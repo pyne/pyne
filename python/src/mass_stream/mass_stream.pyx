@@ -107,7 +107,7 @@ cdef class MassStream:
     #
 
     def norm_comp_dict(self):
-        """Normalizes the comp(osition), preserving the mass of the isotopic vector as mass."""
+        """normalizes the comp(osition), preserving the mass of the isotopic vector as mass."""
         self.ms_pointer.norm_comp_dict()
 
 
@@ -178,20 +178,20 @@ cdef class MassStream:
         self.ms_pointer.load_from_text(filename)
 
 
-    def Print(self):
-        """This prints a string representation of the MassStream to stdout.  Print is 
+    def print_ms(self):
+        """This prints a string representation of the MassStream to stdout.  print is 
         particularly useful in C++.  In Python, this method simply duplicates 
         the functionality you would get from the built-in str() function.
         """
-        self.ms_pointer.Print()
+        self.ms_pointer.print_ms()
 
 
-    def Normalize(self):
+    def normalize(self):
         """This convenience function normalizes the mass stream by setting its mass = 1.0."""
-        self.ms_pointer.Normalize()
+        self.ms_pointer.normalize()
 
 
-    def multByMass(self):
+    def mult_by_mass(self):
         """This function multiplies comp by mass and returns the resultant isotopic vector.
 
         Returns:
@@ -199,7 +199,7 @@ cdef class MassStream:
 
               .. math:: \mbox{isovec[iso]} = \mbox{ms.comp[iso]} \times \mbox{ms.mass}
         """
-        cdef cpp_map[int, double] cpp_isovec = self.ms_pointer.multByMass()
+        cdef cpp_map[int, double] cpp_isovec = self.ms_pointer.mult_by_mass()
         isovec = conv.map_to_dict_int_dbl(cpp_isovec)
         return isovec
 
@@ -217,7 +217,7 @@ cdef class MassStream:
     # Substream Methods
     #
 
-    def getSubStream(self, iso_sequence, char * name=""):
+    def get_sub_stream(self, iso_sequence, char * name=""):
         """Grabs a subset of the mass streams and returns a new stream comprised of only
         the specified nuclides.  The elements or isotopes included in the new substream
         are determined by iso_sequence. 
@@ -261,11 +261,11 @@ cdef class MassStream:
 
         # Make new python version of this mass stream
         py_ms = MassStream()
-        py_ms.ms_pointer[0] = self.ms_pointer.getSubStream(iso_set, std.string(name))
+        py_ms.ms_pointer[0] = self.ms_pointer.get_sub_stream(iso_set, std.string(name))
         return py_ms
 
 
-    def getU(self, char * name=""):
+    def get_u(self, char * name=""):
         """Convenience method that gets the Uranium portion of a mass stream.
 
         Args:
@@ -276,11 +276,11 @@ cdef class MassStream:
               has Uranium members. 
         """
         py_ms = MassStream()
-        py_ms.ms_pointer[0] = self.ms_pointer.getU(std.string(name))
+        py_ms.ms_pointer[0] = self.ms_pointer.get_u(std.string(name))
         return py_ms
         
 
-    def getPU(self, char * name=""):
+    def get_pu(self, char * name=""):
         """Convenience method that gets the Plutonium portion of a mass stream.
 
         Args:
@@ -291,11 +291,11 @@ cdef class MassStream:
               has Plutonium members. 
         """
         py_ms = MassStream()
-        py_ms.ms_pointer[0] = self.ms_pointer.getPU(std.string(name))
+        py_ms.ms_pointer[0] = self.ms_pointer.get_pu(std.string(name))
         return py_ms
         
 
-    def getLAN(self, char * name=""):
+    def get_lan(self, char * name=""):
         """Convenience method that gets the Lanthanide portion of a mass stream.
 
         Args:
@@ -306,11 +306,11 @@ cdef class MassStream:
               has Lanthanide members. 
         """
         py_ms = MassStream()
-        py_ms.ms_pointer[0] = self.ms_pointer.getLAN(std.string(name))
+        py_ms.ms_pointer[0] = self.ms_pointer.get_lan(std.string(name))
         return py_ms
         
 
-    def getACT(self, char * name=""):
+    def get_act(self, char * name=""):
         """Convenience method that gets the Actinide portion of a mass stream.
 
         Args:
@@ -321,11 +321,11 @@ cdef class MassStream:
               has Actinide members. 
         """
         py_ms = MassStream()
-        py_ms.ms_pointer[0] = self.ms_pointer.getACT(std.string(name))
+        py_ms.ms_pointer[0] = self.ms_pointer.get_act(std.string(name))
         return py_ms
         
 
-    def getTRU(self, char * name=""):
+    def get_tru(self, char * name=""):
         """Convenience method that gets the Transuranic portion of a mass stream.
 
         Args:
@@ -336,11 +336,11 @@ cdef class MassStream:
               has Transuranic members. 
         """
         py_ms = MassStream()
-        py_ms.ms_pointer[0] = self.ms_pointer.getTRU(std.string(name))
+        py_ms.ms_pointer[0] = self.ms_pointer.get_tru(std.string(name))
         return py_ms
         
 
-    def getMA(self, char * name=""):
+    def get_ma(self, char * name=""):
         """Convenience method that gets the Minor Actinide portion of a mass stream.
 
         Args:
@@ -351,11 +351,11 @@ cdef class MassStream:
               has Minor Actinide members. 
         """
         py_ms = MassStream()
-        py_ms.ms_pointer[0] = self.ms_pointer.getMA(std.string(name))
+        py_ms.ms_pointer[0] = self.ms_pointer.get_ma(std.string(name))
         return py_ms
         
 
-    def getFP(self, char * name=""):
+    def get_fp(self, char * name=""):
         """Convenience method that gets the Fission Product portion of a mass stream.
 
         Args:
@@ -366,7 +366,7 @@ cdef class MassStream:
               has Fission Product members. 
         """
         py_ms = MassStream()
-        py_ms.ms_pointer[0] = self.ms_pointer.getFP(std.string(name))
+        py_ms.ms_pointer[0] = self.ms_pointer.get_fp(std.string(name))
         return py_ms
         
 
