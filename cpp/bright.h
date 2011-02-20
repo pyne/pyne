@@ -24,7 +24,7 @@
 namespace bright {
 
 //Bright Globals
-void BrightStart ();
+void bright_start ();
 
 extern std::string BRIGHT_DATA;
 
