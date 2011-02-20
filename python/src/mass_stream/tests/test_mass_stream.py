@@ -105,15 +105,15 @@ class TestMassStreamConstructor(TestCase):
 class TestMassStreamMethods(TestCase):
     """Tests that the MassStream member functions work."""
 
-    def test_Normalize(self):
+    def test_normalize(self):
         ms = mass_stream.MassStream({922350: 0.05, 922380: 0.95}, 15)
-        ms.Normalize()
+        ms.normalize()
         assert_equal(ms.mass, 1.0)
 
 
-    def test_multByMass(self):
+    def test_mult_by_mass(self):
         ms = mass_stream.MassStream({922350: 0.05, 922380: 0.95}, 15)
-        isovec = ms.multByMass()
+        isovec = ms.mult_by_mass()
         assert_equal(isovec, {922350: 0.75, 922380: 14.25})
 
 
@@ -143,27 +143,27 @@ class TestMassSubStreamMethods(TestCase):
         962440: 1.0,
         }
 
-    def test_getSubStreamInt_1(self):
+    def test_get_sub_streamInt_1(self):
         ms = mass_stream.MassStream(self.isovec, -1, "Old Stream")
-        ms1 = ms.getSubStream([92, 80160])
+        ms1 = ms.get_sub_stream([92, 80160])
         assert_almost_equal(ms1.comp[80160],  0.3333333333333)
         assert_almost_equal(ms1.comp[922350], 0.3333333333333)
         assert_almost_equal(ms1.comp[922380], 0.3333333333333)
         assert_equal(ms1.mass, 3.0)
         assert_equal(ms1.name, '')
 
-    def test_getSubStreamInt_2(self):
+    def test_get_sub_streamInt_2(self):
         ms = mass_stream.MassStream(self.isovec)
-        ms1 = ms.getSubStream([92, 80160], "New Stream")
+        ms1 = ms.get_sub_stream([92, 80160], "New Stream")
         assert_almost_equal(ms1.comp[80160],  0.3333333333333)
         assert_almost_equal(ms1.comp[922350], 0.3333333333333)
         assert_almost_equal(ms1.comp[922380], 0.3333333333333)
         assert_equal(ms1.mass, 3.0)
         assert_equal(ms1.name, 'New Stream')
 
-    def test_getSubStreamStr_1(self):
+    def test_get_sub_streamStr_1(self):
         ms = mass_stream.MassStream(self.isovec, -1, "Old Stream")
-        ms1 = ms.getSubStream(["U", "80160", "H1"])
+        ms1 = ms.get_sub_stream(["U", "80160", "H1"])
         assert_almost_equal(ms1.comp[10010],  0.25)
         assert_almost_equal(ms1.comp[80160],  0.25)
         assert_almost_equal(ms1.comp[922350], 0.25)
@@ -171,9 +171,9 @@ class TestMassSubStreamMethods(TestCase):
         assert_equal(ms1.mass, 4.0)
         assert_equal(ms1.name, '')
 
-    def test_getSubStreamStr_2(self):
+    def test_get_sub_streamStr_2(self):
         ms = mass_stream.MassStream(self.isovec)
-        ms1 = ms.getSubStream(["U", "80160", "H1"], "New Stream")
+        ms1 = ms.get_sub_stream(["U", "80160", "H1"], "New Stream")
         assert_almost_equal(ms1.comp[10010],  0.25)
         assert_almost_equal(ms1.comp[80160],  0.25)
         assert_almost_equal(ms1.comp[922350], 0.25)
@@ -181,51 +181,51 @@ class TestMassSubStreamMethods(TestCase):
         assert_equal(ms1.mass, 4.0)
         assert_equal(ms1.name, 'New Stream')
 
-    def test_getU_1(self):
+    def test_get_u_1(self):
         ms = mass_stream.MassStream(self.isovec)
-        ms1 = ms.getU()
+        ms1 = ms.get_u()
         assert_equal(ms1.comp, {922350: 0.5, 922380: 0.5})
         assert_equal(ms1.mass, 2.0)
         assert_equal(ms1.name, '')
 
-    def test_getU_2(self):
+    def test_get_u_2(self):
         ms = mass_stream.MassStream(self.isovec)
-        ms1 = ms.getU("U Stream")
+        ms1 = ms.get_u("U Stream")
         assert_equal(ms1.comp, {922350: 0.5, 922380: 0.5})
         assert_equal(ms1.mass, 2.0)
         assert_equal(ms1.name, 'U Stream')
 
-    def test_getPU_1(self):
+    def test_get_pu_1(self):
         ms = mass_stream.MassStream(self.isovec)
-        ms1 = ms.getPU()
+        ms1 = ms.get_pu()
         assert_equal(ms1.comp, {942390: 0.5, 942410: 0.5})
         assert_equal(ms1.mass, 2.0)
         assert_equal(ms1.name, '')
 
-    def test_getPU_2(self):
+    def test_get_pu_2(self):
         ms = mass_stream.MassStream(self.isovec)
-        ms1 = ms.getPU("PU Stream")
+        ms1 = ms.get_pu("PU Stream")
         assert_equal(ms1.comp, {942390: 0.5, 942410: 0.5})
         assert_equal(ms1.mass, 2.0)
         assert_equal(ms1.name, 'PU Stream')
 
-    def test_getLAN_1(self):
+    def test_get_lan_1(self):
         ms = mass_stream.MassStream(self.isovec)
-        ms1 = ms.getLAN()
+        ms1 = ms.get_lan()
         assert_equal(ms1.comp, {691690: 1.0})
         assert_equal(ms1.mass, 1.0)
         assert_equal(ms1.name, '')
 
-    def test_getLAN_2(self):
+    def test_get_lan_2(self):
         ms = mass_stream.MassStream(self.isovec)
-        ms1 = ms.getLAN("LAN Stream")
+        ms1 = ms.get_lan("LAN Stream")
         assert_equal(ms1.comp, {691690: 1.0})
         assert_equal(ms1.mass, 1.0)
         assert_equal(ms1.name, 'LAN Stream')
 
-    def test_getACT_1(self):
+    def test_get_act_1(self):
         ms = mass_stream.MassStream(self.isovec)
-        ms1 = ms.getACT()
+        ms1 = ms.get_act()
         assert_equal(ms1.comp[922350], 1.0/6.0)
         assert_equal(ms1.comp[922380], 1.0/6.0)
         assert_equal(ms1.comp[942390], 1.0/6.0)
@@ -235,9 +235,9 @@ class TestMassSubStreamMethods(TestCase):
         assert_equal(ms1.mass, 6.0)
         assert_equal(ms1.name, '')
 
-    def test_getACT_2(self):
+    def test_get_act_2(self):
         ms = mass_stream.MassStream(self.isovec)
-        ms1 = ms.getACT("ACT Stream")
+        ms1 = ms.get_act("ACT Stream")
         assert_equal(ms1.comp[922350], 1.0/6.0)
         assert_equal(ms1.comp[922380], 1.0/6.0)
         assert_equal(ms1.comp[942390], 1.0/6.0)
@@ -247,9 +247,9 @@ class TestMassSubStreamMethods(TestCase):
         assert_equal(ms1.mass, 6.0)
         assert_equal(ms1.name, 'ACT Stream')
 
-    def test_getTRU_1(self):
+    def test_get_tru_1(self):
         ms = mass_stream.MassStream(self.isovec)
-        ms1 = ms.getTRU()
+        ms1 = ms.get_tru()
         assert_equal(ms1.comp[942390], 1.0/4.0)
         assert_equal(ms1.comp[942410], 1.0/4.0)
         assert_equal(ms1.comp[952420], 1.0/4.0)
@@ -257,9 +257,9 @@ class TestMassSubStreamMethods(TestCase):
         assert_equal(ms1.mass, 4.0)
         assert_equal(ms1.name, '')
 
-    def test_getTRU_2(self):
+    def test_get_tru_2(self):
         ms = mass_stream.MassStream(self.isovec)
-        ms1 = ms.getTRU("TRU Stream")
+        ms1 = ms.get_tru("TRU Stream")
         assert_equal(ms1.comp[942390], 1.0/4.0)
         assert_equal(ms1.comp[942410], 1.0/4.0)
         assert_equal(ms1.comp[952420], 1.0/4.0)
@@ -267,34 +267,34 @@ class TestMassSubStreamMethods(TestCase):
         assert_equal(ms1.mass, 4.0)
         assert_equal(ms1.name, 'TRU Stream')
 
-    def test_getMA_1(self):
+    def test_get_ma_1(self):
         ms = mass_stream.MassStream(self.isovec)
-        ms1 = ms.getMA()
+        ms1 = ms.get_ma()
         assert_equal(ms1.comp[952420], 1.0/2.0)
         assert_equal(ms1.comp[962440], 1.0/2.0)
         assert_equal(ms1.mass, 2.0)
         assert_equal(ms1.name, '')
 
-    def test_getMA_2(self):
+    def test_get_ma_2(self):
         ms = mass_stream.MassStream(self.isovec)
-        ms1 = ms.getMA("MA Stream")
+        ms1 = ms.get_ma("MA Stream")
         assert_equal(ms1.comp[952420], 1.0/2.0)
         assert_equal(ms1.comp[962440], 1.0/2.0)
         assert_equal(ms1.mass, 2.0)
         assert_equal(ms1.name, 'MA Stream')
 
-    def test_getFP_1(self):
+    def test_get_fp_1(self):
         ms = mass_stream.MassStream(self.isovec)
-        ms1 = ms.getFP()
+        ms1 = ms.get_fp()
         assert_equal(ms1.comp[10010],  1.0/3.0)
         assert_equal(ms1.comp[80160],  1.0/3.0)
         assert_equal(ms1.comp[691690], 1.0/3.0)
         assert_equal(ms1.mass, 3.0)
         assert_equal(ms1.name, '')
 
-    def test_getFP_2(self):
+    def test_get_fp_2(self):
         ms = mass_stream.MassStream(self.isovec)
-        ms1 = ms.getFP("FP Stream")
+        ms1 = ms.get_fp("FP Stream")
         assert_equal(ms1.comp[10010],  1.0/3.0)
         assert_equal(ms1.comp[80160],  1.0/3.0)
         assert_equal(ms1.comp[691690], 1.0/3.0)

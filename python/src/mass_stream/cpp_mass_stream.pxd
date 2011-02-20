@@ -22,21 +22,21 @@ cdef extern from "../MassStream.h":
         void load_from_hdf5(std.string, std.string, int) except +
         void load_from_text(char *) except +
 
-        void Print()
-        void Normalize()
-        map[int, double] multByMass()
+        void print_ms()
+        void normalize()
+        map[int, double] mult_by_mass()
         double atomic_weight()
 
         # Substream Methods
-        MassStream getSubStream(set[int], std.string)
-        #MassStream getSubStream(set[std.string], std.string) # Redundant
-        MassStream getU(std.string)
-        MassStream getPU(std.string)
-        MassStream getLAN(std.string)
-        MassStream getACT(std.string)
-        MassStream getTRU(std.string)
-        MassStream getMA(std.string)
-        MassStream getFP(std.string)
+        MassStream get_sub_stream(set[int], std.string)
+        #MassStream get_sub_stream(set[std.string], std.string) # Redundant
+        MassStream get_u(std.string)
+        MassStream get_pu(std.string)
+        MassStream get_lan(std.string)
+        MassStream get_act(std.string)
+        MassStream get_tru(std.string)
+        MassStream get_ma(std.string)
+        MassStream get_fp(std.string)
 
         # Operator Overloads
         MassStream operator+(double)
