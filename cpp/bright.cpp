@@ -6,7 +6,7 @@
 
 std::string bright::BRIGHT_DATA = "";
 
-void bright::BrightStart()
+void bright::bright_start()
 {
 #ifdef _WIN32
     char * tmpBRIGHT_DATA;
