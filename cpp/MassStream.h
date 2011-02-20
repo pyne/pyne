@@ -54,21 +54,21 @@ public:
     ~MassStream ();
 
     //MassStream function definitions
-    void Print (); 
-    void Normalize ();
-    CompDict multByMass();
+    void print_ms (); 
+    void normalize ();
+    CompDict mult_by_mass();
     double atomic_weight();
 
     //Sub-Stream Computation
-    MassStream getSubStream (std::set<int>,  std::string n = "");
-    MassStream getSubStream (std::set<std::string>,  std::string n = "");
-    MassStream getU   (std::string = "");
-    MassStream getPU  (std::string = "");
-    MassStream getLAN (std::string = "");
-    MassStream getACT (std::string = "");
-    MassStream getTRU (std::string = "");
-    MassStream getMA  (std::string = "");
-    MassStream getFP  (std::string = "");
+    MassStream get_sub_stream (std::set<int>,  std::string n = "");
+    MassStream get_sub_stream (std::set<std::string>,  std::string n = "");
+    MassStream get_u   (std::string = "");
+    MassStream get_pu  (std::string = "");
+    MassStream get_lan (std::string = "");
+    MassStream get_act (std::string = "");
+    MassStream get_tru (std::string = "");
+    MassStream get_ma  (std::string = "");
+    MassStream get_fp  (std::string = "");
 
     //Overloaded Operators
     MassStream operator+ (double);
