@@ -224,9 +224,9 @@ MassStream::~MassStream()
 
 /*--- Function definitions ---*/
 
-void MassStream::Print()
+void MassStream::print_ms()
 {
-    //Print the Mass Stream to stdout
+    //print the Mass Stream to stdout
     std::cout << "Mass Stream: " << name << "\n";
     std::cout << "\tMass: " << mass << "\n";
     std::cout << "\t---------\n";
@@ -238,7 +238,7 @@ void MassStream::Print()
 
 std::ostream& operator<<(std::ostream& os, MassStream ms)
 {
-    //Print the Mass Stream to stdout
+    //print the Mass Stream to stdout
     os << "Mass Stream: " << ms.name << "\n";
     os << "\tMass: " << ms.mass << "\n";
     os << "\t---------\n";
@@ -250,13 +250,13 @@ std::ostream& operator<<(std::ostream& os, MassStream ms)
 }
 
 
-void MassStream::Normalize ()
+void MassStream::normalize ()
 {
-    //Normalizes the mass
+    //normalizes the mass
     mass = 1.0;
 }
 
-CompDict MassStream::multByMass()
+CompDict MassStream::mult_by_mass()
 {
     //bypass calculation if already normalized.
     if (mass == 1.0)
@@ -289,7 +289,7 @@ double MassStream::atomic_weight()
 
 /*--- Stub-Stream Computation ---*/
 
-MassStream MassStream::getSubStream (std::set<int> iset,  std::string n)
+MassStream MassStream::get_sub_stream (std::set<int> iset,  std::string n)
 {
     //Grabs a substream from this stream based on a set of integers.
     //Integers can either be of zzaaam form -OR- they can be a z-numer (is 8 for O, 93 for Np, etc).
@@ -308,7 +308,7 @@ MassStream MassStream::getSubStream (std::set<int> iset,  std::string n)
     return MassStream (cd, -1, n);
 }
 
-MassStream MassStream::getSubStream (std::set<std::string> sset,  std::string n)
+MassStream MassStream::get_sub_stream (std::set<std::string> sset,  std::string n)
 {
     //Grabs a substream from this stream based on a set of strings.
     //Strings can be of any form.
@@ -345,53 +345,53 @@ MassStream MassStream::getSubStream (std::set<std::string> sset,  std::string n)
             }
         }
     }
-    return getSubStream(iset, n);
+    return get_sub_stream(iset, n);
 }
 
-MassStream MassStream::getU (std::string n)
+MassStream MassStream::get_u (std::string n)
 {
     //Returns a mass stream of Uranium that is a subset of this mass stream.
     std::set<int> iso_set;
     iso_set.insert(92);
-    return getSubStream (iso_set, n);
+    return get_sub_stream (iso_set, n);
 }
 
-MassStream MassStream::getPU (std::string n)
+MassStream MassStream::get_pu (std::string n)
 {
     //Returns a mass stream of Plutonium that is a subset of this mass stream.
     std::set<int> iso_set;
     iso_set.insert(94);
-    return getSubStream (iso_set, n);
+    return get_sub_stream (iso_set, n);
 }
 
-MassStream MassStream::getLAN (std::string n)
+MassStream MassStream::get_lan (std::string n)
 {
     //Returns a mass stream of Lanthanides that is a subset of this mass stream.
-    return getSubStream (isoname::lan, n);
+    return get_sub_stream (isoname::lan, n);
 }
 
-MassStream MassStream::getACT (std::string n)
+MassStream MassStream::get_act (std::string n)
 {
     //Returns a mass stream of Lanthanides that is a subset of this mass stream.
-    return getSubStream (isoname::act, n);
+    return get_sub_stream (isoname::act, n);
 }
 
-MassStream MassStream::getTRU (std::string n)
+MassStream MassStream::get_tru (std::string n)
 {
     //Returns a mass stream of Lanthanides that is a subset of this mass stream.
-    return getSubStream (isoname::tru, n);
+    return get_sub_stream (isoname::tru, n);
 }
 
-MassStream MassStream::getMA (std::string n)
+MassStream MassStream::get_ma (std::string n)
 {
     //Returns a mass stream of Lanthanides that is a subset of this mass stream.
-    return getSubStream (isoname::ma, n);
+    return get_sub_stream (isoname::ma, n);
 }
 
-MassStream MassStream::getFP (std::string n)
+MassStream MassStream::get_fp (std::string n)
 {
     //Returns a mass stream of Lanthanides that is a subset of this mass stream.
-    return getSubStream (isoname::fp, n);
+    return get_sub_stream (isoname::fp, n);
 }
 
 
@@ -408,8 +408,8 @@ MassStream MassStream::operator+ (MassStream y)
 {
     //Overloads x + y
     CompDict cd;
-    CompDict xwgt = multByMass();
-    CompDict ywgt = y.multByMass();
+    CompDict xwgt = mult_by_mass();
+    CompDict ywgt = y.mult_by_mass();
 
     for (CompIter i = xwgt.begin(); i != xwgt.end(); i++)
     {
