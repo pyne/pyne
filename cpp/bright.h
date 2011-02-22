@@ -98,8 +98,16 @@ double SolveLine (double, double, double, double, double);
 double TANH(double);
 double COTH(double);
 
+
 // File Helpers
 bool FileExists(std::string); 
+
+
+
+/******************/
+/*** Exceptions ***/
+/******************/
+
 
 class FileNotFound : public std::exception
 {
@@ -124,6 +132,58 @@ public:
 
 private:
     std::string filename;
+};
+
+
+
+
+class BadFuelForm : public std::exception
+{
+//Exception for valid fuel form.
+public:
+    BadFuelForm () {};
+    ~BadFuelForm () throw () {};
+
+    static char * name ()
+    {
+        return (char *) "BadFuelForm";
+    };
+
+    virtual const char* what() const throw()
+    {
+        std::string BFFstr ("FUEL COMPOSITION NOT COMPUTABLE!");
+        return (const char *) BFFstr.c_str();
+    };
+};
+
+
+
+
+class BisectionMethodNotPerformed : public std::exception
+{
+//Exception for when the bisection method is not calculated.
+public:
+    BisectionMethodNotPerformed ()
+    {
+        errstr = "Bisection method was not performed.";
+    };
+    BisectionMethodNotPerformed (std::string calctype)
+    {
+        errstr = "Bisection method durring " + calctype + " calculation was not performed.";
+    };
+    ~BisectionMethodNotPerformed () throw () {};
+
+    static char * name ()
+    {
+        return (char *) "BisectionMethodNotPerformed";
+    };
+
+    virtual const char* what() const throw()
+    {
+        return (const char *) errstr.c_str();
+    };
+private:
+    std::string errstr;
 };
 
 
