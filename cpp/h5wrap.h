@@ -40,6 +40,10 @@ namespace h5wrap
         int shape [2];
         std::vector<std::string> cols;
         std::map<std::string, std::vector<T> > data;
+
+        // operator overloads
+        std::vector<T> operator[] (std::string);
+        std::map<std::string, T> operator[] (int);
     };
 
 
