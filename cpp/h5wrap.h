@@ -7,6 +7,7 @@
 #include <fstream>
 #include <string>
 #include <map>
+#include <vector>
 #include <set>
 #include <stdio.h>
 #include <stdlib.h>
@@ -22,10 +23,24 @@ namespace h5wrap
     template <typename T>
     T get_array_index(H5::DataSet *, int, H5::DataType = H5::PredType::NATIVE_DOUBLE);
 
-
     // Conversion functions
     template <typename T>
     std::set<T> h5_array_to_cpp_set(H5::H5File *, std::string, H5::DataType = H5::PredType::NATIVE_DOUBLE);
+
+    // Classes
+    template <typename T>
+    class HomogenousTypeTable
+    {
+    public:
+        HomogenousTypeTable();
+        HomogenousTypeTable(H5::H5File *, std::string, H5::DataType = H5::PredType::NATIVE_DOUBLE);
+
+        // Metadata attribute
+        std::string path;
+        int shape [2];
+        std::vector<std::string> cols;
+        std::map<std::string, std::vector<T> > data;
+    };
 
 
     // Exceptions
