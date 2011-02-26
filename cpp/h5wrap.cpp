@@ -104,6 +104,7 @@ h5wrap::HomogenousTypeTable<T>::HomogenousTypeTable()
 {
 };
 
+
 template <typename T>
 h5wrap::HomogenousTypeTable<T>::HomogenousTypeTable(H5::H5File * h5_file, std::string data_path, H5::DataType dt)
 {
@@ -148,6 +149,30 @@ h5wrap::HomogenousTypeTable<T>::HomogenousTypeTable(H5::H5File * h5_file, std::s
         data[cols[n]] = std::vector<T>(col_buf, col_buf+shape[0]);
     };
 
+};
+
+
+template <typename T>
+std::vector<T> h5wrap::HomogenousTypeTable<T>::operator[](std::string col_name)
+{
+    return data[col_name];
+};
+
+
+template <typename T>
+std::map<std::string, T> h5wrap::HomogenousTypeTable<T>::operator[](int m)
+{
+    // init row
+    std::map<std::string, T> row = std::map<std::string, T>(); 
+
+    // fill row values
+    for(int n = 0; n < shape[1]; n++)
+    {
+        row[cols[n]] = data[cols[n]][m];
+    };
+
+    // return row map
+    return row;
 };
 
 template class h5wrap::HomogenousTypeTable<int>;
