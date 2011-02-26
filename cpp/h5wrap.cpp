@@ -51,27 +51,34 @@ template double h5wrap::get_array_index(H5::DataSet *, int, H5::DataType);
  */
 
 template <typename T>
-T h5wrap::h5_array_to_cpp_set(H5::DataSet * h5_arr, std::set<T> * cpp_set, H5::DataType dt)
+std::set<T> h5wrap::h5_array_to_cpp_set(H5::H5File * h5_file, std::string data_path, H5::DataType dt)
 {
-    // Init indexes
-    T set_element;
+    // Init
+    std::set<T> cpp_set = std::set<T>();
     hsize_t arr_len[1];
 
-    // clear out values currently in the set
-    (*cpp_set).clear();
+    H5::DataSet h5_arr = (*h5_file).openDataSet(data_path);
 
     // Initilize to dataspace, to find the indices we are looping over
-    H5::DataSpace arr_space = (*h5_arr).getSpace();
+    H5::DataSpace arr_space = h5_arr.getSpace();
     int arr_dim = arr_space.getSimpleExtentDims(arr_len, NULL);
 
-    // Iterate over the elements of the array, adding them to the set.
-    for(int n = 0; n < arr_len[0]; n++)
-    {
-        set_element = h5wrap::get_array_index<T>(h5_arr, n, dt);
-        (*cpp_set).insert(set_element);
-    };
+    // Allocate memory buffer    
+    T * mem_arr = new T [arr_len[0]];
 
+    // Read in data from file to memory
+    h5_arr.read(mem_arr, dt);
+
+    // Load new values into the set
+    cpp_set.insert(&mem_arr[0], &mem_arr[arr_len[0]]);
+
+    // Close out data set
+    h5_arr.close();
+
+    // Return set
+    return cpp_set;
 };
 
-template int h5wrap::h5_array_to_cpp_set(H5::DataSet *, std::set<int> *, H5::DataType);
-template double h5wrap::h5_array_to_cpp_set(H5::DataSet *, std::set<double> *, H5::DataType);
+
+template std::set<int> h5wrap::h5_array_to_cpp_set(H5::H5File *, std::string, H5::DataType);
+template std::set<double> h5wrap::h5_array_to_cpp_set(H5::H5File *, std::string, H5::DataType);

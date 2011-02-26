@@ -25,7 +25,7 @@ namespace h5wrap
 
     // Conversion functions
     template <typename T>
-    T h5_array_to_cpp_set(H5::DataSet *, std::set<T> *, H5::DataType = H5::PredType::NATIVE_DOUBLE);
+    std::set<T> h5_array_to_cpp_set(H5::H5File *, std::string, H5::DataType = H5::PredType::NATIVE_DOUBLE);
 
 
     // Exceptions
