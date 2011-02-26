@@ -35,37 +35,6 @@ void MassStream::norm_comp_dict ()
     return;
 }
 
-double MassStream::getArrayNthEntry(H5::DataSet * ds, int n)
-{
-    H5::DataSpace array_space = (*ds).getSpace();
-
-    hsize_t count  [1] = {1};    
-    hsize_t offset [1] = {n};   
-
-    //Handle negative indices
-    if (n < 0)
-        offset[0] = offset[0] + array_space.getSimpleExtentNpoints();
-
-    //If still out of range we have a problem
-    if (offset[0] < 0 || array_space.getSimpleExtentNpoints() <= offset[0])
-        throw HDF5BoundsError();
-
-    array_space.selectHyperslab(H5S_SELECT_SET, count, offset);
-
-    //Set memmory hyperspace
-    hsize_t dimsm[1] = {1};
-    H5::DataSpace memspace(1, dimsm);
-
-    hsize_t count_out  [1] = {1};    
-    hsize_t offset_out [1] = {0};
-
-    memspace.selectHyperslab(H5S_SELECT_SET, count_out, offset_out);
-
-    double data_out [1];
-    (*ds).read(data_out, H5::PredType::NATIVE_DOUBLE, memspace, array_space);
-
-    return data_out[0];    
-}
 
 void MassStream::load_from_hdf5 (std::string filename, std::string groupname, int row)
 {
@@ -107,7 +76,7 @@ void MassStream::load_from_hdf5 (std::string filename, std::string groupname, in
     {
         std::string isokey = msgroup.getObjnameByIdx(msg);
         isoset = msgroup.openDataSet(isokey);
-        isovalue = getArrayNthEntry(&isoset, row);
+        isovalue = h5wrap::get_array_index<double>(&isoset, row);
 
         if (isokey == "Mass" || isokey == "MASS" || isokey == "mass")
         {
