@@ -179,6 +179,48 @@ cdef np.ndarray[np.float64_t, ndim=1] vector_to_array_1d_dbl(cpp_vector[double] 
     return arr
 
 
+
+
+# 2D Float arrays
+
+cdef cpp_vector[cpp_vector[double]] array_to_vector_2d_dbl(np.ndarray[np.float64_t, ndim=2] arr):
+    cdef Py_ssize_t i, I, j, J 
+
+    # Get and reserve the size of the vector
+    # prevents excessive resizing
+    I = arr.shape[0]
+    J = arr.shape[1]
+
+    cdef cpp_vector[cpp_vector[double]] vec = cpp_vector[cpp_vector[double]](I, cpp_vector[double](J))
+
+    # Loop through the array
+    for i in range(I):
+        for j in range(J):
+            vec[i][j] = arr[i][j]
+
+    return vec
+
+
+cdef np.ndarray[np.float64_t, ndim=2] vector_to_array_2d_dbl(cpp_vector[cpp_vector[double]] vec):
+    cdef np.ndarray[np.float64_t, ndim=2] arr
+    cdef int i, I, j, J
+
+    # Get and reserve the size of the array
+    I = vec.size()
+    J = vec[0].size()
+    arr = np.zeros((I, J), dtype=np.float64) 
+
+    # loop through the vector
+    for i in range(I):
+        for j in range(J):
+            arr[i][j] = vec[i][j]
+
+    return arr
+
+
+
+
+
 #
 # Map-Vector Conversions
 #
