@@ -28,7 +28,11 @@ namespace h5wrap
     std::set<T> h5_array_to_cpp_set(H5::H5File *, std::string, H5::DataType = H5::PredType::NATIVE_DOUBLE);
 
     template <typename T>
+    std::vector<T> h5_array_to_cpp_vector_1d(H5::H5File *, std::string, H5::DataType = H5::PredType::NATIVE_DOUBLE);
+
+    template <typename T>
     std::vector< std::vector<T> > h5_array_to_cpp_vector_2d(H5::H5File *, std::string, H5::DataType = H5::PredType::NATIVE_DOUBLE);
+
 
     // Classes
     template <typename T>
@@ -64,3 +68,4 @@ namespace h5wrap
 
 
 #endif
+
