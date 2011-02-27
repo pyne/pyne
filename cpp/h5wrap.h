@@ -33,6 +33,9 @@ namespace h5wrap
     template <typename T>
     std::vector< std::vector<T> > h5_array_to_cpp_vector_2d(H5::H5File *, std::string, H5::DataType = H5::PredType::NATIVE_DOUBLE);
 
+    template <typename T>
+    std::vector< std::vector< std::vector<T> > > h5_array_to_cpp_vector_3d(H5::H5File *, std::string, H5::DataType = H5::PredType::NATIVE_DOUBLE);
+
 
     // Classes
     template <typename T>
