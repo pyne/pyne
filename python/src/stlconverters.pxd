@@ -60,6 +60,11 @@ cdef cpp_vector[cpp_vector[double]] array_to_vector_2d_dbl(np.ndarray[np.float64
 cdef np.ndarray[np.float64_t, ndim=2] vector_to_array_2d_dbl(cpp_vector[cpp_vector[double]])
 
 
+# 3D Float arrays
+cdef cpp_vector[cpp_vector[cpp_vector[double]]] array_to_vector_3d_dbl(np.ndarray[np.float64_t, ndim=3])
+cdef np.ndarray[np.float64_t, ndim=3] vector_to_array_3d_dbl(cpp_vector[cpp_vector[cpp_vector[double]]])
+
+
 
 #
 # Map-Vector Conversions
@@ -71,6 +76,9 @@ cdef dict map_to_dict_int_array_to_vector_1d_dbl(cpp_map[int, cpp_vector[double]
 
 cdef cpp_map[int, cpp_vector[cpp_vector[double]]] dict_to_map_int_vector_to_array_2d_dbl(dict)
 cdef dict map_to_dict_int_array_to_vector_2d_dbl(cpp_map[int, cpp_vector[cpp_vector[double]]])
+
+cdef cpp_map[int, cpp_vector[cpp_vector[cpp_vector[double]]]] dict_to_map_int_vector_to_array_3d_dbl(dict)
+cdef dict map_to_dict_int_array_to_vector_3d_dbl(cpp_map[int, cpp_vector[cpp_vector[cpp_vector[double]]]])
 
 
 
