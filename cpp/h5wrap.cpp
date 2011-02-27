@@ -89,6 +89,46 @@ template std::set<double> h5wrap::h5_array_to_cpp_set(H5::H5File *, std::string,
 
 
 /* 
+ *  Convert hdf5 array to C++ vector.
+ */
+
+template <typename T>
+std::vector<T> h5wrap::h5_array_to_cpp_vector_1d(H5::H5File * h5_file, std::string data_path, H5::DataType dt)
+{
+    // Init
+    hsize_t arr_dims [1];
+    H5::DataSet h5_arr = (*h5_file).openDataSet(data_path);
+
+    // Initilize to dataspace, to find the indices we are looping over
+    H5::DataSpace arr_space = h5_arr.getSpace();
+    int arr_ndims = arr_space.getSimpleExtentDims(arr_dims, NULL);
+
+    // Allocate memory buffer    
+    T mem_arr [arr_dims[0]];
+
+    // Read in data from file to memory
+    h5_arr.read(mem_arr, dt);
+
+    // Initialize vector 
+    std::vector<T> cpp_vec;
+
+    // Load new values into the vector
+    cpp_vec.assign(mem_arr, mem_arr+arr_dims[0]);
+
+    // Close out data set
+    h5_arr.close();
+
+    // Return vector of vectors
+    return cpp_vec;
+};
+
+template std::vector<int> h5wrap::h5_array_to_cpp_vector_1d(H5::H5File *, std::string, H5::DataType);
+template std::vector<double> h5wrap::h5_array_to_cpp_vector_1d(H5::H5File *, std::string, H5::DataType);
+
+
+
+
+/* 
  *  Convert hdf5 array to C++ vector of vectors.
  */
 
@@ -111,7 +151,7 @@ std::vector< std::vector<T> > h5wrap::h5_array_to_cpp_vector_2d(H5::H5File * h5_
     // to play nice with each other
     h5_arr.read(mem_arr, dt);
 
-    // Initialize vector or vectors
+    // Initialize vector of vectors
     std::vector< std::vector<T> > cpp_vec (arr_dims[0], std::vector<T>(arr_dims[1]));
 
     // Load new values into the vector of vectors, using some indexing tricks
