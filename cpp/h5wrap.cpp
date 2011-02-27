@@ -173,6 +173,54 @@ template std::vector< std::vector<double> > h5wrap::h5_array_to_cpp_vector_2d(H5
 
 
 
+/* 
+ *  Convert hdf5 array to C++ vector of vectors of vectors.
+ */
+
+template <typename T>
+std::vector< std::vector< std::vector<T> > > h5wrap::h5_array_to_cpp_vector_3d(H5::H5File * h5_file, std::string data_path, H5::DataType dt)
+{
+    // Init
+    hsize_t arr_dims [3];
+    H5::DataSet h5_arr = (*h5_file).openDataSet(data_path);
+
+    // Initilize to dataspace, to find the indices we are looping over
+    H5::DataSpace arr_space = h5_arr.getSpace();
+    int arr_ndims = arr_space.getSimpleExtentDims(arr_dims, NULL);
+
+    // Allocate memory buffer    
+    T mem_arr [arr_dims[0] * arr_dims[1] * arr_dims[2]];
+
+    // Read in data from file to memory
+    // Have to read in as 1D array to get HDF5 and new keyword
+    // to play nice with each other
+    h5_arr.read(mem_arr, dt);
+
+    // Initialize vector of vectors of vectors
+    std::vector< std::vector< std::vector<T> > > cpp_vec (arr_dims[0], std::vector< std::vector<T> >(arr_dims[1], std::vector<T>(arr_dims[2])));
+
+    // Load new values into the vector of vectors of vectors, using some indexing tricks
+    for(int i = 0; i < arr_dims[0]; i++)
+    {
+        for(int j = 0; j < arr_dims[j]; j++)
+        {
+            cpp_vec[i][j].assign(mem_arr+((i*arr_dims[1]*arr_dims[2]) + (j*arr_dims[2])), mem_arr+((i*arr_dims[1]*arr_dims[2]) + ((j+1)*arr_dims[2])));
+        };
+    };
+
+    // Close out data set
+    h5_arr.close();
+
+    // Return vector of vectors
+    return cpp_vec;
+};
+
+template std::vector< std::vector< std::vector<int> > > h5wrap::h5_array_to_cpp_vector_3d(H5::H5File * h5_file, std::string data_path, H5::DataType dt);
+template std::vector< std::vector< std::vector<double> > > h5wrap::h5_array_to_cpp_vector_3d(H5::H5File * h5_file, std::string data_path, H5::DataType dt);
+
+
+
+
 
 
 /*
