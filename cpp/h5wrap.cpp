@@ -202,7 +202,7 @@ std::vector< std::vector< std::vector<T> > > h5wrap::h5_array_to_cpp_vector_3d(H
     // Load new values into the vector of vectors of vectors, using some indexing tricks
     for(int i = 0; i < arr_dims[0]; i++)
     {
-        for(int j = 0; j < arr_dims[j]; j++)
+        for(int j = 0; j < arr_dims[1]; j++)
         {
             cpp_vec[i][j].assign(mem_arr+((i*arr_dims[1]*arr_dims[2]) + (j*arr_dims[2])), mem_arr+((i*arr_dims[1]*arr_dims[2]) + ((j+1)*arr_dims[2])));
         };
