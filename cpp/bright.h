@@ -13,6 +13,8 @@
 #include <math.h>
 #include <exception>
 #include <sys/stat.h> 
+#include <vector>
+#include <algorithm>
 
 /*** Macros ***/
 #define length_array(a) ( sizeof ( a ) / sizeof ( *a ) )
@@ -63,6 +65,11 @@ bool ChainGreaterCompare(int, int, int);
 bool SubInString(std::string, std::string);
 
 std::string natural_naming(std::string);
+
+
+// Vectorized Functions
+std::vector<double> normalized_delta(double, std::vector<double>);
+
 
 
 //Array Methods
