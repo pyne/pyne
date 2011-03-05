@@ -176,7 +176,50 @@ std::string bright::natural_naming(std::string name)
     return nat_name;
 };
 
-//Array Helpers
+
+
+/*
+ *  Vectorized functions
+ */
+
+std::vector<double> bright::normalized_delta(double x, std::vector<double> vec)
+{
+    // This functions find the normalized 
+    // value of (x - vec[i]) for all elements i 
+    // in the vector.
+    //
+    // This is equivelent to the fraction:
+    //       (x - vec[i])
+    //    -------------------
+    //    (vec_max - vec_min) 
+
+    std::vector<double> nd (vec.size(), 0.0);
+
+    // Get the min and max out of the vector
+    double vec_min = *std::min_element(vec.begin(), vec.end());
+    double vec_max = *std::max_element(vec.begin(), vec.end());
+
+    double min_max_delta = vec_max - vec_min;
+
+    // Calculate the normalized delta for 
+    // all i elements.
+    for(int i = 0; i < vec.size(); i++)
+    {
+        nd[i] = (x - vec[i]) / min_max_delta;
+    };
+
+    return nd;
+};
+
+
+
+
+
+
+/* 
+ * Array Helpers
+ */
+
 int bright::find_index_char(char * val, char ** arr, int arr_len)
 {
     //Finds an element 'val' in array 'arr'
