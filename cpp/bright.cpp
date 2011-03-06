@@ -213,6 +213,37 @@ std::vector<double> bright::normalized_delta(double x, std::vector<double> vec)
 
 
 
+bool bright::sorted_index_comparator(std::pair<int, double> i, std::pair<int, double> j)
+{
+    return i.second < j.second;
+};
+
+
+std::vector<int> bright::sorted_index(std::vector<double> vec)
+{
+    // Make an indexed vector
+    int I = vec.size();
+    std::vector< std::pair<int, double> > ind_vec (I);
+    for (int i = 0; i < I; i++)
+    {
+        ind_vec[i] = std::pair<int, double>(i, vec[i]);
+    };
+
+    // Sort the indexed vector
+    std::sort(ind_vec.begin(), ind_vec.end(), sorted_index_comparator);
+
+    // Grab the indicies out of ind_vec
+    std::vector<int> ind (I);
+    for (int i = 0; i < I; i++)
+    {
+        ind[i] = ind_vec[i].first;
+    };
+
+    return ind;
+};
+
+
+
 
 
 

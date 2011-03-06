@@ -181,6 +181,41 @@ cdef np.ndarray[np.float64_t, ndim=1] vector_to_array_1d_dbl(cpp_vector[double] 
 
 
 
+# 1D Integer arrays
+
+cdef cpp_vector[int] array_to_vector_1d_int(np.ndarray[np.int32_t, ndim=1] arr):
+    cdef cpp_vector[int] vec = cpp_vector[int]()
+    cdef Py_ssize_t n, N 
+
+    # Get and reserve the size of the vector
+    # prevents excessive resizing
+    N = arr.shape[0]
+    vec.reserve(N)
+
+    # Loop through the array
+    for n in range(N):
+        vec.push_back(arr[n])
+
+    return vec
+
+
+cdef np.ndarray[np.int32_t, ndim=1] vector_to_array_1d_int(cpp_vector[int] vec):
+    cdef np.ndarray[np.int32_t, ndim=1] arr
+    cdef int n, N
+
+    # Get and reserve the size of the array
+    N = vec.size()
+    arr = np.zeros((N,), dtype=np.int32) 
+
+    # loop through the vector
+    for n in range(N):
+        arr[n] = vec[n]
+
+    return arr
+
+
+
+
 # 2D Float arrays
 
 cdef cpp_vector[cpp_vector[double]] array_to_vector_2d_dbl(np.ndarray[np.float64_t, ndim=2] arr):
