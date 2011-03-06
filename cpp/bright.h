@@ -70,6 +70,8 @@ std::string natural_naming(std::string);
 // Vectorized Functions
 std::vector<double> normalized_delta(double, std::vector<double>);
 
+bool sorted_index_comparator(std::pair<int, double>, std::pair<int, double>);
+std::vector<int> sorted_index(std::vector<double>);
 
 
 //Array Methods
