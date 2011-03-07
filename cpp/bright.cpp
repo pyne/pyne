@@ -189,23 +189,33 @@ std::vector<double> bright::normalized_delta(double x, std::vector<double> vec)
     // in the vector.
     //
     // This is equivelent to the fraction:
-    //       (x - vec[i])
-    //    -------------------
-    //    (vec_max - vec_min) 
+    //     (x - vec[i])
+    //     ------------
+    //      norm_factor
+    //
+    // Where the normalization factor is 
+    //   norm_factor = (vec_max - vec_min) 
+    // if the min does not equal the max.
+    // and norm_factor = vec_min = vec_max 
+    // if it does.
 
+    double norm_factor;
     std::vector<double> nd (vec.size(), 0.0);
 
     // Get the min and max out of the vector
     double vec_min = *std::min_element(vec.begin(), vec.end());
     double vec_max = *std::max_element(vec.begin(), vec.end());
 
-    double min_max_delta = vec_max - vec_min;
+    if (vec_min == vec_max)
+        norm_factor = vec_min;
+    else
+        norm_factor = vec_max - vec_min;
 
     // Calculate the normalized delta for 
     // all i elements.
     for(int i = 0; i < vec.size(); i++)
     {
-        nd[i] = (x - vec[i]) / min_max_delta;
+        nd[i] = (x - vec[i]) / norm_factor;
     };
 
     return nd;
