@@ -223,6 +223,8 @@ std::vector<double> bright::normalized_delta(double x, std::vector<double> vec)
 
 
 
+
+
 bool bright::sorted_index_comparator(std::pair<int, double> i, std::pair<int, double> j)
 {
     return i.second < j.second;
