@@ -370,9 +370,32 @@ cdef dict map_to_dict_int_vector_to_array_3d_dbl(cpp_map[int, cpp_vector[cpp_vec
 
 
 
+# {str: np.array()} 
+cdef cpp_map[std.string, cpp_vector[double]] dict_to_map_str_array_to_vector_1d_dbl(dict pydict):
+    cdef std.string s
+    cdef cpp_map[std.string, cpp_vector[double]] cppmap = cpp_map[std.string, cpp_vector[double]]()
+
+    for key, value in pydict.items():
+        s = std.string(key)
+        cppmap[s] = array_to_vector_1d_dbl(value)
+
+    return cppmap
+
+
+cdef dict map_to_dict_str_vector_to_array_1d_dbl(cpp_map[std.string, cpp_vector[double]] cppmap):
+    pydict = {}
+    cdef cpp_map[std.string, cpp_vector[double]].iterator mapiter = cppmap.begin()
+
+    while mapiter != cppmap.end():
+        pydict[(deref(mapiter).first).c_str()] = vector_to_array_1d_dbl(deref(mapiter).second)
+        inc(mapiter)
+
+    return pydict
+
+
 
 #
-# Map-Vector Conversions
+# Map-Map-Vector Conversions
 #
 
 # {int: {int: np.array()}}
