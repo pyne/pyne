@@ -182,6 +182,27 @@ std::string bright::natural_naming(std::string name)
  *  Vectorized functions
  */
 
+std::vector<double> bright::delta_vector(double x, std::vector<double> vec)
+{
+    // This functions finds the 
+    // value of (x - vec[i]) for all elements i 
+    // in the vector.
+    std::vector<double> d (vec.size(), 0.0);
+
+    // Calculate the normalized delta for 
+    // all i elements.
+    for(int i = 0; i < vec.size(); i++)
+    {
+        d[i] = (x - vec[i]);
+    };
+
+    return d;
+};
+
+
+
+
+
 std::vector<double> bright::normalized_delta(double x, std::vector<double> vec)
 {
     // This functions find the normalized 
