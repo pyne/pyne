@@ -278,6 +278,25 @@ std::vector<int> bright::sorted_index(std::vector<double> vec)
 
 
 
+std::vector<double> bright::y_x_factor_interpolation(double x_factor, std::vector<double> y2, std::vector<double> y1)
+{
+    // This function calculates the following equation in a vectorized way
+    //
+    //      y = x(y2 - y1) * x_factor + y1
+    //
+    // y1 must be of the same size as y2
+
+    int N = y1.size();
+
+    std::vector<double> y (N, -1.0);
+
+    for (int n = 0; n < N; n++)
+        y[n] = ((y2[n] - y1[n]) * x_factor) + y1[n];
+
+    return y;
+};
+
+
 
 
 /* 
