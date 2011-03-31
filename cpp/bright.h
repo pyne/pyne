@@ -101,7 +101,8 @@ int find_index_char(char *, char **, int = -1);
 //Math Helpers
 extern const double pi;
 extern const double N_A;	//Avagardo's Number
-extern const double bpcm2; 	//barns per cm^2
+extern const double barns_per_cm2; 	// barns per cm^2
+extern const double cm2_per_barn; 	// cm^2 per barn
 
 double slope (double, double, double, double);
 double SolveLine (double, double, double, double, double);
