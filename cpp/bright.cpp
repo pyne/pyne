@@ -326,7 +326,8 @@ int bright::find_index_char(char * val, char ** arr, int arr_len)
 //Math Helpers
 const double bright::pi = 3.14159265359;
 const double bright::N_A = 6.0221415 * pow(10.0, 23);
-const double bright::bpcm2 = pow(10.0, -24); 
+const double bright::barns_per_cm2 = pow(10.0, 24); 
+const double bright::cm2_per_barn = pow(10.0, -24); 
 
 double bright::slope (double x2, double y2, double x1, double y1)
 {
