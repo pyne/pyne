@@ -76,6 +76,11 @@ std::vector<int> sorted_index(std::vector<double>);
 
 std::vector<double> y_x_factor_interpolation(double, std::vector<double>, std::vector<double>);
 
+std::vector< std::vector<double> > vector_outer_product(std::vector<double>, std::vector<double>);
+std::vector< std::vector<double> > inverse_matrix(std::vector< std::vector<double> >);
+std::vector< std::vector<double> > matrix_multiplication(std::vector< std::vector<double> >, std::vector< std::vector<double> >);
+
+
 //Array Methods
 template <class T>
 int find_index(T val, T * arr, int arr_len = -1)
@@ -167,6 +172,30 @@ public:
         return (const char *) BFFstr.c_str();
     };
 };
+
+
+
+
+
+class VectorSizeError : public std::exception
+{
+//Exception for valid fuel form.
+public:
+    VectorSizeError () {};
+    ~VectorSizeError () throw () {};
+
+    static char * name ()
+    {
+        return (char *) "VectorSizeError";
+    };
+
+    virtual const char* what() const throw()
+    {
+        std::string VWSstr ("Vector is of the wrong size.");
+        return (const char *) VWSstr.c_str();
+    };
+};
+
 
 
 
