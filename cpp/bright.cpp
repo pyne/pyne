@@ -299,6 +299,199 @@ std::vector<double> bright::y_x_factor_interpolation(double x_factor, std::vecto
 
 
 
+
+
+std::vector< std::vector<double> > bright::vector_outer_product(std::vector<double> a, std::vector<double> b)
+{
+    // Performs outer product operation on two vectors
+    int I = a.size(); 
+
+    if (I != b.size())
+        throw VectorSizeError();
+
+    std::vector< std::vector<double> > c (I, std::vector<double>(I, 0.0)); 
+
+    for (int i = 0; i < I; i++)
+    {
+        for (int j = 0; j < I; j++)
+            c[i][j] = a[i] * b[j];
+    };
+
+    return c;
+};
+
+
+
+
+
+std::vector< std::vector<double> > bright::maxtrix_inverse(std::vector< std::vector<double> > a)
+{
+    // Performs outer product operation on two vectors
+    int I = a.size(); 
+
+    std::vector< std::vector<double> > a_inv (I, std::vector<double>(I, 0.0)); 
+
+    /* This function calculates the inverse of a square matrix
+     *
+     * Code is rewritten from c++ template code Mike Dinolfo
+     * by D. Kroon which was rewritten by Anthony Scopatz
+     * which was found at http://snippets.dzone.com/posts/show/7558
+     *
+     */
+    /* Loop variables */
+    int i, j, k;
+
+    /* Sum variables */
+    double sum, x;
+    
+    /*  Copy the input matrix to output matrix */
+    for (i = 0; i < I; i++) 
+    {
+        for (j = 0; j < I; j++)
+            a_inv[i][j] = a[i][j]; 
+    };
+    
+    /* Add small value to diagonal if diagonal is zero */
+    for(i = 0; i < I; i++)
+    { 
+        if((a_inv[i][i] < 1e-12) && (a_inv[i][i] > -1e-12))
+            a_inv[i][i][ = 1e-12; 
+    }
+    
+    /* Matrix size of one is special cased */
+    if (I == 1)
+    {
+        a_inv[0][0] = 1.0 / a_inv[0][0];
+        return a_inv;
+    };
+
+    /* Matrix size must be larger than zero */
+    if (I <= 0)
+        throw VectorSizeError();
+
+    
+    
+    /* normalize row 0 */
+    for (i = 1; i < I; i++) 
+    {
+        a_inv[0][i] /= a_inv[0][0];
+    };
+
+
+    /* Do LU separation */    
+    for (i = 1; i < I; i++)  
+    {
+        /* do a column of L */
+        for (j = i; j < I; j++)  
+        { 
+            sum = 0.0;
+            for (k = 0; k < i; k++) 
+                sum += a_inv[j][k] * a_inv[k][i];
+
+            a_inv[j][i] -= sum;
+        };
+
+        if (i == I-1)
+             continue;
+
+        /* do a row of U */
+        for (j = i+1; j < I; j++)
+        {
+            sum = 0.0;
+            for (k = 0; k < i; k++)
+                sum += a_inv[i][k] * a_inv[k][j];
+
+            a_inv[i][j] = (a_inv[i][j] - sum) / a_inv[i][i];
+        };
+    };
+
+
+    /* invert L */ 
+    for ( i = 0; i < I; i++ )  
+    {
+        for ( j = i; j < I; j++ )  
+        {
+            x = 1.0;
+
+            if ( i != j ) 
+            {
+                x = 0.0;
+                for ( k = i; k < j; k++ ) 
+                    x -= a_inv[j][k] * a_inv[k][i];
+            };
+
+            a_inv[j][i] = x / a_inv[j]j];
+        };
+    };
+
+
+    /* invert U */ 
+    for ( i = 0; i < I; i++ ) 
+    {
+        for ( j = i; j < I; j++ )  
+        {
+            if ( i == j ) 
+                continue;
+
+            sum = 0.0;
+
+            for ( k = i; k < j; k++ )
+                sum += a_inv[k][j] * ( (i==k) ? 1.0 : a_inv[i][k] );
+
+            a_inv[i][j] = -sum;
+        };
+    };
+
+
+    /* final inversion */ 
+    for ( i = 0; i < I; i++ ) 
+    {
+        for ( j = 0; j < I; j++ )  
+        {
+            sum = 0.0;
+
+            for ( k = ((i>j)?i:j); k < I; k++ ) 
+                sum += ((j==k)?1.0:a_inv[j][k]) * a_inv[k][i];
+
+            a_inv[j][i] = sum;
+        };
+    };
+ 
+    return a_inv;
+};
+
+
+
+
+
+std::vector< std::vector<double> > matrix_multiplication(std::vector< std::vector<double> > a, std::vector< std::vector<double> > b)
+{
+    // Multiplies two matrices together
+
+    int I = a.size();
+
+    if ( I != a[0].size() || I != b.size() || I != b[0].size())
+        throw VectorSizeError();
+    
+    std::vector< std::vector<double> > c (I, std::vector<double>(I, 0.0)); 
+
+    int i, j, k;
+
+    for (i = 0; i < I; i++)
+    {
+        for (j = 0; j < I; j++)
+        {
+            for (k = 0; k < I; k++)        
+                c[i][j] = a[i][k] * b[k][j];
+        };
+    };
+
+    return c;
+
+};
+
+
+
 /* 
  * Array Helpers
  */
@@ -349,6 +542,8 @@ double bright::COTH(double x)
 {
     return 1.0 / tanh(x);
 };
+
+
 
 
 // File Helpers
