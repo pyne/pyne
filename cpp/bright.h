@@ -77,7 +77,7 @@ std::vector<int> sorted_index(std::vector<double>);
 std::vector<double> y_x_factor_interpolation(double, std::vector<double>, std::vector<double>);
 
 std::vector< std::vector<double> > vector_outer_product(std::vector<double>, std::vector<double>);
-std::vector< std::vector<double> > inverse_matrix(std::vector< std::vector<double> >);
+std::vector< std::vector<double> > matrix_inverse(std::vector< std::vector<double> >);
 std::vector< std::vector<double> > matrix_multiplication(std::vector< std::vector<double> >, std::vector< std::vector<double> >);
 
 
