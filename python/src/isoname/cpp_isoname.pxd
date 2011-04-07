@@ -4,7 +4,7 @@ from libcpp.set cimport set
 
 cimport std
 
-cdef extern from "../isoname.h" namespace "isoname":
+cdef extern from "../../../cpp/isoname.h" namespace "isoname":
     # Conversion dictionaries
     map[std.string, int] LLzz
     map[int, std.string] zzLL
