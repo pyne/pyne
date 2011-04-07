@@ -5,7 +5,7 @@ from libcpp.set cimport set
 cimport std
 
 
-cdef extern from "../MassStream.h":
+cdef extern from "../../../cpp/MassStream.h":
     cdef cppclass MassStream:
         # Constuctors
         MassStream()
