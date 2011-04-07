@@ -324,7 +324,7 @@ std::vector< std::vector<double> > bright::vector_outer_product(std::vector<doub
 
 
 
-std::vector< std::vector<double> > bright::maxtrix_inverse(std::vector< std::vector<double> > a)
+std::vector< std::vector<double> > bright::matrix_inverse(std::vector< std::vector<double> > a)
 {
     // Performs outer product operation on two vectors
     int I = a.size(); 
@@ -355,7 +355,7 @@ std::vector< std::vector<double> > bright::maxtrix_inverse(std::vector< std::vec
     for(i = 0; i < I; i++)
     { 
         if((a_inv[i][i] < 1e-12) && (a_inv[i][i] > -1e-12))
-            a_inv[i][i][ = 1e-12; 
+            a_inv[i][i] = 1e-12; 
     }
     
     /* Matrix size of one is special cased */
@@ -420,7 +420,7 @@ std::vector< std::vector<double> > bright::maxtrix_inverse(std::vector< std::vec
                     x -= a_inv[j][k] * a_inv[k][i];
             };
 
-            a_inv[j][i] = x / a_inv[j]j];
+            a_inv[j][i] = x / a_inv[j][j];
         };
     };
 
@@ -464,7 +464,7 @@ std::vector< std::vector<double> > bright::maxtrix_inverse(std::vector< std::vec
 
 
 
-std::vector< std::vector<double> > matrix_multiplication(std::vector< std::vector<double> > a, std::vector< std::vector<double> > b)
+std::vector< std::vector<double> > bright::matrix_multiplication(std::vector< std::vector<double> > a, std::vector< std::vector<double> > b)
 {
     // Multiplies two matrices together
 
