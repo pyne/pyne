@@ -9,3 +9,7 @@ python/src/stlconverters.cpp
 python/src/isoname/isoname.cpp
 python/src/mass_stream/mass_stream.cpp
 python/src/bright/bright.cpp
+
+
+cpp/test/particle.def
+cpp/test/test_h5wrap.cpp
