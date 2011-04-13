@@ -2,3 +2,8 @@ doc/build/
 python/build/
 *.pyc
 *.save
+
+python/src/bright/bright.cpp
+python/src/isoname/isoname.cpp
+python/src/mass_stream/mass_stream.cpp
+python/src/stlconverters.cpp
