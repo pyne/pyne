@@ -17,10 +17,8 @@
 
 #include "bright.h"
 
-#define ADD_MEMBERS(fdef) \
-    #define FIELD(type, member) type member; \
-    #include fdef \
-    #undef FIELD 
+#define FIELD(type, member) type member;  
+#undef FIELD 
 
 namespace h5wrap
 {
