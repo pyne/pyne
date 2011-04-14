@@ -492,16 +492,45 @@ std::vector< std::vector<double> > bright::matrix_multiplication(std::vector< st
 
 
 
+
+std::vector<double> bright::scalar_matrix_vector_product(double a, std::vector< std::vector<double> > M, std::vector<double> v)
+{
+    // Solves the equation r = aMv for a scalar a, Matrix M, and vector v.
+    // Returns the resultant vector r.
+
+    int I = M.size();
+
+    if ( I != M[0].size() || I != v.size())
+        throw VectorSizeError();
+
+    std::vector<double> r (0.0, I);
+
+    for (int i = 0; i < I; i++)
+    {
+        for (int j = 0; j < I; j++)
+        {
+            r[i] += (M[i][j] * v[i]);
+        };
+        r[i] = (r[i] * a);
+    };
+
+    return r;
+};
+
+
+
+
+
 /* 
  * Array Helpers
  */
 
 int bright::find_index_char(char * val, char ** arr, int arr_len)
 {
-    //Finds an element 'val' in array 'arr'
-    //returns the index of val's first location
-    //returns -1 if not found.
-    //For Arrays of char strings
+    // Finds an element 'val' in array 'arr'
+    // returns the index of val's first location
+    // returns -1 if not found.
+    // For Arrays of char strings
 
     if (arr_len < 0)
         arr_len = length_array(arr);
@@ -521,6 +550,7 @@ const double bright::pi = 3.14159265359;
 const double bright::N_A = 6.0221415 * pow(10.0, 23);
 const double bright::barns_per_cm2 = pow(10.0, 24); 
 const double bright::cm2_per_barn = pow(10.0, -24); 
+const double bright::sec_per_day = 24.0 * 3600.0; 
 
 double bright::slope (double x2, double y2, double x1, double y1)
 {
