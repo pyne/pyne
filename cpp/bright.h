@@ -80,6 +80,7 @@ std::vector< std::vector<double> > vector_outer_product(std::vector<double>, std
 std::vector< std::vector<double> > matrix_inverse(std::vector< std::vector<double> >);
 std::vector< std::vector<double> > matrix_multiplication(std::vector< std::vector<double> >, std::vector< std::vector<double> >);
 
+std::vector<double> scalar_matrix_vector_product(double, std::vector< std::vector<double> >, std::vector<double>);
 
 //Array Methods
 template <class T>
@@ -108,6 +109,7 @@ extern const double pi;
 extern const double N_A;	//Avagardo's Number
 extern const double barns_per_cm2; 	// barns per cm^2
 extern const double cm2_per_barn; 	// cm^2 per barn
+extern const double sec_per_day; 	// seconds per day
 
 double slope (double, double, double, double);
 double SolveLine (double, double, double, double, double);
