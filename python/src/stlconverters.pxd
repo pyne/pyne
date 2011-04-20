@@ -16,6 +16,10 @@ cimport std
 # Map conversions
 #
 
+# <int, int> conversions
+cdef cpp_map[int, int] dict_to_map_int_int(dict)
+cdef dict map_to_dict_int_int(cpp_map[int, int])
+
 # <int, double> conversions
 cdef cpp_map[int, double] dict_to_map_int_dbl(dict)
 cdef dict map_to_dict_int_dbl(cpp_map[int, double])
