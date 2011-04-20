@@ -16,6 +16,26 @@ cimport std
 # Map conversions
 #
 
+# <int, int> conversions
+
+cdef cpp_map[int, int] dict_to_map_int_int(dict pydict):
+    cdef cpp_map[int, int] cppmap = cpp_map[int, int]()
+    for key, value in pydict.items():
+        cppmap[key] = value
+    return cppmap
+
+cdef dict map_to_dict_int_int(cpp_map[int, int] cppmap):
+    pydict = {}
+    cdef cpp_map[int, int].iterator mapiter = cppmap.begin()
+
+    while mapiter != cppmap.end():
+        pydict[deref(mapiter).first] = deref(mapiter).second
+        inc(mapiter)
+
+    return pydict
+
+
+
 # <int, double> conversions
 
 cdef cpp_map[int, double] dict_to_map_int_dbl(dict pydict):
