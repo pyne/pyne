@@ -324,6 +324,7 @@ std::vector< std::vector<double> > bright::vector_outer_product(std::vector<doub
 
 
 
+
 std::vector< std::vector<double> > bright::matrix_inverse(std::vector< std::vector<double> > a)
 {
     // Performs outer product operation on two vectors
@@ -464,6 +465,34 @@ std::vector< std::vector<double> > bright::matrix_inverse(std::vector< std::vect
 
 
 
+std::vector< std::vector<double> > bright::matrix_addition(std::vector< std::vector<double> > a, std::vector< std::vector<double> > b)
+{
+    // Adds two matrices together
+
+    int I = a.size();
+
+    if ( I != a[0].size() || I != b.size() || I != b[0].size())
+        throw VectorSizeError();
+    
+    std::vector< std::vector<double> > c (I, std::vector<double>(I, 0.0)); 
+
+    int i, j;
+
+    for (i = 0; i < I; i++)
+    {
+        for (j = 0; j < I; j++)
+        {
+            c[i][j] = a[i][j] + b[i][j];
+        };
+    };
+
+    return c;
+
+};
+
+
+
+
 std::vector< std::vector<double> > bright::matrix_multiplication(std::vector< std::vector<double> > a, std::vector< std::vector<double> > b)
 {
     // Multiplies two matrices together
@@ -482,13 +511,41 @@ std::vector< std::vector<double> > bright::matrix_multiplication(std::vector< st
         for (j = 0; j < I; j++)
         {
             for (k = 0; k < I; k++)        
-                c[i][j] = a[i][k] * b[k][j];
+                c[i][j] += a[i][k] * b[k][j];
         };
     };
 
     return c;
 
 };
+
+
+
+
+
+std::vector< std::vector<double> > bright::scalar_matrix_product(double a, std::vector< std::vector<double> > M)
+{
+    // Solves the equation r = aM for a scalar a and Matrix M.
+    // Returns the resultant vector r.
+
+    int I = M.size();
+
+    if ( I != M[0].size() || I != v.size())
+        throw VectorSizeError();
+
+    std::vector< std::vector<double> > r (I, std::vector<double>(I, 0.0)); 
+
+    for (int i = 0; i < I; i++)
+    {
+        for (int j = 0; j < I; j++)
+        {
+            r[i][j] += (a * M[i][j]);
+        };
+    };
+
+    return r;
+};
+
 
 
 
@@ -503,7 +560,7 @@ std::vector<double> bright::scalar_matrix_vector_product(double a, std::vector< 
     if ( I != M[0].size() || I != v.size())
         throw VectorSizeError();
 
-    std::vector<double> r (0.0, I);
+    std::vector<double> r (I, 0.0);
 
     for (int i = 0; i < I; i++)
     {
