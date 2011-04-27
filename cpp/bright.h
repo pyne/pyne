@@ -78,8 +78,10 @@ std::vector<double> y_x_factor_interpolation(double, std::vector<double>, std::v
 
 std::vector< std::vector<double> > vector_outer_product(std::vector<double>, std::vector<double>);
 std::vector< std::vector<double> > matrix_inverse(std::vector< std::vector<double> >);
+std::vector< std::vector<double> > matrix_addition(std::vector< std::vector<double> >, std::vector< std::vector<double> >);
 std::vector< std::vector<double> > matrix_multiplication(std::vector< std::vector<double> >, std::vector< std::vector<double> >);
 
+std::vector< std::vector<double> > scalar_matrix_product(double, std::vector< std::vector<double> >);
 std::vector<double> scalar_matrix_vector_product(double, std::vector< std::vector<double> >, std::vector<double>);
 
 //Array Methods
