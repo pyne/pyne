@@ -530,7 +530,7 @@ std::vector< std::vector<double> > bright::scalar_matrix_product(double a, std::
 
     int I = M.size();
 
-    if ( I != M[0].size() || I != v.size())
+    if (I != M[0].size())
         throw VectorSizeError();
 
     std::vector< std::vector<double> > r (I, std::vector<double>(I, 0.0)); 
