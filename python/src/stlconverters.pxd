@@ -16,6 +16,10 @@ cimport std
 # Map conversions
 #
 
+# <int, int> conversions
+cdef cpp_map[int, int] dict_to_map_int_int(dict)
+cdef dict map_to_dict_int_int(cpp_map[int, int])
+
 # <int, double> conversions
 cdef cpp_map[int, double] dict_to_map_int_dbl(dict)
 cdef dict map_to_dict_int_dbl(cpp_map[int, double])
@@ -55,21 +59,47 @@ cdef cpp_vector[double] array_to_vector_1d_dbl(np.ndarray[np.float64_t, ndim=1])
 cdef np.ndarray[np.float64_t, ndim=1] vector_to_array_1d_dbl(cpp_vector[double])
 
 
+# 1D Integer arrays
+cdef cpp_vector[int] array_to_vector_1d_int(np.ndarray[np.int32_t, ndim=1])
+cdef np.ndarray[np.int32_t, ndim=1] vector_to_array_1d_int(cpp_vector[int])
+
+
+# 2D Float arrays
+cdef cpp_vector[cpp_vector[double]] array_to_vector_2d_dbl(np.ndarray[np.float64_t, ndim=2])
+cdef np.ndarray[np.float64_t, ndim=2] vector_to_array_2d_dbl(cpp_vector[cpp_vector[double]])
+
+
+# 3D Float arrays
+cdef cpp_vector[cpp_vector[cpp_vector[double]]] array_to_vector_3d_dbl(np.ndarray[np.float64_t, ndim=3])
+cdef np.ndarray[np.float64_t, ndim=3] vector_to_array_3d_dbl(cpp_vector[cpp_vector[cpp_vector[double]]])
+
+
 
 #
 # Map-Vector Conversions
 #
 
 # {int: np.array()} 
-cdef cpp_map[int, cpp_vector[double]] dict_to_map_int_vector_to_array_1d_dbl(dict)
-cdef dict map_to_dict_int_array_to_vector_1d_dbl(cpp_map[int, cpp_vector[double]])
+cdef cpp_map[int, cpp_vector[double]] dict_to_map_int_array_to_vector_1d_dbl(dict)
+cdef dict map_to_dict_int_vector_to_array_1d_dbl(cpp_map[int, cpp_vector[double]])
 
+cdef cpp_map[int, cpp_vector[cpp_vector[double]]] dict_to_map_int_array_to_vector_2d_dbl(dict)
+cdef dict map_to_dict_int_vector_to_array_2d_dbl(cpp_map[int, cpp_vector[cpp_vector[double]]])
+
+cdef cpp_map[int, cpp_vector[cpp_vector[cpp_vector[double]]]] dict_to_map_int_array_to_vector_3d_dbl(dict)
+cdef dict map_to_dict_int_vector_to_array_3d_dbl(cpp_map[int, cpp_vector[cpp_vector[cpp_vector[double]]]])
+
+# {string: np.array()} 
+cdef cpp_map[std.string, cpp_vector[double]] dict_to_map_str_array_to_vector_1d_dbl(dict)
+cdef dict map_to_dict_str_vector_to_array_1d_dbl(cpp_map[std.string, cpp_vector[double]])
 
 
 #
-# Map-Vector Conversions
+# Map-Map-Vector Conversions
 #
+
 
 # {int: {int: np.array()}}
-cdef cpp_map[int, cpp_map[int, cpp_vector[double]]] dict_to_map_int_int_vector_to_array_1d_dbl(dict)
-cdef dict map_to_dict_int_int_array_to_vector_1d_dbl(cpp_map[int, cpp_map[int, cpp_vector[double]]])
+cdef cpp_map[int, cpp_map[int, cpp_vector[double]]] dict_to_map_int_int_array_to_vector_1d_dbl(dict)
+cdef dict map_to_dict_int_int_vector_to_array_1d_dbl(cpp_map[int, cpp_map[int, cpp_vector[double]]])
+

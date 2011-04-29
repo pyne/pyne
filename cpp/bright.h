@@ -13,6 +13,8 @@
 #include <math.h>
 #include <exception>
 #include <sys/stat.h> 
+#include <vector>
+#include <algorithm>
 
 /*** Macros ***/
 #define length_array(a) ( sizeof ( a ) / sizeof ( *a ) )
@@ -65,6 +67,23 @@ bool SubInString(std::string, std::string);
 std::string natural_naming(std::string);
 
 
+// Vectorized Functions
+std::vector<double> delta_vector(double, std::vector<double>);
+std::vector<double> normalized_delta(double, std::vector<double>);
+
+bool sorted_index_comparator(std::pair<int, double>, std::pair<int, double>);
+std::vector<int> sorted_index(std::vector<double>);
+
+std::vector<double> y_x_factor_interpolation(double, std::vector<double>, std::vector<double>);
+
+std::vector< std::vector<double> > vector_outer_product(std::vector<double>, std::vector<double>);
+std::vector< std::vector<double> > matrix_inverse(std::vector< std::vector<double> >);
+std::vector< std::vector<double> > matrix_addition(std::vector< std::vector<double> >, std::vector< std::vector<double> >);
+std::vector< std::vector<double> > matrix_multiplication(std::vector< std::vector<double> >, std::vector< std::vector<double> >);
+
+std::vector< std::vector<double> > scalar_matrix_product(double, std::vector< std::vector<double> >);
+std::vector<double> scalar_matrix_vector_product(double, std::vector< std::vector<double> >, std::vector<double>);
+
 //Array Methods
 template <class T>
 int find_index(T val, T * arr, int arr_len = -1)
@@ -90,7 +109,9 @@ int find_index_char(char *, char **, int = -1);
 //Math Helpers
 extern const double pi;
 extern const double N_A;	//Avagardo's Number
-extern const double bpcm2; 	//barns per cm^2
+extern const double barns_per_cm2; 	// barns per cm^2
+extern const double cm2_per_barn; 	// cm^2 per barn
+extern const double sec_per_day; 	// seconds per day
 
 double slope (double, double, double, double);
 double SolveLine (double, double, double, double, double);
@@ -98,8 +119,16 @@ double SolveLine (double, double, double, double, double);
 double TANH(double);
 double COTH(double);
 
+
 // File Helpers
 bool FileExists(std::string); 
+
+
+
+/******************/
+/*** Exceptions ***/
+/******************/
+
 
 class FileNotFound : public std::exception
 {
@@ -124,6 +153,82 @@ public:
 
 private:
     std::string filename;
+};
+
+
+
+
+class BadFuelForm : public std::exception
+{
+//Exception for valid fuel form.
+public:
+    BadFuelForm () {};
+    ~BadFuelForm () throw () {};
+
+    static char * name ()
+    {
+        return (char *) "BadFuelForm";
+    };
+
+    virtual const char* what() const throw()
+    {
+        std::string BFFstr ("FUEL COMPOSITION NOT COMPUTABLE!");
+        return (const char *) BFFstr.c_str();
+    };
+};
+
+
+
+
+
+class VectorSizeError : public std::exception
+{
+//Exception for valid fuel form.
+public:
+    VectorSizeError () {};
+    ~VectorSizeError () throw () {};
+
+    static char * name ()
+    {
+        return (char *) "VectorSizeError";
+    };
+
+    virtual const char* what() const throw()
+    {
+        std::string VWSstr ("Vector is of the wrong size.");
+        return (const char *) VWSstr.c_str();
+    };
+};
+
+
+
+
+
+class BisectionMethodNotPerformed : public std::exception
+{
+//Exception for when the bisection method is not calculated.
+public:
+    BisectionMethodNotPerformed ()
+    {
+        errstr = "Bisection method was not performed.";
+    };
+    BisectionMethodNotPerformed (std::string calctype)
+    {
+        errstr = "Bisection method durring " + calctype + " calculation was not performed.";
+    };
+    ~BisectionMethodNotPerformed () throw () {};
+
+    static char * name ()
+    {
+        return (char *) "BisectionMethodNotPerformed";
+    };
+
+    virtual const char* what() const throw()
+    {
+        return (const char *) errstr.c_str();
+    };
+private:
+    std::string errstr;
 };
 
 
