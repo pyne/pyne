@@ -16,6 +16,26 @@ cimport std
 # Map conversions
 #
 
+# <int, int> conversions
+
+cdef cpp_map[int, int] dict_to_map_int_int(dict pydict):
+    cdef cpp_map[int, int] cppmap = cpp_map[int, int]()
+    for key, value in pydict.items():
+        cppmap[key] = value
+    return cppmap
+
+cdef dict map_to_dict_int_int(cpp_map[int, int] cppmap):
+    pydict = {}
+    cdef cpp_map[int, int].iterator mapiter = cppmap.begin()
+
+    while mapiter != cppmap.end():
+        pydict[deref(mapiter).first] = deref(mapiter).second
+        inc(mapiter)
+
+    return pydict
+
+
+
 # <int, double> conversions
 
 cdef cpp_map[int, double] dict_to_map_int_dbl(dict pydict):
@@ -179,12 +199,133 @@ cdef np.ndarray[np.float64_t, ndim=1] vector_to_array_1d_dbl(cpp_vector[double] 
     return arr
 
 
+
+
+# 1D Integer arrays
+
+cdef cpp_vector[int] array_to_vector_1d_int(np.ndarray[np.int32_t, ndim=1] arr):
+    cdef cpp_vector[int] vec = cpp_vector[int]()
+    cdef Py_ssize_t n, N 
+
+    # Get and reserve the size of the vector
+    # prevents excessive resizing
+    N = arr.shape[0]
+    vec.reserve(N)
+
+    # Loop through the array
+    for n in range(N):
+        vec.push_back(arr[n])
+
+    return vec
+
+
+cdef np.ndarray[np.int32_t, ndim=1] vector_to_array_1d_int(cpp_vector[int] vec):
+    cdef np.ndarray[np.int32_t, ndim=1] arr
+    cdef int n, N
+
+    # Get and reserve the size of the array
+    N = vec.size()
+    arr = np.zeros((N,), dtype=np.int32) 
+
+    # loop through the vector
+    for n in range(N):
+        arr[n] = vec[n]
+
+    return arr
+
+
+
+
+# 2D Float arrays
+
+cdef cpp_vector[cpp_vector[double]] array_to_vector_2d_dbl(np.ndarray[np.float64_t, ndim=2] arr):
+    cdef Py_ssize_t i, I, j, J 
+
+    # Get and reserve the size of the vector
+    # prevents excessive resizing
+    I = arr.shape[0]
+    J = arr.shape[1]
+
+    cdef cpp_vector[cpp_vector[double]] vec = cpp_vector[cpp_vector[double]](I, cpp_vector[double](J))
+
+    # Loop through the array
+    for i in range(I):
+        for j in range(J):
+            vec[i][j] = arr[i][j]
+
+    return vec
+
+
+cdef np.ndarray[np.float64_t, ndim=2] vector_to_array_2d_dbl(cpp_vector[cpp_vector[double]] vec):
+    cdef np.ndarray[np.float64_t, ndim=2] arr
+    cdef int i, I, j, J
+
+    # Get and reserve the size of the array
+    I = vec.size()
+    J = vec[0].size()
+    arr = np.zeros((I, J), dtype=np.float64) 
+
+    # loop through the vector
+    for i in range(I):
+        for j in range(J):
+            arr[i][j] = vec[i][j]
+
+    return arr
+
+
+
+
+
+# 3D Float arrays
+
+cdef cpp_vector[cpp_vector[cpp_vector[double]]] array_to_vector_3d_dbl(np.ndarray[np.float64_t, ndim=3] arr):
+    cdef Py_ssize_t i, I, j, J, k, K
+
+    # Get and reserve the size of the vector
+    # prevents excessive resizing
+    I = arr.shape[0]
+    J = arr.shape[1]
+    K = arr.shape[2]
+
+    cdef cpp_vector[cpp_vector[cpp_vector[double]]] vec = cpp_vector[cpp_vector[cpp_vector[double]]](I, cpp_vector[cpp_vector[double]](J, cpp_vector[double](K)))
+
+    # Loop through the array
+    for i in range(I):
+        for j in range(J):
+            for k in range(K):
+                vec[i][j][k] = arr[i][j][k]
+
+    return vec
+
+
+cdef np.ndarray[np.float64_t, ndim=3] vector_to_array_3d_dbl(cpp_vector[cpp_vector[cpp_vector[double]]] vec):
+    cdef np.ndarray[np.float64_t, ndim=3] arr
+    cdef int i, I, j, J, k, K
+
+    # Get and reserve the size of the array
+    I = vec.size()
+    J = vec[0].size()
+    K = vec[0][0].size()
+    arr = np.zeros((I, J, K), dtype=np.float64) 
+
+    # loop through the vector
+    for i in range(I):
+        for j in range(J):
+            for k in range(K):
+                arr[i][j][k] = vec[i][j][k]
+
+    return arr
+
+
+
+
+
 #
 # Map-Vector Conversions
 #
 
 # {int: np.array()} 
-cdef cpp_map[int, cpp_vector[double]] dict_to_map_int_vector_to_array_1d_dbl(dict pydict):
+cdef cpp_map[int, cpp_vector[double]] dict_to_map_int_array_to_vector_1d_dbl(dict pydict):
     cdef cpp_map[int, cpp_vector[double]] cppmap = cpp_map[int, cpp_vector[double]]()
 
     for key, value in pydict.items():
@@ -193,7 +334,7 @@ cdef cpp_map[int, cpp_vector[double]] dict_to_map_int_vector_to_array_1d_dbl(dic
     return cppmap
 
 
-cdef dict map_to_dict_int_array_to_vector_1d_dbl(cpp_map[int, cpp_vector[double]] cppmap):
+cdef dict map_to_dict_int_vector_to_array_1d_dbl(cpp_map[int, cpp_vector[double]] cppmap):
     pydict = {}
     cdef cpp_map[int, cpp_vector[double]].iterator mapiter = cppmap.begin()
 
@@ -205,26 +346,94 @@ cdef dict map_to_dict_int_array_to_vector_1d_dbl(cpp_map[int, cpp_vector[double]
 
 
 
-#
-# Map-Vector Conversions
-#
 
-# {int: {int: np.array()}}
-cdef cpp_map[int, cpp_map[int, cpp_vector[double]]] dict_to_map_int_int_vector_to_array_1d_dbl(dict pydict):
-    cdef cpp_map[int, cpp_map[int, cpp_vector[double]]] cppmap = cpp_map[int, cpp_map[int, cpp_vector[double]]]()
+cdef cpp_map[int, cpp_vector[cpp_vector[double]]] dict_to_map_int_array_to_vector_2d_dbl(dict pydict):
+    cdef cpp_map[int, cpp_vector[cpp_vector[double]]] cppmap = cpp_map[int, cpp_vector[cpp_vector[double]]]()
 
     for key, value in pydict.items():
-        cppmap[key] = dict_to_map_int_vector_to_array_1d_dbl(value)
+        cppmap[key] = array_to_vector_2d_dbl(value)
 
     return cppmap
 
 
-cdef dict map_to_dict_int_int_array_to_vector_1d_dbl(cpp_map[int, cpp_map[int, cpp_vector[double]]] cppmap):
+cdef dict map_to_dict_int_vector_to_array_2d_dbl(cpp_map[int, cpp_vector[cpp_vector[double]]] cppmap):
+    pydict = {}
+    cdef cpp_map[int, cpp_vector[cpp_vector[double]]].iterator mapiter = cppmap.begin()
+
+    while mapiter != cppmap.end():
+        pydict[deref(mapiter).first] = vector_to_array_2d_dbl(deref(mapiter).second)
+        inc(mapiter)
+
+    return pydict
+
+
+
+
+cdef cpp_map[int, cpp_vector[cpp_vector[cpp_vector[double]]]] dict_to_map_int_array_to_vector_3d_dbl(dict pydict):
+    cdef cpp_map[int, cpp_vector[cpp_vector[cpp_vector[double]]]] cppmap = cpp_map[int, cpp_vector[cpp_vector[cpp_vector[double]]]]()
+
+    for key, value in pydict.items():
+        cppmap[key] = array_to_vector_3d_dbl(value)
+
+    return cppmap
+
+
+cdef dict map_to_dict_int_vector_to_array_3d_dbl(cpp_map[int, cpp_vector[cpp_vector[cpp_vector[double]]]] cppmap):
+    pydict = {}
+    cdef cpp_map[int, cpp_vector[cpp_vector[cpp_vector[double]]]].iterator mapiter = cppmap.begin()
+
+    while mapiter != cppmap.end():
+        pydict[deref(mapiter).first] = vector_to_array_3d_dbl(deref(mapiter).second)
+        inc(mapiter)
+
+    return pydict
+
+
+
+# {str: np.array()} 
+cdef cpp_map[std.string, cpp_vector[double]] dict_to_map_str_array_to_vector_1d_dbl(dict pydict):
+    cdef std.string s
+    cdef cpp_map[std.string, cpp_vector[double]] cppmap = cpp_map[std.string, cpp_vector[double]]()
+
+    for key, value in pydict.items():
+        s = std.string(key)
+        cppmap[s] = array_to_vector_1d_dbl(value)
+
+    return cppmap
+
+
+cdef dict map_to_dict_str_vector_to_array_1d_dbl(cpp_map[std.string, cpp_vector[double]] cppmap):
+    pydict = {}
+    cdef cpp_map[std.string, cpp_vector[double]].iterator mapiter = cppmap.begin()
+
+    while mapiter != cppmap.end():
+        pydict[(deref(mapiter).first).c_str()] = vector_to_array_1d_dbl(deref(mapiter).second)
+        inc(mapiter)
+
+    return pydict
+
+
+
+#
+# Map-Map-Vector Conversions
+#
+
+# {int: {int: np.array()}}
+cdef cpp_map[int, cpp_map[int, cpp_vector[double]]] dict_to_map_int_int_array_to_vector_1d_dbl(dict pydict):
+    cdef cpp_map[int, cpp_map[int, cpp_vector[double]]] cppmap = cpp_map[int, cpp_map[int, cpp_vector[double]]]()
+
+    for key, value in pydict.items():
+        cppmap[key] = dict_to_map_int_array_to_vector_1d_dbl(value)
+
+    return cppmap
+
+
+cdef dict map_to_dict_int_int_vector_to_array_1d_dbl(cpp_map[int, cpp_map[int, cpp_vector[double]]] cppmap):
     pydict = {}
     cdef cpp_map[int, cpp_map[int, cpp_vector[double]]].iterator mapiter = cppmap.begin()
 
     while mapiter != cppmap.end():
-        pydict[deref(mapiter).first] = map_to_dict_int_array_to_vector_1d_dbl(deref(mapiter).second)
+        pydict[deref(mapiter).first] = map_to_dict_int_vector_to_array_1d_dbl(deref(mapiter).second)
         inc(mapiter)
 
     return pydict
