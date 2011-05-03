@@ -218,37 +218,58 @@ nucname::zz_group nucname::fp = nucname::LL_to_zz_group(nucname::FP);
 /********************/
 /*** Current Form ***/
 /********************/
-std::string nucname::CurrentForm(std::string nuc)
+std::string nucname::current_form(std::string nuc)
 {
-    //returns current form of a nuclide.
-//	using namespace nucname;
-    using namespace pyne;
+  // returns current form of a nuclide.
+  using namespace pyne;
 
-    nuc = ToUpper(nuc);
-    nuc = Strip(nuc, "-");
+  nuc = to_upper(nuc);
+  nuc = remove_substring(nuc, "-");
 
-    if ( SubInString(alphabet, nuc.substr(0,1)) )
-        return "LLAAAM";
+  if ( contains_substring(alphabet, nuc.substr(0,1)) )
+    return "LLAAAM";
+  else
+  {
+    if (nuc.length() == 7)
+      return "zzaaam";
+    else if ( contains_substring("23456789", last_char(nuc)) )
+      return "MCNP";
+
+    if ( ternary_ge( to_int(nuc.substr(0,nuc.length()-4)), to_int(slice_from_end(nuc,-4,3)), to_int(nuc.substr(0,nuc.length()-4)) * 5) )
+      return "zzaaam";
+    else if ( ternary_ge( to_int(nuc.substr(0,nuc.length()-3)), to_int(slice_from_end(nuc,-3,3)), to_int(nuc.substr(0,nuc.length()-3)) * 5) )
+      return "MCNP";
+    else
+      throw IndeterminateNuclideForm;
+  };
+};
+
+std::string nucname::current_form(int nuc)
+{
+   return nucname::current_form(pyne::to_str(nuc));
+};
+
+
+
+
+/************************/
+/*** zzaaam functions ***/
+/************************/
+int zzaaam(int nuc)
+{
+    int newnuc;
+    //Converts nuclide from MCNP form to zzaaam form.
+    if ( (nuc%1000)-400 < 0 )
+        return nuc * 10;
     else
     {
-        if (nuc.length() == 7)
-            return "zzaaam";
-        else if ( SubInString("23456789", LastChar(nuc)) )
-            return "MCNP";
-
-        if ( ChainGreaterCompare( to_int(nuc.substr(0,nuc.length()-4)), to_int(SubFromEnd(nuc,-4,3)), to_int(nuc.substr(0,nuc.length()-4)) * 5) )
-            return "zzaaam";
-        else if ( ChainGreaterCompare( to_int(nuc.substr(0,nuc.length()-3)), to_int(SubFromEnd(nuc,-3,3)), to_int(nuc.substr(0,nuc.length()-3)) * 5) )
-            return "MCNP";
-        else
-            throw IndeterminateNuclideForm;
+        //Please make more general so that more that the first metastable state is returned...
+        return (nuc - 400)*10 + 1;
     }
 };
 
-std::string nucname::CurrentForm(int nuc)
-{
-    return nucname::CurrentForm( pyne::to_str(nuc) );
-};
+
+
 
 /****************************/
 /*** LLAAAM_2_* Functions ***/
@@ -256,7 +277,6 @@ std::string nucname::CurrentForm(int nuc)
 int nucname::LLAAAM_2_zzaaam(std::string nucstr)
 {
     //Converts nuclide from LLAAAM form to zzaaam form.
-//	using namespace nucname;
     using namespace pyne;
 
     int newnuc;

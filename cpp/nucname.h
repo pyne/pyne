@@ -131,8 +131,14 @@ namespace nucname
   /********************/
   /*** Current Form ***/
   /********************/
-  std::string CurrentForm(std::string);
-  std::string CurrentForm(int);
+  std::string current_form(std::string);
+  std::string current_form(int);
+
+  /************************/
+  /*** zzaaam functions ***/
+  /************************/
+  int zzaaam(int);
+  //int zzaaam(std::string);
 
   /****************************/
   /*** LLAAAM_2_* Functions ***/
