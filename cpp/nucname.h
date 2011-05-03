@@ -3,8 +3,8 @@
 // LLAAAM is for letters  as well (U-235).
 // MCNP is for numerals without the meta-stable flag (92235), as used in MCNP.
 
-#ifndef _ISONAME_
-#define _ISONAME_
+#ifndef _PYNE_NUCNAME_
+#define _PYNE_NUCNAME_
 #include <iostream>
 #include <string>
 #include <map>
@@ -13,153 +13,161 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "bright.h"
+#include "pyne.h"
 
-namespace isoname 
+namespace nucname 
 {
-    /*** Constructs the LL to zz Dictionary ***/
-    typedef std::string LL;
-    typedef int zz;
-    typedef std::map<LL, zz> LLzzType; 
-    typedef LLzzType::iterator LLzzIter; 
-    LLzzType get_LLzz();
-    extern LLzzType LLzz; 
+  /*** Constructs the LL to zz Dictionary ***/
+  typedef std::string LL_t;
+  typedef int zz_t;
 
-    /*** Constructs zz to LL dictionary **/
-    typedef std::map<zz, LL> zzLLType; 
-    typedef zzLLType::iterator zzLLIter; 
-    zzLLType get_zzLL();
-    extern zzLLType zzLL;
+  typedef std::map<LL_t, zz_t> LLzz_t; 
+  typedef LLzz_t::iterator LLzz_iter; 
+  LLzz_t get_LLzz();
+  extern LLzz_t LLzz; 
 
-    /******************************************/
-    /*** Define useful elemental group sets ***/
-    /******************************************/
-    typedef std::string LL_Name;
-    typedef std::set<LL_Name> LL_Group;
-    typedef LL_Group::iterator LL_GroupIter;
-    typedef int zz_Name;
-    typedef std::set<zz_Name> zz_Group;
-    typedef zz_Group::iterator zz_GroupIter;
+  /*** Constructs zz to LL dictionary **/
+  typedef std::map<zz_t, LL_t> zzLL_t; 
+  typedef zzLL_t::iterator zzLL_iter; 
+  zzLL_t get_zzLL();
+  extern zzLL_t zzLL;
 
-    zz_Group LL_2_zz_Group (LL_Group);
+  /******************************************/
+  /*** Define useful elemental group sets ***/
+  /******************************************/
+  typedef std::set<LL_t> LL_group;
+  typedef LL_group::iterator LL_group_iter;
 
-    extern std::string LAN_Array[15];
-    extern LL_Group LAN;
-    extern zz_Group lan;
+  typedef std::set<zz_t> zz_group;
+  typedef zz_group::iterator zz_group_iter;
 
-    extern std::string ACT_Array[23];
-    extern LL_Group ACT;
-    extern zz_Group act;
+  zz_group LL_to_zz_group (LL_group);
 
-    extern std::string TRU_Array[19];
-    extern LL_Group TRU;
-    extern zz_Group tru;
+  extern LL_t LAN_array[15];
+  extern LL_group LAN;
+  extern zz_group lan;
 
-    extern std::string MA_Array[18];
-    extern LL_Group MA;
-    extern zz_Group ma;
+  extern LL_t ACT_array[23];
+  extern LL_group ACT;
+  extern zz_group act;
 
-    LL_Group get_FP();
-    extern LL_Group FP;
-    std::string * get_FP_Array(LL_Group);
-    extern std::string * FP_Array;
-    extern zz_Group fp;
+  extern LL_t TRU_array[19];
+  extern LL_group TRU;
+  extern zz_group tru;
+
+  extern LL_t MA_array[18];
+  extern LL_group MA;
+  extern zz_group ma;
+
+  LL_group get_FP();
+  extern LL_group FP;
+  LL_t * get_FP_array(LL_group);
+  extern LL_t * FP_array;
+  extern zz_group fp;
 
 
-    /******************/
-    /*** Exceptions ***/
-    /******************/
+  /******************/
+  /*** Exceptions ***/
+  /******************/
 
-    class NotANuclide : public std::exception
+  class NotANuclide : public std::exception
+  {
+  public:
+    NotANuclide () {};
+    ~NotANuclide () throw () {};
+
+    NotANuclide(std::string  wasptr, std::string nowptr)
     {
-    public:
-        NotANuclide () {};
-        ~NotANuclide () throw () {};
-        NotANuclide(std::string  wasptr, std::string nowptr)
-        {
-            nucwas = wasptr;
-            nucnow = nowptr;
-        };
-        NotANuclide(std::string wasptr, int nowptr)
-        {
-            nucwas = wasptr;
-            nucnow = bright::to_str(nowptr);
-        };
-        NotANuclide(int wasptr, std::string nowptr)
-        {
-            nucwas = bright::to_str(wasptr);
-            nucnow = nowptr;
-        };
-        NotANuclide(int wasptr, int nowptr)
-        {
-            nucwas = bright::to_str(wasptr);
-            nucnow = bright::to_str(nowptr);
-        };
-        virtual const char* what() const throw()
-        {
-            std::string NaNEstr ("Not a Nuclide! ");
-            if (!nucwas.empty())
-                NaNEstr += nucwas;
-            if (!nucnow.empty())
-            {
-                NaNEstr += " --> "; 
-                NaNEstr += nucnow;
-            }
-            return (const char *) NaNEstr.c_str();
-        };
-    private:
-        std::string nucwas;
-        std::string nucnow;
+       nucwas = wasptr;
+       nucnow = nowptr;
     };
 
-    static class IndeterminateNuclideFormException : public std::exception
+    NotANuclide(std::string wasptr, int nowptr)
     {
-        virtual const char* what() const throw()
-        {
-            return "Nuclide Form Could Not Be Determined!\nPlease Ensure Nuclide is of zzaaam, LLAAAM, or MCNP form.\n";
-        }
-    } IndeterminateNuclideForm;
+      nucwas = wasptr;
+      nucnow = pyne::to_str(nowptr);
+    };
 
-    /********************/
-    /*** Current Form ***/
-    /********************/
-    std::string CurrentForm(std::string);
-    std::string CurrentForm(int);
+    NotANuclide(int wasptr, std::string nowptr)
+    {
+      nucwas = pyne::to_str(wasptr);
+      nucnow = nowptr;
+    };
 
-    /****************************/
-    /*** LLAAAM_2_* Functions ***/
-    /****************************/
-    int LLAAAM_2_zzaaam(std::string);
-    int LLAAAM_2_MCNP(std::string);
+    NotANuclide(int wasptr, int nowptr)
+    {
+      nucwas = pyne::to_str(wasptr);
+      nucnow = pyne::to_str(nowptr);
+    };
 
-    /***************************/
-    /*** zzaaam_2_* Functions **/
-    /***************************/
-    std::string zzaaam_2_LLAAAM(int);
-    int zzaaam_2_MCNP(int);
+    virtual const char* what() const throw()
+    {
+      std::string NaNEstr ("Not a Nuclide! ");
+      if (!nucwas.empty())
+        NaNEstr += nucwas;
 
-    /**************************/
-    /*** MCNP_2_* Functions ***/
-    /**************************/
-    int MCNP_2_zzaaam(int);
-    std::string MCNP_2_LLAAAM(int);
+      if (!nucnow.empty())
+      {
+        NaNEstr += " --> "; 
+        NaNEstr += nucnow;
+      }
+      return (const char *) NaNEstr.c_str();
+    };
 
-    /****************************/
-    /*** mixed_2_*_ Functions ***/
-    /****************************/
-    int mixed_2_zzaaam(std::string);
-    int mixed_2_zzaaam(int);
-    std::string mixed_2_LLAAAM(std::string);
-    std::string mixed_2_LLAAAM(int);
-    int mixed_2_MCNP(std::string);
-    int mixed_2_MCNP(int);
+  private:
+    std::string nucwas;
+    std::string nucnow;
+  };
 
-    /************************/
-    /*** Helper Functions ***/
-    /************************/
-    double nuc_weight_zzaaam(int);
-    double nuc_weight(int);
-    double nuc_weight(std::string);
+  static class IndeterminateNuclideFormException : public std::exception
+  {
+    virtual const char* what() const throw()
+    {
+      return "Nuclide Form Could Not Be Determined!\nPlease Ensure Nuclide is of zzaaam, LLAAAM, or MCNP form.\n";
+    }
+  } IndeterminateNuclideForm;
+
+
+  /********************/
+  /*** Current Form ***/
+  /********************/
+  std::string CurrentForm(std::string);
+  std::string CurrentForm(int);
+
+  /****************************/
+  /*** LLAAAM_2_* Functions ***/
+  /****************************/
+  int LLAAAM_2_zzaaam(std::string);
+  int LLAAAM_2_MCNP(std::string);
+
+  /***************************/
+  /*** zzaaam_2_* Functions **/
+  /***************************/
+  std::string zzaaam_2_LLAAAM(int);
+  int zzaaam_2_MCNP(int);
+
+  /**************************/
+  /*** MCNP_2_* Functions ***/
+  /**************************/
+  int MCNP_2_zzaaam(int);
+  std::string MCNP_2_LLAAAM(int);
+
+  /****************************/
+  /*** mixed_2_*_ Functions ***/
+  /****************************/
+  int mixed_2_zzaaam(std::string);
+  int mixed_2_zzaaam(int);
+  std::string mixed_2_LLAAAM(std::string);
+  std::string mixed_2_LLAAAM(int);
+  int mixed_2_MCNP(std::string);
+  int mixed_2_MCNP(int);
+
+  /************************/
+  /*** Helper Functions ***/
+  /************************/
+  double nuc_weight_zzaaam(int);
+  double nuc_weight(int);
+  double nuc_weight(std::string);
 }
 
 #endif
