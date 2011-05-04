@@ -255,7 +255,7 @@ std::string nucname::current_form(int nuc)
 /************************/
 /*** zzaaam functions ***/
 /************************/
-int zzaaam(int nuc)
+int nucname::zzaaam(int nuc)
 {
   int newnuc;
 
@@ -327,12 +327,55 @@ int zzaaam(int nuc)
 
 
 
-int zzaaam(std::string nuc)
+int nucname::zzaaam(std::string nuc)
 {
   if (nuc.empty())
     throw NotANuclide(nuc, "<empty>");
 
-  
+  int newnuc;
+  std::string nucstr;
+
+  // Get the string into a regular form
+  nucstr = pyne::to_upper(nuc);
+  nucstr = pyne::remove_substring(nucstr, "-");
+
+  if (pyne::contains_substring(pyne::digits, nucstr[0]))
+  {
+    // Nuclide must actually be an integer that 
+    // just happens to be living in string form.
+    newnuc = to_int(nucstr);
+    newnuc = zzaaam(newnuc);
+  }
+  else if (pyne::contains_substring(pyne::alphabet, nucstr[0]))
+  {
+    // Nuclide is probably in LLAAAM form, or some variation therein
+    int anum = to_int(pyne::remove_characters(nucstr, pyne::alphabet));
+    if (anum < 1)
+      throw NotANuclide(nucstr, anum);
+
+    // Figure out if we are meta-stable or not
+    std::string end_char = pyne::last_char(nucstr);
+    if (end_char == "M")
+      newnuc = (10 * anum) + 1;
+    else if (pyne::contains_substring(pyne::digits, end_char))
+      newnuc = (10 * anum);
+    else
+      throw NotANuclide(nucstr, newnuc);
+
+    // Add the Z-number
+    std::string lnum = pyne::remove_characters(nucstr.substr(0, nucstr.length()-1), pyne::digits);
+    if (0 < LLzz.count(lnum))
+      newnuc = (10000 * LLzz[lnum]) + newnuc;
+    else
+      throw NotANuclide(nucstr, newnuc);
+  }
+  else
+  {
+    // Clearly not a nuclide
+    throw NotANuclide(nuc, nucstr);
+  }
+
+  return newnuc;  
 };
 
 
