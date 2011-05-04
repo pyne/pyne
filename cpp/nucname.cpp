@@ -257,17 +257,83 @@ std::string nucname::current_form(int nuc)
 /************************/
 int zzaaam(int nuc)
 {
-    int newnuc;
-    //Converts nuclide from MCNP form to zzaaam form.
-    if ( (nuc%1000)-400 < 0 )
-        return nuc * 10;
+  int newnuc;
+
+  int mod_10000 = nuc % 10000;
+  int div_10000 = nuc / 10000;
+  int mod_10000_div_10 = mod_10000 / 10;
+
+  // Nuclide must already be in zzaaam form
+  if (div_10000 <= mod_10000_div_10 && mod_10000_div_10 <= div_10000 * 6)
+  {
+    // Normal nuclide
+    newnuc = nuc;
+    return newnuc;
+  }
+  else if (mod_10000 == 0 && 0 < zzLL.count(div_10000))
+  {
+    // Natural elemental nuclide:  ie for Urnaium = 920000
+    newnuc = nuc;
+    return newnuc;
+  }
+
+  // Nuclide is not in zzaaam form, 
+  // Try MCNP form, ie zzaaa
+  int mod_1000 = nuc % 1000; 
+  int div_1000 = nuc / 1000;
+  int mod_10000_div_10 = mod_10000 / 10;
+
+  if (div_10000 <= mod_10000_div_10 && mod_10000_div_10 <= div_10000 * 6)
+  {
+    if (mod_1000 - 400 < 0)
+    {
+      // Nuclide in normal MCNP form
+      newnuc = nuc * 10;
+    }
     else
     {
-        //Please make more general so that more that the first metastable state is returned...
-        return (nuc - 400)*10 + 1;
+      // Nuclide in MCNP metastable form
+      newnuc = ((nuc - 400) * 10) + 1;
+      while (2.5 < (float ((newnuc/10)%1000)) / float (newnuc/10000)))
+      {
+        newnuc -= 999;
+      };
     }
+    return newnuc;
+  }
+
+
+  // Not a normal nuclide, might be a 
+  // Natural elemental nuclide.  
+  // ie for Urnaium = 920000
+  if (mod_10000 == 0 && 0 == zzLL.count(div_1000) && 0 < zzLL.count(div_10000))
+  {
+    // zzaaam form natural nuclide
+    newnuc = nuc;
+  }
+  else if (mod_1000 == 0 && mod_10000 != 0 && 0 < zzLL.count(div_1000))
+  {
+    // MCNP form natural nuclide
+    newnuc = nuc * 10;
+  }
+  else
+  {
+    newnuc = -1;
+    throw IndeterminateNuclideForm(nuc, "");
+  };
+
+  return newnuc;
 };
 
+
+
+int zzaaam(std::string nuc)
+{
+  if (nuc.empty())
+    throw NotANuclide(nuc, "<empty>");
+
+  
+};
 
 
 
