@@ -177,45 +177,36 @@ namespace nucname
   std::string current_form(std::string);
   std::string current_form(int);
 
+
   /************************/
   /*** zzaaam functions ***/
   /************************/
   int zzaaam(int);
+  int zzaaam(char *);
   int zzaaam(std::string);
 
-  /****************************/
-  /*** LLAAAM_2_* Functions ***/
-  /****************************/
-  int LLAAAM_2_zzaaam(std::string);
-  int LLAAAM_2_MCNP(std::string);
 
-  /***************************/
-  /*** zzaaam_2_* Functions **/
-  /***************************/
-  std::string zzaaam_2_LLAAAM(int);
-  int zzaaam_2_MCNP(int);
+  /************************/
+  /*** LLAAAM functions ***/
+  /************************/
+  std::string LLAAAM(int);
+  std::string LLAAAM(char *);
+  std::string LLAAAM(std::string);
 
-  /**************************/
-  /*** MCNP_2_* Functions ***/
-  /**************************/
-  int MCNP_2_zzaaam(int);
-  std::string MCNP_2_LLAAAM(int);
 
-  /****************************/
-  /*** mixed_2_*_ Functions ***/
-  /****************************/
-  int mixed_2_zzaaam(std::string);
-  int mixed_2_zzaaam(int);
-  std::string mixed_2_LLAAAM(std::string);
-  std::string mixed_2_LLAAAM(int);
-  int mixed_2_MCNP(std::string);
-  int mixed_2_MCNP(int);
+  /**********************/
+  /*** mcnp functions ***/
+  /**********************/
+  int mcnp(int);
+  int mcnp(char *);
+  int mcnp(std::string);
+
 
   /************************/
   /*** Helper Functions ***/
   /************************/
-  double nuc_weight_zzaaam(int);
   double nuc_weight(int);
+  double nuc_weight(char *);
   double nuc_weight(std::string);
 }
 
