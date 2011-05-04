@@ -202,6 +202,16 @@ namespace nucname
   int mcnp(std::string);
 
 
+  /*************************/
+  /*** serpent functions ***/
+  /*************************/
+  std::string serpent(int);
+  std::string serpent(char *);
+  std::string serpent(std::string);
+
+
+
+
   /************************/
   /*** Helper Functions ***/
   /************************/
