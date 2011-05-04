@@ -478,6 +478,64 @@ int nucname::mcnp(std::string nuc)
 
 
 
+
+/*************************/
+/*** serpent functions ***/
+/*************************/
+std::string nucname::serpent(int)
+{
+  int nucint = zzaaam(nuc);
+  std::string newnuc = "";
+
+  int mod_10 = nucint%10;
+  int mod_10000 = nuc % 10000;
+  int div_10000 = nuc / 10000;
+  int mod_10000_div_10 = mod_10000 / 10;
+
+  // Make sure the LL value is correct
+  if (0 == zzLL.count(div_10000))
+    throw NotANuclide(nuc, nucint);
+
+  // Add LL
+  std::string LLupper = pyne::to_upper(zzLL[div_10000]);
+  std::string LLlower = pyne::to_lower(zzLL[div_10000]);
+  newnuc += LLupper[0];
+  for (int l = 1; l < LLlower.size(); l++)
+    newnuc += LLlower[l];  
+
+  // Add required dash
+  newnuc += "-"
+
+  // Add A-number
+  if (0 < mod_10000)
+    newnuc += to_str(mod_10000_div_10);
+  else if (0 == mod_10000)
+    newnuc += "nat";
+
+  // Add meta-stable flag
+  if (0 < mod_10)
+    newnuc += "m";
+
+  return newnuc;
+};
+
+
+std::string nucname::serpent(char *)
+{
+  std::string newnuc (nuc);
+  return serpent(newnuc);
+};
+
+
+std::string nucname::serpent(std::string)
+{
+  int newnuc = zzaaam(nuc);
+  return serpent(newnuc)
+};
+
+
+
+
 /************************/
 /*** Helper Functions ***/
 /************************/
