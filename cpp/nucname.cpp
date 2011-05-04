@@ -327,6 +327,14 @@ int nucname::zzaaam(int nuc)
 
 
 
+int nucname::zzaaam(char * nuc)
+{
+  std::string newnuc (nuc);
+  return zzaaam(newnuc);
+};
+
+
+
 int nucname::zzaaam(std::string nuc)
 {
   if (nuc.empty())
@@ -380,210 +388,113 @@ int nucname::zzaaam(std::string nuc)
 
 
 
-/****************************/
-/*** LLAAAM_2_* Functions ***/
-/****************************/
-int nucname::LLAAAM_2_zzaaam(std::string nucstr)
+
+/************************/
+/*** LLAAAM functions ***/
+/************************/
+std::string nucname::LLAAAM(int nuc)
 {
-    //Converts nuclide from LLAAAM form to zzaaam form.
-    using namespace pyne;
+  int nucint = zzaaam(nuc);
+  std::string newnuc = "";
 
-    int newnuc;
-    nucstr = ToUpper(nucstr);
-    nucstr = Strip(nucstr, "-");
+  int mod_10 = nucint%10;
+  int mod_10000 = nuc % 10000;
+  int div_10000 = nuc / 10000;
+  int mod_10000_div_10 = mod_10000 / 10;
 
-    int anum =  to_int( MultiStrip(nucstr, alphabet) );
-    if (anum < 1)
-        throw NotANuclide (nucstr, anum);
+  // Make sure the LL value is correct
+  if (0 == zzLL.count(div_10000))
+    throw NotANuclide(nuc, nucint);
 
-    if ( LastChar(nucstr) == "M" )
-        newnuc = (10 * anum) + 1;
-    else if ( SubInString(digits, LastChar(nucstr)) )
-        newnuc = (10 * anum);
-    else
-        throw NotANuclide (nucstr, newnuc);
+  // Add LL
+  newnuc += zzLL[div_10000];
 
-    std::string lnum = MultiStrip(nucstr.substr(0, nucstr.length()-1), digits);
+  // Add A-number
+  if (0 < mod_10000)
+    newnuc += to_str(mod_10000_div_10);
 
-    if ( 0 < LLzz.count(lnum) )
-        newnuc = (10000 * LLzz[lnum]) + newnuc;
-    else
-        throw NotANuclide (nucstr, newnuc);
-    return newnuc;
+  // Add meta-stable flag
+  if (0 < mod_10)
+    newnuc += "M";
+
+  return newnuc;
 };
 
 
-int nucname::LLAAAM_2_MCNP(std::string nucstr)
+
+std::string nucname::LLAAAM(char * nuc)
 {
-    //Converts nuclide from LLAAAM form to MCNP form.
-    return nucname::zzaaam_2_MCNP( nucname::LLAAAM_2_zzaaam(nucstr) );
+  std::string newnuc (nuc);
+  return LLAAAM(newnuc);
+}
+
+
+std::string nucname::LLAAAM(std::string nuc)
+{
+  int newnuc = zzaaam(nuc);
+  return LLAAAM(newnuc);
+}
+
+
+
+
+
+/**********************/
+/*** mcnp functions ***/
+/**********************/
+int nucname::mcnp(int nuc)
+{
+  int newnuc = zzaaam(nuc);
+  int mod_10 = newnuc%10;
+
+  newnuc = newnuc/10;
+
+  // Handle the crazy MCNP meta-stable format
+  if (0 != mod_10)
+  {
+    newnuc += 300;
+    newnuc += (mod_10 * 100);
+  }
+
+  return newnuc;
 };
 
-/***************************/
-/*** zzaaam_2_* Functions **/
-/***************************/
-std::string nucname::zzaaam_2_LLAAAM(int nuc)
+
+
+int nucname::mcnp(char * nuc)
 {
-    //Converts nuclide from azzzm form to LLAAAM form.
-//	using namespace nucname;
-    using namespace pyne;
-
-    std::string newnuc = "";
-    std::string nucstr = to_str( nuc );
-    nucstr = Strip(nucstr, "-");
-    
-    try
-    {
-        if ( LastChar(nucstr) == "1")
-            newnuc = to_str(to_int(SubFromEnd(nucstr,-4,3))) + "M";
-        else if ( LastChar(nucstr) == "0")
-            newnuc = to_str(to_int(SubFromEnd(nucstr,-4,3)));
-        else
-            throw NotANuclide (nucstr, newnuc);
-    }
-    catch (NotANuclide& e)
-    {
-        throw NotANuclide (nucstr, newnuc);
-    }
-
-    int znum = to_int( nucstr.substr(0, nucstr.length()-4) );
-    if ( 0 < zzLL.count(znum) )
-        newnuc = zzLL[znum] + newnuc;
-    else
-    {
-        newnuc = "LL" + newnuc;
-        throw NotANuclide (nucstr, newnuc);
-    }
-    return newnuc;
+  std::string newnuc (nuc);
+  return mcnp(newnuc);
 };
 
-int nucname::zzaaam_2_MCNP(int nuc)
+
+
+int nucname::mcnp(std::string nuc)
 {
-    //Converts nuclide from zzaaam form to MCNP form.
-    if ( nuc%10 == 0 )
-        return nuc / 10;
-    else
-    {
-        int znum = nuc / 10000;
-        int anum = (nuc/10) - (znum*1000) + 300;
-        anum = anum + ((nuc%10)*100);
-        return (znum*1000) + anum;
-    }
+  int newnuc = zzaaam(nuc);
+  return mcnp(newnuc);
 };
 
-/**************************/
-/*** MCNP_2_* Functions ***/
-/**************************/
-int nucname::MCNP_2_zzaaam(int nuc)
-{
-    //Converts nuclide from MCNP form to zzaaam form.
-    if ( (nuc%1000)-400 < 0 )
-        return nuc * 10;
-    else
-    {
-        //Please make more general so that more that the first metastable state is returned...
-        return (nuc - 400)*10 + 1;
-    }
-};
 
-std::string nucname::MCNP_2_LLAAAM(int nuc)
-{
-    //Converts nuclide from MCNP form to LLAAAM form.
-    return nucname::zzaaam_2_LLAAAM( nucname::MCNP_2_zzaaam(nuc) );
-};
 
-/****************************/
-/*** mixed_2_*_ Functions ***/
-/****************************/
-int nucname::mixed_2_zzaaam(std::string nuc)
-{
-    //Converts nuclide from mixed form to zzaaam form.
-//	using namespace nucname;
-    using namespace pyne;
-
-    nuc = ToUpper(nuc);
-    nuc = Strip(nuc, "-");
-    std::string currentform = CurrentForm(nuc);
-    if (currentform == "zzaaam")
-        return to_int(nuc);
-    else if (currentform == "LLAAAM")
-        return LLAAAM_2_zzaaam(nuc);
-    else if (currentform == "MCNP")
-        return MCNP_2_zzaaam( to_int(nuc) );
-    else
-        throw IndeterminateNuclideForm;
-};
-
-int nucname::mixed_2_zzaaam(int nuc)
-{
-    return nucname::mixed_2_zzaaam( pyne::to_str(nuc) );
-};
-
-std::string nucname::mixed_2_LLAAAM(std::string nuc)
-{
-    //Converts nuclide from mixed form to LLAAAM form.
-//	using namespace nucname;
-    using namespace pyne;
-
-    nuc = ToUpper(nuc);
-    nuc = Strip(nuc, "-");
-    std::string currentform = CurrentForm(nuc);
-    if (currentform == "zzaaam")
-        return zzaaam_2_LLAAAM( to_int(nuc) );
-    else if (currentform == "LLAAAM")
-        return nuc;
-    else if (currentform == "MCNP")
-        return MCNP_2_LLAAAM( to_int(nuc) );
-    else
-        throw IndeterminateNuclideForm;
-};
-
-std::string nucname::mixed_2_LLAAAM(int nuc)
-{
-    return nucname::mixed_2_LLAAAM( pyne::to_str(nuc) );
-};
-
-int nucname::mixed_2_MCNP(std::string nuc)
-{
-    //Converts nuclide from mixed form to MCNP form.
-//	using namespace nucname;
-    using namespace pyne;
-
-    nuc = ToUpper(nuc);
-    nuc = Strip(nuc, "-");
-    std::string currentform = CurrentForm(nuc);
-    if (currentform == "zzaaam")
-        return zzaaam_2_MCNP( to_int(nuc) );
-    else if (currentform == "LLAAAM")
-        return LLAAAM_2_MCNP(nuc);
-    else if (currentform == "MCNP")
-        return to_int(nuc);
-    else
-        throw IndeterminateNuclideForm;
-};
-
-int nucname::mixed_2_MCNP(int nuc)
-{
-    return nucname::mixed_2_MCNP( pyne::to_str(nuc) );
-};
 
 /************************/
 /*** Helper Functions ***/
 /************************/
-double nucname::nuc_weight_zzaaam(int nuc)
-{
-    return (double) ((nuc/10)%1000);
-};
-
 double nucname::nuc_weight(int nuc)
 {
-    int nuc_zz = nucname::mixed_2_zzaaam(nuc);
-    return nucname::nuc_weight_zzaaam(nuc_zz);
+    int nuc_zz = zzaaam(nuc);
+    return (double) ((nuc_zz/10)%1000);
+};
+
+double nucname::nuc_weight(char * nuc)
+{
+    int nuc_zz = zzaaam(nuc);
+    return nuc_weight(nuc_zz);
 };
 
 double nucname::nuc_weight(std::string nuc)
 {
-    int nuc_zz = nucname::mixed_2_zzaaam(nuc);
-    return nucname::nuc_weight_zzaaam(nuc_zz);
+    int nuc_zz = zzaaam(nuc);
+    return nuc_weight(nuc_zz);
 };
-
