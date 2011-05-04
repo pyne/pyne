@@ -76,7 +76,7 @@ namespace nucname
     NotANuclide () {};
     ~NotANuclide () throw () {};
 
-    NotANuclide(std::string  wasptr, std::string nowptr)
+    NotANuclide(std::string wasptr, std::string nowptr)
     {
        nucwas = wasptr;
        nucnow = nowptr;
@@ -119,13 +119,56 @@ namespace nucname
     std::string nucnow;
   };
 
-  static class IndeterminateNuclideFormException : public std::exception
+
+
+  static class IndeterminateNuclideForm : public std::exception
   {
+  public:
+    IndeterminateNuclideForm () {};
+    ~IndeterminateNuclideForm () throw () {};
+
+    IndeterminateNuclideForm(std::string wasptr, std::string nowptr)
+    {
+       nucwas = wasptr;
+       nucnow = nowptr;
+    };
+
+    IndeterminateNuclideForm(std::string wasptr, int nowptr)
+    {
+      nucwas = wasptr;
+      nucnow = pyne::to_str(nowptr);
+    };
+
+    IndeterminateNuclideForm(int wasptr, std::string nowptr)
+    {
+      nucwas = pyne::to_str(wasptr);
+      nucnow = nowptr;
+    };
+
+    IndeterminateNuclideForm(int wasptr, int nowptr)
+    {
+      nucwas = pyne::to_str(wasptr);
+      nucnow = pyne::to_str(nowptr);
+    };
+
     virtual const char* what() const throw()
     {
-      return "Nuclide Form Could Not Be Determined!\nPlease Ensure Nuclide is of zzaaam, LLAAAM, or MCNP form.\n";
+      std::string INFEstr ("Indeterminate nuclide form: ";
+      if (!nucwas.empty())
+        INFEstr += nucwas;
+
+      if (!nucnow.empty())
+      {
+        INFEstr += " --> "; 
+        INFEstr += nucnow;
+      }
+      return (const char *) INFEstr.c_str();
     }
-  } IndeterminateNuclideForm;
+
+  private:
+    std::string nucwas;
+    std::string nucnow;
+  };
 
 
   /********************/
@@ -138,7 +181,7 @@ namespace nucname
   /*** zzaaam functions ***/
   /************************/
   int zzaaam(int);
-  //int zzaaam(std::string);
+  int zzaaam(std::string);
 
   /****************************/
   /*** LLAAAM_2_* Functions ***/
