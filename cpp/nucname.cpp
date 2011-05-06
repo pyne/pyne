@@ -347,18 +347,18 @@ int nucname::zzaaam(std::string nuc)
   nucstr = pyne::to_upper(nuc);
   nucstr = pyne::remove_substring(nucstr, "-");
 
-  if (pyne::contains_substring(pyne::digits, &nucstr[0]))
+  if (pyne::contains_substring(pyne::digits, nucstr.substr(0, 1)))
   {
     // Nuclide must actually be an integer that 
     // just happens to be living in string form.
     newnuc = pyne::to_int(nucstr);
     newnuc = zzaaam(newnuc);
   }
-  else if (pyne::contains_substring(pyne::alphabet, &nucstr[0]))
+  else if (pyne::contains_substring(pyne::alphabet, nucstr.substr(0, 1)))
   {
     // Nuclide is probably in LLAAAM form, or some variation therein
     int anum = pyne::to_int(pyne::remove_characters(nucstr, pyne::alphabet));
-    if (anum < 1)
+    if (anum < 0)
       throw NotANuclide(nucstr, anum);
 
     // Figure out if we are meta-stable or not
