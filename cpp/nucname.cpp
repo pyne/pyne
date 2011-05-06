@@ -156,31 +156,31 @@ nucname::zz_group nucname::LL_to_zz_group(nucname::LL_group eg)
 };
 
 // Lanthanides
-LL_t nucname::LAN_array[15] = {"LA", "CE", "PR", "ND", "PM", "SM", "EU", \
+nucname::LL_t nucname::LAN_array[15] = {"LA", "CE", "PR", "ND", "PM", "SM", "EU", \
                                "GD", "TB", "DY", "HO", "ER", "TM", "YB", "LU"};
 nucname::LL_group nucname::LAN (nucname::LAN_array, nucname::LAN_array+15);
 nucname::zz_group nucname::lan = nucname::LL_to_zz_group(nucname::LAN);
 
 // Actinides
-LL_t nucname::ACT_array[23] = {"AC", "TH", "PA", "U", "NP", "PU", "AM", "CM", \
+nucname::LL_t nucname::ACT_array[23] = {"AC", "TH", "PA", "U", "NP", "PU", "AM", "CM", \
                                "BK", "CF", "ES", "FM", "MD", "NO", "LR", "RF", \
                                "DB", "SG", "BH", "HS", "MT", "DS", "RG"};
 nucname::LL_group nucname::ACT (nucname::ACT_array, nucname::ACT_array+23);
 nucname::zz_group nucname::act = nucname::LL_to_zz_group(nucname::ACT);
 
 // Transuarnics
-LL_t nucname::TRU_array[19] = {"NP", "PU", "AM", "CM", "BK", "CF", "ES", "FM", \
+nucname::LL_t nucname::TRU_array[19] = {"NP", "PU", "AM", "CM", "BK", "CF", "ES", "FM", \
                                "MD", "NO", "LR", "RF", "DB", "SG", "BH", "HS", \
                                "MT", "DS", "RG"};
 nucname::LL_group nucname::TRU (nucname::TRU_array, nucname::TRU_array+19);
 nucname::zz_group nucname::tru = nucname::LL_to_zz_group(nucname::TRU);
 
 //Minor Actinides
-LL_t nucname::MA_array[18] = {"NP", "AM", "CM", "BK", "CF", "ES", "FM", "MD", \
+nucname::LL_t nucname::MA_array[18] = {"NP", "AM", "CM", "BK", "CF", "ES", "FM", "MD", \
                               "NO", "LR", "RF", "DB", "SG", "BH", "HS", "MT", \
                               "DS", "RG"};
 nucname::LL_group nucname::MA (nucname::MA_array, nucname::MA_array+18);
-nucname::zz_group nucname::ma = nucname::LL_2_zz_group(nucname::MA);
+nucname::zz_group nucname::ma = nucname::LL_to_zz_group(nucname::MA);
 
 //Fission Products
 nucname::LL_group nucname::get_FP()
@@ -195,13 +195,13 @@ nucname::LL_group nucname::get_FP()
   return FPs;
 }
 
-LL_t * nucname::get_FP_array(nucname::LL_group FPs)
+nucname::LL_t * nucname::get_FP_array(nucname::LL_group FPs)
 {
   // Returns the Fission Product group as an array
   LL_t * fp_array = new LL_t [FPs.size()];
   int n = 0;
 
-  for (LL_GroupIter i = FPs.begin(); i != FPs.end(); i++)
+  for (LL_group_iter i = FPs.begin(); i != FPs.end(); i++)
   {
     fp_array[n] = *i;
     n++;
@@ -210,7 +210,7 @@ LL_t * nucname::get_FP_array(nucname::LL_group FPs)
 };
 
 nucname::LL_group nucname::FP = nucname::get_FP();
-LL_t * nucname::FP_array = nucname::get_FP_array(nucname::FP);
+nucname::LL_t * nucname::FP_array = nucname::get_FP_array(nucname::FP);
 nucname::zz_group nucname::fp = nucname::LL_to_zz_group(nucname::FP);
 
 
@@ -240,7 +240,7 @@ std::string nucname::current_form(std::string nuc)
     else if ( ternary_ge( to_int(nuc.substr(0,nuc.length()-3)), to_int(slice_from_end(nuc,-3,3)), to_int(nuc.substr(0,nuc.length()-3)) * 5) )
       return "MCNP";
     else
-      throw IndeterminateNuclideForm;
+      throw IndeterminateNuclideForm(nuc, "");
   };
 };
 
@@ -281,9 +281,9 @@ int nucname::zzaaam(int nuc)
   // Try MCNP form, ie zzaaa
   int mod_1000 = nuc % 1000; 
   int div_1000 = nuc / 1000;
-  int mod_10000_div_10 = mod_10000 / 10;
+  int mod_1000_div_10 = mod_10000 / 10;
 
-  if (div_10000 <= mod_10000_div_10 && mod_10000_div_10 <= div_10000 * 6)
+  if (div_1000 <= mod_1000_div_10 && mod_1000_div_10 <= div_1000 * 6)
   {
     if (mod_1000 - 400 < 0)
     {
@@ -294,7 +294,7 @@ int nucname::zzaaam(int nuc)
     {
       // Nuclide in MCNP metastable form
       newnuc = ((nuc - 400) * 10) + 1;
-      while (2.5 < (float ((newnuc/10)%1000)) / float (newnuc/10000)))
+      while (2.5 < (float ((newnuc/10)%1000) / float (newnuc/10000)))
       {
         newnuc -= 999;
       };
@@ -347,17 +347,17 @@ int nucname::zzaaam(std::string nuc)
   nucstr = pyne::to_upper(nuc);
   nucstr = pyne::remove_substring(nucstr, "-");
 
-  if (pyne::contains_substring(pyne::digits, nucstr[0]))
+  if (pyne::contains_substring(pyne::digits, &nucstr[0]))
   {
     // Nuclide must actually be an integer that 
     // just happens to be living in string form.
-    newnuc = to_int(nucstr);
+    newnuc = pyne::to_int(nucstr);
     newnuc = zzaaam(newnuc);
   }
-  else if (pyne::contains_substring(pyne::alphabet, nucstr[0]))
+  else if (pyne::contains_substring(pyne::alphabet, &nucstr[0]))
   {
     // Nuclide is probably in LLAAAM form, or some variation therein
-    int anum = to_int(pyne::remove_characters(nucstr, pyne::alphabet));
+    int anum = pyne::to_int(pyne::remove_characters(nucstr, pyne::alphabet));
     if (anum < 1)
       throw NotANuclide(nucstr, anum);
 
@@ -411,7 +411,7 @@ std::string nucname::LLAAAM(int nuc)
 
   // Add A-number
   if (0 < mod_10000)
-    newnuc += to_str(mod_10000_div_10);
+    newnuc += pyne::to_str(mod_10000_div_10);
 
   // Add meta-stable flag
   if (0 < mod_10)
@@ -482,7 +482,7 @@ int nucname::mcnp(std::string nuc)
 /*************************/
 /*** serpent functions ***/
 /*************************/
-std::string nucname::serpent(int)
+std::string nucname::serpent(int nuc)
 {
   int nucint = zzaaam(nuc);
   std::string newnuc = "";
@@ -504,11 +504,11 @@ std::string nucname::serpent(int)
     newnuc += LLlower[l];  
 
   // Add required dash
-  newnuc += "-"
+  newnuc += "-";
 
   // Add A-number
   if (0 < mod_10000)
-    newnuc += to_str(mod_10000_div_10);
+    newnuc += pyne::to_str(mod_10000_div_10);
   else if (0 == mod_10000)
     newnuc += "nat";
 
@@ -520,17 +520,17 @@ std::string nucname::serpent(int)
 };
 
 
-std::string nucname::serpent(char *)
+std::string nucname::serpent(char * nuc)
 {
   std::string newnuc (nuc);
   return serpent(newnuc);
 };
 
 
-std::string nucname::serpent(std::string)
+std::string nucname::serpent(std::string nuc)
 {
   int newnuc = zzaaam(nuc);
-  return serpent(newnuc)
+  return serpent(newnuc);
 };
 
 
