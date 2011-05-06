@@ -127,7 +127,7 @@ std::string pyne::replace_all_substrings(std::string s, std::string substr, std:
   int n_found = s.find(substr);
   while ( 0 <= n_found )
   {
-    strToAlter.replace( n_found , substr.length(), repstr );
+    s.replace( n_found , substr.length(), repstr );
     n_found = s.find(substr);
   }
   return s;
@@ -235,7 +235,7 @@ double pyne::coth(double x)
 
 // File Helpers
 
-bool pyne::FileExists(std::string strfilename) 
+bool pyne::file_exists(std::string strfilename) 
 {
   // Thank you intarwebz for this function!
   // Sepcifically: http://www.techbytes.ca/techbyte103.html

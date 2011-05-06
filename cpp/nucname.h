@@ -121,7 +121,7 @@ namespace nucname
 
 
 
-  static class IndeterminateNuclideForm : public std::exception
+  class IndeterminateNuclideForm : public std::exception
   {
   public:
     IndeterminateNuclideForm () {};
@@ -153,7 +153,7 @@ namespace nucname
 
     virtual const char* what() const throw()
     {
-      std::string INFEstr ("Indeterminate nuclide form: ";
+      std::string INFEstr ("Indeterminate nuclide form: ");
       if (!nucwas.empty())
         INFEstr += nucwas;
 
