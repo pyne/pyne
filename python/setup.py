@@ -13,8 +13,60 @@ import numpy as np
 
 from setup_data import INFO
 
+
+##########################################
+### Set compiler options for extensions ###
+###########################################
+cyt_dir = os.path.abspath(os.path.join('..', 'cython'))
+cpp_dir = os.path.abspath(os.path.join('..', 'cpp'))
+dat_dir = os.path.abspath(os.path.join('..', 'data'))
+
 # Get numpy include dir
 numpy_include = np.get_include()
+
+
+
+#
+# For stlconverters
+# 
+stlconv_ext = {'name': "pyne.stlconverters"}
+
+stlconv_ext['sources'] = [os.path.join(cyt_dir, 'stlconverters.pyx')]
+stlconv_ext['include_dirs'] = [cyt_dir, cpp_dir, numpy_include]
+stlconv_ext['language'] = "c++"
+
+if os.name == 'posix':
+#    stlconv_ext["extra_compile_args"] = ["-Wno-strict-prototypes"]
+    stlconv_ext["undef_macros"] = ["NDEBUG"]
+elif os.name == 'nt':
+    stlconv_ext["extra_compile_args"] = ["/EHsc"]
+    stlconv_ext["define_macros"] = [("_WIN32", None)]
+
+
+#
+# For nucname
+# 
+nucname_ext = {'name': 'pyne.nucname'}
+
+nucname_ext['sources'] = [
+    'bright.cpp',
+    'nucname.cpp',
+    ]
+nucname_ext['sources'] = [os.path.join(cpp_dir, s) for s in isoname_ext['sources']] + \
+                         [os.path.join(cyt_dir, 'nucname.pyx')]
+
+nucname_ext['include_dirs'] = [cyt_dir, cpp_dir, numpy_include]
+nucname_ext['language'] = "c++"
+
+
+if os.name == 'posix':
+    #isoname_ext["extra_compile_args"] = ["-Wno-strict-prototypes"]
+    isoname_ext["undef_macros"] = ["NDEBUG"]
+elif os.name == 'nt':
+    isoname_ext["extra_compile_args"] = ["/EHsc"]
+    isoname_ext["define_macros"] = [("_WIN32", None)]
+
+
 
 
 ##########################
@@ -39,8 +91,9 @@ setup(name="pyne",
     packages = ['pyne'],
     package_dir = pack_dir,
     cmdclass = {'build_ext': build_ext}, 
-#    ext_modules=[
-#        Extension(**pyne_ext), 
-#        ],
+    ext_modules=[
+        Extension(**stlconv_ext), 
+        Extension(**nucname_ext), 
+        ],
     )
 
