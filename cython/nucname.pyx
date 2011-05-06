@@ -124,7 +124,7 @@ def LLAAAM(nuc):
 
 
 def mcnp(nuc):
-    """Converts an arbitrary nuclide and its MCNP form. 
+    """Converts an arbitrary nuclide and its  3MCNP form. 
 
     Args:
         * nuc (int or str): Input nuclide.
