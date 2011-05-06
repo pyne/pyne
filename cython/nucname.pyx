@@ -143,6 +143,27 @@ def mcnp(nuc):
     return newnuc
 
 
+def serpent(nuc):
+    """Converts an arbitrary nuclide and its serepnt form. 
+
+    Args:
+        * nuc (int or str): Input nuclide.
+
+    Returns:
+        * newnuc (int): Output nuclide in serpent form.
+    """
+    cdef std.string newnuc
+
+    if isinstance(nuc, basestring):
+        newnuc = cpp_nucname.serpent(<char *> nuc)
+    elif isinstance(nuc, int):
+        newnuc = cpp_nucname.serpent(<int> nuc)
+    else:
+        raise NucTypeError(nuc)
+
+    return newnuc.c_str()
+
+
 #
 # Helper Functions
 #

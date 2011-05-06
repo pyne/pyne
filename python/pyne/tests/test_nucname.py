@@ -115,6 +115,17 @@ def test_mcnp():
 
 
 
+def test_serpent():
+    assert_equal(nucname.serpent(942390), "Pu-239")
+    assert_equal(nucname.serpent(952421), "Am-242m")
+
+    assert_equal(nucname.serpent("Pu-239"), "Pu-239")
+
+    assert_equal(nucname.serepnt(94239), "Pu-239")
+    assert_equal(nucname.serpent(95642), "Am-242m")
+
+
+
 def test_nuc_weight():
     # zzaam form
     assert_equal(nucname.nuc_weight(80160),  16.0)
