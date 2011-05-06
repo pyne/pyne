@@ -91,6 +91,9 @@ def test_zzaaam():
 
     assert_equal(nucname.zzaaam(2004),  20040)
     assert_equal(nucname.zzaaam(95642), 952421)
+    assert_equal(nucname.zzaaam(95942), 952424)
+
+    assert_equal(nucname.zzaaam("Am-242m"), 952421)
 
 
 def test_LLAAAM():
@@ -101,6 +104,8 @@ def test_LLAAAM():
 
     assert_equal(nucname.LLAAAM(94239), "PU239")
     assert_equal(nucname.LLAAAM(95642), "AM242M")
+
+    assert_equal(nucname.LLAAAM("Am-242m"), "AM242M")
 
 
 def test_mcnp():
@@ -113,6 +118,8 @@ def test_mcnp():
     assert_equal(nucname.mcnp(1001),  1001)
     assert_equal(nucname.mcnp(95642), 95642)
 
+    assert_equal(nucname.mcnp("Am-242m"), 95642)
+
 
 
 def test_serpent():
@@ -121,7 +128,7 @@ def test_serpent():
 
     assert_equal(nucname.serpent("Pu-239"), "Pu-239")
 
-    assert_equal(nucname.serepnt(94239), "Pu-239")
+    assert_equal(nucname.serpent(94239), "Pu-239")
     assert_equal(nucname.serpent(95642), "Am-242m")
 
 
