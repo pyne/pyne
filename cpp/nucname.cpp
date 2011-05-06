@@ -281,9 +281,8 @@ int nucname::zzaaam(int nuc)
   // Try MCNP form, ie zzaaa
   int mod_1000 = nuc % 1000; 
   int div_1000 = nuc / 1000;
-  int mod_1000_div_10 = mod_10000 / 10;
 
-  if (div_1000 <= mod_1000_div_10 && mod_1000_div_10 <= div_1000 * 6)
+  if (div_1000 <= mod_1000 && mod_1000 <= div_1000 * 6)
   {
     if (mod_1000 - 400 < 0)
     {
