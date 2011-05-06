@@ -282,7 +282,7 @@ int nucname::zzaaam(int nuc)
   int mod_1000 = nuc % 1000; 
   int div_1000 = nuc / 1000;
 
-  if (div_1000 <= mod_1000 && mod_1000 <= div_1000 * 6)
+  if (div_1000 <= mod_1000)
   {
     if (mod_1000 - 400 < 0)
     {
@@ -293,7 +293,7 @@ int nucname::zzaaam(int nuc)
     {
       // Nuclide in MCNP metastable form
       newnuc = ((nuc - 400) * 10) + 1;
-      while (2.5 < (float ((newnuc/10)%1000) / float (newnuc/10000)))
+      while (3.0 < (float ((newnuc/10)%1000) / float (newnuc/10000)))
       {
         newnuc -= 999;
       };
@@ -397,8 +397,8 @@ std::string nucname::LLAAAM(int nuc)
   std::string newnuc = "";
 
   int mod_10 = nucint%10;
-  int mod_10000 = nuc % 10000;
-  int div_10000 = nuc / 10000;
+  int mod_10000 = nucint % 10000;
+  int div_10000 = nucint / 10000;
   int mod_10000_div_10 = mod_10000 / 10;
 
   // Make sure the LL value is correct
@@ -487,8 +487,8 @@ std::string nucname::serpent(int nuc)
   std::string newnuc = "";
 
   int mod_10 = nucint%10;
-  int mod_10000 = nuc % 10000;
-  int div_10000 = nuc / 10000;
+  int mod_10000 = nucint % 10000;
+  int div_10000 = nucint / 10000;
   int mod_10000_div_10 = mod_10000 / 10;
 
   // Make sure the LL value is correct
