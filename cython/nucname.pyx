@@ -48,7 +48,7 @@ class NucTypeError(Exception):
         self.nuc = nuc
 
     def __str__(self):
-        msg = "Nuclide type not an int, str, or iterable"
+        msg = "Nuclide type not an int or str"
         if self.nuc is not None:
             msg += ": " + repr(self.nuc) 
         return msg
@@ -61,29 +61,21 @@ def current_form(nuc):
     """Find the current form of a nuclide.
 
     Args:
-        * nuc (int, str, or iterable): Input nuclide(s).
+        * nuc (int or str): Input nuclide(s).
 
     Returns:
-        * form_flag (str or iterable): The form identifier string from ["zzaaam", "LLAAAM", "MCNP"].
+        * form_flag (str): The form identifier string from ["zzaaam", "LLAAAM", "MCNP"].
     """
     cdef std.string cpp_curr_form 
 
     if isinstance(nuc, basestring):
-        cpp_curr_form = cpp_nucname.current_form(nuc)
-        form_flag = cpp_current_form.c_str()
+        cpp_curr_form = cpp_nucname.current_form(<char *> nuc)
     elif isinstance(nuc, int) or isinstance(nuc, long):
         cpp_curr_form = cpp_nucname.current_form(<int> nuc)
-        form_flag = cpp_current_form.c_str()
-    elif isinstance(nuc, Iterable):
-        try:
-            form_flag = nuc.__class__(current_form(n) for n in nuc)
-        except TypeError:
-            form_flag = [current_form(n) for n in nuc]
     else:
         raise NucTypeError(nuc)
 
-#    return cpp_current_form.c_str()
-    return form_flag
+    return cpp_curr_form.c_str()
 
 
 #
@@ -101,7 +93,7 @@ def zzaaam(nuc):
     """
 
     if isinstance(nuc, basestring):
-        newnuc = cpp_nucname.zzaaam(std.string(nuc))
+        newnuc = cpp_nucname.zzaaam(<char *> nuc)
     elif isinstance(nuc, int) or isinstance(nuc, long):
         newnuc = cpp_nucname.zzaaam(<int> nuc)
     else:
@@ -122,7 +114,7 @@ def LLAAAM(nuc):
     cdef std.string newnuc
 
     if isinstance(nuc, basestring):
-        newnuc = cpp_nucname.LLAAAM(std.string(nuc))
+        newnuc = cpp_nucname.LLAAAM(<char *> nuc)
     elif isinstance(nuc, int):
         newnuc = cpp_nucname.LLAAAM(<int> nuc)
     else:
@@ -142,7 +134,7 @@ def mcnp(nuc):
     """
 
     if isinstance(nuc, basestring):
-        newnuc = cpp_nucname.mcnp(std.string(nuc))
+        newnuc = cpp_nucname.mcnp(<char *> nuc)
     elif isinstance(nuc, int):
         newnuc = cpp_nucname.mcnp(<int> nuc)
     else:
@@ -165,7 +157,7 @@ def nuc_weight(nuc):
         * weight (float): Atomic weight of this nuclide [amu].
     """
     if isinstance(nuc, basestring):
-        weight = cpp_nucname.nuc_weight(std.string(nuc))
+        weight = cpp_nucname.nuc_weight(<char *> nuc)
     elif isinstance(nuc, int):
         weight = cpp_nucname.nuc_weight(<int> nuc)
     else:
@@ -173,59 +165,4 @@ def nuc_weight(nuc):
 
     return weight
 
-
-
-#
-# isovec_keys_2_* Functions
-#
-
-def isovec_keys_2_zzaaam(dict isovec):
-    """Converts all keys of an isotopic vector dictionary to zzaaam form.
-
-    Args:
-        * `isovec` (dict): isotopic vector with keys of unknown/mixed form.
-
-    Returns:
-        * `newvec` (dict): isotopic vector with keys of zzaaam (int) form.
-    """
-#    newvec = {}
-#
-#    for iso in isovec.keys():
-#        newvec[mixed_2_zzaaam(iso)] = isovec[iso]
-#
-#    return newvec
-
-
-def isovec_keys_2_LLAAAM(dict isovec):
-    """Converts all keys of an isotopic vector dictionary to LLAAAM form.
-
-    Args:
-        * `isovec` (dict): isotopic vector with keys of unknown/mixed form.
-
-    Returns:
-        * `newvec` (dict): isotopic vector with keys of LLAAAM (str) form.
-    """
-#    newvec = {}
-#
-#    for iso in isovec.keys():
-#        newvec[mixed_2_LLAAAM(iso)] = isovec[iso]
-#
-#    return newvec
-
-
-def isovec_keys_2_MCNP(dict isovec):
-    """Converts all keys of an isotopic vector dictionary to MCNP form.
-
-    Args:
-        * `isovec` (dict): isotopic vector with keys of unknown/mixed form.
-
-    Returns:
-        * `newvec` (dict): isotopic vector with keys of MCNP (int) form.
-    """
-#    newvec = {}
-
-#    for iso in isovec.keys():
-#        newvec[mixed_2_MCNP(iso)] = isovec[iso]
-#
-#    return newvec
 

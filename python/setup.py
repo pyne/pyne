@@ -49,10 +49,10 @@ elif os.name == 'nt':
 nucname_ext = {'name': 'pyne.nucname'}
 
 nucname_ext['sources'] = [
-    'bright.cpp',
+    'pyne.cpp',
     'nucname.cpp',
     ]
-nucname_ext['sources'] = [os.path.join(cpp_dir, s) for s in isoname_ext['sources']] + \
+nucname_ext['sources'] = [os.path.join(cpp_dir, s) for s in nucname_ext['sources']] + \
                          [os.path.join(cyt_dir, 'nucname.pyx')]
 
 nucname_ext['include_dirs'] = [cyt_dir, cpp_dir, numpy_include]
@@ -61,10 +61,10 @@ nucname_ext['language'] = "c++"
 
 if os.name == 'posix':
     #isoname_ext["extra_compile_args"] = ["-Wno-strict-prototypes"]
-    isoname_ext["undef_macros"] = ["NDEBUG"]
+    nucname_ext["undef_macros"] = ["NDEBUG"]
 elif os.name == 'nt':
-    isoname_ext["extra_compile_args"] = ["/EHsc"]
-    isoname_ext["define_macros"] = [("_WIN32", None)]
+    nucname_ext["extra_compile_args"] = ["/EHsc"]
+    nucname_ext["define_macros"] = [("_WIN32", None)]
 
 
 
