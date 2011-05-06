@@ -103,13 +103,13 @@ def zzaaam(nuc):
 
 
 def LLAAAM(nuc):
-    """Converts an arbitrary nuclide and its LLAAAM form. 
+    """Converts a nuclide to its LLAAAM form (str). 
 
     Args:
         * nuc (int or str): Input nuclide.
 
     Returns:
-        * newnuc (int): Output nuclide in LLAAAM form.
+        * newnuc (str): Output nuclide in LLAAAM form.
     """
     cdef std.string newnuc
 
@@ -124,7 +124,7 @@ def LLAAAM(nuc):
 
 
 def mcnp(nuc):
-    """Converts an arbitrary nuclide and its  3MCNP form. 
+    """Converts a nuclide to its MCNP form (int). 
 
     Args:
         * nuc (int or str): Input nuclide.
@@ -144,13 +144,13 @@ def mcnp(nuc):
 
 
 def serpent(nuc):
-    """Converts an arbitrary nuclide and its serepnt form. 
+    """Converts a nuclide to its Serepnt form (str). 
 
     Args:
         * nuc (int or str): Input nuclide.
 
     Returns:
-        * newnuc (int): Output nuclide in serpent form.
+        * newnuc (str): Output nuclide in serpent form.
     """
     cdef std.string newnuc
 
