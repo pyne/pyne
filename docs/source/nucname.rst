@@ -39,11 +39,11 @@ Naming Convetion Casting Functions
 
 .. autofunction:: zzaaam(nuc)
 
-.. autofunction:: LLAAAM
+.. autofunction:: LLAAAM(nuc)
 
-.. autofunction:: mcnp
+.. autofunction:: mcnp(nuc)
 
-.. autofunction:: serpent
+.. autofunction:: serpent(nuc)
 
 
 -----------------------
@@ -145,6 +145,6 @@ The groups are defined as follows::
 Other nucname functions
 -----------------------
 
-.. autofunction:: current_form
+.. autofunction:: current_form(nuc)
 
-.. autofunction:: nuc_weight
+.. autofunction:: nuc_weight(nuc)
