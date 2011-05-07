@@ -251,3 +251,37 @@ div.versioninfo {
     font-size: 0.9em;
 }
 
+
+/**
+ * Styling for field lists
+ */
+
+table.field-list th {
+  border-left: 1px solid #aaa !important;
+  padding-left: 5px;
+}
+
+table.field-list { 
+  border-collapse: separate;
+  border-spacing: 10px;
+}
+
+
+th {
+    background-color: #ede;
+}
+
+.field-list th {
+/*  color: rgb(0,102,204); */
+  color: #993333; 
+}
+
+.first {
+margin-top: 0 !important;
+}
+
+
+td.field-body > blockquote {
+margin-top: 0.1em;
+margin-bottom: 0.5em;
+}
