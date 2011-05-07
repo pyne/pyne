@@ -85,11 +85,15 @@ def current_form(nuc):
 def zzaaam(nuc):
     """Converts a nuclide to its zzaaam (int) form. 
 
-    Args:
-        * nuc (int or str): Input nuclide.
+    Parameters
+    ----------
+    nuc : int or str 
+        Input nuclide.
 
-    Returns:
-        * newnuc (int): Output nuclide in zzaaam form.
+    Returns
+    -------
+    newnuc : int 
+        Output nuclide in zzaaam form.
     """
 
     if isinstance(nuc, basestring):
