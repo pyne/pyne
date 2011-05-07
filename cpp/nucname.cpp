@@ -183,34 +183,18 @@ nucname::LL_group nucname::MA (nucname::MA_array, nucname::MA_array+18);
 nucname::zz_group nucname::ma = nucname::LL_to_zz_group(nucname::MA);
 
 //Fission Products
-nucname::LL_group nucname::get_FP()
-{
-  // Returns the Fission Product group
-  LL_group FPs;
-  for (LLzz_iter i = LLzz.begin(); i != LLzz.end(); i++)
-  {
-    if (ACT.count(i->first) == 0)
-      FPs.insert(i->first);
-  }
-  return FPs;
-}
-
-nucname::LL_t * nucname::get_FP_array(nucname::LL_group FPs)
-{
-  // Returns the Fission Product group as an array
-  LL_t * fp_array = new LL_t [FPs.size()];
-  int n = 0;
-
-  for (LL_group_iter i = FPs.begin(); i != FPs.end(); i++)
-  {
-    fp_array[n] = *i;
-    n++;
-  }
-  return fp_array;
-};
-
-nucname::LL_group nucname::FP = nucname::get_FP();
-nucname::LL_t * nucname::FP_array = nucname::get_FP_array(nucname::FP);
+nucname::LL_t nucname::FP_array[88] = {"AG", "AL", "AR", "AS", "AT", "AU", "B",  "BA", \
+                                       "BE", "BI", "BR", "C",  "CA", "CD", "CE", "CL", \
+                                       "CO", "CR", "CS", "CU", "DY", "ER", "EU", "F",  \
+                                       "FE", "FR", "GA", "GD", "GE", "H",  "HE", "HF", \
+                                       "HG", "HO", "I",  "IN", "IR", "K",  "KR", "LA", \
+                                       "LI", "LU", "MG", "MN", "MO", "N",  "NA", "NB", \
+                                       "ND", "NE", "NI", "O",  "OS", "P",  "PB", "PD", \
+                                       "PM", "PO", "PR", "PT", "RA", "RB", "RE", "RH", \
+                                       "RN", "RU", "S",  "SB", "SC", "SE", "SI", "SM", \
+                                       "SN", "SR", "TA", "TB", "TC", "TE", "TI", "TL", \
+                                       "TM", "V",  "W",  "XE", "Y",  "YB", "ZN", "ZR"};
+nucname::LL_group nucname::FP (nucname::FP_array, nucname::FP_array+88);
 nucname::zz_group nucname::fp = nucname::LL_to_zz_group(nucname::FP);
 
 
