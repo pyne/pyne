@@ -60,11 +60,15 @@ class NucTypeError(Exception):
 def current_form(nuc):
     """Find the current form of a nuclide.
 
-    Args:
-        * nuc (int or str): Input nuclide(s).
+    Parameters
+    ----------
+    nuc : int or str 
+        Input nuclide(s).
 
-    Returns:
-        * form_flag (str): The form identifier string from ["zzaaam", "LLAAAM", "MCNP"].
+    Returns
+    -------
+    form_flag : str
+        The form identifier string from ["zzaaam", "LLAAAM", "MCNP"].
     """
     cdef std.string cpp_curr_form 
 
@@ -83,7 +87,7 @@ def current_form(nuc):
 #
 
 def zzaaam(nuc):
-    """Converts a nuclide to its zzaaam (int) form. 
+    """Converts a nuclide to its zzaaam form. 
 
     Parameters
     ----------
@@ -107,13 +111,17 @@ def zzaaam(nuc):
 
 
 def LLAAAM(nuc):
-    """Converts a nuclide to its LLAAAM form (str). 
+    """Converts a nuclide to its LLAAAM form. 
 
-    Args:
-        * nuc (int or str): Input nuclide.
+    Parameters
+    ----------
+    nuc : int or str 
+        Input nuclide.
 
-    Returns:
-        * newnuc (str): Output nuclide in LLAAAM form.
+    Returns
+    -------
+    newnuc : str 
+        Output nuclide in LLAAAM form.
     """
     cdef std.string newnuc
 
@@ -130,11 +138,15 @@ def LLAAAM(nuc):
 def mcnp(nuc):
     """Converts a nuclide to its MCNP form (int). 
 
-    Args:
-        * nuc (int or str): Input nuclide.
+    Parameters
+    ----------
+    nuc : int or str 
+        Input nuclide.
 
-    Returns:
-        * newnuc (int): Output nuclide in MCNP form.
+    Returns
+    -------
+    newnuc : int 
+        Output nuclide in MCNP form.
     """
 
     if isinstance(nuc, basestring):
@@ -148,13 +160,17 @@ def mcnp(nuc):
 
 
 def serpent(nuc):
-    """Converts a nuclide to its Serepnt form (str). 
+    """Converts a nuclide to its Serepnt form. 
 
-    Args:
-        * nuc (int or str): Input nuclide.
+    Parameters
+    ----------
+    nuc : int or str 
+        Input nuclide.
 
-    Returns:
-        * newnuc (str): Output nuclide in serpent form.
+    Returns
+    -------
+    newnuc : str 
+        Output nuclide in serpent form.
     """
     cdef std.string newnuc
 
@@ -175,11 +191,15 @@ def serpent(nuc):
 def nuc_weight(nuc):
     """Calculates the weight of a nuclide in [amu].
 
-    Args:
-        * nuc (int or str): Input nuclide.
+    Parameters
+    ----------
+    nuc : int or str 
+        Input nuclide.
 
-    Returns:
-        * weight (float): Atomic weight of this nuclide [amu].
+    Returns
+    -------
+    weight : float
+        Atomic weight of this nuclide [amu].
     """
     if isinstance(nuc, basestring):
         weight = cpp_nucname.nuc_weight(<char *> nuc)
