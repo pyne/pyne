@@ -37,7 +37,7 @@ well as other helpful module attributes.
 Naming Convetion Casting Functions
 ----------------------------------
 
-.. autofunction:: zzaaam
+.. autofunction:: zzaaam(nuc)
 
 .. autofunction:: LLAAAM
 
