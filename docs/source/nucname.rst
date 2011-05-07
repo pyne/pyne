@@ -1,6 +1,6 @@
-**********************
-Nuclide Naming Package
-**********************
+********************************************
+Nuclide Naming Module -- :mod:`pyne.nucname`
+********************************************
 This package is used to convert between various nuclide naming schemes.  
 Currently four naming conventions are supported. 
 
@@ -18,14 +18,11 @@ Currently four naming conventions are supported.
  #. **MCNP**: The MCNP format for entering nuclides is unfortunately non-standard.  In most 
     ways it is similar to zzaaam form, except that it lacks the metastable flag.  For information 
     on how metastable isotopes are named, please consult the MCNPX documentation for more information.
- #. **Serepnt**: The serpent naming convetion is similar to LLAAAM form.  However, only the first 
+ #. **Serpent**: The serpent naming convetion is similar to LLAAAM form.  However, only the first 
     letter in the chemical symbol is uppercase, the dash is always present, and the the meta-stable
     flag is lowercase.  For instance, 'Am-242m' is the valid serpent notation for this nuclide.
 
 
-============================================
-:mod:`pyne.nucname` -- Nuclide Naming Module
-============================================
 .. currentmodule:: pyne.nucname
 
 All functionality may be found in the ``nucname`` package::
@@ -36,11 +33,24 @@ This contains several zzaaam, LLAAAM, MCNP and Serpent converter function as
 well as other helpful module attributes.
 
 
+----------------------------------
+Naming Convetion Casting Functions
+----------------------------------
+
+.. autofunction:: zzaaam
+
+.. autofunction:: LLAAAM
+
+.. autofunction:: mcnp
+
+.. autofunction:: serpent
+
+
 -----------------------
 Conversion Dictionaries
 -----------------------
 
-.. attribute:: nucname.LLzz
+.. attribute:: LLzz
 
    Dictionary that is used to convert an elemental symbol (str) to its charge Z-number (int).
    For example::
@@ -49,7 +59,7 @@ Conversion Dictionaries
       nucname.LLzz["U"]  = 92
 
 
-.. attribute:: nucname.zzLL
+.. attribute:: zzLL
 
    Dictionary that is used to convert a charge Z-number (int) to its elemental symbol (str).
    For example::
@@ -127,21 +137,7 @@ The groups are defined as follows::
    nucname.fp  = set([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 
                      29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 
                      54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 
-                     79, 80, 81, 82, 83, 84, 85, 86, 87, 88]
-
-
-----------------------------------
-Naming Convetion Casting Functions
-----------------------------------
-
-
-.. autofunction:: zzaaam
-
-.. autofunction:: LLAAAM
-
-.. autofunction:: mcnp
-
-.. autofunction:: serpent
+                     79, 80, 81, 82, 83, 84, 85, 86, 87, 88])
 
 
 
