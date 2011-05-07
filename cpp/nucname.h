@@ -59,10 +59,8 @@ namespace nucname
   extern LL_group MA;
   extern zz_group ma;
 
-  LL_group get_FP();
+  extern LL_t FP_array[88];
   extern LL_group FP;
-  LL_t * get_FP_array(LL_group);
-  extern LL_t * FP_array;
   extern zz_group fp;
 
 
