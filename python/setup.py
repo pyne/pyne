@@ -17,9 +17,14 @@ from setup_data import INFO
 ##########################################
 ### Set compiler options for extensions ###
 ###########################################
-cyt_dir = os.path.abspath(os.path.join('..', 'cython'))
-cpp_dir = os.path.abspath(os.path.join('..', 'cpp'))
-dat_dir = os.path.abspath(os.path.join('..', 'data'))
+#pyt_dir = os.path.abspath(os.path.join('pyne'))
+#cpp_dir = os.path.abspath(os.path.join('..', 'cpp'))
+#dat_dir = os.path.abspath(os.path.join('..', 'data'))
+
+pyt_dir = os.path.join('pyne')
+cpp_dir = os.path.join('..', 'cpp')
+dat_dir = os.path.join('..', 'data')
+
 
 # Get numpy include dir
 numpy_include = np.get_include()
@@ -31,8 +36,8 @@ numpy_include = np.get_include()
 # 
 stlconv_ext = {'name': "pyne.stlconverters"}
 
-stlconv_ext['sources'] = [os.path.join(cyt_dir, 'stlconverters.pyx')]
-stlconv_ext['include_dirs'] = [cyt_dir, cpp_dir, numpy_include]
+stlconv_ext['sources'] = [os.path.join('pyne', 'stlconverters.pyx')]
+stlconv_ext['include_dirs'] = [pyt_dir, cpp_dir, numpy_include]
 stlconv_ext['language'] = "c++"
 
 if os.name == 'posix':
@@ -53,9 +58,9 @@ nucname_ext['sources'] = [
     'nucname.cpp',
     ]
 nucname_ext['sources'] = [os.path.join(cpp_dir, s) for s in nucname_ext['sources']] + \
-                         [os.path.join(cyt_dir, 'nucname.pyx')]
+                         [os.path.join('pyne', 'nucname.pyx')]
 
-nucname_ext['include_dirs'] = [cyt_dir, cpp_dir, numpy_include]
+nucname_ext['include_dirs'] = [pyt_dir, cpp_dir, numpy_include]
 nucname_ext['language'] = "c++"
 
 

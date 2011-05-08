@@ -11,7 +11,8 @@ from cython.operator cimport preincrement as inc
 # local imports 
 cimport std
 cimport cpp_nucname
-cimport stlconverters as conv
+cimport pyne.stlconverters as conv
+import pyne.stlconverters as conv
 
 #
 # Conversion dictionaries
@@ -36,11 +37,25 @@ FP = conv.cpp_to_py_set_str(cpp_nucname.FP)
 # Elemental integer sets
 #
 
-lan = conv.cpp_to_py_set_int(cpp_nucname.lan)
-act = conv.cpp_to_py_set_int(cpp_nucname.act)
-tru = conv.cpp_to_py_set_int(cpp_nucname.tru)
-ma = conv.cpp_to_py_set_int(cpp_nucname.ma)
-fp = conv.cpp_to_py_set_int(cpp_nucname.fp)
+cdef mksetproxy(cpp_set[int] * s):
+    cdef conv.SetProxy sp = conv.SetProxy()
+    sp.set_ptr = s
+    return sp
+
+
+#cdef conv.SetProxy lan = conv.SetProxy()
+#lan.set_ptr[0] = cpp_nucname.lan
+
+lan = mksetproxy(&cpp_nucname.lan)
+
+#lan = conv.SetProxy()
+#lan.set_ptr = cpp_nucname.lan
+
+#lan = conv.cpp_to_py_set_int(cpp_nucname.lan)
+#act = conv.cpp_to_py_set_int(cpp_nucname.act)
+#tru = conv.cpp_to_py_set_int(cpp_nucname.tru)
+#ma = conv.cpp_to_py_set_int(cpp_nucname.ma)
+#fp = conv.cpp_to_py_set_int(cpp_nucname.fp)
 
 
 class NucTypeError(Exception):
