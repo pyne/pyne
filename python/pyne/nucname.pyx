@@ -7,6 +7,7 @@ from libcpp.map cimport map
 from libcpp.set cimport set as cpp_set
 from cython.operator cimport dereference as deref
 from cython.operator cimport preincrement as inc
+#from cython cimport pointer
 
 # local imports 
 cimport std
@@ -37,19 +38,16 @@ FP = conv.cpp_to_py_set_str(cpp_nucname.FP)
 # Elemental integer sets
 #
 
-cdef mksetproxy(cpp_set[int] * s):
-    cdef conv.SetProxy sp = conv.SetProxy()
-    sp.set_ptr = s
-    return sp
+cpdef conv.SetProxy cpp_lan = conv.SetProxy()
+cpp_lan.set_ptr = &cpp_nucname.lan
+lan = cpp_lan
 
+cpdef conv.SetProxy cpp_act = conv.SetProxy2()
+cpp_act.set_ptr = &cpp_nucname.act
+act = cpp_act
 
-#cdef conv.SetProxy lan = conv.SetProxy()
-#lan.set_ptr[0] = cpp_nucname.lan
-
-lan = mksetproxy(&cpp_nucname.lan)
-
-#lan = conv.SetProxy()
-#lan.set_ptr = cpp_nucname.lan
+#act = conv.SetProxy2()
+#act.set_ptr = &cpp_nucname.act
 
 #lan = conv.cpp_to_py_set_int(cpp_nucname.lan)
 #act = conv.cpp_to_py_set_int(cpp_nucname.act)

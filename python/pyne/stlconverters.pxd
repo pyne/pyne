@@ -116,8 +116,7 @@ cdef dict map_to_dict_int_int_vector_to_array_1d_dbl(cpp_map[int, cpp_map[int, c
 #class SetProxy(collections.Set):
 cdef class SetProxy:
     cdef cpp_set[int] * set_ptr
+
+
+#class SetProxy2(collections.Set):
 #    cdef cpp_set[int] * set_ptr
-
-#    cdef init(self, cpp_set[int] *)
-
-#    def __cinit__(self, cpp_set *)
