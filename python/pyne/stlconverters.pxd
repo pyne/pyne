@@ -5,6 +5,10 @@ from libcpp.vector cimport vector as cpp_vector
 from cython.operator cimport dereference as deref
 from cython.operator cimport preincrement as inc
 
+# Python Imports
+#cimport collections
+import collections
+
 cimport numpy as np
 import numpy as np
 
@@ -103,3 +107,17 @@ cdef dict map_to_dict_str_vector_to_array_1d_dbl(cpp_map[std.string, cpp_vector[
 cdef cpp_map[int, cpp_map[int, cpp_vector[double]]] dict_to_map_int_int_array_to_vector_1d_dbl(dict)
 cdef dict map_to_dict_int_int_vector_to_array_1d_dbl(cpp_map[int, cpp_map[int, cpp_vector[double]]])
 
+
+#
+# Proxy Classes
+#
+
+#cdef class SetProxy(collections.Set):
+#class SetProxy(collections.Set):
+cdef class SetProxy:
+    cdef cpp_set[int] * set_ptr
+#    cdef cpp_set[int] * set_ptr
+
+#    cdef init(self, cpp_set[int] *)
+
+#    def __cinit__(self, cpp_set *)
