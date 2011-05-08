@@ -451,9 +451,6 @@ cdef dict map_to_dict_int_int_vector_to_array_1d_dbl(cpp_map[int, cpp_map[int, c
 #cdef class SetProxy(collections.Set):
 #class SetProxy(collections.Set):
 cdef class SetProxy:
-#    cdef init(self, cpp_set[int] * s):
-#        set_ptr = s
-
     def __cinit__(self):
         pass
 
@@ -462,3 +459,17 @@ cdef class SetProxy:
 
     def __len__(self):
         return self.set_ptr.size()
+
+
+#class SetProxy2(collections.Set, SetProxy):
+class SetProxy2(SetProxy, collections.Set):
+    pass
+
+    #def __cinit__(self):
+    #    pass
+
+    #def __dealloc__(self):
+    #    del self.set_ptr
+
+    #def __len__(self):
+    #    return self.set_ptr.size()
