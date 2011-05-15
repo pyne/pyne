@@ -4,6 +4,7 @@ from libcpp.set cimport set as cpp_set
 from libcpp.vector cimport vector as cpp_vector
 from cython.operator cimport dereference as deref
 from cython.operator cimport preincrement as inc
+from libc.stdlib cimport malloc, free
 
 # Python Imports
 #cimport collections
@@ -448,28 +449,69 @@ cdef dict map_to_dict_int_int_vector_to_array_1d_dbl(cpp_map[int, cpp_map[int, c
 # Proxy Classes
 #
 
-#cdef class SetProxy(collections.Set):
-#class SetProxy(collections.Set):
-cdef class SetProxy:
+cdef class SetIter(object):
+
+    def __cinit__(self, cpp_set[int] * sp):
+
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        cdef cpp_set[int].iterator inow = deref(self.iter_now)
+        cdef cpp_set[int].iterator iend = deref(self.iter_end)
+        cdef int val = deref(inow)
+
+        if inow != iend:
+            print "I"
+            #val = deref(inow)
+            pyval = val
+            print pyval
+        else:
+            print "Freeing..."
+            free(self.iter_now)
+            free(self.iter_end)
+            raise StopIteration    
+
+        inc(deref(self.iter_now))
+        return pyval
+
+
+cdef class _SetProxy:
     def __cinit__(self):
         pass
 
     def __dealloc__(self):
         del self.set_ptr
 
+    #
+    # ABC Methods
+    #
+
+    def __contains__(self, value):
+        if 0 < self.set_ptr.count(value):
+            return True
+        else:
+            return False
+
     def __len__(self):
         return self.set_ptr.size()
 
+    def __iter__(self):
+        cdef SetIter si  = SetIter()
 
-#class SetProxy2(collections.Set, SetProxy):
-class SetProxy2(SetProxy, collections.Set):
+        cdef cpp_set[int].iterator * itn = <cpp_set[int].iterator *> malloc( sizeof(self.set_ptr.begin() ) )
+        itn[0] = self.set_ptr.begin()
+        si.iter_now = itn
+
+        cdef cpp_set[int].iterator * ite = <cpp_set[int].iterator *> malloc( sizeof(self.set_ptr.end() ) )
+        ite[0] = self.set_ptr.end()
+        si.iter_end = ite
+
+
+        return si
+
+
+
+class SetProxy(_SetProxy, collections.Set):
     pass
-
-    #def __cinit__(self):
-    #    pass
-
-    #def __dealloc__(self):
-    #    del self.set_ptr
-
-    #def __len__(self):
-    #    return self.set_ptr.size()

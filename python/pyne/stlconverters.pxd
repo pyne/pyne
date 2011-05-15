@@ -112,11 +112,11 @@ cdef dict map_to_dict_int_int_vector_to_array_1d_dbl(cpp_map[int, cpp_map[int, c
 # Proxy Classes
 #
 
-#cdef class SetProxy(collections.Set):
-#class SetProxy(collections.Set):
-cdef class SetProxy:
+cdef class SetIter(object):
+    cdef cpp_set[int].iterator * iter_now
+    cdef cpp_set[int].iterator * iter_end
+
+
+cdef class _SetProxy:
     cdef cpp_set[int] * set_ptr
 
-
-#class SetProxy2(collections.Set):
-#    cdef cpp_set[int] * set_ptr

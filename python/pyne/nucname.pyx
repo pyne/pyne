@@ -38,11 +38,11 @@ FP = conv.cpp_to_py_set_str(cpp_nucname.FP)
 # Elemental integer sets
 #
 
-cpdef conv.SetProxy cpp_lan = conv.SetProxy()
+cpdef conv._SetProxy cpp_lan = conv.SetProxy()
 cpp_lan.set_ptr = &cpp_nucname.lan
 lan = cpp_lan
 
-cpdef conv.SetProxy cpp_act = conv.SetProxy2()
+cpdef conv._SetProxy cpp_act = conv.SetProxy()
 cpp_act.set_ptr = &cpp_nucname.act
 act = cpp_act
 
