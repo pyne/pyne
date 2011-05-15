@@ -451,8 +451,15 @@ cdef dict map_to_dict_int_int_vector_to_array_1d_dbl(cpp_map[int, cpp_map[int, c
 
 cdef class SetIter(object):
 
-    def __cinit__(self, cpp_set[int] * sp):
+    cdef void init(self):
+        cdef cpp_set[int].iterator * itn = <cpp_set[int].iterator *> malloc(sizeof(self.set_ptr.begin()))
+        itn[0] = self.set_ptr.begin()
+        self.iter_now = itn
 
+        cdef cpp_set[int].iterator * ite = <cpp_set[int].iterator *> malloc(sizeof(self.set_ptr.end()))
+        ite[0] = self.set_ptr.end()
+        self.iter_end = ite
+        
 
     def __iter__(self):
         return self
@@ -463,12 +470,8 @@ cdef class SetIter(object):
         cdef int val = deref(inow)
 
         if inow != iend:
-            print "I"
-            #val = deref(inow)
             pyval = val
-            print pyval
         else:
-            print "Freeing..."
             free(self.iter_now)
             free(self.iter_end)
             raise StopIteration    
@@ -499,14 +502,8 @@ cdef class _SetProxy:
 
     def __iter__(self):
         cdef SetIter si  = SetIter()
-
-        cdef cpp_set[int].iterator * itn = <cpp_set[int].iterator *> malloc( sizeof(self.set_ptr.begin() ) )
-        itn[0] = self.set_ptr.begin()
-        si.iter_now = itn
-
-        cdef cpp_set[int].iterator * ite = <cpp_set[int].iterator *> malloc( sizeof(self.set_ptr.end() ) )
-        ite[0] = self.set_ptr.end()
-        si.iter_end = ite
+        si.set_ptr = self.set_ptr
+        si.init()
 
 
         return si
