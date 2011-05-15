@@ -451,13 +451,13 @@ cdef dict map_to_dict_int_int_vector_to_array_1d_dbl(cpp_map[int, cpp_map[int, c
 
 cdef class SetIter(object):
 
-    cdef void init(self):
-        cdef cpp_set[int].iterator * itn = <cpp_set[int].iterator *> malloc(sizeof(self.set_ptr.begin()))
-        itn[0] = self.set_ptr.begin()
+    cdef void init(self, cpp_set[int] * set_ptr):
+        cdef cpp_set[int].iterator * itn = <cpp_set[int].iterator *> malloc(sizeof(set_ptr.begin()))
+        itn[0] = set_ptr.begin()
         self.iter_now = itn
 
-        cdef cpp_set[int].iterator * ite = <cpp_set[int].iterator *> malloc(sizeof(self.set_ptr.end()))
-        ite[0] = self.set_ptr.end()
+        cdef cpp_set[int].iterator * ite = <cpp_set[int].iterator *> malloc(sizeof(set_ptr.end()))
+        ite[0] = set_ptr.end()
         self.iter_end = ite
         
 
@@ -502,10 +502,7 @@ cdef class _SetProxy:
 
     def __iter__(self):
         cdef SetIter si  = SetIter()
-        si.set_ptr = self.set_ptr
-        si.init()
-
-
+        si.init(self.set_ptr)
         return si
 
 
