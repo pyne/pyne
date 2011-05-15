@@ -113,8 +113,11 @@ cdef dict map_to_dict_int_int_vector_to_array_1d_dbl(cpp_map[int, cpp_map[int, c
 #
 
 cdef class SetIter(object):
+    cdef cpp_set[int] * set_ptr
     cdef cpp_set[int].iterator * iter_now
     cdef cpp_set[int].iterator * iter_end
+
+    cdef void init(SetIter)
 
 
 cdef class _SetProxy:
