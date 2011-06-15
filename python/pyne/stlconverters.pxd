@@ -112,12 +112,31 @@ cdef dict map_to_dict_int_int_vector_to_array_1d_dbl(cpp_map[int, cpp_map[int, c
 # Proxy Classes
 #
 
-cdef class SetIter(object):
+# These classes have to be declared individually
+# because Cython does not yet support templating 
+# metaprogramming.
+
+#
+# --- Sets
+#
+
+# Int
+cdef class SetIterInt(object):
     cdef cpp_set[int].iterator * iter_now
     cdef cpp_set[int].iterator * iter_end
-    cdef void init(SetIter, cpp_set[int] *)
+    cdef void init(SetIterInt, cpp_set[int] *)
 
-cdef class _SetProxy:
+cdef class _SetProxyInt:
     cdef cpp_set[int] * set_ptr
-    cdef void init(_SetProxy, cpp_set[int] *)
+    cdef void init(_SetProxyInt, cpp_set[int] *)
+
+# Str
+cdef class SetIterStr(object):
+    cdef cpp_set[std.string].iterator * iter_now
+    cdef cpp_set[std.string].iterator * iter_end
+    cdef void init(SetIterStr, cpp_set[std.string] *)
+
+cdef class _SetProxyStr:
+    cdef cpp_set[std.string] * set_ptr
+    cdef void init(_SetProxyStr, cpp_set[std.string] *)
 

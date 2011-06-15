@@ -27,33 +27,36 @@ zzLL = conv.map_to_dict_int_str(cpp_nucname.zzLL)
 # Elemental string sets
 #
 
-LAN = conv.cpp_to_py_set_str(cpp_nucname.LAN)
-ACT = conv.cpp_to_py_set_str(cpp_nucname.ACT)
-TRU = conv.cpp_to_py_set_str(cpp_nucname.TRU)
-MA = conv.cpp_to_py_set_str(cpp_nucname.MA)
-FP = conv.cpp_to_py_set_str(cpp_nucname.FP)
+#LAN = conv.SetProxyStr()
+#(<conv._SetProxyStr> LAN).init(&cpp_nucname.LAN)
+
+
+#LAN = conv.cpp_to_py_set_str(cpp_nucname.LAN)
+#ACT = conv.cpp_to_py_set_str(cpp_nucname.ACT)
+#TRU = conv.cpp_to_py_set_str(cpp_nucname.TRU)
+#MA = conv.cpp_to_py_set_str(cpp_nucname.MA)
+#FP = conv.cpp_to_py_set_str(cpp_nucname.FP)
 
 
 #
 # Elemental integer sets
 #
-cpdef conv._SetProxy cpp_lan = conv.SetProxy()
-cpp_lan.set_ptr = &cpp_nucname.lan
-lan = cpp_lan
 
-cpdef conv._SetProxy cpp_act = conv.SetProxy()
-cpp_act.set_ptr = &cpp_nucname.act
-act = cpp_act
+lan = conv.SetProxyInt()
+(<conv._SetProxyInt> lan).init(&cpp_nucname.lan)
 
-tru = conv.SetProxy()
-(<conv._SetProxy> tru).init(&cpp_nucname.tru)
+#act = conv.SetProxyInt()
+#(<conv._SetProxyInt> act).init(&cpp_nucname.act)
 
+#tru = conv.SetProxyInt()
+#(<conv._SetProxyInt> tru).init(&cpp_nucname.tru)
 
-#lan = conv.cpp_to_py_set_int(cpp_nucname.lan)
-#act = conv.cpp_to_py_set_int(cpp_nucname.act)
-#tru = conv.cpp_to_py_set_int(cpp_nucname.tru)
-#ma = conv.cpp_to_py_set_int(cpp_nucname.ma)
-#fp = conv.cpp_to_py_set_int(cpp_nucname.fp)
+#ma = conv.SetProxyInt()
+#(<conv._SetProxyInt> ma).init(&cpp_nucname.ma)
+
+#fp = conv.SetProxyInt()
+#(<conv._SetProxyInt> fp).init(&cpp_nucname.fp)
+
 
 
 class NucTypeError(Exception):
