@@ -449,7 +449,12 @@ cdef dict map_to_dict_int_int_vector_to_array_1d_dbl(cpp_map[int, cpp_map[int, c
 # Proxy Classes
 #
 
-cdef class SetIter(object):
+#
+# --- Sets
+#
+
+# Int
+cdef class SetIterInt(object):
     cdef void init(self, cpp_set[int] * set_ptr):
         cdef cpp_set[int].iterator * itn = <cpp_set[int].iterator *> malloc(sizeof(set_ptr.begin()))
         itn[0] = set_ptr.begin()
@@ -480,22 +485,18 @@ cdef class SetIter(object):
         return pyval
 
 
-cdef class _SetProxy:
-    cdef void init(_SetProxy self, cpp_set[int] * sp):
+cdef class _SetProxyInt:
+    cdef void init(_SetProxyInt self, cpp_set[int] * sp):
         self.set_ptr = sp
         return 
         
-    #def __cinit__(self):
-    #    pass
-
     def __dealloc__(self):
         del self.set_ptr
 
-    #
-    # ABC Methods
-    #
-
     def __contains__(self, value):
+        if not isinstance(value, int):
+            return False
+
         if 0 < self.set_ptr.count(value):
             return True
         else:
@@ -505,13 +506,85 @@ cdef class _SetProxy:
         return self.set_ptr.size()
 
     def __iter__(self):
-        cdef SetIter si = SetIter()
+        cdef SetIterInt si = SetIterInt()
         si.init(self.set_ptr)
         return si
 
 
-class SetProxy(_SetProxy, collections.Set):
-    pass
+class SetProxyInt(_SetProxyInt, collections.Set):
+    def __str__(self):
+        return self.repr()
+
+    def __repr__(self):
+        return "set([" + ", ".join([str(i) for i in self]) + "])"
+
+
+# Str
+cdef class SetIterStr(object):
+    cdef void init(self, cpp_set[std.string] * set_ptr):
+        cdef cpp_set[std.string].iterator * itn = <cpp_set[std.string].iterator *> malloc(sizeof(set_ptr.begin()))
+        itn[0] = set_ptr.begin()
+        self.iter_now = itn
+
+        cdef cpp_set[std.string].iterator * ite = <cpp_set[std.string].iterator *> malloc(sizeof(set_ptr.end()))
+        ite[0] = set_ptr.end()
+        self.iter_end = ite
+        
+    def __dealloc__(self):
+        free(self.iter_now)
+        free(self.iter_end)
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        cdef cpp_set[std.string].iterator inow = deref(self.iter_now)
+        cdef cpp_set[std.string].iterator iend = deref(self.iter_end)
+
+        if inow != iend:
+            pyval = str(deref(inow).c_str())
+        else:
+            raise StopIteration    
+
+        inc(deref(self.iter_now))
+        return pyval
+
+
+cdef class _SetProxyStr:
+    cdef void init(_SetProxyStr self, cpp_set[std.string] * sp):
+        self.set_ptr = sp
+        return 
+        
+    def __dealloc__(self):
+        del self.set_ptr
+
+    def __contains__(self, value):
+        cdef std.string s
+        if isinstance(value, str):
+            s = std.string(value)
+        else:
+            return False
+
+        if 0 < self.set_ptr.count(s):
+            return True
+        else:
+            return False
+
+    def __len__(self):
+        return self.set_ptr.size()
+
+    def __iter__(self):
+        cdef SetIterStr si = SetIterStr()
+        si.init(self.set_ptr)
+        return si
+
+
+class SetProxyStr(_SetProxyStr, collections.Set):
+    def __str__(self):
+        return self.repr()
+
+    def __repr__(self):
+        return "set([" + ", ".join([repr(i) for i in self]) + "])"
 
 
 
