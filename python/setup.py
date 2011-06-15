@@ -42,7 +42,8 @@ stlconv_ext['language'] = "c++"
 
 if os.name == 'posix':
 #    stlconv_ext["extra_compile_args"] = ["-Wno-strict-prototypes"]
-    stlconv_ext["undef_macros"] = ["NDEBUG"]
+#    stlconv_ext["undef_macros"] = ["NDEBUG"]
+    pass
 elif os.name == 'nt':
     stlconv_ext["extra_compile_args"] = ["/EHsc"]
     stlconv_ext["define_macros"] = [("_WIN32", None)]
@@ -66,7 +67,8 @@ nucname_ext['language'] = "c++"
 
 if os.name == 'posix':
     #isoname_ext["extra_compile_args"] = ["-Wno-strict-prototypes"]
-    nucname_ext["undef_macros"] = ["NDEBUG"]
+    #nucname_ext["undef_macros"] = ["NDEBUG"]
+    pass
 elif os.name == 'nt':
     nucname_ext["extra_compile_args"] = ["/EHsc"]
     nucname_ext["define_macros"] = [("_WIN32", None)]
