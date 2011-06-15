@@ -1,6 +1,6 @@
 """Python wrapper for nucname library."""
 # Python imports 
-from collections import Iterable
+#from collections import Iterable
 
 # Cython imports
 from libcpp.map cimport map
@@ -37,7 +37,6 @@ FP = conv.cpp_to_py_set_str(cpp_nucname.FP)
 #
 # Elemental integer sets
 #
-
 cpdef conv._SetProxy cpp_lan = conv.SetProxy()
 cpp_lan.set_ptr = &cpp_nucname.lan
 lan = cpp_lan
@@ -46,8 +45,9 @@ cpdef conv._SetProxy cpp_act = conv.SetProxy()
 cpp_act.set_ptr = &cpp_nucname.act
 act = cpp_act
 
-#act = conv.SetProxy2()
-#act.set_ptr = &cpp_nucname.act
+tru = conv.SetProxy()
+(<conv._SetProxy> tru).init(&cpp_nucname.tru)
+
 
 #lan = conv.cpp_to_py_set_int(cpp_nucname.lan)
 #act = conv.cpp_to_py_set_int(cpp_nucname.act)
