@@ -117,7 +117,7 @@ cdef class SetIter(object):
     cdef cpp_set[int].iterator * iter_end
     cdef void init(SetIter, cpp_set[int] *)
 
-
 cdef class _SetProxy:
     cdef cpp_set[int] * set_ptr
+    cdef void init(_SetProxy, cpp_set[int] *)
 

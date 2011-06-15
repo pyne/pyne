@@ -450,7 +450,6 @@ cdef dict map_to_dict_int_int_vector_to_array_1d_dbl(cpp_map[int, cpp_map[int, c
 #
 
 cdef class SetIter(object):
-
     cdef void init(self, cpp_set[int] * set_ptr):
         cdef cpp_set[int].iterator * itn = <cpp_set[int].iterator *> malloc(sizeof(set_ptr.begin()))
         itn[0] = set_ptr.begin()
@@ -460,6 +459,9 @@ cdef class SetIter(object):
         ite[0] = set_ptr.end()
         self.iter_end = ite
         
+    def __dealloc__(self):
+        free(self.iter_now)
+        free(self.iter_end)
 
     def __iter__(self):
         return self
@@ -472,8 +474,6 @@ cdef class SetIter(object):
         if inow != iend:
             pyval = val
         else:
-            free(self.iter_now)
-            free(self.iter_end)
             raise StopIteration    
 
         inc(deref(self.iter_now))
@@ -481,8 +481,12 @@ cdef class SetIter(object):
 
 
 cdef class _SetProxy:
-    def __cinit__(self):
-        pass
+    cdef void init(_SetProxy self, cpp_set[int] * sp):
+        self.set_ptr = sp
+        return 
+        
+    #def __cinit__(self):
+    #    pass
 
     def __dealloc__(self):
         del self.set_ptr
@@ -501,11 +505,13 @@ cdef class _SetProxy:
         return self.set_ptr.size()
 
     def __iter__(self):
-        cdef SetIter si  = SetIter()
+        cdef SetIter si = SetIter()
         si.init(self.set_ptr)
         return si
 
 
-
 class SetProxy(_SetProxy, collections.Set):
     pass
+
+
+
