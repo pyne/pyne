@@ -488,7 +488,6 @@ cdef class SetIterInt(object):
 cdef class _SetProxyInt:
     cdef void init(_SetProxyInt self, cpp_set[int] * sp):
         self.set_ptr = sp
-        return 
         
     def __dealloc__(self):
         del self.set_ptr
@@ -513,7 +512,7 @@ cdef class _SetProxyInt:
 
 class SetProxyInt(_SetProxyInt, collections.Set):
     def __str__(self):
-        return self.repr()
+        return self.__repr__()
 
     def __repr__(self):
         return "set([" + ", ".join([str(i) for i in self]) + "])"
