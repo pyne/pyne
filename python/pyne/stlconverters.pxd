@@ -130,6 +130,7 @@ cdef class _SetProxyInt:
     cdef cpp_set[int] * set_ptr
     cdef void init(_SetProxyInt, cpp_set[int] *)
 
+
 # Str
 cdef class SetIterStr(object):
     cdef cpp_set[std.string].iterator * iter_now
