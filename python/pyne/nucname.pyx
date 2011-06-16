@@ -19,8 +19,13 @@ import pyne.stlconverters as conv
 # Conversion dictionaries
 #
 
-LLzz = conv.map_to_dict_str_int(cpp_nucname.LLzz)
-zzLL = conv.map_to_dict_int_str(cpp_nucname.zzLL)
+cdef conv._MapProxyStrInt LLzz_proxy = conv.MapProxyStrInt()
+LLzz_proxy.init(&cpp_nucname.LLzz)
+LLzz = LLzz_proxy
+
+cdef conv._MapProxyIntStr zzLL_proxy = conv.MapProxyIntStr()
+zzLL_proxy.init(&cpp_nucname.zzLL)
+zzLL = zzLL_proxy
 
 
 #
