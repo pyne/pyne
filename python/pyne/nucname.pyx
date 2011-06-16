@@ -27,35 +27,59 @@ zzLL = conv.map_to_dict_int_str(cpp_nucname.zzLL)
 # Elemental string sets
 #
 
+# Issues with deallocating using the below :(
 #LAN = conv.SetProxyStr()
 #(<conv._SetProxyStr> LAN).init(&cpp_nucname.LAN)
 
+cdef conv._SetProxyStr LAN_proxy = conv.SetProxyStr()
+LAN_proxy.init(&cpp_nucname.LAN)
+LAN = LAN_proxy
 
-#LAN = conv.cpp_to_py_set_str(cpp_nucname.LAN)
-#ACT = conv.cpp_to_py_set_str(cpp_nucname.ACT)
-#TRU = conv.cpp_to_py_set_str(cpp_nucname.TRU)
-#MA = conv.cpp_to_py_set_str(cpp_nucname.MA)
-#FP = conv.cpp_to_py_set_str(cpp_nucname.FP)
+cdef conv._SetProxyStr ACT_proxy = conv.SetProxyStr()
+ACT_proxy.init(&cpp_nucname.ACT)
+ACT = ACT_proxy
+
+cdef conv._SetProxyStr TRU_proxy = conv.SetProxyStr()
+TRU_proxy.init(&cpp_nucname.TRU)
+TRU = TRU_proxy
+
+cdef conv._SetProxyStr MA_proxy = conv.SetProxyStr()
+MA_proxy.init(&cpp_nucname.MA)
+MA = MA_proxy
+
+cdef conv._SetProxyStr FP_proxy = conv.SetProxyStr()
+FP_proxy.init(&cpp_nucname.FP)
+FP = FP_proxy
 
 
 #
 # Elemental integer sets
 #
 
-lan = conv.SetProxyInt()
-(<conv._SetProxyInt> lan).init(&cpp_nucname.lan)
+# Issues with deallocating using the below :(
+#lan = conv.SetProxyInt()
+#(<conv._SetProxyInt> lan).init(&cpp_nucname.lan)
 
-#act = conv.SetProxyInt()
-#(<conv._SetProxyInt> act).init(&cpp_nucname.act)
+cdef conv._SetProxyInt lan_proxy = conv.SetProxyInt()
+lan_proxy.init(&cpp_nucname.lan)
+lan = lan_proxy
 
-#tru = conv.SetProxyInt()
-#(<conv._SetProxyInt> tru).init(&cpp_nucname.tru)
+cdef conv._SetProxyInt act_proxy = conv.SetProxyInt()
+act_proxy.init(&cpp_nucname.act)
+act = act_proxy
 
-#ma = conv.SetProxyInt()
-#(<conv._SetProxyInt> ma).init(&cpp_nucname.ma)
+cdef conv._SetProxyInt tru_proxy = conv.SetProxyInt()
+tru_proxy.init(&cpp_nucname.tru)
+tru = tru_proxy
 
-#fp = conv.SetProxyInt()
-#(<conv._SetProxyInt> fp).init(&cpp_nucname.fp)
+cdef conv._SetProxyInt ma_proxy = conv.SetProxyInt()
+ma_proxy.init(&cpp_nucname.ma)
+ma = ma_proxy
+
+cdef conv._SetProxyInt fp_proxy = conv.SetProxyInt()
+fp_proxy.init(&cpp_nucname.fp)
+fp = fp_proxy
+
 
 
 
