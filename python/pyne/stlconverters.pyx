@@ -552,7 +552,6 @@ cdef class SetIterStr(object):
 cdef class _SetProxyStr:
     cdef void init(_SetProxyStr self, cpp_set[std.string] * sp):
         self.set_ptr = sp
-        return 
         
     def __dealloc__(self):
         del self.set_ptr
@@ -580,10 +579,164 @@ cdef class _SetProxyStr:
 
 class SetProxyStr(_SetProxyStr, collections.Set):
     def __str__(self):
-        return self.repr()
+        return self.__repr__()
 
     def __repr__(self):
         return "set([" + ", ".join([repr(i) for i in self]) + "])"
 
 
 
+#
+# --- Maps
+#
+
+# (Str, Int)
+cdef class MapIterStrInt(object):
+    cdef void init(self, cpp_map[std.string, int] * map_ptr):
+        cdef cpp_map[std.string, int].iterator * itn = <cpp_map[std.string, int].iterator *> malloc(sizeof(map_ptr.begin()))
+        itn[0] = map_ptr.begin()
+        self.iter_now = itn
+
+        cdef cpp_map[std.string, int].iterator * ite = <cpp_map[std.string, int].iterator *> malloc(sizeof(map_ptr.end()))
+        ite[0] = map_ptr.end()
+        self.iter_end = ite
+        
+    def __dealloc__(self):
+        free(self.iter_now)
+        free(self.iter_end)
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        cdef cpp_map[std.string, int].iterator inow = deref(self.iter_now)
+        cdef cpp_map[std.string, int].iterator iend = deref(self.iter_end)
+
+        if inow != iend:
+            pyval = str(deref(inow).first.c_str())
+        else:
+            raise StopIteration    
+
+        inc(deref(self.iter_now))
+        return pyval
+
+
+cdef class _MapProxyStrInt:
+    cdef void init(_MapProxyStrInt self, cpp_map[std.string, int] * mp):
+        self.map_ptr = mp
+        
+    def __dealloc__(self):
+        del self.map_ptr
+
+    def __contains__(self, key):
+        cdef std.string s
+        if isinstance(key, str):
+            s = std.string(key)
+        else:
+            return False
+
+        if 0 < self.map_ptr.count(s):
+            return True
+        else:
+            return False
+
+    def __len__(self):
+        return self.map_ptr.size()
+
+    def __iter__(self):
+        cdef MapIterStrInt mi = MapIterStrInt()
+        mi.init(self.map_ptr)
+        return mi
+
+    def __getitem__(self, key):
+        cdef std.string s
+        if isinstance(key, str):
+            s = std.string(key)
+        else:
+            raise TypeError("Only string keys are valid.")
+
+        if 0 < self.map_ptr.count(s):
+            return deref(self.map_ptr)[s]
+        else:
+            raise KeyError
+
+
+class MapProxyStrInt(_MapProxyStrInt, collections.Mapping):
+    def __str__(self):
+        return self.__repr__()
+
+    def __repr__(self):
+        return "{" + ", ".join(["{0}: {1}".format(repr(key), value) for key, value in self.items()]) + "}"
+
+
+# (Int, Str)
+cdef class MapIterIntStr(object):
+    cdef void init(self, cpp_map[int, std.string] * map_ptr):
+        cdef cpp_map[int, std.string].iterator * itn = <cpp_map[int, std.string].iterator *> malloc(sizeof(map_ptr.begin()))
+        itn[0] = map_ptr.begin()
+        self.iter_now = itn
+
+        cdef cpp_map[int, std.string].iterator * ite = <cpp_map[int, std.string].iterator *> malloc(sizeof(map_ptr.end()))
+        ite[0] = map_ptr.end()
+        self.iter_end = ite
+        
+    def __dealloc__(self):
+        free(self.iter_now)
+        free(self.iter_end)
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        cdef cpp_map[int, std.string].iterator inow = deref(self.iter_now)
+        cdef cpp_map[int, std.string].iterator iend = deref(self.iter_end)
+
+        if inow != iend:
+            pyval = int(deref(inow).first)
+        else:
+            raise StopIteration    
+
+        inc(deref(self.iter_now))
+        return pyval
+
+
+cdef class _MapProxyIntStr:
+    cdef void init(_MapProxyIntStr self, cpp_map[int, std.string] * mp):
+        self.map_ptr = mp
+        
+    def __dealloc__(self):
+        del self.map_ptr
+
+    def __contains__(self, key):
+        if not isinstance(key, int):
+            return False
+
+        if 0 < self.map_ptr.count(key):
+            return True
+        else:
+            return False
+
+    def __len__(self):
+        return self.map_ptr.size()
+
+    def __iter__(self):
+        cdef MapIterIntStr mi = MapIterIntStr()
+        mi.init(self.map_ptr)
+        return mi
+
+    def __getitem__(self, key):
+        if not isinstance(key, int):
+            raise TypeError("Only integer keys are valid.")
+
+        if 0 < self.map_ptr.count(key):
+            return str(deref(self.map_ptr)[key].c_str())
+        else:
+            raise KeyError
+
+
+class MapProxyIntStr(_MapProxyIntStr, collections.Mapping):
+    def __str__(self):
+        return self.__repr__()
+
+    def __repr__(self):
+        return "{" + ", ".join(["{0}: {1}".format(key, repr(value)) for key, value in self.items()]) + "}"
