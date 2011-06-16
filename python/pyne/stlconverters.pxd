@@ -141,3 +141,29 @@ cdef class _SetProxyStr:
     cdef cpp_set[std.string] * set_ptr
     cdef void init(_SetProxyStr, cpp_set[std.string] *)
 
+
+#
+# --- Maps
+#
+
+# (Str, Int)
+cdef class MapIterStrInt(object):
+    cdef cpp_map[std.string, int].iterator * iter_now
+    cdef cpp_map[std.string, int].iterator * iter_end
+    cdef void init(MapIterStrInt, cpp_map[std.string, int] *)
+
+cdef class _MapProxyStrInt:
+    cdef cpp_map[std.string, int] * map_ptr
+    cdef void init(_MapProxyStrInt, cpp_map[std.string, int] *)
+
+
+# (Int, Str)
+cdef class MapIterIntStr(object):
+    cdef cpp_map[int, std.string].iterator * iter_now
+    cdef cpp_map[int, std.string].iterator * iter_end
+    cdef void init(MapIterIntStr, cpp_map[int, std.string] *)
+
+cdef class _MapProxyIntStr:
+    cdef cpp_map[int, std.string] * map_ptr
+    cdef void init(_MapProxyIntStr, cpp_map[int, std.string] *)
+
