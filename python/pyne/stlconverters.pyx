@@ -669,6 +669,8 @@ class MapProxyStrInt(_MapProxyStrInt, collections.Mapping):
         return "{" + ", ".join(["{0}: {1}".format(repr(key), value) for key, value in self.items()]) + "}"
 
 
+
+
 # (Int, Str)
 cdef class MapIterIntStr(object):
     cdef void init(self, cpp_map[int, std.string] * map_ptr):
@@ -740,3 +742,80 @@ class MapProxyIntStr(_MapProxyIntStr, collections.Mapping):
 
     def __repr__(self):
         return "{" + ", ".join(["{0}: {1}".format(key, repr(value)) for key, value in self.items()]) + "}"
+
+
+
+
+
+
+# (Int, Double)
+cdef class MapIterIntDouble(object):
+    cdef void init(self, cpp_map[int, double] * map_ptr):
+        cdef cpp_map[int, double].iterator * itn = <cpp_map[int, double].iterator *> malloc(sizeof(map_ptr.begin()))
+        itn[0] = map_ptr.begin()
+        self.iter_now = itn
+
+        cdef cpp_map[int, double].iterator * ite = <cpp_map[int, double].iterator *> malloc(sizeof(map_ptr.end()))
+        ite[0] = map_ptr.end()
+        self.iter_end = ite
+        
+    def __dealloc__(self):
+        free(self.iter_now)
+        free(self.iter_end)
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        cdef cpp_map[int, double].iterator inow = deref(self.iter_now)
+        cdef cpp_map[int, double].iterator iend = deref(self.iter_end)
+
+        if inow != iend:
+            pyval = int(deref(inow).first)
+        else:
+            raise StopIteration    
+
+        inc(deref(self.iter_now))
+        return pyval
+
+
+cdef class _MapProxyIntDouble:
+    cdef void init(_MapProxyIntDouble self, cpp_map[int, double] * mp):
+        self.map_ptr = mp
+        
+    def __dealloc__(self):
+        del self.map_ptr
+
+    def __contains__(self, key):
+        if not isinstance(key, int):
+            return False
+
+        if 0 < self.map_ptr.count(key):
+            return True
+        else:
+            return False
+
+    def __len__(self):
+        return self.map_ptr.size()
+
+    def __iter__(self):
+        cdef MapIterIntDouble mi = MapIterIntDouble()
+        mi.init(self.map_ptr)
+        return mi
+
+    def __getitem__(self, key):
+        if not isinstance(key, int):
+            raise TypeError("Only integer keys are valid.")
+
+        if 0 < self.map_ptr.count(key):
+            return float(deref(self.map_ptr)[key])
+        else:
+            raise KeyError
+
+
+class MapProxyIntDouble(_MapProxyIntDouble, collections.Mapping):
+    def __str__(self):
+        return self.__repr__()
+
+    def __repr__(self):
+        return "{" + ", ".join(["{0}: {1}".format(key, value) for key, value in self.items()]) + "}"
