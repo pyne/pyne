@@ -42,6 +42,15 @@ void pyne::Material::norm_comp()
 
 
 
+void pyne::Material::load_from_hdf5(char * fchar, char * gchar, int row)
+{
+  std::string filename (fchar);
+  std::string groupname (gchar);
+  load_from_hdf5(filename, groupname, row);  
+};
+
+
+
 void pyne::Material::load_from_hdf5(std::string filename, std::string groupname, int row)
 {
   // Check that the file is there
@@ -160,18 +169,39 @@ pyne::Material::Material(pyne::comp_map cm, double m, std::string s)
 pyne::Material::Material(char * fchar, double m, std::string s)
 {
   // Initializes the mass stream based on an isotopic composition file with a (char *) name.
+  // Check that the file is there
+  std::string filename (fchar);
+  if (!pyne::file_exists(filename))
+    throw pyne::FileNotFound(filename);
+
+  // Check to see if the file is in HDF5 format.
+  bool isH5 = H5::H5File::isHdf5(filename);
+  if (isH5)
+    load_from_hdf5(filename);
+  else
+    load_from_text(filename);
+
   mass = m;
   name = s;
-  load_from_text(fchar);
 };
 
 
-pyne::Material::Material(std::string fstr, double m, std::string s)
+pyne::Material::Material(std::string filename, double m, std::string s)
 {
   // Initializes the mass stream based on an isotopic composition file with a string name.
+  // Check that the file is there
+  if (!pyne::file_exists(filename))
+    throw pyne::FileNotFound(filename);
+
+  // Check to see if the file is in HDF5 format.
+  bool isH5 = H5::H5File::isHdf5(filename);
+  if (isH5)
+    load_from_hdf5(filename);
+  else
+    load_from_text(filename);
+
   mass = m;
   name = s;
-  load_from_text(fstr);
 };
 
 
