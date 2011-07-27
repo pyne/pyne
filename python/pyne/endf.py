@@ -33,16 +33,18 @@ class Evaluation(object):
     def __init__(self, filename):
         self.fh = open(filename, 'r')
         self.files = []
+        self.verbose = True
 
     def read(self):
         # First we need to read MT=1, MT=451 which has a description of the ENDF
         # file and a list of what data exists in the file
+        if self.verbose:
+            print("Reading File 1...")
         self.readHeader()
 
         # Now we can start looping over the list of data - we can skip the first
         # entry since it is the MT=451 block that we already read
-        file1 = self.files[0]
-        for MF, MT, NC, MOD in file1.listOfMTs[1:]:
+        for MF, MT, NC, MOD in self.reactionList[1:]:
             # File 1 data
             if MF == 1:
                 # Number of total neutrons per fission
@@ -60,106 +62,77 @@ class Evaluation(object):
                 elif MT == 460:
                     self.readDelayedPhoton()
                     
-    def findFile(self, fileNumber):
-        for f in self.files:
-            if f.fileNumber == fileNumber:
-                return f
-
-    def lookForFiles(self):
-        files = set()
-        self.fh.seek(0)
-        for line in self.fh:
-            try:
-                fileNum = int(line[70:72])
-                if fileNum == 0:
-                    continue
-            except ValueError:
-                raise
-            except IndexError:
-                raise
-            files.add(fileNum)
-        print(files)
-
-    def seekFile(self, fileNum):
-        self.fh.seek(0)
-        fileString = '{0:2}'.format(fileNum)
-        while True:
-            position = self.fh.tell()
-            line = self.fh.readline()
-            if line == '':
-                # Reached EOF
-                print('Could not find File {0}'.format(fileNum))
-            if line[70:72] == fileString:
-                self.fh.seek(position)
-                break
-
     def readHeader(self):
+        self.printInfo(451)
+
         # Find File 1 in evaluation
         self.seekFile(1)
 
         # Now read File1
         file1 = ENDFFile1()
+        data = ENDFReaction(451)
+        file1.reactions.append(data)
 
         # First HEAD record
         items = self.getHeadRecord()
-        file1.ZA   = items[0]
-        file1.AWR  = items[1]
-        file1.LRP  = items[2]
-        file1.LFI  = items[3]
-        file1.NLIB = items[4]
-        file1.NMOD = items[5]
+        data.ZA   = items[0]
+        data.AWR  = items[1]
+        data.LRP  = items[2]
+        data.LFI  = items[3]
+        data.NLIB = items[4]
+        data.NMOD = items[5]
 
         # Control record 1
         items = self.getContRecord()
-        file1.ELIS = items[0]
-        file1.STA  = int(items[1])
-        file1.LIS  = items[2]
-        file1.LISO = items[3]
-        file1.NFOR = items[5]
+        data.ELIS = items[0]
+        data.STA  = int(items[1])
+        data.LIS  = items[2]
+        data.LISO = items[3]
+        data.NFOR = items[5]
 
         # Control record 2
         items = self.getContRecord()
-        file1.AWI  = items[0]
-        file1.EMAX = items[1]
-        file1.LREL = items[2]
-        file1.NSUB = items[4]
-        file1.NVER = items[5]
+        data.AWI  = items[0]
+        data.EMAX = items[1]
+        data.LREL = items[2]
+        data.NSUB = items[4]
+        data.NVER = items[5]
 
         # Control record 3
         items = self.getContRecord()
-        file1.TEMP = items[0]
-        file1.LDRV = items[2]
-        file1.NWD  = items[4]
-        file1.NXC  = items[5]
+        data.TEMP = items[0]
+        data.LDRV = items[2]
+        data.NWD  = items[4]
+        data.NXC  = items[5]
 
         # Text record 1
         items = self.getTextRecord()
         text = items[0]
-        file1.ZSYMAM = text[0:11]
-        file1.ALAB   = text[11:22]
-        file1.EDATE  = text[22:32]
-        file1.AUTH   = text[32:66]
+        data.ZSYMAM = text[0:11]
+        data.ALAB   = text[11:22]
+        data.EDATE  = text[22:32]
+        data.AUTH   = text[32:66]
 
         # Text record 2
         items = self.getTextRecord()
         text = items[0]
-        file1.REF    = text[1:22]
-        file1.DDATE  = text[22:32]
-        file1.RDATE  = text[33:43]
-        file1.ENDATE = text[55:63]
+        data.REF    = text[1:22]
+        data.DDATE  = text[22:32]
+        data.RDATE  = text[33:43]
+        data.ENDATE = text[55:63]
 
         # Text record 3
         items = self.getTextRecord()
-        file1.HSUB = items[0]
+        data.HSUB = items[0]
 
         # Now read descriptive records
-        file1.description = []
-        for i in range(file1.NWD - 3):
+        data.description = []
+        for i in range(data.NWD - 3):
             line = self.fh.readline()[:66]
-            file1.description.append(line)
+            data.description.append(line)
 
         # File numbers, reaction designations, and number of records
-        file1.listOfMTs = []
+        self.reactionList = []
         while True:
             line = self.fh.readline()
             if line[72:75] == '  0':
@@ -169,54 +142,95 @@ class Evaluation(object):
             MT  = items[3]
             NC  = items[4]
             MOD = items[5]
-            file1.listOfMTs.append((MF,MT,NC,MOD))
+            self.reactionList.append((MF,MT,NC,MOD))
 
         self.files.append(file1)
 
     def readTotalNu(self):
+        self.printInfo(452)
+
         # Find file 1
         file1 = self.findFile(1)
 
+        # Create total nu reaction
+        nuTotal = ENDFReaction(452)
+        file1.reactions.append(nuTotal)
+
         # Determine representation of total nu data
         items = self.getHeadRecord()
-        LNU = items[3]
-        file1.nuTotalLNU = LNU
+        nuTotal.LNU = items[3]
 
         # Polynomial representation
-        if LNU == 1:
-            line = self.fh.readline()
-            NC = int(line[44:55])
-            file1.nuTotalNC = NC
-            file1.nuTotalCoeffs = getList(NC)
+        if nuTotal.LNU == 1:
+            nuTotal.coeffs = self.getListRecord()
         # Tabulated representation
-        elif LNU == 2:
-            file1.nuTotal = self.getTab1Record()
+        elif nuTotal.LNU == 2:
+            nuTotal.value = self.getTab1Record()
 
         # Skip SEND record
         self.fh.readline()
 
     def readDelayedNu(self):
+        self.printInfo(455)
+
         # Find file 1
         file1 = self.findFile(1)
 
+        # Create delayed nu reaction
+        nuDelay = ENDFReaction(455)
+        file1.reactions.append(nuDelay)
+
         # Determine representation of delayed nu data
         items = self.getHeadRecord()
-        LDG = items[2]
-        LNU = items[3]
+        nuDelay.LDG = items[2]
+        nuDelay.LNU = items[3]
 
         # Nu tabulated and delayed-group constants are energy-independent
-        if LNU == 2 and LDG == 1:
-            line = self.fh.readline()
-            NNF = int(line[44:55])
+        if nuDelay.LNU == 2 and nuDelay.LDG == 0:
+            nuDelay.decayConst = self.getListRecord(onlyList=True)
+            nuDelay.value = self.getTab1Record()
+            self.fh.readline()
 
     def readPromptNu(self):
-        pass
+        self.printInfo(456)
+
+        # Create delayed nu reaction
+        nuPrompt = ENDFReaction(456)
+        self.findFile(1).reactions.append(nuPrompt)
+
+        # Determine representation of delayed nu data
+        items = self.getHeadRecord()
+        nuPrompt.LNU = items[3]
+
+        # Tabulated values of nu
+        if nuPrompt.LNU == 2:
+            nuPrompt.value = self.getTab1Record()
+        # Spontaneous fission
+        elif nuPrompt.LNU == 1:
+            nuPrompt.value = self.getListRecord(onlyList=True)
+
+        # Skip SEND record
+        self.fh.readline()
 
     def readFissionEnergy(self):
-        pass
+        self.printInfo(458)
+
+        # Create delayed nu reaction
+        eRelease = ENDFReaction(458)
+        self.findFile(1).reactions.append(eRelease)
+
+        # Determine representation of delayed nu data
+        items = self.getHeadRecord()
 
     def readDelayedPhoton(self):
-        pass
+        self.printInfo(460)
+
+        # Create delayed nu reaction
+        dp = ENDFReaction(460)
+        self.findFile(1).reactions.append(dp)
+
+        # Determine representation of delayed nu data
+        items = self.getHeadRecord()
 
     def getTextRecord(self, line=None):
         if not line:
@@ -262,23 +276,74 @@ class Evaluation(object):
         NS  = int(line[75:80])
         return [ZA, AWR, L1, L2, N1, N2, MAT, MF, MT, NS]
 
-    def getList(self, N):
-        items = []
+    def getListRecord(self, onlyList=False):
+        # determine how many items are in list
+        items = self.getContRecord()
+        NPL = items[4]
+        
+        # read items
+        itemsList = []
         m = 0
-        for i in range((N-1)/6 + 1):
-            line = fh.readline()
-            toRead = min(6,N-m)
+        for i in range((NPL-1)/6 + 1):
+            line = self.fh.readline()
+            toRead = min(6,NPL-m)
             for j in range(toRead):
-                item = convert(line[0:11])
-                items.append(item)
-                line = line[22:]
+                val = convert(line[0:11])
+                itemsList.append(val)
+                line = line[11:]
             m = m + toRead
-        return items
+        if onlyList:
+            return itemsList
+        else:
+            return (items, itemsList)
 
     def getTab1Record(self):
         r = ENDFTab1Record()
         r.read(self.fh)
         return r
+
+    def findFile(self, fileNumber):
+        for f in self.files:
+            if f.fileNumber == fileNumber:
+                return f
+
+    def findMT(self, MT):
+        for f in self.files:
+            for r in f.reactions:
+                if r.MT == MT:
+                    return r
+
+    def lookForFiles(self):
+        files = set()
+        self.fh.seek(0)
+        for line in self.fh:
+            try:
+                fileNum = int(line[70:72])
+                if fileNum == 0:
+                    continue
+            except ValueError:
+                raise
+            except IndexError:
+                raise
+            files.add(fileNum)
+        print(files)
+
+    def seekFile(self, fileNum):
+        self.fh.seek(0)
+        fileString = '{0:2}'.format(fileNum)
+        while True:
+            position = self.fh.tell()
+            line = self.fh.readline()
+            if line == '':
+                # Reached EOF
+                print('Could not find File {0}'.format(fileNum))
+            if line[70:72] == fileString:
+                self.fh.seek(position)
+                break
+
+    def printInfo(self, MT):
+        if self.verbose:
+            print("   MT={0} {1}".format(MT, MTname[MT]))
 
     def __iter__(self):
         for f in self.files:
@@ -402,7 +467,19 @@ class ENDFHeadRecord(ENDFRecord):
         NS  = int(line[75:80])
         self.items = [ZA, AWR, L1, L2, N1, N2, MAT, MF, MT, NS]
 
-class ENDFFile1(object):
+class ENDFFile(object):
+    """Abstract class for an ENDF file within an ENDF evaluation."""
+
+    def __init__(self):
+        self.reactions = []
+
+    def __repr__(self):
+        try:
+            return "<ENDF File {0.fileNumber}: {0.ZA}>".format(self)
+        except:
+            return "<ENDF File {0.fileNumber}>".format(self)
+
+class ENDFFile1(ENDFFile):
     """
     File1 contains general information about an evaluated data set such as
     descriptive data, number of neutrons per fission, delayed neutron data,
@@ -411,15 +488,11 @@ class ENDFFile1(object):
     """
     
     def __init__(self):
+        super(ENDFFile1,self).__init__()
+
         self.fileNumber = 1
 
-    def __repr__(self):
-        try:
-            return "<ENDF File 1: {0}>".format(self.ZA)
-        except:
-            return "<ENDF File 1>"
-
-class ENDFFile2(object):
+class ENDFFile2(ENDFFile):
     """
     File2 contains resonance parameters including resolved resonance parameters,
     unresolved resonance parameters, and prescribed procedures for resolved and
@@ -429,7 +502,7 @@ class ENDFFile2(object):
     def __init__(self):
         self.fileNumber = 2
 
-class ENDFFile3(object):
+class ENDFFile3(ENDFFile):
     """
     File3 contains neutron cross sections and prescribed procedures for
     inciddent neutrons.
@@ -438,7 +511,7 @@ class ENDFFile3(object):
     def __init__(self):
         self.fileNumber = 3
 
-class ENDFFile4(object):
+class ENDFFile4(ENDFFile):
     """
     File4 contains angular distributions of secondary particles.
     """
@@ -446,7 +519,7 @@ class ENDFFile4(object):
     def __init__(self):
         self.fileNumber = 4
 
-class ENDFFile5(object):
+class ENDFFile5(ENDFFile):
     """
     File5 contains energy distributions of secondary particles.
     """
@@ -454,7 +527,7 @@ class ENDFFile5(object):
     def __init__(self):
         self.fileNumber = 5
 
-class ENDFFile6(object):
+class ENDFFile6(ENDFFile):
     """
     File6 contains product energy-angle distributions.
     """
@@ -462,7 +535,7 @@ class ENDFFile6(object):
     def __init__(self):
         self.fileNumber = 6
 
-class ENDFFile7(object):
+class ENDFFile7(ENDFFile):
     """
     File7 contains thermal neutron scattering law data.
     """
@@ -470,7 +543,7 @@ class ENDFFile7(object):
     def __init__(self):
         self.fileNumber = 7
 
-class ENDFFile8(object):
+class ENDFFile8(ENDFFile):
     """
     File8 contains radioactive decay data.
     """
@@ -478,7 +551,7 @@ class ENDFFile8(object):
     def __init__(self):
         self.fileNumber = 8
 
-class ENDFFile9(object):
+class ENDFFile9(ENDFFile):
     """
     File9 contains multiplicites for production of radioactive elements.
     """
@@ -486,13 +559,23 @@ class ENDFFile9(object):
     def __init__(self):
         self.fileNumber = 9
 
-class ENDFFile10(object):
+class ENDFFile10(ENDFFile):
     """
     File10 contains cross sections for production of radioactive nuclides.
     """
 
     def __init__(self):
         self.fileNumber = 10
+
+class ENDFReaction(ENDFFile):
+    """A single MT record on an ENDF file."""
+
+    def __init__(self, MT):
+        self.MT = MT
+
+    def __repr__(self):
+        return "<ENDF Reaction: MT={0}, {1}>".format(self.MT, MTname[self.MT])
+
 
 def convert(string):
     """
@@ -504,3 +587,11 @@ def convert(string):
         return float(string[:-2] + 'e' + string[-2:])
     else:
         return eval(string)
+
+MTname = {451: "Desciptive Data",
+          452: "Total Neutrons per Fission",
+          455: "Delayed Neutron Data",
+          456: "Prompt Neutrons per Fission",
+          458: "Energy Release Due to Fission",
+          460: "Delayed Photon Data",
+          151: "Resonance Parameters"}
