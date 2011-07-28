@@ -61,6 +61,9 @@ class Evaluation(object):
                     self.readFissionEnergy()
                 elif MT == 460:
                     self.readDelayedPhoton()
+            elif MF == 2:
+                if MT == 151:
+                    self.readResonances()
                     
     def readHeader(self):
         self.printInfo(451)
@@ -190,6 +193,12 @@ class Evaluation(object):
             nuDelay.decayConst = self.getListRecord(onlyList=True)
             nuDelay.value = self.getTab1Record()
             self.fh.readline()
+        elif nuDelay.LNU == 2 and nuDelay.LDG == 1:
+            raise NotImplementedError
+        elif nuDelay.LNU == 1 and nuDelay.LDG == 0:
+            raise NotImplementedError
+        elif nuDelay.LNU == 1 and nuDelay.LDG == 1:
+            raise NotImplementedError
 
     def readPromptNu(self):
         self.printInfo(456)
@@ -215,22 +224,68 @@ class Evaluation(object):
     def readFissionEnergy(self):
         self.printInfo(458)
 
-        # Create delayed nu reaction
+        # Create fission energy release reaction
         eRelease = ENDFReaction(458)
         self.findFile(1).reactions.append(eRelease)
 
-        # Determine representation of delayed nu data
-        items = self.getHeadRecord()
+        # Skip HEAD record
+        self.getHeadRecord()
+
+        # Read LIST record containing components of fission energy release (or
+        # coefficients)
+        items, values = self.getListRecord()
+        NPLY = items[3]
+        if NPLY == 0:
+            eRelease.fissProducts = (values[0], values[1])
+            eRelease.promptNeuts  = (values[2], values[3])
+            eRelease.delayNeuts   = (values[4], values[5])
+            eRelease.promptGammas = (values[6], values[7])
+            eRelease.delayGammas  = (values[8], values[9])
+            eRelease.delayBetas   = (values[10], values[11])
+            eRelease.neutrinos    = (values[12], values[13])
+            eRelease.pseudoQ      = (values[14], values[15])
+            eRelease.total        = (values[16], values[17])
+        elif NPLY > 0:
+            raise NotImplementedError
+
+        # Skip SEND record
+        self.fh.readline()
 
     def readDelayedPhoton(self):
         self.printInfo(460)
 
-        # Create delayed nu reaction
+        # Create delayed photon data reaction
         dp = ENDFReaction(460)
         self.findFile(1).reactions.append(dp)
 
-        # Determine representation of delayed nu data
+        # Determine whether discrete or continuous representation
         items = self.getHeadRecord()
+        dp.LO = items[2]
+        dp.NG = items[4]
+
+        # Discrete representation
+        if dp.LO == 1:
+            # Initialize lists for energies of photons and time dependence of
+            # photon multiplicity
+            dp.energy = []
+            dp.multiplicity = []
+            for i in range(dp.NG):
+                # Read TAB1 record with multiplicity as function of time
+                mult = self.getTab1Record()
+                dp.multiplicity.append(mult)
+
+                # Determine energy
+                E = mult.params[0]
+                dp.energy.append(E)
+
+        # Continuous representation
+        elif dp.LO == 2:
+            # Determine decay constant and number of precursor families
+            dp.decayConst = self.getListRecord(onlyList=True)
+            dp.NNF = len(dp.decayConst)
+
+    def readResonances(self):
+        pass
 
     def getTextRecord(self, line=None):
         if not line:
@@ -368,8 +423,13 @@ class ENDFTab1Record(object):
     def read(self, fh):
         # Determine how many interpolation regions and total points there are
         line = fh.readline()
+        C1 = convert(line[:11])
+        C2 = convert(line[11:22])
+        L1  = int(line[22:33])
+        L2  = int(line[33:44])
         NR = int(line[44:55])
         NP = int(line[55:66])
+        self.params = [C1, C2, L1, L2, NR, NP]
         
         # Read the interpolation region data, namely NBT and INT
         m = 0
@@ -594,4 +654,47 @@ MTname = {451: "Desciptive Data",
           456: "Prompt Neutrons per Fission",
           458: "Energy Release Due to Fission",
           460: "Delayed Photon Data",
-          151: "Resonance Parameters"}
+          151: "Resonance Parameters",
+          1: "(n,total) Neutron total",
+          2: "(z,z0) Elastic scattering",
+          3: "(z,nonelas) Nonelastic neutron",
+          4: "(z,n) One neutron in exit channel",
+          5: "(z,anything) Miscellaneous",
+          10: "(z,contin) Total continuum reaction",
+          11: "(z,2nd) Production of 2n and d",
+          16: "(z,2n) Production of 2n",
+          17: "(z,3n) Production of 3n",
+          18: "(z,fiss) Particle-induced fission",
+          19: "(z,f) First-chance fission",
+          20: "(z,nf) Second chance fission",
+          21: "(z,2nf) Third-chance fission",
+          22: "(z,na) Production of n and alpha",
+          23: "(z,n3a) Production of n and 3 alphas",
+          24: "(z,2na) Production of 2n and alpha",
+          25: "(z,3na) Production of 3n and alpha",
+          27: "(n,abs) Absorption",
+          28: "(z,np) Production of n and p",
+          29: "(z,n2a) Production of n and 2 alphas",
+          30: "(z,2n2a) Production of 2n and 2 alphas",
+          32: "(z,nd) Production of n and d",
+          33: "(z,nt) Production of n and t",
+          34: "(z,n3He) Production of n and He-3",
+          35: "(z,nd2a) Production of n, d, and alpha",
+          36: "(z,nt2a) Production of n, t, and 2 alphas",
+          37: "(z,4n) Production of 4n",
+          38: "(z,3nf) Fourth-chance fission",
+          41: "(z,2np) Production of 2n and p",
+          42: "(z,3np) Production of 3n and p",
+          44: "(z,n2p) Production of n and 2p",
+          45: "(z,npa) Production of n, p, and alpha",
+          50: "(z,n0) Production of n, ground state",
+          51: "(z,n1) Production of n, 1st excited state",
+          52: "(z,n2) Production of n, 2nd excited state",
+          53: "(z,n3) Production of n, 3rd excited state",
+          54: "(z,n4) Production of n, 4th excited state",
+          55: "(z,n5) Production of n, 5th excited state",
+          56: "(z,n6) Production of n, 6th excited state",
+          57: "(z,n7) Production of n, 7th excited state",
+          58: "(z,n8) Production of n, 8th excited state",
+          59: "(z,n9) Production of n, 9th excited state",
+          60: "(z,n10) Production of n, 10th excited state"}
