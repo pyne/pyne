@@ -9,9 +9,11 @@ from cython.operator cimport preincrement as inc
 # local imports 
 cimport std
 cimport cpp_material
-cimport stlconverters as conv
+cimport pyne.stlconverters as conv
+import pyne.stlconverters as conv
 
-import nucname
+cimport pyne.nucname as nucname
+import pyne.nucname as nucname
 import os
 
 cdef class Material:
