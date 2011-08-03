@@ -32,7 +32,7 @@ void pyne::Material::norm_comp()
   double sum = get_comp_sum();
   if (sum != 1.0 && sum != 0.0)
   {
-    for (CompIter i = comp.begin(); i != comp.end(); i++)
+    for (comp_iter i = comp.begin(); i != comp.end(); i++)
       i->second = i->second / sum;
   }
 
@@ -83,11 +83,11 @@ void pyne::Material::load_from_hdf5(std::string filename, std::string groupname,
   H5::DataSet nucset;
   double nucvalue;
   hsize_t matG = matgroup.getNumObjs();
-  for (int matg = 0; matg < matG; msg++)
+  for (int matg = 0; matg < matG; matg++)
   {
     std::string nuckey = matgroup.getObjnameByIdx(matg);
-    matset = matgroup.openDataSet(nuckey);
-    matvalue = h5wrap::get_array_index<double>(&matset, row);
+    nucset = matgroup.openDataSet(nuckey);
+    nucvalue = h5wrap::get_array_index<double>(&nucset, row);
 
     if (nuckey == "Mass" || nuckey == "MASS" || nuckey == "mass")
       mass = nucvalue;
@@ -121,7 +121,7 @@ void pyne::Material::load_from_text (std::string filename)
 
   // New filestream
   std::ifstream f;
-  f.open(fchar);
+  f.open(filename.c_str());
 
   // Read in
   while ( !f.eof() )
@@ -158,7 +158,7 @@ pyne::Material::Material()
 pyne::Material::Material(pyne::comp_map cm, double m, std::string s)
 {
   // Initializes the mass stream based on an isotopic component dictionary.
-  comp = cd;
+  comp = cm;
   mass = m;
   name = s;
   norm_comp();
@@ -285,7 +285,7 @@ pyne::Material pyne::Material::sub_mat (std::set<int> nucset,  std::string n)
       continue;
   };
 
-  return pyne::Material(cd, -1, n);
+  return pyne::Material(cm, -1, n);
 };
 
 
@@ -299,7 +299,7 @@ pyne::Material pyne::Material::sub_mat (std::set<std::string> nucset,  std::stri
   {
     // Is of form LL?
     if (0 < nucname::LLzz.count(*i) )
-      iset.insert( LLzz[*i] );
+      iset.insert( nucname::LLzz[*i] );
     else
     {
       try
@@ -339,7 +339,7 @@ pyne::Material pyne::Material::sub_pu (std::string n)
   // Returns a material of Plutonium that is a sub-material of this one.
   std::set<int> nucset;
   nucset.insert(94);
-  return sub_nuc(nucset, n);
+  return sub_mat(nucset, n);
 };
 
 
@@ -378,7 +378,7 @@ pyne::Material pyne::Material::sub_ma (std::string n)
 pyne::Material pyne::Material::sub_fp (std::string n)
 {
   // Returns a material of Fission Products that is a sub-material of this one.
-  return get_sub_stream (nucname::fp, n);
+  return sub_mat (nucname::fp, n);
 };
 
 
@@ -410,7 +410,7 @@ pyne::Material pyne::Material::operator+ (Material y)
     
   for (pyne::comp_iter i = ywgt.begin(); i != ywgt.end(); i++)
   {
-    if ( 0 == cd.count(i->first) )
+    if ( 0 == cm.count(i->first) )
       cm[i->first] = ywgt[i->first];			
   };
 

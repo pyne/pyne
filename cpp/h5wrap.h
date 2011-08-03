@@ -20,6 +20,68 @@
 
 namespace h5wrap
 {
+  // Exceptions
+  class HDF5BoundsError: public std::exception
+  {
+    virtual const char* what() const throw()
+    {
+      return "Index of point is out of bounds.  Cannot read in from HDF5 File.";
+    };
+  };
+
+
+  class FileNotHDF5: public std::exception
+  {
+  public:
+    FileNotHDF5(){};
+    ~FileNotHDF5() throw () {};
+
+    FileNotHDF5(std::string fname)
+    {
+      filename = fname;
+    };
+
+    virtual const char* what() const throw()
+    {
+      std::string FNH5str ("Not a valid HDF5 file: ");
+      if (!filename.empty())
+        FNH5str += filename;
+
+      return (const char *) FNH5str.c_str();
+    };
+
+  private:
+    std::string filename;
+  };
+
+
+  class GroupNotFound: public std::exception
+  {
+  public:
+    GroupNotFound(){};
+    ~GroupNotFound() throw () {};
+
+    GroupNotFound(std::string fname, std::string gname)
+    {
+      filename = fname;
+    };
+
+    virtual const char* what() const throw()
+    {
+      std::string msg ("the group ");
+      msg += groupname;
+      msg += " not found in the file ";
+      msg += filename;
+      return (const char *) msg.c_str();
+    };
+
+  private:
+    std::string filename;
+    std::string groupname;
+  };
+
+
+
   // Read-in Functions
   template <typename T>
   T get_array_index(H5::DataSet * ds, int n, H5::DataType dt = H5::PredType::NATIVE_DOUBLE)
@@ -35,7 +97,7 @@ namespace h5wrap
 
     //If still out of range we have a problem
     if (offset[0] < 0 || array_space.getSimpleExtentNpoints() <= offset[0])
-        throw H5::HDF5BoundsError();
+        throw HDF5BoundsError();
 
     array_space.selectHyperslab(H5S_SELECT_SET, count, offset);
 
@@ -165,14 +227,14 @@ namespace h5wrap
     h5_arr.read(mem_arr, dt);
 
     // Initialize vector of vectors of vectors
-    std::vector< std::vector< std::vector<T> > > cpp_vec (arr_dims[0], std::vector< std::vector<T> >(arr_dims[1], st$
+    std::vector< std::vector< std::vector<T> > > cpp_vec (arr_dims[0], std::vector< std::vector<T> >(arr_dims[1], std::vector<T>(arr_dims[2])));
 
     // Load new values into the vector of vectors of vectors, using some indexing tricks
     for(int i = 0; i < arr_dims[0]; i++)
     {
         for(int j = 0; j < arr_dims[1]; j++)
         {
-            cpp_vec[i][j].assign(mem_arr+((i*arr_dims[1]*arr_dims[2]) + (j*arr_dims[2])), mem_arr+((i*arr_dims[1]*ar$
+            cpp_vec[i][j].assign(mem_arr+((i*arr_dims[1]*arr_dims[2]) + (j*arr_dims[2])), mem_arr+((i*arr_dims[1]*arr_dims[2]) + ((j+1)*arr_dims[2])));
         };
     };
 
@@ -262,66 +324,6 @@ namespace h5wrap
   // End HomogenousTypeTable
   };
 
-
-  // Exceptions
-  class HDF5BoundsError: public std::exception
-  {
-    virtual const char* what() const throw()
-    {
-      return "Index of point is out of bounds.  Cannot read in from HDF5 File.";
-    };
-  };
-
-
-  class FileNotHDF5: public std::exception
-  {
-  public:
-    FileNotHDF5(){};
-    ~FileNotHDF5() throw () {};
-
-    FileNotHDF5(std::string fname)
-    {
-      filename = fname;
-    };
-
-    virtual const char* what() const throw()
-    {
-      std::string FNH5str ("Not a valid HDF5 file: ");
-      if (!filename.empty())
-        FNH5str += filename;
-
-      return (const char *) FNH5str.c_str();
-    };
-
-  private:
-    std::string filename;
-  };
-
-
-  class GroupNotFound: public std::exception
-  {
-  public:
-    GroupNotFound:(){};
-    ~GroupNotFound:() throw () {};
-
-    GroupNotFound:(std::string fname, std::string gname)
-    {
-      filename = fname;
-    };
-
-    virtual const char* what() const throw()
-    {
-      std::string msg ("the group ");
-      msg += groupname;
-      msg += " not found in the file ";
-      msg += filename;
-      return (const char *) msg.c_str();
-    };
-
-  private:
-    std::string filename;
-    std::string groupname;
-  };
 
 // End namespace h5wrap
 };
