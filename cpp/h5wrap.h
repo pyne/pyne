@@ -35,7 +35,7 @@ namespace h5wrap
 
     //If still out of range we have a problem
     if (offset[0] < 0 || array_space.getSimpleExtentNpoints() <= offset[0])
-        throw HDF5BoundsError();
+        throw H5::HDF5BoundsError();
 
     array_space.selectHyperslab(H5S_SELECT_SET, count, offset);
 
