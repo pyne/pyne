@@ -38,8 +38,6 @@ class Evaluation(object):
     def read(self):
         # First we need to read MT=1, MT=451 which has a description of the ENDF
         # file and a list of what data exists in the file
-        if self.verbose:
-            print("Reading File 1...")
         self.readHeader()
 
         # Now we can start looping over the list of data - we can skip the first
@@ -66,6 +64,8 @@ class Evaluation(object):
                     self.readResonances()
                     
     def readHeader(self):
+        if self.verbose:
+            print("Reading File 1...")
         self.printInfo(451)
 
         # Find File 1 in evaluation
@@ -73,6 +73,9 @@ class Evaluation(object):
 
         # Now read File1
         file1 = ENDFFile1()
+        self.files.append(file1)
+
+        # Create MT for description
         data = ENDFReaction(451)
         file1.reactions.append(data)
 
@@ -146,8 +149,6 @@ class Evaluation(object):
             NC  = items[4]
             MOD = items[5]
             self.reactionList.append((MF,MT,NC,MOD))
-
-        self.files.append(file1)
 
     def readTotalNu(self):
         self.printInfo(452)
@@ -285,6 +286,129 @@ class Evaluation(object):
             dp.NNF = len(dp.decayConst)
 
     def readResonances(self):
+        if self.verbose:
+            print("Reading File 2...")
+        self.printInfo(151)
+
+        # Find File 2 in evaluation
+        self.seekFile(2)
+
+        # Now read File1
+        file2 = ENDFFile2()
+        self.files.append(file2)
+
+        # Create MT for resonances
+        res = ENDFReaction(151)
+        file2.reactions.append(res)
+        res.resonances = []
+
+        # Determine whether discrete or continuous representation
+        items = self.getHeadRecord()
+        res.NIS = items[4] # Number of isotopes
+        
+        for iso in range(res.NIS):
+            items = self.getContRecord()
+            res.ABN = items[1] # isotopic abundance
+            res.LFW = items[3] # fission widths present?
+            res.NER = items[4] # number of resonance energy ranges
+
+            for erange in range(res.NER):
+                items = self.getContRecord()
+                res.EL   = items[0] # lower limit of energy range
+                res.EH   = items[1] # upper limit of energy range
+                res.LRU  = items[2] # flag for resolved (1)/unresolved (2)
+                res.LRF  = items[3] # resonance representation
+                res.NRO  = items[4] # flag for energy dependence of scattering radius
+                res.NAPS = items[5] # flag controlling use of channel/scattering radius
+
+                # Only scattering radius specified
+                if res.LRU == 0 and res.NRO == 0:
+                    items = self.getContRecord()
+                    res.SPI = items[0]
+                    res.AP = items[1]
+                    res.NLS = items[4]
+                # Resolved resonance region
+                elif res.LRU == 1:
+                    self.readResolved(res)
+                # Unresolved resonance region
+                elif res.LRU == 2:
+                    self.readUnresolved(res)
+
+    def readResolved(self, res):
+        # Single- or Multi-level Breit Wigner
+        if res.LRF == 1 or res.LRF == 2:
+            # Read energy-dependent scattering radius if present
+            if res.NRO > 0:
+                res.AP = self.getTab1Record()
+        
+            # Other scatter radius parameters
+            items = self.getContRecord()
+            res.SPI = items[0] # Spin, I, of the target nucleus
+            if res.NRO == 0:
+                res.AP = items[1]
+            res.NLS = items[4] # Number of l-values
+
+            # Read resonance widths, J values, etc
+            for l in range(res.NLS):
+                headerItems, items = self.getListRecord()
+                QX, L, LRX = headerItems[1:4]
+                energy = items[0::6]
+                spin   = items[1::6]
+                GT     = items[2::6]
+                GN     = items[3::6]
+                GG     = items[4::6]
+                GF     = items[5::6]
+                for i, E in enumerate(energy):
+                    resonance = BreitWigner()
+                    resonance.QX  = QX
+                    resonance.L   = L
+                    resonance.LRX = LRX
+                    resonance.E   = energy[i]
+                    resonance.J   = spin[i]
+                    resonance.GT  = GT[i]
+                    resonance.GN  = GN[i]
+                    resonance.GG  = GG[i]
+                    resonance.GF  = GF[i]
+                    res.resonances.append(resonance)
+
+        # Reich-Moore
+        elif res.LRF == 3:
+            # Read energy-dependent scattering radius if present
+            if res.NRO > 0:
+                res.AP = self.getTab1Record()
+        
+            # Other scatter radius parameters
+            items = self.getContRecord()
+            res.SPI  = items[0] # Spin, I, of the target nucleus
+            if res.NRO == 0:
+                res.AP = items[1]
+            res.LAD  = items[3] # Flag for angular distribution
+            res.NLS  = items[4] # Number of l-values
+            res.NLSC = items[5] # Number of l-values for convergence
+            
+            # Read resonance widths, J values, etc
+            for l in range(res.NLS):
+                headerItems, items = self.getListRecord()
+                APL, L = headerItems[1:3]
+                energy = items[0::6]
+                spin   = items[1::6]
+                GN     = items[2::6]
+                GG     = items[3::6]
+                GFA    = items[4::6]
+                GFB    = items[5::6]
+                for i, E in enumerate(energy):
+                    resonance = ReichMoore()
+                    resonance.APL = APL
+                    resonance.L   = L
+                    resonance.E   = energy[i]
+                    resonance.J   = spin[i]
+                    resonance.GN  = GN[i]
+                    resonance.GG  = GG[i]
+                    resonance.GFA = GFA[i]
+                    resonance.GFB = GFB[i]
+                    res.resonances.append(resonance)
+
+    def readUnresolved(self, res):
         pass
 
     def getTextRecord(self, line=None):
@@ -560,6 +684,8 @@ class ENDFFile2(ENDFFile):
     """
 
     def __init__(self):
+        super(ENDFFile2,self).__init__()
+
         self.fileNumber = 2
 
 class ENDFFile3(ENDFFile):
@@ -635,6 +761,32 @@ class ENDFReaction(ENDFFile):
 
     def __repr__(self):
         return "<ENDF Reaction: MT={0}, {1}>".format(self.MT, MTname[self.MT])
+
+class Resonance(object):
+    def __init__(self):
+        pass
+
+class BreitWigner(Resonance):
+    def __init__(self):
+        pass
+
+    def __repr__(self):
+        return "<Breit-Wigner Resonance: l={0.L} J={0.J} E={0.E}>".format(self)
+
+class ReichMoore(Resonance):
+    def __init__(self):
+        pass
+
+    def __repr__(self):
+        return "<Reich-Moore Resonance: l={0.L} J={0.J} E={0.E}>".format(self)
+
+class AdlerAdler(Resonance):
+    def __init__(self):
+        pass
+
+class RMatrixLimited(Resonance):
+    def __init__(self):
+        pass
 
 
 def convert(string):
