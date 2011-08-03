@@ -13,5 +13,5 @@ cdef class Material:
 
 # Dictionary - Map Converters
 ctypedef cpp_material.Material * matp
-cdef cpp_map[std.string, matp] dict_to_map_str_msp(dict)
+cdef cpp_map[std.string, matp] dict_to_map_str_matp(dict)
 cdef dict map_to_dict_str_matp(cpp_map[std.string, matp])

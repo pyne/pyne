@@ -5,18 +5,19 @@ from libcpp.set cimport set
 cimport std
 
 
-cdef extern from "../../cpp/material.h" namespace pyne:
-    ctypedef map[int, double] comp_map
-    ctypedef map[int, double].iterator comp_iter
+cdef extern from "../../cpp/material.h" namespace "pyne":
+    # Cython does not allow for typdef'ing tamplated types :( 
+    #ctypedef map[int, double] comp_map
+    #ctypedef map[int, double].iterator comp_iter
 
     cdef cppclass Material:
         # Constuctors
         Material()
-        Material(comp_map, float, std.string) except +
+        Material(map[int, double], float, std.string) except +
         Material(char *, float, std.string) except +
 
         # Attributes
-        comp_map comp
+        map[int, double] comp
         double mass
         std.string name
 
