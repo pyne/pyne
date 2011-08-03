@@ -40,7 +40,7 @@ namespace pyne
     void norm_comp ();
 
     void load_from_hdf5 (char *, char *, int = -1);
-    void load_from_hdf5 (std::string, std::string, int = -1);
+    void load_from_hdf5 (std::string, std::string="/material", int = -1);
 
     void load_from_text (char *);
     void load_from_text (std::string);
