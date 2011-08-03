@@ -42,20 +42,20 @@ cdef class Material:
 
     def __cinit__(self, nucvec=None, float mass=-1.0, char * name=''):
         """Material C++ constuctor."""
-        cdef cpp_material.comp_map comp
+        cdef cpp_map[int, double] comp
 
         if isinstance(nucvec, dict):
             # Material from dict
             comp = conv.dict_to_map_int_dbl(nucvec)
-            self.mat_pointer = new cpp_mass_stream.Material(comp, mass, std.string(name))
+            self.mat_pointer = new cpp_material.Material(comp, mass, std.string(name))
 
         elif isinstance(nucvec, basestring):
             # Material from file
-            self.mat_pointer = new cpp_mass_stream.Material(<char *> nucvec, mass, std.string(name))
+            self.mat_pointer = new cpp_material.Material(<char *> nucvec, mass, std.string(name))
 
         elif nucvec is None:
             # Empty mass stream
-            self.mat_pointer = new cpp_mass_stream.Material()
+            self.mat_pointer = new cpp_material.Material()
 
         else:
             # Bad Material 
@@ -187,7 +187,7 @@ cdef class Material:
 
               .. math:: \mbox{nucvec[nuc]} = \mbox{mat.comp[nuc]} \times \mbox{mat.mass}
         """
-        cdef cpp_material.comp_map nucvec = self.mat_pointer.mult_by_mass()
+        cdef cpp_map[int, double] nucvec = self.mat_pointer.mult_by_mass()
         cdef conv._MapProxyIntDouble nucvec_proxy = conv.MapProxyIntDouble()
         nucvec_proxy.init(&nucvec)
         return nucvec_proxy
@@ -264,12 +264,12 @@ cdef class Material:
             * substream (Material): A new mass stream object that only 
               has Uranium members. 
         """
-        py_ms = Material()
-        py_ms.mat_pointer[0] = self.mat_pointer.get_u(std.string(name))
-        return py_ms
+        pymat = Material()
+        pymat.mat_pointer[0] = self.mat_pointer.sub_u(std.string(name))
+        return pymat
         
 
-    def get_pu(self, char * name=""):
+    def sub_pu(self, char * name=""):
         """Convenience method that gets the Plutonium portion of a mass stream.
 
         Args:
@@ -279,12 +279,12 @@ cdef class Material:
             * substream (Material): A new mass stream object that only 
               has Plutonium members. 
         """
-        py_ms = Material()
-        py_ms.mat_pointer[0] = self.mat_pointer.get_pu(std.string(name))
-        return py_ms
+        pymat = Material()
+        pymat.mat_pointer[0] = self.mat_pointer.sub_pu(std.string(name))
+        return pymat
         
 
-    def get_lan(self, char * name=""):
+    def sub_lan(self, char * name=""):
         """Convenience method that gets the Lanthanide portion of a mass stream.
 
         Args:
@@ -294,12 +294,12 @@ cdef class Material:
             * substream (Material): A new mass stream object that only 
               has Lanthanide members. 
         """
-        py_ms = Material()
-        py_ms.mat_pointer[0] = self.mat_pointer.get_lan(std.string(name))
-        return py_ms
+        pymat = Material()
+        pymat.mat_pointer[0] = self.mat_pointer.sub_lan(std.string(name))
+        return pymat
         
 
-    def get_act(self, char * name=""):
+    def sub_act(self, char * name=""):
         """Convenience method that gets the Actinide portion of a mass stream.
 
         Args:
@@ -309,12 +309,12 @@ cdef class Material:
             * substream (Material): A new mass stream object that only 
               has Actinide members. 
         """
-        py_ms = Material()
-        py_ms.mat_pointer[0] = self.mat_pointer.get_act(std.string(name))
-        return py_ms
+        pymat = Material()
+        pymat.mat_pointer[0] = self.mat_pointer.sub_act(std.string(name))
+        return pymat
         
 
-    def get_tru(self, char * name=""):
+    def sub_tru(self, char * name=""):
         """Convenience method that gets the Transuranic portion of a mass stream.
 
         Args:
@@ -324,12 +324,12 @@ cdef class Material:
             * substream (Material): A new mass stream object that only 
               has Transuranic members. 
         """
-        py_ms = Material()
-        py_ms.mat_pointer[0] = self.mat_pointer.get_tru(std.string(name))
-        return py_ms
+        pymat = Material()
+        pymat.mat_pointer[0] = self.mat_pointer.sub_tru(std.string(name))
+        return pymat
         
 
-    def get_ma(self, char * name=""):
+    def sub_ma(self, char * name=""):
         """Convenience method that gets the Minor Actinide portion of a mass stream.
 
         Args:
@@ -339,12 +339,12 @@ cdef class Material:
             * substream (Material): A new mass stream object that only 
               has Minor Actinide members. 
         """
-        py_ms = Material()
-        py_ms.mat_pointer[0] = self.mat_pointer.get_ma(std.string(name))
-        return py_ms
+        pymat = Material()
+        pymat.mat_pointer[0] = self.mat_pointer.sub_ma(std.string(name))
+        return pymat
         
 
-    def get_fp(self, char * name=""):
+    def sub_fp(self, char * name=""):
         """Convenience method that gets the Fission Product portion of a mass stream.
 
         Args:
@@ -354,9 +354,9 @@ cdef class Material:
             * substream (Material): A new mass stream object that only 
               has Fission Product members. 
         """
-        py_ms = Material()
-        py_ms.mat_pointer[0] = self.mat_pointer.get_fp(std.string(name))
-        return py_ms
+        pymat = Material()
+        pymat.mat_pointer[0] = self.mat_pointer.sub_fp(std.string(name))
+        return pymat
         
 
     #
@@ -366,15 +366,15 @@ cdef class Material:
     # Addition
 
     def __add_float__(Material x, double y):
-        py_ms = Material()
-        py_ms.mat_pointer[0] = x.mat_pointer[0] + y
-        return py_ms
+        pymat = Material()
+        pymat.mat_pointer[0] = x.mat_pointer[0] + y
+        return pymat
         
 
     def __add_mass_stream__(Material x, Material y):
-        py_ms = Material()
-        py_ms.mat_pointer[0] = x.mat_pointer[0] + y.mat_pointer[0]
-        return py_ms
+        pymat = Material()
+        pymat.mat_pointer[0] = x.mat_pointer[0] + y.mat_pointer[0]
+        return pymat
 
 
     def __add__(x, y): 
@@ -395,9 +395,9 @@ cdef class Material:
     # Multiplication
 
     def __mul_float__(Material x, double y):
-        py_ms = Material()
-        py_ms.mat_pointer[0] = x.mat_pointer[0] * y
-        return py_ms
+        pymat = Material()
+        pymat.mat_pointer[0] = x.mat_pointer[0] * y
+        return pymat
 
 
     def __mul__(x, y):
@@ -416,9 +416,9 @@ cdef class Material:
     # Division
 
     def __div_float__(Material self, double y):
-        py_ms = Material()
-        py_ms.mat_pointer[0] = self.mat_pointer[0] / y
-        return py_ms
+        pymat = Material()
+        pymat.mat_pointer[0] = self.mat_pointer[0] / y
+        return pymat
 
 
     def __div__(Material self, y):
@@ -440,34 +440,34 @@ cdef class Material:
 
 
 
-##############################
-### Mass Stream Converters ###
-##############################
+###########################
+### Material Converters ###
+###########################
 
 # <string, Material *>
 
-cdef cpp_map[std.string, msp] dict_to_map_str_msp(dict pydict):
-    cdef Material pyms 
-    cdef cpp_mass_stream.Material * cpp_msp
-    cdef cpp_map[std.string, msp] cppmap = cpp_map[std.string, msp]()
+cdef cpp_map[std.string, matp] dict_to_map_str_matp(dict pydict):
+    cdef Material pymat 
+    cdef cpp_material.Material * cpp_matp
+    cdef cpp_map[std.string, matp] cppmap = cpp_map[std.string, matp]()
 
     for key, value in pydict.items():
-        pyms = value
-        cpp_msp = pyms.mat_pointer
-        cppmap[std.string(key)] = cpp_msp
+        pymat = value
+        cpp_matp = pymat.mat_pointer
+        cppmap[std.string(key)] = cpp_matp
 
     return cppmap
 
 
-cdef dict map_to_dict_str_msp(cpp_map[std.string, msp] cppmap):
+cdef dict map_to_dict_str_matp(cpp_map[std.string, matp] cppmap):
     pydict = {}
-    cdef Material pyms 
-    cdef cpp_map[std.string, msp].iterator mapiter = cppmap.begin()
+    cdef Material pymat 
+    cdef cpp_map[std.string, matp].iterator mapiter = cppmap.begin()
 
     while mapiter != cppmap.end():
-        pyms = Material()
-        pyms.mat_pointer[0] = deref(deref(mapiter).second)
-        pydict[deref(mapiter).first.c_str()] = pyms
+        pymat = Material()
+        pymat.mat_pointer[0] = deref(deref(mapiter).second)
+        pydict[deref(mapiter).first.c_str()] = pymat
         inc(mapiter)
 
     return pydict
