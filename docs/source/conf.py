@@ -47,7 +47,7 @@ copyright = u'2011, The PyNE Development Team'
 #
 # The short X.Y version.
 sys.path.insert(0, '../../python/')
-from setup_data import INFO
+from setup import INFO
 
 version = INFO['version']
 # The full version, including alpha/beta/rc tags.
