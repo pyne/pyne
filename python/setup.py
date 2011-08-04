@@ -11,7 +11,9 @@ from Cython.Distutils import build_ext
 
 import numpy as np
 
-from setup_data import INFO
+INFO = {
+    'version': '0.1',
+    }
 
 
 ##########################################
@@ -93,19 +95,20 @@ pack_data = {'pyne': []}
 ###################
 ### Call setup! ###
 ###################
-setup(name="pyne",
-    version = INFO['version'],
-    description = 'Python for Nuclear Engineering',
-    author = 'PyNE Development Team',
-    author_email = 'scopatz@gmail.com',
-    url = 'https://github.com/pyne',
-    packages = ['pyne'],
-    package_dir = pack_dir,
-    cmdclass = {'build_ext': build_ext}, 
-    ext_modules=[
-        Extension(**stlconv_ext), 
-        Extension(**nucname_ext), 
-        Extension(**material_ext), 
-        ],
-    )
+if __name__ == "__main__":
+    setup(name="pyne",
+        version = INFO['version'],
+        description = 'Python for Nuclear Engineering',
+        author = 'PyNE Development Team',
+        author_email = 'scopatz@gmail.com',
+        url = 'https://github.com/pyne',
+        packages = ['pyne'],
+        package_dir = pack_dir,
+        cmdclass = {'build_ext': build_ext}, 
+        ext_modules=[
+            Extension(**stlconv_ext), 
+            Extension(**nucname_ext), 
+            Extension(**material_ext), 
+            ],
+        )
 
