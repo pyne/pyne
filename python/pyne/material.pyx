@@ -49,15 +49,16 @@ cdef class Material:
     def __cinit__(self, nucvec=None, float mass=-1.0, char * name=''):
         """Material C++ constuctor."""
         cdef cpp_map[int, double] comp
+        cdef double cmass = mass
 
         if isinstance(nucvec, dict):
             # Material from dict
             comp = conv.dict_to_map_int_dbl(nucvec)
-            self.mat_pointer = new cpp_material.Material(comp, mass, std.string(name))
+            self.mat_pointer = new cpp_material.Material(comp, cmass, std.string(name))
 
         elif isinstance(nucvec, basestring):
             # Material from file
-            self.mat_pointer = new cpp_material.Material(<char *> nucvec, mass, std.string(name))
+            self.mat_pointer = new cpp_material.Material(<char *> nucvec, cmass, std.string(name))
 
         elif nucvec is None:
             # Empty mass stream
@@ -65,7 +66,7 @@ cdef class Material:
 
         else:
             # Bad Material 
-            raise TypeError("The mass stream nuctopic vector must be a dict, str, or None.")
+            raise TypeError("The mass stream nucvec must be a dict, str, or None.")
 
 
     def __dealloc__(self):
@@ -80,7 +81,7 @@ cdef class Material:
     property comp:
         def __get__(self):
             cdef conv._MapProxyIntDouble comp_proxy = conv.MapProxyIntDouble()
-            comp_proxy.init(&self.mat_pointer.comp)
+            comp_proxy.map_ptr = new cpp_map[int, double](self.mat_pointer.comp)
             return comp_proxy
 
         def __set__(self, dict comp):
