@@ -169,6 +169,9 @@ pyne::Material::Material(pyne::comp_map cm, double m, std::string s)
 pyne::Material::Material(char * fchar, double m, std::string s)
 {
   // Initializes the mass stream based on an isotopic composition file with a (char *) name.
+  mass = m;
+  name = s;
+
   // Check that the file is there
   std::string filename (fchar);
   if (!pyne::file_exists(filename))
@@ -180,15 +183,15 @@ pyne::Material::Material(char * fchar, double m, std::string s)
     load_from_hdf5(filename);
   else
     load_from_text(filename);
-
-  mass = m;
-  name = s;
 };
 
 
 pyne::Material::Material(std::string filename, double m, std::string s)
 {
   // Initializes the mass stream based on an isotopic composition file with a string name.
+  mass = m;
+  name = s;
+
   // Check that the file is there
   if (!pyne::file_exists(filename))
     throw pyne::FileNotFound(filename);
@@ -199,9 +202,6 @@ pyne::Material::Material(std::string filename, double m, std::string s)
     load_from_hdf5(filename);
   else
     load_from_text(filename);
-
-  mass = m;
-  name = s;
 };
 
 
