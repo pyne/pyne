@@ -24,8 +24,8 @@ INFO = {
 #dat_dir = os.path.abspath(os.path.join('..', 'data'))
 
 pyt_dir = os.path.join('pyne')
-cpp_dir = os.path.join('..', 'cpp')
-dat_dir = os.path.join('..', 'data')
+cpp_dir = os.path.join('cpp')
+dat_dir = os.path.join('data')
 
 
 # Get numpy include dir
