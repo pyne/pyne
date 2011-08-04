@@ -1,19 +1,95 @@
-// h5wrap.cpp
+// Provides some HDF5 helper functionality in its own namespace
 
-#include "h5wrap.h"
+#if !defined(_H5_WRAP_)
+#define _H5_WRAP_
+
+#include <iostream>
+#include <fstream>
+#include <string>
+#include <map>
+#include <vector>
+#include <set>
+#include <stdio.h>
+#include <stdlib.h>
+#include <exception>
+
+#include "H5Cpp.h"
+
+#include "pyne.h"
 
 
-/* 
- *  Index into an hdf5 array.
- */
-
-template <typename T>
-T h5wrap::get_array_index(H5::DataSet * ds, int n, H5::DataType dt)
+namespace h5wrap
 {
+  // Exceptions
+  class HDF5BoundsError: public std::exception
+  {
+    virtual const char* what() const throw()
+    {
+      return "Index of point is out of bounds.  Cannot read in from HDF5 File.";
+    };
+  };
+
+
+  class FileNotHDF5: public std::exception
+  {
+  public:
+    FileNotHDF5(){};
+    ~FileNotHDF5() throw () {};
+
+    FileNotHDF5(std::string fname)
+    {
+      filename = fname;
+    };
+
+    virtual const char* what() const throw()
+    {
+      std::string FNH5str ("Not a valid HDF5 file: ");
+      if (!filename.empty())
+        FNH5str += filename;
+
+      return (const char *) FNH5str.c_str();
+    };
+
+  private:
+    std::string filename;
+  };
+
+
+  class GroupNotFound: public std::exception
+  {
+  public:
+    GroupNotFound(){};
+    ~GroupNotFound() throw () {};
+
+    GroupNotFound(std::string fname, std::string gname)
+    {
+      filename = fname;
+    };
+
+    virtual const char* what() const throw()
+    {
+      std::string msg ("the group ");
+      msg += groupname;
+      msg += " not found in the file ";
+      msg += filename;
+      return (const char *) msg.c_str();
+    };
+
+  private:
+    std::string filename;
+    std::string groupname;
+  };
+
+
+
+  // Read-in Functions
+  template <typename T>
+  T get_array_index(H5::DataSet * ds, int n, H5::DataType dt = H5::PredType::NATIVE_DOUBLE)
+  {
     H5::DataSpace array_space = (*ds).getSpace();
 
-    hsize_t count  [1] = {1};    
-    hsize_t offset [1] = {n};   
+    hsize_t count  [1] = {1};
+    hsize_t offset [1] = {n};
 
     //Handle negative indices
     if (n < 0)
@@ -21,7 +97,7 @@ T h5wrap::get_array_index(H5::DataSet * ds, int n, H5::DataType dt)
 
     //If still out of range we have a problem
     if (offset[0] < 0 || array_space.getSimpleExtentNpoints() <= offset[0])
-        throw h5wrap::HDF5BoundsError();
+        throw HDF5BoundsError();
 
     array_space.selectHyperslab(H5S_SELECT_SET, count, offset);
 
@@ -29,7 +105,7 @@ T h5wrap::get_array_index(H5::DataSet * ds, int n, H5::DataType dt)
     hsize_t dimsm[1] = {1};
     H5::DataSpace memspace(1, dimsm);
 
-    hsize_t count_out  [1] = {1};    
+    hsize_t count_out  [1] = {1};
     hsize_t offset_out [1] = {0};
 
     memspace.selectHyperslab(H5S_SELECT_SET, count_out, offset_out);
@@ -37,22 +113,14 @@ T h5wrap::get_array_index(H5::DataSet * ds, int n, H5::DataType dt)
     T data_out [1];
     (*ds).read(data_out, dt, memspace, array_space);
 
-    return data_out[0];    
-};
-
-template int h5wrap::get_array_index(H5::DataSet *, int, H5::DataType);
-template double h5wrap::get_array_index(H5::DataSet *, int, H5::DataType);
+    return data_out[0];
+  };
 
 
-
-
-/* 
- *  Convert hdf5 array to C++ set.
- */
-
-template <typename T>
-std::set<T> h5wrap::h5_array_to_cpp_set(H5::H5File * h5_file, std::string data_path, H5::DataType dt)
-{
+  // Conversion functions
+  template <typename T>
+  std::set<T> h5_array_to_cpp_set(H5::H5File * h5_file, std::string data_path, H5::DataType dt = H5::PredType::NATIVE_DOUBLE)
+  {
     // Init
     std::set<T> cpp_set = std::set<T>();
     hsize_t arr_len[1];
@@ -72,29 +140,15 @@ std::set<T> h5wrap::h5_array_to_cpp_set(H5::H5File * h5_file, std::string data_p
     // Load new values into the set
     cpp_set.insert(&mem_arr[0], &mem_arr[arr_len[0]]);
 
-    // Close out data set
     h5_arr.close();
-
-    // Return set
     return cpp_set;
-};
-
-
-template std::set<int> h5wrap::h5_array_to_cpp_set(H5::H5File *, std::string, H5::DataType);
-template std::set<double> h5wrap::h5_array_to_cpp_set(H5::H5File *, std::string, H5::DataType);
+  };
 
 
 
-
-
-
-/* 
- *  Convert hdf5 array to C++ vector.
- */
-
-template <typename T>
-std::vector<T> h5wrap::h5_array_to_cpp_vector_1d(H5::H5File * h5_file, std::string data_path, H5::DataType dt)
-{
+  template <typename T>
+  std::vector<T> h5_array_to_cpp_vector_1d(H5::H5File * h5_file, std::string data_path, H5::DataType dt = H5::PredType::NATIVE_DOUBLE)
+  {
     // Init
     hsize_t arr_dims [1];
     H5::DataSet h5_arr = (*h5_file).openDataSet(data_path);
@@ -115,26 +169,14 @@ std::vector<T> h5wrap::h5_array_to_cpp_vector_1d(H5::H5File * h5_file, std::stri
     // Load new values into the vector
     cpp_vec.assign(mem_arr, mem_arr+arr_dims[0]);
 
-    // Close out data set
     h5_arr.close();
-
-    // Return vector of vectors
     return cpp_vec;
-};
-
-template std::vector<int> h5wrap::h5_array_to_cpp_vector_1d(H5::H5File *, std::string, H5::DataType);
-template std::vector<double> h5wrap::h5_array_to_cpp_vector_1d(H5::H5File *, std::string, H5::DataType);
+  };
 
 
-
-
-/* 
- *  Convert hdf5 array to C++ vector of vectors.
- */
-
-template <typename T>
-std::vector< std::vector<T> > h5wrap::h5_array_to_cpp_vector_2d(H5::H5File * h5_file, std::string data_path, H5::DataType dt)
-{
+  template <typename T>
+  std::vector< std::vector<T> > h5_array_to_cpp_vector_2d(H5::H5File * h5_file, std::string data_path, H5::DataType dt = H5::PredType::NATIVE_DOUBLE)
+  {
     // Init
     hsize_t arr_dims [2];
     H5::DataSet h5_arr = (*h5_file).openDataSet(data_path);
@@ -160,26 +202,14 @@ std::vector< std::vector<T> > h5wrap::h5_array_to_cpp_vector_2d(H5::H5File * h5_
         cpp_vec[i].assign(mem_arr+(i*arr_dims[1]), mem_arr+((i+1)*arr_dims[1]));
     };
 
-    // Close out data set
     h5_arr.close();
-
-    // Return vector of vectors
     return cpp_vec;
-};
-
-template std::vector< std::vector<int> > h5wrap::h5_array_to_cpp_vector_2d(H5::H5File *, std::string, H5::DataType);
-template std::vector< std::vector<double> > h5wrap::h5_array_to_cpp_vector_2d(H5::H5File *, std::string, H5::DataType);
+  };
 
 
-
-
-/* 
- *  Convert hdf5 array to C++ vector of vectors of vectors.
- */
-
-template <typename T>
-std::vector< std::vector< std::vector<T> > > h5wrap::h5_array_to_cpp_vector_3d(H5::H5File * h5_file, std::string data_path, H5::DataType dt)
-{
+  template <typename T>
+  std::vector< std::vector< std::vector<T> > > h5_array_to_cpp_vector_3d(H5::H5File * h5_file, std::string data_path, H5::DataType dt = H5::PredType::NATIVE_DOUBLE)
+  {
     // Init
     hsize_t arr_dims [3];
     H5::DataSet h5_arr = (*h5_file).openDataSet(data_path);
@@ -208,67 +238,48 @@ std::vector< std::vector< std::vector<T> > > h5wrap::h5_array_to_cpp_vector_3d(H
         };
     };
 
-    // Close out data set
     h5_arr.close();
-
-    // Return vector of vectors
     return cpp_vec;
-};
-
-template std::vector< std::vector< std::vector<int> > > h5wrap::h5_array_to_cpp_vector_3d(H5::H5File * h5_file, std::string data_path, H5::DataType dt);
-template std::vector< std::vector< std::vector<double> > > h5wrap::h5_array_to_cpp_vector_3d(H5::H5File * h5_file, std::string data_path, H5::DataType dt);
+  }
 
 
 
-
-
-
-/*
- * Classes
- */
-
-
-
-/*
- * HomogenousTypeTable
- */
-
-template <typename T>
-h5wrap::HomogenousTypeTable<T>::HomogenousTypeTable()
-{
-};
-
-
-template <typename T>
-h5wrap::HomogenousTypeTable<T>::HomogenousTypeTable(H5::H5File * h5_file, std::string data_path, H5::DataType dt)
-{
-    // Init 
-    H5::DataSet h5_set = (*h5_file).openDataSet(data_path);
-    H5::DataSpace h5_space = h5_set.getSpace();
-    H5::CompType h5_type = H5::CompType(h5_set);
-
-    // set path
-    path = data_path;
-
-    // set shape
-    shape[0] = h5_space.getSimpleExtentNpoints();
-    shape[1] = h5_type.getNmembers();
-
-    // set cols
-    std::string * cols_buf = new std::string [shape[1]];
-    for(int n = 0; n < shape[1]; n++)
+  // Classes
+  template <typename T>
+  class HomogenousTypeTable
+  {
+  public:
+    HomogenousTypeTable(){};
+    ~HomogenousTypeTable(){};
+    HomogenousTypeTable(H5::H5File * h5_file, std::string data_path, H5::DataType dt = H5::PredType::NATIVE_DOUBLE)
     {
+      // Init 
+      H5::DataSet h5_set = (*h5_file).openDataSet(data_path);
+      H5::DataSpace h5_space = h5_set.getSpace();
+      H5::CompType h5_type = H5::CompType(h5_set);
+
+      // set path
+      path = data_path;
+
+      // set shape
+      shape[0] = h5_space.getSimpleExtentNpoints();
+      shape[1] = h5_type.getNmembers();
+
+      // set cols
+      std::string * cols_buf = new std::string [shape[1]];
+      for(int n = 0; n < shape[1]; n++)
+      {
         cols_buf[n] = h5_type.getMemberName(n);
-    };
-    cols.assign(cols_buf, cols_buf+shape[1]);
+      };
+      cols.assign(cols_buf, cols_buf+shape[1]);
 
-    // set data
-    H5::CompType col_type;
-    T * col_buf;
+      // set data
+      H5::CompType col_type;
+      T * col_buf;
 
-    data.clear();
-    for(int n = 0; n < shape[1]; n++)
-    {
+      data.clear();
+      for(int n = 0; n < shape[1]; n++)
+      {
         // Make a compound data type of just this column
         col_type = H5::CompType(sizeof(T));
         col_type.insertMember(cols[n], 0, dt);
@@ -281,33 +292,43 @@ h5wrap::HomogenousTypeTable<T>::HomogenousTypeTable(H5::H5File * h5_file, std::s
 
         // save this column as a vector in out data map
         data[cols[n]] = std::vector<T>(col_buf, col_buf+shape[0]);
+      };
     };
 
-};
+    // Metadata attribute
+    std::string path;
+    int shape [2];
+    std::vector<std::string> cols;
+    std::map<std::string, std::vector<T> > data;
 
-
-template <typename T>
-std::vector<T> h5wrap::HomogenousTypeTable<T>::operator[](std::string col_name)
-{
-    return data[col_name];
-};
-
-
-template <typename T>
-std::map<std::string, T> h5wrap::HomogenousTypeTable<T>::operator[](int m)
-{
-    // init row
-    std::map<std::string, T> row = std::map<std::string, T>(); 
-
-    // fill row values
-    for(int n = 0; n < shape[1]; n++)
+    //
+    // operator overloads
+    //
+    // index by column name (string)
+    std::vector<T> operator[] (std::string col_name)
     {
-        row[cols[n]] = data[cols[n]][m];
+      return data[col_name];
     };
 
-    // return row map
-    return row;
+    // index by int
+    std::map<std::string, T> operator[] (int m)
+    {
+      std::map<std::string, T> row = std::map<std::string, T>();
+
+      for(int n = 0; n < shape[1]; n++)
+        row[cols[n]] = data[cols[n]][m];
+
+      return row;
+    };
+
+  // End HomogenousTypeTable
+  };
+
+
+// End namespace h5wrap
 };
 
-template class h5wrap::HomogenousTypeTable<int>;
-template class h5wrap::HomogenousTypeTable<double>;
+
+
+#endif
+
