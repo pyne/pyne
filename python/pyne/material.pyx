@@ -5,6 +5,8 @@ from libcpp.set cimport set as cpp_set
 #from cython.operator cimport reference as ref
 from cython.operator cimport dereference as deref
 from cython.operator cimport preincrement as inc
+from libc.stdlib cimport malloc, free
+
 
 # local imports 
 cimport std
@@ -15,6 +17,8 @@ import pyne.stlconverters as conv
 cimport pyne.nucname as nucname
 import pyne.nucname as nucname
 import os
+
+
 
 cdef class Material:
     """Material composed of nuclides.
@@ -189,9 +193,8 @@ cdef class Material:
 
               .. math:: \mbox{nucvec[nuc]} = \mbox{mat.comp[nuc]} \times \mbox{mat.mass}
         """
-        cdef cpp_map[int, double] nucvec = self.mat_pointer.mult_by_mass()
         cdef conv._MapProxyIntDouble nucvec_proxy = conv.MapProxyIntDouble()
-        nucvec_proxy.init(&nucvec)
+        nucvec_proxy.map_ptr = new cpp_map[int, double](self.mat_pointer.mult_by_mass())
         return nucvec_proxy
 
 
