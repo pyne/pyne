@@ -5,7 +5,7 @@ from libcpp.set cimport set
 cimport std
 
 
-cdef extern from "../../cpp/material.h" namespace "pyne":
+cdef extern from "../cpp/material.h" namespace "pyne":
     # Cython does not allow for typdef'ing tamplated types :( 
     #ctypedef map[int, double] comp_map
     #ctypedef map[int, double].iterator comp_iter

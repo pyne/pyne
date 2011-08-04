@@ -9,5 +9,5 @@ build/
 *.bak
 
 # Ignore Cython'd files
-python/pyne/*.c
-python/pyne/*.cpp
+pyne/*.c
+pyne/*.cpp
