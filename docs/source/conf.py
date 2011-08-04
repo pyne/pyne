@@ -18,6 +18,7 @@ import sys, os
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 sys.path.insert(0, os.path.abspath('../sphinxext'))
 
+
 # -- General configuration -----------------------------------------------------
 
 # Add any Sphinx extension module names here, as strings. They can be extensions
@@ -46,7 +47,7 @@ copyright = u'2011, The PyNE Development Team'
 # built documents.
 #
 # The short X.Y version.
-sys.path.insert(0, '../../python/')
+sys.path.insert(0, '../../')
 from setup import INFO
 
 version = INFO['version']
@@ -173,6 +174,7 @@ html_static_path = ['_static']
 htmlhelp_basename = 'pynedoc'
 
 
+
 # -- Options for LaTeX output --------------------------------------------------
 
 # The paper size ('letter' or 'a4').
@@ -208,3 +210,4 @@ latex_documents = [
 #Autodocumentation Flags
 autodoc_member_order = "groupwise"
 autoclass_content = "both"
+
