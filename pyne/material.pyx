@@ -46,6 +46,7 @@ cdef class Material:
     name : str, optional
         A string label for the material.  Helpful for large numbers of 
         streams. Default ''.
+
     """
 
     def __cinit__(self, nucvec=None, float mass=-1.0, char * name=''):
@@ -280,7 +281,7 @@ cdef class Material:
         """Convenience method that gets the Uranium portion of a mass stream.
 
         Parameters
-        ---------
+        ----------
         name : str, optional 
             The name of the submaterial.
 
