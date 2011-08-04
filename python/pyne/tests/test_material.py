@@ -17,20 +17,19 @@ import tables as tb
 #        f.write('U235  0.05\nU238  0.95')
 
 
-"""\
 class TestMaterialConstructor(TestCase):
     "Tests that the Material constructors works."
 
-    @classmethod
-    def setup_class(cls):
-        "Make temporary file for constructors to read in."
-        with open('mat.txt', 'w') as f:
-            f.write('U235  0.05\nU238  0.95')
+    #@classmethod
+    #def setup_class(cls):
+    #    "Make temporary file for constructors to read in."
+    #    with open('mat.txt', 'w') as f:
+    #        f.write('U235  0.05\nU238  0.95')
 
-    @classmethod
-    def teardown_class(cls):
-        "Remove temporary file so that we don't clutter up the filesystem."
-        os.remove('mat.txt')
+    #@classmethod
+    #def teardown_class(cls):
+    #    "Remove temporary file so that we don't clutter up the filesystem."
+    #    os.remove('mat.txt')
 
     def test_mat1(self):
         mat = Material("mat.txt")
@@ -38,6 +37,7 @@ class TestMaterialConstructor(TestCase):
         assert_equal(mat.mass, 1.0)
         assert_equal(mat.name, '')
 
+"""\
     def test_mat2(self):
         mat = Material("mat.txt", 42)
         assert_equal(mat.comp, {922350: 0.05, 922380: 0.95})
@@ -109,10 +109,10 @@ class TestMaterialConstructor(TestCase):
 class TestMaterialMethods(TestCase):
     "Tests that the Material member functions work."
 
-    #def test_normalize(self):
-    #    mat = Material({922350: 0.05, 922380: 0.95}, 15)
-    #    mat.normalize()
-    #    assert_equal(mat.mass, 1.0)
+    def test_normalize(self):
+        mat = Material({922350: 0.05, 922380: 0.95}, 15)
+        mat.normalize()
+        assert_equal(mat.mass, 1.0)
 
 
     def test_mult_by_mass(self):
@@ -120,7 +120,6 @@ class TestMaterialMethods(TestCase):
         nucvec = mat.mult_by_mass()
         assert_equal(nucvec, {922350: 0.75, 922380: 14.25})
 
-"""\
 
     def test_atomic_weight(self):
         mat_empty = Material({})
@@ -133,6 +132,7 @@ class TestMaterialMethods(TestCase):
         assert_almost_equal(mat_mixed.atomic_weight()/236.5, 1.0, 4)
 
 
+"""\
 
 class TestMassSubStreamMethods(TestCase):
     "Tests that the Material sub-stream getter member functions work."
