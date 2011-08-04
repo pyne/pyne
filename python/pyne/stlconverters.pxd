@@ -178,4 +178,5 @@ cdef class MapIterIntDouble(object):
 cdef class _MapProxyIntDouble:
     cdef cpp_map[int, double] * map_ptr
     cdef void init(_MapProxyIntDouble, cpp_map[int, double] *)
+    cdef void init_with_data(_MapProxyIntDouble, cpp_map[int, double])
 
