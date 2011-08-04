@@ -33,6 +33,7 @@ Contents
     :maxdepth: 2
 
     nucname
+    material
     dev_team
 
 =============
