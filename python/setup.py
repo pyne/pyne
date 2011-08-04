@@ -29,50 +29,54 @@ dat_dir = os.path.join('..', 'data')
 # Get numpy include dir
 numpy_include = np.get_include()
 
+# HDF5 stuff
+posix_hdf5_libs = ["z", "m", "hdf5", "hdf5_hl", "hdf5_cpp", "hdf5_hl_cpp",]
+nt_hdf5_libs = ["/DEFAULTLIB:szip.lib", "/DEFAULTLIB:zlib1.lib", "/DEFAULTLIB:hdf5dll.lib",
+                "/DEFAULTLIB:hdf5_hldll.lib", "/DEFAULTLIB:hdf5_cppdll.lib", "/DEFAULTLIB:hdf5_hl_cppdll.lib", ]
+nt_hdf5_extra_compile_args = ["/EHsc"]
+nt_hdf5_macros = [("_WIN32", None), ("_HDF5USEDLL_", None), ("HDF5CPP_USEDLL", None), ]
+
+
+def cpp_ext(name, sources, use_hdf5=False):
+    """He;lper function for setting up extension dictionary."""
+    ext = {'name': name}
+
+    ext['sources'] = [os.path.join(cpp_dir, s) for s in sources if s.endswith('cpp')] + \
+                     [s for s in sources if not s.endswith('cpp')]
+
+    ext['include_dirs'] = [pyt_dir, cpp_dir, numpy_include]
+    ext['language'] = "c++"
+
+    if os.name == 'posix':
+        #ext["extra_compile_args"] = ["-Wno-strict-prototypes"]
+        #ext["undef_macros"] = ["NDEBUG"]
+        if use_hdf5:
+            ext["libraries"] = posix_hdf5_libs
+    elif os.name == 'nt':
+        ext["extra_compile_args"] = ["/EHsc"]
+        ext["define_macros"] = [("_WIN32", None)]
+
+        if use_hdf5:
+            ext["libraries"] = nt_hdf5_libs
+            ext["extra_compile_args"] += nt_hdf5_extra_compile_args
+            ext["define_macros"] += nt_hdf5_macros
+
+    return ext
 
 
 #
-# For stlconverters
+# For extensions
 # 
-stlconv_ext = {'name': "pyne.stlconverters"}
+stlconv_ext = cpp_ext("pyne.stlconverters", [os.path.join('pyne', 'stlconverters.pyx')])
 
-stlconv_ext['sources'] = [os.path.join('pyne', 'stlconverters.pyx')]
-stlconv_ext['include_dirs'] = [pyt_dir, cpp_dir, numpy_include]
-stlconv_ext['language'] = "c++"
+nucname_ext = cpp_ext("pyne.nucname", ['pyne.cpp',
+                                       'nucname.cpp',
+                                       os.path.join('pyne', 'nucname.pyx'),])
 
-if os.name == 'posix':
-#    stlconv_ext["extra_compile_args"] = ["-Wno-strict-prototypes"]
-#    stlconv_ext["undef_macros"] = ["NDEBUG"]
-    pass
-elif os.name == 'nt':
-    stlconv_ext["extra_compile_args"] = ["/EHsc"]
-    stlconv_ext["define_macros"] = [("_WIN32", None)]
-
-
-#
-# For nucname
-# 
-nucname_ext = {'name': 'pyne.nucname'}
-
-nucname_ext['sources'] = [
-    'pyne.cpp',
-    'nucname.cpp',
-    ]
-nucname_ext['sources'] = [os.path.join(cpp_dir, s) for s in nucname_ext['sources']] + \
-                         [os.path.join('pyne', 'nucname.pyx')]
-
-nucname_ext['include_dirs'] = [pyt_dir, cpp_dir, numpy_include]
-nucname_ext['language'] = "c++"
-
-
-if os.name == 'posix':
-    #isoname_ext["extra_compile_args"] = ["-Wno-strict-prototypes"]
-    #nucname_ext["undef_macros"] = ["NDEBUG"]
-    pass
-elif os.name == 'nt':
-    nucname_ext["extra_compile_args"] = ["/EHsc"]
-    nucname_ext["define_macros"] = [("_WIN32", None)]
-
+material_ext = cpp_ext("pyne.material", ['pyne.cpp',
+                                         'nucname.cpp',
+                                         'material.cpp',
+                                         os.path.join('pyne', 'material.pyx'),], True)
 
 
 
@@ -101,6 +105,7 @@ setup(name="pyne",
     ext_modules=[
         Extension(**stlconv_ext), 
         Extension(**nucname_ext), 
+        Extension(**material_ext), 
         ],
     )
 
