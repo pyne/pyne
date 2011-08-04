@@ -1,4 +1,4 @@
-"""Python wrapper for nucname library."""
+"""Python wrapper for material library."""
 # Cython imports
 from libcpp.map cimport map as cpp_map
 from libcpp.set cimport set as cpp_set
@@ -23,27 +23,29 @@ import os
 cdef class Material:
     """Material composed of nuclides.
 
-    Args:
-        * comp (dict or str): This is the input nuclide component dictionary.
-          This dictionary need not be normalized; Material initialization will
-          automatically renormalize the stream.  Thus the comp simply is a dictionary
-          of relative weights.  The keys of comp must be integers representing
-          nuclides in zzaaam-form.  The values are floats for each nuclide's weight 
-          fraction.
+    Parameters
+    ----------
+    comp : dict or str 
+        This is the input nuclide component dictionary.
+        This dictionary need not be normalized; Material initialization will
+        automatically renormalize the stream.  Thus the comp simply is a dictionary
+        of relative weights.  The keys of comp must be integers representing
+        nuclides in zzaaam-form.  The values are floats for each nuclide's weight 
+        fraction.
 
-          If a string is provided instead of a dictionary, then Material will
-          read in the comp vector from a file at the string's location.  This  
-          either plaintext or hdf5 files.
+        If a string is provided instead of a dictionary, then Material will
+        read in the comp vector from a file at the string's location.  This  
+        either plaintext or hdf5 files.
 
-          If no comp is provided, an empty Material object is constructed.
-
-    Keyword Args:
-        * mass (float): This is the mass of the new stream. If the mass provided
-          is negative (default -1.0) then the mass of the new stream is calculated from 
-          the sum of compdict's components before normalization.  If the mass here
-          is positive or zero, then this mass overrides the calculated one.
-        * name (str):  A string label for the material.  Helpful for large numbers of 
-          streams. Default ''.
+        If no comp is provided, an empty Material object is constructed.
+    mass : float, optional
+        This is the mass of the new stream. If the mass provided
+        is negative (default -1.0) then the mass of the new stream is calculated from 
+        the sum of compdict's components before normalization.  If the mass here
+        is positive or zero, then this mass overrides the calculated one.
+    name : str, optional
+        A string label for the material.  Helpful for large numbers of 
+        streams. Default ''.
     """
 
     def __cinit__(self, nucvec=None, float mass=-1.0, char * name=''):
@@ -108,7 +110,7 @@ cdef class Material:
     #
 
     def norm_comp(self):
-        """normalizes the composition, preserving the mass of the nuclide vector as mass."""
+        """Normalizes the composition, preserving the mass of the nuclide vector as mass."""
         self.mat_pointer.norm_comp()
 
 
@@ -131,22 +133,25 @@ cdef class Material:
         fuel cycle pass.  The sum of all of the nuclide arrays should sum to one, like 
         Material.comp. 
 
-        Args:
-            * filename  (str): Path to HDF5 file that contains the data to read in.    
-            * groupname (str): Path to HDF5 group that represents the data. 
-              In the above example, groupname = "/Material".    
+        Parameters
+        ----------
+        filename : str
+            Path to HDF5 file that contains the data to read in.    
+        groupname : str 
+            Path to HDF5 group that represents the data. 
+            In the above example, groupname = "/Material".    
+        row : int, optional 
+            The index of the arrays from which to read the data.  This 
+            ranges from 0 to N-1.  Defaults to the last element of the array.
+            Negative indexing is allowed (row[-N] = row[0]).
 
-        Keyword Args:
-            * row (int): The index of the arrays from which to read the data.  This 
-              ranges from 0 to N-1.  Defaults to the last element of the array.
-              Negative indexing is allowed (row[-N] = row[0]).
+        Usage
+        -----
+        This function loads data into a pre-existing :class:`Material`.  
+        Initialization is therefore a two-step process::
 
-        Usage:
-            This function loads data into a pre-existing :class:`Material`.  
-            Initialization is therefore a two-step process::
-
-                mat = Material()
-                mat.load_from_hdf5("afile.h5", "/foo/bar/ms", -3)
+            mat = Material()
+            mat.load_from_hdf5("afile.h5", "/foo/bar/ms", -3)
         """
         self.mat_pointer.load_from_hdf5(filename, groupname, row)
 
@@ -164,12 +169,15 @@ cdef class Material:
         Data in this file must be whitespace separated.  Any valid nuclide naming
         scheme may be used for any nuctope.
 
-        Args:
-            * filename (str): Path to HDF5 file that contains the data to read in.    
+        Parameters
+        ----------
+        filename : str 
+            Path to HDF5 file that contains the data to read in.    
 
-        Usage:
-            This function loads data into a pre-existing Material.  
-            Initialization is therefore a two-step process::
+        Usage
+        -----
+        This function loads data into a pre-existing Material.  
+        Initialization is therefore a two-step process::
 
             mat = Material()
             mat.load_from_text("natu.h5")
@@ -188,10 +196,12 @@ cdef class Material:
     def mult_by_mass(self):
         """This function multiplies comp by mass and returns the resultant nuctopic vector.
 
-        Returns:
-            * nucvec(dict): For a Material mat, 
+        Returns
+        -------
+        nucvec : dict
+            For a Material mat, 
 
-              .. math:: \mbox{nucvec[nuc]} = \mbox{mat.comp[nuc]} \times \mbox{mat.mass}
+            .. math:: \mbox{nucvec[nuc]} = \mbox{mat.comp[nuc]} \times \mbox{mat.mass}
         """
         cdef conv._MapProxyIntDouble nucvec_proxy = conv.MapProxyIntDouble()
         nucvec_proxy.map_ptr = new cpp_map[int, double](self.mat_pointer.mult_by_mass())
@@ -202,13 +212,15 @@ cdef class Material:
         """This method returns the atomic weight of the comp of this material.  Note that this is 
         only a rough estimate since this function is not yet coupled with measured atomic weights.
 
-        Returns:
-            * atomic_weight (float): Atomic weight in [amu]."""
+        Returns
+        -------
+        atomic_weight : float 
+            Atomic weight in [amu]."""
         return self.mat_pointer.atomic_weight()
 
 
     #
-    # Substream Methods
+    # submaterial Methods
     #
 
     def sub_mat(self, nuc_sequence, char * name=""):
@@ -219,17 +231,22 @@ cdef class Material:
         The input here is seen as a suggestion and so no error is raised if a nuclide 
         is asked for via nuc_sequence that is not present in the original material.
 
-        Args:
-            * nuc_sequence (sequence): Elements and nuctopes to be taken from current stream.
-              Members of this list must be integers.  For example, [92, 942390]
-              would take all uranium atoms and Pu-239.  
-            * name (str): The name of the substream.
+        Parameters
+        ----------
+        nuc_sequence : sequence
+            Elements and nuctopes to be taken from current stream.
+            Members of this list must be integers.  For example, [92, 942390]
+            would take all uranium atoms and Pu-239.  
+        name : str, optional
+            The name of the submaterial.
 
-        Returns:
-            * substream (Material): A new mass stream object that only 
-              has the members given in nuc_sequence.  The mass of the substream
-              is calculated based on the weight fraction composition and mass
-              of the original mass stream.
+        Returns
+        -------
+        submaterial : Material
+            A new mass stream object that only 
+            has the members given in nuc_sequence.  The mass of the submaterial
+            is calculated based on the weight fraction composition and mass
+            of the original mass stream.
         """
         # Make an nuctopic set 
         cdef int nuc_zz
@@ -262,12 +279,15 @@ cdef class Material:
     def sub_u(self, char * name=""):
         """Convenience method that gets the Uranium portion of a mass stream.
 
-        Args:
-            * name (str): The name of the substream.
+        Parameters
+        ---------
+        name : str, optional 
+            The name of the submaterial.
 
-        Returns:
-            * substream (Material): A new mass stream object that only 
-              has Uranium members. 
+        Returns
+        -------
+        submaterial : Material 
+            A new mass stream object that only has Uranium members. 
         """
         pymat = Material()
         pymat.mat_pointer[0] = self.mat_pointer.sub_u(std.string(name))
@@ -277,12 +297,15 @@ cdef class Material:
     def sub_pu(self, char * name=""):
         """Convenience method that gets the Plutonium portion of a mass stream.
 
-        Args:
-            * name (str): The name of the substream.
+        Parameters
+        ----------
+        name : str, optional 
+            The name of the submaterial.
 
-        Returns:
-            * substream (Material): A new mass stream object that only 
-              has Plutonium members. 
+        Returns
+        -------
+        submaterial : Material 
+            A new mass stream object that only has Plutonium members. 
         """
         pymat = Material()
         pymat.mat_pointer[0] = self.mat_pointer.sub_pu(std.string(name))
@@ -292,12 +315,15 @@ cdef class Material:
     def sub_lan(self, char * name=""):
         """Convenience method that gets the Lanthanide portion of a mass stream.
 
-        Args:
-            * name (str): The name of the substream.
+        Parameters
+        ----------
+        name : str, optional 
+            The name of the submaterial.
 
-        Returns:
-            * substream (Material): A new mass stream object that only 
-              has Lanthanide members. 
+        Returns
+        -------
+        submaterial : Material
+            A new mass stream object that only has Lanthanide members. 
         """
         pymat = Material()
         pymat.mat_pointer[0] = self.mat_pointer.sub_lan(std.string(name))
@@ -307,12 +333,15 @@ cdef class Material:
     def sub_act(self, char * name=""):
         """Convenience method that gets the Actinide portion of a mass stream.
 
-        Args:
-            * name (str): The name of the substream.
+        Parameters
+        ----------
+        name : str, optional
+            The name of the submaterial.
 
-        Returns:
-            * substream (Material): A new mass stream object that only 
-              has Actinide members. 
+        Returns
+        -------
+        submaterial : Material
+            A new mass stream object that only has Actinide members. 
         """
         pymat = Material()
         pymat.mat_pointer[0] = self.mat_pointer.sub_act(std.string(name))
@@ -322,12 +351,15 @@ cdef class Material:
     def sub_tru(self, char * name=""):
         """Convenience method that gets the Transuranic portion of a mass stream.
 
-        Args:
-            * name (str): The name of the substream.
+        Parameters
+        ----------
+        name : str, optional 
+            The name of the submaterial.
 
-        Returns:
-            * substream (Material): A new mass stream object that only 
-              has Transuranic members. 
+        Returns
+        -------
+        submaterial : Material 
+            A new mass stream object that only has Transuranic members. 
         """
         pymat = Material()
         pymat.mat_pointer[0] = self.mat_pointer.sub_tru(std.string(name))
@@ -337,12 +369,15 @@ cdef class Material:
     def sub_ma(self, char * name=""):
         """Convenience method that gets the Minor Actinide portion of a mass stream.
 
-        Args:
-            * name (str): The name of the substream.
+        Parameters
+        ----------
+        name : str, optional 
+            The name of the submaterial.
 
-        Returns:
-            * substream (Material): A new mass stream object that only 
-              has Minor Actinide members. 
+        Returns
+        -------
+        submaterial : Material 
+            A new mass stream object that only has Minor Actinide members. 
         """
         pymat = Material()
         pymat.mat_pointer[0] = self.mat_pointer.sub_ma(std.string(name))
@@ -352,12 +387,15 @@ cdef class Material:
     def sub_fp(self, char * name=""):
         """Convenience method that gets the Fission Product portion of a mass stream.
 
-        Args:
-            * name (str): The name of the substream.
+        Parameters
+        ----------
+        name : str, optional 
+            The name of the submaterial.
 
-        Returns:
-            * substream (Material): A new mass stream object that only 
-              has Fission Product members. 
+        Returns
+        -------
+        submaterial : Material 
+            A new mass stream object that only has Fission Product members. 
         """
         pymat = Material()
         pymat.mat_pointer[0] = self.mat_pointer.sub_fp(std.string(name))
