@@ -49,16 +49,15 @@ cdef class Material:
     def __cinit__(self, nucvec=None, float mass=-1.0, char * name=''):
         """Material C++ constuctor."""
         cdef cpp_map[int, double] comp
-        cdef double cmass = mass
 
         if isinstance(nucvec, dict):
             # Material from dict
             comp = conv.dict_to_map_int_dbl(nucvec)
-            self.mat_pointer = new cpp_material.Material(comp, cmass, std.string(name))
+            self.mat_pointer = new cpp_material.Material(comp, mass, std.string(name))
 
         elif isinstance(nucvec, basestring):
             # Material from file
-            self.mat_pointer = new cpp_material.Material(<char *> nucvec, cmass, std.string(name))
+            self.mat_pointer = new cpp_material.Material(<char *> nucvec, mass, std.string(name))
 
         elif nucvec is None:
             # Empty mass stream
