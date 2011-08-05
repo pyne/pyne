@@ -31,13 +31,10 @@ cdef class Material:
         automatically renormalize the stream.  Thus the comp simply is a dictionary
         of relative weights.  The keys of comp must be integers representing
         nuclides in zzaaam-form.  The values are floats for each nuclide's weight 
-        fraction.
-
-        If a string is provided instead of a dictionary, then Material will
+        fraction. If a string is provided instead of a dictionary, then Material will
         read in the comp vector from a file at the string's location.  This  
-        either plaintext or hdf5 files.
-
-        If no comp is provided, an empty Material object is constructed.
+        either plaintext or hdf5 files. If no comp is provided, an empty Material 
+        object is constructed.
     mass : float, optional
         This is the mass of the new stream. If the mass provided
         is negative (default -1.0) then the mass of the new stream is calculated from 
@@ -116,7 +113,22 @@ cdef class Material:
 
 
     def load_from_hdf5(self, char * filename, char * groupname, int row=-1):
-        """A Material object may be initialized from an HDF5 file.
+        """Initialize a Material object from an HDF5 file.
+
+        Parameters
+        ----------
+        filename : str
+            Path to HDF5 file that contains the data to read in.    
+        groupname : str 
+            Path to HDF5 group that represents the data. 
+            In the above example, groupname = "/Material".    
+        row : int, optional 
+            The index of the arrays from which to read the data.  This 
+            ranges from 0 to N-1.  Defaults to the last element of the array.
+            Negative indexing is allowed (row[-N] = row[0]).
+
+        Notes
+        -----
         The HDF5 representation of a Material is a group that holds several 
         extendable array datasets.  One array is entitled "Mass" while the other datasets
         are nuclide names in LLAAAM form ("U235", "NP237", *etc*).  For example::
@@ -134,21 +146,9 @@ cdef class Material:
         fuel cycle pass.  The sum of all of the nuclide arrays should sum to one, like 
         Material.comp. 
 
-        Parameters
-        ----------
-        filename : str
-            Path to HDF5 file that contains the data to read in.    
-        groupname : str 
-            Path to HDF5 group that represents the data. 
-            In the above example, groupname = "/Material".    
-        row : int, optional 
-            The index of the arrays from which to read the data.  This 
-            ranges from 0 to N-1.  Defaults to the last element of the array.
-            Negative indexing is allowed (row[-N] = row[0]).
-
-        Usage
-        -----
-        This function loads data into a pre-existing :class:`Material`.  
+        Examples
+        --------
+        This method loads data into a pre-existing :class:`Material`.  
         Initialization is therefore a two-step process::
 
             mat = Material()
@@ -158,7 +158,16 @@ cdef class Material:
 
 
     def load_from_text(self, char * filename):
-        """A Material object may be initialized from a simple text file.
+        """Initialize a Material object from a simple text file.
+
+        Parameters
+        ----------
+        filename : str 
+            Path to HDF5 file that contains the data to read in.    
+
+
+        Notes
+        -----
         The text representation of Materials are nuclide identifiers in the 
         first column and mass or weight values in the second column.  For example, 
         for natural uranium::
@@ -170,39 +179,34 @@ cdef class Material:
         Data in this file must be whitespace separated.  Any valid nuclide naming
         scheme may be used for any nuctope.
 
-        Parameters
-        ----------
-        filename : str 
-            Path to HDF5 file that contains the data to read in.    
-
-        Usage
-        -----
-        This function loads data into a pre-existing Material.  
+        Examples:
+        ---------
+        This method loads data into a pre-existing Material.  
         Initialization is therefore a two-step process::
 
             mat = Material()
             mat.load_from_text("natu.h5")
 
-        This function is most often called implicitly by the Material constructor.
+        This method is most often called implicitly by the Material constructor.
         """
         self.mat_pointer.load_from_text(filename)
 
 
 
     def normalize(self):
-        """This convenience function normalizes the mass stream by setting its mass = 1.0."""
+        """This convenience method normalizes the mass stream by setting its mass = 1.0."""
         self.mat_pointer.normalize()
 
 
     def mult_by_mass(self):
-        """This function multiplies comp by mass and returns the resultant nuctopic vector.
+        """This multiplies multiplies comp by mass and returns the resultant nuctopic vector.
 
         Returns
         -------
         nucvec : dict
             For a Material mat, 
 
-            .. math:: \mbox{nucvec[nuc]} = \mbox{mat.comp[nuc]} \times \mbox{mat.mass}
+            .. math:: \\mbox{nucvec[nuc]} = \\mbox{mat.comp[nuc]} \\times \\mbox{mat.mass}
         """
         cdef conv._MapProxyIntDouble nucvec_proxy = conv.MapProxyIntDouble()
         nucvec_proxy.map_ptr = new cpp_map[int, double](self.mat_pointer.mult_by_mass())
@@ -226,11 +230,7 @@ cdef class Material:
 
     def sub_mat(self, nuc_sequence, char * name=""):
         """Grabs a subset of the material and returns a new material comprised of only
-        the specified nuclides.  The elements or nuclides included in the new material
-        are determined by nuc_sequence. 
-
-        The input here is seen as a suggestion and so no error is raised if a nuclide 
-        is asked for via nuc_sequence that is not present in the original material.
+        the specified nuclides.  
 
         Parameters
         ----------
@@ -248,6 +248,11 @@ cdef class Material:
             has the members given in nuc_sequence.  The mass of the submaterial
             is calculated based on the weight fraction composition and mass
             of the original mass stream.
+
+        Notes
+        -----
+        The input here is seen as a suggestion and so no error is raised if a nuclide 
+        is asked for via nuc_sequence that is not present in the original material.
         """
         # Make an nuctopic set 
         cdef int nuc_zz
