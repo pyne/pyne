@@ -91,6 +91,15 @@ pack_dir = {
     
 pack_data = {'pyne': []}
 
+# Compiler directives
+compiler_directives = {'embedsignature': False}
+ext_modules=[
+            Extension(**stlconv_ext), 
+            Extension(**nucname_ext), 
+            Extension(**material_ext), 
+            ]
+for e in ext_modules:
+    e.pyrex_directives = compiler_directives
 
 ###################
 ### Call setup! ###
@@ -105,10 +114,6 @@ if __name__ == "__main__":
         packages = ['pyne'],
         package_dir = pack_dir,
         cmdclass = {'build_ext': build_ext}, 
-        ext_modules=[
-            Extension(**stlconv_ext), 
-            Extension(**nucname_ext), 
-            Extension(**material_ext), 
-            ],
+        ext_modules=ext_modules, 
         )
 
