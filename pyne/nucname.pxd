@@ -23,3 +23,5 @@ import pyne.stlconverters as conv
 # Elemental string sets
 #
 
+
+cdef cpp_set[int] zzaaam_set(object nuc_sequence)

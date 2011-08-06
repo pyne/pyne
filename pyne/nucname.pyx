@@ -256,3 +256,17 @@ def nuc_weight(nuc):
     return weight
 
 
+
+#
+# C++ Helper Functions
+#
+
+cdef cpp_set[int] zzaaam_set(object nuc_sequence):
+    cdef int nuc_zz
+    cdef cpp_set[int] nuc_set = cpp_set[int]()
+
+    for nuc in nuc_sequence:
+        nuc_zz = zzaaam(nuc)
+        nuc_set.insert(nuc_zz)
+
+    return nuc_set

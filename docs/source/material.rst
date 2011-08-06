@@ -12,6 +12,8 @@ All functionality may be found in the ``material`` package::
 
  from pyne.material import Material
 
+Materials are the primary container for radionuclides. They map nuclides to mass weights.
+
     
 **************
 Material Class

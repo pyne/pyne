@@ -157,15 +157,14 @@ nucname::zz_group nucname::LL_to_zz_group(nucname::LL_group eg)
 
 // Lanthanides
 nucname::LL_t nucname::LAN_array[15] = {"LA", "CE", "PR", "ND", "PM", "SM", "EU", \
-                               "GD", "TB", "DY", "HO", "ER", "TM", "YB", "LU"};
+                                        "GD", "TB", "DY", "HO", "ER", "TM", "YB", "LU"};
 nucname::LL_group nucname::LAN (nucname::LAN_array, nucname::LAN_array+15);
 nucname::zz_group nucname::lan = nucname::LL_to_zz_group(nucname::LAN);
 
 // Actinides
-nucname::LL_t nucname::ACT_array[23] = {"AC", "TH", "PA", "U", "NP", "PU", "AM", "CM", \
-                               "BK", "CF", "ES", "FM", "MD", "NO", "LR", "RF", \
-                               "DB", "SG", "BH", "HS", "MT", "DS", "RG"};
-nucname::LL_group nucname::ACT (nucname::ACT_array, nucname::ACT_array+23);
+nucname::LL_t nucname::ACT_array[15] = {"AC", "TH", "PA", "U",  "NP", "PU", "AM", "CM", \
+                                        "BK", "CF", "ES", "FM", "MD", "NO", "LR"};
+nucname::LL_group nucname::ACT (nucname::ACT_array, nucname::ACT_array+15);
 nucname::zz_group nucname::act = nucname::LL_to_zz_group(nucname::ACT);
 
 // Transuarnics
