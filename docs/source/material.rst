@@ -1,7 +1,7 @@
-********************************************
-Material Class -- :mod:`pyne.material`
-********************************************
-This moudule contains the Material class which is used to represent nuclear
+=================================
+Materials -- :mod:`pyne.material`
+=================================
+This moudule contains the Material class, which is used to represent nuclear
 materials throughout PyNE.
 
 .. _material:
@@ -12,7 +12,11 @@ All functionality may be found in the ``material`` package::
 
  from pyne.material import Material
 
-.. autoclass:: Material(comp, [mass=-1, name=''])
+    
+**************
+Material Class
+**************
+.. autoclass:: Material(comp, mass=-1, name='')
 
     .. automethod:: atomic_weight()
     .. automethod:: norm_comp()
@@ -21,6 +25,7 @@ All functionality may be found in the ``material`` package::
     .. automethod:: load_from_hdf5(filename, groupname, row=-1)
     .. automethod:: load_from_text(filename)
     .. automethod:: sub_mat(nuc_sequence, name="")
+    .. automethod:: sub_range(lower=0, upper=10000000, name="")
     .. automethod:: sub_u(name="")
     .. automethod:: sub_pu(name="")
     .. automethod:: sub_fp(name="")
@@ -28,3 +33,4 @@ All functionality may be found in the ``material`` package::
     .. automethod:: sub_act(name="")
     .. automethod:: sub_tru(name="")
     .. automethod:: sub_ma(name="")
+
