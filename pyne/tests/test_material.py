@@ -140,7 +140,7 @@ class TestMassSubMaterialMethods(TestCase):
 
     def test_sub_mat_int_1(self):
         mat = Material(nucvec, -1, "Old Material")
-        mat1 = mat.sub_mat([92, 80160])
+        mat1 = mat.sub_mat([922350, 922380, 80160])
         assert_almost_equal(mat1.comp[80160],  0.3333333333333)
         assert_almost_equal(mat1.comp[922350], 0.3333333333333)
         assert_almost_equal(mat1.comp[922380], 0.3333333333333)
@@ -149,7 +149,7 @@ class TestMassSubMaterialMethods(TestCase):
 
     def test_sub_mat_int_2(self):
         mat = Material(nucvec)
-        mat1 = mat.sub_mat([92, 80160], "New Material")
+        mat1 = mat.sub_mat([922350, 922380, 80160], "New Material")
         assert_almost_equal(mat1.comp[80160],  0.3333333333333)
         assert_almost_equal(mat1.comp[922350], 0.3333333333333)
         assert_almost_equal(mat1.comp[922380], 0.3333333333333)
@@ -158,7 +158,7 @@ class TestMassSubMaterialMethods(TestCase):
 
     def test_sub_mat_attr_1(self):
         mat = Material(nucvec, -1, "Old Material")
-        mat1 = mat.sub_mat(["U", "80160", "H1"])
+        mat1 = mat.sub_mat(["U235", "U238", "80160", "H1"])
         assert_almost_equal(mat1.comp[10010],  0.25)
         assert_almost_equal(mat1.comp[80160],  0.25)
         assert_almost_equal(mat1.comp[922350], 0.25)
@@ -168,7 +168,7 @@ class TestMassSubMaterialMethods(TestCase):
 
     def test_sub_mat_attr_2(self):
         mat = Material(nucvec)
-        mat1 = mat.sub_mat(["U", "80160", "H1"], "New Material")
+        mat1 = mat.sub_mat(["U235", "U238", "80160", "H1"], "New Material")
         assert_almost_equal(mat1.comp[10010],  0.25)
         assert_almost_equal(mat1.comp[80160],  0.25)
         assert_almost_equal(mat1.comp[922350], 0.25)
@@ -373,7 +373,7 @@ def test_getitem_int():
 def test_getitem_str():
     mat = Material(nucvec)
     assert_equal(mat['U235'], 1.0) 
-    assert_raises(TypeError, lambda: mat['word']) 
+    assert_raises(RuntimeError, lambda: mat['word']) 
 
     mat = Material(leu)
     assert_equal(mat['U235'], 0.04) 
@@ -462,7 +462,9 @@ def test_setitem_str():
 
 def test_setitem_slice_int():
     mat = Material(nucvec)
+    mat_id = id(mat)
     mat[920000:930000] = 42
+    assert_equal(mat_id, id(mat))
     assert_equal(mat.mass, 91.0)
     assert_equal(mat[10010], 1.0)
     assert_equal(mat[922350], 42.0)

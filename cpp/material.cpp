@@ -266,6 +266,10 @@ double pyne::Material::atomic_weight()
 
 
 
+
+
+
+
 /*--- Stub-Stream Computation ---*/
 
 pyne::Material pyne::Material::sub_mat (std::set<int> nucset,  std::string n)
@@ -279,10 +283,6 @@ pyne::Material pyne::Material::sub_mat (std::set<int> nucset,  std::string n)
   {
     if ( 0 < nucset.count(i->first) )
       cm[i->first] = (i->second) * mass;
-    else if ( 0 < nucset.count((i->first)/10000) )
-      cm[i->first] = (i->second) * mass;
-    else
-      continue;
   };
 
   return pyne::Material(cm, -1, n);
@@ -297,26 +297,7 @@ pyne::Material pyne::Material::sub_mat (std::set<std::string> nucset,  std::stri
   std::set<int> iset;
   for (std::set<std::string>::iterator i = nucset.begin(); i != nucset.end(); i++)
   {
-    // Is of form LL?
-    if (0 < nucname::LLzz.count(*i) )
-      iset.insert( nucname::LLzz[*i] );
-    else
-    {
-      try
-      {
-        if (0 < nucname::zzLL.count(pyne::to_int(*i)))
-          // Is of form zz?
-          iset.insert(pyne::to_int(*i));
-        else
-          // Is of a valid full nuclide form?
-          iset.insert(nucname::zzaaam(*i));
-      }
-      catch (std::exception& e1)
-      {
-          // Is of a valid full nuclide form?
-          iset.insert(nucname::zzaaam(*i));
-      };
-    };
+    iset.insert(nucname::zzaaam(*i));
   };
 
   return sub_mat(iset, n);
@@ -324,62 +305,80 @@ pyne::Material pyne::Material::sub_mat (std::set<std::string> nucset,  std::stri
 
 
 
-pyne::Material pyne::Material::sub_u (std::string n)
+pyne::Material pyne::Material::set_mat (std::set<int> nucset, double value, std::string n)
 {
-  // Returns a material of Uranium that is a submaterial of this one.
-  std::set<int> nucset;
-  nucset.insert(92);
-  return sub_mat(nucset, n);
+  // Sets a sub-material from this mat based on a set of integers.
+  // Integers can either be of zzaaam form -OR- they can be a z-numer (is 8 for O, 93 for Np, etc).
+  // n is the name of the new material.
+
+  pyne::comp_map cm;
+  
+  // Add non-set components
+  for (pyne::comp_iter i = comp.begin(); i != comp.end(); i++)
+  {
+    if ( 0 == nucset.count(i->first) )
+      cm[i->first] = (i->second) * mass;
+  };
+
+  // Add set component
+  for (std::set<int>::iterator nuc = nucset.begin(); nuc != nucset.end(); nuc++)
+    cm[*nuc] = value;
+  
+  return pyne::Material(cm, -1, n);
 };
 
 
 
-pyne::Material pyne::Material::sub_pu (std::string n)
+pyne::Material pyne::Material::set_mat (std::set<std::string> nucset, double value, std::string n)
 {
-  // Returns a material of Plutonium that is a sub-material of this one.
-  std::set<int> nucset;
-  nucset.insert(94);
-  return sub_mat(nucset, n);
+  // Sets a substream from this stream based on a set of strings.
+  // Strings can be of any form.
+  std::set<int> iset;
+  for (std::set<std::string>::iterator i = nucset.begin(); i != nucset.end(); i++)
+  {
+    iset.insert(nucname::zzaaam(*i));
+  };
+
+  return set_mat(iset, value, n);
 };
 
 
 
-pyne::Material pyne::Material::sub_lan (std::string n)
+
+pyne::Material pyne::Material::del_mat (std::set<int> nucset,  std::string n)
 {
-  // Returns a material of Lanthanides that is a sub-material of this one.
-  return sub_mat(nucname::lan, n);
+  // Removes a sub-material from this mat based on a set of integers.
+  // Integers can either be of zzaaam form -OR- they can be a z-numer (is 8 for O, 93 for Np, etc).
+  // n is the name of the new material.
+
+  pyne::comp_map cm;
+  for (pyne::comp_iter i = comp.begin(); i != comp.end(); i++)
+  {
+    // Only add to new comp if not in nucset
+    if ( 0 == nucset.count(i->first) )
+      cm[i->first] = (i->second) * mass;
+  };
+
+  return pyne::Material(cm, -1, n);
 };
 
 
 
-pyne::Material pyne::Material::sub_act (std::string n)
+pyne::Material pyne::Material::del_mat (std::set<std::string> nucset,  std::string n)
 {
-  //Returns a material of Actindes that is a sub-material of this one.
-  return sub_mat(nucname::act, n);
-};
+  // Removes a substream from this stream based on a set of strings.
+  // Strings can be of any form.
+  std::set<int> iset;
+  for (std::set<std::string>::iterator i = nucset.begin(); i != nucset.end(); i++)
+  {
+    iset.insert(nucname::zzaaam(*i));
+  };
 
-
-pyne::Material pyne::Material::sub_tru (std::string n)
-{
-  // Returns a material of Transuranics that is a sub-material of this one.
-  return sub_mat(nucname::tru, n);
-};
-
-
-
-pyne::Material pyne::Material::sub_ma (std::string n)
-{
-  // Returns a material of Minor Actinides that is a sub-material of this one.
-  return sub_mat(nucname::ma, n);
+  return del_mat(iset, n);
 };
 
 
 
-pyne::Material pyne::Material::sub_fp (std::string n)
-{
-  // Returns a material of Fission Products that is a sub-material of this one.
-  return sub_mat (nucname::fp, n);
-};
 
 
 
@@ -398,12 +397,120 @@ pyne::Material pyne::Material::sub_range(int lower, int upper, std::string n)
   {
     if ((lower <= (i->first)) && ((i->first) < upper))
       cm[i->first] = (i->second) * mass;
-    else
-      continue;
   };
 
   return pyne::Material(cm, -1, n);
 };
+
+
+
+pyne::Material pyne::Material::set_range(int lower, int upper, double value, std::string n)
+{
+  // Sets a sub-material from this mat based on a range of integers.
+  if (upper < lower)
+  {
+    int temp_upper = upper;
+    upper = lower;
+    lower = temp_upper;
+  };
+
+  pyne::comp_map cm;
+  for (pyne::comp_iter i = comp.begin(); i != comp.end(); i++)
+  {
+    if ((lower <= (i->first)) && ((i->first) < upper))
+      cm[i->first] = value;
+    else
+      cm[i->first] = (i->second) * mass;
+  };
+
+  return pyne::Material(cm, -1, n);
+};
+
+
+
+pyne::Material pyne::Material::del_range(int lower, int upper, std::string n)
+{
+  // Removes a sub-material from this mat based on a range of integers.
+  if (upper < lower)
+  {
+    int temp_upper = upper;
+    upper = lower;
+    lower = temp_upper;
+  };
+
+  pyne::comp_map cm;
+  for (pyne::comp_iter i = comp.begin(); i != comp.end(); i++)
+  {
+    if ((upper <= (i->first)) || ((i->first) < lower))
+      cm[i->first] = (i->second) * mass;
+  };
+
+  return pyne::Material(cm, -1, n);
+};
+
+
+
+
+
+
+
+
+
+
+pyne::Material pyne::Material::sub_u (std::string n)
+{
+  // Returns a material of Uranium that is a submaterial of this one.
+  return sub_range(920000, 930000, n);
+};
+
+
+
+pyne::Material pyne::Material::sub_pu (std::string n)
+{
+  // Returns a material of Plutonium that is a sub-material of this one.
+  return sub_range(940000, 950000, n);
+};
+
+
+
+pyne::Material pyne::Material::sub_lan (std::string n)
+{
+  // Returns a material of Lanthanides that is a sub-material of this one.
+  return sub_range(570000, 720000, n);
+};
+
+
+
+pyne::Material pyne::Material::sub_act (std::string n)
+{
+  //Returns a material of Actindes that is a sub-material of this one.
+  return sub_range(890000, 1040000, n);
+};
+
+
+pyne::Material pyne::Material::sub_tru (std::string n)
+{
+  // Returns a material of Transuranics that is a sub-material of this one.
+  return sub_range(930000, 10000000, n);
+};
+
+
+
+pyne::Material pyne::Material::sub_ma (std::string n)
+{
+  // Returns a material of Minor Actinides that is a sub-material of this one.
+  return sub_range(930000, 1040000).del_range(940000, 950000, n);
+};
+
+
+
+pyne::Material pyne::Material::sub_fp (std::string n)
+{
+  // Returns a material of Fission Products that is a sub-material of this one.
+  return sub_range(0, 890000, n);
+};
+
+
 
 
 
