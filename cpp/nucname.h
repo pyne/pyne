@@ -47,7 +47,7 @@ namespace nucname
   extern LL_group LAN;
   extern zz_group lan;
 
-  extern LL_t ACT_array[23];
+  extern LL_t ACT_array[15];
   extern LL_group ACT;
   extern zz_group act;
 
