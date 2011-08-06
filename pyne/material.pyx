@@ -539,17 +539,36 @@ cdef class _Material:
 
 
     def __getitem__(self, key):
+        cdef int key_zz
         cdef double key_mass
 
-        # Get single key
+        # Get single integer-key
         if isinstance(key, int):
             if 0 < self.mat_pointer.comp.count(key):
                 key_mass = self.mat_pointer.comp[key] * self.mat_pointer.mass
                 return key_mass
             else:
-                raise KeyError("key {0} not found".format(key))
+                raise KeyError("key {0} not found".format(repr(key)))
+
+        # Get slice-based sub-material    
+        elif isinstance(key, slice):
+            lower = key.start
+            if lower is None:
+                lower = 0
+
+            upper = key.stop
+            if upper is None:
+                upper = 10000000
+
+            return self.sub_range(lower, upper)
+
+        # Fail-Yurt
         else:
-            raise TypeError("key is of unsupported type {0}".format(type(key)))
+            try:
+                key_zz = nucname.zzaaam(key)
+            except:
+                raise TypeError("key {0} is of unsupported type {1}".format(repr(key), type(key)))
+            return self[key_zz]
 
 
     def __setitem__(self, key, double value):
