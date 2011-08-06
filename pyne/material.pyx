@@ -22,6 +22,20 @@ import pyne.nucname as nucname
 import os
 
 
+cdef cpp_map[int, double] dict_to_comp(dict nucvec):
+    """Converts a dictionary with arbitraily-typed keys to component map."""
+    cdef int key_zz
+    cdef cpp_map[int, double] comp = cpp_map[int, double]()
+
+    for key, value in nucvec.items():
+        if isinstance(key, int):
+            comp[key] = value
+        else:
+            key_zz = nucname.zzaaam(key)
+            comp[key_zz] = value            
+
+    return comp
+
 
 cdef class _Material:
 
@@ -31,7 +45,7 @@ cdef class _Material:
 
         if isinstance(nucvec, dict):
             # Material from dict
-            comp = conv.dict_to_map_int_dbl(nucvec)
+            comp = dict_to_comp(nucvec)
             self.mat_pointer = new cpp_material.Material(comp, mass, std.string(name))
 
         elif isinstance(nucvec, basestring):
@@ -62,16 +76,16 @@ cdef class _Material:
             comp_proxy.map_ptr = new cpp_map[int, double](self.mat_pointer.comp)
             return comp_proxy
 
-        def __set__(self, dict comp):
-            self.mat_pointer.comp = conv.dict_to_map_int_dbl(comp)
+        def __set__(self, dict value):
+            self.mat_pointer.comp = dict_to_comp(value)
 
 
     property mass:
         def __get__(self):
             return self.mat_pointer.mass
 
-        def __set__(self, double mass):
-            self.mat_pointer.mass = mass
+        def __set__(self, double value):
+            self.mat_pointer.mass = value
 
 
     property name:
@@ -79,8 +93,8 @@ cdef class _Material:
             cdef std.string mat_name = self.mat_pointer.name
             return mat_name.c_str()
 
-        def __set__(self, char * name):
-            self.mat_pointer.name = std.string(name)
+        def __set__(self, char * value):
+            self.mat_pointer.name = std.string(value)
 
     #
     # Class Methods

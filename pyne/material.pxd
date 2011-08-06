@@ -6,6 +6,8 @@ from cython import pointer
 cimport std
 cimport cpp_material
 
+cdef cpp_map[int, double] dict_to_comp(dict)
+
 cdef class _Material:
     cdef cpp_material.Material * mat_pointer
 
