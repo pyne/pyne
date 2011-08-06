@@ -296,6 +296,19 @@ class TestMassSubMaterialMethods(TestCase):
         assert_equal(mat1.mass, 3.0)
         assert_equal(mat1.name, 'FP Material')
 
+
+    def test_sub_range(self):
+        mat = Material(nucvec)
+        mat1 = mat.sub_range(920000, 930000)
+        assert_equal(mat1.mass, 2.0)
+        for nuc in mat1:
+            assert_true(920000 <= nuc < 930000)
+
+        mat1 = mat.sub_range(upper="U238")
+        assert_equal(mat1.mass, 4.0)
+        for nuc in mat1:
+            assert_true(nuc < 922380)
+
         
 class TestMaterialOperatorOverloading(TestCase):
     "Tests that the Material operator overloads work."

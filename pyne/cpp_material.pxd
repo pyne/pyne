@@ -39,6 +39,7 @@ cdef extern from "../cpp/material.h" namespace "pyne":
         Material sub_tru(std.string) except +
         Material sub_ma(std.string) except +
         Material sub_fp(std.string) except +
+        Material sub_range(int, int, std.string) except +
 
         # Operator Overloads
         Material operator+(double) except +
