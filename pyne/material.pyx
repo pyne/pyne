@@ -574,15 +574,56 @@ cdef class _Material:
     def __setitem__(self, key, double value):
         cdef matp new_mat 
         cdef conv._MapProxyIntDouble mbm 
+        cdef int key_zz, lower, upper, temp_upper, n, N
+        cdef cpp_map[int, double].iterator mbmiter, mbmend
 
-        # Get single key
+        # Set single integer-key
         if isinstance(key, int):
             mbm = self.mult_by_mass()
             mbm.map_ptr[0][key] = value
             new_mat = new cpp_material.Material(mbm.map_ptr[0], -1.0, self.mat_pointer.name)
             self.mat_pointer = new_mat
+
+        # Set slice-based sub-material    
+        elif isinstance(key, slice):
+            if key.start is None:
+                lower = 0
+            else:
+                lower = nucname.zzaaam(key.start)
+
+            if key.stop is None:
+                upper = 10000000
+            else:
+                upper = nucname.zzaaam(key.stop)
+
+            # Make sure the indices are sorted
+            if (upper < lower):
+                temp_upper = upper
+                upper = lower
+                lower = temp_upper
+
+            # Prep loop
+            mbm = self.mult_by_mass()
+            mbmiter = mbm.map_ptr[0].begin()
+            mbmend = mbm.map_ptr[0].end()
+
+            while mbmiter != mbmend:
+                key_zz = deref(mbmiter).first
+                if ((lower <= key_zz) and (key_zz < upper)):
+                    mbm.map_ptr[0][key_zz] = value
+                inc(mbmiter)
+
+            # set values back on instance
+            new_mat = new cpp_material.Material(mbm.map_ptr[0], -1.0, self.mat_pointer.name)
+            self.mat_pointer = new_mat
+
+        # Fail-Yurt
         else:
-            raise TypeError("key is of unsupported type {0}".format(type(key)))
+            try:
+                key_zz = nucname.zzaaam(key)
+            except:
+                raise TypeError("key {0} is of unsupported type {1}".format(repr(key), type(key)))
+            self[key_zz] = value
 
 
     def __delitem__(self, key):
