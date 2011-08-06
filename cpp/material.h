@@ -60,7 +60,7 @@ namespace pyne
     //Material function definitions
     void normalize ();
     comp_map mult_by_mass();
-    double atomic_weight();
+    double molecular_weight();
 
     //Sub-Stream Computation
     Material sub_mat(std::set<int>, std::string n = "");

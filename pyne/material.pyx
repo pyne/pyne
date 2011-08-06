@@ -192,15 +192,15 @@ cdef class _Material:
         return nucvec_proxy
 
 
-    def atomic_weight(self):
-        """This method returns the atomic weight of the comp of this material.  Note that this is 
+    def molecular_weight(self):
+        """This method returns the molecular weight of the comp of this material.  Note that this is 
         only a rough estimate since this function is not yet coupled with measured atomic weights.
 
         Returns
         -------
-        atomic_weight : float 
-            Atomic weight in [amu]."""
-        return self.mat_pointer.atomic_weight()
+        mol_weight : float 
+            Molecular weight in [amu]."""
+        return self.mat_pointer.molecular_weight()
 
 
     #
