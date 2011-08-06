@@ -417,6 +417,16 @@ def test_getitem_slice_str():
         assert_true(922350 <= nuc)
 
 
+def test_getitem_sequence():
+    mat = Material(nucvec)
+    mat1 = mat[922380, 922350] 
+    assert_equal(mat1.mass, 2.0)
+    assert_equal(set(mat1.keys()), set([922380, 922350]))
+
+    mat1 = mat[922380, 'H2', 'h1']
+    assert_equal(mat1.mass, 2.0)
+    assert_equal(set(mat1.keys()), set([922380, 10010]))
+
 
 def test_setitem_int():
     mat = Material(nucvec)
@@ -517,6 +527,38 @@ def test_setitem_slice_str():
             assert_equal(mat[nuc], 1.0)
 
 
+def test_setitem_sequence():
+    mat = Material(nucvec)
+    mat_id = id(mat)
+    mat[922380, 922350] = 42
+    assert_equal(mat_id, id(mat))
+    assert_equal(mat.mass, 91.0)
+    assert_equal(mat[10010], 1.0)
+    assert_equal(mat[922350], 42.0)
+    assert_equal(mat[922380], 42.0)
+
+    mat = Material(nucvec)
+    mat[922380, 'H2', 'h1'] = 0.0
+    assert_equal(mat.mass, 7.0)
+    assert_equal(len(mat), 10)
+    for nuc in mat:
+        if (nuc in [10010, 10020, 922380]):
+            assert_equal(mat[nuc], 0.0)
+        else:
+            assert_equal(mat[nuc], 1.0)
+
+    mat = Material(nucvec)
+    mat['U235', 'H2', 'h1'] = 2
+    assert_equal(mat.mass, 13.0)
+    assert_equal(len(mat), 10)
+    for nuc in mat:
+        if (nuc in [10010, 10020, 922350]):
+            assert_equal(mat[nuc], 2.0)
+        else:
+            assert_equal(mat[nuc], 1.0)
+
+
+
 def test_delitem_int():
     mat = Material(nucvec)
     assert_equal(mat[922350], 1.0)
@@ -597,6 +639,23 @@ def test_delitem_slice_str():
             assert_raises(KeyError, lambda: mat[nuc]) 
         else:
             assert_equal(mat[nuc], 1.0)
+
+
+def test_delitem_sequence():
+    mat = Material(nucvec)
+    del mat[922380, 922350]
+    assert_equal(mat.mass, 7.0)
+    assert_equal(mat[10010], 1.0)
+    assert_raises(KeyError, lambda: mat[922350]) 
+    assert_raises(KeyError, lambda: mat[922380]) 
+
+    mat = Material(nucvec)
+    del mat[922380, 'H2', 'h1']
+    assert_equal(mat.mass, 7.0)
+    assert_raises(KeyError, lambda: mat[10010]) 
+    assert_raises(KeyError, lambda: mat[10020]) 
+    assert_raises(KeyError, lambda: mat[922380]) 
+
 
 
 def test_iter():
