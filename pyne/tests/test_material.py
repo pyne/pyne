@@ -401,7 +401,7 @@ def test_getitem_slice_int():
 
 def test_getitem_slice_int():
     mat = Material(nucvec)
-    mat1 = mat['U000':'NP000'] 
+    mat1 = mat['U':'NP'] 
     assert_equal(mat1.mass, 2.0)
     for nuc in mat1:
         assert_true(920000 <= nuc < 930000)
