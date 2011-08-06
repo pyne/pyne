@@ -251,7 +251,7 @@ pyne::comp_map pyne::Material::mult_by_mass()
 
 
 
-double pyne::Material::atomic_weight()
+double pyne::Material::molecular_weight()
 {
   // Calculate the atomic weight of the Material
   double inverseA = 0.0;
