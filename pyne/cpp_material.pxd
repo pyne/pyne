@@ -28,7 +28,7 @@ cdef extern from "../cpp/material.h" namespace "pyne":
 
         void normalize() except +
         map[int, double] mult_by_mass() except +
-        double atomic_weight() except +
+        double molecular_weight() except +
 
         # Substream Methods
         Material sub_mat(set[int], std.string) except +

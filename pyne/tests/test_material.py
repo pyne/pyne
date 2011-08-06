@@ -123,15 +123,15 @@ class TestMaterialMethods(TestCase):
         assert_equal(nucvec, {922350: 0.75, 922380: 14.25})
 
 
-    def test_atomic_weight(self):
+    def test_molecular_weight(self):
         mat_empty = Material({})
-        assert_equal(mat_empty.atomic_weight(), 0.0)
+        assert_equal(mat_empty.molecular_weight(), 0.0)
 
         mat_u238 = Material({922380: 1.0})
-        assert_equal(mat_u238.atomic_weight(), 238.0)
+        assert_equal(mat_u238.molecular_weight(), 238.0)
 
         mat_mixed = Material({922350: 0.5, 922380: 0.5})
-        assert_almost_equal(mat_mixed.atomic_weight()/236.5, 1.0, 4)
+        assert_almost_equal(mat_mixed.molecular_weight()/236.5, 1.0, 4)
 
 
 
