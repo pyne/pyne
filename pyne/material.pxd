@@ -2,12 +2,11 @@
 from libcpp.map cimport map as cpp_map
 from cython import pointer
 
-
 # Local imports
 cimport std
 cimport cpp_material
 
-cdef class Material:
+cdef class _Material:
     cdef cpp_material.Material * mat_pointer
 
 
