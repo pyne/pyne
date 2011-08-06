@@ -25,3 +25,4 @@ import pyne.stlconverters as conv
 
 
 cdef cpp_set[int] zzaaam_set(object nuc_sequence)
+
