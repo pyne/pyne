@@ -4,12 +4,26 @@ from unittest import TestCase
 import nose 
 
 from nose.tools import assert_equal, assert_not_equal, assert_raises, raises, \
-    assert_almost_equal
+    assert_almost_equal, assert_true, assert_false
 
 import os
 from pyne.material import Material
 import numpy  as np
 import tables as tb
+
+
+nucvec = {10010:  1.0,   
+          80160:  1.0,   
+          691690: 1.0,
+          922350: 1.0,
+          922380: 1.0,
+          942390: 1.0,
+          942410: 1.0,
+          952420: 1.0,
+          962440: 1.0,
+          }
+
+leu = {922380: 0.96, 922350: 0.04}
 
 
 def make_mat_txt():
@@ -26,7 +40,6 @@ def make_mat_h5():
     f.createArray("/mat", "U235",  np.array([1.0, 0.75, 0.0]), "U235 Test")
     f.createArray("/mat", "PU239", np.array([0.0, 0.25, 0.0]), "PU239 Test")
     f.close()
-
 
 
 class TestMaterialConstructor(TestCase):
@@ -125,20 +138,8 @@ class TestMaterialMethods(TestCase):
 class TestMassSubMaterialMethods(TestCase):
     "Tests that the Material sub-Material ter member functions work."
 
-    nucvec = {
-        10010:  1.0,   
-        80160:  1.0,   
-        691690: 1.0,
-        922350: 1.0,
-        922380: 1.0,
-        942390: 1.0,
-        942410: 1.0,
-        952420: 1.0,
-        962440: 1.0,
-        }
-
     def test_sub_mat_int_1(self):
-        mat = Material(self.nucvec, -1, "Old Material")
+        mat = Material(nucvec, -1, "Old Material")
         mat1 = mat.sub_mat([92, 80160])
         assert_almost_equal(mat1.comp[80160],  0.3333333333333)
         assert_almost_equal(mat1.comp[922350], 0.3333333333333)
@@ -147,7 +148,7 @@ class TestMassSubMaterialMethods(TestCase):
         assert_equal(mat1.name, '')
 
     def test_sub_mat_int_2(self):
-        mat = Material(self.nucvec)
+        mat = Material(nucvec)
         mat1 = mat.sub_mat([92, 80160], "New Material")
         assert_almost_equal(mat1.comp[80160],  0.3333333333333)
         assert_almost_equal(mat1.comp[922350], 0.3333333333333)
@@ -156,7 +157,7 @@ class TestMassSubMaterialMethods(TestCase):
         assert_equal(mat1.name, 'New Material')
 
     def test_sub_mat_attr_1(self):
-        mat = Material(self.nucvec, -1, "Old Material")
+        mat = Material(nucvec, -1, "Old Material")
         mat1 = mat.sub_mat(["U", "80160", "H1"])
         assert_almost_equal(mat1.comp[10010],  0.25)
         assert_almost_equal(mat1.comp[80160],  0.25)
@@ -166,7 +167,7 @@ class TestMassSubMaterialMethods(TestCase):
         assert_equal(mat1.name, '')
 
     def test_sub_mat_attr_2(self):
-        mat = Material(self.nucvec)
+        mat = Material(nucvec)
         mat1 = mat.sub_mat(["U", "80160", "H1"], "New Material")
         assert_almost_equal(mat1.comp[10010],  0.25)
         assert_almost_equal(mat1.comp[80160],  0.25)
@@ -176,49 +177,49 @@ class TestMassSubMaterialMethods(TestCase):
         assert_equal(mat1.name, 'New Material')
 
     def test_sub_u_1(self):
-        mat = Material(self.nucvec)
+        mat = Material(nucvec)
         mat1 = mat.sub_u()
         assert_equal(mat1.comp, {922350: 0.5, 922380: 0.5})
         assert_equal(mat1.mass, 2.0)
         assert_equal(mat1.name, '')
 
     def test_sub_u_2(self):
-        mat = Material(self.nucvec)
+        mat = Material(nucvec)
         mat1 = mat.sub_u("U Material")
         assert_equal(mat1.comp, {922350: 0.5, 922380: 0.5})
         assert_equal(mat1.mass, 2.0)
         assert_equal(mat1.name, 'U Material')
 
     def test_pu_1(self):
-        mat = Material(self.nucvec)
+        mat = Material(nucvec)
         mat1 = mat.sub_pu()
         assert_equal(mat1.comp, {942390: 0.5, 942410: 0.5})
         assert_equal(mat1.mass, 2.0)
         assert_equal(mat1.name, '')
 
     def test_pu_2(self):
-        mat = Material(self.nucvec)
+        mat = Material(nucvec)
         mat1 = mat.sub_pu("PU Material")
         assert_equal(mat1.comp, {942390: 0.5, 942410: 0.5})
         assert_equal(mat1.mass, 2.0)
         assert_equal(mat1.name, 'PU Material')
 
     def test_lan_1(self):
-        mat = Material(self.nucvec)
+        mat = Material(nucvec)
         mat1 = mat.sub_lan()
         assert_equal(mat1.comp, {691690: 1.0})
         assert_equal(mat1.mass, 1.0)
         assert_equal(mat1.name, '')
 
     def test_lan_2(self):
-        mat = Material(self.nucvec)
+        mat = Material(nucvec)
         mat1 = mat.sub_lan("LAN Material")
         assert_equal(mat1.comp, {691690: 1.0})
         assert_equal(mat1.mass, 1.0)
         assert_equal(mat1.name, 'LAN Material')
 
     def test_act_1(self):
-        mat = Material(self.nucvec)
+        mat = Material(nucvec)
         mat1 = mat.sub_act()
         assert_equal(mat1.comp[922350], 1.0/6.0)
         assert_equal(mat1.comp[922380], 1.0/6.0)
@@ -230,7 +231,7 @@ class TestMassSubMaterialMethods(TestCase):
         assert_equal(mat1.name, '')
 
     def test_act_2(self):
-        mat = Material(self.nucvec)
+        mat = Material(nucvec)
         mat1 = mat.sub_act("ACT Material")
         assert_equal(mat1.comp[922350], 1.0/6.0)
         assert_equal(mat1.comp[922380], 1.0/6.0)
@@ -242,7 +243,7 @@ class TestMassSubMaterialMethods(TestCase):
         assert_equal(mat1.name, 'ACT Material')
 
     def test_tru_1(self):
-        mat = Material(self.nucvec)
+        mat = Material(nucvec)
         mat1 = mat.sub_tru()
         assert_equal(mat1.comp[942390], 1.0/4.0)
         assert_equal(mat1.comp[942410], 1.0/4.0)
@@ -252,7 +253,7 @@ class TestMassSubMaterialMethods(TestCase):
         assert_equal(mat1.name, '')
 
     def test_tru_2(self):
-        mat = Material(self.nucvec)
+        mat = Material(nucvec)
         mat1 = mat.sub_tru("TRU Material")
         assert_equal(mat1.comp[942390], 1.0/4.0)
         assert_equal(mat1.comp[942410], 1.0/4.0)
@@ -262,7 +263,7 @@ class TestMassSubMaterialMethods(TestCase):
         assert_equal(mat1.name, 'TRU Material')
 
     def test_ma_1(self):
-        mat = Material(self.nucvec)
+        mat = Material(nucvec)
         mat1 = mat.sub_ma()
         assert_equal(mat1.comp[952420], 1.0/2.0)
         assert_equal(mat1.comp[962440], 1.0/2.0)
@@ -270,7 +271,7 @@ class TestMassSubMaterialMethods(TestCase):
         assert_equal(mat1.name, '')
 
     def test_ma_2(self):
-        mat = Material(self.nucvec)
+        mat = Material(nucvec)
         mat1 = mat.sub_ma("MA Material")
         assert_equal(mat1.comp[952420], 1.0/2.0)
         assert_equal(mat1.comp[962440], 1.0/2.0)
@@ -278,7 +279,7 @@ class TestMassSubMaterialMethods(TestCase):
         assert_equal(mat1.name, 'MA Material')
 
     def test_fp_1(self):
-        mat = Material(self.nucvec)
+        mat = Material(nucvec)
         mat1 = mat.sub_fp()
         assert_equal(mat1.comp[10010],  1.0/3.0)
         assert_equal(mat1.comp[80160],  1.0/3.0)
@@ -287,7 +288,7 @@ class TestMassSubMaterialMethods(TestCase):
         assert_equal(mat1.name, '')
 
     def test_fp_2(self):
-        mat = Material(self.nucvec)
+        mat = Material(nucvec)
         mat1 = mat.sub_fp("FP Material")
         assert_equal(mat1.comp[10010],  1.0/3.0)
         assert_equal(mat1.comp[80160],  1.0/3.0)
@@ -328,5 +329,86 @@ class TestMaterialOperatorOverloading(TestCase):
         assert_equal(mat.mass, 0.1)
 
 
+#
+# Test mapping functions
+#
+
+def test_len():
+    mat = Material(nucvec)
+    assert_equal(len(mat), 9)
+
+
+def test_contains():
+    mat = Material(nucvec)
+    assert_true(10010 in mat)
+    assert_true(922350 in mat)
+    assert_false(92000 in mat)
+    assert_raises(TypeError, lambda: 'word' in mat)
+
+
+def test_getitem_int():
+    mat = Material(nucvec)
+    assert_equal(mat[922350], 1.0) 
+    assert_raises(KeyError, lambda: mat[42]) 
+
+    mat = Material(leu)
+    assert_equal(mat[922350], 0.04) 
+    assert_equal(mat[922380], 0.96) 
+    assert_raises(KeyError, lambda: mat[922340]) 
+
+
+def test_setitem_int():
+    mat = Material(nucvec)
+    assert_equal(mat.mass, 9.0)
+    assert_equal(mat[922350], 1.0) 
+    mat[922350] = 2.0
+    assert_equal(mat.mass, 10.0)
+    assert_equal(mat[922350], 2.0) 
+
+    mat = Material(leu)
+    assert_equal(mat.mass, 1.0)
+    assert_equal(mat[922350], 0.04) 
+    assert_equal(mat[922380], 0.96) 
+    assert_raises(KeyError, lambda: mat[922340]) 
+    mat[922340] = 17.0
+    assert_equal(mat.mass, 18.0)
+    assert_equal(mat[922340], 17.0) 
+    assert_equal(mat[922350], 0.04) 
+    assert_equal(mat[922380], 0.96) 
+    
+
+
+def test_delitem_int():
+    mat = Material(nucvec)
+    assert_equal(mat[922350], 1.0)
+    del mat[922350]
+    assert_raises(KeyError, lambda: mat[922350]) 
+
+    mat = Material(leu)
+    assert_equal(mat[922350], 0.04)
+    del mat[922350]
+    assert_equal(mat.mass, 0.96) 
+    assert_equal(mat.comp[922380], 1.0) 
+    assert_raises(KeyError, lambda: mat[922350]) 
+
+
+def test_iter():
+    mat = Material(nucvec)
+    for nuc in mat:
+        assert_equal(mat[nuc], 1.0)
+
+    mat = Material(leu)
+    keys = set([922350, 922380])
+    values = set([0.04, 0.96])
+    items = set([(922350, 0.04), (922380, 0.96)])
+
+    assert_equal(set(mat.keys()), keys)
+    assert_equal(set(mat.values()), values)
+    assert_equal(set(mat.items()), items)
+
+
+#
+# Run as script
+#
 if __name__ == "__main__":
     nose.main()
