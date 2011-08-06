@@ -234,30 +234,178 @@ cdef class _Material:
         is asked for via nuc_sequence that is not present in the original material.
         """
         # Make an nuctopic set 
-        cdef int nuc_zz
-        cdef cpp_set[int] nuc_set = cpp_set[int]()
-        for nuc in nuc_sequence:
-            if isinstance(nuc, int):
-                if (nuc in nucname.zzLL):
-                    nuc_zz = nuc
-                else:
-                    nuc_zz = nucname.zzaaam(nuc)
+        cdef cpp_set[int] nuc_set = nucname.zzaaam_set(nuc_sequence)
 
-            elif isinstance(nuc, basestring):
-                nuc_str = nuc.upper()
-                if (nuc_str in nucname.LLzz):
-                    nuc_zz = nucname.LLzz[nuc_str]
-                else:
-                    nuc_zz = nucname.zzaaam(nuc)
-
-            else:
-                raise TypeError("nuclides must be strings or integers.")
-
-            nuc_set.insert(nuc_zz)
-
-        # Make new python version of this mass stream
+        # Make new python version of this material
         cdef _Material pymat = Material()
         pymat.mat_pointer[0] = self.mat_pointer.sub_mat(nuc_set, std.string(name))
+        return pymat
+
+
+    def set_mat(self, nuc_sequence, value, char * name=""):
+        """Sets a subset of the material to a new value and returns a new material.
+
+        Parameters
+        ----------
+        nuc_sequence : sequence
+            Elements and nuctopes to be taken from current stream.
+            Members of this list must be integers.  For example, [92, 942390]
+            would take all uranium atoms and Pu-239.
+        value : float
+            Mass value to set all nuclides in sequence to on the material. 
+        name : str, optional
+            The name of the submaterial.
+
+        Returns
+        -------
+        submaterial : Material
+            A new material object whose members in nuc_sequence have the cooresponding 
+            mass value.  The mass of the submaterial is calculated based on the weight 
+            fraction composition and mass of the original material.
+        """
+        # Make an nuctopic set 
+        cdef cpp_set[int] nuc_set = nucname.zzaaam_set(nuc_sequence)
+
+        # Make new python version of this material
+        cdef _Material pymat = Material()
+        pymat.mat_pointer[0] = self.mat_pointer.set_mat(nuc_set, <double> value, std.string(name))
+        return pymat
+
+
+    def del_mat(self, nuc_sequence, char * name=""):
+        """Removes a subset of the material and returns a new material comprised of only
+        the non-specified nuclides.  
+
+        Parameters
+        ----------
+        nuc_sequence : sequence
+            Nuclides to be taken out of the current material.
+        name : str, optional
+            The name of the submaterial.
+
+        Returns
+        -------
+        submaterial : Material
+            A new material object that only has the members not given in nuc_sequence. 
+            The mass of the submaterial is calculated based on the weight fraction 
+            composition and mass of the original material.
+
+        Notes
+        -----
+        The input here is seen as a suggestion and so no error is raised if a nuclide 
+        is asked for via nuc_sequence that is not present in the original material.
+        """
+        # Make an nuctopic set 
+        cdef cpp_set[int] nuc_set = nucname.zzaaam_set(nuc_sequence)
+
+        # Make new python version of this material
+        cdef _Material pymat = Material()
+        pymat.mat_pointer[0] = self.mat_pointer.del_mat(nuc_set, std.string(name))
+        return pymat
+
+
+    def sub_range(self, lower=0, upper=10000000, char * name=""):
+        """Grabs a sub-material from this mat based on a range [lower, upper) of values.
+
+        Parameters
+        ----------
+        lower : nuclide-name, optional
+            Lower bound on nuclide range.
+        upper : nuclide-name, optional
+            Upper bound on nuclide range.
+        name : str, optional 
+            The name of the submaterial.
+
+        Returns
+        -------
+        submaterial : Material 
+            A new mass stream object that only has nuclides on the given range.
+        """
+        cdef int clower, cupper
+
+        if isinstance(lower, int):
+            clower = lower
+        else:
+            clower = nucname.zzaaam(lower)
+
+        if isinstance(upper, int):
+            cupper = upper
+        else:
+            cupper = nucname.zzaaam(upper)
+
+        cdef _Material pymat = Material()
+        pymat.mat_pointer[0] = self.mat_pointer.sub_range(clower, cupper, std.string(name))
+        return pymat
+        
+
+    def set_range(self, lower=0, upper=10000000, value=0.0, char * name=""):
+        """Sets a sub-material from this mat based on a range [lower, upper) to a new 
+        mass weight value.
+
+        Parameters
+        ----------
+        lower : nuclide-name, optional
+            Lower bound on nuclide range.
+        upper : nuclide-name, optional
+            Upper bound on nuclide range.
+        value : float
+            Mass value to set all nuclides on the range to on the material. 
+        name : str, optional 
+            The name of the submaterial.
+
+        Returns
+        -------
+        submaterial : Material 
+            A new mass stream object that only has nuclides on the given range.
+        """
+        cdef int clower, cupper
+
+        if isinstance(lower, int):
+            clower = lower
+        else:
+            clower = nucname.zzaaam(lower)
+
+        if isinstance(upper, int):
+            cupper = upper
+        else:
+            cupper = nucname.zzaaam(upper)
+
+        cdef _Material pymat = Material()
+        pymat.mat_pointer[0] = self.mat_pointer.set_range(clower, cupper, <double> value, std.string(name))
+        return pymat
+        
+
+    def del_range(self, lower=0, upper=10000000, char * name=""):
+        """Remove a range [lower, upper) of nuclides from this material and returns a submaterial.
+
+        Parameters
+        ----------
+        lower : nuclide-name, optional
+            Lower bound on nuclide range.
+        upper : nuclide-name, optional
+            Upper bound on nuclide range.
+        name : str, optional 
+            The name of the submaterial.
+
+        Returns
+        -------
+        submaterial : Material 
+            A new mass stream object that does not contain nuclides on the given range.
+        """
+        cdef int clower, cupper
+
+        if isinstance(lower, int):
+            clower = lower
+        else:
+            clower = nucname.zzaaam(lower)
+
+        if isinstance(upper, int):
+            cupper = upper
+        else:
+            cupper = nucname.zzaaam(upper)
+
+        cdef _Material pymat = Material()
+        pymat.mat_pointer[0] = self.mat_pointer.del_range(clower, cupper, std.string(name))
         return pymat
 
 
@@ -387,39 +535,6 @@ cdef class _Material:
         return pymat
 
 
-    def sub_range(self, lower=0, upper=10000000, char * name=""):
-        """Grabs a sub-material from this mat based on a range [lower, upper) of values.
-
-        Parameters
-        ----------
-        lower : nuclide-name, optional
-            Lower bound on nuclide range.
-        upper : nuclide-name, optional
-            Upper bound on nuclide range.
-        name : str, optional 
-            The name of the submaterial.
-
-        Returns
-        -------
-        submaterial : Material 
-            A new mass stream object that only has nuclides on the given range.
-        """
-        cdef int clower, cupper
-
-        if isinstance(lower, int):
-            clower = lower
-        else:
-            clower = nucname.zzaaam(lower)
-
-        if isinstance(upper, int):
-            cupper = upper
-        else:
-            cupper = nucname.zzaaam(upper)
-
-        cdef _Material pymat = Material()
-        pymat.mat_pointer[0] = self.mat_pointer.sub_range(clower, cupper, std.string(name))
-        return pymat
-        
 
     #
     # Operator Overloads
@@ -515,7 +630,6 @@ cdef class _Material:
 
 
     def __getitem__(self, key):
-        cdef int key_zz
         cdef double key_mass
 
         # Get single integer-key
@@ -525,6 +639,11 @@ cdef class _Material:
                 return key_mass
             else:
                 raise KeyError("key {0} not found".format(repr(key)))
+
+        # Get single string-key
+        elif isinstance(key, basestring):
+            key_zz = nucname.zzaaam(key)
+            return self[key_zz]
 
         # Get slice-based sub-material    
         elif isinstance(key, slice):
@@ -540,72 +659,52 @@ cdef class _Material:
 
         # Fail-Yurt
         else:
-            try:
-                key_zz = nucname.zzaaam(key)
-            except:
-                raise TypeError("key {0} is of unsupported type {1}".format(repr(key), type(key)))
-            return self[key_zz]
+            raise TypeError("key {0} is of unsupported type {1}".format(repr(key), type(key)))
 
 
     def __setitem__(self, key, double value):
-        cdef matp new_mat 
+        cdef _Material new_mat
+        cdef matp new_matp 
         cdef conv._MapProxyIntDouble mbm 
-        cdef int key_zz, lower, upper, temp_upper
+        cdef int key_zz 
         cdef cpp_map[int, double].iterator mbmiter, mbmend
 
         # Set single integer-key
         if isinstance(key, int):
             mbm = self.mult_by_mass()
             mbm.map_ptr[0][key] = value
-            new_mat = new cpp_material.Material(mbm.map_ptr[0], -1.0, self.mat_pointer.name)
-            self.mat_pointer = new_mat
+            new_matp = new cpp_material.Material(mbm.map_ptr[0], -1.0, self.mat_pointer.name)
+            self.mat_pointer = new_matp
+
+        # Set single string-key
+        elif isinstance(key, basestring):
+            key_zz = nucname.zzaaam(key)
+            self[key_zz] = value
 
         # Set slice-based sub-material    
         elif isinstance(key, slice):
-            if key.start is None:
+            lower = key.start
+            if lower is None:
                 lower = 0
-            else:
-                lower = nucname.zzaaam(key.start)
 
-            if key.stop is None:
+            upper = key.stop
+            if upper is None:
                 upper = 10000000
-            else:
-                upper = nucname.zzaaam(key.stop)
-
-            # Make sure the indices are sorted
-            if (upper < lower):
-                temp_upper = upper
-                upper = lower
-                lower = temp_upper
-
-            # Prep loop
-            mbm = self.mult_by_mass()
-            mbmiter = mbm.map_ptr[0].begin()
-            mbmend = mbm.map_ptr[0].end()
-
-            while mbmiter != mbmend:
-                key_zz = deref(mbmiter).first
-                if ((lower <= key_zz) and (key_zz < upper)):
-                    mbm.map_ptr[0][key_zz] = value
-                inc(mbmiter)
 
             # set values back on instance
-            new_mat = new cpp_material.Material(mbm.map_ptr[0], -1.0, self.mat_pointer.name)
-            self.mat_pointer = new_mat
+            new_mat = self.set_range(lower, upper, value, self.name)
+            self.mat_pointer[0] = new_mat.mat_pointer[0]
 
         # Fail-Yurt
         else:
-            try:
-                key_zz = nucname.zzaaam(key)
-            except:
-                raise TypeError("key {0} is of unsupported type {1}".format(repr(key), type(key)))
-            self[key_zz] = value
+            raise TypeError("key {0} is of unsupported type {1}".format(repr(key), type(key)))
 
 
     def __delitem__(self, key):
-        cdef matp new_mat 
+        cdef _Material new_mat
+        cdef matp new_matp
         cdef conv._MapProxyIntDouble mbm
-        cdef int key_zz, lower, upper, temp_upper
+        cdef int key_zz
         cdef cpp_map[int, double].iterator mbmiter, mbmend
 
         # Remove single key
@@ -614,53 +713,31 @@ cdef class _Material:
                 return
             mbm = self.mult_by_mass()
             mbm.map_ptr.erase(<int> key)
-            new_mat = new cpp_material.Material(mbm.map_ptr[0], -1.0, self.mat_pointer.name)
-            self.mat_pointer = new_mat
+            new_matp = new cpp_material.Material(mbm.map_ptr[0], -1.0, self.mat_pointer.name)
+            self.mat_pointer = new_matp
+
+        # Remove single string-key
+        elif isinstance(key, basestring):
+            key_zz = nucname.zzaaam(key)
+            del self[key_zz]
 
         # Remove slice-based sub-material    
         elif isinstance(key, slice):
-            if key.start is None:
+            lower = key.start
+            if lower is None:
                 lower = 0
-            else:
-                lower = nucname.zzaaam(key.start)
 
-            if key.stop is None:
+            upper = key.stop
+            if upper is None:
                 upper = 10000000
-            else:
-                upper = nucname.zzaaam(key.stop)
-
-            # Make sure the indices are sorted
-            if (upper < lower):
-                temp_upper = upper
-                upper = lower
-                lower = temp_upper
-
-            # Prep loop
-            mbm = self.mult_by_mass()
-            mbmiter = mbm.map_ptr[0].begin()
-            mbmend = mbm.map_ptr[0].end()
-            keys_to_remove = []
-
-            while mbmiter != mbmend:
-                key_zz = deref(mbmiter).first
-                if ((lower <= key_zz) and (key_zz < upper)):
-                    keys_to_remove.append(key_zz)
-                inc(mbmiter)
-
-            for key_rm in keys_to_remove:
-                mbm.map_ptr.erase(<int> key_rm)
 
             # set values back on instance
-            new_mat = new cpp_material.Material(mbm.map_ptr[0], -1.0, self.mat_pointer.name)
-            self.mat_pointer = new_mat
+            new_mat = self.del_range(lower, upper, self.name)
+            self.mat_pointer[0] = new_mat.mat_pointer[0]
 
         # Fail-Yurt
         else:
-            try:
-                key_zz = nucname.zzaaam(key)
-            except:
-                raise TypeError("key {0} is of unsupported type {1}".format(repr(key), type(key)))
-            del self[key_zz]
+            raise TypeError("key {0} is of unsupported type {1}".format(repr(key), type(key)))
 
 
     def __iter__(self):
