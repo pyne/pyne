@@ -73,6 +73,8 @@ namespace pyne
     Material sub_ma  (std::string = "");
     Material sub_fp  (std::string = "");
 
+    Material sub_range(int=0, int=10000000, std::string n = "");
+
     //Overloaded Operators
     Material operator+ (double);
     Material operator+ (Material);
