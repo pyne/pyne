@@ -370,6 +370,54 @@ def test_getitem_int():
     assert_raises(KeyError, lambda: mat[922340]) 
 
 
+def test_getitem_str():
+    mat = Material(nucvec)
+    assert_equal(mat['U235'], 1.0) 
+    assert_raises(TypeError, lambda: mat['word']) 
+
+    mat = Material(leu)
+    assert_equal(mat['U235'], 0.04) 
+    assert_equal(mat['U238'], 0.96) 
+    assert_raises(KeyError, lambda: mat['U234']) 
+
+
+def test_getitem_slice_int():
+    mat = Material(nucvec)
+    mat1 = mat[920000:930000] 
+    assert_equal(mat1.mass, 2.0)
+    for nuc in mat1:
+        assert_true(920000 <= nuc < 930000)
+
+    mat1 = mat[:922380]
+    assert_equal(mat1.mass, 4.0)
+    for nuc in mat1:
+        assert_true(nuc < 922380)
+
+    mat1 = mat[922350:]
+    assert_equal(mat1.mass, 6.0)
+    for nuc in mat1:
+        assert_true(922350 <= nuc)
+
+
+def test_getitem_slice_int():
+    mat = Material(nucvec)
+    mat1 = mat['U000':'NP000'] 
+    assert_equal(mat1.mass, 2.0)
+    for nuc in mat1:
+        assert_true(920000 <= nuc < 930000)
+
+    mat1 = mat[:'U238']
+    assert_equal(mat1.mass, 4.0)
+    for nuc in mat1:
+        assert_true(nuc < 922380)
+
+    mat1 = mat['U235':]
+    assert_equal(mat1.mass, 6.0)
+    for nuc in mat1:
+        assert_true(922350 <= nuc)
+
+
+
 def test_setitem_int():
     mat = Material(nucvec)
     assert_equal(mat.mass, 9.0)
