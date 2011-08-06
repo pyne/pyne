@@ -525,9 +525,7 @@ cdef class _Material:
         # Get single key
         if isinstance(key, int):
             mbm = self.mult_by_mass()
-            if 0 == self.mat_pointer.comp.count(key):
-                mbm.map_ptr[0][key] = 0.0 
-            mbm.map_ptr[0][key] = mbm.map_ptr[0][key] + value
+            mbm.map_ptr[0][key] = value
             new_mat = new cpp_material.Material(mbm.map_ptr[0], -1.0, self.mat_pointer.name)
             self.mat_pointer = new_mat
         else:
