@@ -20,7 +20,7 @@ Material Class
 **************
 .. autoclass:: Material(comp, mass=-1, name='')
 
-    .. automethod:: atomic_weight()
+    .. automethod:: molecular_weight()
     .. automethod:: norm_comp()
     .. automethod:: normalize()
     .. automethod:: mult_by_mass()
