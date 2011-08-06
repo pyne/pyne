@@ -574,7 +574,7 @@ cdef class _Material:
     def __setitem__(self, key, double value):
         cdef matp new_mat 
         cdef conv._MapProxyIntDouble mbm 
-        cdef int key_zz, lower, upper, temp_upper, n, N
+        cdef int key_zz, lower, upper, temp_upper
         cdef cpp_map[int, double].iterator mbmiter, mbmend
 
         # Set single integer-key
@@ -628,9 +628,11 @@ cdef class _Material:
 
     def __delitem__(self, key):
         cdef matp new_mat 
-        cdef conv._MapProxyIntDouble mbm 
+        cdef conv._MapProxyIntDouble mbm
+        cdef int key_zz, lower, upper, temp_upper
+        cdef cpp_map[int, double].iterator mbmiter, mbmend
 
-        # Get single key
+        # Remove single key
         if isinstance(key, int):
             if 0 == self.mat_pointer.comp.count(key):
                 return
@@ -638,8 +640,51 @@ cdef class _Material:
             mbm.map_ptr.erase(<int> key)
             new_mat = new cpp_material.Material(mbm.map_ptr[0], -1.0, self.mat_pointer.name)
             self.mat_pointer = new_mat
+
+        # Remove slice-based sub-material    
+        elif isinstance(key, slice):
+            if key.start is None:
+                lower = 0
+            else:
+                lower = nucname.zzaaam(key.start)
+
+            if key.stop is None:
+                upper = 10000000
+            else:
+                upper = nucname.zzaaam(key.stop)
+
+            # Make sure the indices are sorted
+            if (upper < lower):
+                temp_upper = upper
+                upper = lower
+                lower = temp_upper
+
+            # Prep loop
+            mbm = self.mult_by_mass()
+            mbmiter = mbm.map_ptr[0].begin()
+            mbmend = mbm.map_ptr[0].end()
+            keys_to_remove = []
+
+            while mbmiter != mbmend:
+                key_zz = deref(mbmiter).first
+                if ((lower <= key_zz) and (key_zz < upper)):
+                    keys_to_remove.append(key_zz)
+                inc(mbmiter)
+
+            for key_rm in keys_to_remove:
+                mbm.map_ptr.erase(<int> key_rm)
+
+            # set values back on instance
+            new_mat = new cpp_material.Material(mbm.map_ptr[0], -1.0, self.mat_pointer.name)
+            self.mat_pointer = new_mat
+
+        # Fail-Yurt
         else:
-            raise TypeError("key is of unsupported type {0}".format(type(key)))
+            try:
+                key_zz = nucname.zzaaam(key)
+            except:
+                raise TypeError("key {0} is of unsupported type {1}".format(repr(key), type(key)))
+            del self[key_zz]
 
 
     def __iter__(self):

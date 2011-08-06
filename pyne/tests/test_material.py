@@ -513,7 +513,6 @@ def test_setitem_slice_str():
             assert_equal(mat[nuc], 2.0)
         else:
             assert_equal(mat[nuc], 1.0)
-    
 
 
 def test_delitem_int():
@@ -528,6 +527,74 @@ def test_delitem_int():
     assert_equal(mat.mass, 0.96) 
     assert_equal(mat.comp[922380], 1.0) 
     assert_raises(KeyError, lambda: mat[922350]) 
+
+
+def test_delitem_str():
+    mat = Material(nucvec)
+    assert_equal(mat[922350], 1.0)
+    del mat['U235']
+    assert_raises(KeyError, lambda: mat[922350]) 
+
+    mat = Material(leu)
+    assert_equal(mat[922350], 0.04)
+    del mat['U235']
+    assert_equal(mat.mass, 0.96) 
+    assert_equal(mat.comp[922380], 1.0) 
+    assert_raises(KeyError, lambda: mat[922350]) 
+
+
+def test_delitem_slice_int():
+    mat = Material(nucvec)
+    del mat[920000:930000]
+    assert_equal(mat.mass, 7.0)
+    assert_equal(mat[10010], 1.0)
+    assert_raises(KeyError, lambda: mat[922350]) 
+    assert_raises(KeyError, lambda: mat[922380]) 
+
+    mat = Material(nucvec)
+    del mat[:922380]
+    assert_equal(mat.mass, 5.0)
+    for nuc in mat:
+        if (nuc < 922380):
+            assert_raises(KeyError, lambda: mat[nuc]) 
+        else:
+            assert_equal(mat[nuc], 1.0)
+
+    mat = Material(nucvec)
+    del mat[922350:]
+    assert_equal(mat.mass, 3.0)
+    for nuc in mat:
+        if (922350 <= nuc):
+            assert_raises(KeyError, lambda: mat[nuc]) 
+        else:
+            assert_equal(mat[nuc], 1.0)
+
+
+def test_delitem_slice_str():
+    mat = Material(nucvec)
+    del mat['U':'Np']
+    assert_equal(mat.mass, 7.0)
+    assert_equal(mat[10010], 1.0)
+    assert_raises(KeyError, lambda: mat[922350]) 
+    assert_raises(KeyError, lambda: mat[922380]) 
+
+    mat = Material(nucvec)
+    del mat[:'U238']
+    assert_equal(mat.mass, 5.0)
+    for nuc in mat:
+        if (nuc < 922380):
+            assert_raises(KeyError, lambda: mat[nuc]) 
+        else:
+            assert_equal(mat[nuc], 1.0)
+
+    mat = Material(nucvec)
+    del mat['U235':]
+    assert_equal(mat.mass, 3.0)
+    for nuc in mat:
+        if (922350 <= nuc):
+            assert_raises(KeyError, lambda: mat[nuc]) 
+        else:
+            assert_equal(mat[nuc], 1.0)
 
 
 def test_iter():
