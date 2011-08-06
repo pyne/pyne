@@ -24,30 +24,6 @@ import os
 
 
 cdef class _Material:
-    """Material composed of nuclides.
-
-    Parameters
-    ----------
-    comp : dict or str 
-        This is the input nuclide component dictionary.
-        This dictionary need not be normalized; Material initialization will
-        automatically renormalize the stream.  Thus the comp simply is a dictionary
-        of relative weights.  The keys of comp must be integers representing
-        nuclides in zzaaam-form.  The values are floats for each nuclide's weight 
-        fraction. If a string is provided instead of a dictionary, then Material will
-        read in the comp vector from a file at the string's location.  This  
-        either plaintext or hdf5 files. If no comp is provided, an empty Material 
-        object is constructed.
-    mass : float, optional
-        This is the mass of the new stream. If the mass provided
-        is negative (default -1.0) then the mass of the new stream is calculated from 
-        the sum of compdict's components before normalization.  If the mass here
-        is positive or zero, then this mass overrides the calculated one.
-    name : str, optional
-        A string label for the material.  Helpful for large numbers of 
-        streams. Default ''.
-
-    """
 
     def __cinit__(self, nucvec=None, float mass=-1.0, char * name=''):
         """Material C++ constuctor."""
@@ -182,8 +158,8 @@ cdef class _Material:
         Data in this file must be whitespace separated.  Any valid nuclide naming
         scheme may be used for any nuctope.
 
-        Examples:
-        ---------
+        Examples
+        --------
         This method loads data into a pre-existing Material.  
         Initialization is therefore a two-step process::
 
@@ -697,7 +673,30 @@ cdef class _Material:
 
 
 class Material(_Material, collections.MutableMapping):
-    pass
+    """Material composed of nuclides.
+
+    Parameters
+    ----------
+    comp : dict or str 
+        This is the input nuclide component dictionary.
+        This dictionary need not be normalized; Material initialization will
+        automatically renormalize the stream.  Thus the comp simply is a dictionary
+        of relative weights.  The keys of comp must be integers representing
+        nuclides in zzaaam-form.  The values are floats for each nuclide's weight 
+        fraction. If a string is provided instead of a dictionary, then Material will
+        read in the comp vector from a file at the string's location.  This  
+        either plaintext or hdf5 files. If no comp is provided, an empty Material 
+        object is constructed.
+    mass : float, optional
+        This is the mass of the new stream. If the mass provided
+        is negative (default -1.0) then the mass of the new stream is calculated from 
+        the sum of compdict's components before normalization.  If the mass here
+        is positive or zero, then this mass overrides the calculated one.
+    name : str, optional
+        A string label for the material.  Helpful for large numbers of 
+        streams. Default ''.
+
+    """
 
 
 
