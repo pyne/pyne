@@ -399,7 +399,7 @@ def test_getitem_slice_int():
         assert_true(922350 <= nuc)
 
 
-def test_getitem_slice_int():
+def test_getitem_slice_str():
     mat = Material(nucvec)
     mat1 = mat['U':'NP'] 
     assert_equal(mat1.mass, 2.0)
@@ -436,6 +436,83 @@ def test_setitem_int():
     assert_equal(mat[922340], 17.0) 
     assert_equal(mat[922350], 0.04) 
     assert_equal(mat[922380], 0.96) 
+
+
+
+def test_setitem_str():
+    mat = Material(nucvec)
+    assert_equal(mat.mass, 9.0)
+    assert_equal(mat[922350], 1.0) 
+    mat['U235'] = 2.0
+    assert_equal(mat.mass, 10.0)
+    assert_equal(mat[922350], 2.0) 
+
+    mat = Material(leu)
+    assert_equal(mat.mass, 1.0)
+    assert_equal(mat[922350], 0.04) 
+    assert_equal(mat[922380], 0.96) 
+    assert_raises(KeyError, lambda: mat[922340]) 
+    mat['U234'] = 17.0
+    assert_equal(mat.mass, 18.0)
+    assert_equal(mat[922340], 17.0) 
+    assert_equal(mat[922350], 0.04) 
+    assert_equal(mat[922380], 0.96) 
+
+
+
+def test_setitem_slice_int():
+    mat = Material(nucvec)
+    mat[920000:930000] = 42
+    assert_equal(mat.mass, 91.0)
+    assert_equal(mat[10010], 1.0)
+    assert_equal(mat[922350], 42.0)
+    assert_equal(mat[922380], 42.0)
+
+    mat = Material(nucvec)
+    mat[:922380] = 0.0
+    assert_equal(mat.mass, 5.0)
+    for nuc in mat:
+        if (nuc < 922380):
+            assert_equal(mat[nuc], 0.0)
+        else:
+            assert_equal(mat[nuc], 1.0)
+
+    mat = Material(nucvec)
+    mat[922350:] = 2
+    assert_equal(mat.mass, 15.0)
+    for nuc in mat:
+        if (922350 <= nuc):
+            assert_equal(mat[nuc], 2.0)
+        else:
+            assert_equal(mat[nuc], 1.0)
+
+
+
+def test_setitem_slice_str():
+    mat = Material(nucvec)
+    mat['U':'Np'] = 42
+    assert_equal(mat.mass, 91.0)
+    assert_equal(mat[10010], 1.0)
+    assert_equal(mat[922350], 42.0)
+    assert_equal(mat[922380], 42.0)
+
+    mat = Material(nucvec)
+    mat[:'U238'] = 0.0
+    assert_equal(mat.mass, 5.0)
+    for nuc in mat:
+        if (nuc < 922380):
+            assert_equal(mat[nuc], 0.0)
+        else:
+            assert_equal(mat[nuc], 1.0)
+
+    mat = Material(nucvec)
+    mat['U235':] = 2
+    assert_equal(mat.mass, 15.0)
+    for nuc in mat:
+        if (922350 <= nuc):
+            assert_equal(mat[nuc], 2.0)
+        else:
+            assert_equal(mat[nuc], 1.0)
     
 
 
