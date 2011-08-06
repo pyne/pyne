@@ -8,6 +8,9 @@ from cython.operator cimport preincrement as inc
 from libc.stdlib cimport malloc, free
 
 
+# Python imports
+import collections
+
 # local imports 
 cimport std
 cimport cpp_material
@@ -20,7 +23,7 @@ import os
 
 
 
-cdef class Material:
+cdef class _Material:
     """Material composed of nuclides.
 
     Parameters
@@ -277,7 +280,7 @@ cdef class Material:
             nuc_set.insert(nuc_zz)
 
         # Make new python version of this mass stream
-        pymat = Material()
+        cdef _Material pymat = Material()
         pymat.mat_pointer[0] = self.mat_pointer.sub_mat(nuc_set, std.string(name))
         return pymat
 
@@ -295,7 +298,7 @@ cdef class Material:
         submaterial : Material 
             A new mass stream object that only has Uranium members. 
         """
-        pymat = Material()
+        cdef _Material pymat = Material()
         pymat.mat_pointer[0] = self.mat_pointer.sub_u(std.string(name))
         return pymat
         
@@ -313,7 +316,7 @@ cdef class Material:
         submaterial : Material 
             A new mass stream object that only has Plutonium members. 
         """
-        pymat = Material()
+        cdef _Material pymat = Material()
         pymat.mat_pointer[0] = self.mat_pointer.sub_pu(std.string(name))
         return pymat
         
@@ -331,7 +334,7 @@ cdef class Material:
         submaterial : Material
             A new mass stream object that only has Lanthanide members. 
         """
-        pymat = Material()
+        cdef _Material pymat = Material()
         pymat.mat_pointer[0] = self.mat_pointer.sub_lan(std.string(name))
         return pymat
         
@@ -349,7 +352,7 @@ cdef class Material:
         submaterial : Material
             A new mass stream object that only has Actinide members. 
         """
-        pymat = Material()
+        cdef _Material pymat = Material()
         pymat.mat_pointer[0] = self.mat_pointer.sub_act(std.string(name))
         return pymat
         
@@ -367,7 +370,7 @@ cdef class Material:
         submaterial : Material 
             A new mass stream object that only has Transuranic members. 
         """
-        pymat = Material()
+        cdef _Material pymat = Material()
         pymat.mat_pointer[0] = self.mat_pointer.sub_tru(std.string(name))
         return pymat
         
@@ -385,7 +388,7 @@ cdef class Material:
         submaterial : Material 
             A new mass stream object that only has Minor Actinide members. 
         """
-        pymat = Material()
+        cdef _Material pymat = Material()
         pymat.mat_pointer[0] = self.mat_pointer.sub_ma(std.string(name))
         return pymat
         
@@ -403,7 +406,7 @@ cdef class Material:
         submaterial : Material 
             A new mass stream object that only has Fission Product members. 
         """
-        pymat = Material()
+        cdef _Material pymat = Material()
         pymat.mat_pointer[0] = self.mat_pointer.sub_fp(std.string(name))
         return pymat
         
@@ -414,21 +417,21 @@ cdef class Material:
 
     # Addition
 
-    def __add_float__(Material x, double y):
-        pymat = Material()
+    def __add_float__(x, double y):
+        cdef _Material pymat = Material()
         pymat.mat_pointer[0] = x.mat_pointer[0] + y
         return pymat
         
 
-    def __add_mass_stream__(Material x, Material y):
-        pymat = Material()
-        pymat.mat_pointer[0] = x.mat_pointer[0] + y.mat_pointer[0]
+    def __add_material__(x, y):
+        cdef _Material pymat = Material()
+        pymat.mat_pointer[0] =  (<_Material> x).mat_pointer[0] + (<_Material> y).mat_pointer[0]
         return pymat
 
 
     def __add__(x, y): 
-        if isinstance(x, Material) and isinstance(y, Material):
-            return x.__add_mass_stream__(y)
+        if isinstance(x, _Material) and isinstance(y, _Material):
+            return x.__add_material__(y)
         elif isinstance(y, float):
             return x.__add_float__(y)
         elif isinstance(x, float):
@@ -443,8 +446,8 @@ cdef class Material:
 
     # Multiplication
 
-    def __mul_float__(Material x, double y):
-        pymat = Material()
+    def __mul_float__(x, double y):
+        cdef _Material pymat = Material()
         pymat.mat_pointer[0] = x.mat_pointer[0] * y
         return pymat
 
@@ -464,13 +467,13 @@ cdef class Material:
 
     # Division
 
-    def __div_float__(Material self, double y):
-        pymat = Material()
+    def __div_float__(self, double y):
+        cdef _Material pymat = Material()
         pymat.mat_pointer[0] = self.mat_pointer[0] / y
         return pymat
 
 
-    def __div__(Material self, y):
+    def __div__(self, y):
         if isinstance(y, float):
             return self.__div_float__(y)
         elif isinstance(y, int):
@@ -479,13 +482,85 @@ cdef class Material:
             return NotImplemented
 
 
-    def __rdiv__(Material self, y):
+    def __rdiv__(self, y):
         return self.__div__(y)
 
     
-    def __truediv__(Material self, y):
+    def __truediv__(self, y):
         return self.__div__(y)
 
+
+    #
+    # Mapping interface
+    #
+    def __len__(self):
+        return self.mat_pointer.comp.size()
+
+
+    def __contains__(self, int key):
+        if 0 < self.mat_pointer.comp.count(key):
+            return True
+        else:
+            return False
+
+
+    def __getitem__(self, key):
+        cdef double key_mass
+
+        # Get single key
+        if isinstance(key, int):
+            if 0 < self.mat_pointer.comp.count(key):
+                key_mass = self.mat_pointer.comp[key] * self.mat_pointer.mass
+                return key_mass
+            else:
+                raise KeyError("key {0} not found".format(key))
+        else:
+            raise TypeError("key is of unsupported type {0}".format(type(key)))
+
+
+    def __setitem__(self, key, double value):
+        cdef matp new_mat 
+        cdef conv._MapProxyIntDouble mbm 
+
+        # Get single key
+        if isinstance(key, int):
+            mbm = self.mult_by_mass()
+            if 0 == self.mat_pointer.comp.count(key):
+                mbm.map_ptr[0][key] = 0.0 
+            mbm.map_ptr[0][key] = mbm.map_ptr[0][key] + value
+            new_mat = new cpp_material.Material(mbm.map_ptr[0], -1.0, self.mat_pointer.name)
+            self.mat_pointer = new_mat
+        else:
+            raise TypeError("key is of unsupported type {0}".format(type(key)))
+
+
+    def __delitem__(self, key):
+        cdef matp new_mat 
+        cdef conv._MapProxyIntDouble mbm 
+
+        # Get single key
+        if isinstance(key, int):
+            if 0 == self.mat_pointer.comp.count(key):
+                return
+            mbm = self.mult_by_mass()
+            mbm.map_ptr.erase(<int> key)
+            new_mat = new cpp_material.Material(mbm.map_ptr[0], -1.0, self.mat_pointer.name)
+            self.mat_pointer = new_mat
+        else:
+            raise TypeError("key is of unsupported type {0}".format(type(key)))
+
+
+    def __iter__(self):
+        mbm = self.mult_by_mass()
+        mbm_iter = iter(mbm)
+        return mbm_iter
+
+
+
+
+
+class Material(_Material, collections.MutableMapping):
+    pass
 
 
 
@@ -496,7 +571,7 @@ cdef class Material:
 # <string, Material *>
 
 cdef cpp_map[std.string, matp] dict_to_map_str_matp(dict pydict):
-    cdef Material pymat 
+    cdef _Material pymat 
     cdef cpp_material.Material * cpp_matp
     cdef cpp_map[std.string, matp] cppmap = cpp_map[std.string, matp]()
 
@@ -510,7 +585,7 @@ cdef cpp_map[std.string, matp] dict_to_map_str_matp(dict pydict):
 
 cdef dict map_to_dict_str_matp(cpp_map[std.string, matp] cppmap):
     pydict = {}
-    cdef Material pymat 
+    cdef _Material pymat 
     cdef cpp_map[std.string, matp].iterator mapiter = cppmap.begin()
 
     while mapiter != cppmap.end():
