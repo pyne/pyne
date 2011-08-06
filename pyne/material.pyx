@@ -409,6 +409,40 @@ cdef class _Material:
         cdef _Material pymat = Material()
         pymat.mat_pointer[0] = self.mat_pointer.sub_fp(std.string(name))
         return pymat
+
+
+    def sub_range(self, lower=0, upper=10000000, char * name=""):
+        """Grabs a sub-material from this mat based on a range [lower, upper) of values.
+
+        Parameters
+        ----------
+        lower : nuclide-name, optional
+            Lower bound on nuclide range.
+        upper : nuclide-name, optional
+            Upper bound on nuclide range.
+        name : str, optional 
+            The name of the submaterial.
+
+        Returns
+        -------
+        submaterial : Material 
+            A new mass stream object that only has nuclides on the given range.
+        """
+        cdef int clower, cupper
+
+        if isinstance(lower, int):
+            clower = lower
+        else:
+            clower = nucname.zzaaam(lower)
+
+        if isinstance(upper, int):
+            cupper = upper
+        else:
+            cupper = nucname.zzaaam(upper)
+
+        cdef _Material pymat = Material()
+        pymat.mat_pointer[0] = self.mat_pointer.sub_range(clower, cupper, std.string(name))
+        return pymat
         
 
     #

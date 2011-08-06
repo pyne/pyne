@@ -383,6 +383,31 @@ pyne::Material pyne::Material::sub_fp (std::string n)
 
 
 
+pyne::Material pyne::Material::sub_range(int lower, int upper, std::string n)
+{
+  // Grabs a sub-material from this mat based on a range of integers.
+  if (upper < lower)
+  {
+    int temp_upper = upper;
+    upper = lower;
+    lower = temp_upper;
+  };
+
+  pyne::comp_map cm;
+  for (pyne::comp_iter i = comp.begin(); i != comp.end(); i++)
+  {
+    if ((lower <= (i->first)) && ((i->first) < upper))
+      cm[i->first] = (i->second) * mass;
+    else
+      continue;
+  };
+
+  return pyne::Material(cm, -1, n);
+};
+
+
+
+
 /*--- Overloaded Operators ---*/
 
 pyne::Material pyne::Material::operator+ (double y)
