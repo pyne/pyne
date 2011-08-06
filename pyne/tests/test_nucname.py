@@ -95,6 +95,10 @@ def test_zzaaam():
 
     assert_equal(nucname.zzaaam("Am-242m"), 952421)
 
+    assert_equal(nucname.zzaaam("he"), 20000)
+    assert_equal(nucname.zzaaam("U"), 920000)
+    assert_equal(nucname.zzaaam("Np"), 930000)
+
 
 def test_LLAAAM():
     assert_equal(nucname.LLAAAM(942390), "PU239")

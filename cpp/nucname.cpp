@@ -340,9 +340,17 @@ int nucname::zzaaam(std::string nuc)
   else if (pyne::contains_substring(pyne::alphabet, nucstr.substr(0, 1)))
   {
     // Nuclide is probably in LLAAAM form, or some variation therein
-    int anum = pyne::to_int(pyne::remove_characters(nucstr, pyne::alphabet));
+    std::string anum_str = pyne::remove_characters(nucstr, pyne::alphabet);
+
+    // natural element form, a la 'U' -> 920000
+    if (anum_str.empty() && (0 < LLzz.count(nucstr)))
+      return 10000 * LLzz[nucstr]; 
+
+    int anum = pyne::to_int(anum_str);
+
+    // bad form
     if (anum < 0)
-      throw NotANuclide(nucstr, anum);
+      throw NotANuclide(nucstr, anum); 
 
     // Figure out if we are meta-stable or not
     std::string end_char = pyne::last_char(nucstr);
