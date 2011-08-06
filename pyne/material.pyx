@@ -131,7 +131,7 @@ cdef class _Material:
         Initialization is therefore a two-step process::
 
             mat = Material()
-            mat.load_from_hdf5("afile.h5", "/foo/bar/ms", -3)
+            mat.load_from_hdf5("afile.h5", "/foo/bar/mat", -3)
         """
         self.mat_pointer.load_from_hdf5(filename, groupname, row)
 
@@ -788,7 +788,15 @@ class Material(_Material, collections.MutableMapping):
         streams. Default ''.
 
     """
+    def __str__(self):
+        title = "Material: {0}".format(self.name)
+        underline = '-' * len(title)
+        title += "\nmass = {0}\n{1}\n".format(self.mass, underline)
+        s = title + "\n".join(["{0:<7}{1}".format(nucname.LLAAAM(key), value) for key, value in self.comp.items()])
+        return s
 
+    def __repr__(self):
+        return "pyne.material.Material({0}, {1}, {2})".format(repr(self.comp), self.mass, repr(self.name))
 
 
 ###########################
