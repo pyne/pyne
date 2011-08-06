@@ -657,6 +657,10 @@ cdef class _Material:
 
             return self.sub_range(lower, upper)
 
+        # Get sequance-based sub-material
+        elif hasattr(key, '__len__'):
+            return self.sub_mat(key)
+
         # Fail-Yurt
         else:
             raise TypeError("key {0} is of unsupported type {1}".format(repr(key), type(key)))
@@ -693,6 +697,11 @@ cdef class _Material:
 
             # set values back on instance
             new_mat = self.set_range(lower, upper, value, self.name)
+            self.mat_pointer[0] = new_mat.mat_pointer[0]
+
+        # Set sequance-based sub-material
+        elif hasattr(key, '__len__'):
+            new_mat = self.set_mat(key, value, self.name)
             self.mat_pointer[0] = new_mat.mat_pointer[0]
 
         # Fail-Yurt
@@ -733,6 +742,11 @@ cdef class _Material:
 
             # set values back on instance
             new_mat = self.del_range(lower, upper, self.name)
+            self.mat_pointer[0] = new_mat.mat_pointer[0]
+
+        # Remove sequance-based sub-material
+        elif hasattr(key, '__len__'):
+            new_mat = self.del_mat(key, self.name)
             self.mat_pointer[0] = new_mat.mat_pointer[0]
 
         # Fail-Yurt
