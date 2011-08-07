@@ -88,14 +88,12 @@ The groups are defined as follows::
 
    nucname.LAN = set(['CE', 'DY', 'ER', 'EU', 'GD', 'HO', 'LA', 'LU', 'ND', 'PM', 'PR', 'SM', 'TB', 'TM', 'YB'])
 
-   nucname.ACT = set(['AC', 'AM', 'BH', 'BK', 'CF', 'CM', 'DB', 'DS', 'ES', 'FM', 'HS', 'LR', 'MD', 'MT', 'NO', 
-                        'NP', 'PA', 'PU', 'RF', 'RG', 'SG', 'TH', 'U'])
+   nucname.ACT = set(['AC', 'AM', 'BK', 'CF', 'CM', 'ES', 'FM', 'LR', 'MD', 'NO', 'NP', 'PA', 'PU', 'TH', 'U'])
 
    nucname.TRU = set(['AM', 'BH', 'BK', 'CF', 'CM', 'DB', 'DS', 'ES', 'FM', 'HS', 'LR', 'MD', 'MT', 'NO', 'NP', 
-                        'PU', 'RF', 'RG', 'SG'])
+                      'PU', 'RF', 'RG', 'SG'])
 
-   nucname.MA  = set(['AM', 'BH', 'BK', 'CF', 'CM', 'DB', 'DS', 'ES', 'FM', 'HS', 'LR', 'MD', 'MT', 'NO', 'NP', 
-                        'RF', 'RG', 'SG'])
+   nucname.MA  = set(['AM', 'BK', 'CF', 'CM', 'ES', 'FM', 'LR', 'MD', 'NO', 'NP'])
 
    nucname.FP  = set(['AG', 'AL', 'AR', 'AS', 'AT', 'AU', 'B',  'BA', 'BE', 'BI', 'BR', 'C',  'CA', 'CD', 'CE', 
                             'CL', 'CO', 'CR', 'CS', 'CU', 'DY', 'ER', 'EU', 'F',  'FE', 'FR', 'GA', 'GD', 'GE', 
@@ -125,14 +123,12 @@ The groups are defined as follows::
 
    nucname.lan = set([57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71])
 
-   nucname.act = set([89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 
-                      103, 104, 105, 106, 107, 108, 109, 110, 111])
+   nucname.act = set([89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103])
 
-   nucname.tru = set([93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 
+   nucname.tru = set([93,  94,  95,  96,  97,  98, 99, 100, 101, 102, 103, 104, 105, 
                       106, 107, 108, 109, 110, 111])
 
-   nucname.ma  = set([93, 95, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 
-                      107, 108, 109, 110, 111])
+   nucname.ma  = set([93, 95, 96, 97, 98, 99, 100, 101, 102, 103])
 
    nucname.fp  = set([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 
                      29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 
