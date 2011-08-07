@@ -169,16 +169,15 @@ nucname::zz_group nucname::act = nucname::LL_to_zz_group(nucname::ACT);
 
 // Transuarnics
 nucname::LL_t nucname::TRU_array[19] = {"NP", "PU", "AM", "CM", "BK", "CF", "ES", "FM", \
-                               "MD", "NO", "LR", "RF", "DB", "SG", "BH", "HS", \
-                               "MT", "DS", "RG"};
+                                        "MD", "NO", "LR", "RF", "DB", "SG", "BH", "HS", \
+                                        "MT", "DS", "RG"};
 nucname::LL_group nucname::TRU (nucname::TRU_array, nucname::TRU_array+19);
 nucname::zz_group nucname::tru = nucname::LL_to_zz_group(nucname::TRU);
 
 //Minor Actinides
-nucname::LL_t nucname::MA_array[18] = {"NP", "AM", "CM", "BK", "CF", "ES", "FM", "MD", \
-                              "NO", "LR", "RF", "DB", "SG", "BH", "HS", "MT", \
-                              "DS", "RG"};
-nucname::LL_group nucname::MA (nucname::MA_array, nucname::MA_array+18);
+nucname::LL_t nucname::MA_array[10] = {"NP", "AM", "CM", "BK", "CF", "ES", "FM", "MD", \
+                                       "NO", "LR"};
+nucname::LL_group nucname::MA (nucname::MA_array, nucname::MA_array+10);
 nucname::zz_group nucname::ma = nucname::LL_to_zz_group(nucname::MA);
 
 //Fission Products
