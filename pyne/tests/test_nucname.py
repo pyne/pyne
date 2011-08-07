@@ -20,17 +20,16 @@ def test_LAN():
                                    'LU', 'ND', 'PM', 'PR', 'SM', 'TB', 'TM', 'YB']))
 
 def test_ACT():
-    assert_equal(nucname.ACT, set(['AC', 'AM', 'BH', 'BK', 'CF', 'CM', 'DB', 
-           'DS', 'ES', 'FM', 'HS', 'LR', 'MD', 'MT', 'NO', 'NP', 'PA', 'PU', 
-           'RF', 'RG', 'SG', 'TH', 'U']))
+    assert_equal(nucname.ACT, set(["AC", "TH", "PA", "U",  "NP", "PU", "AM", "CM", \
+                                   "BK", "CF", "ES", "FM", "MD", "NO", "LR"]))
             
 def test_TRU():
     assert_equal(nucname.TRU, set(['AM', 'BH', 'BK', 'CF', 'CM', 'DB', 'DS', 
      'ES', 'FM', 'HS', 'LR', 'MD', 'MT', 'NO', 'NP', 'PU', 'RF', 'RG', 'SG']))
 
 def test_MA():
-    assert_equal(nucname.MA, set(['AM', 'BH', 'BK', 'CF', 'CM', 'DB', 'DS', 
-          'ES', 'FM', 'HS', 'LR', 'MD', 'MT', 'NO', 'NP', 'RF', 'RG', 'SG']))
+    assert_equal(nucname.MA, set(["NP", "AM", "CM", "BK", "CF", "ES", "FM", "MD", \
+                                  "NO", "LR"]))
 
 def test_FP():
     assert_equal(nucname.FP, set(['AG', 'AL', 'AR', 'AS', 'AT', 'AU', 'B',  
@@ -41,7 +40,7 @@ def test_FP():
           'O',  'OS', 'P',  'PB', 'PD', 'PM', 'PO', 'PR', 'PT', 'RA', 'RB', 
           'RE', 'RH', 'RN', 'RU', 'S',  'SB', 'SC', 'SE', 'SI', 'SM', 'SN', 
           'SR', 'TA', 'TB', 'TC', 'TE', 'TI', 'TL', 'TM', 'V',  'W',  'XE',  
-          'Y', 'YB', 'ZN', 'ZR']))
+          'Y',  'YB', 'ZN', 'ZR']))
 
 
 def test_lan():
@@ -49,16 +48,15 @@ def test_lan():
                                    68, 69, 70, 71]))
 
 def test_act():
-    assert_equal(nucname.act, set([89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 
-        100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111]))
+    assert_equal(nucname.act, set([89,  90,  91,  92, 93, 94, 95, 96, 97, 98, 99, 
+                                   100, 101, 102, 103]))
 
 def test_tru():
-    assert_equal(nucname.tru, set([93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 
-        103, 104, 105, 106, 107, 108, 109, 110, 111]))
+    assert_equal(nucname.tru, set([93,  94,  95,  96,  97,  98,  99,  100, 101, 102, 
+                                   103, 104, 105, 106, 107, 108, 109, 110, 111]))
 
 def test_ma():
-    assert_equal(nucname.ma, set([93, 95, 96, 97, 98, 99, 100, 101, 102, 103, 
-        104, 105, 106, 107, 108, 109, 110, 111]))
+    assert_equal(nucname.ma, set([93, 95, 96, 97, 98, 99, 100, 101, 102, 103]))
 
 def test_fp():
     assert_equal(nucname.fp, set([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 
