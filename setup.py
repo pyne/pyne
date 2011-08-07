@@ -50,8 +50,8 @@ def cpp_ext(name, sources, use_hdf5=False):
     ext['language'] = "c++"
 
     if os.name == 'posix':
-        #ext["extra_compile_args"] = ["-Wno-strict-prototypes"]
-        #ext["undef_macros"] = ["NDEBUG"]
+        ext["extra_compile_args"] = ["-Wno-strict-prototypes"]
+        ext["undef_macros"] = ["NDEBUG"]
         if use_hdf5:
             ext["libraries"] = posix_hdf5_libs
     elif os.name == 'nt':
