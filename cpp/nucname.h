@@ -55,7 +55,7 @@ namespace nucname
   extern LL_group TRU;
   extern zz_group tru;
 
-  extern LL_t MA_array[18];
+  extern LL_t MA_array[10];
   extern LL_group MA;
   extern zz_group ma;
 
