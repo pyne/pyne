@@ -16,112 +16,21 @@ TODO: Find out Nick's thoughts on CrossSection class.
 import struct
 import math
 
-class CCCCRecord(object):
-    """A single formatted record from a CCCC file."""
+from binaryreader import _BinaryReader, _FortranRecord
 
-    def __init__(self,data):
-        self.data=data
-        self.pos=0
-        self.intSize   = struct.calcsize('i')
-        self.floatSize = struct.calcsize('f')
+class ISOTXS(_BinaryReader):
+    """An ISOTXS object represents a binary ISOTXS file written according to the
+    CCCC specifications.
+
+    Parameters
+    ----------
+    filename : str
+        Path of the ISOTXS file to load.
     
-    def getInt(self):
-        """Returns the next integer in the record."""
-
-        (i,) = struct.unpack('i',self.data[self.pos:self.pos+self.intSize])
-        self.pos += self.intSize
-        return i
-                             
-    def getFloat(self):
-        """Returns the next float in the record."""
-
-        (f,) =  struct.unpack('f',self.data[self.pos:self.pos+self.floatSize])
-        self.pos += self.floatSize
-        return f
-    
-    def getDouble(self):
-        """Returns the next double in the record."""
-
-        (d,) =  struct.unpack('d',self.data[self.pos:self.pos+self.floatSize*2])
-        self.pos += self.floatSize*2
-        return d
-    
-    def getString(self,length):
-        """Returns the next string of a specified length in the record."""
-
-        relevantData = self.data[self.pos:self.pos+length]
-        #print len(relevantData)
-        (s,) = struct.unpack('%ds'%length,relevantData)
-        self.pos += length
-        return s
-    
-    def getList(self, type, length, strLength = 0):
-        """Returns a list of integers, floats, or strings."""
-
-        if type == "int":
-            results = [self.getInt() for i in range(length)]
-        elif type == "float":
-            results = [self.getFloat() for i in range(length)]
-        elif type == "double":
-            results = [self.getDouble() for i in range(length)]
-        elif type == "string":
-            results = [self.getString(strLength).strip() for i in range(length)]
-        else:
-            print("Do not recognize type: {0}".format(type))
-            return None
-        return results
-
-    def __repr__(self):
-        return "<CCCC Record>"
-
-
-class CCCCReader(object):
-    """Reads a binary file according to CCCC standards. This was created
-    following Prof. James Paul Holloway's (hagar@umich.edu) alpha release of
-    ccccutils written in C++ from 2001.
     """
     
-    def __init__(self,fName='ISOTXS'):
-        self.intSize   = struct.calcsize('i')
-        self.floatSize = struct.calcsize('d')
-        self.f = open(fName,'rb')
-        
-    def getInt(self):
-        (i,) = struct.unpack('i',self.f.read(self.intSize))
-        return i
-                             
-    def getFloat(self):
-        (f,) =  struct.unpack('d',self.f.read(self.floatSize))
-        return f
-
-    def getRecord(self):
-        """CCCC records start with an int and end with the same int. This int
-        represents the number of bytes that the record is. That makes it easy to
-        read.
-        """
-
-        numBytes = self.getInt()
-        if numBytes % self.intSize:
-            print('Error: numBytes %d is not a multiple of byte size: %d' % (numBytes,self.intSize))
-            return
-
-        # Read numBytes from the record
-        rec = self.f.read(numBytes)
-        
-        # now read end of record
-        numBytes2 = self.getInt()
-        if numBytes2 != numBytes:
-            print('Error: numBytes2 %d is not a equal to original byte count: %d' % (numBytes2,numBytes))
-            return
-        
-        return CCCCRecord(rec)
-
-
-class ISOTXS(CCCCReader):
-    """Reads a binary ISOTXS file according to the CCCC specifications."""
-    
-    def __init__(self,fName,debug=False):
-        super(ISOTXS,self).__init__(fName)
+    def __init__(self, filename):
+        super(ISOTXS, self).__init__(filename)
 
         # Initialize attributes
         self.fc = {}       # file control info
@@ -130,15 +39,15 @@ class ISOTXS(CCCCReader):
     def read(self):
         """Read through and parse the ISOTXS file."""
 
-        self.readFileID()
-        self.readFileControl()
-        self.readFileData()
+        self.read_file_ID()
+        self.read_file_control()
+        self.read_file_data()
 
         # Read file-wide chi-distribution matrix if present. Note that if
         # file-wide chi is given as a vector, it will be read during
-        # the readFileData method.
+        # the read_file_data method.
         if self.fc['ichidst']>1:
-            self.readChiData()
+            self.read_chi_data()
 
         # Read nuclide data
         for nucName in self.nucNames:
@@ -146,88 +55,88 @@ class ISOTXS(CCCCReader):
             nuc = Nuclide(nucName)
             
             # Read nuclide name and global data
-            self.readNuclideData(nuc)
+            self.read_nuclide_data(nuc)
 
             # Read nuclide cross sections
-            self.readNuclideXS(nuc)   
+            self.read_nuclide_xs(nuc)   
 
             # Read nuclide chi data if present
             if nuc.libParams['chiFlag']>1:
-                self.readNuclideChi(nuc)
+                self.read_nuclide_chi(nuc)
                 
             # Read nuclide scattering matrix
             for block in range(self.fc['nscmax']):
                 for subBlock in range(self.fc['nsblok']):
                     if nuc.libParams['ords'][block]>0:
-                        self.readNuclideScatter(nuc,block,subBlock)
+                        self.read_nuclide_scatter(nuc, block, subBlock)
 
             # Add nuclide to dictionary
             self.nuclides.append(nuc)
         
-    def readFileID(self):
+    def read_file_ID(self):
         """Reads the file identification block. This block is always present in
         the ISOTXS format and contains a label and file version number.
         """
 
         # Get first record from file
-        fileID = self.getRecord()
+        fileID = self.get_fortran_record()
 
         # Read data from file identification record
-        self.label       = fileID.getString(24)
-        self.fileVersion = fileID.getInt()
+        self.label = fileID.get_string(24)
+        self.fileVersion = fileID.get_int()
         
-    def readFileControl(self):
+    def read_file_control(self):
         """Reads the file control block. This block is always present and gives
         many parameters for the file including number of energy groups, number
         of isotopes, etc.
         """
         
         # Get file control record
-        fc = self.getRecord()
+        fc = self.get_fortran_record()
 
         # Read data from file control record
-        self.fc['ngroup']  = fc.getInt() # Number of energy groups in file
-        self.fc['niso']    = fc.getInt() # Number of isotopes in file
-        self.fc['maxup']   = fc.getInt() # Maximum number of upscatter groups
-        self.fc['maxdown'] = fc.getInt() # Maximum number of downscatter groups
-        self.fc['maxord']  = fc.getInt() # Maximum scattering order
-        self.fc['ichidst'] = fc.getInt() # File-wide fission spectrum flag
-        self.fc['nscmax']  = fc.getInt() # Max blocks of scatter data (seems to be actual number)
-        self.fc['nsblok']  = fc.getInt() # Number of subblocks
+        self.fc['ngroup'] = fc.get_int() # Number of energy groups in file
+        self.fc['niso'] = fc.get_int() # Number of isotopes in file
+        self.fc['maxup'] = fc.get_int() # Maximum number of upscatter groups
+        self.fc['maxdown'] = fc.get_int() # Maximum number of downscatter groups
+        self.fc['maxord'] = fc.get_int() # Maximum scattering order
+        self.fc['ichidst'] = fc.get_int() # File-wide fission spectrum flag
+        self.fc['nscmax'] = fc.get_int() # Max blocks of scatter data (seems to be actual number)
+        self.fc['nsblok'] = fc.get_int() # Number of subblocks
         
-    def readFileData(self):
+    def read_file_data(self):
         """Reads the file data block. This block is always present and contains
         isotope names, global chi distribution, energy group structure, and
         locations of each nuclide record.
         """
 
         # Get file data record
-        fileData = self.getRecord()
+        fileData = self.get_fortran_record()
 
         # Skip identification label of file
-        fileData.getString(12*8)
+        fileData.get_string(12*8)
         
         # Read nuclide label for each nuclide
-        self.nucNames = fileData.getList('string', self.fc['niso'], 8)
+        self.nucNames = fileData.get_string(8, self.fc['niso'])
         self.nucNames = [name.strip() for name in self.nucNames]
             
         # Read file-wide chi distribution vector
         if self.fc['ichidst']==1:
-            self.chi = fileData.getList('float', self.fc['ngroup'])
+            self.chi = fileData.get_float(self.fc['ngroup'])
         
         # Read mean neutron velocity in each group
-        self.vel = fileData.getList('float', self.fc['ngroup'])
+        self.vel = fileData.get_float(self.fc['ngroup'])
 
         # Read maximum energy bound of each group
-        self.emax = fileData.getList('float', self.fc['ngroup'])
+        self.emax = fileData.get_float(self.fc['ngroup'])
         
         # Read minimum energy bound of set
-        self.emin = fileData.getFloat()
+        self.emin = fileData.get_float()
         
         # Read number of records to be skipped to read data for a given nuclide
-        self.locs = fileData.getList('int', self.fc['niso'])
+        self.locs = fileData.get_int(self.fc['niso'])
             
-    def readChiData(self):
+    def read_chi_data(self):
         """Reads file-wide chi-distribution matrix. In most cases, chi will be
         given as a vector, not a matrix, and thus in such cases this routine is
         not needed.
@@ -235,97 +144,96 @@ class ISOTXS(CCCCReader):
 
         raise NotImplementedError
     
-    def readNuclideData(self, nuc):
+    def read_nuclide_data(self, nuc):
         """Read the following individual nuclide XS record. Load data into nuc.
         This record contains non-mg data like atomic mass, temperature, and some
         flags.
         """
 
         # Get nuclide data record
-        r = self.getRecord()
+        r = self.get_fortran_record()
 
         # Read nuclide data
-        nuc.libParams['nuclide']  = r.getString(8).strip() # absolute nuclide label
-        nuc.libParams['libName']  = r.getString(8) # library name (ENDFV, etc. )
-        nuc.libParams['isoIdent'] = r.getString(8)
-        nuc.libParams['amass']    = r.getFloat()   # gram atomic weight
-        nuc.libParams['efiss']    = r.getFloat()   # thermal energy yield/fission
-        nuc.libParams['ecapt']    = r.getFloat()   # thermal energy yield/capture
-        nuc.libParams['temp']     = r.getFloat()   # nuclide temperature (K)
-        nuc.libParams['sigPot']   = r.getFloat()   # potential scattering (b/atom)
-        nuc.libParams['adens']    = r.getFloat()   # density of nuclide (atom/b-cm)
-        nuc.libParams['classif']  = r.getInt()     # nuclide classification
-        nuc.libParams['chiFlag']  = r.getInt()     # fission spectrum flag
-        nuc.libParams['fisFlag']  = r.getInt()     # (n,f) cross section flag
-        nuc.libParams['nalph']    = r.getInt()     # (n,alpha) cross section flag
-        nuc.libParams['np']       = r.getInt()     # (n,p) cross section flag
-        nuc.libParams['n2n']      = r.getInt()     # (n,2n) cross section flag
-        nuc.libParams['nd']       = r.getInt()     # (n,d) cross section flag
-        nuc.libParams['nt']       = r.getInt()     # (n,t) cross section flag
-        nuc.libParams['ltot']     = r.getInt()     # number of moments of total xs
-        nuc.libParams['ltrn']     = r.getInt()     # number of moments of transport xs
-        nuc.libParams['strpd']    = r.getInt()     # number of coord directions for transport xs
+        nuc.libParams['nuclide'] = r.get_string(8).strip() # absolute nuclide label
+        nuc.libParams['libName'] = r.get_string(8) # library name (ENDFV, etc. )
+        nuc.libParams['isoIdent'] = r.get_string(8)
+        nuc.libParams['amass'] = r.get_float() # gram atomic weight
+        nuc.libParams['efiss'] = r.get_float() # thermal energy yield/fission
+        nuc.libParams['ecapt'] = r.get_float() # thermal energy yield/capture
+        nuc.libParams['temp'] = r.get_float() # nuclide temperature (K)
+        nuc.libParams['sigPot'] = r.get_float() # potential scattering (b/atom)
+        nuc.libParams['adens'] = r.get_float() # density of nuclide (atom/b-cm)
+        nuc.libParams['classif'] = r.get_int() # nuclide classification
+        nuc.libParams['chiFlag'] = r.get_int() # fission spectrum flag
+        nuc.libParams['fisFlag'] = r.get_int() # (n,f) cross section flag
+        nuc.libParams['nalph'] = r.get_int() # (n,alpha) cross section flag
+        nuc.libParams['np'] = r.get_int() # (n,p) cross section flag
+        nuc.libParams['n2n'] = r.get_int() # (n,2n) cross section flag
+        nuc.libParams['nd'] = r.get_int() # (n,d) cross section flag
+        nuc.libParams['nt'] = r.get_int() # (n,t) cross section flag
+        nuc.libParams['ltot'] = r.get_int() # number of moments of total xs
+        nuc.libParams['ltrn'] = r.get_int() # number of moments of transport xs
+        nuc.libParams['strpd'] = r.get_int() # number of coord directions for transport xs
         
         # Read scattering matrix type identifications for each scatter
         # block. Could be total, inelastic, elastic, n2n
-        nuc.libParams['scatFlag'] = r.getList('int', self.fc['nscmax'])
+        nuc.libParams['scatFlag'] = r.get_int(self.fc['nscmax'])
 
         # Read number of scattering orders in each scatter block.
-        nuc.libParams['ords'] = r.getList('int', self.fc['nscmax'])
+        nuc.libParams['ords'] = r.get_int(self.fc['nscmax'])
 
         # Read number of groups that scatter into group j, including
         # self-scatter, in scatter block n.
         nuc.libParams['jband'] = {}
         for n in range(self.fc['nscmax']):
             for j in range(self.fc['ngroup']):
-                nuc.libParams['jband'][j,n] = r.getInt()
+                nuc.libParams['jband'][j,n] = r.get_int()
                 
         # Read position of in-group scattering cross section for group j,
         # scattering block n, counted from first word of group j data
         nuc.libParams['jj'] = {}
         for n in range(self.fc['nscmax']):
             for j in range(self.fc['ngroup']):
-                nuc.libParams['jj'][j,n] = r.getInt()
-                
+                nuc.libParams['jj'][j,n] = r.get_int()
         
-    def readNuclideXS(self, nuc):
+    def read_nuclide_xs(self, nuc):
         """Reads principal microscopic multigroup cross-section data for a
         single nuclide.
         """
 
         # Get cross section record
-        r = self.getRecord()
+        r = self.get_fortran_record()
         
         # PL-weighted transport cross section in group g for Legendre order l
         for l in range(nuc.libParams['ltrn']):
             for g in range(self.fc['ngroup']):
-                nuc.micros['transport',g,l] = r.getFloat()
+                nuc.micros['transport',g,l] = r.get_float()
         
         # PL-weighted total cross section in group g for Legendre order l
         for l in range(nuc.libParams['ltot']):
             for g in range(self.fc['ngroup']):
-                nuc.micros['total',g,l] = r.getFloat()
+                nuc.micros['total',g,l] = r.get_float()
         
         # Microscopic (n,gamma) cross section in group g
         for g in range(self.fc['ngroup']):
-            nuc.micros['n,g',g] = r.getFloat()
+            nuc.micros['n,g',g] = r.get_float()
     
         # Read fission data if present
         if nuc.libParams['fisFlag'] > 0:
             
             # Microscopic (n,fission) cross section in group g
             for g in range(self.fc['ngroup']):
-                nuc.micros['fis',g] = r.getFloat()
+                nuc.micros['fis',g] = r.get_float()
         
             # Total number of neutrons/fission in group g
             for g in range(self.fc['ngroup']):
-                nuc.micros['nu',g] = r.getFloat()
+                nuc.micros['nu',g] = r.get_float()
         
         # Read fission spectrum vector if present
         if nuc.libParams['chiFlag'] == 1:
             # Nuclide chi in group g
             for g in range(self.fc['ngroup']):
-                nuc.micros['chi',g]=r.getFloat()
+                nuc.micros['chi',g]=r.get_float()
         else:
             if nuc.libParams['fisFlag'] > 0:
                 # Make sure file-wide chi exists
@@ -340,16 +248,16 @@ class ISOTXS(CCCCReader):
         for xstype in ['nalph','np','n2n','nd','nt']:
             if nuc.libParams[xstype]:
                 for g in range(self.fc['ngroup']):
-                    nuc.micros[xstype,g]=r.getFloat()
+                    nuc.micros[xstype,g]=r.get_float()
         
         # Read coordinate direction transport cross section (for various
         # coordinate directions)
         if nuc.libParams['strpd'] > 0:
             for i in range(nuc.libParams['strpd']):
                 for g in range(self.fc['ngroup']):
-                    nuc.micros['strpd',g,i] = r.getFloat()
+                    nuc.micros['strpd',g,i] = r.get_float()
         
-    def readNuclideChi(self, nuc):
+    def read_nuclide_chi(self, nuc):
         """Reads nuclide-level fission spectrum matrix. In most cases, chi will
         be given as a vector, not a matrix, and thus in such cases this routine
         is not needed.
@@ -357,12 +265,12 @@ class ISOTXS(CCCCReader):
 
         raise NotImplementedError
     
-    def readNuclideScatter(self, nuc, block, subBlock):
+    def read_nuclide_scatter(self, nuc, block, subBlock):
         """Read nuclide scattering matrix.
         TODO: Tidy this method up a bit.
         """
 
-        r = self.getRecord()
+        r = self.get_fortran_record()
         ng     = self.fc['ngroup']
         nsblok = self.fc['nsblok']
         m=subBlock+1 # fix starting at zero problem and use same indices as CCCC specification
@@ -401,16 +309,16 @@ class ISOTXS(CCCCReader):
                 fromGroups.reverse()
                 for k in fromGroups:
                     fromG = k-1
-                    nuc.micros['scat',block,g,fromG,order] = r.getFloat()
+                    nuc.micros['scat',block,g,fromG,order] = r.get_float()
                 #print nuc.micros['scat'][k,l]
 
-    def findNuclide(self, name):
+    def find_nuclide(self, name):
         for nuc in self:
             if nuc.name == name:
                 return nuc
         return None
     
-    def collapse(self,emaxList,spectr):
+    def collapse(self, emaxList, spectr):
         """Given a SPECTR file, this method further condesnses a broad group
         library to the energy structure in emaxList where each value is in
         MeV. To condense to a single group, pass the argument
@@ -421,7 +329,6 @@ class ISOTXS(CCCCReader):
         
         # u = ln(E/Emax)
         # E = Emax*e^u
-        import math
         for hfg,flux in enumerate(spectr.flux):
             # spectr.flux is constant lethargy. 
             #what is the hyper fine energy?
@@ -449,11 +356,11 @@ class ISOTXS(CCCCReader):
         return "<ISOTXS File: {0}>".format(self.f.name)
 
                 
-class DLAYXS(CCCCReader):
+class DLAYXS(_BinaryReader):
     """Reads a binary DLAYXS file according to CCCC specification."""
     
     def __init__(self, filename):
-        super(DLAYXS,self).__init__(filename)
+        super(DLAYXS, self).__init__(filename)
         
         self.isotopeFamily = {}
         self.decay = {}
@@ -462,10 +369,10 @@ class DLAYXS(CCCCReader):
     
     def read(self):
         
-        self.readFileID()
-        self.readFileControl()
-        (decay, spectrum) = self.readSpectra()
-        self.readYield()
+        self.read_file_ID()
+        self.read_file_control()
+        (decay, spectrum) = self.read_spectra()
+        self.read_yield()
         
         for isotope in self.isotopes:
             self.decay[isotope]    = {}
@@ -475,87 +382,87 @@ class DLAYXS(CCCCReader):
                 self.decay[isotope][gDelay]    = decay[family]
                 self.spectrum[isotope][gDelay] = spectrum[family]
         
-    def readFileID(self):
+    def read_file_ID(self):
         """read file ID block"""
         
-        id = self.getRecord()
-        self.label = id.getString(24)
-        fileID     = id.getInt()
+        id = self.get_fortran_record()
+        self.label = id.get_string(24)
+        fileID = id.get_int()
         
-    def readFileControl(self):
+    def read_file_control(self):
         
-        fileControl    = self.getRecord()
-        self.nGroups   = fileControl.getInt()
-        self.nIsotopes = fileControl.getInt()
-        self.nFamilies = fileControl.getInt()
+        fileControl = self.get_fortran_record()
+        self.nGroups = fileControl.get_int()
+        self.nIsotopes = fileControl.get_int()
+        self.nFamilies = fileControl.get_int()
         
-    def readSpectra(self):
+    def read_spectra(self):
         """Read the decay constants and delayed neutron spectra"""
         
-        fileData = self.getRecord()
-        self.isotopes = fileData.getList('string', self.nIsotopes, 8)
+        fileData = self.get_fortran_record()
+        self.isotopes = fileData.get_string(8, self.nIsotopes)
         
         # Read decay constants for each family. We will follow the convention
         # of the CCCC files that the families are indexed starting from 1.
         decay = {}
         for family in range(1, self.nFamilies+1):
-            decay[family] = fileData.getFloat()
+            decay[family] = fileData.get_float()
            
         # Read the delayed neutron spectra for each family
         spectra = {}
         for family in range(1, self.nFamilies+1):
-            spectra[family] = fileData.getList('float', self.nGroups)
+            spectra[family] = fileData.get_float(self.nGroups)
             
         # This reads the maximum E for each energy group in eV as well as the
         # minimum energy bound of the set in eV. 
         
-        self.energySpectra = fileData.getList('float', self.nGroups)
-        self.minEnergy = fileData.getFloat()
+        self.energySpectra = fileData.get_float(self.nGroups)
+        self.minEnergy = fileData.get_float()
         
         # Determine the number of families to which fission each isotope
         # contributes to delayed neutron precursors and the number of records
         # to be skipped to read data for each isotope
         
-        ## nFamilies = fileData.getList('int', self.nIsotopes)
-        ## nSkip     = fileData.getList('int', self.nIsotopes)
+        ## nFamilies = fileData.get_int(self.nIsotopes)
+        ## nSkip     = fileData.get_int(self.nIsotopes)
         
         return decay, spectra
     
-    def readYield(self):
+    def read_yield(self):
         """Read the delayed neutron precursor yields"""
         
         for isotope in self.isotopes:
-            yieldData = self.getRecord()
+            yieldData = self.get_fortran_record()
             self.nu[isotope] = {}
             for gDelay in [1,2,3,4,5,6]:
-                self.nu[isotope][gDelay] = yieldData.getList('float', self.nGroups)
-            self.isotopeFamily[isotope] = yieldData.getList('int', 6)
+                self.nu[isotope][gDelay] = yieldData.get_float(self.nGroups)
+            self.isotopeFamily[isotope] = yieldData.get_int(6)
 
 
-class SPECTR(CCCCReader):
+class SPECTR(_BinaryReader):
     """Reads ultra-fine group spectrum file from MC**2"""
 
-    def __init__(self,fName,debug=False):
-        CCCCReader.__init__(self,fName)
-        self.fc={}
+    def __init__(self, filename):
+        super(SPECTR, self).__init__(filename)
+        self.fc = {}
         self.read1D()
-        self.flux=self.read2D()
+        self.flux = self.read2D()
         
     def read1D(self):
-        t1 = self.getRecord()
-        self.fc['eig']=t1.getFloat()
-        self.fc['buck']=t1.getFloat()
-        self.fc['emax']=t1.getFloat()
-        self.fc['deltau']=t1.getFloat()
-        self.fc['ngrp']=t1.getInt()
-        self.fc['mgcsd']=t1.getInt()
-        self.fc['ncsd']=t1.getInt()
+        t1 = self.get_fortran_record()
+        self.fc['eig'] = t1.get_float()
+        self.fc['buck'] = t1.get_float()
+        self.fc['emax'] = t1.get_float()
+        self.fc['deltau'] = t1.get_float()
+        self.fc['ngrp'] = t1.get_int()
+        self.fc['mgcsd'] = t1.get_int()
+        self.fc['ncsd'] = t1.get_int()
         
     def read2D(self):
-        t2 = self.getRecord()
-        flux=[]
+        t2 = self.get_fortran_record()
+        flux = []
         for g in range(self.fc['ngrp']):
-            flux.append(t2.getFloat())
+            flux.append(t2.get_float())
         return flux
 
 

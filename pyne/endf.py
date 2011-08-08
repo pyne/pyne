@@ -38,7 +38,7 @@ class Evaluation(object):
     def read(self):
         # First we need to read MT=1, MT=451 which has a description of the ENDF
         # file and a list of what data exists in the file
-        self.readHeader()
+        self.read_header()
 
         # Now we can start looping over the list of data - we can skip the first
         # entry since it is the MT=451 block that we already read
@@ -47,29 +47,29 @@ class Evaluation(object):
             if MF == 1:
                 # Number of total neutrons per fission
                 if MT == 452:
-                    self.readTotalNu()
+                    self.read_total_nu()
                 # Number of delayed neutrons per fission
                 elif MT == 455:
-                    self.readDelayedNu()
+                    self.read_delayed_nu()
                 # Number of prompt neutrons per fission
                 elif MT == 456:
-                    self.readPromptNu()
+                    self.read_prompt_nu()
                 # Components of energy release due to fission
                 elif MT == 458:
-                    self.readFissionEnergy()
+                    self.read_fission_energy()
                 elif MT == 460:
-                    self.readDelayedPhoton()
+                    self.read_delayed_photon()
             elif MF == 2:
                 if MT == 151:
-                    self.readResonances()
+                    self.read_resonances()
                     
-    def readHeader(self):
+    def read_header(self):
         if self.verbose:
             print("Reading File 1...")
-        self.printInfo(451)
+        self.print_info(451)
 
         # Find File 1 in evaluation
-        self.seekFile(1)
+        self.seek_file(1)
 
         # Now read File1
         file1 = ENDFFile1()
@@ -80,51 +80,51 @@ class Evaluation(object):
         file1.reactions.append(data)
 
         # First HEAD record
-        items = self.getHeadRecord()
-        data.ZA   = items[0]
-        data.AWR  = items[1]
-        data.LRP  = items[2]
-        data.LFI  = items[3]
+        items = self.get_head_record()
+        data.ZA = items[0]
+        data.AWR = items[1]
+        data.LRP = items[2]
+        data.LFI = items[3]
         data.NLIB = items[4]
         data.NMOD = items[5]
 
         # Control record 1
-        items = self.getContRecord()
+        items = self.get_cont_record()
         data.ELIS = items[0]
-        data.STA  = int(items[1])
-        data.LIS  = items[2]
+        data.STA = int(items[1])
+        data.LIS = items[2]
         data.LISO = items[3]
         data.NFOR = items[5]
 
         # Control record 2
-        items = self.getContRecord()
-        data.AWI  = items[0]
+        items = self.get_cont_record()
+        data.AWI = items[0]
         data.EMAX = items[1]
         data.LREL = items[2]
         data.NSUB = items[4]
         data.NVER = items[5]
 
         # Control record 3
-        items = self.getContRecord()
+        items = self.get_cont_record()
         data.TEMP = items[0]
         data.LDRV = items[2]
-        data.NWD  = items[4]
-        data.NXC  = items[5]
+        data.NWD = items[4]
+        data.NXC = items[5]
 
         # Text record 1
         items = self.getTextRecord()
         text = items[0]
         data.ZSYMAM = text[0:11]
-        data.ALAB   = text[11:22]
-        data.EDATE  = text[22:32]
-        data.AUTH   = text[32:66]
+        data.ALAB = text[11:22]
+        data.EDATE = text[22:32]
+        data.AUTH = text[32:66]
 
         # Text record 2
         items = self.getTextRecord()
         text = items[0]
-        data.REF    = text[1:22]
-        data.DDATE  = text[22:32]
-        data.RDATE  = text[33:43]
+        data.REF = text[1:22]
+        data.DDATE = text[22:32]
+        data.RDATE = text[33:43]
         data.ENDATE = text[55:63]
 
         # Text record 3
@@ -143,56 +143,56 @@ class Evaluation(object):
             line = self.fh.readline()
             if line[72:75] == '  0':
                 break
-            items = self.getContRecord(line, skipC=True)
-            MF  = items[2]
-            MT  = items[3]
-            NC  = items[4]
+            items = self.get_cont_record(line, skipC=True)
+            MF = items[2]
+            MT = items[3]
+            NC = items[4]
             MOD = items[5]
             self.reactionList.append((MF,MT,NC,MOD))
 
-    def readTotalNu(self):
-        self.printInfo(452)
+    def read_total_nu(self):
+        self.print_info(452)
 
         # Find file 1
-        file1 = self.findFile(1)
+        file1 = self.find_file(1)
 
         # Create total nu reaction
         nuTotal = ENDFReaction(452)
         file1.reactions.append(nuTotal)
 
         # Determine representation of total nu data
-        items = self.getHeadRecord()
+        items = self.get_head_record()
         nuTotal.LNU = items[3]
 
         # Polynomial representation
         if nuTotal.LNU == 1:
-            nuTotal.coeffs = self.getListRecord()
+            nuTotal.coeffs = self.get_list_record()
         # Tabulated representation
         elif nuTotal.LNU == 2:
-            nuTotal.value = self.getTab1Record()
+            nuTotal.value = self.get_tab1_record()
 
         # Skip SEND record
         self.fh.readline()
 
-    def readDelayedNu(self):
-        self.printInfo(455)
+    def read_delayed_nu(self):
+        self.print_info(455)
 
         # Find file 1
-        file1 = self.findFile(1)
+        file1 = self.find_file(1)
 
         # Create delayed nu reaction
         nuDelay = ENDFReaction(455)
         file1.reactions.append(nuDelay)
 
         # Determine representation of delayed nu data
-        items = self.getHeadRecord()
+        items = self.get_head_record()
         nuDelay.LDG = items[2]
         nuDelay.LNU = items[3]
 
         # Nu tabulated and delayed-group constants are energy-independent
         if nuDelay.LNU == 2 and nuDelay.LDG == 0:
-            nuDelay.decayConst = self.getListRecord(onlyList=True)
-            nuDelay.value = self.getTab1Record()
+            nuDelay.decayConst = self.get_list_record(onlyList=True)
+            nuDelay.value = self.get_tab1_record()
             self.fh.readline()
         elif nuDelay.LNU == 2 and nuDelay.LDG == 1:
             raise NotImplementedError
@@ -201,66 +201,66 @@ class Evaluation(object):
         elif nuDelay.LNU == 1 and nuDelay.LDG == 1:
             raise NotImplementedError
 
-    def readPromptNu(self):
-        self.printInfo(456)
+    def read_prompt_nu(self):
+        self.print_info(456)
 
         # Create delayed nu reaction
         nuPrompt = ENDFReaction(456)
-        self.findFile(1).reactions.append(nuPrompt)
+        self.find_file(1).reactions.append(nuPrompt)
 
         # Determine representation of delayed nu data
-        items = self.getHeadRecord()
+        items = self.get_head_record()
         nuPrompt.LNU = items[3]
 
         # Tabulated values of nu
         if nuPrompt.LNU == 2:
-            nuPrompt.value = self.getTab1Record()
+            nuPrompt.value = self.get_tab1_record()
         # Spontaneous fission
         elif nuPrompt.LNU == 1:
-            nuPrompt.value = self.getListRecord(onlyList=True)
+            nuPrompt.value = self.get_list_record(onlyList=True)
 
         # Skip SEND record
         self.fh.readline()
 
-    def readFissionEnergy(self):
-        self.printInfo(458)
+    def read_fission_energy(self):
+        self.print_info(458)
 
         # Create fission energy release reaction
         eRelease = ENDFReaction(458)
-        self.findFile(1).reactions.append(eRelease)
+        self.find_file(1).reactions.append(eRelease)
 
         # Skip HEAD record
-        self.getHeadRecord()
+        self.get_head_record()
 
         # Read LIST record containing components of fission energy release (or
         # coefficients)
-        items, values = self.getListRecord()
+        items, values = self.get_list_record()
         NPLY = items[3]
         if NPLY == 0:
             eRelease.fissProducts = (values[0], values[1])
-            eRelease.promptNeuts  = (values[2], values[3])
-            eRelease.delayNeuts   = (values[4], values[5])
+            eRelease.promptNeuts = (values[2], values[3])
+            eRelease.delayNeuts = (values[4], values[5])
             eRelease.promptGammas = (values[6], values[7])
-            eRelease.delayGammas  = (values[8], values[9])
-            eRelease.delayBetas   = (values[10], values[11])
-            eRelease.neutrinos    = (values[12], values[13])
-            eRelease.pseudoQ      = (values[14], values[15])
-            eRelease.total        = (values[16], values[17])
+            eRelease.delayGammas = (values[8], values[9])
+            eRelease.delayBetas = (values[10], values[11])
+            eRelease.neutrinos = (values[12], values[13])
+            eRelease.pseudoQ = (values[14], values[15])
+            eRelease.total = (values[16], values[17])
         elif NPLY > 0:
             raise NotImplementedError
 
         # Skip SEND record
         self.fh.readline()
 
-    def readDelayedPhoton(self):
-        self.printInfo(460)
+    def read_delayed_photon(self):
+        self.print_info(460)
 
         # Create delayed photon data reaction
         dp = ENDFReaction(460)
-        self.findFile(1).reactions.append(dp)
+        self.find_file(1).reactions.append(dp)
 
         # Determine whether discrete or continuous representation
-        items = self.getHeadRecord()
+        items = self.get_head_record()
         dp.LO = items[2]
         dp.NG = items[4]
 
@@ -272,7 +272,7 @@ class Evaluation(object):
             dp.multiplicity = []
             for i in range(dp.NG):
                 # Read TAB1 record with multiplicity as function of time
-                mult = self.getTab1Record()
+                mult = self.get_tab1_record()
                 dp.multiplicity.append(mult)
 
                 # Determine energy
@@ -282,16 +282,16 @@ class Evaluation(object):
         # Continuous representation
         elif dp.LO == 2:
             # Determine decay constant and number of precursor families
-            dp.decayConst = self.getListRecord(onlyList=True)
+            dp.decayConst = self.get_list_record(onlyList=True)
             dp.NNF = len(dp.decayConst)
 
-    def readResonances(self):
+    def read_resonances(self):
         if self.verbose:
             print("Reading File 2...")
-        self.printInfo(151)
+        self.print_info(151)
 
         # Find File 2 in evaluation
-        self.seekFile(2)
+        self.seek_file(2)
 
         # Now read File1
         file2 = ENDFFile2()
@@ -303,46 +303,46 @@ class Evaluation(object):
         res.resonances = []
 
         # Determine whether discrete or continuous representation
-        items = self.getHeadRecord()
+        items = self.get_head_record()
         res.NIS = items[4] # Number of isotopes
         
         for iso in range(res.NIS):
-            items = self.getContRecord()
+            items = self.get_cont_record()
             res.ABN = items[1] # isotopic abundance
             res.LFW = items[3] # fission widths present?
             res.NER = items[4] # number of resonance energy ranges
 
             for erange in range(res.NER):
-                items = self.getContRecord()
-                res.EL   = items[0] # lower limit of energy range
-                res.EH   = items[1] # upper limit of energy range
-                res.LRU  = items[2] # flag for resolved (1)/unresolved (2)
-                res.LRF  = items[3] # resonance representation
-                res.NRO  = items[4] # flag for energy dependence of scattering radius
+                items = self.get_cont_record()
+                res.EL = items[0] # lower limit of energy range
+                res.EH = items[1] # upper limit of energy range
+                res.LRU = items[2] # flag for resolved (1)/unresolved (2)
+                res.LRF = items[3] # resonance representation
+                res.NRO = items[4] # flag for energy dependence of scattering radius
                 res.NAPS = items[5] # flag controlling use of channel/scattering radius
 
                 # Only scattering radius specified
                 if res.LRU == 0 and res.NRO == 0:
-                    items = self.getContRecord()
+                    items = self.get_cont_record()
                     res.SPI = items[0]
                     res.AP = items[1]
                     res.NLS = items[4]
                 # Resolved resonance region
                 elif res.LRU == 1:
-                    self.readResolved(res)
+                    self.read_resolved(res)
                 # Unresolved resonance region
                 elif res.LRU == 2:
                     self.readUnresolved(res)
 
-    def readResolved(self, res):
+    def read_resolved(self, res):
         # Single- or Multi-level Breit Wigner
         if res.LRF == 1 or res.LRF == 2:
             # Read energy-dependent scattering radius if present
             if res.NRO > 0:
-                res.AP = self.getTab1Record()
+                res.AP = self.get_tab1_record()
         
             # Other scatter radius parameters
-            items = self.getContRecord()
+            items = self.get_cont_record()
             res.SPI = items[0] # Spin, I, of the target nucleus
             if res.NRO == 0:
                 res.AP = items[1]
@@ -350,60 +350,60 @@ class Evaluation(object):
 
             # Read resonance widths, J values, etc
             for l in range(res.NLS):
-                headerItems, items = self.getListRecord()
+                headerItems, items = self.get_list_record()
                 QX, L, LRX = headerItems[1:4]
                 energy = items[0::6]
-                spin   = items[1::6]
-                GT     = items[2::6]
-                GN     = items[3::6]
-                GG     = items[4::6]
-                GF     = items[5::6]
+                spin = items[1::6]
+                GT = items[2::6]
+                GN = items[3::6]
+                GG = items[4::6]
+                GF = items[5::6]
                 for i, E in enumerate(energy):
                     resonance = BreitWigner()
-                    resonance.QX  = QX
-                    resonance.L   = L
+                    resonance.QX = QX
+                    resonance.L = L
                     resonance.LRX = LRX
-                    resonance.E   = energy[i]
-                    resonance.J   = spin[i]
-                    resonance.GT  = GT[i]
-                    resonance.GN  = GN[i]
-                    resonance.GG  = GG[i]
-                    resonance.GF  = GF[i]
+                    resonance.E = energy[i]
+                    resonance.J = spin[i]
+                    resonance.GT = GT[i]
+                    resonance.GN = GN[i]
+                    resonance.GG = GG[i]
+                    resonance.GF = GF[i]
                     res.resonances.append(resonance)
 
         # Reich-Moore
         elif res.LRF == 3:
             # Read energy-dependent scattering radius if present
             if res.NRO > 0:
-                res.AP = self.getTab1Record()
+                res.AP = self.get_tab1_record()
         
             # Other scatter radius parameters
-            items = self.getContRecord()
-            res.SPI  = items[0] # Spin, I, of the target nucleus
+            items = self.get_cont_record()
+            res.SPI = items[0] # Spin, I, of the target nucleus
             if res.NRO == 0:
                 res.AP = items[1]
-            res.LAD  = items[3] # Flag for angular distribution
-            res.NLS  = items[4] # Number of l-values
+            res.LAD = items[3] # Flag for angular distribution
+            res.NLS = items[4] # Number of l-values
             res.NLSC = items[5] # Number of l-values for convergence
             
             # Read resonance widths, J values, etc
             for l in range(res.NLS):
-                headerItems, items = self.getListRecord()
+                headerItems, items = self.get_list_record()
                 APL, L = headerItems[1:3]
                 energy = items[0::6]
-                spin   = items[1::6]
-                GN     = items[2::6]
-                GG     = items[3::6]
-                GFA    = items[4::6]
-                GFB    = items[5::6]
+                spin = items[1::6]
+                GN = items[2::6]
+                GG = items[3::6]
+                GFA = items[4::6]
+                GFB = items[5::6]
                 for i, E in enumerate(energy):
                     resonance = ReichMoore()
                     resonance.APL = APL
-                    resonance.L   = L
-                    resonance.E   = energy[i]
-                    resonance.J   = spin[i]
-                    resonance.GN  = GN[i]
-                    resonance.GG  = GG[i]
+                    resonance.L = L
+                    resonance.E = energy[i]
+                    resonance.J = spin[i]
+                    resonance.GN = GN[i]
+                    resonance.GG = GG[i]
                     resonance.GFA = GFA[i]
                     resonance.GFB = GFB[i]
                     res.resonances.append(resonance)
@@ -414,14 +414,14 @@ class Evaluation(object):
     def getTextRecord(self, line=None):
         if not line:
             line = self.fh.readline()
-        HL  = line[0:66]
+        HL = line[0:66]
         MAT = int(line[66:70])
-        MF  = int(line[70:72])
-        MT  = int(line[72:75])
-        NS  = int(line[75:80])
+        MF = int(line[70:72])
+        MT = int(line[72:75])
+        NS = int(line[75:80])
         return [HL, MAT, MF, MT, NS]
 
-    def getContRecord(self, line=None, skipC=False):
+    def get_cont_record(self, line=None, skipC=False):
         if not line:
             line = self.fh.readline()
         if skipC:
@@ -430,34 +430,34 @@ class Evaluation(object):
         else:
             C1 = convert(line[:11])
             C2 = convert(line[11:22])
-        L1  = int(line[22:33])
-        L2  = int(line[33:44])
-        N1  = int(line[44:55])
-        N2  = int(line[55:66])
+        L1 = int(line[22:33])
+        L2 = int(line[33:44])
+        N1 = int(line[44:55])
+        N2 = int(line[55:66])
         MAT = int(line[66:70])
-        MF  = int(line[70:72])
-        MT  = int(line[72:75])
-        NS  = int(line[75:80])
+        MF = int(line[70:72])
+        MT = int(line[72:75])
+        NS = int(line[75:80])
         return [C1, C2, L1, L2, N1, N2, MAT, MF, MT, NS]
 
-    def getHeadRecord(self, line=None):
+    def get_head_record(self, line=None):
         if not line:
             line = self.fh.readline()
-        ZA  = int(convert(line[:11]))
+        ZA = int(convert(line[:11]))
         AWR = convert(line[11:22])
-        L1  = int(line[22:33])
-        L2  = int(line[33:44])
-        N1  = int(line[44:55])
-        N2  = int(line[55:66])
+        L1 = int(line[22:33])
+        L2 = int(line[33:44])
+        N1 = int(line[44:55])
+        N2 = int(line[55:66])
         MAT = int(line[66:70])
-        MF  = int(line[70:72])
-        MT  = int(line[72:75])
-        NS  = int(line[75:80])
+        MF = int(line[70:72])
+        MT = int(line[72:75])
+        NS = int(line[75:80])
         return [ZA, AWR, L1, L2, N1, N2, MAT, MF, MT, NS]
 
-    def getListRecord(self, onlyList=False):
+    def get_list_record(self, onlyList=False):
         # determine how many items are in list
-        items = self.getContRecord()
+        items = self.get_cont_record()
         NPL = items[4]
         
         # read items
@@ -476,23 +476,23 @@ class Evaluation(object):
         else:
             return (items, itemsList)
 
-    def getTab1Record(self):
+    def get_tab1_record(self):
         r = ENDFTab1Record()
         r.read(self.fh)
         return r
 
-    def findFile(self, fileNumber):
+    def find_file(self, fileNumber):
         for f in self.files:
             if f.fileNumber == fileNumber:
                 return f
 
-    def findMT(self, MT):
+    def find_mt(self, MT):
         for f in self.files:
             for r in f.reactions:
                 if r.MT == MT:
                     return r
 
-    def lookForFiles(self):
+    def look_for_files(self):
         files = set()
         self.fh.seek(0)
         for line in self.fh:
@@ -507,7 +507,7 @@ class Evaluation(object):
             files.add(fileNum)
         print(files)
 
-    def seekFile(self, fileNum):
+    def seek_file(self, fileNum):
         self.fh.seek(0)
         fileString = '{0:2}'.format(fileNum)
         while True:
@@ -520,7 +520,7 @@ class Evaluation(object):
                 self.fh.seek(position)
                 break
 
-    def printInfo(self, MT):
+    def print_info(self, MT):
         if self.verbose:
             print("   MT={0} {1}".format(MT, MTname[MT]))
 
@@ -549,8 +549,8 @@ class ENDFTab1Record(object):
         line = fh.readline()
         C1 = convert(line[:11])
         C2 = convert(line[11:22])
-        L1  = int(line[22:33])
-        L2  = int(line[33:44])
+        L1 = int(line[22:33])
+        L2 = int(line[33:44])
         NR = int(line[44:55])
         NP = int(line[55:66])
         self.params = [C1, C2, L1, L2, NR, NP]
@@ -600,11 +600,11 @@ class ENDFTextRecord(ENDFRecord):
         super(ENDFTextRecord, self).__init__(fh)
 
     def read(self, line): 
-        HL  = line[0:66]
+        HL = line[0:66]
         MAT = int(line[66:70])
-        MF  = int(line[70:72])
-        MT  = int(line[72:75])
-        NS  = int(line[75:80])
+        MF = int(line[70:72])
+        MT = int(line[72:75])
+        NS = int(line[75:80])
         self.items = [HL, MAT, MF, MT, NS]
 
 class ENDFContRecord(ENDFRecord): 
@@ -616,16 +616,16 @@ class ENDFContRecord(ENDFRecord):
         super(ENDFContRecord, self).__init__(fh)
 
     def read(self, line):
-        C1  = convert(line[:11])
-        C2  = convert(line[11:22])
-        L1  = int(line[22:33])
-        L2  = int(line[33:44])
-        N1  = int(line[44:55])
-        N2  = int(line[55:66])
+        C1 = convert(line[:11])
+        C2 = convert(line[11:22])
+        L1 = int(line[22:33])
+        L2 = int(line[33:44])
+        N1 = int(line[44:55])
+        N2 = int(line[55:66])
         MAT = int(line[66:70])
-        MF  = int(line[70:72])
-        MT  = int(line[72:75])
-        NS  = int(line[75:80])
+        MF = int(line[70:72])
+        MT = int(line[72:75])
+        NS = int(line[75:80])
         self.items = [C1, C2, L1, L2, N1, N2, MAT, MF, MT, NS]
 
 class ENDFHeadRecord(ENDFRecord): 
@@ -639,16 +639,16 @@ class ENDFHeadRecord(ENDFRecord):
         super(ENDFHeadRecord, self).__init__(fh)
 
     def read(self, line):
-        ZA  = int(convert(line[:11]))
+        ZA = int(convert(line[:11]))
         AWR = convert(line[11:22])
-        L1  = int(line[22:33])
-        L2  = int(line[33:44])
-        N1  = int(line[44:55])
-        N2  = int(line[55:66])
+        L1 = int(line[22:33])
+        L2 = int(line[33:44])
+        N1 = int(line[44:55])
+        N2 = int(line[55:66])
         MAT = int(line[66:70])
-        MF  = int(line[70:72])
-        MT  = int(line[72:75])
-        NS  = int(line[75:80])
+        MF = int(line[70:72])
+        MT = int(line[72:75])
+        NS = int(line[75:80])
         self.items = [ZA, AWR, L1, L2, N1, N2, MAT, MF, MT, NS]
 
 class ENDFFile(object):
