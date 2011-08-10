@@ -10,15 +10,15 @@ Currently four naming conventions are supported.
     digits for the atomic mass number, and ends with a metastable flag (0 = ground, 
     1 = first excitied state, 2 = second excited state, etc).  Uranium-235 here would 
     be expressed as '922350'.
- #. **LLAAAM**: This is the more common, human readable notation.  The chamical symbol 
+ #. **name**: This is the more common, human readable notation.  The chamical symbol 
     (one or two characters long) is first, followed by the atomic weight.  Lastly if 
     the nuclide is metasstable, the letter *M* is concatanated to the end.  For example, 
-    'H-1' and 'Am242M' are both valid.  Note that nucname will always return LLAAAM form with
+    'H-1' and 'Am242M' are both valid.  Note that nucname will always return name form with
     the dash removed and all letters uppercase.
  #. **MCNP**: The MCNP format for entering nuclides is unfortunately non-standard.  In most 
     ways it is similar to zzaaam form, except that it lacks the metastable flag.  For information 
     on how metastable isotopes are named, please consult the MCNPX documentation for more information.
- #. **Serpent**: The serpent naming convetion is similar to LLAAAM form.  However, only the first 
+ #. **Serpent**: The serpent naming convetion is similar to name form.  However, only the first 
     letter in the chemical symbol is uppercase, the dash is always present, and the the meta-stable
     flag is lowercase.  For instance, 'Am-242m' is the valid serpent notation for this nuclide.
 
@@ -29,7 +29,7 @@ All functionality may be found in the ``nucname`` package::
 
  from pyne import nucname 
 
-This contains several zzaaam, LLAAAM, MCNP and Serpent converter function as 
+This contains several zzaaam, name, MCNP and Serpent converter function as 
 well as other helpful module attributes.
 
 
@@ -39,7 +39,7 @@ Naming Convetion Casting Functions
 
 .. autofunction:: zzaaam(nuc)
 
-.. autofunction:: LLAAAM(nuc)
+.. autofunction:: name(nuc)
 
 .. autofunction:: mcnp(nuc)
 
@@ -50,22 +50,22 @@ Naming Convetion Casting Functions
 Conversion Dictionaries
 -----------------------
 
-.. attribute:: LLzz
+.. attribute:: name_zz
 
    Dictionary that is used to convert an elemental symbol (str) to its charge Z-number (int).
    For example::
 
-      nucname.LLzz["HE"] = 2
-      nucname.LLzz["U"]  = 92
+      nucname.name_zz["HE"] = 2
+      nucname.name_zz["U"]  = 92
 
 
-.. attribute:: zzLL
+.. attribute:: zz_name
 
    Dictionary that is used to convert a charge Z-number (int) to its elemental symbol (str).
    For example::
 
-      nucname.LLzz[1]  = "H"
-      nucname.LLzz[94] = "PU"
+      nucname.name_zz[1]  = "H"
+      nucname.name_zz[94] = "PU"
 
 
 

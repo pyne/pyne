@@ -6,8 +6,8 @@ cimport std
 
 cdef extern from "../cpp/nucname.h" namespace "nucname":
     # Conversion dictionaries
-    map[std.string, int] LLzz
-    map[int, std.string] zzLL
+    map[std.string, int] name_zz
+    map[int, std.string] zz_name
 
     # Elemental string sets
     set[std.string] LAN
@@ -33,10 +33,10 @@ cdef extern from "../cpp/nucname.h" namespace "nucname":
     int zzaaam(char *) except +
     int zzaaam(std.string) except +
 
-    # LLAAAM Functions
-    std.string LLAAAM(int) except +
-    std.string LLAAAM(char *) except +
-    std.string LLAAAM(std.string) except +
+    # name Functions
+    std.string name(int) except +
+    std.string name(char *) except +
+    std.string name(std.string) except +
 
     # MCNP Functions 
     int mcnp(int) except + 

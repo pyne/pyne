@@ -1,14 +1,14 @@
 // Converts between naming conventions for nuclides.
 // zzaaam is for numerals only (923350).
-// LLAAAM is for letters  as well (U-235).
+// name is for letters  as well (U-235).
 // MCNP is for numerals without the meta-stable flag (92235), as used in MCNP.
 
 #include "nucname.h"
 
 /*** Constructs the LL to zz Dictionary ***/
-nucname::LLzz_t nucname::get_LLzz()
+nucname::name_zz_t nucname::get_name_zz()
 {
-  nucname::LLzz_t lzd;
+  nucname::name_zz_t lzd;
 
   lzd["BE"] = 04;
   lzd["BA"] = 56;
@@ -124,20 +124,20 @@ nucname::LLzz_t nucname::get_LLzz()
 
   return lzd;
 };
-nucname::LLzz_t nucname::LLzz = nucname::get_LLzz();
+nucname::name_zz_t nucname::name_zz = nucname::get_name_zz();
 
 
 /*** Constructs zz to LL dictionary **/
-nucname::zzLL_t nucname::get_zzLL()
+nucname::zzname_t nucname::get_zz_name()
 {
-  zzLL_t zld;
-  for (LLzz_iter i = LLzz.begin(); i != LLzz.end(); i++)
+  zzname_t zld;
+  for (name_zz_iter i = name_zz.begin(); i != name_zz.end(); i++)
   {
     zld[i->second] = i->first;
   }
   return zld;
 };
-nucname::zzLL_t nucname::zzLL = nucname::get_zzLL();
+nucname::zzname_t nucname::zz_name = nucname::get_zz_name();
 
 
 
@@ -145,43 +145,43 @@ nucname::zzLL_t nucname::zzLL = nucname::get_zzLL();
 /*** Define useful elemental group sets ***/
 /******************************************/
 
-nucname::zz_group nucname::LL_to_zz_group(nucname::LL_group eg)
+nucname::zz_group nucname::name_to_zz_group(nucname::name_group eg)
 {
   zz_group zg;
-  for (LL_group_iter i = eg.begin(); i != eg.end(); i++)
+  for (name_group_iter i = eg.begin(); i != eg.end(); i++)
   {
-    zg.insert(LLzz[*i]);
+    zg.insert(name_zz[*i]);
   }
   return zg;
 };
 
 // Lanthanides
-nucname::LL_t nucname::LAN_array[15] = {"LA", "CE", "PR", "ND", "PM", "SM", "EU", \
+nucname::name_t nucname::LAN_array[15] = {"LA", "CE", "PR", "ND", "PM", "SM", "EU", \
                                         "GD", "TB", "DY", "HO", "ER", "TM", "YB", "LU"};
-nucname::LL_group nucname::LAN (nucname::LAN_array, nucname::LAN_array+15);
-nucname::zz_group nucname::lan = nucname::LL_to_zz_group(nucname::LAN);
+nucname::name_group nucname::LAN (nucname::LAN_array, nucname::LAN_array+15);
+nucname::zz_group nucname::lan = nucname::name_to_zz_group(nucname::LAN);
 
 // Actinides
-nucname::LL_t nucname::ACT_array[15] = {"AC", "TH", "PA", "U",  "NP", "PU", "AM", "CM", \
+nucname::name_t nucname::ACT_array[15] = {"AC", "TH", "PA", "U",  "NP", "PU", "AM", "CM", \
                                         "BK", "CF", "ES", "FM", "MD", "NO", "LR"};
-nucname::LL_group nucname::ACT (nucname::ACT_array, nucname::ACT_array+15);
-nucname::zz_group nucname::act = nucname::LL_to_zz_group(nucname::ACT);
+nucname::name_group nucname::ACT (nucname::ACT_array, nucname::ACT_array+15);
+nucname::zz_group nucname::act = nucname::name_to_zz_group(nucname::ACT);
 
 // Transuarnics
-nucname::LL_t nucname::TRU_array[19] = {"NP", "PU", "AM", "CM", "BK", "CF", "ES", "FM", \
+nucname::name_t nucname::TRU_array[19] = {"NP", "PU", "AM", "CM", "BK", "CF", "ES", "FM", \
                                         "MD", "NO", "LR", "RF", "DB", "SG", "BH", "HS", \
                                         "MT", "DS", "RG"};
-nucname::LL_group nucname::TRU (nucname::TRU_array, nucname::TRU_array+19);
-nucname::zz_group nucname::tru = nucname::LL_to_zz_group(nucname::TRU);
+nucname::name_group nucname::TRU (nucname::TRU_array, nucname::TRU_array+19);
+nucname::zz_group nucname::tru = nucname::name_to_zz_group(nucname::TRU);
 
 //Minor Actinides
-nucname::LL_t nucname::MA_array[10] = {"NP", "AM", "CM", "BK", "CF", "ES", "FM", "MD", \
+nucname::name_t nucname::MA_array[10] = {"NP", "AM", "CM", "BK", "CF", "ES", "FM", "MD", \
                                        "NO", "LR"};
-nucname::LL_group nucname::MA (nucname::MA_array, nucname::MA_array+10);
-nucname::zz_group nucname::ma = nucname::LL_to_zz_group(nucname::MA);
+nucname::name_group nucname::MA (nucname::MA_array, nucname::MA_array+10);
+nucname::zz_group nucname::ma = nucname::name_to_zz_group(nucname::MA);
 
 //Fission Products
-nucname::LL_t nucname::FP_array[88] = {"AG", "AL", "AR", "AS", "AT", "AU", "B",  "BA", \
+nucname::name_t nucname::FP_array[88] = {"AG", "AL", "AR", "AS", "AT", "AU", "B",  "BA", \
                                        "BE", "BI", "BR", "C",  "CA", "CD", "CE", "CL", \
                                        "CO", "CR", "CS", "CU", "DY", "ER", "EU", "F",  \
                                        "FE", "FR", "GA", "GD", "GE", "H",  "HE", "HF", \
@@ -192,8 +192,8 @@ nucname::LL_t nucname::FP_array[88] = {"AG", "AL", "AR", "AS", "AT", "AU", "B", 
                                        "RN", "RU", "S",  "SB", "SC", "SE", "SI", "SM", \
                                        "SN", "SR", "TA", "TB", "TC", "TE", "TI", "TL", \
                                        "TM", "V",  "W",  "XE", "Y",  "YB", "ZN", "ZR"};
-nucname::LL_group nucname::FP (nucname::FP_array, nucname::FP_array+88);
-nucname::zz_group nucname::fp = nucname::LL_to_zz_group(nucname::FP);
+nucname::name_group nucname::FP (nucname::FP_array, nucname::FP_array+88);
+nucname::zz_group nucname::fp = nucname::name_to_zz_group(nucname::FP);
 
 
 
@@ -209,7 +209,7 @@ std::string nucname::current_form(std::string nuc)
   nuc = remove_substring(nuc, "-");
 
   if ( contains_substring(alphabet, nuc.substr(0,1)) )
-    return "LLAAAM";
+    return "name";
   else
   {
     if (nuc.length() == 7)
@@ -252,7 +252,7 @@ int nucname::zzaaam(int nuc)
     newnuc = nuc;
     return newnuc;
   }
-  else if (mod_10000 == 0 && 0 < zzLL.count(div_10000))
+  else if (mod_10000 == 0 && 0 < zz_name.count(div_10000))
   {
     // Natural elemental nuclide:  ie for Urnaium = 920000
     newnuc = nuc;
@@ -287,12 +287,12 @@ int nucname::zzaaam(int nuc)
   // Not a normal nuclide, might be a 
   // Natural elemental nuclide.  
   // ie for Urnaium = 920000
-  if (mod_10000 == 0 && 0 == zzLL.count(div_1000) && 0 < zzLL.count(div_10000))
+  if (mod_10000 == 0 && 0 == zz_name.count(div_1000) && 0 < zz_name.count(div_10000))
   {
     // zzaaam form natural nuclide
     newnuc = nuc;
   }
-  else if (mod_1000 == 0 && mod_10000 != 0 && 0 < zzLL.count(div_1000))
+  else if (mod_1000 == 0 && mod_10000 != 0 && 0 < zz_name.count(div_1000))
   {
     // MCNP form natural nuclide
     newnuc = nuc * 10;
@@ -337,12 +337,12 @@ int nucname::zzaaam(std::string nuc)
   }
   else if (pyne::contains_substring(pyne::alphabet, nucstr.substr(0, 1)))
   {
-    // Nuclide is probably in LLAAAM form, or some variation therein
+    // Nuclide is probably in name form, or some variation therein
     std::string anum_str = pyne::remove_characters(nucstr, pyne::alphabet);
 
     // natural element form, a la 'U' -> 920000
-    if (anum_str.empty() && (0 < LLzz.count(nucstr)))
-      return 10000 * LLzz[nucstr]; 
+    if (anum_str.empty() && (0 < name_zz.count(nucstr)))
+      return 10000 * name_zz[nucstr]; 
 
     int anum = pyne::to_int(anum_str);
 
@@ -361,8 +361,8 @@ int nucname::zzaaam(std::string nuc)
 
     // Add the Z-number
     std::string lnum = pyne::remove_characters(nucstr.substr(0, nucstr.length()-1), pyne::digits);
-    if (0 < LLzz.count(lnum))
-      newnuc = (10000 * LLzz[lnum]) + newnuc;
+    if (0 < name_zz.count(lnum))
+      newnuc = (10000 * name_zz[lnum]) + newnuc;
     else
       throw NotANuclide(nucstr, newnuc);
   }
@@ -379,9 +379,9 @@ int nucname::zzaaam(std::string nuc)
 
 
 /************************/
-/*** LLAAAM functions ***/
+/*** name functions ***/
 /************************/
-std::string nucname::LLAAAM(int nuc)
+std::string nucname::name(int nuc)
 {
   int nucint = zzaaam(nuc);
   std::string newnuc = "";
@@ -392,11 +392,11 @@ std::string nucname::LLAAAM(int nuc)
   int mod_10000_div_10 = mod_10000 / 10;
 
   // Make sure the LL value is correct
-  if (0 == zzLL.count(div_10000))
+  if (0 == zz_name.count(div_10000))
     throw NotANuclide(nuc, nucint);
 
   // Add LL
-  newnuc += zzLL[div_10000];
+  newnuc += zz_name[div_10000];
 
   // Add A-number
   if (0 < mod_10000)
@@ -411,17 +411,17 @@ std::string nucname::LLAAAM(int nuc)
 
 
 
-std::string nucname::LLAAAM(char * nuc)
+std::string nucname::name(char * nuc)
 {
   std::string newnuc (nuc);
-  return LLAAAM(newnuc);
+  return name(newnuc);
 }
 
 
-std::string nucname::LLAAAM(std::string nuc)
+std::string nucname::name(std::string nuc)
 {
   int newnuc = zzaaam(nuc);
-  return LLAAAM(newnuc);
+  return name(newnuc);
 }
 
 
@@ -482,12 +482,12 @@ std::string nucname::serpent(int nuc)
   int mod_10000_div_10 = mod_10000 / 10;
 
   // Make sure the LL value is correct
-  if (0 == zzLL.count(div_10000))
+  if (0 == zz_name.count(div_10000))
     throw NotANuclide(nuc, nucint);
 
   // Add LL
-  std::string LLupper = pyne::to_upper(zzLL[div_10000]);
-  std::string LLlower = pyne::to_lower(zzLL[div_10000]);
+  std::string LLupper = pyne::to_upper(zz_name[div_10000]);
+  std::string LLlower = pyne::to_lower(zz_name[div_10000]);
   newnuc += LLupper[0];
   for (int l = 1; l < LLlower.size(); l++)
     newnuc += LLlower[l];  
