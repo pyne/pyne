@@ -69,9 +69,9 @@ Conversion Dictionaries
 
 
 
--------------------
-Element Groups (LL)
--------------------
+---------------------
+Element Groups (name)
+---------------------
 Element groups for the Lanthanides, Actinides, Transuranics, Minor Actinides, and Fission Products.
 
 .. attribute:: nucname.LAN
