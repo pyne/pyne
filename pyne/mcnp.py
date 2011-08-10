@@ -13,102 +13,7 @@ classes.
 
 import struct
 
-class Record(object):
-    """
-    Stores data from a single fortran record.
-
-    Attributes:
-      data       = list of bytes read in from a binary file
-      pos        = position in data list
-      intSize    = size of integer on running machine
-      floatSize  = size of float on running machine
-      doubleSize = size of double on running machine
-    """
-
-    def __init__(self, data, numBytes):
-        """
-        Initialize instance of Record object.
-        """
-
-        self.data       = data
-        self.numBytes   = numBytes
-
-        self.reset()
-        self.intSize    = struct.calcsize('i')
-        self.floatSize  = struct.calcsize('f')
-        self.doubleSize = struct.calcsize('d')
-    
-    def getInt(self, n = 1):
-        """
-        Returns one or more integers at the current position within
-        the data list. If more than one integer is read, the integers
-        are returned in a list.
-        """
-
-        if self.pos >= self.numBytes:
-            raise Exception("Already read all data from record")
-        
-        values = struct.unpack('{0}i'.format(n), self.data[self.pos:self.pos+self.intSize*n])
-        self.pos += self.intSize * n
-        if n == 1:
-            return values[0]
-        else:
-            return list(values)
-                             
-    def getFloat(self, n = 1):
-        """
-        Returns one or more floats at the current position within the
-        data list. If more than one float is read, the floats are
-        returned in a list.
-        """
-
-        if self.pos >= self.numBytes:
-            raise Exception("Already read all data from record")
-        
-        values = struct.unpack('{0}f'.format(n), self.data[self.pos:self.pos+self.floatSize*n])
-        self.pos += self.floatSize * n
-        if n == 1:
-            return values[0]
-        else:
-            return list(values)
-    
-    def getDouble(self, n = 1):
-        """
-        Returns one or more doubles at the current position within the
-        data list. If more than one double is read, the doubles are
-        returned in a list.
-        """
-
-        if self.pos >= self.numBytes:
-            raise Exception("Already read all data from record")
-        
-        values = struct.unpack('{0}d'.format(n),self.data[self.pos:self.pos+self.doubleSize*n])
-        self.pos += self.doubleSize * n
-        if n == 1:
-            return values[0]
-        else:
-            return list(values)
-    
-    def getString(self, length):
-        """
-        Returns a string of a specified length starting at the current
-        position in the data list.
-        """
-
-        if self.pos >= self.numBytes:
-            raise Exception("Already read all data from record")
-        
-        relevantData = self.data[self.pos:self.pos+length]
-        (s,) = struct.unpack('%ds'%length,relevantData)
-        self.pos += length
-        return s
-
-    def reset(self):
-        self.pos = 0
-
-    def __repr__(self):
-        return "<Record: {0} bytes>".format(self.numBytes)
-
+from binaryreader import _BinaryReader
 
 class Mctal(object):
     def __init__(self):
@@ -174,9 +79,9 @@ class Mctal(object):
         for cycle in range(self.n_cycles):
             # read keff and prompt neutron lifetimes
             if vars_per_cycle == 0 or vars_per_cycle == 5:
-                values = [float(i) for i in getWords(self.f, lines = 1)]
+                values = [float(i) for i in get_words(self.f, lines = 1)]
             elif vars_per_cycle == 19:
-                values = [float(i) for i in getWords(self.f, lines = 4)]
+                values = [float(i) for i in get_words(self.f, lines = 4)]
             
             self.k_col.append(values[0])
             self.k_abs.append(values[1])
@@ -202,39 +107,35 @@ class Mctal(object):
             self.cycle_histories.append(values[17])
             self.avg_k_combined_FOM.append(values[18])
             
-def getWords(f, lines = 1):
+def get_words(f, lines = 1):
     words = []
     for i in range(lines):
         local_words = f.readline().split()
         words += local_words
     return words
 
-class Srctp(object):
+class Srctp(_BinaryReader):
 
-    def __init__(self):
-        pass
+    def __init__(self, filename):
+        super(Srctp, self).__init__(filename)
 
-    def read(self, filename):
-
-        # open file
-        self.f = open(filename,'rb')
-
+    def read(self):
         # read header block
-        header = getRecord(self.f)
+        header = self.get_fortran_record()
 
         # interpret header block
-        k              = header.getInt() # unique code (947830)
-        self.loc_next  = header.getInt() # location of next site in FSO array (ixak)
-        self.n_run     = header.getInt() # source particles yet to be run (nsa)
-        self.loc_store = header.getInt() # where to store next source neutron (ist)
-        self.n_source  = header.getInt() # number of source points in fso
+        k = header.get_int() # unique code (947830)
+        self.loc_next = header.get_int() # location of next site in FSO array (ixak)
+        self.n_run = header.get_int() # source particles yet to be run (nsa)
+        self.loc_store = header.get_int() # where to store next source neutron (ist)
+        self.n_source = header.get_int() # number of source points in fso
 
         # read source site array
-        fso = getRecord(self.f)
+        fso = self.get_fortran_record()
         
         self.sites = []
         for i in range(self.n_source):
-            vals = fso.getDouble(11)
+            vals = fso.get_double(11)
 
             site = SourceSite()
             site.x = vals[0]
@@ -250,8 +151,8 @@ class Srctp(object):
 
     def __repr__(self):
         return "<Srctp: {0}>".format(self.f.name)
-        
-        
+
+
 class SourceSite(object):
     
     def __init__(self):
@@ -260,56 +161,33 @@ class SourceSite(object):
     def __repr__(self):
         return "<SourceSite: ({0.x},{0.y},{0.z})>".format(self)
 
-class Runtpe(object):
 
-    def __init__(self):
-        pass
+class Runtpe(_BinaryReader):
+
+    def __init__(self, filename):
+        super(Runtpe, self).__init__(filename)
 
     def read(self, filename):
-
-        # open file
-        self.f = open(filename,'rb')
-
         # read identification block
-        header = getRecord(self.f)
+        header = self.get_fortran_record()
 
         # parse identification block
-        self.codeName = header.getString(8)
-        self.codeVersion = header.getString(5)
-        self.codeDate = header.getString(8)
-        header.getString(19) # machine designator, date and time
-        self.chargeCode = header.getString(10)
-        self.problemID = header.getString(19)
-        self.problemIDsurf = header.getString(19)
-        self.title = header.getString(80)
+        self.codeName = header.get_string(8)
+        self.codeVersion = header.get_string(5)
+        self.codeDate = header.get_string(8)
+        header.get_string(19) # machine designator, date and time
+        self.chargeCode = header.get_string(10)
+        self.problemID = header.get_string(19)
+        self.problemIDsurf = header.get_string(19)
+        self.title = header.get_string(80)
         header.pos += 3*6*11 # skip user file characteristics
-        self.n_tables = header.getInt()
+        self.n_tables = header.get_int()
 
         # read cross-section tables
         self.tables = []
         for i in range(self.n_tables):
-            self.tables.append(getRecord(self.f))
+            self.tables.append(self.get_fortran_record())
             
 
     def __repr__(self):
         return "<Runtpe: {0}>".format(self.f.name)
-
-
-def getRecord(f):
-    """
-    Fortran unformatted records start with an int and end with the
-    same int. This int represents the number of bytes that the record
-    is. That makes it easy to read.
-    """
-
-    intSize = struct.calcsize('i')
-    (numBytes,) = struct.unpack('i', f.read(intSize))
-
-    data = f.read(numBytes)
-        
-    # now read end of record
-    (numBytes2,) = struct.unpack('i', f.read(intSize))
-    if numBytes2 != numBytes:
-        raise Exception("Error while reading unformatted record.")
-        
-    return Record(data, numBytes)
