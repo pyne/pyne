@@ -222,7 +222,7 @@ std::ostream& operator<<(std::ostream& os, pyne::Material mat)
   os << "\t---------\n";
   for(pyne::comp_iter i = mat.comp.begin(); i != mat.comp.end(); i++)
   {
-    os << "\t" << nucname::LLAAAM( i->first ) << "\t" << i->second << "\n";
+    os << "\t" << nucname::name( i->first ) << "\t" << i->second << "\n";
   };
   return os;
 };
