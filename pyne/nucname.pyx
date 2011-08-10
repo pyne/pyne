@@ -19,13 +19,13 @@ import pyne.stlconverters as conv
 # Conversion dictionaries
 #
 
-cdef conv._MapProxyStrInt LLzz_proxy = conv.MapProxyStrInt()
-LLzz_proxy.init(&cpp_nucname.LLzz)
-LLzz = LLzz_proxy
+cdef conv._MapProxyStrInt name_zz_proxy = conv.MapProxyStrInt()
+name_zz_proxy.init(&cpp_nucname.name_zz)
+name_zz = name_zz_proxy
 
-cdef conv._MapProxyIntStr zzLL_proxy = conv.MapProxyIntStr()
-zzLL_proxy.init(&cpp_nucname.zzLL)
-zzLL = zzLL_proxy
+cdef conv._MapProxyIntStr zzname_proxy = conv.MapProxyIntStr()
+zzname_proxy.init(&cpp_nucname.zz_name)
+zz_name = zzname_proxy
 
 
 #
@@ -113,7 +113,7 @@ def current_form(nuc):
     Returns
     -------
     form_flag : str
-        The form identifier string from ["zzaaam", "LLAAAM", "MCNP"].
+        The form identifier string from ["zzaaam", "name", "MCNP"].
     """
     cdef std.string cpp_curr_form 
 
@@ -155,8 +155,8 @@ def zzaaam(nuc):
     return newnuc
 
 
-def LLAAAM(nuc):
-    """Converts a nuclide to its LLAAAM form. 
+def name(nuc):
+    """Converts a nuclide to its name form. 
 
     Parameters
     ----------
@@ -166,14 +166,14 @@ def LLAAAM(nuc):
     Returns
     -------
     newnuc : str 
-        Output nuclide in LLAAAM form.
+        Output nuclide in name form.
     """
     cdef std.string newnuc
 
     if isinstance(nuc, basestring):
-        newnuc = cpp_nucname.LLAAAM(<char *> nuc)
+        newnuc = cpp_nucname.name(<char *> nuc)
     elif isinstance(nuc, int):
-        newnuc = cpp_nucname.LLAAAM(<int> nuc)
+        newnuc = cpp_nucname.name(<int> nuc)
     else:
         raise NucTypeError(nuc)
 

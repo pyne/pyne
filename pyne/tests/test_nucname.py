@@ -6,13 +6,13 @@ from nose.tools import assert_equal, assert_not_equal, assert_raises, raises
 
 from pyne import nucname
 
-def test_LLzz():
-    assert_equal(nucname.LLzz["HE"], 2)
-    assert_equal(nucname.LLzz["U"], 92)
+def test_name_zz():
+    assert_equal(nucname.name_zz["HE"], 2)
+    assert_equal(nucname.name_zz["U"], 92)
 
-def test_zzLL():
-    assert_equal(nucname.zzLL[1],  "H")
-    assert_equal(nucname.zzLL[94], "PU")
+def test_zz_name():
+    assert_equal(nucname.zz_name[1],  "H")
+    assert_equal(nucname.zz_name[94], "PU")
 
 
 def test_LAN():
@@ -71,8 +71,8 @@ def test_current_form():
     assert_equal(nucname.current_form(922380),   "zzaaam")
     assert_equal(nucname.current_form("922350"), "zzaaam")
 
-    assert_equal(nucname.current_form("U235"),  "LLAAAM")
-    assert_equal(nucname.current_form("h-004"), "LLAAAM")
+    assert_equal(nucname.current_form("U235"),  "name")
+    assert_equal(nucname.current_form("h-004"), "name")
 
     assert_equal(nucname.current_form(92238),   "MCNP")
     assert_equal(nucname.current_form("92235"), "MCNP")
@@ -98,16 +98,16 @@ def test_zzaaam():
     assert_equal(nucname.zzaaam("Np"), 930000)
 
 
-def test_LLAAAM():
-    assert_equal(nucname.LLAAAM(942390), "PU239")
-    assert_equal(nucname.LLAAAM(952421), "AM242M")
+def test_name():
+    assert_equal(nucname.name(942390), "PU239")
+    assert_equal(nucname.name(952421), "AM242M")
 
-    assert_equal(nucname.LLAAAM("PU239"), "PU239")
+    assert_equal(nucname.name("PU239"), "PU239")
 
-    assert_equal(nucname.LLAAAM(94239), "PU239")
-    assert_equal(nucname.LLAAAM(95642), "AM242M")
+    assert_equal(nucname.name(94239), "PU239")
+    assert_equal(nucname.name(95642), "AM242M")
 
-    assert_equal(nucname.LLAAAM("Am-242m"), "AM242M")
+    assert_equal(nucname.name("Am-242m"), "AM242M")
 
 
 def test_mcnp():
