@@ -124,7 +124,7 @@ cdef class _Material:
         -----
         The HDF5 representation of a Material is a group that holds several 
         extendable array datasets.  One array is entitled "Mass" while the other datasets
-        are nuclide names in LLAAAM form ("U235", "NP237", *etc*).  For example::
+        are nuclide names in name form ("U235", "NP237", *etc*).  For example::
 
             File.h5 (file)
                 |-- Material (group)
@@ -806,7 +806,7 @@ class Material(_Material, collections.MutableMapping):
         title = "Material: {0}".format(self.name)
         underline = '-' * len(title)
         title += "\nmass = {0}\n{1}\n".format(self.mass, underline)
-        s = title + "\n".join(["{0:<7}{1}".format(nucname.LLAAAM(key), value) for key, value in self.comp.items()])
+        s = title + "\n".join(["{0:<7}{1}".format(nucname.name(key), value) for key, value in self.comp.items()])
         return s
 
     def __repr__(self):

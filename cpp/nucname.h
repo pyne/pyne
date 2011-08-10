@@ -1,6 +1,6 @@
 // Converts between naming conventions for nuclides.
 // zzaaam is for numerals only (923350).
-// LLAAAM is for letters  as well (U-235).
+// name is for letters  as well (U-235).
 // MCNP is for numerals without the meta-stable flag (92235), as used in MCNP.
 
 #ifndef _PYNE_NUCNAME_
@@ -18,49 +18,49 @@
 namespace nucname 
 {
   /*** Constructs the LL to zz Dictionary ***/
-  typedef std::string LL_t;
+  typedef std::string name_t;
   typedef int zz_t;
 
-  typedef std::map<LL_t, zz_t> LLzz_t; 
-  typedef LLzz_t::iterator LLzz_iter; 
-  LLzz_t get_LLzz();
-  extern LLzz_t LLzz; 
+  typedef std::map<name_t, zz_t> name_zz_t; 
+  typedef name_zz_t::iterator name_zz_iter; 
+  name_zz_t get_name_zz();
+  extern name_zz_t name_zz; 
 
   /*** Constructs zz to LL dictionary **/
-  typedef std::map<zz_t, LL_t> zzLL_t; 
-  typedef zzLL_t::iterator zzLL_iter; 
-  zzLL_t get_zzLL();
-  extern zzLL_t zzLL;
+  typedef std::map<zz_t, name_t> zzname_t; 
+  typedef zzname_t::iterator zzname_iter; 
+  zzname_t get_zz_name();
+  extern zzname_t zz_name;
 
   /******************************************/
   /*** Define useful elemental group sets ***/
   /******************************************/
-  typedef std::set<LL_t> LL_group;
-  typedef LL_group::iterator LL_group_iter;
+  typedef std::set<name_t> name_group;
+  typedef name_group::iterator name_group_iter;
 
   typedef std::set<zz_t> zz_group;
   typedef zz_group::iterator zz_group_iter;
 
-  zz_group LL_to_zz_group (LL_group);
+  zz_group name_to_zz_group (name_group);
 
-  extern LL_t LAN_array[15];
-  extern LL_group LAN;
+  extern name_t LAN_array[15];
+  extern name_group LAN;
   extern zz_group lan;
 
-  extern LL_t ACT_array[15];
-  extern LL_group ACT;
+  extern name_t ACT_array[15];
+  extern name_group ACT;
   extern zz_group act;
 
-  extern LL_t TRU_array[19];
-  extern LL_group TRU;
+  extern name_t TRU_array[19];
+  extern name_group TRU;
   extern zz_group tru;
 
-  extern LL_t MA_array[10];
-  extern LL_group MA;
+  extern name_t MA_array[10];
+  extern name_group MA;
   extern zz_group ma;
 
-  extern LL_t FP_array[88];
-  extern LL_group FP;
+  extern name_t FP_array[88];
+  extern name_group FP;
   extern zz_group fp;
 
 
@@ -185,11 +185,11 @@ namespace nucname
 
 
   /************************/
-  /*** LLAAAM functions ***/
+  /*** name functions ***/
   /************************/
-  std::string LLAAAM(int);
-  std::string LLAAAM(char *);
-  std::string LLAAAM(std::string);
+  std::string name(int);
+  std::string name(char *);
+  std::string name(std::string);
 
 
   /**********************/
