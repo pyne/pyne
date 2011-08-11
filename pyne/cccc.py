@@ -1,16 +1,26 @@
 #!/usr/bin/env python
 
 """
-ISOTXS Reader Based on the CCCC standard. This code was derived from
-Prof. James Holloway's open-source C++ classes from the University of Michigan.
+The CCCC module contains a number of classes for reading various cross section,
+flux, geometry, and data files with specifications given by the Committee for
+Computer Code Coordination. The following types of files can be read using
+classes from this module: ISOTXS, DLAYXS, BRKOXS, RTFLUX, ATFLUX, RZFLUX, MATXS,
+and SPECTR.
 
-Initial work on this module by Nick Touran (for his Thesis mostly). DLAYXS added
-by Paul Romano.
+The ISOTXS reader was derived from Prof. James Holloway's open-source C++
+classes from the University of Michigan and later expanded by Nick Touran for
+work on his PhD thesis. DLAYXS was later added by Paul Romano.
 
-Some description of ISOTXS available at
-http://t2.lanl.gov/codes/transx-hyper/isotxs.html.
+A description of the various CCCC formats are available online at:
+    http://t2.lanl.gov/codes/transx-hyper/isotxs.html
+    http://t2.lanl.gov/codes/transx-hyper/matxs.html
+    http://t2.lanl.gov/codes/transx-hyper/rtflux.html
+    http://t2.lanl.gov/codes/transx-hyper/rzflux.html
 
-TODO: Find out Nick's thoughts on CrossSection class.
+Other format specifications can be found in Los Alamos report LA-5324-MS,
+"Report of the Subcommittee on Standard Interface Files." at:
+    http://www.osti.gov/bridge/servlets/purl/5369298-uIcX6p/
+
 """
 
 import struct
@@ -18,8 +28,8 @@ import math
 
 from binaryreader import _BinaryReader, _FortranRecord
 
-class ISOTXS(_BinaryReader):
-    """An ISOTXS object represents a binary ISOTXS file written according to the
+class Isotxs(_BinaryReader):
+    """An Isotxs object represents a binary ISOTXS file written according to the
     CCCC specifications.
 
     Parameters
@@ -30,7 +40,7 @@ class ISOTXS(_BinaryReader):
     """
     
     def __init__(self, filename):
-        super(ISOTXS, self).__init__(filename)
+        super(Isotxs, self).__init__(filename)
 
         # Initialize attributes
         self.fc = {}       # file control info
@@ -52,7 +62,7 @@ class ISOTXS(_BinaryReader):
         # Read nuclide data
         for nucName in self.nucNames:
             # Create nuclide object
-            nuc = Nuclide(nucName)
+            nuc = _Nuclide(nucName)
             
             # Read nuclide name and global data
             self.read_nuclide_data(nuc)
@@ -67,7 +77,7 @@ class ISOTXS(_BinaryReader):
             # Read nuclide scattering matrix
             for block in range(self.fc['nscmax']):
                 for subBlock in range(self.fc['nsblok']):
-                    if nuc.libParams['ords'][block]>0:
+                    if nuc.libParams['ords'][block] > 0:
                         self.read_nuclide_scatter(nuc, block, subBlock)
 
             # Add nuclide to dictionary
@@ -267,40 +277,50 @@ class ISOTXS(_BinaryReader):
     
     def read_nuclide_scatter(self, nuc, block, subBlock):
         """Read nuclide scattering matrix.
-        TODO: Tidy this method up a bit.
+
+        In some versions of the specification, the written description of the
+        scattering matrix is wrong! The person who was typing that version had
+        shifted their right hand one key to the right on the keyboard resulting
+        in gibberish. The CCCC-IV pdf has the correct specification.
         """
 
+        # Get record
         r = self.get_fortran_record()
-        ng     = self.fc['ngroup']
+
+        # Copy values for number of groups and number of subblocks
+        ng = self.fc['ngroup']
         nsblok = self.fc['nsblok']
-        m=subBlock+1 # fix starting at zero problem and use same indices as CCCC specification
-        n=block+1
-        kmax=0
-        # be careful with starting indices at 0 here!!
-        lordn =nuc.libParams['ords'][block]
-        # figure out kmax for this sub-block. 
-        # this is basically how many scattering cross sections there are for this scatter type for this nuclide 
-        jl=(m-1)*((ng-1)/nsblok+1)+1
-        jup= m*((ng-1)/nsblok+1)
-        ju = min(ng,jup)
-        for j in range(jl,ju+1):
-            g = j-1  # convert to groups starting at 0
-            kmax+=nuc.libParams['jband'][g,block]
+
+        # Make sure blocks and subblocks are indexed starting from 1
+        m = subBlock + 1 
+        n = block + 1
+
+        # Determine number of scattering orders in this block
+        lordn = nuc.libParams['ords'][block]
+
+        # This is basically how many scattering cross sections there are for
+        # this scatter type for this nuclide
+        jl = (m - 1)*((ng - 1)/nsblok + 1) + 1
+        jup = m*((ng - 1)/nsblok + 1)
+        ju = min(ng, jup)
+
+        # Figure out kmax for this sub-block. 
+        kmax = 0
+        for j in range(jl, ju+1):
+            g = j - 1  # convert to groups starting at 0
+            kmax += nuc.libParams['jband'][g,block] 
             # scattering from group j
-        
-        #print('jl, jup, ju, kmax: %d %d %d %d' %(jl,jup,ju,kmax))
         
         for order in range(lordn):
             #for k in range(kmax):
-            for j in range(jl,ju+1):       # so close. just gotta finish decifering that last paragraph in 7D record description. 
-                # god, I love the debugger. 
-                # hmm, seems the ISOTXS description online at LANL is messed up. The cccc-iv pdf got me going. 
-                # XS are listed by group 
-                # there are JBAND values for scattering into group j listed in order of the "from" group as
-                # from j+jup to j, from j+jup-1 to j, ...,from j to j, from j-1 to j, j-2 to j, ... , j-down to j
-                # anything listed to the left of j represents upscatter. anything to the right is downscatter. yay.
-                # n,2n on MC**2-2 ISOTXS scatter matrix are reaction based and need to be multiplied by 2 to get
-                # the correct neutron balance.  
+            for j in range(jl, ju+1):
+                # There are JBAND values for scattering into group j listed in
+                # order of the "from" group as from j+jup to j, from j+jup-1 to
+                # j, ...,from j to j, from j-1 to j, j-2 to j, ... , j-down to j
+                # anything listed to the left of j represents
+                # upscatter. anything to the right is downscatter. n,2n on
+                # MC**2-2 ISOTXS scatter matrix are reaction based and need to
+                # be multiplied by 2 to get the correct neutron balance.
                 g = j-1 
                 assert g>=0, "loading negative group in ISOTXS."
                 jup   = nuc.libParams['jj'][g,block] - 1
@@ -310,43 +330,12 @@ class ISOTXS(_BinaryReader):
                 for k in fromGroups:
                     fromG = k-1
                     nuc.micros['scat',block,g,fromG,order] = r.get_float()
-                #print nuc.micros['scat'][k,l]
 
     def find_nuclide(self, name):
         for nuc in self:
             if nuc.name == name:
                 return nuc
         return None
-    
-    def collapse(self, emaxList, spectr):
-        """Given a SPECTR file, this method further condesnses a broad group
-        library to the energy structure in emaxList where each value is in
-        MeV. To condense to a single group, pass the argument
-        emaxList=[1e7]. This method is not complete yet.
-
-        TODO: Find out more about this from Nick.
-        """
-        
-        # u = ln(E/Emax)
-        # E = Emax*e^u
-        for hfg,flux in enumerate(spectr.flux):
-            # spectr.flux is constant lethargy. 
-            #what is the hyper fine energy?
-            hfLethargy = hfg*spectr.fc['deltau'] # this hyper-fine group's lethargy
-            hfEnergy = spectr.fc['emax']*math.exp(hfLethargy)
-            # which broad group are we in?
-            ebgMin=0
-            for bg,ebgMax in enumerate(self.emax):
-                if ebgMin<hfEnergy<ebgMax:
-                    break
-                ebgMin=ebgMax
-            
-            # which new broader group are we in?
-            nbgMin=0
-            for nbg,nbgMax in enumerate(emaxList):
-                if nbgMin<=hfEnergy<nbgMax:
-                    break
-                nbgMin=nbgMax
 
     def __iter__(self):
         for nuc in self.nuclides:
@@ -356,11 +345,21 @@ class ISOTXS(_BinaryReader):
         return "<ISOTXS File: {0}>".format(self.f.name)
 
                 
-class DLAYXS(_BinaryReader):
-    """Reads a binary DLAYXS file according to CCCC specification."""
+class Dlayxs(_BinaryReader):
+    """A Dlayxs object represents the data stored in a CCCC-format DLAYXS
+    file. This file contains delayed neutron precursor yields, emission spectra,
+    and decay constants reduced to multigroup form. Typically, the data in a
+    DLAYXS file would be related to cross-section files in ISOTXS and GRUPXS.
+
+    Parameters
+    ----------
+    filename : str
+        Path of the DLAYXS file to load.
+
+    """
     
     def __init__(self, filename):
-        super(DLAYXS, self).__init__(filename)
+        super(Dlayxs, self).__init__(filename)
         
         self.isotopeFamily = {}
         self.decay = {}
@@ -368,6 +367,7 @@ class DLAYXS(_BinaryReader):
         self.nu = {}
     
     def read(self):
+        """Read through and parse data in the DLAYXS file."""
         
         self.read_file_ID()
         self.read_file_control()
@@ -383,13 +383,14 @@ class DLAYXS(_BinaryReader):
                 self.spectrum[isotope][gDelay] = spectrum[family]
         
     def read_file_ID(self):
-        """read file ID block"""
+        """Read file ID block"""
         
         id = self.get_fortran_record()
         self.label = id.get_string(24)
         fileID = id.get_int()
         
     def read_file_control(self):
+        """Read file control block."""
         
         fileControl = self.get_fortran_record()
         self.nGroups = fileControl.get_int()
@@ -438,8 +439,83 @@ class DLAYXS(_BinaryReader):
                 self.nu[isotope][gDelay] = yieldData.get_float(self.nGroups)
             self.isotopeFamily[isotope] = yieldData.get_int(6)
 
+class Brkoxs(_BinaryReader):
+    """A Brkoxs object represents data stored in a BRKOXS file from the CCCC
+    format specification. This file is given in conjunction with an ISOTXS (or
+    GRUPXS) file when the Bondarenko self-shielding method is to be used.
 
-class SPECTR(_BinaryReader):
+    Parameters
+    ----------
+    filename : str
+        Path of the BRKOXS file to read.
+
+    """
+
+    def __init__(self, filename):
+        super(Brkoxs, self).__init__(filename)
+
+class Rtflux(_BinaryReader):
+    """A Rtflux object represents data stored in a RTFLUX file from the CCCC
+    format specification. This file contains regular total fluxes.
+
+    Parameters
+    ----------
+    filename : str
+        Path to the RTFLUX file to be read.
+
+    """
+
+    def __init__(self, filename):
+        super(Rtflux, self).__init__(filename)
+
+
+class Atflux(_BinaryReader):
+    """A Atflux object represents data stored in a ATFLUX file from the CCCC
+    format specification. This file contains adjoint total fluxes.
+
+    Parameters
+    ----------
+    filename : str
+        Path to the ATFLUX file to be read.
+
+    """
+
+    def __init__(self, filename):
+        super(Atflux, self).__init__(filename)
+
+
+class Rzflux(_BinaryReader):
+    """A Rzflux object represents data stored in a RZFLUX file from the CCCC
+    format specification. This file contains volumetric averages of fluxes by
+    broad energy groups for different geometric zones.
+
+    Parameters
+    ----------
+    filename : str
+        Path to the RZFLUX file to be read.
+
+    """
+
+    def __init__(self, filename):
+        super(Rzflux, self).__init__(filename)
+
+
+class Matxs(_BinaryReader):
+    """A Matxs object represents data stored in a MATXS file. This file contains
+    generalized cross-sections.
+
+    Parameters
+    ----------
+    filename : str
+        Path to the MATXS file to be read.
+
+    """
+
+    def __init__(self, filename):
+        super(Matxs, self).__init__(filename)
+
+
+class Spectr(_BinaryReader):
     """Reads ultra-fine group spectrum file from MC**2"""
 
     def __init__(self, filename):
@@ -466,7 +542,7 @@ class SPECTR(_BinaryReader):
         return flux
 
 
-class Nuclide(object):
+class _Nuclide(object):
     """Contains data about a single nuclide in an ISOTXS file. Originally,
     Touran had his own Nuclide class so this one is provided to supply the basic
     capabilities needed.
@@ -482,4 +558,4 @@ class Nuclide(object):
 
 
 if __name__=='__main__':
-    lib = ISOTXS('ISOTXS')
+    lib = Isotxs('ISOTXS')
