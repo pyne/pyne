@@ -21,6 +21,6 @@ def grab_kaeri_nuclide(nuc, build_dir=""):
     filename = os.path.join(build_dir, nuc + '.html')
     print "    getting {0} and placing in {1}".format(nuc, filename)
 
-    kaeri = urllib2.urlopen('http://atom.kaeri.re.kr/cgi-bin/nuclide?nuc=%s'%(nuc))
+    kaeri = urllib2.urlopen('http://atom.kaeri.re.kr/cgi-bin/nuclide?nuc={0}'.format(nuc))
     with open(filename, 'w') as f:
         f.write(kaeri.read())
