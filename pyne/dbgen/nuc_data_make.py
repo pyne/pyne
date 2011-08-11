@@ -11,7 +11,7 @@ def main():
     except OSError:
         pass
 
-    print "Making nuc_data.h5 at: {0}".format(nuc_data)
+    print "Making nuc_data.h5 at {0}".format(nuc_data)
     make_atomic_weight(nuc_data, build_dir)
 
 
