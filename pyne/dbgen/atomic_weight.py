@@ -1,54 +1,68 @@
 """This module provides a way to grab and store raw data for atomic weights."""
+import os
+import re
 
-import isoname
-import urllib2
-
-from urllib import urlopen
-from urllib import urlencode
-
+from pyne import nucname
+from pyne.dbgen.kaeri import grab_kaeri_nuclide
 
 # Note that since ground state and meta-stable isotopes are of the same atomic weight, 
 # the meta-stables have been discluded from the following data sets.
 
-def grab_kaeri_atomic_weights(file_out='atomic_weight.txt'):
-    """Makes the atomic weight library.
-    Library rows have the the following form:
+nat_iso_regex = re.compile('.*?/cgi-bin/nuclide[?]nuc=([A-Za-z]{1,2}\d{1,3}).*?[(].*?[)]')
 
-    iso	AW	AW_sig	Abund
+def parse_for_natural_isotopes(htmlfile):
+    """Parses an elemental html file, returning a set of naturally occuring isotopes."""
+    nat_isos = set()
+    with open(htmlfile, 'r') as f:
+        for line in f:
+            m = nat_iso_regex.search(line)
+            if m is not None:
+                nat_isos.add(nucname.zzaaam(m.group(1)))
+    return nat_isos
 
-    where:
-        iso	= Isotope in LLZZZM format
-        AW	= Atomic Weight [amu]
-        AW_sig	= Atomic Weight Uncertainty [amu]
-        Abund	= Natural fractional atomic abundance [unitless]
 
-    Not to be used under normal circumstances.
-    More like an embedded script, in case the librrary file is lost and unrecoverable.
+def grab_kaeri_atomic_abund(build_dir=""):
+    """Grabs the KAERI files needed for the atomic abundance calculation, 
+    if not already present.
 
-    FIXME: This could use a rewrite such that it doesn't have to grab them all at once.
+    Parameters
+    ----------
+    build_dir : str
+        Major directory to place html files in. 'KAERI/' will be appended.
     """
+    # Add kaeri to build_dir
+    build_dir = os.path.join(build_dir, 'KAERI')
+    try:
+        os.makedirs(build_dir)
+    except OSError:
+        pass
+    already_grabbed = set(os.listdir(build_dir))
 
-    isolist = []
+    natural_nuclides = set()
+
+    # Grab and parse elemental summary files.
+    for element in nucname.name_zz.keys():
+        htmlfile = element + '.html'
+        if htmlfile in already_grabbed:
+            continue
+        grab_kaeri_nuclide(element, build_dir)
+
+        natural_nuclides = natural_nuclides | parse_for_natural_isotopes(os.path.join(build_dir, htmlfile))
+
+    print natural_nuclides
+
+    # Grab natural nuclide files
+    for nuc in natural_nuclides:
+        nuc = nucname.name(nuc)
+        htmlfile = nuc + '.html'
+        if htmlfile in already_grabbed:
+            continue
+        grab_kaeri_nuclide(element, build_dir)
+
+
+
+def other_stuff():
     
-    for key in isoname.LLaadic.keys():
-        NucFetched = False
-
-        while not NucFetched:
-            try:
-                print key 
-                kaeri = urllib2.urlopen( 'http://atom.kaeri.re.kr/cgi-bin/nuclide?nuc=%s'%(key) )
-                NucFetched = True
-            except:
-                print "Failed to grab, retrying",
-
-        for line in kaeri:
-            if 0 < line.count("/cgi-bin/nuclide?nuc="):
-                nuc = line.partition("/cgi-bin/nuclide?nuc=")[2].partition("\"")[0].upper()
-                if not (nuc == key):
-                    isolist.append(nuc)
-        kaeri.close()
-
-    print "\n~~~~~~~~\n"
 
     isotab = []
 
@@ -121,7 +135,7 @@ atomic_weight_desc = {
     'abund':  tb.FloatCol(pos=4),
     }
 
-def make_atomic_weight(h5_file='nuc_data.h5', data_file='atomic_weight.txt'):
+def _make_atomic_weight(h5_file='nuc_data.h5', data_file='atomic_weight.txt'):
     """Makes an atomic weight table and adds it to the hdf5 library.
 
     Keyword Args:
@@ -157,3 +171,9 @@ def make_atomic_weight(h5_file='nuc_data.h5', data_file='atomic_weight.txt'):
     kdb.close()
 
 
+
+
+def make_atomic_weight(nuc_data, build_dir):
+    # First grab the atomic abundance data
+    print "Grabing the atomic abundance from KAERI"
+    grab_kaeri_atomic_abund(build_dir)
