@@ -1,6 +1,10 @@
 """This module provides a way to grab and store raw data for atomic weights."""
 import os
 import re
+import urllib2
+
+import numpy as np
+import tables as tb
 
 from pyne import nucname
 from pyne.dbgen.kaeri import grab_kaeri_nuclide
@@ -38,9 +42,8 @@ def grab_kaeri_atomic_abund(build_dir=""):
         pass
     already_grabbed = set(os.listdir(build_dir))
 
-    natural_nuclides = set()
-
     # Grab and parse elemental summary files.
+    natural_nuclides = set()
     for element in nucname.name_zz.keys():
         htmlfile = element + '.html'
         if htmlfile not in already_grabbed:
@@ -57,67 +60,73 @@ def grab_kaeri_atomic_abund(build_dir=""):
 
 
 
-def other_stuff():
-    
+atomic_abund_regex = re.compile('<li>Atomic Percent Abundance: (\d+[.]?\d*?)%')
 
-    isotab = []
+def parse_atomic_abund(build_dir=""):
+    """Builds and returns a dictionary from nuclides to atomic abundence fractions."""
 
-    for key in isolist:
-        AW = 0.0
-        AW_sig = 0.0
-        Abund = 0.0			
+    # Grab and parse elemental summary files.
+    natural_nuclides = set()
+    for element in nucname.name_zz.keys():
+        natural_nuclides = natural_nuclides | parse_for_natural_isotopes(os.path.join(build_dir, htmlfile))
 
-        NucFetched = False
+    atomic_abund = {}    
 
-        while not NucFetched:
-            try:
-                print key
-                kaeri = urllib2.urlopen( 'http://atom.kaeri.re.kr/cgi-bin/nuclide?nuc=%s'%(key) )
-                NucFetched = True
-            except:
-                print "Failed to grab, retrying",
+    for nuc in natural_nuclides:
+        nuc_name = nucname.name(nuc)
+        htmlfile = os.path.join(build_dir, nuc_name + '.html')
 
-        for line in kaeri:
-            if 0 < line.count("Atomic Mass:"):
-                ls = line.split()
-                AW = ls[2]
-                AW_sig = ls[4]
-            elif 0 < line.count("Atomic Percent Abundance:"):
-                ls = line.split()
-                abund_try = ls[-1]
-                while Abund == 0.0:
-                    try:
-                        Abund = float(abund_try) / 100.0
-                    except:
-                        abund_try = abund_try[:-1]
-        kaeri.close()
+        with open(htmlfile, 'r') as f:
+            for line in f:
+                m = atomic_abund_regex.search(line)
+                if m is not None:
+                    val = float(m.group(1)) * 0.01
+                    atomic_abund[nuc] = val
+                    break
 
-        if AW == 0.0:
+    return atomic_abund
+
+
+
+def grab_atmoic_mass_adjustment(build_dir=""):
+    """Grabs the current atomic mass adjustment from the Atomic
+    Mass Data Center.  These are courtesy of Georges Audi and 
+    Wang Meng via a private communication, April 2011."""
+    mass_file = 'mass.mas114'
+    bd_files = os.listdir(build_dir)
+    if mass_file in bd_files:
+        return 
+
+    mass = urllib2.urlopen('http://amdc.in2p3.fr/masstables/Ame2011int/mass.mas114')
+    with open(os.path.join(build_dir, mass_file), 'w') as f:
+        f.write(mass.read())
+
+
+
+amdc_regex = re.compile('[ \d-]*? ([\d]{1,3}) ([A-Z][a-z]?) .*? (\d{1,3}) ([ #.\d]{10,11}) ([ #.\d]{1,10})[ ]*?$')
+
+def parse_atmoic_mass_adjustment(build_dir=""):
+    """Parses the atomic mass adjustment data into a list of tuples of 
+    the nuclide, atomic mass, and error."""
+    mass_file = 'mass.mas114'
+    f = open(os.path.join(build_dir, mass_file), 'r')
+
+    atomic_masses = []
+
+    for line in f:
+        m = amdc_regex.search(line)
+        if m is None:
             continue
 
-        isotab.append([isoname.LLZZZM_2_aazzzm(key), AW, AW_sig, '%G'%Abund])
+        nuc = m.group(2) + m.group(1)
+        mass = float(m.group(3)) + 1E-6 * float(m.group(4).strip().replace('#', ''))
+        error = 1E-6 * float(m.group(5).strip().replace('#', ''))
 
+        atomic_masses.append((nuc, mass, error))
+        
+    f.close()
 
-    isotab = sorted(isotab)
-
-    libfile = open(file_out, 'w')
-    for row in isotab:
-        new_row = '{0:<6}  {1:<11}  {2:<9}  {3}\n'.format(isoname.aazzzm_2_LLZZZM(row[0]), row[1], row[2], row[3])
-        libfile.write(new_row)
-    libfile.close()
-
-    return
-
-
-"""Functions to make a nuclear data hdf5 file from the raw libraries."""
-import os
-import re
-import math
-
-import numpy as np
-import tables as tb
-
-import isoname
+    return atomic_masses    
 
 ############################
 ### Next, Atomic Weights ###
@@ -173,3 +182,10 @@ def make_atomic_weight(nuc_data, build_dir):
     # First grab the atomic abundance data
     print "Grabing the atomic abundance from KAERI"
     grab_kaeri_atomic_abund(build_dir)
+
+    # Then grab mass data
+    print "Grabing atomic mass data from AMDC"
+    grab_atmoic_mass_adjustment(build_dir)
+
+
+    parse_atmoic_mass_adjustment(build_dir)
