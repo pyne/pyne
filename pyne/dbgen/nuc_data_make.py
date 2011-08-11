@@ -3,7 +3,7 @@ import os
 
 
 def main():
-    print "Yo dog."
+    print nuc_data
     pass
 
 
