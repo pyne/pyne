@@ -192,14 +192,14 @@ def make_atomic_weight_table(nuc_data, build_dir=""):
         elem_name, elem_zz, elem_mass, _error, _abund = A[element_zz]
 
         new_elem_mass = elem_mass + (nuc_mass * abund)
-        A[element_zz] = element, nuc_zz, new_elem_mass, 0.0, 0.0
+        A[element_zz] = element, element_zz, new_elem_mass, 0.0, 0.0
 
 
     A = sorted(A.values(), key=lambda x: x[1])
-    A = np.array(A, dtype=atomic_weight_dtype)
+    #A = np.array(A, dtype=atomic_weight_dtype)
 
     # Open the HDF5 File
-    kdb = tb.openFile(h5_file, 'a')
+    kdb = tb.openFile(nuc_data, 'a')
 
     # Make a new the table
     Atable = kdb.createTable("/", "atomic_weight", atomic_weight_desc, 
@@ -216,7 +216,8 @@ def make_atomic_weight_table(nuc_data, build_dir=""):
 
 
 def make_atomic_weight(nuc_data, build_dir):
-    with tb.openFile(h5_file, 'a') as f:
+    #os.remove(nuc_data)
+    with tb.openFile(nuc_data, 'a') as f:
         if hasattr(f.root, 'atomic_weight'):
             return 
 
