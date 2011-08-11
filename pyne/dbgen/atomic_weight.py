@@ -43,21 +43,17 @@ def grab_kaeri_atomic_abund(build_dir=""):
     # Grab and parse elemental summary files.
     for element in nucname.name_zz.keys():
         htmlfile = element + '.html'
-        if htmlfile in already_grabbed:
-            continue
-        grab_kaeri_nuclide(element, build_dir)
+        if htmlfile not in already_grabbed:
+            grab_kaeri_nuclide(element, build_dir)
 
         natural_nuclides = natural_nuclides | parse_for_natural_isotopes(os.path.join(build_dir, htmlfile))
-
-    print natural_nuclides
 
     # Grab natural nuclide files
     for nuc in natural_nuclides:
         nuc = nucname.name(nuc)
         htmlfile = nuc + '.html'
-        if htmlfile in already_grabbed:
-            continue
-        grab_kaeri_nuclide(element, build_dir)
+        if htmlfile not in already_grabbed:
+            grab_kaeri_nuclide(nuc, build_dir)
 
 
 
