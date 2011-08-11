@@ -101,6 +101,10 @@ ext_modules=[
 for e in ext_modules:
     e.pyrex_directives = compiler_directives
 
+
+# Utility scripts
+scripts=['scripts/nuc_data_make']
+
 ###################
 ### Call setup! ###
 ###################
@@ -110,10 +114,11 @@ if __name__ == "__main__":
         description = 'Python for Nuclear Engineering',
         author = 'PyNE Development Team',
         author_email = 'scopatz@gmail.com',
-        url = 'https://github.com/pyne',
-        packages = ['pyne'],
+        url = 'http://pyne.github.com/pyne',
+        packages = ['pyne', 'pyne.dbgen'],
         package_dir = pack_dir,
         cmdclass = {'build_ext': build_ext}, 
-        ext_modules=ext_modules, 
+        ext_modules=ext_modules,
+        scripts=scripts, 
         )
 
