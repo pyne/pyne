@@ -102,8 +102,8 @@ def grab_atmoic_mass_adjustment(build_dir=""):
         f.write(mass.read())
 
 
-
-amdc_regex = re.compile('[ \d-]*? ([\d]{1,3}) ([A-Z][a-z]?) .*? (\d{1,3}) ([ #.\d]{10,11}) ([ #.\d]{1,10})[ ]*?$')
+# Note, this regex specifically leaves our free neutrons
+amdc_regex = re.compile('[ \d-]*? (\d{1,3})[ ]{1,4}(\d{1,3}) [A-Z][a-z]? .*? (\d{1,3}) ([ #.\d]{10,11}) ([ #.\d]{1,10})[ ]*?$')
 
 def parse_atmoic_mass_adjustment(build_dir=""):
     """Parses the atomic mass adjustment data into a list of tuples of 
@@ -118,7 +118,7 @@ def parse_atmoic_mass_adjustment(build_dir=""):
         if m is None:
             continue
 
-        nuc = m.group(2) + m.group(1)
+        nuc = int(m.group(1) + m.group(2)) * 10
         mass = float(m.group(3)) + 1E-6 * float(m.group(4).strip().replace('#', ''))
         error = 1E-6 * float(m.group(5).strip().replace('#', ''))
 
@@ -128,9 +128,8 @@ def parse_atmoic_mass_adjustment(build_dir=""):
 
     return atomic_masses    
 
-############################
-### Next, Atomic Weights ###
-############################
+
+
 
 atomic_weight_desc = {
     'iso_LL': tb.StringCol(itemsize=6, pos=0),
