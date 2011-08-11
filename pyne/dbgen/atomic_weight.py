@@ -64,10 +64,12 @@ atomic_abund_regex = re.compile('<li>Atomic Percent Abundance: (\d+[.]?\d*?)%')
 
 def parse_atomic_abund(build_dir=""):
     """Builds and returns a dictionary from nuclides to atomic abundence fractions."""
+    build_dir = os.path.join(build_dir, 'KAERI')
 
     # Grab and parse elemental summary files.
     natural_nuclides = set()
     for element in nucname.name_zz.keys():
+        htmlfile = element + '.html'
         natural_nuclides = natural_nuclides | parse_for_natural_isotopes(os.path.join(build_dir, htmlfile))
 
     atomic_abund = {}    
@@ -103,7 +105,8 @@ def grab_atmoic_mass_adjustment(build_dir=""):
 
 
 # Note, this regex specifically leaves our free neutrons
-amdc_regex = re.compile('[ \d-]*? (\d{1,3})[ ]{1,4}(\d{1,3}) [A-Z][a-z]? .*? (\d{1,3}) ([ #.\d]{10,11}) ([ #.\d]{1,10})[ ]*?$')
+#amdc_regex = re.compile('[ \d-]*? (\d{1,3})[ ]{1,4}(\d{1,3}) [A-Z][a-z]? .*? (\d{1,3}) ([ #.\d]{10,11}) ([ #.\d]{1,10})[ ]*?$')
+amdc_regex = re.compile('[ \d-]*? (\d{1,3})[ ]{1,4}(\d{1,3}) [A-Z][a-z]? .*? (\d{1,3}) ([ #.\d]{5,12}) ([ #.\d]+)[ ]*?$')
 
 def parse_atmoic_mass_adjustment(build_dir=""):
     """Parses the atomic mass adjustment data into a list of tuples of 
@@ -118,7 +121,7 @@ def parse_atmoic_mass_adjustment(build_dir=""):
         if m is None:
             continue
 
-        nuc = int(m.group(1) + m.group(2)) * 10
+        nuc = (10000 * int(m.group(1))) + (10 * int(m.group(2)))
         mass = float(m.group(3)) + 1E-6 * float(m.group(4).strip().replace('#', ''))
         error = 1E-6 * float(m.group(5).strip().replace('#', ''))
 
@@ -132,41 +135,76 @@ def parse_atmoic_mass_adjustment(build_dir=""):
 
 
 atomic_weight_desc = {
-    'iso_LL': tb.StringCol(itemsize=6, pos=0),
-    'iso_zz': tb.IntCol(pos=1),
-    'value':  tb.FloatCol(pos=2),
-    'error':  tb.FloatCol(pos=3),
-    'abund':  tb.FloatCol(pos=4),
+    'nuc_name': tb.StringCol(itemsize=6, pos=0),
+    'nuc_zz':   tb.IntCol(pos=1),
+    'mass':     tb.FloatCol(pos=2),
+    'error':    tb.FloatCol(pos=3),
+    'abund':    tb.FloatCol(pos=4),
     }
 
-def _make_atomic_weight(h5_file='nuc_data.h5', data_file='atomic_weight.txt'):
-    """Makes an atomic weight table and adds it to the hdf5 library.
+atomic_weight_dtype = np.dtype([
+    ('nuc_name', 'S6'),
+    ('nuc_zz',   int),
+    ('mass',     float),
+    ('error',    float), 
+    ('abund',    float), 
+    ])
 
-    Keyword Args:
-        * h5_file (str): path to hdf5 file.
-        * data_file (str): path to the atomic weight text file to load data from.
+def make_atomic_weight_table(nuc_data, build_dir=""):
+    """Makes an atomic weight table in the nuc_data library.
+
+    Parameters
+    ----------
+    nuc_data : str
+        Path to nuclide data file.
+    build_dir : str
+        Directory to place html files in.
     """
+    # Grab raw data
+    atomic_abund  = parse_atomic_abund(build_dir)
+    atomic_masses = parse_atmoic_mass_adjustment(build_dir)
+
+    A = {}
+
+    # Add normal isotopes to A
+    for nuc_zz, mass, error in atomic_masses:
+        try: 
+            nuc_name = nucname.name(nuc_zz)
+        except RuntimeError:
+            continue
+
+        if nuc_zz in atomic_abund:
+            A[nuc_zz] = nuc_name, nuc_zz, mass, error, atomic_abund[nuc_zz]
+        else:
+            A[nuc_zz] = nuc_name, nuc_zz, mass, error, 0.0
+
+    # Add naturally occuring elements
+    for element in nucname.name_zz:
+        nuc_zz = nucname.zzaaam(element)
+        A[nuc_zz] = element, nuc_zz, 0.0, 0.0, 0.0
+        
+    for nuc, abund in atomic_abund.items():
+        zz = nuc / 10000
+        element_zz = zz * 10000
+        element = nucname.zz_name[zz]
+
+        nuc_name, nuc_zz, nuc_mass, _error, _abund = A[nuc]
+        elem_name, elem_zz, elem_mass, _error, _abund = A[element_zz]
+
+        new_elem_mass = elem_mass + (nuc_mass * abund)
+        A[element_zz] = element, nuc_zz, new_elem_mass, 0.0, 0.0
+
+
+    A = sorted(A.values(), key=lambda x: x[1])
+    A = np.array(A, dtype=atomic_weight_dtype)
+
     # Open the HDF5 File
     kdb = tb.openFile(h5_file, 'a')
 
     # Make a new the table
-    Atable = kdb.createTable("/", "A", atomic_weight_desc, "Atomic Weight Data [amu]")
-    nuc = Atable.row
-
-    with open(data_file, 'r') as f:
-        for line in f:
-            ls = line.split()
-            iso_LL = isoname.mixed_2_LLAAAM(ls[0])
-            iso_zz = isoname.LLAAAM_2_zzaaam(iso_LL)
-
-            nuc['iso_LL'] = iso_LL
-            nuc['iso_zz'] = iso_zz
-            nuc['value'] = float(ls[1])
-            nuc['error'] = float(ls[2])
-            nuc['abund'] = float(ls[3])
-
-            # Insert nuclide to table
-            nuc.append()
+    Atable = kdb.createTable("/", "atomic_weight", atomic_weight_desc, 
+                             "Atomic Weight Data [amu]", expectedrows=len(A))
+    Atable.append(A)
 
     # Ensure that data was written to table
     Atable.flush()
@@ -178,6 +216,10 @@ def _make_atomic_weight(h5_file='nuc_data.h5', data_file='atomic_weight.txt'):
 
 
 def make_atomic_weight(nuc_data, build_dir):
+    with tb.openFile(h5_file, 'a') as f:
+        if hasattr(f.root, 'atomic_weight'):
+            return 
+
     # First grab the atomic abundance data
     print "Grabing the atomic abundance from KAERI"
     grab_kaeri_atomic_abund(build_dir)
@@ -186,5 +228,7 @@ def make_atomic_weight(nuc_data, build_dir):
     print "Grabing atomic mass data from AMDC"
     grab_atmoic_mass_adjustment(build_dir)
 
+    # Make atomic weight table once we have the array
+    print "Making atomic weight data table."
+    make_atomic_weight_table(nuc_data, build_dir)
 
-    parse_atmoic_mass_adjustment(build_dir)
