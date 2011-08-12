@@ -47,20 +47,20 @@ cdef class PyneConfig:
 
     property PYNE_DATA:
         def __get__(self):
-            cdef std.string value = cpp_bright.PYNE_DATA
+            cdef std.string value = cpp_pyne.PYNE_DATA
             return value.c_str()
 
         def __set__(self, char * value):
-            cpp_bright.PYNE_DATA = std.string(value)
+            cpp_pyne.PYNE_DATA = std.string(value)
 
 
     property NUC_DATA_PATH:
         def __get__(self):
-            cdef std.string value = cpp_bright.NUC_DATA_PATH
+            cdef std.string value = cpp_pyne.NUC_DATA_PATH
             return value.c_str()
 
         def __set__(self, char * value):
-            cpp_bright.NUC_DATA_PATH = std.string(value)
+            cpp_pyne.NUC_DATA_PATH = std.string(value)
 
 
         
