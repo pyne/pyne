@@ -1,4 +1,5 @@
-import os
+# Important config tools
+from pyne.pyne_config import nuc_data, pyne_start, pyne_config
 
-# Path to database file
-nuc_data = os.path.join(os.path.split(__file__)[0], 'nuc_data.h5')
+# importnat naming functions
+from pyne.nucname import zzaaam, nuc_weight
