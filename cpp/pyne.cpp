@@ -6,6 +6,7 @@
 // PyNE Globals
 
 std::string pyne::PYNE_DATA = "";
+std::string pyne::NUC_DATA_PATH = "";
 
 void pyne::pyne_start()
 {
@@ -13,10 +14,19 @@ void pyne::pyne_start()
   char * tmpPYNE_DATA;
   size_t lenPYNE_DATA;
   errno_t errPYNE_DATA = _dupenv_s(&tmpPYNE_DATA, &lenPYNE_DATA, "PYNE_DATA");
-  if (errPYNE_DATA) std::cout << "PYNE_DATA Enviromental Variable could not be found\n";
+  if (errPYNE_DATA)
+    std::cout << "PYNE_DATA enviromental variable could not be found\n";
   PYNE_DATA = (std::string) tmpPYNE_DATA;
+
+  char * tmpNUC_DATA_PATH;
+  size_t lenNUC_DATA_PATH;
+  errno_t errNUC_DATA_PATH = _dupenv_s(&tmpNUC_DATA_PATH, &lenNUC_DATA_PATH, "NUC_DATA_PATH");
+  if (errPYNE_DATA)
+    std::cout << "NUC_DATA_PATH enviromental variable could not be found\n";
+  NUC_DATA_PATH = (std::string) tmpNUC_DATA_PATH;
 #else
   PYNE_DATA = getenv("PYNE_DATA");
+  NUC_DATA_PATH = getenv("NUC_DATA_PATH");
 #endif
   return;
 };

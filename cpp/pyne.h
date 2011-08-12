@@ -29,6 +29,7 @@ namespace pyne {
   void pyne_start ();
 
   extern std::string PYNE_DATA;
+  extern std::string NUC_DATA_PATH;
 
   // String Transformations
   static std::string digits = "0123456789";
