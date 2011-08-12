@@ -525,9 +525,9 @@ std::string nucname::serpent(std::string nuc)
 
 
 
-/************************/
-/*** Helper Functions ***/
-/************************/
+/****************************/
+/*** Nuc_weight Functions ***/
+/****************************/
 std::map<int, double> nucname::nuc_weight_map = std::map<int, double>();
 
 
@@ -542,15 +542,6 @@ void nucname::_load_nuc_weight_map()
   bool isH5 = H5::H5File::isHdf5(pyne::NUC_DATA_PATH);
   if (!isH5)
     throw h5wrap::FileNotHDF5(pyne::NUC_DATA_PATH);
-
-  // Get the array structure
-  struct atomic_weight_struct {
-    char nuc_name[6];
-    int nuc_zz;
-    double mass;
-    double error;
-    double abund;
-  } atomic_weight_struct;
 
   // Get the HDF5 compound type (table) description
   H5::CompType atomic_weight_desc(sizeof(atomic_weight_struct));
@@ -569,7 +560,7 @@ void nucname::_load_nuc_weight_map()
   int atomic_weight_length = atomic_weight_space.getSimpleExtentNpoints();
 
   // Read in the data
-  atomic_weight_struct * atomic_weight_array = new FCComps::atomic_weight_struct[atomic_weight_length];
+  atomic_weight_struct * atomic_weight_array = new atomic_weight_struct[atomic_weight_length];
   atomic_weight_set.read(atomic_weight_array, atomic_weight_desc);
 
   // close the nuc_data library, before doing anythng stupid
@@ -591,7 +582,7 @@ double nucname::nuc_weight(int nuc)
 
   // First check if we already have the nuc weight in the map
   if (nuc_iter != nuc_end)
-    return *(nuc_iter.second);
+    return (*nuc_iter).second;
 
   // Next, fill up the map with values from the 
   // nuc_data.h5, if the map is empty.
