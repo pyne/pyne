@@ -13,11 +13,14 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#include "H5Cpp.h"
+#include "h5wrap.h"
+
 #include "pyne.h"
 
 namespace nucname 
 {
-  /*** Constructs the LL to zz Dictionary ***/
+  /*** Constructs the name to zz Dictionary ***/
   typedef std::string name_t;
   typedef int zz_t;
 
@@ -26,7 +29,7 @@ namespace nucname
   name_zz_t get_name_zz();
   extern name_zz_t name_zz; 
 
-  /*** Constructs zz to LL dictionary **/
+  /*** Constructs zz to name dictionary **/
   typedef std::map<zz_t, name_t> zzname_t; 
   typedef zzname_t::iterator zzname_iter; 
   zzname_t get_zz_name();
@@ -213,6 +216,8 @@ namespace nucname
   /************************/
   /*** Helper Functions ***/
   /************************/
+  extern std::map<int, double> nuc_weight_map;
+  void _load_nuc_weight_map();
   double nuc_weight(int);
   double nuc_weight(char *);
   double nuc_weight(std::string);
