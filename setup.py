@@ -71,9 +71,12 @@ def cpp_ext(name, sources, use_hdf5=False):
 # 
 stlconv_ext = cpp_ext("pyne.stlconverters", [os.path.join('pyne', 'stlconverters.pyx')])
 
+config_ext = cpp_ext("pyne.pyne_config", ['pyne.cpp',
+                                          os.path.join('pyne', 'pyne_config.pyx'),])
+
 nucname_ext = cpp_ext("pyne.nucname", ['pyne.cpp',
                                        'nucname.cpp',
-                                       os.path.join('pyne', 'nucname.pyx'),])
+                                       os.path.join('pyne', 'nucname.pyx'),], True)
 
 material_ext = cpp_ext("pyne.material", ['pyne.cpp',
                                          'nucname.cpp',
@@ -95,6 +98,7 @@ pack_data = {'pyne': []}
 compiler_directives = {'embedsignature': False}
 ext_modules=[
             Extension(**stlconv_ext), 
+            Extension(**config_ext), 
             Extension(**nucname_ext), 
             Extension(**material_ext), 
             ]
