@@ -13,13 +13,20 @@ cdef extern from "../cpp/material.h" namespace "pyne":
     cdef cppclass Material:
         # Constuctors
         Material()
-        Material(map[int, double], float, std.string) except +
-        Material(char *, float, std.string) except +
+        Material(map[int, double]) except +
+        Material(map[int, double], double) except +
+        Material(map[int, double], double, std.string) except +
+        Material(map[int, double], double, std.string, double) except +
+        Material(char *) except +
+        Material(char *, double) except +
+        Material(char *, double, std.string) except +
+        Material(char *, double, std.string, double) except +
 
         # Attributes
         map[int, double] comp
         double mass
         std.string name
+        double atoms_per_mol
 
         # Methods
         void norm_comp() except +
@@ -28,7 +35,7 @@ cdef extern from "../cpp/material.h" namespace "pyne":
 
         void normalize() except +
         map[int, double] mult_by_mass() except +
-        double molecular_weight() except +
+        double molecular_weight(double) except +
 
         # Substream Methods
         Material sub_mat(set[int], std.string) except +
@@ -50,7 +57,6 @@ cdef extern from "../cpp/material.h" namespace "pyne":
         # Atom frac member functions
         map[int, double] to_atom_frac() except +
         void from_atom_frac(map[int, double]) except +
-
 
         # Operator Overloads
         Material operator+(double) except +

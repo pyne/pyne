@@ -39,18 +39,18 @@ cdef cpp_map[int, double] dict_to_comp(dict nucvec):
 
 cdef class _Material:
 
-    def __cinit__(self, nucvec=None, float mass=-1.0, char * name=''):
+    def __cinit__(self, nucvec=None, double mass=-1.0, char * name='', double atoms_per_mol=-1.0):
         """Material C++ constuctor."""
         cdef cpp_map[int, double] comp
 
         if isinstance(nucvec, dict):
             # Material from dict
             comp = dict_to_comp(nucvec)
-            self.mat_pointer = new cpp_material.Material(comp, mass, std.string(name))
+            self.mat_pointer = new cpp_material.Material(comp, mass, std.string(name), atoms_per_mol)
 
         elif isinstance(nucvec, basestring):
             # Material from file
-            self.mat_pointer = new cpp_material.Material(<char *> nucvec, mass, std.string(name))
+            self.mat_pointer = new cpp_material.Material(<char *> nucvec, mass, std.string(name), atoms_per_mol)
 
         elif nucvec is None:
             # Empty mass stream
@@ -95,6 +95,14 @@ cdef class _Material:
 
         def __set__(self, char * value):
             self.mat_pointer.name = std.string(value)
+
+
+    property atoms_per_mol:
+        def __get__(self):
+            return self.mat_pointer.atoms_per_mol
+
+        def __set__(self, double value):
+            self.mat_pointer.atoms_per_mol = value
 
     #
     # Class Methods
@@ -206,15 +214,20 @@ cdef class _Material:
         return nucvec_proxy
 
 
-    def molecular_weight(self):
-        """This method returns the molecular weight of the comp of this material.  Note that this is 
-        only a rough estimate since this function is not yet coupled with measured atomic weights.
+    def molecular_weight(self, atoms_per_mol=-1.0):
+        """This method returns the molecular weight of the comp of this material.  
+
+        Parameters
+        ----------
+        atoms_per_mol : double
+            Number of atoms to per molecule of material.  Needed as a scaling factor.
+            For example, this value for water is 3.0.
 
         Returns
         -------
         mol_weight : float 
             Molecular weight in [amu]."""
-        return self.mat_pointer.molecular_weight()
+        return self.mat_pointer.molecular_weight(atoms_per_mol)
 
 
     #

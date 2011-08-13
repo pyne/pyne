@@ -49,18 +49,19 @@ namespace pyne
     comp_map comp;
     double mass;
     std::string name;
+    double atoms_per_mol;
 
     //Material Constructors
     Material ();
-    Material (comp_map, double = -1.0, std::string = "");
-    Material (char *, double = -1.0, std::string = "");
-    Material (std::string, double = -1.0, std::string = "");
+    Material (comp_map, double=-1.0, std::string="", double=-1.0);
+    Material (char *, double=-1.0, std::string="", double=-1.0);
+    Material (std::string, double=-1.0, std::string="", double=-1.0);
     ~Material ();
 
     //Material function definitions
     void normalize ();
     comp_map mult_by_mass();
-    double molecular_weight();
+    double molecular_weight(double=-1.0);
 
     //Sub-Stream Computation
     Material sub_mat(std::set<int>, std::string n = "");
