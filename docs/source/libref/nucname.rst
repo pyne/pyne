@@ -4,7 +4,7 @@ Nuclide Naming Module -- :mod:`pyne.nucname`
 This package is used to convert between various nuclide naming schemes.  
 Currently four naming conventions are supported. 
 
-.. _isoform:
+.. _name_forms:
 
  #. **zzaaam**: This type places the charge of the nucleus out front, then has three 
     digits for the atomic mass number, and ends with a metastable flag (0 = ground, 
@@ -137,10 +137,20 @@ The groups are defined as follows::
 
 
 
+-------------
+Atomic weight
+-------------
+
+.. autofunction:: nuc_weight(nuc)
+
+.. data:: nuc_weight_map
+
+    A mapping from zzaaam-nuclides to their mass weights.
+    This is used by :func:`nuc_weight` under the hood.
+
 -----------------------
 Other nucname functions
 -----------------------
 
 .. autofunction:: current_form(nuc)
 
-.. autofunction:: nuc_weight(nuc)
