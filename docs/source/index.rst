@@ -11,9 +11,6 @@ more developers, testers, and users.  If you are interested in being
 involved with this project, please contact us via `github`_ or
 `convore`_.
 
-Current modules are:
-   #. Fill-in soon
-
 PyNE has the following dependencies:
    #. `NumPy <http://numpy.scipy.org/>`_
    #. `SciPy <http://www.scipy.org/>`_
