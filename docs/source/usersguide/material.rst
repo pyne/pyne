@@ -1,10 +1,10 @@
-=================================
-Materials -- :mod:`pyne.material`
-=================================
+.. _usersguide_material:
+
+=========
+Materials
+=========
 This module contains the Material class, which is used to represent nuclear
 materials throughout PyNE.
-
-.. _material:
 
 .. currentmodule:: pyne.material
 
@@ -179,30 +179,5 @@ Plutonium vector.  You may also calculate the molecular weight of a material via
     In [29]: leu.molecular_weight()
     Out[29]: 237.87853011228307
 
-Further information on the Material class may be seen below.
-
-**************
-Material Class
-**************
-.. autoclass:: Material(comp, mass=-1, name='')
-
-    .. automethod:: molecular_weight()
-    .. automethod:: norm_comp()
-    .. automethod:: normalize()
-    .. automethod:: mult_by_mass()
-    .. automethod:: load_from_hdf5(filename, groupname, row=-1)
-    .. automethod:: load_from_text(filename)
-    .. automethod:: sub_mat(nuc_sequence, name="")
-    .. automethod:: set_mat(nuc_sequence, value, name="")
-    .. automethod:: del_mat(nuc_sequence, name="")
-    .. automethod:: sub_range(lower=0, upper=10000000, name="")
-    .. automethod:: set_range(lower=0, upper=10000000, value, name="")
-    .. automethod:: del_range(lower=0, upper=10000000, name="")
-    .. automethod:: sub_u(name="")
-    .. automethod:: sub_pu(name="")
-    .. automethod:: sub_fp(name="")
-    .. automethod:: sub_lan(name="")
-    .. automethod:: sub_act(name="")
-    .. automethod:: sub_tru(name="")
-    .. automethod:: sub_ma(name="")
+Further information on the Material class may be seen in the library refernce :ref:`pyne_material`.
 
