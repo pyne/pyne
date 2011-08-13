@@ -549,6 +549,22 @@ cdef class _Material:
         return pymat
 
 
+    #
+    # Atom Fraction Methods
+    #
+    def to_atom_frac(self):
+        """Converts the material to a map of nuclides to atom fractions.
+        """
+        cdef conv._MapProxyIntDouble comp_proxy = conv.MapProxyIntDouble()
+        comp_proxy.map_ptr[0] = self.mat_pointer.to_atom_frac()
+        return comp_proxy
+        
+
+    def from_atom_frac(self, atom_fracs):
+        """Loads the material composition based on a mapping of atom fractions."""
+        cdef cpp_map[int, double] af = conv.dict_to_map_int_dbl(atom_fracs)
+        self.mat_pointer.from_atom_frac(af)
+
 
     #
     # Operator Overloads

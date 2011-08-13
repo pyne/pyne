@@ -84,6 +84,9 @@ namespace pyne
     Material sub_ma  (std::string = "");
     Material sub_fp  (std::string = "");
 
+    // Atom fraction functions
+    std::map<int, double> to_atom_frac();
+    void from_atom_frac(std::map<int, double>);
 
     //Overloaded Operators
     Material operator+ (double);
