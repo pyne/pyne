@@ -12,7 +12,8 @@ All functionality may be found in the ``material`` package::
 
  from pyne.material import Material
 
-Materials are the primary container for radionuclides. They map nuclides to mass weights.
+Materials are the primary container for radionuclides. They map nuclides to **mass weights**,
+though they contain methods for converting to/from atom fractions as well.
 In many ways they take inspiration from numpy arrays and python dictionaries.  Materials
 have two main attributes which define them.
 
@@ -32,7 +33,7 @@ dictionaries of compositions are shown below.
     In [2]: leu = Material({'U238': 0.96, 'U235': 0.04}, 42, 'LEU')
 
     In [3]: leu
-    Out[3]: pyne.material.Material({922350: 0.04, 922380: 0.96}, 42.0, 'LEU')    
+    Out[3]: pyne.material.Material({922350: 0.04, 922380: 0.96}, 42.0, 'LEU', -1.0)
 
     In [4]: nucvec = {10010:  1.0, 80160:  1.0, 691690: 1.0, 922350: 1.0,
        ...:           922380: 1.0, 942390: 1.0, 942410: 1.0, 952420: 1.0,
@@ -43,7 +44,8 @@ dictionaries of compositions are shown below.
     In [6]: print mat
     Material: 
     mass = 9.0
-    ----------
+    atoms per molecule = -1.0
+    -------------------------
     H1     0.111111111111
     O16    0.111111111111
     TM169  0.111111111111
@@ -96,7 +98,8 @@ of the two original. Multiplying a Material by 2, however, will simply double th
     In [15]: print weird_mat
     Material: 
     mass = 60.0
-    ----------
+    atoms per molecule = -1.0
+    -------------------------
     H1     0.0333333333333
     O16    0.0333333333333
     TM169  0.0333333333333
@@ -120,7 +123,8 @@ You may also change the attributes of a material directly without generating a n
     In [19]: print other_mat
     Material: Other Material
     mass = 10.0
-    ------------------------
+    atoms per molecule = -1.0
+    -------------------------
     H2     3.0
     U235   15.0
 
@@ -134,13 +138,14 @@ of sync.  This may always be fixed with normalization.
     In [21]: print other_mat
     Material: Other Material
     mass = 10.0
-    ------------------------
+    atoms per molecule = -1.0
+    -------------------------
     H2     0.166666666667
     U235   0.833333333333
 
-Finally, you may index into either the material or the composition to get, set, or remove 
-sub-materials.  Generally speaking, the composition you may only index into by integer-key
-and only to retrieve the normalized value.  Indexing into the material allows the 
+Additionally (and very powerfully!), you may index into either the material or the composition 
+to get, set, or remove sub-materials.  Generally speaking, the composition you may only index 
+into by integer-key and only to retrieve the normalized value.  Indexing into the material allows the 
 full range of operations and returns the unnormalized mass weight.  Moreover, indexing into
 the material may be performed with integer-keys, string-keys, slices, or sequences of nuclides.
 
@@ -153,14 +158,15 @@ the material may be performed with integer-keys, string-keys, slices, or sequenc
     Out[23]: 1.68
 
     In [24]: weird_mat['U':'Am']
-    Out[24]: pyne.material.Material({922350: 0.0736, 922380: 0.8464, 942390: 0.04, 942410: 0.04}, 50.0, '')
+    Out[24]: pyne.material.Material({922350: 0.0736, 922380: 0.8464, 942390: 0.04, 942410: 0.04}, 50.0, '', -1.0)
 
     In [25]: other_mat[:920000] = 42.0
 
     In [26]: print other_mat
     Material: Other Material
     mass = 50.3333333333
-    ------------------------
+    atoms per molecule = -1.0
+    -------------------------
     H2     0.834437086093
     U235   0.165562913907
 
@@ -169,7 +175,7 @@ the material may be performed with integer-keys, string-keys, slices, or sequenc
     In [28]: mat[:]
     Out[28]: pyne.material.Material({10010: 0.166666666667, 922350: 0.166666666667, 922380: 0.166666666667, 
        ...:                          942390: 0.166666666667, 942410: 0.166666666667, 952420: 0.166666666667}, 
-       ...:                          0.666666666667, '')
+       ...:                          0.666666666667, '', -1.0)
 
 Other methods also exist for obtaining commonly used sub-materials, such as gathering the Uranium or 
 Plutonium vector.  You may also calculate the molecular weight of a material via the method by the same name.
