@@ -513,6 +513,41 @@ pyne::Material pyne::Material::sub_fp (std::string n)
 
 
 
+/*--- Atom Frac Functions ---*/
+
+std::map<int, double> pyne::Material::to_atom_frac()
+{
+  // Returns an atom fraction map from this material's composition
+
+  // the material's molecular weight
+  double mat_mw = molecular_weight();
+
+  std::map<int, double> atom_fracs = std::map<int, double>();
+
+  for (comp_iter ci = comp.begin(); ci != comp.end(); ci++)
+    atom_fracs[ci->first] = (ci->second) * nucname::nuc_weight(ci->first) / mat_mw;
+
+  return atom_fracs;
+};
+
+
+void pyne::Material::from_atom_frac(std::map<int, double> atom_fracs)
+{
+  // atom frac must be of the form {nuc: af}, eg, water
+  //  80160: 1.0
+  //  10010: 2.0
+
+  // clear existing components
+  comp.clear();
+
+  for (std::map<int, double>::iterator afi = atom_fracs.begin(); afi != atom_fracs.end(); afi++)
+    comp[afi->first] = (afi->second) * nucname::nuc_weight(afi->first);
+
+  norm_comp();
+};
+
+
+
 
 
 /*--- Overloaded Operators ---*/
