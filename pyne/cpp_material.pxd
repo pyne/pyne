@@ -47,6 +47,11 @@ cdef extern from "../cpp/material.h" namespace "pyne":
         Material sub_ma(std.string) except +
         Material sub_fp(std.string) except +
 
+        # Atom frac member functions
+        map[int, double] to_atom_frac() except +
+        void from_atom_frac(map[int, double]) except +
+
+
         # Operator Overloads
         Material operator+(double) except +
         Material operator+(Material) except +
