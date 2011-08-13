@@ -556,7 +556,7 @@ cdef class _Material:
         """Converts the material to a map of nuclides to atom fractions.
         """
         cdef conv._MapProxyIntDouble comp_proxy = conv.MapProxyIntDouble()
-        comp_proxy.map_ptr[0] = self.mat_pointer.to_atom_frac()
+        comp_proxy.map_ptr = new cpp_map[int, double](self.mat_pointer.to_atom_frac())
         return comp_proxy
         
 
