@@ -236,6 +236,9 @@ def serpent(nuc):
 #
 # Helper Functions
 #
+cdef conv._MapProxyIntDouble nuc_weight_map_proxy = conv.MapProxyIntDouble()
+nuc_weight_map_proxy.init(&cpp_nucname.nuc_weight_map)
+nuc_weight_map = nuc_weight_map_proxy
 
 def nuc_weight(nuc):
     """Calculates the weight of a nuclide in [amu].
