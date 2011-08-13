@@ -534,7 +534,6 @@ std::map<int, double> nucname::nuc_weight_map = std::map<int, double>();
 void nucname::_load_nuc_weight_map()
 {
   // Loads the importnat parts of atomic_wight table into nuc_weight_map
-  std::cout << "Nuc data path: " << pyne::NUC_DATA_PATH << "\n";
 
   //Check to see if the file is in HDF5 format.
   if (!pyne::file_exists(pyne::NUC_DATA_PATH))
@@ -575,8 +574,6 @@ void nucname::_load_nuc_weight_map()
 
 double nucname::nuc_weight(int nuc)
 {
-  std::cout << "Nuc data path: " << pyne::NUC_DATA_PATH << "\n";
-
   // Find the nuclide;s weight in AMU
   std::map<int, double>::iterator nuc_iter, nuc_end;
 
