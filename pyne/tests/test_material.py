@@ -4,7 +4,7 @@ from unittest import TestCase
 import nose 
 
 from nose.tools import assert_equal, assert_not_equal, assert_raises, raises, \
-    assert_almost_equal, assert_true, assert_false
+    assert_almost_equal, assert_true, assert_false, assert_in
 
 import os
 from pyne.material import Material
@@ -128,10 +128,18 @@ class TestMaterialMethods(TestCase):
         assert_equal(mat_empty.molecular_weight(), 0.0)
 
         mat_u238 = Material({922380: 1.0})
-        assert_equal(mat_u238.molecular_weight(), 238.0)
+        mw_u238 = mat_u238.molecular_weight()
+        try:
+            assert_almost_equal(mw_u238, 238.050789466)
+        except AssertionError:
+            assert_almost_equal(mw_u238, 238.0)            
 
         mat_mixed = Material({922350: 0.5, 922380: 0.5})
-        assert_almost_equal(mat_mixed.molecular_weight()/236.5, 1.0, 4)
+        mw_mixed = mat_mixed.molecular_weight()
+        try:
+            assert_almost_equal(mw_mixed/236.547360417, 1.0, 4)            
+        except AssertionError:
+            assert_almost_equal(mw_mixed/236.5, 1.0, 4)
 
 
 
