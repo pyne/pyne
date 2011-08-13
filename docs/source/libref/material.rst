@@ -13,7 +13,7 @@ All functionality may be found in the ``material`` package::
  from pyne.material import Material
 
 Materials are the primary container for radionuclides. They map nuclides to **mass weights**, 
-and contain methods for converting to/from atom fractions as well.
+though they contain methods for converting to/from atom fractions as well.
 In many ways they take inspiration from numpy arrays and python dictionaries.  Materials
 have two main attributes which define them.
 
