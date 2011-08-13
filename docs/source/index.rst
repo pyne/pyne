@@ -30,10 +30,10 @@ Contents
 --------
 
 .. toctree::
-    :maxdepth: 2
+    :maxdepth: 1
 
-    nucname
-    material
+    usersguide/index
+    libref/index
     dev_team
 
 =============
