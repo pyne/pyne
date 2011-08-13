@@ -367,10 +367,31 @@ def test_from_atom_frac():
     h2o = {10010: 2.0, 80160: 1.0}
     mat = Material()
     mat.from_atom_frac(h2o)
+    assert_equal(mat.atoms_per_mol, 3.0)
     assert_equal(mat.comp[10010], 0.11191487328808077)
     assert_equal(mat.comp[80160], 0.8880851267119192)
     assert_equal(mat.mass, 18.01056468403)    
     assert_equal(mat.molecular_weight(), 18.01056468403)    
+
+    h2 = Material({10010: 1.0}, atoms_per_mol=2.0)
+    h2o = {'O16': 1.0, h2: 1.0}
+    mat = Material()
+    mat.from_atom_frac(h2o)
+    assert_equal(mat.atoms_per_mol, 3.0)
+    assert_equal(mat.comp[10010], 0.11191487328808077)
+    assert_equal(mat.comp[80160], 0.8880851267119192)
+    assert_equal(mat.molecular_weight(), 18.01056468403)    
+
+    ihm = Material(name='IHM')
+    ihm.from_atom_frac({922350: 0.5, 922380: 0.5})
+    uox = {ihm: 1.0, 'O16': 2.0}
+    mat = Material()
+    mat.from_atom_frac(uox)
+    assert_equal(mat.atoms_per_mol, 3.0)
+    assert_almost_equal(mat.comp[80160], 0.11912625316479536, 16)
+    assert_almost_equal(mat.comp[922350], 0.43763757948940346, 15)
+    assert_almost_equal(mat.comp[922380], 0.44323616734580107, 15)
+    assert_almost_equal(mat.molecular_weight()/268.53718965614, 1.0, 15)
 
 
 #

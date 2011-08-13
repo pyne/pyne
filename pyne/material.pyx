@@ -575,7 +575,38 @@ cdef class _Material:
 
     def from_atom_frac(self, atom_fracs):
         """Loads the material composition based on a mapping of atom fractions."""
-        cdef cpp_map[int, double] af = conv.dict_to_map_int_dbl(atom_fracs)
+        cdef int key_zz
+        cdef double val
+        cdef cpp_map[int, double] key_af
+        cdef cpp_map[int, double].iterator keyiter, keyend
+        cdef cpp_map[int, double] af = cpp_map[int, double]()
+
+        # Convert atom_fracs to something usable in C++
+        for key, value in atom_fracs.items():
+            val = <double> value
+            if isinstance(key, int):
+                key_zz = <int> key
+                if 0 == af.count(key_zz):
+                    af[key_zz] = 0.0                    
+                af[key_zz] = af[key_zz] + val
+            elif isinstance(key, basestring):
+                key_zz = nucname.zzaaam(key)
+                if 0 == af.count(key_zz):
+                    af[key_zz] = 0.0                    
+                af[key_zz] = af[key_zz] + val
+            elif isinstance(key, _Material):
+                key_af = deref((<_Material> key).mat_pointer).to_atom_frac()
+                keyiter = key_af.begin()
+                keyend = key_af.end()
+                while keyiter != keyend:
+                    key_zz = deref(keyiter).first
+                    if 0 == af.count(key_zz):
+                        af[key_zz] = 0.0                    
+                    af[key_zz] = af[key_zz] + (val * deref(keyiter).second)
+                    inc(keyiter)
+            else:
+                raise TypeError("atom fraction keys must be integers, strings, or Materials.")
+
         self.mat_pointer.from_atom_frac(af)
 
 
