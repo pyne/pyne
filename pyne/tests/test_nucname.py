@@ -2,7 +2,7 @@
 from unittest import TestCase
 import nose 
 
-from nose.tools import assert_equal, assert_not_equal, assert_raises, raises
+from nose.tools import assert_equal, assert_not_equal, assert_raises, raises, assert_in
 
 from pyne import nucname
 
@@ -136,30 +136,14 @@ def test_serpent():
 
 
 def test_nuc_weight():
-    # zzaam form
-    assert_equal(nucname.nuc_weight(80160),  16.0)
-    assert_equal(nucname.nuc_weight(922350), 235.0)
-    assert_equal(nucname.nuc_weight(952421), 242.0)
-
-    # MCNP form
-    assert_equal(nucname.nuc_weight(8016),  16.0)
-    assert_equal(nucname.nuc_weight(92235), 235.0)
-    assert_equal(nucname.nuc_weight(95642), 242.0)
+    o16 = [15.99491461957, 16.0]
+    u235 = [235.043931368, 235.0]
+    am242m = [242.059550625, 242.0]
 
     # zzaam form
-    assert_equal(nucname.nuc_weight("80160"),  16.0)
-    assert_equal(nucname.nuc_weight("922350"), 235.0)
-    assert_equal(nucname.nuc_weight("952421"), 242.0)
-
-    # zzaam form
-    assert_equal(nucname.nuc_weight("O-16"),   16.0)
-    assert_equal(nucname.nuc_weight("U235"),   235.0)
-    assert_equal(nucname.nuc_weight("Am242M"), 242.0)
-
-    # MCNP form
-    assert_equal(nucname.nuc_weight("8016"),  16.0)
-    assert_equal(nucname.nuc_weight("92235"), 235.0)
-    assert_equal(nucname.nuc_weight("95642"), 242.0)
+    assert_in(nucname.nuc_weight(80160),  o16)
+    assert_in(nucname.nuc_weight(922350), u235)
+    assert_in(nucname.nuc_weight(952421), am242m)
 
 
 if __name__ == "__main__":
