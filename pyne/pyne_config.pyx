@@ -15,8 +15,11 @@ import os
 
 import pyne.__init__
 
+_local_dir = os.path.split(pyne.__init__.__file__)[0]
 
-nuc_data = os.path.join(os.path.split(pyne.__init__.__file__)[0], 'nuc_data.h5')
+lib = os.path.join(_local_dir, 'lib')
+includes = os.path.join(_local_dir, 'includes')
+nuc_data = os.path.join(_local_dir, 'nuc_data.h5')
 
 
 ####################################
@@ -27,8 +30,7 @@ nuc_data = os.path.join(os.path.split(pyne.__init__.__file__)[0], 'nuc_data.h5')
 def pyne_start():
     # Specifiy the BRIGHT_DATA directory
     if "PYNE_DATA" not in os.environ:
-        bd = os.path.split(pyne.__init__.__file__)
-        os.environ['PYNE_DATA'] = os.path.join(*(bd[0], ''))
+        os.environ['PYNE_DATA'] = _local_dir
 
     # Specifiy the NUC_DATA_PATH 
     if "NUC_DATA_PATH" not in os.environ:
