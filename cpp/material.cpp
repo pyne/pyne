@@ -106,7 +106,7 @@ void pyne::Material::load_from_hdf5(std::string filename, std::string groupname,
 
 
 
-void pyne::Material::load_from_text (char * fchar)
+void pyne::Material::load_from_text(char * fchar)
 {
   std::string filename (fchar);
   load_from_text(filename);
@@ -152,25 +152,28 @@ pyne::Material::Material()
   // Empty Material constructor
   mass = -1.0;
   name = "";
+  atoms_per_mol = -1.0;
 }
 
 
-pyne::Material::Material(pyne::comp_map cm, double m, std::string s)
+pyne::Material::Material(pyne::comp_map cm, double m, std::string s, double apm)
 {
   // Initializes the mass stream based on an isotopic component dictionary.
   comp = cm;
   mass = m;
   name = s;
+  atoms_per_mol = apm;
   norm_comp();
 };
 
 
 
-pyne::Material::Material(char * fchar, double m, std::string s)
+pyne::Material::Material(char * fchar, double m, std::string s, double apm)
 {
   // Initializes the mass stream based on an isotopic composition file with a (char *) name.
   mass = m;
   name = s;
+  atoms_per_mol = apm;
 
   // Check that the file is there
   std::string filename (fchar);
@@ -186,11 +189,12 @@ pyne::Material::Material(char * fchar, double m, std::string s)
 };
 
 
-pyne::Material::Material(std::string filename, double m, std::string s)
+pyne::Material::Material(std::string filename, double m, std::string s, double apm)
 {
   // Initializes the mass stream based on an isotopic composition file with a string name.
   mass = m;
   name = s;
+  atoms_per_mol = apm;
 
   // Check that the file is there
   if (!pyne::file_exists(filename))
@@ -251,7 +255,7 @@ pyne::comp_map pyne::Material::mult_by_mass()
 
 
 
-double pyne::Material::molecular_weight()
+double pyne::Material::molecular_weight(double apm)
 {
   // Calculate the atomic weight of the Material
   double inverseA = 0.0;
@@ -261,7 +265,18 @@ double pyne::Material::molecular_weight()
   if (inverseA == 0.0)
     return inverseA;
 
-  return 1.0 / inverseA;
+  // select the atoms per mol
+  double atsperm = 1.0; // default to 1.0
+  if (0.0 <= apm)
+  {
+    atsperm = apm;            // take the function argument, if valid
+    if (atoms_per_mol < 0.0)
+      atoms_per_mol = apm;     // Store the function argument on class, if class has no value
+  }
+  else if (0.0 <= atoms_per_mol)
+    atsperm = atoms_per_mol;  // select the class's value
+
+  return atsperm / inverseA;
 };
 
 
@@ -525,7 +540,7 @@ std::map<int, double> pyne::Material::to_atom_frac()
   std::map<int, double> atom_fracs = std::map<int, double>();
 
   for (comp_iter ci = comp.begin(); ci != comp.end(); ci++)
-    atom_fracs[ci->first] = (ci->second) * nucname::nuc_weight(ci->first) / mat_mw;
+    atom_fracs[ci->first] = atoms_per_mol * (ci->second) * nucname::nuc_weight(ci->first) / mat_mw;
 
   return atom_fracs;
 };
@@ -539,9 +554,13 @@ void pyne::Material::from_atom_frac(std::map<int, double> atom_fracs)
 
   // clear existing components
   comp.clear();
+  atoms_per_mol = 0.0;
 
   for (std::map<int, double>::iterator afi = atom_fracs.begin(); afi != atom_fracs.end(); afi++)
+  {
     comp[afi->first] = (afi->second) * nucname::nuc_weight(afi->first);
+    atoms_per_mol += (afi->second);
+  };
 
   norm_comp();
 };
