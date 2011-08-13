@@ -803,6 +803,12 @@ cdef class _Material:
         return mbm_iter
 
 
+    #
+    # Make materials hasable so that they may be used as keys in a dictionary
+    #
+    def __hash__(self):
+        # not the most sofisticated hash...
+        return id(self)
 
 
 
