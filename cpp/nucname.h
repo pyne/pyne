@@ -18,6 +18,11 @@
 
 #include "pyne.h"
 
+namespace pyne
+{
+  extern std::string NUC_DATA_PATH;
+};
+
 namespace nucname 
 {
   /*** Constructs the name to zz Dictionary ***/
