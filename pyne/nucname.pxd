@@ -11,6 +11,10 @@ from cython.operator cimport preincrement as inc
 
 # local imports 
 cimport std
+cimport pyne.cpp_pyne
+cimport pyne.pyne_config
+import pyne.pyne_config
+
 cimport cpp_nucname
 cimport pyne.stlconverters as conv
 import pyne.stlconverters as conv
