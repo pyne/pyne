@@ -597,11 +597,22 @@ double nucname::nuc_weight(int nuc)
     catch(...){};
   };
 
+  double aw;
+  int nuc_zz = zzaaam(nuc);
+
+  // If in an excited state, return the ground
+  // state weight...not strictly true, but good guess.
+  if (0 < nuc_zz%10)
+  {
+    aw = nuc_weight((nuc_zz/10)*10);
+    nuc_weight_map[nuc] = aw;
+    return aw;
+  };
+
   // Finally, if none of these work, 
   // take a best guess based on the 
   // aaa number.
-  int nuc_zz = zzaaam(nuc);
-  double aw = (double) ((nuc_zz/10)%1000);
+  aw = (double) ((nuc_zz/10)%1000);
   nuc_weight_map[nuc] = aw;
   return aw;
 };
