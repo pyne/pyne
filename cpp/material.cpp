@@ -540,7 +540,7 @@ std::map<int, double> pyne::Material::to_atom_frac()
   std::map<int, double> atom_fracs = std::map<int, double>();
 
   for (comp_iter ci = comp.begin(); ci != comp.end(); ci++)
-    atom_fracs[ci->first] = atoms_per_mol * (ci->second) * nucname::nuc_weight(ci->first) / mat_mw;
+    atom_fracs[ci->first] = (ci->second) * mat_mw / nucname::nuc_weight(ci->first);
 
   return atom_fracs;
 };
