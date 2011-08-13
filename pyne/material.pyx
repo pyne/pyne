@@ -219,8 +219,8 @@ cdef class _Material:
 
         Parameters
         ----------
-        atoms_per_mol : double
-            Number of atoms to per molecule of material.  Needed as a scaling factor.
+        atoms_per_mol : double, optional
+            Number of atoms to per molecule of material.  Needed to obtain proper scaling.
             For example, this value for water is 3.0.
 
         Returns
@@ -567,6 +567,12 @@ cdef class _Material:
     #
     def to_atom_frac(self):
         """Converts the material to a map of nuclides to atom fractions.
+
+        Returns
+        -------
+        atom_fracs : mapping
+            Dictionary-like object that maps nuclides to atom fractions in the 
+            material.
         """
         cdef conv._MapProxyIntDouble comp_proxy = conv.MapProxyIntDouble()
         comp_proxy.map_ptr = new cpp_map[int, double](self.mat_pointer.to_atom_frac())
@@ -574,7 +580,37 @@ cdef class _Material:
         
 
     def from_atom_frac(self, atom_fracs):
-        """Loads the material composition based on a mapping of atom fractions."""
+        """Loads the material composition based on a mapping of atom fractions.
+
+        Parameters
+        ----------
+        atom_fracs : dict
+            Dictionary that maps nuclides or materials to atom fractions for the 
+            material.  The keys may be intergers, strings, or materials. The values
+            must be castable to floats.
+
+        Examples
+        --------
+        To get a material from water, based on atom fractions::
+        
+            h2o = {10010: 2.0, 'O16': 1.0}
+            mat = Material(name='water')
+            mat.from_atom_frac(h2o)
+
+        Or for Uranium-Oxide, based on an initial fuel vector::
+
+            # Define initial heavy metal
+            ihm = Material(name='IHM')
+            ihm.from_atom_frac({'U235': 0.05, 'U238': 0.95})
+
+            # Define Uranium-Oxide
+            uox = {ihm: 1.0, 80160: 2.0}
+            mat = Material(name='UOX')
+            mat.from_atom_frac(uox)
+
+        Note that the initial heavy metal was used as a key in a dictionary.
+        This is possible because Materials are hashable.
+        """
         cdef int key_zz
         cdef double val
         cdef cpp_map[int, double] key_af
@@ -866,17 +902,27 @@ class Material(_Material, collections.MutableMapping):
     name : str, optional
         A string label for the material.  Helpful for large numbers of 
         streams. Default ''.
+    atoms_per_mol : float, optional
+        Number of atoms to per molecule of material.  Needed to obtain proper scaling
+        of molecular weights.  For example, this value for water is 3.0.
 
     """
     def __str__(self):
-        title = "Material: {0}".format(self.name)
-        underline = '-' * len(title)
-        title += "\nmass = {0}\n{1}\n".format(self.mass, underline)
-        s = title + "\n".join(["{0:<7}{1}".format(nucname.name(key), value) for key, value in self.comp.items()])
+        header = ["Material: {0}".format(self.name)]
+        header += ["mass = {0}".format(self.mass)]
+        header += ["atoms per molecule = {0}".format(self.atoms_per_mol)]
+        header += ['-' * max([len(h) for h in header])]
+        header = "\n".join(header) + "\n"
+        
+        s = header + "\n".join(["{0:<7}{1}".format(nucname.name(key), value) for key, value in self.comp.items()])
         return s
 
     def __repr__(self):
-        return "pyne.material.Material({0}, {1}, {2})".format(repr(self.comp), self.mass, repr(self.name))
+        return "pyne.material.Material({0}, {1}, {2}, {3})".format(repr(self.comp), 
+                                                                   self.mass, 
+                                                                   repr(self.name),
+                                                                   self.atoms_per_mol, 
+                                                                   )
 
 
 ###########################
