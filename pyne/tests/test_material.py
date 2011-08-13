@@ -351,6 +351,29 @@ class TestMaterialOperatorOverloading(TestCase):
 
 
 #
+# Test atom fraction functions
+#
+def test_from_atom_frac():
+    h2o = {10010: 2.0, 80160: 1.0}
+    mat = Material()
+    mat.from_atom_frac(h2o)
+    assert_almost_equal(mat.comp[10010], 0.11199769341903659, 3)
+    assert_almost_equal(mat.comp[80160], 0.8880023065809635, 3)
+
+    assert_equal(mat.mass, 18.01224445143)    
+    #assert_equal(mat.molecular_weight(), 18.01224445143)    
+
+
+def test_to_atom_frac():
+    h2o = {10010: 0.11199769341903659, 80160: 0.8880023065809635}
+    mat = Material(h2o)
+    af = mat.to_atom_frac()
+    assert_almost_equal(af[10010], 2.0, 3)
+    assert_almost_equal(af[80160], 1.0, 3)
+    assert_equal(mat.molecular_weight(), 18.01224445143)    
+
+
+#
 # Test mapping functions
 #
 
