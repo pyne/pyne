@@ -32,6 +32,7 @@ Contents
 .. toctree::
     :maxdepth: 1
 
+    install
     usersguide/index
     libref/index
     dev_team
