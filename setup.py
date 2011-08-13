@@ -128,11 +128,11 @@ exts.append(cpp_ext("pyne.material", ['material.pyx'], ['pyne', 'pyne_nucname', 
 ##########################
 ### Setup Package Data ###
 ##########################
-pack_dir = {
-    'pyne': os.path.join('pyne'), 
-    }
-    
-pack_data = {'pyne': []}
+packages = ['pyne', 'pyne.lib', 'pyne.dbgen']
+
+pack_dir = {'pyne': 'pyne',}
+
+pack_data = {'pyne': ['includes/*.h', 'includes/*.pxd']}
 
 ext_modules=[Extension(**ext) for ext in exts] 
 
@@ -149,16 +149,28 @@ scripts=['scripts/nuc_data_make']
 ### Call setup! ###
 ###################
 if __name__ == "__main__":
+    # clean includes dir and recopy files over
+    if os.path.exists('pyne/includes'):
+        remove_tree('pyne/includes')
+    mkpath('pyne/includes')
+    for header in (glob.glob('cpp/*.h') + glob.glob('pyne/*.pxd')):
+        copy_file(header, 'pyne/includes')
+
+    # call setup
     setup(name="pyne",
         version = INFO['version'],
         description = 'Python for Nuclear Engineering',
         author = 'PyNE Development Team',
         author_email = 'scopatz@gmail.com',
         url = 'http://pyne.github.com/pyne',
-        packages = ['pyne', 'pyne.lib', 'pyne.dbgen'],
+        packages = packages,
         package_dir = pack_dir,
+        package_data = pack_data,
         cmdclass = {'build_ext': build_ext}, 
         ext_modules=ext_modules,
         scripts=scripts, 
         )
 
+    # Clean includes after setup has run
+    if os.path.exists('pyne/includes'):
+        remove_tree('pyne/includes')
