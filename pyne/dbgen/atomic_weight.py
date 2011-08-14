@@ -216,7 +216,6 @@ def make_atomic_weight_table(nuc_data, build_dir=""):
 
 
 def make_atomic_weight(nuc_data, build_dir):
-    #os.remove(nuc_data)
     with tb.openFile(nuc_data, 'a') as f:
         if hasattr(f.root, 'atomic_weight'):
             return 
