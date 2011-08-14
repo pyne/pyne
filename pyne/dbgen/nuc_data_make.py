@@ -4,6 +4,10 @@ from pyne.api import nuc_data
 from pyne.dbgen.api import build_dir
 from pyne.dbgen.atomic_weight import make_atomic_weight
 
+# Thanks to http://patorjk.com/software/taag/
+# and http://www.chris.com/ascii/index.php?art=creatures/dragons
+# for ASCII art inspiriation
+
 pyne_logo = """\
 
                                   /   \       
