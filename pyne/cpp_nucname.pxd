@@ -48,6 +48,11 @@ cdef extern from "../cpp/nucname.h" namespace "nucname":
     std.string serpent(char *) except +
     std.string serpent(std.string) except +
 
+    # NIST Functions
+    std.string nist(int) except +
+    std.string nist(char *) except +
+    std.string nist(std.string) except +
+
     # Helper Functions
     map[int, double] nuc_weight_map
     double nuc_weight(int) except +

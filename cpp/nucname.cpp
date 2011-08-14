@@ -321,19 +321,37 @@ int nucname::zzaaam(std::string nuc)
   if (nuc.empty())
     throw NotANuclide(nuc, "<empty>");
 
-  int newnuc;
+  int newnuc, nuclen;
   std::string nucstr;
 
   // Get the string into a regular form
   nucstr = pyne::to_upper(nuc);
   nucstr = pyne::remove_substring(nucstr, "-");
+  nuclen = nucstr.length();
 
   if (pyne::contains_substring(pyne::digits, nucstr.substr(0, 1)))
   {
-    // Nuclide must actually be an integer that 
-    // just happens to be living in string form.
-    newnuc = pyne::to_int(nucstr);
-    newnuc = zzaaam(newnuc);
+    if (pyne::contains_substring(pyne::digits, nucstr.substr(nuclen-1, nuclen)))
+    {
+      // Nuclide must actually be an integer that 
+      // just happens to be living in string form.
+      newnuc = pyne::to_int(nucstr);
+      newnuc = zzaaam(newnuc);
+    }
+    else
+    {
+      // probably in NIST-like form (242Am)
+      // Here we know we have both digits and letters
+      std::string anum_str = pyne::remove_characters(nucstr, pyne::alphabet);
+      newnuc = pyne::to_int(anum_str) * 10;
+
+      // Add the Z-number
+      std::string elem_name = pyne::remove_characters(nucstr, pyne::digits);
+      if (0 < name_zz.count(elem_name))
+        newnuc = (10000 * name_zz[elem_name]) + newnuc;
+      else
+        throw NotANuclide(nucstr, newnuc);
+    };
   }
   else if (pyne::contains_substring(pyne::alphabet, nucstr.substr(0, 1)))
   {
@@ -360,9 +378,9 @@ int nucname::zzaaam(std::string nuc)
       throw NotANuclide(nucstr, newnuc);
 
     // Add the Z-number
-    std::string lnum = pyne::remove_characters(nucstr.substr(0, nucstr.length()-1), pyne::digits);
-    if (0 < name_zz.count(lnum))
-      newnuc = (10000 * name_zz[lnum]) + newnuc;
+    std::string elem_name = pyne::remove_characters(nucstr.substr(0, nuclen-1), pyne::digits);
+    if (0 < name_zz.count(elem_name))
+      newnuc = (10000 * name_zz[elem_name]) + newnuc;
     else
       throw NotANuclide(nucstr, newnuc);
   }
@@ -378,9 +396,9 @@ int nucname::zzaaam(std::string nuc)
 
 
 
-/************************/
+/**********************/
 /*** name functions ***/
-/************************/
+/**********************/
 std::string nucname::name(int nuc)
 {
   int nucint = zzaaam(nuc);
@@ -521,6 +539,62 @@ std::string nucname::serpent(std::string nuc)
   int newnuc = zzaaam(nuc);
   return serpent(newnuc);
 };
+
+
+
+
+/**********************/
+/*** nist functions ***/
+/**********************/
+std::string nucname::nist(int nuc)
+{
+  int nucint = zzaaam(nuc);
+  std::string newnuc = "";
+
+  int mod_10 = nucint%10;
+  int mod_10000 = nucint % 10000;
+  int div_10000 = nucint / 10000;
+  int mod_10000_div_10 = mod_10000 / 10;
+
+  // Make sure the LL value is correct
+  if (0 == zz_name.count(div_10000))
+    throw NotANuclide(nuc, nucint);
+
+  // Add A-number
+  if (0 < mod_10000)
+    newnuc += pyne::to_str(mod_10000_div_10);
+
+  // Add name
+  std::string name_upper = pyne::to_upper(zz_name[div_10000]);
+  std::string name_lower = pyne::to_lower(zz_name[div_10000]);
+  newnuc += name_upper[0];
+  for (int l = 1; l < name_lower.size(); l++)
+    newnuc += name_lower[l];  
+
+  // Add meta-stable flag
+  // No metastable flag for NIST, 
+  // but could add star, by uncommenting below
+  //if (0 < mod_10)
+  //  newnuc += "*";
+
+  return newnuc;
+};
+
+
+std::string nucname::nist(char * nuc)
+{
+  std::string newnuc (nuc);
+  return nist(newnuc);
+};
+
+
+std::string nucname::nist(std::string nuc)
+{
+  int newnuc = zzaaam(nuc);
+  return nist(newnuc);
+};
+
+
 
 
 
