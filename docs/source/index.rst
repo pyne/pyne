@@ -32,6 +32,7 @@ Contents
     install
     usersguide/index
     libref/index
+    cppapi
     dev_team
 
 =============

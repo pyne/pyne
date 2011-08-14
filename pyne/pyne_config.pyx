@@ -47,7 +47,7 @@ pyne_start()
 ################################
 ### PyNE Configuration Class ###
 ################################
-cdef class PyneConfig:
+cdef class PyneConf:
     """A PyNE configuration helper class."""
 
     property PYNE_DATA:
@@ -70,6 +70,6 @@ cdef class PyneConfig:
 
         
 # Make a singleton of the pyne config object
-pyne_config = PyneConfig()
+pyne_conf = PyneConf()
 
 
