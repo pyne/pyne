@@ -136,7 +136,7 @@ def current_form(nuc):
 #
 
 def zzaaam(nuc):
-    """Converts a nuclide to its zzaaam form. 
+    """Converts a nuclide to its zzaaam form (952420). 
 
     Parameters
     ----------
@@ -160,7 +160,7 @@ def zzaaam(nuc):
 
 
 def name(nuc):
-    """Converts a nuclide to its name form. 
+    """Converts a nuclide to its name form ('AM242M'). 
 
     Parameters
     ----------
@@ -185,7 +185,7 @@ def name(nuc):
 
 
 def mcnp(nuc):
-    """Converts a nuclide to its MCNP form (int). 
+    """Converts a nuclide to its MCNP form (95642). 
 
     Parameters
     ----------
@@ -209,7 +209,7 @@ def mcnp(nuc):
 
 
 def serpent(nuc):
-    """Converts a nuclide to its Serepnt form. 
+    """Converts a nuclide to its Serepnt form ('Am-242m'). 
 
     Parameters
     ----------
@@ -231,6 +231,33 @@ def serpent(nuc):
         raise NucTypeError(nuc)
 
     return newnuc.c_str()
+
+
+
+def nist(nuc):
+    """Converts a nuclide to NIST form ('242Am').
+
+    Parameters
+    ----------
+    nuc : int or str 
+        Input nuclide.
+
+    Returns
+    -------
+    newnuc : str 
+        Output nuclide in nist form.
+    """
+    cdef std.string newnuc
+
+    if isinstance(nuc, basestring):
+        newnuc = cpp_nucname.nist(<char *> nuc)
+    elif isinstance(nuc, int):
+        newnuc = cpp_nucname.nist(<int> nuc)
+    else:
+        raise NucTypeError(nuc)
+
+    return newnuc.c_str()
+
 
 
 #
