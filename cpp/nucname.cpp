@@ -246,7 +246,7 @@ int nucname::zzaaam(int nuc)
   int mod_10000_div_10 = mod_10000 / 10;
 
   // Nuclide must already be in zzaaam form
-  if (div_10000 <= mod_10000_div_10 && mod_10000_div_10 <= div_10000 * 6)
+  if (div_10000 <= mod_10000_div_10 && mod_10000_div_10 <= div_10000 * 7)
   {
     // Normal nuclide
     newnuc = nuc;
