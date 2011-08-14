@@ -19,6 +19,11 @@ INFO = {
     'version': '0.1',
     }
 
+
+# Thanks to http://patorjk.com/software/taag/  
+# and http://www.chris.com/ascii/index.php?art=creatures/dragons
+# for ASCII art inspiriation
+
 pyne_logo = """\
 
                                   /   \       
