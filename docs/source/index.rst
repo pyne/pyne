@@ -18,7 +18,7 @@ PyNE has the following dependencies:
    #. `PyTables <http://www.pytables.org/>`_
 
 The source code for PyNE may be found at the `GitHub project site`_. 
-Or you may simply branch from the trunk using git::
+Or you may simply clone from the official repo using git::
 
     git clone git://github.com/pyne/pyne.git
 
