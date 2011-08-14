@@ -32,6 +32,7 @@ All functionality may be found in the ``nucname`` package::
 This contains several zzaaam, name, MCNP and Serpent converter function as 
 well as other helpful module attributes.
 
+.. _name_cast:
 
 ----------------------------------
 Naming Convetion Casting Functions
