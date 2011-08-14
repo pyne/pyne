@@ -76,6 +76,9 @@ mass vector through :meth:`Material.mult_by_mass`.  Normalization routines to no
     In [10]: mat.mass
     Out[10]: 1.0
 
+
+Material Arithmetic
+-------------------
 Furthermore, various arithmetic operations between Materials and numeric types are also defined.
 Adding two Materials together will return a new Material whose values are the weighted union
 of the two original. Multiplying a Material by 2, however, will simply double the mass.
@@ -110,6 +113,9 @@ of the two original. Multiplying a Material by 2, however, will simply double th
     AM242  0.0333333333333
     CM244  0.0333333333333
 
+
+Raw Attribute Access
+--------------------
 You may also change the attributes of a material directly without generating a new material instance.
 
 .. code-block:: ipython
@@ -143,6 +149,9 @@ of sync.  This may always be fixed with normalization.
     H2     0.166666666667
     U235   0.833333333333
 
+
+Indexing & Slicing
+------------------
 Additionally (and very powerfully!), you may index into either the material or the composition 
 to get, set, or remove sub-materials.  Generally speaking, the composition you may only index 
 into by integer-key and only to retrieve the normalized value.  Indexing into the material allows the 
@@ -178,12 +187,110 @@ the material may be performed with integer-keys, string-keys, slices, or sequenc
        ...:                          0.666666666667, '', -1.0)
 
 Other methods also exist for obtaining commonly used sub-materials, such as gathering the Uranium or 
-Plutonium vector.  You may also calculate the molecular weight of a material via the method by the same name.
+Plutonium vector.  
+
+
+Molecular Weights & Atom Fractions
+----------------------------------
+You may also calculate the molecular weight of a material via the :meth:`Material.molecular_weight` method.
+This uses the :func:`pyne.nucname.nuc_weight` fucntion to look up the atomic weight values of
+the constituent nuclides.
 
 .. code-block:: ipython
 
     In [29]: leu.molecular_weight()
-    Out[29]: 237.87853011228307
+    Out[29]: 237.9290388038301
+
+Note that by default, materials are assumed to have one atom per molecule.  This is a poor
+assumption for more complex materials.  For example, take water.  Without specifiying the 
+number of atoms per molecule, the molecular weight calculation will be off by a factor of 3.
+This can be remedied by passing the correct number to the method.  If there is no other valid
+number of molecules stored on the material, this will set the appropriate attribute on the 
+class.
+
+.. code-block:: ipython
+
+    In [30]: h2o = Material({10010: 0.11191487328808077, 80160: 0.8880851267119192})
+
+    In [31]: h2o.molecular_weight()
+    Out[31]: 6.003521561343334
+
+    In [32]: h2o.molecular_weight(3.0)
+    Out[32]: 18.01056468403
+
+    In [33]: h2o.atoms_per_mol
+    Out[33]: 3.0
+
+It is often also useful to be able to convert the current mass-weighted material to 
+an atom fraction mapping.  This can be easily done via the :meth:`Material.to_atom_frac`
+method.  Continuing with the water example, if the number of atoms per molecule is 
+properly set then the atom fraction return is normalized to this ammount.  Alternatively, 
+if the atoms per molecule are set to its default state on the class, then a truly 
+fractional number of atoms is returned.
+
+.. code-block:: ipython
+
+    In [34]: h2o.to_atom_frac()
+    Out[34]: {10010: 2.0, 80160: 1.0}
+
+    In [35]: h2o.atoms_per_mol = -1.0
+
+    In [36]: h2o.to_atom_frac()
+    Out[36]: {10010: 0.666666666667, 80160: 0.333333333333}
+
+Additionally, you may wish to convert the an existing set of atom fractions to a 
+new material stream.  This can be done with the :meth:`Material.from_atom_frac` method, 
+which will clear out the current contents of the material's composition and replace
+it with the mass-weighted values.  Note that 
+when you initialize a material from atom fractions, the sum of all of the atom fractions
+will be stored as the atoms per molecule on this class.  Additionally, if a mass is not 
+already set on the material, the molecular weight will be used.
+
+.. code-block:: ipython
+
+    In [37]: h2o_atoms = {10010: 2.0, 'O16': 1.0}
+
+    In [38]: h2o = Material()
+
+    In [39]: h2o.from_atom_frac(h2o_atoms)
+
+    In [40]: h2o.comp
+    Out[40]: {10010: 0.111914873288, 80160: 0.888085126712}
+
+    In [41]: h2o.atoms_per_mol
+    Out[41]: 3.0
+
+    In [42]: h2o.mass
+    Out[42]: 18.01056468403
+
+    In [43]: h2o.molecular_weight()
+    Out[43]: 18.01056468403
+
+
+Moreover, other materials may also be used to specify a new material from atom fractions.
+This is a typical case for reactors where the fuel vector is convolved inside of another 
+chemical form.  Below is an example of obtaining the Uranium-Oxide material from Oxygen
+and low-enriched uranium.
+
+.. code-block:: ipython
+
+    In [44]: uox = Material()
+
+    In [45]: uox.name = "UOX"
+
+    In [46]: uox.from_atom_frac({leu: 1.0, 'O16': 2.0})
+
+    In [47]: print uox
+    Material: UOX
+    mass = 269.918868043
+    atoms per molecule = 3.0
+    ------------------------
+    O16    0.118516461895
+    U235   0.0352593415242
+    U238   0.846224196581
+
+.. note:: Materials may be used as keys in a dictionary because they are hashable.
+
 
 Further information on the Material class may be seen in the library refernce :ref:`pyne_material`.
 
