@@ -216,6 +216,14 @@ namespace nucname
   std::string serpent(std::string);
 
 
+  /**********************/
+  /*** nist functions ***/
+  /**********************/
+  std::string nist(int);
+  std::string nist(char *);
+  std::string nist(std::string);
+
+
 
 
   /****************************/

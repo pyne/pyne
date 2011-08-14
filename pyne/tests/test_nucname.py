@@ -97,6 +97,12 @@ def test_zzaaam():
     assert_equal(nucname.zzaaam("U"), 920000)
     assert_equal(nucname.zzaaam("Np"), 930000)
 
+    assert_equal(nucname.zzaaam("4he"),   20040)
+    assert_equal(nucname.zzaaam("244CM"), 962440)
+    assert_equal(nucname.zzaaam("239Pu"), 942390)
+    assert_equal(nucname.zzaaam("242AM"), 952420)
+
+
 
 def test_name():
     assert_equal(nucname.name(942390), "PU239")
@@ -133,6 +139,20 @@ def test_serpent():
     assert_equal(nucname.serpent(94239), "Pu-239")
     assert_equal(nucname.serpent(95642), "Am-242m")
 
+
+
+def test_nist():
+    assert_equal(nucname.nist(942390), "239Pu")
+    assert_equal(nucname.nist(952421), "242Am")
+
+    assert_equal(nucname.nist("Pu-239"), "239Pu")
+
+    assert_equal(nucname.nist(94239), "239Pu")
+    assert_equal(nucname.nist(95642), "242Am")
+
+    assert_equal(nucname.nist("10000"), "H")
+    assert_equal(nucname.nist("920000"), "U")
+    assert_equal(nucname.nist("940000"), "Pu")
 
 
 def test_nuc_weight():
