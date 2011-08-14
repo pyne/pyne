@@ -193,7 +193,7 @@ Plutonium vector.
 Molecular Weights & Atom Fractions
 ----------------------------------
 You may also calculate the molecular weight of a material via the :meth:`Material.molecular_weight` method.
-This uses the :func:`pyne.nucname.nuc_weight` fucntion to look up the atomic weight values of
+This uses the :func:`pyne.nucname.nuc_weight` function to look up the atomic weight values of
 the constituent nuclides.
 
 .. code-block:: ipython
@@ -202,7 +202,7 @@ the constituent nuclides.
     Out[29]: 237.9290388038301
 
 Note that by default, materials are assumed to have one atom per molecule.  This is a poor
-assumption for more complex materials.  For example, take water.  Without specifiying the 
+assumption for more complex materials.  For example, take water.  Without specifying the 
 number of atoms per molecule, the molecular weight calculation will be off by a factor of 3.
 This can be remedied by passing the correct number to the method.  If there is no other valid
 number of molecules stored on the material, this will set the appropriate attribute on the 
@@ -224,7 +224,7 @@ class.
 It is often also useful to be able to convert the current mass-weighted material to 
 an atom fraction mapping.  This can be easily done via the :meth:`Material.to_atom_frac`
 method.  Continuing with the water example, if the number of atoms per molecule is 
-properly set then the atom fraction return is normalized to this ammount.  Alternatively, 
+properly set then the atom fraction return is normalized to this amount.  Alternatively, 
 if the atoms per molecule are set to its default state on the class, then a truly 
 fractional number of atoms is returned.
 
@@ -292,5 +292,5 @@ and low-enriched uranium.
 .. note:: Materials may be used as keys in a dictionary because they are hashable.
 
 
-Further information on the Material class may be seen in the library refernce :ref:`pyne_material`.
+Further information on the Material class may be seen in the library reference :ref:`pyne_material`.
 
