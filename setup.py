@@ -161,9 +161,11 @@ exts.append(cpp_ext("pyne.material", ['material.pyx'], ['pyne', 'pyne_nucname', 
 ##########################
 packages = ['pyne', 'pyne.lib', 'pyne.dbgen']
 
-pack_dir = {'pyne': 'pyne',}
+pack_dir = {'pyne': 'pyne', 'pyne.dbgen': 'pyne/dbgen'}
 
-pack_data = {'pyne': ['includes/*.h', 'includes/*.pxd']}
+pack_data = {'pyne': ['includes/*.h', 'includes/*.pxd'],
+             'pyne.dbgen': ['*.html'],
+            }
 
 ext_modules=[Extension(**ext) for ext in exts] 
 

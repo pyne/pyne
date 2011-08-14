@@ -6,6 +6,7 @@ from distutils.dir_util import mkpath, remove_tree
 from pyne.api import nuc_data
 from pyne.dbgen.api import build_dir
 from pyne.dbgen.atomic_weight import make_atomic_weight
+from pyne.dbgen.scattering_lengths import make_scattering_lengths
 
 # Thanks to http://patorjk.com/software/taag/
 # and http://www.chris.com/ascii/index.php?art=creatures/dragons (Jeff Ferris)
@@ -75,9 +76,10 @@ def main():
 
     print "Making nuc_data at {0}".format(args.nuc_data)
 
-    # make atomic weight table
+    # Make the various tables
     make_atomic_weight(args.nuc_data, args.build_dir)
-
+    make_scattering_lengths(args.nuc_data, args.build_dir)
+    
 
 
 if __name__ == '__main__':
