@@ -1,3 +1,5 @@
+.. _usersguide:
+
 =================
 PyNE User's Guide
 =================
