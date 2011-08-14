@@ -1,3 +1,5 @@
+.. _pyne_nucname:
+
 ********************************************
 Nuclide Naming Module -- :mod:`pyne.nucname`
 ********************************************
@@ -8,19 +10,22 @@ Currently four naming conventions are supported.
 
  #. **zzaaam**: This type places the charge of the nucleus out front, then has three 
     digits for the atomic mass number, and ends with a metastable flag (0 = ground, 
-    1 = first excitied state, 2 = second excited state, etc).  Uranium-235 here would 
+    1 = first excited state, 2 = second excited state, etc).  Uranium-235 here would 
     be expressed as '922350'.
- #. **name**: This is the more common, human readable notation.  The chamical symbol 
+ #. **name**: This is the more common, human readable notation.  The chemical symbol 
     (one or two characters long) is first, followed by the atomic weight.  Lastly if 
-    the nuclide is metasstable, the letter *M* is concatanated to the end.  For example, 
+    the nuclide is metastable, the letter *M* is concatenated to the end.  For example, 
     'H-1' and 'Am242M' are both valid.  Note that nucname will always return name form with
     the dash removed and all letters uppercase.
  #. **MCNP**: The MCNP format for entering nuclides is unfortunately non-standard.  In most 
     ways it is similar to zzaaam form, except that it lacks the metastable flag.  For information 
     on how metastable isotopes are named, please consult the MCNPX documentation for more information.
- #. **Serpent**: The serpent naming convetion is similar to name form.  However, only the first 
+ #. **Serpent**: The serpent naming convention is similar to name form.  However, only the first 
     letter in the chemical symbol is uppercase, the dash is always present, and the the meta-stable
     flag is lowercase.  For instance, 'Am-242m' is the valid serpent notation for this nuclide.
+ #. **NIST**: The NIST naming convention is also similar to the Serpent form.  However, this 
+    convention contains not meta-stable information.  Moreover, the A-number comes before the 
+    element symbol.  For example, '242Am' is the valid NIST notation.
 
 
 .. currentmodule:: pyne.nucname
@@ -34,9 +39,9 @@ well as other helpful module attributes.
 
 .. _name_cast:
 
-----------------------------------
-Naming Convetion Casting Functions
-----------------------------------
+-----------------------------------
+Naming Convention Casting Functions
+-----------------------------------
 
 .. autofunction:: zzaaam(nuc)
 
@@ -45,6 +50,8 @@ Naming Convetion Casting Functions
 .. autofunction:: mcnp(nuc)
 
 .. autofunction:: serpent(nuc)
+
+.. autofunction:: nist(nuc)
 
 
 -----------------------
