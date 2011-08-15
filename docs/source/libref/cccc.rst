@@ -25,14 +25,41 @@ Isotxs Class
 ************
 
 .. autoclass:: Isotxs(filename)
-
-   .. automethod:: read()
-   .. automethod:: find_nuclide(name)
+   :members:
 
 ************
 Dlayxs Class
 ************
 
 .. autoclass:: Dlayxs(filename)
+   :members:
 
-   .. automethod:: read()
+************
+Brkoxs Class
+************
+
+.. autoclass:: Brkoxs(filename)
+
+************
+Rtflux Class
+************
+
+.. autoclass:: Rtflux(filename)
+
+************
+Atflux Class
+************
+
+.. autoclass:: Atflux(filename)
+
+************
+Rzflux Class
+************
+
+.. autoclass:: Rzflux(filename)
+
+************
+Matxs Class
+************
+
+.. autoclass:: Matxs(filename)
