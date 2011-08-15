@@ -44,20 +44,20 @@ class Isotxs(_BinaryReader):
 
         # Initialize attributes
         self.fc = {}       # file control info
-        self.nuclides = [] # actual nuclides
+        self.nuclides = [] #: List of nuclides in ISOTXS file.
 
     def read(self):
         """Read through and parse the ISOTXS file."""
 
-        self.read_file_ID()
-        self.read_file_control()
-        self.read_file_data()
+        self._read_file_ID()
+        self._read_file_control()
+        self._read_file_data()
 
         # Read file-wide chi-distribution matrix if present. Note that if
         # file-wide chi is given as a vector, it will be read during
         # the read_file_data method.
         if self.fc['ichidst']>1:
-            self.read_chi_data()
+            self._read_chi_data()
 
         # Read nuclide data
         for nucName in self.nucNames:
@@ -65,25 +65,25 @@ class Isotxs(_BinaryReader):
             nuc = _Nuclide(nucName)
             
             # Read nuclide name and global data
-            self.read_nuclide_data(nuc)
+            self._read_nuclide_data(nuc)
 
             # Read nuclide cross sections
-            self.read_nuclide_xs(nuc)   
+            self._read_nuclide_xs(nuc)   
 
             # Read nuclide chi data if present
             if nuc.libParams['chiFlag']>1:
-                self.read_nuclide_chi(nuc)
+                self._read_nuclide_chi(nuc)
                 
             # Read nuclide scattering matrix
             for block in range(self.fc['nscmax']):
                 for subBlock in range(self.fc['nsblok']):
                     if nuc.libParams['ords'][block] > 0:
-                        self.read_nuclide_scatter(nuc, block, subBlock)
+                        self._read_nuclide_scatter(nuc, block, subBlock)
 
             # Add nuclide to dictionary
             self.nuclides.append(nuc)
         
-    def read_file_ID(self):
+    def _read_file_ID(self):
         """Reads the file identification block. This block is always present in
         the ISOTXS format and contains a label and file version number.
         """
@@ -95,7 +95,7 @@ class Isotxs(_BinaryReader):
         self.label = fileID.get_string(24)
         self.fileVersion = fileID.get_int()
         
-    def read_file_control(self):
+    def _read_file_control(self):
         """Reads the file control block. This block is always present and gives
         many parameters for the file including number of energy groups, number
         of isotopes, etc.
@@ -114,7 +114,7 @@ class Isotxs(_BinaryReader):
         self.fc['nscmax'] = fc.get_int() # Max blocks of scatter data (seems to be actual number)
         self.fc['nsblok'] = fc.get_int() # Number of subblocks
         
-    def read_file_data(self):
+    def _read_file_data(self):
         """Reads the file data block. This block is always present and contains
         isotope names, global chi distribution, energy group structure, and
         locations of each nuclide record.
@@ -134,7 +134,7 @@ class Isotxs(_BinaryReader):
         if self.fc['ichidst']==1:
             self.chi = fileData.get_float(self.fc['ngroup'])
         
-        # Read mean neutron velocity in each group
+        #: Mean neutron velocity in each group
         self.vel = fileData.get_float(self.fc['ngroup'])
 
         # Read maximum energy bound of each group
@@ -146,7 +146,7 @@ class Isotxs(_BinaryReader):
         # Read number of records to be skipped to read data for a given nuclide
         self.locs = fileData.get_int(self.fc['niso'])
             
-    def read_chi_data(self):
+    def _read_chi_data(self):
         """Reads file-wide chi-distribution matrix. In most cases, chi will be
         given as a vector, not a matrix, and thus in such cases this routine is
         not needed.
@@ -154,7 +154,7 @@ class Isotxs(_BinaryReader):
 
         raise NotImplementedError
     
-    def read_nuclide_data(self, nuc):
+    def _read_nuclide_data(self, nuc):
         """Read the following individual nuclide XS record. Load data into nuc.
         This record contains non-mg data like atomic mass, temperature, and some
         flags.
@@ -206,7 +206,7 @@ class Isotxs(_BinaryReader):
             for j in range(self.fc['ngroup']):
                 nuc.libParams['jj'][j,n] = r.get_int()
         
-    def read_nuclide_xs(self, nuc):
+    def _read_nuclide_xs(self, nuc):
         """Reads principal microscopic multigroup cross-section data for a
         single nuclide.
         """
@@ -267,7 +267,7 @@ class Isotxs(_BinaryReader):
                 for g in range(self.fc['ngroup']):
                     nuc.micros['strpd',g,i] = r.get_float()
         
-    def read_nuclide_chi(self, nuc):
+    def _read_nuclide_chi(self, nuc):
         """Reads nuclide-level fission spectrum matrix. In most cases, chi will
         be given as a vector, not a matrix, and thus in such cases this routine
         is not needed.
@@ -275,7 +275,7 @@ class Isotxs(_BinaryReader):
 
         raise NotImplementedError
     
-    def read_nuclide_scatter(self, nuc, block, subBlock):
+    def _read_nuclide_scatter(self, nuc, block, subBlock):
         """Read nuclide scattering matrix.
 
         In some versions of the specification, the written description of the
@@ -332,6 +332,20 @@ class Isotxs(_BinaryReader):
                     nuc.micros['scat',block,g,fromG,order] = r.get_float()
 
     def find_nuclide(self, name):
+        """Returns a nuclide with a given name.
+
+        Parameters
+        ----------
+        name : str
+            Path of the ISOTXS file to load.
+
+        Returns
+        -------
+        nuc : Nuclide
+            Object containing microscopic cross sections and other data.
+
+        """
+
         for nuc in self:
             if nuc.name == name:
                 return nuc
@@ -369,10 +383,10 @@ class Dlayxs(_BinaryReader):
     def read(self):
         """Read through and parse data in the DLAYXS file."""
         
-        self.read_file_ID()
-        self.read_file_control()
-        (decay, spectrum) = self.read_spectra()
-        self.read_yield()
+        self._read_file_ID()
+        self._read_file_control()
+        (decay, spectrum) = self._read_spectra()
+        self._read_yield()
         
         for isotope in self.isotopes:
             self.decay[isotope]    = {}
@@ -382,14 +396,14 @@ class Dlayxs(_BinaryReader):
                 self.decay[isotope][gDelay]    = decay[family]
                 self.spectrum[isotope][gDelay] = spectrum[family]
         
-    def read_file_ID(self):
+    def _read_file_ID(self):
         """Read file ID block"""
         
         id = self.get_fortran_record()
         self.label = id.get_string(24)
         fileID = id.get_int()
         
-    def read_file_control(self):
+    def _read_file_control(self):
         """Read file control block."""
         
         fileControl = self.get_fortran_record()
@@ -397,7 +411,7 @@ class Dlayxs(_BinaryReader):
         self.nIsotopes = fileControl.get_int()
         self.nFamilies = fileControl.get_int()
         
-    def read_spectra(self):
+    def _read_spectra(self):
         """Read the decay constants and delayed neutron spectra"""
         
         fileData = self.get_fortran_record()
@@ -429,7 +443,7 @@ class Dlayxs(_BinaryReader):
         
         return decay, spectra
     
-    def read_yield(self):
+    def _read_yield(self):
         """Read the delayed neutron precursor yields"""
         
         for isotope in self.isotopes:
