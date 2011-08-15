@@ -1,3 +1,5 @@
+import re
+
 import numpy as np
 
 from pyne import nucname
@@ -490,3 +492,43 @@ def parse_tape6(name = "TAPE6.OUT"):
     return results
 
 
+data_format = "\d+\.\d*[EeDd]?[+-]?\d+"
+
+decay_card1_re = re.compile("(\d+)\s+(\d{{5,7}})\s+(\d)\s+({num})\s+({num})\s+({num})\s+({num})\s+({num})\s+({num})".format(num=data_format))
+
+
+
+def parse_tape9(tape9="TAPE9.INP"):
+    """Parses an ORIGEN 2.2 TAPE9 file and returns the data as a dictionary of nuclide dictionaries.
+    
+    Parameters
+    ----------
+    tape9 : str or file-like object, optional
+        Path to the tape9 file.
+    """
+    # Read and strip lines
+    opened_here = False
+    if isinstance(tape9, basestring):
+        tape9 = open(tape9, 'r')
+        opened_here = True
+
+    tape9_lines = [line.strip() for line in tape9]
+
+    if opened_here:
+        tape9.close()
+
+    # Split lines into various decks.
+    decks = []
+    while 0 < tape9_lines.count('-1'):
+        n = tape9_lines.index('-1')
+        decks.append(tape9_lines[:n])
+        tape9_lines = tape9_lines[n+1:]
+
+    # parse the individual decks.
+    parsed = {}
+    for deck in decks:
+        m = decay_card1_re.match(deck[1])
+        print m
+
+
+    return parsed
