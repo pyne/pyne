@@ -19,8 +19,8 @@ def write_tape4(mat, outfile="TAPE4.INP"):
     lower_z = mat[:'AC']
     upper_z = mat['AC':]
 
-    lower_lines = ["1 {0} {1:.10E}   0 0   0 0   0 0".format(nuc, mass) for nuc, mass in lower_z.mult_by_mass()]
-    upper_lines = ["2 {0} {1:.10E}   0 0   0 0   0 0".format(nuc, mass) for nuc, mass in upper_z.mult_by_mass()]
+    lower_lines = ["1 {0} {1:.10E}   0 0   0 0   0 0".format(nuc, mass) for nuc, mass in lower_z.mult_by_mass().items()]
+    upper_lines = ["2 {0} {1:.10E}   0 0   0 0   0 0".format(nuc, mass) for nuc, mass in upper_z.mult_by_mass().items()]
     lines = lower_lines + upper_lines + ["0 0 0 0\n"]
 
     tape4 = "\n".join(lines)
@@ -156,7 +156,7 @@ def write_tape5_irradiation(irr_type, irr_time, irr_value, nlb,
 
 
     # Fill the template and write it to a file
-    tape5 = tape5_irradiation_template.format(**tape5_kw)
+    tape5 = _tape5_irradiation_template.format(**tape5_kw)
 
     opened_here = False
     if isinstance(outfile, basestring):
