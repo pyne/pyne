@@ -169,272 +169,60 @@ def write_tape5_irradiation(irr_type, irr_time, irr_value, nlb,
         outfile.close()
 
 
-def run_origen(self):
-    """Runs the ORIGEN Burnup Calculations."""
-    os.chdir('libs/ORIGEN/')
 
-    # Grab General Data from the HDF5 File
-    libfile = tb.openFile("../{0}.h5".format(reactor), 'r')
-    CoreLoadIsos = list(libfile.root.CoreLoad_zzaaam)
-    libfile.close()
+def write_tape9(outfile="TAPE9.INP", origfile="tape9.original", sigma_gamma=None, sigma_2n=None, 
+                sigma_3n=None, sigma_f=None, sigma_alpha=None, sigma_p=None, sigma_gamma_x=None, 
+                sigma_2n_x=None, nuclist=None, precision=3):
+    """Writes an ORIGEN 2.2 TAPE9.INP file given cross section values, and optionally based on an 
+    original TAPE9 template file.
 
-    if 0 < verbosity:
-        print(message("Preping the ORIGEN Directories..."))
-    t1 = time.time()
-    for t in FineTime[1:]:
-        self.make_input_tape5(t)
-        self.make_input_tape9(t)
-    for iso in CoreLoadIsos: 
-        os.mkdir("{0}".format(iso))
-    t2 = time.time()
-    if 0 < verbosity:
-        print(message("...Done!  That only took {0:time} min.\n", "{0:.3G}".format((t2-t1)/60.0) ))
+    Parameters
+    ----------
+    outfile : str or file-like object, optional
+        Path to the new tape9 file.
+    origfile : str or file-like object, optional
+        Path to the tape9 template file.
+    sigma_gamma : dict, optional
+        Microscopic (n, gamma) cross-section nuclide map of form {nuc: xs_(n,g) [barns]}.
+    sigma_2n : dict, optional 
+        Microscopic (n, 2n) cross-section nuclide map of form {iso: xs_(n,2n) [barns]}.
+    sigma_3n : dict, optional
+        Microscopic (n, 3n) cross-section nuclide map of form {iso: xs_(n,3n) [barns]}.
+    sigma_f : dict, optional
+        Microscopic (n, fission) cross-section nuclide map of form {iso: xs_(n,f) [barns]}.
+    sigma_alpha : dict, optional
+        Microscopic (n, alpha) cross-section nuclide map of form {iso: xs_(n,alpha) [barns]}.
+    sigma_p : dict, optional 
+        Microscopic (n, proton) cross-section nuclide map of form {iso: xs_(n,p) [barns]}.
+    sigma_gamma_x : dict, optional
+        Microscopic (n, gamma*) excited state cross-section nuclide map of form {iso: xs_(n,g*) [barns]}.
+    sigma_2n_x : dict, optional
+        Microscopic (n, 2n*) excited state cross-section nuclide map of form {iso: xs_(n,2n*) [barns]}.
+    nuclist : sequence, optional
+        List of nuclides to write over.
+    precision :  int, optional 
+        The number of significant figures that all output data is given to beyond the decimal point.
 
-    if 0 < verbosity:
-        print(message("  ~~~~~  Starting ORIGEN Runs  ~~~~~  "))
-    orit1 = time.time()
-
-    # Initialize the data structures
-    self.BU  = {}
-    self.k   = {}
-    self.Pro = {}
-    self.Des = {}
-    self.Tij = {}
-
-    for iso in CoreLoadIsos:
-        isoLL = isoname.zzaaam_2_LLAAAM(iso)
-        if 0 < verbosity:
-            print(message("  ~~~~~  Now on {0:iso}  ~~~~~  \n", "Isotope {0}".format(isoLL)))
-        isot1 = time.time()
-
-        # Initilize iso data, for t = 0
-        self.BU[iso]  = [0.0]
-        self.k[iso]   = [0.0]
-        self.Pro[iso] = [0.0]
-        self.Des[iso] = [0.0]
-        self.Tij[iso] = [{iso: 1000.0}]
-
-        for t in FineTime[1:]:
-            if 0 < verbosity:
-                print(message("Starting ORIGEN run for {0:iso} at {1:time}...", isoLL, "Time {0}".format(t)))
-            t1 = time.time()
-
-            os.chdir("{0}".format(iso))
-
-            # Make/Get Input Decks
-            self.make_input_tape4(Tij[iso][-1])
-            shutil.copy("../{0}_T{1}.tape5".format(reactor, t), "TAPE5.INP")
-            shutil.copy("../{0}_T{1}.tape9".format(reactor, t), "TAPE9.INP")
-
-            # Run ORIGEN
-            subprocess.call(self.run_str, shell=True)
-
-            # Parse Output
-            self.parse_tape6()
-            self.BU[iso].append(  BU[iso][-1] + self.tape6_BU )
-            self.k[iso].append(   self.tape6_k )
-            self.Pro[iso].append( self.tape6_Pro )
-            self.Des[iso].append( self.tape6_Des )
-            self.Tij[iso].append( self.tape6_outvec )
-
-            # Clean up the directory
-            for f in os.listdir('.'):
-                if f[-4:] in ['.INP', '.OUT']:
-                    metasci.SafeRemove(f)
-            os.chdir('../') # Back to ORIGEN Directory
-
-            t2 = time.time()
-            if 0 < verbosity:
-                print(message("ORIGEN run completed in {0:time} min!", "{0:.3G} min".format((t2-t1)/60.0) ))
-    
-        isot2 = time.time()
-        if 0 < verbosity:
-            print(message("  ~~~~~  Isotope {0:iso} took {1:time} min!  ~~~~~  \n", isoLL, "{0:.3G} min".format((isot2-isot1)/60.0) ))
-
-
-    # Kludge to put Tij in the right units and form
-    allORIGENisoList = []
-    for iso in CoreLoadIsos:
-        for t in Tij[iso]:
-            for j in t.keys():
-                if (j not in allORIGENisoList):
-                    allORIGENisoList.append(j)
-    for iso in CoreLoadIsos:
-        for n_t in range(len(Tij[iso])):
-            for j in allORIGENisoList:
-                if j in Tij[iso][n_t].keys():
-                    Tij[iso][n_t][j] = Tij[iso][n_t][j] / (10.0**3)
-                else:
-                    Tij[iso][n_t][j] = 0.0
-    
-    orit2 = time.time()
-    if 0 < verbosity:
-        print(message("  ~~~~~  ORIGEN took {0:time} to run!  ~~~~~  ", "{0:.3G} min".format((orit2-orit1)/60.0) ))
-
-    os.chdir('../../') #Back to 'reactor' root
-    return 
-
-def parse_tape6(name = "TAPE6.OUT"):
-    """Parses an ORIGEN TAPE6.OUT file that is in the current directory + path p.
-
-    Keyword Args:
-        * name (str): Path to the tape6 file to parse:
-
-    Returns:
-        * results (dict): Dictionary of parsed values.
-    """
-    results = {}
-
-    # Defaults
-    in_table = False
-    table_key = None
-    table_type = None
-
-    # Read the TAPE6 file
-    with open(name, 'r') as tape6:
-        for line in tape6:
-            # Skip trivial lines
-            if len(line) == 0:
-                continue
-
-            # Spliut the line
-            ls = line.split()
-
-            # Grab Basis lines
-            if "TIME, SEC" in line:
-                results["time_sec"] = float(ls[-1])
-
-            elif "NEUT. FLUX" in line:
-                results["flux"] = float(ls[-1])
-
-            elif "SP POW,MW" in line:
-                results["specific_power_MW"] = float(ls[-1])
-
-            elif "BURNUP,MWD" in line:
-                results["burnup_MWD"] = float(ls[-1])
-
-            elif "K INFINITY" in line:
-                results["k_inf"] = float(ls[-1])
-
-            elif "NEUT PRODN" in line:
-                results["neutron_production_rate"] = float(ls[-1])
-
-            elif "NEUT DESTN" in line:
-                results["neutron_destruction_rate"] = float(ls[-1])
-
-            elif "TOT BURNUP" in line:
-                results["total_burnup"] = float(ls[-1])
-
-            elif "AVG N FLUX" in line:
-                results["average_flux"] = float(ls[-1])
-
-            elif "AVG SP POW" in line:
-                results["average_specific_power"] = float(ls[-1])
-
-            elif ("TABLE:" in line):
-                in_table = True
-
-                # Set table key
-                if line[0] == "0":
-                    table_key = "table_{0}".format(ls[1])
-                else:
-                    table_key = "table_{0}".format(ls[0])
-
-                if table_key not in results.keys():
-                    results[table_key] = {}
-
-                # Set table type
-                if line[0] == "0":
-                    table_type = ls[2].lower()
-                else:
-                    table_type = ls[1].lower()
-
-                if table_type not in results[table_key].keys():
-                    results[table_key][table_type] = {}
-
-                    pline = line.partition(":")[2].partition(",")
-                    title = pline[0].strip()
-                    units = pline[2].strip()
-
-                    results[table_key][table_type]["title"] = title
-                    results[table_key][table_type]["units"] = units
-                    results[table_key][table_type]["data"]  = {}
-                    
-
-            elif in_table and ("OUTPUT UNIT = " in line):
-                # restore defaults
-                in_table = False
-                table_key = None
-                table_type = None
-
-            elif in_table:
-                ind = 0
-                try:
-                    iso = isoname.LLAAAM_2_zzaaam(ls[0])
-                    ind = 1
-                except:
-                    try:
-                        iso = isoname.LLAAAM_2_zzaaam(ls[0] + ls[1])
-                        ind = 2
-                    except:
-                        continue
-
-                #results[table_key][table_type]["data"][iso] = float(ls[-1])
-                if iso not in results[table_key][table_type]["data"]:
-                    results[table_key][table_type]["data"][iso] = []
-                results[table_key][table_type]["data"][iso].append(np.array(ls[ind:], dtype=float))
-            else:
-                continue
-
-    return results
-
-
-def write_tape9(name_new="TAPE9.INP", name_org="original.tape9", SNG={}, SN2N={}, 
-    SN3N={}, SNF={}, SNA={}, SNP={}, SNGX={}, SN2NX={}, iso_list=[], sigfig=3):
-    """Writes a new ORIGEN TAPE9.INP file based on an original TAPE9 template 
-    file and given cross section values.
-
-    Keyword Args:
-    	* `name_new` (str): Path to the new tape9 file.
-    	* `name_org` (str): Path to the tape9 template file.
-        * `SNG` (dict): (n, gamma) cross-section isotopic vector, of form {iso: xs_(n,g) [barns]}.
-        * `SN2N` (dict): (n, 2n) cross-section isotopic vector, of form {iso: xs_(n,2n) [barns]}.
-        * `SN3N` (dict): (n, 3n) cross-section isotopic vector, of form {iso: xs_(n,3n) [barns]}.
-        * `SNF` (dict): (n, fission) cross-section isotopic vector, of form {iso: xs_(n,f) [barns]}.
-        * `SNA` (dict): (n, alpha) cross-section isotopic vector, of form {iso: xs_(n,alpha) [barns]}.
-        * `SNP` (dict): (n, proton) cross-section isotopic vector, of form {iso: xs_(n,p) [barns]}.
-        * `SNGX` (dict): (n, gamma*) excited state cross-section isotopic vector, of form {iso: xs_(n,g*) [barns]}.
-        * `SN2NX` (dict): (n, 2n*) excited state cross-section isotopic vector, of form {iso: xs_(n,2n*) [barns]}.
-        * `iso_list` (list): List of isotopes to write over.
-        * `sigfig` (int): Ensures that all overwritten data is given to this many digits beyond the 
-          decimal point via "{xs:.{sigfig}E}".format().
+    Notes
+    -----
+    All nuclides must be given in zzaaam form.
     """
 
     #perform some basic set-up
     zero_space = "0.0       "
 
-    SNG   = isoname.isovec_keys_2_zzaaam(SNG)
-    SN2N  = isoname.isovec_keys_2_zzaaam(SN2N)
-    SN3N  = isoname.isovec_keys_2_zzaaam(SN3N)
-    SNF   = isoname.isovec_keys_2_zzaaam(SNF)
-    SNA   = isoname.isovec_keys_2_zzaaam(SNA)
-    SNP   = isoname.isovec_keys_2_zzaaam(SNP)
-    SNGX  = isoname.isovec_keys_2_zzaaam(SNGX)
-    SN2NX = isoname.isovec_keys_2_zzaaam(SN2NX)
-
-    if iso_list == []:
-        iso_set = set()
-        iso_set.update(SNG.keys())
-        iso_set.update(SN2N.keys())
-        iso_set.update(SN3N.keys())
-        iso_set.update(SNF.keys())
-        iso_set.update(SNA.keys())
-        iso_set.update(SNP.keys())
-        iso_set.update(SNGX.keys())
-        iso_set.update(SN2NX.keys())
-        iso_list = list(iso_set)
+    if nuclist is None:
+        nucset = set()
+        nucset.update(sigma_gamma.keys())
+        nucset.update(sigma_2n.keys())
+        nucset.update(sigma_3n.keys())
+        nucset.update(sigma_f.keys())
+        nucset.update(sigma_alpha.keys())
+        nucset.update(sigma_p.keys())
+        nucset.update(sigma_gamma_x.keys())
+        nucset.update(sigma_2n_x.keys())
     else:
-        iso_list = isoname.mixed_2_zzaaam_List(iso_list)
+        nucset = set(nuclist)
 
     #Open the first tape9 for reading and the new tape9 for writing.
     tape9_o = open(name_org, 'r')   #Original File
@@ -582,4 +370,123 @@ def write_tape9(name_new="TAPE9.INP", name_org="original.tape9", SNG={}, SN2N={}
     #Close out the files and return
     tape9_o.close()
     tape9_n.close()
-    return
+
+
+
+
+
+def parse_tape6(name = "TAPE6.OUT"):
+    """Parses an ORIGEN TAPE6.OUT file that is in the current directory + path p.
+
+    Keyword Args:
+        * name (str): Path to the tape6 file to parse:
+
+    Returns:
+        * results (dict): Dictionary of parsed values.
+    """
+    results = {}
+
+    # Defaults
+    in_table = False
+    table_key = None
+    table_type = None
+
+    # Read the TAPE6 file
+    with open(name, 'r') as tape6:
+        for line in tape6:
+            # Skip trivial lines
+            if len(line) == 0:
+                continue
+
+            # Spliut the line
+            ls = line.split()
+
+            # Grab Basis lines
+            if "TIME, SEC" in line:
+                results["time_sec"] = float(ls[-1])
+
+            elif "NEUT. FLUX" in line:
+                results["flux"] = float(ls[-1])
+
+            elif "SP POW,MW" in line:
+                results["specific_power_MW"] = float(ls[-1])
+
+            elif "BURNUP,MWD" in line:
+                results["burnup_MWD"] = float(ls[-1])
+
+            elif "K INFINITY" in line:
+                results["k_inf"] = float(ls[-1])
+
+            elif "NEUT PRODN" in line:
+                results["neutron_production_rate"] = float(ls[-1])
+
+            elif "NEUT DESTN" in line:
+                results["neutron_destruction_rate"] = float(ls[-1])
+
+            elif "TOT BURNUP" in line:
+                results["total_burnup"] = float(ls[-1])
+
+            elif "AVG N FLUX" in line:
+                results["average_flux"] = float(ls[-1])
+
+            elif "AVG SP POW" in line:
+                results["average_specific_power"] = float(ls[-1])
+
+            elif ("TABLE:" in line):
+                in_table = True
+
+                # Set table key
+                if line[0] == "0":
+                    table_key = "table_{0}".format(ls[1])
+                else:
+                    table_key = "table_{0}".format(ls[0])
+
+                if table_key not in results.keys():
+                    results[table_key] = {}
+
+                # Set table type
+                if line[0] == "0":
+                    table_type = ls[2].lower()
+                else:
+                    table_type = ls[1].lower()
+
+                if table_type not in results[table_key].keys():
+                    results[table_key][table_type] = {}
+
+                    pline = line.partition(":")[2].partition(",")
+                    title = pline[0].strip()
+                    units = pline[2].strip()
+
+                    results[table_key][table_type]["title"] = title
+                    results[table_key][table_type]["units"] = units
+                    results[table_key][table_type]["data"]  = {}
+                    
+
+            elif in_table and ("OUTPUT UNIT = " in line):
+                # restore defaults
+                in_table = False
+                table_key = None
+                table_type = None
+
+            elif in_table:
+                ind = 0
+                try:
+                    iso = isoname.LLAAAM_2_zzaaam(ls[0])
+                    ind = 1
+                except:
+                    try:
+                        iso = isoname.LLAAAM_2_zzaaam(ls[0] + ls[1])
+                        ind = 2
+                    except:
+                        continue
+
+                #results[table_key][table_type]["data"][iso] = float(ls[-1])
+                if iso not in results[table_key][table_type]["data"]:
+                    results[table_key][table_type]["data"][iso] = []
+                results[table_key][table_type]["data"][iso].append(np.array(ls[ind:], dtype=float))
+            else:
+                continue
+
+    return results
+
+
