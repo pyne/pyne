@@ -44,7 +44,7 @@ class Isotxs(_BinaryReader):
 
         # Initialize attributes
         self.fc = {}       # file control info
-        self.nuclides = [] # actual nuclides
+        self.nuclides = [] #: List of nuclides in ISOTXS file.
 
     def read(self):
         """Read through and parse the ISOTXS file."""
@@ -134,7 +134,7 @@ class Isotxs(_BinaryReader):
         if self.fc['ichidst']==1:
             self.chi = fileData.get_float(self.fc['ngroup'])
         
-        # Read mean neutron velocity in each group
+        #: Mean neutron velocity in each group
         self.vel = fileData.get_float(self.fc['ngroup'])
 
         # Read maximum energy bound of each group
@@ -332,6 +332,20 @@ class Isotxs(_BinaryReader):
                     nuc.micros['scat',block,g,fromG,order] = r.get_float()
 
     def find_nuclide(self, name):
+        """Returns a nuclide with a given name.
+
+        Parameters
+        ----------
+        name : str
+            Path of the ISOTXS file to load.
+
+        Returns
+        -------
+        nuc : Nuclide
+            Object containing microscopic cross sections and other data.
+
+        """
+
         for nuc in self:
             if nuc.name == name:
                 return nuc
