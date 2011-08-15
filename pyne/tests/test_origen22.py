@@ -1,58 +1,66 @@
 import os
+from StringIO import StringIO
 
 from nose.tools import assert_equal
 
-from metasci.nuke import origen as msno
+from pyne import origen22
+from pyne.material import Material
 
 
 def test_write_tape4():
-    isovec = {"U235": 0.95, 80160: 0.05}
-    msno.write_tape4(isovec, "test.tape4")
+    mat = Material({"U235": 0.95, 80160: 0.05})
+    tape4 = StringIO()
+    origen22.write_tape4(mat, tape4)
 
-    observed_file = open("test.tape4", 'r')
-    observed = observed_file.read()
-
+    tape4.seek(0)
+    observed = tape4.read()
     expected = ("1 80160 5.0000000000E-02   0 0   0 0   0 0\n"
                 "2 922350 9.5000000000E-01   0 0   0 0   0 0\n"
                 "0 0 0 0\n")
 
     assert_equal(observed, expected)
 
-    observed_file.close()
-    os.remove("test.tape4")
 
 
 def test_out_table_string1():
-    obs = msno.out_table_string(None, None)
+    obs = origen22._out_table_string(None, None)
     exp = "1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1"
     assert_equal(obs, exp)
+
 
 def test_out_table_string2():
-    obs = msno.out_table_string((False, False, True), None)
+    obs = origen22._out_table_string((False, False, True), None)
     exp = "1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1"
     assert_equal(obs, exp)
 
+
 def test_out_table_string3():
-    obs = msno.out_table_string((False, False, True), range(1, 25))
+    obs = origen22._out_table_string((False, False, True), range(1, 25))
     exp = "7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7"
     assert_equal(obs, exp)
 
+
 def test_out_table_string4():
-    obs = msno.out_table_string((False, False, True), [10, 5])
+    obs = origen22._out_table_string((False, False, True), [10, 5])
     exp = "8 8 8 8 7 8 8 8 8 7 8 8 8 8 8 8 8 8 8 8 8 8 8 8"
     assert_equal(obs, exp)
 
+
 def test_out_table_string5():
-    obs = msno.out_table_string((True, False, True), [10, 5])
+    obs = origen22._out_table_string((True, False, True), [10, 5])
     exp = "8 8 8 8 3 8 8 8 8 3 8 8 8 8 8 8 8 8 8 8 8 8 8 8"
     assert_equal(obs, exp)
 
-def test_write_tape5_irradiation():
-    msno.write_tape5_irradiation("IRP", 100, 0.550, [204, 205, 206], name="test.tape5",
-                                 out_table_nes=(False, False, True), out_table_laf=(True,  False,  True),  out_table_num=[5, 10])
 
-    observed_file = open("test.tape5", 'r')
-    observed = observed_file.read()
+def test_write_tape5_irradiation():
+    tape5 = StringIO()
+    origen22.write_tape5_irradiation("IRP", 100, 0.550, [204, 205, 206], outfile=tape5,
+                                     out_table_nes=(False, False, True), 
+                                     out_table_laf=(True,  False,  True),  
+                                     out_table_num=[5, 10])
+
+    tape5.seek(0)
+    observed = tape5.read()
 
     expected = ("  -1\n"
                 "  -1\n"  
@@ -74,12 +82,10 @@ def test_write_tape5_irradiation():
 
     assert_equal(observed, expected)
 
-    observed_file.close()
-    os.remove("test.tape5")
 
 
-def test_parse_tape6_1():
-    r = msno.parse_tape6('test.tape6')
+def _test_parse_tape6_1():
+    r = origen22.parse_tape6('test.tape6')
     assert(0 < len(r))
 
     assert_equal(r['time_sec'], 8.64E+06)
