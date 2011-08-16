@@ -493,9 +493,27 @@ def parse_tape6(name = "TAPE6.OUT"):
 
 
 data_format = "\d+\.\d*[EeDd]?[+-]?\d+"
+title_card_re = re.compile("(\d+)\s+(\S.*)")
 
+# Decay library regex
 decay_card1_re = re.compile("(\d+)\s+(\d{{5,7}})\s+(\d)\s+({num})\s+({num})\s+({num})\s+({num})\s+({num})\s+({num})".format(num=data_format))
+decay_card2_re = re.compile("(\d+)\s+({num})\s+({num})\s+({num})\s+({num})\s+({num})\s+({num})".format(num=data_format))
 
+# Cross section and fission product yeild library regex
+xsfpy_card1_re = re.compile("(\d+)\s+(\d{{5,7}})\s+({num})\s+({num})\s+({num})\s+({num})\s+({num})\s+({num})\s+([+-]?{num})".format(num=data_format))
+xsfpy_card2_re = re.compile("(\d+)\s+({num})\s+({num})\s+({num})\s+({num})\s+({num})\s+({num})\s+({num})\s+({num})".format(num=data_format))
+
+
+def _parse_tape9_decay(deck):
+    pdeck = {'_type': 'decay'}
+    pdeck['title'] = title_card_re.match(deck[0]).group(2).strip()
+    return pdeck
+
+
+def _parse_tape9_xsfpy(deck):
+    pdeck = {'_type': 'xsfpy'}
+    pdeck['title'] = title_card_re.match(deck[0]).group(2).strip()
+    return pdeck
 
 
 def parse_tape9(tape9="TAPE9.INP"):
@@ -527,8 +545,18 @@ def parse_tape9(tape9="TAPE9.INP"):
     # parse the individual decks.
     parsed = {}
     for deck in decks:
+        # Decay deck
         m = decay_card1_re.match(deck[1])
-        print m
+        if m is not None:
+            deck_num = int(m.group(1))
+            parsed[deck_num] = _parse_tape9_decay(deck)
+            continue
 
+        # Cross section deck
+        m = xsfpy_card1_re.match(deck[1])
+        if m is not None:
+            deck_num = int(m.group(1))
+            parsed[deck_num] = _parse_tape9_xsfpy(deck)
+            continue
 
     return parsed
