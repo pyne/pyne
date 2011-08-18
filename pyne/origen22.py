@@ -1,8 +1,24 @@
 import re
+from itertools import imap
 
 import numpy as np
 
 from pyne import nucname
+
+
+# Table 4.2 in ORIGEN 2.2. manual
+ORIGEN_TIME_UNITS = [None,              # No zero unit
+                     1.0,               # seconds
+                     60.0,              # minutes
+                     3600.0,            # hours
+                     86400.0,           # days
+                     31556926.0,        # years...which are fuzzily defined.
+                     31556926.0 * 1E3,  # ky
+                     31556926.0 * 1E6,  # My
+                     31556926.0 * 1E9,  # Gy
+                    ]
+
+
 
 ###################################
 ### ORIGEN Input Deck Functions ###
@@ -507,6 +523,14 @@ xsfpy_card2_re = re.compile("(\d+)\s+({num})\s+({num})\s+({num})\s+({num})\s+({n
 def _parse_tape9_decay(deck):
     pdeck = {'_type': 'decay'}
     pdeck['title'] = title_card_re.match(deck[0]).group(2).strip()
+
+    # Parse the first card
+    first_cards = [m.groups()[1:] for m in imap(decay_card1_re.match, deck[1::2])]
+    first_cards = np.array(first_cards, dtype='i4,i4' + ',f8'*6)
+    pdeck['_first_cards'] = first_cards
+
+    pdeck['half_life'] = {nuc: val*ORIGEN_TIME_UNITS[unit] for nuc, unit, val in first_cards[['f0', 'f1', 'f2']]}
+
     return pdeck
 
 
@@ -523,6 +547,11 @@ def parse_tape9(tape9="TAPE9.INP"):
     ----------
     tape9 : str or file-like object, optional
         Path to the tape9 file.
+
+    Returns
+    -------
+    parsed : dict
+        A dictionary of the data from the TAPE9 file.
     """
     # Read and strip lines
     opened_here = False
