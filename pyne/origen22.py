@@ -553,6 +553,62 @@ def _parse_tape9_decay(deck):
 def _parse_tape9_xsfpy(deck):
     pdeck = {'_type': 'xsfpy'}
     pdeck['title'] = title_card_re.match(deck[0]).group(2).strip()
+
+    # Pasre the deck
+    cards = []
+    no_fpy = (0.0, ) * 8
+
+    i = 1
+    deck_size = len(deck)
+    while (i < deck_size):
+        first_card = xsfpy_card1_re.match(deck[i]).groups()[1:]
+        if 0.0 < float(first_card[-1]):
+            i += 1
+            second_card = xsfpy_card2_re.match(deck[i]).groups()[1:]
+        else:
+            second_card = no_fpy
+        cards.append(first_card + second_card)
+        i += 1
+
+    cards = np.array(cards, dtype='i4' + ',f8'*15)
+    pdeck['_cards'] = cards
+
+    # Try to determine subtype
+    if (0.0 < cards['f7']).any():
+        subtype = 'fission_products'
+    elif 890000 < cards['f0'].mean():
+        subtype = 'actinides'
+    else:
+        subtype = 'activation_products'
+    pdeck['_subtype'] = subtype
+
+
+    # Parse first cards
+    pdeck['sigma_gamma'] = {nuc: val for nuc, val in cards[['f0', 'f1']]}
+    pdeck['sigma_2n'] = {nuc: val for nuc, val in cards[['f0', 'f2']]}
+
+    f3_keys = {'fission_products': 'sigma_alpha', 'actinides': 'sigma_3n', 'activation_products': 'sigma_alpha'}
+    pdeck[f3_keys[subtype]] = {nuc: val for nuc, val in cards[['f0', 'f3']]}
+
+    f4_keys = {'fission_products': 'sigma_p', 'actinides': 'sigma_f', 'activation_products': 'sigma_p'}
+    pdeck[f4_keys[subtype]] = {nuc: val for nuc, val in cards[['f0', 'f4']]}
+
+    pdeck['sigma_gamma_x'] = {nuc: val for nuc, val in cards[['f0', 'f5']]}
+    pdeck['sigma_2n_x'] = {nuc: val for nuc, val in cards[['f0', 'f6']]}
+
+    pdeck['fiss_yields_present'] = {nuc: 0.0 < val for nuc, val in cards[['f0', 'f7']]}
+
+    # parse second cards if of correct subtype 
+    if subtype == 'fission_products':
+        pdeck['TH232_fiss_yield'] = {nuc: val for nuc, val in cards[['f0', 'f8']]}
+        pdeck['U233_fiss_yield'] = {nuc: val for nuc, val in cards[['f0', 'f9']]}
+        pdeck['U235_fiss_yield'] = {nuc: val for nuc, val in cards[['f0', 'f10']]}
+        pdeck['U238_fiss_yield'] = {nuc: val for nuc, val in cards[['f0', 'f11']]}
+        pdeck['PU239_fiss_yield'] = {nuc: val for nuc, val in cards[['f0', 'f12']]}
+        pdeck['PU241_fiss_yield'] = {nuc: val for nuc, val in cards[['f0', 'f13']]}
+        pdeck['CM245_fiss_yield'] = {nuc: val for nuc, val in cards[['f0', 'f14']]}
+        pdeck['CF249_fiss_yield'] = {nuc: val for nuc, val in cards[['f0', 'f15']]}
+
     return pdeck
 
 
