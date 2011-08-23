@@ -1,18 +1,19 @@
 import re
-from itertools import imap
+from itertools import imap, izip
 
 import numpy as np
 
 from pyne import nucname
 
 
-# Table 4.2 in ORIGEN 2.2. manual
+# Table 4.2 in ORIGEN 2.2 manual
 ORIGEN_TIME_UNITS = [None,              # No zero unit
                      1.0,               # seconds
                      60.0,              # minutes
                      3600.0,            # hours
                      86400.0,           # days
                      31556926.0,        # years...which are fuzzily defined.
+                     np.inf,            # stable
                      31556926.0 * 1E3,  # ky
                      31556926.0 * 1E6,  # My
                      31556926.0 * 1E9,  # Gy
@@ -524,12 +525,27 @@ def _parse_tape9_decay(deck):
     pdeck = {'_type': 'decay'}
     pdeck['title'] = title_card_re.match(deck[0]).group(2).strip()
 
-    # Parse the first card
-    first_cards = [m.groups()[1:] for m in imap(decay_card1_re.match, deck[1::2])]
-    first_cards = np.array(first_cards, dtype='i4,i4' + ',f8'*6)
-    pdeck['_first_cards'] = first_cards
+    # Parse the cards into a structured arrau
+    cards = [m.groups()[1:] + n.groups()[1:] for m, n in 
+             izip(imap(decay_card1_re.match, deck[1::2]), imap(decay_card2_re.match, deck[2::2]))]
+    cards = np.array(cards, dtype='i4,i4' + ',f8'*12)
+    pdeck['_cards'] = cards
 
-    pdeck['half_life'] = {nuc: val*ORIGEN_TIME_UNITS[unit] for nuc, unit, val in first_cards[['f0', 'f1', 'f2']]}
+    # Add the first cards
+    pdeck['half_life'] = {nuc: val*ORIGEN_TIME_UNITS[unit] for nuc, unit, val in cards[['f0', 'f1', 'f2']]}
+    pdeck['frac_beta_minus_x'] = {nuc: val for nuc, val in cards[['f0', 'f3']]}
+    pdeck['frac_beta_plus_or_electron_capture'] = {nuc: val for nuc, val in cards[['f0', 'f4']]}
+    pdeck['frac_beta_plus_or_electron_capture_x'] = {nuc: val for nuc, val in cards[['f0', 'f5']]}
+    pdeck['frac_alpha'] = {nuc: val for nuc, val in cards[['f0', 'f6']]}
+    pdeck['frac_internal_transfer'] = {nuc: val for nuc, val in cards[['f0', 'f7']]}
+
+    # Add the second cards
+    pdeck['frac_spont_fiss'] = {nuc: val for nuc, val in cards[['f0', 'f8']]}
+    pdeck['frac_beta_n'] = {nuc: val for nuc, val in cards[['f0', 'f9']]}
+    pdeck['recoverable_energy'] = {nuc: val for nuc, val in cards[['f0', 'f9']]}
+    pdeck['frac_natural_abund'] = {nuc: val*0.01 for nuc, val in cards[['f0', 'f10']]}
+    pdeck['inhilation_concentration'] = {nuc: val for nuc, val in cards[['f0', 'f11']]}
+    pdeck['ingestion_concentration'] = {nuc: val for nuc, val in cards[['f0', 'f12']]}
 
     return pdeck
 
