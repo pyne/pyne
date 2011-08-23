@@ -532,7 +532,7 @@ def _parse_tape9_decay(deck):
     pdeck['_cards'] = cards
 
     # Add the first cards
-    pdeck['half_life'] = {nuc: val*ORIGEN_TIME_UNITS[unit] for nuc, unit, val in cards[['f0', 'f1', 'f2']]}
+    pdeck['half_life'] = {nuc: ORIGEN_TIME_UNITS[unit]*(val or 1.0) for nuc, unit, val in cards[['f0', 'f1', 'f2']]}
     pdeck['frac_beta_minus_x'] = {nuc: val for nuc, val in cards[['f0', 'f3']]}
     pdeck['frac_beta_plus_or_electron_capture'] = {nuc: val for nuc, val in cards[['f0', 'f4']]}
     pdeck['frac_beta_plus_or_electron_capture_x'] = {nuc: val for nuc, val in cards[['f0', 'f5']]}
