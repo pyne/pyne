@@ -542,10 +542,10 @@ def _parse_tape9_decay(deck):
     # Add the second cards
     pdeck['frac_spont_fiss'] = {nuc: val for nuc, val in cards[['f0', 'f8']]}
     pdeck['frac_beta_n'] = {nuc: val for nuc, val in cards[['f0', 'f9']]}
-    pdeck['recoverable_energy'] = {nuc: val for nuc, val in cards[['f0', 'f9']]}
-    pdeck['frac_natural_abund'] = {nuc: val*0.01 for nuc, val in cards[['f0', 'f10']]}
-    pdeck['inhilation_concentration'] = {nuc: val for nuc, val in cards[['f0', 'f11']]}
-    pdeck['ingestion_concentration'] = {nuc: val for nuc, val in cards[['f0', 'f12']]}
+    pdeck['recoverable_energy'] = {nuc: val for nuc, val in cards[['f0', 'f10']]}
+    pdeck['frac_natural_abund'] = {nuc: val*0.01 for nuc, val in cards[['f0', 'f11']]}
+    pdeck['inhilation_concentration'] = {nuc: val for nuc, val in cards[['f0', 'f12']]}
+    pdeck['ingestion_concentration'] = {nuc: val for nuc, val in cards[['f0', 'f13']]}
 
     return pdeck
 
