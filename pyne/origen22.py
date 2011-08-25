@@ -624,6 +624,75 @@ def parse_tape9(tape9="TAPE9.INP"):
     -------
     parsed : dict
         A dictionary of the data from the TAPE9 file.
+
+    Notes
+    -----
+    The TAPE9 format is highly structured. Therefore the in-memory representation contains a 
+    non-trivial amount of nesting.  At the top level, the dictionary keys are the library 
+    numbers::
+
+        tape9
+          |- keys : deck number (1, 2, 3, 241, ...) 
+          |- values : sub-dictionaries for each deck.
+
+    Each deck contains keys which vary by deck type (and subtype).  All dictionary-typed data
+    maps zzaaam-nuclide integers to the appropriate value::
+
+        all decks
+          |- '_type' : str in ['decay', 'xsfpy'] # photon libs not yet supported
+          |- '_subtype' : str for 'xsfpy' in ['activation_products', 'actinides', 'fission_products']
+          |- 'title' : str, deck name
+          |- '_cards' : optional, numpy structrued array of deck data
+
+        decay decks
+          |- 'half_life' : float-valued dict [seconds]
+          |- 'frac_beta_minus_x' : float-valued dict [fraction of decays via beta minus 
+          |                        which leave an excited nucleus]
+          |- 'frac_beta_plus_or_electron_capture' : float-valued dict [fraction of decays
+          |                                         via positron emission or electron capture]
+          |- 'frac_beta_plus_or_electron_capture_x' : float-valued dict [fraction of decays
+          |                                           via positron emission or electron capture
+          |                                           which leave an excited nucleus]
+          |- 'frac_alpha' : float-valued dict [fraction of decays via alpha emission]
+          |- 'frac_internal_transfer' : float-valued dict [fraction of decays from an excitied 
+          |                             state to the ground state]
+          |- 'frac_spont_fiss' : float-valued dict [fraction of decays via spontateous fission]
+          |- 'frac_beta_n' : float-valued dict [fraction of decays via beta plus a neutron]
+          |- 'recoverable_energy' : float-valued dict, Total recoverable energy [MeV / decay]
+          |- 'frac_natural_abund' : float-valued dict, natrual occuring abundance [atom fraction]
+          |- 'inhilation_concentration' : float-valued dict, continuous inhilation [RCG]
+          |- 'ingestion_concentration' : float-valued dict, continuous ingestion [RCG]
+
+        cross section and fission product yield decks
+          |- 'sigma_gamma' : float-valued dict, (n, gamma) cross section [barns]
+          |- 'sigma_2n' : float-valued dict, (n, 2n) cross section [barns]
+          |- 'sigma_gamma_x' : float-valued dict, (n, gamma *) cross section [barns]
+          |- 'sigma_2n_x' : float-valued dict, (n, 2n *) cross section [barns]
+          |- 'fiss_yields_present' : bool-valued dict, Whether fission product yields are 
+                                     included for this nuclide.
+
+        activation product cross section decks
+          |- '_subtype' : 'activation_products'
+          |- 'sigma_3n' : float-valued dict, (n, 3n) cross section [barns]
+          |- 'sigma_p' : float-valued dict, (n, proton) cross section [barns]
+
+        actinide cross section decks
+          |- '_subtype' : 'actinides'
+          |- 'sigma_alpha' : float-valued dict, (n, alpha) cross section [barns]
+          |- 'sigma_f' : float-valued dict, (n, fission) cross section [barns]
+
+        fission product cross section and yield decks
+          |- '_subtype' : 'fission_products'
+          |- 'sigma_3n' : float-valued dict, (n, 3n) cross section [barns]
+          |- 'sigma_p' : float-valued dict, (n, proton) cross section [barns]
+          |- 'TH232_fiss_yield' : float-valued dict, yield from Th-232 fission [frac]
+          |- 'U233_fiss_yield' : float-valued dict, yield from U-233 fission [frac]
+          |- 'U235_fiss_yield' : float-valued dict, yield from U-235 fission [frac]
+          |- 'U238_fiss_yield' : float-valued dict, yield from U-238 fission [frac]
+          |- 'PU239_fiss_yield' : float-valued dict, yield from Pu-239 fission [frac]
+          |- 'PU241_fiss_yield' : float-valued dict, yield from Pu-241 fission [frac]
+          |- 'CM245_fiss_yield' : float-valued dict, yield from Cm-245 fission [frac]
+          |- 'CF249_fiss_yield' : float-valued dict, yield from Cf-249 fission [frac]
     """
     # Read and strip lines
     opened_here = False
