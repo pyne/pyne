@@ -2,7 +2,7 @@ import os
 from StringIO import StringIO
 
 import numpy as np
-from nose.tools import assert_equal
+from nose.tools import assert_equal, assert_true
 
 from pyne import origen22
 from pyne.material import Material
@@ -133,7 +133,7 @@ sample_tape9 = """\
    2  942370  4     4.560E+01 0.0       1.000E+00 0.0       3.300E-05 0.0
    2                0.0       0.0       6.220E-02 0.0       2.000E-14 3.000E-08
   -1
-   3      SAMPPLE DECAY LIB: FISSION PRODUCTS
+   3      SAMPLE DECAY LIB: FISSION PRODUCTS
    3  611460  5     5.500E+00 0.0       6.300E-01 0.0       0.0       0.0
    3                0.0       0.0       8.508E-01 0.0       1.000E-10 3.000E-06
    3  621460  8     7.000E+01 0.0       0.0       0.0       1.000E+00 0.0
@@ -200,6 +200,7 @@ def test_parse_tape9():
 
     assert_equal(set(tape9.keys()), set([1, 2, 3, 381, 382, 383]))
 
+    # Activation product decay
     deck1 = tape9[1]
     assert_equal(deck1['_type'], 'decay')
     assert_equal(deck1['title'], 'SAMPLE DECAY LIB: ACTIVATION PRODUCTS')
@@ -219,15 +220,94 @@ def test_parse_tape9():
     assert_equal(deck1['inhilation_concentration'][781900], 2.000E-14)
     assert_equal(deck1['ingestion_concentration'][781900], 3.000E-08)
 
+
+    # Actinide Decay
     deck2 = tape9[2]
     assert_equal(deck2['_type'], 'decay')
     assert_equal(deck2['title'], 'SAMPLE DECAY LIB: ACTINIDES')
     assert_equal(deck2['half_life'][932410], 1.600E+01 * 60.0)
     assert_equal(deck2['half_life'][942370], 4.560E+01 * 86400.0)
 
+
+    # Fission Product Decay
     deck3 = tape9[3]
     assert_equal(deck3['_type'], 'decay')
-    assert_equal(deck3['title'], 'SAMPPLE DECAY LIB: FISSION PRODUCTS')
+    assert_equal(deck3['title'], 'SAMPLE DECAY LIB: FISSION PRODUCTS')
     assert_equal(deck3['half_life'][611460], 5.500E+00 * 31556926.0)
     assert_equal(deck3['half_life'][621460], 7.000E+01 * 31556926.0 * 1E6)
     assert_equal(deck3['half_life'][691720], 6.360E+01 * 3600.0)
+
+
+    # Activation product cross sections
+    deck381 = tape9[381]
+    assert_equal(deck381['_type'], 'xsfpy')
+    assert_equal(deck381['_subtype'], 'activation_products')
+    assert_equal(deck381['title'], 'SAMPLE ACTIVATION PRODUCT XS LIB')
+    assert_true(all(['_fiss_yield' not in key for key in deck381.keys()]))
+
+    assert_true('sigma_alpha' in deck381)
+    assert_true('sigma_3n' not in deck381)
+
+    assert_true('sigma_p' in deck381)
+    assert_true('sigma_f' not in deck381)
+
+    assert_equal(deck381['sigma_gamma'][80170], 7.341E-05)
+    assert_equal(deck381['sigma_2n'][80170], 9.378E-06)
+    assert_equal(deck381['sigma_alpha'][80170], 3.639E-02)
+    assert_equal(deck381['sigma_p'][80170], 3.310E-06)
+    assert_equal(deck381['sigma_gamma_x'][80170], 0.0)
+    assert_equal(deck381['sigma_2n_x'][80170], 0.0)
+    assert_equal(deck381['fiss_yields_present'][80170], False)
+
+
+    # Actinide cross sections
+    deck382 = tape9[382]
+    assert_equal(deck382['_type'], 'xsfpy')
+    assert_equal(deck382['_subtype'], 'actinides')
+    assert_equal(deck382['title'], 'SAMPLE ACTINIDE XS LIB')
+    assert_true(all(['_fiss_yield' not in key for key in deck382.keys()]))
+
+    assert_true('sigma_alpha' not in deck382)
+    assert_true('sigma_3n' in deck382)
+
+    assert_true('sigma_p' not in deck382)
+    assert_true('sigma_f' in deck382)
+
+    assert_equal(deck382['sigma_gamma'][922380], 2.125E-01)
+    assert_equal(deck382['sigma_2n'][922380], 2.731E-03)
+    assert_equal(deck382['sigma_3n'][922380], 2.132E-05)
+    assert_equal(deck382['sigma_f'][922380], 4.976E-02)
+    assert_equal(deck382['sigma_gamma_x'][922380], 0.0)
+    assert_equal(deck382['sigma_2n_x'][922380], 0.0)
+    assert_equal(deck382['fiss_yields_present'][922380], False)
+
+
+    # Fission product cross sections
+    deck383 = tape9[383]
+    assert_equal(deck383['_type'], 'xsfpy')
+    assert_equal(deck383['_subtype'], 'fission_products')
+    assert_equal(deck383['title'], 'SAMPLE FISSION PRODUCT YIELD')
+    assert_true(any(['_fiss_yield' in key for key in deck383.keys()]))
+
+    assert_true('sigma_alpha' in deck383)
+    assert_true('sigma_3n' not in deck383)
+
+    assert_true('sigma_p' in deck383)
+    assert_true('sigma_f' not in deck383)
+
+    assert_equal(deck383['sigma_gamma'][300670], 2.600E-02)
+    assert_equal(deck383['sigma_2n'][300670], 0.0)
+    assert_equal(deck383['sigma_alpha'][300670], 3.512E-09)
+    assert_equal(deck383['sigma_p'][300670], 0.0)
+    assert_equal(deck383['sigma_gamma_x'][300670], 0.0)
+    assert_equal(deck383['sigma_2n_x'][300670], 0.0)
+    assert_equal(deck383['fiss_yields_present'][300670], True)
+    assert_equal(deck383['TH232_fiss_yield'][300670], 0.0)
+    assert_equal(deck383['U233_fiss_yield'][300670], 2.50E-09)
+    assert_equal(deck383['U235_fiss_yield'][300670], 3.84E-10)
+    assert_equal(deck383['U238_fiss_yield'][300670], 4.60E-12)
+    assert_equal(deck383['PU239_fiss_yield'][300670], 2.14E-11)
+    assert_equal(deck383['PU241_fiss_yield'][300670], 0.0)
+    assert_equal(deck383['CM245_fiss_yield'][300670], 0.0)
+    assert_equal(deck383['CF249_fiss_yield'][300670], 0.0)
+
