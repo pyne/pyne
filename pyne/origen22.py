@@ -45,7 +45,9 @@ def sec_to_time_unit(s):
         t = s / val
         unit = i 
 
-        if t == 1.0:
+        print t, i, unit
+
+        if t != 0.0 and val == np.inf:
             # Origen spec for stable nuclides
             t = 0.0
             break
@@ -57,6 +59,7 @@ def sec_to_time_unit(s):
             else:
                 unit -= 1
             t = s / ORIGEN_TIME_UNITS[unit]
+            print t, i, unit
             break
 
     return t, unit

@@ -8,6 +8,19 @@ from pyne import origen22
 from pyne.material import Material
 
 
+def test_sec_to_time_unit():
+    assert_equal(origen22.sec_to_time_unit(1.0),  (1.0, 1)) 
+    assert_equal(origen22.sec_to_time_unit(10.0),  (10.0, 1)) 
+
+    assert_equal(origen22.sec_to_time_unit(60.0),  (1.0, 2)) 
+    assert_equal(origen22.sec_to_time_unit(120.0),  (2.0, 2)) 
+
+    assert_equal(origen22.sec_to_time_unit(np.inf),  (0.0, 6)) 
+    assert_equal(origen22.sec_to_time_unit(315569260.0),  (10.0, 5)) 
+    assert_equal(origen22.sec_to_time_unit(31556926.0 * 1E7),  (10.0, 8)) 
+
+
+
 def test_write_tape4():
     mat = Material({"U235": 0.95, 80160: 0.05})
     tape4 = StringIO()
