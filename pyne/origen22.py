@@ -629,6 +629,8 @@ _decay_card_fmt = ("{nlb:>4}{nuc:>8}  {unit}     {time:<9.{p}E} {fbx:<9.{p}E} {f
 
 _xs_card_fmt = "{nlb:>4}{nuc:>8} {sg:<9.{p}E} {s2n:<9.{p}E} {s3n_or_a:<9.{p}E} {sf_or_p:<9.{p}E} {sg_x:<9.{p}E} {s2n_x:<9.{p}E} {fpy_flag:>6.1F} \n"
 
+_fpy_card_fmt = "{nlb:>4}     {y1:<9.{p}E} {y2:<9.{p}E} {y3:<9.{p}E} {y4:<9.{p}E} {y5:<9.{p}E} {y6:<9.{p}E} {y7:<9.{p}E} {y8:<9.{p}E}\n"
+
 def _decay_deck_2_str(nlb, deck, precision):
     # Get unique isotopes 
     nucset = {nuc for nuc in chain(*[v.keys() for k, v in deck.items() if hasattr(v, 'keys')])}
@@ -687,9 +689,38 @@ def _xsfpy_deck_2_str(nlb, deck, precision):
     # Get unique isotopes 
     nucset = {nuc for nuc in chain(*[v.keys() for k, v in deck.items() if hasattr(v, 'keys')])}
 
+    is_actinides = deck['_subtype'] == 'actinides'
+
     s = ""
     for nuc in nucset:
-        pass
+        fpy_flag = -1.0
+        fpy_present = _double_get(deck, 'fiss_yields_present', nuc, False)
+        if fpy_present:
+            fpy_flag = 1.0
+
+        s += _xs_card_fmt.format(nlb=nlb,
+                                 nuc=nuc,
+                                 sg=_double_get(deck, 'sigma_gamma', nuc),
+                                 s2n=_double_get(deck, 'sigma_2n', nuc),
+                                 s3n_or_a=_double_get(deck, 'sigma_alpha', nuc) if is_actinides else _double_get(deck, 'sigma_3n', nuc),
+                                 sf_or_p=_double_get(deck, 'sigma_f', nuc) if is_actinides else _double_get(deck, 'sigma_p', nuc),
+                                 sg_x=_double_get(deck, 'sigma_gamma_x', nuc),
+                                 s2n_x=_double_get(deck, 'sigma_2n_x', nuc),
+                                 fpy_flag=fpy_flag,
+                                 p=precision,
+                                 )
+        if fpy_present:
+            s += _fpy_card_fmt.format(nlb=nlb,
+                                 y1=_double_get(deck, 'TH232_fiss_yield', nuc),
+                                 y2=_double_get(deck, 'U233_fiss_yield', nuc),
+                                 y3=_double_get(deck, 'U235_fiss_yield', nuc),
+                                 y4=_double_get(deck, 'U238_fiss_yield', nuc),
+                                 y5=_double_get(deck, 'PU239_fiss_yield', nuc),
+                                 y6=_double_get(deck, 'PU241_fiss_yield', nuc),
+                                 y7=_double_get(deck, 'CM245_fiss_yield', nuc),
+                                 y8=_double_get(deck, 'CF249_fiss_yield', nuc),
+                                 p=precision,
+                                 )
     return s
 
 
