@@ -366,11 +366,18 @@ def test_write_tape9():
                   383: {'_type': 'xsfpy', '_subtype': 'fission_products', 'sigma_gamma': {10010: 20.0}, 'title': 'xsfpy3'},
                  }
 
-    # merge so that dict takes precedence
+    # Test that basic functionality works
     origen22.write_tape9(tape9_dict, tape9_file)
     tape9_file.seek(0)
     t9str = tape9_file.read()
 
-    print t9str
-    assert False
+    # Try to round-trip
+    full_tape9_file = StringIO(sample_tape9)
+    full_tape9 = origen22.parse_tape9(tape9_file)
 
+    backout_tape9 = StringIO()
+    origen22.write_tape9(full_tape9, backout_tape9)
+    backout_tape9.seek(0)
+
+    backin_tape9 = origen22.parse_tape9(backout_tape9)
+    assert_equal(full_tape9, backin_tape9)
