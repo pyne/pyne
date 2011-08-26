@@ -1,4 +1,5 @@
 import re
+from copy import deepcopy
 from itertools import imap, izip
 
 import numpy as np
@@ -730,3 +731,47 @@ def parse_tape9(tape9="TAPE9.INP"):
             continue
 
     return parsed
+
+
+
+def merge_tape9(tape9s):
+    """Merges a sequence of full or partial TAPE9s into a single tape9 dictionary.
+    Data from the first tape9 has precednce over the second, the second over the
+    third, etc.
+
+    Parameters
+    ----------
+    tape9s : list or tuple
+        A sequence of full or partial tape9 dictionaries.  See parse_tape9()
+        for more information on the structure of these dictionaires.
+
+    Returns
+    -------
+    tape9 : dictionary
+        A tape9 file which is the merger of the all of the tape9s.  See 
+        parse_tape9() for more information on the structure of this dictionary.
+    """
+    tape9 = {}
+
+    for t in tape9s[::-1]:
+        for nlb, deck in t.items():
+            if nlb in tape9:
+                # Make sure the decks are of the same type
+                assert tape9[nlb]['_type'] == deck['_type']
+                if ('_subtype' in tape9[nlb]) and ('_subtype' in deck):
+                    assert tape9[nlb]['_subtype'] == deck['_subtype']
+
+                # _cards has been invalidated... remove it
+                tape9[nlb].pop('_cards', None)
+
+                # Update all of the keys, except _cards
+                for key, value in deck.items():
+                    if key in tape9[nlb] and hasattr(value, 'keys'):
+                        tape9[nlb][key].update(value)
+                    elif key != '_cards':
+                        tape9[nlb][key] = deepcopy(value)
+            else:
+                # New library number, make a copy
+                tape9[nlb] = deepcopy(deck)
+
+    return tape9
