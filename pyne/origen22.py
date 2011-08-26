@@ -45,13 +45,11 @@ def sec_to_time_unit(s):
         t = s / val
         unit = i 
 
-        print t, i, unit
-
         if t != 0.0 and val == np.inf:
             # Origen spec for stable nuclides
             t = 0.0
             break
-        elif t < 1.0:
+        elif 0.0 < t < 1.0:
             if i == 1: 
                 pass
             elif i == 7:
@@ -59,7 +57,6 @@ def sec_to_time_unit(s):
             else:
                 unit -= 1
             t = s / ORIGEN_TIME_UNITS[unit]
-            print t, i, unit
             break
 
     return t, unit
@@ -627,18 +624,19 @@ def _double_get(dict, key1, key2, default=0.0):
 
 _deck_title_fmt = "{nlb:>4}    {title:^72}\n"
 
-_decay_deck_fmt = ("{nlb:>4}{nuc:>8}  {unit}     {time:<9.{p}E} {fbx:<9.{p}E} {fpec:<9.{p}E} {fpecx:<9.{p}E} {fa:<9.{p}E} {fit:<9.{p}E}\n"
+_decay_card_fmt = ("{nlb:>4}{nuc:>8}  {unit}     {time:<9.{p}E} {fbx:<9.{p}E} {fpec:<9.{p}E} {fpecx:<9.{p}E} {fa:<9.{p}E} {fit:<9.{p}E}\n"
                    "{nlb:>4}                {fsf:<9.{p}E} {fn:<9.{p}E} {qrec:<9.{p}E} {abund:<9.{p}E} {arcg:<9.{p}E} {wrcg:<9.{p}E}\n")
 
+_xs_card_fmt = "{nlb:>4}{nuc:>8} {sg:<9.{p}E} {s2n:<9.{p}E} {s3n_or_a:<9.{p}E} {sf_or_p:<9.{p}E} {sg_x:<9.{p}E} {s2n_x:<9.{p}E} {fpy_flag:>6.1F} \n"
+
 def _decay_deck_2_str(nlb, deck, precision):
-    # Gets unique isotopes 
+    # Get unique isotopes 
     nucset = {nuc for nuc in chain(*[v.keys() for k, v in deck.items() if hasattr(v, 'keys')])}
 
     s = ""
-
     for nuc in nucset:
         t, unit = sec_to_time_unit(_double_get(deck, 'half_life', nuc))
-        s += _decay_deck_fmt.format(nlb=nlb,
+        s += _decay_card_fmt.format(nlb=nlb,
                                     nuc=nuc,
                                     unit=unit,
                                     time=t,
@@ -657,11 +655,42 @@ def _decay_deck_2_str(nlb, deck, precision):
                                     )
     return s
 
+
 def _xs_deck_2_str(nlb, deck, precision):
-    return ""
+    # Get unique isotopes 
+    nucset = {nuc for nuc in chain(*[v.keys() for k, v in deck.items() if hasattr(v, 'keys')])}
+
+    is_actinides = deck['_subtype'] == 'actinides'
+
+    s = ""
+    for nuc in nucset:
+        fpy_flag = -1.0
+        fpy_present = _double_get(deck, 'fiss_yields_present', nuc, False)
+        if fpy_present:
+            fpy_flag = 1.0
+
+        s += _xs_card_fmt.format(nlb=nlb,
+                                 nuc=nuc,
+                                 sg=_double_get(deck, 'sigma_gamma', nuc),
+                                 s2n=_double_get(deck, 'sigma_2n', nuc),
+                                 s3n_or_a=_double_get(deck, 'sigma_alpha', nuc) if is_actinides else _double_get(deck, 'sigma_3n', nuc),
+                                 sf_or_p=_double_get(deck, 'sigma_f', nuc) if is_actinides else _double_get(deck, 'sigma_p', nuc),
+                                 sg_x=_double_get(deck, 'sigma_gamma_x', nuc),
+                                 s2n_x=_double_get(deck, 'sigma_2n_x', nuc),
+                                 fpy_flag=fpy_flag,
+                                 p=precision,
+                                 )
+    return s
+
 
 def _xsfpy_deck_2_str(nlb, deck, precision):
-    return ""
+    # Get unique isotopes 
+    nucset = {nuc for nuc in chain(*[v.keys() for k, v in deck.items() if hasattr(v, 'keys')])}
+
+    s = ""
+    for nuc in nucset:
+        pass
+    return s
 
 
 _DECK_2_STR_MAP = {

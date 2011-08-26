@@ -18,6 +18,7 @@ def test_sec_to_time_unit():
     assert_equal(origen22.sec_to_time_unit(np.inf),  (0.0, 6)) 
     assert_equal(origen22.sec_to_time_unit(315569260.0),  (10.0, 5)) 
     assert_equal(origen22.sec_to_time_unit(31556926.0 * 1E7),  (10.0, 8)) 
+    assert_equal(origen22.sec_to_time_unit(31556926.0 * 1E10),  (10.0, 9)) 
 
 
 
