@@ -338,3 +338,25 @@ def test_merge_tape9():
     assert_true('_cards' in tape9[381])
     assert_true('_cards' not in tape9[382])
     assert_true('_cards' in tape9[383])
+
+
+
+def test_write_tape9():
+    tape9_file = StringIO()
+
+    tape9_dict = {1: {'_type': 'decay', 'half_life': {10010: 42.0}, 'title': 'decay1'},
+                  2: {'_type': 'decay', '_bad_key': None, 'title': 'decay2'},
+                  3: {'_type': 'decay', 'title': "Sweet Decay"},
+                  381: {'_type': 'xsfpy', '_subtype': 'activation_products', 'sigma_gamma': {10010: 12.0}, 'title': 'xs1'},
+                  382: {'_type': 'xsfpy', '_subtype': 'actinides', 'sigma_f': {922350: 16.0}, 'title': 'xs2'},
+                  383: {'_type': 'xsfpy', '_subtype': 'fission_products', 'sigma_gamma': {10010: 20.0}, 'title': 'xsfpy3'},
+                 }
+
+    # merge so that dict takes precedence
+    origen22.write_tape9(tape9_dict, tape9_file)
+    tape9_file.seek(0)
+    t9str = tape9_file.read()
+
+    print t9str
+    assert False
+
