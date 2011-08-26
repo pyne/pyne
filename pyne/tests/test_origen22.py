@@ -311,3 +311,30 @@ def test_parse_tape9():
     assert_equal(deck383['CM245_fiss_yield'][300670], 0.0)
     assert_equal(deck383['CF249_fiss_yield'][300670], 0.0)
 
+
+
+def test_merge_tape9():
+    tape9_file = StringIO(sample_tape9)
+    tape9_file = origen22.parse_tape9(tape9_file)
+
+    tape9_dict = {1: {'_type': 'decay', 'half_life': {10010: 42.0}},
+                  2: {'_type': 'decay', '_bad_key': None},
+                  3: {'_type': 'decay', 'title': "Sweet Decay"},
+                  382: {'_type': 'xsfpy', '_subtype': 'actinides', 'sigma_f': {922350: 16.0}},
+                 }
+
+    # merge so that dict takes precedence
+    tape9 = origen22.merge_tape9([tape9_dict, tape9_file])
+
+    # run tests
+    assert_equal(tape9[1]['half_life'][10010], 42.0)
+    assert_true('_bad_key' in tape9[2])
+    assert_equal(tape9[3]['title'], "Sweet Decay")
+    assert_equal(tape9[382]['sigma_f'][922350], 16.0)
+
+    assert_true('_cards' not in tape9[1])
+    assert_true('_cards' not in tape9[2])
+    assert_true('_cards' not in tape9[3])
+    assert_true('_cards' in tape9[381])
+    assert_true('_cards' not in tape9[382])
+    assert_true('_cards' in tape9[383])
