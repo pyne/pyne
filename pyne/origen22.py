@@ -1,6 +1,6 @@
 import re
 from copy import deepcopy
-from itertools import imap, izip
+from itertools import chain, imap, izip
 
 import numpy as np
 
@@ -20,6 +20,47 @@ ORIGEN_TIME_UNITS = [None,              # No zero unit
                      31556926.0 * 1E9,  # Gy
                     ]
 
+
+def sec_to_time_unit(s):
+    """Converts seconds to ORIGEN time and units.
+
+    Parameters
+    ----------
+    s : float
+        time in seconds
+
+    Returns
+    -------
+    t : float
+        time in units
+    unit : int
+        time unit that t is in. Represents index 
+        into ORIGEN_TIME_UNITS, which matches 
+        Table 4.2 in ORIGEN 2.2 manual.
+    """
+    for i, val in enumerate(ORIGEN_TIME_UNITS):
+        if val is None:
+            continue
+
+        t = s / val
+        unit = i 
+
+        if t == 1.0:
+            # Origen spec for stable nuclides
+            t = 0.0
+            break
+        elif t < 1.0:
+            if i == 1: 
+                pass
+            elif i == 7:
+                unit -= 2 
+            else:
+                unit -= 1
+            t = s / ORIGEN_TIME_UNITS[unit]
+            break
+
+    return t, unit
+        
 
 
 ###################################
@@ -187,210 +228,6 @@ def write_tape5_irradiation(irr_type, irr_time, irr_value, nlb,
 
     if opened_here:
         outfile.close()
-
-
-
-def write_tape9(outfile="TAPE9.INP", origfile="tape9.original", sigma_gamma=None, sigma_2n=None, 
-                sigma_3n=None, sigma_f=None, sigma_alpha=None, sigma_p=None, sigma_gamma_x=None, 
-                sigma_2n_x=None, nuclist=None, precision=3):
-    """Writes an ORIGEN 2.2 TAPE9.INP file given cross section values, and optionally based on an 
-    original TAPE9 template file.
-
-    Parameters
-    ----------
-    outfile : str or file-like object, optional
-        Path to the new tape9 file.
-    origfile : str or file-like object, optional
-        Path to the tape9 template file.
-    sigma_gamma : dict, optional
-        Microscopic (n, gamma) cross-section nuclide map of form {nuc: xs_(n,g) [barns]}.
-    sigma_2n : dict, optional 
-        Microscopic (n, 2n) cross-section nuclide map of form {iso: xs_(n,2n) [barns]}.
-    sigma_3n : dict, optional
-        Microscopic (n, 3n) cross-section nuclide map of form {iso: xs_(n,3n) [barns]}.
-    sigma_f : dict, optional
-        Microscopic (n, fission) cross-section nuclide map of form {iso: xs_(n,f) [barns]}.
-    sigma_alpha : dict, optional
-        Microscopic (n, alpha) cross-section nuclide map of form {iso: xs_(n,alpha) [barns]}.
-    sigma_p : dict, optional 
-        Microscopic (n, proton) cross-section nuclide map of form {iso: xs_(n,p) [barns]}.
-    sigma_gamma_x : dict, optional
-        Microscopic (n, gamma*) excited state cross-section nuclide map of form {iso: xs_(n,g*) [barns]}.
-    sigma_2n_x : dict, optional
-        Microscopic (n, 2n*) excited state cross-section nuclide map of form {iso: xs_(n,2n*) [barns]}.
-    nuclist : sequence, optional
-        List of nuclides to write over.
-    precision :  int, optional 
-        The number of significant figures that all output data is given to beyond the decimal point.
-
-    Notes
-    -----
-    All nuclides must be given in zzaaam form.
-    """
-
-    #perform some basic set-up
-    zero_space = "0.0       "
-
-    if nuclist is None:
-        nucset = set()
-        nucset.update(sigma_gamma.keys())
-        nucset.update(sigma_2n.keys())
-        nucset.update(sigma_3n.keys())
-        nucset.update(sigma_f.keys())
-        nucset.update(sigma_alpha.keys())
-        nucset.update(sigma_p.keys())
-        nucset.update(sigma_gamma_x.keys())
-        nucset.update(sigma_2n_x.keys())
-    else:
-        nucset = set(nuclist)
-
-    #Open the first tape9 for reading and the new tape9 for writing.
-    tape9_o = open(name_org, 'r')   #Original File
-    tape9_n = open(name_new, 'w')   #New File
-
-    #Write the new file...
-    for line in tape9_o:
-        ls = line.split()
-        if ls == []:
-            #Rewrites blank lines
-            tape9_n.write(line)
-            continue
-        elif int(ls[0]) <= 3:
-            #Rewrites Decay data and '-1' spacer lines
-            tape9_n.write(line)
-            continue
-
-        #Rewrites Title Lines
-        try:
-            int(ls[1])
-            iso = isoname.mixed_2_zzaaam(ls[1])
-        except ValueError:
-            tape9_n.write(line)
-            continue
-
-        #If we don't care about the isotope, just rewrite the line...
-        if iso not in iso_list:
-            tape9_n.write(line)
-            continue
-
-        #Fixes messed up exponential data in the original file...
-        orig_data = []
-        SkipNext = False
-        for n in range(len(ls)):
-            if SkipNext:
-                SkipNext = False
-            elif 'E' in ls[n]:
-                try:
-                    orig_data.append(float(ls[n]))
-                except ValueError:
-                    orig_data.append(float(ls[n] + ls[n+1]))
-                    SkipNext = True
-            else:
-                orig_data.append(float(ls[n]))
-        ls = orig_data	#This is what ls was suppossed to look like! Stupid ORIGEN...			 
-
-        newline = line[:13]
-
-        #(n, gamma) XS
-        if iso in SNG.keys(): 
-            if SNG[iso] == 0.0:
-                newline = newline + zero_space
-            else:
-                newline = newline + "{0:.{1}E} ".format(SNG[iso], sigfig)
-        else:
-            newline = newline + "{0:.{1}E} ".format(ls[2], sigfig)
-
-        #(n, 2n) XS
-        if iso in SN2N.keys():
-            if SN2N[iso] == 0.0:
-                newline = newline + zero_space
-            else:
-                newline = newline + "{0:.{1}E} ".format(SN2N[iso], sigfig)
-        else:
-            newline = newline + "{0:.{1}E} ".format(ls[3], sigfig)
-
-        #Check if in actinide set, because positional arguments mean different things.
-        if (iso/10000) in isoname.act:
-            #(n, 3n) XS
-            if iso in SN3N.keys():
-                if SN3N[iso] == 0.0:
-                    newline = newline + zero_space
-                else:
-                    newline = newline + "{0:.{1}E} ".format(SN3N[iso], sigfig)
-            else:
-                newline = newline + "{0:.{1}E} ".format(ls[4], sigfig)
-
-            #(n, fission) XS
-            if iso in SNF.keys():
-                if SNF[iso] == 0.0:
-                    newline = newline + zero_space
-                else:
-                    newline = newline + "{0:.{1}E} ".format(SNF[iso], sigfig)
-            else:
-                newline = newline + "{0:.{1}E} ".format(ls[5], sigfig)
-
-        #If not an actinide, then...
-        else:
-            #(n, alpha) XS
-            if iso in SNA.keys():
-                if SNA[iso] == 0.0:
-                    newline = newline + zero_space
-                else:
-                    newline = newline + "{0:.{1}E} ".format(SNA[iso], sigfig)
-            else:
-                newline = newline + "{0:.{1}E} ".format(ls[4], sigfig)
-
-            #(n, proton) XS
-            if iso in SNP.keys():
-                if SNP[iso] == 0.0:
-                    newline = newline + zero_space
-                else:
-                    newline = newline + "{0:.{1}E} ".format(SNP[iso], sigfig)
-            else:
-                newline = newline + "{0:.{1}E} ".format(ls[5], sigfig)
-
-        #(n, g*) XS
-        if iso in SNGX.keys(): 
-            if SNGX[iso] == 0.0:
-                newline = newline + zero_space
-            else:
-                newline = newline + "{0:.{1}E} ".format(SNGX[iso], sigfig)
-        elif ls[2] == 0.0:
-            newline = newline + zero_space
-        elif iso in SNG.keys():
-            sngx = SNG[iso] * ls[6] / ls[2]
-            if sngx == 0.0:
-                newline = newline + zero_space
-            else:
-                newline = newline + "{0:.{1}E} ".format(sngx, sigfig)
-        else:
-            newline = newline + "{0:.{1}E} ".format(ls[6], sigfig)
-
-        #(n, 2n*) XS
-        if iso in SN2NX.keys(): 
-            if SN2NX[iso] == 0.0:
-                newline = newline + zero_space
-            else:
-                newline = newline + "{0:.{1}E} ".format(SN2NX[iso], sigfig)
-        elif ls[3] == 0.0:
-            newline = newline + zero_space
-        elif iso in SN2N.keys():
-            sn2nx = SN2N[iso] * ls[7] / ls[3]
-            if sn2nx == 0.0:
-                newline = newline + zero_space
-            else:
-                newline = newline + "{0:.{1}E} ".format(sn2nx, sigfig)
-        else:
-            newline = newline + "{0:.{1}E} ".format(ls[7], sigfig)
-
-        #End the line
-        newline = newline + line[-8:]
-        tape9_n.write(newline)
-
-    #Close out the files and return
-    tape9_o.close()
-    tape9_n.close()
-
 
 
 
@@ -753,8 +590,8 @@ def merge_tape9(tape9s):
     """
     tape9 = {}
 
-    for t in tape9s[::-1]:
-        for nlb, deck in t.items():
+    for t9 in tape9s[::-1]:
+        for nlb, deck in t9.items():
             if nlb in tape9:
                 # Make sure the decks are of the same type
                 assert tape9[nlb]['_type'] == deck['_type']
@@ -775,3 +612,89 @@ def merge_tape9(tape9s):
                 tape9[nlb] = deepcopy(deck)
 
     return tape9
+
+
+
+def _double_get(dict, key1, key2, default=0.0):
+    if key1 in dict:
+        return dict[key1].get(key2, default)
+    else:
+        return default
+
+
+_deck_title_fmt = "{nlb:>4}    {title:^72}\n"
+
+_decay_deck_fmt = ("{nlb:>4}{nuc:>8}  {unit}     {time:<9.{p}E} {fbx:<9.{p}E} {fpec:<9.{p}E} {fpecx:<9.{p}E} {fa:<9.{p}E} {fit:<9.{p}E}\n"
+                   "{nlb:>4}                {fsf:<9.{p}E} {fn:<9.{p}E} {qrec:<9.{p}E} {abund:<9.{p}E} {arcg:<9.{p}E} {wrcg:<9.{p}E}\n")
+
+def _decay_deck_2_str(nlb, deck, precision):
+    # Gets unique isotopes 
+    nucset = {nuc for nuc in chain(*[v.keys() for k, v in deck.items() if hasattr(v, 'keys')])}
+
+    s = ""
+
+    for nuc in nucset:
+        t, unit = sec_to_time_unit(_double_get(deck, 'half_life', nuc))
+        s += _decay_deck_fmt.format(nlb=nlb,
+                                    nuc=nuc,
+                                    unit=unit,
+                                    time=t,
+                                    fbx=_double_get(deck, 'frac_beta_minus_x', nuc),
+                                    fpec=_double_get(deck, 'frac_beta_plus_or_electron_capture', nuc),
+                                    fpecx=_double_get(deck, 'frac_beta_plus_or_electron_capture_x', nuc),
+                                    fa=_double_get(deck, 'frac_alpha', nuc),
+                                    fit=_double_get(deck, 'frac_internal_transfer', nuc),
+                                    fsf=_double_get(deck, 'frac_spont_fiss', nuc),
+                                    fn=_double_get(deck, 'frac_beta_n', nuc),
+                                    qrec=_double_get(deck, 'recoverable_energy', nuc),
+                                    abund=_double_get(deck, 'frac_natural_abund', nuc),
+                                    arcg=_double_get(deck, 'inhilation_concentration', nuc),
+                                    wrcg=_double_get(deck, 'ingestion_concentration', nuc),
+                                    p=precision,
+                                    )
+    return s
+
+def _xs_deck_2_str(nlb, deck, precision):
+    return ""
+
+def _xsfpy_deck_2_str(nlb, deck, precision):
+    return ""
+
+
+_DECK_2_STR_MAP = {
+    ('decay', None): _decay_deck_2_str,
+    ('xsfpy', 'activation_products'): _xs_deck_2_str,
+    ('xsfpy', 'actinides'): _xs_deck_2_str,
+    ('xsfpy', 'fission_products'): _xsfpy_deck_2_str,
+    }
+
+
+def write_tape9(tape9, outfile="TAPE9.INP", precision=3):
+    """Writes an ORIGEN 2.2 TAPE9.INP file given a tape9 dictionary of values.
+
+    Parameters
+    ----------
+    tape9 : dict
+        A tape9 dictionary. See parse_tape9() for more information on the structure.
+    outfile : str or file-like object, optional
+        Path to the new tape9 file.
+    precision :  int, optional 
+        The number of significant figures that all output data is given to beyond 
+        the decimal point.
+    """
+    t9 = ""
+
+    for nlb, deck in tape9.items():
+        t9 += _deck_title_fmt.format(nlb=nlb, title=deck['title'])
+        t9 += _DECK_2_STR_MAP[deck['_type'], deck.get('_subtype', None)](nlb, deck, precision)
+        t9 += "  -1\n"
+
+    opened_here = False
+    if isinstance(outfile, basestring):
+        outfile = open(outfile, 'w')
+        opened_here = True
+
+    outfile.write(t9)
+
+    if opened_here:
+        outfile.close()
