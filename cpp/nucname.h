@@ -13,16 +13,10 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "H5Cpp.h"
-#include "h5wrap.h"
-
 #include "pyne.h"
 
 namespace pyne
 {
-  extern std::string NUC_DATA_PATH;
-};
-
 namespace nucname 
 {
   /*** Constructs the name to zz Dictionary ***/
@@ -223,26 +217,7 @@ namespace nucname
   std::string nist(char *);
   std::string nist(std::string);
 
-
-
-
-  /****************************/
-  /*** Nuc_weight Functions ***/
-  /****************************/
-  extern std::map<int, double> nuc_weight_map;
-
-  typedef struct atomic_weight_struct {
-    char nuc_name[6];
-    int nuc_zz;
-    double mass;
-    double error;
-    double abund;
-  } atomic_weight_struct;
-
-  void _load_nuc_weight_map();
-  double nuc_weight(int);
-  double nuc_weight(char *);
-  double nuc_weight(std::string);
-}
+};
+};
 
 #endif

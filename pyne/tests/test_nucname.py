@@ -155,17 +155,6 @@ def test_nist():
     assert_equal(nucname.nist("940000"), "Pu")
 
 
-def test_nuc_weight():
-    o16 = [15.99491461957, 16.0]
-    u235 = [235.043931368, 235.0]
-    am242m = [242.059550625, 242.0]
-
-    # zzaam form
-    assert_in(nucname.nuc_weight(80160),  o16)
-    assert_in(nucname.nuc_weight(922350), u235)
-    assert_in(nucname.nuc_weight(952421), am242m)
-
-
 if __name__ == "__main__":
     nose.main()
 
