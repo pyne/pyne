@@ -6,9 +6,9 @@
 #include "nucname.h"
 
 /*** Constructs the LL to zz Dictionary ***/
-nucname::name_zz_t nucname::get_name_zz()
+pyne::nucname::name_zz_t pyne::nucname::get_name_zz()
 {
-  nucname::name_zz_t lzd;
+  pyne::nucname::name_zz_t lzd;
 
   lzd["BE"] = 04;
   lzd["BA"] = 56;
@@ -124,11 +124,11 @@ nucname::name_zz_t nucname::get_name_zz()
 
   return lzd;
 };
-nucname::name_zz_t nucname::name_zz = nucname::get_name_zz();
+pyne::nucname::name_zz_t pyne::nucname::name_zz = pyne::nucname::get_name_zz();
 
 
 /*** Constructs zz to LL dictionary **/
-nucname::zzname_t nucname::get_zz_name()
+pyne::nucname::zzname_t pyne::nucname::get_zz_name()
 {
   zzname_t zld;
   for (name_zz_iter i = name_zz.begin(); i != name_zz.end(); i++)
@@ -137,7 +137,7 @@ nucname::zzname_t nucname::get_zz_name()
   }
   return zld;
 };
-nucname::zzname_t nucname::zz_name = nucname::get_zz_name();
+pyne::nucname::zzname_t pyne::nucname::zz_name = pyne::nucname::get_zz_name();
 
 
 
@@ -145,7 +145,7 @@ nucname::zzname_t nucname::zz_name = nucname::get_zz_name();
 /*** Define useful elemental group sets ***/
 /******************************************/
 
-nucname::zz_group nucname::name_to_zz_group(nucname::name_group eg)
+pyne::nucname::zz_group pyne::nucname::name_to_zz_group(pyne::nucname::name_group eg)
 {
   zz_group zg;
   for (name_group_iter i = eg.begin(); i != eg.end(); i++)
@@ -156,32 +156,32 @@ nucname::zz_group nucname::name_to_zz_group(nucname::name_group eg)
 };
 
 // Lanthanides
-nucname::name_t nucname::LAN_array[15] = {"LA", "CE", "PR", "ND", "PM", "SM", "EU", \
+pyne::nucname::name_t pyne::nucname::LAN_array[15] = {"LA", "CE", "PR", "ND", "PM", "SM", "EU", \
                                         "GD", "TB", "DY", "HO", "ER", "TM", "YB", "LU"};
-nucname::name_group nucname::LAN (nucname::LAN_array, nucname::LAN_array+15);
-nucname::zz_group nucname::lan = nucname::name_to_zz_group(nucname::LAN);
+pyne::nucname::name_group pyne::nucname::LAN (pyne::nucname::LAN_array, pyne::nucname::LAN_array+15);
+pyne::nucname::zz_group pyne::nucname::lan = pyne::nucname::name_to_zz_group(pyne::nucname::LAN);
 
 // Actinides
-nucname::name_t nucname::ACT_array[15] = {"AC", "TH", "PA", "U",  "NP", "PU", "AM", "CM", \
+pyne::nucname::name_t pyne::nucname::ACT_array[15] = {"AC", "TH", "PA", "U",  "NP", "PU", "AM", "CM", \
                                         "BK", "CF", "ES", "FM", "MD", "NO", "LR"};
-nucname::name_group nucname::ACT (nucname::ACT_array, nucname::ACT_array+15);
-nucname::zz_group nucname::act = nucname::name_to_zz_group(nucname::ACT);
+pyne::nucname::name_group pyne::nucname::ACT (pyne::nucname::ACT_array, pyne::nucname::ACT_array+15);
+pyne::nucname::zz_group pyne::nucname::act = pyne::nucname::name_to_zz_group(pyne::nucname::ACT);
 
 // Transuarnics
-nucname::name_t nucname::TRU_array[19] = {"NP", "PU", "AM", "CM", "BK", "CF", "ES", "FM", \
+pyne::nucname::name_t pyne::nucname::TRU_array[19] = {"NP", "PU", "AM", "CM", "BK", "CF", "ES", "FM", \
                                         "MD", "NO", "LR", "RF", "DB", "SG", "BH", "HS", \
                                         "MT", "DS", "RG"};
-nucname::name_group nucname::TRU (nucname::TRU_array, nucname::TRU_array+19);
-nucname::zz_group nucname::tru = nucname::name_to_zz_group(nucname::TRU);
+pyne::nucname::name_group pyne::nucname::TRU (pyne::nucname::TRU_array, pyne::nucname::TRU_array+19);
+pyne::nucname::zz_group pyne::nucname::tru = pyne::nucname::name_to_zz_group(pyne::nucname::TRU);
 
 //Minor Actinides
-nucname::name_t nucname::MA_array[10] = {"NP", "AM", "CM", "BK", "CF", "ES", "FM", "MD", \
+pyne::nucname::name_t pyne::nucname::MA_array[10] = {"NP", "AM", "CM", "BK", "CF", "ES", "FM", "MD", \
                                        "NO", "LR"};
-nucname::name_group nucname::MA (nucname::MA_array, nucname::MA_array+10);
-nucname::zz_group nucname::ma = nucname::name_to_zz_group(nucname::MA);
+pyne::nucname::name_group pyne::nucname::MA (pyne::nucname::MA_array, pyne::nucname::MA_array+10);
+pyne::nucname::zz_group pyne::nucname::ma = pyne::nucname::name_to_zz_group(pyne::nucname::MA);
 
 //Fission Products
-nucname::name_t nucname::FP_array[88] = {"AG", "AL", "AR", "AS", "AT", "AU", "B",  "BA", \
+pyne::nucname::name_t pyne::nucname::FP_array[88] = {"AG", "AL", "AR", "AS", "AT", "AU", "B",  "BA", \
                                        "BE", "BI", "BR", "C",  "CA", "CD", "CE", "CL", \
                                        "CO", "CR", "CS", "CU", "DY", "ER", "EU", "F",  \
                                        "FE", "FR", "GA", "GD", "GE", "H",  "HE", "HF", \
@@ -192,15 +192,15 @@ nucname::name_t nucname::FP_array[88] = {"AG", "AL", "AR", "AS", "AT", "AU", "B"
                                        "RN", "RU", "S",  "SB", "SC", "SE", "SI", "SM", \
                                        "SN", "SR", "TA", "TB", "TC", "TE", "TI", "TL", \
                                        "TM", "V",  "W",  "XE", "Y",  "YB", "ZN", "ZR"};
-nucname::name_group nucname::FP (nucname::FP_array, nucname::FP_array+88);
-nucname::zz_group nucname::fp = nucname::name_to_zz_group(nucname::FP);
+pyne::nucname::name_group pyne::nucname::FP (pyne::nucname::FP_array, pyne::nucname::FP_array+88);
+pyne::nucname::zz_group pyne::nucname::fp = pyne::nucname::name_to_zz_group(pyne::nucname::FP);
 
 
 
 /********************/
 /*** Current Form ***/
 /********************/
-std::string nucname::current_form(std::string nuc)
+std::string pyne::nucname::current_form(std::string nuc)
 {
   // returns current form of a nuclide.
   using namespace pyne;
@@ -226,9 +226,9 @@ std::string nucname::current_form(std::string nuc)
   };
 };
 
-std::string nucname::current_form(int nuc)
+std::string pyne::nucname::current_form(int nuc)
 {
-   return nucname::current_form(pyne::to_str(nuc));
+   return pyne::nucname::current_form(pyne::to_str(nuc));
 };
 
 
@@ -237,7 +237,7 @@ std::string nucname::current_form(int nuc)
 /************************/
 /*** zzaaam functions ***/
 /************************/
-int nucname::zzaaam(int nuc)
+int pyne::nucname::zzaaam(int nuc)
 {
   int newnuc;
 
@@ -308,7 +308,7 @@ int nucname::zzaaam(int nuc)
 
 
 
-int nucname::zzaaam(char * nuc)
+int pyne::nucname::zzaaam(char * nuc)
 {
   std::string newnuc (nuc);
   return zzaaam(newnuc);
@@ -316,7 +316,7 @@ int nucname::zzaaam(char * nuc)
 
 
 
-int nucname::zzaaam(std::string nuc)
+int pyne::nucname::zzaaam(std::string nuc)
 {
   if (nuc.empty())
     throw NotANuclide(nuc, "<empty>");
@@ -399,7 +399,7 @@ int nucname::zzaaam(std::string nuc)
 /**********************/
 /*** name functions ***/
 /**********************/
-std::string nucname::name(int nuc)
+std::string pyne::nucname::name(int nuc)
 {
   int nucint = zzaaam(nuc);
   std::string newnuc = "";
@@ -429,14 +429,14 @@ std::string nucname::name(int nuc)
 
 
 
-std::string nucname::name(char * nuc)
+std::string pyne::nucname::name(char * nuc)
 {
   std::string newnuc (nuc);
   return name(newnuc);
 }
 
 
-std::string nucname::name(std::string nuc)
+std::string pyne::nucname::name(std::string nuc)
 {
   int newnuc = zzaaam(nuc);
   return name(newnuc);
@@ -449,7 +449,7 @@ std::string nucname::name(std::string nuc)
 /**********************/
 /*** mcnp functions ***/
 /**********************/
-int nucname::mcnp(int nuc)
+int pyne::nucname::mcnp(int nuc)
 {
   int newnuc = zzaaam(nuc);
   int mod_10 = newnuc%10;
@@ -468,7 +468,7 @@ int nucname::mcnp(int nuc)
 
 
 
-int nucname::mcnp(char * nuc)
+int pyne::nucname::mcnp(char * nuc)
 {
   std::string newnuc (nuc);
   return mcnp(newnuc);
@@ -476,7 +476,7 @@ int nucname::mcnp(char * nuc)
 
 
 
-int nucname::mcnp(std::string nuc)
+int pyne::nucname::mcnp(std::string nuc)
 {
   int newnuc = zzaaam(nuc);
   return mcnp(newnuc);
@@ -489,7 +489,7 @@ int nucname::mcnp(std::string nuc)
 /*************************/
 /*** serpent functions ***/
 /*************************/
-std::string nucname::serpent(int nuc)
+std::string pyne::nucname::serpent(int nuc)
 {
   int nucint = zzaaam(nuc);
   std::string newnuc = "";
@@ -527,14 +527,14 @@ std::string nucname::serpent(int nuc)
 };
 
 
-std::string nucname::serpent(char * nuc)
+std::string pyne::nucname::serpent(char * nuc)
 {
   std::string newnuc (nuc);
   return serpent(newnuc);
 };
 
 
-std::string nucname::serpent(std::string nuc)
+std::string pyne::nucname::serpent(std::string nuc)
 {
   int newnuc = zzaaam(nuc);
   return serpent(newnuc);
@@ -546,7 +546,7 @@ std::string nucname::serpent(std::string nuc)
 /**********************/
 /*** nist functions ***/
 /**********************/
-std::string nucname::nist(int nuc)
+std::string pyne::nucname::nist(int nuc)
 {
   int nucint = zzaaam(nuc);
   std::string newnuc = "";
@@ -581,14 +581,14 @@ std::string nucname::nist(int nuc)
 };
 
 
-std::string nucname::nist(char * nuc)
+std::string pyne::nucname::nist(char * nuc)
 {
   std::string newnuc (nuc);
   return nist(newnuc);
 };
 
 
-std::string nucname::nist(std::string nuc)
+std::string pyne::nucname::nist(std::string nuc)
 {
   int newnuc = zzaaam(nuc);
   return nist(newnuc);
@@ -596,111 +596,3 @@ std::string nucname::nist(std::string nuc)
 
 
 
-
-
-
-/****************************/
-/*** Nuc_weight Functions ***/
-/****************************/
-std::map<int, double> nucname::nuc_weight_map = std::map<int, double>();
-
-
-void nucname::_load_nuc_weight_map()
-{
-  // Loads the importnat parts of atomic_wight table into nuc_weight_map
-
-  //Check to see if the file is in HDF5 format.
-  if (!pyne::file_exists(pyne::NUC_DATA_PATH))
-    throw pyne::FileNotFound(pyne::NUC_DATA_PATH);
-
-  bool isH5 = H5::H5File::isHdf5(pyne::NUC_DATA_PATH);
-  if (!isH5)
-    throw h5wrap::FileNotHDF5(pyne::NUC_DATA_PATH);
-
-  // Get the HDF5 compound type (table) description
-  H5::CompType atomic_weight_desc(sizeof(atomic_weight_struct));
-  atomic_weight_desc.insertMember("nuc_name", HOFFSET(atomic_weight_struct, nuc_name), H5::StrType(0, 6));
-  atomic_weight_desc.insertMember("nuc_zz",   HOFFSET(atomic_weight_struct, nuc_zz),   H5::PredType::NATIVE_INT);
-  atomic_weight_desc.insertMember("mass",     HOFFSET(atomic_weight_struct, mass),     H5::PredType::NATIVE_DOUBLE);
-  atomic_weight_desc.insertMember("error",    HOFFSET(atomic_weight_struct, error),    H5::PredType::NATIVE_DOUBLE);
-  atomic_weight_desc.insertMember("abund",    HOFFSET(atomic_weight_struct, abund),    H5::PredType::NATIVE_DOUBLE);
-
-  // Open the HDF5 file
-  H5::H5File nuc_data_h5 (pyne::NUC_DATA_PATH.c_str(), H5F_ACC_RDONLY);
-
-  // Open the data set
-  H5::DataSet atomic_weight_set = nuc_data_h5.openDataSet("/atomic_weight");
-  H5::DataSpace atomic_weight_space = atomic_weight_set.getSpace();
-  int atomic_weight_length = atomic_weight_space.getSimpleExtentNpoints();
-
-  // Read in the data
-  atomic_weight_struct * atomic_weight_array = new atomic_weight_struct[atomic_weight_length];
-  atomic_weight_set.read(atomic_weight_array, atomic_weight_desc);
-
-  // close the nuc_data library, before doing anythng stupid
-  nuc_data_h5.close();
-
-  // Ok now that we have the array of stucts, put it in a the map
-  for(int n = 0; n < atomic_weight_length; n++)
-    nuc_weight_map[atomic_weight_array[n].nuc_zz] = atomic_weight_array[n].mass;
-};
-
-
-double nucname::nuc_weight(int nuc)
-{
-  // Find the nuclide;s weight in AMU
-  std::map<int, double>::iterator nuc_iter, nuc_end;
-
-  nuc_iter = nuc_weight_map.find(nuc);
-  nuc_end = nuc_weight_map.end();
-
-  // First check if we already have the nuc weight in the map
-  if (nuc_iter != nuc_end)
-    return (*nuc_iter).second;
-
-  // Next, fill up the map with values from the 
-  // nuc_data.h5, if the map is empty.
-  if (nuc_weight_map.empty())
-  {
-    // Don't fail if we can't load the library
-    try
-    {
-      _load_nuc_weight_map();
-      return nuc_weight(nuc);
-    }
-    catch(...){};
-  };
-
-  double aw;
-  int nuc_zz = zzaaam(nuc);
-
-  // If in an excited state, return the ground
-  // state weight...not strictly true, but good guess.
-  if (0 < nuc_zz%10)
-  {
-    aw = nuc_weight((nuc_zz/10)*10);
-    nuc_weight_map[nuc] = aw;
-    return aw;
-  };
-
-  // Finally, if none of these work, 
-  // take a best guess based on the 
-  // aaa number.
-  aw = (double) ((nuc_zz/10)%1000);
-  nuc_weight_map[nuc] = aw;
-  return aw;
-};
-
-
-double nucname::nuc_weight(char * nuc)
-{
-  int nuc_zz = zzaaam(nuc);
-  return nuc_weight(nuc_zz);
-};
-
-
-double nucname::nuc_weight(std::string nuc)
-{
-  int nuc_zz = zzaaam(nuc);
-  return nuc_weight(nuc_zz);
-};
