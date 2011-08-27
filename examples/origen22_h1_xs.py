@@ -16,7 +16,7 @@ water.mass = 1E3
 # Make a tape4 file for water
 origen22.write_tape4(water)
 
-# Make a tape 5 for this caluclation
+# Make a tape 5 for this calculation
 #   * Just output the concentration tables
 #   * The cross-section library numbers must 
 #     the library / deck numbers in tape9 
