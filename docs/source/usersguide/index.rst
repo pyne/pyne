@@ -12,3 +12,4 @@ essential aspects of using PyNE to do nuclear engineering.
     nucname
     material
     cccc
+    origen22
