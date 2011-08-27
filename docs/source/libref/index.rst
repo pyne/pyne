@@ -10,6 +10,7 @@ The following modules and sub-packages are discussed:
     :maxdepth: 1
 
     nucname
+    data
     material
     cccc
     origen22
