@@ -1,8 +1,8 @@
 .. _pyne_nucname:
 
-********************************************
+============================================
 Nuclide Naming Module -- :mod:`pyne.nucname`
-********************************************
+============================================
 This package is used to convert between various nuclide naming schemes.  
 Currently four naming conventions are supported. 
 
@@ -144,17 +144,6 @@ The groups are defined as follows::
                      79, 80, 81, 82, 83, 84, 85, 86, 87, 88])
 
 
-
--------------
-Atomic weight
--------------
-
-.. autofunction:: nuc_weight(nuc)
-
-.. data:: nuc_weight_map
-
-    A mapping from zzaaam-nuclides to their mass weights.
-    This is used by :func:`nuc_weight` under the hood.
 
 -----------------------
 Other nucname functions
