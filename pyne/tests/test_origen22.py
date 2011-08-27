@@ -100,8 +100,8 @@ def test_write_tape5_irradiation():
 
 
 
-def _test_parse_tape6_1():
-    r = origen22.parse_tape6('test.tape6')
+def test_parse_tape6():
+    r = origen22.parse_tape6('tape6.test')
     assert(0 < len(r))
 
     assert_equal(r['time_sec'], 8.64E+06)
