@@ -12,3 +12,4 @@ The following modules and sub-packages are discussed:
     nucname
     material
     cccc
+    origen22
