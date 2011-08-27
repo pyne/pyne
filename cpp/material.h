@@ -21,6 +21,7 @@
 
 #include "pyne.h"
 #include "nucname.h"
+#include "data.h"
 
 namespace pyne
 {

@@ -261,37 +261,6 @@ def nist(nuc):
 
 
 #
-# Helper Functions
-#
-cdef conv._MapProxyIntDouble nuc_weight_map_proxy = conv.MapProxyIntDouble()
-nuc_weight_map_proxy.init(&cpp_nucname.nuc_weight_map)
-nuc_weight_map = nuc_weight_map_proxy
-
-def nuc_weight(nuc):
-    """Calculates the weight of a nuclide in [amu].
-
-    Parameters
-    ----------
-    nuc : int or str 
-        Input nuclide.
-
-    Returns
-    -------
-    weight : float
-        Atomic weight of this nuclide [amu].
-    """
-    if isinstance(nuc, basestring):
-        weight = cpp_nucname.nuc_weight(<char *> nuc)
-    elif isinstance(nuc, int):
-        weight = cpp_nucname.nuc_weight(<int> nuc)
-    else:
-        raise NucTypeError(nuc)
-
-    return weight
-
-
-
-#
 # C++ Helper Functions
 #
 
