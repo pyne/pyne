@@ -135,10 +135,13 @@ exts = []
 exts.append(cpp_ext("pyne.lib.libpyne", ['pyne.cpp']))
 
 # nucname
-exts.append(cpp_ext("pyne.lib.libpyne_nucname", ['nucname.cpp'], ['pyne'], True))
+exts.append(cpp_ext("pyne.lib.libpyne_nucname", ['nucname.cpp'], ['pyne']))
+
+# data
+exts.append(cpp_ext("pyne.lib.libpyne_data", ['data.cpp'], ['pyne', 'pyne_nucname'], True))
 
 # material
-exts.append(cpp_ext("pyne.lib.libpyne_material", ['material.cpp'], ['pyne', 'pyne_nucname'], True))
+exts.append(cpp_ext("pyne.lib.libpyne_material", ['material.cpp'], ['pyne', 'pyne_nucname', 'pyne_data'], True))
 
 
 # Python extension modules
@@ -149,10 +152,13 @@ exts.append(cpp_ext("pyne.stlconverters", ['stlconverters.pyx']))
 exts.append(cpp_ext("pyne.pyne_config", ['pyne_config.pyx'], ['pyne']))
 
 # nucname
-exts.append(cpp_ext("pyne.nucname", ['nucname.pyx'], ['pyne', 'pyne_nucname'], True))
+exts.append(cpp_ext("pyne.nucname", ['nucname.pyx'], ['pyne', 'pyne_nucname']))
 
 # material
-exts.append(cpp_ext("pyne.material", ['material.pyx'], ['pyne', 'pyne_nucname', 'pyne_material'], True))
+exts.append(cpp_ext("pyne.data", ['data.pyx'], ['pyne', 'pyne_nucname', 'pyne_data'], True))
+
+# material
+exts.append(cpp_ext("pyne.material", ['material.pyx'], ['pyne', 'pyne_nucname', 'pyne_data', 'pyne_material'], True))
 
 
 
