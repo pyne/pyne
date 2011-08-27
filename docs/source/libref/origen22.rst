@@ -13,7 +13,7 @@ All functionality may be found in the ``origen22`` package::
 
  from pyne import origen22
 
-Examples of use may be found in the user's guide.
+Examples of use may be found in the user's guide (:ref:`usersguide_origen22`).
 
 
 -----
