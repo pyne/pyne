@@ -92,7 +92,7 @@ void pyne::Material::load_from_hdf5(std::string filename, std::string groupname,
     if (nuckey == "Mass" || nuckey == "MASS" || nuckey == "mass")
       mass = nucvalue;
     else
-      comp[nucname::zzaaam(nuckey)] = nucvalue;
+      comp[pyne::nucname::zzaaam(nuckey)] = nucvalue;
 
     nucset.close();
   };
@@ -131,7 +131,7 @@ void pyne::Material::load_from_text (std::string filename)
     if (0 < isostr.length())
     {
       f >> wgtstr;
-      comp[nucname::zzaaam(isostr)] = pyne::to_dbl(wgtstr);
+      comp[pyne::nucname::zzaaam(isostr)] = pyne::to_dbl(wgtstr);
     };
   };
 
@@ -226,7 +226,7 @@ std::ostream& operator<<(std::ostream& os, pyne::Material mat)
   os << "\t---------\n";
   for(pyne::comp_iter i = mat.comp.begin(); i != mat.comp.end(); i++)
   {
-    os << "\t" << nucname::name( i->first ) << "\t" << i->second << "\n";
+    os << "\t" << pyne::nucname::name( i->first ) << "\t" << i->second << "\n";
   };
   return os;
 };
@@ -260,7 +260,7 @@ double pyne::Material::molecular_weight(double apm)
   // Calculate the atomic weight of the Material
   double inverseA = 0.0;
   for (pyne::comp_iter nuc = comp.begin(); nuc != comp.end(); nuc++)
-    inverseA += (nuc->second) / nucname::nuc_weight(nuc->first);
+    inverseA += (nuc->second) / pyne::nuc_weight(nuc->first);
 
   if (inverseA == 0.0)
     return inverseA;
@@ -312,7 +312,7 @@ pyne::Material pyne::Material::sub_mat (std::set<std::string> nucset,  std::stri
   std::set<int> iset;
   for (std::set<std::string>::iterator i = nucset.begin(); i != nucset.end(); i++)
   {
-    iset.insert(nucname::zzaaam(*i));
+    iset.insert(pyne::nucname::zzaaam(*i));
   };
 
   return sub_mat(iset, n);
@@ -351,7 +351,7 @@ pyne::Material pyne::Material::set_mat (std::set<std::string> nucset, double val
   std::set<int> iset;
   for (std::set<std::string>::iterator i = nucset.begin(); i != nucset.end(); i++)
   {
-    iset.insert(nucname::zzaaam(*i));
+    iset.insert(pyne::nucname::zzaaam(*i));
   };
 
   return set_mat(iset, value, n);
@@ -386,7 +386,7 @@ pyne::Material pyne::Material::del_mat (std::set<std::string> nucset,  std::stri
   std::set<int> iset;
   for (std::set<std::string>::iterator i = nucset.begin(); i != nucset.end(); i++)
   {
-    iset.insert(nucname::zzaaam(*i));
+    iset.insert(pyne::nucname::zzaaam(*i));
   };
 
   return del_mat(iset, n);
@@ -540,7 +540,7 @@ std::map<int, double> pyne::Material::to_atom_frac()
   std::map<int, double> atom_fracs = std::map<int, double>();
 
   for (comp_iter ci = comp.begin(); ci != comp.end(); ci++)
-    atom_fracs[ci->first] = (ci->second) * mat_mw / nucname::nuc_weight(ci->first);
+    atom_fracs[ci->first] = (ci->second) * mat_mw / pyne::nuc_weight(ci->first);
 
   return atom_fracs;
 };
@@ -558,7 +558,7 @@ void pyne::Material::from_atom_frac(std::map<int, double> atom_fracs)
 
   for (std::map<int, double>::iterator afi = atom_fracs.begin(); afi != atom_fracs.end(); afi++)
   {
-    comp[afi->first] = (afi->second) * nucname::nuc_weight(afi->first);
+    comp[afi->first] = (afi->second) * pyne::nuc_weight(afi->first);
     atoms_per_mol += (afi->second);
   };
 
