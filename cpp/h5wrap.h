@@ -325,6 +325,25 @@ namespace h5wrap
   };
 
 
+  /********************************/
+  /*** Support for complex data ***/
+  /********************************/
+  typedef struct {
+    double re;   /* real part */
+    double im;   /* imaginary part */
+  } complex_t;
+
+  H5::CompType _get_COMPLEX()
+  {
+    H5::CompType ct(sizeof(complex_t));
+    ct.insertMember("real", HOFFSET(complex_t, re), H5::PredType::NATIVE_DOUBLE);
+    ct.insertMember("imag", HOFFSET(complex_t, im), H5::PredType::NATIVE_DOUBLE);
+    return ct;
+  };
+
+  H5::CompType COMPLEX = _get_COMPLEX();
+
+
 // End namespace h5wrap
 };
 
