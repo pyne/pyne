@@ -356,6 +356,7 @@ def parse_tape6(tape6="TAPE6.OUT"):
             ind = 0
             try:
                 nuc = nucname.zzaaam(ls[0])
+                assert nuc%10000 != 0
                 ind = 1
             except:
                 try:
