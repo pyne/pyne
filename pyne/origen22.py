@@ -105,7 +105,7 @@ _tape5_irradiation_template = """\
   -1
   CUT     5 {CUT_OFF} -1
   RDA     FIND CROSS SECTION LIBRARY IDENTIFIER NUMBERS IN YOUR LIBRARY FILE
-  LIB     0 1 2 3 {NLB1} {NLB2} {NLB3} 9 3 0 3 0
+  LIB     0 {DECAY_NLB1} {DECAY_NLB2} {DECAY_NLB3} {XSFPY_NLB1} {XSFPY_NLB2} {XSFPY_NLB3} 9 3 0 4 0
   OPTL    {optl}
   OPTA    {opta}
   OPTF    {optf}
@@ -147,8 +147,11 @@ def _out_table_string(out_table_nes, out_table_num):
     return s
 
 
-def write_tape5_irradiation(irr_type, irr_time, irr_value, nlb, 
-                            cut_off=1E-10, outfile="TAPE5.INP",
+def write_tape5_irradiation(irr_type, irr_time, irr_value, 
+                            outfile="TAPE5.INP",
+                            decay_nlb=(1, 2, 3), 
+                            xsfpy_nlb=(204, 205, 206), 
+                            cut_off=1E-10, 
                             out_table_nes=(False, False, True),
                             out_table_laf=(True,  True,  True),
                             out_table_num=None):
@@ -164,8 +167,13 @@ def write_tape5_irradiation(irr_type, irr_time, irr_value, nlb,
     irr_value : float 
         Magnitude of the irradiation. If irr_type = "IRP", then
         this is a power.  If irr_type = "IRF", then this is a flux. 
-    nlb : length 3 sequence
-        Three tuple of library numbers from the tape9 file, eg (204, 205, 206).
+    outfile : str or file-like object
+        Path or file to write the tape5 to.
+    decay_nlb : length 3 sequence
+        Three tuple of library numbers from the tape9 file decay data, eg (1, 2, 3).
+    xsfpy_nlb : length 3 sequence
+        Three tuple of library numbers from the tape9 file for cross section and fission
+        product yields, eg (204, 205, 206).
     cut_off : float, optional
         Cut-off concentration, below which reults are not recorded.
     out_table_nes :  length 3 sequence of bools, optional
@@ -187,9 +195,12 @@ def write_tape5_irradiation(irr_type, irr_time, irr_value, nlb,
     # Make template fill-value dictionary
     tape5_kw = {
         'CUT_OFF': "{0:.3E}".format(cut_off),
-        'NLB1': nlb[0],
-        'NLB2': nlb[1],
-        'NLB3': nlb[2],
+        'DECAY_NLB1': decay_nlb[0],
+        'DECAY_NLB2': decay_nlb[1],
+        'DECAY_NLB3': decay_nlb[2],
+        'XSFPY_NLB1': xsfpy_nlb[0],
+        'XSFPY_NLB2': xsfpy_nlb[1],
+        'XSFPY_NLB3': xsfpy_nlb[2],
         'irr_type': irr_type,
         'irr_time': '{0:.10E}'.format(irr_time),
         'irr_value': '{0:.10E}'.format(irr_value),
@@ -346,6 +357,10 @@ def parse_tape6(name = "TAPE6.OUT"):
 
     return results
 
+
+#
+# Tape9 functions
+#
 
 data_format = "\d+\.\d*[EeDd]?[+-]?\d+"
 title_card_re = re.compile("(\d+)\s+(\S.*)")
