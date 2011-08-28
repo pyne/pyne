@@ -15,6 +15,7 @@
 
 #include "H5Cpp.h"
 
+#include "extra_types.h"
 #include "pyne.h"
 
 
@@ -328,16 +329,11 @@ namespace h5wrap
   /********************************/
   /*** Support for complex data ***/
   /********************************/
-  typedef struct {
-    double re;   /* real part */
-    double im;   /* imaginary part */
-  } complex_t;
-
   H5::CompType _get_COMPLEX()
   {
-    H5::CompType ct(sizeof(complex_t));
-    ct.insertMember("real", HOFFSET(complex_t, re), H5::PredType::NATIVE_DOUBLE);
-    ct.insertMember("imag", HOFFSET(complex_t, im), H5::PredType::NATIVE_DOUBLE);
+    H5::CompType ct(sizeof(extra_types::complex_t));
+    ct.insertMember("real", HOFFSET(extra_types::complex_t, re), H5::PredType::NATIVE_DOUBLE);
+    ct.insertMember("imag", HOFFSET(extra_types::complex_t, im), H5::PredType::NATIVE_DOUBLE);
     return ct;
   };
 
