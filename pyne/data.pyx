@@ -11,6 +11,8 @@ from cython.operator cimport preincrement as inc
 
 # local imports 
 cimport std
+cimport extra_types
+
 cimport pyne.cpp_pyne
 cimport pyne.pyne_config
 import pyne.pyne_config
@@ -25,7 +27,7 @@ import pyne.stlconverters as conv
 
 
 #
-# nuc_weight Functions
+# nuc_weight functions
 #
 cdef conv._MapProxyIntDouble nuc_weight_map_proxy = conv.MapProxyIntDouble()
 nuc_weight_map_proxy.init(&cpp_data.nuc_weight_map)
@@ -43,14 +45,139 @@ def nuc_weight(nuc):
     -------
     weight : float
         Atomic weight of this nuclide [amu].
+
+    Notes
+    -----
+    If the nuclide is not found, the A-number is returned as a float.
     """
-    if isinstance(nuc, basestring):
-        weight = cpp_data.nuc_weight(<char *> nuc)
-    elif isinstance(nuc, int):
+    if isinstance(nuc, int):
         weight = cpp_data.nuc_weight(<int> nuc)
+    elif isinstance(nuc, basestring):
+        weight = cpp_data.nuc_weight(<char *> nuc)
     else:
         raise pyne.nucname.NucTypeError(nuc)
 
     return weight
+
+
+
+#
+# scattering length functions
+#
+cdef conv._MapProxyIntComplex b_coherent_map_proxy = conv.MapProxyIntComplex()
+b_coherent_map_proxy.init(&cpp_data.b_coherent_map)
+b_coherent_map = b_coherent_map_proxy
+
+
+def b_coherent(nuc):
+    """Finds the coherent bound scattering length of a nuclide in [cm].
+
+    Parameters
+    ----------
+    nuc : int or str 
+        Input nuclide.
+
+    Returns
+    -------
+    bc : complex
+        Coherent bound scattering length of nuc [cm].
+
+    Notes
+    -----
+    If nuc is not found, the value for a nuclide with the same A-number 
+    is used instead. If still no value is found, the an isotope of the 
+    same element as nuc is used.  If still no values are found, zero is
+    returned.
+    """
+    cdef extra_types.complex_t value
+
+    if isinstance(nuc, int):
+        value = cpp_data.b_coherent(<int> nuc)
+    elif isinstance(nuc, basestring):
+        value = cpp_data.b_coherent(<char *> nuc)
+    else:
+        raise pyne.nucname.NucTypeError(nuc)
+
+    return complex(float(value.re), float(value.im))
+
+
+
+cdef conv._MapProxyIntComplex b_incoherent_map_proxy = conv.MapProxyIntComplex()
+b_incoherent_map_proxy.init(&cpp_data.b_incoherent_map)
+b_incoherent_map = b_incoherent_map_proxy
+
+def b_incoherent(nuc):
+    """Finds the incoherent bound scattering length of a nuclide in [cm].
+
+    Parameters
+    ----------
+    nuc : int or str 
+        Input nuclide.
+
+    Returns
+    -------
+    bi : complex
+        Incoherent bound scattering length of nuc [cm].
+
+    Notes
+    -----
+    If nuc is not found, the value for a nuclide with the same A-number 
+    is used instead. If still no value is found, the an isotope of the 
+    same element as nuc is used.  If still no values are found, zero is
+    returned.
+    """
+    cdef extra_types.complex_t value
+
+    if isinstance(nuc, int):
+        value = cpp_data.b_incoherent(<int> nuc)
+    elif isinstance(nuc, basestring):
+        value = cpp_data.b_incoherent(<char *> nuc)
+    else:
+        raise pyne.nucname.NucTypeError(nuc)
+
+    return complex(float(value.re), float(value.im))
+
+
+
+cdef conv._MapProxyIntDouble b_map_proxy = conv.MapProxyIntDouble()
+b_map_proxy.init(&cpp_data.b_map)
+b_map = b_map_proxy
+
+def b(nuc):
+    """Finds the bound scattering length of a nuclide in [cm].
+
+    Parameters
+    ----------
+    nuc : int or str 
+        Input nuclide.
+
+    Returns
+    -------
+    bc : float
+        Coherent bound scattering length of nuc [cm].
+
+    Notes
+    -----
+    If nuc is not found, the value for a nuclide with the same A-number 
+    is used instead. If still no value is found, the an isotope of the 
+    same element as nuc is used.  If still no values are found, zero is
+    returned.
+
+    This value is computed from the coherent and incoherent scattering 
+    lengths as follows:
+
+    .. math::
+
+        b = \\sqrt{\\left| b_{\mbox{coh}} \\right|^2 + \\left| b_{\mbox{inc}} \\right|^2}
+
+    """
+    if isinstance(nuc, int):
+        value = cpp_data.b(<int> nuc)
+    elif isinstance(nuc, basestring):
+        value = cpp_data.b(<char *> nuc)
+    else:
+        raise pyne.nucname.NucTypeError(nuc)
+
+    return float(value)
 
 
