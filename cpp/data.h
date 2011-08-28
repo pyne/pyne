@@ -13,6 +13,8 @@
 #include "H5Cpp.h"
 #include "h5wrap.h"
 
+#include "extra_types.h"
+
 #include "pyne.h"
 #include "nucname.h"
 
@@ -42,15 +44,15 @@ namespace pyne
   /***********************************/
   /*** scattering length functions ***/
   /***********************************/
-  extern std::map<int, h5wrap::complex_t> b_coherent_map;
-  extern std::map<int, h5wrap::complex_t> b_incoherent_map;
+  extern std::map<int, extra_types::complex_t> b_coherent_map;
+  extern std::map<int, extra_types::complex_t> b_incoherent_map;
   extern std::map<int, double> b_map;
 
   typedef struct scattering_lengths_struct {
     char nuc_name[6];
     int nuc_zz;
-    h5wrap::complex_t b_coherent;
-    h5wrap::complex_t b_incoherent;
+    extra_types::complex_t b_coherent;
+    extra_types::complex_t b_incoherent;
     double xs_coherent;
     double xs_incoherent;
     double xs;
@@ -58,13 +60,13 @@ namespace pyne
 
   void _load_scattering_lengths();
 
-  h5wrap::complex_t b_coherent(int);
-  h5wrap::complex_t b_coherent(char *);
-  h5wrap::complex_t b_coherent(std::string);
+  extra_types::complex_t b_coherent(int);
+  extra_types::complex_t b_coherent(char *);
+  extra_types::complex_t b_coherent(std::string);
 
-  h5wrap::complex_t b_incoherent(int);
-  h5wrap::complex_t b_incoherent(char *);
-  h5wrap::complex_t b_incoherent(std::string);
+  extra_types::complex_t b_incoherent(int);
+  extra_types::complex_t b_incoherent(char *);
+  extra_types::complex_t b_incoherent(std::string);
 
   double b(int);
   double b(char *);
