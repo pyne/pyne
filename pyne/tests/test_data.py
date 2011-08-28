@@ -17,6 +17,10 @@ def test_nuc_weight():
     assert_in(data.nuc_weight(952421), am242m)
 
 
+def test_b_coherent():
+    assert_equal(data.b_coherent('H1'), -3.7406E-13 + 0j)
+
+
 if __name__ == "__main__":
     nose.main()
 
