@@ -14,6 +14,7 @@ import numpy as np
 
 # Local imports
 cimport std
+cimport extra_types
 
 
 #
@@ -179,4 +180,16 @@ cdef class _MapProxyIntDouble:
     cdef cpp_map[int, double] * map_ptr
     cdef void init(_MapProxyIntDouble, cpp_map[int, double] *)
     cdef void init_with_data(_MapProxyIntDouble, cpp_map[int, double])
+
+
+# (Int, Complex)
+cdef class MapIterIntComplex(object):
+    cdef cpp_map[int, extra_types.complex_t].iterator * iter_now
+    cdef cpp_map[int, extra_types.complex_t].iterator * iter_end
+    cdef void init(MapIterIntComplex, cpp_map[int, extra_types.complex_t] *)
+
+cdef class _MapProxyIntComplex:
+    cdef cpp_map[int, extra_types.complex_t] * map_ptr
+    cdef void init(_MapProxyIntComplex, cpp_map[int, extra_types.complex_t] *)
+    cdef void init_with_data(_MapProxyIntComplex, cpp_map[int, extra_types.complex_t])
 

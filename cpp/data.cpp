@@ -118,8 +118,8 @@ double pyne::nuc_weight(std::string nuc)
 /***********************************/
 /*** scattering length functions ***/
 /***********************************/
-std::map<int, h5wrap::complex_t> pyne::b_coherent_map = std::map<int, h5wrap::complex_t>();
-std::map<int, h5wrap::complex_t> pyne::b_incoherent_map = std::map<int, h5wrap::complex_t>();
+std::map<int, extra_types::complex_t> pyne::b_coherent_map = std::map<int, extra_types::complex_t>();
+std::map<int, extra_types::complex_t> pyne::b_incoherent_map = std::map<int, extra_types::complex_t>();
 std::map<int, double> pyne::b_map = std::map<int, double>();
 
 
@@ -175,10 +175,10 @@ void pyne::_load_scattering_lengths()
 //
 
 
-h5wrap::complex_t pyne::b_coherent(int nuc)
+extra_types::complex_t pyne::b_coherent(int nuc)
 {
   // Find the nuclide's bound scattering length in cm
-  std::map<int, h5wrap::complex_t>::iterator nuc_iter, nuc_end;
+  std::map<int, extra_types::complex_t>::iterator nuc_iter, nuc_end;
 
   nuc_iter = b_coherent_map.find(nuc);
   nuc_end = b_coherent_map.end();
@@ -195,7 +195,7 @@ h5wrap::complex_t pyne::b_coherent(int nuc)
     return b_coherent(nuc);
   };
 
-  h5wrap::complex_t bc;
+  extra_types::complex_t bc;
   int nuc_zz = nucname::zzaaam(nuc);
   int znum = nuc_zz/10000;
   int anum = (nuc_zz/10)%1000;
@@ -235,14 +235,14 @@ h5wrap::complex_t pyne::b_coherent(int nuc)
 };
 
 
-h5wrap::complex_t pyne::b_coherent(char * nuc)
+extra_types::complex_t pyne::b_coherent(char * nuc)
 {
   int nuc_zz = nucname::zzaaam(nuc);
   return b_coherent(nuc_zz);
 };
 
 
-h5wrap::complex_t pyne::b_coherent(std::string nuc)
+extra_types::complex_t pyne::b_coherent(std::string nuc)
 {
   int nuc_zz = nucname::zzaaam(nuc);
   return b_coherent(nuc_zz);
@@ -255,10 +255,10 @@ h5wrap::complex_t pyne::b_coherent(std::string nuc)
 //
 
 
-h5wrap::complex_t pyne::b_incoherent(int nuc)
+extra_types::complex_t pyne::b_incoherent(int nuc)
 {
   // Find the nuclide's bound inchoherent scattering length in cm
-  std::map<int, h5wrap::complex_t>::iterator nuc_iter, nuc_end;
+  std::map<int, extra_types::complex_t>::iterator nuc_iter, nuc_end;
 
   nuc_iter = b_incoherent_map.find(nuc);
   nuc_end = b_incoherent_map.end();
@@ -275,7 +275,7 @@ h5wrap::complex_t pyne::b_incoherent(int nuc)
     return b_incoherent(nuc);
   };
 
-  h5wrap::complex_t bi;
+  extra_types::complex_t bi;
   int nuc_zz = nucname::zzaaam(nuc);
   int znum = nuc_zz/10000;
   int anum = (nuc_zz/10)%1000;
@@ -315,14 +315,14 @@ h5wrap::complex_t pyne::b_incoherent(int nuc)
 };
 
 
-h5wrap::complex_t pyne::b_incoherent(char * nuc)
+extra_types::complex_t pyne::b_incoherent(char * nuc)
 {
   int nuc_zz = nucname::zzaaam(nuc);
   return b_incoherent(nuc_zz);
 };
 
 
-h5wrap::complex_t pyne::b_incoherent(std::string nuc)
+extra_types::complex_t pyne::b_incoherent(std::string nuc)
 {
   int nuc_zz = nucname::zzaaam(nuc);
   return b_incoherent(nuc_zz);
@@ -347,8 +347,8 @@ double pyne::b(int nuc)
     return (*nuc_iter).second;
 
   // Next, calculate the value from coherent and incoherent lengths
-  h5wrap::complex_t bc = b_coherent(nuc);
-  h5wrap::complex_t bi = b_incoherent(nuc);
+  extra_types::complex_t bc = b_coherent(nuc);
+  extra_types::complex_t bi = b_incoherent(nuc);
 
   double b_val = sqrt(bc.re*bc.re + bc.im*bc.im + bi.re*bi.re + bi.im*bi.im);
 

@@ -3,11 +3,27 @@ from libcpp.map cimport map
 from libcpp.set cimport set
 
 cimport std
+cimport extra_types
 
 cdef extern from "../cpp/data.h" namespace "pyne":
-    # nuc_weight Functions
+    # nuc_weight functions
     map[int, double] nuc_weight_map
     double nuc_weight(int) except +
     double nuc_weight(char *) except +
     double nuc_weight(std.string) except +
 
+    # Scattering length functions
+    map[int, extra_types.complex_t] b_coherent_map
+    extra_types.complex_t b_coherent(int) except +
+    extra_types.complex_t b_coherent(char *) except +
+    extra_types.complex_t b_coherent(std.string) except +
+
+    map[int, extra_types.complex_t] b_incoherent_map
+    extra_types.complex_t b_incoherent(int) except +
+    extra_types.complex_t b_incoherent(char *) except +
+    extra_types.complex_t b_incoherent(std.string) except +
+
+    map[int, double] b_map
+    double b(int) except +
+    double b(char *) except +
+    double b(std.string) except +
