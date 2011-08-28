@@ -135,12 +135,13 @@ void pyne::_load_scattering_lengths()
   if (!isH5)
     throw h5wrap::FileNotHDF5(pyne::NUC_DATA_PATH);
 
+
   // Get the HDF5 compound type (table) description
   H5::CompType scat_len_desc(sizeof(scattering_lengths_struct));
   scat_len_desc.insertMember("nuc_name", HOFFSET(scattering_lengths_struct, nuc_name), H5::StrType(0, 6));
   scat_len_desc.insertMember("nuc_zz",   HOFFSET(scattering_lengths_struct, nuc_zz),   H5::PredType::NATIVE_INT);
-  scat_len_desc.insertMember("b_coherent", HOFFSET(scattering_lengths_struct, b_coherent), h5wrap::COMPLEX);
-  scat_len_desc.insertMember("b_incoherent", HOFFSET(scattering_lengths_struct, b_incoherent), h5wrap::COMPLEX);
+  scat_len_desc.insertMember("b_coherent", HOFFSET(scattering_lengths_struct, b_coherent), h5wrap::PYTABLES_COMPLEX128);
+  scat_len_desc.insertMember("b_incoherent", HOFFSET(scattering_lengths_struct, b_incoherent), h5wrap::PYTABLES_COMPLEX128);
   scat_len_desc.insertMember("xs_coherent", HOFFSET(scattering_lengths_struct, xs_coherent), H5::PredType::NATIVE_DOUBLE);
   scat_len_desc.insertMember("xs_incoherent", HOFFSET(scattering_lengths_struct, xs_incoherent), H5::PredType::NATIVE_DOUBLE);
   scat_len_desc.insertMember("xs", HOFFSET(scattering_lengths_struct, xs), H5::PredType::NATIVE_DOUBLE);
@@ -161,6 +162,7 @@ void pyne::_load_scattering_lengths()
   nuc_data_h5.close();
 
   // Ok now that we have the array of stucts, put it in the maps
+  extra_types::complex_t bc, bi;
   for(int n = 0; n < scat_len_length; n++)
   {
     b_coherent_map[scat_len_array[n].nuc_zz] = scat_len_array[n].b_coherent;

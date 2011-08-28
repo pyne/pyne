@@ -329,15 +329,15 @@ namespace h5wrap
   /********************************/
   /*** Support for complex data ***/
   /********************************/
-  H5::CompType _get_COMPLEX()
+  H5::CompType _get_PYTABLES_COMPLEX128()
   {
     H5::CompType ct(sizeof(extra_types::complex_t));
-    ct.insertMember("real", HOFFSET(extra_types::complex_t, re), H5::PredType::NATIVE_DOUBLE);
-    ct.insertMember("imag", HOFFSET(extra_types::complex_t, im), H5::PredType::NATIVE_DOUBLE);
+    ct.insertMember("r", HOFFSET(extra_types::complex_t, re), H5::PredType::NATIVE_DOUBLE);
+    ct.insertMember("i", HOFFSET(extra_types::complex_t, im), H5::PredType::NATIVE_DOUBLE);
     return ct;
   };
 
-  H5::CompType COMPLEX = _get_COMPLEX();
+  H5::CompType PYTABLES_COMPLEX128 = _get_PYTABLES_COMPLEX128();
 
 
 // End namespace h5wrap
