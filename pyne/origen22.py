@@ -412,7 +412,7 @@ def _parse_tape9_decay(deck):
     pdeck['frac_beta_plus_or_electron_capture'] = {nuc: val for nuc, val in cards[['f0', 'f4']]}
     pdeck['frac_beta_plus_or_electron_capture_x'] = {nuc: val for nuc, val in cards[['f0', 'f5']]}
     pdeck['frac_alpha'] = {nuc: val for nuc, val in cards[['f0', 'f6']]}
-    pdeck['frac_internal_transfer'] = {nuc: val for nuc, val in cards[['f0', 'f7']]}
+    pdeck['frac_isomeric_transition'] = {nuc: val for nuc, val in cards[['f0', 'f7']]}
 
     # Add the second cards
     pdeck['frac_spont_fiss'] = {nuc: val for nuc, val in cards[['f0', 'f8']]}
@@ -529,8 +529,8 @@ def parse_tape9(tape9="TAPE9.INP"):
           |                                           via positron emission or electron capture
           |                                           which leave an excited nucleus]
           |- 'frac_alpha' : float-valued dict [fraction of decays via alpha emission]
-          |- 'frac_internal_transfer' : float-valued dict [fraction of decays from an excitied 
-          |                             state to the ground state]
+          |- 'frac_isomeric_transition' : float-valued dict [fraction of decays from an excitied 
+          |                               state to the ground state]
           |- 'frac_spont_fiss' : float-valued dict [fraction of decays via spontateous fission]
           |- 'frac_beta_n' : float-valued dict [fraction of decays via beta plus a neutron]
           |- 'recoverable_energy' : float-valued dict, Total recoverable energy [MeV / decay]
@@ -683,7 +683,7 @@ def _decay_deck_2_str(nlb, deck, precision):
                                     fpec=_double_get(deck, 'frac_beta_plus_or_electron_capture', nuc),
                                     fpecx=_double_get(deck, 'frac_beta_plus_or_electron_capture_x', nuc),
                                     fa=_double_get(deck, 'frac_alpha', nuc),
-                                    fit=_double_get(deck, 'frac_internal_transfer', nuc),
+                                    fit=_double_get(deck, 'frac_isomeric_transition', nuc),
                                     fsf=_double_get(deck, 'frac_spont_fiss', nuc),
                                     fn=_double_get(deck, 'frac_beta_n', nuc),
                                     qrec=_double_get(deck, 'recoverable_energy', nuc),
