@@ -227,7 +227,7 @@ def test_parse_tape9():
     assert_equal(deck1['frac_beta_plus_or_electron_capture'][200410], 1.0)
     assert_equal(deck1['frac_beta_plus_or_electron_capture_x'][10010], 0.0)
     assert_equal(deck1['frac_alpha'][781900], 1.0)
-    assert_equal(deck1['frac_internal_transfer'][10020], 0.0)
+    assert_equal(deck1['frac_isomeric_transition'][10020], 0.0)
     assert_equal(deck1['frac_spont_fiss'][10020], 0.0)
     assert_equal(deck1['frac_beta_n'][10020], 0.0)
     assert_equal(deck1['recoverable_energy'][10030], 5.680E-03)
