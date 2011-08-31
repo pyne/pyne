@@ -1,5 +1,7 @@
 import re
 
+import numpy as np
+
 from pyne import nucname
 from pyne.utils import time_conversion
 
@@ -68,6 +70,7 @@ def half_life(ensdf):
         m = _level_regex.match(line)
         if m is not None:
             g = m.groups()
+            print line
 
             # grab the from nuclide
             try:
@@ -81,6 +84,9 @@ def half_life(ensdf):
             time_info = g[1].strip()
             if 0 == len(time_info):
                 valid_from_nuc = False
+            elif time_info == 'STABLE':
+                half_life = np.inf
+                data += [(from_nuc, from_nuc, half_life, 1.0)]
             else:
                 hl, unit = [s.strip() for s in time_info.split()]
                 half_life = time_conversion(float(hl), unit)
