@@ -1,7 +1,9 @@
 """This module provides a way to grab and store raw data for radioactive decay."""
 import os
 import re
+import urllib
 import urllib2
+from zipfile import ZipFile
 
 import numpy as np
 import tables as tb
@@ -24,12 +26,21 @@ def grab_ensdf_decay(build_dir=""):
         os.makedirs(build_dir)
     except OSError:
         pass
-    already_grabbed = set(os.listdir(build_dir))
 
     # Grab ENSDF files and unzip them.
     iaea_base_url = 'http://www-nds.iaea.org/ensdf_base_files/2010-November/'
     ensdf_zip = ['ensdf_1010_099.zip', 'ensdf_1010_199.zip', 'ensdf_1010_294.zip',]
 
+    for f in ensdf_zip:
+        fpath = os.path.join(build_dir, f)
+        if f not in os.listdir(build_dir):
+            print "  grabing {0} and placing it in {1}".format(f, fpath)
+            urllib.urlretrieve(iaea_base_url + f, fpath)
+
+        with ZipFile(fpath) as zf:
+            for name in zf.namelist():
+                print "    extracting {0} from {1}".format(name, f)
+                zf.extract(name, os.path.join(build_dir, name))
 
 
 
@@ -152,7 +163,7 @@ def make_atomic_weight_table(nuc_data, build_dir=""):
 
 
 
-def make_atomic_weight(nuc_data, build_dir):
+def make_decay(nuc_data, build_dir):
     #with tb.openFile(nuc_data, 'r') as f:
     #    if hasattr(f.root, 'decay'):
     #        return 
@@ -161,11 +172,7 @@ def make_atomic_weight(nuc_data, build_dir):
     print "Grabing the ENSDF decay data from IAEA"
     grab_ensdf_decay(build_dir)
 
-    # Then grab mass data
-    print "Grabing atomic mass data from AMDC"
-    grab_atmoic_mass_adjustment(build_dir)
-
     # Make atomic weight table once we have the array
-    print "Making atomic weight data table."
-    make_atomic_weight_table(nuc_data, build_dir)
+    #print "Making atomic weight data table."
+    #make_atomic_weight_table(nuc_data, build_dir)
 
