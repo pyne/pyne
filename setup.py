@@ -100,7 +100,12 @@ def cpp_ext(name, sources, libs=None, use_hdf5=False):
                            'build/lib.{0}-{1}/pyne/lib'.format(get_platform(), get_python_version()),
                            ]
     # perfectly general, thanks to dynamic runtime linking of $ORIGIN
-    ext['runtime_library_dirs'] = ['${ORIGIN}/lib', '${ORIGIN}']
+    #ext['runtime_library_dirs'] = ['${ORIGIN}/lib', '${ORIGIN}']
+    ext['runtime_library_dirs'] = ['${ORIGIN}/lib', '${ORIGIN}'] + \
+                                  [os.path.abspath(p) for p in ext['library_dirs']] + \
+                                  [os.path.abspath(p + '/pyne/lib') for p in sys.path] + \
+                                  [os.path.abspath(p + '/pyne') for p in sys.path] + \
+                                  [os.path.abspath(p) for p in sys.path]
 
 
     if os.name == 'posix':
