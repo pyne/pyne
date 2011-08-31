@@ -7,26 +7,10 @@ import numpy as np
 import tables as tb
 
 from pyne import nucname
-from pyne.dbgen.kaeri import grab_kaeri_nuclide
-
-# Note that since ground state and meta-stable isotopes are of the same atomic weight, 
-# the meta-stables have been discluded from the following data sets.
-
-iso_regex = re.compile('.*?/cgi-bin/nuclide[?]nuc=([A-Za-z]{1,2}\d{1,3}).*?')
-
-def parse_for_all_isotopes(htmlfile):
-    """Parses an elemental html file, returning a set of all isotopes."""
-    isos = set()
-    with open(htmlfile, 'r') as f:
-        for line in f:
-            m = iso_regex.search(line)
-            if m is not None:
-                isos.add(nucname.zzaaam(m.group(1)))
-    return isos
 
 
-def grab_kaeri_decay(build_dir=""):
-    """Grabs the KAERI files needed for the decay data, 
+def grab_ensdf_decay(build_dir=""):
+    """Grabs the ENSDF decay data files
     if not already present.
 
     Parameters
@@ -35,35 +19,24 @@ def grab_kaeri_decay(build_dir=""):
         Major directory to place html files in. 'KAERI/' will be appended.
     """
     # Add kaeri to build_dir
-    build_dir = os.path.join(build_dir, 'KAERI')
+    build_dir = os.path.join(build_dir, 'ENSDF')
     try:
         os.makedirs(build_dir)
     except OSError:
         pass
     already_grabbed = set(os.listdir(build_dir))
 
-    # Grab and parse elemental summary files.
-    nuclides = set()
-    for element in nucname.name_zz.keys():
-        htmlfile = element + '.html'
-        if htmlfile not in already_grabbed:
-            grab_kaeri_nuclide(element, build_dir)
-
-        nuclides = nuclides | parse_for_all_isotopes(os.path.join(build_dir, htmlfile))
-
-    # Grab natural nuclide files
-    for nuc in nuclides:
-        nuc = nucname.name(nuc)
-        htmlfile = nuc + '.html'
-        if htmlfile not in already_grabbed:
-            grab_kaeri_nuclide(nuc, build_dir)
+    # Grab ENSDF files and unzip them.
+    iaea_base_url = 'http://www-nds.iaea.org/ensdf_base_files/2010-November/'
+    ensdf_zip = ['ensdf_1010_099.zip', 'ensdf_1010_199.zip', 'ensdf_1010_294.zip',]
 
 
 
-half_life_regex = re.compile('<li>Half life: [~]?(\d+[.]?\d*?)\s*(\w+)')
+
+#half_life_regex = re.compile('<li>Half life: [~]?(\d+[.]?\d*?)\s*(\w+)')
 
 def parse_decay(build_dir=""):
-    """Builds and returns a list of nuclide decay data."""
+    """Builds and returns a list of nuclide decay data.
     build_dir = os.path.join(build_dir, 'KAERI')
 
     # Grab and parse elemental summary files.
@@ -97,20 +70,14 @@ def parse_decay(build_dir=""):
                     val = float(m.group(1)) * 0.01
                     atomic_abund[nuc] = val
                     continue
-
+    """
+    # stub for now
+    decay_data = [('H2', 10020, 'H1', 10010, 10.0, 0.1, 1.0)]
     return decay_data
 
 
 
 
-
-atomic_weight_desc = {
-    'nuc_name': tb.StringCol(itemsize=6, pos=0),
-    'nuc_zz':   tb.IntCol(pos=1),
-    'mass':     tb.FloatCol(pos=2),
-    'error':    tb.FloatCol(pos=3),
-    'abund':    tb.FloatCol(pos=4),
-    }
 
 atomic_weight_dtype = np.dtype([
     ('nuc_name', 'S6'),
@@ -186,13 +153,13 @@ def make_atomic_weight_table(nuc_data, build_dir=""):
 
 
 def make_atomic_weight(nuc_data, build_dir):
-    with tb.openFile(nuc_data, 'a') as f:
-        if hasattr(f.root, 'atomic_weight'):
-            return 
+    #with tb.openFile(nuc_data, 'r') as f:
+    #    if hasattr(f.root, 'decay'):
+    #        return 
 
-    # First grab the atomic abundance data
-    print "Grabing the atomic abundance from KAERI"
-    grab_kaeri_atomic_abund(build_dir)
+    # grab the decay data
+    print "Grabing the ENSDF decay data from IAEA"
+    grab_ensdf_decay(build_dir)
 
     # Then grab mass data
     print "Grabing atomic mass data from AMDC"
