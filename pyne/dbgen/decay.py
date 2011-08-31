@@ -40,12 +40,23 @@ def grab_ensdf_decay(build_dir=""):
         with ZipFile(fpath) as zf:
             for name in zf.namelist():
                 print "    extracting {0} from {1}".format(name, f)
-                zf.extract(name, build_dir)
+                zf.extract(name, os.path.join(build_dir, name))
 
 
 
 #half_life_regex = re.compile('<li>Half life: [~]?(\d+[.]?\d*?)\s*(\w+)')
 
+atomic_decay_dtype = np.dtype([
+    ('from_nuc_name', 'S6'),
+    ('from_nuc_zz',   int),
+    ('to_nuc_name',   'S6'),
+    ('to_nuc_zz',     int), 
+    ('half_life',    float),
+    ('decay_const',   float),
+    ('branch_ratio',  float),
+    ])
+    
+    
 def parse_decay(build_dir=""):
     """Builds and returns a list of nuclide decay data.
     build_dir = os.path.join(build_dir, 'KAERI')
@@ -84,18 +95,7 @@ def parse_decay(build_dir=""):
     """
     # stub for now
     decay_data = [('H2', 10020, 'H1', 10010, 10.0, 0.1, 1.0)]
-    return decay_data
     
-atomic_decay_dtype = np.dtype([
-    ('from_nuc_name', 'S6'),
-    ('from_nuc_zz',   int),
-    ('to_nuc_name',   'S6'),
-    ('to_nuc_zz',     int), 
-    ('half_life',    float),
-    ('decay_const'   float),
-    ('branch_ratio'  float),
-    ])
-
     decay_array = np.array(decay_data, dtype=atomic_decay_dtype)
     return decay_array
     
