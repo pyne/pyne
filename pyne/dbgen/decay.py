@@ -40,7 +40,7 @@ def grab_ensdf_decay(build_dir=""):
         with ZipFile(fpath) as zf:
             for name in zf.namelist():
                 print "    extracting {0} from {1}".format(name, f)
-                zf.extract(name, os.path.join(build_dir, name))
+                zf.extract(name, build_dir)
 
 
 
