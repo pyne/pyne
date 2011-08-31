@@ -118,7 +118,7 @@ def make_atomic_decay_table(nuc_data, build_dir=""):
 
     # Make a new the table
     decaytable = decay_db.createTable("/", "atomic_decay", atomic_decay_dtype, 
-                             "Atomic Decay Data half_life [s], lambda [s^-1], branch_ratio [fraction]", expectedrows=len(atomic_decay))
+                             "Atomic Decay Data half_life [s], decay_const [s^-1], branch_ratio [fraction]", expectedrows=len(atomic_decay))
     decaytable.append(atomic_decay)
 
     # Ensure that data was written to table
