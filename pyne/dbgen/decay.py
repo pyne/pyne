@@ -85,20 +85,22 @@ def parse_decay(build_dir=""):
     # stub for now
     decay_data = [('H2', 10020, 'H1', 10010, 10.0, 0.1, 1.0)]
     return decay_data
-
-
-
-
-
-atomic_weight_dtype = np.dtype([
-    ('nuc_name', 'S6'),
-    ('nuc_zz',   int),
-    ('mass',     float),
-    ('error',    float), 
-    ('abund',    float), 
+    
+atomic_decay_dtype = np.dtype([
+    ('from_nuc_name', 'S6'),
+    ('from_nuc_zz',   int),
+    ('to_nuc_name',   'S6'),
+    ('to_nuc_zz',     int), 
+    ('half_life',    float),
+    ('decay_const'   float),
+    ('branch_ratio'  float),
     ])
 
-def make_atomic_weight_table(nuc_data, build_dir=""):
+    decay_array = np.array(decay_data, dtype=atomic_decay_dtype)
+    return decay_array
+    
+    
+def make_atomic_decay_table(nuc_data, build_dir=""):
     """Makes an atomic weight table in the nuc_data library.
 
     Parameters
@@ -109,56 +111,21 @@ def make_atomic_weight_table(nuc_data, build_dir=""):
         Directory to place html files in.
     """
     # Grab raw data
-    atomic_abund  = parse_atomic_abund(build_dir)
-    atomic_masses = parse_atmoic_mass_adjustment(build_dir)
-
-    A = {}
-
-    # Add normal isotopes to A
-    for nuc_zz, mass, error in atomic_masses:
-        try: 
-            nuc_name = nucname.name(nuc_zz)
-        except RuntimeError:
-            continue
-
-        if nuc_zz in atomic_abund:
-            A[nuc_zz] = nuc_name, nuc_zz, mass, error, atomic_abund[nuc_zz]
-        else:
-            A[nuc_zz] = nuc_name, nuc_zz, mass, error, 0.0
-
-    # Add naturally occuring elements
-    for element in nucname.name_zz:
-        nuc_zz = nucname.zzaaam(element)
-        A[nuc_zz] = element, nuc_zz, 0.0, 0.0, 0.0
-        
-    for nuc, abund in atomic_abund.items():
-        zz = nuc / 10000
-        element_zz = zz * 10000
-        element = nucname.zz_name[zz]
-
-        nuc_name, nuc_zz, nuc_mass, _error, _abund = A[nuc]
-        elem_name, elem_zz, elem_mass, _error, _abund = A[element_zz]
-
-        new_elem_mass = elem_mass + (nuc_mass * abund)
-        A[element_zz] = element, element_zz, new_elem_mass, 0.0, 0.0
-
-
-    A = sorted(A.values(), key=lambda x: x[1])
-    #A = np.array(A, dtype=atomic_weight_dtype)
+    atomic_decay  = parse_decay(build_dir)
 
     # Open the HDF5 File
-    kdb = tb.openFile(nuc_data, 'a')
+    decay_db = tb.openFile(nuc_data, 'a')
 
     # Make a new the table
-    Atable = kdb.createTable("/", "atomic_weight", atomic_weight_desc, 
-                             "Atomic Weight Data [amu]", expectedrows=len(A))
-    Atable.append(A)
+    decaytable = decay_db.createTable("/", "atomic_decay", atomic_decay_dtype, 
+                             "Atomic Decay Data half_life [s], lambda [s^-1], branch_ratio [fraction]", expectedrows=len(atomic_decay))
+    decaytable.append(atomic_decay)
 
     # Ensure that data was written to table
-    Atable.flush()
+    decaytable.flush()
 
     # Close the hdf5 file
-    kdb.close()
+    decay_db.close()
 
 
 
