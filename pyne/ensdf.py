@@ -4,7 +4,7 @@ from pyne import nucname
 from pyne.utils import time_conversion
 
 
-_level_regex = re.compile('([ \d]{3}[ A-Za-z]{2})  L .{{30}}(.{10}).{28}([ M])([ \d])')
+_level_regex = re.compile('([ \d]{3}[ A-Za-z]{2})  L .{30}(.{10}).{28}([ M])([ 1-9])')
 
 _level_cont_regex = re.compile('([ \d]{3}[ A-Za-z]{2})[0-9A-Za-z] L (.*)')
 
@@ -71,22 +71,27 @@ def half_life(ensdf):
 
             # grab the from nuclide
             try:
-                from_nuc = nucname.zzaaam(g[0], g[-2], g[-1])
+                from_nuc = _to_zzaaam(g[0], g[-2], g[-1])
                 valid_from_nuc = True
             except:
                 valid_from_nuc = False
                 continue
 
             # Grab the half-lives
-            hl, unit = [s.strip() for s in g[1].split()]
-            half_life = time_conversion(hl, unit)
+            time_info = g[1].strip()
+            if 0 == len(time_info):
+                valid_from_nuc = False
+            else:
+                hl, unit = [s.strip() for s in time_info.split()]
+                half_life = time_conversion(float(hl), unit)
             continue
 
         m = _level_cont_regex.match(line)
         if m is not None and valid_from_nuc:
             g = m.groups()
             dat = dict([d.split('=') for d in g[-1].split() if '=' in d])
-            dat = {_decay_to[key](from_nuc): float(val)*0.01 for key, val in dat.items()}
+            dat = {_decay_to[key](from_nuc): float(val)*0.01 for key, val in dat.items() 
+                                                             if key in _decay_to.keys()}
             data += [(from_nuc, to_nuc, half_life, br) for to_nuc, br in dat.items()]
             continue
 
