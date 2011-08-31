@@ -5,6 +5,7 @@ from distutils.dir_util import mkpath, remove_tree
 
 from pyne.api import nuc_data
 from pyne.dbgen.api import build_dir
+from pyne.dbgen.decay import make_decay
 from pyne.dbgen.atomic_weight import make_atomic_weight
 from pyne.dbgen.scattering_lengths import make_scattering_lengths
 
@@ -79,6 +80,7 @@ def main():
     # Make the various tables
     make_atomic_weight(args.nuc_data, args.build_dir)
     make_scattering_lengths(args.nuc_data, args.build_dir)
+    make_decay(args.nuc_data, args.build_dir)
     
 
 
