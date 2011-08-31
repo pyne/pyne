@@ -9,7 +9,7 @@ import numpy as np
 import tables as tb
 
 from pyne import nucname
-
+from pyne import ensdf
 
 def grab_ensdf_decay(build_dir=""):
     """Grabs the ENSDF decay data files
@@ -40,11 +40,9 @@ def grab_ensdf_decay(build_dir=""):
         with ZipFile(fpath) as zf:
             for name in zf.namelist():
                 print "    extracting {0} from {1}".format(name, f)
-                zf.extract(name, os.path.join(build_dir, name))
+                zf.extract(name, build_dir)
 
 
-
-#half_life_regex = re.compile('<li>Half life: [~]?(\d+[.]?\d*?)\s*(\w+)')
 
 atomic_decay_dtype = np.dtype([
     ('from_nuc_name', 'S6'),
@@ -59,42 +57,15 @@ atomic_decay_dtype = np.dtype([
     
 def parse_decay(build_dir=""):
     """Builds and returns a list of nuclide decay data.
-    build_dir = os.path.join(build_dir, 'KAERI')
-
-    # Grab and parse elemental summary files.
-    nuclides = set()
-    for element in nucname.name_zz.keys():
-        htmlfile = element + '.html'
-        nuclides = nuclides | parse_for_all_isotopes(os.path.join(build_dir, htmlfile))
-
-    decay_data = []
-
-    from_nuc_name = ""
-    from_nuc_zz = 0
-    to_nuc_name = ""
-    to_nuc_zz = 0
-    hl = 0.0
-    dc = 0.0
-    br = 1.0
-
-    for nuc in nuclides:
-        nuc_name = nucname.name(nuc)
-        htmlfile = os.path.join(build_dir, nuc_name + '.html')
-
-        from_nuc_name = nuc_name
-        from_nuc_zz = nuc
-        br = 1.0
-
-        with open(htmlfile, 'r') as f:
-            for line in f:
-                m = half_life_regex.search(line)
-                if m is not None:
-                    val = float(m.group(1)) * 0.01
-                    atomic_abund[nuc] = val
-                    continue
     """
+    build_dir = os.path.join(build_dir, 'ENSDF')
+
+    decay_data = ensdf.half_life(os.path.join(build_dir, 'ensdf.235'))
+
+    print decay_data
+
     # stub for now
-    decay_data = [('H2', 10020, 'H1', 10010, 10.0, 0.1, 1.0)]
+    #decay_data = [('H2', 10020, 'H1', 10010, 10.0, 0.1, 1.0)]
     
     decay_array = np.array(decay_data, dtype=atomic_decay_dtype)
     return decay_array
@@ -140,6 +111,6 @@ def make_decay(nuc_data, build_dir):
     grab_ensdf_decay(build_dir)
 
     # Make atomic weight table once we have the array
-    #print "Making atomic weight data table."
-    #make_atomic_weight_table(nuc_data, build_dir)
+    print "Making decay data table."
+    make_atomic_decay_table(nuc_data, build_dir)
 
