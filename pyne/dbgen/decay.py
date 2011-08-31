@@ -1,6 +1,7 @@
 """This module provides a way to grab and store raw data for radioactive decay."""
 import os
 import re
+import glob
 import urllib
 import urllib2
 from zipfile import ZipFile
@@ -39,8 +40,9 @@ def grab_ensdf_decay(build_dir=""):
 
         with ZipFile(fpath) as zf:
             for name in zf.namelist():
-                print "    extracting {0} from {1}".format(name, f)
-                zf.extract(name, build_dir)
+                if not os.path.exists(os.path.join(build_dir, name)):
+                    print "    extracting {0} from {1}".format(name, f)
+                    zf.extract(name, build_dir)
 
 
 
@@ -60,7 +62,11 @@ def parse_decay(build_dir=""):
     """
     build_dir = os.path.join(build_dir, 'ENSDF')
 
-    decay_data = ensdf.half_life(os.path.join(build_dir, 'ensdf.235'))
+    decay_data = []
+    files = sorted([f for f in glob.glob(os.path.join(build_dir, 'ensdf.*'))])
+    for f in files:
+        print "    parsing decay data from {0}".format(f)
+        decay_data += ensdf.half_life(f)
 
     print decay_data
 
@@ -89,7 +95,7 @@ def make_atomic_decay_table(nuc_data, build_dir=""):
 
     # Make a new the table
     decaytable = decay_db.createTable("/", "atomic_decay", atomic_decay_dtype, 
-                             "Atomic Decay Data half_life [s], decay_const [s^-1], branch_ratio [fraction]", expectedrows=len(atomic_decay))
+                             "Atomic Decay Data half_life [s], decay_const [1/s], branch_ratio [frac]", expectedrows=len(atomic_decay))
     decaytable.append(atomic_decay)
 
     # Ensure that data was written to table
