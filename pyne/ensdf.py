@@ -6,7 +6,7 @@ from pyne.utils import time_conversion
 
 _level_regex = re.compile('([ \d]{3}[ A-Za-z]{2})  L .{{30}}(.{10}).{28}([ M])([ \d])')
 
-_level_cont_regex = re.compile(''([ \d]{3}[ A-Za-z]{2})[0-9A-Za-z] L (.*)')
+_level_cont_regex = re.compile('([ \d]{3}[ A-Za-z]{2})[0-9A-Za-z] L (.*)')
 
 def _to_zzaaam(nuc, m, s):
     nuc_zz = nucname.zzaaam(nuc.strip())
@@ -52,13 +52,14 @@ def half_life(ensdf):
 
     """
     opened_here = False
-    if isinstance(path, bsestring):
+    if isinstance(ensdf, basestring):
         ensdf = open(ensdf, 'r')
         opened_here = True
 
     data = []
     from_nuc = 0
     half_life = 0.0
+    valid_from_nuc = False
 
     # Run through the file
     lines = ensdf.readlines()
@@ -69,7 +70,12 @@ def half_life(ensdf):
             g = m.groups()
 
             # grab the from nuclide
-            from_nuc = nucname.zzaaam(g[0], g[-2], g[-1])
+            try:
+                from_nuc = nucname.zzaaam(g[0], g[-2], g[-1])
+                valid_from_nuc = True
+            except:
+                valid_from_nuc = False
+                continue
 
             # Grab the half-lives
             hl, unit = [s.strip() for s in g[1].split()]
@@ -77,7 +83,7 @@ def half_life(ensdf):
             continue
 
         m = _level_cont_regex.match(line)
-        if m is not None:
+        if m is not None and valid_from_nuc:
             g = m.groups()
             dat = dict([d.split('=') for d in g[-1].split() if '=' in d])
             dat = {_decay_to[key](from_nuc): float(val)*0.01 for key, val in dat.items()}
