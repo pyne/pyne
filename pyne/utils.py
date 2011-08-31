@@ -37,7 +37,8 @@ time_conv_dict = {'fs': 1e-15,
 		  'years': 86400.0*365.25,
 		  'mev': 1e-15 * 7.6e-8 / 6.03,
 		  }
+
 def time_conversion(input_time, units):
-    sec_time = input_time * time_conv_dict[units]
+    sec_time = input_time * time_conv_dict[units.lower()]
     return sec_time
     
