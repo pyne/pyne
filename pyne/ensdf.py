@@ -22,15 +22,29 @@ def _to_zzaaam(nuc, m, s):
     return nuc_zz
 
 
+def _to_float(x):
+    x = x.strip()
+    x = x.replace('$', '')
+    x = x.replace('?', '')
+
+    if 0 == len(x):
+        x = 0.0
+    else:
+        x = float(x)
+
+    return x
+    
+
+
 _decay_to = {
-    '%EC': lambda x: x-10000,
-    '%B+': lambda x: x-10000,
-    '%EC+%B+': lambda x: x-10000,
-    '%B-': lambda x: x+10000,
-    '%IT': lambda x: int((x/10)*10),
-    '%A': lambda x: x-20040,
-    '%P': lambda x: x-10010,
-    '%N': lambda x: x-10,
+    '%EC': lambda x: (x-10000)/10*10,
+    '%B+': lambda x: (x-10000)/10*10,
+    '%EC+%B+': lambda x: (x-10000)/10*10,
+    '%B-': lambda x: (x+10000)/10*10,
+    '%IT': lambda x: x/10*10,
+    '%A': lambda x: (x-20040)/10*10,
+    '%P': lambda x: (x-10010)/10*10,
+    '%N': lambda x: (x-10)/10*10,
     }
 
 
@@ -70,7 +84,6 @@ def half_life(ensdf):
         m = _level_regex.match(line)
         if m is not None:
             g = m.groups()
-            print line
 
             # grab the from nuclide
             try:
@@ -81,24 +94,26 @@ def half_life(ensdf):
                 continue
 
             # Grab the half-lives
-            time_info = g[1].strip()
+            time_info = g[1].replace('?', '').strip()
             if 0 == len(time_info):
                 valid_from_nuc = False
             elif time_info == 'STABLE':
                 half_life = np.inf
                 data += [(from_nuc, from_nuc, half_life, 1.0)]
             else:
-                hl, unit = [s.strip() for s in time_info.split()]
-                half_life = time_conversion(float(hl), unit)
+                time_unit = [s.strip() for s in time_info.split()]
+                if 2 == len(time_unit):
+                    hl, unit = time_unit
+                    half_life = time_conversion(float(hl), unit)
             continue
 
         m = _level_cont_regex.match(line)
         if m is not None and valid_from_nuc:
             g = m.groups()
-            dat = dict([d.split('=') for d in g[-1].split() if '=' in d])
-            dat = {_decay_to[key](from_nuc): float(val)*0.01 for key, val in dat.items() 
-                                                             if key in _decay_to.keys()}
-            data += [(from_nuc, to_nuc, half_life, br) for to_nuc, br in dat.items()]
+            dat = dict([d.split('=')[:2] for d in g[-1].replace('$', ' ').split() if '=' in d])
+            dat = {_decay_to[key](from_nuc): _to_float(val)*0.01 
+                        for key, val in dat.items() if key in _decay_to.keys()}
+            data += [(from_nuc, to_nuc, half_life, br) for to_nuc, br in dat.items() if 0.0 < br]
             continue
 
     if opened_here:
