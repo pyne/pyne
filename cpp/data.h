@@ -71,6 +71,35 @@ namespace pyne
   double b(int);
   double b(char *);
   double b(std::string);
+
+
+
+  /****************************/
+  /*** decay data functions ***/
+  /****************************/
+  extern std::map<int, double> half_life_map;
+  extern std::map<int, double> decay_const_map;
+
+  typedef struct atomic_decay_struct {
+    char from_nuc_name[6];
+    int from_nuc_zz;
+    double level;
+    char to_nuc_name[6];
+    int to_nuc_zz;
+    double half_life;
+    double decay_const;
+    double branch_ratio;
+  } atomic_decay_struct;
+
+  void _load_atomic_decay();
+
+  double half_life(int);
+  double half_life(char *);
+  double half_life(std::string);
+
+  double decay_const(int);
+  double decay_const(char *);
+  double decay_const(std::string);
 }
 
 #endif

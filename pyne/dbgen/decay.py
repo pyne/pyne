@@ -110,9 +110,9 @@ def make_atomic_decay_table(nuc_data, build_dir=""):
 
 
 def make_decay(nuc_data, build_dir):
-    #with tb.openFile(nuc_data, 'r') as f:
-    #    if hasattr(f.root, 'decay'):
-    #        return 
+    with tb.openFile(nuc_data, 'r') as f:
+        if hasattr(f.root, 'atomic_decay'):
+            return 
 
     # grab the decay data
     print "Grabing the ENSDF decay data from IAEA"
