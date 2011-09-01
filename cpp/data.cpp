@@ -434,10 +434,10 @@ void pyne::_load_atomic_decay()
     level = atom_dec_array[n].level;
 
     if (0 == half_life_map.count(from_nuc) || 0.0 == level)
-      half_life_map[atom_dec_array[n].from_nuc_zz] = atom_dec_array[n].half_life;
+      half_life_map[from_nuc] = atom_dec_array[n].half_life;
 
     if (0 == decay_const_map.count(from_nuc) || 0.0 == level)
-      decay_const_map[atom_dec_array[n].from_nuc_zz] = atom_dec_array[n].decay_const;
+      decay_const_map[from_nuc] = atom_dec_array[n].decay_const;
   };
 };
 
@@ -465,7 +465,6 @@ double pyne::half_life(int nuc)
     _load_atomic_decay();
     return half_life(nuc);
   };
-
 
   // Finally, if none of these work, 
   // assume the value is stable
