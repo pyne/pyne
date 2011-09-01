@@ -11,7 +11,7 @@ are taken from the :file:`nuc_data.h5` library.
 
 All functionality may be found in the ``data`` module::
 
- from pyne import nucname
+ from pyne import data
 
 -------------
 Atomic Weight
