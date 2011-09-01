@@ -223,7 +223,7 @@ cdef conv._MapProxyIntDouble decay_const_map_proxy = conv.MapProxyIntDouble()
 decay_const_map_proxy.init(&cpp_data.decay_const_map)
 decay_const_map = decay_const_map_proxy
 
-def half_life(nuc):
+def decay_const(nuc):
     """Finds the decay constant of a nuclide in [1/seconds].
 
     Parameters
