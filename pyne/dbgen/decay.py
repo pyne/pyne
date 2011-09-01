@@ -68,11 +68,9 @@ def parse_decay(build_dir=""):
         print "    parsing decay data from {0}".format(f)
         decay_data += ensdf.half_life(f)
 
-    print decay_data
+    ln2 = np.log(2.0)
+    decay_data = [(nucname.name(fn), fn, nucname.name(tn), tn, hl, ln2/hl, br) for fn, tn, hl, br in decay_data]
 
-    # stub for now
-    #decay_data = [('H2', 10020, 'H1', 10010, 10.0, 0.1, 1.0)]
-    
     decay_array = np.array(decay_data, dtype=atomic_decay_dtype)
     return decay_array
     

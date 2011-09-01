@@ -1,4 +1,9 @@
-time_conv_dict = {'fs': 1e-15, 
+time_conv_dict = {
+          'as': 1e-18, 
+		  'attosec': 1e-18, 
+		  'attosecond': 1e-18, 
+		  'attoseconds': 1e-18,
+          'fs': 1e-15, 
 		  'femtosec': 1e-15, 
 		  'femtosecond': 1e-15, 
 		  'femtoseconds': 1e-15,
@@ -35,6 +40,8 @@ time_conv_dict = {'fs': 1e-15,
 		  'y': 86400.0*365.25,
 		  'year': 86400.0*365.25,
 		  'years': 86400.0*365.25,
+		  'ev': 1e-9 * 7.6e-8 / 6.03,
+		  'kev': 1e-12 * 7.6e-8 / 6.03,
 		  'mev': 1e-15 * 7.6e-8 / 6.03,
 		  }
 
