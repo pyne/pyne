@@ -6,7 +6,7 @@ from pyne import nucname
 from pyne.utils import time_conversion
 
 
-_level_regex = re.compile('([ \d]{3}[ A-Za-z]{2})  L .{30}(.{10}).{28}([ M])([ 1-9])')
+_level_regex = re.compile('([ \d]{3}[ A-Za-z]{2})  L (.{10}).{20}(.{10}).{28}([ M])([ 1-9])')
 
 _level_cont_regex = re.compile('([ \d]{3}[ A-Za-z]{2})[0-9A-Za-z] L (.*)')
 
@@ -58,13 +58,14 @@ def half_life(ensdf):
 
     Returns
     -------
-    data : list of 4-tuples
+    data : list of 5-tuples
         List of tuples where the indices match
 
         1. from_nuclide, int (zzaaam)
-        2. to_nuclide,  int (zzaaam)
-        3. half_life, float (seconds)
-        4. branch_ratio, float (frac)
+        2. level, float (MeV) - from_nuc's energy level
+        3. to_nuclide, int (zzaaam)
+        4. half_life, float (seconds)
+        5. branch_ratio, float (frac)
 
     """
     opened_here = False
@@ -75,6 +76,7 @@ def half_life(ensdf):
     data = []
     from_nuc = 0
     half_life = 0.0
+    level = 0.0
     valid_from_nuc = False
 
     # Run through the file
@@ -93,13 +95,19 @@ def half_life(ensdf):
                 valid_from_nuc = False
                 continue
 
+            # parse energy level
+            try:
+                level = float(g[1]) * 1E-3
+            except ValueError:
+                pass
+
             # Grab the half-lives
-            time_info = g[1].replace('?', '').strip()
+            time_info = g[2].replace('?', '').strip()
             if 0 == len(time_info):
                 valid_from_nuc = False
             elif time_info == 'STABLE':
                 half_life = np.inf
-                data += [(from_nuc, from_nuc, half_life, 1.0)]
+                data += [(from_nuc, 0.0, from_nuc, half_life, 1.0)]
             else:
                 time_unit = [s.strip() for s in time_info.split()]
                 if 2 == len(time_unit):
@@ -113,7 +121,7 @@ def half_life(ensdf):
             dat = dict([d.split('=')[:2] for d in g[-1].replace('$', ' ').split() if '=' in d])
             dat = {_decay_to[key](from_nuc): _to_float(val)*0.01 
                         for key, val in dat.items() if key in _decay_to.keys()}
-            data += [(from_nuc, to_nuc, half_life, br) for to_nuc, br in dat.items() if 0.0 < br]
+            data += [(from_nuc, level, to_nuc, half_life, br) for to_nuc, br in dat.items() if 0.0 < br]
             continue
 
     if opened_here:
