@@ -162,7 +162,6 @@ void pyne::_load_scattering_lengths()
   nuc_data_h5.close();
 
   // Ok now that we have the array of stucts, put it in the maps
-  extra_types::complex_t bc, bi;
   for(int n = 0; n < scat_len_length; n++)
   {
     b_coherent_map[scat_len_array[n].nuc_zz] = scat_len_array[n].b_coherent;
@@ -370,3 +369,172 @@ double pyne::b(std::string nuc)
   int nuc_zz = nucname::zzaaam(nuc);
   return b(nuc_zz);
 };
+
+
+
+
+
+
+
+
+
+/******************************/
+/*** atomic decay functions ***/
+/******************************/
+std::map<int, double> pyne::half_life_map = std::map<int, double>();
+std::map<int, double> pyne::decay_const_map = std::map<int, double>();
+
+
+void pyne::_load_atomic_decay()
+{
+  // Loads the importnat parts of atomic_decay table into memory
+
+  //Check to see if the file is in HDF5 format.
+  if (!pyne::file_exists(pyne::NUC_DATA_PATH))
+    throw pyne::FileNotFound(pyne::NUC_DATA_PATH);
+
+  bool isH5 = H5::H5File::isHdf5(pyne::NUC_DATA_PATH);
+  if (!isH5)
+    throw h5wrap::FileNotHDF5(pyne::NUC_DATA_PATH);
+
+
+  // Get the HDF5 compound type (table) description
+  H5::CompType atom_dec_desc(sizeof(atomic_decay_struct));
+  atom_dec_desc.insertMember("from_nuc_name", HOFFSET(atomic_decay_struct, from_nuc_name), H5::StrType(0, 6));
+  atom_dec_desc.insertMember("from_nuc_zz",   HOFFSET(atomic_decay_struct, from_nuc_zz),   H5::PredType::NATIVE_INT);
+  atom_dec_desc.insertMember("level", HOFFSET(atomic_decay_struct, level), H5::PredType::NATIVE_DOUBLE);
+  atom_dec_desc.insertMember("to_nuc_name", HOFFSET(atomic_decay_struct, to_nuc_name), H5::StrType(0, 6));
+  atom_dec_desc.insertMember("to_nuc_zz",   HOFFSET(atomic_decay_struct, to_nuc_zz),   H5::PredType::NATIVE_INT);
+  atom_dec_desc.insertMember("half_life", HOFFSET(atomic_decay_struct, half_life), H5::PredType::NATIVE_DOUBLE);
+  atom_dec_desc.insertMember("decay_const", HOFFSET(atomic_decay_struct, decay_const), H5::PredType::NATIVE_DOUBLE);
+  atom_dec_desc.insertMember("branch_ratio", HOFFSET(atomic_decay_struct, branch_ratio), H5::PredType::NATIVE_DOUBLE);
+
+  // Open the HDF5 file
+  H5::H5File nuc_data_h5 (pyne::NUC_DATA_PATH.c_str(), H5F_ACC_RDONLY);
+
+  // Open the data set
+  H5::DataSet atom_dec_set = nuc_data_h5.openDataSet("/atomic_decay");
+  H5::DataSpace atom_dec_space = atom_dec_set.getSpace();
+  int atom_dec_length = atom_dec_space.getSimpleExtentNpoints();
+
+  // Read in the data
+  atomic_decay_struct * atom_dec_array = new atomic_decay_struct[atom_dec_length];
+  atom_dec_set.read(atom_dec_array, atom_dec_desc);
+
+  // close the nuc_data library, before doing anythng stupid
+  nuc_data_h5.close();
+
+  // Ok now that we have the array of stucts, put it in the maps
+  // giving precednece to ground state values or those seen first.
+  int from_nuc;
+  double level;
+  for(int n = 0; n < atom_dec_length; n++)
+  {
+    from_nuc = atom_dec_array[n].from_nuc_zz;
+    level = atom_dec_array[n].level;
+
+    if (0 == half_life_map.count(from_nuc) || 0.0 == level)
+      half_life_map[atom_dec_array[n].from_nuc_zz] = atom_dec_array[n].half_life;
+
+    if (0 == decay_const_map.count(from_nuc) || 0.0 == level)
+      decay_const_map[atom_dec_array[n].from_nuc_zz] = atom_dec_array[n].decay_const;
+  };
+};
+
+
+//
+// Half-life data
+//
+
+double pyne::half_life(int nuc)
+{
+  // Find the nuclide's half life in s
+  std::map<int, double>::iterator nuc_iter, nuc_end;
+
+  nuc_iter = half_life_map.find(nuc);
+  nuc_end = half_life_map.end();
+
+  // First check if we already have the nuc in the map
+  if (nuc_iter != nuc_end)
+    return (*nuc_iter).second;
+
+  // Next, fill up the map with values from the 
+  // nuc_data.h5, if the map is empty.
+  if (half_life_map.empty())
+  {
+    _load_atomic_decay();
+    return half_life(nuc);
+  };
+
+
+  // Finally, if none of these work, 
+  // assume the value is stable
+  double hl = 1.0 / 0.0;
+  half_life_map[nuc] = hl;
+  return hl;
+};
+
+
+double pyne::half_life(char * nuc)
+{
+  int nuc_zz = nucname::zzaaam(nuc);
+  return half_life(nuc_zz);
+};
+
+
+double pyne::half_life(std::string nuc)
+{
+  int nuc_zz = nucname::zzaaam(nuc);
+  return half_life(nuc_zz);
+};
+
+
+
+//
+// Decay constant data
+//
+
+double pyne::decay_const(int nuc)
+{
+  // Find the nuclide's half life in s
+  std::map<int, double>::iterator nuc_iter, nuc_end;
+
+  nuc_iter = decay_const_map.find(nuc);
+  nuc_end = decay_const_map.end();
+
+  // First check if we already have the nuc in the map
+  if (nuc_iter != nuc_end)
+    return (*nuc_iter).second;
+
+  // Next, fill up the map with values from the 
+  // nuc_data.h5, if the map is empty.
+  if (decay_const_map.empty())
+  {
+    _load_atomic_decay();
+    return decay_const(nuc);
+  };
+
+  // Finally, if none of these work, 
+  // assume the value is stable
+  double dc = 0.0;
+  decay_const_map[nuc] = dc;
+  return dc;
+};
+
+
+double pyne::decay_const(char * nuc)
+{
+  int nuc_zz = nucname::zzaaam(nuc);
+  return decay_const(nuc_zz);
+};
+
+
+double pyne::decay_const(std::string nuc)
+{
+  int nuc_zz = nucname::zzaaam(nuc);
+  return decay_const(nuc_zz);
+};
+
+
+
+

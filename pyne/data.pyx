@@ -181,3 +181,72 @@ def b(nuc):
     return float(value)
 
 
+
+
+
+#
+# decay data functions
+#
+cdef conv._MapProxyIntDouble half_life_map_proxy = conv.MapProxyIntDouble()
+half_life_map_proxy.init(&cpp_data.half_life_map)
+half_life_map = half_life_map_proxy
+
+def half_life(nuc):
+    """Finds the half-life of a nuclide in [seconds].
+
+    Parameters
+    ----------
+    nuc : int or str 
+        Input nuclide.
+
+    Returns
+    -------
+    hl : float
+        Half-life of this nuclide [seconds].
+
+    Notes
+    -----
+    If the nuclide is not found, the nuclide is assumed to be stable.
+    """
+    if isinstance(nuc, int):
+        hl = cpp_data.half_life(<int> nuc)
+    elif isinstance(nuc, basestring):
+        hl = cpp_data.half_life(<char *> nuc)
+    else:
+        raise pyne.nucname.NucTypeError(nuc)
+
+    return hl
+
+
+
+cdef conv._MapProxyIntDouble decay_const_map_proxy = conv.MapProxyIntDouble()
+decay_const_map_proxy.init(&cpp_data.decay_const_map)
+decay_const_map = decay_const_map_proxy
+
+def half_life(nuc):
+    """Finds the decay constant of a nuclide in [1/seconds].
+
+    Parameters
+    ----------
+    nuc : int or str 
+        Input nuclide.
+
+    Returns
+    -------
+    dc : float
+        Decay constant of this nuclide [1/seconds].
+
+    Notes
+    -----
+    If the nuclide is not found, the nuclide is assumed to be stable.
+    """
+    if isinstance(nuc, int):
+        dc = cpp_data.decay_const(<int> nuc)
+    elif isinstance(nuc, basestring):
+        dc = cpp_data.decay_const(<char *> nuc)
+    else:
+        raise pyne.nucname.NucTypeError(nuc)
+
+    return dc
+
+
