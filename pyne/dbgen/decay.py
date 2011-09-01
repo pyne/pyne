@@ -49,9 +49,10 @@ def grab_ensdf_decay(build_dir=""):
 atomic_decay_dtype = np.dtype([
     ('from_nuc_name', 'S6'),
     ('from_nuc_zz',   int),
+    ('level',         float),
     ('to_nuc_name',   'S6'),
     ('to_nuc_zz',     int), 
-    ('half_life',    float),
+    ('half_life',     float),
     ('decay_const',   float),
     ('branch_ratio',  float),
     ])
@@ -69,9 +70,12 @@ def parse_decay(build_dir=""):
         decay_data += ensdf.half_life(f)
 
     ln2 = np.log(2.0)
-    decay_data = [(nucname.name(fn), fn, nucname.name(tn), tn, hl, ln2/hl, br) for fn, tn, hl, br in decay_data]
+    decay_data = [(nucname.name(fn), fn, lvl, nucname.name(tn), tn, hl, ln2/hl, br) for fn, lvl, tn, hl, br in decay_data]
 
     decay_array = np.array(decay_data, dtype=atomic_decay_dtype)
+    da, mask = np.unique(decay_array, return_index=True)
+    mask.sort()
+    decay_array = decay_array[mask]
     return decay_array
     
     
@@ -93,7 +97,7 @@ def make_atomic_decay_table(nuc_data, build_dir=""):
 
     # Make a new the table
     decaytable = decay_db.createTable("/", "atomic_decay", atomic_decay_dtype, 
-                             "Atomic Decay Data half_life [s], decay_const [1/s], branch_ratio [frac]", expectedrows=len(atomic_decay))
+                             "Atomic Decay Data level [MeV], half_life [s], decay_const [1/s], branch_ratio [frac]", expectedrows=len(atomic_decay))
     decaytable.append(atomic_decay)
 
     # Ensure that data was written to table
