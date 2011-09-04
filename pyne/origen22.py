@@ -62,6 +62,10 @@ def sec_to_time_unit(s):
     return t, unit
         
 
+# Regex helpers
+_data_format = "\d+\.\d*[EeDd]?[+-]?\d+"
+
+
 
 ###################################
 ### ORIGEN Input Deck Functions ###
@@ -104,14 +108,13 @@ _tape5_irradiation_template = """\
   -1
   -1
   CUT     5 {CUT_OFF} -1
-  RDA     FIND CROSS SECTION LIBRARY IDENTIFIER NUMBERS IN YOUR LIBRARY FILE
+  RDA     Make sure thet the library identifier numbers match those in the TAPE9.INP file
   LIB     0 {DECAY_NLB1} {DECAY_NLB2} {DECAY_NLB3} {XSFPY_NLB1} {XSFPY_NLB2} {XSFPY_NLB3} 9 3 0 4 0
   OPTL    {optl}
   OPTA    {opta}
   OPTF    {optf}
   INP     1 -1  0  -1  4  4
-  HED     1     IN FUEL
-  RDA     ALL IRRADIATION (IRF and IRP) CARDS MUST TAKE PLACE IN BETWEEN BURNUP (BUP) CARDS
+  RDA     All irradiation (IRF and IRP) cards must be between burnup (BUP) cards.
   BUP
   {irr_type}     {irr_time}  {irr_value}   1   2   4  2
   BUP
@@ -243,6 +246,50 @@ def write_tape5_irradiation(irr_type, irr_time, irr_value,
 
 
 
+#
+# Tape6 functions
+#
+
+_rx_bu_data_line = re.compile(' (TIME, SEC|NEUT. FLUX|SP POW,MWD|K INFINITY|NEUT PRODN|NEUT DESTN|TOT BURNUP|AVG N FLUX|AVG SP POW) (.*)')
+
+_rx_bu_key_map = {
+    "TIME, SEC":  "time_sec",
+    "NEUT. FLUX": "flux", 
+    "SP POW,MW":  "specific_power_MW", 
+    "BURNUP,MWD": "burnup_MWD", 
+    "K INFINITY": "k_inf", 
+    "NEUT PRODN": "neutron_production_rate",
+    "NEUT DESTN": "neutron_destruction_rate",
+    "TOT BURNUP": "total_burnup", 
+    "AVG N FLUX": "average_flux",
+    "AVG SP POW": "average_specific_power",
+    }
+
+_table_header_line = re.compile("[ 0]\s+(\d+) (NUCLIDE|ELEMENT|SUMMARY) TABLE:([ A-Z]+),([ 0-9A-Za-z*]+)")
+
+_table_header_alpha_line = re.compile("[ 0]\s+(\d+) (NUCLIDE|ELEMENT|SUMMARY) TABLE:\s*(ALPHA RADIOACTIVITY)\s+([ 0-9A-Za-z*]+)")
+
+_nuclide_line = re.compile(" ([ A-Z][A-Z][ \d][ \d]\d[ M])\s+(.*)")
+
+_element_line = re.compile(" ([ A-Z][A-Z])   \s+(.*)")
+
+_species_group_line = re.compile('[ +]\s+(ACTIVATION PRODUCTS|ACTINIDES[+]DAUGHTERS|FISSION PRODUCTS)')
+
+_group_key_map = {
+    'ACTIVATION PRODUCTS': 'activation_products',
+    'ACTINIDES+DAUGHTERS': 'actinides',
+    'FISSION PRODUCTS': 'fission_products',
+    }
+
+_alpha_n_header_line = re.compile('\s*(\(ALPHA,N\) NEUTRON SOURCE), (NEUTRONS/SEC)')
+
+_spont_fiss_header_line = re.compile('\s*(SPONTANEOUS FISSION NEUTRON SOURCE), (NEUTRONS/SEC)')
+
+_n_source_key_map ={
+    '(ALPHA,N) NEUTRON SOURCE': 'alpha_neutron_source',
+    'SPONTANEOUS FISSION NEUTRON SOURCE': 'spont_fiss_neutron_source',
+    }
+
 def parse_tape6(tape6="TAPE6.OUT"):
     """Parses an ORIGEN 2.2 TAPE6.OUT file. 
 
@@ -263,119 +310,115 @@ def parse_tape6(tape6="TAPE6.OUT"):
     for others as well.  However, this parser could probably use a rewrite with 
     regular expressions and it could easily stand to be more general.
     """
+    # Read the TAPE6 file
     opened_here = False
     if isinstance(tape6, basestring):
         tape6 = open(tape6, 'r')
         opened_here = True
 
+    lines = tape6.readlines()
+
+    if opened_here:
+        tape6.close()
+
+    # Prep to parse the file
     results = {}
 
     # Defaults
-    in_table = False
     table_key = None
     table_type = None
+    table_group = None
 
-    # Read the TAPE6 file line by line
-    for line in tape6:
-        # Skip trivial lines
-        if len(line) == 0:
+    # Read in the file line-by-line
+    for i, line in enumerate(lines):
+        # Get reactivity and burnup data
+        m = _rx_bu_data_line.match(line)
+        if m is not None:
+            key, data = m.groups()
+            results[_rx_bu_key_map[key]] = np.array(data.split(), dtype=float)
             continue
 
-        # Spliut the line
-        ls = line.split()
+        # Get table spcies group
+        m = _species_group_line.match(line)
+        if m is not None:
+            table_group = _group_key_map[m.group(1)]
+            continue
 
-        # Grab Basis lines
-        if "TIME, SEC" in line:
-            results["time_sec"] = float(ls[-1])
+        # Get table header info
+        m = _table_header_line.match(line) or _table_header_alpha_line.match(line)
+        if m is not None:
+            tnum, ttype, ttitle, tunits = m.groups()
 
-        elif "NEUT. FLUX" in line:
-            results["flux"] = float(ls[-1])
-
-        elif "SP POW,MW" in line:
-            results["specific_power_MW"] = float(ls[-1])
-
-        elif "BURNUP,MWD" in line:
-            results["burnup_MWD"] = float(ls[-1])
-
-        elif "K INFINITY" in line:
-            results["k_inf"] = float(ls[-1])
-
-        elif "NEUT PRODN" in line:
-            results["neutron_production_rate"] = float(ls[-1])
-
-        elif "NEUT DESTN" in line:
-            results["neutron_destruction_rate"] = float(ls[-1])
-
-        elif "TOT BURNUP" in line:
-            results["total_burnup"] = float(ls[-1])
-
-        elif "AVG N FLUX" in line:
-            results["average_flux"] = float(ls[-1])
-
-        elif "AVG SP POW" in line:
-            results["average_specific_power"] = float(ls[-1])
-
-        elif ("TABLE:" in line):
-            in_table = True
-
-                
-            # Set table key
-            if line[0] == "0":
-                table_key = "table_{0}".format(ls[1])
-            else:
-                table_key = "table_{0}".format(ls[0])
-
+            table_key = "table_{0}".format(tnum)
             if table_key not in results.keys():
                 results[table_key] = {}
 
-            # Set table type
-            if line[0] == "0":
-                table_type = ls[2].lower()
-            else:
-                table_type = ls[1].lower()
-
-            if table_type not in results[table_key].keys():
+            table_type = ttype.lower()
+            if table_type not in results[table_key]:
                 results[table_key][table_type] = {}
 
-                pline = line.partition(":")[2].partition(",")
-                title = pline[0].strip()
-                units = pline[2].strip()
-
-                results[table_key][table_type]["title"] = title
-                results[table_key][table_type]["units"] = units
-                results[table_key][table_type]["data"]  = {}
-                    
-
-        elif in_table and ("OUTPUT UNIT = " in line):
-            # restore defaults
-            in_table = False
-            table_key = None
-            table_type = None
-
-        elif in_table:
-            ind = 0
-            try:
-                nuc = nucname.zzaaam(ls[0])
-                assert nuc%10000 != 0
-                ind = 1
-            except:
-                try:
-                    nuc = nucname.zzaaam(ls[0] + ls[1])
-                    ind = 2
-                except:
-                    continue
-
-            #results[table_key][table_type]["data"][iso] = float(ls[-1])
-            if nuc not in results[table_key][table_type]["data"]:
-                results[table_key][table_type]["data"][nuc] = []
-            results[table_key][table_type]["data"][nuc].append(np.array(ls[ind:], dtype=float))
-
-        else:
+            results[table_key][table_type]["title"] = ttitle.strip().lower()
+            results[table_key][table_type]["units"] = tunits.strip().lower()
+            if table_group not in results[table_key][table_type]:
+                results[table_key][table_type][table_group] = {}
             continue
 
-    # close file, if appropriate
-    if opened_here:
-        tape6.close()
+
+        # Grab nuclide data lines
+        m = _nuclide_line.match(line)
+        if m is not None:
+            nuc, data = m.groups()
+            nuc_name = nuc.replace(' ', '')
+
+            # Don't know WTF element 'SF' is suppossed to be! (Spent fuel, spontaneous fission)
+            if nuc_name == 'SF250':
+                continue
+
+            nuc_zz = nucname.zzaaam(nuc_name)
+            nuc_key = nuc_zz if table_type == 'nuclide' else nuc_name
+            nuc_data = np.array(data.split(), dtype=float)
+
+            if table_key.startswith('table_'): 
+                if nuc_key not in results[table_key][table_type][table_group]:
+                    results[table_key][table_type][table_group][nuc_key] = nuc_data
+                else:
+                    print sorted(results[table_key].keys())
+                    print sorted(results[table_key][table_type].keys())
+                    print sorted(results[table_key][table_type][table_group].keys())
+                    print nuc_key, table_key, table_type, table_group, i, line
+                    raise KeyError
+            else:
+                results[table_key] = nuc_data
+            continue
+
+        # Grab element data line
+        m = _element_line.match(line)
+        if m is not None:
+            elem, data = m.groups()
+            elem = elem.replace(' ', '')
+
+            # Still don't know WTF element 'SF' is suppossed to be! (Spent fuel, spontaneous fission)
+            if elem == 'SF':
+                continue
+
+            results[table_key][table_type][table_group][elem] = np.array(data.split(), dtype=float)
+            continue
+
+        # Grab (alpha, n) and spontaneous fission headers
+        m = _alpha_n_header_line.match(line) or _spont_fiss_header_line.match(line)
+        if m is not None:
+            ttitle, tunits = m.groups()
+
+            table_key = _n_source_key_map[ttitle]
+            if table_key not in results.keys():
+                results[table_key] = {}
+
+            table_type = None
+            table_group = None
+
+            results[table_key]["title"] = ttitle.strip().lower()
+            results[table_key]["units"] = tunits.strip().lower()
+            continue
 
     return results
 
@@ -384,16 +427,15 @@ def parse_tape6(tape6="TAPE6.OUT"):
 # Tape9 functions
 #
 
-data_format = "\d+\.\d*[EeDd]?[+-]?\d+"
 title_card_re = re.compile("(\d+)\s+(\S.*)")
 
 # Decay library regex
-decay_card1_re = re.compile("(\d+)\s+(\d{{5,7}})\s+(\d)\s+({num})\s+({num})\s+({num})\s+({num})\s+({num})\s+({num})".format(num=data_format))
-decay_card2_re = re.compile("(\d+)\s+({num})\s+({num})\s+({num})\s+({num})\s+({num})\s+({num})".format(num=data_format))
+decay_card1_re = re.compile("(\d+)\s+(\d{{5,7}})\s+(\d)\s+({num})\s+({num})\s+({num})\s+({num})\s+({num})\s+({num})".format(num=_data_format))
+decay_card2_re = re.compile("(\d+)\s+({num})\s+({num})\s+({num})\s+({num})\s+({num})\s+({num})".format(num=_data_format))
 
 # Cross section and fission product yeild library regex
-xsfpy_card1_re = re.compile("(\d+)\s+(\d{{5,7}})\s+({num})\s+({num})\s+({num})\s+({num})\s+({num})\s+({num})\s+([+-]?{num})".format(num=data_format))
-xsfpy_card2_re = re.compile("(\d+)\s+({num})\s+({num})\s+({num})\s+({num})\s+({num})\s+({num})\s+({num})\s+({num})".format(num=data_format))
+xsfpy_card1_re = re.compile("(\d+)\s+(\d{{5,7}})\s+({num})\s+({num})\s+({num})\s+({num})\s+({num})\s+({num})\s+([+-]?{num})".format(num=_data_format))
+xsfpy_card2_re = re.compile("(\d+)\s+({num})\s+({num})\s+({num})\s+({num})\s+({num})\s+({num})\s+({num})\s+({num})".format(num=_data_format))
 
 
 def _parse_tape9_decay(deck):
