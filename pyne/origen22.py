@@ -5,7 +5,7 @@ from itertools import chain, imap, izip
 import numpy as np
 
 from pyne import nucname
-
+from pyne.material import Material, from_atom_frac
 
 # Table 4.2 in ORIGEN 2.2 manual
 ORIGEN_TIME_UNITS = [None,              # No zero unit
@@ -328,6 +328,8 @@ def parse_tape6(tape6="TAPE6.OUT"):
       |- 'total_burnup': Cummulative burnup over all time [MWd/input mass [g] from TAPE4]
       |- 'average_flux': average neutron flux over preceeding time interval [n/cm^2/s]
       |- 'average_specific_power: recator specific power over preceeding time interval [MW]
+      |- 'materials': list of Materials of same length as 'time_sec', only present if 
+      |               'table_3' or 'table_5' exist and have 'nuclide' output.
       |- 'alpha_neutron_source': dict
       |                          |- 'title': str
       |                          |- 'units': str
@@ -476,6 +478,25 @@ def parse_tape6(tape6="TAPE6.OUT"):
         m = _photon_spec_header_line.match(line)
         if m is not None:
             break
+
+    # Done with parsing, try to convert to material
+    tbl = None
+    if ('table_5' in results) and ('nuclide' in results['table_5']):
+        tbl = 'table_5'
+        mat_gen = Material
+    elif ('table_3' in results) and ('nuclide' in results['table_3']):
+        tbl = 'table_3'
+        mat_gen = from_atom_frac
+
+    if tbl is not None:
+        T = len(results['time_sec'])
+        mats = [Material() for t in range(T)]
+
+        for grp in _group_key_map.values():
+            if grp in results[tbl]['nuclide']:
+                mats = [m + mat_gen({nuc: arr[i] for nuc, arr in results[tbl]['nuclide'][grp].items()}) for i, m in enumerate(mats)]
+
+        results['materials'] = mats
 
     return results
 
