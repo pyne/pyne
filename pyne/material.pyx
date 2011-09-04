@@ -925,6 +925,68 @@ class Material(_Material, collections.MutableMapping):
                                                                    )
 
 
+#####################################
+### Material generation functions ###
+#####################################
+
+def from_atom_frac(atom_fracs, double mass=-1.0, char * name='', double atoms_per_mol=-1.0):
+    """Returns a Material from a mapping of atom fractions.
+
+    Parameters
+    ----------
+    atom_fracs : dict
+        Dictionary that maps nuclides or materials to atom fractions for the 
+        material.  The keys may be intergers, strings, or materials. The values
+        must be castable to floats.
+    mass : float, optional
+        This is the mass of the new stream. If the mass provided
+        is negative (default -1.0) then the mass of the new stream is calculated from 
+        the sum of compdict's components before normalization.  If the mass here
+        is positive or zero, then this mass overrides the calculated one.
+    name : str, optional
+        A string label for the material.  Helpful for large numbers of 
+        streams. Default ''.
+    atoms_per_mol : float, optional
+        Number of atoms to per molecule of material.  Needed to obtain proper scaling
+        of molecular weights.  For example, this value for water is 3.0.
+
+    Returns
+    -------
+    mat : Material
+        A material generated from atom fractions.
+
+    Examples
+    --------
+    To get a material from water, based on atom fractions::
+        
+        h2o = {10010: 2.0, 'O16': 1.0}
+        mat = from_atom_frac(h2o, name='water')
+
+    Or for Uranium-Oxide, based on an initial fuel vector::
+
+        # Define initial heavy metal
+        ihm = from_atom_frac({'U235': 0.05, 'U238': 0.95}, name='IHM')
+
+        # Define Uranium-Oxide
+        uox = {ihm: 1.0, 80160: 2.0}
+        mat = from_atom_frac(uox, name='UOX')
+
+    Note that the initial heavy metal was used as a key in a dictionary.
+    This is possible because Materials are hashable.
+    """
+    mat = Material()
+    mat.from_atom_frac(atom_fracs)
+    mat.name = name
+
+    if 0.0 <= mass:
+        mat.mass = mass
+
+    if 0.0 <= atoms_per_mol:
+        mat.atoms_per_mol = atoms_per_mol
+
+    return mat
+
+
 ###########################
 ### Material Converters ###
 ###########################
