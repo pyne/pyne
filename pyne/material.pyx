@@ -164,7 +164,7 @@ cdef class _Material:
         Parameters
         ----------
         filename : str 
-            Path to HDF5 file that contains the data to read in.    
+            Path to text file that contains the data to read in.    
 
 
         Notes
@@ -930,7 +930,7 @@ class Material(_Material, collections.MutableMapping):
 #####################################
 
 def from_atom_frac(atom_fracs, double mass=-1.0, char * name='', double atoms_per_mol=-1.0):
-    """Returns a Material from a mapping of atom fractions.
+    """Create a Material from a mapping of atom fractions.
 
     Parameters
     ----------
@@ -985,6 +985,97 @@ def from_atom_frac(atom_fracs, double mass=-1.0, char * name='', double atoms_pe
         mat.atoms_per_mol = atoms_per_mol
 
     return mat
+
+
+
+def load_from_hdf5(char * filename, char * groupname, int row=-1):
+    """Create a Material object from an HDF5 file.
+
+    Parameters
+    ----------
+    filename : str
+        Path to HDF5 file that contains the data to read in.    
+    groupname : str 
+        Path to HDF5 group that represents the data. 
+        In the above example, groupname = "/Material".    
+    row : int, optional 
+        The index of the arrays from which to read the data.  This 
+        ranges from 0 to N-1.  Defaults to the last element of the array.
+        Negative indexing is allowed (row[-N] = row[0]).
+
+    Returns
+    -------
+    mat : Material
+        A material found in the HDF5 file.
+
+    See Also
+    --------
+    Please see the :meth:`Material.load_from_hdf5` method for 
+    more information.
+
+    Examples
+    --------
+    This method loads data into a new material::
+
+        mat = load_from_hdf5("afile.h5", "/foo/bar/mat", -3)
+        
+    """
+    mat = Material()
+    mat.load_from_hdf5(filename, groupname, row)
+    return mat
+
+
+
+def load_from_text(char * filename, double mass=-1.0, char * name='', double atoms_per_mol=-1.0):
+    """Create a Material object from a simple text file.
+
+    Parameters
+    ----------
+    filename : str 
+        Path to text file that contains the data to read in.
+    mass : float, optional
+        This is the mass of the new stream. If the mass provided
+        is negative (default -1.0) then the mass of the new stream is calculated from 
+        the sum of compdict's components before normalization.  If the mass here
+        is positive or zero, then this mass overrides the calculated one.
+    name : str, optional
+        A string label for the material.  Helpful for large numbers of 
+        streams. Default ''.
+    atoms_per_mol : float, optional
+        Number of atoms to per molecule of material.  Needed to obtain proper scaling
+        of molecular weights.  For example, this value for water is 3.0.
+
+    Returns
+    -------
+    mat : Material
+        A material found in the HDF5 file.
+
+    See Also
+    --------
+    Please see the :meth:`Material.load_from_text` method for 
+    more information.
+
+    Examples
+    --------
+    This method loads data into a new Material::
+
+        mat = load_from_text("natu.h5")
+
+    """
+    mat = Material()
+    mat.load_from_text(filename)
+    mat.name = name
+
+    if 0.0 <= mass:
+        mat.mass = mass
+
+    if 0.0 <= atoms_per_mol:
+        mat.atoms_per_mol = atoms_per_mol
+
+    return mat
+
+
+
 
 
 ###########################
