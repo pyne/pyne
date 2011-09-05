@@ -130,6 +130,57 @@ def test_parse_tape6():
     assert_equal(len(r['materials']), len(r['time_sec']))
 
 
+
+def test_parse_tape6_PWRM021():
+    """Originally found at https://typhoon.jaea.go.jp/origen22/sample_pwrmox_orlibj33/PWRM0210.out"""
+    r = origen22.parse_tape6('tape6_PWRM0210.test')
+    assert_true(0 < len(r))
+
+    assert_array_equal(r['time_sec'], [0.00E+00,  1.21E+07,  2.42E+07,  3.63E+07,  4.84E+07,  6.05E+07,  7.26E+07, 8.47E+07,  9.68E+07,  1.09E+08,  1.21E+08, 1.33E+08])
+    assert_array_equal(r['average_flux'], [0.00E+00,  3.46E+14,  3.46E+14,  3.46E+14,  3.46E+14,  3.46E+14,  3.46E+14,  3.46E+14,  3.46E+14,  3.46E+14,  3.46E+14,  3.46E+14])
+
+    tab_keys = set(['table_{0}'.format(n) for n in [5]])
+    assert_true(tab_keys <=  set(r.keys()))
+
+    for tk in tab_keys:
+        for ttype in ['nuclide', 'element', 'summary']:
+            if ttype in r[tk]:
+                assert_true(set(r[tk][ttype].keys()) <= set(['title', 'units', 'activation_products', 'actinides', 'fission_products']))
+
+    assert_array_equal(r['alpha_neutron_source']['CM242'], [0.00000E+00, 8.50160E+08, 1.28411E+09, 1.48965E+09, 1.57830E+09, 1.60855E+09, 1.61128E+09, 1.60202E+09, 1.58856E+09, 1.57406E+09, 1.55987E+09, 1.54529E+09])
+    assert_array_equal(r['spont_fiss_neutron_source']['PU238'], [5.58385E+06, 5.52908E+06, 5.68992E+06, 5.94790E+06, 6.24106E+06, 6.53804E+06, 6.82350E+06, 7.09041E+06, 7.33580E+06, 7.55876E+06, 7.75904E+06, 7.93683E+06])
+    
+    assert_true('materials' in r)
+    assert_equal(len(r['materials']), len(r['time_sec']))
+
+
+def test_parse_tape6():
+    """Originally found at https://typhoon.jaea.go.jp/origen22/sample_pwruo2_orlibj33/SF97-4.out"""
+    r = origen22.parse_tape6('tape6_SF97_4.test')
+    assert_true(0 < len(r))
+
+    assert_array_equal(r['time_sec'], [1.07E+08,  1.11E+08,  1.13E+08,  1.15E+08,  1.16E+08, 1.16E+08,  1.25E+08])
+    assert_array_equal(r['k_inf'], [1.17263, 1.16222, 1.15412, 1.14823, 1.14351, 1.14351, 1.14238])
+
+    tab_keys = set(['table_{0}'.format(n) for n in [5]])
+    assert_true(tab_keys <=  set(r.keys()))
+
+    for tk in tab_keys:
+        for ttype in ['nuclide', 'element', 'summary']:
+            if ttype in r[tk]:
+                assert_true(set(r[tk][ttype].keys()) <= set(['title', 'units', 'activation_products', 'actinides', 'fission_products']))
+
+    assert_array_equal(r['alpha_neutron_source']['PU240'], [4.51852E+05, 4.62660E+05, 4.71046E+05, 4.76390E+05, 4.81151E+05, 4.81151E+05, 4.82556E+05])
+    assert_array_equal(r['spont_fiss_neutron_source']['CM246'], [2.78744E+06, 3.40763E+06, 3.98241E+06, 4.41669E+06, 4.83645E+06, 4.83645E+06, 4.83365E+06])
+    
+    assert_true('materials' in r)
+    assert_equal(len(r['materials']), len(r['time_sec']))
+
+
+
+
+
+
 sample_tape9 = """\
    1      SAMPLE DECAY LIB: ACTIVATION PRODUCTS
    1   10010  6     0.0       0.0       0.0       0.0       0.0       0.0
