@@ -10,7 +10,7 @@ materials throughout PyNE.
 
 All functionality may be found in the ``material`` package::
 
- from pyne.material import Material
+ from pyne import material
 
 Materials are the primary container for radionuclides. They map nuclides to **mass weights**, 
 though they contain methods for converting to/from atom fractions as well.
@@ -48,4 +48,17 @@ Material Class
     .. automethod:: sub_act(name="")
     .. automethod:: sub_tru(name="")
     .. automethod:: sub_ma(name="")
+
+
+
+*****************************
+Material Generation Functions
+*****************************
+The following top-level module functions are used to generate materials from various sources.
+
+.. autofunction:: from_atom_frac(atom_fracs, mass=-1.0, name='', atoms_per_mol=-1.0)
+
+.. autofunction:: load_from_hdf5(filename, groupname, row=-1)
+
+.. autofunction:: load_from_text(filename, mass=-1.0, name='', atoms_per_mol=-1.0)
 
