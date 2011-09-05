@@ -17,3 +17,5 @@ The Python for Nuclear Engineering Team includes:
 .. _Seth Johnson: http://reference-man.com/
 
 .. _Paul Romano: mailto:romano7@gmail.com
+
+Contact us via pyne-dev@googlegroups.com
