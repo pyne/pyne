@@ -418,7 +418,7 @@ def parse_tape6(tape6="TAPE6.OUT"):
 
         # Grab nuclide data lines
         m = _nuclide_line.match(line)
-        if m is not None:
+        if (m is not None) and (table_key is not None):
             nuc, data = m.groups()
             nuc_name = nuc.replace(' ', '')
 
@@ -440,7 +440,7 @@ def parse_tape6(tape6="TAPE6.OUT"):
 
         # Grab element data line
         m = _element_line.match(line)
-        if m is not None:
+        if (m is not None) and (table_key is not None):
             elem, data = m.groups()
             elem = elem.replace(' ', '')
 
@@ -477,7 +477,9 @@ def parse_tape6(tape6="TAPE6.OUT"):
         # Photon spectra parsing is not yet supported
         m = _photon_spec_header_line.match(line)
         if m is not None:
-            break
+            table_key = None
+            table_type = None
+            table_group = None
 
     # Done with parsing, try to convert to material
     tbl = None
