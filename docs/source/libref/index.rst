@@ -13,4 +13,5 @@ The following modules and sub-packages are discussed:
     data
     material
     cccc
+    ensdf
     origen22
