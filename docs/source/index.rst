@@ -8,10 +8,11 @@ bindings and I/O support for other industry standard nuclear codes.
 
 PyNE development is a continuing effort and we are always looking for
 more developers, testers, and users.  If you are interested in being
-involved with this project, please contact us via `github`_ or
-`convore`_.
+involved with this project, please contact us via pyne-dev@googlegroups.com, 
+`github`_, or `convore`_.
 
 PyNE has the following dependencies:
+
    #. `NumPy <http://numpy.scipy.org/>`_
    #. `SciPy <http://www.scipy.org/>`_
    #. `HDF5 <http://www.hdfgroup.org/HDF5/>`_
