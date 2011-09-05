@@ -8,6 +8,7 @@ from pyne.dbgen.api import build_dir
 from pyne.dbgen.decay import make_decay
 from pyne.dbgen.atomic_weight import make_atomic_weight
 from pyne.dbgen.scattering_lengths import make_scattering_lengths
+from pyne.dbgen.simple_xs import make_simple_xs
 
 # Thanks to http://patorjk.com/software/taag/
 # and http://www.chris.com/ascii/index.php?art=creatures/dragons (Jeff Ferris)
@@ -81,7 +82,7 @@ def main():
     make_atomic_weight(args.nuc_data, args.build_dir)
     make_scattering_lengths(args.nuc_data, args.build_dir)
     make_decay(args.nuc_data, args.build_dir)
-    
+    make_simple_xs(args.nuc_data, args.build_dir)    
 
 
 if __name__ == '__main__':
