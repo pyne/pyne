@@ -3,6 +3,7 @@ from StringIO import StringIO
 
 import numpy as np
 from nose.tools import assert_equal, assert_true
+from numpy.testing import assert_array_equal
 
 from pyne import origen22
 from pyne.material import Material
@@ -101,27 +102,32 @@ def test_write_tape5_irradiation():
 
 def test_parse_tape6():
     r = origen22.parse_tape6('tape6.test')
-    assert(0 < len(r))
+    assert_true(0 < len(r))
 
-    assert_equal(r['time_sec'], 8.64E+06)
-    assert_equal(r['flux'], 1.71E+17)
-    assert_equal(r['specific_power_MW'], 5.50E-01)
-    assert_equal(r['burnup_MWD'], 5.50E+01)
-    assert_equal(r['k_inf'], 0.08498)
-    assert_equal(r['neutron_production_rate'], 2.97E-04)
-    assert_equal(r['neutron_destruction_rate'], 3.50E-03)
-    assert_equal(r['total_burnup'], 5.50E+01)
-    assert_equal(r['average_flux'], 1.71E+17)
-    assert_equal(r['average_specific_power'], 5.50E-01)
+    assert_array_equal(r['time_sec'], [0.0, 8.64E+06])
+    assert_array_equal(r['flux'], [0.0, 1.71E+17])
+    assert_array_equal(r['specific_power_MW'], [0.0, 5.50E-01])
+    assert_array_equal(r['burnup_MWD'], [0.0, 5.50E+01])
+    assert_array_equal(r['k_inf'], [0.0, 0.08498])
+    assert_array_equal(r['neutron_production_rate'], [0.0, 2.97E-04])
+    assert_array_equal(r['neutron_destruction_rate'], [0.0, 3.50E-03])
+    assert_array_equal(r['total_burnup'], [0.0, 5.50E+01])
+    assert_array_equal(r['average_flux'], [0.0, 1.71E+17])
+    assert_array_equal(r['average_specific_power'], [0.0, 5.50E-01])
 
     tab_keys = set(['table_{0}'.format(n) for n in range(1, 11) + range(13, 25)])
-    assert(tab_keys <=  set(r.keys()))
+    assert_true(tab_keys <=  set(r.keys()))
 
     for tk in tab_keys:
-        assert('nuclide' in  r[tk].keys())
-        assert('title' in r[tk]['nuclide'].keys())
-        assert('units' in r[tk]['nuclide'].keys())
-        assert('data'  in r[tk]['nuclide'].keys())
+        for ttype in ['nuclide', 'element', 'summary']:
+            if ttype in r[tk]:
+                assert_true(set(r[tk][ttype].keys()) <= set(['title', 'units', 'activation_products', 'actinides', 'fission_products']))
+
+    assert_array_equal(r['alpha_neutron_source']['U235'], [7.509E-04, 2.442E-14])
+    assert_array_equal(r['spont_fiss_neutron_source']['ES255'], [0.000E+00, 1.917E+05])
+    
+    assert_true('materials' in r)
+    assert_equal(len(r['materials']), len(r['time_sec']))
 
 
 sample_tape9 = """\
