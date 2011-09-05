@@ -973,6 +973,10 @@ def from_atom_frac(atom_fracs, double mass=-1.0, char * name='', double atoms_pe
 
     Note that the initial heavy metal was used as a key in a dictionary.
     This is possible because Materials are hashable.
+
+    See Also
+    --------
+    Material.from_atom_frac : Underlying method class method.
     """
     mat = Material()
     mat.from_atom_frac(atom_fracs)
@@ -1008,17 +1012,15 @@ def load_from_hdf5(char * filename, char * groupname, int row=-1):
     mat : Material
         A material found in the HDF5 file.
 
-    See Also
-    --------
-    Please see the :meth:`Material.load_from_hdf5` method for 
-    more information.
-
     Examples
     --------
     This method loads data into a new material::
 
         mat = load_from_hdf5("afile.h5", "/foo/bar/mat", -3)
         
+    See Also
+    --------
+    Material.load_from_hdf5 : Underlying method class method.
     """
     mat = Material()
     mat.load_from_hdf5(filename, groupname, row)
@@ -1050,17 +1052,15 @@ def load_from_text(char * filename, double mass=-1.0, char * name='', double ato
     mat : Material
         A material found in the HDF5 file.
 
-    See Also
-    --------
-    Please see the :meth:`Material.load_from_text` method for 
-    more information.
-
     Examples
     --------
     This method loads data into a new Material::
 
         mat = load_from_text("natu.h5")
 
+    See Also
+    --------
+    Material.load_from_text : Underlying method class method.
     """
     mat = Material()
     mat.load_from_text(filename)
