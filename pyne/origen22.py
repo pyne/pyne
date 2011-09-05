@@ -250,7 +250,7 @@ def write_tape5_irradiation(irr_type, irr_time, irr_value,
 # Tape6 functions
 #
 
-_rx_bu_data_line = re.compile(' (TIME, SEC|NEUT. FLUX|SP POW,MWD|K INFINITY|NEUT PRODN|NEUT DESTN|TOT BURNUP|AVG N FLUX|AVG SP POW) (.*)')
+_rx_bu_data_line = re.compile(' (TIME, SEC|NEUT. FLUX|SP POW,MW|BURNUP,MWD|K INFINITY|NEUT PRODN|NEUT DESTN|TOT BURNUP|AVG N FLUX|AVG SP POW) (.*)')
 
 _rx_bu_key_map = {
     "TIME, SEC":  "time_sec",
