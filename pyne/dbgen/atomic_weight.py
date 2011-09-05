@@ -7,22 +7,10 @@ import numpy as np
 import tables as tb
 
 from pyne import nucname
-from pyne.dbgen.kaeri import grab_kaeri_nuclide
+from pyne.dbgen.kaeri import grab_kaeri_nuclide, parse_for_natural_isotopes
 
 # Note that since ground state and meta-stable isotopes are of the same atomic weight, 
 # the meta-stables have been discluded from the following data sets.
-
-nat_iso_regex = re.compile('.*?/cgi-bin/nuclide[?]nuc=([A-Za-z]{1,2}\d{1,3}).*?[(].*?[)]')
-
-def parse_for_natural_isotopes(htmlfile):
-    """Parses an elemental html file, returning a set of naturally occuring isotopes."""
-    nat_isos = set()
-    with open(htmlfile, 'r') as f:
-        for line in f:
-            m = nat_iso_regex.search(line)
-            if m is not None:
-                nat_isos.add(nucname.zzaaam(m.group(1)))
-    return nat_isos
 
 
 def grab_kaeri_atomic_abund(build_dir=""):
@@ -216,7 +204,7 @@ def make_atomic_weight_table(nuc_data, build_dir=""):
 
 
 def make_atomic_weight(nuc_data, build_dir):
-    with tb.openFile(nuc_data, 'a') as f:
+    with tb.openFile(nuc_data, 'r') as f:
         if hasattr(f.root, 'atomic_weight'):
             return 
 

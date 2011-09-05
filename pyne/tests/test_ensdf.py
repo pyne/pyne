@@ -7,7 +7,7 @@ import numpy as np
 from nose.tools import assert_equal, assert_not_equal, assert_raises, raises, assert_in
 
 from pyne import ensdf
-from pyne.utils import time_conversion
+from pyne.utils import to_sec
 
 ensdf3_sample = """\
   3H     ADOPTED LEVELS                1987TI07                  87NP     200007
@@ -105,7 +105,7 @@ def test_half_life():
 
     hl = ensdf.half_life(f)
 
-    assert_equal(hl, [(10030, 0.0, 20030, time_conversion(12.32, 'Y'), 1.0),
+    assert_equal(hl, [(10030, 0.0, 20030, to_sec(12.32, 'Y'), 1.0),
                       (20030, 0.0, 20030, np.inf, 1.0),
                       (20030, 0.0, 20030, np.inf, 1.0),
                      ])
