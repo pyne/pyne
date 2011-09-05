@@ -7,7 +7,7 @@ from nose.tools import assert_equal, assert_not_equal, assert_raises, raises, \
     assert_almost_equal, assert_true, assert_false, assert_in
 
 import os
-from pyne.material import Material
+from pyne.material import Material, from_atom_frac, load_from_hdf5, load_from_text
 import numpy  as np
 import tables as tb
 
@@ -363,7 +363,7 @@ def test_to_atom_frac():
     assert_equal(mat.molecular_weight(), 18.01056468403)    
 
 
-def test_from_atom_frac():
+def test_from_atom_frac_meth():
     h2o = {10010: 2.0, 80160: 1.0}
     mat = Material()
     mat.from_atom_frac(h2o)
@@ -723,6 +723,74 @@ def test_iter():
     assert_equal(set(mat.keys()), keys)
     assert_equal(set(mat.values()), values)
     assert_equal(set(mat.items()), items)
+
+
+
+# 
+# test material generation functions
+#
+
+def test_from_atom_frac_func():
+    h2o = {10010: 2.0, 80160: 1.0}
+    mat = from_atom_frac(h2o)
+    assert_equal(mat.atoms_per_mol, 3.0)
+    assert_equal(mat.comp[10010], 0.11191487328808077)
+    assert_equal(mat.comp[80160], 0.8880851267119192)
+    assert_equal(mat.mass, 18.01056468403)    
+    assert_equal(mat.molecular_weight(), 18.01056468403)    
+
+    h2 = Material({10010: 1.0}, atoms_per_mol=2.0)
+    h2o = {'O16': 1.0, h2: 1.0}
+    mat = from_atom_frac(h2o)
+    assert_equal(mat.atoms_per_mol, 3.0)
+    assert_equal(mat.comp[10010], 0.11191487328808077)
+    assert_equal(mat.comp[80160], 0.8880851267119192)
+    assert_equal(mat.molecular_weight(), 18.01056468403)    
+
+    ihm = from_atom_frac({922350: 0.5, 922380: 0.5}, name='IHM')
+    uox = {ihm: 1.0, 'O16': 2.0}
+    mat = from_atom_frac(uox)
+    assert_equal(mat.atoms_per_mol, 3.0)
+    assert_almost_equal(mat.comp[80160], 0.11912625316479536, 16)
+    assert_almost_equal(mat.comp[922350], 0.43763757948940346, 15)
+    assert_almost_equal(mat.comp[922380], 0.44323616734580107, 15)
+    assert_almost_equal(mat.molecular_weight()/268.53718965614, 1.0, 15)
+
+
+
+def test_load_from_hdf5_func():
+    mat = load_from_hdf5("mat.h5", "/mat")
+    assert_equal(mat.mass, 0.0)
+    assert_equal(mat.comp, {922350: 0.0, 942390: 0.0})
+
+    mat = load_from_hdf5("mat.h5", "/mat", 0)
+    assert_equal(mat.mass, 1.0)
+    assert_equal(mat.comp, {922350: 1.0, 942390: 0.0})
+
+    mat = load_from_hdf5("mat.h5", "/mat", 1)
+    assert_equal(mat.mass, 0.5)
+    assert_equal(mat.comp, {922350: 0.75, 942390: 0.25})
+
+    mat = load_from_hdf5("mat.h5", "/mat", 2)
+    assert_equal(mat.mass, 0.0)
+    assert_equal(mat.comp, {922350: 0.0, 942390: 0.0})
+
+    mat = load_from_hdf5("mat.h5", "/mat", -1)
+    assert_equal(mat.mass, 0.0)
+    assert_equal(mat.comp, {922350: 0.0, 942390: 0.0})
+
+    mat = load_from_hdf5("mat.h5", "/mat", -2)
+    assert_equal(mat.mass, 0.5)
+    assert_equal(mat.comp, {922350: 0.75, 942390: 0.25})
+
+    mat = load_from_hdf5("mat.h5", "/mat", -3)
+    assert_equal(mat.mass, 1.0)
+    assert_equal(mat.comp, {922350: 1.0, 942390: 0.0})
+
+
+def test_load_from_text_func():
+    mat= load_from_text("mat.txt")
+    assert_equal(mat.comp, {922350: 0.05, 922380: 0.95})
 
 
 #
