@@ -3,7 +3,7 @@ import re
 import numpy as np
 
 from pyne import nucname
-from pyne.utils import time_conversion
+from pyne.utils import to_sec
 
 
 _level_regex = re.compile('([ \d]{3}[ A-Za-z]{2})  L (.{10}).{20}(.{10}).{28}([ M])([ 1-9])')
@@ -112,7 +112,7 @@ def half_life(ensdf):
                 time_unit = [s.strip() for s in time_info.split()]
                 if 2 == len(time_unit):
                     hl, unit = time_unit
-                    half_life = time_conversion(float(hl), unit)
+                    half_life = to_sec(float(hl), unit)
             continue
 
         m = _level_cont_regex.match(line)

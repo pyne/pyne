@@ -45,7 +45,53 @@ time_conv_dict = {
 		  'mev': 1e-15 * 7.6e-8 / 6.03,
 		  }
 
-def time_conversion(input_time, units):
+def to_sec(input_time, units):
+    """Converts a time with units to seconds.
+
+    Parameters
+    ----------
+    input_time : number
+        Time value in [units].
+    units : str
+        Units flag, eg 'min', 'ms', 'days', or even 'MeV'.
+
+    Returns
+    -------
+    sec_time : float
+        Time value in [sec]. 
+    """
     sec_time = input_time * time_conv_dict[units.lower()]
     return sec_time
+
+
+
+
+barn_conv_dict = {
+    'mb': 1E-3,
+    'ub': 1E-6,
+    'microbarn': 1E-6,
+    'b': 1.0,
+    'barn': 1.0,
+    'barns': 1.0,
+    'kb': 1E+3,
+    'kilobarn': 1E+3,
+    }
     
+
+def to_barns(xs, units):
+    """Converts a cross section with units to barns.
+
+    Parameters
+    ----------
+    xs : number
+        Cross section value in [units].
+    units : str
+        Units flag, eg 'b', 'microbarn'.
+
+    Returns
+    -------
+    barn_xs : float
+        Cross section value in [barns].
+    """
+    barn_xs = xs * barn_conv_dict[units.lower()]
+    return barn_xs
