@@ -32,9 +32,24 @@ def grab_kaeri_nuclide(nuc, build_dir="", n=None):
 
     # Get the url 
     req = urllib2.Request(kaeri_url, headers={'User-Agent': 'Mozilla/5.0'})
-    hdl = urllib2.urlopen(req)
+    hdl = urllib2.urlopen(req, timeout=30.0)
+    i = 1
+
+    # try reading in the data until it works or ten times
+    read_in = False
+    while (not read_in) and (i <= 10):
+        try:
+            kaeri_hmtl = hdl.read()
+            read_in = True
+        except urllib2.URLError:
+            hdl.close()
+            i += 1
+            print "    getting {0} and placing in {1}, attempt {2}".format(nuc, filename, i)
+            hdl = urllib2.urlopen(req, timeout=30.0)
+
+    # Write out to the file    
     with open(filename, 'w') as f:
-        f.write(hdl.read())
+        f.write(kaeri_html)
 
 nat_iso_regex = re.compile('.*?/cgi-bin/nuclide[?]nuc=([A-Za-z]{1,2}\d{1,3}).*?[(].*?[)]')
 
