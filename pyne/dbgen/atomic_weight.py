@@ -204,9 +204,10 @@ def make_atomic_weight_table(nuc_data, build_dir=""):
 
 
 def make_atomic_weight(nuc_data, build_dir):
-    with tb.openFile(nuc_data, 'r') as f:
-        if hasattr(f.root, 'atomic_weight'):
-            return 
+    if os.path.exists(nuc_data):
+        with tb.openFile(nuc_data, 'r') as f:
+            if hasattr(f.root, 'atomic_weight'):
+                return 
 
     # First grab the atomic abundance data
     print "Grabing the atomic abundance from KAERI"
