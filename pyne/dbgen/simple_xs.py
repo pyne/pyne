@@ -38,7 +38,7 @@ def grab_kaeri_simple_xs(build_dir=""):
         all_nuclides = all_nuclides | parse_for_all_isotopes(os.path.join(build_dir, htmlfile))
 
     # Grab nuclide XS summary files
-    for nuc in all_nuclides:
+    for nuc in sorted(all_nuclides):
         nuc = nucname.name(nuc)
         htmlfile = nuc + '_2.html'
         if htmlfile not in already_grabbed:
@@ -130,14 +130,14 @@ def parse_simple_xs(build_dir=""):
         htmlfile = element + '.html'
         all_nuclides = all_nuclides | parse_for_all_isotopes(os.path.join(build_dir, htmlfile))
 
+    all_nuclides = sorted([nucname.zzaaam(nuc) for nuc in all_nuclides])
 
     energy_tables = {eng: np.zeros(len(all_nuclides), dtype=simple_xs_dtype) for eng in simple_xs_energy.keys()}
 
     # Loop through species
-    for i, nuc in enumerate(nuclist):
-        nuc_zz = nucname.zzaaam(nuc)
+    for i, nuc_zz in enumerate(all_nuclides):
         nuc_name = nucname.name(nuc_zz)
-        filename = os.path.join(build_dir, nuc + '_2.html')
+        filename = os.path.join(build_dir, nuc_name + '_2.html')
 
         # Loop through all energy types
         for eng in simple_xs_energy:
@@ -194,7 +194,7 @@ def make_simple_xs_tables(nuc_data, build_dir=""):
 
     # Create tables for every energy 
     for eng, eng_flag in simple_xs_energy.items():
-        simple_xs_table = db.createTable(simple_xs_group, eng, simple_xs_dtype, "{0} [barns]".format(eng_flag.capitalize())
+        simple_xs_table = db.createTable(simple_xs_group, eng, simple_xs_dtype, "{0} [barns]".format(eng_flag.capitalize()))
         simple_xs_table.append(simple_xs_tables[eng])
         simple_xs_table.flush()
 
