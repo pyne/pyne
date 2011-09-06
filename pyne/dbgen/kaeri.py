@@ -39,7 +39,7 @@ def grab_kaeri_nuclide(nuc, build_dir="", n=None):
     read_in = False
     while (not read_in) and (i <= 10):
         try:
-            kaeri_hmtl = hdl.read()
+            kaeri_html = hdl.read()
             read_in = True
         except urllib2.URLError:
             hdl.close()
