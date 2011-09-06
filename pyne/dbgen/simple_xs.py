@@ -146,10 +146,14 @@ def parse_simple_xs(build_dir=""):
 
             # Loop trhough reactions
             for chan in simple_xs_channels:
-                energy_tables[eng]['nuc_name'][i] = get_xs_from_file(filename, eng, chan)
+                energy_tables[eng][chan][i] = get_xs_from_file(filename, eng, chan)
 
-    # Calculate some xs
     for eng in simple_xs_energy:
+        # Store only non-trivial entries
+        mask = (energy_tables[eng][simple_xs_channels.keys()] != np.zeros(1, dtype=simple_xs_dtype)[simple_xs_channels.keys()])
+        energy_tables[eng] = energy_tables[eng][mask]
+
+        # Calculate some xs
         energy_tables[eng]['sigma_s'] = energy_tables[eng]['sigma_e'] + energy_tables[eng]['sigma_i']
 
         energy_tables[eng]['sigma_a'] = energy_tables[eng]['sigma_gamma'] + \
@@ -182,7 +186,7 @@ def make_simple_xs_tables(nuc_data, build_dir=""):
     simple_xs_tables = parse_simple_xs(build_dir)
 
     # Open the HDF5 File
-    db = tb.openFile(h5_file, 'a')
+    db = tb.openFile(nuc_data, 'a')
 
     # Create neutron group
     if not hasattr(db.root, 'neutron'):
@@ -194,7 +198,9 @@ def make_simple_xs_tables(nuc_data, build_dir=""):
 
     # Create tables for every energy 
     for eng, eng_flag in simple_xs_energy.items():
-        simple_xs_table = db.createTable(simple_xs_group, eng, simple_xs_dtype, "{0} [barns]".format(eng_flag.capitalize()))
+        simple_xs_table = db.createTable(simple_xs_group, eng, simple_xs_dtype, 
+                                         "{0} [barns]".format(eng_flag.capitalize()), 
+                                         expectedrows=len(simple_xs_tables[eng]))
         simple_xs_table.append(simple_xs_tables[eng])
         simple_xs_table.flush()
 
