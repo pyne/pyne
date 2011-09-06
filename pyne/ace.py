@@ -107,35 +107,7 @@ class Library(object):
             table.XSS.insert(0, None)
 
             # Read all data blocks
-            if type(table) is NeutronTable:
-                table._read_esz()
-                table._read_nu()
-                table._read_mtr()
-                table._read_lqr()
-                table._read_tyr()
-                table._read_lsig()
-                table._read_sig()
-                table._read_land()
-                table._read_and()
-                table._read_ldlw()
-                table._read_dlw()
-                # Read GPD block
-                table._read_mtrp()
-                table._read_lsigp()
-                table._read_sigp()
-                # Read LANDP block
-                # Read ANDP block
-                # Read LDLWP block
-                # Read DLWP block
-                # Read YP block
-                # Read FIS block
-                table._read_fis()
-                table._read_unr()
-            elif type(table) is SabTable:
-                table._read_itie()
-                table._read_itce()
-                table._read_itxe()
-                table._read_itca()
+            table._read_all()
 
             lines = lines[12+n_lines:]
             if not lines:
@@ -145,9 +117,19 @@ class Library(object):
         for table in self.tables:
             if table.name.startswith(name):
                 return table
+
+
+class AceTable(object):
+    def __init__(self, name, awr, temp):
+        self.name = name
+        self.awr = awr
+        self.temp = temp
+
+    def _read_all(self):
+        raise NotImplementedError
         
         
-class NeutronTable(object):
+class NeutronTable(AceTable):
     """A NeutronTable object contains continuous-energy neutron interaction data
     read from an ACE-formatted Type I table.
 
@@ -163,15 +145,38 @@ class NeutronTable(object):
     """
 
     def __init__(self, name, awr, temp):
-        self.name = name
-        self.awr = awr
-        self.temp = temp
+        super(NeutronTable, self).__init__(name, awr, temp)
 
     def __repr__(self):
         if hasattr(self, 'name'):
             return "<ACE Continuous-E Neutron Table: {0}>".format(self.name)
         else:
             return "<ACE Continuous-E Neutron Table>"
+
+    def _read_all(self):
+        self._read_esz()
+        self._read_nu()
+        self._read_mtr()
+        self._read_lqr()
+        self._read_tyr()
+        self._read_lsig()
+        self._read_sig()
+        self._read_land()
+        self._read_and()
+        self._read_ldlw()
+        self._read_dlw()
+        # Read GPD block
+        self._read_mtrp()
+        self._read_lsigp()
+        self._read_sigp()
+        # Read LANDP block
+        # Read ANDP block
+        # Read LDLWP block
+        # Read DLWP block
+        # Read YP block
+        # Read FIS block
+        self._read_fis()
+        self._read_unr()
 
     def _read_esz(self):
         """
@@ -890,12 +895,16 @@ class NeutronTable(object):
             yield r
 
 
-class SabTable(object):
+class SabTable(AceTable):
 
     def __init__(self, name, awr, temp):
-        self.name = name
-        self.awr = awr
-        self.temp = temp
+        super(SabTable, self).__init__(name, awr, temp)
+
+    def _read_all(self):
+        self._read_itie()
+        self._read_itce()
+        self._read_itxe()
+        self._read_itca()
 
     def __repr__(self):
         if hasattr(self, 'name'):
@@ -1112,12 +1121,10 @@ class Reaction(object):
             return "<ACE Reaction: Unknown MT={0}>".format(self.MT)
 
 
-class DosimetryTable(object):
+class DosimetryTable(AceTable):
 
     def __init__(self, name, awr, temp):
-        self.name = name
-        self.awr = awr
-        self.temp = temp
+        super(DosimetryTable, self).__init__(name, awr, temp)
 
     def __repr__(self):
         if hasattr(self, 'name'):
@@ -1126,12 +1133,10 @@ class DosimetryTable(object):
             return "<ACE Dosimetry Table>"
         
 
-class NeutronDiscreteTable(object):
+class NeutronDiscreteTable(AceTable):
 
     def __init__(self, name, awr, temp):
-        self.name = name
-        self.awr = awr
-        self.temp = temp
+        super(NeutronDiscreteTable, self).__init__(name, awr, temp)
 
     def __repr__(self):
         if hasattr(self, 'name'):
@@ -1140,12 +1145,10 @@ class NeutronDiscreteTable(object):
             return "<ACE Discrete-E Neutron Table>"
         
 
-class NeutronMGTable(object):
+class NeutronMGTable(AceTable):
 
     def __init__(self, name, awr, temp):
-        self.name = name
-        self.awr = awr
-        self.temp = temp
+        super(NeutronMGTable, self).__init__(name, awr, temp)
 
     def __repr__(self):
         if hasattr(self, 'name'):
@@ -1154,12 +1157,10 @@ class NeutronMGTable(object):
             return "<ACE Multigroup Neutron Table>"
         
 
-class PhotoatomicTable(object):
+class PhotoatomicTable(AceTable):
 
     def __init__(self, name, awr, temp):
-        self.name = name
-        self.awr = awr
-        self.temp = temp
+        super(PhotoatomicTable, self).__init__(name, awr, temp)
 
     def __repr__(self):
         if hasattr(self, 'name'):
@@ -1168,12 +1169,10 @@ class PhotoatomicTable(object):
             return "<ACE Continuous-E Photoatomic Table>"
         
 
-class PhotoatomicMGTable(object):
+class PhotoatomicMGTable(AceTable):
 
     def __init__(self, name, awr, temp):
-        self.name = name
-        self.awr = awr
-        self.temp = temp
+        super(PhotoatomicMGTable, self).__init__(name, awr, temp)
 
     def __repr__(self):
         if hasattr(self, 'name'):
@@ -1182,12 +1181,10 @@ class PhotoatomicMGTable(object):
             return "<ACE Multigroup Photoatomic Table>"
         
 
-class ElectronTable(object):
+class ElectronTable(AceTable):
 
     def __init__(self, name, awr, temp):
-        self.name = name
-        self.awr = awr
-        self.temp = temp
+        super(ElectronTable, self).__init__(name, awr, temp)
 
     def __repr__(self):
         if hasattr(self, 'name'):
@@ -1196,12 +1193,10 @@ class ElectronTable(object):
             return "<ACE Electron Table>"
         
 
-class PhotonuclearTable(object):
+class PhotonuclearTable(AceTable):
 
     def __init__(self, name, awr, temp):
-        self.name = name
-        self.awr = awr
-        self.temp = temp
+        super(PhotonuclearTable, self).__init__(name, awr, temp)
 
     def __repr__(self):
         if hasattr(self, 'name'):
