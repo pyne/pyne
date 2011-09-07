@@ -13,6 +13,7 @@ The following modules and sub-packages are discussed:
     data
     material
     cccc
+    ace
     ensdf
     origen22
     utils
