@@ -50,7 +50,7 @@ for i in range(11):
     # Run and parse origen output
     rtn = check_call(['o2_therm_linux.exe'])
     tape6 = origen22.parse_tape6('TAPE6.OUT')
-    h2_concentration.append(tape6['table_5']['summary']['data'][10020][0][-1])
+    h2_concentration.append(tape6['table_5']['summary']['activation_products']['H2'][-1])
 
 print 
 print "H2 Concentration: ", h2_concentration
