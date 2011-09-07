@@ -1,17 +1,28 @@
 #!/usr/bin/env python
 
-from matplotlib.pyplot import *
-from numpy import zeros, copy, meshgrid, interp, linspace, pi, arccos, concatenate
-from bisect import bisect_right
-
 """
-This module is for reading ACE-formatted files. The ACE format is "A Compact
-ENDF" format that originated from work on MCNP. It is used in a number of other
+This module is for reading ACE-format cross sections. ACE stands for "A Compact
+ENDF" format and originated from work on MCNP_. It is used in a number of other
 Monte Carlo particle transport codes.
 
-For more information on this module, contact Paul Romano <romano7@gmail.com>.
+ACE-format cross sections are typically generated from ENDF_ files through a
+cross section processing program like NJOY_. The ENDF data consists of tabulated
+thermal data, ENDF/B resonance parameters, distribution parameters in the
+unresolved resonance region, and tabulated data in the fast region. After the
+ENDF data has been reconstructed and Doppler-broadened, the ACER module
+generates ACE-format cross sections.
+
+.. _MCNP: http://mcnp-green.lanl.gov/
+.. _NJOY: http://t2.lanl.gov/codes/codes.html
+.. _ENDF: http://www.nndc.bnl.gov/endf
+
+.. moduleauthor:: Paul Romano <romano7@gmail.com>
 
 """
+
+import matplotlib.pyplot as pyplot
+from numpy import zeros, copy, meshgrid, interp, linspace, pi, arccos, concatenate
+from bisect import bisect_right
 
 class Library(object):
     """A Library objects represents an ACE-formatted file which may contain
@@ -113,13 +124,24 @@ class Library(object):
             if not lines:
                 return
 
-    def find_table(self,name):
+    def find_table(self, name):
+        """Returns a cross-section table with a given name.
+
+        Parameters
+        ----------
+        name : str
+            Name of the cross-section table, e.g. 92235.70c
+
+        """
+
         for table in self.tables:
             if table.name.startswith(name):
                 return table
 
 
 class AceTable(object):
+    """Abstract superclass of all other classes for cross section tables."""
+
     def __init__(self, name, awr, temp):
         self.name = name
         self.awr = awr
@@ -131,7 +153,9 @@ class AceTable(object):
         
 class NeutronTable(AceTable):
     """A NeutronTable object contains continuous-energy neutron interaction data
-    read from an ACE-formatted Type I table.
+    read from an ACE-formatted Type I table. These objects are not normally
+    instantiated by the user but rather created when reading data using a
+    Library object and stored within the ``tables`` attribute of a Library object.
 
     Parameters
     ----------
@@ -860,20 +884,20 @@ class NeutronTable(AceTable):
 
     def plot(self, MT = 1):
         if MT == 1:
-            loglog(self.energy, self.sigma_t, label='(n,total)')
+            pyplot.loglog(self.energy, self.sigma_t, label='(n,total)')
         elif MT == 27:
-            loglog(self.energy, self.sigma_a, label='(n,abs)')
+            pyplot.loglog(self.energy, self.sigma_a, label='(n,abs)')
         else:
             for r in self:
                 if r.MT == MT:
-                    loglog(self.energy[r.IE-1:], r.sigma,
-                           label = reaction_name(MT))
+                    pyplot.loglog(self.energy[r.IE-1:], r.sigma,
+                                  label = reaction_name(MT))
 
         # Plot configuration
-        xlabel("Energy (MeV)")
-        ylabel("Cross section (barns)")
-        grid(True)
-        legend()
+        pyplot.xlabel("Energy (MeV)")
+        pyplot.ylabel("Cross section (barns)")
+        pyplot.grid(True)
+        pyplot.legend()
 
     def plot_sum(self):
         sumSigma = copy(self.sigma_el)
@@ -882,8 +906,8 @@ class NeutronTable(AceTable):
                 continue
             for i, sig in enumerate(r.sigma):
                 sumSigma[r.IE-1+i] += sig
-        loglog(self.energy, self.sigma_t)
-        loglog(self.energy, sumSigma)
+        pyplot.loglog(self.energy, self.sigma_t)
+        pyplot.loglog(self.energy, sumSigma)
 
     def find_reaction(self, MT):
         for r in self.reactions:
@@ -1049,18 +1073,18 @@ class Reaction(object):
 
     def plot(self):
         if self.MT == 1:
-            loglog(self.table.energy, self.sigma, label='(n,total)')
+            pyplot.loglog(self.table.energy, self.sigma, label='(n,total)')
         elif self.MT == 27:
-            loglog(self.table.energy, self.sigma, label='(n,abs)')
+            pyplot.loglog(self.table.energy, self.sigma, label='(n,abs)')
         else:
-            loglog(self.table.energy[self.IE-1:], self.sigma,
-                   label = reaction_name(self.MT))
-
+            pyplot.loglog(self.table.energy[self.IE-1:], self.sigma,
+                          label = reaction_name(self.MT))
+            
         # Plot configuration
-        xlabel("Energy (MeV)")
-        ylabel("Cross section (barns)")
-        grid(True)
-        legend()
+        pyplot.xlabel("Energy (MeV)")
+        pyplot.ylabel("Cross section (barns)")
+        pyplot.grid(True)
+        pyplot.legend()
 
     def broaden(self, T_high):
         pass        
@@ -1077,7 +1101,7 @@ class Reaction(object):
         index = bisect_right(self.ang_energy_in, E_in)
 
         # plot distribution
-        plot(self.ang_cos[index],self.ang_pdf[index])
+        pyplot.plot(self.ang_cos[index],self.ang_pdf[index])
 
     def plot_angle_polar(self, E_in):
         """
@@ -1099,7 +1123,7 @@ class Reaction(object):
         r = concatenate((r,r[::-1]))
 
         # plot angle distribution
-        polar(theta, r, label='E = {0} MeV'.format(E_in))
+        pyplot.polar(theta, r, label='E = {0} MeV'.format(E_in))
 
     def plot_energy_dist(self, E_in):
         """
@@ -1111,7 +1135,7 @@ class Reaction(object):
         index = bisect_right(self.e_dist_energy_in, E_in)
 
         # plot energy distribution
-        semilogx(self.e_dist_energy_out[index], self.e_dist_pdf[index])
+        pyplot.semilogx(self.e_dist_energy_out[index], self.e_dist_pdf[index])
 
     def __repr__(self):
         try:
