@@ -1,17 +1,28 @@
 #!/usr/bin/env python
 
-from matplotlib.pyplot import *
-from numpy import zeros, copy, meshgrid, interp, linspace, pi, arccos, concatenate
-from bisect import bisect_right
-
 """
-This module is for reading ACE-formatted files. The ACE format is "A Compact
-ENDF" format that originated from work on MCNP. It is used in a number of other
+This module is for reading ACE-format cross sections. ACE stands for "A Compact
+ENDF" format and originated from work on MCNP_. It is used in a number of other
 Monte Carlo particle transport codes.
 
-For more information on this module, contact Paul Romano <romano7@gmail.com>.
+ACE-format cross sections are typically generated from ENDF_ files through a
+cross section processing program like NJOY_. The ENDF data consists of tabulated
+thermal data, ENDF/B resonance parameters, distribution parameters in the
+unresolved resonance region, and tabulated data in the fast region. After the
+ENDF data has been reconstructed and Doppler-broadened, the ACER module
+generates ACE-format cross sections.
+
+.. _MCNP: http://mcnp-green.lanl.gov/
+.. _NJOY: http://t2.lanl.gov/codes/codes.html
+.. _ENDF: http://www.nndc.bnl.gov/endf
+
+.. moduleauthor:: Paul Romano <romano7@gmail.com>
 
 """
+
+import matplotlib.pyplot as pyplot
+from numpy import zeros, copy, meshgrid, interp, linspace, pi, arccos, concatenate
+from bisect import bisect_right
 
 class Library(object):
     """A Library objects represents an ACE-formatted file which may contain
@@ -107,49 +118,44 @@ class Library(object):
             table.XSS.insert(0, None)
 
             # Read all data blocks
-            if type(table) is NeutronTable:
-                table._read_esz()
-                table._read_nu()
-                table._read_mtr()
-                table._read_lqr()
-                table._read_tyr()
-                table._read_lsig()
-                table._read_sig()
-                table._read_land()
-                table._read_and()
-                table._read_ldlw()
-                table._read_dlw()
-                # Read GPD block
-                table._read_mtrp()
-                table._read_lsigp()
-                table._read_sigp()
-                # Read LANDP block
-                # Read ANDP block
-                # Read LDLWP block
-                # Read DLWP block
-                # Read YP block
-                # Read FIS block
-                table._read_fis()
-                table._read_unr()
-            elif type(table) is SabTable:
-                table._read_itie()
-                table._read_itce()
-                table._read_itxe()
-                table._read_itca()
+            table._read_all()
 
             lines = lines[12+n_lines:]
             if not lines:
                 return
 
-    def find_table(self,name):
+    def find_table(self, name):
+        """Returns a cross-section table with a given name.
+
+        Parameters
+        ----------
+        name : str
+            Name of the cross-section table, e.g. 92235.70c
+
+        """
+
         for table in self.tables:
             if table.name.startswith(name):
                 return table
+
+
+class AceTable(object):
+    """Abstract superclass of all other classes for cross section tables."""
+
+    def __init__(self, name, awr, temp):
+        self.name = name
+        self.awr = awr
+        self.temp = temp
+
+    def _read_all(self):
+        raise NotImplementedError
         
         
-class NeutronTable(object):
+class NeutronTable(AceTable):
     """A NeutronTable object contains continuous-energy neutron interaction data
-    read from an ACE-formatted Type I table.
+    read from an ACE-formatted Type I table. These objects are not normally
+    instantiated by the user but rather created when reading data using a
+    Library object and stored within the ``tables`` attribute of a Library object.
 
     Parameters
     ----------
@@ -163,15 +169,38 @@ class NeutronTable(object):
     """
 
     def __init__(self, name, awr, temp):
-        self.name = name
-        self.awr = awr
-        self.temp = temp
+        super(NeutronTable, self).__init__(name, awr, temp)
 
     def __repr__(self):
         if hasattr(self, 'name'):
             return "<ACE Continuous-E Neutron Table: {0}>".format(self.name)
         else:
             return "<ACE Continuous-E Neutron Table>"
+
+    def _read_all(self):
+        self._read_esz()
+        self._read_nu()
+        self._read_mtr()
+        self._read_lqr()
+        self._read_tyr()
+        self._read_lsig()
+        self._read_sig()
+        self._read_land()
+        self._read_and()
+        self._read_ldlw()
+        self._read_dlw()
+        # Read GPD block
+        self._read_mtrp()
+        self._read_lsigp()
+        self._read_sigp()
+        # Read LANDP block
+        # Read ANDP block
+        # Read LDLWP block
+        # Read DLWP block
+        # Read YP block
+        # Read FIS block
+        self._read_fis()
+        self._read_unr()
 
     def _read_esz(self):
         """
@@ -855,20 +884,20 @@ class NeutronTable(object):
 
     def plot(self, MT = 1):
         if MT == 1:
-            loglog(self.energy, self.sigma_t, label='(n,total)')
+            pyplot.loglog(self.energy, self.sigma_t, label='(n,total)')
         elif MT == 27:
-            loglog(self.energy, self.sigma_a, label='(n,abs)')
+            pyplot.loglog(self.energy, self.sigma_a, label='(n,abs)')
         else:
             for r in self:
                 if r.MT == MT:
-                    loglog(self.energy[r.IE-1:], r.sigma,
-                           label = reaction_name(MT))
+                    pyplot.loglog(self.energy[r.IE-1:], r.sigma,
+                                  label = reaction_name(MT))
 
         # Plot configuration
-        xlabel("Energy (MeV)")
-        ylabel("Cross section (barns)")
-        grid(True)
-        legend()
+        pyplot.xlabel("Energy (MeV)")
+        pyplot.ylabel("Cross section (barns)")
+        pyplot.grid(True)
+        pyplot.legend()
 
     def plot_sum(self):
         sumSigma = copy(self.sigma_el)
@@ -877,8 +906,8 @@ class NeutronTable(object):
                 continue
             for i, sig in enumerate(r.sigma):
                 sumSigma[r.IE-1+i] += sig
-        loglog(self.energy, self.sigma_t)
-        loglog(self.energy, sumSigma)
+        pyplot.loglog(self.energy, self.sigma_t)
+        pyplot.loglog(self.energy, sumSigma)
 
     def find_reaction(self, MT):
         for r in self.reactions:
@@ -890,12 +919,16 @@ class NeutronTable(object):
             yield r
 
 
-class SabTable(object):
+class SabTable(AceTable):
 
     def __init__(self, name, awr, temp):
-        self.name = name
-        self.awr = awr
-        self.temp = temp
+        super(SabTable, self).__init__(name, awr, temp)
+
+    def _read_all(self):
+        self._read_itie()
+        self._read_itce()
+        self._read_itxe()
+        self._read_itca()
 
     def __repr__(self):
         if hasattr(self, 'name'):
@@ -1040,18 +1073,18 @@ class Reaction(object):
 
     def plot(self):
         if self.MT == 1:
-            loglog(self.table.energy, self.sigma, label='(n,total)')
+            pyplot.loglog(self.table.energy, self.sigma, label='(n,total)')
         elif self.MT == 27:
-            loglog(self.table.energy, self.sigma, label='(n,abs)')
+            pyplot.loglog(self.table.energy, self.sigma, label='(n,abs)')
         else:
-            loglog(self.table.energy[self.IE-1:], self.sigma,
-                   label = reaction_name(self.MT))
-
+            pyplot.loglog(self.table.energy[self.IE-1:], self.sigma,
+                          label = reaction_name(self.MT))
+            
         # Plot configuration
-        xlabel("Energy (MeV)")
-        ylabel("Cross section (barns)")
-        grid(True)
-        legend()
+        pyplot.xlabel("Energy (MeV)")
+        pyplot.ylabel("Cross section (barns)")
+        pyplot.grid(True)
+        pyplot.legend()
 
     def broaden(self, T_high):
         pass        
@@ -1068,7 +1101,7 @@ class Reaction(object):
         index = bisect_right(self.ang_energy_in, E_in)
 
         # plot distribution
-        plot(self.ang_cos[index],self.ang_pdf[index])
+        pyplot.plot(self.ang_cos[index],self.ang_pdf[index])
 
     def plot_angle_polar(self, E_in):
         """
@@ -1090,7 +1123,7 @@ class Reaction(object):
         r = concatenate((r,r[::-1]))
 
         # plot angle distribution
-        polar(theta, r, label='E = {0} MeV'.format(E_in))
+        pyplot.polar(theta, r, label='E = {0} MeV'.format(E_in))
 
     def plot_energy_dist(self, E_in):
         """
@@ -1102,7 +1135,7 @@ class Reaction(object):
         index = bisect_right(self.e_dist_energy_in, E_in)
 
         # plot energy distribution
-        semilogx(self.e_dist_energy_out[index], self.e_dist_pdf[index])
+        pyplot.semilogx(self.e_dist_energy_out[index], self.e_dist_pdf[index])
 
     def __repr__(self):
         try:
@@ -1112,12 +1145,10 @@ class Reaction(object):
             return "<ACE Reaction: Unknown MT={0}>".format(self.MT)
 
 
-class DosimetryTable(object):
+class DosimetryTable(AceTable):
 
     def __init__(self, name, awr, temp):
-        self.name = name
-        self.awr = awr
-        self.temp = temp
+        super(DosimetryTable, self).__init__(name, awr, temp)
 
     def __repr__(self):
         if hasattr(self, 'name'):
@@ -1126,12 +1157,10 @@ class DosimetryTable(object):
             return "<ACE Dosimetry Table>"
         
 
-class NeutronDiscreteTable(object):
+class NeutronDiscreteTable(AceTable):
 
     def __init__(self, name, awr, temp):
-        self.name = name
-        self.awr = awr
-        self.temp = temp
+        super(NeutronDiscreteTable, self).__init__(name, awr, temp)
 
     def __repr__(self):
         if hasattr(self, 'name'):
@@ -1140,12 +1169,10 @@ class NeutronDiscreteTable(object):
             return "<ACE Discrete-E Neutron Table>"
         
 
-class NeutronMGTable(object):
+class NeutronMGTable(AceTable):
 
     def __init__(self, name, awr, temp):
-        self.name = name
-        self.awr = awr
-        self.temp = temp
+        super(NeutronMGTable, self).__init__(name, awr, temp)
 
     def __repr__(self):
         if hasattr(self, 'name'):
@@ -1154,12 +1181,10 @@ class NeutronMGTable(object):
             return "<ACE Multigroup Neutron Table>"
         
 
-class PhotoatomicTable(object):
+class PhotoatomicTable(AceTable):
 
     def __init__(self, name, awr, temp):
-        self.name = name
-        self.awr = awr
-        self.temp = temp
+        super(PhotoatomicTable, self).__init__(name, awr, temp)
 
     def __repr__(self):
         if hasattr(self, 'name'):
@@ -1168,12 +1193,10 @@ class PhotoatomicTable(object):
             return "<ACE Continuous-E Photoatomic Table>"
         
 
-class PhotoatomicMGTable(object):
+class PhotoatomicMGTable(AceTable):
 
     def __init__(self, name, awr, temp):
-        self.name = name
-        self.awr = awr
-        self.temp = temp
+        super(PhotoatomicMGTable, self).__init__(name, awr, temp)
 
     def __repr__(self):
         if hasattr(self, 'name'):
@@ -1182,12 +1205,10 @@ class PhotoatomicMGTable(object):
             return "<ACE Multigroup Photoatomic Table>"
         
 
-class ElectronTable(object):
+class ElectronTable(AceTable):
 
     def __init__(self, name, awr, temp):
-        self.name = name
-        self.awr = awr
-        self.temp = temp
+        super(ElectronTable, self).__init__(name, awr, temp)
 
     def __repr__(self):
         if hasattr(self, 'name'):
@@ -1196,12 +1217,10 @@ class ElectronTable(object):
             return "<ACE Electron Table>"
         
 
-class PhotonuclearTable(object):
+class PhotonuclearTable(AceTable):
 
     def __init__(self, name, awr, temp):
-        self.name = name
-        self.awr = awr
-        self.temp = temp
+        super(PhotonuclearTable, self).__init__(name, awr, temp)
 
     def __repr__(self):
         if hasattr(self, 'name'):
