@@ -1,7 +1,7 @@
 .. _dev_team:
 
 =====================
-PyNE Developemnt Team
+PyNE Development Team
 =====================
 The Python for Nuclear Engineering Team includes:
 
