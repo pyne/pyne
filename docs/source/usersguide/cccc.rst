@@ -6,25 +6,7 @@ CCCC Formats
 
 .. currentmodule:: pyne.cccc
 
-The CCCC module contains a number of classes for reading various cross section,
-flux, geometry, and data files with specifications given by the Committee for
-Computer Code Coordination. The following types of files can be read using
-classes from this module: ISOTXS, DLAYXS, BRKOXS, RTFLUX, ATFLUX, RZFLUX, MATXS,
-and SPECTR.
-
-The ISOTXS reader was originally derived from Professor James Holloway's
-open-source C++ classes from the University of Michigan and later expanded by
-Nick Touran for work on his PhD thesis. DLAYXS was later added by Paul Romano.
-
-A description of several CCCC formats are available online for ISOTXS_, MATXS_,
-RTFLUX_, and RZFLUX_. Other format specifications can be found in Los Alamos
-Report LA-5324-MS_.
-    
-.. _ISOTXS: http://t2.lanl.gov/codes/transx-hyper/isotxs.html
-.. _MATXS: http://t2.lanl.gov/codes/transx-hyper/matxs.html
-.. _RTFLUX: http://t2.lanl.gov/codes/transx-hyper/rtflux.html
-.. _RZFLUX: http://t2.lanl.gov/codes/transx-hyper/rzflux.html
-.. _LA-5324-MS: http://www.osti.gov/bridge/servlets/purl/5369298-uIcX6p/
+.. automodule:: pyne.cccc
 
 For a complete specification for the classes in the ``cccc`` module, please
 refer to the Library Reference entry for :ref:`pyne_cccc`.
