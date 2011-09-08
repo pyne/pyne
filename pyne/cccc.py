@@ -16,9 +16,13 @@ RTFLUX_, and RZFLUX_. Other format specifications can be found in Los Alamos
 Report LA-5324-MS_.
     
 .. _ISOTXS: http://t2.lanl.gov/codes/transx-hyper/isotxs.html
+
 .. _MATXS: http://t2.lanl.gov/codes/transx-hyper/matxs.html
+
 .. _RTFLUX: http://t2.lanl.gov/codes/transx-hyper/rtflux.html
+
 .. _RZFLUX: http://t2.lanl.gov/codes/transx-hyper/rzflux.html
+
 .. _LA-5324-MS: http://www.osti.gov/bridge/servlets/purl/5369298-uIcX6p/
 
 """
