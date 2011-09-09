@@ -1,4 +1,5 @@
 # Cython imports
+from libcpp.utility cimport pair
 from libcpp.map cimport map as cpp_map
 from libcpp.set cimport set as cpp_set
 from libcpp.vector cimport vector as cpp_vector
@@ -677,7 +678,7 @@ cdef class _MapProxyStrInt:
 
     def __getitem__(self, key):
         cdef std.string s
-        if isinstance(key, str):
+        if isinstance(key, basestring):
             s = std.string(key)
         else:
             raise TypeError("Only string keys are valid.")
@@ -687,8 +688,19 @@ cdef class _MapProxyStrInt:
         else:
             raise KeyError
 
+    def __setitem__(self, char * key, int value):
+        cdef std.string s = std.string(key)
+        cdef pair[std.string, int] item = pair[std.string, int](s, value)
+        self.map_ptr.insert(item)
+        
+    def __delitem__(self, char * key):
+        cdef std.string s
+        if key in self:
+            s = std.string(key)
+            self.map_ptr.erase(s)
 
-class MapProxyStrInt(_MapProxyStrInt, collections.Mapping):
+
+class MapProxyStrInt(_MapProxyStrInt, collections.MutableMapping):
     def __str__(self):
         return self.__repr__()
 
@@ -762,8 +774,17 @@ cdef class _MapProxyIntStr:
         else:
             raise KeyError
 
+    def __setitem__(self, int key, char * value):
+        cdef std.string s = std.string(value)
+        cdef pair[int, std.string] item = pair[int, std.string](key, s)
+        self.map_ptr.insert(item)
+        
+    def __delitem__(self, int key):
+        if key in self:
+            self.map_ptr.erase(key)
 
-class MapProxyIntStr(_MapProxyIntStr, collections.Mapping):
+
+class MapProxyIntStr(_MapProxyIntStr, collections.MutableMapping):
     def __str__(self):
         return self.__repr__()
 
