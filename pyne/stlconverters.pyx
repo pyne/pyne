@@ -863,8 +863,16 @@ cdef class _MapProxyIntDouble:
         else:
             raise KeyError
 
+    def __setitem__(self, int key, double value):
+        cdef pair[int, double] item = pair[int, double](key, value)
+        self.map_ptr.insert(item)
+        
+    def __delitem__(self, int key):
+        if key in self:
+            self.map_ptr.erase(key)
 
-class MapProxyIntDouble(_MapProxyIntDouble, collections.Mapping):
+
+class MapProxyIntDouble(_MapProxyIntDouble, collections.MutableMapping):
     def __str__(self):
         return self.__repr__()
 
@@ -945,8 +953,20 @@ cdef class _MapProxyIntComplex:
         else:
             raise KeyError
 
+    def __setitem__(self, int key, complex value):
+        cdef extra_types.complex_t v = extra_types.complex_t()
+        v.re = value.real
+        v.im = value.imag
+        cdef pair[int, extra_types.complex_t] item = pair[int, extra_types.complex_t](key, v)
+        self.map_ptr.insert(item)
+        
+    def __delitem__(self, int key):
+        if key in self:
+            self.map_ptr.erase(key)
 
-class MapProxyIntComplex(_MapProxyIntComplex, collections.Mapping):
+
+
+class MapProxyIntComplex(_MapProxyIntComplex, collections.MutableMapping):
     def __str__(self):
         return self.__repr__()
 
