@@ -509,8 +509,20 @@ cdef class _SetProxyInt:
         si.init(self.set_ptr)
         return si
 
+    # Add mutable interface
 
-class SetProxyInt(_SetProxyInt, collections.Set):
+    def add(self, int value):
+        self.set_ptr.insert(value)
+        return 
+
+    def discard(self, int value):
+        if value in self:
+            self.set_ptr.erase(value)
+        return 
+
+
+
+class SetProxyInt(_SetProxyInt, collections.MutableSet):
     def __str__(self):
         return self.__repr__()
 
@@ -558,7 +570,7 @@ cdef class _SetProxyStr:
 
     def __contains__(self, value):
         cdef std.string s
-        if isinstance(value, str):
+        if isinstance(value, basestring):
             s = std.string(value)
         else:
             return False
@@ -575,6 +587,21 @@ cdef class _SetProxyStr:
         cdef SetIterStr si = SetIterStr()
         si.init(self.set_ptr)
         return si
+
+    # Add mutable interface
+
+    def add(self, char * value):
+        cdef std.string s
+        s = std.string(value)
+        self.set_ptr.insert(s)
+        return 
+
+    def discard(self, char * value):
+        cdef std.string s
+        if value in self:
+            s = std.string(value)
+            self.set_ptr.erase(s)
+        return 
 
 
 class SetProxyStr(_SetProxyStr, collections.Set):
