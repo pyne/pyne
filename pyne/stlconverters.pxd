@@ -1,4 +1,5 @@
 # Cython imports
+from libcpp.utility cimport pair
 from libcpp.map cimport map as cpp_map
 from libcpp.set cimport set as cpp_set
 from libcpp.vector cimport vector as cpp_vector
