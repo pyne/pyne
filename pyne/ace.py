@@ -13,7 +13,9 @@ ENDF data has been reconstructed and Doppler-broadened, the ACER module
 generates ACE-format cross sections.
 
 .. _MCNP: http://mcnp-green.lanl.gov/
+
 .. _NJOY: http://t2.lanl.gov/codes/codes.html
+
 .. _ENDF: http://www.nndc.bnl.gov/endf
 
 .. moduleauthor:: Paul Romano <romano7@gmail.com>
@@ -189,7 +191,7 @@ class NeutronTable(AceTable):
         self._read_and()
         self._read_ldlw()
         self._read_dlw()
-        # Read GPD block
+        self._read_gpd()
         self._read_mtrp()
         self._read_lsigp()
         self._read_sigp()
@@ -198,7 +200,7 @@ class NeutronTable(AceTable):
         # Read LDLWP block
         # Read DLWP block
         # Read YP block
-        # Read FIS block
+        self._read_yp()
         self._read_fis()
         self._read_unr()
 
@@ -782,6 +784,39 @@ class NeutronTable(AceTable):
                     
             # TODO: Read rest of data
 
+    def _read_gpd(self):
+        """Read total photon production cross section and secondary photon
+        energies based on older 30x20 matrix formulation.
+
+        """
+
+        JXS12 = self.JXS[12]
+
+        if JXS12 != 0:
+            # Determine number of energies
+            NE = self.NXS[3]
+
+            # Read total photon production cross section
+            self.index = JXS12
+            self.sigma_photon = self._get_float(NE)
+
+            # The following energies are the discrete incident neutron energies
+            # for which the equiprobable secondary photon outgoing energies are
+            # given
+            self.e_in_photon_equi = [1.39e-10, 1.52e-7, 4.14e-7, 1.13e-6, 3.06e-6,
+                                     8.32e-6,  2.26e-5, 6.14e-5, 1.67e-4, 4.54e-4,
+                                     1.235e-3, 3.35e-3, 9.23e-3, 2.48e-2, 6.76e-2,
+                                     0.184,    0.303,   0.500,   0.823,   1.353,
+                                     1.738,    2.232,   2.865,   3.68,    6.07,
+                                     7.79,     10.,     12.,     13.5,    15.]
+
+            # Read equiprobable outgoing photon energies
+            self.e_out_photon_equi = []
+            for i in range(30):
+                # Equiprobable outgoing photon energies for incident neutron
+                # energy i
+                self.e_out_photon_equi.append(self._get_float(20))
+
     def _read_mtrp(self):
         """
         Get the list of reaction MTs for photon-producing reactions for this
@@ -812,6 +847,16 @@ class NeutronTable(AceTable):
         JXS15 = self.JXS[15]
         for rxn in self.photonReactions:
             pass
+
+    def _read_yp(self):
+        """Read list of reactions required as photon production yield
+        multipliers.
+        """
+
+        if self.NXS[6] != 0:
+            self.index = self.JXS[20]
+            NYP = self._get_int()
+            self.MT_for_photon_yield = self._get_int(NYP)
 
     def _read_fis(self):
         """
