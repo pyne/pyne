@@ -128,9 +128,9 @@ cdef class SetIterInt(object):
     cdef cpp_set[int].iterator * iter_end
     cdef void init(SetIterInt, cpp_set[int] *)
 
-cdef class _SetProxyInt:
+cdef class _SetInt:
     cdef cpp_set[int] * set_ptr
-    cdef void init(_SetProxyInt, cpp_set[int] *)
+    cdef void init(_SetInt, cpp_set[int] *)
 
 
 # Str
@@ -139,9 +139,9 @@ cdef class SetIterStr(object):
     cdef cpp_set[std.string].iterator * iter_end
     cdef void init(SetIterStr, cpp_set[std.string] *)
 
-cdef class _SetProxyStr:
+cdef class _SetStr:
     cdef cpp_set[std.string] * set_ptr
-    cdef void init(_SetProxyStr, cpp_set[std.string] *)
+    cdef void init(_SetStr, cpp_set[std.string] *)
 
 
 #
@@ -154,9 +154,9 @@ cdef class MapIterStrInt(object):
     cdef cpp_map[std.string, int].iterator * iter_end
     cdef void init(MapIterStrInt, cpp_map[std.string, int] *)
 
-cdef class _MapProxyStrInt:
+cdef class _MapStrInt:
     cdef cpp_map[std.string, int] * map_ptr
-    cdef void init(_MapProxyStrInt, cpp_map[std.string, int] *)
+    cdef public bint _free_map
 
 
 # (Int, Str)
@@ -165,9 +165,9 @@ cdef class MapIterIntStr(object):
     cdef cpp_map[int, std.string].iterator * iter_end
     cdef void init(MapIterIntStr, cpp_map[int, std.string] *)
 
-cdef class _MapProxyIntStr:
+cdef class _MapIntStr:
     cdef cpp_map[int, std.string] * map_ptr
-    cdef void init(_MapProxyIntStr, cpp_map[int, std.string] *)
+    cdef public bint _free_map
 
 
 
@@ -177,10 +177,9 @@ cdef class MapIterIntDouble(object):
     cdef cpp_map[int, double].iterator * iter_end
     cdef void init(MapIterIntDouble, cpp_map[int, double] *)
 
-cdef class _MapProxyIntDouble:
+cdef class _MapIntDouble:
     cdef cpp_map[int, double] * map_ptr
-    cdef void init(_MapProxyIntDouble, cpp_map[int, double] *)
-    cdef void init_with_data(_MapProxyIntDouble, cpp_map[int, double])
+    cdef public bint _free_map
 
 
 # (Int, Complex)
@@ -189,8 +188,7 @@ cdef class MapIterIntComplex(object):
     cdef cpp_map[int, extra_types.complex_t].iterator * iter_end
     cdef void init(MapIterIntComplex, cpp_map[int, extra_types.complex_t] *)
 
-cdef class _MapProxyIntComplex:
+cdef class _MapIntComplex:
     cdef cpp_map[int, extra_types.complex_t] * map_ptr
-    cdef void init(_MapProxyIntComplex, cpp_map[int, extra_types.complex_t] *)
-    cdef void init_with_data(_MapProxyIntComplex, cpp_map[int, extra_types.complex_t])
+    cdef public bint _free_map
 

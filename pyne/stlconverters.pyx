@@ -486,8 +486,8 @@ cdef class SetIterInt(object):
         return pyval
 
 
-cdef class _SetProxyInt:
-    cdef void init(_SetProxyInt self, cpp_set[int] * sp):
+cdef class _SetInt:
+    cdef void init(_SetInt self, cpp_set[int] * sp):
         self.set_ptr = sp
         
     def __dealloc__(self):
@@ -523,7 +523,7 @@ cdef class _SetProxyInt:
 
 
 
-class SetProxyInt(_SetProxyInt, collections.MutableSet):
+class SetInt(_SetInt, collections.MutableSet):
     def __str__(self):
         return self.__repr__()
 
@@ -562,8 +562,8 @@ cdef class SetIterStr(object):
         return pyval
 
 
-cdef class _SetProxyStr:
-    cdef void init(_SetProxyStr self, cpp_set[std.string] * sp):
+cdef class _SetStr:
+    cdef void init(_SetStr self, cpp_set[std.string] * sp):
         self.set_ptr = sp
         
     def __dealloc__(self):
@@ -605,7 +605,7 @@ cdef class _SetProxyStr:
         return 
 
 
-class SetProxyStr(_SetProxyStr, collections.Set):
+class SetStr(_SetStr, collections.Set):
     def __str__(self):
         return self.__repr__()
 
@@ -649,12 +649,29 @@ cdef class MapIterStrInt(object):
         return pyval
 
 
-cdef class _MapProxyStrInt:
-    cdef void init(_MapProxyStrInt self, cpp_map[std.string, int] * mp):
-        self.map_ptr = mp
+cdef class _MapStrInt:
+    def __cinit__(self, new_map=True, bint free_map=True):
+        cdef std.string s
+        cdef pair[std.string, int] item
+
+        # Decide how to init map, if at all
+        if isinstance(new_map, _MapStrInt):
+            self.map_ptr = (<_MapStrInt> new_map).map_ptr
+        elif hasattr(new_map, 'items'):
+            self.map_ptr = new cpp_map[std.string, int]()
+            for key, value in new_map.items():
+                s = std.string(key)
+                item = pair[std.string, int](s, value)
+                self.map_ptr.insert(item)
+        elif bool(new_map):
+            self.map_ptr = new cpp_map[std.string, int]()
+
+        # Store free_map
+        self._free_map = free_map
         
     def __dealloc__(self):
-        del self.map_ptr
+        if self._free_map:
+            del self.map_ptr
 
     def __contains__(self, key):
         cdef std.string s
@@ -700,7 +717,19 @@ cdef class _MapProxyStrInt:
             self.map_ptr.erase(s)
 
 
-class MapProxyStrInt(_MapProxyStrInt, collections.MutableMapping):
+class MapStrInt(_MapStrInt, collections.MutableMapping):
+    """Wrapper class for C++ standard library maps of type <string, int>.
+    Provides dictionary like interface on the Python level.
+
+    Parameters
+    ----------
+    new_map : bool or dict-like
+        Boolean on whether to make a new map or not, or dict-like object
+        with keys and values which are castable to the appropriate type.
+    free_map : bool
+        Flag for whether the pointer to the C++ map should be deallocated
+        when the wrapper is dereferenced.
+    """
     def __str__(self):
         return self.__repr__()
 
@@ -741,12 +770,29 @@ cdef class MapIterIntStr(object):
         return pyval
 
 
-cdef class _MapProxyIntStr:
-    cdef void init(_MapProxyIntStr self, cpp_map[int, std.string] * mp):
-        self.map_ptr = mp
+cdef class _MapIntStr:
+    def __cinit__(self, new_map=True, bint free_map=True):
+        cdef std.string s
+        cdef pair[int, std.string] item
+
+        # Decide how to init map, if at all
+        if isinstance(new_map, _MapIntStr):
+            self.map_ptr = (<_MapIntStr> new_map).map_ptr
+        elif hasattr(new_map, 'items'):
+            self.map_ptr = new cpp_map[int, std.string]()
+            for key, value in new_map.items():
+                s = std.string(value)
+                item = pair[int, std.string](key, s)
+                self.map_ptr.insert(item)
+        elif bool(new_map):
+            self.map_ptr = new cpp_map[int, std.string]()
+
+        # Store free_map
+        self._free_map = free_map
         
     def __dealloc__(self):
-        del self.map_ptr
+        if self._free_map:
+            del self.map_ptr
 
     def __contains__(self, key):
         if not isinstance(key, int):
@@ -784,7 +830,19 @@ cdef class _MapProxyIntStr:
             self.map_ptr.erase(key)
 
 
-class MapProxyIntStr(_MapProxyIntStr, collections.MutableMapping):
+class MapIntStr(_MapIntStr, collections.MutableMapping):
+    """Wrapper class for C++ standard library maps of type <int, string>.
+    Provides dictionary like interface on the Python level.
+
+    Parameters
+    ----------
+    new_map : bool or dict-like
+        Boolean on whether to make a new map or not, or dict-like object
+        with keys and values which are castable to the appropriate type.
+    free_map : bool
+        Flag for whether the pointer to the C++ map should be deallocated
+        when the wrapper is dereferenced.
+    """
     def __str__(self):
         return self.__repr__()
 
@@ -827,15 +885,27 @@ cdef class MapIterIntDouble(object):
         return pyval
 
 
-cdef class _MapProxyIntDouble:
-    cdef void init_with_data(_MapProxyIntDouble self, cpp_map[int, double] data):
-        self.map_ptr = new cpp_map[int, double](data)
-        
-    cdef void init(_MapProxyIntDouble self, cpp_map[int, double] * mp):
-        self.map_ptr = mp
-        
+cdef class _MapIntDouble:
+    def __cinit__(self, new_map=True, bint free_map=True):
+        cdef pair[int, double] item
+
+        # Decide how to init map, if at all
+        if isinstance(new_map, _MapIntDouble):
+            self.map_ptr = (<_MapIntDouble> new_map).map_ptr
+        elif hasattr(new_map, 'items'):
+            self.map_ptr = new cpp_map[int, double]()
+            for key, value in new_map.items():
+                item = pair[int, double](key, value)
+                self.map_ptr.insert(item)
+        elif bool(new_map):
+            self.map_ptr = new cpp_map[int, double]()
+
+        # Store free_map
+        self._free_map = free_map
+
     def __dealloc__(self):
-        del self.map_ptr
+        if self._free_map:
+            del self.map_ptr
 
     def __contains__(self, key):
         if not isinstance(key, int):
@@ -872,7 +942,20 @@ cdef class _MapProxyIntDouble:
             self.map_ptr.erase(key)
 
 
-class MapProxyIntDouble(_MapProxyIntDouble, collections.MutableMapping):
+class MapIntDouble(_MapIntDouble, collections.MutableMapping):
+    """Wrapper class for C++ standard library maps of type <int, double>.
+    Provides dictionary like interface on the Python level.
+
+    Parameters
+    ----------
+    new_map : bool or dict-like
+        Boolean on whether to make a new map or not, or dict-like object
+        with keys and values which are castable to the appropriate type.
+    free_map : bool
+        Flag for whether the pointer to the C++ map should be deallocated
+        when the wrapper is dereferenced.
+    """
+
     def __str__(self):
         return self.__repr__()
 
@@ -914,15 +997,31 @@ cdef class MapIterIntComplex(object):
         return pyval
 
 
-cdef class _MapProxyIntComplex:
-    cdef void init_with_data(_MapProxyIntComplex self, cpp_map[int, extra_types.complex_t] data):
-        self.map_ptr = new cpp_map[int, extra_types.complex_t](data)
-        
-    cdef void init(_MapProxyIntComplex self, cpp_map[int, extra_types.complex_t] * mp):
-        self.map_ptr = mp
+cdef class _MapIntComplex:        
+    def __cinit__(self, new_map=True, bint free_map=True):
+        cdef pair[int, extra_types.complex_t] item
+        cdef extra_types.complex_t v
+
+        # Decide how to init map, if at all
+        if isinstance(new_map, _MapIntComplex):
+            self.map_ptr = (<_MapIntComplex> new_map).map_ptr
+        elif hasattr(new_map, 'items'):
+            self.map_ptr = new cpp_map[int, extra_types.complex_t]()
+            for key, value in new_map.items():
+                v = extra_types.complex_t()
+                v.re = value.real
+                v.im = value.imag
+                item = pair[int, extra_types.complex_t](key, v)
+                self.map_ptr.insert(item)
+        elif bool(new_map):
+            self.map_ptr = new cpp_map[int, extra_types.complex_t]()
+
+        # Store free_map
+        self._free_map = free_map
         
     def __dealloc__(self):
-        del self.map_ptr
+        if self._free_map:
+            del self.map_ptr
 
     def __contains__(self, key):
         if not isinstance(key, int):
@@ -966,7 +1065,20 @@ cdef class _MapProxyIntComplex:
 
 
 
-class MapProxyIntComplex(_MapProxyIntComplex, collections.MutableMapping):
+class MapIntComplex(_MapIntComplex, collections.MutableMapping):
+    """Wrapper class for C++ standard library maps of type <int, complex>.
+    Provides dictionary like interface on the Python level.
+
+    Parameters
+    ----------
+    new_map : bool or dict-like
+        Boolean on whether to make a new map or not, or dict-like object
+        with keys and values which are castable to the appropriate type.
+    free_map : bool
+        Flag for whether the pointer to the C++ map should be deallocated
+        when the wrapper is dereferenced.
+    """
+
     def __str__(self):
         return self.__repr__()
 

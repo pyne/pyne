@@ -60,6 +60,10 @@ cdef class _Material:
             # Bad Material 
             raise TypeError("The mass stream nucvec must be a dict, str, or None.")
 
+        # Wrap the comp attribute at init, rather than as a property
+        cdef conv._MapIntDouble comp_proxy = conv.MapIntDouble(False, False)
+        comp_proxy.map_ptr = &self.mat_pointer.comp
+        self.comp = comp_proxy
 
     def __dealloc__(self):
         """Material C++ destructor."""
@@ -69,16 +73,6 @@ cdef class _Material:
     #
     # Class Attributes
     #
-
-    property comp:
-        def __get__(self):
-            cdef conv._MapProxyIntDouble comp_proxy = conv.MapProxyIntDouble()
-            comp_proxy.map_ptr = new cpp_map[int, double](self.mat_pointer.comp)
-            return comp_proxy
-
-        def __set__(self, dict value):
-            self.mat_pointer.comp = dict_to_comp(value)
-
 
     property mass:
         def __get__(self):
@@ -209,7 +203,7 @@ cdef class _Material:
 
             .. math:: \\mbox{nucvec[nuc]} = \\mbox{mat.comp[nuc]} \\times \\mbox{mat.mass}
         """
-        cdef conv._MapProxyIntDouble nucvec_proxy = conv.MapProxyIntDouble()
+        cdef conv._MapIntDouble nucvec_proxy = conv.MapIntDouble()
         nucvec_proxy.map_ptr = new cpp_map[int, double](self.mat_pointer.mult_by_mass())
         return nucvec_proxy
 
@@ -574,7 +568,7 @@ cdef class _Material:
             Dictionary-like object that maps nuclides to atom fractions in the 
             material.
         """
-        cdef conv._MapProxyIntDouble comp_proxy = conv.MapProxyIntDouble()
+        cdef conv._MapIntDouble comp_proxy = conv.MapIntDouble()
         comp_proxy.map_ptr = new cpp_map[int, double](self.mat_pointer.to_atom_frac())
         return comp_proxy
         
@@ -779,7 +773,7 @@ cdef class _Material:
     def __setitem__(self, key, double value):
         cdef _Material new_mat
         cdef matp new_matp 
-        cdef conv._MapProxyIntDouble mbm 
+        cdef conv._MapIntDouble mbm 
         cdef int key_zz 
         cdef cpp_map[int, double].iterator mbmiter, mbmend
 
@@ -789,6 +783,7 @@ cdef class _Material:
             mbm.map_ptr[0][key] = value
             new_matp = new cpp_material.Material(mbm.map_ptr[0], -1.0, self.mat_pointer.name)
             self.mat_pointer = new_matp
+            (<conv._MapIntDouble> self.comp).map_ptr = &self.mat_pointer.comp
 
         # Set single string-key
         elif isinstance(key, basestring):
@@ -808,11 +803,13 @@ cdef class _Material:
             # set values back on instance
             new_mat = self.set_range(lower, upper, value, self.name)
             self.mat_pointer[0] = new_mat.mat_pointer[0]
+            (<conv._MapIntDouble> self.comp).map_ptr = &self.mat_pointer.comp
 
         # Set sequance-based sub-material
         elif hasattr(key, '__len__'):
             new_mat = self.set_mat(key, value, self.name)
             self.mat_pointer[0] = new_mat.mat_pointer[0]
+            (<conv._MapIntDouble> self.comp).map_ptr = &self.mat_pointer.comp
 
         # Fail-Yurt
         else:
@@ -822,7 +819,7 @@ cdef class _Material:
     def __delitem__(self, key):
         cdef _Material new_mat
         cdef matp new_matp
-        cdef conv._MapProxyIntDouble mbm
+        cdef conv._MapIntDouble mbm
         cdef int key_zz
         cdef cpp_map[int, double].iterator mbmiter, mbmend
 
@@ -834,6 +831,7 @@ cdef class _Material:
             mbm.map_ptr.erase(<int> key)
             new_matp = new cpp_material.Material(mbm.map_ptr[0], -1.0, self.mat_pointer.name)
             self.mat_pointer = new_matp
+            (<conv._MapIntDouble> self.comp).map_ptr = &self.mat_pointer.comp
 
         # Remove single string-key
         elif isinstance(key, basestring):
@@ -853,11 +851,13 @@ cdef class _Material:
             # set values back on instance
             new_mat = self.del_range(lower, upper, self.name)
             self.mat_pointer[0] = new_mat.mat_pointer[0]
+            (<conv._MapIntDouble> self.comp).map_ptr = &self.mat_pointer.comp
 
         # Remove sequance-based sub-material
         elif hasattr(key, '__len__'):
             new_mat = self.del_mat(key, self.name)
             self.mat_pointer[0] = new_mat.mat_pointer[0]
+            (<conv._MapIntDouble> self.comp).map_ptr = &self.mat_pointer.comp
 
         # Fail-Yurt
         else:
