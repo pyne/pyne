@@ -17,3 +17,4 @@ The following modules and sub-packages are discussed:
     ensdf
     origen22
     utils
+    stlconverters
