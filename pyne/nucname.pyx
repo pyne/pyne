@@ -23,12 +23,12 @@ import pyne.stlconverters as conv
 # Conversion dictionaries
 #
 
-cdef conv._MapProxyStrInt name_zz_proxy = conv.MapProxyStrInt()
-name_zz_proxy.init(&cpp_nucname.name_zz)
+cdef conv._MapStrInt name_zz_proxy = conv.MapStrInt(False)
+name_zz_proxy.map_ptr = &cpp_nucname.name_zz
 name_zz = name_zz_proxy
 
-cdef conv._MapProxyIntStr zzname_proxy = conv.MapProxyIntStr()
-zzname_proxy.init(&cpp_nucname.zz_name)
+cdef conv._MapIntStr zzname_proxy = conv.MapIntStr(False)
+zzname_proxy.map_ptr = &cpp_nucname.zz_name
 zz_name = zzname_proxy
 
 
@@ -36,27 +36,23 @@ zz_name = zzname_proxy
 # Elemental string sets
 #
 
-# Issues with deallocating using the below :(
-#LAN = conv.SetProxyStr()
-#(<conv._SetProxyStr> LAN).init(&cpp_nucname.LAN)
-
-cdef conv._SetProxyStr LAN_proxy = conv.SetProxyStr()
+cdef conv._SetStr LAN_proxy = conv.SetStr()
 LAN_proxy.init(&cpp_nucname.LAN)
 LAN = LAN_proxy
 
-cdef conv._SetProxyStr ACT_proxy = conv.SetProxyStr()
+cdef conv._SetStr ACT_proxy = conv.SetStr()
 ACT_proxy.init(&cpp_nucname.ACT)
 ACT = ACT_proxy
 
-cdef conv._SetProxyStr TRU_proxy = conv.SetProxyStr()
+cdef conv._SetStr TRU_proxy = conv.SetStr()
 TRU_proxy.init(&cpp_nucname.TRU)
 TRU = TRU_proxy
 
-cdef conv._SetProxyStr MA_proxy = conv.SetProxyStr()
+cdef conv._SetStr MA_proxy = conv.SetStr()
 MA_proxy.init(&cpp_nucname.MA)
 MA = MA_proxy
 
-cdef conv._SetProxyStr FP_proxy = conv.SetProxyStr()
+cdef conv._SetStr FP_proxy = conv.SetStr()
 FP_proxy.init(&cpp_nucname.FP)
 FP = FP_proxy
 
@@ -66,26 +62,26 @@ FP = FP_proxy
 #
 
 # Issues with deallocating using the below :(
-#lan = conv.SetProxyInt()
-#(<conv._SetProxyInt> lan).init(&cpp_nucname.lan)
+#lan = conv.SetInt()
+#(<conv._SetInt> lan).init(&cpp_nucname.lan)
 
-cdef conv._SetProxyInt lan_proxy = conv.SetProxyInt()
+cdef conv._SetInt lan_proxy = conv.SetInt()
 lan_proxy.init(&cpp_nucname.lan)
 lan = lan_proxy
 
-cdef conv._SetProxyInt act_proxy = conv.SetProxyInt()
+cdef conv._SetInt act_proxy = conv.SetInt()
 act_proxy.init(&cpp_nucname.act)
 act = act_proxy
 
-cdef conv._SetProxyInt tru_proxy = conv.SetProxyInt()
+cdef conv._SetInt tru_proxy = conv.SetInt()
 tru_proxy.init(&cpp_nucname.tru)
 tru = tru_proxy
 
-cdef conv._SetProxyInt ma_proxy = conv.SetProxyInt()
+cdef conv._SetInt ma_proxy = conv.SetInt()
 ma_proxy.init(&cpp_nucname.ma)
 ma = ma_proxy
 
-cdef conv._SetProxyInt fp_proxy = conv.SetProxyInt()
+cdef conv._SetInt fp_proxy = conv.SetInt()
 fp_proxy.init(&cpp_nucname.fp)
 fp = fp_proxy
 
