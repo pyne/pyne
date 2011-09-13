@@ -5,12 +5,13 @@ from cython import pointer
 # Local imports
 cimport std
 cimport cpp_material
+cimport pyne.stlconverters as conv
+
 
 cdef cpp_map[int, double] dict_to_comp(dict)
 
 cdef class _Material:
     cdef cpp_material.Material * mat_pointer
-
 
 # Dictionary - Map Converters
 ctypedef cpp_material.Material * matp
