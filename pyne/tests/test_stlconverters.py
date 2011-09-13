@@ -66,8 +66,8 @@ def test_map_str_int():
     assert_equal(m['no'], 0)
 
     n = conv.MapStrInt(m, False)
-    assert_equal(len(m), 2)
-    assert_equal(m['yes'], 1)
+    assert_equal(len(n), 2)
+    assert_equal(n['yes'], 1)
 
     # points to the same underlying map
     n['maybe'] = -1 
@@ -86,12 +86,12 @@ def test_map_int_str():
     assert_equal(m[0], 'no')
 
     n = conv.MapIntStr(m, False)
-    assert_equal(len(m), 2)
-    assert_equal(m[1], 'yes')
+    assert_equal(len(n), 2)
+    assert_equal(n[1], 'yes')
 
     # points to the same underlying map
     n[-1] = 'maybe' 
-    assert_equal(m[-1], 'maybe')
+    assert_equal(n[-1], 'maybe')
 
 
 
@@ -107,8 +107,8 @@ def test_map_int_double():
     assert_equal(m[0], 3.14)
 
     n = conv.MapIntDouble(m, False)
-    assert_equal(len(m), 2)
-    assert_equal(m[1], 4.2)
+    assert_equal(len(n), 2)
+    assert_equal(n[1], 4.2)
 
     # points to the same underlying map
     n[-1] = 10.1
@@ -128,8 +128,8 @@ def test_map_int_complex():
     assert_equal(m[0], 3.14 - 2.2j)
 
     n = conv.MapIntComplex(m, False)
-    assert_equal(len(m), 2)
-    assert_equal(m[1], 4.2 + 42.0j)
+    assert_equal(len(n), 2)
+    assert_equal(n[1], 4.2 + 42.0j)
 
     # points to the same underlying map
     n[-1] = 10.1 + 3.3j
