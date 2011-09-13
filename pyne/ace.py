@@ -13,7 +13,9 @@ ENDF data has been reconstructed and Doppler-broadened, the ACER module
 generates ACE-format cross sections.
 
 .. _MCNP: http://mcnp-green.lanl.gov/
+
 .. _NJOY: http://t2.lanl.gov/codes/codes.html
+
 .. _ENDF: http://www.nndc.bnl.gov/endf
 
 .. moduleauthor:: Paul Romano <romano7@gmail.com>
@@ -189,16 +191,16 @@ class NeutronTable(AceTable):
         self._read_and()
         self._read_ldlw()
         self._read_dlw()
-        # Read GPD block
+        self._read_gpd()
         self._read_mtrp()
         self._read_lsigp()
         self._read_sigp()
-        # Read LANDP block
-        # Read ANDP block
+        self._read_landp()
+        self._read_andp()
         # Read LDLWP block
         # Read DLWP block
         # Read YP block
-        # Read FIS block
+        self._read_yp()
         self._read_fis()
         self._read_unr()
 
@@ -782,6 +784,39 @@ class NeutronTable(AceTable):
                     
             # TODO: Read rest of data
 
+    def _read_gpd(self):
+        """Read total photon production cross section and secondary photon
+        energies based on older 30x20 matrix formulation.
+
+        """
+
+        JXS12 = self.JXS[12]
+
+        if JXS12 != 0:
+            # Determine number of energies
+            NE = self.NXS[3]
+
+            # Read total photon production cross section
+            self.index = JXS12
+            self.sigma_photon = self._get_float(NE)
+
+            # The following energies are the discrete incident neutron energies
+            # for which the equiprobable secondary photon outgoing energies are
+            # given
+            self.e_in_photon_equi = [1.39e-10, 1.52e-7, 4.14e-7, 1.13e-6, 3.06e-6,
+                                     8.32e-6,  2.26e-5, 6.14e-5, 1.67e-4, 4.54e-4,
+                                     1.235e-3, 3.35e-3, 9.23e-3, 2.48e-2, 6.76e-2,
+                                     0.184,    0.303,   0.500,   0.823,   1.353,
+                                     1.738,    2.232,   2.865,   3.68,    6.07,
+                                     7.79,     10.,     12.,     13.5,    15.]
+
+            # Read equiprobable outgoing photon energies
+            self.e_out_photon_equi = []
+            for i in range(30):
+                # Equiprobable outgoing photon energies for incident neutron
+                # energy i
+                self.e_out_photon_equi.append(self._get_float(20))
+
     def _read_mtrp(self):
         """
         Get the list of reaction MTs for photon-producing reactions for this
@@ -811,7 +846,81 @@ class NeutronTable(AceTable):
 
         JXS15 = self.JXS[15]
         for rxn in self.photonReactions:
-            pass
+            self.index = JXS15 + rxn.LOCA - 1
+            MFTYPE = self._get_int()
+
+            # Yield data taken from ENDF File 12 or 6
+            if MFTYPE == 12 or MFTYPE == 16:
+                MTMULT = self._get_int()
+
+                # ENDF interpolation parameters
+                NR = self._get_int()
+                NBT = self._get_int(NR)
+                INT = self._get_int(NR)
+
+                # Energy-dependent yield
+                NE = self._get_int()
+                rxn.e_yield = self._get_float(NE)
+                rxn.photon_yield = self._get_float(NE)
+
+            # Cross-section data from ENDF File 13
+            elif MFTYPE == 13:
+                # Energy grid index at which data starts
+                rxn.IE = self._get_int()
+
+                # Cross sections
+                NE = self._get_int()
+                self.sigma = self._get_float(NE)
+            else:
+                raise
+
+    def _read_landp(self):
+        """Determine location of angular distribution for each photon-producing
+        reaction MT.
+        """
+
+        JXS16 = self.JXS[16]
+        for i, rxn in enumerate(self.photonReactions):
+            rxn.LOCB = int(self.XSS[JXS16+i])
+
+    def _read_andp(self):
+        """Find the angular distribution for each photon-producing reaction
+        MT."""
+
+        JXS17 = self.JXS[17]
+        for i, rxn in enumerate(self.photonReactions):
+            if rxn.LOCB == 0:
+                # No angular distribution data are given for this reaction,
+                # isotropic scattering is asssumed in LAB
+                continue
+
+            self.index = JXS17 + rxn.LOCB - 1
+
+            # Number of energies and incoming energy grid
+            NE = self._get_int()
+            self.a_dist_energy_in = self._get_float(NE)
+
+            # Location of tables associated with each outgoing angle
+            # distribution
+            LC = self._get_int(NE)
+
+            # 32 equiprobable cosine bins for each incoming energy
+            self.a_dist_mu_out = {}
+            for j, location in enumerate(LC):
+                if location == 0:
+                    continue
+                self.index = JXS17 + location - 1
+                self.a_dist_mu_out[j] = self._get_float(33)
+
+    def _read_yp(self):
+        """Read list of reactions required as photon production yield
+        multipliers.
+        """
+
+        if self.NXS[6] != 0:
+            self.index = self.JXS[20]
+            NYP = self._get_int()
+            self.MT_for_photon_yield = self._get_int(NYP)
 
     def _read_fis(self):
         """
