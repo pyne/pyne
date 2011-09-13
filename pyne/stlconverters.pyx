@@ -487,11 +487,23 @@ cdef class SetIterInt(object):
 
 
 cdef class _SetInt:
-    cdef void init(_SetInt self, cpp_set[int] * sp):
-        self.set_ptr = sp
+    def __cinit__(self, new_set=True, bint free_set=True):
+        # Decide how to init set, if at all
+        if isinstance(new_set, _SetInt):
+            self.set_ptr = (<_SetInt> new_set).set_ptr
+        elif hasattr(new_set, '__iter__') or (hasattr(new_set, '__len__') and hasattr(new_set, '__getitem__')):
+            self.set_ptr = new cpp_set[int]()
+            for value in new_set:
+                self.set_ptr.insert(value)
+        elif bool(new_set):
+            self.set_ptr = new cpp_set[int]()
+
+        # Store free_set
+        self._free_set = free_set
         
     def __dealloc__(self):
-        del self.set_ptr
+        if self._free_set:
+            del self.set_ptr
 
     def __contains__(self, value):
         if not isinstance(value, int):
@@ -524,6 +536,18 @@ cdef class _SetInt:
 
 
 class SetInt(_SetInt, collections.MutableSet):
+    """Wrapper class for C++ standard library sets of type <int>.
+    Provides set like interface on the Python level.
+
+    Parameters
+    ----------
+    new_set : bool or dict-like
+        Boolean on whether to make a new set or not, or set-like object
+        with keys and values which are castable to the appropriate type.
+    free_set : bool
+        Flag for whether the pointer to the C++ set should be deallocated
+        when the wrapper is dereferenced.
+    """
     def __str__(self):
         return self.__repr__()
 
@@ -563,11 +587,26 @@ cdef class SetIterStr(object):
 
 
 cdef class _SetStr:
-    cdef void init(_SetStr self, cpp_set[std.string] * sp):
-        self.set_ptr = sp
+    def __cinit__(self, new_set=True, bint free_set=True):
+        cdef std.string s
+
+        # Decide how to init set, if at all
+        if isinstance(new_set, _SetStr):
+            self.set_ptr = (<_SetStr> new_set).set_ptr
+        elif hasattr(new_set, '__iter__') or (hasattr(new_set, '__len__') and hasattr(new_set, '__getitem__')):
+            self.set_ptr = new cpp_set[std.string]()
+            for value in new_set:
+                s = std.string(value)
+                self.set_ptr.insert(s)
+        elif bool(new_set):
+            self.set_ptr = new cpp_set[std.string]()
+
+        # Store free_set
+        self._free_set = free_set
         
     def __dealloc__(self):
-        del self.set_ptr
+        if self._free_set:
+            del self.set_ptr
 
     def __contains__(self, value):
         cdef std.string s
@@ -606,6 +645,18 @@ cdef class _SetStr:
 
 
 class SetStr(_SetStr, collections.Set):
+    """Wrapper class for C++ standard library sets of type <string>.
+    Provides set like interface on the Python level.
+
+    Parameters
+    ----------
+    new_set : bool or dict-like
+        Boolean on whether to make a new set or not, or set-like object
+        with keys and values which are castable to the appropriate type.
+    free_set : bool
+        Flag for whether the pointer to the C++ set should be deallocated
+        when the wrapper is dereferenced.
+    """
     def __str__(self):
         return self.__repr__()
 
