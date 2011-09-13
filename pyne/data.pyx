@@ -29,8 +29,8 @@ import pyne.stlconverters as conv
 #
 # nuc_weight functions
 #
-cdef conv._MapProxyIntDouble nuc_weight_map_proxy = conv.MapProxyIntDouble()
-nuc_weight_map_proxy.init(&cpp_data.nuc_weight_map)
+cdef conv._MapIntDouble nuc_weight_map_proxy = conv.MapIntDouble(False)
+nuc_weight_map_proxy.map_ptr = &cpp_data.nuc_weight_map
 nuc_weight_map = nuc_weight_map_proxy
 
 def nuc_weight(nuc):
@@ -64,8 +64,8 @@ def nuc_weight(nuc):
 #
 # scattering length functions
 #
-cdef conv._MapProxyIntComplex b_coherent_map_proxy = conv.MapProxyIntComplex()
-b_coherent_map_proxy.init(&cpp_data.b_coherent_map)
+cdef conv._MapIntComplex b_coherent_map_proxy = conv.MapIntComplex(False)
+b_coherent_map_proxy.map_ptr = &cpp_data.b_coherent_map
 b_coherent_map = b_coherent_map_proxy
 
 
@@ -102,8 +102,8 @@ def b_coherent(nuc):
 
 
 
-cdef conv._MapProxyIntComplex b_incoherent_map_proxy = conv.MapProxyIntComplex()
-b_incoherent_map_proxy.init(&cpp_data.b_incoherent_map)
+cdef conv._MapIntComplex b_incoherent_map_proxy = conv.MapIntComplex(False)
+b_incoherent_map_proxy.map_ptr = &cpp_data.b_incoherent_map
 b_incoherent_map = b_incoherent_map_proxy
 
 def b_incoherent(nuc):
@@ -139,8 +139,8 @@ def b_incoherent(nuc):
 
 
 
-cdef conv._MapProxyIntDouble b_map_proxy = conv.MapProxyIntDouble()
-b_map_proxy.init(&cpp_data.b_map)
+cdef conv._MapIntDouble b_map_proxy = conv.MapIntDouble(False)
+b_map_proxy.map_ptr = &cpp_data.b_map
 b_map = b_map_proxy
 
 def b(nuc):
@@ -187,8 +187,8 @@ def b(nuc):
 #
 # decay data functions
 #
-cdef conv._MapProxyIntDouble half_life_map_proxy = conv.MapProxyIntDouble()
-half_life_map_proxy.init(&cpp_data.half_life_map)
+cdef conv._MapIntDouble half_life_map_proxy = conv.MapIntDouble(False)
+half_life_map_proxy.map_ptr = &cpp_data.half_life_map
 half_life_map = half_life_map_proxy
 
 def half_life(nuc):
@@ -219,8 +219,8 @@ def half_life(nuc):
 
 
 
-cdef conv._MapProxyIntDouble decay_const_map_proxy = conv.MapProxyIntDouble()
-decay_const_map_proxy.init(&cpp_data.decay_const_map)
+cdef conv._MapIntDouble decay_const_map_proxy = conv.MapIntDouble(False)
+decay_const_map_proxy.map_ptr = &cpp_data.decay_const_map
 decay_const_map = decay_const_map_proxy
 
 def decay_const(nuc):
