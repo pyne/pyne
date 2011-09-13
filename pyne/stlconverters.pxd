@@ -130,7 +130,7 @@ cdef class SetIterInt(object):
 
 cdef class _SetInt:
     cdef cpp_set[int] * set_ptr
-    cdef void init(_SetInt, cpp_set[int] *)
+    cdef public bint _free_set
 
 
 # Str
@@ -141,7 +141,7 @@ cdef class SetIterStr(object):
 
 cdef class _SetStr:
     cdef cpp_set[std.string] * set_ptr
-    cdef void init(_SetStr, cpp_set[std.string] *)
+    cdef public bint _free_set
 
 
 #

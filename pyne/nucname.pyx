@@ -36,24 +36,24 @@ zz_name = zzname_proxy
 # Elemental string sets
 #
 
-cdef conv._SetStr LAN_proxy = conv.SetStr()
-LAN_proxy.init(&cpp_nucname.LAN)
+cdef conv._SetStr LAN_proxy = conv.SetStr(False)
+LAN_proxy.set_ptr = &cpp_nucname.LAN
 LAN = LAN_proxy
 
-cdef conv._SetStr ACT_proxy = conv.SetStr()
-ACT_proxy.init(&cpp_nucname.ACT)
+cdef conv._SetStr ACT_proxy = conv.SetStr(False)
+ACT_proxy.set_ptr = &cpp_nucname.ACT
 ACT = ACT_proxy
 
-cdef conv._SetStr TRU_proxy = conv.SetStr()
-TRU_proxy.init(&cpp_nucname.TRU)
+cdef conv._SetStr TRU_proxy = conv.SetStr(False)
+TRU_proxy.set_ptr = &cpp_nucname.TRU
 TRU = TRU_proxy
 
-cdef conv._SetStr MA_proxy = conv.SetStr()
-MA_proxy.init(&cpp_nucname.MA)
+cdef conv._SetStr MA_proxy = conv.SetStr(False)
+MA_proxy.set_ptr = &cpp_nucname.MA
 MA = MA_proxy
 
-cdef conv._SetStr FP_proxy = conv.SetStr()
-FP_proxy.init(&cpp_nucname.FP)
+cdef conv._SetStr FP_proxy = conv.SetStr(False)
+FP_proxy.set_ptr = &cpp_nucname.FP
 FP = FP_proxy
 
 
@@ -61,28 +61,24 @@ FP = FP_proxy
 # Elemental integer sets
 #
 
-# Issues with deallocating using the below :(
-#lan = conv.SetInt()
-#(<conv._SetInt> lan).init(&cpp_nucname.lan)
-
-cdef conv._SetInt lan_proxy = conv.SetInt()
-lan_proxy.init(&cpp_nucname.lan)
+cdef conv._SetInt lan_proxy = conv.SetInt(False)
+lan_proxy.set_ptr = &cpp_nucname.lan
 lan = lan_proxy
 
-cdef conv._SetInt act_proxy = conv.SetInt()
-act_proxy.init(&cpp_nucname.act)
+cdef conv._SetInt act_proxy = conv.SetInt(False)
+act_proxy.set_ptr = &cpp_nucname.act
 act = act_proxy
 
-cdef conv._SetInt tru_proxy = conv.SetInt()
-tru_proxy.init(&cpp_nucname.tru)
+cdef conv._SetInt tru_proxy = conv.SetInt(False)
+tru_proxy.set_ptr = &cpp_nucname.tru
 tru = tru_proxy
 
-cdef conv._SetInt ma_proxy = conv.SetInt()
-ma_proxy.init(&cpp_nucname.ma)
+cdef conv._SetInt ma_proxy = conv.SetInt(False)
+ma_proxy.set_ptr = &cpp_nucname.ma
 ma = ma_proxy
 
-cdef conv._SetInt fp_proxy = conv.SetInt()
-fp_proxy.init(&cpp_nucname.fp)
+cdef conv._SetInt fp_proxy = conv.SetInt(False)
+fp_proxy.set_ptr = &cpp_nucname.fp
 fp = fp_proxy
 
 
