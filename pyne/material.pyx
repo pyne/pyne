@@ -140,7 +140,7 @@ cdef class _Material:
         self.mat_pointer.norm_comp()
 
 
-    def load_from_hdf5(self, char * filename, char * groupname, int row=-1):
+    def from_hdf5(self, char * filename, char * groupname, int row=-1):
         """Initialize a Material object from an HDF5 file.
 
         Parameters
@@ -180,12 +180,12 @@ cdef class _Material:
         Initialization is therefore a two-step process::
 
             mat = Material()
-            mat.load_from_hdf5("afile.h5", "/foo/bar/mat", -3)
+            mat.from_hdf5("afile.h5", "/foo/bar/mat", -3)
         """
-        self.mat_pointer.load_from_hdf5(filename, groupname, row)
+        self.mat_pointer.from_hdf5(filename, groupname, row)
 
 
-    def load_from_text(self, char * filename):
+    def from_text(self, char * filename):
         """Initialize a Material object from a simple text file.
 
         Parameters
@@ -213,12 +213,16 @@ cdef class _Material:
         Initialization is therefore a two-step process::
 
             mat = Material()
-            mat.load_from_text("natu.h5")
+            mat.from_text("natu.h5")
 
         This method is most often called implicitly by the Material constructor.
         """
-        self.mat_pointer.load_from_text(filename)
+        self.mat_pointer.from_text(filename)
 
+
+
+    def write_hdf5(self, filename, datapath="/material", nucpath="/nuc_zz", row=-1):
+        self.mat_pointer.write_hdf5(filename, datapath, nucpath, row)
 
 
     def normalize(self):
@@ -1025,7 +1029,7 @@ def from_atom_frac(atom_fracs, double mass=-1.0, char * name='', double atoms_pe
 
 
 
-def load_from_hdf5(char * filename, char * groupname, int row=-1):
+def from_hdf5(char * filename, char * groupname, int row=-1):
     """Create a Material object from an HDF5 file.
 
     Parameters
@@ -1049,19 +1053,19 @@ def load_from_hdf5(char * filename, char * groupname, int row=-1):
     --------
     This method loads data into a new material::
 
-        mat = load_from_hdf5("afile.h5", "/foo/bar/mat", -3)
+        mat = from_hdf5("afile.h5", "/foo/bar/mat", -3)
         
     See Also
     --------
-    Material.load_from_hdf5 : Underlying method class method.
+    Material.from_hdf5 : Underlying method class method.
     """
     mat = Material()
-    mat.load_from_hdf5(filename, groupname, row)
+    mat.from_hdf5(filename, groupname, row)
     return mat
 
 
 
-def load_from_text(char * filename, double mass=-1.0, char * name='', double atoms_per_mol=-1.0):
+def from_text(char * filename, double mass=-1.0, char * name='', double atoms_per_mol=-1.0):
     """Create a Material object from a simple text file.
 
     Parameters
@@ -1089,14 +1093,14 @@ def load_from_text(char * filename, double mass=-1.0, char * name='', double ato
     --------
     This method loads data into a new Material::
 
-        mat = load_from_text("natu.h5")
+        mat = from_text("natu.h5")
 
     See Also
     --------
-    Material.load_from_text : Underlying method class method.
+    Material.from_text : Underlying method class method.
     """
     mat = Material()
-    mat.load_from_text(filename)
+    mat.from_text(filename)
     mat.name = name
 
     if 0.0 <= mass:

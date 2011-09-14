@@ -340,6 +340,20 @@ namespace h5wrap
   H5::CompType PYTABLES_COMPLEX128 = _get_PYTABLES_COMPLEX128();
 
 
+  /*** Helper functions ***/
+  bool path_exists(H5::H5File * h5_file, std::string path)
+  {
+    try {
+      H5::DataSet ds = (*h5_file).openDataSet(path);
+      ds.close();
+      return true;
+    }
+    catch (H5::FileIException e) {
+      return false;
+    }
+  };
+
+
 // End namespace h5wrap
 };
 
