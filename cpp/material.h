@@ -40,11 +40,14 @@ namespace pyne
   public:
     void norm_comp ();
 
-    void load_from_hdf5 (char *, char *, int = -1);
-    void load_from_hdf5 (std::string, std::string="/material", int = -1);
+    void from_hdf5 (char *, char *, int = -1);
+    void from_hdf5 (std::string, std::string="/material", int = -1);
 
-    void load_from_text (char *);
-    void load_from_text (std::string);
+    void write_hdf5 (char *, char *, char *, int = -1);
+    void write_hdf5 (std::string, std::string="/material", std::string nuclist="/nuc_zz", int = -1);
+
+    void from_text (char *);
+    void from_text (std::string);
 
     //Fundemental mass stream data
     comp_map comp;
@@ -98,6 +101,14 @@ namespace pyne
   };
 
 std::ostream& operator<< (std::ostream& os, Material mat);
+
+
+  typedef struct material_struct {
+    char name [20];
+    double mass;
+    double atoms_per_mol;
+    double comp [];
+  } material_struct;
 
 // End pyne namespace
 };
