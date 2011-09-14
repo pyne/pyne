@@ -30,8 +30,10 @@ cdef extern from "../cpp/material.h" namespace "pyne":
 
         # Methods
         void norm_comp() except +
-        void load_from_hdf5(char *, char *, int) except +
-        void load_from_text(char *) except +
+        void from_hdf5(char *, char *, int) except +
+        void from_text(char *) except +
+
+        void write_hdf5(char *, char *, char *, int) except +
 
         void normalize() except +
         map[int, double] mult_by_mass() except +
