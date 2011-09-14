@@ -714,6 +714,12 @@ cdef class _MapStrInt:
                 s = std.string(key)
                 item = pair[std.string, int](s, value)
                 self.map_ptr.insert(item)
+        elif hasattr(new_map, '__len__'):
+            self.map_ptr = new cpp_map[std.string, int]()
+            for i in new_map:
+                s = std.string(i[0])
+                item = pair[std.string, int](s, i[1])
+                self.map_ptr.insert(item)
         elif bool(new_map):
             self.map_ptr = new cpp_map[std.string, int]()
 
@@ -835,6 +841,12 @@ cdef class _MapIntStr:
                 s = std.string(value)
                 item = pair[int, std.string](key, s)
                 self.map_ptr.insert(item)
+        elif hasattr(new_map, '__len__'):
+            self.map_ptr = new cpp_map[int, std.string]()
+            for i in new_map:
+                s = std.string(i[1])
+                item = pair[int, std.string](i[0], s)
+                self.map_ptr.insert(item)
         elif bool(new_map):
             self.map_ptr = new cpp_map[int, std.string]()
 
@@ -947,6 +959,11 @@ cdef class _MapIntDouble:
             self.map_ptr = new cpp_map[int, double]()
             for key, value in new_map.items():
                 item = pair[int, double](key, value)
+                self.map_ptr.insert(item)
+        elif hasattr(new_map, '__len__'):
+            self.map_ptr = new cpp_map[int, double]()
+            for i in new_map:
+                item = pair[int, double](i[0], i[1])
                 self.map_ptr.insert(item)
         elif bool(new_map):
             self.map_ptr = new cpp_map[int, double]()
@@ -1063,6 +1080,14 @@ cdef class _MapIntComplex:
                 v.re = value.real
                 v.im = value.imag
                 item = pair[int, extra_types.complex_t](key, v)
+                self.map_ptr.insert(item)
+        elif hasattr(new_map, '__len__'):
+            self.map_ptr = new cpp_map[int, extra_types.complex_t]()
+            for i in new_map:
+                v = extra_types.complex_t()
+                v.re = i[1].real
+                v.im = i[1].imag
+                item = pair[int, extra_types.complex_t](i[0], v)
                 self.map_ptr.insert(item)
         elif bool(new_map):
             self.map_ptr = new cpp_map[int, extra_types.complex_t]()

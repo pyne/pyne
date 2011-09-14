@@ -1,4 +1,5 @@
 # Cython imports
+from libcpp.utility cimport pair as cpp_pair
 from libcpp.map cimport map as cpp_map
 from cython import pointer
 
