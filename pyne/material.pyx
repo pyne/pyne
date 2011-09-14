@@ -1,5 +1,6 @@
 """Python wrapper for material library."""
 # Cython imports
+from libcpp.utility cimport pair as cpp_pair
 from libcpp.map cimport map as cpp_map
 from libcpp.set cimport set as cpp_set
 #from cython.operator cimport reference as ref
@@ -60,10 +61,8 @@ cdef class _Material:
             # Bad Material 
             raise TypeError("The mass stream nucvec must be a dict, str, or None.")
 
-        # Wrap the comp attribute at init, rather than as a property
-        cdef conv._MapIntDouble comp_proxy = conv.MapIntDouble(False, False)
-        comp_proxy.map_ptr = &self.mat_pointer.comp
-        self.comp = comp_proxy
+        # Init the poperty comp
+        self._comp = None
 
     def __dealloc__(self):
         """Material C++ destructor."""
@@ -73,6 +72,40 @@ cdef class _Material:
     #
     # Class Attributes
     #
+
+    property comp:
+        def __get__(self):
+            cdef conv._MapIntDouble comp_proxy 
+
+            if self._comp is None:
+                comp_proxy = conv.MapIntDouble(False, False)
+                comp_proxy.map_ptr = &self.mat_pointer.comp
+                self._comp = comp_proxy
+
+            return self._comp
+
+        def __set__(self, value):
+            cdef cpp_pair[int, double] item
+            cdef cpp_map[int, double]  m 
+
+            if isinstance(value, conv._MapIntDouble):
+                self.mat_pointer.comp = deref((<conv._MapIntDouble> value).map_ptr)
+            elif hasattr(value, 'items'):
+                m = cpp_map[int, double]()
+                for k, v in value.items():
+                    item = cpp_pair[int, double](k, v)
+                    m.insert(item)
+                self.mat_pointer.comp = m
+            elif hasattr(value, '__len__'):
+                m = cpp_map[int, double]()
+                for i in value:
+                    item = cpp_pair[int, double](i[0], i[1])
+                    m.insert(item)
+                self.mat_pointer.comp = m
+            else:
+                raise TypeError('{0} cannot be converted to a map.'.format(type(value)))
+
+            self._comp = None
 
     property mass:
         def __get__(self):
@@ -783,7 +816,7 @@ cdef class _Material:
             mbm.map_ptr[0][key] = value
             new_matp = new cpp_material.Material(mbm.map_ptr[0], -1.0, self.mat_pointer.name)
             self.mat_pointer = new_matp
-            (<conv._MapIntDouble> self.comp).map_ptr = &self.mat_pointer.comp
+            self._comp = None
 
         # Set single string-key
         elif isinstance(key, basestring):
@@ -803,13 +836,13 @@ cdef class _Material:
             # set values back on instance
             new_mat = self.set_range(lower, upper, value, self.name)
             self.mat_pointer[0] = new_mat.mat_pointer[0]
-            (<conv._MapIntDouble> self.comp).map_ptr = &self.mat_pointer.comp
+            self._comp = None
 
         # Set sequance-based sub-material
         elif hasattr(key, '__len__'):
             new_mat = self.set_mat(key, value, self.name)
             self.mat_pointer[0] = new_mat.mat_pointer[0]
-            (<conv._MapIntDouble> self.comp).map_ptr = &self.mat_pointer.comp
+            self._comp = None
 
         # Fail-Yurt
         else:
@@ -831,7 +864,7 @@ cdef class _Material:
             mbm.map_ptr.erase(<int> key)
             new_matp = new cpp_material.Material(mbm.map_ptr[0], -1.0, self.mat_pointer.name)
             self.mat_pointer = new_matp
-            (<conv._MapIntDouble> self.comp).map_ptr = &self.mat_pointer.comp
+            self._comp = None
 
         # Remove single string-key
         elif isinstance(key, basestring):
@@ -851,13 +884,13 @@ cdef class _Material:
             # set values back on instance
             new_mat = self.del_range(lower, upper, self.name)
             self.mat_pointer[0] = new_mat.mat_pointer[0]
-            (<conv._MapIntDouble> self.comp).map_ptr = &self.mat_pointer.comp
+            self._comp = None
 
         # Remove sequance-based sub-material
         elif hasattr(key, '__len__'):
             new_mat = self.del_mat(key, self.name)
             self.mat_pointer[0] = new_mat.mat_pointer[0]
-            (<conv._MapIntDouble> self.comp).map_ptr = &self.mat_pointer.comp
+            self._comp = None
 
         # Fail-Yurt
         else:
