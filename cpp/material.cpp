@@ -42,16 +42,23 @@ void pyne::Material::norm_comp()
 
 
 
-void pyne::Material::load_from_hdf5(char * fchar, char * gchar, int row)
+
+
+
+
+
+
+
+void pyne::Material::from_hdf5(char * fchar, char * gchar, int row)
 {
   std::string filename (fchar);
   std::string groupname (gchar);
-  load_from_hdf5(filename, groupname, row);  
+  from_hdf5(filename, groupname, row);  
 };
 
 
 
-void pyne::Material::load_from_hdf5(std::string filename, std::string groupname, int row)
+void pyne::Material::from_hdf5(std::string filename, std::string groupname, int row)
 {
   // Check that the file is there
   if (!pyne::file_exists(filename))
@@ -106,14 +113,88 @@ void pyne::Material::load_from_hdf5(std::string filename, std::string groupname,
 
 
 
-void pyne::Material::load_from_text(char * fchar)
+
+
+void pyne::Material::write_hdf5(char * fchar, char * gchar, char * nchar, int row)
 {
   std::string filename (fchar);
-  load_from_text(filename);
+  std::string groupname (gchar);
+  std::string nuclist (nchar);
+  write_hdf5(filename, groupname, nuclist, row);  
 };
 
 
-void pyne::Material::load_from_text (std::string filename)
+
+void pyne::Material::write_hdf5(std::string filename, std::string datapath, std::string nucpath, int row)
+{
+  // Turn off annoying HDF5 errors
+  H5::Exception::dontPrint();
+
+  // Create new/open datafile.
+  H5::H5File db;
+  if (pyne::file_exists(filename))
+  {
+    bool isH5 = H5::H5File::isHdf5(filename);
+    if (!isH5)
+      throw h5wrap::FileNotHDF5(filename);
+    db = H5::H5File(filename, H5F_ACC_RDWR);
+  }
+  else
+    db = H5::H5File(filename, H5F_ACC_TRUNC);
+
+
+  // Read in nuclist if available, write it out if not
+  bool nucpath_exists = h5wrap::path_exists(&db, nucpath);
+  std::vector<int> nuclides;
+  int nuc_size;
+  
+  if (nucpath_exists)
+  {
+    nuclides = h5wrap::h5_array_to_cpp_vector_1d<int>(&db, nucpath, H5::PredType::NATIVE_INT);
+    nuc_size = nuclides.size();
+  }
+  else
+  {
+    nuclides = std::vector<int>();
+    for (pyne::comp_iter i = comp.begin(); i != comp.end(); i++)
+      nuclides.push_back(i->first);
+    nuc_size = nuclides.size();
+
+    // Create the data if it doesn't exist
+    int nuc_data [nuc_size];
+    for (int n = 0; n != nuc_size; n++)
+      nuc_data[n] = nuclides[n];
+    hsize_t nuc_dims[1] = {nuc_size};
+    H5::DataSpace nuc_space(1, nuc_dims);
+    H5::DataSet nuc_set = db.createDataSet(nucpath, H5::PredType::NATIVE_INT, nuc_space);
+    nuc_set.write(nuc_data, H5::PredType::NATIVE_INT);
+    db.flush(H5F_SCOPE_GLOBAL);
+  };
+
+  // Add writer for material to table here.
+
+  // Close out the HDF5 file
+  db.close();
+};
+
+
+
+
+
+
+
+
+
+
+
+void pyne::Material::from_text(char * fchar)
+{
+  std::string filename (fchar);
+  from_text(filename);
+};
+
+
+void pyne::Material::from_text (std::string filename)
 {
   // Check that the file is there
   if (!pyne::file_exists(filename))
@@ -183,9 +264,9 @@ pyne::Material::Material(char * fchar, double m, std::string s, double apm)
   // Check to see if the file is in HDF5 format.
   bool isH5 = H5::H5File::isHdf5(filename);
   if (isH5)
-    load_from_hdf5(filename);
+    from_hdf5(filename);
   else
-    load_from_text(filename);
+    from_text(filename);
 };
 
 
@@ -203,9 +284,9 @@ pyne::Material::Material(std::string filename, double m, std::string s, double a
   // Check to see if the file is in HDF5 format.
   bool isH5 = H5::H5File::isHdf5(filename);
   if (isH5)
-    load_from_hdf5(filename);
+    from_hdf5(filename);
   else
-    load_from_text(filename);
+    from_text(filename);
 };
 
 
