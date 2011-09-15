@@ -218,9 +218,17 @@ void pyne::Material::write_hdf5(std::string filename, std::string datapath, std:
   }
   else
   {
+    // Write data
     data_space = H5::DataSpace(1, data_dims);
     data_set = db.createDataSet(datapath, data_desc, data_space);
     data_set.write(mat_data, data_desc);
+
+    // Add attribute pointing to nuc path
+    // The following should work...but doesn't
+    //H5::StrType nuc_attr_type(0, H5T_VARIABLE);
+    //H5::DataSpace nuc_attr_space(H5S_SCALAR);
+    //H5::Attribute nuc_attr = data_set.createAttribute("nucpath", nuc_attr_type, nuc_attr_space);
+    //nuc_attr.write(nuc_attr_type, nucpath);
   };
 
   // Close out the HDF5 file
