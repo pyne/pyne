@@ -178,8 +178,9 @@ void pyne::Material::write_hdf5(std::string filename, std::string datapath, std:
   // Write out to the file
   //
   H5::DataSet data_set;
-  H5::DataSpace data_space;
+  H5::DataSpace data_space, data_hyperslab;
   hsize_t data_dims[1] = {1};
+  hsize_t data_max_dims[1] = {H5S_UNLIMITED};
   size_t material_struct_size = sizeof(pyne::material_struct) + sizeof(double)*(nuc_size);
   H5::CompType data_desc(material_struct_size);
   H5::ArrayType comp_values_array_type (H5::PredType::NATIVE_DOUBLE, 1, nuc_dims);
@@ -218,16 +219,40 @@ void pyne::Material::write_hdf5(std::string filename, std::string datapath, std:
   }
   else
   {
-    // Write data
-    data_space = H5::DataSpace(1, data_dims);
-    data_set = db.createDataSet(datapath, data_desc, data_space);
-    data_set.write(mat_data, data_desc);
+    // Get full space
+    data_space = H5::DataSpace(1, data_dims, data_max_dims);
+
+    // Make data set properties to enable chunking
+    H5::DSetCreatPropList data_set_params;
+    hsize_t chunk_dims[1] ={100}; // parameterize this is in the function sig.
+    data_set_params.setChunk(1, chunk_dims);
+
+    material_struct * data_fill_value  = (material_struct *) malloc(material_struct_size);
+    for (int i=0; i < 20; i++)
+      (*data_fill_value).name[i] = NULL;
+    (*data_fill_value).mass = -1.0;
+    (*data_fill_value).atoms_per_mol = -1.0;
+    for (int n = 0; n != nuc_size; n++)
+      (*data_fill_value).comp[n] = 0.0;
+    data_set_params.setFillValue(data_desc, &data_fill_value);
+
+    // Create the data set
+    data_set = db.createDataSet(datapath, data_desc, data_space, data_set_params);
+    data_set.extend(data_dims);
+
+    // Get the data space
+    data_hyperslab = data_set.getSpace();
+    hsize_t data_offset[1] = {0};
+    data_hyperslab.selectHyperslab(H5S_SELECT_SET, data_dims, data_offset);
 
     // Add attribute pointing to nuc path
     H5::StrType nuc_attr_type(0, nucpath.length());
     H5::DataSpace nuc_attr_space(H5S_SCALAR);
     H5::Attribute nuc_attr = data_set.createAttribute("nucpath", nuc_attr_type, nuc_attr_space);
     nuc_attr.write(nuc_attr_type, nucpath);
+
+    // Write the first row...
+    data_set.write(mat_data, data_desc, data_space, data_hyperslab);
   };
 
   // Close out the HDF5 file
