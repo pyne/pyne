@@ -33,7 +33,9 @@ cdef extern from "../cpp/material.h" namespace "pyne":
         void from_hdf5(char *, char *, int) except +
         void from_text(char *) except +
 
-        void write_hdf5(char *, char *, char *, int) except +
+        void write_hdf5(char *, char *, char *) except +
+        void write_hdf5(char *, char *, char *, float) except +
+        void write_hdf5(char *, char *, char *, float, int) except +
 
         void normalize() except +
         map[int, double] mult_by_mass() except +
