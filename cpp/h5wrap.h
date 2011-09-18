@@ -26,7 +26,7 @@ namespace h5wrap
   {
     virtual const char* what() const throw()
     {
-      return "Index of point is out of bounds.  Cannot read in from HDF5 File.";
+      return "Index of point is out of bounds.  Cannot handle in HDF5 file.";
     };
   };
 
