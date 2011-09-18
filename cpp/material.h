@@ -40,11 +40,11 @@ namespace pyne
   public:
     void norm_comp ();
 
-    void from_hdf5 (char *, char *, int = -1);
-    void from_hdf5 (std::string, std::string="/material", int = -1);
+    void from_hdf5 (char *, char *, int=-1);
+    void from_hdf5 (std::string, std::string="/material", int=-1);
 
-    void write_hdf5 (char *, char *, char *, int = -1);
-    void write_hdf5 (std::string, std::string="/material", std::string nuclist="/nuc_zz", int = -1);
+    void write_hdf5 (char *, char *, char *, float=-0.0, int=100);
+    void write_hdf5 (std::string, std::string="/material", std::string nuclist="/nuc_zz", float=-0.0, int=100);
 
     void from_text (char *);
     void from_text (std::string);
