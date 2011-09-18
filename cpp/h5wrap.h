@@ -82,6 +82,33 @@ namespace h5wrap
   };
 
 
+  class PathNotFound: public std::exception
+  {
+  public:
+    PathNotFound(){};
+    ~PathNotFound() throw () {};
+
+    PathNotFound(std::string fname, std::string pname)
+    {
+      filename = fname;
+      path = pname;
+    };
+
+    virtual const char* what() const throw()
+    {
+      std::string msg ("the path ");
+      msg += path;
+      msg += " was not found in the HDF5 file ";
+      msg += filename;
+      return (const char *) msg.c_str();
+    };
+
+  private:
+    std::string filename;
+    std::string path;
+  };
+
+
 
   // Read-in Functions
   template <typename T>
@@ -343,12 +370,24 @@ namespace h5wrap
   /*** Helper functions ***/
   bool path_exists(H5::H5File * h5_file, std::string path)
   {
-    try {
+    try 
+    {
       H5::DataSet ds = (*h5_file).openDataSet(path);
       ds.close();
       return true;
     }
-    catch (H5::FileIException e) {
+    catch (H5::FileIException e) 
+    {
+      try
+      {
+        H5::Group g = (*h5_file).openGroup(path);
+        g.close();
+        return true;
+      }
+      catch (H5::Exception fgerror)
+      {
+        return false;
+      }
       return false;
     }
   };
