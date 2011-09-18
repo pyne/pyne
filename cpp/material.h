@@ -40,8 +40,10 @@ namespace pyne
   public:
     void norm_comp ();
 
-    void from_hdf5 (char *, char *, int=-1);
-    void from_hdf5 (std::string, std::string="/material", int=-1);
+    void _load_comp_protocol0(H5::H5File *, std::string, int);
+
+    void from_hdf5 (char *, char *, int=-1, int=1);
+    void from_hdf5 (std::string, std::string="/material", int=-1, int=1);
 
     void write_hdf5 (char *, char *, char *, float=-0.0, int=100);
     void write_hdf5 (std::string, std::string="/material", std::string nuclist="/nuc_zz", float=-0.0, int=100);
@@ -108,6 +110,19 @@ std::ostream& operator<< (std::ostream& os, Material mat);
     double atoms_per_mol;
     double comp [];
   } material_struct;
+
+
+  /******************/
+  /*** Exceptions ***/
+  /******************/
+
+  class MaterialProtocolError: public std::exception
+  {
+    virtual const char* what() const throw()
+    {
+      return "Invalid loading protocol number; please use 0 or 1.";
+    };
+  };
 
 // End pyne namespace
 };
