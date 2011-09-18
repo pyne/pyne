@@ -221,8 +221,13 @@ cdef class _Material:
 
 
 
-    def write_hdf5(self, filename, datapath="/material", nucpath="/nuc_zz", row=-1):
-        self.mat_pointer.write_hdf5(filename, datapath, nucpath, row)
+    def write_hdf5(self, filename, datapath="/material", nucpath="/nuc_zz", row=None, chunksize=100):
+        # Hack to make C++ API keep default row=-0
+        # Python doesn't have a negative zero as an integer
+        if row is None:
+            self.mat_pointer.write_hdf5(filename, datapath, nucpath, <float> -0.0, chunksize)
+        else:
+            self.mat_pointer.write_hdf5(filename, datapath, nucpath, row, chunksize)
 
 
     def normalize(self):
