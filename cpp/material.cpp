@@ -45,51 +45,15 @@ void pyne::Material::norm_comp()
 
 
 
-
-
-
-
-void pyne::Material::from_hdf5(char * fchar, char * gchar, int row)
+void pyne::Material::_load_comp_protocol0(H5::H5File * db, std::string datapath, int row)
 {
-  std::string filename (fchar);
-  std::string groupname (gchar);
-  from_hdf5(filename, groupname, row);  
-};
-
-
-
-void pyne::Material::from_hdf5(std::string filename, std::string groupname, int row)
-{
-  // Check that the file is there
-  if (!pyne::file_exists(filename))
-    throw pyne::FileNotFound(filename);
-
-  // Check to see if the file is in HDF5 format.
-  bool isH5 = H5::H5File::isHdf5(filename);
-  if (!isH5)
-    throw h5wrap::FileNotHDF5(filename);
-
-  H5::Exception::dontPrint();
-
-  H5::H5File matfile (filename, H5F_ACC_RDONLY);
-  H5::Group matgroup;
-
-  try
-  {
-    matgroup = matfile.openGroup(groupname);
-  }
-  catch (H5::Exception fgerror)
-  {
-    throw h5wrap::GroupNotFound(filename, groupname);
-  }    
-
-  // Clear current content
-  comp.clear();
-
-  // Iterate over elements of the group.
+  H5::Group matgroup = (*db).openGroup(datapath);
   H5::DataSet nucset;
+
   double nucvalue;
   hsize_t matG = matgroup.getNumObjs();
+
+  // Iterate over datasets in the group.
   for (int matg = 0; matg < matG; matg++)
   {
     std::string nuckey = matgroup.getObjnameByIdx(matg);
@@ -104,10 +68,61 @@ void pyne::Material::from_hdf5(std::string filename, std::string groupname, int 
     nucset.close();
   };
 
-  // FIXME: Set the material name here. (based on groupname)
+  // Set meta data
+  name = datapath.substr(datapath.rfind("/")+1, datapath.length());
+  atoms_per_mol = -1.0;
+};
 
-  matfile.close();
 
+
+
+
+
+
+void pyne::Material::from_hdf5(char * fchar, char * dchar, int row, int protocol)
+{
+  std::string filename (fchar);
+  std::string datapath (dchar);
+  from_hdf5(filename, datapath, row, protocol);  
+};
+
+
+
+void pyne::Material::from_hdf5(std::string filename, std::string datapath, int row, int protocol)
+{
+  // Turn off annoying HDF5 errors
+  //H5::Exception::dontPrint();
+
+  // Check that the file is there
+  if (!pyne::file_exists(filename))
+    throw pyne::FileNotFound(filename);
+
+  // Check to see if the file is in HDF5 format.
+  bool isH5 = H5::H5File::isHdf5(filename);
+  if (!isH5)
+    throw h5wrap::FileNotHDF5(filename);
+
+  // Open the database
+  H5::H5File db (filename, H5F_ACC_RDONLY);
+
+  bool datapath_exists = h5wrap::path_exists(&db, datapath);
+  if (!datapath_exists)
+    throw h5wrap::PathNotFound(filename, datapath);
+
+  // Clear current content
+  comp.clear();
+
+  // Load via various protocols
+  if (protocol == 0)
+    _load_comp_protocol0(&db, datapath, row);
+  else
+    throw pyne::MaterialProtocolError();
+
+
+  // Close the database
+  db.close();
+
+  // Renomalize the composition, just to be safe.
   norm_comp();
 };
 
@@ -280,6 +295,7 @@ void pyne::Material::write_hdf5(std::string filename, std::string datapath, std:
 
   // Write the row...
   data_set.write(mat_data, data_desc, data_space, data_hyperslab);
+  //data_set.write(mat_data, data_desc,  data_hyperslab, data_space);
 
   // Close out the HDF5 file
   db.close();
