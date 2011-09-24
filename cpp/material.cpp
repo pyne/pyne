@@ -76,6 +76,11 @@ void pyne::Material::_load_comp_protocol0(H5::H5File * db, std::string datapath,
 
 
 
+void pyne::Material::_load_comp_protocol1(H5::H5File * db, std::string datapath, int row)
+{
+};
+
+
 
 
 
@@ -115,6 +120,8 @@ void pyne::Material::from_hdf5(std::string filename, std::string datapath, int r
   // Load via various protocols
   if (protocol == 0)
     _load_comp_protocol0(&db, datapath, row);
+  else if (protocol == 1)
+    _load_comp_protocol1(&db, datapath, row);
   else
     throw pyne::MaterialProtocolError();
 
@@ -244,13 +251,14 @@ void pyne::Material::write_hdf5(std::string filename, std::string datapath, std:
     if (signbit(row))
       row_num = data_dims[0] + row;  // careful, row is negative
 
-    if (data_dims[0] == row_num)
+    if (data_dims[0] <= row_num)
     {
-      // row == -0, extend to data set so that we can append
+      // row == -0, extend to data set so that we can append, or
+      // row_num is larger than current dimension, resize to accomodate.
       data_dims[0] = row_num + 1;
       data_set.extend(data_dims);
     }
-    else if (data_dims[0]  < 0)
+    else if (data_dims[0] < 0)
       throw h5wrap::HDF5BoundsError();
 
     data_offset[0] = row_num;
@@ -293,9 +301,11 @@ void pyne::Material::write_hdf5(std::string filename, std::string datapath, std:
   hsize_t data_count[1] = {1};
   data_hyperslab.selectHyperslab(H5S_SELECT_SET, data_count, data_offset);
 
+  // Get a memory space for writing
+  H5::DataSpace mem_space (1, data_count, data_max_dims);
+
   // Write the row...
-  data_set.write(mat_data, data_desc, data_space, data_hyperslab);
-  //data_set.write(mat_data, data_desc,  data_hyperslab, data_space);
+  data_set.write(mat_data, data_desc, mem_space, data_hyperslab);
 
   // Close out the HDF5 file
   db.close();
