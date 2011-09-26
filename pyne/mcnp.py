@@ -12,6 +12,7 @@ classes.
 """
 
 import struct
+import math 
 
 from binaryreader import _BinaryReader
 
@@ -113,6 +114,128 @@ def get_words(f, lines = 1):
         local_words = f.readline().split()
         words += local_words
     return words
+
+class SourceSurf(object):
+    def __init__(self):
+        pass
+
+class TrackData(object):
+    def __init__(self):
+        pass
+
+class SurfSrc(_BinaryReader):
+
+    def __init__(self, filename):
+        super(SurfSrc, self).__init__(filename)
+
+    def __str__(self):
+        headerString  = "Code: {0} (version: {1}) [{2}]\n".format(self.kod, self.ver, self.loddat)
+        headerString += "Problem info: ({0}) {1}\n{2}\n".format(self.idtm, self.probid, self.aid)
+        headerString += "Showing dump #{0}\n".format(self.knod)
+        headerString += "{0} histories, {1} tracks, {2} record size, {3} surfaces, {4} histories\n".format(self.np1, self.nrss, self.ncrd, self.njsw, self.niss)
+        headerString += "{0} cells, source particle: {1}, macrobody facet flag: {2}\n".format(self.niwr, self.mipts, self.kjaq)
+        for i in self.surflist:
+            headerString += "Surface {0}: facet {1}, type {2} with {3} parameters: (".format(i.id, i.facetId, i.type, i.numParams)
+            if i.numParams > 1:
+                for j in i.surfParams:
+                    headerString += " {0}".format(j)
+            else:
+                headerString += " {0}".format(i.surfParams)
+            headerString += ")\n"
+        headerString += "Summary Table: " + str(self.summaryTable)
+
+        trackData = "Track Data\n"
+  #                       1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890
+        trackData +=     "       nps   BITARRAY        WGT        ERG        TME             X             Y             Z          U          V     COSINE  |       W\n"
+        for j in self.tracklist:
+            trackData += "%10d %10g %10.5g %10.5g %10.5g %13.5e %13.5e %13.5e %10.5f %10.5f %10.5f  | %10.5f " % (j.nps, j.bitarray, j.wgt, j.erg, j.tme, j.x, j.y, j.z, j.u, j.v, j.cs, j.w) + "\n"
+
+        return headerString + "\n" + trackData
+
+    def read(self):
+        # read header block
+        header = self.get_fortran_record()
+
+        # interpret header block
+        self.kod    = header.get_string(8)  # code identifier
+        self.ver    = header.get_string(5)  # code version identifier
+        self.loddat = header.get_string(8)  # code version date
+        self.idtm   = header.get_string(19) # current date and time
+        self.probid = header.get_string(19) # problem identification string
+        self.aid    = header.get_string(80) # title card of initial run
+        self.knod   = header.get_int()      # dump number
+
+        # read various counts and sizes
+        tablelengths = self.get_fortran_record()
+
+        # interpret table lengths
+        self.np1  = tablelengths.get_long()  # number of histories used to generate source
+        self.nrss = tablelengths.get_long()  # number of tracks written to surface source
+        self.ncrd = tablelengths.get_int()  # number of values in surface source record
+                                            # 6 for a spherical source
+                                            # 11 otherwise
+        self.njsw = tablelengths.get_int()  # number of surfaces 
+        self.niss = tablelengths.get_long()  # number of histories written to surface source
+
+        if self.np1 < 0:
+            # read more size info
+            tablelengths = self.get_fortran_record()
+
+            self.niwr  = tablelengths.get_int()  # number of cells in surface source card
+            self.mipts = tablelengths.get_int()  # source particle type
+            self.kjaq  = tablelengths.get_int()  # macrobody facet flag
+
+        self.np1 = abs(self.np1)
+
+        # get info for each surface
+        self.surflist = []
+        for j in range(self.njsw):
+            surfaceinfo = self.get_fortran_record()
+            
+            surfinfo = SourceSurf()
+            surfinfo.id = surfaceinfo.get_int()            # surface ID
+            if self.kjaq == 1:
+                surfinfo.facetId = surfaceinfo.get_int()   # facet ID
+            else:
+                surfinfo.facetId = -1                      # dummy facet ID
+
+            surfinfo.type = surfaceinfo.get_int()                      # surface type
+            surfinfo.numParams = surfaceinfo.get_int()                 # number of surface parameters
+            surfinfo.surfParams = surfaceinfo.get_double(surfinfo.numParams)
+
+            self.surflist.append(surfinfo)                  
+
+
+        for j in range(self.njsw,self.njsw+self.niwr):
+            self.get_fortran_record()
+            print j
+
+        summaryInfo = self.get_fortran_record()            # summary table
+        self.summaryTable = summaryInfo.get_int((2+4*self.mipts)*(self.njsw+self.niwr)+1)
+        self.summaryTable = self.summaryTable[1:]
+        
+        self.tracklist = []
+        for j in range(self.nrss):
+            trackInfo = self.get_fortran_record()
+            trackData = TrackData()
+            trackData.record   = trackInfo.get_double(self.ncrd)
+            trackData.nps      = trackData.record[0]
+            trackData.bitarray = trackData.record[1]
+            trackData.wgt      = trackData.record[2]
+            trackData.erg      = trackData.record[3]
+            trackData.tme      = trackData.record[4]
+            trackData.x        = trackData.record[5]
+            trackData.y        = trackData.record[6]
+            trackData.z        = trackData.record[7]
+            trackData.u        = trackData.record[8]
+            trackData.v        = trackData.record[9]
+            trackData.cs       = trackData.record[10]
+            trackData.w        = math.copysign(math.sqrt(1 - trackData.u*trackData.u - trackData.v*trackData.v),trackData.bitarray)
+            # trackData.bitarray = abs(trackData.bitarray)
+            
+            self.tracklist.append(trackData)
+
+
 
 class Srctp(_BinaryReader):
 
