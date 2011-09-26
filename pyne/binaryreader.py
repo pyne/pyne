@@ -29,60 +29,51 @@ class _FortranRecord(object):
 
         self.reset()
         self.intSize    = struct.calcsize('i')
+        self.longSize   = struct.calcsize('q')
         self.floatSize  = struct.calcsize('f')
         self.doubleSize = struct.calcsize('d')
-    
-    def get_int(self, n=1):
-        """
-        Returns one or more integers at the current position within
-        the data list. If more than one integer is read, the integers
-        are returned in a list.
-        """
 
+    def get_data(self, n, typeCode, itemSize):
+        """
+        Returns one or more items of a specified type at the current
+        position within the data list. If more than one item is read,
+        the items are returned in a list.
+        """
         if self.pos >= self.numBytes:
             raise BinaryReaderError("Already read all data from record")
         
-        values = struct.unpack('{0}i'.format(n), self.data[self.pos:self.pos+self.intSize*n])
-        self.pos += self.intSize * n
+        values = struct.unpack('{0}{1}'.format(n,typeCode), self.data[self.pos:self.pos+itemSize*n])
+        self.pos += itemSize * n
         if n == 1:
             return values[0]
         else:
             return list(values)
+        
+
+    def get_int(self, n=1):
+        """
+        Returns one or more 4-byte integers.
+        """
+        return self.get_data(n,'i',self.intSize)
+                             
+    def get_long(self, n=1):
+        """
+        Returns one or more 8-byte integers.
+        """
+        return self.get_data(n,'q',self.longSize)
                              
     def get_float(self, n=1):
         """
-        Returns one or more floats at the current position within the
-        data list. If more than one float is read, the floats are
-        returned in a list.
+        Returns one or more floats.
         """
-
-        if self.pos >= self.numBytes:
-            raise BinaryReaderError("Already read all data from record")
-        
-        values = struct.unpack('{0}f'.format(n), self.data[self.pos:self.pos+self.floatSize*n])
-        self.pos += self.floatSize * n
-        if n == 1:
-            return values[0]
-        else:
-            return list(values)
-    
+        return self.get_data(n,'f',self.floatSize)
+                             
     def get_double(self, n=1):
         """
-        Returns one or more doubles at the current position within the
-        data list. If more than one double is read, the doubles are
-        returned in a list.
+        Returns one or more double
         """
-
-        if self.pos >= self.numBytes:
-            raise BinaryReaderError("Already read all data from record")
-        
-        values = struct.unpack('{0}d'.format(n),self.data[self.pos:self.pos+self.doubleSize*n])
-        self.pos += self.doubleSize * n
-        if n == 1:
-            return values[0]
-        else:
-            return list(values)
-    
+        return self.get_data(n,'d',self.doubleSize)
+                             
     def get_string(self, length, n=1):
         """
         Returns a string of a specified length starting at the current
@@ -100,6 +91,48 @@ class _FortranRecord(object):
         else:
             return [s[i*length:(i+1)*length] for i in range(n)]
 
+    def put_data(self, newdata, format, itemSize):
+        """
+        Packs a list of data objects at the current position with a
+        specified format and data size.
+        """
+        for i in range(len(newdata)):
+            self.data += struct.pack(format,newdata[i])
+            self.pos += itemSize
+            self.numBytes += itemSize
+
+    def put_int(self, data):
+        """
+        Pack a list of 4-byte integers.
+        """
+        self.put_data(data,'1i',self.intSize)
+
+    def put_long(self,data):
+        """
+        Pack a list of 8-byte integers.
+        """
+        self.put_data(data,'1q',self.longSize)
+
+    def put_float(self,data):
+        """
+        Pack a list of floats
+        """
+        self.put_data(data,'1f',self.floatSize)
+        
+    def put_double(self,data):
+        """
+        Pack a list of doubles
+        """
+        self.put_data(data,'1d',self.doubleSize)
+        
+    
+    def put_string(self, data, length, n=1):
+        """
+        Packs a list of one or more double at the current
+        position within the data list.
+        """
+        self.put_data(data,'{0}s'.format(length),length)
+    
     def reset(self):
         self.pos = 0
 
@@ -108,23 +141,35 @@ class _FortranRecord(object):
 
 
 class _BinaryReader(object):
-    """Reads a binary file according to CCCC standards. This was created
-    following Prof. James Paul Holloway's (hagar@umich.edu) alpha release of
-    ccccutils written in C++ from 2001.
+    """Reads/writes a binary file according to CCCC standards. This
+    was created following Prof. James Paul Holloway's
+    (hagar@umich.edu) alpha release of ccccutils written in C++ from
+    2001.
     """
     
-    def __init__(self, filename):
+    def __init__(self,filename,mode='rb'):
         self.intSize = struct.calcsize('i')
-        self.floatSize = struct.calcsize('d')
-        self.f = open(filename, 'rb')
+        self.f = open(filename, mode)
         
+    def close(self):
+        self.f.close()
+
     def get_int(self):
         (i,) = struct.unpack('i',self.f.read(self.intSize))
         return i
+
+    def put_int(self,data):
+        self.f.write(struct.pack('i',data))
                              
-    def get_float(self):
-        (f,) =  struct.unpack('d',self.f.read(self.floatSize))
-        return f
+    def put_fortran_record(self,record):
+        """Fortran formatted records start with an integer and end with the same
+        integer that represents the number of bytes that the record is.
+        """
+        self.put_int(record.numBytes)
+        self.f.write(record.data)
+        self.put_int(record.numBytes)
+
+        return 1
 
     def get_fortran_record(self):
         """Fortran formatted records start with an integer and end with the same
@@ -132,8 +177,6 @@ class _BinaryReader(object):
         """
 
         numBytes = self.get_int()
-        if numBytes % self.intSize:
-            raise InvalidFortranRecordError("Number of bytes in Fortran formatted record is not a multiple of the integer size")
 
         # Read numBytes from the record
         data = self.f.read(numBytes)
@@ -157,4 +200,7 @@ class BinaryReaderError(Exception):
 
 
 class InvalidFortranRecordError(BinaryReaderError):
+    pass
+
+class FortranRecordError(BinaryReaderError):
     pass
