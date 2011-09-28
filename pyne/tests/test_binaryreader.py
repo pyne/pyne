@@ -4,7 +4,8 @@ import struct
 import filecmp
 import os
 
-from binaryreader import _FortranRecord, FortranRecordError, _BinaryReader, BinaryReaderError
+from pyne.binaryreader import (_FortranRecord, FortranRecordError,
+                               _BinaryReader, BinaryReaderError)
 
 # test the ability to make a new empty FortranRecord
 def test_make_empty_FR():
@@ -43,7 +44,7 @@ def test_reset_FR():
     
 
 # useful for checking all the changes expected from writing to a FortranRecord
-def check_write_record_data(record,pos,num,data,typeString):
+def check_write_record_data(record, pos, num, data, typeString):
 
     if record.pos != pos:
         raise FortranRecordError("Writing " + typeString + 
