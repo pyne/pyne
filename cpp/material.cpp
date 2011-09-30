@@ -92,32 +92,22 @@ void pyne::Material::_load_comp_protocol1(H5::H5File * db, std::string datapath,
   };
 
   // Grab the nucpath
-  //H5std_string nucpath;
-  std::string nucpath;
+  void * npath;
   H5::Attribute nuc_attr = data_set.openAttribute("nucpath");
   hsize_t nuc_attr_len = nuc_attr.getStorageSize() / sizeof(char);
   H5::StrType nuc_attr_type(0, nuc_attr_len);
-  //nuc_attr.read(nuc_attr_type, &nucpath);
-  nuc_attr.read(nuc_attr_type, &nucpath);
-  //nuc_attr.read(nuc_attr_type, reinterpret_cast<void*>(&nucpath));
-
-  std::cout << "Donkey\n";
-  std::cout << nuc_attr_len << "\n";
-  std::cout << nucpath.size() << "\n";
+  nuc_attr.read(nuc_attr_type, npath);
+  std::string nucpath ((char *) npath, ((char *) npath)+nuc_attr_len);
 
   // Grab the nuclides
   std::vector<int> nuclides = h5wrap::h5_array_to_cpp_vector_1d<int>(db, nucpath, H5::PredType::NATIVE_INT);
   int nuc_size = nuclides.size();
   hsize_t nuc_dims[1] = {nuc_size};
 
-  std::cout << "Swears\n";
-
   // Get the data hyperslab
   H5::DataSpace data_hyperslab = data_set.getSpace();
   hsize_t data_count[1] = {1};
   data_hyperslab.selectHyperslab(H5S_SELECT_SET, data_count, data_offset);
-
-  std::cout << "Kill\n";
 
   // Get memory space for writing
   H5::DataSpace mem_space (1, data_count);
