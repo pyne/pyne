@@ -31,8 +31,8 @@ Material Class
     .. automethod:: norm_comp()
     .. automethod:: normalize()
     .. automethod:: mult_by_mass()
-    .. automethod:: load_from_hdf5(filename, groupname, row=-1)
-    .. automethod:: load_from_text(filename)
+    .. automethod:: from_hdf5(filename, datapath, row=-1, protocol=1)
+    .. automethod:: from_text(filename)
     .. automethod:: to_atom_frac()
     .. automethod:: from_atom_frac(atom_fracs)
     .. automethod:: sub_mat(nuc_sequence, name="")
@@ -58,7 +58,7 @@ The following top-level module functions are used to generate materials from var
 
 .. autofunction:: from_atom_frac(atom_fracs, mass=-1.0, name='', atoms_per_mol=-1.0)
 
-.. autofunction:: load_from_hdf5(filename, groupname, row=-1)
+.. autofunction:: from_hdf5(filename, datapath, row=-1, protocol=1)
 
-.. autofunction:: load_from_text(filename, mass=-1.0, name='', atoms_per_mol=-1.0)
+.. autofunction:: from_text(filename, mass=-1.0, name='', atoms_per_mol=-1.0)
 
