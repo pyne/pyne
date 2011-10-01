@@ -7,7 +7,7 @@ from nose.tools import assert_equal, assert_not_equal, assert_raises, raises, \
     assert_almost_equal, assert_true, assert_false, assert_in
 
 import os
-from pyne.material import Material, from_atom_frac, load_from_hdf5, load_from_text
+from pyne.material import Material, from_atom_frac, from_hdf5, from_text
 import numpy  as np
 import tables as tb
 
@@ -42,69 +42,69 @@ def make_mat_h5():
     f.close()
 
 
-class TestMaterialConstructor(TestCase):
-    "Tests that the Material constructors works."
+###############################################################################
 
-    def test_mat1(self):
-        mat = Material("mat.txt")
-        assert_equal(mat.comp, {922350: 0.05, 922380: 0.95})
-        assert_equal(mat.mass, 1.0)
-        assert_equal(mat.name, '')
+def test_mat1():
+    mat = Material("mat.txt")
+    assert_equal(mat.comp, {922350: 0.05, 922380: 0.95})
+    assert_equal(mat.mass, 1.0)
+    assert_equal(mat.name, '')
 
-    def test_mat2(self):
-        mat = Material("mat.txt", 42)
-        assert_equal(mat.comp, {922350: 0.05, 922380: 0.95})
-        assert_equal(mat.mass, 42.0)
-        assert_equal(mat.name, '')
+def test_mat2():
+    mat = Material("mat.txt", 42)
+    assert_equal(mat.comp, {922350: 0.05, 922380: 0.95})
+    assert_equal(mat.mass, 42.0)
+    assert_equal(mat.name, '')
 
-    def test_mat3(self):
-        mat = Material("mat.txt", -42, "My Material")
-        assert_equal(mat.comp, {922350: 0.05, 922380: 0.95})
-        assert_equal(mat.mass, 1.0)
-        assert_equal(mat.name, 'My Material')
+def test_mat3():
+    mat = Material("mat.txt", -42, "My Material")
+    assert_equal(mat.comp, {922350: 0.05, 922380: 0.95})
+    assert_equal(mat.mass, 1.0)
+    assert_equal(mat.name, 'My Material')
 
-    def test_mat4(self):
-        mat = Material({922350: 0.05, 922380: 0.95}, 15, "Dict Try")
-        assert_equal(mat.comp, {922350: 0.05, 922380: 0.95})
-        assert_equal(mat.mass, 15.0)
-        assert_equal(mat.name, 'Dict Try')
+def test_mat4():
+    mat = Material({922350: 0.05, 922380: 0.95}, 15, "Dict Try")
+    assert_equal(mat.comp, {922350: 0.05, 922380: 0.95})
+    assert_equal(mat.mass, 15.0)
+    assert_equal(mat.name, 'Dict Try')
 
-    def test_load_from_hdf5(self):
-        #perform tests
-        mat = Material()
-        mat.load_from_hdf5("mat.h5", "/mat")
-        assert_equal(mat.mass, 0.0)
-        assert_equal(mat.comp, {922350: 0.0, 942390: 0.0})
-
-        mat.load_from_hdf5("mat.h5", "/mat", 0)
-        assert_equal(mat.mass, 1.0)
-        assert_equal(mat.comp, {922350: 1.0, 942390: 0.0})
-
-        mat.load_from_hdf5("mat.h5", "/mat", 1)
-        assert_equal(mat.mass, 0.5)
-        assert_equal(mat.comp, {922350: 0.75, 942390: 0.25})
-
-        mat.load_from_hdf5("mat.h5", "/mat", 2)
-        assert_equal(mat.mass, 0.0)
-        assert_equal(mat.comp, {922350: 0.0, 942390: 0.0})
-
-        mat.load_from_hdf5("mat.h5", "/mat", -1)
-        assert_equal(mat.mass, 0.0)
-        assert_equal(mat.comp, {922350: 0.0, 942390: 0.0})
-
-        mat.load_from_hdf5("mat.h5", "/mat", -2)
-        assert_equal(mat.mass, 0.5)
-        assert_equal(mat.comp, {922350: 0.75, 942390: 0.25})
-
-        mat.load_from_hdf5("mat.h5", "/mat", -3)
-        assert_equal(mat.mass, 1.0)
-        assert_equal(mat.comp, {922350: 1.0, 942390: 0.0})
+def test_from_text():
+    mat = Material()
+    mat.from_text("mat.txt")
+    assert_equal(mat.comp, {922350: 0.05, 922380: 0.95})
 
 
-    def test_load_from_text(self):
-        mat = Material()
-        mat.load_from_text("mat.txt")
-        assert_equal(mat.comp, {922350: 0.05, 922380: 0.95})
+def test_from_hdf5_protocol_0():
+    mat = Material()
+    mat.from_hdf5("mat.h5", "/mat", protocol=0)
+    assert_equal(mat.mass, 0.0)
+    assert_equal(mat.comp, {922350: 0.0, 942390: 0.0})
+
+    mat.from_hdf5("mat.h5", "/mat", 0, 0)
+    assert_equal(mat.mass, 1.0)
+    assert_equal(mat.comp, {922350: 1.0, 942390: 0.0})
+
+    mat.from_hdf5("mat.h5", "/mat", 1, 0)
+    assert_equal(mat.mass, 0.5)
+    assert_equal(mat.comp, {922350: 0.75, 942390: 0.25})
+
+    mat.from_hdf5("mat.h5", "/mat", 2, 0)
+    assert_equal(mat.mass, 0.0)
+    assert_equal(mat.comp, {922350: 0.0, 942390: 0.0})
+
+    mat.from_hdf5("mat.h5", "/mat", -1, 0)
+    assert_equal(mat.mass, 0.0)
+    assert_equal(mat.comp, {922350: 0.0, 942390: 0.0})
+
+    mat.from_hdf5("mat.h5", "/mat", -2, 0)
+    assert_equal(mat.mass, 0.5)
+    assert_equal(mat.comp, {922350: 0.75, 942390: 0.25})
+
+    mat.from_hdf5("mat.h5", "/mat", -3, 0)
+    assert_equal(mat.mass, 1.0)
+    assert_equal(mat.comp, {922350: 1.0, 942390: 0.0})
+
+
 
 
 
@@ -758,38 +758,38 @@ def test_from_atom_frac_func():
 
 
 
-def test_load_from_hdf5_func():
-    mat = load_from_hdf5("mat.h5", "/mat")
+def test_from_hdf5_func_protocol_0():
+    mat = from_hdf5("mat.h5", "/mat", protocol=0)
     assert_equal(mat.mass, 0.0)
     assert_equal(mat.comp, {922350: 0.0, 942390: 0.0})
 
-    mat = load_from_hdf5("mat.h5", "/mat", 0)
+    mat = from_hdf5("mat.h5", "/mat", 0, 0)
     assert_equal(mat.mass, 1.0)
     assert_equal(mat.comp, {922350: 1.0, 942390: 0.0})
 
-    mat = load_from_hdf5("mat.h5", "/mat", 1)
+    mat = from_hdf5("mat.h5", "/mat", 1, 0)
     assert_equal(mat.mass, 0.5)
     assert_equal(mat.comp, {922350: 0.75, 942390: 0.25})
 
-    mat = load_from_hdf5("mat.h5", "/mat", 2)
+    mat = from_hdf5("mat.h5", "/mat", 2, 0)
     assert_equal(mat.mass, 0.0)
     assert_equal(mat.comp, {922350: 0.0, 942390: 0.0})
 
-    mat = load_from_hdf5("mat.h5", "/mat", -1)
+    mat = from_hdf5("mat.h5", "/mat", -1, 0)
     assert_equal(mat.mass, 0.0)
     assert_equal(mat.comp, {922350: 0.0, 942390: 0.0})
 
-    mat = load_from_hdf5("mat.h5", "/mat", -2)
+    mat = from_hdf5("mat.h5", "/mat", -2, 0)
     assert_equal(mat.mass, 0.5)
     assert_equal(mat.comp, {922350: 0.75, 942390: 0.25})
 
-    mat = load_from_hdf5("mat.h5", "/mat", -3)
+    mat = from_hdf5("mat.h5", "/mat", -3, 0)
     assert_equal(mat.mass, 1.0)
     assert_equal(mat.comp, {922350: 1.0, 942390: 0.0})
 
 
-def test_load_from_text_func():
-    mat= load_from_text("mat.txt")
+def test_from_text_func():
+    mat= from_text("mat.txt")
     assert_equal(mat.comp, {922350: 0.05, 922380: 0.95})
 
 
