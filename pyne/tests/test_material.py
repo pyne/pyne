@@ -105,6 +105,34 @@ def test_from_hdf5_protocol_0():
     assert_equal(mat.comp, {922350: 1.0, 942390: 0.0})
 
 
+def test_hdf5_protocol_1():
+    if 'proto1.h5' in os.listdir('.'):
+        os.remove('proto1.h5')
+
+    # Test material writing
+    leu = Material({'U235': 0.04, 'U238': 0.96}, 4.2, "LEU", 1.0)
+    leu.write_hdf5('proto1.h5')
+
+    for i in range(2, 11):
+        leu = Material({'U235': 0.04, 'U238': 0.96}, i*4.2, "LEU", 1.0*i)
+        leu.write_hdf5('proto1.h5', row=i-1)
+
+    # Loads with protocol 1 now.
+    m = Material()
+    m.from_hdf5('proto1.h5', '/material', -3, 1)
+    assert_equal(m.name, 'LEU')
+    assert_equal(m.atoms_per_mol, 8.0)
+    assert_equal(m.mass, 33.6)
+    assert_equal(m.comp, {922350: 0.04, 922380: 0.96})
+
+    m = from_hdf5('proto1.h5', '/material', 3, 1)
+    assert_equal(m.name, 'LEU')
+    assert_equal(m.atoms_per_mol, 4.0)
+    assert_equal(m.mass, 16.8)
+    assert_equal(m.comp, {922350: 0.04, 922380: 0.96})
+
+    os.remove('proto1.h5')
+
 
 
 
@@ -791,6 +819,7 @@ def test_from_hdf5_func_protocol_0():
 def test_from_text_func():
     mat= from_text("mat.txt")
     assert_equal(mat.comp, {922350: 0.05, 922380: 0.95})
+
 
 
 #
