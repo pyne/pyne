@@ -152,7 +152,7 @@ void pyne::Material::from_hdf5(char * fchar, char * dchar, int row, int protocol
 void pyne::Material::from_hdf5(std::string filename, std::string datapath, int row, int protocol)
 {
   // Turn off annoying HDF5 errors
-  //H5::Exception::dontPrint();
+  H5::Exception::dontPrint();
 
   // Check that the file is there
   if (!pyne::file_exists(filename))
