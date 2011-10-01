@@ -85,8 +85,6 @@ void pyne::Material::_load_comp_protocol1(H5::H5File * db, std::string datapath,
     // Handle negative row indecies
     H5::DataSpace data_space = data_set.getSpace();
     hsize_t data_dims[1];
-    //hsize_t data_max_dims[1];
-    //int data_rank = data_space.getSimpleExtentDims(data_dims, data_max_dims);
     int data_rank = data_space.getSimpleExtentDims(data_dims);
     data_offset[0] += data_dims[0];
   };
@@ -123,19 +121,17 @@ void pyne::Material::_load_comp_protocol1(H5::H5File * db, std::string datapath,
   data_desc.insertMember("atoms_per_mol", HOFFSET(pyne::material_struct, atoms_per_mol), H5::PredType::NATIVE_DOUBLE);
   data_desc.insertMember("comp", HOFFSET(pyne::material_struct, comp), comp_values_array_type);
 
-  std::cout << "The\n";
-
   // make the data array, have to over-allocate
-  material_struct * mat_data  = (material_struct *) malloc(material_struct_size);
+  material_struct * mat_data = (material_struct *) malloc(material_struct_size);
 
   // Finally, get data and put in on this instance
-  data_set.read(mat_data, data_desc);
+  data_set.read(mat_data, data_desc, mem_space, data_hyperslab);
 
   name = std::string((*mat_data).name);
   mass = (*mat_data).mass;
   atoms_per_mol = (*mat_data).atoms_per_mol;
   for (int i = 0; i < nuc_size; i++)
-    comp[nuclides[i]] = (*mat_data).comp[i];
+    comp[nuclides[i]] = (double) (*mat_data).comp[i];
 
   free(mat_data);
 };
