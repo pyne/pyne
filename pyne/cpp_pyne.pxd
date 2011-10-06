@@ -6,7 +6,7 @@ from libcpp.vector cimport vector
 cimport std
 
 
-cdef extern from "../cpp/pyne.h" namespace "pyne":
+cdef extern from "pyne.h" namespace "pyne":
     std.string PYNE_DATA
     std.string NUC_DATA_PATH
 
