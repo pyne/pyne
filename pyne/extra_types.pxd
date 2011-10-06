@@ -2,7 +2,7 @@
 cimport std
 
 
-cdef extern from "../cpp/extra_types.h" namespace "extra_types":
+cdef extern from "extra_types.h" namespace "extra_types":
 
     ctypedef struct complex_t:
         double re
