@@ -52,7 +52,7 @@ pyne_logo = """\
 """
 
 
-##########################################
+###########################################
 ### Set compiler options for extensions ###
 ###########################################
 pyt_dir = os.path.join('pyne')
@@ -101,12 +101,12 @@ def cpp_ext(name, sources, libs=None, use_hdf5=False):
                            ]
     # perfectly general, thanks to dynamic runtime linking of $ORIGIN
     #ext['runtime_library_dirs'] = ['${ORIGIN}/lib', '${ORIGIN}']
-    #ext['runtime_library_dirs'] = ['${ORIGIN}/lib', '${ORIGIN}', '${ORIGIN}/.']
-    ext['runtime_library_dirs'] = ['${ORIGIN}/lib', '${ORIGIN}', '${ORIGIN}/.'] + \
-                                  [os.path.abspath(p) for p in ext['library_dirs']] + \
-                                  [os.path.abspath(p + '/pyne/lib') for p in sys.path] + \
-                                  [os.path.abspath(p + '/pyne') for p in sys.path] + \
-                                  [os.path.abspath(p) for p in sys.path]
+    ext['runtime_library_dirs'] = ['${ORIGIN}/lib', '${ORIGIN}', '${ORIGIN}/.']
+    #ext['runtime_library_dirs'] = ['${ORIGIN}/lib', '${ORIGIN}', '${ORIGIN}/.'] + \
+    #                              [os.path.abspath(p) for p in ext['library_dirs']] + \
+    #                              [os.path.abspath(p + '/pyne/lib') for p in sys.path] + \
+    #                              [os.path.abspath(p + '/pyne') for p in sys.path] + \
+    #                              [os.path.abspath(p) for p in sys.path]
 
 
     if os.name == 'posix':
@@ -175,7 +175,7 @@ packages = ['pyne', 'pyne.lib', 'pyne.dbgen']
 
 pack_dir = {'pyne': 'pyne', 'pyne.dbgen': 'pyne/dbgen'}
 
-pack_data = {'pyne': ['includes/*.h', 'includes/*.pxd'],
+pack_data = {'pyne': ['includes/*.h', 'includes/pyne/*.pxd'],
              'pyne.dbgen': ['*.html'],
             }
 
@@ -199,9 +199,14 @@ if __name__ == "__main__":
     # clean includes dir and recopy files over
     if os.path.exists('pyne/includes'):
         remove_tree('pyne/includes')
+
     mkpath('pyne/includes')
-    for header in (glob.glob('cpp/*.h') + glob.glob('pyne/*.pxd')):
+    for header in glob.glob('cpp/*.h'):
         copy_file(header, 'pyne/includes')
+
+    mkpath('pyne/includes/pyne')
+    for header in glob.glob('pyne/*.pxd'):
+        copy_file(header, 'pyne/includes/pyne')
 
     # call setup
     setup(name="pyne",
