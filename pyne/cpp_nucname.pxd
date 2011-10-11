@@ -4,7 +4,7 @@ from libcpp.set cimport set
 
 cimport std
 
-cdef extern from "../cpp/nucname.h" namespace "pyne::nucname":
+cdef extern from "nucname.h" namespace "pyne::nucname":
     # Conversion dictionaries
     map[std.string, int] name_zz
     map[int, std.string] zz_name

@@ -140,29 +140,38 @@ cdef class _Material:
         self.mat_pointer.norm_comp()
 
 
-    def from_hdf5(self, char * filename, char * groupname, int row=-1, int protocol=1):
+    def from_hdf5(self, char * filename, char * datapath, int row=-1, int protocol=1):
         """Initialize a Material object from an HDF5 file.
 
         Parameters
         ----------
         filename : str
             Path to HDF5 file that contains the data to read in.    
-        groupname : str 
-            Path to HDF5 group that represents the data. 
-            In the above example, groupname = "/Material".    
+        datapath : str 
+            Path to HDF5 table or group that represents the data. 
+            In the example below, datapath = "/material".    
         row : int, optional 
             The index of the arrays from which to read the data.  This 
             ranges from 0 to N-1.  Defaults to the last element of the array.
             Negative indexing is allowed (row[-N] = row[0]).
+        protocol : int, optional
+            Specifies the protocol to use to read in the data.  Different 
+            protocols are used to represent different internal structures in 
+            the HDF5 file.
 
         Notes
         -----
-        The HDF5 representation of a Material is a group that holds several 
+        There are currently two protocols which are implemented for how to store
+        materials inside of an HDF5 file.  Protocol 0 is the older, deprecated method
+        using a group of arrays.  Protocol 1 is the newer, prefered method which 
+        uses a table of materials plus a side array of nuclides.
+
+        The Protocol 0 HDF5 representation of a Material is a group that holds several 
         extendable array datasets.  One array is entitled "Mass" while the other datasets
         are nuclide names in name form ("U235", "NP237", *etc*).  For example::
 
-            File.h5 (file)
-                |-- Material (group)
+            file.h5 (file)
+                |-- material (group)
                     |-- Mass (array)
                     |-- H1 (array)
                     |-- O16 (array)
@@ -172,7 +181,24 @@ cdef class _Material:
 
         The arrays are all of length N, where each row typically represents a different 
         fuel cycle pass.  The sum of all of the nuclide arrays should sum to one, like 
-        Material.comp. 
+        Material.comp. This method is deprecated.
+
+        Protocol 1 is the newer, more efficient protocol for storing many materials. 
+        It consists of a table which stores the material information and an array
+        that stores the nuclides (zzaaam) which index the comp array::
+
+            file.h5 (file)
+                |-- material (table)
+                    |-- name (string col, len 20)
+                    |-- mass (double col)
+                    |-- atoms_per_mol (double col)
+                    |-- comp (double array col, len of nuc_zz)
+                |-- nuc_zz (int array)
+
+        The material table has a string attribute called 'nucpath' which holds the 
+        path to the nuclide array inside this HDF5 file.  The same nucpath may be
+        used for multiple material tables.  The length of the nucpath must match 
+        the length of the comp arrays.
 
         Examples
         --------
@@ -182,7 +208,7 @@ cdef class _Material:
             mat = Material()
             mat.from_hdf5("afile.h5", "/foo/bar/mat", -3)
         """
-        self.mat_pointer.from_hdf5(filename, groupname, row, protocol)
+        self.mat_pointer.from_hdf5(filename, datapath, row, protocol)
 
 
     def from_text(self, char * filename):
@@ -1034,20 +1060,23 @@ def from_atom_frac(atom_fracs, double mass=-1.0, char * name='', double atoms_pe
 
 
 
-def from_hdf5(char * filename, char * groupname, int row=-1):
+def from_hdf5(char * filename, char * datapath, int row=-1, int protocol=1):
     """Create a Material object from an HDF5 file.
 
     Parameters
     ----------
     filename : str
         Path to HDF5 file that contains the data to read in.    
-    groupname : str 
-        Path to HDF5 group that represents the data. 
-        In the above example, groupname = "/Material".    
+    datapath : str 
+        Path to HDF5 table or group that represents the data. 
     row : int, optional 
         The index of the arrays from which to read the data.  This 
         ranges from 0 to N-1.  Defaults to the last element of the array.
         Negative indexing is allowed (row[-N] = row[0]).
+    protocol : int, optional
+        Specifies the protocol to use to read in the data.  Different 
+        protocols are used to represent different internal structures in 
+        the HDF5 file.
 
     Returns
     -------
@@ -1065,7 +1094,7 @@ def from_hdf5(char * filename, char * groupname, int row=-1):
     Material.from_hdf5 : Underlying method class method.
     """
     mat = Material()
-    mat.from_hdf5(filename, groupname, row)
+    mat.from_hdf5(filename, datapath, row, protocol)
     return mat
 
 
