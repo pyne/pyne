@@ -125,10 +125,13 @@ class TrackData(object):
 
 class SurfSrc(_BinaryReader):
 
-    def __init__(self, filename):
-        super(SurfSrc, self).__init__(filename)
+    def __init__(self, filename, mode="rb"):
+        super(SurfSrc, self).__init__(filename,mode)
 
     def __str__(self):
+        return self.print_header()
+
+    def print_header(self):
         headerString  = "Code: {0} (version: {1}) [{2}]\n".format(self.kod, self.ver, self.loddat)
         headerString += "Problem info: ({0}) {1}\n{2}\n".format(self.idtm, self.probid, self.aid)
         headerString += "Showing dump #{0}\n".format(self.knod)
@@ -144,15 +147,65 @@ class SurfSrc(_BinaryReader):
             headerString += ")\n"
         headerString += "Summary Table: " + str(self.summaryTable)
 
+        return headerString
+
+    def print_tracklist(self):
         trackData = "Track Data\n"
   #                       1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890
         trackData +=     "       nps   BITARRAY        WGT        ERG        TME             X             Y             Z          U          V     COSINE  |       W\n"
         for j in self.tracklist:
             trackData += "%10d %10g %10.5g %10.5g %10.5g %13.5e %13.5e %13.5e %10.5f %10.5f %10.5f  | %10.5f " % (j.nps, j.bitarray, j.wgt, j.erg, j.tme, j.x, j.y, j.z, j.u, j.v, j.cs, j.w) + "\n"
 
-        return headerString + "\n" + trackData
+        return trackData
 
-    def read(self):
+    def compare(self,other):
+        if other.kod != self.kod:
+            print "kod does not match"
+            return False
+        if other.ver != self.ver:
+            print "ver does not match"
+            return False
+        if other.loddat != self.loddat:
+            print "loddat does not match"
+            return False
+
+        if other.ncrd != self.ncrd:
+            print "ncrd does not match"
+            return False
+        if other.njsw != self.njsw:
+            print "njsw does not match"
+            return False
+
+        if other.niwr  != self.niwr:
+            print "niwr does not match"
+            return False
+        if other.mipts != self.mipts:
+            print "mipts does not match"
+            return False
+        if other.kjaq  != self.kjaq:
+            print "kjaq does not match"
+            return False
+
+        for surf in range(len(self.surflist)):
+            if other.surflist[surf].id         != self.surflist[surf].id:
+                print "surf " + str(surf) + " ID doesn't match"
+                return False
+            if other.surflist[surf].facetId    != self.surflist[surf].facetId:
+                print "surf " + str(surf) + " facetId doesn't match"
+                return False
+            if other.surflist[surf].type       != self.surflist[surf].id:
+                print "surf " + str(surf) + " type doesn't match"
+                return False
+            if other.surflist[surf].numParams  != self.surflist[surf].numParams:
+                print "surf " + str(surf) + " numParams doesn't match"
+                return False
+            if other.surflist[surf].surfParams != self.surflist[surf].surfParams:
+                print "surf " + str(surf) + " surfParams doesn't match"
+                return False
+
+        return True
+
+    def read_header(self):
         # read header block
         header = self.get_fortran_record()
 
@@ -214,6 +267,7 @@ class SurfSrc(_BinaryReader):
         self.summaryTable = summaryInfo.get_int((2+4*self.mipts)*(self.njsw+self.niwr)+1)
         self.summaryTable = self.summaryTable[1:]
         
+    def read_tracklist(self):
         self.tracklist = []
         for j in range(self.nrss):
             trackInfo = self.get_fortran_record()
@@ -234,8 +288,6 @@ class SurfSrc(_BinaryReader):
             # trackData.bitarray = abs(trackData.bitarray)
             
             self.tracklist.append(trackData)
-
-
 
 class Srctp(_BinaryReader):
 
