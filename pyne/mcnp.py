@@ -290,6 +290,9 @@ class SurfSrc(_BinaryReader):
             self.tracklist.append(trackData)
 
 class Srctp(_BinaryReader):
+    """This class stores source site data from a 'srctp' file written by
+    MCNP. The source sites are stored in the 'fso' array in MCNP.
+    """
 
     def __init__(self, filename):
         super(Srctp, self).__init__(filename)
@@ -303,7 +306,7 @@ class Srctp(_BinaryReader):
         self.loc_next = header.get_int() # location of next site in FSO array (ixak)
         self.n_run = header.get_int() # source particles yet to be run (nsa)
         self.loc_store = header.get_int() # where to store next source neutron (ist)
-        self.n_source = header.get_int() # number of source points in fso
+        self.n_source = header.get_int() # number of source points in fso (mrl)
 
         # read source site array
         fso = self.get_fortran_record()
@@ -322,7 +325,11 @@ class Srctp(_BinaryReader):
 
     def remainingSites(self):
         index = self.loc_next - 1
-        return self.sites[index : index + self.n_run]
+        if (self.loc_next + self.n_run) >= self.n_source:
+            return (self.sites[index:] + 
+                    self.sites[:self.n_run - (self.n_source - index)])
+        else:
+            return self.sites[index : index + self.n_run]
 
     def __repr__(self):
         return "<Srctp: {0}>".format(self.f.name)

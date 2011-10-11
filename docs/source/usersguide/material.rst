@@ -56,8 +56,8 @@ dictionaries of compositions are shown below.
     AM242  0.111111111111
     CM244  0.111111111111
 
-Materials may also be initialized from plain text or HDF5 files (see :meth:`Material.load_from_text` and
-:meth:`Material.load_from_hdf5`).  Once you have a Material instance, you can always obtain the unnormalized
+Materials may also be initialized from plain text or HDF5 files (see :meth:`Material.from_text` and
+:meth:`Material.from_hdf5`).  Once you have a Material instance, you can always obtain the unnormalized
 mass vector through :meth:`Material.mult_by_mass`.  Normalization routines to normalize the mass 
 :meth:`Material.normalize` or the composition :meth:`Material.norm_comp` are also available.
 

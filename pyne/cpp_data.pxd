@@ -5,7 +5,7 @@ from libcpp.set cimport set
 cimport std
 cimport extra_types
 
-cdef extern from "../cpp/data.h" namespace "pyne":
+cdef extern from "data.h" namespace "pyne":
     # nuc_weight functions
     map[int, double] nuc_weight_map
     double nuc_weight(int) except +
