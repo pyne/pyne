@@ -304,7 +304,7 @@ void pyne::Material::write_hdf5(std::string filename, std::string datapath, std:
     // Determine the row size.
     int row_num = (int) row;
 
-    if (signbit(row))
+    if (std::signbit(row))
       row_num = data_dims[0] + row;  // careful, row is negative
 
     if (data_dims[0] <= row_num)

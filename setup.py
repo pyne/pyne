@@ -108,7 +108,6 @@ def cpp_ext(name, sources, libs=None, use_hdf5=False):
     #                              [os.path.abspath(p + '/pyne') for p in sys.path] + \
     #                              [os.path.abspath(p) for p in sys.path]
 
-
     if os.name == 'posix':
         #ext["extra_compile_args"] = ["-Wno-strict-prototypes"]
         ext["undef_macros"] = ["NDEBUG"]
