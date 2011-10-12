@@ -232,12 +232,12 @@ double pyne::solve_line(double x, double x2, double y2, double x1, double y1)
 
 double pyne::tanh(double x)
 {
-  return tanh(x);
+  return std::tanh(x);
 };
 
 double pyne::coth(double x)
 {
-  return 1.0 / tanh(x);
+  return 1.0 / std::tanh(x);
 };
 
 
