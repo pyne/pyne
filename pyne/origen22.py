@@ -63,7 +63,7 @@ def sec_to_time_unit(s):
         
 
 # Regex helpers
-_data_format = "\d+\.\d*[EeDd]?[+-]?\d+"
+_data_format = "\d+\.\d*[EeDd]?[ +-]?\d+"
 
 
 
@@ -525,6 +525,7 @@ def _parse_tape9_decay(deck):
     # Parse the cards into a structured arrau
     cards = [m.groups()[1:] + n.groups()[1:] for m, n in 
              izip(imap(decay_card1_re.match, deck[1::2]), imap(decay_card2_re.match, deck[2::2]))]
+    cards = [tuple(d.replace(' ', '') for d in card) for card in cards]
     cards = np.array(cards, dtype='i4,i4' + ',f8'*12)
     pdeck['_cards'] = cards
 
@@ -553,7 +554,7 @@ def _parse_tape9_xsfpy(deck):
 
     # Pasre the deck
     cards = []
-    no_fpy = (0.0, ) * 8
+    no_fpy = ('0.0', ) * 8
 
     i = 1
     deck_size = len(deck)
@@ -567,6 +568,7 @@ def _parse_tape9_xsfpy(deck):
         cards.append(first_card + second_card)
         i += 1
 
+    cards = [tuple(d.replace(' ', '') for d in card) for card in cards]
     cards = np.array(cards, dtype='i4' + ',f8'*15)
     pdeck['_cards'] = cards
 
