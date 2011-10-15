@@ -104,7 +104,7 @@ namespace pyne
     Material operator/ (double);
   };
 
-std::ostream& operator<< (std::ostream& os, Material mat);
+  std::ostream& operator<< (std::ostream& os, Material mat);
 
   typedef struct material_struct {
     char name [20];
