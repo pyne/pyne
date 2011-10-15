@@ -94,6 +94,25 @@ def test_map_int_str():
     assert_equal(n[-1], 'maybe')
 
 
+def test_map_str_double():
+    m = conv.MapStrDouble()
+    m['worm'] = 69.12
+    m['drum'] = 100
+    assert_equal(len(m), 2)
+    assert_equal(m['worm'], 69.12)
+
+    m = conv.MapStrDouble({'yes': 42.42, 'no': 0})
+    assert_equal(len(m), 2)
+    assert_equal(m['no'], 0.0)
+
+    n = conv.MapStrDouble(m, False)
+    assert_equal(len(n), 2)
+    assert_equal(n['yes'], 42.42)
+
+    # points to the same underlying map
+    n['maybe'] = -0.07
+    assert_equal(m['maybe'], -0.07)
+
 
 def test_map_int_double():
     m = conv.MapIntDouble()
