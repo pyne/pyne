@@ -7,7 +7,7 @@ from nose.tools import assert_equal, assert_not_equal, assert_raises, raises, \
     assert_almost_equal, assert_true, assert_false, assert_in
 
 import os
-from pyne.material import Material, from_atom_frac, from_hdf5, from_text
+from pyne.material import Material, from_atom_frac, from_hdf5, from_text, MapStrMaterial
 import numpy  as np
 import tables as tb
 
@@ -821,6 +821,40 @@ def test_from_text_func():
     assert_equal(mat.comp, {922350: 0.05, 922380: 0.95})
 
 
+
+def test_map_str_material():
+    m = MapStrMaterial()
+    m['leu'] = Material(leu)
+    m['heu'] = Material({'U238': 0.01, 'U235': 0.99}, 42.0)
+    assert_equal(len(m), 2)
+    assert_equal(m['leu'].mass, 1.0)
+    assert_equal(m['leu']['U235'], 0.04)
+    assert_equal(m['heu'].mass, 42.0)
+    assert_equal(m['heu']['U238'], 0.42)
+
+    m = MapStrMaterial({'leu': Material(leu), 'heu': Material({'U238': 0.01, 'U235': 0.99}, 42.0)})
+    assert_equal(len(m), 2)
+    assert_equal(m['leu'].mass, 1.0)
+    assert_equal(m['leu']['U235'], 0.04)
+    assert_equal(m['heu'].mass, 42.0)
+    assert_equal(m['heu']['U238'], 0.42)
+
+    n = MapStrMaterial(m, False)
+    assert_equal(len(n), 2)
+    assert_equal(n['leu'].mass, 1.0)
+    assert_equal(n['leu']['U235'], 0.04)
+    assert_equal(n['heu'].mass, 42.0)
+    assert_equal(n['heu']['U238'], 0.42)
+
+    # points to the same underlying map
+    n['other'] = Material({'PU239': 15.0})
+    assert_equal(m['other'].mass, 15.0)
+    assert_equal(m['other']['PU239'], 15.0)
+
+    assert_equal(n['leu'].mass, 1.0)
+    assert_equal(n['leu']['U235'], 0.04)
+    assert_equal(n['heu'].mass, 42.0)
+    assert_equal(n['heu']['U238'], 0.42)
 
 #
 # Run as script
