@@ -181,6 +181,16 @@ cdef class _MapStrDouble:
     cdef public bint _free_map
 
 
+# (Int, Int)
+cdef class MapIterIntInt(object):
+    cdef cpp_map[int, int].iterator * iter_now
+    cdef cpp_map[int, int].iterator * iter_end
+    cdef void init(MapIterIntInt, cpp_map[int, int] *)
+
+cdef class _MapIntInt:
+    cdef cpp_map[int, int] * map_ptr
+    cdef public bint _free_map
+
 
 # (Int, Double)
 cdef class MapIterIntDouble(object):
