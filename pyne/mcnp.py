@@ -13,6 +13,7 @@ classes.
 
 import struct
 import math 
+import os
 
 from binaryreader import _BinaryReader
 
@@ -321,3 +322,168 @@ class Runtpe(_BinaryReader):
 
     def __repr__(self):
         return "<Runtpe: {0}>".format(self.f.name)
+
+
+class Xsdir(object):
+
+    def __init__(self, filename):
+        self.f = open(filename, 'r')
+        self.filename = os.path.abspath(filename)
+        self.directory = os.path.dirname(filename)
+        self.awr = {}
+        self.tables = []
+
+        self.read()
+
+    def read(self):
+        # Go to beginning of file
+        self.f.seek(0)
+
+        # Read first section (DATAPATH)
+        line = self.f.readline()
+        words = line.split()
+        if words:
+            if words[0].lower().startswith('datapath'):
+                index = line.index('=')
+                self.datapath = line[index+1:].strip()
+
+        # Read second section
+        line = self.f.readline()
+        words = line.split()
+        assert len(words) == 3
+        assert words[0].lower() == 'atomic'
+        assert words[1].lower() == 'weight'
+        assert words[2].lower() == 'ratios'
+
+        while True:
+            line = self.f.readline()
+            words = line.split()
+
+            # Check for end of second section
+            if len(words) % 2 != 0 or words[0] == 'directory':
+                break
+            
+            for zaid, awr in zip(words[::2], words[1::2]):
+                self.awr[zaid] = awr
+
+        # Read third section
+        while words[0] != 'directory':
+            words = self.f.readline().split()
+            
+        while True:
+            words = self.f.readline().split()
+            if not words:
+                break
+
+            # Handle continuation lines
+            while words[-1] == '+':
+                extraWords = self.f.readline().split()
+                words = words + extraWords
+            assert len(words) >= 7
+
+            # Create XsdirTable object and add to line
+            table = XsdirTable()
+            self.tables.append(table)
+            
+            # All tables have at least 7 attributes
+            table.name = words[0]
+            table.awr = float(words[1])
+            table.filename = words[2]
+            table.access = words[3]
+            table.filetype = int(words[4])
+            table.address = int(words[5])
+            table.tablelength = int(words[6])
+
+            if len(words) > 7:
+                table.recordlength = int(words[7])
+            if len(words) > 8:
+                table.entries = int(words[8])
+            if len(words) > 9:
+                table.temperature = float(words[9])
+            if len(words) > 10:
+                table.ptable = (words[10] == 'ptable')
+
+    def find_table(self, name):
+        tables = []
+        for table in self:
+            if name in table.name:
+                tables.append(table)
+        return tables
+
+    def to_xsdata(self, filename):
+        xsdata = open(filename, 'w')
+        for table in self.tables:
+            if table.serpent_type == 1:
+                xsdata.write(table.to_serpent() + '\n')
+        xsdata.close()
+
+    def __iter__(self):
+        for table in self.tables:
+            yield table
+
+class XsdirTable(object):
+
+    def __init__(self):
+        self.name = None
+        self.awr = None
+        self.filename = None
+        self.access = None
+        self.filetype = None
+        self.address = None
+        self.tablelength = None
+        self.recordlength = None
+        self.entries = None
+        self.temperature = None
+        self.ptable = False
+
+    @property
+    def alias(self):
+        return self.name
+
+    @property
+    def serpent_type(self):
+        if self.name.endswith('c'):
+            return 1
+        elif self.name.endswith('y'):
+            return 2
+        elif self.name.endswith('t'):
+            return 3
+        else:
+            return None
+
+    @property
+    def metastable(self):
+        # Only valid for neutron cross-sections
+        if not self.name.endswith('c'):
+            return
+
+        # Handle special case of Am-242 and Am-242m
+        if self.ZAID == '95242':
+            return True
+        elif self.ZAID == '95642':
+            return False
+
+        # All other cases
+        A = int(self.ZAID) % 1000
+        if A > 600:
+            return True
+        else:
+            return False
+
+    @property
+    def ZAID(self):
+        return self.name[:self.name.find('.')]
+
+    def to_serpent(self, directory=''):
+        # Adjust directory
+        if directory:
+            if not directory.endswith('/'):
+                directory = directory.strip() + '/'
+
+        return "{0} {0} {1} {2} {3} {4} {5} {6} {7}".format(
+            self.name, self.serpent_type, self.ZAID, 1 if self.metastable else 0,
+            self.awr, self.temperature/8.6173423e-11, self.filetype - 1,
+            directory + self.filename)
+
+    def __repr__(self):
+        return "<XsDirTable: {0}>".format(self.name)
