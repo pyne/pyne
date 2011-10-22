@@ -34,7 +34,9 @@ supported by PyNE.  Functions to convert between forms may be seen in :ref:`name
  #. **NIST**: The NIST naming convention is also similar to the Serpent form.  However, this
     convention contains not meta-stable information.  Moreover, the A-number comes before the
     element symbol.  For example, '242Am' is the valid NIST notation.
-
+ #. **CINDER**: The CINDER format is similar to zzaaam form except that the placement of the Z- and
+    A-numbers are swapped. Therefore, this format is effectively aaazzzm.  For example, '2420951' is
+    the valid cinder notation for 'AM242M'.
 
 If there are more conventions that you would like to see supported, please contact the :ref:`dev_team`.
 
