@@ -134,7 +134,10 @@ def parse_res(resfile, write_py=False):
 
     # Write the file out
     if write_py:
-        new_filename = filename.rpartition('.')[0] + '.py'
+        if isinstance(resfile, basestring):
+            new_filename = resfile.rpartition('.')[0] + '.py'
+        else:
+            new_filename = resfile.name.rpartition('.')[0] + '.py'
         with open(new_filename, 'w') as pyfile:
             pyfile.write(f)
 
@@ -146,7 +149,7 @@ def parse_res(resfile, write_py=False):
 
 
 
-def parse_dep(depfile, write_py=False):
+def parse_dep(depfile, write_py=False, make_mats=True):
     """Converts a serpent depletion *_dep.m output file to a dictionary (and 
     optionally to a *_dep.py file).
 
@@ -156,6 +159,8 @@ def parse_dep(depfile, write_py=False):
         Path to depletion file or a dep file handle.
     write_py : bool, optional
         Flag for whether to write the dep file to an analogous python file.
+    make_mats : bool, optional
+        Flag for weather or not to build Materials out of mass data.
 
     Returns
     -------
@@ -203,19 +208,34 @@ def parse_dep(depfile, write_py=False):
     f = f.replace('.*', "*")
     f = f.replace('./', "/")
 
-    # Add imports to header
-    header = "import numpy as np\n\n"
-
-    # Add header to file
-    f = header + f
-
     # Remove semicolons
     f = _replace_semicolons(f)
 
+    # Add imports to header
+    header = "import numpy as np\n"
+    if make_mats:
+        header += "from pyne.material import Material\n"
+    header += "\n"
+
+    # Add materials
+    footer = ""
+    if make_mats:
+        mat_gen_line = "{name}MATERIAL = [{name}VOLUME * Material(dict(zip(ZAI[:-2], {name}MDENS[:-2, col]))) for col in range(len(DAYS))]\n"
+        footer += "\n\n# Construct materials\n"
+        base_names = re.findall('(MAT_\w*_)MDENS = ', f)
+        for base_name in base_names:
+            footer += mat_gen_line.format(name=base_name)
+        footer += "TOT_MATERIAL = [Material(dict(zip(ZAI[:-2], TOT_MASS[:-2, col]))) for col in range(len(DAYS))]\n"
+
+    # Add header & footer to file
+    f = header + f + footer
 
     # Write the file out
     if write_py:
-        new_filename = filename.rpartition('.')[0] + '.py'
+        if isinstance(depfile, basestring):
+            new_filename = depfile.rpartition('.')[0] + '.py'
+        else:
+            new_filename = depfile.name.rpartition('.')[0] + '.py'
         with open(new_filename, 'w') as pyfile:
             pyfile.write(f)
 
@@ -280,7 +300,10 @@ def parse_det(detfile, write_py=False):
 
     # Write the file out
     if write_py:
-        new_filename = filename.rpartition('.')[0] + '.py'
+        if isinstance(detfile, basestring):
+            new_filename = detfile.rpartition('.')[0] + '.py'
+        else:
+            new_filename = detfile.name.rpartition('.')[0] + '.py'
         with open(new_filename, 'w') as pyfile:
             pyfile.write(f)
 
