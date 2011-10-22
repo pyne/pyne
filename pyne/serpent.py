@@ -49,8 +49,8 @@ def _replace_arrays(s):
 
 
 def parse_res(resfile, write_py=False):
-    """Converts a serpent results *_res.m output file to a dictionary (and 
-    optionally to a *_res.py file).
+    """Converts a serpent results ``*_res.m`` output file to a dictionary (and 
+    optionally to a ``*_res.py`` file).
 
     Parameters
     ----------
@@ -150,8 +150,8 @@ def parse_res(resfile, write_py=False):
 
 
 def parse_dep(depfile, write_py=False, make_mats=True):
-    """Converts a serpent depletion *_dep.m output file to a dictionary (and 
-    optionally to a *_dep.py file).
+    """Converts a serpent depletion ``*_dep.m`` output file to a dictionary (and 
+    optionally to a ``*_dep.py`` file).
 
     Parameters
     ----------
@@ -160,7 +160,9 @@ def parse_dep(depfile, write_py=False, make_mats=True):
     write_py : bool, optional
         Flag for whether to write the dep file to an analogous python file.
     make_mats : bool, optional
-        Flag for weather or not to build Materials out of mass data.
+        Flag for whether or not to build Materials out of mass data and add 
+        these to the return dictionary.  Materials so added have names which 
+        end in '_MATERIAL'.
 
     Returns
     -------
@@ -248,8 +250,8 @@ def parse_dep(depfile, write_py=False, make_mats=True):
 
 
 def parse_det(detfile, write_py=False):
-    """Converts a serpent detector *_det.m output file to a dictionary (and 
-    optionally to a *_det.py file).
+    """Converts a serpent detector ``*_det.m`` output file to a dictionary (and 
+    optionally to a ``*_det.py`` file).
 
     Parameters
     ----------
