@@ -24,10 +24,15 @@ def test_parse_res1():
 
 def test_parse_dep1():
     dep = serpent.parse_dep('sample_dep.m')
+    nuc_set = set(dep['ZAI'][:-2])
     shape = (len(dep['ZAI']), len(dep['DAYS'])) 
     for key in dep:
         if key.endswith('_VOLUME'):
             assert_true(isinstance(dep[key], float))
+        elif key.endswith('_MATERIAL'):
+            assert_equal(len(dep[key]), shape[1])
+            for n in range(shape[1]):
+                assert_equal(nuc_set, set(dep[key][n].comp.keys()))
         elif key.startswith('MAT_') and key.endswith('_BURNUP'):
             assert_equal(dep[key].shape, (1, shape[1]))
         elif key.startswith('MAT_') or key.startswith('TOT_'):
