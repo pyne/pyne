@@ -9,6 +9,7 @@ from pyne.dbgen.decay import make_decay
 from pyne.dbgen.atomic_weight import make_atomic_weight
 from pyne.dbgen.scattering_lengths import make_scattering_lengths
 from pyne.dbgen.simple_xs import make_simple_xs
+from pyne.dbgen.cinder import make_cinder
 
 # Thanks to http://patorjk.com/software/taag/
 # and http://www.chris.com/ascii/index.php?art=creatures/dragons (Jeff Ferris)
@@ -45,12 +46,23 @@ pyne_logo = """\
 def main():
     print pyne_logo
 
+    make_funcs = [('atomic_weight', make_atomic_weight),
+                  ('scattering_lengths', make_scattering_lengths),
+                  ('decay', make_decay), 
+                  ('simple_xs', make_simple_xs), 
+                  ('cinder', make_cinder), 
+                 ]
+    make_map = dict(make_funcs)
+
     # Parse the command line arguments
     parser = argparse.ArgumentParser(description='Make a nuclear data library.')
     parser.add_argument('-o', dest='nuc_data', action='store', default=nuc_data,
                         help='path to the output database file.')
     parser.add_argument('-b', dest='build_dir', action='store', default=build_dir,
                         help='path to the build directory.')
+    parser.add_argument('-m', dest='make', action='store', default='all',
+                        help='comma-separated parts of nuc_data to make: ' + \
+                        ", ".join([mf[0] for mf in make_funcs]) + ', all, and none.')
     parser.add_argument('--clean', dest='clean', type=int, default=0,
                         help="""level to clean up existing files.
                                 0: no cleaning (default).
@@ -72,17 +84,19 @@ def main():
         remove_tree(args.build_dir)
     mkpath(args.build_dir)
 
-    # Stop after cleaning
-    if 0 < args.clean:
-        return
+    # Determine what to make
+    if args.make == 'none':
+        make_order = []
+    elif args.make == 'all':
+        make_order = [mf[0] for mf in make_funcs]
+    else:
+        make_order = args.make.replace(' ', "").split(',')
 
     print "Making nuc_data at {0}".format(args.nuc_data)
 
     # Make the various tables
-    make_atomic_weight(args.nuc_data, args.build_dir)
-    make_scattering_lengths(args.nuc_data, args.build_dir)
-    make_decay(args.nuc_data, args.build_dir)
-    make_simple_xs(args.nuc_data, args.build_dir)    
+    for mo in make_order:
+        make_map[mo](args.nuc_data, args.build_dir)
 
 
 if __name__ == '__main__':
