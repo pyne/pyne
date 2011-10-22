@@ -217,6 +217,14 @@ namespace nucname
   std::string nist(char *);
   std::string nist(std::string);
 
+
+  /************************/
+  /*** cinder functions ***/
+  /************************/
+  int cinder(int);
+  int cinder(char *);
+  int cinder(std::string);
+
 };
 };
 
