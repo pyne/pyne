@@ -1340,7 +1340,10 @@ class PhotonuclearTable(AceTable):
 def isotope_name(name):
     # TODO: Use material module to replace this
 
-    ZAID = int(name[:name.find('.')])
+    try:
+        ZAID = int(name[:name.find('.')])
+    except ValueError:
+        return name
 
     # determine mass number and atomic number
     A = ZAID % 1000
