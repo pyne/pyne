@@ -518,7 +518,7 @@ def parse_neutron_fp_info(raw_data):
     return info_table
 
 
-def make_neutron_fp_info(nuc_data, build_dir):
+def make_neutron_fp_info(nuc_data, build_dir=""):
     """Adds the neutron fission product yield info to the hdf5 library.
 
     Parameters
@@ -553,19 +553,20 @@ def make_neutron_fp_info(nuc_data, build_dir):
     db.close()
 
 
-#### STOPPED HERE
-
 gfp_info_pattern = "Photofission Yield Data.*?fission products"
 
-def _grab_photon_fp_info(raw_data):
+def grab_photon_fp_info(raw_data):
     """Grabs the photon fission product info.
 
-    Args:
-        * raw_data (str): string of the cinder.dat data file.
+    Parameters
+    ----------
+    raw_data : str
+        string of the cinder.dat data file.
 
-    Returns:
-        * info_table (list of tuples): elements are tuples that have the form 
-          "(index, nuc_name, nuc_zz, type, mass)". 
+    Returns
+    -------
+    info_table : array 
+        Structured array with the form "(index, nuc_name, nuc_zz, type, mass)". 
     """
     # Get group sizes
     N_n, N_g = get_fp_sizes(raw_data)
@@ -590,7 +591,7 @@ def _grab_photon_fp_info(raw_data):
         iit = iits[m]
         index = int(iit[0])
 
-        nuc_zz = nucname.LLAAAM_2_zzaaam(iit[1])
+        nuc_zz = nucname.zzaaam(iit[1])
         # Correct for metastable flag
         if 0 != nuc_zz%10:
             nuc_zz = nuc_zz + 2000
@@ -602,48 +603,51 @@ def _grab_photon_fp_info(raw_data):
         info_row = (index, nuc_name, nuc_zz, type, mass)
         info_table.append(info_row)
 
+    info_table = np.array(info_table, dtype=fp_info_dtype)
+
     return info_table
 
-def make_photon_fp_info(nuc_data, build_dir):
+def make_photon_fp_info(nuc_data, build_dir=""):
     """Adds the photofission product yield info to the hdf5 library.
 
-    Keyword Args:
-        * h5_file (str): path to hdf5 file.
-        * data_file (str): path to the cinder.dat data file.
+    Parameters
+    ----------
+    nuc_data : str
+        Path to nuclide data file.
+    build_dir : str
+        Directory with cinder.dat file.
     """
     # Open the HDF5 File
-    db = tb.openFile(h5_file, 'a')
+    db = tb.openFile(nuc_data, 'a')
 
     # Ensure that the appropriate file structure is present
     _init_cinder(db)
 
     # Read in cinder data file
-    with open(data_file, 'r') as f:
+    cinder_dat = os.path.join(build_dir, 'cinder.dat')
+    with open(cinder_dat, 'r') as f:
         raw_data = f.read()
 
     # Grab photon info table
-    info_table = _grab_photon_fp_info(raw_data)
+    info_table = grab_photon_fp_info(raw_data)
 
     # Init the neutron fission product info table
-    gfp_table = db.createTable('/photon/fission_products/', 'info', fp_info_desc, 
-                                'Photofission Product Yield Information')
+    gfp_table = db.createTable('/photon/cinder_fission_products/', 'info', fp_info_dtype, 
+                                'CINDER Photofission Product Yield Information')
     gfp_table.append(info_table)
 
     # Close the hdf5 file
     db.close()
 
 
-fp_yields_desc = {
-    'index': tb.Int16Col(pos=0),
-
-    'from_nuc_name': tb.StringCol(6, pos=1),
-    'from_nuc_zz': tb.Int32Col(pos=2),
-
-    'to_nuc_name': tb.StringCol(6, pos=3),
-    'to_nuc_zz': tb.Int32Col(pos=4),
-
-    'mass_frac': tb.Float64Col(pos=5),
-    }
+fp_yields_dtype = np.dtype([
+    ('index', np.int16),
+    ('from_nuc_name', 'S6'),
+    ('from_nuc_zz', int),
+    ('to_nuc_name', 'S6'),
+    ('to_nuc_zz', int),
+    ('mass_frac', float),
+    ])
 
 
 fp_to_nuc_insert = "\s{1,3}" + cinder_float
@@ -651,21 +655,25 @@ fp_to_nuc_base = "  ([ \d]{4}) ([ \d]{7})\n("
 
 nfp_yields_pattern = "Fission Yield Data.*Photofission Yield Data"
 
-def make_neutron_fp_yields(nuc_data, build_dir):
+def make_neutron_fp_yields(nuc_data, build_dir=""):
     """Adds the neutron fission product yields to the hdf5 library.
 
-    Keyword Args:
-        * h5_file (str): path to hdf5 file.
-        * data_file (str): path to the cinder.dat data file.
+    Parameters
+    ----------
+    nuc_data : str
+        Path to nuclide data file.
+    build_dir : str
+        Directory with cinder.dat file.
     """
     # Open the HDF5 File
-    db = tb.openFile(h5_file, 'a')
+    db = tb.openFile(nuc_data, 'a')
 
     # Ensure that the appropriate file structure is present
     _init_cinder(db)
 
     # Read in cinder data file
-    with open(data_file, 'r') as f:
+    cinder_dat = os.path.join(build_dir, 'cinder.dat')
+    with open(cinder_dat, 'r') as f:
         raw_data = f.read()
 
     # Get group sizes
@@ -679,14 +687,14 @@ def make_neutron_fp_yields(nuc_data, build_dir):
     nfp_yields_raw = m_yields.group(0)
 
     # Init the neutron fission product info table
-    nfp_table = db.createTable('/neutron/fission_products/', 'yields', fp_yields_desc, 
-                                'Neutron Fission Product Yields')
+    nfp_table = db.createTable('/neutron/cinder_fission_products/', 'yields', fp_yields_dtype, 
+                                'CINDER Neutron Fission Product Yields')
     nfprow = nfp_table.row
 
     # Iterate over all to-nucs
     fp_to_nuc_pattern = fp_to_nuc_base + N_n*fp_to_nuc_insert + ")"
     for m_to in re.finditer(fp_to_nuc_pattern, nfp_yields_raw):
-        to_nuc_zz = nucname.zzaaam(m_to.group(2))
+        to_nuc_zz = nucname.zzaaam(m_to.group(2).strip())
 
         # Check matestable state
         if 1 < to_nuc_zz%10:
@@ -723,39 +731,43 @@ gfp_yields_pattern = "Photofission Yield Data.*"
 def make_photon_fp_yields(nuc_data, build_dir):
     """Adds the photofission product yields to the hdf5 library.
 
-    Keyword Args:
-        * h5_file (str): path to hdf5 file.
-        * data_file (str): path to the cinder.dat data file.
+    Parameters
+    ----------
+    nuc_data : str
+        Path to nuclide data file.
+    build_dir : str
+        Directory with cinder.dat file.
     """
     # Open the HDF5 File
-    db = tb.openFile(h5_file, 'a')
+    db = tb.openFile(nuc_data, 'a')
 
     # Ensure that the appropriate file structure is present
     _init_cinder(db)
 
     # Read in cinder data file
-    with open(data_file, 'r') as f:
+    cinder_dat = os.path.join(build_dir, 'cinder.dat')
+    with open(cinder_dat, 'r') as f:
         raw_data = f.read()
 
     # Get group sizes
     N_n, N_g = get_fp_sizes(raw_data)
 
     # get the info table
-    info_table = _grab_photon_fp_info(raw_data)
+    info_table = grab_photon_fp_info(raw_data)
 
     # Grab the part of the file that is a neutron fission product yields
     m_yields = re.search(gfp_yields_pattern, raw_data, re.DOTALL)
     gfp_yields_raw = m_yields.group(0)
 
     # Init the neutron fission product info table
-    gfp_table = db.createTable('/photon/fission_products/', 'yields', fp_yields_desc, 
-                                'Photofission Product Yields')
+    gfp_table = db.createTable('/photon/cinder_fission_products/', 'yields', fp_yields_dtype, 
+                                'CINDER Photofission Product Yields')
     gfprow = gfp_table.row
 
     # Iterate over all to-nucs
     fp_to_nuc_pattern = fp_to_nuc_base + N_g*fp_to_nuc_insert + ")"
     for m_to in re.finditer(fp_to_nuc_pattern, gfp_yields_raw):
-        to_nuc_zz = nucname.zzaaam(m_to.group(2))
+        to_nuc_zz = nucname.zzaaam(m_to.group(2).strip())
 
         # Check matestable state
         if 1 < to_nuc_zz%10:
@@ -788,9 +800,9 @@ def make_photon_fp_yields(nuc_data, build_dir):
 
 
 def make_cinder(nuc_data, build_dir):
-    #with tb.openFile(nuc_data, 'a') as f:
-    #    if hasattr(f.root, 'neutron') and hasattr(f.root.neutron, 'simple_xs'):
-    #        return
+    with tb.openFile(nuc_data, 'a') as f:
+        if hasattr(f.root, 'neutron') and hasattr(f.root.neutron, 'cinder_xs') and hasattr(f.root.neutron, 'cinder_fission_products'):
+            return
 
     # First grab the atomic abundance data
     grab_cinder_dat(build_dir)
@@ -817,10 +829,15 @@ def make_cinder(nuc_data, build_dir):
     make_neutron_fp_info(nuc_data, build_dir)
 
     # Add neutron yield table
-    #make_neutron_fp_yields(nuc_data, build_dir)
+    print "  neutron fission product yields."
+    make_neutron_fp_yields(nuc_data, build_dir)
 
     # Add photon info table
-    #make_photon_fp_info(nuc_data, build_dir)
+    print "  photofission product info."
+    make_photon_fp_info(nuc_data, build_dir)
 
     # Add neutron yield table
-    #make_photon_fp_yields(nuc_data, build_dir)
+    print "  photofission product yields."
+    make_photon_fp_yields(nuc_data, build_dir)
+
+    print "...finished with cinder."
