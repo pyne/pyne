@@ -222,10 +222,11 @@ cdef class _Material:
         Parameters
         ----------
         filename : str
-            Path to HDF5 file that contains the data to read in.    
+            Path to HDF5 file to write the data out to.  If the file does not exist,
+            it will be created.
         datapath : str, optional
             Path to HDF5 table that represents the data.  If the table does not
-            exist, it is created.
+            exist, it will be created.
         nucpath : str, optional
             Path to zzaaam array of nuclides to write out.  If this array does not
             exist, it is created with the nuclides present in this material. Nuclides
@@ -265,7 +266,6 @@ cdef class _Material:
         filename : str 
             Path to text file that contains the data to read in.    
 
-
         Notes
         -----
         The text representation of Materials are nuclide identifiers in the 
@@ -277,7 +277,15 @@ cdef class _Material:
             92238   0.992745
 
         Data in this file must be whitespace separated.  Any valid nuclide naming
-        scheme may be used for any nuctope.
+        scheme may be used for the nuclide identifiers.  Moreover, material metadata 
+        may be optionally supplied::
+
+            Name    NatU
+            Mass    42.0
+            APerM   1
+            922340  0.000055
+            U235    0.00720
+            92238   0.992745
 
         Examples
         --------
@@ -285,11 +293,32 @@ cdef class _Material:
         Initialization is therefore a two-step process::
 
             mat = Material()
-            mat.from_text("natu.h5")
+            mat.from_text("natu.txt")
 
         This method is most often called implicitly by the Material constructor.
         """
         self.mat_pointer.from_text(filename)
+
+
+    def write_text(self, filename):
+        """Writes the material to a plain text file.
+
+        Parameters
+        ----------
+        filename : str
+            Path to text file to write the data to.  If the file already exists, it 
+            will be overwritten.    
+
+        Examples
+        --------
+        The following writes out a low-enriched uranium material to a new file::
+
+            leu = Material({'U235': 0.04, 'U238': 0.96}, 42.0, "LEU", 1.0)
+            leu.write_text('leu.txt')
+
+        """
+        self.mat_pointer.write_text(filename)
+
 
 
 
@@ -1167,14 +1196,14 @@ def from_text(char * filename, double mass=-1.0, char * name='', double atoms_pe
     --------
     This method loads data into a new Material::
 
-        mat = from_text("natu.h5")
+        mat = from_text("natu.txt")
 
     See Also
     --------
     Material.from_text : Underlying method class method.
     """
     mat = Material()
-    mat.from_text(filename)
+
     mat.name = name
 
     if 0.0 <= mass:
@@ -1183,6 +1212,7 @@ def from_text(char * filename, double mass=-1.0, char * name='', double atoms_pe
     if 0.0 <= atoms_per_mol:
         mat.atoms_per_mol = atoms_per_mol
 
+    mat.from_text(filename)
     return mat
 
 
