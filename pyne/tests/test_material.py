@@ -111,11 +111,11 @@ def test_hdf5_protocol_1():
 
     # Test material writing
     leu = Material({'U235': 0.04, 'U238': 0.96}, 4.2, "LEU", 1.0)
-    leu.write_hdf5('proto1.h5')
+    leu.write_hdf5('proto1.h5', chunksize=10)
 
     for i in range(2, 11):
         leu = Material({'U235': 0.04, 'U238': 0.96}, i*4.2, "LEU", 1.0*i)
-        leu.write_hdf5('proto1.h5', row=i-1)
+        leu.write_hdf5('proto1.h5')
 
     # Loads with protocol 1 now.
     m = Material()
@@ -855,6 +855,7 @@ def test_map_str_material():
     assert_equal(n['leu']['U235'], 0.04)
     assert_equal(n['heu'].mass, 42.0)
     assert_equal(n['heu']['U238'], 0.42)
+
 
 #
 # Run as script
