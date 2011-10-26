@@ -388,7 +388,7 @@ void pyne::Material::from_text(char * fchar)
 };
 
 
-void pyne::Material::from_text (std::string filename)
+void pyne::Material::from_text(std::string filename)
 {
   // Check that the file is there
   if (!pyne::file_exists(filename))
@@ -399,19 +399,65 @@ void pyne::Material::from_text (std::string filename)
   f.open(filename.c_str());
 
   // Read in
+  comp.clear();
+  std::string keystr, valstr;
+
   while ( !f.eof() )
   {
-    std::string isostr, wgtstr;
-    f >> isostr;
-    if (0 < isostr.length())
-    {
-      f >> wgtstr;
-      comp[pyne::nucname::zzaaam(isostr)] = pyne::to_dbl(wgtstr);
-    };
+    f >> keystr;
+
+    if (0 == keystr.length())
+      continue;
+    else 
+      f >> valstr;
+
+    if (keystr == "Name")
+      name = valstr;
+    else if (keystr == "Mass")
+      mass = pyne::to_dbl(valstr);
+    else if (keystr == "APerM")
+      atoms_per_mol = pyne::to_dbl(valstr);
+    else
+      comp[pyne::nucname::zzaaam(keystr)] = pyne::to_dbl(valstr);
   };
 
   f.close();
   norm_comp();
+};
+
+
+
+void pyne::Material::write_text(char * fchar)
+{
+  std::string filename (fchar);
+  write_text(filename);
+};
+
+
+void pyne::Material::write_text (std::string filename)
+{
+  std::ofstream f;
+  f.open(filename.c_str(), std::ios_base::trunc);
+
+  if (0 < name.length())
+    f << "Name    " << name << "\n";
+
+  if (0 <= mass)
+    f << "Mass    " << mass << "\n";
+
+  if (0 <= atoms_per_mol)
+    f << "APerM   " << atoms_per_mol << "\n";
+
+  std::string nuc_name;
+  for(pyne::comp_iter i = comp.begin(); i != comp.end(); i++)
+  {
+    nuc_name = pyne::nucname::name( i->first ) + "  ";
+    while (nuc_name.length() < 8)
+      nuc_name += " ";
+    f << nuc_name << i->second << "\n";
+  };
+
+  f.close();
 };
 
 
@@ -426,7 +472,7 @@ pyne::Material::Material()
 {
   // Empty Material constructor
   mass = -1.0;
-  name = "";
+  name = std::string("");
   atoms_per_mol = -1.0;
 }
 
