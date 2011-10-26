@@ -32,6 +32,7 @@ Material Class
     .. automethod:: normalize()
     .. automethod:: mult_by_mass()
     .. automethod:: from_hdf5(filename, datapath, row=-1, protocol=1)
+    .. automethod:: write_hdf5(filename, datapath="/material", nucpath="/nuc_zz", row=-0.0, chunksize=100)
     .. automethod:: from_text(filename)
     .. automethod:: to_atom_frac()
     .. automethod:: from_atom_frac(atom_fracs)

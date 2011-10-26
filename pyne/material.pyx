@@ -216,6 +216,47 @@ cdef class _Material:
         self.mat_pointer.from_hdf5(filename, datapath, row, protocol)
 
 
+    def write_hdf5(self, filename, datapath="/material", nucpath="/nuc_zz", row=-0.0, chunksize=100):
+        """Writes the material to an HDF5 file, using Protocol 1 (see the from_hdf5() method).
+
+        Parameters
+        ----------
+        filename : str
+            Path to HDF5 file that contains the data to read in.    
+        datapath : str, optional
+            Path to HDF5 table that represents the data.  If the table does not
+            exist, it is created.
+        nucpath : str, optional
+            Path to zzaaam array of nuclides to write out.  If this array does not
+            exist, it is created with the nuclides present in this material. Nuclides
+            present in this material but not in nucpath will not be written out.
+        row : float, optional 
+            The row index of the HDF5 table to write this material to.  This 
+            ranges from 0 to N.  Negative indexing is allowed (row[-N] = row[0]).
+            Defaults to the appending this material to the table (row[N] = row[-0.0]).
+            This value must be a float since in integer repesentation 0 **is** -0, but
+            in float representation 0.0 **is not** -0.0.
+        chunksize : int, optional
+            In Protocol 1, materials are stored in an HDF5 table which is an extensible
+            data type. The chunksize determines the number of rows per chunk.  For better
+            performance, this number should be as close as possible to the final table 
+            size.  This parameter is only relevant if a new table is being created.
+
+        Examples
+        --------
+        The following writes out ten low-enriched uranium materials to a new table::
+
+            leu = Material({'U235': 0.04, 'U238': 0.96}, 4.2, "LEU", 1.0)
+            leu.write_hdf5('proto1.h5', chunksize=10)
+
+            for i in range(2, 11):
+                leu = Material({'U235': 0.04, 'U238': 0.96}, i*4.2, "LEU", 1.0*i)
+                leu.write_hdf5('proto1.h5')
+
+        """
+        self.mat_pointer.write_hdf5(filename, datapath, nucpath, row, chunksize)
+
+
     def from_text(self, char * filename):
         """Initialize a Material object from a simple text file.
 
@@ -250,15 +291,6 @@ cdef class _Material:
         """
         self.mat_pointer.from_text(filename)
 
-
-
-    def write_hdf5(self, filename, datapath="/material", nucpath="/nuc_zz", row=None, chunksize=100):
-        # Hack to make C++ API keep default row=-0
-        # Python doesn't have a negative zero as an integer
-        if row is None:
-            self.mat_pointer.write_hdf5(filename, datapath, nucpath, <float> -0.0, chunksize)
-        else:
-            self.mat_pointer.write_hdf5(filename, datapath, nucpath, row, chunksize)
 
 
     def normalize(self):
