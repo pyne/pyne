@@ -74,6 +74,32 @@ def test_from_text():
     assert_equal(mat.comp, {922350: 0.05, 922380: 0.95})
 
 
+def test_write_text():
+    if 'leu.txt' in os.listdir('.'):
+        os.remove('leu.txt')
+
+    leu = Material({'U235': 0.04, 'U238': 0.96}, 42.0, "LEU", 1.0)
+    leu.write_text('leu.txt')
+
+    with open('leu.txt') as f:
+        written = f.read()
+    expected = ("Name    LEU\n"
+                "Mass    42\n"
+                "APerM   1\n"
+                "U235    0.04\n"
+                "U238    0.96\n")
+    assert_equal(written, expected)
+
+    read_leu = from_text('leu.txt')
+    assert_equal(leu.name, read_leu.name)
+    assert_equal(leu.mass, read_leu.mass)
+    assert_equal(leu.atoms_per_mol, read_leu.atoms_per_mol)
+    assert_equal(leu.comp, read_leu.comp)
+
+    os.remove('leu.txt')
+
+
+
 def test_from_hdf5_protocol_0():
     mat = Material()
     mat.from_hdf5("mat.h5", "/mat", protocol=0)
