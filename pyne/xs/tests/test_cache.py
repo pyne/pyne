@@ -3,7 +3,7 @@ import os
 import numpy as np
 import tables as tb
 
-from nose.tools import assert_equal, assert_not_equal, assert_almost_equal
+from nose.tools import assert_equal, assert_not_equal, assert_almost_equal, assert_true
 from numpy.testing import assert_array_equal, assert_array_almost_equal
 
 from pyne.xs.cache import xs_cache, get_sigma_f_n, get_sigma_a_n, partial_energy_matrix, get_phi_g
@@ -76,7 +76,7 @@ def test_xs_cache_set_E_g():
     xs_cache['has_some_g'] = True
     xs_cache['E_g'] = [1.0, 2.0, 8.0, 10.0]
     assert_equal(len(xs_cache['partial_energy_matrix']), 3)
-    assert 'has_some_g' not in xs_cache
+    assert_true('has_some_g' not in xs_cache)
     
 
 def test_xs_cache_set_phi_n():
@@ -89,12 +89,12 @@ def test_xs_cache_set_phi_n():
 
     # Test that resetting the flux cleans the cache properly
     phi_g = xs_cache['phi_g']
-    assert 'phi_g' in xs_cache
+    assert_true('phi_g' in xs_cache)
 
     xs_cache['phi_n'] = [1.0, 5.0]
 
-    assert 'E_g' in xs_cache
-    assert 'phi_g' not in xs_cache
+    assert_true('E_g' in xs_cache)
+    assert_true('phi_g' not in xs_cache)
 
 
 def test_xs_cache_get_phi_g():
@@ -138,7 +138,7 @@ def test_get_sigma_f_n1():
                          1.22020000e+00,   1.25640000e+00,   1.29290000e+00,
                          1.26850000e+00,   1.19820000e+00,   1.12000000e+00,
                          1.06560000e+00,   1.53220000e+00,   2.06170000e+00,
-                         2.10070000e+00,   1.96770000e+00,   1.96770000e+00])
+                         2.10070000e+00,   1.96770000e+00,   1.96770000e+00][::-1])
 
     assert_array_equal(sigma_f_n, expected)
 
@@ -174,7 +174,7 @@ def test_get_sigma_a_n1():
          3.44370000e-05,   3.43310000e-05,   3.43120000e-05,
          3.49470000e-05,   3.58100000e-05,   3.62750000e-05,
          3.60950000e-05,   3.48160000e-05,   2.97130000e-05,
-         2.89150000e-05,   2.67690000e-05,   2.60400000e-05])
+         2.89150000e-05,   2.67690000e-05,   2.60400000e-05][::-1])
 
     assert_array_equal(sigma_a_n, expected)
 
@@ -196,7 +196,7 @@ def test_get_sigma_a_n2():
         0.       ,  0.       ,  0.       ,  0.       ,  0.       ,
         0.       ,  0.       ,  0.       ,  0.       ,  0.       ,
         0.0011439,  0.019188 ,  0.047752 ,  0.087012 ,  0.18032  ,
-        0.18847  ,  0.20148  ,  0.2053   ])
+        0.18847  ,  0.20148  ,  0.2053   ][::-1])
 
     expected += np.array([
          1.52240000e-03,   9.30720000e-04,   7.23200000e-04,
@@ -219,7 +219,7 @@ def test_get_sigma_a_n2():
          6.32150000e-06,   7.01920000e-06,   7.69640000e-06,
          8.43000000e-06,   9.14600000e-06,   9.83610000e-06,
          1.03010000e-05,   1.06530000e-05,   9.44650000e-06,
-         9.18780000e-06,   8.38510000e-06,   8.10500000e-06])
+         9.18780000e-06,   8.38510000e-06,   8.10500000e-06][::-1])
 
     assert_array_equal(sigma_a_n, expected)
 
@@ -241,7 +241,7 @@ def test_get_sigma_a_n3():
         0.       ,  0.       ,  0.       ,  0.       ,  0.       ,
         0.       ,  0.       ,  0.       ,  0.       ,  0.       ,
         0.       ,  0.0043036,  0.060056 ,  0.11588  ,  0.15215  ,
-        0.15165  ,  0.12801  ,  0.112    ])
+        0.15165  ,  0.12801  ,  0.112    ][::-1])
 
     expected += np.array([
          1.59870000e+04,   9.74200000e+03,   7.57740000e+03,
@@ -264,7 +264,7 @@ def test_get_sigma_a_n3():
          8.79710000e-01,   8.66060000e-01,   8.25060000e-01,
          7.46760000e-01,   6.08280000e-01,   4.47760000e-01,
          3.38630000e-01,   2.50370000e-01,   1.21070000e-01,
-         1.11410000e-01,   8.97170000e-02,   8.20000000e-02])
+         1.11410000e-01,   8.97170000e-02,   8.20000000e-02][::-1])
 
     expected += np.array([
          1.40840000e-03,   1.10660000e-03,   8.04470000e-04,
@@ -287,7 +287,7 @@ def test_get_sigma_a_n3():
          5.50360000e-06,   7.86570000e-06,   1.11590000e-05,
          1.53870000e-05,   2.08170000e-05,   2.86970000e-05,
          3.76470000e-05,   5.65300000e-05,   8.97390000e-05,
-         1.15640000e-04,   1.34700000e-04,   1.46310000e-04])
+         1.15640000e-04,   1.34700000e-04,   1.46310000e-04][::-1])
 
     assert_array_equal(sigma_a_n, expected)
 
