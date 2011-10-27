@@ -6,15 +6,16 @@ import tables as tb
 from nose.tools import assert_equal, assert_not_equal, assert_almost_equal
 from numpy.testing import assert_array_equal, assert_array_almost_equal
 
-from pyne.xs.cache import xs_cache
+from pyne.xs.cache import xs_cache, get_sigma_f_n, get_sigma_a_n, partial_energy_matrix, get_phi_g
 from pyne.pyne_config import pyne_conf
 
+nuc_data = pyne_conf.NUC_DATA_PATH
 
 def test_xs_cache_E_n():
     xs_cache.clear()
 
     with tb.openFile(nuc_data, 'r') as f:
-        E_n = np.array(f.root.neutron.xs_mg.E_g)
+        E_n = np.array(f.root.neutron.cinder_xs.E_g)
 
     from_cache = xs_cache['E_n']
     assert_not_equal(id(E_n), id(from_cache))
@@ -27,28 +28,28 @@ def test_xs_cache_sigma_f_n():
     xs_cache.clear()
 
     with tb.openFile(nuc_data, 'r') as f:
-        sigma_f_n_U235 = np.array(f.root.neutron.xs_mg.fission[28]['xs'])
+        sigma_f_n_U235 = np.array(f.root.neutron.cinder_xs.fission[28]['xs'])
 
-    from_cache = xs_cache['sigma_f_n_922350']
+    from_cache = xs_cache['sigma_f_n',922350]
 
     assert_not_equal(id(sigma_f_n_U235), id(from_cache))
-    assert_equal(id(from_cache), id(xs_cache['sigma_f_n_922350']))
+    assert_equal(id(from_cache), id(xs_cache['sigma_f_n',922350]))
 
-    assert_array_equal(sigma_f_n_U235, xs_cache['sigma_f_n_922350'])
+    assert_array_equal(sigma_f_n_U235, xs_cache['sigma_f_n',922350])
 
 
 def test_xs_cache_sigma_a_n():
     xs_cache.clear()
 
     with tb.openFile(nuc_data, 'r') as f:
-        sigma_a_n_H1 = np.array(f.root.neutron.xs_mg.absorption[0]['xs'])
+        sigma_a_n_H1 = np.array(f.root.neutron.cinder_xs.absorption[0]['xs'])
 
-    from_cache = xs_cache['sigma_a_n_10010']
+    from_cache = xs_cache['sigma_a_n',10010]
 
     assert_not_equal(id(sigma_a_n_H1), id(from_cache))
-    assert_equal(id(from_cache), id(xs_cache['sigma_a_n_10010']))
+    assert_equal(id(from_cache), id(xs_cache['sigma_a_n',10010]))
 
-    assert_array_equal(sigma_a_n_H1, xs_cache['sigma_a_n_10010'])
+    assert_array_equal(sigma_a_n_H1, xs_cache['sigma_a_n',10010])
 
 
 def test_xs_cache_set_E_g():
@@ -116,7 +117,7 @@ def test_xs_cache_get_phi_g():
 #
 
 def test_get_sigma_f_n1():
-    sigma_f_n = xs.get_sigma_f_n(922350)
+    sigma_f_n = get_sigma_f_n(922350)
     expected = np.array([1.74780000e+03,   1.09570000e+03,   8.54720000e+02,
                          8.21910000e+02,   5.96110000e+02,   6.55820000e+02,
                          4.85430000e+02,   5.24960000e+02,   4.01070000e+02,
@@ -143,14 +144,14 @@ def test_get_sigma_f_n1():
 
 
 def test_get_sigma_f_n2():
-    sigma_f_n = xs.get_sigma_f_n(10010)
+    sigma_f_n = get_sigma_f_n(10010)
     expected = np.zeros(63)
     assert_array_equal(sigma_f_n, expected)
 
 
 def test_get_sigma_a_n1():
     # Test example with one entry
-    sigma_a_n = xs.get_sigma_a_n(10010)
+    sigma_a_n = get_sigma_a_n(10010)
 
     expected = np.array([
          9.96360000e-01,   6.07160000e-01,   4.72250000e-01,
@@ -180,7 +181,7 @@ def test_get_sigma_a_n1():
 
 def test_get_sigma_a_n2():
     # Test example with multiple entries but not that have reaction_type = 'c'
-    sigma_a_n = xs.get_sigma_a_n(10020)
+    sigma_a_n = get_sigma_a_n(10020)
 
     expected = np.array([
         0.       ,  0.       ,  0.       ,  0.       ,  0.       ,
@@ -225,7 +226,7 @@ def test_get_sigma_a_n2():
 
 def test_get_sigma_a_n3():
     # Test example with multiple entries including one that has reaction_type = 'c'
-    sigma_a_n = xs.get_sigma_a_n(20030)
+    sigma_a_n = get_sigma_a_n(20030)
 
     expected = np.array([
         0.       ,  0.       ,  0.       ,  0.       ,  0.       ,
@@ -293,7 +294,7 @@ def test_get_sigma_a_n3():
 
 def test_get_sigma_a_n4():
     # Test that a zeros array is returned for an entry that is not in the table
-    sigma_a_n = xs.get_sigma_a_n(10420)
+    sigma_a_n = get_sigma_a_n(10420)
     expected = np.zeros(63)
     assert_array_equal(sigma_a_n, expected)
 
@@ -309,7 +310,7 @@ def test_partial_energy_matrix1():
     E_g = np.array([0.0, 10.0])
     E_n = np.array([0.0, 10.0])
 
-    pem = xs.partial_energy_matrix(E_g, E_n)
+    pem = partial_energy_matrix(E_g, E_n)
 
     expected = np.array([[1.0]])
 
@@ -322,7 +323,7 @@ def test_partial_energy_matrix2():
     E_g = np.array([0.0, 5.0, 10.0])
     E_n = np.array([0.0, 5.0, 10.0])
 
-    pem = xs.partial_energy_matrix(E_g, E_n)
+    pem = partial_energy_matrix(E_g, E_n)
 
     expected = np.array([[1.0, 0.0], 
                          [0.0, 1.0]])
@@ -336,7 +337,7 @@ def test_partial_energy_matrix3():
     E_g = np.array([1.25, 5.0, 7.5])
     E_n = np.array([0.0, 2.5, 5.0, 7.5, 10.0])
 
-    pem = xs.partial_energy_matrix(E_g, E_n)
+    pem = partial_energy_matrix(E_g, E_n)
 
     expected = np.array([[0.5, 1.0, 0.0, 0.0], 
                          [0.0, 0.0, 1.0, 0.0]])
@@ -350,7 +351,7 @@ def test_partial_energy_matrix4():
     E_g = np.array([0.0, 5.0, 10.0])
     E_n = np.array([0.0, 2.5, 5.0, 7.5, 10.0])
 
-    pem = xs.partial_energy_matrix(E_g, E_n)
+    pem = partial_energy_matrix(E_g, E_n)
 
     expected = np.array([[1.0, 1.0, 0.0, 0.0], 
                          [0.0, 0.0, 1.0, 1.0]])
@@ -364,7 +365,7 @@ def test_partial_energy_matrix5():
     E_g = np.array([0.0, 4.0, 10.0])
     E_n = np.array([0.0, 2.5, 5.0, 7.5, 10.0])
 
-    pem = xs.partial_energy_matrix(E_g, E_n)
+    pem = partial_energy_matrix(E_g, E_n)
 
     expected = np.array([[1.0, 0.6, 0.0, 0.0], 
                          [0.0, 0.4, 1.0, 1.0]])
@@ -378,7 +379,7 @@ def test_partial_energy_matrix6():
     E_g = np.array([0.0, 4.0, 8.0])
     E_n = np.array([0.0, 2.5, 5.0, 7.5, 10.0])
 
-    pem = xs.partial_energy_matrix(E_g, E_n)
+    pem = partial_energy_matrix(E_g, E_n)
 
     expected = np.array([[1.0, 0.6, 0.0, 0.0], 
                          [0.0, 0.4, 1.0, 0.2]])
@@ -398,7 +399,7 @@ def test_phi_g1():
 
     phi_n = np.ones(1)
 
-    phi_g = xs.phi_g(E_g, E_n, phi_n)
+    phi_g = get_phi_g(E_g, E_n, phi_n)
 
     expected = np.array([1.0])
 
@@ -413,7 +414,7 @@ def test_phi_g2():
 
     phi_n = np.ones(2)
 
-    phi_g = xs.phi_g(E_g, E_n, phi_n)
+    phi_g = get_phi_g(E_g, E_n, phi_n)
 
     expected = np.array([1.0, 1.0])
 
@@ -428,7 +429,7 @@ def test_phi_g3():
 
     phi_n = np.ones(4)
 
-    phi_g = xs.phi_g(E_g, E_n, phi_n)
+    phi_g = get_phi_g(E_g, E_n, phi_n)
 
     expected = np.array([1.5, 1.0])
 
@@ -443,7 +444,7 @@ def test_phi_g4():
 
     phi_n = np.ones(4)
 
-    phi_g = xs.phi_g(E_g, E_n, phi_n)
+    phi_g = get_phi_g(E_g, E_n, phi_n)
 
     expected = np.array([2.0, 2.0])
 
@@ -458,7 +459,7 @@ def test_phi_g5():
 
     phi_n = np.ones(4)
 
-    phi_g = xs.phi_g(E_g, E_n, phi_n)
+    phi_g = get_phi_g(E_g, E_n, phi_n)
 
     expected = np.array([1.6, 2.4]) 
 
@@ -473,7 +474,7 @@ def test_phi_g6():
 
     phi_n = np.ones(4)
 
-    phi_g = xs.phi_g(E_g, E_n, phi_n)
+    phi_g = get_phi_g(E_g, E_n, phi_n)
 
     expected = np.array([1.6, 1.6])
 
@@ -489,7 +490,7 @@ def test_phi_g7():
 
     phi_n = np.array([0.0, 2.0, 1.0, 0.5])
 
-    phi_g = xs.phi_g(E_g, E_n, phi_n)
+    phi_g = get_phi_g(E_g, E_n, phi_n)
 
     expected = np.array([1.2, 1.9])
 
