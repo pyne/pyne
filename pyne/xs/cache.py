@@ -21,7 +21,7 @@ def is_g_indexed(key):
         is_g = '_g' in key[0]
     return is_g
 
-class XSCache(MuatbleMapping):
+class XSCache(MutableMapping):
     """A lightweight multigroup cross-section cache based off of python dictionaries.
     High resolution (*_n) data will be read from nuc_data.  Note, that this requires
     that nuc_data.h5 was built with CINDER data.
@@ -60,7 +60,7 @@ class XSCache(MuatbleMapping):
     def __getitem__(self, key):
         """Key lookup by via custom loading from the nuc_data database file."""
 
-        if key not in self._cache:
+        if (key not in self._cache) and (key in self._get_fns or key[0] in self._get_fns):
             if isinstance(key, basestring):
                 self._cache[key] = self._get_fns[key]()
             else:
