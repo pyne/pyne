@@ -130,14 +130,14 @@ def make_mg_group_structure(nuc_data, build_dir=""):
     n_E_g_pattern = "Neutron group .*, MeV" + ("\s+("+cinder_float+")")*(G_n + 1)
     m = re.search(n_E_g_pattern, raw_data)
     g = m.groups()
-    n_E_g = np.array(g, dtype=float)
+    n_E_g = np.array(g[::-1], dtype=float)
     db.createArray('/neutron/cinder_xs', 'E_g', n_E_g, 'Neutron energy group bounds [MeV]')
 
     # Find & write photon group structure
     g_E_g_pattern = "Gamma structure, MeV" + ("\s+("+cinder_float+")")*(G_g + 1)
     m = re.search(g_E_g_pattern, raw_data)
     g = m.groups()
-    g_E_g = np.array(g, dtype=float)
+    g_E_g = np.array(g[::-1], dtype=float)
     db.createArray('/photon/cinder_source', 'E_g', g_E_g, 'Photon energy group bounds [MeV]')
 
     # Close the hdf5 file
@@ -218,7 +218,7 @@ def make_mg_absorption(nuc_data, build_dir=""):
             rx_type = rx_type.strip()
 
             # Setup XS array
-            xs = np.array(m_to.groups()[2:], dtype=float)
+            xs = np.array(m_to.groups()[-1:1:-1], dtype=float)
             assert xs.shape == (G_n, )
 
             # Write this row to the absorption table
@@ -308,7 +308,7 @@ def make_mg_fission(nuc_data, build_dir=""):
         yield_h = int(m_fission.group(3))
 
         # Grab XS array
-        xs = np.array(m_fission.groups()[3:], dtype=float)
+        xs = np.array(m_fission.groups()[-1:2:-1], dtype=float)
         assert xs.shape == (G_n, )
 
         # Write fission table row
@@ -396,7 +396,7 @@ def make_mg_gamma_decay(nuc_data, build_dir=""):
         energy = float(m_gd.group(2))
 
         # Grab spectrum
-        spectrum = np.array(m_gd.groups()[2:], dtype=float)
+        spectrum = np.array(m_gd.groups()[-1:1:-1], dtype=float)
         assert spectrum.shape == (G_g, )
 
         # Prepare the row
