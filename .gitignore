@@ -12,6 +12,7 @@ build_nuc_data/
 # Ignore Cython'd files
 pyne/*.c
 pyne/*.cpp
+pyne/*/*.cpp
 
 # Ignore specific files
 examples/BASE_TAPE9.INP
