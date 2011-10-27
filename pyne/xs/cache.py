@@ -350,4 +350,5 @@ def get_phi_g(E_g, E_n, phi_n):
     return phi_g
 
 
+# Make a singleton of the cross-section cache
 xs_cache = XSCache()
