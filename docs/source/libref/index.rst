@@ -16,5 +16,6 @@ The following modules and sub-packages are discussed:
     ace
     ensdf
     origen22
+    serpent
     utils
     stlconverters

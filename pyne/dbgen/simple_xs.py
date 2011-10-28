@@ -190,7 +190,7 @@ def make_simple_xs_tables(nuc_data, build_dir=""):
 
     # Create neutron group
     if not hasattr(db.root, 'neutron'):
-        neutron_group = db.createGroup('/', 'neutron', 'Neutron Cross Sections')
+        neutron_group = db.createGroup('/', 'neutron', 'Neutron Interaction Data')
 
     # Create simple_xs Group
     if not hasattr(db.root.neutron, 'simple_xs'):

@@ -102,6 +102,10 @@ def test_zzaaam():
     assert_equal(nucname.zzaaam("239Pu"), 942390)
     assert_equal(nucname.zzaaam("242AM"), 952420)
 
+    assert_equal(nucname.zzaaam(40020),   20040)
+    assert_equal(nucname.zzaaam(2440961), 962441)
+    assert_equal(nucname.zzaaam(2390940), 942390)
+    assert_equal(nucname.zzaaam(2420950), 952420)
 
 
 def test_name():
@@ -114,6 +118,11 @@ def test_name():
     assert_equal(nucname.name(95642), "AM242M")
 
     assert_equal(nucname.name("Am-242m"), "AM242M")
+
+    assert_equal(nucname.name(40020),   "HE4")
+    assert_equal(nucname.name(2440961), "CM244M")
+    assert_equal(nucname.name(2390940), "PU239")
+    assert_equal(nucname.name(2420950), "AM242")
 
 
 def test_mcnp():
@@ -128,6 +137,8 @@ def test_mcnp():
 
     assert_equal(nucname.mcnp("Am-242m"), 95642)
 
+    assert_equal(nucname.mcnp(10010),  1001)
+    assert_equal(nucname.mcnp(2420951), 95642)
 
 
 def test_serpent():
@@ -138,6 +149,9 @@ def test_serpent():
 
     assert_equal(nucname.serpent(94239), "Pu-239")
     assert_equal(nucname.serpent(95642), "Am-242m")
+
+    assert_equal(nucname.serpent(2390940), "Pu-239")
+    assert_equal(nucname.serpent(2420951), "Am-242m")
 
 
 
@@ -153,6 +167,26 @@ def test_nist():
     assert_equal(nucname.nist("10000"), "H")
     assert_equal(nucname.nist("920000"), "U")
     assert_equal(nucname.nist("940000"), "Pu")
+
+    assert_equal(nucname.nist(2390940), "239Pu")
+    assert_equal(nucname.nist(2420951), "242Am")
+
+
+def test_cinder():
+    assert_equal(nucname.cinder(10020),  20010)
+    assert_equal(nucname.cinder(952421), 2420951)
+
+    assert_equal(nucname.cinder("H2"),     20010)
+    assert_equal(nucname.cinder("AM242M"), 2420951)
+
+    assert_equal(nucname.cinder(1002),  20010)
+    assert_equal(nucname.cinder(95642), 2420951)
+
+    assert_equal(nucname.cinder("Am-242m"), 2420951)
+
+    assert_equal(nucname.cinder(20010),  20010)
+    assert_equal(nucname.cinder(2420951), 2420951)
+
 
 
 if __name__ == "__main__":
