@@ -60,7 +60,11 @@ The following top-level module functions are used to generate materials from var
 
 .. autofunction:: from_atom_frac(atom_fracs, mass=-1.0, name='', atoms_per_mol=-1.0)
 
+---------
+
 .. autofunction:: from_hdf5(filename, datapath, row=-1, protocol=1)
+
+---------
 
 .. autofunction:: from_text(filename, mass=-1.0, name='', atoms_per_mol=-1.0)
 

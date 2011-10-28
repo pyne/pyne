@@ -24,7 +24,7 @@ def is_g_indexed(key):
 
 class XSCache(MutableMapping):
     """A lightweight multigroup cross-section cache based off of python dictionaries.
-    High resolution (*_n) data will be read from nuc_data.  Note, that this requires
+    High resolution (``*_n``) data will be read from nuc_data.  Note, that this requires
     that nuc_data.h5 was built with CINDER data.
     """
 
