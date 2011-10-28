@@ -15,6 +15,7 @@ The following modules and sub-packages are discussed:
     cccc
     ace
     ensdf
+    xs/index
     origen22
     serpent
     utils
