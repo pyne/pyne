@@ -56,7 +56,7 @@ def test_xs_cache_set_E_g():
     xs_cache.clear()
 
     # Add an energy stucture
-    xs_cache['E_g'] = [1.0, 10.0]
+    xs_cache['E_g'] = [10.0, 1.0]
     E_g = xs_cache['E_g']
 
     # Assert that the cache is working
@@ -64,7 +64,7 @@ def test_xs_cache_set_E_g():
     assert_equal(id(E_g), id(xs_cache['E_g']))
 
     # Assert that the cache has been reloaded
-    xs_cache['E_g'] = [1.0, 2.0, 10.0]
+    xs_cache['E_g'] = [10.0, 2.0, 1.0]
     assert_not_equal(id(E_g), id(xs_cache['E_g']))
     assert_equal(len(E_g), 2)
     assert_equal(len(xs_cache['E_g']), 3)
@@ -74,7 +74,7 @@ def test_xs_cache_set_E_g():
 
     # Assert that the reloading is done properly
     xs_cache['has_some_g'] = True
-    xs_cache['E_g'] = [1.0, 2.0, 8.0, 10.0]
+    xs_cache['E_g'] = [10.0, 8.0, 2.0, 1.0]
     assert_equal(len(xs_cache['partial_energy_matrix']), 3)
     assert_true('has_some_g' not in xs_cache)
     
@@ -298,97 +298,8 @@ def test_get_sigma_a_n4():
     expected = np.zeros(63)
     assert_array_equal(sigma_a_n, expected)
 
-
-
 #
-# Test Partial Energy Matrix
-#
-
-def test_partial_energy_matrix1():
-    xs_cache.clear()
-
-    E_g = np.array([0.0, 10.0])
-    E_n = np.array([0.0, 10.0])
-
-    pem = partial_energy_matrix(E_g, E_n)
-
-    expected = np.array([[1.0]])
-
-    assert_array_equal(pem, expected)    
-
-
-def test_partial_energy_matrix2():
-    xs_cache.clear()
-
-    E_g = np.array([0.0, 5.0, 10.0])
-    E_n = np.array([0.0, 5.0, 10.0])
-
-    pem = partial_energy_matrix(E_g, E_n)
-
-    expected = np.array([[1.0, 0.0], 
-                         [0.0, 1.0]])
-
-    assert_array_equal(pem, expected)    
-
-
-def test_partial_energy_matrix3():
-    xs_cache.clear()
-
-    E_g = np.array([1.25, 5.0, 7.5])
-    E_n = np.array([0.0, 2.5, 5.0, 7.5, 10.0])
-
-    pem = partial_energy_matrix(E_g, E_n)
-
-    expected = np.array([[0.5, 1.0, 0.0, 0.0], 
-                         [0.0, 0.0, 1.0, 0.0]])
-
-    assert_array_equal(pem, expected)    
-
-
-def test_partial_energy_matrix4():
-    xs_cache.clear()
-
-    E_g = np.array([0.0, 5.0, 10.0])
-    E_n = np.array([0.0, 2.5, 5.0, 7.5, 10.0])
-
-    pem = partial_energy_matrix(E_g, E_n)
-
-    expected = np.array([[1.0, 1.0, 0.0, 0.0], 
-                         [0.0, 0.0, 1.0, 1.0]])
-
-    assert_array_equal(pem, expected)    
-
-
-def test_partial_energy_matrix5():
-    xs_cache.clear()
-
-    E_g = np.array([0.0, 4.0, 10.0])
-    E_n = np.array([0.0, 2.5, 5.0, 7.5, 10.0])
-
-    pem = partial_energy_matrix(E_g, E_n)
-
-    expected = np.array([[1.0, 0.6, 0.0, 0.0], 
-                         [0.0, 0.4, 1.0, 1.0]])
-
-    assert_array_equal(pem, expected)    
-
-
-def test_partial_energy_matrix6():
-    xs_cache.clear()
-
-    E_g = np.array([0.0, 4.0, 8.0])
-    E_n = np.array([0.0, 2.5, 5.0, 7.5, 10.0])
-
-    pem = partial_energy_matrix(E_g, E_n)
-
-    expected = np.array([[1.0, 0.6, 0.0, 0.0], 
-                         [0.0, 0.4, 1.0, 0.2]])
-
-    assert_array_equal(pem, expected)    
-
-
-#
-# Test Partial Energy Matrix
+# Test Flux Group Collapse
 #
 
 def test_phi_g1():
