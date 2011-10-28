@@ -96,8 +96,8 @@ class Isotxs(_BinaryReader):
         fileID = self.get_fortran_record()
 
         # Read data from file identification record
-        self.label = fileID.get_string(24)
-        self.fileVersion = fileID.get_int()
+        self.label = fileID.get_string(24)[0]
+        self.fileVersion = fileID.get_int()[0]
         
     def _read_file_control(self):
         """Reads the file control block. This block is always present and gives
@@ -109,14 +109,14 @@ class Isotxs(_BinaryReader):
         fc = self.get_fortran_record()
 
         # Read data from file control record
-        self.fc['ngroup'] = fc.get_int() # Number of energy groups in file
-        self.fc['niso'] = fc.get_int() # Number of isotopes in file
-        self.fc['maxup'] = fc.get_int() # Maximum number of upscatter groups
-        self.fc['maxdown'] = fc.get_int() # Maximum number of downscatter groups
-        self.fc['maxord'] = fc.get_int() # Maximum scattering order
-        self.fc['ichidst'] = fc.get_int() # File-wide fission spectrum flag
-        self.fc['nscmax'] = fc.get_int() # Max blocks of scatter data (seems to be actual number)
-        self.fc['nsblok'] = fc.get_int() # Number of subblocks
+        self.fc['ngroup'] = fc.get_int()[0] # Number of energy groups in file
+        self.fc['niso'] = fc.get_int()[0] # Number of isotopes in file
+        self.fc['maxup'] = fc.get_int()[0] # Maximum number of upscatter groups
+        self.fc['maxdown'] = fc.get_int()[0] # Maximum number of downscatter groups
+        self.fc['maxord'] = fc.get_int()[0] # Maximum scattering order
+        self.fc['ichidst'] = fc.get_int()[0] # File-wide fission spectrum flag
+        self.fc['nscmax'] = fc.get_int()[0] # Max blocks of scatter data (seems to be actual number)
+        self.fc['nsblok'] = fc.get_int()[0] # Number of subblocks
         
     def _read_file_data(self):
         """Reads the file data block. This block is always present and contains
@@ -145,7 +145,7 @@ class Isotxs(_BinaryReader):
         self.emax = fileData.get_float(self.fc['ngroup'])
         
         # Read minimum energy bound of set
-        self.emin = fileData.get_float()
+        self.emin = fileData.get_float()[0]
         
         # Read number of records to be skipped to read data for a given nuclide
         self.locs = fileData.get_int(self.fc['niso'])
@@ -168,26 +168,26 @@ class Isotxs(_BinaryReader):
         r = self.get_fortran_record()
 
         # Read nuclide data
-        nuc.libParams['nuclide'] = r.get_string(8).strip() # absolute nuclide label
-        nuc.libParams['libName'] = r.get_string(8) # library name (ENDFV, etc. )
-        nuc.libParams['isoIdent'] = r.get_string(8)
-        nuc.libParams['amass'] = r.get_float() # gram atomic weight
-        nuc.libParams['efiss'] = r.get_float() # thermal energy yield/fission
-        nuc.libParams['ecapt'] = r.get_float() # thermal energy yield/capture
-        nuc.libParams['temp'] = r.get_float() # nuclide temperature (K)
-        nuc.libParams['sigPot'] = r.get_float() # potential scattering (b/atom)
-        nuc.libParams['adens'] = r.get_float() # density of nuclide (atom/b-cm)
-        nuc.libParams['classif'] = r.get_int() # nuclide classification
-        nuc.libParams['chiFlag'] = r.get_int() # fission spectrum flag
-        nuc.libParams['fisFlag'] = r.get_int() # (n,f) cross section flag
-        nuc.libParams['nalph'] = r.get_int() # (n,alpha) cross section flag
-        nuc.libParams['np'] = r.get_int() # (n,p) cross section flag
-        nuc.libParams['n2n'] = r.get_int() # (n,2n) cross section flag
-        nuc.libParams['nd'] = r.get_int() # (n,d) cross section flag
-        nuc.libParams['nt'] = r.get_int() # (n,t) cross section flag
-        nuc.libParams['ltot'] = r.get_int() # number of moments of total xs
-        nuc.libParams['ltrn'] = r.get_int() # number of moments of transport xs
-        nuc.libParams['strpd'] = r.get_int() # number of coord directions for transport xs
+        nuc.libParams['nuclide'] = r.get_string(8)[0].strip() # absolute nuclide label
+        nuc.libParams['libName'] = r.get_string(8)[0] # library name (ENDFV, etc. )
+        nuc.libParams['isoIdent'] = r.get_string(8)[0]
+        nuc.libParams['amass'] = r.get_float()[0] # gram atomic weight
+        nuc.libParams['efiss'] = r.get_float()[0] # thermal energy yield/fission
+        nuc.libParams['ecapt'] = r.get_float()[0] # thermal energy yield/capture
+        nuc.libParams['temp'] = r.get_float()[0] # nuclide temperature (K)
+        nuc.libParams['sigPot'] = r.get_float()[0] # potential scattering (b/atom)
+        nuc.libParams['adens'] = r.get_float()[0] # density of nuclide (atom/b-cm)
+        nuc.libParams['classif'] = r.get_int()[0] # nuclide classification
+        nuc.libParams['chiFlag'] = r.get_int()[0] # fission spectrum flag
+        nuc.libParams['fisFlag'] = r.get_int()[0] # (n,f) cross section flag
+        nuc.libParams['nalph'] = r.get_int()[0] # (n,alpha) cross section flag
+        nuc.libParams['np'] = r.get_int()[0] # (n,p) cross section flag
+        nuc.libParams['n2n'] = r.get_int()[0] # (n,2n) cross section flag
+        nuc.libParams['nd'] = r.get_int()[0] # (n,d) cross section flag
+        nuc.libParams['nt'] = r.get_int()[0] # (n,t) cross section flag
+        nuc.libParams['ltot'] = r.get_int()[0] # number of moments of total xs
+        nuc.libParams['ltrn'] = r.get_int()[0] # number of moments of transport xs
+        nuc.libParams['strpd'] = r.get_int()[0] # number of coord directions for transport xs
         
         # Read scattering matrix type identifications for each scatter
         # block. Could be total, inelastic, elastic, n2n
@@ -201,14 +201,14 @@ class Isotxs(_BinaryReader):
         nuc.libParams['jband'] = {}
         for n in range(self.fc['nscmax']):
             for j in range(self.fc['ngroup']):
-                nuc.libParams['jband'][j,n] = r.get_int()
+                nuc.libParams['jband'][j,n] = r.get_int()[0]
                 
         # Read position of in-group scattering cross section for group j,
         # scattering block n, counted from first word of group j data
         nuc.libParams['jj'] = {}
         for n in range(self.fc['nscmax']):
             for j in range(self.fc['ngroup']):
-                nuc.libParams['jj'][j,n] = r.get_int()
+                nuc.libParams['jj'][j,n] = r.get_int()[0]
         
     def _read_nuclide_xs(self, nuc):
         """Reads principal microscopic multigroup cross-section data for a
@@ -221,33 +221,33 @@ class Isotxs(_BinaryReader):
         # PL-weighted transport cross section in group g for Legendre order l
         for l in range(nuc.libParams['ltrn']):
             for g in range(self.fc['ngroup']):
-                nuc.micros['transport',g,l] = r.get_float()
+                nuc.micros['transport',g,l] = r.get_float()[0]
         
         # PL-weighted total cross section in group g for Legendre order l
         for l in range(nuc.libParams['ltot']):
             for g in range(self.fc['ngroup']):
-                nuc.micros['total',g,l] = r.get_float()
+                nuc.micros['total',g,l] = r.get_float()[0]
         
         # Microscopic (n,gamma) cross section in group g
         for g in range(self.fc['ngroup']):
-            nuc.micros['n,g',g] = r.get_float()
+            nuc.micros['n,g',g] = r.get_float()[0]
     
         # Read fission data if present
         if nuc.libParams['fisFlag'] > 0:
             
             # Microscopic (n,fission) cross section in group g
             for g in range(self.fc['ngroup']):
-                nuc.micros['fis',g] = r.get_float()
+                nuc.micros['fis',g] = r.get_float()[0]
         
             # Total number of neutrons/fission in group g
             for g in range(self.fc['ngroup']):
-                nuc.micros['nu',g] = r.get_float()
+                nuc.micros['nu',g] = r.get_float()[0]
         
         # Read fission spectrum vector if present
         if nuc.libParams['chiFlag'] == 1:
             # Nuclide chi in group g
             for g in range(self.fc['ngroup']):
-                nuc.micros['chi',g]=r.get_float()
+                nuc.micros['chi',g]=r.get_float()[0]
         else:
             if nuc.libParams['fisFlag'] > 0:
                 # Make sure file-wide chi exists
@@ -262,14 +262,14 @@ class Isotxs(_BinaryReader):
         for xstype in ['nalph','np','n2n','nd','nt']:
             if nuc.libParams[xstype]:
                 for g in range(self.fc['ngroup']):
-                    nuc.micros[xstype,g]=r.get_float()
+                    nuc.micros[xstype,g]=r.get_float()[0]
         
         # Read coordinate direction transport cross section (for various
         # coordinate directions)
         if nuc.libParams['strpd'] > 0:
             for i in range(nuc.libParams['strpd']):
                 for g in range(self.fc['ngroup']):
-                    nuc.micros['strpd',g,i] = r.get_float()
+                    nuc.micros['strpd',g,i] = r.get_float()[0]
         
     def _read_nuclide_chi(self, nuc):
         """Reads nuclide-level fission spectrum matrix. In most cases, chi will
@@ -333,7 +333,7 @@ class Isotxs(_BinaryReader):
                 fromGroups.reverse()
                 for k in fromGroups:
                     fromG = k-1
-                    nuc.micros['scat',block,g,fromG,order] = r.get_float()
+                    nuc.micros['scat',block,g,fromG,order] = r.get_float()[0]
 
     def find_nuclide(self, name):
         """Returns a nuclide with a given name.
@@ -404,16 +404,16 @@ class Dlayxs(_BinaryReader):
         """Read file ID block"""
         
         id = self.get_fortran_record()
-        self.label = id.get_string(24)
-        fileID = id.get_int()
+        self.label = id.get_string(24)[0]
+        fileID = id.get_int()[0]
         
     def _read_file_control(self):
         """Read file control block."""
         
         fileControl = self.get_fortran_record()
-        self.nGroups = fileControl.get_int()
-        self.nIsotopes = fileControl.get_int()
-        self.nFamilies = fileControl.get_int()
+        self.nGroups = fileControl.get_int()[0]
+        self.nIsotopes = fileControl.get_int()[0]
+        self.nFamilies = fileControl.get_int()[0]
         
     def _read_spectra(self):
         """Read the decay constants and delayed neutron spectra"""
@@ -425,7 +425,7 @@ class Dlayxs(_BinaryReader):
         # of the CCCC files that the families are indexed starting from 1.
         decay = {}
         for family in range(1, self.nFamilies+1):
-            decay[family] = fileData.get_float()
+            decay[family] = fileData.get_float()[0]
            
         # Read the delayed neutron spectra for each family
         spectra = {}
@@ -436,7 +436,7 @@ class Dlayxs(_BinaryReader):
         # minimum energy bound of the set in eV. 
         
         self.energySpectra = fileData.get_float(self.nGroups)
-        self.minEnergy = fileData.get_float()
+        self.minEnergy = fileData.get_float()[0]
         
         # Determine the number of families to which fission each isotope
         # contributes to delayed neutron precursors and the number of records
@@ -544,19 +544,19 @@ class Spectr(_BinaryReader):
         
     def read1D(self):
         t1 = self.get_fortran_record()
-        self.fc['eig'] = t1.get_float()
-        self.fc['buck'] = t1.get_float()
-        self.fc['emax'] = t1.get_float()
-        self.fc['deltau'] = t1.get_float()
-        self.fc['ngrp'] = t1.get_int()
-        self.fc['mgcsd'] = t1.get_int()
-        self.fc['ncsd'] = t1.get_int()
+        self.fc['eig'] = t1.get_float()[0]
+        self.fc['buck'] = t1.get_float()[0]
+        self.fc['emax'] = t1.get_float()[0]
+        self.fc['deltau'] = t1.get_float()[0]
+        self.fc['ngrp'] = t1.get_int()[0]
+        self.fc['mgcsd'] = t1.get_int()[0]
+        self.fc['ncsd'] = t1.get_int()[0]
         
     def read2D(self):
         t2 = self.get_fortran_record()
         flux = []
         for g in range(self.fc['ngrp']):
-            flux.append(t2.get_float())
+            flux.append(t2.get_float()[0])
         return flux
 
 
