@@ -10,7 +10,7 @@
 #include <cctype>
 #include <stdlib.h>
 #include <iostream>
-#include <math.h>
+#include <cmath>
 #include <exception>
 #include <sys/stat.h> 
 #include <vector>

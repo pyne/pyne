@@ -52,3 +52,9 @@ cdef extern from "nucname.h" namespace "pyne::nucname":
     std.string nist(int) except +
     std.string nist(char *) except +
     std.string nist(std.string) except +
+
+    # Cinder Functions 
+    int cinder(int) except + 
+    int cinder(char *) except + 
+    int cinder(std.string) except + 
+

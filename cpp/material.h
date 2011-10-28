@@ -53,6 +53,9 @@ namespace pyne
     void from_text (char *);
     void from_text (std::string);
 
+    void write_text (char *);
+    void write_text (std::string);
+
     //Fundemental mass stream data
     comp_map comp;
     double mass;
@@ -104,7 +107,7 @@ namespace pyne
     Material operator/ (double);
   };
 
-std::ostream& operator<< (std::ostream& os, Material mat);
+  std::ostream& operator<< (std::ostream& os, Material mat);
 
   typedef struct material_struct {
     char name [20];
