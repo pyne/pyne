@@ -101,13 +101,13 @@ def cpp_ext(name, sources, libs=None, use_hdf5=False):
                            ]
     # perfectly general, thanks to dynamic runtime linking of $ORIGIN
     #ext['runtime_library_dirs'] = ['${ORIGIN}/lib', '${ORIGIN}']
-    ext['runtime_library_dirs'] = ['${ORIGIN}/lib', '${ORIGIN}', '${ORIGIN}/.']
+    ext['runtime_library_dirs'] = ['${ORIGIN}/lib', '${ORIGIN}', '${ORIGIN}/.', 
+                                   '${ORIGIN}/../lib', '${ORIGIN}/..',]
     #ext['runtime_library_dirs'] = ['${ORIGIN}/lib', '${ORIGIN}', '${ORIGIN}/.'] + \
     #                              [os.path.abspath(p) for p in ext['library_dirs']] + \
     #                              [os.path.abspath(p + '/pyne/lib') for p in sys.path] + \
     #                              [os.path.abspath(p + '/pyne') for p in sys.path] + \
     #                              [os.path.abspath(p) for p in sys.path]
-
 
     if os.name == 'posix':
         #ext["extra_compile_args"] = ["-Wno-strict-prototypes"]
@@ -160,20 +160,23 @@ exts.append(cpp_ext("pyne.pyne_config", ['pyne_config.pyx'], ['pyne']))
 # nucname
 exts.append(cpp_ext("pyne.nucname", ['nucname.pyx'], ['pyne', 'pyne_nucname']))
 
-# material
+# data
 exts.append(cpp_ext("pyne.data", ['data.pyx'], ['pyne', 'pyne_nucname', 'pyne_data'], True))
 
 # material
 exts.append(cpp_ext("pyne.material", ['material.pyx'], ['pyne', 'pyne_nucname', 'pyne_data', 'pyne_material'], True))
+
+# xs.models
+exts.append(cpp_ext("pyne.xs.models", ['xs/models.pyx'], ['pyne', 'pyne_nucname']))
 
 
 
 ##########################
 ### Setup Package Data ###
 ##########################
-packages = ['pyne', 'pyne.lib', 'pyne.dbgen']
+packages = ['pyne', 'pyne.lib', 'pyne.dbgen', 'pyne.xs']
 
-pack_dir = {'pyne': 'pyne', 'pyne.dbgen': 'pyne/dbgen'}
+pack_dir = {'pyne': 'pyne', 'pyne.dbgen': 'pyne/dbgen', 'pyne.xs': 'pyne/xs'}
 
 pack_data = {'pyne': ['includes/*.h', 'includes/pyne/*.pxd'],
              'pyne.dbgen': ['*.html'],

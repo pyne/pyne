@@ -40,7 +40,7 @@ cdef cpp_map[int, double] dict_to_comp(dict nucvec):
 
 cdef class _Material:
 
-    def __cinit__(self, nucvec=None, double mass=-1.0, char * name='', double atoms_per_mol=-1.0):
+    def __cinit__(self, nucvec=None, double mass=-1.0, char * name='', double atoms_per_mol=-1.0, bint free_mat=True):
         """Material C++ constuctor."""
         cdef cpp_map[int, double] comp
 
@@ -53,20 +53,25 @@ cdef class _Material:
             # Material from file
             self.mat_pointer = new cpp_material.Material(<char *> nucvec, mass, std.string(name), atoms_per_mol)
 
-        elif nucvec is None:
-            # Empty mass stream
-            self.mat_pointer = new cpp_material.Material()
+        elif (nucvec is None): 
+            if free_mat:
+                # Make empty mass stream
+                self.mat_pointer = new cpp_material.Material()
+            else:
+                self.mat_pointer = NULL
 
         else:
             # Bad Material 
             raise TypeError("The mass stream nucvec must be a dict, str, or None.")
 
-        # Init the poperty comp
+        # Init some meta-data
         self._comp = None
+        self._free_mat = free_mat
 
     def __dealloc__(self):
         """Material C++ destructor."""
-        del self.mat_pointer
+        if self._free_mat:
+            del self.mat_pointer
 
 
     #
@@ -211,6 +216,48 @@ cdef class _Material:
         self.mat_pointer.from_hdf5(filename, datapath, row, protocol)
 
 
+    def write_hdf5(self, filename, datapath="/material", nucpath="/nuc_zz", row=-0.0, chunksize=100):
+        """Writes the material to an HDF5 file, using Protocol 1 (see the from_hdf5() method).
+
+        Parameters
+        ----------
+        filename : str
+            Path to HDF5 file to write the data out to.  If the file does not exist,
+            it will be created.
+        datapath : str, optional
+            Path to HDF5 table that represents the data.  If the table does not
+            exist, it will be created.
+        nucpath : str, optional
+            Path to zzaaam array of nuclides to write out.  If this array does not
+            exist, it is created with the nuclides present in this material. Nuclides
+            present in this material but not in nucpath will not be written out.
+        row : float, optional 
+            The row index of the HDF5 table to write this material to.  This 
+            ranges from 0 to N.  Negative indexing is allowed (row[-N] = row[0]).
+            Defaults to the appending this material to the table (row[N] = row[-0.0]).
+            This value must be a float since in integer repesentation 0 **is** -0, but
+            in float representation 0.0 **is not** -0.0.
+        chunksize : int, optional
+            In Protocol 1, materials are stored in an HDF5 table which is an extensible
+            data type. The chunksize determines the number of rows per chunk.  For better
+            performance, this number should be as close as possible to the final table 
+            size.  This parameter is only relevant if a new table is being created.
+
+        Examples
+        --------
+        The following writes out ten low-enriched uranium materials to a new table::
+
+            leu = Material({'U235': 0.04, 'U238': 0.96}, 4.2, "LEU", 1.0)
+            leu.write_hdf5('proto1.h5', chunksize=10)
+
+            for i in range(2, 11):
+                leu = Material({'U235': 0.04, 'U238': 0.96}, i*4.2, "LEU", 1.0*i)
+                leu.write_hdf5('proto1.h5')
+
+        """
+        self.mat_pointer.write_hdf5(filename, datapath, nucpath, row, chunksize)
+
+
     def from_text(self, char * filename):
         """Initialize a Material object from a simple text file.
 
@@ -218,7 +265,6 @@ cdef class _Material:
         ----------
         filename : str 
             Path to text file that contains the data to read in.    
-
 
         Notes
         -----
@@ -231,7 +277,15 @@ cdef class _Material:
             92238   0.992745
 
         Data in this file must be whitespace separated.  Any valid nuclide naming
-        scheme may be used for any nuctope.
+        scheme may be used for the nuclide identifiers.  Moreover, material metadata 
+        may be optionally supplied::
+
+            Name    NatU
+            Mass    42.0
+            APerM   1
+            922340  0.000055
+            U235    0.00720
+            92238   0.992745
 
         Examples
         --------
@@ -239,21 +293,33 @@ cdef class _Material:
         Initialization is therefore a two-step process::
 
             mat = Material()
-            mat.from_text("natu.h5")
+            mat.from_text("natu.txt")
 
         This method is most often called implicitly by the Material constructor.
         """
         self.mat_pointer.from_text(filename)
 
 
+    def write_text(self, filename):
+        """Writes the material to a plain text file.
 
-    def write_hdf5(self, filename, datapath="/material", nucpath="/nuc_zz", row=None, chunksize=100):
-        # Hack to make C++ API keep default row=-0
-        # Python doesn't have a negative zero as an integer
-        if row is None:
-            self.mat_pointer.write_hdf5(filename, datapath, nucpath, <float> -0.0, chunksize)
-        else:
-            self.mat_pointer.write_hdf5(filename, datapath, nucpath, row, chunksize)
+        Parameters
+        ----------
+        filename : str
+            Path to text file to write the data to.  If the file already exists, it 
+            will be overwritten.    
+
+        Examples
+        --------
+        The following writes out a low-enriched uranium material to a new file::
+
+            leu = Material({'U235': 0.04, 'U238': 0.96}, 42.0, "LEU", 1.0)
+            leu.write_text('leu.txt')
+
+        """
+        self.mat_pointer.write_text(filename)
+
+
 
 
     def normalize(self):
@@ -973,6 +1039,9 @@ class Material(_Material, collections.MutableMapping):
     atoms_per_mol : float, optional
         Number of atoms to per molecule of material.  Needed to obtain proper scaling
         of molecular weights.  For example, this value for water is 3.0.
+    free_mat : bool, optional
+        Flag for whether this wrapper 'owns' this underlying C++ pyne::Material object,
+        and thus determines whether or not to deallocate it on wrapper destruction.
 
     """
     def __str__(self):
@@ -1127,14 +1196,14 @@ def from_text(char * filename, double mass=-1.0, char * name='', double atoms_pe
     --------
     This method loads data into a new Material::
 
-        mat = from_text("natu.h5")
+        mat = from_text("natu.txt")
 
     See Also
     --------
     Material.from_text : Underlying method class method.
     """
     mat = Material()
-    mat.from_text(filename)
+
     mat.name = name
 
     if 0.0 <= mass:
@@ -1143,6 +1212,7 @@ def from_text(char * filename, double mass=-1.0, char * name='', double atoms_pe
     if 0.0 <= atoms_per_mol:
         mat.atoms_per_mol = atoms_per_mol
 
+    mat.from_text(filename)
     return mat
 
 
@@ -1180,4 +1250,149 @@ cdef dict map_to_dict_str_matp(cpp_map[std.string, matp] cppmap):
         inc(mapiter)
 
     return pydict
+
+
+
+# (Str, Material)
+cdef class MapIterStrMaterial(object):
+    cdef void init(self, cpp_map[std.string, matp] * map_ptr):
+        cdef cpp_map[std.string, matp].iterator * itn = <cpp_map[std.string, matp].iterator *> malloc(sizeof(map_ptr.begin()))
+        itn[0] = map_ptr.begin()
+        self.iter_now = itn
+
+        cdef cpp_map[std.string, matp].iterator * ite = <cpp_map[std.string, matp].iterator *> malloc(sizeof(map_ptr.end()))
+        ite[0] = map_ptr.end()
+        self.iter_end = ite
+        
+    def __dealloc__(self):
+        free(self.iter_now)
+        free(self.iter_end)
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        cdef cpp_map[std.string, matp].iterator inow = deref(self.iter_now)
+        cdef cpp_map[std.string, matp].iterator iend = deref(self.iter_end)
+
+        if inow != iend:
+            pyval = str(deref(inow).first.c_str())
+        else:
+            raise StopIteration    
+
+        inc(deref(self.iter_now))
+        return pyval
+
+
+cdef class _MapStrMaterial:
+    def __cinit__(self, new_map=True, bint free_map=True):
+        cdef std.string s
+        cdef cpp_pair[std.string, matp] item
+
+        # Cache needed to prevent Python from deref'ing 
+        # pointers before their time.
+        self._cache = {}
+
+        # Decide how to init map, if at all
+        if isinstance(new_map, _MapStrMaterial):
+            self.map_ptr = (<_MapStrMaterial> new_map).map_ptr
+            self._cache = (<_MapStrMaterial> new_map)._cache
+        elif hasattr(new_map, 'items'):
+            self.map_ptr = new cpp_map[std.string, matp]()
+            for key, value in new_map.items():
+                #s = std.string(key)
+                #item = cpp_pair[std.string, matp](s, (<_Material> value).mat_pointer)
+                #self.map_ptr.insert(item)
+                self[key] = value
+        elif hasattr(new_map, '__len__'):
+            self.map_ptr = new cpp_map[std.string, matp]()
+            for i in new_map:
+                #s = std.string(i[0])
+                #item = cpp_pair[std.string, matp](s, (<_Material> i[1]).mat_pointer)
+                #self.map_ptr.insert(item)
+                self[i[0]] = i[1]
+        elif bool(new_map):
+            self.map_ptr = new cpp_map[std.string, matp]()
+
+        # Store free_map
+        self._free_map = free_map
+        
+    def __dealloc__(self):
+        if self._free_map:
+            del self.map_ptr
+
+    def __contains__(self, key):
+        cdef std.string s
+        if isinstance(key, str):
+            s = std.string(key)
+        else:
+            return False
+
+        if 0 < self.map_ptr.count(s):
+            return True
+        else:
+            return False
+
+    def __len__(self):
+        return self.map_ptr.size()
+
+    def __iter__(self):
+        cdef MapIterStrMaterial mi = MapIterStrMaterial()
+        mi.init(self.map_ptr)
+        return mi
+
+    def __getitem__(self, key):
+        cdef std.string s
+        cdef _Material pymat
+
+        if isinstance(key, basestring):
+            s = std.string(key)
+        else:
+            raise TypeError("Only string keys are valid.")
+
+        if 0 < self.map_ptr.count(s):
+            if key not in self._cache:
+                pymat = Material(nucvec=None, free_mat=False)
+                pymat.mat_pointer = deref(self.map_ptr)[s]
+                self._cache[key] = pymat
+            return self._cache[key]
+        else:
+            raise KeyError(repr(key) + " not in map.")
+
+    def __setitem__(self, char * key, value):
+        cdef std.string s = std.string(key)
+        if not isinstance(value, _Material):
+            raise TypeError("may only set materials into this mapping.")
+        cdef cpp_pair[std.string, matp] item = cpp_pair[std.string, matp](s, (<_Material> value).mat_pointer)
+        self.map_ptr.insert(item)
+        self._cache[key] = value
+        
+    def __delitem__(self, char * key):
+        cdef std.string s
+        if key in self:
+            s = std.string(key)
+            self.map_ptr.erase(s)
+            del self._cache[key]
+
+
+class MapStrMaterial(_MapStrMaterial, collections.MutableMapping):
+    """Wrapper class for C++ standard library maps of type <string, Material *>.
+    Provides dictionary like interface on the Python level.
+
+    Parameters
+    ----------
+    new_map : bool or dict-like
+        Boolean on whether to make a new map or not, or dict-like object
+        with keys and values which are castable to the appropriate type.
+    free_map : bool
+        Flag for whether the pointer to the C++ map should be deallocated
+        when the wrapper is dereferenced.
+    """
+    def __str__(self):
+        return self.__repr__()
+
+    def __repr__(self):
+        return "{" + ", ".join(["{0}: {1}".format(repr(key), value) for key, value in self.items()]) + "}"
+
+
 
