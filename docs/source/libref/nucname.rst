@@ -26,6 +26,9 @@ Currently four naming conventions are supported.
  #. **NIST**: The NIST naming convention is also similar to the Serpent form.  However, this 
     convention contains not meta-stable information.  Moreover, the A-number comes before the 
     element symbol.  For example, '242Am' is the valid NIST notation.
+ #. **CINDER**: The CINDER format is similar to zzaaam form except that the placement of the Z- and 
+    A-numbers are swapped. Therefore, this format is effectively aaazzzm.  For example, '2420951' is 
+    the valid cinder notation for 'AM242M'.
 
 
 .. currentmodule:: pyne.nucname
@@ -45,13 +48,25 @@ Naming Convention Casting Functions
 
 .. autofunction:: zzaaam(nuc)
 
+-----
+
 .. autofunction:: name(nuc)
+
+-----
 
 .. autofunction:: mcnp(nuc)
 
+-----
+
 .. autofunction:: serpent(nuc)
 
+-----
+
 .. autofunction:: nist(nuc)
+
+-----
+
+.. autofunction:: cinder(nuc)
 
 
 -----------------------

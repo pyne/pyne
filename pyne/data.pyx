@@ -153,8 +153,8 @@ def b(nuc):
 
     Returns
     -------
-    bc : float
-        Coherent bound scattering length of nuc [cm].
+    b : float
+        Bound scattering length of nuc [cm].
 
     Notes
     -----
