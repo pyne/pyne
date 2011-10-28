@@ -258,6 +258,12 @@ int pyne::nucname::zzaaam(int nuc)
     newnuc = nuc;
     return newnuc;
   }
+  else if (mod_10000_div_10 < div_10000 && 0 < zz_name.count(mod_10000_div_10))
+  {
+    // Cinder-form (aaazzzm), ie 2350920
+    newnuc = (mod_10000_div_10*10000) + (div_10000*10) + (nuc%10);
+    return newnuc;
+  }
 
   // Nuclide is not in zzaaam form, 
   // Try MCNP form, ie zzaaa
@@ -593,6 +599,43 @@ std::string pyne::nucname::nist(std::string nuc)
   int newnuc = zzaaam(nuc);
   return nist(newnuc);
 };
+
+
+
+
+/************************/
+/*** cinder functions ***/
+/************************/
+int pyne::nucname::cinder(int nuc)
+{
+  // cinder nuclides of form aaazzzm
+
+  int newnuc = zzaaam(nuc);
+  int mod_10000 = newnuc % 10000;
+  int div_10000 = newnuc / 10000;
+  int mod_10000_div_10 = mod_10000 / 10;
+  int mod_10 = newnuc%10;
+
+  newnuc = (mod_10000_div_10*10000) + (div_10000*10) + mod_10;
+  return newnuc;
+};
+
+
+
+int pyne::nucname::cinder(char * nuc)
+{
+  std::string newnuc (nuc);
+  return cinder(newnuc);
+};
+
+
+
+int pyne::nucname::cinder(std::string nuc)
+{
+  int newnuc = zzaaam(nuc);
+  return cinder(newnuc);
+};
+
 
 
 

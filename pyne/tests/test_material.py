@@ -7,7 +7,7 @@ from nose.tools import assert_equal, assert_not_equal, assert_raises, raises, \
     assert_almost_equal, assert_true, assert_false, assert_in
 
 import os
-from pyne.material import Material, from_atom_frac, from_hdf5, from_text
+from pyne.material import Material, from_atom_frac, from_hdf5, from_text, MapStrMaterial
 import numpy  as np
 import tables as tb
 
@@ -74,6 +74,32 @@ def test_from_text():
     assert_equal(mat.comp, {922350: 0.05, 922380: 0.95})
 
 
+def test_write_text():
+    if 'leu.txt' in os.listdir('.'):
+        os.remove('leu.txt')
+
+    leu = Material({'U235': 0.04, 'U238': 0.96}, 42.0, "LEU", 1.0)
+    leu.write_text('leu.txt')
+
+    with open('leu.txt') as f:
+        written = f.read()
+    expected = ("Name    LEU\n"
+                "Mass    42\n"
+                "APerM   1\n"
+                "U235    0.04\n"
+                "U238    0.96\n")
+    assert_equal(written, expected)
+
+    read_leu = from_text('leu.txt')
+    assert_equal(leu.name, read_leu.name)
+    assert_equal(leu.mass, read_leu.mass)
+    assert_equal(leu.atoms_per_mol, read_leu.atoms_per_mol)
+    assert_equal(leu.comp, read_leu.comp)
+
+    os.remove('leu.txt')
+
+
+
 def test_from_hdf5_protocol_0():
     mat = Material()
     mat.from_hdf5("mat.h5", "/mat", protocol=0)
@@ -111,11 +137,11 @@ def test_hdf5_protocol_1():
 
     # Test material writing
     leu = Material({'U235': 0.04, 'U238': 0.96}, 4.2, "LEU", 1.0)
-    leu.write_hdf5('proto1.h5')
+    leu.write_hdf5('proto1.h5', chunksize=10)
 
     for i in range(2, 11):
         leu = Material({'U235': 0.04, 'U238': 0.96}, i*4.2, "LEU", 1.0*i)
-        leu.write_hdf5('proto1.h5', row=i-1)
+        leu.write_hdf5('proto1.h5')
 
     # Loads with protocol 1 now.
     m = Material()
@@ -820,6 +846,41 @@ def test_from_text_func():
     mat= from_text("mat.txt")
     assert_equal(mat.comp, {922350: 0.05, 922380: 0.95})
 
+
+
+def test_map_str_material():
+    m = MapStrMaterial()
+    m['leu'] = Material(leu)
+    m['heu'] = Material({'U238': 0.01, 'U235': 0.99}, 42.0)
+    assert_equal(len(m), 2)
+    assert_equal(m['leu'].mass, 1.0)
+    assert_equal(m['leu']['U235'], 0.04)
+    assert_equal(m['heu'].mass, 42.0)
+    assert_equal(m['heu']['U238'], 0.42)
+
+    m = MapStrMaterial({'leu': Material(leu), 'heu': Material({'U238': 0.01, 'U235': 0.99}, 42.0)})
+    assert_equal(len(m), 2)
+    assert_equal(m['leu'].mass, 1.0)
+    assert_equal(m['leu']['U235'], 0.04)
+    assert_equal(m['heu'].mass, 42.0)
+    assert_equal(m['heu']['U238'], 0.42)
+
+    n = MapStrMaterial(m, False)
+    assert_equal(len(n), 2)
+    assert_equal(n['leu'].mass, 1.0)
+    assert_equal(n['leu']['U235'], 0.04)
+    assert_equal(n['heu'].mass, 42.0)
+    assert_equal(n['heu']['U238'], 0.42)
+
+    # points to the same underlying map
+    n['other'] = Material({'PU239': 15.0})
+    assert_equal(m['other'].mass, 15.0)
+    assert_equal(m['other']['PU239'], 15.0)
+
+    assert_equal(n['leu'].mass, 1.0)
+    assert_equal(n['leu']['U235'], 0.04)
+    assert_equal(n['heu'].mass, 42.0)
+    assert_equal(n['heu']['U238'], 0.42)
 
 
 #

@@ -251,6 +251,31 @@ def nist(nuc):
     return newnuc.c_str()
 
 
+def cinder(nuc):
+    """Converts a nuclide to its CINDER (aaazzzm) form (2420951). 
+
+    Parameters
+    ----------
+    nuc : int or str 
+        Input nuclide.
+
+    Returns
+    -------
+    newnuc : int 
+        Output nuclide in CINDER (aaazzzm) form.
+    """
+
+    if isinstance(nuc, basestring):
+        newnuc = cpp_nucname.cinder(<char *> nuc)
+    elif isinstance(nuc, int):
+        newnuc = cpp_nucname.cinder(<int> nuc)
+    else:
+        raise NucTypeError(nuc)
+
+    return newnuc
+
+
+
 
 #
 # C++ Helper Functions
