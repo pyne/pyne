@@ -75,7 +75,7 @@ def test_write_FR_single_int():
     testRecord = _FortranRecord('',0)  # already tested
     
     # write integer
-    testRecord.put_int([setInt])
+    testRecord.put_int(setInt)
 
     return check_write_record_data(testRecord, setNumBytes, setNumBytes,
                                    setData,"4-byte integer")
@@ -104,7 +104,7 @@ def test_write_FR_single_long():
     testRecord = _FortranRecord('',0)  # already tested
     
     # write long
-    testRecord.put_long([setLong])
+    testRecord.put_long(setLong)
 
     return check_write_record_data(testRecord, setNumBytes, setNumBytes,
                                    setData,"8-byte integer")
@@ -131,7 +131,7 @@ def test_write_FR_single_float():
     testRecord = _FortranRecord('',0)  # already tested
     
     # write float
-    testRecord.put_float([setFloat])
+    testRecord.put_float(setFloat)
 
     return check_write_record_data(testRecord, setNumBytes, setNumBytes,
                                    setData,"float")
@@ -158,7 +158,7 @@ def test_write_FR_single_double():
     testRecord = _FortranRecord('',0)  # already tested
     
     # write double
-    testRecord.put_double([setDouble])
+    testRecord.put_double(setDouble)
 
     return check_write_record_data(testRecord, setNumBytes, setNumBytes,
                                    setData,"double")
@@ -216,7 +216,7 @@ def test_write_FR_mixed_record():
         '\xa8\x10\x9f\xde\xdfD\xc3\xf5H@'
 
     testRecord = _FortranRecord('',0)
-    testRecord.put_int([setInt])
+    testRecord.put_int(setInt)
     testRecord.put_string([setString],len(setString))
     testRecord.put_double(setDoubleList)
     testRecord.put_float([setFloat])
@@ -240,7 +240,7 @@ def test_read_FR_single_int():
 
     testRecord.reset()                 # already tested
 
-    testInt = testRecord.get_int()
+    testInt = testRecord.get_int()[0]
 
     if testInt != setInt:
         raise FortranRecordError("Value from get_int doesn't match value "
@@ -275,7 +275,7 @@ def test_read_FR_single_long():
 
     testRecord.reset()                 # already tested
 
-    testLong = testRecord.get_long()
+    testLong = testRecord.get_long()[0]
 
     if testLong != setLong:
         raise FortranRecordError("Value from get_long doesn't match value "
@@ -310,7 +310,7 @@ def test_read_FR_single_float():
 
     testRecord.reset()
     
-    testFloat = testRecord.get_float()
+    testFloat = testRecord.get_float()[0]
 
     # NOTE: since Python doesn't do native 32-bit floats, both values should be
     #       passed through a string formatting to truncate to 6 digits
@@ -357,7 +357,7 @@ def test_read_FR_single_double():
 
     testRecord.reset()
     
-    testDouble = testRecord.get_double()
+    testDouble = testRecord.get_double()[0]
 
     if testDouble != setDouble:
         raise FortranRecordError("Value from get_double doesn't match value "
@@ -393,7 +393,7 @@ def test_read_FR_single_string():
 
     testRecord.reset()
 
-    testString = testRecord.get_string(setLength)
+    testString = testRecord.get_string(setLength)[0]
 
     if testString != setString:
         raise FortranRecordError("List from get_string doesn't match value "
@@ -433,12 +433,12 @@ def test_read_FR_mixed_record():
 
     testRecord.reset()
 
-    testInt = testRecord.get_int()
+    testInt = testRecord.get_int()[0]
     if testInt != setInt:
         raise FortranRecordError("Value from get_int doesn't match value "
                                  "from put_int.")
 
-    testString = testRecord.get_string(12)
+    testString = testRecord.get_string(12)[0]
     if testString != setString:
         raise FortranRecordError("List from get_string doesn't match value "
                                  "from put_string.")
@@ -448,7 +448,7 @@ def test_read_FR_mixed_record():
         raise FortranRecordError("List from get_double doesn't match value "
                                  "from put_double.")
 
-    testFloat = testRecord.get_float()
+    testFloat = testRecord.get_float()[0]
     # NOTE: since Python doesn't do native 32-bit floats, both values should be
     #       passed through a string formatting to truncate to 6 digits
     setFloat  = '%10.6f' % setFloat
@@ -517,11 +517,11 @@ def test_read_BR():
     
     testRecord = binaryFile.get_fortran_record()
 
-    testInt = testRecord.get_int()
+    testInt = testRecord.get_int()[0]
     if testInt != setInt:
         raise BinaryReaderError("Integer value was not as expected.")
 
-    testString = testRecord.get_string(12)
+    testString = testRecord.get_string(12)[0]
     if testString != setString:
         raise BinaryReaderError("String was not as expected.")
 
@@ -529,7 +529,7 @@ def test_read_BR():
     if testDoubleList != setDoubleList:
         raise BinaryReaderError("List of doubles was not as expected.")
 
-    testFloat = testRecord.get_float()
+    testFloat = testRecord.get_float()[0]
     # NOTE: since Python doesn't do native 32-bit floats, both values should be
     #       passed through a string formatting to truncate to 6 digits
     setFloat  = '%10.6f' % setFloat
