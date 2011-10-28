@@ -279,47 +279,52 @@ def one_over_gamma_squared(E):
     return inv_g2
 
 
-def d2sigma_s_dE_prime_dOmega(E_prime, E, theta, b=1.0, M_A=1.0, T=300.0):
-    """Computes the double differential total scattering cross section from the equation.  
-    This is likely only valid in the thermal region.
+#
+# This needs more thought, much like all of the scattering models
+#
 
-    .. math::
+#def d2sigma_s_dE_prime_dOmega(E_prime, E, theta, b=1.0, M_A=1.0, T=300.0):
+#    """Computes the double differential total scattering cross section from the equation.  
+#    This is likely only valid in the thermal region.
+#
+#    .. math::
+#
+#        \\frac{d\\sigma_s(E)}{dE^\\prime} = \\mbox{[1]}
+#
+#    FIXME: I am untested
+#
+#    Parameters
+#    ----------
+#    E_prime : float (or array)
+#        The exiting energy of the neutron after scattering event [MeV].
+#    E : float (or array)
+#        The incident energy of the neutron prior to scattering event [MeV].
+#    theta : float (or array) 
+#        Scattering angle in [radians].
+#    b : float (or array), optional
+#        The bound scattering length of the target nucleus.
+#    M_A : float (or array), optional
+#        Atomic mass of the target nucleus [amu].
+#    T : float (or array), optional 
+#        Tempurature of the target material [kelvin].
+#
+#    Refs:
+#        1. Mattes M, Keinert J. Thermal neutron scattering data for the moderator 
+#           materials H2O, D2O and ZrHx in ENDF-6 format and as ACE library for 
+#           MCNP (X) codes. IAEA report INDC (NDS)-0470. 2005;(April). Available at: 
+#           http://200.136.52.101/reports-new/indc-reports/indc-nds/indc-nds-0470.pdf.
+#    """
+#    kT = k * T
+#    rcf = one_over_gamma_squared(E)
+#
+#    _alpha = alpha(E_prime, E, theta, M_A, T) 
+#    _beta = beta(E_prime, E, T)
+#
+#    power_term = (_beta/2.0) + (_alpha/4.0) + (_beta**2 / (4.0 * _alpha))
+#
+#    return rcf * (b**2 / kT) * np.sqrt((np.pi * E_prime) / (_alpha * E)) * np.exp(-power_term)
 
-        \\frac{d\\sigma_s(E)}{dE^\\prime} = \\mbox{[1]}
 
-    FIXME: I am untested
-
-    Parameters
-    ----------
-    E_prime : float (or array)
-        The exiting energy of the neutron after scattering event [MeV].
-    E : float (or array)
-        The incident energy of the neutron prior to scattering event [MeV].
-    theta : float (or array) 
-        Scattering angle in [radians].
-    b : float (or array), optional
-        The bound scattering length of the target nucleus.
-    M_A : float (or array), optional
-        Atomic mass of the target nucleus [amu].
-    T : float (or array), optional 
-        Tempurature of the target material [kelvin].
-
-
-    Refs:
-        1. Mattes M, Keinert J. Thermal neutron scattering data for the moderator 
-           materials H2O, D2O and ZrHx in ENDF-6 format and as ACE library for 
-           MCNP (X) codes. IAEA report INDC (NDS)-0470. 2005;(April). Available at: 
-           http://200.136.52.101/reports-new/indc-reports/indc-nds/indc-nds-0470.pdf.
-    """
-    kT = k * T
-    rcf = one_over_gamma_squared(E)
-
-    _alpha = alpha(E_prime, E, theta, M_A, T) 
-    _beta = beta(E_prime, E, T)
-
-    power_term = (_beta/2.0) + (_alpha/4.0) + (_beta**2 / (4.0 * _alpha))
-
-    return rcf * (b**2 / kT) * np.sqrt((np.pi * E_prime) / (_alpha * E)) * np.exp(-power_term)
     
 #
 # Failed analytic soltion to the integral of the double differential 
@@ -379,39 +384,49 @@ def E_prime_min(E, M_A=1.0):
 
     .. math::
 
-        \mbox{min}(E^\prime) = \left(\\frac{M_A - m_n}{M_A + m_n}\\right)^2 E
+        \\mbox{min}(E^\\prime) = \\left(\\frac{M_A - m_n}{M_A + m_n}\\right)^2 E
 
-    Args:
-        * E (float): The incident energy of the neutron prior to the 
-          scattering event [MeV].
+    
+    Parameters
+    ----------
+    E : float (or array)
+        The incident energy of the neutron prior to scattering event [MeV].
+    M_A : float (or array), optional
+        Atomic mass of the target nucleus [amu].
 
-    Keyword Args:
-        * M_A (float): Atomic mass of the target nucleus [amu].
+    Returns
+    -------
+    min_E_prime : float (or array)
+        Minimum exiting energy.
     """
     alph = ((M_A - m_n)/(M_A + m_n))**2 * E
-    min_E = alph * E
-    return min_E
+    min_E_prime = alph * E
+    return min_E_prime
 
 
-def E_prime_max(E, T=300.0):
-    """The maximum possible exiting enegy of a neuron after a scattering collision. 
-    This is based on the incident energy and the tempurature of the target.
-    The neutron can gain no more energy than the kinetic energy of the target.
-    In a macroscopic system, this is on average equal to kT.
+#
+# Below was the average maximal value
+#
 
-    .. math::
-
-        \mbox{max}(E^\prime) = E + kT
-
-    Args:
-        * E (float): The incident energy of the neutron prior to the 
-          scattering event [MeV].
-
-    Keyword Args:
-        * T (float): Tempurature of the target material [kelvin].
-    """
-    max_E = E + (k * T)
-    return max_E
+#def E_prime_max(E, T=300.0):
+#    """The maximum possible exiting enegy of a neuron after a scattering collision. 
+#    This is based on the incident energy and the tempurature of the target.
+#    The neutron can gain no more energy than the kinetic energy of the target.
+#    In a macroscopic system, this is on average equal to kT.
+#
+#    .. math::
+#
+#        \mbox{max}(E^\prime) = E + kT
+#
+#    Args:
+#        * E (float): The incident energy of the neutron prior to the 
+#          scattering event [MeV].
+#
+#    Keyword Args:
+#        * T (float): Tempurature of the target material [kelvin].
+#    """
+#    max_E = E + (k * T)
+#    return max_E
 
 
 def sigma_s_const(b):
@@ -420,81 +435,92 @@ def sigma_s_const(b):
 
     .. math::
 
-        \sigma_s = 4 \pi b^2
+        \\sigma_s = 4 \\pi b^2
 
-    Args:
-        * b (float): The bound scattering length of the target nucleus [cm].
+    Parameters
+    ----------
+    b : float (or array)
+        The bound scattering length of the target nucleus.
 
-    Returns:
-        * sig_s (float): the micorscopic scattering cross-section [barns].
+    Returns
+    -------
+    sig_s : float (or array) 
+        The micorscopic scattering cross-section [barns].
+
+    See Also
+    --------
+    pyne.data.b : scattering length data.
     """
-    sig_s = 4.0 * np.pi * (b**2) * (10.0**24)
-
+    sig_s = (4E24) * np.pi * (b**2)
     return sig_s
 
 
-def sigma_s_E(E, b=1.0, M_A=1.0, T=300.0):
-    """Computes the total scattering cross section from an empirical model.
+#
+# These definitely need more thought
+#
 
-    .. math::
+#def sigma_s_E(E, b=1.0, M_A=1.0, T=300.0):
+#    """Computes the total scattering cross section from an empirical model.
+#
+#    .. math::
+#
+#        \\sigma_s(E) = 4 \\pi b^2 \\cdot \\left( 1 - \\frac{2E}{931.46 \\cdot m_n} \\right) \\cdot
+#                      \\left( 1 + \\frac{m_n}{M_A} \\frac{kT}{E} \\cdot e^{-\\frac{M_A}{m_n}\\frac{E}{kT}} \\right) 
+#                      \\cdot \\left( 1 - \\mbox{Exp}\\left[-\\sqrt{\\frac{0.1}{E}}\\right] \\right)
+#
+#    Args:
+#        * E (float): The incident energy of the neutron prior to the 
+#          scattering event [MeV].
+#
+#    Keyword Args:
+#        * b (float): The bound scattering length of the target nucleus.
+#        * M_A (float): Atomic mass of the target nucleus [amu].
+#        * T (float): Tempurature of the target material [kelvin].
+#    """
+#    kT_over_AE = k * T / ((M_A / m_n) * E)
+#
+#    sig_s = sigma_s_const(b)
+#    rcf = one_over_gamma_squared(E)
+#    
+#    sig_s_E = (rcf * sig_s) * (1.0 + kT_over_AE * np.exp(-1.0/kT_over_AE)) * (1.0 - np.exp(-np.sqrt(0.1/E))) 
+#
+#    return sig_s_E
 
-        \\sigma_s(E) = 4 \\pi b^2 \\cdot \\left( 1 - \\frac{2E}{931.46 \\cdot m_n} \\right) \\cdot
-                      \\left( 1 + \\frac{m_n}{M_A} \\frac{kT}{E} \\cdot e^{-\\frac{M_A}{m_n}\\frac{E}{kT}} \\right) 
-                      \\cdot \\left( 1 - \\mbox{Exp}\\left[-\\sqrt{\\frac{0.1}{E}}\\right] \\right)
 
-    Args:
-        * E (float): The incident energy of the neutron prior to the 
-          scattering event [MeV].
-
-    Keyword Args:
-        * b (float): The bound scattering length of the target nucleus.
-        * M_A (float): Atomic mass of the target nucleus [amu].
-        * T (float): Tempurature of the target material [kelvin].
-    """
-    kT_over_AE = k * T / ((M_A / m_n) * E)
-
-    sig_s = sigma_s_const(b)
-    rcf = one_over_gamma_squared(E)
-    
-    sig_s_E = (rcf * sig_s) * (1.0 + kT_over_AE * np.exp(-1.0/kT_over_AE)) * (1.0 - np.exp(-np.sqrt(0.1/E))) 
-
-    return sig_s_E
-
-
-def P(E, E_prime, M_A=1.0, T=300.0):
-    """Calculates the neutron scattering transfer probability from
-
-    .. math::
-        P(E \\to E^\\prime) = \\frac{1}{E + kT - \\left( \\frac{M_A - m_n}{M_A + m_n} \\right)^2 E}
-
-    as long as 
-
-    .. math::
-        \\left( \\frac{M_A - m_n}{M_A + m_n} \\right)^2 E \\le E^\\prime \\le E + kT
-
-    The probability is zero outside of this range.
-
-    Args:
-        * E (float): The incident energy of the neutron prior to the 
-          scattering event [MeV].
-        * E_prime (float): The exiting energy of the neutron after the 
-          scattering event [MeV].
-
-    Keyword Args:
-        * M_A (float): Atomic mass of the target nucleus [amu].
-        * T (float): Tempurature of the target material [kelvin].
-
-    Returns:
-        * p (float): A transfer probablity.
-    """
-    # Find bounds
-    E_prime_lower = E_prime_min(E, M_A)    
-    E_prime_upper = E_prime_max(E, T)    
-
-    if E_prime_lower <= E_prime <= E_prime_upper:
-        p = 1.0 / (E_prime_upper - E_prime_lower)
-    else:
-        p = 0.0
-
-    return p
+#def P(E, E_prime, M_A=1.0, T=300.0):
+#    """Calculates the neutron scattering transfer probability from
+#
+#    .. math::
+#        P(E \\to E^\\prime) = \\frac{1}{E + kT - \\left( \\frac{M_A - m_n}{M_A + m_n} \\right)^2 E}
+#
+#    as long as 
+#
+#    .. math::
+#        \\left( \\frac{M_A - m_n}{M_A + m_n} \\right)^2 E \\le E^\\prime \\le E + kT
+#
+#    The probability is zero outside of this range.
+#
+#    Args:
+#        * E (float): The incident energy of the neutron prior to the 
+#          scattering event [MeV].
+#        * E_prime (float): The exiting energy of the neutron after the 
+#          scattering event [MeV].
+#
+#    Keyword Args:
+#        * M_A (float): Atomic mass of the target nucleus [amu].
+#        * T (float): Tempurature of the target material [kelvin].
+#
+#    Returns:
+#        * p (float): A transfer probablity.
+#    """
+#    # Find bounds
+#    E_prime_lower = E_prime_min(E, M_A)    
+#    E_prime_upper = E_prime_max(E, T)    
+#
+#    if E_prime_lower <= E_prime <= E_prime_upper:
+#        p = 1.0 / (E_prime_upper - E_prime_lower)
+#    else:
+#        p = 0.0
+#
+#    return p
     
