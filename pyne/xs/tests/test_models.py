@@ -8,7 +8,7 @@ from nose.tools import assert_equal, assert_not_equal, assert_almost_equal, asse
 from numpy.testing import assert_array_equal, assert_array_almost_equal
 
 from pyne.xs.models import partial_energy_matrix, partial_energy_matrix_mono, chi, alpha, k, \
-    m_n, beta, alpha_at_theta_0, alpha_at_theta_pi, one_over_gamma_squared
+    m_n, beta, alpha_at_theta_0, alpha_at_theta_pi, one_over_gamma_squared, E_prime_min, sigma_s_const
 from pyne.pyne_config import pyne_conf
 
 nuc_data = pyne_conf.NUC_DATA_PATH
@@ -266,3 +266,14 @@ def test_one_over_gamma_squared():
     expected = 1.0 - 2.0 * E / (931.46 * 1.0086649159700001)
     assert_array_almost_equal(rcf, expected)
 
+
+def test_E_prime_min():
+    assert_equal(0.0, E_prime_min(1.0, m_n))
+    assert_equal(1.0/9.0, E_prime_min(1.0, 2.0*m_n))
+    assert_equal(4.0/9.0, E_prime_min(2.0, 2.0*m_n))
+
+
+def test_sigma_s_const():
+    assert_equal(sigma_s_const(0.0), 0.0)
+    assert_equal(sigma_s_const(0.5), 1E24 * np.pi)
+    assert_equal(sigma_s_const(1.0), 4E24 * np.pi)

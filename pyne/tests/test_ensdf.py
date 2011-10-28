@@ -4,7 +4,7 @@ from StringIO import StringIO
 import nose 
 import numpy as np
 
-from nose.tools import assert_equal, assert_not_equal, assert_raises, raises, assert_in
+from nose.tools import assert_equal
 
 from pyne import ensdf
 from pyne.utils import to_sec
