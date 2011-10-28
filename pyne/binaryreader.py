@@ -44,11 +44,7 @@ class _FortranRecord(object):
         
         values = struct.unpack('{0}{1}'.format(n,typeCode), self.data[self.pos:self.pos+itemSize*n])
         self.pos += itemSize * n
-        if n == 1:
-            return values[0]
-        else:
-            return list(values)
-        
+        return list(values)
 
     def get_int(self, n=1):
         """
@@ -86,16 +82,18 @@ class _FortranRecord(object):
         relevantData = self.data[self.pos:self.pos+length*n]
         (s,) = struct.unpack('{0}s'.format(length*n), relevantData)
         self.pos += length*n
-        if n == 1:
-            return s
-        else:
-            return [s[i*length:(i+1)*length] for i in range(n)]
+        return [s[i*length:(i+1)*length] for i in range(n)]
 
     def put_data(self, newdata, format, itemSize):
         """
         Packs a list of data objects at the current position with a
         specified format and data size.
         """
+        try: 
+            iter(newdata) 
+        except TypeError: 
+            newdata = [newdata]
+
         for i in range(len(newdata)):
             self.data += struct.pack(format,newdata[i])
             self.pos += itemSize
