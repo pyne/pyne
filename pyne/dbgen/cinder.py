@@ -800,6 +800,7 @@ def make_photon_fp_yields(nuc_data, build_dir):
 
 
 def make_cinder(nuc_data, build_dir):
+    """Controller function for adding cinder data."""
     with tb.openFile(nuc_data, 'a') as f:
         if hasattr(f.root, 'neutron') and hasattr(f.root.neutron, 'cinder_xs') and hasattr(f.root.neutron, 'cinder_fission_products'):
             return

@@ -94,6 +94,24 @@ simple_xs_dtype = np.dtype([
 
 
 def get_xs_from_file(filename, eng, chan):
+    """Parses out a cross section from a KAERI file.
+
+    Parameters
+    ----------
+    filename : str
+        Local path to a KAERI neutron cross section summary html file.
+    eng : str
+        Energy flag to find this cross section for.  (Must be key 
+        of simple_xs_energy dictionary).
+    chan : str
+        Cross section (interaction channel) to find.  (Must be key 
+        of simple_xs_channels dict).
+
+    Returns
+    -------
+    data : float
+        Microscopic cross section in [barns].
+    """
     with open(filename, 'r') as f:
         in_channel = False
         for line in f:
@@ -114,7 +132,7 @@ def get_xs_from_file(filename, eng, chan):
                 # XS not defined for this energy, returning zero
                 return 0.0
 
-    # If the specific XS was not found in trhis file, return zero
+    # If the specific XS was not found in this file, return zero
     return 0.0
 
 
@@ -211,6 +229,7 @@ def make_simple_xs_tables(nuc_data, build_dir=""):
 
 
 def make_simple_xs(nuc_data, build_dir):
+    """Controller function for adding basic cross section data."""
     with tb.openFile(nuc_data, 'a') as f:
         if hasattr(f.root, 'neutron') and hasattr(f.root.neutron, 'simple_xs'):
             return 
