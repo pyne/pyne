@@ -6,7 +6,7 @@ import tables as tb
 from nose.tools import assert_equal, assert_not_equal, assert_almost_equal, assert_true
 from numpy.testing import assert_array_equal, assert_array_almost_equal
 
-from pyne.xs.cache import xs_cache, get_sigma_f_n, get_sigma_a_n, partial_energy_matrix, get_phi_g
+from pyne.xs.cache import xs_cache, get_sigma_f_n, get_sigma_a_n, partial_energy_matrix, phi_g
 from pyne.pyne_config import pyne_conf
 
 nuc_data = pyne_conf.NUC_DATA_PATH
@@ -297,115 +297,4 @@ def test_get_sigma_a_n4():
     sigma_a_n = get_sigma_a_n(10420)
     expected = np.zeros(63)
     assert_array_equal(sigma_a_n, expected)
-
-#
-# Test Flux Group Collapse
-#
-
-def test_phi_g1():
-    xs_cache.clear()
-
-    E_g = np.array([0.0, 10.0])
-    E_n = np.array([0.0, 10.0])
-
-    phi_n = np.ones(1)
-
-    phi_g = get_phi_g(E_g, E_n, phi_n)
-
-    expected = np.array([1.0])
-
-    assert_array_equal(phi_g, expected)    
-
-
-def test_phi_g2():
-    xs_cache.clear()
-
-    E_g = np.array([0.0, 5.0, 10.0])
-    E_n = np.array([0.0, 5.0, 10.0])
-
-    phi_n = np.ones(2)
-
-    phi_g = get_phi_g(E_g, E_n, phi_n)
-
-    expected = np.array([1.0, 1.0])
-
-    assert_array_equal(phi_g, expected)    
-
-
-def test_phi_g3():
-    xs_cache.clear()
-
-    E_g = np.array([1.25, 5.0, 7.5])
-    E_n = np.array([0.0, 2.5, 5.0, 7.5, 10.0])
-
-    phi_n = np.ones(4)
-
-    phi_g = get_phi_g(E_g, E_n, phi_n)
-
-    expected = np.array([1.5, 1.0])
-
-    assert_array_equal(phi_g, expected)    
-
-
-def test_phi_g4():
-    xs_cache.clear()
-
-    E_g = np.array([0.0, 5.0, 10.0])
-    E_n = np.array([0.0, 2.5, 5.0, 7.5, 10.0])
-
-    phi_n = np.ones(4)
-
-    phi_g = get_phi_g(E_g, E_n, phi_n)
-
-    expected = np.array([2.0, 2.0])
-
-    assert_array_equal(phi_g, expected)    
-
-
-def test_phi_g5():
-    xs_cache.clear()
-
-    E_g = np.array([0.0, 4.0, 10.0])
-    E_n = np.array([0.0, 2.5, 5.0, 7.5, 10.0])
-
-    phi_n = np.ones(4)
-
-    phi_g = get_phi_g(E_g, E_n, phi_n)
-
-    expected = np.array([1.6, 2.4]) 
-
-    assert_array_equal(phi_g, expected)    
-
-
-def test_phi_g6():
-    xs_cache.clear()
-
-    E_g = np.array([0.0, 4.0, 8.0])
-    E_n = np.array([0.0, 2.5, 5.0, 7.5, 10.0])
-
-    phi_n = np.ones(4)
-
-    phi_g = get_phi_g(E_g, E_n, phi_n)
-
-    expected = np.array([1.6, 1.6])
-
-    # Floating point error here requires 'alomst' equal
-    assert_array_almost_equal(phi_g, expected)    
-
-
-def test_phi_g7():
-    xs_cache.clear()
-
-    E_g = np.array([0.0, 4.0, 8.0])
-    E_n = np.array([0.0, 2.5, 5.0, 7.5, 10.0])
-
-    phi_n = np.array([0.0, 2.0, 1.0, 0.5])
-
-    phi_g = get_phi_g(E_g, E_n, phi_n)
-
-    expected = np.array([1.2, 1.9])
-
-    # Floating point error here requires 'alomst' equal
-    assert_array_almost_equal(phi_g, expected)    
-
 

@@ -128,6 +128,34 @@ def partial_energy_matrix(E_g, E_n):
     return pem
 
 
+
+######################
+### Group Collapse ###
+######################
+def phi_g(E_g, E_n, phi_n):
+    """Calculates a lower resolution flux, phi_g, from a lower resolution group stucture E_g, 
+    a higher resolution groups E_n, and a higher resolution flux phi_n.
+
+    Parameters
+    ----------
+    E_g : sequence of floats 
+        Lower resolution energy group structure [MeV] that is of length G+1. 
+    E_n : sequence of floats 
+        Higher resolution energy group structure [MeV] that is of length N+1. 
+    phi_n : sequence of floats
+        The high-fidelity flux [n/cm^2/s] to collapse the fission cross-section over (length N).  
+
+    Returns
+    -------
+    phi_g : numpy array of floats 
+        The flux collapsed to G energy groups.
+    """
+    pem = partial_energy_matrix(E_g, E_n)
+    phi_g = np.dot(pem, phi_n)
+    return phi_g
+
+
+
 #######################
 ### Physical models ###
 #######################
