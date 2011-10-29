@@ -8,7 +8,8 @@ from nose.tools import assert_equal, assert_not_equal, assert_almost_equal, asse
 from numpy.testing import assert_array_equal, assert_array_almost_equal
 
 from pyne.xs.models import partial_energy_matrix, partial_energy_matrix_mono, chi, alpha, k, \
-    m_n, beta, alpha_at_theta_0, alpha_at_theta_pi, one_over_gamma_squared, E_prime_min, sigma_s_const
+    m_n, beta, alpha_at_theta_0, alpha_at_theta_pi, one_over_gamma_squared, E_prime_min, sigma_s_const, \
+    phi_g
 from pyne.pyne_config import pyne_conf
 
 nuc_data = pyne_conf.NUC_DATA_PATH
@@ -191,6 +192,117 @@ def test_partial_energy_matrix3():
     E_n = np.array([0.0, 2.5, 5.0, 7.5, 10.0][::-1])
 
     assert_raises(ValueError,  partial_energy_matrix, E_g, E_n)
+
+
+#
+# Test Group Collapse
+#
+
+def test_phi_g1():
+    E_g = np.array([0.0, 10.0])
+    E_n = np.array([0.0, 10.0])
+
+    phi_n = np.ones(1)
+
+    observed = phi_g(E_g, E_n, phi_n)
+
+    expected = np.array([1.0])
+
+    assert_array_equal(observed, expected)
+
+
+def test_phi_g2():
+    E_g = np.array([0.0, 5.0, 10.0])
+    E_n = np.array([0.0, 5.0, 10.0])
+
+    phi_n = np.ones(2)
+
+    observed = phi_g(E_g, E_n, phi_n)
+
+    expected = np.array([1.0, 1.0])
+
+    assert_array_equal(observed, expected)
+
+
+def test_phi_g3():
+    E_g = np.array([1.25, 5.0, 7.5])
+    E_n = np.array([0.0, 2.5, 5.0, 7.5, 10.0])
+
+    phi_n = np.ones(4)
+
+    observed = phi_g(E_g, E_n, phi_n)
+
+    expected = np.array([1.5, 1.0])
+
+    assert_array_equal(observed, expected)
+
+def test_phi_g4():
+    E_g = np.array([0.0, 5.0, 10.0])
+    E_n = np.array([0.0, 2.5, 5.0, 7.5, 10.0])
+
+    phi_n = np.ones(4)
+
+    observed = phi_g(E_g, E_n, phi_n)
+
+    expected = np.array([2.0, 2.0])
+
+    assert_array_equal(observed, expected)
+
+
+def test_phi_g5():
+    E_g = np.array([0.0, 4.0, 10.0])
+    E_n = np.array([0.0, 2.5, 5.0, 7.5, 10.0])
+
+    phi_n = np.ones(4)
+
+    observed = phi_g(E_g, E_n, phi_n)
+
+    expected = np.array([1.6, 2.4])
+
+    assert_array_equal(observed, expected)
+
+
+def test_phi_g6():
+    E_g = np.array([0.0, 4.0, 8.0])
+    E_n = np.array([0.0, 2.5, 5.0, 7.5, 10.0])
+
+    phi_n = np.ones(4)
+
+    observed = phi_g(E_g, E_n, phi_n)
+
+    expected = np.array([1.6, 1.6])
+
+    # Floating point error here requires 'alomst' equal
+    assert_array_almost_equal(phi_g, expected)
+
+def test_phi_g6():
+    E_g = np.array([0.0, 4.0, 8.0])
+    E_n = np.array([0.0, 2.5, 5.0, 7.5, 10.0])
+
+    phi_n = np.ones(4)
+
+    observed = phi_g(E_g, E_n, phi_n)
+
+    expected = np.array([1.6, 1.6])
+
+    # Floating point error here requires 'alomst' equal
+    assert_array_almost_equal(observed, expected)
+
+
+def test_phi_g7():
+    E_g = np.array([0.0, 4.0, 8.0])
+    E_n = np.array([0.0, 2.5, 5.0, 7.5, 10.0])
+
+    phi_n = np.array([0.0, 2.0, 1.0, 0.5])
+
+    observed = phi_g(E_g, E_n, phi_n)
+
+    expected = np.array([1.2, 1.9])
+
+    # Floating point error here requires 'alomst' equal
+    assert_array_almost_equal(observed, expected)
+
+
 
 
 #
