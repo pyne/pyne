@@ -8,7 +8,7 @@ import tables as tb
 
 from pyne import nucname
 from pyne.pyne_config import pyne_conf
-from pyne.xs.models import partial_energy_matrix
+from pyne.xs.models import partial_energy_matrix, phi_g
 
 
 ###############################################################################
@@ -35,7 +35,7 @@ class XSCache(MutableMapping):
                          'sigma_f_n': get_sigma_f_n,
                          'sigma_a_n': get_sigma_a_n,
                          'sigma_rx_n': get_sigma_reaction_n,
-                         'phi_g': lambda: get_phi_g(self['E_g'], self['E_n'], self['phi_n']),
+                         'phi_g': lambda: phi_g(self['E_g'], self['E_n'], self['phi_n']),
                         }
 
     #
@@ -268,29 +268,6 @@ def get_sigma_reaction_n(nuc, rx):
         sigma_rx_n = rows.sum(axis=0)
 
     return sigma_rx_n
-
-
-def get_phi_g(E_g, E_n, phi_n):
-    """Calculates the lower resolution flux, phi_g, from the lower resolution group stucture E_g, 
-    the higher resolution groups E_n, and the higher resolution flux phi_n.
-
-    Parameters
-    ----------
-    E_g : sequence of floats 
-        Lower resolution energy group structure [MeV] that is of length G+1. 
-    E_n : sequence of floats 
-        Higher resolution energy group structure [MeV] that is of length N+1. 
-    phi_n : sequence of floats
-        The high-fidelity flux [n/cm^2/s] to collapse the fission cross-section over (length N).  
-
-    Returns
-    -------
-    phi_g : numpy array of floats 
-        The flux collapsed to G energy groups.
-    """
-    pem = partial_energy_matrix(E_g, E_n)
-    phi_g = np.dot(pem, phi_n)
-    return phi_g
 
 
 # Make a singleton of the cross-section cache
