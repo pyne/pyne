@@ -204,6 +204,7 @@ def make_atomic_weight_table(nuc_data, build_dir=""):
 
 
 def make_atomic_weight(nuc_data, build_dir):
+    """Controller function for adding atomic_weights."""
     if os.path.exists(nuc_data):
         with tb.openFile(nuc_data, 'r') as f:
             if hasattr(f.root, 'atomic_weight'):
