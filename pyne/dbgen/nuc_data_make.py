@@ -44,6 +44,7 @@ pyne_logo = """\
 
 
 def main():
+    """Entry point for nuc_data_make utility."""
     print pyne_logo
 
     make_funcs = [('atomic_weight', make_atomic_weight),
