@@ -7,7 +7,7 @@ from pyne import nucname
 
 def grab_kaeri_nuclide(nuc, build_dir="", n=None):
     """Grabs a nuclide file from KAERI from the web and places 
-    it in nuc.html in the build directory.
+    it a {nuc}.html file in the build directory.
 
     Parameters
     ----------
