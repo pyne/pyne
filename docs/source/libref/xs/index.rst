@@ -5,7 +5,7 @@ Cross Section Interface -- :mod:`pyne.xs`
 =========================================
 Pyne provides a top-level interface for computing (and caching) multigroup neutron cross sections.
 These cross sections will be computed from a variety of available data sources (stored in nuc_data.h5).
-In order of preferance: 
+In order of preference: 
 
 #. CINDER 63-group cross sections,
 #. A two-point fast/thermal interpolation (using 'simple_xs' data from KAERI),
@@ -23,4 +23,5 @@ pointwise data sources (such as ENDF or ACE files).
 .. toctree::
     :maxdepth: 1
 
+    models
     cache

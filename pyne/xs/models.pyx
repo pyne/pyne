@@ -13,7 +13,7 @@ from scipy.special import erf
 #from scipy import integrate
 #import metasci.mathematics.integrate as msmintegrate
 
-# Bolzman's constant in MeV/K
+# Bolzmann's constant in MeV/K
 k = constants.physical_constants['Boltzmann constant in eV/K'][0] * (1.0E-6)
 
 # Neutron mass in amu
@@ -440,7 +440,7 @@ def sigma_s_const(b):
     Parameters
     ----------
     b : float (or array)
-        The bound scattering length of the target nucleus.
+        The bound scattering length [cm] of the target nucleus.
 
     Returns
     -------

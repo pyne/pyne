@@ -13,10 +13,10 @@ All functionality may be found in the ``cache`` module::
 
  from pyne.xs import cache
 
-The reason for using a cache for multi-group cross sections is to prevent excessive recomputation
-and to be able to automaically invalidate all data when then group structure changes.
+The reason for using a cache for multi-group cross sections is to prevent excessive re-computation
+and to be able to automatically invalidate all data when then group structure changes.
 
-The following terminology appiles for this module:
+The following terminology applies for this module:
 
 * **G**: The number of user specified energy groups, indexed by **g**.
 * **N**: The number of high-resolution energy groups, indexed by **n**.
@@ -46,4 +46,28 @@ XSCache Class
 
         # Directly
         from pyne.xs.cache import xs_cache
+
+
+**********************
+Cache Helper Functions
+**********************
+The following functions help the cache extract data from the ``nuc_data.h5`` file.
+
+.. autofunction:: get_E_n()
+
+---------
+
+.. autofunction:: get_sigma_f_n(nuc)
+
+---------
+
+.. autofunction:: get_sigma_a_n(nuc)
+
+---------
+
+.. autofunction:: get_sigma_reaction_n(nuc, rx)
+
+---------
+
+.. autofunction:: get_phi_g(E_g, E_n, phi_n)
 
