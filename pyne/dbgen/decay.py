@@ -80,14 +80,14 @@ def parse_decay(build_dir=""):
     
     
 def make_atomic_decay_table(nuc_data, build_dir=""):
-    """Makes an atomic weight table in the nuc_data library.
+    """Makes a decay table in the nuc_data library.
 
     Parameters
     ----------
     nuc_data : str
         Path to nuclide data file.
     build_dir : str
-        Directory to place html files in.
+        Directory to place ensdf files in.
     """
     # Grab raw data
     atomic_decay  = parse_decay(build_dir)
@@ -110,6 +110,7 @@ def make_atomic_decay_table(nuc_data, build_dir=""):
 
 
 def make_decay(nuc_data, build_dir):
+    """Controller function for adding decay data."""
     with tb.openFile(nuc_data, 'r') as f:
         if hasattr(f.root, 'atomic_decay'):
             return 
