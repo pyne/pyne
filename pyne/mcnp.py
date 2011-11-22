@@ -510,20 +510,20 @@ class XsdirTable(object):
             return
 
         # Handle special case of Am-242 and Am-242m
-        if self.ZAID == '95242':
-            return True
-        elif self.ZAID == '95642':
-            return False
+        if self.zaid == '95242':
+            return 1
+        elif self.zaid == '95642':
+            return 0
 
         # All other cases
-        A = int(self.ZAID) % 1000
+        A = int(self.zaid) % 1000
         if A > 600:
-            return True
+            return 1
         else:
-            return False
+            return 0
 
     @property
-    def ZAID(self):
+    def zaid(self):
         return self.name[:self.name.find('.')]
 
     def to_serpent(self, directory=''):
@@ -533,7 +533,7 @@ class XsdirTable(object):
                 directory = directory.strip() + '/'
 
         return "{0} {0} {1} {2} {3} {4} {5} {6} {7}".format(
-            self.name, self.serpent_type, self.ZAID, 1 if self.metastable else 0,
+            self.name, self.serpent_type, self.zaid, 1 if self.metastable else 0,
             self.awr, self.temperature/8.6173423e-11, self.filetype - 1,
             directory + self.filename)
 
