@@ -200,7 +200,7 @@ class NeutronTable(AceTable):
         # Read LDLWP block
         # Read DLWP block
         # Read YP block
-        self._read_yp()
+        # self._read_yp()
         self._read_fis()
         self._read_unr()
 
@@ -1094,12 +1094,11 @@ class SabTable(AceTable):
         # Read values
         NE = self._get_int()
         self.elastic_e_in = self._get_float(NE)
+        self.elastic_P = self._get_float(NE)
         if self.NXS[5] == 4:
-            P = self._get_float(NE)
-            self.elastic_P = [P[i]/self.elastic_e_in[i]
-                              for i in range(NE)]
+            self.elastic_type = 'sigma=P'
         else:
-            self.elastic_P = self._get_float(NE)
+            self.elastic_type = 'sigma=P/E'
 
     def _read_itxe(self):
         """
