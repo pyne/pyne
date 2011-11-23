@@ -1,3 +1,5 @@
+import os
+
 time_conv_dict = {
           'as': 1e-18, 
 		  'attosec': 1e-18, 
@@ -95,3 +97,25 @@ def to_barns(xs, units):
     """
     barn_xs = xs * barn_conv_dict[units.lower()]
     return barn_xs
+
+
+#########################
+### message functions ###
+#########################
+
+USE_COLOR = (os.name is 'posix')
+
+def message(s):
+    """Formats a message for printing.  If on a posix system the message will be in color."""
+    head = "\033[1;32m" if USE_COLOR else "*** MESSAGE ***: "
+    tail = "\033[0m" if USE_COLOR else ""
+    msg = head + s + tail
+    return msg
+
+
+def failure(s):
+    """Formats a fail message for printing.  If on a posix system the message will be in color."""
+    head = "\033[1;31m" if USE_COLOR else "*** FAILURE ***: "
+    tail = "\033[0m" if USE_COLOR else ""
+    msg = head + s + tail
+    return msg
