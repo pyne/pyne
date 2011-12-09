@@ -15,7 +15,7 @@ import struct
 import math 
 import os
 
-from binaryreader import _BinaryReader
+from binaryreader import _BinaryReader, _FortranRecord
 
 class Mctal(object):
     def __init__(self):
@@ -194,7 +194,7 @@ class SurfSrc(_BinaryReader):
             if other.surflist[surf].facetId    != self.surflist[surf].facetId:
                 print "surf " + str(surf) + " facetId doesn't match"
                 return False
-            if other.surflist[surf].type       != self.surflist[surf].id:
+            if other.surflist[surf].type       != self.surflist[surf].type:
                 print "surf " + str(surf) + " type doesn't match"
                 return False
             if other.surflist[surf].numParams  != self.surflist[surf].numParams:
@@ -207,55 +207,65 @@ class SurfSrc(_BinaryReader):
         return True
 
     def read_header(self):
+        """
+        Reads in the header blocks, of which there are four:
+        -header, -table1, -table2, -summary
+        """
         # read header block
         header = self.get_fortran_record()
 
         # interpret header block
-        self.kod    = header.get_string(8)  # code identifier
-        self.ver    = header.get_string(5)  # code version identifier
-        self.loddat = header.get_string(8)  # code version date
-        self.idtm   = header.get_string(19) # current date and time
-        self.probid = header.get_string(19) # problem identification string
-        self.aid    = header.get_string(80) # title card of initial run
-        self.knod   = header.get_int()      # dump number
+        self.kod    = header.get_string(8)[0]  # code identifier
+        self.ver    = header.get_string(5)[0]  # code version identifier
+        self.loddat = header.get_string(8)[0]  # code version date
+        self.idtm   = header.get_string(19)[0] # current date and time
+        self.probid = header.get_string(19)[0] # problem identification string
+        self.aid    = header.get_string(80)[0] # title card of initial run
+        self.knod   = header.get_int()[0]      # dump number
 
         # read various counts and sizes
         tablelengths = self.get_fortran_record()
 
         # interpret table lengths
-        self.np1  = tablelengths.get_long()  # number of histories used to generate source
-        self.nrss = tablelengths.get_long()  # number of tracks written to surface source
-        self.ncrd = tablelengths.get_int()  # number of values in surface source record
-                                            # 6 for a spherical source
-                                            # 11 otherwise
-        self.njsw = tablelengths.get_int()  # number of surfaces 
-        self.niss = tablelengths.get_long()  # number of histories written to surface source
+        self.np1  = tablelengths.get_long()[0]  # number of histories used to generate source
+        self.nrss = tablelengths.get_long()[0]  # number of tracks written to surface source
+        self.ncrd = tablelengths.get_int()[0]  # number of values in surface source record
+                                               # 6 for a spherical source
+                                               # 11 otherwise
+        self.njsw = tablelengths.get_int()[0]   # number of surfaces
+        self.niss = tablelengths.get_long()[0]  # number of histories written to surface source
 
         if self.np1 < 0:
             # read more size info
             tablelengths = self.get_fortran_record()
 
-            self.niwr  = tablelengths.get_int()  # number of cells in surface source card
-            self.mipts = tablelengths.get_int()  # source particle type
-            self.kjaq  = tablelengths.get_int()  # macrobody facet flag
-
+            self.niwr  = tablelengths.get_int()[0]  # number of cells in surface source card
+            self.mipts = tablelengths.get_int()[0]  # source particle type
+            self.kjaq  = tablelengths.get_int()[0]  # macrobody facet flag
+            self.table2extra=[]
+            while tablelengths.numBytes > tablelengths.pos:
+                self.table2extra += tablelengths.get_int()
+        else:
+            print "np1 is ", self.np1
+        
+        self.orignp1 = self.np1
         self.np1 = abs(self.np1)
 
         # get info for each surface
         self.surflist = []
         for j in range(self.njsw):
-            surfaceinfo = self.get_fortran_record()
+            self.surfaceinfo = self.get_fortran_record()
             
             surfinfo = SourceSurf()
-            surfinfo.id = surfaceinfo.get_int()            # surface ID
+            surfinfo.id = self.surfaceinfo.get_int()            # surface ID
             if self.kjaq == 1:
-                surfinfo.facetId = surfaceinfo.get_int()   # facet ID
+                surfinfo.facetId = self.surfaceinfo.get_int()   # facet ID
             else:
-                surfinfo.facetId = -1                      # dummy facet ID
+                surfinfo.facetId = -1                           # dummy facet ID
 
-            surfinfo.type = surfaceinfo.get_int()                      # surface type
-            surfinfo.numParams = surfaceinfo.get_int()                 # number of surface parameters
-            surfinfo.surfParams = surfaceinfo.get_double(surfinfo.numParams)
+            surfinfo.type = self.surfaceinfo.get_int()                 # surface type
+            surfinfo.numParams = self.surfaceinfo.get_int()[0]         # number of surface parameters
+            surfinfo.surfParams = self.surfaceinfo.get_double(surfinfo.numParams)
 
             self.surflist.append(surfinfo)                  
 
@@ -266,9 +276,14 @@ class SurfSrc(_BinaryReader):
 
         summaryInfo = self.get_fortran_record()            # summary table
         self.summaryTable = summaryInfo.get_int((2+4*self.mipts)*(self.njsw+self.niwr)+1)
-        self.summaryTable = self.summaryTable[1:]
+        self.summaryExtra=[]
+        while summaryInfo.numBytes > summaryInfo.pos:
+            self.summaryExtra += summaryInfo.get_int()
         
     def read_tracklist(self):
+        """
+        Reads in track records for individual particles.
+        """
         self.tracklist = []
         for j in range(self.nrss):
             trackInfo = self.get_fortran_record()
@@ -289,7 +304,59 @@ class SurfSrc(_BinaryReader):
             # trackData.bitarray = abs(trackData.bitarray)
             
             self.tracklist.append(trackData)
-
+            
+    def put_header(self):
+        """
+        Write the header part of the header
+        to the surface source file
+        """
+        rec = [self.kod, self.ver, self.loddat, self.idtm, self.probid, self.aid]
+        newrecord = _FortranRecord("".join(rec), len("".join(rec)))
+        newrecord.put_int([self.knod])
+        self.put_fortran_record(newrecord)
+        return
+    
+    
+    def put_table_1(self):
+        """
+        Write the table1 part of the header
+        to the surface source file
+        """
+        newrecord = _FortranRecord("", 0)
+        newrecord.put_long( [self.np1])
+        newrecord.put_long( [self.nrss])
+        newrecord.put_int(  [self.ncrd])
+        newrecord.put_int(  [self.njsw])
+        newrecord.put_long( [self.niss])
+        self.put_fortran_record(newrecord)
+        return
+    
+    
+    def put_table_2(self):
+        """
+        Write the table2 part of the header
+        to the surface source file
+        """
+        newrecord = _FortranRecord("", 0)
+        newrecord.put_int( [self.niwr ])
+        newrecord.put_int( [self.mipts])
+        newrecord.put_int( [self.kjaq ])
+        newrecord.put_int( self.table2extra)
+        self.put_fortran_record(newrecord)
+        return
+        
+        
+    def put_summary(self):
+        """
+        Write the summary part of the header
+        to the surface source file
+        """
+        newrecord = _FortranRecord("", 0)
+        newrecord.put_int( [self.summaryTable])
+        newrecord.put_int( [self.summaryExtra])
+        self.put_fortran_record(newrecord)
+        return
+    
 class Srctp(_BinaryReader):
     """This class stores source site data from a 'srctp' file written by
     MCNP. The source sites are stored in the 'fso' array in MCNP.
