@@ -9,3 +9,6 @@ from pyne.data import nuc_weight
 
 # Materials
 from pyne.material import Material
+
+# Bins
+from pyne.bins import ninespace, stair_step
