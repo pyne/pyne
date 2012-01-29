@@ -9,7 +9,7 @@ from numpy.testing import assert_array_equal, assert_array_almost_equal
 
 from pyne.xs.models import partial_energy_matrix, partial_energy_matrix_mono, chi, alpha, k, \
     m_n, beta, alpha_at_theta_0, alpha_at_theta_pi, one_over_gamma_squared, E_prime_min, \
-    sigma_s_const, phi_g, group_collapse
+    sigma_s_const, sigma_s, phi_g, group_collapse
 from pyne.pyne_config import pyne_conf
 
 nuc_data = pyne_conf.NUC_DATA_PATH
@@ -411,3 +411,16 @@ def test_sigma_s_const():
     assert_equal(sigma_s_const(0.0), 0.0)
     assert_equal(sigma_s_const(0.5), 1E24 * np.pi)
     assert_equal(sigma_s_const(1.0), 4E24 * np.pi)
+
+def test_sigma_s():
+    # Probably could use some more testing
+    E = np.logspace(-9, 2, 101)
+
+    sig_s = sigma_s(E)
+    assert_true((0.0 <= sig_s).all())
+    assert_true((sig_s[1:] <= sig_s[:-1]).all())
+
+    sig_s = sigma_s(E, 12.0, 13.0, 1900.0)
+    assert_true((0.0 <= sig_s).all())
+    assert_true((sig_s[1:] <= sig_s[:-1]).all())
+

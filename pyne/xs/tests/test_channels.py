@@ -7,8 +7,10 @@ from nose.tools import assert_equal, assert_not_equal, assert_almost_equal, asse
                        assert_raises
 from numpy.testing import assert_array_equal, assert_array_almost_equal
 
+import pyne.data
+import pyne.xs.models
 from pyne.xs.cache import xs_cache
-from pyne.xs.channels import sigma_f
+from pyne.xs.channels import sigma_f, sigma_s_gh
 from pyne.pyne_config import pyne_conf
 
 
@@ -18,7 +20,7 @@ from pyne.pyne_config import pyne_conf
 # This is OK since the underlying functions are very well tested.
 #
 
-def test_sigma_f1():
+def test_sigma_f():
     E_g = np.array([10.0, 7.5, 5.0, 2.5, 0.1])
     E_n = xs_cache['E_n']
     phi_n = np.ones(len(E_n) - 1)
@@ -35,3 +37,13 @@ def test_sigma_f1():
     observed = (0.0 <= sig_f).all()
     assert_true(observed)
 
+
+def test_sigma_s_gh():
+    # Tests stub
+    b = pyne.data.b('H1')
+    aw = pyne.data.nuc_weight('H1')
+    E = np.logspace(-6, 1, 10)[::-1]
+    E_centers = (E[1:] + E[:-1]) / 2.0
+    expected = np.diag(pyne.xs.models.sigma_s(E_centers, b, aw, 600.0))
+    observed = sigma_s_gh('H1', 600.0, E_g=E)
+    assert_array_equal(expected, observed)
