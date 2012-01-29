@@ -106,3 +106,7 @@ Physical models
 ---------
 
 .. autofunction:: sigma_s_const(b)
+
+---------
+
+.. autofunction:: sigma_s(E, b=1.0, M_A=1.0, T=300.0)

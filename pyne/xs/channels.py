@@ -1,4 +1,7 @@
+import numpy as np
+
 import pyne.data
+import pyne.xs.models
 from pyne import nucname
 from pyne.xs.cache import xs_cache
 from pyne.xs.models import group_collapse
@@ -73,10 +76,6 @@ def sigma_s_gh(nuc, T, E_g=None, E_n=None, phi_n=None):
     lower resolution group structure using a higher fidelity flux.  Note that g, h index G, 
     n indexes N, and G < N.  g is for the incident energy and h is for the exiting energy.
 
-    .. math::
-        \\sigma_{s, g\\to h} = \\frac{\\int_{E_g}^{E_{g+1}} \\int_{E_h}^{E_{h+1}} \\sigma_s(E) P(E \\to E^\\prime) \\phi(E) dE^\\prime dE}
-                                {\\int_{E_g}^{E_{g+1}} \\phi(E) dE}
-
     Parameters
     ----------
     nuc :
@@ -102,14 +101,17 @@ def sigma_s_gh(nuc, T, E_g=None, E_n=None, phi_n=None):
 
     Warnings
     --------
-    This function is currently a stub which returns a zero-array of the 
-    appropriate shape until the proper way to compute the scattering kernel
-    is determined.  This function is safe to use but the results are trivial.
+    This function is currently a stub until the proper way to compute the 
+    scattering kernel is determined.  This function is safe to use but the 
+    results are trivial.  This function simply returns an array with the 
+    diagonal elements set to sigma_s as computed by pyne.xs.models.sigma_s().
+    This conserves the calculation of sigma_s_g by summing sigma_s_gh over 
+    the h-index.
 
     """
     _prep_cache(E_g, E_n, phi_n)
 
-    nuc_zz = nucname.zzaaam(iso)
+    nuc_zz = nucname.zzaaam(nuc)
     key = ('sigma_s_gh', nuc_zz, T)
 
     # Don't recalculate anything if you don't have to
@@ -121,10 +123,10 @@ def sigma_s_gh(nuc, T, E_g=None, E_n=None, phi_n=None):
     b = pyne.data.b(nuc_zz)
     aw = pyne.data.nuc_weight(nuc_zz)
 
-    # Initialize the scattering kernel
-    sig_s_gh = np.zeros((G, G), dtype=float)
-
     # OMG FIXME So hard!
+    ## Initialize the scattering kernel
+    #sig_s_gh = np.zeros((G, G), dtype=float)
+    #
     ## Calculate all values of the kernel
     #for g, h in product(range(G), range(G)):
     #    # Numerator inetgration term 
@@ -142,6 +144,12 @@ def sigma_s_gh(nuc, T, E_g=None, E_n=None, phi_n=None):
     #
     #    # Cross section value
     #    sig_s_gh[g, h] = numer / denom
+
+    # Temporary stub
+    E_g = xs_cache['E_g']
+    E_g_centers = (E_g[1:] + E_g[:-1]) / 2.0
+    sig_s = pyne.xs.models.sigma_s(E_g_centers, b, aw, T)
+    sig_s_gh = np.diag(sig_s)
 
     # Put this value back into the cache, with the appropriate label
     xs_cache[key] = sig_s_gh
