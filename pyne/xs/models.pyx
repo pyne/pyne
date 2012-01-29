@@ -155,6 +155,56 @@ def phi_g(E_g, E_n, phi_n):
     return phi_g
 
 
+def group_collapse(sigma_n, phi_n, phi_g=None, partial_energies=None, E_g=None, E_n=None):
+    """Calculates the group cross-sections for a nuclide for a new, lower resolution
+    group structure using a higher fidelity flux.  Note that g indexes G, n indexes N, 
+    and G < N.  
+
+    This function has two optional ways of being called.  If the group boundaries
+    E_g and E_n are provided, this will collapse the flux automatically.  However, 
+    if a partial energy matrix and flux collapse has already been performed you can
+    shortcut their recalculation by calling this function with the phi_g and 
+    partial_energies keyword arguments.
+
+    Parameters
+    ----------
+    sigma_n : array-like of floats)
+        A high-fidelity cross-section.
+    phi_n : array-like of floats
+        The high-fidelity flux [n/cm^2/s] to collapse the fission cross-section 
+        over (length N).  
+    phi_g : array-like of floats, optional
+        The low-fidelity flux [n/cm^2/s] to collapse the fission cross-section 
+        down to (length G).  If present, partial_energies is needed as well.
+    partial_energies : 2D array-like of floats, optional
+        A partial energy matrix as provided by a previous call to the function
+        partial_energy_matrix().  If present, phi_g is needed as well.
+    E_g : array-like of floats, optional
+        Lower resolution energy group structure [MeV] that is of length G+1.
+        If present, E_n is needed as well.
+    E_n : array-like of floats, optional
+        Higher resolution energy group structure [MeV] that is of length N+1. 
+        If present, E_g is needed as well.
+
+    Returns
+    -------
+    sigma_g : ndarray
+        An array of the collapsed fission cross-section.
+    """
+    if (phi_g is not None) and (partial_energies is not None):
+        pem = partial_energies
+    elif (E_g is not None) and (E_n is not None):
+        pem =  partial_energy_matrix(E_g, E_n)
+        phi_g = np.dot(pem, phi_n)
+    else:
+        raise ValueError("Either phi_g and partial_energies or E_g and E_n must "
+                         "both not be None.")
+
+    # Calulate partial group collapse
+    sigma_g = np.dot(pem, sigma_n * phi_n) / phi_g
+    return sigma_g
+
+
 
 #######################
 ### Physical models ###
