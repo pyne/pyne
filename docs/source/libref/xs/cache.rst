@@ -67,7 +67,3 @@ The following functions help the cache extract data from the ``nuc_data.h5`` fil
 
 .. autofunction:: get_sigma_reaction_n(nuc, rx)
 
----------
-
-.. autofunction:: get_phi_g(E_g, E_n, phi_n)
-
