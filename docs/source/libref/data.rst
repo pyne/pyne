@@ -56,6 +56,7 @@ Neutron Scattering Lengths
     A mapping from zzaaam-nuclides to their bound neuton scattering lengths.
     This is used by :func:`b` under the hood.
 
+-----
 
 .. autofunction:: b_coherent(nuc)
 
@@ -64,7 +65,7 @@ Neutron Scattering Lengths
     A mapping from zzaaam-nuclides to their bound coherent neuton scattering lengths.
     This is used by :func:`b_coherent` under the hood.
 
-
+-----
 
 .. autofunction:: b_incoherent(nuc)
 
