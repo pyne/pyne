@@ -537,32 +537,49 @@ def sigma_s_const(b):
 # These definitely need more thought
 #
 
-#def sigma_s_E(E, b=1.0, M_A=1.0, T=300.0):
-#    """Computes the total scattering cross section from an empirical model.
-#
-#    .. math::
-#
-#        \\sigma_s(E) = 4 \\pi b^2 \\cdot \\left( 1 - \\frac{2E}{931.46 \\cdot m_n} \\right) \\cdot
-#                      \\left( 1 + \\frac{m_n}{M_A} \\frac{kT}{E} \\cdot e^{-\\frac{M_A}{m_n}\\frac{E}{kT}} \\right) 
-#                      \\cdot \\left( 1 - \\mbox{Exp}\\left[-\\sqrt{\\frac{0.1}{E}}\\right] \\right)
-#
-#    Args:
-#        * E (float): The incident energy of the neutron prior to the 
-#          scattering event [MeV].
-#
-#    Keyword Args:
-#        * b (float): The bound scattering length of the target nucleus.
-#        * M_A (float): Atomic mass of the target nucleus [amu].
-#        * T (float): Tempurature of the target material [kelvin].
-#    """
-#    kT_over_AE = k * T / ((M_A / m_n) * E)
-#
-#    sig_s = sigma_s_const(b)
-#    rcf = one_over_gamma_squared(E)
-#    
-#    sig_s_E = (rcf * sig_s) * (1.0 + kT_over_AE * np.exp(-1.0/kT_over_AE)) * (1.0 - np.exp(-np.sqrt(0.1/E))) 
-#
-#    return sig_s_E
+def sigma_s(E, b=1.0, M_A=1.0, T=300.0):
+    """Computes the scattering cross section from an analytic model.  The model
+    accounts for both one-over-v dependence and relativistic effects and the 
+    bound scattering length provided.  This model does not include resonances.
+    This function works on both float and array values for the energy.
+
+    .. math::
+
+        \\sigma_s(E) = 4 \\pi b^2 \\cdot \\left( 1 - \\frac{2E}{931.46 \\cdot m_n} \\right) \\cdot
+                      \\left( 1 + \\frac{m_n}{M_A} \\frac{kT}{E} \\cdot e^{-\\frac{M_A}{m_n}\\frac{E}{kT}} \\right) 
+                      \\cdot \\left( 1 - \\mbox{Exp}\\left[-\\sqrt{\\frac{0.1}{E}}\\right] \\right)
+
+    Parameters
+    ----------
+    E : float or array-like
+        The incident energy of the neutron prior to the scattering event [MeV].
+    b : float, optional
+        The bound scattering length of the target nucleus [cm].
+    M_A : float, optional
+        Atomic mass of the target nucleus [amu].
+    T : float, optional
+        Tempurature of the target material [kelvin].
+
+    Returns
+    -------
+    sig_s : float or ndarray
+        The scattering cross section evaluated at the given energy.
+
+    See Also
+    --------
+    pyne.data.b : scattering length data.
+    pyne.data.nuc_weight : Atomic mass data.
+
+    """
+    kT_over_AE = k * T / ((M_A / m_n) * E)
+
+    sig_s = sigma_s_const(b)
+    rcf = one_over_gamma_squared(E)
+    
+    sig_s = (rcf * sig_s) * (1.0 + kT_over_AE * np.exp(-1.0/kT_over_AE)) * \
+                            (1.0 - np.exp(-np.sqrt(0.1/E))) 
+
+    return sig_s
 
 
 #def P(E, E_prime, M_A=1.0, T=300.0):
