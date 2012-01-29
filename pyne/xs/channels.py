@@ -97,7 +97,7 @@ def sigma_s_gh(nuc, T, E_g=None, E_n=None, phi_n=None):
 
     Notes
     -----
-    This always pulls the scattering length out of nuc_data library.
+    This pulls the scattering length out of nuc_data library.
 
     Warnings
     --------
@@ -155,4 +155,53 @@ def sigma_s_gh(nuc, T, E_g=None, E_n=None, phi_n=None):
     xs_cache[key] = sig_s_gh
 
     return sig_s_gh
+
+
+def sigma_s(nuc, T, E_g=None, E_n=None, phi_n=None):
+    """Calculates the neutron scattering cross-section for a nuclide. 
+
+    .. math::
+        \\sigma_{s, g} = \\sum_{h} \\sigma_{s, g\\to h} 
+
+    Parameters
+    ----------
+    nuc :
+        A nuclide name for which to calculate the fission cross-section.
+    T : float
+        Tempurature of the target material [kelvin].
+    E_g : array-like of floats, optional
+        New, lower fidelity energy group structure [MeV] that is of length G+1. 
+    E_n : array-like of floats, optional
+        Higher resolution energy group structure [MeV] that is of length N+1. 
+    phi_n : array-like of floats, optional
+        The high-fidelity flux [n/cm^2/s] to collapse the fission cross-section over.  
+        Length N.  
+
+    Returns
+    -------
+    sig_s_g : ndarray 
+        An array of the scattering cross section.
+
+    """
+    _prep_cache(E_g, E_n, phi_n)
+
+    nuc_zz = nucname.zzaaam(nuc)
+    key_g = ('sigma_s_g', nuc_zz, T)
+    key_gh = ('sigma_s_gh', nuc_zz, T)
+
+    # Don't recalculate anything if you don't have to
+    if key_g in xs_cache:
+        return xs_cache[key_g]
+
+    # This calculation requires the scattering kernel
+    if key_gh not in xs_cache:
+        xs_cache[key_gh] = sigma_s_gh(nuc, T, E_g, E_n, phi_n)
+
+    # Sum over all h
+    sig_s_g = xs_cache[key_gh].sum(axis=1)
+
+    # Put this value back into the cache, with the appropriate label
+    xs_cache[key_g] = sig_s_g
+
+    return sig_s_g
 
