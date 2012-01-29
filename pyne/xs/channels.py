@@ -1,3 +1,4 @@
+import pyne.data
 from pyne import nucname
 from pyne.xs.cache import xs_cache
 from pyne.xs.models import group_collapse
@@ -65,4 +66,85 @@ def sigma_f(nuc, E_g=None, E_n=None, phi_n=None):
     xs_cache[sigma_f_g_nuc_zz] = sigma_f_g
 
     return sigma_f_g
+
+
+def sigma_s_gh(nuc, T, E_g=None, E_n=None, phi_n=None):
+    """Calculates the neutron scattering cross-section kernel for a nuclide for a new, 
+    lower resolution group structure using a higher fidelity flux.  Note that g, h index G, 
+    n indexes N, and G < N.  g is for the incident energy and h is for the exiting energy.
+
+    .. math::
+        \\sigma_{s, g\\to h} = \\frac{\\int_{E_g}^{E_{g+1}} \\int_{E_h}^{E_{h+1}} \\sigma_s(E) P(E \\to E^\\prime) \\phi(E) dE^\\prime dE}
+                                {\\int_{E_g}^{E_{g+1}} \\phi(E) dE}
+
+    Parameters
+    ----------
+    nuc :
+        A nuclide name for which to calculate the fission cross-section.
+    T : float
+        Tempurature of the target material [kelvin].
+    E_g : array-like of floats, optional
+        New, lower fidelity energy group structure [MeV] that is of length G+1. 
+    E_n : array-like of floats, optional
+        Higher resolution energy group structure [MeV] that is of length N+1. 
+    phi_n : array-like of floats, optional
+        The high-fidelity flux [n/cm^2/s] to collapse the fission cross-section over.  
+        Length N.  
+
+    Returns
+    -------
+    sig_s_gh : ndarray 
+        An array of the scattering kernel.
+
+    Notes
+    -----
+    This always pulls the scattering length out of nuc_data library.
+
+    Warnings
+    --------
+    This function is currently a stub which returns a zero-array of the 
+    appropriate shape until the proper way to compute the scattering kernel
+    is determined.  This function is safe to use but the results are trivial.
+
+    """
+    _prep_cache(E_g, E_n, phi_n)
+
+    nuc_zz = nucname.zzaaam(iso)
+    key = ('sigma_s_gh', nuc_zz, T)
+
+    # Don't recalculate anything if you don't have to
+    if key in xs_cache:
+        return xs_cache[key]
+
+    # Get some needed data
+    G = len(xs_cache['E_g']) - 1
+    b = pyne.data.b(nuc_zz)
+    aw = pyne.data.nuc_weight(nuc_zz)
+
+    # Initialize the scattering kernel
+    sig_s_gh = np.zeros((G, G), dtype=float)
+
+    # OMG FIXME So hard!
+    ## Calculate all values of the kernel
+    #for g, h in product(range(G), range(G)):
+    #    # Numerator inetgration term 
+    #    dnumer = lambda _E_prime, _E: sigma_s_E(_E, b, M_A, T) *  P(_E, _E_prime, M_A, T) * xs_cache['phi_g'][g]
+    #
+    #    # Integral
+    #    nE = 26
+    #    E_space = np.logspace(np.log10(xs_cache['E_g'][g]), np.log10(xs_cache['E_g'][g+1]), nE)
+    #    E_prime_space = np.logspace(np.log10(xs_cache['E_g'][h]), np.log10(xs_cache['E_g'][h+1]), nE)
+    #
+    #    numer = msmintegrate.dbltrapz(dnumer, E_space, E_prime_space)
+    #
+    #    # Denominator term, analytically integrated
+    #    denom = xs_cache['phi_g'][g] * (xs_cache['E_g'][g+1] - xs_cache['E_g'][g])
+    #
+    #    # Cross section value
+    #    sig_s_gh[g, h] = numer / denom
+
+    # Put this value back into the cache, with the appropriate label
+    xs_cache[key] = sig_s_gh
+
+    return sig_s_gh
 
