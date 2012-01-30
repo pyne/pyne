@@ -79,7 +79,7 @@ def sigma_s_gh(nuc, T, E_g=None, E_n=None, phi_n=None):
     Parameters
     ----------
     nuc :
-        A nuclide name for which to calculate the fission cross-section.
+        A nuclide name for which to calculate the scattering kernel.
     T : float
         Tempurature of the target material [kelvin].
     E_g : array-like of floats, optional
@@ -166,7 +166,7 @@ def sigma_s(nuc, T, E_g=None, E_n=None, phi_n=None):
     Parameters
     ----------
     nuc :
-        A nuclide name for which to calculate the fission cross-section.
+        A nuclide name for which to calculate the scattering cross section.
     T : float
         Tempurature of the target material [kelvin].
     E_g : array-like of floats, optional
@@ -204,4 +204,61 @@ def sigma_s(nuc, T, E_g=None, E_n=None, phi_n=None):
     xs_cache[key_g] = sig_s_g
 
     return sig_s_g
+
+
+def sigma_a_reaction(nuc, rx, E_g=None, E_n=None, phi_n=None):
+    """Calculates the neutron absorption reaction cross-section for a nuclide for a 
+    new, lower resolution group structure using a higher fidelity flux.  Note that 
+    g indexes G, n indexes N, and G < N.
+
+    Parameters
+    ----------
+    nuc :
+        A nuclide name for which to calculate the absorption reaction cross-section.
+    rx : str
+        Reaction key. ('gamma', 'alpha', 'p', etc.)
+    E_g : array-like of floats, optional
+        New, lower fidelity energy group structure [MeV] that is of length G+1. 
+    E_n : array-like of floats, optional
+        Higher resolution energy group structure [MeV] that is of length N+1. 
+    phi_n : array-like of floats, optional
+        The high-fidelity flux [n/cm^2/s] to collapse the fission cross-section over.  
+        Length N.  
+
+    Returns
+    -------
+    sigma_rx_g : ndarray 
+        An array of the collapsed absorption reaction cross section.
+
+    Notes
+    -----
+    This always pulls the absorption reaction cross-section out of the nuc_data.    
+
+    See Also
+    --------
+    pyne.xs.cache.ABSORPTION_RX
+    pyne.xs.cache.ABSORPTION_RX_MAP 
+    """
+    _prep_cache(E_g, E_n, phi_n)
+
+    # Get the absorption XS
+    nuc_zz = nucname.zzaaam(nuc)
+    key_n = ('sigma_rx_n', nuc_zz, rx)
+    key_g = ('sigma_rx_g', nuc_zz, rx)
+
+    # Don't recalculate anything if you don't have to
+    if key_g in xs_cache:
+        return xs_cache[key_g]
+    else:
+        sigma_rx_n = xs_cache[key_n]
+
+    # Perform the group collapse, knowing that the right data is in the cache
+    sigma_rx_g = group_collapse(sigma_rx_n, xs_cache['phi_n'], phi_g=xs_cache['phi_g'], 
+                                partial_energies=xs_cache['partial_energy_matrix'])
+
+    # Put this value back into the cache, with the appropriate label
+    xs_cache[key_g] = sigma_rx_g
+
+    return sigma_rx_g
+
 
