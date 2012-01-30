@@ -6,6 +6,10 @@ from pyne import nucname
 from pyne.xs.cache import xs_cache
 from pyne.xs.models import group_collapse
 
+# Hide warnings from numpy
+np.seterr(divide='ignore')
+
+
 def _prep_cache(E_g=None, E_n=None, phi_n=None):
     """Ensures that certain values are in the cache safely."""
     if E_n is not None:
@@ -260,5 +264,56 @@ def sigma_a_reaction(nuc, rx, E_g=None, E_n=None, phi_n=None):
     xs_cache[key_g] = sigma_rx_g
 
     return sigma_rx_g
+
+
+def metastable_ratio(nuc, rx, E_g=None, E_n=None, phi_n=None):
+    """Calculates the ratio between a reaction that leaves the nuclide in a 
+    metastable state and the equivalent reaction that leaves the nuclide in 
+    the ground state.  This allows the calculation of metastable cross sections 
+    via sigma_ms = ratio * sigma_ground.  Note that g indexes G, n indexes N, 
+    and G < N.
+
+    Note: This always pulls the absorption reaction cross-sections out of the nuc_data library.    
+
+    Parameters
+    ----------
+    nuc :
+        A nuclide name for which to calculate the metastable.
+    rx : str
+        Reaction key. ('gamma', 'alpha', 'p', etc.)
+    E_g : array-like of floats, optional
+        New, lower fidelity energy group structure [MeV] that is of length G+1. 
+    E_n : array-like of floats, optional
+        Higher resolution energy group structure [MeV] that is of length N+1. 
+    phi_n : array-like of floats, optional
+        The high-fidelity flux [n/cm^2/s] to collapse the fission cross-section over.  
+        Length N.  
+
+    Returns
+    -------
+    ratio_rx_g : ndarray
+        An array of the ratio of the metastable cross section for a reaction 
+        to the ground state reaction.
+
+    Notes
+    -----
+    This always pulls the absorption reaction cross section out of the nuc_data.
+
+    See Also
+    --------
+    pyne.xs.cache.ABSORPTION_RX
+    pyne.xs.cache.ABSORPTION_RX_MAP 
+    """
+    # Get the cross-sections
+    sigma_rx = sigma_a_reaction(nuc, rx, E_g, E_n, phi_n)
+    sigma_rx_x = sigma_a_reaction(nuc, rx + '_x', E_g, E_n, phi_n)
+
+    # Get the ratio
+    ratio_rx_g = sigma_rx_x / sigma_rx
+    ratio_rx_g[ratio_rx_g < 0.0] = 0.0
+    ratio_rx_g[ratio_rx_g == np.inf] = 0.0
+    ratio_rx_g[np.isnan(ratio_rx_g)] = 0.0
+
+    return ratio_rx_g
 
 

@@ -44,3 +44,7 @@ Channels
 -----
 
 .. autofunction:: sigma_a_reaction(nuc, rx, E_g=None, E_n=None, phi_n=None)
+
+-----
+
+.. autofunction:: metastable_ratio(nuc, rx, E_g=None, E_n=None, phi_n=None)
