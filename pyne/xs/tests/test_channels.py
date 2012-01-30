@@ -10,7 +10,7 @@ from numpy.testing import assert_array_equal, assert_array_almost_equal
 import pyne.data
 import pyne.xs.models
 from pyne.xs.cache import xs_cache
-from pyne.xs.channels import sigma_f, sigma_s_gh, sigma_s
+from pyne.xs.channels import sigma_f, sigma_s_gh, sigma_s, sigma_a_reaction
 from pyne.pyne_config import pyne_conf
 
 
@@ -54,3 +54,22 @@ def test_sigma_s():
     expected = sigma_s_gh('H1', 600.0, E_g=E_g).sum(axis=1)
     observed = sigma_s('H1', 600.0, E_g=E_g)
     assert_array_equal(expected, observed)
+
+
+def test_sigma_a_reaction():
+    E_g = np.array([10.0, 7.5, 5.0, 2.5, 0.1])
+    E_n = xs_cache['E_n']
+    phi_n = np.ones(len(E_n) - 1)
+
+    sig_rx = sigma_a_reaction('U238', '2n', E_g, E_n, phi_n)
+    observed = (0.0 <= sig_rx).all()
+    assert_true(observed)
+
+    sig_rx = sigma_a_reaction('U238', 'gamma', E_g, E_n, phi_n)
+    observed = (0.0 <= sig_rx).all()
+    assert_true(observed)
+
+    sig_rx = sigma_a_reaction('H1', 'g')
+    observed = (0.0 <= sig_rx).all()
+    assert_true(observed)
+

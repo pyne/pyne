@@ -40,3 +40,7 @@ Channels
 -----
 
 .. autofunction:: sigma_s(nuc, T, E_g=None, E_n=None, phi_n=None)
+
+-----
+
+.. autofunction:: sigma_a_reaction(nuc, rx, E_g=None, E_n=None, phi_n=None)
