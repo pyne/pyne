@@ -35,11 +35,15 @@ Channels
 
 -----
 
+.. autofunction:: sigma_s(nuc, T, E_g=None, E_n=None, phi_n=None)
+
+-----
+
 .. autofunction:: sigma_s_gh(nuc, T, E_g=None, E_n=None, phi_n=None)
 
 -----
 
-.. autofunction:: sigma_s(nuc, T, E_g=None, E_n=None, phi_n=None)
+.. autofunction:: sigma_a(nuc, T, E_g=None, E_n=None, phi_n=None)
 
 -----
 

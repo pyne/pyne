@@ -11,7 +11,7 @@ import pyne.data
 import pyne.xs.models
 from pyne.xs.cache import xs_cache
 from pyne.xs.channels import sigma_f, sigma_s_gh, sigma_s, sigma_a_reaction, \
-    metastable_ratio
+    metastable_ratio, sigma_a
 from pyne.pyne_config import pyne_conf
 
 
@@ -95,3 +95,20 @@ def test_metastable_ratio():
     observed = (0.0 <= ms_rx).all()
     assert_true(observed)
 
+
+def test_sigma_a():
+    E_g = np.array([10.0, 7.5, 5.0, 2.5, 0.1])
+    E_n = xs_cache['E_n']
+    phi_n = np.ones(len(E_n) - 1)
+
+    sig_a = sigma_a('U238', E_g, E_n, phi_n)
+    observed = (0.0 <= sig_a).all()
+    assert_true(observed)
+
+    sig_a = sigma_a('U238', E_g, E_n, phi_n)
+    observed = (0.0 <= sig_a).all()
+    assert_true(observed)
+
+    sig_a = sigma_a('U235')
+    observed = (0.0 <= sig_a).all()
+    assert_true(observed)
