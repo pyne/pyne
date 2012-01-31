@@ -317,3 +317,55 @@ def metastable_ratio(nuc, rx, E_g=None, E_n=None, phi_n=None):
     return ratio_rx_g
 
 
+def sigma_a(nuc, E_g=None, E_n=None, phi_n=None):
+    """Calculates the neutron absorption cross section for a nuclide for a new, 
+    lower resolution group structure using a higher fidelity flux.  Note that 
+    g indexes G, n indexes N, and G < N.
+
+    Parameters
+    ----------
+    nuc :
+        A nuclide name for which to calculate the absorption cross section.
+    rx : str
+        Reaction key. ('gamma', 'alpha', 'p', etc.)
+    E_g : array-like of floats, optional
+        New, lower fidelity energy group structure [MeV] that is of length G+1. 
+    E_n : array-like of floats, optional
+        Higher resolution energy group structure [MeV] that is of length N+1. 
+    phi_n : array-like of floats, optional
+        The high-fidelity flux [n/cm^2/s] to collapse the fission cross-section over.  
+        Length N.  
+
+    Returns
+    -------
+    sigma_a_g : ndarray 
+        An array of the collapsed absorption cross section.
+
+    Notes
+    -----
+    This always pulls the absorption cross section out of the nuc_data.    
+
+    """
+    _prep_cache(E_g, E_n, phi_n)
+
+    # Get the absorption XS
+    nuc_zz = nucname.zzaaam(nuc)
+    key_n = ('sigma_a_n', nuc_zz)
+    key_g = ('sigma_a_g', nuc_zz)
+
+    # Don't recalculate anything if you don't have to
+    if key_g in xs_cache:
+        return xs_cache[key_g]
+    else:
+        sigma_a_n = xs_cache[key_n]
+
+    # Perform the group collapse, knowing that the right data is in the cache
+    sigma_a_g = group_collapse(sigma_a_n, xs_cache['phi_n'], phi_g=xs_cache['phi_g'], 
+                               partial_energies=xs_cache['partial_energy_matrix'])
+
+    # Put this value back into the cache, with the appropriate label
+    xs_cache[key_g] = sigma_a_g
+
+    return sigma_a_g
+
+
