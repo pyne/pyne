@@ -35,6 +35,10 @@ Channels
 
 -----
 
+.. autofunction:: chi(nuc, E_g=None, E_n=None, phi_n=None, eres=101)
+
+-----
+
 .. autofunction:: sigma_s(nuc, T, E_g=None, E_n=None, phi_n=None)
 
 -----
