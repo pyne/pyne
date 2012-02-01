@@ -1,10 +1,13 @@
 import numpy as np
+import scipy.integrate
+import tables as tb
 
 import pyne.data
 import pyne.xs.models
 from pyne import nucname
 from pyne.xs.cache import xs_cache
 from pyne.xs.models import group_collapse
+from pyne.pyne_config import pyne_conf
 
 # Hide warnings from numpy
 np.seterr(divide='ignore')
@@ -32,7 +35,7 @@ def sigma_f(nuc, E_g=None, E_n=None, phi_n=None):
 
     Parameters
     ----------
-    nuc :
+    nuc 
         A nuclide name for which to calculate the fission cross-section.
     E_g : array-like of floats, optional
         New, lower fidelity energy group structure [MeV] that is of length G+1. 
@@ -82,7 +85,7 @@ def sigma_s_gh(nuc, T, E_g=None, E_n=None, phi_n=None):
 
     Parameters
     ----------
-    nuc :
+    nuc 
         A nuclide name for which to calculate the scattering kernel.
     T : float
         Tempurature of the target material [kelvin].
@@ -217,7 +220,7 @@ def sigma_a_reaction(nuc, rx, E_g=None, E_n=None, phi_n=None):
 
     Parameters
     ----------
-    nuc :
+    nuc 
         A nuclide name for which to calculate the absorption reaction cross-section.
     rx : str
         Reaction key. ('gamma', 'alpha', 'p', etc.)
@@ -277,7 +280,7 @@ def metastable_ratio(nuc, rx, E_g=None, E_n=None, phi_n=None):
 
     Parameters
     ----------
-    nuc :
+    nuc 
         A nuclide name for which to calculate the metastable.
     rx : str
         Reaction key. ('gamma', 'alpha', 'p', etc.)
@@ -324,10 +327,8 @@ def sigma_a(nuc, E_g=None, E_n=None, phi_n=None):
 
     Parameters
     ----------
-    nuc :
+    nuc 
         A nuclide name for which to calculate the absorption cross section.
-    rx : str
-        Reaction key. ('gamma', 'alpha', 'p', etc.)
     E_g : array-like of floats, optional
         New, lower fidelity energy group structure [MeV] that is of length G+1. 
     E_n : array-like of floats, optional
@@ -367,5 +368,77 @@ def sigma_a(nuc, E_g=None, E_n=None, phi_n=None):
     xs_cache[key_g] = sigma_a_g
 
     return sigma_a_g
+
+
+def chi(nuc, E_g=None, E_n=None, phi_n=None, eres=101):
+    """Calculates the neutron fission energy spectrum for an isotope for a new, 
+    lower resolution group structure using a higher fidelity flux.  Note that 
+    g indexes G, n indexes N, and G < N.
+
+    Parameters
+    ----------
+    nuc 
+        A nuclide name for which to calculate the neutron fission energy spectrum.
+    E_g : array-like of floats, optional
+        New, lower fidelity energy group structure [MeV] that is of length G+1. 
+    E_n : array-like of floats, optional
+        Higher resolution energy group structure [MeV] that is of length N+1. 
+    phi_n : array-like of floats, optional
+        The high-fidelity flux [n/cm^2/s] to collapse the fission cross-section over.  
+        Length N.
+    eres : int
+        Number of energy-points to integrate over per group.
+
+    Returns
+    -------
+    chi_g : ndarray 
+        An array of the fission energy spectrum.
+
+    See Also
+    --------
+    pyne.xs.models.chi : used under the covers by this function.
+    """
+    _prep_cache(E_g, E_n, phi_n)
+
+    # Get the fission XS
+    nuc_zz = nucname.zzaaam(nuc)
+    key = ('chi_g', nuc_zz)
+
+    # Don't recalculate anything if you don't have to
+    if key in xs_cache:
+        return xs_cache[key]
+
+    # Get the the set of nuclides we know we need chi for.  
+    if 'fissionable_nucs' not in xs_cache:
+        with tb.openFile(pyne_conf.NUC_DATA_PATH, 'r') as f:
+            fn = set(f.root.neutron.cinder_xs.fission.cols.nuc_zz)
+        xs_cache['fissionable_nucs'] = fn
+    fissionable_nucs = xs_cache['fissionable_nucs']
+
+    if (nuc_zz not in fissionable_nucs) and (86 <= nuc_zz/10000):
+        fissionable_nucs.add(nuc_zz)
+
+    # Perform the group collapse on a continuous chi
+    G = len(xs_cache['E_g']) - 1
+    chi_g = np.zeros(G, dtype=float)
+
+    if (nuc_zz in fissionable_nucs):
+        for g in range(G):
+            E_space = np.logspace(np.log10(xs_cache['E_g'][g]), 
+                                  np.log10(xs_cache['E_g'][g+1]), eres)
+            dnumer = pyne.xs.models.chi(E_space)
+
+            numer = scipy.integrate.trapz(dnumer, E_space)
+            denom = (xs_cache['E_g'][g+1] - xs_cache['E_g'][g])
+
+            chi_g[g] = (numer / denom)
+
+        # renormalize chi
+        chi_g = chi_g / chi_g.sum()
+
+    # Put this value back into the cache, with the appropriate label
+    xs_cache[key] = chi_g
+    return chi_g
+
 
 
