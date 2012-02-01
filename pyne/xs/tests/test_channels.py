@@ -11,7 +11,7 @@ import pyne.data
 import pyne.xs.models
 from pyne.xs.cache import xs_cache
 from pyne.xs.channels import sigma_f, sigma_s_gh, sigma_s, sigma_a_reaction, \
-    metastable_ratio, sigma_a, chi
+    metastable_ratio, sigma_a, chi, sigma_t
 from pyne.pyne_config import pyne_conf
 
 
@@ -138,3 +138,27 @@ def test_chi():
     observed = (0.0 <= c).all()
     assert_true(observed)
     assert_almost_equal(c.sum(), 0.0)
+
+
+def test_sigma_t():
+    E_g = np.array([10.0, 7.5, 5.0, 2.5, 0.1])
+    E_n = xs_cache['E_n']
+    phi_n = np.ones(len(E_n) - 1)
+
+    sig_t = sigma_t('U238', 600.0, E_g, E_n, phi_n)
+    observed = (0.0 <= sig_t).all()
+    assert_true(observed)
+    expected = sigma_a('U238', E_g, E_n, phi_n) + sigma_s('U238', 600.0, E_g, E_n, phi_n)
+    assert_array_almost_equal(sig_t, expected)
+
+    sig_t = sigma_t('U238', 600.0, E_g, E_n, phi_n)
+    observed = (0.0 <= sig_t).all()
+    assert_true(observed)
+    expected = sigma_a('U238', E_g, E_n, phi_n) + sigma_s('U238', 600.0, E_g, E_n, phi_n)
+    assert_array_almost_equal(sig_t, expected)
+
+    sig_t = sigma_t('U235')
+    observed = (0.0 <= sig_t).all()
+    assert_true(observed)
+    expected = sigma_a('U235') + sigma_s('U235', 600.0, E_g, E_n, phi_n)
+    assert_array_almost_equal(sig_t, expected)
