@@ -172,7 +172,7 @@ def sigma_s(nuc, T, E_g=None, E_n=None, phi_n=None):
 
     Parameters
     ----------
-    nuc :
+    nuc 
         A nuclide name for which to calculate the scattering cross section.
     T : float
         Tempurature of the target material [kelvin].
@@ -440,5 +440,59 @@ def chi(nuc, E_g=None, E_n=None, phi_n=None, eres=101):
     xs_cache[key] = chi_g
     return chi_g
 
+
+
+def sigma_t(nuc, T=300.0, E_g=None, E_n=None, phi_n=None):
+    """Calculates the total neutron cross section for a nuclide. 
+
+    .. math::
+        \\sigma_{t, g} = \\sigma_{a, g} + \\sigma_{s, g}
+
+    Parameters
+    ----------
+    nuc 
+        A nuclide name for which to calculate the total cross section.
+    T : float, optional
+        Tempurature of the target material [kelvin].
+    E_g : array-like of floats, optional
+        New, lower fidelity energy group structure [MeV] that is of length G+1. 
+    E_n : array-like of floats, optional
+        Higher resolution energy group structure [MeV] that is of length N+1. 
+    phi_n : array-like of floats, optional
+        The high-fidelity flux [n/cm^2/s] to collapse the fission cross-section over.  
+        Length N.  
+
+    Returns
+    -------
+    sig_t_g : ndarray 
+        An array of the total cross section.
+
+    """
+    _prep_cache(E_g, E_n, phi_n)
+
+    # Get the total XS
+    nuc_zz = nucname.zzaaam(nuc)
+    key_a = ('sigma_a_g', nuc_zz)
+    key_s = ('sigma_t_g', nuc_zz, T)
+    key_t = ('sigma_t_g', nuc_zz, T)
+
+    # Don't recalculate anything if you don't have to
+    if key_t in xs_cache:
+        return xs_cache[key_t]
+
+    # This calculation requires the abosorption cross-section
+    if key_a not in xs_cache:
+        xs_cache[key_a] = sigma_a(nuc, E_g, E_n, phi_n)
+
+    # This calculation requires the scattering cross-section
+    if key_s not in xs_cache:
+        xs_cache[key_s] = sigma_s(nuc, T, E_g, E_n, phi_n)
+
+    # Sum over all h indeces
+    sig_t_g = xs_cache[key_a] + xs_cache[key_s]
+
+    # Put this value back into the cache, with the appropriate label
+    xs_cache[key_t] = sig_t_g
+    return sig_t_g
 
 

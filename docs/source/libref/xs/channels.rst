@@ -31,6 +31,10 @@ The following terminology applies for this module:
 ********
 Channels
 ********
+.. autofunction:: sigma_t(nuc, T=300.0, E_g=None, E_n=None, phi_n=None)
+
+-----
+
 .. autofunction:: sigma_f(nuc, E_g=None, E_n=None, phi_n=None)
 
 -----
