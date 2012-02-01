@@ -11,7 +11,7 @@ import pyne.data
 import pyne.xs.models
 from pyne.xs.cache import xs_cache
 from pyne.xs.channels import sigma_f, sigma_s_gh, sigma_s, sigma_a_reaction, \
-    metastable_ratio, sigma_a
+    metastable_ratio, sigma_a, chi
 from pyne.pyne_config import pyne_conf
 
 
@@ -112,3 +112,29 @@ def test_sigma_a():
     sig_a = sigma_a('U235')
     observed = (0.0 <= sig_a).all()
     assert_true(observed)
+
+
+def test_chi():
+    E_g = np.array([10.0, 7.5, 5.0, 2.5, 0.1])
+    E_n = xs_cache['E_n']
+    phi_n = np.ones(len(E_n) - 1)
+
+    c = chi('U238', E_g, E_n, phi_n)
+    observed = (0.0 <= c).all()
+    assert_true(observed)
+    assert_almost_equal(c.sum(), 1.0)
+
+    c = chi('U238', E_g, E_n, phi_n)
+    observed = (0.0 <= c).all()
+    assert_true(observed)
+    assert_almost_equal(c.sum(), 1.0)
+
+    c = chi('U235')
+    observed = (0.0 <= c).all()
+    assert_true(observed)
+    assert_almost_equal(c.sum(), 1.0)
+
+    c = chi('H1')
+    observed = (0.0 <= c).all()
+    assert_true(observed)
+    assert_almost_equal(c.sum(), 0.0)
