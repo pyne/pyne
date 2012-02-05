@@ -1229,11 +1229,14 @@ cdef cpp_map[std.string, matp] dict_to_map_str_matp(dict pydict):
     cdef _Material pymat 
     cdef cpp_material.Material * cpp_matp
     cdef cpp_map[std.string, matp] cppmap = cpp_map[std.string, matp]()
+    cdef cpp_pair[std.string, matp] item
 
     for key, value in pydict.items():
         pymat = value
         cpp_matp = pymat.mat_pointer
-        cppmap[std.string(key)] = cpp_matp
+        #cppmap[std.string(key)] = cpp_matp
+        item = cpp_pair[std.string, matp](std.string(key), cpp_matp)
+        cppmap.insert(item)
 
     return cppmap
 
