@@ -90,12 +90,11 @@ void pyne::Material::_load_comp_protocol1(H5::H5File * db, std::string datapath,
   };
 
   // Grab the nucpath
-  void * npath;
+  std::string nucpath;
   H5::Attribute nuc_attr = data_set.openAttribute("nucpath");
   hsize_t nuc_attr_len = nuc_attr.getStorageSize() / sizeof(char);
   H5::StrType nuc_attr_type(0, nuc_attr_len);
-  nuc_attr.read(nuc_attr_type, npath);
-  std::string nucpath ((char *) npath, ((char *) npath)+nuc_attr_len);
+  nuc_attr.read(nuc_attr_type, nucpath);
 
   // Grab the nuclides
   std::vector<int> nuclides = h5wrap::h5_array_to_cpp_vector_1d<int>(db, nucpath, H5::PredType::NATIVE_INT);
