@@ -20,7 +20,8 @@ class TestDagmcWithUnitbox( unittest.TestCase ):
         self.assertEqual( rets, [False, False, False, True] )
         
         md = dagmc.volume_metadata( 2 )
-        self.assertEqual( md['material'], 0 )
+        self.assertEqual( md['material'], 5 )
+        self.assertEqual( md['rho'], .5 )
         self.assertTrue( all( x in md for x in ['material','rho','imp'] ) )
 
     def test_versions( self ):
