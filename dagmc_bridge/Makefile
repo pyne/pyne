@@ -1,5 +1,6 @@
-#MOAB_BASE_DIR = /local.hd/cnergg/sjackson/MOAB/cubit
 MOAB_BASE_DIR = /path/to/MOAB/install
+# Usable default for CNERG users
+# MOAB_BASE_DIR = /filespace/groups/cnerg/opt/MOAB/shared-cubit-c12
 
 include ${MOAB_BASE_DIR}/lib/moab.make
 #include ${MOAB_BASE_DIR}/lib/iMesh-Defs.inc
