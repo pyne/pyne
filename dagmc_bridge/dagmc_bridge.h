@@ -55,6 +55,8 @@ int vol_is_implicit_complement( EntityHandle vol );
 
 ErrorCode get_volume_metadata( EntityHandle vol, int* material, double* density, double* importance );
 
+ErrorCode get_volume_boundary( EntityHandle vol, vec3 minPt, vec3 maxPt );
+
 #ifdef __cplusplus
 } // extern "C"
 #endif

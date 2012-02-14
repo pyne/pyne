@@ -81,6 +81,20 @@ def volume_metadata( vol_id ):
 
     return {'material':mat.value, 'rho':rho.value, 'imp':imp.value}
 
+def volume_boundary( vol_id ):
+    """Get the lower and upper boundary of a volume in (x,y,z) coordinates.
+
+    Return the lower and upper coordinates of an axis-aligned bounding box for the given
+    volume.  The returned box may or may not be the minimal bounding box for the volume.
+    Return (xyz low) and (xyz high) as numpy arrays.
+    """
+    eh = vol_id_to_handle[ vol_id ]
+    low = numpy.array( [0,0,0], dtype=numpy.float64 )
+    high = numpy.array( [0,0,0], dtype=numpy.float64 )
+
+    bridge.lib.get_volume_boundary( eh, low, high )
+    return low, high
+
 def point_in_volume( vol_id, xyz, uvw = [0,0,0] ):
     """Determine whether the given point, xyz, is in the given volume.
     

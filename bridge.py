@@ -96,3 +96,6 @@ lib.vol_is_implicit_complement.argtypes = [EntityHandle]
 _returns_moab_errors( lib.get_volume_metadata )
 lib.get_volume_metadata.argtypes = [ EntityHandle, ctypes.POINTER( ctypes.c_int ),
                                      ctypes.POINTER( ctypes.c_double ), ctypes.POINTER( ctypes.c_double ) ]
+
+_returns_moab_errors( lib.get_volume_boundary )
+lib.get_volume_boundary.argtypes = [ EntityHandle, _vec3, _vec3 ]
