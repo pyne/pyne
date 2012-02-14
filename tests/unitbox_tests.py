@@ -2,6 +2,7 @@ import unittest
 import os.path
 
 import pydagmc.dagmc as dagmc
+import pydagmc.util as dagutil
 
 class TestDagmcWithUnitbox( unittest.TestCase ):
 
@@ -125,4 +126,13 @@ class TestDagmcWithUnitbox( unittest.TestCase ):
         dagmc.tell_ray_story( (0,0,0), (1,1,0) )
         dagmc.tell_ray_story( (-3,0,0),(1,0,0) )
 
+
+    def test_util_graveyard_bound( self ):
+
+        lo, hi = dagutil.find_graveyard_inner_box()
+
+        grave_diam = 4.15692194
+        for i in range(0,3):
+            self.assertAlmostEqual( lo[i], -grave_diam )
+            self.assertAlmostEqual( hi[i], grave_diam )
 
