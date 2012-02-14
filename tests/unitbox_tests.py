@@ -136,3 +136,10 @@ class TestDagmcWithUnitbox( unittest.TestCase ):
             self.assertAlmostEqual( lo[i], -grave_diam )
             self.assertAlmostEqual( hi[i], grave_diam )
 
+    def test_util_matlist( self ):
+
+        mats = dagutil.get_material_set()
+        self.assertEqual( set((0,5)), mats )
+
+        mats = dagutil.get_material_set( with_rho=True )
+        self.assertEqual( set([(0,0.0),(5,0.5)]), mats )
