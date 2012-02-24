@@ -10,6 +10,7 @@
 #include "moab/CartVect.hpp"
 #include "moab/Interface.hpp"
 
+#include "KDEKernel.hpp"
 #include "MeshTally.hpp"
 
 // forward declarations
@@ -86,15 +87,17 @@ class KDEMeshTally : public MeshTally {
      * @param moabMesh the MOAB instance containing the mesh information
      * @param moabSet the MOAB set of entities used in the tally
      * @param bandwidth the set of bandwidth values (hx, hy, hz)
-     * @param numSubtracks (optional) the number of subtracks to be used
      * @param type (optional) the type of tally to be used
+     * @param k (optional) the KernelType function to be used in the computation
+     * @param numSubtracks (optional) the number of subtracks to be used
      */
     KDEMeshTally( const fmesh_card& settings,
                   moab::Interface* moabMesh,
-                  moab::EntityHandle moabSet, 
+                  moab::EntityHandle moabSet,
                   moab::CartVect bandwidth,
-                  unsigned int numSubtracks = 0,
-                  TallyType type = COLLISION );
+                  TallyType type = COLLISION,
+                  KDEKernel::KernelType k = KDEKernel::EPANECHNIKOV,
+                  unsigned int numSubtracks = 0 );
 
     /**
      * Destructor.
@@ -152,8 +155,9 @@ class KDEMeshTally : public MeshTally {
     moab::Interface* mb;           // the MOAB instance
     
     moab::CartVect bandwidth;      // the set of bandwidth values (hx, hy, hz)
-    unsigned int subtracks;        // number of subtracks to be used in tally
-    TallyType kde_tally;           // specifies type of tally to be used             
+    TallyType kde_tally;           // specifies type of KDE tally 
+    KDEKernel* kernel;             // kernel function tally is based on
+    unsigned int subtracks;        // number of subtracks used in tally       
     
     std::string output_filename;
     moab::EntityHandle tally_set;  // the MOAB set of entities used in tally

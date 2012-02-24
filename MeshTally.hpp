@@ -59,6 +59,7 @@ protected:
   }
 
 public:
+  virtual ~MeshTally(){}
   
   /**
    * Print / write results to the AMeshTally's output file.

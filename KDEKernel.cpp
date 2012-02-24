@@ -4,6 +4,9 @@
 
 #include "KDEKernel.hpp"
 
+// initializing static variable
+const char* const KDEKernel::kernel_names[] = { "epanechnikov", "uniform" };
+
 //-----------------------------------------------------------------------------
 KDEKernel::KernelType KDEKernel::get_type()
 {

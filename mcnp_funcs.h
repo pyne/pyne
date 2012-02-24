@@ -1,3 +1,6 @@
+#ifndef DAGMC_MCNP_IFACE_H
+#define DAGMC_MCNP_IFACE_H
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -119,35 +122,8 @@ extern "C" {
                             double* overlap_thickness, double* facet_tol, int* srccell_mode );
 
   void dagmc_version_(double* dagmcVersion);
-
-  /** MESH TALLY FUNCTIONALITY BELOW THIS LINE */
-  void dagmc_fmesh_initialize_( const int* mcnp_icl );
-  void dagmc_fmesh_setup_mesh_( int* ipt, int* id, int* fmesh_index, 
-                                double* energy_mesh, int* n_energy_mesh, int* tot_energy_bin, 
-                                char* comment, int* n_comment_lines, int *is_collision_tally );
-  void dagmc_fmesh_end_history_();
-  void dagmc_fmesh_score_(int *fmesh_index, double *x, double *y, double *z,
-                          double *u, double *v, double *w, double *erg,double *wgt,double *d, int* ien );
-  void dagmc_fmesh_print_( int* fmesh_index, double* sp_norm, double* fmesh_fact );
-
-  void dagmc_fmesh_get_tally_data_( int* fmesh_index, void* fortran_data_pointer );
-  void dagmc_fmesh_get_error_data_( int* fmesh_index, void* fortran_data_pointer );
-  void dagmc_fmesh_get_scratch_data_( int* fmesh_index, void* fortran_data_pointer );
-  void dagmc_fmesh_clear_data_( int* fmesh_index );
-  void dagmc_fmesh_add_scratch_to_tally_( int* fmesh_index );
-  void dagmc_fmesh_add_scratch_to_error_( int* fmesh_index );
-
-  /* ALTERNATIVE TALLIES MCNP FUNCTIONS */
-
-  /**  
-   *   Obtains the collision position (x,y,z), the particle weight (wgt), the
-   *   total macroscopic cross section of the current cell (ple), and the
-   *   particle energy (erg) from MCNP for use in the KDE collision tally.
-   */
-  void dagmc_kde_tally_( double* x, double* y, double* z, double* wgt,
-                         double* ple, double* erg );
-
 #ifdef __cplusplus
 } // extern "C"
 #endif
 
+#endif /* DAGMC_MCNP_IFACE_H */

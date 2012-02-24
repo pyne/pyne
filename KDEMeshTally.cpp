@@ -16,24 +16,17 @@
 #include "moab/Types.hpp"
 
 #include "KDECollision.hpp"
+#include "KDEKernel.hpp"
 #include "KDETrack.hpp"
 #include "KDEMeshTally.hpp"
+#include "meshtal_funcs.h"
 
 moab::CartVect KDEMeshTally::default_bandwidth( 1, 1, 1 );
 
-extern "C"{
-  // fortran function to calculate score from track length:
-  //  - i is the fmesh_index number assigned to the tally
-  //  - erg is the particle's energy prior to a collision
-  //  - wgt is the current weight of the particle
-  //  - d is a track length ( only needed for KDE SUBTRACK tallies )
-  //  - result is passed back in score
-extern void __fmesh_mod_MOD_dagmc_mesh_score( int* i, double* erg, double* wgt,
-                                              double* d, double *score );
-}
 
 //-----------------------------------------------------------------------------
-static double parse_bandwidth_param( const std::string& key, const std::string& val, 
+static double parse_bandwidth_param( const std::string& key,
+                                     const std::string& val, 
                                      double default_value = 1 )
 {
   char* end;
@@ -47,6 +40,28 @@ static double parse_bandwidth_param( const std::string& key, const std::string& 
   return ret;
 }
 //-----------------------------------------------------------------------------
+static KDEKernel::KernelType set_kernel_type( const std::string& key,
+                                              const std::string& val )
+{
+
+  KDEKernel::KernelType k;
+
+  if ( val == "epanechnikov" || val == "e" )
+    k = KDEKernel::EPANECHNIKOV;
+  else if ( val == "uniform" || val == "u" )
+    k = KDEKernel::UNIFORM;
+  else {
+
+    k = KDEKernel::EPANECHNIKOV;
+    std::cerr << "\nWarning: " << val << " is not a valid kernel function" << std::endl;
+        std::cerr << "      Using default " << key << " = epanechnikov\n" << std::endl;
+
+  }
+
+  return k;
+
+}
+//-----------------------------------------------------------------------------
 KDEMeshTally* KDEMeshTally::setup( const fmesh_card& fmesh, 
                                    moab::Interface* mbi, TallyType type )
 {
@@ -54,6 +69,7 @@ KDEMeshTally* KDEMeshTally::setup( const fmesh_card& fmesh,
   bool use_dagmc_mesh = true; // true if mesh data should be pulled from DagMC object
   std::string input_filename, output_filename;
   moab::CartVect bandwidth = default_bandwidth;
+  KDEKernel::KernelType kernel = KDEKernel::EPANECHNIKOV;
   unsigned int subtracks = 0;
 
   const fmesh_card::fc_params_t& params = fmesh.fc_params;
@@ -68,6 +84,7 @@ KDEMeshTally* KDEMeshTally::setup( const fmesh_card& fmesh,
     else if( key == "hx" ) bandwidth[0] = parse_bandwidth_param( key, val );
     else if( key == "hy" ) bandwidth[1] = parse_bandwidth_param( key, val );
     else if( key == "hz" ) bandwidth[2] = parse_bandwidth_param( key, val );
+    else if( key == "kernel" ) kernel = set_kernel_type( key, val );
     else if( key == "subtracks" && type != COLLISION ) { 
       subtracks = atoi( val.c_str() );
       if( subtracks == 0 ) {
@@ -97,11 +114,12 @@ KDEMeshTally* KDEMeshTally::setup( const fmesh_card& fmesh,
   std::cout << "fmesh" << id 
             << ", input: " << (use_dagmc_mesh ? "(pre-loaded DagMC data)" : input_filename.c_str())  
             << ", output: " << output_filename << std::endl;
-
-  std::cout << "   with bandwidth = " << bandwidth;
+  
+  std::cout << "   using the " << KDEKernel::kernel_names[kernel] << " kernel";
+  std::cout << " with bandwidth = " << bandwidth;
 
   if ( subtracks != 0 )
-    std::cout << " and subtracks = " << subtracks << std::endl;
+    std::cout << "\n   and splitting tracks into " << subtracks << " subtracks" << std::endl;
   else
     std::cout << std::endl;
 
@@ -121,7 +139,8 @@ KDEMeshTally* KDEMeshTally::setup( const fmesh_card& fmesh,
 
   }
 
-  KDEMeshTally *kde = new KDEMeshTally( fmesh, mbi, moab_set, bandwidth, subtracks, type );
+  KDEMeshTally *kde = new KDEMeshTally( fmesh, mbi, moab_set, bandwidth,
+                                        type, kernel, subtracks );
   kde->output_filename = output_filename;
   kde->tally_set = moab_set;
 
@@ -133,9 +152,11 @@ KDEMeshTally::KDEMeshTally( const fmesh_card& settings,
                             moab::Interface* moabMesh,
                             moab::EntityHandle moabSet,
                             moab::CartVect bandwidth,
-                            unsigned int numSubtracks,
-                            KDEMeshTally::TallyType type )
-: MeshTally(settings), mb( moabMesh ), bandwidth( bandwidth ), kde_tally( type )
+                            KDEMeshTally::TallyType type,
+                            KDEKernel::KernelType k,
+                            unsigned int numSubtracks )
+: MeshTally(settings), mb( moabMesh ), bandwidth( bandwidth ),
+  kde_tally( type ), kernel( new KDEKernel(k) )
 {
 
   build_tree(moabSet); 
@@ -163,6 +184,7 @@ KDEMeshTally::~KDEMeshTally()
 {
 
   delete tree;
+  delete kernel;
   
 }
 //-----------------------------------------------------------------------------
@@ -180,7 +202,7 @@ void KDEMeshTally::tally_collision( const KDEWeightParam & param,
   } 
  
   // make a KDECollision object to represent a single collision location
-  KDECollision collision( collision_loc, bandwidth );
+  KDECollision collision( collision_loc, bandwidth, kernel );
 
   // get valid neighborhood dimensions for non-zero contributions to tally
   double min[3];
@@ -242,7 +264,7 @@ void KDEMeshTally::tally_track( const KDEWeightParam & param,
 
   // make a KDETrack object to represent a single track segment
   KDETrack track( start_point, direction, bandwidth, *(param.tracklength),
-                  tally_subtracks );
+                  kernel, tally_subtracks );
     
   // get valid neighborhood dimensions for non-zero contributions to tally
   double min[3];
@@ -410,7 +432,7 @@ void KDEMeshTally::build_tree( moab::EntityHandle meshset )
   // If there are many divisions (for some rather arbitrary definition of "many"), print
   // a warning about performance compromise
   int psize = tally_ents.psize();
-  std::cout << "  Tally range has psize: " << psize << std::endl;
+  std::cout << "   Tally range has psize: " << psize << std::endl;
   if( psize > 4 ){
     std::cerr << "Warning: large tally range psize " << psize 
               << ", may reduce performance." << std::endl;
@@ -490,8 +512,8 @@ double KDEMeshTally::get_score_weight( const KDEWeightParam & param )
     d = *(param.tracklength);  // use actual track length for SUBTRACK tallies
   
   // determine the tally weighting factor from MCNP
-  __fmesh_mod_MOD_dagmc_mesh_score( param.fmesh_index, param.energy,
-                                    param.particle_wgt, &d, &score_weight );
+  mcnp_weight_calculation( param.fmesh_index, param.energy, param.particle_wgt,
+                           &d, &score_weight );
   
   // divide weight by total cross section for COLLISION tallies only
   if ( kde_tally == COLLISION )

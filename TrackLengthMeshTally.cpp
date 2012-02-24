@@ -31,29 +31,16 @@
 
 // the header file has at least one assert, so keep this include below the macro checks
 #include "TrackLengthMeshTally.hpp"
+#include "meshtal_funcs.h"
 
 
 // tolerance for ray-triangle intersection tests
 // (note: this paramater is ignored by GeomUtil, so don't bother trying to tune it)
 #define TRIANGLE_INTERSECTION_TOL 1e-6
 
-
-
-//#define TALLY_VOLUME_TESTING
-
-#ifdef TALLY_VOLUME_TESTING
-
-static double world_volume = 200*200*222.4;
-
-#endif
-
 // If the following is defined, use OBB trees for ray-triangle intersections,
 // otherwise use KD tree
 //#define USE_OBB_TREE_RAY_TRACING
-
-
-
-
 
 /* Tetrahedron volume code taken from MOAB/tools/measure.cpp */
 inline static double tet_volume( const moab::CartVect& v0,
@@ -245,10 +232,6 @@ TrackLengthMeshTally* TrackLengthMeshTally::setup( const fmesh_card& fmesh_param
     
   }
   
-#ifdef TALLY_VOLUME_TESTING
-  std::cout << "Tally #" << id << " has calculated volume " << mt->volume << std::endl;
-#endif
-  
   return mt;
 
 }
@@ -259,18 +242,13 @@ TrackLengthMeshTally::TrackLengthMeshTally( const fmesh_card& fmesh, Interface* 
   MeshTally( fmesh ),
   mb( mb_p ), output_filename(output_filename_p),  
   obb_tool( new OrientedBoxTreeTool(mb_p) ),
-  last_visited_tet( 0 ), score_callback( new SimpleScoreCallback() ),
+  last_visited_tet( 0 ), 
   convex( false ), conformality( NULL ), conformal_surface_source( false ),
   mcnp_current_cell( NULL ), last_cell( -1 )
-{
-#ifdef TALLY_VOLUME_TESTING
-  volume = intersected_length = total_track_length = 0;
-#endif
-}
+{}
   
 TrackLengthMeshTally::~TrackLengthMeshTally(){
   delete obb_tool;
-  delete score_callback;
 }
 
 /**
@@ -405,9 +383,6 @@ ErrorCode TrackLengthMeshTally::load_mesh( const std::string& input_filename,
     a = a.transpose().inverse();
     tet_baryc_data.at( ent_idx(tet) ) = a;
 
-#ifdef TALLY_VOLUME_TESTING
-    volume += tet_volume( p[0], p[1], p[2], p[3] );
-#endif
   }
 
   // prepare to build KD tree and OBB tree
@@ -512,22 +487,6 @@ ErrorCode TrackLengthMeshTally::write_results( double sp_norm, double mult_fact,
   rval = mb->write_file( filename.c_str(), NULL, NULL, &tally_set, 1, &(output_tags[0]), output_tags.size() );
   assert (rval == MB_SUCCESS );
  
-#ifdef TALLY_VOLUME_TESTING
-
-  std::cout << "Track length " << intersected_length << " of " << total_track_length << " : est vol = ";
-
-  // volume estimated by track length
-  double est = (intersected_length/total_track_length) * world_volume;
-  // difference between estimation and reality
-  double diff = volume - est;
-  // percent of convergence to reality
-  double factor = 100.0 * (1.0-(diff / volume)); 
-
-  std::cout << est << " vol = " << volume << std::endl;
-  std::cout << "Volume convergence: " << factor << "%" << std::endl; 
-  
-#endif
-
   return MB_SUCCESS;
 }
 
@@ -558,12 +517,6 @@ bool TrackLengthMeshTally::point_in_tet( const CartVect& point, const EntityHand
   return in_tet;
 }
 
-
-void TrackLengthMeshTally::set_score_callback( ScoreCallback* new_scb ){
-  assert( new_scb );
-  delete score_callback;
-  score_callback = new_scb;
-}
 
 /**
  * Add a score to a given mesh cell
@@ -823,15 +776,11 @@ static inline bool tris_eq( const EntityHandle *t1, const EntityHandle *t2 ){
  * @param score_params Parameter structure to pass to score callback
  */
 void TrackLengthMeshTally::add_track_segment( CartVect& start, CartVect& vec, 
-                                              double length, int ebin, void* score_params )
+                                              double length, int ebin, MCNPTrackParam* score_params )
 {
   ErrorCode rval;
 
   bool conformal_begin_track = false;
-
-#ifdef TALLY_VOLUME_TESTING
-  total_track_length += length;
-#endif
 
   if( conformality ){
 
@@ -981,11 +930,9 @@ void TrackLengthMeshTally::add_track_segment( CartVect& start, CartVect& vec,
           //return;
         }
         
-#ifdef TALLY_VOLUME_TESTING
-        intersected_length += track_length;
-#endif
-
-        double score = score_callback->make_score( track_length, score_params ); 
+        double score;
+        mcnp_weight_calculation( score_params->fmesh_index, score_params->erg, score_params->wgt,
+                                 &track_length, &score );
         add_score_to_mesh_cell( tet, score, ebin );
         found_crossing = true;
       }

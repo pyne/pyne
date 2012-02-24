@@ -41,24 +41,11 @@ public:
   /**
    * Tally a single particle track segment
    */
-  void add_track_segment( CartVect& start, CartVect& vec, double length, int ebin,  void* score_params );
+  void add_track_segment( CartVect& start, CartVect& vec, double length, int ebin,  MCNPTrackParam* score_params );
   
   virtual void end_history ();
     
   virtual void print(  double sp_norm, double mult_fact );
-
-  class ScoreCallback { 
-  public:
-    virtual double make_score( double length, void* params ) = 0;
-  };
-
-  class SimpleScoreCallback : public ScoreCallback {
-    virtual double make_score( double length, void* /*params are ignored*/ ){
-      return length;
-    }
-  };
-
-  void set_score_callback( ScoreCallback* new_scb );
 
   ~TrackLengthMeshTally();
 
@@ -106,8 +93,6 @@ protected:
 
   EntityHandle last_visited_tet;
 
-  ScoreCallback* score_callback;
-
   std::vector< Matrix3 > tet_baryc_data;
 
   bool convex; // true if user asserts this mesh tally has convex geometry
@@ -126,14 +111,6 @@ protected:
 private:
   TrackLengthMeshTally& operator=( const TrackLengthMeshTally& mt ); // unimplemented
   TrackLengthMeshTally( const TrackLengthMeshTally& mt ); // unimplemented
-
-
-#ifdef TALLY_VOLUME_TESTING
-public:
-  double volume;
-  double intersected_length;
-  double total_track_length;
-#endif
 
 };
 

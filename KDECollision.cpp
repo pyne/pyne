@@ -11,8 +11,8 @@
 //-----------------------------------------------------------------------------
 KDECollision::KDECollision( const moab::CartVect & collision_loc,
                             const moab::CartVect & bandwidth,
-                            KDEKernel::KernelType k )
-: Xic( collision_loc ), H( bandwidth ), kernel( new KDEKernel( k ) )
+                            KDEKernel* k )
+: Xic( collision_loc ), H( bandwidth ), kernel( k )
 {
 
   // check bandwidth values are valid
@@ -33,39 +33,6 @@ KDECollision::KDECollision( const moab::CartVect & collision_loc,
   }
   
   set_neighborhood();
-
-}
-//-----------------------------------------------------------------------------
-KDECollision::KDECollision( const KDECollision & obj )
-: Xic( obj.Xic ), H( obj.H ), kernel( new KDEKernel( obj.kernel->get_type() ) )
-{
-  
-  set_neighborhood();
-
-}
-//-----------------------------------------------------------------------------
-KDECollision::~KDECollision()
-{
-
-  delete kernel;
-
-}
-//-----------------------------------------------------------------------------
-KDECollision & KDECollision::operator=( const KDECollision & obj )
-{
-
-  if ( this != &obj ) {
-
-    delete kernel;
-    Xic = obj.Xic;
-    H = obj.H;
-    kernel = new KDEKernel( obj.kernel->get_type() );
-
-    set_neighborhood();
-
-  }
-
-  return *this;
 
 }
 //-----------------------------------------------------------------------------
@@ -140,7 +107,7 @@ double KDECollision::compute_contribution( const moab::CartVect & X )
   for ( int i = 0 ; i < 3 ; ++i ) {
     
     u = ( X[i] - Xic[i] ) / H[i] ;
-    k_xyz *= kernel->evaluate ( u );
+    k_xyz *= kernel->evaluate( u );
     h *= H[i];
 
   }      

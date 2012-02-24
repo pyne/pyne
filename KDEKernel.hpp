@@ -15,8 +15,9 @@ class KDEKernel {
      * An enumerative type that specifies the kernel function being used by a
      * Kernel object.
      */
-    enum KernelType { EPANECHNIKOV = 0, UNIFORM };
-
+    enum KernelType { EPANECHNIKOV = 0, UNIFORM = 1 };
+    static const char* const kernel_names[];
+    
      /**
       * Constructs a default kernel based on the Epanechnikov kernel function.
       */

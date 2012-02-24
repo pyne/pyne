@@ -22,15 +22,14 @@ class KDETrack {
      * Default constructor.  Constructs a kernel density estimator object for a
      * track segment of length 1.0 beginning at (0,0,0) with direction (1,0,0)
      * and bandwidth (0.1,0.1,0.1).  All contributions are computed using the
-     * Epanechnikov kernel and the integral estimator.
+     * integral estimator.
      */
-    KDETrack();
+    KDETrack( KDEKernel* k );
 
     /**
      * Constructs a kernel density estimator object for a track segment based
      * on the bandwidth H.  The default mode for this function is to compute
-     * all contributions using the Epanechnikov kernel and the integral
-     * estimator.
+     * all contributions using the integral estimator.
      *
      * NOTE: To use the subtrack estimator instead of the integral estimator,
      * simply add a non-zero value for the "numSubtracks" parameter.
@@ -39,30 +38,15 @@ class KDETrack {
      * @param direction the direction the particle is traveling (uo, vo, wo)
      * @param bandwidth the set of bandwidth values (hx, hy, hz)
      * @param track_length the length of the track segment
+     * @param k the kernel function to be used in the computation
      * @param numSubtracks (optional) the number of subtracks to be used
-     * @param k (optional) the KernelType function to be used in the computation
      */
     KDETrack( const moab::CartVect & start_point,
               const moab::CartVect & direction,
               const moab::CartVect & bandwidth,
               const double track_length,
-              unsigned int numSubtracks = 0,
-              KDEKernel::KernelType k = KDEKernel::EPANECHNIKOV );
-
-    /**
-     * Copy constructor.
-     */
-    KDETrack( const KDETrack & obj );
-
-    /**
-     * Destructor.
-     */
-    ~KDETrack();
-
-    /**
-     * Overload assignment =.
-     */
-    KDETrack & operator=( const KDETrack & obj );
+              KDEKernel* k,
+              unsigned int numSubtracks = 0 );
 
     /**
      * @return the starting point Xo = (xo, yo, zo)

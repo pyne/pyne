@@ -21,7 +21,7 @@ const double quad_weights[4] = { 0.652145154863, 0.652145154863,
 bool KDETrack::seed_is_set = false;
  
 //-----------------------------------------------------------------------------
-KDETrack::KDETrack()
+KDETrack::KDETrack( KDEKernel* k )
 {
   
   // set up the track segment
@@ -36,7 +36,7 @@ KDETrack::KDETrack()
   // set the bandwidth, kernel function and neighborhood
   H = Xo + 0.1;
 
-  kernel = new KDEKernel( KDEKernel::EPANECHNIKOV );
+  kernel = k;
 
   set_neighborhood();
 
@@ -46,9 +46,9 @@ KDETrack::KDETrack( const moab::CartVect & start_point,
                     const moab::CartVect & direction,
                     const moab::CartVect & bandwidth,
                     const double track_length,
-                    unsigned int numSubtracks,
-                    KDEKernel::KernelType k )
-: H( bandwidth ), kernel( new KDEKernel( k ) )
+                    KDEKernel* k,
+                    unsigned int numSubtracks )
+: H( bandwidth ), kernel( k )
 {
   
   // set up the track segment
@@ -78,42 +78,6 @@ KDETrack::KDETrack( const moab::CartVect & start_point,
   // store random points along the track if subtrack estimator is requested
   if ( numSubtracks > 0 )
     subtrack_points = choose_points( numSubtracks );
-
-}
-//-----------------------------------------------------------------------------
-KDETrack::KDETrack( const KDETrack & obj )
-: track( obj.track ), H( obj.H ), 
-  kernel( new KDEKernel( obj.kernel->get_type() ) ),
-  subtrack_points( obj.subtrack_points )
-{
-  
-  set_neighborhood();
-
-}
-//-----------------------------------------------------------------------------
-KDETrack::~KDETrack()
-{
-
-  delete kernel;
-
-}
-//-----------------------------------------------------------------------------
-KDETrack & KDETrack::operator=( const KDETrack & obj )
-{
-
-  if ( this != &obj ) {
-
-    delete kernel;
-    track = obj.track;
-    H = obj.H;
-    kernel = new KDEKernel( obj.kernel->get_type() );
-    subtrack_points = obj.subtrack_points;
-
-    set_neighborhood();
-
-  }
-
-  return *this;
 
 }
 //-----------------------------------------------------------------------------

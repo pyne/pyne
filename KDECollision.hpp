@@ -18,31 +18,15 @@ class KDECollision {
 
     /**
      * Constructs a kernel density estimator object for the collision point
-     * Xic based on the bandwidth H.  The kernel function k cannot be changed
-     * once a KDECollision object has been created.
+     * Xic based on the bandwidth H.
      *
      * @param collision the collision point (xic, yic, zic)
      * @param bandwidth the set of bandwidth values (hx, hy, hz)
-     * @param k the KernelType function to be used in the computation
+     * @param k the kernel function to be used in the computation
      */
     KDECollision( const moab::CartVect & collision,
                   const moab::CartVect & bandwidth,
-                  KDEKernel::KernelType k = KDEKernel::EPANECHNIKOV );
-
-    /**
-     * Copy constructor.
-     */
-    KDECollision( const KDECollision & obj );
-
-    /**
-     * Destructor.
-     */
-    ~KDECollision();
-
-    /**
-     * Overload assignment =.
-     */
-    KDECollision & operator=( const KDECollision & obj );
+                  KDEKernel* k );
 
     /**
      * @return the collision point Xic = (xic, yic, zic)

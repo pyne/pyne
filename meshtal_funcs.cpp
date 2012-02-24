@@ -1,4 +1,4 @@
-#include "mcnp_funcs.h"
+#include "meshtal_funcs.h"
 
 #include <iostream>
 #include <sstream>
@@ -48,28 +48,11 @@ static std::vector< MeshTally* > all_tallies;
 /// pointer to MCNP5's current cell ID variable (icl) 
 static const int* current_mcnp_cell;
 
-extern "C"{
-  // fortran function to calculate score from track length
-  // d is a track length computed for the ith fmesh card in the fortran iteration
-  // result is passed back in score
-extern void __fmesh_mod_MOD_dagmc_mesh_score( int* i, double* erg, double* wgt, double* d, double *score );
-extern void __fmesh_mod_MOD_dagmc_make_fortran_pointer( void* fort_ref, double* array, int* size );
-extern void __fmesh_mod_MOD_dagmc_mesh_choose_ebin( int* i, double* erg, int* ien );
-}
-
-/**
- * MCNP5-specific scoring callback class for TrackLengthMeshTallies 
- */
-class MCNPTrackScore : public moab::TrackLengthMeshTally::ScoreCallback 
+void mcnp_weight_calculation( int* index, double* erg, double* wgt, 
+                              double* dist, double* score_result )
 {
-public:
-  virtual double make_score( double length, void* param ){
-    MCNPTrackParam* p = static_cast<MCNPTrackParam*>(param);
-    double score;
-    __fmesh_mod_MOD_dagmc_mesh_score( p->fmesh_index, p->erg, p->wgt, &length, &score );
-    return score;
-  }
-};
+    FMESH_FUNC(dagmc_mesh_score)( index, erg, wgt, dist, score_result );
+}
 
 
 
@@ -239,7 +222,6 @@ void dagmc_fmesh_setup_mesh_( int* /*ipt*/, int* id, int* fmesh_index,
   if( type == "tracklen" ){
 
     TrackLengthMeshTally* t = TrackLengthMeshTally::setup( fmesh_settings, mbi, current_mcnp_cell );
-    t->set_score_callback( new MCNPTrackScore() );
     new_tally = tracklen_tallies[*fmesh_index] = t;
 
   }
@@ -285,7 +267,7 @@ void dagmc_fmesh_get_tally_data_( int* fmesh_index, void* fortran_data_pointer )
   int length;
  
   data = all_tallies[*fmesh_index]->get_tally_data( length );
-  __fmesh_mod_MOD_dagmc_make_fortran_pointer( fortran_data_pointer, data, &length );
+  FMESH_FUNC( dagmc_make_fortran_pointer )( fortran_data_pointer, data, &length );
 }
 
 /**
@@ -299,7 +281,7 @@ void dagmc_fmesh_get_error_data_( int* fmesh_index, void* fortran_data_pointer )
   int length;
  
   data = all_tallies[*fmesh_index]->get_error_data( length );
-  __fmesh_mod_MOD_dagmc_make_fortran_pointer( fortran_data_pointer, data, &length );
+  FMESH_FUNC( dagmc_make_fortran_pointer )( fortran_data_pointer, data, &length );
 }
 
 /**
@@ -312,7 +294,7 @@ void dagmc_fmesh_get_scratch_data_( int* fmesh_index, void* fortran_data_pointer
   int length;
   
   data = all_tallies[*fmesh_index]->get_scratch_data( length );
-  __fmesh_mod_MOD_dagmc_make_fortran_pointer( fortran_data_pointer, data, &length );
+  FMESH_FUNC( dagmc_make_fortran_pointer )( fortran_data_pointer, data, &length );
 }
 
 /**
@@ -442,8 +424,13 @@ void dagmc_fmesh_print_( int* fmesh_index, double* sp_norm, double* fmesh_fact )
 
 }
 
-/* ALTERNATIVE TALLIES MCNP FUNCTIONS */
-
+/**  
+ *   Obtains the collision position (x,y,z), the particle weight (wgt), the
+ *   total macroscopic cross section of the current cell (ple), and the
+ *   particle energy (erg) from MCNP for use in the KDE collision tally.
+ *
+ *   called from hstory.F90
+ */
 void dagmc_kde_tally_( double* x, double* y, double* z, double* wgt,
                        double* ple, double* erg )
 {
@@ -455,7 +442,7 @@ void dagmc_kde_tally_( double* x, double* y, double* z, double* wgt,
       int idx = (*i)->get_fmesh_index();
       
       // ask Fortran to pick the energy bin for this collision
-      __fmesh_mod_MOD_dagmc_mesh_choose_ebin( &idx, erg, &ien );
+      FMESH_FUNC( dagmc_mesh_choose_ebin )( &idx, erg, &ien );
 
       if( ien == -1 ) continue; // erg falls outside of requested energy bins for this mesh
 
