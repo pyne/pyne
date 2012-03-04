@@ -80,8 +80,8 @@ class Library(object):
             # line is empty, we are at end of file
             words = lines[0].split()
             name = words[0]
-            awr = eval(words[1])
-            temp = eval(words[2])
+            awr = float(words[1])
+            temp = float(words[2])
 
             # ensure we have a valid table type
             if 0 == len(name) or name[-1] not in table_types:
