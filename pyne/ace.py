@@ -23,6 +23,8 @@ generates ACE-format cross sections.
 from numpy import zeros, copy, meshgrid, interp, linspace, pi, arccos, concatenate
 from bisect import bisect_right
 
+from pyne import nucname
+
 class Library(object):
     """A Library objects represents an ACE-formatted file which may contain
     multiple tables with data.
@@ -94,7 +96,7 @@ class Library(object):
             temp_in_K = round(temp * 1e6 / 8.617342e-5)
             if self.verbose:
                 print("Loading nuclide {0} at {1} K ({2})".format(
-                        isotope_name(name), temp_in_K, name))
+                        nucname.serpent(name.partition('.')[0]), temp_in_K, name))
             self.tables.append(table)
 
             # Read comment
@@ -409,8 +411,7 @@ class NeutronTable(AceTable):
             rxn.LOCB = int(self.XSS[JXS8+i])
 
     def _read_and(self):
-        """
-        Find the angular distribution for each reaction MT
+        """Find the angular distribution for each reaction MT
         """
 
         JXS9 = self.JXS[9]
@@ -473,8 +474,7 @@ class NeutronTable(AceTable):
             rxn.LOCC = int(self.XSS[LED+i])
 
     def _read_dlw(self):
-        """
-        Determine the energy distribution for secondary neutrons for
+        """Determine the energy distribution for secondary neutrons for
         each reaction MT
         """
 
@@ -1245,34 +1245,6 @@ class PhotonuclearTable(AceTable):
             return "<ACE Photonuclear Table: {0}>".format(self.name)
         else:
             return "<ACE Photonuclear Table>"
-
-def isotope_name(name):
-    # TODO: Use material module to replace this
-
-    try:
-        ZAID = int(name[:name.find('.')])
-    except ValueError:
-        return name
-
-    # determine mass number and atomic number
-    A = ZAID % 1000
-    Z = (ZAID - A) / 1000
-
-    return "{0}-{1}".format(element_name[Z], A)
-
-# TODO: Use material module to replace this
-element_name = [None, "H",  "He", "Li", "Be", "B",  "C",  "N",  "O",  "F",  "Ne",
-                "Na", "Mg", "Al", "Si", "P",  "S",  "Cl", "Ar", "K",  "Ca",
-                "Sc", "Ti", "V",  "Cr", "Mn", "Fe", "Co", "Ni", "Cu", "Zn",
-                "Ga", "Ge", "As", "Se", "Br", "Kr", "Rb", "Sr", "Y",  "Zr",
-                "Nb", "Mo", "Tc", "Ru", "Rh", "Pd", "Ag", "Cd", "In", "Sn",
-                "Sb", "Te", "I",  "Xe", "Cs", "Ba", "La", "Ce", "Pr", "Nd",
-                "Pm", "Sm", "Eu", "Gd", "Tb", "Dy", "Ho", "Er", "Tm", "Yb",
-                "Lu", "Hf", "Ta", "W",  "Re", "Os", "Ir", "Pt", "Au", "Hg", 
-                "Tl", "Pb", "Bi", "Po", "At", "Rn", "Fr", "Ra", "Ac", "Th",
-                "Pa", "U",  "Np", "Pu", "Am", "Cm", "Bk", "Cf", "Es", "Fm", 
-                "Md", "No", "Lr", "Rf", "Db", "Sg", "Bh", "Hs", "Mt"]
-
 
 reaction_names = {
     # TODO: This should be provided as part of the ENDF module functionality
