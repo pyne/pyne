@@ -19,10 +19,8 @@ generates ACE-format cross sections.
 .. _ENDF: http://www.nndc.bnl.gov/endf
 
 .. moduleauthor:: Paul Romano <romano7@gmail.com>
-
 """
 
-import matplotlib.pyplot as pyplot
 from numpy import zeros, copy, meshgrid, interp, linspace, pi, arccos, concatenate
 from bisect import bisect_right
 
@@ -991,33 +989,6 @@ class NeutronTable(AceTable):
             self.index += 1
             return value
 
-    def plot(self, MT = 1):
-        if MT == 1:
-            pyplot.loglog(self.energy, self.sigma_t, label='(n,total)')
-        elif MT == 27:
-            pyplot.loglog(self.energy, self.sigma_a, label='(n,abs)')
-        else:
-            for r in self:
-                if r.MT == MT:
-                    pyplot.loglog(self.energy[r.IE-1:], r.sigma,
-                                  label = reaction_name(MT))
-
-        # Plot configuration
-        pyplot.xlabel("Energy (MeV)")
-        pyplot.ylabel("Cross section (barns)")
-        pyplot.grid(True)
-        pyplot.legend()
-
-    def plot_sum(self):
-        sumSigma = copy(self.sigma_el)
-        for r in self:
-            if r.MT >= 200:
-                continue
-            for i, sig in enumerate(r.sigma):
-                sumSigma[r.IE-1+i] += sig
-        pyplot.loglog(self.energy, self.sigma_t)
-        pyplot.loglog(self.energy, sumSigma)
-
     def find_reaction(self, MT):
         for r in self.reactions:
             if r.MT == MT:
@@ -1179,21 +1150,6 @@ class Reaction(object):
         self.IE = None     # Energy grid index
         self.sigma = []    # Cross section values
 
-    def plot(self):
-        if self.MT == 1:
-            pyplot.loglog(self.table.energy, self.sigma, label='(n,total)')
-        elif self.MT == 27:
-            pyplot.loglog(self.table.energy, self.sigma, label='(n,abs)')
-        else:
-            pyplot.loglog(self.table.energy[self.IE-1:], self.sigma,
-                          label = reaction_name(self.MT))
-            
-        # Plot configuration
-        pyplot.xlabel("Energy (MeV)")
-        pyplot.ylabel("Cross section (barns)")
-        pyplot.grid(True)
-        pyplot.legend()
-
     def broaden(self, T_high):
         pass        
 
@@ -1202,48 +1158,6 @@ class Reaction(object):
 
         table = self.table
         return table.energy[self.IE]
-
-    def plot_angle_dist(self, E_in):
-
-        # determine index for incoming energy
-        index = bisect_right(self.ang_energy_in, E_in)
-
-        # plot distribution
-        pyplot.plot(self.ang_cos[index],self.ang_pdf[index])
-
-    def plot_angle_polar(self, E_in):
-        """
-        Plots the secondary angle distribution for this reaction at a
-        given incoming energy of the particle.
-        """
-
-        # determine index for incoming energy
-        index = bisect_right(self.ang_energy_in, E_in)
-
-        # Find angles and probabilities (cos from 0 to pi)
-        angles = arccos(self.ang_cos[index])[::-1]
-        pdf = self.ang_pdf[index][::-1]
-
-        theta = linspace(0, pi, 100)
-        r = interp(theta, angles, pdf)
-
-        theta = concatenate((theta,theta + pi))
-        r = concatenate((r,r[::-1]))
-
-        # plot angle distribution
-        pyplot.polar(theta, r, label='E = {0} MeV'.format(E_in))
-
-    def plot_energy_dist(self, E_in):
-        """
-        Plots the secondary energy distribution for this reaction at a
-        given incoming energy if data are available.
-        """
-
-        # determine index for incoming energy
-        index = bisect_right(self.e_dist_energy_in, E_in)
-
-        # plot energy distribution
-        pyplot.semilogx(self.e_dist_energy_out[index], self.e_dist_pdf[index])
 
     def __repr__(self):
         try:
