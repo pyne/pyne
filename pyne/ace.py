@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
-"""
-This module is for reading ACE-format cross sections. ACE stands for "A Compact
+"""This module is for reading ACE-format cross sections. ACE stands for "A Compact
 ENDF" format and originated from work on MCNP_. It is used in a number of other
 Monte Carlo particle transport codes.
 
@@ -234,8 +233,7 @@ class NeutronTable(AceTable):
         self.photonReactions = []
 
     def _read_nu(self):
-        """
-        Read the NU block -- this contains information on the prompt
+        """Read the NU block -- this contains information on the prompt
         and delayed neutron precursor yields, decay constants, etc
         """
 
@@ -344,8 +342,7 @@ class NeutronTable(AceTable):
                 LOCC[group] = self.XSS[LED + group]
 
     def _read_mtr(self):
-        """
-        Get the list of reaction MTs for this cross-section table. The
+        """Get the list of reaction MTs for this cross-section table. The
         MT values are somewhat arbitrary.
         """
 
@@ -377,8 +374,7 @@ class NeutronTable(AceTable):
             rxn.TY = int(self.XSS[JXS5+i])
 
     def _read_lsig(self):
-        """
-        Determine location of cross sections for each reaction MT
+        """Determine location of cross sections for each reaction MT
         """
 
         LXS = self.JXS[6]
@@ -1162,7 +1158,7 @@ class Reaction(object):
     def __repr__(self):
         try:
             return "<ACE Reaction: MT={0} {1}>".format(
-                self.MT, reaction_name(self.MT))
+                self.MT, reaction_names[self.MT])
         except KeyError:
             return "<ACE Reaction: Unknown MT={0}>".format(self.MT)
 
@@ -1277,140 +1273,77 @@ element_name = [None, "H",  "He", "Li", "Be", "B",  "C",  "N",  "O",  "F",  "Ne"
                 "Pa", "U",  "Np", "Pu", "Am", "Cm", "Bk", "Cf", "Es", "Fm", 
                 "Md", "No", "Lr", "Rf", "Db", "Sg", "Bh", "Hs", "Mt"]
 
-def reaction_name(MT):
+
+reaction_names = {
     # TODO: This should be provided as part of the ENDF module functionality
-    if MT == 1:
-        return '(n,total)'
-    elif MT == 2:
-        return '(n,elastic)'
-    elif MT == 3:
-        return '(n,nonelastic)'
-    elif MT == 4:
-        return '(n,inelastic)'
-    elif MT == 5:
-        return '(misc)'
-    elif MT == 10:
-        return '(n,continuum)'
-    elif MT == 11:
-        return '(n,2n d)'
-    elif MT == 16:
-        return '(n,2n)'
-    elif MT == 17:
-        return '(n,3n)'
-    elif MT == 18:
-        return '(n,fission)'
-    elif MT == 19:
-        return '(n,f)'
-    elif MT == 20:
-        return '(n,nf)'
-    elif MT == 21:
-        return '(n,2nf)'
-    elif MT == 22:
-        return '(n,na)'
-    elif MT == 23:
-        return '(n,n3a)'
-    elif MT == 24:
-        return '(n,2na)'
-    elif MT == 25:
-        return '(n,3na)'
-    elif MT == 28:
-        return '(n,np)'
-    elif MT == 29:
-        return '(n,n2a)'
-    elif MT == 30:
-        return '(n,2n2a)'
-    elif MT == 32:
-        return '(n,nd)'
-    elif MT == 33:
-        return '(n,nt)'
-    elif MT == 34:
-        return '(n,n He-3)'
-    elif MT == 35:
-        return '(n,nd3a)'
-    elif MT == 36:
-        return '(n,nt2a)'
-    elif MT == 37:
-        return '(n,4n)'
-    elif MT == 38:
-        return '(n,3nf)'
-    elif MT == 41:
-        return '(n,2np)'
-    elif MT == 42:
-        return '(n,3np)'
-    elif MT == 44:
-        return '(n,2np)'
-    elif MT == 45:
-        return '(n,npa)'
-    elif MT >= 50 and MT <= 90:
-        return '(n,n{0})'.format(MT-50)
-    elif MT == 91:
-        return '(n,nc)'
-    elif MT == 102:
-        return '(n,gamma)'
-    elif MT == 103:
-        return '(n,p)'
-    elif MT == 104:
-        return '(n,d)'
-    elif MT == 105:
-        return '(n,t)'
-    elif MT == 106:
-        return '(n,3He)'
-    elif MT == 107:
-        return '(n,a)'
-    elif MT == 108:
-        return '(n,2a)'
-    elif MT == 109:
-        return '(n,3a)'
-    elif MT == 111:
-        return '(n,2p)'
-    elif MT == 112:
-        return '(n,pa)'
-    elif MT == 113:
-        return '(n,t2a)'
-    elif MT == 114:
-        return '(n,d2a)'
-    elif MT == 115:
-        return '(n,pd)'
-    elif MT == 116:
-        return '(n,pt)'
-    elif MT == 117:
-        return '(n,da)'
-    elif MT == 201:
-        return '(n,Xn)'
-    elif MT == 202:
-        return '(n,Xgamma)'
-    elif MT == 203:
-        return '(n,Xp)'
-    elif MT == 204:
-        return '(n,Xd)'
-    elif MT == 205:
-        return '(n,Xt)'
-    elif MT == 206:
-        return '(n,X3He)'
-    elif MT == 207:
-        return '(n,Xa)'
-    elif MT == 444:
-        return '(damage)'
-    elif MT >= 600 and MT <= 648:
-        return '(n,p{0})'.format(MT-600)
-    elif MT == 649:
-        return '(n,pc)'
-    elif MT >= 650 and MT <= 698:
-        return '(n,d{0})'.format(MT-650)
-    elif MT == 699:
-        return '(n,dc)'
-    elif MT >= 700 and MT <= 748:
-        return '(n,t{0})'.format(MT-700)
-    elif MT == 749:
-        return '(n,tc)'
-    elif MT >= 750 and MT <= 798:
-        return '(n,3He{0})'.format(MT-750)
-    elif MT == 799:
-        return '(n,3Hec)'
-    elif MT >= 800 and MT <= 848:
-        return '(n,a{0})'.format(MT-800)
-    elif MT == 849:
-        return '(n,ac)'
+    1: '(n,total)',
+    2: '(n,elastic)',
+    3: '(n,nonelastic)',
+    4: '(n,inelastic)',
+    5: '(misc)',
+    10: '(n,continuum)',
+    11: '(n,2n d)',
+    16: '(n,2n)',
+    17: '(n,3n)',
+    18: '(n,fission)',
+    19: '(n,f)',
+    20: '(n,nf)',
+    21: '(n,2nf)',
+    22: '(n,na)',
+    23: '(n,n3a)',
+    24: '(n,2na)',
+    25: '(n,3na)',
+    28: '(n,np)',
+    29: '(n,n2a)',
+    30: '(n,2n2a)',
+    32: '(n,nd)',
+    33: '(n,nt)',
+    34: '(n,n He-3)',
+    35: '(n,nd3a)',
+    36: '(n,nt2a)',
+    37: '(n,4n)',
+    38: '(n,3nf)',
+    41: '(n,2np)',
+    42: '(n,3np)',
+    44: '(n,2np)',
+    45: '(n,npa)',
+    91: '(n,nc)',
+    102: '(n,gamma)',
+    103: '(n,p)',
+    104: '(n,d)',
+    105: '(n,t)',
+    106: '(n,3He)',
+    107: '(n,a)',
+    108: '(n,2a)',
+    109: '(n,3a)',
+    111: '(n,2p)',
+    112: '(n,pa)',
+    113: '(n,t2a)',
+    114: '(n,d2a)',
+    115: '(n,pd)',
+    116: '(n,pt)',
+    117: '(n,da)',
+    201: '(n,Xn)',
+    202: '(n,Xgamma)',
+    203: '(n,Xp)',
+    204: '(n,Xd)',
+    205: '(n,Xt)',
+    206: '(n,X3He)',
+    207: '(n,Xa)',
+    444: '(damage)',
+    649: '(n,pc)',
+    699: '(n,dc)',
+    749: '(n,tc)',
+    799: '(n,3Hec)',
+    849: '(n,ac)',
+    }
+"""Dictionary of MT reaction labels"""
+reaction_names.update({mt: '(n,n{0})'.format(mt - 50) for mt in range(50, 91)})
+reaction_names.update({mt: '(n,p{0})'.format(mt - 600) for mt in range(600, 649)})
+reaction_names.update({mt: '(n,d{0})'.format(mt - 650) for mt in range(650, 699)})
+reaction_names.update({mt: '(n,t{0})'.format(mt - 700) for mt in range(700, 649)})
+reaction_names.update({mt: '(n,3He{0})'.format(mt - 750) for mt in range(750, 799)})
+reaction_names.update({mt: '(n,a{0})'.format(mt - 800) for mt in range(700, 649)})
 
 
 if __name__ == '__main__':
