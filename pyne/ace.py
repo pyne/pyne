@@ -55,10 +55,22 @@ class Library(object):
             self.binary = True
 
         # Set verbosity
-        self.verbose = True
+        self.verbose = False
 
     def read(self):
         """Read through and parse the ACE-format library."""
+
+        table_types = {
+            "c": NeutronTable,
+            "t": SabTable,
+            "y": DosimetryTable,
+            "d": NeutronDiscreteTable,
+            "p": PhotoatomicTable,
+            "m": NeutronMGTable,
+            "g": PhotoatomicMGTable,
+            "e": ElectronTable,
+            "u": PhotonuclearTable,
+            }
 
         lines = self.f.readlines()
         self.tables = []
@@ -71,28 +83,15 @@ class Library(object):
             awr = eval(words[1])
             temp = eval(words[2])
 
-            if name.endswith("c"):
-                table = NeutronTable(name, awr, temp)
-            elif name.endswith("t"):
-                table = SabTable(name, awr, temp)
-            elif name.endswith("y"):
-                table = DosimetryTable(name, awr, temp)
-            elif name.endswith("d"):
-                table = NeutronDiscreteTable(name, awr, temp)
-            elif name.endswith("p"):
-                table = PhotoatomicTable(name, awr, temp)
-            elif name.endswith("m"):
-                table = NeutronMGTable(name, awr, temp)
-            elif name.endswith("g"):
-                table = PhotoatomicMGTable(name, awr, temp)
-            elif name.endswith("e"):
-                table = ElectronTable(name, awr, temp)
-            elif name.endswith("u"):
-                table = PhotonuclearTable(name, awr, temp)
-            else:
+            # ensure we have a valid table type
+            if 0 == len(name) or name[-1] not in table_types:
                 # TODO: Make this a proper exception.
                 print("Unsupported table: " + name)
                 return
+
+            # get the table
+            table = table_types[name[-1]](name, awr, temp)
+
             temp_in_K = round(temp * 1e6 / 8.617342e-5)
             if self.verbose:
                 print("Loading nuclide {0} at {1} K ({2})".format(
@@ -138,6 +137,9 @@ class Library(object):
         for table in self.tables:
             if table.name.startswith(name):
                 return table
+
+    def __del__(self):
+        self.f.close()
 
 
 class AceTable(object):
@@ -204,10 +206,8 @@ class NeutronTable(AceTable):
         self._read_unr()
 
     def _read_esz(self):
-        """
-        Read ESZ block -- this block contains the energy grid, total
+        """Read ESZ block -- this block contains the energy grid, total
         xs, absorption xs, elastic scattering xs, and heating numbers.
-
         """
         
         NE = self.NXS[3]
@@ -355,8 +355,7 @@ class NeutronTable(AceTable):
             self.reactions.append(Reaction(MT,self))
             
     def _read_lqr(self):
-        """
-        Find Q-values for each reaction MT
+        """Find Q-values for each reaction MT
         """
 
         JXS4 = self.JXS[4]
@@ -364,8 +363,7 @@ class NeutronTable(AceTable):
             rxn.Q = self.XSS[JXS4+i]
 
     def _read_tyr(self):
-        """
-        Find the neutron release for each reaction MT. A neutron
+        """Find the neutron release for each reaction MT. A neutron
         release of 19 indicates fission. A neutron release greater
         than 100 signifies reactions other than fission taht have
         energy-dependent neutron multiplicities
@@ -384,8 +382,7 @@ class NeutronTable(AceTable):
             rxn.LOCA = int(self.XSS[LXS+i])
 
     def _read_sig(self):
-        """
-        Read cross-sections for each reaction MT
+        """Read cross-sections for each reaction MT
         """
 
         JXS7 = self.JXS[7]
@@ -395,8 +392,7 @@ class NeutronTable(AceTable):
             rxn.sigma = self.XSS[JXS7+rxn.LOCA+1 : JXS7+rxn.LOCA+1+NE]
 
     def _read_land(self):
-        """
-        Find locations for angular distributions
+        """Find locations for angular distributions
         """
 
         JXS8 = self.JXS[8]
@@ -458,8 +454,7 @@ class NeutronTable(AceTable):
                     rxn.ang_cdf[i] = self._get_float(NP)
         
     def _read_ldlw(self):
-        """
-        Find locations for energy distribution data for each reaction
+        """Find locations for energy distribution data for each reaction
         """
 
         LED = self.JXS[10]
@@ -824,8 +819,7 @@ class NeutronTable(AceTable):
             self.photonReactions.append(Reaction(MT,self))
 
     def _read_lsigp(self):
-        """
-        Determine location of cross sections for each photon-producing reaction
+        """Determine location of cross sections for each photon-producing reaction
         MT.
         """
 
@@ -834,8 +828,7 @@ class NeutronTable(AceTable):
             rxn.LOCA = int(self.XSS[LXS+i])
 
     def _read_sigp(self):
-        """
-        Read cross-sections for each photon-producing reaction MT.
+        """Read cross-sections for each photon-producing reaction MT.
         """
 
         JXS15 = self.JXS[15]
@@ -917,8 +910,7 @@ class NeutronTable(AceTable):
             self.MT_for_photon_yield = self._get_int(NYP)
 
     def _read_fis(self):
-        """
-        Read total fission cross-section data if present. Generally,
+        """Read total fission cross-section data if present. Generally,
         this table is not provided since it is redundant.
         """
 
@@ -933,8 +925,7 @@ class NeutronTable(AceTable):
         self.sigma_f = self._get_float(NE)
 
     def _read_unr(self):
-        """
-        Read the unresolved resonance range probability tables if present
+        """Read the unresolved resonance range probability tables if present
         """
 
         # Check if URR probability tables are present
@@ -1096,8 +1087,7 @@ class SabTable(AceTable):
                 self.inelastic_mu_out[-1].append(self._get_float(NMU+1))
 
     def _read_itca(self):
-        """
-        Read angular distributions for elastic scattering.
+        """Read angular distributions for elastic scattering.
         """
 
         NMU = self.NXS[6]
