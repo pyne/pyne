@@ -56,9 +56,22 @@ class Library(object):
 
         # Set verbosity
         self.verbose = False
+        self.tables = {}
 
-    def read(self):
-        """Read through and parse the ACE-format library."""
+    def read(self, table_names=None):
+        """Read through and parse the ACE-format library.
+
+        Parameters
+        ----------
+        table_names : None, str, or iterable, optional
+            Tables from the file to read in.  If None, reads in all of the 
+            tables. If str, reads in only the single table of a matching name.
+        """
+        if isinstance(table_names, basestring):
+            table_names = [table_names]
+
+        if table_names is not None:
+            table_names = set(table_names)
 
         table_types = {
             "c": NeutronTable,
@@ -73,9 +86,12 @@ class Library(object):
             }
 
         lines = self.f.readlines()
-        self.tables = []
         
         while True:
+            # Check end condition
+            if 0 == len(lines):
+                break
+
             # Read name of table, atomic weight ratio, and temperature. If first
             # line is empty, we are at end of file
             words = lines[0].split()
@@ -83,11 +99,20 @@ class Library(object):
             awr = float(words[1])
             temp = float(words[2])
 
+            nxs = [int(i) for i in ''.join(lines[6:8]).split()]
+            n_lines = (nxs[0] + 3)/4
+
+            # varify that we are suppossed to read this table in
+            if (table_names is not None) and (name not in table_names):
+                lines = lines[12+n_lines:]
+                continue
+
             # ensure we have a valid table type
             if 0 == len(name) or name[-1] not in table_types:
                 # TODO: Make this a proper exception.
                 print("Unsupported table: " + name)
-                return
+                lines = lines[12+n_lines:]
+                continue
 
             # get the table
             table = table_types[name[-1]](name, awr, temp)
@@ -96,17 +121,16 @@ class Library(object):
             if self.verbose:
                 print("Loading nuclide {0} at {1} K ({2})".format(
                         nucname.serpent(name.partition('.')[0]), temp_in_K, name))
-            self.tables.append(table)
+            self.tables[name] = table
 
             # Read comment
             table.comment = lines[1].strip()
 
             # Read NXS and JXS arrays
-            table.NXS = [int(i) for i in ''.join(lines[6:8]).split()]
+            table.NXS = nxs
             table.JXS = [int(i) for i in ''.join(lines[8:12]).split()]
 
             # Read XSS array
-            n_lines = (table.NXS[0] + 3)/4
             table.XSS = [float(i) for i in ''.join(lines[12:12+n_lines]).split()]
 
             # Insert empty object at beginning of NXS, JXS, and XSS
@@ -119,10 +143,7 @@ class Library(object):
 
             # Read all data blocks
             table._read_all()
-
             lines = lines[12+n_lines:]
-            if not lines:
-                return
 
     def find_table(self, name):
         """Returns a cross-section table with a given name.
@@ -133,10 +154,7 @@ class Library(object):
             Name of the cross-section table, e.g. 92235.70c
 
         """
-
-        for table in self.tables:
-            if table.name.startswith(name):
-                return table
+        return self.tables.get(name, None)
 
     def __del__(self):
         self.f.close()
