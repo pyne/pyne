@@ -20,6 +20,7 @@ generates ACE-format cross sections.
 .. moduleauthor:: Paul Romano <romano7@gmail.com>
 """
 
+import numpy as np
 from numpy import zeros, copy, meshgrid, interp, linspace, pi, arccos, concatenate
 from bisect import bisect_right
 
@@ -131,7 +132,10 @@ class Library(object):
             table.JXS = [int(i) for i in ''.join(lines[8:12]).split()]
 
             # Read XSS array
-            table.XSS = [float(i) for i in ''.join(lines[12:12+n_lines]).split()]
+            #table.XSS = [float(i) for i in ''.join(lines[12:12+n_lines]).split()]
+            datastr = ''.join(lines[12:12+n_lines])
+            xss = np.fromstring(datastr, sep=' ')
+            table.XSS = list(xss)
 
             # Insert empty object at beginning of NXS, JXS, and XSS
             # arrays so that the indexing will be the same as
@@ -975,7 +979,8 @@ class NeutronTable(AceTable):
 
     def _get_float(self, n_values = 1):
         if n_values > 1:
-            values = self.XSS[self.index:self.index+n_values]
+            ind = self.index
+            values = self.XSS[ind:ind+n_values]
             self.index += n_values
             return values
         else:
@@ -985,8 +990,8 @@ class NeutronTable(AceTable):
             
     def _get_int(self, n_values = 1):
         if n_values > 1:
-            values = [int(i) for i in 
-                      self.XSS[self.index:self.index+n_values]]
+            ind = self.index
+            values = [int(i) for i in self.XSS[ind:ind+n_values]]
             self.index += n_values
             return values
         else:
