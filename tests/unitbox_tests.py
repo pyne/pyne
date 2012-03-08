@@ -119,12 +119,22 @@ class TestDagmcWithUnitbox( unittest.TestCase ):
             self.assertEqual( expected_vols[i], vol )
             if expected_dists[i] != 0: 
                 self.assertAlmostEqual( expected_dists[i], dist )
+        self.assertEqual( i, 3 )
+
+        for i, (vol, dist, surf) in enumerate( dagmc.ray_iterator( startvol, start, direction, dist_limit=4 ) ):
+            self.assertEqual( expected_vols[i], vol )
+            if expected_dists[i] != 0:
+                self.assertAlmostEqual( expected_dists[i], dist )
+        self.assertEqual( i, 1 )
+
 
 
     def test_ray_story( self ):
         # Run with `nosetests -s` to see output printed on stdout
         dagmc.tell_ray_story( (0,0,0), (1,1,0) )
         dagmc.tell_ray_story( (-3,0,0),(1,0,0) )
+        dagmc.tell_ray_story( (-3,0,0),(1,0,0), dist_limit=4 ) # tests edge behavior
+        dagmc.tell_ray_story( (-3,0,0),(1,0,0), dist_limit=4.1 )
 
 
     def test_util_graveyard_bound( self ):
