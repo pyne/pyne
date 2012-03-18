@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
-"""
-This module is for reading ACE-format cross sections. ACE stands for "A Compact
+"""This module is for reading ACE-format cross sections. ACE stands for "A Compact
 ENDF" format and originated from work on MCNP_. It is used in a number of other
 Monte Carlo particle transport codes.
 
@@ -19,12 +18,13 @@ generates ACE-format cross sections.
 .. _ENDF: http://www.nndc.bnl.gov/endf
 
 .. moduleauthor:: Paul Romano <romano7@gmail.com>
-
 """
 
-import matplotlib.pyplot as pyplot
+import numpy as np
 from numpy import zeros, copy, meshgrid, interp, linspace, pi, arccos, concatenate
 from bisect import bisect_right
+
+from pyne import nucname
 
 class Library(object):
     """A Library objects represents an ACE-formatted file which may contain
@@ -56,60 +56,86 @@ class Library(object):
             self.binary = True
 
         # Set verbosity
-        self.verbose = True
+        self.verbose = False
+        self.tables = {}
 
-    def read(self):
-        """Read through and parse the ACE-format library."""
+    def read(self, table_names=None):
+        """Read through and parse the ACE-format library.
+
+        Parameters
+        ----------
+        table_names : None, str, or iterable, optional
+            Tables from the file to read in.  If None, reads in all of the 
+            tables. If str, reads in only the single table of a matching name.
+        """
+        if isinstance(table_names, basestring):
+            table_names = [table_names]
+
+        if table_names is not None:
+            table_names = set(table_names)
+
+        table_types = {
+            "c": NeutronTable,
+            "t": SabTable,
+            "y": DosimetryTable,
+            "d": NeutronDiscreteTable,
+            "p": PhotoatomicTable,
+            "m": NeutronMGTable,
+            "g": PhotoatomicMGTable,
+            "e": ElectronTable,
+            "u": PhotonuclearTable,
+            }
 
         lines = self.f.readlines()
-        self.tables = []
         
         while True:
+            # Check end condition
+            if 0 == len(lines):
+                break
+
             # Read name of table, atomic weight ratio, and temperature. If first
             # line is empty, we are at end of file
             words = lines[0].split()
             name = words[0]
-            awr = eval(words[1])
-            temp = eval(words[2])
+            awr = float(words[1])
+            temp = float(words[2])
 
-            if name.endswith("c"):
-                table = NeutronTable(name, awr, temp)
-            elif name.endswith("t"):
-                table = SabTable(name, awr, temp)
-            elif name.endswith("y"):
-                table = DosimetryTable(name, awr, temp)
-            elif name.endswith("d"):
-                table = NeutronDiscreteTable(name, awr, temp)
-            elif name.endswith("p"):
-                table = PhotoatomicTable(name, awr, temp)
-            elif name.endswith("m"):
-                table = NeutronMGTable(name, awr, temp)
-            elif name.endswith("g"):
-                table = PhotoatomicMGTable(name, awr, temp)
-            elif name.endswith("e"):
-                table = ElectronTable(name, awr, temp)
-            elif name.endswith("u"):
-                table = PhotonuclearTable(name, awr, temp)
-            else:
+            nxs = [int(i) for i in ''.join(lines[6:8]).split()]
+            n_lines = (nxs[0] + 3)/4
+
+            # varify that we are suppossed to read this table in
+            if (table_names is not None) and (name not in table_names):
+                lines = lines[12+n_lines:]
+                continue
+
+            # ensure we have a valid table type
+            if 0 == len(name) or name[-1] not in table_types:
                 # TODO: Make this a proper exception.
                 print("Unsupported table: " + name)
-                return
+                lines = lines[12+n_lines:]
+                continue
+
+            # get the table
+            table = table_types[name[-1]](name, awr, temp)
+
             temp_in_K = round(temp * 1e6 / 8.617342e-5)
             if self.verbose:
                 print("Loading nuclide {0} at {1} K ({2})".format(
-                        isotope_name(name), temp_in_K, name))
-            self.tables.append(table)
+                        nucname.serpent(name.partition('.')[0]), temp_in_K, name))
+            self.tables[name] = table
 
             # Read comment
             table.comment = lines[1].strip()
 
             # Read NXS and JXS arrays
-            table.NXS = [int(i) for i in ''.join(lines[6:8]).split()]
+            table.NXS = nxs
             table.JXS = [int(i) for i in ''.join(lines[8:12]).split()]
 
             # Read XSS array
-            n_lines = (table.NXS[0] + 3)/4
-            table.XSS = [float(i) for i in ''.join(lines[12:12+n_lines]).split()]
+            #table.XSS = [float(i) for i in ''.join(lines[12:12+n_lines]).split()]
+            datastr = ''.join(lines[12:12+n_lines])
+            xss = np.fromstring(datastr, sep=' ')
+            table.XSS = list(xss)
 
             # Insert empty object at beginning of NXS, JXS, and XSS
             # arrays so that the indexing will be the same as
@@ -121,10 +147,7 @@ class Library(object):
 
             # Read all data blocks
             table._read_all()
-
             lines = lines[12+n_lines:]
-            if not lines:
-                return
 
     def find_table(self, name):
         """Returns a cross-section table with a given name.
@@ -135,10 +158,10 @@ class Library(object):
             Name of the cross-section table, e.g. 92235.70c
 
         """
+        return self.tables.get(name, None)
 
-        for table in self.tables:
-            if table.name.startswith(name):
-                return table
+    def __del__(self):
+        self.f.close()
 
 
 class AceTable(object):
@@ -205,10 +228,8 @@ class NeutronTable(AceTable):
         self._read_unr()
 
     def _read_esz(self):
-        """
-        Read ESZ block -- this block contains the energy grid, total
+        """Read ESZ block -- this block contains the energy grid, total
         xs, absorption xs, elastic scattering xs, and heating numbers.
-
         """
         
         NE = self.NXS[3]
@@ -236,8 +257,7 @@ class NeutronTable(AceTable):
         self.photonReactions = []
 
     def _read_nu(self):
-        """
-        Read the NU block -- this contains information on the prompt
+        """Read the NU block -- this contains information on the prompt
         and delayed neutron precursor yields, decay constants, etc
         """
 
@@ -346,8 +366,7 @@ class NeutronTable(AceTable):
                 LOCC[group] = self.XSS[LED + group]
 
     def _read_mtr(self):
-        """
-        Get the list of reaction MTs for this cross-section table. The
+        """Get the list of reaction MTs for this cross-section table. The
         MT values are somewhat arbitrary.
         """
 
@@ -358,8 +377,7 @@ class NeutronTable(AceTable):
             self.reactions.append(Reaction(MT,self))
             
     def _read_lqr(self):
-        """
-        Find Q-values for each reaction MT
+        """Find Q-values for each reaction MT
         """
 
         JXS4 = self.JXS[4]
@@ -367,8 +385,7 @@ class NeutronTable(AceTable):
             rxn.Q = self.XSS[JXS4+i]
 
     def _read_tyr(self):
-        """
-        Find the neutron release for each reaction MT. A neutron
+        """Find the neutron release for each reaction MT. A neutron
         release of 19 indicates fission. A neutron release greater
         than 100 signifies reactions other than fission taht have
         energy-dependent neutron multiplicities
@@ -379,8 +396,7 @@ class NeutronTable(AceTable):
             rxn.TY = int(self.XSS[JXS5+i])
 
     def _read_lsig(self):
-        """
-        Determine location of cross sections for each reaction MT
+        """Determine location of cross sections for each reaction MT
         """
 
         LXS = self.JXS[6]
@@ -388,8 +404,7 @@ class NeutronTable(AceTable):
             rxn.LOCA = int(self.XSS[LXS+i])
 
     def _read_sig(self):
-        """
-        Read cross-sections for each reaction MT
+        """Read cross-sections for each reaction MT
         """
 
         JXS7 = self.JXS[7]
@@ -399,8 +414,7 @@ class NeutronTable(AceTable):
             rxn.sigma = self.XSS[JXS7+rxn.LOCA+1 : JXS7+rxn.LOCA+1+NE]
 
     def _read_land(self):
-        """
-        Find locations for angular distributions
+        """Find locations for angular distributions
         """
 
         JXS8 = self.JXS[8]
@@ -415,8 +429,7 @@ class NeutronTable(AceTable):
             rxn.LOCB = int(self.XSS[JXS8+i])
 
     def _read_and(self):
-        """
-        Find the angular distribution for each reaction MT
+        """Find the angular distribution for each reaction MT
         """
 
         JXS9 = self.JXS[9]
@@ -463,8 +476,7 @@ class NeutronTable(AceTable):
                     rxn.ang_cdf[i] = self._get_float(NP)
         
     def _read_ldlw(self):
-        """
-        Find locations for energy distribution data for each reaction
+        """Find locations for energy distribution data for each reaction
         """
 
         LED = self.JXS[10]
@@ -479,8 +491,7 @@ class NeutronTable(AceTable):
             rxn.LOCC = int(self.XSS[LED+i])
 
     def _read_dlw(self):
-        """
-        Determine the energy distribution for secondary neutrons for
+        """Determine the energy distribution for secondary neutrons for
         each reaction MT
         """
 
@@ -830,8 +841,7 @@ class NeutronTable(AceTable):
             self.photonReactions.append(Reaction(MT,self))
 
     def _read_lsigp(self):
-        """
-        Determine location of cross sections for each photon-producing reaction
+        """Determine location of cross sections for each photon-producing reaction
         MT.
         """
 
@@ -840,8 +850,7 @@ class NeutronTable(AceTable):
             rxn.LOCA = int(self.XSS[LXS+i])
 
     def _read_sigp(self):
-        """
-        Read cross-sections for each photon-producing reaction MT.
+        """Read cross-sections for each photon-producing reaction MT.
         """
 
         JXS15 = self.JXS[15]
@@ -923,8 +932,7 @@ class NeutronTable(AceTable):
             self.MT_for_photon_yield = self._get_int(NYP)
 
     def _read_fis(self):
-        """
-        Read total fission cross-section data if present. Generally,
+        """Read total fission cross-section data if present. Generally,
         this table is not provided since it is redundant.
         """
 
@@ -939,8 +947,7 @@ class NeutronTable(AceTable):
         self.sigma_f = self._get_float(NE)
 
     def _read_unr(self):
-        """
-        Read the unresolved resonance range probability tables if present
+        """Read the unresolved resonance range probability tables if present
         """
 
         # Check if URR probability tables are present
@@ -972,7 +979,8 @@ class NeutronTable(AceTable):
 
     def _get_float(self, n_values = 1):
         if n_values > 1:
-            values = self.XSS[self.index:self.index+n_values]
+            ind = self.index
+            values = self.XSS[ind:ind+n_values]
             self.index += n_values
             return values
         else:
@@ -982,41 +990,14 @@ class NeutronTable(AceTable):
             
     def _get_int(self, n_values = 1):
         if n_values > 1:
-            values = [int(i) for i in 
-                      self.XSS[self.index:self.index+n_values]]
+            ind = self.index
+            values = [int(i) for i in self.XSS[ind:ind+n_values]]
             self.index += n_values
             return values
         else:
             value = int(self.XSS[self.index])
             self.index += 1
             return value
-
-    def plot(self, MT = 1):
-        if MT == 1:
-            pyplot.loglog(self.energy, self.sigma_t, label='(n,total)')
-        elif MT == 27:
-            pyplot.loglog(self.energy, self.sigma_a, label='(n,abs)')
-        else:
-            for r in self:
-                if r.MT == MT:
-                    pyplot.loglog(self.energy[r.IE-1:], r.sigma,
-                                  label = reaction_name(MT))
-
-        # Plot configuration
-        pyplot.xlabel("Energy (MeV)")
-        pyplot.ylabel("Cross section (barns)")
-        pyplot.grid(True)
-        pyplot.legend()
-
-    def plot_sum(self):
-        sumSigma = copy(self.sigma_el)
-        for r in self:
-            if r.MT >= 200:
-                continue
-            for i, sig in enumerate(r.sigma):
-                sumSigma[r.IE-1+i] += sig
-        pyplot.loglog(self.energy, self.sigma_t)
-        pyplot.loglog(self.energy, sumSigma)
 
     def find_reaction(self, MT):
         for r in self.reactions:
@@ -1129,8 +1110,7 @@ class SabTable(AceTable):
                 self.inelastic_mu_out[-1].append(self._get_float(NMU+1))
 
     def _read_itca(self):
-        """
-        Read angular distributions for elastic scattering.
+        """Read angular distributions for elastic scattering.
         """
 
         NMU = self.NXS[6]
@@ -1179,21 +1159,6 @@ class Reaction(object):
         self.IE = None     # Energy grid index
         self.sigma = []    # Cross section values
 
-    def plot(self):
-        if self.MT == 1:
-            pyplot.loglog(self.table.energy, self.sigma, label='(n,total)')
-        elif self.MT == 27:
-            pyplot.loglog(self.table.energy, self.sigma, label='(n,abs)')
-        else:
-            pyplot.loglog(self.table.energy[self.IE-1:], self.sigma,
-                          label = reaction_name(self.MT))
-            
-        # Plot configuration
-        pyplot.xlabel("Energy (MeV)")
-        pyplot.ylabel("Cross section (barns)")
-        pyplot.grid(True)
-        pyplot.legend()
-
     def broaden(self, T_high):
         pass        
 
@@ -1203,52 +1168,10 @@ class Reaction(object):
         table = self.table
         return table.energy[self.IE]
 
-    def plot_angle_dist(self, E_in):
-
-        # determine index for incoming energy
-        index = bisect_right(self.ang_energy_in, E_in)
-
-        # plot distribution
-        pyplot.plot(self.ang_cos[index],self.ang_pdf[index])
-
-    def plot_angle_polar(self, E_in):
-        """
-        Plots the secondary angle distribution for this reaction at a
-        given incoming energy of the particle.
-        """
-
-        # determine index for incoming energy
-        index = bisect_right(self.ang_energy_in, E_in)
-
-        # Find angles and probabilities (cos from 0 to pi)
-        angles = arccos(self.ang_cos[index])[::-1]
-        pdf = self.ang_pdf[index][::-1]
-
-        theta = linspace(0, pi, 100)
-        r = interp(theta, angles, pdf)
-
-        theta = concatenate((theta,theta + pi))
-        r = concatenate((r,r[::-1]))
-
-        # plot angle distribution
-        pyplot.polar(theta, r, label='E = {0} MeV'.format(E_in))
-
-    def plot_energy_dist(self, E_in):
-        """
-        Plots the secondary energy distribution for this reaction at a
-        given incoming energy if data are available.
-        """
-
-        # determine index for incoming energy
-        index = bisect_right(self.e_dist_energy_in, E_in)
-
-        # plot energy distribution
-        pyplot.semilogx(self.e_dist_energy_out[index], self.e_dist_pdf[index])
-
     def __repr__(self):
         try:
             return "<ACE Reaction: MT={0} {1}>".format(
-                self.MT, reaction_name(self.MT))
+                self.MT, reaction_names[self.MT])
         except KeyError:
             return "<ACE Reaction: Unknown MT={0}>".format(self.MT)
 
@@ -1336,167 +1259,76 @@ class PhotonuclearTable(AceTable):
         else:
             return "<ACE Photonuclear Table>"
 
-def isotope_name(name):
-    # TODO: Use material module to replace this
-
-    try:
-        ZAID = int(name[:name.find('.')])
-    except ValueError:
-        return name
-
-    # determine mass number and atomic number
-    A = ZAID % 1000
-    Z = (ZAID - A) / 1000
-
-    return "{0}-{1}".format(element_name[Z], A)
-
-# TODO: Use material module to replace this
-element_name = [None, "H",  "He", "Li", "Be", "B",  "C",  "N",  "O",  "F",  "Ne",
-                "Na", "Mg", "Al", "Si", "P",  "S",  "Cl", "Ar", "K",  "Ca",
-                "Sc", "Ti", "V",  "Cr", "Mn", "Fe", "Co", "Ni", "Cu", "Zn",
-                "Ga", "Ge", "As", "Se", "Br", "Kr", "Rb", "Sr", "Y",  "Zr",
-                "Nb", "Mo", "Tc", "Ru", "Rh", "Pd", "Ag", "Cd", "In", "Sn",
-                "Sb", "Te", "I",  "Xe", "Cs", "Ba", "La", "Ce", "Pr", "Nd",
-                "Pm", "Sm", "Eu", "Gd", "Tb", "Dy", "Ho", "Er", "Tm", "Yb",
-                "Lu", "Hf", "Ta", "W",  "Re", "Os", "Ir", "Pt", "Au", "Hg", 
-                "Tl", "Pb", "Bi", "Po", "At", "Rn", "Fr", "Ra", "Ac", "Th",
-                "Pa", "U",  "Np", "Pu", "Am", "Cm", "Bk", "Cf", "Es", "Fm", 
-                "Md", "No", "Lr", "Rf", "Db", "Sg", "Bh", "Hs", "Mt"]
-
-def reaction_name(MT):
+reaction_names = {
     # TODO: This should be provided as part of the ENDF module functionality
-    if MT == 1:
-        return '(n,total)'
-    elif MT == 2:
-        return '(n,elastic)'
-    elif MT == 3:
-        return '(n,nonelastic)'
-    elif MT == 4:
-        return '(n,inelastic)'
-    elif MT == 5:
-        return '(misc)'
-    elif MT == 10:
-        return '(n,continuum)'
-    elif MT == 11:
-        return '(n,2n d)'
-    elif MT == 16:
-        return '(n,2n)'
-    elif MT == 17:
-        return '(n,3n)'
-    elif MT == 18:
-        return '(n,fission)'
-    elif MT == 19:
-        return '(n,f)'
-    elif MT == 20:
-        return '(n,nf)'
-    elif MT == 21:
-        return '(n,2nf)'
-    elif MT == 22:
-        return '(n,na)'
-    elif MT == 23:
-        return '(n,n3a)'
-    elif MT == 24:
-        return '(n,2na)'
-    elif MT == 25:
-        return '(n,3na)'
-    elif MT == 28:
-        return '(n,np)'
-    elif MT == 29:
-        return '(n,n2a)'
-    elif MT == 30:
-        return '(n,2n2a)'
-    elif MT == 32:
-        return '(n,nd)'
-    elif MT == 33:
-        return '(n,nt)'
-    elif MT == 34:
-        return '(n,n He-3)'
-    elif MT == 35:
-        return '(n,nd3a)'
-    elif MT == 36:
-        return '(n,nt2a)'
-    elif MT == 37:
-        return '(n,4n)'
-    elif MT == 38:
-        return '(n,3nf)'
-    elif MT == 41:
-        return '(n,2np)'
-    elif MT == 42:
-        return '(n,3np)'
-    elif MT == 44:
-        return '(n,2np)'
-    elif MT == 45:
-        return '(n,npa)'
-    elif MT >= 50 and MT <= 90:
-        return '(n,n{0})'.format(MT-50)
-    elif MT == 91:
-        return '(n,nc)'
-    elif MT == 102:
-        return '(n,gamma)'
-    elif MT == 103:
-        return '(n,p)'
-    elif MT == 104:
-        return '(n,d)'
-    elif MT == 105:
-        return '(n,t)'
-    elif MT == 106:
-        return '(n,3He)'
-    elif MT == 107:
-        return '(n,a)'
-    elif MT == 108:
-        return '(n,2a)'
-    elif MT == 109:
-        return '(n,3a)'
-    elif MT == 111:
-        return '(n,2p)'
-    elif MT == 112:
-        return '(n,pa)'
-    elif MT == 113:
-        return '(n,t2a)'
-    elif MT == 114:
-        return '(n,d2a)'
-    elif MT == 115:
-        return '(n,pd)'
-    elif MT == 116:
-        return '(n,pt)'
-    elif MT == 117:
-        return '(n,da)'
-    elif MT == 201:
-        return '(n,Xn)'
-    elif MT == 202:
-        return '(n,Xgamma)'
-    elif MT == 203:
-        return '(n,Xp)'
-    elif MT == 204:
-        return '(n,Xd)'
-    elif MT == 205:
-        return '(n,Xt)'
-    elif MT == 206:
-        return '(n,X3He)'
-    elif MT == 207:
-        return '(n,Xa)'
-    elif MT == 444:
-        return '(damage)'
-    elif MT >= 600 and MT <= 648:
-        return '(n,p{0})'.format(MT-600)
-    elif MT == 649:
-        return '(n,pc)'
-    elif MT >= 650 and MT <= 698:
-        return '(n,d{0})'.format(MT-650)
-    elif MT == 699:
-        return '(n,dc)'
-    elif MT >= 700 and MT <= 748:
-        return '(n,t{0})'.format(MT-700)
-    elif MT == 749:
-        return '(n,tc)'
-    elif MT >= 750 and MT <= 798:
-        return '(n,3He{0})'.format(MT-750)
-    elif MT == 799:
-        return '(n,3Hec)'
-    elif MT >= 800 and MT <= 848:
-        return '(n,a{0})'.format(MT-800)
-    elif MT == 849:
-        return '(n,ac)'
+    1: '(n,total)',
+    2: '(n,elastic)',
+    3: '(n,nonelastic)',
+    4: '(n,inelastic)',
+    5: '(misc)',
+    10: '(n,continuum)',
+    11: '(n,2n d)',
+    16: '(n,2n)',
+    17: '(n,3n)',
+    18: '(n,fission)',
+    19: '(n,f)',
+    20: '(n,nf)',
+    21: '(n,2nf)',
+    22: '(n,na)',
+    23: '(n,n3a)',
+    24: '(n,2na)',
+    25: '(n,3na)',
+    28: '(n,np)',
+    29: '(n,n2a)',
+    30: '(n,2n2a)',
+    32: '(n,nd)',
+    33: '(n,nt)',
+    34: '(n,n He-3)',
+    35: '(n,nd3a)',
+    36: '(n,nt2a)',
+    37: '(n,4n)',
+    38: '(n,3nf)',
+    41: '(n,2np)',
+    42: '(n,3np)',
+    44: '(n,2np)',
+    45: '(n,npa)',
+    91: '(n,nc)',
+    102: '(n,gamma)',
+    103: '(n,p)',
+    104: '(n,d)',
+    105: '(n,t)',
+    106: '(n,3He)',
+    107: '(n,a)',
+    108: '(n,2a)',
+    109: '(n,3a)',
+    111: '(n,2p)',
+    112: '(n,pa)',
+    113: '(n,t2a)',
+    114: '(n,d2a)',
+    115: '(n,pd)',
+    116: '(n,pt)',
+    117: '(n,da)',
+    201: '(n,Xn)',
+    202: '(n,Xgamma)',
+    203: '(n,Xp)',
+    204: '(n,Xd)',
+    205: '(n,Xt)',
+    206: '(n,X3He)',
+    207: '(n,Xa)',
+    444: '(damage)',
+    649: '(n,pc)',
+    699: '(n,dc)',
+    749: '(n,tc)',
+    799: '(n,3Hec)',
+    849: '(n,ac)',
+    }
+"""Dictionary of MT reaction labels"""
+reaction_names.update({mt: '(n,n{0})'.format(mt - 50) for mt in range(50, 91)})
+reaction_names.update({mt: '(n,p{0})'.format(mt - 600) for mt in range(600, 649)})
+reaction_names.update({mt: '(n,d{0})'.format(mt - 650) for mt in range(650, 699)})
+reaction_names.update({mt: '(n,t{0})'.format(mt - 700) for mt in range(700, 649)})
+reaction_names.update({mt: '(n,3He{0})'.format(mt - 750) for mt in range(750, 799)})
+reaction_names.update({mt: '(n,a{0})'.format(mt - 800) for mt in range(700, 649)})
 
 
 if __name__ == '__main__':
