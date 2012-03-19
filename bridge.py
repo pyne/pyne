@@ -58,6 +58,8 @@ lib.dag_alloc_ray_history.argtypes = []
 lib.dag_dealloc_ray_history.restype = None
 lib.dag_dealloc_ray_history.argtypes = [ctypes.c_void_p]
 
+lib.dag_dealloc_ray_buffer.restype = None
+lib.dag_dealloc_ray_buffer.argtypes = [ctypes.c_void_p]
 
 @contextmanager
 def _ray_history():
@@ -71,6 +73,14 @@ lib.dag_ray_fire.argtypes = [EntityHandle, _vec3, _vec3,
                              ctypes.POINTER(ctypes.c_double),
                              ctypes.c_void_p, ctypes.c_double]
 
+_returns_moab_errors(lib.dag_ray_follow)
+lib.dag_ray_follow.argtypes = [EntityHandle, _vec3, _vec3, ctypes.c_double,
+                               ctypes.POINTER(ctypes.c_int),
+                               ctypes.POINTER(ctypes.POINTER(EntityHandle)), 
+                               ctypes.POINTER(ctypes.POINTER(ctypes.c_double)),
+                               ctypes.POINTER(ctypes.POINTER(EntityHandle)),
+                               ctypes.c_void_p]
+                               
 
 _returns_moab_errors(lib.dag_next_vol)
 lib.dag_next_vol.argtypes = [EntityHandle, EntityHandle,

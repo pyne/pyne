@@ -175,7 +175,7 @@ def fire_one_ray( vol_id, xyz, uvw ):
         return None
 
 
-def ray_iterator( init_vol_id, startpoint, direction, **kw ):
+def ray_iterator_slow( init_vol_id, startpoint, direction, **kw ):
     """Return an iterator for a ray in a single direction.
 
     The iterator will yield a series of tuples (vol,dist,surf), indicating the next
@@ -227,6 +227,33 @@ def ray_iterator( init_vol_id, startpoint, direction, **kw ):
             else: 
                 yield ( newvol, dist, newsurf )
 
+def ray_iterator( init_vol_id, startpoint, direction, **kw ):
+
+    eh = bridge.EntityHandle( vol_id_to_handle[ init_vol_id ] )
+    xyz = numpy.array( startpoint, dtype=numpy.float64 )
+    uvw = numpy.array( direction, dtype=numpy.float64 )
+
+    dist_limit = kw.get('dist_limit',0.0)
+
+    surfs = ctypes.POINTER( bridge.EntityHandle )()
+    vols = ctypes.POINTER( bridge.EntityHandle )()
+    dists = ctypes.POINTER( ctypes.c_double )()
+    buf = ctypes.c_void_p()
+    x = ctypes.c_int( 0 )
+
+    bridge.lib.dag_ray_follow( eh, xyz, uvw, dist_limit, 
+                               ctypes.byref(x), ctypes.byref(surfs), 
+                               ctypes.byref(dists), ctypes.byref(vols), buf )
+    for i in range(x.value):
+        vol_id = vol_handle_to_id[vols[i].value]
+        surf_id = surf_handle_to_id[surfs[i].value]
+        if kw.get( 'yield_xyz', False):
+            xyz += uvw * dists[i]
+            yield (vol_id, dists[i], surf_id, xyz)
+        else:
+            yield (vol_id, dists[i], surf_id)
+    
+    bridge.lib.dag_dealloc_ray_buffer(buf)
 
 def tell_ray_story( startpoint, direction, output=sys.stdout, **kw ):
     """Write a human-readable history of a ray in a given direction.

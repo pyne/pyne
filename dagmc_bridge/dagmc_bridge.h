@@ -43,6 +43,13 @@ ErrorCode dag_ray_fire( EntityHandle vol, vec3 ray_start, vec3 ray_dir,
                         EntityHandle* next_surf, double* next_surf_dist,
                         void* history, double distance_limit );
 
+ErrorCode dag_ray_follow( EntityHandle firstvol, vec3 ray_start, vec3 ray_dir,
+                          double distance_limit, int* num_intersections,
+                          EntityHandle** surfs, double** distances, EntityHandle** volumes,
+                          void* data_buffers );
+
+void dag_dealloc_ray_buffer( void* data_buffers );
+
 ErrorCode dag_pt_in_vol( EntityHandle vol, vec3 pt, int* result, vec3 dir, const void* history );
 
 

@@ -1,6 +1,9 @@
 #include "dagmc_bridge.h"
 
 #include <DagMC.hpp>
+#include <moab/CartVect.hpp>
+
+using moab::CartVect;
 
 #include <vector>
 
@@ -83,7 +86,8 @@ void dag_dealloc_ray_history( void* r ){
     delete ( static_cast<DagMC::RayHistory*>(r) );
 }
 
-ErrorCode dag_ray_fire( EntityHandle vol, vec3 ray_start, vec3 ray_dir, EntityHandle* next_surf_ent, double* next_surf_dist,
+ErrorCode dag_ray_fire( EntityHandle vol, vec3 ray_start, vec3 ray_dir, 
+                        EntityHandle* next_surf_ent, double* next_surf_dist,
                         void* history, double distance_limit ){
     ErrorCode err;
 
@@ -94,6 +98,68 @@ ErrorCode dag_ray_fire( EntityHandle vol, vec3 ray_start, vec3 ray_dir, EntityHa
     CHECKERR( err );
 
     return err;
+}
+
+class ray_buffers{
+
+    public:
+    DagMC::RayHistory history;
+    std::vector<EntityHandle> surfs;
+    std::vector<double> dists;
+    std::vector<EntityHandle> vols;
+
+};
+
+ErrorCode dag_ray_follow( EntityHandle firstvol, vec3 ray_start, vec3 ray_dir,
+                          double distance_limit, int* num_intersections,
+                          EntityHandle** surfs, double** distances, EntityHandle** volumes,
+                          void* data_buffers ){
+
+    ray_buffers* buf = new ray_buffers;
+    ErrorCode err;
+    DagMC* dag = DagMC::instance();
+
+    EntityHandle vol = firstvol;
+    double dlimit = distance_limit;
+    CartVect ray_point( ray_start );
+    EntityHandle next_surf;
+    double next_surf_dist;
+
+    CartVect uvw(ray_dir);
+
+    // iterate over the ray until no more intersections are available
+    while(vol){
+        err = dag->ray_fire( vol, ray_point.array(), ray_dir, 
+                             next_surf, next_surf_dist, &(buf->history), dlimit );
+        CHECKERR( err );
+
+        if( next_surf ){
+            ray_point += uvw * next_surf_dist;
+            buf->surfs.push_back( next_surf );
+            buf->dists.push_back( next_surf_dist );
+            err = dag->next_vol( next_surf, vol, vol );
+            CHECKERR(err);
+            buf->vols.push_back(vol);
+            if( dlimit != 0 ){
+                dlimit -= next_surf_dist;
+            }
+        }
+        else vol = 0;
+    }
+
+    // assign to the output variables
+    *num_intersections = buf->surfs.size();
+    *surfs = &(buf->surfs[0]);
+    *distances = &(buf->dists[0]);
+    *volumes = &(buf->vols[0]);
+    data_buffers = buf;
+
+    return err;
+}
+
+void dag_dealloc_ray_buffer( void* data_buffers ){
+    ray_buffers* b = static_cast<ray_buffers*>(data_buffers);
+    delete b;
 }
 
 ErrorCode dag_pt_in_vol( EntityHandle vol, vec3 pt, int* result, vec3 dir, const void* history){
