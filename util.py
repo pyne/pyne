@@ -1,6 +1,7 @@
 import numpy
 
 from dagmc import *
+from bridge import DagmcError
 
 def find_graveyard_inner_box():
     """Estimate the dimension of the inner wall of the graveyard, assuming box shape.
