@@ -30,7 +30,7 @@ class AceViewer(QMainWindow):
         # Initial data structures
         self.tables = []
 
-        self.populateTables()
+        self.populateReactions()
         
     def _CreateGui(self):
         # Set title of window
@@ -40,33 +40,22 @@ class AceViewer(QMainWindow):
         self.main = QWidget()
         self.setCentralWidget(self.main)
 
-        tableLabel = QLabel("ACE Table:")
-        self.tableCombo = QComboBox()
-        tableLayout = QHBoxLayout()
-        tableLayout.addWidget(tableLabel)
-        tableLayout.addWidget(self.tableCombo)
-
         # Create reaction list view
-        self.reactionList = QListWidget()
-        self.reactionList.setSelectionMode(QAbstractItemView.ExtendedSelection)
+        self.reactionTree = QTreeWidget()
+        self.reactionTree.setColumnCount(1)
+        self.reactionTree.setHeaderLabels(["Nuclides/Reactions"])
+        self.reactionTree.setMinimumWidth(200)
+        self.reactionTree.setSelectionMode(QAbstractItemView.ExtendedSelection)
 
         # Create canvas
-        self.fig = Figure(figsize=(400,400), dpi=72, facecolor=(1,1,1), edgecolor=(0,0,0))
+        self.fig = Figure(figsize=(400,200), dpi=72, facecolor=(1,1,1), edgecolor=(0,0,0))
         self.canvas = FigureCanvas(self.fig)
 
-        bottomLayout = QHBoxLayout()
-        bottomLayout.addWidget(self.reactionList)
-        bottomLayout.addWidget(self.canvas)
-
-        line = QFrame(self.main)
-        line.setFrameShape(QFrame.HLine)
-        line.setFrameShadow(QFrame.Sunken)
+        layout = QHBoxLayout()
+        layout.addWidget(self.reactionTree)
+        layout.addWidget(self.canvas)
 
         # Set layout
-        layout = QVBoxLayout()
-        layout.addLayout(tableLayout)
-        layout.addWidget(line)
-        layout.addLayout(bottomLayout)
         self.main.setLayout(layout)
 
         # Create menu bar
@@ -77,16 +66,18 @@ class AceViewer(QMainWindow):
         self.setMenuBar(self.menubar)
 
         # File menu
-        self.actionOpen = QAction("&Open ACE Library...", self)
+        self.actionOpen = QAction("&Open Library...", self)
+        self.actionOpenPartial = QAction("&Open Partial Library...", self)
         self.actionExit = QAction("E&xit", self)
-        self.menuFile.addActions([self.actionOpen, self.actionExit])
+        self.menuFile.addActions([self.actionOpen, self.actionOpenPartial,
+                                  self.actionExit])
 
         # Actions
         self.connect(self.actionOpen, SIGNAL("triggered()"), self.openLibrary)
+        self.connect(self.actionOpenPartial, SIGNAL("triggered()"),
+                     self.openPartialLibrary)
         self.connect(self.actionExit, SIGNAL("triggered()"), self.close)
-        self.connect(self.tableCombo, SIGNAL("currentIndexChanged(int)"),
-                     self.populateReactions)
-        self.connect(self.reactionList, SIGNAL("itemSelectionChanged()"),
+        self.connect(self.reactionTree, SIGNAL("itemSelectionChanged()"),
                      self.drawPlot)
 
     def openLibrary(self): 
@@ -111,40 +102,74 @@ class AceViewer(QMainWindow):
         self.tables.sort(key=lambda table: table.name)
 
         # Reset combo box
-        self.populateTables()
+        self.populateReactions()
 
-    def populateTables(self):
-        self.tableCombo.clear()
-        for table in self.tables:
-            self.tableCombo.addItem(table.name)
-        if self.tables:
-            self.tableCombo.setEnabled(True)
+    def openPartialLibrary(self):
+        """Select and open an ACE file and store data in memory."""
+
+        filename = QFileDialog.getOpenFileName(self, "Load ACE Library", "./",
+                                               "ACE Libraries (*)")
+
+        table_names, completed = QInputDialog.getText(
+            self, "Nuclides", "Enter nuclides:")
+        if completed:
+            table_names = str(table_names).split()
         else:
-            self.tableCombo.setDisabled(True)
+            return
+
+        try:
+            if filename:
+                # Parse ACE library
+                lib = ace.Library(filename)
+                lib.read(table_names)
+
+                # Append tables into self.tables object
+                for table in lib.tables.values():
+                    self.tables.append(table)
+        except:
+            pass
+
+        # Sort tables based on name
+        self.tables.sort(key=lambda table: table.name)
+
+        # Reset combo box
+        self.populateReactions()
 
     def populateReactions(self):
-        self.reactionList.clear()
+        self.reactionTree.clear()
 
-        table = self._currentTable()
-        if table:
+        for table in self.tables:
+            # Add top-level item
+            tableItem = QTreeWidgetItem(self.reactionTree, [table.name])
+            tableItem.setData(0, Qt.UserRole, table)
+
             for reaction in table:
-                self.reactionList.addItem(ace.reaction_names[reaction.MT])
+                # Add sub-item
+                try:
+                    reactionName = ace.reaction_names[reaction.MT]
+                except:
+                    reactionName = "MT = {0}".format(reaction.MT)
+                item = QTreeWidgetItem(tableItem, [reactionName])
+                item.setData(0, Qt.UserRole, reaction)
 
         self.drawPlot()
-            
 
     def drawPlot(self):
         self.fig.clear()
 
-        items = self.reactionList.selectedItems()
+        items = self.reactionTree.selectedItems()
 
-        if items: 
+        if len(items) > 0:
             self.axes = self.fig.add_subplot(111)
-            table = self._currentTable()
 
-            for item in self.reactionList.selectedItems():
-                index = self.reactionList.row(item)
-                reaction = table.reactions[index]
+            for item in items:
+                reaction = item.data(0, Qt.UserRole).toPyObject()
+
+                if not isinstance(reaction, ace.Reaction):
+                    continue
+
+                # Get table
+                table = reaction.table
                 
                 if reaction.MT == 1:
                     self.axes.loglog(table.energy, reaction.sigma)
@@ -152,22 +177,11 @@ class AceViewer(QMainWindow):
                     self.axes.loglog(table.energy, reaction.sigma)
                 else:
                     self.axes.loglog(table.energy[reaction.IE-1:], reaction.sigma)
-                self.axes.grid(True)
-
-        self.canvas.draw()
-
-    def _currentTable(self):
-        indexTable = self.tableCombo.currentIndex()
-        return self.tables[indexTable]
-
-    def _currentReaction(self):
-        indexReaction = self.reactionList.currentRow()
-        print(indexReaction)
-        if indexReaction >= 0:
-            return self._currentTable().reactions[indexReaction]
-        else:
-            return None
-
+                
+            self.axes.grid(True)
+            self.axes.set_xlabel('Energy (MeV)')
+            self.axes.set_ylabel('Cross section (barns)')
+            self.canvas.draw()
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
