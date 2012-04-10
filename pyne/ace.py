@@ -20,6 +20,8 @@ generates ACE-format cross sections.
 .. moduleauthor:: Paul Romano <romano7@gmail.com>
 """
 
+import struct
+
 import numpy as np
 from numpy import zeros, copy, meshgrid, interp, linspace, pi, arccos, concatenate
 from bisect import bisect_right
@@ -74,17 +76,82 @@ class Library(object):
         if table_names is not None:
             table_names = set(table_names)
 
-        table_types = {
-            "c": NeutronTable,
-            "t": SabTable,
-            "y": DosimetryTable,
-            "d": NeutronDiscreteTable,
-            "p": PhotoatomicTable,
-            "m": NeutronMGTable,
-            "g": PhotoatomicMGTable,
-            "e": ElectronTable,
-            "u": PhotonuclearTable,
-            }
+        if self.binary:
+            self._read_binary(table_names)
+        else:
+            self._read_ascii(table_names)
+
+    def _read_binary(self, table_names, recl_length=4096, entries=512):
+
+        while True:
+            start_position = self.f.tell()
+
+            # Check for end-of-file
+            if self.f.read(1) == '':
+                return
+            self.f.seek(start_position)
+
+            # Read name, atomic weight ratio, temperature, date, comment, and
+            # material
+            name, awr, temp, date, comment, mat = \
+                struct.unpack('=10sdd10s70s10s', self.f.read(116))
+            name = name.strip()
+
+            # Read ZAID/awr combinations
+            data = struct.unpack('=' + 16*'id', self.f.read(192))
+
+            # Read NXS
+            NXS = list(struct.unpack('=16i', self.f.read(64)))
+
+            # Determine length of XSS and number of records
+            length = NXS[0]
+            n_records = (length + entries - 1)/entries
+
+            # verify that we are suppossed to read this table in
+            if (table_names is not None) and (name not in table_names):
+                self.f.seek(start_position + recl_length*(n_records + 1))
+                continue
+
+            # ensure we have a valid table type
+            if 0 == len(name) or name[-1] not in table_types:
+                # TODO: Make this a proper exception.
+                print("Unsupported table: " + name)
+                self.f.seek(start_position + recl_length*(n_records + 1))
+                continue
+
+            # get the table
+            table = table_types[name[-1]](name, awr, temp)
+
+            temp_in_K = round(temp * 1e6 / 8.617342e-5)
+            if self.verbose:
+                print("Loading nuclide {0} at {1} K ({2})".format(
+                        nucname.serpent(name.partition('.')[0]), temp_in_K, name))
+            self.tables[name] = table
+
+            # Set NXS and read JXS
+            table.NXS = NXS
+            table.JXS = list(struct.unpack('=32i', self.f.read(128)))
+
+            # Read XSS
+            self.f.seek(start_position + recl_length)
+            table.XSS = list(struct.unpack('={0}d'.format(length),
+                                           self.f.read(length*8)))
+
+            # Insert empty object at beginning of NXS, JXS, and XSS
+            # arrays so that the indexing will be the same as
+            # Fortran. This makes it easier to follow the ACE format
+            # specification.
+            table.NXS.insert(0, None)
+            table.JXS.insert(0, None)
+            table.XSS.insert(0, None)
+
+            # Read all data blocks
+            table._read_all()
+
+            # Advance to next record
+            self.f.seek(start_position + recl_length*(n_records + 1))
+
+    def _read_ascii(self, table_names):
 
         lines = self.f.readlines()
         
@@ -103,7 +170,7 @@ class Library(object):
             nxs = [int(i) for i in ''.join(lines[6:8]).split()]
             n_lines = (nxs[0] + 3)/4
 
-            # varify that we are suppossed to read this table in
+            # verify that we are suppossed to read this table in
             if (table_names is not None) and (name not in table_names):
                 lines = lines[12+n_lines:]
                 continue
@@ -1258,6 +1325,17 @@ class PhotonuclearTable(AceTable):
             return "<ACE Photonuclear Table: {0}>".format(self.name)
         else:
             return "<ACE Photonuclear Table>"
+
+table_types = {
+    "c": NeutronTable,
+    "t": SabTable,
+    "y": DosimetryTable,
+    "d": NeutronDiscreteTable,
+    "p": PhotoatomicTable,
+    "m": NeutronMGTable,
+    "g": PhotoatomicMGTable,
+    "e": ElectronTable,
+    "u": PhotonuclearTable}
 
 reaction_names = {
     # TODO: This should be provided as part of the ENDF module functionality
