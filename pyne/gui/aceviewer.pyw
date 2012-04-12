@@ -153,6 +153,9 @@ class AceViewer(QMainWindow):
             tableItem = QTreeWidgetItem(self.reactionTree, [table.name])
             tableItem.setData(0, Qt.UserRole, table)
 
+            # Add item for total reaction
+            item = QTreeWidgetItem(tableItem, ["(n,total)"])
+
             for reaction in table:
                 # Add sub-item
                 try:
@@ -165,32 +168,46 @@ class AceViewer(QMainWindow):
         self.draw_plot()
 
     def draw_plot(self):
+        # Clears the current figure
         self.fig.clear()
 
+        # Get all selected reactions
         items = self.reactionTree.selectedItems()
 
         if len(items) > 0:
+            # Create instance of Axes on the Figure
             self.axes = self.fig.add_subplot(111)
 
             for item in items:
+                # Get Reaction object stored in QTreeWidgetItem
                 reaction = item.data(0, Qt.UserRole).toPyObject()
 
+                # Handle total reaction separately
+                if item.text(0) == "(n,total)":
+                    # Get NeutronTable object
+                    table = item.parent().data(0, Qt.UserRole).toPyObject()
+
+                    # Plot total cross section
+                    self.axes.loglog(table.energy, table.sigma_t)
+                    continue
+
+                # Make sure that the data stored in QTreeWidgetItem is actually
+                # a Reaction instance
                 if not isinstance(reaction, ace.Reaction):
                     continue
 
-                # Get table
+                # Get reference to NeutronTable containing Reaction
                 table = reaction.table
                 
-                if reaction.MT == 1:
-                    self.axes.loglog(table.energy, reaction.sigma)
-                elif reaction.MT == 27:
-                    self.axes.loglog(table.energy, reaction.sigma)
-                else:
-                    self.axes.loglog(table.energy[reaction.IE-1:], reaction.sigma)
-                
+                # Plot reaction cross section
+                self.axes.loglog(table.energy[reaction.IE-1:], reaction.sigma)
+            
+            # Customize plot
             self.axes.grid(True)
             self.axes.set_xlabel('Energy (MeV)')
             self.axes.set_ylabel('Cross section (barns)')
+
+            # Display plot on FigureCanvas
             self.canvas.draw()
 
 if __name__ == '__main__':
