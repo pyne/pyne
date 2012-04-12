@@ -11,9 +11,11 @@ import sys
 import matplotlib
 matplotlib.use('Qt4Agg')
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as NavigationToolbar
 from matplotlib.figure import Figure
 
-# For the time being we're using 
+# For the time being we're using PyQt4 since matplotlib-support for PySide is
+# very recent
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 
@@ -25,14 +27,14 @@ class AceViewer(QMainWindow):
         super(AceViewer, self).__init__(parent)
 
         # Create GUI elements
-        self._CreateGui()
+        self._create_gui()
         
         # Initial data structures
         self.tables = []
 
-        self.populateReactions()
+        self.populate_reactions()
         
-    def _CreateGui(self):
+    def _create_gui(self):
         # Set title of window
         self.setWindowTitle("ACE Data Viewer")
 
@@ -51,9 +53,17 @@ class AceViewer(QMainWindow):
         self.fig = Figure(figsize=(400,200), dpi=72, facecolor=(1,1,1), edgecolor=(0,0,0))
         self.canvas = FigureCanvas(self.fig)
 
+        # Create toolbar
+        self.mplToolbar = NavigationToolbar(self.canvas, self.main)
+
+        # Create layout for canvas and toolbar
+        drawLayout = QVBoxLayout()
+        drawLayout.addWidget(self.canvas)
+        drawLayout.addWidget(self.mplToolbar)
+
         layout = QHBoxLayout()
         layout.addWidget(self.reactionTree)
-        layout.addWidget(self.canvas)
+        layout.addLayout(drawLayout)
 
         # Set layout
         self.main.setLayout(layout)
@@ -73,14 +83,14 @@ class AceViewer(QMainWindow):
                                   self.actionExit])
 
         # Actions
-        self.connect(self.actionOpen, SIGNAL("triggered()"), self.openLibrary)
+        self.connect(self.actionOpen, SIGNAL("triggered()"), self.open_library)
         self.connect(self.actionOpenPartial, SIGNAL("triggered()"),
-                     self.openPartialLibrary)
+                     self.open_partial_library)
         self.connect(self.actionExit, SIGNAL("triggered()"), self.close)
         self.connect(self.reactionTree, SIGNAL("itemSelectionChanged()"),
-                     self.drawPlot)
+                     self.draw_plot)
 
-    def openLibrary(self): 
+    def open_library(self): 
         """Select and open an ACE file and store data in memory."""
 
         filename = QFileDialog.getOpenFileName(self, "Load ACE Library", "./",
@@ -102,9 +112,9 @@ class AceViewer(QMainWindow):
         self.tables.sort(key=lambda table: table.name)
 
         # Reset combo box
-        self.populateReactions()
+        self.populate_reactions()
 
-    def openPartialLibrary(self):
+    def open_partial_library(self):
         """Select and open an ACE file and store data in memory."""
 
         filename = QFileDialog.getOpenFileName(self, "Load ACE Library", "./",
@@ -133,9 +143,9 @@ class AceViewer(QMainWindow):
         self.tables.sort(key=lambda table: table.name)
 
         # Reset combo box
-        self.populateReactions()
+        self.populate_reactions()
 
-    def populateReactions(self):
+    def populate_reactions(self):
         self.reactionTree.clear()
 
         for table in self.tables:
@@ -152,9 +162,9 @@ class AceViewer(QMainWindow):
                 item = QTreeWidgetItem(tableItem, [reactionName])
                 item.setData(0, Qt.UserRole, reaction)
 
-        self.drawPlot()
+        self.draw_plot()
 
-    def drawPlot(self):
+    def draw_plot(self):
         self.fig.clear()
 
         items = self.reactionTree.selectedItems()
