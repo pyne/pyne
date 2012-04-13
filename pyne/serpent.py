@@ -222,12 +222,13 @@ def parse_dep(depfile, write_py=False, make_mats=True):
     # Add materials
     footer = ""
     if make_mats:
-        mat_gen_line = "{name}MATERIAL = [{name}VOLUME * Material(dict(zip(ZAI[:-2], {name}MDENS[:-2, col]))) for col in range(len(DAYS))]\n"
-        footer += "\n\n# Construct materials\n"
+        mat_gen_line = "{name}MATERIAL = [{name}VOLUME * Material(dict(zip(zai[:-2], {name}MDENS[:-2, col]))) for col in cols]\n"
+        footer += "\n\n# Construct materials\nzai = map(int, ZAI)\ncols = range(len(DAYS))\n"
         base_names = re.findall('(MAT_\w*_)MDENS = ', f)
         for base_name in base_names:
             footer += mat_gen_line.format(name=base_name)
-        footer += "TOT_MATERIAL = [Material(dict(zip(ZAI[:-2], TOT_MASS[:-2, col]))) for col in range(len(DAYS))]\n"
+        footer += "TOT_MATERIAL = [Material(dict(zip(zai[:-2], TOT_MASS[:-2, col]))) for col in cols]\n"
+        footer += "del zai, cols\n"
 
     # Add header & footer to file
     f = header + f + footer
