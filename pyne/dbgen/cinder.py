@@ -11,17 +11,20 @@ from pyne import nucname
 from pyne.utils import to_barns
 
 
-def grab_cinder_dat(build_dir=""):
+def grab_cinder_dat(build_dir="", datapath=''):
     """Grabs the cinder.dat file from the DATAPATH directory if not already present."""
     build_filename = os.path.join(build_dir, 'cinder.dat')
     if os.path.exists(build_filename):
         return 
-
-    if 'DATAPATH' in os.environ:
+    
+    if isinstance(datapath, basestring) and 0 < len(datapath):
+        pass
+    elif 'DATAPATH' in os.environ:
         datapath = os.environ['DATAPATH']
-        print "Grabing cinder.dat from " + datapath
     else:
         raise OSError("DATAPATH not defined in environment; cinder.dat not found.")
+
+    print "Grabing cinder.dat from " + datapath
 
     local_filename = os.path.join(datapath, "[Cc][Ii][Nn][Dd][Ee][Rr].[Dd][Aa][Tt]")
     local_filename = glob(local_filename)
@@ -799,14 +802,16 @@ def make_photon_fp_yields(nuc_data, build_dir):
     db.close()
 
 
-def make_cinder(nuc_data, build_dir):
+def make_cinder(args):
     """Controller function for adding cinder data."""
+    nuc_data, build_dir, datapath = args.nuc_data, args.build_dir, args.datapath
+
     with tb.openFile(nuc_data, 'a') as f:
         if hasattr(f.root, 'neutron') and hasattr(f.root.neutron, 'cinder_xs') and hasattr(f.root.neutron, 'cinder_fission_products'):
             return
 
     # First grab the atomic abundance data
-    grab_cinder_dat(build_dir)
+    grab_cinder_dat(build_dir, datapath)
 
     # Add energy groups to file
     print "Adding cinder data..."
