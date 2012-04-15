@@ -61,6 +61,8 @@ def main():
                         help='path to the output database file.')
     parser.add_argument('-b', dest='build_dir', action='store', default=build_dir,
                         help='path to the build directory.')
+    parser.add_argument('--datapath', dest='datapath', action='store', default="",
+                        help='MCNP DATAPATH.')
     parser.add_argument('-m', dest='make', action='store', default='all',
                         help='comma-separated parts of nuc_data to make: ' + \
                         ", ".join([mf[0] for mf in make_funcs]) + ', all, and none.')
@@ -90,14 +92,14 @@ def main():
         make_order = []
     elif args.make == 'all':
         make_order = [mf[0] for mf in make_funcs]
-    else:
+    else:   
         make_order = args.make.replace(' ', "").split(',')
 
     print "Making nuc_data at {0}".format(args.nuc_data)
 
     # Make the various tables
     for mo in make_order:
-        make_map[mo](args.nuc_data, args.build_dir)
+        make_map[mo](args)
 
 
 if __name__ == '__main__':
