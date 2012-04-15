@@ -136,8 +136,10 @@ def make_scattering_lengths_table(nuc_data, build_dir=""):
 
 
 
-def make_scattering_lengths(nuc_data, build_dir):
+def make_scattering_lengths(args):
     """Controller function for adding scattering lengths."""
+    nuc_data, build_dir = args.nuc_data, args.build_dir
+
     # Check that the table exists
     with tb.openFile(nuc_data, 'a') as f:
         if hasattr(f.root, 'neutron') and hasattr(f.root.neutron, 'scattering_lengths'):
