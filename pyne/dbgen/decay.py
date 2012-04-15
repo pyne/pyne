@@ -109,8 +109,10 @@ def make_atomic_decay_table(nuc_data, build_dir=""):
 
 
 
-def make_decay(nuc_data, build_dir):
+def make_decay(args):
     """Controller function for adding decay data."""
+    nuc_data, build_dir = args.nuc_data, args.build_dir
+
     with tb.openFile(nuc_data, 'r') as f:
         if hasattr(f.root, 'atomic_decay'):
             return 

@@ -228,8 +228,10 @@ def make_simple_xs_tables(nuc_data, build_dir=""):
 
 
 
-def make_simple_xs(nuc_data, build_dir):
+def make_simple_xs(args):
     """Controller function for adding basic cross section data."""
+    nuc_data, build_dir = args.nuc_data, args.build_dir
+
     with tb.openFile(nuc_data, 'a') as f:
         if hasattr(f.root, 'neutron') and hasattr(f.root.neutron, 'simple_xs'):
             return 
