@@ -130,6 +130,7 @@ html_theme_options = {'sidebarbgcolor': '#F1FFF0',
                       'codebgcolor': '#F1FFF0',
                       'codetextcolor': '#000000', 
                       'quotebgcolor': '#f6fcfc',
+                      #'min_height': 'bottom',
                       }
 
 # Add any paths that contain custom themes here, relative to this directory.
