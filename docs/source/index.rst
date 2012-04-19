@@ -9,7 +9,7 @@ bindings and I/O support for other industry standard nuclear codes.
 PyNE development is a continuing effort and we are always looking for
 more developers, testers, and users.  If you are interested in being
 involved with this project, please contact us via pyne-dev@googlegroups.com, 
-`github`_, or `convore`_.
+or `github`_.
 
 PyNE has the following dependencies:
 
@@ -48,5 +48,3 @@ Helpful Links
 .. _GitHub project site: https://github.com/pyne
 
 .. _github: https://github.com/pyne/pyne
-
-.. _convore: https://convore.com/pyne/
