@@ -290,7 +290,7 @@ class NeutronTable(AceTable):
         # Read LDLWP block
         # Read DLWP block
         # Read YP block
-        # self._read_yp()
+        self._read_yp()
         self._read_fis()
         self._read_unr()
 
@@ -996,7 +996,8 @@ class NeutronTable(AceTable):
         if self.NXS[6] != 0:
             self.index = self.JXS[20]
             NYP = self._get_int()
-            self.MT_for_photon_yield = self._get_int(NYP)
+            if NYP > 0:
+                self.MT_for_photon_yield = self._get_int(NYP)
 
     def _read_fis(self):
         """Read total fission cross-section data if present. Generally,
