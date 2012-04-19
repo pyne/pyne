@@ -1,6 +1,6 @@
-================================
-Welcome to PyNE's documentation!
-================================
+=====================================
+PyNE: Python for Nuclear Engineering
+=====================================
 PyNE, or Python for Nuclear Engineering, is a suite of tools to aid in 
 computational nuclear science & engineering.  PyNE seeks to provide 
 native implementations of common nuclear algorithms, as well as Python
@@ -15,6 +15,7 @@ PyNE has the following dependencies:
 
    #. `NumPy <http://numpy.scipy.org/>`_
    #. `SciPy <http://www.scipy.org/>`_
+   #. `Cython <http://cython.org/>`_
    #. `HDF5 <http://www.hdfgroup.org/HDF5/>`_
    #. `PyTables <http://www.pytables.org/>`_
 
