@@ -25,10 +25,10 @@ body
     #background-color: {{ theme_footerbgcolor }};
     #background:{{ theme_footerbgcolor }} url('sun.png') no-repeat right top fixed;
     background-color: {{ theme_footerbgcolor }};
-    background-image:url('sun.png'),  url('cld.png'), url('grass.png'), url('pyne_icon_small.png'), url('cld1.png'), url('cld1.png');
-    background-repeat: no-repeat, no-repeat, repeat-x, no-repeat, no-repeat, no-repeat;
-    background-position: top right, 2% 40%, left bottom, -1% bottom, 9% 12%, 4% 80%;
-    background-attachment: fixed, fixed, scroll, scroll, fixed, fixed;
+    background-image:url('sun.png'),  url('cld.png'), url('grass.png'), url('mount.png'), url('pyne_icon_small.png'), url('cld1.png'), url('cld1.png'), url('cld.png'), url('cld1.png');
+    background-repeat: no-repeat, no-repeat, repeat-x, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat;
+    background-position: top right, 2% 40%, left bottom, 100.5% bottom, -1% bottom, 9% 12%, 4% 80%, 93% 450px, 99% 25%;
+    background-attachment: fixed, fixed, scroll, scroll, scroll, fixed, fixed, scroll, fixed;
 }
 
 /*****************************************************
