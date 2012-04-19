@@ -37,10 +37,10 @@ Contents
     cppapi
     dev_team
 
-=============
-Helpful Links
-=============
-	
+------------
+Search Links
+------------
+
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
