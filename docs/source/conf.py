@@ -131,6 +131,7 @@ html_theme_options = {'sidebarbgcolor': '#F1FFF0',
                       'codetextcolor': '#000000', 
                       'quotebgcolor': '#f6fcfc',
                       #'rubricbgcolor': '#D17519',
+                      #'rubricbgcolor': '#69A74E',
                       'rubricbgcolor': '#996600',
                       #'min_height': 'bottom',
                       }
