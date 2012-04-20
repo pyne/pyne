@@ -23,7 +23,6 @@ np.seterr(divide='ignore')
 
 def test_atom_weight_channel1():
     E_n = xs_cache['E_n']
-    #phi_n = np.ones(len(E_n) - 1)
     xs_cache['E_g'] = np.array([3, 2, 1.0])
 
     chanfunc = lambda nuc: np.array([1.0, nuc], float)
@@ -46,6 +45,27 @@ def test_atom_weight_channel1():
     exp = np.array([1.0, 33393.333333333336])
     assert_array_almost_equal(obs, exp)
 
+
+def test_atom_weight_channel2():
+    E_n = xs_cache['E_n']
+    xs_cache['phi_n'] = np.ones(len(E_n) - 1)
+    xs_cache['E_g'] = np.logspace(-6, 1, 10)[::-1]
+    exp = (sigma_t('H1') * 2.0 + sigma_t('O16')) / 3.0
+
+    # Test dict
+    nucspec = {'H1': 2.0, 'O16': 1.0}
+    obs = _atom_weight_channel(sigma_t, nucspec)
+    assert_array_almost_equal(obs, exp)
+
+    # Test list of tuples
+    nucspec = [('H1', 2.0), ('O16', 1.0)]
+    obs = _atom_weight_channel(sigma_t, nucspec)
+    assert_array_equal(obs, exp)
+
+    # test material
+    h2o = Material({10010: 0.11191487328808077, 80160: 0.8880851267119192})
+    obs = _atom_weight_channel(sigma_t, h2o)
+    assert_array_almost_equal(obs, exp)
 
 
 #
