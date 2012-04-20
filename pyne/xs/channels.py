@@ -1,3 +1,5 @@
+import collections
+
 import numpy as np
 import scipy.integrate
 import tables as tb
@@ -8,6 +10,7 @@ from pyne import nucname
 from pyne.xs.cache import xs_cache
 from pyne.xs.models import group_collapse
 from pyne.pyne_config import pyne_conf
+from pyne.material import Material
 
 # Hide warnings from numpy
 np.seterr(divide='ignore')
@@ -26,6 +29,31 @@ def _prep_cache(E_g=None, E_n=None, phi_n=None):
         xs_cache['phi_n'] = phi_n
 
 
+def _atom_weight_channel(chanfunc, nucspec, *args, **kwargs):
+    """Convolves a channel for several nuclides based on atomic weights."""
+    # convert to atom weights
+    if isinstance(nucspec, Material):
+        aws = nucspec.to_atom_frac()
+    elif isinstance(nucspec, collections.Mapping):
+        aws = nucspec
+    elif isinstance(nucspec, collections.Sequence):
+        aws = dict(nucspec)
+
+    # tally the channels as we go
+    weight_total = 0.0
+    chan = np.zeros(len(xs_cache['E_g']) - 1, float)
+    for nuc, weight in aws.items():
+        weight_total += weight
+        nuc_chan = chanfunc(nuc, *args, **kwargs)
+        chan += weight * nuc_chan
+
+    # re-normalize
+    if weight_total != 1.0:
+        chan = chan / weight_total
+
+    return chan
+
+
 def sigma_f(nuc, E_g=None, E_n=None, phi_n=None):
     """Calculates the neutron fission cross-section for a nuclide for a new, 
     lower resolution group structure using a higher fidelity flux.  Note that 
@@ -35,8 +63,9 @@ def sigma_f(nuc, E_g=None, E_n=None, phi_n=None):
 
     Parameters
     ----------
-    nuc 
-        A nuclide name for which to calculate the fission cross-section.
+    nuc : int, str, Material, or dict-like 
+        A nuclide or nuclide-atom fraction mapping for which to calculate the 
+        fission cross-section.
     E_g : array-like of floats, optional
         New, lower fidelity energy group structure [MeV] that is of length G+1. 
     E_n : array-like of floats, optional
@@ -56,6 +85,9 @@ def sigma_f(nuc, E_g=None, E_n=None, phi_n=None):
 
     """
     _prep_cache(E_g, E_n, phi_n)
+
+    if isinstance(nuc, collections.Iterable) and not isinstance(nuc, basestring):
+        return _atom_weight_channel(sigma_f, nuc)
 
     # Get the fission XS
     nuc_zz = nucname.zzaaam(nuc)
@@ -85,8 +117,9 @@ def sigma_s_gh(nuc, T, E_g=None, E_n=None, phi_n=None):
 
     Parameters
     ----------
-    nuc 
-        A nuclide name for which to calculate the scattering kernel.
+    nuc : int, str, Material, or dict-like 
+        A nuclide or nuclide-atom fraction mapping for which to calculate the 
+        scattering kernel.
     T : float
         Tempurature of the target material [kelvin].
     E_g : array-like of floats, optional
@@ -117,6 +150,9 @@ def sigma_s_gh(nuc, T, E_g=None, E_n=None, phi_n=None):
 
     """
     _prep_cache(E_g, E_n, phi_n)
+
+    if isinstance(nuc, collections.Iterable) and not isinstance(nuc, basestring):
+        return _atom_weight_channel(sigma_s_gh, nuc, T)
 
     nuc_zz = nucname.zzaaam(nuc)
     key = ('sigma_s_gh', nuc_zz, T)
@@ -172,8 +208,9 @@ def sigma_s(nuc, T, E_g=None, E_n=None, phi_n=None):
 
     Parameters
     ----------
-    nuc 
-        A nuclide name for which to calculate the scattering cross section.
+    nuc : int, str, Material, or dict-like 
+        A nuclide or nuclide-atom fraction mapping for which to calculate the 
+        scattering cross section.
     T : float
         Tempurature of the target material [kelvin].
     E_g : array-like of floats, optional
@@ -191,6 +228,9 @@ def sigma_s(nuc, T, E_g=None, E_n=None, phi_n=None):
 
     """
     _prep_cache(E_g, E_n, phi_n)
+
+    if isinstance(nuc, collections.Iterable) and not isinstance(nuc, basestring):
+        return _atom_weight_channel(sigma_s, nuc, T)
 
     nuc_zz = nucname.zzaaam(nuc)
     key_g = ('sigma_s_g', nuc_zz, T)
@@ -220,8 +260,9 @@ def sigma_a_reaction(nuc, rx, E_g=None, E_n=None, phi_n=None):
 
     Parameters
     ----------
-    nuc 
-        A nuclide name for which to calculate the absorption reaction cross-section.
+    nuc : int, str, Material, or dict-like 
+        A nuclide or nuclide-atom fraction mapping for which to calculate the 
+        absorption reaction cross-section.
     rx : str
         Reaction key. ('gamma', 'alpha', 'p', etc.)
     E_g : array-like of floats, optional
@@ -247,6 +288,9 @@ def sigma_a_reaction(nuc, rx, E_g=None, E_n=None, phi_n=None):
     pyne.xs.cache.ABSORPTION_RX_MAP 
     """
     _prep_cache(E_g, E_n, phi_n)
+
+    if isinstance(nuc, collections.Iterable) and not isinstance(nuc, basestring):
+        return _atom_weight_channel(sigma_a_reaction, nuc, rx)
 
     # Get the absorption XS
     nuc_zz = nucname.zzaaam(nuc)
@@ -280,8 +324,9 @@ def metastable_ratio(nuc, rx, E_g=None, E_n=None, phi_n=None):
 
     Parameters
     ----------
-    nuc 
-        A nuclide name for which to calculate the metastable.
+    nuc : int, str, Material, or dict-like 
+        A nuclide or nuclide-atom fraction mapping for which to calculate the 
+        metastable ratio.
     rx : str
         Reaction key. ('gamma', 'alpha', 'p', etc.)
     E_g : array-like of floats, optional
@@ -327,8 +372,9 @@ def sigma_a(nuc, E_g=None, E_n=None, phi_n=None):
 
     Parameters
     ----------
-    nuc 
-        A nuclide name for which to calculate the absorption cross section.
+    nuc : int, str, Material, or dict-like 
+        A nuclide or nuclide-atom fraction mapping for which to calculate the 
+        absorption cross section.
     E_g : array-like of floats, optional
         New, lower fidelity energy group structure [MeV] that is of length G+1. 
     E_n : array-like of floats, optional
@@ -348,6 +394,9 @@ def sigma_a(nuc, E_g=None, E_n=None, phi_n=None):
 
     """
     _prep_cache(E_g, E_n, phi_n)
+
+    if isinstance(nuc, collections.Iterable) and not isinstance(nuc, basestring):
+        return _atom_weight_channel(sigma_a, nuc)
 
     # Get the absorption XS
     nuc_zz = nucname.zzaaam(nuc)
@@ -377,8 +426,9 @@ def chi(nuc, E_g=None, E_n=None, phi_n=None, eres=101):
 
     Parameters
     ----------
-    nuc 
-        A nuclide name for which to calculate the neutron fission energy spectrum.
+    nuc : int, str, Material, or dict-like 
+        A nuclide or nuclide-atom fraction mapping for which to calculate the 
+        neutron fission energy spectrum.
     E_g : array-like of floats, optional
         New, lower fidelity energy group structure [MeV] that is of length G+1. 
     E_n : array-like of floats, optional
@@ -399,6 +449,9 @@ def chi(nuc, E_g=None, E_n=None, phi_n=None, eres=101):
     pyne.xs.models.chi : used under the covers by this function.
     """
     _prep_cache(E_g, E_n, phi_n)
+
+    if isinstance(nuc, collections.Iterable) and not isinstance(nuc, basestring):
+        return _atom_weight_channel(chi, nuc)
 
     # Get the fission XS
     nuc_zz = nucname.zzaaam(nuc)
@@ -450,8 +503,9 @@ def sigma_t(nuc, T=300.0, E_g=None, E_n=None, phi_n=None):
 
     Parameters
     ----------
-    nuc 
-        A nuclide name for which to calculate the total cross section.
+    nuc : int, str, Material, or dict-like 
+        A nuclide or nuclide-atom fraction mapping for which to calculate the 
+        total cross section.
     T : float, optional
         Tempurature of the target material [kelvin].
     E_g : array-like of floats, optional
@@ -469,6 +523,9 @@ def sigma_t(nuc, T=300.0, E_g=None, E_n=None, phi_n=None):
 
     """
     _prep_cache(E_g, E_n, phi_n)
+
+    if isinstance(nuc, collections.Iterable) and not isinstance(nuc, basestring):
+        return _atom_weight_channel(sigma_t, nuc, T)
 
     # Get the total XS
     nuc_zz = nucname.zzaaam(nuc)
