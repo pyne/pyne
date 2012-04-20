@@ -276,6 +276,10 @@ int pyne::nucname::zzaaam(int nuc)
     {
       // Nuclide in normal MCNP form
       newnuc = nuc * 10;
+
+      // special case MCNP Am-242m
+      if (newnuc == 952420)
+        newnuc += 1;
     }
     else
     {
@@ -285,6 +289,10 @@ int pyne::nucname::zzaaam(int nuc)
       {
         newnuc -= 999;
       };
+
+      // special case MCNP Am-242
+      if (newnuc == 952421)
+        newnuc -= 1;
     }
     return newnuc;
   }
@@ -462,8 +470,14 @@ int pyne::nucname::mcnp(int nuc)
 
   newnuc = newnuc/10;
 
+  // special case Am242(m)
+  if (newnuc == 95242 && mod_10 < 2)
+  {
+    mod_10 = (mod_10 + 1) % 2;
+  }
+
   // Handle the crazy MCNP meta-stable format
-  if (0 != mod_10)
+  if (0 != mod_10) 
   {
     newnuc += 300;
     newnuc += (mod_10 * 100);
