@@ -177,7 +177,7 @@ def name(nuc):
 
 
 def mcnp(nuc):
-    """Converts a nuclide to its MCNP form (95642). 
+    """Converts a nuclide to its MCNP form (92636). 
 
     Parameters
     ----------
@@ -188,6 +188,14 @@ def mcnp(nuc):
     -------
     newnuc : int 
         Output nuclide in MCNP form.
+
+    Notes
+    -----
+    Most metastables in this form add 300 + 100*m where 
+    m is the isomeric state (U-236m = 92636).  However,
+    MCNP special cases Am-242 and Am-242m by switching 
+    the meaning. Thus Am-242m = 95242 and Am-242 = 95642.
+
     """
 
     if isinstance(nuc, basestring):

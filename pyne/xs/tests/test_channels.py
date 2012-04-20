@@ -11,8 +11,40 @@ import pyne.data
 import pyne.xs.models
 from pyne.xs.cache import xs_cache
 from pyne.xs.channels import sigma_f, sigma_s_gh, sigma_s, sigma_a_reaction, \
-    metastable_ratio, sigma_a, chi, sigma_t
+    metastable_ratio, sigma_a, chi, sigma_t, _atom_weight_channel
 from pyne.pyne_config import pyne_conf
+from pyne.material import Material
+
+np.seterr(divide='ignore')
+
+#
+# Test helper functions
+#
+
+def test_atom_weight_channel1():
+    E_n = xs_cache['E_n']
+    #phi_n = np.ones(len(E_n) - 1)
+    xs_cache['E_g'] = np.array([3, 2, 1.0])
+
+    chanfunc = lambda nuc: np.array([1.0, nuc], float)
+
+    # Test dict
+    nucspec = {1: 1, 10: 2}
+    obs = _atom_weight_channel(chanfunc, nucspec)
+    exp = np.array([1.0, 7.0])
+    assert_array_equal(obs, exp)
+
+    # Test list of tuples
+    nucspec = [(1, 1), (10, 2)]
+    obs = _atom_weight_channel(chanfunc, nucspec)
+    exp = np.array([1.0, 7.0])
+    assert_array_equal(obs, exp)
+
+    # test material
+    h2o = Material({10010: 0.11191487328808077, 80160: 0.8880851267119192})
+    obs = _atom_weight_channel(chanfunc, h2o)
+    exp = np.array([1.0, 33393.333333333336])
+    assert_array_almost_equal(obs, exp)
 
 
 
