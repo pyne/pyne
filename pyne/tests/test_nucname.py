@@ -88,7 +88,9 @@ def test_zzaaam():
     assert_equal(nucname.zzaaam("AM242M"), 952421)
 
     assert_equal(nucname.zzaaam(2004),  20040)
-    assert_equal(nucname.zzaaam(95642), 952421)
+    assert_equal(nucname.zzaaam(95642), 952420)
+    assert_equal(nucname.zzaaam(95242), 952421)
+    assert_equal(nucname.zzaaam(92636), 922361)
     assert_equal(nucname.zzaaam(95942), 952424)
 
     assert_equal(nucname.zzaaam("Am-242m"), 952421)
@@ -115,7 +117,9 @@ def test_name():
     assert_equal(nucname.name("PU239"), "PU239")
 
     assert_equal(nucname.name(94239), "PU239")
-    assert_equal(nucname.name(95642), "AM242M")
+    assert_equal(nucname.name(95242), "AM242M")
+    assert_equal(nucname.name(95642), "AM242")
+    assert_equal(nucname.name(92636), "U236M")
 
     assert_equal(nucname.name("Am-242m"), "AM242M")
 
@@ -127,18 +131,26 @@ def test_name():
 
 def test_mcnp():
     assert_equal(nucname.mcnp(10010),  1001)
-    assert_equal(nucname.mcnp(952421), 95642)
+    assert_equal(nucname.mcnp(952421), 95242)
+    assert_equal(nucname.mcnp(952420), 95642)
+    assert_equal(nucname.mcnp(922361), 92636)
 
     assert_equal(nucname.mcnp("H1"),     1001)
-    assert_equal(nucname.mcnp("AM242M"), 95642)
+    assert_equal(nucname.mcnp("AM242M"), 95242)
+    assert_equal(nucname.mcnp("AM242"), 95642)
+    assert_equal(nucname.mcnp("U236M"), 92636)
 
     assert_equal(nucname.mcnp(1001),  1001)
     assert_equal(nucname.mcnp(95642), 95642)
 
-    assert_equal(nucname.mcnp("Am-242m"), 95642)
+    assert_equal(nucname.mcnp("Am-242"),  95642)
+    assert_equal(nucname.mcnp("Am-242m"), 95242)
+    assert_equal(nucname.mcnp("U-236m"),  92636)
 
     assert_equal(nucname.mcnp(10010),  1001)
-    assert_equal(nucname.mcnp(2420951), 95642)
+    assert_equal(nucname.mcnp(2420951), 95242)
+    assert_equal(nucname.mcnp(2420950), 95642)
+    assert_equal(nucname.mcnp(2360921), 92636)
 
 
 def test_serpent():
@@ -148,7 +160,9 @@ def test_serpent():
     assert_equal(nucname.serpent("Pu-239"), "Pu-239")
 
     assert_equal(nucname.serpent(94239), "Pu-239")
-    assert_equal(nucname.serpent(95642), "Am-242m")
+    assert_equal(nucname.serpent(95642), "Am-242")
+    assert_equal(nucname.serpent(95242), "Am-242m")
+    assert_equal(nucname.serpent(92636), "U-236m")
 
     assert_equal(nucname.serpent(2390940), "Pu-239")
     assert_equal(nucname.serpent(2420951), "Am-242m")
@@ -180,7 +194,9 @@ def test_cinder():
     assert_equal(nucname.cinder("AM242M"), 2420951)
 
     assert_equal(nucname.cinder(1002),  20010)
-    assert_equal(nucname.cinder(95642), 2420951)
+    assert_equal(nucname.cinder(95642), 2420950)
+    assert_equal(nucname.cinder(95242), 2420951)
+    assert_equal(nucname.cinder(92636), 2360921)
 
     assert_equal(nucname.cinder("Am-242m"), 2420951)
 
