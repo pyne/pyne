@@ -148,7 +148,9 @@ cdef class _Material:
 
     def norm_comp(self):
         """Normalizes the composition, preserving the mass of the nuclide
-        vector as mass."""
+        vector as mass.
+
+        """
         self.mat_pointer.norm_comp()
 
 
@@ -223,6 +225,7 @@ cdef class _Material:
 
             mat = Material()
             mat.from_hdf5("afile.h5", "/foo/bar/mat", -3)
+
         """
         self.mat_pointer.from_hdf5(filename, datapath, row, protocol)
 
@@ -314,6 +317,7 @@ cdef class _Material:
             mat.from_text("natu.txt")
 
         This method is most often called implicitly by the Material constructor.
+
         """
         self.mat_pointer.from_text(filename)
 
@@ -342,7 +346,9 @@ cdef class _Material:
 
     def normalize(self):
         """This convenience method normalizes the mass stream by setting its
-        mass = 1.0."""
+        mass = 1.0.
+
+        """
         self.mat_pointer.normalize()
 
 
@@ -357,6 +363,7 @@ cdef class _Material:
 
             .. math:: \\mbox{nucvec[nuc]} = \\mbox{mat.comp[nuc]} \\times
             \\mbox{mat.mass}
+
         """
         cdef conv._MapIntDouble nucvec_proxy = conv.MapIntDouble()
         nucvec_proxy.map_ptr = new cpp_map[int, double](
@@ -377,7 +384,9 @@ cdef class _Material:
         Returns
         -------
         mol_weight : float
-            Molecular weight in [amu]."""
+            Molecular weight in [amu].
+
+        """
         return self.mat_pointer.molecular_weight(atoms_per_mol)
 
 
@@ -411,6 +420,7 @@ cdef class _Material:
         The input here is seen as a suggestion and so no error is raised if a
         nuclide is asked for via nuc_sequence that is not present in the
         original material.
+
         """
         # Make an nuctopic set
         cdef cpp_set[int] nuc_set = nucname.zzaaam_set(nuc_sequence)
@@ -444,6 +454,7 @@ cdef class _Material:
             cooresponding mass value.  The mass of the submaterial is
             calculated based on the weight fraction composition and mass of the
             original material.
+
         """
         # Make an nuctopic set
         cdef cpp_set[int] nuc_set = nucname.zzaaam_set(nuc_sequence)
@@ -478,6 +489,7 @@ cdef class _Material:
         The input here is seen as a suggestion and so no error is raised if a
         nuclide is asked for via nuc_sequence that is not present in the
         original material.
+
         """
         # Make an nuctopic set
         cdef cpp_set[int] nuc_set = nucname.zzaaam_set(nuc_sequence)
@@ -506,6 +518,7 @@ cdef class _Material:
         -------
         submaterial : Material
             A new mass stream object that only has nuclides on the given range.
+
         """
         cdef int clower, cupper
 
@@ -544,6 +557,7 @@ cdef class _Material:
         -------
         submaterial : Material
             A new mass stream object that only has nuclides on the given range.
+
         """
         cdef int clower, cupper
 
@@ -581,6 +595,7 @@ cdef class _Material:
         submaterial : Material
             A new mass stream object that does not contain nuclides on the
             given range.
+
         """
         cdef int clower, cupper
 
@@ -613,6 +628,7 @@ cdef class _Material:
         -------
         submaterial : Material
             A new mass stream object that only has Uranium members.
+
         """
         cdef _Material pymat = Material()
         pymat.mat_pointer[0] = self.mat_pointer.sub_u(std.string(name))
@@ -631,6 +647,7 @@ cdef class _Material:
         -------
         submaterial : Material
             A new mass stream object that only has Plutonium members.
+
         """
         cdef _Material pymat = Material()
         pymat.mat_pointer[0] = self.mat_pointer.sub_pu(std.string(name))
@@ -649,6 +666,7 @@ cdef class _Material:
         -------
         submaterial : Material
             A new mass stream object that only has Lanthanide members.
+
         """
         cdef _Material pymat = Material()
         pymat.mat_pointer[0] = self.mat_pointer.sub_lan(std.string(name))
@@ -667,6 +685,7 @@ cdef class _Material:
         -------
         submaterial : Material
             A new mass stream object that only has Actinide members.
+
         """
         cdef _Material pymat = Material()
         pymat.mat_pointer[0] = self.mat_pointer.sub_act(std.string(name))
@@ -685,6 +704,7 @@ cdef class _Material:
         -------
         submaterial : Material
             A new mass stream object that only has Transuranic members.
+
         """
         cdef _Material pymat = Material()
         pymat.mat_pointer[0] = self.mat_pointer.sub_tru(std.string(name))
@@ -704,6 +724,7 @@ cdef class _Material:
         -------
         submaterial : Material
             A new mass stream object that only has Minor Actinide members.
+
         """
         cdef _Material pymat = Material()
         pymat.mat_pointer[0] = self.mat_pointer.sub_ma(std.string(name))
@@ -723,6 +744,7 @@ cdef class _Material:
         -------
         submaterial : Material
             A new mass stream object that only has Fission Product members.
+
         """
         cdef _Material pymat = Material()
         pymat.mat_pointer[0] = self.mat_pointer.sub_fp(std.string(name))
@@ -740,6 +762,7 @@ cdef class _Material:
         atom_fracs : mapping
             Dictionary-like object that maps nuclides to atom fractions in the
             material.
+
         """
         cdef conv._MapIntDouble comp_proxy = conv.MapIntDouble()
         comp_proxy.map_ptr = new cpp_map[int, double](self.mat_pointer.to_atom_frac())
@@ -777,6 +800,7 @@ cdef class _Material:
 
         Note that the initial heavy metal was used as a key in a dictionary.
         This is possible because Materials are hashable.
+
         """
         cdef int key_zz
         cdef double val
@@ -1162,6 +1186,7 @@ def from_atom_frac(atom_fracs, double mass=-1.0, char * name='', double
     See Also
     --------
     Material.from_atom_frac : Underlying method class method.
+
     """
     mat = Material()
     mat.from_atom_frac(atom_fracs)
@@ -1209,6 +1234,7 @@ def from_hdf5(char * filename, char * datapath, int row=-1, int protocol=1):
     See Also
     --------
     Material.from_hdf5 : Underlying method class method.
+
     """
     mat = Material()
     mat.from_hdf5(filename, datapath, row, protocol)
@@ -1250,6 +1276,7 @@ def from_text(char * filename, double mass=-1.0, char * name='', double atoms_pe
     See Also
     --------
     Material.from_text : Underlying method class method.
+
     """
     mat = Material()
 
@@ -1444,6 +1471,7 @@ class MapStrMaterial(_MapStrMaterial, collections.MutableMapping):
     free_map : bool
         Flag for whether the pointer to the C++ map should be deallocated
         when the wrapper is dereferenced.
+
     """
     def __str__(self):
         return self.__repr__()
