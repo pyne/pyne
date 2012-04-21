@@ -47,10 +47,12 @@ pyne_logo = """\
 def _fetch_prebuilt(args):
     nuc_data, build_dir = args.nuc_data, args.build_dir
     prebuilt_nuc_data = os.path.join(build_dir, 'prebuilt_nuc_data.h5')
+    prebuilt_nuc_data_url = "<PUT ME IN>"
     if os.path.exists(prebuilt_nuc_data):
         return
 
-    pnd = urllib2.urlopen("<PUT ME IN>")
+    print "Fetching pre-built nuc_data.h5 from " + prebuilt_nuc_data_url
+    pnd = urllib2.urlopen(prebuilt_nuc_data_url)
     with open(prebuilt_nuc_data, 'wb') as f:
         f.write(pnd.read())
 
@@ -68,6 +70,7 @@ def main():
                   ('cinder', make_cinder), 
                   ]
     make_map = dict(make_funcs)
+    make_open = {'scattering_lengths', 'simple_xs'}
 
     # Parse the command line arguments
     parser = argparse.ArgumentParser(description='Make a nuclear data library.')
@@ -80,6 +83,9 @@ def main():
     parser.add_argument('--fetch-prebuilt', dest='fetch_prebuilt', action='store', 
                         type=lambda s: 't' in s.lower() or 'y' in s.lower(), 
                         default=True, help='grab partially assembled file [y/n].')
+    parser.add_argument('--make-open-only', dest='make_open_only', action='store', 
+                        type=lambda s: 't' in s.lower() or 'y' in s.lower(), 
+                        default=False, help='only add open data to file [y/n].')
     parser.add_argument('-m', dest='make', action='store', default='all',
                         help='comma-separated parts of nuc_data to make: ' + \
                         ", ".join([mf[0] for mf in make_funcs]) + ', all, and none.')
@@ -111,6 +117,9 @@ def main():
         make_order = [mf[0] for mf in make_funcs]
     else:   
         make_order = args.make.replace(' ', "").split(',')
+
+    if args.make_open_only:
+        make_order = [mo for mo in make_order if mo in make_open]
 
     # fetch prebuilt data library if possible
     if args.fetch_prebuilt:
