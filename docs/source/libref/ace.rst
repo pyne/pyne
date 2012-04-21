@@ -20,5 +20,17 @@ for :ref:`usersguide_ace`.
 Library Class
 *************
 
-.. autoclass:: Library(filename)
+.. autoclass:: Library
+   :members:
+
+.. autoclass:: AceTable
+   :members:
+
+.. autoclass:: NeutronTable
+   :members:
+
+.. autoclass:: SabTable
+   :members:
+
+.. autoclass:: Reaction
    :members:
