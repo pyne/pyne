@@ -8,7 +8,6 @@ from cython.operator cimport dereference as deref
 from cython.operator cimport preincrement as inc
 from libc.stdlib cimport malloc, free
 
-
 # Python imports
 import collections
 
@@ -156,7 +155,9 @@ cdef class _Material:
 
     def from_hdf5(self, char * filename, char * datapath, int row=-1,
                   int protocol=1):
-        """Initialize a Material object from an HDF5 file.
+        """from_hdf5(self, char * filename, char * datapath, int row=-1, int
+        protocol=1)
+        Initialize a Material object from an HDF5 file.
 
         Parameters
         ----------
@@ -852,8 +853,7 @@ cdef class _Material:
 
     def __add_material__(x, y):
         cdef _Material pymat = Material()
-        pymat.mat_pointer[0] = (<_Material> x).mat_pointer[0] +
-                (<_Material> y).mat_pointer[0]
+        pymat.mat_pointer[0] = (<_Material> x).mat_pointer[0] + (<_Material> y).mat_pointer[0]
         return pymat
 
 
