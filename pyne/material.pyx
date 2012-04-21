@@ -155,8 +155,7 @@ cdef class _Material:
 
     def from_hdf5(self, char * filename, char * datapath, int row=-1,
                   int protocol=1):
-        """from_hdf5(self, char * filename, char * datapath, int row=-1, int
-        protocol=1)
+        """from_hdf5(char * filename, char * datapath, int row=-1, int protocol=1)
         Initialize a Material object from an HDF5 file.
 
         Parameters
@@ -233,7 +232,8 @@ cdef class _Material:
 
     def write_hdf5(self, filename, datapath="/material", nucpath="/nuc_zz",
                    row=-0.0, chunksize=100):
-        """Writes the material to an HDF5 file, using Protocol 1 (see the
+        """write_hdf5(filename, datapath="/material", nucpath="/nuc_zz", row=-0.0, chunksize=100)
+        Writes the material to an HDF5 file, using Protocol 1 (see the
         from_hdf5() method).
 
         Parameters
@@ -281,7 +281,8 @@ cdef class _Material:
 
 
     def from_text(self, char * filename):
-        """Initialize a Material object from a simple text file.
+        """from_text(char * filename)
+        Initialize a Material object from a simple text file.
 
         Parameters
         ----------
@@ -324,7 +325,8 @@ cdef class _Material:
 
 
     def write_text(self, filename):
-        """Writes the material to a plain text file.
+        """write_text(filename)
+        Writes the material to a plain text file.
 
         Parameters
         ----------
@@ -362,8 +364,7 @@ cdef class _Material:
         nucvec : dict
             For a Material mat,
 
-            .. math:: \\mbox{nucvec[nuc]} = \\mbox{mat.comp[nuc]} \\times
-            \\mbox{mat.mass}
+            .. math:: \\mbox{nucvec[nuc]} = \\mbox{mat.comp[nuc]} \\times \\mbox{mat.mass}
 
         """
         cdef conv._MapIntDouble nucvec_proxy = conv.MapIntDouble()
@@ -373,7 +374,8 @@ cdef class _Material:
 
 
     def molecular_weight(self, atoms_per_mol=-1.0):
-        """This method returns the molecular weight of the comp of this
+        """molecular_weight(atoms_per_mol=-1.0)
+        This method returns the molecular weight of the comp of this
         material.
 
         Parameters
@@ -396,7 +398,8 @@ cdef class _Material:
     #
 
     def sub_mat(self, nuc_sequence, char * name=""):
-        """Grabs a subset of the material and returns a new material comprised
+        """sub_mat(nuc_sequence, char * name="")
+        Grabs a subset of the material and returns a new material comprised
         of only the specified nuclides.
 
         Parameters
@@ -434,7 +437,8 @@ cdef class _Material:
 
 
     def set_mat(self, nuc_sequence, value, char * name=""):
-        """Sets a subset of the material to a new value and returns a new
+        """set_mat(nuc_sequence, value, char * name="")
+        Sets a subset of the material to a new value and returns a new
         material.
 
         Parameters
@@ -468,7 +472,8 @@ cdef class _Material:
 
 
     def del_mat(self, nuc_sequence, char * name=""):
-        """Removes a subset of the material and returns a new material
+        """del_mat(nuc_sequence, char * name="")
+        Removes a subset of the material and returns a new material
         comprised of only the non-specified nuclides.
 
         Parameters
@@ -503,7 +508,8 @@ cdef class _Material:
 
 
     def sub_range(self, lower=0, upper=10000000, char * name=""):
-        """Grabs a sub-material from this mat based on a range [lower, upper)
+        """sub_range(lower=0, upper=10000000, char * name="")
+        Grabs a sub-material from this mat based on a range [lower, upper)
         of values.
 
         Parameters
@@ -540,7 +546,8 @@ cdef class _Material:
 
 
     def set_range(self, lower=0, upper=10000000, value=0.0, char * name=""):
-        """Sets a sub-material from this mat based on a range [lower, upper) to
+        """set_range(lower=0, upper=10000000, value=0.0, char * name="")
+        Sets a sub-material from this mat based on a range [lower, upper) to
         a new mass weight value.
 
         Parameters
@@ -579,7 +586,8 @@ cdef class _Material:
 
 
     def del_range(self, lower=0, upper=10000000, char * name=""):
-        """Remove a range [lower, upper) of nuclides from this material and
+        """del_range(lower=0, upper=10000000, char * name="")
+        Remove a range [lower, upper) of nuclides from this material and
         returns a submaterial.
 
         Parameters
@@ -617,7 +625,7 @@ cdef class _Material:
 
 
     def sub_u(self, char * name=""):
-        """sub_u(self, char * name="")
+        """sub_u(char * name="")
         Convenience method that gets the Uranium portion of a mass stream.
 
         Parameters
@@ -637,7 +645,8 @@ cdef class _Material:
 
 
     def sub_pu(self, char * name=""):
-        """Convenience method that gets the Plutonium portion of a mass stream.
+        """sub_pu(char * name="")
+        Convenience method that gets the Plutonium portion of a mass stream.
 
         Parameters
         ----------
@@ -656,7 +665,8 @@ cdef class _Material:
 
 
     def sub_lan(self, char * name=""):
-        """Convenience method that gets the Lanthanide portion of a mass stream.
+        """sub_lan(char * name="")
+        Convenience method that gets the Lanthanide portion of a mass stream.
 
         Parameters
         ----------
@@ -675,7 +685,8 @@ cdef class _Material:
 
 
     def sub_act(self, char * name=""):
-        """Convenience method that gets the Actinide portion of a mass stream.
+        """sub_act(char * name="")
+        Convenience method that gets the Actinide portion of a mass stream.
 
         Parameters
         ----------
@@ -694,7 +705,9 @@ cdef class _Material:
 
 
     def sub_tru(self, char * name=""):
-        """Convenience method that gets the Transuranic portion of a mass stream.
+        """sub_tru(char * name="")
+        Convenience method that gets the Transuranic portion of a mass
+        stream.
 
         Parameters
         ----------
@@ -713,7 +726,8 @@ cdef class _Material:
 
 
     def sub_ma(self, char * name=""):
-        """Convenience method that gets the Minor Actinide portion of a mass
+        """sub_ma(char * name="")
+        Convenience method that gets the Minor Actinide portion of a mass
         stream.
 
         Parameters
@@ -733,7 +747,8 @@ cdef class _Material:
 
 
     def sub_fp(self, char * name=""):
-        """Convenience method that gets the Fission Product portion of a mass
+        """sub_fp(char * name="")
+        Convenience method that gets the Fission Product portion of a mass
         stream.
 
         Parameters
@@ -771,7 +786,8 @@ cdef class _Material:
 
 
     def from_atom_frac(self, atom_fracs):
-        """Loads the material composition based on a mapping of atom fractions.
+        """from_atom_frac(atom_fracs)
+        Loads the material composition based on a mapping of atom fractions.
 
         Parameters
         ----------
@@ -1123,7 +1139,8 @@ class Material(_Material, collections.MutableMapping):
         header += ['-' * max([len(h) for h in header])]
         header = "\n".join(header) + "\n"
 
-        s = header + "\n".join(["{0:<7}{1}".format(nucname.name(key), value) for key, value in self.comp.items()])
+        s = header + "\n".join(["{0:<7}{1}".format(
+                nucname.name(key), value) for key, value in self.comp.items()])
         return s
 
     def __repr__(self):
@@ -1138,7 +1155,8 @@ class Material(_Material, collections.MutableMapping):
 
 def from_atom_frac(atom_fracs, double mass=-1.0, char * name='', double
                    atoms_per_mol=-1.0):
-    """Create a Material from a mapping of atom fractions.
+    """from_atom_frac(atom_fracs, double mass=-1.0, char * name='', double atoms_per_mol=-1.0)
+    Create a Material from a mapping of atom fractions.
 
     Parameters
     ----------
@@ -1203,7 +1221,8 @@ def from_atom_frac(atom_fracs, double mass=-1.0, char * name='', double
 
 
 def from_hdf5(char * filename, char * datapath, int row=-1, int protocol=1):
-    """Create a Material object from an HDF5 file.
+    """from_hdf5(char * filename, char * datapath, int row=-1, int protocol=1)
+    Create a Material object from an HDF5 file.
 
     Parameters
     ----------
@@ -1242,8 +1261,10 @@ def from_hdf5(char * filename, char * datapath, int row=-1, int protocol=1):
 
 
 
-def from_text(char * filename, double mass=-1.0, char * name='', double atoms_per_mol=-1.0):
-    """Create a Material object from a simple text file.
+def from_text(char * filename, double mass=-1.0, char * name='', double
+              atoms_per_mol=-1.0):
+    """from_text(char * filename, double mass=-1.0, char * name='', double atoms_per_mol=-1.0)
+    Create a Material object from a simple text file.
 
     Parameters
     ----------
@@ -1460,8 +1481,8 @@ cdef class _MapStrMaterial:
 
 
 class MapStrMaterial(_MapStrMaterial, collections.MutableMapping):
-    """Wrapper class for C++ standard library maps of type <string, Material *>.
-    Provides dictionary like interface on the Python level.
+    """Wrapper class for C++ standard library maps of type <string, Material
+    \*>.  Provides dictionary like interface on the Python level.
 
     Parameters
     ----------
