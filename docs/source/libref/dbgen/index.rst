@@ -32,3 +32,13 @@ divided conceptually into three parts, run in series:
     scattering_lengths
     simple_xs
     cinder
+
+++++++++++++++++
+Attribution
+++++++++++++++++
+The PyNE development team would like to thank the following people and organizations
+for allowing us to redistribute open nuclear data in binary form as part of ``nuc_data_make``.
+
+* **KAERI** and **Jonghwa Chang** for the data available at the excellent 
+  http://atom.kaeri.re.kr website.
+* **NIST** and **Alan Munter** for neutron scattering length data.
