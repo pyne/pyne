@@ -24,7 +24,7 @@ Currently four naming conventions are supported.
     letter in the chemical symbol is uppercase, the dash is always present, and the the meta-stable
     flag is lowercase.  For instance, 'Am-242m' is the valid serpent notation for this nuclide.
  #. **NIST**: The NIST naming convention is also similar to the Serpent form.  However, this 
-    convention contains not meta-stable information.  Moreover, the A-number comes before the 
+    convention contains no metastable information.  Moreover, the A-number comes before the 
     element symbol.  For example, '242Am' is the valid NIST notation.
  #. **CINDER**: The CINDER format is similar to zzaaam form except that the placement of the Z- and 
     A-numbers are swapped. Therefore, this format is effectively aaazzzm.  For example, '2420951' is 
