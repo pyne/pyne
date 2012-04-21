@@ -1202,31 +1202,6 @@ class SabTable(AceTable):
         else:
             return "<ACE Thermal S(a,b) Table>"
 
-    def plot_inelastic(self, index):
-        E_out = [1e6 * E for E in self.inelastic_e_out[index]]
-        mu_out = self.inelastic_mu_out[index]
-
-        x = range(self.NXS[3]+1)
-        y = E_out
-        X,Y = meshgrid(x,y)
-        Z = self._z_function(X,Y,E_out,mu_out)
-        pcolor(X,Y,Z)
-
-        # Plot options
-        colorbar()
-        xlim([0,self.NXS[3]])
-        ylim([min(E_out),max(E_out)])
-        xlabel('Equally likely cosine bin')
-        ylabel('Outgoing Energy (eV)')
-
-    def _z_function(self, x, y, E_out, mu_out):
-        z = []
-        for i in range(len(x)):
-            x_ = x[i]
-            y_ = y[i]
-            z.append([mu_out[E_out.index(k)][j] for j,k in zip(x_,y_)])
-        return z
-
     def _read_itie(self):
         """
         Read energy-dependent inelastic scattering cross sections
