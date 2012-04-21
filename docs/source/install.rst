@@ -3,6 +3,16 @@
 ============
 Installation
 ============
+-------------
+Dependencies
+-------------
+PyNE has the following dependencies:
+
+   #. `NumPy <http://numpy.scipy.org/>`_
+   #. `SciPy <http://www.scipy.org/>`_
+   #. `Cython <http://cython.org/>`_
+   #. `HDF5 <http://www.hdfgroup.org/HDF5/>`_
+   #. `PyTables <http://www.pytables.org/>`_
 
 ------
 Binary
@@ -19,7 +29,7 @@ Source
 Installing PyNE from source is a two-step process::
 
     cd pyne/
-    python setup.py install
+    python setup.py install --user
     nuc_data_make
 
 The ``setup.py`` command compiles and installs the PyNE source code.
