@@ -11,18 +11,13 @@ more developers, testers, and users.  If you are interested in being
 involved with this project, please contact us via pyne-dev@googlegroups.com, 
 or `github`_.
 
-PyNE has the following dependencies:
-
-   #. `NumPy <http://numpy.scipy.org/>`_
-   #. `SciPy <http://www.scipy.org/>`_
-   #. `Cython <http://cython.org/>`_
-   #. `HDF5 <http://www.hdfgroup.org/HDF5/>`_
-   #. `PyTables <http://www.pytables.org/>`_
-
 The source code for PyNE may be found at the `GitHub project site`_. 
-Or you may simply clone from the official repo using git::
+For a quick install from source, please  clone from the official repo::
 
     git clone git://github.com/pyne/pyne.git
+    cd pyne/
+    python setup.py install --user
+    nuc_data_make
 
 --------
 Contents
