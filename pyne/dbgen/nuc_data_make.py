@@ -1,5 +1,7 @@
 import os
 import argparse
+import urllib2
+import shutil
 from distutils.file_util import copy_file, move_file
 from distutils.dir_util import mkpath, remove_tree
 
@@ -42,6 +44,18 @@ pyne_logo = """\
                                      `  
 """
 
+def _fetch_prebuilt(args):
+    nuc_data, build_dir = args.nuc_data, args.build_dir
+    prebuilt_nuc_data = os.path.join(build_dir, 'prebuilt_nuc_data.h5')
+    if os.path.exists(prebuilt_nuc_data):
+        return
+
+    pnd = urllib2.urlopen("<PUT ME IN>")
+    with open(prebuilt_nuc_data, 'wb') as f:
+        f.write(pnd.read())
+
+    shutil.copyfile(prebuilt_nuc_data, nuc_data)
+
 
 def main():
     """Entry point for nuc_data_make utility."""
@@ -52,7 +66,7 @@ def main():
                   ('decay', make_decay), 
                   ('simple_xs', make_simple_xs), 
                   ('cinder', make_cinder), 
-                 ]
+                  ]
     make_map = dict(make_funcs)
 
     # Parse the command line arguments
@@ -63,6 +77,9 @@ def main():
                         help='path to the build directory.')
     parser.add_argument('--datapath', dest='datapath', action='store', default="",
                         help='MCNP DATAPATH.')
+    parser.add_argument('--fetch-prebuilt', dest='fetch_prebuilt', action='store', 
+                        type=lambda s: 't' in s.lower() or 'y' in s.lower(), 
+                        default=True, help='grab partially assembled file [y/n].')
     parser.add_argument('-m', dest='make', action='store', default='all',
                         help='comma-separated parts of nuc_data to make: ' + \
                         ", ".join([mf[0] for mf in make_funcs]) + ', all, and none.')
@@ -95,9 +112,12 @@ def main():
     else:   
         make_order = args.make.replace(' ', "").split(',')
 
-    print "Making nuc_data at {0}".format(args.nuc_data)
+    # fetch prebuilt data library if possible
+    if args.fetch_prebuilt:
+        _fetch_prebuilt(args)
 
     # Make the various tables
+    print "Making nuc_data at {0}".format(args.nuc_data)
     for mo in make_order:
         make_map[mo](args)
 
