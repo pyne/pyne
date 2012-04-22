@@ -41,4 +41,17 @@ for allowing us to redistribute open nuclear data in binary form as part of ``nu
 
 * **KAERI** and **Jonghwa Chang** for the data available at the excellent 
   http://atom.kaeri.re.kr website.
-* **NIST** and **Alan Munter** for neutron scattering length data.
+* **NIST** and **Alan Munter** for `neutron scattering length data`_.
+* **The Atomic Mass Data Center**, **Georges Audi**, and **Wang Meng**  for `atomic mass related data`_.
+
+.. _neutron scattering length data: http://www.ncnr.nist.gov/resources/n-lengths/list.html
+.. _atomic mass related data: http://amdc.in2p3.fr/
+
+++++++++++++++++++++++++++++
+Prebuilt Nuclear Data
+++++++++++++++++++++++++++++
+For developers who wish to generate the open nuclear data file that is distributed along with PyNE, 
+please run the following command::
+
+    nuc_data_make --fetch-prebuilt False --make-open-only True -o prebuilt_nuc_data.h5
+

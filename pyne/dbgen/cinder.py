@@ -9,7 +9,7 @@ import tables as tb
 
 from pyne import nucname
 from pyne.utils import to_barns
-
+from pyne.dbgen.api import BASIC_FILTERS
 
 def grab_cinder_dat(build_dir="", datapath=''):
     """Grabs the cinder.dat file from the DATAPATH directory if not already present."""
@@ -116,7 +116,7 @@ def make_mg_group_structure(nuc_data, build_dir=""):
         Directory with cinder.dat file.
     """
     # Open the HDF5 File
-    db = tb.openFile(nuc_data, 'a')
+    db = tb.openFile(nuc_data, 'a', filters=BASIC_FILTERS)
 
     # Ensure that the appropriate file structure is present
     _init_cinder(db)
@@ -171,7 +171,7 @@ def make_mg_absorption(nuc_data, build_dir=""):
         Directory with cinder.dat file.
     """
     # Open the HDF5 File
-    db = tb.openFile(nuc_data, 'a')
+    db = tb.openFile(nuc_data, 'a', filters=BASIC_FILTERS)
 
     # Ensure that the appropriate file structure is present
     _init_cinder(db)
@@ -265,7 +265,7 @@ def make_mg_fission(nuc_data, build_dir=""):
         Directory with cinder.dat file.
     """
     # Open the HDF5 File
-    db = tb.openFile(nuc_data, 'a')
+    db = tb.openFile(nuc_data, 'a', filters=BASIC_FILTERS)
 
     # Ensure that the appropriate file structure is present
     _init_cinder(db)
@@ -354,7 +354,7 @@ def make_mg_gamma_decay(nuc_data, build_dir=""):
         Directory with cinder.dat file.
     """
     # Open the HDF5 File
-    db = tb.openFile(nuc_data, 'a')
+    db = tb.openFile(nuc_data, 'a', filters=BASIC_FILTERS)
 
     # Ensure that the appropriate file structure is present
     _init_cinder(db)
@@ -532,7 +532,7 @@ def make_neutron_fp_info(nuc_data, build_dir=""):
         Directory with cinder.dat file.
     """
     # Open the HDF5 File
-    db = tb.openFile(nuc_data, 'a')
+    db = tb.openFile(nuc_data, 'a', filters=BASIC_FILTERS)
 
     # Ensure that the appropriate file structure is present
     _init_cinder(db)
@@ -621,7 +621,7 @@ def make_photon_fp_info(nuc_data, build_dir=""):
         Directory with cinder.dat file.
     """
     # Open the HDF5 File
-    db = tb.openFile(nuc_data, 'a')
+    db = tb.openFile(nuc_data, 'a', filters=BASIC_FILTERS)
 
     # Ensure that the appropriate file structure is present
     _init_cinder(db)
@@ -669,7 +669,7 @@ def make_neutron_fp_yields(nuc_data, build_dir=""):
         Directory with cinder.dat file.
     """
     # Open the HDF5 File
-    db = tb.openFile(nuc_data, 'a')
+    db = tb.openFile(nuc_data, 'a', filters=BASIC_FILTERS)
 
     # Ensure that the appropriate file structure is present
     _init_cinder(db)
@@ -742,7 +742,7 @@ def make_photon_fp_yields(nuc_data, build_dir):
         Directory with cinder.dat file.
     """
     # Open the HDF5 File
-    db = tb.openFile(nuc_data, 'a')
+    db = tb.openFile(nuc_data, 'a', filters=BASIC_FILTERS)
 
     # Ensure that the appropriate file structure is present
     _init_cinder(db)
@@ -806,7 +806,7 @@ def make_cinder(args):
     """Controller function for adding cinder data."""
     nuc_data, build_dir, datapath = args.nuc_data, args.build_dir, args.datapath
 
-    with tb.openFile(nuc_data, 'a') as f:
+    with tb.openFile(nuc_data, 'a', filters=BASIC_FILTERS) as f:
         if hasattr(f.root, 'neutron') and hasattr(f.root.neutron, 'cinder_xs') and hasattr(f.root.neutron, 'cinder_fission_products'):
             return
 
