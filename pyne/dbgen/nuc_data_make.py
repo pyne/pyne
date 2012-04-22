@@ -47,7 +47,7 @@ pyne_logo = """\
 def _fetch_prebuilt(args):
     nuc_data, build_dir = args.nuc_data, args.build_dir
     prebuilt_nuc_data = os.path.join(build_dir, 'prebuilt_nuc_data.h5')
-    prebuilt_nuc_data_url = "<PUT ME IN>"
+    prebuilt_nuc_data_url = "http://s3.amazonaws.com/pyne/prebuilt_nuc_data.h5"
     if os.path.exists(prebuilt_nuc_data):
         return
 
@@ -98,7 +98,7 @@ def main():
 
     # clean nuc data
     if args.clean in [1, 2]:
-        print "removing nuc_data from {0}".format(args.nuc_data)
+        print "Removing nuc_data from {0}".format(args.nuc_data)
         try:
             os.remove(args.nuc_data)
         except OSError:
@@ -106,7 +106,7 @@ def main():
 
     # Make the build dir
     if args.clean == 2:
-        print "removing build_dir from {0}".format(args.build_dir)
+        print "Removing build_dir from {0}".format(args.build_dir)
         remove_tree(args.build_dir)
     mkpath(args.build_dir)
 
