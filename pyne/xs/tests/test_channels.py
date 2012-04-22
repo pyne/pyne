@@ -17,10 +17,12 @@ from pyne.material import Material
 
 np.seterr(divide='ignore')
 
+def setup():
+    xs_cache.clear()
+
 #
 # Test helper functions
 #
-
 def test_atom_weight_channel1():
     E_n = xs_cache['E_n']
     xs_cache['E_g'] = np.array([3, 2, 1.0])
