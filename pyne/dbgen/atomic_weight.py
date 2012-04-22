@@ -7,6 +7,7 @@ import numpy as np
 import tables as tb
 
 from pyne import nucname
+from pyne.dbgen.api import BASIC_FILTERS
 from pyne.dbgen.kaeri import grab_kaeri_nuclide, parse_for_natural_isotopes
 
 # Note that since ground state and meta-stable isotopes are of the same atomic weight, 
@@ -187,7 +188,7 @@ def make_atomic_weight_table(nuc_data, build_dir=""):
     #A = np.array(A, dtype=atomic_weight_dtype)
 
     # Open the HDF5 File
-    kdb = tb.openFile(nuc_data, 'a')
+    kdb = tb.openFile(nuc_data, 'a', filters=BASIC_FILTERS)
 
     # Make a new the table
     Atable = kdb.createTable("/", "atomic_weight", atomic_weight_desc, 

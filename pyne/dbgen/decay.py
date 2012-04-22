@@ -11,6 +11,7 @@ import tables as tb
 
 from pyne import nucname
 from pyne import ensdf
+from pyne.dbgen.api import BASIC_FILTERS
 
 def grab_ensdf_decay(build_dir=""):
     """Grabs the ENSDF decay data files
@@ -93,7 +94,7 @@ def make_atomic_decay_table(nuc_data, build_dir=""):
     atomic_decay  = parse_decay(build_dir)
 
     # Open the HDF5 File
-    decay_db = tb.openFile(nuc_data, 'a')
+    decay_db = tb.openFile(nuc_data, 'a', filters=BASIC_FILTERS)
 
     # Make a new the table
     decaytable = decay_db.createTable("/", "atomic_decay", atomic_decay_dtype, 
