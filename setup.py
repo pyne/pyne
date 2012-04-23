@@ -16,7 +16,7 @@ import numpy as np
 import sys
 
 INFO = {
-    'version': '0.1',
+    'version': '0.1-rc',
     }
 
 
