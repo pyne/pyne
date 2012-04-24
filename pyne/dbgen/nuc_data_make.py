@@ -6,6 +6,7 @@ from distutils.file_util import copy_file, move_file
 from distutils.dir_util import mkpath, remove_tree
 
 from pyne.api import nuc_data
+from pyne.utils import message
 from pyne.dbgen.api import build_dir
 from pyne.dbgen.decay import make_decay
 from pyne.dbgen.atomic_weight import make_atomic_weight
@@ -48,20 +49,20 @@ def _fetch_prebuilt(args):
     nuc_data, build_dir = args.nuc_data, args.build_dir
     prebuilt_nuc_data = os.path.join(build_dir, 'prebuilt_nuc_data.h5')
     prebuilt_nuc_data_url = "http://s3.amazonaws.com/pyne/prebuilt_nuc_data.h5"
-    if os.path.exists(prebuilt_nuc_data):
-        return
 
-    print "Fetching pre-built nuc_data.h5 from " + prebuilt_nuc_data_url
-    pnd = urllib2.urlopen(prebuilt_nuc_data_url)
-    with open(prebuilt_nuc_data, 'wb') as f:
-        f.write(pnd.read())
+    if not os.path.exists(prebuilt_nuc_data):
+        print "Fetching pre-built nuc_data.h5 from " + prebuilt_nuc_data_url
+        pnd = urllib2.urlopen(prebuilt_nuc_data_url)
+        with open(prebuilt_nuc_data, 'wb') as f:
+            f.write(pnd.read())
 
-    shutil.copyfile(prebuilt_nuc_data, nuc_data)
+    if not os.path.exists(nuc_data):
+        shutil.copyfile(prebuilt_nuc_data, nuc_data)
 
 
 def main():
     """Entry point for nuc_data_make utility."""
-    print pyne_logo
+    print message(pyne_logo)
 
     make_funcs = [('atomic_weight', make_atomic_weight),
                   ('scattering_lengths', make_scattering_lengths),
