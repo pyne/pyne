@@ -8,7 +8,7 @@ import numpy as np
 import tables as tb
 
 from pyne import nucname
-from pyne.utils import to_barns
+from pyne.utils import to_barns, failure
 from pyne.dbgen.api import BASIC_FILTERS
 
 def grab_cinder_dat(build_dir="", datapath=''):
@@ -22,17 +22,19 @@ def grab_cinder_dat(build_dir="", datapath=''):
     elif 'DATAPATH' in os.environ:
         datapath = os.environ['DATAPATH']
     else:
-        raise OSError("DATAPATH not defined in environment; cinder.dat not found.")
-
-    print "Grabing cinder.dat from " + datapath
+        print failure("DATAPATH not defined in environment; cinder.dat not found.")
+        return False
 
     local_filename = os.path.join(datapath, "[Cc][Ii][Nn][Dd][Ee][Rr].[Dd][Aa][Tt]")
     local_filename = glob(local_filename)
     if 0 < len(local_filename):
+        print "Grabing cinder.dat from " + datapath
         shutil.copy(local_filename[0], build_filename)
+        rtn = True
     else:
-        raise OSError("cinder.dat file not found in DATAPATH dir.")
-
+        print failure("cinder.dat file not found in DATAPATH dir.")
+        rtn = False
+    return rtn
 
 # These read in cinder.dat
 cinder_float = "[\d.+-Ee]+"
@@ -811,7 +813,9 @@ def make_cinder(args):
             return
 
     # First grab the atomic abundance data
-    grab_cinder_dat(build_dir, datapath)
+    grabbed = grab_cinder_dat(build_dir, datapath)
+    if not grabbed:
+        return
 
     # Add energy groups to file
     print "Adding cinder data..."
