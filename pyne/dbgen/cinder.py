@@ -15,7 +15,7 @@ def grab_cinder_dat(build_dir="", datapath=''):
     """Grabs the cinder.dat file from the DATAPATH directory if not already present."""
     build_filename = os.path.join(build_dir, 'cinder.dat')
     if os.path.exists(build_filename):
-        return 
+        return True
     
     if isinstance(datapath, basestring) and 0 < len(datapath):
         pass
