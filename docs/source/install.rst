@@ -26,7 +26,9 @@ install from source.
 ------
 Source
 ------
-Installing PyNE from source is a two-step process::
+Installing PyNE from source is a two-step process.  First, download and 
+unzip the source (`zip`_, `tar`_).  Then run the following commands from 
+the unzipped directory::
 
     cd pyne/
     python setup.py install --user
@@ -69,3 +71,6 @@ Or as in the example:
     export LD_LIBRARY_PATH=$HOME/epd/lib:$LD_LIBRARY_PATH
 
 You may now proceed with the PyNE install :ref:`as above <install_source>`.
+
+.. _zip: https://github.com/pyne/pyne/zipball/0.1-rc
+.. _tar: https://github.com/pyne/pyne/tarball/0.1-rc
