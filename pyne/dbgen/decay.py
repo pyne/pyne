@@ -97,8 +97,10 @@ def make_atomic_decay_table(nuc_data, build_dir=""):
     decay_db = tb.openFile(nuc_data, 'a', filters=BASIC_FILTERS)
 
     # Make a new the table
-    decaytable = decay_db.createTable("/", "atomic_decay", atomic_decay_dtype, 
-                             "Atomic Decay Data level [MeV], half_life [s], decay_const [1/s], branch_ratio [frac]", expectedrows=len(atomic_decay))
+    decaytable = decay_db.createTable("/", "atomic_decay", 
+                    np.empty(0, dtype=atomic_decay_dtype), 
+                    "Atomic Decay Data level [MeV], half_life [s], decay_const "
+                    "[1/s], branch_ratio [frac]", expectedrows=len(atomic_decay))
     decaytable.append(atomic_decay)
 
     # Ensure that data was written to table
