@@ -188,8 +188,9 @@ def make_mg_absorption(nuc_data, build_dir=""):
 
     # Init the neutron absorption table
     absorption_dtype = np.dtype(absorption_dtype_tuple + [('xs', float, G_n)])
-    absorption_table = db.createTable('/neutron/cinder_xs/', 'absorption', absorption_dtype, 
-                                       'Neutron absorption reaction cross sections [barns]')
+    absorption_table = db.createTable('/neutron/cinder_xs/', 'absorption', 
+                                      np.empty(0, dtype=absorption_dtype), 
+                                      'Neutron absorption reaction cross sections [barns]')
     abrow = absorption_table.row
 
     # Init to_nuc_pattern
@@ -282,8 +283,9 @@ def make_mg_fission(nuc_data, build_dir=""):
 
     # Init the neutron absorption table
     fission_dtype = np.dtype(fission_dtype_tuple + [('xs', float, G_n)])
-    fission_table = db.createTable('/neutron/cinder_xs/', 'fission', fission_dtype, 
-                                    'Neutron fission reaction cross sections [barns]')
+    fission_table = db.createTable('/neutron/cinder_xs/', 'fission', 
+                                   np.empty(0, dtype=fission_dtype), 
+                                   'Neutron fission reaction cross sections [barns]')
     frow = fission_table.row
 
     # Init to_nuc_pattern
@@ -371,8 +373,9 @@ def make_mg_gamma_decay(nuc_data, build_dir=""):
 
     # Init the gamma absorption table
     gamma_decay_dtype = np.dtype(gamma_decay_dtype_tuple + [('spectrum', float, G_g)])
-    gamma_decay_table = db.createTable('/photon/cinder_source/', 'decay_spectra', gamma_decay_dtype, 
-                                        'Gamma decay spectrum [MeV]')
+    gamma_decay_table = db.createTable('/photon/cinder_source/', 'decay_spectra', 
+                                       np.empty(0, dtype=gamma_decay_dtype), 
+                                       'Gamma decay spectrum [MeV]')
     gdrow = gamma_decay_table.row
 
     # Init to_nuc_pattern
@@ -548,8 +551,9 @@ def make_neutron_fp_info(nuc_data, build_dir=""):
     info_table = parse_neutron_fp_info(raw_data)
 
     # Init the neutron fission product info table
-    nfp_table = db.createTable('/neutron/cinder_fission_products/', 'info', fp_info_dtype, 
-                                'CINDER Neutron Fission Product Yield Information')
+    nfp_table = db.createTable('/neutron/cinder_fission_products/', 'info', 
+                               np.empty(0, dtype=fp_info_dtype), 
+                               'CINDER Neutron Fission Product Yield Information')
 
     # Append Rows
     nfp_table.append(info_table)
@@ -637,8 +641,9 @@ def make_photon_fp_info(nuc_data, build_dir=""):
     info_table = grab_photon_fp_info(raw_data)
 
     # Init the neutron fission product info table
-    gfp_table = db.createTable('/photon/cinder_fission_products/', 'info', fp_info_dtype, 
-                                'CINDER Photofission Product Yield Information')
+    gfp_table = db.createTable('/photon/cinder_fission_products/', 'info', 
+                               np.empty(0, dtype=fp_info_dtype), 
+                               'CINDER Photofission Product Yield Information')
     gfp_table.append(info_table)
 
     # Close the hdf5 file
@@ -692,8 +697,9 @@ def make_neutron_fp_yields(nuc_data, build_dir=""):
     nfp_yields_raw = m_yields.group(0)
 
     # Init the neutron fission product info table
-    nfp_table = db.createTable('/neutron/cinder_fission_products/', 'yields', fp_yields_dtype, 
-                                'CINDER Neutron Fission Product Yields')
+    nfp_table = db.createTable('/neutron/cinder_fission_products/', 'yields', 
+                               np.empty(0, dtype=fp_yields_dtype), 
+                               'CINDER Neutron Fission Product Yields')
     nfprow = nfp_table.row
 
     # Iterate over all to-nucs
@@ -765,8 +771,9 @@ def make_photon_fp_yields(nuc_data, build_dir):
     gfp_yields_raw = m_yields.group(0)
 
     # Init the neutron fission product info table
-    gfp_table = db.createTable('/photon/cinder_fission_products/', 'yields', fp_yields_dtype, 
-                                'CINDER Photofission Product Yields')
+    gfp_table = db.createTable('/photon/cinder_fission_products/', 'yields', 
+                               np.empty(0, dtype=fp_yields_dtype), 
+                               'CINDER Photofission Product Yields')
     gfprow = gfp_table.row
 
     # Iterate over all to-nucs

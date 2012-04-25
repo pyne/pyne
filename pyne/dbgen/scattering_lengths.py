@@ -123,7 +123,8 @@ def make_scattering_lengths_table(nuc_data, build_dir=""):
         neutron_group = db.createGroup('/', 'neutron', 'Neutron Data')
 
     # Init the neutron fission product info table
-    sl_table = db.createTable('/neutron/', 'scattering_lengths', sl_dtype, 
+    sl_table = db.createTable('/neutron/', 'scattering_lengths', 
+                              np.empty(0, dtype=sl_dtype), 
                               'Neutron Scattering Lengths, b [cm], sigma [barns]', 
                               expectedrows=len(sl_array))
     sl_table.append(sl_array)
