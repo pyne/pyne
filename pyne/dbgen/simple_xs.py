@@ -217,7 +217,8 @@ def make_simple_xs_tables(nuc_data, build_dir=""):
 
     # Create tables for every energy 
     for eng, eng_flag in simple_xs_energy.items():
-        simple_xs_table = db.createTable(simple_xs_group, eng, simple_xs_dtype, 
+        simple_xs_table = db.createTable(simple_xs_group, eng, 
+                                         np.empty(0, dtype=simple_xs_dtype), 
                                          "{0} [barns]".format(eng_flag.capitalize()), 
                                          expectedrows=len(simple_xs_tables[eng]))
         simple_xs_table.append(simple_xs_tables[eng])
