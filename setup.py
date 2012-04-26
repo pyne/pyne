@@ -9,7 +9,7 @@ from distutils.extension import Extension
 from distutils.util import get_platform
 from distutils.file_util import copy_file, move_file
 from distutils.dir_util import mkpath, remove_tree
-from distutils.sysconfig import get_python_version
+from distutils.sysconfig import get_python_version, get_config_vars
 from Cython.Distutils import build_ext
 
 import numpy as np
@@ -109,14 +109,33 @@ def cpp_ext(name, sources, libs=None, use_hdf5=False):
     #                              [os.path.abspath(p + '/pyne') for p in sys.path] + \
     #                              [os.path.abspath(p) for p in sys.path]
 
-    if os.name == 'posix':
+    if sys.platform == 'linux2':
         #ext["extra_compile_args"] = ["-Wno-strict-prototypes"]
         ext["undef_macros"] = ["NDEBUG"]
         if use_hdf5:
             ext["libraries"] += posix_hdf5_libs
         if libs is not None:
             ext["libraries"] += libs
-    elif os.name == 'nt':
+    elif sys.platform == 'darwin':
+        ext["undef_macros"] = ["NDEBUG"]
+        if use_hdf5:
+            ext["libraries"] += posix_hdf5_libs
+        if libs is not None:
+            ext["libraries"] += libs
+        config_vars = get_config_vars()
+        config_vars['SO'] = '.dylib'
+        config_vars['LDSHARED'] = config_vars['LDSHARED'].replace('-bundle', '-Wl,-x') 
+        #import pdb; pdb.set_trace()
+
+        #ext["extra_compile_args"] = ["-dynamiclib",]# "-undefined", "dynamic_lookup"]
+        ext["extra_compile_args"] = ["-dynamiclib", "-undefined", "dynamic_lookup", '-shared']
+        #ext["extra_compile_args"] = ["-dynamic", "-shared"]
+
+        #ext["extra_link_args"] = ["-dylib", "-shared"]
+        #ext["extra_link_args"] = ["-dynamic", "-shared"]
+        #ext["extra_link_args"] = ["-dynamiclib", "-shared"]
+        ext["extra_link_args"] = ["-dynamiclib", "-undefined", "dynamic_lookup", '-shared']
+    elif sys.platform == 'win32':
         ext["extra_compile_args"] = ["/EHsc"]
         ext["define_macros"] = [("_WIN32", None)]
 
@@ -127,6 +146,8 @@ def cpp_ext(name, sources, libs=None, use_hdf5=False):
 
         if libs is not None:
             ext["libraries"] += libs
+    elif sys.platform == 'cygwin':
+        pass
 
     return ext
 
