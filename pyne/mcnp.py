@@ -34,6 +34,11 @@ try:
 except ImportError:
     pass
 
+# from operator import mul
+
+class MctalTallyData(object):
+    def __init__(self):
+        pass
 
 class Mctal(object):
     def __init__(self):
@@ -47,6 +52,16 @@ class Mctal(object):
 
         # open file
         self.f = open(filename, 'r')
+
+        self.read_header()
+
+        for i in self.tally_nums:
+            self.read_tally_data(i)
+
+    def read_header(self):
+        """
+        Read the header, comment, and tally information from MCTAL file.
+        """
 
         # get code name, version, date/time, etc
         words = self.f.readline().split()
@@ -66,15 +81,90 @@ class Mctal(object):
         self.n_tallies = words[1]
         if len(words) > 2:
             # perturbation tallies present
-            pass
+            self.n_perts = words[3]
 
         # read tally numbers
-        tally_nums = [int(i) for i in self.f.readline().split()]
+        self.tally_nums = []
+        while len(self.tally_nums) < self.n_tallies:
+            self.tally_nums.append([int(i) for i in self.f.readline().split()])
 
-        # read tallies
-        for i_tal in tally_nums:
-            pass
+    def readBinBounds(self,num_bounds):
+        bin_bounds = []
+        while (len(bin_bounds) < num_bounds):
+            bin_bounds.append([double(i) for i in self.f.readline.split()])
 
+    def readDimensionInfo(num):
+        words = self.f.readline().split()
+        if (len(words[0])>1):
+            if (words[0][1] == 'T'):
+                bins_total = true
+            else if (words[0][1] == 'C'):
+                bins_cumm = true
+        num_bins = max(int(words[1]),1)
+        return [bins_total, bins_cumm, num_bins]
+
+    def readTallyData(self,tally_num):
+        
+        # Tally intro card
+        words = self.f.readline().split()
+        td = MctalTallyData()
+        td.tally_num = tally_num
+        td.mode = int(words[2])
+        td.type = int(words[3])
+
+        # tally comment card
+        td.comment = self.f.readline()
+        
+        # tally F bins
+        [F_bins_total, F_bins_cumm, num_bins] = self.readDimensionInfo()
+        td.F_bins = [int(i) for i in self.readBinBounds(num_bins)]
+        bin_dims = [num_bins]
+
+        # tally d bins
+        [td.D_bins_total, td.D_bins_cumm, num_bins] = self.readDimensionInfo();
+        bin_dims.insert(0,num_bins)
+
+        # tally U bins
+        [td.U_bins_total, td.U_bins_cumm, num_bins] = self.readDimensionInfo();
+        bin_dims.insert(0,num_bins)
+
+        # tally S bins
+        [td.S_bins_total, td.S_bins_cumm, num_bins] = self.readDimensionInfo();
+        bin_dims.insert(0,num_bins)
+
+        # tally M bins
+        [td.M_bins_total, td.M_bins_cumm, num_bins] = self.readDimensionInfo();
+        bin_dims.insert(0,num_bins)
+
+        # tally C bins
+        [td.C_bins_total, td.C_bins_cumm, num_bins] = self.readDimensionInfo();
+        td.C_bins = self.readBinBounds(td.num_bins)
+        bin_dims.insert(0,num_bins)
+
+        # tally E bins
+        [td.E_bins_total, td.E_bins_cumm, num_bins] = self.readDimensionInfo();
+        td.E_bins = self.readBinBounds(num_bins)
+        bin_dims.insert(0,num_bins)
+
+        # tally T bins
+        [td.T_bins_total, td.T_bins_cumm, num_bins] = self.readDimensionInfo();
+        td.T_bins = self.readBinBounds(num_bins)
+        bin_dims.insert(0,num_bins)
+
+        # add dimension for error
+        bin_dims.insert(0,2)
+
+        # vals
+        self.f.readline()
+        td.data=self.readBinData(bin_dims)
+
+        #tfc
+        words=self.f.readline().split()
+        tfc_bins=int(words[1])
+        td.tfc_idx= [int(i) for i in words[2:]]
+        td.tfc_Data=self.readTfcData(tfc_bins)
+
+    def read_kcode_data(self):
         # read kcode information
         words = self.f.readline().split()
         self.n_cycles = int(words[1])
