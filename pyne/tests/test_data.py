@@ -9,15 +9,15 @@ from nose.tools import assert_equal, assert_not_equal, assert_raises, raises, as
 from pyne import data
 import numpy as np
 
-def test_nuc_weight():
+def test_atomic_mass():
     o16 = [15.99491461957, 16.0]
     u235 = [235.043931368, 235.0]
     am242m = [242.059550625, 242.0]
 
     # zzaam form
-    assert_in(data.nuc_weight(80160),  o16)
-    assert_in(data.nuc_weight(922350), u235)
-    assert_in(data.nuc_weight(952421), am242m)
+    assert_in(data.atomic_mass(80160),  o16)
+    assert_in(data.atomic_mass(922350), u235)
+    assert_in(data.atomic_mass(952421), am242m)
 
 
 def test_b_coherent():
