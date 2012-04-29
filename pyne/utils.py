@@ -62,6 +62,7 @@ def to_sec(input_time, units):
     -------
     sec_time : float
         Time value in [sec]. 
+
     """
     sec_time = input_time * time_conv_dict[units.lower()]
     return sec_time
@@ -95,6 +96,7 @@ def to_barns(xs, units):
     -------
     barn_xs : float
         Cross section value in [barns].
+
     """
     barn_xs = xs * barn_conv_dict[units.lower()]
     return barn_xs
@@ -107,7 +109,10 @@ def to_barns(xs, units):
 USE_COLOR = (os.name is 'posix')
 
 def message(s):
-    """Formats a message for printing.  If on a posix system the message will be in color."""
+    """Formats a message for printing.  If on a posix system the message will
+    be in color.
+
+    """
     head = "\033[1;32m" if USE_COLOR else "*** MESSAGE ***: "
     tail = "\033[0m" if USE_COLOR else ""
     msg = head + s + tail
@@ -115,13 +120,14 @@ def message(s):
 
 
 def failure(s):
-    """Formats a fail message for printing.  If on a posix system the message will be in color."""
+    """Formats a fail message for printing.  If on a posix system the message
+    will be in color.
+
+    """
     head = "\033[1;31m" if USE_COLOR else "*** FAILURE ***: "
     tail = "\033[0m" if USE_COLOR else ""
     msg = head + s + tail
     return msg
-
-
 
 
 ##################################
@@ -130,7 +136,9 @@ def failure(s):
 
 def remove(path):
     """Removes a path, or recursively a directory, or does nothing
-    if path is neither a file nor a directory."""
+    if path is neither a file nor a directory.
+
+    """
     if os.path.isfile(path):
         os.remove(path)
     elif os.path.isdir(path):

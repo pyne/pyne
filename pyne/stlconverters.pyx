@@ -547,6 +547,7 @@ class SetInt(_SetInt, collections.MutableSet):
     free_set : bool
         Flag for whether the pointer to the C++ set should be deallocated
         when the wrapper is dereferenced.
+
     """
     def __str__(self):
         return self.__repr__()
@@ -593,7 +594,9 @@ cdef class _SetStr:
         # Decide how to init set, if at all
         if isinstance(new_set, _SetStr):
             self.set_ptr = (<_SetStr> new_set).set_ptr
-        elif hasattr(new_set, '__iter__') or (hasattr(new_set, '__len__') and hasattr(new_set, '__getitem__')):
+        elif hasattr(new_set, '__iter__') or
+                (hasattr(new_set, '__len__') and
+                hasattr(new_set, '__getitem__')):
             self.set_ptr = new cpp_set[std.string]()
             for value in new_set:
                 s = std.string(value)
@@ -656,6 +659,7 @@ class SetStr(_SetStr, collections.Set):
     free_set : bool
         Flag for whether the pointer to the C++ set should be deallocated
         when the wrapper is dereferenced.
+
     """
     def __str__(self):
         return self.__repr__()
@@ -786,12 +790,14 @@ class MapStrInt(_MapStrInt, collections.MutableMapping):
     free_map : bool
         Flag for whether the pointer to the C++ map should be deallocated
         when the wrapper is dereferenced.
+
     """
     def __str__(self):
         return self.__repr__()
 
     def __repr__(self):
-        return "{" + ", ".join(["{0}: {1}".format(repr(key), value) for key, value in self.items()]) + "}"
+        return "{" + ", ".join(["{0}: {1}".format(repr(key), value) for key,
+                value in self.items()]) + "}"
 
 
 
