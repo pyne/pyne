@@ -3,14 +3,14 @@
 #include "data.h"
 
 
-/****************************/
-/*** nuc_weight Functions ***/
-/****************************/
-std::map<int, double> pyne::nuc_weight_map = std::map<int, double>();
+/*****************************/
+/*** atomic_mass Functions ***/
+/*****************************/
+std::map<int, double> pyne::atomic_mass_map = std::map<int, double>();
 
-void pyne::_load_nuc_weight_map()
+void pyne::_load_atomic_mass_map()
 {
-  // Loads the importnat parts of atomic_wight table into nuc_weight_map
+  // Loads the important parts of atomic_wight table into atomic_mass_map
 
   //Check to see if the file is in HDF5 format.
   if (!pyne::file_exists(pyne::NUC_DATA_PATH))
@@ -45,17 +45,17 @@ void pyne::_load_nuc_weight_map()
 
   // Ok now that we have the array of stucts, put it in the map
   for(int n = 0; n < atomic_weight_length; n++)
-    nuc_weight_map[atomic_weight_array[n].nuc_zz] = atomic_weight_array[n].mass;
+    atomic_mass_map[atomic_weight_array[n].nuc_zz] = atomic_weight_array[n].mass;
 };
 
 
-double pyne::nuc_weight(int nuc)
+double pyne::atomic_mass(int nuc)
 {
   // Find the nuclide;s weight in AMU
   std::map<int, double>::iterator nuc_iter, nuc_end;
 
-  nuc_iter = nuc_weight_map.find(nuc);
-  nuc_end = nuc_weight_map.end();
+  nuc_iter = atomic_mass_map.find(nuc);
+  nuc_end = atomic_mass_map.end();
 
   // First check if we already have the nuc weight in the map
   if (nuc_iter != nuc_end)
@@ -63,13 +63,13 @@ double pyne::nuc_weight(int nuc)
 
   // Next, fill up the map with values from the 
   // nuc_data.h5, if the map is empty.
-  if (nuc_weight_map.empty())
+  if (atomic_mass_map.empty())
   {
     // Don't fail if we can't load the library
     try
     {
-      _load_nuc_weight_map();
-      return nuc_weight(nuc);
+      _load_atomic_mass_map();
+      return atomic_mass(nuc);
     }
     catch(...){};
   };
@@ -81,8 +81,8 @@ double pyne::nuc_weight(int nuc)
   // state weight...not strictly true, but good guess.
   if (0 < nuc_zz%10)
   {
-    aw = nuc_weight((nuc_zz/10)*10);
-    nuc_weight_map[nuc] = aw;
+    aw = atomic_mass((nuc_zz/10)*10);
+    atomic_mass_map[nuc] = aw;
     return aw;
   };
 
@@ -90,22 +90,22 @@ double pyne::nuc_weight(int nuc)
   // take a best guess based on the 
   // aaa number.
   aw = (double) ((nuc_zz/10)%1000);
-  nuc_weight_map[nuc] = aw;
+  atomic_mass_map[nuc] = aw;
   return aw;
 };
 
 
-double pyne::nuc_weight(char * nuc)
+double pyne::atomic_mass(char * nuc)
 {
   int nuc_zz = nucname::zzaaam(nuc);
-  return nuc_weight(nuc_zz);
+  return atomic_mass(nuc_zz);
 };
 
 
-double pyne::nuc_weight(std::string nuc)
+double pyne::atomic_mass(std::string nuc)
 {
   int nuc_zz = nucname::zzaaam(nuc);
-  return nuc_weight(nuc_zz);
+  return atomic_mass(nuc_zz);
 };
 
 
@@ -125,7 +125,7 @@ std::map<int, double> pyne::b_map = std::map<int, double>();
 
 void pyne::_load_scattering_lengths()
 {
-  // Loads the importnat parts of atomic_wight table into nuc_weight_map
+  // Loads the important parts of atomic_wight table into atomic_mass_map
 
   //Check to see if the file is in HDF5 format.
   if (!pyne::file_exists(pyne::NUC_DATA_PATH))
@@ -387,7 +387,7 @@ std::map<int, double> pyne::decay_const_map = std::map<int, double>();
 
 void pyne::_load_atomic_decay()
 {
-  // Loads the importnat parts of atomic_decay table into memory
+  // Loads the important parts of atomic_decay table into memory
 
   //Check to see if the file is in HDF5 format.
   if (!pyne::file_exists(pyne::NUC_DATA_PATH))
