@@ -96,7 +96,7 @@ def test_sigma_f():
 def test_sigma_s_gh():
     # Tests stub
     b = pyne.data.b('H1')
-    aw = pyne.data.nuc_weight('H1')
+    aw = pyne.data.atomic_mass('H1')
     E = np.logspace(-6, 1, 10)[::-1]
     E_centers = (E[1:] + E[:-1]) / 2.0
     expected = np.diag(pyne.xs.models.sigma_s(E_centers, b, aw, 600.0))
