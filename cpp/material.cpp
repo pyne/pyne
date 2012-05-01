@@ -580,7 +580,7 @@ double pyne::Material::molecular_weight(double apm)
   // Calculate the atomic weight of the Material
   double inverseA = 0.0;
   for (pyne::comp_iter nuc = comp.begin(); nuc != comp.end(); nuc++)
-    inverseA += (nuc->second) / pyne::nuc_weight(nuc->first);
+    inverseA += (nuc->second) / pyne::atomic_mass(nuc->first);
 
   if (inverseA == 0.0)
     return inverseA;
@@ -860,7 +860,7 @@ std::map<int, double> pyne::Material::to_atom_frac()
   std::map<int, double> atom_fracs = std::map<int, double>();
 
   for (comp_iter ci = comp.begin(); ci != comp.end(); ci++)
-    atom_fracs[ci->first] = (ci->second) * mat_mw / pyne::nuc_weight(ci->first);
+    atom_fracs[ci->first] = (ci->second) * mat_mw / pyne::atomic_mass(ci->first);
 
   return atom_fracs;
 };
@@ -878,7 +878,7 @@ void pyne::Material::from_atom_frac(std::map<int, double> atom_fracs)
 
   for (std::map<int, double>::iterator afi = atom_fracs.begin(); afi != atom_fracs.end(); afi++)
   {
-    comp[afi->first] = (afi->second) * pyne::nuc_weight(afi->first);
+    comp[afi->first] = (afi->second) * pyne::atomic_mass(afi->first);
     atoms_per_mol += (afi->second);
   };
 
