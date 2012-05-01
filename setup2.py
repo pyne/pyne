@@ -173,13 +173,11 @@ def cpp_ext(name, sources, libs=None, use_hdf5=False):
         ext["extra_compile_args"] = ["-dynamiclib",
                                      "-undefined", "dynamic_lookup", 
                                      '-shared',
-                                     #"-arch", "x86_64",
                                      ]
         ext["extra_link_args"] = ["-dynamiclib", 
                                   "-undefined", "dynamic_lookup", 
                                   '-shared',
                                   "-install_name" , os.path.join(PYNE_DIR, 'lib', name.split('.')[-1] + config_vars['SO']),
-                                  #"-arch", "x86_64",
                                   ]
     elif sys.platform == 'win32':
         ext["extra_compile_args"] = ["/EHsc"]
