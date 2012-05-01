@@ -123,18 +123,23 @@ def cpp_ext(name, sources, libs=None, use_hdf5=False):
         if libs is not None:
             ext["libraries"] += libs
         config_vars = get_config_vars()
-        config_vars['SO'] = '.dylib'
+        #config_vars['SO'] = '.dylib'
         config_vars['LDSHARED'] = config_vars['LDSHARED'].replace('-bundle', '-Wl,-x') 
-        #import pdb; pdb.set_trace()
 
-        #ext["extra_compile_args"] = ["-dynamiclib",]# "-undefined", "dynamic_lookup"]
-        ext["extra_compile_args"] = ["-dynamiclib", "-undefined", "dynamic_lookup", '-shared']
-        #ext["extra_compile_args"] = ["-dynamic", "-shared"]
-
-        #ext["extra_link_args"] = ["-dylib", "-shared"]
-        #ext["extra_link_args"] = ["-dynamic", "-shared"]
-        #ext["extra_link_args"] = ["-dynamiclib", "-shared"]
-        ext["extra_link_args"] = ["-dynamiclib", "-undefined", "dynamic_lookup", '-shared']
+	#os.environ['DYLD_LIBRARY_PATH'] = ":".join(ext['library_dirs'])
+        #ext['library_dirs'] = ["$(CURDIR)/" + ld for ld in ext['library_dirs']]
+        #ext['runtime_library_dirs'] = [rld.replace("${ORIGIN}", "$(CURDIR)") for rld in ext['runtime_library_dirs']]
+        #ext['runtime_library_dirs'] = [rld.replace("${ORIGIN}", "@rpath") for rld in ext['runtime_library_dirs']]
+        ext["extra_compile_args"] = ["-dynamiclib",
+                                     #"-install_name" , ext['library_dirs'][-1],
+                                     "-undefined", "dynamic_lookup", 
+                                     '-shared', 
+                                     '-Wl,-z,origin'
+                                     ]
+        ext["extra_link_args"] = ["-dynamiclib", 
+                                  "-undefined", "dynamic_lookup", 
+                                  '-shared', 
+                                  ]
     elif sys.platform == 'win32':
         ext["extra_compile_args"] = ["/EHsc"]
         ext["define_macros"] = [("_WIN32", None)]
