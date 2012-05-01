@@ -27,37 +27,37 @@ import pyne.stlconverters as conv
 
 
 #
-# nuc_weight functions
+# atomic_mass functions
 #
-cdef conv._MapIntDouble nuc_weight_map_proxy = conv.MapIntDouble(False)
-nuc_weight_map_proxy.map_ptr = &cpp_data.nuc_weight_map
-nuc_weight_map = nuc_weight_map_proxy
+cdef conv._MapIntDouble atomic_mass_map_proxy = conv.MapIntDouble(False)
+atomic_mass_map_proxy.map_ptr = &cpp_data.atomic_mass_map
+atomic_mass_map = atomic_mass_map_proxy
 
-def nuc_weight(nuc):
-    """Finds the weight of a nuclide in [amu].
+def atomic_mass(nuc):
+    """Finds the atomic mass of a nuclide in [amu].
 
     Parameters
     ----------
-    nuc : int or str 
+    nuc : int or str
         Input nuclide.
 
     Returns
     -------
-    weight : float
-        Atomic weight of this nuclide [amu].
+    mass : float
+        Atomic mass of this nuclide [amu].
 
     Notes
     -----
     If the nuclide is not found, the A-number is returned as a float.
     """
     if isinstance(nuc, int):
-        weight = cpp_data.nuc_weight(<int> nuc)
+        mass = cpp_data.atomic_mass(<int> nuc)
     elif isinstance(nuc, basestring):
-        weight = cpp_data.nuc_weight(<char *> nuc)
+        mass = cpp_data.atomic_mass(<char *> nuc)
     else:
         raise pyne.nucname.NucTypeError(nuc)
 
-    return weight
+    return mass
 
 
 

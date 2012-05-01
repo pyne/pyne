@@ -13,16 +13,16 @@ All functionality may be found in the ``data`` module::
 
  from pyne import data
 
--------------
-Atomic Weight
--------------
+-----------
+Atomic Mass
+-----------
 
-.. autofunction:: nuc_weight(nuc)
+.. autofunction:: atomic_mass(nuc)
 
-.. data:: nuc_weight_map
+.. data:: atomic_mass_map
 
     A mapping from zzaaam-nuclides to their mass weights.
-    This is used by :func:`nuc_weight` under the hood.
+    This is used by :func:`atomic_mass` under the hood.
 
 
 ----------
