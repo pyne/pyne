@@ -1086,6 +1086,7 @@ cdef class _Material:
 
     def __iter__(self):
         mbm = self.mult_by_mass()
+        self._iter_mbm = mbm
         mbm_iter = iter(mbm)
         return mbm_iter
 
