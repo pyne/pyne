@@ -22,7 +22,7 @@ def grab_cinder_dat(build_dir="", datapath=''):
     elif 'DATAPATH' in os.environ:
         datapath = os.environ['DATAPATH']
     else:
-        print failure("DATAPATH not defined in environment; cinder.dat not found.")
+        print failure("DATAPATH not defined in environment; cinder.dat not found - skipping.")
         return False
 
     local_filename = os.path.join(datapath, "[Cc][Ii][Nn][Dd][Ee][Rr].[Dd][Aa][Tt]")
@@ -32,7 +32,7 @@ def grab_cinder_dat(build_dir="", datapath=''):
         shutil.copy(local_filename[0], build_filename)
         rtn = True
     else:
-        print failure("cinder.dat file not found in DATAPATH dir.")
+        print failure("cinder.dat file not found in DATAPATH dir - skipping.")
         rtn = False
     return rtn
 
