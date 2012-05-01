@@ -19,6 +19,10 @@ INFO = {
     'version': '0.1-rc',
     }
 
+_local_subsititues = {'darwin': 'Library'}
+PYNE_DIR = os.path.join(os.environ['HOME'], 
+                        _local_subsititues.get(sys.platform, '.local'),
+                        'pyne')
 
 # Thanks to http://patorjk.com/software/taag/  
 # and http://www.chris.com/ascii/index.php?art=creatures/dragons
@@ -51,6 +55,40 @@ pyne_logo = """\
                                      `  
 """
 
+###############################
+### Platform specific setup ###
+###############################
+def darwin_linker_paths():
+    paths = [os.path.join(PYNE_DIR, 'lib')]
+    vars = ['LD_LIBRARY_PATH', 'DYLD_FALLBACK_LIBRARY_PATH', 'DYLD_LIBRARY_PATH', 'LIBRARY_PATH']
+    for v in vars:
+        curvar = os.getenv(v, '')
+        varpaths = paths + ([] if 0 == len(curvar) else [curvar])
+        os.environ[v] = ":".join(varpaths)
+
+
+def darwin_build_ext_decorator(f):
+    def new_build_ext(self, ext):
+        rtn = f(self, ext)
+        if not ext.name.split('.')[-1].startswith('lib'):
+            return rtn
+        
+        libpath = os.path.join(PYNE_DIR, 'lib')
+        if not os.path.exists(libpath):
+            mkpath(libpath)
+        
+        copy_file(self.get_ext_fullpath(ext.name), libpath)
+        return rtn
+    return new_build_ext
+
+
+def darwin_setup():
+    darwin_linker_paths()
+    build_ext.build_extension = darwin_build_ext_decorator(build_ext.build_extension)
+
+platform_setup = {'darwin': darwin_setup}
+
+
 
 ###########################################
 ### Set compiler options for extensions ###
@@ -69,6 +107,9 @@ nt_hdf5_libs = ["/DEFAULTLIB:szip.lib", "/DEFAULTLIB:zlib1.lib", "/DEFAULTLIB:hd
                 "/DEFAULTLIB:hdf5_hldll.lib", "/DEFAULTLIB:hdf5_cppdll.lib", "/DEFAULTLIB:hdf5_hl_cppdll.lib", ]
 nt_hdf5_extra_compile_args = ["/EHsc"]
 nt_hdf5_macros = [("_WIN32", None), ("_HDF5USEDLL_", None), ("HDF5CPP_USEDLL", None), ]
+
+
+
 
 
 def cpp_ext(name, sources, libs=None, use_hdf5=False):
@@ -99,6 +140,7 @@ def cpp_ext(name, sources, libs=None, use_hdf5=False):
     ext['library_dirs'] = ['build/lib/pyne/lib',
                            'build/lib.{0}-{1}/pyne/lib'.format(get_platform(), get_python_version()),
                            ]
+                         
     # perfectly general, thanks to dynamic runtime linking of $ORIGIN
     #ext['runtime_library_dirs'] = ['${ORIGIN}/lib', '${ORIGIN}']
     ext['runtime_library_dirs'] = ['${ORIGIN}/lib', '${ORIGIN}', '${ORIGIN}/.', 
@@ -126,19 +168,16 @@ def cpp_ext(name, sources, libs=None, use_hdf5=False):
         #config_vars['SO'] = '.dylib'
         config_vars['LDSHARED'] = config_vars['LDSHARED'].replace('-bundle', '-Wl,-x') 
 
-	#os.environ['DYLD_LIBRARY_PATH'] = ":".join(ext['library_dirs'])
-        #ext['library_dirs'] = ["$(CURDIR)/" + ld for ld in ext['library_dirs']]
-        #ext['runtime_library_dirs'] = [rld.replace("${ORIGIN}", "$(CURDIR)") for rld in ext['runtime_library_dirs']]
-        #ext['runtime_library_dirs'] = [rld.replace("${ORIGIN}", "@rpath") for rld in ext['runtime_library_dirs']]
+        ext['library_dirs'] = []
+        ext['runtime_library_dirs'] = []
         ext["extra_compile_args"] = ["-dynamiclib",
-                                     #"-install_name" , ext['library_dirs'][-1],
                                      "-undefined", "dynamic_lookup", 
-                                     '-shared', 
-                                     '-Wl,-z,origin'
+                                     '-shared',
                                      ]
         ext["extra_link_args"] = ["-dynamiclib", 
                                   "-undefined", "dynamic_lookup", 
-                                  '-shared', 
+                                  '-shared',
+                                  "-install_name" , os.path.join(PYNE_DIR, 'lib', name.split('.')[-1] + config_vars['SO']),
                                   ]
     elif sys.platform == 'win32':
         ext["extra_compile_args"] = ["/EHsc"]
@@ -237,13 +276,16 @@ if __name__ == "__main__":
     for header in glob.glob('pyne/*.pxd'):
         copy_file(header, 'pyne/includes/pyne')
 
+    # Platform specific setup
+    platform_setup.get(sys.platform, lambda: None)()
+    
     # call setup
     setup(name="pyne",
         version = INFO['version'],
         description = 'Python for Nuclear Engineering',
         author = 'PyNE Development Team',
         author_email = 'scopatz@gmail.com',
-        url = 'http://pyne.github.com/pyne',
+        url = 'http://pyne.github.com/',
         packages = packages,
         package_dir = pack_dir,
         package_data = pack_data,
