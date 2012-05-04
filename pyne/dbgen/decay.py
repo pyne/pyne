@@ -31,6 +31,7 @@ def grab_ensdf_decay(build_dir=""):
 
     # Grab ENSDF files and unzip them.
     iaea_base_url = 'http://www-nds.iaea.org/ensdf_base_files/2010-November/'
+    s3_base_url = 'http://s3.amazonaws.com/pyne/'
     ensdf_zip = ['ensdf_1010_099.zip', 'ensdf_1010_199.zip', 'ensdf_1010_294.zip',]
 
     for f in ensdf_zip:
@@ -38,6 +39,11 @@ def grab_ensdf_decay(build_dir=""):
         if f not in os.listdir(build_dir):
             print "  grabing {0} and placing it in {1}".format(f, fpath)
             urllib.urlretrieve(iaea_base_url + f, fpath)
+
+            if os.path.getsize(fpath) < 1048576: 
+                print "  could not get {0} from IAEA; trying S3 mirror".format(f)
+                os.remove(fpath)
+                urllib.urlretrieve(s3_base_url + f, fpath)
 
         with ZipFile(fpath) as zf:
             for name in zf.namelist():
