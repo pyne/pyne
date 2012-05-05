@@ -1,0 +1,138 @@
+======================
+PyNE 0.1 Release Notes
+======================
+
+PyNE 0.1 is the first release of Python for Nuclear Engineering project 
+after an initial last year of effort.  PyNE is a free and open source 
+(BSD licensed) project which is meant to compliment other project, such
+as NumPy and SciPy, as a necessary package in the computational nuclear
+engineer's toolkit.  It is meant to play nicely with existing, industry
+standard nuclear engineering tools.  The goal of PyNE is to be both fast 
+and useful.  As such, this is only the begging!
+
+Release highlights:
+
+  - Support for many I/O routines.
+  - Nuclear data interface.
+  - C/C++ library which may be linked against independent of Python.
+  - Cython wrappers for C++ standard library containers.
+
+Please visit our website for more information: http://pyne.github.com/
+
+PyNE requires Python 2.7, NumPy 1.5+, PyTables 2.1+.
+
+
+New features
+============
+
+Nuclide Naming in ``pyne.nucname``
+----------------------------------
+This module may be used to convert between various nuclide naming schemes. 
+Currently the following naming conventions are supported: zzaaam, human 
+readable names, MCNP, Serpent, NIST, and CINDER.  This module is 
+implemented in C.
+
+
+Basic Nuclear Data via ``pyne.data``
+------------------------------------
+This aims to provide quick access to very high fidelity nuclear data. Usually 
+values are taken from the nuc_data.h5 library which is generated with the new
+``nuc_data_make`` utility at install.  Current data includes atomic masses, 
+decay data, neutron scattering lengths, and simple cross section data. 63-group
+neutron cross sections, photon cross sections, and fission product yields are
+also added when CINDER is available.  This module is implemented in C.
+
+
+Material Class in ``pyne.material``
+-----------------------------------
+Materials are the primary container for radionuclides throughout PyNE. They map 
+nuclides to mass weights, though they contain methods for converting to/from 
+atom fractions as well.  In many ways they take inspiration from numpy arrays 
+and python dictionaries.  Materials are implemented in C++ and support both text
+and HDF5 I/O.
+
+
+CCCC Formats in ``pyne.cccc``
+-----------------------------
+The CCCC module contains a number of classes for reading various cross section, 
+flux, geometry, and data files with specifications given by the Committee for 
+Computer Code Coordination. The following types of files can be read using 
+classes from this module: ISOTXS, DLAYXS, BRKOXS, RTFLUX, ATFLUX, RZFLUX, MATXS, 
+and SPECTR.
+
+
+ACE Cross Sections in ``pyne.ace``
+----------------------------------
+This module is for reading ACE-format cross sections. ACE stands for "A Compact 
+ENDF" format and originated from work on MCNP. It is used in a number of other 
+Monte Carlo particle transport codes.
+
+
+Cross Section Interface via ``pyne.xs``
+---------------------------------------
+This is a top-level interface for computing (and caching) multigroup neutron 
+cross sections. These cross sections will be computed from a variety of 
+available data sources (stored in nuc_data.h5).  In order of preference: 
+
+    1. CINDER 63-group cross sections,
+    2. A two-point fast/thermal interpolation (using 'simple_xs' data from KAERI),
+    3. or physical models implemented in this sub-package.
+
+In the future, this package will support generating multigroup cross sections 
+from user-specified pointwise data sources (such as ENDF or ACE files).
+
+
+ORIGEN 2.2 Support in ``pyne.origen22``
+---------------------------------------
+This provides an interface for reading, writing, and merging certain ORIGEN 2.2 
+input and output files.  Specifically, tapes 4, 5, 6, and 9 are supported.
+
+
+Serpent Support in ``pyne.serpent``
+-----------------------------------
+Serpent is a continuous energy Monte Carlo reactor physics code.  Pyne contains 
+support for reading in Serpent's three types of output files: res, dep, and det.
+These are all in Matlab's ``*.m`` format and are read in as Python dictionaries 
+of numpy arrays and Materials.  They may be optionally written out to 
+corresponding ``*.py`` files and imported later.
+
+
+C++ Standard Library Converters in ``pyne.stlconverters``
+---------------------------------------------------------
+This module contains wrapper classes for commonly used containers in the C++ 
+standard library.   This module is largely used by PyNE under the covers, in 
+Cython and elsewhere. However, these classes are of more general interest so 
+feel free to use them in your own code as well.  Currently implemented are
+SetInt, SetStr, MapStrInt, MapIntStr, MapIntDouble, and MapIntComplex.
+
+
+Nuclear Data Generation in ``pyne.dbgen``
+-----------------------------------------
+Pyne provides an easy-to-use, repeatable aggregation utility for nuclear data.  
+This command line utility is called ``nuc_data_make`` builds and installs an HDF5 
+file named ``nuc_data.h5`` to the current PyNE install.  Nuclear data is gathered 
+from a variety of sources, including the web and the data files for other programs 
+installed on your system (such as MCNP).
+
+
+Authors
+=======
+This release contains code written by the following people (in alphabetical 
+order):
+
+* Christopher Dembia
+* Robert Flanagan
+* Paul Romano
+* Anthony Scopatz
+* Paul Wilson
+
+Additionally, we would like to thank the following people for their 
+inspiration, guidance, and testing:
+
+* Katy Huff
+* Seth Johnson
+* Joshua Peterson
+* Rachel Slaybaugh
+* Nick Touran
+* Morgan White
+
