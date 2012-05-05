@@ -16,7 +16,7 @@ import numpy as np
 import sys
 
 INFO = {
-    'version': '0.1-rc',
+    'version': '0.1',
     }
 
 _local_subsititues = {'darwin': 'Library'}
