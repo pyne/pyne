@@ -1037,39 +1037,37 @@ class NeutronTable(AceTable):
         energies based on older 30x20 matrix formulation.
 
         """
-
         JXS12 = self.JXS[12]
-
         if JXS12 != 0:
             # Determine number of energies
             NE = self.NXS[3]
 
             # Read total photon production cross section
-            self.index = JXS12
-            self.sigma_photon = self._get_float(NE)
+            ind = JXS12
+            self.sigma_photon = self.XSS[ind:ind+NE]
+            ind += NE
 
             # The following energies are the discrete incident neutron energies
             # for which the equiprobable secondary photon outgoing energies are
             # given
-            self.e_in_photon_equi = [1.39e-10, 1.52e-7, 4.14e-7, 1.13e-6, 3.06e-6,
+            self.e_in_photon_equi = np.array(
+                                    [1.39e-10, 1.52e-7, 4.14e-7, 1.13e-6, 3.06e-6,
                                      8.32e-6,  2.26e-5, 6.14e-5, 1.67e-4, 4.54e-4,
                                      1.235e-3, 3.35e-3, 9.23e-3, 2.48e-2, 6.76e-2,
                                      0.184,    0.303,   0.500,   0.823,   1.353,
                                      1.738,    2.232,   2.865,   3.68,    6.07,
-                                     7.79,     10.,     12.,     13.5,    15.]
+                                     7.79,     10.,     12.,     13.5,    15.])
 
             # Read equiprobable outgoing photon energies
-            self.e_out_photon_equi = []
-            for i in range(30):
-                # Equiprobable outgoing photon energies for incident neutron
-                # energy i
-                self.e_out_photon_equi.append(self._get_float(20))
+            # Equiprobable outgoing photon energies for incident neutron
+            # energy i
+            self.e_out_photon_equi = self.XSS[ind:ind+600]
+            self.e_out_photon_equi.shape = (30, 20)
 
     def _read_mtrp(self):
         """Get the list of reaction MTs for photon-producing reactions for this
         cross-section table. The MT values are somewhat arbitrary.
         """
-
         LMT = self.JXS[13]
         NMT = self.NXS[6]
         mts = np.asarray(self.XSS[LMT:LMT+NMT], dtype=int)
@@ -1080,44 +1078,50 @@ class NeutronTable(AceTable):
         """Determine location of cross sections for each photon-producing reaction
         MT.
         """
-
         LXS = self.JXS[14]
-        for i, rxn in enumerate(self.photon_reactions.values()):
-            rxn.LOCA = int(self.XSS[LXS+i])
+        NMT = self.NXS[6]
+        loca = np.asarray(self.XSS[LXS:LXS+NMT])
+        for loc, rxn in zip(loca, self.photon_reactions.values()):
+            rxn.LOCA = loc
 
     def _read_sigp(self):
         """Read cross-sections for each photon-producing reaction MT.
         """
-
         JXS15 = self.JXS[15]
         for rxn in self.photon_reactions.values():
-            self.index = JXS15 + rxn.LOCA - 1
-            MFTYPE = self._get_int()
+            ind = JXS15 + rxn.LOCA - 1
+            MFTYPE = int(self.XSS[ind])
+            ind += 1
 
-            # Yield data taken from ENDF File 12 or 6
             if MFTYPE == 12 or MFTYPE == 16:
-                MTMULT = self._get_int()
-
+                # Yield data taken from ENDF File 12 or 6
+                MTMULT = int(self.XSS[ind])
+                ind += 1
+    
                 # ENDF interpolation parameters
-                NR = self._get_int()
-                NBT = self._get_int(NR)
-                INT = self._get_int(NR)
+                NR = int(self.XSS[ind])
+                dat = np.asarray(self.XSS[ind+1:ind+1+2*NR], dtype=int)
+                dat.shape = (2, NR)
+                NBT, INT = dat
+                ind += 1 + 2*NR
 
                 # Energy-dependent yield
-                NE = self._get_int()
-                rxn.e_yield = self._get_float(NE)
-                rxn.photon_yield = self._get_float(NE)
-
-            # Cross-section data from ENDF File 13
+                NE = int(self.XSS[ind])
+                dat = self.XSS[ind+1:ind+1+2*NE]
+                dat.shape = (2, NE)
+                rxn.e_yield, rxn.photon_yield = dat
+                ind += 1 + 2*NE
             elif MFTYPE == 13:
+                # Cross-section data from ENDF File 13
                 # Energy grid index at which data starts
-                rxn.IE = self._get_int()
+                rxn.IE = int(self.XSS[ind])
 
                 # Cross sections
-                NE = self._get_int()
-                self.sigma = self._get_float(NE)
+                NE = int(self.XSS[ind+1])
+                self.sigma = self.XSS[ind+2:ind+2+NE]
+                ind += 2 + NE
             else:
-                raise
+                raise ValueError("MFTYPE must be 12, 13, 16. Got {}".format(MFTYPE))
 
     def _read_landp(self):
         """Determine location of angular distribution for each photon-producing
