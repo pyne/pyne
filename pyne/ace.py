@@ -22,6 +22,7 @@ generates ACE-format cross sections.
 
 import struct
 from warnings import warn
+from collections import OrderedDict
 
 import numpy as np
 from numpy import zeros, copy, meshgrid, interp, linspace, pi, arccos, concatenate
@@ -323,6 +324,8 @@ class NeutronTable(AceTable):
 
     def __init__(self, name, awr, temp):
         super(NeutronTable, self).__init__(name, awr, temp)
+        self.reactions = OrderedDict()
+        self.photon_reactions = OrderedDict()
 
     def __repr__(self):
         if hasattr(self, 'name'):
@@ -375,12 +378,7 @@ class NeutronTable(AceTable):
         rxn.IE = 1
         rxn.TY = 1
         rxn.sigma = sigma_el
-
-        # Add elastic scattering to list of reactions
-        self.reactions = [rxn]
-
-        # Create photon-producting reaction list
-        self.photonReactions = []
+        self.reactions[MT] = rxn
 
     def _read_nu(self):
         """Read the NU block -- this contains information on the prompt
@@ -495,19 +493,17 @@ class NeutronTable(AceTable):
         """Get the list of reaction MTs for this cross-section table. The
         MT values are somewhat arbitrary.
         """
-
         LMT = self.JXS[3]
         NMT = self.NXS[4]
-        for i in range(NMT):
-            MT = int(self.XSS[LMT+i])
-            self.reactions.append(Reaction(MT,self))
+        mts = np.asarray(self.XSS[LMT:LMT+NMT], dtype=int)
+        rxs = [(mt, Reaction(mt, self)) for mt in mts]
+        self.reactions.update(rxs)
             
     def _read_lqr(self):
         """Find Q-values for each reaction MT
         """
-
         JXS4 = self.JXS[4]
-        for i, rxn in enumerate(self.reactions[1:]):
+        for i, rxn in enumerate(self.reactions.values()[1:]):
             rxn.Q = self.XSS[JXS4+i]
 
     def _read_tyr(self):
@@ -516,33 +512,33 @@ class NeutronTable(AceTable):
         than 100 signifies reactions other than fission taht have
         energy-dependent neutron multiplicities
         """
-
+        NMT = self.NXS[4]
         JXS5 = self.JXS[5]
-        for i, rxn in enumerate(self.reactions[1:]):
-            rxn.TY = int(self.XSS[JXS5+i])
+        tys = np.asarray(self.XSS[JXS5:JXS5+NMT], dtype=int)
+        for ty, rxn in zip(tys, self.reactions.values()[1:]):
+            rxn.TY = ty
 
     def _read_lsig(self):
         """Determine location of cross sections for each reaction MT
         """
-
+        NMT = self.NXS[4]
         LXS = self.JXS[6]
-        for i, rxn in enumerate(self.reactions[1:]):
-            rxn.LOCA = int(self.XSS[LXS+i])
+        loca = np.asarray(self.XSS[LXS:LXS+NMT], dtype=int)
+        for loc, rxn in zip(loca, self.reactions.values()[1:]):
+            rxn.LOCA = loc
 
     def _read_sig(self):
         """Read cross-sections for each reaction MT
         """
-
         JXS7 = self.JXS[7]
-        for rxn in self.reactions[1:]:
+        for rxn in self.reactions.values()[1:]:
             rxn.IE = int(self.XSS[JXS7+rxn.LOCA-1])
             NE = int(self.XSS[JXS7+rxn.LOCA])
-            rxn.sigma = self.XSS[JXS7+rxn.LOCA+1 : JXS7+rxn.LOCA+1+NE]
+            rxn.sigma = self.XSS[JXS7+rxn.LOCA+1:JXS7+rxn.LOCA+1+NE]
 
     def _read_land(self):
         """Find locations for angular distributions
         """
-
         JXS8 = self.JXS[8]
 
         # Number of reactions is less than total since we only need
@@ -551,8 +547,9 @@ class NeutronTable(AceTable):
         NMT = self.NXS[5]
 
         # Need NMT + 1 since elastic scattering is included
-        for i, rxn in enumerate(self.reactions[:NMT+1]):
-            rxn.LOCB = int(self.XSS[JXS8+i])
+        locb = np.asarray(self.XSS[JXS8:JXS8+NMT+1], dtype=int)
+        for loc, rxn in zip(locb, self.reactions.values()[:NMT+1]):
+            rxn.LOCB = loc
 
     def _read_and(self):
         """Find the angular distribution for each reaction MT
@@ -563,7 +560,7 @@ class NeutronTable(AceTable):
 
         # Angular distribution for all MT with secondary neutrons
         # including elastic scattering
-        for rxn in self.reactions[:NMT+1]:
+        for rxn in self.reactions.values()[:NMT+1]:
 
             # Check if angular distribution data exist 
             if rxn.LOCB == -1:
@@ -613,7 +610,7 @@ class NeutronTable(AceTable):
         # scattering is also not included.
         NMT = self.NXS[5]
 
-        for i, rxn in enumerate(self.reactions[1:NMT+1]):
+        for i, rxn in enumerate(self.reactions.values()[1:NMT+1]):
             rxn.LOCC = int(self.XSS[LED+i])
 
     def _read_dlw(self):
@@ -624,9 +621,9 @@ class NeutronTable(AceTable):
         LDIS = self.JXS[11]
         NMT = self.NXS[5]
 
-        LOCC = [rxn.LOCC for rxn in self.reactions[1:NMT+1]]
+        LOCC = [rxn.LOCC for rxn in self.reactions.values()[1:NMT+1]]
 
-        for irxn, rxn in enumerate(self.reactions[1:NMT+1]):
+        for irxn, rxn in enumerate(self.reactions.values()[1:NMT+1]):
             self.index = LDIS + rxn.LOCC - 1
             LNW = self._get_int()
             LAW = self._get_int()
@@ -955,16 +952,15 @@ class NeutronTable(AceTable):
                 self.e_out_photon_equi.append(self._get_float(20))
 
     def _read_mtrp(self):
-        """
-        Get the list of reaction MTs for photon-producing reactions for this
+        """Get the list of reaction MTs for photon-producing reactions for this
         cross-section table. The MT values are somewhat arbitrary.
         """
 
         LMT = self.JXS[13]
         NMT = self.NXS[6]
-        for i in range(NMT):
-            MT = int(self.XSS[LMT+i])
-            self.photonReactions.append(Reaction(MT,self))
+        mts = np.asarray(self.XSS[LMT:LMT+NMT], dtype=int)
+        rxs = [(mt, Reaction(mt, self)) for mt in mts]
+        self.photon_reactions.update(rxs)
 
     def _read_lsigp(self):
         """Determine location of cross sections for each photon-producing reaction
@@ -972,7 +968,7 @@ class NeutronTable(AceTable):
         """
 
         LXS = self.JXS[14]
-        for i, rxn in enumerate(self.photonReactions):
+        for i, rxn in enumerate(self.photon_reactions.values()):
             rxn.LOCA = int(self.XSS[LXS+i])
 
     def _read_sigp(self):
@@ -980,7 +976,7 @@ class NeutronTable(AceTable):
         """
 
         JXS15 = self.JXS[15]
-        for rxn in self.photonReactions:
+        for rxn in self.photon_reactions.values():
             self.index = JXS15 + rxn.LOCA - 1
             MFTYPE = self._get_int()
 
@@ -1015,7 +1011,7 @@ class NeutronTable(AceTable):
         """
 
         JXS16 = self.JXS[16]
-        for i, rxn in enumerate(self.photonReactions):
+        for i, rxn in enumerate(self.photon_reactions.values()):
             rxn.LOCB = int(self.XSS[JXS16+i])
 
     def _read_andp(self):
@@ -1023,7 +1019,7 @@ class NeutronTable(AceTable):
         MT."""
 
         JXS17 = self.JXS[17]
-        for i, rxn in enumerate(self.photonReactions):
+        for i, rxn in enumerate(self.photon_reactions.values()):
             if rxn.LOCB == 0:
                 # No angular distribution data are given for this reaction,
                 # isotropic scattering is asssumed in LAB
@@ -1299,6 +1295,16 @@ class Reaction(object):
     distribution. These objects are stored within the ``reactions`` attribute on
     subclasses of AceTable, e.g. NeutronTable.
 
+    Parameters
+    ----------
+    MT : int
+        The ENDF MT number for this reaction. On occasion, MCNP uses MT numbers
+        that don't correspond exactly to the ENDF specification.
+    table : AceTable
+        The ACE table which contains this reaction. This is useful if data on
+        the parent nuclide is needed (for instance, the energy grid at which
+        cross sections are tabulated)
+
     :Attributes:
       **ang_energy_in** : list of floats
         Incoming energies in MeV at which angular distributions are tabulated.
@@ -1339,17 +1345,7 @@ class Reaction(object):
         this reaction. If negative, it indicates that scattering should be
         performed in the center-of-mass system. If positive, scattering should
         be preformed in the laboratory system.
-      
 
-    Parameters
-    ----------
-    MT : int
-        The ENDF MT number for this reaction. On occasion, MCNP uses MT numbers
-        that don't correspond exactly to the ENDF specification.
-    table : AceTable
-        The ACE table which contains this reaction. This is useful if data on
-        the parent nuclide is needed (for instance, the energy grid at which
-        cross sections are tabulated)
     """
 
     def __init__(self, MT, table=None):
@@ -1368,9 +1364,7 @@ class Reaction(object):
 
     def threshold(self):
         """Return energy threshold for this reaction"""
-
-        table = self.table
-        return table.energy[self.IE]
+        return self.table.energy[self.IE]
 
     def __repr__(self):
         name = reaction_names.get(self.MT, None)
