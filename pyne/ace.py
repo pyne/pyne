@@ -560,7 +560,6 @@ class NeutronTable(AceTable):
         # Angular distribution for all MT with secondary neutrons
         # including elastic scattering
         for rxn in self.reactions.values()[:NMT+1]:
-
             # Check if angular distribution data exist 
             if rxn.LOCB == -1:
                 # Angular distribution data are specified through LAWi
@@ -607,7 +606,6 @@ class NeutronTable(AceTable):
     def _read_ldlw(self):
         """Find locations for energy distribution data for each reaction
         """
-
         LED = self.JXS[10]
 
         # Number of reactions is less than total since we only need
@@ -615,30 +613,31 @@ class NeutronTable(AceTable):
         # neutrons. Thus, MT > 100 are not included. Elastic
         # scattering is also not included.
         NMT = self.NXS[5]
-
-        for i, rxn in enumerate(self.reactions.values()[1:NMT+1]):
-            rxn.LOCC = int(self.XSS[LED+i])
+        locc = np.asarray(self.XSS[LED:LED+NMT], dtype=int)
+        for loc, rxn in zip(locc, self.reactions.values()[1:NMT+1]):
+            rxn.LOCC = loc
 
     def _read_dlw(self):
         """Determine the energy distribution for secondary neutrons for
         each reaction MT
         """
-
         LDIS = self.JXS[11]
         NMT = self.NXS[5]
 
-        LOCC = [rxn.LOCC for rxn in self.reactions.values()[1:NMT+1]]
-
-        for irxn, rxn in enumerate(self.reactions.values()[1:NMT+1]):
-            self.index = LDIS + rxn.LOCC - 1
-            LNW = self._get_int()
-            LAW = self._get_int()
-            # print([rxn,LAW])
-            IDAT = self._get_int()
-            NR = self._get_int()
+        rxs = self.reactions.values()[1:NMT+1]
+        for irxn, rxn in enumerate(rxs):
+            ind = LDIS + rxn.LOCC - 1
+            LNW = int(self.XSS[ind])
+            LAW = int(self.XSS[ind+1])
+            IDAT = int(self.XSS[ind+2])
+            NR = int(self.XSS[ind+3])
+            ind += 4
             if NR > 0:
-                interp_NBT = self._get_int(NR)
-                interp_INT = self._get_int(NR)
+                dat = np.asarray(self.XSS[ind:ind+2*NR], dtype=int)
+                dat.shape = (2, NR)
+                interp_NBT, interp_INT = dat
+
+            self.index = ind
 
             # Determine tabular energy points and probability of law
             # validity
@@ -916,8 +915,8 @@ class NeutronTable(AceTable):
                 rxn.e_dist_energy_in = self._get_float(NE)
                 L = self._get_int(NE)
 
-            if irxn+1 < len(LOCC):
-                if self.index < LDIS + LOCC[irxn+1] - 1:
+            if irxn+1 < NMT:
+                if self.index < LDIS + rxs[irxn+1].LOCC - 1:
                     LNW = self._get_int()
                     LAW = self._get_int()
                     # print([rxn,rxn.e_dist_law,LAW])
