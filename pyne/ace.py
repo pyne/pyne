@@ -363,11 +363,10 @@ class NeutronTable(AceTable):
         NE = self.NXS[3]
         self.index = self.JXS[1]
 
-        self.energy   = self._get_float(NE)
-        self.sigma_t  = self._get_float(NE)
-        self.sigma_a  = self._get_float(NE)
-        sigma_el = self._get_float(NE)
-        self.heating  = self._get_float(NE)
+        arr = self.XSS[self.index:self.index+NE*5]
+        arr.shape = (5, NE)
+        self.energy, self.sigma_t, self.sigma_a, sigma_el, self.heating = arr
+        self.index += NE*5
 
         # Create elastic scattering reaction
         MT = 2
@@ -378,8 +377,7 @@ class NeutronTable(AceTable):
         rxn.sigma = sigma_el
 
         # Add elastic scattering to list of reactions
-        self.reactions = []
-        self.reactions.append(rxn)
+        self.reactions = [rxn]
 
         # Create photon-producting reaction list
         self.photonReactions = []
@@ -416,7 +414,6 @@ class NeutronTable(AceTable):
                 NE = int(self.XSS[KNU+2+2*NR])
                 self.nu_t_energy = self.XSS[KNU+3+2*NR    : KNU+3+2*NR+NE  ]
                 self.nu_t_value  = self.XSS[KNU+3+2*NR+NE : KNU+3+2*NR+2*NE]
-
         # Both prompt nu and total nu
         elif self.XSS[JXS2] < 0:
             KNU = JXS2 + 1
@@ -487,11 +484,12 @@ class NeutronTable(AceTable):
                 self.nu_d_precursor_prob[group]   = self.XSS[i+3+2*NR+NE : i+3+2*NR+2*NE]
                 i = i+3+2*NR+2*NE
 
+            # FIXME The following code never will save LOCC on the object!
             # Energy distribution for delayed fission neutrons
-            LED = self.JXS[26]
-            LOCC = {}
-            for group in range(n_group):
-                LOCC[group] = self.XSS[LED + group]
+            #LED = self.JXS[26]
+            #LOCC = {}
+            #for group in range(n_group):
+            #    LOCC[group] = self.XSS[LED + group]
 
     def _read_mtr(self):
         """Get the list of reaction MTs for this cross-section table. The
@@ -1106,7 +1104,7 @@ class NeutronTable(AceTable):
                 for I in range(N):
                     self.urr_table[I][J][K] = self._get_float()
 
-    def _get_float(self, n_values = 1):
+    def _get_float(self, n_values=1):
         if n_values > 1:
             ind = self.index
             values = self.XSS[ind:ind+n_values]
@@ -1117,10 +1115,11 @@ class NeutronTable(AceTable):
             self.index += 1
             return value
             
-    def _get_int(self, n_values = 1):
+    def _get_int(self, n_values=1):
         if n_values > 1:
             ind = self.index
-            values = [int(i) for i in self.XSS[ind:ind+n_values]]
+            #values = [int(i) for i in self.XSS[ind:ind+n_values]]
+            values = np.asarray(self.XSS[ind:ind+n_values], dtype=int)
             self.index += n_values
             return values
         else:
