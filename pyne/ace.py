@@ -17,7 +17,7 @@ generates ACE-format cross sections.
 
 .. _ENDF: http://www.nndc.bnl.gov/endf
 
-.. moduleauthor:: Paul Romano <romano7@gmail.com>
+.. moduleauthor:: Paul Romano <romano7@gmail.com>, Anthony Scopatz
 """
 
 import struct
@@ -723,6 +723,7 @@ class NeutronTable(AceTable):
                     ind += 2 + 3*NP
 
                 # convert to arrays if possible
+                rxn.e_dist_intt = np.array(rxn.e_dist_intt)
                 nps = np.array(nps)
                 if all((nps[1:] - nps[:-1]) == 0):
                     rxn.e_dist_energy_out = np.array(rxn.e_dist_energy_out)
@@ -779,83 +780,113 @@ class NeutronTable(AceTable):
             elif LAW == 11:
                 # Energy dependent Watt spectrum (ENDF-6 File 5 LF=11)
                 # Interpolation scheme between a's    
-                NR = self._get_int()
+                NR = int(self.XSS[ind])
+                ind += 1
                 if NR > 0:
-                    rxn.e_dist_NBTa = self._get_int(NR)
-                    rxn.e_dist_INTa = self._get_int(NR)
+                    dat = np.asarray(self.XSS[ind:ind+2*NR], dtype=int)
+                    dat.shape = (2, NR)
+                    rxn.e_dist_NBTa, rxn.e_dist_INTa = dat
+                    ind += 2 * NR                    
 
                 # Incident energy table and tabulated a's
-                NE = self._get_int()
-                rxn.e_dist_energya_in = self._get_float(NE)
-                rxn.e_dist_a = self._get_float(NE)
+                NE = int(self.XSS[ind])
+                rxn.e_dist_energya_in = self.XSS[ind+1:ind+1+NE]
+                rxn.e_dist_a = self.XSS[ind+1+NE:ind+1+2*NE]
+                ind += 1 + 2*NE
 
                 # Interpolation scheme between b's
-                NR = self._get_int()
+                NR = int(self.XSS[ind])
+                ind += 1
                 if NR > 0:
-                    rxn.e_dist_NBTb = self._get_int(NR)
-                    rxn.e_dist_INTb = self._get_int(NR)
+                    dat = np.asarray(self.XSS[ind:ind+2*NR], dtype=int)
+                    dat.shape = (2, NR)
+                    rxn.e_dist_NBTb, rxn.e_dist_INTb = dat
+                    ind += 2 * NR                    
 
                 # Incident energy table and tabulated b's
-                NE = self._get_int()
-                rxn.e_dist_energyb_in = self._get_float(NE)
-                rxn.e_dist_b = self._get_float(NE)
+                NE = int(self.XSS[ind])
+                rxn.e_dist_energyb_in = self.XSS[ind+1:ind+1+NE]
+                rxn.e_dist_b = self.XSS[ind+1+NE:ind+1+2*NE]
 
-                rxn.e_dist_U = self._get_float()
-
-            # Tabular linear functions (UK Law 2)
+                rxn.e_dist_U = self.XSS[ind+1+2*NE]
+                ind += 2 + 2*NE
             elif LAW == 22:
+                # Tabular linear functions (UK Law 2)
                 # Interpolation scheme (not used in MCNP)
-                NR = self._get_int()
+                NR = int(self.XSS[ind])
+                ind += 1
                 if NR > 0:
-                    rxn.e_dist_NBT = self._get_int(NR)
-                    rxn.e_dist_INT = self._get_int(NR)
+                    dat = np.asarray(self.XSS[ind:ind+2*NR], dtype=int)
+                    dat.shape = (2, NR)
+                    rxn.e_dist_NBT, rxn.e_dist_INT = dat
+                    ind += 2 * NR                    
 
                 # Number of incident energies
-                NE = self._get_int()
-                rxn.e_dist_energy_in = self._get_float(NE)
-                LOCE = self._get_int(NE)
+                NE = int(self.XSS[ind])
+                rxn.e_dist_energy_in = self.XSS[ind+1:ind+1+NE]
+                LOCE = np.asarray(self.XSS[ind+1+NE:ind+1+2*NE], dtype=int)
+                ind += 1 + 2*NE
 
                 # Read linear functions
+                nfs = []
                 rxn.e_dist_P = []
                 rxn.e_dist_T = []
                 rxn.e_dist_C = []
                 for i in range(NE):
-                    NF = self._get_int()
-                    rxn.e_dist_P.append(self._get_float(NF))
-                    rxn.e_dist_T.append(self._get_float(NF))
-                    rxn.e_dist_C.append(self._get_float(NF))
+                    NF = int(self.XSS[ind])
+                    nfs.append(NF)
+                    dat = self.XSS[ind+1:ind+1+3*NF]
+                    dat.shape = (3, NF)
+                    rxn.e_dist_P.append(dat[0])
+                    rxn.e_dist_T.append(dat[1])
+                    rxn.e_dist_C.append(dat[2])
+                    ind += 1 + 3*NF
 
-            # From UK Law 6
+                # convert to arrays if possible
+                nfs = np.array(nfs)
+                if all((nfs[1:] - nfs[:-1]) == 0):
+                    rxn.e_dist_P = np.array(rxn.e_dist_P)
+                    rxn.e_dist_T = np.array(rxn.e_dist_T)
+                    rxn.e_dist_C = np.array(rxn.e_dist_C)
             elif LAW == 24:
+                # From UK Law 6
                 # Interpolation scheme (not used in MCNP)
-                NR = self._get_int()
+                NR = int(self.XSS[ind])
+                ind += 1
                 if NR > 0:
-                    rxn.e_dist_NBT = self._get_int(NR)
-                    rxn.e_dist_INT = self._get_int(NR)
+                    dat = np.asarray(self.XSS[ind:ind+2*NR], dtype=int)
+                    dat.shape = (2, NR)
+                    rxn.e_dist_NBT, rxn.e_dist_INT = dat
+                    ind += 2 * NR                    
 
                 # Number of incident energies
-                NE = self._get_int()
-                rxn.e_dist_energy_in = self._get_float(NE)
+                NE = int(self.XSS[ind])
+                rxn.e_dist_energy_in = self.XSS[ind+1:ind+1+NE]
+                ind += 1 + NE
                 
                 # Outgoing energy tables
-                NET = self._get_int()
-                rxn.e_dist_T = []
-                for i in range(NE):
-                    rxn.e_dist_T.append(self._get_float(NET))
-
-            # Kalbach-87 Formalism (ENDF File 6 Law 1, LANG=2)
+                NET = int(self.XSS[ind])
+                rxn.e_dist_T = self.XSS[ind+1:ind+1+NE*NET]
+                rxn.e_dist_T.shape = (NE, NET)
+                ind += 1 + NE*NET
             elif LAW == 44:
+                # Kalbach-87 Formalism (ENDF File 6 Law 1, LANG=2)
                 # Interpolation scheme
-                NR = self._get_int()
+                NR = int(self.XSS[ind])
+                ind += 1
                 if NR > 0:
-                    rxn.e_dist_NBT = self._get_int(NR)
-                    rxn.e_dist_INT = self._get_int(NR)
+                    dat = np.asarray(self.XSS[ind:ind+2*NR], dtype=int)
+                    dat.shape = (2, NR)
+                    rxn.e_dist_NBT, rxn.e_dist_INT = dat
+                    ind += 2 * NR                    
 
                 # Number of outgoing energies in each E_out table
-                NE = self._get_int()
-                rxn.e_dist_energy_in = self._get_float(NE)
-                L = self._get_int(NE)
+                NE = int(self.XSS[ind])
+                rxn.e_dist_energy_in = self.XSS[ind+1:ind+1+NE]
+                L = np.asarray(self.XSS[ind+1+NE:ind+1+2*NE], dtype=int)
+                ind += 1 + 2*NE
 
+                nps = []
                 rxn.e_dist_intt = []        # Interpolation scheme (1=hist, 2=lin-lin)
                 rxn.e_dist_energy_out = []  # Outgoing E grid for each incoming E
                 rxn.e_dist_pdf = []         # Probability dist for " " "
@@ -863,7 +894,7 @@ class NeutronTable(AceTable):
                 rxn.e_dist_frac = []        # Precompound fraction for " " "
                 rxn.e_dist_ang = []         # Angular distribution slope for " " "
                 for i in range(NE):
-                    INTTp = self._get_int()
+                    INTTp = int(self.XSS[ind])
                     if INTTp > 10:
                         INTT = INTTp % 10
                         ND = (INTTp - INTT)/10
@@ -871,37 +902,56 @@ class NeutronTable(AceTable):
                         INTT = INTTp
                     rxn.e_dist_intt.append(INTT)
 
-                    NP = self._get_int()
-                    rxn.e_dist_energy_out.append(self._get_float(NP))
-                    rxn.e_dist_pdf.append(self._get_float(NP))
-                    rxn.e_dist_cdf.append(self._get_float(NP))
-                    rxn.e_dist_frac.append(self._get_float(NP))
-                    rxn.e_dist_ang.append(self._get_float(NP))
+                    NP = int(self.XSS[ind+1])
+                    nps.append(NP)
+                    ind += 2
 
-            # Like 44, but tabular distribution instead of Kalbach-87
+                    dat = self.XSS[ind:ind+5*NP]
+                    dat.shape = (5, NP)
+                    rxn.e_dist_energy_out.append(dat[0])
+                    rxn.e_dist_pdf.append(dat[1])
+                    rxn.e_dist_cdf.append(dat[2])
+                    rxn.e_dist_frac.append(dat[3])
+                    rxn.e_dist_ang.append(dat[4])
+                    ind += 5*NP
+
+                # convert to arrays if possible
+                rxn.e_dist_intt = np.array(rxn.e_dist_intt)
+                nps = np.array(nps)
+                if all((nps[1:] - nps[:-1]) == 0):
+                    rxn.e_dist_energy_out = np.array(rxn.e_dist_energy_out)
+                    rxn.e_dist_pdf = np.array(rxn.e_dist_pdf)
+                    rxn.e_dist_cdf = np.array(rxn.e_dist_cdf)
             elif LAW == 61:
+                # Like 44, but tabular distribution instead of Kalbach-87
                 # Interpolation scheme
-                NR = self._get_int()
+                NR = int(self.XSS[ind])
+                ind += 1
                 if NR > 0:
-                    rxn.e_dist_NBT = self._get_int(NR)
-                    rxn.e_dist_INT = self._get_int(NR)
+                    dat = np.asarray(self.XSS[ind:ind+2*NR], dtype=int)
+                    dat.shape = (2, NR)
+                    rxn.e_dist_NBT, rxn.e_dist_INT = dat
+                    ind += 2 * NR                    
 
                 # Number of outgoing energies in each E_out table
-                NE = self._get_int()
-                rxn.e_dist_energy_in = self._get_float(NE)
-                L = self._get_int(NE)
+                NE = int(self.XSS[ind])
+                rxn.e_dist_energy_in = self.XSS[ind+1:ind+1+NE]
+                L = np.asarray(self.XSS[ind+1+NE:ind+1+2*NE], dtype=int)
+                ind += 1 + 2*NE
 
+                npes = []
                 rxn.e_dist_intt = []        # Interpolation scheme (1=hist, 2=lin-lin)
                 rxn.e_dist_energy_out = []  # Outgoing E grid for each incoming E
                 rxn.e_dist_pdf = []         # Probability dist for " " "
                 rxn.e_dist_cdf = []         # Cumulative dist for " " "
 
+                npas = []
                 rxn.a_dist_intt = []
                 rxn.a_dist_mu_out = [] # Cosine scattering angular grid
                 rxn.a_dist_pdf = []    # Probability dist function
                 rxn.a_dist_cdf = []
                 for i in range(NE):
-                    INTTp = self._get_int()
+                    INTTp = int(self.XSS[ind])
                     if INTTp > 10:
                         INTT = INTTp % 10
                         ND = (INTTp - INTT)/10
@@ -910,48 +960,75 @@ class NeutronTable(AceTable):
                     rxn.e_dist_intt.append(INTT)
 
                     # Secondary energy distribution
-                    NP = self._get_int()
-                    rxn.e_dist_energy_out.append(self._get_float(NP))
-                    rxn.e_dist_pdf.append(self._get_float(NP))
-                    rxn.e_dist_cdf.append(self._get_float(NP))
+                    NPE = int(self.XSS[ind+1])
+                    npes.append(NPE)
+                    dat = self.XSS[ind+2:ind+2+4*NPE]
+                    dat.shape = (4, NPE)
+                    rxn.e_dist_energy_out.append(dat[0])
+                    rxn.e_dist_pdf.append(dat[1])
+                    rxn.e_dist_cdf.append(dat[2])
+                    LC = np.asarray(dat[3], dtype=int)
+                    ind += 2 + 4*NPE
 
                     # Secondary angular distribution
-                    LC = self._get_int(NP)
                     rxn.a_dist_intt.append([])
                     rxn.a_dist_mu_out.append([])
                     rxn.a_dist_pdf.append([])
                     rxn.a_dist_cdf.append([])
-                    for j in range(NP):
-                        rxn.a_dist_intt[-1].append(self._get_int())
-                        NP = self._get_int()
-                        rxn.a_dist_mu_out[-1].append(self._get_float(NP))
-                        rxn.a_dist_pdf[-1].append(self._get_float(NP))
-                        rxn.a_dist_cdf[-1].append(self._get_float(NP))
+                    for j in range(NPE):
+                        rxn.a_dist_intt[-1].append(int(self.XSS[ind]))
+                        NPA = int(self.XSS[ind+1])
+                        npas.append(NPA)
+                        dat = self.XSS[ind+2:ind+2+3*NPA]
+                        dat.shape = (3, NPA)
+                        rxn.a_dist_mu_out[-1].append(dat[0])
+                        rxn.a_dist_pdf[-1].append(dat[1])
+                        rxn.a_dist_cdf[-1].append(dat[2])
+                        ind += 2 + 3*NPA
 
-            # N-body phase space distribution (ENDF File 6 Law 6)
+                # convert to arrays if possible
+                rxn.e_dist_intt = np.array(rxn.e_dist_intt)
+                npes = np.array(npes)
+                npas = np.array(npas)
+                if all((npes[1:] - npes[:-1]) == 0):
+                    rxn.e_dist_energy_out = np.array(rxn.e_dist_energy_out)
+                    rxn.e_dist_pdf = np.array(rxn.e_dist_pdf)
+                    rxn.e_dist_cdf = np.array(rxn.e_dist_cdf)
+
+                    rxn.a_dist_intt = np.array(rxn.a_dist_intt)
+                    if all((npas[1:] - npas[:-1]) == 0):
+                        rxn.a_dist_mu_out = np.array(rxn.a_dist_mu_out)
+                        rxn.a_dist_pdf = np.array(rxn.a_dist_pdf)
+                        rxn.a_dist_cdf = np.array(rxn.a_dist_cdf)
             elif LAW == 66:
-                rxn.e_dist_nbodies = self._get_int()
-                rxn.e_dist_massratio = self._get_float()
-
-            # Laboratory angle-energy law (ENDF File 6 Law 7)
+                # N-body phase space distribution (ENDF File 6 Law 6)
+                rxn.e_dist_nbodies = int(self.XSS[ind])
+                rxn.e_dist_massratio = self.XSS[ind+1]
+                ind += 2
             elif LAW == 67:
+                # Laboratory angle-energy law (ENDF File 6 Law 7)
                 # Interpolation scheme
-                NR = self._get_int()
+                NR = int(self.XSS[ind])
+                ind += 1
                 if NR > 0:
-                    rxn.e_dist_NBT = self._get_int(NR)
-                    rxn.e_dist_INT = self._get_int(NR)
+                    dat = np.asarray(self.XSS[ind:ind+2*NR], dtype=int)
+                    dat.shape = (2, NR)
+                    rxn.e_dist_NBT, rxn.e_dist_INT = dat
+                    ind += 2 * NR                    
 
                 # Number of outgoing energies in each E_out table
-                NE = self._get_int()
-                rxn.e_dist_energy_in = self._get_float(NE)
-                L = self._get_int(NE)
+                NE = int(self.XSS[ind])
+                rxn.e_dist_energy_in = self.XSS[ind+1:ind+1+NE]
+                L = np.asarray(self.XSS[ind+1+NE:ind+1+2*NE], dtype=int)
+                ind += 1 + 2*NE
 
-            self.index = ind
 
+            # Bump up index for next loop
             if irxn+1 < NMT:
-                if self.index < LDIS + rxs[irxn+1].LOCC - 1:
-                    LNW = self._get_int()
-                    LAW = self._get_int()
+                if ind < LDIS + rxs[irxn+1].LOCC - 1:
+                    LNW = int(self.XSS[ind])
+                    LAW = int(self.XSS[ind+1])
+                    ind += 2
                     
             # TODO: Read rest of data
 
