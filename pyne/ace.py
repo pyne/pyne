@@ -1213,36 +1213,11 @@ class NeutronTable(AceTable):
         urr_table.strides = (8, 8*M*N, 8*N)  # Needed to get in N, 6, M order
         self.urr_table = urr_table
 
-    def _get_float(self, n_values=1):
-        if n_values > 1:
-            ind = self.index
-            values = self.XSS[ind:ind+n_values]
-            self.index += n_values
-            return values
-        else:
-            value = self.XSS[self.index]
-            self.index += 1
-            return value
-            
-    def _get_int(self, n_values=1):
-        if n_values > 1:
-            ind = self.index
-            #values = [int(i) for i in self.XSS[ind:ind+n_values]]
-            values = np.asarray(self.XSS[ind:ind+n_values], dtype=int)
-            self.index += n_values
-            return values
-        else:
-            value = int(self.XSS[self.index])
-            self.index += 1
-            return value
-
-    def find_reaction(self, MT):
-        for r in self.reactions:
-            if r.MT == MT:
-                return r
+    def find_reaction(self, mt):
+        return self.reactions.get(mt, None)
 
     def __iter__(self):
-        for r in self.reactions:
+        for r in self.reactions.values():
             yield r
 
 
