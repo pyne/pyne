@@ -21,6 +21,7 @@ generates ACE-format cross sections.
 """
 
 import struct
+from warnings import warn
 
 import numpy as np
 from numpy import zeros, copy, meshgrid, interp, linspace, pi, arccos, concatenate
@@ -31,6 +32,11 @@ from pyne import nucname
 class Library(object):
     """A Library objects represents an ACE-formatted file which may contain
     multiple tables with data.
+
+    Parameters
+    ----------
+    filename : str
+        Path of the ACE library file to load.
 
     :attributes:
       **binary** : bool
@@ -43,11 +49,6 @@ class Library(object):
       **verbose** : bool
         Determines whether output is printed to the stdout when reading a
         Library
-
-    Parameters
-    ----------
-    filename : str
-        Path of the ACE library file to load.
 
     """
 
@@ -153,9 +154,14 @@ class Library(object):
             # arrays so that the indexing will be the same as
             # Fortran. This makes it easier to follow the ACE format
             # specification.
-            table.NXS.insert(0, None)
-            table.JXS.insert(0, None)
-            table.XSS.insert(0, None)
+            table.NXS.insert(0, 0)
+            table.NXS = np.array(table.NXS, dtype=int)
+
+            table.JXS.insert(0, 0)
+            table.JXS = np.array(table.JXS, dtype=int)
+
+            table.XSS.insert(0, 0.0)
+            table.XSS = np.array(table.XSS, dtype=float)
 
             # Read all data blocks
             table._read_all()
@@ -167,11 +173,7 @@ class Library(object):
 
         lines = self.f.readlines()
         
-        while True:
-            # Check end condition
-            if 0 == len(lines):
-                break
-
+        while 0 != len(lines):
             # Read name of table, atomic weight ratio, and temperature. If first
             # line is empty, we are at end of file
             words = lines[0].split()
@@ -179,8 +181,9 @@ class Library(object):
             awr = float(words[1])
             temp = float(words[2])
 
-            nxs = [int(i) for i in ''.join(lines[6:8]).split()]
-            n_lines = (nxs[0] + 3)/4
+            datastr = '0 ' + ' '.join(lines[6:8])
+            nxs = np.fromstring(datastr, sep=' ', dtype=int)
+            n_lines = (nxs[1] + 3)/4
 
             # verify that we are suppossed to read this table in
             if (table_names is not None) and (name not in table_names):
@@ -189,8 +192,7 @@ class Library(object):
 
             # ensure we have a valid table type
             if 0 == len(name) or name[-1] not in table_types:
-                # TODO: Make this a proper exception.
-                print("Unsupported table: " + name)
+                warn("Unsupported table: " + name, RuntimeWarning)
                 lines = lines[12+n_lines:]
                 continue
 
@@ -206,23 +208,18 @@ class Library(object):
             # Read comment
             table.comment = lines[1].strip()
 
-            # Read NXS and JXS arrays
-            table.NXS = nxs
-            table.JXS = [int(i) for i in ''.join(lines[8:12]).split()]
-
-            # Read XSS array
-            #table.XSS = [float(i) for i in ''.join(lines[12:12+n_lines]).split()]
-            datastr = ''.join(lines[12:12+n_lines])
-            xss = np.fromstring(datastr, sep=' ')
-            table.XSS = list(xss)
-
+            # Add NXS, JXS, and XSS arrays to table
             # Insert empty object at beginning of NXS, JXS, and XSS
             # arrays so that the indexing will be the same as
             # Fortran. This makes it easier to follow the ACE format
             # specification.
-            table.NXS.insert(0, None)
-            table.JXS.insert(0, None)
-            table.XSS.insert(0, None)
+            table.NXS = nxs
+
+            datastr = '0 ' + ' '.join(lines[8:12])
+            table.JXS = np.fromstring(datastr, sep=' ', dtype=int)
+
+            datastr = '0.0 ' + ' '.join(lines[12:12+n_lines])
+            table.XSS = np.fromstring(datastr, sep=' ', dtype=float)
 
             # Read all data blocks
             table._read_all()
@@ -262,6 +259,15 @@ class NeutronTable(AceTable):
     Library object and stored within the ``tables`` attribute of a Library
     object.
 
+    Parameters
+    ----------
+    name : str
+        ZAID identifier of the table, e.g. '92235.70c'.
+    awr : float
+        Atomic weight ratio of the target nuclide.
+    temp : float
+        Temperature of the target nuclide in eV.
+    
     :Attributes:
       **awr** : float
         Atomic weight ratio of the target nuclide.
@@ -313,15 +319,6 @@ class NeutronTable(AceTable):
       **temp** : float
         Temperature of the target nuclide in eV.
 
-    Parameters
-    ----------
-    name : str
-        ZAID identifier of the table, e.g. 92235.70c.
-    awr : float
-        Atomic weight ratio of the target nuclide.
-    temp : float
-        Temperature of the target nuclide in eV.
-    
     """
 
     def __init__(self, name, awr, temp):
@@ -1377,11 +1374,12 @@ class Reaction(object):
         return table.energy[self.IE]
 
     def __repr__(self):
-        try:
-            return "<ACE Reaction: MT={0} {1}>".format(
-                self.MT, reaction_names[self.MT])
-        except KeyError:
-            return "<ACE Reaction: Unknown MT={0}>".format(self.MT)
+        name = reaction_names.get(self.MT, None)
+        if name is not None:
+            rep = "<ACE Reaction: MT={0} {1}>".format(self.MT, name)
+        else:
+            rep = "<ACE Reaction: Unknown MT={0}>".format(self.MT)
+        return rep
 
 
 class DosimetryTable(AceTable):
