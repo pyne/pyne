@@ -554,7 +554,6 @@ class NeutronTable(AceTable):
     def _read_and(self):
         """Find the angular distribution for each reaction MT
         """
-
         JXS9 = self.JXS[9]
         NMT = self.NXS[5]
 
@@ -573,11 +572,13 @@ class NeutronTable(AceTable):
                 # TY < 0 and in LAB if TY > 0)
                 continue
 
-            self.index = JXS9 + rxn.LOCB - 1
-            NE = self._get_int()
-            rxn.ang_energy_in = self._get_float(NE)
-            LC = self._get_int(NE)
+            ind = JXS9 + rxn.LOCB - 1
+
+            NE = int(self.XSS[ind])
+            rxn.ang_energy_in = self.XSS[ind+1:ind+1+NE]
+            LC = np.asarray(self.XSS[ind+1+NE:ind+1+2*NE], dtype=int)
             rxn.ang_location = LC
+            ind = ind+1+2*NE
 
             rxn.ang_cos = {}
             rxn.ang_pdf = {}
@@ -589,14 +590,19 @@ class NeutronTable(AceTable):
                 elif location > 0:
                     # Equiprobable 32 bin distribution
                     # print([rxn,'equiprobable'])
-                    rxn.ang_cos[i] = self._get_float(33)
+                    rxn.ang_cos[i] = self.XSS[ind:ind+33]
+                    ind += 33
                 elif location < 0:
                     # Tabular angular distribution
-                    JJ = self._get_int()
-                    NP = self._get_int()
-                    rxn.ang_cos[i] = self._get_float(NP)
-                    rxn.ang_pdf[i] = self._get_float(NP)
-                    rxn.ang_cdf[i] = self._get_float(NP)
+                    JJ = int(self.XSS[ind])
+                    NP = int(self.XSS[ind+1])
+                    ind += 2
+                    ang_dat = self.XSS[ind:ind+3*NP]
+                    ang_dat.shape = (3, NP)
+                    rxn.ang_cos[i], rxn.ang_pdf[i], rxn.ang_cdf[i] = ang_dat
+                    ind += 3 * NP
+
+            self.index = ind
         
     def _read_ldlw(self):
         """Find locations for energy distribution data for each reaction
