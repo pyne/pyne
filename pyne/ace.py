@@ -636,62 +636,73 @@ class NeutronTable(AceTable):
                 dat = np.asarray(self.XSS[ind:ind+2*NR], dtype=int)
                 dat.shape = (2, NR)
                 interp_NBT, interp_INT = dat
-
-            self.index = ind
+                ind += 2 * NR
 
             # Determine tabular energy points and probability of law
             # validity
-            NE = self._get_int()
-            rxn.e_dist_energy = self._get_float(NE)
-            rxn.e_dist_pvalid = self._get_float(NE)
+            NE = int(self.XSS[ind])
+            dat = self.XSS[ind+1:ind+1+2*NE]
+            dat.shape = (2, NE)
+            rxn.e_dist_energy, rxn.e_dist_pvalid = dat
 
             rxn.e_dist_law = LAW
-            self.index = LDIS + IDAT - 1
+            ind = LDIS + IDAT - 1
+            self.index = ind
 
-            # Tabular equiprobable energy bins (ENDF Law 1)
             if LAW == 1:
-                NR = self._get_int()
+                # Tabular equiprobable energy bins (ENDF Law 1)
+                NR = int(self.XSS[ind])
+                ind += 1
                 if NR > 0:
-                    rxn.e_dist_NBT = self._get_int(NR)
-                    rxn.e_dist_INT = self._get_int(NR)
+                    dat = np.asarray(self.XSS[ind:ind+2*NR], dtype=int)
+                    dat.shape = (2, NR)
+                    rxn.e_dist_NBT, rxn.e_dist_INT = dat
+                    ind += 2 * NR                    
 
                 # Number of outgoing energies in each E_out table
-                NE = self._get_int()
-                rxn.e_dist_energy_in = self._get_float(NE)
+                NE = int(self.XSS[ind])
+                rxn.e_dist_energy_in = self.XSS[ind+1:ind+1+NE]
+                ind += 1 + NE
 
                 # Read E_out tables
-                NET = self._get_int()
-                self.e_dist_energy_out1 = self._get_float(NET)
-                self.e_dist_energy_out2 = self._get_float(NET)
-                self.e_dist_energy_outNE = self._get_float(NET)
-
-            # Discrete photon energy
+                NET = int(self.XSS[ind])
+                dat = self.XSS[ind+1:ind+1+3*NET]
+                dat.shape = (3, NET)
+                self.e_dist_energy_out1, self.e_dist_energy_out2, \
+                                         self.e_dist_energy_outNE = dat
+                ind += 1 + 3 * NET
             elif LAW == 2:
-                self.e_dist_LP = self._get_int()
-                self.e_dist_EG = self._get_float()
-
-            # Level scattering (ENDF Law 3)
+                # Discrete photon energy
+                self.e_dist_LP = int(self.XSS[ind])
+                self.e_dist_EG = self.XSS[ind+1]
+                ind += 2
             elif LAW == 3:
-                rxn.e_dist_data = self._get_float(2)
-
-            # Continuous tabular distribution (ENDF Law 1)
+                # Level scattering (ENDF Law 3)
+                rxn.e_dist_data = self.XSS[ind:ind+2]
+                ind += 2
             elif LAW == 4:
-                NR = self._get_int()
+                # Continuous tabular distribution (ENDF Law 1)
+                NR = int(self.XSS[ind])
+                ind += 1
                 if NR > 0:
-                    rxn.e_dist_NBT = self._get_int(NR)
-                    rxn.e_dist_INT = self._get_int(NR)
+                    dat = np.asarray(self.XSS[ind:ind+2*NR], dtype=int)
+                    dat.shape = (2, NR)
+                    rxn.e_dist_NBT, rxn.e_dist_INT = dat
+                    ind += 2 * NR                    
 
                 # Number of outgoing energies in each E_out table
-                NE = self._get_int()
-                rxn.e_dist_energy_in = self._get_float(NE)
-                L = self._get_float(NE)
+                NE = int(self.XSS[ind])
+                rxn.e_dist_energy_in = self.XSS[ind+1:ind+1+NE]
+                L = self.XSS[ind+1+NE:ind+1+2*NE]
+                ind += 1 + 2*NE
 
+                nps = []
                 rxn.e_dist_intt = []        # Interpolation scheme (1=hist, 2=lin-lin)
                 rxn.e_dist_energy_out = []  # Outgoing E grid for each incoming E
                 rxn.e_dist_pdf = []         # Probability dist for " " "
                 rxn.e_dist_cdf = []         # Cumulative dist for " " "
                 for i in range(NE):
-                    INTTp = self._get_int()
+                    INTTp = int(self.XSS[ind])
                     if INTTp > 10:
                         INTT = INTTp % 10
                         ND = (INTTp - INTT)/10
@@ -699,54 +710,74 @@ class NeutronTable(AceTable):
                         INTT = INTTp
                         ND = 0
                     rxn.e_dist_intt.append(INTT)
-                    if ND > 0:
-                        print [rxn, ND, INTT]
-                    
+                    #if ND > 0:
+                    #    print [rxn, ND, INTT]
 
-                    NP = self._get_int()
-                    rxn.e_dist_energy_out.append(self._get_float(NP))
-                    rxn.e_dist_pdf.append(self._get_float(NP))
-                    rxn.e_dist_cdf.append(self._get_float(NP))
-                 
-            # General evaporation spectrum (ENDF-5 File 5 LF=5)
+                    NP = int(self.XSS[ind+1])
+                    nps.append(NP)
+                    dat = self.XSS[ind+2:ind+2+3*NP]
+                    dat.shape = (3, NP)
+                    rxn.e_dist_energy_out.append(dat[0])
+                    rxn.e_dist_pdf.append(dat[1])
+                    rxn.e_dist_cdf.append(dat[2])
+                    ind += 2 + 3*NP
+
+                # convert to arrays if possible
+                nps = np.array(nps)
+                if all((nps[1:] - nps[:-1]) == 0):
+                    rxn.e_dist_energy_out = np.array(rxn.e_dist_energy_out)
+                    rxn.e_dist_pdf = np.array(rxn.e_dist_pdf)
+                    rxn.e_dist_cdf = np.array(rxn.e_dist_cdf)
             elif LAW == 5:
-                NR = self._get_int()
+                # General evaporation spectrum (ENDF-5 File 5 LF=5)
+                NR = int(self.XSS[ind])
+                ind += 1
                 if NR > 0:
-                    rxn.e_dist_NBT = self._get_int(NR)
-                    rxn.e_dist_INT = self._get_int(NR)
+                    dat = np.asarray(self.XSS[ind:ind+2*NR], dtype=int)
+                    dat.shape = (2, NR)
+                    rxn.e_dist_NBT, rxn.e_dist_INT = dat
+                    ind += 2 * NR                    
                 
-                NE = self._get_int()
-                rxn.e_dist_energy_in = self._get_float(NE)
-                rxn.e_dist_T = self._get_float(NE)
-                NET = self._get_int()
-                rxn.e_dist_X = self._get_float(NET)
+                NE = int(self.XSS[ind])
+                rxn.e_dist_energy_in = self.XSS[ind+1:ind+1+NE]
+                rxn.e_dist_T = self.XSS[ind+1+NE:ind+1+2*NE]
+                ind += 1+ 2*NE
 
-            # Simple Maxwell fission spectrum (ENDF-6 File 5 LF=7) 
+                NET = int(self.XSS[ind])
+                rxn.e_dist_X = self.XSS[ind+1:ind+1+NET]
+                ind += 1 + NET
             elif LAW == 7:
-                NR = self._get_int()
+                # Simple Maxwell fission spectrum (ENDF-6 File 5 LF=7) 
+                NR = int(self.XSS[ind])
+                ind += 1
                 if NR > 0:
-                    rxn.e_dist_NBT = self._get_int(NR)
-                    rxn.e_dist_INT = self._get_int(NR)
+                    dat = np.asarray(self.XSS[ind:ind+2*NR], dtype=int)
+                    dat.shape = (2, NR)
+                    rxn.e_dist_NBT, rxn.e_dist_INT = dat
+                    ind += 2 * NR                    
 
-                NE = self._get_int()
-                rxn.e_dist_energy_in = self._get_float(NE)
-                rxn.e_dist_T = self._get_float(NE)
-                rxn.e_dist_U = self._get_float()
-                
-            # Evaporation spectrum (ENDF-6 File 5 LF=9)
+                NE = int(self.XSS[ind])
+                rxn.e_dist_energy_in = self.XSS[ind+1:ind+1+NE]
+                rxn.e_dist_T = self.XSS[ind+1+NE:ind+1+2*NE]
+                rxn.e_dist_U = self.XSS[ind+1+2*NE]
+                ind += 2 + 2*NE
             elif LAW == 9:
-                NR = self._get_int()
+                # Evaporation spectrum (ENDF-6 File 5 LF=9)
+                NR = int(self.XSS[ind])
+                ind += 1
                 if NR > 0:
-                    rxn.e_dist_NBT = self._get_int(NR)
-                    rxn.e_dist_INT = self._get_int(NR)
+                    dat = np.asarray(self.XSS[ind:ind+2*NR], dtype=int)
+                    dat.shape = (2, NR)
+                    rxn.e_dist_NBT, rxn.e_dist_INT = dat
+                    ind += 2 * NR                    
 
-                NE = self._get_int()
-                rxn.e_dist_energy_in = self._get_float(NE)
-                rxn.e_dist_T = self._get_float(NE)
-                rxn.e_dist_U = self._get_float()
-
-            # Energy dependent Watt spectrum (ENDF-6 File 5 LF=11)
+                NE = int(self.XSS[ind])
+                rxn.e_dist_energy_in = self.XSS[ind+1:ind+1+NE]
+                rxn.e_dist_T = self.XSS[ind+1+NE:ind+1+2*NE]
+                rxn.e_dist_U = self.XSS[ind+1+2*NE]
+                ind += 2 + 2*NE
             elif LAW == 11:
+                # Energy dependent Watt spectrum (ENDF-6 File 5 LF=11)
                 # Interpolation scheme between a's    
                 NR = self._get_int()
                 if NR > 0:
@@ -915,11 +946,12 @@ class NeutronTable(AceTable):
                 rxn.e_dist_energy_in = self._get_float(NE)
                 L = self._get_int(NE)
 
+            self.index = ind
+
             if irxn+1 < NMT:
                 if self.index < LDIS + rxs[irxn+1].LOCC - 1:
                     LNW = self._get_int()
                     LAW = self._get_int()
-                    # print([rxn,rxn.e_dist_law,LAW])
                     
             # TODO: Read rest of data
 
