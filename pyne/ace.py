@@ -1080,7 +1080,7 @@ class NeutronTable(AceTable):
         """
         LXS = self.JXS[14]
         NMT = self.NXS[6]
-        loca = np.asarray(self.XSS[LXS:LXS+NMT])
+        loca = np.asarray(self.XSS[LXS:LXS+NMT], dtype=int)
         for loc, rxn in zip(loca, self.photon_reactions.values()):
             rxn.LOCA = loc
 
@@ -1127,15 +1127,15 @@ class NeutronTable(AceTable):
         """Determine location of angular distribution for each photon-producing
         reaction MT.
         """
-
         JXS16 = self.JXS[16]
-        for i, rxn in enumerate(self.photon_reactions.values()):
-            rxn.LOCB = int(self.XSS[JXS16+i])
+        NMT = self.NXS[6]
+        locb = np.asarray(self.XSS[JXS16:JXS16+NMT], dtype=int)
+        for loc, rxn in zip(locb, self.photon_reactions.values()):
+            rxn.LOCB = loc
 
     def _read_andp(self):
         """Find the angular distribution for each photon-producing reaction
         MT."""
-
         JXS17 = self.JXS[17]
         for i, rxn in enumerate(self.photon_reactions.values()):
             if rxn.LOCB == 0:
@@ -1143,80 +1143,75 @@ class NeutronTable(AceTable):
                 # isotropic scattering is asssumed in LAB
                 continue
 
-            self.index = JXS17 + rxn.LOCB - 1
+            ind = JXS17 + rxn.LOCB - 1
 
             # Number of energies and incoming energy grid
-            NE = self._get_int()
-            self.a_dist_energy_in = self._get_float(NE)
+            NE = int(self.XSS[ind])
+            self.a_dist_energy_in = self.XSS[ind+1:ind+1+NE]
+            ind += 1 + NE
 
             # Location of tables associated with each outgoing angle
             # distribution
-            LC = self._get_int(NE)
+            LC = np.asarray(self.XSS[ind:ind+NE], dtype=int)
 
             # 32 equiprobable cosine bins for each incoming energy
-            self.a_dist_mu_out = {}
+            a_dist_mu_out = {}
             for j, location in enumerate(LC):
                 if location == 0:
                     continue
-                self.index = JXS17 + location - 1
-                self.a_dist_mu_out[j] = self._get_float(33)
+                ind = JXS17 + location - 1
+                a_dist_mu_out[j] = self.XSS[ind:ind+33]
+            self.a_dist_mu_out = a_dist_mu_out
 
     def _read_yp(self):
         """Read list of reactions required as photon production yield
         multipliers.
         """
-
         if self.NXS[6] != 0:
-            self.index = self.JXS[20]
-            NYP = self._get_int()
+            ind = self.JXS[20]
+            NYP = int(self.XSS[ind])
             if NYP > 0:
-                self.MT_for_photon_yield = self._get_int(NYP)
+                dat = np.asarray(self.XSS[ind+1:ind+1+NYP], dtype=int)
+                self.MT_for_photon_yield = dat
 
     def _read_fis(self):
         """Read total fission cross-section data if present. Generally,
         this table is not provided since it is redundant.
         """
-
         # Check if fission block is present
-        self.index = self.JXS[21]
-        if self.index == 0:
+        ind = self.JXS[21]
+        if ind == 0:
             return
 
         # Read fission cross sections
-        self.IE_fission = self._get_int()  # Energy grid index
-        NE = self._get_int()
-        self.sigma_f = self._get_float(NE)
+        self.IE_fission = int(self.XSS[ind])  # Energy grid index
+        NE = int(self.XSS[ind+1])
+        self.sigma_f = self.XSS[ind+2:ind+2+NE]
 
     def _read_unr(self):
-        """Read the unresolved resonance range probability tables if present
+        """Read the unresolved resonance range probability tables if present.
         """
-
         # Check if URR probability tables are present
-        self.index = self.JXS[23]
-        if self.index == 0:
+        ind = self.JXS[23]
+        if ind == 0:
             return
 
-        N = self._get_int()   # Number of incident energies
-        M = self._get_int()   # Length of probability table
-        INT = self._get_int() # Interpolation parameter (2=lin-lin, 5=log-log)
-        ILF = self._get_int() # Inelastic competition flag
-        IOA = self._get_int() # Other absorption flag
-        IFF = self._get_int() # Factors flag
+        N = int(self.XSS[ind])     # Number of incident energies
+        M = int(self.XSS[ind+1])   # Length of probability table
+        INT = int(self.XSS[ind+2]) # Interpolation parameter (2=lin-lin, 5=log-log)
+        ILF = int(self.XSS[ind+3]) # Inelastic competition flag
+        IOA = int(self.XSS[ind+4]) # Other absorption flag
+        IFF = int(self.XSS[ind+5]) # Factors flag
+        ind += 6
 
-        self.urr_energy = self._get_float(N) # Incident energies
+        self.urr_energy = self.XSS[ind:ind+N] # Incident energies
+        ind += N
 
         # Set up URR probability table
-        self.urr_table = []
-        for I in range(N):
-            self.urr_table.append([])
-            for J in range(6):
-                self.urr_table[-1].append([None for K in range(M)])
-        
-        # Read values for URR probability tables
-        for J in range(6):
-            for K in range(M):
-                for I in range(N):
-                    self.urr_table[I][J][K] = self._get_float()
+        urr_table = self.XSS[ind:ind+N*6*M]
+        urr_table.shape = (N, 6, M)
+        urr_table.strides = (8, 8*M*N, 8*N)  # Needed to get in N, 6, M order
+        self.urr_table = urr_table
 
     def _get_float(self, n_values=1):
         if n_values > 1:
