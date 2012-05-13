@@ -17,16 +17,20 @@ generates ACE-format cross sections.
 
 .. moduleauthor:: Paul Romano <romano7@gmail.com>, Anthony Scopatz <scopatz@gmail.com>
 """
+cimport std
 
 import struct
 from warnings import warn
 from collections import OrderedDict
 
+cimport numpy as np
 import numpy as np
-from numpy import zeros, copy, meshgrid, interp, linspace, pi, arccos, concatenate
 from bisect import bisect_right
 
+from pyne cimport nucname
 from pyne import nucname
+
+import time
 
 class Library(object):
     """A Library objects represents an ACE-formatted file which may contain
@@ -134,8 +138,8 @@ class Library(object):
             # get the table
             table = table_types[name[-1]](name, awr, temp)
 
-            temp_in_K = round(temp * 1e6 / 8.617342e-5)
             if self.verbose:
+                temp_in_K = round(temp * 1e6 / 8.617342e-5)
                 print("Loading nuclide {0} at {1} K ({2})".format(
                         nucname.serpent(name.partition('.')[0]), temp_in_K, name))
             self.tables[name] = table
@@ -169,6 +173,8 @@ class Library(object):
             self.f.seek(start_position + recl_length*(n_records + 1))
 
     def _read_ascii(self, table_names):
+        cdef char * cdatastr
+        cdef list lines, rawdata
 
         lines = self.f.readlines()
         
@@ -181,7 +187,10 @@ class Library(object):
             temp = float(words[2])
 
             datastr = '0 ' + ' '.join(lines[6:8])
-            nxs = np.fromstring(datastr, sep=' ', dtype=int)
+            rawdata = datastr.split()
+            nxs = np.array(rawdata, dtype=int)
+            #nxs = np.fromstring(datastr, sep=' ', dtype=int)
+
             n_lines = (nxs[1] + 3)/4
 
             # verify that we are suppossed to read this table in
@@ -198,8 +207,8 @@ class Library(object):
             # get the table
             table = table_types[name[-1]](name, awr, temp)
 
-            temp_in_K = round(temp * 1e6 / 8.617342e-5)
             if self.verbose:
+                temp_in_K = round(temp * 1e6 / 8.617342e-5)
                 print("Loading nuclide {0} at {1} K ({2})".format(
                         nucname.serpent(name.partition('.')[0]), temp_in_K, name))
             self.tables[name] = table
@@ -215,10 +224,17 @@ class Library(object):
             table.NXS = nxs
 
             datastr = '0 ' + ' '.join(lines[8:12])
-            table.JXS = np.fromstring(datastr, sep=' ', dtype=int)
+            rawdata = datastr.split()
+            table.JXS = np.array(rawdata, dtype=int)
+            #table.JXS = np.fromstring(datastr, sep=' ', dtype=int)
 
+            # NOTE: using str.split() in Cython seems to be 30% faster 
+            # than letting numpy do the splitting.  This is only true 
+            # in Cython.  In Python, please use np.fromstring()
             datastr = '0.0 ' + ' '.join(lines[12:12+n_lines])
-            table.XSS = np.fromstring(datastr, sep=' ', dtype=float)
+            rawdata = datastr.split()
+            table.XSS = np.array(rawdata, dtype=float)
+            #table.XSS = np.fromstring(datastr, sep=' ', dtype=float)
 
             # Read all data blocks
             table._read_all()
@@ -1215,9 +1231,10 @@ class NeutronTable(AceTable):
         return self.reactions.get(mt, None)
 
     def __iter__(self):
-        for r in self.reactions.values():
-            yield r
-
+        # Generators not supported in Cython
+        #for r in self.reactions.values():
+        #    yield r
+        return iter(self.reactions.values())
 
 class SabTable(AceTable):
     """A SabTable object contains thermal scattering data as represented by
