@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 """This module is for reading ACE-format cross sections. ACE stands for "A Compact
 ENDF" format and originated from work on MCNP_. It is used in a number of other
 Monte Carlo particle transport codes.
@@ -17,7 +15,7 @@ generates ACE-format cross sections.
 
 .. _ENDF: http://www.nndc.bnl.gov/endf
 
-.. moduleauthor:: Paul Romano <romano7@gmail.com>, Anthony Scopatz
+.. moduleauthor:: Paul Romano <romano7@gmail.com>, Anthony Scopatz <scopatz@gmail.com>
 """
 
 import struct
