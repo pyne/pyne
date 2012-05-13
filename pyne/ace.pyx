@@ -30,7 +30,6 @@ from bisect import bisect_right
 from pyne cimport nucname
 from pyne import nucname
 
-import time
 
 class Library(object):
     """A Library objects represents an ACE-formatted file which may contain
@@ -98,7 +97,6 @@ class Library(object):
             self._read_ascii(table_names)
 
     def _read_binary(self, table_names, recl_length=4096, entries=512):
-
         while True:
             start_position = self.f.tell()
 
@@ -173,11 +171,10 @@ class Library(object):
             self.f.seek(start_position + recl_length*(n_records + 1))
 
     def _read_ascii(self, table_names):
-        cdef char * cdatastr
         cdef list lines, rawdata
 
         lines = self.f.readlines()
-        
+
         while 0 != len(lines):
             # Read name of table, atomic weight ratio, and temperature. If first
             # line is empty, we are at end of file
@@ -376,14 +373,14 @@ class NeutronTable(AceTable):
         """Read ESZ block -- this block contains the energy grid, total
         xs, absorption xs, elastic scattering xs, and heating numbers.
         """
+        cdef int ind, NE
         
         NE = self.NXS[3]
-        self.index = self.JXS[1]
+        ind = self.JXS[1]
 
-        arr = self.XSS[self.index:self.index+NE*5]
+        arr = self.XSS[ind:ind+NE*5]
         arr.shape = (5, NE)
         self.energy, self.sigma_t, self.sigma_a, sigma_el, self.heating = arr
-        self.index += NE*5
 
         # Create elastic scattering reaction
         MT = 2
@@ -398,6 +395,7 @@ class NeutronTable(AceTable):
         """Read the NU block -- this contains information on the prompt
         and delayed neutron precursor yields, decay constants, etc
         """
+        cdef int ind, i, JXS2, KNU, LNU, NR, NE, NC
 
         JXS2 = self.JXS[2]
 
@@ -544,6 +542,7 @@ class NeutronTable(AceTable):
     def _read_sig(self):
         """Read cross-sections for each reaction MT
         """
+        cdef int JXS7, NE
         JXS7 = self.JXS[7]
         for rxn in self.reactions.values()[1:]:
             rxn.IE = int(self.XSS[JXS7+rxn.LOCA-1])
@@ -644,6 +643,8 @@ class NeutronTable(AceTable):
         """Determine the energy distribution for secondary neutrons for
         each reaction MT
         """
+        cdef int ind, i, LDIS, NMT, NE, NR, LNW, LAW, IDAT, NPE, NPA
+
         LDIS = self.JXS[11]
         NMT = self.NXS[5]
 
@@ -670,7 +671,6 @@ class NeutronTable(AceTable):
 
             rxn.e_dist_law = LAW
             ind = LDIS + IDAT - 1
-            self.index = ind
 
             if LAW == 1:
                 # Tabular equiprobable energy bins (ENDF Law 1)
@@ -1060,6 +1060,8 @@ class NeutronTable(AceTable):
         energies based on older 30x20 matrix formulation.
 
         """
+        cdef int ind, JXS12, NE
+
         JXS12 = self.JXS[12]
         if JXS12 != 0:
             # Determine number of energies
@@ -1110,6 +1112,8 @@ class NeutronTable(AceTable):
     def _read_sigp(self):
         """Read cross-sections for each photon-producing reaction MT.
         """
+        cdef int ind, JXS15, MFTYPE, NR, NE
+
         JXS15 = self.JXS[15]
         for rxn in self.photon_reactions.values():
             ind = JXS15 + rxn.LOCA - 1
@@ -1159,6 +1163,8 @@ class NeutronTable(AceTable):
     def _read_andp(self):
         """Find the angular distribution for each photon-producing reaction
         MT."""
+        cdef int ind, i, j, JXS17, NE
+
         JXS17 = self.JXS[17]
         for i, rxn in enumerate(self.photon_reactions.values()):
             if rxn.LOCB == 0:
@@ -1214,6 +1220,8 @@ class NeutronTable(AceTable):
     def _read_unr(self):
         """Read the unresolved resonance range probability tables if present.
         """
+        cdef int ind, N, M, INT, ILF, IOA, IFF
+
         # Check if URR probability tables are present
         ind = self.JXS[23]
         if ind == 0:
