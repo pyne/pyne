@@ -568,8 +568,13 @@ class NeutronTable(AceTable):
     def _read_and(self):
         """Find the angular distribution for each reaction MT
         """
+        cdef int ind, i, JXS9, NMT, NE
+        cdef dict ang_cos, ang_pdf, ang_cdf
+        #cdef np.ndarray[np.float64_t, ndim=1] xss
+
         JXS9 = self.JXS[9]
         NMT = self.NXS[5]
+        xss = self.XSS
 
         # Angular distribution for all MT with secondary neutrons
         # including elastic scattering
@@ -587,36 +592,40 @@ class NeutronTable(AceTable):
 
             ind = JXS9 + rxn.LOCB - 1
 
-            NE = int(self.XSS[ind])
-            rxn.ang_energy_in = self.XSS[ind+1:ind+1+NE]
-            LC = np.asarray(self.XSS[ind+1+NE:ind+1+2*NE], dtype=int)
+            NE = int(xss[ind])
+            rxn.ang_energy_in = xss[ind+1:ind+1+NE]
+            LC = np.asarray(xss[ind+1+NE:ind+1+2*NE], dtype=int)
             rxn.ang_location = LC
             ind = ind+1+2*NE
 
-            rxn.ang_cos = {}
-            rxn.ang_pdf = {}
-            rxn.ang_cdf = {}
-            for i, location in enumerate(LC):
-                if location == 0:
-                    # Isotropic angular distribution
-                    continue
-                elif location > 0:
+            i = 0
+            ang_cos = {}
+            ang_pdf = {}
+            ang_cdf = {}
+            while i < NE:
+                location = LC[i]
+                if location > 0:
                     # Equiprobable 32 bin distribution
                     # print([rxn,'equiprobable'])
-                    rxn.ang_cos[i] = self.XSS[ind:ind+33]
+                    ang_cos[i] = xss[ind:ind+33]
                     ind += 33
                 elif location < 0:
                     # Tabular angular distribution
-                    JJ = int(self.XSS[ind])
-                    NP = int(self.XSS[ind+1])
+                    JJ = int(xss[ind])
+                    NP = int(xss[ind+1])
                     ind += 2
-                    ang_dat = self.XSS[ind:ind+3*NP]
+                    ang_dat = xss[ind:ind+3*NP]
                     ang_dat.shape = (3, NP)
-                    rxn.ang_cos[i], rxn.ang_pdf[i], rxn.ang_cdf[i] = ang_dat
+                    ang_cos[i], ang_pdf[i], ang_cdf[i] = ang_dat
                     ind += 3 * NP
+                # pass if location == 0
+                # Isotropic angular distribution
+                i += 1
 
-            self.index = ind
-        
+            rxn.ang_cos = ang_cos
+            rxn.ang_pdf = ang_pdf
+            rxn.ang_cdf = ang_cdf
+
     def _read_ldlw(self):
         """Find locations for energy distribution data for each reaction
         """
