@@ -1315,63 +1315,26 @@ class SabTable(AceTable):
         NE_in = len(self.inelastic_e_in)
         NE_out = self.NXS[4]
         NMU = self.NXS[3]
-
-        # Set index for reading values
         ind = self.JXS[3]
         
-        self.inelastic_e_out = []
-        self.inelastic_mu_out = []
-        # Loop over incoming energies 
-        for i in range(NE_in):
-            self.inelastic_e_out.append([])
-            self.inelastic_mu_out.append([])
+        self.inelastic_e_out = self.XSS[ind:ind+NE_in*NE_out*(NMU+2):NMU+2]
+        self.inelastic_e_out.shape = (NE_in, NE_out)
 
-            # Loop over outgoing energies 
-            for j in range(NE_out):
-                # Read outgoing energy
-                self.inelastic_e_out[-1].append(self._get_float())
-
-                # Read discrete cosines for scattering from E_in to E_out
-                self.inelastic_mu_out[-1].append(self._get_float(NMU+1))
-
-        np.save('orig_e', self.inelastic_e_out)
-        np.save('orig_mu', self.inelastic_mu_out)
+        self.inelastic_mu_out = self.XSS[ind:ind+NE_in*NE_out*(NMU+2)]
+        self.inelastic_mu_out.shape = (NE_in, NE_out, NMU+2)
+        self.inelastic_mu_out = self.inelastic_mu_out[:,:,1:]
 
     def _read_itca(self):
         """Read angular distributions for elastic scattering.
         """
-
         NMU = self.NXS[6]
         if self.JXS[4] == 0 or NMU == -1:
             return
-
-        self.index = self.JXS[6]
+        ind = self.JXS[6]
 
         NE = len(self.elastic_e_in)
-        self.elastic_mu_out = []
-        for i in range(NE):
-            self.elastic_mu_out.append(self._get_float(NMU))
-
-    def _get_float(self, n_values = 1):
-        if n_values > 1:
-            values = self.XSS[self.index:self.index+n_values]
-            self.index += n_values
-            return values
-        else:
-            value = self.XSS[self.index]
-            self.index += 1
-            return value
-            
-    def _get_int(self, n_values = 1):
-        if n_values > 1:
-            values = [int(i) for i in 
-                      self.XSS[self.index:self.index+n_values]]
-            self.index += n_values
-            return values
-        else:
-            value = int(self.XSS[self.index])
-            self.index += 1
-            return value
+        self.elastic_mu_out = self.XSS[ind:ind+NE*NMU]
+        self.elastic_mu_out.shape = (NE, NMU)
 
             
 class Reaction(object):
