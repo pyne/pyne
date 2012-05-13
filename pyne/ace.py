@@ -1225,6 +1225,15 @@ class SabTable(AceTable):
     """A SabTable object contains thermal scattering data as represented by
     an S(alpha, beta) table.
 
+    Parameters
+    ----------
+    name : str
+        ZAID identifier of the table, e.g. lwtr.10t.
+    awr : float
+        Atomic weight ratio of the target nuclide.
+    temp : float
+        Temperature of the target nuclide in eV.
+
     :Attributes:
       **awr** : float
         Atomic weight ratio of the target nuclide.
@@ -1255,15 +1264,6 @@ class SabTable(AceTable):
       **temp** : float
         Temperature of the target nuclide in eV.
 
-    Parameters
-    ----------
-    name : str
-        ZAID identifier of the table, e.g. lwtr.10t.
-    awr : float
-        Atomic weight ratio of the target nuclide.
-    temp : float
-        Temperature of the target nuclide in eV.
-
     """
     
 
@@ -1283,47 +1283,41 @@ class SabTable(AceTable):
             return "<ACE Thermal S(a,b) Table>"
 
     def _read_itie(self):
+        """Read energy-dependent inelastic scattering cross sections.
         """
-        Read energy-dependent inelastic scattering cross sections
-        """
-
-        self.index = self.JXS[1]
-
-        NE = self._get_int()
-        self.inelastic_e_in = self._get_float(NE)
-        self.inelastic_sigma = self._get_float(NE)
+        ind = self.JXS[1]
+        NE = int(self.XSS[ind])
+        self.inelastic_e_in = self.XSS[ind+1:ind+1+NE]
+        self.inelastic_sigma = self.XSS[ind+1+NE:ind+1+2*NE]
 
     def _read_itce(self):
+        """Read energy-dependent elastic scattering cross sections.
         """
-        Read energy-dependent elastic scattering cross sections
-        """
-
         # Determine if ITCE block exists
-        self.index = self.JXS[4]
-        if self.index == 0:
+        ind = self.JXS[4]
+        if ind == 0:
             return
 
         # Read values
-        NE = self._get_int()
-        self.elastic_e_in = self._get_float(NE)
-        self.elastic_P = self._get_float(NE)
+        NE = int(self.XSS[ind])
+        self.elastic_e_in = self.XSS[ind+1:ind+1+NE]
+        self.elastic_P = self.XSS[ind+1+NE:ind+1+2*NE]
+
         if self.NXS[5] == 4:
             self.elastic_type = 'sigma=P'
         else:
             self.elastic_type = 'sigma=P/E'
 
     def _read_itxe(self):
+        """Read coupled energy/angle distributions for inelastic scattering.
         """
-        Read coupled energy/angle distributions for inelastic scattering
-        """
-        
         # Determine number of energies and angles
         NE_in = len(self.inelastic_e_in)
         NE_out = self.NXS[4]
         NMU = self.NXS[3]
 
         # Set index for reading values
-        self.index = self.JXS[3]
+        ind = self.JXS[3]
         
         self.inelastic_e_out = []
         self.inelastic_mu_out = []
@@ -1339,6 +1333,9 @@ class SabTable(AceTable):
 
                 # Read discrete cosines for scattering from E_in to E_out
                 self.inelastic_mu_out[-1].append(self._get_float(NMU+1))
+
+        np.save('orig_e', self.inelastic_e_out)
+        np.save('orig_mu', self.inelastic_mu_out)
 
     def _read_itca(self):
         """Read angular distributions for elastic scattering.
