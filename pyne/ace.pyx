@@ -30,6 +30,8 @@ from bisect import bisect_right
 from pyne cimport nucname
 from pyne import nucname
 
+from pyne._utils import fromstring_split, fromstring_token
+
 
 class Library(object):
     """A Library objects represents an ACE-formatted file which may contain
@@ -184,9 +186,7 @@ class Library(object):
             temp = float(words[2])
 
             datastr = '0 ' + ' '.join(lines[6:8])
-            rawdata = datastr.split()
-            nxs = np.array(rawdata, dtype=int)
-            #nxs = np.fromstring(datastr, sep=' ', dtype=int)
+            nxs = fromstring_split(datastr, dtype=int)
 
             n_lines = (nxs[1] + 3)/4
 
@@ -221,17 +221,11 @@ class Library(object):
             table.NXS = nxs
 
             datastr = '0 ' + ' '.join(lines[8:12])
-            rawdata = datastr.split()
-            table.JXS = np.array(rawdata, dtype=int)
-            #table.JXS = np.fromstring(datastr, sep=' ', dtype=int)
+            table.JXS = fromstring_split(datastr, dtype=int)
 
-            # NOTE: using str.split() in Cython seems to be 30% faster 
-            # than letting numpy do the splitting.  This is only true 
-            # in Cython.  In Python, please use np.fromstring()
-            datastr = '0.0 ' + ' '.join(lines[12:12+n_lines])
-            rawdata = datastr.split()
-            table.XSS = np.array(rawdata, dtype=float)
-            #table.XSS = np.fromstring(datastr, sep=' ', dtype=float)
+            datastr = '0.0 ' + ''.join(lines[12:12+n_lines])
+            table.XSS = fromstring_split(datastr, dtype=float)
+            #table.XSS = fromstring_token(datastr, inplace=True, maxsize=4*n_lines+1)
 
             # Read all data blocks
             table._read_all()
