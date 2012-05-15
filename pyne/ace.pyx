@@ -175,9 +175,12 @@ class Library(object):
     def _read_ascii(self, table_names):
         cdef list lines, rawdata
 
-        lines = self.f.readlines()
+        f = self.f
+        tables_seen = set()
+    
+        lines = [f.readline() for i in range(13)]
 
-        while 0 != len(lines):
+        while (0 != len(lines)) and (lines[0] != ''):
             # Read name of table, atomic weight ratio, and temperature. If first
             # line is empty, we are at end of file
             words = lines[0].split()
@@ -189,17 +192,34 @@ class Library(object):
             nxs = fromstring_split(datastr, dtype=int)
 
             n_lines = (nxs[1] + 3)/4
+            n_bytes = len(lines[-1]) * (n_lines - 2) + 1
+
+            # Ensure that we have more tables to read in
+            if (table_names is not None) and (table_names < tables_seen):
+                break
+            tables_seen.add(name)
 
             # verify that we are suppossed to read this table in
             if (table_names is not None) and (name not in table_names):
-                lines = lines[12+n_lines:]
+                f.seek(n_bytes, 1)
+                f.readline()
+                lines = [f.readline() for i in range(13)]
                 continue
 
             # ensure we have a valid table type
             if 0 == len(name) or name[-1] not in table_types:
                 warn("Unsupported table: " + name, RuntimeWarning)
-                lines = lines[12+n_lines:]
+                f.seek(n_bytes, 1)
+                f.readline()
+                lines = [f.readline() for i in range(13)]
                 continue
+
+            # read and and fix over-shoot
+            lines += f.readlines(n_bytes)
+            if 12+n_lines < len(lines):
+                goback = sum([len(line) for line in lines[12+n_lines:]])
+                lines = lines[:12+n_lines]
+                f.seek(-goback, 1)
 
             # get the table
             table = table_types[name[-1]](name, awr, temp)
@@ -229,7 +249,9 @@ class Library(object):
 
             # Read all data blocks
             table._read_all()
-            lines = lines[12+n_lines:]
+            lines = [f.readline() for i in range(13)]
+
+        f.seek(0)
 
     def find_table(self, name):
         """Returns a cross-section table with a given name.
