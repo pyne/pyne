@@ -60,30 +60,58 @@ def test_remove():
     utils.remove('Medic!')
 
 
-def test_fastfromstring1():
+def test_fromstring_split1():
     s = "1 2.3 4"
-    obs = utils.fastfromstring(s)
+    obs = utils.fromstring_split(s)
     exp = np.fromstring(s, sep=" ")
     assert_array_equal(obs, exp)
 
 
-def test_fastfromstring2():
+def test_fromstring_split2():
     s = "1-2.3-4"
-    obs = utils.fastfromstring(s, sep='-')
+    obs = utils.fromstring_split(s, sep='-')
     exp = np.fromstring(s, sep="-")
     assert_array_equal(obs, exp)
 
 
-def test_fastfromstring3():
+def test_fromstring_split3():
+    s = "1,2.3,4"
+    obs = utils.fromstring_split(s, sep=',')
+    exp = np.fromstring(s, sep=",")
+    assert_array_equal(obs, exp)
+
+
+def test_fromstring_split4():
+    s = "1\n 23 \t 4"
+    obs = utils.fromstring_split(s, dtype=int)
+    exp = np.array([1, 23, 4])
+    assert_array_equal(obs, exp)
+
+
+def test_fromstring_token1():
+    s = "1 2.3 4"
+    obs = utils.fromstring_token(s)
+    exp = np.fromstring(s, sep=" ")
+    assert_array_equal(obs, exp)
+
+
+def test_fromstring_token2():
+    s = "1-2.3-4"
+    obs = utils.fromstring_token(s, sep='-')
+    exp = np.fromstring(s, sep="-")
+    assert_array_equal(obs, exp)
+
+
+def test_fromstring_token3():
     s = "1,  2.3, 4"
-    obs = utils.fastfromstring(s, sep=' ,')
+    obs = utils.fromstring_token(s, sep=' ,')
     exp = np.fromstring(s, sep=", ")
     assert_array_equal(obs, exp)
 
 
-def test_fastfromstring4():
+def test_fromstring_token4():
     s = "1, 2.3 ,4"
-    obs = utils.fastfromstring(s, sep=' ,', inplace=True)
+    obs = utils.fromstring_token(s, sep=' ,', inplace=True)
     exp = np.array([1.0, 2.3, 4.0])
     assert_equal(s, "1\x00 2.3\x00,4")
     assert_array_equal(obs, exp)
