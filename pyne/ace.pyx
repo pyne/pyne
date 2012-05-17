@@ -30,7 +30,9 @@ from bisect import bisect_right
 from pyne cimport nucname
 from pyne import nucname
 
+# fromstring func should depend on numpy verison
 from pyne._utils import fromstring_split, fromstring_token
+cdef bint NP_LE_V15 = int(np.__version__.split('.')[1]) <= 5 and np.__version__.startswith('1')
 
 
 class Library(object):
@@ -244,8 +246,11 @@ class Library(object):
             table.JXS = fromstring_split(datastr, dtype=int)
 
             datastr = '0.0 ' + ''.join(lines[12:12+n_lines])
-            table.XSS = fromstring_split(datastr, dtype=float)
-            #table.XSS = fromstring_token(datastr, inplace=True, maxsize=4*n_lines+1)
+            if NP_LE_V15:
+                #table.XSS = np.fromstring(datastr, sep=" ")
+                table.XSS = fromstring_split(datastr, dtype=float)
+            else:
+                table.XSS = fromstring_token(datastr, inplace=True, maxsize=4*n_lines+1)
 
             # Read all data blocks
             table._read_all()
