@@ -496,79 +496,71 @@ class Njoy99(object):
                 os.remove(fileName)
         os.chdir(myCwd)
 
-  def matxs(self):
-    print " --- make matxs for " + self.hmat + " ---"
-    myCwd = os.getcwd()
-    myNjoy = myCwd + '/' + self.execDir + "/xnjoy<file_data"
-    os.chdir(self.evaluationName)
-    listGro = [ 0, 239, 30, 27, 50, 68, 100, 35, 69, 187, 70, 620, 80, 100,
-    640, 174, 175, 172, 33, 1968, 315, 172, 175, 281, 349, 89 ]
-    listGro2 = [ 0, 94, 12, 21, 22, 48, 24, 36, 38, 42 ]
-    htime = time.ctime(time.time())
-    self.__dict__.update({"nbGro": listGro[self.nstr - 1], \
-                          "htime": htime})
-    if self.gstr == 0:
-      text_data = """
-      moder
-      24 -25
-      matxsr
-      -25 0 28/
-      1 '%(hmat)s from %(evaluationName)s (%(mat)d) at %(htime)s'/
-      1 2 1 1
-      'neutron library'/
-      'n'
-      %(nbGro)d
-      'nscat' 'ntherm'/
-      1 1
-      1 1
-      %(hmat)s %(mat)d /
-      stop
-      """%self.__dict__
-    else:
-      self.__dict__.update({"nbGro2": listGro2[self.gstr - 1]})
-      text_data = """
-      moder
-      24 -25
-      moder
-      26 -27
-      matxsr
-      -25 -27 28/
-      1 '%(hmat)s coupled-set from %(evaluationName)s (%(mat)d+%(matgg)d) at %(htime)s'/
-      2 3 1 1
-      'neutron-gamma library'/
-      'n' 'g'
-      %(nbGro)d %(nbGro2)d
-      'nscat' 'ng' 'gscat' 'ntherm'/
-      1 1 2 1
-      1 2 2 1
-      %(hmat)s %(mat)d %(matgg)d/
-      stop
-      """%self.__dict__
-      os.system("ln -s gamma" + self.hmatgg + " tape26")
-    file_data = open("file_data",'w')
-    file_data.write(text_data)
-    file_data.close()
-    os.system("ln -s gendf" + self.hmat + " tape24")
-    os.system(myNjoy)
-    os.system("mv file_data file_data_matxs" + self.hmat)
-    os.system("mv tape28 matxs" + self.hmat)
-    os.system("mv output out_matxs_" + self.hmat)
-    os.system("chmod 644 out_matxs_" + self.hmat)
-    for fileName in os.listdir(os.getcwd()):
-      if fileName[:4] == 'tape': os.remove(fileName)
-    os.chdir(myCwd)
-#
-  def makeFp(self, eaf=0):
-    self.scatteringLaw = None
-    self.fission = None
-    self.dilutions = None
-    keeplegendre = self.legendre
-    self.legendre = 0
-    self.pendf(eaf)
-    self.gendf(eaf)
-    self.draglib(fp=1)
-    self.legendre = keeplegendre
-#
+    def matxs(self):
+        """Generate an ASCII MATXS file using the MODER and MATXSR modules."""
+
+        print " --- make matxs for " + self.hmat + " ---"
+        myCwd = os.getcwd()
+        myNjoy = myCwd + '/' + self.execDir + "/xnjoy<file_data"
+        os.chdir(self.evaluationName)
+        listGro = [0, 239, 30, 27, 50, 68, 100, 35, 69, 187, 70, 620, 80, 100,
+                   640, 174, 175, 172, 33, 1968, 315, 172, 175, 281, 349, 89]
+        listGro2 = [0, 94, 12, 21, 22, 48, 24, 36, 38, 42]
+        htime = time.ctime(time.time())
+        self.__dict__.update({"nbGro": listGro[self.nstr - 1],
+                              "htime": htime})
+        if self.gstr == 0:
+            text_data = ("moder\n24 -25\nmatxsr\n-25 0 28/\n1 '%(hmat)s from "
+                         "%(evaluationName)s (%(mat)d) at %(htime)s'/\n"
+                         "1 2 1 1\n'neutron library'/\n'n'\n%(nbGro)d\n"
+                         "'nscat' 'ntherm'/\n1 1\n1 1\n%(hmat)s %(mat)d /\n"
+                         "stop\n" % self.__dict__)
+        else:
+            self.__dict__.update({"nbGro2": listGro2[self.gstr - 1]})
+            text_data = ("moder\n24 -25\nmoder\n26 -27\nmatxsr\n-25 -27 28/\n"
+                         "1 '%(hmat)s coupled-set from %(evaluationName)s "
+                         "(%(mat)d+%(matgg)d) at %(htime)s'/\n2 3 1 1\n"
+                         "'neutron-gamma library'/\n'n' 'g'\n%(nbGro)d "
+                         "%(nbGro2)d\n'nscat' 'ng' 'gscat' 'ntherm'/\n1 1 2 1\n"
+                         "1 2 2 1\n%(hmat)s %(mat)d %(matgg)d/\nstop\n" 
+                         % self.__dict__)
+            os.system("ln -s gamma" + self.hmatgg + " tape26")
+        file_data = open("file_data", 'w')
+        file_data.write(text_data)
+        file_data.close()
+        os.system("ln -s gendf" + self.hmat + " tape24")
+        os.system(myNjoy)
+        os.system("mv file_data file_data_matxs" + self.hmat)
+        os.system("mv tape28 matxs" + self.hmat)
+        os.system("mv output out_matxs_" + self.hmat)
+        os.system("chmod 644 out_matxs_" + self.hmat)
+        for fileName in os.listdir(os.getcwd()):
+            if fileName[:4] == 'tape':
+                os.remove(fileName)
+        os.chdir(myCwd)
+
+    def makeFp(self, eaf=0):
+        """Creates a PENDF, GENDF, and DRAGLIB file for a single fission
+        product.
+
+        Parameters
+        ----------
+        eaf : int
+            If eaf is 1, simplified processing is performed to be compatible
+            with the EAF nuclear library.
+
+        """
+
+        self.scatteringLaw = None
+        self.fission = None
+        self.dilutions = None
+        keeplegendre = self.legendre
+        self.legendre = 0
+        self.pendf(eaf)
+        self.gendf(eaf)
+        self.draglib(fp=1)
+        self.legendre = keeplegendre
+
   def burnup(self):
     myCwd = os.getcwd()
     myNjoy = myCwd + '/' + self.execDir + "/xnjoy<tempFile"
