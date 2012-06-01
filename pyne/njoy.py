@@ -728,16 +728,17 @@ class Njoy99(object):
                 nbAtoms = 2
                 elasOpt = 1
                 matsab_inc = 233
-                matsab_inc = 234
+                matsab_coh = 234
             elif self.scatteringMat == 31:
                 # C in Graphite
                 elasOpt = 1
                 matsab_inc = 229
-                matsab_inc = 230
+                matsab_coh = 230
             elif self.scatteringMat == 37:
                 # H in Polyethylene (CH2)
                 nbAtoms = 2
                 matsab_inc = 223
+                matsab_coh = 224
             elif self.scatteringMat == 40:
                 # H in Benzine (C6H6)
                 nbAtoms = 2
@@ -747,7 +748,7 @@ class Njoy99(object):
                 nbAtoms = 2
                 elasOpt = 1
                 matsab_inc = 235
-                matsab_inc = 236
+                matsab_coh = 236
             text_data += ("acer\n-21 -25 0 48 49\n2 0 1 %(suff)f/\n"
                           "'pendf tape from %(evaluationName)s'/\n"
                           "%(mat)d  %(textTmp)s %(scatName)s/\n"
