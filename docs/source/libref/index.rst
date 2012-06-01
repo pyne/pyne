@@ -13,6 +13,7 @@ The following modules and sub-packages are discussed:
     data
     material
     bins
+    njoy
     cccc
     ace
     ensdf
