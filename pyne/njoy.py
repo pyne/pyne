@@ -66,7 +66,7 @@ class Njoy99(object):
             if nbDil > 10:
                 raise PyNjoyError("cannot have more than 10 dilutions")
             for dil in self.dilutions:
-                textDil = textDil + " %E" % dil
+                textDil += " %E" % dil
         else:
             nbDil = 0
         nbTmp = len(self.temperatures)
@@ -74,7 +74,7 @@ class Njoy99(object):
             raise PyNjoyError("cannot have more than 10 temperatures")
         textTmp=""
         for tmp in self.temperatures:
-            textTmp = textTmp + " %E" % tmp
+            textTmp += " %E" % tmp
 
         matsab_inc = 221
         nbAtoms = 1
@@ -141,39 +141,39 @@ class Njoy99(object):
             text_data = "moder\n20 -21\nmoder\n26 -27\n"
         else:
             text_data = "moder\n20 -21\n"
-        text_data = text_data + (
+        text_data += (
             "reconr\n-21 -22\n'pendf tape from %(evaluationName)s'/\n"
             "%(mat)d 1/\n0.001  0.  0.005/\n"
             "'%(hmat)s from %(evaluationName)s at %(htime)s' /\n0/\n"
             "broadr\n-21 -22 -23\n%(mat)d %(nbTmp)d/\n0.001/\n"
             "%(textTmp)s/\n0/\n" % self.__dict__)
         if self.dilutions and self.purr:
-            text_data = text_data + (
+            text_data +=  (
                 "purr\n-21 -23 -24\n%(mat)d %(nbTmp)d %(nbDil)d 20 32/\n"
                 "%(textTmp)s/\n%(textDil)s/\n0/\n" % self.__dict__)
         elif self.dilutions:
-            text_data = text_data + (
+            text_data +=  (
                 "unresr\n-21 -23 -24\n%(mat)d %(nbTmp)d %(nbDil)d 1/\n"
                 "%(textTmp)s/\n%(textDil)s/\n0/\n" % self.__dict__)
         if self.dilutions:
-            text_data = text_data + (
+            text_data +=  (
                 "thermr\n0 -24 -35\n0 %(mat)d 16 %(nbTmp)d %(typeLaw)d 0 "
                 "%(nbAtoms)d 221 0\n%(textTmp)s/\n0.001 4.0\nmoder\n-35 29\n"
                 "stop\n" % self.__dict__)
         else:
             if self.scatteringLaw:
-                text_data = text_data + (
+                text_data +=  (
                     "thermr\n%(unitLaw)d -23 -35\n%(matLaw)d %(mat)d 16 "
                     "%(nbTmp)d %(typeLaw)d %(elasOpt)d %(nbAtoms)d "
                     "%(matsab_inc)d 0/\n%(textTmp)s/\n0.001 4.0\n"
                     "moder\n-35 29\nstop\n" % self.__dict__)
             elif eaf == 0:
-                text_data = text_data + (
+                text_data +=  (
                     "thermr\n0 -23 -35\n0 %(mat)d 16 %(nbTmp)d "
                     "%(typeLaw)d 0 %(nbAtoms)d 221 0\n%(textTmp)s/\n"
                     "0.001 4.0\nmoder\n-35 29\nstop\n" % self.__dict__)
             else:
-                text_data = text_data + (
+                text_data +=  (
                     "moder\n-23 29\nstop\n" % self.__dict__)
         file_data = open("file_data",'w')
         file_data.write(text_data)
@@ -185,165 +185,141 @@ class Njoy99(object):
         os.system("mv output out_pendf_" + self.hmat)
         os.system("chmod 644 out_pendf_" + self.hmat)
         for fileName in os.listdir(os.getcwd()):
-            if fileName[:4] == 'tape': os.remove(fileName)
+            if fileName[:4] == 'tape':
+                os.remove(fileName)
         os.chdir(myCwd)
 
-  def gendf(self, eaf=0):
-    print " --- make gendf for " + self.hmat + " ---"
-    myCwd = os.getcwd()
-    myNjoy = myCwd + '/' + self.execDir + "/xnjoy<file_data"
-    if not os.path.isfile(os.path.expandvars(self.evaluationFile)):
-      raise PyNjoyError("evaluation file " + self.evaluationFile + " not found")
-    os.chdir(self.evaluationName)
-    matsab_inc = 221
-    matsab_coh = 0
-    if self.scatteringLaw:
-      if self.scatteringMat == 1:    
-        matsab_inc = 222
-      elif self.scatteringMat == 7: 
-        matsab_inc = 225        
-        matsab_coh = 226        
-      elif self.scatteringMat == 11: 
-        matsab_inc = 228
-      elif self.scatteringMat == 26:
-        matsab_inc = 231
-        matsab_coh = 232
-      elif self.scatteringMat == 27:
-        matsab_inc = 233
-        matsab_coh = 234
-      elif self.scatteringMat == 31: 
-        matsab_inc = 229
-        matsab_coh = 230
-      elif self.scatteringMat == 37: 
-        matsab_inc = 223
-        matsab_coh = 224
-      elif self.scatteringMat == 40: 
-        matsab_inc = 227
-      elif self.scatteringMat == 58:
-        matsab_inc = 235             
-        matsab_coh = 236             
-    if self.iwt:
-      newiwt = self.iwt
-    else:
-      newiwt = 4
-    if self.dilutions:
-      newiwt = -abs(newiwt)
-      nbDil = len(self.dilutions)
-      if nbDil > 10: raise PyNjoyError("cannot have more than 10 dilutions")
-      textDil=""
-      for dil in self.dilutions:
-        textDil = textDil + " " + "%E"%dil
-    else:
-      newiwt = abs(newiwt)
-      nbDil = 1
-      textDil="1.0e10"
-    nbTmp = len(self.temperatures)
-    if nbTmp > 10: raise PyNjoyError("cannot have more than 10 temperatures")
-    textTmp=""
-    for tmp in self.temperatures:
-      textTmp = textTmp + " " + "%E"%tmp
-    htime = time.ctime(time.time())
-    self.__dict__.update({"textDil": textDil, \
-                          "nbDil"  : nbDil,   \
-                          "textTmp": textTmp, \
-                          "nbTmp"  : nbTmp,   \
-                          "htime"  : htime,   \
-                          "newiwt" : newiwt,  \
-                          "matsab_inc" : matsab_inc, \
-                          "matsab_coh" : matsab_coh, \
-                          "autosup": self.autolib[1]})
-    #
-    text_data = """
-    moder
-    20 -21
-    moder
-    29 -25
-    groupr
-    -21 -25 0 -26
-    %(mat)d %(nstr)d %(gstr)d %(newiwt)d %(legendre)d %(nbTmp)d %(nbDil)d 1
-    '%(hmat)s from %(evaluationName)s at %(htime)s' /
-    %(textTmp)s/
-    %(textDil)s/
-    """%self.__dict__
-    if self.dilutions:
-      text_data = text_data + """
-      %(autosup)f %(potential)f 20000 / Homog. Flux Calc.Param
-      """%self.__dict__
-    if newiwt == 1 or newiwt == -1:
-      text_data = text_data + self.wght
-    elif newiwt == 4 or newiwt == -4:
-      text_data = text_data + """
-      0.2 0.0253 820.3e3 1.40e6 / iwt=4 parameters
-      """
-    for tmp in self.temperatures:
-      if eaf == 0:
-        if matsab_coh != 0:
-          text_data = text_data + """
-          3/
-          3 %(matsab_inc)d /
-          3 %(matsab_coh)d /
-          """%self.__dict__
+    def gendf(self, eaf=0):
+        """Generate a multigroup GENDF file from ENDF raw data and a PENDF file
+        already generated. This requires that the pendf() method has already
+        been called.
+
+        Parameters
+        ----------
+        eaf : int
+            If eaf is 1, simplified processing is performed to be compatible
+            with the EAF nuclear library.
+
+        """
+
+        print " --- make gendf for " + self.hmat + " ---"
+        myCwd = os.getcwd()
+        myNjoy = myCwd + '/' + self.execDir + "/xnjoy<file_data"
+        if not os.path.isfile(os.path.expandvars(self.evaluationFile)):
+            raise PyNjoyError("evaluation file " + self.evaluationFile +
+                              " not found")
+        os.chdir(self.evaluationName)
+        matsab_inc = 221
+        matsab_coh = 0
+        if self.scatteringLaw:
+            if self.scatteringMat == 1:
+                matsab_inc = 222
+            elif self.scatteringMat == 7:
+                matsab_inc = 225        
+                matsab_coh = 226        
+            elif self.scatteringMat == 11:
+                matsab_inc = 228
+            elif self.scatteringMat == 26:
+                matsab_inc = 231
+                matsab_coh = 232
+            elif self.scatteringMat == 27:
+                matsab_inc = 233
+                matsab_coh = 234
+            elif self.scatteringMat == 31:
+                matsab_inc = 229
+                matsab_coh = 230
+            elif self.scatteringMat == 37:
+                matsab_inc = 223
+                matsab_coh = 224
+            elif self.scatteringMat == 40:
+                matsab_inc = 227
+            elif self.scatteringMat == 58:
+                matsab_inc = 235             
+                matsab_coh = 236             
+        if self.iwt:
+            newiwt = self.iwt
         else:
-          text_data = text_data + """
-          3/
-          3 %(matsab_inc)d /
-          """%self.__dict__
-      else:
-        text_data = text_data + """
-        3/
-        """
-      if self.fission:
-        text_data = text_data + """
-        3 452 /
-        """
-      if self.fission == 2:
-        text_data = text_data + """
-        3 455 /
-        5 455 /
-        """
-      if self.gstr != 0:
-        text_data = text_data + """
-        16 / photon interaction matrices
-        """
-      if eaf == 0:
-        if matsab_coh != 0:
-          text_data = text_data + """
-          6 /
-          6 %(matsab_inc)d /
-          6 %(matsab_coh)d /
-          0/
-          """%self.__dict__
+            newiwt = 4
+        if self.dilutions:
+            newiwt = -abs(newiwt)
+            nbDil = len(self.dilutions)
+            if nbDil > 10:
+                raise PyNjoyError("cannot have more than 10 dilutions")
+            textDil = ""
+            for dil in self.dilutions:
+                textDil += " %E" % dil
         else:
-          text_data = text_data + """
-          6 /
-          6 %(matsab_inc)d /
-          0/
-          """%self.__dict__
-      else:
-        text_data = text_data + """
-        6 /
-        0/
-        """
-    text_data = text_data + """
-    0/
-    moder
-    -26 30
-    stop
-    """
-    file_data = open("file_data",'w')
-    file_data.write(text_data)
-    file_data.close()
-    os.system("ln -s " + self.evaluationFile + " tape20")
-    os.system("ln -s pendf" + self.hmat + " tape29")
-    os.system(myNjoy)
-    os.system("mv file_data file_data_gendf" + self.hmat)
-    os.system("mv tape30 gendf" + self.hmat)
-    os.system("mv output out_gendf_" + self.hmat)
-    os.system("chmod 644 out_gendf_" + self.hmat)
-    for fileName in os.listdir(os.getcwd()):
-      if fileName[:4] == 'tape': os.remove(fileName)
-    os.chdir(myCwd)
-  #
+            newiwt = abs(newiwt)
+            nbDil = 1
+            textDil = "1.0e10"
+        nbTmp = len(self.temperatures)
+        if nbTmp > 10:
+            raise PyNjoyError("cannot have more than 10 temperatures")
+        textTmp = ""
+        for tmp in self.temperatures:
+            textTmp += " %E" % tmp
+        htime = time.ctime(time.time())
+        self.__dict__.update({"textDil": textDil,
+                              "nbDil"  : nbDil,
+                              "textTmp": textTmp,
+                              "nbTmp"  : nbTmp,
+                              "htime"  : htime,
+                              "newiwt" : newiwt,
+                              "matsab_inc" : matsab_inc,
+                              "matsab_coh" : matsab_coh,
+                              "autosup": self.autolib[1]})
+
+        text_data = ("moder\n20 -21\nmoder\n29 -25\ngroupr"
+                     "-21 -25 0 -26\n%(mat)d %(nstr)d %(gstr)d %(newiwt)d "
+                     "%(legendre)d %(nbTmp)d %(nbDil)d 1\n'%(hmat)s from "
+                     "%(evaluationName)s at %(htime)s' /\n%(textTmp)s/\n"
+                     "%(textDil)s/\n" % self.__dict__)
+        if self.dilutions:
+            text_data += ("%(autosup)f %(potential)f 20000 / "
+                          "Homog. Flux Calc.Param" % self.__dict__)
+        if newiwt == 1 or newiwt == -1:
+            text_data += self.wght
+        elif newiwt == 4 or newiwt == -4:
+            text_data += "0.2 0.0253 820.3e3 1.40e6 / iwt=4 parameters"
+        for tmp in self.temperatures:
+            if eaf == 0:
+                if matsab_coh != 0:
+                    text_data += ("3/\n3 %(matsab_inc)d /\n"
+                                  "3 %(matsab_coh)d /\n" % self.__dict__)
+                else:
+                    text_data += "3/\n3 %(matsab_inc)d /\n" % self.__dict__
+            else:
+              text_data += "3/\n"
+            if self.fission:
+                text_data += "3 452 /\n"
+            if self.fission == 2:
+                text_data += "3 455 /\n5 455 /\n"
+            if self.gstr != 0:
+                text_data += "16 / photon interaction matrices\n"
+            if eaf == 0:
+                if matsab_coh != 0:
+                    text_data += ("6 /\n6 %(matsab_inc)d /\n6 "
+                                  "%(matsab_coh)d /\n0/\n" % self.__dict__)
+                else:
+                    text_data += "6 /\n6 %(matsab_inc)d /\n0/\n" % self.__dict__
+            else:
+                text_data += "6 /\n0/\n"
+        text_data += "0/\nmoder\n-26 30\nstop"
+        file_data = open("file_data",'w')
+        file_data.write(text_data)
+        file_data.close()
+        os.system("ln -s " + self.evaluationFile + " tape20")
+        os.system("ln -s pendf" + self.hmat + " tape29")
+        os.system(myNjoy)
+        os.system("mv file_data file_data_gendf" + self.hmat)
+        os.system("mv tape30 gendf" + self.hmat)
+        os.system("mv output out_gendf_" + self.hmat)
+        os.system("chmod 644 out_gendf_" + self.hmat)
+        for fileName in os.listdir(os.getcwd()):
+            if fileName[:4] == 'tape':
+                os.remove(fileName)
+        os.chdir(myCwd)
+
   def gamma(self):
     print " --- make gamma gendf for " + self.hmatgg + " ---"
     myCwd = os.getcwd()
