@@ -337,7 +337,7 @@ class Njoy99(object):
             os.mkdir(self.evaluationName)
         os.chdir(self.evaluationName)
         htime = time.ctime(time.time())
-        self.__dict__.update({"htime"  : htime})
+        self.__dict__.update({"htime": htime})
 
         text_data = ("moder\n40 -41\nreconr\n-41 -42\n"
                      "'pendf tape from %(evaluationName)s'/\n"
@@ -382,7 +382,8 @@ class Njoy99(object):
         if self.oldlib:
             os.system("mv ../" + self.oldlib + " draglib" + evaluationNameBase)
         os.chdir(self.evaluationName)
-        if os.path.isfile("drag"): os.remove("drag")
+        if os.path.isfile("drag"):
+            os.remove("drag")
         if os.path.isfile("draglib" + evaluationNameBase):
             iold = 29
             name1 = "draglib" + evaluationNameBase + ".bis.gz"
@@ -459,15 +460,16 @@ class Njoy99(object):
         file_out = open("out_draglib_" + self.hmat,'w')
         while 1:
             line=file_in.readline()
-            if not line: break
-            ind=line.find('???????????')
+            if not line:
+                break
+            ind = line.find('???????????')
             if ind != -1:
                 if not self.eFiss:
                     raise PyNjoyError("self.eFiss instance variable not set")
                 line = line[:ind] + "%E" % self.eFiss + line[ind+11:]
                 self.eFiss = None
             if self.branchingNG:
-                ind=line.find(' ng ')
+                ind = line.find(' ng ')
                 if ind != -1:
                   jnd = line[ind+3:].find(' 0.000 ')
                   if jnd == -1:
@@ -703,17 +705,17 @@ class Njoy99(object):
             nbAtoms = 1
             elasOpt = 0
             if self.scatteringMat == 1:
-                # Hydrogen in H20
+                # H in H20
                 nbAtoms = 2
                 matsab_inc = 222
             elif self.scatteringMat == 7:
-                # Hydrogen in ZrH
+                # H in ZrH
                 nbAtoms = 2
                 elasOpt = 1
                 matsab_inc = 225
                 matsab_coh = 226
             elif self.scatteringMat == 11:
-                # Hydrogen in D20
+                # D in D20
                 nbAtoms = 2
                 matsab_inc = 228
             elif self.scatteringMat == 26:
@@ -728,16 +730,16 @@ class Njoy99(object):
                 matsab_inc = 233
                 matsab_inc = 234
             elif self.scatteringMat == 31:
-                # Graphite
+                # C in Graphite
                 elasOpt = 1
                 matsab_inc = 229
                 matsab_inc = 230
             elif self.scatteringMat == 37:
-                # Hydrogen in CH2
+                # H in Polyethylene (CH2)
                 nbAtoms = 2
                 matsab_inc = 223
             elif self.scatteringMat == 40:
-                # Hydrogen in C6H6 (benzine)
+                # H in Benzine (C6H6)
                 nbAtoms = 2
                 matsab_inc = 227
             elif self.scatteringMat == 58:
@@ -788,7 +790,7 @@ class Njoy99(object):
                 os.mkdir(self.dirName)
             os.system("mv tape38 " + '   ' + self.dirName + "/" + self.hmat + 
                       '_' + str(int(self.tempace[0])) + ".ace")
-        else: 
+        else:
             raise PyNjoyError("ace file for " + self.hmat + " not created")
 
         for fileName in os.listdir(os.getcwd()):
