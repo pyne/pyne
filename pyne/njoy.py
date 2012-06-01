@@ -1,26 +1,24 @@
-#
-#-----------------------------------------------------------------------
-#
-# Purpose:
-#  automatic generation of Njoy input data, including dragr data.
-#  Generation of DRAGLIB and ACELIB.
-#
-# Copyright:
-#  This code was originallu distirbuted under the LGPL license (below).
-#  However, we have been given written permission from the author Alain
-#  Herbert to redistribute it under PyNE's BSD license.
-#  
-# Original Copyright:
-#  Copyright (C) 2003 Ecole Polytechnique de Montreal
-#  This library is free software; you can redistribute it and/or
-#  modify it under the terms of the GNU Lesser General Public
-#  License as published by the Free Software Foundation; either
-#  version 2.1 of the License, or (at your option) any later version
-#
-# Author(s): A. Hebert and R. Karthikeyan
-#
-#-----------------------------------------------------------------------
-#
+#!/usr/bin/env python
+
+"""
+Purpose:
+  Automatic generation of Njoy input data, including dragr data.
+  Generation of DRAGLIB and ACELIB.
+
+Copyright:
+  This code was originally distirbuted under the LGPL license (below).
+  However, we have been given written permission from the author Alain
+  Herbert to redistribute it under PyNE's BSD license.
+  
+Original Copyright:
+  Copyright (C) 2003 Ecole Polytechnique de Montreal
+  This library is free software; you can redistribute it and/or
+  modify it under the terms of the GNU Lesser General Public
+  License as published by the Free Software Foundation; either
+  version 2.1 of the License, or (at your option) any later version
+
+.. moduleauthor:: A. Hebert, R. Karthikeyan
+"""
 
 import os
 import time
@@ -30,194 +28,166 @@ class PyNjoyError(Exception):
     pass
 
 class Njoy99(object):
-  def __init__(self):
-    self.iwt = 4
-    self.legendre = 1
-    self.legendregg = 6
-    self.scatteringLaw = None
-    self.eFiss = None
-    self.branchingNG = None
-    self.branchingN2N = None
-    self.gstr = 0
-    self.oldlib = None
-    self.purr = None
-  def pendf(self, eaf=0):
-    print " --- make pendf for " + self.hmat + " ---"
-    myCwd = os.getcwd()
-    myNjoy = myCwd + '/' + self.execDir + "/xnjoy<file_data"
-    if not os.path.isfile(os.path.expandvars(self.evaluationFile)):
-      raise PyNjoyError("evaluation file " + self.evaluationFile + " not found")
-    if not os.path.isdir(self.evaluationName): os.mkdir(self.evaluationName)
-    os.chdir(self.evaluationName)
-    textDil=""
-    if self.dilutions:
-      nbDil = len(self.dilutions)
-      if nbDil > 10: raise PyNjoyError("cannot have more than 10 dilutions")
-      for dil in self.dilutions:
-        textDil = textDil + " " + "%E"%dil
-    else:
-      nbDil = 0
-    nbTmp = len(self.temperatures)
-    if nbTmp > 10: raise PyNjoyError("cannot have more than 10 temperatures")
-    textTmp=""
-    for tmp in self.temperatures:
-      textTmp = textTmp + " " + "%E"%tmp
+    def __init__(self):
+        self.iwt = 4
+        self.legendre = 1
+        self.legendregg = 6
+        self.scatteringLaw = None
+        self.eFiss = None
+        self.branchingNG = None
+        self.branchingN2N = None
+        self.gstr = 0
+        self.oldlib = None
+        self.purr = None
 
-    matsab_inc = 221
-    nbAtoms = 1
-    elasOpt = 0
-    if self.scatteringLaw:
-      if self.scatteringMat == 1:    # H1_H20
-        nbAtoms = 2
-        matsab_inc = 222               # h2o
-      elif self.scatteringMat == 7:  # H_ZRH
-        nbAtoms = 2
-        elasOpt = 1
-        matsab_inc = 225               # zrhyd
-      elif self.scatteringMat == 11: # H2_D20
-        nbAtoms = 2
-        matsab_inc = 228               # d2o
-      elif self.scatteringMat == 26: # Be
-        elasOpt = 1
-        matsab_inc = 231               # be
-      elif self.scatteringMat == 27: # BeO 
-        nbAtoms = 2
-        elasOpt = 1
-        matsab_inc = 233               # beo
-      elif self.scatteringMat == 31: # C_GRAPH
-        elasOpt = 1
-        matsab_inc = 229               # graph
-      elif self.scatteringMat == 37: # H_CH2
-        nbAtoms = 2
-        matsab_inc = 223               # poly
-      elif self.scatteringMat == 40: # H_C6H6 (benzine)
-        nbAtoms = 2
-        matsab_inc = 227               # benz
-      elif self.scatteringMat == 58: # Zr_ZRH
-        nbAtoms = 2
-        elasOpt = 1
-        matsab_inc = 235               # zrhyd
-      unitLaw = -27
-      matLaw = self.scatteringMat
-      typeLaw = 4
-      os.system("ln -s " + self.scatteringLaw + " tape26")
-    else:
-      unitLaw = 0
-      matLaw = 0
-      typeLaw = 1
-      nbAtoms = 1
-      elasOpt = 0
-    htime = time.ctime(time.time())
-    self.__dict__.update({"textDil": textDil, \
-                          "nbDil"  : nbDil,   \
-                          "textTmp": textTmp, \
-                          "nbTmp"  : nbTmp,   \
-                          "unitLaw": unitLaw, \
-                          "matLaw" : matLaw,  \
-                          "typeLaw": typeLaw, \
-                          "nbAtoms": nbAtoms, \
-                          "elasOpt": elasOpt, \
-                          "htime"  : htime,   \
-                          "matsab_inc" : matsab_inc})
-    #
-    if self.scatteringLaw:
-      text_data = """
-      moder
-      20 -21
-      moder
-      26 -27
-      """
-    else:
-      text_data = """
-      moder
-      20 -21
-      """
-    text_data = text_data + """
-    reconr
-    -21 -22
-    'pendf tape from %(evaluationName)s'/
-    %(mat)d 1/
-    0.001  0.  0.005/
-    '%(hmat)s from %(evaluationName)s at %(htime)s' /
-    0/
-    broadr
-    -21 -22 -23
-    %(mat)d %(nbTmp)d/
-    0.001/
-    %(textTmp)s/
-    0/
-    """%self.__dict__
-    if self.dilutions and self.purr:
-      text_data = text_data + """
-    purr
-    -21 -23 -24
-    %(mat)d %(nbTmp)d %(nbDil)d 20 32/
-    %(textTmp)s/
-    %(textDil)s/
-    0/
-      """%self.__dict__
-    elif self.dilutions:
-      text_data = text_data + """
-    unresr
-    -21 -23 -24
-    %(mat)d %(nbTmp)d %(nbDil)d 1/
-    %(textTmp)s/
-    %(textDil)s/
-    0/
-      """%self.__dict__
-    if self.dilutions:
-      text_data = text_data + """
-    thermr
-    0 -24 -35
-    0 %(mat)d 16 %(nbTmp)d %(typeLaw)d 0 %(nbAtoms)d 221 0
-    %(textTmp)s/
-    0.001 4.0
-    moder
-    -35 29
-    stop
-      """%self.__dict__
-    else:
-     if self.scatteringLaw:
-      text_data = text_data + """
-    thermr
-    %(unitLaw)d -23 -35
-    %(matLaw)d %(mat)d 16 %(nbTmp)d %(typeLaw)d %(elasOpt)d %(nbAtoms)d %(matsab_inc)d 0/
-    %(textTmp)s/
-    0.001 4.0
-    moder
-    -35 29
-    stop
-      """%self.__dict__
-     elif eaf == 0:
-      text_data = text_data + """
-    thermr
-    0 -23 -35
-    0 %(mat)d 16 %(nbTmp)d %(typeLaw)d 0 %(nbAtoms)d 221 0
-    %(textTmp)s/
-    0.001 4.0
-    moder
-    -35 29
-    stop
-      """%self.__dict__
-     else:
-      text_data = text_data + """
-    moder
-    -23 29
-    stop
-      """%self.__dict__
-    file_data = open("file_data",'w')
-    file_data.write(text_data)
-    file_data.close()
-    os.system("ln -s " + self.evaluationFile + " tape20")
-    os.system(myNjoy)
-    os.system("mv tape29 pendf" + self.hmat)
-    os.system("mv file_data file_data_pendf" + self.hmat)
-    os.system("mv output out_pendf_" + self.hmat)
-    os.system("chmod 644 out_pendf_" + self.hmat)
-    for fileName in os.listdir(os.getcwd()):
-      if fileName[:4] == 'tape': os.remove(fileName)
-    os.chdir(myCwd)
-  #
+    def pendf(self, eaf=0):
+        """Generate a PENDF file from the ENDF raw data.
+
+        Parameters
+        ----------
+        eaf : int
+            If eaf is 1, simplified processing is performed to be compatible
+            with the EAF nuclear library.
+
+        """
+
+        print " --- make pendf for " + self.hmat + " ---"
+        myCwd = os.getcwd()
+        myNjoy = myCwd + '/' + self.execDir + "/xnjoy<file_data"
+        if not os.path.isfile(os.path.expandvars(self.evaluationFile)):
+            raise PyNjoyError("evaluation file " + self.evaluationFile + 
+                              " not found")
+        if not os.path.isdir(self.evaluationName):
+            os.mkdir(self.evaluationName)
+        os.chdir(self.evaluationName)
+        textDil=""
+        if self.dilutions:
+            nbDil = len(self.dilutions)
+            if nbDil > 10:
+                raise PyNjoyError("cannot have more than 10 dilutions")
+            for dil in self.dilutions:
+                textDil = textDil + " %E" % dil
+        else:
+            nbDil = 0
+        nbTmp = len(self.temperatures)
+        if nbTmp > 10:
+            raise PyNjoyError("cannot have more than 10 temperatures")
+        textTmp=""
+        for tmp in self.temperatures:
+            textTmp = textTmp + " %E" % tmp
+
+        matsab_inc = 221
+        nbAtoms = 1
+        elasOpt = 0
+        if self.scatteringLaw:
+            if self.scatteringMat == 1:
+                # Hydrogen in H20
+                nbAtoms = 2
+                matsab_inc = 222
+            elif self.scatteringMat == 7:
+                # Hydrogen in ZrH
+                nbAtoms = 2
+                elasOpt = 1
+                matsab_inc = 225
+            elif self.scatteringMat == 11:
+                # Hydrogen in D20
+                nbAtoms = 2
+                matsab_inc = 228
+            elif self.scatteringMat == 26:
+                # Beryllium metal
+                elasOpt = 1
+                matsab_inc = 231
+            elif self.scatteringMat == 27:
+                # Beryllium in BeO 
+                nbAtoms = 2
+                elasOpt = 1
+                matsab_inc = 233
+            elif self.scatteringMat == 31:
+                # Graphite
+                elasOpt = 1
+                matsab_inc = 229
+            elif self.scatteringMat == 37:
+                # Hydrogen in CH2
+                nbAtoms = 2
+                matsab_inc = 223
+            elif self.scatteringMat == 40:
+                # Hydrogen in C6H6 (benzine)
+                nbAtoms = 2
+                matsab_inc = 227
+            elif self.scatteringMat == 58:
+                # Zirconium in ZrH
+                nbAtoms = 2
+                elasOpt = 1
+                matsab_inc = 235
+            unitLaw = -27
+            matLaw = self.scatteringMat
+            typeLaw = 4
+            os.system("ln -s " + self.scatteringLaw + " tape26")
+        else:
+            unitLaw = 0
+            matLaw = 0
+            typeLaw = 1
+            nbAtoms = 1
+            elasOpt = 0
+        htime = time.ctime(time.time())
+        self.__dict__.update({"textDil": textDil, "nbDil": nbDil,
+                              "textTmp": textTmp, "nbTmp": nbTmp,  
+                              "unitLaw": unitLaw, "matLaw": matLaw,
+                              "typeLaw": typeLaw, "nbAtoms": nbAtoms,
+                              "elasOpt": elasOpt, "htime": htime,
+                              "matsab_inc" : matsab_inc})
+
+        if self.scatteringLaw:
+            text_data = "moder\n20 -21\nmoder\n26 -27\n"
+        else:
+            text_data = "moder\n20 -21\n"
+        text_data = text_data + (
+            "reconr\n-21 -22\n'pendf tape from %(evaluationName)s'/\n"
+            "%(mat)d 1/\n0.001  0.  0.005/\n"
+            "'%(hmat)s from %(evaluationName)s at %(htime)s' /\n0/\n"
+            "broadr\n-21 -22 -23\n%(mat)d %(nbTmp)d/\n0.001/\n"
+            "%(textTmp)s/\n0/\n" % self.__dict__)
+        if self.dilutions and self.purr:
+            text_data = text_data + (
+                "purr\n-21 -23 -24\n%(mat)d %(nbTmp)d %(nbDil)d 20 32/\n"
+                "%(textTmp)s/\n%(textDil)s/\n0/\n" % self.__dict__)
+        elif self.dilutions:
+            text_data = text_data + (
+                "unresr\n-21 -23 -24\n%(mat)d %(nbTmp)d %(nbDil)d 1/\n"
+                "%(textTmp)s/\n%(textDil)s/\n0/\n" % self.__dict__)
+        if self.dilutions:
+            text_data = text_data + (
+                "thermr\n0 -24 -35\n0 %(mat)d 16 %(nbTmp)d %(typeLaw)d 0 "
+                "%(nbAtoms)d 221 0\n%(textTmp)s/\n0.001 4.0\nmoder\n-35 29\n"
+                "stop\n" % self.__dict__)
+        else:
+            if self.scatteringLaw:
+                text_data = text_data + (
+                    "thermr\n%(unitLaw)d -23 -35\n%(matLaw)d %(mat)d 16 "
+                    "%(nbTmp)d %(typeLaw)d %(elasOpt)d %(nbAtoms)d "
+                    "%(matsab_inc)d 0/\n%(textTmp)s/\n0.001 4.0\n"
+                    "moder\n-35 29\nstop\n" % self.__dict__)
+            elif eaf == 0:
+                text_data = text_data + (
+                    "thermr\n0 -23 -35\n0 %(mat)d 16 %(nbTmp)d "
+                    "%(typeLaw)d 0 %(nbAtoms)d 221 0\n%(textTmp)s/\n"
+                    "0.001 4.0\nmoder\n-35 29\nstop\n" % self.__dict__)
+            else:
+                text_data = text_data + (
+                    "moder\n-23 29\nstop\n" % self.__dict__)
+        file_data = open("file_data",'w')
+        file_data.write(text_data)
+        file_data.close()
+        os.system("ln -s " + self.evaluationFile + " tape20")
+        os.system(myNjoy)
+        os.system("mv tape29 pendf" + self.hmat)
+        os.system("mv file_data file_data_pendf" + self.hmat)
+        os.system("mv output out_pendf_" + self.hmat)
+        os.system("chmod 644 out_pendf_" + self.hmat)
+        for fileName in os.listdir(os.getcwd()):
+            if fileName[:4] == 'tape': os.remove(fileName)
+        os.chdir(myCwd)
+
   def gendf(self, eaf=0):
     print " --- make gendf for " + self.hmat + " ---"
     myCwd = os.getcwd()
