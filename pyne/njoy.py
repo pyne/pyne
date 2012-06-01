@@ -361,144 +361,141 @@ class Njoy99(object):
               os.remove(fileName)
         os.chdir(myCwd)
 
-  def draglib(self, fp=0):
-    myCwd = os.getcwd()
-    myNjoy = myCwd + '/' + self.execDir + "/xnjoy<file_data"
-    if not os.path.isfile(os.path.expandvars(self.evaluationFile)):
-      raise PyNjoyError("evaluation file " + self.evaluationFile + " not found")
-    evaluationNameBase =  os.path.basename(self.evaluationName)
-    if self.oldlib: os.system("mv ../" + self.oldlib + " draglib" + evaluationNameBase)
-    os.chdir(self.evaluationName)
-    if os.path.isfile("drag"): os.remove("drag")
-    if os.path.isfile("draglib" + evaluationNameBase):
-      iold = 29
-      name1 = "draglib" + evaluationNameBase + ".bis.gz"
-      if not os.path.isfile(name1):
-        os.system("cp draglib" + evaluationNameBase + \
-        " draglib" + evaluationNameBase + ".bis")
-        os.system("gzip draglib" + evaluationNameBase + ".bis")
-      else:
-        name2 = "draglib" + evaluationNameBase + ".bis2.gz"
-        os.system("cp draglib" + evaluationNameBase + \
-        " draglib" + evaluationNameBase + ".bis2")
-        os.system("gzip draglib" + evaluationNameBase + ".bis2")
-        if os.path.isfile(name2):
-          len1 = os.stat(name1).st_size
-          len2 = os.stat(name2).st_size
-          if len2 > len1:
-            os.remove(name1)
-            os.rename(name2, name1)
-          else:
-            os.remove(name2)
-      os.system("mv draglib" + evaluationNameBase + " tape29")
-      print " append data for " + self.hmat + " to existing draglib file"
-    else:
-      iold = 0
-      print " create a new draglib file for " + self.hmat
-    htime = time.ctime(time.time())
-    #
-    if self.dilutions:
-      self.__dict__.update({"htime": htime,      \
-                            "iold" : iold,       \
-                            "ss0"  : self.ss[0], \
-                            "ss1"  : self.ss[1], \
-                            "auto0": self.autolib[0], \
-                            "auto1": self.autolib[1], \
-                            "auto2": self.autolib[2], \
-                            "fp"   : fp})
-      text_data = """
-      moder
-      20 -21
-      moder
-      22 -23
-      moder
-      24 -25
-      dragr
-      -21 -23 -25 0 0 %(iold)d 30 %(fp)d/
-      """%self.__dict__
-      if iold == 0:
-        text_data = text_data + """
-        'draglib from %(evaluationName)s at %(htime)s'/
-        """%self.__dict__
-      text_data = text_data + """
-      %(mat)d %(hmat)s /
-      '%(hmat)s from %(evaluationName)s (%(mat)d) at %(htime)s' /
-      %(ss0)E %(ss1)E /
-      %(auto0)E %(auto1)E %(auto2)E /
-      0/
-      stop
-      """%self.__dict__
-    else:
-      self.__dict__.update({"htime": htime, "iold": iold, "fp": fp})
-      text_data = """
-      moder
-      20 -21
-      moder
-      24 -25
-      dragr
-      -21 0 -25 0 0 %(iold)d 30 %(fp)d/
-      """%self.__dict__
-      if iold == 0:
-        text_data = text_data + """
-        'draglib from %(evaluationName)s at %(htime)s'/
-        """%self.__dict__
-      text_data = text_data + """
-      %(mat)d %(hmat)s /
-      '%(hmat)s from %(evaluationName)s (%(mat)d) at %(htime)s' /
-      0.1 1.0E10 /
-      0/
-      stop
-      """%self.__dict__
-    file_data = open("file_data",'w')
-    file_data.write(text_data)
-    file_data.close()
-    os.system("ln -s " + self.evaluationFile + " tape20")
-    if self.dilutions:
-      os.system("ln -s pendf" + self.hmat + " tape22")
-    os.system("ln -s gendf" + self.hmat + " tape24")
-    os.system(myNjoy)
-    os.system("mv file_data file_data_dendf" + self.hmat)
-    stats = os.stat("tape30")                                 # get the stats of the file
-    size = stats[6]                                           # extract the file size in bytes from the stats list
-    if size > 8 :
-      os.system("mv tape30 draglib"+evaluationNameBase)
-    else:
-      os.system("mv tape29 draglib"+evaluationNameBase)
-      raise PyNjoyError("draglib file for " + self.hmat + " not created")
-    file_in = open('output','r')
-    file_out = open("out_draglib_" + self.hmat,'w')
-    while 1:
-      line=file_in.readline()
-      if not line: break
-      ind=line.find('???????????')
-      if ind != -1:
-        if not self.eFiss: raise PyNjoyError("self.eFiss instance variable not set")
-        line = line[:ind] + "%E"%self.eFiss + line[ind+11:]
-        self.eFiss = None
-      if self.branchingNG:
-        ind=line.find(' ng ')
-        if ind != -1:
-          jnd=line[ind+3:].find(' 0.000 ')
-          if jnd == -1: raise PyNjoyError("unable to set the isomeric ng branching ratio")
-          line = line[:ind+jnd+4] + "%5.3f"%self.branchingNG + line[ind+jnd+9:]
-          self.branchingNG = None
-      if self.branchingN2N:
-        ind=line.find(' n2n ')
-        if ind != -1:
-          jnd=line[ind+4:].find(' 0.000 ')
-          if jnd == -1: raise PyNjoyError("unable to set the isomeric n2n branching ratio")
-          line = line[:ind+jnd+5] + "%5.3f"%self.branchingN2N + line[ind+jnd+10:]
-          self.branchingN2N = None
-      file_out.writelines(line)
-    file_out.close()
-    file_in.close()
-    os.remove('output')
-    os.system("chmod 644 out_draglib_" + self.hmat)
-    for fileName in os.listdir(os.getcwd()):
-      if fileName[:4] == 'temp': os.remove(fileName)
-      if fileName[:4] == 'tape': os.remove(fileName)
-    os.chdir(myCwd)
-  #
+    def draglib(self, fp=0):
+        """Generate a DRAGLIB file using the MODER and DRAGR modules and
+        add/update the new isotopic data in the DRAGLIB file.
+
+        Parameters
+        ----------
+        fp : int
+            If fp is 1, the scattering information are stored as diagonal
+            matrices in the DRAGLIB.
+
+        """
+
+        myCwd = os.getcwd()
+        myNjoy = myCwd + '/' + self.execDir + "/xnjoy<file_data"
+        if not os.path.isfile(os.path.expandvars(self.evaluationFile)):
+          raise PyNjoyError("evaluation file " + self.evaluationFile +
+                            " not found")
+        evaluationNameBase = os.path.basename(self.evaluationName)
+        if self.oldlib:
+            os.system("mv ../" + self.oldlib + " draglib" + evaluationNameBase)
+        os.chdir(self.evaluationName)
+        if os.path.isfile("drag"): os.remove("drag")
+        if os.path.isfile("draglib" + evaluationNameBase):
+            iold = 29
+            name1 = "draglib" + evaluationNameBase + ".bis.gz"
+            if not os.path.isfile(name1):
+                os.system("cp draglib" + evaluationNameBase +
+                          " draglib" + evaluationNameBase + ".bis")
+                os.system("gzip draglib" + evaluationNameBase + ".bis")
+            else:
+                name2 = "draglib" + evaluationNameBase + ".bis2.gz"
+                os.system("cp draglib" + evaluationNameBase +
+                          " draglib" + evaluationNameBase + ".bis2")
+                os.system("gzip draglib" + evaluationNameBase + ".bis2")
+                if os.path.isfile(name2):
+                    len1 = os.stat(name1).st_size
+                    len2 = os.stat(name2).st_size
+                    if len2 > len1:
+                        os.remove(name1)
+                        os.rename(name2, name1)
+                    else:
+                        os.remove(name2)
+            os.system("mv draglib" + evaluationNameBase + " tape29")
+            print " append data for " + self.hmat + " to existing draglib file"
+        else:
+            iold = 0
+            print " create a new draglib file for " + self.hmat
+        htime = time.ctime(time.time())
+
+        if self.dilutions:
+            self.__dict__.update({"htime": htime,
+                                  "iold" : iold,
+                                  "ss0"  : self.ss[0],
+                                  "ss1"  : self.ss[1],
+                                  "auto0": self.autolib[0],
+                                  "auto1": self.autolib[1],
+                                  "auto2": self.autolib[2],
+                                  "fp"   : fp})
+            text_data = ("moder\n20 -21\nmoder\n22 -23\nmoder\n24 -25\n"
+                         "dragr\n-21 -23 -25 0 0 %(iold)d 30 %(fp)d/\n" 
+                         % self.__dict__)
+            if iold == 0:
+                text_data += ("'draglib from %(evaluationName)s at "
+                              "%(htime)s'/\n" % self.__dict__)
+            text_data += ("%(mat)d %(hmat)s /\n'%(hmat)s from "
+                          "%(evaluationName)s (%(mat)d) at %(htime)s' /\n"
+                          "%(ss0)E %(ss1)E /\n%(auto0)E %(auto1)E %(auto2)E /\n"
+                          "0/\nstop\n" % self.__dict__)
+        else:
+            self.__dict__.update({"htime": htime, "iold": iold, "fp": fp})
+            text_data = ("moder\n20 -21\nmoder\n24 -25\ndragr\n-21 0 -25 0 0 "
+                         "%(iold)d 30 %(fp)d/\n" % self.__dict__)
+            if iold == 0:
+                text_data += ("'draglib from %(evaluationName)s at %(htime)s'/\n"
+                              % self.__dict__)
+            text_data += ("%(mat)d %(hmat)s /\n'%(hmat)s from "
+                          "%(evaluationName)s (%(mat)d) at %(htime)s' /\n"
+                          "0.1 1.0E10 /\n0/\nstop\n" % self.__dict__)
+        file_data = open("file_data",'w')
+        file_data.write(text_data)
+        file_data.close()
+        os.system("ln -s " + self.evaluationFile + " tape20")
+        if self.dilutions:
+            os.system("ln -s pendf" + self.hmat + " tape22")
+        os.system("ln -s gendf" + self.hmat + " tape24")
+        os.system(myNjoy)
+        os.system("mv file_data file_data_dendf" + self.hmat)
+        stats = os.stat("tape30") # get the stats of the file
+        size = stats[6] # extract the file size in bytes from the stats list
+        if size > 8 :
+            os.system("mv tape30 draglib" + evaluationNameBase)
+        else:
+            os.system("mv tape29 draglib" + evaluationNameBase)
+            raise PyNjoyError("draglib file for " + self.hmat + " not created")
+        file_in = open('output','r')
+        file_out = open("out_draglib_" + self.hmat,'w')
+        while 1:
+            line=file_in.readline()
+            if not line: break
+            ind=line.find('???????????')
+            if ind != -1:
+                if not self.eFiss:
+                    raise PyNjoyError("self.eFiss instance variable not set")
+                line = line[:ind] + "%E" % self.eFiss + line[ind+11:]
+                self.eFiss = None
+            if self.branchingNG:
+                ind=line.find(' ng ')
+                if ind != -1:
+                  jnd = line[ind+3:].find(' 0.000 ')
+                  if jnd == -1:
+                      raise PyNjoyError("unable to set the isomeric ng "
+                                        "branching ratio")
+                  line = line[:ind+jnd+4] + "%5.3f" % self.branchingNG \
+                      + line[ind+jnd+9:]
+                  self.branchingNG = None
+            if self.branchingN2N:
+                ind=line.find(' n2n ')
+                if ind != -1:
+                    jnd = line[ind+4:].find(' 0.000 ')
+                    if jnd == -1:
+                        raise PyNjoyError("unable to set the isomeric n2n "
+                                          "branching ratio")
+                    line = line[:ind+jnd+5] + "%5.3f"%self.branchingN2N \
+                        + line[ind+jnd+10:]
+                    self.branchingN2N = None
+            file_out.writelines(line)
+        file_out.close()
+        file_in.close()
+        os.remove('output')
+        os.system("chmod 644 out_draglib_" + self.hmat)
+        for fileName in os.listdir(os.getcwd()):
+            if fileName[:4] == 'temp' or fileName[:4] == 'tape':
+                os.remove(fileName)
+        os.chdir(myCwd)
+
   def matxs(self):
     print " --- make matxs for " + self.hmat + " ---"
     myCwd = os.getcwd()
