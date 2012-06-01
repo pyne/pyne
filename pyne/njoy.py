@@ -676,122 +676,123 @@ class Njoy99(object):
         os.remove("file_data")
         os.chdir(myCwd)
 
-  def acer(self):
-    myCwd = os.getcwd()
-    myNjoy = myCwd + '/' + self.execDir + "/xnjoy<file_data"
-    if not os.path.isfile(os.path.expandvars(self.evaluationFile)):
-      raise PyNjoyError("evaluation file " + self.evaluationFile + " not found")
-    textTmp=""
-    for tmp in self.tempace:
-      textTmp = textTmp + " " + "%E"%tmp
-    os.chdir(self.evaluationName)
-    self.__dict__.update({"textTmp": textTmp})
-    text_data = """
-    moder
-    20 -21
-    moder
-    29 -25
-    acer
-    -21 -25 0 38 39
-    1 0 1 %(suff)f/
-    'pendf tape from %(evaluationName)s'/
-    %(mat)d  %(textTmp)s /
-    1 1/
-    0.001/
-    acer / Check ACE files
-    0 38 0 40 41
-    7 1 1 -1/
-    /
-    """%self.__dict__
-    if self.scatteringLaw:
-      matsab_inc = 221
-      matsab_coh = 0
-      nbAtoms = 1
-      elasOpt = 0
-      if self.scatteringMat == 1:    # H1_H20
-        nbAtoms = 2
-        matsab_inc = 222               # h2o
-      elif self.scatteringMat == 7:  # H_ZRH
-        nbAtoms = 2
-        elasOpt = 1
-        matsab_inc = 225               # zrhyd
-        matsab_coh = 226               # zrhyd$
-      elif self.scatteringMat == 11: # H2_D20
-        nbAtoms = 2
-        matsab_inc = 228               # d2o
-      elif self.scatteringMat == 26: # Be
-        elasOpt = 1
-        matsab_inc = 231               # be
-        matsab_coh = 232               # be$
-      elif self.scatteringMat == 27: # BeO 
-        nbAtoms = 2
-        elasOpt = 1
-        matsab_inc = 233               # beo
-        matsab_inc = 234               # beo$
-      elif self.scatteringMat == 31: # C_GRAPH
-        elasOpt = 1
-        matsab_inc = 229               # graph
-        matsab_inc = 230               # graph$
-      elif self.scatteringMat == 37: # H_CH2
-        nbAtoms = 2
-        matsab_inc = 223               # poly
-      elif self.scatteringMat == 40: # H_C6H6 (benzine)
-        nbAtoms = 2
-        matsab_inc = 227               # benz
-      elif self.scatteringMat == 58: # Zr_ZRH
-        nbAtoms = 2
-        elasOpt = 1
-        matsab_inc = 235               # zrhyd
-        matsab_inc = 236               # zrhyd$
-      text_data = text_data + """
-    acer
-    -21 -25 0 48 49
-    2 0 1 %(suff)f/
-    'pendf tape from %(evaluationName)s'/
-    %(mat)d  %(textTmp)s %(scatName)s/
-    %(za)d 0 0 /
-    %(matsab_inc)d 16 %(matsab_coh)d %(elasOpt)d %(nbAtoms)d 4.0 0 0 /
-    acer / Check ACE files
-    0 48 0 50 51
-    7 1 1 -1/
-    /
-    stop
-    """%self.__dict__
-    else:
-      text_data = text_data + """
-    stop
-    """
-    file_data = open("file_data",'w')
-    file_data.write(text_data)
-    file_data.close()
-    os.system("ln -s " + self.evaluationFile + " tape20")
-    os.system("ln -s pendf" + self.hmat + " tape29")
-    os.system(myNjoy)
-    if os.path.isfile("tape48"):
-     inp=open("tape48","r")
-     outp=open("acecandu",'a')
-     line = inp.readlines()
-     outp.writelines(line)
-     inp1=open("tape49","r")
-     outp1=open("acexsdir",'a')
-     line = inp1.readlines()
-     outp1.writelines(line)
-    if os.path.isfile("tape38"):
-     inp=open("tape38","r")
-     outp=open("acecandu",'a')
-     line = inp.readlines()
-     outp.writelines(line)
-     inp1=open("tape39","r")
-     outp1=open("acexsdir",'a')
-     line = inp1.readlines()
-     outp1.writelines(line)
-     print " ace file for" + self.hmat + "created"
-     if not os.path.isdir(self.dirName): os.mkdir(self.dirName)
-     os.system("mv tape38 " + '   ' + self.dirName + "/"+self.hmat +'_'+str(int(self.tempace[0]))+".ace")
-    else: 
-     raise PyNjoyError("ace file for " + self.hmat + " not created")
-#
-    for fileName in os.listdir(os.getcwd()):
-      if fileName[:4] == 'tape': os.remove(fileName)
-    os.remove("file_data")
-    os.chdir(myCwd)
+    def acer(self):
+        """Generate ACE-format cross section libraries using the MODER, RECONR,
+        BROADR, PURR (if dilutions present), THERMR, and ACER modules.
+
+        """
+
+        myCwd = os.getcwd()
+        myNjoy = myCwd + '/' + self.execDir + "/xnjoy<file_data"
+        if not os.path.isfile(os.path.expandvars(self.evaluationFile)):
+            raise PyNjoyError("evaluation file " + self.evaluationFile +
+                              " not found")
+        textTmp = ""
+        for tmp in self.tempace:
+            textTmp += " %E" % tmp
+        os.chdir(self.evaluationName)
+        self.__dict__.update({"textTmp": textTmp})
+        text_data = ("moder\n20 -21\nmoder\n29 -25\nacer\n-21 -25 0 38 39\n"
+                     "1 0 1 %(suff)f/\n'pendf tape from %(evaluationName)s'/\n"
+                     "%(mat)d  %(textTmp)s /\n1 1/\n0.001/\nacer / "
+                     "Check ACE files\n0 38 0 40 41\n7 1 1 -1/\n/\n" 
+                     % self.__dict__)
+        if self.scatteringLaw:
+            matsab_inc = 221
+            matsab_coh = 0
+            nbAtoms = 1
+            elasOpt = 0
+            if self.scatteringMat == 1:
+                # Hydrogen in H20
+                nbAtoms = 2
+                matsab_inc = 222
+            elif self.scatteringMat == 7:
+                # Hydrogen in ZrH
+                nbAtoms = 2
+                elasOpt = 1
+                matsab_inc = 225
+                matsab_coh = 226
+            elif self.scatteringMat == 11:
+                # Hydrogen in D20
+                nbAtoms = 2
+                matsab_inc = 228
+            elif self.scatteringMat == 26:
+                # Beryllium metal
+                elasOpt = 1
+                matsab_inc = 231
+                matsab_coh = 232
+            elif self.scatteringMat == 27:
+                # Beryllium in BeO
+                nbAtoms = 2
+                elasOpt = 1
+                matsab_inc = 233
+                matsab_inc = 234
+            elif self.scatteringMat == 31:
+                # Graphite
+                elasOpt = 1
+                matsab_inc = 229
+                matsab_inc = 230
+            elif self.scatteringMat == 37:
+                # Hydrogen in CH2
+                nbAtoms = 2
+                matsab_inc = 223
+            elif self.scatteringMat == 40:
+                # Hydrogen in C6H6 (benzine)
+                nbAtoms = 2
+                matsab_inc = 227
+            elif self.scatteringMat == 58:
+                # Zirconium in ZrH
+                nbAtoms = 2
+                elasOpt = 1
+                matsab_inc = 235
+                matsab_inc = 236
+            text_data += ("acer\n-21 -25 0 48 49\n2 0 1 %(suff)f/\n"
+                          "'pendf tape from %(evaluationName)s'/\n"
+                          "%(mat)d  %(textTmp)s %(scatName)s/\n"
+                          "%(za)d 0 0 /\n"
+                          "%(matsab_inc)d 16 %(matsab_coh)d %(elasOpt)d "
+                          "%(nbAtoms)d 4.0 0 0 /\n"
+                          "acer / Check ACE files\n"
+                          "0 48 0 50 51\n"
+                          "7 1 1 -1/\n"
+                          "/\n"
+                          "stop\n" % self.__dict__)
+        else:
+            text_data += "stop\n"
+        file_data = open("file_data", 'w')
+        file_data.write(text_data)
+        file_data.close()
+        os.system("ln -s " + self.evaluationFile + " tape20")
+        os.system("ln -s pendf" + self.hmat + " tape29")
+        os.system(myNjoy)
+        if os.path.isfile("tape48"):
+            inp = open("tape48","r")
+            outp = open("acecandu",'a')
+            line = inp.readlines()
+            outp.writelines(line)
+            inp1 = open("tape49","r")
+            outp1 = open("acexsdir",'a')
+            line = inp1.readlines()
+            outp1.writelines(line)
+        if os.path.isfile("tape38"):
+            inp = open("tape38","r")
+            outp = open("acecandu",'a')
+            line = inp.readlines()
+            outp.writelines(line)
+            inp1 = open("tape39","r")
+            outp1 = open("acexsdir",'a')
+            line = inp1.readlines()
+            outp1.writelines(line)
+            print " ace file for" + self.hmat + "created"
+            if not os.path.isdir(self.dirName):
+                os.mkdir(self.dirName)
+            os.system("mv tape38 " + '   ' + self.dirName + "/" + self.hmat + 
+                      '_' + str(int(self.tempace[0])) + ".ace")
+        else: 
+            raise PyNjoyError("ace file for " + self.hmat + " not created")
+
+        for fileName in os.listdir(os.getcwd()):
+            if fileName[:4] == 'tape':
+                os.remove(fileName)
+        os.remove("file_data")
+        os.chdir(myCwd)
