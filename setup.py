@@ -222,6 +222,9 @@ exts.append(cpp_ext("pyne.stlconverters", ['stlconverters.pyx']))
 # pyne_config
 exts.append(cpp_ext("pyne.pyne_config", ['pyne_config.pyx'], ['pyne']))
 
+# _utils
+exts.append(cpp_ext("pyne._utils", ['_utils.pyx']))
+
 # nucname
 exts.append(cpp_ext("pyne.nucname", ['nucname.pyx'], ['pyne', 'pyne_nucname']))
 
@@ -230,6 +233,9 @@ exts.append(cpp_ext("pyne.data", ['data.pyx'], ['pyne', 'pyne_nucname', 'pyne_da
 
 # material
 exts.append(cpp_ext("pyne.material", ['material.pyx'], ['pyne', 'pyne_nucname', 'pyne_data', 'pyne_material'], True))
+
+# ace
+exts.append(cpp_ext("pyne.ace", ['ace.pyx'], ['pyne', 'pyne_nucname']))
 
 # xs.models
 exts.append(cpp_ext("pyne.xs.models", ['xs/models.pyx'], ['pyne', 'pyne_nucname']))
