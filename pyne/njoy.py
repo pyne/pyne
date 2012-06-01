@@ -561,114 +561,121 @@ class Njoy99(object):
         self.draglib(fp=1)
         self.legendre = keeplegendre
 
-  def burnup(self):
-    myCwd = os.getcwd()
-    myNjoy = myCwd + '/' + self.execDir + "/xnjoy<tempFile"
-    evaluationNameBase =  os.path.basename(self.evaluationName)
-    os.chdir(self.evaluationName)
-    if os.path.isfile("drag"): os.remove("drag")
-    if os.path.isfile("draglib" + evaluationNameBase):
-      iold = 29
-      name1 = "draglib" + evaluationNameBase + ".bis.gz"
-      if not os.path.isfile(name1):
-        os.system("cp draglib" + evaluationNameBase + \
-        " draglib" + evaluationNameBase + ".bis")
-        os.system("gzip draglib" + evaluationNameBase + ".bis")
-      else:
-        name2 = "draglib" + evaluationNameBase + ".bis2.gz"
-        os.system("cp draglib" + evaluationNameBase + \
-        " draglib" + evaluationNameBase + ".bis2")
-        os.system("gzip draglib" + evaluationNameBase + ".bis2")
-        if os.path.isfile(name2):
-          len1 = os.stat(name1).st_size
-          len2 = os.stat(name2).st_size
-          if len2 > len1:
-            os.remove(name1)
-            os.rename(name2, name1)
-          else:
-            os.remove(name2)
-      os.system("mv draglib" + evaluationNameBase + " tape29")
-    else:
-      iold = 0
-    htime = time.ctime(time.time())
-    self.__dict__.update({"iold" : iold , "htime" : htime})
-    text_data = """
-    dragr
-    0 0 0 23 24 %(iold)d 30/
-"""%self.__dict__
-    if iold == 0:
-      text_data = text_data + """
-      'draglib from %(evaluationName)s at %(htime)s'/
-"""%self.__dict__
-    file_data = open("file_data",'w')
-    file_data.write(text_data)
-    file_data.close()
-    yield_file = os.path.expandvars(self.fissionFile)
-    if os.path.isdir(yield_file):
-      tape23 = open("tape23",'w')
-      tape23.write("LIBRARY, DUMMY TAPE HEADER\n")
-      for fileName in os.listdir(yield_file):
-        file = open(yield_file + fileName,'r')
-        lines = file.readlines()
-        n = len(lines)
-        tape23.writelines(lines[1:n-1])
-        file.close()
-      tape23.writelines(lines[n-1:n])
-      tape23.close()
-    else:
-      os.system("ln -s " + self.fissionFile + " tape23")
-    os.system("ln -s " + self.decayFile + " tape24")
-    chainFileName = 'chain' + evaluationNameBase
-    listFiles = os.listdir(os.getcwd())
-    if chainFileName not in listFiles:
-      print 'Make the burnup chain file named',chainFileName
-      data_dict = {}
-      mat_dict = {}
-      for fileName in listFiles:
-        if fileName[:11] == 'out_draglib':
-          file = open(fileName,'r')
-          while 1:
-            line=file.readline()
-            if not line: break
-            if line[:41] == ' isotopic specification line for material':
-              mat = line[42:49]
-              line=file.readline()
-              line=file.readline()
-              info = ''
-              key = line[:8]
-              while line[:6] != ' -----':
-                info = info + line
-                line=file.readline()
-              data_dict[key] = info[:-1]
-              mat_dict[key] = 10*int(mat)
-              if key.find('_') != -1: mat_dict[key] = mat_dict[key] - 1
-      dictKeys = data_dict.keys()
-      dictKeys.sort(lambda a, b: mat_dict[a]-mat_dict[b])
-      chainFile = open(chainFileName,'w')
-      for key in dictKeys:
-        line = data_dict[key]
-        pos = 0
-        while pos != -1:
-           pos = line.find('\n')
-           chainFile.write(line[:pos-1] + '\n')
-           line = line[pos+1:]
-      chainFile.write("end /\n")
-      chainFile.write("stop\n")
-      chainFile.close()
-    else:
-      print 'Use existing burnup chain file named',chainFileName
-    os.system("cat file_data " + chainFileName + " > tempFile")
-    os.system(myNjoy)
-    os.system("mv tape30 draglib" + evaluationNameBase)
-    os.system("mv output out_draglib_burnup")
-    os.system("chmod 644 out_draglib_burnup")
-    os.system("mv tempFile file_data_burnup")
-    for fileName in os.listdir(os.getcwd()):
-      if fileName[:4] == 'temp': os.remove(fileName)
-      if fileName[:4] == 'tape': os.remove(fileName)
-    os.remove("file_data")
-    os.chdir(myCwd)
-#
+    def burnup(self):
+        """Process burnup data for the complete library. This requires a file
+        whose name starts with chain, e.g. chaincandu, that contains information
+        about the energy from all isotopes generated using single DRAGR
+        runs. The 'chain' file is generated automatically.
+
+        """
+
+        myCwd = os.getcwd()
+        myNjoy = myCwd + '/' + self.execDir + "/xnjoy<tempFile"
+        evaluationNameBase =  os.path.basename(self.evaluationName)
+        os.chdir(self.evaluationName)
+        if os.path.isfile("drag"):
+            os.remove("drag")
+        if os.path.isfile("draglib" + evaluationNameBase):
+            iold = 29
+            name1 = "draglib" + evaluationNameBase + ".bis.gz"
+            if not os.path.isfile(name1):
+                os.system("cp draglib" + evaluationNameBase +
+                          " draglib" + evaluationNameBase + ".bis")
+                os.system("gzip draglib" + evaluationNameBase + ".bis")
+            else:
+                name2 = "draglib" + evaluationNameBase + ".bis2.gz"
+                os.system("cp draglib" + evaluationNameBase +
+                          " draglib" + evaluationNameBase + ".bis2")
+                os.system("gzip draglib" + evaluationNameBase + ".bis2")
+                if os.path.isfile(name2):
+                    len1 = os.stat(name1).st_size
+                    len2 = os.stat(name2).st_size
+                    if len2 > len1:
+                        os.remove(name1)
+                        os.rename(name2, name1)
+                    else:
+                        os.remove(name2)
+            os.system("mv draglib" + evaluationNameBase + " tape29")
+        else:
+            iold = 0
+        htime = time.ctime(time.time())
+        self.__dict__.update({"iold": iold, "htime": htime})
+        text_data = "dragr\n0 0 0 23 24 %(iold)d 30/\n" % self.__dict__
+        if iold == 0:
+          text_data += ("'draglib from %(evaluationName)s at "
+                        "%(htime)s'/\n" % self.__dict__)
+        file_data = open("file_data", 'w')
+        file_data.write(text_data)
+        file_data.close()
+        yield_file = os.path.expandvars(self.fissionFile)
+        if os.path.isdir(yield_file):
+            tape23 = open("tape23",'w')
+            tape23.write("LIBRARY, DUMMY TAPE HEADER\n")
+            for fileName in os.listdir(yield_file):
+                file = open(yield_file + fileName, 'r')
+                lines = file.readlines()
+                n = len(lines)
+                tape23.writelines(lines[1:n-1])
+                file.close()
+            tape23.writelines(lines[n-1:n])
+            tape23.close()
+        else:
+            os.system("ln -s " + self.fissionFile + " tape23")
+        os.system("ln -s " + self.decayFile + " tape24")
+        chainFileName = 'chain' + evaluationNameBase
+        listFiles = os.listdir(os.getcwd())
+        if chainFileName not in listFiles:
+            print 'Make the burnup chain file named',chainFileName
+            data_dict = {}
+            mat_dict = {}
+            for fileName in listFiles:
+                if fileName[:11] == 'out_draglib':
+                    file = open(fileName,'r')
+                    while True:
+                        line = file.readline()
+                        if not line:
+                            break
+                        if (line[:41] == 
+                            ' isotopic specification line for material'):
+                            mat = line[42:49]
+                            line = file.readline()
+                            line = file.readline()
+                            info = ''
+                            key = line[:8]
+                            while line[:6] != ' -----':
+                                info = info + line
+                                line = file.readline()
+                            data_dict[key] = info[:-1]
+                            mat_dict[key] = 10*int(mat)
+                            if key.find('_') != -1:
+                                mat_dict[key] = mat_dict[key] - 1
+            dictKeys = data_dict.keys()
+            dictKeys.sort(lambda a, b: mat_dict[a] - mat_dict[b])
+            chainFile = open(chainFileName, 'w')
+            for key in dictKeys:
+                line = data_dict[key]
+                pos = 0
+                while pos != -1:
+                    pos = line.find('\n')
+                    chainFile.write(line[:pos-1] + '\n')
+                    line = line[pos+1:]
+            chainFile.write("end /\n")
+            chainFile.write("stop\n")
+            chainFile.close()
+        else:
+            print 'Use existing burnup chain file named',chainFileName
+        os.system("cat file_data " + chainFileName + " > tempFile")
+        os.system(myNjoy)
+        os.system("mv tape30 draglib" + evaluationNameBase)
+        os.system("mv output out_draglib_burnup")
+        os.system("chmod 644 out_draglib_burnup")
+        os.system("mv tempFile file_data_burnup")
+        for fileName in os.listdir(os.getcwd()):
+            if fileName[:4] == 'temp' or fileName[:4] == 'tape':
+                os.remove(fileName)
+        os.remove("file_data")
+        os.chdir(myCwd)
+
   def acer(self):
     myCwd = os.getcwd()
     myNjoy = myCwd + '/' + self.execDir + "/xnjoy<file_data"
