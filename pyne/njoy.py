@@ -41,7 +41,10 @@ class Njoy99(object):
         self.purr = None
 
     def pendf(self, eaf=0):
-        """Generate a PENDF file from the ENDF raw data.
+        """Generate a pointwise PENDF file from the ENDF raw data using the
+        MODER, RECONR, BROADR, PURR (if dilutions present), and THERMR
+        modules. This is the starting point for all other datatype generations
+        including DRAGLIB, ACE, WIMSD, etc.
 
         Parameters
         ----------
@@ -190,9 +193,8 @@ class Njoy99(object):
         os.chdir(myCwd)
 
     def gendf(self, eaf=0):
-        """Generate a multigroup GENDF file from ENDF raw data and a PENDF file
-        already generated. This requires that the pendf() method has already
-        been called.
+        """Generate a multigroup GENDF file using the MODER and GROUPR
+        modules. This requires that the pendf() method has already been called.
 
         Parameters
         ----------
@@ -320,50 +322,45 @@ class Njoy99(object):
                 os.remove(fileName)
         os.chdir(myCwd)
 
-  def gamma(self):
-    print " --- make gamma gendf for " + self.hmatgg + " ---"
-    myCwd = os.getcwd()
-    myNjoy = myCwd + '/' + self.execDir + "/xnjoy<file_data"
-    if not os.path.isfile(os.path.expandvars(self.evaluationFile)):
-      raise PyNjoyError("evaluation file " + self.evaluationFile + " not found")
-    if not os.path.isdir(self.evaluationName): os.mkdir(self.evaluationName)
-    os.chdir(self.evaluationName)
-    htime = time.ctime(time.time())
-    self.__dict__.update({"htime"  : htime})
-    #
-    text_data = """
-    moder
-    40 -41
-    reconr
-    -41 -42
-    'pendf tape from %(evaluationName)s'/
-    %(matgg)d 1/
-    0.002 /
-    '%(hmatgg)s (gamma) from %(evaluationName)s at %(htime)s' /
-    0/
-    gaminr
-    -41 -42 0 -43
-    %(matgg)d %(gstr)d 3 %(legendregg)d 1
-    '%(hmatgg)s (gamma) from %(evaluationName)s at %(htime)s' /
-    -1 /
-    0 /
-    moder
-    -43 44
-    stop
-    """%self.__dict__
-    file_data = open("file_data",'w')
-    file_data.write(text_data)
-    file_data.close()
-    os.system("ln -s " + self.evaluationFile + " tape40")
-    os.system(myNjoy)
-    os.system("mv tape44 gamma" + self.hmatgg)
-    os.system("mv file_data file_data_gamma" + self.hmatgg)
-    os.system("mv output out_gamma_" + self.hmatgg)
-    os.system("chmod 644 out_gamma_" + self.hmatgg)
-    for fileName in os.listdir(os.getcwd()):
-      if fileName[:4] == 'tape': os.remove(fileName)
-    os.chdir(myCwd)
-  #
+    def gamma(self):
+        """Generate photo-atomic (gamma) group ENDF file using the MODER,
+        RECONR, and GAMINR modules.
+        """
+
+        print " --- make gamma gendf for " + self.hmatgg + " ---"
+        myCwd = os.getcwd()
+        myNjoy = myCwd + '/' + self.execDir + "/xnjoy<file_data"
+        if not os.path.isfile(os.path.expandvars(self.evaluationFile)):
+          raise PyNjoyError("evaluation file " + self.evaluationFile +
+                            " not found")
+        if not os.path.isdir(self.evaluationName):
+            os.mkdir(self.evaluationName)
+        os.chdir(self.evaluationName)
+        htime = time.ctime(time.time())
+        self.__dict__.update({"htime"  : htime})
+
+        text_data = ("moder\n40 -41\nreconr\n-41 -42\n"
+                     "'pendf tape from %(evaluationName)s'/\n"
+                     "%(matgg)d 1/\n0.002 /\n'%(hmatgg)s (gamma) from "
+                     "%(evaluationName)s at %(htime)s' /\n0/\ngaminr\n"
+                     "-41 -42 0 -43\n%(matgg)d %(gstr)d 3 %(legendregg)d 1\n"
+                     "'%(hmatgg)s (gamma) from %(evaluationName)s at "
+                     "%(htime)s' /\n-1 /\n0 /\nmoder\n-43 44\nstop\n" 
+                     % self.__dict__)
+        file_data = open("file_data", 'w')
+        file_data.write(text_data)
+        file_data.close()
+        os.system("ln -s " + self.evaluationFile + " tape40")
+        os.system(myNjoy)
+        os.system("mv tape44 gamma" + self.hmatgg)
+        os.system("mv file_data file_data_gamma" + self.hmatgg)
+        os.system("mv output out_gamma_" + self.hmatgg)
+        os.system("chmod 644 out_gamma_" + self.hmatgg)
+        for fileName in os.listdir(os.getcwd()):
+          if fileName[:4] == 'tape':
+              os.remove(fileName)
+        os.chdir(myCwd)
+
   def draglib(self, fp=0):
     myCwd = os.getcwd()
     myNjoy = myCwd + '/' + self.execDir + "/xnjoy<file_data"
