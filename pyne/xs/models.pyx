@@ -155,6 +155,56 @@ def phi_g(E_g, E_n, phi_n):
     return phi_g
 
 
+def group_collapse(sigma_n, phi_n, phi_g=None, partial_energies=None, E_g=None, E_n=None):
+    """Calculates the group cross-sections for a nuclide for a new, lower resolution
+    group structure using a higher fidelity flux.  Note that g indexes G, n indexes N, 
+    and G < N.  
+
+    This function has two optional ways of being called.  If the group boundaries
+    E_g and E_n are provided, this will collapse the flux automatically.  However, 
+    if a partial energy matrix and flux collapse has already been performed you can
+    shortcut their recalculation by calling this function with the phi_g and 
+    partial_energies keyword arguments.
+
+    Parameters
+    ----------
+    sigma_n : array-like of floats)
+        A high-fidelity cross-section.
+    phi_n : array-like of floats
+        The high-fidelity flux [n/cm^2/s] to collapse the fission cross-section 
+        over (length N).  
+    phi_g : array-like of floats, optional
+        The low-fidelity flux [n/cm^2/s] to collapse the fission cross-section 
+        down to (length G).  If present, partial_energies is needed as well.
+    partial_energies : 2D array-like of floats, optional
+        A partial energy matrix as provided by a previous call to the function
+        partial_energy_matrix().  If present, phi_g is needed as well.
+    E_g : array-like of floats, optional
+        Lower resolution energy group structure [MeV] that is of length G+1.
+        If present, E_n is needed as well.
+    E_n : array-like of floats, optional
+        Higher resolution energy group structure [MeV] that is of length N+1. 
+        If present, E_g is needed as well.
+
+    Returns
+    -------
+    sigma_g : ndarray
+        An array of the collapsed fission cross-section.
+    """
+    if (phi_g is not None) and (partial_energies is not None):
+        pem = partial_energies
+    elif (E_g is not None) and (E_n is not None):
+        pem =  partial_energy_matrix(E_g, E_n)
+        phi_g = np.dot(pem, phi_n)
+    else:
+        raise ValueError("Either phi_g and partial_energies or E_g and E_n must "
+                         "both not be None.")
+
+    # Calulate partial group collapse
+    sigma_g = np.dot(pem, sigma_n * phi_n) / phi_g
+    return sigma_g
+
+
 
 #######################
 ### Physical models ###
@@ -487,32 +537,49 @@ def sigma_s_const(b):
 # These definitely need more thought
 #
 
-#def sigma_s_E(E, b=1.0, M_A=1.0, T=300.0):
-#    """Computes the total scattering cross section from an empirical model.
-#
-#    .. math::
-#
-#        \\sigma_s(E) = 4 \\pi b^2 \\cdot \\left( 1 - \\frac{2E}{931.46 \\cdot m_n} \\right) \\cdot
-#                      \\left( 1 + \\frac{m_n}{M_A} \\frac{kT}{E} \\cdot e^{-\\frac{M_A}{m_n}\\frac{E}{kT}} \\right) 
-#                      \\cdot \\left( 1 - \\mbox{Exp}\\left[-\\sqrt{\\frac{0.1}{E}}\\right] \\right)
-#
-#    Args:
-#        * E (float): The incident energy of the neutron prior to the 
-#          scattering event [MeV].
-#
-#    Keyword Args:
-#        * b (float): The bound scattering length of the target nucleus.
-#        * M_A (float): Atomic mass of the target nucleus [amu].
-#        * T (float): Tempurature of the target material [kelvin].
-#    """
-#    kT_over_AE = k * T / ((M_A / m_n) * E)
-#
-#    sig_s = sigma_s_const(b)
-#    rcf = one_over_gamma_squared(E)
-#    
-#    sig_s_E = (rcf * sig_s) * (1.0 + kT_over_AE * np.exp(-1.0/kT_over_AE)) * (1.0 - np.exp(-np.sqrt(0.1/E))) 
-#
-#    return sig_s_E
+def sigma_s(E, b=1.0, M_A=1.0, T=300.0):
+    """Computes the scattering cross section from an analytic model.  The model
+    accounts for both one-over-v dependence and relativistic effects and the 
+    bound scattering length provided.  This model does not include resonances.
+    This function works on both float and array values for the energy.
+
+    .. math::
+
+        \\sigma_s(E) = 4 \\pi b^2 \\cdot \\left( 1 - \\frac{2E}{931.46 \\cdot m_n} \\right) \\cdot
+                      \\left( 1 + \\frac{m_n}{M_A} \\frac{kT}{E} \\cdot e^{-\\frac{M_A}{m_n}\\frac{E}{kT}} \\right) 
+                      \\cdot \\left( 1 - \\mbox{Exp}\\left[-\\sqrt{\\frac{0.1}{E}}\\right] \\right)
+
+    Parameters
+    ----------
+    E : float or array-like
+        The incident energy of the neutron prior to the scattering event [MeV].
+    b : float, optional
+        The bound scattering length of the target nucleus [cm].
+    M_A : float, optional
+        Atomic mass of the target nucleus [amu].
+    T : float, optional
+        Tempurature of the target material [kelvin].
+
+    Returns
+    -------
+    sig_s : float or ndarray
+        The scattering cross section evaluated at the given energy.
+
+    See Also
+    --------
+    pyne.data.b : scattering length data.
+    pyne.data.atomic_mass : Atomic mass data.
+
+    """
+    kT_over_AE = k * T / ((M_A / m_n) * E)
+
+    sig_s = sigma_s_const(b)
+    rcf = one_over_gamma_squared(E)
+    
+    sig_s = (rcf * sig_s) * (1.0 + kT_over_AE * np.exp(-1.0/kT_over_AE)) * \
+                            (1.0 - np.exp(-np.sqrt(0.1/E))) 
+
+    return sig_s
 
 
 #def P(E, E_prime, M_A=1.0, T=300.0):

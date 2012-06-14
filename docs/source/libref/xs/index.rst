@@ -25,3 +25,4 @@ pointwise data sources (such as ENDF or ACE files).
 
     models
     cache
+    channels
