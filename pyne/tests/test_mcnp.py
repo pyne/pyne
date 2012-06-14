@@ -7,8 +7,9 @@ import nose.tools
 
 from pyne import mcnp
 
-ssrname = "mcnp_surfsrc.w"
-sswname = "copy_mcnp_surfsrc.w"
+thisdir = os.path.dirname(__file__)
+ssrname = os.path.join(thisdir,"mcnp_surfsrc.w")
+sswname = os.path.join(thisdir,"copy_mcnp_surfsrc.w")
 
 class TestSurfSrc(unittest.TestCase):
 
