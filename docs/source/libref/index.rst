@@ -12,6 +12,8 @@ The following modules and sub-packages are discussed:
     nucname
     data
     material
+    bins
+    njoy
     cccc
     ace
     ensdf

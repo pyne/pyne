@@ -8,8 +8,8 @@ from nose.tools import assert_equal, assert_not_equal, assert_almost_equal, asse
 from numpy.testing import assert_array_equal, assert_array_almost_equal
 
 from pyne.xs.models import partial_energy_matrix, partial_energy_matrix_mono, chi, alpha, k, \
-    m_n, beta, alpha_at_theta_0, alpha_at_theta_pi, one_over_gamma_squared, E_prime_min, sigma_s_const, \
-    phi_g
+    m_n, beta, alpha_at_theta_0, alpha_at_theta_pi, one_over_gamma_squared, E_prime_min, \
+    sigma_s_const, sigma_s, phi_g, group_collapse
 from pyne.pyne_config import pyne_conf
 
 nuc_data = pyne_conf.NUC_DATA_PATH
@@ -303,6 +303,28 @@ def test_phi_g7():
     assert_array_almost_equal(observed, expected)
 
 
+def test_group_collapse1():
+    E_g = np.array([0.0, 4.0, 8.0])
+    E_n = np.array([0.0, 2.5, 5.0, 7.5, 10.0])
+
+    phi_n = np.array([0.0, 2.0, 1.0, 0.5])
+    sigma_n = np.array([1.0, 2.0, 3.0, 4.0])
+
+    expected = np.array([2.0, 5.0 / 1.9])
+
+    # First way of calling
+    observed = group_collapse(sigma_n, phi_n, E_g=E_g, E_n=E_n)
+    assert_array_almost_equal(observed, expected)
+
+    # Second method of calling
+    p_g = phi_g(E_g, E_n, phi_n)
+    pem = partial_energy_matrix(E_g, E_n)
+    observed = group_collapse(sigma_n, phi_n, phi_g=p_g, partial_energies=pem)
+    assert_array_almost_equal(observed, expected)
+
+    # bad call
+    assert_raises(ValueError, group_collapse, sigma_n, phi_n)
+
 
 
 #
@@ -389,3 +411,16 @@ def test_sigma_s_const():
     assert_equal(sigma_s_const(0.0), 0.0)
     assert_equal(sigma_s_const(0.5), 1E24 * np.pi)
     assert_equal(sigma_s_const(1.0), 4E24 * np.pi)
+
+def test_sigma_s():
+    # Probably could use some more testing
+    E = np.logspace(-9, 2, 101)
+
+    sig_s = sigma_s(E)
+    assert_true((0.0 <= sig_s).all())
+    assert_true((sig_s[1:] <= sig_s[:-1]).all())
+
+    sig_s = sigma_s(E, 12.0, 13.0, 1900.0)
+    assert_true((0.0 <= sig_s).all())
+    assert_true((sig_s[1:] <= sig_s[:-1]).all())
+

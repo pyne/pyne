@@ -65,9 +65,29 @@ The following functions help the cache extract data from the ``nuc_data.h5`` fil
 
 ---------
 
-.. autofunction:: get_sigma_reaction_n(nuc, rx)
+.. autofunction:: get_sigma_a_reaction_n(nuc, rx)
 
----------
+.. data:: ABSORPTION_RX
 
-.. autofunction:: get_phi_g(E_g, E_n, phi_n)
+    Acceptable absorption reaction strings::
+
+        set(["", 'np *', 'a  *', 'h  *', '2p *', '3n *', 'd  *', 'np/d',
+             'na', '*', 'nd', 'g  *', '3n', 'np', 'nt', 't', 'nt *',
+             'x  *', '4n *', 'na *', 'nd *', 't  *', 'a', 'c', '2p', 'd',
+             'g', 'h', 'n', '4n', 'p', 'n  *', '2a', '2n *', 'x', '2n',
+             'nh *', 'p  *'])
+
+.. data:: ABSORPTION_RX_MAP 
+
+    Aliases for absorption reactions::
+
+        {'neutron': 'n',
+         'gamma': 'g',
+         'alpha': 'a',
+         'proton': 'p',
+         'trit': 't',
+         'triton': 't',
+         'deut': 'd',
+         'deuteron': 'd',
+        }
 
