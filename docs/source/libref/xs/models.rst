@@ -64,6 +64,16 @@ same direction.  All elements of **P_E** live on the range [0,1].
 
 .. autofunction:: partial_energy_matrix_mono(E_g, E_n, slope=-1)
 
+************************
+Group Collapse Functions
+************************
+.. autofunction:: phi_g(E_g, E_n, phi_n)
+
+---------
+
+.. autofunction:: group_collapse(sigma_n, phi_n, phi_g=None, partial_energies=None, E_g=None, E_n=None)
+
+
 ***************
 Physical models
 ***************
@@ -96,3 +106,7 @@ Physical models
 ---------
 
 .. autofunction:: sigma_s_const(b)
+
+---------
+
+.. autofunction:: sigma_s(E, b=1.0, M_A=1.0, T=300.0)

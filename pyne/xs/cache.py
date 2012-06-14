@@ -34,7 +34,7 @@ class XSCache(MutableMapping):
         self._get_fns = {'E_n': get_E_n,
                          'sigma_f_n': get_sigma_f_n,
                          'sigma_a_n': get_sigma_a_n,
-                         'sigma_rx_n': get_sigma_reaction_n,
+                         'sigma_rx_n': get_sigma_a_reaction_n,
                          'phi_g': lambda: phi_g(self['E_g'], self['E_n'], self['phi_n']),
                         }
 
@@ -221,7 +221,7 @@ ABSORPTION_RX_MAP = {
     'deuteron': 'd',
     }
 
-def get_sigma_reaction_n(nuc, rx):
+def get_sigma_a_reaction_n(nuc, rx):
     """Grabs a nuclide's absorption reaction cross-section from the nuc_data library.
 
     Parameters
@@ -236,6 +236,11 @@ def get_sigma_reaction_n(nuc, rx):
     sigma_rx_n : numpy array
         This nuclide's absorption reaction cross-section pulled from the nuc_data library 
         file.  If not present in the library, a zero-array is returned.
+
+    See Also
+    --------
+    pyne.xs.cache.ABSORPTION_RX
+    pyne.xs.cache.ABSORPTION_RX_MAP
     """
     # munge the reaction rate
     if rx not in ABSORPTION_RX:

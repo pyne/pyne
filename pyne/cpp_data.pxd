@@ -6,11 +6,11 @@ cimport std
 cimport extra_types
 
 cdef extern from "data.h" namespace "pyne":
-    # nuc_weight functions
-    map[int, double] nuc_weight_map
-    double nuc_weight(int) except +
-    double nuc_weight(char *) except +
-    double nuc_weight(std.string) except +
+    # atomic_mass functions
+    map[int, double] atomic_mass_map
+    double atomic_mass(int) except +
+    double atomic_mass(char *) except +
+    double atomic_mass(std.string) except +
 
 
     # Scattering length functions

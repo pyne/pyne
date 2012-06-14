@@ -12,7 +12,7 @@ import numpy as np
 import tables as tb
 
 from pyne import nucname
-
+from pyne.dbgen.api import BASIC_FILTERS
 
 
 def grab_scattering_lengths(build_dir="", file_out='scattering_lengths.html'):
@@ -115,7 +115,7 @@ def make_scattering_lengths_table(nuc_data, build_dir=""):
     sl_array = parse_scattering_lengths(build_dir)
 
     # Open the HDF5 File
-    db = tb.openFile(nuc_data, 'a')
+    db = tb.openFile(nuc_data, 'a', filters=BASIC_FILTERS)
 
     # Ensure that the appropriate file structure is present
     if not hasattr(db.root, 'neutron'):
@@ -123,7 +123,8 @@ def make_scattering_lengths_table(nuc_data, build_dir=""):
         neutron_group = db.createGroup('/', 'neutron', 'Neutron Data')
 
     # Init the neutron fission product info table
-    sl_table = db.createTable('/neutron/', 'scattering_lengths', sl_dtype, 
+    sl_table = db.createTable('/neutron/', 'scattering_lengths', 
+                              np.empty(0, dtype=sl_dtype), 
                               'Neutron Scattering Lengths, b [cm], sigma [barns]', 
                               expectedrows=len(sl_array))
     sl_table.append(sl_array)
@@ -136,10 +137,12 @@ def make_scattering_lengths_table(nuc_data, build_dir=""):
 
 
 
-def make_scattering_lengths(nuc_data, build_dir):
+def make_scattering_lengths(args):
     """Controller function for adding scattering lengths."""
+    nuc_data, build_dir = args.nuc_data, args.build_dir
+
     # Check that the table exists
-    with tb.openFile(nuc_data, 'a') as f:
+    with tb.openFile(nuc_data, 'a', filters=BASIC_FILTERS) as f:
         if hasattr(f.root, 'neutron') and hasattr(f.root.neutron, 'scattering_lengths'):
             return
 

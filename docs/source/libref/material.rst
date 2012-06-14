@@ -26,45 +26,21 @@ The material class is presented below.  For more information please refer to :re
 Material Class
 **************
 .. autoclass:: Material(comp, mass=-1.0, name='', atoms_per_mol=-1.0)
-
-    .. automethod:: molecular_weight(atoms_per_mol=-1.0)
-    .. automethod:: norm_comp()
-    .. automethod:: normalize()
-    .. automethod:: mult_by_mass()
-    .. automethod:: from_hdf5(filename, datapath, row=-1, protocol=1)
-    .. automethod:: write_hdf5(filename, datapath="/material", nucpath="/nuc_zz", row=-0.0, chunksize=100)
-    .. automethod:: from_text(filename)
-    .. automethod:: write_text(filename)
-    .. automethod:: to_atom_frac()
-    .. automethod:: from_atom_frac(atom_fracs)
-    .. automethod:: sub_mat(nuc_sequence, name="")
-    .. automethod:: set_mat(nuc_sequence, value, name="")
-    .. automethod:: del_mat(nuc_sequence, name="")
-    .. automethod:: sub_range(lower=0, upper=10000000, name="")
-    .. automethod:: set_range(lower=0, upper=10000000, value, name="")
-    .. automethod:: del_range(lower=0, upper=10000000, name="")
-    .. automethod:: sub_u(name="")
-    .. automethod:: sub_pu(name="")
-    .. automethod:: sub_fp(name="")
-    .. automethod:: sub_lan(name="")
-    .. automethod:: sub_act(name="")
-    .. automethod:: sub_tru(name="")
-    .. automethod:: sub_ma(name="")
-
-
+   :members:
+   :inherited-members:
 
 *****************************
 Material Generation Functions
 *****************************
 The following top-level module functions are used to generate materials from various sources.
 
-.. autofunction:: from_atom_frac(atom_fracs, mass=-1.0, name='', atoms_per_mol=-1.0)
+.. autofunction:: from_atom_frac
 
 ---------
 
-.. autofunction:: from_hdf5(filename, datapath, row=-1, protocol=1)
+.. autofunction:: from_hdf5
 
 ---------
 
-.. autofunction:: from_text(filename, mass=-1.0, name='', atoms_per_mol=-1.0)
+.. autofunction:: from_text
 
