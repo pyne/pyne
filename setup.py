@@ -9,7 +9,7 @@ from distutils.extension import Extension
 from distutils.util import get_platform
 from distutils.file_util import copy_file, move_file
 from distutils.dir_util import mkpath, remove_tree
-from distutils.sysconfig import get_python_version
+from distutils.sysconfig import get_python_version, get_config_vars
 from Cython.Distutils import build_ext
 
 import numpy as np
@@ -19,6 +19,10 @@ INFO = {
     'version': '0.1',
     }
 
+_local_subsititues = {'darwin': 'Library'}
+PYNE_DIR = os.path.join(os.environ['HOME'], 
+                        _local_subsititues.get(sys.platform, '.local'),
+                        'pyne')
 
 # Thanks to http://patorjk.com/software/taag/  
 # and http://www.chris.com/ascii/index.php?art=creatures/dragons
@@ -51,6 +55,40 @@ pyne_logo = """\
                                      `  
 """
 
+###############################
+### Platform specific setup ###
+###############################
+def darwin_linker_paths():
+    paths = [os.path.join(PYNE_DIR, 'lib')]
+    vars = ['LD_LIBRARY_PATH', 'DYLD_FALLBACK_LIBRARY_PATH', 'DYLD_LIBRARY_PATH', 'LIBRARY_PATH']
+    for v in vars:
+        curvar = os.getenv(v, '')
+        varpaths = paths + ([] if 0 == len(curvar) else [curvar])
+        os.environ[v] = ":".join(varpaths)
+
+
+def darwin_build_ext_decorator(f):
+    def new_build_ext(self, ext):
+        rtn = f(self, ext)
+        if not ext.name.split('.')[-1].startswith('lib'):
+            return rtn
+        
+        libpath = os.path.join(PYNE_DIR, 'lib')
+        if not os.path.exists(libpath):
+            mkpath(libpath)
+        
+        copy_file(self.get_ext_fullpath(ext.name), libpath)
+        return rtn
+    return new_build_ext
+
+
+def darwin_setup():
+    darwin_linker_paths()
+    build_ext.build_extension = darwin_build_ext_decorator(build_ext.build_extension)
+
+platform_setup = {'darwin': darwin_setup}
+
+
 
 ###########################################
 ### Set compiler options for extensions ###
@@ -69,6 +107,9 @@ nt_hdf5_libs = ["/DEFAULTLIB:szip.lib", "/DEFAULTLIB:zlib1.lib", "/DEFAULTLIB:hd
                 "/DEFAULTLIB:hdf5_hldll.lib", "/DEFAULTLIB:hdf5_cppdll.lib", "/DEFAULTLIB:hdf5_hl_cppdll.lib", ]
 nt_hdf5_extra_compile_args = ["/EHsc"]
 nt_hdf5_macros = [("_WIN32", None), ("_HDF5USEDLL_", None), ("HDF5CPP_USEDLL", None), ]
+
+
+
 
 
 def cpp_ext(name, sources, libs=None, use_hdf5=False):
@@ -99,6 +140,7 @@ def cpp_ext(name, sources, libs=None, use_hdf5=False):
     ext['library_dirs'] = ['build/lib/pyne/lib',
                            'build/lib.{0}-{1}/pyne/lib'.format(get_platform(), get_python_version()),
                            ]
+                         
     # perfectly general, thanks to dynamic runtime linking of $ORIGIN
     #ext['runtime_library_dirs'] = ['${ORIGIN}/lib', '${ORIGIN}']
     ext['runtime_library_dirs'] = ['${ORIGIN}/lib', '${ORIGIN}', '${ORIGIN}/.', 
@@ -109,14 +151,35 @@ def cpp_ext(name, sources, libs=None, use_hdf5=False):
     #                              [os.path.abspath(p + '/pyne') for p in sys.path] + \
     #                              [os.path.abspath(p) for p in sys.path]
 
-    if os.name == 'posix':
+    if sys.platform == 'linux2':
         #ext["extra_compile_args"] = ["-Wno-strict-prototypes"]
         ext["undef_macros"] = ["NDEBUG"]
         if use_hdf5:
             ext["libraries"] += posix_hdf5_libs
         if libs is not None:
             ext["libraries"] += libs
-    elif os.name == 'nt':
+    elif sys.platform == 'darwin':
+        ext["undef_macros"] = ["NDEBUG"]
+        if use_hdf5:
+            ext["libraries"] += posix_hdf5_libs
+        if libs is not None:
+            ext["libraries"] += libs
+        config_vars = get_config_vars()
+        #config_vars['SO'] = '.dylib'
+        config_vars['LDSHARED'] = config_vars['LDSHARED'].replace('-bundle', '-Wl,-x') 
+
+        ext['library_dirs'] = []
+        ext['runtime_library_dirs'] = []
+        ext["extra_compile_args"] = ["-dynamiclib",
+                                     "-undefined", "dynamic_lookup", 
+                                     '-shared',
+                                     ]
+        ext["extra_link_args"] = ["-dynamiclib", 
+                                  "-undefined", "dynamic_lookup", 
+                                  '-shared',
+                                  "-install_name" , os.path.join(PYNE_DIR, 'lib', name.split('.')[-1] + config_vars['SO']),
+                                  ]
+    elif sys.platform == 'win32':
         ext["extra_compile_args"] = ["/EHsc"]
         ext["define_macros"] = [("_WIN32", None)]
 
@@ -127,6 +190,8 @@ def cpp_ext(name, sources, libs=None, use_hdf5=False):
 
         if libs is not None:
             ext["libraries"] += libs
+    elif sys.platform == 'cygwin':
+        pass
 
     return ext
 
@@ -157,6 +222,9 @@ exts.append(cpp_ext("pyne.stlconverters", ['stlconverters.pyx']))
 # pyne_config
 exts.append(cpp_ext("pyne.pyne_config", ['pyne_config.pyx'], ['pyne']))
 
+# _utils
+exts.append(cpp_ext("pyne._utils", ['_utils.pyx']))
+
 # nucname
 exts.append(cpp_ext("pyne.nucname", ['nucname.pyx'], ['pyne', 'pyne_nucname']))
 
@@ -165,6 +233,9 @@ exts.append(cpp_ext("pyne.data", ['data.pyx'], ['pyne', 'pyne_nucname', 'pyne_da
 
 # material
 exts.append(cpp_ext("pyne.material", ['material.pyx'], ['pyne', 'pyne_nucname', 'pyne_data', 'pyne_material'], True))
+
+# ace
+exts.append(cpp_ext("pyne.ace", ['ace.pyx'], ['pyne', 'pyne_nucname']))
 
 # xs.models
 exts.append(cpp_ext("pyne.xs.models", ['xs/models.pyx'], ['pyne', 'pyne_nucname']))
@@ -211,13 +282,16 @@ if __name__ == "__main__":
     for header in glob.glob('pyne/*.pxd'):
         copy_file(header, 'pyne/includes/pyne')
 
+    # Platform specific setup
+    platform_setup.get(sys.platform, lambda: None)()
+    
     # call setup
     setup(name="pyne",
         version = INFO['version'],
         description = 'Python for Nuclear Engineering',
         author = 'PyNE Development Team',
         author_email = 'scopatz@gmail.com',
-        url = 'http://pyne.github.com/pyne',
+        url = 'http://pyne.github.com/',
         packages = packages,
         package_dir = pack_dir,
         package_data = pack_data,

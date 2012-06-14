@@ -1,4 +1,7 @@
 import os
+from distutils.dir_util import remove_tree
+
+from _utils import fromstring_split, fromstring_token
 
 time_conv_dict = {
           'as': 1e-18, 
@@ -119,3 +122,20 @@ def failure(s):
     tail = "\033[0m" if USE_COLOR else ""
     msg = head + s + tail
     return msg
+
+
+
+
+##################################
+### Path manipulation routines ###
+##################################
+
+def remove(path):
+    """Removes a path, or recursively a directory, or does nothing
+    if path is neither a file nor a directory."""
+    if os.path.isfile(path):
+        os.remove(path)
+    elif os.path.isdir(path):
+        remove_tree(path, verbose=False)
+    else:
+        pass

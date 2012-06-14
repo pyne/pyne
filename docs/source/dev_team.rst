@@ -8,6 +8,7 @@ The Python for Nuclear Engineering Team includes:
 * `Anthony Scopatz`_
 * `Seth Johnson`_
 * `Paul Romano`_
+* Paul Wilson
 * Nick Touran
 * Katy Huff
 * Josh Peterson
