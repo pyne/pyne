@@ -160,6 +160,8 @@ class SurfSrc(_BinaryReader):
         return trackData
 
     def compare(self,other):
+        """ """
+
         if other.kod != self.kod:
             print "kod does not match"
             return False
@@ -207,14 +209,15 @@ class SurfSrc(_BinaryReader):
         return True
 
     def read_header(self):
+        """Read in the header block data
+
+        This block comprises 4 fortran records which we refer to as:
+        header, table1, table2, summary
         """
-        Reads in the header blocks, of which there are four:
-        -header, -table1, -table2, -summary
-        """
-        # read header block
+        # read header record
         header = self.get_fortran_record()
 
-        # interpret header block
+        # interpret header 
         self.kod    = header.get_string(8)[0]  # code identifier
         self.ver    = header.get_string(5)[0]  # code version identifier
         self.loddat = header.get_string(8)[0]  # code version date
@@ -223,7 +226,7 @@ class SurfSrc(_BinaryReader):
         self.aid    = header.get_string(80)[0] # title card of initial run
         self.knod   = header.get_int()[0]      # dump number
 
-        # read various counts and sizes
+        # read table 1 record; various counts and sizes
         tablelengths = self.get_fortran_record()
 
         # interpret table lengths
@@ -236,7 +239,7 @@ class SurfSrc(_BinaryReader):
         self.niss = tablelengths.get_long()[0]  # number of histories written to surface source
 
         if self.np1 < 0:
-            # read more size info
+            # read table 2 record; more size info
             tablelengths = self.get_fortran_record()
 
             self.niwr  = tablelengths.get_int()[0]  # number of cells in surface source card
@@ -245,15 +248,19 @@ class SurfSrc(_BinaryReader):
             self.table2extra=[]
             while tablelengths.numBytes > tablelengths.pos:
                 self.table2extra += tablelengths.get_int()
+            # print "np1 is ", self.np1
         else:
-            print "np1 is ", self.np1
+            # print "np1 is ", self.np1
+            pass
         
         self.orignp1 = self.np1
+        print self.np1
         self.np1 = abs(self.np1)
 
         # get info for each surface
         self.surflist = []
         for j in range(self.njsw):
+            # read next surface info record
             self.surfaceinfo = self.get_fortran_record()
             
             surfinfo = SourceSurf()
@@ -269,17 +276,20 @@ class SurfSrc(_BinaryReader):
 
             self.surflist.append(surfinfo)                  
 
-
+        # We read any extra records as determined by njsw+niwr...
+        #  No known case of their actual utility is known currently
         for j in range(self.njsw,self.njsw+self.niwr):
             self.get_fortran_record()
-            print j
+            print "Extra info in header not handled:", j
 
-        summaryInfo = self.get_fortran_record()            # summary table
+        # read summary table record
+        summaryInfo = self.get_fortran_record()
         self.summaryTable = summaryInfo.get_int((2+4*self.mipts)*(self.njsw+self.niwr)+1)
         self.summaryExtra=[]
         while summaryInfo.numBytes > summaryInfo.pos:
             self.summaryExtra += summaryInfo.get_int()
         
+
     def read_tracklist(self):
         """
         Reads in track records for individual particles.
@@ -303,8 +313,10 @@ class SurfSrc(_BinaryReader):
             trackData.w        = math.copysign(math.sqrt(1 - trackData.u*trackData.u - trackData.v*trackData.v),trackData.bitarray)
             # trackData.bitarray = abs(trackData.bitarray)
             
-            self.tracklist.append(trackData)
-            
+            self.tracklist.append(trackData)       
+        return
+
+
     def put_header(self):
         """
         Write the header part of the header
@@ -344,6 +356,27 @@ class SurfSrc(_BinaryReader):
         newrecord.put_int( self.table2extra)
         self.put_fortran_record(newrecord)
         return
+
+
+    def put_surface_info(self):
+        """
+        Write the record for each surface
+        to the surface source file
+        """
+
+        for cnt, s in enumerate(self.surflist):
+            newrecord = _FortranRecord("",0)
+            newrecord.put_int(s.id)
+            if self.kjaq == 1:
+                newrecord.put_int(s.facetId) # don't add a 'dummy facet ID'
+            # else no macrobody flag byte in the record
+
+            newrecord.put_int(s.type)
+            newrecord.put_int(s.numParams)
+            newrecord.put_double(s.surfParams)
+            
+            self.put_fortran_record(newrecord)
+        return
         
         
     def put_summary(self):
@@ -352,11 +385,14 @@ class SurfSrc(_BinaryReader):
         to the surface source file
         """
         newrecord = _FortranRecord("", 0)
-        newrecord.put_int( [self.summaryTable])
-        newrecord.put_int( [self.summaryExtra])
+        newrecord.put_int( list(self.summaryTable) )
+        newrecord.put_int( list(self.summaryExtra) )
+        #newrecord.put_int( [self.summaryTable])
+        #newrecord.put_int( [self.summaryExtra])
         self.put_fortran_record(newrecord)
         return
-    
+
+
 class Srctp(_BinaryReader):
     """This class stores source site data from a 'srctp' file written by
     MCNP. The source sites are stored in the 'fso' array in MCNP.
