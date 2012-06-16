@@ -19,7 +19,7 @@
 /*** Macros ***/
 #define length_array(a) ( sizeof ( a ) / sizeof ( *a ) )
 
-#ifdef _WIN32
+#ifdef _WIN32_MSVC
     #define isnan(x) ((x) != (x))
 #endif
 
