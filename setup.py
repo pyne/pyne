@@ -72,7 +72,7 @@ posix_hdf5_libs = ["z", "m", "hdf5", "hdf5_hl", "hdf5_cpp", "hdf5_hl_cpp",]
 nt_hdf5_libs = ["/DEFAULTLIB:szip.lib", "/DEFAULTLIB:zlib1.lib", "/DEFAULTLIB:hdf5dll.lib",
                 "/DEFAULTLIB:hdf5_hldll.lib", "/DEFAULTLIB:hdf5_cppdll.lib", "/DEFAULTLIB:hdf5_hl_cppdll.lib", ]
 nt_hdf5_extra_compile_args = ["/EHsc"]
-nt_hdf5_macros = [("_WIN32", None), ("_HDF5USEDLL_", None), ("HDF5CPP_USEDLL", None), ]
+nt_hdf5_macros = [("_WIN32_MSVC", None), ("_HDF5USEDLL_", None), ("HDF5CPP_USEDLL", None), ]
 
 
 ###############################
@@ -123,11 +123,10 @@ def win32_finalize_opts_decorator(f):
         replace(ext.libraries, "__USE_HDF5__", posix_hdf5_libs)
         replace(ext.extra_compile_args, "__USE_HDF5__", [])
         replace(ext.define_macros, "__USE_HDF5__", [])
-    
-    
+
     def nt_like_ext(ext):
         replace(ext.extra_compile_args, "__COMPILER__", ["/EHsc"])
-        replace(ext.define_macros, "__COMPILER__", [("_WIN32", None)])
+        replace(ext.define_macros, "__COMPILER__", [("_WIN32_MSVC", None)])
         replace(ext.libraries, "__USE_HDF5__", nt_hdf5_libs)
         replace(ext.extra_compile_args, "__USE_HDF5__", nt_hdf5_extra_compile_args)
         replace(ext.define_macros, "__USE_HDF5__", nt_hdf5_macros)
