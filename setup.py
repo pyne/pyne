@@ -4,7 +4,8 @@ import os
 import glob
 from copy import deepcopy
 
-from distutils.core import setup
+from distutils.core import setup, run_setup
+from distutils.dist import Distribution
 from distutils.extension import Extension
 from distutils.util import get_platform
 from distutils.file_util import copy_file, move_file
@@ -55,6 +56,25 @@ pyne_logo = """\
                                      `  
 """
 
+###########################################
+### Set compiler options for extensions ###
+###########################################
+pyt_dir = os.path.join('pyne')
+cpp_dir = os.path.join('cpp')
+dat_dir = os.path.join('data')
+
+
+# Get numpy include dir
+numpy_include = np.get_include()
+
+# HDF5 stuff
+posix_hdf5_libs = ["z", "m", "hdf5", "hdf5_hl", "hdf5_cpp", "hdf5_hl_cpp",]
+nt_hdf5_libs = ["/DEFAULTLIB:szip.lib", "/DEFAULTLIB:zlib1.lib", "/DEFAULTLIB:hdf5dll.lib",
+                "/DEFAULTLIB:hdf5_hldll.lib", "/DEFAULTLIB:hdf5_cppdll.lib", "/DEFAULTLIB:hdf5_hl_cppdll.lib", ]
+nt_hdf5_extra_compile_args = ["/EHsc"]
+nt_hdf5_macros = [("_WIN32", None), ("_HDF5USEDLL_", None), ("HDF5CPP_USEDLL", None), ]
+
+
 ###############################
 ### Platform specific setup ###
 ###############################
@@ -86,31 +106,56 @@ def darwin_setup():
     darwin_linker_paths()
     build_ext.build_extension = darwin_build_ext_decorator(build_ext.build_extension)
 
-platform_setup = {'darwin': darwin_setup}
+
+def win32_finalize_opts_decorator(f):
+    def replace(lst, val, rep):
+        if val not in lst:
+            return lst
+        ind = lst.index(val)
+        del lst[ind]
+        for r in rep[::-1]:
+            lst.insert(ind, r)
+        return lst
+
+    def posix_like_ext(ext):
+        replace(ext.extra_compile_args, "__COMPILER__", [])
+        replace(ext.define_macros, "__COMPILER__", [])
+        replace(ext.libraries, "__USE_HDF5__", posix_hdf5_libs)
+        replace(ext.extra_compile_args, "__USE_HDF5__", [])
+        replace(ext.define_macros, "__USE_HDF5__", [])
+    
+    
+    def nt_like_ext(ext):
+        replace(ext.extra_compile_args, "__COMPILER__", ["/EHsc"])
+        replace(ext.define_macros, "__COMPILER__", [("_WIN32", None)])
+        replace(ext.libraries, "__USE_HDF5__", nt_hdf5_libs)
+        replace(ext.extra_compile_args, "__USE_HDF5__", nt_hdf5_extra_compile_args)
+        replace(ext.define_macros, "__USE_HDF5__", nt_hdf5_macros)
+    
+    update_ext = {'mingw32': posix_like_ext, 
+                  'cygwin': posix_like_ext, 
+                  'msvc': nt_like_ext, 
+                 }
+    
+    def new_finalize_opts(self):
+        rtn = f(self)
+        comp = self.compiler
+        for ext in self.extensions:
+            update_ext[comp](ext)
+        return rtn
+    return new_finalize_opts
+
+
+def win32_setup():
+    build_ext.finalize_options = win32_finalize_opts_decorator(build_ext.finalize_options)
+    
+platform_setup = {'darwin': darwin_setup, 'win32': win32_setup}
 
 
 
-###########################################
-### Set compiler options for extensions ###
-###########################################
-pyt_dir = os.path.join('pyne')
-cpp_dir = os.path.join('cpp')
-dat_dir = os.path.join('data')
-
-
-# Get numpy include dir
-numpy_include = np.get_include()
-
-# HDF5 stuff
-posix_hdf5_libs = ["z", "m", "hdf5", "hdf5_hl", "hdf5_cpp", "hdf5_hl_cpp",]
-nt_hdf5_libs = ["/DEFAULTLIB:szip.lib", "/DEFAULTLIB:zlib1.lib", "/DEFAULTLIB:hdf5dll.lib",
-                "/DEFAULTLIB:hdf5_hldll.lib", "/DEFAULTLIB:hdf5_cppdll.lib", "/DEFAULTLIB:hdf5_hl_cppdll.lib", ]
-nt_hdf5_extra_compile_args = ["/EHsc"]
-nt_hdf5_macros = [("_WIN32", None), ("_HDF5USEDLL_", None), ("HDF5CPP_USEDLL", None), ]
-
-
-
-
+##########################
+### Exetension Creator ###
+##########################
 
 def cpp_ext(name, sources, libs=None, use_hdf5=False):
     """Helper function for setting up extension dictionary.
@@ -180,13 +225,13 @@ def cpp_ext(name, sources, libs=None, use_hdf5=False):
                                   "-install_name" , os.path.join(PYNE_DIR, 'lib', name.split('.')[-1] + config_vars['SO']),
                                   ]
     elif sys.platform == 'win32':
-        ext["extra_compile_args"] = ["/EHsc"]
-        ext["define_macros"] = [("_WIN32", None)]
+        ext["extra_compile_args"] = ["__COMPILER__"]
+        ext["define_macros"] = ["__COMPILER__"]
 
         if use_hdf5:
-            ext["libraries"] += nt_hdf5_libs
-            ext["extra_compile_args"] += nt_hdf5_extra_compile_args
-            ext["define_macros"] += nt_hdf5_macros
+            ext["libraries"].append("__USE_HDF5__")
+            ext["extra_compile_args"].append("__USE_HDF5__")
+            ext["define_macros"].append("__USE_HDF5__")
 
         if libs is not None:
             ext["libraries"] += libs
