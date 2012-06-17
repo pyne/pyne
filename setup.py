@@ -5,7 +5,7 @@ import glob
 from copy import deepcopy
 
 from distutils.core import setup, run_setup
-from distutils.dist import Distribution
+from distutils import sysconfig
 from distutils.extension import Extension
 from distutils.util import get_platform
 from distutils.file_util import copy_file, move_file
@@ -141,12 +141,30 @@ def win32_finalize_opts_decorator(f):
         comp = self.compiler
         for ext in self.extensions:
             update_ext[comp](ext)
+        if sysconfig.get_config_var('CC') is None:
+            if comp in ['mingw32', 'cygwin']:
+                # Hack to get compiler to be recognized
+                sysconfig._config_vars['CC'] = 'gcc'
         return rtn
     return new_finalize_opts
 
 
+def win32_build_ext_decorator(f):
+    def new_build_ext(self, ext):
+        dll_name = ext.name.split('.')[-1]
+        if dll_name.startswith('lib'):
+            def_file = os.path.join('build', 'temp.{0}-{1}'.format(get_platform(), 
+                                        get_python_version()), dll_name + '.def')
+            print def_file
+            import pdb; pdb.set_trace()
+        rtn = f(self, ext)
+        return rtn
+    return new_build_ext
+
+
 def win32_setup():
     build_ext.finalize_options = win32_finalize_opts_decorator(build_ext.finalize_options)
+    build_ext.build_extension = win32_build_ext_decorator(build_ext.build_extension)
     
 platform_setup = {'darwin': darwin_setup, 'win32': win32_setup}
 
@@ -297,7 +315,7 @@ pack_data = {'pyne': ['includes/*.h', 'includes/pyne/*.pxd'],
              'pyne.dbgen': ['*.html'],
             }
 
-ext_modules=[Extension(**ext) for ext in exts] 
+ext_modules=[Extension(**ext) for ext in exts][:1] 
 
 # Compiler directives
 compiler_directives = {'embedsignature': False}
