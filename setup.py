@@ -329,7 +329,7 @@ pack_data = {'pyne': ['includes/*.h', 'includes/pyne/*.pxd'],
              'pyne.dbgen': ['*.html'],
             }
 
-ext_modules=[Extension(**ext) for ext in exts][:1] 
+ext_modules=[Extension(**ext) for ext in exts]
 
 # Compiler directives
 compiler_directives = {'embedsignature': False}
