@@ -152,19 +152,33 @@ def win32_finalize_opts_decorator(f):
 def win32_build_ext_decorator(f):
     def new_build_ext(self, ext):
         dll_name = ext.name.split('.')[-1]
-        if dll_name.startswith('lib'):
-            def_file = os.path.join('build', 'temp.{0}-{1}'.format(get_platform(), 
-                                        get_python_version()), dll_name + '.def')
-            print def_file
-            import pdb; pdb.set_trace()
+        islib = dll_name.startswith('lib')
+        config_vars = get_config_vars()
+        if islib:
+            config_vars['SO'] = '.dll'
         rtn = f(self, ext)
+        if islib:
+            config_vars['SO'] = '.pyd'
         return rtn
     return new_build_ext
+
+
+def win32_get_exp_sym_decorator(f):
+    def new_get_exp_sym(self, ext):
+        rtn = f(self, ext)
+        dll_name = ext.name.split('.')[-1]
+        islib = dll_name.startswith('lib')
+        initfunc_name = 'init' + dll_name 
+        if islib and initfunc_name in rtn:
+            rtn.remove(initfunc_name)
+        return rtn
+    return new_get_exp_sym
 
 
 def win32_setup():
     build_ext.finalize_options = win32_finalize_opts_decorator(build_ext.finalize_options)
     build_ext.build_extension = win32_build_ext_decorator(build_ext.build_extension)
+    build_ext.get_export_symbols = win32_get_exp_sym_decorator(build_ext.get_export_symbols)
     
 platform_setup = {'darwin': darwin_setup, 'win32': win32_setup}
 
