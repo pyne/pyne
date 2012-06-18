@@ -78,11 +78,13 @@ def parse_decay(build_dir=""):
 
     ln2 = np.log(2.0)
     decay_data = [(nucname.name(fn), fn, lvl, nucname.name(tn), tn, hl, ln2/hl, br) for fn, lvl, tn, hl, br in decay_data]
+    decay_data = set(decay_data)
+    decay_data = sorted(decay_data, key=lambda x: (x[1], x[4]))
 
     decay_array = np.array(decay_data, dtype=atomic_decay_dtype)
-    da, mask = np.unique(decay_array, return_index=True)
-    mask.sort()
-    decay_array = decay_array[mask]
+    #da, mask = np.unique(decay_array, return_index=True)
+    #mask.sort()
+    #decay_array = decay_array[mask]
     return decay_array
     
     
