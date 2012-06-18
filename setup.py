@@ -298,6 +298,7 @@ exts.append(cpp_ext("pyne.stlconverters", ['stlconverters.pyx']))
 # pyne_config
 exts.append(cpp_ext("pyne.pyne_config", ['pyne_config.pyx'], ['pyne']))
 
+
 # _utils
 exts.append(cpp_ext("pyne._utils", ['_utils.pyx']))
 

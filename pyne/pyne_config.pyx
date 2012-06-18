@@ -72,4 +72,10 @@ cdef class PyneConf:
 # Make a singleton of the pyne config object
 pyne_conf = PyneConf()
 
+# hacks for not communicating environment (windows issue)
+if pyne_conf.PYNE_DATA == "<NOT_FOUND>":
+    pyne_conf.PYNE_DATA = os.environ['PYNE_DATA']
+if pyne_conf.NUC_DATA_PATH == "<NOT_FOUND>":
+    pyne_conf.NUC_DATA_PATH = os.environ['NUC_DATA_PATH']
+
 
