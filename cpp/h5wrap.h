@@ -151,79 +151,72 @@ namespace h5wrap
 
   // Conversion functions
   template <typename T>
-  std::set<T> h5_array_to_cpp_set(H5::H5File * h5_file, std::string data_path, H5::DataType dt = H5::PredType::NATIVE_DOUBLE)
+  std::set<T> h5_array_to_cpp_set(hid_t h5file, std::string data_path, hid_t dtype=H5T_NATIVE_DOUBLE)
   {
-    // Init
     std::set<T> cpp_set = std::set<T>();
     hsize_t arr_len[1];
-
-    H5::DataSet h5_arr = (*h5_file).openDataSet(data_path);
+    hid_t dset = H5Dopen(h5file, data_path.c_str());
+    herr_t status;
 
     // Initilize to dataspace, to find the indices we are looping over
-    H5::DataSpace arr_space = h5_arr.getSpace();
-    int arr_dim = arr_space.getSimpleExtentDims(arr_len, NULL);
-
-    // Allocate memory buffer    
-    T * mem_arr = new T [arr_len[0]];
+    hid_t arr_space = H5Dget_space(dset);
+    int arr_dim = H5Sget_simple_extent_dims(arr_space, arr_len, NULL);
 
     // Read in data from file to memory
-    h5_arr.read(mem_arr, dt);
+    T * mem_arr = new T [arr_len[0]];
+    status = H5Dread(dset, dtype, H5S_ALL, H5S_ALL, H5P_DEFAULT, mem_arr);
 
     // Load new values into the set
     cpp_set.insert(&mem_arr[0], &mem_arr[arr_len[0]]);
 
-    h5_arr.close();
+    status = H5Dclose(dset);
     return cpp_set;
   };
 
 
 
   template <typename T>
-  std::vector<T> h5_array_to_cpp_vector_1d(H5::H5File * h5_file, std::string data_path, H5::DataType dt = H5::PredType::NATIVE_DOUBLE)
+  std::vector<T> h5_array_to_cpp_vector_1d(hid_t h5file, std::string data_path, 
+                                           hid_t dtype=H5T_NATIVE_DOUBLE)
   {
-    // Init
+    std::vector<T> cpp_vec;
     hsize_t arr_dims [1];
-    H5::DataSet h5_arr = (*h5_file).openDataSet(data_path);
+    hid_t dset = H5Dopen(h5file, data_path.c_str());
+    herr_t status;
 
     // Initilize to dataspace, to find the indices we are looping over
-    H5::DataSpace arr_space = h5_arr.getSpace();
-    int arr_ndims = arr_space.getSimpleExtentDims(arr_dims, NULL);
-
-    // Allocate memory buffer    
-    T mem_arr [arr_dims[0]];
+    hid_t arr_space = H5Dget_space(dset);
+    int arr_ndim = H5Sget_simple_extent_dims(arr_space, arr_dims, NULL);
 
     // Read in data from file to memory
-    h5_arr.read(mem_arr, dt);
-
-    // Initialize vector 
-    std::vector<T> cpp_vec;
+    T mem_arr [arr_dims[0]];
+    status = H5Dread(dset, dtype, H5S_ALL, H5S_ALL, H5P_DEFAULT, mem_arr);
 
     // Load new values into the vector
     cpp_vec.assign(mem_arr, mem_arr+arr_dims[0]);
 
-    h5_arr.close();
+    status = H5Dclose(dset);
     return cpp_vec;
   };
 
 
   template <typename T>
-  std::vector< std::vector<T> > h5_array_to_cpp_vector_2d(H5::H5File * h5_file, std::string data_path, H5::DataType dt = H5::PredType::NATIVE_DOUBLE)
+  std::vector< std::vector<T> > h5_array_to_cpp_vector_2d(H5::H5File * h5file, std::string data_path, H5::DataType dt = H5::PredType::NATIVE_DOUBLE)
   {
     // Init
     hsize_t arr_dims [2];
-    H5::DataSet h5_arr = (*h5_file).openDataSet(data_path);
+    hid_t dset = H5Dopen(h5file, data_path.c_str());
+    herr_t status;
 
     // Initilize to dataspace, to find the indices we are looping over
-    H5::DataSpace arr_space = h5_arr.getSpace();
-    int arr_ndims = arr_space.getSimpleExtentDims(arr_dims, NULL);
-
-    // Allocate memory buffer    
-    T mem_arr [arr_dims[0] * arr_dims[1]];
+    hid_t arr_space = H5Dget_space(dset);
+    int arr_ndim = H5Sget_simple_extent_dims(arr_space, arr_dims, NULL);
 
     // Read in data from file to memory
     // Have to read in as 1D array to get HDF5 and new keyword
     // to play nice with each other
-    h5_arr.read(mem_arr, dt);
+    T mem_arr [arr_dims[0] * arr_dims[1]];
+    status = H5Dread(dset, dtype, H5S_ALL, H5S_ALL, H5P_DEFAULT, mem_arr);
 
     // Initialize vector of vectors
     std::vector< std::vector<T> > cpp_vec (arr_dims[0], std::vector<T>(arr_dims[1]));
@@ -234,29 +227,28 @@ namespace h5wrap
         cpp_vec[i].assign(mem_arr+(i*arr_dims[1]), mem_arr+((i+1)*arr_dims[1]));
     };
 
-    h5_arr.close();
+    status = H5Dclose(dset);
     return cpp_vec;
   };
 
 
   template <typename T>
-  std::vector< std::vector< std::vector<T> > > h5_array_to_cpp_vector_3d(H5::H5File * h5_file, std::string data_path, H5::DataType dt = H5::PredType::NATIVE_DOUBLE)
+  std::vector< std::vector< std::vector<T> > > h5_array_to_cpp_vector_3d(H5::H5File * h5file, std::string data_path, H5::DataType dt = H5::PredType::NATIVE_DOUBLE)
   {
     // Init
     hsize_t arr_dims [3];
-    H5::DataSet h5_arr = (*h5_file).openDataSet(data_path);
+    hid_t dset = H5Dopen(h5file, data_path.c_str());
+    herr_t status;
 
     // Initilize to dataspace, to find the indices we are looping over
-    H5::DataSpace arr_space = h5_arr.getSpace();
-    int arr_ndims = arr_space.getSimpleExtentDims(arr_dims, NULL);
-
-    // Allocate memory buffer    
-    T mem_arr [arr_dims[0] * arr_dims[1] * arr_dims[2]];
+    hid_t arr_space = H5Dget_space(dset);
+    int arr_ndim = H5Sget_simple_extent_dims(arr_space, arr_dims, NULL);
 
     // Read in data from file to memory
     // Have to read in as 1D array to get HDF5 and new keyword
     // to play nice with each other
-    h5_arr.read(mem_arr, dt);
+    T mem_arr [arr_dims[0] * arr_dims[1] * arr_dims[2]];
+    status = H5Dread(dset, dtype, H5S_ALL, H5S_ALL, H5P_DEFAULT, mem_arr);
 
     // Initialize vector of vectors of vectors
     std::vector< std::vector< std::vector<T> > > cpp_vec (arr_dims[0], std::vector< std::vector<T> >(arr_dims[1], std::vector<T>(arr_dims[2])));
@@ -270,9 +262,9 @@ namespace h5wrap
         };
     };
 
-    h5_arr.close();
+    status = H5Dclose(dset);
     return cpp_vec;
-  }
+  };
 
 
 
@@ -283,10 +275,10 @@ namespace h5wrap
   public:
     HomogenousTypeTable(){};
     ~HomogenousTypeTable(){};
-    HomogenousTypeTable(H5::H5File * h5_file, std::string data_path, H5::DataType dt = H5::PredType::NATIVE_DOUBLE)
+    HomogenousTypeTable(H5::H5File * h5file, std::string data_path, H5::DataType dt = H5::PredType::NATIVE_DOUBLE)
     {
       // Init 
-      H5::DataSet h5_set = (*h5_file).openDataSet(data_path);
+      H5::DataSet h5_set = (*h5file).openDataSet(data_path);
       H5::DataSpace h5_space = h5_set.getSpace();
       H5::CompType h5_type = H5::CompType(h5_set);
 
