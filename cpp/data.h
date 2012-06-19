@@ -10,7 +10,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "H5Cpp.h"
 #include "h5wrap.h"
 
 #include "extra_types.h"

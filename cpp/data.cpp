@@ -11,17 +11,18 @@ std::map<int, double> pyne::atomic_mass_map = std::map<int, double>();
 void pyne::_load_atomic_mass_map()
 {
   // Loads the important parts of atomic_wight table into atomic_mass_map
+  herr_t status;
 
   //Check to see if the file is in HDF5 format.
   if (!pyne::file_exists(pyne::NUC_DATA_PATH))
     throw pyne::FileNotFound(pyne::NUC_DATA_PATH);
 
-  bool isH5 = H5::H5File::isHdf5(pyne::NUC_DATA_PATH);
-  if (!isH5)
+  bool ish5 = H5Fis_hdf5(pyne::NUC_DATA_PATH.c_str());
+  if (!ish5)
     throw h5wrap::FileNotHDF5(pyne::NUC_DATA_PATH);
 
   // Get the HDF5 compound type (table) description
-  H5::CompType atomic_weight_desc(sizeof(atomic_weight_struct));
+  hid_t atomic_weight_desc = H5Tcreate(H5T_COMPOUND, sizeof(atomic_weight_struct));
   atomic_weight_desc.insertMember("nuc_name", HOFFSET(atomic_weight_struct, nuc_name), H5::StrType(0, 6));
   atomic_weight_desc.insertMember("nuc_zz",   HOFFSET(atomic_weight_struct, nuc_zz),   H5::PredType::NATIVE_INT);
   atomic_weight_desc.insertMember("mass",     HOFFSET(atomic_weight_struct, mass),     H5::PredType::NATIVE_DOUBLE);
