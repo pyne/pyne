@@ -201,9 +201,9 @@ namespace h5wrap
 
 
   template <typename T>
-  std::vector< std::vector<T> > h5_array_to_cpp_vector_2d(H5::H5File * h5file, std::string data_path, H5::DataType dt = H5::PredType::NATIVE_DOUBLE)
+  std::vector< std::vector<T> > h5_array_to_cpp_vector_2d(hid_t h5file, std::string data_path, 
+                                                          hid_t dtype=H5T_NATIVE_DOUBLE)
   {
-    // Init
     hsize_t arr_dims [2];
     hid_t dset = H5Dopen(h5file, data_path.c_str());
     herr_t status;
@@ -218,10 +218,8 @@ namespace h5wrap
     T mem_arr [arr_dims[0] * arr_dims[1]];
     status = H5Dread(dset, dtype, H5S_ALL, H5S_ALL, H5P_DEFAULT, mem_arr);
 
-    // Initialize vector of vectors
-    std::vector< std::vector<T> > cpp_vec (arr_dims[0], std::vector<T>(arr_dims[1]));
-
     // Load new values into the vector of vectors, using some indexing tricks
+    std::vector< std::vector<T> > cpp_vec (arr_dims[0], std::vector<T>(arr_dims[1]));
     for(int i = 0; i < arr_dims[0]; i++)
     {
         cpp_vec[i].assign(mem_arr+(i*arr_dims[1]), mem_arr+((i+1)*arr_dims[1]));
@@ -233,9 +231,10 @@ namespace h5wrap
 
 
   template <typename T>
-  std::vector< std::vector< std::vector<T> > > h5_array_to_cpp_vector_3d(H5::H5File * h5file, std::string data_path, H5::DataType dt = H5::PredType::NATIVE_DOUBLE)
+  std::vector< std::vector< std::vector<T> > > h5_array_to_cpp_vector_3d(hid_t h5file, 
+                                                  std::string data_path, 
+                                                  hid_t dtype=H5T_NATIVE_DOUBLE)
   {
-    // Init
     hsize_t arr_dims [3];
     hid_t dset = H5Dopen(h5file, data_path.c_str());
     herr_t status;
@@ -250,10 +249,8 @@ namespace h5wrap
     T mem_arr [arr_dims[0] * arr_dims[1] * arr_dims[2]];
     status = H5Dread(dset, dtype, H5S_ALL, H5S_ALL, H5P_DEFAULT, mem_arr);
 
-    // Initialize vector of vectors of vectors
-    std::vector< std::vector< std::vector<T> > > cpp_vec (arr_dims[0], std::vector< std::vector<T> >(arr_dims[1], std::vector<T>(arr_dims[2])));
-
     // Load new values into the vector of vectors of vectors, using some indexing tricks
+    std::vector< std::vector< std::vector<T> > > cpp_vec (arr_dims[0], std::vector< std::vector<T> >(arr_dims[1], std::vector<T>(arr_dims[2])));
     for(int i = 0; i < arr_dims[0]; i++)
     {
         for(int j = 0; j < arr_dims[1]; j++)
@@ -275,44 +272,40 @@ namespace h5wrap
   public:
     HomogenousTypeTable(){};
     ~HomogenousTypeTable(){};
-    HomogenousTypeTable(H5::H5File * h5file, std::string data_path, H5::DataType dt = H5::PredType::NATIVE_DOUBLE)
+    HomogenousTypeTable(hid_t h5file, std::string data_path, hid_t dtype=H5T_NATIVE_DOUBLE)
     {
-      // Init 
-      H5::DataSet h5_set = (*h5file).openDataSet(data_path);
-      H5::DataSpace h5_space = h5_set.getSpace();
-      H5::CompType h5_type = H5::CompType(h5_set);
+      herr_t status;
+      hid_t h5_set = H5Dopen(h5file, data_path.c_str());
+      hid_t h5_space = H5Dget_space(dset);
+      hid_t h5_type = H5Dget_type(h5_set);
 
       // set path
       path = data_path;
 
       // set shape
-      shape[0] = h5_space.getSimpleExtentNpoints();
-      shape[1] = h5_type.getNmembers();
+      shape[0] = H5Sget_simple_extent_npoints(h5_space);
+      shape[1] = H5Tget_nmembers(h5_type);
 
       // set cols
       std::string * cols_buf = new std::string [shape[1]];
       for(int n = 0; n < shape[1]; n++)
-      {
-        cols_buf[n] = h5_type.getMemberName(n);
-      };
+        cols_buf[n] = H5Tget_member_name(h5_type, n);
       cols.assign(cols_buf, cols_buf+shape[1]);
 
       // set data
-      H5::CompType col_type;
+      hid_t col_type;
       T * col_buf;
 
       data.clear();
       for(int n = 0; n < shape[1]; n++)
       {
         // Make a compound data type of just this column
-        col_type = H5::CompType(sizeof(T));
-        col_type.insertMember(cols[n], 0, dt);
-
-        // allocate space to read in this column
-        col_buf = new T [shape[0]];
+        col_type = H5Tcreate(H5T_COMPOUND, sizeof(T));
+        status = H5Tinsert(col_type, cols[n].c_str(), n*sizeof(T), dtype);
 
         // Read in this column
-        h5_set.read(col_buf, col_type);
+        col_buf = new T [shape[0]];
+        status = H5Dread(h5_set, col_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, col_buf);
 
         // save this column as a vector in out data map
         data[cols[n]] = std::vector<T>(col_buf, col_buf+shape[0]);
@@ -344,23 +337,22 @@ namespace h5wrap
 
       return row;
     };
-
-  // End HomogenousTypeTable
   };
 
 
   /********************************/
   /*** Support for complex data ***/
   /********************************/
-  H5::CompType _get_PYTABLES_COMPLEX128()
+  hid_t _get_PYTABLES_COMPLEX128()
   {
-    H5::CompType ct(sizeof(extra_types::complex_t));
-    ct.insertMember("r", HOFFSET(extra_types::complex_t, re), H5::PredType::NATIVE_DOUBLE);
-    ct.insertMember("i", HOFFSET(extra_types::complex_t, im), H5::PredType::NATIVE_DOUBLE);
+    herr_t status; 
+    hid_t ct = H5Tcreate(H5T_COMPOUND, sizeof(extra_types::complex_t));
+    status = H5Tinsert(ct, "r", HOFFSET(extra_types::complex_t, re), H5T_NATIVE_DOUBLE);
+    status = H5Tinsert(ct, "i", HOFFSET(extra_types::complex_t, im), H5T_NATIVE_DOUBLE);
     return ct;
   };
 
-  H5::CompType PYTABLES_COMPLEX128 = _get_PYTABLES_COMPLEX128();
+  hid_t PYTABLES_COMPLEX128 = _get_PYTABLES_COMPLEX128();
 
 
   /*** Helper functions ***/
