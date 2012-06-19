@@ -19,6 +19,32 @@ class TestSurfSrc(unittest.TestCase):
     def tearDown(self):
         pass
 
+    def test_read_header_block(self):
+        """
+        """
+        ssr = mcnp.SurfSrc(ssrname, 'rb')
+        ssr.read_header()
+
+        # header record values
+        self.assertEqual(ssr.kod   , "mcnp    ")
+        self.assertEqual(ssr.ver   , "5    ")
+        self.assertEqual(ssr.loddat, "01232009")
+        self.assertEqual(ssr.idtm  , " 10/31/11 13:52:39 ")
+        self.assertEqual(ssr.probid, " 10/31/11 13:52:35 ")
+        self.assertEqual(ssr.aid   , "c Test deck with H20 cube, point n source, SSW of top surface interactions      ")
+        self.assertEqual(ssr.knod  , 2)
+        # table 1 record values
+        self.assertEqual(ssr.np1   , 1000)
+        self.assertEqual(ssr.nrss  , 173)
+        self.assertEqual(ssr.ncrd  , 11)
+        self.assertEqual(ssr.njsw  , 1)
+        self.assertEqual(ssr.niss  , 173)
+        # table 2 record values
+        self.assertEqual(ssr.niwr  , 0)
+        self.assertEqual(ssr.mipts , 3)
+        self.assertEqual(ssr.kjaq  , 0)
+        
+
     def test_put_header_block(self):
         """We copy the header block, write to new file, re-read, and compare.
         This tests that information is preserved correctly when written.
