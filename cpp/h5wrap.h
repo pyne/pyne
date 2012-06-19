@@ -13,7 +13,7 @@
 #include <stdlib.h>
 #include <exception>
 
-#include "H5Cpp.h"
+#include "hdf5.h"
 
 #include "extra_types.h"
 #include "pyne.h"
@@ -112,34 +112,38 @@ namespace h5wrap
 
   // Read-in Functions
   template <typename T>
-  T get_array_index(H5::DataSet * ds, int n, H5::DataType dt = H5::PredType::NATIVE_DOUBLE)
+  T get_array_index(hid_t dset, int n, hid_t dtype=H5T_NATIVE_DOUBLE)
   {
-    H5::DataSpace array_space = (*ds).getSpace();
+    herr_t status;
 
     hsize_t count  [1] = {1};
     hsize_t offset [1] = {n};
 
+    hid_t dspace = H5Dget_space(dset);
+    hsize_t npoints = H5Sget_simple_extent_npoints(dspace);
+
     //Handle negative indices
     if (n < 0)
-        offset[0] = offset[0] + array_space.getSimpleExtentNpoints();
+        offset[0] = offset[0] + npoints;
 
     //If still out of range we have a problem
-    if (offset[0] < 0 || array_space.getSimpleExtentNpoints() <= offset[0])
+    if (offset[0] < 0 || npoints <= offset[0])
         throw HDF5BoundsError();
 
-    array_space.selectHyperslab(H5S_SELECT_SET, count, offset);
+    status = H5Sselect_hyperslab(dspace, H5S_SELECT_SET, offset, NULL, count, NULL);
 
     //Set memmory hyperspace
     hsize_t dimsm[1] = {1};
-    H5::DataSpace memspace(1, dimsm);
+    hid_t memspace = H5Screate_simple(1, dimsm, NULL);
 
     hsize_t count_out  [1] = {1};
     hsize_t offset_out [1] = {0};
 
-    memspace.selectHyperslab(H5S_SELECT_SET, count_out, offset_out);
+    status = H5Sselect_hyperslab(memspace, H5S_SELECT_SET, offset_out, NULL, 
+                                 count_out, NULL);
 
     T data_out [1];
-    (*ds).read(data_out, dt, memspace, array_space);
+    status = H5Dread(dset, dtype, memspace, dspace, H5P_DEFAULT, data_out);
 
     return data_out[0];
   };
@@ -368,28 +372,18 @@ namespace h5wrap
 
 
   /*** Helper functions ***/
-  bool path_exists(H5::H5File * h5_file, std::string path)
+  bool path_exists(hid_t h5file, std::string path)
   {
-    try 
+    bool rtn;
+    hid_t ds = H5Dopen(h5file, path.c_str());
+    if (0 <= ds)
     {
-      H5::DataSet ds = (*h5_file).openDataSet(path);
-      ds.close();
-      return true;
+      rtn = true;
+      H5Dclose(ds);
     }
-    catch (H5::FileIException e) 
-    {
-      try
-      {
-        H5::Group g = (*h5_file).openGroup(path);
-        g.close();
-        return true;
-      }
-      catch (H5::Exception fgerror)
-      {
-        return false;
-      }
-      return false;
-    }
+    else 
+      rtn = false;
+    return rtn;
   };
 
 
