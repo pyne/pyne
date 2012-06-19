@@ -21,7 +21,8 @@ INFO = {
     }
 
 _local_subsititues = {'darwin': 'Library'}
-PYNE_DIR = os.path.join(os.environ['HOME'], 
+HOME = os.environ['HOME'] if os.name != 'nt' else os.environ['UserProfile']
+PYNE_DIR = os.path.join(HOME, 
                         _local_subsititues.get(sys.platform, '.local'),
                         'pyne')
 
