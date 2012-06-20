@@ -52,8 +52,9 @@ void pyne::Material::_load_comp_protocol0(hid_t db, std::string datapath, int ro
   hid_t nucset;
   int i; 
   double nucvalue;
-  char * nuckeybuf [128];
-  ssize_t nuckeylen; 
+  char nuckeybuf [128];
+  ssize_t nuckeylen;
+  std::string nuckey;
 
   // get the number of members in the material group
   H5G_info_t group_info; 
@@ -63,12 +64,14 @@ void pyne::Material::_load_comp_protocol0(hid_t db, std::string datapath, int ro
   // Iterate over datasets in the group.
   for (int matg = 0; matg < matG; matg++)
   {
-    nuckeylen = H5Lget_name_by_idx(matgroup, ".", NULL, NULL, matg, nuckeybuf, NULL, H5P_DEFAULT);
-    char * nuckey = new char[nuckeylen];
-    for (i = 0; i < nuckeylen; i++)
-      nuckey[i] = nuckeybuf[i];
-    nucset = H5Dopen(matgroup, nuckey);
+    nuckeylen = 1 + H5Lget_name_by_idx(matgroup, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, matg, 
+                                        NULL, 0, H5P_DEFAULT);
+    char * nkey = new char[nuckeylen];
+    nuckeylen = H5Lget_name_by_idx(matgroup, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, matg, 
+                                    nkey, nuckeylen, H5P_DEFAULT);
+    nucset = H5Dopen(matgroup, nkey);
     nucvalue = h5wrap::get_array_index<double>(nucset, row);
+    nuckey = nkey;
 
     if (nuckey == "Mass" || nuckey == "MASS" || nuckey == "mass")
       mass = nucvalue;
@@ -76,7 +79,7 @@ void pyne::Material::_load_comp_protocol0(hid_t db, std::string datapath, int ro
       comp[pyne::nucname::zzaaam(nuckey)] = nucvalue;
 
     status = H5Dclose(nucset);
-    delete[] nuckey;
+    delete[] nkey;
   };
 
   // Set meta data
@@ -98,7 +101,7 @@ void pyne::Material::_load_comp_protocol1(hid_t db, std::string datapath, int ro
     // Handle negative row indices
     hid_t data_space = H5Dget_space(data_set);
     hsize_t data_dims[1];
-    int data_rank = H5Sget_simple_extent_dims(data_space, data_dims);
+    H5Sget_simple_extent_dims(data_space, data_dims, NULL);
     data_offset[0] += data_dims[0];
   };
 
@@ -129,7 +132,7 @@ void pyne::Material::_load_comp_protocol1(hid_t db, std::string datapath, int ro
   size_t material_struct_size = sizeof(pyne::material_struct) + sizeof(double)*nuc_size;
   hid_t desc = H5Tcreate(H5T_COMPOUND, material_struct_size);
   hid_t str20 = H5Tcreate(H5T_STRING, 20);
-  hid_t comp_values_array_type = H5Tarray_create(H5T_NATIVE_DOUBLE, 1, nuc_dims);
+  hid_t comp_values_array_type = H5Tarray_create2(H5T_NATIVE_DOUBLE, 1, nuc_dims);
 
   // make the data table type
   status = H5Tinsert(desc, "name", HOFFSET(pyne::material_struct, name), str20);
@@ -169,7 +172,8 @@ void pyne::Material::from_hdf5(char * fchar, char * dchar, int row, int protocol
 void pyne::Material::from_hdf5(std::string filename, std::string datapath, int row, int protocol)
 {
   // Turn off annoying HDF5 errors
-  H5Eset_auto(NULL, NULL, NULL);
+  herr_t status;
+  H5Eset_auto(NULL, NULL);
 
   // Check that the file is there
   if (!pyne::file_exists(filename))
@@ -199,7 +203,7 @@ void pyne::Material::from_hdf5(std::string filename, std::string datapath, int r
     throw pyne::MaterialProtocolError();
 
   // Close the database
-  db.close();
+  status = H5Fclose(db);
 
   // Renomalize the composition, just to be safe.
   norm_comp();
@@ -223,7 +227,7 @@ void pyne::Material::write_hdf5(std::string filename, std::string datapath, std:
 {
   // Turn off annoying HDF5 errors
   herr_t status;
-  H5Eset_auto(NULL, NULL, NULL);
+  H5Eset_auto(NULL, NULL);
 
   // Create new/open datafile.
   hid_t db;
@@ -283,7 +287,7 @@ void pyne::Material::write_hdf5(std::string filename, std::string datapath, std:
   size_t material_struct_size = sizeof(pyne::material_struct) + sizeof(double)*nuc_size;
   hid_t desc = H5Tcreate(H5T_COMPOUND, material_struct_size);
   hid_t str20 = H5Tcreate(H5T_STRING, 20);
-  hid_t comp_values_array_type = H5Tarray_create(H5T_NATIVE_DOUBLE, 1, nuc_dims);
+  hid_t comp_values_array_type = H5Tarray_create2(H5T_NATIVE_DOUBLE, 1, nuc_dims);
 
   // make the data table type
   status = H5Tinsert(desc, "name", HOFFSET(pyne::material_struct, name), str20);
@@ -358,7 +362,7 @@ void pyne::Material::write_hdf5(std::string filename, std::string datapath, std:
     status = H5Pset_fill_value(data_set_params, desc, &data_fill_value);
 
     // Create the data set
-    data_set = hid_t H5Dcreate(db, datapath.c_str(), desc, data_space, data_set_params);
+    data_set = H5Dcreate(db, datapath.c_str(), desc, data_space, data_set_params);
     status = H5Dset_extent(data_set, data_dims);
 
     // Add attribute pointing to nuc path
