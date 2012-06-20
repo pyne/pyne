@@ -69,11 +69,11 @@ dat_dir = os.path.join('data')
 numpy_include = np.get_include()
 
 # HDF5 stuff
-posix_hdf5_libs = ["z", "m", "hdf5", "hdf5_hl", "hdf5_cpp", "hdf5_hl_cpp",]
+posix_hdf5_libs = ["z", "m", "hdf5", "hdf5_hl",]
 nt_hdf5_libs = ["/DEFAULTLIB:szip.lib", "/DEFAULTLIB:zlib1.lib", "/DEFAULTLIB:hdf5dll.lib",
-                "/DEFAULTLIB:hdf5_hldll.lib", "/DEFAULTLIB:hdf5_cppdll.lib", "/DEFAULTLIB:hdf5_hl_cppdll.lib", ]
+                "/DEFAULTLIB:hdf5_hldll.lib",]
 nt_hdf5_extra_compile_args = ["/EHsc"]
-nt_hdf5_macros = [("_WIN32_MSVC", None), ("_HDF5USEDLL_", None), ("HDF5CPP_USEDLL", None), ]
+nt_hdf5_macros = [("_WIN32_MSVC", None), ("_HDF5USEDLL_", None),]
 
 
 ###############################
