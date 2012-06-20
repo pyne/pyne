@@ -22,27 +22,28 @@ void pyne::_load_atomic_mass_map()
     throw h5wrap::FileNotHDF5(pyne::NUC_DATA_PATH);
 
   // Get the HDF5 compound type (table) description
-  hid_t atomic_weight_desc = H5Tcreate(H5T_COMPOUND, sizeof(atomic_weight_struct));
-  atomic_weight_desc.insertMember("nuc_name", HOFFSET(atomic_weight_struct, nuc_name), H5::StrType(0, 6));
-  atomic_weight_desc.insertMember("nuc_zz",   HOFFSET(atomic_weight_struct, nuc_zz),   H5::PredType::NATIVE_INT);
-  atomic_weight_desc.insertMember("mass",     HOFFSET(atomic_weight_struct, mass),     H5::PredType::NATIVE_DOUBLE);
-  atomic_weight_desc.insertMember("error",    HOFFSET(atomic_weight_struct, error),    H5::PredType::NATIVE_DOUBLE);
-  atomic_weight_desc.insertMember("abund",    HOFFSET(atomic_weight_struct, abund),    H5::PredType::NATIVE_DOUBLE);
+  hid_t str6 = H5Tcreate(H5T_STRING, 6)
+  hid_t desc = H5Tcreate(H5T_COMPOUND, sizeof(atomic_weight_struct));
+  status = H5Tinsert(desc, "nuc_name", HOFFSET(atomic_weight_struct, nuc_name), str6);
+  status = H5Tinsert(desc, "nuc_zz",   HOFFSET(atomic_weight_struct, nuc_zz),   H5T_NATIVE_INT);
+  status = H5Tinsert(desc, "mass",     HOFFSET(atomic_weight_struct, mass),     H5T_NATIVE_DOUBLE);
+  status = H5Tinsert(desc, "error",    HOFFSET(atomic_weight_struct, error),    H5T_NATIVE_DOUBLE);
+  status = H5Tinsert(desc, "abund",    HOFFSET(atomic_weight_struct, abund),    H5T_NATIVE_DOUBLE);
 
   // Open the HDF5 file
-  H5::H5File nuc_data_h5 (pyne::NUC_DATA_PATH.c_str(), H5F_ACC_RDONLY);
+  hid_t nuc_data_h5 = H5Fopen(pyne::NUC_DATA_PATH.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT);
 
   // Open the data set
-  H5::DataSet atomic_weight_set = nuc_data_h5.openDataSet("/atomic_weight");
-  H5::DataSpace atomic_weight_space = atomic_weight_set.getSpace();
-  int atomic_weight_length = atomic_weight_space.getSimpleExtentNpoints();
+  hid_t atomic_weight_set = H5Dopen(nuc_data_h5, "/atomic_weight");
+  hid_t atomic_weight_space = H5Dget_space(atomic_weight_set);
+  int atomic_weight_length = H5Sget_simple_extent_npoints(atomic_weight_space);
 
   // Read in the data
   atomic_weight_struct * atomic_weight_array = new atomic_weight_struct[atomic_weight_length];
-  atomic_weight_set.read(atomic_weight_array, atomic_weight_desc);
+  status = H5Dread(atomic_weight_set, desc, H5S_ALL, H5S_ALL, H5P_DEFAULT, atomic_weight_array);
 
   // close the nuc_data library, before doing anythng stupid
-  nuc_data_h5.close();
+  status = H5Fclose(nuc_data_h5);
 
   // Ok now that we have the array of stucts, put it in the map
   for(int n = 0; n < atomic_weight_length; n++)
@@ -127,40 +128,45 @@ std::map<int, double> pyne::b_map = std::map<int, double>();
 void pyne::_load_scattering_lengths()
 {
   // Loads the important parts of atomic_wight table into atomic_mass_map
+  herr_t status;
 
   //Check to see if the file is in HDF5 format.
   if (!pyne::file_exists(pyne::NUC_DATA_PATH))
     throw pyne::FileNotFound(pyne::NUC_DATA_PATH);
 
-  bool isH5 = H5::H5File::isHdf5(pyne::NUC_DATA_PATH);
-  if (!isH5)
+  bool ish5 = H5Fis_hdf5(pyne::NUC_DATA_PATH.c_str());
+  if (!ish5)
     throw h5wrap::FileNotHDF5(pyne::NUC_DATA_PATH);
 
-
   // Get the HDF5 compound type (table) description
-  H5::CompType scat_len_desc(sizeof(scattering_lengths_struct));
-  scat_len_desc.insertMember("nuc_name", HOFFSET(scattering_lengths_struct, nuc_name), H5::StrType(0, 6));
-  scat_len_desc.insertMember("nuc_zz",   HOFFSET(scattering_lengths_struct, nuc_zz),   H5::PredType::NATIVE_INT);
-  scat_len_desc.insertMember("b_coherent", HOFFSET(scattering_lengths_struct, b_coherent), h5wrap::PYTABLES_COMPLEX128);
-  scat_len_desc.insertMember("b_incoherent", HOFFSET(scattering_lengths_struct, b_incoherent), h5wrap::PYTABLES_COMPLEX128);
-  scat_len_desc.insertMember("xs_coherent", HOFFSET(scattering_lengths_struct, xs_coherent), H5::PredType::NATIVE_DOUBLE);
-  scat_len_desc.insertMember("xs_incoherent", HOFFSET(scattering_lengths_struct, xs_incoherent), H5::PredType::NATIVE_DOUBLE);
-  scat_len_desc.insertMember("xs", HOFFSET(scattering_lengths_struct, xs), H5::PredType::NATIVE_DOUBLE);
+  hid_t str6 = H5Tcreate(H5T_STRING, 6)
+  hid_t desc = H5Tcreate(H5T_COMPOUND, sizeof(scattering_lengths_struct));
+  status = H5Tinsert(desc, "nuc_name", HOFFSET(scattering_lengths_struct, nuc_name), str6);
+  status = H5Tinsert(desc, "nuc_zz", HOFFSET(scattering_lengths_struct, nuc_zz), H5T_NATIVE_INT);
+  status = H5Tinsert(desc, "b_coherent", HOFFSET(scattering_lengths_struct, b_coherent), 
+                      h5wrap::PYTABLES_COMPLEX128);
+  status = H5Tinsert(desc, "b_incoherent", HOFFSET(scattering_lengths_struct, b_incoherent), 
+                      h5wrap::PYTABLES_COMPLEX128);
+  status = H5Tinsert(desc, "xs_coherent", HOFFSET(scattering_lengths_struct, xs_coherent), 
+                      H5T_NATIVE_DOUBLE);
+  status = H5Tinsert(desc, "xs_incoherent", HOFFSET(scattering_lengths_struct, xs_incoherent), 
+                      H5T_NATIVE_DOUBLE);
+  status = H5Tinsert(desc, "xs", HOFFSET(scattering_lengths_struct, xs), H5T_NATIVE_DOUBLE);
 
   // Open the HDF5 file
-  H5::H5File nuc_data_h5 (pyne::NUC_DATA_PATH.c_str(), H5F_ACC_RDONLY);
+  hid_t nuc_data_h5 = H5Fopen(pyne::NUC_DATA_PATH.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT);
 
   // Open the data set
-  H5::DataSet scat_len_set = nuc_data_h5.openDataSet("/neutron/scattering_lengths");
-  H5::DataSpace scat_len_space = scat_len_set.getSpace();
-  int scat_len_length = scat_len_space.getSimpleExtentNpoints();
+  hid_t scat_len_set = H5Dopen(nuc_data_h5, "/neutron/scattering_lengths");
+  hid_t scat_len_space = H5Dget_space(scat_len_set);
+  int scat_len_length = H5Sget_simple_extent_npoints(scat_len_space);
 
   // Read in the data
   scattering_lengths_struct * scat_len_array = new scattering_lengths_struct[scat_len_length];
-  scat_len_set.read(scat_len_array, scat_len_desc);
+  status = H5Dread(scat_len_set, desc, H5S_ALL, H5S_ALL, H5P_DEFAULT, scat_len_array);
 
   // close the nuc_data library, before doing anythng stupid
-  nuc_data_h5.close();
+  status = H5Fclose(nuc_data_h5);
 
   // Ok now that we have the array of stucts, put it in the maps
   for(int n = 0; n < scat_len_length; n++)
@@ -394,36 +400,40 @@ void pyne::_load_atomic_decay()
   if (!pyne::file_exists(pyne::NUC_DATA_PATH))
     throw pyne::FileNotFound(pyne::NUC_DATA_PATH);
 
-  bool isH5 = H5::H5File::isHdf5(pyne::NUC_DATA_PATH);
-  if (!isH5)
+  bool ish5 = H5Fis_hdf5(pyne::NUC_DATA_PATH.c_str());
+  if (!ish5)
     throw h5wrap::FileNotHDF5(pyne::NUC_DATA_PATH);
 
-
   // Get the HDF5 compound type (table) description
-  H5::CompType atom_dec_desc(sizeof(atomic_decay_struct));
-  atom_dec_desc.insertMember("from_nuc_name", HOFFSET(atomic_decay_struct, from_nuc_name), H5::StrType(0, 6));
-  atom_dec_desc.insertMember("from_nuc_zz",   HOFFSET(atomic_decay_struct, from_nuc_zz),   H5::PredType::NATIVE_INT);
-  atom_dec_desc.insertMember("level", HOFFSET(atomic_decay_struct, level), H5::PredType::NATIVE_DOUBLE);
-  atom_dec_desc.insertMember("to_nuc_name", HOFFSET(atomic_decay_struct, to_nuc_name), H5::StrType(0, 6));
-  atom_dec_desc.insertMember("to_nuc_zz",   HOFFSET(atomic_decay_struct, to_nuc_zz),   H5::PredType::NATIVE_INT);
-  atom_dec_desc.insertMember("half_life", HOFFSET(atomic_decay_struct, half_life), H5::PredType::NATIVE_DOUBLE);
-  atom_dec_desc.insertMember("decay_const", HOFFSET(atomic_decay_struct, decay_const), H5::PredType::NATIVE_DOUBLE);
-  atom_dec_desc.insertMember("branch_ratio", HOFFSET(atomic_decay_struct, branch_ratio), H5::PredType::NATIVE_DOUBLE);
+  hid_t str6 = H5Tcreate(H5T_STRING, 6)
+  hid_t desc = H5Tcreate(H5T_COMPOUND, sizeof(atomic_decay_struct));
+  status = H5Tinsert(desc, "from_nuc_name", HOFFSET(atomic_decay_struct, from_nuc_name), str6);
+  status = H5Tinsert(desc, "from_nuc_zz", HOFFSET(atomic_decay_struct, from_nuc_zz), 
+                      H5T_NATIVE_INT);
+  status = H5Tinsert(desc, "level", HOFFSET(atomic_decay_struct, level), H5T_NATIVE_DOUBLE);
+  status = H5Tinsert(desc, "to_nuc_name", HOFFSET(atomic_decay_struct, to_nuc_name), str6);
+  status = H5Tinsert(desc, "to_nuc_zz", HOFFSET(atomic_decay_struct, to_nuc_zz), H5T_NATIVE_INT);
+  status = H5Tinsert(desc, "half_life", HOFFSET(atomic_decay_struct, half_life), 
+                      H5T_NATIVE_DOUBLE);
+  status = H5Tinsert(desc, "decay_const", HOFFSET(atomic_decay_struct, decay_const), 
+                      H5T_NATIVE_DOUBLE);
+  status = H5Tinsert(desc, "branch_ratio", HOFFSET(atomic_decay_struct, branch_ratio), 
+                      H5T_NATIVE_DOUBLE);
 
   // Open the HDF5 file
-  H5::H5File nuc_data_h5 (pyne::NUC_DATA_PATH.c_str(), H5F_ACC_RDONLY);
+  hid_t nuc_data_h5 = H5Fopen(pyne::NUC_DATA_PATH.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT);
 
   // Open the data set
-  H5::DataSet atom_dec_set = nuc_data_h5.openDataSet("/atomic_decay");
-  H5::DataSpace atom_dec_space = atom_dec_set.getSpace();
-  int atom_dec_length = atom_dec_space.getSimpleExtentNpoints();
+  hid_t atom_dec_set = H5Dopen(nuc_data_h5, "/atomic_decay");
+  hid_t atom_dec_space = H5Dget_space(atom_dec_set);
+  int atom_dec_length = H5Sget_simple_extent_npoints(atom_dec_space);
 
   // Read in the data
   atomic_decay_struct * atom_dec_array = new atomic_decay_struct[atom_dec_length];
-  atom_dec_set.read(atom_dec_array, atom_dec_desc);
+  status = H5Dread(atom_dec_set, desc, H5S_ALL, H5S_ALL, H5P_DEFAULT, atom_dec_array);
 
   // close the nuc_data library, before doing anythng stupid
-  nuc_data_h5.close();
+  status = H5Fclose(nuc_data_h5);
 
   // Ok now that we have the array of stucts, put it in the maps
   // giving precednece to ground state values or those seen first.
