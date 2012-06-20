@@ -6,7 +6,7 @@
 
 
 // h5wrap template
-template double h5wrap::get_array_index(H5::DataSet *, int, H5::DataType);
+template double h5wrap::get_array_index(hid_t, int, hid_t);
 
 
 
@@ -45,27 +45,38 @@ void pyne::Material::norm_comp()
 
 
 
-void pyne::Material::_load_comp_protocol0(H5::H5File * db, std::string datapath, int row)
+void pyne::Material::_load_comp_protocol0(hid_t db, std::string datapath, int row)
 {
-  H5::Group matgroup = (*db).openGroup(datapath);
-  H5::DataSet nucset;
-
+  herr_t status;
+  hid_t matgroup = H5Gopen(db, datapath.c_str());
+  hid_t nucset;
+  int i; 
   double nucvalue;
-  hsize_t matG = matgroup.getNumObjs();
+  char * nuckeybuf [128];
+  ssize_t nuckeylen; 
+
+  // get the number of members in the material group
+  H5G_info_t group_info; 
+  status = H5Gget_info(matgroup, &group_info);
+  hsize_t matG = group_info.nlinks;
 
   // Iterate over datasets in the group.
   for (int matg = 0; matg < matG; matg++)
   {
-    std::string nuckey = matgroup.getObjnameByIdx(matg);
-    nucset = matgroup.openDataSet(nuckey);
-    nucvalue = h5wrap::get_array_index<double>(&nucset, row);
+    nuckeylen = H5Lget_name_by_idx(matgroup, ".", NULL, NULL, matg, nuckeybuf, NULL, H5P_DEFAULT);
+    char * nuckey = new char[nuckeylen];
+    for (i = 0; i < nuckeylen; i++)
+      nuckey[i] = nuckeybuf[i];
+    nucset = H5Dopen(matgroup, nuckey);
+    nucvalue = h5wrap::get_array_index<double>(nucset, row);
 
     if (nuckey == "Mass" || nuckey == "MASS" || nuckey == "mass")
       mass = nucvalue;
     else
       comp[pyne::nucname::zzaaam(nuckey)] = nucvalue;
 
-    nucset.close();
+    status = H5Dclose(nucset);
+    delete[] nuckey;
   };
 
   // Set meta data
