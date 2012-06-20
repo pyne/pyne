@@ -16,7 +16,6 @@
 #include "hdf5.h"
 
 #include "extra_types.h"
-#include "pyne.h"
 
 
 namespace h5wrap
