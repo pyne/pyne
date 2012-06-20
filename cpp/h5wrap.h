@@ -275,7 +275,7 @@ namespace h5wrap
     {
       herr_t status;
       hid_t h5_set = H5Dopen(h5file, data_path.c_str());
-      hid_t h5_space = H5Dget_space(dset);
+      hid_t h5_space = H5Dget_space(h5_set);
       hid_t h5_type = H5Dget_type(h5_set);
 
       // set path
