@@ -238,7 +238,7 @@ void pyne::Material::write_hdf5(std::string filename, std::string datapath, std:
     db = H5Fopen(filename.c_str(), H5F_ACC_RDWR, H5P_DEFAULT);
   }
   else
-    db = H5Fopen(filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT);
+    db = H5Fcreate(filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
   //
   // Read in nuclist if available, write it out if not
@@ -371,6 +371,7 @@ void pyne::Material::write_hdf5(std::string filename, std::string datapath, std:
     hid_t nuc_attr_space = H5Screate(H5S_SCALAR);
     hid_t nuc_attr = H5Acreate(data_set, "nucpath", nuc_attr_type, nuc_attr_space, H5P_DEFAULT);
     H5Awrite(nuc_attr, nuc_attr_type, nucpath.c_str());
+    H5Fflush(db, H5F_SCOPE_GLOBAL);
 
     // Remember to de-allocate
     delete[] data_fill_value;
@@ -388,6 +389,7 @@ void pyne::Material::write_hdf5(std::string filename, std::string datapath, std:
   H5Dwrite(data_set, desc, mem_space, data_hyperslab, H5P_DEFAULT, mat_data);
 
   // Close out the HDF5 file
+  H5Fflush(db, H5F_SCOPE_GLOBAL);
   H5Fclose(db);
 
   // Remember the milk!  
