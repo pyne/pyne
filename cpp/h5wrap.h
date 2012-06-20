@@ -113,8 +113,6 @@ namespace h5wrap
   template <typename T>
   T get_array_index(hid_t dset, int n, hid_t dtype=H5T_NATIVE_DOUBLE)
   {
-    herr_t status;
-
     hsize_t count  [1] = {1};
     hsize_t offset [1] = {n};
 
@@ -129,7 +127,7 @@ namespace h5wrap
     if (offset[0] < 0 || npoints <= offset[0])
         throw HDF5BoundsError();
 
-    status = H5Sselect_hyperslab(dspace, H5S_SELECT_SET, offset, NULL, count, NULL);
+    H5Sselect_hyperslab(dspace, H5S_SELECT_SET, offset, NULL, count, NULL);
 
     //Set memmory hyperspace
     hsize_t dimsm[1] = {1};
@@ -138,11 +136,11 @@ namespace h5wrap
     hsize_t count_out  [1] = {1};
     hsize_t offset_out [1] = {0};
 
-    status = H5Sselect_hyperslab(memspace, H5S_SELECT_SET, offset_out, NULL, 
+    H5Sselect_hyperslab(memspace, H5S_SELECT_SET, offset_out, NULL, 
                                  count_out, NULL);
 
     T data_out [1];
-    status = H5Dread(dset, dtype, memspace, dspace, H5P_DEFAULT, data_out);
+    H5Dread(dset, dtype, memspace, dspace, H5P_DEFAULT, data_out);
 
     return data_out[0];
   };
@@ -155,7 +153,6 @@ namespace h5wrap
     std::set<T> cpp_set = std::set<T>();
     hsize_t arr_len[1];
     hid_t dset = H5Dopen(h5file, data_path.c_str());
-    herr_t status;
 
     // Initilize to dataspace, to find the indices we are looping over
     hid_t arr_space = H5Dget_space(dset);
@@ -163,12 +160,12 @@ namespace h5wrap
 
     // Read in data from file to memory
     T * mem_arr = new T [arr_len[0]];
-    status = H5Dread(dset, dtype, H5S_ALL, H5S_ALL, H5P_DEFAULT, mem_arr);
+    H5Dread(dset, dtype, H5S_ALL, H5S_ALL, H5P_DEFAULT, mem_arr);
 
     // Load new values into the set
     cpp_set.insert(&mem_arr[0], &mem_arr[arr_len[0]]);
 
-    status = H5Dclose(dset);
+    H5Dclose(dset);
     return cpp_set;
   };
 
@@ -181,7 +178,6 @@ namespace h5wrap
     std::vector<T> cpp_vec;
     hsize_t arr_dims [1];
     hid_t dset = H5Dopen(h5file, data_path.c_str());
-    herr_t status;
 
     // Initilize to dataspace, to find the indices we are looping over
     hid_t arr_space = H5Dget_space(dset);
@@ -189,12 +185,12 @@ namespace h5wrap
 
     // Read in data from file to memory
     T mem_arr [arr_dims[0]];
-    status = H5Dread(dset, dtype, H5S_ALL, H5S_ALL, H5P_DEFAULT, mem_arr);
+    H5Dread(dset, dtype, H5S_ALL, H5S_ALL, H5P_DEFAULT, mem_arr);
 
     // Load new values into the vector
     cpp_vec.assign(mem_arr, mem_arr+arr_dims[0]);
 
-    status = H5Dclose(dset);
+    H5Dclose(dset);
     return cpp_vec;
   };
 
@@ -205,7 +201,6 @@ namespace h5wrap
   {
     hsize_t arr_dims [2];
     hid_t dset = H5Dopen(h5file, data_path.c_str());
-    herr_t status;
 
     // Initilize to dataspace, to find the indices we are looping over
     hid_t arr_space = H5Dget_space(dset);
@@ -215,7 +210,7 @@ namespace h5wrap
     // Have to read in as 1D array to get HDF5 and new keyword
     // to play nice with each other
     T mem_arr [arr_dims[0] * arr_dims[1]];
-    status = H5Dread(dset, dtype, H5S_ALL, H5S_ALL, H5P_DEFAULT, mem_arr);
+    H5Dread(dset, dtype, H5S_ALL, H5S_ALL, H5P_DEFAULT, mem_arr);
 
     // Load new values into the vector of vectors, using some indexing tricks
     std::vector< std::vector<T> > cpp_vec (arr_dims[0], std::vector<T>(arr_dims[1]));
@@ -224,7 +219,7 @@ namespace h5wrap
         cpp_vec[i].assign(mem_arr+(i*arr_dims[1]), mem_arr+((i+1)*arr_dims[1]));
     };
 
-    status = H5Dclose(dset);
+    H5Dclose(dset);
     return cpp_vec;
   };
 
@@ -236,7 +231,6 @@ namespace h5wrap
   {
     hsize_t arr_dims [3];
     hid_t dset = H5Dopen(h5file, data_path.c_str());
-    herr_t status;
 
     // Initilize to dataspace, to find the indices we are looping over
     hid_t arr_space = H5Dget_space(dset);
@@ -246,7 +240,7 @@ namespace h5wrap
     // Have to read in as 1D array to get HDF5 and new keyword
     // to play nice with each other
     T mem_arr [arr_dims[0] * arr_dims[1] * arr_dims[2]];
-    status = H5Dread(dset, dtype, H5S_ALL, H5S_ALL, H5P_DEFAULT, mem_arr);
+    H5Dread(dset, dtype, H5S_ALL, H5S_ALL, H5P_DEFAULT, mem_arr);
 
     // Load new values into the vector of vectors of vectors, using some indexing tricks
     std::vector< std::vector< std::vector<T> > > cpp_vec (arr_dims[0], std::vector< std::vector<T> >(arr_dims[1], std::vector<T>(arr_dims[2])));
@@ -258,7 +252,7 @@ namespace h5wrap
         };
     };
 
-    status = H5Dclose(dset);
+    H5Dclose(dset);
     return cpp_vec;
   };
 
@@ -273,7 +267,6 @@ namespace h5wrap
     ~HomogenousTypeTable(){};
     HomogenousTypeTable(hid_t h5file, std::string data_path, hid_t dtype=H5T_NATIVE_DOUBLE)
     {
-      herr_t status;
       hid_t h5_set = H5Dopen(h5file, data_path.c_str());
       hid_t h5_space = H5Dget_space(h5_set);
       hid_t h5_type = H5Dget_type(h5_set);
@@ -300,11 +293,11 @@ namespace h5wrap
       {
         // Make a compound data type of just this column
         col_type = H5Tcreate(H5T_COMPOUND, sizeof(T));
-        status = H5Tinsert(col_type, cols[n].c_str(), n*sizeof(T), dtype);
+        H5Tinsert(col_type, cols[n].c_str(), n*sizeof(T), dtype);
 
         // Read in this column
         col_buf = new T [shape[0]];
-        status = H5Dread(h5_set, col_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, col_buf);
+        H5Dread(h5_set, col_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, col_buf);
 
         // save this column as a vector in out data map
         data[cols[n]] = std::vector<T>(col_buf, col_buf+shape[0]);
@@ -344,10 +337,9 @@ namespace h5wrap
   /********************************/
   hid_t _get_PYTABLES_COMPLEX128()
   {
-    herr_t status; 
     hid_t ct = H5Tcreate(H5T_COMPOUND, sizeof(extra_types::complex_t));
-    status = H5Tinsert(ct, "r", HOFFSET(extra_types::complex_t, re), H5T_NATIVE_DOUBLE);
-    status = H5Tinsert(ct, "i", HOFFSET(extra_types::complex_t, im), H5T_NATIVE_DOUBLE);
+    H5Tinsert(ct, "r", HOFFSET(extra_types::complex_t, re), H5T_NATIVE_DOUBLE);
+    H5Tinsert(ct, "i", HOFFSET(extra_types::complex_t, im), H5T_NATIVE_DOUBLE);
     return ct;
   };
 
@@ -357,7 +349,7 @@ namespace h5wrap
   /*** Helper functions ***/
   bool path_exists(hid_t h5file, std::string path)
   {
-    bool rtn;
+    bool rtn = false;
     hid_t ds = H5Dopen(h5file, path.c_str());
     if (0 <= ds)
     {
@@ -365,7 +357,14 @@ namespace h5wrap
       H5Dclose(ds);
     }
     else 
-      rtn = false;
+    {
+      hid_t grp = H5Gopen(h5file, path.c_str());
+      if (0 <= grp)
+      {
+        rtn = true;
+        H5Gclose(grp);
+      }
+    }
     return rtn;
   };
 

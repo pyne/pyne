@@ -47,38 +47,36 @@ void pyne::Material::norm_comp()
 
 void pyne::Material::_load_comp_protocol0(hid_t db, std::string datapath, int row)
 {
-  herr_t status;
   hid_t matgroup = H5Gopen(db, datapath.c_str());
   hid_t nucset;
   int i; 
   double nucvalue;
-  char nuckeybuf [128];
   ssize_t nuckeylen;
   std::string nuckey;
 
   // get the number of members in the material group
   H5G_info_t group_info; 
-  status = H5Gget_info(matgroup, &group_info);
+  H5Gget_info(matgroup, &group_info);
   hsize_t matG = group_info.nlinks;
 
   // Iterate over datasets in the group.
   for (int matg = 0; matg < matG; matg++)
   {
-    nuckeylen = 1 + H5Lget_name_by_idx(matgroup, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, matg, 
+    nuckeylen = 1 + H5Lget_name_by_idx(matgroup, ".", H5_INDEX_NAME, H5_ITER_INC, matg, 
                                         NULL, 0, H5P_DEFAULT);
     char * nkey = new char[nuckeylen];
-    nuckeylen = H5Lget_name_by_idx(matgroup, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, matg, 
+    nuckeylen = H5Lget_name_by_idx(matgroup, ".", H5_INDEX_NAME, H5_ITER_INC, matg, 
                                     nkey, nuckeylen, H5P_DEFAULT);
+    nuckey = nkey;
     nucset = H5Dopen(matgroup, nkey);
     nucvalue = h5wrap::get_array_index<double>(nucset, row);
-    nuckey = nkey;
 
     if (nuckey == "Mass" || nuckey == "MASS" || nuckey == "mass")
       mass = nucvalue;
     else
       comp[pyne::nucname::zzaaam(nuckey)] = nucvalue;
 
-    status = H5Dclose(nucset);
+    H5Dclose(nucset);
     delete[] nkey;
   };
 
@@ -91,7 +89,6 @@ void pyne::Material::_load_comp_protocol0(hid_t db, std::string datapath, int ro
 
 void pyne::Material::_load_comp_protocol1(hid_t db, std::string datapath, int row)
 {
-  herr_t status;
   std::string nucpath;
   hid_t data_set = H5Dopen(db, datapath.c_str());
 
@@ -108,9 +105,10 @@ void pyne::Material::_load_comp_protocol1(hid_t db, std::string datapath, int ro
   // Grab the nucpath
   hid_t nuc_attr = H5Aopen(data_set, "nucpath", H5P_DEFAULT);
   hsize_t nuc_attr_len = H5Aget_storage_size(nuc_attr) / sizeof(char);
-  hid_t str_attr = H5Tcreate(H5T_STRING, nuc_attr_len);
+  hid_t str_attr = H5Tcopy(H5T_C_S1);
+  H5Tset_size(str_attr, nuc_attr_len);
   char * nucpathbuf = new char [nuc_attr_len];
-  status = H5Aread(nuc_attr, str_attr, nucpathbuf);
+  H5Aread(nuc_attr, str_attr, nucpathbuf);
   nucpath = nucpathbuf;
   delete[] nucpathbuf;
 
@@ -122,8 +120,7 @@ void pyne::Material::_load_comp_protocol1(hid_t db, std::string datapath, int ro
   // Get the data hyperslab
   hid_t data_hyperslab = H5Dget_space(data_set);
   hsize_t data_count[1] = {1};
-  status = H5Sselect_hyperslab(data_hyperslab, H5S_SELECT_SET, data_offset, NULL, data_count, 
-                                NULL);
+  H5Sselect_hyperslab(data_hyperslab, H5S_SELECT_SET, data_offset, NULL, data_count, NULL);
 
   // Get memory space for writing
   hid_t mem_space = H5Screate_simple(1, data_count, NULL);
@@ -131,21 +128,22 @@ void pyne::Material::_load_comp_protocol1(hid_t db, std::string datapath, int ro
   // Get material type
   size_t material_struct_size = sizeof(pyne::material_struct) + sizeof(double)*nuc_size;
   hid_t desc = H5Tcreate(H5T_COMPOUND, material_struct_size);
-  hid_t str20 = H5Tcreate(H5T_STRING, 20);
+  hid_t str20 = H5Tcopy(H5T_C_S1);
+  H5Tset_size(str20, 20);
   hid_t comp_values_array_type = H5Tarray_create2(H5T_NATIVE_DOUBLE, 1, nuc_dims);
 
   // make the data table type
-  status = H5Tinsert(desc, "name", HOFFSET(pyne::material_struct, name), str20);
-  status = H5Tinsert(desc, "mass", HOFFSET(pyne::material_struct, mass), H5T_NATIVE_DOUBLE);
-  status = H5Tinsert(desc, "atoms_per_mol", HOFFSET(pyne::material_struct, atoms_per_mol), 
-                      H5T_NATIVE_DOUBLE);
-  status = H5Tinsert(desc, "comp", HOFFSET(pyne::material_struct, comp), comp_values_array_type);
+  H5Tinsert(desc, "name", HOFFSET(pyne::material_struct, name), str20);
+  H5Tinsert(desc, "mass", HOFFSET(pyne::material_struct, mass), H5T_NATIVE_DOUBLE);
+  H5Tinsert(desc, "atoms_per_mol", HOFFSET(pyne::material_struct, atoms_per_mol), 
+              H5T_NATIVE_DOUBLE);
+  H5Tinsert(desc, "comp", HOFFSET(pyne::material_struct, comp), comp_values_array_type);
 
   // make the data array, have to over-allocate
   material_struct * mat_data = new material_struct [material_struct_size];
 
   // Finally, get data and put in on this instance
-  status = H5Dread(data_set, desc, mem_space, data_hyperslab, H5P_DEFAULT, mat_data);
+  H5Dread(data_set, desc, mem_space, data_hyperslab, H5P_DEFAULT, mat_data);
 
   name = std::string((*mat_data).name);
   mass = (*mat_data).mass;
@@ -154,6 +152,8 @@ void pyne::Material::_load_comp_protocol1(hid_t db, std::string datapath, int ro
     comp[nuclides[i]] = (double) (*mat_data).comp[i];
 
   delete[] mat_data;
+  H5Tclose(str_attr);
+  H5Tclose(str20);
 };
 
 
@@ -226,7 +226,6 @@ void pyne::Material::write_hdf5(char * fchar, char * gchar, char * nchar, float 
 void pyne::Material::write_hdf5(std::string filename, std::string datapath, std::string nucpath, float row, int chunksize)
 {
   // Turn off annoying HDF5 errors
-  herr_t status;
   H5Eset_auto(NULL, NULL);
 
   // Create new/open datafile.
@@ -269,8 +268,8 @@ void pyne::Material::write_hdf5(std::string filename, std::string datapath, std:
     nuc_dims[0] = nuc_size;
     hid_t nuc_space = H5Screate_simple(1, nuc_dims, NULL);
     hid_t nuc_set = H5Dcreate(db, nucpath.c_str(), H5T_NATIVE_INT, nuc_space, H5P_DEFAULT);
-    status = H5Dwrite(nuc_set, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, nuc_data);
-    status = H5Fflush(db, H5F_SCOPE_GLOBAL);
+    H5Dwrite(nuc_set, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, nuc_data);
+    H5Fflush(db, H5F_SCOPE_GLOBAL);
   };
 
 
@@ -286,15 +285,16 @@ void pyne::Material::write_hdf5(std::string filename, std::string datapath, std:
 
   size_t material_struct_size = sizeof(pyne::material_struct) + sizeof(double)*nuc_size;
   hid_t desc = H5Tcreate(H5T_COMPOUND, material_struct_size);
-  hid_t str20 = H5Tcreate(H5T_STRING, 20);
+  hid_t str20 = H5Tcopy(H5T_C_S1);
+  H5Tset_size(str20, 20);
   hid_t comp_values_array_type = H5Tarray_create2(H5T_NATIVE_DOUBLE, 1, nuc_dims);
 
   // make the data table type
-  status = H5Tinsert(desc, "name", HOFFSET(pyne::material_struct, name), str20);
-  status = H5Tinsert(desc, "mass", HOFFSET(pyne::material_struct, mass), H5T_NATIVE_DOUBLE);
-  status = H5Tinsert(desc, "atoms_per_mol", HOFFSET(pyne::material_struct, atoms_per_mol), 
+  H5Tinsert(desc, "name", HOFFSET(pyne::material_struct, name), str20);
+  H5Tinsert(desc, "mass", HOFFSET(pyne::material_struct, mass), H5T_NATIVE_DOUBLE);
+  H5Tinsert(desc, "atoms_per_mol", HOFFSET(pyne::material_struct, atoms_per_mol), 
                       H5T_NATIVE_DOUBLE);
-  status = H5Tinsert(desc, "comp", HOFFSET(pyne::material_struct, comp), comp_values_array_type);
+  H5Tinsert(desc, "comp", HOFFSET(pyne::material_struct, comp), comp_values_array_type);
 
   // make the data array, have to over-allocate
   material_struct * mat_data  = new material_struct[material_struct_size];
@@ -335,7 +335,7 @@ void pyne::Material::write_hdf5(std::string filename, std::string datapath, std:
       // row == -0, extend to data set so that we can append, or
       // row_num is larger than current dimension, resize to accomodate.
       data_dims[0] = row_num + 1;
-      status = H5Dset_extent(data_set, data_dims);
+      H5Dset_extent(data_set, data_dims);
     }
     else if (data_dims[0] < 0)
       throw h5wrap::HDF5BoundsError();
@@ -350,7 +350,7 @@ void pyne::Material::write_hdf5(std::string filename, std::string datapath, std:
     // Make data set properties to enable chunking
     hid_t data_set_params = H5Pcreate(H5P_DATASET_CREATE);
     hsize_t chunk_dims[1] ={chunksize}; 
-    status = H5Pset_chunk(data_set_params, 1, chunk_dims);
+    H5Pset_chunk(data_set_params, 1, chunk_dims);
 
     material_struct * data_fill_value  = new material_struct[material_struct_size];
     for (int i=0; i < 20; i++)
@@ -359,17 +359,18 @@ void pyne::Material::write_hdf5(std::string filename, std::string datapath, std:
     (*data_fill_value).atoms_per_mol = -1.0;
     for (int n = 0; n != nuc_size; n++)
       (*data_fill_value).comp[n] = 0.0;
-    status = H5Pset_fill_value(data_set_params, desc, &data_fill_value);
+    H5Pset_fill_value(data_set_params, desc, &data_fill_value);
 
     // Create the data set
     data_set = H5Dcreate(db, datapath.c_str(), desc, data_space, data_set_params);
-    status = H5Dset_extent(data_set, data_dims);
+    H5Dset_extent(data_set, data_dims);
 
     // Add attribute pointing to nuc path
-    hid_t nuc_attr_type = H5Tcreate(H5T_STRING, nucpath.length());
+    hid_t nuc_attr_type = H5Tcopy(H5T_C_S1);
+    H5Tset_size(nuc_attr_type, nucpath.length());
     hid_t nuc_attr_space = H5Screate(H5S_SCALAR);
     hid_t nuc_attr = H5Acreate(data_set, "nucpath", nuc_attr_type, nuc_attr_space, H5P_DEFAULT);
-    status = H5Awrite(nuc_attr, nuc_attr_type, nucpath.c_str());
+    H5Awrite(nuc_attr, nuc_attr_type, nucpath.c_str());
 
     // Remember to de-allocate
     delete[] data_fill_value;
@@ -378,21 +379,21 @@ void pyne::Material::write_hdf5(std::string filename, std::string datapath, std:
   // Get the data hyperslab
   data_hyperslab = H5Dget_space(data_set);
   hsize_t data_count[1] = {1};
-  status = H5Sselect_hyperslab(data_hyperslab, H5S_SELECT_SET, data_offset, NULL, data_count, 
-                                NULL);
+  H5Sselect_hyperslab(data_hyperslab, H5S_SELECT_SET, data_offset, NULL, data_count, NULL);
 
   // Get a memory space for writing
   hid_t mem_space = H5Screate_simple(1, data_count, data_max_dims);
 
   // Write the row...
-  status = H5Dwrite(data_set, desc, mem_space, data_hyperslab, H5P_DEFAULT, mat_data);
+  H5Dwrite(data_set, desc, mem_space, data_hyperslab, H5P_DEFAULT, mat_data);
 
   // Close out the HDF5 file
-  status = H5Fclose(db);
+  H5Fclose(db);
 
   // Remember the milk!  
   // ...by which I mean to deallocate
   delete[] mat_data;
+  H5Tclose(str20);
 };
 
 
