@@ -22,7 +22,7 @@ void pyne::_load_atomic_mass_map()
     throw h5wrap::FileNotHDF5(pyne::NUC_DATA_PATH);
 
   // Get the HDF5 compound type (table) description
-  hid_t str6 = H5Tcreate(H5T_STRING, 6)
+  hid_t str6 = H5Tcreate(H5T_STRING, 6);
   hid_t desc = H5Tcreate(H5T_COMPOUND, sizeof(atomic_weight_struct));
   status = H5Tinsert(desc, "nuc_name", HOFFSET(atomic_weight_struct, nuc_name), str6);
   status = H5Tinsert(desc, "nuc_zz",   HOFFSET(atomic_weight_struct, nuc_zz),   H5T_NATIVE_INT);
@@ -139,7 +139,7 @@ void pyne::_load_scattering_lengths()
     throw h5wrap::FileNotHDF5(pyne::NUC_DATA_PATH);
 
   // Get the HDF5 compound type (table) description
-  hid_t str6 = H5Tcreate(H5T_STRING, 6)
+  hid_t str6 = H5Tcreate(H5T_STRING, 6);
   hid_t desc = H5Tcreate(H5T_COMPOUND, sizeof(scattering_lengths_struct));
   status = H5Tinsert(desc, "nuc_name", HOFFSET(scattering_lengths_struct, nuc_name), str6);
   status = H5Tinsert(desc, "nuc_zz", HOFFSET(scattering_lengths_struct, nuc_zz), H5T_NATIVE_INT);
@@ -395,6 +395,7 @@ std::map<int, double> pyne::decay_const_map = std::map<int, double>();
 void pyne::_load_atomic_decay()
 {
   // Loads the important parts of atomic_decay table into memory
+  herr_t status;
 
   //Check to see if the file is in HDF5 format.
   if (!pyne::file_exists(pyne::NUC_DATA_PATH))
@@ -405,7 +406,7 @@ void pyne::_load_atomic_decay()
     throw h5wrap::FileNotHDF5(pyne::NUC_DATA_PATH);
 
   // Get the HDF5 compound type (table) description
-  hid_t str6 = H5Tcreate(H5T_STRING, 6)
+  hid_t str6 = H5Tcreate(H5T_STRING, 6);
   hid_t desc = H5Tcreate(H5T_COMPOUND, sizeof(atomic_decay_struct));
   status = H5Tinsert(desc, "from_nuc_name", HOFFSET(atomic_decay_struct, from_nuc_name), str6);
   status = H5Tinsert(desc, "from_nuc_zz", HOFFSET(atomic_decay_struct, from_nuc_zz), 
