@@ -152,7 +152,7 @@ namespace h5wrap
   {
     std::set<T> cpp_set = std::set<T>();
     hsize_t arr_len[1];
-    hid_t dset = H5Dopen(h5file, data_path.c_str());
+    hid_t dset = H5Dopen2(h5file, data_path.c_str(), H5P_DEFAULT);
 
     // Initilize to dataspace, to find the indices we are looping over
     hid_t arr_space = H5Dget_space(dset);
