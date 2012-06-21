@@ -25,6 +25,13 @@ HOME = os.environ['HOME'] if os.name != 'nt' else os.environ['UserProfile']
 PYNE_DIR = os.path.join(HOME, 
                         _local_subsititues.get(sys.platform, '.local'),
                         'pyne')
+                        
+HDF5_DIR = os.environ.get('HDF5_DIR', '')
+args = sys.argv[:]
+for arg in args:
+    if arg.find('--hdf5=') == 0:
+        HDF5_DIR = os.path.expanduser(arg.split('=')[1])
+        sys.argv.remove(arg)
 
 # Thanks to http://patorjk.com/software/taag/  
 # and http://www.chris.com/ascii/index.php?art=creatures/dragons
@@ -211,6 +218,8 @@ def cpp_ext(name, sources, libs=None, use_hdf5=False):
 
     ext["libraries"] = []
     ext['include_dirs'] = [pyt_dir, cpp_dir, numpy_include]
+    if 0 < len(HDF5_DIR):
+        ext['include_dirs'].append(os.path.join(HDF5_DIR, 'include'))
     ext['language'] = "c++"
 
     # may need to be more general
