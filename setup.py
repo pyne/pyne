@@ -6,6 +6,7 @@ from copy import deepcopy
 
 from distutils.core import setup, run_setup
 from distutils import sysconfig
+from distutils.ccompiler import CCompiler
 from distutils.extension import Extension
 from distutils.util import get_platform
 from distutils.file_util import copy_file, move_file
@@ -76,10 +77,10 @@ dat_dir = os.path.join('data')
 numpy_include = np.get_include()
 
 # HDF5 stuff
-posix_hdf5_libs = ["z", "m", "hdf5", "hdf5_hl",]
-#nt_hdf5_libs = ["/DEFAULTLIB:szip.lib", "/DEFAULTLIB:zlib1.lib", "/DEFAULTLIB:hdf5dll.lib",
-#                "/DEFAULTLIB:hdf5_hldll.lib",]
-nt_hdf5_libs = ["szip", "zlib1", "hdf5dll", "hdf5_hldll",]
+#posix_hdf5_libs = ["z", "m", "hdf5", "hdf5_hl",]
+posix_hdf5_libs = ["hdf5", "hdf5_hl",]
+#nt_hdf5_libs = ["szip", "zlib1", "hdf5dll", "hdf5_hldll",]
+nt_hdf5_libs = ["hdf5dll", "hdf5_hldll",]
 nt_hdf5_extra_compile_args = ["/EHsc"]
 nt_hdf5_macros = [("_WIN32_MSVC", None), ("_HDF5USEDLL_", None),]
 
@@ -185,10 +186,24 @@ def win32_get_exp_sym_decorator(f):
     return new_get_exp_sym
 
 
+def win32_exec_decorator(f):
+    def new_exec(self, func, args, msg=None, level=1):
+        if 2 == len(args) and args[0].endswith('.def') and not args[0].startswith('lib'):
+            filename, contents = args
+            contents = [c for c in contents if not c.startswith('LIBRARY ')]
+            args = (filename, contents)
+        print "Args = ", args
+        rtn = f(self, func, args, msg, level)
+        return rtn
+    return new_exec
+
+
 def win32_setup():
     build_ext.finalize_options = win32_finalize_opts_decorator(build_ext.finalize_options)
     build_ext.build_extension = win32_build_ext_decorator(build_ext.build_extension)
     build_ext.get_export_symbols = win32_get_exp_sym_decorator(build_ext.get_export_symbols)
+    #build_ext.execute = win32_exec_decorator(build_ext.execute)
+    CCompiler.execute = win32_exec_decorator(CCompiler.execute)
     
 platform_setup = {'darwin': darwin_setup, 'win32': win32_setup}
 
@@ -228,7 +243,7 @@ def cpp_ext(name, sources, libs=None, use_hdf5=False):
     ext['library_dirs'] = ['build/lib/pyne/lib',
                            'build/lib.{0}-{1}/pyne/lib'.format(get_platform(), get_python_version()),
                            "C:\\Python27\\Lib\\site-packages",
-                           os.path.join(HDF5_DIR, 'dll'),
+                           #os.path.join(HDF5_DIR, 'dll'),
                            ]
                          
     # perfectly general, thanks to dynamic runtime linking of $ORIGIN
