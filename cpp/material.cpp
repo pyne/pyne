@@ -47,9 +47,8 @@ void pyne::Material::norm_comp()
 
 void pyne::Material::_load_comp_protocol0(hid_t db, std::string datapath, int row)
 {
-  hid_t matgroup = H5Gopen(db, datapath.c_str());
+  hid_t matgroup = H5Gopen2(db, datapath.c_str(), H5P_DEFAULT);
   hid_t nucset;
-  int i; 
   double nucvalue;
   ssize_t nuckeylen;
   std::string nuckey;
@@ -68,7 +67,7 @@ void pyne::Material::_load_comp_protocol0(hid_t db, std::string datapath, int ro
     nuckeylen = H5Lget_name_by_idx(matgroup, ".", H5_INDEX_NAME, H5_ITER_INC, matg, 
                                     nkey, nuckeylen, H5P_DEFAULT);
     nuckey = nkey;
-    nucset = H5Dopen(matgroup, nkey);
+    nucset = H5Dopen2(matgroup, nkey, H5P_DEFAULT);
     nucvalue = h5wrap::get_array_index<double>(nucset, row);
 
     if (nuckey == "Mass" || nuckey == "MASS" || nuckey == "mass")
@@ -90,7 +89,7 @@ void pyne::Material::_load_comp_protocol0(hid_t db, std::string datapath, int ro
 void pyne::Material::_load_comp_protocol1(hid_t db, std::string datapath, int row)
 {
   std::string nucpath;
-  hid_t data_set = H5Dopen(db, datapath.c_str());
+  hid_t data_set = H5Dopen2(db, datapath.c_str(), H5P_DEFAULT);
 
   hsize_t data_offset[1] = {row};
   if (row < 0)
@@ -173,7 +172,7 @@ void pyne::Material::from_hdf5(std::string filename, std::string datapath, int r
 {
   // Turn off annoying HDF5 errors
   herr_t status;
-  H5Eset_auto(NULL, NULL);
+  H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
 
   // Check that the file is there
   if (!pyne::file_exists(filename))
@@ -226,7 +225,7 @@ void pyne::Material::write_hdf5(char * fchar, char * gchar, char * nchar, float 
 void pyne::Material::write_hdf5(std::string filename, std::string datapath, std::string nucpath, float row, int chunksize)
 {
   // Turn off annoying HDF5 errors
-  H5Eset_auto(NULL, NULL);
+  H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
 
   // Create new/open datafile.
   hid_t db;
@@ -267,7 +266,8 @@ void pyne::Material::write_hdf5(std::string filename, std::string datapath, std:
       nuc_data[n] = nuclides[n];
     nuc_dims[0] = nuc_size;
     hid_t nuc_space = H5Screate_simple(1, nuc_dims, NULL);
-    hid_t nuc_set = H5Dcreate(db, nucpath.c_str(), H5T_NATIVE_INT, nuc_space, H5P_DEFAULT);
+    hid_t nuc_set = H5Dcreate2(db, nucpath.c_str(), H5T_NATIVE_INT, nuc_space, 
+                                H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     H5Dwrite(nuc_set, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, nuc_data);
     H5Fflush(db, H5F_SCOPE_GLOBAL);
   };
@@ -320,7 +320,7 @@ void pyne::Material::write_hdf5(std::string filename, std::string datapath, std:
   bool datapath_exists = h5wrap::path_exists(db, datapath);
   if (datapath_exists)
   {
-    data_set = H5Dopen(db, datapath.c_str());
+    data_set = H5Dopen2(db, datapath.c_str(), H5P_DEFAULT);
     data_space = H5Dget_space(data_set);
     data_rank = H5Sget_simple_extent_dims(data_space, data_dims, data_max_dims);
 
@@ -362,14 +362,16 @@ void pyne::Material::write_hdf5(std::string filename, std::string datapath, std:
     H5Pset_fill_value(data_set_params, desc, &data_fill_value);
 
     // Create the data set
-    data_set = H5Dcreate(db, datapath.c_str(), desc, data_space, data_set_params);
+    data_set = H5Dcreate2(db, datapath.c_str(), desc, data_space, data_set_params, 
+                            data_set_params, data_set_params);
     H5Dset_extent(data_set, data_dims);
 
     // Add attribute pointing to nuc path
     hid_t nuc_attr_type = H5Tcopy(H5T_C_S1);
     H5Tset_size(nuc_attr_type, nucpath.length());
     hid_t nuc_attr_space = H5Screate(H5S_SCALAR);
-    hid_t nuc_attr = H5Acreate(data_set, "nucpath", nuc_attr_type, nuc_attr_space, H5P_DEFAULT);
+    hid_t nuc_attr = H5Acreate2(data_set, "nucpath", nuc_attr_type, nuc_attr_space, 
+                                H5P_DEFAULT, H5P_DEFAULT);
     H5Awrite(nuc_attr, nuc_attr_type, nucpath.c_str());
     H5Fflush(db, H5F_SCOPE_GLOBAL);
 
