@@ -77,8 +77,9 @@ numpy_include = np.get_include()
 
 # HDF5 stuff
 posix_hdf5_libs = ["z", "m", "hdf5", "hdf5_hl",]
-nt_hdf5_libs = ["/DEFAULTLIB:szip.lib", "/DEFAULTLIB:zlib1.lib", "/DEFAULTLIB:hdf5dll.lib",
-                "/DEFAULTLIB:hdf5_hldll.lib",]
+#nt_hdf5_libs = ["/DEFAULTLIB:szip.lib", "/DEFAULTLIB:zlib1.lib", "/DEFAULTLIB:hdf5dll.lib",
+#                "/DEFAULTLIB:hdf5_hldll.lib",]
+nt_hdf5_libs = ["szip", "zlib1", "hdf5dll", "hdf5_hldll",]
 nt_hdf5_extra_compile_args = ["/EHsc"]
 nt_hdf5_macros = [("_WIN32_MSVC", None), ("_HDF5USEDLL_", None),]
 
@@ -128,14 +129,15 @@ def win32_finalize_opts_decorator(f):
     def posix_like_ext(ext):
         replace(ext.extra_compile_args, "__COMPILER__", [])
         replace(ext.define_macros, "__COMPILER__", [])
-        replace(ext.libraries, "__USE_HDF5__", posix_hdf5_libs)
+        replace(ext.libraries, "__USE_HDF5__", nt_hdf5_libs)
         replace(ext.extra_compile_args, "__USE_HDF5__", [])
         replace(ext.define_macros, "__USE_HDF5__", [])
 
     def nt_like_ext(ext):
         replace(ext.extra_compile_args, "__COMPILER__", ["/EHsc"])
         replace(ext.define_macros, "__COMPILER__", [("_WIN32_MSVC", None)])
-        replace(ext.libraries, "__USE_HDF5__", nt_hdf5_libs)
+        replace(ext.libraries, "__USE_HDF5__", 
+                    ["/DEFAULTLIB:" + lib + ".lib" for lib in nt_hdf5_libs])
         replace(ext.extra_compile_args, "__USE_HDF5__", nt_hdf5_extra_compile_args)
         replace(ext.define_macros, "__USE_HDF5__", nt_hdf5_macros)
     
@@ -225,6 +227,8 @@ def cpp_ext(name, sources, libs=None, use_hdf5=False):
     # may need to be more general
     ext['library_dirs'] = ['build/lib/pyne/lib',
                            'build/lib.{0}-{1}/pyne/lib'.format(get_platform(), get_python_version()),
+                           "C:\\Python27\\Lib\\site-packages",
+                           os.path.join(HDF5_DIR, 'dll'),
                            ]
                          
     # perfectly general, thanks to dynamic runtime linking of $ORIGIN
