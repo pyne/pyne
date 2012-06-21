@@ -177,7 +177,7 @@ namespace h5wrap
   {
     std::vector<T> cpp_vec;
     hsize_t arr_dims [1];
-    hid_t dset = H5Dopen(h5file, data_path.c_str());
+    hid_t dset = H5Dopen2(h5file, data_path.c_str(), H5P_DEFAULT);
 
     // Initilize to dataspace, to find the indices we are looping over
     hid_t arr_space = H5Dget_space(dset);
@@ -200,7 +200,7 @@ namespace h5wrap
                                                           hid_t dtype=H5T_NATIVE_DOUBLE)
   {
     hsize_t arr_dims [2];
-    hid_t dset = H5Dopen(h5file, data_path.c_str());
+    hid_t dset = H5Dopen2(h5file, data_path.c_str(), H5P_DEFAULT);
 
     // Initilize to dataspace, to find the indices we are looping over
     hid_t arr_space = H5Dget_space(dset);
@@ -230,7 +230,7 @@ namespace h5wrap
                                                   hid_t dtype=H5T_NATIVE_DOUBLE)
   {
     hsize_t arr_dims [3];
-    hid_t dset = H5Dopen(h5file, data_path.c_str());
+    hid_t dset = H5Dopen2(h5file, data_path.c_str(), H5P_DEFAULT);
 
     // Initilize to dataspace, to find the indices we are looping over
     hid_t arr_space = H5Dget_space(dset);
@@ -267,7 +267,7 @@ namespace h5wrap
     ~HomogenousTypeTable(){};
     HomogenousTypeTable(hid_t h5file, std::string data_path, hid_t dtype=H5T_NATIVE_DOUBLE)
     {
-      hid_t h5_set = H5Dopen(h5file, data_path.c_str());
+      hid_t h5_set = H5Dopen2(h5file, data_path.c_str(), H5P_DEFAULT);
       hid_t h5_space = H5Dget_space(h5_set);
       hid_t h5_type = H5Dget_type(h5_set);
 
@@ -350,7 +350,7 @@ namespace h5wrap
   bool path_exists(hid_t h5file, std::string path)
   {
     bool rtn = false;
-    hid_t ds = H5Dopen(h5file, path.c_str());
+    hid_t ds = H5Dopen2(h5file, path.c_str(), H5P_DEFAULT);
     if (0 <= ds)
     {
       rtn = true;
@@ -358,7 +358,7 @@ namespace h5wrap
     }
     else 
     {
-      hid_t grp = H5Gopen(h5file, path.c_str());
+      hid_t grp = H5Gopen2(h5file, path.c_str(), H5P_DEFAULT);
       if (0 <= grp)
       {
         rtn = true;

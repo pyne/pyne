@@ -34,7 +34,7 @@ void pyne::_load_atomic_mass_map()
   hid_t nuc_data_h5 = H5Fopen(pyne::NUC_DATA_PATH.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT);
 
   // Open the data set
-  hid_t atomic_weight_set = H5Dopen(nuc_data_h5, "/atomic_weight");
+  hid_t atomic_weight_set = H5Dopen2(nuc_data_h5, "/atomic_weight", H5P_DEFAULT);
   hid_t atomic_weight_space = H5Dget_space(atomic_weight_set);
   int atomic_weight_length = H5Sget_simple_extent_npoints(atomic_weight_space);
 
@@ -159,7 +159,7 @@ void pyne::_load_scattering_lengths()
   hid_t nuc_data_h5 = H5Fopen(pyne::NUC_DATA_PATH.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT);
 
   // Open the data set
-  hid_t scat_len_set = H5Dopen(nuc_data_h5, "/neutron/scattering_lengths");
+  hid_t scat_len_set = H5Dopen2(nuc_data_h5, "/neutron/scattering_lengths", H5P_DEFAULT);
   hid_t scat_len_space = H5Dget_space(scat_len_set);
   int scat_len_length = H5Sget_simple_extent_npoints(scat_len_space);
 
@@ -429,7 +429,7 @@ void pyne::_load_atomic_decay()
   hid_t nuc_data_h5 = H5Fopen(pyne::NUC_DATA_PATH.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT);
 
   // Open the data set
-  hid_t atom_dec_set = H5Dopen(nuc_data_h5, "/atomic_decay");
+  hid_t atom_dec_set = H5Dopen2(nuc_data_h5, "/atomic_decay", H5P_DEFAULT);
   hid_t atom_dec_space = H5Dget_space(atom_dec_set);
   int atom_dec_length = H5Sget_simple_extent_npoints(atom_dec_space);
 
