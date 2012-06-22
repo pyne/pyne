@@ -20,7 +20,9 @@ class TestSurfSrc(unittest.TestCase):
         pass
 
     def test_read_header_block(self):
-        """
+        """Test the read_header() method in the SurfSrc class
+        We compare the SurfSrc object variables with expected values from the
+        file 'mcnp_surfsrc.w'.
         """
         ssr = mcnp.SurfSrc(ssrname, 'rb')
         ssr.read_header()
