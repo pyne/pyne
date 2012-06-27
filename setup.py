@@ -389,6 +389,8 @@ for e in ext_modules:
 
 # Utility scripts
 scripts=['scripts/nuc_data_make']
+if os.name == 'nt':
+    scripts = [s + '.bat' for s in scripts]
 
 
 def cleanup(mdpath="<None>"):
