@@ -1,6 +1,7 @@
 #!/usr/bin/env python
  
 import os
+import sys
 import glob
 import json
 from copy import deepcopy
@@ -12,15 +13,17 @@ from distutils.extension import Extension
 from distutils.util import get_platform
 from distutils.file_util import copy_file, move_file
 from distutils.dir_util import mkpath, remove_tree
-from distutils.sysconfig import get_python_version, get_config_vars
+from distutils.sysconfig import get_python_version, get_config_vars, get_python_lib
 from Cython.Distutils import build_ext
 
+
 import numpy as np
-import sys
 
 INFO = {
     'version': '0.1',
     }
+
+SITE_PACKAGES = get_python_lib()
 
 _local_subsititues = {'darwin': 'Library'}
 HOME = os.environ['HOME'] if os.name != 'nt' else os.environ['UserProfile']
@@ -257,10 +260,12 @@ def cpp_ext(name, sources, libs=None, use_hdf5=False):
     # may need to be more general
     ext['library_dirs'] = ['build/lib/pyne/lib',
                            'build/lib.{0}-{1}/pyne/lib'.format(get_platform(), get_python_version()),
-                           "C:\\Python27\\Lib\\site-packages",
-                           #os.path.join(HDF5_DIR, 'dll'),
                            ]
-                         
+    if os.name == 'nt':
+        ext['library_dirs'] += [SITE_PACKAGES, os.path.join(HDF5_DIR, 'dll'),]
+    ext['library_dirs'].append(os.path.join(HDF5_DIR, 'lib'))
+                           
+
     # perfectly general, thanks to dynamic runtime linking of $ORIGIN
     #ext['runtime_library_dirs'] = ['${ORIGIN}/lib', '${ORIGIN}']
     ext['runtime_library_dirs'] = ['${ORIGIN}/lib', '${ORIGIN}', '${ORIGIN}/.', 
@@ -385,10 +390,54 @@ for e in ext_modules:
 # Utility scripts
 scripts=['scripts/nuc_data_make']
 
+
+def cleanup(mdpath="<None>"):
+    # Clean includes after setup has run
+    if os.path.exists('pyne/includes'):
+        remove_tree('pyne/includes')
+
+    # clean up metadata file
+    if os.path.exists(mdpath):
+        os.remove(mdpath)
+
+
+def final_message(setup_success=True, metadata=None):
+    if setup_success:
+        return
+        
+    if metadata is not None:
+        msg = "\n\nCURRENT METADATA:\n"
+        for k, v in sorted(metadata.items()):
+            msg += "  {0} = {1}\n".format(k, repr(v))
+        print msg[:-1]
+
+    if os.name != 'nt':
+        return
+
+    try: 
+        import tables as tb
+        h5ver = tb.getHDF5Version()
+    except ImportError:
+        h5ver = '1.8.5-patch1'
+
+    msg = ("\n\nIf compilation is failing with HDF5 issues please try the "
+           "following steps:\n\n"
+           "    1. Install EPD [1].\n"
+           "    2. Download the HDF5 Windows binarys from [2].\n"
+           "    3. Unzip them to the C-drive (C:\\hdf5-{h5ver}).\n"
+           "    4. Re-run setup with the '--hdf5' option:\n\n"
+           "        python setup.py install --user --hdf5=C:\\hdf5-{h5ver}\n\n"
+           "Should this still fail, please report your problem to pyne-dev@googlegroups.com\n\n"
+           "[1] http://www.enthought.com/products/epd.php\n"
+           "[2] http://www.hdfgroup.org/ftp/HDF5/releases/hdf5-{h5ver}/bin/windows/\n"
+           ).format(h5ver=h5ver)
+    print msg
+
+
 ###################
 ### Call setup! ###
 ###################
-if __name__ == "__main__":
+def pyne_setup():
     print pyne_logo
 
     # clean includes dir and recopy files over
@@ -410,25 +459,30 @@ if __name__ == "__main__":
     # Platform specific setup
     platform_setup.get(sys.platform, lambda: None)()
     
+    setup_kwargs = {
+        "name": "pyne",
+        "version": INFO['version'],
+        "description": 'Python for Nuclear Engineering',
+        "author": 'PyNE Development Team',
+        "author_email": 'scopatz@gmail.com',
+        "url": 'http://pyne.github.com/',
+        "packages": packages,
+        "package_dir": pack_dir,
+        "package_data": pack_data,
+        "cmdclass": {'build_ext': build_ext}, 
+        "ext_modules": ext_modules,
+        "scripts": scripts, 
+        }
+        
     # call setup
-    setup(name="pyne",
-        version = INFO['version'],
-        description = 'Python for Nuclear Engineering',
-        author = 'PyNE Development Team',
-        author_email = 'scopatz@gmail.com',
-        url = 'http://pyne.github.com/',
-        packages = packages,
-        package_dir = pack_dir,
-        package_data = pack_data,
-        cmdclass = {'build_ext': build_ext}, 
-        ext_modules=ext_modules,
-        scripts=scripts, 
-        )
+    setup_success= False
+    try:
+        rtn = setup(**setup_kwargs)
+        setup_success= True
+    finally:
+        cleanup(mdpath)
+        final_message(setup_success, metadata=md)
 
-    # Clean includes after setup has run
-    if os.path.exists('pyne/includes'):
-        remove_tree('pyne/includes')
 
-    # clean up metadata file
-    if os.path.exists(mdpath):
-        os.remove(mdpath)
+if __name__ == "__main__":
+    pyne_setup()
