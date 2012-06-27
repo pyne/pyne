@@ -2,6 +2,7 @@
  
 import os
 import glob
+import json
 from copy import deepcopy
 
 from distutils.core import setup, run_setup
@@ -33,6 +34,20 @@ for arg in args:
     if arg.find('--hdf5=') == 0:
         HDF5_DIR = os.path.expanduser(arg.split('=')[1])
         sys.argv.remove(arg)
+
+
+def make_metadata(path):
+    """Build a metadata file."""
+    md = {"HDF5_DIR": HDF5_DIR,
+          }
+    md.update(INFO)
+
+    # write the metadata file
+    with open(path, 'w') as f:
+        json.dump(md, f, indent=2)
+
+    return md
+
 
 # Thanks to http://patorjk.com/software/taag/  
 # and http://www.chris.com/ascii/index.php?art=creatures/dragons
@@ -355,7 +370,7 @@ packages = ['pyne', 'pyne.lib', 'pyne.dbgen', 'pyne.xs']
 
 pack_dir = {'pyne': 'pyne', 'pyne.dbgen': 'pyne/dbgen', 'pyne.xs': 'pyne/xs'}
 
-pack_data = {'pyne': ['includes/*.h', 'includes/pyne/*.pxd'],
+pack_data = {'pyne': ['includes/*.h', 'includes/pyne/*.pxd', '*.json'],
              'pyne.dbgen': ['*.html'],
             }
 
@@ -388,6 +403,10 @@ if __name__ == "__main__":
     for header in glob.glob('pyne/*.pxd'):
         copy_file(header, 'pyne/includes/pyne')
 
+    # Create metadata file
+    mdpath = "pyne/metadata.json"
+    md = make_metadata(mdpath)
+
     # Platform specific setup
     platform_setup.get(sys.platform, lambda: None)()
     
@@ -409,3 +428,7 @@ if __name__ == "__main__":
     # Clean includes after setup has run
     if os.path.exists('pyne/includes'):
         remove_tree('pyne/includes')
+
+    # clean up metadata file
+    if os.path.exists(mdpath):
+        os.remove(mdpath)
