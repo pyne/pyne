@@ -43,11 +43,40 @@ prevents the developers from distributing it with PyNE.  However, the
 do its best to find relevant nuclear data elsewhere on your machine
 or from public sources on the internet.  
 
+
+.. _win_install:
+
 ********************
-Linux (Ubuntu) + EPD
+Windows Installation
+********************
+Depending on the current state of your system, installing on Windows may 
+be more or less involved.  We recommend the following procedure.  This 
+ensures that all dependencies are installed correctly and PyNE has been 
+built and tested using this setup.
+
+#. Install the Enthought Python Distribution (`EPD`_).
+#. Determine your HDF5 version by running the following command::
+
+    python -c "import tables; print tables.getHDF5Version()"
+
+#. Download the `HDF5 Windows binaries`_ for your version.
+   Navigate to something like ``http://www.hdfgroup.org/ftp/HDF5/releases/hdf5-{h5ver}/bin/windows/``
+   and select the appropriate 32- or 64-bit file.  Do not download the source-only files.
+#. Unzip HDF5 to the C-drive (``C:\\hdf5-{h5ver}``).
+#. Download and unzip the source (`zip`_). 
+#. Move into the source directory and run the PyNE setup command with the ``--hdf5`` option::
+
+    cd pyne\
+    python setup.py install --user --hdf5=C:\\hdf5-{h5ver}
+           
+And voila, everything will have installed correctly.  Should this still fail, 
+please report your problem to pyne-dev@googlegroups.com.
+
+********************
+Linux + EPD
 ********************
 Assuming you are on some flavor of Linux and you primarily use Python 
-through the Enthought Python Distribution (EPD), you can install PyNE
+through the Enthought Python Distribution (`EPD`_), you can install PyNE
 to be based off of the EPD packages.
 
 First, you'll need to know where on your system EPD is installed.
@@ -74,3 +103,6 @@ You may now proceed with the PyNE install :ref:`as above <install_source>`.
 
 .. _zip: https://github.com/pyne/pyne/zipball/0.1-rc
 .. _tar: https://github.com/pyne/pyne/tarball/0.1-rc
+
+.. _EPD: http://www.enthought.com/products/epd.php
+.. _HDF5 Windows binaries: http://www.hdfgroup.org/ftp/HDF5/releases/
