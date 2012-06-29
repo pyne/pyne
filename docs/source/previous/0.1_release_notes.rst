@@ -8,7 +8,7 @@ after an initial last year of effort.  PyNE is a free and open source
 as NumPy and SciPy, as a necessary package in the computational nuclear
 engineer's toolkit.  It is meant to play nicely with existing, industry
 standard nuclear engineering tools.  The goal of PyNE is to be both fast 
-and useful.  As such, this is only the begging!
+and useful.  As such, this is only the beginning!
 
 Release highlights:
 
