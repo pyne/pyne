@@ -19,6 +19,8 @@ For a quick install from source, please  clone from the official repo::
     python setup.py install --user
     nuc_data_make
 
+For Windows install instructions please :ref:`go here <win_install>`.
+
 --------
 Contents
 --------
