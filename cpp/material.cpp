@@ -225,7 +225,7 @@ void pyne::Material::write_hdf5(char * fchar, char * gchar, char * nchar, float 
 void pyne::Material::write_hdf5(std::string filename, std::string datapath, std::string nucpath, float row, int chunksize)
 {
   // Turn off annoying HDF5 errors
-//  H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
+  H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
 
   // Create new/open datafile.
   hid_t db;
@@ -246,7 +246,7 @@ void pyne::Material::write_hdf5(std::string filename, std::string datapath, std:
   std::vector<int> nuclides;
   int nuc_size;
   hsize_t nuc_dims[1];
-  
+
   if (nucpath_exists)
   {
     nuclides = h5wrap::h5_array_to_cpp_vector_1d<int>(db, nucpath, H5T_NATIVE_INT);
@@ -271,7 +271,6 @@ void pyne::Material::write_hdf5(std::string filename, std::string datapath, std:
     H5Dwrite(nuc_set, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, nuc_data);
     H5Fflush(db, H5F_SCOPE_GLOBAL);
   };
-
 
 
   //
@@ -362,13 +361,9 @@ void pyne::Material::write_hdf5(std::string filename, std::string datapath, std:
     H5Pset_fill_value(data_set_params, desc, &data_fill_value);
 
     // Create the data set
-    data_set = H5Dcreate2(db, datapath.c_str(), desc, data_space, data_set_params, 
-                            data_set_params, data_set_params);
-//    data_set = H5Dcreate2(db, datapath.c_str(), desc, data_space, H5P_DEFAULT, 
-//                            H5P_DEFAULT, H5P_DEFAULT);
+    data_set = H5Dcreate2(db, datapath.c_str(), desc, data_space, H5P_DEFAULT, 
+                            data_set_params, H5P_DEFAULT);
     H5Dset_extent(data_set, data_dims);
-//    H5Dwrite(data_set, desc, data_space, H5S_ALL, H5P_DEFAULT, data_fill_value);
-//    H5Fflush(db, H5F_SCOPE_GLOBAL);
 
     // Add attribute pointing to nuc path
     hid_t nuc_attr_type = H5Tcopy(H5T_C_S1);
@@ -382,6 +377,9 @@ void pyne::Material::write_hdf5(std::string filename, std::string datapath, std:
     // Remember to de-allocate
     delete[] data_fill_value;
   };
+
+  H5Dclose(data_set);
+  data_set = H5Dopen2(db, datapath.c_str(), H5P_DEFAULT);  
 
   // Get the data hyperslab
   data_hyperslab = H5Dget_space(data_set);
@@ -401,12 +399,6 @@ void pyne::Material::write_hdf5(std::string filename, std::string datapath, std:
   H5Tclose(str20);
   H5Tclose(desc);
   H5Fclose(db);
-
-    bool dp_exists = h5wrap::path_exists(db, datapath);
-    if (dp_exists)
-        std::cout << "EXISTS NOW!!\n\n";
-    else
-        std::cout << "NOT HERE!!\n\n";
 
   // Remember the milk!  
   // ...by which I mean to deallocate
