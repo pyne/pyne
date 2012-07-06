@@ -96,24 +96,20 @@ to be based off of the EPD packages.
 First, you'll need to know where on your system EPD is installed.
 Call this variable ``EPD_DIR``; for example if you have installed it 
 to your home directory then ``EPD_DIR=$HOME/epd``.  You'll then need
-to add the following lines to your :file:`~/.bashrc` file *after* 
-installing EPD but *prior to* installing PyNE:
-
-.. code-block:: bash
+to add the following lines to your ``~/.bashrc`` file *after* 
+installing EPD but *prior to* installing PyNE::
 
     export PATH=$EPD_DIR/bin:$HOME/.local/bin:$PATH
     export CPATH=$EPD_DIR/include:$CPATH
     export LD_LIBRARY_PATH=$EPD_DIR/lib:$LD_LIBRARY_PATH
 
-Or as in the example:
-
-.. code-block:: bash
+Or as in the example::
 
     export PATH=$HOME/epd/bin:$HOME/.local/bin:$PATH
     export CPATH=$HOME/epd/include:$CPATH
     export LD_LIBRARY_PATH=$HOME/epd/lib:$LD_LIBRARY_PATH
 
-You may now proceed with the PyNE install `as above <install_source>`_.
+You may now proceed with the PyNE install as above.
 
 .. _zip: https://github.com/pyne/pyne/zipball/0.1-rc
 .. _tar: https://github.com/pyne/pyne/tarball/0.1-rc
