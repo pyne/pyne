@@ -7,6 +7,6 @@ If you are interested in the package itself, or would like to help
 and contribute, please let us know either on the mailing list 
 (pyne-dev@googlegroups.com) or `github`_.
 
-.. include:: docs/source/install.rst
+.. include:: https://raw.github.com/pyne/pyne/staging/docs/source/install.rst
 
 .. _github: https://github.com/pyne/pyne
