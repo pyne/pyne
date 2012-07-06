@@ -113,7 +113,7 @@ Or as in the example:
     export CPATH=$HOME/epd/include:$CPATH
     export LD_LIBRARY_PATH=$HOME/epd/lib:$LD_LIBRARY_PATH
 
-You may now proceed with the PyNE install :ref:`as above <install_source>`.
+You may now proceed with the PyNE install `as above <install_source>`_.
 
 .. _zip: https://github.com/pyne/pyne/zipball/0.1-rc
 .. _tar: https://github.com/pyne/pyne/tarball/0.1-rc
