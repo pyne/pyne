@@ -221,7 +221,7 @@ class MyTreeWidget(QTreeWidget):
 
     def mousePressEvent(self, event):
         if event.button() == Qt.RightButton:
-            self.temporaryPos = event.globalPos()
+            self.temporaryPos = self.viewport().mapFromGlobal(event.globalPos())
             menu = QMenu()
             menu.addAction("Plot Angle Distribution", self.create_angle)
             menu.addAction("Plot Angle Distribution (Polar)", self.create_angle_polar)
