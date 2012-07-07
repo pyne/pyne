@@ -36,6 +36,31 @@ class Isotxs(_BinaryReader):
     """An Isotxs object represents a binary ISOTXS file written according to the
     CCCC specifications.
 
+    :Attributes:
+      **chi** : list of floats
+        Fission yields by group.
+
+      **emax** : list of floats
+        Maximum energy bound for each group
+
+      **emin** : float
+        Minimum energy bound of set
+
+      **fc** : dict
+        Dictionary with file-control information
+
+      **fileVersion** : int
+        Version of the ISOTXS file.
+
+      **label** : str
+        File identification string
+
+      **nuclides** : list of _Nuclides
+        List of individual nuclides in the ISOTXS file.
+
+      **vel** : float
+        Mean neutron velocity in each group.
+
     Parameters
     ----------
     filename : str
@@ -368,6 +393,31 @@ class Dlayxs(_BinaryReader):
     file. This file contains delayed neutron precursor yields, emission spectra,
     and decay constants reduced to multigroup form. Typically, the data in a
     DLAYXS file would be related to cross-section files in ISOTXS and GRUPXS.
+
+    :Attributes:
+      **isotopes** : list of strs
+        Names of the isotopes in the DLAYXS file.
+
+      **isotopeFamily** : dict
+        Dictionary whose keys are the isotope names and whose values are 
+
+      **decay** : dict
+        Dictionary whose keys are names of nuclides and whose values are decay
+        constants for each delayed neutron family.
+
+      **spectrum** : dict
+
+      **nGroups** : int
+        Number of energy groups
+
+      **nIsotopes** : int
+        Number of isotopes
+
+      **nFamilies** : int
+        Number of delayed neutron families
+
+      **nu** : dict
+      
 
     Parameters
     ----------

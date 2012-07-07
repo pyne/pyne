@@ -15,7 +15,7 @@ generates ACE-format cross sections.
 
 .. _ENDF: http://www.nndc.bnl.gov/endf
 
-.. moduleauthor:: Paul Romano <romano7@gmail.com>, Anthony Scopatz <scopatz@gmail.com>
+.. moduleauthor:: Paul Romano <paul.k.romano@gmail.com>, Anthony Scopatz <scopatz@gmail.com>
 """
 cimport std
 
