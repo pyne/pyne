@@ -367,8 +367,7 @@ class NeutronTable(AceTable):
         self._read_cross_sections()
         self._read_nu()
         self._read_angular_distributions()
-        self._read_ldlw()
-        self._read_dlw()
+        self._read_energy_distributions()
         self._read_gpd()
         self._read_mtrp()
         self._read_lsigp()
@@ -618,66 +617,57 @@ class NeutronTable(AceTable):
             reaction.ang_pdf = ang_pdf
             reaction.ang_cdf = ang_cdf
 
-    def _read_ldlw(self):
-        """Find locations for energy distribution data for each reaction
-        """
-        LED = self.jxs[10]
-
-        # Number of reactions is less than total since we only need
-        # energy distribution for reactions with secondary
-        # neutrons. Thus, MT > 100 are not included. Elastic
-        # scattering is also not included.
-        NMT = self.nxs[5]
-        locc = np.asarray(self.xss[LED:LED+NMT], dtype=int)
-        for loc, rxn in zip(locc, self.reactions.values()[1:NMT+1]):
-            rxn.LOCC = loc
-
-    def _read_dlw(self):
+    def _read_energy_distributions(self):
         """Determine the energy distribution for secondary neutrons for
         each reaction MT
         """
-        cdef int ind, i, LDIS, NMT, NE, NR, LNW, LAW, IDAT, NPE, NPA
+        cdef int ind, i, n_reactions, NE, n_regions, location_next_law, law, location_data, NPE, NPA
 
-        LDIS = self.jxs[11]
-        NMT = self.nxs[5]
+        # Number of reactions with secondary neutrons other than elastic
+        # scattering. For elastic scattering, the outgoing energy can be
+        # determined from kinematics.
+        n_reactions = self.nxs[5]
 
-        rxs = self.reactions.values()[1:NMT+1]
-        for irxn, rxn in enumerate(rxs):
-            ind = LDIS + rxn.LOCC - 1
-            LNW = int(self.xss[ind])
-            LAW = int(self.xss[ind+1])
-            IDAT = int(self.xss[ind+2])
-            NR = int(self.xss[ind+3])
+        for i, reaction in enumerate(self.reactions.values()[1:n_reactions + 1]):
+            # Set starting index for energy distribution
+            ind = self.jxs[11] + int(self.xss[self.jxs[10] + i]) - 1
+
+            location_next_law = int(self.xss[ind])
+            law = int(self.xss[ind+1])
+            location_data = int(self.xss[ind+2])
+
+            # Number of interpolation regions for law applicability regime
+            n_regions = int(self.xss[ind+3])
             ind += 4
-            if NR > 0:
-                dat = np.asarray(self.xss[ind:ind+2*NR], dtype=int)
-                dat.shape = (2, NR)
+            if n_regions > 0:
+                dat = np.asarray(self.xss[ind:ind + 2*n_regions], dtype=int)
+                dat.shape = (2, n_regions)
                 interp_NBT, interp_INT = dat
-                ind += 2 * NR
+                ind += 2 * n_regions
 
             # Determine tabular energy points and probability of law
             # validity
             NE = int(self.xss[ind])
             dat = self.xss[ind+1:ind+1+2*NE]
             dat.shape = (2, NE)
-            rxn.e_dist_energy, rxn.e_dist_pvalid = dat
+            reaction.e_dist_energy, reaction.e_dist_pvalid = dat
 
-            rxn.e_dist_law = LAW
-            ind = LDIS + IDAT - 1
+            reaction.e_dist_law = law
+            ind = self.jxs[11] + location_data - 1
 
-            if LAW == 1:
+            if law == 1:
                 # Tabular equiprobable energy bins (ENDF Law 1)
-                NR = int(self.xss[ind])
+                n_regions = int(self.xss[ind])
                 ind += 1
-                if NR > 0:
-                    dat = np.asarray(self.xss[ind:ind+2*NR], dtype=int)
-                    dat.shape = (2, NR)
-                    rxn.e_dist_NBT, rxn.e_dist_INT = dat
-                    ind += 2 * NR                    
+                if n_regions > 0:
+                    dat = np.asarray(self.xss[ind:ind+2*n_regions], dtype=int)
+                    dat.shape = (2, n_regions)
+                    reaction.e_dist_NBT, reaction.e_dist_INT = dat
+                    ind += 2 * n_regions                    
 
                 # Number of outgoing energies in each E_out table
                 NE = int(self.xss[ind])
-                rxn.e_dist_energy_in = self.xss[ind+1:ind+1+NE]
+                reaction.e_dist_energy_in = self.xss[ind+1:ind+1+NE]
                 ind += 1 + NE
 
                 # Read E_out tables
@@ -687,36 +677,36 @@ class NeutronTable(AceTable):
                 self.e_dist_energy_out1, self.e_dist_energy_out2, \
                                          self.e_dist_energy_outNE = dat
                 ind += 1 + 3 * NET
-            elif LAW == 2:
+            elif law == 2:
                 # Discrete photon energy
                 self.e_dist_LP = int(self.xss[ind])
                 self.e_dist_EG = self.xss[ind+1]
                 ind += 2
-            elif LAW == 3:
+            elif law == 3:
                 # Level scattering (ENDF Law 3)
-                rxn.e_dist_data = self.xss[ind:ind+2]
+                reaction.e_dist_data = self.xss[ind:ind+2]
                 ind += 2
-            elif LAW == 4:
+            elif law == 4:
                 # Continuous tabular distribution (ENDF Law 1)
-                NR = int(self.xss[ind])
+                n_regions = int(self.xss[ind])
                 ind += 1
-                if NR > 0:
-                    dat = np.asarray(self.xss[ind:ind+2*NR], dtype=int)
-                    dat.shape = (2, NR)
-                    rxn.e_dist_NBT, rxn.e_dist_INT = dat
-                    ind += 2 * NR                    
+                if n_regions > 0:
+                    dat = np.asarray(self.xss[ind:ind+2*n_regions], dtype=int)
+                    dat.shape = (2, n_regions)
+                    reaction.e_dist_NBT, reaction.e_dist_INT = dat
+                    ind += 2 * n_regions                    
 
                 # Number of outgoing energies in each E_out table
                 NE = int(self.xss[ind])
-                rxn.e_dist_energy_in = self.xss[ind+1:ind+1+NE]
+                reaction.e_dist_energy_in = self.xss[ind+1:ind+1+NE]
                 L = self.xss[ind+1+NE:ind+1+2*NE]
                 ind += 1 + 2*NE
 
                 nps = []
-                rxn.e_dist_intt = []        # Interpolation scheme (1=hist, 2=lin-lin)
-                rxn.e_dist_energy_out = []  # Outgoing E grid for each incoming E
-                rxn.e_dist_pdf = []         # Probability dist for " " "
-                rxn.e_dist_cdf = []         # Cumulative dist for " " "
+                reaction.e_dist_intt = []        # Interpolation scheme (1=hist, 2=lin-lin)
+                reaction.e_dist_energy_out = []  # Outgoing E grid for each incoming E
+                reaction.e_dist_pdf = []         # Probability dist for " " "
+                reaction.e_dist_cdf = []         # Cumulative dist for " " "
                 for i in range(NE):
                     INTTp = int(self.xss[ind])
                     if INTTp > 10:
@@ -725,190 +715,190 @@ class NeutronTable(AceTable):
                     else:
                         INTT = INTTp
                         ND = 0
-                    rxn.e_dist_intt.append(INTT)
+                    reaction.e_dist_intt.append(INTT)
                     #if ND > 0:
-                    #    print [rxn, ND, INTT]
+                    #    print [reaction, ND, INTT]
 
                     NP = int(self.xss[ind+1])
                     nps.append(NP)
                     dat = self.xss[ind+2:ind+2+3*NP]
                     dat.shape = (3, NP)
-                    rxn.e_dist_energy_out.append(dat[0])
-                    rxn.e_dist_pdf.append(dat[1])
-                    rxn.e_dist_cdf.append(dat[2])
+                    reaction.e_dist_energy_out.append(dat[0])
+                    reaction.e_dist_pdf.append(dat[1])
+                    reaction.e_dist_cdf.append(dat[2])
                     ind += 2 + 3*NP
 
                 # convert to arrays if possible
-                rxn.e_dist_intt = np.array(rxn.e_dist_intt)
+                reaction.e_dist_intt = np.array(reaction.e_dist_intt)
                 nps = np.array(nps)
                 if all((nps[1:] - nps[:-1]) == 0):
-                    rxn.e_dist_energy_out = np.array(rxn.e_dist_energy_out)
-                    rxn.e_dist_pdf = np.array(rxn.e_dist_pdf)
-                    rxn.e_dist_cdf = np.array(rxn.e_dist_cdf)
-            elif LAW == 5:
+                    reaction.e_dist_energy_out = np.array(reaction.e_dist_energy_out)
+                    reaction.e_dist_pdf = np.array(reaction.e_dist_pdf)
+                    reaction.e_dist_cdf = np.array(reaction.e_dist_cdf)
+            elif law == 5:
                 # General evaporation spectrum (ENDF-5 File 5 LF=5)
-                NR = int(self.xss[ind])
+                n_regions = int(self.xss[ind])
                 ind += 1
-                if NR > 0:
-                    dat = np.asarray(self.xss[ind:ind+2*NR], dtype=int)
-                    dat.shape = (2, NR)
-                    rxn.e_dist_NBT, rxn.e_dist_INT = dat
-                    ind += 2 * NR                    
+                if n_regions > 0:
+                    dat = np.asarray(self.xss[ind:ind+2*n_regions], dtype=int)
+                    dat.shape = (2, n_regions)
+                    reaction.e_dist_NBT, reaction.e_dist_INT = dat
+                    ind += 2 * n_regions                    
                 
                 NE = int(self.xss[ind])
-                rxn.e_dist_energy_in = self.xss[ind+1:ind+1+NE]
-                rxn.e_dist_T = self.xss[ind+1+NE:ind+1+2*NE]
+                reaction.e_dist_energy_in = self.xss[ind+1:ind+1+NE]
+                reaction.e_dist_T = self.xss[ind+1+NE:ind+1+2*NE]
                 ind += 1+ 2*NE
 
                 NET = int(self.xss[ind])
-                rxn.e_dist_X = self.xss[ind+1:ind+1+NET]
+                reaction.e_dist_X = self.xss[ind+1:ind+1+NET]
                 ind += 1 + NET
-            elif LAW == 7:
+            elif law == 7:
                 # Simple Maxwell fission spectrum (ENDF-6 File 5 LF=7) 
-                NR = int(self.xss[ind])
+                n_regions = int(self.xss[ind])
                 ind += 1
-                if NR > 0:
-                    dat = np.asarray(self.xss[ind:ind+2*NR], dtype=int)
-                    dat.shape = (2, NR)
-                    rxn.e_dist_NBT, rxn.e_dist_INT = dat
-                    ind += 2 * NR                    
+                if n_regions > 0:
+                    dat = np.asarray(self.xss[ind:ind+2*n_regions], dtype=int)
+                    dat.shape = (2, n_regions)
+                    reaction.e_dist_NBT, reaction.e_dist_INT = dat
+                    ind += 2 * n_regions                    
 
                 NE = int(self.xss[ind])
-                rxn.e_dist_energy_in = self.xss[ind+1:ind+1+NE]
-                rxn.e_dist_T = self.xss[ind+1+NE:ind+1+2*NE]
-                rxn.e_dist_U = self.xss[ind+1+2*NE]
+                reaction.e_dist_energy_in = self.xss[ind+1:ind+1+NE]
+                reaction.e_dist_T = self.xss[ind+1+NE:ind+1+2*NE]
+                reaction.e_dist_U = self.xss[ind+1+2*NE]
                 ind += 2 + 2*NE
-            elif LAW == 9:
+            elif law == 9:
                 # Evaporation spectrum (ENDF-6 File 5 LF=9)
-                NR = int(self.xss[ind])
+                n_regions = int(self.xss[ind])
                 ind += 1
-                if NR > 0:
-                    dat = np.asarray(self.xss[ind:ind+2*NR], dtype=int)
-                    dat.shape = (2, NR)
-                    rxn.e_dist_NBT, rxn.e_dist_INT = dat
-                    ind += 2 * NR                    
+                if n_regions > 0:
+                    dat = np.asarray(self.xss[ind:ind+2*n_regions], dtype=int)
+                    dat.shape = (2, n_regions)
+                    reaction.e_dist_NBT, reaction.e_dist_INT = dat
+                    ind += 2 * n_regions                    
 
                 NE = int(self.xss[ind])
-                rxn.e_dist_energy_in = self.xss[ind+1:ind+1+NE]
-                rxn.e_dist_T = self.xss[ind+1+NE:ind+1+2*NE]
-                rxn.e_dist_U = self.xss[ind+1+2*NE]
+                reaction.e_dist_energy_in = self.xss[ind+1:ind+1+NE]
+                reaction.e_dist_T = self.xss[ind+1+NE:ind+1+2*NE]
+                reaction.e_dist_U = self.xss[ind+1+2*NE]
                 ind += 2 + 2*NE
-            elif LAW == 11:
+            elif law == 11:
                 # Energy dependent Watt spectrum (ENDF-6 File 5 LF=11)
                 # Interpolation scheme between a's    
-                NR = int(self.xss[ind])
+                n_regions = int(self.xss[ind])
                 ind += 1
-                if NR > 0:
-                    dat = np.asarray(self.xss[ind:ind+2*NR], dtype=int)
-                    dat.shape = (2, NR)
-                    rxn.e_dist_NBTa, rxn.e_dist_INTa = dat
-                    ind += 2 * NR                    
+                if n_regions > 0:
+                    dat = np.asarray(self.xss[ind:ind+2*n_regions], dtype=int)
+                    dat.shape = (2, n_regions)
+                    reaction.e_dist_NBTa, reaction.e_dist_INTa = dat
+                    ind += 2 * n_regions                    
 
                 # Incident energy table and tabulated a's
                 NE = int(self.xss[ind])
-                rxn.e_dist_energya_in = self.xss[ind+1:ind+1+NE]
-                rxn.e_dist_a = self.xss[ind+1+NE:ind+1+2*NE]
+                reaction.e_dist_energya_in = self.xss[ind+1:ind+1+NE]
+                reaction.e_dist_a = self.xss[ind+1+NE:ind+1+2*NE]
                 ind += 1 + 2*NE
 
                 # Interpolation scheme between b's
-                NR = int(self.xss[ind])
+                n_regions = int(self.xss[ind])
                 ind += 1
-                if NR > 0:
-                    dat = np.asarray(self.xss[ind:ind+2*NR], dtype=int)
-                    dat.shape = (2, NR)
-                    rxn.e_dist_NBTb, rxn.e_dist_INTb = dat
-                    ind += 2 * NR                    
+                if n_regions > 0:
+                    dat = np.asarray(self.xss[ind:ind+2*n_regions], dtype=int)
+                    dat.shape = (2, n_regions)
+                    reaction.e_dist_NBTb, reaction.e_dist_INTb = dat
+                    ind += 2 * n_regions                    
 
                 # Incident energy table and tabulated b's
                 NE = int(self.xss[ind])
-                rxn.e_dist_energyb_in = self.xss[ind+1:ind+1+NE]
-                rxn.e_dist_b = self.xss[ind+1+NE:ind+1+2*NE]
+                reaction.e_dist_energyb_in = self.xss[ind+1:ind+1+NE]
+                reaction.e_dist_b = self.xss[ind+1+NE:ind+1+2*NE]
 
-                rxn.e_dist_U = self.xss[ind+1+2*NE]
+                reaction.e_dist_U = self.xss[ind+1+2*NE]
                 ind += 2 + 2*NE
-            elif LAW == 22:
+            elif law == 22:
                 # Tabular linear functions (UK Law 2)
                 # Interpolation scheme (not used in MCNP)
-                NR = int(self.xss[ind])
+                n_regions = int(self.xss[ind])
                 ind += 1
-                if NR > 0:
-                    dat = np.asarray(self.xss[ind:ind+2*NR], dtype=int)
-                    dat.shape = (2, NR)
-                    rxn.e_dist_NBT, rxn.e_dist_INT = dat
-                    ind += 2 * NR                    
+                if n_regions > 0:
+                    dat = np.asarray(self.xss[ind:ind+2*n_regions], dtype=int)
+                    dat.shape = (2, n_regions)
+                    reaction.e_dist_NBT, reaction.e_dist_INT = dat
+                    ind += 2 * n_regions                    
 
                 # Number of incident energies
                 NE = int(self.xss[ind])
-                rxn.e_dist_energy_in = self.xss[ind+1:ind+1+NE]
+                reaction.e_dist_energy_in = self.xss[ind+1:ind+1+NE]
                 LOCE = np.asarray(self.xss[ind+1+NE:ind+1+2*NE], dtype=int)
                 ind += 1 + 2*NE
 
                 # Read linear functions
                 nfs = []
-                rxn.e_dist_P = []
-                rxn.e_dist_T = []
-                rxn.e_dist_C = []
+                reaction.e_dist_P = []
+                reaction.e_dist_T = []
+                reaction.e_dist_C = []
                 for i in range(NE):
                     NF = int(self.xss[ind])
                     nfs.append(NF)
                     dat = self.xss[ind+1:ind+1+3*NF]
                     dat.shape = (3, NF)
-                    rxn.e_dist_P.append(dat[0])
-                    rxn.e_dist_T.append(dat[1])
-                    rxn.e_dist_C.append(dat[2])
+                    reaction.e_dist_P.append(dat[0])
+                    reaction.e_dist_T.append(dat[1])
+                    reaction.e_dist_C.append(dat[2])
                     ind += 1 + 3*NF
 
                 # convert to arrays if possible
                 nfs = np.array(nfs)
                 if all((nfs[1:] - nfs[:-1]) == 0):
-                    rxn.e_dist_P = np.array(rxn.e_dist_P)
-                    rxn.e_dist_T = np.array(rxn.e_dist_T)
-                    rxn.e_dist_C = np.array(rxn.e_dist_C)
-            elif LAW == 24:
+                    reaction.e_dist_P = np.array(reaction.e_dist_P)
+                    reaction.e_dist_T = np.array(reaction.e_dist_T)
+                    reaction.e_dist_C = np.array(reaction.e_dist_C)
+            elif law == 24:
                 # From UK Law 6
                 # Interpolation scheme (not used in MCNP)
-                NR = int(self.xss[ind])
+                n_regions = int(self.xss[ind])
                 ind += 1
-                if NR > 0:
-                    dat = np.asarray(self.xss[ind:ind+2*NR], dtype=int)
-                    dat.shape = (2, NR)
-                    rxn.e_dist_NBT, rxn.e_dist_INT = dat
-                    ind += 2 * NR                    
+                if n_regions > 0:
+                    dat = np.asarray(self.xss[ind:ind+2*n_regions], dtype=int)
+                    dat.shape = (2, n_regions)
+                    reaction.e_dist_NBT, reaction.e_dist_INT = dat
+                    ind += 2 * n_regions                    
 
                 # Number of incident energies
                 NE = int(self.xss[ind])
-                rxn.e_dist_energy_in = self.xss[ind+1:ind+1+NE]
+                reaction.e_dist_energy_in = self.xss[ind+1:ind+1+NE]
                 ind += 1 + NE
                 
                 # Outgoing energy tables
                 NET = int(self.xss[ind])
-                rxn.e_dist_T = self.xss[ind+1:ind+1+NE*NET]
-                rxn.e_dist_T.shape = (NE, NET)
+                reaction.e_dist_T = self.xss[ind+1:ind+1+NE*NET]
+                reaction.e_dist_T.shape = (NE, NET)
                 ind += 1 + NE*NET
-            elif LAW == 44:
+            elif law == 44:
                 # Kalbach-87 Formalism (ENDF File 6 Law 1, LANG=2)
                 # Interpolation scheme
-                NR = int(self.xss[ind])
+                n_regions = int(self.xss[ind])
                 ind += 1
-                if NR > 0:
-                    dat = np.asarray(self.xss[ind:ind+2*NR], dtype=int)
-                    dat.shape = (2, NR)
-                    rxn.e_dist_NBT, rxn.e_dist_INT = dat
-                    ind += 2 * NR                    
+                if n_regions > 0:
+                    dat = np.asarray(self.xss[ind:ind+2*n_regions], dtype=int)
+                    dat.shape = (2, n_regions)
+                    reaction.e_dist_NBT, reaction.e_dist_INT = dat
+                    ind += 2 * n_regions                    
 
                 # Number of outgoing energies in each E_out table
                 NE = int(self.xss[ind])
-                rxn.e_dist_energy_in = self.xss[ind+1:ind+1+NE]
+                reaction.e_dist_energy_in = self.xss[ind+1:ind+1+NE]
                 L = np.asarray(self.xss[ind+1+NE:ind+1+2*NE], dtype=int)
                 ind += 1 + 2*NE
 
                 nps = []
-                rxn.e_dist_intt = []        # Interpolation scheme (1=hist, 2=lin-lin)
-                rxn.e_dist_energy_out = []  # Outgoing E grid for each incoming E
-                rxn.e_dist_pdf = []         # Probability dist for " " "
-                rxn.e_dist_cdf = []         # Cumulative dist for " " "
-                rxn.e_dist_frac = []        # Precompound fraction for " " "
-                rxn.e_dist_ang = []         # Angular distribution slope for " " "
+                reaction.e_dist_intt = []        # Interpolation scheme (1=hist, 2=lin-lin)
+                reaction.e_dist_energy_out = []  # Outgoing E grid for each incoming E
+                reaction.e_dist_pdf = []         # Probability dist for " " "
+                reaction.e_dist_cdf = []         # Cumulative dist for " " "
+                reaction.e_dist_frac = []        # Precompound fraction for " " "
+                reaction.e_dist_ang = []         # Angular distribution slope for " " "
                 for i in range(NE):
                     INTTp = int(self.xss[ind])
                     if INTTp > 10:
@@ -916,7 +906,7 @@ class NeutronTable(AceTable):
                         ND = (INTTp - INTT)/10
                     else:
                         INTT = INTTp
-                    rxn.e_dist_intt.append(INTT)
+                    reaction.e_dist_intt.append(INTT)
 
                     NP = int(self.xss[ind+1])
                     nps.append(NP)
@@ -924,48 +914,48 @@ class NeutronTable(AceTable):
 
                     dat = self.xss[ind:ind+5*NP]
                     dat.shape = (5, NP)
-                    rxn.e_dist_energy_out.append(dat[0])
-                    rxn.e_dist_pdf.append(dat[1])
-                    rxn.e_dist_cdf.append(dat[2])
-                    rxn.e_dist_frac.append(dat[3])
-                    rxn.e_dist_ang.append(dat[4])
+                    reaction.e_dist_energy_out.append(dat[0])
+                    reaction.e_dist_pdf.append(dat[1])
+                    reaction.e_dist_cdf.append(dat[2])
+                    reaction.e_dist_frac.append(dat[3])
+                    reaction.e_dist_ang.append(dat[4])
                     ind += 5*NP
 
                 # convert to arrays if possible
-                rxn.e_dist_intt = np.array(rxn.e_dist_intt)
+                reaction.e_dist_intt = np.array(reaction.e_dist_intt)
                 nps = np.array(nps)
                 if all((nps[1:] - nps[:-1]) == 0):
-                    rxn.e_dist_energy_out = np.array(rxn.e_dist_energy_out)
-                    rxn.e_dist_pdf = np.array(rxn.e_dist_pdf)
-                    rxn.e_dist_cdf = np.array(rxn.e_dist_cdf)
-            elif LAW == 61:
+                    reaction.e_dist_energy_out = np.array(reaction.e_dist_energy_out)
+                    reaction.e_dist_pdf = np.array(reaction.e_dist_pdf)
+                    reaction.e_dist_cdf = np.array(reaction.e_dist_cdf)
+            elif law == 61:
                 # Like 44, but tabular distribution instead of Kalbach-87
                 # Interpolation scheme
-                NR = int(self.xss[ind])
+                n_regions = int(self.xss[ind])
                 ind += 1
-                if NR > 0:
-                    dat = np.asarray(self.xss[ind:ind+2*NR], dtype=int)
-                    dat.shape = (2, NR)
-                    rxn.e_dist_NBT, rxn.e_dist_INT = dat
-                    ind += 2 * NR                    
+                if n_regions > 0:
+                    dat = np.asarray(self.xss[ind:ind+2*n_regions], dtype=int)
+                    dat.shape = (2, n_regions)
+                    reaction.e_dist_NBT, reaction.e_dist_INT = dat
+                    ind += 2 * n_regions                    
 
                 # Number of outgoing energies in each E_out table
                 NE = int(self.xss[ind])
-                rxn.e_dist_energy_in = self.xss[ind+1:ind+1+NE]
+                reaction.e_dist_energy_in = self.xss[ind+1:ind+1+NE]
                 L = np.asarray(self.xss[ind+1+NE:ind+1+2*NE], dtype=int)
                 ind += 1 + 2*NE
 
                 npes = []
-                rxn.e_dist_intt = []        # Interpolation scheme (1=hist, 2=lin-lin)
-                rxn.e_dist_energy_out = []  # Outgoing E grid for each incoming E
-                rxn.e_dist_pdf = []         # Probability dist for " " "
-                rxn.e_dist_cdf = []         # Cumulative dist for " " "
+                reaction.e_dist_intt = []        # Interpolation scheme (1=hist, 2=lin-lin)
+                reaction.e_dist_energy_out = []  # Outgoing E grid for each incoming E
+                reaction.e_dist_pdf = []         # Probability dist for " " "
+                reaction.e_dist_cdf = []         # Cumulative dist for " " "
 
                 npas = []
-                rxn.a_dist_intt = []
-                rxn.a_dist_mu_out = [] # Cosine scattering angular grid
-                rxn.a_dist_pdf = []    # Probability dist function
-                rxn.a_dist_cdf = []
+                reaction.a_dist_intt = []
+                reaction.a_dist_mu_out = [] # Cosine scattering angular grid
+                reaction.a_dist_pdf = []    # Probability dist function
+                reaction.a_dist_cdf = []
                 for i in range(NE):
                     INTTp = int(self.xss[ind])
                     if INTTp > 10:
@@ -973,78 +963,70 @@ class NeutronTable(AceTable):
                         ND = (INTTp - INTT)/10
                     else:
                         INTT = INTTp
-                    rxn.e_dist_intt.append(INTT)
+                    reaction.e_dist_intt.append(INTT)
 
                     # Secondary energy distribution
                     NPE = int(self.xss[ind+1])
                     npes.append(NPE)
                     dat = self.xss[ind+2:ind+2+4*NPE]
                     dat.shape = (4, NPE)
-                    rxn.e_dist_energy_out.append(dat[0])
-                    rxn.e_dist_pdf.append(dat[1])
-                    rxn.e_dist_cdf.append(dat[2])
+                    reaction.e_dist_energy_out.append(dat[0])
+                    reaction.e_dist_pdf.append(dat[1])
+                    reaction.e_dist_cdf.append(dat[2])
                     LC = np.asarray(dat[3], dtype=int)
                     ind += 2 + 4*NPE
 
                     # Secondary angular distribution
-                    rxn.a_dist_intt.append([])
-                    rxn.a_dist_mu_out.append([])
-                    rxn.a_dist_pdf.append([])
-                    rxn.a_dist_cdf.append([])
+                    reaction.a_dist_intt.append([])
+                    reaction.a_dist_mu_out.append([])
+                    reaction.a_dist_pdf.append([])
+                    reaction.a_dist_cdf.append([])
                     for j in range(NPE):
-                        rxn.a_dist_intt[-1].append(int(self.xss[ind]))
+                        reaction.a_dist_intt[-1].append(int(self.xss[ind]))
                         NPA = int(self.xss[ind+1])
                         npas.append(NPA)
                         dat = self.xss[ind+2:ind+2+3*NPA]
                         dat.shape = (3, NPA)
-                        rxn.a_dist_mu_out[-1].append(dat[0])
-                        rxn.a_dist_pdf[-1].append(dat[1])
-                        rxn.a_dist_cdf[-1].append(dat[2])
+                        reaction.a_dist_mu_out[-1].append(dat[0])
+                        reaction.a_dist_pdf[-1].append(dat[1])
+                        reaction.a_dist_cdf[-1].append(dat[2])
                         ind += 2 + 3*NPA
 
                 # convert to arrays if possible
-                rxn.e_dist_intt = np.array(rxn.e_dist_intt)
+                reaction.e_dist_intt = np.array(reaction.e_dist_intt)
                 npes = np.array(npes)
                 npas = np.array(npas)
                 if all((npes[1:] - npes[:-1]) == 0):
-                    rxn.e_dist_energy_out = np.array(rxn.e_dist_energy_out)
-                    rxn.e_dist_pdf = np.array(rxn.e_dist_pdf)
-                    rxn.e_dist_cdf = np.array(rxn.e_dist_cdf)
+                    reaction.e_dist_energy_out = np.array(reaction.e_dist_energy_out)
+                    reaction.e_dist_pdf = np.array(reaction.e_dist_pdf)
+                    reaction.e_dist_cdf = np.array(reaction.e_dist_cdf)
 
-                    rxn.a_dist_intt = np.array(rxn.a_dist_intt)
+                    reaction.a_dist_intt = np.array(reaction.a_dist_intt)
                     if all((npas[1:] - npas[:-1]) == 0):
-                        rxn.a_dist_mu_out = np.array(rxn.a_dist_mu_out)
-                        rxn.a_dist_pdf = np.array(rxn.a_dist_pdf)
-                        rxn.a_dist_cdf = np.array(rxn.a_dist_cdf)
-            elif LAW == 66:
+                        reaction.a_dist_mu_out = np.array(reaction.a_dist_mu_out)
+                        reaction.a_dist_pdf = np.array(reaction.a_dist_pdf)
+                        reaction.a_dist_cdf = np.array(reaction.a_dist_cdf)
+            elif law == 66:
                 # N-body phase space distribution (ENDF File 6 Law 6)
-                rxn.e_dist_nbodies = int(self.xss[ind])
-                rxn.e_dist_massratio = self.xss[ind+1]
+                reaction.e_dist_nbodies = int(self.xss[ind])
+                reaction.e_dist_massratio = self.xss[ind+1]
                 ind += 2
-            elif LAW == 67:
+            elif law == 67:
                 # Laboratory angle-energy law (ENDF File 6 Law 7)
                 # Interpolation scheme
-                NR = int(self.xss[ind])
+                n_regions = int(self.xss[ind])
                 ind += 1
-                if NR > 0:
-                    dat = np.asarray(self.xss[ind:ind+2*NR], dtype=int)
-                    dat.shape = (2, NR)
-                    rxn.e_dist_NBT, rxn.e_dist_INT = dat
-                    ind += 2 * NR                    
+                if n_regions > 0:
+                    dat = np.asarray(self.xss[ind:ind+2*n_regions], dtype=int)
+                    dat.shape = (2, n_regions)
+                    reaction.e_dist_NBT, reaction.e_dist_INT = dat
+                    ind += 2 * n_regions                    
 
                 # Number of outgoing energies in each E_out table
                 NE = int(self.xss[ind])
-                rxn.e_dist_energy_in = self.xss[ind+1:ind+1+NE]
+                reaction.e_dist_energy_in = self.xss[ind+1:ind+1+NE]
                 L = np.asarray(self.xss[ind+1+NE:ind+1+2*NE], dtype=int)
                 ind += 1 + 2*NE
-
-
-            # Bump up index for next loop
-            if irxn+1 < NMT:
-                if ind < LDIS + rxs[irxn+1].LOCC - 1:
-                    LNW = int(self.xss[ind])
-                    LAW = int(self.xss[ind+1])
-                    ind += 2
                     
             # TODO: Read rest of data
 
@@ -1109,7 +1091,7 @@ class NeutronTable(AceTable):
     def _read_sigp(self):
         """Read cross-sections for each photon-producing reaction MT.
         """
-        cdef int ind, jxs15, MFTYPE, NR, NE
+        cdef int ind, jxs15, MFTYPE, n_regions, NE
 
         jxs15 = self.jxs[15]
         for rxn in self.photon_reactions.values():
@@ -1123,11 +1105,11 @@ class NeutronTable(AceTable):
                 ind += 1
     
                 # ENDF interpolation parameters
-                NR = int(self.xss[ind])
-                dat = np.asarray(self.xss[ind+1:ind+1+2*NR], dtype=int)
-                dat.shape = (2, NR)
+                n_regions = int(self.xss[ind])
+                dat = np.asarray(self.xss[ind+1:ind+1+2*n_regions], dtype=int)
+                dat.shape = (2, n_regions)
                 NBT, INT = dat
-                ind += 1 + 2*NR
+                ind += 1 + 2*n_regions
 
                 # Energy-dependent yield
                 NE = int(self.xss[ind])
@@ -1429,9 +1411,6 @@ class Reaction(object):
         self.MT = MT       # MT value
         self.Q = None      # Q-value
         self.TY = None     # Neutron release
-        self.LOCA = None
-        self.LOCB = None
-        self.LOCC = None
         self.IE = None     # Energy grid index
         self.sigma = []    # Cross section values
 
