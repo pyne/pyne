@@ -555,9 +555,8 @@ class NeutronTable(AceTable):
     def _read_angular_distributions(self):
         """Find the angular distribution for each reaction MT
         """
-        cdef int ind, i, j, n_reactions, NE
+        cdef int ind, i, j, n_reactions, n_energies, n_bins
         cdef dict ang_cos, ang_pdf, ang_cdf
-        #cdef np.ndarray[np.float64_t, ndim=1] xss
 
         # Number of reactions with secondary neutrons (including elastic
         # scattering)
@@ -578,33 +577,42 @@ class NeutronTable(AceTable):
                 # TY < 0 and in LAB if TY > 0)
                 continue
 
-            ind = self.jxs[9] + loc - 1
+            ind = self.jxs[9] + loc
 
-            NE = int(self.xss[ind])
-            reaction.ang_energy_in = self.xss[ind+1:ind+1+NE]
-            ind += 1 + 2*NE
+            # Number of energies at which angular distributions are tabulated
+            n_energies = int(self.xss[ind - 1])
+
+            # Incoming energy grid
+            reaction.ang_energy_in = self.xss[ind:ind + n_energies]
+            ind += n_energies
+
+            # Read locations for angular distributions
+            locations = np.asarray(self.xss[ind:ind + n_energies], dtype=int)
+            ind += n_energies
 
             ang_cos = {}
             ang_pdf = {}
             ang_cdf = {}
-            for j in range(NE):
-                location = int(self.xss[ind + 1 + NE + j])
+            for j, location in enumerate(locations):
                 if location > 0:
                     # Equiprobable 32 bin distribution
                     # print([reaction,'equiprobable'])
-                    ang_cos[i] = self.xss[ind:ind + 33]
+                    ang_cos[j] = self.xss[ind:ind + 33]
                     ind += 33
                 elif location < 0:
                     # Tabular angular distribution
                     JJ = int(self.xss[ind])
-                    NP = int(self.xss[ind + 1])
+                    n_bins = int(self.xss[ind + 1])
                     ind += 2
-                    ang_dat = self.xss[ind:ind + 3*NP]
-                    ang_dat.shape = (3, NP)
+                    ang_dat = self.xss[ind:ind + 3*n_bins]
+                    ang_dat.shape = (3, n_bins)
                     ang_cos[j], ang_pdf[j], ang_cdf[j] = ang_dat
-                    ind += 3 * NP
-                # pass if location == 0
-                # Isotropic angular distribution
+                    ind += 3 * n_bins
+                else:
+                    # Isotropic angular distribution
+                    ang_cos = np.array([-1., 0., 1.])
+                    ang_pdf = np.array([0.5, 0.5, 0.5])
+                    ang_cdf = np.array([0., 0.5, 1.])
 
             reaction.ang_cos = ang_cos
             reaction.ang_pdf = ang_pdf
