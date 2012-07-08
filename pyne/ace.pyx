@@ -145,8 +145,7 @@ class Library(object):
                 print("Loading nuclide {0} at {1} K".format(name, temp_in_K))
             self.tables[name] = table
 
-            # Set NXS and read JXS
-            table.nxs = nxs
+            # Read JXS
             table.jxs = list(struct.unpack('=32i', self.f.read(128)))
 
             # Read XSS
@@ -158,6 +157,7 @@ class Library(object):
             # arrays so that the indexing will be the same as
             # Fortran. This makes it easier to follow the ACE format
             # specification.
+            table.nxs = nxs
             table.nxs.insert(0, 0)
             table.nxs = np.array(table.nxs, dtype=int)
 
@@ -364,11 +364,8 @@ class NeutronTable(AceTable):
             return "<ACE Continuous-E Neutron Table>"
 
     def _read_all(self):
-        self._read_esz()
+        self._read_basic_data()
         self._read_nu()
-        self._read_mtr()
-        self._read_lqr()
-        self._read_tyr()
         self._read_lsig()
         self._read_sig()
         self._read_land()
@@ -388,27 +385,50 @@ class NeutronTable(AceTable):
         self._read_fis()
         self._read_unr()
 
-    def _read_esz(self):
-        """Read ESZ block -- this block contains the energy grid, total
-        xs, absorption xs, elastic scattering xs, and heating numbers.
+    def _read_basic_data(self):
+        """Reads and parses the ESZ, MTR, LQR, and TRY blocks. These blocks
+        contain the energy grid, the total, absorption, and elastic cross
+        sections, average heating numbers, and a list of reactions with their
+        Q-values and multiplicites.
         """
-        cdef int ind, NE
-        
-        NE = self.nxs[3]
-        ind = self.jxs[1]
 
-        arr = self.xss[ind:ind+NE*5]
-        arr.shape = (5, NE)
+        cdef int n_energies, n_reactions
+
+        # Determine number of energies on nuclide grid and number of reactions
+        # excluding elastic scattering
+        n_energies = self.nxs[3]
+        n_reactions = self.nxs[4]
+
+        # Read energy grid and total, absorption, elastic scattering, and
+        # heating cross sections -- note that this appear separate from the rest
+        # of the reaction cross sections
+        arr = self.xss[self.jxs[1]:self.jxs[1] + 5*n_energies]
+        arr.shape = (5, n_energies)
         self.energy, self.sigma_t, self.sigma_a, sigma_el, self.heating = arr
 
         # Create elastic scattering reaction
-        MT = 2
-        rxn = Reaction(MT, self)
-        rxn.Q = 0.0
-        rxn.IE = 1
-        rxn.TY = 1
-        rxn.sigma = sigma_el
-        self.reactions[MT] = rxn
+        elastic_scatter = Reaction(2, self)
+        elastic_scatter.Q = 0.0
+        elastic_scatter.IE = 1
+        elastic_scatter.TY = 1
+        elastic_scatter.sigma = sigma_el
+        self.reactions[2] = elastic_scatter
+
+        # Create all other reactions with MT values
+        mts = np.asarray(self.xss[self.jxs[3]:self.jxs[3] + n_reactions], dtype=int)
+        qvalues = np.asarray(self.xss[self.jxs[4]:self.jxs[4] + 
+                                      n_reactions], dtype=float)
+        tys = np.asarray(self.xss[self.jxs[5]:self.jxs[5] + n_reactions], dtype=int)
+
+                             # Create all reactions other than elastic scatter
+        reactions = [(mt, Reaction(mt, self)) for mt in mts]
+        self.reactions.update(reactions)
+
+        # Loop over all reactions other than elastic scattering
+        for i, reaction in enumerate(self.reactions.values()[1:]):
+            reaction.Q = qvalues[i]
+            reaction.multiplicity = abs(tys[i])
+            reaction.center_of_mass = (tys[i] < 0)
 
     def _read_nu(self):
         """Read the NU block -- this contains information on the prompt
@@ -519,35 +539,6 @@ class NeutronTable(AceTable):
             #LOCC = {}
             #for group in range(n_group):
             #    LOCC[group] = self.xss[LED + group]
-
-    def _read_mtr(self):
-        """Get the list of reaction MTs for this cross-section table. The
-        MT values are somewhat arbitrary.
-        """
-        LMT = self.jxs[3]
-        NMT = self.nxs[4]
-        mts = np.asarray(self.xss[LMT:LMT+NMT], dtype=int)
-        rxs = [(mt, Reaction(mt, self)) for mt in mts]
-        self.reactions.update(rxs)
-            
-    def _read_lqr(self):
-        """Find Q-values for each reaction MT
-        """
-        jxs4 = self.jxs[4]
-        for i, rxn in enumerate(self.reactions.values()[1:]):
-            rxn.Q = self.xss[jxs4+i]
-
-    def _read_tyr(self):
-        """Find the neutron release for each reaction MT. A neutron
-        release of 19 indicates fission. A neutron release greater
-        than 100 signifies reactions other than fission taht have
-        energy-dependent neutron multiplicities
-        """
-        NMT = self.nxs[4]
-        jxs5 = self.jxs[5]
-        tys = np.asarray(self.xss[jxs5:jxs5+NMT], dtype=int)
-        for ty, rxn in zip(tys, self.reactions.values()[1:]):
-            rxn.TY = ty
 
     def _read_lsig(self):
         """Determine location of cross sections for each reaction MT
