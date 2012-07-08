@@ -366,8 +366,7 @@ class NeutronTable(AceTable):
     def _read_all(self):
         self._read_cross_sections()
         self._read_nu()
-        self._read_land()
-        self._read_and()
+        self._read_angular_distributions()
         self._read_ldlw()
         self._read_dlw()
         self._read_gpd()
@@ -553,81 +552,67 @@ class NeutronTable(AceTable):
             #for group in range(n_group):
             #    LOCC[group] = self.xss[LED + group]
 
-    def _read_land(self):
-        """Find locations for angular distributions
-        """
-        jxs8 = self.jxs[8]
-
-        # Number of reactions is less than total since we only need
-        # angular distribution for reactions with secondary
-        # neutrons. Thus, MT > 100 are not included.
-        NMT = self.nxs[5]
-
-        # Need NMT + 1 since elastic scattering is included
-        locb = np.asarray(self.xss[jxs8:jxs8+NMT+1], dtype=int)
-        for loc, rxn in zip(locb, self.reactions.values()[:NMT+1]):
-            rxn.LOCB = loc
-
-    def _read_and(self):
+    def _read_angular_distributions(self):
         """Find the angular distribution for each reaction MT
         """
-        cdef int ind, i, jxs9, NMT, NE
+        cdef int ind, i, j, n_reactions, NE
         cdef dict ang_cos, ang_pdf, ang_cdf
         #cdef np.ndarray[np.float64_t, ndim=1] xss
 
-        jxs9 = self.jxs[9]
-        NMT = self.nxs[5]
-        xss = self.xss
+        # Number of reactions with secondary neutrons (including elastic
+        # scattering)
+        n_reactions = self.nxs[5] + 1
 
-        # Angular distribution for all MT with secondary neutrons
-        # including elastic scattering
-        for rxn in self.reactions.values()[:NMT+1]:
+        # Angular distribution for all reactions with secondary neutrons
+        for i, reaction in enumerate(self.reactions.values()[:n_reactions]):
+            loc = int(self.xss[self.jxs[8] + i])
+
             # Check if angular distribution data exist 
-            if rxn.LOCB == -1:
+            if loc == -1:
                 # Angular distribution data are specified through LAWi
                 # = 44 in the DLW block
                 continue
-            elif rxn.LOCB == 0:
+            elif loc == 0:
                 # No angular distribution data are given for this
                 # reaction, isotropic scattering is asssumed (in CM if
                 # TY < 0 and in LAB if TY > 0)
                 continue
 
-            ind = jxs9 + rxn.LOCB - 1
+            ind = self.jxs[9] + loc - 1
 
-            NE = int(xss[ind])
-            rxn.ang_energy_in = xss[ind+1:ind+1+NE]
-            LC = np.asarray(xss[ind+1+NE:ind+1+2*NE], dtype=int)
-            rxn.ang_location = LC
-            ind = ind+1+2*NE
+            NE = int(self.xss[ind])
+            reaction.ang_energy_in = self.xss[ind+1:ind+1+NE]
+            LC = np.asarray(self.xss[ind+1+NE:ind+1+2*NE], dtype=int)
+            reaction.ang_location = LC
+            ind += 1 + 2*NE
 
-            i = 0
+            j = 0
             ang_cos = {}
             ang_pdf = {}
             ang_cdf = {}
-            while i < NE:
-                location = LC[i]
+            while j < NE:
+                location = LC[j]
                 if location > 0:
                     # Equiprobable 32 bin distribution
-                    # print([rxn,'equiprobable'])
-                    ang_cos[i] = xss[ind:ind+33]
+                    # print([reaction,'equiprobable'])
+                    ang_cos[i] = self.xss[ind:ind+33]
                     ind += 33
                 elif location < 0:
                     # Tabular angular distribution
-                    JJ = int(xss[ind])
-                    NP = int(xss[ind+1])
+                    JJ = int(self.xss[ind])
+                    NP = int(self.xss[ind+1])
                     ind += 2
-                    ang_dat = xss[ind:ind+3*NP]
+                    ang_dat = self.xss[ind:ind+3*NP]
                     ang_dat.shape = (3, NP)
-                    ang_cos[i], ang_pdf[i], ang_cdf[i] = ang_dat
+                    ang_cos[j], ang_pdf[j], ang_cdf[j] = ang_dat
                     ind += 3 * NP
                 # pass if location == 0
                 # Isotropic angular distribution
-                i += 1
+                j += 1
 
-            rxn.ang_cos = ang_cos
-            rxn.ang_pdf = ang_pdf
-            rxn.ang_cdf = ang_cdf
+            reaction.ang_cos = ang_cos
+            reaction.ang_pdf = ang_pdf
+            reaction.ang_cdf = ang_cdf
 
     def _read_ldlw(self):
         """Find locations for energy distribution data for each reaction
