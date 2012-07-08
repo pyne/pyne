@@ -364,10 +364,8 @@ class NeutronTable(AceTable):
             return "<ACE Continuous-E Neutron Table>"
 
     def _read_all(self):
-        self._read_basic_data()
+        self._read_cross_sections()
         self._read_nu()
-        self._read_lsig()
-        self._read_sig()
         self._read_land()
         self._read_and()
         self._read_ldlw()
@@ -385,14 +383,14 @@ class NeutronTable(AceTable):
         self._read_fis()
         self._read_unr()
 
-    def _read_basic_data(self):
-        """Reads and parses the ESZ, MTR, LQR, and TRY blocks. These blocks
-        contain the energy grid, the total, absorption, and elastic cross
-        sections, average heating numbers, and a list of reactions with their
-        Q-values and multiplicites.
+    def _read_cross_sections(self):
+        """Reads and parses the ESZ, MTR, LQR, TRY, LSIG, and SIG blocks. These
+        blocks contain the energy grid, all reaction cross sections, the total
+        cross section, average heating numbers, and a list of reactions with
+        their Q-values and multiplicites.
         """
 
-        cdef int n_energies, n_reactions
+        cdef int n_energies, n_reactions, loc
 
         # Determine number of energies on nuclide grid and number of reactions
         # excluding elastic scattering
@@ -410,7 +408,7 @@ class NeutronTable(AceTable):
         elastic_scatter = Reaction(2, self)
         elastic_scatter.Q = 0.0
         elastic_scatter.IE = 1
-        elastic_scatter.TY = 1
+        elastic_scatter.multiplicity = 1
         elastic_scatter.sigma = sigma_el
         self.reactions[2] = elastic_scatter
 
@@ -426,9 +424,24 @@ class NeutronTable(AceTable):
 
         # Loop over all reactions other than elastic scattering
         for i, reaction in enumerate(self.reactions.values()[1:]):
+            # Copy Q values and multiplicities and determine if scattering
+            # should be treated in the center-of-mass or lab system
             reaction.Q = qvalues[i]
             reaction.multiplicity = abs(tys[i])
             reaction.center_of_mass = (tys[i] < 0)
+
+            # Get locator for cross-section data
+            loc = int(self.xss[self.jxs[6] + i])
+
+            # Determine starting index on energy grid
+            reaction.IE = int(self.xss[self.jxs[7] + loc - 1])
+
+            # Determine number of energies in reaction
+            n_energies = int(self.xss[self.jxs[7] + loc])
+
+            # Read reaction cross section
+            reaction.sigma = self.xss[self.jxs[7] + loc + 1:
+                                          self.jxs[7] + loc + 1 + n_energies]
 
     def _read_nu(self):
         """Read the NU block -- this contains information on the prompt
@@ -539,25 +552,6 @@ class NeutronTable(AceTable):
             #LOCC = {}
             #for group in range(n_group):
             #    LOCC[group] = self.xss[LED + group]
-
-    def _read_lsig(self):
-        """Determine location of cross sections for each reaction MT
-        """
-        NMT = self.nxs[4]
-        LXS = self.jxs[6]
-        loca = np.asarray(self.xss[LXS:LXS+NMT], dtype=int)
-        for loc, rxn in zip(loca, self.reactions.values()[1:]):
-            rxn.LOCA = loc
-
-    def _read_sig(self):
-        """Read cross-sections for each reaction MT
-        """
-        cdef int jxs7, NE
-        jxs7 = self.jxs[7]
-        for rxn in self.reactions.values()[1:]:
-            rxn.IE = int(self.xss[jxs7+rxn.LOCA-1])
-            NE = int(self.xss[jxs7+rxn.LOCA])
-            rxn.sigma = self.xss[jxs7+rxn.LOCA+1:jxs7+rxn.LOCA+1+NE]
 
     def _read_land(self):
         """Find locations for angular distributions
