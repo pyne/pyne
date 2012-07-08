@@ -582,33 +582,29 @@ class NeutronTable(AceTable):
 
             NE = int(self.xss[ind])
             reaction.ang_energy_in = self.xss[ind+1:ind+1+NE]
-            LC = np.asarray(self.xss[ind+1+NE:ind+1+2*NE], dtype=int)
-            reaction.ang_location = LC
             ind += 1 + 2*NE
 
-            j = 0
             ang_cos = {}
             ang_pdf = {}
             ang_cdf = {}
-            while j < NE:
-                location = LC[j]
+            for j in range(NE):
+                location = int(self.xss[ind + 1 + NE + j])
                 if location > 0:
                     # Equiprobable 32 bin distribution
                     # print([reaction,'equiprobable'])
-                    ang_cos[i] = self.xss[ind:ind+33]
+                    ang_cos[i] = self.xss[ind:ind + 33]
                     ind += 33
                 elif location < 0:
                     # Tabular angular distribution
                     JJ = int(self.xss[ind])
-                    NP = int(self.xss[ind+1])
+                    NP = int(self.xss[ind + 1])
                     ind += 2
-                    ang_dat = self.xss[ind:ind+3*NP]
+                    ang_dat = self.xss[ind:ind + 3*NP]
                     ang_dat.shape = (3, NP)
                     ang_cos[j], ang_pdf[j], ang_cdf[j] = ang_dat
                     ind += 3 * NP
                 # pass if location == 0
                 # Isotropic angular distribution
-                j += 1
 
             reaction.ang_cos = ang_cos
             reaction.ang_pdf = ang_pdf
