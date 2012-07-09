@@ -1107,8 +1107,10 @@ class NeutronTable(AceTable):
             # Read equiprobable outgoing photon energies
             # Equiprobable outgoing photon energies for incident neutron
             # energy i
-            self.e_out_photon_equi = self.XSS[ind:ind+600]
-            self.e_out_photon_equi.shape = (30, 20)
+            e_out_photon_equi = self.XSS[ind:ind+600]
+            if len(e_out_photon_equi) == 600:
+                self.e_out_photon_equi = e_out_photon_equi
+                self.e_out_photon_equi.shape = (30, 20)
 
     def _read_mtrp(self):
         """Get the list of reaction MTs for photon-producing reactions for this
