@@ -142,8 +142,7 @@ class Library(object):
 
             if self.verbose:
                 temp_in_K = round(temp * 1e6 / 8.617342e-5)
-                print("Loading nuclide {0} at {1} K ({2})".format(
-                        nucname.serpent(name.partition('.')[0]), temp_in_K, name))
+                print("Loading nuclide {0} at {1} K".format(name, temp_in_K))
             self.tables[name] = table
 
             # Set NXS and read JXS
@@ -228,8 +227,7 @@ class Library(object):
 
             if self.verbose:
                 temp_in_K = round(temp * 1e6 / 8.617342e-5)
-                print("Loading nuclide {0} at {1} K ({2})".format(
-                        nucname.serpent(name.partition('.')[0]), temp_in_K, name))
+                print("Loading nuclide {0} at {1} K".format(name, temp_in_K))
             self.tables[name] = table
 
             # Read comment
