@@ -1093,6 +1093,25 @@ class NeutronTable(AceTable):
             # ENDF/B-VII.0 libraries distributed with MCNP as well as other
             # libraries do not contain this 30x20 matrix.
 
+            # # The following energies are the discrete incident neutron energies
+            # # for which the equiprobable secondary photon outgoing energies are
+            # # given
+            # self.e_in_photon_equi = np.array(
+            #                         [1.39e-10, 1.52e-7, 4.14e-7, 1.13e-6, 3.06e-6,
+            #                          8.32e-6,  2.26e-5, 6.14e-5, 1.67e-4, 4.54e-4,
+            #                          1.235e-3, 3.35e-3, 9.23e-3, 2.48e-2, 6.76e-2,
+            #                          0.184,    0.303,   0.500,   0.823,   1.353,
+            #                          1.738,    2.232,   2.865,   3.68,    6.07,
+            #                          7.79,     10.,     12.,     13.5,    15.])
+
+            # # Read equiprobable outgoing photon energies
+            # # Equiprobable outgoing photon energies for incident neutron
+            # # energy i
+            # e_out_photon_equi = self.XSS[ind:ind+600]
+            # if len(e_out_photon_equi) == 600:
+            #     self.e_out_photon_equi = e_out_photon_equi
+            #     self.e_out_photon_equi.shape = (30, 20)
+
     def _read_mtrp(self):
         """Get the list of reaction MTs for photon-producing reactions for this
         cross-section table. The MT values are somewhat arbitrary.
