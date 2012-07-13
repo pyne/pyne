@@ -17,7 +17,6 @@ extern "C" {
  * that EntityHandle will be defined in C.
  */
 
-
 typedef double vec3[3];
 
 float dag_version( void );
@@ -31,9 +30,7 @@ const int* geom_id_list( int dimension, int* number_of_items );
 EntityHandle handle_from_id( int dimension, int id );
 int id_from_handle( EntityHandle eh );
 
-
 ErrorCode dag_load( const char* filename );
-
 
 void* dag_alloc_ray_history( void );
 
@@ -51,7 +48,6 @@ ErrorCode dag_ray_follow( EntityHandle firstvol, vec3 ray_start, vec3 ray_dir,
 void dag_dealloc_ray_buffer( void* data_buffers );
 
 ErrorCode dag_pt_in_vol( EntityHandle vol, vec3 pt, int* result, vec3 dir, const void* history );
-
 
 ErrorCode dag_next_vol( EntityHandle surface, EntityHandle volume, EntityHandle* next_vol );
 
