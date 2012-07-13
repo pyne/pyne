@@ -6,6 +6,7 @@
 using moab::CartVect;
 
 #include <vector>
+#include <map>
 
 using moab::DagMC;
 using moab::EntityHandle;
@@ -59,7 +60,18 @@ ErrorCode dag_load( const char* filename ){
     CHECKERR( err );
     err = dag->init_OBBTree();
     CHECKERR( err );
-    err = dag->parse_metadata();
+
+    std::vector<std::string> metadata_keys;
+    metadata_keys.push_back("imp");
+    metadata_keys.push_back("mat");
+    metadata_keys.push_back("rho");
+    metadata_keys.push_back("graveyard");
+
+    std::map<std::string, std::string> metadata_synonyms;
+    metadata_synonyms["rest.of.world"] = "graveyard";
+    metadata_synonyms["outside.world"] = "graveyard";
+
+    err = dag->parse_properties(metadata_keys, metadata_synonyms);
     CHECKERR( err );
 
     int num_surfs = dag->num_entities( 2 );
@@ -184,7 +196,7 @@ ErrorCode dag_next_vol( EntityHandle surface, EntityHandle volume, EntityHandle*
 }
 
 int vol_is_graveyard( EntityHandle vol ){
-    return DagMC::instance()->is_graveyard( vol );
+    return DagMC::instance()->has_prop( vol, "graveyard" );
 }
 
 /* int surf_is_spec_refl( EntityHandle surf ); */
@@ -195,19 +207,45 @@ int vol_is_implicit_complement( EntityHandle vol ){
 }
 
 ErrorCode get_volume_metadata( EntityHandle vol, int* material, double* density, double* importance ){
-    DagmcVolData vd;
     ErrorCode err;
     DagMC* dag = DagMC::instance();
 
-    err = dag->get_volume_metadata( vol, vd );
+    // the defaults from DagMC's old get_volume_metadata: mat = 0, rho = 0, imp = 1
+    int mat_id = 0;
+    double rho = 0, imp = 1;
 
-    CHECKERR( err );
+    std::string str;
+    err = dag->prop_value( vol, "mat", str );
+    if( err == moab::MB_SUCCESS ){
+        mat_id = strtol( str.c_str(), NULL, 10 );
+    }
+    else if( err != moab::MB_TAG_NOT_FOUND ){
+        // TAG_NOT_FOUND should not be returned as an error; it just means
+        // the default value of mat_id needs to be used.
+        CHECKERR(err);
+    }
+    
+    err = dag->prop_value( vol, "rho", str );
+    if( err == moab::MB_SUCCESS ){
+        rho = strtod( str.c_str(), NULL );
+    }
+    else if( err != moab::MB_TAG_NOT_FOUND ){
+        CHECKERR(err);
+    }
 
-    *material = vd.mat_id;
-    *density = vd.density;
-    *importance = vd.importance;
+    err = dag->prop_value( vol, "imp", str );
+    if( err == moab::MB_SUCCESS ){
+        imp = strtod( str.c_str(), NULL );
+    }
+    else if( err != moab::MB_TAG_NOT_FOUND ){
+        CHECKERR(err);
+    }
 
-    return err;
+    *material = mat_id;
+    *density = rho;
+    *importance = imp;
+
+    return moab::MB_SUCCESS;
 }
 
 ErrorCode get_volume_boundary( EntityHandle vol, vec3 minPt, vec3 maxPt ){
