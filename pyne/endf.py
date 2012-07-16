@@ -284,8 +284,8 @@ class Evaluation(object):
         # Read LIST record containing components of fission energy release (or
         # coefficients)
         items, values = self._get_list_record()
-        NPLY = items[3]
-        if NPLY == 0:
+        eRelease.NPLY = items[3]
+        if eRelease.NPLY == 0:
             eRelease.fissProducts = (values[0], values[1])
             eRelease.promptNeuts = (values[2], values[3])
             eRelease.delayNeuts = (values[4], values[5])
@@ -295,8 +295,16 @@ class Evaluation(object):
             eRelease.neutrinos = (values[12], values[13])
             eRelease.pseudoQ = (values[14], values[15])
             eRelease.total = (values[16], values[17])
-        elif NPLY > 0:
-            raise NotImplementedError
+        elif eRelease.NPLY > 0:
+            eRelease.fissProducts = zip(values[0::18], values[1::18])
+            eRelease.promptNeuts = zip(values[2::18], values[3::18])
+            eRelease.delayNeuts = zip(values[4::18], values[5::18])
+            eRelease.promptGammas = zip(values[6::18], values[7::18])
+            eRelease.delayGammas = zip(values[8::18], values[9::18])
+            eRelease.delayBetas = zip(values[10::18], values[11::18])
+            eRelease.neutrinos = zip(values[12::18], values[13::18])
+            eRelease.pseudoQ = zip(values[14::18], values[15::18])
+            eRelease.total = zip(values[16::18], values[16::18])
 
         # Skip SEND record
         self.fh.readline()
@@ -380,10 +388,10 @@ class Evaluation(object):
                     res.NLS = items[4]
                 # Resolved resonance region
                 elif res.LRU == 1:
-                    self.read_resolved(res)
+                    self._read_resolved(res)
                 # Unresolved resonance region
                 elif res.LRU == 2:
-                    self.readUnresolved(res)
+                    self._read_unresolved(res)
 
     def _read_resolved(self, res):
         # Single- or Multi-level Breit Wigner
