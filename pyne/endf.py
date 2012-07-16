@@ -16,6 +16,7 @@ For more information on this module, contact Paul Romano <romano7@gmail.com>
 import re
 import numpy as np
 import matplotlib.pyplot as plt
+import scipy
 
 number = " (\d.\d+(?:\+|\-)\d)"
 
@@ -34,42 +35,78 @@ class Evaluation(object):
         self.fh = open(filename, 'r')
         self.files = []
         self.verbose = True
-
-    def read(self):
+        self.veryverbose = False
         # First we need to read MT=1, MT=451 which has a description of the ENDF
         # file and a list of what data exists in the file
         self.read_header()
 
-        # Now we can start looping over the list of data - we can skip the first
+    def read(self, reactions=None):
+        if not reactions:
+            if self.verbose:
+                print 'No reaction given. Read all'
+            reactions = []
+            for r in self.reactionList[1:]:
+                reactions.append(r[0:2])
+        if isinstance(reactions, tuple):
+            reactions = [reactions]
+        # Start looping over the requested reactions
         # entry since it is the MT=451 block that we already read
-        for MF, MT, NC, MOD in self.reactionList[1:]:
-            # File 1 data
-            if MF == 1:
-                # Number of total neutrons per fission
-                if MT == 452:
-                    self.read_total_nu()
-                # Number of delayed neutrons per fission
-                elif MT == 455:
-                    self.read_delayed_nu()
-                # Number of prompt neutrons per fission
-                elif MT == 456:
-                    self.read_prompt_nu()
-                # Components of energy release due to fission
-                elif MT == 458:
-                    self.read_fission_energy()
-                elif MT == 460:
-                    self.read_delayed_photon()
-            elif MF == 2:
-                if MT == 151:
-                    self.read_resonances()
-                    
+        for rMF, rMT in reactions:
+            found = False
+            for MF, MT, NC, MOD in self.reactionList[1:]:
+                if MF == rMF and MT == rMT:
+                    found = True
+                    # File 1 data
+                    if MF == 1:
+                        # Now read File1 (most likely unnecessary, but...)
+                        file1 = self.find_file(1)
+                        if not file1:
+                            file1 = ENDFFile1()
+                            self.files.append(file1)
+                        # Number of total neutrons per fission
+                        if MT == 452:
+                            self.read_total_nu()
+                        # Number of delayed neutrons per fission
+                        elif MT == 455:
+                            self.read_delayed_nu()
+                        # Number of prompt neutrons per fission
+                        elif MT == 456:
+                            self.read_prompt_nu()
+                        # Components of energy release due to fission
+                        elif MT == 458:
+                            self.read_fission_energy()
+                        elif MT == 460:
+                            self.read_delayed_photon()
+                    elif MF == 2:
+                        # Now read File2
+                        file2 = self.find_file(2)
+                        if not file2:
+                            file2 = ENDFFile2()
+                            self.files.append(file2)
+                        if MT == 151:
+                            self.read_resonances()
+                    elif MF == 7:
+                        # Now read File7
+                        file7 = self.find_file(7)
+                        if not file7:
+                            file7 = ENDFFile7()
+                            self.files.append(file7)
+                        if MT == 2:
+                            self.read_thermal_elastic()
+                        if MT == 4:
+                            self.read_thermal_inelastic()
+            if not found:
+                if self.verbose:
+                    print 'Reaction not found'
+                raise NotFound('Reaction')
+
     def read_header(self):
         if self.verbose:
             print("Reading File 1...")
         self.print_info(451)
 
-        # Find File 1 in evaluation
-        self.seek_file(1)
+        # Find reaction
+        self.seek_mfmt(1, 451)
 
         # Now read File1
         file1 = ENDFFile1()
@@ -156,6 +193,9 @@ class Evaluation(object):
         # Find file 1
         file1 = self.find_file(1)
 
+        # Find reaction
+        self.seek_mfmt(1, 452)
+
         # Create total nu reaction
         nuTotal = ENDFReaction(452)
         file1.reactions.append(nuTotal)
@@ -179,6 +219,9 @@ class Evaluation(object):
 
         # Find file 1
         file1 = self.find_file(1)
+
+        # Find reaction
+        self.seek_mfmt(1, 455)
 
         # Create delayed nu reaction
         nuDelay = ENDFReaction(455)
@@ -208,6 +251,9 @@ class Evaluation(object):
         nuPrompt = ENDFReaction(456)
         self.find_file(1).reactions.append(nuPrompt)
 
+        # Find reaction
+        self.seek_mfmt(1, 456)
+
         # Determine representation of delayed nu data
         items = self.get_head_record()
         nuPrompt.LNU = items[3]
@@ -228,6 +274,9 @@ class Evaluation(object):
         # Create fission energy release reaction
         eRelease = ENDFReaction(458)
         self.find_file(1).reactions.append(eRelease)
+
+        # Find reaction
+        self.seek_mfmt(1, 458)
 
         # Skip HEAD record
         self.get_head_record()
@@ -258,6 +307,9 @@ class Evaluation(object):
         # Create delayed photon data reaction
         dp = ENDFReaction(460)
         self.find_file(1).reactions.append(dp)
+
+        # Find reaction
+        self.seek_mfmt(1, 460)
 
         # Determine whether discrete or continuous representation
         items = self.get_head_record()
@@ -290,12 +342,11 @@ class Evaluation(object):
             print("Reading File 2...")
         self.print_info(151)
 
-        # Find File 2 in evaluation
-        self.seek_file(2)
+        # Find reaction
+        self.seek_mfmt(2, 151)
 
-        # Now read File1
-        file2 = ENDFFile2()
-        self.files.append(file2)
+        # Now read File2
+        file2 = self.find_file(2)
 
         # Create MT for resonances
         res = ENDFReaction(151)
@@ -305,7 +356,7 @@ class Evaluation(object):
         # Determine whether discrete or continuous representation
         items = self.get_head_record()
         res.NIS = items[4] # Number of isotopes
-        
+
         for iso in range(res.NIS):
             items = self.get_cont_record()
             res.ABN = items[1] # isotopic abundance
@@ -340,7 +391,7 @@ class Evaluation(object):
             # Read energy-dependent scattering radius if present
             if res.NRO > 0:
                 res.AP = self.get_tab1_record()
-        
+
             # Other scatter radius parameters
             items = self.get_cont_record()
             res.SPI = items[0] # Spin, I, of the target nucleus
@@ -376,7 +427,7 @@ class Evaluation(object):
             # Read energy-dependent scattering radius if present
             if res.NRO > 0:
                 res.AP = self.get_tab1_record()
-        
+
             # Other scatter radius parameters
             items = self.get_cont_record()
             res.SPI = items[0] # Spin, I, of the target nucleus
@@ -385,7 +436,7 @@ class Evaluation(object):
             res.LAD = items[3] # Flag for angular distribution
             res.NLS = items[4] # Number of l-values
             res.NLSC = items[5] # Number of l-values for convergence
-            
+
             # Read resonance widths, J values, etc
             for l in range(res.NLS):
                 headerItems, items = self.get_list_record()
@@ -411,9 +462,134 @@ class Evaluation(object):
     def readUnresolved(self, res):
         pass
 
+    def read_thermal_elastic(self):
+        # Find file7
+        file7 = self.find_file(7)
+
+        # Create MT for resonances
+        elast = ENDFReaction(2)
+        self.print_info(2)
+
+        # Seek File 7
+        self.seek_mfmt(7, 2)
+
+        # Get head record
+        items = self.get_head_record()
+        elast.ZA = items[0] # ZA identifier
+        elast.AWR = items[1] # AWR
+        elast.LTHR = items[2] # coherent/incoherent flag
+        if elast.LTHR == 1:
+            if self.verbose:
+                print 'Coherent elastic'
+                temp = []
+                eint = []
+                set = []
+                temp0 = self.get_tab1_record()
+                # Save temp
+                temp.append(temp0.params[0])
+                # Save Eint
+                eint = temp0.x
+                # Save S(E, T0)
+                set.append(temp0.y)
+                elast.LT = temp0.params[2]
+                if self.veryverbose:
+                    print 'Number of temperatures:', elast.LT+1
+                for t in range(elast.LT):
+                    heads, s = self.get_list_record()
+                    # Save S(E,T)
+                    set.append(s)
+                    # Save T
+                    temp.append(heads[0])
+                elast.temp = scipy.array(temp)
+                elast.set = scipy.array(set)
+                elast.eint = scipy.array(eint)
+        elif elast.LTHR == 2:
+            if self.verbose:
+                print 'Incoherent elastic'
+                temp = []
+                eint = []
+                set = []
+                record = self.get_tab1_record()
+                # Save cross section
+                elast.sb = record.params[0]
+                # Save Tint
+                elast.t = scipy.array(record.x)
+                # Save W(T)
+                elast.w = scipy.array(record.y)
+        else:
+            print 'Invalid value of LHTR'
+        file7.reactions.append(elast)
+
+    def read_thermal_inelastic(self):
+        # Find file7
+        file7 = self.find_file(7)
+
+        # Create MT for resonances
+        inel = ENDFReaction(4)
+        self.print_info(4)
+
+        # Seek File 7
+        self.seek_mfmt(7, 4)
+
+        # Get head record
+        items = self.get_head_record()
+        inel.ZA = items[0] # ZA identifier
+        inel.AWR = items[1] # AWR
+        inel.LAT = items[3] # Temperature flag
+        inel.LASYM = items[4] # Symmetry flag
+        HeaderItems, B = self.get_list_record()
+        inel.LLN = HeaderItems[2]
+        inel.NS = HeaderItems[5]
+        inel.B = B
+        if B[0] == 0.0:
+            if self.verbose:
+                print 'No principal atom'
+        else:
+            nbeta = self.get_tab2_record()
+            sabt = []
+            beta = []
+            for be in range(nbeta.NBT[0]):
+                #Read record for first temperature (always present)
+                sabt_temp = []
+                temp = []
+                temp0 = self.get_tab1_record()
+                # Save S(be, 0, :)
+                sabt_temp.append(temp0.y)
+                # Save alpha(:)
+                alpha = temp0.x
+                # Save beta(be)
+                beta.append(temp0.params[1])
+                # Save temperature
+                temp.append(temp0.params[0])
+                inel.LT = temp0.params[2]
+                if self.veryverbose:
+                    print 'Number of temperatures:', inel.LT+1
+                for t in range(inel.LT):
+                    #Read records for all the other temperatures
+                    headsab, sa = self.get_list_record()
+                    # Save S(be, t+1, :)
+                    sabt_temp.append(sa)
+                    # Save temperature
+                    temp.append(headsab[0])
+                sabt.append(sabt_temp)
+            # Prepare arrays for output
+            sabt = scipy.array(sabt)
+            inel.sabt = []
+            for i in range(scipy.shape(sabt)[1]):
+                inel.sabt.append(scipy.transpose(sabt[:, i, :]))
+            inel.sabt = scipy.array(inel.sabt)
+            inel.alpha = scipy.array(alpha)
+            inel.beta = scipy.array(beta)
+            inel.temp = scipy.array(temp)
+        teffrecord = self.get_tab1_record()
+        inel.teff = teffrecord.y
+        file7.reactions.append(inel)
+
     def getTextRecord(self, line=None):
         if not line:
             line = self.fh.readline()
+        if self.veryverbose:
+            print 'Get TEXT record'
         HL = line[0:66]
         MAT = int(line[66:70])
         MF = int(line[70:72])
@@ -422,6 +598,8 @@ class Evaluation(object):
         return [HL, MAT, MF, MT, NS]
 
     def get_cont_record(self, line=None, skipC=False):
+        if self.veryverbose:
+            print 'Get CONT record'
         if not line:
             line = self.fh.readline()
         if skipC:
@@ -443,6 +621,8 @@ class Evaluation(object):
     def get_head_record(self, line=None):
         if not line:
             line = self.fh.readline()
+        if self.veryverbose:
+            print 'Get HEAD record'
         ZA = int(convert(line[:11]))
         AWR = convert(line[11:22])
         L1 = int(line[22:33])
@@ -457,9 +637,11 @@ class Evaluation(object):
 
     def get_list_record(self, onlyList=False):
         # determine how many items are in list
+        if self.veryverbose:
+            print 'Get LIST record'
         items = self.get_cont_record()
         NPL = items[4]
-        
+
         # read items
         itemsList = []
         m = 0
@@ -477,7 +659,16 @@ class Evaluation(object):
             return (items, itemsList)
 
     def get_tab1_record(self):
+        if self.veryverbose:
+            print 'Get TAB1 record'
         r = ENDFTab1Record()
+        r.read(self.fh)
+        return r
+
+    def get_tab2_record(self):
+        if self.veryverbose:
+            print 'Get TAB2 record'
+        r = ENDFTab2Record()
         r.read(self.fh)
         return r
 
@@ -485,6 +676,7 @@ class Evaluation(object):
         for f in self.files:
             if f.fileNumber == fileNumber:
                 return f
+        return None
 
     def find_mt(self, MT):
         for f in self.files:
@@ -492,31 +684,46 @@ class Evaluation(object):
                 if r.MT == MT:
                     return r
 
-    def look_for_files(self):
-        files = set()
-        self.fh.seek(0)
-        for line in self.fh:
-            try:
-                fileNum = int(line[70:72])
-                if fileNum == 0:
-                    continue
-            except ValueError:
-                raise
-            except IndexError:
-                raise
-            files.add(fileNum)
-        print(files)
+#    def look_for_files(self):
+#        files = set()
+#        self.fh.seek(0)
+#        for line in self.fh:
+#            try:
+#                fileNum = int(line[70:72])
+#                if fileNum == 0:
+#                    continue
+#            except ValueError:
+#                raise
+#            except IndexError:
+#                raise
+#            files.add(fileNum)
+#        print(files)
 
-    def seek_file(self, fileNum):
+#    def seek_file(self, fileNum):
+#        self.fh.seek(0)
+#        fileString = '{0:2}'.format(fileNum)
+#        while True:
+#            position = self.fh.tell()
+#            line = self.fh.readline()
+#            if line == '':
+#                # Reached EOF
+#                print('Could not find File {0}'.format(fileNum))
+#            if line[70:72] == fileString:
+#                self.fh.seek(position)
+#                break
+
+    def seek_mfmt(self, MF, MT):
         self.fh.seek(0)
-        fileString = '{0:2}'.format(fileNum)
+        searchString = '{0:2}{1:3}'.format(MF, MT)
         while True:
             position = self.fh.tell()
             line = self.fh.readline()
             if line == '':
                 # Reached EOF
-                print('Could not find File {0}'.format(fileNum))
-            if line[70:72] == fileString:
+                if self.verbose:
+                    print('Could not find MF={0}, MT={1}'.format(MF, MT))
+                raise NotFound('Reaction')
+            if line[70:75] == searchString:
                 self.fh.seek(position)
                 break
 
@@ -554,7 +761,7 @@ class ENDFTab1Record(object):
         NR = int(line[44:55])
         NP = int(line[55:66])
         self.params = [C1, C2, L1, L2, NR, NP]
-        
+
         # Read the interpolation region data, namely NBT and INT
         m = 0
         for i in range((NR-1)/3 + 1):
@@ -581,6 +788,35 @@ class ENDFTab1Record(object):
                 line = line[22:]
             m = m + toRead
 
+class ENDFTab2Record(object):
+    def __init__(self):
+        self.NBT = []
+        self.INT = []
+
+    def read(self, fh):
+        # Determine how many interpolation regions and total points there are
+        line = fh.readline()
+        C1 = convert(line[:11])
+        C2 = convert(line[11:22])
+        L1 = int(line[22:33])
+        L2 = int(line[33:44])
+        NR = int(line[44:55])
+        NZ = int(line[55:66])
+        self.params = [C1, C2, L1, L2, NR, NZ]
+
+        # Read the interpolation region data, namely NBT and INT
+        m = 0
+        for i in range((NR-1)/3 + 1):
+            line = fh.readline()
+            toRead = min(3,NR-m)
+            for j in range(toRead):
+                NBT = int(line[0:11])
+                INT = int(line[11:22])
+                self.NBT.append(NBT)
+                self.INT.append(INT)
+                line = line[22:]
+            m = m + toRead
+
     def plot(self):
         plt.plot(self.x, self.y)
 
@@ -599,7 +835,7 @@ class ENDFTextRecord(ENDFRecord):
     def __init__(self, fh):
         super(ENDFTextRecord, self).__init__(fh)
 
-    def read(self, line): 
+    def read(self, line):
         HL = line[0:66]
         MAT = int(line[66:70])
         MF = int(line[70:72])
@@ -607,7 +843,7 @@ class ENDFTextRecord(ENDFRecord):
         NS = int(line[75:80])
         self.items = [HL, MAT, MF, MT, NS]
 
-class ENDFContRecord(ENDFRecord): 
+class ENDFContRecord(ENDFRecord):
     """
     An ENDFContRecord is a control record.
     """
@@ -628,7 +864,82 @@ class ENDFContRecord(ENDFRecord):
         NS = int(line[75:80])
         self.items = [C1, C2, L1, L2, N1, N2, MAT, MF, MT, NS]
 
-class ENDFHeadRecord(ENDFRecord): 
+#class ENDFEndRecord(ENDFRecord):
+#    """
+#    An ENDFEndRecord is an END record.
+#    """
+#
+#    def __init__(self, fh):
+#        super(ENDFEndRecord, self).__init__(fh)
+#
+#    def read(self, line):
+#        MF = int(line[70:72])
+#        MT = int(line[72:75])
+#        NS = int(line[75:80])
+#        self.items = [MF, MT, NS]
+#
+#class ENDFSendRecord(ENDFRecord):
+#    """
+#    An ENDFSendRecord is a SEND record.
+#    """
+#
+#    def __init__(self, fh):
+#        super(ENDFEndRecord, self).__init__(fh)
+#
+#    def read(self, line):
+#        super(ENDFSendRecord, self).read(self.line)
+#        if items[2] == 99999:
+#            print 'SEND'
+#        else:
+#            raise NotFound('SEND')
+#
+#class ENDFFendRecord(ENDFRecord):
+#    """
+#    An ENDFFendRecord is a MEND record.
+#    """
+#
+#    def __init__(self, fh):
+#        super(ENDFEndRecord, self).__init__(fh)
+#
+#    def read(self, line):
+#        super(ENDFFendRecord, self).read(self.line)
+#        if (items[1] == 0) and (items[2] == 0):
+#            print 'FEND'
+#        else:
+#            raise NotFound('FEND')
+#
+#class ENDFMendRecord(ENDFRecord):
+#    """
+#    An ENDFMendRecord is a MEND record.
+#    """
+#
+#    def __init__(self, fh):
+#        super(ENDFMEndRecord, self).__init__(fh)
+#
+#    def read(self, line):
+#        super(ENDFMendRecord, self).read(self.line)
+#        if (items[0] == 0) and (items[1] == 0) and (items[2] == 0):
+#            print 'MEND'
+#        else:
+#            raise NotFound('MEND')
+#
+#class ENDFTendRecord(ENDFRecord):
+#    """
+#    An ENDFMendRecord is a MEND record.
+#    """
+#
+#    def __init__(self, fh):
+#        super(ENDFTEndRecord, self).__init__(fh)
+#
+#    def read(self, line):
+#        super(ENDFTendRecord, self).read(self.line)
+#        if (items[0] == -1) and (items[1] == 0) and (items[2] == 0):
+#            print 'TEND'
+#        else:
+#            raise NotFound('TEND')
+#
+
+class ENDFHeadRecord(ENDFRecord):
     """
     An ENDFHeadRecord is the first in a section and has the same form as a
     control record, except that C1 and C2 fields always contain ZA and AWR,
@@ -670,7 +981,7 @@ class ENDFFile1(ENDFFile):
     number of prompt neutrons per fission, and components of energy release due
     to fission.
     """
-    
+
     def __init__(self):
         super(ENDFFile1,self).__init__()
 
@@ -727,6 +1038,7 @@ class ENDFFile7(ENDFFile):
     """
 
     def __init__(self):
+        super(ENDFFile7,self).__init__()
         self.fileNumber = 7
 
 class ENDFFile8(ENDFFile):
@@ -975,3 +1287,36 @@ MTname = {1: "(n,total) Neutron total",
           570: "Q1 (7s1/2) subshell",
           571: "Q2 (7p1/2) subshell",
           572: "Q3 (7p3/2) subshell"}
+
+class NotFound(Exception):
+    def __init__(self, value):
+        self.value = value
+    def __str__(self):
+        return repr(self.value)
+
+if __name__ == '__main__':
+    #
+    # Some tests. The test files can be downloaded from:
+    #    http://www.oecd-nea.org/dbforms/data/eva/evatapes/endfb_7/tsl-ENDF-VII0.endf/
+    #    http://www.oecd-nea.org/dbforms/data/eva/evatapes/endfb_7/n-ENDF-VII0.endf/
+    #
+    u235 = Evaluation('n-092_U_235.endf')
+    u235.read()
+    for file in u235.files:
+        print '>>>', file, file.reactions
+    water = Evaluation('tsl-HinH2O.endf')
+    water.read()
+    for file in water.files:
+        print '>>>', file, file.reactions
+    graphite = Evaluation('tsl-graphite.endf')
+    graphite.read()
+    for file in graphite.files:
+        print '>>>', file, file.reactions
+    zrh = Evaluation('tsl-HinZrH.endf')
+    zrh.read()
+    for file in zrh.files:
+        print '>>>', file, file.reactions
+
+
+
+
