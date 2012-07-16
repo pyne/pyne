@@ -16,7 +16,6 @@ For more information on this module, contact Paul Romano <romano7@gmail.com>
 import re
 import numpy as np
 import matplotlib.pyplot as plt
-import scipy
 
 number = " (\d.\d+(?:\+|\-)\d)"
 
@@ -36,6 +35,7 @@ class Evaluation(object):
         self.files = []
         self.verbose = True
         self.veryverbose = False
+
         # First we need to read MT=1, MT=451 which has a description of the ENDF
         # file and a list of what data exists in the file
         self.read_header()
@@ -500,9 +500,9 @@ class Evaluation(object):
                     set.append(s)
                     # Save T
                     temp.append(heads[0])
-                elast.temp = scipy.array(temp)
-                elast.set = scipy.array(set)
-                elast.eint = scipy.array(eint)
+                elast.temp = np.array(temp)
+                elast.set = np.array(set)
+                elast.eint = np.array(eint)
         elif elast.LTHR == 2:
             if self.verbose:
                 print 'Incoherent elastic'
@@ -513,9 +513,9 @@ class Evaluation(object):
                 # Save cross section
                 elast.sb = record.params[0]
                 # Save Tint
-                elast.t = scipy.array(record.x)
+                elast.t = np.array(record.x)
                 # Save W(T)
-                elast.w = scipy.array(record.y)
+                elast.w = np.array(record.y)
         else:
             print 'Invalid value of LHTR'
         file7.reactions.append(elast)
@@ -573,14 +573,14 @@ class Evaluation(object):
                     temp.append(headsab[0])
                 sabt.append(sabt_temp)
             # Prepare arrays for output
-            sabt = scipy.array(sabt)
+            sabt = np.array(sabt)
             inel.sabt = []
-            for i in range(scipy.shape(sabt)[1]):
-                inel.sabt.append(scipy.transpose(sabt[:, i, :]))
-            inel.sabt = scipy.array(inel.sabt)
-            inel.alpha = scipy.array(alpha)
-            inel.beta = scipy.array(beta)
-            inel.temp = scipy.array(temp)
+            for i in range(np.shape(sabt)[1]):
+                inel.sabt.append(np.transpose(sabt[:, i, :]))
+            inel.sabt = np.array(inel.sabt)
+            inel.alpha = np.array(alpha)
+            inel.beta = np.array(beta)
+            inel.temp = np.array(temp)
         teffrecord = self.get_tab1_record()
         inel.teff = teffrecord.y
         file7.reactions.append(inel)
