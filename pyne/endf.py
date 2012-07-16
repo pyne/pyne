@@ -38,7 +38,7 @@ class Evaluation(object):
 
         # First we need to read MT=1, MT=451 which has a description of the ENDF
         # file and a list of what data exists in the file
-        self.read_header()
+        self._read_header()
 
     def read(self, reactions=None):
         if not reactions:
@@ -65,18 +65,18 @@ class Evaluation(object):
                             self.files.append(file1)
                         # Number of total neutrons per fission
                         if MT == 452:
-                            self.read_total_nu()
+                            self._read_total_nu()
                         # Number of delayed neutrons per fission
                         elif MT == 455:
-                            self.read_delayed_nu()
+                            self._read_delayed_nu()
                         # Number of prompt neutrons per fission
                         elif MT == 456:
-                            self.read_prompt_nu()
+                            self._read_prompt_nu()
                         # Components of energy release due to fission
                         elif MT == 458:
-                            self.read_fission_energy()
+                            self._read_fission_energy()
                         elif MT == 460:
-                            self.read_delayed_photon()
+                            self._read_delayed_photon()
                     elif MF == 2:
                         # Now read File2
                         file2 = self.find_file(2)
@@ -84,7 +84,7 @@ class Evaluation(object):
                             file2 = ENDFFile2()
                             self.files.append(file2)
                         if MT == 151:
-                            self.read_resonances()
+                            self._read_resonances()
                     elif MF == 7:
                         # Now read File7
                         file7 = self.find_file(7)
@@ -92,15 +92,15 @@ class Evaluation(object):
                             file7 = ENDFFile7()
                             self.files.append(file7)
                         if MT == 2:
-                            self.read_thermal_elastic()
+                            self._read_thermal_elastic()
                         if MT == 4:
-                            self.read_thermal_inelastic()
+                            self._read_thermal_inelastic()
             if not found:
                 if self.verbose:
                     print 'Reaction not found'
                 raise NotFound('Reaction')
 
-    def read_header(self):
+    def _read_header(self):
         if self.verbose:
             print("Reading File 1...")
         self.print_info(451)
@@ -117,7 +117,7 @@ class Evaluation(object):
         file1.reactions.append(data)
 
         # First HEAD record
-        items = self.get_head_record()
+        items = self._get_head_record()
         data.ZA = items[0]
         data.AWR = items[1]
         data.LRP = items[2]
@@ -126,7 +126,7 @@ class Evaluation(object):
         data.NMOD = items[5]
 
         # Control record 1
-        items = self.get_cont_record()
+        items = self._get_cont_record()
         data.ELIS = items[0]
         data.STA = int(items[1])
         data.LIS = items[2]
@@ -134,7 +134,7 @@ class Evaluation(object):
         data.NFOR = items[5]
 
         # Control record 2
-        items = self.get_cont_record()
+        items = self._get_cont_record()
         data.AWI = items[0]
         data.EMAX = items[1]
         data.LREL = items[2]
@@ -142,14 +142,14 @@ class Evaluation(object):
         data.NVER = items[5]
 
         # Control record 3
-        items = self.get_cont_record()
+        items = self._get_cont_record()
         data.TEMP = items[0]
         data.LDRV = items[2]
         data.NWD = items[4]
         data.NXC = items[5]
 
         # Text record 1
-        items = self.getTextRecord()
+        items = self._get_text_record()
         text = items[0]
         data.ZSYMAM = text[0:11]
         data.ALAB = text[11:22]
@@ -157,7 +157,7 @@ class Evaluation(object):
         data.AUTH = text[32:66]
 
         # Text record 2
-        items = self.getTextRecord()
+        items = self._get_text_record()
         text = items[0]
         data.REF = text[1:22]
         data.DDATE = text[22:32]
@@ -165,7 +165,7 @@ class Evaluation(object):
         data.ENDATE = text[55:63]
 
         # Text record 3
-        items = self.getTextRecord()
+        items = self._get_text_record()
         data.HSUB = items[0]
 
         # Now read descriptive records
@@ -180,14 +180,14 @@ class Evaluation(object):
             line = self.fh.readline()
             if line[72:75] == '  0':
                 break
-            items = self.get_cont_record(line, skipC=True)
+            items = self._get_cont_record(line, skipC=True)
             MF = items[2]
             MT = items[3]
             NC = items[4]
             MOD = items[5]
             self.reactionList.append((MF,MT,NC,MOD))
 
-    def read_total_nu(self):
+    def _read_total_nu(self):
         self.print_info(452)
 
         # Find file 1
@@ -201,20 +201,20 @@ class Evaluation(object):
         file1.reactions.append(nuTotal)
 
         # Determine representation of total nu data
-        items = self.get_head_record()
+        items = self._get_head_record()
         nuTotal.LNU = items[3]
 
         # Polynomial representation
         if nuTotal.LNU == 1:
-            nuTotal.coeffs = self.get_list_record()
+            nuTotal.coeffs = self._get_list_record()
         # Tabulated representation
         elif nuTotal.LNU == 2:
-            nuTotal.value = self.get_tab1_record()
+            nuTotal.value = self._get_tab1_record()
 
         # Skip SEND record
         self.fh.readline()
 
-    def read_delayed_nu(self):
+    def _read_delayed_nu(self):
         self.print_info(455)
 
         # Find file 1
@@ -228,14 +228,14 @@ class Evaluation(object):
         file1.reactions.append(nuDelay)
 
         # Determine representation of delayed nu data
-        items = self.get_head_record()
+        items = self._get_head_record()
         nuDelay.LDG = items[2]
         nuDelay.LNU = items[3]
 
         # Nu tabulated and delayed-group constants are energy-independent
         if nuDelay.LNU == 2 and nuDelay.LDG == 0:
-            nuDelay.decayConst = self.get_list_record(onlyList=True)
-            nuDelay.value = self.get_tab1_record()
+            nuDelay.decayConst = self._get_list_record(onlyList=True)
+            nuDelay.value = self._get_tab1_record()
             self.fh.readline()
         elif nuDelay.LNU == 2 and nuDelay.LDG == 1:
             raise NotImplementedError
@@ -244,7 +244,7 @@ class Evaluation(object):
         elif nuDelay.LNU == 1 and nuDelay.LDG == 1:
             raise NotImplementedError
 
-    def read_prompt_nu(self):
+    def _read_prompt_nu(self):
         self.print_info(456)
 
         # Create delayed nu reaction
@@ -255,20 +255,20 @@ class Evaluation(object):
         self.seek_mfmt(1, 456)
 
         # Determine representation of delayed nu data
-        items = self.get_head_record()
+        items = self._get_head_record()
         nuPrompt.LNU = items[3]
 
         # Tabulated values of nu
         if nuPrompt.LNU == 2:
-            nuPrompt.value = self.get_tab1_record()
+            nuPrompt.value = self._get_tab1_record()
         # Spontaneous fission
         elif nuPrompt.LNU == 1:
-            nuPrompt.value = self.get_list_record(onlyList=True)
+            nuPrompt.value = self._get_list_record(onlyList=True)
 
         # Skip SEND record
         self.fh.readline()
 
-    def read_fission_energy(self):
+    def _read_fission_energy(self):
         self.print_info(458)
 
         # Create fission energy release reaction
@@ -279,11 +279,11 @@ class Evaluation(object):
         self.seek_mfmt(1, 458)
 
         # Skip HEAD record
-        self.get_head_record()
+        self._get_head_record()
 
         # Read LIST record containing components of fission energy release (or
         # coefficients)
-        items, values = self.get_list_record()
+        items, values = self._get_list_record()
         NPLY = items[3]
         if NPLY == 0:
             eRelease.fissProducts = (values[0], values[1])
@@ -301,7 +301,7 @@ class Evaluation(object):
         # Skip SEND record
         self.fh.readline()
 
-    def read_delayed_photon(self):
+    def _read_delayed_photon(self):
         self.print_info(460)
 
         # Create delayed photon data reaction
@@ -312,7 +312,7 @@ class Evaluation(object):
         self.seek_mfmt(1, 460)
 
         # Determine whether discrete or continuous representation
-        items = self.get_head_record()
+        items = self._get_head_record()
         dp.LO = items[2]
         dp.NG = items[4]
 
@@ -324,7 +324,7 @@ class Evaluation(object):
             dp.multiplicity = []
             for i in range(dp.NG):
                 # Read TAB1 record with multiplicity as function of time
-                mult = self.get_tab1_record()
+                mult = self._get_tab1_record()
                 dp.multiplicity.append(mult)
 
                 # Determine energy
@@ -334,10 +334,10 @@ class Evaluation(object):
         # Continuous representation
         elif dp.LO == 2:
             # Determine decay constant and number of precursor families
-            dp.decayConst = self.get_list_record(onlyList=True)
+            dp.decayConst = self._get_list_record(onlyList=True)
             dp.NNF = len(dp.decayConst)
 
-    def read_resonances(self):
+    def _read_resonances(self):
         if self.verbose:
             print("Reading File 2...")
         self.print_info(151)
@@ -354,17 +354,17 @@ class Evaluation(object):
         res.resonances = []
 
         # Determine whether discrete or continuous representation
-        items = self.get_head_record()
+        items = self._get_head_record()
         res.NIS = items[4] # Number of isotopes
 
         for iso in range(res.NIS):
-            items = self.get_cont_record()
+            items = self._get_cont_record()
             res.ABN = items[1] # isotopic abundance
             res.LFW = items[3] # fission widths present?
             res.NER = items[4] # number of resonance energy ranges
 
             for erange in range(res.NER):
-                items = self.get_cont_record()
+                items = self._get_cont_record()
                 res.EL = items[0] # lower limit of energy range
                 res.EH = items[1] # upper limit of energy range
                 res.LRU = items[2] # flag for resolved (1)/unresolved (2)
@@ -374,7 +374,7 @@ class Evaluation(object):
 
                 # Only scattering radius specified
                 if res.LRU == 0 and res.NRO == 0:
-                    items = self.get_cont_record()
+                    items = self._get_cont_record()
                     res.SPI = items[0]
                     res.AP = items[1]
                     res.NLS = items[4]
@@ -385,15 +385,15 @@ class Evaluation(object):
                 elif res.LRU == 2:
                     self.readUnresolved(res)
 
-    def read_resolved(self, res):
+    def _read_resolved(self, res):
         # Single- or Multi-level Breit Wigner
         if res.LRF == 1 or res.LRF == 2:
             # Read energy-dependent scattering radius if present
             if res.NRO > 0:
-                res.AP = self.get_tab1_record()
+                res.AP = self._get_tab1_record()
 
             # Other scatter radius parameters
-            items = self.get_cont_record()
+            items = self._get_cont_record()
             res.SPI = items[0] # Spin, I, of the target nucleus
             if res.NRO == 0:
                 res.AP = items[1]
@@ -401,7 +401,7 @@ class Evaluation(object):
 
             # Read resonance widths, J values, etc
             for l in range(res.NLS):
-                headerItems, items = self.get_list_record()
+                headerItems, items = self._get_list_record()
                 QX, L, LRX = headerItems[1:4]
                 energy = items[0::6]
                 spin = items[1::6]
@@ -426,10 +426,10 @@ class Evaluation(object):
         elif res.LRF == 3:
             # Read energy-dependent scattering radius if present
             if res.NRO > 0:
-                res.AP = self.get_tab1_record()
+                res.AP = self._get_tab1_record()
 
             # Other scatter radius parameters
-            items = self.get_cont_record()
+            items = self._get_cont_record()
             res.SPI = items[0] # Spin, I, of the target nucleus
             if res.NRO == 0:
                 res.AP = items[1]
@@ -439,7 +439,7 @@ class Evaluation(object):
 
             # Read resonance widths, J values, etc
             for l in range(res.NLS):
-                headerItems, items = self.get_list_record()
+                headerItems, items = self._get_list_record()
                 APL, L = headerItems[1:3]
                 energy = items[0::6]
                 spin = items[1::6]
@@ -459,10 +459,10 @@ class Evaluation(object):
                     resonance.GFB = GFB[i]
                     res.resonances.append(resonance)
 
-    def readUnresolved(self, res):
+    def _read_unresolved(self, res):
         pass
 
-    def read_thermal_elastic(self):
+    def _read_thermal_elastic(self):
         # Find file7
         file7 = self.find_file(7)
 
@@ -474,7 +474,7 @@ class Evaluation(object):
         self.seek_mfmt(7, 2)
 
         # Get head record
-        items = self.get_head_record()
+        items = self._get_head_record()
         elast.ZA = items[0] # ZA identifier
         elast.AWR = items[1] # AWR
         elast.LTHR = items[2] # coherent/incoherent flag
@@ -484,7 +484,7 @@ class Evaluation(object):
                 temp = []
                 eint = []
                 set = []
-                temp0 = self.get_tab1_record()
+                temp0 = self._get_tab1_record()
                 # Save temp
                 temp.append(temp0.params[0])
                 # Save Eint
@@ -495,7 +495,7 @@ class Evaluation(object):
                 if self.veryverbose:
                     print 'Number of temperatures:', elast.LT+1
                 for t in range(elast.LT):
-                    heads, s = self.get_list_record()
+                    heads, s = self._get_list_record()
                     # Save S(E,T)
                     set.append(s)
                     # Save T
@@ -509,7 +509,7 @@ class Evaluation(object):
                 temp = []
                 eint = []
                 set = []
-                record = self.get_tab1_record()
+                record = self._get_tab1_record()
                 # Save cross section
                 elast.sb = record.params[0]
                 # Save Tint
@@ -520,7 +520,7 @@ class Evaluation(object):
             print 'Invalid value of LHTR'
         file7.reactions.append(elast)
 
-    def read_thermal_inelastic(self):
+    def _read_thermal_inelastic(self):
         # Find file7
         file7 = self.find_file(7)
 
@@ -532,12 +532,12 @@ class Evaluation(object):
         self.seek_mfmt(7, 4)
 
         # Get head record
-        items = self.get_head_record()
+        items = self._get_head_record()
         inel.ZA = items[0] # ZA identifier
         inel.AWR = items[1] # AWR
         inel.LAT = items[3] # Temperature flag
         inel.LASYM = items[4] # Symmetry flag
-        HeaderItems, B = self.get_list_record()
+        HeaderItems, B = self._get_list_record()
         inel.LLN = HeaderItems[2]
         inel.NS = HeaderItems[5]
         inel.B = B
@@ -545,14 +545,14 @@ class Evaluation(object):
             if self.verbose:
                 print 'No principal atom'
         else:
-            nbeta = self.get_tab2_record()
+            nbeta = self._get_tab2_record()
             sabt = []
             beta = []
             for be in range(nbeta.NBT[0]):
                 #Read record for first temperature (always present)
                 sabt_temp = []
                 temp = []
-                temp0 = self.get_tab1_record()
+                temp0 = self._get_tab1_record()
                 # Save S(be, 0, :)
                 sabt_temp.append(temp0.y)
                 # Save alpha(:)
@@ -566,7 +566,7 @@ class Evaluation(object):
                     print 'Number of temperatures:', inel.LT+1
                 for t in range(inel.LT):
                     #Read records for all the other temperatures
-                    headsab, sa = self.get_list_record()
+                    headsab, sa = self._get_list_record()
                     # Save S(be, t+1, :)
                     sabt_temp.append(sa)
                     # Save temperature
@@ -581,11 +581,11 @@ class Evaluation(object):
             inel.alpha = np.array(alpha)
             inel.beta = np.array(beta)
             inel.temp = np.array(temp)
-        teffrecord = self.get_tab1_record()
+        teffrecord = self._get_tab1_record()
         inel.teff = teffrecord.y
         file7.reactions.append(inel)
 
-    def getTextRecord(self, line=None):
+    def _get_text_record(self, line=None):
         if not line:
             line = self.fh.readline()
         if self.veryverbose:
@@ -597,7 +597,7 @@ class Evaluation(object):
         NS = int(line[75:80])
         return [HL, MAT, MF, MT, NS]
 
-    def get_cont_record(self, line=None, skipC=False):
+    def _get_cont_record(self, line=None, skipC=False):
         if self.veryverbose:
             print 'Get CONT record'
         if not line:
@@ -618,7 +618,7 @@ class Evaluation(object):
         NS = int(line[75:80])
         return [C1, C2, L1, L2, N1, N2, MAT, MF, MT, NS]
 
-    def get_head_record(self, line=None):
+    def _get_head_record(self, line=None):
         if not line:
             line = self.fh.readline()
         if self.veryverbose:
@@ -635,11 +635,11 @@ class Evaluation(object):
         NS = int(line[75:80])
         return [ZA, AWR, L1, L2, N1, N2, MAT, MF, MT, NS]
 
-    def get_list_record(self, onlyList=False):
+    def _get_list_record(self, onlyList=False):
         # determine how many items are in list
         if self.veryverbose:
             print 'Get LIST record'
-        items = self.get_cont_record()
+        items = self._get_cont_record()
         NPL = items[4]
 
         # read items
@@ -658,14 +658,14 @@ class Evaluation(object):
         else:
             return (items, itemsList)
 
-    def get_tab1_record(self):
+    def _get_tab1_record(self):
         if self.veryverbose:
             print 'Get TAB1 record'
         r = ENDFTab1Record()
         r.read(self.fh)
         return r
 
-    def get_tab2_record(self):
+    def _get_tab2_record(self):
         if self.veryverbose:
             print 'Get TAB2 record'
         r = ENDFTab2Record()
