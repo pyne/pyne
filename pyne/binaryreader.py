@@ -147,6 +147,7 @@ class _BinaryReader(object):
     
     def __init__(self,filename,mode='rb'):
         self.intSize = struct.calcsize('i')
+        self.longSize   = struct.calcsize('q')
         self.f = open(filename, mode)
         
     def close(self):

@@ -4,7 +4,7 @@
 Nuclear Data Generation -- :mod:`pyne.dbgen`
 ============================================
 Pyne provides an easy-to-use, repeatable aggregation utility for nuclear data.  This command line
-utility called ``nuc_data_make`` builds and installs an HDF5 file named ``nuc_data.h5`` to the 
+utility is called ``nuc_data_make`` builds and installs an HDF5 file named ``nuc_data.h5`` to the 
 current PyNE install.  Nuclear data is gathered from a vareity of sources, including the web 
 and the data files for other programs installed on your system (such as MCNP).
 

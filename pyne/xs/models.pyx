@@ -568,7 +568,7 @@ def sigma_s(E, b=1.0, M_A=1.0, T=300.0):
     See Also
     --------
     pyne.data.b : scattering length data.
-    pyne.data.nuc_weight : Atomic mass data.
+    pyne.data.atomic_mass : Atomic mass data.
 
     """
     kT_over_AE = k * T / ((M_A / m_n) * E)
