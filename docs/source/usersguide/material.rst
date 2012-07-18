@@ -193,7 +193,7 @@ Plutonium vector.
 Molecular Weights & Atom Fractions
 ----------------------------------
 You may also calculate the molecular weight of a material via the :meth:`Material.molecular_weight` method.
-This uses the :func:`pyne.data.nuc_weight` function to look up the atomic weight values of
+This uses the :func:`pyne.data.atomic_mass` function to look up the atomic mass values of
 the constituent nuclides.
 
 .. code-block:: ipython
