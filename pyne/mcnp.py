@@ -11,11 +11,434 @@ classes.
 
 """
 
+import collections
 import struct
 import math 
 import os
 
 from binaryreader import _BinaryReader, _FortranRecord
+
+class Inp(object):
+    def __init__(self, fname, title=None, description=None, author=None,
+            modifications=None, path="", inpextension=".inp"):
+        self.inpextension = inpextension
+        self.fname = fname
+        if len(path) > 0 and path[-1] != os.sep:
+            path += os.sep
+        self.path = path + self.fname + os.sep
+        if not os.path.exists(self.path):
+            os.mkdir(self.path)
+        self.f = open(self.path + fname + inpextension, 'w')
+        self.cells = collections.OrderedDict()
+        self.surfaces = collections.OrderedDict()
+        self.materials = collections.OrderedDict()
+        self.scattering_laws = collections.OrderedDict()
+        self.source = None
+        self.source_points = None
+        self.miscdata = []
+        self.tallies = collections.OrderedDict()
+        self.surfaceCard = 0
+        self.cellCard = 0
+        self.matCard = 0
+        self.tally_cellflux_card = 4
+        self.title = title
+        self.description = description
+        self.author = author
+        self.modifications = modifications
+
+    def getNextMatCard(self):
+        self.matCard = self.matCard + 100
+
+    def setTitle(self, title):
+        self.title = title
+
+    def setDescription(self, description):
+        self.description
+
+    def addCell(self, name, matName, density, densityUnits, inSurfaceNames,
+            outSurfaceNames, imp, temp=None, vol=None):
+        # TODO only assign if no errors. check uniqueness of name
+        # TODO clean up rror checking; make it consistent
+        #try:
+            self._unique("cell", name)
+
+            if matName not in self.materials:
+                raise Exception("Material " + matName + " does not exist," \
+                        " cannot use in cell")
+
+            inSurfaces = []
+            # TODO initalize for efficiency
+            for surfaceName in inSurfaceNames:
+                if surfaceName not in self.surfaces:
+                    raise Exception("Surface " + surfaceName + " does not " \
+                            "exist, cannot use in cell")
+                inSurfaces = inSurfaces + [self.surfaces[surfaceName]]
+
+            outSurfaces = []
+            for surfaceName in outSurfaceNames:
+                if surfaceName not in self.surfaces:
+                    raise Exception("Surface " + surfaceName + " does not " \
+                            "exist, cannot use in cell")
+                outSurfaces = outSurfaces + [self.surfaces[surfaceName]]
+
+            self.cells[name] = mcnpcards.Cell(self.getNextCellCard(), name,
+                    self.materials[matName], density, densityUnits, inSurfaces,
+                    outSurfaces, imp, temp, vol)
+        #except:
+        #    raise Exception("Failed to add a cell")
+
+    def addCellVoid(self, name, inSurfaceNames, outSurfaceNames, imp):
+        # TODO only assign if no errors. check uniqueness of name
+        #try:
+            self._unique("cell", name)
+
+            inSurfaces = []
+            # TODO initalize for efficiency
+            for surfaceName in inSurfaceNames:
+                if surfaceName not in self.surfaces:
+                    raise Exception("Surface " + surfaceName + " does not " \
+                            "exist, cannot use in cell")
+                inSurfaces = inSurfaces + [self.surfaces[surfaceName]]
+
+            outSurfaces = []
+            for surfaceName in outSurfaceNames:
+                if surfaceName not in self.surfaces:
+                    raise Exception("Surface " + surfaceName + " does not " \
+                            "exist, cannot use in cell")
+                outSurfaces = outSurfaces + [self.surfaces[surfaceName]]
+
+            self.cells[name] = mcnpcards.CellVoid(self.getNextCellCard(), name,
+                    inSurfaces, outSurfaces, imp)
+        #except:
+        #    raise Exception("Failed to add a cell")
+
+    def addSurfacePlane(self, name, dirstr, pos, 
+                        reflecting=False, white=False):
+        # TODO only assign if no errors. check uniqueness of name
+        #try:
+            self._unique("surface", name)
+            self.surfaces[name] = mcnpcards.Plane(self.getNextSurfaceCard(),
+                    name, dirstr, pos, reflecting, white)
+        #except:
+        #    raise Exception("Failed to add a plane surface.")
+
+
+    def addSurfaceCylinder(self, name, dirstr, radius,
+                           reflecting=False, white=False):
+        # TODO only assign if no errors. check uniqueness of name
+        #try:
+            self._unique("surface", name)
+            self.surfaces[name] = mcnpcards.Cylinder(self.getNextSurfaceCard(),
+                    name, dirstr, radius, reflecting, white)
+        #except:
+        #    raise Exception("Failed to add a cylinder surface.")
+
+    def add_surface_originsphere(self, name, radius,
+                                 reflecting=False, white=False):
+        # TODO only assign if no errors, check uniqueness of name
+        self._unique("surface", name)
+        self.surfaces[name] = mcnpcards.Sphere(self.getNextSurfaceCard(),
+                name, radius)
+
+    def add_surface_rectangularparallelepiped(self, name, xmin, xmax,
+                                              ymin, ymax, zmin, zmax,
+                                              reflecting=False, white=False):
+        self.surfaces[name] = mcnpcards.RectangularParallelepiped(
+                self.getNextSurfaceCard(), name, xmin, xmax, ymin, ymax,
+                zmin, zmax, reflecting, white)
+
+    def addMaterial(self, name, comment, ZAIDs, densityUnits, densities,
+            temp=None):
+        # TODO only assign if no errors. check uniqueness of name
+        #try:
+            self._unique("material", name)
+            self.materials[name] = mcnpcards.Material(self.getNextMatCard(),
+                    name, comment, ZAIDs, densityUnits, densities, temp)
+        #except:
+        #    raise Exception("Failed to add a material")
+
+    def add_scattering_law(self, material_name, libraries, temp=None):
+        # TODO simple version now: user simply supplies the library names.
+        if material_name not in self.materials:
+            raise Exception("Material {0} does not exist. Cannot create "
+                "scattering law card for nonexistant materials.".format(
+                    material_name))
+        material_no = self.materials[material_name].card_no
+        # Each material can only have one scattering law.
+        self.scattering_laws[material_name] = mcnpcards.ScatteringLaw(
+                material_no,
+                libraries,
+                temp)
+
+    def add_criticality_source(self, n_histories=1000,
+                               keff_guess=1.0,
+                               n_skip_cycles=30,
+                               n_cycles=130):
+        # TODO there are other options
+        self.source = mcnpcards.Criticality(n_histories, keff_guess,
+                n_skip_cycles, n_cycles)
+
+    def add_criticality_source_points(self, points=[[0,0,0]]):
+        # TODO
+        self.source_points = mcnpcards.CriticalitySourcePoints(points)
+
+    def add_tally_cellflux(self, name, particle, cell_names):
+        # Check to see that the relevant particle type is already in use.
+        self._unique("tally", name)
+        cell_nos = []
+        for cell_name in cell_names:
+            if cell_name not in self.cells:
+                raise Exception("The cell {0} is not defined for this input "
+                        "file.".format(cell_name))
+            cell_nos += [self.cells[cell_name].card_no]
+            self.tallies[name] = mcnpcards.TallyCellFlux(
+                    self.getNextTallyCellFluxCard(), name,
+                    particle, cell_nos)
+
+    def add_tally_multiplier(self, tally_name, multsets):
+        """[(c, "matname", MTs), (c, "matname", MTs)
+        TODO can tally_no be zero, like with the En card?
+        ERROR check: the material used for multiplier is the same as the one
+        used for the cell in the actual tally?
+        TODO want to make the -1 input smarter
+        """
+        if tally_name not in self.tallies:
+            raise Exception("The tally specified for this tally multiplier "
+                    "card does not exist.")
+        tally_no = self.tallies[tally_name].card_no
+        newmultsets = []
+        for multset in multsets:
+            if len(multset) == 1:
+                newmultsets += [multset]
+            elif len(multset) == 3:
+                mat_name = multset[1]
+                if mat_name not in self.materials:
+                    raise Exception("The material specified in this tally "
+                            "multiplier card does not exist.")
+                mat_no = self.materials[mat_name].card_no
+                newmultsets += [(multset[0], mat_no, multset[2])]
+        self.miscdata += [mcnpcards.TallyMultiplier(tally_no, newmultsets)]
+
+    def add_tally_energy(self, tally_name, energies):
+        # TODO allow for logarithmic input.
+        if tally_name is 0:
+            # If this energy card is supposed to apply to all energies.
+            tally_no = 0
+        else:
+            if tally_name not in self.tallies:
+                raise Exception("The tally specified for this tally energy "
+                        "card does not exist.")
+            tally_no = self.tallies[tally_name].card_no
+        self.miscdata += [mcnpcards.TallyEnergy(tally_no, energies)]
+
+    def add_printdump(self):
+        self.miscdata += [mcnpcards.PrintDump()]
+
+    def write(self):
+        if self.title != None:
+            self.writeCard(self.title)
+            self.writeComment("")
+        if self.source is None:
+            raise Exception("Input file does not have a particle source, "
+                    "and must have one.")
+        self.writeComment("******************** File Description "
+                "******************************")
+        self.writeComment("")
+        if self.description != None:
+            self.writeComment("Description: " + self.description)
+        self.writeComment("")
+        if self.author != None:
+            self.writeComment("Author: " + self.author)
+        self.writeComment("")
+        self.writeModifications()
+        self.writeComment("")
+        # writing cells
+        self.writeComment("")
+        self.writeDeckHeaderLine("Cell")
+        self.writeComment("")
+        for cellName in self.cells:
+            self.writeCard(self.cells[cellName].card())
+        self.writeReturn()
+
+        # writing surfaces
+        self.writeComment("")
+        self.writeDeckHeaderLine("Surface")
+        self.writeComment("")
+        for surfaceName in self.surfaces:
+            self.writeCard(self.surfaces[surfaceName].card())
+        self.writeReturn()
+
+        # writing data cards
+        self.writeComment("")
+        self.writeDeckHeaderLine("Data")
+        # writing materials
+        self.writeComment("")
+        self.writeDataHeaderLine("Materials")
+        for materialName in self.materials:
+            self.writeComment("")
+            self.writeMaterialComment(self.materials[materialName].comment())
+            self.writeComment("")
+            self.writeMaterialCard(self.materials[materialName].card())
+            if materialName in self.scattering_laws:
+                self.writeCard(self.scattering_laws[materialName].card())
+
+        # Writing source cards.
+        # Want a way to know what type of source we're using.
+        self.writeComment("")
+        self.writeDataHeaderLine("Source")
+        self.writeComment("")
+        self.writeCard(self.source.card())
+        if self.source_points is not None:
+            self.writeCard(self.source_points.card())
+
+        # Writing tally cards.
+        if len(self.tallies) > 0:
+            # There are tally cards
+            self.writeComment("")
+            self.writeDataHeaderLine("Tallies")
+            self.writeComment("")
+            for tally_name in self.tallies:
+                self.writeCard(self.tallies[tally_name].card())
+
+        # Write miscellaneous data cards.
+        for card in self.miscdata:
+            self.writeCard(card.card())
+        self.f.close()
+
+    def writeModifications(self):
+        first = True
+        for modtuple in self.modifications:
+            if first == True:
+                self.writeComment("Modifications: " + modtuple[0] + " - " +
+                        modtuple[1])
+                first = False
+            else:
+                self.writeComment("               " + modtuple[0] + " - " +
+                        modtuple[1])
+
+    def writeReturn(self):
+        self.f.write("\n")
+
+    def writeCard(self, string2print):
+        '''Checks length of string, makes sure it's less than 80 characters.
+            TODO skipping this operation based on the location of the $ needs
+            to be improved.
+        '''
+        stringIsMultipleLines = False
+        firstLine = True
+        max_line_length = 74
+        # If there is no comment on this line or it starts after the 74th
+        # character.
+        if ((string2print.find('$') < 0) or
+                (string2print.find('$') > max_line_length)):
+            while len(string2print) > max_line_length:
+                stringIsMultipleLines = True
+                spaceindex = string.rfind(string2print, ' ', 
+                                          0, max_line_length) + 1
+                if firstLine:
+                    self.f.write(string2print[0:spaceindex] + "\n")
+                    firstLine = False
+                else:
+                    self.f.write("     " + string2print[0:spaceindex] + "\n")
+                string2print = string2print[spaceindex:len(string2print)]
+            if stringIsMultipleLines and not firstLine:
+                self.f.write(5 * " ")
+        self.f.write(string2print + "\n")
+
+    def writeMaterialCard(self, string2print):
+        self.f.write(string2print)
+
+    def writeComment(self, string2print):
+        '''
+        '''
+        if string2print == "":
+            self.f.write("c\n")
+            return
+        while len(string2print) > 74:
+            spaceindex = string.rfind(string2print, ' ', 0, 74) + 1
+            self.f.write("c " + string2print[0:spaceindex] + "\n")
+            string2print = string2print[spaceindex:len(string2print)]
+        self.f.write("c " + string2print + "\n")
+
+    def writeMaterialComment(self, stringTuple):
+        if type(stringTuple) is not tuple:
+            raise Exception("Material comment input must be a tuple.")
+        for string in stringTuple:
+            self.writeComment("    -- " + string)
+
+    def writeHeaderLine(self):
+        self.f.write("C ==========================\n")
+
+    def writeDeckHeaderLine(self, header):
+        self.writeComment("*** " + header + " Cards ***")
+
+    def writeDataHeaderLine(self, header):
+        self.writeComment(" ----- " + header)
+
+    def run(self, plot=False, outfname=None, mctafname=None):
+        curdir = os.path.abspath(os.path.curdir)
+        print curdir
+        print self.path
+        os.chdir(self.path)
+        to_execute = "mcnpx i=%s%s" % (self.fname, self.inpextension)
+        if outfname is not None:
+            to_execute += " o=%s" % outfname
+        if mctafname is not None:
+            # Did we even run for an MCTA file?
+            to_execute += " m=%s" % mctafname
+        if plot:
+            to_execute += " ip"
+        os.system(to_execute)
+        os.chdir(curdir)
+
+    def clean(self, runt=True, src=True, out=False, mcta=False, com=True):
+        # TODO not platform independent
+        curdir = os.path.abspath(os.path.curdir)
+        os.chdir(self.path)
+        if runt:
+            os.system("rm *runt*")
+        if src:
+            os.system("rm *srct*")
+        if out:
+            os.system("rm *out*")
+        if mcta:
+            os.system("rm *mcta*")
+        if com:
+            os.system("rm *com*")
+        os.chdir(curdir)
+
+    def _unique(self, card_type, name):
+        if card_type == "cell":
+            dict_to_check = self.cells
+        elif card_type == "surface":
+            dict_to_check = self.surfaces
+        elif card_type == "material":
+            dict_to_check = self.materials
+        elif card_type == "tally":
+            dict_to_check = self.tallies
+        else:
+            raise Exception("TODO")
+        if name in dict_to_check:
+            raise Exception("This %s name has already been used for "
+                    "another %s" % (card_type, card_type))
+        return
+
+    def getNextSurfaceCard(self):
+        self.surfaceCard += 1
+        return self.surfaceCard
+
+    def getNextCellCard(self):
+        self.cellCard += 1
+        return self.cellCard
+
+    def getNextMatCard(self):
+        self.matCard += 1
+        return self.matCard
+
+    def getNextTallyCellFluxCard(self):
+        self.tally_cellflux_card += 10
+        return self.tally_cellflux_card
+
 
 class Mctal(object):
     def __init__(self):
