@@ -19,8 +19,59 @@ import os
 from binaryreader import _BinaryReader, _FortranRecord
 
 class Inp(object):
+    """This class manages the creation of a plaintext MCNPX input file. The
+    class manages the creation of cards (cell, surface, data, etc.) and handles
+    the numbering of such cards. The class has also has a method to run the
+    input script.
+
+    The class is used by initializing the Inp object with various metadata
+    settings that are printed as comments at the top of the input file. To
+    actually define the simulation, the user makes calls (mostly in any order)
+    to the appropriate _add_* methods. For example, there is a _add_cell()
+    method that requires inputs of surface numbers, materials, etc. Calling an
+    _add_* function does not cause anything to be written to the input file.
+    Rather, this step is done by calling write(). The _add_* methods simply
+    cause the creation of an instance of a mcnpcard, which is then saved to one
+    of a number of ordered dictionaries in this class. write() then uses these
+    ordered dictionaries to print the informaiton contained in them.
+
+    Similar to input to Serpent, this class attempts to rely on "keywords",
+    rather than just numbers, to relate cell cards to surface and material
+    cards. This means that all surfaces and materials have string names, and a
+    cell card is created by referring to these names.
+
+    """
+
     def __init__(self, fname, title=None, description=None, author=None,
             modifications=None, path="", inpextension=".inp"):
+        """
+        This instantiates an Inp object, which initializes many of the fields
+        in the class and creates the path directory if it does not already
+        exist. None of the methods are actually called at this point (the input
+        is still completely undefined).
+
+        Parameters
+        ----------
+        fname : str
+            Name of the input file.
+        title : str
+            The first (uncommented) line that is printed in the input file.
+        description : str
+            Text that is written to the input file as comments as a perhaps
+            lengthy description of the simulation specified by the input file.
+        author : str
+            The name of the author of the input. This is printed at the top of
+            the input file, below the description.
+        modifications : tuple
+            A tuple of strings that describe modifications to the input. A
+            primitive version record. There are surely better ways to input
+            this.
+        path : str
+            The path where the input file should be written.
+        inpextension : str
+            The filename extension for the input file.
+        """
+
         self.inpextension = inpextension
         self.fname = fname
         if len(path) > 0 and path[-1] != os.sep:
@@ -46,16 +97,16 @@ class Inp(object):
         self.author = author
         self.modifications = modifications
 
-    def getNextMatCard(self):
+    def _next_mat_card(self):
         self.matCard = self.matCard + 100
 
-    def setTitle(self, title):
+    def set_title(self, title):
         self.title = title
 
-    def setDescription(self, description):
+    def set_description(self, description):
         self.description
 
-    def addCell(self, name, matName, density, densityUnits, inSurfaceNames,
+    def add_cell(self, name, matName, density, densityUnits, inSurfaceNames,
             outSurfaceNames, imp, temp=None, vol=None):
         # TODO only assign if no errors. check uniqueness of name
         # TODO clean up rror checking; make it consistent
@@ -81,13 +132,13 @@ class Inp(object):
                             "exist, cannot use in cell")
                 outSurfaces = outSurfaces + [self.surfaces[surfaceName]]
 
-            self.cells[name] = mcnpcards.Cell(self.getNextCellCard(), name,
+            self.cells[name] = mcnpcards.Cell(self._next_cell_card(), name,
                     self.materials[matName], density, densityUnits, inSurfaces,
                     outSurfaces, imp, temp, vol)
         #except:
         #    raise Exception("Failed to add a cell")
 
-    def addCellVoid(self, name, inSurfaceNames, outSurfaceNames, imp):
+    def add_cell_void(self, name, inSurfaceNames, outSurfaceNames, imp):
         # TODO only assign if no errors. check uniqueness of name
         #try:
             self._unique("cell", name)
@@ -107,28 +158,28 @@ class Inp(object):
                             "exist, cannot use in cell")
                 outSurfaces = outSurfaces + [self.surfaces[surfaceName]]
 
-            self.cells[name] = mcnpcards.CellVoid(self.getNextCellCard(), name,
+            self.cells[name] = mcnpcards.CellVoid(self._next_cell_card(), name,
                     inSurfaces, outSurfaces, imp)
         #except:
         #    raise Exception("Failed to add a cell")
 
-    def addSurfacePlane(self, name, dirstr, pos, 
+    def add_surface_plane(self, name, dirstr, pos, 
                         reflecting=False, white=False):
         # TODO only assign if no errors. check uniqueness of name
         #try:
             self._unique("surface", name)
-            self.surfaces[name] = mcnpcards.Plane(self.getNextSurfaceCard(),
+            self.surfaces[name] = mcnpcards.Plane(self._next_surface_card(),
                     name, dirstr, pos, reflecting, white)
         #except:
         #    raise Exception("Failed to add a plane surface.")
 
 
-    def addSurfaceCylinder(self, name, dirstr, radius,
+    def add_surface_cylinder(self, name, dirstr, radius,
                            reflecting=False, white=False):
         # TODO only assign if no errors. check uniqueness of name
         #try:
             self._unique("surface", name)
-            self.surfaces[name] = mcnpcards.Cylinder(self.getNextSurfaceCard(),
+            self.surfaces[name] = mcnpcards.Cylinder(self._next_surface_card(),
                     name, dirstr, radius, reflecting, white)
         #except:
         #    raise Exception("Failed to add a cylinder surface.")
@@ -137,22 +188,22 @@ class Inp(object):
                                  reflecting=False, white=False):
         # TODO only assign if no errors, check uniqueness of name
         self._unique("surface", name)
-        self.surfaces[name] = mcnpcards.Sphere(self.getNextSurfaceCard(),
+        self.surfaces[name] = mcnpcards.Sphere(self._next_surface_card(),
                 name, radius)
 
     def add_surface_rectangularparallelepiped(self, name, xmin, xmax,
                                               ymin, ymax, zmin, zmax,
                                               reflecting=False, white=False):
         self.surfaces[name] = mcnpcards.RectangularParallelepiped(
-                self.getNextSurfaceCard(), name, xmin, xmax, ymin, ymax,
+                self._next_surface_card(), name, xmin, xmax, ymin, ymax,
                 zmin, zmax, reflecting, white)
 
-    def addMaterial(self, name, comment, ZAIDs, densityUnits, densities,
+    def add_material(self, name, comment, ZAIDs, densityUnits, densities,
             temp=None):
         # TODO only assign if no errors. check uniqueness of name
         #try:
             self._unique("material", name)
-            self.materials[name] = mcnpcards.Material(self.getNextMatCard(),
+            self.materials[name] = mcnpcards.Material(self._next_mat_card(),
                     name, comment, ZAIDs, densityUnits, densities, temp)
         #except:
         #    raise Exception("Failed to add a material")
@@ -192,7 +243,7 @@ class Inp(object):
                         "file.".format(cell_name))
             cell_nos += [self.cells[cell_name].card_no]
             self.tallies[name] = mcnpcards.TallyCellFlux(
-                    self.getNextTallyCellFluxCard(), name,
+                    self._next_tally_cell_flux_card(), name,
                     particle, cell_nos)
 
     def add_tally_multiplier(self, tally_name, multsets):
@@ -236,90 +287,90 @@ class Inp(object):
 
     def write(self):
         if self.title != None:
-            self.writeCard(self.title)
-            self.writeComment("")
+            self._write_card(self.title)
+            self._write_comment("")
         if self.source is None:
             raise Exception("Input file does not have a particle source, "
                     "and must have one.")
-        self.writeComment("******************** File Description "
+        self._write_comment("******************** File Description "
                 "******************************")
-        self.writeComment("")
+        self._write_comment("")
         if self.description != None:
-            self.writeComment("Description: " + self.description)
-        self.writeComment("")
+            self._write_comment("Description: " + self.description)
+        self._write_comment("")
         if self.author != None:
-            self.writeComment("Author: " + self.author)
-        self.writeComment("")
-        self.writeModifications()
-        self.writeComment("")
+            self._write_comment("Author: " + self.author)
+        self._write_comment("")
+        self._write_modifications()
+        self._write_comment("")
         # writing cells
-        self.writeComment("")
-        self.writeDeckHeaderLine("Cell")
-        self.writeComment("")
+        self._write_comment("")
+        self._write_deck_header_line("Cell")
+        self._write_comment("")
         for cellName in self.cells:
-            self.writeCard(self.cells[cellName].card())
-        self.writeReturn()
+            self._write_card(self.cells[cellName].card())
+        self._write_return()
 
         # writing surfaces
-        self.writeComment("")
-        self.writeDeckHeaderLine("Surface")
-        self.writeComment("")
+        self._write_comment("")
+        self._write_deck_header_line("Surface")
+        self._write_comment("")
         for surfaceName in self.surfaces:
-            self.writeCard(self.surfaces[surfaceName].card())
-        self.writeReturn()
+            self._write_card(self.surfaces[surfaceName].card())
+        self._write_return()
 
         # writing data cards
-        self.writeComment("")
-        self.writeDeckHeaderLine("Data")
+        self._write_comment("")
+        self._write_deck_header_line("Data")
         # writing materials
-        self.writeComment("")
-        self.writeDataHeaderLine("Materials")
+        self._write_comment("")
+        self._write_data_header_line("Materials")
         for materialName in self.materials:
-            self.writeComment("")
-            self.writeMaterialComment(self.materials[materialName].comment())
-            self.writeComment("")
-            self.writeMaterialCard(self.materials[materialName].card())
+            self._write_comment("")
+            self._write_material_comment(self.materials[materialName].comment())
+            self._write_comment("")
+            self._write_material_card(self.materials[materialName].card())
             if materialName in self.scattering_laws:
-                self.writeCard(self.scattering_laws[materialName].card())
+                self._write_card(self.scattering_laws[materialName].card())
 
         # Writing source cards.
         # Want a way to know what type of source we're using.
-        self.writeComment("")
-        self.writeDataHeaderLine("Source")
-        self.writeComment("")
-        self.writeCard(self.source.card())
+        self._write_comment("")
+        self._write_data_header_line("Source")
+        self._write_comment("")
+        self._write_card(self.source.card())
         if self.source_points is not None:
-            self.writeCard(self.source_points.card())
+            self._write_card(self.source_points.card())
 
         # Writing tally cards.
         if len(self.tallies) > 0:
             # There are tally cards
-            self.writeComment("")
-            self.writeDataHeaderLine("Tallies")
-            self.writeComment("")
+            self._write_comment("")
+            self._write_data_header_line("Tallies")
+            self._write_comment("")
             for tally_name in self.tallies:
-                self.writeCard(self.tallies[tally_name].card())
+                self._write_card(self.tallies[tally_name].card())
 
         # Write miscellaneous data cards.
         for card in self.miscdata:
-            self.writeCard(card.card())
+            self._write_card(card.card())
         self.f.close()
 
-    def writeModifications(self):
+    def _write_modifications(self):
         first = True
         for modtuple in self.modifications:
             if first == True:
-                self.writeComment("Modifications: " + modtuple[0] + " - " +
+                self._write_comment("Modifications: " + modtuple[0] + " - " +
                         modtuple[1])
                 first = False
             else:
-                self.writeComment("               " + modtuple[0] + " - " +
+                self._write_comment("               " + modtuple[0] + " - " +
                         modtuple[1])
 
-    def writeReturn(self):
+    def _write_return(self):
         self.f.write("\n")
 
-    def writeCard(self, string2print):
+    def _write_card(self, string2print):
         '''Checks length of string, makes sure it's less than 80 characters.
             TODO skipping this operation based on the location of the $ needs
             to be improved.
@@ -345,10 +396,10 @@ class Inp(object):
                 self.f.write(5 * " ")
         self.f.write(string2print + "\n")
 
-    def writeMaterialCard(self, string2print):
+    def _write_material_card(self, string2print):
         self.f.write(string2print)
 
-    def writeComment(self, string2print):
+    def _write_comment(self, string2print):
         '''
         '''
         if string2print == "":
@@ -360,20 +411,20 @@ class Inp(object):
             string2print = string2print[spaceindex:len(string2print)]
         self.f.write("c " + string2print + "\n")
 
-    def writeMaterialComment(self, stringTuple):
+    def _write_material_comment(self, stringTuple):
         if type(stringTuple) is not tuple:
             raise Exception("Material comment input must be a tuple.")
         for string in stringTuple:
-            self.writeComment("    -- " + string)
+            self._write_comment("    -- " + string)
 
     def writeHeaderLine(self):
         self.f.write("C ==========================\n")
 
-    def writeDeckHeaderLine(self, header):
-        self.writeComment("*** " + header + " Cards ***")
+    def _write_deck_header_line(self, header):
+        self._write_comment("*** " + header + " Cards ***")
 
-    def writeDataHeaderLine(self, header):
-        self.writeComment(" ----- " + header)
+    def _write_data_header_line(self, header):
+        self._write_comment(" ----- " + header)
 
     def run(self, plot=False, outfname=None, mctafname=None):
         curdir = os.path.abspath(os.path.curdir)
@@ -392,7 +443,11 @@ class Inp(object):
         os.chdir(curdir)
 
     def clean(self, runt=True, src=True, out=False, mcta=False, com=True):
-        # TODO not platform independent
+        """
+        
+        TODO not platform independent; os.remove() does not take reg exps.
+        """
+
         curdir = os.path.abspath(os.path.curdir)
         os.chdir(self.path)
         if runt:
@@ -423,19 +478,19 @@ class Inp(object):
                     "another %s" % (card_type, card_type))
         return
 
-    def getNextSurfaceCard(self):
+    def _next_surface_card(self):
         self.surfaceCard += 1
         return self.surfaceCard
 
-    def getNextCellCard(self):
+    def _next_cell_card(self):
         self.cellCard += 1
         return self.cellCard
 
-    def getNextMatCard(self):
+    def _next_mat_card(self):
         self.matCard += 1
         return self.matCard
 
-    def getNextTallyCellFluxCard(self):
+    def _next_tally_cell_flux_card(self):
         self.tally_cellflux_card += 10
         return self.tally_cellflux_card
 
