@@ -16,7 +16,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "H5Cpp.h"
 #include "h5wrap.h"
 
 #include "pyne.h"
@@ -41,8 +40,8 @@ namespace pyne
     void norm_comp ();
 
     // Persistence functions.
-    void _load_comp_protocol0(H5::H5File *, std::string, int);
-    void _load_comp_protocol1(H5::H5File *, std::string, int);
+    void _load_comp_protocol0(hid_t, std::string, int);
+    void _load_comp_protocol1(hid_t, std::string, int);
 
     void from_hdf5 (char *, char *, int=-1, int=1);
     void from_hdf5 (std::string, std::string="/material", int=-1, int=1);

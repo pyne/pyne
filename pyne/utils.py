@@ -1,6 +1,8 @@
 import os
 from distutils.dir_util import remove_tree
 
+from _utils import fromstring_split, fromstring_token
+
 time_conv_dict = {
           'as': 1e-18, 
 		  'attosec': 1e-18, 

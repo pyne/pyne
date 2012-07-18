@@ -3,8 +3,8 @@
 ============================================
 Nuclide Naming Module -- :mod:`pyne.nucname`
 ============================================
-This package is used to convert between various nuclide naming schemes.
-Currently four naming conventions are supported.
+This package is used to convert between various nuclide naming schemes.  
+Currently the following naming conventions are supported:
 
 .. _name_forms:
 

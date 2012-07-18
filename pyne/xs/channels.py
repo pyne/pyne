@@ -164,7 +164,7 @@ def sigma_s_gh(nuc, T, E_g=None, E_n=None, phi_n=None):
     # Get some needed data
     G = len(xs_cache['E_g']) - 1
     b = pyne.data.b(nuc_zz)
-    aw = pyne.data.nuc_weight(nuc_zz)
+    aw = pyne.data.atomic_mass(nuc_zz)
 
     # OMG FIXME So hard!
     ## Initialize the scattering kernel
