@@ -10,7 +10,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "H5Cpp.h"
+#include "hdf5.h"
 #include "h5wrap.h"
 
 #include "extra_types.h"
@@ -22,10 +22,10 @@ namespace pyne
 {
   extern std::string NUC_DATA_PATH;
 
-  /****************************/
-  /*** nuc_weight Functions ***/
-  /****************************/
-  extern std::map<int, double> nuc_weight_map;
+  /*****************************/
+  /*** atomic_mass Functions ***/
+  /*****************************/
+  extern std::map<int, double> atomic_mass_map;
 
   typedef struct atomic_weight_struct {
     char nuc_name[6];
@@ -35,10 +35,10 @@ namespace pyne
     double abund;
   } atomic_weight_struct;
 
-  void _load_nuc_weight_map();
-  double nuc_weight(int);
-  double nuc_weight(char *);
-  double nuc_weight(std::string);
+  void _load_atomic_mass_map();
+  double atomic_mass(int);
+  double atomic_mass(char *);
+  double atomic_mass(std::string);
 
 
   /***********************************/
