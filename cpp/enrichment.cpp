@@ -25,6 +25,10 @@ pyne_enr::Cascade::Cascade()
   mat_feed = pyne::Material();
   mat_prod = pyne::Material();
   mat_tail = pyne::Material();
+
+  tot_per_feed = 0.0;
+  swu_per_feed = 0.0;
+  swu_per_prod = 0.0;
 };
 
 
@@ -199,12 +203,12 @@ void pyne_enr::_recompute_prod_tail_mats(pyne_enr::Cascade & casc)
   };
 
   casc.mat_prod = pyne::Material(comp_prod);
-  casc.mat_prod.mass *= casc.mat_feed.mass;
   casc.x_prod_j = casc.mat_prod.comp[casc.j];
+  //casc.mat_prod.mass *= casc.mat_feed.mass;
 
   casc.mat_tail = pyne::Material(comp_tail);
-  casc.mat_tail.mass *= casc.mat_feed.mass;
   casc.x_tail_j = casc.mat_tail.comp[casc.j];
+  //casc.mat_tail.mass *= casc.mat_feed.mass;
 
   return;
 };
@@ -295,7 +299,11 @@ pyne_enr::Cascade pyne_enr::_norm_comp_secant(pyne_enr::Cascade & casc, double t
     // Check for infinite loops
     for (h = 0; h < historyN.size(); h++)
       if (historyN[h] == curr_N && historyM[h] == curr_M)
+      {
+        casc.N = curr_N;
+        casc.M = curr_M;
         throw EnrichmentInfiniteLoopError();
+      };
 
     if (150 <= historyN.size())
     {
@@ -306,7 +314,11 @@ pyne_enr::Cascade pyne_enr::_norm_comp_secant(pyne_enr::Cascade & casc, double t
     historyM.push_back(curr_M);
 
     if (10000 < counter)
+    {
+      casc.N = curr_N;
+      casc.M = curr_M;
       throw EnrichmentIterationLimit();
+    }
     else
       counter += 1;
 
@@ -381,9 +393,8 @@ pyne_enr::Cascade pyne_enr::_norm_comp_other(pyne_enr::Cascade & orig_casc, doub
   return casc;
 };
 
-/*
 
-double pyne_enr::deltaU_i_OverG(int i)
+double pyne_enr::_deltaU_i_OverG(pyne_enr::Cascade & casc, int i)
 {
   // Solves for a stage separative power relevant to the ith component
   // per unit of flow G.  This is taken from Equation 31 divided by G 
@@ -393,20 +404,22 @@ double pyne_enr::deltaU_i_OverG(int i)
   // To link to this article: DOI: 10.1081/SS-100100654
   // URL: http://dx.doi.org/10.1081/SS-100100654
 
-  double alphastar_i = alphastar_i(pyne::atomic_mass(i));
-  return log(pow( alpha_0, (Mstar - pyne::atomic_mass(j)) )) * ((alphastar_i - 1.0)/(alphastar_i + 1.0));
+  double astar_i = alphastar_i(casc.alpha, casc.Mstar, pyne::atomic_mass(i));
+  return log(pow(casc.alpha, (casc.Mstar - pyne::atomic_mass(casc.j)) )) * \
+                             ((astar_i - 1.0)/(astar_i + 1.0));
 };
 
 
-void pyne_enr::ltot_per_feed()
+pyne_enr::Cascade pyne_enr::ltot_per_feed(pyne_enr::Cascade & orig_casc, double tolerance)
 {
   // This function finds the total flow rate (L) over the feed flow rate (F)
   bool comp_converged = false;
+  pyne_enr::Cascade casc = orig_casc;
 
   try
   {
     // Try secant method first
-    _norm_comp_secant();
+    casc = _norm_comp_secant(casc, tolerance);
     comp_converged = true;
   }
   catch (...)
@@ -414,7 +427,7 @@ void pyne_enr::ltot_per_feed()
     try
     {
       // Then try other cr8zy method
-      _norm_comp_other();
+      casc = _norm_comp_other(casc, tolerance * 100);
     	comp_converged = true;
     }
 		catch (...)
@@ -424,48 +437,52 @@ void pyne_enr::ltot_per_feed()
     };
   };
 
-  if (comp_converged)
+  if (!comp_converged)
+    return casc;
+
+  int nuc;
+  int j = casc.j;
+  int k = casc.k;
+  double ppf = prod_per_feed(casc.mat_feed.comp[j], casc.x_prod_j, casc.x_tail_j);
+  double tpf = tail_per_feed(casc.mat_feed.comp[j], casc.x_prod_j, casc.x_tail_j);
+
+  // Matched Flow Ratios
+  double rfeed = casc.mat_feed.comp[j] / casc.mat_feed.comp[k];
+  double rprod = casc.mat_prod.comp[j] / casc.mat_prod.comp[k];
+  double rtail = casc.mat_tail.comp[j] / casc.mat_tail.comp[k];
+
+  double ltotpf = 0.0;
+  double swupf = 0.0;
+  double temp_numer = 0.0; 
+
+  for (pyne::comp_iter i = casc.mat_feed.comp.begin(); i != casc.mat_feed.comp.end(); i++)
   {
-    double PoF = prod_per_feed(mat_feed.comp[j], x_prod_j, x_tail_j);
-    double WoF = tail_per_feed(mat_feed.comp[j], x_prod_j, x_tail_j);
-
-    // Matched Flow Ratios
-    double RF = mat_feed.comp[j] / mat_feed.comp[k];
-    double RP = mat_prod.comp[j] / mat_prod.comp[k];
-    double RW = mat_tail.comp[j] / mat_tail.comp[k];
-
-    double LtotalOverF = 0.0;
-    double SWUoverF = 0.0;
-    double tempNumerator = 0.0; 
-
-    for (pyne::comp_iter i = mat_feed.comp.begin(); i != mat_feed.comp.end(); i++)
-    {
-      tempNumerator = (PoF*mat_prod.comp[i->first]*log(RP) + WoF*mat_tail.comp[i->first]*log(RW) - mat_feed.comp[i->first]*log(RF));
-      LtotalOverF = LtotalOverF + (tempNumerator / deltaU_i_OverG(i->first));
-      SWUoverF = SWUoverF + tempNumerator;
-    };
-
-    if (0 < bright::verbosity)
-      std::cout << "    L/F = " << LtotalOverF << "\n";        
-
-    // Assign flow rates
-    TotalPerFeed = LtotalOverF;
-
-    // The -1 term is put in the SWU calculation because otherwise SWUoverF   
-    // represents the SWU that would be undone if you were to deenrich the 
-    // whole process.  Thus the SWU to enrich is -1x this number.  This is 
-    // a by-product of the value function used as a constraint.
-    swu_per_feed    = -1 * SWUoverF;          //This is the SWU for 1 kg of Feed material.
-    swu_per_prod = -1 * SWUoverF / PoF;	//This is the SWU for 1 kg of Product material.
-
-    // Assign Isotopic streams the proper masses.
-    mat_prod.mass  = mat_feed.mass * PoF;
-    mat_tail.mass = mat_feed.mass * WoF;
+    nuc = (i->first);
+    temp_numer = (ppf*casc.mat_prod.comp[nuc]*log(rprod) + \
+                  tpf*casc.mat_tail.comp[nuc]*log(rtail) - \
+                      casc.mat_feed.comp[nuc]*log(rfeed));
+    ltotpf = ltotpf + (temp_numer / _deltaU_i_OverG(casc, nuc));
+    swupf = swupf + temp_numer;
   };
 
-  return;
+  // Assign flow rates
+  casc.tot_per_feed = ltotpf;
+
+  // The -1 term is put in the SWU calculation because otherwise swupf   
+  // represents the SWU that would be undone if you were to deenrich the 
+  // whole process.  Thus the SWU to enrich is -1x this number.  This is 
+  // a by-product of the value function used as a constraint.
+  casc.swu_per_feed = -1 * swupf;       // This is the SWU for 1 kg of Feed material.
+  casc.swu_per_prod = -1 * swupf / ppf;	// This is the SWU for 1 kg of Product material.
+
+  // Assign Isotopic streams the proper masses.
+  casc.mat_prod.mass = casc.mat_feed.mass * ppf;
+  casc.mat_tail.mass = casc.mat_feed.mass * tpf;
+
+  return casc;
 };
 
+/*
 
 void pyne_enr::multicomponent(double Mstar_0, double tolerance)
 {
