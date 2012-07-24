@@ -66,9 +66,9 @@ namespace enrichment {
   void _recompute_nm(Cascade &, double=1.0E-7);
   void _recompute_prod_tail_mats(Cascade &);
   Cascade _norm_comp_secant(Cascade &, double=1.0E-7);
+  Cascade _norm_comp_other(Cascade &, double=1.0E-5);
 
 /*
-    void _norm_comp_other(double=1.0E-7);
     double deltaU_i_OverG(int);
     void ltot_per_feed();
     void multicomponent(double, double=1.0E-7);
