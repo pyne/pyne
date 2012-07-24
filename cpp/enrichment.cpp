@@ -84,10 +84,10 @@ double pyne_enr::tail_per_prod(double x_feed, double x_prod, double x_tail)
 }
 
 
-double pyne_enr::alphastar_i(double alpha_0, double Mstar, double M_i)
+double pyne_enr::alphastar_i(double alpha, double Mstar, double M_i)
 {
   // M_i is the mass of the ith nuclide
-  return pow(alpha_0, (Mstar - M_i));
+  return pow(alpha, (Mstar - M_i));
 }
 
 double pyne_enr::Ei(double astar_i, double N)
@@ -101,38 +101,42 @@ double pyne_enr::Si(double astar_i, double M)
   return ((astar_i - 1.0)/(pow(astar_i, M+1) - 1.0));
 };
 
-void pyne_enr::_recompute_nm()
+void pyne_enr::_recompute_nm(pyne_enr::Cascade & casc, double tolerance)
 {
-  // This give the order-of-exactness to which N and M are solved for.
-  double ooe = 7.0;
-  double tolerance = pow(10.0, -ooe);
 
-  double PoF = prod_per_feed(mat_feed.comp[j], xP_j, xW_j);
-  double WoF = tail_per_feed(mat_feed.comp[j], xP_j, xW_j);
-  double alphastar_j = alphastar_i(pyne::atomic_mass(j));
+  double ppf = prod_per_feed(casc.mat_feed.comp[casc.j], casc.x_prod_j, casc.x_tail_j);
+  double tpf = tail_per_feed(casc.mat_feed.comp[casc.j], casc.x_prod_j, casc.x_tail_j);
+  double astar_j = alphastar_i(casc.alpha, casc.Mstar, pyne::atomic_mass(casc.j));
 
   // Save original state of N & M
-  double origN = N;
-  double origM = M;
+  double N = casc.N;
+  double M = casc.M;
+  double origN = casc.N;
+  double origM = casc.M;
 
-  double lhsP = PoF * xP_j / mat_feed.comp[j];
-  double rhsP = (pow(alphastar_j, M+1.0) - 1.0) / (pow(alphastar_j, M+1.0) - pow(alphastar_j, -N));
-  double lhsW = WoF * xW_j / mat_feed.comp[j];
-  double rhsW = (1.0 - pow(alphastar_j, -N)) / (pow(alphastar_j, M+1.0) - pow(alphastar_j, -N));
+  double lhs_prod = ppf * casc.x_prod_j / casc.mat_feed.comp[casc.j];
+  double rhs_prod = (pow(astar_j, M+1.0) - 1.0) / (pow(astar_j, M+1.0) - pow(astar_j, -N));
+  double lhs_tail = tpf * casc.x_tail_j / casc.mat_feed.comp[casc.j];
+  double rhs_tail = (1.0 - pow(astar_j, -N)) / (pow(astar_j, M+1.0) - pow(astar_j, -N));
 
   double n = 1.0;
-  while (tolerance < fabs(lhsP - rhsP) && tolerance < fabs(lhsW - rhsW))
+  double delta_prod = lhs_prod - rhs_prod;
+  double delta_tail = lhs_tail - rhs_tail;
+  while (tolerance < fabs(delta_prod) && tolerance < fabs(delta_tail))
   {
-    if (tolerance < fabs(lhsP - rhsP))
+    delta_prod = lhs_prod - rhs_prod;
+    delta_tail = lhs_tail - rhs_tail;
+
+    if (tolerance < fabs(delta_prod))
     {
-      N = N - ((lhsP - rhsP) * N);
-      rhsP = (pow(alphastar_j, M+1.0) - 1.0) / (pow(alphastar_j, M+1.0) - pow(alphastar_j, -N));
+      N = N - (delta_prod * N);
+      rhs_prod = (pow(astar_j, M+1.0) - 1.0) / (pow(astar_j, M+1.0) - pow(astar_j, -N));
     };
 
-    if (tolerance < fabs(lhsW - rhsW))
+    if (tolerance < fabs(delta_tail))
     {
-      M = M - ((lhsW - rhsW) * M);
-      rhsW = (1.0 - pow(alphastar_j, -N)) / (pow(alphastar_j, M+1.0) - pow(alphastar_j, -N));
+      M = M - (delta_tail * M);
+      rhs_tail = (1.0 - pow(astar_j, -N)) / (pow(astar_j, M+1.0) - pow(astar_j, -N));
     };
 
     if (N < tolerance)
@@ -149,6 +153,9 @@ void pyne_enr::_recompute_nm()
       n = n + 1.0;
     };
   };
+
+  casc.N = N;
+  casc.M = M;
   return; 
 };
 
@@ -176,7 +183,7 @@ void pyne_enr::_recompute_prod_tail_mats(pyne_enr::Cascade & casc)
   for (pyne::comp_iter i = casc.mat_feed.comp.begin(); i != casc.mat_feed.comp.end(); i++)
   {
     nuc = (i->first);
-    astar_i = alphastar_i(pyne::atomic_mass(nuc));
+    astar_i = alphastar_i(casc.alpha, casc.Mstar, pyne::atomic_mass(nuc));
 
     // calc prod comp
     numer_prod = casc.mat_feed.comp[nuc] * (pow(astar_i, M+1.0) - 1.0);
@@ -202,7 +209,9 @@ void pyne_enr::_recompute_prod_tail_mats(pyne_enr::Cascade & casc)
   return;
 };
 
-void pyne_enr::_norm_comp_secant(pyne_enr::Cascade & casc, double tolerance)
+
+
+pyne_enr::Cascade pyne_enr::_norm_comp_secant(pyne_enr::Cascade & casc, double tolerance)
 {
   // This function actually solves the whole system of equations.  It uses _recompute_prod_tail_mats 
   // to find the roots for the enriching and stripping stage numbers.  It then 
@@ -213,129 +222,103 @@ void pyne_enr::_norm_comp_secant(pyne_enr::Cascade & casc, double tolerance)
   pyne_enr::Cascade curr_casc = casc;
 
   // Is the history of N and M that has been input
+  uint h;
   std::vector<double> historyN;
   std::vector<double> historyM;
 
   // Start iteration Counter
   int counter = 0;
 
-  // Set first two points
+  // Initialize prev point
   prev_casc.N += 1.0;
   prev_casc.M += 1.0;
-
-  // Initialize 'last_' point
-  _recompute_nm();
+  _recompute_nm(prev_casc, tolerance);
   _recompute_prod_tail_mats(prev_casc);
   historyN.push_back(prev_casc.N);
   historyN.push_back(prev_casc.M);
 
-/*
 
-  // Initialize 'curr_ent' point
-  N = curr_N;
-  M = curr_M;
-  _recompute_prod_tail_mats();
-  double curr_xP_j = mat_prod.comp[j];
-  double curr_xW_j = mat_tail.comp[j];
-  historyN.push_back(N);
-  historyN.push_back(M);
+  // Initialize current point
+  _recompute_nm(curr_casc, tolerance);
+  _recompute_prod_tail_mats(curr_casc);
+  historyN.push_back(curr_casc.N);
+  historyN.push_back(curr_casc.M);
 
   // My guess is that what we are checkin here is that the isotopic compositions
   // make sense with abs(1.0 - masscurr_P) rather than calculatign the 
   // relative product to watse mass streams.
-  double tempcurr_N = 0.0;
-  double tempcurr_M = 0.0;
-  double templast_N = 0.0;
-  double templast_M = 0.0;
+  double prev_N = prev_casc.N;
+  double prev_M = prev_casc.M;
+  double curr_N = curr_casc.N;
+  double curr_M = curr_casc.M;
+  double temp_prev_N = 0.0;
+  double temp_prev_M = 0.0;
+  double temp_curr_N = 0.0;
+  double temp_curr_M = 0.0;
 
-  while (tolerance < fabs(xP_j - curr_xP_j) || tolerance < fabs(xW_j - curr_xW_j))
+  double delta_x_prod_j = casc.x_prod_j - curr_casc.x_prod_j;
+  double delta_x_tail_j = casc.x_tail_j - curr_casc.x_tail_j;
+
+  while (tolerance < fabs(delta_x_prod_j) || tolerance < fabs(delta_x_tail_j))
   {
-    if (1 < bright::verbosity)
-      std::cout << "--------------------\n";
+    delta_x_prod_j = casc.x_prod_j - curr_casc.x_prod_j;
+    delta_x_tail_j = casc.x_tail_j - curr_casc.x_tail_j;
 
-    if (tolerance <= fabs(xP_j - curr_xP_j))
+    if (tolerance <= fabs(delta_x_prod_j))
     {
       // Make a new guess for N
-      tempcurr_N = curr_N;
-      templast_N = last_N;
-      curr_N = curr_N + (xP_j - curr_xP_j)*((curr_N - last_N)/(curr_xP_j - last_xP_j));
-      last_N = tempcurr_N;
+      temp_curr_N = curr_N;
+      temp_prev_N = prev_N;
+      curr_N = curr_N + delta_x_prod_j*\
+              ((curr_N - prev_N)/(curr_casc.x_prod_j - prev_casc.x_prod_j));
+      prev_N = temp_curr_N;
 
       // If the new value of N is less than zero, reset.
       if (curr_N < 0.0)
-      {
-        curr_N = (tempcurr_N + templast_N)/2.0;
-        if (1 < bright::verbosity)
-          std::cout << "    N < 0, resetting.\n";
-      };
+        curr_N = (temp_curr_N + temp_prev_N)/2.0;
     };
 
-    if (tolerance <= fabs(xW_j - curr_xW_j))
+    if (tolerance <= fabs(delta_x_tail_j))
     {
       // Make a new guess for M
-      tempcurr_M = curr_M;
-      templast_M = last_M;
-      curr_M = curr_M + (xW_j - curr_xW_j)*((curr_M - last_M)/(curr_xW_j - last_xW_j));
-      last_M = tempcurr_M;
+      temp_curr_M = curr_M;
+      temp_prev_M = prev_M;
+      curr_M = curr_M + delta_x_tail_j*\
+               ((curr_M - prev_M)/(curr_casc.x_tail_j - prev_casc.x_tail_j));
+      prev_M = temp_curr_M;
 
       // If the new value of M is less than zero, reset.
-      if (M < 0.0)
-      {
-        curr_M = (tempcurr_M + templast_M)/2.0;
-        if (1 < bright::verbosity)
-          std::cout << "    M < 0, resetting.\n";
-      };
+      if (curr_M < 0.0)
+        curr_M = (temp_curr_M + temp_prev_M)/2.0;
     };
 
     // Check for infinite loops
-    for (int h = 0; h < historyN.size(); h++)
-    {
+    for (h = 0; h < historyN.size(); h++)
       if (historyN[h] == curr_N && historyM[h] == curr_M)
-      {
-        if (1 < bright::verbosity)
-          std::cout << "~~~ Infinite loop found and exception thrown! ~~~.\n";
         throw EnrichmentInfiniteLoopError();
-      };
-    };
 
     if (150 <= historyN.size())
     {
       historyN.erase(historyN.begin());
       historyM.erase(historyM.begin());
     };
-    historyN.push_back(N);
-    historyM.push_back(M);
+    historyN.push_back(curr_N);
+    historyM.push_back(curr_M);
 
     if (10000 < counter)
-    {
-      if (1 < bright::verbosity)
-        std::cout << "~~~ Secant method counter limit hit! ~~~.\n";
       throw EnrichmentIterationLimit();
-    }
     else
-    {
-      counter = counter + 1;
-    };
+      counter += 1;
 
     // Calculate new isotopics for valid (N, M)        
-    last_xP_j = curr_xP_j;
-    last_xW_j = curr_xW_j;
-
-    N = curr_N;
-    M = curr_M;
-    _recompute_prod_tail_mats();
-    curr_xP_j = mat_prod.comp[j];
-    curr_xW_j = mat_tail.comp[j];
-
-    if (1 < bright::verbosity)
-    {
-      std::cout << "Product Mass: " << curr_xP_j << "\tTails Mass: " << curr_xW_j << "\n";
-      std::cout << "====================\n";
-    };
+    prev_casc = curr_casc;
+    curr_casc.N = curr_N;
+    curr_casc.M = curr_M;
+    _recompute_nm(curr_casc, tolerance);
+    _recompute_prod_tail_mats(curr_casc);
   };
-*/
 
-  return;
+  return curr_casc;
 };
 
 /*
@@ -444,8 +427,8 @@ void pyne_enr::ltot_per_feed()
 
   if (comp_converged)
   {
-    double PoF = prod_per_feed(mat_feed.comp[j], xP_j, xW_j);
-    double WoF = tail_per_feed(mat_feed.comp[j], xP_j, xW_j);
+    double PoF = prod_per_feed(mat_feed.comp[j], x_prod_j, x_tail_j);
+    double WoF = tail_per_feed(mat_feed.comp[j], x_prod_j, x_tail_j);
 
     // Matched Flow Ratios
     double RF = mat_feed.comp[j] / mat_feed.comp[k];
