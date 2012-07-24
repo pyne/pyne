@@ -321,33 +321,32 @@ pyne_enr::Cascade pyne_enr::_norm_comp_secant(pyne_enr::Cascade & casc, double t
   return curr_casc;
 };
 
-/*
 
 // I have serious doubts that this works...
-void pyne_enr::_norm_comp_other()
+pyne_enr::Cascade pyne_enr::_norm_comp_other(pyne_enr::Cascade & orig_casc, double tolerance)
 {
-  // This give the order-of-exactness to which N and M are solved for.
-  double ooe = 5.0;
-  double tolerance = pow(10.0, -ooe);
+  pyne_enr::Cascade casc = orig_casc;
 
-  // Is the hisorty of N and M that has been input
+  // Is the history of N and M that has been input
+  uint h;
   std::vector<double> historyN;
   std::vector<double> historyM;
 
   // Initial point
-  N = N0;
-  M = M0;
-  _recompute_prod_tail_mats();
-  double massP = mat_prod.mass;
-  double massW = mat_tail.mass;
+  double N = casc.N;
+  double M = casc.M;
+  _recompute_nm(casc, tolerance);
+  _recompute_prod_tail_mats(casc);
+  double mass_prod = casc.mat_prod.mass;
+  double mass_tail = casc.mat_tail.mass;
 
-  while (tolerance < fabs(1.0 - massP) && tolerance < fabs(1.0 - massW) )
+  while (tolerance < fabs(1.0 - mass_prod) && tolerance < fabs(1.0 - mass_tail) )
   {
-    if (tolerance <= fabs(1.0 - massP))
-      N = N - (1.0 - massP)/(1.0 + massP);
+    if (tolerance <= fabs(1.0 - mass_prod))
+      N = N - (1.0 - mass_prod)/(1.0 + mass_prod);
 
-    if (tolerance <= fabs(1.0 - massW))
-      M = M + (1.0 - massW)/(1.0 + massW);
+    if (tolerance <= fabs(1.0 - mass_tail))
+      M = M + (1.0 - mass_tail)/(1.0 + mass_tail);
 
     // Note this infinite loop checker does not raise an exception
     // Thus the exception cannot be caught by a try statement and then another
@@ -357,32 +356,32 @@ void pyne_enr::_norm_comp_other()
     // and since it is looping it is probably signalling around some actual value.
 
     // Check for infinite loops
-    for (int h = 0; h < historyN.size(); h++)
-    {
+    for (h = 0; h < historyN.size(); h++)
       if (historyN[h] == N && historyM[h] == M)
-      {
         //throw EnrichmentInfiniteLoopError(); //Possible future use.
-        return;
-      };
+        return casc;
 
-      if (150 <= historyN.size())
-      {
-        historyN.erase(historyN.begin());
-        historyM.erase(historyM.begin());
-      };
+    if (150 <= historyN.size())
+    {
+      historyN.erase(historyN.begin());
+      historyM.erase(historyM.begin());
     };
     historyN.push_back(N);
     historyM.push_back(M);
 
     // Calculate new masses
-    _recompute_prod_tail_mats();
-    massP = mat_prod.mass;
-    massW = mat_tail.mass;
+    casc.N = N;
+    casc.M = M;
+    _recompute_nm(casc, tolerance);
+    _recompute_prod_tail_mats(casc);
+    mass_prod = casc.mat_prod.mass;
+    mass_tail = casc.mat_tail.mass;
   };
 
-  return;
+  return casc;
 };
 
+/*
 
 double pyne_enr::deltaU_i_OverG(int i)
 {
