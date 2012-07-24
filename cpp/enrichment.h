@@ -39,6 +39,8 @@ namespace enrichment {
     pyne::Material mat_feed; // feed material
     pyne::Material mat_prod; // product material
     pyne::Material mat_tail; // tails material
+
+    void _reset_xjs();
   };
 
 
@@ -53,20 +55,19 @@ namespace enrichment {
 
 */
 
-    double prod_per_feed(double, double, double);
-    double tail_per_feed(double, double, double);
-    double tail_per_prod(double, double, double);
+  double prod_per_feed(double, double, double);
+  double tail_per_feed(double, double, double);
+  double tail_per_prod(double, double, double);
 
-    double alphastar_i(double, double, double);
-    double Ei (double, double);
-    double Si (double, double);
+  double alphastar_i(double, double, double);
+  double Ei (double, double);
+  double Si (double, double);
+
+  void _norm_comp_secant(Cascade &, double=1.0E-7);
+  void _recompute_prod_tail_mats(Cascade &);
+
 /*
-    void FindNM();
-
-    double xP_i(int);
-    double xW_i(int);
-    void SolveNM();
-    void _norm_comp_secant(double=1.0E-7);
+    void _recompute_nm();
     void _norm_comp_other(double=1.0E-7);
     double deltaU_i_OverG(int);
     void ltot_per_feed();
