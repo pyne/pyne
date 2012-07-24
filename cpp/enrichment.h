@@ -40,7 +40,7 @@ namespace enrichment {
     pyne::Material mat_prod; // product material
     pyne::Material mat_tail; // tails material
 
-    double tot_per_feed; // Total flow rate per feed rate.
+    double l_t_per_feed; // Total flow rate per feed rate.
     double swu_per_feed; // This is the SWU for 1 kg of Feed material.
     double swu_per_prod; // This is the SWU for 1 kg of Product material.
 
@@ -67,11 +67,7 @@ namespace enrichment {
 
   double _deltaU_i_OverG(Cascade &, int);
   Cascade ltot_per_feed(Cascade &, double=1.0E-7);
-
-/*
-    void multicomponent(double, double=1.0E-7);
-  };
-*/
+  Cascade multicomponent(Cascade &, double=1.0E-7);
 
   /******************/
   /*** Exceptions ***/
@@ -84,7 +80,6 @@ namespace enrichment {
     };
   };
 
-
   class EnrichmentIterationLimit: public std::exception
   {
     virtual const char* what() const throw()
@@ -92,7 +87,6 @@ namespace enrichment {
       return "Iteration limit hit durring enrichment calculation!  Breaking...";
     };
   };
-
 
   class EnrichmentIterationNaN: public std::exception
   {
