@@ -2,12 +2,12 @@
 
 #include "enrichment.h"
 
-
+namespace pyne_enr = pyne::enrichment;
 
 /*********************************/
 /*** Enrichment Helper Classes ***/
 /*********************************/
-pyne::enrichment::Cascade()
+pyne_enr::Cascade::Cascade()
 {
   alpha = 0.0;
   Mstar = 0.0;
@@ -28,84 +28,74 @@ pyne::enrichment::Cascade()
 };
 
 
-pyne::enrichment::~Cascade()
+pyne_enr::Cascade::~Cascade()
 {
 };
 
 
-pyne::enrichment::Cascade pyne::enrichment::fillUraniumEnrichmentDefaults()
+pyne_enr::Cascade pyne_enr::_fill_default_uranium_cascade()
 {
-  // Default enrichment paramters for uranium-based enrichment
-  Cascade ued; 
+  // Default cascade for uranium-based enrichment
+  Cascade duc; 
 
-  ued.alpha = 1.05;
-  ued.Mstar = 236.5;
+  duc.alpha = 1.05;
+  duc.Mstar = 236.5;
 
-  ued.j = 922350;
-  ued.k = 922380;
+  duc.j = 922350;
+  duc.k = 922380;
 
-  ued.N = 30.0;
-  ued.M = 10.0;
+  duc.N = 30.0;
+  duc.M = 10.0;
 
-  ued.x_feed_j = 0.00711;
-  ued.x_prod_j = 0.05;
-  ued.x_tail_j = 0.0025;
+  duc.x_feed_j = 0.00711;
+  duc.x_prod_j = 0.05;
+  duc.x_tail_j = 0.0025;
 
-  return ued;
+  return duc;
 };
-pyne::enrichment::Cascade bright::UraniumEnrichmentDefaults(bright::fillUraniumEnrichmentDefaults());
+pyne_enr::Cascade pyne_enr::default_uranium_cascade(pyne_enr::_fill_default_uranium_cascade());
 
 
-void pyne::enrichment::initialize(Cascade ep)
-{
-  // Initializes the enrichment component. 
-  alpha_0 = ep.alpha_0;
-  Mstar_0 = ep.Mstar_0;
-  j       = ep.j;
-  k       = ep.k;
-  N0      = ep.N0;
-  M0      = ep.M0;
-  xP_j    = ep.xP_j;
-  xW_j    = ep.xW_j;
-};
 
-double pyne::enrichment::prod_per_feed(double x_feed, double x_prod, double x_tail)
+double pyne_enr::prod_per_feed(double x_feed, double x_prod, double x_tail)
 {
   // Product over Feed Enrichment Ratio
   return ((x_feed - x_tail)/(x_prod - x_tail));
 }
 
-double pyne::enrichment::tail_per_feed(double x_feed, double x_prod, double x_tail)
+double pyne_enr::tail_per_feed(double x_feed, double x_prod, double x_tail)
 {
   // Tails over Feed Enrichment Ratio
   return ((x_feed - x_prod)/(x_tail - x_prod));
 }
 
-double pyne::enrichment::tail_per_prod(double x_feed, double x_prod, double x_tail)
+double pyne_enr::tail_per_prod(double x_feed, double x_prod, double x_tail)
 {
   // Tails over Feed Enrichment Ratio
   return ((x_feed - x_prod)/(x_tail - x_feed));
 }
 
 
-double pyne::enrichment::alphastar_i(double alpha_0, double Mstar, double M_i)
+double pyne_enr::alphastar_i(double alpha_0, double Mstar, double M_i)
 {
   // M_i is the mass of the ith nuclide
   return pow(alpha_0, (Mstar - M_i));
 }
 
-double pyne::enrichment::Ei(double astar_i, double N)
+double pyne_enr::Ei(double astar_i, double N)
 {
   return ((astar_i - 1.0) / (1.0 - pow(astar_i, -N)));
 };
 
 
-double pyne::enrichment::Si(double astar_i, double M)
+double pyne_enr::Si(double astar_i, double M)
 {
   return ((astar_i - 1.0)/(pow(astar_i, M+1) - 1.0));
 };
 
-void pyne::enrichment::FindNM()
+/*
+
+void pyne_enr::FindNM()
 {
   // This give the order-of-exactness to which N and M are solved for.
   double ooe = 7.0;
@@ -157,7 +147,7 @@ void pyne::enrichment::FindNM()
 };
   
 
-double pyne::enrichment::xP_i(int i)
+double pyne_enr::xP_i(int i)
 {
   double alphastar_i = alphastar_i(pyne::atomic_mass(i));
   double numerator = mat_feed.comp[i]*(pow(alphastar_i, M+1.0) - 1.0);
@@ -166,7 +156,7 @@ double pyne::enrichment::xP_i(int i)
 };
 
 
-double pyne::enrichment::xW_i(int i)
+double pyne_enr::xW_i(int i)
 {
   double alphastar_i = alphastar_i(pyne::atomic_mass(i));
   double numerator = mat_feed.comp[i] * (1.0 - pow(alphastar_i, -N));
@@ -175,7 +165,7 @@ double pyne::enrichment::xW_i(int i)
 };
 
 
-void pyne::enrichment::SolveNM()
+void pyne_enr::SolveNM()
 {
   //This function takes a given initial guess number of enriching and stripping stages 
   //for a given composition of fuel with a given jth key component, knowing the values 
@@ -201,7 +191,7 @@ void pyne::enrichment::SolveNM()
 };
 
 
-void pyne::enrichment::_norm_comp_secant(double N0, double tolerance)
+void pyne_enr::_norm_comp_secant(double N0, double tolerance)
 {
   // This function actually solves the whole system of equations.  It uses SolveNM 
   // to find the roots for the enriching and stripping stage numbers.  It then 
@@ -339,7 +329,7 @@ void pyne::enrichment::_norm_comp_secant(double N0, double tolerance)
 
 
 // I have serious doubts that this works...
-void pyne::enrichment::_norm_comp_other()
+void pyne_enr::_norm_comp_other()
 {
   // This give the order-of-exactness to which N and M are solved for.
   double ooe = 5.0;
@@ -399,7 +389,7 @@ void pyne::enrichment::_norm_comp_other()
 };
 
 
-double pyne::enrichment::deltaU_i_OverG(int i)
+double pyne_enr::deltaU_i_OverG(int i)
 {
   // Solves for a stage separative power relevant to the ith component
   // per unit of flow G.  This is taken from Equation 31 divided by G 
@@ -414,7 +404,7 @@ double pyne::enrichment::deltaU_i_OverG(int i)
 };
 
 
-void pyne::enrichment::ltot_per_feed()
+void pyne_enr::ltot_per_feed()
 {
   // This function finds the total flow rate (L) over the feed flow rate (F)
   bool comp_converged = false;
@@ -483,7 +473,7 @@ void pyne::enrichment::ltot_per_feed()
 };
 
 
-void pyne::enrichment::multicomponent(double Mstar_0, double tolerance)
+void pyne_enr::multicomponent(double Mstar_0, double tolerance)
 {
   // The multicomponent() function finds a value of Mstar by minimzing the seperative power.  
   // Note that Mstar0 represents an intial guess at what Mstar might be.
@@ -596,3 +586,5 @@ void pyne::enrichment::multicomponent(double Mstar_0, double tolerance)
   TotalPerFeed = curr__ltot_per_feed;
   return;
 };
+
+*/
