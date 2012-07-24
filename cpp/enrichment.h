@@ -40,20 +40,17 @@ namespace enrichment {
     pyne::Material mat_prod; // product material
     pyne::Material mat_tail; // tails material
 
+    double tot_per_feed; // Total flow rate per feed rate.
+    double swu_per_feed; // This is the SWU for 1 kg of Feed material.
+    double swu_per_prod; // This is the SWU for 1 kg of Product material.
+
+    // member functions
     void _reset_xjs();
   };
 
 
   Cascade _fill_default_uranium_cascade();
   extern Cascade default_uranium_cascade;
-
-/*
-    // Flow Rates
-    double TotalPerFeed;    // Total flow rate per feed rate.
-    double swu_per_feed;      // This is the SWU for 1 kg of Feed material.
-    double swu_per_prod;   // This is the SWU for 1 kg of Product material.
-
-*/
 
   double prod_per_feed(double, double, double);
   double tail_per_feed(double, double, double);
@@ -68,9 +65,10 @@ namespace enrichment {
   Cascade _norm_comp_secant(Cascade &, double=1.0E-7);
   Cascade _norm_comp_other(Cascade &, double=1.0E-5);
 
+  double _deltaU_i_OverG(Cascade &, int);
+  Cascade ltot_per_feed(Cascade &, double=1.0E-7);
+
 /*
-    double deltaU_i_OverG(int);
-    void ltot_per_feed();
     void multicomponent(double, double=1.0E-7);
   };
 */
