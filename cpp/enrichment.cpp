@@ -33,6 +33,14 @@ pyne_enr::Cascade::~Cascade()
 };
 
 
+void pyne_enr::Cascade::_reset_xjs()
+{
+  // resets the key enriment member variables
+  x_feed_j = mat_feed.comp[j];
+  x_prod_j = mat_prod.comp[j];
+  x_tail_j = mat_tail.comp[j];
+};
+
 pyne_enr::Cascade pyne_enr::_fill_default_uranium_cascade()
 {
   // Default cascade for uranium-based enrichment
@@ -93,9 +101,7 @@ double pyne_enr::Si(double astar_i, double M)
   return ((astar_i - 1.0)/(pow(astar_i, M+1) - 1.0));
 };
 
-/*
-
-void pyne_enr::FindNM()
+void pyne_enr::_recompute_nm()
 {
   // This give the order-of-exactness to which N and M are solved for.
   double ooe = 7.0;
@@ -145,59 +151,66 @@ void pyne_enr::FindNM()
   };
   return; 
 };
-  
-
-double pyne_enr::xP_i(int i)
-{
-  double alphastar_i = alphastar_i(pyne::atomic_mass(i));
-  double numerator = mat_feed.comp[i]*(pow(alphastar_i, M+1.0) - 1.0);
-  double denominator = (pow(alphastar_i, M+1.0) - pow(alphastar_i, -N)) / prod_per_feed(mat_feed.comp[j], xP_j, xW_j);
-  return numerator / denominator;
-};
 
 
-double pyne_enr::xW_i(int i)
-{
-  double alphastar_i = alphastar_i(pyne::atomic_mass(i));
-  double numerator = mat_feed.comp[i] * (1.0 - pow(alphastar_i, -N));
-	double denominator = (pow(alphastar_i, M+1.0) - pow(alphastar_i, -N)) / tail_per_feed(mat_feed.comp[j], xP_j, xW_j);
-  return numerator / denominator;
-};
 
-
-void pyne_enr::SolveNM()
+void pyne_enr::_recompute_prod_tail_mats(pyne_enr::Cascade & casc)
 {
   //This function takes a given initial guess number of enriching and stripping stages 
   //for a given composition of fuel with a given jth key component, knowing the values 
   //that are desired in both Product and Tails streams.  Having this it solves for what 
   //the actual N and M stage numbers are and also what the product and waste streams 
   //compositions are.  It returns precisely these.
+  pyne::comp_map comp_prod;
+  pyne::comp_map comp_tail;
 
-  FindNM();
+  int nuc;
+  double astar_i, numer_prod, numer_tail, denom_prod, denom_tail;
 
-  pyne::comp_map compP;
-  pyne::comp_map compW;
+  double N = casc.N;
+  double M = casc.M;
+  double x_feed_j = casc.mat_feed.comp[casc.j];
+  double x_prod_j = casc.x_prod_j;
+  double x_tail_j = casc.x_tail_j;
 
-  for (pyne::comp_iter i = mat_feed.comp.begin(); i != mat_feed.comp.end(); i++)
+  for (pyne::comp_iter i = casc.mat_feed.comp.begin(); i != casc.mat_feed.comp.end(); i++)
   {
-    compP[i->first] = xP_i(i->first);
-    compW[i->first] = xW_i(i->first);
+    nuc = (i->first);
+    astar_i = alphastar_i(pyne::atomic_mass(nuc));
+
+    // calc prod comp
+    numer_prod = casc.mat_feed.comp[nuc] * (pow(astar_i, M+1.0) - 1.0);
+    denom_prod = (pow(astar_i, M+1.0) - pow(astar_i, -N)) / \
+                  prod_per_feed(x_feed_j, x_prod_j, x_tail_j);
+    comp_prod[nuc] = numer_prod / denom_prod;
+
+    // calc tail comp
+    numer_tail = casc.mat_feed.comp[nuc] * (1.0 - pow(astar_i, -N));
+	  denom_tail = (pow(astar_i, M+1.0) - pow(astar_i, -N)) / \
+                  tail_per_feed(x_feed_j, x_prod_j, x_tail_j);
+    comp_tail[nuc] = numer_tail / denom_tail;
   };
 
-  mat_prod  = pyne::Material(compP);
-  mat_tail = pyne::Material(compW);
+  casc.mat_prod = pyne::Material(comp_prod);
+  casc.mat_prod.mass *= casc.mat_feed.mass;
+  casc.x_prod_j = casc.mat_prod.comp[casc.j];
+
+  casc.mat_tail = pyne::Material(comp_tail);
+  casc.mat_tail.mass *= casc.mat_feed.mass;
+  casc.x_tail_j = casc.mat_tail.comp[casc.j];
 
   return;
 };
 
-
-void pyne_enr::_norm_comp_secant(double N0, double tolerance)
+void pyne_enr::_norm_comp_secant(pyne_enr::Cascade & casc, double tolerance)
 {
-  // This function actually solves the whole system of equations.  It uses SolveNM 
+  // This function actually solves the whole system of equations.  It uses _recompute_prod_tail_mats 
   // to find the roots for the enriching and stripping stage numbers.  It then 
   // checks to see if the product and waste streams meet their target enrichments
   // for the jth component like they should.  If they don't then it trys other values 
   // of N and M varied by Newton's Method.  Rinse and repeat as needed.
+  pyne_enr::Cascade prev_casc = casc;
+  pyne_enr::Cascade curr_casc = casc;
 
   // Is the history of N and M that has been input
   std::vector<double> historyN;
@@ -207,24 +220,21 @@ void pyne_enr::_norm_comp_secant(double N0, double tolerance)
   int counter = 0;
 
   // Set first two points
-  double last_N = N0 + 1.0;
-  double last_M = M0 + 1.0;
-  double curr_N = N0;
-  double curr_M = M0;
+  prev_casc.N += 1.0;
+  prev_casc.M += 1.0;
 
   // Initialize 'last_' point
-  N = last_N;
-  M = last_M;
-  SolveNM();
-  double last_xP_j = mat_prod.comp[j];
-  double last_xW_j = mat_tail.comp[j];
-  historyN.push_back(N);
-  historyN.push_back(M);
+  _recompute_nm();
+  _recompute_prod_tail_mats(prev_casc);
+  historyN.push_back(prev_casc.N);
+  historyN.push_back(prev_casc.M);
+
+/*
 
   // Initialize 'curr_ent' point
   N = curr_N;
   M = curr_M;
-  SolveNM();
+  _recompute_prod_tail_mats();
   double curr_xP_j = mat_prod.comp[j];
   double curr_xW_j = mat_tail.comp[j];
   historyN.push_back(N);
@@ -313,7 +323,7 @@ void pyne_enr::_norm_comp_secant(double N0, double tolerance)
 
     N = curr_N;
     M = curr_M;
-    SolveNM();
+    _recompute_prod_tail_mats();
     curr_xP_j = mat_prod.comp[j];
     curr_xW_j = mat_tail.comp[j];
 
@@ -323,10 +333,12 @@ void pyne_enr::_norm_comp_secant(double N0, double tolerance)
       std::cout << "====================\n";
     };
   };
+*/
 
   return;
 };
 
+/*
 
 // I have serious doubts that this works...
 void pyne_enr::_norm_comp_other()
@@ -342,7 +354,7 @@ void pyne_enr::_norm_comp_other()
   // Initial point
   N = N0;
   M = M0;
-  SolveNM();
+  _recompute_prod_tail_mats();
   double massP = mat_prod.mass;
   double massW = mat_tail.mass;
 
@@ -380,7 +392,7 @@ void pyne_enr::_norm_comp_other()
     historyM.push_back(M);
 
     // Calculate new masses
-    SolveNM();
+    _recompute_prod_tail_mats();
     massP = mat_prod.mass;
     massW = mat_tail.mass;
   };
