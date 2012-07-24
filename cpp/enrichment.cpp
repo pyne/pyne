@@ -26,7 +26,7 @@ pyne_enr::Cascade::Cascade()
   mat_prod = pyne::Material();
   mat_tail = pyne::Material();
 
-  tot_per_feed = 0.0;
+  l_t_per_feed = 0.0;
   swu_per_feed = 0.0;
   swu_per_prod = 0.0;
 };
@@ -466,7 +466,7 @@ pyne_enr::Cascade pyne_enr::ltot_per_feed(pyne_enr::Cascade & orig_casc, double 
   };
 
   // Assign flow rates
-  casc.tot_per_feed = ltotpf;
+  casc.l_t_per_feed = ltotpf;
 
   // The -1 term is put in the SWU calculation because otherwise swupf   
   // represents the SWU that would be undone if you were to deenrich the 
@@ -482,9 +482,9 @@ pyne_enr::Cascade pyne_enr::ltot_per_feed(pyne_enr::Cascade & orig_casc, double 
   return casc;
 };
 
-/*
 
-void pyne_enr::multicomponent(double Mstar_0, double tolerance)
+
+pyne_enr::Cascade pyne_enr::multicomponent(pyne_enr::Cascade & orig_casc, double tolerance)
 {
   // The multicomponent() function finds a value of Mstar by minimzing the seperative power.  
   // Note that Mstar0 represents an intial guess at what Mstar might be.
@@ -492,110 +492,87 @@ void pyne_enr::multicomponent(double Mstar_0, double tolerance)
 
   // History table that has Mstar, LoF, and slope between this point and the last_ one 
   // hist = []
+  pyne_enr::Cascade temp_casc;
+  pyne_enr::Cascade prev_casc = orig_casc;
+  pyne_enr::Cascade curr_casc = orig_casc;
 
-
-  // xpn is the exponential index index
+  // xpn is the exponential index 
+  double ooe = log10(tolerance);
   double xpn = 1.0;
 
   // Initialize previous point
-  double prev_Mstar = Mstar_0;
-  double prev_ltot_per_feed = ltot_per_feed();
+  prev_casc = ltot_per_feed(prev_casc, tolerance);
 
   // Initialize curr_ent point
-  double curr__Mstar = Mstar_0 + 0.1;
-  double curr__ltot_per_feed = ltot_per_feed();
+  curr_casc.Mstar += 0.1;
+  curr_casc = ltot_per_feed(curr_casc, tolerance);
 
-  double m = pyne::slope(curr__Mstar, curr__ltot_per_feed, prev_Mstar, prev_ltot_per_feed);
+  double m = pyne::slope(curr_casc.Mstar, curr_casc.l_t_per_feed, \
+                         prev_casc.Mstar, prev_casc.l_t_per_feed);
   double m_sign = m / fabs(m);
 
-  double tempMstar;
-  double templtot_per_feed;
-  double tempm;
-  double tempm_sign;
+  double temp_m;
+  double temp_m_sign;
 
   if (0.0 < m_sign)
   {
-    tempMstar  = prev_Mstar;
-    templtot_per_feed = prev_ltot_per_feed;
-    prev_Mstar  = curr__Mstar;
-    prev_ltot_per_feed = curr__ltot_per_feed;
-    curr__Mstar  = tempMstar;
-    curr__ltot_per_feed = templtot_per_feed;
-  };
-
-  // print points
-  if (0 < bright::verbosity)
-  {
-    std::cout << "last_ Point: M* = " << prev_Mstar << "\tL/F = " << prev_ltot_per_feed << "\n";
-    std::cout << "curr_ Point: M* = " << curr__Mstar << "\tL/F = " << curr__ltot_per_feed << "\n";
+    temp_casc = prev_casc;
+    prev_casc = curr_casc;
+    curr_casc = temp_casc;
+    //m = -1.0 * m;
+    //m_sign = -1.0 * m_sign;
   };
 
   // Start iterations.    
   while (xpn < ooe)
   {
     // Check that parameters are still well-formed
-    if ( isnan(curr__Mstar) || isnan(curr__ltot_per_feed) || isnan(prev_Mstar) || isnan(prev_ltot_per_feed) )
+    if (isnan(curr_casc.Mstar) || isnan(curr_casc.l_t_per_feed) || \
+        isnan(prev_casc.Mstar) || isnan(prev_casc.l_t_per_feed))
       throw EnrichmentIterationNaN();
 
-    prev_Mstar  = curr__Mstar;
-    prev_ltot_per_feed = curr__ltot_per_feed;
+    prev_casc = curr_casc;
 
-    curr__Mstar = curr__Mstar - (m_sign * pow(10.0, -xpn));
-    Mstar = curr__Mstar;
-    ltot_per_feed();
-    curr__ltot_per_feed = TotalPerFeed;
+    curr_casc.Mstar = curr_casc.Mstar - (m_sign * pow(10.0, -xpn));
+    curr_casc = ltot_per_feed(curr_casc, tolerance);
 
-    if (prev_ltot_per_feed < curr__ltot_per_feed)
+    if (prev_casc.l_t_per_feed < curr_casc.l_t_per_feed)
     {
-      tempMstar = curr__Mstar - (m_sign * pow(10.0, -xpn));
-      Mstar = tempMstar;
-      ltot_per_feed();
-      templtot_per_feed = TotalPerFeed; 
+      temp_casc = curr_casc;
+      temp_casc.Mstar = temp_casc.Mstar - (m_sign * pow(10.0, -xpn));
+      temp_casc = ltot_per_feed(temp_casc, tolerance);
 
-      tempm = pyne::slope(curr__Mstar, curr__ltot_per_feed, tempMstar, templtot_per_feed);
-      if (tempm == 0.0)
+      temp_m = pyne::slope(curr_casc.Mstar, curr_casc.l_t_per_feed, \
+                           temp_casc.Mstar, temp_casc.l_t_per_feed);
+      if (temp_m == 0.0)
       {
-        prev_Mstar  = curr__Mstar;
-        prev_ltot_per_feed = curr__ltot_per_feed;
-        curr__Mstar  = tempMstar;
-        curr__ltot_per_feed = templtot_per_feed;
-
-        // print Point
-        if (0 < bright::verbosity)
-          std::cout << "Next Point: M* = " << curr__Mstar << "\tL/F = " << curr__ltot_per_feed << "\n";
+        prev_casc = curr_casc;
+        curr_casc = temp_casc;
         break;
       };
 
-      tempm_sign = tempm / fabs(tempm);
-      if (m_sign != tempm_sign)
+      temp_m_sign = temp_m / fabs(temp_m);
+      if (m_sign != temp_m_sign)
       {
         xpn = xpn + 1;
 
-        tempMstar = prev_Mstar + (m_sign * pow(10.0, -xpn));
-        Mstar = tempMstar;
-        ltot_per_feed();
-        templtot_per_feed = TotalPerFeed;
-        tempm = pyne::slope(prev_Mstar, prev_ltot_per_feed, tempMstar, templtot_per_feed);
+        temp_casc = prev_casc;
+        temp_casc.Mstar = temp_casc.Mstar + (m_sign * pow(10.0, -xpn));
+        temp_casc = ltot_per_feed(temp_casc, tolerance);
+        temp_m = pyne::slope(prev_casc.Mstar, prev_casc.l_t_per_feed, \
+                             temp_casc.Mstar, temp_casc.l_t_per_feed);
 
-        if (tempm == 0.0)
+        if (temp_m == 0.0)
         {
-          curr__Mstar  = tempMstar;
-          curr__ltot_per_feed = templtot_per_feed;
-
-          // print Point
-          if (0 < bright::verbosity)
-            std::cout << "Next Point: M* = " << curr__Mstar << "\tL/F = " << curr__ltot_per_feed << "\n";
+          prev_casc = curr_casc;
+          curr_casc = temp_casc;
           break;
         };
 
-        m_sign = tempm / fabs(tempm);
+        m_sign = temp_m / fabs(temp_m);
       };
     };
   };
 
-  Mstar        = curr__Mstar;
-  TotalPerFeed = curr__ltot_per_feed;
-  return;
+  return curr_casc;
 };
-
-*/
