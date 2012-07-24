@@ -1264,7 +1264,6 @@ class NeutronTable(AceTable):
         # Set up URR probability table
         urr_table = self.XSS[ind:ind+N*6*M]
         urr_table.shape = (N, 6, M)
-        urr_table.strides = (8, 8*M*N, 8*N)  # Needed to get in N, 6, M order
         self.urr_table = urr_table
 
     def find_reaction(self, mt):
