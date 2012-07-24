@@ -38,48 +38,20 @@ namespace enrichment {
 
     pyne::Material mat_feed; // feed material
     pyne::Material mat_prod; // product material
-    pyne::Material mat_feed; // tails material
+    pyne::Material mat_tail; // tails material
   };
 
 
-  Cascade fillUraniumEnrichmentDefaults();
-  extern Cascade UraniumEnrichmentDefaults;
+  Cascade _fill_default_uranium_cascade();
+  extern Cascade default_uranium_cascade;
 
-
-  class Enrichment : public FCComp
-  {
-  // Reprocessing class
-  public:
-    // Reprocessing Constructors
-    Enrichment ();
-    Enrichment (std::string);
-    Enrichment (Cascade, std::string = "");
-    ~Enrichment ();
-
-    // Public data
-    double alpha_0;           // specify on init.
-    double Mstar_0;           // specify on init.
-    double Mstar;             // Current Mstar
-    pyne::Material mat_tail;  // Tails Stream
-
-    // key isotopic info
-    int j;          // The jth isotope is the key, in zzaaam form, must be in mat_feed.
-    int k;          // The kth isotope is the other key to separate j away from.
-    double xP_j;    // Product enrichment of jth isotope
-    double xW_j;    // Tails/Tails enrichment of the jth isotope
-
-    // Stage info
-    double N;       // N Enriching Stages
-    double M;       // M Stripping Stages
-    double N0;      // initial guess of N-stages
-    double M0;      // initial guess of M-stages
-
+/*
     // Flow Rates
     double TotalPerFeed;    // Total flow rate per feed rate.
     double swu_per_feed;      // This is the SWU for 1 kg of Feed material.
     double swu_per_prod;   // This is the SWU for 1 kg of Product material.
 
-
+*/
 
     double prod_per_feed(double, double, double);
     double tail_per_feed(double, double, double);
@@ -88,6 +60,7 @@ namespace enrichment {
     double alphastar_i(double, double, double);
     double Ei (double, double);
     double Si (double, double);
+/*
     void FindNM();
 
     double xP_i(int);
@@ -99,7 +72,7 @@ namespace enrichment {
     void ltot_per_feed();
     void multicomponent(double, double=1.0E-7);
   };
-
+*/
 
   /******************/
   /*** Exceptions ***/
