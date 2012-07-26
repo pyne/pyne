@@ -99,29 +99,29 @@ cdef class Cascade:
         def __set__(self, value):
             self._inst.M = <double> value
 
-    property x_feedeed_j:
+    property x_feed_j:
         """This is the target enrichment of the jth isotope in the
         feed stream mat_feed.  The :math:`x^F_j` value should be 
         set prior to solving for the remainder of the cascade.  For 
         typical uranium vectors, this value is about U-235 = 0.00711.
         """
         def __get__(self):
-            return self._inst.x_feedeed_j
+            return self._inst.x_feed_j
 
         def __set__(self, value):
-            self._inst.x_feedeed_j = <double> value
+            self._inst.x_feed_j = <double> value
 
-    property x_prodrod_j:
+    property x_prod_j:
         """This is the target enrichment of the jth isotope in the
         product stream mat_prod.  The :math:`x^P_j` value should be 
         set prior to solving for the remainder of the cascade.  For 
         typical uranium vectors, this value is about U-235 = 0.05.
         """
         def __get__(self):
-            return self._inst.x_prodrod_j
+            return self._inst.x_prod_j
 
         def __set__(self, value):
-            self._inst.x_prodrod_j = <double> value
+            self._inst.x_prod_j = <double> value
 
     property x_tail_j:
         """This is the target enrichment of the jth isotope in the
@@ -214,7 +214,7 @@ cdef class Cascade:
 
     # Class methods
     def _reset_xjs(self):
-        """Sets the x_feedeed_j, x_prodrod_j, and x_tail_j attributes to their
+        """Sets the x_feedeed_j, x_prod_j:, and x_tail_j attributes to their
         values in the mat_feed, mat_prod, and mat_tail materials.
         """
         self._inst._reset_xjs()
@@ -237,7 +237,7 @@ def default_uranium_cascade():
         duc.M = 10.0
 
         duc.x_feedeed_j = 0.0072
-        duc.x_prodrod_j = 0.05
+        duc.x_prod_j: = 0.05
         duc.x_tail_j = 0.0025
 
         duc.mat_feed = pyne.material.Material({922340: 0.000055, 922350: 0.00720, 
@@ -381,7 +381,7 @@ def ltot_per_feed(Cascade orig_casc, double tolerance=1.0E-7):
 
     """
     cdef Cascade casc = Cascade()
-    cdef cpp_enrichment.Cascade ccasc = ltot_per_feed(orig_casc._inst, tolerance)
+    cdef cpp_enrichment.Cascade ccasc = cpp_enrichment.ltot_per_feed(orig_casc._inst[0], tolerance)
     casc._inst[0] = ccasc
     return casc
 
@@ -410,6 +410,6 @@ def multicomponent(Cascade orig_casc, double tolerance=1.0E-7):
 
     """
     cdef Cascade casc = Cascade()
-    cdef cpp_enrichment.Cascade ccasc = ltot_per_feed(orig_casc._inst, tolerance)
+    cdef cpp_enrichment.Cascade ccasc = cpp_enrichment.ltot_per_feed(orig_casc._inst[0], tolerance)
     casc._inst[0] = ccasc
     return casc
