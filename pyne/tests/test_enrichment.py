@@ -12,20 +12,6 @@ from pyne.material import Material
 from pyne import enrichment as enr
 
 #
-# Fixtures
-#
-
-def setup_enrichment():
-    bright_conf.track_nucs = set([922350, 922360, 922380])
-    bright_conf.verbosity = 0
-
-
-def setup_enrichment1():
-    bright_conf.track_nucs = set([922320, 922340, 922350, 922360, 922380])
-    bright_conf.verbosity = 0
-
-
-#
 # Tests the cascade helper class.
 #
 
@@ -101,261 +87,31 @@ def test_default_uranium_cascade():
     assert_equal(casc.mat_feed, Material({922340: 5.5e-05, 922350: 0.0072, 
                                 922380: 0.992745}, 1.0, 'Natural Uranium', 1.0))
 
+def test_prod_per_feed():
+    xf, xp, xt = 0.0072, 0.05, 0.0025
+    exp = (xf - xt) / (xp - xt)
+    obs = enr.prod_per_feed(xf, xp, xt)
+    assert_almost_equal(obs, exp)
+
+def test_tail_per_feed():
+    xf, xp, xt = 0.0072, 0.05, 0.0025
+    exp = (xf - xp) / (xt - xp)
+    obs = enr.tail_per_feed(xf, xp, xt)
+    assert_almost_equal(obs, exp)
+
+def test_tail_per_prod():
+    xf, xp, xt = 0.0072, 0.05, 0.0025
+    exp = (xf - xp) / (xt - xf)
+    obs = enr.tail_per_prod(xf, xp, xt)
+    assert_almost_equal(obs, exp)
+
+def test_alphastar_i():
+    a, ms, mi = 1.05, 236.5, 235.0
+    exp = a**(ms - mi)
+    obs = enr.alphastar_i(a, ms, mi)
+    assert_almost_equal(obs, exp)
+
 """\
-#
-# Tests that the Enrichment component constructors work.
-#
-
-@with_setup(None, teardown_enrichment)
-def test_Enrichment_1():
-    e = Enrichment()
-    assert_equal(e.name, '')
-    assert_equal(e.track_params, set(["M",  "MassFeed", "MassProduct", "MassTails", 
-                                      "Mstar", "N", "SWUperFeed", "SWUperProduct", "TotalPerFeed"]))
-
-@with_setup(None, teardown_enrichment)
-def test_Enrichment_2():
-    e = Enrichment(name="e")
-    assert_equal(e.name, 'e')
-    assert_equal(e.track_params, set(["M",  "MassFeed", "MassProduct", "MassTails", 
-                                      "Mstar", "N", "SWUperFeed", "SWUperProduct", "TotalPerFeed"]))
-
-@with_setup(None, teardown_enrichment)
-def test_Enrichment_3():
-    casc = bright.enrichment.uranium_enrichment_defaults()
-    casc.x_prod_j = 0.1
-    e = Enrichment(enrich_params=ep)
-    assert_equal(e.name, '')
-    assert_equal(e.track_params, set(["M",  "MassFeed", "MassProduct", "MassTails", 
-                                      "Mstar", "N", "SWUperFeed", "SWUperProduct", "TotalPerFeed"]))
-    assert_equal(e.alpha, 1.05)
-    assert_equal(e.Mstar, 236.5)
-    assert_equal(e.j, 922350)
-    assert_equal(e.k, 922380)
-    assert_equal(e.N, 30.0)
-    assert_equal(e.M, 10.0)
-    assert_equal(e.x_prod_j, 0.1)
-    assert_equal(e.x_tail_j, 0.0025)
-
-@with_setup(None, teardown_enrichment)
-def test_Enrichment_4():
-    casc = bright.enrichment.uranium_enrichment_defaults()
-    casc.j = 922360
-    e = Enrichment(enrich_params=ep, name='e')
-    assert_equal(e.name, 'e')
-    assert_equal(e.track_params, set(["M",  "MassFeed", "MassProduct", "MassTails", 
-                                      "Mstar", "N", "SWUperFeed", "SWUperProduct", "TotalPerFeed"]))
-    assert_equal(e.alpha, 1.05)
-    assert_equal(e.Mstar, 236.5)
-    assert_equal(e.j, 922360)
-    assert_equal(e.k, 922380)
-    assert_equal(e.N, 30.0)
-    assert_equal(e.M, 10.0)
-    assert_equal(e.x_prod_j, 0.05)
-    assert_equal(e.x_tail_j, 0.0025)
-
-
-#
-# Tests that enrichment the fuel cycle component attributes work.
-#
-
-
-@with_setup(None, teardown_enrichment)
-def test_track_params():
-    e = Enrichment()
-    assert_equal(e.track_params, set(["M",  "MassFeed", "MassProduct", "MassTails", 
-                                      "Mstar", "N", "SWUperFeed", "SWUperProduct", "TotalPerFeed"]))
-    e.track_params = set(["Om nom nom"])
-    assert_equal(e.track_params, set(["Om nom nom"]))
-                        
-@with_setup(None, teardown_enrichment)
-def test_alpha():
-    e = Enrichment()
-    e.alpha = 1.06
-    assert_equal(e.alpha, 1.06)
-
-@with_setup(None, teardown_enrichment)
-def test_Mstar():
-    e = Enrichment()
-    e.Mstar = 235.5
-    assert_equal(e.Mstar, 235.5)
-
-@with_setup(None, teardown_enrichment)
-def test_j():
-    e = Enrichment()
-    e.j = 922360
-    assert_equal(e.j, 922360)
-
-@with_setup(None, teardown_enrichment)
-def test_k():
-    e = Enrichment()
-    e.k = 922390
-    assert_equal(e.k, 922390)
-
-@with_setup(None, teardown_enrichment)
-def test_N():
-    e = Enrichment()
-    e.N = 35.0
-    assert_equal(e.N, 35.0)
-
-@with_setup(None, teardown_enrichment)
-def test_M():
-    e = Enrichment()
-    e.M = 15.0
-    assert_equal(e.M, 15.0)
-
-@with_setup(None, teardown_enrichment)
-def test_x_prod_j():
-    e = Enrichment()
-    e.x_prod_j = 0.1
-    assert_equal(e.x_prod_j, 0.1)
-
-@with_setup(None, teardown_enrichment)
-def test_x_tail_j():
-    e = Enrichment()
-    e.x_tail_j = 0.005
-    assert_equal(e.x_tail_j, 0.005)
-
-@with_setup(None, teardown_enrichment)
-def test_Mstar():
-    e = Enrichment()
-    e.Mstar = 235.5
-    assert_equal(e.Mstar, 235.5)
-
-@with_setup(None, teardown_enrichment)
-def test_mat_feed():
-    e = Enrichment()
-    mat = Material({922380: 0.5})        
-    e.mat_feed = mat
-    assert_equal(e.mat_feed.mass, 0.5)
-    assert_equal(e.mat_feed.comp[922380], 1.0)
-
-@with_setup(None, teardown_enrichment)
-def test_mat_prod():
-    e = Enrichment()
-    mat = Material({922380: 0.5})        
-    e.mat_prod = mat
-    assert_equal(e.mat_prod.mass, 0.5)
-    assert_equal(e.mat_prod.comp[922380], 1.0)
-
-@with_setup(None, teardown_enrichment)
-def test_mat_tail():
-    e = Enrichment()
-    mat = Material({922380: 0.5})        
-    e.mat_tail = mat
-    assert_equal(e.mat_tail.mass, 0.5)
-    assert_equal(e.mat_tail.comp[922380], 1.0)    
-
-@with_setup(None, teardown_enrichment)
-def test_N():
-    e = Enrichment()
-    e.N = 35.0
-    assert_equal(e.N, 35.0)
-
-@with_setup(None, teardown_enrichment)
-def test_M():
-    e = Enrichment()
-    e.M = 15.0
-    assert_equal(e.M, 15.0)
-
-@with_setup(None, teardown_enrichment)
-def test_TotalPerFeed():
-    e = Enrichment()
-    e.TotalPerFeed = 12.0
-    assert_equal(e.TotalPerFeed, 12.0)
-
-@with_setup(None, teardown_enrichment)
-def test_SWUperFeed():
-    e = Enrichment()
-    e.SWUperFeed = 101.0
-    assert_equal(e.SWUperFeed, 101.0)
-
-@with_setup(None, teardown_enrichment)
-def test_SWUperProduct():
-    e = Enrichment()
-    e.SWUperProduct = 1010.0
-    assert_equal(e.SWUperProduct, 1010.0)
-
-
-#
-# Tests that the fuel cycle component methods work.
-#
-
-@with_setup(setup_enrichment, teardown_enrichment)
-def test_initialize():
-    e = Enrichment()
-    assert_equal(e.x_prod_j, 0.05)
-    casc = Cascade()
-    casc.x_prod_j = 0.1
-    e.initialize(ep)
-    assert_almost_equal(e.alpha, 0.0)
-    assert_almost_equal(e.Mstar, 0.0)
-    assert_equal(e.j, 0)
-    assert_equal(e.k, 0)
-    assert_almost_equal(e.N, 0.0)
-    assert_almost_equal(e.M, 0.0)
-    assert_equal(e.x_prod_j, 0.1)
-    assert_almost_equal(e.x_tail_j, 0.0)
-
-
-@with_setup(setup_enrichment, teardown_enrichment)
-def test_calc_1():
-    e = Enrichment()
-    e.mat_feed = Material({922350: 0.01, 922380: 0.985, 922360: 0.005})
-    e.calc()
-    assert_almost_equal(e.mat_prod.comp[922350],  0.05,   6) 
-    assert_almost_equal(e.mat_tail.comp[922350], 0.0025, 6)
-
-@with_setup(setup_enrichment, teardown_enrichment)
-def test_calc_2():
-    e = Enrichment()
-    e.calc({922350: 0.01, 922380: 0.985, 922360: 0.005})
-    assert_almost_equal(e.mat_prod.comp[922350],  0.05,   6) 
-    assert_almost_equal(e.mat_tail.comp[922350], 0.0025, 6)
-
-@with_setup(setup_enrichment, teardown_enrichment)
-def test_calc_3():
-    e = Enrichment()
-    mat = Material({922350: 0.01, 922380: 0.985, 922360: 0.005})
-    e.calc(mat)
-    assert_almost_equal(e.mat_prod.comp[922350],  0.05,   6) 
-    assert_almost_equal(e.mat_tail.comp[922350], 0.0025, 6)
-
-@with_setup(setup_enrichment, teardown_enrichment)
-def test_calc_params():
-    e = Enrichment()
-    mat = Material({922350: 0.01, 922380: 0.985, 922360: 0.005})
-    e.calc(mat)
-    e.calc_params()
-
-    assert_equal(e.params_prior_calc["MassFeed"],  e.mat_feed.mass)
-    assert_equal(e.params_after_calc["MassFeed"], 0.0)
-
-    assert_equal(e.params_prior_calc["MassProduct"],  0.0)
-    assert_equal(e.params_after_calc["MassProduct"], e.mat_prod.mass)
-
-    assert_equal(e.params_prior_calc["MassTails"],  0.0)
-    assert_equal(e.params_after_calc["MassTails"], e.mat_tail.mass)
-
-    assert_equal(e.params_prior_calc["N"],  e.N)
-    assert_equal(e.params_after_calc["N"], e.N)
-
-    assert_equal(e.params_prior_calc["M"],  e.M)
-    assert_equal(e.params_after_calc["M"], e.M)
-
-    assert_equal(e.params_prior_calc["Mstar"],  e.Mstar)
-    assert_equal(e.params_after_calc["Mstar"], e.Mstar)
-
-    assert_equal(e.params_prior_calc["TotalPerFeed"],  e.TotalPerFeed)
-    assert_equal(e.params_after_calc["TotalPerFeed"], e.TotalPerFeed)
-
-    assert_equal(e.params_prior_calc["SWUperFeed"],  e.SWUperFeed)
-    assert_equal(e.params_after_calc["SWUperFeed"], 0.0)
-
-    assert_equal(e.params_prior_calc["SWUperProduct"],  0.0)
-    assert_equal(e.params_after_calc["SWUperProduct"], e.SWUperProduct)
-
-
 
 @with_setup(setup_enrichment1, teardown_enrichment)
 def test_sample_feed():
