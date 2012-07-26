@@ -89,7 +89,7 @@ double pyne_enr::tail_per_feed(double x_feed, double x_prod, double x_tail)
 
 double pyne_enr::tail_per_prod(double x_feed, double x_prod, double x_tail)
 {
-  // Tails over Feed Enrichment Ratio
+  // Tails over Product Enrichment Ratio
   return ((x_feed - x_prod)/(x_tail - x_feed));
 }
 
@@ -100,16 +100,19 @@ double pyne_enr::alphastar_i(double alpha, double Mstar, double M_i)
   return pow(alpha, (Mstar - M_i));
 }
 
-double pyne_enr::Ei(double astar_i, double N)
-{
-  return ((astar_i - 1.0) / (1.0 - pow(astar_i, -N)));
-};
-
-
-double pyne_enr::Si(double astar_i, double M)
-{
-  return ((astar_i - 1.0)/(pow(astar_i, M+1) - 1.0));
-};
+// FIXME: I forgot what these mean physically,     
+// and they are unused in the rest of the file.
+// removing until meaning can be remembered!
+//double pyne_enr::Ei(double astar_i, double N)
+//{
+//  return ((astar_i - 1.0) / (1.0 - pow(astar_i, -N)));
+//};
+//
+//
+//double pyne_enr::Si(double astar_i, double M)
+//{
+//  return ((astar_i - 1.0)/(pow(astar_i, M+1) - 1.0));
+//};
 
 void pyne_enr::_recompute_nm(pyne_enr::Cascade & casc, double tolerance)
 {

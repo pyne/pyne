@@ -74,7 +74,7 @@ cdef class Cascade:
 
     property k:
         """This is an integer in zzaaam-form that represents the kth key component.
-        This nuclide is preferentially enriched in the waste stream. For standard 
+        This nuclide is preferentially enriched in the tails stream. For standard 
         uranium cascades k is 922380 (ie U-238).
         """
         def __get__(self):
@@ -99,33 +99,33 @@ cdef class Cascade:
         def __set__(self, value):
             self._inst.M = <double> value
 
-    property x_feed_j:
+    property x_feedeed_j:
         """This is the target enrichment of the jth isotope in the
         feed stream mat_feed.  The :math:`x^F_j` value should be 
         set prior to solving for the remainder of the cascade.  For 
         typical uranium vectors, this value is about U-235 = 0.00711.
         """
         def __get__(self):
-            return self._inst.x_feed_j
+            return self._inst.x_feedeed_j
 
         def __set__(self, value):
-            self._inst.x_feed_j = <double> value
+            self._inst.x_feedeed_j = <double> value
 
-    property x_prod_j:
+    property x_prodrod_j:
         """This is the target enrichment of the jth isotope in the
         product stream mat_prod.  The :math:`x^P_j` value should be 
         set prior to solving for the remainder of the cascade.  For 
         typical uranium vectors, this value is about U-235 = 0.05.
         """
         def __get__(self):
-            return self._inst.x_prod_j
+            return self._inst.x_prodrod_j
 
         def __set__(self, value):
-            self._inst.x_prod_j = <double> value
+            self._inst.x_prodrod_j = <double> value
 
     property x_tail_j:
         """This is the target enrichment of the jth isotope in the
-        waste stream mat_tail.  The :math:`x^T_j` value should be 
+        Tails stream mat_tail.  The :math:`x^T_j` value should be 
         set prior to solving for the remainder of the cascade. For 
         typical uranium vectors, this value is about U-235 = 0.0025.
         """
@@ -214,7 +214,7 @@ cdef class Cascade:
 
     # Class methods
     def _reset_xjs(self):
-        """Sets the x_feed_j, x_prod_j, and x_tail_j attributes to their
+        """Sets the x_feedeed_j, x_prodrod_j, and x_tail_j attributes to their
         values in the mat_feed, mat_prod, and mat_tail materials.
         """
         self._inst._reset_xjs()
@@ -236,8 +236,8 @@ def default_uranium_cascade():
         duc.N = 30.0
         duc.M = 10.0
 
-        duc.x_feed_j = 0.0072
-        duc.x_prod_j = 0.05
+        duc.x_feedeed_j = 0.0072
+        duc.x_prodrod_j = 0.05
         duc.x_tail_j = 0.0025
 
         duc.mat_feed = pyne.material.Material({922340: 0.000055, 922350: 0.00720, 
@@ -261,341 +261,102 @@ def default_uranium_cascade():
     return duc
 
 
+def prod_per_feed(double x_feed, double x_prod, double x_tail):
+    """Calculates the product over feed enrichment ratio.
 
-cdef class Enrichment(fccomp.FCComp):
-    """Enrichment Fuel Cycle Component Class.  Daughter of FCComp.
+    .. math::
+
+        \\frac{p}{f} = \\frac{(x_f - x_t)}{(x_p - x_t)}
 
     Parameters
     ----------
-    enrich_params : EnrichmentParameters, optional 
-        This specifies how the enrichment cascade should be set up.  It is a EnrichmentParameters
-        instance.  If enrich_params is not specified, then the cascade is initialized with values 
-        from uranium_enrichment_defaults().
-    name : str 
-        The name of the enrichment fuel cycle component instance.
+    x_feed : float
+        Feed enrichment.
+    x_prod : float
+       Product enrichment.
+    x_tail : float
+        Tails enrichment.
+
+    Returns
+    -------
+    pfratio : float
+        As calculated above.
 
     """
+    return cpp_enrichment.prod_per_feed(x_feed, x_prod, x_tail)
 
-    def __cinit__(self, *args, **kwargs):
-        pass
 
-    def __init__(self, enrich_params=None, char * name="", *args, **kwargs):
-        cdef EnrichmentParameters enr_par
+def tail_per_feed(double x_feed, double x_prod, double x_tail):
+    """Calculates the tails over feed enrichment ratio.
 
-        if enrich_params is None:
-            self._inst = new cpp_enrichment.Enrichment(std.string(name))
-        elif isinstance(enrich_params, EnrichmentParameters):
-            enr_par = enrich_params
-            self._inst = new cpp_enrichment.Enrichment(<cpp_enrichment.EnrichmentParameters> enr_par.ptr[0], std.string(name))
+    .. math::
 
+        \\frac{t}{f} = \\frac{(x_f - x_p)}{(x_t - x_p)}
 
-    #
-    # Class Attributes
-    #
+    Parameters
+    ----------
+    x_feed : float
+        Feed enrichment.
+    x_prod : float
+        Product enrichment.
+    x_tail : float
+        Tails enrichment.
 
-    # Enrichment Attributes
+    Returns
+    -------
+    tfratio : float
+        As calculated above.
 
-    property alpha_0:
-        """The :math:`\\alpha_0` attribute specifies the overall stage separation factor
-        for the cascade.  This should be set on initialization.  Values should be
-        greater than one.  Values less than one represent de-enrichment."""
-        def __get__(self):
-            return (<cpp_enrichment.Enrichment *> self._inst).alpha_0
+    """
+    return cpp_enrichment.tail_per_feed(x_feed, x_prod, x_tail)
 
-        def __set__(self, value):
-            (<cpp_enrichment.Enrichment *> self._inst).alpha_0 = <double> value
 
+def tail_per_prod(double x_feed, double x_prod, double x_tail):
+    """Calculates the tails over product enrichment ratio.
 
-    property Mstar_0:
-        """The :math:`M^*_0` represents a first guess at what the `Mstar` should be.
-        The value of Mstar_0 on initialization should be in the ballpark
-        of the optimized result of the Mstar attribute.  However, :math:`M^*_0` must
-        always have a value between the weights of the j and k key components."""
-        def __get__(self):
-            return (<cpp_enrichment.Enrichment *> self._inst).Mstar_0
+    .. math::
 
-        def __set__(self, value):
-            (<cpp_enrichment.Enrichment *> self._inst).Mstar_0 = <double> value
+        \\frac{t}{p} = \\frac{(x_f - x_p)}{(x_t - x_f)}
 
+    Parameters
+    ----------
+    x_feed : float
+        Feed enrichment.
+    x_prod : float
+        Product enrichment.
+    x_tail : float
+        Tails enrichment.
 
-    property Mstar:
-        """The :math:`M^*` attribute represents the mass for which the adjusted
-        stage separation factor, :math:`\\alpha^*_i`, is equal to one.  It is this
-        value that is varied to achieve an optimized enrichment cascade."""
-        def __get__(self):
-            return (<cpp_enrichment.Enrichment *> self._inst).Mstar
+    Returns
+    -------
+    tpratio : float
+        As calculated above.
 
-        def __set__(self, value):
-            (<cpp_enrichment.Enrichment *> self._inst).Mstar = <double> value
+    """
+    return cpp_enrichment.tail_per_feed(x_feed, x_prod, x_tail)
 
 
-    property mat_tail:
-        """In addition to the mat_feed and mat_prod materials, Enrichment
-        also has a tails or waste stream that is represented by this attribute.
-        The mass of this material and the ms_prod product material should always 
-        add up to the mass of the mat_feed feed stock."""
-        def __get__(self):
-            cdef pyne.material._Material pymat = pyne.material.Material()
-            pymat.mat_pointer[0] = (<cpp_enrichment.Enrichment *> self._inst).mat_tail
-            return pymat
+def alphastar_i(double alpha, double Mstar, double M_i):
+    """Calculates the stage separation factor for a nuclide i of atomic mass M_i.
 
-        def __set__(self, pyne.material._Material mat):
-            (<cpp_enrichment.Enrichment *> self._inst).mat_tail = <pyne.cpp_material.Material> mat.mat_pointer[0]
+    .. math::
 
+        \\alpha^*_i = \\alpha^{(M^* - M_i)}
 
-    property j:
-        """This is an integer in zzaaam-form that represents the jth key component.
-        This nuclide is preferentially enriched in the product stream.
-        For standard uranium cascades j is 922350 (ie U-235)."""
-        def __get__(self):
-            return (<cpp_enrichment.Enrichment *> self._inst).j
+    Parameters
+    ----------
+    alpha : float
+        Stage separation factor.
+    Mstar : float
+        Mass separation factor.      
+    M_i : float
+        Atomic mass of the ith nuclide.
 
-        def __set__(self, value):
-            (<cpp_enrichment.Enrichment *> self._inst).j = nucname.zzaaam(value)
+    Returns
+    -------
+    astar_i : float
+        As calculated above.
 
-
-    property k:
-        """This is an integer in zzaaam-form that represents the kth key component.
-        This nuclide is preferentially enriched in the waste stream.
-        For standard uranium cascades k is 922380 (ie U-238)."""
-        def __get__(self):
-            return (<cpp_enrichment.Enrichment *> self._inst).k
-
-        def __set__(self, value):
-            (<cpp_enrichment.Enrichment *> self._inst).k = nucname.zzaaam(value)
-
-
-    property x_prod_j:
-        """This is the target enrichment of the jth isotope in the
-        product stream mat_prod.  The :math:`x^P_j` value is set by 
-        the user at initialization or run-time.  For typical uranium 
-        vectors, this value is about U-235 = 0.05."""
-        def __get__(self):
-            return (<cpp_enrichment.Enrichment *> self._inst).x_prod_j
-
-        def __set__(self, value):
-            (<cpp_enrichment.Enrichment *> self._inst).x_prod_j = <double> value
-
-
-    property x_tail_j:
-        """This is the target enrichment of the jth isotope in the
-        waste stream ms_tail.  The :math:`x^W_j` value is set by the 
-        user at initialization or runtime.  For typical uranium vectors,
-        this value is about U-235 = 0.0025."""
-        def __get__(self):
-            return (<cpp_enrichment.Enrichment *> self._inst).x_tail_j
-
-        def __set__(self, value):
-            (<cpp_enrichment.Enrichment *> self._inst).x_tail_j = <double> value
-
-
-    property N:
-        """This is the number of enriching stages present in an ideal cascade.
-        Along with Mstar and M, this number is optimized to ensure that a product 
-        enrichment of x_prod_j is attained."""
-        def __get__(self):
-            return (<cpp_enrichment.Enrichment *> self._inst).N
-
-        def __set__(self, value):
-            (<cpp_enrichment.Enrichment *> self._inst).N = <double> value
-
-
-    property M:
-        """This is the number of stripping stages present in an ideal cascade.
-        Along with Mstar and N, this number is optimized to ensure that a waste 
-        enrichment of x_tail_j is attained."""
-        def __get__(self):
-            return (<cpp_enrichment.Enrichment *> self._inst).M
-
-        def __set__(self, value):
-            (<cpp_enrichment.Enrichment *> self._inst).M = <double> value
-
-
-    property N0:
-        """This is the number of enriching stages initially guessed by the user."""
-        def __get__(self):
-            return (<cpp_enrichment.Enrichment *> self._inst).N0
-
-        def __set__(self, value):
-            (<cpp_enrichment.Enrichment *> self._inst).N0 = <double> value
-
-
-    property M0:
-        """This is the number of stripping stages initially guessed by the user."""
-        def __get__(self):
-            return (<cpp_enrichment.Enrichment *> self._inst).M0
-
-        def __set__(self, value):
-            (<cpp_enrichment.Enrichment *> self._inst).M0 = <double> value
-
-
-    property TotalPerFeed:
-        """This represents the total flow rate of the cascade divided by the 
-        feed flow rate.  As such, it shows the mass of material needed in the
-        cascade to enrich an additional kilogram of feed.  Symbolically,
-        the total flow rate is given as :math:`L` while the feed rate is
-        :math:`F`.  Therefore, this quantity is sometimes seen as 'L-over-F'
-        or as 'L/F'.  TotalPerFeed is the value that is minimized to form an 
-        optimized cascade."""
-        def __get__(self):
-            return (<cpp_enrichment.Enrichment *> self._inst).TotalPerFeed
-
-        def __set__(self, value):
-            (<cpp_enrichment.Enrichment *> self._inst).TotalPerFeed = <double> value
-
-
-    property SWUperFeed:
-        """This value denotes the number of separative work units (SWU) required
-        per kg of feed for the specified cascade."""
-        def __get__(self):
-            return (<cpp_enrichment.Enrichment *> self._inst).SWUperFeed
-
-        def __set__(self, value):
-            (<cpp_enrichment.Enrichment *> self._inst).SWUperFeed = <double> value
-
-
-    property SWUperProduct:
-        """This value is the number of separative work units (SWU) required
-        to produce 1 [kg] of product in the specified cascade."""
-        def __get__(self):
-            return (<cpp_enrichment.Enrichment *> self._inst).SWUperProduct
-
-        def __set__(self, value):
-            (<cpp_enrichment.Enrichment *> self._inst).SWUperProduct = <double> value
-
-
-
-    #
-    # Class Methods
-    # 
-
-    def initialize(self, EnrichmentParameters enrich_params):
-        """The initialize method takes an enrichment parameter object and sets
-        the corresponding Enrichment attributes to the same value.
-
-        Parameters
-        ----------
-        enrich_params : EnrichmentParameters
-            A class containing the values to (re-)initialize an Enrichment cascade with.
-
-        """
-        cdef EnrichmentParameters enr_par = enrich_params
-        (<cpp_enrichment.Enrichment *> self._inst).initialize(<cpp_enrichment.EnrichmentParameters> enr_par.ptr[0])
-
-
-    def calc_params(self):
-        """This sets the Enrichment parameters to the following 
-        values::
-
-                self.params_prior_calc["MassFeed"] = self.mat_feed.mass
-                self.params_after_calc["MassFeed"] = 0.0
-
-                self.params_prior_calc["MassProduct"] = 0.0
-                self.params_after_calc["MassProduct"] = self.mat_prod.mass
-
-                self.params_prior_calc["MassTails"] = 0.0
-                self.params_after_calc["MassTails"] = self.mat_tail.mass
-
-                self.params_prior_calc["N"] = self.N
-                self.params_after_calc["N"] = self.N
-
-                self.params_prior_calc["M"] = self.M
-                self.params_after_calc["M"] = self.M
-
-                self.params_prior_calc["Mstar"] = self.Mstar
-                self.params_after_calc["Mstar"] = self.Mstar
-
-                self.params_prior_calc["TotalPerFeed"] = self.TotalPerFeed
-                self.params_after_calc["TotalPerFeed"] = self.TotalPerFeed
-
-                self.params_prior_calc["SWUperFeed"] = self.SWUperFeed
-                self.params_after_calc["SWUperFeed"] = 0.0
-
-                self.params_prior_calc["SWUperProduct"] = 0.0
-                self.params_after_calc["SWUperProduct"] = self.SWUperProduct
-
-        """
-        (<cpp_enrichment.FCComp *> self._inst).calc_params()
-
-
-    def calc(self, input=None):
-        """This method performs an optimization calculation on M* and solves for 
-        appropriate values for all Enrichment attributes.  This includes the 
-        product and waste streams flowing out of the the cascade as well.
-
-        Parameters
-        ----------
-        input : dict or Material or None, optional
-            If input is present, it is set as the component's mat_feed.  If input is 
-            a nuclide mapping (zzaaam keys, float values), it is first converted into a 
-            Material before being set as mat_feed.
-
-        Returns
-        -------
-        output : Material
-            mat_prod
-
-        """
-        cdef pyne.material._Material in_mat 
-        cdef pyne.material._Material output = pyne.material.Material()
-
-        if input is None:
-            output.mat_pointer[0] = (<cpp_enrichment.FCComp *> self._inst).calc()
-        elif isinstance(input, dict):
-            output.mat_pointer[0] = (<cpp_enrichment.Enrichment *> self._inst).calc(conv.dict_to_map_int_dbl(input))
-        elif isinstance(input, pyne.material._Material):
-            in_mat = input
-            output.mat_pointer[0] = (<cpp_enrichment.Enrichment *> self._inst).calc(<pyne.cpp_material.Material> in_mat.mat_pointer[0])
-
-        return output
-
-
-    def PoverF(self, double x_F, double x_P, double x_W):
-        """Solves for the product over feed enrichment ratio.
-
-        .. math::
-
-            \\frac{p}{f} = \\frac{(x_F - x_W)}{(x_P - x_W)}
-
-        Parameters
-        ----------
-        x_F : float
-            Feed enrichment.
-        x_P : float
-            Product enrichment.
-        x_W : float
-            Waste enrichment.
-
-        Returns
-        -------
-        pfratio : float
-            As calculated above.
-
-        """
-        return (<cpp_enrichment.Enrichment *> self._inst).PoverF(x_F, x_P, x_W)
-
-
-    def WoverF(self, double x_F, double x_P, double x_W):
-        """Solves for the waste over feed enrichment ratio.
-
-        .. math::
-
-            \\frac{p}{f} = \\frac{(x_F - x_P)}{(x_W - x_P)}
-
-        Parameters
-        ----------
-        x_F : float
-            Feed enrichment.
-        x_P : float
-            Product enrichment.
-        x_W : float
-            Waste enrichment.
-
-        Returns
-        -------
-        wfratio : float
-            As calculated above.
-
-        """
-        return (<cpp_enrichment.Enrichment *> self._inst).WoverF(x_F, x_P, x_W)
+    """
+    return cpp_enrichment.alphastar_i(alpha, Mstar, M_i)
 
