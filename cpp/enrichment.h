@@ -57,8 +57,12 @@ namespace enrichment {
   double tail_per_prod(double, double, double);
 
   double alphastar_i(double, double, double);
-  double Ei(double, double);
-  double Si(double, double);
+
+  // FIXME: I forgot what these mean physically,
+  // and they are unused in the rest of the file.
+  // removing until meaning can be remembered!
+  //double Ei(double, double);
+  //double Si(double, double);
 
   void _recompute_nm(Cascade &, double=1.0E-7);
   void _recompute_prod_tail_mats(Cascade &);
