@@ -369,6 +369,8 @@ exts.append(cpp_ext("pyne.ace", ['ace.pyx'], ['pyne', 'pyne_nucname']))
 # xs.models
 exts.append(cpp_ext("pyne.xs.models", ['xs/models.pyx'], ['pyne', 'pyne_nucname']))
 
+# material
+exts.append(cpp_ext("pyne.enrichment", ['enrichment.pyx'], ['pyne_enrichment']))
 
 
 ##########################
