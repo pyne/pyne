@@ -90,7 +90,7 @@ double pyne_enr::tail_per_feed(double x_feed, double x_prod, double x_tail)
 double pyne_enr::tail_per_prod(double x_feed, double x_prod, double x_tail)
 {
   // Tails over Product Enrichment Ratio
-  return ((x_feed - x_prod)/(x_tail - x_feed));
+  return ((x_feed - x_prod) / (x_tail - x_feed));
 }
 
 

@@ -333,7 +333,7 @@ def tail_per_prod(double x_feed, double x_prod, double x_tail):
         As calculated above.
 
     """
-    return cpp_enrichment.tail_per_feed(x_feed, x_prod, x_tail)
+    return cpp_enrichment.tail_per_prod(x_feed, x_prod, x_tail)
 
 
 def alphastar_i(double alpha, double Mstar, double M_i):
