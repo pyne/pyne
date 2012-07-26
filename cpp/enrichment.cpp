@@ -59,9 +59,15 @@ pyne_enr::Cascade pyne_enr::_fill_default_uranium_cascade()
   duc.N = 30.0;
   duc.M = 10.0;
 
-  duc.x_feed_j = 0.00711;
+  duc.x_feed_j = 0.0072;
   duc.x_prod_j = 0.05;
   duc.x_tail_j = 0.0025;
+
+  pyne::comp_map cm;
+  cm[922340] = 0.000055;
+  cm[922350] = 0.00720;
+  cm[922380] = 0.992745;
+  duc.mat_feed = pyne::Material(cm, 1.0, "Natural Uranium", 1.0)
 
   return duc;
 };
