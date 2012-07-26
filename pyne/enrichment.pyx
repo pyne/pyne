@@ -20,9 +20,9 @@ cimport cpp_enrichment
 
 
 
-########################
-### Enrichment Class ###
-########################
+#####################
+### Cascade Class ###
+#####################
 
 
 cdef class Cascade:
@@ -32,10 +32,10 @@ cdef class Cascade:
     """
 
     def __cinit__(self):
-        self.ptr = new cpp_enrichment.Cascade()
+        self._inst = new cpp_enrichment.Cascade()
 
     def __dealloc__(self):
-        del self.ptr
+        del self._inst
 
     #
     # Class Attributes
@@ -45,10 +45,10 @@ cdef class Cascade:
         for the cascade.  This should be set on initialization.  Values should be
         greater than one.  Values less than one represent de-enrichment."""
         def __get__(self):
-            return self.ptr.alpha
+            return self._inst.alpha
 
         def __set__(self, value):
-            self.ptr.alpha = <double> value
+            self._inst.alpha = <double> value
 
     property Mstar:
         """This is the mass separation factor :math:`M^*`.  On initialization, this 
@@ -56,10 +56,10 @@ cdef class Cascade:
         this must always have a value between the weights of the j and k key components.
         """
         def __get__(self):
-            return self.ptr.Mstar
+            return self._inst.Mstar
 
         def __set__(self, value):
-            self.ptr.Mstar = <double> value
+            self._inst.Mstar = <double> value
 
     property j:
         """This is an integer in zzaaam-form that represents the jth key component.
@@ -67,10 +67,10 @@ cdef class Cascade:
         uranium cascades j is 922350 (ie U-235).
         """
         def __get__(self):
-            return self.ptr.j
+            return self._inst.j
 
         def __set__(self, value):
-            self.ptr.j = nucname.zzaaam(value)
+            self._inst.j = nucname.zzaaam(value)
 
     property k:
         """This is an integer in zzaaam-form that represents the kth key component.
@@ -78,26 +78,26 @@ cdef class Cascade:
         uranium cascades k is 922380 (ie U-238).
         """
         def __get__(self):
-            return self.ptr.k
+            return self._inst.k
 
         def __set__(self, value):
-            self.ptr.k = nucname.zzaaam(value)
+            self._inst.k = nucname.zzaaam(value)
 
     property N:
         """The number of enriching stages."""
         def __get__(self):
-            return self.ptr.N
+            return self._inst.N
 
         def __set__(self, value):
-            self.ptr.N = <double> value
+            self._inst.N = <double> value
 
     property M:
         """The number of stripping stages."""
         def __get__(self):
-            return self.ptr.M
+            return self._inst.M
 
         def __set__(self, value):
-            self.ptr.M = <double> value
+            self._inst.M = <double> value
 
     property x_feed_j:
         """This is the target enrichment of the jth isotope in the
@@ -106,10 +106,10 @@ cdef class Cascade:
         typical uranium vectors, this value is about U-235 = 0.00711.
         """
         def __get__(self):
-            return self.ptr.x_feed_j
+            return self._inst.x_feed_j
 
         def __set__(self, value):
-            self.ptr.x_feed_j = <double> value
+            self._inst.x_feed_j = <double> value
 
     property x_prod_j:
         """This is the target enrichment of the jth isotope in the
@@ -118,10 +118,10 @@ cdef class Cascade:
         typical uranium vectors, this value is about U-235 = 0.05.
         """
         def __get__(self):
-            return self.ptr.x_prod_j
+            return self._inst.x_prod_j
 
         def __set__(self, value):
-            self.ptr.x_prod_j = <double> value
+            self._inst.x_prod_j = <double> value
 
     property x_tail_j:
         """This is the target enrichment of the jth isotope in the
@@ -130,44 +130,135 @@ cdef class Cascade:
         typical uranium vectors, this value is about U-235 = 0.0025.
         """
         def __get__(self):
-            return self.ptr.x_tail_j
+            return self._inst.x_tail_j
 
         def __set__(self, value):
-            self.ptr.x_tail_j = <double> value
+            self._inst.x_tail_j = <double> value
 
+    property mat_feed:
+        """Feed material to be enriched.  Often set at initialization.
+        """
+        def __get__(self):
+            cdef pyne.material._Material pymat = pyne.material.Material()
+            pymat.mat_pointer[0] = self._inst.mat_feed
+            return pymat
 
+        def __set__(self, mat):
+            cdef pyne.material._Material pymat
+            if isinstance(mat, pyne.material._Material):
+                pymat = mat
+            else:
+                pymat = pyne.material.Material(mat)
+            self._inst.mat_feed = <pyne.cpp_material.Material> pymat.mat_pointer[0]
 
-def uranium_enrichment_defaults():
-    """This function returns a new EnrichmentParameters instance which 
-    holds sensible initial values a urnaium enrichment cascade.
+    property mat_prod:
+        """Product (enriched) material.
+        """
+        def __get__(self):
+            cdef pyne.material._Material pymat = pyne.material.Material()
+            pymat.mat_pointer[0] = self._inst.mat_prod
+            return pymat
 
-    The values of this instance of EnrichmentParameters are as
-    follows::
+        def __set__(self, mat):
+            cdef pyne.material._Material pymat
+            if isinstance(mat, pyne.material._Material):
+                pymat = mat
+            else:
+                pymat = pyne.material.Material(mat)
+            self._inst.mat_prod = <pyne.cpp_material.Material> pymat.mat_pointer[0]
 
-        ued = bright.enrichment.EnrichmentParameters()
+    property mat_tail:
+        """Tails (de-enriched) material.
+        """
+        def __get__(self):
+            cdef pyne.material._Material pymat = pyne.material.Material()
+            pymat.mat_pointer[0] = self._inst.mat_tail
+            return pymat
 
-        ued.alpha_0 = 1.05
-        ued.Mstar_0 = 236.5
+        def __set__(self, mat):
+            cdef pyne.material._Material pymat
+            if isinstance(mat, pyne.material._Material):
+                pymat = mat
+            else:
+                pymat = pyne.material.Material(mat)
+            self._inst.mat_tail = <pyne.cpp_material.Material> pymat.mat_pointer[0]
 
-        ued.j = 922350
-        ued.k = 922380
+    property l_t_per_feed:
+        """Total flow rate (:math:`L_t`) per feed flow rate.  This is a 
+        characteristic of the cascade as a whole.  As such it is this 
+        quatity which is minimized in any real cascade.
+        """
+        def __get__(self):
+            return self._inst.l_t_per_feed
 
-        ued.x_prod_j = 0.05
-        ued.x_tail_j = 0.0025
+        def __set__(self, value):
+            self._inst.l_t_per_feed = <double> value
 
-        ued.N0 = 30.0
-        ued.M0 = 10.0
+    property swu_per_feed:
+        """The seperative work units (SWU) per unit mass of feed material. 
+        """
+        def __get__(self):
+            return self._inst.swu_per_feed
+
+        def __set__(self, value):
+            self._inst.swu_per_feed = <double> value
+
+    property swu_per_prod:
+        """The seperative work units (SWU) per unit mass of prod material. 
+        """
+        def __get__(self):
+            return self._inst.swu_per_prod
+
+        def __set__(self, value):
+            self._inst.swu_per_prod = <double> value
+
+    # Class methods
+    def _reset_xjs(self):
+        """Sets the x_feed_j, x_prod_j, and x_tail_j attributes to their
+        values in the mat_feed, mat_prod, and mat_tail materials.
+        """
+        self._inst._reset_xjs()
+
+def default_uranium_cascade():
+    """Returns a copy of a default uranium enrichment cascade, which has 
+    sensible initial values for this very common case.
+
+    The values of this instance of Cascade are as follows::
+
+        duc = pyne.enrichment.Cascade()
+
+        duc.alpha = 1.05
+        duc.Mstar = 236.5
+
+        duc.j = 922350
+        duc.k = 922380
+
+        duc.N = 30.0
+        duc.M = 10.0
+
+        duc.x_feed_j = 0.0072
+        duc.x_prod_j = 0.05
+        duc.x_tail_j = 0.0025
+
+        duc.mat_feed = pyne.material.Material({922340: 0.000055, 922350: 0.00720, 
+                                    922380: 0.992745}, 1.0, "Natural Uranium", 1.0)
+        duc.mat_prod = pyne.material.Material()
+        duc.mat_tail = pyne.material.Material()
+
+        duc.l_t_per_feed = 0.0
+        duc.swu_per_feed = 0.0
+        duc.swu_per_prod = 0.0
 
     Returns
     -------
-    ued : EnrichmentParameters
+    duc : Cascade
         As defined above.
 
     """
-    cdef cpp_enrichment.EnrichmentParameters cpp_ued = cpp_enrichment.fillUraniumEnrichmentDefaults()
-    cdef EnrichmentParameters ued = EnrichmentParameters()
-    ued.ptr[0] = cpp_ued
-    return ued
+    cdef cpp_enrichment.Cascade cpp_duc = cpp_enrichment._fill_default_uranium_cascade()
+    cdef Cascade duc = Cascade()
+    duc._inst[0] = cpp_duc
+    return duc
 
 
 
