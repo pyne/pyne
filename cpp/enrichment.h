@@ -80,7 +80,7 @@ namespace enrichment {
   {
     virtual const char* what() const throw()
     {
-      return "Inifinite loop found while calculating enrichment cascade!  Breaking...";
+      return "Inifinite loop found while calculating enrichment cascade.";
     };
   };
 
@@ -88,7 +88,7 @@ namespace enrichment {
   {
     virtual const char* what() const throw()
     {
-      return "Iteration limit hit durring enrichment calculation!  Breaking...";
+      return "Iteration limit hit durring enrichment calculation.";
     };
   };
 
@@ -96,7 +96,7 @@ namespace enrichment {
   {
     virtual const char* what() const throw()
     {
-      return "Iteration has hit a point where some values are not-a-number!  Breaking...";
+      return "Iteration has hit a point where some values are not-a-number.";
     };
   };
 

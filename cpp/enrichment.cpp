@@ -189,9 +189,9 @@ void pyne_enr::_recompute_prod_tail_mats(pyne_enr::Cascade & casc)
 
   double N = casc.N;
   double M = casc.M;
-  double x_feed_j = casc.mat_feed.comp[casc.j];
-  double x_prod_j = casc.x_prod_j;
-  double x_tail_j = casc.x_tail_j;
+
+  double ppf = prod_per_feed(casc.mat_feed.comp[casc.j], casc.x_prod_j, casc.x_tail_j);
+  double tpf = tail_per_feed(casc.mat_feed.comp[casc.j], casc.x_prod_j, casc.x_tail_j);
 
   for (pyne::comp_iter i = casc.mat_feed.comp.begin(); i != casc.mat_feed.comp.end(); i++)
   {
@@ -200,23 +200,21 @@ void pyne_enr::_recompute_prod_tail_mats(pyne_enr::Cascade & casc)
 
     // calc prod comp
     numer_prod = casc.mat_feed.comp[nuc] * (pow(astar_i, M+1.0) - 1.0);
-    denom_prod = (pow(astar_i, M+1.0) - pow(astar_i, -N)) / \
-                  prod_per_feed(x_feed_j, x_prod_j, x_tail_j);
+    denom_prod = (pow(astar_i, M+1.0) - pow(astar_i, -N)) / ppf;
     comp_prod[nuc] = numer_prod / denom_prod;
 
     // calc tail comp
     numer_tail = casc.mat_feed.comp[nuc] * (1.0 - pow(astar_i, -N));
-	  denom_tail = (pow(astar_i, M+1.0) - pow(astar_i, -N)) / \
-                  tail_per_feed(x_feed_j, x_prod_j, x_tail_j);
+	  denom_tail = (pow(astar_i, M+1.0) - pow(astar_i, -N)) / tpf;
     comp_tail[nuc] = numer_tail / denom_tail;
   };
 
   casc.mat_prod = pyne::Material(comp_prod);
-  casc.x_prod_j = casc.mat_prod.comp[casc.j];
+  //casc.x_prod_j = casc.mat_prod.comp[casc.j];
   //casc.mat_prod.mass *= casc.mat_feed.mass;
 
   casc.mat_tail = pyne::Material(comp_tail);
-  casc.x_tail_j = casc.mat_tail.comp[casc.j];
+  //casc.x_tail_j = casc.mat_tail.comp[casc.j];
   //casc.mat_tail.mass *= casc.mat_feed.mass;
 
   return;
@@ -231,6 +229,7 @@ pyne_enr::Cascade pyne_enr::_norm_comp_secant(pyne_enr::Cascade & casc, double t
   // checks to see if the product and waste streams meet their target enrichments
   // for the jth component like they should.  If they don't then it trys other values 
   // of N and M varied by Newton's Method.  Rinse and repeat as needed.
+  int j = casc.j;
   pyne_enr::Cascade prev_casc = casc;
   pyne_enr::Cascade curr_casc = casc;
 
@@ -269,21 +268,33 @@ pyne_enr::Cascade pyne_enr::_norm_comp_secant(pyne_enr::Cascade & casc, double t
   double temp_curr_N = 0.0;
   double temp_curr_M = 0.0;
 
-  double delta_x_prod_j = casc.x_prod_j - curr_casc.x_prod_j;
-  double delta_x_tail_j = casc.x_tail_j - curr_casc.x_tail_j;
+  double delta_x_prod_j = casc.mat_prod.comp[j] - curr_casc.mat_prod.comp[j];
+  double delta_x_tail_j = casc.mat_tail.comp[j] - curr_casc.mat_tail.comp[j];
 
-  while (tolerance < fabs(delta_x_prod_j) || tolerance < fabs(delta_x_tail_j))
+/*
+  while ((tolerance < fabs(delta_x_prod_j) / curr_casc.mat_prod.comp[j]  || \
+          tolerance < fabs(delta_x_tail_j) / curr_casc.mat_tail.comp[j]) && \
+        ((tolerance < fabs(curr_N - prev_N) / curr_N) || \
+         (tolerance < fabs(curr_M - prev_M) / curr_M)))
+*/
+  while ((tolerance < fabs(curr_N - prev_N) / curr_N) || \
+         (tolerance < fabs(curr_M - prev_M) / curr_M))
   {
-    delta_x_prod_j = casc.x_prod_j - curr_casc.x_prod_j;
-    delta_x_tail_j = casc.x_tail_j - curr_casc.x_tail_j;
+    delta_x_prod_j = casc.mat_prod.comp[j] - curr_casc.mat_prod.comp[j];
+    delta_x_tail_j = casc.mat_tail.comp[j] - curr_casc.mat_tail.comp[j];
 
-    if (tolerance <= fabs(delta_x_prod_j))
+//    std::cout << "delta_x_prod_j = " << delta_x_prod_j << \
+//        "; delta_x_tail_j = " << delta_x_tail_j << \
+//        "\n";
+
+//    if (tolerance <= fabs(delta_x_prod_j)/curr_casc.mat_prod.comp[j])
+    if (tolerance < fabs(curr_N - prev_N) / curr_N)
     {
       // Make a new guess for N
       temp_curr_N = curr_N;
       temp_prev_N = prev_N;
       curr_N = curr_N + delta_x_prod_j*\
-              ((curr_N - prev_N)/(curr_casc.x_prod_j - prev_casc.x_prod_j));
+              ((curr_N - prev_N)/(curr_casc.mat_prod.comp[j] - prev_casc.mat_prod.comp[j]));
       prev_N = temp_curr_N;
 
       // If the new value of N is less than zero, reset.
@@ -291,13 +302,14 @@ pyne_enr::Cascade pyne_enr::_norm_comp_secant(pyne_enr::Cascade & casc, double t
         curr_N = (temp_curr_N + temp_prev_N)/2.0;
     };
 
-    if (tolerance <= fabs(delta_x_tail_j))
+//    if (tolerance <= fabs(delta_x_tail_j)/curr_casc.mat_tail.comp[j])
+    if (tolerance < fabs(curr_M - prev_M) / curr_M)
     {
       // Make a new guess for M
       temp_curr_M = curr_M;
       temp_prev_M = prev_M;
       curr_M = curr_M + delta_x_tail_j*\
-               ((curr_M - prev_M)/(curr_casc.x_tail_j - prev_casc.x_tail_j));
+               ((curr_M - prev_M)/(curr_casc.mat_tail.comp[j] - prev_casc.mat_tail.comp[j]));
       prev_M = temp_curr_M;
 
       // If the new value of M is less than zero, reset.
@@ -337,8 +349,26 @@ pyne_enr::Cascade pyne_enr::_norm_comp_secant(pyne_enr::Cascade & casc, double t
     curr_casc.M = curr_M;
     _recompute_nm(curr_casc, tolerance);
     _recompute_prod_tail_mats(curr_casc);
+
+/*
+  std::cout << "curr_N = " << curr_N;
+  std::cout << "; curr_M = " << curr_M;
+  std::cout << "\n";
+  std::cout << "prev_N = " << prev_N;
+  std::cout << "; prev_M = " << prev_M;
+  std::cout << "\n";
+  std::cout << "~~~~~~~~~~~~\n";
+*/
   };
 
+//  std::cout << "~~~~~~~~~~~~\n";
+  std::cout << "curr_N = " << curr_N;
+  std::cout << "; curr_M = " << curr_M;
+  std::cout << "\n";
+  std::cout << "prev_N = " << prev_N;
+  std::cout << "; prev_M = " << prev_M;
+  std::cout << "\n";
+  std::cout << "~~~~~~~~~~~~\n";
   return curr_casc;
 };
 
@@ -506,7 +536,7 @@ pyne_enr::Cascade pyne_enr::multicomponent(pyne_enr::Cascade & orig_casc, double
   pyne_enr::Cascade curr_casc = orig_casc;
 
   // xpn is the exponential index 
-  double ooe = log10(tolerance);
+  double ooe = -log10(tolerance);
   double xpn = 1.0;
 
   // Initialize previous point
@@ -528,13 +558,19 @@ pyne_enr::Cascade pyne_enr::multicomponent(pyne_enr::Cascade & orig_casc, double
     temp_casc = prev_casc;
     prev_casc = curr_casc;
     curr_casc = temp_casc;
-    //m = -1.0 * m;
-    //m_sign = -1.0 * m_sign;
+    m = -1.0 * m;
+    m_sign = -1.0 * m_sign;
   };
 
-  // Start iterations.    
+  // Start iterations.  
   while (xpn < ooe)
   {
+    std::cout << "curr_casc.MStar = " << curr_casc.Mstar << \
+                 ", " << curr_casc.l_t_per_feed << \
+                 ", " << prev_casc.l_t_per_feed << \
+                ", " << curr_casc.x_prod_j << \
+                "\n";
+
     // Check that parameters are still well-formed
     if (isnan(curr_casc.Mstar) || isnan(curr_casc.l_t_per_feed) || \
         isnan(prev_casc.Mstar) || isnan(prev_casc.l_t_per_feed))
