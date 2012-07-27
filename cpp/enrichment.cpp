@@ -268,8 +268,10 @@ pyne_enr::Cascade pyne_enr::_norm_comp_secant(pyne_enr::Cascade & casc, double t
   double temp_curr_N = 0.0;
   double temp_curr_M = 0.0;
 
-  double delta_x_prod_j = casc.mat_prod.comp[j] - curr_casc.mat_prod.comp[j];
-  double delta_x_tail_j = casc.mat_tail.comp[j] - curr_casc.mat_tail.comp[j];
+//  double delta_x_prod_j = casc.mat_prod.comp[j] - curr_casc.mat_prod.comp[j];
+//  double delta_x_tail_j = casc.mat_tail.comp[j] - curr_casc.mat_tail.comp[j];
+  double delta_x_prod_j = casc.x_prod_j - curr_casc.mat_prod.comp[j];
+  double delta_x_tail_j = casc.x_tail_j - curr_casc.mat_tail.comp[j];
 
 /*
   while ((tolerance < fabs(delta_x_prod_j) / curr_casc.mat_prod.comp[j]  || \
@@ -278,10 +280,14 @@ pyne_enr::Cascade pyne_enr::_norm_comp_secant(pyne_enr::Cascade & casc, double t
          (tolerance < fabs(curr_M - prev_M) / curr_M)))
 */
   while ((tolerance < fabs(curr_N - prev_N) / curr_N) || \
-         (tolerance < fabs(curr_M - prev_M) / curr_M))
+         (tolerance < fabs(curr_M - prev_M) / curr_M) && counter < 10000)
   {
-    delta_x_prod_j = casc.mat_prod.comp[j] - curr_casc.mat_prod.comp[j];
-    delta_x_tail_j = casc.mat_tail.comp[j] - curr_casc.mat_tail.comp[j];
+//    delta_x_prod_j = casc.mat_prod.comp[j] - curr_casc.mat_prod.comp[j];
+//    delta_x_tail_j = casc.mat_tail.comp[j] - curr_casc.mat_tail.comp[j];
+    delta_x_prod_j = casc.x_prod_j - curr_casc.mat_prod.comp[j];
+    delta_x_tail_j = casc.x_tail_j - curr_casc.mat_tail.comp[j];
+
+    //std::cout << "prod_comp = " << casc.x_prod_j << "\n";
 
 //    std::cout << "delta_x_prod_j = " << delta_x_prod_j << \
 //        "; delta_x_tail_j = " << delta_x_tail_j << \
@@ -334,6 +340,7 @@ pyne_enr::Cascade pyne_enr::_norm_comp_secant(pyne_enr::Cascade & casc, double t
     historyN.push_back(curr_N);
     historyM.push_back(curr_M);
 
+/*
     if (10000 < counter)
     {
       casc.N = curr_N;
@@ -341,6 +348,8 @@ pyne_enr::Cascade pyne_enr::_norm_comp_secant(pyne_enr::Cascade & casc, double t
       throw EnrichmentIterationLimit();
     }
     else
+*/
+
       counter += 1;
 
     // Calculate new isotopics for valid (N, M)        
@@ -362,6 +371,7 @@ pyne_enr::Cascade pyne_enr::_norm_comp_secant(pyne_enr::Cascade & casc, double t
   };
 
 //  std::cout << "~~~~~~~~~~~~\n";
+/*
   std::cout << "curr_N = " << curr_N;
   std::cout << "; curr_M = " << curr_M;
   std::cout << "\n";
@@ -369,6 +379,7 @@ pyne_enr::Cascade pyne_enr::_norm_comp_secant(pyne_enr::Cascade & casc, double t
   std::cout << "; prev_M = " << prev_M;
   std::cout << "\n";
   std::cout << "~~~~~~~~~~~~\n";
+*/
   return curr_casc;
 };
 
@@ -393,6 +404,8 @@ pyne_enr::Cascade pyne_enr::_norm_comp_other(pyne_enr::Cascade & orig_casc, doub
 
   while (tolerance < fabs(1.0 - mass_prod) && tolerance < fabs(1.0 - mass_tail) )
   {
+//    std::cout << "N = " << N << "; M = " << M << "\n";
+
     if (tolerance <= fabs(1.0 - mass_prod))
       N = N - (1.0 - mass_prod)/(1.0 + mass_prod);
 
@@ -452,8 +465,9 @@ double pyne_enr::_deltaU_i_OverG(pyne_enr::Cascade & casc, int i)
 pyne_enr::Cascade pyne_enr::ltot_per_feed(pyne_enr::Cascade & orig_casc, double tolerance)
 {
   // This function finds the total flow rate (L) over the feed flow rate (F)
-  bool comp_converged = false;
   pyne_enr::Cascade casc = orig_casc;
+/*
+  bool comp_converged = false;
 
   try
   {
@@ -478,6 +492,9 @@ pyne_enr::Cascade pyne_enr::ltot_per_feed(pyne_enr::Cascade & orig_casc, double 
 
   if (!comp_converged)
     return casc;
+*/
+
+  casc = _norm_comp_secant(casc, tolerance);
 
   int nuc;
   int j = casc.j;
