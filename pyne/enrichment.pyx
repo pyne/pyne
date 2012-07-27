@@ -410,6 +410,6 @@ def multicomponent(Cascade orig_casc, double tolerance=1.0E-7):
 
     """
     cdef Cascade casc = Cascade()
-    cdef cpp_enrichment.Cascade ccasc = cpp_enrichment.ltot_per_feed(orig_casc._inst[0], tolerance)
+    cdef cpp_enrichment.Cascade ccasc = cpp_enrichment.multicomponent(orig_casc._inst[0], tolerance)
     casc._inst[0] = ccasc
     return casc
