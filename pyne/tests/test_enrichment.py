@@ -127,22 +127,23 @@ def test_sample_feed():
             922380: 0.9863899989,
             })
     orig_casc.mat_feed = feed
-    casc = enr.multicomponent(orig_casc, tolerance=1e-9)
+    casc = enr.multicomponent(orig_casc)
+
+    print casc.N
+    print casc.M
+    print repr(casc.Mstar)
 
     assert_almost_equal(casc.mat_prod.comp[922350], 0.06,   5) 
     assert_almost_equal(casc.mat_tail.comp[922350], 0.0025, 5)
 
-    assert_almost_equal(casc.mat_feed.mass / 1.0,                 1.0, 5)
-    assert_almost_equal(casc.mat_prod.mass / 0.11652173913043479, 1.0, 5)
-    assert_almost_equal(casc.mat_tail.mass / 0.88347826086956527, 1.0, 5)
+    assert_almost_equal(casc.mat_feed.mass / 1.0,                 1.0)
+    assert_almost_equal(casc.mat_prod.mass / 0.11652173913043479, 1.0)
+    assert_almost_equal(casc.mat_tail.mass / 0.88347826086956527, 1.0)
 
-    assert_almost_equal(casc.N / 26.8646352802, 1.0, 1)
-    assert_almost_equal(casc.M / 16.6379009423, 1.0, 1)
+    assert_almost_equal(casc.N / 26.8646352802, 1.0, 5)
+    assert_almost_equal(casc.M / 16.6379009423, 1.0, 5)
 
-    assert_almost_equal(casc.Mstar / 236.577085, 1.0, 3)
-    print casc.N
-    print casc.M
-    print repr(casc.Mstar)
+    assert_almost_equal(casc.Mstar / 236.577085, 1.0, 5)
 
     assert_almost_equal(casc.l_t_per_feed / 357.388791749,  1.0, 5)
     assert_almost_equal(casc.swu_per_feed / 0.932280175218, 1.0, 5)
