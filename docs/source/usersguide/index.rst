@@ -15,4 +15,5 @@ essential aspects of using PyNE to do nuclear engineering.
     cccc
     ace
     origen22
+    enrichment
     stlconverters

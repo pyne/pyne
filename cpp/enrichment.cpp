@@ -400,6 +400,17 @@ pyne_enr::Cascade pyne_enr::multicomponent(pyne_enr::Cascade & orig_casc, \
   pyne_enr::Cascade prev_casc = orig_casc;
   pyne_enr::Cascade curr_casc = orig_casc;
 
+  // validate Mstar or pick new value
+  if ((orig_casc.Mstar < pyne::atomic_mass(orig_casc.j) &&  \
+       orig_casc.Mstar < pyne::atomic_mass(orig_casc.k)) || \
+      (orig_casc.Mstar > pyne::atomic_mass(orig_casc.j) &&  \
+       orig_casc.Mstar > pyne::atomic_mass(orig_casc.k)))
+  {
+    double ms = (pyne::atomic_mass(orig_casc.j) + pyne::atomic_mass(orig_casc.k)) / 2.0;
+    prev_casc.Mstar = ms;
+    curr_casc.Mstar = ms;
+  };
+
   // xpn is the exponential index 
   double ooe = -log10(tolerance);
   double xpn = 1.0;

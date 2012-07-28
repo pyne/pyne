@@ -84,4 +84,5 @@ file must be supplied by the user.  Additionally, the execution path for ORIGEN
     print "H2 Concentration: ", h2_concentration
 
 
-Further information on the naming module may be seen in the library reference :ref:`pyne_origen22`.
+Further information on the ORIGEN module may be seen in the library reference 
+:ref:`pyne_origen22`.
