@@ -20,6 +20,7 @@ The following modules and sub-packages are discussed:
     xs/index
     origen22
     serpent
+    enrichment
     utils
     stlconverters
     dbgen/index
