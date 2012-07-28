@@ -127,11 +127,7 @@ def test_sample_feed():
             922380: 0.9863899989,
             })
     orig_casc.mat_feed = feed
-    casc = enr.multicomponent(orig_casc, tolerance=1E-7)
-
-    print casc.N
-    print casc.M
-    print repr(casc.Mstar)
+    casc = enr.multicomponent(orig_casc, tolerance=1E-11)
 
     assert_almost_equal(casc.mat_prod.comp[922350], 0.06,   5) 
     assert_almost_equal(casc.mat_tail.comp[922350], 0.0025, 5)
