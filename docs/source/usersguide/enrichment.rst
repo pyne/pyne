@@ -7,7 +7,7 @@ Enrichment
 ======================
 Nuclide - and specifically uranium - enrichment is a common materials task. 
 This is the process by which the isotopic distribution is modified based on 
-the masses of the constituent nuclides.  On an industrial scale, this is ofen 
+the masses of the constituent nuclides.  On an industrial scale, this is often 
 done using gaseous diffusion or gas centrifuge cascades.
 
 The PyNE enrichment module provides a technology-independent way of solving 
@@ -33,8 +33,8 @@ The following cascade attributes must also be given as sane initial guesses:
 
 * :math:`M^*` (``Mstar``) - mass separation factor: initial guess for overall 
   mass separation for the cascade [236.5].
-* :math:`N` (``N``) - number of enriching stages: initial geuss [30.0].
-* :math:`M` (``M``) - number of stripping stages: initial geuss [10.0].
+* :math:`N` (``N``) - number of enriching stages: initial guess [30.0].
+* :math:`M` (``M``) - number of stripping stages: initial guess [10.0].
 
 For two component mixtures, i.e. those with only two nuclides in the feed material,
 enrichment is well defined and the optimal cascade setup may be solved for trivially.  
@@ -43,7 +43,7 @@ target enrichments alone (``x_feed_j``, ``x_prod_j``, ``x_tail_j``).  Because th
 mass balance equations themselves are under-determined extra constraints must be
 emplaced.  This turns out to be a minimization of the total material flow rate 
 through the cascade per unit of feed [WOOD]_ [GARZA]_.  This value, :math:`L_t/F`, 
-may be seen as a function of the mass separtation :math:`M^*` below.
+may be seen as a function of the mass separation :math:`M^*` below.
 
 .. figure:: mstar_vs_flowrate.png
     :align: center
@@ -52,14 +52,14 @@ may be seen as a function of the mass separtation :math:`M^*` below.
     factor between the jth and kth key components for a sample uranium cascade.*
     :download:`[ipython notebook] <mstar_vs_flowrate.ipynb>`
 
-It is easy to see how the flow rate is minimzed near the center of this bucket-shape in 
+It is easy to see how the flow rate is minimized near the center of this bucket-shape in 
 Figure 1.  Finding this minimum point is what the :func:`multicomponent`
 function does.  This optimization is the main function of the enrichment module.
 
 --------------
 Example of Use
 --------------
-The fundemental data structure of enrichment is the :class:`Cascade`.
+The fundamental data structure of enrichment is the :class:`Cascade`.
 Cascades are containers for attributes which define a technology-agnostic cascade.
 You may set up a cascade either by passing keyword arguments into the constructor
 or as attributes on the instance:
