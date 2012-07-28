@@ -1,13 +1,17 @@
 """PyNE nuclear data tests"""
+import os
 import math
 
-from unittest import TestCase
 import nose 
-
 from nose.tools import assert_equal, assert_not_equal, assert_raises, raises, assert_in
 
+import pyne
 from pyne import data
 import numpy as np
+
+# These tests require nuc_data
+if not os.path.isfile(pyne.nuc_data):
+    raise RuntimeError("Tests require nuc_data.h5.  Please run nuc_data_make.")
 
 def test_atomic_mass():
     o16 = [15.99491461957, 16.0]
