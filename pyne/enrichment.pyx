@@ -252,29 +252,14 @@ def default_uranium_cascade():
 
     .. code-block:: python
 
-        duc = pyne.enrichment.Cascade()
-
-        duc.alpha = 1.05
-        duc.Mstar = 236.5
-
-        duc.j = 922350
-        duc.k = 922380
-
-        duc.N = 30.0
-        duc.M = 10.0
-
-        duc.x_feedeed_j = 0.0072
-        duc.x_prod_j: = 0.05
-        duc.x_tail_j = 0.0025
-
-        duc.mat_feed = pyne.material.Material({922340: 0.000055, 922350: 0.00720, 
-                                    922380: 0.992745}, 1.0, "Natural Uranium", 1.0)
-        duc.mat_prod = pyne.material.Material()
-        duc.mat_tail = pyne.material.Material()
-
-        duc.l_t_per_feed = 0.0
-        duc.swu_per_feed = 0.0
-        duc.swu_per_prod = 0.0
+        duc = pyne.enrichment.Cascade(N=30.0, M=10.0, alpha=1.05, Mstar=236.5, 
+                j=922350, k=922380, x_feed_j=0.0072, x_prod_j=0.05, x_tail_j=0.0025,
+                l_t_per_feed=0.0, swu_per_feed=0.0, swu_per_prod=0.0, 
+                mat_feed=pyne.material.Material({922340: 5.5e-05, 922350: 0.0072, 
+                                                 922380: 0.992745}, 1.0, 
+                                                'Natural Uranium', 1.0), 
+                mat_prod=pyne.material.Material({}, -1.0, '', -1.0), 
+                mat_tail=pyne.material.Material({}, -1.0, '', -1.0))
 
     Returns
     -------
