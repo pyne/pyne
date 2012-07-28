@@ -1,4 +1,11 @@
-"""Python wrapper for enrichment."""
+"""The enrichment module contains tools for defining and manipulating 
+enrichment cascades.  The Cascade class is a simple container for storing 
+parameters which define and enrichment setup.  These include feed, product, 
+and tail materials, target enrichments, and separation factors.  The main 
+functions in this modules computes the total flow rate and separation factors
+from an initial cascade.  Other helper function compute relative flow rates 
+and nuclide-specific separation factors.
+"""
 # Cython imports
 from cython cimport pointer
 from cython.operator cimport dereference as deref
@@ -31,11 +38,29 @@ cdef class Cascade:
     are passed into and out of many enrichment functions.  
     """
 
-    def __cinit__(self):
+    def __cinit__(self, **kwargs):
         self._inst = new cpp_enrichment.Cascade()
+
+    def __init__(self, **kwargs):
+        """__init__(self, **kwargs)
+
+        Parameters
+        ----------
+        kwargs : optional
+            Any keyword argument which is supplied is applied as an attribute
+            to this instance.
+        """
+        for key, val in kwargs.items():
+            setattr(self, key, val)
 
     def __dealloc__(self):
         del self._inst
+
+    def __repr__(self):
+        attrs = [a for a in dir(self) if not a.startswith('_')]
+        attr_reps = [a + '=' + repr(getattr(self, a)) for a in attrs]
+        r = self.__class__.__name__ + '(' + ', '.join(attr_reps) + ')'
+        return r
 
     #
     # Class Attributes
@@ -223,7 +248,9 @@ def default_uranium_cascade():
     """Returns a copy of a default uranium enrichment cascade, which has 
     sensible initial values for this very common case.
 
-    The values of this instance of Cascade are as follows::
+    The values of this instance of Cascade are as follows:
+
+    .. code-block:: python
 
         duc = pyne.enrichment.Cascade()
 
@@ -262,7 +289,8 @@ def default_uranium_cascade():
 
 
 def prod_per_feed(double x_feed, double x_prod, double x_tail):
-    """Calculates the product over feed enrichment ratio.
+    """prod_per_feed(x_feed, x_prod, x_tail)
+    Calculates the product over feed enrichment ratio.
 
     .. math::
 
@@ -287,7 +315,8 @@ def prod_per_feed(double x_feed, double x_prod, double x_tail):
 
 
 def tail_per_feed(double x_feed, double x_prod, double x_tail):
-    """Calculates the tails over feed enrichment ratio.
+    """tail_per_feed(x_feed, x_prod, x_tail)
+    Calculates the tails over feed enrichment ratio.
 
     .. math::
 
@@ -312,7 +341,8 @@ def tail_per_feed(double x_feed, double x_prod, double x_tail):
 
 
 def tail_per_prod(double x_feed, double x_prod, double x_tail):
-    """Calculates the tails over product enrichment ratio.
+    """tail_per_prod(x_feed, x_prod, x_tail)
+    Calculates the tails over product enrichment ratio.
 
     .. math::
 
@@ -337,7 +367,8 @@ def tail_per_prod(double x_feed, double x_prod, double x_tail):
 
 
 def alphastar_i(double alpha, double Mstar, double M_i):
-    """Calculates the stage separation factor for a nuclide i of atomic mass M_i.
+    """alphastar_i(alpha, Mstar, M_i)
+    Calculates the stage separation factor for a nuclide i of atomic mass :math:`M_i`.
 
     .. math::
 
@@ -362,7 +393,8 @@ def alphastar_i(double alpha, double Mstar, double M_i):
 
 
 def ltot_per_feed(Cascade orig_casc, double tolerance=1.0E-7, int max_iter=100):
-    """Calculates the total flow rate (:math:`L_t`) over the feed flow 
+    """ltot_per_feed(orig_casc, tolerance=1.0E-7, max_iter=100)
+    Calculates the total flow rate (:math:`L_t`) over the feed flow 
     rate (:math:`F`).
 
     Parameters
@@ -389,12 +421,13 @@ def ltot_per_feed(Cascade orig_casc, double tolerance=1.0E-7, int max_iter=100):
 
 
 def multicomponent(Cascade orig_casc, double tolerance=1.0E-7, int max_iter=100):
-    """Calculates the optimal value of Mstar by minimzing the seperative power.
+    """multicomponent(orig_casc, tolerance=1.0E-7, max_iter=100)
+    Calculates the optimal value of Mstar by minimzing the seperative power.
     The minimizing the seperative power is equivelent to minimizing :math:`L_t/F`,
     or the total flow rate for the cascade divided by the feed flow rate. 
     Note that orig_casc.Mstar represents an intial guess at what Mstar might be.
-    This function is appropriate for multicomponent (more than 2 nuclides) feed
-    materials.
+    This function is appropriate for feed materials with more than 2 nuclides 
+    (i.e. multicomponent).
 
     Parameters
     ----------
