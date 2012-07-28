@@ -247,14 +247,14 @@ pyne_enr::Cascade pyne_enr::_norm_comp_secant(pyne_enr::Cascade & casc, double t
   _recompute_nm(prev_casc, tolerance);
   _recompute_prod_tail_mats(prev_casc);
   historyN.push_back(prev_casc.N);
-  historyN.push_back(prev_casc.M);
+  historyM.push_back(prev_casc.M);
 
 
   // Initialize current point
   _recompute_nm(curr_casc, tolerance);
   _recompute_prod_tail_mats(curr_casc);
   historyN.push_back(curr_casc.N);
-  historyN.push_back(curr_casc.M);
+  historyM.push_back(curr_casc.M);
 
   // My guess is that what we are checkin here is that the isotopic compositions
   // make sense with abs(1.0 - masscurr_P) rather than calculatign the 
@@ -273,14 +273,17 @@ pyne_enr::Cascade pyne_enr::_norm_comp_secant(pyne_enr::Cascade & casc, double t
   double delta_x_prod_j = casc.x_prod_j - curr_casc.mat_prod.comp[j];
   double delta_x_tail_j = casc.x_tail_j - curr_casc.mat_tail.comp[j];
 
+  while ((tolerance < fabs(delta_x_prod_j) / curr_casc.mat_prod.comp[j]  || \
+          tolerance < fabs(delta_x_tail_j) / curr_casc.mat_tail.comp[j]) && \
+          counter < 10000)
 /*
   while ((tolerance < fabs(delta_x_prod_j) / curr_casc.mat_prod.comp[j]  || \
           tolerance < fabs(delta_x_tail_j) / curr_casc.mat_tail.comp[j]) && \
         ((tolerance < fabs(curr_N - prev_N) / curr_N) || \
          (tolerance < fabs(curr_M - prev_M) / curr_M)))
-*/
   while ((tolerance < fabs(curr_N - prev_N) / curr_N) || \
          (tolerance < fabs(curr_M - prev_M) / curr_M) && counter < 10000)
+*/
   {
 //    delta_x_prod_j = casc.mat_prod.comp[j] - curr_casc.mat_prod.comp[j];
 //    delta_x_tail_j = casc.mat_tail.comp[j] - curr_casc.mat_tail.comp[j];
@@ -293,8 +296,8 @@ pyne_enr::Cascade pyne_enr::_norm_comp_secant(pyne_enr::Cascade & casc, double t
 //        "; delta_x_tail_j = " << delta_x_tail_j << \
 //        "\n";
 
-//    if (tolerance <= fabs(delta_x_prod_j)/curr_casc.mat_prod.comp[j])
-    if (tolerance < fabs(curr_N - prev_N) / curr_N)
+//    if (tolerance < fabs(curr_N - prev_N) / curr_N)
+    if (tolerance <= fabs(delta_x_prod_j)/curr_casc.mat_prod.comp[j])
     {
       // Make a new guess for N
       temp_curr_N = curr_N;
@@ -308,8 +311,8 @@ pyne_enr::Cascade pyne_enr::_norm_comp_secant(pyne_enr::Cascade & casc, double t
         curr_N = (temp_curr_N + temp_prev_N)/2.0;
     };
 
-//    if (tolerance <= fabs(delta_x_tail_j)/curr_casc.mat_tail.comp[j])
-    if (tolerance < fabs(curr_M - prev_M) / curr_M)
+//    if (tolerance < fabs(curr_M - prev_M) / curr_M)
+    if (tolerance <= fabs(delta_x_tail_j)/curr_casc.mat_tail.comp[j])
     {
       // Make a new guess for M
       temp_curr_M = curr_M;
@@ -325,12 +328,21 @@ pyne_enr::Cascade pyne_enr::_norm_comp_secant(pyne_enr::Cascade & casc, double t
 
     // Check for infinite loops
     for (h = 0; h < historyN.size(); h++)
+    {
       if (historyN[h] == curr_N && historyM[h] == curr_M)
       {
-        casc.N = curr_N;
-        casc.M = curr_M;
-        throw EnrichmentInfiniteLoopError();
+        //std::cout << "here\n";
+        curr_N = curr_N + delta_x_prod_j*\
+              ((curr_N - prev_N)/(curr_casc.mat_prod.comp[j] - prev_casc.mat_prod.comp[j]));
+        curr_M = curr_M + delta_x_tail_j*\
+               ((curr_M - prev_M)/(curr_casc.mat_tail.comp[j] - prev_casc.mat_tail.comp[j]));;
+        //counter -= 1;
+        //casc.N = curr_N;
+        //casc.M = curr_M;
+        //throw EnrichmentInfiniteLoopError();
+        //break;
       };
+    };
 
     if (150 <= historyN.size())
     {
@@ -339,7 +351,8 @@ pyne_enr::Cascade pyne_enr::_norm_comp_secant(pyne_enr::Cascade & casc, double t
     };
     historyN.push_back(curr_N);
     historyM.push_back(curr_M);
-
+/*
+*/
 /*
     if (10000 < counter)
     {
@@ -366,6 +379,9 @@ pyne_enr::Cascade pyne_enr::_norm_comp_secant(pyne_enr::Cascade & casc, double t
   std::cout << "prev_N = " << prev_N;
   std::cout << "; prev_M = " << prev_M;
   std::cout << "\n";
+  std::cout << "xpj = " << curr_casc.mat_prod.comp[j];
+  std::cout << "; xtj = " << curr_casc.mat_tail.comp[j];
+  std::cout << "\n";
   std::cout << "~~~~~~~~~~~~\n";
 */
   };
@@ -378,7 +394,11 @@ pyne_enr::Cascade pyne_enr::_norm_comp_secant(pyne_enr::Cascade & casc, double t
   std::cout << "prev_N = " << prev_N;
   std::cout << "; prev_M = " << prev_M;
   std::cout << "\n";
+  std::cout << "xpj = " << curr_casc.mat_prod.comp[j];
+  std::cout << "; xtj = " << curr_casc.mat_tail.comp[j];
+  std::cout << "\n";
   std::cout << "~~~~~~~~~~~~\n";
+  std::cout << "counter = " << counter << "\n";
 */
   return curr_casc;
 };
@@ -404,8 +424,6 @@ pyne_enr::Cascade pyne_enr::_norm_comp_other(pyne_enr::Cascade & orig_casc, doub
 
   while (tolerance < fabs(1.0 - mass_prod) && tolerance < fabs(1.0 - mass_tail) )
   {
-//    std::cout << "N = " << N << "; M = " << M << "\n";
-
     if (tolerance <= fabs(1.0 - mass_prod))
       N = N - (1.0 - mass_prod)/(1.0 + mass_prod);
 
@@ -560,7 +578,8 @@ pyne_enr::Cascade pyne_enr::multicomponent(pyne_enr::Cascade & orig_casc, double
   prev_casc = ltot_per_feed(prev_casc, tolerance);
 
   // Initialize curr_ent point
-  curr_casc.Mstar += 0.1;
+//  curr_casc.Mstar += 0.1;
+  curr_casc.Mstar = (pyne::atomic_mass(curr_casc.j) + curr_casc.Mstar) / 2.0;
   curr_casc = ltot_per_feed(curr_casc, tolerance);
 
   double m = pyne::slope(curr_casc.Mstar, curr_casc.l_t_per_feed, \
@@ -570,24 +589,22 @@ pyne_enr::Cascade pyne_enr::multicomponent(pyne_enr::Cascade & orig_casc, double
   double temp_m;
   double temp_m_sign;
 
+/*
   if (0.0 < m_sign)
   {
     temp_casc = prev_casc;
     prev_casc = curr_casc;
     curr_casc = temp_casc;
-    m = -1.0 * m;
-    m_sign = -1.0 * m_sign;
+    //m = -1.0 * m;
+    //m_sign = -1.0 * m_sign;
   };
+*/
 
   // Start iterations.  
-  while (xpn < ooe)
+//  while (xpn < ooe)
+//  while (m_sign != 0.0)
+  while (tolerance < fabs(curr_casc.l_t_per_feed - prev_casc.l_t_per_feed) / curr_casc.l_t_per_feed)
   {
-    std::cout << "curr_casc.MStar = " << curr_casc.Mstar << \
-                 ", " << curr_casc.l_t_per_feed << \
-                 ", " << prev_casc.l_t_per_feed << \
-                ", " << curr_casc.x_prod_j << \
-                "\n";
-
     // Check that parameters are still well-formed
     if (isnan(curr_casc.Mstar) || isnan(curr_casc.l_t_per_feed) || \
         isnan(prev_casc.Mstar) || isnan(prev_casc.l_t_per_feed))
@@ -598,6 +615,17 @@ pyne_enr::Cascade pyne_enr::multicomponent(pyne_enr::Cascade & orig_casc, double
     curr_casc.Mstar = curr_casc.Mstar - (m_sign * pow(10.0, -xpn));
     curr_casc = ltot_per_feed(curr_casc, tolerance);
 
+/*
+    temp_m = pyne::slope(curr_casc.Mstar, curr_casc.l_t_per_feed, \
+                         prev_casc.Mstar, prev_casc.l_t_per_feed);
+    temp_m_sign = temp_m / fabs(temp_m);
+
+    if ((prev_casc.l_t_per_feed < curr_casc.l_t_per_feed) && (m_sign != temp_m_sign))
+        xpn = xpn + 1;
+
+    m = temp_m;
+    m_sign = temp_m_sign;
+*/
     if (prev_casc.l_t_per_feed < curr_casc.l_t_per_feed)
     {
       temp_casc = curr_casc;
@@ -632,8 +660,21 @@ pyne_enr::Cascade pyne_enr::multicomponent(pyne_enr::Cascade & orig_casc, double
         };
 
         m_sign = temp_m / fabs(temp_m);
+        m = temp_m;
+        prev_casc = curr_casc;
+        curr_casc = temp_casc;
       };
+
+    std::cout << "curr_casc.MStar = " << curr_casc.Mstar << \
+                 ", " << curr_casc.Mstar - prev_casc.Mstar << \
+                 ", " << curr_casc.l_t_per_feed << \
+                 ", " << prev_casc.l_t_per_feed << \
+                ", " << m_sign << \
+                "\n";
+
     };
+    /*
+    */
   };
 
   return curr_casc;
