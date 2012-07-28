@@ -40,14 +40,11 @@ cdef extern from "enrichment.h" namespace "pyne::enrichment":
     double tail_per_prod(double, double, double) except +
 
     double alphastar_i(double, double, double) except +
-    double Ei(double, double) except +
-    double Si(double, double) except +
 
     void _recompute_nm(Cascade &, double) except +
     void _recompute_prod_tail_mats(Cascade &) except +
-    Cascade _norm_comp_secant(Cascade &, double) except +
-    Cascade _norm_comp_other(Cascade &, double) except +
-
+    Cascade _norm_comp_secant(Cascade &, double, int) except +
     double _deltaU_i_OverG(Cascade &, int) except +
-    Cascade ltot_per_feed(Cascade &, double) except +
-    Cascade multicomponent(Cascade &, double) except +
+
+    Cascade ltot_per_feed(Cascade &, double, int) except +
+    Cascade multicomponent(Cascade &, double, int) except +
