@@ -58,16 +58,9 @@ namespace enrichment {
 
   double alphastar_i(double, double, double);
 
-  // FIXME: I forgot what these mean physically,
-  // and they are unused in the rest of the file.
-  // removing until meaning can be remembered!
-  //double Ei(double, double);
-  //double Si(double, double);
-
   void _recompute_nm(Cascade &, double=1.0E-7);
   void _recompute_prod_tail_mats(Cascade &);
   Cascade _norm_comp_secant(Cascade &, double=1.0E-7);
-  Cascade _norm_comp_other(Cascade &, double=1.0E-5);
 
   double _deltaU_i_OverG(Cascade &, int);
   Cascade ltot_per_feed(Cascade &, double=1.0E-7);
