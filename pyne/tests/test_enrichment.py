@@ -69,6 +69,10 @@ def test_M():
     casc.M = 10.0
     assert_equal(casc.M, 10.0)
 
+def test_x_feed_j():
+    casc = enr.Cascade(x_feed_j=0.0072)
+    assert_equal(casc.x_feed_j, 0.0072)
+
 def test_x_prod_j():
     casc = enr.Cascade()
     casc.x_prod_j = 0.05
