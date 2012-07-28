@@ -339,6 +339,9 @@ exts.append(cpp_ext("pyne.lib.libpyne_data", ['data.cpp'], ['pyne', 'pyne_nucnam
 # material
 exts.append(cpp_ext("pyne.lib.libpyne_material", ['material.cpp'], ['pyne', 'pyne_nucname', 'pyne_data'], True))
 
+# enrichment
+exts.append(cpp_ext("pyne.lib.libpyne_enrichment", ['enrichment.cpp'], ['pyne_material',]))
+
 
 # Python extension modules
 # STL converters
@@ -366,6 +369,8 @@ exts.append(cpp_ext("pyne.ace", ['ace.pyx'], ['pyne', 'pyne_nucname']))
 # xs.models
 exts.append(cpp_ext("pyne.xs.models", ['xs/models.pyx'], ['pyne', 'pyne_nucname']))
 
+# material
+exts.append(cpp_ext("pyne.enrichment", ['enrichment.pyx'], ['pyne_enrichment', 'pyne_material']))
 
 
 ##########################
