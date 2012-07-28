@@ -42,7 +42,14 @@ However, for more than two components, the cascade cannot be determined from the
 target enrichments alone (``x_feed_j``, ``x_prod_j``, ``x_tail_j``).  Because the 
 mass balance equations themselves are under-determined extra constraints must be
 emplaced.  This turns out to be a minimization of the total material flow rate 
-through the cascade [WOOD]_ [GARZA]_.
+through the cascade per unit of feed [WOOD]_ [GARZA]_.  This value, :math:`L_t/F`, 
+may be seen as a function of the mass separtation :math:`M^*` below.
+
+.. figure:: mstar_vs_flowrate.png
+    :align: center
+
+    **Figure 1:** *The normalized total flow rate as a function of the mass separation 
+    factor between the jth and kth key components for a sample uranium cascade.*
 
 --------------
 Example of Use
