@@ -51,6 +51,10 @@ may be seen as a function of the mass separtation :math:`M^*` below.
     **Figure 1:** *The normalized total flow rate as a function of the mass separation 
     factor between the jth and kth key components for a sample uranium cascade.*
 
+It is easy to see how the flow rate is minimzed near the center of this bucket-shape in 
+Figure 1.  Finding this minimum point is what the :func:`pyne.enrichment.multicomponent`
+function does.  This optimization is the main function of the enrichment module.
+
 --------------
 Example of Use
 --------------
