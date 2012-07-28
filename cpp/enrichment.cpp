@@ -100,21 +100,6 @@ double pyne_enr::alphastar_i(double alpha, double Mstar, double M_i)
   return pow(alpha, (Mstar - M_i));
 }
 
-// FIXME: I forgot what these mean physically,     
-// and they are unused in the rest of the file.
-// removing until meaning can be remembered!
-// LATER: I think I embedded these in a loop 
-// in _recompute_nm() for speed.
-//double pyne_enr::Ei(double astar_i, double N)
-//{
-//  return ((astar_i - 1.0) / (1.0 - pow(astar_i, -N)));
-//};
-//
-//
-//double pyne_enr::Si(double astar_i, double M)
-//{
-//  return ((astar_i - 1.0)/(pow(astar_i, M+1) - 1.0));
-//};
 
 void pyne_enr::_recompute_nm(pyne_enr::Cascade & casc, double tolerance)
 {
@@ -335,64 +320,6 @@ pyne_enr::Cascade pyne_enr::_norm_comp_secant(pyne_enr::Cascade & casc, double t
 };
 
 
-// I have serious doubts that this works...
-pyne_enr::Cascade pyne_enr::_norm_comp_other(pyne_enr::Cascade & orig_casc, double tolerance)
-{
-  pyne_enr::Cascade casc = orig_casc;
-
-  // Is the history of N and M that has been input
-  uint h;
-  std::vector<double> historyN;
-  std::vector<double> historyM;
-
-  // Initial point
-  double N = casc.N;
-  double M = casc.M;
-  _recompute_nm(casc, tolerance);
-  _recompute_prod_tail_mats(casc);
-  double mass_prod = casc.mat_prod.mass;
-  double mass_tail = casc.mat_tail.mass;
-
-  while (tolerance < fabs(1.0 - mass_prod) && tolerance < fabs(1.0 - mass_tail) )
-  {
-    if (tolerance <= fabs(1.0 - mass_prod))
-      N = N - (1.0 - mass_prod)/(1.0 + mass_prod);
-
-    if (tolerance <= fabs(1.0 - mass_tail))
-      M = M + (1.0 - mass_tail)/(1.0 + mass_tail);
-
-    // Note this infinite loop checker does not raise an exception
-    // Thus the exception cannot be caught by a try statement and then another
-    // root finding Comp2Unity method tried.
-    // This simply leaves N and M in whatever their curr_ent state is at the time.
-    // This is fine for M* = 235.1 for U, since M* won't be optimized here as an outlier 
-    // and since it is looping it is probably signalling around some actual value.
-
-    // Check for infinite loops
-    for (h = 0; h < historyN.size(); h++)
-      if (historyN[h] == N && historyM[h] == M)
-        return casc;
-
-    if (150 <= historyN.size())
-    {
-      historyN.erase(historyN.begin());
-      historyM.erase(historyM.begin());
-    };
-    historyN.push_back(N);
-    historyM.push_back(M);
-
-    // Calculate new masses
-    casc.N = N;
-    casc.M = M;
-    _recompute_nm(casc, tolerance);
-    _recompute_prod_tail_mats(casc);
-    mass_prod = casc.mat_prod.mass;
-    mass_tail = casc.mat_tail.mass;
-  };
-
-  return casc;
-};
-
 
 double pyne_enr::_deltaU_i_OverG(pyne_enr::Cascade & casc, int i)
 {
@@ -452,10 +379,9 @@ pyne_enr::Cascade pyne_enr::ltot_per_feed(pyne_enr::Cascade & orig_casc, double 
   casc.swu_per_feed = -1 * swupf;       // This is the SWU for 1 kg of Feed material.
   casc.swu_per_prod = -1 * swupf / ppf;	// This is the SWU for 1 kg of Product material.
 
-  // Assign Isotopic streams the proper masses.
+  // Assign isotopic streams the proper masses.
   casc.mat_prod.mass = casc.mat_feed.mass * ppf;
   casc.mat_tail.mass = casc.mat_feed.mass * tpf;
-
   return casc;
 };
 
