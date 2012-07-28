@@ -50,74 +50,61 @@ may be seen as a function of the mass separtation :math:`M^*` below.
 
     **Figure 1:** *The normalized total flow rate as a function of the mass separation 
     factor between the jth and kth key components for a sample uranium cascade.*
+    :download:`[ipython notebook] <mstar_vs_flowrate.ipynb>`
 
 It is easy to see how the flow rate is minimzed near the center of this bucket-shape in 
-Figure 1.  Finding this minimum point is what the :func:`pyne.enrichment.multicomponent`
+Figure 1.  Finding this minimum point is what the :func:`multicomponent`
 function does.  This optimization is the main function of the enrichment module.
 
 --------------
 Example of Use
 --------------
-This example irradiates 1 kg of water for 1000 days in ORIGEN 2.2, increasing the 
-capture cross section of Hydrogen-1 by 10% each time.  The Hydrogen-2 concentration 
-is then gathered and displayed. This example may be found in the source tree as 
-:file:`examples/origen22_h1_xs.py`. Note that in this example, the ``'BASE_TAPE9.INP'``
-file must be supplied by the user.  Additionally, the execution path for ORIGEN
-(here ``o2_therm_linux.exe``) may differ by system and platform::
+The fundemental data structure of enrichment is the :class:`Cascade`.
+Cascades are containers for attributes which define a technology-agnostic cascade.
+You may set up a cascade either by passing keyword arguments into the constructor
+or as attributes on the instance:
 
-    from subprocess import check_call
+.. code-block:: python
 
-    from pyne import origen22
-    from pyne.api import Material
+    import pyne.enrichment as enr
+    from pyne.material import Material
 
+    casc = enr.Cascade(x_prod_j=0.06)
+    feed = Material({
+            922320: 1.1 * (10.0**-9),
+            922340: 0.00021,
+            922350: 0.0092,
+            922360: 0.0042,
+            922380: 0.9863899989,
+            })
+    casc.mat_feed = feed
 
-    # 1 kg of water
-    water = Material()
-    water.from_atom_frac({'H1': 2.0, 'O16': 1.0})
-    water.mass = 1E3
+A default uranium enrichment cascade is provided as a quick way to set up a basic
+Cascade instance, which you may modify later:
 
-    # Make a tape4 file for water
-    origen22.write_tape4(water)
+.. code-block:: python
 
-    # Make a tape 5 for this calculation
-    #   * Just output the concentration tables
-    #   * The cross-section library numbers must 
-    #     the library / deck numbers in tape9 
-    origen22.write_tape5_irradiation("IRF", 1000.0, 4E14,
-                                     xsfpy_nlb=(381, 382, 383),
-                                     out_table_num=[5])
+    orig_casc = enr.default_uranium_cascade()
+    orig_casc.x_prod_j = 0.06
+    orig_casc.mat_feed = feed
 
-    # Grab a base tape9 from which we will overlay new values
-    # This must be supplied by the user
-    base_tape9 = origen22.parse_tape9("BASE_TAPE9.INP")
+This may then be fed into the :func:`multicomponent` function to produce an optimized
+version of the original cascade.  The product and tails material streams have been
+computed on the optimized version:
 
-    base_h1_xs = base_tape9[381]['sigma_gamma'][10010]
+.. code-block:: python
 
-    # Init a dumb overlay tape9
-    overlay_tape9 = {381: {'_type': 'xsfpy',
-                           '_subtype': 'activation_products',
-                           'sigma_gamma': {10010: base_h1_xs},
-                           }
-                    }
-
-
-    # Run origen, increasing the cross section each time.
-    h2_concentration = []
-    for i in range(11):
-        overlay_tape9[381]['sigma_gamma'][10010] = (1.0 + i*0.1) * base_h1_xs
-
-        # Merge the base and overlay, and write out
-        new_tape9 = origen22.merge_tape9([overlay_tape9, base_tape9])
-        origen22.write_tape9(new_tape9, 'TAPE9.INP')
-
-        # Run and parse origen output
-        rtn = check_call(['o2_therm_linux.exe'])
-        tape6 = origen22.parse_tape6('TAPE6.OUT')
-        h2_concentration.append(tape6['table_5']['summary']['activation_products']['H2'][-1])
-
-    print
-    print "H2 Concentration: ", h2_concentration
-
+    >>> opt_casc = enr.multicomponent(orig_casc, tolerance=1E-11)
+    >>> print opt_casc.mat_prod
+    Material: 
+    mass = 0.11652173913
+    atoms per molecule = -1.0
+    -------------------------
+    U232   9.25100048726e-09
+    U234   0.00160553384204
+    U235   0.0600000000115
+    U236   0.0193252508798
+    U238   0.919069206016
 
 Further information on the enrichment module may be seen in the library reference 
 :ref:`pyne_enrichment`.
