@@ -16,6 +16,8 @@ import struct
 import math 
 import os
 
+import mcnpcard
+
 from binaryreader import _BinaryReader, _FortranRecord
 
 class Inp(object):
@@ -70,44 +72,97 @@ class Inp(object):
             The path where the input file should be written.
         inpextension : str
             The filename extension for the input file.
-        """
 
+        """
+        # Filename extension for input files.
         self.inpextension = inpextension
+        # Filename for input file.
         self.fname = fname
+        # Append slash if user does not provide one.
         if len(path) > 0 and path[-1] != os.sep:
             path += os.sep
         self.path = path + self.fname + os.sep
         if not os.path.exists(self.path):
             os.mkdir(self.path)
         self.f = open(self.path + fname + inpextension, 'w')
+        # The following OrderedDicts are "indexed" using a human-readable name
+        # for the card that the user chooses.
+        # Stores the cell card objects. Must be kept in order.
         self.cells = collections.OrderedDict()
+        # Stores the surface card objects; must be kept in order.
         self.surfaces = collections.OrderedDict()
+        # Stores the material card objects; must be kept in order.
         self.materials = collections.OrderedDict()
+        # TODO This may be treated more generally as a data card.
         self.scattering_laws = collections.OrderedDict()
+        # Holds source card; assumes there is only one source def.
         self.source = None
+        # Criticality source points, e.g. "KSRC"
         self.source_points = None
+        # All data cards. May be printed in any order.
         self.miscdata = []
+        # Tally cards.
         self.tallies = collections.OrderedDict()
+        # Surface, cell, and material card counters.
         self.surfaceCard = 0
         self.cellCard = 0
         self.matCard = 0
+        # TODO cell flux tally number (F4 tally)
         self.tally_cellflux_card = 4
+        # The following are written to the top of the input file as comments.
         self.title = title
         self.description = description
         self.author = author
         self.modifications = modifications
 
     def _next_mat_card(self):
+        """Increments the material card counter.
+        TODO It is assumed taht the the interval for material card indices is
+        100. There is no need for this though; it could be 1.
+
+        """
         self.matCard = self.matCard + 100
 
     def set_title(self, title):
+        """Sets the title of the input file. The title is written to the top of
+        the input as a comment.
+        The user may call this method, or simply supply the title through the
+        constructor keyword argument.
+
+        Parameters
+        ---------
+        title : str
+            The title of the input file, which is written to the top of the
+            input file as a comment.
+        """
         self.title = title
 
     def set_description(self, description):
-        self.description
+        """Sets the description of the input file, which is written to the top
+        of the input as a comment. The description is expected to be several
+        lines.
+        The user may call this method, or simply supply the title through the
+        constructor keyword argument.
+
+        Parameters
+        ----------
+        description : str
+            Description for the input file.
+
+        """
+        self.description = description
 
     def add_cell(self, name, matName, density, densityUnits, inSurfaceNames,
             outSurfaceNames, imp, temp=None, vol=None):
+        """
+
+        Parameters
+        ----------
+
+        Examples
+        --------
+
+        """
         # TODO only assign if no errors. check uniqueness of name
         # TODO clean up rror checking; make it consistent
         #try:
