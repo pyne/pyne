@@ -37,7 +37,7 @@ class Inp(object):
     of a number of ordered dictionaries in this class. write() then uses these
     ordered dictionaries to print the informaiton contained in them.
 
-    Similar to input to Serpent, this class attempts to rely on "keywords",
+    Similar to input to Serpent, this class attempts to rely on "names",
     rather than just numbers, to relate cell cards to surface and material
     cards. This means that all surfaces and materials have string names, and a
     cell card is created by referring to these names.
@@ -154,13 +154,53 @@ class Inp(object):
 
     def add_cell(self, name, matName, density, densityUnits, inSurfaceNames,
             outSurfaceNames, imp, temp=None, vol=None):
-        """
+        """Create a cell card given a material name, density, surface names,
+        and other inputs. The class manages finding the corresponding material
+        and surface card numbers for the user. The materials and surfaces for
+        this cell must have already been added.
 
         Parameters
         ----------
+        name : str
+            Name for the cell (e.g. "fuelpin", "shield").
+        matName : str
+            Name of the material card to associate with this cell. The material
+            must have been created already (e.g. "UO2").
+        density : float
+            Material density for the cell.
+            Units specified by densityUnits input.
+        densityUnits : str
+            Either 'g/cm^3' or 'atoms/b/cm'.
+        inSurfaceNames : list, str
+            Names of the surfaces that have a negative sense for this cell
+            (e.g. "pinboundary").
+        outSurfaceNames : list, str
+            Names of the surfaces that have a positive sense for this cell
+            (e.g. "unitcellboundary").
+        imp : int
+            Importance of the cell for neutrons, for variance reduction.
+        temp : float, optional
+            The temperature of the cell, if the user wants to invoke the free
+            gas thermal treatment for a temperature other than room
+            temperature.
+            Units of Kelvin.
+        vol : float, optional
+            If the user wants to override MCNPX's automatic calculation of cell
+            volume, that volume can be provided here.
+            Units of cm^3 (may not matter, depending on problem).
 
         Examples
         --------
+        To create a fuel pin using the "UO2" material, assuming "pin" is a
+        cylindrical surface::
+
+            inp.add_cell("myfirstcell", "UO2", 11.5, 'g/cm^3', ["pin",], [], 
+                    1, 600)
+
+        TODO Only neutron importances can be specified so far.
+        TODO Change in/outSurface* to neg/posSurface*.
+        TODO Change docstrings to the kwarg/optional convention used elsewhere
+        in PyNE.
 
         """
         # TODO only assign if no errors. check uniqueness of name
