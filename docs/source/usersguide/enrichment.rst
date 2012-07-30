@@ -37,7 +37,8 @@ The following cascade attributes must also be given as sane initial guesses:
 * :math:`M` (``M``) - number of stripping stages: initial guess [10.0].
 
 For two component mixtures, i.e. those with only two nuclides in the feed material,
-enrichment is well defined and the optimal cascade setup may be solved for trivially.  
+the mass balance and flow rate equations are well defined and the optimal enrichment
+cascade setup may be solved for trivially.  
 However, for more than two components, the cascade cannot be determined from the 
 target enrichments alone (``x_feed_j``, ``x_prod_j``, ``x_tail_j``).  Because the 
 mass balance equations themselves are under-determined extra constraints must be
