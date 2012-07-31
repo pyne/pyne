@@ -12,11 +12,12 @@ classes.
 """
 
 import collections
+import string
 import struct
 import math 
 import os
 
-import mcnpcard
+from pyne import mcnpcard
 
 from binaryreader import _BinaryReader, _FortranRecord
 
@@ -211,30 +212,30 @@ class Inp(object):
 
         """
         #try:
-            self._unique("cell", name)
+        self._unique("cell", name)
 
-            if matName not in self.materials:
-                raise Exception("Material " + matName + " does not exist," \
-                        " cannot use in cell")
+        if matName not in self.materials:
+            raise Exception("Material " + matName + " does not exist," \
+                    " cannot use in cell")
 
-            inSurfaces = []
-            # TODO initalize for efficiency
-            for surfaceName in inSurfaceNames:
-                if surfaceName not in self.surfaces:
-                    raise Exception("Surface " + surfaceName + " does not " \
-                            "exist, cannot use in cell")
-                inSurfaces = inSurfaces + [self.surfaces[surfaceName]]
+        inSurfaces = []
+        # TODO initalize for efficiency
+        for surfaceName in inSurfaceNames:
+            if surfaceName not in self.surfaces:
+                raise Exception("Surface " + surfaceName + " does not " \
+                        "exist, cannot use in cell")
+            inSurfaces = inSurfaces + [self.surfaces[surfaceName]]
 
-            outSurfaces = []
-            for surfaceName in outSurfaceNames:
-                if surfaceName not in self.surfaces:
-                    raise Exception("Surface " + surfaceName + " does not " \
-                            "exist, cannot use in cell")
-                outSurfaces = outSurfaces + [self.surfaces[surfaceName]]
+        outSurfaces = []
+        for surfaceName in outSurfaceNames:
+            if surfaceName not in self.surfaces:
+                raise Exception("Surface " + surfaceName + " does not " \
+                        "exist, cannot use in cell")
+            outSurfaces = outSurfaces + [self.surfaces[surfaceName]]
 
-            self.cells[name] = mcnpcards.Cell(self._next_cell_card(), name,
-                    self.materials[matName], density, densityUnits, inSurfaces,
-                    outSurfaces, imp, temp, vol)
+        self.cells[name] = mcnpcard.Cell(self._next_cell_card(), name,
+                self.materials[matName], density, densityUnits, inSurfaces,
+                outSurfaces, imp, temp, vol)
         #except:
         #    raise Exception("Failed to add a cell")
 
@@ -267,25 +268,25 @@ class Inp(object):
         TODO error check if the user tries to supply a temp kwarg, etc.
         """
         #try:
-            self._unique("cell", name)
+        self._unique("cell", name)
 
-            inSurfaces = []
-            # TODO initalize for efficiency
-            for surfaceName in inSurfaceNames:
-                if surfaceName not in self.surfaces:
-                    raise Exception("Surface " + surfaceName + " does not " \
-                            "exist, cannot use in cell")
-                inSurfaces = inSurfaces + [self.surfaces[surfaceName]]
+        inSurfaces = []
+        # TODO initalize for efficiency
+        for surfaceName in inSurfaceNames:
+            if surfaceName not in self.surfaces:
+                raise Exception("Surface " + surfaceName + " does not " \
+                        "exist, cannot use in cell")
+            inSurfaces = inSurfaces + [self.surfaces[surfaceName]]
 
-            outSurfaces = []
-            for surfaceName in outSurfaceNames:
-                if surfaceName not in self.surfaces:
-                    raise Exception("Surface " + surfaceName + " does not " \
-                            "exist, cannot use in cell")
-                outSurfaces = outSurfaces + [self.surfaces[surfaceName]]
+        outSurfaces = []
+        for surfaceName in outSurfaceNames:
+            if surfaceName not in self.surfaces:
+                raise Exception("Surface " + surfaceName + " does not " \
+                        "exist, cannot use in cell")
+            outSurfaces = outSurfaces + [self.surfaces[surfaceName]]
 
-            self.cells[name] = mcnpcards.CellVoid(self._next_cell_card(), name,
-                    inSurfaces, outSurfaces, imp)
+        self.cells[name] = mcnpcard.CellVoid(self._next_cell_card(), name,
+                inSurfaces, outSurfaces, imp)
         #except:
         #    raise Exception("Failed to add a cell")
 
@@ -315,9 +316,9 @@ class Inp(object):
             gives white reflection. TODO cosine distribution?
         """
         #try:
-            self._unique("surface", name)
-            self.surfaces[name] = mcnpcards.Plane(self._next_surface_card(),
-                    name, dirstr, pos, reflecting, white)
+        self._unique("surface", name)
+        self.surfaces[name] = mcnpcard.Plane(self._next_surface_card(),
+                name, dirstr, pos, reflecting, white)
         #except:
         #    raise Exception("Failed to add a plane surface.")
 
@@ -348,9 +349,9 @@ class Inp(object):
 
         """
         #try:
-            self._unique("surface", name)
-            self.surfaces[name] = mcnpcards.Cylinder(self._next_surface_card(),
-                    name, dirstr, radius, reflecting, white)
+        self._unique("surface", name)
+        self.surfaces[name] = mcnpcard.Cylinder(self._next_surface_card(),
+                name, dirstr, radius, reflecting, white)
         #except:
         #    raise Exception("Failed to add a cylinder surface.")
 
@@ -380,7 +381,7 @@ class Inp(object):
         """
 
         self._unique("surface", name)
-        self.surfaces[name] = mcnpcards.Sphere(self._next_surface_card(),
+        self.surfaces[name] = mcnpcard.Sphere(self._next_surface_card(),
                 name, radius)
 
     def add_surface_rectangularparallelepiped(self, name, xmin, xmax,
@@ -407,7 +408,7 @@ class Inp(object):
         TODO the name is currenty has quite the length.
 
         """
-        self.surfaces[name] = mcnpcards.RectangularParallelepiped(
+        self.surfaces[name] = mcnpcard.RectangularParallelepiped(
                 self._next_surface_card(), name, xmin, xmax, ymin, ymax,
                 zmin, zmax, reflecting, white)
 
@@ -421,9 +422,10 @@ class Inp(object):
             Name for the material (e.g. 'UO2')
             that is used when adding cards to that use this material (e.g. cell
             cards).
-        comment : str
-            Description of the material (e.g. "My grandfather
-            worked hard to make this 2.35% enriched oxide.").
+        comment : tuple, str
+            Description of the material, e.g. ('My grandfather
+            worked hard to make', 'this 2.35% enriched oxide.').
+            Each element of the tuple is printed on its own line.
         ZAIDs : list, int
             The nuclides that make up the material.
         densityUnits : str
@@ -443,9 +445,9 @@ class Inp(object):
         """
         # TODO only assign if no errors. check uniqueness of name
         #try:
-            self._unique("material", name)
-            self.materials[name] = mcnpcards.Material(self._next_mat_card(),
-                    name, comment, ZAIDs, densityUnits, densities, temp)
+        self._unique("material", name)
+        self.materials[name] = mcnpcard.Material(self._next_mat_card(),
+                name, comment, ZAIDs, densityUnits, densities, temp)
         #except:
         #    raise Exception("Failed to add a material")
 
@@ -478,7 +480,7 @@ class Inp(object):
                     material_name))
         material_no = self.materials[material_name].card_no
         # Each material can only have one scattering law.
-        self.scattering_laws[material_name] = mcnpcards.ScatteringLaw(
+        self.scattering_laws[material_name] = mcnpcard.ScatteringLaw(
                 material_no,
                 libraries,
                 temp)
@@ -517,7 +519,7 @@ class Inp(object):
 
         """
         # TODO there are other options
-        self.source = mcnpcards.Criticality(n_histories, keff_guess,
+        self.source = mcnpcard.Criticality(n_histories, keff_guess,
                 n_skip_cycles, n_cycles)
 
     def add_criticality_source_points(self, points=[[0,0,0]]):
@@ -541,7 +543,7 @@ class Inp(object):
         """
         # If self.source_points is not None when _write() is called, then this
         # KSRC card is printed.
-        self.source_points = mcnpcards.CriticalitySourcePoints(points)
+        self.source_points = mcnpcard.CriticalitySourcePoints(points)
 
     def add_tally_cellflux(self, name, particle, cell_names):
         """Adds a cell flux tally (F4). The tally numbers (e.g. 14) are managed
@@ -584,7 +586,7 @@ class Inp(object):
                 raise Exception("The cell {0} is not defined for this input "
                         "file.".format(cell_name))
             cell_nos += [self.cells[cell_name].card_no]
-            self.tallies[name] = mcnpcards.TallyCellFlux(
+            self.tallies[name] = mcnpcard.TallyCellFlux(
                     self._next_tally_cell_flux_card(), name,
                     particle, cell_nos)
 
@@ -647,7 +649,7 @@ class Inp(object):
                             "multiplier card does not exist.")
                 mat_no = self.materials[mat_name].card_no
                 newmultsets += [(multset[0], mat_no, multset[2])]
-        self.miscdata += [mcnpcards.TallyMultiplier(tally_no, newmultsets)]
+        self.miscdata += [mcnpcard.TallyMultiplier(tally_no, newmultsets)]
 
     def add_tally_energy(self, tally_name, energies):
         """Adds a tally energy card (E).
@@ -677,14 +679,14 @@ class Inp(object):
                 raise Exception("The tally specified for this tally energy "
                         "card does not exist.")
             tally_no = self.tallies[tally_name].card_no
-        self.miscdata += [mcnpcards.TallyEnergy(tally_no, energies)]
+        self.miscdata += [mcnpcard.TallyEnergy(tally_no, energies)]
 
     def add_printdump(self):
         """Adds a Print Dump card (PRDMP).
         
         TODO 
         """
-        self.miscdata += [mcnpcards.PrintDump()]
+        self.miscdata += [mcnpcard.PrintDump()]
 
     def write(self):
         if self.title != None:
