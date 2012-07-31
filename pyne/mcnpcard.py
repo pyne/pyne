@@ -184,10 +184,10 @@ class Surface(Card):
             Card number.
         name : str
             Human-readable name given by user.
-        reflecting : bool
+        reflecting : bool, optional
             Places an asterisk before the card number if the surface is
             reflecting.
-        white : bool
+        white : bool, optional
             Places an addition symbol before the card number if the surface
             gives white reflection. TODO cosine distribution?
 
@@ -208,7 +208,7 @@ class Surface(Card):
 
 
 class Cylinder(Surface):
-    """An axis-aligned and axis-centered cylinder. MCNPX also allows for more
+    """An axis-aligned and axis-centered cylinder (C*). MCNPX also allows for more
     general cylinders.
 
     """
@@ -227,10 +227,10 @@ class Cylinder(Surface):
         radius : float
             Radius of the cylinder.
             Units of centimeters.
-        reflecting : bool
+        reflecting : bool, optional
             Places an asterisk before the card number if the surface is
             reflecting.
-        white : bool
+        white : bool, optional
             Places an addition symbol before the card number if the surface
             gives white reflection. TODO cosine distribution?
 
@@ -271,10 +271,10 @@ class Plane(Surface):
         pos : float
             Distance from the axis with which the plane is aligned.
             Units of centimeters.
-        reflecting : bool
+        reflecting : bool, optional
             Places an asterisk before the card number if the surface is
             reflecting.
-        white : bool
+        white : bool, optional
             Places an addition symbol before the card number if the surface
             gives white reflection. TODO cosine distribution?
 
@@ -299,7 +299,7 @@ class Plane(Surface):
 
 
 class Sphere(Surface):
-    """A sphere (S0). Or horse; whatever. TODO """
+    """A sphere (SO). Or horse; whatever. TODO """
     def __init__(self, card_no, name, radius, center=False,
                  reflecting=False, white=False):
         """
@@ -318,12 +318,14 @@ class Sphere(Surface):
         center : None or list float
             If None, circle is centered at the origin. Otherwise, it is at the
             location specified this list, as [x y z].
-        reflecting : bool
+        reflecting : bool, optional
             Places an asterisk before the card number if the surface is
             reflecting.
-        white : bool
+        white : bool, optional
             Places an addition symbol before the card number if the surface
             gives white reflection. TODO cosine distribution?
+
+        TODO only the origin sphere is implemented.
 
         """
         Surface.__init__(self, card_no, name, reflecting, white)
@@ -367,10 +369,10 @@ class RectangularParallelepiped(Surface):
             Human-readable name given by user.
         xmin, xmax, ymin, ymax, zmin, zmax : float
             Bound of the parallelepiped in the given direction.
-        reflecting : bool
+        reflecting : bool, optional
             Places an asterisk before the card number if the surface is
             reflecting.
-        white : bool
+        white : bool, optional
             Places an addition symbol before the card number if the surface
             gives white reflection. TODO cosine distribution?
             
@@ -403,7 +405,7 @@ class RectangularParallelepiped(Surface):
 
 
 class Material(Card):
-    """A material card (MT)."""
+    """A material card (M)."""
 
     def __init__(self, card_no, name, comment, ZAIDs, densityUnits, densities,
             temp=None):
@@ -505,8 +507,10 @@ class ScatteringLaw(Card):
         material_no : int
             The material card number for which the scattering law should be
             applied.
-        libraries : str
+        libraries : list, str
             The scattering law library name, such as 'lwtr'. See MCNPX manual.
+            More than may be specified, but if only one is specified it must
+            still be specified as a length-1 list.
         temp : float
             If a specific table is desired, specify the temperature for Doppler
             broadening and the proper table is selected.

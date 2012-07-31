@@ -162,7 +162,9 @@ class Inp(object):
         Parameters
         ----------
         name : str
-            Name for the cell (e.g. "fuelpin", "shield").
+            Name for the cell (e.g. 'fuelpin', 'shield') 
+            that is used when
+            adding cards that use this cell.
         matName : str
             Name of the material card to associate with this cell. The material
             must have been created already (e.g. "UO2").
@@ -191,20 +193,23 @@ class Inp(object):
 
         Examples
         --------
-        To create a fuel pin using the "UO2" material, assuming "pin" is a
-        cylindrical surface::
+        The following creates a fuel pin using the 'UO2' material, assuming 'pin' is a
+        cylindrical surface. The name of the cell, which can be used to create
+        tallies for this cell, is 'myfirstcell'. Its density is 11.5 g/cm^3, it
+        its neutron importance is 1, and its temperature is 600 K. Its volume
+        is not provided, so MCNPX will attempt to calculate it manually::
 
-            inp.add_cell("myfirstcell", "UO2", 11.5, 'g/cm^3', ["pin",], [], 
-                    1, 600)
+            inp.add_cell('myfirstcell', 'UO2', 11.5, 'g/cm^3', ['pin',], [], 
+                    1, temp=600)
 
         TODO Only neutron importances can be specified so far.
         TODO Change in/outSurface* to neg/posSurface*.
         TODO Change docstrings to the kwarg/optional convention used elsewhere
         in PyNE.
+        TODO only assign if no errors. check uniqueness of name
+        TODO clean up error checking; make it consistent
 
         """
-        # TODO only assign if no errors. check uniqueness of name
-        # TODO clean up rror checking; make it consistent
         #try:
             self._unique("cell", name)
 
@@ -234,7 +239,33 @@ class Inp(object):
         #    raise Exception("Failed to add a cell")
 
     def add_cell_void(self, name, inSurfaceNames, outSurfaceNames, imp):
-        # TODO only assign if no errors. check uniqueness of name
+        """Adds a void cell. Accordingly the cell does not have a material card
+        associated with it. Furthermore, a specified temperature would have no
+        effect (TODO).
+
+        Parameters
+        ----------
+        name : str
+            Name for the cell (e.g. 'whereneutronsgotodie') that is used when
+            adding cards that use this cell.
+        inSurfaceNames : list, str
+            Names of the surfaces that have a negative sense for this cell
+            (e.g. "innerboundary").
+        outSurfaceNames : list, str
+            Names of the surfaces that have a positive sense for this cell
+            (e.g. "outerboundary").
+        imp : int
+            Importance of the cell for neutrons, for variance reduction.
+
+        Examples
+        --------
+        The following void extends infintely outside of the surface 'pin', and
+        has a neutron importance of 1::
+
+            inp.add_cell_void('myfirstvoid', [], ['pin',], 1)
+
+        TODO error check if the user tries to supply a temp kwarg, etc.
+        """
         #try:
             self._unique("cell", name)
 
@@ -260,7 +291,29 @@ class Inp(object):
 
     def add_surface_plane(self, name, dirstr, pos, 
                         reflecting=False, white=False):
-        # TODO only assign if no errors. check uniqueness of name
+        """Adds an axis-aligned plane surface (PX, PY, PZ) to the surface card
+        block. The surface number assigned to this surface is managed
+        internally.
+
+        Parameters
+        ----------
+        name : str
+            Name for the surface (e.g. 'veryflatsurface') 
+            that is used when
+            adding cards that use this surface (e.g. cell cards).
+        dirstr : str
+            The axis with which the plane is parallel. Lower or uppercase
+            'x', 'y', or 'z'.
+        pos : float
+            Distance from the axis with which the plane is aligned.
+            Units of centimeters.
+        reflecting : bool, optional
+            Places an asterisk before the card number if the surface is
+            reflecting.
+        white : bool, optional
+            Places an addition symbol before the card number if the surface
+            gives white reflection. TODO cosine distribution?
+        """
         #try:
             self._unique("surface", name)
             self.surfaces[name] = mcnpcards.Plane(self._next_surface_card(),
@@ -271,7 +324,29 @@ class Inp(object):
 
     def add_surface_cylinder(self, name, dirstr, radius,
                            reflecting=False, white=False):
-        # TODO only assign if no errors. check uniqueness of name
+        """Adds an axis-aligned and axis-centered cylinder surface (CX, CY, CZ)
+        to the surface card block.
+
+        Parameters
+        ----------
+        name : str
+            Name for the surface (e.g. 'verycylindrical') 
+            that is used when
+            adding cards that use this surface (e.g. cell cards).
+        dirstr : str
+            The axis with which the cylinder is aligned. Lower or uppercase
+            'x', 'y', or 'z'.
+        radius : float
+            Radius of the cylinder.
+            Units of centimeters.
+        reflecting : bool, optional
+            Places an asterisk before the card number if the surface is
+            reflecting.
+        white : bool, optional
+            Places an addition symbol before the card number if the surface
+            gives white reflection. TODO cosine distribution?
+
+        """
         #try:
             self._unique("surface", name)
             self.surfaces[name] = mcnpcards.Cylinder(self._next_surface_card(),
@@ -281,7 +356,29 @@ class Inp(object):
 
     def add_surface_originsphere(self, name, radius,
                                  reflecting=False, white=False):
-        # TODO only assign if no errors, check uniqueness of name
+        """Adds a sphere surface centered at the origin (S0) to the surface
+        card block.
+
+        Parameters
+        ----------
+        name : str
+            Name for the surface (e.g. 'veryspherical') 
+            that is used when
+            adding cards that use this surface (e.g. cell cards).
+        radius : float
+            Radius of the sphere.
+            Units of centimeters.
+        reflecting : bool, optional
+            Places an asterisk before the card number if the surface is
+            reflecting.
+        white : bool, optional
+            Places an addition symbol before the card number if the surface
+            gives white reflection. TODO cosine distribution?
+
+        TODO only the origin sphere is implemented.
+
+        """
+
         self._unique("surface", name)
         self.surfaces[name] = mcnpcards.Sphere(self._next_surface_card(),
                 name, radius)
@@ -289,12 +386,61 @@ class Inp(object):
     def add_surface_rectangularparallelepiped(self, name, xmin, xmax,
                                               ymin, ymax, zmin, zmax,
                                               reflecting=False, white=False):
+        """Adds a rectangular parallelepiped surface (RPP) to the surface card
+        block.
+
+        Parameters
+        ----------
+        name : str
+            Name for the surface (e.g. 'veryrppish') 
+            that is used when
+            adding cards that use this surface (e.g. cell cards).
+        xmin, xmax, ymin, ymax, zmin, zmax : float
+            Bound of the parallelepiped in the given direction.
+        reflecting : bool, optional
+            Places an asterisk before the card number if the surface is
+            reflecting.
+        white : bool, optional
+            Places an addition symbol before the card number if the surface
+            gives white reflection. TODO cosine distribution?
+
+        TODO the name is currenty has quite the length.
+
+        """
         self.surfaces[name] = mcnpcards.RectangularParallelepiped(
                 self._next_surface_card(), name, xmin, xmax, ymin, ymax,
                 zmin, zmax, reflecting, white)
 
     def add_material(self, name, comment, ZAIDs, densityUnits, densities,
             temp=None):
+        """Adds a material card (M) to the data card block.
+
+        Parameters
+        ----------
+        name : str
+            Name for the material (e.g. 'UO2')
+            that is used when adding cards to that use this material (e.g. cell
+            cards).
+        comment : str
+            Description of the material (e.g. "My grandfather
+            worked hard to make this 2.35% enriched oxide.").
+        ZAIDs : list, int
+            The nuclides that make up the material.
+        densityUnits : str
+            Either 'atoms/b/cm' or 'g/cm^3'
+            TODO descriptive is more important than short
+        densities : list, float
+            Density or atom/weight fraction of the nuclides, given in the same
+            order as the ZAIDs.
+        temp : float
+            Temperature of the material. This is relevant for Doppler
+            broadening.
+
+        Examples
+        --------
+
+
+        """
         # TODO only assign if no errors. check uniqueness of name
         #try:
             self._unique("material", name)
@@ -304,6 +450,27 @@ class Inp(object):
         #    raise Exception("Failed to add a material")
 
     def add_scattering_law(self, material_name, libraries, temp=None):
+        """Adds a thermal scattering law card (MT) to the data card block. The
+        card must be associated with a material (M) card.
+
+        Parameters
+        ----------
+        material_name : str
+            Name of the material for which this card should be applied.
+        libraries : list, str
+            The scattering law library name, such as 'lwtr'. See MCNPX manual.
+            More than may be specified, but if only one is specified it must
+            still be specified as a length-1 list.
+        temp : float
+            If a specific table is desired, specify the temperature for Doppler
+            broadening and the proper table is selected.
+
+        Examples
+        --------
+
+        TODO automatic logic for selecting tables for Doppler broadening.
+
+        """
         # TODO simple version now: user simply supplies the library names.
         if material_name not in self.materials:
             raise Exception("Material {0} does not exist. Cannot create "
@@ -320,15 +487,95 @@ class Inp(object):
                                keff_guess=1.0,
                                n_skip_cycles=30,
                                n_cycles=130):
+        """Adds a criticality source card (KCODE) to the data card block.
+
+        Parameters
+        ----------
+        n_histories : int, optional
+            Number of particle histories to run in each cycle.
+        keff_guess : float, optional
+            Initial guess for the effective multiplication constant of the
+            system.
+        n_skip_cycles : int, optional
+            The number of cycles to skip.
+        n_cycles : int, optional
+            The total number of cycles to simulate (skipped + active).
+
+        Examples
+        --------
+        The following::
+
+            add_criticality_source(2000, 1.5, 30, 300)
+
+        creates a criticality source with 2000 histories per cycle, an initial
+        k_eff guess of 1.5, 30 skipped cyles, and 300 total cycles. The
+        resulting card in the input file will resemble the following::
+
+            KCODE 2000 1.5 30 300
+
+        TODO this docstring is not very descriptive.
+
+        """
         # TODO there are other options
         self.source = mcnpcards.Criticality(n_histories, keff_guess,
                 n_skip_cycles, n_cycles)
 
     def add_criticality_source_points(self, points=[[0,0,0]]):
-        # TODO
+        """Adds criticality source points (KSRC)
+
+        Parameters
+        ----------
+        points : list of lists, float
+            A list containing all points for criticality sources.
+
+        Examples
+        --------
+        The following creates three source points::
+
+            add_criticality_source_points([[0,0,0], [-1,0,0], [1,0,0]])
+
+        The resulting card in the input file will resemble the following::
+
+            KSRC 0 0 0  -1 0 0  1 0 0
+
+        """
+        # If self.source_points is not None when _write() is called, then this
+        # KSRC card is printed.
         self.source_points = mcnpcards.CriticalitySourcePoints(points)
 
     def add_tally_cellflux(self, name, particle, cell_names):
+        """Adds a cell flux tally (F4). The tally numbers (e.g. 14) are managed
+        internally.
+
+        Parameters
+        ----------
+        name : str
+            Name for the tally (e.g. 'fuelflux') 
+            that is used when adding a tally multiplier card or perhaps when
+            parsing output.
+        particle : str
+            The type of particle to tally. 'N' for protons, 'P' for photons, etc.
+        cell_names : list, str
+            A list of the names of cells for which the tally is desired.
+
+        Examples
+        --------
+        This is a tally for the neutron flux in the cells named 'fuel' and
+        'mod'::
+        
+            add_tally_cellflux('fluxtally', 'N', ['fuel', 'mod'])
+
+        The resulting card in the input file will resemble the following::
+
+            F14:N 1 2
+
+        where it is assumed that the 'fuel' and 'mod' cells have cell numbers 1
+        and 2.
+
+        TODO I don't think cell flux is the best descriptive name for this
+        tally.
+
+        """
         # Check to see that the relevant particle type is already in use.
         self._unique("tally", name)
         cell_nos = []
@@ -342,7 +589,44 @@ class Inp(object):
                     particle, cell_nos)
 
     def add_tally_multiplier(self, tally_name, multsets):
-        """[(c, "matname", MTs), (c, "matname", MTs)
+        """Adds a tally multiplier card (FM).
+        
+        Parameters
+        ----------
+        tally_name : str
+            Name of the tally for which the tally multiplier should be applied.
+        multsets : list of tuples
+            The form of this input is somewhat complicated. Each element in the
+            list is a tuple with three items of data: the constant C that the
+            entire tally is multiplied by, the name of the material to be used
+            for this multiplier, and a list of the reactions (MTs) desired.
+            Thus the form of the input is::
+            
+                [(C, 'matname', MTs), (C, 'matname', MTs)]
+
+            See the examples for more information.
+        
+        Examples
+        --------
+        The following finds the reaction rate density for fission and capture
+        in cell 'fuel' for which the flux is tallied by tally 'fuelflux', and
+        which is composed of material 'uo2'::
+
+            add_tally_multiplier('fuelflux', [(-1, 'uo2', [18, 102])])
+
+        The resulting card in the input file will resemble the following::
+
+            FM14 (1)
+                 (-1 1 (18) (102))
+
+        Note that the material specified on this card need not be the material
+        used for the cell associated with the tally to which this card is
+        applied.
+       
+        TODO I'd like to move away from MT numbers, etc if possible.
+
+
+        [(c, "matname", MTs), (c, "matname", MTs)
         TODO can tally_no be zero, like with the En card?
         ERROR check: the material used for multiplier is the same as the one
         used for the cell in the actual tally?
@@ -366,6 +650,24 @@ class Inp(object):
         self.miscdata += [mcnpcards.TallyMultiplier(tally_no, newmultsets)]
 
     def add_tally_energy(self, tally_name, energies):
+        """Adds a tally energy card (E).
+
+        Parameters
+        ----------
+        tally_name : str
+            The name of the tally for which these energies are specified (e.g.
+            'fuelflux'). Specifiying 0 (the int) will cause these energies to
+            be used for all tallies for which a specific tally energy card is
+            not applied (TODO error check for the use of multiple tally energy
+            cards).
+        energies : list, float
+            A list of the upper bound of the energy bins.
+            Units of MeV.
+
+        Examples
+        --------
+        TODO
+        """
         # TODO allow for logarithmic input.
         if tally_name is 0:
             # If this energy card is supposed to apply to all energies.
@@ -378,6 +680,10 @@ class Inp(object):
         self.miscdata += [mcnpcards.TallyEnergy(tally_no, energies)]
 
     def add_printdump(self):
+        """Adds a Print Dump card (PRDMP).
+        
+        TODO 
+        """
         self.miscdata += [mcnpcards.PrintDump()]
 
     def write(self):
@@ -451,6 +757,42 @@ class Inp(object):
             self._write_card(card.card())
         self.f.close()
 
+    def run(self, plot=False, outfname=None, mctafname=None):
+        curdir = os.path.abspath(os.path.curdir)
+        print curdir
+        print self.path
+        os.chdir(self.path)
+        to_execute = "mcnpx i=%s%s" % (self.fname, self.inpextension)
+        if outfname is not None:
+            to_execute += " o=%s" % outfname
+        if mctafname is not None:
+            # Did we even run for an MCTA file?
+            to_execute += " m=%s" % mctafname
+        if plot:
+            to_execute += " ip"
+        os.system(to_execute)
+        os.chdir(curdir)
+
+    def clean(self, runt=True, src=True, out=False, mcta=False, com=True):
+        """
+        
+        TODO not platform independent; os.remove() does not take reg exps.
+        """
+
+        curdir = os.path.abspath(os.path.curdir)
+        os.chdir(self.path)
+        if runt:
+            os.system("rm *runt*")
+        if src:
+            os.system("rm *srct*")
+        if out:
+            os.system("rm *out*")
+        if mcta:
+            os.system("rm *mcta*")
+        if com:
+            os.system("rm *com*")
+        os.chdir(curdir)
+
     def _write_modifications(self):
         first = True
         for modtuple in self.modifications:
@@ -512,7 +854,7 @@ class Inp(object):
         for string in stringTuple:
             self._write_comment("    -- " + string)
 
-    def writeHeaderLine(self):
+    def _write_header_line(self):
         self.f.write("C ==========================\n")
 
     def _write_deck_header_line(self, header):
@@ -520,42 +862,6 @@ class Inp(object):
 
     def _write_data_header_line(self, header):
         self._write_comment(" ----- " + header)
-
-    def run(self, plot=False, outfname=None, mctafname=None):
-        curdir = os.path.abspath(os.path.curdir)
-        print curdir
-        print self.path
-        os.chdir(self.path)
-        to_execute = "mcnpx i=%s%s" % (self.fname, self.inpextension)
-        if outfname is not None:
-            to_execute += " o=%s" % outfname
-        if mctafname is not None:
-            # Did we even run for an MCTA file?
-            to_execute += " m=%s" % mctafname
-        if plot:
-            to_execute += " ip"
-        os.system(to_execute)
-        os.chdir(curdir)
-
-    def clean(self, runt=True, src=True, out=False, mcta=False, com=True):
-        """
-        
-        TODO not platform independent; os.remove() does not take reg exps.
-        """
-
-        curdir = os.path.abspath(os.path.curdir)
-        os.chdir(self.path)
-        if runt:
-            os.system("rm *runt*")
-        if src:
-            os.system("rm *srct*")
-        if out:
-            os.system("rm *out*")
-        if mcta:
-            os.system("rm *mcta*")
-        if com:
-            os.system("rm *com*")
-        os.chdir(curdir)
 
     def _unique(self, card_type, name):
         if card_type == "cell":
