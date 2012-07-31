@@ -345,7 +345,7 @@ exts.append(cpp_ext("pyne.lib.libpyne_enrichment", ['enrichment.cpp'], ['pyne_ma
 
 # Python extension modules
 # STL converters
-#exts.append(cpp_ext("pyne.stlconverters", ['stlconverters.pyx']))
+exts.append(cpp_ext("pyne.stlconverters", ['stlconverters.pyx']))
 
 # pyne_config
 exts.append(cpp_ext("pyne.pyne_config", ['pyne_config.pyx'], ['pyne']))
