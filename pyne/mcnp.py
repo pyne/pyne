@@ -30,10 +30,10 @@ class Inp(object):
     The class is used by initializing the Inp object with various metadata
     settings that are printed as comments at the top of the input file. To
     actually define the simulation, the user makes calls (mostly in any order)
-    to the appropriate _add_* methods. For example, there is a _add_cell()
+    to the appropriate add_*() methods. For example, there is an add_cell()
     method that requires inputs of surface numbers, materials, etc. Calling an
-    _add_* function does not cause anything to be written to the input file.
-    Rather, this step is done by calling write(). The _add_* methods simply
+    add_*() function does not cause anything to be written to the input file.
+    Rather, this step is done by calling write(). The add_() methods simply
     cause the creation of an instance of a mcnpcard, which is then saved to one
     of a number of ordered dictionaries in this class. write() then uses these
     ordered dictionaries to print the informaiton contained in them.
@@ -44,11 +44,9 @@ class Inp(object):
     cell card is created by referring to these names.
 
     """
-
     def __init__(self, fname, title=None, description=None, author=None,
             modifications=None, path="", inpextension=".inp"):
-        """
-        This instantiates an Inp object, which initializes many of the fields
+        """This instantiates an Inp object, which initializes many of the fields
         in the class and creates the path directory if it does not already
         exist. None of the methods are actually called at this point (the input
         is still completely undefined).
@@ -73,6 +71,10 @@ class Inp(object):
             The path where the input file should be written.
         inpextension : str
             The filename extension for the input file.
+
+        Examples
+        --------
+        mcnp.Inp(
 
         """
         # Filename extension for input files.
@@ -131,7 +133,7 @@ class Inp(object):
         constructor keyword argument.
 
         Parameters
-        ---------
+        ----------
         title : str
             The title of the input file, which is written to the top of the
             input file as a comment.
