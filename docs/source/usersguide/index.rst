@@ -11,6 +11,7 @@ essential aspects of using PyNE to do nuclear engineering.
 
     nucname
     material
+    mcnp
     njoy
     cccc
     ace
