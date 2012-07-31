@@ -1,9 +1,10 @@
+#!/usr/bin/env python
+
 """This module contains a Card class for each MCNP card. The user is not
 expected to interact with this module; it is loaded by pyne.mcnp and used by
 pyne.mcnp.Inp.
 
 """
-
 
 import numpy as np
 
