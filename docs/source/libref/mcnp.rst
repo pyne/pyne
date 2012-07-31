@@ -16,6 +16,22 @@ functionality of the module can be obtained by importing as such::
 *********************
 Current functionality
 *********************
+tdo: 1 - finish the docstrings, with 1 example
+     2 - convert my infinite lattice into a well-commented example of usage
+     3 - finish this libref rst file.
+     4 - list of future tasks
+        -combining with existing pyne modules.
+        the user would then be able to create an input deck by writing
+        straight-up json files.
+            -good docstrings and tutorial and examples (most importanty), as
+            listing the card name
+            -the examples should show the typical (old) card that it would
+            produce.
+        -have an API set up, implementation can come next.
+        -i do not think it should double as documentation; could be misleading
+        when things are not updated too quickly. should just stick to the
+        syntax. perhaps only things that are seen as unclear in the manual.
+        must be clear; ifit's LESS clear than it definitely will not be used.
 
 ************************
 Functionality to discuss
@@ -46,7 +62,8 @@ Lots of repitition, and that's an issue I'm not clear how to solve:
 One of the things that is not great about what I've done is that for each card
 there are two methods: one in mcnp.Inp and one in mcnpcard. The former has
 information about the input as a whole, and the latter has the "low-level"
-information about how the card is supposed to be written
+information about how the card is supposed to be written Coud really use some
+feedback here.
 
 Learning curve: What do we expect the user knows? When they use a temp keyword
 on a cell card should the documentation tell them what free gas thermal
