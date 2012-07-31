@@ -13,6 +13,8 @@ functionality of the module can be obtained by importing as such::
 
     from pyne import mcnp
 
+:ref:`pyne_mcnpcard`.
+
 *********************
 Current functionality
 *********************
@@ -76,7 +78,4 @@ Inp Class
 .. autoclass:: Inp
    :members:
    :inherited-members:
-
-
-.. automodule:: mcnpcard
 
