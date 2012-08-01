@@ -12,5 +12,4 @@ for most of the cards available in MCNPX.
 
 .. automodule:: pyne.mcnpcard
    :members:
-   :inherited-members:
 
