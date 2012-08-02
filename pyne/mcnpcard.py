@@ -44,14 +44,14 @@ class Card(object):
         self.name = name
         self.card_no = card_no
     
-    def getDensityPrefix(self, densityUnits):
+    def get_density_prefix(self, density_units):
         """In MCNPX, mass densities are represented by prepending a minus sign.
         This converts this notation in something sensible as far as user input
         goes.
 
         Parameters
         ----------
-        densityUnits : str
+        density_units : str
             Must be either 'g/cm^3' or 'atoms/b/cm'.
 
         Returns
@@ -61,13 +61,13 @@ class Card(object):
             number densities.
 
         """
-        if densityUnits == 'g/cm^3':
+        if density_units == 'g/cm^3':
             return '-'
-        elif densityUnits == 'atoms/b/cm':
+        elif density_units == 'atoms/b/cm':
             return ''
         else:
             raise Exception("Invalid string to specify density units: "
-                    + densityUnits)
+                    + density_units)
 
     def comment(self):
         """ "Virtual". 
@@ -101,14 +101,14 @@ class Cell(Card):
     TODO only the IMP, TMP, and VOL keywords are allowed.
 
     """
-    def __init__(self, card_no, name, material, density, densityUnits,
-            inSurfaces, outSurfaces, imp, temp, vol):
+    def __init__(self, card_no, name, material, density, density_units,
+            neg_surfs, pos_surfs, imp, temp, vol):
         super(Cell, self).__init__(card_no, name)
         self.material = material
         self.density = density
-        self.densityPrefix = self.getDensityPrefix(densityUnits)
-        self.inSurfaces = inSurfaces
-        self.outSurfaces = outSurfaces
+        self.dens_prefix = self.get_density_prefix(density_units)
+        self.neg_surfs = neg_surfs
+        self.pos_surfs = pos_surfs
         self.imp = imp
         self.temp = temp
         self.vol = vol
@@ -118,12 +118,12 @@ class Cell(Card):
         string2write = str(self.card_no)
         string2write += (" " * (4 - len(string2write)) +
                 str(self.material.card_no))
-        string2write += (" " * (8 - len(string2write + self.densityPrefix)) + 
-                self.densityPrefix + "%.4e" % self.density)
+        string2write += (" " * (8 - len(string2write + self.dens_prefix)) + 
+                self.dens_prefix + "%.4e" % self.density)
         string2write += (" " * (18 - len(string2write)))
-        for surface in self.outSurfaces:
+        for surface in self.pos_surfs:
             string2write += "  {0}".format(surface.card_no)
-        for surface in self.inSurfaces:
+        for surface in self.neg_surfs:
             string2write += " -{0}".format(surface.card_no)
         string2write += (" " * (25 - len(string2write)) + 
                 "IMP:N={0}".format(self.imp))
@@ -139,7 +139,7 @@ class CellVoid(Card):
     """Creates a cell that is a void or vacuum (i.e. no associated material card).
 
     """
-    def __init__(self, card_no, name, inSurfaces, outSurfaces, imp):
+    def __init__(self, card_no, name, neg_surfs, pos_surfs, imp):
         """Constructor.
 
         Parameters
@@ -148,27 +148,27 @@ class CellVoid(Card):
             Provided by the cell card counter in mcnp.Inp.
         name : str
             The user's human-readable name for this card.
-        inSurfaces : list
+        neg_surfs : list
             The surface card numbers for which this cell is located in the
             negative sense.
-        outSurfaces : list
+        pos_surfs : list
             Surfaces that have a positive sense for this cell.
         imp : int
             Neutron importance. TODO should allow any particle importance.
 
         """
         super(CellVoid, self).__init__(card_no, name)
-        self.inSurfaces = inSurfaces
-        self.outSurfaces = outSurfaces
+        self.neg_surfs = neg_surfs
+        self.pos_surfs = pos_surfs
         self.imp = imp
 
     def card(self):
         string2write = str(self.card_no)
         string2write += (" " * (4 - len(string2write)) + "0")
         string2write += (" " * (18 - len(string2write)))
-        for surface in self.outSurfaces:
+        for surface in self.pos_surfs:
             string2write += "  {0}".format(surface.card_no)
-        for surface in self.inSurfaces:
+        for surface in self.neg_surfs:
             string2write += " -{0}".format(surface.card_no)
         string2write += (" " * (25 - len(string2write)) + 
                 "IMP:N={0}".format(self.imp))
@@ -428,7 +428,7 @@ class Material(Card):
     
     """
 
-    def __init__(self, card_no, name, comment, ZAIDs, densityUnits, densities,
+    def __init__(self, card_no, name, comment, ZAIDs, density_units, densities,
             temp=None):
         """Constructor.
 
@@ -443,7 +443,7 @@ class Material(Card):
             worked hard to make this mineral.").
         ZAIDs : list, int
             The nuclides that make up the material.
-        densityUnits : str
+        density_units : str
             Either 'atoms/b/cm' or 'g/cm^3'
             TODO descriptive is more important than short
         densities : list, float
@@ -467,25 +467,25 @@ class Material(Card):
             raise Exception("Number of ZAIDs does not match number of " \
             "densities.")
         super(Material, self).__init__(card_no, name)
-        self.commentTuple = comment
-        self.setZAIDs(ZAIDs)
+        self.comment_tuple = comment
+        self.set_ZAIDs(ZAIDs)
         if len(ZAIDs) == 1:
-            self.densityPrefix = ''
+            self.dens_prefix = ''
         else:
-            self.densityPrefix = self.getDensityPrefix(densityUnits)
-        self.setDensities(densities)
+            self.dens_prefix = self.get_density_prefix(density_units)
+        self.set_densities(densities)
         self.temp = temp
 
-    def setZAIDs(self, ZAIDs):
+    def set_ZAIDs(self, ZAIDs):
         # TODO error check, make sure they are ZAIDs
         self.ZAIDs = ZAIDs
 
-    def setDensities(self, densities):
+    def set_densities(self, densities):
         # TODO error check densities
         self.densities = densities
 
     def comment(self):
-        return self.commentTuple
+        return self.comment_tuple
 
     def card(self):
         nspaces = 15
@@ -495,7 +495,7 @@ class Material(Card):
         string2write += "%s" % self.ZAIDs[0]
         if self.temp is not None:
             string2write += self._table_id(self.temp)
-        string2write += " " * (1 + int(self.densityPrefix != '-'))
+        string2write += " " * (1 + int(self.dens_prefix != '-'))
         string2write += "%e\n" % self.densities[0]
         if len(self.ZAIDs) > 1:
             for i in range(1, len(self.ZAIDs)):
@@ -503,7 +503,7 @@ class Material(Card):
                 string2write += "%s" % self.ZAIDs[i]
                 if self.temp is not None:
                     string2write += self._table_id(self.temp)
-                string2write += " " * (1 + int(self.densityPrefix != '-'))
+                string2write += " " * (1 + int(self.dens_prefix != '-'))
                 string2write += "%e\n" % self.densities[i]
         return string2write
 
@@ -718,27 +718,27 @@ class TallyMultiplier(Card):
 
     def card(self):
         string2write = "FM%i  " % self.card_no
-        firstLine = True
+        first_line = True
         for multset in self.multsets:
             # return after each set
-            if firstLine:
-                nextLine = ""
-                firstLine = False
+            if first_line:
+                next_line = ""
+                first_line = False
             else:
-                nextLine = "\n" + 5 * " "
+                next_line = "\n" + 5 * " "
             if len(multset) == 1:
                 if type(multset[0]) is int:
-                    string2write += nextLine + "(%i)" % multset[0]
+                    string2write += next_line + "(%i)" % multset[0]
                 elif type(multset[0]) is float:
-                    string2write += nextLine + "(%.4f)" % multset[0]
+                    string2write += next_line + "(%.4f)" % multset[0]
                 else:
                     raise Exception("TODO")
             elif len(multset) == 3:
                 # TODO clean up duplicate code.
                 if type(multset[0]) is int:
-                    string2write += nextLine + "(%i %i" % (multset[0], multset[1])
+                    string2write += next_line + "(%i %i" % (multset[0], multset[1])
                 elif type(multset[0]) is float:
-                    string2write += nextLine + "(%.4f %i" % (multset[0], multset[1])
+                    string2write += next_line + "(%.4f %i" % (multset[0], multset[1])
                 for mt in multset[2]:
                     string2write += " (%i)" % mt
                 string2write += ")"
