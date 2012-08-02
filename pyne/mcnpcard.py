@@ -468,21 +468,27 @@ class Material(Card):
             "densities.")
         super(Material, self).__init__(card_no, name)
         self.comment_tuple = comment
-        self.set_ZAIDs(ZAIDs)
+        if check_ZAIDs(ZAIDs):
+            self.ZAIDs = ZAIDs
+        else:
+            raise Exception("Error in ZAID input.")
         if len(ZAIDs) == 1:
             self.dens_prefix = ''
         else:
             self.dens_prefix = self.get_density_prefix(density_units)
-        self.set_densities(densities)
+        if check_densities(densities):
+            self.densities = densities
+        else:
+            raise Exception("Error in density input.")
         self.temp = temp
 
-    def set_ZAIDs(self, ZAIDs):
+    def check_ZAIDs(self, ZAIDs):
         # TODO error check, make sure they are ZAIDs
-        self.ZAIDs = ZAIDs
+        pass
 
-    def set_densities(self, densities):
+    def check_densities(self, densities):
         # TODO error check densities
-        self.densities = densities
+        pass
 
     def comment(self):
         return self.comment_tuple
