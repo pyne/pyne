@@ -8,7 +8,7 @@ pyne.mcnp.Inp.
 
 import numpy as np
 
-class Card:
+class Card(object):
     """Superclass for all MCNP cards. The methods that all cards have is a
     comment() method that describes the input in human-readable text and a
     card() method that prints the proper card to the input file. Some of the
@@ -18,6 +18,9 @@ class Card:
     The user is not expected to interact with objects of this class. All
     objects are expected to be instantiated by the mcnp.Inp class; the user
     creates Card objects through methods in mcnp.Inp.
+
+    Having this class inherit from object makes this a new-style class, so that
+    the super() builtin method can be used.
 
     """
     # The column at which to start in-line comments (card descriptions).
@@ -100,7 +103,7 @@ class Cell(Card):
     """
     def __init__(self, card_no, name, material, density, densityUnits,
             inSurfaces, outSurfaces, imp, temp, vol):
-        Card.__init__(self, card_no, name)
+        super(Cell, self).__init__(card_no, name)
         self.material = material
         self.density = density
         self.densityPrefix = self.getDensityPrefix(densityUnits)
@@ -154,7 +157,7 @@ class CellVoid(Card):
             Neutron importance. TODO should allow any particle importance.
 
         """
-        Card.__init__(self, card_no, name)
+        super(CellVoid, self).__init__(card_no, name)
         self.inSurfaces = inSurfaces
         self.outSurfaces = outSurfaces
         self.imp = imp
@@ -198,7 +201,7 @@ class Surface(Card):
             gives white reflection. TODO cosine distribution?
 
         """
-        Card.__init__(self, card_no, name)
+        super(Surface, self).__init__(card_no, name)
         self.reflecting = reflecting
         self.white = white
     def card_no_string(self):
@@ -242,7 +245,7 @@ class Cylinder(Surface):
             gives white reflection. TODO cosine distribution?
 
         """
-        Surface.__init__(self, card_no, name, reflecting, white)
+        super(Cylinder, self).__init__(card_no, name, reflecting, white)
         self.radius = radius
         assert(dirstr.upper() == 'X' or 
                dirstr.upper() == 'Y' or
@@ -289,7 +292,7 @@ class Plane(Surface):
             gives white reflection. TODO cosine distribution?
 
         """
-        Surface.__init__(self, card_no, name, reflecting, white)
+        super(Plane, self).__init__(card_no, name, reflecting, white)
         self.pos = pos
         self.dirstr = dirstr
 
@@ -341,7 +344,7 @@ class Sphere(Surface):
         TODO only the origin sphere is implemented.
 
         """
-        Surface.__init__(self, card_no, name, reflecting, white)
+        super(Sphere, self).__init__(card_no, name, reflecting, white)
         self.radius = radius
         self.center = center
 
@@ -395,7 +398,8 @@ class RectangularParallelepiped(Surface):
         for both values doesn't make sense, but it's not intuitive.
 
         """
-        Surface.__init__(self, card_no, name, reflecting, white)
+        super(RectangularParallelepiped, self).__init__(
+                card_no, name, reflecting, white)
         self.xmin = xmin
         self.xmax = xmax
         self.ymin = ymin
@@ -462,7 +466,7 @@ class Material(Card):
         if len(ZAIDs) != len(densities):
             raise Exception("Number of ZAIDs does not match number of " \
             "densities.")
-        Card.__init__(self, card_no, name)
+        super(Material, self).__init__(card_no, name)
         self.commentTuple = comment
         self.setZAIDs(ZAIDs)
         if len(ZAIDs) == 1:
@@ -538,7 +542,7 @@ class ScatteringLaw(Card):
             broadening and the proper table is selected.
 
         """
-        Card.__init__(self, material_no, "MT")
+        super(ScatteringLaw, self).__init__(material_no, "MT")
         if type(libraries) is not list:
             raise Exception("Libriares are not provided as a list, and they "
                     "must be provided as a list.")
@@ -581,7 +585,7 @@ class Tally(Card):
         ----------
 
         """
-        Card.__init__(self, card_no, name)
+        super(Tally, self).__init__(card_no, name)
         self.particle = particle
 
     def card(self):
@@ -600,7 +604,7 @@ class TallyCellFlux(Tally):
         ----------
 
         """
-        Tally.__init__(self, card_no, name, particle)
+        super(TallyCellFlux, self).__init__(card_no, name, particle)
         self.cell_nos = cell_nos
 
     def card(self):
@@ -621,7 +625,7 @@ class Source(Card):
         ----------
 
         """
-        Card.__init__(self, None, name)
+        super(Source, self).__init__(None, name)
 
     def card(self):
         pass
@@ -641,7 +645,7 @@ class Criticality(Source):
         """
         # TODO this is not exactly the same as what MCNPX uses by default. I
         # also left out 5 other options for this card.
-        Source.__init__(self, "KCODE")
+        super(Criticality, self).__init__("KCODE")
         self.n_histories = n_histories
         self.keff_guess = keff_guess
         self.n_skip_cycles = n_skip_cycles
@@ -665,7 +669,7 @@ class CriticalitySourcePoints(Source):
         ----------
 
         """
-        Source.__init__(self, "KSRC")
+        super(CriticalitySourcePoints, self).__init__("KSRC")
         self.points = points
 
     def card(self):
@@ -687,7 +691,7 @@ class TallyEnergy(Card):
         ----------
 
         """
-        Card.__init__(self, tally_no, "En")
+        super(TallyEnergy, self).__init__(tally_no, "En")
         self.energies = energies
 
     def card(self):
@@ -709,7 +713,7 @@ class TallyMultiplier(Card):
         ----------
 
         """
-        Card.__init__(self, tally_no, "FMn")
+        super(TallyMultiplier, self).__init__(tally_no, "FMn")
         self.multsets = multsets
 
     def card(self):
