@@ -74,7 +74,11 @@ class Inp(object):
 
         Examples
         --------
-        mcnp.Inp(
+        Here is an example of initializing an instance of mcnp.Inp::
+
+            my_inp = mcnp.Inp('inp1', 'Infinite Lattice', 
+                'Obtaining the spectral flux in an LWR infinite lattice.',
+                'Mr. MCNP')
 
         """
         # Filename extension for input files.
