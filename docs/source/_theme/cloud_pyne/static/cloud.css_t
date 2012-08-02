@@ -453,7 +453,8 @@ div.body h1 {
     font-size: 200%;
 }
 
-div.body h2
+div.body h2,
+div.body p.rubric
 {
      margin: 1em -10px 0 -10px;
      padding: 7px;
@@ -471,32 +472,10 @@ div.body h2
      text-shadow: 1px 1px 0 rgba(0,0,0,.1);
 }
 
-/* fitze made the changes below to highlight the differences between
-   section (----) headers in the docstrings for headers that weren't Parameters
-   or Returns (e.g. Notes, Examples), and the section headers in docs/source
-   files.
-    border: 1px solid {{ theme_quotetrimcolor }};
-    padding: 1px 2px;
-    margin: 0 1px;
-
-    color: {{ theme_codetextcolor }};
- */
-div.body p.rubric
-{
-     padding: 1px 2px;
-     margin: 0 1px;
-
-     background: {{ theme_codebgcolor }};
-     border: 1px solid {{ theme_docstringsectinbordercolor }};
-
-     font-size: 120%;
-     /* color: {{ theme_sidebarlinkcolor }}; */
-     font-weight: bold;
-}
-
+div.body p.rubric,
 div.body div.section.dimmed h2
 {
-     background: {{ theme_sectionbgcolor }};
+     background: {{ theme_rubricbgcolor }};
 }
 
 div.body h3 { font-size: 140%; }
