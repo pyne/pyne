@@ -107,9 +107,9 @@ class Inp(object):
         # Tally cards.
         self.tallies = collections.OrderedDict()
         # Surface, cell, and material card counters.
-        self.surfaceCard = 0
-        self.cellCard = 0
-        self.matCard = 0
+        self.surface_card = 0
+        self.cell_card = 0
+        self.mat_card = 0
         # TODO cell flux tally number (F4 tally)
         self.tally_cellflux_card = 4
         # The following are written to the top of the input file as comments.
@@ -124,7 +124,7 @@ class Inp(object):
         100. There is no need for this though; it could be 1.
 
         """
-        self.matCard = self.matCard + 100
+        self.mat_card = self.mat_card + 100
 
     def set_title(self, title):
         """Sets the title of the input file. The title is written to the top of
@@ -155,8 +155,8 @@ class Inp(object):
         """
         self.description = description
 
-    def add_cell(self, name, matName, density, densityUnits, inSurfaceNames,
-            outSurfaceNames, imp, temp=None, vol=None):
+    def add_cell(self, name, mat_name, density, density_units, neg_surf_names,
+            pos_surf_names, imp, temp=None, vol=None):
         """Create a cell card given a material name, density, surface names,
         and other inputs. The class manages finding the corresponding material
         and surface card numbers for the user. The materials and surfaces for
@@ -168,18 +168,18 @@ class Inp(object):
             Name for the cell (e.g. 'fuelpin', 'shield') 
             that is used when
             adding cards that use this cell.
-        matName : str
+        mat_name : str
             Name of the material card to associate with this cell. The material
             must have been created already (e.g. "UO2").
         density : float
             Material density for the cell.
-            Units specified by densityUnits input.
-        densityUnits : str
+            Units specified by density_units input.
+        density_units : str
             Either 'g/cm^3' or 'atoms/b/cm'.
-        inSurfaceNames : list, str
+        neg_surf_names : list, str
             Names of the surfaces that have a negative sense for this cell
             (e.g. "pinboundary").
-        outSurfaceNames : list, str
+        pos_surf_names : list, str
             Names of the surfaces that have a positive sense for this cell
             (e.g. "unitcellboundary").
         imp : int
@@ -216,32 +216,32 @@ class Inp(object):
         #try:
         self._unique("cell", name)
 
-        if matName not in self.materials:
-            raise Exception("Material " + matName + " does not exist," \
+        if mat_name not in self.materials:
+            raise Exception("Material " + mat_name + " does not exist," \
                     " cannot use in cell")
 
-        inSurfaces = []
+        neg_surfs = []
         # TODO initalize for efficiency
-        for surfaceName in inSurfaceNames:
-            if surfaceName not in self.surfaces:
-                raise Exception("Surface " + surfaceName + " does not " \
+        for surf_name in neg_surf_names:
+            if surf_name not in self.surfaces:
+                raise Exception("Surface " + surf_name + " does not " \
                         "exist, cannot use in cell")
-            inSurfaces = inSurfaces + [self.surfaces[surfaceName]]
+            neg_surfs = neg_surfs + [self.surfaces[surf_name]]
 
-        outSurfaces = []
-        for surfaceName in outSurfaceNames:
-            if surfaceName not in self.surfaces:
-                raise Exception("Surface " + surfaceName + " does not " \
+        pos_surfs = []
+        for surf_name in pos_surf_names:
+            if surf_name not in self.surfaces:
+                raise Exception("Surface " + surf_name + " does not " \
                         "exist, cannot use in cell")
-            outSurfaces = outSurfaces + [self.surfaces[surfaceName]]
+            pos_surfs = pos_surfs + [self.surfaces[surf_name]]
 
         self.cells[name] = mcnpcard.Cell(self._next_cell_card(), name,
-                self.materials[matName], density, densityUnits, inSurfaces,
-                outSurfaces, imp, temp, vol)
+                self.materials[mat_name], density, density_units, neg_surfs,
+                pos_surfs, imp, temp, vol)
         #except:
         #    raise Exception("Failed to add a cell")
 
-    def add_cell_void(self, name, inSurfaceNames, outSurfaceNames, imp):
+    def add_cell_void(self, name, neg_surf_names, pos_surf_names, imp):
         """Adds a void cell. Accordingly the cell does not have a material card
         associated with it. Furthermore, a specified temperature would have no
         effect (TODO).
@@ -251,10 +251,10 @@ class Inp(object):
         name : str
             Name for the cell (e.g. 'whereneutronsgotodie') that is used when
             adding cards that use this cell.
-        inSurfaceNames : list, str
+        neg_surf_names : list, str
             Names of the surfaces that have a negative sense for this cell
             (e.g. "innerboundary").
-        outSurfaceNames : list, str
+        pos_surf_names : list, str
             Names of the surfaces that have a positive sense for this cell
             (e.g. "outerboundary").
         imp : int
@@ -272,23 +272,23 @@ class Inp(object):
         #try:
         self._unique("cell", name)
 
-        inSurfaces = []
+        neg_surfs = []
         # TODO initalize for efficiency
-        for surfaceName in inSurfaceNames:
-            if surfaceName not in self.surfaces:
-                raise Exception("Surface " + surfaceName + " does not " \
+        for surf_name in neg_surf_names:
+            if surf_name not in self.surfaces:
+                raise Exception("Surface " + surf_name + " does not " \
                         "exist, cannot use in cell")
-            inSurfaces = inSurfaces + [self.surfaces[surfaceName]]
+            neg_surfs = neg_surfs + [self.surfaces[surf_name]]
 
-        outSurfaces = []
-        for surfaceName in outSurfaceNames:
-            if surfaceName not in self.surfaces:
-                raise Exception("Surface " + surfaceName + " does not " \
+        pos_surfs = []
+        for surf_name in pos_surf_names:
+            if surf_name not in self.surfaces:
+                raise Exception("Surface " + surf_name + " does not " \
                         "exist, cannot use in cell")
-            outSurfaces = outSurfaces + [self.surfaces[surfaceName]]
+            pos_surfs = pos_surfs + [self.surfaces[surf_name]]
 
         self.cells[name] = mcnpcard.CellVoid(self._next_cell_card(), name,
-                inSurfaces, outSurfaces, imp)
+                neg_surfs, pos_surfs, imp)
         #except:
         #    raise Exception("Failed to add a cell")
 
@@ -414,7 +414,7 @@ class Inp(object):
                 self._next_surface_card(), name, xmin, xmax, ymin, ymax,
                 zmin, zmax, reflecting, white)
 
-    def add_material(self, name, comment, ZAIDs, densityUnits, densities,
+    def add_material(self, name, comment, ZAIDs, density_units, densities,
             temp=None):
         """Adds a material card (M) to the data card block.
 
@@ -430,7 +430,7 @@ class Inp(object):
             Each element of the tuple is printed on its own line.
         ZAIDs : list, int
             The nuclides that make up the material.
-        densityUnits : str
+        density_units : str
             Either 'atoms/b/cm' or 'g/cm^3'
             TODO descriptive is more important than short
         densities : list, float
@@ -449,7 +449,7 @@ class Inp(object):
         #try:
         self._unique("material", name)
         self.materials[name] = mcnpcard.Material(self._next_mat_card(),
-                name, comment, ZAIDs, densityUnits, densities, temp)
+                name, comment, ZAIDs, density_units, densities, temp)
         #except:
         #    raise Exception("Failed to add a material")
 
@@ -712,16 +712,16 @@ class Inp(object):
         self._write_comment("")
         self._write_deck_header_line("Cell")
         self._write_comment("")
-        for cellName in self.cells:
-            self._write_card(self.cells[cellName].card())
+        for cell_name in self.cells:
+            self._write_card(self.cells[cell_name].card())
         self._write_return()
 
         # writing surfaces
         self._write_comment("")
         self._write_deck_header_line("Surface")
         self._write_comment("")
-        for surfaceName in self.surfaces:
-            self._write_card(self.surfaces[surfaceName].card())
+        for surf_name in self.surfaces:
+            self._write_card(self.surfaces[surf_name].card())
         self._write_return()
 
         # writing data cards
@@ -730,13 +730,13 @@ class Inp(object):
         # writing materials
         self._write_comment("")
         self._write_data_header_line("Materials")
-        for materialName in self.materials:
+        for matl_name in self.materials:
             self._write_comment("")
-            self._write_material_comment(self.materials[materialName].comment())
+            self._write_material_comment(self.materials[matl_name].comment())
             self._write_comment("")
-            self._write_material_card(self.materials[materialName].card())
-            if materialName in self.scattering_laws:
-                self._write_card(self.scattering_laws[materialName].card())
+            self._write_material_card(self.materials[matl_name].card())
+            if matl_name in self.scattering_laws:
+                self._write_card(self.scattering_laws[matl_name].card())
 
         # Writing source cards.
         # Want a way to know what type of source we're using.
@@ -884,16 +884,16 @@ class Inp(object):
         return
 
     def _next_surface_card(self):
-        self.surfaceCard += 1
-        return self.surfaceCard
+        self.surface_card += 1
+        return self.surface_card
 
     def _next_cell_card(self):
-        self.cellCard += 1
-        return self.cellCard
+        self.cell_card += 1
+        return self.cell_card
 
     def _next_mat_card(self):
-        self.matCard += 1
-        return self.matCard
+        self.mat_card += 1
+        return self.mat_card
 
     def _next_tally_cell_flux_card(self):
         self.tally_cellflux_card += 10
