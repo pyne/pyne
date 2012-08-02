@@ -60,6 +60,7 @@ class Inp(object):
         description : str
             Text that is written to the input file as comments as a perhaps
             lengthy description of the simulation specified by the input file.
+            This can be multiple lines.
         author : str
             The name of the author of the input. This is printed at the top of
             the input file, below the description.
@@ -129,35 +130,6 @@ class Inp(object):
 
         """
         self.mat_card = self.mat_card + 100
-
-    def set_title(self, title):
-        """Sets the title of the input file. The title is written to the top of
-        the input as a comment.
-        The user may call this method, or simply supply the title through the
-        constructor keyword argument.
-
-        Parameters
-        ----------
-        title : str
-            The title of the input file, which is written to the top of the
-            input file as a comment.
-        """
-        self.title = title
-
-    def set_description(self, description):
-        """Sets the description of the input file, which is written to the top
-        of the input as a comment. The description is expected to be several
-        lines.
-        The user may call this method, or simply supply the title through the
-        constructor keyword argument.
-
-        Parameters
-        ----------
-        description : str
-            Description for the input file.
-
-        """
-        self.description = description
 
     def add_cell(self, name, mat_name, density, density_units, neg_surf_names,
             pos_surf_names, imp, temp=None, vol=None):
