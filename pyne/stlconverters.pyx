@@ -594,7 +594,7 @@ cdef class _SetStr:
         # Decide how to init set, if at all
         if isinstance(new_set, _SetStr):
             self.set_ptr = (<_SetStr> new_set).set_ptr
-        elif hasattr(new_set, '__iter__') or
+        elif hasattr(new_set, '__iter__') or \
                 (hasattr(new_set, '__len__') and
                 hasattr(new_set, '__getitem__')):
             self.set_ptr = new cpp_set[std.string]()
