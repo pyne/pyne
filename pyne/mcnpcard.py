@@ -128,10 +128,10 @@ class Cell(Card):
         string2write += (" " * (25 - len(string2write)) + 
                 "IMP:N={0}".format(self.imp))
         if self.temp is not None:
-            string2write += " TMP=%.4e" % (self.temp * Card.kelvin2energy)
+            string2write += " TMP=%.4e" % (self.temp * self.kelvin2energy)
         if self.vol is not None:
             string2write += " VOL=%.4e" % self.vol
-        return (string2write + " " * (Card.dollarcol - len(string2write)) + 
+        return (string2write + " " * (self.dollarcol - len(string2write)) + 
                 "$ " + self.comment())
 
 
@@ -172,7 +172,7 @@ class CellVoid(Card):
             string2write += " -{0}".format(surface.card_no)
         string2write += (" " * (25 - len(string2write)) + 
                 "IMP:N={0}".format(self.imp))
-        return (string2write + " " * (Card.dollarcol - len(string2write)) + 
+        return (string2write + " " * (self.dollarcol - len(string2write)) + 
                 "$ " + self.comment())
 
 
@@ -260,7 +260,7 @@ class Cylinder(Surface):
         string2write = self.card_no_string()
         string2write += (" " * (4 - len(string2write)) + "C" +
                 self.dirstr.upper() + "  " + "%.4f" % self.radius)
-        return (string2write + " " * (Surface.dollarcol - len(string2write)) +
+        return (string2write + " " * (self.dollarcol - len(string2write)) +
                 "$ " + self.comment())
 
 
@@ -307,7 +307,7 @@ class Plane(Surface):
         string2write = self.card_no_string()
         string2write += (" " * (4 - len(string2write)) + "P" +
                 self.dirstr.upper() + " " * nspaces + "%.4f" % self.pos)
-        return (string2write + " " * (Surface.dollarcol - len(string2write)) +
+        return (string2write + " " * (self.dollarcol - len(string2write)) +
                 "$ " + self.comment())
 
 
@@ -365,7 +365,7 @@ class Sphere(Surface):
         else:
             string2write += (" " * (4 - len(string2write)) + "SO" +
                     " %.4f" % self.radius)
-        return (string2write + " " * (Surface.dollarcol - len(string2write)) +
+        return (string2write + " " * (self.dollarcol - len(string2write)) +
                 "$ " + self.comment())
 
 
@@ -418,7 +418,7 @@ class RectangularParallelepiped(Surface):
                 " %.4f %.4f %.4f %.4f %.4f %.4f" % (
                         self.xmin, self.xmax, self.ymin, self.ymax,
                         self.zmin, self.zmax))
-        dollarcol = max(Surface.dollarcol - len(string2write), 2)
+        dollarcol = max(self.dollarcol - len(string2write), 2)
         return (string2write + " " * dollarcol +
                 "$ " + self.comment())
 
@@ -468,7 +468,7 @@ class Material(Card):
             "densities.")
         super(Material, self).__init__(card_no, name)
         self.comment_tuple = comment
-        if check_ZAIDs(ZAIDs):
+        if self.check_ZAIDs(ZAIDs):
             self.ZAIDs = ZAIDs
         else:
             raise Exception("Error in ZAID input.")
@@ -476,7 +476,7 @@ class Material(Card):
             self.dens_prefix = ''
         else:
             self.dens_prefix = self.get_density_prefix(density_units)
-        if check_densities(densities):
+        if self.check_densities(densities):
             self.densities = densities
         else:
             raise Exception("Error in density input.")
@@ -484,11 +484,11 @@ class Material(Card):
 
     def check_ZAIDs(self, ZAIDs):
         # TODO error check, make sure they are ZAIDs
-        pass
+        return True
 
     def check_densities(self, densities):
         # TODO error check densities
-        pass
+        return True
 
     def comment(self):
         return self.comment_tuple
