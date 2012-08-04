@@ -868,6 +868,20 @@ class Inp(object):
     
     @staticmethod
     def example_infinitelattice(inpname='infinitelattice'):
+        """Creates an example input file for a infinite lattice of enriched UO2
+        fuel pins surrounded by water.
+
+        Parameters
+        ----------
+        inpname : str, optional
+            Name of the directory and file name for the generated input file.
+
+        Returns
+        -------
+        inp1 : pyne.mcnp.Inp object
+            The Inp object created for the example.
+
+        """
         # Create the mcnp.Inp object. A single 'modification' is provided.
         inp1 = Inp(inpname, 
             'Example of PyNE mcnp.Inp class for infinite lattice',
@@ -946,6 +960,7 @@ class Inp(object):
         # Write the input file!
         inp1.write()
         print "An example input is written to the " + inpname + " directory."
+        return inp1
 
 
 class Mctal(object):
