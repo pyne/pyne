@@ -482,6 +482,7 @@ class Material(Card):
 
     def check_ZAIDs(self, ZAIDs):
         # TODO error check, make sure they are ZAIDs
+        # TODO use properties.
         return True
 
     def check_densities(self, densities):

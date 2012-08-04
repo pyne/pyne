@@ -17,6 +17,8 @@ import struct
 import math 
 import os
 
+import numpy as np
+
 from pyne import mcnpcard
 
 from binaryreader import _BinaryReader, _FortranRecord
@@ -871,6 +873,87 @@ class Inp(object):
     def _next_tally_cell_flux_card(self):
         self.tally_cellflux_card += 10
         return self.tally_cellflux_card
+    
+    @staticmethod
+    def example_infinitelattice(inpname='infinitelattice'):
+        # Create the mcnp.Inp object. A single 'modification' is provided.
+        inp1 = Inp(inpname, 
+            'Example of PyNE mcnp.Inp class for infinite lattice',
+            ("This input is generated using PyNE's mcnp.Inp class, a wrapper for "
+            "input files. This particular input is of an infinite lattice of "
+            "enriched UO2 fuel pins surrounded by water."), 
+            'Chris Dembia', 
+            [('Aug 2012', 'creation')])
+        
+        # Add surfaces.
+        radius = 0.40 # cm
+        inp1.add_surface_cylinder('pin', 'z', radius)
+        pitch = 1.2 # cm
+        inp1.add_surface_rectangularparallelepiped('cellbound',
+                -pitch / 2, pitch / 2, -pitch / 2, pitch / 2, 0, 0,
+                reflecting=True)
+        # Add materials.
+        enrichment = 0.05
+        uox_temp = 600
+        inp1.add_material('UOX', ('5% enriched UO2',),
+                ['8016', '92235', '92238'], 'atoms/b/cm',
+                [2, enrichment, 1 - enrichment], uox_temp)
+        water_temp = 300
+        inp1.add_material('H2O', ('Water',), 
+                ['1001', '8016'], 'atoms/b/cm',
+                [2, 1],
+                water_temp)
+        # We specify a scattering law for hydrogen bound in water.
+        inp1.add_scattering_law('H2O', ['lwtr'])
+        # Add cells.
+        pin_vol = 3.14159 * radius**2
+        uox_density = 11
+        water_density = 1
+        inp1.add_cell('UOX pin', # name.
+                      'UOX', # material, given above.
+                      uox_density,
+                      'g/cm^3', # units of density.
+                      ["pin"], # surfaces for negative sense.
+                      [], # surfaces for positive sense.
+                      1, # neutron importance.
+                      temp=uox_temp, # temperature (K).
+                      vol=pin_vol) # volume(cm^3).
+        inp1.add_cell('moderator',
+                      'H2O',
+                      water_density,
+                      'g/cm^3',
+                      ['cellbound'],
+                      ['pin'],
+                      1,
+                      water_temp,
+                      vol=pitch**2 - pin_vol)
+        inp1.add_cell_void('Problem boundary', # name.
+                           [], # negative sense.
+                           ['cellbound'],# positive sense.
+                           0) # neutron importance 
+        # Source.
+        # Use the default arguments.
+        inp1.add_criticality_source()
+        # Use the default argument.
+        inp1.add_criticality_source_points()
+        # Flux tally (F4) in the fuel; for neutrons.
+        inp1.add_tally_cellflux('fuel spectrum', 'N',
+                ['UOX pin'])
+        # Flux tally (F4) in the moderator; for neutrons.
+        inp1.add_tally_cellflux('moderator spectrum', 'N',
+                ['moderator'])
+        group_def = 10**np.arange(-9.9, 1.1, .1)
+        inp1.add_tally_energy(0, list(group_def))
+        # Tally multiplier cards for obtaining reaction rates.
+        # MT 1: total, MT 2: elastic scattering, MT 3: fission, MT 4: capture
+        inp1.add_tally_multiplier('fuel spectrum', [(1,),
+                (-1, 'UOX', [1, 2, 18, 102])])
+        inp1.add_tally_multiplier('moderator spectrum', [(1,),
+                (-1, 'H2O', [1, 2, 18, 102])])
+        inp1.add_printdump()
+        # Write the input file!
+        inp1.write()
+        print "An example input is written to the " + inpname + " directory."
 
 
 class Mctal(object):
