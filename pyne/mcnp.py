@@ -181,14 +181,13 @@ class Inp(object):
             inp.add_cell('myfirstcell', 'UO2', 11.5, 'g/cm^3', ['pin',], [], 
                     1, temp=600)
 
-        TODO Only neutron importances can be specified so far.
-        TODO Change in/outSurface* to neg/posSurface*.
-        TODO Change docstrings to the kwarg/optional convention used elsewhere
-        in PyNE.
-        TODO only assign if no errors. check uniqueness of name
-        TODO clean up error checking; make it consistent
-
         """
+        # TODO Only neutron importances can be specified so far.
+        # TODO Change in/outSurface* to neg/posSurface*.
+        # TODO Change docstrings to the kwarg/optional convention used elsewhere
+        # in PyNE.
+        # TODO only assign if no errors. check uniqueness of name
+        # TODO clean up error checking; make it consistent
         #try:
         self._unique("cell", name)
 
@@ -220,7 +219,7 @@ class Inp(object):
     def add_cell_void(self, name, neg_surf_names, pos_surf_names, imp):
         """Adds a void cell. Accordingly the cell does not have a material card
         associated with it. Furthermore, a specified temperature would have no
-        effect (TODO).
+        effect.
 
         Parameters
         ----------
@@ -243,8 +242,8 @@ class Inp(object):
 
             inp.add_cell_void('myfirstvoid', [], ['pin',], 1)
 
-        TODO error check if the user tries to supply a temp kwarg, etc.
         """
+        # TODO error check if the user tries to supply a temp kwarg, etc.
         #try:
         self._unique("cell", name)
 
@@ -291,8 +290,10 @@ class Inp(object):
             reflecting.
         white : bool, optional
             Places an addition symbol before the card number if the surface
-            gives white reflection. TODO cosine distribution?
+            gives white reflection. 
+
         """
+        # TODO cosine distribution?
         #try:
         self._unique("surface", name)
         self.surfaces[name] = mcnpcard.Plane(self._next_surface_card(),
@@ -323,9 +324,10 @@ class Inp(object):
             reflecting.
         white : bool, optional
             Places an addition symbol before the card number if the surface
-            gives white reflection. TODO cosine distribution?
+            gives white reflection.
 
         """
+        # TODO cosine distribution?
         #try:
         self._unique("surface", name)
         self.surfaces[name] = mcnpcard.Cylinder(self._next_surface_card(),
@@ -352,12 +354,10 @@ class Inp(object):
             reflecting.
         white : bool, optional
             Places an addition symbol before the card number if the surface
-            gives white reflection. TODO cosine distribution?
-
-        TODO only the origin sphere is implemented.
+            gives white reflection.
 
         """
-
+        # TODO only the origin sphere is implemented.
         self._unique("surface", name)
         self.surfaces[name] = mcnpcard.Sphere(self._next_surface_card(),
                 name, radius)
@@ -381,11 +381,10 @@ class Inp(object):
             reflecting.
         white : bool, optional
             Places an addition symbol before the card number if the surface
-            gives white reflection. TODO cosine distribution?
-
-        TODO the name is currenty has quite the length.
+            gives white reflection.
 
         """
+        # TODO the name is currenty has quite the length.
         self.surfaces[name] = mcnpcard.RectangularParallelepiped(
                 self._next_surface_card(), name, xmin, xmax, ymin, ymax,
                 zmin, zmax, reflecting, white)
@@ -408,7 +407,6 @@ class Inp(object):
             The nuclides that make up the material.
         density_units : str
             Either 'atoms/b/cm' or 'g/cm^3'
-            TODO descriptive is more important than short
         densities : list, float
             Density or atom/weight fraction of the nuclides, given in the same
             order as the ZAIDs.
@@ -418,9 +416,11 @@ class Inp(object):
 
         Examples
         --------
+            TODO
 
 
         """
+        # TODO descriptive is more important than short
         # TODO only assign if no errors. check uniqueness of name
         #try:
         self._unique("material", name)
@@ -493,9 +493,8 @@ class Inp(object):
 
             KCODE 2000 1.5 30 300
 
-        TODO this docstring is not very descriptive.
-
         """
+        # TODO this docstring is not very descriptive.
         # TODO there are other options
         self.source = mcnpcard.Criticality(n_histories, keff_guess,
                 n_skip_cycles, n_cycles)
@@ -552,10 +551,9 @@ class Inp(object):
         where it is assumed that the 'fuel' and 'mod' cells have cell numbers 1
         and 2.
 
-        TODO I don't think cell flux is the best descriptive name for this
-        tally.
-
         """
+        # TODO I don't think cell flux is the best descriptive name for this
+        # tally.
         # Check to see that the relevant particle type is already in use.
         self._unique("tally", name)
         cell_nos = []
@@ -603,15 +601,13 @@ class Inp(object):
         used for the cell associated with the tally to which this card is
         applied.
        
-        TODO I'd like to move away from MT numbers, etc if possible.
-
-
-        [(c, "matname", MTs), (c, "matname", MTs)
-        TODO can tally_no be zero, like with the En card?
-        ERROR check: the material used for multiplier is the same as the one
-        used for the cell in the actual tally?
-        TODO want to make the -1 input smarter
         """
+        # TODO I'd like to move away from MT numbers, etc if possible.
+        # [(c, "matname", MTs), (c, "matname", MTs)
+        # TODO can tally_no be zero, like with the En card?
+        # ERROR check: the material used for multiplier is the same as the one
+        # used for the cell in the actual tally?
+        # TODO want to make the -1 input smarter
         if tally_name not in self.tallies:
             raise Exception("The tally specified for this tally multiplier "
                     "card does not exist.")
@@ -646,7 +642,8 @@ class Inp(object):
 
         Examples
         --------
-        TODO
+            TODO
+
         """
         # TODO allow for logarithmic input.
         if tally_name is 0:
