@@ -125,14 +125,6 @@ class Inp(object):
         self.author = author
         self.modifications = modifications
 
-    def _next_mat_card(self):
-        """Increments the material card counter.
-        TODO It is assumed taht the the interval for material card indices is
-        100. There is no need for this though; it could be 1.
-
-        """
-        self.mat_card = self.mat_card + 100
-
     def add_cell(self, name, mat_name, density, density_units, neg_surf_names,
             pos_surf_names, imp, temp=None, vol=None):
         """Create a cell card given a material name, density, surface names,
