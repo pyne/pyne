@@ -460,6 +460,7 @@ class Material(Card):
         if type(ZAIDs) == int:
             raise Exception("ZAIDs input must be a list.")
         if type(densities) == int or type(densities) == float:
+            # TODO this is a bad error-check.
             raise Exception("densities input must be a list.")
         if len(ZAIDs) != len(densities):
             raise Exception("Number of ZAIDs does not match number of " \
