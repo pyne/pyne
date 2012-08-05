@@ -110,6 +110,7 @@ class Inp(object):
         # Criticality source points, e.g. "KSRC"
         self.source_points = None
         # All data cards. May be printed in any order.
+        # TODO should be a dict.
         self.miscdata = []
         # Tally cards.
         self.tallies = collections.OrderedDict()
@@ -514,6 +515,8 @@ class Inp(object):
         """
         # If self.source_points is not None when _write() is called, then this
         # KSRC card is printed.
+        # TODO should not store this in source_points... should be in
+        # miscsource or something, or just miscdata.
         self.source_points = mcnpcard.CriticalitySourcePoints(points)
 
     def add_tally_cellflux(self, name, particle, cell_names):
@@ -867,7 +870,7 @@ class Inp(object):
         return self.tally_cellflux_card
     
     @staticmethod
-    def example_infinitelattice(inpname='infinitelattice'):
+    def example_infinitelattice(inpname='infinitelattice', printmsg=True):
         """Creates an example input file for a infinite lattice of enriched UO2
         fuel pins surrounded by water.
 
@@ -875,6 +878,10 @@ class Inp(object):
         ----------
         inpname : str, optional
             Name of the directory and file name for the generated input file.
+        printmsg : str, optional
+            Prints a line to indicate the input file has been created. The
+            option to disable this message is used in testing, so that the
+            output of the testing is clean.
 
         Returns
         -------
@@ -959,7 +966,9 @@ class Inp(object):
         inp1.add_printdump()
         # Write the input file!
         inp1.write()
-        print "An example input is written to the " + inpname + " directory."
+        if printmsg:
+            print ("An example input is written to the " + inpname + 
+                " directory.")
         return inp1
 
 
