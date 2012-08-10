@@ -240,7 +240,7 @@ def make_simple_xs(args):
             return 
 
     # First grab the atomic abundance data
-    print "Grabing neutron summary files from KAERI"
+    print "Grabbing neutron summary files from KAERI"
     grab_kaeri_simple_xs(build_dir)
 
     # Make simple table once we have the array
