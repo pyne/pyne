@@ -59,14 +59,15 @@ namespace pyne
     //Fundemental mass stream data
     comp_map comp;
     double mass;
+    double density;
     std::string name;
     double atoms_per_mol;
 
     //Material Constructors
     Material ();
-    Material (comp_map, double=-1.0, std::string="", double=-1.0);
-    Material (char *, double=-1.0, std::string="", double=-1.0);
-    Material (std::string, double=-1.0, std::string="", double=-1.0);
+    Material (comp_map, double=-1.0, double=-1.0, std::string="", double=-1.0);
+    Material (char *, double=-1.0, double=-1.0, std::string="", double=-1.0);
+    Material (std::string, double=-1.0, double=-1.0, std::string="", double=-1.0);
     ~Material ();
 
     //Material function definitions
@@ -112,6 +113,7 @@ namespace pyne
   typedef struct material_struct {
     char name [20];
     double mass;
+    double density;
     double atoms_per_mol;
     double comp [];
   } material_struct;
