@@ -214,11 +214,11 @@ def make_atomic_weight(args):
                 return 
 
     # First grab the atomic abundance data
-    print "Grabing the atomic abundance from KAERI"
+    print "Grabbing the atomic abundance from KAERI"
     grab_kaeri_atomic_abund(build_dir)
 
     # Then grab mass data
-    print "Grabing atomic mass data from AMDC"
+    print "Grabbing atomic mass data from AMDC"
     grab_atmoic_mass_adjustment(build_dir)
 
     # Make atomic weight table once we have the array
