@@ -63,7 +63,7 @@ class Njoy99(object):
         if not os.path.isdir(self.evaluationName):
             os.mkdir(self.evaluationName)
         os.chdir(self.evaluationName)
-        textDil=""
+        textDil = ""
         if self.dilutions:
             nbDil = len(self.dilutions)
             if nbDil > 10:
@@ -75,7 +75,7 @@ class Njoy99(object):
         nbTmp = len(self.temperatures)
         if nbTmp > 10:
             raise PyNjoyError("cannot have more than 10 temperatures")
-        textTmp=""
+        textTmp = ""
         for tmp in self.temperatures:
             textTmp += " %E" % tmp
 
