@@ -45,11 +45,16 @@ def grab_ensdf_decay(build_dir=""):
                 os.remove(fpath)
                 urllib.urlretrieve(s3_base_url + f, fpath)
 
-        with ZipFile(fpath) as zf:
+        # not using ZipFile context manager (with statement for Python 2.6)
+        try:
+            zf = ZipFile(fpath)
             for name in zf.namelist():
                 if not os.path.exists(os.path.join(build_dir, name)):
                     print "    extracting {0} from {1}".format(name, f)
                     zf.extract(name, build_dir)
+        finally:
+            zf.close()
+        
 
 
 
