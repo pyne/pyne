@@ -39,8 +39,7 @@ cdef cpp_map[int, double] dict_to_comp(dict nucvec):
 
 cdef class _Material:
 
-    def __cinit__(self, nucvec=None, double mass=-1.0, char * name='',
-                  double atoms_per_mol=-1.0, bint free_mat=True):
+    def __cinit__(self, nucvec=None, double mass=-1.0, double density=-1.0, char * name='', double atoms_per_mol=-1.0, bint free_mat=True):
         """Material C++ constuctor."""
         cdef cpp_map[int, double] comp
 
@@ -48,12 +47,12 @@ cdef class _Material:
             # Material from dict
             comp = dict_to_comp(nucvec)
             self.mat_pointer = new cpp_material.Material(
-                    comp, mass, std.string(name), atoms_per_mol)
+                    comp, mass, density, std.string(name), atoms_per_mol)
 
         elif isinstance(nucvec, basestring):
             # Material from file
             self.mat_pointer = new cpp_material.Material(
-                    <char *> nucvec, mass, std.string(name), atoms_per_mol)
+                    <char *> nucvec, mass, density, std.string(name), atoms_per_mol)
 
         elif (nucvec is None):
             if free_mat:
@@ -124,6 +123,12 @@ cdef class _Material:
         def __set__(self, double value):
             self.mat_pointer.mass = value
 
+    property density:
+        def __get__(self):
+            return self.mat_pointer.density
+
+        def __set__(self, double value):
+            self.mat_pointer.density = value
 
     property name:
         def __get__(self):
@@ -998,7 +1003,7 @@ cdef class _Material:
             mbm = self.mult_by_mass()
             mbm.map_ptr[0][key] = value
             new_matp = new cpp_material.Material(
-                    mbm.map_ptr[0], -1.0, self.mat_pointer.name)
+                    mbm.map_ptr[0], -1.0, -1.0, self.mat_pointer.name)
             self.mat_pointer = new_matp
             self._comp = None
 
@@ -1048,7 +1053,7 @@ cdef class _Material:
             mbm = self.mult_by_mass()
             mbm.map_ptr.erase(<int> key)
             new_matp = new cpp_material.Material(
-                    mbm.map_ptr[0], -1.0, self.mat_pointer.name)
+                    mbm.map_ptr[0], -1.0, -1.0, self.mat_pointer.name)
             self.mat_pointer = new_matp
             self._comp = None
 
@@ -1120,6 +1125,8 @@ class Material(_Material, collections.MutableMapping):
         (default -1.0) then the mass of the new stream is calculated from the
         sum of compdict's components before normalization.  If the mass here is
         positive or zero, then this mass overrides the calculated one.
+    density : float, optional
+        This is the density of the material.
     name : str, optional
         A string label for the material.  Helpful for large numbers of
         streams. Default ''.
@@ -1136,6 +1143,7 @@ class Material(_Material, collections.MutableMapping):
     def __str__(self):
         header = ["Material: {0}".format(self.name)]
         header += ["mass = {0}".format(self.mass)]
+        header += ["density= {0}".format(self.density)]
         header += ["atoms per molecule = {0}".format(self.atoms_per_mol)]
         header += ['-' * max([len(h) for h in header])]
         header = "\n".join(header) + "\n"
@@ -1145,8 +1153,8 @@ class Material(_Material, collections.MutableMapping):
         return s
 
     def __repr__(self):
-        return "pyne.material.Material({0}, {1}, {2}, {3})".format(
-                repr(self.comp), self.mass, repr(self.name),
+        return "pyne.material.Material({0}, {1}, {2}, {3}, {4})".format(
+                repr(self.comp), self.mass, self.density, repr(self.name),
                 self.atoms_per_mol,)
 
 
