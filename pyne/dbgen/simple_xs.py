@@ -151,7 +151,8 @@ def parse_simple_xs(build_dir=""):
 
     all_nuclides = sorted([nucname.zzaaam(nuc) for nuc in all_nuclides])
 
-    energy_tables = {eng: np.zeros(len(all_nuclides), dtype=simple_xs_dtype) for eng in simple_xs_energy.keys()}
+    energy_tables = dict([(eng, np.zeros(len(all_nuclides), dtype=simple_xs_dtype)) \
+                          for eng in simple_xs_energy.keys()])
 
     # Loop through species
     for i, nuc_zz in enumerate(all_nuclides):
@@ -239,7 +240,7 @@ def make_simple_xs(args):
             return 
 
     # First grab the atomic abundance data
-    print "Grabing neutron summary files from KAERI"
+    print "Grabbing neutron summary files from KAERI"
     grab_kaeri_simple_xs(build_dir)
 
     # Make simple table once we have the array
