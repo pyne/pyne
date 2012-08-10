@@ -28,8 +28,7 @@ namespace pyne
   extern std::map<int, double> atomic_mass_map;
 
   typedef struct atomic_weight_struct {
-    char nuc_name[6];
-    int nuc_zz;
+    int nuc;
     double mass;
     double error;
     double abund;
@@ -49,8 +48,7 @@ namespace pyne
   extern std::map<int, double> b_map;
 
   typedef struct scattering_lengths_struct {
-    char nuc_name[6];
-    int nuc_zz;
+    int nuc;
     extra_types::complex_t b_coherent;
     extra_types::complex_t b_incoherent;
     double xs_coherent;
@@ -81,11 +79,9 @@ namespace pyne
   extern std::map<int, double> decay_const_map;
 
   typedef struct atomic_decay_struct {
-    char from_nuc_name[6];
-    int from_nuc_zz;
+    int from_nuc;
     double level;
-    char to_nuc_name[6];
-    int to_nuc_zz;
+    int to_nuc;
     double half_life;
     double decay_const;
     double branch_ratio;
