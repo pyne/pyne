@@ -71,7 +71,7 @@ def main():
                   ('cinder', make_cinder), 
                   ]
     make_map = dict(make_funcs)
-    make_open = {'atomic_weight', 'scattering_lengths', 'simple_xs'}
+    make_open = set(['atomic_weight', 'scattering_lengths', 'simple_xs'])
 
     # Parse the command line arguments
     parser = argparse.ArgumentParser(description='Make a nuclear data library.')
