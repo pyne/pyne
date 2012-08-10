@@ -8,10 +8,6 @@ project( pyne )
 # 'include()' command, 'find_package()' command.
 set( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_LIST_DIR}/cmake )
 
-# A number of things are required for running pyne
-find_package(HDF5 REQUIRED)
-set(PYNE_INCLUDE_DIR ${HDF5_INCLUDE_DIR})
-
 # Include the CMake script UseCython.cmake.  This defines add_cython_module().
 # Instruction for use can be found at the top of cmake/UseCython.cmake.
 include( UseCython )
@@ -19,8 +15,15 @@ include( UseCython )
 # Also, there are some custom pyne macros to make for less verbosity
 include( PyneMacros )
 
+# Beware of dragons
+print_logo()
+
 # This makes all the libraries build as SHARED
 set(BUILD_SHARED_LIBS true)
+
+# A number of things are required for running pyne
+find_package(HDF5 REQUIRED)
+set(PYNE_INCLUDE_DIR ${HDF5_INCLUDE_DIR})
 
 # With CMake, a clean separation can be made between the source tree and the
 # build tree.  When all source is compiled, as with pure C/C++, the source is
@@ -34,7 +37,6 @@ add_custom_target( ReplicatePythonSourceTree ALL ${CMAKE_COMMAND} -P
 
 include_directories( ${CYTHON_CMAKE_EXAMPLE_SOURCE_DIR}/include )
 
-print_logo()
 
 # ------------ Add all Subdirectories with a CMakeLists File ----------------------
 file(GLOB all_valid_subdirs RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} 
