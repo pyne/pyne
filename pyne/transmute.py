@@ -24,6 +24,7 @@ def decay(mat, t):
     A = _create_decay_matrix(nucvec)
     print nucvec
     print A
+    eA = _solve_decay_matrix(A)
 
 
 def _create_decay_matrix(nucs):
@@ -32,3 +33,8 @@ def _create_decay_matrix(nucs):
     A = np.zeros((nnucs, nnucs), dtype=float)
     A[nucsrange, nucsrange] = [-data.decay_const(nuc) for nuc in nucs]
     return A
+
+
+def _solve_decay_matrix(A):
+    eA = scipy.linalg.expm(A)
+    return eA
