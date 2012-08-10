@@ -28,7 +28,7 @@ def grab_cinder_dat(build_dir="", datapath=''):
     local_filename = os.path.join(datapath, "[Cc][Ii][Nn][Dd][Ee][Rr].[Dd][Aa][Tt]")
     local_filename = glob(local_filename)
     if 0 < len(local_filename):
-        print "Grabing cinder.dat from " + datapath
+        print "Grabbing cinder.dat from " + datapath
         shutil.copy(local_filename[0], build_filename)
         rtn = True
     else:
