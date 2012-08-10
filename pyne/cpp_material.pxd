@@ -15,16 +15,20 @@ cdef extern from "material.h" namespace "pyne":
         Material()
         Material(map[int, double]) except +
         Material(map[int, double], double) except +
+        Material(map[int, double], double, double) except +
         Material(map[int, double], double, std.string) except +
-        Material(map[int, double], double, std.string, double) except +
+        Material(map[int, double], double, double, std.string) except +
+        Material(map[int, double], double, double,std.string, double) except +
         Material(char *) except +
         Material(char *, double) except +
-        Material(char *, double, std.string) except +
-        Material(char *, double, std.string, double) except +
+        Material(char *, double, double) except +
+        Material(char *, double, double, std.string) except +
+        Material(char *, double, double, std.string, double) except +
 
         # Attributes
         map[int, double] comp
         double mass
+        double density
         std.string name
         double atoms_per_mol
 

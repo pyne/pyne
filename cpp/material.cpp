@@ -269,6 +269,7 @@ void pyne::Material::write_hdf5(std::string filename, std::string datapath, std:
   // make the data table type
   data_desc.insertMember("name", HOFFSET(pyne::material_struct, name), H5::StrType(0, 20));
   data_desc.insertMember("mass", HOFFSET(pyne::material_struct, mass), H5::PredType::NATIVE_DOUBLE);
+  data_desc.insertMember("density", HOFFSET(pyne::material_struct, density), H5::PredType::NATIVE_DOUBLE);
   data_desc.insertMember("atoms_per_mol", HOFFSET(pyne::material_struct, atoms_per_mol), H5::PredType::NATIVE_DOUBLE);
   data_desc.insertMember("comp", HOFFSET(pyne::material_struct, comp), comp_values_array_type);
 
@@ -283,6 +284,7 @@ void pyne::Material::write_hdf5(std::string filename, std::string datapath, std:
       (*mat_data).name[i] = NULL;
   };
   (*mat_data).mass = mass;
+  (*mat_data).density = density;
   (*mat_data).atoms_per_mol = atoms_per_mol;
   for (int n = 0; n != nuc_size; n++)
   {
@@ -332,6 +334,7 @@ void pyne::Material::write_hdf5(std::string filename, std::string datapath, std:
     for (int i=0; i < 20; i++)
       (*data_fill_value).name[i] = NULL;
     (*data_fill_value).mass = -1.0;
+    (*data_fill_value).density= -1.0;
     (*data_fill_value).atoms_per_mol = -1.0;
     for (int n = 0; n != nuc_size; n++)
       (*data_fill_value).comp[n] = 0.0;
@@ -414,6 +417,8 @@ void pyne::Material::from_text(std::string filename)
       name = valstr;
     else if (keystr == "Mass")
       mass = pyne::to_dbl(valstr);
+    else if (keystr == "Density")
+      density = pyne::to_dbl(valstr);
     else if (keystr == "APerM")
       atoms_per_mol = pyne::to_dbl(valstr);
     else
@@ -444,6 +449,9 @@ void pyne::Material::write_text (std::string filename)
   if (0 <= mass)
     f << "Mass    " << mass << "\n";
 
+  if (0 <= density)
+    f << "Density    "  << density << "\n";
+  
   if (0 <= atoms_per_mol)
     f << "APerM   " << atoms_per_mol << "\n";
 
@@ -471,16 +479,18 @@ pyne::Material::Material()
 {
   // Empty Material constructor
   mass = -1.0;
+  density = -1.0;
   name = std::string("");
   atoms_per_mol = -1.0;
 }
 
 
-pyne::Material::Material(pyne::comp_map cm, double m, std::string s, double apm)
+pyne::Material::Material(pyne::comp_map cm, double m, double d, std::string s, double apm)
 {
   // Initializes the mass stream based on an isotopic component dictionary.
   comp = cm;
   mass = m;
+  density=d;
   name = s;
   atoms_per_mol = apm;
   norm_comp();
@@ -488,10 +498,11 @@ pyne::Material::Material(pyne::comp_map cm, double m, std::string s, double apm)
 
 
 
-pyne::Material::Material(char * fchar, double m, std::string s, double apm)
+pyne::Material::Material(char * fchar, double m, double d, std::string s, double apm)
 {
   // Initializes the mass stream based on an isotopic composition file with a (char *) name.
   mass = m;
+  density = d;
   name = s;
   atoms_per_mol = apm;
 
@@ -509,11 +520,12 @@ pyne::Material::Material(char * fchar, double m, std::string s, double apm)
 };
 
 
-pyne::Material::Material(std::string filename, double m, std::string s, double apm)
+pyne::Material::Material(std::string filename, double m, double d, std::string s, double apm)
 {
   // Initializes the mass stream based on an isotopic composition file with a string name.
   mass = m;
   name = s;
+  density = d;
   atoms_per_mol = apm;
 
   // Check that the file is there
@@ -620,7 +632,7 @@ pyne::Material pyne::Material::sub_mat (std::set<int> nucset,  std::string n)
       cm[i->first] = (i->second) * mass;
   };
 
-  return pyne::Material(cm, -1, n);
+  return pyne::Material(cm, -1, -1, n);
 };
 
 
@@ -659,7 +671,7 @@ pyne::Material pyne::Material::set_mat (std::set<int> nucset, double value, std:
   for (std::set<int>::iterator nuc = nucset.begin(); nuc != nucset.end(); nuc++)
     cm[*nuc] = value;
   
-  return pyne::Material(cm, -1, n);
+  return pyne::Material(cm, -1, -1, n);
 };
 
 
@@ -694,7 +706,7 @@ pyne::Material pyne::Material::del_mat (std::set<int> nucset,  std::string n)
       cm[i->first] = (i->second) * mass;
   };
 
-  return pyne::Material(cm, -1, n);
+  return pyne::Material(cm, -1, -1, n);
 };
 
 
@@ -734,7 +746,7 @@ pyne::Material pyne::Material::sub_range(int lower, int upper, std::string n)
       cm[i->first] = (i->second) * mass;
   };
 
-  return pyne::Material(cm, -1, n);
+  return pyne::Material(cm, -1,-1, n);
 };
 
 
@@ -758,7 +770,7 @@ pyne::Material pyne::Material::set_range(int lower, int upper, double value, std
       cm[i->first] = (i->second) * mass;
   };
 
-  return pyne::Material(cm, -1, n);
+  return pyne::Material(cm, -1,-1, n);
 };
 
 
@@ -780,7 +792,7 @@ pyne::Material pyne::Material::del_range(int lower, int upper, std::string n)
       cm[i->first] = (i->second) * mass;
   };
 
-  return pyne::Material(cm, -1, n);
+  return pyne::Material(cm, -1, -1, n);
 };
 
 
@@ -894,7 +906,7 @@ void pyne::Material::from_atom_frac(std::map<int, double> atom_fracs)
 pyne::Material pyne::Material::operator+ (double y)
 {
   // Overloads x + y
-  return pyne::Material(comp, mass + y, name);
+  return pyne::Material(comp, mass + y, density, name);
 };
 
 
@@ -920,7 +932,7 @@ pyne::Material pyne::Material::operator+ (Material y)
       cm[i->first] = ywgt[i->first];			
   };
 
-  return pyne::Material(cm, -1, "");
+  return pyne::Material(cm, -1, -1, "");
 };
 
 
@@ -928,7 +940,7 @@ pyne::Material pyne::Material::operator+ (Material y)
 pyne::Material pyne::Material::operator* (double y)
 {
   // Overloads x * y
-  return pyne::Material(comp, mass * y, name);
+  return pyne::Material(comp, mass * y, density, name);
 };
 
 
@@ -936,6 +948,6 @@ pyne::Material pyne::Material::operator* (double y)
 pyne::Material pyne::Material::operator/ (double y)
 {
   // Overloads x / y
-  return pyne::Material(comp, mass / y, name);
+  return pyne::Material(comp, mass / y, density, name);
 }
 
