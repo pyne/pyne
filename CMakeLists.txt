@@ -8,6 +8,10 @@ project( pyne )
 # 'include()' command, 'find_package()' command.
 set( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_LIST_DIR}/cmake )
 
+# A number of things are required for running pyne
+find_package(HDF5 REQUIRED)
+set(PYNE_INCLUDE_DIR ${HDF5_INCLUDE_DIR})
+
 # Include the CMake script UseCython.cmake.  This defines add_cython_module().
 # Instruction for use can be found at the top of cmake/UseCython.cmake.
 include( UseCython )
@@ -30,14 +34,15 @@ add_custom_target( ReplicatePythonSourceTree ALL ${CMAKE_COMMAND} -P
 
 include_directories( ${CYTHON_CMAKE_EXAMPLE_SOURCE_DIR}/include )
 
-# Process the CMakeLists.txt in the subdirectories.
+print_logo()
 
 # ------------ Add all Subdirectories with a CMakeLists File ----------------------
-FILE(GLOB all_valid_subdirs RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "*/CMakeLists.txt")
+file(GLOB all_valid_subdirs RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} 
+  "*/CMakeLists.txt")
 
-FOREACH(dir ${all_valid_subdirs})
-  IF(${dir} MATCHES "^([^/]*)//CMakeLists.txt")
-    STRING(REGEX REPLACE "^([^/]*)//CMakeLists.txt" "\\1" dir_trimmed ${dir})
-    ADD_SUBDIRECTORY(${dir_trimmed})
-  ENDIF()
-ENDFOREACH(dir)
+foreach(dir ${all_valid_subdirs})
+  if(${dir} MATCHES "^([^/]*)//CMakeLists.txt")
+    string(REGEX REPLACE "^([^/]*)//CMakeLists.txt" "\\1" dir_trimmed ${dir})
+    add_subdirectory(${dir_trimmed})
+  endif()
+endforeach(dir)
