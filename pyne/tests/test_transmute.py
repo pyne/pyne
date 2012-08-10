@@ -4,7 +4,7 @@ from unittest import TestCase
 import nose
 
 from nose.tools import assert_equal, assert_not_equal, assert_raises, raises, \
-    assert_almost_equal, assert_true, assert_false, assert_in
+    assert_almost_equal, assert_true, assert_false
 
 import os
 from pyne.material import Material
@@ -19,4 +19,3 @@ def test_decay1():
     obs = transmute.decay(mat, 1.0)
 
     assert False
-
