@@ -12,6 +12,12 @@ set( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_LIST_DIR}/cmake )
 # Instruction for use can be found at the top of cmake/UseCython.cmake.
 include( UseCython )
 
+# Also, there are some custom pyne macros to make for less verbosity
+include( PyneMacros )
+
+# This makes all the libraries build as SHARED
+set(BUILD_SHARED_LIBS true)
+
 # With CMake, a clean separation can be made between the source tree and the
 # build tree.  When all source is compiled, as with pure C/C++, the source is
 # no-longer needed in the build tree.  However, with pure *.py source, the
