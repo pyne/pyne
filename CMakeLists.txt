@@ -52,15 +52,5 @@ add_custom_target( ReplicatePythonSourceTree ALL ${CMAKE_COMMAND} -P
   ${CMAKE_CURRENT_BINARY_DIR}
   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} )
 
-include_directories( ${CYTHON_CMAKE_EXAMPLE_SOURCE_DIR}/include )
-
-# ------------ Add all Subdirectories with a CMakeLists File ----------------------
-file(GLOB all_valid_subdirs RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} 
-  "*/CMakeLists.txt")
-
-foreach(dir ${all_valid_subdirs})
-  if(${dir} MATCHES "^([^/]*)//CMakeLists.txt")
-    string(REGEX REPLACE "^([^/]*)//CMakeLists.txt" "\\1" dir_trimmed ${dir})
-    add_subdirectory(${dir_trimmed})
-  endif()
-endforeach(dir)
+add_subdirectory(cpp)
+add_subdirectory(pyne)

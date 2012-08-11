@@ -1,3 +1,4 @@
+set(PYNE_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR} ${PYNE_INCLUDE_DIRS} PARENT_SCOPE)
 
 add_lib_to_pyne(pyne pyne.cpp)
 install_lib(pyne)
