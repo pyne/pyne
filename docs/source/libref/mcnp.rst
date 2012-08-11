@@ -14,7 +14,7 @@ functionality of the module can be obtained by importing as such::
     from pyne import mcnp
 
 The userguide page :ref:`usersguide_mcnp` includes an example of the usage of
-the `mcnp.Inp` class.
+the ``mcnp.Inp`` class.
 
 **************
 Inp Class
