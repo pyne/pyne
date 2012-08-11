@@ -33,10 +33,14 @@ print_logo()
 set(BUILD_SHARED_LIBS true)
 
 # Include the HDF5 library and c++ headers
-FIND_PACKAGE( HDF5 COMPONENTS CXX )
-INCLUDE_DIRECTORIES(${HDF5_INCLUDE_DIRS})
-ADD_DEFINITIONS(${HDF5_DEFINITIONS})
+find_package( HDF5 COMPONENTS CXX )
+include_directories(${HDF5_INCLUDE_DIRS})
+add_definitions(${HDF5_DEFINITIONS})
 set(LIBS ${LIBS} ${HDF5_CXX_LIBRARIES})
+
+# find numpy and include the numpy headers
+find_package(Numpy REQUIRED)
+include_directories(${NUMPY_INCLUDE_DIR})
 
 # With CMake, a clean separation can be made between the source tree and the
 # build tree.  When all source is compiled, as with pure C/C++, the source is
