@@ -16,15 +16,18 @@ class InputFile(object):
     """
     __metaclass__ = abc.ABCMeta
 
-    @abc.abstractmethod
-    def _cell_card(self, cell):
-        """Returns a cell card string."""
+    def __init__(self):
         pass
+
+    @abc.abstractmethod
+    def _cell(self, cell):
+        """Returns a cell card string."""
+        return
 
     @abc.abstractmethod
     def _infinite_cylinder_surface(self, surface):
         """Returns an infinite cylinder surface card."""
-        pass
+        return
 
 class JSONInput(InputFile):
     """TODO ideally we can exchange file formats through something like this
@@ -43,12 +46,20 @@ class MCNPInput(InputFile):
 
         """
 
-    def cell_card(self, cell):
+    def _cell(self, cell):
+        """Returns a cell card string."""
+        return
 
-    def cell
+    def _infinite_cylinder_surface(self, surface):
+        """Returns an infinite cylinder surface card."""
+        return
+
+
+
 
 class SerpentInput(object):
-    """
+    """Must find the cell used for a given material, and would need to create
+    more than one material if necessary.
 
     """
     def __init__(self, reactordef, simulationdef):
