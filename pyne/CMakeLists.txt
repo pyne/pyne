@@ -1,4 +1,5 @@
 # Python extension modules
+include_directories(${PYNE_INCLUDE_DIRS})
 
 # STL converters
 # If the pyx file is a C++ file, we should specify that here.
