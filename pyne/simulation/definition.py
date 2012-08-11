@@ -1,6 +1,13 @@
 #!/usr/bin/env python
 
-"""Another possible name is latticesim or latticesimulation.
+"""The ``definition`` module can be imported as such::
+
+    from pyne.simulation import definition
+
+Below is the reference for this module.
+
+
+Another possible name is latticesim or latticesimulation.
 
 """
 
@@ -8,6 +15,7 @@ import abc
 import collections
 
 from pyne import material
+from pyne.simulation import cards
 
 class SimulationDefinition(object):
     __metaclass__ = abc.ABCMeta
@@ -50,15 +58,44 @@ class SystemDefinition(SimulationDefinition):
         self.cells = collections.OrderedDict()
 
     def save(self, fname):
-        """Saves reactor definition to a JSON file."""
+        """Saves definition to a JSON file. It is unlikely that the class will
+        be amenable to json.dump()."""
+        return
 
     def _open(self, fname):
+        return
+
+    def add_cell(self):
+        return
+
+    def add_cylinder(self):
+        return
 
 
 class OptionsDefinition(SimulationDefinition):
-    """This may need to be subclassed for different codes."""
+    """This is basically where all the data cards are stored. The easy name for
+    this class is either OptionsDefinition (Serpent) or DataDefinition (MCNP),
+    but I'm not too happy with either. I'd like any ideas for this. This may
+    need to be subclassed for different codes, because different codes do not
+    provide the same options."""
 
-    def __init__(self):
+    def __init__(self, fname=None):
+        """Creates a new options definition or loads one from a JSON file."""
+
+        if fname is not None:
+            self._open(fname)
+        else:
+            self._create_new()
+
+    def _create_new(self):
+        """Initialize any attributes/properties."""
+
+    def save(self, fname):
+        """Saves definition to a JSON file. It is unlikely that the class will
+        be amenable to json.dump()."""
+        return
+
+    def _open(self, fname):
         return
 
     def add_criticality_source(self):
@@ -67,119 +104,6 @@ class OptionsDefinition(SimulationDefinition):
     def add_criticality_points(self):
         return
 
-
-class Card(object):
-    """Abstract superclass for all cards. All cards have a name and number
-    property, as well as a comment method.
-    
-    """
-
-    __metaclass__ = abc.ABCMeta
-    
-    @abc.abstractmethod
-    def __init__(self, name, number):
-        name(name)
-        number(number)
-
-    @abc.abstractmethod
-    def comment(self):
+    def add_tally_cellflux(self):
         return
-
-    @property
-    def number(self):
-        return self._number
-
-    @number.setter
-    def number(self, value):
-        self._number = value
-       
-    @property
-    def name(self):
-        return self._name
-
-    @name.setter
-    def name(self, value):
-        self._name = value
-
-class CellVoid(Card):
-    """
-    """
-
-    def __init__(self, name, number):
-        """
-        """
-
-    def comment(self):
-        return
-    
-    @property
-    def neg_surface_cards(self):
-        """Surfaces with a negative sense for this cell."""
-        return self._neg_surface_cards
-
-    @property
-    def pos_surface_cards(self):
-        """Surfaces with a positive sense for this cell."""
-        return self._pos_surface_cards
-
-    @property
-    def neutron_importance(self):
-        """MCNPX only."""
-        return self._neutron_importance
-
-
-class Cell(CellVoid):
-    """
-    """
-
-    def __init__(self, name, number):
-        """
-
-        """
-
-    def comment(self):
-        return
-
-    @property
-    def material(self):
-        """A pyne.material object specifying the material filling the cell."""
-        return self._materialcard
-
-    @property
-    def density(self):
-        """Density for the material, in units of self.density_units."""
-        return self._density
-
-    @property
-    def density_units(self):
-        """Either 'g/cm^3', or 'atoms/b/cm'."""
-        return self._density_units
-
-    @property
-    def temperature(self):
-        """Temperature of the cell, in Kelvin."""
-        return self._temperature
-
-    @property
-    def volume(self):
-        """Volume of the cell, in cm^3. Optional."""
-        return self._volume
-        
-
-class Surface(Card):
-    """
-    """
-
-    def __init__(self, name, number):
-        return
-
-
-
-
-
-
-
-
-
-
 
