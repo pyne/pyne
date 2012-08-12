@@ -39,58 +39,85 @@ except ImportError:
 class MctalTallyData(object):
 
     mcnpTallyDims = ['F','D','U','S','M','C','E','T']
-    mcnpTallyPhysDims = ['C','E','T']
+    mcnpTallyPhysDims = ['F','C','E','T']
 
     def __init__(self):
-        tally_num = 0
-        mode = 0
-        ttype = 0
-        comment = ""
-        dim_info = {}
-        bins = {}
-        data = np.array()
-        shape = []
+        self.tally_num = 0
+        self.mode = 0
+        self.ttype = 0
+        self.comment = ""
+        self.dim_info = {}
+        self.bins = {}
+        self.data = np.array([])
+        self.shape = []
+        self.tfc = {}
         pass
 
-    def readBinData(fp):
+    def write(self):
+        print "Tally number: " + str(self.tally_num)
+        print "Tally mode: " + str(self.mode)
+        print "Tally type: " + str(self.ttype)
+        print "Tally comment: " + self.comment
+
+        for dim in MctalTallyData.mcnpTallyDims:
+            msg = "Dimension " + dim + " has " + str(max(self.dim_info[dim]['num_bins'],1)) + " bin(s)"
+            if self.dim_info[dim]['total_flag']:
+                msg += ", including a total bin"
+            print msg
+        dataview = self.data.view().reshape(self.shape)
+        print dataview
+        print "There are " + str(self.tfc['num_TFC_sets']) + " sets of tally fluctation chart data from bins: " + str(self.tfc['bin_indices'])
+        for tfc_set in self.tfc['data']:
+            print tfc_set
+    
+    def readBinData(self,fp):
         num_entries = 2; # value + error
-        for dim in mcnpTallyDims:
-            num_entries *= dim_info[dim]['num_bins'] + int(dim_info[dim]['total_flag'])
-            
+        for dim in self.mcnpTallyDims:
+            num_entries *= max(self.dim_info[dim]['num_bins'],1)
+        print "Reading " + str(num_entries) + " entries."
         # read num_entries in numpy array (how?)
         while (self.data.size < num_entries):
-            self.data.append([double(i) for i in fp.readline.split()])
+            self.data = np.append(self.data,[float(i) for i in fp.readline().split()])
 
+        print self.data
+        print self.data.size
         return
 
     def readDimensionInfo(self,fp):
         totalBinFlag = 'T'
         cummulativeBinFlag = 'C'
 
-        bins_total = false
-        bins_cumm = false
+        bins_total = False
+        bins_cumm = False
 
         words = fp.readline().split()
-
         if (len(words[0])>1):
-            bins_total = (words[0][1] == totalBinFlag)
-            bins_cumm = (words[0][1] == cummulativeBinFlag)
-        num_bins = max(int(words[1]),1)
+            bins_total = (words[0][1].upper() == totalBinFlag)
+            bins_cumm = (words[0][1].upper() == cummulativeBinFlag)
+        num_bins = int(words[1])
         
         return {'total_flag':bins_total, 'cumm_flag':bins_cumm, 'num_bins':num_bins}
 
     def readBinBounds(self,fp,num_bounds):
         bin_bounds = []
         while (len(bin_bounds) < num_bounds):
-            bin_bounds.append([double(i) for i in fp.readline.split()])
+            bin_bounds.extend([float(i) for i in fp.readline().split()])
         return bin_bounds
 
+    def readTFC(self,fp):
+        
+        words = fp.readline().split()
+        self.tfc['num_TFC_sets'] = int(words[1])
+        self.tfc['bin_indices'] = words[2:]
+        self.tfc['data'] = []
+        for row in range(self.tfc['num_TFC_sets']):
+            self.tfc['data'].append([float(i) for i in fp.readline().split()])
 
     def readTallyData(self,fp):
         
         # Tally intro card
         words = fp.readline().split()
-        self.tally_num = tally_num
+        self.tally_num = int(words[1])
         self.mode = int(words[2])
         self.ttype = int(words[3])
 
@@ -98,11 +125,12 @@ class MctalTallyData(object):
         self.comment = fp.readline()
 
         # tally dimension information
-        for dim in mcnpTallyDims:
+        for dim in self.mcnpTallyDims:
             self.dim_info[dim] =  self.readDimensionInfo(fp)
-            if dim in mcnpTallyPhysDims:
-                self.bins[dim] = self.readBinBounds(self.dim_info[dim]['num_bins'])
-            self.shape.append(self.dim_info[dim]['num_bins'])
+            if dim.upper() in self.mcnpTallyPhysDims and self.dim_info[dim]['num_bins']>0:
+                self.bins[dim] = self.readBinBounds(fp,self.dim_info[dim]['num_bins']-int(self.dim_info[dim]['total_flag']))
+            self.shape.extend([max(1,self.dim_info[dim]['num_bins'])])
+        self.shape.append(2)
 
         # vals
         fp.readline()
@@ -111,8 +139,21 @@ class MctalTallyData(object):
         #tfc
         self.readTFC(fp)
 
+        return self.tally_num
+
 class Mctal(object):
     def __init__(self):
+        self.codeName = ""
+        self.codeVersion = ""
+        self.codeDate = ""
+        self.codeTime = ""
+        self.n_dump = 0
+        self.n_histories = 0
+        self.n_nrn = 0
+        self.comment = ""
+        self.n_tallies = 0
+        self.n_perts = 0
+        self.tally_nums = []
         pass
 
     def read_header(self):
@@ -121,29 +162,44 @@ class Mctal(object):
         """
 
         # get code name, version, date/time, etc
-        words = fp.readline().split()
+        words = self.f.readline().split()
         self.codeName = words[0]
         self.codeVersion = words[1]
         self.codeDate = words[2]
         self.codeTime = words[3]
         self.n_dump = words[4]
         self.n_histories = int(words[5])
-        self.n_prn       = int(words[6])
+        self.n_nrn       = int(words[6])
 
         # comment line of input file
-        self.comment = fp.readline().strip()
+        self.comment = self.f.readline().strip()
 
         # read tally line
-        words = fp.readline().split()
-        self.n_tallies = words[1]
+        words = self.f.readline().split()
+        self.n_tallies = int(words[1])
         if len(words) > 2:
             # perturbation tallies present
-            self.n_perts = words[3]
+            self.n_perts = int(words[3])
 
         # read tally numbers
-        self.tally_nums = []
         while len(self.tally_nums) < self.n_tallies:
-            self.tally_nums.append([int(i) for i in fp.readline().split()])
+            self.tally_nums.extend([int(i) for i in self.f.readline().split()])
+
+    def print_header(self):
+        print "Code name: " + self.codeName
+        print "Code version: " + self.codeVersion
+        print "Code Date & Time: " + self.codeDate + " " + self.codeTime
+        print "Number of dumps in runtpe: " + str(self.n_dump)
+        print "Number of histories: " + str(self.n_histories)
+        print "Number of random numbers used: " + str(self.n_nrn)
+        print
+        print "Problem title: " + self.comment
+        print "Number of tallies in file: " + str(self.n_tallies)
+        if (self.n_perts > 0):
+            print "Number of perturbations in file: " + str(self.n_perts)
+        else:
+            print "No perturbations in file."
+        print "Tally numbers: " + str(self.tally_nums)
 
     def read_kcode_data(self):
         # read kcode information
@@ -211,14 +267,15 @@ class Mctal(object):
         self.read_header()
 
         # for standard tallies, read each tally and add to a dictionary
-        if self.tally_nums < 0:
+        if self.tally_nums > 0:
             self.tallyData = {}
 
             for i in self.tally_nums:
                 thisTallyData = MctalTallyData()
-                thisTallyNum = thisTallyData.read_tally(self.f)
+                thisTallyNum = thisTallyData.readTallyData(self.f)
                 self.tallyData[thisTallyNum] = thisTallyData
 
+    def hide_this(self):
         # read kcode information
         self.read_kcode_data()
 
