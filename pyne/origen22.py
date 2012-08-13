@@ -496,7 +496,9 @@ def parse_tape6(tape6="TAPE6.OUT"):
 
         for grp in _group_key_map.values():
             if grp in results[tbl]['nuclide']:
-                mats = [m + mat_gen({nuc: arr[i] for nuc, arr in results[tbl]['nuclide'][grp].items()}) for i, m in enumerate(mats)]
+                mats = [m + mat_gen(dict([(nuc, arr[i]) for nuc, arr in \
+                                            results[tbl]['nuclide'][grp].items()])) \
+                                            for i, m in enumerate(mats)]
 
         results['materials'] = mats
 
