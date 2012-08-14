@@ -41,7 +41,7 @@ class SystemDefinition(SimulationDefinition):
     regions in space in the reactor, called cells, are defined through the
     intersection, union, etc of surfaces and are filled by materials. The
     definition of materials is done using the `material` module of PyNE.
-    
+
     """
 
     def __init__(self, fname=None):
