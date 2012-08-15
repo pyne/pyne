@@ -19,7 +19,7 @@ extension to other codes may require more effort.
 
 import abc
 
-class InputFile(object):
+class IInput(object):
     """Abstract base class for classes that take system and option definitions
     to create an input file for a certain code (e.g. MCNPX, Serpent, MCODE,
     etc.).
@@ -27,7 +27,7 @@ class InputFile(object):
     """
     __metaclass__ = abc.ABCMeta
 
-    def __init__(self, systemdef, optionsdef):
+    def __init__(self, optionsdef):
         """
 
         Parameters
@@ -36,6 +36,10 @@ class InputFile(object):
 
         """
         pass
+
+    @abc.abstractmethod
+    def _walk(self, region):
+        return
 
     @abc.abstractmethod
     def _cell(self, cell):
@@ -47,15 +51,12 @@ class InputFile(object):
         """Returns an infinite cylinder surface card."""
         return
 
-#class JSONInput(InputFile):
-#    """TODO ideally we can exchange file formats through something like this
-#    intermediate."""
 
-class MCNPInput(InputFile):
+class MCNPInput(IInput):
     """Contains a write method for each type of surface.
     """
 
-    def __init__(self, systemdef, optionsdef):
+    def __init__(self, optionsdef):
         pass
 
     def _cell(self, cell):
@@ -67,12 +68,15 @@ class MCNPInput(InputFile):
         return
 
 
-class SerpentInput(object):
+class SerpentInput(IInput):
     """Must find the cell used for a given material, and would need to create
     more than one material if necessary.
 
     """
-    def __init__(self, systemdef, optionsdef):
-        pass
+    pass
 
 
+class JSONInput(IInput):
+    """Ideally we can exchange file formats through something like this
+    intermediate."""
+    pass
