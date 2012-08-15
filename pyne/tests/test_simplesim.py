@@ -31,6 +31,26 @@ class TestSurfaces(unittest.TestCase):
         self.assertEquals(cyl.radius, 0.4)
         self.assertEquals(cyl.reflecting, None)
         self.assertEquals(cyl.white, None)
+        # Set reflecting.
+        cyl = cards.AxisCylinder('mycyl', 'z', 0.4, reflecting=True)
+        self.assertEquals(cyl.reflecting, True)
+        self.assertEquals(cyl.white, None)
+        # Set white.
+        cyl = cards.AxisCylinder('mycyl', 'z', 0.4, white=True)
+        self.assertEquals(cyl.reflecting, None)
+        self.assertEquals(cyl.white, True)
+        # Set reflecting and white.
+        self.assertRaises(ValueError, cards.AxisCylinder, 'mycyl', 'z', 0.4,
+                reflecting=True, white=True)
+        # Test the exception message.
+        try:
+            cyl = cards.AxisCylinder('mycyl', 'z', 0.4, reflecting=True,
+                    white=True)
+        except ValueError as e:
+            self.assertEquals(e.message, "The user set the surface to be "
+                    "reflecting AND white, but can only be neither or "
+                    "one of the two.")
+
         # Z can be capitalized in input.
         cyl = cards.AxisCylinder('mycyl', 'Z', 0.4)
         self.assertEquals(cyl.cartesian_axis, 'z')
