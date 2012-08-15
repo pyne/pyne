@@ -1,8 +1,8 @@
 .. _pyne_simplesim:
 
-=======================================================
-Reactor Simulation definition and input file generation
-=======================================================
+==================================
+Simple Simulation Input Generation
+==================================
 
 .. currentmodule:: pyne.simplesim
 
@@ -105,7 +105,8 @@ Cards Module
 ************
 
 .. automodule:: pyne.simplesim.cards
-    :member-order: 'bysource'
+    :member-order: 'groupwise'
     :members:
     :inherited-members:
+    :show-inheritance:
 
