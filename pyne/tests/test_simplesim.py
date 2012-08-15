@@ -22,7 +22,7 @@ class TestSurfaces(unittest.TestCase):
         pass
 
     def test_AxisCylinder(self):
-        """Checks AxisCylinder's methods, properties, and exceptions."""
+        """Tests AxisCylinder's methods, properties, and exceptions."""
 
         ## __init__()
         cyl = cards.AxisCylinder('mycyl', 'z', 0.4)
@@ -75,6 +75,12 @@ class TestSurfaces(unittest.TestCase):
         # The axis cylinder cannot be shifted perpendicular to its axis.
         self.assertRaises(ValueError, cyl.shift, [0, 0, 3])
         self.assertRaises(ValueError, cyl.shift, [3, 3, 0])
+        # Test the exception message.
+        try:
+            cyl.shift([3, 3, 0])
+        except ValueError as e:
+            self.assertEquals(e.message, "A cylinder aligned with the x axis "
+                    "cannot be shifted in the y or z directions.")
 
         ## stretch()
         # z-aligned
@@ -111,6 +117,13 @@ class TestSurfaces(unittest.TestCase):
         self.assertAlmostEqual(cyl.radius, 3.6)
         self.assertRaises(ValueError, cyl.stretch, [0, 3, 0])
         self.assertRaises(ValueError, cyl.stretch, [1, 3, 2])
-
+        # Test the exception message.
+        try:
+            cyl.stretch([1, 3, 2])
+        except ValueError as e:
+            self.assertEquals(e.message, "Stretches perpendicular to the "
+                    "axis must be uniform in the two perpendicular "
+                    "directions. User provided y stretch 3.0000 and z "
+                    "stretch 2.0000 for a x-aligned cylinder.")
 
 
