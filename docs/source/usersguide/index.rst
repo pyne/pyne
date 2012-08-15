@@ -18,3 +18,4 @@ essential aspects of using PyNE to do nuclear engineering.
     origen22
     enrichment
     stlconverters
+    simplesim
