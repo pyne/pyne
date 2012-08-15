@@ -21,6 +21,8 @@ class TestSurfaces(unittest.TestCase):
         # test density_units exception.
         pass
 
+    def test_AxisPlane(self):
+        """Tests Plane's methods, properties, and exceptions."""
     def test_AxisCylinder(self):
         """Tests AxisCylinder's methods, properties, and exceptions."""
 
