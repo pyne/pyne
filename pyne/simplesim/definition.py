@@ -2,7 +2,7 @@
 
 """The ``definition`` module can be imported as such::
 
-    from pyne.simulation import definition
+    from pyne.simplesim import definition
 
 Below is the reference for this module.
 

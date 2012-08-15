@@ -2,7 +2,7 @@
 
 """The ``inputfile`` module can be imported as such::
 
-    from pyne.simulation import inputfile
+    from pyne.simplesim import inputfile
 
 Below is the reference for this module.
 
