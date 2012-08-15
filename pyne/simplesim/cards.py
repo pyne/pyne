@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 
-"""The ``cards`` module can be imported as such::
+"""The :py:mod:`cards` module can be imported as such::
 
     from pyne.simplesim import cards
 
 The user does not interact with this module. Rather, the user interacts with
-the ``definition`` module. Instances of classes in the ``definition`` module
+the :py:mod:`definition` module. Instances of classes in the :py:mod:`definition` module
 contains instances of the classes in this module.  Below is the reference for
 the module.
 
@@ -42,7 +42,7 @@ class ICard(object):
         name : str
             Name of this instance of this card, used for referencing this card
             from others and modifying this card after it has been added to a
-            definition (see ``pyne.simplesim.definition``). There is no
+            definition (see :py:mod:`pyne.simplesim.definition`). There is no
             known restriction on the characters that can be used in the name,
             but the name must be unique.
 
@@ -112,7 +112,7 @@ class Cell(CellVoid):
             See :py:class:`CellVoid`
         material : :py:class:`pyne.material.Material`
             A material definition using the :py:mod:`pyne.material` module.
-            For use here, the material's ``name`` property must be set to something
+            For use here, the material's :py:attr:`name` property must be set to something
             other than '' and must be unique. See
             :py:class:`pyne.material.Material`.
         density : float
@@ -427,7 +427,7 @@ class ISurface(ICard):
     The Surface superclass contains properties to set the surface as reflecting
     or white. For codes other than MCNPX, reflecting or white surfaces may be
     specified on a separate boundary condition card (i.e. in Serpent) or may
-    not even be available. For other codes, then, the appropriate ``inputfile``
+    not even be available. For other codes, then, the appropriate :py:mod:`inputfile`
     class needs to pick up this information and print the appropriate string to
     the code's input file, or in the latter case return an exception.
 
@@ -467,7 +467,7 @@ class ISurface(ICard):
         
         Parameters
         ----------
-        vector : 3-element list or ``np.array``, float [centimeters]
+        vector : 3-element list or :py:class:`np.array`, float [centimeters]
             The elements specify translation in the x, y, and z directions, 
             in this order.
 
@@ -490,7 +490,7 @@ class ISurface(ICard):
 
         Parameters
         ----------
-        vector : 3-element list or ``np.array``, float [unitless]
+        vector : 3-element list or :py:class`np.array`, float [unitless]
             The elements specify a stretch in the x, y, and z directions, in
             this order. A zero in any of the directions indicates that no
             stretch is done in that direction.
@@ -522,8 +522,8 @@ class ISurface(ICard):
 
         Examples
         --------
-        The following shows a simple case of how a more complex region can be constructed from
-        regions returned by this property::
+        The following shows a simple case of how a more complex region can be
+        constructed from regions returned by this property::
 
             reg1 = surf1.neg
             reg2 = surf2.neg
@@ -670,7 +670,7 @@ class AxisCylinder(IAxisSurface):
 
         Examples
         --------
-        The following is okay (where we have imported ``numpy`` as ``np``)::
+        The following is okay (where we have imported :py:mod:`numpy` as ``np``)::
 
             cyl = AxisCylinder('mycyl', 'z', 0.4)
             cyl.shift([0, 0, 3])
@@ -707,7 +707,7 @@ class AxisCylinder(IAxisSurface):
         Examples
         --------
         The following stretches are okay for a cylinder aligned with the x axis
-        (where we have imported ``numpy`` as ``np``)::
+        (where we have imported :py:mod`numpy` as ``np``)::
             
             cyl = AxisCylinder('mycyl', 'z', 0.4)
             cyl.stretch([0, 0, 2])
@@ -763,12 +763,31 @@ class AxisCylinder(IAxisSurface):
 
 
 class Plane(IAxisSurface):
-    """
+    """Plane perpendicular to one of the Cartesian axes."""
 
-    """
     def __init__(self, name, cartesian_axis, position,
                  reflecting=None, white=None):
         """
+        Parameters
+        ----------
+        name : str
+            See :py:class:`ICard`.
+        cartesian_axis : str
+            The axis that to which the plane is perpendicular.
+            See :py:class`IAxisSurface`.
+        position : float [centimeters]
+            Position of the plane along :py:attr:`cartesian_axis`.
+        reflecting : bool, optional
+            See :py:class:`ISurface`
+        white : bool, optional
+            See :py:class:`ISurface`
+
+        Examples
+        --------
+        The following creates a plane perpendicular to the x axis, 3 cm along
+        the positive x axis with a reflecting boundary condition::
+
+           plane = Plane('myplane', 'x', 3, reflecting=True) 
 
         """
         super(Plane, self).__init__(name, cartesian_axis,
