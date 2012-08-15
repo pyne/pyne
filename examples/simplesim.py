@@ -108,7 +108,7 @@ rxr.add_lattice
 rxr.add_universe
 cards.CellbyUniverse
 
-
+perhaps add all surfaces and materials at once.
 
 
 
