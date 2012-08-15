@@ -13,23 +13,33 @@ the module.
 
 import abc
 
+import numpy as np
+
 from pyne import material
 
 class ICard(object):
-    """Abstract superclass for all cards. All cards have a name and number
-    property, as well as a comment method.
-    
-    """
+
+    # This line makes this class an abstract base class (ABC).
     __metaclass__ = abc.ABCMeta
     
     def __init__(self, name):
-        """
+        """Abstract superclass for all cards. All cards have a name and number
+        property, as well as a comment method.
+
+        Parameters
+        ----------
+        name : str
+            Name of this instance of this card, used for referencing this card
+            from others and modifying this card after it has been added to a
+            definition (see ``pyne.simplesim.definition``).
 
         """
         self.name = name
 
+    # All subclasses must now define a comment() method.
     @abc.abstractmethod
     def comment(self):
+        """All cards define a comment describing the content of the card."""
         return
 
     @property
@@ -40,16 +50,24 @@ class ICard(object):
     def name(self, value):
         self._name = value
 
+
 class CellVoid(ICard):
-    """
-    """
+
     def __init__(self, name, region):
+        """An empty region of space; this cell does not contain a material.
+
+        Parameters
+        ----------
+        region : pyne.simplesim.cards.Region
+            Defines the region of space that this cell occupies (see
+            ``pyne.simplesim.cards.Region``).
+
         """
-        """
-        self.region(region)
+        self.region = region
 
    def comment(self):
-       return
+       # TODO Walk the region.
+       return "Comment unimplemented."
 
    @property
    def region(self):
@@ -57,12 +75,25 @@ class CellVoid(ICard):
 
    
 class Cell(CellVoid):
-    """
-    """
 
     def __init__(self, name, region, material, density, density_units):
+        """A cell is a region of space filled with a material.
+        
+        Parameters
+        ----------
+        name : str
+            Name of this instance of this card, used for referencing this card
+            from others and modifying this card after it has been added to a
+            definition (see ``pyne.simplesim.definition``).
+        region : ``pyne.simplesim.cards.Region``
+            Defines the region of space that this cell occupies (see
+            :ref:`pyne.simplesim.cards.Region`).
+        material : ``pyne.material.Material``
+            Defines a material (see :py:mod:`pyne.material`).
+        
         """
-        """
+        # TODO decide how I will do cross-referencing.
+
         super(Cell, self).__init__(name, region)
         self.material = material
         self.density = density
@@ -86,56 +117,41 @@ class Cell(CellVoid):
         return self._density_units
 
 
-class CellSimpleVoid(CellVoid):
+class CellVoidMCNP(CellVoid):
     """
     """
 
-    def __init__(self, name, neg_surfs, pos_surfs):
-        """There must be thought given to how default arguments are treated. It
-        seems to make more sense that there are no kwargs in this module, that
-        they are all in ``definition``, since ``definition`` contains the
-        methods that the user calls.
+    def __init__(self, name, region,
+                 temperature=None, volume=None,
+                 neut_imp=None, phot_imp=None, elec_imp=None, prot_imp=None,
+                 proton_weight_lim=None,
+                 neut_exp_transform=None,
+                 phot_exp_transform=None,
+                 elec_exp_transform=None,
+                 prot_exp_transform=None,
+                 neut_force_coll=None,
+                 phot_force_coll=None,
+                 elec_force_coll=None,
+                 prot_force_coll=None,
+                 neut_weight_win_bound=None,
+                 phot_weight_win_bound=None,
+                 elec_weight_win_bound=None,
+                 prot_weight_win_bound=None,
+                 neut_dxtran_contrib=None,
+                 phot_dxtran_contrib=None,
+                 elec_dxtran_contrib=None,
+                 prot_dxtran_contrib=None,
+                 fission_turnoff=None,
+                 det_contrib=None,
+                 transform=None
+                 ):
+        """
+        The U, LAT, and FILL keywords are not available; as this functionality
+        should be obtained by using Universe and Lattice cards.
 
         """
-        # TODO this could be an overloaded constructor to CellVoid().
-        # Create a region using the negative and positive surfaces.
-        super(CellSimpleVoid, self).__init__(name, region)
-        return
-
-    def comment(self):
-        return
-
-#    @property
-#    def neg_surface_cards(self):
-#        """Surfaces with a negative sense for this cell."""
-#        return self._neg_surface_cards
-#
-#    @property
-#    def pos_surface_cards(self):
-#        """Surfaces with a positive sense for this cell."""
-#        return self._pos_surface_cards
-
-class CellSimple(Cell):
-    """
-    """
-    def __init__(self, name, neg_surfs, pos_surfs, material, density,
-            density_units):
-        # Create region from neg and pos surfaces.
-        super(CellSimple, self).__init__(name, region,
-                                         material, density, density_units)
-        return
-
-
-class CellSimpleVoidMCNP(CellSimpleVoid):
-    """
-    """
-
-    def __init__(self, name, neg_surfs, pos_surfs,
-                 temperature=None, volume=None,
-                 neutron_imp=None, photon_imp=None, electron_imp=None,
-                 proton_imp=None):
-        super(CellSimpleVoidMCNP, self).__init__(name, neg_surfs,
-                pos_surfs)
+        # TODO allow use of U, LAT, and FILL keywords?
+        super(CellVoidMCNP, self).__init__(name, region)
         # Assign keyword arguments.
         self.temperature = temperature
         self.volume = volume
@@ -171,11 +187,11 @@ class CellSimpleVoidMCNP(CellSimpleVoid):
         return self._proton_imp
 
 
-class CellSimpleMCNP(CellSimpleVoidMCNP, CellSimple):
+class CellMCNP(CellVoidMCNP):
     """
     """
 
-    def __init__(self, name, neg_surfs, pos_surfs, material,
+    def __init__(self, name, region, material,
                  temperature=None, volume=None,
                  neutron_imp=None, photon_imp=None, electron_imp=None,
                  proton_imp=None):
@@ -425,24 +441,74 @@ class Plane(IAxisSurface):
         self._position = value
 
 
-class Macrobody(ISurface):
-    pass
+class IMacrobody(ISurface):
+    """
+
+    """
+    def __init__(self, name, reflecting, white):
+        """
+
+        """
+        super(IMacrobody, self).__init__(name, reflecting, white)
 
 
 class Parallelepiped(Macrobody):
+    """
+
+    """
     def __init__(self, name, xmin, xmax, ymin, ymax, zmin, zmax,
-            reflecting=False, white=False):
+                 reflecting=False, white=False):
+        """
+
+        Examples
+        --------
+
+        """
+        super(Parallelepiped, self).__init__(name, reflecting, white)
+        self.xlims = np.array([xmin, xmax])
+        self.ylims = np.array([ymin, ymax])
+        self.zlims = np.array([zmin, zmax])
+
+    @property
+    def xlims(self):
+        return self._xlims
+
+    @xlims.setter(self, value):
+        if value[0] > value[1]:
+            raise ValueError("The value of xmin is greater than that of xmax.")
+        self._xlims = value
+
+    @property
+    def ylims(self):
+        return self._ylims
+
+    @ylims.setter(self, value):
+        if value[0] > value[1]:
+            raise ValueError("The value of ymin is greater than that of ymax.")
+        self._ylims = value
+
+    @property
+    def zlims(self):
+        return self._zlims
+
+    @zlims.setter(self, value):
+        if value[0] > value[1]:
+            raise ValueError("The value of zmin is greater than that of zmax.")
+        self._zlims = value
 
 
 class Cuboid(Parallelepiped):
-    """
+    """Same exact thing as a Parallelepiped. This class is provided because the
+    name is shorter, and thus may be preferred by those who fancy brevity.
+
     """
     def __init__(self, name, xmin, xmax, ymin, ymax, zmin, zmax,
-            reflecting=False, white=False):
+                 reflecting=False, white=False):
         """
         """
         super(Cuboid, self).__init__(name, xmin, xmax, ymin, ymax, zmin, zmax,
                                      reflecting, white)
+
 
 class Region(object):
     """Represents a volume (space) confined by unions and intersections of
