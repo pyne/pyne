@@ -19,6 +19,7 @@ the module.
 # TODO use sphinx domains where possible instead of double single quotes.
 # TODO write a development guide next to the usersguide.
 # TODO make error messages valuable: give back to the user their input.
+# TODO sphinx inheritance diagrams.
 
 import abc
 
@@ -498,7 +499,7 @@ class ISurface(ICard):
         Examples
         --------
         Both of the following lines stretch the surface along the y axis by a
-        factor of 2. The x and z directions are unaffected.::
+        factor of 2. The x and z directions are unaffected::
 
             surf.stretch([0, 2, 0])
             surf.stretch(np.array([0, 2, 0]))
@@ -514,8 +515,8 @@ class ISurface(ICard):
         :py:class:`Region`. The region is define as the
         space on the side of the surface that has a negative sense.
 
-        In the expected typical usage of the :py:mod:`simplesim` package,
-        regions are constructed using these 
+        In the expected typical usage of the :py:mod:`pyne.simplesim` package,
+        regions are constructed using these properties.
 
         For more information, see :py:class:`Region` and
         :ref:`usersguide_simplesim`.
@@ -762,8 +763,13 @@ class AxisCylinder(IAxisSurface):
         self._radius = value
 
 
-class Plane(IAxisSurface):
-    """Plane perpendicular to one of the Cartesian axes."""
+class AxisPlane(IAxisSurface):
+    """
+    .. inheritance-diagram:: pyne.simplesim.cards.AxisCylinder
+    Plane perpendicular to one of the Cartesian axes.
+    
+    
+    """
 
     def __init__(self, name, cartesian_axis, position,
                  reflecting=None, white=None):
@@ -773,8 +779,8 @@ class Plane(IAxisSurface):
         name : str
             See :py:class:`ICard`.
         cartesian_axis : str
-            The axis that to which the plane is perpendicular.
-            See :py:class`IAxisSurface`.
+            The axis to which the plane is perpendicular.
+            See :py:class:`IAxisSurface`.
         position : float [centimeters]
             Position of the plane along :py:attr:`cartesian_axis`.
         reflecting : bool, optional
@@ -787,15 +793,58 @@ class Plane(IAxisSurface):
         The following creates a plane perpendicular to the x axis, 3 cm along
         the positive x axis with a reflecting boundary condition::
 
-           plane = Plane('myplane', 'x', 3, reflecting=True) 
+           plane = AxisPlane('myplane', 'x', 3, reflecting=True) 
 
         """
-        super(Plane, self).__init__(name, cartesian_axis,
+        super(AxisPlane, self).__init__(name, cartesian_axis,
                                     reflecting, white)
         self.position = position
     
     def comment(self):
+        return "Axis plane %s: %s = %.4f" % (self.name, self.position)
         pass
+
+    def shift(self, vector):
+        """See :py:meth:`ISurface.shift`. AxisPlanes can be shifted in any
+        direction, but only shifts along their axis have an effect.
+
+        Examples
+        --------
+        The following has the effect of shifting the plane's position to x = 6
+        cm::
+
+           plane = AxisPlane('myplane', 'x', 3)
+           plane.shift([3, 0, 0])
+
+        The following has no effect, but is allowed::
+
+           plane.shift([0, 3, 2])
+
+        """
+        if self.cartesian_axis == 'x':
+            self.position += vector[0]
+        elif self.cartesian_axis == 'y':
+            self.position += vector[1]
+        elif self.cartesian_axis == 'z':
+            self.position += vector[2]
+
+    def stretch(self):
+        """See :py:meth:`ISurface.stretch`. AxisPlanes can be stretched in any
+        direction, but only stretches along their axis have an effect. The
+        position of the plane is scaled by the stretch factor.
+
+        Examples
+        --------
+        The following has the effect of moving the plane's position to x = 9 cm::
+
+            plane = AxisPlane('myplane', 'x', 3)
+            plane.stretch([3, 0, 0])
+        
+        The following has no effect, but is allowed::
+
+            plane.stretch([0, 3, 2])
+
+        """
 
     @property
     def position(self):
@@ -943,6 +992,8 @@ class RegionOr(IRegionBool):
 
 
 class RegionLeaf(Region):
+    """
+    """
 
     def __init__(self, surface, pos_sense):
         self.surface = surface
