@@ -28,11 +28,10 @@ import numpy as np
 from pyne import material
 
 class ICard(object):
-    """This class is not used by the user. Abstract superclass for all cards.
+    """This class is not used by the user. Abstract base class for all cards.
     All cards have a name property and a comment() method.
 
     """
-
     # This line makes this class an abstract base class (ABC).
     __metaclass__ = abc.ABCMeta
     
@@ -113,8 +112,8 @@ class Cell(CellVoid):
             See :py:class:`CellVoid`
         material : :py:class:`pyne.material.Material`
             A material definition using the :py:mod:`pyne.material` module.
-            For use here, the material's :py:attr:`name` property must be set to something
-            other than '' and must be unique. See
+            For use here, the material's :py:attr:`name` property must be set
+            to something other than '' and must be unique. See
             :py:class:`pyne.material.Material`.
         density : float
             Density for the material, in units of density_units.
@@ -144,6 +143,7 @@ class Cell(CellVoid):
 
     @material.setter
     def material(self, obj):
+        # This check is redundant.
         if obj.name == '':
             raise ValueError("The ``name`` property of the material cannot "
                     "be empty.")
@@ -380,10 +380,12 @@ class CellMCNP(CellVoidMCNP, Cell):
 
 
 class IUniverse(ICard):
-    """This class is not used by the user. Abstract superclass for all
+    """This class is not used by the user. Abstract base class for all
     universe cards.
 
     """
+    __metaclass__ = abc.ABCMeta
+
     def __init__(self, name):
         pass
 
@@ -426,7 +428,7 @@ class LatticeByArray(ICard):
         
 
 class ISurface(ICard):
-    """This class is not used by the user. Abstract superclass for all
+    """This class is not used by the user. Abstract base class for all
     surface cards.
 
     The Surface superclass contains properties to set the surface as reflecting
@@ -544,7 +546,7 @@ class ISurface(ICard):
     @property
     def pos(self):
         """Similar to :py:attr:`neg`, except the resulting
-        :py:mod:`RegionLeaf` is on the side of the surface with a positive
+        :py:class:`RegionLeaf` is on the side of the surface with a positive
         sense.
         
         """
@@ -576,7 +578,7 @@ class ISurface(ICard):
 
 
 class IAxisSurface(ISurface):
-    """This class is not used by the user. Abstract superclass for all simple
+    """This class is not used by the user. Abstract base class for all simple
     axis-aligned surfaces. Accordingly, such classes share the cartesian_axis
     property.
 
@@ -584,6 +586,7 @@ class IAxisSurface(ISurface):
     
     """
     __metaclass__ = abc.ABCMeta
+
     def __init__(self, name, cartesian_axis, reflecting, white):
         """
         Parameters
@@ -875,12 +878,15 @@ class AxisPlane(IAxisSurface):
 
 
 class IMacrobody(ISurface):
-    """This class is not used by the user. Abstract superclass for all
+    """This class is not used by the user. Abstract base class for all
     macrobody cards. Macrobodies are an MCNP concept.
 
     .. inheritance-diagram:: pyne.simplesim.cards.IMacrobody
 
     """
+    __metaclass__ = abc.ABCMeta
+
+    # TODO abstract method for obtaining "sub"-surfaces.
     def __init__(self, name, reflecting, white):
         """
 
@@ -907,9 +913,10 @@ class Parallelepiped(IMacrobody):
         name : str
             See :py:class:`ICard`.
         xmin, xmax, ymin, ymax, zmin, zmax : float [centimeters]
-            Bounds of the parallelepiped in the given direction. Setting both
-            min and max in a given direction to 0 indicates the parallelepiped
-            is infinite in that direction.
+            Bounds of the parallelepiped in the given direction. The *min value
+            must be less than the *max value. Setting both min and max in a
+            given direction to 0 indicates the parallelepiped is infinite in
+            that direction.
         reflecting : bool, optional
             See :py:class:`ISurface`
         white : bool, optional
@@ -917,7 +924,7 @@ class Parallelepiped(IMacrobody):
 
         Examples
         --------
-        The following creates a cube at the origin with 4 cm sides::
+        The following creates a cube centered at the origin with 4 cm sides::
 
             pp = Parallelepiped('mypp', -2, 2, -2, 2, -2, 2)
 
@@ -962,15 +969,13 @@ class Parallelepiped(IMacrobody):
             pp.stretch([2, 0, 3])
 
         creates a parallelepiped bounded by [0, 8] x [-2, 2] x [-6, 6].
-        Consider the reflection of the following parallelepiped::
+        Consider the reflection of the following parallelepiped
+        about the z axis::
         
             pp = Parallelepiped('mypp', 0, 4, -2, 2, -3, 6)
-
-        about the z axis::
-
             pp.stretch([0, 0, -1])
 
-        This results in bounds of [0, 4] x [-2, 2] x [-6, 3]
+        This results in bounds of [0, 4] x [-2, 2] x [-6, 3].
         
         """
         if vector[0] != 0:
@@ -1025,14 +1030,13 @@ class Parallelepiped(IMacrobody):
 
 
 class Cuboid(Parallelepiped):
-    """Same exact thing as a Parallelepiped. This class is provided because the
-    name is shorter, and thus may be preferred by those who fancy brevity.
+    """Same exact thing as a :py:class:`Parallelepiped`. This class is provided
+    because the name is shorter, and thus may be preferred by those who fancy
+    brevity.
 
     """
     def __init__(self, name, xmin, xmax, ymin, ymax, zmin, zmax,
                  reflecting=False, white=False):
-        """
-        """
         super(Cuboid, self).__init__(name, xmin, xmax, ymin, ymax, zmin, zmax,
                                      reflecting, white)
 
@@ -1077,6 +1081,7 @@ class Region(object):
 
 class IRegionBool(Region):
     """Abstract class; should have no instances of this."""
+    __metaclass__ = abc.ABCMeta
     def __init__(self, left_region, right_region):
         self.left_region = left_region
         self.right_region = right_region
