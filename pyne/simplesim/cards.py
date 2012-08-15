@@ -18,6 +18,7 @@ the module.
 # autosummary, :nosignatures: pyne.simplesim.cards
 # TODO use sphinx domains where possible instead of double single quotes.
 # TODO write a development guide next to the usersguide.
+# TODO make error messages valuable: give back to the user their input.
 
 import abc
 
@@ -60,6 +61,9 @@ class ICard(object):
 
     @name.setter
     def name(self, value):
+        if value == '':
+            raise ValueError("The ``name`` property of the cell cannot "
+                    "be empty.")
         self._name = value
 
 
@@ -140,8 +144,8 @@ class Cell(CellVoid):
     @material.setter
     def material(self, obj):
         if obj.name == '':
-            raise ValueError("The name property of the material cannot "
-                    "be ''.")
+            raise ValueError("The ``name`` property of the material cannot "
+                    "be empty.")
         self._material = obj
 
     @property
@@ -160,7 +164,8 @@ class Cell(CellVoid):
     def density_units(self, value):
         if density_units != 'g/cm^3' and density_units != 'atoms/b/cm':
             raise ValueError("The property ``density_units`` must be either "
-                    "'g/cm^3' or 'atoms/b/cm'.")
+                    "'g/cm^3' or 'atoms/b/cm'. User provided "
+                    "'{0}'".format(value))
         self._density_units = value
 
 
@@ -247,10 +252,11 @@ class CellVoidMCNP(CellVoid):
         if value < 200:
             raise UserWarning("Temperature set as less than 200 K. Are you "
                     "trying to specify temperature in degrees "
-                    "Celcius, etc.?")
+                    "Celcius, etc.? User provided %.4f." % value)
         if value < 1:
             raise UserWarning("Temperature set as less than 1 K. Are you "
-                    "trying to specify temperature as 'kT'?")
+                    "trying to specify temperature as 'kT'? "
+                    "User provided %.4f." % value)
         self._temperature = value
 
     @property
@@ -446,7 +452,8 @@ class ISurface(ICard):
         self.reflecting = reflecting
         self.white = white 
         if self.reflecting and self.white:
-            raise ValueError("A surface cannot be reflecting AND white.")
+            raise ValueError("The user set the surface to be reflecting AND "
+                    "white, but can only be neither or one of the two.")
 
     @abc.abstractmethod
     def comment(self):
@@ -485,12 +492,13 @@ class ISurface(ICard):
         ----------
         vector : 3-element list or ``np.array``, float [unitless]
             The elements specify a stretch in the x, y, and z directions, in
-            this order.
+            this order. A zero in any of the directions indicates that no
+            stretch is done in that direction.
 
         Examples
         --------
         Both of the following lines stretch the surface along the y axis by a
-        factor of 2::
+        factor of 2. The x and z directions are unaffected.::
 
             surf.stretch([0, 2, 0])
             surf.stretch(np.array([0, 2, 0]))
@@ -542,7 +550,8 @@ class ISurface(ICard):
     def reflecting(self, value):
         if value is not None and type(value) is not bool:
             raise TypeError("The property ``reflecting`` must be "
-                    "None or of boolean type.");
+                    "None or of boolean type. User provided "
+                    "{0}.".format(value))
         self._reflecting = value
 
     @property
@@ -553,7 +562,8 @@ class ISurface(ICard):
     def white(self, value):
         if value is not None and type(value) is not bool:
             raise TypeError("The property ``white`` must be "
-                    "None or of boolean type.");
+                    "None or of boolean type. User provided "
+                    "{0}.".format(value))
         self._white = value
 
 
@@ -579,7 +589,7 @@ class IAxisSurface(ISurface):
             See :py:class:`ISurface`
 
         """
-        super(AxisSurface, self).__init__(name, reflecting, white)
+        super(IAxisSurface, self).__init__(name, reflecting, white)
         self.cartesian_axis = cartesian_axis
 
     @abc.abstractmethod
@@ -604,12 +614,12 @@ class IAxisSurface(ISurface):
     def cartesian_axis(self, value):
         if type(value) is not str:
             raise ValueError("AxisCylinder's cartesian_axis property must be "
-                    "a string.")
-        if (value.lower() != 'x' and
-                value.lower() != 'y' and 
+                    "a string. User provided {0}.".format(value))
+        if (value.lower() != 'x' and value.lower() != 'y' and 
                 value.lower() != 'z'):
             raise ValueError("AxisCylinder's cartesian_axis property must be "
-                    "'x', 'X', 'y', 'Y', or 'z', 'Z'.")
+                    "'x', 'X', 'y', 'Y', or 'z', 'Z'. "
+                    "User provided '{0}'.".format(value))
         self._cartesian_axis = value.lower()
 
 
@@ -647,36 +657,98 @@ class AxisCylinder(IAxisSurface):
         self.radius = radius
 
     def comment(self):
-        return "Axis cylinder %s: aligned and centered on %s axis"
-                ", with radius %.4f (diameter %.4f).".format(
-                        self.name, self.cartesian_axis,
-                        self.radius, 2 * self.radius)
+        return ("Axis cylinder %s: aligned and centered on %s axis, "
+                "with radius %.4f (diameter %.4f)." %
+                        (self.name, self.cartesian_axis,
+                        self.radius, 2 * self.radius))
     
     def shift(self, vector):
-        """See :py:meth:`ISurface.shift`. Cylinders can only be shifted along
+        """See :py:meth:`ISurface.shift`. Axis cylinders can only be shifted along
         their axis, and even in such cases the shift has no effect. However,
         such a shift must be permitted in case this surface is part of a region
         that is being shifted.
+
+        Examples
+        --------
+        The following is okay (where we have imported ``numpy`` as ``np``)::
+
+            cyl = AxisCylinder('mycyl', 'z', 0.4)
+            cyl.shift([0, 0, 3])
+            cyl.shift(np.array([0, 0, 3]))
+
+        The following do not work:
+
+            cyl.shift([3, 0, 0])
+            cyl.shift([0, 3, 3])
+            
         
         """
+        # Flag for exception.
         iserror = False
         if self.cartesian_axis == 'x' and (vector[1] != 0 or vector[2] != 0):
             iserror = True
             dirs = ('x', 'y', 'z')
-        if self.cartesian_axis == 'y' and (vector[1] != 0 or vector[2] != 0):
+        if self.cartesian_axis == 'y' and (vector[0] != 0 or vector[2] != 0):
             iserror = True
             dirs = ('y', 'x', 'z')
-        if self.cartesian_axis == 'z' and (vector[1] != 0 or vector[2] != 0):
+        if self.cartesian_axis == 'z' and (vector[0] != 0 or vector[1] != 0):
             iserror = True
             dirs = ('z', 'x', 'y')
         if iserror:
-            raise ValueError("A cylinder aligned with the {0} axis cannot "
-                    "be shifted in the {1} or {2} directions." % dirs)
+            raise ValueError("A cylinder aligned with the %s axis cannot "
+                    "be shifted in the %s or %s directions." % dirs)
 
     def stretch(self, vector):
-        """See :py:meth:`ISurface:stretch`"""
-        if self.cartesian_axis 
-        return
+        """See :py:meth:`ISurface:stretch`. Axis cylinders can be stretched in
+        the direction of their axis, which has no effect (permitted in case
+        this surface is part of a region that is being stretched), or can be
+        stretched `uniformly` in the plane perpendicular to its axis.
+        
+        Examples
+        --------
+        The following stretches are okay for a cylinder aligned with the x axis
+        (where we have imported ``numpy`` as ``np``)::
+            
+            cyl = AxisCylinder('mycyl', 'z', 0.4)
+            cyl.stretch([0, 0, 2])
+            cyl.stretch([3, 3, 0])
+            cyl.stretch(np.array([3, 3, 2]))
+
+        However, the following would cause the cylinder to lose its
+        circular cross section, which cannot be accommodated::
+
+            cyl.stretch([0, 3, 0])
+            cyl.stretch([2, 3, 1])
+        
+        """
+        # TODO allow some slop between the same two values for a uniform
+        # perpendicular stretch.
+        # Flag for exception.
+        iserror = False
+        # 'out' is used in the exception below.
+        if self.cartesian_axis == 'x':
+            if vector[1] != vector[2]:
+                iserror = True
+                out = ('y', vector[1], 'z', vector[2], 'x')
+            elif vector[1] != 0:
+                self.radius *= vector[1]
+        if self.cartesian_axis == 'y':
+            if vector[0] != vector[2]:
+                iserror = True
+                out = ('x', vector[0], 'z', vector[2], 'y')
+            elif vector[0] != 0:
+                self.radius *= vector[0]
+        if self.cartesian_axis == 'z':
+            if vector[0] != vector[1]:
+                iserror = True
+                out = ('x', vector[0], 'y', vector[1], 'z')
+            elif vector[0] != 0:
+                self.radius *= vector[0]
+        if iserror:
+            raise ValueError("Stretches perpendicular to the axis must be "
+                    "uniform in the two perpendicular directions. User "
+                    "provided %s stretch %.4f and %s stretch %.4f for a "
+                    "%s-aligned cylinder." % out)
 
     @property
     def radius(self):
@@ -685,8 +757,8 @@ class AxisCylinder(IAxisSurface):
     @radius.setter
     def radius(self, value):
         if value <= 0:
-            raise ValueError("AxisCylinder's radius property must be "
-                    "positive.")
+            raise ValueError("The ``radius`` property must be "
+                    "positive. User provided %.4f." % value)
         self._radius = value
 
 
@@ -704,6 +776,7 @@ class Plane(IAxisSurface):
         self.position = position
     
     def comment(self):
+        pass
 
     @property
     def position(self):
@@ -715,7 +788,8 @@ class Plane(IAxisSurface):
 
 
 class IMacrobody(ISurface):
-    """
+    """This class is not used by the user. Abstract superclass for all
+    macrobody cards. Macrobodies are an MCNP concept.
 
     """
     def __init__(self, name, reflecting, white):
@@ -755,7 +829,8 @@ class Parallelepiped(IMacrobody):
     @xlims.setter
     def xlims(self, value):
         if value[0] > value[1]:
-            raise ValueError("The value of xmin is greater than that of xmax.")
+            raise ValueError("The value of xmin, %.4f, is greater than "
+                    "that of xmax, %.4f." % (value[0], value[1]))
         self._xlims = value
 
     @property
@@ -765,7 +840,8 @@ class Parallelepiped(IMacrobody):
     @ylims.setter
     def ylims(self, value):
         if value[0] > value[1]:
-            raise ValueError("The value of ymin is greater than that of ymax.")
+            raise ValueError("The value of ymin, %.4f, is greater than "
+                    "that of ymax, %.4f." % (value[0], value[1]))
         self._ylims = value
 
     @property
@@ -775,7 +851,8 @@ class Parallelepiped(IMacrobody):
     @zlims.setter
     def zlims(self, value):
         if value[0] > value[1]:
-            raise ValueError("The value of zmin is greater than that of zmax.")
+            raise ValueError("The value of zmin, %.4f, is greater than "
+                    "that of zmax, %.4f." % (value[0], value[1]))
         self._zlims = value
 
 
@@ -813,6 +890,7 @@ class Region(object):
 
     def union(self, arg):
         return RegionOr(self, arg)
+
 
 class IRegionBool(Region):
     """Abstract class; should have no instances of this."""
@@ -865,8 +943,9 @@ class RegionLeaf(Region):
 
     @pos_sense.setter
     def pos_sense(self, value):
+        # TODO this is probably not okay by the proponents of duck typing.
         if type(value) is not bool:
-            raise TypeError("User specified a value for pos_sense that is "
+            raise TypeError("User provided a value for pos_sense that is "
                     "not of boolean type.")
         self._pos_sense = value
 
