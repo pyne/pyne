@@ -110,3 +110,4 @@ Cards Module
     :inherited-members:
     :show-inheritance:
 
+.. inheritance-diagram:: pyne.simplesim.cards.AxisCylinder
