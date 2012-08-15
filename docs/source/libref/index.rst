@@ -26,4 +26,4 @@ The following modules and sub-packages are discussed:
     dbgen/index
     mcnp
     mcnpcard
-    simulation
+    simplesim
