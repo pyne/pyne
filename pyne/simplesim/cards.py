@@ -659,7 +659,7 @@ class AxisCylinder(IAxisSurface):
 
     def comment(self):
         return ("Axis cylinder %s: aligned and centered on %s axis, "
-                "with radius %.4f (diameter %.4f)." %
+                "with radius %.4f cm (diameter %.4f cm)." %
                         (self.name, self.cartesian_axis,
                         self.radius, 2 * self.radius))
     
@@ -766,6 +766,7 @@ class AxisCylinder(IAxisSurface):
 class AxisPlane(IAxisSurface):
     """
     .. inheritance-diagram:: pyne.simplesim.cards.AxisCylinder
+    
     Plane perpendicular to one of the Cartesian axes.
     
     
@@ -801,11 +802,12 @@ class AxisPlane(IAxisSurface):
         self.position = position
     
     def comment(self):
-        return "Axis plane %s: %s = %.4f" % (self.name, self.position)
+        return "Axis plane %s: %s = %.4f cm" % (self.name, self.cartesian_axis,
+                self.position)
         pass
 
     def shift(self, vector):
-        """See :py:meth:`ISurface.shift`. AxisPlanes can be shifted in any
+        """See :py:meth:`ISurface.shift`. Axis planes can be shifted in any
         direction, but only shifts along their axis have an effect.
 
         Examples
@@ -828,8 +830,8 @@ class AxisPlane(IAxisSurface):
         elif self.cartesian_axis == 'z':
             self.position += vector[2]
 
-    def stretch(self):
-        """See :py:meth:`ISurface.stretch`. AxisPlanes can be stretched in any
+    def stretch(self, vector):
+        """See :py:meth:`ISurface.stretch`. Axis planes can be stretched in any
         direction, but only stretches along their axis have an effect. The
         position of the plane is scaled by the stretch factor.
 
@@ -845,6 +847,12 @@ class AxisPlane(IAxisSurface):
             plane.stretch([0, 3, 2])
 
         """
+        if self.cartesian_axis == 'x' and vector[0] != 0:
+            self.position *= vector[0]
+        elif self.cartesian_axis == 'y' and vector[1] != 0:
+            self.position *= vector[1]
+        elif self.cartesian_axis == 'z' and vector[2] != 0:
+            self.position *= vector[2]
 
     @property
     def position(self):
