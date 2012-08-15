@@ -2,7 +2,7 @@
 
 """The ``cards`` module can be imported as such::
 
-    from pyne.simulation import cards
+    from pyne.simplesim import cards
 
 The user does not interact with this module. Rather, the user interacts with
 the ``definition`` module. Instances of classes in the ``definition`` module
@@ -11,6 +11,14 @@ the module.
 
 """
 
+# TODO in the Sphinx documentation, create a developers and a user's version of
+# this documentation.
+# TODO in the Sphinx documentation, provide a list of all classes without any
+# docstrings. autosummary
+# autosummary, :nosignatures: pyne.simplesim.cards
+# TODO use sphinx domains where possible instead of double single quotes.
+# TODO write a development guide next to the usersguide.
+
 import abc
 
 import numpy as np
@@ -18,20 +26,24 @@ import numpy as np
 from pyne import material
 
 class ICard(object):
+    """This class is not used by the user. Abstract superclass for all cards.
+    All cards have a name property and a comment() method.
+
+    """
 
     # This line makes this class an abstract base class (ABC).
     __metaclass__ = abc.ABCMeta
     
     def __init__(self, name):
-        """Abstract superclass for all cards. All cards have a name and number
-        property, as well as a comment method.
-
+        """
         Parameters
         ----------
         name : str
             Name of this instance of this card, used for referencing this card
             from others and modifying this card after it has been added to a
-            definition (see ``pyne.simplesim.definition``).
+            definition (see ``pyne.simplesim.definition``). There is no
+            known restriction on the characters that can be used in the name,
+            but the name must be unique.
 
         """
         self.name = name
@@ -40,7 +52,7 @@ class ICard(object):
     @abc.abstractmethod
     def comment(self):
         """All cards define a comment describing the content of the card."""
-        return
+        raise NotImplementedError
 
     @property
     def name(self):
@@ -52,44 +64,61 @@ class ICard(object):
 
 
 class CellVoid(ICard):
+    """An empty region of space; this cell does not contain a material."""
 
     def __init__(self, name, region):
-        """An empty region of space; this cell does not contain a material.
-
+        """
         Parameters
         ----------
-        region : pyne.simplesim.cards.Region
+        region : :py:class:`Region`
             Defines the region of space that this cell occupies (see
-            ``pyne.simplesim.cards.Region``).
+            :py:class:`Region`).
+
+        Examples
+        --------
+        TODO
 
         """
         self.region = region
 
-   def comment(self):
+    def comment(self):
        # TODO Walk the region.
-       return "Comment unimplemented."
+       return "Void cell. Comment unimplemented."
 
-   @property
-   def region(self):
-       return self._region
+    @property
+    def region(self):
+        return self._region
+
+    @region.setter
+    def region(self, obj):
+        self._region = obj
 
    
 class Cell(CellVoid):
+    """A cell is a region of space filled with a material.
 
+    """
     def __init__(self, name, region, material, density, density_units):
-        """A cell is a region of space filled with a material.
-        
+        """
         Parameters
         ----------
         name : str
-            Name of this instance of this card, used for referencing this card
-            from others and modifying this card after it has been added to a
-            definition (see ``pyne.simplesim.definition``).
-        region : ``pyne.simplesim.cards.Region``
-            Defines the region of space that this cell occupies (see
-            :ref:`pyne.simplesim.cards.Region`).
-        material : ``pyne.material.Material``
-            Defines a material (see :py:mod:`pyne.material`).
+            See :py:class:`ICard`.
+        region : :py:class:`Region`
+            See :py:class:`CellVoid`
+        material : :py:class:`pyne.material.Material`
+            A material definition using the :py:mod:`pyne.material` module.
+            For use here, the material's ``name`` property must be set to something
+            other than '' and must be unique. See
+            :py:class:`pyne.material.Material`.
+        density : float
+            Density for the material, in units of density_units.
+        density_units : str
+            Either 'g/cm^3', or 'atoms/b/cm'.
+
+        Examples
+        --------
+        TODO
         
         """
         # TODO decide how I will do cross-referencing.
@@ -100,54 +129,98 @@ class Cell(CellVoid):
         self.density_units = density_units
 
     def comment(self):
-        return
+        # TODO walk the region.
+        # TODO print material description.
+        return "Cell. comment unimplemented."
 
     @property
     def material(self):
         return self._material
 
+    @material.setter
+    def material(self, obj):
+        if obj.name == '':
+            raise ValueError("The name property of the material cannot "
+                    "be ''.")
+        self._material = obj
+
     @property
     def density(self):
-        """Density for the material, in units of self.density_units."""
         return self._density
+
+    @density.setter
+    def density(self, value):
+        self._density = value
 
     @property
     def density_units(self):
-        """Either 'g/cm^3', or 'atoms/b/cm'."""
         return self._density_units
+
+    @density_units.setter
+    def density_units(self, value):
+        if density_units != 'g/cm^3' and density_units != 'atoms/b/cm':
+            raise ValueError("The property ``density_units`` must be either "
+                    "'g/cm^3' or 'atoms/b/cm'.")
+        self._density_units = value
 
 
 class CellVoidMCNP(CellVoid):
+    """A cell card with keyword options that are available in MCNP. Thus, it
+    only makes sense to use this card if writing an input for MCNP. This is a
+    void (no material) cell; see :py:class:`CellMCNP` for the corresponding
+    cell filled with a material.
+    
+    The U, LAT, and FILL keywords are not available; as this functionality
+        should be obtained by using Universe and Lattice cards.
+
+    Note this card was written with MCNPX version 2.7 in mind.
+
     """
-    """
+    # TODO Sphinx documentation should not list all keyword arguments.
 
     def __init__(self, name, region,
                  temperature=None, volume=None,
-                 neut_imp=None, phot_imp=None, elec_imp=None, prot_imp=None,
+                 neutron_imp=None,
+                 photon_imp=None,
+                 electron_imp=None,
+                 proton_imp=None,
                  proton_weight_lim=None,
-                 neut_exp_transform=None,
-                 phot_exp_transform=None,
-                 elec_exp_transform=None,
-                 prot_exp_transform=None,
-                 neut_force_coll=None,
-                 phot_force_coll=None,
-                 elec_force_coll=None,
-                 prot_force_coll=None,
-                 neut_weight_win_bound=None,
-                 phot_weight_win_bound=None,
-                 elec_weight_win_bound=None,
-                 prot_weight_win_bound=None,
-                 neut_dxtran_contrib=None,
-                 phot_dxtran_contrib=None,
-                 elec_dxtran_contrib=None,
-                 prot_dxtran_contrib=None,
+                 neutron_exp_transform=None,
+                 photon_exp_transform=None,
+                 electron_exp_transform=None,
+                 proton_exp_transform=None,
+                 neutron_force_coll=None,
+                 photon_force_coll=None,
+                 electron_force_coll=None,
+                 proton_force_coll=None,
+                 neutron_weight_win_bound=None,
+                 photon_weight_win_bound=None,
+                 electron_weight_win_bound=None,
+                 proton_weight_win_bound=None,
+                 neutron_dxtran_contrib=None,
+                 photon_dxtran_contrib=None,
+                 electron_dxtran_contrib=None,
+                 proton_dxtran_contrib=None,
                  fission_turnoff=None,
                  det_contrib=None,
                  transform=None
                  ):
         """
-        The U, LAT, and FILL keywords are not available; as this functionality
-        should be obtained by using Universe and Lattice cards.
+        Parameters
+        ----------
+        name : str
+            See :py:class:`ICard`.
+        region : :py:class:`Region`
+            See :py:class:`CellVoid`
+        temperature : float, otional [Kelvin]
+            Temperature of the cell.
+        volume : float, optional [cm^3]
+            Volume of the cell.
+        TODO
+
+        Examples
+        --------
+        TODO
 
         """
         # TODO allow use of U, LAT, and FILL keywords?
@@ -160,42 +233,117 @@ class CellVoidMCNP(CellVoid):
         self.electron_imp = electron_imp
         self.proton_imp = proton_imp
 
+    def comment(self):
+        # TODO walk the region.
+        # TODO print material description.
+        return "Cell. comment unimplemented."
+
     @property
     def temperature(self):
-        """Temperature of the cell, in Kelvin."""
         return self._temperature
+
+    @temperature.setter
+    def temperature(self, value):
+        if value < 200:
+            raise UserWarning("Temperature set as less than 200 K. Are you "
+                    "trying to specify temperature in degrees "
+                    "Celcius, etc.?")
+        if value < 1:
+            raise UserWarning("Temperature set as less than 1 K. Are you "
+                    "trying to specify temperature as 'kT'?")
+        self._temperature = value
 
     @property
     def volume(self):
-        """Volume of the cell, in cm^3. Optional."""
         return self._volume
 
     @property
     def neutron_imp(self):
         return self._neutron_imp
 
+    @neutron_imp.setter
+    def neutron_imp(self, value):
+        self._neutron_imp = value
+
     @property
     def photon_imp(self):
         return self._photon_imp
+
+    @photon_imp.setter
+    def photon_imp(self, value):
+        self._photon_imp = value
 
     @property
     def electron_imp(self):
         return self._electron_imp
 
+    @electron_imp.setter
+    def electron_imp(self, value):
+        self._electron_imp = value
+
     @property
     def proton_imp(self):
         return self._proton_imp
 
+    @proton_imp.setter
+    def proton_imp(self, value):
+        self._proton_imp = value
 
-class CellMCNP(CellVoidMCNP):
-    """
-    """
 
+class CellMCNP(CellVoidMCNP, Cell):
+    """A cell card with keyword options that are available in MCNP. Thus, it
+    only makes sense to use this card if writing an input for MCNP.    
+
+    The U, LAT, and FILL keywords are not available; as this functionality
+        should be obtained by using Universe and Lattice cards.
+
+    Note this card was written with MCNPX version 2.7 in mind.
+
+    """
+    # TODO flesh out keyword arguments.
     def __init__(self, name, region, material,
                  temperature=None, volume=None,
-                 neutron_imp=None, photon_imp=None, electron_imp=None,
-                 proton_imp=None):
+                 neutron_imp=None,
+                 photon_imp=None,
+                 electron_imp=None,
+                 proton_imp=None,
+                 proton_weight_lim=None,
+                 neutron_exp_transform=None,
+                 photon_exp_transform=None,
+                 electron_exp_transform=None,
+                 proton_exp_transform=None,
+                 neutron_force_coll=None,
+                 photon_force_coll=None,
+                 electron_force_coll=None,
+                 proton_force_coll=None,
+                 neutron_weight_win_bound=None,
+                 photon_weight_win_bound=None,
+                 electron_weight_win_bound=None,
+                 proton_weight_win_bound=None,
+                 neutron_dxtran_contrib=None,
+                 photon_dxtran_contrib=None,
+                 electron_dxtran_contrib=None,
+                 proton_dxtran_contrib=None,
+                 fission_turnoff=None,
+                 det_contrib=None,
+                 transform=None
+                 ):
         """
+        Parameters
+        ----------
+        name : str
+            See :py:class:`ICard`.
+        region : :py:class:`Region`
+            See :py:class:`CellVoid`
+        material : :py:class:`pyne.material.Material`
+            See :py:class:`Cell`
+        **kwargs : varies
+            See :py:class:`CellVoidMCNP`.
+            
+        Examples
+        --------
+        TODO
+
         """
         # Based on Python's Method Resolution Order (MRO), the constructor for
         # CellSimpleVoidMCNP is called because it is listed first above.
@@ -207,49 +355,56 @@ class CellMCNP(CellVoidMCNP):
                                              photon_imp=photon_imp,
                                              electron_imp=electron_imp,
                                              proton_imp=proton_imp)
-        # The following fields are not initialized via the constructor above.
+        # The following fields are not initialized via the superclass
+        # constructor above.
         self.material = material
         self.density = density
         self.density_units = density_units
         return
 
     def comment(self):
-        return
+        # TODO walk the region.
+        # TODO print material description.
+        return "Cell. comment unimplemented."
 
 
-class IUniverse(Card):
-    """
+class IUniverse(ICard):
+    """This class is not used by the user. Abstract superclass for all
+    universe cards.
 
     """
     def __init__(self, name):
         pass
 
 
-class IUniverseByRegion(IUniverse):
+class UniverseByRegion(IUniverse):
     """
 
     """
+    # TODO
     def __init__(self, name, region):
         pass
 
 
-class IUniverseByLattice(IUniverse):
+class UniverseByLattice(IUniverse):
     """
 
     """
+    # TODO
     def __init__(self, name, lattice):
         pass
 
 
-class Lattice(Card):
+class Lattice(ICard):
     """
 
     """
+    # TODO 
     def __init__(self, name, geom, universe):
         pass
 
 
-class LatticeByArray(Card):
+class LatticeByArray(ICard):
     """
 
     """
@@ -260,57 +415,124 @@ class LatticeByArray(Card):
         
 
 class ISurface(ICard):
-    """
+    """This class is not used by the user. Abstract superclass for all
+    surface cards.
+
+    The Surface superclass contains properties to set the surface as reflecting
+    or white. For codes other than MCNPX, reflecting or white surfaces may be
+    specified on a separate boundary condition card (i.e. in Serpent) or may
+    not even be available. For other codes, then, the appropriate ``inputfile``
+    class needs to pick up this information and print the appropriate string to
+    the code's input file, or in the latter case return an exception.
+
     """
     # TODO support rotation.
     __metaclass__ = abc.ABCMeta
     
     def __init__(self, name, reflecting, white):
-        """TODO The Surface superclass contains fields for reflecting and white
-        surfaces. For codes other than MCNPX, reflecting or white surfaces may
-        be specified on a separate boundary condition card (Serpent) or may not
-        even be available. For other codes, then, the appropriate ``inputfile``
-        class needs to pick up this information and print the appropriate
-        string to the code's input file, or in the latter case return an
-        exception.
+        """
+        Parameters
+        ----------
+        name : str
+            See :py:class:`ICard`.
+        reflecting : bool, optional
+            The surface has a reflective boundary condition.
+        white : bool, optional
+            The surface has a white boundary condition (reflection with a
+            cosine distribution with respect to the surface normal).
 
         """
         super(ISurface, self).__init__(name)
         self.reflecting = reflecting
         self.white = white 
+        if self.reflecting and self.white:
+            raise ValueError("A surface cannot be reflecting AND white.")
 
     @abc.abstractmethod
     def comment(self):
-        return
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def shift(self, vector):
+        """Translates the surface. This is an abstract method, and must be
+        defined by each surface card. Shifts may not be permitted for all
+        surfaces in all directions, and in such cases an exception is raised.
+        
+        Parameters
+        ----------
+        vector : 3-element list or ``np.array``, float [centimeters]
+            The elements specify translation in the x, y, and z directions, 
+            in this order.
+
+        Examples
+        --------
+        Both of the following lines shifts the surface along the x axis by 3 cm::
+
+            surf.shift([3, 0, 0])
+            surf.shift(np.array([3, 0, 0]))
+        
+        """
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def stretch(self, vector):
+        """Stretches (scales) the surface from the origin. This is an abstract
+        method, and must be defined by each surface card. Stretches may not be
+        permitted for all surfaces in all directions, and in such cases an
+        exception is raised.
+
+        Parameters
+        ----------
+        vector : 3-element list or ``np.array``, float [unitless]
+            The elements specify a stretch in the x, y, and z directions, in
+            this order.
+
+        Examples
+        --------
+        Both of the following lines stretch the surface along the y axis by a
+        factor of 2::
+
+            surf.stretch([0, 2, 0])
+            surf.stretch(np.array([0, 2, 0]))
+        
+        """
+        raise NotImplementedError
 
     @property
     def neg(self):
-        """
-        Returns
-        -------
-        region : cards.Region
+        """A property that creates and returns a
+        :py:class:`RegionLeaf` that can then be used in
+        boolean arithmetic with subclasses of
+        :py:class:`Region`. The region is define as the
+        space on the side of the surface that has a negative sense.
+
+        In the expected typical usage of the :py:mod:`simplesim` package,
+        regions are constructed using these 
+
+        For more information, see :py:class:`Region` and
+        :ref:`usersguide_simplesim`.
+
+        Examples
+        --------
+        The following shows a simple case of how a more complex region can be constructed from
+        regions returned by this property::
+
+            reg1 = surf1.neg
+            reg2 = surf2.neg
+            reg3 = reg1 & reg2
+            reg4 = reg1 | reg2
+
         """
         return RegionLeaf(self, False)
 
     @property
     def pos(self):
-        """
-        Returns
-        -------
-        region : cards.Region
-
+        """Similar to :py:attr:`neg`, except the resulting
+        :py:mod:`RegionLeaf` is on the side of the surface with a positive
+        sense.
+        
         """
         return RegionLeaf(self, True)
-
-    @abc.abstractmethod
-    def shift(self, vector):
-        """Shifts the surface."""
-        return
-
-    @abc.abstractmethod
-    def stretch(self, vector):
-        """Stretches the surface."""
-        return
     
     @property
     def reflecting(self):
@@ -319,7 +541,7 @@ class ISurface(ICard):
     @reflecting.setter
     def reflecting(self, value):
         if value is not None and type(value) is not bool:
-            raise TypeError("'reflecting' keyword argument must be "
+            raise TypeError("The property ``reflecting`` must be "
                     "None or of boolean type.");
         self._reflecting = value
 
@@ -330,14 +552,15 @@ class ISurface(ICard):
     @white.setter
     def white(self, value):
         if value is not None and type(value) is not bool:
-            raise TypeError("'white' keyword argument must be "
+            raise TypeError("The property ``white`` must be "
                     "None or of boolean type.");
         self._white = value
 
 
 class IAxisSurface(ISurface):
-    """Superclass for simple axis-aligned surfaces. Accordingly,
-    such classes share the cartesian_axis property.
+    """This class is not used by the user. Abstract superclass for all simple
+    axis-aligned surfaces. Accordingly, such classes share the cartesian_axis
+    property.
     
     """
     __metaclass__ = abc.ABCMeta
@@ -345,6 +568,15 @@ class IAxisSurface(ISurface):
         """
         Parameters
         ----------
+        name : str
+            See :py:class:`ICard`.
+        cartesian_axis : str
+            Either 'x', 'X', 'y', 'Y', 'z', or 'Z'. Regardless of input, it is
+            stored as lower-case. The meaning depends on the surface.
+        reflecting : bool, optional
+            See :py:class:`ISurface`
+        white : bool, optional
+            See :py:class:`ISurface`
 
         """
         super(AxisSurface, self).__init__(name, reflecting, white)
@@ -352,17 +584,17 @@ class IAxisSurface(ISurface):
 
     @abc.abstractmethod
     def comment(self):
-        return
+        raise NotImplementedError
     
     @abc.abstractmethod
     def shift(self, vector):
-        """Shifts the surface."""
-        return
+        """See :py:meth:`ISurface.shift`."""
+        raise NotImplementedError
 
     @abc.abstractmethod
     def stretch(self, vector):
-        """Stretches the surface."""
-        return
+        """See :py:meth:`ISurface.stretch`."""
+        raise NotImplementedError
 
     @property
     def cartesian_axis(self):
@@ -375,20 +607,39 @@ class IAxisSurface(ISurface):
                     "a string.")
         if (value.lower() != 'x' and
                 value.lower() != 'y' and 
-                value.lower() != 'z')
+                value.lower() != 'z'):
             raise ValueError("AxisCylinder's cartesian_axis property must be "
                     "'x', 'X', 'y', 'Y', or 'z', 'Z'.")
-        self._cartesian_axis = value
+        self._cartesian_axis = value.lower()
 
 
 class AxisCylinder(IAxisSurface):
-    """
+    """Cylinder aligned with and centered on one of the Cartesian axes."""
 
-    """
     # TODO if this is shifted, then it becomes not an axis-cylinder.
     def __init__(self, name, cartesian_axis, radius,
                  reflecting=None, white=None):
         """
+        Parameters
+        ----------
+        name : str
+            See :py:class:`ICard`.
+        cartesian_axis : str
+            The axis with which the cylinder is aligned and centered.
+            See :py:class`IAxisSurface`.
+        radius : float [centimeters]
+            Radius of the cylinder.
+        reflecting : bool, optional
+            See :py:class:`ISurface`
+        white : bool, optional
+            See :py:class:`ISurface`
+
+        Examples
+        --------
+        The following creates a cylinder aligned with the z axis, going through
+        centered on the z axis, with a radius of 0.4 cm::
+
+            cyl = AxisCylinder('mycyl', 'z', 0.4)
 
         """
         super(AxisCylinder, self).__init__(name, cartesian_axis, 
@@ -396,15 +647,35 @@ class AxisCylinder(IAxisSurface):
         self.radius = radius
 
     def comment(self):
-        # TODO
-        return
+        return "Axis cylinder %s: aligned and centered on %s axis"
+                ", with radius %.4f (diameter %.4f).".format(
+                        self.name, self.cartesian_axis,
+                        self.radius, 2 * self.radius)
     
     def shift(self, vector):
-        """Shifts the surface."""
-        return
+        """See :py:meth:`ISurface.shift`. Cylinders can only be shifted along
+        their axis, and even in such cases the shift has no effect. However,
+        such a shift must be permitted in case this surface is part of a region
+        that is being shifted.
+        
+        """
+        iserror = False
+        if self.cartesian_axis == 'x' and (vector[1] != 0 or vector[2] != 0):
+            iserror = True
+            dirs = ('x', 'y', 'z')
+        if self.cartesian_axis == 'y' and (vector[1] != 0 or vector[2] != 0):
+            iserror = True
+            dirs = ('y', 'x', 'z')
+        if self.cartesian_axis == 'z' and (vector[1] != 0 or vector[2] != 0):
+            iserror = True
+            dirs = ('z', 'x', 'y')
+        if iserror:
+            raise ValueError("A cylinder aligned with the {0} axis cannot "
+                    "be shifted in the {1} or {2} directions." % dirs)
 
     def stretch(self, vector):
-        """Stretches the surface."""
+        """See :py:meth:`ISurface:stretch`"""
+        if self.cartesian_axis 
         return
 
     @property
@@ -413,7 +684,7 @@ class AxisCylinder(IAxisSurface):
 
     @radius.setter
     def radius(self, value):
-        if value <= 0
+        if value <= 0:
             raise ValueError("AxisCylinder's radius property must be "
                     "positive.")
         self._radius = value
@@ -431,6 +702,8 @@ class Plane(IAxisSurface):
         super(Plane, self).__init__(name, cartesian_axis,
                                     reflecting, white)
         self.position = position
+    
+    def comment(self):
 
     @property
     def position(self):
@@ -451,8 +724,11 @@ class IMacrobody(ISurface):
         """
         super(IMacrobody, self).__init__(name, reflecting, white)
 
+    @abc.abstractmethod
+    def comment(self):
+        raise NotImplementedError
 
-class Parallelepiped(Macrobody):
+class Parallelepiped(IMacrobody):
     """
 
     """
@@ -469,11 +745,15 @@ class Parallelepiped(Macrobody):
         self.ylims = np.array([ymin, ymax])
         self.zlims = np.array([zmin, zmax])
 
+    def comment(self):
+        return
+
     @property
     def xlims(self):
         return self._xlims
 
-    @xlims.setter(self, value):
+    @xlims.setter
+    def xlims(self, value):
         if value[0] > value[1]:
             raise ValueError("The value of xmin is greater than that of xmax.")
         self._xlims = value
@@ -482,7 +762,8 @@ class Parallelepiped(Macrobody):
     def ylims(self):
         return self._ylims
 
-    @ylims.setter(self, value):
+    @ylims.setter
+    def ylims(self, value):
         if value[0] > value[1]:
             raise ValueError("The value of ymin is greater than that of ymax.")
         self._ylims = value
@@ -491,7 +772,8 @@ class Parallelepiped(Macrobody):
     def zlims(self):
         return self._zlims
 
-    @zlims.setter(self, value):
+    @zlims.setter
+    def zlims(self, value):
         if value[0] > value[1]:
             raise ValueError("The value of zmin is greater than that of zmax.")
         self._zlims = value
@@ -598,9 +880,9 @@ class Option(ICard):
         """
         return
 
+    @abc.abstractmethod
     def comment(self):
-        """This should be abstract as well."""
-        return
+        raise NotImplementedError
 
 
 class Source(ICard):
