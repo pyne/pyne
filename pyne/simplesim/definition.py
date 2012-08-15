@@ -17,7 +17,7 @@ import collections
 from pyne import material
 from pyne.simulation import cards
 
-class SimulationDefinition(object):
+class IDefinition(object):
     __metaclass__ = abc.ABCMeta
 
     @abc.abstractmethod
@@ -36,7 +36,7 @@ class SimulationDefinition(object):
         return
 
 
-class SystemDefinition(SimulationDefinition):
+class SystemDefinition(IDefinition):
     """This class creates a reactor definition as is done in MCNPX: homogeneous
     regions in space in the reactor, called cells, are defined through the
     intersection, union, etc of surfaces and are filled by materials. The
@@ -72,16 +72,18 @@ class SystemDefinition(SimulationDefinition):
         return
 
 
-class OptionsDefinition(SimulationDefinition):
+class SimulationDefinition(IDefinition):
     """This is basically where all the data cards are stored. The easy name for
     this class is either OptionsDefinition (Serpent) or DataDefinition (MCNP),
     but I'm not too happy with either. I'd like any ideas for this. This may
     need to be subclassed for different codes, because different codes do not
-    provide the same options."""
+    provide the same options.
+    
+    """
 
-    def __init__(self, fname=None):
+    def __init__(self, systemdef, fname=None):
         """Creates a new options definition or loads one from a JSON file."""
-
+        self.sys(systemdef)
         if fname is not None:
             self._open(fname)
         else:
@@ -98,12 +100,19 @@ class OptionsDefinition(SimulationDefinition):
     def _open(self, fname):
         return
 
-    def add_criticality_source(self):
+    def add_source(self, source):
         return
 
-    def add_criticality_points(self):
+    def add_card(self, card):
         return
 
-    def add_tally_cellflux(self):
+    def add_tally(self, card):
         return
 
+    @property
+    def sys(self):
+        return self._sys
+
+    @sys.setter
+    def sys(self, value):
+        self._sys = value
