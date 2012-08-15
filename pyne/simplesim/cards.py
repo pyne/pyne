@@ -181,6 +181,8 @@ class CellVoidMCNP(CellVoid):
 
     Note this card was written with MCNPX version 2.7 in mind.
 
+    .. inheritance-diagram:: pyne.simplesim.cards.CellVoidMCNP
+
     """
     # TODO Sphinx documentation should not list all keyword arguments.
 
@@ -305,6 +307,8 @@ class CellMCNP(CellVoidMCNP, Cell):
         should be obtained by using Universe and Lattice cards.
 
     Note this card was written with MCNPX version 2.7 in mind.
+
+    .. inheritance-diagram:: pyne.simplesim.cards.CellMCNP
 
     """
     # TODO flesh out keyword arguments.
@@ -432,6 +436,8 @@ class ISurface(ICard):
     class needs to pick up this information and print the appropriate string to
     the code's input file, or in the latter case return an exception.
 
+    .. inheritance-diagram:: pyne.simplesim.cards.ISurface
+
     """
     # TODO support rotation.
     __metaclass__ = abc.ABCMeta
@@ -494,7 +500,8 @@ class ISurface(ICard):
         vector : 3-element list or :py:class`np.array`, float [unitless]
             The elements specify a stretch in the x, y, and z directions, in
             this order. A zero in any of the directions indicates that no
-            stretch is done in that direction.
+            stretch is done in that direction. Negative values are allowed, and
+            represent reflections.
 
         Examples
         --------
@@ -572,6 +579,8 @@ class IAxisSurface(ISurface):
     """This class is not used by the user. Abstract superclass for all simple
     axis-aligned surfaces. Accordingly, such classes share the cartesian_axis
     property.
+
+    .. inheritance-diagram:: pyne.simplesim.cards.IAxisSurface
     
     """
     __metaclass__ = abc.ABCMeta
@@ -625,7 +634,11 @@ class IAxisSurface(ISurface):
 
 
 class AxisCylinder(IAxisSurface):
-    """Cylinder aligned with and centered on one of the Cartesian axes."""
+    """Cylinder aligned with and centered on one of the Cartesian axes.
+    
+    .. inheritance-diagram:: pyne.simplesim.cards.AxisCylinder
+    
+    """
 
     # TODO if this is shifted, then it becomes not an axis-cylinder.
     def __init__(self, name, cartesian_axis, radius,
@@ -764,11 +777,9 @@ class AxisCylinder(IAxisSurface):
 
 
 class AxisPlane(IAxisSurface):
-    """
+    """Plane perpendicular to one of the Cartesian axes.
+
     .. inheritance-diagram:: pyne.simplesim.cards.AxisCylinder
-    
-    Plane perpendicular to one of the Cartesian axes.
-    
     
     """
 
@@ -867,6 +878,8 @@ class IMacrobody(ISurface):
     """This class is not used by the user. Abstract superclass for all
     macrobody cards. Macrobodies are an MCNP concept.
 
+    .. inheritance-diagram:: pyne.simplesim.cards.IMacrobody
+
     """
     def __init__(self, name, reflecting, white):
         """
@@ -878,16 +891,35 @@ class IMacrobody(ISurface):
     def comment(self):
         raise NotImplementedError
 
+
 class Parallelepiped(IMacrobody):
-    """
+    """Rectangular parallelepiped in which all surfaces are parallel to the
+    cartesian axes.
+
+    .. inheritance-diagram::pyne.simplesim.cards.Parallelepiped
 
     """
     def __init__(self, name, xmin, xmax, ymin, ymax, zmin, zmax,
                  reflecting=False, white=False):
         """
+        Parameters
+        ----------
+        name : str
+            See :py:class:`ICard`.
+        xmin, xmax, ymin, ymax, zmin, zmax : float [centimeters]
+            Bounds of the parallelepiped in the given direction. Setting both
+            min and max in a given direction to 0 indicates the parallelepiped
+            is infinite in that direction.
+        reflecting : bool, optional
+            See :py:class:`ISurface`
+        white : bool, optional
+            See :py:class:`ISurface`
 
         Examples
         --------
+        The following creates a cube at the origin with 4 cm sides::
+
+            pp = Parallelepiped('mypp', -2, 2, -2, 2, -2, 2)
 
         """
         super(Parallelepiped, self).__init__(name, reflecting, white)
@@ -896,7 +928,67 @@ class Parallelepiped(IMacrobody):
         self.zlims = np.array([zmin, zmax])
 
     def comment(self):
-        return
+        return ("Parallelepiped %s: [%.4f, %.4f] x [%.4f, %.4f] x " \
+               "[%.4f, %.4f] cm" % (self.name, self.xlims[0], self.xlims[1],
+                   self.ylims[0], self.ylims[1], self.zlims[0], self.zlims[1]))
+
+    def shift(self, vector):
+        """See :py:meth:`ISurface.shift`.
+        
+        Examples
+        --------
+        The following::
+
+            pp = Parallelepiped('mypp', -2, 2, -2, 2, -2, 2)
+            pp.shift([2, 0, 0])
+
+        creates a parallelepiped bounded by [0, 4] x [-2, 2] x [-2, 2].
+
+        """
+        self.xlims += vector[0]
+        self.ylims += vector[1]
+        self.zlims += vector[2]
+
+    def stretch(self, vector):
+        """See :py:meth:`ISurface.stretch`. Handling reflections (negative
+        stretch factors) requires additional consideration for this surface,
+        but is implemented.
+        
+        Examples
+        --------
+        The following::
+
+            pp = Parallelepiped('mypp', 0, 4, -2, 2, -2, 2)
+            pp.stretch([2, 0, 3])
+
+        creates a parallelepiped bounded by [0, 8] x [-2, 2] x [-6, 6].
+        Consider the reflection of the following parallelepiped::
+        
+            pp = Parallelepiped('mypp', 0, 4, -2, 2, -3, 6)
+
+        about the z axis::
+
+            pp.stretch([0, 0, -1])
+
+        This results in bounds of [0, 4] x [-2, 2] x [-6, 3]
+        
+        """
+        if vector[0] != 0:
+            if vector[0] > 0:
+                self.xlims *= vector[0]
+            else:
+                # Stretch factor is negative, swap limits.
+                self.xlims = vector[0] * self.xlims[::-1]
+        if vector[1] != 0:
+            if vector[1] > 0:
+                self.ylims *= vector[1]
+            else:
+                self.ylims = vector[1] * self.ylims[::-1]
+        if vector[2] != 0:
+            if vector[2] > 0: 
+                self.zlims *= vector[2]
+            else:
+                self.zlims = vector[2] * self.zlims[::-1]
 
     @property
     def xlims(self):
@@ -966,6 +1058,21 @@ class Region(object):
 
     def union(self, arg):
         return RegionOr(self, arg)
+
+    def shift(self, vector):
+        """The surfaces themselves are modified; copies are not made.
+
+        """
+
+    def stretch(self, vector):
+        """
+
+        """
+
+    def node_visitor(self, function):
+        """
+
+        """
 
 
 class IRegionBool(Region):

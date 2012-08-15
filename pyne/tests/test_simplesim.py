@@ -21,55 +21,6 @@ class TestSurfaces(unittest.TestCase):
         # test density_units exception.
         pass
 
-    def test_AxisPlane(self):
-        """Tests Plane's methods, properties, and exceptions."""
-
-        ## __init__()
-        plane = cards.AxisPlane('myplane', 'x', 3, reflecting=True) 
-        self.assertEquals(plane.name, 'myplane')
-        self.assertEquals(plane.cartesian_axis, 'x')
-        self.assertEquals(plane.position, 3)
-        # test_AxisCylinder() checks these booleans more thoroughly.
-        self.assertEquals(plane.reflecting, True)
-        self.assertEquals(plane.white, None)
-
-        ## comment()
-        self.assertEquals(plane.comment(), "Axis plane myplane: x = 3.0000 cm")
-
-        ## shift()
-        plane = cards.AxisPlane('myplane', 'x', 3)
-        plane.shift([3, 0, 0])
-        self.assertEquals(plane.position, 6)
-        plane.shift([0, 3, 2])
-        self.assertEquals(plane.position, 6)
-        plane = cards.AxisPlane('myplane', 'y', 3)
-        plane.shift([0, 3, 0])
-        self.assertEquals(plane.position, 6)
-        plane.shift([3, 0, 2])
-        self.assertEquals(plane.position, 6)
-        plane = cards.AxisPlane('myplane', 'z', 3)
-        plane.shift([0, 0, 3])
-        self.assertEquals(plane.position, 6)
-        plane.shift([2, 3, 0])
-        self.assertEquals(plane.position, 6)
-
-        ## stretch()
-        plane = cards.AxisPlane('myplane', 'x', 3)
-        plane.stretch([3, 0, 0])
-        self.assertEquals(plane.position, 9)
-        plane.stretch([0, 3, 2])
-        self.assertEquals(plane.position, 9)
-        plane = cards.AxisPlane('myplane', 'y', 3)
-        plane.stretch([0, 3, 0])
-        self.assertEquals(plane.position, 9)
-        plane.stretch([3, 0, 2])
-        self.assertEquals(plane.position, 9)
-        plane = cards.AxisPlane('myplane', 'z', 3)
-        plane.stretch([0, 0, 3])
-        self.assertEquals(plane.position, 9)
-        plane.stretch([2, 3, 0])
-        self.assertEquals(plane.position, 9)
-
     def test_AxisCylinder(self):
         """Tests AxisCylinder's methods, properties, and exceptions."""
 
@@ -78,15 +29,15 @@ class TestSurfaces(unittest.TestCase):
         self.assertEquals(cyl.name, 'mycyl')
         self.assertEquals(cyl.cartesian_axis, 'z')
         self.assertEquals(cyl.radius, 0.4)
-        self.assertEquals(cyl.reflecting, None)
-        self.assertEquals(cyl.white, None)
+        self.assertIsNone(cyl.reflecting)
+        self.assertIsNone(cyl.white)
         # Set reflecting.
         cyl = cards.AxisCylinder('mycyl', 'z', 0.4, reflecting=True)
         self.assertEquals(cyl.reflecting, True)
-        self.assertEquals(cyl.white, None)
+        self.assertIsNone(cyl.white)
         # Set white.
         cyl = cards.AxisCylinder('mycyl', 'z', 0.4, white=True)
-        self.assertEquals(cyl.reflecting, None)
+        self.assertIsNone(cyl.reflecting)
         self.assertEquals(cyl.white, True)
         # Set reflecting and white.
         self.assertRaises(ValueError, cards.AxisCylinder, 'mycyl', 'z', 0.4,
@@ -194,5 +145,89 @@ class TestSurfaces(unittest.TestCase):
                     "axis must be uniform in the two perpendicular "
                     "directions. User provided y stretch 3.0000 and z "
                     "stretch 2.0000 for a x-aligned cylinder.")
+
+    def test_AxisPlane(self):
+        """Tests Plane's methods, properties, and exceptions."""
+
+        ## __init__()
+        plane = cards.AxisPlane('myplane', 'x', 3, reflecting=True) 
+        self.assertEquals(plane.name, 'myplane')
+        self.assertEquals(plane.cartesian_axis, 'x')
+        self.assertEquals(plane.position, 3)
+        # test_AxisCylinder() checks these booleans more thoroughly.
+        self.assertEquals(plane.reflecting, True)
+        self.assertIsNone(plane.white)
+
+        ## comment()
+        self.assertEquals(plane.comment(), "Axis plane myplane: x = 3.0000 cm")
+
+        ## shift()
+        plane = cards.AxisPlane('myplane', 'x', 3)
+        plane.shift([3, 0, 0])
+        self.assertEquals(plane.position, 6)
+        plane.shift([0, 3, 2])
+        self.assertEquals(plane.position, 6)
+        plane = cards.AxisPlane('myplane', 'y', 3)
+        plane.shift([0, 3, 0])
+        self.assertEquals(plane.position, 6)
+        plane.shift([3, 0, 2])
+        self.assertEquals(plane.position, 6)
+        plane = cards.AxisPlane('myplane', 'z', 3)
+        plane.shift([0, 0, 3])
+        self.assertEquals(plane.position, 6)
+        plane.shift([2, 3, 0])
+        self.assertEquals(plane.position, 6)
+
+        ## stretch()
+        plane = cards.AxisPlane('myplane', 'x', 3)
+        plane.stretch([3, 0, 0])
+        self.assertEquals(plane.position, 9)
+        plane.stretch([0, 3, 2])
+        self.assertEquals(plane.position, 9)
+        plane = cards.AxisPlane('myplane', 'y', 3)
+        plane.stretch([0, 3, 0])
+        self.assertEquals(plane.position, 9)
+        plane.stretch([3, 0, 2])
+        self.assertEquals(plane.position, 9)
+        plane = cards.AxisPlane('myplane', 'z', 3)
+        plane.stretch([0, 0, 3])
+        self.assertEquals(plane.position, 9)
+        plane.stretch([2, 3, 0])
+        self.assertEquals(plane.position, 9)
+
+    def test_Parallelepiped(self):
+        """Tests Parallelepiped's methods, properties, and exceptions."""
+
+        ## __init__()
+        pp = cards.Parallelepiped('mypp', -2, 3, -4, 5, -6, 7, reflecting=True,
+                white=False)
+        self.assertEquals(pp.name, 'mypp')
+        self.assertTrue((pp.xlims == np.array([-2, 3])).all())
+        self.assertTrue((pp.ylims == np.array([-4, 5])).all())
+        self.assertTrue((pp.zlims == np.array([-6, 7])).all())
+        self.assertEquals(pp.reflecting, True)
+        self.assertEquals(pp.white, False)
+
+        ## comment()
+        self.assertEquals(pp.comment(), "Parallelepiped mypp: "
+                "[-2.0000, 3.0000] x [-4.0000, 5.0000] x "
+                "[-6.0000, 7.0000] cm")
+
+        ## shift()
+        pp.shift([2, 1, -1])
+        self.assertTrue((pp.xlims == np.array([0, 5])).all())
+        self.assertTrue((pp.ylims == np.array([-3, 6])).all())
+        self.assertTrue((pp.zlims == np.array([-7, 6])).all())
+            
+        ## stretch()
+        pp.stretch([4, 2, 3])
+        self.assertTrue((pp.xlims == np.array([0, 20])).all())
+        self.assertTrue((pp.ylims == np.array([-6, 12])).all())
+        self.assertTrue((pp.zlims == np.array([-21, 18])).all())
+        # Reflect.
+        pp.stretch([-2, -1, -2])
+        self.assertTrue((pp.xlims == np.array([-40, 0])).all())
+        self.assertTrue((pp.ylims == np.array([-12, 6])).all())
+        self.assertTrue((pp.zlims == np.array([-36, 42])).all())
 
 
