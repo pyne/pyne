@@ -1,19 +1,19 @@
-.. _pyne_simulation:
+.. _pyne_simplesim:
 
 =======================================================
 Reactor Simulation definition and input file generation
 =======================================================
 
-.. currentmodule:: pyne.simulation
+.. currentmodule:: pyne.simplesim
 
-.. automodule:: pyne.simulation
+.. automodule:: pyne.simplesim
   
-The ``simulation`` package provides modules for the definition of a system (its
+The ``simplesim`` package provides modules for the definition of a system (its
 geometry and material composition), the definition of simulation parameters,
 and for the generation of input files to codes that can perform such
 simulations (MCNP, Serpent, MCODE, etc.). The package is imported as such::
 
-    from pyne import simulation
+    from pyne import simplesim
 
 The three objectives of this module, in increasing specificity, are:
 
@@ -86,7 +86,7 @@ contact information.
 Definition Module
 *****************
 
-.. automodule:: pyne.simulation.definition
+.. automodule:: pyne.simplesim.definition
     :member-order: 'bysource'
     :members:
     :inherited-members:
@@ -95,7 +95,7 @@ Definition Module
 Input Module
 ************
 
-.. automodule:: pyne.simulation.inputfile
+.. automodule:: pyne.simplesim.inputfile
     :member-order: 'bysource'
     :members:
     :inherited-members:
@@ -104,7 +104,7 @@ Input Module
 Cards Module
 ************
 
-.. automodule:: pyne.simulation.cards
+.. automodule:: pyne.simplesim.cards
     :member-order: 'bysource'
     :members:
     :inherited-members:
