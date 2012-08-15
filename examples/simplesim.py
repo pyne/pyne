@@ -2,14 +2,12 @@
 # Geometry and materials
 
 # Materials.
-uo2 = material.Material(name='UOX')
-uo2.from_atom_frac({'U235': 0.05,
+uo2 = material.from_atom_frac({'U235': 0.05,
                     'U238': 0.95,
-                    'O16' : 2.0})
+                    'O16' : 2.0}, name='UO2')
 
-h2o = material.Material(name='H2O')
-h2o.from_atom_frac({'H1' : 2.0,
-                    'O16': 1.0})
+h2o = material.from_atom_frac({'H1' : 2.0,
+                    'O16': 1.0}, name='H2O')
 
 
 # Surfaces.

@@ -1,8 +1,8 @@
 .. _pyne_simplesim:
 
-==================================
-Simple Simulation Input Generation
-==================================
+===================================
+Simple Simulation Input Definitions
+===================================
 
 .. currentmodule:: pyne.simplesim
 
