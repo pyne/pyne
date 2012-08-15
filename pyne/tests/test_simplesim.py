@@ -23,6 +23,33 @@ class TestSurfaces(unittest.TestCase):
 
     def test_AxisPlane(self):
         """Tests Plane's methods, properties, and exceptions."""
+
+        ## __init__()
+        plane = cards.AxisPlane('myplane', 'x', 3, reflecting=True) 
+        self.assertEquals(plane.name, 'myplane')
+        self.assertEquals(plane.cartesian_axis, 'x')
+        self.assertEquals(plane.position, 3)
+        # test_AxisCylinder() checks these booleans more thoroughly.
+        self.assertEquals(plane.reflecting, True)
+        self.assertEquals(plane.white, None)
+
+        ## comment()
+        self.assertEquals(plane.comment(), "Axis plane myplane: x = 3.0000 cm")
+
+        ## shift()
+        plane = cards.AxisPlane('myplane', 'x', 3)
+        plane.shift([3, 0, 0])
+        self.assertEquals(plane.position, 6)
+        plane.shift([0, 3, 2])
+        self.assertEquals(plane.position, 6)
+
+        ## stretch()
+        plane = cards.AxisPlane('myplane', 'x', 3)
+        plane.stretch([3, 0, 0])
+        self.assertEquals(plane.position, 9)
+        plane.stretch([0, 3, 2])
+        self.assertEquals(plane.position, 9)
+
     def test_AxisCylinder(self):
         """Tests AxisCylinder's methods, properties, and exceptions."""
 
@@ -64,7 +91,7 @@ class TestSurfaces(unittest.TestCase):
         ## comment()
         self.assertEquals(cyl.comment(),
                 "Axis cylinder mycyl: aligned and centered on x axis, "
-                "with radius 0.4000 (diameter 0.8000).")
+                "with radius 0.4000 cm (diameter 0.8000 cm).")
 
         ## shift()
         # z-aligned
