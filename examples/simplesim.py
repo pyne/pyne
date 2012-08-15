@@ -19,24 +19,26 @@ cellbound = cards.Parallelepiped('bound',
         -pitch / 2, pitch / 2, -pitch / 2, pitch / 2, 0, 0,
         reflecting=True)
 
-
 # Cells.
-fuel = cards.CellSimpleMCNP('fuel', ['pin'], [], 'UOX',
+fuel = cards.CellMCNP('fuel', pin.neg, 'UOX',
         neutron_imp=1)
-coolant = cards.CellSimpleMCNP('coolant', ['bound'], ['pin'], 'H2O',
+coolant = cards.CellMCNP('coolant', pin.pos & cellbound.neg, 'H2O',
         neutron_imp=1)
+graveyard = cards.CellVoidMCNP('graveyard', cellbound.pos, neutron_imp=0)
 
 # Create system definition from the cards above.
-rxr = simulation.definition.SystemDefinition()
+rxr = simplesim.definition.SystemDefinition()
 rxr.add_material(uo2)
 rxr.add_material(h2o)
 rxr.add_surface(pin)
 rxr.add_surface(cellbound)
 rxr.add_cell(fuel)
 rxr.add_cell(coolant)
+rxr.add_cell(graveyard)
+# The system definition is complete.
 
 # 
-opts = simulationdef.SimulationDefinition(rxr)
+opts = definition.SimulationDefinition(rxr)
 
 opts.add_card(cards.CriticalitySource(1000, 1, 1, 1))
 opts.add_card(cards.CriticalityPoints([[0, 0, 0]]))
