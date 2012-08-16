@@ -74,8 +74,7 @@ simple_xs_energy = {
 
 
 simple_xs_dtype = np.dtype([
-    ('nuc_name', 'S6'),
-    ('nuc_zz', int),
+    ('nuc',     int),
     ('sigma_t', float),
     ('sigma_s', float),
     ('sigma_e', float),
@@ -155,14 +154,13 @@ def parse_simple_xs(build_dir=""):
                           for eng in simple_xs_energy.keys()])
 
     # Loop through species
-    for i, nuc_zz in enumerate(all_nuclides):
-        nuc_name = nucname.name(nuc_zz)
+    for i, nuc in enumerate(all_nuclides):
+        nuc_name = nucname.name(nuc)
         filename = os.path.join(build_dir, nuc_name + '_2.html')
 
         # Loop through all energy types
         for eng in simple_xs_energy:
-            energy_tables[eng]['nuc_name'][i] = nuc_name
-            energy_tables[eng]['nuc_zz'][i] = nuc_zz
+            energy_tables[eng]['nuc'][i] = nuc
 
             # Loop trhough reactions
             for chan in simple_xs_channels:
