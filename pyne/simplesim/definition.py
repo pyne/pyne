@@ -24,7 +24,7 @@ class IDefinition(object):
         """
 
         """
-        self.verbose = True
+        self.verbose = verbose
         if fname is not None:
             self._open(fname)
         else:
@@ -45,7 +45,7 @@ class IDefinition(object):
         """Save object data to a JSON file."""
         raise NotImplementedError
 
-    def _unique(self, card_type, name):
+    def _assert_unique(self, card_type, name):
         """Checks that the name on a card has not already been used for another
         card.
 
@@ -71,6 +71,10 @@ class IDefinition(object):
 
     @verbose.setter
     def verbose(self, value):
+        self._verbose = verbose
+
+    @verbose.setter
+    def verbose(self, value):
         # TODO boolean, check or rely on ducktyping?
         if type(value) is not bool:
             raise TypeError("The ``verbose`` property must be of type bool.")
@@ -84,13 +88,9 @@ class SystemDefinition(IDefinition):
     definition of materials is done using the `material` module of PyNE.
 
     """
-    def __init__(self, fname=None):
+    def __init__(self, fname=None, verbose=True):
         """Creates a new reactor definition or loads one from a JSON file."""
-
-        if fname is not None:
-            self._open(fname)
-        else:
-            self._create_new()
+        super(SystemDefinition, self).__init__(fname, verbose)
 
     def _create_new(self):
         self.surfaces = collections.OrderedDict()
@@ -101,15 +101,18 @@ class SystemDefinition(IDefinition):
         """
 
         """
-        self._unique("cell", name)
+        if self.verbose:
+            print "Adding cell %s." % cell.name
+        self._assert_unique("cell", cell.name)
         # Add all surfaces that aren't already added. Do this by walking the
-        # region tree and calling _add_cell_surfaces() at the leaves.
-        region.walk(self._add_cell_surfaces)
+        # region tree and calling _add_unique_surfaces() at the leaves.
+        cell.region.walk(self._add_unique_surfaces)
         # Only add the material if it doesn't already exist.
-        if self._unique("material", cell.material.name):
+        if (hasattr(cell, 'material') and 
+                cell.material.name not in self.materials):
             self.add_material(cell.material)
         # Okay, all checks passed.
-        self.cell[cell.name] = cell
+        self.cells[cell.name] = cell
 
     def add_surface(self, surface):
         """This method is only used by the user for surfaces that are not on a
@@ -118,12 +121,21 @@ class SystemDefinition(IDefinition):
         the objects.
 
         """
-        self._unique("surface", surface.name)
-        self.surfaces[surfaces.name] = surface
+        self._assert_unique("surface", surface.name)
+        self.surfaces[surface.name] = surface
 
-    def _add_cell_surfaces(self, regionleaf):
-        if self._unique("surface", regionleaf.surface.name):
-            self.add_surface(regionleaf.region.surface)
+    def _add_unique_surfaces(self, regionleaf):
+        name = regionleaf.surface.name
+        if self.verbose:
+            print "Trying to add surface %s..." % name
+        if name not in self.surfaces:
+            self.add_surface(regionleaf.surface)
+            if self.verbose:
+                print "Surface %s added successfully." % name
+        else:
+            if self.verbose:
+                print "Surface %s already exists in the definition." % name
+
 
     def add_material(self, material):
         """This method is only used by the user for materials that are not on a
@@ -133,7 +145,7 @@ class SystemDefinition(IDefinition):
         if material.name == None or material.name == '':
             raise ValueError("The ``name`` property of the material cannot "
                     "be empty.")
-        self._unique("material", material.name)
+        self._assert_unique("material", material.name)
         self.materials[material.name] = material
 
     def save(self, fname):
@@ -151,7 +163,7 @@ class SimulationDefinition(IDefinition):
     but I'm not too happy with either. I'd like any ideas for this. This may
     need to be subclassed for different codes, because different codes do not
     provide the same options.
-    
+
     """
 
     def __init__(self, systemdef, fname=None):

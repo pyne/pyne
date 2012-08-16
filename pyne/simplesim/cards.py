@@ -85,6 +85,7 @@ class CellVoid(ICard):
         TODO
 
         """
+        super(CellVoid, self).__init__(name)
         self.region = region
 
     def comment(self):
@@ -254,19 +255,26 @@ class CellVoidMCNP(CellVoid):
 
     @temperature.setter
     def temperature(self, value):
-        if value < 200:
-            raise UserWarning("Temperature set as less than 200 K. Are you "
-                    "trying to specify temperature in degrees "
-                    "Celcius, etc.? User provided %.4f." % value)
-        if value < 1:
-            raise UserWarning("Temperature set as less than 1 K. Are you "
-                    "trying to specify temperature as 'kT'? "
-                    "User provided %.4f." % value)
+        if value is not None:
+            if value < 200:
+                raise UserWarning("Temperature set as less than 200 K. "
+                        "Are you trying to specify temperature in degrees "
+                        "Celcius, etc.? User provided %.4f." % value)
+            if value < 1:
+                raise UserWarning("Temperature set as less than 1 K. "
+                        "Are you trying to specify temperature as 'kT'? "
+                        "User provided %.4f." % value)
         self._temperature = value
 
     @property
     def volume(self):
         return self._volume
+
+    @volume.setter
+    def volume(self, value):
+        if value is not None and value < 0:
+            raise ValueError("The ``volume`` property cannot be negative. "
+                "User provided %.4f." % value)
 
     @property
     def neutron_imp(self):
@@ -301,7 +309,7 @@ class CellVoidMCNP(CellVoid):
         self._proton_imp = value
 
 
-class CellMCNP(CellVoidMCNP, Cell):
+class CellMCNP(CellVoidMCNP): #, Cell):
     """A cell card with keyword options that are available in MCNP. Thus, it
     only makes sense to use this card if writing an input for MCNP.    
 
@@ -314,7 +322,7 @@ class CellMCNP(CellVoidMCNP, Cell):
 
     """
     # TODO flesh out keyword arguments.
-    def __init__(self, name, region, material,
+    def __init__(self, name, region, material, density, density_units,
                  temperature=None, volume=None,
                  neutron_imp=None,
                  photon_imp=None,
@@ -360,14 +368,9 @@ class CellMCNP(CellVoidMCNP, Cell):
         """
         # Based on Python's Method Resolution Order (MRO), the constructor for
         # CellSimpleVoidMCNP is called because it is listed first above.
-        super(CellSimpleMCNP, self).__init__(name, neg_surfs,
-                                             pos_surfs,
-                                             temperature=temperature,
-                                             volume=volume,
-                                             neutron_imp=neutron_imp,
-                                             photon_imp=photon_imp,
-                                             electron_imp=electron_imp,
-                                             proton_imp=proton_imp)
+        super(CellMCNP, self).__init__(name, region, temperature=temperature,
+                volume=volume, neutron_imp=neutron_imp, photon_imp=photon_imp,
+                electron_imp=electron_imp, proton_imp=proton_imp)
         # The following fields are not initialized via the superclass
         # constructor above.
         self.material = material
@@ -1042,8 +1045,11 @@ class Cuboid(Parallelepiped):
                                      reflecting, white)
 
 
-class Region(ICard):
-    """Represents a volume (space) confined by unions and intersections of
+class IRegion(ICard):
+    """This class is not used by the user. Abstract base class for
+    all regions.
+
+    Represents a volume (space) confined by unions and intersections of
     surfaces."""
     # TODO transformation functions
     # Cell cards are then formed by a region and a material.
@@ -1054,25 +1060,25 @@ class Region(ICard):
     # TODO add transformation methods.
     # TODO describe how parent works.
 
+    __metaclass__ = abc.ABCMeta
+
     def __init__(self, name):
-        super(Region, self).__init__(name)
+        super(IRegion, self).__init__(name)
         self.parent = None
 
+    @abc.abstractmethod
     def comment(self):
-        # TODO; implement for subclasses.
-        return "Region %s." % self.name
+        raise NotImplementedError
 
     def set(self, region):
         # TODO copy?
-        self.parent = parent
         if issubclass(region, RegionLeaf):
-
-        else:
-            self.left_child = region.left_child
-            self.right_child = region.right_child
-
-
-
+            self = RegionLeaf(region.surface, region.pos_sense, self.name)
+        elif issubclass(region, RegionOr):
+            self = RegionOr(region.left_child, region.right_child, self.name)
+        elif issubclass(region, RegionAnd):
+            self = RegionAnd(region.left_child, region.right_child, self.name)
+        self.parent = region.parent
 
     def __and__(self, arg):
         return self.intersect(arg)
@@ -1090,21 +1096,24 @@ class Region(ICard):
         """The surfaces themselves are modified; copies are not made.
 
         """
+        # TODO walk.
 
     def stretch(self, vector):
         """
 
         """
+        # TODO walk.
 
     def walk(self, function):
         """
 
         """
         if isinstance(self, RegionLeaf):
-            function(self)
+            dir(function)
+            function.im_func(function.im_self, self)
         else:
-            self.left_child.visit(function)
-            self.right_child.visit(function)
+            self.left_child.walk(function)
+            self.right_child.walk(function)
         
     @property
     def parent(self):
@@ -1112,25 +1121,26 @@ class Region(ICard):
 
     @parent.setter
     def parent(self, value):
-        self._parent = parent
+        self._parent = value
 
 
-class IRegionBool(Region):
+class IRegionBool(IRegion):
     """This class is not used by the user. Abstract base class for
     :py:class:`RegionAnd` and :py:class:`RegionOr`.
 
     """
     __metaclass__ = abc.ABCMeta
 
-    def __init__(self, left_child, right_child, name=''):
+    def __init__(self, left_child, right_child, name='<Empty>'):
+        super(IRegionBool, self).__init__(name)
         self.left_child = left_child
         self.right_child = right_child
         self.left_child.parent = self
         self.right_child.parent = self
 
-    def default_name(self, midchar):
-        return (" ( (" + left_child.name + ") " + midchar + " (" + 
-                right_child.name + ") ) ")
+    def comment(self, midchar):
+        return ("(" + self.left_child.comment() + " " + midchar + " " +
+                self.right_child.comment() + ")")
 
     @property
     def left_child(self):
@@ -1153,25 +1163,33 @@ class RegionAnd(IRegionBool):
     """
 
     """
-    def default_name(self):
-        return super(RegionAnd, self).default_name('&')
+    def comment(self):
+        return super(RegionAnd, self).comment('&')
 
 
 class RegionOr(IRegionBool):
     """
 
     """
-    def default_name(self):
-        return super(RegionOr, self).default_name('|')
+    def comment(self):
+        return super(RegionOr, self).comment('|')
 
 
-class RegionLeaf(Region):
+class RegionLeaf(IRegion):
     """
     """
 
-    def __init__(self, surface, pos_sense):
+    def __init__(self, surface, pos_sense, name='<Empty>'):
+        # TODO Default name is an empty string.
+        super(RegionLeaf, self).__init__(name)
         self.surface = surface
         self.pos_sense = pos_sense
+
+    def comment(self):
+        if self.pos_sense:
+            return '+' + self.surface.name
+        else:
+            return '-' + self.surface.name 
 
     @property
     def surface(self):
@@ -1192,7 +1210,6 @@ class RegionLeaf(Region):
             raise TypeError("User provided a value for pos_sense that is "
                     "not of boolean type.")
         self._pos_sense = value
-
 
 
 class Option(ICard):
