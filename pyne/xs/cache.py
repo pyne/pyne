@@ -152,7 +152,7 @@ def get_sigma_f_n(nuc):
     nuc_data = pyne_conf.NUC_DATA_PATH
     with tb.openFile(nuc_data, 'r') as f:
         N = f.root.neutron.cinder_xs.fission.coldescrs['xs'].shape[0]
-        cond = 'nuc_zz == {0}'.format(nuc)
+        cond = 'nuc == {0}'.format(nuc)
         rows = [np.array(row['xs']) for row in f.root.neutron.cinder_xs.fission.where(cond)]
 
     if len(rows) == 0:
@@ -186,7 +186,7 @@ def get_sigma_a_n(nuc):
     nuc_data = pyne_conf.NUC_DATA_PATH
     with tb.openFile(nuc_data, 'r') as f:
         N = f.root.neutron.cinder_xs.absorption.coldescrs['xs'].shape[0]
-        cond = "(from_nuc_zz == {0}) & (reaction_type != 'c')".format(nuc)
+        cond = "(from_nuc == {0}) & (reaction_type != 'c')".format(nuc)
         rows = [np.array(row['xs']) for row in f.root.neutron.cinder_xs.absorption.where(cond)]
 
     if len(rows) == 0:
@@ -262,7 +262,7 @@ def get_sigma_a_reaction_n(nuc, rx):
     nuc_data = pyne_conf.NUC_DATA_PATH
     with tb.openFile(nuc_data, 'r') as f:
         N = f.root.neutron.cinder_xs.absorption.coldescrs['xs'].shape[0]
-        cond = "(from_nuc_zz == {0}) & (reaction_type == '{1}')".format(nuc, rx)
+        cond = "(from_nuc == {0}) & (reaction_type == '{1}')".format(nuc, rx)
         rows = [np.array(row['xs']) for row in f.root.neutron.cinder_xs.absorption.where(cond)]
 
     if len(rows) == 0:
