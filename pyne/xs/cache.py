@@ -310,7 +310,7 @@ def get_eaf_xs(nuc, rx):
         Nuclide in zzaaam form.
     rx : str 
         Reaction MT # in nnnm form.
-      OR: (eventually
+      OR: (eventually)
         Reaction key: 'gamma', 'alpha', 'p', etc.
 
     Returns
