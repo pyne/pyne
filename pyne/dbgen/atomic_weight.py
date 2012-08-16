@@ -156,7 +156,7 @@ def make_atomic_weight_table(nuc_data, build_dir=""):
     # Add normal isotopes to A
     for nuc, mass, error in atomic_masses:
         if nuc in atomic_abund:
-            A[nuc] = nuc, mass, error, atomic_abund[nuc_zz]
+            A[nuc] = nuc, mass, error, atomic_abund[nuc]
         else:
             A[nuc] = nuc, mass, error, 0.0
 
@@ -170,7 +170,7 @@ def make_atomic_weight_table(nuc_data, build_dir=""):
         element_zz = zz * 10000
         element = nucname.zz_name[zz]
 
-        nuc_zz, nuc_mass, _error, _abund = A[nuc]
+        _nuc, nuc_mass, _error, _abund = A[nuc]
         elem_zz, elem_mass, _error, _abund = A[element_zz]
 
         new_elem_mass = elem_mass + (nuc_mass * abund)

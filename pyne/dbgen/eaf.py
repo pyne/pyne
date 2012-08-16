@@ -39,12 +39,11 @@ def grab_eaf_data(build_dir=""):
 
 
 eaf_dtype = np.dtype([
-    #('nuc_name',      'S6'         ),
-    ('nuc_zz',        int          ),
-    ('rxnum',         'S7'         ),
-    ('rxstr',         'S4'         ),
-    ('daughter',      'S5'         ),
-    ('xsec',          float, (175,))
+    ('nuc', int),
+    ('rxnum', 'S7'),
+    ('rxstr', 'S4'),
+    ('daughter', 'S5'),
+    ('xsec', float, (175,))
     ])
 
 # Regular expression for parsing an individual set of EAF data
