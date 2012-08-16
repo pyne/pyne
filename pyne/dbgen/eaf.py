@@ -12,7 +12,20 @@ from pyne.utils import to_barns, failure
 from pyne.dbgen.api import BASIC_FILTERS
 
 def grab_eaf_data(build_dir=""):
-    pass
+    """Grabs the EAF file from the local filesystem if not already present."""
+    build_filename = os.path.join(build_dir, 'cinder.dat')
+    if os.path.exists(build_filename):
+        return True
+
+    # FIXME make local_filename more general
+    local_filename = "/filespace/groups/cnerg/opt/FENDL2.0-A/fendlg-2.0_175"
+    if os.path.exists(local_filename):
+        print failure("EAF file not found - skipping.")
+        return False
+
+    print "Grabbing the EAF activation data from " + local_filename
+    shutil.copy(local_filename, build_filename)
+    return True
 
 
 #def _init_eaf(db):
@@ -58,7 +71,7 @@ def parse_eaf_xsec(build_dir):
     """
     
     #TODO: change eaf_file to something more universal
-    eaf_file = "/filespace/groups/cnerg/opt/FENDL2.0-A/fendlg-2.0_175"):
+    eaf_file = os.path.join(build_dir, 'eaf')
 
     with open(eaf_file, 'r') as f:
         raw_data = f.read()
@@ -97,13 +110,13 @@ def make_eaf_table(nuc_data, build_dir=""):
     db = tb.openFile(nuc_data, 'a', filters=BASIC_FILTERS)
 
     # Ensure that the appropriate file structure is present
-    if not hasattr(db.root, 'neutron')
+    if not hasattr(db.root, 'neutron'):
         neutron_group = db.createGroup('/', 'neutron', \
                 'Neutron Interaction Data')
 
     # Create xs group
     if not hasattr(db.root.neutron, 'eaf_xs'):
-    eaf_group = db.createGroup("/neutron", "eaf_xs", \
+        eaf_group = db.createGroup("/neutron", "eaf_xs", \
             "EAF 175-Group Neutron Activation Cross Section Data")
 
 
@@ -125,16 +138,17 @@ def make_eaf_table(nuc_data, build_dir=""):
 
 def make_eaf(args):
     """Controller function for adding cinder data."""
-    nuc_data, build_dir, datapath = args.nuc_data, args.build_dir, args.datapath
+    nuc_data, build_dir = args.nuc_data, args.build_dir
 
     # Check if the table already exists
     with tb.openFile(nuc_data, 'a', filters=BASIC_FILTERS) as f:
         if hasattr(f.root, 'neutron') and hasttr(f.root.neutron, 'eaf_xs'):
             return
 
-    #
-    print "Grabbing the EAF activation data."
-    grab_eaf_data(build_dir)
+    # First grab the EAF activation data.
+    grabbed = grab_eaf_data(build_dir)
+    if not grabbed:
+        return
 
     print "Making EAF activation data table."
     make_eaf_table(nuc_data, build_dir)
