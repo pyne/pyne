@@ -700,12 +700,10 @@ def make_neutron_fp_yields(nuc_data, build_dir=""):
         # Prep rows to the table
         for n in range(N_n):
             info = info_table[n]
-
             nfprow['index'] = info[0]
-            nfprow['from_nuc'] = info[2]
+            nfprow['from_nuc'] = info[1]
             nfprow['to_nuc'] = to_nuc
             nfprow['mass_frac'] = yields[n]
-
             nfprow.append()
 
         # Write the table
@@ -771,12 +769,10 @@ def make_photon_fp_yields(nuc_data, build_dir):
         # Prep rows to the table
         for n in range(N_g):
             info = info_table[n]
-
             gfprow['index'] = info[0]
-            gfprow['from_nuc'] = info[2]
+            gfprow['from_nuc'] = info[1]
             gfprow['to_nuc'] = to_nuc
             gfprow['mass_frac'] = yields[n]
-
             gfprow.append()
 
         # Write the table
