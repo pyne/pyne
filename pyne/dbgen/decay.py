@@ -59,11 +59,9 @@ def grab_ensdf_decay(build_dir=""):
 
 
 atomic_decay_dtype = np.dtype([
-    ('from_nuc_name', 'S6'),
-    ('from_nuc_zz',   int),
+    ('from_nuc',   int),
     ('level',         float),
-    ('to_nuc_name',   'S6'),
-    ('to_nuc_zz',     int), 
+    ('to_nuc',     int), 
     ('half_life',     float),
     ('decay_const',   float),
     ('branch_ratio',  float),
@@ -82,7 +80,7 @@ def parse_decay(build_dir=""):
         decay_data += ensdf.half_life(f)
 
     ln2 = np.log(2.0)
-    decay_data = [(nucname.name(fn), fn, lvl, nucname.name(tn), tn, hl, ln2/hl, br) for fn, lvl, tn, hl, br in decay_data]
+    decay_data = [(fn, lvl, tn, hl, ln2/hl, br) for fn, lvl, tn, hl, br in decay_data]
     decay_data = set(decay_data)
     decay_data = sorted(decay_data, key=lambda x: (x[1], x[4]))
 
