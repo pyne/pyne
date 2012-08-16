@@ -154,10 +154,8 @@ from_nuc_pattern = "\n#[\s\d]{4}:\s+(\d+).*?\n(_______________________| [\w/-]+ 
 to_nuc_base = "#[\s\d]{4}:\s+(\d+) produced by the following C-X  \((.{4})\) REF:.*?\n"
 
 absorption_dtype_tuple = [
-    ('from_nuc_name', 'S6'),
-    ('from_nuc_zz', int),
-    ('to_nuc_name', 'S6'),
-    ('to_nuc_zz', int),
+    ('from_nuc', int),
+    ('to_nuc', int),
     ('reaction_type', 'S4'),
     # Extra 'xs' entry should be appended with value ('xs', float, G_n)    
     ]
@@ -198,26 +196,24 @@ def make_mg_absorption(nuc_data, build_dir=""):
 
     # Iterate through all from nuctopes.
     for m_from in re.finditer(from_nuc_pattern, raw_data, re.DOTALL):
-        from_nuc_zz = nucname.zzaaam(m_from.group(1))
+        from_nuc = nucname.zzaaam(m_from.group(1))
 
         # Check matestable state
-        if 1 < from_nuc_zz%10:
+        if 1 < from_nuc%10:
             # Metastable state too high!
             continue
-        from_nuc_name = nucname.name(from_nuc_zz)
 
         # Grab the string for this from_nuc in order to get all of the to_nucs
         from_nuc_part = m_from.group(0)
 
         # Iterate over all to_nucs
         for m_to in re.finditer(to_nuc_pattern, from_nuc_part):
-            to_nuc_zz = nucname.zzaaam(m_to.group(1))
+            to_nuc = nucname.zzaaam(m_to.group(1))
 
             # Check matestable state
-            if 1 < to_nuc_zz%10:
+            if 1 < to_nuc%10:
                 # Metastable state too high!
                 continue
-            to_nuc_name = nucname.name(to_nuc_zz)
 
             # Munge reaction type
             rx_type = m_to.group(2)
@@ -228,12 +224,8 @@ def make_mg_absorption(nuc_data, build_dir=""):
             assert xs.shape == (G_n, )
 
             # Write this row to the absorption table
-            abrow['from_nuc_name'] = from_nuc_name
-            abrow['from_nuc_zz'] = from_nuc_zz
-
-            abrow['to_nuc_name'] = to_nuc_name
-            abrow['to_nuc_zz'] = to_nuc_zz
-
+            abrow['from_nuc'] = from_nuc
+            abrow['to_nuc'] = to_nuc
             abrow['reaction_type'] = rx_type
             abrow['xs'] = xs
 
@@ -249,8 +241,7 @@ def make_mg_absorption(nuc_data, build_dir=""):
 fission_base = "\n([\s\d]+),([\s\d]+),([\s\d]+)=\(n,f\) yield sets\. If > 0,[\s\d]{4}-gp fisn CX follows\..*?\n"
 
 fission_dtype_tuple = [
-    ('nuc_name', 'S6'),
-    ('nuc_zz', int),
+    ('nuc', int),
     ('thermal_yield', np.int8),
     ('fast_yield', np.int8),
     ('high_energy_yield', np.int8),
@@ -293,13 +284,12 @@ def make_mg_fission(nuc_data, build_dir=""):
 
     # Iterate through all from nuctopes.
     for m_from in re.finditer(from_nuc_pattern, raw_data, re.DOTALL):
-        from_nuc_zz = nucname.zzaaam(m_from.group(1))
+        from_nuc = nucname.zzaaam(m_from.group(1))
 
         # Check matestable state
-        if 1 < from_nuc_zz%10:
+        if 1 < from_nuc%10:
             # Metastable state too high!
             continue
-        from_nuc_name = nucname.name(from_nuc_zz)
 
         # Grab the string for this from_nuc in order to get all of the to_nucs
         from_nuc_part = m_from.group(0)
@@ -319,8 +309,7 @@ def make_mg_fission(nuc_data, build_dir=""):
         assert xs.shape == (G_n, )
 
         # Write fission table row
-        frow['nuc_name'] = from_nuc_name
-        frow['nuc_zz'] = from_nuc_zz
+        frow['nuc'] = from_nuc
 
         frow['thermal_yield']     = yield_t
         frow['fast_yield']        = yield_f
@@ -340,8 +329,7 @@ gamma_decay_base = "gamma spectra from .{3} multiplied by\s+(" + cinder_float + 
                    cinder_float + ")\n"
 
 gamma_decay_dtype_tuple = [
-    ('nuc_name', 'S6'),
-    ('nuc_zz', int),
+    ('nuc', int),
     ('energy', float),
     ('scaling_factor', float),
     # Extra 'spectrum' entry should be appended with value ('spectrum', float, G_g)
@@ -383,13 +371,12 @@ def make_mg_gamma_decay(nuc_data, build_dir=""):
 
     # Iterate through all from nuctopes.
     for m_from in re.finditer(from_nuc_pattern, raw_data, re.DOTALL):
-        from_nuc_zz = nucname.zzaaam(m_from.group(1))
+        from_nuc = nucname.zzaaam(m_from.group(1))
 
         # Check matestable state
-        if 1 < from_nuc_zz%10:
+        if 1 < from_nuc%10:
             # Metastable state too high!
             continue
-        from_nuc_name = nucname.name(from_nuc_zz)
 
         # Grab the string for this from_nuc in order to get all of the to_nucs
         from_nuc_part = m_from.group(0)
@@ -408,8 +395,7 @@ def make_mg_gamma_decay(nuc_data, build_dir=""):
         assert spectrum.shape == (G_g, )
 
         # Prepare the row
-        gdrow['nuc_name'] = from_nuc_name
-        gdrow['nuc_zz'] = from_nuc_zz
+        gdrow['nuc'] = from_nuc
 
         gdrow['energy'] = energy
         gdrow['scaling_factor'] = scale
@@ -455,8 +441,7 @@ def get_fp_sizes(raw_data):
 
 fp_info_dtype = np.dtype([
     ('index', np.int16),
-    ('nuc_name', 'S6'),
-    ('nuc_zz', int),
+    ('nuc', int),
     ('type', 'S11'),
     ('mass', float),
     ])
@@ -484,7 +469,7 @@ def parse_neutron_fp_info(raw_data):
     Returns
     -------
     info_table : array 
-        Structured array with the form "(index, nuc_name, nuc_zz, type, mass)". 
+        Structured array with the form "(index, nuc, type, mass)". 
     """
     # Get group sizes
     N_n, N_g = get_fp_sizes(raw_data)
@@ -509,16 +494,15 @@ def parse_neutron_fp_info(raw_data):
         iit = iits[m]
         index = int(iit[0])
 
-        nuc_zz = nucname.zzaaam(iit[1])
+        nuc = nucname.zzaaam(iit[1])
         # Correct for metastable flag
-        if 0 != nuc_zz%10:
-            nuc_zz = nuc_zz + 2000
+        if 0 != nuc%10:
+            nuc = nuc + 2000
 
-        nuc_name = nucname.name(nuc_zz)
         type = fp_type_flag[iit[2]]
         mass = float(masses[m])
 
-        info_row = (index, nuc_name, nuc_zz, type, mass)
+        info_row = (index, nuc, type, mass)
         info_table.append(info_row)
 
     info_table = np.array(info_table, dtype=fp_info_dtype)
@@ -575,7 +559,7 @@ def grab_photon_fp_info(raw_data):
     Returns
     -------
     info_table : array 
-        Structured array with the form "(index, nuc_name, nuc_zz, type, mass)". 
+        Structured array with the form "(index, nuc, type, mass)". 
     """
     # Get group sizes
     N_n, N_g = get_fp_sizes(raw_data)
@@ -600,16 +584,15 @@ def grab_photon_fp_info(raw_data):
         iit = iits[m]
         index = int(iit[0])
 
-        nuc_zz = nucname.zzaaam(iit[1])
+        nuc = nucname.zzaaam(iit[1])
         # Correct for metastable flag
-        if 0 != nuc_zz%10:
-            nuc_zz = nuc_zz + 2000
+        if 0 != nuc%10:
+            nuc = nuc + 2000
 
-        nuc_name = nucname.name(nuc_zz)
         type = fp_type_flag[iit[2]]
         mass = float(masses[m])
 
-        info_row = (index, nuc_name, nuc_zz, type, mass)
+        info_row = (index, nuc, type, mass)
         info_table.append(info_row)
 
     info_table = np.array(info_table, dtype=fp_info_dtype)
@@ -652,10 +635,8 @@ def make_photon_fp_info(nuc_data, build_dir=""):
 
 fp_yields_dtype = np.dtype([
     ('index', np.int16),
-    ('from_nuc_name', 'S6'),
-    ('from_nuc_zz', int),
-    ('to_nuc_name', 'S6'),
-    ('to_nuc_zz', int),
+    ('from_nuc', int),
+    ('to_nuc', int),
     ('mass_frac', float),
     ])
 
@@ -705,13 +686,12 @@ def make_neutron_fp_yields(nuc_data, build_dir=""):
     # Iterate over all to-nucs
     fp_to_nuc_pattern = fp_to_nuc_base + N_n*fp_to_nuc_insert + ")"
     for m_to in re.finditer(fp_to_nuc_pattern, nfp_yields_raw):
-        to_nuc_zz = nucname.zzaaam(m_to.group(2).strip())
+        to_nuc = nucname.zzaaam(m_to.group(2).strip())
 
         # Check matestable state
-        if 1 < to_nuc_zz%10:
+        if 1 < to_nuc%10:
             # Metastable state too high!
             continue
-        to_nuc_name = nucname.name(to_nuc_zz)
 
         # Get the array of yield data
         yields = np.array(m_to.group(3).split(), dtype=float)
@@ -722,10 +702,8 @@ def make_neutron_fp_yields(nuc_data, build_dir=""):
             info = info_table[n]
 
             nfprow['index'] = info[0]
-            nfprow['from_nuc_name'] = info[1]
-            nfprow['from_nuc_zz'] = info[2]
-            nfprow['to_nuc_name'] = to_nuc_name
-            nfprow['to_nuc_zz'] = to_nuc_zz
+            nfprow['from_nuc'] = info[2]
+            nfprow['to_nuc'] = to_nuc
             nfprow['mass_frac'] = yields[n]
 
             nfprow.append()
@@ -779,13 +757,12 @@ def make_photon_fp_yields(nuc_data, build_dir):
     # Iterate over all to-nucs
     fp_to_nuc_pattern = fp_to_nuc_base + N_g*fp_to_nuc_insert + ")"
     for m_to in re.finditer(fp_to_nuc_pattern, gfp_yields_raw):
-        to_nuc_zz = nucname.zzaaam(m_to.group(2).strip())
+        to_nuc = nucname.zzaaam(m_to.group(2).strip())
 
         # Check matestable state
-        if 1 < to_nuc_zz%10:
+        if 1 < to_nuc%10:
             # Metastable state too high!
             continue
-        to_nuc_name = nucname.name(to_nuc_zz)
 
         # Get the array of yield data
         yields = np.array(m_to.group(3).split(), dtype=float)
@@ -796,10 +773,8 @@ def make_photon_fp_yields(nuc_data, build_dir):
             info = info_table[n]
 
             gfprow['index'] = info[0]
-            gfprow['from_nuc_name'] = info[1]
-            gfprow['from_nuc_zz'] = info[2]
-            gfprow['to_nuc_name'] = to_nuc_name
-            gfprow['to_nuc_zz'] = to_nuc_zz
+            gfprow['from_nuc'] = info[2]
+            gfprow['to_nuc'] = to_nuc
             gfprow['mass_frac'] = yields[n]
 
             gfprow.append()

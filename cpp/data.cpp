@@ -45,7 +45,6 @@ void pyne::_load_atomic_mass_map()
   // Ok now that we have the array of stucts, put it in the map
   for(int n = 0; n < atomic_weight_length; n++)
     atomic_mass_map[atomic_weight_array[n].nuc] = atomic_weight_array[n].mass;
-  H5Tclose(str6);
 };
 
 
@@ -170,7 +169,6 @@ void pyne::_load_scattering_lengths()
     b_coherent_map[scat_len_array[n].nuc] = scat_len_array[n].b_coherent;
     b_incoherent_map[scat_len_array[n].nuc] = scat_len_array[n].b_incoherent;
   };
-  H5Tclose(str6);
 };
 
 
@@ -445,7 +443,6 @@ void pyne::_load_atomic_decay()
     if (0 == decay_const_map.count(from_nuc) || 0.0 == level)
       decay_const_map[from_nuc] = atom_dec_array[n].decay_const;
   };
-  H5Tclose(str6);
 };
 
 
