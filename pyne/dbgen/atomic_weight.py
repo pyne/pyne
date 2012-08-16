@@ -177,8 +177,7 @@ def make_atomic_weight_table(nuc_data, build_dir=""):
         A[element_zz] = element_zz, new_elem_mass, 0.0, 0.0
 
 
-    A = sorted(A.values(), key=lambda x: x[1])
-    #A = np.array(A, dtype=atomic_weight_dtype)
+    A = sorted(A.values(), key=lambda x: x[0])
 
     # Open the HDF5 File
     kdb = tb.openFile(nuc_data, 'a', filters=BASIC_FILTERS)
