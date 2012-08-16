@@ -1,3 +1,23 @@
+from pyne.simplesim import definition, cards, inputfile
+
+"""
+# super brief
+rxr = simplesim.definition.SystemDefinition()
+pinsurf = cards.AxisCylinder('fuelpin', 'x', 0.40)
+rxr.add_cell(cards.CellMCNP('fuel', pinsurf.neg,
+        material.from_atom_frac({'U235': 0.05, 'U238': 0.95, 'O16': 2.0},
+            name='UO2'), 
+        neutron_imp=1))
+pitch = 1.2
+boundsurf = cards.Parallelepiped('bound',
+    -pitch / 2, pitch / 2, -pitch / 2, pitch / 2,
+    0, 0, reflecting=True),
+rxr.add_cell(cards.CellMCNP('coolant', pinsurf.pos & boundsurf.neg,
+        material.from_atom_frac({'H1': 2.0, 'O16': 1.0}, name='H2O'),
+        neutron_imp=1))
+rxr.add_cell(cards.CellVoidMCNP('graveyard', boundsurf.pos, neutron_imp=0))
+
+
 
 # Geometry and materials
 
@@ -20,9 +40,9 @@ cellbound = cards.Parallelepiped('bound',
         reflecting=True)
 
 # Cells.
-fuel = cards.CellMCNP('fuel', pin.neg, 'UOX',
+fuel = cards.CellMCNP('fuel', pin.neg, uo2,
         neutron_imp=1)
-coolant = cards.CellMCNP('coolant', pin.pos & cellbound.neg, 'H2O',
+coolant = cards.CellMCNP('coolant', pin.pos & cellbound.neg, h2o,
         neutron_imp=1)
 graveyard = cards.CellVoidMCNP('graveyard', cellbound.pos, neutron_imp=0)
 
@@ -130,5 +150,5 @@ perhaps add all surfaces and materials at once.
 
 
 
-
-
+# TODO show a bunch of ways to do a single simulation.
+"""
