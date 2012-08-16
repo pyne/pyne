@@ -796,7 +796,7 @@ _fpy_card_fmt = "{nlb:>4}     {y1:<9.{p}E} {y2:<9.{p}E} {y3:<9.{p}E} {y4:<9.{p}E
 
 def _decay_deck_2_str(nlb, deck, precision):
     # Get unique isotopes 
-    nucset = dict([nuc for nuc in chain(*[v.keys() for k, v in deck.items() if hasattr(v, 'keys')]) ])
+    nucset = set([nuc for nuc in chain(*[v.keys() for k, v in deck.items() if hasattr(v, 'keys')]) ])
 
     s = ""
     for nuc in nucset:
@@ -823,7 +823,7 @@ def _decay_deck_2_str(nlb, deck, precision):
 
 def _xs_deck_2_str(nlb, deck, precision):
     # Get unique isotopes 
-    nucset = dict([nuc for nuc in chain(*[v.keys() for k, v in deck.items() if hasattr(v, 'keys')]) ])
+    nucset = set([nuc for nuc in chain(*[v.keys() for k, v in deck.items() if hasattr(v, 'keys')]) ])
 
     is_actinides = deck['_subtype'] == 'actinides'
 
@@ -850,7 +850,7 @@ def _xs_deck_2_str(nlb, deck, precision):
 
 def _xsfpy_deck_2_str(nlb, deck, precision):
     # Get unique isotopes 
-    nucset = dict([nuc for nuc in chain(*[v.keys() for k, v in deck.items() if hasattr(v, 'keys')]) ])
+    nucset = set([nuc for nuc in chain(*[v.keys() for k, v in deck.items() if hasattr(v, 'keys')]) ])
 
     is_actinides = deck['_subtype'] == 'actinides'
 
