@@ -1,6 +1,9 @@
 from pyne.simplesim import definition, cards, inputfile
 
+from pyne import material
+
 """
+
 # super brief
 rxr = simplesim.definition.SystemDefinition()
 pinsurf = cards.AxisCylinder('fuelpin', 'x', 0.40)
@@ -17,7 +20,7 @@ rxr.add_cell(cards.CellMCNP('coolant', pinsurf.pos & boundsurf.neg,
         neutron_imp=1))
 rxr.add_cell(cards.CellVoidMCNP('graveyard', boundsurf.pos, neutron_imp=0))
 
-
+"""
 
 # Geometry and materials
 
@@ -40,23 +43,21 @@ cellbound = cards.Parallelepiped('bound',
         reflecting=True)
 
 # Cells.
-fuel = cards.CellMCNP('fuel', pin.neg, uo2,
+fuel = cards.CellMCNP('fuel', pin.neg, uo2, 11.0, 'g/cm^3',
         neutron_imp=1)
 coolant = cards.CellMCNP('coolant', pin.pos & cellbound.neg, h2o,
+        1.0, 'g/cm^3',
         neutron_imp=1)
 graveyard = cards.CellVoidMCNP('graveyard', cellbound.pos, neutron_imp=0)
 
 # Create system definition from the cards above.
-rxr = simplesim.definition.SystemDefinition()
-rxr.add_material(uo2)
-rxr.add_material(h2o)
-rxr.add_surface(pin)
-rxr.add_surface(cellbound)
+rxr = definition.SystemDefinition()
 rxr.add_cell(fuel)
 rxr.add_cell(coolant)
 rxr.add_cell(graveyard)
 # The system definition is complete.
 
+"""
 # 
 opts = definition.SimulationDefinition(rxr)
 
@@ -80,49 +81,50 @@ for this_enrich in enrichments:
     
 
 
-
-
 """
-
 """
 # Create cards.
 channel = cards.AxisCylinder("channel", 'X', 2.54)
-leftbound = cards.Plane("leftbound", 'X', -500.0)
-rightbound = cards.Plane("rightbound", 'X', 500.0)
+leftbound = cards.AxisPlane("leftbound", 'X', -500.0)
+rightbound = cards.AxisPlane("rightbound", 'X', 500.0)
 polycyl = cards.AxisCylinder("polycyl", 'X', 17.54)
 tungstencyl = cards.AxisCylinder("tungstencyl", 'X', 27.54)
 coppercyl = cards.AxisCylinder("coppercyl", 'X', 28.04)
-shieldleft = cards.Plane("shieldleft", 'X', -25.0)
-shieldright = cards.Plane("shieldright", 'X', 25.0)
+shieldleft = cards.AxisPlane("shieldleft", 'X', -25.0)
+shieldright = cards.AxisPlane("shieldright", 'X', 25.0)
 aperturecyl = cards.AxisCylinder("aperturecyl", 'Z', 0.25)
-half = cards.Plane("half", 'Z', 0.0)
+half = cards.AxisPlane("half", 'Z', 0.0)
 gravecyl = cards.AxisCylinder("gravecyl", 'X', 33.04)
 
 # Make regions.
-pipemid = leftbound.pos & rightbound.neg & channel.neg
-polyshield = shieldleft.pos & shieldright.neg & 
+pipemid = leftbound.pos & rightbound.neg # & channel.neg
+polyshield = (shieldleft.pos & shieldright.neg & 
         channel.pos & polycyl.neg & 
-        aperturecyl.pos 
-tungstenshield = shieldleft.pos & shieldright.neg &
+        aperturecyl.pos )
+tungstenshield = (shieldleft.pos & shieldright.neg &
         polycyl.pos & tungstencyl.neg &
-        aperturecyl.pos
-coppershield = shieldleft.pos & shieldright.neg &
+        aperturecyl.pos)
+coppershield = (shieldleft.pos & shieldright.neg &
         tungstencyl.pos & coppercyl.neg &
-        aperturecyl.pos
+        aperturecyl.pos)
 aperture = aperturecyl.neg & channel.pos & coppercyl.neg
-usefulvoid = (channel.pos & gravecyl.neg & 
+usefulvoid = ((channel.pos & gravecyl.neg & 
               leftbound.pos & shieldleft.neg)
              |
              (channel.pos & gravecyl.neg &
               shieldright.pos & rightbound.neg)
              |
              (tungstencyl.pos & gravecyl.neg &
-              shieldleft.pos & shieldright.neg)
-uselessvoid = leftbound.neg | rightbound.pos |
+              shieldleft.pos & shieldright.neg))
+uselessvoid = (leftbound.neg | rightbound.pos |
               (leftbound.pos & leftbound.neg &
-               gravecyl.pos)
+               gravecyl.pos))
 
+print pipemid.comment()
+print polyshield.comment()
+"""
 
+"""
 rxr.add_lattice
 
 rxr.add_universe
@@ -134,7 +136,7 @@ perhaps add all surfaces and materials at once.
 
 
 
-
+"""
 
 
 
@@ -151,4 +153,3 @@ perhaps add all surfaces and materials at once.
 
 
 # TODO show a bunch of ways to do a single simulation.
-"""
