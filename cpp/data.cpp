@@ -21,14 +21,11 @@ void pyne::_load_atomic_mass_map()
     throw h5wrap::FileNotHDF5(pyne::NUC_DATA_PATH);
 
   // Get the HDF5 compound type (table) description
-  hid_t str6 = H5Tcopy (H5T_C_S1);
-  H5Tset_size(str6, 6);
   hid_t desc = H5Tcreate(H5T_COMPOUND, sizeof(atomic_weight_struct));
-  H5Tinsert(desc, "nuc_name", HOFFSET(atomic_weight_struct, nuc_name), str6);
-  H5Tinsert(desc, "nuc_zz",   HOFFSET(atomic_weight_struct, nuc_zz),   H5T_NATIVE_INT);
-  H5Tinsert(desc, "mass",     HOFFSET(atomic_weight_struct, mass),     H5T_NATIVE_DOUBLE);
-  H5Tinsert(desc, "error",    HOFFSET(atomic_weight_struct, error),    H5T_NATIVE_DOUBLE);
-  H5Tinsert(desc, "abund",    HOFFSET(atomic_weight_struct, abund),    H5T_NATIVE_DOUBLE);
+  H5Tinsert(desc, "nuc",   HOFFSET(atomic_weight_struct, nuc),   H5T_NATIVE_INT);
+  H5Tinsert(desc, "mass",  HOFFSET(atomic_weight_struct, mass),  H5T_NATIVE_DOUBLE);
+  H5Tinsert(desc, "error", HOFFSET(atomic_weight_struct, error), H5T_NATIVE_DOUBLE);
+  H5Tinsert(desc, "abund", HOFFSET(atomic_weight_struct, abund), H5T_NATIVE_DOUBLE);
 
   // Open the HDF5 file
   hid_t nuc_data_h5 = H5Fopen(pyne::NUC_DATA_PATH.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT);
@@ -47,8 +44,7 @@ void pyne::_load_atomic_mass_map()
 
   // Ok now that we have the array of stucts, put it in the map
   for(int n = 0; n < atomic_weight_length; n++)
-    atomic_mass_map[atomic_weight_array[n].nuc_zz] = atomic_weight_array[n].mass;
-  H5Tclose(str6);
+    atomic_mass_map[atomic_weight_array[n].nuc] = atomic_weight_array[n].mass;
 };
 
 
@@ -140,11 +136,8 @@ void pyne::_load_scattering_lengths()
     throw h5wrap::FileNotHDF5(pyne::NUC_DATA_PATH);
 
   // Get the HDF5 compound type (table) description
-  hid_t str6 = H5Tcopy (H5T_C_S1);
-  H5Tset_size(str6, 6);
   hid_t desc = H5Tcreate(H5T_COMPOUND, sizeof(scattering_lengths_struct));
-  status = H5Tinsert(desc, "nuc_name", HOFFSET(scattering_lengths_struct, nuc_name), str6);
-  status = H5Tinsert(desc, "nuc_zz", HOFFSET(scattering_lengths_struct, nuc_zz), H5T_NATIVE_INT);
+  status = H5Tinsert(desc, "nuc", HOFFSET(scattering_lengths_struct, nuc), H5T_NATIVE_INT);
   status = H5Tinsert(desc, "b_coherent", HOFFSET(scattering_lengths_struct, b_coherent), 
                       h5wrap::PYTABLES_COMPLEX128);
   status = H5Tinsert(desc, "b_incoherent", HOFFSET(scattering_lengths_struct, b_incoherent), 
@@ -173,10 +166,9 @@ void pyne::_load_scattering_lengths()
   // Ok now that we have the array of stucts, put it in the maps
   for(int n = 0; n < scat_len_length; n++)
   {
-    b_coherent_map[scat_len_array[n].nuc_zz] = scat_len_array[n].b_coherent;
-    b_incoherent_map[scat_len_array[n].nuc_zz] = scat_len_array[n].b_incoherent;
+    b_coherent_map[scat_len_array[n].nuc] = scat_len_array[n].b_coherent;
+    b_incoherent_map[scat_len_array[n].nuc] = scat_len_array[n].b_incoherent;
   };
-  H5Tclose(str6);
 };
 
 
@@ -409,15 +401,11 @@ void pyne::_load_atomic_decay()
     throw h5wrap::FileNotHDF5(pyne::NUC_DATA_PATH);
 
   // Get the HDF5 compound type (table) description
-  hid_t str6 = H5Tcopy (H5T_C_S1);
-  H5Tset_size(str6, 6);
   hid_t desc = H5Tcreate(H5T_COMPOUND, sizeof(atomic_decay_struct));
-  status = H5Tinsert(desc, "from_nuc_name", HOFFSET(atomic_decay_struct, from_nuc_name), str6);
-  status = H5Tinsert(desc, "from_nuc_zz", HOFFSET(atomic_decay_struct, from_nuc_zz), 
+  status = H5Tinsert(desc, "from_nuc", HOFFSET(atomic_decay_struct, from_nuc), 
                       H5T_NATIVE_INT);
   status = H5Tinsert(desc, "level", HOFFSET(atomic_decay_struct, level), H5T_NATIVE_DOUBLE);
-  status = H5Tinsert(desc, "to_nuc_name", HOFFSET(atomic_decay_struct, to_nuc_name), str6);
-  status = H5Tinsert(desc, "to_nuc_zz", HOFFSET(atomic_decay_struct, to_nuc_zz), H5T_NATIVE_INT);
+  status = H5Tinsert(desc, "to_nuc", HOFFSET(atomic_decay_struct, to_nuc), H5T_NATIVE_INT);
   status = H5Tinsert(desc, "half_life", HOFFSET(atomic_decay_struct, half_life), 
                       H5T_NATIVE_DOUBLE);
   status = H5Tinsert(desc, "decay_const", HOFFSET(atomic_decay_struct, decay_const), 
@@ -446,7 +434,7 @@ void pyne::_load_atomic_decay()
   double level;
   for(int n = 0; n < atom_dec_length; n++)
   {
-    from_nuc = atom_dec_array[n].from_nuc_zz;
+    from_nuc = atom_dec_array[n].from_nuc;
     level = atom_dec_array[n].level;
 
     if (0 == half_life_map.count(from_nuc) || 0.0 == level)
@@ -455,7 +443,6 @@ void pyne::_load_atomic_decay()
     if (0 == decay_const_map.count(from_nuc) || 0.0 == level)
       decay_const_map[from_nuc] = atom_dec_array[n].decay_const;
   };
-  H5Tclose(str6);
 };
 
 

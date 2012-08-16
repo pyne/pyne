@@ -11,14 +11,64 @@ from pyne import nucname
 from pyne.utils import to_barns, failure
 from pyne.dbgen.api import BASIC_FILTERS
 
+<<<<<<< HEAD
+=======
+def grab_eaf_data(build_dir=""):
+    """Grabs the EAF file from the local filesystem if not already present."""
+    build_filename = os.path.join(build_dir, 'eaf')
+    if os.path.exists(build_filename):
+        return True
+
+    # FIXME make local_filename more general
+    local_filename = "/filespace/groups/cnerg/opt/FENDL2.0-A/fendlg-2.0_175"
+    if not os.path.exists(local_filename):
+        print failure("EAF file not found - skipping.")
+        return False
+
+    print "Grabbing the EAF activation data from " + local_filename
+    shutil.copy(local_filename, build_filename)
+    return True
+
+
+#def _init_eaf(db):
+#    """Initializes a multigroup cross-section part of the database.
+#
+#    Parameters
+#    ----------
+#    db : tables.File 
+#        A nuclear data hdf5 file.
+#    """
+#
+#    # Create neutron group
+#    if not hasattr(db.root, 'neutron'):
+#        neutron_group = db.createGroup('/', 'neutron', 'Neutron Interaction Data')
+#
+#    # Create xs group
+#    if not hasattr(db.root.neutron, 'eaf_xs'):
+#        nxs_mg_group = db.createGroup("/neutron", "eaf_xs", "EAF 175-Group Neutron Activation Cross Section Data")
+#
+#    # Create fission_yield groups
+#    if not hasattr(db.root.neutron, 'cinder_fission_products'):
+#        nxs_mg_group = db.createGroup("/neutron", "cinder_fission_products", "CINDER Neutron Fission Product Yield Data")
+
+
+>>>>>>> pub-origin/staging
 
 # numpy array row storage information for EAF data
 eaf_dtype = np.dtype([
+<<<<<<< HEAD
     ('nuc_zz',        int          ),
     ('rxnum',         'S7'         ),
     ('rxstr',         'S4'         ),
     ('daughter',      'S5'         ),
     ('xsec',          float, (175,))
+=======
+    ('nuc', int),
+    ('rxnum', 'S7'),
+    ('rxstr', 'S4'),
+    ('daughter', 'S5'),
+    ('xsec', float, (175,))
+>>>>>>> pub-origin/staging
     ])
 
 # Regular expression for parsing an individual set of EAF data
@@ -47,7 +97,11 @@ def parse_eaf_xsec(build_dir):
     """
     
     #TODO: change eaf_file to something more universal
+<<<<<<< HEAD
     eaf_file = "/filespace/groups/cnerg/opt/FENDL2.0-A/fendlg-2.0_175"
+=======
+    eaf_file = os.path.join(build_dir, 'eaf')
+>>>>>>> pub-origin/staging
 
     with open(eaf_file, 'r') as f:
         raw_data = f.read()
@@ -62,9 +116,13 @@ def parse_eaf_xsec(build_dir):
         xsec_list = [float(x) for x in md['xsec'].split()]
         xsec_list += (175-len(xsec_list))*[0.0]
 
+<<<<<<< HEAD
         # Store information in new row of array.
         eafrow = (
                   nucname.zzaaam(md['iso']),
+=======
+        eafrow = (nucname.zzaaam(md['iso']),
+>>>>>>> pub-origin/staging
                   md['rxnum'],
                   md['rxstr'],
                   md['daugh'],
@@ -122,18 +180,30 @@ def make_eaf_table(nuc_data, build_dir=""):
 
 
 def make_eaf(args):
+<<<<<<< HEAD
     """Controller function for adding cross section data from EAF format file.
     """
     nuc_data, build_dir, datapath = args.nuc_data, args.build_dir, args.datapath
+=======
+    """Controller function for adding cinder data."""
+    nuc_data, build_dir = args.nuc_data, args.build_dir
+>>>>>>> pub-origin/staging
 
     # Check if the table already exists
     with tb.openFile(nuc_data, 'a', filters=BASIC_FILTERS) as f:
         if hasattr(f.root, 'neutron') and hasattr(f.root.neutron, 'eaf_xs'):
             return
 
+<<<<<<< HEAD
     #
     print "Grabbing the EAF activation data."
     parse_eaf_xsec(build_dir)
+=======
+    # First grab the EAF activation data.
+    grabbed = grab_eaf_data(build_dir)
+    if not grabbed:
+        return
+>>>>>>> pub-origin/staging
 
     print "Making EAF activation data table."
     make_eaf_table(nuc_data, build_dir)
