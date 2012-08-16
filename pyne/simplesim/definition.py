@@ -20,20 +20,30 @@ from pyne.simulation import cards
 class IDefinition(object):
     __metaclass__ = abc.ABCMeta
 
+    def __init__(self, fname=None, verbose=True):
+        """
+
+        """
+        self.verbose = True
+        if fname is not None:
+            self._open(fname)
+        else:
+            self._create_new()
+
     @abc.abstractmethod
     def _create_new(self):
         """Definition started from scratch. Initialize all fields. """
-        return
+        raise NotImplementedError
 
     @abc.abstractmethod
     def _open(self, fname):
         """Open object data from a JSON file."""
-        return
+        raise NotImplementedError
 
     @abc.abstractmethod
     def save(self, fname):
         """Save object data to a JSON file."""
-        return
+        raise NotImplementedError
 
     def _unique(self, card_type, name):
         """Checks that the name on a card has not already been used for another
@@ -55,6 +65,17 @@ class IDefinition(object):
             raise Exception("The %s name %s has already been used for "
                     "another %s" % (card_type, name, card_type))
 
+    @property
+    def verbose(self):
+        return self._verbose
+
+    @verbose.setter
+    def verbose(self, value):
+        # TODO boolean, check or rely on ducktyping?
+        if type(value) is not bool:
+            raise TypeError("The ``verbose`` property must be of type bool.")
+        self._verbose = value
+
 
 class SystemDefinition(IDefinition):
     """This class creates a system definition as is done in MCNPX: homogeneous
@@ -63,7 +84,6 @@ class SystemDefinition(IDefinition):
     definition of materials is done using the `material` module of PyNE.
 
     """
-
     def __init__(self, fname=None):
         """Creates a new reactor definition or loads one from a JSON file."""
 
@@ -82,19 +102,38 @@ class SystemDefinition(IDefinition):
 
         """
         self._unique("cell", name)
-        # Check for the material.
-        if cell.material.name not in self.materials:
-            raise ValueError("Material %s is not found in this system
-            definition." % cell.material.name)
-        # Check for all required cells.
+        # Add all surfaces that aren't already added. Do this by walking the
+        # region tree and calling _add_cell_surfaces() at the leaves.
+        region.walk(self._add_cell_surfaces)
+        # Only add the material if it doesn't already exist.
+        if self._unique("material", cell.material.name):
+            self.add_material(cell.material)
         # Okay, all checks passed.
         self.cell[cell.name] = cell
 
+    def add_surface(self, surface):
+        """This method is only used by the user for surfaces that are not on a
+        cell card. Surfaces on a cell card are added automatically. Duplication
+        is checked by card name, not by using Python's 'is' operator to compare
+        the objects.
+
+        """
+        self._unique("surface", surface.name)
+        self.surfaces[surfaces.name] = surface
+
+    def _add_cell_surfaces(self, regionleaf):
+        if self._unique("surface", regionleaf.surface.name):
+            self.add_surface(regionleaf.region.surface)
+
     def add_material(self, material):
+        """This method is only used by the user for materials that are not on a
+        cell card.  Materials on cell cards are added automatically.
+
+        """
         if material.name == None or material.name == '':
             raise ValueError("The ``name`` property of the material cannot "
                     "be empty.")
-        self._unique("material", name)
+        self._unique("material", material.name)
         self.materials[material.name] = material
 
     def save(self, fname):
