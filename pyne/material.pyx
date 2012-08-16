@@ -1174,7 +1174,7 @@ def from_atom_frac(atom_fracs, double mass=-1.0, char * name='', double
         A string label for the material.  Helpful for large numbers of
         streams. Default ''.
     atoms_per_mol : float, optional
-        Number of atoms to per molecule of material.  Needed to obtain proper
+        Number of atoms per molecule of material.  Needed to obtain proper
         scaling of molecular weights.  For example, this value for water is
         3.0.
 
