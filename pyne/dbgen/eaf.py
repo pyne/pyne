@@ -13,13 +13,13 @@ from pyne.dbgen.api import BASIC_FILTERS
 
 def grab_eaf_data(build_dir=""):
     """Grabs the EAF file from the local filesystem if not already present."""
-    build_filename = os.path.join(build_dir, 'cinder.dat')
+    build_filename = os.path.join(build_dir, 'eaf')
     if os.path.exists(build_filename):
         return True
 
     # FIXME make local_filename more general
     local_filename = "/filespace/groups/cnerg/opt/FENDL2.0-A/fendlg-2.0_175"
-    if os.path.exists(local_filename):
+    if not os.path.exists(local_filename):
         print failure("EAF file not found - skipping.")
         return False
 
@@ -85,13 +85,11 @@ def parse_eaf_xsec(build_dir):
         xsec_list = [float(x) for x in md['xsec'].split()]
         xsec_list += (175-len(xsec_list))*[0.0]
 
-        eafrow = (#nucname.name(md['iso']),
-                  nucname.zzaaam(md['iso']),
+        eafrow = (nucname.zzaaam(md['iso']),
                   md['rxnum'],
                   md['rxstr'],
                   md['daugh'],
                   xsec_list
-                  
                   )
         
         eaf_data.append(eafrow)
@@ -142,7 +140,7 @@ def make_eaf(args):
 
     # Check if the table already exists
     with tb.openFile(nuc_data, 'a', filters=BASIC_FILTERS) as f:
-        if hasattr(f.root, 'neutron') and hasttr(f.root.neutron, 'eaf_xs'):
+        if hasattr(f.root, 'neutron') and hasattr(f.root.neutron, 'eaf_xs'):
             return
 
     # First grab the EAF activation data.
