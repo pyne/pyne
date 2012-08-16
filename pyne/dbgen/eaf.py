@@ -11,35 +11,9 @@ from pyne import nucname
 from pyne.utils import to_barns, failure
 from pyne.dbgen.api import BASIC_FILTERS
 
-def grab_eaf_data(build_dir=""):
-    pass
 
-
-#def _init_eaf(db):
-#    """Initializes a multigroup cross-section part of the database.
-#
-#    Parameters
-#    ----------
-#    db : tables.File 
-#        A nuclear data hdf5 file.
-#    """
-#
-#    # Create neutron group
-#    if not hasattr(db.root, 'neutron'):
-#        neutron_group = db.createGroup('/', 'neutron', 'Neutron Interaction Data')
-#
-#    # Create xs group
-#    if not hasattr(db.root.neutron, 'eaf_xs'):
-#        nxs_mg_group = db.createGroup("/neutron", "eaf_xs", "EAF 175-Group Neutron Activation Cross Section Data")
-#
-#    # Create fission_yield groups
-#    if not hasattr(db.root.neutron, 'cinder_fission_products'):
-#        nxs_mg_group = db.createGroup("/neutron", "cinder_fission_products", "CINDER Neutron Fission Product Yield Data")
-
-
-
+# numpy array row storage information for EAF data
 eaf_dtype = np.dtype([
-    #('nuc_name',      'S6'         ),
     ('nuc_zz',        int          ),
     ('rxnum',         'S7'         ),
     ('rxstr',         'S4'         ),
@@ -48,14 +22,28 @@ eaf_dtype = np.dtype([
     ])
 
 # Regular expression for parsing an individual set of EAF data
+# Includes some groupnames that are currently unused.
 eaf_info_pattern = \
     "(?P<iso>\d{5,7})\s*(?P<rxnum>\d{2,4})\s*(?P<ngrps>\d{1,3})" \
     + "\s*(?P<parent>[a-zA-Z]{1,2}\s{0,3}\d{1,3}[M ][12 ])" \
-    + "(?P<rxstr>\(N,[\w\s]{3}\))(?P<daugh>[a-zA-Z.]{1,2}\s{0,3}\d{1,3})"
-eaf_bin_pattern = "(.*?)(?P<xsec>(\d\.\d{5}E[-+]\d{2}\s*){1,175})"
+    + "(?P<rxstr>\(N,[\w\s]{3}\))(?P<daugh>[a-zA-Z.]{1,2}\s{0,3}\d{1,3})(.*?)"
+eaf_bin_pattern = "(?P<xsec>(\d\.\d{5}E[-+]\d{2}\s*){1,175})"
+
 
 def parse_eaf_xsec(build_dir):
-    """
+    """Create numpy array by parsing EAF data
+
+    Parameters
+    ----------
+    build_dir : str
+        Directory where EAF data is stored (TODO).
+    
+    Returns
+    ---------
+    eaf_array : numpy array
+        Numpy array with a row for each isotope+reaction combination
+         found in the EAF data.
+
     """
     
     #TODO: change eaf_file to something more universal
@@ -67,12 +55,6 @@ def parse_eaf_xsec(build_dir):
     eaf_data = list()
     eaf_pattern = eaf_info_pattern + eaf_bin_pattern 
 
-#    eaf_pattern = \
-#    "(?P<iso>\d{5,7})\s*(?P<rxnum>\d{2,4})\s*(?P<ngrps>\d{1,3})" \
-#    + "\s*(?P<parent>[a-zA-Z]{1,2}\s{0,3}\d{1,3}[M ][12 ])" \
-#    + "(?P<rxstr>\(N,[\w\s]{3}\))(?P<daugh>[a-zA-Z.]{1,2}\s{0,3}\d{1,3})" \
-#    + "(.*?)(?P<xsec>(\d\.\d{5}E[-+]\d{2}\s*){1,175})"
-
     # Iterate over all iso/rx combinations in file
     for m in re.finditer(eaf_pattern, raw_data, re.DOTALL):
         md = m.groupdict()
@@ -80,7 +62,8 @@ def parse_eaf_xsec(build_dir):
         xsec_list = [float(x) for x in md['xsec'].split()]
         xsec_list += (175-len(xsec_list))*[0.0]
 
-        eafrow = (#nucname.name(md['iso']),
+        # Store information in new row of array.
+        eafrow = (
                   nucname.zzaaam(md['iso']),
                   md['rxnum'],
                   md['rxstr'],
@@ -98,7 +81,15 @@ def parse_eaf_xsec(build_dir):
 
 
 def make_eaf_table(nuc_data, build_dir=""):
-    """
+    """Function for adding EAF group and table to HDF5 storage.
+
+    Parameters
+    ----------
+    nuc_data : str
+        Path to nuclide data file.
+    build_dir : str
+        Directory where EAF data is located.
+    
     """
     eaf_array = parse_eaf_xsec(build_dir)
 
@@ -131,7 +122,8 @@ def make_eaf_table(nuc_data, build_dir=""):
 
 
 def make_eaf(args):
-    """Controller function for adding cinder data."""
+    """Controller function for adding cross section data from EAF format file.
+    """
     nuc_data, build_dir, datapath = args.nuc_data, args.build_dir, args.datapath
 
     # Check if the table already exists
@@ -141,7 +133,7 @@ def make_eaf(args):
 
     #
     print "Grabbing the EAF activation data."
-    grab_eaf_data(build_dir)
+    parse_eaf_xsec(build_dir)
 
     print "Making EAF activation data table."
     make_eaf_table(nuc_data, build_dir)
