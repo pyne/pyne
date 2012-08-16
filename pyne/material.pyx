@@ -65,7 +65,7 @@ cdef class _Material:
         else:
             # Bad Material
             raise TypeError("The mass stream nucvec must be a dict, str, "
-                    "or None.")
+                    "or None, but is a {0}".format(type(nucvec)))
 
         # Init some meta-data
         self._comp = None
