@@ -20,6 +20,8 @@ the module.
 # TODO write a development guide next to the usersguide.
 # TODO make error messages valuable: give back to the user their input.
 # TODO sphinx inheritance diagrams.
+# TODO if i make a material card, make sure to revert back to the Material
+# object that Anthony has once they implement a comment.
 
 import abc
 
@@ -49,7 +51,7 @@ class ICard(object):
         """
         self.name = name
 
-    # All subclasses must now define a comment() method.
+    # All subclasses must define a comment() method.
     @abc.abstractmethod
     def comment(self):
         """All cards define a comment describing the content of the card."""
@@ -87,7 +89,7 @@ class CellVoid(ICard):
 
     def comment(self):
        # TODO Walk the region.
-       return "Void cell. Comment unimplemented."
+       return "Void cell %s" % self.name
 
     @property
     def region(self):
@@ -135,7 +137,7 @@ class Cell(CellVoid):
     def comment(self):
         # TODO walk the region.
         # TODO print material description.
-        return "Cell. comment unimplemented."
+        return "Cell %s" % name
 
     @property
     def material(self):
@@ -244,7 +246,7 @@ class CellVoidMCNP(CellVoid):
     def comment(self):
         # TODO walk the region.
         # TODO print material description.
-        return "Cell. comment unimplemented."
+        return "Void cell for MCNP %s" % self.name
 
     @property
     def temperature(self):
@@ -376,7 +378,7 @@ class CellMCNP(CellVoidMCNP, Cell):
     def comment(self):
         # TODO walk the region.
         # TODO print material description.
-        return "Cell. comment unimplemented."
+        return "Cell for MCNP %s" % name
 
 
 class IUniverse(ICard):
@@ -818,7 +820,6 @@ class AxisPlane(IAxisSurface):
     def comment(self):
         return "Axis plane %s: %s = %.4f cm" % (self.name, self.cartesian_axis,
                 self.position)
-        pass
 
     def shift(self, vector):
         """See :py:meth:`ISurface.shift`. Axis planes can be shifted in any
@@ -1041,7 +1042,7 @@ class Cuboid(Parallelepiped):
                                      reflecting, white)
 
 
-class Region(object):
+class Region(ICard):
     """Represents a volume (space) confined by unions and intersections of
     surfaces."""
     # TODO transformation functions
@@ -1051,6 +1052,28 @@ class Region(object):
     # __not__ operator and defining a complement boolean property that is set
     # by the __not__ operator.
     # TODO add transformation methods.
+    # TODO describe how parent works.
+
+    def __init__(self, name):
+        super(Region, self).__init__(name)
+        self.parent = None
+
+    def comment(self):
+        # TODO; implement for subclasses.
+        return "Region %s." % self.name
+
+    def set(self, region):
+        # TODO copy?
+        self.parent = parent
+        if issubclass(region, RegionLeaf):
+
+        else:
+            self.left_child = region.left_child
+            self.right_child = region.right_child
+
+
+
+
     def __and__(self, arg):
         return self.intersect(arg)
 
@@ -1073,42 +1096,73 @@ class Region(object):
 
         """
 
-    def node_visitor(self, function):
+    def walk(self, function):
         """
 
         """
+        if isinstance(self, RegionLeaf):
+            function(self)
+        else:
+            self.left_child.visit(function)
+            self.right_child.visit(function)
+        
+    @property
+    def parent(self):
+        return self._parent
+
+    @parent.setter
+    def parent(self, value):
+        self._parent = parent
 
 
 class IRegionBool(Region):
-    """Abstract class; should have no instances of this."""
+    """This class is not used by the user. Abstract base class for
+    :py:class:`RegionAnd` and :py:class:`RegionOr`.
+
+    """
     __metaclass__ = abc.ABCMeta
-    def __init__(self, left_region, right_region):
-        self.left_region = left_region
-        self.right_region = right_region
+
+    def __init__(self, left_child, right_child, name=''):
+        self.left_child = left_child
+        self.right_child = right_child
+        self.left_child.parent = self
+        self.right_child.parent = self
+
+    def default_name(self, midchar):
+        return (" ( (" + left_child.name + ") " + midchar + " (" + 
+                right_child.name + ") ) ")
 
     @property
-    def left_region(self):
-        return self._left_region
+    def left_child(self):
+        return self._left_child
 
-    @left_region.setter
-    def left_region(self, value):
-        self._left_region = value
+    @left_child.setter
+    def left_child(self, value):
+        self._left_child = value
 
     @property
-    def right_region(self):
-        return self._right_region
+    def right_child(self):
+        return self._right_child
 
-    @right_region.setter
-    def right_region(self, value):
-        self._right_region = value
+    @right_child.setter
+    def right_child(self, value):
+        self._right_child = value
 
 
 class RegionAnd(IRegionBool):
-    pass
+    """
+
+    """
+    def default_name(self):
+        return super(RegionAnd, self).default_name('&')
 
 
 class RegionOr(IRegionBool):
-    pass
+    """
+
+    """
+    def default_name(self):
+        return super(RegionOr, self).default_name('|')
 
 
 class RegionLeaf(Region):
