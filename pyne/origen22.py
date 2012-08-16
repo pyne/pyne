@@ -532,20 +532,20 @@ def _parse_tape9_decay(deck):
     pdeck['_cards'] = cards
 
     # Add the first cards
-    pdeck['half_life'] = {nuc: ORIGEN_TIME_UNITS[unit]*(val or 1.0) for nuc, unit, val in cards[['f0', 'f1', 'f2']]}
-    pdeck['frac_beta_minus_x'] = {nuc: val for nuc, val in cards[['f0', 'f3']]}
-    pdeck['frac_beta_plus_or_electron_capture'] = {nuc: val for nuc, val in cards[['f0', 'f4']]}
-    pdeck['frac_beta_plus_or_electron_capture_x'] = {nuc: val for nuc, val in cards[['f0', 'f5']]}
-    pdeck['frac_alpha'] = {nuc: val for nuc, val in cards[['f0', 'f6']]}
-    pdeck['frac_isomeric_transition'] = {nuc: val for nuc, val in cards[['f0', 'f7']]}
+    pdeck['half_life'] = dict([(nuc, ORIGEN_TIME_UNITS[unit]*(val or 1.0)) for nuc, unit, val in cards[['f0', 'f1', 'f2']] ])
+    pdeck['frac_beta_minus_x'] = dict([(nuc, val) for nuc, val in cards[['f0', 'f3']] ])
+    pdeck['frac_beta_plus_or_electron_capture'] = dict([(nuc, val) for nuc, val in cards[['f0', 'f4']] ])
+    pdeck['frac_beta_plus_or_electron_capture_x'] = dict([(nuc, val) for nuc, val in cards[['f0', 'f5']] ])
+    pdeck['frac_alpha'] = dict([(nuc, val) for nuc, val in cards[['f0', 'f6']] ])
+    pdeck['frac_isomeric_transition'] = dict([(nuc, val) for nuc, val in cards[['f0', 'f7']] ])
 
     # Add the second cards
-    pdeck['frac_spont_fiss'] = {nuc: val for nuc, val in cards[['f0', 'f8']]}
-    pdeck['frac_beta_n'] = {nuc: val for nuc, val in cards[['f0', 'f9']]}
-    pdeck['recoverable_energy'] = {nuc: val for nuc, val in cards[['f0', 'f10']]}
-    pdeck['frac_natural_abund'] = {nuc: val*0.01 for nuc, val in cards[['f0', 'f11']]}
-    pdeck['inhilation_concentration'] = {nuc: val for nuc, val in cards[['f0', 'f12']]}
-    pdeck['ingestion_concentration'] = {nuc: val for nuc, val in cards[['f0', 'f13']]}
+    pdeck['frac_spont_fiss'] = dict([(nuc, val) for nuc, val in cards[['f0', 'f8']] ])
+    pdeck['frac_beta_n'] = dict([(nuc, val) for nuc, val in cards[['f0', 'f9']] ])
+    pdeck['recoverable_energy'] = dict([(nuc, val) for nuc, val in cards[['f0', 'f10']] ])
+    pdeck['frac_natural_abund'] = dict([(nuc, val*0.01) for nuc, val in cards[['f0', 'f11']] ])
+    pdeck['inhilation_concentration'] = dict([(nuc, val) for nuc, val in cards[['f0', 'f12']] ])
+    pdeck['ingestion_concentration'] = dict([(nuc, val) for nuc, val in cards[['f0', 'f13']] ])
 
     return pdeck
 
@@ -585,30 +585,30 @@ def _parse_tape9_xsfpy(deck):
 
 
     # Parse first cards
-    pdeck['sigma_gamma'] = {nuc: val for nuc, val in cards[['f0', 'f1']]}
-    pdeck['sigma_2n'] = {nuc: val for nuc, val in cards[['f0', 'f2']]}
+    pdeck['sigma_gamma'] = dict([(nuc, val) for nuc, val in cards[['f0', 'f1']] ])
+    pdeck['sigma_2n'] = dict([(nuc, val) for nuc, val in cards[['f0', 'f2']] ])
 
     f3_keys = {'fission_products': 'sigma_alpha', 'actinides': 'sigma_3n', 'activation_products': 'sigma_alpha'}
-    pdeck[f3_keys[subtype]] = {nuc: val for nuc, val in cards[['f0', 'f3']]}
+    pdeck[f3_keys[subtype]] = dict([(nuc, val) for nuc, val in cards[['f0', 'f3']] ])
 
     f4_keys = {'fission_products': 'sigma_p', 'actinides': 'sigma_f', 'activation_products': 'sigma_p'}
-    pdeck[f4_keys[subtype]] = {nuc: val for nuc, val in cards[['f0', 'f4']]}
+    pdeck[f4_keys[subtype]] = dict([(nuc, val) for nuc, val in cards[['f0', 'f4']] ])
 
-    pdeck['sigma_gamma_x'] = {nuc: val for nuc, val in cards[['f0', 'f5']]}
-    pdeck['sigma_2n_x'] = {nuc: val for nuc, val in cards[['f0', 'f6']]}
+    pdeck['sigma_gamma_x'] = dict([(nuc, val) for nuc, val in cards[['f0', 'f5']] ])
+    pdeck['sigma_2n_x'] = dict([(nuc, val) for nuc, val in cards[['f0', 'f6']] ])
 
-    pdeck['fiss_yields_present'] = {nuc: 0.0 < val for nuc, val in cards[['f0', 'f7']]}
+    pdeck['fiss_yields_present'] = dict([(nuc, 0.0 < val) for nuc, val in cards[['f0', 'f7']] ])
 
     # parse second cards if of correct subtype 
     if subtype == 'fission_products':
-        pdeck['TH232_fiss_yield'] = {nuc: val for nuc, val in cards[['f0', 'f8']]}
-        pdeck['U233_fiss_yield'] = {nuc: val for nuc, val in cards[['f0', 'f9']]}
-        pdeck['U235_fiss_yield'] = {nuc: val for nuc, val in cards[['f0', 'f10']]}
-        pdeck['U238_fiss_yield'] = {nuc: val for nuc, val in cards[['f0', 'f11']]}
-        pdeck['PU239_fiss_yield'] = {nuc: val for nuc, val in cards[['f0', 'f12']]}
-        pdeck['PU241_fiss_yield'] = {nuc: val for nuc, val in cards[['f0', 'f13']]}
-        pdeck['CM245_fiss_yield'] = {nuc: val for nuc, val in cards[['f0', 'f14']]}
-        pdeck['CF249_fiss_yield'] = {nuc: val for nuc, val in cards[['f0', 'f15']]}
+        pdeck['TH232_fiss_yield'] = dict([(nuc, val) for nuc, val in cards[['f0', 'f8']] ])
+        pdeck['U233_fiss_yield'] = dict([(nuc, val) for nuc, val in cards[['f0', 'f9']] ])
+        pdeck['U235_fiss_yield'] = dict([(nuc, val) for nuc, val in cards[['f0', 'f10']] ])
+        pdeck['U238_fiss_yield'] = dict([(nuc, val) for nuc, val in cards[['f0', 'f11']] ])
+        pdeck['PU239_fiss_yield'] = dict([(nuc, val) for nuc, val in cards[['f0', 'f12']] ])
+        pdeck['PU241_fiss_yield'] = dict([(nuc, val) for nuc, val in cards[['f0', 'f13']] ])
+        pdeck['CM245_fiss_yield'] = dict([(nuc, val) for nuc, val in cards[['f0', 'f14']] ])
+        pdeck['CF249_fiss_yield'] = dict([(nuc, val) for nuc, val in cards[['f0', 'f15']] ])
 
     return pdeck
 
@@ -796,7 +796,7 @@ _fpy_card_fmt = "{nlb:>4}     {y1:<9.{p}E} {y2:<9.{p}E} {y3:<9.{p}E} {y4:<9.{p}E
 
 def _decay_deck_2_str(nlb, deck, precision):
     # Get unique isotopes 
-    nucset = {nuc for nuc in chain(*[v.keys() for k, v in deck.items() if hasattr(v, 'keys')])}
+    nucset = dict([nuc for nuc in chain(*[v.keys() for k, v in deck.items() if hasattr(v, 'keys')]) ])
 
     s = ""
     for nuc in nucset:
@@ -823,7 +823,7 @@ def _decay_deck_2_str(nlb, deck, precision):
 
 def _xs_deck_2_str(nlb, deck, precision):
     # Get unique isotopes 
-    nucset = {nuc for nuc in chain(*[v.keys() for k, v in deck.items() if hasattr(v, 'keys')])}
+    nucset = dict([nuc for nuc in chain(*[v.keys() for k, v in deck.items() if hasattr(v, 'keys')]) ])
 
     is_actinides = deck['_subtype'] == 'actinides'
 
@@ -850,7 +850,7 @@ def _xs_deck_2_str(nlb, deck, precision):
 
 def _xsfpy_deck_2_str(nlb, deck, precision):
     # Get unique isotopes 
-    nucset = {nuc for nuc in chain(*[v.keys() for k, v in deck.items() if hasattr(v, 'keys')])}
+    nucset = dict([nuc for nuc in chain(*[v.keys() for k, v in deck.items() if hasattr(v, 'keys')]) ])
 
     is_actinides = deck['_subtype'] == 'actinides'
 
