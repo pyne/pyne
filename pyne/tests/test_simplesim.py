@@ -411,8 +411,9 @@ class TestSystemDefinition(unittest.TestCase):
         self.assertTrue(tally.total)
         self.assertFalse(tally.alt_units)
         # comment()
-        self.assertEquals(tally.comment(), "Surface current tally 'fuel': "
-                "surfaces 'fuelpin'; 'bound'; and total of all provided.")
+        self.assertEquals(tally.comment(), "Surface current tally 'fuel' of "
+                "electrons: surfaces 'fuelpin'; 'bound'; and total of all "
+                "provided.")
         tally = cards.SurfaceCurrent('fuel', 'photon', [[self.pin,
                 self.cellbound]], alt_units=True)
         self.assertEquals(tally.particle, 'photon')
@@ -423,8 +424,8 @@ class TestSystemDefinition(unittest.TestCase):
         self.assertFalse(tally.total)
         self.assertTrue(tally.alt_units)
         # comment()
-        self.assertEquals(tally.comment(), "Surface current tally 'fuel': "
-                "total in 'fuelpin', 'bound'.")
+        self.assertEquals(tally.comment(), "Surface current tally 'fuel' "
+                "of photons: total in 'fuelpin', 'bound'.")
 
         ## SurfaceFlux
         tally = cards.SurfaceFlux('fuel', 'electron', [self.pin,
@@ -437,8 +438,9 @@ class TestSystemDefinition(unittest.TestCase):
         self.assertTrue(tally.average)
         self.assertFalse(tally.alt_units)
         # comment()
-        self.assertEquals(tally.comment(), "Surface flux tally 'fuel': "
-                "surfaces 'fuelpin'; 'bound'; and avg. of all provided.")
+        self.assertEquals(tally.comment(), "Surface flux tally 'fuel' "
+                "of electrons: surfaces 'fuelpin'; 'bound'; and avg. "
+                "of all provided.")
         tally = cards.SurfaceFlux('fuel', 'proton', [[self.pin, self.cellbound]],
                     alt_units=True)
         self.assertEquals(tally.particle, 'proton')
@@ -449,8 +451,8 @@ class TestSystemDefinition(unittest.TestCase):
         self.assertFalse(tally.average)
         self.assertTrue(tally.alt_units)
         # comment()
-        self.assertEquals(tally.comment(), "Surface flux tally 'fuel': "
-                "avg. in 'fuelpin', 'bound'.")
+        self.assertEquals(tally.comment(), "Surface flux tally 'fuel' "
+                "of protons: avg. in 'fuelpin', 'bound'.")
 
         ## CellFlux
         # One cell.
@@ -473,46 +475,61 @@ class TestSystemDefinition(unittest.TestCase):
                     "The property ``particle`` must be 'neutron', "
                     "'photon', 'electron', or 'proton'. "
                     "User provided 'test'.")
-        self.assertEquals(tally.comment(), "Cell flux tally 'fuel': "
-                "cell 'fuel'.")
+        self.assertEquals(tally.comment(), "Cell flux tally 'fuel' "
+                "of protons: cell 'fuel'.")
         self.assertIs(tally._unique_card_list()[0], self.fuel)
         # Two individual cells.
         tally = cards.CellFlux('both', 'neutron', [self.fuel, self.coolant])
-        self.assertEquals(tally.comment(), "Cell flux tally 'both': "
-                "cells 'fuel'; 'coolant'.")
+        self.assertEquals(tally.comment(), "Cell flux tally 'both' "
+                "of neutrons: cells 'fuel'; 'coolant'.")
         self.assertIs(tally._unique_card_list()[0], self.fuel)
         self.assertIs(tally._unique_card_list()[1], self.coolant)
         # Two individual cells, with average over all.
         tally = cards.CellFlux('withavg', 'neutron', [self.fuel, self.coolant],
                 average=True)
-        self.assertEquals(tally.comment(), "Cell flux tally 'withavg': "
-                "cells 'fuel'; 'coolant'; and avg. of all provided.")
+        self.assertEquals(tally.comment(), "Cell flux tally 'withavg' "
+                "of neutrons: cells 'fuel'; 'coolant'; and avg. of all "
+                "provided.")
         self.assertIs(tally._unique_card_list()[0], self.fuel)
         self.assertIs(tally._unique_card_list()[1], self.coolant)
         # Two individual cells, and an averaging, with an average over all.
         tally = cards.CellFlux('withavg', 'neutron', [self.fuel,
                 [self.fuel, self.coolant], self.coolant], average=True)
-        self.assertEquals(tally.comment(), "Cell flux tally 'withavg': "
-                "cells 'fuel'; avg. in 'fuel', 'coolant'; 'coolant'; "
-                "and avg. of all provided.")
+        self.assertEquals(tally.comment(), "Cell flux tally 'withavg' "
+                "of neutrons: cells 'fuel'; avg. in 'fuel', 'coolant'; "
+                "'coolant'; and avg. of all provided.")
         self.assertIs(tally._unique_card_list()[0], self.fuel)
         self.assertIs(tally._unique_card_list()[1], self.coolant)
         self.assertTrue(len(tally._unique_card_list()) == 2)
 
         ## CellEnergyDeposition
-        tally = CellEnergyDeposition('energy', 'neutron', self.fuel)
+        tally = cards.CellEnergyDeposition('energy', 'neutron', self.fuel)
         self.assertEquals(tally.name, 'energy')
         self.assertEquals(tally.particle, 'neutron')
         self.assertIs(tally.cards, self.fuel)
         self.assertEquals(tally.comment(), "Energy deposition tally "
-                "'energy': cell 'fuel'.")
-        tally = CellEnergyDeposition('energy', ['neutron', 'proton'],
+                "'energy' of neutrons: cell 'fuel'.")
+        tally = cards.CellEnergyDeposition('energy', ['neutron', 'proton'],
                 self.fuel)
-        self.assertTrue(type(tally.cards) is list)
-        tally = CellEnergyDeposition('energy', 'all', self.fuel)
-        tally = CellEnergyDeposition('energy', ['neutron', 'all'], self.fuel)
-        tally = CellEnergyDeposition('energy', 'all', self.fuel, alt_units=True)
+        self.assertIs(type(tally.particle), list)
+        self.assertEquals(tally.particle[0], 'neutron')
+        self.assertEquals(tally.particle[1], 'proton')
+        self.assertEquals(tally.comment(), "Energy deposition tally " 
+                "'energy' of neutrons, protons: cell 'fuel'.")
+        tally = cards.CellEnergyDeposition('energy', 'all', self.fuel)
+        self.assertEquals(tally.comment(), "Energy deposition tally "
+                "'energy' of all: cell 'fuel'.")
+        # Test exceptions.
+        self.assertRaises(ValueError, cards.CellEnergyDeposition, 'energy',
+                ['neutron', 'all'], self.fuel)
+        self.assertRaises(ValueError, cards.CellEnergyDeposition,
+                'energy', 'all', self.fuel, alt_units=True)
 
+        ## CellFissionEnergyDeposition
+        tally = CellFissionEnergyDeposition('fuel', [cellA, cellB],
+                average=True)
+        tally = CellFissionEnergyDeposition('fuel', [[cellA, cellB]],
+                alt_units=True)
 
 
 class TestSimulationDefinition(unittest.TestCase):
