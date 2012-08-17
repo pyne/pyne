@@ -2018,8 +2018,9 @@ class RepeatedStructure(IAverageTally):
 
 
 class IDetector(ITally):
-    def __init__(self, name, particle, sep_direct=True, *args, **kwargs):
+    def __init__(self, name, particle, spec, sep_direct=True, *args, **kwargs):
         super(IDetector, self).__init__(name, particle, *args, **kwargs)
+        self.spec = spec
         self.sep_direct = sep_direct
 
     @abc.abstractmethod
@@ -2069,7 +2070,7 @@ class PointDetector(IDetector):
     # TODO I wish we could avoid the use of negative numbers to signal
     # somethign semantic other than a negative number, but other alternatives
     # here seem to not be as clean or easy or general.
-    def __init__(self, name, particle, points, sep_direct=True):
+    def __init__(self, name, particle, spec, sep_direct=True):
         """
         Parameters
         ----------
@@ -2078,7 +2079,7 @@ class PointDetector(IDetector):
         particles : str, list of str
             See :py:class:`ITally`. In MCNP for this tally, only neutrons and
             photons are allowed.
-        points : tuple, list of tuples [centimeters/mean free paths]
+        spec : tuple, list of tuples [centimeters/mean free paths]
             The tuple has 2 elements: a 3-element list of floats and a float.
             The 3-element list provides the location of the point detector, and
             the float is the radius of a sphere of exclusion. The list can also
@@ -2193,8 +2194,7 @@ class RingDetector(IDetector):
         return super(RingDetector, self).comment("Ring detector")
 
     def _tuple_tostring(self, aring):
-        point[pos_loc] = aring[1]
-        string = ("ring %s = %.4f cm, radius %.4f, s.o.e. "
+        string = ("ring %s = %.4f cm, radius %.4f cm, s.o.e. "
                 "radius %.4f " %
                 (aring[0], aring[1], aring[2], abs(aring[3])))
         if aring[3] < 0:
