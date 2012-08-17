@@ -407,6 +407,7 @@ class TestSystemDefinition(unittest.TestCase):
         self.assertIs(tally.cards[0], self.pin)
         self.assertIs(tally.cards[1], self.cellbound)
         self.assertTrue(len(tally.cards), 2)
+        self.assertFalse(hasattr(tally, 'average'))
         self.assertTrue(tally.total)
         self.assertFalse(tally.alt_units)
         # comment()
@@ -424,6 +425,33 @@ class TestSystemDefinition(unittest.TestCase):
         # comment()
         self.assertEquals(tally.comment(), "Surface current tally 'fuel': "
                 "total in 'fuelpin', 'bound'.")
+
+        ## SurfaceFlux
+        tally = cards.SurfaceFlux('fuel', 'electron', [self.pin,
+                self.cellbound], average=True)
+        self.assertEquals(tally.name, 'fuel')
+        self.assertEquals(tally.particle, 'electron')
+        self.assertIs(tally.cards[0], self.pin)
+        self.assertIs(tally.cards[1], self.cellbound)
+        self.assertTrue(len(tally.cards), 2)
+        self.assertTrue(tally.average)
+        self.assertFalse(tally.alt_units)
+        # comment()
+        self.assertEquals(tally.comment(), "Surface flux tally 'fuel': "
+                "surfaces 'fuelpin'; 'bound'; and total of all provided.")
+        tally = cards.SurfaceFlux('fuel', 'proton', [[self.pin, self.cellbound]],
+                    alt_units=True)
+        self.assertEquals(tally.particle, 'proton')
+        self.assertTrue(len(tally.cards), 1)
+        self.assertTrue(len(tally.cards[0]), 2)
+        self.assertIs(tally.cards[0][0], self.pin)
+        self.assertIs(tally.cards[0][1], self.cellbound)
+        self.assertFalse(tally.average)
+        self.assertTrue(tally.alt_units)
+        # comment()
+        self.assertEquals(tally.comment(), "Surface flux tally 'fuel': "
+                "total in 'fuelpin', 'bound'.")
+
 
         ## CellFlux
         # One cell.
