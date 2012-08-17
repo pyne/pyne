@@ -21,6 +21,7 @@ extension to other codes may require more effort.
 
 import abc
 import datetime
+import textwrap
 
 class IInputFile(object):
     """Abstract base class for classes that take system and option definitions
@@ -99,6 +100,11 @@ class MCNPInput(IInputFile):
         """
         super(MCNPInput, self).__init__(fname, simdef, comments, header,
                 plug)
+        self.description = description
+        self.commentwrap = Textwrapper(initial_indent='C',
+                subsequent_indent='C', break_long_words=True)
+        self.cardwrap = TextWrapper(subsequent_indent='     ',
+                break_long_words=True)
 
     def _write_subclass(self):
         # Header
@@ -132,11 +138,6 @@ class MCNPInput(IInputFile):
         # Misc cards.
         self._write_data_header("Miscellaneous")
         self._write_dictionary(self.sim.misc)
-            self._write_pair(card)
-            def _write_pair(self, card)
-            if self.comments:
-                self._write_comment(card.comment())
-            self._write_card(card.mcnp())
 
     def _write_dictionary(self, dictionary):
         for card in dictionary:
@@ -170,11 +171,10 @@ class MCNPInput(IInputFile):
         self._write_comment(n_chars * "*")
 
     def _write_comment(self, comment=""):
-
+        self.fid.write(self.commentwrap.wrap(comment))
 
     def _write_card(self, string):
-
-    def _write_wrap(self, string, ):
+        self.fid.write(self.cardwrap.wrap(string))
 
     def _cell(self, cell):
         """Returns a cell card string given a Cell card."""
