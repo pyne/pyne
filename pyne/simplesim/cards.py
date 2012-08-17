@@ -2035,7 +2035,11 @@ class IDetector(ITally):
                 string += self._tuple_tostring(point)
                 if counter < len(self.spec):
                     string += "; "
-        return string + "."
+        if not self.sep_direct: 
+            dircontr = 'not'
+        else:
+            dircontr = ''
+        string += "; direct contrib is %s separate." % dircontr
     
     @abc.abstractmethod
     def _tuple_tostring(self):
@@ -2202,6 +2206,18 @@ class RingDetector(IDetector):
         else:
             string += 'cm'
         return string
+
+
+class EnergyGrid(IOptions):
+    """Energy grid for tallies. In MCNP, this is the **E** card.
+
+    .. inheritance-diagram:: pyne.simplesim.cards.EnergyGrid
+
+    """
+    def __init__(self, name, tally, energies):
+        super(EnergyGrid, self).__init__(name)
+
+
 
 
 class Comment(ITally):
