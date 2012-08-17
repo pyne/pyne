@@ -526,23 +526,55 @@ class TestSystemDefinition(unittest.TestCase):
                 'energy', 'all', self.fuel, alt_units=True)
 
         ## CellFissionEnergyDeposition
-        tally = cards.CellFissionEnergyDeposition('fuel', [self.pin,
-                self.cellbound], average=True)
+        tally = cards.CellFissionEnergyDeposition('fuel', [self.fuel,
+                self.coolant], average=True)
         self.assertEquals(tally.name, 'fuel')
         self.assertEquals(tally.particle, 'neutron')
         self.assertIs(type(tally.cards), list)
         self.assertIs(tally.cards[0], self.fuel)
-        self.assertIs(tally.cards[0], self.cellbound)
+        self.assertIs(tally.cards[1], self.coolant)
         self.assertTrue(tally.average)
         self.assertFalse(tally.alt_units)
-        tally = cards.CellFissionEnergyDeposition('fuel', [[self.pin,
-                self.cellbound]], alt_units=True)
+        self.assertEquals(tally.comment(), "Fission energy deposition tally "
+                "'fuel' of neutrons: cells 'fuel'; 'coolant'; and avg. of "
+                "all provided.")
+        tally = cards.CellFissionEnergyDeposition('fuel', [[self.fuel,
+                self.coolant]], alt_units=True)
         self.assertTrue(len(tally.cards), 1)
         self.assertTrue(len(tally.cards[0]), 2)
-        self.assertIs(tally.cards[0][0], self.pin)
-        self.assertIs(tally.cards[0][1], self.cellbound)
+        self.assertIs(tally.cards[0][0], self.fuel)
+        self.assertIs(tally.cards[0][1], self.coolant)
         self.assertFalse(tally.average)
         self.assertTrue(tally.alt_units)
+
+        ## CellPulseHeight
+        tally = cards.CellPulseHeight('fuel', ['proton', 'electron'], [self.fuel,
+                self.coolant], alt_units=True)
+        self.assertEquals(tally.name, 'fuel')
+        self.assertEquals(tally.particle[0], 'proton')
+        self.assertEquals(tally.particle[1], 'electron')
+        self.assertIs(tally.cards[0], self.fuel)
+        self.assertIs(tally.cards[1], self.coolant)
+        self.assertFalse(tally.average)
+        self.assertTrue(tally.alt_units)
+        tally.average = True
+        self.assertTrue(tally.average)
+
+        ## CellChargeDeposition
+        tally = cards.CellChargeDeposition('fuel', ['proton', 'electron'],
+                [self.fuel, self.coolant])
+        self.assertEquals(tally.name, 'fuel')
+        self.assertEquals(tally.particle[0], 'proton')
+        self.assertEquals(tally.particle[1], 'electron')
+        self.assertIs(tally.cards[0], self.fuel)
+        self.assertIs(tally.cards[1], self.coolant)
+        self.assertFalse(tally.average)
+        self.assertFalse(tally.alt_units)
+        tally.average = True
+        self.assertTrue(tally.average)
+
+
+
 
 
 class TestSimulationDefinition(unittest.TestCase):
