@@ -573,6 +573,55 @@ class TestSystemDefinition(unittest.TestCase):
         tally.average = True
         self.assertTrue(tally.average)
 
+        ## PointDetector
+        det = cards.PointDetector('point', 'neutron', ([0, 0, 0], 0))
+        self.assertEquals(det.name, 'point')
+        self.assertEquals(det.particle, 'neutron')
+        self.assertEquals(det.spec[0], [0, 0, 0])
+        self.assertEquals(det.spec[1], 0)
+        self.assertEquals(det.sep_direct, True)
+        self.assertEquals(det.comment(), "Point detector tally 'point' of "
+                "neutrons: point (0.0000, 0.0000, 0.0000) cm, "
+                "radius 0.0000 cm.")
+        det = cards.PointDetector('point', 'neutron', (np.array([1, 2, 3]), 4))
+        self.assertTrue((det.spec[0] == [1, 2, 3]).all())
+        self.assertEquals(det.spec[1], 4)
+        self.assertEquals(det.sep_direct, True)
+        self.assertEquals(det.comment(), "Point detector tally 'point' of "
+                "neutrons: point (1.0000, 2.0000, 3.0000) cm, "
+                "radius 4.0000 cm.")
+        det = cards.PointDetector('point', 'neutron', ([1, 0, 0], -3))
+        self.assertEquals(det.comment(), "Point detector tally 'point' of "
+                "neutrons: point (1.0000, 0.0000, 0.0000) cm, "
+                "radius 3.0000 mfp.")
+        det = cards.PointDetector('point', 'photon', [([0, 0, 0],  0),
+                                                      ([1, 0, 0], -3)])
+        self.assertEquals(det.spec[0][0], [0, 0, 0])
+        self.assertEquals(det.spec[0][1], 0)
+        self.assertEquals(det.spec[1][0], [1, 0, 0])
+        self.assertEquals(det.spec[1][1], -3)
+        self.assertEquals(det.comment(), "Point detector tally 'point' of "
+                "photons: point (0.0000, 0.0000, 0.0000) cm, "
+                "radius 0.0000 cm; "
+                "point (1.0000, 0.0000, 0.0000) cm, radius 3.0000 mfp.")
+        det = cards.PointDetector('point', 'photon', ([0, 0, 0], 0),
+                sep_direct=False)
+        self.assertFalse(det.sep_direct)
+
+        ## RingDetector
+        det = cards.RingDetector('ring', 'neutron', ('x', 10.0, 2.0,  1.0))
+        self.assertEquals(det.name, 'ring')
+        self.assertEquals(det.particle, 'neutron')
+        self.assertTrue(det.sep_direct)
+        self.assertEquals(det.comment(), "Ring detector tally 'ring' of "
+                "neutrons: ring x = 10.0000 cm, radius 2.0000 cm, s.o.e. "
+                "radius 1.0000 cm.")
+        det = cards.RingDetector('ring', 'neutron', ('x', 10.0, 2.0, -1.0))
+        det = cards.RingDetector('ring', 'neutron', [('x', 10.0, 2.0, -1.0),
+                                                     ('y', 20.0, 3.0, 1.0)])
+        det = cards.RingDetector('ring', 'neutron', ('x', 10.0, 2.0, -1.0), 
+                sep_direct=True)
+
 
 class TestSimulationDefinition(unittest.TestCase):
     """Tests the :py:class:`definition.SimulationDefinition` class."""
