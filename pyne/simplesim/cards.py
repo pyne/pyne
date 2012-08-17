@@ -1197,12 +1197,12 @@ class RegionLeaf(IRegion):
         self._pos_sense = value
 
 
-class IOption(ICard):
+class IMisc(ICard):
     """ """
     __metaclass__ = abc.ABCMeta
 
     def __init__(self, name, *args, **kwargs):
-        super(IOption, self).__init__(name, *args, **kwargs)
+        super(IMisc, self).__init__(name, *args, **kwargs)
 
     @abc.abstractmethod
     def comment(self):
@@ -2104,7 +2104,8 @@ class PointDetector(IDetector):
             det = PointDetector('point', 'neutron', ([0, 0, 0], 0))
 
         The following creates a detector at (1, 1, 1) cm with a sphere of
-        exclusion with a radius of 1 cm::
+        exclusion with a radius of 1 cm, where we have imported :py:mod:`numpy`
+        as ``np``)::
 
             det = PointDetector('point', 'neutron', (np.array([1, 1, 1]), 1))
 
@@ -2208,17 +2209,52 @@ class RingDetector(IDetector):
         return string
 
 
-class EnergyGrid(IOption):
+class EnergyGrid(IMisc):
     """Energy grid for tallies. In MCNP, this is the **E** card.
 
     .. inheritance-diagram:: pyne.simplesim.cards.EnergyGrid
 
     """
     def __init__(self, name, tally, energies):
+        """
+        Parameters
+        ----------
+        name : str
+            See :py:class:`ICard`.
+        tally : :py:class:`ITally`, None
+            The tally for which this energy grid should apply. If requesting
+            for this grid to apply to all tallies, then this is None.
+        energies : list, :py:class:`np.array`
+            The upper bounds of the energy groups.
+
+        Examples
+        --------
+        """
         super(EnergyGrid, self).__init__(name)
+        self.tally = tally
+        self.energies = energies
 
+    def comment(self):
+        string = "Energy grid '%s' for " % self.name
+        if tally is None:
+            string += "all tallies"
+        else:
+            string += "tally %s" % tallyname
+        return string + ": %i groups." % len(self.energies)
 
+    @property
+    def energies(self):
+        return self._energies
+
+    @energies.property
+    def energies(self, value):
+        self._energies = value
 
 
 class Comment(ITally):
     pass
+
+
+
+
+
