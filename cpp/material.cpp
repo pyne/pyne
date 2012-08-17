@@ -511,25 +511,29 @@ pyne::Material::Material()
 }
 
 
-pyne::Material::Material(pyne::comp_map cm, double m, std::string s, double apm)
+pyne::Material::Material(pyne::comp_map cm, double m, std::string s, double apm,
+                         Json::Value attributes)
 {
   // Initializes the mass stream based on an isotopic component dictionary.
   comp = cm;
   mass = m;
   name = s;
   atoms_per_mol = apm;
+  attrs = attributes;
   if (!comp.empty()) 
     norm_comp();
 };
 
 
 
-pyne::Material::Material(char * fchar, double m, std::string s, double apm)
+pyne::Material::Material(char * fchar, double m, std::string s, double apm,
+                         Json::Value attributes)
 {
   // Initializes the mass stream based on an isotopic composition file with a (char *) name.
   mass = m;
   name = s;
   atoms_per_mol = apm;
+  attrs = attributes;
 
   // Check that the file is there
   std::string filename (fchar);
@@ -545,12 +549,14 @@ pyne::Material::Material(char * fchar, double m, std::string s, double apm)
 };
 
 
-pyne::Material::Material(std::string filename, double m, std::string s, double apm)
+pyne::Material::Material(std::string filename, double m, std::string s, double apm,
+                         Json::Value attributes)
 {
   // Initializes the mass stream based on an isotopic composition file with a string name.
   mass = m;
   name = s;
   atoms_per_mol = apm;
+  attrs = attributes;
 
   // Check that the file is there
   if (!pyne::file_exists(filename))

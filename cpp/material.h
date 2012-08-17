@@ -16,6 +16,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include <json/json-forwards.h>
+#include <json/json.h>
 #include "h5wrap.h"
 
 #include "pyne.h"
@@ -60,12 +62,16 @@ namespace pyne
     double mass;
     std::string name;
     double atoms_per_mol;
+    Json::Value attrs;
 
     //Material Constructors
     Material ();
-    Material (comp_map, double=-1.0, std::string="", double=-1.0);
-    Material (char *, double=-1.0, std::string="", double=-1.0);
-    Material (std::string, double=-1.0, std::string="", double=-1.0);
+    Material(comp_map, double=-1.0, std::string="", double=-1.0, 
+             Json::Value=Json::Value(Json::objectValue));
+    Material(char *, double=-1.0, std::string="", double=-1.0, 
+             Json::Value=Json::Value(Json::objectValue));
+    Material(std::string, double=-1.0, std::string="", double=-1.0,
+             Json::Value=Json::Value(Json::objectValue));
     ~Material ();
 
     //Material function definitions
