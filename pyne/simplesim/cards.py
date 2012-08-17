@@ -1385,7 +1385,7 @@ class ITally(ICard):
     """
     __metaclass__ = abc.ABCMeta
 
-    def __init__(self, name, particle, *args, **kwargs):
+    def __init__(self, name, particle, alt_units=False, *args, **kwargs):
         """
         Parameters
         ----------
@@ -1393,10 +1393,14 @@ class ITally(ICard):
             See :py:class:`ICard`. Used for, e.g., tally multiplier cards.
         particle : str
             Either 'neutron', 'photon', electron', or 'proton'.
+        alt_units : bool, optional
+            If set to True and the tally can use alternative units, alternative
+            units are used for the tally. See subclasses.
 
         """
         super(ITally, self).__init__(name, *args, **kwargs)
         self.particle = particle
+        self.alt_units = alt_units
 
     @abc.abstractmethod
     def comment(self):
@@ -1415,17 +1419,25 @@ class ITally(ICard):
                     "User provided '%s'." % value)
         self._particle = value
 
+    @property
+    def alt_units(self):
+        return self._alt_units
 
-class IAverageTally(ITally):
+    @alt_units.setter
+    def alt_units(self, value):
+        self._alt_units = value
+
+
+class ICellSurfTally(ITally):
     """This class is not used by the user. Abstract base class for
-    tallies of averaged quantities. In MCNP, these are the **F2**, **F4**,
-    **F6**, and **F7** tallies. Some of these are for cells, and some are for
-    surfaces.
+    tallies over cells and surfaces, as opposed to detector tallies. In MCNP,
+    these are the **F1**, **F2**, **F4**, **F6**, **F7** and **F8** tallies.
+    Some of these are for cells, and some are for surfaces.
 
     """
     __metaclass__ = abc.ABCMeta
 
-    def __init__(self, name, particle, cards, average=False, *args, **kwargs):
+    def __init__(self, name, particle, cards, *args, **kwargs):
         """
         Parameters
         ----------
@@ -1441,15 +1453,30 @@ class IAverageTally(ITally):
             list, within the outer list. To avoid ambiguity, if only one set of
             averages is desired, then this set must be nested in two lists. See
             the examples.
-        average : bool, optional
-            Include a tally for the average flux across all cells/surfaces
-            specified on this card (note: NOT across `all` cells in the
-            problem).
+        alt_units : bool, optional
+            If set to True and the tally can use alternative units, alternative
+            units are used for the tally. See subclasses.
+
+        Examples
+        --------
+        The following gives the tally in cell A::
+
+            tally = CellFlux('fuel', 'neutron', cellA)
+
+        The following two cards give the tally in surface A and B, and
+        the average across surfaces B and C::
+
+            tally = SurfaceFlux('fuel', 'photon', [surfA, surfB, [surfB,
+                    surfC]], average=True)
+
+        To obtain the average across surface A and B only, a nested list is
+        required to distinguish the case of tallying on A and B individually::
+
+            tally = SurfaceFlux('fuel', 'neutron', [[surfA, surfB]])
 
         """
-        super(IAverageTally, self).__init__(name, particle)
+        super(IAverageTally, self).__init__(name, particle, *args, **kwargs)
         self.cards = cards
-        self.average = average
 
     @abc.abstractmethod
     def comment(self, title, card_type):
@@ -1489,10 +1516,6 @@ class IAverageTally(ITally):
         #else:
         #    raise ValueError("Expected {0} or list, got {1}.".format(
         #            card_type, type(self.cards)))
-        if self.average:
-            string += "; and avg. of all provided."
-        else:
-            string += "."
         return string
 
     @property
@@ -1532,14 +1555,104 @@ class IAverageTally(ITally):
                 " got {0}.".format(type(self.cards)))
 
 
+class IAverageTally(ICellSurfTally):
+    """This class is not used by the user. Abstract base class for
+    tallies of averaged quantities. In MCNP, these are the **F2**, **F4**,
+    **F6**, **F7** and **F8** tallies. Some of these are for cells, and some
+    are for surfaces.
+
+    """
+    __metaclass__ = abc.ABCMeta
+
+    def __init__(self, name, particle, cards, average=False, *args, **kwargs):
+        """
+        Parameters
+        ----------
+        name : str
+            See :py:class:`ITally`.
+        particle : str
+            See :py:class:`ITally`.
+        cards : :py:class:`Cell` or :py:class:`ISurface`, list, list of lists
+            See :py:class:`ICellSurfTally`.
+        average : bool, optional
+            Include a tally for the average flux across all cells/surfaces
+            specified on this card (note: NOT across all cells in the
+            `problem`).
+        alt_units : bool, optional
+            If set to True and the tally can use alternative units, alternative
+            units are used for the tally. See subclasses.
+
+        Examples
+        --------
+        The following requests the tally in cell A, cell B, as well as the
+        average across A and B::
+
+            tally = CellEnergyDeposition('fuel', 'neutron', [cellA, cellB],
+                    average=True)
+
+        """
+        super(IAverageTally, self).__init__(name, particle, cards, *args,
+                                            **kwargs)
+        self.average = average
+
+    @abc.abstractmethod
+    def comment(self, title, card_type):
+        string = super(IAverageTally, self).comment(title, card_type)
+        if self.average:
+            string += "; and avg. of all provided."
+        else:
+            string += "."
+        return string
+
+    @property
+    def average(self):
+        return self._average
+
+    @average.setter
+    def average(self, value):
+        self._average = value
+
+
 class SurfaceCurrent(ITally):
     """Surface current tally. In MCNP, this is the **F1** card.
 
     .. inheritance-diagram:: pyne.simplesim.cards.SurfaceCurrent
 
     """
-    def __init__(self, name, particle, cards, total=False):
-        TODO
+    def __init__(self, name, particle, cards, total=False, alt_units=False):
+        """
+        Parameters
+        ----------
+        name : str
+            See :py:class:`ITally`.
+        particle : str
+            See :py:class:`ITally`.
+        cards : :py:class:`ISurface`, list, list of lists
+            See :py:class:`ICellSurfTally`.
+        total : bool, optional
+            Include a tally for the total current across all surfaces
+            specified on this card (note: NOT across all surfaces in the
+            `problem`).
+        alt_units : bool, optional
+            If True, Tally is additionally weighted by particle energy.
+
+        Examples
+        --------
+        The following requests the tally in surface A, surface B, as well as the
+        total across A and B::
+
+            tally = SurfaceCurrent('fuel', 'electron', [surfA, surfB],
+                    total=True)
+
+        In the following, the tally is also weighted by particle energy::
+
+            tally = SurfaceCurrent('fuel', 'photon', [[surfA, surfB]],
+                    alt_units=True)
+
+        """
+        super(SurfaceCurrent, self).__init__(name, particle, cards, alt_units)
+        self.total = total
+
 
 
 class SurfaceFlux(IAverageTally):
@@ -1548,7 +1661,7 @@ class SurfaceFlux(IAverageTally):
     .. inheritance-diagram:: pyne.simplesim.cards.SurfaceFlux
 
     """
-    def __init__(self, name, particle, cards, average=False):
+    def __init__(self, name, particle, cards, average=False, alt_units=False):
         """
         Parameters
         ----------
@@ -1560,11 +1673,43 @@ class SurfaceFlux(IAverageTally):
             See :py:class:`IAverageTally`.
         average : bool, optional
             See :py:class:`IAverageTally`.
+        alt_units : bool, optional
+            If True, Tally is additionally weighted by particle energy.
+
+        Examples
+        --------
+        The following requests the tally in surface A, surface B, as well as
+        the average across A and B::
+
+            tally = SurfaceFlux('fuel', 'electron', [surfA, surfB],
+                    average=True)
+
+        In the following, the tally is also weighted by particle energy::
+
+            tally = SurfaceFlux('fuel', 'proton', [[surfA, surfB]],
+                    alt_units=True)
+        
+        See base classes for more examples.
+
         """
-        super(SurfaceFlux, self).__init__(name, particle, cards, average)
+        super(SurfaceFlux, self).__init__(name, particle, cards, average,
+                                          alt_units)
 
     def comment(self):
-        return super(SurfaceFlux, self).comment("Surface flux", 'surface')
+        string = super(SurfaceFlux, self).comment("Surface flux", 'surface')
+        if self.total:
+            string += "; and total of all provided."
+        else:
+            string += "."
+        return string
+
+    @property
+    def total(self):
+        return self._total
+
+    @total.setter
+    def total(self, value):
+        self._total = value
 
 
 class CellFlux(IAverageTally):
@@ -1573,7 +1718,7 @@ class CellFlux(IAverageTally):
     .. inheritance-diagram:: pyne.simplesim.cards.CellFlux
 
     """
-    def __init__(self, name, particle, cards, average=False):
+    def __init__(self, name, particle, cards, average=False, alt_units=False):
         """
         Parameters
         ----------
@@ -1585,34 +1730,88 @@ class CellFlux(IAverageTally):
             See :py:class:`IAverageTally`.
         average : bool, optional
             See :py:class:`IAverageTally`.
+        alt_units : bool, optional
+            If True, Tally is additionally weighted by particle energy.
+
+        Examples
+        --------
+        The following requests the tally in cell A, cell B, as well as the
+        average across A and B::
+
+            tally = CellFlux('fuel', 'electron', [cellA, cellB],
+                    average=True)
+
+        In the following, the tally is also weighted by particle energy::
+
+            tally = CellFlux('fuel', 'proton', [[cellA, cellB]],
+                    alt_units=True)
+        
+        See base classes for more examples.
+
         """
-        super(CellFlux, self).__init__(name, particle, cards, average)
+        super(CellFlux, self).__init__(name, particle, cards, average,
+                                       alt_units)
 
     def comment(self):
         return super(CellFlux, self).comment("Cell flux", 'cell')
 
 
 class CellEnergyDeposition(IAverageTally):
-    """Energy deposition tally. In MCNP, this is the **F6** card.
+    """Energy deposition tally. In MCNP, this is the **F6** card. In MCNP, it
+    is not permitted to use a particle 'all' and also to use alternative units.
 
     .. inheritance-diagram:: pyne.simplesim.cards.CellEnergyDeposition
 
     """
-    def __init__(self, name, particle, cards, average=False):
+    # TODO in mcnp input, prevent particle all and alt_units
+    def __init__(self, name, particles, cards, average=False, alt_units=True):
         """
         Parameters
         ----------
         name : str
             See :py:class:`ITally`.
-        particle : str
-            See :py:class:`ITally`. For this tally, the additional value of
-            'all' is allowed, and specifies collision heating.
+        particles : str, list of str
+            See :py:class:`ITally`. For this tally, the user can specify the
+            particle type as a list of strs to tally more than one type of
+            particle. Also, the additional value of 'all' is allowed, and
+            specifies collision heating. As is expected, 'all' cannot be
+            provided as part of a list.
         cards : :py:class:`Cell`, list, list of lists
             See :py:class:`IAverageTally`.
         average : bool, optional
             See :py:class:`IAverageTally`.
+        alt_units : bool, optional
+            If True, alternative units are used for the tally. In MCNP, the
+            default units are MeV/g and the alternative units are jerks/g.
+
+        Examples
+        --------
+        The following requests the energy deposited by neutrons in cell A::
+
+            tally = CellEnergyDeposition('energy', 'neutron', cellA)
+
+
+        The following requests the energy deposited by neutrons and protons in
+        cell A::
+
+            tally = CellEnergyDeposition('energy', ['neutron', 'proton'],
+                    cellA)
+        
+        The following requests the energy deposited by all particles in cell
+        A::
+
+            tally = CellEnergyDeposition('energy', 'all', cellA)
+
+        The following are not allowed in MCNP::
+            
+            tally = CellEnergyDeposition('energy', ['neutron', 'all'], cellA)
+            tally = CellEnergyDeposition('energy', 'all', cellA, alt_units=True)
+
+        See base classes for more examples.
+
         """
-        super(EnergyDeposition, self).__init__(name, particle, cards, average)
+        super(EnergyDeposition, self).__init__(name, particles, cards, average,
+                alt_units)
 
     def comment(self):
         return super(EnergyDeposition, self).comment("Energy deposition",
@@ -1624,11 +1823,21 @@ class CellEnergyDeposition(IAverageTally):
 
     @particle.setter
     def particle(self, value):
-        if (value != 'neutron' and value != 'photon' and 
-                value != 'electron' and value != 'proton' and value != 'all'):
-            raise ValueError("The property ``particle`` must be 'neutron', "
-                    "'photon', 'electron', 'proton', or 'all'."
-                    "User provided '%s'." % value)
+        if type(value) is list:
+            for string in value:
+                if (string != 'neutron' and string != 'photon' and 
+                        string != 'electron' and string != 'proton'):
+                    raise ValueError("The ``particle`` list must "
+                            "contain only 'neutron', 'photon', 'electron',"
+                            " or 'proton'. User provided '%s'." % string)
+        else:
+            # A single string is provided.
+            if (value != 'neutron' and value != 'photon' and 
+                    value != 'electron' and value != 'proton' and 
+                    value != 'all'):
+                raise ValueError("The property ``particle`` must be "
+                        "'neutron', 'photon', 'electron', 'proton', or 'all'."
+                        "User provided '%s'." % value)
         self._particle = value
 
 
@@ -1639,7 +1848,7 @@ class CellFissionEnergyDeposition(IAverageTally):
     .. inheritance-diagram:: pyne.simplesim.cards.CellFissionEnergyDeposition
 
     """
-    def __init__(self, name, cards, average=False):
+    def __init__(self, name, cards, average=False, alt_units=False):
         """
         Parameters
         ----------
@@ -1649,13 +1858,147 @@ class CellFissionEnergyDeposition(IAverageTally):
             See :py:class:`IAverageTally`.
         average : bool, optional
             See :py:class:`IAverageTally`.
+        alt_units : bool, optional
+            If True, alternative units are used for the tally. In MCNP, the
+            default units are MeV/g and the alternative units are jerks/g.
+
+        Examples
+        --------
+        The following requests the tally in cell A, cell B, as well as the
+        average across A and B::
+
+            tally = CelLFissionEnergyDeposition('fuel', [cellA,
+                    cellB], average=True)
+
+        In the following, the alternate units are used::
+
+            tally = CelLFissionEnergyDeposition('fuel', [[cellA,
+                    cellB]], alt_units=True)
+        
+        See base classes for more examples.
+
         """
         super(FissionEnergyDeposition, self).__init__(name, 'neutron', cards,
-                                                      average)
+                                                      average, alt_units)
 
     def comment(self):
         return super(FissionEnergyDeposition, self).comment(
                 "Fission energy deposition", 'cell')
 
 
+class CellPulseHeight(ICellSurfTally):
+    """Pulse height tally in cells. In MCNP, this is the **F8** card. For a
+    charge deposition tally, see :py:class:`CellChargeDeposition`.
 
+    .. inheritance-diagram:: pyne.simplesim.cards.CellPulseHeight
+
+    """
+    def __init__(self, name, particles, cards, average=False, alt_units=False)
+        """
+        Parameters
+        ----------
+        name : str
+            See :py:class:`ITally`.
+        particles : str, list of str
+            See :py:class:`ITally`. Multiple particles can be provided in a
+            list of str. In MCNP, if only 'proton', or 'electron' is
+            specified, both are automatically included.
+        cards : :py:class:`Cell`, list, list of lists
+            See :py:class:`IAverageTally`.
+        average : bool, optional
+            See :py:class:`IAverageTally`.
+        alt_units : bool, optional
+            If True, alternative units are used for the tally. In MCNP, the
+            default units are pulses and the alternative units are MeV.
+
+        Examples
+        --------
+        The following requests the tally in cell A and cell B for both protons
+        and electrons, and requests units of MeV::
+
+            tally = CellPulseHeight('fuel', ['proton', 'electron'], [cellA,
+                    cellB], alt_units=True)
+
+        See base classes for more examples.
+
+        """
+        super(CellPulseHeight, self).__init__(name, particles, cards, average,
+                                              alt_units)
+
+    def comment(self):
+        return super(CellPulseHeight, self).comment("Pulse height", 'cell')
+
+    @property
+    def particle(self):
+        return self._particle
+
+    @particle.setter
+    def particle(self, value):
+        # Copied from CellEnergyDeposition.particle
+        if type(value) is list:
+            for string in value:
+                self._assert_particle(string)
+        else:
+            # A single string is provided.
+            self._assert_particle(string)
+        self._particle = value
+
+    def _assert_particle(self, string):
+        if (string != 'neutron' and string != 'photon' and 
+                string != 'electron' and string != 'proton'):
+            raise ValueError("The ``particle`` list must "
+                    "contain only 'neutron', 'photon', 'electron',"
+                    " or 'proton'. User provided '%s'." % string)
+
+class CellChargeDeposition(CellPulseHeight):
+    """Charge deposition tally in cells. In MCNP, this is the **+F8** card. No
+    alternative units are available.
+
+    .. inheritance-diagram:: pyne.simplesim.cards.CellChargeDeposition
+
+    """
+    # TODO it doesn't make sense that the user can provide the particle type
+    # here, at least for MCNP.
+    def __init__(self, name, particles, cards, average=False):
+        """
+        Parameters
+        ----------
+        name : str
+            See :py:class:`ITally`.
+        particles : str, list of str
+            See :py:class:`ITally`. Multiple particles can be provided in a
+            list of str. In MCNP, if only 'proton', or 'electron' is
+            specified, both are automatically included.
+        cards : :py:class:`Cell`, list, list of lists
+            See :py:class:`IAverageTally`.
+        average : bool, optional
+            See :py:class:`IAverageTally`.
+
+        Examples
+        --------
+        The following requests the tally in cell A and cell B for both protons
+        and electrons::
+
+            tally = CellPulseHeight('fuel', ['proton', 'electron'], [cellA,
+                    cellB])
+
+        See base classes for more examples.
+
+        """
+        super(CellPulseHeight, self).__init__(name, particles, cards, average)
+
+    def comment(self):
+        return super(CellPulseHeight, self).comment("Charge deposition", 'cell')
+
+
+class RepeatedStructure(IAverageTally):
+    # TODO
+    pass
+
+
+class Detector(ITally):
+    pass
+
+
+class Comment(ITally):
+    pass
