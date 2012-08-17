@@ -16,6 +16,8 @@ extension to other codes may require more effort.
 - Write out
 - Read in a JSON file input def.
 """
+# TODO need to be able to tell the user the numbers given to the different
+# cards, for parsing.
 
 import abc
 

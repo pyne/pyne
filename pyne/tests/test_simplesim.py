@@ -5,25 +5,37 @@ import unittest
 
 import numpy as np
 
+from pyne import material
 from pyne.simplesim import definition, cards, inputfile
 
-class TestSurfaces(unittest.TestCase):
-    """Tests the ISurface class and its subclasses, all of which are subclassed
-    from ICard and are in the :py:mod:`pyne.simplesim.cards` module."""
+# TODO test the exception that setting a name to '' is not aight.
 
+
+class TestCells(unittest.TestCase):
+    """Tests the :py:class:`cards.Cell` class and its subclasses, all of which
+    are subclassed from :py:class:`cards.ICard` and are in the :py:mod:`cards`
+    module.
+
+    """
+        # test density_units exception.
+
+class TestSurfaces(unittest.TestCase):
+    """Tests the :py:class:`cards.ISurface` class and its
+    subclasses, all of which are subclassed from :py:class:`cards.ICard` and
+    are in the :py:mod:`cards` module.
+    
+    """
     def setUp(self):
         pass
 
     def tearDown(self):
         pass
 
-    def test_Cell(self):
-        # test density_units exception.
-        pass
-
     def test_AxisCylinder(self):
-        """Tests AxisCylinder's methods, properties, and exceptions."""
-
+        """Tests :py:class:`cards.AxisCylinder`'s methods, properties, and
+        exceptions.
+        
+        """
         ## __init__()
         cyl = cards.AxisCylinder('mycyl', 'z', 0.4)
         self.assertEquals(cyl.name, 'mycyl')
@@ -61,7 +73,7 @@ class TestSurfaces(unittest.TestCase):
 
         ## comment()
         self.assertEquals(cyl.comment(),
-                "Axis cylinder mycyl: aligned and centered on x axis, "
+                "Axis cylinder 'mycyl': aligned and centered on x axis, "
                 "with radius 0.4000 cm (diameter 0.8000 cm).")
 
         ## shift()
@@ -147,8 +159,10 @@ class TestSurfaces(unittest.TestCase):
                     "stretch 2.0000 for a x-aligned cylinder.")
 
     def test_AxisPlane(self):
-        """Tests Plane's methods, properties, and exceptions."""
-
+        """Tests :py:class:`cards.AxisPlane`'s methods, properties, and
+        exceptions.
+        
+        """
         ## __init__()
         plane = cards.AxisPlane('myplane', 'x', 3, reflecting=True) 
         self.assertEquals(plane.name, 'myplane')
@@ -159,7 +173,7 @@ class TestSurfaces(unittest.TestCase):
         self.assertIsNone(plane.white)
 
         ## comment()
-        self.assertEquals(plane.comment(), "Axis plane myplane: x = 3.0000 cm")
+        self.assertEquals(plane.comment(), "Axis plane 'myplane': x = 3.0000 cm.")
 
         ## shift()
         plane = cards.AxisPlane('myplane', 'x', 3)
@@ -196,8 +210,10 @@ class TestSurfaces(unittest.TestCase):
         self.assertEquals(plane.position, 9)
 
     def test_Parallelepiped(self):
-        """Tests Parallelepiped's methods, properties, and exceptions."""
-
+        """Tests :py:class:`cards.Parallelepiped`'s methods, properties, and
+        exceptions.
+        
+        """
         ## __init__()
         pp = cards.Parallelepiped('mypp', -2, 3, -4, 5, -6, 7, reflecting=True,
                 white=False)
@@ -209,9 +225,9 @@ class TestSurfaces(unittest.TestCase):
         self.assertEquals(pp.white, False)
 
         ## comment()
-        self.assertEquals(pp.comment(), "Parallelepiped mypp: "
+        self.assertEquals(pp.comment(), "Parallelepiped 'mypp': "
                 "[-2.0000, 3.0000] x [-4.0000, 5.0000] x "
-                "[-6.0000, 7.0000] cm")
+                "[-6.0000, 7.0000] cm.")
 
         ## shift()
         pp.shift([2, 1, -1])
@@ -229,5 +245,212 @@ class TestSurfaces(unittest.TestCase):
         self.assertTrue((pp.xlims == np.array([-40, 0])).all())
         self.assertTrue((pp.ylims == np.array([-12, 6])).all())
         self.assertTrue((pp.zlims == np.array([-36, 42])).all())
+    
+
+class TestOptions(unittest.TestCase):
+    """Tests the :py:class:`cards.IOptions` class and its subclasses, all of which are subclassed
+    from :py:class:`cards.ICard` and are in the :py:mod:`cards` module.
+    
+    """
+    def tests_Criticality(self):
+        """Tests :py:class:`cards.Criticality`'s methods, properties, and
+        exceptions.
+        
+        """
+        ## __init__()
+        # Default arguments.
+        critsrc = cards.Criticality()
+        self.assertEquals(critsrc.name, 'criticality')
+        # Test trying to change the name.
+        self.assertRaises(StandardError, setattr, critsrc, 'name', 'testname')
+        try:
+            critsrc.name = 'testname'
+        except StandardError as e:
+            self.assertEquals(e.message, "This is a unique card, meaning "
+                    "only one card of this type can be found in a "
+                    "``definition``. Accordingly, the name is read-only.")
+        self.assertEquals(critsrc.n_histories, 1000)
+        self.assertEquals(critsrc.keff_guess, 1)
+        self.assertEquals(critsrc.n_skip_cycles, 30)
+        self.assertEquals(critsrc.n_cycles, 130)
+        # Testing keyword argument functionality.
+        critsrc = cards.Criticality(n_cycles=300)
+        self.assertEquals(critsrc.n_histories, 1000)
+        self.assertEquals(critsrc.keff_guess, 1)
+        self.assertEquals(critsrc.n_skip_cycles, 30)
+        self.assertEquals(critsrc.n_cycles, 300)
+        # Testing documentation example.
+        critsrc = cards.Criticality(2000, 1.5, 30, 300)
+        self.assertEquals(critsrc.n_histories, 2000)
+        self.assertEquals(critsrc.keff_guess, 1.5)
+        self.assertEquals(critsrc.n_skip_cycles, 30)
+        self.assertEquals(critsrc.n_cycles, 300)
+
+        # Test exceptions for each of the properties.
+        self.assertRaises(ValueError, setattr, critsrc, 'n_histories', 0.5)
+        self.assertRaises(ValueError, setattr, critsrc, 'n_histories', -1)
+        self.assertRaises(ValueError, setattr, critsrc, 'keff_guess', -1)
+        self.assertRaises(ValueError, setattr, critsrc, 'n_skip_cycles', 0.5)
+        self.assertRaises(ValueError, setattr, critsrc, 'n_skip_cycles', -1)
+        self.assertRaises(ValueError, setattr, critsrc, 'n_cycles', 0.5)
+        self.assertRaises(ValueError, setattr, critsrc, 'n_cycles', -1)
+        # Test the exception messages.
+        try:
+            critsrc.n_histories = 0.5
+        except ValueError as e:
+            self.assertEquals(e.message, "The property ``n_histories`` "
+                    "must be an integer. User provided 0.5000.")
+        try:
+            critsrc.n_histories = -1
+        except ValueError as e:
+            self.assertEquals(e.message, "The property ``n_histories`` "
+                    "must be positive. User provided -1.")
+        try:
+            critsrc.keff_guess = -1
+        except ValueError as e:
+            self.assertEquals(e.message, "The property ``keff_guess`` "
+                    "must be non-negative. User provided -1.0000.")
+        try:
+            critsrc.n_skip_cycles = 0.5
+        except ValueError as e:
+            self.assertEquals(e.message, "The property ``n_skip_cycles`` "
+                    "must be an integer. User provided 0.5000.")
+        try:
+            critsrc.n_skip_cycles = -1
+        except ValueError as e:
+            self.assertEquals(e.message, "The property ``n_skip_cycles`` "
+                    "must be positive. User provided -1.")
+        try:
+            critsrc.n_cycles = 0.5
+        except ValueError as e:
+            self.assertEquals(e.message, "The property ``n_cycles`` "
+                    "must be an integer. User provided 0.5000.")
+        try:
+            critsrc.n_cycles = -1
+        except ValueError as e:
+            self.assertEquals(e.message, "The property ``n_cycles`` "
+                    "must be equal to or greater than ``n_skip_cycles``. "
+                    "User provided -1.")
+
+        ## comment()
+        critsrc = cards.Criticality()
+        self.assertEquals(critsrc.comment(), "Criticality source "
+                "'criticality': n_histories: 1000, keff_guess: 1.0000"
+                ", n_skip_cycles: 30, n_cycles: 130.")
+            
+    def test_CriticalityPoints(self):
+        """Tests :py:class:`cards.CriticalityPoints`'s methods, properties, and
+        exceptions.
+        
+        """
+        ## __init__()
+        # Default arguments.
+        critpts = cards.CriticalityPoints()
+        self.assertEquals(critpts.name, 'criticalitypoints')
+        self.assertTrue(critpts.points == [[0, 0, 0]])
+        critpts = cards.CriticalityPoints([[1, 2, 3],
+                                        np.array([np.pi, np.e, 0])])
+        self.assertEquals(critpts.comment(), "Criticality points "
+                "'criticalitypoints': (1.0000, 2.0000, 3.0000), "
+                "(3.1416, 2.7183, 0.0000).")
+        self.assertRaises(ValueError, setattr, critpts, 'points', 
+                [[0, 0, 0], [1]])
+        try:
+            critpts.points = [[0, 0, 0], [1]]
+        except ValueError as e:
+            self.assertEquals(e.message, "Length of all point lists/arrays "
+                    "must be 3. User provided a point [1].")
 
 
+class TestSystemDefinition(unittest.TestCase):
+    """Tests the :py:class:`definition.SystemDefinition` class."""
+
+    def setUp(self):
+        self.uo2 = material.from_atom_frac({'U235': 0.05,
+                            'U238': 0.95,
+                            'O16' : 2.0}, name='UO2')
+        self.h2o = material.from_atom_frac({'H1' : 2.0,
+                            'O16': 1.0}, name='H2O')
+        
+        # Surfaces.
+        radius = 0.40 # cm
+        self.pin = cards.AxisCylinder('fuelpin', 'X', radius)
+        pitch = 1.2 # cm
+        self.cellbound = cards.Parallelepiped('bound',
+                -pitch / 2, pitch / 2, -pitch / 2, pitch / 2, 0, 0,
+                reflecting=True)
+        
+        # Cells.
+        self.fuel = cards.CellMCNP('fuel', self.pin.neg, self.uo2, 11.0,
+                'g/cm^3', neutron_imp=1)
+        self.coolant = cards.CellMCNP('coolant', self.pin.pos &
+                self.cellbound.neg, self.h2o, 1.0, 'g/cm^3', neutron_imp=1)
+        self.graveyard = cards.CellVoidMCNP('graveyard', self.cellbound.pos,
+                neutron_imp=0)
+        
+        # Create system definition from the cards above.
+        self.rxr = definition.SystemDefinition(verbose=False)
+        self.rxr.add_cell(self.fuel)
+        self.rxr.add_cell(self.coolant)
+        self.rxr.add_cell(self.graveyard)
+
+    def test_ITally(self):
+        """Tests :py:class:`cards.ITally`'s methods, properties, and
+        exceptions, and those of its subclasses.
+
+        """
+        ## CellFlux
+        # One cell.
+        tally = cards.CellFlux('fuel', 'neutron', self.fuel)
+        self.assertEquals(tally.name, 'fuel')
+        self.assertEquals(tally.particle, 'neutron')
+        # Test ``particle`` property.
+        tally = cards.CellFlux('fuel', 'photon', self.fuel)
+        self.assertEquals(tally.particle, 'photon')
+        tally = cards.CellFlux('fuel', 'electron', self.fuel)
+        self.assertEquals(tally.particle, 'electron')
+        tally = cards.CellFlux('fuel', 'proton', self.fuel)
+        self.assertEquals(tally.particle, 'proton')
+        # Test exception on ``particle`` property.
+        self.assertRaises(ValueError, setattr, tally, 'particle', 'test')
+        try:
+            tally.particle = 'test'
+        except ValueError as e:
+            self.assertEquals(e.message, 
+                    "The property ``particle`` must be 'neutron', "
+                    "'photon', 'electron', or 'proton'. "
+                    "User provided 'test'.")
+        self.assertEquals(tally.comment(), "Cell flux tally 'fuel': "
+                "cell 'fuel'.")
+        self.assertIs(tally._unique_card_list()[0], self.fuel)
+        # Two individual cells.
+        tally = cards.CellFlux('both', 'neutron', [self.fuel, self.coolant])
+        self.assertEquals(tally.comment(), "Cell flux tally 'both': "
+                "cells 'fuel'; 'coolant'.")
+        self.assertIs(tally._unique_card_list()[0], self.fuel)
+        self.assertIs(tally._unique_card_list()[1], self.coolant)
+        # Two individual cells, with average over all.
+        tally = cards.CellFlux('withavg', 'neutron', [self.fuel, self.coolant],
+                average=True)
+        self.assertEquals(tally.comment(), "Cell flux tally 'withavg': "
+                "cells 'fuel'; 'coolant'; and avg. of all provided.")
+        self.assertIs(tally._unique_card_list()[0], self.fuel)
+        self.assertIs(tally._unique_card_list()[1], self.coolant)
+        # Two individual cells, and an averaging, with an average over all.
+        tally = cards.CellFlux('withavg', 'neutron', [self.fuel,
+                [self.fuel, self.coolant], self.coolant], average=True)
+        self.assertEquals(tally.comment(), "Cell flux tally 'withavg': "
+                "cells 'fuel'; avg. in 'fuel', 'coolant'; 'coolant'; "
+                "and avg. of all provided.")
+        self.assertIs(tally._unique_card_list()[0], self.fuel)
+        self.assertIs(tally._unique_card_list()[1], self.coolant)
+        self.assertTrue(len(tally._unique_card_list()) == 2)
+
+
+class TestSimulationDefinition(unittest.TestCase):
+    """Tests the :py:class:`definition.SimulationDefinition` class."""
+    # The system definition is complete.
+    
+    #sim = definition.MCNPSimulation(rxr)
+    #sim.add_card(cards.Criticality())
+    #sim.add_card(cards.CriticalityPoints())

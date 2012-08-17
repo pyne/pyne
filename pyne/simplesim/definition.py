@@ -13,6 +13,10 @@ Another possible name is latticesim or latticesimulation.
 
 import abc
 import collections
+import pickle
+import json
+
+import numpy as np
 
 from pyne import material
 from pyne.simulation import cards
@@ -26,8 +30,12 @@ class IDefinition(object):
         """
         self.verbose = verbose
         if fname is not None:
+            if self.verbose:
+                print "Opening definition stored in %s." % fname
             self._open(fname)
         else:
+            if self.verbose:
+                print "Creating a new definition."
             self._create_new()
 
     @abc.abstractmethod
@@ -36,34 +44,46 @@ class IDefinition(object):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def _open(self, fname):
-        """Open object data from a JSON file."""
-        raise NotImplementedError
-
-    @abc.abstractmethod
     def save(self, fname):
         """Save object data to a JSON file."""
-        raise NotImplementedError
+        fid = open(fname, 'w')
+        #pickle.dump(self, fid)
+        fid.write(DefinitionEncoder().encode(self))
+        fid.close()
 
-    def _assert_unique(self, card_type, name):
+    @abc.abstractmethod
+    def _open(self, fname):
+        """Open object data from a JSON file."""
+        # TODO Ensure the file exists.
+        fid = open(fname)
+        self = pickle.load(fname)
+        fid.close()
+
+    def _assert_unique(self, card_type, card):
         """Checks that the name on a card has not already been used for another
         card.
 
         """
-        if card_type == "cell":
+        # TODO Don't require the user to pass the card_type string.
+        if card_type == 'cell':
             dict_to_check = self.cells
-        elif card_type == "surface":
+        elif card_type == 'surface':
             dict_to_check = self.surfaces
-        elif card_type == "material":
+        elif card_type == 'material':
             dict_to_check = self.materials
-        elif card_type == "tally":
-            dict_to_check = self.tallies
+        elif card_type == 'source':
+            dict_to_check = self.source
+        elif card_type == 'tally':
+            dict_to_check = self.tally
+        elif card_type == 'misc':
+            dict_to_check = self.misc
         else:
             raise ValueError("The input ``card_type`` must be either "
-                    "'cell', 'surface', or 'material'.")
-        if name in dict_to_check:
+                    "'cell', 'surface', 'material', 'source', "
+                    "'tally', or 'misc'.")
+        if card.name in dict_to_check:
             raise Exception("The %s name %s has already been used for "
-                    "another %s" % (card_type, name, card_type))
+                    "another %s" % (card_type, card.name, card_type))
 
     @property
     def verbose(self):
@@ -103,15 +123,19 @@ class SystemDefinition(IDefinition):
         """
         if self.verbose:
             print "Adding cell %s." % cell.name
-        self._assert_unique("cell", cell.name)
+        # Only add the cell if a cell with the same name hasn't been added
+        # already.
+        self._assert_unique('cell', cell)
         # Add all surfaces that aren't already added. Do this by walking the
         # region tree and calling _add_unique_surfaces() at the leaves.
         cell.region.walk(self._add_unique_surfaces)
-        # Only add the material if it doesn't already exist.
-        if (hasattr(cell, 'material') and 
+        # Only add the material if this is not a void cell and if it doesn't
+        # already exist.
+        if (hasattr(cell, 'material') and
                 cell.material.name not in self.materials):
             self.add_material(cell.material)
-        # Okay, all checks passed.
+        # Constituent surfaces and material have been added, so we can added
+        # the cell.
         self.cells[cell.name] = cell
 
     def add_surface(self, surface):
@@ -121,7 +145,7 @@ class SystemDefinition(IDefinition):
         the objects.
 
         """
-        self._assert_unique("surface", surface.name)
+        self._assert_unique('surface', surface)
         self.surfaces[surface.name] = surface
 
     def _add_unique_surfaces(self, regionleaf):
@@ -136,7 +160,6 @@ class SystemDefinition(IDefinition):
             if self.verbose:
                 print "Surface %s already exists in the definition." % name
 
-
     def add_material(self, material):
         """This method is only used by the user for materials that are not on a
         cell card.  Materials on cell cards are added automatically.
@@ -145,16 +168,16 @@ class SystemDefinition(IDefinition):
         if material.name == None or material.name == '':
             raise ValueError("The ``name`` property of the material cannot "
                     "be empty.")
-        self._assert_unique("material", material.name)
+        self._assert_unique('material', material)
         self.materials[material.name] = material
 
     def save(self, fname):
         """Saves definition to a JSON file. It is unlikely that the class will
         be amenable to json.dump()."""
-        return
+        super(SystemDefinition, self).save(fname)
 
     def _open(self, fname):
-        return
+        super(SystemDefinition, self)._open(fname)
 
 
 class SimulationDefinition(IDefinition):
@@ -165,34 +188,47 @@ class SimulationDefinition(IDefinition):
     provide the same options.
 
     """
+    # TODO when adding a criticality points card, check that a criticality card
+    # has been added as well.
 
-    def __init__(self, systemdef, fname=None):
+    def __init__(self, systemdef, fname=None, verbose=True):
         """Creates a new options definition or loads one from a JSON file."""
+        super(SimulationDefinition, self).__init__(fname, verbose)
         self.sys = systemdef
-        if fname is not None:
-            self._open(fname)
-        else:
-            self._create_new()
-
-    def _open(self, fname):
-        return
-
-    def add_source(self, source):
-        return
-
-    def add_card(self, card):
-        return
-
-    def add_tally(self, card):
-        return
 
     def _create_new(self):
         """Initialize any attributes/properties."""
+        self.source = collections.OrderedDict()
+        self.misc = collections.OrderedDict()
+        self.tally = collections.OrderedDict()
+
+    def add_card(self, card):
+        if issubclass(card, cards.ISource):
+            self._add_source(card)
+        elif issubclass(card, cards.ITally):
+            self._add_tally(card)
+        elif issubclass(card, cards.IMisc):
+            self._add_misc(card)
+
+    def _add_source(self, card):
+        self._assert_unique('source', card)
+        self.source[card.name] = card
+
+    def _add_tally(self, card):
+        self._assert_unique('tally', card)
+        self.tally[card.name] = card
+
+    def _add_misc(self, card):
+        self._assert_unique('misc', card)
+        self.misc[card.name] = card
 
     def save(self, fname):
         """Saves definition to a JSON file. It is unlikely that the class will
         be amenable to json.dump()."""
         return
+
+    def _open(self, fname):
+        pass
 
     @property
     def sys(self):
@@ -202,5 +238,37 @@ class SimulationDefinition(IDefinition):
     def sys(self, value):
         self._sys = value
 
+
 class MCNPSimulation(SimulationDefinition):
-    pass
+    """ """
+
+
+
+
+class DefinitionEncoder(json.JSONEncoder):
+    # TODO circular reference issue.
+    def default(self, obj):
+        try:
+            if hasattr(obj, '__dict__'):
+                print "a"
+                print type(obj)
+                print obj.__dict__
+                return obj.__dict__
+            if isinstance(obj, np.ndarray):
+                print "b"
+                print type(obj)
+                print obj.tolist()
+                return obj.tolist()
+            #if isinstance(obj, cards.Cell) or issubclass(obj, cards.Cell):
+            #    print "cell"
+            #    return ''
+            else:
+                print "c"
+                print type(obj)
+                return json.JSONEncoder.default(self, obj)
+        except:
+            print "exception: "
+            print type(obj)
+            print obj
+            raise
+
