@@ -1483,7 +1483,19 @@ class ICellSurfTally(ITally):
         # card_type is either 'cell', or 'surface'
         # Assuming the user has provided objects of the appropriate type; the
         # issubclass check was not working with little effort. TODO
-        string = "%s tally '%s': " % (title, self.name)
+        string = "%s tally '%s' of " % (title, self.name)
+        if type(self.particle) is not list:
+            string += self.particle
+            if self.particle != 'all':
+                string += "s"
+        else:
+            pcounter = 0
+            for part in self.particle:
+                pcounter += 1
+                string += "%ss" % part
+                if pcounter < len(self.particle):
+                    string += ", "
+        string += ": "
         if card_type == 'cell':
             classcheck = CellVoid
         elif card_type == 'surface':
@@ -1769,7 +1781,7 @@ class CellEnergyDeposition(IAverageTally):
 
     """
     # TODO in mcnp input, prevent particle all and alt_units
-    def __init__(self, name, particles, cards, average=False, alt_units=True):
+    def __init__(self, name, particles, cards, average=False, alt_units=False):
         """
         Parameters
         ----------
@@ -1815,15 +1827,15 @@ class CellEnergyDeposition(IAverageTally):
         See base classes for more examples.
 
         """
-        super(EnergyDeposition, self).__init__(name, particles, cards, average,
-                alt_units)
+        super(CellEnergyDeposition, self).__init__(name, particles, cards,
+                average, alt_units)
         # TODO move this error check to the MCNP method.
         if self.particle == 'all' and self.alt_units:
             raise ValueError("The particle cannot be 'all' if alt_units is "
                     "True.")
 
     def comment(self):
-        return super(EnergyDeposition, self).comment("Energy deposition",
+        return super(CellEnergyDeposition, self).comment("Energy deposition",
                 'cell')
 
     @property
@@ -1876,12 +1888,12 @@ class CellFissionEnergyDeposition(IAverageTally):
         The following requests the tally in cell A, cell B, as well as the
         average across A and B::
 
-            tally = CelLFissionEnergyDeposition('fuel', [cellA,
+            tally = CellFissionEnergyDeposition('fuel', [cellA,
                     cellB], average=True)
 
         In the following, the alternate units are used::
 
-            tally = CelLFissionEnergyDeposition('fuel', [[cellA,
+            tally = CellFissionEnergyDeposition('fuel', [[cellA,
                     cellB]], alt_units=True)
         
         See base classes for more examples.
