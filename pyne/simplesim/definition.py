@@ -249,6 +249,10 @@ class DefinitionEncoder(json.JSONEncoder):
     # TODO circular reference issue.
     def default(self, obj):
         try:
+            if issubclass(obj, cards.ISurface):
+                # TODO something like this to get around the circular
+                # reference.
+                return obj.name
             if hasattr(obj, '__dict__'):
                 print "a"
                 print type(obj)
