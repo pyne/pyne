@@ -1475,11 +1475,11 @@ class ICellSurfTally(ITally):
             tally = SurfaceFlux('fuel', 'neutron', [[surfA, surfB]])
 
         """
-        super(IAverageTally, self).__init__(name, particle, *args, **kwargs)
+        super(ICellSurfTally, self).__init__(name, particle, *args, **kwargs)
         self.cards = cards
 
     @abc.abstractmethod
-    def comment(self, title, card_type):
+    def comment(self, title, union_type, card_type):
         # card_type is either 'cell', or 'surface'
         # Assuming the user has provided objects of the appropriate type; the
         # issubclass check was not working with little effort. TODO
@@ -1491,14 +1491,15 @@ class ICellSurfTally(ITally):
         if type(self.cards) is not list: # issubclass(self.cards, classcheck):
             string += "%s '%s'" % (card_type, self.cards.name)
         elif type(self.cards) is list:
-            string += "%ss " % card_type
+            if type(self.cards[0]) is not list:
+                string += "%ss " % card_type
             outcounter = 0
             for obj in self.cards:
                 outcounter += 1
                 if type(obj) is not list: # issubclass(obj, classcheck):
                     string += "'%s'" % obj.name
                 elif type(obj) is list:
-                    string += "avg. in "
+                    string += "%s in " % union_type
                     incounter = 0
                     for avgobj in obj:
                         incounter += 1
@@ -1555,6 +1556,56 @@ class ICellSurfTally(ITally):
                 " got {0}.".format(type(self.cards)))
 
 
+class SurfaceCurrent(ICellSurfTally):
+    """Surface current tally. In MCNP, this is the **F1** card.
+
+    .. inheritance-diagram:: pyne.simplesim.cards.SurfaceCurrent
+
+    """
+    def __init__(self, name, particle, cards, total=False, alt_units=False):
+        """
+        Parameters
+        ----------
+        name : str
+            See :py:class:`ITally`.
+        particle : str
+            See :py:class:`ITally`.
+        cards : :py:class:`ISurface`, list, list of lists
+            See :py:class:`ICellSurfTally`.
+        total : bool, optional
+            Include a tally for the total current across all surfaces
+            specified on this card (note: NOT across all surfaces in the
+            `problem`).
+        alt_units : bool, optional
+            If True, Tally is additionally weighted by particle energy.
+
+        Examples
+        --------
+        The following requests the tally in surface A, surface B, as well as the
+        total across A and B::
+
+            tally = SurfaceCurrent('fuel', 'electron', [surfA, surfB],
+                    total=True)
+
+        In the following, the tally is also weighted by particle energy::
+
+            tally = SurfaceCurrent('fuel', 'photon', [[surfA, surfB]],
+                    alt_units=True)
+
+        """
+        super(SurfaceCurrent, self).__init__(name, particle, cards, alt_units)
+        self.total = total
+
+    def comment(self):
+        string = super(SurfaceCurrent, self).comment("Surface current", 'total',
+                'surface')
+        if self.total:
+            string += "; and total of all provided."
+        else:
+            string += "."
+        return string
+
+
 class IAverageTally(ICellSurfTally):
     """This class is not used by the user. Abstract base class for
     tallies of averaged quantities. In MCNP, these are the **F2**, **F4**,
@@ -1597,9 +1648,10 @@ class IAverageTally(ICellSurfTally):
 
     @abc.abstractmethod
     def comment(self, title, card_type):
-        string = super(IAverageTally, self).comment(title, card_type)
+        avgstr = 'avg.'
+        string = super(IAverageTally, self).comment(title, avgstr, card_type)
         if self.average:
-            string += "; and avg. of all provided."
+            string += "; and %s of all provided." % avgstr
         else:
             string += "."
         return string
@@ -1611,48 +1663,6 @@ class IAverageTally(ICellSurfTally):
     @average.setter
     def average(self, value):
         self._average = value
-
-
-class SurfaceCurrent(ITally):
-    """Surface current tally. In MCNP, this is the **F1** card.
-
-    .. inheritance-diagram:: pyne.simplesim.cards.SurfaceCurrent
-
-    """
-    def __init__(self, name, particle, cards, total=False, alt_units=False):
-        """
-        Parameters
-        ----------
-        name : str
-            See :py:class:`ITally`.
-        particle : str
-            See :py:class:`ITally`.
-        cards : :py:class:`ISurface`, list, list of lists
-            See :py:class:`ICellSurfTally`.
-        total : bool, optional
-            Include a tally for the total current across all surfaces
-            specified on this card (note: NOT across all surfaces in the
-            `problem`).
-        alt_units : bool, optional
-            If True, Tally is additionally weighted by particle energy.
-
-        Examples
-        --------
-        The following requests the tally in surface A, surface B, as well as the
-        total across A and B::
-
-            tally = SurfaceCurrent('fuel', 'electron', [surfA, surfB],
-                    total=True)
-
-        In the following, the tally is also weighted by particle energy::
-
-            tally = SurfaceCurrent('fuel', 'photon', [[surfA, surfB]],
-                    alt_units=True)
-
-        """
-        super(SurfaceCurrent, self).__init__(name, particle, cards, alt_units)
-        self.total = total
-
 
 
 class SurfaceFlux(IAverageTally):
@@ -1696,12 +1706,7 @@ class SurfaceFlux(IAverageTally):
                                           alt_units)
 
     def comment(self):
-        string = super(SurfaceFlux, self).comment("Surface flux", 'surface')
-        if self.total:
-            string += "; and total of all provided."
-        else:
-            string += "."
-        return string
+        return super(SurfaceFlux, self).comment("Surface flux", 'surface')
 
     @property
     def total(self):
@@ -1893,7 +1898,7 @@ class CellPulseHeight(ICellSurfTally):
     .. inheritance-diagram:: pyne.simplesim.cards.CellPulseHeight
 
     """
-    def __init__(self, name, particles, cards, average=False, alt_units=False)
+    def __init__(self, name, particles, cards, average=False, alt_units=False):
         """
         Parameters
         ----------
