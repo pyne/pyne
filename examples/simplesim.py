@@ -1,5 +1,6 @@
-from pyne.simplesim import definition, cards, inputfile
+import json
 
+from pyne.simplesim import definition, cards, inputfile
 from pyne import material
 
 """
@@ -56,6 +57,13 @@ rxr.add_cell(fuel)
 rxr.add_cell(coolant)
 rxr.add_cell(graveyard)
 # The system definition is complete.
+
+sim = definition.MCNPSimulation(rxr)
+
+sim.add_card(cards.Criticality())
+sim.add_card(cards.CriticalityPoints())
+
+rxr.save('test')
 
 """
 # 

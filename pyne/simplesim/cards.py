@@ -22,6 +22,8 @@ the module.
 # TODO sphinx inheritance diagrams.
 # TODO if i make a material card, make sure to revert back to the Material
 # object that Anthony has once they implement a comment.
+# Maybe I place an underscore for abstract base classes so that the user
+# doesn't see them, but I want them to see them...
 
 import abc
 
@@ -37,7 +39,7 @@ class ICard(object):
     # This line makes this class an abstract base class (ABC).
     __metaclass__ = abc.ABCMeta
     
-    def __init__(self, name):
+    def __init__(self, name, unique=False):
         """
         Parameters
         ----------
@@ -49,7 +51,11 @@ class ICard(object):
             but the name must be unique.
 
         """
-        self.name = name
+        self._unique = unique
+        if self._unique:
+            self._name = name
+        else:
+            self.name = name
 
     # All subclasses must define a comment() method.
     @abc.abstractmethod
@@ -63,6 +69,10 @@ class ICard(object):
 
     @name.setter
     def name(self, value):
+        if self._unique:
+            raise StandardError("This is a unique card, meaning only one card"
+                    " of this type can be found in a ``definition``. "
+                    "Accordingly, the name is read-only.")
         if value == '':
             raise ValueError("The ``name`` property of the cell cannot "
                     "be empty.")
@@ -323,32 +333,7 @@ class CellMCNP(CellVoidMCNP): #, Cell):
     """
     # TODO flesh out keyword arguments.
     def __init__(self, name, region, material, density, density_units,
-                 temperature=None, volume=None,
-                 neutron_imp=None,
-                 photon_imp=None,
-                 electron_imp=None,
-                 proton_imp=None,
-                 proton_weight_lim=None,
-                 neutron_exp_transform=None,
-                 photon_exp_transform=None,
-                 electron_exp_transform=None,
-                 proton_exp_transform=None,
-                 neutron_force_coll=None,
-                 photon_force_coll=None,
-                 electron_force_coll=None,
-                 proton_force_coll=None,
-                 neutron_weight_win_bound=None,
-                 photon_weight_win_bound=None,
-                 electron_weight_win_bound=None,
-                 proton_weight_win_bound=None,
-                 neutron_dxtran_contrib=None,
-                 photon_dxtran_contrib=None,
-                 electron_dxtran_contrib=None,
-                 proton_dxtran_contrib=None,
-                 fission_turnoff=None,
-                 det_contrib=None,
-                 transform=None
-                 ):
+                 **kwargs):
         """
         Parameters
         ----------
@@ -368,9 +353,7 @@ class CellMCNP(CellVoidMCNP): #, Cell):
         """
         # Based on Python's Method Resolution Order (MRO), the constructor for
         # CellSimpleVoidMCNP is called because it is listed first above.
-        super(CellMCNP, self).__init__(name, region, temperature=temperature,
-                volume=volume, neutron_imp=neutron_imp, photon_imp=photon_imp,
-                electron_imp=electron_imp, proton_imp=proton_imp)
+        super(CellMCNP, self).__init__(name, region, **kwargs)
         # The following fields are not initialized via the superclass
         # constructor above.
         self.material = material
@@ -391,7 +374,7 @@ class IUniverse(ICard):
     """
     __metaclass__ = abc.ABCMeta
 
-    def __init__(self, name):
+    def __init__(self, name, *args, **kwargs):
         pass
 
 
@@ -449,7 +432,7 @@ class ISurface(ICard):
     # TODO support rotation.
     __metaclass__ = abc.ABCMeta
     
-    def __init__(self, name, reflecting, white):
+    def __init__(self, name, reflecting, white, *args, **kwargs):
         """
         Parameters
         ----------
@@ -462,7 +445,7 @@ class ISurface(ICard):
             cosine distribution with respect to the surface normal).
 
         """
-        super(ISurface, self).__init__(name)
+        super(ISurface, self).__init__(name, *args, **kwargs)
         self.reflecting = reflecting
         self.white = white 
         if self.reflecting and self.white:
@@ -592,7 +575,7 @@ class IAxisSurface(ISurface):
     """
     __metaclass__ = abc.ABCMeta
 
-    def __init__(self, name, cartesian_axis, reflecting, white):
+    def __init__(self, name, cartesian_axis, reflecting, white, *args, **kwargs):
         """
         Parameters
         ----------
@@ -607,7 +590,8 @@ class IAxisSurface(ISurface):
             See :py:class:`ISurface`
 
         """
-        super(IAxisSurface, self).__init__(name, reflecting, white)
+        super(IAxisSurface, self).__init__(name, reflecting, white, *args,
+                                           **kwargs)
         self.cartesian_axis = cartesian_axis
 
     @abc.abstractmethod
@@ -679,7 +663,7 @@ class AxisCylinder(IAxisSurface):
         self.radius = radius
 
     def comment(self):
-        return ("Axis cylinder %s: aligned and centered on %s axis, "
+        return ("Axis cylinder '%s': aligned and centered on %s axis, "
                 "with radius %.4f cm (diameter %.4f cm)." %
                         (self.name, self.cartesian_axis,
                         self.radius, 2 * self.radius))
@@ -821,7 +805,7 @@ class AxisPlane(IAxisSurface):
         self.position = position
     
     def comment(self):
-        return "Axis plane %s: %s = %.4f cm" % (self.name, self.cartesian_axis,
+        return "Axis plane '%s': %s = %.4f cm." % (self.name, self.cartesian_axis,
                 self.position)
 
     def shift(self, vector):
@@ -891,11 +875,12 @@ class IMacrobody(ISurface):
     __metaclass__ = abc.ABCMeta
 
     # TODO abstract method for obtaining "sub"-surfaces.
-    def __init__(self, name, reflecting, white):
+    def __init__(self, name, reflecting, white, *args, **kwargs):
         """
 
         """
-        super(IMacrobody, self).__init__(name, reflecting, white)
+        super(IMacrobody, self).__init__(name, reflecting, white, *args,
+                                         **kwargs)
 
     @abc.abstractmethod
     def comment(self):
@@ -939,8 +924,8 @@ class Parallelepiped(IMacrobody):
         self.zlims = np.array([zmin, zmax])
 
     def comment(self):
-        return ("Parallelepiped %s: [%.4f, %.4f] x [%.4f, %.4f] x " \
-               "[%.4f, %.4f] cm" % (self.name, self.xlims[0], self.xlims[1],
+        return ("Parallelepiped '%s': [%.4f, %.4f] x [%.4f, %.4f] x " \
+               "[%.4f, %.4f] cm." % (self.name, self.xlims[0], self.xlims[1],
                    self.ylims[0], self.ylims[1], self.zlims[0], self.zlims[1]))
 
     def shift(self, vector):
@@ -1062,8 +1047,8 @@ class IRegion(ICard):
 
     __metaclass__ = abc.ABCMeta
 
-    def __init__(self, name):
-        super(IRegion, self).__init__(name)
+    def __init__(self, name, *args, **kwargs):
+        super(IRegion, self).__init__(name, *args, **kwargs)
         self.parent = None
 
     @abc.abstractmethod
@@ -1131,8 +1116,8 @@ class IRegionBool(IRegion):
     """
     __metaclass__ = abc.ABCMeta
 
-    def __init__(self, left_child, right_child, name='<Empty>'):
-        super(IRegionBool, self).__init__(name)
+    def __init__(self, left_child, right_child, name='<Empty>', *args, **kwargs):
+        super(IRegionBool, self).__init__(name, *args, **kwargs)
         self.left_child = left_child
         self.right_child = right_child
         self.left_child.parent = self
@@ -1212,24 +1197,465 @@ class RegionLeaf(IRegion):
         self._pos_sense = value
 
 
-class Option(ICard):
-    """All cards classified as data cards in MCNP, except for materials."""
+class IOption(ICard):
+    """ """
+    __metaclass__ = abc.ABCMeta
 
-    def __init__(self, name):
-        """
-        """
-        return
+    def __init__(self, name, *args, **kwargs):
+        super(IOption, self).__init__(name, *args, **kwargs)
 
     @abc.abstractmethod
     def comment(self):
         raise NotImplementedError
 
 
-class Source(ICard):
+class ISource(IOption):
     """ """
-    def __init__(self, name):
-        pass
+    __metaclass__ = abc.ABCMeta
 
+    def __init__(self, name, *args, **kwargs):
+        super(ISource, self).__init__(name, *args, **kwargs)
+
+    @abc.abstractmethod
+    def comment(self):
+        raise NotImplementedError
+
+
+class Criticality(ISource):
+    """A criticality source of neutrons. Unique card with name `criticality`.
+    In MCNP, this is the **KCODE** card.
+    
+    .. inheritance-diagram:: pyne.simplesim.cards.Criticality
+
+    """
+
+    # TODO in the example, include the resulting MCNP output?
+    def __init__(self, n_histories=1000, keff_guess=1.0,
+            n_skip_cycles=30, n_cycles=130):
+        """
+        Parameters
+        ----------
+        n_histories : int, optional
+            Number of particle histories to run in each cycle.
+        keff_guess : float, optional
+            Initial guess for the effective multiplication constant of the
+            system.
+        n_skip_cycles : int, optional
+            The number of cycles to skip.
+        n_cycles : int, optional
+            The total number of cycles to simulate (skipped + active).
+
+        Examples
+        --------
+        The following::
+
+            critsrc = Criticality(2000, 1.5, 30, 300)
+
+        creates a criticality source with 2000 histories per cycle, an initial
+        k_eff guess of 1.5, 30 skipped cyles, and 300 total cycles.
+        
+        """
+        super(Criticality, self).__init__('criticality', unique=True) 
+        self.n_histories = n_histories
+        self.keff_guess = keff_guess
+        self.n_skip_cycles = n_skip_cycles
+        self.n_cycles = n_cycles
+
+    def comment(self):
+        return ("Criticality source '%s': n_histories: %i, keff_guess: %.4f"
+                ", n_skip_cycles: %i, n_cycles: %i." % (self.name,
+                    self.n_histories, self.keff_guess, self.n_skip_cycles,
+                    self.n_cycles))
+
+    @property
+    def n_histories(self):
+        return self._n_histories
+
+    @n_histories.setter
+    def n_histories(self, value):
+        if type(value) is not int:
+            raise ValueError("The property ``n_histories`` must be an "
+                    "integer. User provided %.4f." % value)
+        if value <= 0:
+            raise ValueError("The property ``n_histories`` must be positive. "
+                "User provided %i." % value)
+        self._n_histories = value
+
+    @property
+    def keff_guess(self):
+        return self._keff_guess
+ 
+    @keff_guess.setter
+    def keff_guess(self, value):
+        if value < 0:
+            raise ValueError("The property ``keff_guess`` must be "
+                    "non-negative. User provided %.4f." % value)
+        self._keff_guess = value
+
+    @property
+    def n_skip_cycles(self):
+        return self._n_skip_cycles
+
+    @n_skip_cycles.setter
+    def n_skip_cycles(self, value):
+        if type(value) is not int:
+            raise ValueError("The property ``n_skip_cycles`` must be an "
+                    "integer. User provided %.4f." % value)
+        if value <= 0:
+            raise ValueError("The property ``n_skip_cycles`` must be positive. "
+                "User provided %i." % value)
+        self._n_skip_cycles = value
+
+    @property
+    def n_cycles(self):
+        return self._n_cycles
+
+    @n_cycles.setter
+    def n_cycles(self, value):
+        if type(value) is not int:
+            raise ValueError("The property ``n_cycles`` must be an "
+                    "integer. User provided %.4f." % value)
+        if value < self.n_skip_cycles:
+            raise ValueError("The property ``n_cycles`` must be equal to or "
+                    "greater than ``n_skip_cycles``. User provided %i." %
+                    value)
+        # If n_cycles is greater or equal to n_skip_cycles, it is positive.
+        self._n_cycles = value
+
+
+class CriticalityPoints(ISource):
+    """Initial source points for neutrons generated by a criticality source.
+    Unique card with name 'criticalitypoints'. In MCNP, this is the **KSRC**
+    card.
+
+    .. inheritance-diagram:: pyne.simplesim.cards.CriticalityPoints
+    
+    """
+    def __init__(self, points=[[0, 0, 0]]):
+        """
+        Parameters
+        ----------
+        points : list of 3-element lists, optional [centimeters]
+            A list of 3-element lists (or numpy arrays) specifying
+            initial neutron source points in 3-D space.
+
+        Examples
+        --------
+        The following specifies two initial source points at (1, 2, 3) cm and
+        at (3.141..., 2.718..., 0) cm, where we have imported :py:mod:`numpy`
+        as ``np``::
+
+            critpts = CriticalityPoints([[1, 2, 3],
+                                        np.array([np.pi, np.e, 0])])
+
+        """
+        super(CriticalityPoints, self).__init__('criticalitypoints',
+                unique=True)
+        self.points = points
+
+    def comment(self):
+        string = "Criticality points 'criticalitypoints': "
+        counter = 0
+        for point in self.points:
+            counter += 1
+            string += "(%.4f, %.4f, %.4f)" % tuple(point)
+            if counter < len(self.points):
+                string += ", "
+            else:
+                string += "."
+        return string
+
+    @property
+    def points(self):
+        return self._points
+
+    @points.setter
+    def points(self, value):
+        for point in value:
+            if len(point) is not 3:
+                raise ValueError("Length of all point lists/arrays must be 3."
+                        " User provided a point %s." % str(point))
+        self._points = value
+
+
+class ITally(ICard):
+    """This class is not used by the user. Abstract base class for
+    tallies (MCNP) or detectors (Serpent).
+
+    """
+    __metaclass__ = abc.ABCMeta
+
+    def __init__(self, name, particle, *args, **kwargs):
+        """
+        Parameters
+        ----------
+        name : str
+            See :py:class:`ICard`. Used for, e.g., tally multiplier cards.
+        particle : str
+            Either 'neutron', 'photon', electron', or 'proton'.
+
+        """
+        super(ITally, self).__init__(name, *args, **kwargs)
+        self.particle = particle
+
+    @abc.abstractmethod
+    def comment(self):
+        raise NotImplementedError
+
+    @property
+    def particle(self):
+        return self._particle
+
+    @particle.setter
+    def particle(self, value):
+        if (value != 'neutron' and value != 'photon' and 
+                value != 'electron' and value != 'proton'):
+            raise ValueError("The property ``particle`` must be 'neutron', "
+                    "'photon', 'electron', or 'proton'. "
+                    "User provided '%s'." % value)
+        self._particle = value
+
+
+class IAverageTally(ITally):
+    """This class is not used by the user. Abstract base class for
+    tallies of averaged quantities. In MCNP, these are the **F2**, **F4**,
+    **F6**, and **F7** tallies. Some of these are for cells, and some are for
+    surfaces.
+
+    """
+    __metaclass__ = abc.ABCMeta
+
+    def __init__(self, name, particle, cards, average=False, *args, **kwargs):
+        """
+        Parameters
+        ----------
+        name : str
+            See :py:class:`ITally`.
+        particle : str
+            See :py:class:`ITally`.
+        cards : :py:class:`Cell` or :py:class:`ISurface`, list, list of lists
+            If tallying 1 cell/surface, the input is that cell/surface card. If
+            tallying multiple cells/surfaces, the individual cell/surface cards
+            are provided in a list. To obtain the average tally across multiple
+            cells/surfaces, these cell/surface cards are provided in their own
+            list, within the outer list. To avoid ambiguity, if only one set of
+            averages is desired, then this set must be nested in two lists. See
+            the examples.
+        average : bool, optional
+            Include a tally for the average flux across all cells/surfaces
+            specified on this card (note: NOT across `all` cells in the
+            problem).
+
+        """
+        super(IAverageTally, self).__init__(name, particle)
+        self.cards = cards
+        self.average = average
+
+    @abc.abstractmethod
+    def comment(self, title, card_type):
+        # card_type is either 'cell', or 'surface'
+        # Assuming the user has provided objects of the appropriate type; the
+        # issubclass check was not working with little effort. TODO
+        string = "%s tally '%s': " % (title, self.name)
+        if card_type == 'cell':
+            classcheck = CellVoid
+        elif card_type == 'surface':
+            classcheck = ISurface
+        if type(self.cards) is not list: # issubclass(self.cards, classcheck):
+            string += "%s '%s'" % (card_type, self.cards.name)
+        elif type(self.cards) is list:
+            string += "%ss " % card_type
+            outcounter = 0
+            for obj in self.cards:
+                outcounter += 1
+                if type(obj) is not list: # issubclass(obj, classcheck):
+                    string += "'%s'" % obj.name
+                elif type(obj) is list:
+                    string += "avg. in "
+                    incounter = 0
+                    for avgobj in obj:
+                        incounter += 1
+                        # Must be a cell/surface card.
+                        string += "'%s'" % avgobj.name
+                        if incounter < len(obj):
+                            string += ", "
+                # TODO an anti-duck-typing exception:
+                #else:
+                #    raise ValueError("Expected {0} or list, got {1}.".format(
+                #            card_type, type(obj)))
+                if outcounter < len(self.cards):
+                    string += "; "
+        # TODO an anti-duck-typing exception:
+        #else:
+        #    raise ValueError("Expected {0} or list, got {1}.".format(
+        #            card_type, type(self.cards)))
+        if self.average:
+            string += "; and avg. of all provided."
+        else:
+            string += "."
+        return string
+
+    @property
+    def cards(self):
+        return self._cards
+
+    @cards.setter
+    def cards(self, value):
+        self._cards = value
+
+    def _unique_card_list(self):
+        # Returns a unique list of all the cards provided in self.cards.
+        # This method is called by
+        # :py:class:`pyne.simplesim.SimulationDefinition` for error-checking.
+        # TODO this is ideally recursive, and maybe can be implemented in a
+        # cleaner way.
+        # Assuming the user has provided objects of the appropriate type; the
+        # issubclass check was not working with little effort. TODO. See
+        # comment().
+        if type(self.cards) is not list: # issubclass(self.cards, ?):
+            return [self.cards]
+        elif type(self.cards) is list:
+            card_list = list()
+            for obj in self.cards:
+                if type(obj) is list:
+                    for avgobj in obj:
+                        # issubclass(avgobj, IAverageTally)
+                        if (type(avgobj) is not list and
+                                avgobj not in card_list):
+                            card_list += [avgobj]
+                elif obj not in card_list:
+                    # Not a list, must be a cell/surface.
+                    card_list += [obj]
+            return card_list
+        else:
+            raise ValueError("Expected cell, surface, or list,"
+                " got {0}.".format(type(self.cards)))
+
+
+class SurfaceCurrent(ITally):
+    """Surface current tally. In MCNP, this is the **F1** card.
+
+    .. inheritance-diagram:: pyne.simplesim.cards.SurfaceCurrent
+
+    """
+    def __init__(self, name, particle, cards, total=False):
+        TODO
+
+
+class SurfaceFlux(IAverageTally):
+    """Surface flux tally. In MCNP, this is the **F2** card.
+
+    .. inheritance-diagram:: pyne.simplesim.cards.SurfaceFlux
+
+    """
+    def __init__(self, name, particle, cards, average=False):
+        """
+        Parameters
+        ----------
+        name : str
+            See :py:class:`ITally`.
+        particle : str
+            See :py:class:`ITally`.
+        cards : :py:class:`ISurface`, list, list of lists
+            See :py:class:`IAverageTally`.
+        average : bool, optional
+            See :py:class:`IAverageTally`.
+        """
+        super(SurfaceFlux, self).__init__(name, particle, cards, average)
+
+    def comment(self):
+        return super(SurfaceFlux, self).comment("Surface flux", 'surface')
+
+
+class CellFlux(IAverageTally):
+    """Cell flux tally. In MCNP, this is the **F4** card.
+
+    .. inheritance-diagram:: pyne.simplesim.cards.CellFlux
+
+    """
+    def __init__(self, name, particle, cards, average=False):
+        """
+        Parameters
+        ----------
+        name : str
+            See :py:class:`ITally`.
+        particle : str
+            See :py:class:`ITally`.
+        cards : :py:class:`Cell`, list, list of lists
+            See :py:class:`IAverageTally`.
+        average : bool, optional
+            See :py:class:`IAverageTally`.
+        """
+        super(CellFlux, self).__init__(name, particle, cards, average)
+
+    def comment(self):
+        return super(CellFlux, self).comment("Cell flux", 'cell')
+
+
+class CellEnergyDeposition(IAverageTally):
+    """Energy deposition tally. In MCNP, this is the **F6** card.
+
+    .. inheritance-diagram:: pyne.simplesim.cards.CellEnergyDeposition
+
+    """
+    def __init__(self, name, particle, cards, average=False):
+        """
+        Parameters
+        ----------
+        name : str
+            See :py:class:`ITally`.
+        particle : str
+            See :py:class:`ITally`. For this tally, the additional value of
+            'all' is allowed, and specifies collision heating.
+        cards : :py:class:`Cell`, list, list of lists
+            See :py:class:`IAverageTally`.
+        average : bool, optional
+            See :py:class:`IAverageTally`.
+        """
+        super(EnergyDeposition, self).__init__(name, particle, cards, average)
+
+    def comment(self):
+        return super(EnergyDeposition, self).comment("Energy deposition",
+                'cell')
+
+    @property
+    def particle(self):
+        return self._particle
+
+    @particle.setter
+    def particle(self, value):
+        if (value != 'neutron' and value != 'photon' and 
+                value != 'electron' and value != 'proton' and value != 'all'):
+            raise ValueError("The property ``particle`` must be 'neutron', "
+                    "'photon', 'electron', 'proton', or 'all'."
+                    "User provided '%s'." % value)
+        self._particle = value
+
+
+class CellFissionEnergyDeposition(IAverageTally):        
+    """Fission energy deposition tally. In MCNP, this is the **F7** card. The
+    particle is necessarily neutron.
+
+    .. inheritance-diagram:: pyne.simplesim.cards.CellFissionEnergyDeposition
+
+    """
+    def __init__(self, name, cards, average=False):
+        """
+        Parameters
+        ----------
+        name : str
+            See :py:class:`ITally`.
+        cards : :py:class:`Cell`, list, list of lists
+            See :py:class:`IAverageTally`.
+        average : bool, optional
+            See :py:class:`IAverageTally`.
+        """
+        super(FissionEnergyDeposition, self).__init__(name, 'neutron', cards,
+                                                      average)
+
+    def comment(self):
+        return super(FissionEnergyDeposition, self).comment(
+                "Fission energy deposition", 'cell')
 
 
 
