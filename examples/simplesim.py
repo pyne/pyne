@@ -75,6 +75,7 @@ sim.add_card(coolanttally)
     
 sim.add_card(egrid)
 
+inp = MCNPInput("input1", sim)
 #rxr.save('test')
 
 """
