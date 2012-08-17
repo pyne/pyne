@@ -1209,7 +1209,7 @@ class IMisc(ICard):
         raise NotImplementedError
 
 
-class ISource(IOption):
+class ISource(IMisc):
     """ """
     __metaclass__ = abc.ABCMeta
 
@@ -2236,17 +2236,17 @@ class EnergyGrid(IMisc):
 
     def comment(self):
         string = "Energy grid '%s' for " % self.name
-        if tally is None:
+        if self.tally is None:
             string += "all tallies"
         else:
-            string += "tally %s" % tallyname
+            string += "tally %s" % self.tally.name
         return string + ": %i groups." % len(self.energies)
 
     @property
     def energies(self):
         return self._energies
 
-    @energies.property
+    @energies.setter
     def energies(self, value):
         self._energies = value
 
