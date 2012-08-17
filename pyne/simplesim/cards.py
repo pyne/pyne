@@ -1209,7 +1209,7 @@ class IMisc(ICard):
         raise NotImplementedError
 
 
-class ISource(IMisc):
+class ISource(ICard):
     """ """
     __metaclass__ = abc.ABCMeta
 
