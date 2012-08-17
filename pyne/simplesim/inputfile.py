@@ -21,7 +21,7 @@ extension to other codes may require more effort.
 
 import abc
 
-class IInput(object):
+class IInputFile(object):
     """Abstract base class for classes that take system and option definitions
     to create an input file for a certain code (e.g. MCNPX, Serpent, MCODE,
     etc.).
@@ -29,28 +29,40 @@ class IInput(object):
     """
     __metaclass__ = abc.ABCMeta
 
-    def __init__(self, optionsdef):
+    def __init__(self, fname, simdef, comments=True):
         """
 
         Parameters
         ----------
-        reactordef : pyne.ReactorDefinition
+        fname : str
+            Filename/path at which to create the input file.
+        simdef: :py:class:`SimulationDefinition` or subclass.
+            TODO
+        comments : bool, optional
+            TODO
 
         """
-        pass
+        self.fname = fname
+        self.sim = simdef
 
+    def write(self):
+        self.set_up()
+        self._writesubclass()
+        self.fid.close()
+
+    def set_up(self):
+        self.fid = open(self.fname, 'w')
+
+    def clean_up(self):
+        self.fid.close()
+    
     @abc.abstractmethod
-    def _walk(self, region):
-        return
+    def _write_subclass(self):
+        return NotImplementedError
 
     @abc.abstractmethod
     def _cell(self, cell):
         """Returns a cell card string."""
-        return
-
-    @abc.abstractmethod
-    def _infinite_cylinder_surface(self, surface):
-        """Returns an infinite cylinder surface card."""
         return
 
 
@@ -58,15 +70,32 @@ class MCNPInput(IInput):
     """Contains a write method for each type of surface.
     """
 
-    def __init__(self, optionsdef):
-        pass
+    def __init__(self, fname, simdef):
+        """
+
+        """
+        super(MCNPInput, self).__init__(fname, simdef)
+
+    def _write_subclass(self):
+        # Write cell cards.
+        for cell in self.sim.sys.cells:
+            cell.write()
+        # Write surface cards.
+        for surf in self.sim.sys.surfaces:
+            surf.write()
+        # Write data cards.
+        # Source cards.
+        for src in self.sim.source:
+            src.write()
+        # Tally cards.
+        for tall in self.sim.tally:
+            tall.write()
+
+
+
 
     def _cell(self, cell):
         """Returns a cell card string given a Cell card."""
-        return
-
-    def _infinite_cylinder_surface(self, surface):
-        """Returns an infinite cylinder surface card."""
         return
 
 
