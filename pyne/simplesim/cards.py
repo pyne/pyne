@@ -2119,8 +2119,7 @@ class PointDetector(IDetector):
                     sep_direct=False)
 
         """
-        super(PointDetector, self).__init__(name, particle, sep_direct)
-        self.spec = spec
+        super(PointDetector, self).__init__(name, particle, spec, sep_direct)
 
     def comment(self):
         return super(PointDetector, self).comment("Point detector")
@@ -2188,8 +2187,7 @@ class RingDetector(IDetector):
                     sep_direct=False)
 
         """
-        super(RingDetector, self).__init__(name, particle, sep_direct)
-        self.spec = spec
+        super(RingDetector, self).__init__(name, particle, spec, sep_direct)
 
     def comment(self):
         return super(RingDetector, self).comment("Ring detector")
@@ -2204,14 +2202,6 @@ class RingDetector(IDetector):
         else:
             string += 'cm'
         return string
-
-    @property
-    def spec(self):
-        return self._spec
-
-    @spec.setter
-    def spec(self, value):
-        self._spec = value
 
 
 class Comment(ITally):
