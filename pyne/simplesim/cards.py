@@ -1899,12 +1899,12 @@ class CellFissionEnergyDeposition(IAverageTally):
         See base classes for more examples.
 
         """
-        super(FissionEnergyDeposition, self).__init__(name, 'neutron', cards,
-                                                      average, alt_units)
+        super(CellFissionEnergyDeposition, self).__init__(name, 'neutron',
+                cards, average, alt_units)
 
     def comment(self):
-        return super(FissionEnergyDeposition, self).comment(
-                "Fission energy deposition", 'cell')
+        return super(CellFissionEnergyDeposition, self).comment( "Fission
+                energy deposition", 'cell')
 
 
 class CellPulseHeight(ICellSurfTally):
