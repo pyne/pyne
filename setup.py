@@ -255,6 +255,7 @@ def cpp_ext(name, sources, libs=None, use_hdf5=False):
     ext['include_dirs'] = [pyt_dir, cpp_dir, numpy_include]
     if 0 < len(HDF5_DIR):
         ext['include_dirs'].append(os.path.join(HDF5_DIR, 'include'))
+    ext['define_macros'] = [('JSON_IS_AMALGAMATION', None)]
     ext['language'] = "c++"
 
     # may need to be more general
@@ -306,7 +307,7 @@ def cpp_ext(name, sources, libs=None, use_hdf5=False):
                                   ]
     elif sys.platform == 'win32':
         ext["extra_compile_args"] = ["__COMPILER__"]
-        ext["define_macros"] = ["__COMPILER__"]
+        ext["define_macros"] += ["__COMPILER__"]
 
         if use_hdf5:
             ext["libraries"].append("__USE_HDF5__")
@@ -328,7 +329,7 @@ exts = []
 
 # Pure C/C++ share libraries
 # pyne lib
-exts.append(cpp_ext("pyne.lib.libpyne", ['pyne.cpp']))
+exts.append(cpp_ext("pyne.lib.libpyne", ['jsoncpp.cpp', 'pyne.cpp']))
 
 # nucname
 exts.append(cpp_ext("pyne.lib.libpyne_nucname", ['nucname.cpp'], ['pyne']))
