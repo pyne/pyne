@@ -110,9 +110,9 @@ class SystemDefinition(IDefinition):
         super(SystemDefinition, self).__init__(fname, verbose)
 
     def _create_new(self):
-        self.surfaces = collections.OrderedDict()
-        self.materials = collections.OrderedDict()
-        self.cells = collections.OrderedDict()
+        self._surfaces = collections.OrderedDict()
+        self._materials = collections.OrderedDict()
+        self._cells = collections.OrderedDict()
 
     def add_cell(self, cell):
         """
@@ -133,7 +133,7 @@ class SystemDefinition(IDefinition):
             self.add_material(cell.material)
         # Constituent surfaces and material have been added, so we can added
         # the cell.
-        self.cells[cell.name] = cell
+        self._cells[cell.name] = cell
 
     def add_surface(self, surface):
         """This method is only used by the user for surfaces that are not on a
@@ -143,7 +143,7 @@ class SystemDefinition(IDefinition):
 
         """
         self._assert_unique('surface', surface)
-        self.surfaces[surface.name] = surface
+        self._surfaces[surface.name] = surface
 
     def _add_unique_surfaces(self, regionleaf):
         name = regionleaf.surface.name
@@ -166,7 +166,7 @@ class SystemDefinition(IDefinition):
             raise ValueError("The ``name`` property of the material cannot "
                     "be empty.")
         self._assert_unique('material', material)
-        self.materials[material.name] = material
+        self._materials[material.name] = material
 
     def save(self, fname):
         """Saves definition to a JSON file. It is unlikely that the class will
@@ -175,6 +175,23 @@ class SystemDefinition(IDefinition):
 
     def _open(self, fname):
         super(SystemDefinition, self)._open(fname)
+
+    @property
+    def surfaces(self):
+        """Ordered dictionary of surfaces (from :py:class:`cards.ISurface`)."""
+        # TODO document that the user should not add cards directly, but can
+        # modify them if so inclined.
+        return self._surfaces
+
+    @property
+    def materials(self):
+        """Ordered dictionary of materials (from :py:mod:`pyne.material`)."""
+        return self._materials
+
+    @property
+    def cells(self):
+        """Ordered dictionary of cells (:py:class:`cards.Cell` or subclass)."""
+        return self._cells
 
 
 class SimulationDefinition(IDefinition):
@@ -198,29 +215,32 @@ class SimulationDefinition(IDefinition):
 
     def _create_new(self):
         """Initialize any attributes/properties."""
-        self.source = collections.OrderedDict()
-        self.tally = collections.OrderedDict()
-        self.misc = collections.OrderedDict()
+        self._source = collections.OrderedDict()
+        self._tally = collections.OrderedDict()
+        self._misc = collections.OrderedDict()
 
-    def add_card(self, card):
-        if issubclass(card, cards.ISource):
-            self._add_source(card)
-        elif issubclass(card, cards.ITally):
-            self._add_tally(card)
-        elif issubclass(card, cards.IMisc):
-            self._add_misc(card)
-
-    def _add_source(self, card):
+    def add_source(self, card):
+        if not issubclass(card, cards.ISource):
+            raise ValueError("Only cards subclassed from ``ISource`` can be "
+                    "added by this method. User provided {}.".format(card))
         self._assert_unique('source', card)
-        self.source[card.name] = card
+        self._source[card.name] = card
 
-    def _add_tally(self, card):
+    def add_tally(self, card):
+        # TODO check cells and surfaces?
+        if not issubclass(card, cards.ITally):
+            raise ValueError("Only cards subclassed from ``ITally`` can be "
+                    "added by this method. User provided {}.".format(card))
         self._assert_unique('tally', card)
-        self.tally[card.name] = card
+        self._tally[card.name] = card
 
-    def _add_misc(self, card):
+    def add_misc(self, card):
+        # TODO check references to tallies?
+        if not issubclass(card, cards.IMisc):
+            raise ValueError("Only cards subclassed from ``IMisc`` can be "
+                    "added by this method. User provided {}.".format(card))
         self._assert_unique('misc', card)
-        self.misc[card.name] = card
+        self._misc[card.name] = card
 
     def save(self, fname):
         """Saves definition to a JSON file. It is unlikely that the class will
@@ -237,6 +257,24 @@ class SimulationDefinition(IDefinition):
     @sys.setter
     def sys(self, value):
         self._sys = value
+
+    @property
+    def source(self):
+        """Ordered dictionary of source cards (from
+        :py:source:`cards.ISource`)
+
+        """
+        return self._source
+
+    @property
+    def tally(self):
+        """Ordered dictionary of tallies (from :py:class:`cards.ITally`)."""
+        return self._tally
+
+    @property
+    def misc(self):
+        """Ordered dictionary of misc. cards (from :py:class:`cards.IMisc`)."""
+        return self._misc
 
 
 class MCNPSimulation(SimulationDefinition):
