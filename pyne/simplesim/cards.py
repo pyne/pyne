@@ -2025,20 +2025,28 @@ class IDetector(ITally):
     @abc.abstractmethod
     def comment(self, name):
         string = super(IDetector, self).comment(name)
-        if type(self.points) is tuple:
-            string += self._tuple_tostring(self.points)
+        if type(self.spec) is tuple:
+            string += self._tuple_tostring(self.spec)
         else:
             counter = 0
-            for point in self.points:
+            for point in self.spec:
                 counter += 1
                 string += self._tuple_tostring(point)
-                if counter < len(self.points):
+                if counter < len(self.spec):
                     string += "; "
         return string + "."
     
     @abc.abstractmethod
     def _tuple_tostring(self):
         raise NotImplementedError
+
+    @property
+    def spec(self):
+        return self._spec
+
+    @spec.setter
+    def spec(self, value):
+        self._spec = value
 
     @property
     def sep_direct(self):
@@ -2112,27 +2120,19 @@ class PointDetector(IDetector):
 
         """
         super(PointDetector, self).__init__(name, particle, sep_direct)
-        self.points = points
+        self.spec = spec
 
     def comment(self):
         return super(PointDetector, self).comment("Point detector")
 
     def _tuple_tostring(self, apoint):
-        string = ("point (%.4f, %.4f, %.4f) cm, radius %.4f " %
-                tuple(apoint[0]) + tuple(abs(apoint[1])))
+        numbertuple = tuple(apoint[0]) + (abs(apoint[1]),)
+        string = "point (%.4f, %.4f, %.4f) cm, radius %.4f " % numbertuple
         if apoint[1] < 0:
             string += 'mfp'
         else:
             string += 'cm'
         return string
-
-    @property
-    def points(self):
-        return self._points
-
-    @points.setter
-    def points(self, value):
-        self._points = value
 
 
 class RingDetector(IDetector):
@@ -2194,22 +2194,12 @@ class RingDetector(IDetector):
     def comment(self):
         return super(RingDetector, self).comment("Ring detector")
 
-    def _tuple_tostring(self, aspec):
-        point = [0, 0, 0]
-        if aspec[0].lower() == 'x':
-            pos_loc = 0
-        elif aspec[0].lower() == 'y':
-            pos_loc = 1
-        elif aspec[0].lower() == 'z':
-            pos_loc = 2
-        else:
-            raise ValueError("Cartesian axis string must be 'x', 'X', 'y', "
-                    "'Y', 'z', or 'Z'. User provided '%s'." % aspec[0])
-        point[pos_loc] = aspec[1]
-        string = ("point (%.4f, %.4f, %.4f) cm, radius %.4f, s.o.e. "
+    def _tuple_tostring(self, aring):
+        point[pos_loc] = aring[1]
+        string = ("ring %s = %.4f cm, radius %.4f, s.o.e. "
                 "radius %.4f " %
-                tuple(point) + tuple(aspec[2] + tuple(abs(aspec[3])))
-        if aspec[3] < 0:
+                (aring[0], aring[1], aring[2], abs(aring[3])))
+        if aring[3] < 0:
             string += 'mfp'
         else:
             string += 'cm'
