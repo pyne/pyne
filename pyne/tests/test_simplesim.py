@@ -526,8 +526,8 @@ class TestSystemDefinition(unittest.TestCase):
                 'energy', 'all', self.fuel, alt_units=True)
 
         ## CellFissionEnergyDeposition
-        tally = CellFissionEnergyDeposition('fuel', [self.pin, self.cellbound],
-                average=True)
+        tally = cards.CellFissionEnergyDeposition('fuel', [self.pin,
+                self.cellbound], average=True)
         self.assertEquals(tally.name, 'fuel')
         self.assertEquals(tally.particle, 'neutron')
         self.assertIs(type(tally.cards), list)
@@ -535,7 +535,7 @@ class TestSystemDefinition(unittest.TestCase):
         self.assertIs(tally.cards[0], self.cellbound)
         self.assertTrue(tally.average)
         self.assertFalse(tally.alt_units)
-        tally = CellFissionEnergyDeposition('fuel', [[self.pin,
+        tally = cards.CellFissionEnergyDeposition('fuel', [[self.pin,
                 self.cellbound]], alt_units=True)
         self.assertTrue(len(tally.cards), 1)
         self.assertTrue(len(tally.cards[0]), 2)
