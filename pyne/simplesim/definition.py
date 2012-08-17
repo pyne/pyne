@@ -227,7 +227,7 @@ class SimulationDefinition(IDefinition):
         self._source[card.name] = card
 
     def add_tally(self, card):
-        # TODO check cells and surfaces?
+        # TODO check cells and surfaces? only if moving to string refs.
         if not issubclass(card, cards.ITally):
             raise ValueError("Only cards subclassed from ``ITally`` can be "
                     "added by this method. User provided {}.".format(card))
@@ -235,7 +235,7 @@ class SimulationDefinition(IDefinition):
         self._tally[card.name] = card
 
     def add_misc(self, card):
-        # TODO check references to tallies?
+        # TODO check references to tallies? only if moving to string refs.
         if not issubclass(card, cards.IMisc):
             raise ValueError("Only cards subclassed from ``IMisc`` can be "
                     "added by this method. User provided {}.".format(card))
