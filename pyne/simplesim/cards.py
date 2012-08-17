@@ -1817,6 +1817,10 @@ class CellEnergyDeposition(IAverageTally):
         """
         super(EnergyDeposition, self).__init__(name, particles, cards, average,
                 alt_units)
+        # TODO move this error check to the MCNP method.
+        if self.particle == 'all' and self.alt_units:
+            raise ValueError("The particle cannot be 'all' if alt_units is "
+                    "True.")
 
     def comment(self):
         return super(EnergyDeposition, self).comment("Energy deposition",

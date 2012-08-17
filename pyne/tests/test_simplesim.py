@@ -438,7 +438,7 @@ class TestSystemDefinition(unittest.TestCase):
         self.assertFalse(tally.alt_units)
         # comment()
         self.assertEquals(tally.comment(), "Surface flux tally 'fuel': "
-                "surfaces 'fuelpin'; 'bound'; and total of all provided.")
+                "surfaces 'fuelpin'; 'bound'; and avg. of all provided.")
         tally = cards.SurfaceFlux('fuel', 'proton', [[self.pin, self.cellbound]],
                     alt_units=True)
         self.assertEquals(tally.particle, 'proton')
@@ -450,8 +450,7 @@ class TestSystemDefinition(unittest.TestCase):
         self.assertTrue(tally.alt_units)
         # comment()
         self.assertEquals(tally.comment(), "Surface flux tally 'fuel': "
-                "total in 'fuelpin', 'bound'.")
-
+                "avg. in 'fuelpin', 'bound'.")
 
         ## CellFlux
         # One cell.
@@ -499,6 +498,21 @@ class TestSystemDefinition(unittest.TestCase):
         self.assertIs(tally._unique_card_list()[0], self.fuel)
         self.assertIs(tally._unique_card_list()[1], self.coolant)
         self.assertTrue(len(tally._unique_card_list()) == 2)
+
+        ## CellEnergyDeposition
+        tally = CellEnergyDeposition('energy', 'neutron', self.fuel)
+        self.assertEquals(tally.name, 'energy')
+        self.assertEquals(tally.particle, 'neutron')
+        self.assertIs(tally.cards, self.fuel)
+        self.assertEquals(tally.comment(), "Energy deposition tally "
+                "'energy': cell 'fuel'.")
+        tally = CellEnergyDeposition('energy', ['neutron', 'proton'],
+                self.fuel)
+        self.assertTrue(type(tally.cards) is list)
+        tally = CellEnergyDeposition('energy', 'all', self.fuel)
+        tally = CellEnergyDeposition('energy', ['neutron', 'all'], self.fuel)
+        tally = CellEnergyDeposition('energy', 'all', self.fuel, alt_units=True)
+
 
 
 class TestSimulationDefinition(unittest.TestCase):
