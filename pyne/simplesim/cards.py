@@ -1385,7 +1385,7 @@ class ITally(ICard):
     """
     __metaclass__ = abc.ABCMeta
 
-    def __init__(self, name, particle, alt_units=False, *args, **kwargs):
+    def __init__(self, name, particle, *args, **kwargs):
         """
         Parameters
         ----------
@@ -1393,14 +1393,10 @@ class ITally(ICard):
             See :py:class:`ICard`. Used for, e.g., tally multiplier cards.
         particle : str
             Either 'neutron', 'photon', electron', or 'proton'.
-        alt_units : bool, optional
-            If set to True and the tally can use alternative units, alternative
-            units are used for the tally. See subclasses.
 
         """
         super(ITally, self).__init__(name, *args, **kwargs)
         self.particle = particle
-        self.alt_units = alt_units
 
     @abc.abstractmethod
     def comment(self):
@@ -1419,14 +1415,6 @@ class ITally(ICard):
                     "User provided '%s'." % value)
         self._particle = value
 
-    @property
-    def alt_units(self):
-        return self._alt_units
-
-    @alt_units.setter
-    def alt_units(self, value):
-        self._alt_units = value
-
 
 class ICellSurfTally(ITally):
     """This class is not used by the user. Abstract base class for
@@ -1437,7 +1425,7 @@ class ICellSurfTally(ITally):
     """
     __metaclass__ = abc.ABCMeta
 
-    def __init__(self, name, particle, cards, *args, **kwargs):
+    def __init__(self, name, particle, cards, alt_units=False, *args, **kwargs):
         """
         Parameters
         ----------
@@ -1477,6 +1465,7 @@ class ICellSurfTally(ITally):
         """
         super(ICellSurfTally, self).__init__(name, particle, *args, **kwargs)
         self.cards = cards
+        self.alt_units
 
     @abc.abstractmethod
     def comment(self, title, union_type, card_type):
@@ -1531,14 +1520,6 @@ class ICellSurfTally(ITally):
         #            card_type, type(self.cards)))
         return string
 
-    @property
-    def cards(self):
-        return self._cards
-
-    @cards.setter
-    def cards(self, value):
-        self._cards = value
-
     def _unique_card_list(self):
         # Returns a unique list of all the cards provided in self.cards.
         # This method is called by
@@ -1566,6 +1547,22 @@ class ICellSurfTally(ITally):
         else:
             raise ValueError("Expected cell, surface, or list,"
                 " got {0}.".format(type(self.cards)))
+
+    @property
+    def cards(self):
+        return self._cards
+
+    @cards.setter
+    def cards(self, value):
+        self._cards = value
+
+    @property
+    def alt_units(self):
+        return self._alt_units
+
+    @alt_units.setter
+    def alt_units(self, value):
+        self._alt_units = value
 
 
 class SurfaceCurrent(ICellSurfTally):
@@ -1869,6 +1866,7 @@ class CellFissionEnergyDeposition(IAverageTally):
     .. inheritance-diagram:: pyne.simplesim.cards.CellFissionEnergyDeposition
 
     """
+    # TODO prevent user from specifying a different particle.
     def __init__(self, name, cards, average=False, alt_units=False):
         """
         Parameters
@@ -1903,11 +1901,11 @@ class CellFissionEnergyDeposition(IAverageTally):
                 cards, average, alt_units)
 
     def comment(self):
-        return super(CellFissionEnergyDeposition, self).comment( "Fission
-                energy deposition", 'cell')
+        return super(CellFissionEnergyDeposition, self).comment(
+                "Fission energy deposition", 'cell')
 
 
-class CellPulseHeight(ICellSurfTally):
+class CellPulseHeight(IAverageTally):
     """Pulse height tally in cells. In MCNP, this is the **F8** card. For a
     charge deposition tally, see :py:class:`CellChargeDeposition`.
 
@@ -2000,7 +1998,7 @@ class CellChargeDeposition(CellPulseHeight):
         The following requests the tally in cell A and cell B for both protons
         and electrons::
 
-            tally = CellPulseHeight('fuel', ['proton', 'electron'], [cellA,
+            tally = CellChargeDeposition('fuel', ['proton', 'electron'], [cellA,
                     cellB])
 
         See base classes for more examples.
@@ -2017,9 +2015,95 @@ class RepeatedStructure(IAverageTally):
     pass
 
 
-class Detector(ITally):
-    pass
+class PointDetector(ITally):
+    """A point detector tally. In MCNP, this is the **F5** card. This is not to
+    be confused with the more general use of the term `Detector` in Serpent.
 
+    .. inheritance-diagram:: pyne.simplesim.cards.PointDetector
+
+    """
+    # TODO ideally *args would be used to let the user specify any number of
+    # points.
+    # TODO I wish we could avoid the use of negative numbers to signal
+    # somethign semantic other than a negative number, but other alternatives
+    # here seem to not be as clean or easy or general.
+    def __init__(self, name, particle, points, sep_direct=True):
+        """
+        Parameters
+        ----------
+        name : str
+            See :py:class:`ITally`.
+        particles : str, list of str
+            See :py:class:`ITally`. In MCNP for this tally, only neutrons and
+            photons are allowed.
+        points : tuple, list of tuples [centimeters/mean free paths]
+            The tuple has 2 elements: a 3-element list of floats and a float.
+            The 3-element list provides the location of the point detector, and
+            the float is the radius of a sphere of exclusion. The list can also
+            be a :py:mod:`numpy` array. By default, the units for the radius is
+            also centimeters, but can be changed to mean free paths by
+            providing a negative radius. If requesting multiple point
+            detectors, a list of point-radius tuples can be provided.
+        sep_direct : bool, optional
+            In MCNP, the direct contribution to the tally is printed
+            separately. Set to False to disable the separate printing.
+
+        Examples
+        --------
+
+            det = PointDetector('point', 'neutron', ([0, 0, 0], 0))
+            det = PointDetector('point', 'neutron', 
+                    (np.array([0, 0, 0]), 1))
+            det = PointDetector('point', 'neutron', ([1, 0, 0], -3))
+            det = PointDetector('point', 'photon', [([0, 0, 0],  0),
+                                                     ([1, 0, 0], -3)])
+            det = PointDetector('point', 'photon', ([0, 0, 0], 0),
+                    sep_direct=False)
+
+        """
+        super(PointDetector, self).__init__(name, particle)
+
+    def comment(self):
+
+
+class RingDetector(ITally):
+    """A ring detector tally. In MCNP, this is the **F5a** card. This is not to
+    be confused with the more general use of the term `Detector` in Serpent.
+
+    .. inheritance-diagram:: pyne.simplesim.cards.RingDetector
+
+    """
+    # TODO use *args instead of these silly lists.
+    def __init__(self, name, particle, spec, sep_direct=True):
+        """
+        Parameters
+        ----------
+        name : str
+            See :py:class:`ITally`.
+        particles : str, list of str
+            See :py:class:`ITally`. In MCNP for this tally, only neutrons and
+            photons are allowed.
+        spec : tuple, list of tuples [centimeters/mean free paths]
+            The tuple has 4 elements: a Cartesian axis string ('x', 'y', 'z'),
+            a position (float) along that axis, the radius (float) of the ring, and the
+            radius (float) of the sphere of exclusion. A negative radius for the sphere
+            changes the units to mean free paths. To request multiple ring
+            detectors, a list of these tuples can be provided.
+        sep_direct : bool, optional
+            In MCNP, the direct contribution to the tally is printed
+            separately. Set to False to disable the separate printing.
+
+        Examples
+        --------
+
+            det = RingDetector('ring', 'neutron', ('x', 10.0, 2.0,  1.0))
+            det = RingDetector('ring', 'neutron', ('x', 10.0, 2.0, -1.0))
+            det = RingDetector('ring', 'neutron', [('x', 10.0, 2.0, -1.0),
+                                                   ('y', 20.0, 3.0, 1.0)])
+            det = RingDetector('ring', 'neutron', ('x', 10.0, 2.0, -1.0), 
+                    sep_direct=True)
+
+        """
 
 class Comment(ITally):
     pass
