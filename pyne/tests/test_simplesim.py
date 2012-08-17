@@ -603,8 +603,8 @@ class TestSystemDefinition(unittest.TestCase):
         self.assertEquals(det.comment(), "Point detector tally 'point' of "
                 "photons: point (0.0000, 0.0000, 0.0000) cm, "
                 "radius 0.0000 cm; "
-                "point (1.0000, 0.0000, 0.0000) cm, radius 3.0000 mfp;
-                direct contrib is separate.")
+                "point (1.0000, 0.0000, 0.0000) cm, radius 3.0000 mfp; "
+                "direct contrib is separate.")
         det = cards.PointDetector('point', 'photon', ([0, 0, 0], 0),
                 sep_direct=False)
         self.assertFalse(det.sep_direct)
@@ -620,7 +620,7 @@ class TestSystemDefinition(unittest.TestCase):
         det = cards.RingDetector('ring', 'neutron', ('x', 10.0, 2.0, -1.0))
         self.assertEquals(det.comment(), "Ring detector tally 'ring' of "
                 "neutrons: ring x = 10.0000 cm, radius 2.0000 cm, s.o.e. "
-                "radius 1.0000 mfp; direct contrib is not separate.")
+                "radius 1.0000 mfp; direct contrib is separate.")
         det = cards.RingDetector('ring', 'neutron', [('x', 10.0, 2.0, -1.0),
                                                      ('y', 20.0, 3.0, 1.0)])
         self.assertEquals(det.comment(), "Ring detector tally 'ring' of "
@@ -631,7 +631,7 @@ class TestSystemDefinition(unittest.TestCase):
                 sep_direct=False)
         self.assertEquals(det.comment(), "Ring detector tally 'ring' of "
                 "neutrons: ring x = 10.0000 cm, radius 2.0000 cm, s.o.e. "
-                "radius 1.0000 cm. direct contrib is not separate.")
+                "radius 1.0000 mfp; direct contrib is not separate.")
 
 
 class TestSimulationDefinition(unittest.TestCase):
