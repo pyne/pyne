@@ -6,9 +6,6 @@
 
 Below is the reference for this module.
 
-
-Another possible name is latticesim or latticesimulation.
-
 """
 
 import abc
@@ -19,7 +16,7 @@ import json
 import numpy as np
 
 from pyne import material
-from pyne.simulation import cards
+from pyne.simplesim import cards
 
 class IDefinition(object):
     __metaclass__ = abc.ABCMeta
@@ -194,13 +191,16 @@ class SimulationDefinition(IDefinition):
     def __init__(self, systemdef, fname=None, verbose=True):
         """Creates a new options definition or loads one from a JSON file."""
         super(SimulationDefinition, self).__init__(fname, verbose)
+        # TODO when saving a simulation def, the the system def should also be
+        # saved, and so this assignment that happens on this next line
+        # shouldn't happen this way.
         self.sys = systemdef
 
     def _create_new(self):
         """Initialize any attributes/properties."""
         self.source = collections.OrderedDict()
-        self.misc = collections.OrderedDict()
         self.tally = collections.OrderedDict()
+        self.misc = collections.OrderedDict()
 
     def add_card(self, card):
         if issubclass(card, cards.ISource):
@@ -240,7 +240,7 @@ class SimulationDefinition(IDefinition):
 
 
 class MCNPSimulation(SimulationDefinition):
-    """ """
+    pass
 
 
 
