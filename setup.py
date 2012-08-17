@@ -348,6 +348,9 @@ exts.append(cpp_ext("pyne.lib.libpyne_enrichment", ['enrichment.cpp'], ['pyne_ma
 # STL converters
 exts.append(cpp_ext("pyne.stlconverters", ['stlconverters.pyx']))
 
+# JsonCpp Wrapper
+exts.append(cpp_ext("pyne.jsoncpp", ['jsoncpp.pyx'], ['pyne']))
+
 # pyne_config
 exts.append(cpp_ext("pyne.pyne_config", ['pyne_config.pyx'], ['pyne']))
 
