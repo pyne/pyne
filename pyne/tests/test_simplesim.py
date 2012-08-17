@@ -399,6 +399,32 @@ class TestSystemDefinition(unittest.TestCase):
         exceptions, and those of its subclasses.
 
         """
+        ## SurfaceCurrent
+        tally = cards.SurfaceCurrent('fuel', 'electron', [self.pin,
+                self.cellbound], total=True)
+        self.assertEquals(tally.name, 'fuel')
+        self.assertEquals(tally.particle, 'electron')
+        self.assertIs(tally.cards[0], self.pin)
+        self.assertIs(tally.cards[1], self.cellbound)
+        self.assertTrue(len(tally.cards), 2)
+        self.assertTrue(tally.total)
+        self.assertFalse(tally.alt_units)
+        # comment()
+        self.assertEquals(tally.comment(), "Surface current tally 'fuel': "
+                "surfaces 'fuelpin'; 'bound'; and total of all provided.")
+        tally = cards.SurfaceCurrent('fuel', 'photon', [[self.pin,
+                self.cellbound]], alt_units=True)
+        self.assertEquals(tally.particle, 'photon')
+        self.assertTrue(len(tally.cards), 1)
+        self.assertTrue(len(tally.cards[0]), 2)
+        self.assertIs(tally.cards[0][0], self.pin)
+        self.assertIs(tally.cards[0][1], self.cellbound)
+        self.assertFalse(tally.total)
+        self.assertTrue(tally.alt_units)
+        # comment()
+        self.assertEquals(tally.comment(), "Surface current tally 'fuel': "
+                "total in 'fuelpin', 'bound'.")
+
         ## CellFlux
         # One cell.
         tally = cards.CellFlux('fuel', 'neutron', self.fuel)
