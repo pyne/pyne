@@ -1399,8 +1399,21 @@ class ITally(ICard):
         self.particle = particle
 
     @abc.abstractmethod
-    def comment(self):
-        raise NotImplementedError
+    def comment(self, title):
+        string = "%s tally '%s' of " % (title, self.name)
+        if type(self.particle) is not list:
+            string += self.particle
+            if self.particle != 'all':
+                string += "s"
+        else:
+            pcounter = 0
+            for part in self.particle:
+                pcounter += 1
+                string += "%ss" % part
+                if pcounter < len(self.particle):
+                    string += ", "
+        string += ": "
+        return string
 
     @property
     def particle(self):
@@ -1465,26 +1478,15 @@ class ICellSurfTally(ITally):
         """
         super(ICellSurfTally, self).__init__(name, particle, *args, **kwargs)
         self.cards = cards
-        self.alt_units
+        self.alt_units = alt_units
 
     @abc.abstractmethod
     def comment(self, title, union_type, card_type):
         # card_type is either 'cell', or 'surface'
         # Assuming the user has provided objects of the appropriate type; the
         # issubclass check was not working with little effort. TODO
-        string = "%s tally '%s' of " % (title, self.name)
-        if type(self.particle) is not list:
-            string += self.particle
-            if self.particle != 'all':
-                string += "s"
-        else:
-            pcounter = 0
-            for part in self.particle:
-                pcounter += 1
-                string += "%ss" % part
-                if pcounter < len(self.particle):
-                    string += ", "
-        string += ": "
+        string = super(ICellSurfTally, self).comment(title)
+
         if card_type == 'cell':
             classcheck = CellVoid
         elif card_type == 'surface':
@@ -2015,7 +2017,39 @@ class RepeatedStructure(IAverageTally):
     pass
 
 
-class PointDetector(ITally):
+class IDetector(ITally):
+    def __init__(self, name, particle, sep_direct=True, *args, **kwargs):
+        super(IDetector, self).__init__(name, particle, *args, **kwargs)
+        self.sep_direct = sep_direct
+
+    @abc.abstractmethod
+    def comment(self, name):
+        string = super(IDetector, self).comment(name)
+        if type(self.points) is tuple:
+            string += self._tuple_tostring(self.points)
+        else:
+            counter = 0
+            for point in self.points:
+                counter += 1
+                string += self._tuple_tostring(point)
+                if counter < len(self.points):
+                    string += "; "
+        return string + "."
+    
+    @abc.abstractmethod
+    def _tuple_tostring(self):
+        raise NotImplementedError
+
+    @property
+    def sep_direct(self):
+        return self._sep_direct
+
+    @sep_direct.setter
+    def sep_direct(self, value):
+        self._sep_direct = value
+
+
+class PointDetector(IDetector):
     """A point detector tally. In MCNP, this is the **F5** card. This is not to
     be confused with the more general use of the term `Detector` in Serpent.
 
@@ -2046,27 +2080,62 @@ class PointDetector(ITally):
             detectors, a list of point-radius tuples can be provided.
         sep_direct : bool, optional
             In MCNP, the direct contribution to the tally is printed
-            separately. Set to False to disable the separate printing.
+            separately. Set to False to disable the separate printing. This is
+            a property of the undocumented :py:class:`IDetector`.
 
         Examples
         --------
+        The following creates a single point detector at the origin, without a
+        sphere of exclusion::
 
             det = PointDetector('point', 'neutron', ([0, 0, 0], 0))
-            det = PointDetector('point', 'neutron', 
-                    (np.array([0, 0, 0]), 1))
+
+        The following creates a detector at (1, 1, 1) cm with a sphere of
+        exclusion with a radius of 1 cm::
+
+            det = PointDetector('point', 'neutron', (np.array([1, 1, 1]), 1))
+
+        The radius for the sphere of exclusion here is 3 mfp::
+
             det = PointDetector('point', 'neutron', ([1, 0, 0], -3))
+
+        This is an example of requesting two point detectors::
+        
             det = PointDetector('point', 'photon', [([0, 0, 0],  0),
                                                      ([1, 0, 0], -3)])
+
+        Here, it is requested that the direct contribution is not tallied
+        separately::
+
             det = PointDetector('point', 'photon', ([0, 0, 0], 0),
                     sep_direct=False)
 
         """
-        super(PointDetector, self).__init__(name, particle)
+        super(PointDetector, self).__init__(name, particle, sep_direct)
+        self.points = points
 
     def comment(self):
+        return super(PointDetector, self).comment("Point detector")
+
+    def _tuple_tostring(self, apoint):
+        string = ("point (%.4f, %.4f, %.4f) cm, radius %.4f " %
+                tuple(apoint[0]) + tuple(abs(apoint[1])))
+        if apoint[1] < 0:
+            string += 'mfp'
+        else:
+            string += 'cm'
+        return string
+
+    @property
+    def points(self):
+        return self._points
+
+    @points.setter
+    def points(self, value):
+        self._points = value
 
 
-class RingDetector(ITally):
+class RingDetector(IDetector):
     """A ring detector tally. In MCNP, this is the **F5a** card. This is not to
     be confused with the more general use of the term `Detector` in Serpent.
 
@@ -2088,22 +2157,72 @@ class RingDetector(ITally):
             a position (float) along that axis, the radius (float) of the ring, and the
             radius (float) of the sphere of exclusion. A negative radius for the sphere
             changes the units to mean free paths. To request multiple ring
-            detectors, a list of these tuples can be provided.
+            detectors, a list of these tuples can be provided. The Cartesian
+            axis strings can be upper or lower case ('x', 'X', 'y', 'Y', 'z',
+            'Z').
         sep_direct : bool, optional
             In MCNP, the direct contribution to the tally is printed
-            separately. Set to False to disable the separate printing.
+            separately. Set to False to disable the separate printing. This is
+            a property of the undocumented :py:class:`IDetector`.
 
         Examples
         --------
+        The following creates a single ring detector at x = 10.0 cm, with a
+        2.0 cm radius, and a 1.0 cm radius sphere of exclusion::
 
             det = RingDetector('ring', 'neutron', ('x', 10.0, 2.0,  1.0))
+
+        In the following, the sphere of exclusion has a radius of 1.0 mfp::
+
             det = RingDetector('ring', 'neutron', ('x', 10.0, 2.0, -1.0))
+
+        This is an example of requesting two ring detectors::
+
             det = RingDetector('ring', 'neutron', [('x', 10.0, 2.0, -1.0),
                                                    ('y', 20.0, 3.0, 1.0)])
+
+        Here it is requested that the direct contribution is not tallied
+        separately::
+        
             det = RingDetector('ring', 'neutron', ('x', 10.0, 2.0, -1.0), 
-                    sep_direct=True)
+                    sep_direct=False)
 
         """
+        super(RingDetector, self).__init__(name, particle, sep_direct)
+        self.spec = spec
+
+    def comment(self):
+        return super(RingDetector, self).comment("Ring detector")
+
+    def _tuple_tostring(self, aspec):
+        point = [0, 0, 0]
+        if aspec[0].lower() == 'x':
+            pos_loc = 0
+        elif aspec[0].lower() == 'y':
+            pos_loc = 1
+        elif aspec[0].lower() == 'z':
+            pos_loc = 2
+        else:
+            raise ValueError("Cartesian axis string must be 'x', 'X', 'y', "
+                    "'Y', 'z', or 'Z'. User provided '%s'." % aspec[0])
+        point[pos_loc] = aspec[1]
+        string = ("point (%.4f, %.4f, %.4f) cm, radius %.4f, s.o.e. "
+                "radius %.4f " %
+                tuple(point) + tuple(aspec[2] + tuple(abs(aspec[3])))
+        if aspec[3] < 0:
+            string += 'mfp'
+        else:
+            string += 'cm'
+        return string
+
+    @property
+    def spec(self):
+        return self._spec
+
+    @spec.setter
+    def spec(self, value):
+        self._spec = value
+
 
 class Comment(ITally):
     pass

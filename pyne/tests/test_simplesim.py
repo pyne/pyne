@@ -574,9 +574,6 @@ class TestSystemDefinition(unittest.TestCase):
         self.assertTrue(tally.average)
 
 
-
-
-
 class TestSimulationDefinition(unittest.TestCase):
     """Tests the :py:class:`definition.SimulationDefinition` class."""
     # The system definition is complete.
