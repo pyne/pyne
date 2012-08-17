@@ -38,6 +38,8 @@ class ICard(object):
     """
     # This line makes this class an abstract base class (ABC).
     __metaclass__ = abc.ABCMeta
+    # Useful for cell cards and the TMP card.
+    kelvin2kT = 8.6173423e-11
     
     def __init__(self, name, unique=False):
         """
@@ -61,6 +63,12 @@ class ICard(object):
     @abc.abstractmethod
     def comment(self):
         """All cards define a comment describing the content of the card."""
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def mcnp(self, sim):
+        # sim is an instance of
+        # :py:class:`pyne.simplesim.definition.SimulationDefinition`.
         raise NotImplementedError
 
     @property
@@ -99,8 +107,19 @@ class CellVoid(ICard):
         self.region = region
 
     def comment(self):
-       # TODO Walk the region.
-       return "Void cell %s" % self.name
+        # TODO Walk the region.
+        return "Void cell %s" % self.name
+
+    def mcnp(self, sim):
+        # Card number.
+        string = sim.sys.cells.keys().index(self.name) + " 0 "
+        # Print surfaces.
+        self.region.walk(
+        if isinstance(self.region, RegionAnd):
+        elif: isinstance(self.region, RegionOr):
+        elif isinstance(self.region, RegionLeaf):
+
+
 
     @property
     def region(self):
@@ -1094,11 +1113,11 @@ class IRegion(ICard):
 
         """
         if isinstance(self, RegionLeaf):
-            dir(function)
-            function.im_func(function.im_self, self)
+            dir(leaf_func)
+            leaf_func.im_func(leaf_func.im_self, self)
         else:
-            self.left_child.walk(function)
-            self.right_child.walk(function)
+            self.left_child.walk(leaf_func)
+            self.right_child.walk(leaf_func)
         
     @property
     def parent(self):
@@ -1123,6 +1142,7 @@ class IRegionBool(IRegion):
         self.left_child.parent = self
         self.right_child.parent = self
 
+    @abc.abstractmethod
     def comment(self, midchar):
         return ("(" + self.left_child.comment() + " " + midchar + " " +
                 self.right_child.comment() + ")")
