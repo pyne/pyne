@@ -633,6 +633,15 @@ class TestSystemDefinition(unittest.TestCase):
                 "neutrons: ring x = 10.0000 cm, radius 2.0000 cm, s.o.e. "
                 "radius 1.0000 mfp; direct contrib is not separate.")
 
+        ## EnergyGrid
+        egrid = cards.EnergyGrid('grid0', None, [1e-4, 1, 100e3, 10e6])
+        self.assertEquals(egrid.comment(), "Energy grid 'grid0' for "
+                "all tallies: 4 groups.")
+        egrid = cards.EnergyGrid('grid0', None, np.array([1e-4, 1, 100e3,
+                    10e6]))
+        self.assertEquals(egrid.comment(), "Energy grid 'grid0' for "
+                "all tallies: 4 groups.")
+
 
 class TestSimulationDefinition(unittest.TestCase):
     """Tests the :py:class:`definition.SimulationDefinition` class."""
