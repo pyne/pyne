@@ -31,7 +31,8 @@ class IInputFile(object):
     """
     __metaclass__ = abc.ABCMeta
 
-    def __init__(self, fname, simdef, comments=True, header=None, plug=True):
+    def __init__(self, fname, simdef, comments=True, header=None, plug=True,
+                 float_format="%.5e"):
         """
 
         Parameters
@@ -49,6 +50,7 @@ class IInputFile(object):
         self.comments = comments
         self.header = header
         self.plug = plug
+        self.float_format = num_format
 
     def write(self):
         self.set_up()
@@ -94,16 +96,23 @@ class MCNPInput(IInputFile):
     """
     # TODO user can overload commenting methods.
     def __init__(self, fname, simdef, comments=True, header=None,
-            description=None, plug=True):
+            description=None, plug=True, float_format="%.5f"):
         """
 
         """
+        # TODO could cleanup keyword arguments wiht **kwarg.
+        # Be careful with the order of inputs here for the kwargs.
         super(MCNPInput, self).__init__(fname, simdef, comments, header,
-                plug)
+                plug, float_format, cont_by_blanks=True)
         self.description = description
+        self.cont_by_blanks = cont_by_blanks
         self.commentwrap = Textwrapper(initial_indent='C',
                 subsequent_indent='C', break_long_words=True)
-        self.cardwrap = TextWrapper(subsequent_indent='     ',
+        if self.cont_by_blanks:
+            card_cont = 5 * ' '
+        else:
+            card_cont = '& '
+        self.cardwrap = TextWrapper(subsequent_indent=card_cont,
                 break_long_words=True)
 
     def _write_subclass(self):
@@ -143,7 +152,7 @@ class MCNPInput(IInputFile):
         for card in dictionary:
             if self.comments:
                 self._write_comment(card.comment())
-            self._write_card(card.mcnp(self.sim))
+            self._write_card(card.mcnp(self.float_format, self.sim))
 
     def add_user_card(self, block, card, comment=None):
         # TODO
