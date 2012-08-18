@@ -38,51 +38,54 @@ class ICard(object):
     """
     # This line makes this class an abstract base class (ABC).
     __metaclass__ = abc.ABCMeta
-    # Useful for cell cards and the TMP card.
+    # Useful for cell cards and the TMP card in MCNP.
+    # k is Boltzmann's constant in eV/K, and T is temperature in K
     kelvin2kT = 8.6173423e-11
-    mcnp_particle_desig = {'neutron': 'N',
-                           'anti-neutron': '-N',
-                           'photon': 'P',
-                           'electron': 'E',
-                           'positron': '-E',
-                           'muon': '|',
-                           'anti-muon': '-|',
-                           'tau': '*',
-                           'electron neutrino': 'U',
-                           'anti-electron neutrino': '-U',
-                           'muon neutrino': 'V',
-                           'tau neutrino': 'W',
-                           'proton': 'H',
-                           'anti-proton': '-H',
-                           'lambda': 'L',
-                           'sigma+': '+',
-                           'sigma-': '-',
-                           'cascade0': 'X',
-                           'cascade-': 'Y',
-                           'omega': 'O',
-                           'lambdac+': 'C',
-                           'cascadec+': '!',
-                           'cascadec0': '?',
-                           'lambdab0': '<',
-                           'pion+': '/',
-                           'pion-': '-/',
-                           'neutral pion': 'Z',
-                           'kaon+': 'K',
-                           'kaon-': '-K',
-                           'K0 short': '%',
-                           'K0 long': '^',
-                           'D+': 'G',
-                           'D0': '@',
-                           'Ds+': 'f',
-                           'B+': '>',
-                           'B0': 'B',
-                           'Bs0': 'Q',
-                           'deuteron': 'D',
-                           'triton': 'T',
-                           'helium-3': 'S',
-                           'helium-4': 'A',
-                           'heavy ions': '#'
-                           }
+    # These are provided in the order in which they are listed in the MCNP
+    # manual.
+    mcnp_particle = {'neutron': 'N',
+                     'anti-neutron': '-N',
+                     'photon': 'P',
+                     'electron': 'E',
+                     'positron': '-E',
+                     'muon': '|',
+                     'anti-muon': '-|',
+                     'tau': '*',
+                     'electron neutrino': 'U',
+                     'anti-electron neutrino': '-U',
+                     'muon neutrino': 'V',
+                     'tau neutrino': 'W',
+                     'proton': 'H',
+                     'anti-proton': '-H',
+                     'lambda': 'L',
+                     'sigma+': '+',
+                     'sigma-': '-',
+                     'cascade0': 'X',
+                     'cascade-': 'Y',
+                     'omega': 'O',
+                     'lambdac+': 'C',
+                     'cascadec+': '!',
+                     'cascadec0': '?',
+                     'lambdab0': '<',
+                     'pion+': '/',
+                     'pion-': '-/',
+                     'neutral pion': 'Z',
+                     'kaon+': 'K',
+                     'kaon-': '-K',
+                     'K0 short': '%',
+                     'K0 long': '^',
+                     'D+': 'G',
+                     'D0': '@',
+                     'Ds+': 'f',
+                     'B+': '>',
+                     'B0': 'B',
+                     'Bs0': 'Q',
+                     'deuteron': 'D',
+                     'triton': 'T',
+                     'helium-3': 'S',
+                     'helium-4': 'A',
+                     'heavy ions': '#'
+                     }
     
     def __init__(self, name, unique=False):
         """
@@ -158,7 +161,28 @@ class Cell(ICard):
 
         Examples
         --------
-        TODO
+        Suppose we have surface cards ``surfA`` and ``surfB``, and material
+        cards ``matA`` and ``matB``. The following creates a void cell on the
+        negative side of ``surfA`` and the positive side of ``surfB`` (see
+        :py:class:`Region` to learn how to create regions)::
+
+            cellA = Cell('A', surfA.neg & surfB.pos)
+
+        The following cell is filled with ``matA``::
+
+            cellB = Cell('B', surfA.neg & surfB.pos, matA, 10.0, 'g/cm^3')
+            cellB = Cell('B', surfA.neg & surfB.pos, matA, 0.5, 'atoms/b/cm')
+
+        Note that if a material is specified, a density and density units must
+        also be provided The following is not allowed::
+
+            cellB = Cell('B', surfA.neg & surfB.pos, matA)
+            cellB = Cell('B', surfA.neg & surfB.pos, matA, density=1)
+            cellB = Cell('B', surfA.neg & surfB.pos, matA, 
+                    density_units='g/cm^3')
+            cellB = Cell('B', surfA.neg & surfB.pos, density=1)
+            cellB = Cell('B', surfA.neg & surfB.pos, 
+                    density_units='g/cm^3')
         
         """
         # TODO decide how I will do cross-referencing.
@@ -168,6 +192,12 @@ class Cell(ICard):
         self.material = material
         self.density = density
         self.density_units = density_units
+        if ((self.material and not (self.density or self.density_units)) or
+                (self.density and not (self.density_units or self.material)) or
+                (self.density_units and not (self.density or self.material)))
+            raise ValueError("If specifying a material, ``material``, "
+                    "``density``, and ``density_units`` must all be "
+                    "specified.")
 
     def comment(self):
         string = "Cell '%s':" % name
@@ -180,10 +210,10 @@ class Cell(ICard):
 
     def mcnp(self, float_format, sim):
         # Card number.
-        string = "%i" % (sim.sys.cells.keys().index(self.name) + 1)
+        string = "%i" % sim.sys.cell_num(self.name)
         if self.material and self.density and self.density_units:
             # Material number.
-            string += " %i " % (sim.sys.cells.keys().index(self.material.name) + 1)
+            string += " %i " % sim.sys.material_num(self.material.name)
             # Density, with units prefix.
             string += self._density_prefix(self.density_units)
             string += formatstr % self.density
@@ -261,7 +291,12 @@ class Cell(ICard):
 
 class CellMCNP(Cell):
     """A cell card with keyword options that are available in MCNP. Thus, it
-    only makes sense to use this card if writing an input for MCNP.
+    only makes sense to use this card if writing an input for MCNP. A number of
+    the keyword arguments are for a particular particle. The particles
+    available are given in :py:attr:`mcnp_particle`. The user provides the full
+    name of the particle, as given as keys in :py:attr:`mcnp_particle`. The
+    card will then use the appropriate particle designator when writing the
+    card.
     
     The U, LAT, and FILL keywords are not available; as this functionality
         should be obtained by using Universe and Lattice cards.
@@ -286,7 +321,7 @@ class CellMCNP(Cell):
                  photon_weight=None,
                  fission_turnoff=None,
                  det_contrib=None,
-                 transform=None
+                 transformation=None
                  user_custom=None
                  ):
         """
@@ -332,7 +367,7 @@ class CellMCNP(Cell):
             particles entering the cell, 'nogame', or a lower bound as a
             non-negative float. See MCNP manual.
             To specify this input for more
-            than one particle, provide a list of these tuples.
+            than one particle, or energy/time index, provide a list of these tuples.
         dxtran_contrib : 3-element tuple of str, int/None and float, optional
             DXTRAN Contribution, **DXC**. The 1st element is a particle name
             (see :py:attr:`mcnp_particle`). The 2nd element (int) is an index of a
@@ -340,17 +375,33 @@ class CellMCNP(Cell):
             apply to all DXTRAN spheres. The 3rd element (float) is the probability
             of contribution to the DXTRAN sphere(s). Only for neutrons and
             photons.
-            To specify this input for more
-            than one particle, provide a list of these tuples.
+            To specify this input for more than one particle or DXTRAN sphere,
+            provide a list of these tuples.
         photon_weight : 0, '-inf', or float; optional
             Photon weight, **PWT**. Relative threshold weight of photons that
             are produced at neutron collisions. With a value of 0, one photon
             is generated per collision; with a value of '-inf', no photons are
             generated. In general, this input can be a positive or negative
             float.
-        fission_turnoff : 
-        det_contrib : 
-        transform : 
+        fission_turnoff : str, optional
+            Fission turnoff, **NONU**. The allowed values are: 'capture-gamma',
+            'real-gamma', and 'capture-nogamma'. See MCNP manual.
+        det_contrib : tuple of str and float, optional
+            Detector contribution, **PD**. The 1st element (str) is the name of the
+            tally obtaining contribution from this cell, and the 2nd element
+            (float) is the probability of contribution.
+            To specify this input for more than one tally,
+            provide a list of these tuples.
+        transformation : str or 4-element tuple, optional
+            Cell transformation, **TRCL**. If str, it is the name of a
+            :py:class:`Transformation` card (**TR**). If tuple, the 1st element
+            is a displacement vector as a 3-element list or
+            :py:class:`np.array`; the 2nd element is a rotation matrix as a 3 x
+            3 list, :py:class:`np.array`, or :py:class:`np.matrix`; the 3rd
+            element is the string 'aux-in-main' or 'main-in-aux'; the 4th
+            element is a bool, 'cosines' if rotation matrix is in cosines and
+            'degrees' if rotation matrix is in degrees. See
+            :py:class:`Transformation`.
         user_custom : str, optional
             This string is appended to the end of the mcnp card. It is possible
             (likely) that the user will want to append a string to the end of
@@ -364,6 +415,8 @@ class CellMCNP(Cell):
         TODO
 
         """
+        # TODO allow user to use defalt arguments on the transformation card
+        # (e.g. not require the specification of cosines/degrees).
         # TODO allow use of U, LAT, and FILL keywords?
         super(CellMCNP, self).__init__(name, region, material, density,
                                        density_units)
@@ -378,11 +431,21 @@ class CellMCNP(Cell):
         self.photon_weight = photon_weight
         self.fission_turnoff = fission_turnoff
         self.det_contrib = det_contrib
-        self.transform = transform
+        self.transformation = transformation
 
     def comment(self):
         string = super(CellMCNP, self).comment()
         float_format = "%.5f"
+        # temperature
+        if self.temperature:
+            string += "TMP="
+            string += float_format % self.temperature
+            string += " K"
+        # volume
+        if self.volume:
+            string += "VOL="
+            string += float_format % self.volume
+            string += " cm^3"
         # importance
         if self.importance:
             importance = self._make_list(self.importance)
@@ -415,19 +478,46 @@ class CellMCNP(Cell):
         # dxtran_contrib
         if self.dxtran_contrib:
             dxtran_contrib = self._make_list(self.dxtran_contrib)
-            for entry in self.dxtran_contrib:
+            for entry in dxtran_contrib:
                 string += (" DXC%i:%s=" % 
                     (entry[1], self.mcnp_particle(entry[0]))
                 string += float_format % entry[2]
         # photon_weight
-        if self.photon_weight:
-            string += " PWT={0}".format(self.photon_weight)
+        if self.photon_weight: string += " PWT={0}".format(self.photon_weight)
         # fission_turnoff
+        if self.fission_turnoff: string += " NONU=%s" % self.fission_turnoff
         # det_contrib
+        if self.det_contrib:
+            det_contrib = self._make_list(self.det_contrib)
+            for entry in det_contrib:
+                string += " PD for tally '%s'=" % entry[0]
+                string += float_format % entry[1]
         # transform
+        if self.transformation:
+            # For brevity.
+            transform = self.transformation
+            string += " TRCL "
+            if type(transform) is str:
+                string += "'%s'" % transform
+            else:
+                tempcard = Transformation('temp', transform[0],
+                    transform[1], transform[3], transform[4])
+                string += tempcard._comment_data()
+        # user_custom
+        if self.user_custom: string += " and user's custom input."
+        string += "."
+        return string
 
     def mcnp(self, float_format, sim):
-        string = super(CellVoidMCNP, self).__init__(float_format, sim)
+        string = super(CellMCNP, self).mcnp(float_format, sim)
+        # temperature
+        if self.temperature:
+            string += "TMP="
+            string += float_format % (self.temperature * self.kelvin2kT)
+        # volume
+        if self.volume:
+            string += "VOL="
+            string += float_format % self.volume
         # importance
         if self.importance:
             importance = self._make_list(self.importance)
@@ -458,18 +548,46 @@ class CellMCNP(Cell):
         # dxtran_contrib
         if self.dxtran_contrib:
             dxtran_contrib = self._make_list(self.dxtran_contrib)
-            for entry in self.dxtran_contrib:
+            for entry in dxtran_contrib:
                 string += (" DXC%i:%s=" % 
-                    (entry[1], self.mcnp_particle(entry[0]))
+                    (entry[1], self.mcnp_particle(entry[0])))
                 string += float_format % entry[2]
         # photon_weight
         if self.photon_weight:
             string += " PWT="
             if self.photon_weight == '-inf': string += "-1.0E6"
             else: string += float_format % self.photon_weight
-        # fission_turnoff
+        # fission_turnoff TODO move exception to setter?
+        if self.fission_turnoff:
+            string += " NONU="
+            if self.fission_turnoff == 'capture-gamma': string += "0"
+            elif self.fission_turnoff == 'real-gamma': string += "1"
+            elif self.fission_turnoff == 'capture-nogamma': string += "2"
+            else: 
+                raise ValueError("Expected 'capture-gamma', 'real-gamma', "
+                        "'capture-nogamma'. User provided '%s'." %
+                        self.fission_turnoff)
         # det_contrib
+        if self.det_contrib:
+            det_contrib = self._make_list(self.det_contrib)
+            for entry in det_contrib:
+                string += " PD%i=" % sim.tally_num(entry[0])
+                string += float_format % entry[1]
         # transform
+        if self.transformation:
+            # For brevity.
+            transform = self.transformation
+            string += " "
+            if type(transform) is str:
+                string += "TRCL=%i" % sim.transformation_num(transform)
+            else:
+                if transform[4] == 'degrees': string += "*"
+                tempcard = Transformation('temp', transform[0],
+                    transform[1], transform[3], transform[4])
+                string += "TRCL (%s)" % tempcard._mcnp_lineup(float_format)
+                
+        # user_custom
+        if self.user_custom: string += " %s" % self.user_custom
                 
     def _make_list(self, arg):
         if arg is list: return arg
@@ -549,9 +667,39 @@ class CellMCNP(Cell):
     @photon_weight.setter
     def photon_weight(self, value):
         self._photon_weight = value
+    
+    @property
+    def fission_turnoff(self):
+        return self._fission_turnoff
+    
+    @fission_turnoff.setter
+    def fission_turnoff(self, value):
+        self._fission_turnoff = value
 
+    @property
+    def det_contrib(self):
+        return self._det_contrib
+    
+    @det_contrib.setter
+    def det_contrib(self, value):
+        self._det_contrib = value
 
+    @property
+    def transformation(self):
+        return self._transformation
+    
+    @transformation.setter
+    def transformation(self, value):
+        self._transformation = value
 
+    @property
+    def user_custom(self):
+        return self._user_custom
+    
+    @user_custom.setter
+    def user_custom(self, value):
+        self._user_custom = value
+    
 
 class IUniverse(ICard):
     """This class is not used by the user. Abstract base class for all
@@ -1383,8 +1531,7 @@ class RegionLeaf(IRegion):
             prefix = ''
         else:
             prefix = '-'
-        return "%s%i" % (prefix,
-                sim.sys.surfaces.keys().index(self.surface.name) + 1)
+        return "%s%i" % (prefix, sim.sys.surface_num(self.surface.name))
 
     @property
     def surface(self):
@@ -2485,9 +2632,103 @@ class ProtonPhysics(IMisc):
     pass
 
 
+class Transformation(IMisc):
+    """A coordinate transformation. In MCNP, this is the **TR** card. MCNP
+    allows the specification of less than 9 values in the rotation matrix; this
+    is not supported here.
+
+    .. inheritance-diagram:: pyne.simplesim.cards.Transformation
+
+    """
+    # TODO support for MCNP's less-than-9-element transformation matrices.
+    def __init__(self, name, displacement, rotation, aux_in_main=True,
+            degrees=False):
+        """
+        Parameters
+        ----------
+        name : str
+            See :py:class:`ICard`.
+        displacement : 3-element list, :py:class:`np.array`, float [cm]
+            Displacement vector.
+        rotation : 3 x 3 list, :py:class:`np.array`, :py:class:`np.matrix`
+            Rotation matrix.
+        aux_in_main : bool, optional
+            The displacement vector is in the main coordinate system and points
+            to the origin of the transformed/auxiliary coordinate system. If
+            False, then the displacement vector is in the
+            transformed/auxiliary coordiante system and points to the origin of
+            the main coordinate system.
+        degrees : bool, optional
+            If True, then the elements of the rotation matrix are in degrees.
+
+        """
+        super(Transformation, self).__init__(name)
+        self.displacement = displacement
+        self.rotation = rotation
+        self.aux_in_main = aux_in_main
+
+    def comment(self):
+        string = "Transformation '%s': pos. of " % self.name
+        string += self._comment_data()
+        return string
+
+    def _comment_data(self):
+        if self.aux_in_main:
+            string += "aux origin in main"
+        else:
+            string += "main origin in aux"
+        string += " (%.5e, %.5e, %.5e) cm" % tuple(self.displacement)
+        dirs = ['x', 'y', 'z']
+        for idx in range(3):
+            string += " %s' <%.5e, %.5e, %.5e>" % tuple(dirs[idx],
+                    self.rotation[0][0],
+                    self.rotation[1][0], 
+                    self.rotation[2][0])
+        if self.degrees: string += " deg"
+        string += "."
+        return string
+
+    def mcnp(self, float_format, sim):
+        string = ""
+        if self.degrees: string += "*"        
+        string += "TR%i" % sim.transformation_num(self.name)
+        string += self._mcnp_lineup(float_format)
+        return string
+
+    def _mcnp_lineup(self, float_format): 
+        # Needed by CellMCNP.
+        formatstr = " %s %s %s" % 3 * (float_format,)
+        string += formatstr % tuple(self.displacement)
+        for i_row in range(3):
+            for i_col in range(3):
+                string += " "
+                string += float_format % self.rotation[i_row][i_col]
+        if self.aux_in_main: string += "1"
+        else: string += "-1"
 
 
+        return string
 
+    @property
+    def displacement(self):
+        return self._displacement
+    
+    @displacement.setter
+    def displacement(self, value):
+        self._displacement = value
 
+    @property
+    def rotation(self):
+        return self._rotation
+    
+    @rotation.setter
+    def rotation(self, value):
+        self._rotation = value
 
-
+    @property
+    def aux_in_main(self):
+        return self._aux_in_main
+    
+    @aux_in_main.setter
+    def aux_in_main(self, value):
+        self._aux_in_main = value

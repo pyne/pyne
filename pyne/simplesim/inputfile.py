@@ -85,11 +85,6 @@ class IInputFile(object):
     def add_user_card_literal(self, block, string):
         return NotImplementedError
 
-    @abc.abstractmethod
-    def _cell(self, cell):
-        """Returns a cell card string."""
-        return
-
 
 class MCNPInput(IInputFile):
     """Contains a write method for each type of surface.
@@ -112,6 +107,7 @@ class MCNPInput(IInputFile):
         if self.cont_by_blanks:
             card_cont = 5 * ' '
         else:
+            raise # TODO ampersand goes at the beginning of the line.
             card_cont = '& '
         self.cardwrap = textwrap.TextWrapper(subsequent_indent=card_cont,
                 break_long_words=True)
@@ -193,10 +189,6 @@ class MCNPInput(IInputFile):
 
     def _new_line(self):
         self.fid.write('\n')
-
-    def _cell(self, cell):
-        """Returns a cell card string given a Cell card."""
-        return
 
 
 class SerpentInput(IInputFile):
