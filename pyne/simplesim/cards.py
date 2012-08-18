@@ -66,7 +66,7 @@ class ICard(object):
         raise NotImplementedError
 
     #@abc.abstractmethod
-    def mcnp(self, sim):
+    def mcnp(self, float_format, sim):
         # sim is an instance of
         # :py:class:`pyne.simplesim.definition.SimulationDefinition`.
         raise NotImplementedError
@@ -110,12 +110,35 @@ class CellVoid(ICard):
         # TODO Walk the region.
         return "Void cell %s" % self.name
 
-    def mcnp(self, sim):
+    def mcnp(self, float_format, sim):
         # Card number.
         string = "%i 0 " % (sim.sys.cells.keys().index(self.name) + 1)
         # Print surfaces.
         string += self.region.mcnp(sim)
         return string
+
+    def _mcnp_density_prefix(self, density_units):
+        """In MCNP, mass densities are represented by prepending a minus sign.
+
+        Parameters
+        ----------
+        density_units : str
+            Must be either 'g/cm^3' or 'atoms/b/cm'.
+
+        Returns
+        -------
+        prefix : str
+            Returns a minus sign for mass densities and an empty string for
+            number densities.
+
+        """
+        if density_units == 'g/cm^3':
+            return '-'
+        elif density_units == 'atoms/b/cm':
+            return ''
+        else:
+            raise Exception("Invalid string to specify density units: %s."
+                    % density_units)
 
     @property
     def region(self):
@@ -165,6 +188,19 @@ class Cell(CellVoid):
         # TODO print material description.
         return "Cell %s" % name
 
+    def mcnp(self, float_format, sim):
+        # Card number.
+        string = "%i " % (sim.sys.cells.keys().index(self.name) + 1)
+        # Material number.
+        string += "%i " % (sim.sys.cells.keys().index(self.material.name) + 1)
+        # Density, with units prefix.
+        formatstr = "%s%s" % (self._mcnp_density_prefix(self.density_units),
+                float_format)
+        string += formatstr % self.density
+        # Print surfaces.
+        string += self.region.mcnp(sim)
+        return string
+
     @property
     def material(self):
         return self._material
@@ -202,7 +238,8 @@ class CellVoidMCNP(CellVoid):
     """A cell card with keyword options that are available in MCNP. Thus, it
     only makes sense to use this card if writing an input for MCNP. This is a
     void (no material) cell; see :py:class:`CellMCNP` for the corresponding
-    cell filled with a material.
+    cell filled with a material. A value of None for a keyword indicates that
+    it is ignored.
     
     The U, LAT, and FILL keywords are not available; as this functionality
         should be obtained by using Universe and Lattice cards.
@@ -220,7 +257,7 @@ class CellVoidMCNP(CellVoid):
                  photon_imp=None,
                  electron_imp=None,
                  proton_imp=None,
-                 proton_weight_lim=None,
+                 photon_weight=None,
                  neutron_exp_transform=None,
                  photon_exp_transform=None,
                  electron_exp_transform=None,
@@ -252,7 +289,20 @@ class CellVoidMCNP(CellVoid):
             Temperature of the cell.
         volume : float, optional [cm^3]
             Volume of the cell.
-        TODO
+        *_imp : int, optional
+            Particle importance for variance reduction.
+        photon_weight : 0, '-inf', or float; optional
+            Relative threshold weight of photons that are produced at neutron
+            collisions. With a value of 0, one photon is generated per
+            collision; with a value of '-inf', no photons are generated. In
+            general, this input can be a positive or negative float.
+        *_exp_transform : 
+        *_force_coll : 
+        *_weight_win_bound : 
+        *_dxtran_contrib : 
+        fission_turnoff : 
+        det_contrib : 
+        transform : 
 
         Examples
         --------
@@ -273,6 +323,10 @@ class CellVoidMCNP(CellVoid):
         # TODO walk the region.
         # TODO print material description.
         return "Void cell for MCNP %s" % self.name
+
+    def mcnp(self, float_format, sim):
+        string = super(CellVoidMCNP, self).__init__(float_format, sim)
+        string += 
 
     @property
     def temperature(self):
@@ -2292,6 +2346,29 @@ class EnergyGrid(IMisc):
 
 class Comment(ITally):
     pass
+
+
+class Mode(IMisc):
+    pass
+
+
+class NeutronPhysics(IMisc):
+    pass
+
+
+class PhotonPhysics(IMisc):
+    pass
+
+
+class ElectronPhysics(IMisc):
+    pass
+
+
+class ProtonPhysics(IMisc):
+    pass
+
+
+
 
 
 
