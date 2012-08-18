@@ -76,6 +76,8 @@ sim.add_tally(coolanttally)
 sim.add_misc(egrid)
 
 inp = inputfile.MCNPInput("input1", sim)
+
+print fuel.mcnp(sim)
 #rxr.save('test')
 
 """
