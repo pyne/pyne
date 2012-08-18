@@ -65,7 +65,7 @@ class ICard(object):
         """All cards define a comment describing the content of the card."""
         raise NotImplementedError
 
-    @abc.abstractmethod
+    #@abc.abstractmethod
     def mcnp(self, sim):
         # sim is an instance of
         # :py:class:`pyne.simplesim.definition.SimulationDefinition`.
@@ -114,12 +114,7 @@ class CellVoid(ICard):
         # Card number.
         string = sim.sys.cells.keys().index(self.name) + " 0 "
         # Print surfaces.
-        self.region.walk(
-        if isinstance(self.region, RegionAnd):
-        elif: isinstance(self.region, RegionOr):
-        elif isinstance(self.region, RegionLeaf):
-
-
+        string += self.region.mcnp(sim)
 
     @property
     def region(self):
@@ -1062,8 +1057,7 @@ class IRegion(ICard):
     # __not__ operator and defining a complement boolean property that is set
     # by the __not__ operator.
     # TODO add transformation methods.
-    # TODO describe how parent works.
-
+    # TODO describe how parent works. it is not actually needed...
     __metaclass__ = abc.ABCMeta
 
     def __init__(self, name, *args, **kwargs):
@@ -1108,15 +1102,19 @@ class IRegion(ICard):
         """
         # TODO walk.
 
-    def walk(self, function):
+    def walk(self, leaf_func, and_func=None, or_func=None):
         """
 
         """
+        # TODO
         if isinstance(self, RegionLeaf):
-            dir(leaf_func)
             leaf_func.im_func(leaf_func.im_self, self)
         else:
             self.left_child.walk(leaf_func)
+            if and_func and isinstance(self, and_func):
+                and_func.im_func(and_func.im_self, self)
+            if or_func and isinstance(self, or_func):
+                or_func.im_func(or_func.im_func, self)
             self.right_child.walk(leaf_func)
         
     @property
@@ -1147,6 +1145,11 @@ class IRegionBool(IRegion):
         return ("(" + self.left_child.comment() + " " + midchar + " " +
                 self.right_child.comment() + ")")
 
+    @abc.abstractmethod
+    def mcnp(self, sim, midchar):
+        return ("(" + self.left_child.mcnp(sim) + midchar + 
+                self.right_child.mcnp(sim) + ")")
+
     @property
     def left_child(self):
         return self._left_child
@@ -1171,6 +1174,9 @@ class RegionAnd(IRegionBool):
     def comment(self):
         return super(RegionAnd, self).comment('&')
 
+    def mcnp(self, sim):
+        return super(RegionOr, self).mcnp(sim, ' ')
+
 
 class RegionOr(IRegionBool):
     """
@@ -1178,6 +1184,9 @@ class RegionOr(IRegionBool):
     """
     def comment(self):
         return super(RegionOr, self).comment('|')
+
+    def mcnp(self, sim):
+        return super(RegionOr, self).mcnp(sim, ':')
 
 
 class RegionLeaf(IRegion):
@@ -1192,9 +1201,17 @@ class RegionLeaf(IRegion):
 
     def comment(self):
         if self.pos_sense:
-            return '+' + self.surface.name
+            prefix = '+'
         else:
-            return '-' + self.surface.name 
+            prefix = '-'
+        return prefix + self.surface.name
+
+    def mcnp(self, sim):
+        if self.pos_sense:
+            prefix = ''
+        else:
+            prefix = '-'
+        return prefix + sim.sys.surfaces.keys().index(self.surface.name)
 
     @property
     def surface(self):

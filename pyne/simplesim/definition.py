@@ -220,7 +220,7 @@ class SimulationDefinition(IDefinition):
         self._misc = collections.OrderedDict()
 
     def add_source(self, card):
-        if not issubclass(card, cards.ISource):
+        if not isinstance(card, cards.ISource):
             raise ValueError("Only cards subclassed from ``ISource`` can be "
                     "added by this method. User provided {}.".format(card))
         self._assert_unique('source', card)
@@ -228,7 +228,7 @@ class SimulationDefinition(IDefinition):
 
     def add_tally(self, card):
         # TODO check cells and surfaces? only if moving to string refs.
-        if not issubclass(card, cards.ITally):
+        if not isinstance(card, cards.ITally):
             raise ValueError("Only cards subclassed from ``ITally`` can be "
                     "added by this method. User provided {}.".format(card))
         self._assert_unique('tally', card)
@@ -236,7 +236,7 @@ class SimulationDefinition(IDefinition):
 
     def add_misc(self, card):
         # TODO check references to tallies? only if moving to string refs.
-        if not issubclass(card, cards.IMisc):
+        if not isinstance(card, cards.IMisc):
             raise ValueError("Only cards subclassed from ``IMisc`` can be "
                     "added by this method. User provided {}.".format(card))
         self._assert_unique('misc', card)
