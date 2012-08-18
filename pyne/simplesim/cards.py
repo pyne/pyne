@@ -366,86 +366,53 @@ class CellMCNP(Cell):
     def comment(self):
         string = super(CellMCNP, self).comment()
         float_format = "%.5f"
-        # *_imp
-        if self.neutron_imp:
-            string += " IMP:N=%i" % self.neutron_imp
-        if self.photon_imp:
-            string += " IMP:P=%i" % self.photon_imp
-        if self.electron_imp:
-            string += " IMP:E=%i" % self.electron_imp
-        if self.proton_imp:
-            string += " IMP:H=%i" % self.proton_imp
-        # photon_weight
-        if self.photon_weight:
-            string += " PWT={0}".format(self.photon_weight)
-        # *_exp_transform
-        if self.neutron_exp_transform:
-            string += " EXT:N="
-            string += float_format % self.neutron_exp_transform
-        if self.photon_exp_transform:
-            string += " EXT:P="
-            string += float_format % self.photon_exp_transform
-        if self.electron_exp_transform:
-            string += " EXT:E="
-            string += float_format % self.electron_exp_transform
-        if self.proton_exp_transform:
-            string += " EXT:H="
-            string += float_format % self.proton_exp_transform
-        # *_forced_coll
-        if self.neutron_forced_coll:
-            string += " FCL:N="
-            string += float_format % self.neutron_forced_coll
-        if self.photon_forced_coll:
-            string += " FCL:P="
-            string += float_format % self.photon_forced_coll
-        if self.electron_forced_coll:
-            string += " FCL:E="
-            string += float_format % self.electron_forced_coll
-        if self.proton_forced_coll:
-            string += " FCL:H="
-            string += float_format % self.proton_forced_coll
-        # *_weight_win_bound
-        if self.neutron_weight_win_bound:
-            string += " WWN%i:N=" % self.neutron_weight_win_bound[0]
-            string += str(self.neutron_weight_win_bound[1])
-        if self.photon_weight_win_bound:
-            string += " WWN%i:P=" % self.photon_weight_win_bound[0]
-            string += str(self.photon_weight_win_bound[1])
-        if self.electron_weight_win_bound:
-            string += " WWN%i:E=" % self.electron_weight_win_bound[0]
-            string += str(self.electron_weight_win_bound[1])
-        if self.proton_weight_win_bound:
-            string += " WWN%i:H=" % self.proton_weight_win_bound[0]
-            string += str(self.proton_weight_win_bound[1])
-        # *_dxtran_contrib
-        if self.neutron_dxtran_contrib:
-            string += " DXC%i:N=" % self.neutron_dxtran_contrib[0]
-            string += float_format % self.neutron_dxtran_contrib[1]
-        if self.photon_dxtran_contrib:
-            string += " DXC%i:P=" % self.photon_dxtran_contrib[0]
-            string += float_format % self.photon_dxtran_contrib[1]
-
-    def mcnp(self, float_format, sim):
-        string = super(CellVoidMCNP, self).__init__(float_format, sim)
-        # *_imp
+        # importance
         if self.importance:
             importance = self._make_list(self.importance)
             for entry in importance:
                 string += (" IMP:%s=%i" % 
                         (self.mcnp_particle(entry[0]), entry[1]))
-        # *_exp_transform
+        # exp_transform
+        if self.neutron_exp_transform:
+            string += " EXT:N="
+            string += float_format % self.neutron_exp_transform
+        # forced_coll
+        if self.neutron_forced_coll:
+            string += " FCL:N="
+            string += float_format % self.neutron_forced_coll
+        # weight_win_bound
+        if self.neutron_weight_win_bound:
+            string += " WWN%i:N=" % self.neutron_weight_win_bound[0]
+            string += str(self.neutron_weight_win_bound[1])
+        # dxtran_contrib
+        if self.neutron_dxtran_contrib:
+            string += " DXC%i:N=" % self.neutron_dxtran_contrib[0]
+            string += float_format % self.neutron_dxtran_contrib[1]
+        # photon_weight
+        if self.photon_weight:
+            string += " PWT={0}".format(self.photon_weight)
+
+    def mcnp(self, float_format, sim):
+        string = super(CellVoidMCNP, self).__init__(float_format, sim)
+        # importance
+        if self.importance:
+            importance = self._make_list(self.importance)
+            for entry in importance:
+                string += (" IMP:%s=%i" % 
+                        (self.mcnp_particle(entry[0]), entry[1]))
+        # exp_transform
         if self.exp_transform:
             exp_transform = self._make_list(self.exp_transform)
             for entry in exp_transform:
                 string += " EXT:%s=" % self.mcnp_particle(entry[0])
                 string += float_format % entry[1]
-        # *_forced_coll
+        # forced_coll
         if self.forced_coll:
             forced_coll = self._make_list(self.forced_coll)
             for entry in forced_coll:
                 string += " FCL:%s=" % self.mcnp_particle(entry[0])
                 string += float_format % entry[1]
-        # *_weight_win_bound
+        # weight_win_bound
         if self.weight_win_bound:
             weight_win_bound = self._make_list(self.weight_win_bound)
             for entry in weight_win_bound:
@@ -454,7 +421,7 @@ class CellMCNP(Cell):
                 if entry[2] == 'kill': string += '-1'
                 elif entry[2] == 'nogame': string =+ '0'
                 else: string += float_format % entry[2]
-        # *_dxtran_contrib
+        # dxtran_contrib
         if self.dxtran_contrib:
             dxtran_contrib = self._make_list(self.dxtran_contrib)
             for entry in self.dxtran_contrib:
