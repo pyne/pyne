@@ -385,17 +385,34 @@ class TestSystemDefinition(unittest.TestCase):
         
         # Cells.
         self.fuel = cards.CellMCNP('fuel', self.pin.neg, self.uo2, 11.0,
-                'g/cm^3', neutron_imp=1)
+                'g/cm^3', importance=('neutron', 1))
         self.coolant = cards.CellMCNP('coolant', self.pin.pos &
-                self.cellbound.neg, self.h2o, 1.0, 'g/cm^3', neutron_imp=1)
-        self.graveyard = cards.CellVoidMCNP('graveyard', self.cellbound.pos,
-                neutron_imp=0)
+                self.cellbound.neg, self.h2o, 1.0, 'g/cm^3', 
+                importance=('neutron', 1))
+        self.graveyard = cards.CellMCNP('graveyard', self.cellbound.pos,
+                importance=('neutron', 0))
         
         # Create system definition from the cards above.
         self.rxr = definition.SystemDefinition(verbose=False)
         self.rxr.add_cell(self.fuel)
         self.rxr.add_cell(self.coolant)
         self.rxr.add_cell(self.graveyard)
+
+    def test_Cell(self):
+
+        cellA = cards.Cell('A', self.pin.neg & self.cellbound.pos,
+                self.uo2)
+        cellB = cards.Cell('B', surfA.neg & surfB.pos, matA, 10.0, 'g/cm^3')
+        cellB = cards.Cell('B', surfA.neg & surfB.pos, matA, 0.5, 'atoms/b/cm')
+        cellB = cards.Cell('B', surfA.neg & surfB.pos, matA)
+        cellB = cards.Cell('B', surfA.neg & surfB.pos, matA, density=1)
+        cellB = cards.Cell('B', surfA.neg & surfB.pos, matA, 
+                density_units='g/cm^3')
+        cellB = cards.Cell('B', surfA.neg & surfB.pos, density=1)
+        cellB = cards.Cell('B', surfA.neg & surfB.pos, 
+                density_units='g/cm^3')
+
+    def test_CellMCNP(self):
 
     def test_ITally(self):
         """Tests :py:class:`cards.ITally`'s methods, properties, and
