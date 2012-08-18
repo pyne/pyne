@@ -63,19 +63,19 @@ rxr.add_cell(graveyard)
 # Simulation definition.
 sim = definition.MCNPSimulation(rxr)
 
-sim.add_card(cards.Criticality())
-sim.add_card(cards.CriticalityPoints())
+sim.add_source(cards.Criticality())
+sim.add_source(cards.CriticalityPoints())
 
 fueltally = cards.CellFlux('fuel', 'neutron', fuel)
 coolanttally = cards.CellFlux('coolant', 'neutron', coolant)
 egrid = cards.EnergyGrid('grid0', None, 10**np.arange(-9.9, 1.1, .1))
 
-sim.add_card(fueltally)
-sim.add_card(coolanttally)
+sim.add_tally(fueltally)
+sim.add_tally(coolanttally)
     
-sim.add_card(egrid)
+sim.add_misc(egrid)
 
-inp = MCNPInput("input1", sim)
+inp = inputfile.MCNPInput("input1", sim)
 #rxr.save('test')
 
 """
