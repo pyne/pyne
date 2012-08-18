@@ -278,6 +278,326 @@ class CellMCNP(Cell):
     def __init__(self, name, region, material=None, density=None,
                  density_units=None,
                  temperature=None, volume=None,
+                 importance=None,
+                 photon_weight=None,
+                 exp_transform=None,
+                 forced_coll=None,
+                 weight_win_bound=None,
+                 dxtran_contrib=None,
+                 fission_turnoff=None,
+                 det_contrib=None,
+                 transform=None
+                 user_custom=None
+                 ):
+        """
+        Parameters
+        ----------
+        name : str
+            See :py:class:`ICard`.
+        region : :py:class:`Region`
+            See :py:class:`Cell`.
+        material : :py:class:`pyne.material.Material`, None for void
+            See :py:class:`Cell`.
+        density : float, None for void
+            See :py:class:`Cell`.
+        density_units : str, None for void
+            See :py:class:`Cell`.
+        temperature : float, otional [Kelvin]
+            Temperature of the cell for thermal treatment, **TMP**.
+        volume : float, optional [cm^3]
+            Volume of the cell, **VOL**.
+        *_imp : int, optional
+            Particle importance, **IMP**, for variance reduction.
+        photon_weight : 0, '-inf', or float; optional
+            Photon weight, **PWT**. Relative threshold weight of photons that
+            are produced at neutron collisions. With a value of 0, one photon
+            is generated per collision; with a value of '-inf', no photons are
+            generated. In general, this input can be a positive or negative
+            float.
+        *_exp_transform : float, optional
+            An exponential transform, **EXT**. The value is the parameter 'a'
+            as described in the MCNP manual. This is a form of variance
+            reduction. 
+        *_forced_coll : float, optional
+            Forced collisions, **FCL**. Between -1 and 1. See MCNP manual.
+        *_weight_win_bound : 2-element tuple of int and str/float, optional
+            Weight window lower bound, **WWN**. The first element of the tuple
+            is the energy/time index (int), and the second is 'kill' to kill
+            particles entering the cell, 'nogame' or a non-negative float. See
+            MCNP manual.
+        *_dxtran_contrib : 2-element tuple of int/None and float, optional
+            DXTRAN Contribution, **DXC**. The first element is an index of a
+            DXTRAN sphere (on the DXTRANSphere card), or None if this is to
+            apply to all DXTRAN spheres. The second element is the probability
+            of contribution to the DXTRAN sphere(s). Only for neutrons and
+            photons.
+        fission_turnoff : 
+        det_contrib : 
+        transform : 
+        user_custom : str, optional
+            This string is appended to the end of the mcnp card. It is possible
+            (likely) that the user will want to append a string to the end of
+            the MCNP card, given the limited support of keyword
+            arguments. This is perhaps most useful if the user wants to specify
+            a keyword for a particle that is not supported by any of the
+            kwargs.
+
+        Examples
+        --------
+        TODO
+
+        """
+        # TODO allow use of U, LAT, and FILL keywords?
+        super(CellMCNP, self).__init__(name, region, material, density,
+                                       density_units)
+        # Assign keyword arguments.
+        self.temperature = temperature
+        self.volume = volume
+        self.neutron_imp = neutron_imp
+        self.photon_imp = photon_imp
+        self.electron_imp = electron_imp
+        self.proton_imp = proton_imp
+        self.photon_weight = photon_weight
+        self.neutron_exp_transform = neutron_exp_transform
+        self.photon_exp_transform = photon_exp_transform
+        self.electron_exp_transform = electron_exp_transform
+        self.proton_exp_transform = proton_exp_transform
+        self.neutron_forced_coll = neutron_forced_coll
+        self.photon_forced_coll = photon_forced_coll
+        self.electron_forced_coll = electron_forced_coll
+        self.proton_forced_coll = proton_forced_coll
+        self.neutron_weight_win_bound = neutron_weight_win_bound
+        self.photon_weight_win_bound = photon_weight_win_bound
+        self.electron_weight_win_bound = electron_weight_win_bound
+        self.proton_weight_win_bound = proton_weight_win_bound
+        self.neutron_dxtran_contrib = neutron_dxtran_contrib
+        self.photon_dxtran_contrib = photon_dxtran_contrib
+        self.electron_dxtran_contrib = electron_dxtran_contrib
+        self.proton_dxtran_contrib = proton_dxtran_contrib
+
+    def comment(self):
+        string = super(CellMCNP, self).comment()
+        float_format = "%.5f"
+        # *_imp
+        if self.neutron_imp:
+            string += " IMP:N=%i" % self.neutron_imp
+        if self.photon_imp:
+            string += " IMP:P=%i" % self.photon_imp
+        if self.electron_imp:
+            string += " IMP:E=%i" % self.electron_imp
+        if self.proton_imp:
+            string += " IMP:H=%i" % self.proton_imp
+        # photon_weight
+        if self.photon_weight:
+            string += " PWT={0}".format(self.photon_weight)
+        # *_exp_transform
+        if self.neutron_exp_transform:
+            string += " EXT:N="
+            string += float_format % self.neutron_exp_transform
+        if self.photon_exp_transform:
+            string += " EXT:P="
+            string += float_format % self.photon_exp_transform
+        if self.electron_exp_transform:
+            string += " EXT:E="
+            string += float_format % self.electron_exp_transform
+        if self.proton_exp_transform:
+            string += " EXT:H="
+            string += float_format % self.proton_exp_transform
+        # *_forced_coll
+        if self.neutron_forced_coll:
+            string += " FCL:N="
+            string += float_format % self.neutron_forced_coll
+        if self.photon_forced_coll:
+            string += " FCL:P="
+            string += float_format % self.photon_forced_coll
+        if self.electron_forced_coll:
+            string += " FCL:E="
+            string += float_format % self.electron_forced_coll
+        if self.proton_forced_coll:
+            string += " FCL:H="
+            string += float_format % self.proton_forced_coll
+        # *_weight_win_bound
+        if self.neutron_weight_win_bound:
+            string += " WWN%i:N=" % self.neutron_weight_win_bound[0]
+            string += str(self.neutron_weight_win_bound[1])
+        if self.photon_weight_win_bound:
+            string += " WWN%i:P=" % self.photon_weight_win_bound[0]
+            string += str(self.photon_weight_win_bound[1])
+        if self.electron_weight_win_bound:
+            string += " WWN%i:E=" % self.electron_weight_win_bound[0]
+            string += str(self.electron_weight_win_bound[1])
+        if self.proton_weight_win_bound:
+            string += " WWN%i:H=" % self.proton_weight_win_bound[0]
+            string += str(self.proton_weight_win_bound[1])
+        # *_dxtran_contrib
+        if self.neutron_dxtran_contrib:
+            string += " DXC%i:N=" % self.neutron_dxtran_contrib[0]
+            string += float_format % self.neutron_dxtran_contrib[1]
+        if self.photon_dxtran_contrib:
+            string += " DXC%i:P=" % self.photon_dxtran_contrib[0]
+            string += float_format % self.photon_dxtran_contrib[1]
+
+    def mcnp(self, float_format, sim):
+        string = super(CellVoidMCNP, self).__init__(float_format, sim)
+        # *_imp
+        if self.importance:
+            if type(self.importance) is list:
+                for entry in self.importance:
+                    string += (" IMP:%s=%i" % 
+                            (self.mcnp_particle(entry[0]), entry[1]))
+            else:
+                string += (" IMP:%s=%i" % 
+                        (self.mcnp_particle(self.importance[0]),
+                         self.importance[1]))
+        # photon_weight
+        if self.photon_weight:
+            string += " PWT="
+            if self.photon_weight == '-inf': string += "-1.0E6"
+            else: string += float_format % self.photon_weight
+        # *_exp_transform
+        if self.exp_transform:
+            if type(self.exp_transform) is list:
+                for entry in self.exp_transform:
+                    string += " EXT:%s=" % self.mcnp_particle(entry[0])
+                    string += float_format % entry[1]
+            else:
+                string += (" EXT:%s=" %
+                        self.mcnp_particle(self.exp_transform[0]))
+                string += float_format % self.exp_transform[1]
+        # *_forced_coll
+        if self.forced_coll:
+            if type(self.forced_coll) is list:
+                for entry in self.forced_coll:
+                    string += " FCL:%s=" % self.mcnp_particle(entry[0])
+                    string += float_format % entry[1]
+            else:
+                string += " FCL:%s=" % self.mcnp_particle(self.forced_coll[0])
+                string += float_format % self.forced_coll[1]
+        # *_weight_win_bound
+        if self.weight_win_bound:
+            if type(self.weight_win_bound) is list:
+                for entry in self.weight_win_bound:
+                    string += (" WWN%i:%s=" % 
+                            (entry[1], self.mcnp_particle(entry[0]))
+                    if entry[2] == 'kill': string += '-1'
+                    elif entry[2] == 'nogame': string =+ '0'
+                    else: string += float_format % entry[2]
+            else:
+                string += (" WWN%i:%s=" % 
+                        (self.weight_win_bound[1],
+                         self.mcnp_particle(self.weight_win_bound[0]))
+                if self.weight_win_bound[2] == 'kill': string += '-1'
+                elif self.weight_win_bound[2] == 'nogame': string =+ '0'
+                else: string += float_format % self.weight_win_bound[2]
+        # *_dxtran_contrib
+        if self.dxtran_contrib:
+            if type(self.dxtran_contrib) is list:
+                for entry in self.dxtran_contrib:
+                    string += (" DXC%i:%s=" % 
+                        (entry[1], self.mcnp_particle(entry[0]))
+                    string += float_format % entry[2]
+            else:
+                string += (" DXC%i:%s=" % 
+                    (self.dxtran_contrib[1],
+                        self.mcnp_particle(self.dxtran_contrib[0]))
+                string += float_format % self.dxtran_contrib[2]
+                
+
+    @property
+    def temperature(self):
+        return self._temperature
+
+    @temperature.setter
+    def temperature(self, value):
+        if value is not None:
+            if value < 200:
+                raise UserWarning("Temperature set as less than 200 K. "
+                        "Are you trying to specify temperature in degrees "
+                        "Celcius, etc.? User provided %.4f." % value)
+            if value < 1:
+                raise UserWarning("Temperature set as less than 1 K. "
+                        "Are you trying to specify temperature as 'kT'? "
+                        "User provided %.4f." % value)
+        self._temperature = value
+
+    @property
+    def volume(self):
+        return self._volume
+
+    @volume.setter
+    def volume(self, value):
+        if value is not None and value < 0:
+            raise ValueError("The ``volume`` property cannot be negative. "
+                "User provided %.4f." % value)
+
+    @property
+    def importance(self):
+        return self._importance
+
+    @importance.setter
+    def importance(self, value):
+        self._importance = value
+
+    @phoperty
+    def photon_weight(self):
+        return self._photon_weight
+    
+    @photon_weight.setter
+    def photon_weight(self, value):
+        self._photon_weight = value
+
+    @property
+    def exp_transform(self):
+        return self._exp_transform
+
+    @exp_transform.setter
+    def exp_transform(self, value):
+        self._exp_transform = value
+
+    @property
+    def forced_coll(self):
+        return self._forced_coll
+
+    @forced_coll.setter
+    def forced_coll(self, value):
+        self._forced_coll = value
+
+    @property
+    def weight_win_bound(self):
+        return self._weight_win_bound
+
+    @weight_win_bound.setter
+    def weight_win_bound(self, value):
+        self._weight_win_bound = value
+
+    @property
+    def dxtran_contrib(self):
+        return self._dxtran_contrib
+
+    @dxtran_contrib.setter
+    def dxtran_contrib(self, value):
+        self._dxtran_contrib = value
+
+
+class CellMCNP(Cell):
+    """A cell card with keyword options that are available in MCNP. Thus, it
+    only makes sense to use this card if writing an input for MCNP.
+    
+    The U, LAT, and FILL keywords are not available; as this functionality
+        should be obtained by using Universe and Lattice cards.
+
+    Note this card was written with MCNPX version 2.7 in mind.
+
+    .. inheritance-diagram:: pyne.simplesim.cards.CellMCNP
+
+    """
+    # TODO Sphinx documentation should not list all keyword arguments.
+    # TODO let the user add their own through keyword arguments...
+    # user_string
+
+    def __init__(self, name, region, material=None, density=None,
+                 density_units=None,
+                 temperature=None, volume=None,
                  neutron_imp=None,
                  photon_imp=None,
                  electron_imp=None,
