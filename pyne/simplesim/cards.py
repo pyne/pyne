@@ -112,9 +112,10 @@ class CellVoid(ICard):
 
     def mcnp(self, sim):
         # Card number.
-        string = sim.sys.cells.keys().index(self.name) + " 0 "
+        string = "%i 0 " % (sim.sys.cells.keys().index(self.name) + 1)
         # Print surfaces.
         string += self.region.mcnp(sim)
+        return string
 
     @property
     def region(self):
@@ -1211,7 +1212,8 @@ class RegionLeaf(IRegion):
             prefix = ''
         else:
             prefix = '-'
-        return prefix + sim.sys.surfaces.keys().index(self.surface.name)
+        return "%s%i" % (prefix,
+                sim.sys.surfaces.keys().index(self.surface.name) + 1)
 
     @property
     def surface(self):
