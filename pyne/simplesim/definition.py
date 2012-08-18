@@ -168,6 +168,25 @@ class SystemDefinition(IDefinition):
         self._assert_unique('material', material)
         self._materials[material.name] = material
 
+    def cell_num(self, name):
+        # TODO removing cards.
+        return self.cells.keys().index(name)
+
+    def surface_num(self, name):
+        return self.surfaces.keys().index(name)
+
+    def material_num(self, name):
+        return self.materials.keys().index(name)
+
+    def remove_cell(self, name):
+        raise
+
+    def remove_surface(self, name):
+        raise
+
+    def remove_material(self, name):
+        raise
+
     def save(self, fname):
         """Saves definition to a JSON file. It is unlikely that the class will
         be amenable to json.dump()."""
@@ -242,6 +261,18 @@ class SimulationDefinition(IDefinition):
         self._assert_unique('misc', card)
         self._misc[card.name] = card
 
+    def tally_num(self, name):
+        raise
+
+    def remove_source(self, name):
+        raise
+
+    def remove_tally(self, name):
+        raise
+
+    def remove_misc(self, name):
+        raise
+
     def save(self, fname):
         """Saves definition to a JSON file. It is unlikely that the class will
         be amenable to json.dump()."""
@@ -278,10 +309,15 @@ class SimulationDefinition(IDefinition):
 
 
 class MCNPSimulation(SimulationDefinition):
-    pass
 
+    def tally_num(self, name):
+        raise
 
+    def add_transformation(self, card):
+        raise
 
+    def transformation_num(self, name):
+        raise
 
 class DefinitionEncoder(json.JSONEncoder):
     # TODO circular reference issue.
