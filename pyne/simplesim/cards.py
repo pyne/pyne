@@ -275,15 +275,15 @@ class CellMCNP(Cell):
     # TODO let the user add their own through keyword arguments...
     # user_string
 
-    def __init__(self, name, region, material=None, density=None,
-                 density_units=None,
+    def __init__(self, name, region, material=None,
+                 density=None, density_units=None,
                  temperature=None, volume=None,
                  importance=None,
-                 photon_weight=None,
                  exp_transform=None,
                  forced_coll=None,
                  weight_win_bound=None,
                  dxtran_contrib=None,
+                 photon_weight=None,
                  fission_turnoff=None,
                  det_contrib=None,
                  transform=None
@@ -353,27 +353,15 @@ class CellMCNP(Cell):
         # Assign keyword arguments.
         self.temperature = temperature
         self.volume = volume
-        self.neutron_imp = neutron_imp
-        self.photon_imp = photon_imp
-        self.electron_imp = electron_imp
-        self.proton_imp = proton_imp
+        self.importance = importance
+        self.exp_transform = neutron_exp_transform
+        self.forced_coll = neutron_forced_coll
+        self.weight_win_bound = neutron_weight_win_bound
+        self.dxtran_contrib = neutron_dxtran_contrib
         self.photon_weight = photon_weight
-        self.neutron_exp_transform = neutron_exp_transform
-        self.photon_exp_transform = photon_exp_transform
-        self.electron_exp_transform = electron_exp_transform
-        self.proton_exp_transform = proton_exp_transform
-        self.neutron_forced_coll = neutron_forced_coll
-        self.photon_forced_coll = photon_forced_coll
-        self.electron_forced_coll = electron_forced_coll
-        self.proton_forced_coll = proton_forced_coll
-        self.neutron_weight_win_bound = neutron_weight_win_bound
-        self.photon_weight_win_bound = photon_weight_win_bound
-        self.electron_weight_win_bound = electron_weight_win_bound
-        self.proton_weight_win_bound = proton_weight_win_bound
-        self.neutron_dxtran_contrib = neutron_dxtran_contrib
-        self.photon_dxtran_contrib = photon_dxtran_contrib
-        self.electron_dxtran_contrib = electron_dxtran_contrib
-        self.proton_dxtran_contrib = proton_dxtran_contrib
+        self.fission_turnoff = fission_turnoff
+        self.det_contrib = det_contrib
+        self.transform = transform
 
     def comment(self):
         string = super(CellMCNP, self).comment()
@@ -441,67 +429,50 @@ class CellMCNP(Cell):
         string = super(CellVoidMCNP, self).__init__(float_format, sim)
         # *_imp
         if self.importance:
-            if type(self.importance) is list:
-                for entry in self.importance:
-                    string += (" IMP:%s=%i" % 
-                            (self.mcnp_particle(entry[0]), entry[1]))
-            else:
+            importance = self._make_list(self.importance)
+            for entry in importance:
                 string += (" IMP:%s=%i" % 
-                        (self.mcnp_particle(self.importance[0]),
-                         self.importance[1]))
+                        (self.mcnp_particle(entry[0]), entry[1]))
+        # *_exp_transform
+        if self.exp_transform:
+            exp_transform = self._make_list(self.exp_transform)
+            for entry in exp_transform:
+                string += " EXT:%s=" % self.mcnp_particle(entry[0])
+                string += float_format % entry[1]
+        # *_forced_coll
+        if self.forced_coll:
+            forced_coll = self._make_list(self.forced_coll)
+            for entry in forced_coll:
+                string += " FCL:%s=" % self.mcnp_particle(entry[0])
+                string += float_format % entry[1]
+        # *_weight_win_bound
+        if self.weight_win_bound:
+            weight_win_bound = self._make_list(self.weight_win_bound)
+            for entry in weight_win_bound:
+                string += (" WWN%i:%s=" % 
+                        (entry[1], self.mcnp_particle(entry[0]))
+                if entry[2] == 'kill': string += '-1'
+                elif entry[2] == 'nogame': string =+ '0'
+                else: string += float_format % entry[2]
+        # *_dxtran_contrib
+        if self.dxtran_contrib:
+            dxtran_contrib = self._make_list(self.dxtran_contrib)
+            for entry in self.dxtran_contrib:
+                string += (" DXC%i:%s=" % 
+                    (entry[1], self.mcnp_particle(entry[0]))
+                string += float_format % entry[2]
         # photon_weight
         if self.photon_weight:
             string += " PWT="
             if self.photon_weight == '-inf': string += "-1.0E6"
             else: string += float_format % self.photon_weight
-        # *_exp_transform
-        if self.exp_transform:
-            if type(self.exp_transform) is list:
-                for entry in self.exp_transform:
-                    string += " EXT:%s=" % self.mcnp_particle(entry[0])
-                    string += float_format % entry[1]
-            else:
-                string += (" EXT:%s=" %
-                        self.mcnp_particle(self.exp_transform[0]))
-                string += float_format % self.exp_transform[1]
-        # *_forced_coll
-        if self.forced_coll:
-            if type(self.forced_coll) is list:
-                for entry in self.forced_coll:
-                    string += " FCL:%s=" % self.mcnp_particle(entry[0])
-                    string += float_format % entry[1]
-            else:
-                string += " FCL:%s=" % self.mcnp_particle(self.forced_coll[0])
-                string += float_format % self.forced_coll[1]
-        # *_weight_win_bound
-        if self.weight_win_bound:
-            if type(self.weight_win_bound) is list:
-                for entry in self.weight_win_bound:
-                    string += (" WWN%i:%s=" % 
-                            (entry[1], self.mcnp_particle(entry[0]))
-                    if entry[2] == 'kill': string += '-1'
-                    elif entry[2] == 'nogame': string =+ '0'
-                    else: string += float_format % entry[2]
-            else:
-                string += (" WWN%i:%s=" % 
-                        (self.weight_win_bound[1],
-                         self.mcnp_particle(self.weight_win_bound[0]))
-                if self.weight_win_bound[2] == 'kill': string += '-1'
-                elif self.weight_win_bound[2] == 'nogame': string =+ '0'
-                else: string += float_format % self.weight_win_bound[2]
-        # *_dxtran_contrib
-        if self.dxtran_contrib:
-            if type(self.dxtran_contrib) is list:
-                for entry in self.dxtran_contrib:
-                    string += (" DXC%i:%s=" % 
-                        (entry[1], self.mcnp_particle(entry[0]))
-                    string += float_format % entry[2]
-            else:
-                string += (" DXC%i:%s=" % 
-                    (self.dxtran_contrib[1],
-                        self.mcnp_particle(self.dxtran_contrib[0]))
-                string += float_format % self.dxtran_contrib[2]
+        # fission_turnoff
+        # det_contrib
+        # transform
                 
+    def _make_list(self, arg):
+        if arg is list: return arg
+        else: return [arg]
 
     @property
     def temperature(self):
