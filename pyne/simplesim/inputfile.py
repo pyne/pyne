@@ -157,10 +157,12 @@ class MCNPInput(IInputFile):
     def add_user_card(self, block, card, comment=None):
         # TODO
         # use textwrap
+        pass
 
 
     def add_user_card_literal(self, block, string):
         # TODO
+        pass
 
     def _write_plug_subclass(self, string):
         self._write_comment(string)
