@@ -121,6 +121,7 @@ class MCNPInput(IInputFile):
         if self.header:
             self._write_comment(self.header)
         else:
+            # MCNP files need a first 'comment' line.
             self._write_comment("datetime: %s" % str(datetime.datetime.now()))
         if self.description:
             self._write_comment(self.description)
@@ -131,10 +132,12 @@ class MCNPInput(IInputFile):
         self._write_dictionary(self.sim.sys.cells)
 
         # Write surface cards.
+        self._new_line()
         self._write_deck_header("Surface")
         self._write_dictionary(self.sim.sys.surfaces)
 
         # Write data cards.
+        self._new_line()
         self._write_deck_header("Data")
         # Material cards.
         self._write_data_header("Material")
@@ -187,6 +190,9 @@ class MCNPInput(IInputFile):
 
     def _write_card(self, string):
         self.fid.write(self.cardwrap.wrap(string))
+
+    def _new_line(self):
+        self.fid.write('\n')
 
     def _cell(self, cell):
         """Returns a cell card string given a Cell card."""
