@@ -373,24 +373,41 @@ class CellMCNP(Cell):
                 string += (" IMP:%s=%i" % 
                         (self.mcnp_particle(entry[0]), entry[1]))
         # exp_transform
-        if self.neutron_exp_transform:
-            string += " EXT:N="
-            string += float_format % self.neutron_exp_transform
+        if self.exp_transform:
+            exp_transform = self._make_list(self.exp_transform)
+            for entry in exp_transform:
+                string += " EXT:%s=" % self.mcnp_particle(entry[0])
+                string += float_format % entry[1]
         # forced_coll
-        if self.neutron_forced_coll:
-            string += " FCL:N="
-            string += float_format % self.neutron_forced_coll
+        if self.forced_coll:
+            forced_coll = self._make_list(self.forced_coll)
+            for entry in forced_coll:
+                string += " FCL:%s=" % self.mcnp_particle(entry[0])
+                string += float_format % entry[1]
         # weight_win_bound
         if self.neutron_weight_win_bound:
             string += " WWN%i:N=" % self.neutron_weight_win_bound[0]
             string += str(self.neutron_weight_win_bound[1])
+        if self.weight_win_bound:
+            weight_win_bound = self._make_list(self.weight_win_bound)
+            for entry in weight_win_bound:
+                string += (" WWN%i:%s=" % 
+                        (entry[1], self.mcnp_particle(entry[0]))
+                if type(entry[2]) is str: string += entry[2]
+                else: string += float_format % entry[2]
         # dxtran_contrib
-        if self.neutron_dxtran_contrib:
-            string += " DXC%i:N=" % self.neutron_dxtran_contrib[0]
-            string += float_format % self.neutron_dxtran_contrib[1]
+        if self.dxtran_contrib:
+            dxtran_contrib = self._make_list(self.dxtran_contrib)
+            for entry in self.dxtran_contrib:
+                string += (" DXC%i:%s=" % 
+                    (entry[1], self.mcnp_particle(entry[0]))
+                string += float_format % entry[2]
         # photon_weight
         if self.photon_weight:
             string += " PWT={0}".format(self.photon_weight)
+        # fission_turnoff
+        # det_contrib
+        # transform
 
     def mcnp(self, float_format, sim):
         string = super(CellVoidMCNP, self).__init__(float_format, sim)
