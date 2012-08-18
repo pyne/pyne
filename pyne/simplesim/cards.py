@@ -40,6 +40,49 @@ class ICard(object):
     __metaclass__ = abc.ABCMeta
     # Useful for cell cards and the TMP card.
     kelvin2kT = 8.6173423e-11
+    mcnp_particle_desig = {'neutron': 'N',
+                           'anti-neutron': '-N',
+                           'photon': 'P',
+                           'electron': 'E',
+                           'positron': '-E',
+                           'muon': '|',
+                           'anti-muon': '-|',
+                           'tau': '*',
+                           'electron neutrino': 'U',
+                           'anti-electron neutrino': '-U',
+                           'muon neutrino': 'V',
+                           'tau neutrino': 'W',
+                           'proton': 'H',
+                           'anti-proton': '-H',
+                           'lambda': 'L',
+                           'sigma+': '+',
+                           'sigma-': '-',
+                           'cascade0': 'X',
+                           'cascade-': 'Y',
+                           'omega': 'O',
+                           'lambdac+': 'C',
+                           'cascadec+': '!',
+                           'cascadec0': '?',
+                           'lambdab0': '<',
+                           'pion+': '/',
+                           'pion-': '-/',
+                           'neutral pion': 'Z',
+                           'kaon+': 'K',
+                           'kaon-': '-K',
+                           'K0 short': '%',
+                           'K0 long': '^',
+                           'D+': 'G',
+                           'D0': '@',
+                           'Ds+': 'f',
+                           'B+': '>',
+                           'B0': 'B',
+                           'Bs0': 'Q',
+                           'deuteron': 'D',
+                           'triton': 'T',
+                           'helium-3': 'S',
+                           'helium-4': 'A',
+                           'heavy ions': '#'
+                           }
     
     def __init__(self, name, unique=False):
         """
@@ -86,33 +129,68 @@ class ICard(object):
                     "be empty.")
         self._name = value
 
+   
+class Cell(ICard):
+    """A cell is a region of space filled with a material. If requesting a void
+    cell, the ``material``, ``density``, and ``density_units`` attributes are
+    all set to None (as by default).
 
-class CellVoid(ICard):
-    """An empty region of space; this cell does not contain a material."""
-
-    def __init__(self, name, region):
+    """
+    def __init__(self, name, region, material=None, density=None,
+                 density_units=None, *args, **kwargs):
         """
         Parameters
         ----------
-        region : :py:class:`Region`
+        name : str
+            See :py:class:`ICard`.
+        region : :py:class:`Region` subclass
             Defines the region of space that this cell occupies (see
             :py:class:`Region`).
+        material : :py:class:`pyne.material.Material`, None for void
+            A material definition using the :py:mod:`pyne.material` module.
+            For use here, the material's :py:attr:`name` property must be set
+            to something other than '' and must be unique. See
+            :py:class:`pyne.material.Material`.
+        density : float, None for void
+            Density for the material, in units of density_units.
+        density_units : str, None for void
+            Either 'g/cm^3', or 'atoms/b/cm'.
 
         Examples
         --------
         TODO
-
+        
         """
-        super(CellVoid, self).__init__(name)
+        # TODO decide how I will do cross-referencing.
+
+        super(Cell, self).__init__(name, *args, **kwargs)
         self.region = region
+        self.material = material
+        self.density = density
+        self.density_units = density_units
 
     def comment(self):
-        # TODO Walk the region.
-        return "Void cell %s" % self.name
+        string = "Cell '%s':" % name
+        string += " region %s, " % self.region.comment()
+        if self.material and self.density and self.density_units:
+            string += "material '%s'" % self.material.name
+            string += " density %.5e %s" % (self.density, self.density_units)
+        else:
+            string += "void"
 
     def mcnp(self, float_format, sim):
         # Card number.
-        string = "%i 0 " % (sim.sys.cells.keys().index(self.name) + 1)
+        string = "%i" % (sim.sys.cells.keys().index(self.name) + 1)
+        if self.material and self.density and self.density_units:
+            # Material number.
+            string += " %i " % (sim.sys.cells.keys().index(self.material.name) + 1)
+            # Density, with units prefix.
+            string += self._density_prefix(self.density_units)
+            string += formatstr % self.density
+        else:
+            # Void.
+            string += " 0"
+
         # Print surfaces.
         string += self.region.mcnp(sim)
         return string
@@ -148,59 +226,6 @@ class CellVoid(ICard):
     def region(self, obj):
         self._region = obj
 
-   
-class Cell(CellVoid):
-    """A cell is a region of space filled with a material.
-
-    """
-    def __init__(self, name, region, material, density, density_units):
-        """
-        Parameters
-        ----------
-        name : str
-            See :py:class:`ICard`.
-        region : :py:class:`Region`
-            See :py:class:`CellVoid`
-        material : :py:class:`pyne.material.Material`
-            A material definition using the :py:mod:`pyne.material` module.
-            For use here, the material's :py:attr:`name` property must be set
-            to something other than '' and must be unique. See
-            :py:class:`pyne.material.Material`.
-        density : float
-            Density for the material, in units of density_units.
-        density_units : str
-            Either 'g/cm^3', or 'atoms/b/cm'.
-
-        Examples
-        --------
-        TODO
-        
-        """
-        # TODO decide how I will do cross-referencing.
-
-        super(Cell, self).__init__(name, region)
-        self.material = material
-        self.density = density
-        self.density_units = density_units
-
-    def comment(self):
-        # TODO walk the region.
-        # TODO print material description.
-        return "Cell %s" % name
-
-    def mcnp(self, float_format, sim):
-        # Card number.
-        string = "%i " % (sim.sys.cells.keys().index(self.name) + 1)
-        # Material number.
-        string += "%i " % (sim.sys.cells.keys().index(self.material.name) + 1)
-        # Density, with units prefix.
-        formatstr = "%s%s" % (self._mcnp_density_prefix(self.density_units),
-                float_format)
-        string += formatstr % self.density
-        # Print surfaces.
-        string += self.region.mcnp(sim)
-        return string
-
     @property
     def material(self):
         return self._material
@@ -234,24 +259,24 @@ class Cell(CellVoid):
         self._density_units = value
 
 
-class CellVoidMCNP(CellVoid):
+class CellMCNP(Cell):
     """A cell card with keyword options that are available in MCNP. Thus, it
-    only makes sense to use this card if writing an input for MCNP. This is a
-    void (no material) cell; see :py:class:`CellMCNP` for the corresponding
-    cell filled with a material. A value of None for a keyword indicates that
-    it is ignored.
+    only makes sense to use this card if writing an input for MCNP.
     
     The U, LAT, and FILL keywords are not available; as this functionality
         should be obtained by using Universe and Lattice cards.
 
     Note this card was written with MCNPX version 2.7 in mind.
 
-    .. inheritance-diagram:: pyne.simplesim.cards.CellVoidMCNP
+    .. inheritance-diagram:: pyne.simplesim.cards.CellMCNP
 
     """
     # TODO Sphinx documentation should not list all keyword arguments.
+    # TODO let the user add their own through keyword arguments...
+    # user_string
 
-    def __init__(self, name, region,
+    def __init__(self, name, region, material=None, density=None,
+                 density_units=None,
                  temperature=None, volume=None,
                  neutron_imp=None,
                  photon_imp=None,
@@ -262,10 +287,10 @@ class CellVoidMCNP(CellVoid):
                  photon_exp_transform=None,
                  electron_exp_transform=None,
                  proton_exp_transform=None,
-                 neutron_force_coll=None,
-                 photon_force_coll=None,
-                 electron_force_coll=None,
-                 proton_force_coll=None,
+                 neutron_forced_coll=None,
+                 photon_forced_coll=None,
+                 electron_forced_coll=None,
+                 proton_forced_coll=None,
                  neutron_weight_win_bound=None,
                  photon_weight_win_bound=None,
                  electron_weight_win_bound=None,
@@ -277,6 +302,7 @@ class CellVoidMCNP(CellVoid):
                  fission_turnoff=None,
                  det_contrib=None,
                  transform=None
+                 user_custom=None
                  ):
         """
         Parameters
@@ -284,25 +310,52 @@ class CellVoidMCNP(CellVoid):
         name : str
             See :py:class:`ICard`.
         region : :py:class:`Region`
-            See :py:class:`CellVoid`
+            See :py:class:`Cell`.
+        material : :py:class:`pyne.material.Material`, None for void
+            See :py:class:`Cell`.
+        density : float, None for void
+            See :py:class:`Cell`.
+        density_units : str, None for void
+            See :py:class:`Cell`.
         temperature : float, otional [Kelvin]
-            Temperature of the cell.
+            Temperature of the cell for thermal treatment, **TMP**.
         volume : float, optional [cm^3]
-            Volume of the cell.
+            Volume of the cell, **VOL**.
         *_imp : int, optional
-            Particle importance for variance reduction.
+            Particle importance, **IMP**, for variance reduction.
         photon_weight : 0, '-inf', or float; optional
-            Relative threshold weight of photons that are produced at neutron
-            collisions. With a value of 0, one photon is generated per
-            collision; with a value of '-inf', no photons are generated. In
-            general, this input can be a positive or negative float.
-        *_exp_transform : 
-        *_force_coll : 
-        *_weight_win_bound : 
-        *_dxtran_contrib : 
+            Photon weight, **PWT**. Relative threshold weight of photons that
+            are produced at neutron collisions. With a value of 0, one photon
+            is generated per collision; with a value of '-inf', no photons are
+            generated. In general, this input can be a positive or negative
+            float.
+        *_exp_transform : float, optional
+            An exponential transform, **EXT**. The value is the parameter 'a'
+            as described in the MCNP manual. This is a form of variance
+            reduction. 
+        *_forced_coll : float, optional
+            Forced collisions, **FCL**. Between -1 and 1. See MCNP manual.
+        *_weight_win_bound : 2-element tuple of int and str/float, optional
+            Weight window lower bound, **WWN**. The first element of the tuple
+            is the energy/time index (int), and the second is 'kill' to kill
+            particles entering the cell, 'nogame' or a non-negative float. See
+            MCNP manual.
+        *_dxtran_contrib : 2-element tuple of int/None and float, optional
+            DXTRAN Contribution, **DXC**. The first element is an index of a
+            DXTRAN sphere (on the DXTRANSphere card), or None if this is to
+            apply to all DXTRAN spheres. The second element is the probability
+            of contribution to the DXTRAN sphere(s). Only for neutrons and
+            photons.
         fission_turnoff : 
         det_contrib : 
         transform : 
+        user_custom : str, optional
+            This string is appended to the end of the mcnp card. It is possible
+            (likely) that the user will want to append a string to the end of
+            the MCNP card, given the limited support of keyword
+            arguments. This is perhaps most useful if the user wants to specify
+            a keyword for a particle that is not supported by any of the
+            kwargs.
 
         Examples
         --------
@@ -310,7 +363,8 @@ class CellVoidMCNP(CellVoid):
 
         """
         # TODO allow use of U, LAT, and FILL keywords?
-        super(CellVoidMCNP, self).__init__(name, region)
+        super(CellMCNP, self).__init__(name, region, material, density,
+                                       density_units)
         # Assign keyword arguments.
         self.temperature = temperature
         self.volume = volume
@@ -318,15 +372,171 @@ class CellVoidMCNP(CellVoid):
         self.photon_imp = photon_imp
         self.electron_imp = electron_imp
         self.proton_imp = proton_imp
+        self.photon_weight = photon_weight
+        self.neutron_exp_transform = neutron_exp_transform
+        self.photon_exp_transform = photon_exp_transform
+        self.electron_exp_transform = electron_exp_transform
+        self.proton_exp_transform = proton_exp_transform
+        self.neutron_forced_coll = neutron_forced_coll
+        self.photon_forced_coll = photon_forced_coll
+        self.electron_forced_coll = electron_forced_coll
+        self.proton_forced_coll = proton_forced_coll
+        self.neutron_weight_win_bound = neutron_weight_win_bound
+        self.photon_weight_win_bound = photon_weight_win_bound
+        self.electron_weight_win_bound = electron_weight_win_bound
+        self.proton_weight_win_bound = proton_weight_win_bound
+        self.neutron_dxtran_contrib = neutron_dxtran_contrib
+        self.photon_dxtran_contrib = photon_dxtran_contrib
+        self.electron_dxtran_contrib = electron_dxtran_contrib
+        self.proton_dxtran_contrib = proton_dxtran_contrib
 
     def comment(self):
-        # TODO walk the region.
-        # TODO print material description.
-        return "Void cell for MCNP %s" % self.name
+        string = super(CellMCNP, self).comment()
+        float_format = "%.5f"
+        # *_imp
+        if self.neutron_imp:
+            string += " IMP:N=%i" % self.neutron_imp
+        if self.photon_imp:
+            string += " IMP:P=%i" % self.photon_imp
+        if self.electron_imp:
+            string += " IMP:E=%i" % self.electron_imp
+        if self.proton_imp:
+            string += " IMP:H=%i" % self.proton_imp
+        # photon_weight
+        if self.photon_weight:
+            string += " PWT={0}".format(self.photon_weight)
+        # *_exp_transform
+        if self.neutron_exp_transform:
+            string += " EXT:N="
+            string += float_format % self.neutron_exp_transform
+        if self.photon_exp_transform:
+            string += " EXT:P="
+            string += float_format % self.photon_exp_transform
+        if self.electron_exp_transform:
+            string += " EXT:E="
+            string += float_format % self.electron_exp_transform
+        if self.proton_exp_transform:
+            string += " EXT:H="
+            string += float_format % self.proton_exp_transform
+        # *_forced_coll
+        if self.neutron_forced_coll:
+            string += " FCL:N="
+            string += float_format % self.neutron_forced_coll
+        if self.photon_forced_coll:
+            string += " FCL:P="
+            string += float_format % self.photon_forced_coll
+        if self.electron_forced_coll:
+            string += " FCL:E="
+            string += float_format % self.electron_forced_coll
+        if self.proton_forced_coll:
+            string += " FCL:H="
+            string += float_format % self.proton_forced_coll
+        # *_weight_win_bound
+        if self.neutron_weight_win_bound:
+            string += " WWN%i:N=" % self.neutron_weight_win_bound[0]
+            string += str(self.neutron_weight_win_bound[1])
+        if self.photon_weight_win_bound:
+            string += " WWN%i:P=" % self.photon_weight_win_bound[0]
+            string += str(self.photon_weight_win_bound[1])
+        if self.electron_weight_win_bound:
+            string += " WWN%i:E=" % self.electron_weight_win_bound[0]
+            string += str(self.electron_weight_win_bound[1])
+        if self.proton_weight_win_bound:
+            string += " WWN%i:H=" % self.proton_weight_win_bound[0]
+            string += str(self.proton_weight_win_bound[1])
+        # *_dxtran_contrib
+        if self.neutron_dxtran_contrib:
+            string += " DXC%i:N=" % self.neutron_dxtran_contrib[0]
+            string += float_format % self.neutron_dxtran_contrib[1]
+        if self.photon_dxtran_contrib:
+            string += " DXC%i:P=" % self.photon_dxtran_contrib[0]
+            string += float_format % self.photon_dxtran_contrib[1]
 
     def mcnp(self, float_format, sim):
         string = super(CellVoidMCNP, self).__init__(float_format, sim)
-        string += 
+        # *_imp
+        if self.neutron_imp:
+            string += " IMP:N=%i" % self.neutron_imp
+        if self.photon_imp:
+            string += " IMP:P=%i" % self.photon_imp
+        if self.electron_imp:
+            string += " IMP:E=%i" % self.electron_imp
+        if self.proton_imp:
+            string += " IMP:H=%i" % self.proton_imp
+        # photon_weight
+        if self.photon_weight:
+            string += " PWT="
+            if self.photon_weight == '-inf'
+                string += "-1.0E6"
+            else:
+                string += float_format % self.photon_weight
+        # *_exp_transform
+        if self.neutron_exp_transform:
+            string += " EXT:N="
+            string += float_format % self.neutron_exp_transform
+        if self.photon_exp_transform:
+            string += " EXT:P="
+            string += float_format % self.photon_exp_transform
+        if self.electron_exp_transform:
+            string += " EXT:E="
+            string += float_format % self.electron_exp_transform
+        if self.proton_exp_transform:
+            string += " EXT:H="
+            string += float_format % self.proton_exp_transform
+        # *_forced_coll
+        if self.neutron_forced_coll:
+            string += " FCL:N="
+            string += float_format % self.neutron_forced_coll
+        if self.photon_forced_coll:
+            string += " FCL:P="
+            string += float_format % self.photon_forced_coll
+        if self.electron_forced_coll:
+            string += " FCL:E="
+            string += float_format % self.electron_forced_coll
+        if self.proton_forced_coll:
+            string += " FCL:H="
+            string += float_format % self.proton_forced_coll
+        # *_weight_win_bound
+        if self.neutron_weight_win_bound:
+            string += " WWN%i:N=" % self.neutron_weight_win_bound[0]
+            if self.neutron_weight_win_bound[1] == 'kill':
+                string += '-1'
+            elif self.neutron_weight_win_bound[1] == 'nogame':
+                string =+ '0'
+            else:
+                string += float_format % self.neutron_weight_win_bound[1]
+        if self.photon_weight_win_bound:
+            string += " WWN%i:P=" % self.photon_weight_win_bound[0]
+            if self.photon_weight_win_bound[1] == 'kill':
+                string += '-1'
+            elif self.photon_weight_win_bound[1] == 'nogame':
+                string =+ '0'
+            else:
+                string += float_format % self.photon_weight_win_bound[1]
+        if self.electron_weight_win_bound:
+            string += " WWN%i:E=" % self.electron_weight_win_bound[0]
+            if self.electron_weight_win_bound[1] == 'kill':
+                string += '-1'
+            elif self.electron_weight_win_bound[1] == 'nogame':
+                string =+ '0'
+            else:
+                string += float_format % self.electron_weight_win_bound[1]
+        if self.proton_weight_win_bound:
+            string += " WWN%i:H=" % self.proton_weight_win_bound[0]
+            if self.proton_weight_win_bound[1] == 'kill':
+                string += '-1'
+            elif self.proton_weight_win_bound[1] == 'nogame':
+                string =+ '0'
+            else:
+                string += float_format % self.proton_weight_win_bound[1]
+        # *_dxtran_contrib
+        if self.neutron_dxtran_contrib:
+            string += " DXC%i:N=" % self.neutron_dxtran_contrib[0]
+            string += float_format % self.neutron_dxtran_contrib[1]
+        if self.photon_dxtran_contrib:
+            string += " DXC%i:P=" % self.photon_dxtran_contrib[0]
+            string += float_format % self.photon_dxtran_contrib[1]
+
 
     @property
     def temperature(self):
@@ -387,54 +597,141 @@ class CellVoidMCNP(CellVoid):
     def proton_imp(self, value):
         self._proton_imp = value
 
+    @phoperty
+    def photon_weight(self):
+        return self._photon_weight
+    
+    @photon_weight.setter
+    def photon_weight(self, value):
+        self._photon_weight = value
 
-class CellMCNP(CellVoidMCNP): #, Cell):
-    """A cell card with keyword options that are available in MCNP. Thus, it
-    only makes sense to use this card if writing an input for MCNP.    
+    @property
+    def neutron_exp_transform(self):
+        return self._neutron_exp_transform
 
-    The U, LAT, and FILL keywords are not available; as this functionality
-        should be obtained by using Universe and Lattice cards.
+    @neutron_exp_transform.setter
+    def neutron_exp_transform(self, value):
+        self._neutron_exp_transform = value
 
-    Note this card was written with MCNPX version 2.7 in mind.
+    @property
+    def photon_exp_transform(self):
+        return self._photon_exp_transform
 
-    .. inheritance-diagram:: pyne.simplesim.cards.CellMCNP
+    @photon_exp_transform.setter
+    def photon_exp_transform(self, value):
+        self._photon_exp_transform = value
 
-    """
-    # TODO flesh out keyword arguments.
-    def __init__(self, name, region, material, density, density_units,
-                 **kwargs):
-        """
-        Parameters
-        ----------
-        name : str
-            See :py:class:`ICard`.
-        region : :py:class:`Region`
-            See :py:class:`CellVoid`
-        material : :py:class:`pyne.material.Material`
-            See :py:class:`Cell`
-        **kwargs : varies
-            See :py:class:`CellVoidMCNP`.
-            
-        Examples
-        --------
-        TODO
+    @property
+    def electron_exp_transform(self):
+        return self._electron_exp_transform
 
-        """
-        # Based on Python's Method Resolution Order (MRO), the constructor for
-        # CellSimpleVoidMCNP is called because it is listed first above.
-        super(CellMCNP, self).__init__(name, region, **kwargs)
-        # The following fields are not initialized via the superclass
-        # constructor above.
-        self.material = material
-        self.density = density
-        self.density_units = density_units
-        return
+    @electron_exp_transform.setter
+    def electron_exp_transform(self, value):
+        self._electron_exp_transform = value
 
-    def comment(self):
-        # TODO walk the region.
-        # TODO print material description.
-        return "Cell for MCNP %s" % name
+    @property
+    def proton_exp_transform(self):
+        return self._proton_exp_transform
 
+    @proton_exp_transform.setter
+    def proton_exp_transform(self, value):
+        self._proton_exp_transform = value
+
+    @property
+    def neutron_forced_coll(self):
+        return self._neutron_forced_coll
+
+    @neutron_forced_coll.setter
+    def neutron_forced_coll(self, value):
+        self._neutron_forced_coll = value
+
+    @property
+    def photon_forced_coll(self):
+        return self._photon_forced_coll
+
+    @photon_forced_coll.setter
+    def photon_forced_coll(self, value):
+        self._photon_forced_coll = value
+
+    @property
+    def electron_forced_coll(self):
+        return self._electron_forced_coll
+
+    @electron_forced_coll.setter
+    def electron_forced_coll(self, value):
+        self._electron_forced_coll = value
+
+    @property
+    def proton_forced_coll(self):
+        return self._proton_forced_coll
+
+    @proton_forced_coll.setter
+    def proton_forced_coll(self, value):
+        self._proton_forced_coll = value
+
+    @property
+    def neutron_weight_win_bound(self):
+        return self._neutron_weight_win_bound
+
+    @neutron_weight_win_bound.setter
+    def neutron_weight_win_bound(self, value):
+        self._neutron_weight_win_bound = value
+
+    @property
+    def photon_weight_win_bound(self):
+        return self._photon_weight_win_bound
+
+    @photon_weight_win_bound.setter
+    def photon_weight_win_bound(self, value):
+        self._photon_weight_win_bound = value
+
+    @property
+    def electron_weight_win_bound(self):
+        return self._electron_weight_win_bound
+
+    @electron_weight_win_bound.setter
+    def electron_weight_win_bound(self, value):
+        self._electron_weight_win_bound = value
+
+    @property
+    def proton_weight_win_bound(self):
+        return self._proton_weight_win_bound
+
+    @proton_weight_win_bound.setter
+    def proton_weight_win_bound(self, value):
+        self._proton_weight_win_bound = value
+
+    @property
+    def neutron_dxtran_contrib(self):
+        return self._neutron_dxtran_contrib
+
+    @neutron_dxtran_contrib.setter
+    def neutron_dxtran_contrib(self, value):
+        self._neutron_dxtran_contrib = value
+
+    @property
+    def photon_dxtran_contrib(self):
+        return self._photon_dxtran_contrib
+
+    @photon_dxtran_contrib.setter
+    def photon_dxtran_contrib(self, value):
+        self._photon_dxtran_contrib = value
+
+    @property
+    def electron_dxtran_contrib(self):
+        return self._electron_dxtran_contrib
+
+    @electron_dxtran_contrib.setter
+    def electron_dxtran_contrib(self, value):
+        self._electron_dxtran_contrib = value
+
+    @property
+    def proton_dxtran_contrib(self):
+        return self._proton_dxtran_contrib
+
+    @proton_dxtran_contrib.setter
+    def proton_dxtran_contrib(self, value):
+        self._proton_dxtran_contrib = value
 
 class IUniverse(ICard):
     """This class is not used by the user. Abstract base class for all

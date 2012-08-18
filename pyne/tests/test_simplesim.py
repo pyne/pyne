@@ -18,6 +18,8 @@ class TestCells(unittest.TestCase):
 
     """
         # test density_units exception.
+        # test '-inf' test.
+        # test dxtran sphere reference.
 
 class TestSurfaces(unittest.TestCase):
     """Tests the :py:class:`cards.ISurface` class and its
