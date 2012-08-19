@@ -2976,23 +2976,24 @@ class Vector(IMisc):
         self.vectors = collections.OrderedDict()
 
     def comment(self):
-        string += "Vector '%s':" % self.name
+        string = "Vector '%s':" % self.name
         counter = 0
-        for key, val in self.vectors:
+        for key, val in self.vectors.iteritems():
             counter += 1
-            string += " %s: (%.5f, %.5f, %.5f) cm" % (key, tuple(val))
+            string += " %s: (%.5e, %.5e, %.5e) cm" % ((key,) + tuple(val))
             if counter < len(self.vectors):
                 string += ","
-        return string += "."
+        return string + "."
 
     def mcnp(self, float_format, sim):
         if len(self.vectors) == 0:
             raise StandardError("No vectors added.")
-        string += "VECT "
-        for key, val in self.vectors:
+        string = "VECT"
+        counter = 0
+        for key, val in self.vectors.iteritems():
             counter += 1
             index = self.index(key)
-            formatstr += "V%i %s %s %s" % (index, 3 * (float_format,))
+            formatstr = " V%i %s %s %s" % ((index,) + 3 * (float_format,))
             string += formatstr % tuple(val)
         return string
         
@@ -3029,7 +3030,7 @@ class Vector(IMisc):
         self.vectors[vecname] = vector
         return self.index(vecname)
 
-    def index(self, vecname)
+    def index(self, vecname):
         # MCNP is okay with index 0.
         return self.vectors.keys().index(vecname)
 
