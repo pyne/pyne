@@ -216,7 +216,7 @@ class Cell(ICard):
             # Material number.
             string += " %i " % sim.sys.material_num(self.material.name)
             # Density, with units prefix.
-            string += self._density_prefix(self.density_units)
+            string += self._mcnp_density_prefix(self.density_units)
             string += formatstr % self.density
         else:
             # Void.
