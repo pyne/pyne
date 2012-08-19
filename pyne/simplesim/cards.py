@@ -2834,16 +2834,16 @@ class ExponentialTransform(ICellMod):
         self.signs += [sign]
 
     def comment(self):
-        string = "Exponential transform '%s': " % self.name
+        string = "Exponential transform '%s':" % self.name
         for i_cell in range(len(self.cells)):
             string += " " + self._comment_unit(i_cell)
             if i_cell < (len(self.cells) - 1):
                 string += ";"
-        return string
+        return string + "."
 
     def _comment_unit(self, i_cell):
         string = "cell '%s' " % self.cells[i_cell].name
-        string = "stretch by {0} ".format(self.stretchs[i_cell])
+        string += "stretch by {0} ".format(self.stretchs[i_cell])
         string += self.signs[i_cell] + " "
         if self.signs[i_cell] == 'away': string += "from "
         string += self.directions[i_cell]
@@ -2854,7 +2854,7 @@ class ExponentialTransform(ICellMod):
         # support for universes, etc.
         string = "EXT:%s" % self.mcnp_particle[self.particle]
         # TODO this should loop through in the print order.
-        for cell in self.sim.sys.cells: 
+        for key, cell in sim.sys.cells.iteritems(): 
             if cell in self.cells:
                 i_cell = self.cells.index(cell)
                 string += " " + self._mcnp_unit(float_format, sim, i_cell)
@@ -2868,18 +2868,18 @@ class ExponentialTransform(ICellMod):
         if self.signs[i_cell] == 'away': string += "-"
         if self.stretchs[i_cell] == 'capture-to-total': string += "S"
         else: string += float_format % self.stretchs[i_cell]
-        string += "Q"
         if self.directions[i_cell] == 'currdir': pass
         elif (self.directions[i_cell].upper() == 'X' or
               self.directions[i_cell].upper() == 'Y' or
               self.directions[i_cell].upper() == 'Z'):
             string += self.directions[i_cell].upper()
         else:
-            if 'vector' not in self.sim.misc:
+            if 'vector' not in sim.misc:
                 raise Exception("Vector card is needed for the Exponential "
                         "transform card.")
             vecname = self.directions[i_cell]
-            string += "V%i" % self.sim.misc['vector'].index(vecname)
+            string += "V%i" % sim.misc['vector'].index(vecname)
+        return string
 
     @property
     def particle(self): return self._particle
