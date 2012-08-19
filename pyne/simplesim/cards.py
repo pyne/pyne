@@ -192,21 +192,22 @@ class Cell(ICard):
         self.material = material
         self.density = density
         self.density_units = density_units
-        if ((self.material and not (self.density or self.density_units)) or
-                (self.density and not (self.density_units or self.material)) or
-                (self.density_units and not (self.density or self.material)))
+        if ((self.material and not (self.density and self.density_units)) or
+                (self.density and not (self.density_units and self.material)) or
+                (self.density_units and not (self.density and self.material))):
             raise ValueError("If specifying a material, ``material``, "
                     "``density``, and ``density_units`` must all be "
                     "specified.")
 
     def comment(self):
-        string = "Cell '%s':" % name
+        string = "Cell '%s':" % self.name
         string += " region %s, " % self.region.comment()
         if self.material and self.density and self.density_units:
             string += "material '%s'" % self.material.name
             string += " density %.5e %s" % (self.density, self.density_units)
         else:
             string += "void"
+        return string
 
     def mcnp(self, float_format, sim):
         # Card number.
@@ -220,9 +221,8 @@ class Cell(ICard):
         else:
             # Void.
             string += " 0"
-
         # Print surfaces.
-        string += self.region.mcnp(sim)
+        string += " %s" % self.region.mcnp(sim)
         return string
 
     def _mcnp_density_prefix(self, density_units):
@@ -263,7 +263,11 @@ class Cell(ICard):
     @material.setter
     def material(self, obj):
         # This check is redundant.
-        if obj.name == '':
+        if obj and type(obj) is not material.Material:
+            raise ValueError("The property ``material`` must be instance "
+                    "of ``pyne.material.Material``. User provided {0}.".format(
+                    obj))
+        if obj and obj.name == '':
             raise ValueError("The ``name`` property of the material cannot "
                     "be empty.")
         self._material = obj
@@ -282,7 +286,7 @@ class Cell(ICard):
 
     @density_units.setter
     def density_units(self, value):
-        if density_units != 'g/cm^3' and density_units != 'atoms/b/cm':
+        if (value and value != 'g/cm^3' and value != 'atoms/b/cm'):
             raise ValueError("The property ``density_units`` must be either "
                     "'g/cm^3' or 'atoms/b/cm'. User provided "
                     "'{0}'".format(value))
@@ -321,7 +325,7 @@ class CellMCNP(Cell):
                  photon_weight=None,
                  fission_turnoff=None,
                  det_contrib=None,
-                 transformation=None
+                 transformation=None,
                  user_custom=None
                  ):
         """
@@ -424,10 +428,10 @@ class CellMCNP(Cell):
         self.temperature = temperature
         self.volume = volume
         self.importance = importance
-        self.exp_transform = neutron_exp_transform
-        self.forced_coll = neutron_forced_coll
-        self.weight_win_bound = neutron_weight_win_bound
-        self.dxtran_contrib = neutron_dxtran_contrib
+        self.exp_transform = exp_transform
+        self.forced_coll = forced_coll
+        self.weight_win_bound = weight_win_bound
+        self.dxtran_contrib = dxtran_contrib
         self.photon_weight = photon_weight
         self.fission_turnoff = fission_turnoff
         self.det_contrib = det_contrib
@@ -435,7 +439,7 @@ class CellMCNP(Cell):
 
     def comment(self):
         string = super(CellMCNP, self).comment()
-        float_format = "%.5f"
+        float_format = "%.5e"
         # temperature
         if self.temperature:
             string += "TMP="
@@ -472,7 +476,7 @@ class CellMCNP(Cell):
             weight_win_bound = self._make_list(self.weight_win_bound)
             for entry in weight_win_bound:
                 string += (" WWN%i:%s=" % 
-                        (entry[1], self.mcnp_particle(entry[0]))
+                        (entry[1], self.mcnp_particle(entry[0])))
                 if type(entry[2]) is str: string += entry[2]
                 else: string += float_format % entry[2]
         # dxtran_contrib
@@ -480,7 +484,7 @@ class CellMCNP(Cell):
             dxtran_contrib = self._make_list(self.dxtran_contrib)
             for entry in dxtran_contrib:
                 string += (" DXC%i:%s=" % 
-                    (entry[1], self.mcnp_particle(entry[0]))
+                    (entry[1], self.mcnp_particle(entry[0])))
                 string += float_format % entry[2]
         # photon_weight
         if self.photon_weight: string += " PWT={0}".format(self.photon_weight)
@@ -541,7 +545,7 @@ class CellMCNP(Cell):
             weight_win_bound = self._make_list(self.weight_win_bound)
             for entry in weight_win_bound:
                 string += (" WWN%i:%s=" % 
-                        (entry[1], self.mcnp_particle(entry[0]))
+                        (entry[1], self.mcnp_particle(entry[0])))
                 if entry[2] == 'kill': string += '-1'
                 elif entry[2] == 'nogame': string =+ '0'
                 else: string += float_format % entry[2]
@@ -1495,7 +1499,7 @@ class RegionAnd(IRegionBool):
         return super(RegionAnd, self).comment('&')
 
     def mcnp(self, sim):
-        return super(RegionOr, self).mcnp(sim, ' ')
+        return super(RegionAnd, self).mcnp(sim, ' ')
 
 
 class RegionOr(IRegionBool):
@@ -1845,7 +1849,7 @@ class ICellSurfTally(ITally):
         string = super(ICellSurfTally, self).comment(title)
 
         if card_type == 'cell':
-            classcheck = CellVoid
+            classcheck = Cell
         elif card_type == 'surface':
             classcheck = ISurface
         if type(self.cards) is not list: # issubclass(self.cards, classcheck):
