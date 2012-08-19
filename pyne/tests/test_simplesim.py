@@ -432,7 +432,20 @@ class TestSystemDefinition(unittest.TestCase):
 
     def test_CellMCNP(self):
         # Test each keyword, and test a few in combination.
-        pass
+        # Without keyword arguments
+        cellC = cards.Cell('C', self.pin.neg & self.cellbound.pos)
+        self.rxr.add_cell(cellC)
+        self.assertEquals(cellC.comment(), "Cell 'C': region "
+                "(-fuelpin & +bound), void")
+        self.assertEquals(cellC.mcnp("%.5e", self.sim), "4 0 (-1 2)")
+        cellD = cards.Cell('D', self.pin.neg & self.cellbound.pos, self.uo2,
+                10.0, 'g/cm^3')
+        self.rxr.add_cell(cellD)
+        self.assertEquals(cellD.comment(), "Cell 'D': region "
+                "(-fuelpin & +bound), material 'UO2' density 1.00000e+01 "
+                "g/cm^3")
+        self.assertEquals(cellD.mcnp("%.5e", self.sim), "5 1 -1.00000e+01 "
+                "(-1 2)")
 
     def test_ITally(self):
         """Tests :py:class:`cards.ITally`'s methods, properties, and
