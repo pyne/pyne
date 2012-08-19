@@ -24,7 +24,8 @@ the module.
 # object that Anthony has once they implement a comment.
 # Maybe I place an underscore for abstract base classes so that the user
 # doesn't see them, but I want them to see them...
-
+# TODO Comment number format to exponential.
+# TODO mcnp_particle ref's.
 import abc
 
 import numpy as np
@@ -404,8 +405,8 @@ class CellMCNP(Cell):
             3 list, :py:class:`np.array`, or :py:class:`np.matrix`; the 3rd
             element is the string 'aux-in-main' or 'main-in-aux'; the 4th
             element is a bool, 'cosines' if rotation matrix is in cosines and
-            'degrees' if rotation matrix is in degrees. See
-            :py:class:`Transformation`.
+            'degrees' if rotation matrix is in degrees. Note that these are the
+            same arguments to the :py:class:`Transformation`.
         user_custom : str, optional
             This string is appended to the end of the mcnp card. It is possible
             (likely) that the user will want to append a string to the end of
@@ -432,6 +433,9 @@ class CellMCNP(Cell):
                     importance=[('neutron', 1), ('photon', 0)])
 
         The following sets an exponential transform of 0.7
+        
+        TODO when doing transform, take care of transform examples below.
+
 
         If the user wants to supply an exponential transform card, with a
         transform of '0.7V2', on their own, they can do the following::
@@ -2694,6 +2698,10 @@ class Transformation(IMisc):
         degrees : bool, optional
             If True, then the elements of the rotation matrix are in degrees.
 
+        Examples
+        --------
+            TODO
+
         """
         super(Transformation, self).__init__(name)
         self.displacement = displacement
@@ -2765,3 +2773,117 @@ class Transformation(IMisc):
     @aux_in_main.setter
     def aux_in_main(self, value):
         self._aux_in_main = value
+
+
+def ExponentialTransform(IMisc):
+    """An exponential transform that adjusts the total cross section by a
+    given factor in a given direction. In MCNP, this is the **EXT** card.
+
+    .. inheritance-diagram:: pyne.simplesim.cards.ExponentialTransform
+
+    """
+    def __init__(self, name, particle, stretch, direction, away=False):
+        """
+        Parameters
+        ----------
+        name : str
+            See :py:class:`ICard`.
+        particle : str
+            A particle string, taken from the keys of :py:attr:`mcnp_particle`.
+        stretch : str or float
+            The stretch factor. If 'capture-to-total', the stretch factor is
+            the ratio of the capture cross section to the total cross section
+            (referred to as Sigma_a in the MCNP manual). Otherwise, the factor
+            is a number between 0 and 1.
+        direction : str or 3-element list/:py:class:`np.array` [centimeters]
+            If 'currdir' then the stretching is done in the particle's
+            direction of travel. If 'x', 'X', 'y', 'Y', or 'z', 'Z', the
+            stretching is with respect to the requested axis. If a 3-element
+            list or array, the stretching is done with respect to the point
+            given by this list/array.
+        away : bool, optional
+            The stretching is by default done 'toward' the direction requested;
+            setting this to False requests the stretching to be done away from
+            the direction requested.
+
+        Examples
+        --------
+        The following requests a transformation that stretches by the ratio of
+        the capture cross section to the total cross section, in the direction
+        of the particle's travel::
+
+            ext = ExponentialTransform('ext1', 'neutron', 'capture-to-total',
+                    'currdir')
+
+        The following requests a transformation that stretches by a factor of
+        0.5 in the direction of the particle's travel::
+
+            ext = ExponentialTransform('ext1', 'neutron', 0.5, 'currdir')
+
+        The following requests a transformation with respect to the x axis::
+
+            ext = ExponentialTransform('ext1', 'neutron', 0.5, 'x')
+
+        The following requests a transformation away from the origin::
+
+            ext = ExponentialTransform('ext1', 'neutron', 0.5, [0, 0, 0],
+                    away=True)
+
+        """
+        super(ExponentialTransform, self).__init__(name)
+        self.stretch = stretch
+        self.direction = direction
+        self.away = away
+
+    def comment(self):
+        string = "Exponential transform '%s' on %ss: " % (self.name,
+                self.particle)
+        return string += " " + self._comment_data()
+
+    def _comment_data(self):
+        string = "stretch by {0} ".format(self.stretch)
+        if not self.away: string += "toward "
+        else:             string += "away from "
+        if type(self.direction) is str: string += self.direction
+        else: string += "(%.5e, %.5e, %.5e) cm" % tuple(self.direction)
+        return string
+
+    def mcnp(self):
+        string = "EXT:%s" % self.mcnp_particle[self.particle]
+        string 
+
+    @property
+    def particle(self):
+        return self._particle
+
+    @particle.setter
+    def particle(self, value):
+        # TODO check to make sure it is a key.
+        if value not in self.mcnp_particle:
+            raise LookupError("The particle %s is not in the "
+                    "``mcnp_particle`` dictionary." % value)
+        self._particle = value
+
+    @property
+    def stretch(self):
+        return self._stretch
+
+    @stretch.setter
+    def stretch(self, value):
+        self._stretch = value
+
+    @property
+    def direction(self):
+        return self._direction
+
+    @direction.setter
+    def direction(self, value):
+        self._direction = value
+
+    @property
+    def away(self):
+        return self._away
+
+    @away.setter
+    def away(self, value):
+        self._away = value
