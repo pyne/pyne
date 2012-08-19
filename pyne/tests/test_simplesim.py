@@ -476,22 +476,22 @@ class TestSystemDefinition(unittest.TestCase):
                 "0.0e+00 V1 1.0e+00 0.0e+00 0.0e+00")
 
         ## ExponentialTransform
-        extn = ExponentialTransform('neutron', cellA, 'capture-to-total',
+        extn = cards.ExponentialTransform('neutron', self.fuel, 'capture-to-total',
                 'currdir', 'toward')
         self.assertEquals(extn.name, 'exptransform-neutron')
-        self.assertIs(extn.cells[0], cellA)
+        self.assertIs(extn.cells[0], self.fuel)
         self.assertEquals(extn.stretchs[0], 'capture-to-total')
         self.assertEquals(extn.directions[0], 'currdir')
         self.assertEquals(extn.signs[0], 'toward')
-        extn = ExponentialTransform('neutron', cellA, 0.5, 'currdir',
+        extn = cards.ExponentialTransform('neutron', self.fuel, 0.5, 'currdir',
                 'toward')
-        extn = ExponentialTransform('neutron', cellA, 0.5, 'x', 'toward')
-        extn = ExponentialTransform('neutron', cellA, 0.5, [0, 0, 0],
+        extn = cards.ExponentialTransform('neutron', self.fuel, 0.5, 'x', 'toward')
+        extn = cards.ExponentialTransform('neutron', self.fuel, 0.5, [0, 0, 0],
                 'away')
-        extn = ExponentialTransform('neutron', 
-                cellA, 'capture-to-total', 'currdir', 'toward', 
-                cellB, 0.5, 'currdir', 'toward',
-                cellC, 0.5, [0, 0, 0], 'away')
+        extn = cards.ExponentialTransform('neutron', 
+                self.fuel, 'capture-to-total', 'currdir', 'toward', 
+                self.coolant, 0.5, 'currdir', 'toward',
+                self.graveyard, 0.5, [0, 0, 0], 'away')
         
 
     def test_ITally(self):
