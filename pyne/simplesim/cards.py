@@ -2804,12 +2804,11 @@ def ExponentialTransform(IMisc):
             the ratio of the capture cross section to the total cross section
             (referred to as Sigma_a in the MCNP manual). Otherwise, the factor
             is a number between 0 and 1.
-        direction : str or 3-element list/:py:class:`np.array` [centimeters]
+        direction : str 
             If 'currdir' then the stretching is done in the particle's
             direction of travel. If 'x', 'X', 'y', 'Y', or 'z', 'Z', the
-            stretching is with respect to the requested axis. If a 3-element
-            list or array, the stretching is done with respect to the point
-            given by this list/array.
+            stretching is with respect to the requested axis. Otherwise, it is
+            the name of a vector on the :py:class:`Vector` card.
         sign : str
             If 'toward', the stretching is done toward the direction requested.
             If 'away', the stretching is done away from the direction requested.
@@ -2840,16 +2839,21 @@ def ExponentialTransform(IMisc):
 
         The following requests a transformation away from the origin::
 
-            extn = ExponentialTransform('neutron', cellA, 0.5, [0, 0, 0],
+            extn = ExponentialTransform('neutron', cellA, 0.5, 'vec1',
                     'away')
 
-        If the user wants to request an exponential transform for cells
+        where somewhere else the user has added::
+
+            vec = Vector()
+            vec.add('vec1', [0, 0, 0])
+
+        to the simulation. If the user wants to request an exponential transform for cells
         ``cellB`` and ``cellC`` as well, they can do the following::
 
             extn = ExponentialTransform('neutron', 
                     cellA, 'capture-to-total', 'currdir', 'toward', 
                     cellB, 0.5, 'currdir', 'toward',
-                    cellC, 0.5, [0, 0, 0], 'away')
+                    cellC, 0.5, 'vec1', 'away')
 
         """
         super(ExponentialTransform, self).__init__('exptransform-' + particle,
@@ -2889,27 +2893,40 @@ def ExponentialTransform(IMisc):
         string = "stretch by {0} ".format(self.stretchs[i_cell])
         string += self.signs[i_cell] + " "
         if self.signs[i_cell] == 'away': string += "from "
-        if type(self.directions[i_cell]) is str: 
-            string += self.directions[i_cell]
-        else: 
-            string += "(%.5e, %.5e, %.5e) cm" % tuple(self.directions[i_cell])
+        string += self.directions[i_cell]
         return string
 
     def mcnp(self, float_format, sim):
+        # TODO this ordering might not be correct, particularly once we add
+        # support for universes, etc.
         string = "EXT:%s" % self.mcnp_particle[self.particle]
-        string = " "
+        # TODO this should loop through in the print order.
+        for cell in self.sim.sys.cells: 
+            if cell in self.cells:
+                i_cell = self.cells.index(cell)
+                string += " " + self._mcnp_unit(float_format, sim, i_cell)
+            else: 
+                string += " 0"
+        return string
 
-    def _mcnp_unit(self, float_format, i_cell):
+    def _mcnp_unit(self, float_format, sim, i_cell):
+        # TODO add exception if there is no Vector card.
         string = ""
         if self.signs[i_cell] == 'away': string += "-"
         if self.stretchs[i_cell] == 'capture-to-total': string += "S"
         else: string += float_format % self.stretchs[i_cell]
         string += "Q"
         if self.directions[i_cell] == 'currdir': pass
-        elif type(self.directions[i_cell]) is str:
+        elif (self.directions[i_cell].upper() == 'X' or
+              self.directions[i_cell].upper() == 'Y' or
+              self.directions[i_cell].upper() == 'Z'):
             string += self.directions[i_cell].upper()
         else:
-            string += "V"
+            if 'vector' not in self.sim.misc:
+                raise Exception("Vector card is needed for the Exponential "
+                        "transform card.")
+            vecname = self.directions[i_cell]
+            string += "V%i" % self.sim.misc['vector'].index(vecname)
 
     @property
     def particle(self):
@@ -3005,7 +3022,10 @@ class Vector(IMisc):
         Parameters
         ----------
         vecname : str
-            Name of the vector
+            Name of the vector. The names 'currdir', 'x', 'X', 'y', 'Y', 'z',
+            and 'Z' will cause a conflict with the
+            :py:class:`ExponentialTransform`, as they have other meanings on
+            that card.
         vector : 3-element list, :py:class:`np.array`, etc. [centimeters]
 
         Returns
