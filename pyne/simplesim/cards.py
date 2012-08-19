@@ -2708,11 +2708,13 @@ class Transformation(IMisc):
     def aux_in_main(self, value): self._aux_in_main = value
 
 
-def ICellMod(IMisc):
-    pass
+class ICellMod(IMisc):
+    __metaclass__ = abc.ABCMeta
+    def __init__(self, name, *args, **kwargs):
+        super(ICellMod, self).__init__(name, *args, **kwargs)
 
 
-def ExponentialTransform(ICellMod):
+class ExponentialTransform(ICellMod):
     """An exponential transform that adjusts the total cross section by a given
     factor in a given direction. Unique card for a given particle type, with
     name `exptransform-<particle>`. In MCNP, this is the **EXT** card.
@@ -2720,7 +2722,7 @@ def ExponentialTransform(ICellMod):
     .. inheritance-diagram:: pyne.simplesim.cards.ExponentialTransform
 
     """
-    def __init__(self, particle, cell, stretch, direction, toward, *args):
+    def __init__(self, particle, cell, stretch, direction, sign, *args):
         """
         Parameters
         ----------
@@ -2799,20 +2801,18 @@ def ExponentialTransform(ICellMod):
         self.cells = [cell]
         self.stretchs = [stretch]
         self.directions = [direction]
-        self.signs = [signs]
+        self.signs = [sign]
         # If information for multiple cells has been provided...
         for i_cell in range(len(args) / n_args_per_cell):
             i_start = n_args_per_cell * i_cell
             self.add(*args[i_start:i_start+4])
 
-    def add(self, cell, stretch, direction, toward):
+    def add(self, cell, stretch, direction, sign):
         """The user can add additional transforms, for additional cells, using
         this method. See above for a description of the input.
 
         Parameters
         ----------
-        name : str
-        particle : str
         cell : :py:class:`Cell` or subclass
         stretch : str or float
         direction : str 
@@ -2829,9 +2829,9 @@ def ExponentialTransform(ICellMod):
 
         """
         self.cells += [cell]
-        self.stretchs += [stretchs]
-        self.directions += [directions]
-        self.signs += [signs]
+        self.stretchs += [stretch]
+        self.directions += [direction]
+        self.signs += [sign]
 
     def comment(self):
         string = "Exponential transform '%s': " % self.name
