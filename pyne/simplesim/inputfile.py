@@ -18,6 +18,7 @@ extension to other codes may require more effort.
 """
 # TODO need to be able to tell the user the numbers given to the different
 # cards, for parsing.
+# TODO check uniqueness
 
 import abc
 import datetime
