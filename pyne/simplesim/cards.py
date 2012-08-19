@@ -27,6 +27,9 @@ the module.
 # TODO Comment number format to exponential.
 # TODO mcnp_particle ref's.
 # TODO rewrite detectors to work with more than 1 input.
+# TODO move the functionality of ExponentialTransform's constructor to its add
+# method.
+
 import abc
 import collections
 
@@ -543,7 +546,7 @@ class CellMCNP(Cell):
             else:
                 tempcard = Transformation('temp', transform[0],
                     transform[1], transform[3], transform[4])
-                string += tempcard._comment_data()
+                string += tempcard._comment_unit()
         # user_custom
         if self.user_custom: string += " and user's custom input."
         string += "."
@@ -625,7 +628,7 @@ class CellMCNP(Cell):
                 if transform[4] == 'degrees': string += "*"
                 tempcard = Transformation('temp', transform[0],
                     transform[1], transform[3], transform[4])
-                string += "TRCL (%s)" % tempcard._mcnp_lineup(float_format)
+                string += "TRCL (%s)" % tempcard._mcnp_unit(float_format)
                 
         # user_custom
         if self.user_custom: string += " %s" % self.user_custom
@@ -2716,10 +2719,10 @@ class Transformation(IMisc):
 
     def comment(self):
         string = "Transformation '%s': pos. of " % self.name
-        string += self._comment_data()
+        string += self._comment_unit()
         return string
 
-    def _comment_data(self):
+    def _comment_unit(self):
         if self.aux_in_main:
             string += "aux origin in main"
         else:
@@ -2739,10 +2742,10 @@ class Transformation(IMisc):
         string = ""
         if self.degrees: string += "*"        
         string += "TR%i" % sim.transformation_num(self.name)
-        string += self._mcnp_lineup(float_format)
+        string += self._mcnp_unit(float_format)
         return string
 
-    def _mcnp_lineup(self, float_format): 
+    def _mcnp_unit(self, float_format): 
         # Needed by CellMCNP.
         formatstr = " %s %s %s" % 3 * (float_format,)
         string += formatstr % tuple(self.displacement)
@@ -2815,7 +2818,8 @@ def ExponentialTransform(IMisc):
         *args : cell, stretch, direction, sign...
             To request an exponential transform for more than one cell, supply
             the last four arguments for the additional cells. See examples.
-
+            This can also be done using :py:meth:`add`.
+ 
         Examples
         --------
         Consider cell ``cellA``. The following requests a
@@ -2863,28 +2867,49 @@ def ExponentialTransform(IMisc):
         if len(args) % n_args_per_cell != 0:
             raise StandardError("The length of ``*args`` must be a multiple "
                     "of %i. Length is %i." % (n_args_per_cell, len(args)))
-        self.n_cells = len(args) / n_args_per_cell
-        # Initialize what will become the properties of this class.
-        cells = [cell]
-        stretchs = [stretch]
-        directions = [direction]
-        signs = [signs]
+        # Initialize properties.
+        self.cells = [cell]
+        self.stretchs = [stretch]
+        self.directions = [direction]
+        self.signs = [signs]
         # If information for multiple cells has been provided...
-        for i_cell in range(self.n_cells):
-            cells += [args[n_args_per_cell * i_cell]]
-            stretchs += [args[n_args_per_cell * i_cell + 1]]
-            directions += [args[n_args_per_cell * i_cell + 2]]
-            signs += [args[n_args_per_cell * i_cell + 3]]
-        self.cells = cells 
-        self.stretchs = stretchs
-        self.directions = directions
-        self.signs = signs
+        for i_cell in range(len(args) / n_args_per_cell):
+            i_start = n_args_per_cell * i_cell
+            self.add(*args[i_start:i_start+4])
+
+    def add(self, cell, stretch, direction, toward):
+        """The user can add additional transforms, for additional cells, using
+        this method. See above for a description of the input.
+
+        Parameters
+        ----------
+        name : str
+        particle : str
+        cell : :py:class:`Cell` or subclass
+        stretch : str or float
+        direction : str 
+        sign : str
+
+        Examples
+        --------
+        The last example above can also be achieved by the following::
+
+            extn = ExponentialTransform('neutron', 
+                    cellA, 'capture-to-total', 'currdir', 'toward')
+            extn.add(cellB, 0.5, 'currdir', 'toward')
+            extn.add(cellC, 0.5, 'vec1', 'away')
+
+        """
+        self.cells += [cell]
+        self.stretchs += [stretchs]
+        self.directions += [directions]
+        self.signs += [signs]
 
     def comment(self):
         string = "Exponential transform '%s': " % self.name
-        for i_cell in range(self.n_cells):
+        for i_cell in range(len(self.cells)):
             string += " " + self._comment_unit(i_cell)
-            if i_cell < (self.n_cells - 1):
+            if i_cell < (len(self.cells) - 1):
                 string += ";"
         return string
 
@@ -2992,28 +3017,6 @@ class Vector(IMisc):
         super(Vector, self).__init__('vector', unique=True)
         self.vectors = collections.OrderedDict()
 
-    def comment(self):
-        string = "Vector '%s':" % self.name
-        counter = 0
-        for key, val in self.vectors.iteritems():
-            counter += 1
-            string += " %s: (%.5e, %.5e, %.5e) cm" % ((key,) + tuple(val))
-            if counter < len(self.vectors):
-                string += ","
-        return string + "."
-
-    def mcnp(self, float_format, sim):
-        if len(self.vectors) == 0:
-            raise StandardError("No vectors added.")
-        string = "VECT"
-        counter = 0
-        for key, val in self.vectors.iteritems():
-            counter += 1
-            index = self.index(key)
-            formatstr = " V%i %s %s %s" % ((index,) + 3 * (float_format,))
-            string += formatstr % tuple(val)
-        return string
-        
     def add(self, vecname, vector):
         """Adds a vector with name ``vecname`` to the card. If a vector with that
         vecname has already been added, an exception is raised. Returns the index
@@ -3050,6 +3053,29 @@ class Vector(IMisc):
         self.vectors[vecname] = vector
         return self.index(vecname)
 
+
+    def comment(self):
+        string = "Vector '%s':" % self.name
+        counter = 0
+        for key, val in self.vectors.iteritems():
+            counter += 1
+            string += " %s: (%.5e, %.5e, %.5e) cm" % ((key,) + tuple(val))
+            if counter < len(self.vectors):
+                string += ","
+        return string + "."
+
+    def mcnp(self, float_format, sim):
+        if len(self.vectors) == 0:
+            raise StandardError("No vectors added.")
+        string = "VECT"
+        counter = 0
+        for key, val in self.vectors.iteritems():
+            counter += 1
+            index = self.index(key)
+            formatstr = " V%i %s %s %s" % ((index,) + 3 * (float_format,))
+            string += formatstr % tuple(val)
+        return string
+        
     def index(self, vecname):
         # MCNP is okay with index 0.
         return self.vectors.keys().index(vecname)
