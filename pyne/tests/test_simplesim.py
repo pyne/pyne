@@ -397,7 +397,7 @@ class TestSystemDefinition(unittest.TestCase):
         self.rxr.add_cell(self.fuel)
         self.rxr.add_cell(self.coolant)
         self.rxr.add_cell(self.graveyard)
-        self.sim = definition.MCNPSimulation(self.rxr)
+        self.sim = definition.MCNPSimulation(self.rxr, verbose=False)
 
     def test_Cell(self):
 
@@ -417,20 +417,21 @@ class TestSystemDefinition(unittest.TestCase):
         # self.fuel is not a Material.
         self.assertRaises(ValueError, cards.Cell, 'B', self.pin.neg &
             self.cellbound.pos, self.fuel, 10.0, 'g/cm^3')
-        cellC = cards.Cell('C', self.pin.neg & self.cellbound.pos, self.fuel,
+        cellC = cards.Cell('C', self.pin.neg & self.cellbound.pos, self.uo2,
                 0.5, 'atoms/b/cm')
         self.assertRaises(ValueError, cards.Cell, 'B', self.pin.neg &
-            self.cellbound.pos, self.fuel)
+            self.cellbound.pos, self.uo2)
         self.assertRaises(ValueError, cards.Cell, 'B', self.pin.neg &
-            self.cellbound.pos, self.fuel, density=1)
+            self.cellbound.pos, self.uo2, density=1)
         self.assertRaises(ValueError, cards.Cell, 'B', self.pin.neg &
-            self.cellbound.pos, self.fuel, density_units='g/cm^3')
+            self.cellbound.pos, self.uo2, density_units='g/cm^3')
         self.assertRaises(ValueError, cards.Cell, 'B', self.pin.neg &
             self.cellbound.pos, density=1)
         self.assertRaises(ValueError, cards.Cell, 'B', self.pin.neg &
             self.cellbound.pos, density_units='g/cm^3')
 
     def test_CellMCNP(self):
+        # Test each keyword, and test a few in combination.
         pass
 
     def test_ITally(self):
