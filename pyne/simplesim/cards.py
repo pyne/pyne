@@ -416,10 +416,32 @@ class CellMCNP(Cell):
 
         Examples
         --------
-        The following sets the temperature of the cell to 600 K::
+        The following sets the temperature of the cell to 600 K, its volume
+        to 1.5 cm^3, and the neutron impotartance to 1.::
 
-            cellA = CellMCNP(
+            cellA = CellMCNP('A', surfA.neg & surfB.pos,
+                    matA, 10.0, 'g/cm^3',
+                    temperature=600, volume=1,
+                    importance=('neutron', 1))
 
+        The following sets the neutron importance to 1 and the photon
+        importance to 0::
+
+            cellA = CellMCNP('A', surfA.neg & surfB.pos,
+                    matA, 10.0, 'g/cm^3',
+                    importance=[('neutron', 1), ('photon', 0)])
+
+        The following sets an exponential transform of 0.7
+
+        If the user wants to supply an exponential transform card, with a
+        transform of '0.7V2', on their own, they can do the following::
+
+            cellA = CellMCNP('A', surfA.neg & surfB.pos,
+                    matA, 10.0, 'g/cm^3',
+                    importance=[('neutron', 1), ('photon', 0)],
+                    user_custom='EXT:N 0.7V2')
+
+        and the user_custom string will be printed at the end of the cell card.
 
         See :py:class:`Cell` for more examples.
 
@@ -635,6 +657,8 @@ class CellMCNP(Cell):
 
     @importance.setter
     def importance(self, value):
+        # TODO check that the importance isn't set for the same particle
+        # multiple times.
         self._importance = value
 
     @property
