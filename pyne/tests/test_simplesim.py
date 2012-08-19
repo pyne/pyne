@@ -400,6 +400,10 @@ class TestSystemDefinition(unittest.TestCase):
         self.sim = definition.MCNPSimulation(self.rxr, verbose=False)
 
     def test_Cell(self):
+        """Tests :py:class:`cards.Cell`'s methods, properties, and
+        exceptions.
+
+        """
 
         cellA = cards.Cell('A', self.pin.neg & self.cellbound.pos)
         self.rxr.add_cell(cellA)
@@ -431,7 +435,11 @@ class TestSystemDefinition(unittest.TestCase):
             self.cellbound.pos, density_units='g/cm^3')
 
     def test_CellMCNP(self):
-        # Test each keyword, and test a few in combination.
+        """Tests :py:class:`cards.CellMCNP`'s methods, properties, and
+        exceptions. Tests each kwarg, and test a
+        few in combination.
+
+        """
         # Without keyword arguments
         cellC = cards.Cell('C', self.pin.neg & self.cellbound.pos)
         self.rxr.add_cell(cellC)
@@ -694,6 +702,10 @@ class TestSystemDefinition(unittest.TestCase):
                     10e6]))
         self.assertEquals(egrid.comment(), "Energy grid 'grid0' for "
                 "all tallies: 4 groups.")
+
+
+class TestMisc(unittest.TestCase):
+    pass
 
 
 class TestSimulationDefinition(unittest.TestCase):
