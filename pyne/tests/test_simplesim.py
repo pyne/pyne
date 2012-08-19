@@ -455,6 +455,45 @@ class TestSystemDefinition(unittest.TestCase):
         self.assertEquals(cellD.mcnp("%.5e", self.sim), "5 1 -1.00000e+01 "
                 "(-1 2)")
 
+        ## Vector
+        vec = cards.Vector()
+        self.assertEquals(vec.name, 'vector')
+        vec.add('origin', [0, 0, 0])
+        self.assertEquals(vec.index('origin'), 0)
+        self.assertEquals(vec.comment(), "Vector 'vector': origin: "
+                "(0.00000e+00, 0.00000e+00, 0.00000e+00) cm.")
+        # the mcnp() method doesn't actually need a sim.
+        self.assertEquals(vec.mcnp('%.1e', None), "VECT V0 0.0e+00 0.0e+00 "
+                "0.0e+00")
+        vec.add('x-axis', np.array([1, 0, 0]))
+        self.assertEquals(vec.index('origin'), 0)
+        self.assertEquals(vec.index('x-axis'), 1)
+        self.assertEquals(vec.comment(), "Vector 'vector': origin: "
+                "(0.00000e+00, 0.00000e+00, 0.00000e+00) cm, x-axis: "
+                "(1.00000e+00, 0.00000e+00, 0.00000e+00) cm.")
+        # the mcnp() method doesn't actually need a sim.
+        self.assertEquals(vec.mcnp('%.1e', None), "VECT V0 0.0e+00 0.0e+00 "
+                "0.0e+00 V1 1.0e+00 0.0e+00 0.0e+00")
+
+        ## ExponentialTransform
+        extn = ExponentialTransform('neutron', cellA, 'capture-to-total',
+                'currdir', 'toward')
+        self.assertEquals(extn.name, 'exptransform-neutron')
+        self.assertIs(extn.cells[0], cellA)
+        self.assertEquals(extn.stretchs[0], 'capture-to-total')
+        self.assertEquals(extn.directions[0], 'currdir')
+        self.assertEquals(extn.signs[0], 'toward')
+        extn = ExponentialTransform('neutron', cellA, 0.5, 'currdir',
+                'toward')
+        extn = ExponentialTransform('neutron', cellA, 0.5, 'x', 'toward')
+        extn = ExponentialTransform('neutron', cellA, 0.5, [0, 0, 0],
+                'away')
+        extn = ExponentialTransform('neutron', 
+                cellA, 'capture-to-total', 'currdir', 'toward', 
+                cellB, 0.5, 'currdir', 'toward',
+                cellC, 0.5, [0, 0, 0], 'away')
+        
+
     def test_ITally(self):
         """Tests :py:class:`cards.ITally`'s methods, properties, and
         exceptions, and those of its subclasses.
@@ -706,26 +745,8 @@ class TestSystemDefinition(unittest.TestCase):
 
 class TestMisc(unittest.TestCase):
     """Tests subclasses of :py:class:`cards.IMisc`."""
+    pass
 
-    def test_Vector(self):
-        vec = cards.Vector()
-        self.assertEquals(vec.name, 'vector')
-        vec.add('origin', [0, 0, 0])
-        self.assertEquals(vec.index('origin'), 0)
-        self.assertEquals(vec.comment(), "Vector 'vector': origin: "
-                "(0.00000e+00, 0.00000e+00, 0.00000e+00) cm.")
-        # the mcnp() method doesn't actually need a sim.
-        self.assertEquals(vec.mcnp('%.1e', None), "VECT V0 0.0e+00 0.0e+00 "
-                "0.0e+00")
-        vec.add('x-axis', np.array([1, 0, 0]))
-        self.assertEquals(vec.index('origin'), 0)
-        self.assertEquals(vec.index('x-axis'), 1)
-        self.assertEquals(vec.comment(), "Vector 'vector': origin: "
-                "(0.00000e+00, 0.00000e+00, 0.00000e+00) cm, x-axis: "
-                "(1.00000e+00, 0.00000e+00, 0.00000e+00) cm.")
-        # the mcnp() method doesn't actually need a sim.
-        self.assertEquals(vec.mcnp('%.1e', None), "VECT V0 0.0e+00 0.0e+00 "
-                "0.0e+00 V1 1.0e+00 0.0e+00 0.0e+00")
 
 
 class TestSimulationDefinition(unittest.TestCase):

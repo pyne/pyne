@@ -257,16 +257,13 @@ class Cell(ICard):
                     % density_units)
 
     @property
-    def region(self):
-        return self._region
+    def region(self): return self._region
 
     @region.setter
-    def region(self, obj):
-        self._region = obj
+    def region(self, obj): self._region = obj
 
     @property
-    def material(self):
-        return self._material
+    def material(self): return self._material
 
     @material.setter
     def material(self, obj):
@@ -281,14 +278,13 @@ class Cell(ICard):
         self._material = obj
 
     @property
-    def density(self):          return self._density
+    def density(self): return self._density
 
     @density.setter
-    def density(self, value):   self._density = value
+    def density(self, value): self._density = value
 
     @property
-    def density_units(self):
-        return self._density_units
+    def density_units(self): return self._density_units
 
     @density_units.setter
     def density_units(self, value):
@@ -634,8 +630,7 @@ class CellMCNP(Cell):
         else: return [arg]
 
     @property
-    def temperature(self):
-        return self._temperature
+    def temperature(self): return self._temperature
 
     @temperature.setter
     def temperature(self, value):
@@ -651,8 +646,7 @@ class CellMCNP(Cell):
         self._temperature = value
 
     @property
-    def volume(self):
-        return self._volume
+    def volume(self): return self._volume
 
     @volume.setter
     def volume(self, value):
@@ -661,8 +655,7 @@ class CellMCNP(Cell):
                 "User provided %.4f." % value)
 
     @property
-    def importance(self):
-        return self._importance
+    def importance(self): return self._importance
 
     @importance.setter
     def importance(self, value):
@@ -671,76 +664,58 @@ class CellMCNP(Cell):
         self._importance = value
 
     @property
-    def exp_transform(self):
-        return self._exp_transform
+    def exp_transform(self): return self._exp_transform
 
     @exp_transform.setter
-    def exp_transform(self, value):
-        self._exp_transform = value
+    def exp_transform(self, value): self._exp_transform = value
 
     @property
-    def forced_coll(self):
-        return self._forced_coll
+    def forced_coll(self): return self._forced_coll
 
     @forced_coll.setter
-    def forced_coll(self, value):
-        self._forced_coll = value
+    def forced_coll(self, value): self._forced_coll = value
 
     @property
-    def weight_win_bound(self):
-        return self._weight_win_bound
+    def weight_win_bound(self): return self._weight_win_bound
 
     @weight_win_bound.setter
-    def weight_win_bound(self, value):
-        self._weight_win_bound = value
+    def weight_win_bound(self, value): self._weight_win_bound = value
 
     @property
-    def dxtran_contrib(self):
-        return self._dxtran_contrib
+    def dxtran_contrib(self): return self._dxtran_contrib
 
     @dxtran_contrib.setter
-    def dxtran_contrib(self, value):
-        self._dxtran_contrib = value
+    def dxtran_contrib(self, value): self._dxtran_contrib = value
     
     @property
-    def photon_weight(self):
-        return self._photon_weight
+    def photon_weight(self): return self._photon_weight
     
     @photon_weight.setter
-    def photon_weight(self, value):
-        self._photon_weight = value
+    def photon_weight(self, value): self._photon_weight = value
     
     @property
-    def fission_turnoff(self):
-        return self._fission_turnoff
+    def fission_turnoff(self): return self._fission_turnoff
     
     @fission_turnoff.setter
-    def fission_turnoff(self, value):
-        self._fission_turnoff = value
+    def fission_turnoff(self, value): self._fission_turnoff = value
 
     @property
-    def det_contrib(self):
-        return self._det_contrib
+    def det_contrib(self): return self._det_contrib
     
     @det_contrib.setter
-    def det_contrib(self, value):
-        self._det_contrib = value
+    def det_contrib(self, value): self._det_contrib = value
 
     @property
-    def transformation(self):
-        return self._transformation
+    def transformation(self): return self._transformation
     
     @transformation.setter
-    def transformation(self, value):
-        self._transformation = value
+    def transformation(self, value): self._transformation = value
 
     @property
-    def user_custom(self):
-        return self._user_custom
+    def user_custom(self): return self._user_custom
     
     @user_custom.setter
-    def user_custom(self, value):
-        self._user_custom = value
+    def user_custom(self, value): self._user_custom = value
     
 
 class IUniverse(ICard):
@@ -912,6 +887,16 @@ class ISurface(ICard):
         """Similar to :py:attr:`neg`, except the resulting
         :py:class:`RegionLeaf` is on the side of the surface with a positive
         sense.
+
+        Examples
+        --------
+        The following shows a simple case of how a more complex region can be
+        constructed from regions returned by this property::
+
+            reg1 = surf1.pos
+            reg2 = surf2.pos
+            reg3 = reg1 & reg2
+            reg4 = reg1 | reg2
         
         """
         return RegionLeaf(self, True)
@@ -985,8 +970,7 @@ class IAxisSurface(ISurface):
         raise NotImplementedError
 
     @property
-    def cartesian_axis(self):
-        return self._cartesian_axis
+    def cartesian_axis(self): return self._cartesian_axis
 
     @cartesian_axis.setter
     def cartesian_axis(self, value):
@@ -1201,12 +1185,9 @@ class AxisPlane(IAxisSurface):
            plane.shift([0, 3, 2])
 
         """
-        if self.cartesian_axis == 'x':
-            self.position += vector[0]
-        elif self.cartesian_axis == 'y':
-            self.position += vector[1]
-        elif self.cartesian_axis == 'z':
-            self.position += vector[2]
+        if self.cartesian_axis == 'x':   self.position += vector[0]
+        elif self.cartesian_axis == 'y': self.position += vector[1]
+        elif self.cartesian_axis == 'z': self.position += vector[2]
 
     def stretch(self, vector):
         """See :py:meth:`ISurface.stretch`. Axis planes can be stretched in any
@@ -1233,12 +1214,10 @@ class AxisPlane(IAxisSurface):
             self.position *= vector[2]
 
     @property
-    def position(self):
-        return self._position
+    def position(self): return self._position
 
     @position.setter
-    def position(self, value):
-        self._position = value
+    def position(self, value): self._position = value
 
 
 class IMacrobody(ISurface):
@@ -1344,25 +1323,18 @@ class Parallelepiped(IMacrobody):
         
         """
         if vector[0] != 0:
-            if vector[0] > 0:
-                self.xlims *= vector[0]
-            else:
+            if vector[0] > 0: self.xlims *= vector[0]
+            else: self.xlims = vector[0] * self.xlims[::-1]
                 # Stretch factor is negative, swap limits.
-                self.xlims = vector[0] * self.xlims[::-1]
         if vector[1] != 0:
-            if vector[1] > 0:
-                self.ylims *= vector[1]
-            else:
-                self.ylims = vector[1] * self.ylims[::-1]
+            if vector[1] > 0: self.ylims *= vector[1]
+            else: self.ylims = vector[1] * self.ylims[::-1]
         if vector[2] != 0:
-            if vector[2] > 0: 
-                self.zlims *= vector[2]
-            else:
-                self.zlims = vector[2] * self.zlims[::-1]
+            if vector[2] > 0: self.zlims *= vector[2]
+            else: self.zlims = vector[2] * self.zlims[::-1]
 
     @property
-    def xlims(self):
-        return self._xlims
+    def xlims(self): return self._xlims
 
     @xlims.setter
     def xlims(self, value):
@@ -1372,8 +1344,7 @@ class Parallelepiped(IMacrobody):
         self._xlims = value
 
     @property
-    def ylims(self):
-        return self._ylims
+    def ylims(self): return self._ylims
 
     @ylims.setter
     def ylims(self, value):
@@ -1383,8 +1354,7 @@ class Parallelepiped(IMacrobody):
         self._ylims = value
 
     @property
-    def zlims(self):
-        return self._zlims
+    def zlims(self): return self._zlims
 
     @zlims.setter
     def zlims(self, value):
@@ -1667,8 +1637,7 @@ class Criticality(ISource):
                     self.n_cycles))
 
     @property
-    def n_histories(self):
-        return self._n_histories
+    def n_histories(self): return self._n_histories
 
     @n_histories.setter
     def n_histories(self, value):
@@ -1681,8 +1650,7 @@ class Criticality(ISource):
         self._n_histories = value
 
     @property
-    def keff_guess(self):
-        return self._keff_guess
+    def keff_guess(self): return self._keff_guess
  
     @keff_guess.setter
     def keff_guess(self, value):
@@ -1692,8 +1660,7 @@ class Criticality(ISource):
         self._keff_guess = value
 
     @property
-    def n_skip_cycles(self):
-        return self._n_skip_cycles
+    def n_skip_cycles(self): return self._n_skip_cycles
 
     @n_skip_cycles.setter
     def n_skip_cycles(self, value):
@@ -1706,8 +1673,7 @@ class Criticality(ISource):
         self._n_skip_cycles = value
 
     @property
-    def n_cycles(self):
-        return self._n_cycles
+    def n_cycles(self): return self._n_cycles
 
     @n_cycles.setter
     def n_cycles(self, value):
@@ -1765,8 +1731,7 @@ class CriticalityPoints(ISource):
         return string
 
     @property
-    def points(self):
-        return self._points
+    def points(self): return self._points
 
     @points.setter
     def points(self, value):
@@ -1815,8 +1780,7 @@ class ITally(ICard):
         return string
 
     @property
-    def particle(self):
-        return self._particle
+    def particle(self): return self._particle
 
     @particle.setter
     def particle(self, value):
@@ -1950,20 +1914,16 @@ class ICellSurfTally(ITally):
                 " got {0}.".format(type(self.cards)))
 
     @property
-    def cards(self):
-        return self._cards
+    def cards(self): return self._cards
 
     @cards.setter
-    def cards(self, value):
-        self._cards = value
+    def cards(self, value): self._cards = value
 
     @property
-    def alt_units(self):
-        return self._alt_units
+    def alt_units(self): return self._alt_units
 
     @alt_units.setter
-    def alt_units(self, value):
-        self._alt_units = value
+    def alt_units(self, value): self._alt_units = value
 
 
 class SurfaceCurrent(ICellSurfTally):
@@ -2009,10 +1969,8 @@ class SurfaceCurrent(ICellSurfTally):
     def comment(self):
         string = super(SurfaceCurrent, self).comment("Surface current", 'total',
                 'surface')
-        if self.total:
-            string += "; and total of all provided."
-        else:
-            string += "."
+        if self.total: string += "; and total of all provided."
+        else:          string += "."
         return string
 
 
@@ -2060,19 +2018,15 @@ class IAverageTally(ICellSurfTally):
     def comment(self, title, card_type):
         avgstr = 'avg.'
         string = super(IAverageTally, self).comment(title, avgstr, card_type)
-        if self.average:
-            string += "; and %s of all provided." % avgstr
-        else:
-            string += "."
+        if self.average: string += "; and %s of all provided." % avgstr
+        else:            string += "."
         return string
 
     @property
-    def average(self):
-        return self._average
+    def average(self): return self._average
 
     @average.setter
-    def average(self, value):
-        self._average = value
+    def average(self, value): self._average = value
 
 
 class SurfaceFlux(IAverageTally):
@@ -2119,12 +2073,10 @@ class SurfaceFlux(IAverageTally):
         return super(SurfaceFlux, self).comment("Surface flux", 'surface')
 
     @property
-    def total(self):
-        return self._total
+    def total(self): return self._total
 
     @total.setter
-    def total(self, value):
-        self._total = value
+    def total(self, value): self._total = value
 
 
 class CellFlux(IAverageTally):
@@ -2237,8 +2189,7 @@ class CellEnergyDeposition(IAverageTally):
                 'cell')
 
     @property
-    def particle(self):
-        return self._particle
+    def particle(self): return self._particle
 
     @particle.setter
     def particle(self, value):
@@ -2349,8 +2300,7 @@ class CellPulseHeight(IAverageTally):
         return super(CellPulseHeight, self).comment("Pulse height", 'cell')
 
     @property
-    def particle(self):
-        return self._particle
+    def particle(self): return self._particle
 
     @particle.setter
     def particle(self, value):
@@ -2434,10 +2384,8 @@ class IDetector(ITally):
                 string += self._tuple_tostring(point)
                 if counter < len(self.spec):
                     string += "; "
-        if not self.sep_direct: 
-            dircontr = 'not '
-        else:
-            dircontr = ''
+        if not self.sep_direct: dircontr = 'not '
+        else:                   dircontr = ''
         return string + "; direct contrib is %sseparate." % dircontr
     
     @abc.abstractmethod
@@ -2445,20 +2393,16 @@ class IDetector(ITally):
         raise NotImplementedError
 
     @property
-    def spec(self):
-        return self._spec
+    def spec(self): return self._spec
 
     @spec.setter
-    def spec(self, value):
-        self._spec = value
+    def spec(self, value): self._spec = value
 
     @property
-    def sep_direct(self):
-        return self._sep_direct
+    def sep_direct(self): return self._sep_direct
 
     @sep_direct.setter
-    def sep_direct(self, value):
-        self._sep_direct = value
+    def sep_direct(self, value): self._sep_direct = value
 
 
 class PointDetector(IDetector):
@@ -2532,10 +2476,8 @@ class PointDetector(IDetector):
     def _tuple_tostring(self, apoint):
         numbertuple = tuple(apoint[0]) + (abs(apoint[1]),)
         string = "point (%.4f, %.4f, %.4f) cm, radius %.4f " % numbertuple
-        if apoint[1] < 0:
-            string += 'mfp'
-        else:
-            string += 'cm'
+        if apoint[1] < 0: string += 'mfp'
+        else:             string += 'cm'
         return string
 
 
@@ -2601,10 +2543,8 @@ class RingDetector(IDetector):
         string = ("ring %s = %.4f cm, radius %.4f cm, s.o.e. "
                 "radius %.4f " %
                 (aring[0], aring[1], aring[2], abs(aring[3])))
-        if aring[3] < 0:
-            string += 'mfp'
-        else:
-            string += 'cm'
+        if aring[3] < 0: string += 'mfp'
+        else:            string += 'cm'
         return string
 
 
@@ -2635,19 +2575,15 @@ class EnergyGrid(IMisc):
 
     def comment(self):
         string = "Energy grid '%s' for " % self.name
-        if self.tally is None:
-            string += "all tallies"
-        else:
-            string += "tally %s" % self.tally.name
+        if self.tally is None: string += "all tallies"
+        else:                  string += "tally %s" % self.tally.name
         return string + ": %i groups." % len(self.energies)
 
     @property
-    def energies(self):
-        return self._energies
+    def energies(self): return self._energies
 
     @energies.setter
-    def energies(self, value):
-        self._energies = value
+    def energies(self, value): self._energies = value
 
 
 class Comment(ITally):
@@ -2684,7 +2620,7 @@ class Transformation(IMisc):
     """
     # TODO support for MCNP's less-than-9-element transformation matrices.
     def __init__(self, name, displacement, rotation, aux_in_main=True,
-            degrees=False):
+                 degrees=False):
         """
         Parameters
         ----------
@@ -2719,10 +2655,8 @@ class Transformation(IMisc):
         return string
 
     def _comment_unit(self):
-        if self.aux_in_main:
-            string += "aux origin in main"
-        else:
-            string += "main origin in aux"
+        if self.aux_in_main: string += "aux origin in main"
+        else:                string += "main origin in aux"
         string += " (%.5e, %.5e, %.5e) cm" % tuple(self.displacement)
         dirs = ['x', 'y', 'z']
         for idx in range(3):
@@ -2756,31 +2690,29 @@ class Transformation(IMisc):
         return string
 
     @property
-    def displacement(self):
-        return self._displacement
+    def displacement(self): return self._displacement
     
     @displacement.setter
-    def displacement(self, value):
-        self._displacement = value
+    def displacement(self, value): self._displacement = value
 
     @property
-    def rotation(self):
-        return self._rotation
+    def rotation(self): return self._rotation
     
     @rotation.setter
-    def rotation(self, value):
-        self._rotation = value
+    def rotation(self, value): self._rotation = value
 
     @property
-    def aux_in_main(self):
-        return self._aux_in_main
+    def aux_in_main(self): return self._aux_in_main
     
     @aux_in_main.setter
-    def aux_in_main(self, value):
-        self._aux_in_main = value
+    def aux_in_main(self, value): self._aux_in_main = value
 
 
-def ExponentialTransform(IMisc):
+def ICellMod(IMisc):
+    pass
+
+
+def ExponentialTransform(ICellMod):
     """An exponential transform that adjusts the total cross section by a given
     factor in a given direction. Unique card for a given particle type, with
     name `exptransform-<particle>`. In MCNP, this is the **EXT** card.
@@ -2825,7 +2757,7 @@ def ExponentialTransform(IMisc):
 
             extn = ExponentialTransform('neutron', cellA, 'capture-to-total',
                     'currdir', 'toward')
-            assert ext.name == 'exptransform-neutron'
+            assert extn.name == 'exptransform-neutron'
         
         The following requests a transformation that stretches by a factor of
         0.5 in the direction of the particle's travel::
@@ -2950,8 +2882,7 @@ def ExponentialTransform(IMisc):
             string += "V%i" % self.sim.misc['vector'].index(vecname)
 
     @property
-    def particle(self):
-        return self._particle
+    def particle(self): return self._particle
 
     @particle.setter
     def particle(self, value):
@@ -2961,8 +2892,7 @@ def ExponentialTransform(IMisc):
         self._particle = value
 
     @property
-    def cells(self):
-        return self._cells
+    def cells(self): return self._cells
 
     @cells.setter
     def cells(self, value):
@@ -2972,25 +2902,22 @@ def ExponentialTransform(IMisc):
                         "provided {0}.".format(arg))
         self._cells = value
 
+    # I'm aware that this spelling of stretchs is incorrect; it's for
+    # consistency.
     @property
-    def stretchs(self):
-        return self._stretchs
+    def stretchs(self): return self._stretchs
 
     @stretchs.setter
-    def stretchs(self, value):
-        self._stretchs = value
+    def stretchs(self, value): self._stretchs = value
 
     @property
-    def directions(self):
-        return self._directions
+    def directions(self): return self._directions
 
     @directions.setter
-    def directions(self, value):
-        self._directions = value
+    def directions(self, value): self._directions = value
 
     @property
-    def signs(self):
-        return self._signs
+    def signs(self): return self._signs
 
     @signs.setter
     def signs(self, value):
