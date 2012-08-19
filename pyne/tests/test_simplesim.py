@@ -708,21 +708,21 @@ class TestMisc(unittest.TestCase):
     """Tests subclasses of :py:class:`cards.IMisc`."""
 
     def test_Vector(self):
-        vec = Vector()
+        vec = cards.Vector()
         self.assertEquals(vec.name, 'vector')
         vec.add('origin', [0, 0, 0])
         self.assertEquals(vec.index('origin'), 0)
-        self.assertEquals(vec.comment(), "Vector 'vector': (0.00000e+00"
-                ", 0.00000e+00, 0.00000+e00) cm.")
+        self.assertEquals(vec.comment(), "Vector 'vector': origin: "
+                "(0.00000e+00, 0.00000e+00, 0.00000e+00) cm.")
         # the mcnp() method doesn't actually need a sim.
         self.assertEquals(vec.mcnp('%.1e', None), "VECT V0 0.0e+00 0.0e+00 "
                 "0.0e+00")
-        vec.add('x-axis', np.array([1, 0, 0])
+        vec.add('x-axis', np.array([1, 0, 0]))
         self.assertEquals(vec.index('origin'), 0)
         self.assertEquals(vec.index('x-axis'), 1)
         self.assertEquals(vec.comment(), "Vector 'vector': origin: "
-                "(0.00000e+00, 0.00000e+00, 0.00000+e00) cm, x-axis: "
-                "(1.00000e+00, 0.00000e+00, 0.00000+e00) cm.")
+                "(0.00000e+00, 0.00000e+00, 0.00000e+00) cm, x-axis: "
+                "(1.00000e+00, 0.00000e+00, 0.00000e+00) cm.")
         # the mcnp() method doesn't actually need a sim.
         self.assertEquals(vec.mcnp('%.1e', None), "VECT V0 0.0e+00 0.0e+00 "
                 "0.0e+00 V1 1.0e+00 0.0e+00 0.0e+00")
