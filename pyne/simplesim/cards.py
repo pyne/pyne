@@ -52,10 +52,10 @@ class ICard(object):
                      'muon': '|',
                      'anti-muon': '-|',
                      'tau': '*',
-                     'electron neutrino': 'U',
-                     'anti-electron neutrino': '-U',
-                     'muon neutrino': 'V',
-                     'tau neutrino': 'W',
+                     'electron_neutrino': 'U',
+                     'anti-electron_neutrino': '-U',
+                     'muon_neutrino': 'V',
+                     'tau_neutrino': 'W',
                      'proton': 'H',
                      'anti-proton': '-H',
                      'lambda': 'L',
@@ -70,11 +70,11 @@ class ICard(object):
                      'lambdab0': '<',
                      'pion+': '/',
                      'pion-': '-/',
-                     'neutral pion': 'Z',
+                     'neutral_pion': 'Z',
                      'kaon+': 'K',
                      'kaon-': '-K',
-                     'K0 short': '%',
-                     'K0 long': '^',
+                     'K0-short': '%',
+                     'K0-long': '^',
                      'D+': 'G',
                      'D0': '@',
                      'Ds+': 'f',
@@ -85,7 +85,7 @@ class ICard(object):
                      'triton': 'T',
                      'helium-3': 'S',
                      'helium-4': 'A',
-                     'heavy ions': '#'
+                     'heavy_ions': '#'
                      }
     
     def __init__(self, name, unique=False):
@@ -95,9 +95,9 @@ class ICard(object):
         name : str
             Name of this instance of this card, used for referencing this card
             from others and modifying this card after it has been added to a
-            definition (see :py:mod:`pyne.simplesim.definition`). There is no
-            known restriction on the characters that can be used in the name,
-            but the name must be unique.
+            definition (see :py:mod:`pyne.simplesim.definition`). The only
+            known restriction on the format of the name is that it cannot
+            contain spaces. 
 
         """
         self._unique = unique
@@ -124,6 +124,9 @@ class ICard(object):
 
     @name.setter
     def name(self, value):
+        if value.find(' ') != -1:
+            raise ValueError("The property ``name`` cannot contain spaces. "
+                    "User provided '%s'." % value)
         if self._unique:
             raise StandardError("This is a unique card, meaning only one card"
                     " of this type can be found in a ``definition``. "
