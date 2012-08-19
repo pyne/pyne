@@ -397,22 +397,41 @@ class TestSystemDefinition(unittest.TestCase):
         self.rxr.add_cell(self.fuel)
         self.rxr.add_cell(self.coolant)
         self.rxr.add_cell(self.graveyard)
+        self.sim = definition.MCNPSimulation(self.rxr)
 
     def test_Cell(self):
 
-        cellA = cards.Cell('A', self.pin.neg & self.cellbound.pos,
-                self.uo2)
-        cellB = cards.Cell('B', surfA.neg & surfB.pos, matA, 10.0, 'g/cm^3')
-        cellB = cards.Cell('B', surfA.neg & surfB.pos, matA, 0.5, 'atoms/b/cm')
-        cellB = cards.Cell('B', surfA.neg & surfB.pos, matA)
-        cellB = cards.Cell('B', surfA.neg & surfB.pos, matA, density=1)
-        cellB = cards.Cell('B', surfA.neg & surfB.pos, matA, 
-                density_units='g/cm^3')
-        cellB = cards.Cell('B', surfA.neg & surfB.pos, density=1)
-        cellB = cards.Cell('B', surfA.neg & surfB.pos, 
-                density_units='g/cm^3')
+        cellA = cards.Cell('A', self.pin.neg & self.cellbound.pos)
+        self.rxr.add_cell(cellA)
+        self.assertEquals(cellA.comment(), "Cell 'A': region "
+                "(-fuelpin & +bound), void")
+        self.assertEquals(cellA.mcnp("%.5e", self.sim), "4 0 (-1 2)")
+        cellB = cards.Cell('B', self.pin.neg & self.cellbound.pos, self.uo2,
+                10.0, 'g/cm^3')
+        self.rxr.add_cell(cellB)
+        self.assertEquals(cellB.comment(), "Cell 'B': region "
+                "(-fuelpin & +bound), material 'uo2' density 1.00000e+01 "
+                "g/cm^3")
+        self.assertEquals(cellB.mcnp("%.5e", self.sim), "5 1 -1.00000e+01 "
+                "(-1 2)")
+        # self.fuel is not a Material.
+        self.assertRaises(ValueError, cards.Cell, 'B', self.pin.neg &
+            self.cellbound.pos, self.fuel, 10.0, 'g/cm^3')
+        cellC = cards.Cell('C', self.pin.neg & self.cellbound.pos, self.fuel,
+                0.5, 'atoms/b/cm')
+        self.assertRaises(ValueError, cards.Cell, 'B', self.pin.neg &
+            self.cellbound.pos, self.fuel)
+        self.assertRaises(ValueError, cards.Cell, 'B', self.pin.neg &
+            self.cellbound.pos, self.fuel, density=1)
+        self.assertRaises(ValueError, cards.Cell, 'B', self.pin.neg &
+            self.cellbound.pos, self.fuel, density_units='g/cm^3')
+        self.assertRaises(ValueError, cards.Cell, 'B', self.pin.neg &
+            self.cellbound.pos, density=1)
+        self.assertRaises(ValueError, cards.Cell, 'B', self.pin.neg &
+            self.cellbound.pos, density_units='g/cm^3')
 
     def test_CellMCNP(self):
+        pass
 
     def test_ITally(self):
         """Tests :py:class:`cards.ITally`'s methods, properties, and
