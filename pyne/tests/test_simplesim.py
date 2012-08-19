@@ -455,6 +455,11 @@ class TestSystemDefinition(unittest.TestCase):
         self.assertEquals(cellD.mcnp("%.5e", self.sim), "5 1 -1.00000e+01 "
                 "(-1 2)")
 
+    def test_ExponentialTransform(self):
+        """Tests :py:class:`cards.ExponentialTransform` and the related
+        :py:class:`cards.Vector`.
+
+        """
         ## Vector
         vec = cards.Vector()
         self.assertEquals(vec.name, 'vector')
@@ -474,7 +479,7 @@ class TestSystemDefinition(unittest.TestCase):
         # the mcnp() method doesn't actually need a sim.
         self.assertEquals(vec.mcnp('%.1e', None), "VECT V0 0.0e+00 0.0e+00 "
                 "0.0e+00 V1 1.0e+00 0.0e+00 0.0e+00")
-
+        self.sim.add_misc(vec)
         ## ExponentialTransform
         extn = cards.ExponentialTransform('neutron', self.fuel, 'capture-to-total',
                 'currdir', 'toward')
@@ -483,15 +488,53 @@ class TestSystemDefinition(unittest.TestCase):
         self.assertEquals(extn.stretchs[0], 'capture-to-total')
         self.assertEquals(extn.directions[0], 'currdir')
         self.assertEquals(extn.signs[0], 'toward')
-        extn = cards.ExponentialTransform('neutron', self.fuel, 0.5, 'currdir',
+        self.assertEquals(extn.comment(), "Exponential transform "
+                "'exptransform-neutron': cell 'fuel' stretch by "
+                "capture-to-total toward currdir.")
+        self.assertEquals(extn.mcnp('%.1e', self.sim), "EXT:N S 0 0")
+        extn = cards.ExponentialTransform('neutron', self.coolant, 0.5,
+                'currdir', 'toward')
+        self.assertEquals(extn.comment(), "Exponential transform "
+                "'exptransform-neutron': cell 'coolant' stretch by "
+                "0.5 toward currdir.")
+        self.assertEquals(extn.mcnp('%.1e', self.sim), "EXT:N 0 5.0e-01 0")
+        extn = cards.ExponentialTransform('neutron', self.fuel, 0.5, 'x',
                 'toward')
-        extn = cards.ExponentialTransform('neutron', self.fuel, 0.5, 'x', 'toward')
-        extn = cards.ExponentialTransform('neutron', self.fuel, 0.5, [0, 0, 0],
+        self.assertEquals(extn.comment(), "Exponential transform "
+                "'exptransform-neutron': cell 'fuel' stretch by "
+                "0.5 toward x.")
+        self.assertEquals(extn.mcnp('%.1e', self.sim), "EXT:N 5.0e-01X 0 0")
+        extn = cards.ExponentialTransform('neutron', self.fuel, 0.5, 'origin',
                 'away')
+        self.assertEquals(extn.comment(), "Exponential transform "
+                "'exptransform-neutron': cell 'fuel' stretch by "
+                "0.5 away from origin.")
+        self.assertEquals(extn.mcnp('%.1e', self.sim), "EXT:N -5.0e-01V0 0 0")
+        # Multiple cells.
         extn = cards.ExponentialTransform('neutron', 
                 self.fuel, 'capture-to-total', 'currdir', 'toward', 
                 self.coolant, 0.5, 'currdir', 'toward',
-                self.graveyard, 0.5, [0, 0, 0], 'away')
+                self.graveyard, 0.5, 'x-axis', 'away')
+        self.assertEquals(extn.comment(), "Exponential transform "
+                "'exptransform-neutron': cell 'fuel' stretch by "
+                "capture-to-total toward currdir; cell 'coolant' stretch by "
+                "0.5 toward currdir; cell 'graveyard' stretch by 0.5 away "
+                "from x-axis.")
+        self.assertEquals(extn.mcnp('%.1e', self.sim), 
+                "EXT:N S 5.0e-01 -5.0e-01V1")
+        ext2 = cards.ExponentialTransform('neutron', 
+                self.fuel, 'capture-to-total', 'currdir', 'toward')
+        ext2.add(self.coolant, 0.5, 'currdir', 'toward')
+        ext2.add(self.graveyard, 0.5, 'x-axis', 'away')
+        self.assertEquals(ext2.comment(), "Exponential transform "
+                "'exptransform-neutron': cell 'fuel' stretch by "
+                "capture-to-total toward currdir; cell 'coolant' stretch by "
+                "0.5 toward currdir; cell 'graveyard' stretch by 0.5 away "
+                "from x-axis.")
+        self.assertEquals(ext2.mcnp('%.1e', self.sim), 
+                "EXT:N S 5.0e-01 -5.0e-01V1")
+        # Using add().
+        # Manage order-of-cells issue/question.
         
 
     def test_ITally(self):
