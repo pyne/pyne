@@ -128,8 +128,7 @@ class SystemDefinition(IDefinition):
         cell.region.walk(self._add_unique_surfaces)
         # Only add the material if this is not a void cell and if it doesn't
         # already exist.
-        if (hasattr(cell, 'material') and
-                cell.material.name not in self.materials):
+        if (cell.material and cell.material.name not in self.materials):
             self.add_material(cell.material)
         # Constituent surfaces and material have been added, so we can added
         # the cell.
@@ -170,13 +169,16 @@ class SystemDefinition(IDefinition):
 
     def cell_num(self, name):
         # TODO removing cards.
-        return self.cells.keys().index(name)
+        # Must add one because indices start at 0 but card numbers at 1.
+        return self.cells.keys().index(name) + 1
 
     def surface_num(self, name):
-        return self.surfaces.keys().index(name)
+        # Must add one because indices start at 0 but card numbers at 1.
+        return self.surfaces.keys().index(name) + 1
 
     def material_num(self, name):
-        return self.materials.keys().index(name)
+        # Must add one because indices start at 0 but card numbers at 1.
+        return self.materials.keys().index(name) + 1
 
     def remove_cell(self, name):
         raise
@@ -261,9 +263,6 @@ class SimulationDefinition(IDefinition):
         self._assert_unique('misc', card)
         self._misc[card.name] = card
 
-    def tally_num(self, name):
-        raise
-
     def remove_source(self, name):
         raise
 
@@ -310,7 +309,48 @@ class SimulationDefinition(IDefinition):
 
 class MCNPSimulation(SimulationDefinition):
 
+    def add_tally(self, card):
+        super(MCNPSimulation, self).add_tally(card)
+        if isinstance(card, cards.SurfaceCurrent):
+            self._tally_surfacecurrent[card.name] = card
+        elif isinstance(card, cards.SurfaceFlux):
+            self._tally_surfaceflux[card.name] = card
+        elif isinstance(card, cards.CellFlux):
+            self._tally_cellflux[card.name] = card
+        elif isinstance(card, cards.CellEnergyDeposition):
+            self._tally_cellenergydep[card.name] = card
+        elif isinstance(card, cards.CellFissionEnergyDeposition):
+            self._tally_cellfissiondep[card.name] = card
+        elif isinstance(card, (cards.CellPulseHeight,
+                cards.CellChargeDeposition)):
+            self._tally_pulseheight[card.name] = card
+        elif isinstance(card, cards.IDetector):
+            self._tally_detector[card.name] = card
+        else:
+            raise Exception
+
     def tally_num(self, name):
+        card = self.tally[name]
+        # Must add one because indices start at 0 but card numbers at 1.
+        if isinstance(card, cards.SurfaceCurrent):
+            return (self._tally_surfacecurrent.keys().index(name) + 1) * 10 + 1
+        elif isinstance(card, cards.SurfaceFlux):
+            return (self._tally_surfaceflux.keys().index(name) + 1) * 10 + 2
+        elif isinstance(card, cards.CellFlux):
+            return (self._tally_cellflux.keys().index(name) + 1) * 10 + 4
+        elif isinstance(card, cards.CellEnergyDeposition):
+            return (self._tally_cellenergydep.keys().index(name) + 1) * 10 + 6
+        elif isinstance(card, cards.CellFissionEnergyDeposition):
+            return (self._tally_cellfissiondep.keys().index(name) + 1) * 10 + 7
+        elif isinstance(card, (cards.CellPulseHeight,
+                cards.CellChargeDeposition)):
+            return (self._tally_pulseheight.keys().index(name) + 1) * 10 + 8
+        elif isinstance(card, cards.IDetector):
+            return (self._tally_detector.keys().index(name) + 1) * 10 + 5
+        else:
+            raise Exception
+
+    def remove_tally(self, name):
         raise
 
     def add_transformation(self, card):
