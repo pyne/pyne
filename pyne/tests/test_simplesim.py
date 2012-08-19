@@ -410,7 +410,7 @@ class TestSystemDefinition(unittest.TestCase):
                 10.0, 'g/cm^3')
         self.rxr.add_cell(cellB)
         self.assertEquals(cellB.comment(), "Cell 'B': region "
-                "(-fuelpin & +bound), material 'uo2' density 1.00000e+01 "
+                "(-fuelpin & +bound), material 'UO2' density 1.00000e+01 "
                 "g/cm^3")
         self.assertEquals(cellB.mcnp("%.5e", self.sim), "5 1 -1.00000e+01 "
                 "(-1 2)")
