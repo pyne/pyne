@@ -2969,6 +2969,8 @@ class Vector(IMisc):
     used with the :py:card:`ExponentialTransform` card in MCNP.
     
     """
+    # TODO don't require the user to make this card. The reason we're allowing
+    # it is vector re-use.
     def __init__(self):
         super(Vector, self).__init__('vector', unique=True)
         self.vectors = collections.OrderedDict()
@@ -3028,7 +3030,8 @@ class Vector(IMisc):
         return self.index(vecname)
 
     def index(self, vecname)
-        return self.vectors.keys().index(vecname) + 1
+        # MCNP is okay with index 0.
+        return self.vectors.keys().index(vecname)
 
 
 
