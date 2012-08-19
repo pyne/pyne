@@ -162,7 +162,7 @@ class Cell(ICard):
         Examples
         --------
         Suppose we have surface cards ``surfA`` and ``surfB``, and material
-        cards ``matA`` and ``matB``. The following creates a void cell on the
+        card ``matA``. The following creates a void cell on the
         negative side of ``surfA`` and the positive side of ``surfB`` (see
         :py:class:`Region` to learn how to create regions)::
 
@@ -217,7 +217,7 @@ class Cell(ICard):
             string += " %i " % sim.sys.material_num(self.material.name)
             # Density, with units prefix.
             string += self._mcnp_density_prefix(self.density_units)
-            string += formatstr % self.density
+            string += float_format % self.density
         else:
             # Void.
             string += " 0"
@@ -416,10 +416,15 @@ class CellMCNP(Cell):
 
         Examples
         --------
-        TODO
+        The following sets the temperature of the cell to 600 K::
+
+            cellA = CellMCNP(
+
+
+        See :py:class:`Cell` for more examples.
 
         """
-        # TODO allow user to use defalt arguments on the transformation card
+        # TODO allow user to use default arguments on the transformation card
         # (e.g. not require the specification of cosines/degrees).
         # TODO allow use of U, LAT, and FILL keywords?
         super(CellMCNP, self).__init__(name, region, material, density,
