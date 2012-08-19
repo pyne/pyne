@@ -26,6 +26,7 @@ the module.
 # doesn't see them, but I want them to see them...
 # TODO Comment number format to exponential.
 # TODO mcnp_particle ref's.
+# TODO rewrite detectors to work with more than 1 input.
 import abc
 
 import numpy as np
@@ -2779,13 +2780,14 @@ class Transformation(IMisc):
 
 
 def ExponentialTransform(IMisc):
-    """An exponential transform that adjusts the total cross section by a
-    given factor in a given direction. In MCNP, this is the **EXT** card.
+    """An exponential transform that adjusts the total cross section by a given
+    factor in a given direction. Unique card for a given particle type, with
+    name `exptransform-<particle>`. In MCNP, this is the **EXT** card.
 
     .. inheritance-diagram:: pyne.simplesim.cards.ExponentialTransform
 
     """
-    def __init__(self, name, particle, stretch, direction, away=False):
+    def __init__(self, particle, cell, stretch, direction, toward, *args):
         """
         Parameters
         ----------
@@ -2793,6 +2795,8 @@ def ExponentialTransform(IMisc):
             See :py:class:`ICard`.
         particle : str
             A particle string, taken from the keys of :py:attr:`mcnp_particle`.
+        cell : :py:class:`Cell` or subclass
+            The cell for which the transform should be applied. 
         stretch : str or float
             The stretch factor. If 'capture-to-total', the stretch factor is
             the ratio of the capture cross section to the total cross section
@@ -2804,56 +2808,103 @@ def ExponentialTransform(IMisc):
             stretching is with respect to the requested axis. If a 3-element
             list or array, the stretching is done with respect to the point
             given by this list/array.
-        away : bool, optional
-            The stretching is by default done 'toward' the direction requested;
-            setting this to False requests the stretching to be done away from
-            the direction requested.
+        sign : str
+            If 'toward', the stretching is done toward the direction requested.
+            If 'away', the stretching is done away from the direction requested.
+        *args : cell, stretch, direction, sign...
+            To request an exponential transform for more than one cell, supply
+            the last four arguments for the additional cells. See examples.
 
         Examples
         --------
-        The following requests a transformation that stretches by the ratio of
-        the capture cross section to the total cross section, in the direction
-        of the particle's travel::
+        Consider cell ``cellA``. The following requests a
+        transformation that stretches by the ratio of the capture cross section
+        to the total cross section, in the direction of the particle's travel.
+        The name of the card will be `exptransform-neutron`::
 
-            ext = ExponentialTransform('ext1', 'neutron', 'capture-to-total',
-                    'currdir')
-
+            extn = ExponentialTransform('neutron', cellA, 'capture-to-total',
+                    'currdir', 'toward')
+            assert ext.name == 'exptransform-neutron'
+        
         The following requests a transformation that stretches by a factor of
         0.5 in the direction of the particle's travel::
 
-            ext = ExponentialTransform('ext1', 'neutron', 0.5, 'currdir')
+            extn = ExponentialTransform('neutron', cellA, 0.5, 'currdir',
+                    'toward')
 
         The following requests a transformation with respect to the x axis::
 
-            ext = ExponentialTransform('ext1', 'neutron', 0.5, 'x')
+            extn = ExponentialTransform('neutron', cellA, 0.5, 'x', 'toward')
 
         The following requests a transformation away from the origin::
 
-            ext = ExponentialTransform('ext1', 'neutron', 0.5, [0, 0, 0],
-                    away=True)
+            extn = ExponentialTransform('neutron', cellA, 0.5, [0, 0, 0],
+                    'away')
+
+        If the user wants to request an exponential transform for cells
+        ``cellB`` and ``cellC`` as well, they can do the following::
+
+            extn = ExponentialTransform('neutron', 
+                    cellA, 'capture-to-total', 'currdir', 'toward', 
+                    cellB, 0.5, 'currdir', 'toward',
+                    cellC, 0.5, [0, 0, 0], 'away')
 
         """
-        super(ExponentialTransform, self).__init__(name)
-        self.stretch = stretch
-        self.direction = direction
-        self.away = away
+        super(ExponentialTransform, self).__init__('exptransform-' + particle)
+        self.particle = particle
+        n_args_per_cell = 4
+        if len(args) % n_args_per_cell != 0:
+            raise StandardError("The length of ``*args`` must be a multiple "
+                    "of %i. Length is %i." % (n_args_per_cell, len(args)))
+        self.n_cells = len(args) / n_args_per_cell
+        # Initialize what will become the properties of this class.
+        cells = [cell]
+        stretchs = [stretch]
+        directions = [direction]
+        signs = [signs]
+        # If information for multiple cells has been provided...
+        for i_cell in range(self.n_cells):
+            cells += [args[n_args_per_cell * i_cell]]
+            stretchs += [args[n_args_per_cell * i_cell + 1]]
+            directions += [args[n_args_per_cell * i_cell + 2]]
+            signs += [args[n_args_per_cell * i_cell + 3]]
+        self.cells = cells 
+        self.stretchs = stretchs
+        self.directions = directions
+        self.signs = signs
 
     def comment(self):
-        string = "Exponential transform '%s' on %ss: " % (self.name,
-                self.particle)
-        return string += " " + self._comment_data()
-
-    def _comment_data(self):
-        string = "stretch by {0} ".format(self.stretch)
-        if not self.away: string += "toward "
-        else:             string += "away from "
-        if type(self.direction) is str: string += self.direction
-        else: string += "(%.5e, %.5e, %.5e) cm" % tuple(self.direction)
+        string = "Exponential transform '%s': " % self.name
+        for i_cell in range(self.n_cells):
+            string += " " + self._comment_unit(i_cell)
+            if i_cell < (self.n_cells - 1):
+                string += ";"
         return string
 
-    def mcnp(self):
+    def _comment_unit(self, i_cell):
+        string = "cell '%s' " % self.cells[i_cell].name
+        string = "stretch by {0} ".format(self.stretchs[i_cell])
+        string += self.signs[i_cell] + " "
+        if self.signs[i_cell] == 'away': string += "from "
+        if type(self.directions[i_cell]) is str: 
+            string += self.directions[i_cell]
+        else: 
+            string += "(%.5e, %.5e, %.5e) cm" % tuple(self.directions[i_cell])
+        return string
+
+    def mcnp(self, float_format, sim):
         string = "EXT:%s" % self.mcnp_particle[self.particle]
-        string 
+        string = " "
+
+    def _mcnp_unit(self, float_format, i_cell):
+        string = ""
+        if self.signs[i_cell] == 'away': string += "-"
+        if self.stretchs[i_cell] == 'capture-to-total': string += "S"
+        else: string += float_format % self.stretchs[i_cell]
+        string += "Q"
+        if self.directions[i_cell] == 'currdir': pass
+        elif type(self.directions[i_cell]) is str:
+            string += self.directions[i_cell].upper()
 
     @property
     def particle(self):
@@ -2861,32 +2912,47 @@ def ExponentialTransform(IMisc):
 
     @particle.setter
     def particle(self, value):
-        # TODO check to make sure it is a key.
         if value not in self.mcnp_particle:
             raise LookupError("The particle %s is not in the "
                     "``mcnp_particle`` dictionary." % value)
         self._particle = value
 
     @property
-    def stretch(self):
-        return self._stretch
+    def cells(self):
+        return self._cells
 
-    @stretch.setter
-    def stretch(self, value):
-        self._stretch = value
-
-    @property
-    def direction(self):
-        return self._direction
-
-    @direction.setter
-    def direction(self, value):
-        self._direction = value
+    @cells.setter
+    def cells(self, value):
+        for arg in value:
+            if not isinstance(arg, Cell):
+                raise ValueError("The ``cell`` must be a ``Cell``. User "
+                        "provided {0}.".format(arg))
+        self._cells = value
 
     @property
-    def away(self):
-        return self._away
+    def stretchs(self):
+        return self._stretchs
 
-    @away.setter
-    def away(self, value):
-        self._away = value
+    @stretchs.setter
+    def stretchs(self, value):
+        self._stretchs = value
+
+    @property
+    def directions(self):
+        return self._directions
+
+    @directions.setter
+    def directions(self, value):
+        self._directions = value
+
+    @property
+    def signs(self):
+        return self._signs
+
+    @signs.setter
+    def signs(self, value):
+        for arg in value:
+            if arg != 'toward' and arg != 'away':
+                raise ValueError("The value of ``sign`` must be 'toward' or "
+                        "'away'. User provided '%s'." % arg)
+        self._signs = value
