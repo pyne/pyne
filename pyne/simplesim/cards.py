@@ -28,6 +28,7 @@ the module.
 # TODO mcnp_particle ref's.
 # TODO rewrite detectors to work with more than 1 input.
 import abc
+import collections
 
 import numpy as np
 
@@ -113,6 +114,7 @@ class ICard(object):
         """All cards define a comment describing the content of the card."""
         raise NotImplementedError
 
+    # TODO
     #@abc.abstractmethod
     def mcnp(self, float_format, sim):
         # sim is an instance of
@@ -2850,7 +2852,8 @@ def ExponentialTransform(IMisc):
                     cellC, 0.5, [0, 0, 0], 'away')
 
         """
-        super(ExponentialTransform, self).__init__('exptransform-' + particle)
+        super(ExponentialTransform, self).__init__('exptransform-' + particle,
+                unique=True)
         self.particle = particle
         n_args_per_cell = 4
         if len(args) % n_args_per_cell != 0:
@@ -2905,6 +2908,8 @@ def ExponentialTransform(IMisc):
         if self.directions[i_cell] == 'currdir': pass
         elif type(self.directions[i_cell]) is str:
             string += self.directions[i_cell].upper()
+        else:
+            string += "V"
 
     @property
     def particle(self):
@@ -2956,3 +2961,78 @@ def ExponentialTransform(IMisc):
                 raise ValueError("The value of ``sign`` must be 'toward' or "
                         "'away'. User provided '%s'." % arg)
         self._signs = value
+
+
+class Vector(IMisc):
+    """Position vector. In MCNP, this is the **VECT** card. Unique card with name
+    `vector`. Vector are added to the card via the :py:meth:`add`. The card is
+    used with the :py:card:`ExponentialTransform` card in MCNP.
+    
+    """
+    def __init__(self):
+        super(Vector, self).__init__('vector', unique=True)
+        self.vectors = collections.OrderedDict()
+
+    def comment(self):
+        string += "Vector '%s':" % self.name
+        counter = 0
+        for key, val in self.vectors:
+            counter += 1
+            string += " %s: (%.5f, %.5f, %.5f) cm" % (key, tuple(val))
+            if counter < len(self.vectors):
+                string += ","
+        return string += "."
+
+    def mcnp(self, float_format, sim):
+        if len(self.vectors) == 0:
+            raise StandardError("No vectors added.")
+        string += "VECT "
+        for key, val in self.vectors:
+            counter += 1
+            index = self.index(key)
+            formatstr += "V%i %s %s %s" % (index, 3 * (float_format,))
+            string += formatstr % tuple(val)
+        return string
+        
+    def add(self, vecname, vector):
+        """Adds a vector with name ``vecname`` to the card. If a vector with that
+        vecname has already been added, an exception is raised. Returns the index
+        of the vector.
+
+        Parameters
+        ----------
+        vecname : str
+            Name of the vector
+        vector : 3-element list, :py:class:`np.array`, etc. [centimeters]
+
+        Returns
+        -------
+        index : int
+            Index of the vector that ends up on the **VECT** card.
+
+        Examples
+        --------
+        The following adds two vectors, where we have imported :py:mod:`numpy`
+        as ``np``::
+
+            vec = Vector()
+            vec.add('origin', [0, 0, 0])
+            vec.add('x-axis', np.array([1, 0, 0]))
+
+        The vector 'origin' has index 1 and the vector 'x-axis' has index 2.
+
+        """
+        if vecname in self.vectors:
+            raise StandardError("Vector with ``vecname`` '%s' exists already.")
+        self.vectors[vecname] = vector
+        return self.index(vecname)
+
+    def index(self, vecname)
+        return self.vectors.keys().index(vecname) + 1
+
+
+
+
+
+
+
