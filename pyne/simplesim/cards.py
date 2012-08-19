@@ -250,10 +250,8 @@ class Cell(ICard):
             number densities.
 
         """
-        if density_units == 'g/cm^3':
-            return '-'
-        elif density_units == 'atoms/b/cm':
-            return ''
+        if density_units == 'g/cm^3':          return '-'
+        elif density_units == 'atoms/b/cm':    return ''
         else:
             raise Exception("Invalid string to specify density units: %s."
                     % density_units)
@@ -283,12 +281,10 @@ class Cell(ICard):
         self._material = obj
 
     @property
-    def density(self):
-        return self._density
+    def density(self):          return self._density
 
     @density.setter
-    def density(self, value):
-        self._density = value
+    def density(self, value):   self._density = value
 
     @property
     def density_units(self):
