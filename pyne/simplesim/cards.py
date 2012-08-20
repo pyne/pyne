@@ -31,6 +31,8 @@ the module.
 # method.
 # TODO allow card suppression (don't delete but don't print it).
 # TODO allow readfile commands.
+# TODO emphasize how easy it is to modify the cards, just subclass it
+# individually and use your own.
 
 import abc
 import collections
@@ -2770,7 +2772,7 @@ class ICellMod(IUniqueParticle):
     """
     __metaclass__ = abc.ABCMeta
 
-    def __init__(self, pre_name, particle, cell, n_args_per_cell, *args,
+    def __init__(self, pre_name, particle, n_args_per_cell, *args,
                  **kwargs):
         """
         Parameters
@@ -2786,7 +2788,7 @@ class ICellMod(IUniqueParticle):
 
         """
         super(ICellMod, self).__init__(pre_name, particle)
-        self.cells = [cell]
+        self.cells = []
         self._n_args_per_cell = n_args_per_cell
         if len(args) % n_args_per_cell != 0:
             raise StandardError("The length of ``*args`` must be a multiple "
@@ -2853,7 +2855,7 @@ class ExponentialTransform(ICellMod):
     .. inheritance-diagram:: pyne.simplesim.cards.ExponentialTransform
 
     """
-    def __init__(self, particle, cell, stretch, direction, sign, *args):
+    def __init__(self, particle, *args):
         """
         Parameters
         ----------
@@ -2920,11 +2922,11 @@ class ExponentialTransform(ICellMod):
 
         """
         super(ExponentialTransform, self).__init__('exptransform', particle,
-                                                   cell, 4, *args)
+                                                   4, *args)
         # Initialize properties for the subclass.
-        self.stretchs = [stretch]
-        self.directions = [direction]
-        self.signs = [sign]
+        self.stretchs = []
+        self.directions = []
+        self.signs = []
         # If information for multiple cells has been provided...
         self._process_varargs(args)
 
@@ -3022,7 +3024,7 @@ class ForcedCollision(ICellMod):
     .. inheritance-diagram:: pyne.simplesim.cards.ForcedCollision
 
     """
-    def __init__(self, particle, cell, prob, only_entering, *args):
+    def __init__(self, particle, *args):
         """
         Parameters
         ----------
@@ -3058,10 +3060,9 @@ class ForcedCollision(ICellMod):
                                              cellB, 0.5, False)
 
         """
-        super(ForcedCollision, self).__init__('forcedcoll', particle, cell,
-                                              3, *args)
-        self.probs = [prob]
-        self.only_enterings = [only_entering]
+        super(ForcedCollision, self).__init__('forcedcoll', particle, 3, *args)
+        self.probs = []
+        self.only_enterings = []
         # If information for multiple cells has been provided...
         self._process_varargs(args)
 
@@ -3117,38 +3118,54 @@ class ForcedCollision(ICellMod):
 
 
 class WeightWindowBound(ICellMod):
-    """Cell-based weight window lower bounds. In MCNP, this is the **WWN**
+    """Cell-based weight window lower bounds. Unique card for a given particle
+    type, with name `weightwinbound-<particle>`. In MCNP, this is the **WWN**
     card. In MCNP, these are typically generated automatically using its weight
     window generator.
 
     .. inheritance-diagram:: pyne.simplesim.cards.WeightWindowBound
 
     """
-    def __init__(self, particle, cell, idx_energy, idx_time, bound, *args):
+    def __init__(self, particle, *args):
         """
         Parameters
         ----------
         particle : str
             See :py:class:`ICellMod`.
-        idx_type : str
-            This is either 'energy', or 'time', depending if ``index`` is an
-            energy or time index.
-        index : int
-            Energy or time index, depending on value of ``idx_type``.
         cell : :py:class:`Cell` or subclass
             See :py:class:`ICellMod`
+        idx_energy : int
+            Index of the energy, on a :py:class:`WeightWindowEnergies` card,
+            for which a bound is being specified. If no energy bins are
+            specified (e.g. 1 energy bin for weight windows), provide 1. The
+            index starts at 1.
+        idx_time : int
+            Index of the time, on a :py:class:`WeightWindowTimes` card,
+            for which a bound is being specified. If no time intervals are
+            specified in the problem (e.g. 1 time interval for weight windows),
+            provide 1. The index starts at 1.
         bound : str or float
             Lower bound for the weight to cause rouletting, or 'killall' to
             kill all particles entering the cell.
+        *args : cell, idx_energy, idx_time, bound, ...
+            Any number of sets of the previous four arguments can be provided
+            as additional arguments. See examples. This can also be done using
+            :py:meth:`add`.
 
         Examples
         --------
+        TODO
 
         """
+        super(WeightWindowBound, self).__init__('weightwinbound', particle,
+                                                cell, 3, *args)
         # Check for existence of weight window cards.
         pass
 
     def add(cell, idx_energy, idx_time, bound):
+        pass
+
+    def set_by_array(cell, array):
         pass
 
 
