@@ -8,3 +8,7 @@ cimport cpp_jsoncpp
 
 cdef class Value:
     cdef cpp_jsoncpp.Value * _inst
+
+
+cdef class Reader:
+    cdef cpp_jsoncpp.Reader * _inst
