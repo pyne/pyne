@@ -29,6 +29,8 @@ the module.
 # TODO rewrite detectors to work with more than 1 input.
 # TODO move the functionality of ExponentialTransform's constructor to its add
 # method.
+# TODO allow card suppression (don't delete but don't print it).
+# TODO allow readfile commands.
 
 import abc
 import collections
@@ -3325,7 +3327,8 @@ class Vector(IMisc):
 
         """
         if vecname in self.vectors:
-            raise StandardError("Vector with ``vecname`` '%s' exists already.")
+            raise StandardError("Vector with ``vecname`` {0!r} exists "
+                    "already.".format(vecname))
         self.vectors[vecname] = vector
         return self.index(vecname)
 
