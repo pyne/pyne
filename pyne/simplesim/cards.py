@@ -2732,7 +2732,8 @@ class ICellMod(IMisc):
 
     """
     __metaclass__ = abc.ABCMeta
-    def __init__(self, pre_name, particle, cell, *args, **kwargs):
+    def __init__(self, pre_name, particle, cell, n_args_per_cell, *args,
+                 **kwargs):
         """
         Parameters
         ----------
@@ -2743,12 +2744,23 @@ class ICellMod(IMisc):
             A particle string, taken from the keys of :py:attr:`mcnp_particle`.
         cell : :py:class:`Cell` or subclass
             The cell for which the card applies.
+        n_args_per_cell : int
+            The number of arguments the subclass expects per cell.
 
         """
         super(ICellMod, self).__init__("{0}-{1}".format(pre_name, particle),
-                                       unique=True, *args, **kwargs)
+                                       unique=True)
         self.particle = particle
         self.cells = [cell]
+        self._n_args_per_cell = n_args_per_cell
+        if len(args) % n_args_per_cell != 0:
+            raise StandardError("The length of ``*args`` must be a multiple "
+                    "of {0}. Length is {1}.".format(n_args_per_cell, len(args)))
+
+    def _process_varargs(self, args):
+        for i_cell in range(len(args) / self._n_args_per_cell):
+            i_start = self._n_args_per_cell * i_cell
+            self.add(*args[i_start:i_start+self._n_args_per_cell])
 
     @abc.abstractmethod
     def add(self, cell):
@@ -2851,19 +2863,13 @@ class ExponentialTransform(ICellMod):
 
         """
         super(ExponentialTransform, self).__init__('exptransform', particle,
-                                                   cell)
-        n_args_per_cell = 4
-        if len(args) % n_args_per_cell != 0:
-            raise StandardError("The length of ``*args`` must be a multiple "
-                    "of {0}. Length is {1}.".format(n_args_per_cell, len(args)))
+                                                   cell, 4, *args)
         # Initialize properties for the subclass.
         self.stretchs = [stretch]
         self.directions = [direction]
         self.signs = [sign]
         # If information for multiple cells has been provided...
-        for i_cell in range(len(args) / n_args_per_cell):
-            i_start = n_args_per_cell * i_cell
-            self.add(*args[i_start:i_start+4])
+        self._process_varargs(args)
 
     def add(self, cell, stretch, direction, sign):
         """The user can add additional transforms, for additional cells, using
@@ -2972,11 +2978,32 @@ class ForcedCollision(ICellMod):
     .. inheritance-diagram:: pyne.simplesim.cards.ForcedCollision
 
     """
-    def __init__(self, particle, cell, spec, *args):
+    def __init__(self, particle, cell, prob, only_entering, *args):
         """
         Parameters
         ----------
+        particle : str
+            See :py:class:`ICellMod`.
+        cell : :py:class:`Cell` or subclass
+            See :py:class:`ICellMod`.
+        prob : float
+            If 'none', there is no forced collision for this cell.
+            If float, it is the survival probability as described in the MCNP
+            manual.
+        only_entering : bool
+            If True, the card applies only to particles entering the cell. If
+            False, the card applies to particles entering as well as those
+            surviving weight games in the cell.
+
+        Examples
+        --------
         """
+        super(ForcedCollision, self).__init__('forcedcoll', particle, cell,
+                                              3, *args)
+        self.probs = [prob]
+        self.only_enterings = [only_entering]
+        # If information for multiple cells has been provided...
+        self._process_varargs(args)
 
 
 class Vector(IMisc):
