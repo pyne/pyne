@@ -795,9 +795,31 @@ class TestSystemDefinition(unittest.TestCase):
 
 class TestMisc(unittest.TestCase):
     """Tests subclasses of :py:class:`cards.IMisc`."""
-    pass
 
+    def test_Transformation(self):
+        """"Tests :py:class:`cards.Transformation`."""
 
+    
+        trans = cards.Transformation('trans1', [1, 2, 3],
+                [[4, 5, 6], [7, 8, 9], [10, 11, 12]])
+        self.assertEquals(trans.comment(), "Transformation 'trans1' "
+                "pos. of aux origin in main (1, 2, 3) cm, "
+                "x' <4, 7, 10> y' <5, 8, 11> z' <6 9 12>.")
+        self.assertEquals(trans.mcnp('%.1f', self.sim), "TR1 "
+                "1.00000 2.00000 3.00000 "
+                "4.00000 5.00000 6.00000 "
+                "7.00000 8.00000 9.00000 "
+                "10.00000 11.00000 12.00000 1")
+        trans = cards.Transformation('trans1', [1, 2, 3],
+                np.array([[4, 5, 6], [7, 8, 9], [10, 11, 12]]))
+        trans = cards.Transformation('trans1', [1, 2, 3],
+                np.matrix([[4, 5, 6], [7, 8, 9], [10, 11, 12]]))
+        trans = cards.Transformation('trans1', [1, 2, 3],
+                [[4, 5, 6], [7, 8, 9], [10, 11, 12]],
+                aux_in_main=False)
+        trans = cards.Transformation('trans1', [1, 2, 3],
+                [[4, 5, 6], [7, 8, 9], [10, 11, 12]],
+                degrees=True)
 
 class TestSimulationDefinition(unittest.TestCase):
     """Tests the :py:class:`definition.SimulationDefinition` class."""
@@ -806,3 +828,8 @@ class TestSimulationDefinition(unittest.TestCase):
     #sim = definition.MCNPSimulation(rxr)
     #sim.add_card(cards.Criticality())
     #sim.add_card(cards.CriticalityPoints())
+
+## The following tests are redundant, but are to make sure that the examples in
+# the documentation function as expected.
+class TestGodiva(unittest.TestCase):
+    pass

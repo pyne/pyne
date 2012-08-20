@@ -74,6 +74,8 @@ class IDefinition(object):
             dict_to_check = self.tally
         elif card_type == 'misc':
             dict_to_check = self.misc
+        elif card_type == 'transformation':
+            dict_to_check = self.transformations
         else:
             raise ValueError("The input ``card_type`` must be either "
                     "'cell', 'surface', 'material', 'source', "
@@ -309,6 +311,11 @@ class SimulationDefinition(IDefinition):
 
 class MCNPSimulation(SimulationDefinition):
 
+    def _create_new(self):
+        """Initialize any attributes/properties."""
+        super(MCNPSimulation, self)._create_new()
+        self._transformation = collections.OrderedDict()
+
     def add_tally(self, card):
         super(MCNPSimulation, self).add_tally(card)
         if isinstance(card, cards.SurfaceCurrent):
@@ -354,10 +361,20 @@ class MCNPSimulation(SimulationDefinition):
         raise
 
     def add_transformation(self, card):
-        raise
+        if not isinstance(card, cards.Transformation):
+            raise ValueError("Only ``Transformation``s can be "
+                    "added by this method. User provided {0}.".format(card))
+        self._assert_unique('transformation', card)
+        self._transformations[card.name] = card
 
     def transformation_num(self, name):
-        raise
+        return self._transformations.keys().index(name) + 1
+
+    @property
+    def transformations(self):
+        """Ordered dictionary of misc. cards (from :py:class:`cards.IMisc`)."""
+        return self._transformations
+
 
 class DefinitionEncoder(json.JSONEncoder):
     # TODO circular reference issue.
