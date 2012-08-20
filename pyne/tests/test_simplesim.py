@@ -575,11 +575,31 @@ class TestSystemDefinition(unittest.TestCase):
         self.assertEquals(wwe.comment(), "Weight window energies "
                 "'weightwinenergy-photon' for photons: 2 bins, in MeV.")
         self.assertEquals(wwe.mcnp('%.1g', self.sim), "WWE:P 1 1e+01")
+        wwe = cards.WeightWindowEnergies('photon', [1, 10], for_gen=True)
+        self.assertEquals(wwe.name, 'weightwingenenergy-photon')
+        self.assertEquals(wwe.comment(), "Weight window generator energies "
+                "'weightwingenenergy-photon' for photons: 2 bins, in MeV.")
+        self.assertEquals(wwe.mcnp('%.1g', self.sim), "WWGE:P 1 1e+01")
+        wwe = cards.WeightWindowEnergies('photon', [], for_gen=True)
+        self.assertEquals(wwe.name, 'weightwingenenergy-photon')
+        self.assertEquals(wwe.comment(), "Weight window generator energies "
+                "'weightwingenenergy-photon' for photons: default bins.")
+        self.assertEquals(wwe.mcnp('%.1g', self.sim), "WWGE:P")
         wwt = cards.WeightWindowTimes('proton', [1, 1e12])
         self.assertEquals(wwt.name, 'weightwintime-proton')
         self.assertEquals(wwt.comment(), "Weight window times "
                 "'weightwintime-proton' for protons: 2 intervals, in shakes.")
         self.assertEquals(wwt.mcnp('%.1g', self.sim), "WWT:H 1e+08 1e+20")
+        wwt = cards.WeightWindowTimes('proton', [1, 1e12], for_gen=True)
+        self.assertEquals(wwt.name, 'weightwingentime-proton')
+        self.assertEquals(wwt.comment(), "Weight window generator times "
+                "'weightwingentime-proton' for protons: 2 intervals, in shakes.")
+        self.assertEquals(wwt.mcnp('%.1g', self.sim), "WWGT:H 1e+08 1e+20")
+        wwt = cards.WeightWindowTimes('proton', [], for_gen=True)
+        self.assertEquals(wwt.name, 'weightwingentime-proton')
+        self.assertEquals(wwt.comment(), "Weight window generator times "
+                "'weightwingentime-proton' for protons: default intervals.")
+        self.assertEquals(wwt.mcnp('%.1g', self.sim), "WWGT:H")
 
     def test_Transformation(self):
         """Tests :py:class:`cards.Transformation`."""
