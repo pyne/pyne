@@ -2854,7 +2854,8 @@ class ExponentialTransform(ICellMod):
             vec.add('vec1', [0, 0, 0])
 
         to the simulation. If the user wants to request an exponential transform for cells
-        ``cellB`` and ``cellC`` as well, they can do the following::
+        ``cellB`` and ``cellC`` as well, they can do the following, or use
+        :py:meth:`add`::
 
             extn = ExponentialTransform('neutron', 
                     cellA, 'capture-to-total', 'currdir', 'toward', 
@@ -2901,13 +2902,13 @@ class ExponentialTransform(ICellMod):
     def comment(self):
         string = "Exponential transform {0!r}:".format(self.name)
         for i_cell in range(len(self.cells)):
-            string += " " + self._comment_unit(i_cell)
+            string += " cell {0!r}".format(self.cells[i_cell].name)
+            string += self._comment_unit(i_cell)
             if i_cell < (len(self.cells) - 1): string += ";"
         return string + "."
 
     def _comment_unit(self, i_cell):
-        string = "cell {0!r} ".format(self.cells[i_cell].name)
-        string += "stretch by {0} ".format(self.stretchs[i_cell])
+        string = " stretch by {0} ".format(self.stretchs[i_cell])
         string += self.signs[i_cell] + " "
         if self.signs[i_cell] == 'away': string += "from "
         string += self.directions[i_cell]
@@ -2997,6 +2998,18 @@ class ForcedCollision(ICellMod):
 
         Examples
         --------
+        The following cards request forced collisions with neutrons in the cell
+        defined by cell card ``cellA``::  
+
+            fcl = ForcedCollision('neutron', cellA, 0.5, True)
+            fcl = ForcedCollision('neutron', cellA, 0.5, False)
+
+        If the user wants to request forced collisions for ``cellB`` as well,
+        they can do the following, or use :py:meth:`add`::
+
+            fcl = ForcedCollision('neutron', cellA, 0.5, True,
+                                             cellB, 0.5, False)
+
         """
         super(ForcedCollision, self).__init__('forcedcoll', particle, cell,
                                               3, *args)
@@ -3004,6 +3017,45 @@ class ForcedCollision(ICellMod):
         self.only_enterings = [only_entering]
         # If information for multiple cells has been provided...
         self._process_varargs(args)
+
+    def add(self, cell, prob, only_entering):
+        """The user can add additional forced collision probabilities, for
+        additional cells, using this method. See above for a description of the
+        input.
+
+        Parameters
+        ----------
+        cell : :py:class:`Cell` or subclass
+        prob : float
+        only_entering : bool
+
+        Examples
+        --------
+        The last example above can also be achieved by the following::
+
+            fcl = ForcedCollision('neutron', cellA, 0.5, True)
+            fcl.add(cellB, 0.5, False)
+
+        """
+        self.probs += [prob]
+        self.only_enterings += [only_entering]
+
+    def comment(self):
+        string = "Forced collision {0!r}:".format(self.name)
+        for i_cell in range(len(self.cells)):
+            string ++ " "
+
+    @property
+    def probs(self): return self._probs
+
+    @probs.setter
+    def probs(self, value): self._probs = value
+
+    @property
+    def only_enterings(self): return self._only_enterings
+
+    @only_enterings.setter
+    def only_enterings(self, value): self._only_enterings = value
 
 
 class Vector(IMisc):
