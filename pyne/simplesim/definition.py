@@ -314,7 +314,7 @@ class MCNPSimulation(SimulationDefinition):
     def _create_new(self):
         """Initialize any attributes/properties."""
         super(MCNPSimulation, self)._create_new()
-        self._transformation = collections.OrderedDict()
+        self._transformations = collections.OrderedDict()
 
     def add_tally(self, card):
         super(MCNPSimulation, self).add_tally(card)
@@ -368,7 +368,7 @@ class MCNPSimulation(SimulationDefinition):
         self._transformations[card.name] = card
 
     def transformation_num(self, name):
-        return self._transformations.keys().index(name) + 1
+        return self.transformations.keys().index(name) + 1
 
     @property
     def transformations(self):
