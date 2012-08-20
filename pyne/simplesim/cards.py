@@ -2766,6 +2766,38 @@ class ICellMod(IMisc):
     def add(self, cell):
         self.cells += [cell]
 
+    @abc.abstractmethod
+    def comment(self, title):
+        string = "{0} {1!r}:".format(title, self.name)
+        for i_cell in range(len(self.cells)):
+            string += " cell {0!r}".format(self.cells[i_cell].name)
+            string += self._comment_unit(i_cell)
+            if i_cell < (len(self.cells) - 1): string += ";"
+        return string + "."
+
+    @abc.abstractmethod
+    def _comment_unit(self):
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def mcnp(self, float_format, sim, keystring):
+        # TODO this ordering might not be correct, particularly once we add
+        # support for universes, etc.
+        string = "{0}:{1!s}".format(
+                keystring, self.mcnp_particle[self.particle])
+        # TODO this should loop through in the print order.
+        for key, cell in sim.sys.cells.iteritems(): 
+            if cell in self.cells:
+                i_cell = self.cells.index(cell)
+                string += " " + self._mcnp_unit(float_format, sim, i_cell)
+            else: 
+                string += " 0"
+        return string
+
+    @abc.abstractmethod
+    def _mcnp_unit(self):
+        raise NotImplementedError
+
     @property
     def particle(self): return self._particle
 
@@ -2900,12 +2932,8 @@ class ExponentialTransform(ICellMod):
         self.signs += [sign]
 
     def comment(self):
-        string = "Exponential transform {0!r}:".format(self.name)
-        for i_cell in range(len(self.cells)):
-            string += " cell {0!r}".format(self.cells[i_cell].name)
-            string += self._comment_unit(i_cell)
-            if i_cell < (len(self.cells) - 1): string += ";"
-        return string + "."
+        return super(ExponentialTransform, self).comment(
+                "Exponential transform")
 
     def _comment_unit(self, i_cell):
         string = " stretch by {0} ".format(self.stretchs[i_cell])
@@ -2915,17 +2943,8 @@ class ExponentialTransform(ICellMod):
         return string
 
     def mcnp(self, float_format, sim):
-        # TODO this ordering might not be correct, particularly once we add
-        # support for universes, etc.
-        string = "EXT:{0!s}".format(self.mcnp_particle[self.particle])
-        # TODO this should loop through in the print order.
-        for key, cell in sim.sys.cells.iteritems(): 
-            if cell in self.cells:
-                i_cell = self.cells.index(cell)
-                string += " " + self._mcnp_unit(float_format, sim, i_cell)
-            else: 
-                string += " 0"
-        return string
+        return super(ExponentialTransform, self).mcnp(float_format, sim,
+                "EXT")
 
     def _mcnp_unit(self, float_format, sim, i_cell):
         # TODO add exception if there is no Vector card.
