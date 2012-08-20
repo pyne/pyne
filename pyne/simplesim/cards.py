@@ -2724,7 +2724,31 @@ class Transformation(IMisc):
     def aux_in_main(self, value): self._aux_in_main = value
 
 
-class ICellMod(IMisc):
+class IUniqueParticle(IMisc):
+    """This class is not used by the user. Abstract base class for cards that
+    are unique for a given particle.
+
+    """
+    # TODO not getting any *args or **kwargs.
+    __metaclass__ = abc.ABCMeta
+
+    def __init__(self, pre_name, particle):
+        super(IUniqueParticle, self).__init__(
+                "{0}-{1}".format(pre_name, particle), unique=True)
+        self.particle = particle
+
+    @property
+    def particle(self): return self._particle
+
+    @particle.setter
+    def particle(self, value):
+        if value not in self.mcnp_particle:
+            raise LookupError("The particle {0} is not in the "
+                    "``mcnp_particle`` dictionary.".format(value))
+        self._particle = value
+
+
+class ICellMod(IUniqueParticle):
     """This class is not used by the user. Abstract base class for cards that
     can be specified in MCNP on both the cell card or in the data block.
     All subclasses have a ``particle`` and ``cell`` property, and similar form.
@@ -2732,6 +2756,7 @@ class ICellMod(IMisc):
 
     """
     __metaclass__ = abc.ABCMeta
+
     def __init__(self, pre_name, particle, cell, n_args_per_cell, *args,
                  **kwargs):
         """
@@ -2748,9 +2773,7 @@ class ICellMod(IMisc):
             The number of arguments the subclass expects per cell.
 
         """
-        super(ICellMod, self).__init__("{0}-{1}".format(pre_name, particle),
-                                       unique=True)
-        self.particle = particle
+        super(ICellMod, self).__init__(pre_name, particle)
         self.cells = [cell]
         self._n_args_per_cell = n_args_per_cell
         if len(args) % n_args_per_cell != 0:
@@ -2797,16 +2820,6 @@ class ICellMod(IMisc):
     @abc.abstractmethod
     def _mcnp_unit(self):
         raise NotImplementedError
-
-    @property
-    def particle(self): return self._particle
-
-    @particle.setter
-    def particle(self, value):
-        if value not in self.mcnp_particle:
-            raise LookupError("The particle {0} is not in the "
-                    "``mcnp_particle`` dictionary.".format(value))
-        self._particle = value
 
     @property
     def cells(self): return self._cells
@@ -2886,8 +2899,7 @@ class ExponentialTransform(ICellMod):
             vec.add('vec1', [0, 0, 0])
 
         to the simulation. If the user wants to request an exponential transform for cells
-        ``cellB`` and ``cellC`` as well, they can do the following, or use
-        :py:meth:`add`::
+        ``cellB`` and ``cellC`` as well, they can do the following::
 
             extn = ExponentialTransform('neutron', 
                     cellA, 'capture-to-total', 'currdir', 'toward', 
@@ -3014,6 +3026,10 @@ class ForcedCollision(ICellMod):
             If True, the card applies only to particles entering the cell. If
             False, the card applies to particles entering as well as those
             surviving weight games in the cell.
+        *args : cell, prob, only_entering, ...
+            To request forced collision for more than one cell, supply
+            the last three arguments for the additional cells. See examples.
+            This can also be done using :py:meth:`add`.
 
         Examples
         --------
@@ -3024,7 +3040,7 @@ class ForcedCollision(ICellMod):
             fcl = ForcedCollision('neutron', cellA, 0.5, False)
 
         If the user wants to request forced collisions for ``cellB`` as well,
-        they can do the following, or use :py:meth:`add`::
+        they can do the following::
 
             fcl = ForcedCollision('neutron', cellA, 0.5, True,
                                              cellB, 0.5, False)
@@ -3086,6 +3102,124 @@ class ForcedCollision(ICellMod):
 
     @only_enterings.setter
     def only_enterings(self, value): self._only_enterings = value
+
+
+class WeightWindowBound(ICellMod):
+    """Cell-based weight window lower bounds. In MCNP, this is the **WWN**
+    card. In MCNP, these are typically generated automatically using its weight
+    window generator.
+
+    .. inheritance-diagram:: pyne.simplesim.cards.WeightWindowBound
+
+    """
+    def __init__(self, particle, idx_type, index, cell, bound, *args):
+        """
+        Parameters
+        ----------
+        particle : str
+            See :py:class:`ICellMod`.
+        idx_type : str
+            This is either 'energy', or 'time', depending if ``index`` is an
+            energy or time index.
+        index : int
+            Energy or time index, depending on value of ``idx_type``.
+        cell : :py:class:`Cell` or subclass
+            See :py:class:`ICellMod`
+        bound : str or float
+
+
+        """
+        pass
+
+class WeightWindowEnergies(IMisc):
+    """Upper energy bounds for weight windows. Unique card for a given particle
+    type, with name `weightwinenergy-<particle>`. In MCNP, this is the **WWE**
+    card.
+
+    .. inheritance-diagram:: pyne.simplesim.cards.WeightWindowEnergies
+
+    """
+    def __init__(self, particle, bounds):
+        """
+        Parameters
+        ----------
+        particle : str
+            TODO
+        bounds : list, :py:class:`np.array`
+            Upper energy bounds of the weight windows.
+TODO units
+
+        Examples
+        --------
+
+            
+
+        """
+        pass
+
+class WeightWindowTimes(IMisc):
+    """Upper time bounds for weight windows. Unique card for a given particle
+    type, with name `weightwintime-<particle>`. In MCNP this is the **WWT**
+    card.
+
+    .. inheritance-diagram:: pyne.simplesim.cards.WeightWindowTimes
+
+    """
+    def __init__(self, particle, bounds):
+        """
+        Parameters
+        ----------
+        particle : str
+            TODO
+        bounds : list, :py:class:`np.array`
+            Upper time bounds of the weight windows.
+    shakes.
+
+        Examples
+        --------
+
+        """
+        pass
+
+
+
+
+class DXTRANContribution(ICellMod):
+    """Contribution probabilities to DXTRAN sphere by cells. In MCNP, this is
+    the **DXC** card.
+
+    .. inheritance-diagram:: pyne.simplesim.cards.DXTRANContribution
+
+    """
+    # Unique
+    def __init__(self, particle, sphere_name, cell, prob, *args):
+        """
+        Parameters
+        ----------
+        particle : str
+            See :py:class:`ICellMod`
+        sphere_name : str
+            Name of the DXTRAN sphere for which this card applies.
+        cell : :py:class:`Cell` or subclass
+            See :py:class:`ICellMod`
+        prob : float
+            The probabilit of contribution to the sphere.
+
+        Examples
+        --------
+        """
+            
+class DXTRANSpheres(IMisc):
+    """DXTRAN spheres. In MCNP, this is the **DXT** card.
+
+    .. inheritance-diagram:: pyne.simplesim.cards.DXTRANSpheres
+
+    """
+    # TODO maybe the constructor just has the options, must use add method.
+    # Is this a unique card?
+    def __init__(self, particle, point, inner_radius, outer_radius,
+            upper_cutoff, lower_cutoff, min_photon_weight, *args):
+        pass
 
 
 class Vector(IMisc):
