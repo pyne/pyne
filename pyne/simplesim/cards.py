@@ -2850,7 +2850,9 @@ class ICellMod(IUniqueParticle):
 class ExponentialTransform(ICellMod):
     """An exponential transform that adjusts the total cross section by a given
     factor in a given direction. Unique card for a given particle type, with
-    name `exptransform-<particle>`. In MCNP, this is the **EXT** card.
+    name `exptransform-<particle>`. In MCNP, this is the **EXT** card.  The
+    user can initialize this card without requesting any exponential
+    transforms.
 
     .. inheritance-diagram:: pyne.simplesim.cards.ExponentialTransform
 
@@ -2912,8 +2914,9 @@ class ExponentialTransform(ICellMod):
             vec = Vector()
             vec.add('vec1', [0, 0, 0])
 
-        to the simulation. If the user wants to request an exponential transform for cells
-        ``cellB`` and ``cellC`` as well, they can do the following::
+        to the simulation. If the user wants to request an exponential
+        transform for cells ``cellB`` and ``cellC`` as well, they can do the
+        following::
 
             extn = ExponentialTransform('neutron', 
                     cellA, 'capture-to-total', 'currdir', 'toward', 
@@ -2946,8 +2949,8 @@ class ExponentialTransform(ICellMod):
         The last example above can also be achieved by the following, assuming
         cell cards ``cellA``, ``cellB`` and ``cellC`` have been created::
 
-            extn = ExponentialTransform('neutron', 
-                    cellA, 'capture-to-total', 'currdir', 'toward')
+            extn = ExponentialTransform('neutron') 
+            extn.add(cellA, 'capture-to-total', 'currdir', 'toward')
             extn.add(cellB, 0.5, 'currdir', 'toward')
             extn.add(cellC, 0.5, 'vec1', 'away')
 
@@ -3019,7 +3022,8 @@ class ExponentialTransform(ICellMod):
 
 class ForcedCollision(ICellMod):
     """A forced collision setting. Unique card for a given particle type, with
-    name `forcedcoll-<particle>`. In MCNP, this is the **FCL** card. 
+    name `forcedcoll-<particle>`. In MCNP, this is the **FCL** card. The user
+    can initialize this card without requesting forced collisions.
 
     .. inheritance-diagram:: pyne.simplesim.cards.ForcedCollision
 
@@ -3081,7 +3085,8 @@ class ForcedCollision(ICellMod):
         --------
         The last example above can also be achieved by the following::
 
-            fcl = ForcedCollision('neutron', cellA, 0.5, True)
+            fcl = ForcedCollision('neutron')
+            fcl.add(cellA, 0.5, True)
             fcl.add(cellB, 0.5, False)
 
         """
