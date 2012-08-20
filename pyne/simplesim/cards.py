@@ -47,6 +47,7 @@ class ICard(object):
     # Useful for cell cards and the TMP card in MCNP.
     # k is Boltzmann's constant in eV/K, and T is temperature in K
     kelvin2kT = 8.6173423e-11
+    secs2shakes = 1e+8
     # These are provided in the order in which they are listed in the MCNP
     # manual.
     mcnp_particle = {'neutron': 'N',
@@ -2733,6 +2734,16 @@ class IUniqueParticle(IMisc):
     __metaclass__ = abc.ABCMeta
 
     def __init__(self, pre_name, particle):
+        """
+        Parameters
+        ----------
+        pre_name : str
+            First part of card :py:attr:`name`. Names are of the form
+            ``<pre_name>-<particle>``.
+        particle : str
+            A particle string, taken from the keys of :py:attr:`mcnp_particle`.
+
+        """
         super(IUniqueParticle, self).__init__(
                 "{0}-{1}".format(pre_name, particle), unique=True)
         self.particle = particle
@@ -2763,10 +2774,9 @@ class ICellMod(IUniqueParticle):
         Parameters
         ----------
         pre_name : str
-            First part of card :py:attr:`name`. Names are of the form
-            ``<pre_name>-<particle>``.
+            See :py:class:`IUniqueParticle`.
         particle : str
-            A particle string, taken from the keys of :py:attr:`mcnp_particle`.
+            See :py:class:`IUniqueParticle`.
         cell : :py:class:`Cell` or subclass
             The cell for which the card applies.
         n_args_per_cell : int
@@ -3127,11 +3137,14 @@ class WeightWindowBound(ICellMod):
             See :py:class:`ICellMod`
         bound : str or float
 
+        Examples
+        --------
 
         """
+        # Check for existence of weight window cards.
         pass
 
-class WeightWindowEnergies(IMisc):
+class WeightWindowEnergies(IUniqueParticle):
     """Upper energy bounds for weight windows. Unique card for a given particle
     type, with name `weightwinenergy-<particle>`. In MCNP, this is the **WWE**
     card.
@@ -3144,20 +3157,42 @@ class WeightWindowEnergies(IMisc):
         Parameters
         ----------
         particle : str
-            TODO
-        bounds : list, :py:class:`np.array`
+            See :py:class:`IUniqueParticle`.
+        bounds : list, :py:class:`np.array` [MeV]
             Upper energy bounds of the weight windows.
-TODO units
 
         Examples
         --------
+        The following specifies energy bins [0, 1] and [1, 10] MeV for photon
+        weight windows::
 
-            
+            wwe = WeightWindowEnergies('photon', [1, 10])            
 
         """
-        pass
+        super(WeightWindowEnergies, self).__init__('weightwinenergy',
+                                                   particle)
+        self.bounds = bounds
 
-class WeightWindowTimes(IMisc):
+    def comment(self):
+        return ("Weight window energies {0!r} for {1}s: {2} bins, "
+                "in MeV.".format(self.name, self.particle, len(self.bounds)))
+
+    def mcnp(self, float_format, sim):
+        string = "WWE:{0}".format(self.mcnp_particle[self.particle])
+        float_format = " " + float_format
+        for bound in self.bounds: string += float_format % bound
+        return string
+        
+    @property
+    def bounds(self): return self._bounds
+
+    @bounds.setter
+    def bounds(self, value):
+        self._bounds = value
+        self.n_bounds = len(self.bounds)
+
+
+class WeightWindowTimes(IUniqueParticle):
     """Upper time bounds for weight windows. Unique card for a given particle
     type, with name `weightwintime-<particle>`. In MCNP this is the **WWT**
     card.
@@ -3170,18 +3205,42 @@ class WeightWindowTimes(IMisc):
         Parameters
         ----------
         particle : str
-            TODO
-        bounds : list, :py:class:`np.array`
+            See :py:class:`IUniqueParticle`.
+        bounds : list, :py:class:`np.array` [seconds]
             Upper time bounds of the weight windows.
-    shakes.
 
         Examples
         --------
+        The following specifies time intervals [-inf, 1] and [1, 1e12] sec for
+        photon weight windows::
+            
+            wwt = WeightWindowTimes('photon', [1, 1e12])            
 
         """
-        pass
+        super(WeightWindowTimes, self).__init__('weightwintime', particle)
+        self.bounds = bounds
 
+    def comment(self):
+        # TODO don't tie the comment to any certain units; units are
+        # code-dependent.
+        return ("Weight window times {0!r} for {1}s: {2} intervals, "
+                "in shakes.".format(
+                    self.name, self.particle, len(self.bounds)))
 
+    def mcnp(self, float_format, sim):
+        string = "WWT:{0}".format(self.mcnp_particle[self.particle])
+        float_format = " " + float_format
+        for bound in self.bounds: 
+            string += float_format % (bound * self.secs2shakes)
+        return string
+        
+    @property
+    def bounds(self): return self._bounds
+
+    @bounds.setter
+    def bounds(self, value): 
+        self._bounds = value
+        self.n_bounds = len(self.bounds)
 
 
 class DXTRANContribution(ICellMod):
