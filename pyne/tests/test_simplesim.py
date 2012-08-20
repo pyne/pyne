@@ -538,6 +538,34 @@ class TestSystemDefinition(unittest.TestCase):
         self.assertEquals(ext2.mcnp('%.1e', self.sim), 
                 "EXT:N S 5.0e-01 -5.0e-01V1")
         # Manage order-of-cells issue/question.
+
+        ## ForcedCollision
+        fcl = cards.ForcedCollision('neutron', self.fuel, 0.5, True)
+        self.assertEquals(fcl.name, 'forcedcoll-neutron')
+        self.assertEquals(fcl.cells[0], self.fuel)
+        self.assertEquals(fcl.probs[0], 0.5)
+        self.assertTrue(fcl.only_enterings[0])
+        self.assertEquals(fcl.comment(), "Forced collision "
+                "'forcedcoll-neutron': cell 'fuel' prob 0.5 for entering only.")
+        self.assertEquals(fcl.mcnp('%.1e', self.sim), "FCL:N -5.0e-01 0 0")
+        fcl = cards.ForcedCollision('neutron', self.fuel, 0.5, False)
+        self.assertEquals(fcl.comment(), "Forced collision "
+                "'forcedcoll-neutron': cell 'fuel' prob 0.5 for entering "
+                "and weight games.")
+        self.assertEquals(fcl.mcnp('%.1e', self.sim), "FCL:N 5.0e-01 0 0")
+        fcl = cards.ForcedCollision('neutron', self.fuel, 0.5, True,
+                                               self.coolant, 0.5, False)
+        self.assertEquals(fcl.comment(), "Forced collision "
+                "'forcedcoll-neutron': cell 'fuel' prob 0.5 for entering "
+                "only; cell 'coolant' prob 0.5 for entering and weight games.")
+        self.assertEquals(fcl.mcnp('%.1e', self.sim), "FCL:N -5.0e-01 5.0e-01 0")
+        fcl = cards.ForcedCollision('neutron', self.fuel, 0.5, True)
+        fcl.add(self.coolant, 0.5, False)
+        self.assertEquals(fcl.comment(), "Forced collision "
+                "'forcedcoll-neutron': cell 'fuel' prob 0.5 for entering "
+                "only; cell 'coolant' prob 0.5 for entering and weight games.")
+        self.assertEquals(fcl.mcnp('%.1e', self.sim), "FCL:N -5.0e-01 5.0e-01 0")
+
         
     def test_Transformation(self):
         """"Tests :py:class:`cards.Transformation`."""
