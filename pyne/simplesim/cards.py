@@ -2627,7 +2627,19 @@ class Transformation(IMisc):
 
         Examples
         --------
-            TODO
+
+            trans = Transformation('trans1', [1, 2, 3],
+                    [[4, 5, 6], [7, 8, 9], [10, 11, 12]])
+            trans = Transformation('trans1', [1, 2, 3],
+                    np.array([[4, 5, 6], [7, 8, 9], [10, 11, 12]]))
+            trans = Transformation('trans1', [1, 2, 3],
+                    np.matrix([[4, 5, 6], [7, 8, 9], [10, 11, 12]]))
+            trans = Transformation('trans1', [1, 2, 3],
+                    [[4, 5, 6], [7, 8, 9], [10, 11, 12]],
+                    aux_in_main=False)
+            trans = Transformation('trans1', [1, 2, 3],
+                    [[4, 5, 6], [7, 8, 9], [10, 11, 12]],
+                    degrees=True)
 
         """
         super(Transformation, self).__init__(name)
@@ -2636,22 +2648,21 @@ class Transformation(IMisc):
         self.aux_in_main = aux_in_main
 
     def comment(self):
-        string = "Transformation '%s': pos. of " % self.name
-        string += self._comment_unit()
-        return string
+        return "Transformation {0!r}: pos. of {1}".format(self.name,
+                self.comment_unit())
 
     def _comment_unit(self):
         if self.aux_in_main: string += "aux origin in main"
         else:                string += "main origin in aux"
-        string += " ({0[0]}, {0[1]}, {0[2]}) cm".format(self.displacement)
+        string += " ({0[0]}, {0[1]}, {0[2]}) cm, ".format(self.displacement)
         dirs = ['x', 'y', 'z']
         for idx in range(3):
-            string += " {0}' <{1}, {2}, {3}>{4}.".format(dirs[idx],
+            string += " {0}' <{1}, {2}, {3}>{4}".format(dirs[idx],
                     self.rotation[0][0],
                     self.rotation[1][0], 
                     self.rotation[2][0],
                     " deg" if self.degrees else "")
-        return string
+        return string + "."
 
     def mcnp(self, float_format, sim):
         string += "{0}TR{1}".format("*" if self.degrees else "",
