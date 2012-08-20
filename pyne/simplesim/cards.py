@@ -3008,8 +3008,8 @@ class ForcedCollision(ICellMod):
             See :py:class:`ICellMod`.
         prob : float
             If 'none', there is no forced collision for this cell.
-            If float, it is the survival probability as described in the MCNP
-            manual.
+            If float (between 0 and 1), it is the survival probability as
+            described in the MCNP manual.
         only_entering : bool
             If True, the card applies only to particles entering the cell. If
             False, the card applies to particles entering as well as those
@@ -3056,13 +3056,24 @@ class ForcedCollision(ICellMod):
             fcl.add(cellB, 0.5, False)
 
         """
+        super(ForcedCollision, self).add(cell)
         self.probs += [prob]
         self.only_enterings += [only_entering]
 
     def comment(self):
-        string = "Forced collision {0!r}:".format(self.name)
-        for i_cell in range(len(self.cells)):
-            string ++ " "
+        return super(ForcedCollision, self).comment("Forced collision")
+
+    def _comment_unit(self, i_cell):
+        if self.only_enterings[i_cell]: oestr = "entering only"
+        else: oestr = "entering and weight games"
+        return " prob {0} for {1}".format(self.probs[i_cell], oestr)
+
+    def mcnp(self, float_format, sim):
+        return super(ForcedCollision, self).mcnp(float_format, sim, "FCL")
+
+    def _mcnp_unit(self, float_format, sim, i_cell):
+        string = "-" if self.only_enterings[i_cell] else ""
+        return string + float_format % self.probs[i_cell]
 
     @property
     def probs(self): return self._probs
