@@ -526,8 +526,8 @@ class TestSystemDefinition(unittest.TestCase):
         self.assertEquals(extn.mcnp('%.1e', self.sim), 
                 "EXT:N S 5.0e-01 -5.0e-01V1")
         # Using add().
-        ext2 = cards.ExponentialTransform('neutron', 
-                self.fuel, 'capture-to-total', 'currdir', 'toward')
+        ext2 = cards.ExponentialTransform('neutron')
+        ext2.add(self.fuel, 'capture-to-total', 'currdir', 'toward')
         ext2.add(self.coolant, 0.5, 'currdir', 'toward')
         ext2.add(self.graveyard, 0.5, 'x-axis', 'away')
         self.assertEquals(ext2.comment(), "Exponential transform "
@@ -559,7 +559,8 @@ class TestSystemDefinition(unittest.TestCase):
                 "'forcedcoll-neutron': cell 'fuel' prob 0.5 for entering "
                 "only; cell 'coolant' prob 0.5 for entering and weight games.")
         self.assertEquals(fcl.mcnp('%.1e', self.sim), "FCL:N -5.0e-01 5.0e-01 0")
-        fcl = cards.ForcedCollision('neutron', self.fuel, 0.5, True)
+        fcl = cards.ForcedCollision('neutron')
+        fcl.add(self.fuel, 0.5, True)
         fcl.add(self.coolant, 0.5, False)
         self.assertEquals(fcl.comment(), "Forced collision "
                 "'forcedcoll-neutron': cell 'fuel' prob 0.5 for entering "
