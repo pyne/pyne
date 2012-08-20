@@ -3200,14 +3200,18 @@ class WeightWindowEnergies(IUniqueParticle):
         self.for_gen=for_gen
 
     def comment(self):
-        if self.for_gen and len(self.bounds) == 0: n_bins = 'default'
-        else:                                      n_bins = len(self.bounds)
-        return ("Weight window {0}energies {1!r} for {2}s: {3} bins, "
-                "in MeV.".format('generator ' if self.for_gen else '',
-                    self.name, self.particle, n_bins))
+        if self.for_gen and len(self.bounds) == 0:
+            n_bins = "default"
+            units = "."
+        else:
+            n_bins = len(self.bounds)
+            units = ", in MeV."
+        return ("Weight window {0}energies {1!r} for {2}s: {3} bins{4}".format(
+            "generator " if self.for_gen else "", self.name, self.particle,
+            n_bins, units))
 
     def mcnp(self, float_format, sim):
-        string = "WW{0}E:{1}".format('G' if self.for_gen else '',
+        string = "WW{0}E:{1}".format("G" if self.for_gen else "",
                 self.mcnp_particle[self.particle])
         float_format = " " + float_format
         for bound in self.bounds: string += float_format % bound
@@ -3277,14 +3281,19 @@ class WeightWindowTimes(IUniqueParticle):
     def comment(self):
         # TODO don't tie the comment to any certain units; units are
         # code-dependent.
-        if self.for_gen and len(self.bounds) == 0: n_bins = 'default'
-        else:                                      n_bins = len(self.bounds)
-        return ("Weight window {0}times {1!r} for {2}s: {3} intervals, "
-                "in shakes.".format('generator ' if self.for_gen else '',
-                    self.name, self.particle, n_bins))
+        if self.for_gen and len(self.bounds) == 0:
+            n_bins = "default"
+            units = "."
+        else:
+            n_bins = len(self.bounds)
+            units = ", in shakes."
+        return ("Weight window {0}times {1!r} for {2}s: "
+                "{3} intervals{4}".format(
+                    "generator " if self.for_gen else "",
+                    self.name, self.particle, n_bins, units))
 
     def mcnp(self, float_format, sim):
-        string = "WW{0}T:{1}".format('G' if self.for_gen else '',
+        string = "WW{0}T:{1}".format("G" if self.for_gen else "",
                 self.mcnp_particle[self.particle])
         float_format = " " + float_format
         for bound in self.bounds: 
