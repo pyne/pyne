@@ -77,7 +77,7 @@ class TestSurfaces(unittest.TestCase):
         ## comment()
         self.assertEquals(cyl.comment(),
                 "Axis cylinder 'mycyl': aligned and centered on x axis, "
-                "with radius 0.4000 cm (diameter 0.8000 cm).")
+                "with radius 0.4 cm (diameter 0.8 cm).")
 
         ## shift()
         # z-aligned
@@ -158,8 +158,8 @@ class TestSurfaces(unittest.TestCase):
         except ValueError as e:
             self.assertEquals(e.message, "Stretches perpendicular to the "
                     "axis must be uniform in the two perpendicular "
-                    "directions. User provided y stretch 3.0000 and z "
-                    "stretch 2.0000 for a x-aligned cylinder.")
+                    "directions. User provided y stretch 3 and z "
+                    "stretch 2 for a x-aligned cylinder.")
 
     def test_AxisPlane(self):
         """Tests :py:class:`cards.AxisPlane`'s methods, properties, and
@@ -176,7 +176,7 @@ class TestSurfaces(unittest.TestCase):
         self.assertIsNone(plane.white)
 
         ## comment()
-        self.assertEquals(plane.comment(), "Axis plane 'myplane': x = 3.0000 cm.")
+        self.assertEquals(plane.comment(), "Axis plane 'myplane': x = 3 cm.")
 
         ## shift()
         plane = cards.AxisPlane('myplane', 'x', 3)
@@ -229,8 +229,8 @@ class TestSurfaces(unittest.TestCase):
 
         ## comment()
         self.assertEquals(pp.comment(), "Parallelepiped 'mypp': "
-                "[-2.0000, 3.0000] x [-4.0000, 5.0000] x "
-                "[-6.0000, 7.0000] cm.")
+                "[-2, 3] x [-4, 5] x "
+                "[-6, 7] cm.")
 
         ## shift()
         pp.shift([2, 1, -1])
@@ -302,7 +302,7 @@ class TestOptions(unittest.TestCase):
             critsrc.n_histories = 0.5
         except ValueError as e:
             self.assertEquals(e.message, "The property ``n_histories`` "
-                    "must be an integer. User provided 0.5000.")
+                    "must be an integer. User provided 0.5.")
         try:
             critsrc.n_histories = -1
         except ValueError as e:
@@ -312,12 +312,12 @@ class TestOptions(unittest.TestCase):
             critsrc.keff_guess = -1
         except ValueError as e:
             self.assertEquals(e.message, "The property ``keff_guess`` "
-                    "must be non-negative. User provided -1.0000.")
+                    "must be non-negative. User provided -1.")
         try:
             critsrc.n_skip_cycles = 0.5
         except ValueError as e:
             self.assertEquals(e.message, "The property ``n_skip_cycles`` "
-                    "must be an integer. User provided 0.5000.")
+                    "must be an integer. User provided 0.5.")
         try:
             critsrc.n_skip_cycles = -1
         except ValueError as e:
@@ -327,7 +327,7 @@ class TestOptions(unittest.TestCase):
             critsrc.n_cycles = 0.5
         except ValueError as e:
             self.assertEquals(e.message, "The property ``n_cycles`` "
-                    "must be an integer. User provided 0.5000.")
+                    "must be an integer. User provided 0.5.")
         try:
             critsrc.n_cycles = -1
         except ValueError as e:
@@ -338,7 +338,7 @@ class TestOptions(unittest.TestCase):
         ## comment()
         critsrc = cards.Criticality()
         self.assertEquals(critsrc.comment(), "Criticality source "
-                "'criticality': n_histories: 1000, keff_guess: 1.0000"
+                "'criticality': n_histories: 1000, keff_guess: 1.0"
                 ", n_skip_cycles: 30, n_cycles: 130.")
             
     def test_CriticalityPoints(self):
@@ -352,10 +352,10 @@ class TestOptions(unittest.TestCase):
         self.assertEquals(critpts.name, 'criticalitypoints')
         self.assertTrue(critpts.points == [[0, 0, 0]])
         critpts = cards.CriticalityPoints([[1, 2, 3],
-                                        np.array([np.pi, np.e, 0])])
+                                        np.array([3.1416, 2.7183, 0])])
         self.assertEquals(critpts.comment(), "Criticality points "
-                "'criticalitypoints': (1.0000, 2.0000, 3.0000), "
-                "(3.1416, 2.7183, 0.0000).")
+                "'criticalitypoints': (1, 2, 3), "
+                "(3.1416, 2.7183, 0.0).")
         self.assertRaises(ValueError, setattr, critpts, 'points', 
                 [[0, 0, 0], [1]])
         try:
@@ -414,10 +414,13 @@ class TestSystemDefinition(unittest.TestCase):
                 10.0, 'g/cm^3')
         self.rxr.add_cell(cellB)
         self.assertEquals(cellB.comment(), "Cell 'B': region "
-                "(-fuelpin & +bound), material 'UO2' density 1.00000e+01 "
+                "(-fuelpin & +bound), material 'UO2' density 10.0 "
                 "g/cm^3")
         self.assertEquals(cellB.mcnp("%.5e", self.sim), "5 1 -1.00000e+01 "
                 "(-1 2)")
+        # Incorrect density string.
+        self.assertRaises(ValueError, cards.Cell, 'B', self.pin.neg &
+                self.cellbound.pos, self.uo2, 10.0, 'g/cm3')
         # self.fuel is not a Material.
         self.assertRaises(ValueError, cards.Cell, 'B', self.pin.neg &
             self.cellbound.pos, self.fuel, 10.0, 'g/cm^3')
@@ -450,7 +453,7 @@ class TestSystemDefinition(unittest.TestCase):
                 10.0, 'g/cm^3')
         self.rxr.add_cell(cellD)
         self.assertEquals(cellD.comment(), "Cell 'D': region "
-                "(-fuelpin & +bound), material 'UO2' density 1.00000e+01 "
+                "(-fuelpin & +bound), material 'UO2' density 10.0 "
                 "g/cm^3")
         self.assertEquals(cellD.mcnp("%.5e", self.sim), "5 1 -1.00000e+01 "
                 "(-1 2)")
@@ -466,7 +469,7 @@ class TestSystemDefinition(unittest.TestCase):
         vec.add('origin', [0, 0, 0])
         self.assertEquals(vec.index('origin'), 0)
         self.assertEquals(vec.comment(), "Vector 'vector': origin: "
-                "(0.00000e+00, 0.00000e+00, 0.00000e+00) cm.")
+                "(0, 0, 0) cm.")
         # the mcnp() method doesn't actually need a sim.
         self.assertEquals(vec.mcnp('%.1e', None), "VECT V0 0.0e+00 0.0e+00 "
                 "0.0e+00")
@@ -474,8 +477,8 @@ class TestSystemDefinition(unittest.TestCase):
         self.assertEquals(vec.index('origin'), 0)
         self.assertEquals(vec.index('x-axis'), 1)
         self.assertEquals(vec.comment(), "Vector 'vector': origin: "
-                "(0.00000e+00, 0.00000e+00, 0.00000e+00) cm, x-axis: "
-                "(1.00000e+00, 0.00000e+00, 0.00000e+00) cm.")
+                "(0, 0, 0) cm, x-axis: "
+                "(1, 0, 0) cm.")
         # the mcnp() method doesn't actually need a sim.
         self.assertEquals(vec.mcnp('%.1e', None), "VECT V0 0.0e+00 0.0e+00 "
                 "0.0e+00 V1 1.0e+00 0.0e+00 0.0e+00")
@@ -724,19 +727,19 @@ class TestSystemDefinition(unittest.TestCase):
         self.assertEquals(det.spec[1], 0)
         self.assertEquals(det.sep_direct, True)
         self.assertEquals(det.comment(), "Point detector tally 'point' of "
-                "neutrons: point (0.0000, 0.0000, 0.0000) cm, "
-                "radius 0.0000 cm; direct contrib is separate.")
+                "neutrons: point (0, 0, 0) cm, "
+                "radius 0 cm; direct contrib is separate.")
         det = cards.PointDetector('point', 'neutron', (np.array([1, 2, 3]), 4))
         self.assertTrue((det.spec[0] == [1, 2, 3]).all())
         self.assertEquals(det.spec[1], 4)
         self.assertEquals(det.sep_direct, True)
         self.assertEquals(det.comment(), "Point detector tally 'point' of "
-                "neutrons: point (1.0000, 2.0000, 3.0000) cm, "
-                "radius 4.0000 cm; direct contrib is separate.")
+                "neutrons: point (1, 2, 3) cm, "
+                "radius 4 cm; direct contrib is separate.")
         det = cards.PointDetector('point', 'neutron', ([1, 0, 0], -3))
         self.assertEquals(det.comment(), "Point detector tally 'point' of "
-                "neutrons: point (1.0000, 0.0000, 0.0000) cm, "
-                "radius 3.0000 mfp; direct contrib is separate.")
+                "neutrons: point (1, 0, 0) cm, "
+                "radius 3 mfp; direct contrib is separate.")
         det = cards.PointDetector('point', 'photon', [([0, 0, 0],  0),
                                                       ([1, 0, 0], -3)])
         self.assertEquals(det.spec[0][0], [0, 0, 0])
@@ -744,9 +747,9 @@ class TestSystemDefinition(unittest.TestCase):
         self.assertEquals(det.spec[1][0], [1, 0, 0])
         self.assertEquals(det.spec[1][1], -3)
         self.assertEquals(det.comment(), "Point detector tally 'point' of "
-                "photons: point (0.0000, 0.0000, 0.0000) cm, "
-                "radius 0.0000 cm; "
-                "point (1.0000, 0.0000, 0.0000) cm, radius 3.0000 mfp; "
+                "photons: point (0, 0, 0) cm, "
+                "radius 0 cm; "
+                "point (1, 0, 0) cm, radius 3 mfp; "
                 "direct contrib is separate.")
         det = cards.PointDetector('point', 'photon', ([0, 0, 0], 0),
                 sep_direct=False)
@@ -758,23 +761,23 @@ class TestSystemDefinition(unittest.TestCase):
         self.assertEquals(det.particle, 'neutron')
         self.assertTrue(det.sep_direct)
         self.assertEquals(det.comment(), "Ring detector tally 'ring' of "
-                "neutrons: ring x = 10.0000 cm, radius 2.0000 cm, s.o.e. "
-                "radius 1.0000 cm; direct contrib is separate.")
+                "neutrons: ring x = 10.0 cm, radius 2.0 cm, s.o.e. "
+                "radius 1.0 cm; direct contrib is separate.")
         det = cards.RingDetector('ring', 'neutron', ('x', 10.0, 2.0, -1.0))
         self.assertEquals(det.comment(), "Ring detector tally 'ring' of "
-                "neutrons: ring x = 10.0000 cm, radius 2.0000 cm, s.o.e. "
-                "radius 1.0000 mfp; direct contrib is separate.")
+                "neutrons: ring x = 10.0 cm, radius 2.0 cm, s.o.e. "
+                "radius 1.0 mfp; direct contrib is separate.")
         det = cards.RingDetector('ring', 'neutron', [('x', 10.0, 2.0, -1.0),
                                                      ('y', 20.0, 3.0, 1.0)])
         self.assertEquals(det.comment(), "Ring detector tally 'ring' of "
-                "neutrons: ring x = 10.0000 cm, radius 2.0000 cm, s.o.e. "
-                "radius 1.0000 mfp; ring y = 20.0000 cm, radius 3.0000 "
-                "cm, s.o.e. radius 1.0000 cm; direct contrib is separate.")
+                "neutrons: ring x = 10.0 cm, radius 2.0 cm, s.o.e. "
+                "radius 1.0 mfp; ring y = 20.0 cm, radius 3.0 "
+                "cm, s.o.e. radius 1.0 cm; direct contrib is separate.")
         det = cards.RingDetector('ring', 'neutron', ('x', 10.0, 2.0, -1.0), 
                 sep_direct=False)
         self.assertEquals(det.comment(), "Ring detector tally 'ring' of "
-                "neutrons: ring x = 10.0000 cm, radius 2.0000 cm, s.o.e. "
-                "radius 1.0000 mfp; direct contrib is not separate.")
+                "neutrons: ring x = 10.0 cm, radius 2.0 cm, s.o.e. "
+                "radius 1.0 mfp; direct contrib is not separate.")
 
         ## EnergyGrid
         egrid = cards.EnergyGrid('grid0', None, [1e-4, 1, 100e3, 10e6])
@@ -784,6 +787,10 @@ class TestSystemDefinition(unittest.TestCase):
                     10e6]))
         self.assertEquals(egrid.comment(), "Energy grid 'grid0' for "
                 "all tallies: 4 groups.")
+        # For a specific tally.
+        egrid = cards.EnergyGrid('grid1', det, np.array([1, 2]))
+        self.assertEquals(egrid.comment(), "Energy grid 'grid1' for "
+                "tally ring: 2 groups.")
 
 
 class TestMisc(unittest.TestCase):
