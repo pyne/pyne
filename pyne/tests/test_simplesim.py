@@ -525,6 +525,7 @@ class TestSystemDefinition(unittest.TestCase):
                 "from x-axis.")
         self.assertEquals(extn.mcnp('%.1e', self.sim), 
                 "EXT:N S 5.0e-01 -5.0e-01V1")
+        # Using add().
         ext2 = cards.ExponentialTransform('neutron', 
                 self.fuel, 'capture-to-total', 'currdir', 'toward')
         ext2.add(self.coolant, 0.5, 'currdir', 'toward')
@@ -536,9 +537,57 @@ class TestSystemDefinition(unittest.TestCase):
                 "from x-axis.")
         self.assertEquals(ext2.mcnp('%.1e', self.sim), 
                 "EXT:N S 5.0e-01 -5.0e-01V1")
-        # Using add().
         # Manage order-of-cells issue/question.
         
+    def test_Transformation(self):
+        """"Tests :py:class:`cards.Transformation`."""
+
+        trans = cards.Transformation('trans1', [1, 2, 3],
+                [[4, 5, 6], [7, 8, 9], [10, 11, 12]])
+        self.sim.add_transformation(trans)
+        self.assertEquals(trans.comment(), "Transformation 'trans1': "
+                "pos. of aux origin in main (1, 2, 3) cm, "
+                "x' <4, 7, 10>, y' <5, 8, 11>, z' <6, 9, 12>.")
+        self.assertEquals(trans.mcnp('%.1f', self.sim), "TR1 "
+                "1.0 2.0 3.0 "
+                "4.0 5.0 6.0 "
+                "7.0 8.0 9.0 "
+                "10.0 11.0 12.0 1")
+        trans = cards.Transformation('trans1', [1, 2, 3],
+                np.array([[4, 5, 6], [7, 8, 9], [10, 11, 12]]))
+        self.assertEquals(trans.comment(), "Transformation 'trans1': "
+                "pos. of aux origin in main (1, 2, 3) cm, "
+                "x' <4, 7, 10>, y' <5, 8, 11>, z' <6, 9, 12>.")
+        self.assertEquals(trans.mcnp('%.1f', self.sim), "TR1 "
+                "1.0 2.0 3.0 "
+                "4.0 5.0 6.0 "
+                "7.0 8.0 9.0 "
+                "10.0 11.0 12.0 1")
+        trans = cards.Transformation('trans1', [1, 2, 3],
+                np.matrix([[4, 5, 6], [7, 8, 9], [10, 11, 12]]))
+        self.assertEquals(trans.comment(), "Transformation 'trans1': "
+                "pos. of aux origin in main (1, 2, 3) cm, "
+                "x' <4, 7, 10>, y' <5, 8, 11>, z' <6, 9, 12>.")
+        self.assertEquals(trans.mcnp('%.1f', self.sim), "TR1 "
+                "1.0 2.0 3.0 "
+                "4.0 5.0 6.0 "
+                "7.0 8.0 9.0 "
+                "10.0 11.0 12.0 1")
+        trans = cards.Transformation('trans1', [1, 2, 3],
+                [[4, 5, 6], [7, 8, 9], [10, 11, 12]],
+                aux_in_main=False)
+        self.assertFalse(trans.aux_in_main)
+        self.assertEquals(trans.comment(), "Transformation 'trans1': "
+                "pos. of main origin in aux (1, 2, 3) cm, "
+                "x' <4, 7, 10>, y' <5, 8, 11>, z' <6, 9, 12>.")
+        self.assertEquals(trans.mcnp('%.1f', self.sim), "TR1 "
+                "1.0 2.0 3.0 "
+                "4.0 5.0 6.0 "
+                "7.0 8.0 9.0 "
+                "10.0 11.0 12.0 -1")
+        trans = cards.Transformation('trans1', [1, 2, 3],
+                [[4, 5, 6], [7, 8, 9], [10, 11, 12]],
+                degrees=True)
 
     def test_ITally(self):
         """Tests :py:class:`cards.ITally`'s methods, properties, and
@@ -796,30 +845,6 @@ class TestSystemDefinition(unittest.TestCase):
 class TestMisc(unittest.TestCase):
     """Tests subclasses of :py:class:`cards.IMisc`."""
 
-    def test_Transformation(self):
-        """"Tests :py:class:`cards.Transformation`."""
-
-    
-        trans = cards.Transformation('trans1', [1, 2, 3],
-                [[4, 5, 6], [7, 8, 9], [10, 11, 12]])
-        self.assertEquals(trans.comment(), "Transformation 'trans1' "
-                "pos. of aux origin in main (1, 2, 3) cm, "
-                "x' <4, 7, 10> y' <5, 8, 11> z' <6 9 12>.")
-        self.assertEquals(trans.mcnp('%.1f', self.sim), "TR1 "
-                "1.00000 2.00000 3.00000 "
-                "4.00000 5.00000 6.00000 "
-                "7.00000 8.00000 9.00000 "
-                "10.00000 11.00000 12.00000 1")
-        trans = cards.Transformation('trans1', [1, 2, 3],
-                np.array([[4, 5, 6], [7, 8, 9], [10, 11, 12]]))
-        trans = cards.Transformation('trans1', [1, 2, 3],
-                np.matrix([[4, 5, 6], [7, 8, 9], [10, 11, 12]]))
-        trans = cards.Transformation('trans1', [1, 2, 3],
-                [[4, 5, 6], [7, 8, 9], [10, 11, 12]],
-                aux_in_main=False)
-        trans = cards.Transformation('trans1', [1, 2, 3],
-                [[4, 5, 6], [7, 8, 9], [10, 11, 12]],
-                degrees=True)
 
 class TestSimulationDefinition(unittest.TestCase):
     """Tests the :py:class:`definition.SimulationDefinition` class."""
