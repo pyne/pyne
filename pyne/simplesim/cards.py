@@ -3148,13 +3148,19 @@ class WeightWindowBound(ICellMod):
 
 class WeightWindowEnergies(IUniqueParticle):
     """Upper energy bounds for weight windows. Unique card for a given particle
-    type, with name `weightwinenergy-<particle>`. In MCNP, this is the **WWE**
-    card.
+    type, with name `weightwinenergy-<particle>` or
+    `weightwingenenergy-<particle>`. In MCNP, this is the **WWE**
+    or **WWGE** card.
 
     .. inheritance-diagram:: pyne.simplesim.cards.WeightWindowEnergies
 
     """
-    def __init__(self, particle, bounds):
+    # The choice to combine this card with the WWGE card means that we can't
+    # read in an MCNP input quite as easily? Raise an excpetion if a regular
+    # and a generator card are provided by the user; or maybe just a warning,
+    # and go with the indices provided by the former. it's possible that the
+    # indices are the same. Why wouldn't they be?
+    def __init__(self, particle, bounds, for_gen=False):
         """
         Parameters
         ----------
@@ -3162,6 +3168,12 @@ class WeightWindowEnergies(IUniqueParticle):
             See :py:class:`IUniqueParticle`.
         bounds : list, :py:class:`np.array` [MeV]
             Upper energy bounds of the weight windows.
+        for_gen : bool, optional
+            If set to True, this becomes the energies for the weight window
+            generator energies card, **WWGE**.
+            To request the default functionality that MCNP provides on the
+            **WWGE** card when no bounds are specified, provide an empty list
+            for ``bounds``.
 
         Examples
         --------
@@ -3170,17 +3182,33 @@ class WeightWindowEnergies(IUniqueParticle):
 
             wwe = WeightWindowEnergies('photon', [1, 10])            
 
+        The following specifies the energy bins on a weight window generator
+        times card::
+
+            wwt = WeightWindowEnergies('photon', [1, 1e12], for_gen=True)            
+
+        The following, in MCNP, uses the default bins if using the generator
+        option::
+        
+            wwt = WeightWindowEnergies('photon', [], for_gen=True)            
+
         """
-        super(WeightWindowEnergies, self).__init__('weightwinenergy',
-                                                   particle)
+        super(WeightWindowEnergies, self).__init__(
+                'weightwin{0}energy'.format('gen' if for_gen else ''),
+                particle)
         self.bounds = bounds
+        self.for_gen=for_gen
 
     def comment(self):
-        return ("Weight window energies {0!r} for {1}s: {2} bins, "
-                "in MeV.".format(self.name, self.particle, len(self.bounds)))
+        if self.for_gen and len(self.bounds) == 0: n_bins = 'default'
+        else:                                      n_bins = len(self.bounds)
+        return ("Weight window {0}energies {1!r} for {2}s: {3} bins, "
+                "in MeV.".format('generator ' if self.for_gen else '',
+                    self.name, self.particle, n_bins))
 
     def mcnp(self, float_format, sim):
-        string = "WWE:{0}".format(self.mcnp_particle[self.particle])
+        string = "WW{0}E:{1}".format('G' if self.for_gen else '',
+                self.mcnp_particle[self.particle])
         float_format = " " + float_format
         for bound in self.bounds: string += float_format % bound
         return string
@@ -3193,16 +3221,22 @@ class WeightWindowEnergies(IUniqueParticle):
         self._bounds = value
         self.n_bounds = len(self.bounds)
 
+    @property
+    def for_gen(self): return self._for_gen
+
+    @for_gen.setter
+    def for_gen(self, value): self._for_gen = value
+
 
 class WeightWindowTimes(IUniqueParticle):
     """Upper time bounds for weight windows. Unique card for a given particle
-    type, with name `weightwintime-<particle>`. In MCNP this is the **WWT**
-    card.
+    type, with name `weightwintime-<particle>` or `weightwingentime-<particle`.
+    In MCNP this is the **WWT** or **WWGT** card.
 
     .. inheritance-diagram:: pyne.simplesim.cards.WeightWindowTimes
 
     """
-    def __init__(self, particle, bounds):
+    def __init__(self, particle, bounds, for_gen=False):
         """
         Parameters
         ----------
@@ -3210,6 +3244,12 @@ class WeightWindowTimes(IUniqueParticle):
             See :py:class:`IUniqueParticle`.
         bounds : list, :py:class:`np.array` [seconds]
             Upper time bounds of the weight windows.
+        for_gen : bool, optional
+            If set to True, this becomes the energies for the weight window
+            generator energies card, **WWGE**.
+            To request the default functionality that MCNP provides on the
+            **WWGE** card when no bounds are specified, provide an empty list
+            for ``bounds``.
 
         Examples
         --------
@@ -3218,19 +3258,34 @@ class WeightWindowTimes(IUniqueParticle):
             
             wwt = WeightWindowTimes('photon', [1, 1e12])            
 
+        The following specifies the time intervals on a weight window generator
+        times card::
+
+            wwt = WeightWindowTimes('photon', [1, 1e12], for_gen=True)            
+
+        The following, in MCNP, uses the default bins if using the generator
+        option::
+
+            wwt = WeightWindowTimes('photon', [], for_gen=True)            
+
         """
-        super(WeightWindowTimes, self).__init__('weightwintime', particle)
+        super(WeightWindowTimes, self).__init__(
+                'weightwin{0}time'.format('gen' if for_gen else ''), particle)
         self.bounds = bounds
+        self.for_gen = for_gen
 
     def comment(self):
         # TODO don't tie the comment to any certain units; units are
         # code-dependent.
-        return ("Weight window times {0!r} for {1}s: {2} intervals, "
-                "in shakes.".format(
-                    self.name, self.particle, len(self.bounds)))
+        if self.for_gen and len(self.bounds) == 0: n_bins = 'default'
+        else:                                      n_bins = len(self.bounds)
+        return ("Weight window {0}times {1!r} for {2}s: {3} intervals, "
+                "in shakes.".format('generator ' if self.for_gen else '',
+                    self.name, self.particle, n_bins))
 
     def mcnp(self, float_format, sim):
-        string = "WWT:{0}".format(self.mcnp_particle[self.particle])
+        string = "WW{0}T:{1}".format('G' if self.for_gen else '',
+                self.mcnp_particle[self.particle])
         float_format = " " + float_format
         for bound in self.bounds: 
             string += float_format % (bound * self.secs2shakes)
@@ -3243,6 +3298,12 @@ class WeightWindowTimes(IUniqueParticle):
     def bounds(self, value): 
         self._bounds = value
         self.n_bounds = len(self.bounds)
+
+    @property
+    def for_gen(self): return self._for_gen
+
+    @for_gen.setter
+    def for_gen(self, value): self._for_gen = value
 
 
 class DXTRANContribution(ICellMod):
