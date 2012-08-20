@@ -3124,7 +3124,7 @@ class WeightWindowBound(ICellMod):
     .. inheritance-diagram:: pyne.simplesim.cards.WeightWindowBound
 
     """
-    def __init__(self, particle, idx_type, index, cell, bound, *args):
+    def __init__(self, particle, cell, idx_energy, idx_time, bound, *args):
         """
         Parameters
         ----------
@@ -3138,6 +3138,8 @@ class WeightWindowBound(ICellMod):
         cell : :py:class:`Cell` or subclass
             See :py:class:`ICellMod`
         bound : str or float
+            Lower bound for the weight to cause rouletting, or 'killall' to
+            kill all particles entering the cell.
 
         Examples
         --------
@@ -3145,6 +3147,10 @@ class WeightWindowBound(ICellMod):
         """
         # Check for existence of weight window cards.
         pass
+
+    def add(cell, idx_energy, idx_time, bound):
+        pass
+
 
 class WeightWindowEnergies(IUniqueParticle):
     """Upper energy bounds for weight windows. Unique card for a given particle
