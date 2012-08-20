@@ -2599,7 +2599,9 @@ class ProtonPhysics(IMisc):
 class Transformation(IMisc):
     """A coordinate transformation. In MCNP, this is the **TR** card. MCNP
     allows the specification of less than 9 values in the rotation matrix; this
-    is not supported here.
+    is not supported here. Note that if generating an input for MCNP, this card
+    needs to be added to the simulation by
+    :py:meth:`pyne.simplesim.definition.MCNPSimulation.add_transformation`.
 
     .. inheritance-diagram:: pyne.simplesim.cards.Transformation
 
@@ -2644,45 +2646,45 @@ class Transformation(IMisc):
         """
         super(Transformation, self).__init__(name)
         self.displacement = displacement
-        self.rotation = rotation
+        # For numpy matrices.
+        if hasattr(rotation, 'tolist'): self.rotation = rotation.tolist()
+        else:                           self.rotation = rotation
         self.aux_in_main = aux_in_main
+        self.degrees = degrees
 
     def comment(self):
         return "Transformation {0!r}: pos. of {1}".format(self.name,
-                self.comment_unit())
+                self._comment_unit())
 
     def _comment_unit(self):
-        if self.aux_in_main: string += "aux origin in main"
-        else:                string += "main origin in aux"
-        string += " ({0[0]}, {0[1]}, {0[2]}) cm, ".format(self.displacement)
+        if self.aux_in_main: string = "aux origin in main"
+        else:                string = "main origin in aux"
+        string += " ({0[0]}, {0[1]}, {0[2]}) cm,".format(self.displacement)
         dirs = ['x', 'y', 'z']
         for idx in range(3):
             string += " {0}' <{1}, {2}, {3}>{4}".format(dirs[idx],
-                    self.rotation[0][0],
-                    self.rotation[1][0], 
-                    self.rotation[2][0],
+                    self.rotation[0][idx],
+                    self.rotation[1][idx], 
+                    self.rotation[2][idx],
                     " deg" if self.degrees else "")
+            if idx != 2: string += ","
         return string + "."
 
     def mcnp(self, float_format, sim):
-        string += "{0}TR{1}".format("*" if self.degrees else "",
+        string = "{0}TR{1}".format("*" if self.degrees else "",
                 sim.transformation_num(self.name))
         string += self._mcnp_unit(float_format)
         return string
 
     def _mcnp_unit(self, float_format): 
         # Needed by CellMCNP.
-        formatstr = " {0} {0} {0}".float(float_format)
-        string += formatstr % tuple(self.displacement)
+        formatstr = " {0} {0} {0}".format(float_format)
+        string = formatstr % tuple(self.displacement)
         for i_row in range(3):
             for i_col in range(3):
                 string += " "
                 string += float_format % self.rotation[i_row][i_col]
-        if self.aux_in_main: string += "1"
-        else: string += "-1"
-
-
-        return string
+        return string + (" 1" if self.aux_in_main else " -1")
 
     @property
     def displacement(self): return self._displacement
