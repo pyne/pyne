@@ -132,7 +132,7 @@ class ICard(object):
     def name(self, value):
         if value.find(' ') != -1:
             raise ValueError("The property ``name`` cannot contain spaces. "
-                    "User provided '%s'." % value)
+                    "User provided {0}.".format(value))
         if self._unique:
             raise StandardError("This is a unique card, meaning only one card"
                     " of this type can be found in a ``definition``. "
@@ -210,21 +210,21 @@ class Cell(ICard):
                     "specified.")
 
     def comment(self):
-        string = "Cell '%s':" % self.name
-        string += " region %s, " % self.region.comment()
+        string = "Cell {0!r}: region {1}, ".format(
+                self.name, self.region.comment())
         if self.material and self.density and self.density_units:
-            string += "material '%s'" % self.material.name
-            string += " density %.5e %s" % (self.density, self.density_units)
+            string += "material {0!r} density {1} {2}".format(
+                    self.material.name, self.density, self.density_units)
         else:
             string += "void"
         return string
 
     def mcnp(self, float_format, sim):
         # Card number.
-        string = "%i" % sim.sys.cell_num(self.name)
+        string = "{0}".format(sim.sys.cell_num(self.name))
         if self.material and self.density and self.density_units:
             # Material number.
-            string += " %i " % sim.sys.material_num(self.material.name)
+            string += " {0} ".format(sim.sys.material_num(self.material.name))
             # Density, with units prefix.
             string += self._mcnp_density_prefix(self.density_units)
             string += float_format % self.density
@@ -232,7 +232,7 @@ class Cell(ICard):
             # Void.
             string += " 0"
         # Print surfaces.
-        string += " %s" % self.region.mcnp(sim)
+        string += " {0}".format(self.region.mcnp(sim))
         return string
 
     def _mcnp_density_prefix(self, density_units):
@@ -253,8 +253,8 @@ class Cell(ICard):
         if density_units == 'g/cm^3':          return '-'
         elif density_units == 'atoms/b/cm':    return ''
         else:
-            raise Exception("Invalid string to specify density units: %s."
-                    % density_units)
+            raise Exception("Invalid string to specify density units: "
+                "{0!r}.".format(density_units))
 
     @property
     def region(self): return self._region
@@ -291,7 +291,7 @@ class Cell(ICard):
         if (value and value != 'g/cm^3' and value != 'atoms/b/cm'):
             raise ValueError("The property ``density_units`` must be either "
                     "'g/cm^3' or 'atoms/b/cm'. User provided "
-                    "'{0}'".format(value))
+                    "{0!r}".format(value))
         self._density_units = value
 
 
@@ -471,7 +471,7 @@ class CellMCNP(Cell):
 
     def comment(self):
         string = super(CellMCNP, self).comment()
-        float_format = "%.5e"
+        float_format = "%.5g"
         # temperature
         if self.temperature:
             string += "TMP="
@@ -486,13 +486,13 @@ class CellMCNP(Cell):
         if self.importance:
             importance = self._make_list(self.importance)
             for entry in importance:
-                string += (" IMP:%s=%i" % 
-                        (self.mcnp_particle(entry[0]), entry[1]))
+                string += " IMP:{0}={1}".format(
+                        self.mcnp_particle(entry[0]), entry[1])
         # exp_transform
         if self.exp_transform:
             exp_transform = self._make_list(self.exp_transform)
             for entry in exp_transform:
-                string += " EXT:%s=" % self.mcnp_particle(entry[0])
+                string += " EXT:{0}=".format(self.mcnp_particle(entry[0]))
                 string += float_format % entry[1]
         # forced_coll
         if self.forced_coll:
@@ -638,11 +638,11 @@ class CellMCNP(Cell):
             if value < 200:
                 raise UserWarning("Temperature set as less than 200 K. "
                         "Are you trying to specify temperature in degrees "
-                        "Celcius, etc.? User provided %.4f." % value)
+                        "Celcius, etc.? User provided {0}.".format(value))
             if value < 1:
                 raise UserWarning("Temperature set as less than 1 K. "
                         "Are you trying to specify temperature as 'kT'? "
-                        "User provided %.4f." % value)
+                        "User provided {0}.".format(value))
         self._temperature = value
 
     @property
@@ -652,7 +652,7 @@ class CellMCNP(Cell):
     def volume(self, value):
         if value is not None and value < 0:
             raise ValueError("The ``volume`` property cannot be negative. "
-                "User provided %.4f." % value)
+                "User provided {0}.".format(value))
 
     @property
     def importance(self): return self._importance
@@ -908,9 +908,8 @@ class ISurface(ICard):
     @reflecting.setter
     def reflecting(self, value):
         if value is not None and type(value) is not bool:
-            raise TypeError("The property ``reflecting`` must be "
-                    "None or of boolean type. User provided "
-                    "{0}.".format(value))
+            raise TypeError("The property ``reflecting`` must be None or of "
+                    "boolean type. User provided {0}.".format(value))
         self._reflecting = value
 
     @property
@@ -920,9 +919,8 @@ class ISurface(ICard):
     @white.setter
     def white(self, value):
         if value is not None and type(value) is not bool:
-            raise TypeError("The property ``white`` must be "
-                    "None or of boolean type. User provided "
-                    "{0}.".format(value))
+            raise TypeError("The property ``white`` must be None or of "
+                    "boolean type. User provided {0}.".format(value))
         self._white = value
 
 
@@ -1023,10 +1021,9 @@ class AxisCylinder(IAxisSurface):
         self.radius = radius
 
     def comment(self):
-        return ("Axis cylinder '%s': aligned and centered on %s axis, "
-                "with radius %.4f cm (diameter %.4f cm)." %
-                        (self.name, self.cartesian_axis,
-                        self.radius, 2 * self.radius))
+        return ("Axis cylinder {0!r}: aligned and centered on {1} axis, "
+                "with radius {2} cm (diameter {3} cm).".format(self.name,
+                    self.cartesian_axis, self.radius, 2 * self.radius))
     
     def shift(self, vector):
         """See :py:meth:`ISurface.shift`. Axis cylinders can only be shifted along
@@ -1061,8 +1058,9 @@ class AxisCylinder(IAxisSurface):
             iserror = True
             dirs = ('z', 'x', 'y')
         if iserror:
-            raise ValueError("A cylinder aligned with the %s axis cannot "
-                    "be shifted in the %s or %s directions." % dirs)
+            raise ValueError("A cylinder aligned with the {0[0]} axis cannot "
+                    "be shifted in the {0[1]} or {0[2]} directions.".format(
+                        dirs))
 
     def stretch(self, vector):
         """See :py:meth:`ISurface:stretch`. Axis cylinders can be stretched in
@@ -1113,8 +1111,8 @@ class AxisCylinder(IAxisSurface):
         if iserror:
             raise ValueError("Stretches perpendicular to the axis must be "
                     "uniform in the two perpendicular directions. User "
-                    "provided %s stretch %.4f and %s stretch %.4f for a "
-                    "%s-aligned cylinder." % out)
+                    "provided {0[0]} stretch {0[1]} and {0[2]} stretch "
+                    "{0[3]} for a {0[4]}-aligned cylinder.".format(out))
 
     @property
     def radius(self):
@@ -1124,7 +1122,7 @@ class AxisCylinder(IAxisSurface):
     def radius(self, value):
         if value <= 0:
             raise ValueError("The ``radius`` property must be "
-                    "positive. User provided %.4f." % value)
+                    "positive. User provided {0}.".format(value))
         self._radius = value
 
 
@@ -1165,8 +1163,8 @@ class AxisPlane(IAxisSurface):
         self.position = position
     
     def comment(self):
-        return "Axis plane '%s': %s = %.4f cm." % (self.name, self.cartesian_axis,
-                self.position)
+        return "Axis plane {0!r}: {1} = {2} cm.".format(
+                self.name, self.cartesian_axis, self.position)
 
     def shift(self, vector):
         """See :py:meth:`ISurface.shift`. Axis planes can be shifted in any
@@ -1279,8 +1277,8 @@ class Parallelepiped(IMacrobody):
         self.zlims = np.array([zmin, zmax])
 
     def comment(self):
-        return ("Parallelepiped '%s': [%.4f, %.4f] x [%.4f, %.4f] x " \
-               "[%.4f, %.4f] cm." % (self.name, self.xlims[0], self.xlims[1],
+        return ("Parallelepiped {0!r}: [{1}, {2}] x [{3}, {4}] x " 
+               "[{5}, {6}] cm.".format(self.name, self.xlims[0], self.xlims[1],
                    self.ylims[0], self.ylims[1], self.zlims[0], self.zlims[1]))
 
     def shift(self, vector):
@@ -1339,8 +1337,8 @@ class Parallelepiped(IMacrobody):
     @xlims.setter
     def xlims(self, value):
         if value[0] > value[1]:
-            raise ValueError("The value of xmin, %.4f, is greater than "
-                    "that of xmax, %.4f." % (value[0], value[1]))
+            raise ValueError("The value of xmin, {0}, is greater than "
+                    "that of xmax, {1}.".format(value[0], value[1]))
         self._xlims = value
 
     @property
@@ -1349,8 +1347,8 @@ class Parallelepiped(IMacrobody):
     @ylims.setter
     def ylims(self, value):
         if value[0] > value[1]:
-            raise ValueError("The value of ymin, %.4f, is greater than "
-                    "that of ymax, %.4f." % (value[0], value[1]))
+            raise ValueError("The value of ymin, {0}, is greater than "
+                    "that of ymax, {1}.".format(value[0], value[1]))
         self._ylims = value
 
     @property
@@ -1359,8 +1357,8 @@ class Parallelepiped(IMacrobody):
     @zlims.setter
     def zlims(self, value):
         if value[0] > value[1]:
-            raise ValueError("The value of zmin, %.4f, is greater than "
-                    "that of zmax, %.4f." % (value[0], value[1]))
+            raise ValueError("The value of zmin, {0}, is greater than "
+                    "that of zmax, {1}.".format(value[0], value[1]))
         self._zlims = value
 
 
@@ -1543,7 +1541,7 @@ class RegionLeaf(IRegion):
             prefix = ''
         else:
             prefix = '-'
-        return "%s%i" % (prefix, sim.sys.surface_num(self.surface.name))
+        return "{0}{1}".format(prefix, sim.sys.surface_num(self.surface.name))
 
     @property
     def surface(self):
@@ -1631,8 +1629,8 @@ class Criticality(ISource):
         self.n_cycles = n_cycles
 
     def comment(self):
-        return ("Criticality source '%s': n_histories: %i, keff_guess: %.4f"
-                ", n_skip_cycles: %i, n_cycles: %i." % (self.name,
+        return ("Criticality source {0!r}: n_histories: {1}, keff_guess: {2}"
+                ", n_skip_cycles: {3}, n_cycles: {4}.".format(self.name,
                     self.n_histories, self.keff_guess, self.n_skip_cycles,
                     self.n_cycles))
 
@@ -1643,10 +1641,10 @@ class Criticality(ISource):
     def n_histories(self, value):
         if type(value) is not int:
             raise ValueError("The property ``n_histories`` must be an "
-                    "integer. User provided %.4f." % value)
+                    "integer. User provided {0}.".format(value))
         if value <= 0:
             raise ValueError("The property ``n_histories`` must be positive. "
-                "User provided %i." % value)
+                "User provided {0}.".format(value))
         self._n_histories = value
 
     @property
@@ -1656,7 +1654,7 @@ class Criticality(ISource):
     def keff_guess(self, value):
         if value < 0:
             raise ValueError("The property ``keff_guess`` must be "
-                    "non-negative. User provided %.4f." % value)
+                    "non-negative. User provided {0}.".format(value))
         self._keff_guess = value
 
     @property
@@ -1666,10 +1664,10 @@ class Criticality(ISource):
     def n_skip_cycles(self, value):
         if type(value) is not int:
             raise ValueError("The property ``n_skip_cycles`` must be an "
-                    "integer. User provided %.4f." % value)
+                    "integer. User provided {0}.".format(value))
         if value <= 0:
             raise ValueError("The property ``n_skip_cycles`` must be positive. "
-                "User provided %i." % value)
+                "User provided {0}.".format(value))
         self._n_skip_cycles = value
 
     @property
@@ -1679,11 +1677,11 @@ class Criticality(ISource):
     def n_cycles(self, value):
         if type(value) is not int:
             raise ValueError("The property ``n_cycles`` must be an "
-                    "integer. User provided %.4f." % value)
+                    "integer. User provided {0}.".format(value))
         if value < self.n_skip_cycles:
             raise ValueError("The property ``n_cycles`` must be equal to or "
-                    "greater than ``n_skip_cycles``. User provided %i." %
-                    value)
+                    "greater than ``n_skip_cycles``. "
+                    "User provided {0}.".format(value))
         # If n_cycles is greater or equal to n_skip_cycles, it is positive.
         self._n_cycles = value
 
@@ -1715,7 +1713,7 @@ class CriticalityPoints(ISource):
 
         """
         super(CriticalityPoints, self).__init__('criticalitypoints',
-                unique=True)
+                                                unique=True)
         self.points = points
 
     def comment(self):
@@ -1723,11 +1721,8 @@ class CriticalityPoints(ISource):
         counter = 0
         for point in self.points:
             counter += 1
-            string += "(%.4f, %.4f, %.4f)" % tuple(point)
-            if counter < len(self.points):
-                string += ", "
-            else:
-                string += "."
+            string += "({0[0]}, {0[1]}, {0[2]}){1}".format(point,
+                ", " if counter < len(self.points) else ".")
         return string
 
     @property
@@ -1738,7 +1733,7 @@ class CriticalityPoints(ISource):
         for point in value:
             if len(point) is not 3:
                 raise ValueError("Length of all point lists/arrays must be 3."
-                        " User provided a point %s." % str(point))
+                        " User provided a point {0}.".format(point))
         self._points = value
 
 
@@ -1764,19 +1759,17 @@ class ITally(ICard):
 
     @abc.abstractmethod
     def comment(self, title):
-        string = "%s tally '%s' of " % (title, self.name)
+        string = "{0} tally {1!r} of ".format(title, self.name)
         if type(self.particle) is not list:
             string += self.particle
-            if self.particle != 'all':
-                string += "s"
+            if self.particle != 'all': string += "s"
         else:
             pcounter = 0
             for part in self.particle:
                 pcounter += 1
-                string += "%ss" % part
-                if pcounter < len(self.particle):
-                    string += ", "
-        string += ": "
+                string += "{0}s".format(part)
+                if pcounter < len(self.particle): string += ", "
+        string += ":"
         return string
 
     @property
@@ -1788,7 +1781,7 @@ class ITally(ICard):
                 value != 'electron' and value != 'proton'):
             raise ValueError("The property ``particle`` must be 'neutron', "
                     "'photon', 'electron', or 'proton'. "
-                    "User provided '%s'." % value)
+                    "User provided {0!r}.".format(value))
         self._particle = value
 
 
@@ -1848,37 +1841,34 @@ class ICellSurfTally(ITally):
         # card_type is either 'cell', or 'surface'
         # Assuming the user has provided objects of the appropriate type; the
         # issubclass check was not working with little effort. TODO
-        string = super(ICellSurfTally, self).comment(title)
-
+        string = super(ICellSurfTally, self).comment(title) + " "
         if card_type == 'cell':
             classcheck = Cell
         elif card_type == 'surface':
             classcheck = ISurface
         if type(self.cards) is not list: # issubclass(self.cards, classcheck):
-            string += "%s '%s'" % (card_type, self.cards.name)
+            string += "{0} {1!r}".format(card_type, self.cards.name)
         elif type(self.cards) is list:
             if type(self.cards[0]) is not list:
-                string += "%ss " % card_type
+                string += "{0}s ".format(card_type)
             outcounter = 0
             for obj in self.cards:
                 outcounter += 1
                 if type(obj) is not list: # issubclass(obj, classcheck):
-                    string += "'%s'" % obj.name
+                    string += "{0!r}".format(obj.name)
                 elif type(obj) is list:
-                    string += "%s in " % union_type
+                    string += "{0} in ".format(union_type)
                     incounter = 0
                     for avgobj in obj:
                         incounter += 1
                         # Must be a cell/surface card.
-                        string += "'%s'" % avgobj.name
-                        if incounter < len(obj):
-                            string += ", "
+                        string += "{0!r}".format(avgobj.name)
+                        if incounter < len(obj): string += ", "
                 # TODO an anti-duck-typing exception:
                 #else:
                 #    raise ValueError("Expected {0} or list, got {1}.".format(
                 #            card_type, type(obj)))
-                if outcounter < len(self.cards):
-                    string += "; "
+                if outcounter < len(self.cards): string += "; "
         # TODO an anti-duck-typing exception:
         #else:
         #    raise ValueError("Expected {0} or list, got {1}.".format(
@@ -2018,7 +2008,7 @@ class IAverageTally(ICellSurfTally):
     def comment(self, title, card_type):
         avgstr = 'avg.'
         string = super(IAverageTally, self).comment(title, avgstr, card_type)
-        if self.average: string += "; and %s of all provided." % avgstr
+        if self.average: string += "; and {0} of all provided.".format(avgstr)
         else:            string += "."
         return string
 
@@ -2186,7 +2176,7 @@ class CellEnergyDeposition(IAverageTally):
 
     def comment(self):
         return super(CellEnergyDeposition, self).comment("Energy deposition",
-                'cell')
+                                                         'cell')
 
     @property
     def particle(self): return self._particle
@@ -2199,7 +2189,8 @@ class CellEnergyDeposition(IAverageTally):
                         string != 'electron' and string != 'proton'):
                     raise ValueError("The ``particle`` list must "
                             "contain only 'neutron', 'photon', 'electron',"
-                            " or 'proton'. User provided '%s'." % string)
+                            " or 'proton'. User provided {0!r}.".format(
+                                string))
         else:
             # A single string is provided.
             if (value != 'neutron' and value != 'photon' and 
@@ -2207,7 +2198,7 @@ class CellEnergyDeposition(IAverageTally):
                     value != 'all'):
                 raise ValueError("The property ``particle`` must be "
                         "'neutron', 'photon', 'electron', 'proton', or 'all'."
-                        "User provided '%s'." % value)
+                        "User provided {0!r}.".format(value))
         self._particle = value
 
 
@@ -2382,11 +2373,10 @@ class IDetector(ITally):
             for point in self.spec:
                 counter += 1
                 string += self._tuple_tostring(point)
-                if counter < len(self.spec):
-                    string += "; "
-        if not self.sep_direct: dircontr = 'not '
-        else:                   dircontr = ''
-        return string + "; direct contrib is %sseparate." % dircontr
+                if counter < len(self.spec): string += ";"
+        string += "; direct contrib is {0}separate.".format(
+                '' if self.sep_direct else 'not ')
+        return string
     
     @abc.abstractmethod
     def _tuple_tostring(self):
@@ -2474,10 +2464,8 @@ class PointDetector(IDetector):
         return super(PointDetector, self).comment("Point detector")
 
     def _tuple_tostring(self, apoint):
-        numbertuple = tuple(apoint[0]) + (abs(apoint[1]),)
-        string = "point (%.4f, %.4f, %.4f) cm, radius %.4f " % numbertuple
-        if apoint[1] < 0: string += 'mfp'
-        else:             string += 'cm'
+        string = " point ({0[0]}, {0[1]}, {0[2]}) cm, radius {1} {2}".format(
+                apoint[0], abs(apoint[1]), 'mfp' if apoint[1] < 0 else 'cm')
         return string
 
 
@@ -2540,11 +2528,9 @@ class RingDetector(IDetector):
         return super(RingDetector, self).comment("Ring detector")
 
     def _tuple_tostring(self, aring):
-        string = ("ring %s = %.4f cm, radius %.4f cm, s.o.e. "
-                "radius %.4f " %
-                (aring[0], aring[1], aring[2], abs(aring[3])))
-        if aring[3] < 0: string += 'mfp'
-        else:            string += 'cm'
+        string = (" ring {0} = {1} cm, radius {2} cm, s.o.e. "
+                "radius {3} {4}".format(aring[0], aring[1], aring[2],
+                    abs(aring[3]), 'mfp' if aring[3] < 0 else 'cm'))
         return string
 
 
@@ -2574,10 +2560,10 @@ class EnergyGrid(IMisc):
         self.energies = energies
 
     def comment(self):
-        string = "Energy grid '%s' for " % self.name
+        string = "Energy grid {0!r} for ".format(self.name)
         if self.tally is None: string += "all tallies"
-        else:                  string += "tally %s" % self.tally.name
-        return string + ": %i groups." % len(self.energies)
+        else:                  string += "tally {0}".format(self.tally.name)
+        return string + ": {0} groups.".format(len(self.energies))
 
     @property
     def energies(self): return self._energies
@@ -2657,27 +2643,25 @@ class Transformation(IMisc):
     def _comment_unit(self):
         if self.aux_in_main: string += "aux origin in main"
         else:                string += "main origin in aux"
-        string += " (%.5e, %.5e, %.5e) cm" % tuple(self.displacement)
+        string += " ({0[0]}, {0[1]}, {0[2]}) cm".format(self.displacement)
         dirs = ['x', 'y', 'z']
         for idx in range(3):
-            string += " %s' <%.5e, %.5e, %.5e>" % tuple(dirs[idx],
+            string += " {0}' <{1}, {2}, {3}>{4}.".format(dirs[idx],
                     self.rotation[0][0],
                     self.rotation[1][0], 
-                    self.rotation[2][0])
-        if self.degrees: string += " deg"
-        string += "."
+                    self.rotation[2][0],
+                    " deg" if self.degrees else "")
         return string
 
     def mcnp(self, float_format, sim):
-        string = ""
-        if self.degrees: string += "*"        
-        string += "TR%i" % sim.transformation_num(self.name)
+        string += "{0}TR{1}".format("*" if self.degrees else "",
+                sim.transformation_num(self.name))
         string += self._mcnp_unit(float_format)
         return string
 
     def _mcnp_unit(self, float_format): 
         # Needed by CellMCNP.
-        formatstr = " %s %s %s" % 3 * (float_format,)
+        formatstr = " {0} {0} {0}".float(float_format)
         string += formatstr % tuple(self.displacement)
         for i_row in range(3):
             for i_col in range(3):
@@ -2796,7 +2780,7 @@ class ExponentialTransform(ICellMod):
         n_args_per_cell = 4
         if len(args) % n_args_per_cell != 0:
             raise StandardError("The length of ``*args`` must be a multiple "
-                    "of %i. Length is %i." % (n_args_per_cell, len(args)))
+                    "of {0}. Length is {1}.".format(n_args_per_cell, len(args)))
         # Initialize properties.
         self.cells = [cell]
         self.stretchs = [stretch]
@@ -2834,15 +2818,14 @@ class ExponentialTransform(ICellMod):
         self.signs += [sign]
 
     def comment(self):
-        string = "Exponential transform '%s':" % self.name
+        string = "Exponential transform {0!r}:".format(self.name)
         for i_cell in range(len(self.cells)):
             string += " " + self._comment_unit(i_cell)
-            if i_cell < (len(self.cells) - 1):
-                string += ";"
+            if i_cell < (len(self.cells) - 1): string += ";"
         return string + "."
 
     def _comment_unit(self, i_cell):
-        string = "cell '%s' " % self.cells[i_cell].name
+        string = "cell {0!r} ".format(self.cells[i_cell].name)
         string += "stretch by {0} ".format(self.stretchs[i_cell])
         string += self.signs[i_cell] + " "
         if self.signs[i_cell] == 'away': string += "from "
@@ -2852,7 +2835,7 @@ class ExponentialTransform(ICellMod):
     def mcnp(self, float_format, sim):
         # TODO this ordering might not be correct, particularly once we add
         # support for universes, etc.
-        string = "EXT:%s" % self.mcnp_particle[self.particle]
+        string = "EXT:{0!s}".format(self.mcnp_particle[self.particle])
         # TODO this should loop through in the print order.
         for key, cell in sim.sys.cells.iteritems(): 
             if cell in self.cells:
@@ -2878,7 +2861,7 @@ class ExponentialTransform(ICellMod):
                 raise Exception("Vector card is needed for the Exponential "
                         "transform card.")
             vecname = self.directions[i_cell]
-            string += "V%i" % sim.misc['vector'].index(vecname)
+            string += "V{0}".format(sim.misc['vector'].index(vecname))
         return string
 
     @property
@@ -2887,8 +2870,8 @@ class ExponentialTransform(ICellMod):
     @particle.setter
     def particle(self, value):
         if value not in self.mcnp_particle:
-            raise LookupError("The particle %s is not in the "
-                    "``mcnp_particle`` dictionary." % value)
+            raise LookupError("The particle {0} is not in the "
+                    "``mcnp_particle`` dictionary.".format(value))
         self._particle = value
 
     @property
@@ -2924,7 +2907,7 @@ class ExponentialTransform(ICellMod):
         for arg in value:
             if arg != 'toward' and arg != 'away':
                 raise ValueError("The value of ``sign`` must be 'toward' or "
-                        "'away'. User provided '%s'." % arg)
+                        "'away'. User provided {0!r}.".format(arg))
         self._signs = value
 
 
@@ -2978,13 +2961,12 @@ class Vector(IMisc):
 
 
     def comment(self):
-        string = "Vector '%s':" % self.name
+        string = "Vector {0!r}:".format(self.name)
         counter = 0
         for key, val in self.vectors.iteritems():
             counter += 1
-            string += " %s: (%.5e, %.5e, %.5e) cm" % ((key,) + tuple(val))
-            if counter < len(self.vectors):
-                string += ","
+            string += " {0}: ({1[0]}, {1[1]}, {1[2]}) cm".format(key, val)
+            if counter < len(self.vectors): string += ","
         return string + "."
 
     def mcnp(self, float_format, sim):
@@ -2995,7 +2977,7 @@ class Vector(IMisc):
         for key, val in self.vectors.iteritems():
             counter += 1
             index = self.index(key)
-            formatstr = " V%i %s %s %s" % ((index,) + 3 * (float_format,))
+            formatstr = " V{0} {1} {1} {1}".format(index, float_format)
             string += formatstr % tuple(val)
         return string
         
