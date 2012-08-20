@@ -353,11 +353,13 @@ class CellMCNP(Cell):
             2nd (int) is the cell importance. 
             To specify this input for more
             than one particle, provide a list of these tuples.
-        exp_transform : 2-element tuple of str and float, optional
+        exp_transform : 4-element tuple of str, str/float, str, and str, optional
             An exponential transform, **EXT**. The 1st element is a particle
-            name (see :py:attr:`mcnp_particle`). The 2nd element (float) is the
-            parameter 'a' as described in the MCNP manual. This is a form of
-            variance reduction. 
+            name (see :py:attr:`mcnp_particle`). The 2nd element (str) is the
+            stretch, the 3rd element (str) is the direction, and the 4th
+            element (str) is the sign ('toward', 'away'). These inputs are the
+            same as those on the :py:class:`Transformation`; refer to the
+            information there.
             To specify this input for more
             than one particle, provide a list of these tuples.
         forced_coll : 2-element tuple of str and float, optional
@@ -372,15 +374,15 @@ class CellMCNP(Cell):
             is the energy/time index, and the 3rd element is 'kill' to kill
             particles entering the cell, 'nogame', or a lower bound as a
             non-negative float. See MCNP manual.
-            To specify this input for more
-            than one particle, or energy/time index, provide a list of these tuples.
+            To specify this input for more than one particle, or energy/time
+            index, provide a list of these tuples.
         dxtran_contrib : 3-element tuple of str, int/None and float, optional
             DXTRAN Contribution, **DXC**. The 1st element is a particle name
-            (see :py:attr:`mcnp_particle`). The 2nd element (int) is an index of a
-            DXTRAN sphere (on the DXTRANSphere card), or None if this is to
-            apply to all DXTRAN spheres. The 3rd element (float) is the probability
-            of contribution to the DXTRAN sphere(s). Only for neutrons and
-            photons.
+            (see :py:attr:`mcnp_particle`). The 2nd element (int) is an index
+            of a DXTRAN sphere (on the DXTRANSphere card), or None if this is
+            to apply to all DXTRAN spheres. The 3rd element (float) is the
+            probability of contribution to the DXTRAN sphere(s). Only for
+            neutrons and photons.
             To specify this input for more than one particle or DXTRAN sphere,
             provide a list of these tuples.
         photon_weight : 0, '-inf', or float; optional
@@ -433,9 +435,26 @@ class CellMCNP(Cell):
                     matA, 10.0, 'g/cm^3',
                     importance=[('neutron', 1), ('photon', 0)])
 
-        The following sets an exponential transform of 0.7
-        
-        TODO when doing transform, take care of transform examples below.
+        The following sets an exponential transform for neutrons with stretch
+        'capture-to-total' toward the current direction of travel of the
+        particle::
+
+            cellA = CellMCNP(..., exp_transform=('neutron', 'capture-to-total',
+                    'currdir', 'toward'))
+
+        As with the :py:class:`Transformation` card, the direction can be the
+        name of a vector (e.g. `vec1`) on the :py:class:`Vector` card, as long
+        as the :py:class:`Vector` has been added to the simulation before an
+        input is generated::
+
+            cellA = CellMCNP(..., exp_transform=('neutron', 0.5,
+                    'vec1', 'away'))
+            vec = Vector()
+            vec.add('vec1', [0, 0, 0])
+
+
+
+        To specify an additional exponential transform for protons::
 
 
         If the user wants to supply an exponential transform card, with a
@@ -2706,9 +2725,55 @@ class Transformation(IMisc):
 
 
 class ICellMod(IMisc):
+    """This class is not used by the user. Abstract base class for cards that
+    can be specified in MCNP on both the cell card or in the data block.
+    All subclasses have a ``particle`` and ``cell`` property, and similar form.
+    All subclasses are unique for a given particle type.
+
+    """
     __metaclass__ = abc.ABCMeta
-    def __init__(self, name, *args, **kwargs):
-        super(ICellMod, self).__init__(name, *args, **kwargs)
+    def __init__(self, pre_name, particle, cell, *args, **kwargs):
+        """
+        Parameters
+        ----------
+        pre_name : str
+            First part of card :py:attr:`name`. Names are of the form
+            ``<pre_name>-<particle>``.
+        particle : str
+            A particle string, taken from the keys of :py:attr:`mcnp_particle`.
+        cell : :py:class:`Cell` or subclass
+            The cell for which the card applies.
+
+        """
+        super(ICellMod, self).__init__("{0}-{1}".format(pre_name, particle),
+                                       unique=True, *args, **kwargs)
+        self.particle = particle
+        self.cells = [cell]
+
+    @abc.abstractmethod
+    def add(self, cell):
+        self.cells += [cell]
+
+    @property
+    def particle(self): return self._particle
+
+    @particle.setter
+    def particle(self, value):
+        if value not in self.mcnp_particle:
+            raise LookupError("The particle {0} is not in the "
+                    "``mcnp_particle`` dictionary.".format(value))
+        self._particle = value
+
+    @property
+    def cells(self): return self._cells
+
+    @cells.setter
+    def cells(self, value):
+        for arg in value:
+            if not isinstance(arg, Cell):
+                raise ValueError("The ``cell`` must be a ``Cell``. User "
+                        "provided {0}.".format(arg))
+        self._cells = value
 
 
 class ExponentialTransform(ICellMod):
@@ -2723,12 +2788,10 @@ class ExponentialTransform(ICellMod):
         """
         Parameters
         ----------
-        name : str
-            See :py:class:`ICard`.
         particle : str
-            A particle string, taken from the keys of :py:attr:`mcnp_particle`.
+            See :py:class:`ICellMod`.
         cell : :py:class:`Cell` or subclass
-            The cell for which the transform should be applied. 
+            See :py:class:`ICellMod`.
         stretch : str or float
             The stretch factor. If 'capture-to-total', the stretch factor is
             the ratio of the capture cross section to the total cross section
@@ -2787,15 +2850,13 @@ class ExponentialTransform(ICellMod):
                     cellC, 0.5, 'vec1', 'away')
 
         """
-        super(ExponentialTransform, self).__init__('exptransform-' + particle,
-                unique=True)
-        self.particle = particle
+        super(ExponentialTransform, self).__init__('exptransform', particle,
+                                                   cell)
         n_args_per_cell = 4
         if len(args) % n_args_per_cell != 0:
             raise StandardError("The length of ``*args`` must be a multiple "
                     "of {0}. Length is {1}.".format(n_args_per_cell, len(args)))
-        # Initialize properties.
-        self.cells = [cell]
+        # Initialize properties for the subclass.
         self.stretchs = [stretch]
         self.directions = [direction]
         self.signs = [sign]
@@ -2817,7 +2878,8 @@ class ExponentialTransform(ICellMod):
 
         Examples
         --------
-        The last example above can also be achieved by the following::
+        The last example above can also be achieved by the following, assuming
+        cell cards ``cellA``, ``cellB`` and ``cellC`` have been created::
 
             extn = ExponentialTransform('neutron', 
                     cellA, 'capture-to-total', 'currdir', 'toward')
@@ -2825,7 +2887,7 @@ class ExponentialTransform(ICellMod):
             extn.add(cellC, 0.5, 'vec1', 'away')
 
         """
-        self.cells += [cell]
+        super(ExponentialTransform, self).add(cell)
         self.stretchs += [stretch]
         self.directions += [direction]
         self.signs += [sign]
@@ -2877,27 +2939,6 @@ class ExponentialTransform(ICellMod):
             string += "V{0}".format(sim.misc['vector'].index(vecname))
         return string
 
-    @property
-    def particle(self): return self._particle
-
-    @particle.setter
-    def particle(self, value):
-        if value not in self.mcnp_particle:
-            raise LookupError("The particle {0} is not in the "
-                    "``mcnp_particle`` dictionary.".format(value))
-        self._particle = value
-
-    @property
-    def cells(self): return self._cells
-
-    @cells.setter
-    def cells(self, value):
-        for arg in value:
-            if not isinstance(arg, Cell):
-                raise ValueError("The ``cell`` must be a ``Cell``. User "
-                        "provided {0}.".format(arg))
-        self._cells = value
-
     # I'm aware that this spelling of stretchs is incorrect; it's for
     # consistency.
     @property
@@ -2922,6 +2963,20 @@ class ExponentialTransform(ICellMod):
                 raise ValueError("The value of ``sign`` must be 'toward' or "
                         "'away'. User provided {0!r}.".format(arg))
         self._signs = value
+
+
+class ForcedCollision(ICellMod):
+    """A forced collision setting. Unique card for a given particle type, with
+    name `forcedcoll-<particle>`. In MCNP, this is the **FCL** card. 
+
+    .. inheritance-diagram:: pyne.simplesim.cards.ForcedCollision
+
+    """
+    def __init__(self, particle, cell, spec, *args):
+        """
+        Parameters
+        ----------
+        """
 
 
 class Vector(IMisc):
@@ -2997,6 +3052,9 @@ class Vector(IMisc):
     def index(self, vecname):
         # MCNP is okay with index 0.
         return self.vectors.keys().index(vecname)
+
+
+
 
 
 
