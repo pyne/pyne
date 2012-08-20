@@ -566,9 +566,23 @@ class TestSystemDefinition(unittest.TestCase):
                 "only; cell 'coolant' prob 0.5 for entering and weight games.")
         self.assertEquals(fcl.mcnp('%.1e', self.sim), "FCL:N -5.0e-01 5.0e-01 0")
 
-        
+    def test_WeightWindows(self):
+        """Tests weight window cards."""
+
+        # Tests float conversion.
+        wwe = cards.WeightWindowEnergies('photon', [1, 10])
+        self.assertEquals(wwe.name, 'weightwinenergy-photon')
+        self.assertEquals(wwe.comment(), "Weight window energies "
+                "'weightwinenergy-photon' for photons: 2 bins, in MeV.")
+        self.assertEquals(wwe.mcnp('%.1g', self.sim), "WWE:P 1 1e+01")
+        wwt = cards.WeightWindowTimes('proton', [1, 1e12])
+        self.assertEquals(wwt.name, 'weightwintime-proton')
+        self.assertEquals(wwt.comment(), "Weight window times "
+                "'weightwintime-proton' for protons: 2 intervals, in shakes.")
+        self.assertEquals(wwt.mcnp('%.1g', self.sim), "WWT:H 1e+08 1e+20")
+
     def test_Transformation(self):
-        """"Tests :py:class:`cards.Transformation`."""
+        """Tests :py:class:`cards.Transformation`."""
 
         trans = cards.Transformation('trans1', [1, 2, 3],
                 [[4, 5, 6], [7, 8, 9], [10, 11, 12]])
