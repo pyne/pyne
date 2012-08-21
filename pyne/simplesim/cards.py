@@ -3174,7 +3174,27 @@ class WeightWindowBound(ICellMod):
 
         Examples
         --------
-        TODO
+        The following specifies the weight window bounds for ``cellA`` if the
+        :py:class:`WeightWindowEnergies` and :py:class:`WeightWindowTimes` cards
+        are not used::
+
+            wwn = WeightWindowBound('neutron', 1, 1, cellA, 0.01)
+
+        The following::
+
+            wwn = WeightWindowBound('neutron', 1, 1, cellA, 0.01,
+                                               2, 3, cellA, 0.01)
+
+        assumes that cards such as the following have been added to the
+        simulation::
+
+            wwe = WeightWindowEnergies('neutron', [1, 10])
+            wwt = WeightWindowTimes('neutron', [1, 1e12, 2e12])
+
+        Previously-provided values can be modified later on::
+
+            wwn.add(1, 1, cellA, 0.02)
+
 
         """
         super(WeightWindowBound, self).__init__('weightwinbound', particle,
@@ -3198,7 +3218,10 @@ class WeightWindowBound(ICellMod):
 
         Examples
         --------
-        TODO
+
+            wwn = WeightWindowBound('neutron')
+            wwn.add(1, 1, cellA, 0.01)
+            wwn.add(2, 3, cellA, 0.01)
 
         """
         super(WeightWindowBound, self).add(cell)
@@ -3219,15 +3242,14 @@ class WeightWindowBound(ICellMod):
                     if self.bounds[cell][i_e][i_t]:
                         # The 3-dim dict's entries are initialized to None
                         string += " cell {0!r}:".format( cell.name)
-                        string += self._comment_unit(
-                                self.bounds[cell][i_e][i_t])
+                        string += self._comment_unit(cell, i_e, i_t)
                         string += ","
         # Change last character from a comma to a period.
         string[-1] = "."
         return string
 
-    def _comment_unit(self, this_bound):
-        return " {0}".format(this_bound)
+    def _comment_unit(self, cell, i_e, i_t):
+        return " {0}".format(self.bounds[cell][i_e][i_t])
 
     def mcnp(self, float_format, sim):
         # Prepare to obtain linear index.
@@ -3244,33 +3266,27 @@ class WeightWindowBound(ICellMod):
                 i_linear = (i_t - 1) * n_times + i_e
                 # Start card.
                 string += "WWN{0}:{1}".format(
-                cells_with_idx = self._cells_with_idx(i_linear)
+                        i_linear, self.mcnp_particle[self.particle])
                 # Check all cells in the system.
                 for cell in sim.sys.cells:
                     # Is this cell on this card, and is there a bound defined
                     # for it, for this energy and time?
-                    string += " "
                     if cell in self.cells and self.bounds[cell][i_e][i_t]:
-                        this_bound = self.bounds[cell][i_e][i_t]
-                        if type(this_bound) is float:
-                            string += float_format % this_bound
-                        elif this_bound == 'killall':
-                            string += "-1"
-                        else:
-                            raise ValueError("Unexpected input.")
+                        string += self._mcnp_unit(float_format, cell, i_e, i_t)
                     else:
-                        string += "0"
+                        string += " 0"
                 string += "\n"
         return string
 
-    def _idxs_for(self, idx_energy, idx_time):
-        idx_matches = []
-        for idx in range(len(self.cells)):
-            if (self.idx_energys[i] == idx_energy and
-                self.idx_times[idx] == idx_time):
-                idx_matches += [idx]
-        return idx_matches
-                
+    def _mcnp_unit(self, float_format, cell, i_e, i_t):
+       string = " "
+       this_bound = self.bounds[cell][i_e][i_t]
+       if type(this_bound) is float: string += float_format % this_bound
+       elif this_bound == 'killall': string += "-1"
+       else:                         raise ValueError("Unexpected input.")
+       return string
+       
+
     @property
     def idx_energys(self): return self._idx_energys
 
