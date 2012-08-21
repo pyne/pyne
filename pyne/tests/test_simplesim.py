@@ -466,14 +466,14 @@ class TestSystemDefinition(unittest.TestCase):
         ## Vector
         vec = cards.Vector()
         self.assertEquals(vec.name, 'vector')
-        vec.add('origin', [0, 0, 0])
+        vec.set('origin', [0, 0, 0])
         self.assertEquals(vec.index('origin'), 0)
         self.assertEquals(vec.comment(), "Vector 'vector': origin: "
                 "(0, 0, 0) cm.")
         # the mcnp() method doesn't actually need a sim.
         self.assertEquals(vec.mcnp('%.1e', None), "VECT V0 0.0e+00 0.0e+00 "
                 "0.0e+00")
-        vec.add('x-axis', np.array([1, 0, 0]))
+        vec.set('x-axis', np.array([1, 0, 0]))
         self.assertEquals(vec.index('origin'), 0)
         self.assertEquals(vec.index('x-axis'), 1)
         self.assertEquals(vec.comment(), "Vector 'vector': origin: "
@@ -483,6 +483,11 @@ class TestSystemDefinition(unittest.TestCase):
         self.assertEquals(vec.mcnp('%.1e', None), "VECT V0 0.0e+00 0.0e+00 "
                 "0.0e+00 V1 1.0e+00 0.0e+00 0.0e+00")
         self.sim.add_misc(vec)
+        # Try modifying.
+        vec.set('x-axis', [2, 1, 3])
+        self.assertEquals(vec.mcnp('%.1e', None), "VECT V0 0.0e+00 0.0e+00 "
+                "0.0e+00 V1 2.0e+00 1.0e+00 3.0e+00")
+
         ## ExponentialTransform
         extn = cards.ExponentialTransform('neutron', self.fuel, 'capture-to-total',
                 'currdir', 'toward')
@@ -525,11 +530,11 @@ class TestSystemDefinition(unittest.TestCase):
                 "from x-axis.")
         self.assertEquals(extn.mcnp('%.1e', self.sim), 
                 "EXT:N S 5.0e-01 -5.0e-01V1")
-        # Using add().
+        # Using set().
         ext2 = cards.ExponentialTransform('neutron')
-        ext2.add(self.fuel, 'capture-to-total', 'currdir', 'toward')
-        ext2.add(self.coolant, 0.5, 'currdir', 'toward')
-        ext2.add(self.graveyard, 0.5, 'x-axis', 'away')
+        ext2.set(self.fuel, 'capture-to-total', 'currdir', 'toward')
+        ext2.set(self.coolant, 0.5, 'currdir', 'toward')
+        ext2.set(self.graveyard, 0.5, 'x-axis', 'away')
         self.assertEquals(ext2.comment(), "Exponential transform "
                 "'exptransform-neutron': cell 'fuel' stretch by "
                 "capture-to-total toward currdir; cell 'coolant' stretch by "
@@ -562,8 +567,8 @@ class TestSystemDefinition(unittest.TestCase):
                 "only; cell 'coolant' prob 0.5 for entering and weight games.")
         self.assertEquals(fcl.mcnp('%.1e', self.sim), "FCL:N -5.0e-01 5.0e-01 0")
         fcl = cards.ForcedCollision('neutron')
-        fcl.add(self.fuel, 0.5, True)
-        fcl.add(self.coolant, 0.5, False)
+        fcl.set(self.fuel, 0.5, True)
+        fcl.set(self.coolant, 0.5, False)
         self.assertEquals(fcl.comment(), "Forced collision "
                 "'forcedcoll-neutron': cell 'fuel' prob 0.5 for entering "
                 "only; cell 'coolant' prob 0.5 for entering and weight games.")
