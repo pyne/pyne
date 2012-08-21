@@ -460,7 +460,7 @@ class CellMCNP(Cell):
             cellA = CellMCNP(..., exp_transform=('neutron', 0.5,
                     'vec1', 'away'))
             vec = Vector()
-            vec.add('vec1', [0, 0, 0])
+            vec.set('vec1', [0, 0, 0])
 
 
 
@@ -2803,10 +2803,10 @@ class ICellMod(IUniqueParticle):
     def _process_varargs(self, args):
         for i_cell in range(len(args) / self._n_args_per_cell):
             i_start = self._n_args_per_cell * i_cell
-            self.add(*args[i_start:i_start+self._n_args_per_cell])
+            self.set(*args[i_start:i_start+self._n_args_per_cell])
 
     @abc.abstractmethod
-    def add(self, cell):
+    def set(self, cell):
         if cell not in self.cells: self.cells += [cell]
 
     @abc.abstractmethod
@@ -2890,7 +2890,7 @@ class ExponentialTransform(ICellMod):
         *args : cell, stretch, direction, sign...
             To request an exponential transform for more than one cell, supply
             the last four arguments for the additional cells. See examples.
-            This can also be done using :py:meth:`add`.
+            This can also be done using :py:meth:`set`.
  
         Examples
         --------
@@ -2921,7 +2921,7 @@ class ExponentialTransform(ICellMod):
         where somewhere else the user has added::
 
             vec = Vector()
-            vec.add('vec1', [0, 0, 0])
+            vec.set('vec1', [0, 0, 0])
 
         to the simulation. If the user wants to request an exponential
         transform for cells ``cellB`` and ``cellC`` as well, they can do the
@@ -2942,9 +2942,10 @@ class ExponentialTransform(ICellMod):
         # If information for multiple cells has been provided...
         self._process_varargs(args)
 
-    def add(self, cell, stretch, direction, sign):
-        """The user can add additional transforms, for additional cells, using
-        this method. See above for a description of the input.
+    def set(self, cell, stretch, direction, sign):
+        """The user can add additional transforms, for additional cells, or
+        modify existing values using this method. See above for a description
+        of the input.
 
         Parameters
         ----------
@@ -2959,12 +2960,12 @@ class ExponentialTransform(ICellMod):
         cell cards ``cellA``, ``cellB`` and ``cellC`` have been created::
 
             extn = ExponentialTransform('neutron') 
-            extn.add(cellA, 'capture-to-total', 'currdir', 'toward')
-            extn.add(cellB, 0.5, 'currdir', 'toward')
-            extn.add(cellC, 0.5, 'vec1', 'away')
+            extn.set(cellA, 'capture-to-total', 'currdir', 'toward')
+            extn.set(cellB, 0.5, 'currdir', 'toward')
+            extn.set(cellC, 0.5, 'vec1', 'away')
 
         """
-        super(ExponentialTransform, self).add(cell)
+        super(ExponentialTransform, self).set(cell)
         self.stretchs[cell] = stretch
         self.directions[cell] = direction
         self.signs[cell] = sign
@@ -3056,7 +3057,7 @@ class ForcedCollision(ICellMod):
         *args : cell, prob, only_entering, ...
             To request forced collision for more than one cell, supply
             the last three arguments for the additional cells. See examples.
-            This can also be done using :py:meth:`add`.
+            This can also be done using :py:meth:`set`.
 
         Examples
         --------
@@ -3079,10 +3080,10 @@ class ForcedCollision(ICellMod):
         # If information for multiple cells has been provided...
         self._process_varargs(args)
 
-    def add(self, cell, prob, only_entering):
+    def set(self, cell, prob, only_entering):
         """The user can add additional forced collision probabilities, for
-        additional cells, using this method. See above for a description of the
-        input.
+        additional cells, or modify existing data, using this method. See above
+        for a description of the input.
 
         Parameters
         ----------
@@ -3095,11 +3096,11 @@ class ForcedCollision(ICellMod):
         The last example above can also be achieved by the following::
 
             fcl = ForcedCollision('neutron')
-            fcl.add(cellA, 0.5, True)
-            fcl.add(cellB, 0.5, False)
+            fcl.set(cellA, 0.5, True)
+            fcl.set(cellB, 0.5, False)
 
         """
-        super(ForcedCollision, self).add(cell)
+        super(ForcedCollision, self).set(cell)
         self.probs[cell] = prob
         self.only_enterings[cell] = only_entering
 
@@ -3170,7 +3171,7 @@ class WeightWindowBound(ICellMod):
         *args : cell, idx_energy, idx_time, bound, ...
             Any number of sets of the previous four arguments can be provided
             as additional arguments. See examples. This can also be done using
-            :py:meth:`add`.
+            :py:meth:`set`.
 
         Examples
         --------
@@ -3191,11 +3192,6 @@ class WeightWindowBound(ICellMod):
             wwe = WeightWindowEnergies('neutron', [1, 10])
             wwt = WeightWindowTimes('neutron', [1, 1e12, 2e12])
 
-        Previously-provided values can be modified later on::
-
-            wwn.add(1, 1, cellA, 0.02)
-
-
         """
         super(WeightWindowBound, self).__init__('weightwinbound', particle,
                                                 3, *args)
@@ -3206,7 +3202,7 @@ class WeightWindowBound(ICellMod):
         self.bounds = MultiDict(4)
         self._process_varargs(args)
 
-    def add(self, idx_energy, idx_time, cell, bound):
+    def set(self, idx_energy, idx_time, cell, bound):
         """
         Parameters
         ----------
@@ -3218,13 +3214,18 @@ class WeightWindowBound(ICellMod):
 
         Examples
         --------
+        The following does the same as the second example above::
 
             wwn = WeightWindowBound('neutron')
-            wwn.add(1, 1, cellA, 0.01)
-            wwn.add(2, 3, cellA, 0.01)
+            wwn.set(1, 1, cellA, 0.01)
+            wwn.set(2, 3, cellA, 0.01)
+
+        Previously-provided values can be modified later on::
+
+            wwn.set(1, 1, cellA, 0.02)
 
         """
-        super(WeightWindowBound, self).add(cell)
+        super(WeightWindowBound, self).set(cell)
         if idx_energy not in self.idx_energys: self.idx_energys += [idx_energy]
         if idx_time not in self.idx_times:     self.idx_times += [idx_time]
         self.bounds[cell][idx_energy][idx_time] = bound
@@ -3525,9 +3526,10 @@ class Vector(IMisc):
         super(Vector, self).__init__('vector', unique=True)
         self.vectors = collections.OrderedDict()
 
-    def add(self, vecname, vector):
+    def set(self, vecname, vector):
         """Adds a vector with name ``vecname`` to the card. If a vector with that
-        vecname has already been added, an exception is raised. Returns the index
+        vecname has already been added, that vector is then changed to the new
+        value. Returns the index
         of the vector.
 
         Parameters
@@ -3550,15 +3552,12 @@ class Vector(IMisc):
         as ``np``::
 
             vec = Vector()
-            vec.add('origin', [0, 0, 0])
-            vec.add('x-axis', np.array([1, 0, 0]))
+            vec.set('origin', [0, 0, 0])
+            vec.set('x-axis', np.array([1, 0, 0]))
 
         The vector 'origin' has index 1 and the vector 'x-axis' has index 2.
 
         """
-        if vecname in self.vectors:
-            raise StandardError("Vector with ``vecname`` {0!r} exists "
-                    "already.".format(vecname))
         self.vectors[vecname] = vector
         return self.index(vecname)
 
