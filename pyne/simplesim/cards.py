@@ -33,6 +33,9 @@ the module.
 # TODO allow readfile commands.
 # TODO emphasize how easy it is to modify the cards, just subclass it
 # individually and use your own.
+# Disadvantage of actually providing the cell card is now if you want to modify
+# something later, you have to go grab the appropriate cell card, since you
+# don't have the object anymore.
 
 import abc
 import collections
@@ -2767,7 +2770,8 @@ class ICellMod(IUniqueParticle):
     """This class is not used by the user. Abstract base class for cards that
     can be specified in MCNP on both the cell card or in the data block.
     All subclasses have a ``particle`` and ``cell`` property, and similar form.
-    All subclasses are unique for a given particle type.
+    All subclasses are unique for a given particle type. Entries for a given
+    cell can be modified by providing an input for the same cell.
 
     """
     __metaclass__ = abc.ABCMeta
@@ -2801,15 +2805,18 @@ class ICellMod(IUniqueParticle):
 
     @abc.abstractmethod
     def add(self, cell):
-        self.cells += [cell]
+        if cell not in self.cells:
+            self.cells += [cell]
 
     @abc.abstractmethod
     def comment(self, title):
         string = "{0} {1!r}:".format(title, self.name)
-        for i_cell in range(len(self.cells)):
-            string += " cell {0!r}".format(self.cells[i_cell].name)
-            string += self._comment_unit(i_cell)
-            if i_cell < (len(self.cells) - 1): string += ";"
+        counter = 0
+        for cell in self.cells:
+            counter += 1
+            string += " cell {0!r}".format(cell.name)
+            string += self._comment_unit(cell)
+            if counter < len(self.cells): string += ";"
         return string + "."
 
     @abc.abstractmethod
@@ -2825,8 +2832,7 @@ class ICellMod(IUniqueParticle):
         # TODO this should loop through in the print order.
         for key, cell in sim.sys.cells.iteritems(): 
             if cell in self.cells:
-                i_cell = self.cells.index(cell)
-                string += " " + self._mcnp_unit(float_format, sim, i_cell)
+                string += " " + self._mcnp_unit(float_format, sim, cell)
             else: 
                 string += " 0"
         return string
@@ -2857,6 +2863,8 @@ class ExponentialTransform(ICellMod):
     .. inheritance-diagram:: pyne.simplesim.cards.ExponentialTransform
 
     """
+    # TODO make all the lists into cell-keyed dictionaries so the user can edit
+    # per-cell entries.
     def __init__(self, particle, *args):
         """
         Parameters
@@ -2927,9 +2935,9 @@ class ExponentialTransform(ICellMod):
         super(ExponentialTransform, self).__init__('exptransform', particle,
                                                    4, *args)
         # Initialize properties for the subclass.
-        self.stretchs = []
-        self.directions = []
-        self.signs = []
+        self.stretchs = dict()
+        self.directions = dict()
+        self.signs = dict()
         # If information for multiple cells has been provided...
         self._process_varargs(args)
 
@@ -2956,41 +2964,41 @@ class ExponentialTransform(ICellMod):
 
         """
         super(ExponentialTransform, self).add(cell)
-        self.stretchs += [stretch]
-        self.directions += [direction]
-        self.signs += [sign]
+        self.stretchs[cell] = stretch
+        self.directions[cell] = direction
+        self.signs[cell] = sign
 
     def comment(self):
         return super(ExponentialTransform, self).comment(
                 "Exponential transform")
 
-    def _comment_unit(self, i_cell):
-        string = " stretch by {0} ".format(self.stretchs[i_cell])
-        string += self.signs[i_cell] + " "
-        if self.signs[i_cell] == 'away': string += "from "
-        string += self.directions[i_cell]
+    def _comment_unit(self, cell):
+        string = " stretch by {0} ".format(self.stretchs[cell])
+        string += self.signs[cell] + " "
+        if self.signs[cell] == 'away': string += "from "
+        string += self.directions[cell]
         return string
 
     def mcnp(self, float_format, sim):
         return super(ExponentialTransform, self).mcnp(float_format, sim,
                 "EXT")
 
-    def _mcnp_unit(self, float_format, sim, i_cell):
+    def _mcnp_unit(self, float_format, sim, cell):
         # TODO add exception if there is no Vector card.
         string = ""
-        if self.signs[i_cell] == 'away': string += "-"
-        if self.stretchs[i_cell] == 'capture-to-total': string += "S"
-        else: string += float_format % self.stretchs[i_cell]
-        if self.directions[i_cell] == 'currdir': pass
-        elif (self.directions[i_cell].upper() == 'X' or
-              self.directions[i_cell].upper() == 'Y' or
-              self.directions[i_cell].upper() == 'Z'):
-            string += self.directions[i_cell].upper()
+        if self.signs[cell] == 'away': string += "-"
+        if self.stretchs[cell] == 'capture-to-total': string += "S"
+        else: string += float_format % self.stretchs[cell]
+        if self.directions[cell] == 'currdir': pass
+        elif (self.directions[cell].upper() == 'X' or
+              self.directions[cell].upper() == 'Y' or
+              self.directions[cell].upper() == 'Z'):
+            string += self.directions[cell].upper()
         else:
             if 'vector' not in sim.misc:
                 raise Exception("Vector card is needed for the Exponential "
                         "transform card.")
-            vecname = self.directions[i_cell]
+            vecname = self.directions[cell]
             string += "V{0}".format(sim.misc['vector'].index(vecname))
         return string
 
@@ -3065,8 +3073,8 @@ class ForcedCollision(ICellMod):
 
         """
         super(ForcedCollision, self).__init__('forcedcoll', particle, 3, *args)
-        self.probs = []
-        self.only_enterings = []
+        self.probs = dict()
+        self.only_enterings = dict()
         # If information for multiple cells has been provided...
         self._process_varargs(args)
 
@@ -3091,23 +3099,23 @@ class ForcedCollision(ICellMod):
 
         """
         super(ForcedCollision, self).add(cell)
-        self.probs += [prob]
-        self.only_enterings += [only_entering]
+        self.probs[cell] = prob
+        self.only_enterings[cell] = only_entering
 
     def comment(self):
         return super(ForcedCollision, self).comment("Forced collision")
 
-    def _comment_unit(self, i_cell):
-        if self.only_enterings[i_cell]: oestr = "entering only"
+    def _comment_unit(self, cell):
+        if self.only_enterings[cell]: oestr = "entering only"
         else: oestr = "entering and weight games"
-        return " prob {0} for {1}".format(self.probs[i_cell], oestr)
+        return " prob {0} for {1}".format(self.probs[cell], oestr)
 
     def mcnp(self, float_format, sim):
         return super(ForcedCollision, self).mcnp(float_format, sim, "FCL")
 
-    def _mcnp_unit(self, float_format, sim, i_cell):
-        string = "-" if self.only_enterings[i_cell] else ""
-        return string + float_format % self.probs[i_cell]
+    def _mcnp_unit(self, float_format, sim, cell):
+        string = "-" if self.only_enterings[cell] else ""
+        return string + float_format % self.probs[cell]
 
     @property
     def probs(self): return self._probs
@@ -3163,15 +3171,78 @@ class WeightWindowBound(ICellMod):
 
         """
         super(WeightWindowBound, self).__init__('weightwinbound', particle,
-                                                cell, 3, *args)
+                                                3, *args)
         # Check for existence of weight window cards.
+        self.idx_energys = dict()
+        self.idx_times = dict()
+        self.bounds = dict()
+        self._process_varargs(args)
+
+    def add(self, cell, idx_energy, idx_time, bound):
+        super(WeightWindowBound, self).add(cell)
+        self.idx_energys[cell] = idx_energy
+        self.idx_times[cell] = idx_times
+        self.bounds[cell] = bound
+
+    def set_by_array(self, cell, array):
         pass
 
-    def add(cell, idx_energy, idx_time, bound):
-        pass
+    def comment(self):
+        return super(WeightWindowBound, self).comment("Weight window bounds")
 
-    def set_by_array(cell, array):
-        pass
+    def _comment_unit(self, cell):
+        if self.only_enterings[cell]: oestr = "entering only"
+        else: oestr = "entering and weight games"
+        return " prob {0} for {1}".format(self.probs[cell], oestr)
+
+    def mcnp(self, float_format, sim):
+        wwgt_name = 'weightwingentimes-{0}'.format(self.particle)
+        wwt_name = 'weightwintimes-{0}'.format(self.particle)
+        if wwgt_name in sim.misc and wwt_name in sim.misc:
+            raise UserWarning("Both a WWGT and a WWT card have been added; "
+                    "using WWGT, ignoring WWT.")
+        if wwgt_name in sim.misc:  n_times = sim.misc[wwgt_name].n_bounds
+        elif wwt_name in sim.misc: n_times = sim.misc[wwt_name].n_bounds
+        for i_e in self.idx_energys:
+            for i_t in self.idx_times:
+                i_linear = 1 + ((i_t * n_times) + i_e)
+                for idx in self._idxs_for(i_e, i_t):
+                    string += self._mcnp_unit(float_format, sim, idx)
+                cells =  1
+        string +=  1
+
+    def _mcnp_unit(self, float_format, sim, cell):
+        string
+        string = "-" if self.only_enterings[cell] else ""
+        return string + float_format % self.probs[cell]
+
+    def _idxs_for(self, idx_energy, idx_time):
+        idx_matches = []
+        for idx in range(len(self.cells)):
+            if (self.idx_energys[i] == idx_energy and
+                self.idx_times[idx] == idx_time):
+                idx_matches += [idx]
+        return idx_matches
+                
+    @property
+    def idx_energys(self): return self._idx_energys
+
+    @property
+    def idx_energys(self, value): self._idx_energys = value
+
+    @property
+    def idx_times(self): return self._idx_times
+
+    @property
+    def idx_times(self, value): self._idx_times = value
+
+    @property
+    def bounds(self): return self._bounds
+
+    @property
+    def bounds(self, value): self._bounds = value
+
+
 
 
 class WeightWindowEnergies(IUniqueParticle):
