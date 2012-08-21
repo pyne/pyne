@@ -19,6 +19,16 @@
 /*** Macros ***/
 #define length_array(a) ( sizeof ( a ) / sizeof ( *a ) )
 
+#if defined(__APPLE__)
+#if (__GNUC__ >= 4)
+  #include <cmath>
+  #define isnan(x) std::isnan(x)
+#else
+  #include <math.h>
+  #define isnan(x) __isnand((double)x)
+#endif
+#endif
+
 #ifdef _WIN32_MSVC
     #define isnan(x) ((x) != (x))
 #endif
