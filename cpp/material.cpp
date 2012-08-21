@@ -518,7 +518,8 @@ pyne::Material::Material(pyne::comp_map cm, double m, std::string s, double apm)
   mass = m;
   name = s;
   atoms_per_mol = apm;
-  norm_comp();
+  if (!comp.empty()) 
+    norm_comp();
 };
 
 

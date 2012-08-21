@@ -90,22 +90,22 @@ def sigma_f(nuc, E_g=None, E_n=None, phi_n=None):
         return _atom_weight_channel(sigma_f, nuc)
 
     # Get the fission XS
-    nuc_zz = nucname.zzaaam(nuc)
-    sigma_f_n_nuc_zz = ('sigma_f_n', nuc_zz)
-    sigma_f_g_nuc_zz = ('sigma_f_g', nuc_zz)
+    nuc = nucname.zzaaam(nuc)
+    sigma_f_n_nuc = ('sigma_f_n', nuc)
+    sigma_f_g_nuc = ('sigma_f_g', nuc)
 
     # Don't recalculate anything if you don't have to
-    if sigma_f_g_nuc_zz in xs_cache:
-        return xs_cache[sigma_f_g_nuc_zz]
+    if sigma_f_g_nuc in xs_cache:
+        return xs_cache[sigma_f_g_nuc]
     else:
-        sigma_f_n = xs_cache[sigma_f_n_nuc_zz]
+        sigma_f_n = xs_cache[sigma_f_n_nuc]
 
     # Perform the group collapse, knowing that the right data is in the cache
     sigma_f_g = group_collapse(sigma_f_n, xs_cache['phi_n'], phi_g=xs_cache['phi_g'], 
                                partial_energies=xs_cache['partial_energy_matrix'])
 
     # Put this value back into the cache, with the appropriate label
-    xs_cache[sigma_f_g_nuc_zz] = sigma_f_g
+    xs_cache[sigma_f_g_nuc] = sigma_f_g
 
     return sigma_f_g
 
@@ -154,8 +154,8 @@ def sigma_s_gh(nuc, T, E_g=None, E_n=None, phi_n=None):
     if isinstance(nuc, collections.Iterable) and not isinstance(nuc, basestring):
         return _atom_weight_channel(sigma_s_gh, nuc, T)
 
-    nuc_zz = nucname.zzaaam(nuc)
-    key = ('sigma_s_gh', nuc_zz, T)
+    nuc = nucname.zzaaam(nuc)
+    key = ('sigma_s_gh', nuc, T)
 
     # Don't recalculate anything if you don't have to
     if key in xs_cache:
@@ -163,8 +163,8 @@ def sigma_s_gh(nuc, T, E_g=None, E_n=None, phi_n=None):
 
     # Get some needed data
     G = len(xs_cache['E_g']) - 1
-    b = pyne.data.b(nuc_zz)
-    aw = pyne.data.atomic_mass(nuc_zz)
+    b = pyne.data.b(nuc)
+    aw = pyne.data.atomic_mass(nuc)
 
     # OMG FIXME So hard!
     ## Initialize the scattering kernel
@@ -232,9 +232,9 @@ def sigma_s(nuc, T, E_g=None, E_n=None, phi_n=None):
     if isinstance(nuc, collections.Iterable) and not isinstance(nuc, basestring):
         return _atom_weight_channel(sigma_s, nuc, T)
 
-    nuc_zz = nucname.zzaaam(nuc)
-    key_g = ('sigma_s_g', nuc_zz, T)
-    key_gh = ('sigma_s_gh', nuc_zz, T)
+    nuc = nucname.zzaaam(nuc)
+    key_g = ('sigma_s_g', nuc, T)
+    key_gh = ('sigma_s_gh', nuc, T)
 
     # Don't recalculate anything if you don't have to
     if key_g in xs_cache:
@@ -293,9 +293,9 @@ def sigma_a_reaction(nuc, rx, E_g=None, E_n=None, phi_n=None):
         return _atom_weight_channel(sigma_a_reaction, nuc, rx)
 
     # Get the absorption XS
-    nuc_zz = nucname.zzaaam(nuc)
-    key_n = ('sigma_rx_n', nuc_zz, rx)
-    key_g = ('sigma_rx_g', nuc_zz, rx)
+    nuc = nucname.zzaaam(nuc)
+    key_n = ('sigma_rx_n', nuc, rx)
+    key_g = ('sigma_rx_g', nuc, rx)
 
     # Don't recalculate anything if you don't have to
     if key_g in xs_cache:
@@ -399,9 +399,9 @@ def sigma_a(nuc, E_g=None, E_n=None, phi_n=None):
         return _atom_weight_channel(sigma_a, nuc)
 
     # Get the absorption XS
-    nuc_zz = nucname.zzaaam(nuc)
-    key_n = ('sigma_a_n', nuc_zz)
-    key_g = ('sigma_a_g', nuc_zz)
+    nuc = nucname.zzaaam(nuc)
+    key_n = ('sigma_a_n', nuc)
+    key_g = ('sigma_a_g', nuc)
 
     # Don't recalculate anything if you don't have to
     if key_g in xs_cache:
@@ -454,8 +454,8 @@ def chi(nuc, E_g=None, E_n=None, phi_n=None, eres=101):
         return _atom_weight_channel(chi, nuc)
 
     # Get the fission XS
-    nuc_zz = nucname.zzaaam(nuc)
-    key = ('chi_g', nuc_zz)
+    nuc = nucname.zzaaam(nuc)
+    key = ('chi_g', nuc)
 
     # Don't recalculate anything if you don't have to
     if key in xs_cache:
@@ -464,18 +464,18 @@ def chi(nuc, E_g=None, E_n=None, phi_n=None, eres=101):
     # Get the the set of nuclides we know we need chi for.  
     if 'fissionable_nucs' not in xs_cache:
         with tb.openFile(pyne_conf.NUC_DATA_PATH, 'r') as f:
-            fn = set(f.root.neutron.cinder_xs.fission.cols.nuc_zz)
+            fn = set(f.root.neutron.cinder_xs.fission.cols.nuc)
         xs_cache['fissionable_nucs'] = fn
     fissionable_nucs = xs_cache['fissionable_nucs']
 
-    if (nuc_zz not in fissionable_nucs) and (86 <= nuc_zz/10000):
-        fissionable_nucs.add(nuc_zz)
+    if (nuc not in fissionable_nucs) and (86 <= nuc/10000):
+        fissionable_nucs.add(nuc)
 
     # Perform the group collapse on a continuous chi
     G = len(xs_cache['E_g']) - 1
     chi_g = np.zeros(G, dtype=float)
 
-    if (nuc_zz in fissionable_nucs):
+    if (nuc in fissionable_nucs):
         for g in range(G):
             E_space = np.logspace(np.log10(xs_cache['E_g'][g]), 
                                   np.log10(xs_cache['E_g'][g+1]), eres)
@@ -528,10 +528,10 @@ def sigma_t(nuc, T=300.0, E_g=None, E_n=None, phi_n=None):
         return _atom_weight_channel(sigma_t, nuc, T)
 
     # Get the total XS
-    nuc_zz = nucname.zzaaam(nuc)
-    key_a = ('sigma_a_g', nuc_zz)
-    key_s = ('sigma_t_g', nuc_zz, T)
-    key_t = ('sigma_t_g', nuc_zz, T)
+    nuc = nucname.zzaaam(nuc)
+    key_a = ('sigma_a_g', nuc)
+    key_s = ('sigma_t_g', nuc, T)
+    key_t = ('sigma_t_g', nuc, T)
 
     # Don't recalculate anything if you don't have to
     if key_t in xs_cache:
