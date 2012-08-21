@@ -637,15 +637,55 @@ class TestSystemDefinition(unittest.TestCase):
                 "'weightwinbound-photon' for photons: energy idx 1: "
                 "time idx 1: cell 'D': 0.01.")
         self.assertEquals(wwn.mcnp('%g', self.sim), "WWN1:P 0 0 0 0 0.01 0")
+        # More than one cell.
+        wwn = cards.WeightWindowBound('photon')
+        wwn.set(1, 1, cellD, 0.01)
+        wwn.set(1, 1, cellE, 0.02)
+        wwn.set(2, 1, cellE, 0.03)
+        wwn.set(1, 3, cellD, 0.04)
+        wwn.set(2, 3, cellD, 0.05)
+        wwn.set(2, 3, cellE, 0.06)
+        self.assertEquals(wwn.comment(), "Weight window bounds "
+                "'weightwinbound-photon' for photons: energy idx 1: "
+                "time idx 1: cell 'D': 0.01, cell 'E': 0.02, "
+                "energy idx 1: time idx 3: cell 'E': 0.04, "
+                "energy idx 2: time idx 1: cell 'E': 0.03, "
+                "energy idx 2: time idx 3: cell 'D': 0.05, cell 'E': 0.06.")
+        self.assertEquals(wwn.mcnp('%g', self.sim), "WWN1:P 0 0 0 0 0.01 0")
+
+
         # Make sure set() works.
+
+
         # Make sure using WWGT default times gives the proper linear index.
         wwt = cards.WeightWindowTimes('photon', [], for_gen=True)
-        self.sim.add_misc(wwt)
-        wwn = cards.WeightWindowBound('neutron', 8, 6, cellD, 0.01)
-        print wwn.mcnp('%g', self.sim)
+        # Overwriting a card.
+        self.assertRaises(UserWarning, self.sim.add_misc, wwt)
+        wwn = cards.WeightWindowBound('photon', 8, 6, cellD, 0.01)
+        self.assertEquals(wwn.comment(), "Weight window bounds "
+                "'weightwinbound-photon' for photons: energy idx 8: "
+                "time idx 6: cell 'D': 0.01.")
+        self.assertEquals(wwn.mcnp('%g', self.sim), "WWN68:P 0 0 0 0 0.01 0")
+
+        # Test killall
+        wwn = cards.WeightWindowBound('photon', 1, 1, cellD, 'killall')
+        self.assertEquals(wwn.comment(), "Weight window bounds "
+                "'weightwinbound-photon' for photons: energy idx 1: "
+                "time idx 1: cell 'D': killall.")
+        self.assertEquals(wwn.mcnp('%g', self.sim), "WWN1:P 0 0 0 0 -1 0")
 
         # Check exception when using a particle type for which WWE/WWT cards
         # are not defined.
+        wwn = cards.WeightWindowBound('neutron', 1, 1, cellD, 0.01)
+        self.assertRaises(Exception, wwn.mcnp,'%g', self.sim)
+        try:
+            wwn.mcnp('%g', self.sim)
+        except Exception as e:
+            self.assertEquals(e.message, "No WWGT:N or WWT:N card found in "
+                    "the simulation.")
+
+        # Test mcnp output if no cells are given for a particular index:
+        # don't print the card.
 
     def test_Transformation(self):
         """Tests :py:class:`cards.Transformation`."""
