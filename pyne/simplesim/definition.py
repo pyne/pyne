@@ -7,7 +7,7 @@
 Below is the reference for this module.
 
 """
-
+# TODO check overwriting warning.
 import abc
 import collections
 import pickle
@@ -81,8 +81,10 @@ class IDefinition(object):
                     "'cell', 'surface', 'material', 'source', "
                     "'tally', or 'misc'.")
         if card.name in dict_to_check:
-            raise Exception("The %s name %s has already been used for "
-                    "another %s" % (card_type, card.name, card_type))
+            raise UserWarning("Card {0!r}, type {0!r} is already part of the "
+                    "definition; overwriting.".format(card.name, card_type))
+            #raise Exception("The %s name %s has already been used for "
+            #        "another %s" % (card_type, card.name, card_type))
 
     @property
     def verbose(self):
