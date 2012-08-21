@@ -542,6 +542,10 @@ class TestSystemDefinition(unittest.TestCase):
                 "from x-axis.")
         self.assertEquals(ext2.mcnp('%.1e', self.sim), 
                 "EXT:N S 5.0e-01 -5.0e-01V1")
+        # Modifying.
+        ext2.set(self.graveyard, 0.7, 'x-axis', 'away')
+        self.assertEquals(ext2.mcnp('%.1e', self.sim), 
+                "EXT:N S 5.0e-01 -7.0e-01V1")
         # Manage order-of-cells issue/question.
         # TODO editing entries.
 
@@ -573,6 +577,11 @@ class TestSystemDefinition(unittest.TestCase):
                 "'forcedcoll-neutron': cell 'fuel' prob 0.5 for entering "
                 "only; cell 'coolant' prob 0.5 for entering and weight games.")
         self.assertEquals(fcl.mcnp('%.1e', self.sim), "FCL:N -5.0e-01 5.0e-01 0")
+        fcl.set(self.coolant, 0.7, False)
+        self.assertEquals(fcl.comment(), "Forced collision "
+                "'forcedcoll-neutron': cell 'fuel' prob 0.5 for entering "
+                "only; cell 'coolant' prob 0.7 for entering and weight games.")
+        self.assertEquals(fcl.mcnp('%.1e', self.sim), "FCL:N -5.0e-01 7.0e-01 0")
 
     def test_WeightWindows(self):
         """Tests weight window cards."""
