@@ -488,9 +488,9 @@ class TestSystemDefinition(unittest.TestCase):
                 'currdir', 'toward')
         self.assertEquals(extn.name, 'exptransform-neutron')
         self.assertIs(extn.cells[0], self.fuel)
-        self.assertEquals(extn.stretchs[0], 'capture-to-total')
-        self.assertEquals(extn.directions[0], 'currdir')
-        self.assertEquals(extn.signs[0], 'toward')
+        self.assertEquals(extn.stretchs[self.fuel], 'capture-to-total')
+        self.assertEquals(extn.directions[self.fuel], 'currdir')
+        self.assertEquals(extn.signs[self.fuel], 'toward')
         self.assertEquals(extn.comment(), "Exponential transform "
                 "'exptransform-neutron': cell 'fuel' stretch by "
                 "capture-to-total toward currdir.")
@@ -538,13 +538,15 @@ class TestSystemDefinition(unittest.TestCase):
         self.assertEquals(ext2.mcnp('%.1e', self.sim), 
                 "EXT:N S 5.0e-01 -5.0e-01V1")
         # Manage order-of-cells issue/question.
+        # TODO editing entries.
 
+    def test_ForcedCollision(self):
         ## ForcedCollision
         fcl = cards.ForcedCollision('neutron', self.fuel, 0.5, True)
         self.assertEquals(fcl.name, 'forcedcoll-neutron')
         self.assertEquals(fcl.cells[0], self.fuel)
-        self.assertEquals(fcl.probs[0], 0.5)
-        self.assertTrue(fcl.only_enterings[0])
+        self.assertEquals(fcl.probs[self.fuel], 0.5)
+        self.assertTrue(fcl.only_enterings[self.fuel])
         self.assertEquals(fcl.comment(), "Forced collision "
                 "'forcedcoll-neutron': cell 'fuel' prob 0.5 for entering only.")
         self.assertEquals(fcl.mcnp('%.1e', self.sim), "FCL:N -5.0e-01 0 0")
