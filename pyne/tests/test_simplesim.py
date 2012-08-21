@@ -617,6 +617,35 @@ class TestSystemDefinition(unittest.TestCase):
         self.assertEquals(wwt.comment(), "Weight window generator times "
                 "'weightwingentime-proton' for protons: default intervals.")
         self.assertEquals(wwt.mcnp('%.1g', self.sim), "WWGT:H")
+        
+        
+        cellC = cards.Cell('C', self.pin.neg & self.cellbound.pos)
+        cellD = cards.Cell('D', self.pin.neg & self.cellbound.pos)
+        cellE = cards.Cell('E', self.pin.neg & self.cellbound.pos)
+        self.sim.sys.add_cell(cellC)
+        self.rxr.add_cell(cellD)
+        self.rxr.add_cell(cellE)
+
+        wwe = cards.WeightWindowEnergies('photon', range(1, 5), for_gen=True)
+        wwt = cards.WeightWindowTimes('photon', range(1, 13), for_gen=True)
+        self.sim.add_misc(wwe)
+        self.sim.add_misc(wwt)
+
+        wwn = cards.WeightWindowBound('photon', 1, 1, cellD, 0.01)
+        self.assertEquals(wwn.name, 'weightwinbound-photon')
+        self.assertEquals(wwn.comment(), "Weight window bounds "
+                "'weightwinbound-photon' for photons: energy idx 1: "
+                "time idx 1: cell 'D': 0.01.")
+        self.assertEquals(wwn.mcnp('%g', self.sim), "WWN1:P 0 0 0 0 0.01 0")
+        # Make sure set() works.
+        # Make sure using WWGT default times gives the proper linear index.
+        wwt = cards.WeightWindowTimes('photon', [], for_gen=True)
+        self.sim.add_misc(wwt)
+        wwn = cards.WeightWindowBound('neutron', 8, 6, cellD, 0.01)
+        print wwn.mcnp('%g', self.sim)
+
+        # Check exception when using a particle type for which WWE/WWT cards
+        # are not defined.
 
     def test_Transformation(self):
         """Tests :py:class:`cards.Transformation`."""

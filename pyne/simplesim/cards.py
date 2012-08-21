@@ -38,6 +38,7 @@ the module.
 # don't have the object anymore.
 # TODO testing backlog: (1) modification of ICellMod (2) no vector card
 # exception, (3) weightwindowbound
+# TODO check WWGT default arg effect in WWN.
 
 import abc
 import collections
@@ -3132,12 +3133,6 @@ class ForcedCollision(ICellMod):
     def only_enterings(self, value): self._only_enterings = value
 
 
-def MultiDict(n_dims):
-    if n_dims <= 1:
-        return None
-    return collections.defaultdict(lambda:MultiDict(n_dims - 1))
-
-
 class WeightWindowBound(ICellMod):
     """Cell-based weight window lower bounds. Unique card for a given particle
     type, with name `weightwinbound-<particle>`. In MCNP, this is the **WWN**
@@ -3175,16 +3170,16 @@ class WeightWindowBound(ICellMod):
 
         Examples
         --------
-        The following specifies the weight window bounds for ``cellA`` if the
+        The following specifies the weight window bounds for ``cellB`` if the
         :py:class:`WeightWindowEnergies` and :py:class:`WeightWindowTimes` cards
         are not used::
 
-            wwn = WeightWindowBound('neutron', 1, 1, cellA, 0.01)
+            wwn = WeightWindowBound('neutron', 1, 1, cellB, 0.01)
 
         The following::
 
-            wwn = WeightWindowBound('neutron', 1, 1, cellA, 0.01,
-                                               2, 3, cellA, 0.01)
+            wwn = WeightWindowBound('neutron', 1, 1, cellB, 0.01,
+                                               2, 3, cellB, 0.01)
 
         assumes that cards such as the following have been added to the
         simulation::
@@ -3194,12 +3189,12 @@ class WeightWindowBound(ICellMod):
 
         """
         super(WeightWindowBound, self).__init__('weightwinbound', particle,
-                                                3, *args)
+                                                4, *args)
         # Check for existence of weight window cards.
-        self.idx_energys = dict()
-        self.idx_times = dict()
-        # See definition of MultiDict above this class.
-        self.bounds = MultiDict(4)
+        self.idx_energys = []
+        self.idx_times = []
+        # _multi_dict is a method in this class.
+        self.bounds = self._multi_dict(4)
         self._process_varargs(args)
 
     def set(self, idx_energy, idx_time, cell, bound):
@@ -3217,12 +3212,12 @@ class WeightWindowBound(ICellMod):
         The following does the same as the second example above::
 
             wwn = WeightWindowBound('neutron')
-            wwn.set(1, 1, cellA, 0.01)
-            wwn.set(2, 3, cellA, 0.01)
+            wwn.set(1, 1, cellB, 0.01)
+            wwn.set(2, 3, cellB, 0.01)
 
         Previously-provided values can be modified later on::
 
-            wwn.set(1, 1, cellA, 0.02)
+            wwn.set(1, 1, cellB, 0.02)
 
         """
         super(WeightWindowBound, self).set(cell)
@@ -3231,12 +3226,12 @@ class WeightWindowBound(ICellMod):
         self.bounds[cell][idx_energy][idx_time] = bound
 
     def comment(self):
-        string += "Weight window bounds {0!r} for {1}s:".format(
+        string = "Weight window bounds {0!r} for {1}s:".format(
                 self.name, self.particle)
         for i_e in self.idx_energys:
             string += " energy idx {0}:".format(i_e)
             for i_t in self.idx_times:
-                string += " time idx {1}:".format(i_t)
+                string += " time idx {0}:".format(i_t)
                 for cell in self.cells:
                     # TODO check if there are any entries at all. If not print
                     # something like 'none'.
@@ -3246,8 +3241,7 @@ class WeightWindowBound(ICellMod):
                         string += self._comment_unit(cell, i_e, i_t)
                         string += ","
         # Change last character from a comma to a period.
-        string[-1] = "."
-        return string
+        return string[:-1] + "."
 
     def _comment_unit(self, cell, i_e, i_t):
         return " {0}".format(self.bounds[cell][i_e][i_t])
@@ -3259,9 +3253,18 @@ class WeightWindowBound(ICellMod):
         if wwgt_name in sim.misc and wwt_name in sim.misc:
             raise UserWarning("Both a WWGT and a WWT card have been added; "
                     "using WWGT, ignoring WWT.")
-        if wwgt_name in sim.misc:  n_times = sim.misc[wwgt_name].n_bounds
-        elif wwt_name in sim.misc: n_times = sim.misc[wwt_name].n_bounds
+        if wwgt_name in sim.misc:
+            # Deal with MCNP default indices that are unhandled by the WWGT
+            # card here.
+            if (sim.misc[wwgt_name].for_gen and
+                    len(sim.misc[wwgt_name].bounds) == 0):
+                n_times = 10
+            else:
+                n_times = sim.misc[wwgt_name].n_bounds
+        elif wwt_name in sim.misc:
+            n_times = sim.misc[wwt_name].n_bounds
         string = ""
+        # Finally, create all necessary cards (one per linear index).
         for i_e in self.idx_energys:
             for i_t in self.idx_times:
                 i_linear = (i_t - 1) * n_times + i_e
@@ -3287,23 +3290,27 @@ class WeightWindowBound(ICellMod):
        else:                         raise ValueError("Unexpected input.")
        return string
        
+    def _multi_dict(self, n_dims):
+        if n_dims <= 1:
+            return None
+        return collections.defaultdict(lambda: self._multi_dict(n_dims - 1))
 
     @property
     def idx_energys(self): return self._idx_energys
 
-    @property
+    @idx_energys.setter
     def idx_energys(self, value): self._idx_energys = value
 
     @property
     def idx_times(self): return self._idx_times
 
-    @property
+    @idx_times.setter
     def idx_times(self, value): self._idx_times = value
 
     @property
     def bounds(self): return self._bounds
 
-    @property
+    @bounds.setter
     def bounds(self, value): self._bounds = value
 
 
@@ -3401,6 +3408,12 @@ class WeightWindowTimes(IUniqueParticle):
     .. inheritance-diagram:: pyne.simplesim.cards.WeightWindowTimes
 
     """
+    # TODO bounds [] can be provided if for_gen=False, in which case MCNP
+    # generates a WWT card with 10 indices on it, that could then be used on a
+    # WWN card, though if the user is using WWG then they shouldn't be using
+    # WWN directly, but in any case the WWN might say that the WWGT card does
+    # not have 10 indices, since only MCNP is handling that. Need to show this
+    # to the WWN card.
     def __init__(self, particle, bounds, for_gen=False):
         """
         Parameters
