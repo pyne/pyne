@@ -2855,6 +2855,10 @@ class ICellMod(IUniqueParticle):
         self._cells = value
 
 
+class Importance(ICellMod):
+    pass
+
+
 class ExponentialTransform(ICellMod):
     """An exponential transform that adjusts the total cross section by a given
     factor in a given direction. Unique card for a given particle type, with
@@ -3176,6 +3180,10 @@ class WeightWindowBound(ICellMod):
 
             wwn = WeightWindowBound('neutron', 1, 1, cellB, 0.01)
 
+        The value of ``bound`` can be ``'killall'``::
+
+            wwn = WeightWindowBound('neutron', 1, 1, cellB, 'killall')
+
         The following::
 
             wwn = WeightWindowBound('neutron', 1, 1, cellB, 0.01,
@@ -3248,8 +3256,8 @@ class WeightWindowBound(ICellMod):
 
     def mcnp(self, float_format, sim):
         # Prepare to obtain linear index.
-        wwgt_name = 'weightwingentimes-{0}'.format(self.particle)
-        wwt_name = 'weightwintimes-{0}'.format(self.particle)
+        wwgt_name = 'weightwingentime-{0}'.format(self.particle)
+        wwt_name = 'weightwintime-{0}'.format(self.particle)
         if wwgt_name in sim.misc and wwt_name in sim.misc:
             raise UserWarning("Both a WWGT and a WWT card have been added; "
                     "using WWGT, ignoring WWT.")
@@ -3263,32 +3271,45 @@ class WeightWindowBound(ICellMod):
                 n_times = sim.misc[wwgt_name].n_bounds
         elif wwt_name in sim.misc:
             n_times = sim.misc[wwt_name].n_bounds
+        else:
+            raise Exception("No WWGT:{0} or WWT:{0} card found in the "
+                    "simulation.".format(self.mcnp_particle[self.particle]))
         string = ""
         # Finally, create all necessary cards (one per linear index).
+        counter = 0
         for i_e in self.idx_energys:
             for i_t in self.idx_times:
                 i_linear = (i_t - 1) * n_times + i_e
-                # Start card.
-                string += "WWN{0}:{1}".format(
-                        i_linear, self.mcnp_particle[self.particle])
-                # Check all cells in the system.
-                for cell in sim.sys.cells:
-                    # Is this cell on this card, and is there a bound defined
-                    # for it, for this energy and time?
-                    if cell in self.cells and self.bounds[cell][i_e][i_t]:
-                        string += self._mcnp_unit(float_format, cell, i_e, i_t)
-                    else:
-                        string += " 0"
-                string += "\n"
+                # Start card, but only if any values are assigned for this idx.
+                if self._n_vals_for(i_e, i_t) > 0:
+                    counter += 1
+                    string += "{0}WWN{1}:{2}".format(
+                            "\n" if counter > 1 else "",
+                            i_linear, self.mcnp_particle[self.particle])
+                    # Check all cells in the system.
+                    for key, cell in sim.sys.cells.iteritems():
+                        # Is this cell on this card, and is there a bound
+                        # defined for it, for this energy and time?
+                        if cell in self.cells and self.bounds[cell][i_e][i_t]:
+                            string += self._mcnp_unit(
+                                    float_format, cell, i_e, i_t)
+                        else:
+                            string += " 0"
         return string
 
     def _mcnp_unit(self, float_format, cell, i_e, i_t):
-       string = " "
-       this_bound = self.bounds[cell][i_e][i_t]
-       if type(this_bound) is float: string += float_format % this_bound
-       elif this_bound == 'killall': string += "-1"
-       else:                         raise ValueError("Unexpected input.")
-       return string
+        string = " "
+        this_bound = self.bounds[cell][i_e][i_t]
+        if type(this_bound) is float: string += float_format % this_bound
+        elif this_bound == 'killall': string += "-1"
+        else:                         raise ValueError("Unexpected input.")
+        return string
+ 
+    def _n_vals_for(self, i_e, i_t):
+        n_vals = 0
+        for cell in self.cells:
+            if self.bounds[cell][i_e][i_t]: n_vals += 1
+        return n_vals
        
     def _multi_dict(self, n_dims):
         if n_dims <= 1:
