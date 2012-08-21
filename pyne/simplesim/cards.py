@@ -36,6 +36,8 @@ the module.
 # Disadvantage of actually providing the cell card is now if you want to modify
 # something later, you have to go grab the appropriate cell card, since you
 # don't have the object anymore.
+# TODO testing backlog: (1) modification of ICellMod (2) no vector card
+# exception, (3) weightwindowbound
 
 import abc
 import collections
@@ -2805,8 +2807,7 @@ class ICellMod(IUniqueParticle):
 
     @abc.abstractmethod
     def add(self, cell):
-        if cell not in self.cells:
-            self.cells += [cell]
+        if cell not in self.cells: self.cells += [cell]
 
     @abc.abstractmethod
     def comment(self, title):
@@ -3130,6 +3131,12 @@ class ForcedCollision(ICellMod):
     def only_enterings(self, value): self._only_enterings = value
 
 
+def MultiDict(n_dims):
+    if n_dims <= 1:
+        return None
+    return collections.defaultdict(lambda:MultiDict(n_dims - 1))
+
+
 class WeightWindowBound(ICellMod):
     """Cell-based weight window lower bounds. Unique card for a given particle
     type, with name `weightwinbound-<particle>`. In MCNP, this is the **WWN**
@@ -3145,8 +3152,6 @@ class WeightWindowBound(ICellMod):
         ----------
         particle : str
             See :py:class:`ICellMod`.
-        cell : :py:class:`Cell` or subclass
-            See :py:class:`ICellMod`
         idx_energy : int
             Index of the energy, on a :py:class:`WeightWindowEnergies` card,
             for which a bound is being specified. If no energy bins are
@@ -3157,6 +3162,8 @@ class WeightWindowBound(ICellMod):
             for which a bound is being specified. If no time intervals are
             specified in the problem (e.g. 1 time interval for weight windows),
             provide 1. The index starts at 1.
+        cell : :py:class:`Cell` or subclass
+            See :py:class:`ICellMod`
         bound : str or float
             Lower bound for the weight to cause rouletting, or 'killall' to
             kill all particles entering the cell.
@@ -3175,27 +3182,55 @@ class WeightWindowBound(ICellMod):
         # Check for existence of weight window cards.
         self.idx_energys = dict()
         self.idx_times = dict()
-        self.bounds = dict()
+        # See definition of MultiDict above this class.
+        self.bounds = MultiDict(4)
         self._process_varargs(args)
 
-    def add(self, cell, idx_energy, idx_time, bound):
-        super(WeightWindowBound, self).add(cell)
-        self.idx_energys[cell] = idx_energy
-        self.idx_times[cell] = idx_times
-        self.bounds[cell] = bound
+    def add(self, idx_energy, idx_time, cell, bound):
+        """
+        Parameters
+        ----------
+        particle : str
+        idx_energy : int
+        idx_time : int
+        cell : :py:class:`Cell` or subclass
+        bound : str or float
 
-    def set_by_array(self, cell, array):
-        pass
+        Examples
+        --------
+        TODO
+
+        """
+        super(WeightWindowBound, self).add(cell)
+        if idx_energy not in self.idx_energys: self.idx_energys += [idx_energy]
+        if idx_time not in self.idx_times:     self.idx_times += [idx_time]
+        self.bounds[cell][idx_energy][idx_time] = bound
 
     def comment(self):
-        return super(WeightWindowBound, self).comment("Weight window bounds")
+        string += "Weight window bounds {0!r} for {1}s:".format(
+                self.name, self.particle)
+        for i_e in self.idx_energys:
+            string += " energy idx {0}:".format(i_e)
+            for i_t in self.idx_times:
+                string += " time idx {1}:".format(i_t)
+                for cell in self.cells:
+                    # TODO check if there are any entries at all. If not print
+                    # something like 'none'.
+                    if self.bounds[cell][i_e][i_t]:
+                        # The 3-dim dict's entries are initialized to None
+                        string += " cell {0!r}:".format( cell.name)
+                        string += self._comment_unit(
+                                self.bounds[cell][i_e][i_t])
+                        string += ","
+        # Change last character from a comma to a period.
+        string[-1] = "."
+        return string
 
-    def _comment_unit(self, cell):
-        if self.only_enterings[cell]: oestr = "entering only"
-        else: oestr = "entering and weight games"
-        return " prob {0} for {1}".format(self.probs[cell], oestr)
+    def _comment_unit(self, this_bound):
+        return " {0}".format(this_bound)
 
     def mcnp(self, float_format, sim):
+        # Prepare to obtain linear index.
         wwgt_name = 'weightwingentimes-{0}'.format(self.particle)
         wwt_name = 'weightwintimes-{0}'.format(self.particle)
         if wwgt_name in sim.misc and wwt_name in sim.misc:
@@ -3203,18 +3238,30 @@ class WeightWindowBound(ICellMod):
                     "using WWGT, ignoring WWT.")
         if wwgt_name in sim.misc:  n_times = sim.misc[wwgt_name].n_bounds
         elif wwt_name in sim.misc: n_times = sim.misc[wwt_name].n_bounds
+        string = ""
         for i_e in self.idx_energys:
             for i_t in self.idx_times:
-                i_linear = 1 + ((i_t * n_times) + i_e)
-                for idx in self._idxs_for(i_e, i_t):
-                    string += self._mcnp_unit(float_format, sim, idx)
-                cells =  1
-        string +=  1
-
-    def _mcnp_unit(self, float_format, sim, cell):
-        string
-        string = "-" if self.only_enterings[cell] else ""
-        return string + float_format % self.probs[cell]
+                i_linear = (i_t - 1) * n_times + i_e
+                # Start card.
+                string += "WWN{0}:{1}".format(
+                cells_with_idx = self._cells_with_idx(i_linear)
+                # Check all cells in the system.
+                for cell in sim.sys.cells:
+                    # Is this cell on this card, and is there a bound defined
+                    # for it, for this energy and time?
+                    string += " "
+                    if cell in self.cells and self.bounds[cell][i_e][i_t]:
+                        this_bound = self.bounds[cell][i_e][i_t]
+                        if type(this_bound) is float:
+                            string += float_format % this_bound
+                        elif this_bound == 'killall':
+                            string += "-1"
+                        else:
+                            raise ValueError("Unexpected input.")
+                    else:
+                        string += "0"
+                string += "\n"
+        return string
 
     def _idxs_for(self, idx_energy, idx_time):
         idx_matches = []
@@ -3241,8 +3288,6 @@ class WeightWindowBound(ICellMod):
 
     @property
     def bounds(self, value): self._bounds = value
-
-
 
 
 class WeightWindowEnergies(IUniqueParticle):
