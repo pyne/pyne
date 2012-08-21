@@ -58,7 +58,8 @@ cdef class _Material:
         elif (nucvec is None):
             if free_mat:
                 # Make empty mass stream
-                self.mat_pointer = new cpp_material.Material()
+                self.mat_pointer = new cpp_material.Material(comp, 
+                                        mass, std.string(name), atoms_per_mol)
             else:
                 self.mat_pointer = NULL
 

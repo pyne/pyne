@@ -60,8 +60,7 @@ def nist_num(nist_data):
 
 
 sl_dtype = np.dtype([
-    ('nuc_name',      'S6'),
-    ('nuc_zz',        int),
+    ('nuc',           int),
     ('b_coherent',    np.complex128),
     ('b_incoherent',  np.complex128),
     ('xs_coherent',   float),
@@ -87,8 +86,7 @@ def parse_scattering_lengths(build_dir):
     for m in re.finditer(scat_len_pattern, raw_data):
         md = m.groupdict()
 
-        slrow = (nucname.name(md['iso']),
-                 nucname.zzaaam(md['iso']),
+        slrow = (nucname.zzaaam(md['iso']),
                  nist_num(md['b_coherent']) * (1E-13),
                  nist_num(md['b_incoherent']) * (1E-13),
                  nist_num(md['xs_coherent']),
