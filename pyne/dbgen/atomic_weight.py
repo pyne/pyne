@@ -124,19 +124,17 @@ def parse_atmoic_mass_adjustment(build_dir=""):
 
 
 atomic_weight_desc = {
-    'nuc_name': tb.StringCol(itemsize=6, pos=0),
-    'nuc_zz':   tb.IntCol(pos=1),
-    'mass':     tb.FloatCol(pos=2),
-    'error':    tb.FloatCol(pos=3),
-    'abund':    tb.FloatCol(pos=4),
+    'nuc':   tb.IntCol(pos=1),
+    'mass':  tb.FloatCol(pos=2),
+    'error': tb.FloatCol(pos=3),
+    'abund': tb.FloatCol(pos=4),
     }
 
 atomic_weight_dtype = np.dtype([
-    ('nuc_name', 'S6'),
-    ('nuc_zz',   int),
-    ('mass',     float),
-    ('error',    float), 
-    ('abund',    float), 
+    ('nuc',   int),
+    ('mass',  float),
+    ('error', float), 
+    ('abund', float), 
     ])
 
 def make_atomic_weight_table(nuc_data, build_dir=""):
@@ -156,36 +154,30 @@ def make_atomic_weight_table(nuc_data, build_dir=""):
     A = {}
 
     # Add normal isotopes to A
-    for nuc_zz, mass, error in atomic_masses:
-        try: 
-            nuc_name = nucname.name(nuc_zz)
-        except RuntimeError:
-            continue
-
-        if nuc_zz in atomic_abund:
-            A[nuc_zz] = nuc_name, nuc_zz, mass, error, atomic_abund[nuc_zz]
+    for nuc, mass, error in atomic_masses:
+        if nuc in atomic_abund:
+            A[nuc] = nuc, mass, error, atomic_abund[nuc]
         else:
-            A[nuc_zz] = nuc_name, nuc_zz, mass, error, 0.0
+            A[nuc] = nuc, mass, error, 0.0
 
     # Add naturally occuring elements
     for element in nucname.name_zz:
-        nuc_zz = nucname.zzaaam(element)
-        A[nuc_zz] = element, nuc_zz, 0.0, 0.0, 0.0
+        nuc = nucname.zzaaam(element)
+        A[nuc] = nuc, 0.0, 0.0, 0.0
         
     for nuc, abund in atomic_abund.items():
         zz = nuc / 10000
         element_zz = zz * 10000
         element = nucname.zz_name[zz]
 
-        nuc_name, nuc_zz, nuc_mass, _error, _abund = A[nuc]
-        elem_name, elem_zz, elem_mass, _error, _abund = A[element_zz]
+        _nuc, nuc_mass, _error, _abund = A[nuc]
+        elem_zz, elem_mass, _error, _abund = A[element_zz]
 
         new_elem_mass = elem_mass + (nuc_mass * abund)
-        A[element_zz] = element, element_zz, new_elem_mass, 0.0, 0.0
+        A[element_zz] = element_zz, new_elem_mass, 0.0, 0.0
 
 
-    A = sorted(A.values(), key=lambda x: x[1])
-    #A = np.array(A, dtype=atomic_weight_dtype)
+    A = sorted(A.values(), key=lambda x: x[0])
 
     # Open the HDF5 File
     kdb = tb.openFile(nuc_data, 'a', filters=BASIC_FILTERS)
@@ -214,11 +206,11 @@ def make_atomic_weight(args):
                 return 
 
     # First grab the atomic abundance data
-    print "Grabing the atomic abundance from KAERI"
+    print "Grabbing the atomic abundance from KAERI"
     grab_kaeri_atomic_abund(build_dir)
 
     # Then grab mass data
-    print "Grabing atomic mass data from AMDC"
+    print "Grabbing atomic mass data from AMDC"
     grab_atmoic_mass_adjustment(build_dir)
 
     # Make atomic weight table once we have the array
