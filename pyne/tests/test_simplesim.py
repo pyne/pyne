@@ -700,6 +700,28 @@ class TestSystemDefinition(unittest.TestCase):
             self.assertEquals(e.message, "No WWGT:N or WWT:N card found in "
                     "the simulation.")
 
+        # Test cell importances.
+        impn = cards.Importance('neutron', self.fuel, 1, self.coolant, 2)
+        self.assertEquals(impn.name, 'importance-neutron')
+        self.assertEquals(impn.comment(), "Importance 'importance-neutron': "
+                "cell 'fuel' 1; cell 'coolant' 2.")
+        self.assertEquals(impn.mcnp('%g', self.sim), "IMP:N 1 2 0 0 0 0")
+        impn.set(self.graveyard, 0)
+        self.assertEquals(impn.comment(), "Importance 'importance-neutron': "
+                "cell 'fuel' 1; cell 'coolant' 2; cell 'graveyard' 0.")
+        self.assertEquals(impn.mcnp('%g', self.sim), "IMP:N 1 2 0 0 0 0")
+        # Modifying.
+        impn.set(self.graveyard, 1)
+        self.assertEquals(impn.comment(), "Importance 'importance-neutron': "
+                "cell 'fuel' 1; cell 'coolant' 2; cell 'graveyard' 1.")
+        self.assertEquals(impn.mcnp('%g', self.sim), "IMP:N 1 2 1 0 0 0")
+        # Using args.
+        args = [self.fuel, 1, self.coolant, 2, self.graveyard, 3]
+        impn = cards.Importance('neutron', *args)
+        self.assertEquals(impn.comment(), "Importance 'importance-neutron': "
+                "cell 'fuel' 1; cell 'coolant' 2; cell 'graveyard' 3.")
+        self.assertEquals(impn.mcnp('%g', self.sim), "IMP:N 1 2 3 0 0 0")
+
 
     def test_Transformation(self):
         """Tests :py:class:`cards.Transformation`."""
