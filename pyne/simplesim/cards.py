@@ -42,6 +42,7 @@ the module.
 # TODO improve inheritance around ICellMod.
 # TODO rewrite WeightWindowBound so that there is a separate card for each
 # index.
+# TODO consistent plural card names when appropriate.
 
 import abc
 import collections
@@ -2349,6 +2350,7 @@ class CellPulseHeight(IAverageTally):
                     "contain only 'neutron', 'photon', 'electron',"
                     " or 'proton'. User provided '%s'." % string)
 
+
 class CellChargeDeposition(CellPulseHeight):
     """Charge deposition tally in cells. In MCNP, this is the **+F8** card. No
     alternative units are available.
@@ -4033,25 +4035,182 @@ class DXTRANContribution(ICellMod):
         Examples
         --------
         """
-            
-class DXTRANSpheres(IMisc):
-    """DXTRAN spheres. In MCNP, this is the **DXT** card.
+        # DXTRANSphere must be added first before this can be used?
+
+
+class DXTRANSpheres(IUniqueParticle):
+    """DXTRAN spheres. Unique card for a given particle type, with name
+    `dixtranspheres-<particle>`. In MCNP, this is the **DXT** card. See the
+    code's (e.g. MCNP's) manual for default values. All the spheres added to
+    this card are named so that they can be referenced by other cards.
 
     .. inheritance-diagram:: pyne.simplesim.cards.DXTRANSpheres
 
     """
     # TODO maybe the constructor just has the options, must use add method.
     # Is this a unique card?
-    def __init__(self, particle, point, inner_radius, outer_radius,
-            upper_cutoff, lower_cutoff, min_photon_weight, *args):
-        pass
+    # I (Chris) wish I learned about namedtuples when I started this project.
+    Sphere = collections.namedtuple('Sphere',
+            ['name', 'center', 'inrad', 'outrad'])
+
+    def __init__(self, particle, *args, **kwargs):
+        """
+        Parameters
+        ----------
+        particle : str
+            See :py:class:`IUniqueParticle`.
+        sph_name : str
+            Name of the sphere.
+        center : 3-element list or :py:class:`np.array` [centimeters]
+            Center of this sphere.
+        inner_radius : float [centimeters]
+            Inner radius of this sphere.
+        outer_radius : float [centimeters]
+            Outer radius of this sphere.
+        *args : sph_name, point, inner_radius, outer_radius, ...
+            To request more than one sphere, supply the last 4 arguments for
+            the additional spheres. See examples. This can also be done using
+            :py:meth:`set`.
+        upper_cutoff : float, optional
+            Upper weight cutoff, for all spheres.
+        lower_cutoff : float, optional
+            Lower weight cutoff, for all spheres.
+        min_photon_weight : float, optional
+            Only relevant if this card is for neutrons.
+
+        Examples
+        --------
+        The following requests a DXTRAN sphere `sph1` at (1, 2, 3) cm, with
+        inner radius 4 cm and outer radius 5 cm::
+
+            dsph = DXTRANSpheres('neutron', 'sph1', [1, 2, 3], 4, 5)
+
+        It is possible to define multiple spheres in the constructor; keyword
+        arguments come after the sphere parameters::
+
+            dsph = DXTRANSpheres('neutron', 'sph1', [1, 2, 3], 4, 5,
+                                            'sph2', [4, 5, 6], 7, 8,
+                                 upper_cutoff=0.1, lower_cutoff=0.05,
+                                 min_photon_weight=0.5)
+
+        """
+        super(DXTRANSpheres, self).__init__('dxtranspheres', particle)
+        self.upper_cutoff = kwargs.get('upper_cutoff', None)
+        self.lower_cutoff = kwargs.get('lower_cutoff', None)
+        self.min_photon_weight = kwargs.get('min_photon_weight', None)
+        self.spheres = dict()
+        self._n_args_per_set = 4
+        # TODO copied from ICellMod, ICellModParticle.
+        for i_set in range(len(args) / self._n_args_per_set):
+            i_start = self._n_args_per_set * i_set
+            self.set(*args[i_start:i_start+self._n_args_per_set])
+
+    def set(self, sph_name, point, inner_radius, outer_radius):
+        """
+        Parameters
+        ----------
+        sph_name : str
+            Name of the sphere.
+        center : 3-element list or :py:class:`np.array` [centimeters]
+            Center of this sphere.
+        inner_radius : float [centimeters]
+            Inner radius of this sphere.
+        outer_radius : float [centimeters]
+
+        Examples
+        --------
+        The last example above can be achieved as follows::
+
+            dsph = DXTRANSpheres('neutron', upper_cutoff=0.1,
+                                 lower_cutoff=0.05,
+                                 min_photon_weight=0.5)
+            dsph.set('sph1', [1, 2, 3], 4, 5)
+            dsph.set('sph2', [4, 5, 6], 7, 8)
+
+        Previously provided values can be modified later on::
+
+            dsph.set('sph2', [4.5, 5.5, 6.5], 8.5, 9.5)
+
+        """
+        self.spheres[sph_name] = self.Sphere(
+                sph_name, point, inner_radius, outer_radius)
+
+    def comment(self):
+        upcut = self.upper_cutoff
+        lowcut = self.lower_cutoff
+        mpw = self.min_photon_weight
+        string = ("DXTRAN spheres {0!r}: "
+                  "up. cut. {1}, low cut. {2}, min photon wgt. {3}.".format(
+                      self.name,
+                      upcut  if upcut  else 'default',
+                      lowcut if lowcut else 'default',
+                      mpw    if mpw    else 'default'))
+        counter = 0
+        for name in self.spheres:
+            counter += 1
+            string += " sphere " + self._comment_unit(name)
+            if counter < len(self.spheres): string += ";"
+        return string + "."
+
+    def _comment_unit(self, name):
+        sph = self.spheres[name]
+        return ("{0!r} at ({1[0]:g}, {1[1]:g}, {1[2]:g}) cm, "
+                "in. rad. {2:g} cm, out. rad. {3:g} cm".format(
+                    name, sph.center, sph.inrad, sph.outrad))
+
+    def mcnp(self, float_format, sim):
+        mpw = self.min_photon_weight
+        string = "DXT:{0}".format(self.mcnp_particle[self.particle])
+        for name in self.spheres:
+            string += "  " + self._mcnp_unit(float_format, sim, name)
+        string += 2 * " "
+        if self.upper_cutoff: string += float_format % self.upper_cutoff
+        else:                 string += "0"
+        string += " "
+        if self.lower_cutoff: string += float_format % self.lower_cutoff
+        else:                 string += "0"
+        string += " "
+        if mpw:               string += float_format % mpw
+        else:                 string += "0"
+        return string
+
+    def _mcnp_unit(self, float_format, sim, name):
+        sph = self.spheres[name]
+        formatstr = "{0} {0} {0} {0} {0}".format(float_format)
+        return formatstr % (tuple(sph.center) + (sph.inrad, sph.outrad))
+
+    @property
+    def upper_cutoff(self): return self._upper_cutoff
+
+    @upper_cutoff.setter
+    def upper_cutoff(self, value): self._upper_cutoff = value
+
+    @property
+    def lower_cutoff(self): return self._lower_cutoff
+
+    @lower_cutoff.setter
+    def lower_cutoff(self, value): self._lower_cutoff = value
+
+    @property
+    def min_photon_weight(self): return self._min_photon_weight
+
+    @min_photon_weight.setter
+    def min_photon_weight(self, value): self._min_photon_weight = value
+
+    @property
+    def spheres(self): return self._spheres
+
+    @spheres.setter
+    def spheres(self, value): self._spheres = value
 
 
 class Vector(IMisc):
     """Position vector. In MCNP, this is the **VECT** card. Unique card with name
     `vector`. Vector are added to the card via the :py:meth:`add`. The card is
     used with the :py:card:`ExponentialTransform` card in MCNP.
-    
+
+    .. inheritance-diagram:: pyne.simplesim.cards.Vector
+
     """
     # TODO don't require the user to make this card. The reason we're allowing
     # it is vector re-use.
