@@ -700,7 +700,7 @@ class TestSystemDefinition(unittest.TestCase):
             self.assertEquals(e.message, "No WWGT:N or WWT:N card found in "
                     "the simulation.")
 
-        # Test cell importances.
+        ## Importance
         impn = cards.Importance('neutron', self.fuel, 1, self.coolant, 2)
         self.assertEquals(impn.name, 'importance-neutron')
         self.assertEquals(impn.comment(), "Importance 'importance-neutron': "
@@ -721,6 +721,17 @@ class TestSystemDefinition(unittest.TestCase):
         self.assertEquals(impn.comment(), "Importance 'importance-neutron': "
                 "cell 'fuel' 1; cell 'coolant' 2; cell 'graveyard' 3.")
         self.assertEquals(impn.mcnp('%g', self.sim), "IMP:N 1 2 3 0 0 0")
+
+        ## Volume
+        vol = cards.Volume(self.fuel, 1)
+        print len(self.rxr.cells)
+        self.assertEquals(vol.name, 'volume')
+        self.assertEquals(vol.comment(), "Volume 'volume': cell 'fuel' 1.")
+        self.assertEquals(vol.mcnp('%g', self.sim), "VOL 1 5J")
+        vol = cards.Volume(self.fuel, 1, self.coolant, 2, manual=True)
+
+        vol.set(self.coolant, 3)
+        # TODO test skipping in an actual MCNP input.
 
 
     def test_Transformation(self):

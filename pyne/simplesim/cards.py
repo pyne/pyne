@@ -39,6 +39,7 @@ the module.
 # TODO testing backlog: (1) modification of ICellMod (2) no vector card
 # exception, (3) weightwindowbound
 # TODO check WWGT default arg effect in WWN.
+# TODO improve inheritance around ICellMod.
 
 import abc
 import collections
@@ -2736,6 +2737,194 @@ class Transformation(IMisc):
     def aux_in_main(self, value): self._aux_in_main = value
 
 
+class ICellMod(IMisc):
+    """This class is not used by the user. Abstract base class for cards that
+    can be specified in MCNP on both the cell card or in the data block.  All
+    subclasses are unique, have a ``cell`` property, and have a similar form.
+    Entries for a given cell can be modified by providing an input for the same
+    cell.
+
+    """
+    # The mcnp() method of the class implements the jump feature, which
+    # ICellModParticle does not.
+    __metaclass__ = abc.ABCMeta
+
+    def __init__(self, name, n_args_per_cell, *args, **kwargs):
+        """
+        Parameters
+        ----------
+        name : str
+            See :py:class:`ICard`.
+        cell : :py:class:`Cell` or subclass
+            The cell for which the card applies.
+        n_args_per_cell : int
+            The number of arguments the subclass expects per cell.
+
+        """
+        super(ICellMod, self).__init__(name, unique=True)
+        self.cells = []
+        self._n_args_per_cell = n_args_per_cell
+        if len(args) % n_args_per_cell != 0:
+            raise StandardError("The length of ``*args`` must be a multiple "
+                    "of {0}. Length is {1}.".format(n_args_per_cell, len(args)))
+
+    def _process_varargs(self, args):
+        for i_cell in range(len(args) / self._n_args_per_cell):
+            i_start = self._n_args_per_cell * i_cell
+            self.set(*args[i_start:i_start+self._n_args_per_cell])
+
+    @abc.abstractmethod
+    def set(self, cell):
+        if cell not in self.cells: self.cells += [cell]
+
+    @abc.abstractmethod
+    def comment(self, title):
+        string = "{0} {1!r}:".format(title, self.name)
+        counter = 0
+        for cell in self.cells:
+            counter += 1
+            string += " cell {0!r}".format(cell.name)
+            string += self._comment_unit(cell)
+            if counter < len(self.cells): string += ";"
+        return string + "."
+
+    @abc.abstractmethod
+    def _comment_unit(self):
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def mcnp(self, float_format, sim, keystring):
+        # TODO this ordering might not be correct, particularly once we add
+        # support for universes, etc.
+        string = "{0}".format(keystring)
+        # TODO this should loop through in the print order.
+        # `gathering` empty cells (cells for which no value is given).
+        empty_count = 0
+        for key, cell in sim.sys.cells.iteritems(): 
+            if cell in self.cells:
+                if empty_count > 0:
+                    string += " {0}J".format(empty_count)
+                    empty_count = 0
+                string += " " + self._mcnp_unit(float_format, sim, cell)
+            else:
+                empty_count += 1
+            # Account for running out of cells with empty baggage.
+            if cell is sim.sys.cells.values()[-1]:
+                string += " {0}J".format(empty_count)
+        return string
+
+    @abc.abstractmethod
+    def _mcnp_unit(self):
+        raise NotImplementedError
+
+    @property
+    def cells(self): return self._cells
+
+    @cells.setter
+    def cells(self, value):
+        for arg in value:
+            if not isinstance(arg, Cell):
+                raise ValueError("The ``cell`` must be a ``Cell``. User "
+                        "provided {0}.".format(arg))
+        self._cells = value
+
+
+class Temperature(ICellMod):
+    pass
+
+
+class Volume(ICellMod):
+    """Cell volumes. Unique card with name `volume`. In MCNP, this is the
+    **VOL** card. The user can initialize this card without providing any cell
+    volumes.
+
+    .. inheritance-diagram:: pyne.simplesim.cards.Volume
+
+    """
+    def __init__(self, *args, **kwargs):
+        """
+        Parameters
+        ----------
+        cell : :py:class:`Cell` or subclass
+            The cell for which the volume is being provided.
+        vol : float [centimeters]
+            Volume of the cell
+        args : cell, imp, ...
+            To provide importances for more than one cell, supply the last two
+            arguments for the other cells. See examples. This can also be done
+            using :py:meth:`set`.
+        manual : bool, optional (default: False)
+            If set to True, the code will not attempt to calculate cell volumes
+            on its own.
+
+        Examples
+        --------
+        The following are examples of the usage of this card::
+
+            vol = Volume(cellA, 1)
+            vol = Volume(cellA, 1, cellB, 2, manual=True)
+
+        """
+        super(Volume, self).__init__('volume', 2, *args, **kwargs)
+        self.manual = kwargs.get('manual', False)
+        self.vols = dict()
+        self._process_varargs(args)
+
+    def set(self, cell, vol):
+        """
+        Parameters
+        ----------
+        cell : :py:class:`Cell` or subclass
+        vol : float
+
+        Examples
+        --------
+        The example above can be achieved by the following::
+
+            vol = Volume(manual=True)
+            vol.set(cellA, 1)
+            vol.set(cellB, 2)
+
+        Previously-provided values can be modified later on::
+
+            vol.set(cellB, 3)
+
+        """
+        super(Volume, self).set(cell)
+        self.vols[cell] = vol
+
+    def comment(self):
+        string = "Volume"
+        if self.manual: string += "(all manual)"
+        return super(Volume, self).comment("Volume")
+ 
+    def _comment_unit(self, cell):
+        return " " + str(self.vols[cell])
+
+    def mcnp(self, float_format, sim):
+        if self.manual: return "VOL NO"
+        else: return super(Volume, self).mcnp(float_format, sim, "VOL")
+
+    def _mcnp_unit(self, float_format, sim, cell):
+        return float_format % self.vols[cell]
+
+    @property
+    def manual(self): return self._manual
+
+    @manual.setter
+    def manual(self, value): self._manual = value
+
+    @property
+    def vols(self): return self._vols
+
+    @vols.setter
+    def vols(self, value): self._vols = value
+
+
+class Area(ICellMod):
+    pass
+
+
 class IUniqueParticle(IMisc):
     """This class is not used by the user. Abstract base class for cards that
     are unique for a given particle.
@@ -2770,12 +2959,13 @@ class IUniqueParticle(IMisc):
         self._particle = value
 
 
-class ICellMod(IUniqueParticle):
+class ICellModParticle(IUniqueParticle):
     """This class is not used by the user. Abstract base class for cards that
-    can be specified in MCNP on both the cell card or in the data block.
-    All subclasses have a ``particle`` and ``cell`` property, and similar form.
-    All subclasses are unique for a given particle type. Entries for a given
-    cell can be modified by providing an input for the same cell.
+    can be specified in MCNP on both the cell card or in the data block, and
+    are unique by particle.  All subclasses have a ``particle`` and ``cell``
+    property, and similar form.  All subclasses are unique for a given particle
+    type. Entries for a given cell can be modified by providing an input for
+    the same cell.
 
     """
     __metaclass__ = abc.ABCMeta
@@ -2795,7 +2985,7 @@ class ICellMod(IUniqueParticle):
             The number of arguments the subclass expects per cell.
 
         """
-        super(ICellMod, self).__init__(pre_name, particle)
+        super(ICellModParticle, self).__init__(pre_name, particle)
         self.cells = []
         self._n_args_per_cell = n_args_per_cell
         if len(args) % n_args_per_cell != 0:
@@ -2856,25 +3046,12 @@ class ICellMod(IUniqueParticle):
         self._cells = value
 
 
-class Temperature(ICellMod):
-    pass
-
-
-class Volume(ICellMod):
-    """Cell volumes. Unique card with name `volume`. In MCNP, this is the
-    **VOL** card. The user can initialize this card without providing any cell
-    volumes.
-
-    """
-    def __int__(self, *args):
-        pass
-
-
-class Importance(ICellMod):
+class Importance(ICellModParticle):
     """Particle importance. Unique card for a given particle type, with name
     `importance-<particle>`. In MCNP, this is the **IMP** card. The user can
-    initialize this card without providing any cell importances.
-
+    initialize this card without providing any cell importances.  The typical
+    usage is to provide the importance for all cells, though the card does not
+    require this.
     .. inheritance-diagram:: pyne.simplesim.cards.Importance
 
     """
@@ -2884,8 +3061,14 @@ class Importance(ICellMod):
         ----------
         particle : str
             See :py:class:`ICellMod`.
+        cell : :py:class:`Cell` or subclass
+            See :py:class:`ICellMod`.
         imp : int
             Cell importance.
+        args : cell, imp, ...
+            To provide importances for more than one cell, supply the last two
+            arguments for the other cells. See examples. This can also be done
+            using :py:meth:`set`.
 
         Examples
         --------
@@ -2947,7 +3130,7 @@ class Importance(ICellMod):
     def imps(self, value): self._imps = value
 
 
-class ExponentialTransform(ICellMod):
+class ExponentialTransform(ICellModParticle):
     """An exponential transform that adjusts the total cross section by a given
     factor in a given direction. Unique card for a given particle type, with
     name `exptransform-<particle>`. In MCNP, this is the **EXT** card.  The
@@ -3127,7 +3310,7 @@ class ExponentialTransform(ICellMod):
         self._signs = value
 
 
-class ForcedCollision(ICellMod):
+class ForcedCollision(ICellModParticle):
     """A forced collision setting. Unique card for a given particle type, with
     name `forcedcoll-<particle>`. In MCNP, this is the **FCL** card. The user
     can initialize this card without requesting forced collisions.
@@ -3233,7 +3416,7 @@ class ForcedCollision(ICellMod):
     def only_enterings(self, value): self._only_enterings = value
 
 
-class WeightWindowBound(ICellMod):
+class WeightWindowBound(ICellModParticle):
     """Cell-based weight window lower bounds. Unique card for a given particle
     type, with name `weightwinbound-<particle>`. In MCNP, this is the **WWN**
     card. In MCNP, these are typically generated automatically using its weight
