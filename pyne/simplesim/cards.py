@@ -484,6 +484,7 @@ class CellMCNP(Cell):
         # TODO allow user to use default arguments on the transformation card
         # (e.g. not require the specification of cosines/degrees).
         # TODO allow use of U, LAT, and FILL keywords?
+        # TODO TMP card: need to be able to specify index.
         super(CellMCNP, self).__init__(name, region, material, density,
                                        density_units)
         # Assign keyword arguments.
@@ -2855,8 +2856,95 @@ class ICellMod(IUniqueParticle):
         self._cells = value
 
 
-class Importance(ICellMod):
+class Temperature(ICellMod):
     pass
+
+
+class Volume(ICellMod):
+    """Cell volumes. Unique card with name `volume`. In MCNP, this is the
+    **VOL** card. The user can initialize this card without providing any cell
+    volumes.
+
+    """
+    def __int__(self, *args):
+        pass
+
+
+class Importance(ICellMod):
+    """Particle importance. Unique card for a given particle type, with name
+    `importance-<particle>`. In MCNP, this is the **IMP** card. The user can
+    initialize this card without providing any cell importances.
+
+    .. inheritance-diagram:: pyne.simplesim.cards.Importance
+
+    """
+    def __init__(self, particle, *args):
+        """
+        Parameters
+        ----------
+        particle : str
+            See :py:class:`ICellMod`.
+        imp : int
+            Cell importance.
+
+        Examples
+        --------
+        The following specifies the neutron importance in cells ``cellA`` and
+        ``cellB``::
+
+            impn = Importance('neutron', cellA, 1, cellB, 2)
+
+        If providing importances for many cells it may be easier to do the
+        following::
+
+            args = [cellA, 1, cellB, 1, cellC, 0]
+            impn = cards.Importance('neutron', *args)
+
+        """
+        super(Importance, self).__init__("importance", particle, 2, *args)
+        self.imps = dict()
+        self._process_varargs(args)
+
+    def set(self, cell, imp):
+        """
+        Parameters
+        ----------
+        particle : str
+        imp : int
+
+        Examples
+        --------
+        The example above can be achieved by the following::
+
+            impn = Importance('neutron')
+            impn.set(cellA, 1)
+            impn.set(cellB, 2)
+
+        Previously-provided values can be modified later on::
+
+            impn.set(cellB, 1)
+
+        """
+        super(Importance, self).set(cell)
+        self.imps[cell] = imp
+
+    def comment(self):
+        return super(Importance, self).comment("Importance")
+
+    def _comment_unit(self, cell):
+        return " " + str(self.imps[cell])
+
+    def mcnp(self, float_format, sim):
+        return super(Importance, self).mcnp(float_format, sim, "IMP")
+
+    def _mcnp_unit(self, float_format, sim, cell):
+        return "{0}".format(self.imps[cell])
+
+    @property
+    def imps(self): return self._imps
+
+    @imps.setter
+    def imps(self, value): self._imps = value
 
 
 class ExponentialTransform(ICellMod):
@@ -2968,6 +3056,10 @@ class ExponentialTransform(ICellMod):
             extn.set(cellA, 'capture-to-total', 'currdir', 'toward')
             extn.set(cellB, 0.5, 'currdir', 'toward')
             extn.set(cellC, 0.5, 'vec1', 'away')
+
+        Previously-provided values can be modified later on::
+
+            extn.set(cellC, 0.7, 'vec1', 'away')
 
         """
         super(ExponentialTransform, self).set(cell)
@@ -3103,6 +3195,10 @@ class ForcedCollision(ICellMod):
             fcl = ForcedCollision('neutron')
             fcl.set(cellA, 0.5, True)
             fcl.set(cellB, 0.5, False)
+
+        Previously-provided values can be modified later on::
+
+            fcl.set(cellB, 0.7, False)
 
         """
         super(ForcedCollision, self).set(cell)
