@@ -19,6 +19,10 @@ extension to other codes may require more effort.
 # TODO need to be able to tell the user the numbers given to the different
 # cards, for parsing.
 # TODO check uniqueness
+# TODO manage print order of cell cards, this may just be given by the ordered
+# dict.
+# TODO let users enter cell or surface cards to a certain location or number;
+# describe how the remaining cards are modified.
 
 import abc
 import datetime
