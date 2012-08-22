@@ -3241,8 +3241,6 @@ class WeightWindowBound(ICellMod):
             for i_t in self.idx_times:
                 string += " time idx {0}:".format(i_t)
                 for cell in self.cells:
-                    # TODO check if there are any entries at all. If not print
-                    # something like 'none'.
                     if self.bounds[cell][i_e][i_t]:
                         # The 3-dim dict's entries are initialized to None
                         string += " cell {0!r}:".format( cell.name)
@@ -3256,30 +3254,30 @@ class WeightWindowBound(ICellMod):
 
     def mcnp(self, float_format, sim):
         # Prepare to obtain linear index.
-        wwgt_name = 'weightwingentime-{0}'.format(self.particle)
-        wwt_name = 'weightwintime-{0}'.format(self.particle)
-        if wwgt_name in sim.misc and wwt_name in sim.misc:
-            raise UserWarning("Both a WWGT and a WWT card have been added; "
-                    "using WWGT, ignoring WWT.")
-        if wwgt_name in sim.misc:
+        wwge_name = 'weightwingenenergy-{0}'.format(self.particle)
+        wwe_name = 'weightwinenergy-{0}'.format(self.particle)
+        if wwge_name in sim.misc and wwe_name in sim.misc:
+            raise UserWarning("Both a WWGE and a WWE card have been added; "
+                    "using WWGE, ignoring WWE.")
+        if wwge_name in sim.misc:
             # Deal with MCNP default indices that are unhandled by the WWGT
             # card here.
-            if (sim.misc[wwgt_name].for_gen and
-                    len(sim.misc[wwgt_name].bounds) == 0):
-                n_times = 10
+            if (sim.misc[wwge_name].for_gen and
+                    len(sim.misc[wwge_name].bounds) == 0):
+                n_energies = 10
             else:
-                n_times = sim.misc[wwgt_name].n_bounds
-        elif wwt_name in sim.misc:
-            n_times = sim.misc[wwt_name].n_bounds
+                n_energies = sim.misc[wwge_name].n_bounds
+        elif wwe_name in sim.misc:
+            n_energies = sim.misc[wwe_name].n_bounds
         else:
             raise Exception("No WWGT:{0} or WWT:{0} card found in the "
                     "simulation.".format(self.mcnp_particle[self.particle]))
         string = ""
         # Finally, create all necessary cards (one per linear index).
         counter = 0
-        for i_e in self.idx_energys:
-            for i_t in self.idx_times:
-                i_linear = (i_t - 1) * n_times + i_e
+        for i_t in self.idx_times:
+            for i_e in self.idx_energys:
+                i_linear = (i_t - 1) * n_energies + i_e
                 # Start card, but only if any values are assigned for this idx.
                 if self._n_vals_for(i_e, i_t) > 0:
                     counter += 1
@@ -3306,6 +3304,7 @@ class WeightWindowBound(ICellMod):
         return string
  
     def _n_vals_for(self, i_e, i_t):
+        # TODO may not need this check.
         n_vals = 0
         for cell in self.cells:
             if self.bounds[cell][i_e][i_t]: n_vals += 1
@@ -3349,6 +3348,12 @@ class WeightWindowEnergies(IUniqueParticle):
     # and a generator card are provided by the user; or maybe just a warning,
     # and go with the indices provided by the former. it's possible that the
     # indices are the same. Why wouldn't they be?
+    # TODO bounds [] can be provided if for_gen=False, in which case MCNP
+    # generates a WWE card with 10 indices on it, that could then be used on a
+    # WWN card, though if the user is using WWG then they shouldn't be using
+    # WWN directly, but in any case the WWN might say that the WWGE card does
+    # not have 10 indices, since only MCNP is handling that. Need to show this
+    # to the WWN card. EDIT this is managed in WWN.mcnp()
     def __init__(self, particle, bounds, for_gen=False):
         """
         Parameters
@@ -3429,12 +3434,6 @@ class WeightWindowTimes(IUniqueParticle):
     .. inheritance-diagram:: pyne.simplesim.cards.WeightWindowTimes
 
     """
-    # TODO bounds [] can be provided if for_gen=False, in which case MCNP
-    # generates a WWT card with 10 indices on it, that could then be used on a
-    # WWN card, though if the user is using WWG then they shouldn't be using
-    # WWN directly, but in any case the WWN might say that the WWGT card does
-    # not have 10 indices, since only MCNP is handling that. Need to show this
-    # to the WWN card.
     def __init__(self, particle, bounds, for_gen=False):
         """
         Parameters
