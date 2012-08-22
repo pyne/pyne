@@ -699,7 +699,6 @@ class TestSystemDefinition(unittest.TestCase):
         except Exception as e:
             self.assertEquals(e.message, "No WWGT:N or WWT:N card found in "
                     "the simulation.")
-
         ## Importance
         impn = cards.Importance('neutron', self.fuel, 1, self.coolant, 2)
         self.assertEquals(impn.name, 'importance-neutron')
@@ -728,16 +727,15 @@ class TestSystemDefinition(unittest.TestCase):
         self.assertEquals(vol.comment(), "Volume 'volume': cell 'fuel' 1 cm^3.")
         self.assertEquals(vol.mcnp('%g', self.sim), "VOL 1 5J")
         vol = cards.Volume(cellD, 1)
-        self.assertEquals(vol.mcnp('%g', self.sim), "VOL 3J 1 2J")
+        self.assertEquals(vol.mcnp('%g', self.sim), "VOL 4J 1 1J")
         # Multiple cells
         vol = cards.Volume(self.fuel, 1, self.coolant, 2, manual=True)
-        self.assertEquals(vol.comment(), "Volume 'volume': "
+        self.assertEquals(vol.comment(), "Volume 'volume': (all manual) "
                 "cell 'fuel' 1 cm^3, cell 'coolant' 2 cm^3.")
-        self.assertEquals(vol.mcnp('%g', self.sim), "VOL 1 2 3J")
-
+        self.assertEquals(vol.mcnp('%g', self.sim), "VOL NO 1 2 4J")
+        # Using set()
         vol.set(self.coolant, 3)
-        # TODO test skipping in an actual MCNP input.
-
+        self.assertEquals(vol.mcnp('%g', self.sim), "VOL NO 1 3 4J")
 
     def test_Transformation(self):
         """Tests :py:class:`cards.Transformation`."""
