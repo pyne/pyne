@@ -761,6 +761,26 @@ class TestSystemDefinition(unittest.TestCase):
         self.assertEquals(thtme.mcnp('%g', self.sim), "THTME 1e+18 2e+18")
 
         ## Temperature
+        temp = cards.Temperature(self.fuel, 600)
+        self.assertEquals(tmp.name, 'temperature')
+        self.assertEquals(tmp.comment(), "Temperatures 'temperature': "
+                "cell 'fuel' 600 K.")
+        self.assertEquals(tmp.mcnp('%g', self.sim), "TMP 600 5J")
+        temp = cards.Temperature(self.fuel, 600, cellE, 900, index=2)
+        self.assertEquals(tmp.comment(), "Temperatures for time index "
+                "2 'temperature-idx2': cell 'fuel' 600 K, "
+                "cell 'E' 900 K.")
+        self.assertEquals(tmp.mcnp('%g', self.sim), "TMP2 600 4J 900")
+        # set()
+        temp = Temperature(index=2)
+        temp.set(self.fuel, 600)
+        temp.set(cellE, 900)
+        self.assertEquals(tmp.comment(), "Temperatures for time index "
+                "2 'temperature-idx2': cell 'fuel' 600 K, "
+                "cell 'E' 900 K.")
+        self.assertEquals(tmp.mcnp('%g', self.sim), "TMP2 600 4J 900")
+        # modifying.
+        temp.set(self.coolant, 950)
 
     def test_Transformation(self):
         """Tests :py:class:`cards.Transformation`."""

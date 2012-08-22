@@ -2889,7 +2889,7 @@ class Volume(ICellMod):
             vol.set(cellA, 1)
             vol.set(cellB, 2)
 
-        Previously-provided values can be modified later on::
+        Previously provided values can be modified later on::
 
             vol.set(cellB, 3)
 
@@ -3036,38 +3036,101 @@ class IUniqueParticle(IMisc):
 
 
 class Temperature(ICellMod):
-    """Temperature of cells. Unique card with name `temperature`. In MCNP, this
+    """Temperature of cells. Unique card with name `temperature`. If a time
+    index is provided, the unique name is `temperature-idx<index>`. In MCNP, this
     is the **TMP** card and is used for the free gas thermal treatment. This
-    card may require that :py:class:`TemperatureTimes` card is part of the
+    card may require that :py:class:`TemperatureTimes` card is in the
     simulation.
 
     .. inheritance-diagram:: pyne.simplesim.cards.Temperature
 
     """
+    # TODO check if THTME card exists.
     def __init__(self, *args, **kwargs):
         """
         Parameters
         ----------
         cell : :py:class:`Cell` or subclass.
             Cell for which the temperature is being specified.
-        idx_time : int, optional
-            Time index for which temperatures are 
         temp : float [Kelvin]
             Temperature of the cell. For MCNP, this is converted into MeV.
         *args : cell, temp, ...
             To provide the temperature for more than one cell, supply the last
             three arguments for the other cells. See examples. This can also be
             done with :py:meth:`set`.
+        index : int, optional
+            The index (starting at 1) of a time on the
+            :py:class:`TemperatureTimes` card for which the temperatures are
+            provided. If no :py:class:`TemperatureTimes` card is used, the user
+            does not provide this input, and it defaults to ``None``.
 
         Examples
         --------
         The following are examples of the usage of this card:
 
             temp = Temperature(cellA, 600)
-            temp = Temperature(cellA, 600, cellB, 900)
+            temp = Temperature(cellA, 600, cellB, 900, index=2)
 
         """
-        super(Temperature, self).__init__('temperature', 2, *args)
+        self.index = kwargs.get('index', None)
+        name = 'temperature'
+        if self.index: name += '-idx{0}'.format(self.index)
+        super(Temperature, self).__init__(name, 2, *args)
+        self.temps = dict()
+        self._process_varargs(args)
+
+    def set(self, cell, temp):
+        """
+        Parameters
+        ----------
+        cell : :py:class:`Cell` or subclass.
+        temp : float [Kelvin]
+
+        Examples
+        --------
+        The following does the same as the example above::
+
+            temp = Temperature(index=2)
+            temp.set(cellA, 600)
+            temp.set(cellB, 900)
+
+        Previously provided values can be modified later on::
+
+            temp.set(cellB, 950)
+
+        """
+        super(Temperature, self).set(cell)
+        self.temps[cell] = temp
+
+    def comment(self):
+        # TODO get access to sim and show the actual time, not just the index.
+        string = "Temperatures"
+        if self.index: string += " for time index {0}".format(self.index)
+        return super(Temperature, self).comment(string)
+
+    def _comment_unit(self, cell):
+        return " {0} K".format(self.temps[cell])
+
+    def mcnp(self, float_format, sim):
+        string = "TMP"
+        if self.index: string += "{0}".format(self.index)
+        return super(Temperature, self).mcnp(float_format, sim, string)
+
+    def _mcnp_unit(self, float_format, sim, cell):
+        return float_format % (self.temps[cell] * self.kelvin2kT)
+
+    @property
+    def index(self): return self._index
+
+    @index.setter
+    def index(self, value): self._index = value
+
+    @property
+    def temps(self): return self._temps
+
+    @temps.setter
+    def temps(self, value): self._temps = value
+
 
 
 class TemperatureTimes(IMisc):
@@ -3260,7 +3323,7 @@ class Importance(ICellModParticle):
             impn.set(cellA, 1)
             impn.set(cellB, 2)
 
-        Previously-provided values can be modified later on::
+        Previously provided values can be modified later on::
 
             impn.set(cellB, 1)
 
@@ -3397,7 +3460,7 @@ class ExponentialTransform(ICellModParticle):
             extn.set(cellB, 0.5, 'currdir', 'toward')
             extn.set(cellC, 0.5, 'vec1', 'away')
 
-        Previously-provided values can be modified later on::
+        Previously provided values can be modified later on::
 
             extn.set(cellC, 0.7, 'vec1', 'away')
 
@@ -3539,7 +3602,7 @@ class ForcedCollision(ICellModParticle):
             fcl.set(cellA, 0.5, True)
             fcl.set(cellB, 0.5, False)
 
-        Previously-provided values can be modified later on::
+        Previously provided values can be modified later on::
 
             fcl.set(cellB, 0.7, False)
 
@@ -3662,7 +3725,7 @@ class WeightWindowBound(ICellModParticle):
             wwn.set(1, 1, cellB, 0.01)
             wwn.set(2, 3, cellB, 0.01)
 
-        Previously-provided values can be modified later on::
+        Previously provided values can be modified later on::
 
             wwn.set(1, 1, cellB, 0.02)
 
