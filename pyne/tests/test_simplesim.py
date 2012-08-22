@@ -780,13 +780,15 @@ class TestSystemDefinition(unittest.TestCase):
         self.assertEquals(temp.comment(), "Temperatures for time index "
                 "2 'temperature-idx2': cell 'fuel' 600 K, "
                 "cell 'E' 900 K.")
-        self.assertEquals(temp.mcnp('%g', self.sim), "TMP2 600 4J 900")
+        self.assertEquals(temp.mcnp('%g', self.sim),
+                "TMP2 5.17041e-08 4J 7.75561e-08")
         # Modifying.
-        temp.set(self.coolant, 950)
+        temp.set(cellE, 950)
         self.assertEquals(temp.comment(), "Temperatures for time index "
                 "2 'temperature-idx2': cell 'fuel' 600 K, "
                 "cell 'E' 950 K.")
-        self.assertEquals(temp.mcnp('%g', self.sim), "TMP2 600 4J 900")
+        self.assertEquals(temp.mcnp('%g', self.sim),
+                "TMP2 5.17041e-08 4J 8.18648e-08")
 
 
     def test_Transformation(self):
