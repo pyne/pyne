@@ -2778,14 +2778,14 @@ class ICellMod(IMisc):
         if cell not in self.cells: self.cells += [cell]
 
     @abc.abstractmethod
-    def comment(self, title):
-        string = "{0} {1!r}:".format(title, self.name)
+    def comment(self, title, poststr=""):
+        string = "{0} {1!r}:{2}".format(title, self.name, poststr)
         counter = 0
         for cell in self.cells:
             counter += 1
             string += " cell {0!r}".format(cell.name)
             string += self._comment_unit(cell)
-            if counter < len(self.cells): string += ";"
+            if counter < len(self.cells): string += ","
         return string + "."
 
     @abc.abstractmethod
@@ -2894,16 +2894,17 @@ class Volume(ICellMod):
         self.vols[cell] = vol
 
     def comment(self):
-        string = "Volume"
-        if self.manual: string += "(all manual)"
-        return super(Volume, self).comment("Volume")
+        if self.manual: poststr = " (all manual)"
+        else: poststr = ""
+        return super(Volume, self).comment("Volume", poststr)
  
     def _comment_unit(self, cell):
         return " {0} cm^3".format(self.vols[cell])
 
     def mcnp(self, float_format, sim):
-        if self.manual: return "VOL NO"
-        else: return super(Volume, self).mcnp(float_format, sim, "VOL")
+        string = "VOL"
+        if self.manual: string += " NO"
+        return super(Volume, self).mcnp(float_format, sim, string)
 
     def _mcnp_unit(self, float_format, sim, cell):
         return float_format % self.vols[cell]
