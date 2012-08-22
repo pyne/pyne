@@ -136,6 +136,7 @@ class MCNPInput(IInputFile):
         # Write data cards.
         self._new_line()
         self._write_deck_header("Data")
+        # TODO WWN card will not work with the card wrapper as it is....
         # Material cards.
         self._write_data_header("Material")
         self._write_dictionary(self.sim.material)
