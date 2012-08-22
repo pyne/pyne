@@ -737,6 +737,22 @@ class TestSystemDefinition(unittest.TestCase):
         vol.set(self.coolant, 3)
         self.assertEquals(vol.mcnp('%g', self.sim), "VOL NO 1 3 4J")
 
+        ## Area
+        are = cards.Area(self.fuel, 10)
+        self.assertEquals(are.name, 'area')
+        self.assertEquals(are.comment(), "Area 'area': cell 'fuel' 10 cm^2.")
+        self.assertEquals(are.mcnp('%g', self.sim), "AREA 10 5J")
+        are = cards.Area(cellD, 10)
+        self.assertEquals(are.mcnp('%g', self.sim), "AREA 4J 10 1J")
+        # Multiple cells
+        are = cards.Area(self.fuel, 10, self.coolant, 20)
+        self.assertEquals(are.comment(), "Area 'area': "
+                "cell 'fuel' 10 cm^2, cell 'coolant' 20 cm^2.")
+        self.assertEquals(are.mcnp('%g', self.sim), "AREA 10 20 4J")
+        # Using set()
+        are.set(self.coolant, 30)
+        self.assertEquals(are.mcnp('%g', self.sim), "AREA 10 30 4J")
+
     def test_Transformation(self):
         """Tests :py:class:`cards.Transformation`."""
 
