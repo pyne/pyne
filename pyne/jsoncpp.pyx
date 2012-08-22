@@ -3,6 +3,7 @@ from cython.operator cimport dereference as deref
 from cython.operator cimport preincrement as inc
 from libc.stdlib cimport malloc, free
 from cython cimport pointer
+from libc.string cimport const_char
 
 # Python imports
 import collections
@@ -17,19 +18,55 @@ except ImportError:
     import json
 
 
-cdef class Value:
-    def __cinit__(self):
+cdef cpp_jsoncpp.Value * pydoc_to_cval(object doc):
+    cdef cpp_jsoncpp.Value * cval = NULL
+#    if cvalue.isObject() or cvalue.isArray():
+#            #pyvalue._inst = &cvalue
+#            pyvalue._inst[0] = cvalue
+#            return pyvalue
+    if False:
+        pass
+    elif isinstance(doc, basestring):
+        cval = new cpp_jsoncpp.Value(<char *> doc)
+    elif isinstance(doc, float):
+        cval = new cpp_jsoncpp.Value(<double> doc)
+    elif isinstance(doc, bool):
+        # NOTE: bool must go before int!
+        print "I AM BOOL"
+        #cval = new cpp_jsoncpp.Value(<bint> doc)
+        cval = new cpp_jsoncpp.Value(<cpp_jsoncpp.ValueType> cpp_jsoncpp.booleanValue)
+        cval = <bint> 1
+    elif isinstance(doc, int):
+        print "I AM INT"
+        cval = new cpp_jsoncpp.Value(<int> doc)
+#        elif cvalue.isNull():
+#            return None
+    else:
+        raise ValueError("{0} not of know type".format(doc))
+    return cval
+
+
+
+cdef class Value(object):
+    def __cinit__(self, document=None, bint view=False):
         """Value C++ constuctor."""
-        self._inst = new cpp_jsoncpp.Value()
+        self._view = view
+        if view:
+            self._inst = NULL
+        elif document is not None:
+            self._inst = pydoc_to_cval(document)
+        else:
+            self._inst = new cpp_jsoncpp.Value()
 
     def __dealloc__(self):
         """Value C++ destructor."""
-        del self._inst
+        if not self._view:
+            del self._inst
 
     def __getitem__(self, pykey):
         cdef cpp_jsoncpp.Value cvalue
-        #cdef cpp_jsoncpp.Value * cvalueref
         cdef Value pyvalue = Value()
+        #cdef Value pyvalue = Value(view=True)
         cdef std.string cstrvalue
         cdef int cintkey
         cdef std.string cstrkey
@@ -43,7 +80,7 @@ cdef class Value:
             cvalue = self._inst.get(cintkey, self._inst.null)
         elif isinstance(pykey, slice) and self._inst.isArray():
             N = self._inst.size()
-            for 
+            #for 
         else:
             if (isinstance(pykey, int) or isinstance(pykey, slice)) and not self._inst.isArray():
                 raise KeyError('key is int but object is not an array')
@@ -56,7 +93,6 @@ cdef class Value:
             pyvalue._inst[0] = cvalue
             return pyvalue
         elif cvalue.isString():
-            #return const_cast<char *> cvalue.asCString()
             cstrvalue = cvalue.asString()
             return cstrvalue.c_str()
         elif cvalue.isDouble():
@@ -70,8 +106,55 @@ cdef class Value:
         else:
             raise ValueError("{0} not of know type".format(pykey))
 
+    def __setitem__(self, key, value):
+        cdef std.string cstrkey 
+        cdef std.string cstrval
+        cdef cpp_jsoncpp.Value * ckey 
+        cdef cpp_jsoncpp.Value * cvalue
+
+        cstrkey = std.string(key)
+        ckey = &self._inst[0][cstrkey]
+        
+        cstrval = std.string(value)
+        cvalue = new cpp_jsoncpp.Value(cstrval)
+        ckey.swap(deref(cvalue))
+
     def __len__(self):
-        return self._inst.size()
+        if self._inst.isObject() or self._inst.isArray():
+            return self._inst.size()
+        elif self._inst.isString():
+            return len(str(self))
+        else:
+            raise TypeError("JSON Value has no length")
+
+    def __str__(self):
+        cdef const_char * s = NULL
+        if self._inst.isString():
+            s = self._inst.asCString()
+        else:
+            # FIXME: add writer here
+            pass
+        return s
+
+    def __float__(self):
+        if self._inst.isNumeric():
+            return self._inst.asDouble()
+        else:
+            return NotImplemented
+
+    def __int__(self):
+        if self._inst.isNumeric():
+            return self._inst.asInt()
+        else:
+            return NotImplemented
+
+    def __nonzero__(self):
+        if self._inst.isBool():
+            print "Here"
+            return self._inst.asBool()
+        else:
+            print "Not Here"
+            return NotImplemented
 
 
 cdef class Reader:
