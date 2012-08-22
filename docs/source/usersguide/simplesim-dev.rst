@@ -23,3 +23,9 @@ Design decisions
 ================
 
 Why SimulationDefinition and Inputfile are separate.
+
+
+
+
+float_format % uses dollar rather than str.format() because the % syntax is
+more conventional outside of python.
