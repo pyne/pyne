@@ -117,6 +117,9 @@ class ICard(object):
             contain spaces. 
 
         """
+        # Somebody on the internet said to use super() even when only
+        # subclassing from object.
+        super(ICard, self).__init__()
         self._unique = unique
         if self._unique:
             self._name = name
@@ -2847,10 +2850,10 @@ class Volume(ICellMod):
         ----------
         cell : :py:class:`Cell` or subclass
             The cell for which the volume is being provided.
-        vol : float [centimeters]
-            Volume of the cell
-        args : cell, imp, ...
-            To provide importances for more than one cell, supply the last two
+        vol : float [centimeters^3]
+            Volume of the cell.
+        args : cell, vol, ...
+            To provide volumes for more than one cell, supply the last two
             arguments for the other cells. See examples. This can also be done
             using :py:meth:`set`.
         manual : bool, optional (default: False)
@@ -2865,7 +2868,7 @@ class Volume(ICellMod):
             vol = Volume(cellA, 1, cellB, 2, manual=True)
 
         """
-        super(Volume, self).__init__('volume', 2, *args, **kwargs)
+        super(Volume, self).__init__('volume', 2, *args)
         self.manual = kwargs.get('manual', False)
         self.vols = dict()
         self._process_varargs(args)
@@ -2923,7 +2926,78 @@ class Volume(ICellMod):
 
 
 class Area(ICellMod):
-    pass
+    """Cell surface areas. Unique card with name `area`. In MCNP, this is the
+    **AREA** card. The user can initialize this card without providing any cell
+    areas.
+
+    .. inheritance-diagram:: pyne.simplesim.cards.Area
+
+    """
+    def __init__(self, *args):
+        """
+        Parameters
+        ----------
+        cell : :py:class:`Cell` or subclass
+            The cell for which the area is being provided
+        area : float [centimeters^2]
+            Surface area of the cell.
+        *args : cell, area, ...
+            To provide areas for more than one cell, suppy the last two
+            arguments for the other surfaces. See examples. This can also be
+            done using :py:meth:`set`.
+
+        Examples
+        --------
+        The follow are examples of the usage of this card::
+
+            area = Area(cellA, 10)
+            area = Area(cellA, 10, cellB, 20)
+
+        """
+        super(Area, self).__init__('area', 2, *args)
+        self.areas = dict()
+        self._process_varargs(args)
+
+    def set(self, cell, area):
+        """
+        Parameters
+        ----------
+        cell : :py:class:`Cell` or subclass
+        area : float [centimeters^2]
+
+        Examples
+        --------
+        The example above can be achieved by the following::
+
+            area = Area()
+            area.set(cellA, 10)
+            area.set(cellB, 20)
+
+        Previously-defined values can be modified later on::
+
+            area.set(cellB, 30)
+
+        """
+        super(Area, self).set(cell)
+        self.areas[cell] = area
+ 
+    def comment(self):
+        return super(Area, self).comment("Area")
+
+    def _comment_unit(self, cell):
+        return " {0} cm^2".format(self.areas[cell])
+
+    def mcnp(self, float_format, sim):
+        return super(Area, self).mcnp(float_format, sim, "AREA")
+
+    def _mcnp_unit(self, float_format, sim, cell):
+        return float_format % self.areas[cell]
+
+    @property
+    def areas(self): return self._areas
+
+    @areas.setter
+    def areas(self, value): self._areas = value
 
 
 class IUniqueParticle(IMisc):
