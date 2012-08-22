@@ -638,6 +638,21 @@ class TestSystemDefinition(unittest.TestCase):
                 "time idx 1: cell 'D': 0.01.")
         self.assertEquals(wwn.mcnp('%g', self.sim), "WWN1:P 0 0 0 0 0.01 0")
         # More than one cell.
+        wwn = cards.WeightWindowBound('photon' , 1, 1, cellD, 0.01 , 1, 1,
+                cellE, 0.02 , 2, 1, cellE, 0.03 , 1, 3, cellD, 0.04 , 2, 3,
+                cellD, 0.05 , 2, 3, cellE, 0.06)
+        self.assertEquals(wwn.comment(), "Weight window bounds "
+                "'weightwinbound-photon' for photons: energy idx 1: "
+                "time idx 1: cell 'D': 0.01, cell 'E': 0.02, "
+                "time idx 3: cell 'D': 0.04, "
+                "energy idx 2: time idx 1: cell 'E': 0.03, "
+                "time idx 3: cell 'D': 0.05, cell 'E': 0.06.")
+        self.assertEquals(wwn.mcnp('%g', self.sim), 
+                "WWN1:P 0 0 0 0 0.01 0.02\n"
+                "WWN2:P 0 0 0 0 0 0.03\n"
+                "WWN9:P 0 0 0 0 0.04 0\n"
+                "WWN10:P 0 0 0 0 0.05 0.06")
+        # Make sure set() works.
         wwn = cards.WeightWindowBound('photon')
         wwn.set(1, 1, cellD, 0.01)
         wwn.set(1, 1, cellE, 0.02)
@@ -648,24 +663,25 @@ class TestSystemDefinition(unittest.TestCase):
         self.assertEquals(wwn.comment(), "Weight window bounds "
                 "'weightwinbound-photon' for photons: energy idx 1: "
                 "time idx 1: cell 'D': 0.01, cell 'E': 0.02, "
-                "energy idx 1: time idx 3: cell 'E': 0.04, "
+                "time idx 3: cell 'D': 0.04, "
                 "energy idx 2: time idx 1: cell 'E': 0.03, "
-                "energy idx 2: time idx 3: cell 'D': 0.05, cell 'E': 0.06.")
-        self.assertEquals(wwn.mcnp('%g', self.sim), "WWN1:P 0 0 0 0 0.01 0")
-
-
-        # Make sure set() works.
-
+                "time idx 3: cell 'D': 0.05, cell 'E': 0.06.")
+        self.assertEquals(wwn.mcnp('%g', self.sim), 
+                "WWN1:P 0 0 0 0 0.01 0.02\n"
+                "WWN2:P 0 0 0 0 0 0.03\n"
+                "WWN9:P 0 0 0 0 0.04 0\n"
+                "WWN10:P 0 0 0 0 0.05 0.06")
 
         # Make sure using WWGT default times gives the proper linear index.
-        wwt = cards.WeightWindowTimes('photon', [], for_gen=True)
+        wwe = cards.WeightWindowEnergies('photon', [], for_gen=True)
         # Overwriting a card.
-        self.assertRaises(UserWarning, self.sim.add_misc, wwt)
+        self.sim.add_misc(wwe)
+        #self.assertRaises(UserWarning, self.sim.add_misc, wwe)
         wwn = cards.WeightWindowBound('photon', 8, 6, cellD, 0.01)
         self.assertEquals(wwn.comment(), "Weight window bounds "
                 "'weightwinbound-photon' for photons: energy idx 8: "
                 "time idx 6: cell 'D': 0.01.")
-        self.assertEquals(wwn.mcnp('%g', self.sim), "WWN68:P 0 0 0 0 0.01 0")
+        self.assertEquals(wwn.mcnp('%g', self.sim), "WWN58:P 0 0 0 0 0.01 0")
 
         # Test killall
         wwn = cards.WeightWindowBound('photon', 1, 1, cellD, 'killall')
@@ -684,8 +700,6 @@ class TestSystemDefinition(unittest.TestCase):
             self.assertEquals(e.message, "No WWGT:N or WWT:N card found in "
                     "the simulation.")
 
-        # Test mcnp output if no cells are given for a particular index:
-        # don't print the card.
 
     def test_Transformation(self):
         """Tests :py:class:`cards.Transformation`."""
