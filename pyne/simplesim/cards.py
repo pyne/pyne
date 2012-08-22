@@ -2816,9 +2816,9 @@ class ICellMod(IMisc):
                 string += " " + self._mcnp_unit(float_format, sim, cell)
             else:
                 empty_count += 1
-            # Account for running out of cells with empty baggage.
-            if cell is sim.sys.cells.values()[-1]:
-                string += " {0}J".format(empty_count)
+                # Account for running out of cells with empty baggage.
+                if cell is sim.sys.cells.values()[-1]:
+                    string += " {0}J".format(empty_count)
         return string
 
     @abc.abstractmethod
