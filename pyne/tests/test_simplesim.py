@@ -790,6 +790,42 @@ class TestSystemDefinition(unittest.TestCase):
         self.assertEquals(temp.mcnp('%g', self.sim),
                 "TMP2 5.17041e-08 4J 8.18648e-08")
 
+        ## DXTRANSpheres
+        dsph = cards.DXTRANSpheres('neutron', 'sph1', [1, 2, 3], 4, 5)
+        self.assertEquals(dsph.name, 'dxtranspheres-neutron')
+        self.assertEquals(dsph.comment(), "DXTRAN spheres "
+                "'dxtranspheres-neutron': up. cut. default, low cut. default"
+                ", min photon wgt. default. sphere 'sph1' at (1, 2, 3) cm, "
+                "in. rad. 4 cm, out. rad. 5 cm.")
+        self.assertEquals(dsph.mcnp('%g', self.sim),
+                "DXT:N  1 2 3 4 5  0 0 0")
+        dsph = cards.DXTRANSpheres('neutron', 'sph1', [1, 2, 3], 4, 5,
+                                              'sph2', [4, 5, 6], 7, 8,
+                                   upper_cutoff=0.1, lower_cutoff=0.05,
+                                   min_photon_weight=0.5)
+        self.assertEquals(dsph.comment(), "DXTRAN spheres "
+                "'dxtranspheres-neutron': up. cut. 0.1, low cut. 0.05"
+                ", min photon wgt. 0.5. sphere 'sph1' at (1, 2, 3) cm, "
+                "in. rad. 4 cm, out. rad. 5 cm; sphere 'sph2' at (4, 5, 6) cm,"
+                " in. rad. 7 cm, out. rad. 8 cm.")
+        self.assertEquals(dsph.mcnp('%g', self.sim),
+                "DXT:N  1 2 3 4 5  4 5 6 7 8  0.1 0.05 0.5")
+        dsph = cards.DXTRANSpheres('neutron', upper_cutoff=0.1,
+                                   lower_cutoff=0.05,
+                                   min_photon_weight=0.5)
+        dsph.set('sph1', [1, 2, 3], 4, 5)
+        dsph.set('sph2', [4, 5, 6], 7, 8)
+        self.assertEquals(dsph.comment(), "DXTRAN spheres "
+                "'dxtranspheres-neutron': up. cut. 0.1, low cut. 0.05"
+                ", min photon wgt. 0.5. sphere 'sph1' at (1, 2, 3) cm, "
+                "in. rad. 4 cm, out. rad. 5 cm; sphere 'sph2' at (4, 5, 6) cm,"
+                " in. rad. 7 cm, out. rad. 8 cm.")
+        self.assertEquals(dsph.mcnp('%g', self.sim),
+                "DXT:N  1 2 3 4 5  4 5 6 7 8  0.1 0.05 0.5")
+        dsph.set('sph2', [4.5, 5.5, 6.5], 8.5, 9.5)
+        self.assertEquals(dsph.mcnp('%g', self.sim),
+                "DXT:N  1 2 3 4 5  4.5 5.5 6.5 8.5 9.5  0.1 0.05 0.5")
+
 
     def test_Transformation(self):
         """Tests :py:class:`cards.Transformation`."""
