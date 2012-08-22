@@ -774,7 +774,7 @@ class TestSystemDefinition(unittest.TestCase):
         self.assertEquals(temp.mcnp('%g', self.sim),
                 "TMP2 5.17041e-08 4J 7.75561e-08")
         # set()
-        temp = Temperature(index=2)
+        temp = cards.Temperature(index=2)
         temp.set(self.fuel, 600)
         temp.set(cellE, 900)
         self.assertEquals(temp.comment(), "Temperatures for time index "
