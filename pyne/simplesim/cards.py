@@ -230,7 +230,7 @@ class Cell(ICard):
         string = "Cell {0!r}: region {1}, ".format(
                 self.name, self.region.comment())
         if self.material and self.density and self.density_units:
-            string += "material {0!r} density {1} {2}".format(
+            string += "material {0!r} density {1:g} {2}".format(
                     self.material.name, self.density, self.density_units)
         else:
             string += "void"
@@ -508,7 +508,7 @@ class CellMCNP(Cell):
 
     def comment(self):
         string = super(CellMCNP, self).comment()
-        float_format = "%.5g"
+        float_format = "%g"
         # temperature
         if self.temperature:
             string += "TMP="
@@ -675,11 +675,11 @@ class CellMCNP(Cell):
             if value < 200:
                 raise UserWarning("Temperature set as less than 200 K. "
                         "Are you trying to specify temperature in degrees "
-                        "Celcius, etc.? User provided {0}.".format(value))
+                        "Celcius, etc.? User provided {0:g}.".format(value))
             if value < 1:
                 raise UserWarning("Temperature set as less than 1 K. "
                         "Are you trying to specify temperature as 'kT'? "
-                        "User provided {0}.".format(value))
+                        "User provided {0:g}.".format(value))
         self._temperature = value
 
     @property
@@ -689,7 +689,7 @@ class CellMCNP(Cell):
     def volume(self, value):
         if value is not None and value < 0:
             raise ValueError("The ``volume`` property cannot be negative. "
-                "User provided {0}.".format(value))
+                    "User provided {0:g}.".format(value))
 
     @property
     def importance(self): return self._importance
@@ -1059,7 +1059,7 @@ class AxisCylinder(IAxisSurface):
 
     def comment(self):
         return ("Axis cylinder {0!r}: aligned and centered on {1} axis, "
-                "with radius {2} cm (diameter {3} cm).".format(self.name,
+                "with radius {2:g} cm (diameter {3:g} cm).".format(self.name,
                     self.cartesian_axis, self.radius, 2 * self.radius))
     
     def shift(self, vector):
@@ -1148,8 +1148,8 @@ class AxisCylinder(IAxisSurface):
         if iserror:
             raise ValueError("Stretches perpendicular to the axis must be "
                     "uniform in the two perpendicular directions. User "
-                    "provided {0[0]} stretch {0[1]} and {0[2]} stretch "
-                    "{0[3]} for a {0[4]}-aligned cylinder.".format(out))
+                    "provided {0[0]} stretch {0[1]:g} and {0[2]} stretch "
+                    "{0[3]:g} for a {0[4]}-aligned cylinder.".format(out))
 
     @property
     def radius(self):
@@ -1159,7 +1159,7 @@ class AxisCylinder(IAxisSurface):
     def radius(self, value):
         if value <= 0:
             raise ValueError("The ``radius`` property must be "
-                    "positive. User provided {0}.".format(value))
+                    "positive. User provided {0:g}.".format(value))
         self._radius = value
 
 
@@ -1200,7 +1200,7 @@ class AxisPlane(IAxisSurface):
         self.position = position
     
     def comment(self):
-        return "Axis plane {0!r}: {1} = {2} cm.".format(
+        return "Axis plane {0!r}: {1} = {2:g} cm.".format(
                 self.name, self.cartesian_axis, self.position)
 
     def shift(self, vector):
@@ -1314,9 +1314,10 @@ class Parallelepiped(IMacrobody):
         self.zlims = np.array([zmin, zmax])
 
     def comment(self):
-        return ("Parallelepiped {0!r}: [{1}, {2}] x [{3}, {4}] x " 
-               "[{5}, {6}] cm.".format(self.name, self.xlims[0], self.xlims[1],
-                   self.ylims[0], self.ylims[1], self.zlims[0], self.zlims[1]))
+        return ("Parallelepiped {0!r}: [{1:g}, {2:g}] x [{3:g}, {4:g}] x "
+                "[{5:g}, {6:g}] cm.".format(self.name, self.xlims[0],
+                    self.xlims[1], self.ylims[0], self.ylims[1], self.zlims[0],
+                    self.zlims[1]))
 
     def shift(self, vector):
         """See :py:meth:`ISurface.shift`.
@@ -1374,8 +1375,8 @@ class Parallelepiped(IMacrobody):
     @xlims.setter
     def xlims(self, value):
         if value[0] > value[1]:
-            raise ValueError("The value of xmin, {0}, is greater than "
-                    "that of xmax, {1}.".format(value[0], value[1]))
+            raise ValueError("The value of xmin, {0:g}, is greater than "
+                    "that of xmax, {1:g}.".format(value[0], value[1]))
         self._xlims = value
 
     @property
@@ -1384,8 +1385,8 @@ class Parallelepiped(IMacrobody):
     @ylims.setter
     def ylims(self, value):
         if value[0] > value[1]:
-            raise ValueError("The value of ymin, {0}, is greater than "
-                    "that of ymax, {1}.".format(value[0], value[1]))
+            raise ValueError("The value of ymin, {0:g}, is greater than "
+                    "that of ymax, {1:g}.".format(value[0], value[1]))
         self._ylims = value
 
     @property
@@ -1394,8 +1395,8 @@ class Parallelepiped(IMacrobody):
     @zlims.setter
     def zlims(self, value):
         if value[0] > value[1]:
-            raise ValueError("The value of zmin, {0}, is greater than "
-                    "that of zmax, {1}.".format(value[0], value[1]))
+            raise ValueError("The value of zmin, {0:g}, is greater than "
+                    "that of zmax, {1:g}.".format(value[0], value[1]))
         self._zlims = value
 
 
@@ -1666,7 +1667,7 @@ class Criticality(ISource):
         self.n_cycles = n_cycles
 
     def comment(self):
-        return ("Criticality source {0!r}: n_histories: {1}, keff_guess: {2}"
+        return ("Criticality source {0!r}: n_histories: {1}, keff_guess: {2:g}"
                 ", n_skip_cycles: {3}, n_cycles: {4}.".format(self.name,
                     self.n_histories, self.keff_guess, self.n_skip_cycles,
                     self.n_cycles))
@@ -1691,7 +1692,7 @@ class Criticality(ISource):
     def keff_guess(self, value):
         if value < 0:
             raise ValueError("The property ``keff_guess`` must be "
-                    "non-negative. User provided {0}.".format(value))
+                    "non-negative. User provided {0:g}.".format(value))
         self._keff_guess = value
 
     @property
@@ -1758,7 +1759,7 @@ class CriticalityPoints(ISource):
         counter = 0
         for point in self.points:
             counter += 1
-            string += "({0[0]}, {0[1]}, {0[2]}){1}".format(point,
+            string += "({0[0]:g}, {0[1]:g}, {0[2]:g}){1}".format(point,
                 ", " if counter < len(self.points) else ".")
         return string
 
@@ -2501,8 +2502,9 @@ class PointDetector(IDetector):
         return super(PointDetector, self).comment("Point detector")
 
     def _tuple_tostring(self, apoint):
-        string = " point ({0[0]}, {0[1]}, {0[2]}) cm, radius {1} {2}".format(
-                apoint[0], abs(apoint[1]), 'mfp' if apoint[1] < 0 else 'cm')
+        string = (" point ({0[0]:g}, {0[1]:g}, {0[2]:g}) cm, radius "
+                "{1:g} {2}".format(
+                apoint[0], abs(apoint[1]), 'mfp' if apoint[1] < 0 else 'cm'))
         return string
 
 
@@ -2565,8 +2567,8 @@ class RingDetector(IDetector):
         return super(RingDetector, self).comment("Ring detector")
 
     def _tuple_tostring(self, aring):
-        string = (" ring {0} = {1} cm, radius {2} cm, s.o.e. "
-                "radius {3} {4}".format(aring[0], aring[1], aring[2],
+        string = (" ring {0} = {1:g} cm, radius {2:g} cm, s.o.e. "
+                "radius {3:g} {4}".format(aring[0], aring[1], aring[2],
                     abs(aring[3]), 'mfp' if aring[3] < 0 else 'cm'))
         return string
 
@@ -2696,10 +2698,11 @@ class Transformation(IMisc):
     def _comment_unit(self):
         if self.aux_in_main: string = "aux origin in main"
         else:                string = "main origin in aux"
-        string += " ({0[0]}, {0[1]}, {0[2]}) cm,".format(self.displacement)
+        string += " ({0[0]:g}, {0[1]:g}, {0[2]:g}) cm,".format(
+                self.displacement)
         dirs = ['x', 'y', 'z']
         for idx in range(3):
-            string += " {0}' <{1}, {2}, {3}>{4}".format(dirs[idx],
+            string += " {0}' <{1:g}, {2:g}, {3:g}>{4}".format(dirs[idx],
                     self.rotation[0][idx],
                     self.rotation[1][idx], 
                     self.rotation[2][idx],
@@ -2900,7 +2903,7 @@ class Volume(ICellMod):
         return super(Volume, self).comment("Volume", poststr)
  
     def _comment_unit(self, cell):
-        return " {0} cm^3".format(self.vols[cell])
+        return " {0:g} cm^3".format(self.vols[cell])
 
     def mcnp(self, float_format, sim):
         string = "VOL"
@@ -2983,7 +2986,7 @@ class Area(ICellMod):
         return super(Area, self).comment("Area")
 
     def _comment_unit(self, cell):
-        return " {0} cm^2".format(self.areas[cell])
+        return " {0:g} cm^2".format(self.areas[cell])
 
     def mcnp(self, float_format, sim):
         return super(Area, self).mcnp(float_format, sim, "AREA")
@@ -3095,8 +3098,8 @@ class TemperatureTimes(IMisc):
         self.times = times
 
     def comment(self):
-        string = "Temperature times {0!r} (in MeV):"
-        for val in self.times: string += " {0}".format(val)
+        string = "Temperature times {0!r} (in MeV):".format(self.name)
+        for val in self.times: string += " {0:g}".format(val)
         return string + "."
 
     def mcnp(self, float_format, sim):
@@ -3409,7 +3412,10 @@ class ExponentialTransform(ICellModParticle):
                 "Exponential transform")
 
     def _comment_unit(self, cell):
-        string = " stretch by {0} ".format(self.stretchs[cell])
+        string = " stretch by "
+        if type(self.stretchs[cell]) is str: string += self.stretchs[cell]
+        else: string += "{0:g}".format(self.stretchs[cell])
+        string += " "
         string += self.signs[cell] + " "
         if self.signs[cell] == 'away': string += "from "
         string += self.directions[cell]
@@ -3548,7 +3554,7 @@ class ForcedCollision(ICellModParticle):
     def _comment_unit(self, cell):
         if self.only_enterings[cell]: oestr = "entering only"
         else: oestr = "entering and weight games"
-        return " prob {0} for {1}".format(self.probs[cell], oestr)
+        return " prob {0:g} for {1}".format(self.probs[cell], oestr)
 
     def mcnp(self, float_format, sim):
         return super(ForcedCollision, self).mcnp(float_format, sim, "FCL")
@@ -3683,7 +3689,9 @@ class WeightWindowBound(ICellModParticle):
         return string[:-1] + "."
 
     def _comment_unit(self, cell, i_e, i_t):
-        return " {0}".format(self.bounds[cell][i_e][i_t])
+        bound = self.bounds[cell][i_e][i_t]
+        if type(bound) is str: return " {0}".format(bound)
+        else:                  return " {0:g}".format(bound)
 
     def mcnp(self, float_format, sim):
         # Prepare to obtain linear index.
@@ -4029,7 +4037,8 @@ class Vector(IMisc):
         counter = 0
         for key, val in self.vectors.iteritems():
             counter += 1
-            string += " {0}: ({1[0]}, {1[1]}, {1[2]}) cm".format(key, val)
+            string += " {0}: ({1[0]:g}, {1[1]:g}, {1[2]:g}) cm".format(
+                    key, val)
             if counter < len(self.vectors): string += ","
         return string + "."
 

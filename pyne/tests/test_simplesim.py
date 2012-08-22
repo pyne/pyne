@@ -338,7 +338,7 @@ class TestOptions(unittest.TestCase):
         ## comment()
         critsrc = cards.Criticality()
         self.assertEquals(critsrc.comment(), "Criticality source "
-                "'criticality': n_histories: 1000, keff_guess: 1.0"
+                "'criticality': n_histories: 1000, keff_guess: 1"
                 ", n_skip_cycles: 30, n_cycles: 130.")
             
     def test_CriticalityPoints(self):
@@ -355,7 +355,7 @@ class TestOptions(unittest.TestCase):
                                         np.array([3.1416, 2.7183, 0])])
         self.assertEquals(critpts.comment(), "Criticality points "
                 "'criticalitypoints': (1, 2, 3), "
-                "(3.1416, 2.7183, 0.0).")
+                "(3.1416, 2.7183, 0).")
         self.assertRaises(ValueError, setattr, critpts, 'points', 
                 [[0, 0, 0], [1]])
         try:
@@ -414,7 +414,7 @@ class TestSystemDefinition(unittest.TestCase):
                 10.0, 'g/cm^3')
         self.rxr.add_cell(cellB)
         self.assertEquals(cellB.comment(), "Cell 'B': region "
-                "(-fuelpin & +bound), material 'UO2' density 10.0 "
+                "(-fuelpin & +bound), material 'UO2' density 10 "
                 "g/cm^3")
         self.assertEquals(cellB.mcnp("%.5e", self.sim), "5 1 -1.00000e+01 "
                 "(-1 2)")
@@ -453,7 +453,7 @@ class TestSystemDefinition(unittest.TestCase):
                 10.0, 'g/cm^3')
         self.rxr.add_cell(cellD)
         self.assertEquals(cellD.comment(), "Cell 'D': region "
-                "(-fuelpin & +bound), material 'UO2' density 10.0 "
+                "(-fuelpin & +bound), material 'UO2' density 10 "
                 "g/cm^3")
         self.assertEquals(cellD.mcnp("%.5e", self.sim), "5 1 -1.00000e+01 "
                 "(-1 2)")
@@ -590,12 +590,12 @@ class TestSystemDefinition(unittest.TestCase):
         wwe = cards.WeightWindowEnergies('photon', [1, 10])
         self.assertEquals(wwe.name, 'weightwinenergy-photon')
         self.assertEquals(wwe.comment(), "Weight window energies "
-                "'weightwinenergy-photon' for photons: 2 bins, in MeV.")
+                "'weightwinenergy-photon' for photons: 2 bins.")
         self.assertEquals(wwe.mcnp('%.1g', self.sim), "WWE:P 1 1e+01")
         wwe = cards.WeightWindowEnergies('photon', [1, 10], for_gen=True)
         self.assertEquals(wwe.name, 'weightwingenenergy-photon')
         self.assertEquals(wwe.comment(), "Weight window generator energies "
-                "'weightwingenenergy-photon' for photons: 2 bins, in MeV.")
+                "'weightwingenenergy-photon' for photons: 2 bins.")
         self.assertEquals(wwe.mcnp('%.1g', self.sim), "WWGE:P 1 1e+01")
         wwe = cards.WeightWindowEnergies('photon', [], for_gen=True)
         self.assertEquals(wwe.name, 'weightwingenenergy-photon')
@@ -605,12 +605,12 @@ class TestSystemDefinition(unittest.TestCase):
         wwt = cards.WeightWindowTimes('proton', [1, 1e12])
         self.assertEquals(wwt.name, 'weightwintime-proton')
         self.assertEquals(wwt.comment(), "Weight window times "
-                "'weightwintime-proton' for protons: 2 intervals, in shakes.")
+                "'weightwintime-proton' for protons: 2 intervals.")
         self.assertEquals(wwt.mcnp('%.1g', self.sim), "WWT:H 1e+08 1e+20")
         wwt = cards.WeightWindowTimes('proton', [1, 1e12], for_gen=True)
         self.assertEquals(wwt.name, 'weightwingentime-proton')
         self.assertEquals(wwt.comment(), "Weight window generator times "
-                "'weightwingentime-proton' for protons: 2 intervals, in shakes.")
+                "'weightwingentime-proton' for protons: 2 intervals.")
         self.assertEquals(wwt.mcnp('%.1g', self.sim), "WWGT:H 1e+08 1e+20")
         wwt = cards.WeightWindowTimes('proton', [], for_gen=True)
         self.assertEquals(wwt.name, 'weightwingentime-proton')
@@ -752,6 +752,13 @@ class TestSystemDefinition(unittest.TestCase):
         # Using set()
         are.set(self.coolant, 30)
         self.assertEquals(are.mcnp('%g', self.sim), "AREA 10 30 4J")
+
+        ## TemperatureTimes
+        thtme = cards.TemperatureTimes([1e10, 2e10])
+        self.assertEquals(thtme.name, 'temptimes')
+        self.assertEquals(thtme.comment(), "Temperature times 'temptimes' "
+                "(in MeV): 1e+10 2e+10.")
+        self.assertEquals(thtme.mcnp('%g', self.sim), "THTME 1e+18 2e+18")
 
     def test_Transformation(self):
         """Tests :py:class:`cards.Transformation`."""
@@ -1024,23 +1031,23 @@ class TestSystemDefinition(unittest.TestCase):
         self.assertEquals(det.particle, 'neutron')
         self.assertTrue(det.sep_direct)
         self.assertEquals(det.comment(), "Ring detector tally 'ring' of "
-                "neutrons: ring x = 10.0 cm, radius 2.0 cm, s.o.e. "
-                "radius 1.0 cm; direct contrib is separate.")
+                "neutrons: ring x = 10 cm, radius 2 cm, s.o.e. "
+                "radius 1 cm; direct contrib is separate.")
         det = cards.RingDetector('ring', 'neutron', ('x', 10.0, 2.0, -1.0))
         self.assertEquals(det.comment(), "Ring detector tally 'ring' of "
-                "neutrons: ring x = 10.0 cm, radius 2.0 cm, s.o.e. "
-                "radius 1.0 mfp; direct contrib is separate.")
+                "neutrons: ring x = 10 cm, radius 2 cm, s.o.e. "
+                "radius 1 mfp; direct contrib is separate.")
         det = cards.RingDetector('ring', 'neutron', [('x', 10.0, 2.0, -1.0),
                                                      ('y', 20.0, 3.0, 1.0)])
         self.assertEquals(det.comment(), "Ring detector tally 'ring' of "
-                "neutrons: ring x = 10.0 cm, radius 2.0 cm, s.o.e. "
-                "radius 1.0 mfp; ring y = 20.0 cm, radius 3.0 "
-                "cm, s.o.e. radius 1.0 cm; direct contrib is separate.")
+                "neutrons: ring x = 10 cm, radius 2 cm, s.o.e. "
+                "radius 1 mfp; ring y = 20 cm, radius 3 "
+                "cm, s.o.e. radius 1 cm; direct contrib is separate.")
         det = cards.RingDetector('ring', 'neutron', ('x', 10.0, 2.0, -1.0), 
                 sep_direct=False)
         self.assertEquals(det.comment(), "Ring detector tally 'ring' of "
-                "neutrons: ring x = 10.0 cm, radius 2.0 cm, s.o.e. "
-                "radius 1.0 mfp; direct contrib is not separate.")
+                "neutrons: ring x = 10 cm, radius 2 cm, s.o.e. "
+                "radius 1 mfp; direct contrib is not separate.")
 
         ## EnergyGrid
         egrid = cards.EnergyGrid('grid0', None, [1e-4, 1, 100e3, 10e6])
