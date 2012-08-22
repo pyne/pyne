@@ -1,13 +1,31 @@
 """C++ wrapper for jsoncpp."""
+from libc.string cimport const_char
 cimport std
 
 cdef extern from "json/json.h" namespace "Json":
+    cdef enum ValueType:
+        nullValue,
+        intValue,      
+        uintValue,     
+        realValue,     
+        stringValue,   
+        booleanValue,  
+        arrayValue,    
+        objectValue 
+
     cdef cppclass Value:
         Value null
 
         Value() except +
+        Value(ValueType) except +
+        Value(char *) except +
+        Value(std.string) except +
+        Value(double) except +
+        Value(int) except +
+        Value(bint) except +
+        Value(bint, enum) except +
 
-        char * asCString() except +
+        const_char * asCString() except +
         std.string asString() except +
         int asInt() except +
         #uint asUInt() except +
@@ -30,6 +48,11 @@ cdef extern from "json/json.h" namespace "Json":
 
         Value get(int, Value) except +
         Value get(std.string, Value) except +
+        Value & operator[](std.string) except +
+
+        void swap(Value &) except +
+        void swap(Value *) except +
+        #Value & operator=(Value) except +
 
         int size() except +
 
