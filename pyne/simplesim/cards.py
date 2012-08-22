@@ -2899,7 +2899,7 @@ class Volume(ICellMod):
         return super(Volume, self).comment("Volume")
  
     def _comment_unit(self, cell):
-        return " " + str(self.vols[cell])
+        return " {0} cm^3".format(self.vols[cell])
 
     def mcnp(self, float_format, sim):
         if self.manual: return "VOL NO"
