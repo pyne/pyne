@@ -80,7 +80,7 @@ class IDefinition(object):
             raise ValueError("The input ``card_type`` must be either "
                     "'cell', 'surface', 'material', 'source', "
                     "'tally', or 'misc'.")
-        if card.name in dict_to_check:
+        if card.name in dict_to_check and self.verbose:
             print ("Card {0!r}, type {1!r} is already part of the "
                     "definition; overwriting.".format(card.name, card_type))
             #raise UserWarning("Card {0!r}, type {0!r} is already part of the "
