@@ -463,15 +463,21 @@ class TestSystemDefinition(unittest.TestCase):
                 self.uo2, 10.0, 'g/cm^3',
                 temperature=600, volume=1,
                 importance=('neutron', 1))
+        self.rxr.add_cell(cellE)
         self.assertEquals(cellE.comment(), "Cell 'E': region "
                 "(-fuelpin & +bound), material 'UO2' density 10 "
                 "g/cm^3 TMP= 600 K VOL= 1 cm^3 IMP:N= 1.")
-        self.rxr.add_cell(cellE)
         self.assertEquals(cellE.mcnp('%g', self.sim), "6 1 -10 "
                 "(-1 2) TMP=5.17041e-08 VOL=1 IMP:N=1")
-        cellA = cards.CellMCNP('A', self.pin.neg & self.cellbound.pos,
+        cellF = cards.CellMCNP('F', self.pin.neg & self.cellbound.pos,
                 self.uo2, 10.0, 'g/cm^3',
                 importance=[('neutron', 1), ('photon', 0)])
+        self.rxr.add_cell(cellF)
+        self.assertEquals(cellE.comment(), "Cell 'E': region "
+                "(-fuelpin & +bound), material 'UO2' density 10 "
+                "g/cm^3 TMP= 600 K VOL= 1 cm^3 IMP:N= 1 IMP:P=0.")
+        self.assertEquals(cellE.mcnp('%g', self.sim), "6 1 -10 "
+                "(-1 2) TMP=5.17041e-08 VOL=1 IMP:N=1 IMP:P=0")
         #cellA = CellMCNP(..., exp_transform=[
         #        ('neutron', 'capture-to-total', 'currdir', 'toward'),
         #        ('photon', 0.5, 'x', 'away')])
