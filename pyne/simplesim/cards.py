@@ -366,41 +366,47 @@ class CellMCNP(Cell):
         volume : float, optional [cm^3]
             Volume of the cell, **VOL**.
         importance : 2-element tuple of str and int, optional
-            Particle importance, **IMP**, for variance reduction. The 1st
+            Particle importance, :py:class:`Importance`, **IMP**, for variance
+            reduction. The 1st
             element is a particle name (see :py:attr:`mcnp_particle`). The
             2nd (int) is the cell importance. 
             To specify this input for more
             than one particle, provide a list of these tuples.
         exp_transform : 4-element tuple of str, str/float, str, and str, optional
-            An exponential transform, **EXT**. The 1st element is a particle
+            An exponential transform, :py:class:`ExponentialTransform`,
+            **EXT**. The 1st element is a particle
             name (see :py:attr:`mcnp_particle`). The 2nd element (str) is the
             stretch, the 3rd element (str) is the direction, and the 4th
-            element (str) is the sign ('toward', 'away'). These inputs are the
-            same as those on the :py:class:`Transformation`; refer to the
-            information there.
+            element (str) is the sign ('toward', 'away'). Refer to
+            :py:class:`ExponentialTransform` for the form of these inputs.
             To specify this input for more
             than one particle, provide a list of these tuples.
-        forced_coll : 2-element tuple of str and float, optional
-            Forced collisions, **FCL**. The 1st element is a particle name (see
-            :py:attr:`mcnp_particle`). The 2nd element (float) is forced
-            collision parameter, between -1 and 1. See MCNP manual.
+        forced_coll : 3-element tuple of str, float, and bool, optional
+            Forced collisions, :py:class:`ForcedCollision`, **FCL**. The 1st
+            element is a particle name (see
+            :py:attr:`mcnp_particle`). The 2nd element (float) is the
+            probability. The 3rd element (bool) selects the events that trigger
+            forced collisions. Refer to :py:class:`ForcedCollision` for the
+            form of these inputs.
             To specify this input for more
             than one particle, provide a list of these tuples.
-        weight_win_bound : 3-element tuple of str, int and str/float, optional
-            Weight window lower bound, **WWN**. The 1st element is a particle
-            name (see :py:attr:`mcnp_paticle`). The 2nd element (int) of the tuple
-            is the energy/time index, and the 3rd element is 'kill' to kill
-            particles entering the cell, 'nogame', or a lower bound as a
-            non-negative float. See MCNP manual.
+        weight_win_bound : 4-element tuple of str, int, int, and str/float, optional
+            Weight window lower bound, :pyclass:`WeightWindowBound`, **WWN**.
+            The 1st element is a particle name (see :py:attr:`mcnp_paticle`).
+            The 2nd element (int) is the energy index, the 3rd element (int) is
+            the time index. The 4th element is the bound.
+            Refer to :py:class:`WeightWindowBound` for the form of these
+            inputs.
             To specify this input for more than one particle, or energy/time
             index, provide a list of these tuples.
-        dxtran_contrib : 3-element tuple of str, int/None and float, optional
-            DXTRAN Contribution, **DXC**. The 1st element is a particle name
-            (see :py:attr:`mcnp_particle`). The 2nd element (int) is an index
-            of a DXTRAN sphere (on the DXTRANSphere card), or None if this is
-            to apply to all DXTRAN spheres. The 3rd element (float) is the
-            probability of contribution to the DXTRAN sphere(s). Only for
-            neutrons and photons.
+        dxtran_contrib : 3-element tuple of str, str/None and float, optional
+            DXTRAN Contribution, :py:class:`DXTRANContribution`, **DXC**. The
+            1st element is a particle name (see :py:attr:`mcnp_particle`). The
+            2nd element (str) is the name of a DXTRAN sphere (on the
+            DXTRANSphere card), or None if this is to apply to all DXTRAN
+            spheres. The 3rd element (float) is the probability of contribution
+            to the DXTRAN sphere(s). Only for neutrons and photons. Refer to
+            :py:class:`DXTRANContribution` for the form of these inputs.
             To specify this input for more than one particle or DXTRAN sphere,
             provide a list of these tuples.
         photon_weight : 0, '-inf', or float; optional
@@ -2941,12 +2947,12 @@ class Area(ICellMod):
         Parameters
         ----------
         cell : :py:class:`Cell` or subclass
-            The cell for which the area is being provided
+            The cell for which the area is being provided.
         area : float [centimeters^2]
             Surface area of the cell.
         *args : cell, area, ...
             To provide areas for more than one cell, suppy the last two
-            arguments for the other surfaces. See examples. This can also be
+            arguments for the other cells. See examples. This can also be
             done using :py:meth:`set`.
 
         Examples
@@ -2976,7 +2982,7 @@ class Area(ICellMod):
             area.set(cellA, 10)
             area.set(cellB, 20)
 
-        Previously-defined values can be modified later on::
+        Previously provided values can be modified later on::
 
             area.set(cellB, 30)
 
@@ -3001,6 +3007,97 @@ class Area(ICellMod):
 
     @areas.setter
     def areas(self, value): self._areas = value
+
+
+class FissionTurnoff(ICellMod):
+    """Fission turnoff options. Unique card with name `fissionturnoff`. In
+    MCNP, this is the **NONU** card. If no arguments are provided, then the
+    setting of 'capture-gamma' is applied to all cells.
+
+    .. inheritance-diagram:: pyne.simplesim.cards.FissionTurnoff
+
+    """
+    def __init__(self, *args):
+        """
+        Parameters
+        ----------
+        cell : :py:class:`Cell` or subclass
+            The cell for which input is provided.
+        setting : str
+            One of the following 3 strings: 'capture-gamma' to request fissions
+            to count as capture, but still cause gamma radiation; 'real-gamma'
+            for fission to actually occur and to also produce gamma radiation;
+            and 'capture-nogamma' for fission to be counted as capture, and to
+            not release gammas.
+        *args : cell, setting, ...
+            To provide a setting for more than one cell, supply the last two
+            arguments for the other cells. See examples. This can also be done
+            using :py:meth:`set`.
+
+        Examples
+        --------
+        The following sets all cells to the 'capture-gamma' setting::
+
+            fto = FissionTurnoff()
+
+        The followings specifies settings for more than one cell::
+
+            fto = FissionTurnoff(cellA, 'real-gamma', cellB, 'capture-nogamma')
+
+        """
+        super(FissionTurnoff, self).__init__('fissionturnoff', 2, *args)
+        self.settings = dict()
+        self._process_varargs(args)
+
+    def set(self, cell, setting):
+        """
+        Parameters
+        ----------
+        cell : :py:class:`Cell` or subclass
+        setting : str
+
+        Examples
+        --------
+        The example above can be achieved by the following::
+        
+            fto = FissionTurnoff()
+            fto.set(cellA, 'real-gamma')
+            fto.set(cellB, 'capture-nogamma')
+
+        Previously provided values can be modified later on::
+
+            fto.set(cellB, 'real-gamma')
+
+        """
+        super(FissionTurnoff, self).set(cell)
+        self.settings[cell] = setting
+ 
+    def comment(self):
+        string = "Fission turnoff"
+        if len(self.cells) == 0:
+            return string + ": capture-gamma for all cells."
+        else:
+            return super(FissionTurnoff, self).comment("Fission turnoff")
+
+    def _comment_unit(self, cell):
+        return " {0}".format(self.settings[cell])
+
+    def mcnp(self, float_format, sim):
+        return super(FissionTurnoff, self).mcnp(float_format, sim, "NONU")
+
+    def _mcnp_unit(self, float_format, sim, cell):
+        if self.settings[cell] == 'capture-gamma':     return "0"
+        elif self.settings[cell] == 'real-gamma':      return "1"
+        elif self.settings[cell] == 'capture-nogamma': return "2"
+        else:
+            raise Exception("Unexpected input {0!r}.".format(
+                self.settings[cell])
+
+    @property
+    def settings(self): return self._settings
+
+    @settings.setter
+    def settings(self, value): self._settings = value
 
 
 class IUniqueParticle(IMisc):
@@ -3314,7 +3411,7 @@ class Importance(ICellModParticle):
         """
         Parameters
         ----------
-        particle : str
+        cell : :py:class:`Cell` or subclass
         imp : int
 
         Examples
@@ -3713,7 +3810,6 @@ class WeightWindowBound(ICellModParticle):
         """
         Parameters
         ----------
-        particle : str
         idx_energy : int
         idx_time : int
         cell : :py:class:`Cell` or subclass
@@ -4197,7 +4293,7 @@ class DXTRANSpheres(IUniqueParticle):
             i_start = self._n_args_per_set * i_set
             self.set(*args[i_start:i_start+self._n_args_per_set])
 
-    def set(self, sph_name, point, inner_radius, outer_radius):
+    def set(self, sph_name, center, inner_radius, outer_radius):
         """
         Parameters
         ----------
@@ -4273,7 +4369,6 @@ class DXTRANSpheres(IUniqueParticle):
 
     def index(self, sph_name):
         return self.spheres.keys().index(sph_name) + 1
-
 
     @property
     def upper_cutoff(self): return self._upper_cutoff
