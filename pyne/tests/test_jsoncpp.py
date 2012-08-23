@@ -76,12 +76,26 @@ def test_badmapvalue():
     m = {'name': 'Terry Jones', 42: 42.0}
     assert_raises(KeyError, Value, m)
 
+def test_nestedvalue():
+    lofl = [[1, 2, 3, True, 5, 6], '1', {'a': {'b': 42.0}}]
+    lofl = [[1, 2, 3, False, 5, 6], '1', {'a': {'b': 42.0}}]
+    lofl = [[1, 2, 3, None, 5, 6], '1', {'a': {'b': 42.0}}]
+    v = Value(lofl)
+    #print len(v[0])
+    a = v[0]
+    print a[3]
+    #print v[0][3]
+    #print v[2]['a']['b']
+    assert False
+
 def test_arrsetitem():
-    l = ['Terry Jones', 1, None, 42.0, {}]
-    v = Value([])
+    #l = ['Terry Jones', 1, None, 42.0, {}]
+    l = ['Terry Jones', 1, 42.0]
+    v = Value([None] * len(l))
     for i, value in enumerate(l):
         v[i] = value
-    #assert_equal([v[i] for i in range(len(l))], l)
+    #assert False
+    assert_equal([v[i] for i in range(len(l))], l)
 
 def test_mapsetitem():
     m = {'name': 'Terry Jones', 'age': 42.0}
@@ -89,6 +103,8 @@ def test_mapsetitem():
     for key, value in m.items():
         v[key] = value
     assert_equal(dict([(k, v[k]) for k in m.keys()]), m)
+"""\
+"""
 
 #r = jsoncpp.Reader()
 #root = r.parse({'a': 10, 'b': 'Hello', 'c': {'d': [1, 2, 10.0]}})
