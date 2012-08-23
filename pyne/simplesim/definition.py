@@ -319,6 +319,13 @@ class MCNPSimulation(SimulationDefinition):
         """Initialize any attributes/properties."""
         super(MCNPSimulation, self)._create_new()
         self._transformations = collections.OrderedDict()
+        self._tally_surfacecurrent = collections.OrderedDict()
+        self._tally_surfaceflux = collections.OrderedDict()
+        self._tally_cellflux = collections.OrderedDict()
+        self._tally_cellenergydep = collections.OrderedDict()
+        self._tally_cellfissiondep = collections.OrderedDict()
+        self._tally_pulseheight = collections.OrderedDict()
+        self._tally_detector = collections.OrderedDict()
 
     def add_tally(self, card):
         super(MCNPSimulation, self).add_tally(card)
