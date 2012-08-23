@@ -880,8 +880,27 @@ class TestSystemDefinition(unittest.TestCase):
 
         ## DetectorContribution
         det = cards.PointDetector('point', 'neutron', ([0, 0, 0], 0))
+        det2 = cards.PointDetector('point2', 'neutron', ([0, 0, 0], 0))
         self.sim.add_tally(det)
-        
+        self.sim.add_tally(det2)
+        dc = cards.DetectorContribution('point2', self.fuel, 0.5)
+        self.assertEquals(dc.name, 'detcontrib-point2')
+        self.assertEquals(dc.comment(), "Detector contribution "
+                "'detcontrib-point2': cell 'fuel' 0.5.")
+        self.assertEquals(dc.mcnp('%g', self.sim), "PD25 0.5 5J")
+        dc = cards.DetectorContribution('point2', self.fuel, 0.5, self.coolant,
+                0.6)
+        self.assertEquals(dc.comment(), "Detector contribution "
+                "'detcontrib-point2': cell 'fuel' 0.5, cell 'coolant' 0.6.")
+        self.assertEquals(dc.mcnp('%g', self.sim), "PD25 0.5 0.6 4J")
+        dc = cards.DetectorContribution('point2')
+        dc.set(self.fuel, 0.5)
+        dc.set(self.coolant, 0.6)
+        self.assertEquals(dc.comment(), "Detector contribution "
+                "'detcontrib-point2': cell 'fuel' 0.5, cell 'coolant' 0.6.")
+        self.assertEquals(dc.mcnp('%g', self.sim), "PD25 0.5 0.6 4J")
+        dc.set(self.coolant, 0.7)
+        self.assertEquals(dc.mcnp('%g', self.sim), "PD25 0.5 0.7 4J")
 
 
 
