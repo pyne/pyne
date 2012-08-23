@@ -429,7 +429,8 @@ class CellMCNP(Cell):
             collisions, :py:class:`PhotonWeight`, **PWT**. The tuple contains:
 
             1. (str/float) 'off', 'one', or weight threshold parameter
-            2. (bool) ``pre_weight``; required if 1st element is float
+            2. (bool) ``pre_weight``; relevant is 1st element is float
+               (optional)
 
             Refer to :py:meth:`PhotonWeight.set` for the form of these
             inputs.
@@ -456,13 +457,12 @@ class CellMCNP(Cell):
             1. (list/:py:class:`np.array`) displacement vector
             2. (3 x 3 list/:py:class:`np.array`/:py:class:`np.matrix`) 
                rotation matrix
-            3. (str) 'aux-in-main' or 'main-in-aux' (not optional)
-            4. (bool) Rotation in degrees if True, in cosines if False (not
-               optional)
+            3. (bool) If True, 'aux-in-main', else 'main-in-aux' (optional)
+            4. (bool) Rotation in degrees if True, in cosines if False
+               (optional)
 
-             Refer to :py:class:`Transformation` for the form of these inputs.
-             Even though the last of these two elements have default values in
-             :py:class:`Transformation`, they are required here.
+             Refer to :py:class:`Transformation` for the form of these inputs
+             and the default values for the optional arguments.
         user_custom : str, optional
             This string is appended to the end of the MCNP card. It is possible
             that the user will want to append a string to the end of the MCNP
@@ -527,9 +527,11 @@ class CellMCNP(Cell):
             sim.add_tally(det1)
 
         Here are two examples of specifying a photon weight threshold (the bool
-        must be provided if the first element is a float)::
+        can be provided if the first element is a float, but defaults to False
+        otherwise)::
 
             cellA = CellMCNP(..., photon_weight=('one'))
+            cellA = CellMCNP(..., photon_weight=(0.5))
             cellA = CellMCNP(..., photon_weight=(0.5, True))
 
         The following turns off fission in this cell, but still requests that
@@ -550,10 +552,16 @@ class CellMCNP(Cell):
             sim = definition.MCNPSimulation(...)
             sim.add_transformation(transA)
 
-        Alternatively, a transformation can be specified right on the keyword::
+        Alternatively, a transformation can be specified right on the keyword.
+        Here we have used the default values for the last two inputs::
+
+            cellA = CellMCNP(..., transformation=([1, 0, 0], np.eye(3))
+
+        Here, we want to change the 4th element from its default, value, so we
+        must specify the 3rd element even though it has its default value::
 
             cellA = CellMCNP(..., transformation=([1, 0, 0], np.eye(3),
-                    'main-in-aux', True))
+                    True, False))
 
         If the user wants to supply an exponential transform keyword, with a
         transform of '0.7V2', on their own, they can do the following::
@@ -591,68 +599,73 @@ class CellMCNP(Cell):
         string = super(CellMCNP, self).comment()
         # temperature
         if self.temperature:
-            card = Temperature(this, self.temperature)
-            string += " TMP=" + card._comment_unit(self.name)
+            card = Temperature(self, self.temperature)
+            string += " TMP=" + card._comment_unit(self)
         # volume
         if self.volume:
-            card = Volume(this, self.volume)
-            string += " VOL=" + card._comment_unit(self.name)
+            card = Volume(self, self.volume)
+            string += " VOL=" + card._comment_unit(self)
         # importance
         if self.importance:
             for entry in self._make_list(self.importance):
-                card = Importance(entry[0], entry[1])
-                string += (" IMP:{0}=".format(entry[0]) +
-                        card._comment_unit(self.name))
+                card = Importance(entry[0], self, entry[1])
+                string += " IMP:{0}=".format(self.mcnp_particle[entry[0]])
+                string += card._comment_unit(self)
         # exp_transform
         if self.exp_transform:
             for entry in self._make_list(self.exp_transform):
-                string += " EXT:{0}=".format(self.mcnp_particle(entry[0]))
-                string += float_format % entry[1]
+                card = ExponentialTransform(
+                        entry[0], self, entry[1], entry[2], entry[3])
+                string += " EXT:{0}=".format(self.mcnp_particle[entry[0]])
+                string += card._comment_unit(self)
         # forced_coll
         if self.forced_coll:
-            forced_coll = self._make_list(self.forced_coll)
-            for entry in forced_coll:
-                string += " FCL:%s=" % self.mcnp_particle(entry[0])
-                string += float_format % entry[1]
+            for entry in self._make_list(self.forced_coll):
+                card = ForcedCollision(entry[0], self, entry[1], entry[2])
+                string += " FCL:{0}=".format(self.mcnp_particle[entry[0]])
+                string += card._comment_unit(self)
         # weight_win_bound
-        if self.neutron_weight_win_bound:
-            string += " WWN%i:N=" % self.neutron_weight_win_bound[0]
-            string += str(self.neutron_weight_win_bound[1])
         if self.weight_win_bound:
-            weight_win_bound = self._make_list(self.weight_win_bound)
-            for entry in weight_win_bound:
-                string += (" WWN%i:%s=" % 
-                        (entry[1], self.mcnp_particle(entry[0])))
-                if type(entry[2]) is str: string += entry[2]
-                else: string += float_format % entry[2]
+            for entry in self._make_list(self.weight_win_bound):
+                card = WeightWindowBound(
+                        entry[0], entry[1], entry[2], self, entry[3])
+                string += " WWN({0},{1}):{2}=".format(
+                        entry[1], entry[2], self.mcnp_particle[entry[0]])
+                string += card._comment_unit(self, entry[1], entry[2])
         # dxtran_contrib
         if self.dxtran_contrib:
             dxtran_contrib = self._make_list(self.dxtran_contrib)
-            for entry in dxtran_contrib:
-                string += (" DXC%i:%s=" % 
-                    (entry[1], self.mcnp_particle(entry[0])))
-                string += float_format % entry[2]
+            for entry in self._make_list(self.dxtran_contrib):
+                card = DXTRANContribution(entry[0], entry[1], self, entry[2])
+                string += " DXC{0!r}:{1}=".format( 
+                    entry[1], self.mcnp_particle[entry[0]])
+                string += card._comment_unit(self)
         # photon_weight
-        if self.photon_weight: string += " PWT={0}".format(self.photon_weight)
+        if self.photon_weight:
+            # TODO this might cause issues.
+            card = PhotonWeight()
+            card.set(self, *list(self.photon_weight))
+            string += " PWT=" + card._comment_unit(self)
         # fission_turnoff
-        if self.fission_turnoff: string += " NONU=%s" % self.fission_turnoff
+        if self.fission_turnoff:
+            card = FissionTurnoff(self, self.fission_turnoff)
+            string += " NONU=" + card._comment_unit(self)
         # det_contrib
         if self.det_contrib:
-            det_contrib = self._make_list(self.det_contrib)
-            for entry in det_contrib:
-                string += " PD for tally '%s'=" % entry[0]
-                string += float_format % entry[1]
+            for entry in self._make_list(self.det_contrib):
+                card = DetectorContribution(entry[0], self, entry[1])
+                string += " PD for tally {0!r}=".format(entry[0])
+                string += card._comment_unit(self)
         # transform
         if self.transformation:
             # For brevity.
-            transform = self.transformation
+            entry = self.transformation
             string += " TRCL "
-            if type(transform) is str:
-                string += "'%s'" % transform
+            if type(entry) is str:
+                string += "{0!r}".format(transform)
             else:
-                tempcard = Transformation('temp', transform[0],
-                    transform[1], transform[3], transform[4])
-                string += tempcard._comment_unit()
+                card = Transformation('temp', *list(entry))
+                string += card._comment_unit()
         # user_custom
         if self.user_custom: string += " and user's custom input."
         string += "."
@@ -662,48 +675,60 @@ class CellMCNP(Cell):
         string = super(CellMCNP, self).mcnp(float_format, sim)
         # temperature
         if self.temperature:
-            string += " TMP="
-            string += float_format % (self.temperature * self.kelvin2kT)
+            card = Temperature(self, self.temperature)
+            string += " TMP={0}".format(
+                    card._mcnp_unit(float_format, sim, self))
         # volume
         if self.volume:
-            string += " VOL="
-            string += float_format % self.volume
+            card = Volume(self, self.volume)
+            string += " VOL={0}".format(
+                    card._mcnp_unit(float_format, sim, self))
         # importance
         if self.importance:
-            importance = self._make_list(self.importance)
-            for entry in importance:
-                string += (" IMP:%s=%i" % 
-                        (self.mcnp_particle(entry[0]), entry[1]))
+            for entry in self._make_list(self.importance):
+                card = Importance(entry[0], self, entry[1])
+                string += " IMP:{0}={1}".format(
+                        self.mcnp_particle[entry[0]], 
+                        card._mcnp_unit(float_format, sim, self))
         # exp_transform
         if self.exp_transform:
-            exp_transform = self._make_list(self.exp_transform)
-            for entry in exp_transform:
-                string += " EXT:%s=" % self.mcnp_particle(entry[0])
-                string += float_format % entry[1]
+            for entry in self._make_list(self.exp_transform):
+                card = ExponentialTransform(
+                        entry[0], self, entry[1], entry[2], entry[3])
+                string += " EXT:{0}={1}".format(
+                        self.mcnp_particle[entry[0]], 
+                        card._mcnp_unit(float_format, sim, self))
         # forced_coll
         if self.forced_coll:
-            forced_coll = self._make_list(self.forced_coll)
-            for entry in forced_coll:
-                string += " FCL:%s=" % self.mcnp_particle(entry[0])
-                string += float_format % entry[1]
+            for entry in self._make_list(self.forced_coll):
+                card = ForcedCollision(entry[0], self, entry[1], entry[2])
+                string += " FCL:{0}={1}".format(
+                        self.mcnp_particle[entry[0]], 
+                        card._mcnp_unit(float_format, sim, self))
         # weight_win_bound
         if self.weight_win_bound:
-            weight_win_bound = self._make_list(self.weight_win_bound)
-            for entry in weight_win_bound:
-                string += (" WWN%i:%s=" % 
-                        (entry[1], self.mcnp_particle(entry[0])))
-                if entry[2] == 'kill': string += '-1'
-                elif entry[2] == 'nogame': string =+ '0'
-                else: string += float_format % entry[2]
+            for entry in self._make_list(self.weight_win_bound):
+                card = WeightWindowBound(
+                        entry[0], entry[1], entry[2], self, entry[3])
+                # Need the next line to obtain the linear index.
+                card._find_n_energies(sim)
+                string += " WWN{0}:{1}={2}".format( 
+                        card._i_linear(entry[1], entry[2]),
+                        self.mcnp_particle[entry[0]], 
+                        card._mcnp_unit(float_format, sim, self, entry[1],
+                            entry[2]))
         # dxtran_contrib
         if self.dxtran_contrib:
             dxtran_contrib = self._make_list(self.dxtran_contrib)
             for entry in dxtran_contrib:
+                card = DXTRANContribution(entry[0], entry[1], self, entry[2])
                 string += (" DXC%i:%s=" % 
                     (entry[1], self.mcnp_particle(entry[0])))
                 string += float_format % entry[2]
         # photon_weight
         if self.photon_weight:
+            card = PhotonWeight()
+            card.set(self, *list(self.photon_weight))
             string += " PWT="
             if self.photon_weight == '-inf': string += "-1.0E6"
             else: string += float_format % self.photon_weight
@@ -721,6 +746,7 @@ class CellMCNP(Cell):
         if self.det_contrib:
             det_contrib = self._make_list(self.det_contrib)
             for entry in det_contrib:
+                card = DetectorContribution(entry[0], self, entry[1])
                 string += " PD%i=" % sim.tally_num(entry[0])
                 string += float_format % entry[1]
         # transform
@@ -3162,8 +3188,9 @@ class FissionTurnoff(ICellMod):
         elif self.settings[cell] == 'real-gamma':      return "1"
         elif self.settings[cell] == 'capture-nogamma': return "2"
         else:
-            raise Exception("Unexpected input {0!r}.".format(
-                self.settings[cell]))
+            raise ValueError("Expected 'capture-gamma', 'real-gamma', "
+                    "'capture-nogamma'. User provided {0!r}.".format(
+                    self.settings[cell]))
 
     @property
     def settings(self): return self._settings
@@ -4116,30 +4143,13 @@ class WeightWindowBound(ICellModParticle):
 
     def mcnp(self, float_format, sim):
         # Prepare to obtain linear index.
-        wwge_name = 'weightwingenenergy-{0}'.format(self.particle)
-        wwe_name = 'weightwinenergy-{0}'.format(self.particle)
-        if wwge_name in sim.misc and wwe_name in sim.misc:
-            raise UserWarning("Both a WWGE and a WWE card have been added; "
-                    "using WWGE, ignoring WWE.")
-        if wwge_name in sim.misc:
-            # Deal with MCNP default indices that are unhandled by the WWGT
-            # card here.
-            if (sim.misc[wwge_name].for_gen and
-                    len(sim.misc[wwge_name].bounds) == 0):
-                n_energies = 10
-            else:
-                n_energies = sim.misc[wwge_name].n_bounds
-        elif wwe_name in sim.misc:
-            n_energies = sim.misc[wwe_name].n_bounds
-        else:
-            raise Exception("No WWGT:{0} or WWT:{0} card found in the "
-                    "simulation.".format(self.mcnp_particle[self.particle]))
+        self._find_n_energies(sim)
         string = ""
         # Finally, create all necessary cards (one per linear index).
         counter = 0
         for i_t in self.idx_times:
             for i_e in self.idx_energys:
-                i_linear = (i_t - 1) * n_energies + i_e
+                i_linear = self._i_linear(i_e, i_t)
                 # Start card, but only if any values are assigned for this idx.
                 if self._n_vals_for(i_e, i_t) > 0:
                     counter += 1
@@ -4171,6 +4181,29 @@ class WeightWindowBound(ICellModParticle):
         for cell in self.cells:
             if self.bounds[cell][i_e][i_t]: n_vals += 1
         return n_vals
+
+    def _find_n_energies(self, sim):
+        wwge_name = 'weightwingenenergy-{0}'.format(self.particle)
+        wwe_name = 'weightwinenergy-{0}'.format(self.particle)
+        if wwge_name in sim.misc and wwe_name in sim.misc:
+            raise UserWarning("Both a WWGE and a WWE card have been added; "
+                    "using WWGE, ignoring WWE.")
+        if wwge_name in sim.misc:
+            # Deal with MCNP default indices that are unhandled by the WWGT
+            # card here.
+            if (sim.misc[wwge_name].for_gen and
+                    len(sim.misc[wwge_name].bounds) == 0):
+                self._n_energies = 10
+            else:
+                self._n_energies = sim.misc[wwge_name].n_bounds
+        elif wwe_name in sim.misc:
+            self._n_energies = sim.misc[wwe_name].n_bounds
+        else:
+            raise Exception("No WWGT:{0} or WWT:{0} card found in the "
+                    "simulation.".format(self.mcnp_particle[self.particle]))
+
+    def _i_linear(self, i_e, i_t):
+        return (i_t - 1) * self._n_energies + i_e
        
     def _multi_dict(self, n_dims):
         if n_dims <= 1:
