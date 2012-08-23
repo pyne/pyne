@@ -576,10 +576,9 @@ class CellMCNP(Cell):
         See :py:class:`Cell` for more examples.
 
         """
-        # TODO allow user to use default arguments on the transformation card
-        # (e.g. not require the specification of cosines/degrees).
         # TODO allow use of U, LAT, and FILL keywords?
-        # TODO TMP card: need to be able to specify index.
+        # TODO check that the importance isn't set for the same particle
+        # multiple times.
         super(CellMCNP, self).__init__(name, region, material, density,
                                        density_units)
         # Assign keyword arguments.
@@ -776,34 +775,19 @@ class CellMCNP(Cell):
 
     @temperature.setter
     def temperature(self, value):
-        if value is not None:
-            if value < 200:
-                raise UserWarning("Temperature set as less than 200 K. "
-                        "Are you trying to specify temperature in degrees "
-                        "Celcius, etc.? User provided {0:g}.".format(value))
-            if value < 1:
-                raise UserWarning("Temperature set as less than 1 K. "
-                        "Are you trying to specify temperature as 'kT'? "
-                        "User provided {0:g}.".format(value))
         self._temperature = value
 
     @property
     def volume(self): return self._volume
 
     @volume.setter
-    def volume(self, value):
-        if value is not None and value < 0:
-            raise ValueError("The ``volume`` property cannot be negative. "
-                    "User provided {0:g}.".format(value))
+    def volume(self, value): self._volume = value
 
     @property
     def importance(self): return self._importance
 
     @importance.setter
-    def importance(self, value):
-        # TODO check that the importance isn't set for the same particle
-        # multiple times.
-        self._importance = value
+    def importance(self, value): self._importance = value
 
     @property
     def exp_transform(self): return self._exp_transform
@@ -3517,9 +3501,18 @@ class Temperature(ICellMod):
     def temps(self): return self._temps
 
     @temps.setter
-    def temps(self, value): self._temps = value
-
-
+    def temps(self, value): 
+        for arg in value:
+            if arg is not None:
+                if arg < 200:
+                    raise UserWarning("Temperature set as less than 200 K. "
+                            "Are you trying to specify temperature in degrees "
+                            "Celcius, etc.? User provided {0:g}.".format(arg))
+                if arg < 1:
+                    raise UserWarning("Temperature set as less than 1 K. "
+                            "Are you trying to specify temperature as 'kT'? "
+                            "User provided {0:g}.".format(arg))
+        self._temps = value
 
 class TemperatureTimes(IMisc):
     """Times at which temperatuers are specified on the :py:class:`Temperature
