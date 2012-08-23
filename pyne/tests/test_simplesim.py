@@ -459,6 +459,7 @@ class TestSystemDefinition(unittest.TestCase):
                 "(-1 2)")
 
         # Keywords.
+        # Temperature, volume, importance.
         cellE = cards.CellMCNP('E', self.pin.neg & self.cellbound.pos,
                 self.uo2, 10.0, 'g/cm^3',
                 temperature=600, volume=1,
@@ -478,37 +479,169 @@ class TestSystemDefinition(unittest.TestCase):
                 "g/cm^3 IMP:N= 1 IMP:P= 0.")
         self.assertEquals(cellF.mcnp('%g', self.sim), "7 1 -10 "
                 "(-1 2) IMP:N=1 IMP:P=0")
-        #cellA = CellMCNP(..., exp_transform=[
-        #        ('neutron', 'capture-to-total', 'currdir', 'toward'),
-        #        ('photon', 0.5, 'x', 'away')])
-        #cellA = CellMCNP(..., 
-        #        exp_transform=('neutron', 0.5, 'vec1', 'away'))
-        #vec = Vector()
-        #vec.set('vec1', [0, 0, 0])
-        #cellA = CellMCNP(..., forced_coll=('neutron', 0.5, False))
-        #cellA = CellMCNP(..., 
-        #        weight_win_bound=('neutron', 3, 1, 'killall'))
-        #cellA = CellMCNP(..., dxtran_contrib=('neutron', 'det1', 0.5))
-        #sim = definition.MCNPDefinition(...)
-        #det1 = PointDetector('det1', ...)
-        #sim.add_tally(det1)
-        #cellA = CellMCNP(..., photon_weight=('one'))
-        #cellA = CellMCNP(..., photon_weight=(0.5, True))
-        #cellA = CellMCNP(..., fission_turnoff='capture-gamma')
-        #cellA = CellMCNP(..., det_contrib=('det1', 0.5))
-        #cellA = CellMCNP(..., transformation='transA')
-        #transA = Transformation('transA', ...)
-        #sim = definition.MCNPSimulation(...)
-        #sim.add_transformation(transA)
-        #cellA = CellMCNP(..., transformation=([1, 0, 0], np.eye(3))
-        #cellA = CellMCNP(..., transformation=([1, 0, 0], np.eye(3),
-        #        True, False))
-        #cellA = CellMCNP('A', self.pin.neg & self.cellbound.pos,
-        #        matA, 10.0, 'g/cm^3',
-        #        importance=[('neutron', 1), ('photon', 0)],
-        #        user_custom='EXT:N 0.7V2')
-        #    cellA = CellMCNP(..., photon_weight=(0.5))
+        # Exponential transform
+        cellG = cards.CellMCNP('G', self.pin.neg & self.cellbound.pos,
+                self.uo2, 10.0, 'g/cm^3',
+                exp_transform=[
+                ('neutron', 'capture-to-total', 'currdir', 'toward'),
+                ('photon', 0.5, 'x', 'away')])
+        self.rxr.add_cell(cellG)
+        self.assertEquals(cellG.comment(), "Cell 'G': region "
+                "(-fuelpin & +bound), material 'UO2' density 10 g/cm^3 "
+                "EXT:N= stretch by capture-to-total toward currdir "
+                "EXT:P= stretch by 0.5 away from x.")
+        self.assertEquals(cellG.mcnp('%g', self.sim), "8 1 -10 "
+                "(-1 2) EXT:N=S EXT:P=-0.5X")
+        cellH = cards.CellMCNP('H', self.pin.neg & self.cellbound.pos,
+                self.uo2, 10.0, 'g/cm^3',
+                exp_transform=('neutron', 0.5, 'vec1', 'away'))
+        vec = cards.Vector()
+        vec.set('vec1', [0, 0, 0])
+        self.rxr.add_cell(cellH)
+        self.sim.add_misc(vec)
+        self.assertEquals(cellH.comment(), "Cell 'H': region "
+                "(-fuelpin & +bound), material 'UO2' density 10 g/cm^3 "
+                "EXT:N= stretch by 0.5 away from vec1.")
+        self.assertEquals(cellH.mcnp('%g', self.sim), "9 1 -10 "
+                "(-1 2) EXT:N=-0.5V0")
+        # Forced collisions
+        cellI = cards.CellMCNP('I', self.pin.neg & self.cellbound.pos,
+                self.uo2, 10.0, 'g/cm^3',
+                forced_coll=('neutron', 0.5, False))
+        self.rxr.add_cell(cellI)
+        self.assertEquals(cellI.comment(), "Cell 'I': region "
+                "(-fuelpin & +bound), material 'UO2' density 10 g/cm^3 "
+                "FCL:N= prob 0.5 for entering and weight games.")
+        self.assertEquals(cellI.mcnp('%g', self.sim), "10 1 -10 "
+                "(-1 2) FCL:N=0.5")
+        # Weight window bound
+        # Must add weight window energies card.
+        cellJ = cards.CellMCNP('J', self.pin.neg & self.cellbound.pos,
+                self.uo2, 10.0, 'g/cm^3',
+                weight_win_bound=('neutron', 3, 1, 'killall'))
+        wwe = cards.WeightWindowEnergies('neutron', [1, 10, 12])
+        self.rxr.add_cell(cellJ)
+        self.sim.add_misc(wwe)
+        self.assertEquals(cellJ.comment(), "Cell 'J': region "
+                "(-fuelpin & +bound), material 'UO2' density 10 g/cm^3 "
+                "WWN(3,1):N= killall.")
+        self.assertEquals(cellJ.mcnp('%g', self.sim), "11 1 -10 "
+                "(-1 2) WWN3:N=-1")
+        # DXTRAN contribution
+        cellK = cards.CellMCNP('K', self.pin.neg & self.cellbound.pos,
+                self.uo2, 10.0, 'g/cm^3',
+                dxtran_contrib=('neutron', 'sph1', 0.5))
+        dsph = cards.DXTRANSpheres('neutron', 'sph1', [1, 2, 3], 4, 5)
+        self.rxr.add_cell(cellK)
+        self.sim.add_misc(dsph)
+        self.assertEquals(cellK.comment(), "Cell 'K': region "
+                "(-fuelpin & +bound), material 'UO2' density 10 g/cm^3 "
+                "DXC'sph1':N= 0.5.")
+        self.assertEquals(cellK.mcnp('%g', self.sim), "12 1 -10 "
+                "(-1 2) DXC1:N=0.5")
+        # Photon weight
+        cellL = cards.CellMCNP('L', self.pin.neg & self.cellbound.pos,
+                self.uo2, 10.0, 'g/cm^3',
+                photon_weight=('one',))
+        self.rxr.add_cell(cellL)
+        self.assertEquals(cellL.comment(), "Cell 'L': region "
+                "(-fuelpin & +bound), material 'UO2' density 10 g/cm^3 "
+                "PWT= one.")
+        self.assertEquals(cellL.mcnp('%g', self.sim), "13 1 -10 (-1 2) "
+                "PWT=0")
+        # Exception test.
+        self.assertRaises(ValueError, cards.CellMCNP, 'L', self.pin.neg &
+                self.cellbound.pos,
+                self.uo2, 10.0, 'g/cm^3',
+                photon_weight=('one'))
+        cellL2 = cards.CellMCNP('L2', self.pin.neg & self.cellbound.pos,
+                self.uo2, 10.0, 'g/cm^3',
+                photon_weight=(0.5,))
+        self.rxr.add_cell(cellL2)
+        self.assertEquals(cellL2.comment(), "Cell 'L2': region "
+                "(-fuelpin & +bound), material 'UO2' density 10 g/cm^3 "
+                "PWT= 0.5.")
+        self.assertEquals(cellL2.mcnp('%g', self.sim), "14 1 -10 (-1 2) "
+                "PWT=0.5")
+        cellM = cards.CellMCNP('M', self.pin.neg & self.cellbound.pos,
+                self.uo2, 10.0, 'g/cm^3',
+                photon_weight=(0.5, True))
+        self.rxr.add_cell(cellM)
+        self.assertEquals(cellM.comment(), "Cell 'M': region "
+                "(-fuelpin & +bound), material 'UO2' density 10 g/cm^3 "
+                "PWT= 0.5 (pre-weighted).")
+        self.assertEquals(cellM.mcnp('%g', self.sim), "15 1 -10 "
+                "(-1 2) PWT=-0.5")
+        # Fission turnoff
+        cellN = cards.CellMCNP('N', self.pin.neg & self.cellbound.pos,
+                self.uo2, 10.0, 'g/cm^3',
+                fission_turnoff='capture-nogamma')
+        self.rxr.add_cell(cellN)
+        self.assertEquals(cellN.comment(), "Cell 'N': region "
+                "(-fuelpin & +bound), material 'UO2' density 10 g/cm^3 "
+                "NONU= capture-nogamma.")
+        self.assertEquals(cellN.mcnp('%g', self.sim), "16 1 -10 "
+                "(-1 2) NONU=2")
+        # Detector contribution
+        cellO = cards.CellMCNP('O', self.pin.neg & self.cellbound.pos,
+                self.uo2, 10.0, 'g/cm^3',
+                det_contrib=('det1', 0.5))
+        det1 = cards.PointDetector('det1', 'neutron', ([0, 0, 0], 0))
+        self.rxr.add_cell(cellO)
+        self.sim.add_tally(det1)
+        self.assertEquals(cellO.comment(), "Cell 'O': region "
+                "(-fuelpin & +bound), material 'UO2' density 10 g/cm^3 "
+                "PD for tally 'det1'= 0.5.")
+        self.assertEquals(cellO.mcnp('%g', self.sim), "17 1 -10 "
+                "(-1 2) PD15=0.5")
+        # Transformation
+        cellP = cards.CellMCNP('P', self.pin.neg & self.cellbound.pos,
+                self.uo2, 10.0, 'g/cm^3',
+                transformation='transA')
+        trans = cards.Transformation('transA', [1, 2, 3],
+                [[4, 5, 6], [7, 8, 9], [10, 11, 12]])
+        self.rxr.add_cell(cellP)
+        self.sim.add_transformation(trans)
+        self.assertEquals(cellP.comment(), "Cell 'P': region "
+                "(-fuelpin & +bound), material 'UO2' density 10 g/cm^3 "
+                "TRCL 'transA'.")
+        self.assertEquals(cellP.mcnp('%g', self.sim), "18 1 -10 "
+                "(-1 2) TRCL=1")
+        cellP = cards.CellMCNP('P', self.pin.neg & self.cellbound.pos,
+                self.uo2, 10.0, 'g/cm^3',
+                transformation=([1, 0, 0], np.eye(3)))
+        self.rxr.add_cell(cellP)
+        self.assertEquals(cellP.comment(), "Cell 'P': region "
+                "(-fuelpin & +bound), material 'UO2' density 10 g/cm^3 "
+                "TRCL aux origin in main (1, 0, 0) cm, x' <1, 0, 0>, "
+                "y' <0, 1, 0>, z' <0, 0, 1>.")
+        self.assertEquals(cellP.mcnp('%g', self.sim), "18 1 -10 "
+                "(-1 2) TRCL ( 1 0 0 1 0 0 0 1 0 0 0 1 1)")
+        cellP = cards.CellMCNP('P', self.pin.neg & self.cellbound.pos,
+                self.uo2, 10.0, 'g/cm^3',
+                transformation=([1, 0, 0], np.eye(3), True, True))
+        self.rxr.add_cell(cellP)
+        self.assertEquals(cellP.comment(), "Cell 'P': region "
+                "(-fuelpin & +bound), material 'UO2' density 10 g/cm^3 "
+                "TRCL aux origin in main (1, 0, 0) cm, "
+                "x' <1, 0, 0> deg, y' <0, 1, 0> deg, "
+                "z' <0, 0, 1> deg.")
+        self.assertEquals(cellP.mcnp('%g', self.sim), "18 1 -10 "
+                "(-1 2) *TRCL ( 1 0 0 1 0 0 0 1 0 0 0 1 1)")
+        cellP = cards.CellMCNP('P', self.pin.neg & self.cellbound.pos,
+                self.uo2, 10.0, 'g/cm^3',
+                user_custom='EXT:N 0.7V2')
+        self.rxr.add_cell(cellP)
+        self.assertEquals(cellP.comment(), "Cell 'P': region "
+                "(-fuelpin & +bound), material 'UO2' density 10 g/cm^3 "
+                "and user's custom input.")
+        self.assertEquals(cellP.mcnp('%g', self.sim), "18 1 -10 "
+                "(-1 2) EXT:N 0.7V2")
         #TODO set temperature to 100 or -1
+        #cellE = cards.CellMCNP('E', self.pin.neg & self.cellbound.pos,
+        #        self.uo2, 10.0, 'g/cm^3',
+        #        temperature=100)
+        #self.assertRaises(UserWarning, cellE.comment)
 
     def test_ExponentialTransform(self):
         """Tests :py:class:`cards.ExponentialTransform` and the related
@@ -1026,6 +1159,14 @@ class TestSystemDefinition(unittest.TestCase):
         trans = cards.Transformation('trans1', [1, 2, 3],
                 [[4, 5, 6], [7, 8, 9], [10, 11, 12]],
                 degrees=True)
+        self.assertEquals(trans.comment(), "Transformation 'trans1': "
+                "pos. of aux origin in main (1, 2, 3) cm, "
+                "x' <4, 7, 10> deg, y' <5, 8, 11> deg, z' <6, 9, 12> deg.")
+        self.assertEquals(trans.mcnp('%.1f', self.sim), "*TR1 "
+                "1.0 2.0 3.0 "
+                "4.0 5.0 6.0 "
+                "7.0 8.0 9.0 "
+                "10.0 11.0 12.0 1")
 
     def test_ITally(self):
         """Tests :py:class:`cards.ITally`'s methods, properties, and
