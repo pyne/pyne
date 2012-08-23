@@ -48,6 +48,47 @@ def test_nonevalue():
     v = Value(n)
     assert_true(v.isnull())
 
+def test_arrvalue():
+    a = [1, 2, 5, 3]
+    v = Value(a)
+    assert_equal(len(v), len(a))
+    assert_equal([v[i] for i in range(len(a))], a)
+
+def test_tuplevalue():
+    a = (1, 2, 5, 3)
+    v = Value(a)
+    assert_equal(len(v), len(a))
+    assert_equal(tuple([v[i] for i in range(len(a))]), a)
+
+def test_setvalue():
+    a = set([1, 2, 5, 3])
+    v = Value(a)
+    assert_equal(len(v), len(a))
+    assert_equal(set([v[i] for i in range(len(a))]), a)
+
+def test_mapvalue():
+    m = {'name': 'Terry Jones', 'age': 42.0}
+    v = Value(m)
+    assert_equal(len(v), len(m))
+    assert_equal(dict([(k, v[k]) for k in m.keys()]), m)
+
+def test_badmapvalue():
+    m = {'name': 'Terry Jones', 42: 42.0}
+    assert_raises(KeyError, Value, m)
+
+def test_arrsetitem():
+    l = ['Terry Jones', 1, None, 42.0, {}]
+    v = Value([])
+    for i, value in enumerate(l):
+        v[i] = value
+    #assert_equal([v[i] for i in range(len(l))], l)
+
+def test_mapsetitem():
+    m = {'name': 'Terry Jones', 'age': 42.0}
+    v = Value({})
+    for key, value in m.items():
+        v[key] = value
+    assert_equal(dict([(k, v[k]) for k in m.keys()]), m)
 
 #r = jsoncpp.Reader()
 #root = r.parse({'a': 10, 'b': 'Hello', 'c': {'d': [1, 2, 10.0]}})
