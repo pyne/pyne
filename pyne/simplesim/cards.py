@@ -613,53 +613,56 @@ class CellMCNP(Cell):
         if self.importance:
             for entry in self._make_list(self.importance):
                 card = Importance(entry[0], self, entry[1])
-                string += " IMP:{0}=".format(self.mcnp_particle[entry[0]])
-                string += card._comment_unit(self)
+                string += " IMP:{0}={1}".format(
+                        self.mcnp_particle[entry[0]],
+                        card._comment_unit(self))
         # exp_transform
         if self.exp_transform:
             for entry in self._make_list(self.exp_transform):
                 card = ExponentialTransform(
                         entry[0], self, entry[1], entry[2], entry[3])
-                string += " EXT:{0}=".format(self.mcnp_particle[entry[0]])
-                string += card._comment_unit(self)
+                string += " EXT:{0}={1}".format(
+                        self.mcnp_particle[entry[0]],
+                        card._comment_unit(self))
         # forced_coll
         if self.forced_coll:
             for entry in self._make_list(self.forced_coll):
                 card = ForcedCollision(entry[0], self, entry[1], entry[2])
-                string += " FCL:{0}=".format(self.mcnp_particle[entry[0]])
-                string += card._comment_unit(self)
+                string += " FCL:{0}={1}".format(
+                        self.mcnp_particle[entry[0]],
+                        card._comment_unit(self))
         # weight_win_bound
         if self.weight_win_bound:
             for entry in self._make_list(self.weight_win_bound):
                 card = WeightWindowBound(
                         entry[0], entry[1], entry[2], self, entry[3])
-                string += " WWN({0},{1}):{2}=".format(
-                        entry[1], entry[2], self.mcnp_particle[entry[0]])
-                string += card._comment_unit(self, entry[1], entry[2])
+                string += " WWN({0},{1}):{2}={3}".format(
+                        entry[1], entry[2], self.mcnp_particle[entry[0]],
+                        card._comment_unit(self, entry[1], entry[2]))
         # dxtran_contrib
         if self.dxtran_contrib:
             dxtran_contrib = self._make_list(self.dxtran_contrib)
             for entry in self._make_list(self.dxtran_contrib):
                 card = DXTRANContribution(entry[0], entry[1], self, entry[2])
                 string += " DXC{0!r}:{1}=".format( 
-                    entry[1], self.mcnp_particle[entry[0]])
-                string += card._comment_unit(self)
+                        entry[1], self.mcnp_particle[entry[0]],
+                        card._comment_unit(self))
         # photon_weight
         if self.photon_weight:
             # TODO this might cause issues.
             card = PhotonWeight()
             card.set(self, *list(self.photon_weight))
-            string += " PWT=" + card._comment_unit(self)
+            string += " PWT={0}".format(card._comment_unit(self))
         # fission_turnoff
         if self.fission_turnoff:
             card = FissionTurnoff(self, self.fission_turnoff)
-            string += " NONU=" + card._comment_unit(self)
+            string += " NONU={0}".format(card._comment_unit(self))
         # det_contrib
         if self.det_contrib:
             for entry in self._make_list(self.det_contrib):
                 card = DetectorContribution(entry[0], self, entry[1])
-                string += " PD for tally {0!r}=".format(entry[0])
-                string += card._comment_unit(self)
+                string += " PD for tally {0!r}={1}".format(
+                        entry[0], card._comment_unit(self))
         # transform
         if self.transformation:
             # For brevity.
