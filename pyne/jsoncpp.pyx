@@ -54,7 +54,11 @@ cdef cpp_jsoncpp.Value * tocppval(object doc) except NULL:
     elif isinstance(doc, int):
         cval = new cpp_jsoncpp.Value(<int> doc)
     elif doc is None:
+        print "I AM NONE"
         cval = new cpp_jsoncpp.Value(<cpp_jsoncpp.ValueType> cpp_jsoncpp.nullValue)
+        if cval.isNull():
+            print "AND I AM NULL"
+        #cval = <cpp_jsoncpp.Value *> &((new cpp_jsoncpp.Value()).null)
     else:
         raise ValueError("{0} not of known type".format(doc))
     return cval
@@ -77,20 +81,15 @@ cdef class Value(object):
             del self._inst
 
     def __getitem__(self, pykey):
-        cdef cpp_jsoncpp.Value cvalue
-        cdef Value pyvalue = Value()
-        #cdef Value pyvalue = Value(view=True)
-        cdef std.string cstrvalue
-        cdef int cintkey
-        cdef std.string cstrkey
+        cdef cpp_jsoncpp.Value * cvalue
+        cdef Value pyvalue = Value(view=True)
+        print "Getting item"
 
         # convert key and get value
         if isinstance(pykey, basestring):
-            cstrkey = std.string(pykey)
-            cvalue = self._inst.get(cstrkey, self._inst.null)
+            cvalue = &self._inst[0][<const_char *> pykey]
         elif isinstance(pykey, int) and self._inst.isArray():
-            cintkey = pykey
-            cvalue = self._inst.get(cintkey, self._inst.null)
+            cvalue = &self._inst[0][<int> pykey]
         elif isinstance(pykey, slice) and self._inst.isArray():
             N = self._inst.size()
             #for 
@@ -102,19 +101,20 @@ cdef class Value(object):
 
         # convert value
         if cvalue.isObject() or cvalue.isArray():
-            #pyvalue._inst = &cvalue
-            pyvalue._inst[0] = cvalue
+            print "I AM OBJ"
+            pyvalue._inst = cvalue
+            print "I AM STILL OBJ"
             return pyvalue
         elif cvalue.isString():
-            cstrvalue = cvalue.asString()
-            return cstrvalue.c_str()
+            return <char *> cvalue.asCString()
         elif cvalue.isDouble():
             return cvalue.asDouble()
-        elif cvalue.isIntegral():
-            return cvalue.asInt()
         elif cvalue.isBool():
             return cvalue.asBool()
+        elif cvalue.isIntegral():
+            return cvalue.asInt()
         elif cvalue.isNull():
+            print "I AM LOW NULL"
             return None
         else:
             raise ValueError("{0} not of know type".format(pykey))
@@ -124,6 +124,11 @@ cdef class Value(object):
         if isinstance(key, basestring):
             ckey = &self._inst[0][<const_char *> key]
         elif isinstance(key, int):
+            curr_size = self._inst[0].size()
+            if key < 0:
+                key = curr_size - key
+            if (curr_size <= key) or (key < 0):
+                raise IndexError
             ckey = &self._inst[0][<int> key]
         else:
             raise KeyError('key not of appropriate type, got {0}'.format(type(key)))
@@ -160,10 +165,8 @@ cdef class Value(object):
 
     def __nonzero__(self):
         if self._inst.isBool():
-            print "Here"
             return self._inst.asBool()
         else:
-            print "Not Here"
             return NotImplemented
 
     def isnull(self):
