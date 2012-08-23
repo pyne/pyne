@@ -854,6 +854,29 @@ class TestSystemDefinition(unittest.TestCase):
         dxc.set(self.coolant, 0.8)
         self.assertEquals(dxc.mcnp('%g', self.sim), "DXC2:N 0.5 0.8 4J")
 
+        ## FissionTurnoff
+        # Default.
+        fto = cards.FissionTurnoff()
+        self.assertEquals(fto.name, 'fissionturnoff')
+        self.assertEquals(fto.comment(), "Fission turnoff 'fissionturnoff': "
+                "capture-gamma for all cells.")
+        self.assertEquals(fto.mcnp('%g', self.sim), "NONU")
+        # With an argument.
+        fto = cards.FissionTurnoff(self.fuel, 'real-gamma',
+                                   self.coolant, 'capture-nogamma')
+        self.assertEquals(fto.comment(), "Fission turnoff 'fissionturnoff': "
+                "cell 'fuel' real-grammar, cell 'coolant' capture-nogamma.")
+        self.assertEquals(fto.mcnp('%g', self.sim), "NONU 1 2 4J")
+        # set()
+        fto = cards.FissionTurnoff()
+        fto.set(self.fuel, 'real-gamma')
+        fto.set(self.coolant, 'capture-nogamma')
+        self.assertEquals(fto.comment(), "Fission turnoff 'fissionturnoff': "
+                "cell 'fuel' real-grammar, cell 'coolant' capture-nogamma.")
+        self.assertEquals(fto.mcnp('%g', self.sim), "NONU 1 2 4J")
+        # Modifying.
+
+
     def test_Transformation(self):
         """Tests :py:class:`cards.Transformation`."""
 
