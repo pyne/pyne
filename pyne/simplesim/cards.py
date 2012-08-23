@@ -230,7 +230,7 @@ class Cell(ICard):
                     "``density``, and ``density_units`` must all be "
                     "specified.")
 
-    def comment(self):
+    def comment(self, period=True):
         string = "Cell {0!r}: region {1}, ".format(
                 self.name, self.region.comment())
         if self.material and self.density and self.density_units:
@@ -238,6 +238,7 @@ class Cell(ICard):
                     self.material.name, self.density, self.density_units)
         else:
             string += "void"
+        if period: string += "."
         return string
 
     def mcnp(self, float_format, sim):
@@ -596,9 +597,10 @@ class CellMCNP(Cell):
         self.fission_turnoff = fission_turnoff
         self.det_contrib = det_contrib
         self.transformation = transformation
+        self.user_custom = user_custom
 
     def comment(self):
-        string = super(CellMCNP, self).comment()
+        string = super(CellMCNP, self).comment(period=False)
         # temperature
         if self.temperature:
             card = Temperature(self, self.temperature)
@@ -669,9 +671,8 @@ class CellMCNP(Cell):
                 card = Transformation('temp', *list(entry))
                 string += card._comment_unit()
         # user_custom
-        if self.user_custom: string += " and user's custom input."
-        string += "."
-        return string
+        if self.user_custom: string += " and user's custom input"
+        return string + "."
 
     def mcnp(self, float_format, sim):
         string = super(CellMCNP, self).mcnp(float_format, sim)
@@ -733,8 +734,7 @@ class CellMCNP(Cell):
             card = PhotonWeight()
             card.set(self, *list(self.photon_weight))
             string += " PWT={0}".format(
-                    card._mcnp_unit(float_format, sim, self)
-        # fission_turnoff TODO move exception to setter?
+                    card._mcnp_unit(float_format, sim, self))
         if self.fission_turnoff:
             card = FissionTurnoff(self, self.fission_turnoff)
             string += " NONU=" + card._mcnp_unit(float_format, sim, self)
@@ -744,7 +744,7 @@ class CellMCNP(Cell):
                 card = DetectorContribution(entry[0], self, entry[1])
                 string += " PD{0}={1}".format(
                     sim.tally_num(entry[0]),
-                    card._mcnp_unit(float_format, sim, self)
+                    card._mcnp_unit(float_format, sim, self))
         # transform
         if self.transformation:
             # For brevity.
@@ -760,7 +760,8 @@ class CellMCNP(Cell):
                 string += "TRCL ({0})".format(card._mcnp_unit[float_format])
                 
         # user_custom
-        if self.user_custom: string += " %s" % self.user_custom
+        if self.user_custom: string += " {0}".format(self.user_custom)
+        return string
                 
     def _make_list(self, arg):
         if type(arg) is list: return arg
