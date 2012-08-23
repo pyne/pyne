@@ -3105,24 +3105,100 @@ class FissionTurnoff(ICellMod):
 class PhotonWeight(ICellMod):
     """Controls production of neutron-induced photons through particle weight.
     Unique card with name `photonweight`. In MCNP, this is the **PWT** card.
+    Unlike with other subclasses of :py:class:`ICellMod` and
+    :py:class:`ICellModParticle`, this class cannot be formed via only the
+    constructor; the :py:meth:`set` method must be used.
 
     .. inheritance-diagram:: pyne.simplesim.cards.PhotonWeight
 
     """
-    def __init__(self, *args):
+    Weight = collections.namedtuple('Weight', ['setting', 'pre_weight'])
+
+    def __init__(self):
+        # The reason for the basic constructor is that it is important that I
+        # use an optional keyword argument here, and so a variable argument
+        # list is not so pleasant to work with.
+        super(PhotonWeight, self).__init__('photonweight', 2)
+        self.weights = dict()
+
+    def set(self, cell, setting, pre_weight=False):
         """
         Parameters
         ----------
-        cell
-        setting
-        The setting 'off' turns of photon production, 'one' produces one photon
-        per neutron collision if photon production is enabled, ...
+        cell : :py:class:`Cell` or subclass
+            The cell for which the photon weight is being provided.
+        setting : str/float
+            The setting 'off' turns of photon production, the setting 'one'
+            produces one photon per neutron collision if photon production is
+            enabled, and if a float is provided, it is used to compute a weight
+            threshold for the creation of photons.
+        pre_weight : bool, optional
+            If True, then the weight threshold incorporates the starting weight
+            of the neutron that induced the photon. This argument is ignored if
+            ``setting`` is of type ``str``.
 
         Examples
         --------
+        The card is first initialized, after which weights can be added using
+        this method. The following turns off neutron-induced photon
+        production for ``cellA``::
+
+            pw = PhotonWeight()
+            pw.set(cellA, 'off')
+
+        The following requests that one photon is produced for every neutron
+        collision in ``cellB``::
+
+            pw.set(cellB, 'one')
+
+        An explicit weight can be given, as well::
+
+            pw.set(cellC, 0.5)
+
+        The starting neutorn weight can be incorporated in the weight
+        threshold::
+
+            pw.set(cellD, 0.5, pre_weight=True)
+
+        Previously provided values may be modified later on::
+
+            pw.set(cellD, 0.7, pre_weight=True)
 
         """
-        super(PhotonWeight, self).__init__('photonweight', 2, *args)
+        super(PhotonWeight, self).set(cell)
+        if type(setting) is float and setting < 0:
+            raise ValueError("The weight must be non-negative.")
+        self.weights[cell] = self.Weight(setting, pre_weight)
+
+    def comment(self):
+        return super(PhotonWeight, self).comment("Photon weight thresholds")
+
+    def _comment_unit(self, cell):
+        setting = self.weights[cell].setting
+        if type(setting) is str: return " " + setting
+        else: return " {0:g}{1}".format(setting, 
+                " (pre-weighted)" if self.weights[cell].pre_weight else "")
+
+    def mcnp(self, float_format, sim):
+        if len(self.cells) == 0:
+            raise Exception("No entries provided.")
+        string = "PWT"
+        return super(PhotonWeight, self).mcnp(float_format, sim, string)
+
+    def _mcnp_unit(self, float_format, sim, cell):
+        setting = self.weights[cell].setting
+        # The following if-statement is for if setting is a float.
+        if self.weights[cell].pre_weight: setting = -setting
+        if setting == 'off':   return "-1.0E6"
+        elif setting == 'one': return "0"
+        else:                  return float_format % setting
+
+    @property
+    def weights(self): return self._weights
+
+    @weights.setter
+    def weights(self, value):
+        self._weights = value
 
 
 class DetectorContribution(ICellMod):
@@ -3140,7 +3216,8 @@ class DetectorContribution(ICellMod):
             Name of the detector (subclass of :py:class:`IDetector`) for which
             this card stores probabilities of contribution.
         cell : :py:class:`Cell` or subclass
-            The cell for which the probability of contribution is provided.
+            The cell for which the probability of contribution is being
+            provided.
         prob : float
             Probability that this cell contributes to this detector.
         *args : cell, prob, ...
