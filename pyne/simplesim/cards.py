@@ -331,9 +331,7 @@ class CellMCNP(Cell):
 
     """
     # TODO Sphinx documentation should not list all keyword arguments.
-    # TODO let the user add their own through keyword arguments...
-    # user_string
-
+    # TODO Transformation: allow default arguments.
     def __init__(self, name, region, material=None,
                  density=None, density_units=None,
                  temperature=None, volume=None,
@@ -362,85 +360,116 @@ class CellMCNP(Cell):
         density_units : str, None for void
             See :py:class:`Cell`.
         temperature : float, otional [Kelvin]
-            Temperature of the cell for thermal treatment, **TMP**.
+            Temperature of the cell for thermal treatment,
+            :py:class:`Temperature`, **TMP**.
         volume : float, optional [cm^3]
-            Volume of the cell, **VOL**.
-        importance : 2-element tuple of str and int, optional
-            Particle importance, :py:class:`Importance`, **IMP**, for variance
-            reduction. The 1st
-            element is a particle name (see :py:attr:`mcnp_particle`). The
-            2nd (int) is the cell importance. 
+            Volume of the cell, :py:class:`Volume`, **VOL**.
+        importance : 2-element tuple, or list of tuples, optional
+            Particle importance, :py:class:`Importance`, **IMP**. The tuple
+            contains:
+            
+            1. (str) particle name (see :py:attr:`mcnp_particle`)
+            2. (int) the importance
+
+            Refer to :py:class:`Importance` for more information.
             To specify this input for more
             than one particle, provide a list of these tuples.
-        exp_transform : 4-element tuple of str, str/float, str, and str, optional
+        exp_transform : 4-element tuple, or list of tuples, optional
             An exponential transform, :py:class:`ExponentialTransform`,
-            **EXT**. The 1st element is a particle
-            name (see :py:attr:`mcnp_particle`). The 2nd element (str) is the
-            stretch, the 3rd element (str) is the direction, and the 4th
-            element (str) is the sign ('toward', 'away'). Refer to
-            :py:class:`ExponentialTransform` for the form of these inputs.
+            **EXT**. The tuple contains:
+
+            1. (str) particle name (see :py:attr:`mcnp_particle`)
+            2. (str/float) stretch
+            3. (str) direction
+            4. (str) sign ('toward', 'away')
+            
+            Refer to :py:class:`ExponentialTransform` for the form of these
+            inputs.
             To specify this input for more
             than one particle, provide a list of these tuples.
-        forced_coll : 3-element tuple of str, float, and bool, optional
-            Forced collisions, :py:class:`ForcedCollision`, **FCL**. The 1st
-            element is a particle name (see
-            :py:attr:`mcnp_particle`). The 2nd element (float) is the
-            probability. The 3rd element (bool) selects the events that trigger
-            forced collisions. Refer to :py:class:`ForcedCollision` for the
+        forced_coll : 3-element tuple, or list of tuples, optional
+            Forced collisions, :py:class:`ForcedCollision`, **FCL**. The tuple
+            contains:
+
+            1. (str) particle name (see :py:attr:`mcnp_particle`)
+            2. (float) probability
+            3. (bool) only entering the cell triggers forced collision
+
+            Refer to :py:class:`ForcedCollision` for the
             form of these inputs.
             To specify this input for more
             than one particle, provide a list of these tuples.
-        weight_win_bound : 4-element tuple of str, int, int, and str/float, optional
-            Weight window lower bound, :pyclass:`WeightWindowBound`, **WWN**.
-            The 1st element is a particle name (see :py:attr:`mcnp_paticle`).
-            The 2nd element (int) is the energy index, the 3rd element (int) is
-            the time index. The 4th element is the bound.
+        weight_win_bound : 4-element tuple, or list of tuples, optional
+            Weight window lower bound, :py:class:`WeightWindowBound`, **WWN**.
+            The tuple contains:
+
+            1. (str) particle name (see :py:attr:`mcnp_particle`)
+            2. (int) energy index
+            3. (int) time index
+            4. (float/str) lower bound, or 'killall'
+
             Refer to :py:class:`WeightWindowBound` for the form of these
             inputs.
             To specify this input for more than one particle, or energy/time
             index, provide a list of these tuples.
-        dxtran_contrib : 3-element tuple of str, str/None and float, optional
-            DXTRAN Contribution, :py:class:`DXTRANContribution`, **DXC**. The
-            1st element is a particle name (see :py:attr:`mcnp_particle`). The
-            2nd element (str) is the name of a DXTRAN sphere (on the
-            DXTRANSphere card), or None if this is to apply to all DXTRAN
-            spheres. The 3rd element (float) is the probability of contribution
-            to the DXTRAN sphere(s). Only for neutrons and photons. Refer to
-            :py:class:`DXTRANContribution` for the form of these inputs.
+        dxtran_contrib : 3-element tuple, or list of tuples, optional
+            Probability of contribution to a DXTRAN sphere,
+            :py:class:`DXTRANContribution`, **DXC**.  The tuple contains:
+            
+            1. (str) particle name (see :py:attr:`mcnp_particle`)
+            2. (str/None) DXTRAN sphere name (None for all spheres)
+            3. (float) probabilility of contribution
+            
+            Refer to :py:class:`DXTRANContribution` for the form of these
+            inputs.
             To specify this input for more than one particle or DXTRAN sphere,
             provide a list of these tuples.
-        photon_weight : 0, '-inf', or float; optional
-            Photon weight, **PWT**. Relative threshold weight of photons that
-            are produced at neutron collisions. With a value of 0, one photon
-            is generated per collision; with a value of '-inf', no photons are
-            generated. In general, this input can be a positive or negative
-            float.
+        photon_weight : 2-element tuple, or list of tuples, optional
+            Threshold weight of photons that are produced at neutron
+            collisions, :py:class:`PhotonWeight`, **PWT**. The tuple contains:
+
+            1. (str/float) 'off', 'one', or weight threshold parameter
+            2. (bool) ``pre_weight``; required if 1st element is float
+
+            Refer to :py:meth:`PhotonWeight.set` for the form of these
+            inputs.
         fission_turnoff : str, optional
-            Fission turnoff, **NONU**. The allowed values are: 'capture-gamma',
-            'real-gamma', and 'capture-nogamma'. See MCNP manual.
+            Fission turnoff, :py:class:`FissionTurnoff`, **NONU**. The allowed
+            values are: 'capture-gamma', 'real-gamma', and 'capture-nogamma'.
+            Refer to :py:meth:`FissionTurnoff` for more information.
         det_contrib : tuple of str and float, optional
-            Detector contribution, **PD**. The 1st element (str) is the name of the
-            tally obtaining contribution from this cell, and the 2nd element
-            (float) is the probability of contribution.
-            To specify this input for more than one tally,
-            provide a list of these tuples.
+            Detector contribution, :py:class:`DetectorContribution`, **PD**.
+            The tuple contains:
+
+            1. (str) name of :py:class:`IDetector` tally obtaining contribution 
+               from this cell
+            2. (float) probability of contribution
+            
+            Refer to :py:meth:`DetectorContribution` for the form of these
+            inputs.
+            To specify this input for more than one tally, provide a list of
+            these tuples.
         transformation : str or 4-element tuple, optional
             Cell transformation, **TRCL**. If str, it is the name of a
-            :py:class:`Transformation` card (**TR**). If tuple, the 1st element
-            is a displacement vector as a 3-element list or
-            :py:class:`np.array`; the 2nd element is a rotation matrix as a 3 x
-            3 list, :py:class:`np.array`, or :py:class:`np.matrix`; the 3rd
-            element is the string 'aux-in-main' or 'main-in-aux'; the 4th
-            element is a bool, 'cosines' if rotation matrix is in cosines and
-            'degrees' if rotation matrix is in degrees. Note that these are the
-            same arguments to the :py:class:`Transformation`.
+            :py:class:`Transformation` card. If tuple, it contains:
+            
+            1. (list/:py:class:`np.array`) displacement vector
+            2. (3 x 3 list/:py:class:`np.array`/:py:class:`np.matrix`) 
+               rotation matrix
+            3. (str) 'aux-in-main' or 'main-in-aux' (not optional)
+            4. (bool) Rotation in degrees if True, in cosines if False (not
+               optional)
+
+             Refer to :py:class:`Transformation` for the form of these inputs.
+             Even though the last of these two elements have default values in
+             :py:class:`Transformation`, they are required here.
         user_custom : str, optional
-            This string is appended to the end of the mcnp card. It is possible
-            (likely) that the user will want to append a string to the end of
-            the MCNP card, given the limited support of keyword
-            arguments. This is perhaps most useful if the user wants to specify
-            a keyword for a particle that is not supported by any of the
-            kwargs.
+            This string is appended to the end of the MCNP card. It is possible
+            that the user will want to append a string to the end of the MCNP
+            card, given the limited support of keyword arguments. This is
+            perhaps most useful if the user wants to specify a keyword for a
+            particle that is not supported by any of the keyword arguments
+            above.
 
         Examples
         --------
@@ -461,27 +490,72 @@ class CellMCNP(Cell):
 
         The following sets an exponential transform for neutrons with stretch
         'capture-to-total' toward the current direction of travel of the
-        particle::
+        particle, and a differente transform for photons::
 
-            cellA = CellMCNP(..., exp_transform=('neutron', 'capture-to-total',
-                    'currdir', 'toward'))
+            cellA = CellMCNP(..., exp_transform=[
+                    ('neutron', 'capture-to-total', 'currdir', 'toward'),
+                    ('photon', 0.5, 'x', 'away')])
 
-        As with the :py:class:`Transformation` card, the direction can be the
-        name of a vector (e.g. `vec1`) on the :py:class:`Vector` card, as long
-        as the :py:class:`Vector` has been added to the simulation before an
-        input is generated::
+        The direction can be the name of a vector (e.g. `vec1`) on the
+        :py:class:`Vector` card, as long as the :py:class:`Vector` has been
+        added to the simulation before an input is generated::
 
-            cellA = CellMCNP(..., exp_transform=('neutron', 0.5,
-                    'vec1', 'away'))
+            cellA = CellMCNP(..., 
+                    exp_transform=('neutron', 0.5, 'vec1', 'away'))
             vec = Vector()
             vec.set('vec1', [0, 0, 0])
 
+        We can request forced collision for neutrons that enter the cell and
+        as part of weight games::
 
+            cellA = CellMCNP(..., forced_coll=('neutron', 0.5, False))
 
-        To specify an additional exponential transform for protons::
+        The following specifies the lower bound for neutrons at energy index,
+        3, time index 1 (assuming that the :py:class:`WeightWindowEnergies`
+        card is in the simulation)::
 
+            cellA = CellMCNP(..., 
+                    weight_win_bound=('neutron', 3, 1, 'killall'))
 
-        If the user wants to supply an exponential transform card, with a
+        The following specifies the probability that neutrons from this cell
+        will tally in detector `det1` (assuming a sphere with this name will be
+        in the simulation, on the :py:class:`DXTRANSpheres` card)::
+        
+            cellA = CellMCNP(..., dxtran_contrib=('neutron', 'det1', 0.5))
+            sim = definition.MCNPDefinition(...)
+            det1 = PointDetector('det1', ...)
+            sim.add_tally(det1)
+
+        Here are two examples of specifying a photon weight threshold (the bool
+        must be provided if the first element is a float)::
+
+            cellA = CellMCNP(..., photon_weight=('one'))
+            cellA = CellMCNP(..., photon_weight=(0.5, True))
+
+        The following turns off fission in this cell, but still requests that
+        gammas are generated by fission interactions::
+        
+            cellA = CellMCNP(..., fission_turnoff='capture-gamma')
+
+        The following specifies the probability that this cell contributes to
+        detector `det1`, which must be in the simulation::
+
+            cellA = CellMCNP(..., det_contrib=('det1', 0.5))
+
+        A transformation can be provided by referring to a
+        :py:class:`Transformation` card::
+
+            cellA = CellMCNP(..., transformation='transA')
+            transA = Transformation('transA', ...)
+            sim = definition.MCNPSimulation(...)
+            sim.add_transformation(transA)
+
+        Alternatively, a transformation can be specified right on the keyword::
+
+            cellA = CellMCNP(..., transformation=([1, 0, 0], np.eye(3),
+                    'main-in-aux', True))
+
+        If the user wants to supply an exponential transform keyword, with a
         transform of '0.7V2', on their own, they can do the following::
 
             cellA = CellMCNP('A', surfA.neg & surfB.pos,
@@ -515,27 +589,23 @@ class CellMCNP(Cell):
 
     def comment(self):
         string = super(CellMCNP, self).comment()
-        float_format = "%g"
         # temperature
         if self.temperature:
-            string += "TMP="
-            string += float_format % self.temperature
-            string += " K"
+            card = Temperature(this, self.temperature)
+            string += " TMP=" + card._comment_unit(self.name)
         # volume
         if self.volume:
-            string += "VOL="
-            string += float_format % self.volume
-            string += " cm^3"
+            card = Volume(this, self.volume)
+            string += " VOL=" + card._comment_unit(self.name)
         # importance
         if self.importance:
-            importance = self._make_list(self.importance)
-            for entry in importance:
-                string += " IMP:{0}={1}".format(
-                        self.mcnp_particle(entry[0]), entry[1])
+            for entry in self._make_list(self.importance):
+                card = Importance(entry[0], entry[1])
+                string += (" IMP:{0}=".format(entry[0]) +
+                        card._comment_unit(self.name))
         # exp_transform
         if self.exp_transform:
-            exp_transform = self._make_list(self.exp_transform)
-            for entry in exp_transform:
+            for entry in self._make_list(self.exp_transform):
                 string += " EXT:{0}=".format(self.mcnp_particle(entry[0]))
                 string += float_format % entry[1]
         # forced_coll
@@ -592,11 +662,11 @@ class CellMCNP(Cell):
         string = super(CellMCNP, self).mcnp(float_format, sim)
         # temperature
         if self.temperature:
-            string += "TMP="
+            string += " TMP="
             string += float_format % (self.temperature * self.kelvin2kT)
         # volume
         if self.volume:
-            string += "VOL="
+            string += " VOL="
             string += float_format % self.volume
         # importance
         if self.importance:
@@ -4360,6 +4430,7 @@ class DXTRANContribution(ICellMod):
         --------
         The following shows how this card can be constructed using this
         method::
+
             dxc = DXTRANContribution('neutron', 'sph1')
             dxc.set(cellA, 0.5)
             dxc.set(cellB, 0.75)
