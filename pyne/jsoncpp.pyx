@@ -37,6 +37,7 @@ cdef cpp_jsoncpp.Value * tocppval(object doc):
 #            return pyvalue
     if False:
         pass
+#    elif cvalue.isObject() or cvalue.isArray():
     elif isinstance(doc, basestring):
         cval = new cpp_jsoncpp.Value(<char *> doc)
     elif isinstance(doc, float):
@@ -47,8 +48,8 @@ cdef cpp_jsoncpp.Value * tocppval(object doc):
         cval = toboolval(<bint> doc)
     elif isinstance(doc, int):
         cval = new cpp_jsoncpp.Value(<int> doc)
-#        elif cvalue.isNull():
-#            return None
+    elif doc is None:
+        cval = new cpp_jsoncpp.Value(<cpp_jsoncpp.ValueType> cpp_jsoncpp.nullValue)
     else:
         raise ValueError("{0} not of know type".format(doc))
     return cval
@@ -163,6 +164,9 @@ cdef class Value(object):
         else:
             print "Not Here"
             return NotImplemented
+
+    def isnull(self):
+        return self._inst.isNull()
 
 
 cdef class Reader:
