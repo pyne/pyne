@@ -878,6 +878,12 @@ class TestSystemDefinition(unittest.TestCase):
         fto.set(self.coolant, 'capture-gamma')
         self.assertEquals(fto.mcnp('%g', self.sim), "NONU 1 0 4J")
 
+        ## DetectorContribution
+        det = cards.PointDetector('point', 'neutron', ([0, 0, 0], 0))
+        self.sim.add_tally(det)
+        
+
+
 
     def test_Transformation(self):
         """Tests :py:class:`cards.Transformation`."""

@@ -3102,12 +3102,123 @@ class FissionTurnoff(ICellMod):
     def settings(self, value): self._settings = value
 
 
+class PhotonWeight(ICellMod):
+    """Controls production of neutron-induced photons through particle weight.
+    Unique card with name `photonweight`. In MCNP, this is the **PWT** card.
+
+    .. inheritance-diagram:: pyne.simplesim.cards.PhotonWeight
+
+    """
+    def __init__(self, *args):
+        """
+        Parameters
+        ----------
+        cell
+        setting
+        The setting 'off' turns of photon production, 'one' produces one photon
+        per neutron collision if photon production is enabled, ...
+
+        Examples
+        --------
+
+        """
+        super(PhotonWeight, self).__init__('photonweight', 2, *args)
+
+
+class DetectorContribution(ICellMod):
+    """Probability of contribution of cell to a detector. Unique card with name
+    `detcontrib-<detname>`. In MCNP, this is the **PD** card.
+
+    .. inheritance-diagram:: pyne.simplesim.cards.DetectorContribution
+
+    """
+    def __init__(self, det_name, *args):
+        """
+        Parameters
+        ----------
+        det_name : str
+            Name of the detector (subclass of :py:class:`IDetector`) for which
+            this card stores probabilities of contribution.
+        cell : :py:class:`Cell` or subclass
+            The cell for which the probability of contribution is provided.
+        prob : float
+            Probability that this cell contributes to this detector.
+        *args : cell, prob, ...
+            To provide probabilities for more than one cell, supply the last
+            two arguments for the other cells. See examples. This can also be
+            done using :py:meth:`set`.
+
+        Examples
+        --------
+        Suppose a cell ``cellA`` and a detector ``det1`` have been
+        defined and are in the simulation. Then, we can do the following::
+
+            dc = DetectorContribution('det1', cellA, 0.5)
+
+        or, if we also have a ``cellB``:
+
+            dc = DetectorContribution('det1', cellA, 0.5, cellB, 0.6)
+
+
+        """
+        self.det_name = det_name
+        super(DetectorContribution, self).__init__(
+                'detcontrib-{0}'.format(det_name), 2, *args)
+        self.probs = dict()
+        self._process_varargs(args)
+
+    def set(self, cell, prob):
+        """
+        Parameters
+        ----------
+        cell : :py:class:`Cell` or subclass
+        prob : float
+
+        Examples
+        --------
+        The last example above can be achieved by the following::
+
+            dc = DetectorContribution('det1')
+            dc.set(cellA, 0.5)
+            dc.set(cellB, 0.6)
+
+        Previously provided values can be modified later on::
+
+            dc.set(cellB, 0.7)
+
+        """
+        super(DetectorContribution, self).set(cell)
+        self.probs[cell] = prob
+ 
+    def comment(self):
+        string = "Detector contribution to {0!r}.".format(self.det_name)
+        return super(DetectorContribution, self).comment(string)
+
+    def _comment_unit(self, cell):
+        return " {0}".format(self.probs[cell])
+
+    def mcnp(self, float_format, sim):
+        # TODO exception if the detector doesn't exist.
+        string = "PD{0}".format(self.sim.tally_num(self.det_name))
+        return super(DetectorContribution, self).mcnp(
+                float_format, sim, string)
+
+    def _mcnp_unit(self, float_format, sim, cell):
+        return float_format % self.probs[cell]
+
+    @property
+    def probs(self): return self._probs
+
+    @probs.setter
+    def probs(self, value): self._probs = value
+
+
 class IUniqueParticle(IMisc):
     """This class is not used by the user. Abstract base class for cards that
     are unique for a given particle.
 
     """
-    # TODO not getting any *args or **kwargs.
+    # TODO not passig any *args or **kwargs.
     __metaclass__ = abc.ABCMeta
 
     def __init__(self, pre_name, particle, *args, **kwargs):
