@@ -3011,7 +3011,7 @@ class IUniqueParticle(IMisc):
     # TODO not getting any *args or **kwargs.
     __metaclass__ = abc.ABCMeta
 
-    def __init__(self, pre_name, particle):
+    def __init__(self, pre_name, particle, *args, **kwargs):
         """
         Parameters
         ----------
@@ -3111,7 +3111,7 @@ class Temperature(ICellMod):
         return super(Temperature, self).comment(string)
 
     def _comment_unit(self, cell):
-        return " {0} K".format(self.temps[cell])
+        return " {0:g} K".format(self.temps[cell])
 
     def mcnp(self, float_format, sim):
         string = "TMP"
@@ -4012,30 +4012,122 @@ class WeightWindowTimes(IUniqueParticle):
 
 
 class DXTRANContribution(ICellMod):
-    """Contribution probabilities to DXTRAN sphere by cells. In MCNP, this is
-    the **DXC** card.
+    """Contribution probabilities to DXTRAN sphere by cells. Unique card for a
+    given particle type and DXTRAN sphere, with name
+    `dxtrancont-<sph_name>-<particle>` (or more simply `dxtrancont-<particle>`
+    if input applies for all spheres). In MCNP, this is the **DXC** card.
 
     .. inheritance-diagram:: pyne.simplesim.cards.DXTRANContribution
 
     """
-    # Unique
-    def __init__(self, particle, sphere_name, cell, prob, *args):
+    def __init__(self, particle, sph_name, *args):
         """
         Parameters
         ----------
         particle : str
-            See :py:class:`ICellMod`
-        sphere_name : str
-            Name of the DXTRAN sphere for which this card applies.
+            See :py:class:`ICellMod`.
+        sph_name : str or None
+            Name of the DXTRAN sphere, on the :py:class:`DXTRANSpheres` card,
+            for which this card applies. To apply this card to all spheres, set
+            to None.
         cell : :py:class:`Cell` or subclass
-            See :py:class:`ICellMod`
+            See :py:class:`ICellMod`.
         prob : float
-            The probabilit of contribution to the sphere.
+            The probability of contribution to the sphere.
 
         Examples
         --------
+        The following shows how this card is used to specify contribution
+        probabilities for all DXTRAN spheres::
+
+            dxc = DXTRANContribution('neutron', None, cellA, 0.5)
+
+        The following applies for only 'sph1' on the :py:class:`DXTRANSpheres`
+        card::
+
+            dxc = DXTRANContribution('neutron', 'sph1', cellA, 0.5)
+
+        The following provides probabilities for two different cells::
+
+            dxc = DXTRANContribution('neutron', 'sph1', cellA, 0.5,
+                                                        cellB, 0.75)
+
         """
         # DXTRANSphere must be added first before this can be used?
+        super(DXTRANContribution, self).__init__(
+                'dxtrancont{0}-{1}'.format(
+                    "-" + sph_name if sph_name else "", particle),
+                2, *args)
+        self.particle = particle
+        self.sph_name = sph_name
+        self.probs = dict()
+        self._process_varargs(args)
+
+    def set(self, cell, prob):
+        """
+        Parameters
+        ----------
+        cell : :py:class:`Cell` or subclass
+        prob : float
+
+        Examples
+        --------
+        The following shows how this card can be constructed using this
+        method::
+            dxc = DXTRANContribution('neutron', 'sph1')
+            dxc.set(cellA, 0.5)
+            dxc.set(cellB, 0.75)
+
+        Previously provided values can be modified later on::
+
+            dxc.set(cellB, 0.8)
+
+        """
+        super(DXTRANContribution, self).set(cell)
+        self.probs[cell] = prob
+
+    def comment(self):
+        string = "DXTRAN contribution"
+        if self.sph_name: string += " for sphere {0!r}".format(self.sph_name)
+        else:             string += " for all spheres"
+        return super(DXTRANContribution, self).comment(string)
+
+    def _comment_unit(self, cell):
+        return " {0:g}".format(self.probs[cell])
+
+    def mcnp(self, float_format, sim):
+        # Get sphere index.
+        dxt_name = 'dxtranspheres-{0}'.format(self.particle)
+        if self.sph_name:
+            if dxt_name not in sim.misc:
+                raise StandardError("To specify DXTRAN contributions for "
+                        "{0}s, a {1} misc card must be in the "
+                        "simulation.".format(self.particle, dxt_name))
+            sph_index = sim.misc[dxt_name].index(self.sph_name)
+        else:
+            sph_index = ''
+        string = "DXC{0}:{1}".format(
+                sph_index, self.mcnp_particle[self.particle])
+        return super(DXTRANContribution, self).mcnp(float_format, sim, string)
+
+    def _mcnp_unit(self, float_format, sim, cell):
+        return float_format % self.probs[cell]
+
+    @property
+    def particle(self): return self._particle
+
+    @particle.setter
+    def particle(self, value):
+        if value not in self.mcnp_particle:
+            raise LookupError("The particle {0} is not in the "
+                    "``mcnp_particle`` dictionary.".format(value))
+        self._particle = value
+
+    @property
+    def probs(self): return self._probs
+
+    @probs.setter
+    def probs(self, value): self._probs = value
 
 
 class DXTRANSpheres(IUniqueParticle):
@@ -4098,7 +4190,7 @@ class DXTRANSpheres(IUniqueParticle):
         self.upper_cutoff = kwargs.get('upper_cutoff', None)
         self.lower_cutoff = kwargs.get('lower_cutoff', None)
         self.min_photon_weight = kwargs.get('min_photon_weight', None)
-        self.spheres = dict()
+        self.spheres = collections.OrderedDict()
         self._n_args_per_set = 4
         # TODO copied from ICellMod, ICellModParticle.
         for i_set in range(len(args) / self._n_args_per_set):
@@ -4178,6 +4270,10 @@ class DXTRANSpheres(IUniqueParticle):
         sph = self.spheres[name]
         formatstr = "{0} {0} {0} {0} {0}".format(float_format)
         return formatstr % (tuple(sph.center) + (sph.inrad, sph.outrad))
+
+    def index(self, sph_name):
+        return self.spheres.keys().index(sph_name) + 1
+
 
     @property
     def upper_cutoff(self): return self._upper_cutoff
