@@ -43,6 +43,9 @@ the module.
 # TODO rewrite WeightWindowBound so that there is a separate card for each
 # index.
 # TODO consistent plural card names when appropriate.
+# Temperature < 200, < 1 warnings, remove?
+# Refactor CellMCNP so all relevant classes have a method _mcnp_cell_comment
+# and _mcnp_cell_card
 
 import abc
 import collections
@@ -721,8 +724,7 @@ class CellMCNP(Cell):
             for entry in self._make_list(self.dxtran_contrib):
                 card = DXTRANContribution(entry[0], entry[1], self, entry[2])
                 string += " DXC{0}:{1}={2}".format( 
-
-                        self.mcnp_particle[entry[0]], 
+                        card.sph_index(sim), self.mcnp_particle[entry[0]], 
                         card._mcnp_unit(float_format, sim, self, entry[1],
                             entry[2]))
                 string += float_format % entry[2]
@@ -730,44 +732,38 @@ class CellMCNP(Cell):
         if self.photon_weight:
             card = PhotonWeight()
             card.set(self, *list(self.photon_weight))
-            string += " PWT="
-            if self.photon_weight == '-inf': string += "-1.0E6"
-            else: string += float_format % self.photon_weight
+            string += " PWT={0}".format(
+                    card._mcnp_unit(float_format, sim, self)
         # fission_turnoff TODO move exception to setter?
         if self.fission_turnoff:
-            string += " NONU="
-            if self.fission_turnoff == 'capture-gamma': string += "0"
-            elif self.fission_turnoff == 'real-gamma': string += "1"
-            elif self.fission_turnoff == 'capture-nogamma': string += "2"
-            else: 
-                raise ValueError("Expected 'capture-gamma', 'real-gamma', "
-                        "'capture-nogamma'. User provided '%s'." %
-                        self.fission_turnoff)
+            card = FissionTurnoff(self, self.fission_turnoff)
+            string += " NONU=" + card._mcnp_unit(float_format, sim, self)
         # det_contrib
         if self.det_contrib:
-            det_contrib = self._make_list(self.det_contrib)
-            for entry in det_contrib:
+            for entry in self._make_list(self.det_contrib):
                 card = DetectorContribution(entry[0], self, entry[1])
-                string += " PD%i=" % sim.tally_num(entry[0])
-                string += float_format % entry[1]
+                string += " PD{0}={1}".format(
+                    sim.tally_num(entry[0]),
+                    card._mcnp_unit(float_format, sim, self)
         # transform
         if self.transformation:
             # For brevity.
-            transform = self.transformation
+            entry = self.transformation
             string += " "
             if type(transform) is str:
-                string += "TRCL=%i" % sim.transformation_num(transform)
+                string += "TRCL={0}".format(sim.transformation_num(entry))
             else:
-                if transform[4] == 'degrees': string += "*"
-                tempcard = Transformation('temp', transform[0],
-                    transform[1], transform[3], transform[4])
-                string += "TRCL (%s)" % tempcard._mcnp_unit(float_format)
+                if (len(entry) < 4 or
+                        (len(entry) == 4 and entry[4])):
+                    string += "*"
+                card = Transformation('temp', *list(entry))
+                string += "TRCL ({0})".format(card._mcnp_unit[float_format])
                 
         # user_custom
         if self.user_custom: string += " %s" % self.user_custom
                 
     def _make_list(self, arg):
-        if arg is list: return arg
+        if type(arg) is list: return arg
         else: return [arg]
 
     @property
@@ -4736,7 +4732,6 @@ class Vector(IMisc):
         """
         self.vectors[vecname] = vector
         return self.index(vecname)
-
 
     def comment(self):
         string = "Vector {0!r}:".format(self.name)
