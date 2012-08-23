@@ -825,7 +825,34 @@ class TestSystemDefinition(unittest.TestCase):
         dsph.set('sph2', [4.5, 5.5, 6.5], 8.5, 9.5)
         self.assertEquals(dsph.mcnp('%g', self.sim),
                 "DXT:N  1 2 3 4 5  4.5 5.5 6.5 8.5 9.5  0.1 0.05 0.5")
+        self.sim.add_misc(dsph)
 
+        # DXTRANContribution
+        dxc = cards.DXTRANContribution('neutron', None, self.fuel, 0.5)
+        self.assertEquals(dxc.name, 'dxtrancont-neutron')
+        self.assertEquals(dxc.comment(), "DXTRAN contribution "
+                "for all spheres 'dxtrancont-neutron': cell 'fuel' 0.5.")
+        self.assertEquals(dxc.mcnp('%g', self.sim), "DXC:N 0.5 5J")
+        dxc = cards.DXTRANContribution('neutron', 'sph2', self.fuel, 0.5)
+        self.assertEquals(dxc.comment(), "DXTRAN contribution "
+                "for sphere 'sph2' 'dxtrancont-sph2-neutron': "
+                "cell 'fuel' 0.5.")
+        self.assertEquals(dxc.mcnp('%g', self.sim), "DXC2:N 0.5 5J")
+        dxc = cards.DXTRANContribution('neutron', 'sph2', self.fuel, 0.5,
+                                                       self.coolant, 0.7)
+        self.assertEquals(dxc.comment(), "DXTRAN contribution "
+                "for sphere 'sph2' 'dxtrancont-sph2-neutron': "
+                "cell 'fuel' 0.5, cell 'coolant' 0.7.")
+        self.assertEquals(dxc.mcnp('%g', self.sim), "DXC2:N 0.5 0.7 4J")
+        dxc = cards.DXTRANContribution('neutron', 'sph2')
+        dxc.set(self.fuel, 0.5)
+        dxc.set(self.coolant, 0.7)
+        self.assertEquals(dxc.comment(), "DXTRAN contribution "
+                "for sphere 'sph2' 'dxtrancont-sph2-neutron': "
+                "cell 'fuel' 0.5, cell 'coolant' 0.7.")
+        self.assertEquals(dxc.mcnp('%g', self.sim), "DXC2:N 0.5 0.7 4J")
+        dxc.set(self.coolant, 0.8)
+        self.assertEquals(dxc.mcnp('%g', self.sim), "DXC2:N 0.5 0.8 4J")
 
     def test_Transformation(self):
         """Tests :py:class:`cards.Transformation`."""
