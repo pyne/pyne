@@ -713,17 +713,19 @@ class CellMCNP(Cell):
                 # Need the next line to obtain the linear index.
                 card._find_n_energies(sim)
                 string += " WWN{0}:{1}={2}".format( 
-                        card._i_linear(entry[1], entry[2]),
+                        card.i_linear(entry[1], entry[2]),
                         self.mcnp_particle[entry[0]], 
                         card._mcnp_unit(float_format, sim, self, entry[1],
                             entry[2]))
         # dxtran_contrib
         if self.dxtran_contrib:
-            dxtran_contrib = self._make_list(self.dxtran_contrib)
-            for entry in dxtran_contrib:
+            for entry in self._make_list(self.dxtran_contrib):
                 card = DXTRANContribution(entry[0], entry[1], self, entry[2])
-                string += (" DXC%i:%s=" % 
-                    (entry[1], self.mcnp_particle(entry[0])))
+                string += " DXC{0}:{1}={2}".format( 
+
+                        self.mcnp_particle[entry[0]], 
+                        card._mcnp_unit(float_format, sim, self, entry[1],
+                            entry[2]))
                 string += float_format % entry[2]
         # photon_weight
         if self.photon_weight:
@@ -4149,13 +4151,13 @@ class WeightWindowBound(ICellModParticle):
         counter = 0
         for i_t in self.idx_times:
             for i_e in self.idx_energys:
-                i_linear = self._i_linear(i_e, i_t)
                 # Start card, but only if any values are assigned for this idx.
                 if self._n_vals_for(i_e, i_t) > 0:
                     counter += 1
                     string += "{0}WWN{1}:{2}".format(
                             "\n" if counter > 1 else "",
-                            i_linear, self.mcnp_particle[self.particle])
+                            self.i_linear(i_e, i_t),
+                            self.mcnp_particle[self.particle])
                     # Check all cells in the system.
                     for key, cell in sim.sys.cells.iteritems():
                         # Is this cell on this card, and is there a bound
@@ -4202,7 +4204,7 @@ class WeightWindowBound(ICellModParticle):
             raise Exception("No WWGT:{0} or WWT:{0} card found in the "
                     "simulation.".format(self.mcnp_particle[self.particle]))
 
-    def _i_linear(self, i_e, i_t):
+    def i_linear(self, i_e, i_t):
         return (i_t - 1) * self._n_energies + i_e
        
     def _multi_dict(self, n_dims):
@@ -4486,19 +4488,23 @@ class DXTRANContribution(ICellMod):
         return " {0:g}".format(self.probs[cell])
 
     def mcnp(self, float_format, sim):
-        # Get sphere index.
-        dxt_name = 'dxtranspheres-{0}'.format(self.particle)
+        string = "DXC{0}:{1}".format(
+                self.sph_index(sim), self.mcnp_particle[self.particle])
+        return super(DXTRANContribution, self).mcnp(float_format, sim, string)
+
+    def sph_index(self, sim):
         if self.sph_name:
+            # Get sphere index.
+            dxt_name = 'dxtranspheres-{0}'.format(self.particle)
             if dxt_name not in sim.misc:
                 raise StandardError("To specify DXTRAN contributions for "
                         "{0}s, a {1} misc card must be in the "
                         "simulation.".format(self.particle, dxt_name))
-            sph_index = sim.misc[dxt_name].index(self.sph_name)
+            index = sim.misc[dxt_name].index(self.sph_name)
         else:
-            sph_index = ''
-        string = "DXC{0}:{1}".format(
-                sph_index, self.mcnp_particle[self.particle])
-        return super(DXTRANContribution, self).mcnp(float_format, sim, string)
+            # Applies to all spheres.
+            index = ''
+        return index
 
     def _mcnp_unit(self, float_format, sim, cell):
         return float_format % self.probs[cell]
