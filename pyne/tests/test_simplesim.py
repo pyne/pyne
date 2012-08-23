@@ -498,7 +498,7 @@ class TestSystemDefinition(unittest.TestCase):
         #        importance=[('neutron', 1), ('photon', 0)],
         #        user_custom='EXT:N 0.7V2')
         #    cellA = CellMCNP(..., photon_weight=(0.5))
-
+        TODO set temperature to 100 or -1
 
     def test_ExponentialTransform(self):
         """Tests :py:class:`cards.ExponentialTransform` and the related
