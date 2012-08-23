@@ -408,14 +408,14 @@ class TestSystemDefinition(unittest.TestCase):
         cellA = cards.Cell('A', self.pin.neg & self.cellbound.pos)
         self.rxr.add_cell(cellA)
         self.assertEquals(cellA.comment(), "Cell 'A': region "
-                "(-fuelpin & +bound), void")
+                "(-fuelpin & +bound), void.")
         self.assertEquals(cellA.mcnp("%.5e", self.sim), "4 0 (-1 2)")
         cellB = cards.Cell('B', self.pin.neg & self.cellbound.pos, self.uo2,
                 10.0, 'g/cm^3')
         self.rxr.add_cell(cellB)
         self.assertEquals(cellB.comment(), "Cell 'B': region "
                 "(-fuelpin & +bound), material 'UO2' density 10 "
-                "g/cm^3")
+                "g/cm^3.")
         self.assertEquals(cellB.mcnp("%.5e", self.sim), "5 1 -1.00000e+01 "
                 "(-1 2)")
         # Incorrect density string.
@@ -447,27 +447,31 @@ class TestSystemDefinition(unittest.TestCase):
         cellC = cards.Cell('C', self.pin.neg & self.cellbound.pos)
         self.rxr.add_cell(cellC)
         self.assertEquals(cellC.comment(), "Cell 'C': region "
-                "(-fuelpin & +bound), void")
+                "(-fuelpin & +bound), void.")
         self.assertEquals(cellC.mcnp("%.5e", self.sim), "4 0 (-1 2)")
         cellD = cards.Cell('D', self.pin.neg & self.cellbound.pos, self.uo2,
                 10.0, 'g/cm^3')
         self.rxr.add_cell(cellD)
         self.assertEquals(cellD.comment(), "Cell 'D': region "
                 "(-fuelpin & +bound), material 'UO2' density 10 "
-                "g/cm^3")
+                "g/cm^3.")
         self.assertEquals(cellD.mcnp("%.5e", self.sim), "5 1 -1.00000e+01 "
                 "(-1 2)")
 
         # Keywords.
-        #cellA = CellMCNP('A', self.pin.neg & self.cellbound.pos,
-        #        matA, 10.0, 'g/cm^3',
-        #        temperature=600, volume=1,
-        #        importance=('neutron', 1))
-        #self.assertEquals(cellA, 
-        #self.assertEquals(cellA, name, 
-        #cellA = CellMCNP('A', self.pin.neg & self.cellbound.pos,
-        #        matA, 10.0, 'g/cm^3',
-        #        importance=[('neutron', 1), ('photon', 0)])
+        cellE = cards.CellMCNP('E', self.pin.neg & self.cellbound.pos,
+                self.uo2, 10.0, 'g/cm^3',
+                temperature=600, volume=1,
+                importance=('neutron', 1))
+        self.assertEquals(cellE.comment(), "Cell 'E': region "
+                "(-fuelpin & +bound), material 'UO2' density 10 "
+                "g/cm^3 TMP= 600 K VOL= 1 cm^3 IMP:N= 1.")
+        self.rxr.add_cell(cellE)
+        self.assertEquals(cellE.mcnp('%g', self.sim), "6 1 -10 "
+                "(-1 2) TMP=5.17041e-08 VOL=1 IMP:N=1")
+        cellA = cards.CellMCNP('A', self.pin.neg & self.cellbound.pos,
+                self.uo2, 10.0, 'g/cm^3',
+                importance=[('neutron', 1), ('photon', 0)])
         #cellA = CellMCNP(..., exp_transform=[
         #        ('neutron', 'capture-to-total', 'currdir', 'toward'),
         #        ('photon', 0.5, 'x', 'away')])
@@ -498,7 +502,7 @@ class TestSystemDefinition(unittest.TestCase):
         #        importance=[('neutron', 1), ('photon', 0)],
         #        user_custom='EXT:N 0.7V2')
         #    cellA = CellMCNP(..., photon_weight=(0.5))
-        TODO set temperature to 100 or -1
+        #TODO set temperature to 100 or -1
 
     def test_ExponentialTransform(self):
         """Tests :py:class:`cards.ExponentialTransform` and the related
