@@ -18,7 +18,18 @@ except ImportError:
     import json
 
 
-cdef cpp_jsoncpp.Value * pydoc_to_cval(object doc):
+cdef cpp_jsoncpp.Value * toboolval(bint b):
+    # NOTE: This is a little hack-y but has to be done since
+    # Cython bints are not actually C++ bools
+    cdef cpp_jsoncpp.Value * cval = \
+            new cpp_jsoncpp.Value(<cpp_jsoncpp.ValueType> cpp_jsoncpp.booleanValue)
+    cdef cpp_jsoncpp.Reader reader= cpp_jsoncpp.Reader()
+    if b:
+        reader.parse('true', deref(cval), 0)
+    return cval
+
+
+cdef cpp_jsoncpp.Value * tocppval(object doc):
     cdef cpp_jsoncpp.Value * cval = NULL
 #    if cvalue.isObject() or cvalue.isArray():
 #            #pyvalue._inst = &cvalue
@@ -32,12 +43,9 @@ cdef cpp_jsoncpp.Value * pydoc_to_cval(object doc):
         cval = new cpp_jsoncpp.Value(<double> doc)
     elif isinstance(doc, bool):
         # NOTE: bool must go before int!
-        print "I AM BOOL"
-        #cval = new cpp_jsoncpp.Value(<bint> doc)
-        cval = new cpp_jsoncpp.Value(<cpp_jsoncpp.ValueType> cpp_jsoncpp.booleanValue)
-        cval = <bint> 1
+        # Python bools are ints, but ints are not bools.
+        cval = toboolval(<bint> doc)
     elif isinstance(doc, int):
-        print "I AM INT"
         cval = new cpp_jsoncpp.Value(<int> doc)
 #        elif cvalue.isNull():
 #            return None
@@ -54,7 +62,7 @@ cdef class Value(object):
         if view:
             self._inst = NULL
         elif document is not None:
-            self._inst = pydoc_to_cval(document)
+            self._inst = tocppval(document)
         else:
             self._inst = new cpp_jsoncpp.Value()
 
