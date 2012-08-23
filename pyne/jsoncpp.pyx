@@ -29,17 +29,22 @@ cdef cpp_jsoncpp.Value * toboolval(bint b):
     return cval
 
 
-cdef cpp_jsoncpp.Value * tocppval(object doc):
+cdef cpp_jsoncpp.Value * tocppval(object doc) except NULL:
     cdef cpp_jsoncpp.Value * cval = NULL
-#    if cvalue.isObject() or cvalue.isArray():
-#            #pyvalue._inst = &cvalue
-#            pyvalue._inst[0] = cvalue
-#            return pyvalue
-    if False:
-        pass
-#    elif cvalue.isObject() or cvalue.isArray():
+    if isinstance(doc, collections.Mapping):
+        cval = new cpp_jsoncpp.Value(<cpp_jsoncpp.ValueType> cpp_jsoncpp.objectValue)
+        for k, v in doc.items():
+            if not isinstance(k, basestring):
+                raise KeyError('object keys must be strings, got {0}'.format(k))
+            cval[0][<const_char *> k].swap(deref(tocppval(v)))
     elif isinstance(doc, basestring):
+        # string must come before other sequences
         cval = new cpp_jsoncpp.Value(<char *> doc)
+    elif isinstance(doc, collections.Sequence) or isinstance(doc, collections.Set):
+        cval = new cpp_jsoncpp.Value(<cpp_jsoncpp.ValueType> cpp_jsoncpp.arrayValue)
+        cval.resize(<int> len(doc))
+        for i, d in enumerate(doc):
+            cval[0][<int> i].swap(deref(tocppval(d)))
     elif isinstance(doc, float):
         cval = new cpp_jsoncpp.Value(<double> doc)
     elif isinstance(doc, bool):
@@ -51,9 +56,8 @@ cdef cpp_jsoncpp.Value * tocppval(object doc):
     elif doc is None:
         cval = new cpp_jsoncpp.Value(<cpp_jsoncpp.ValueType> cpp_jsoncpp.nullValue)
     else:
-        raise ValueError("{0} not of know type".format(doc))
+        raise ValueError("{0} not of known type".format(doc))
     return cval
-
 
 
 cdef class Value(object):
@@ -116,17 +120,14 @@ cdef class Value(object):
             raise ValueError("{0} not of know type".format(pykey))
 
     def __setitem__(self, key, value):
-        cdef std.string cstrkey 
-        cdef std.string cstrval
         cdef cpp_jsoncpp.Value * ckey 
-        cdef cpp_jsoncpp.Value * cvalue
-
-        cstrkey = std.string(key)
-        ckey = &self._inst[0][cstrkey]
-        
-        cstrval = std.string(value)
-        cvalue = new cpp_jsoncpp.Value(cstrval)
-        ckey.swap(deref(cvalue))
+        if isinstance(key, basestring):
+            ckey = &self._inst[0][<const_char *> key]
+        elif isinstance(key, int):
+            ckey = &self._inst[0][<int> key]
+        else:
+            raise KeyError('key not of appropriate type, got {0}'.format(type(key)))
+        ckey.swap(deref(tocppval(value)))
 
     def __len__(self):
         if self._inst.isObject() or self._inst.isArray():
