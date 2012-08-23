@@ -459,42 +459,45 @@ class TestSystemDefinition(unittest.TestCase):
                 "(-1 2)")
 
         # Keywords.
-        cellA = CellMCNP('A', self.pin.neg & self.cellbound.pos,
-                matA, 10.0, 'g/cm^3',
-                temperature=600, volume=1,
-                importance=('neutron', 1))
-        self.assertEquals(cellA, name, 
-        cellA = CellMCNP('A', self.pin.neg & self.cellbound.pos,
-                matA, 10.0, 'g/cm^3',
-                importance=[('neutron', 1), ('photon', 0)])
-        cellA = CellMCNP(..., exp_transform=[
-                ('neutron', 'capture-to-total', 'currdir', 'toward'),
-                ('photon', 0.5, 'x', 'away')])
-        cellA = CellMCNP(..., 
-                exp_transform=('neutron', 0.5, 'vec1', 'away'))
-        vec = Vector()
-        vec.set('vec1', [0, 0, 0])
-        cellA = CellMCNP(..., forced_coll=('neutron', 0.5, False))
-        cellA = CellMCNP(..., 
-                weight_win_bound=('neutron', 3, 1, 'killall'))
-        cellA = CellMCNP(..., dxtran_contrib=('neutron', 'det1', 0.5))
-        sim = definition.MCNPDefinition(...)
-        det1 = PointDetector('det1', ...)
-        sim.add_tally(det1)
-        cellA = CellMCNP(..., photon_weight=('one'))
-        cellA = CellMCNP(..., photon_weight=(0.5, True))
-        cellA = CellMCNP(..., fission_turnoff='capture-gamma')
-        cellA = CellMCNP(..., det_contrib=('det1', 0.5))
-        cellA = CellMCNP(..., transformation='transA')
-        transA = Transformation('transA', ...)
-        sim = definition.MCNPSimulation(...)
-        sim.add_transformation(transA)
-        cellA = CellMCNP(..., transformation=([1, 0, 0], np.eye(3),
-                'main-in-aux', True))
-        cellA = CellMCNP('A', self.pin.neg & self.cellbound.pos,
-                matA, 10.0, 'g/cm^3',
-                importance=[('neutron', 1), ('photon', 0)],
-                user_custom='EXT:N 0.7V2')
+        #cellA = CellMCNP('A', self.pin.neg & self.cellbound.pos,
+        #        matA, 10.0, 'g/cm^3',
+        #        temperature=600, volume=1,
+        #        importance=('neutron', 1))
+        #self.assertEquals(cellA, 
+        #self.assertEquals(cellA, name, 
+        #cellA = CellMCNP('A', self.pin.neg & self.cellbound.pos,
+        #        matA, 10.0, 'g/cm^3',
+        #        importance=[('neutron', 1), ('photon', 0)])
+        #cellA = CellMCNP(..., exp_transform=[
+        #        ('neutron', 'capture-to-total', 'currdir', 'toward'),
+        #        ('photon', 0.5, 'x', 'away')])
+        #cellA = CellMCNP(..., 
+        #        exp_transform=('neutron', 0.5, 'vec1', 'away'))
+        #vec = Vector()
+        #vec.set('vec1', [0, 0, 0])
+        #cellA = CellMCNP(..., forced_coll=('neutron', 0.5, False))
+        #cellA = CellMCNP(..., 
+        #        weight_win_bound=('neutron', 3, 1, 'killall'))
+        #cellA = CellMCNP(..., dxtran_contrib=('neutron', 'det1', 0.5))
+        #sim = definition.MCNPDefinition(...)
+        #det1 = PointDetector('det1', ...)
+        #sim.add_tally(det1)
+        #cellA = CellMCNP(..., photon_weight=('one'))
+        #cellA = CellMCNP(..., photon_weight=(0.5, True))
+        #cellA = CellMCNP(..., fission_turnoff='capture-gamma')
+        #cellA = CellMCNP(..., det_contrib=('det1', 0.5))
+        #cellA = CellMCNP(..., transformation='transA')
+        #transA = Transformation('transA', ...)
+        #sim = definition.MCNPSimulation(...)
+        #sim.add_transformation(transA)
+        #cellA = CellMCNP(..., transformation=([1, 0, 0], np.eye(3))
+        #cellA = CellMCNP(..., transformation=([1, 0, 0], np.eye(3),
+        #        True, False))
+        #cellA = CellMCNP('A', self.pin.neg & self.cellbound.pos,
+        #        matA, 10.0, 'g/cm^3',
+        #        importance=[('neutron', 1), ('photon', 0)],
+        #        user_custom='EXT:N 0.7V2')
+        #    cellA = CellMCNP(..., photon_weight=(0.5))
 
 
     def test_ExponentialTransform(self):
