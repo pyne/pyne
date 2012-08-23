@@ -43,6 +43,11 @@ def test_falsevalue():
     v = Value(b)
     assert_false(v)
     
+def test_nonevalue():
+    n = None
+    v = Value(n)
+    assert_true(v.isnull())
+
 
 #r = jsoncpp.Reader()
 #root = r.parse({'a': 10, 'b': 'Hello', 'c': {'d': [1, 2, 10.0]}})
