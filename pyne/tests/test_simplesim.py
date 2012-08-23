@@ -902,6 +902,28 @@ class TestSystemDefinition(unittest.TestCase):
         dc.set(self.coolant, 0.7)
         self.assertEquals(dc.mcnp('%g', self.sim), "PD25 0.5 0.7 4J")
 
+        ## PhotonWeight
+        pw = cards.PhotonWeight()
+        self.assertEquals(pw.name, 'photonweight')
+        pw.set(self.fuel, 'off')
+        self.assertEquals(pw.comment(), "Photon weight thresholds "
+                "'photonweight': cell 'fuel' off.")
+        self.assertEquals(pw.mcnp('%g', self.sim), "PWT -1.0E6 5J")
+        pw.set(self.coolant, 'one')
+        self.assertEquals(pw.comment(), "Photon weight thresholds "
+                "'photonweight': cell 'fuel' off, "
+                "cell 'coolant' one.")
+        self.assertEquals(pw.mcnp('%g', self.sim), "PWT -1.0E6 0 4J")
+        pw.set(self.coolant, 0.5)
+        self.assertEquals(pw.comment(), "Photon weight thresholds "
+                "'photonweight': cell 'fuel' off, "
+                "cell 'coolant' 0.5.")
+        self.assertEquals(pw.mcnp('%g', self.sim), "PWT -1.0E6 0.5 4J")
+        pw.set(self.coolant, 0.5, pre_weight=True)
+        self.assertEquals(pw.comment(), "Photon weight thresholds "
+                "'photonweight': cell 'fuel' off, "
+                "cell 'coolant' 0.5 (pre-weighted).")
+        self.assertEquals(pw.mcnp('%g', self.sim), "PWT -1.0E6 -0.5 4J")
 
 
     def test_Transformation(self):
