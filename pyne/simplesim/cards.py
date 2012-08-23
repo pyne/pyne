@@ -3075,7 +3075,7 @@ class FissionTurnoff(ICellMod):
     def comment(self):
         string = "Fission turnoff"
         if len(self.cells) == 0:
-            return string + ": capture-gamma for all cells."
+            return string + " 'fissionturnoff': capture-gamma for all cells."
         else:
             return super(FissionTurnoff, self).comment("Fission turnoff")
 
@@ -3083,7 +3083,9 @@ class FissionTurnoff(ICellMod):
         return " {0}".format(self.settings[cell])
 
     def mcnp(self, float_format, sim):
-        return super(FissionTurnoff, self).mcnp(float_format, sim, "NONU")
+        string = "NONU"
+        if len(self.cells) == 0: return string
+        return super(FissionTurnoff, self).mcnp(float_format, sim, string)
 
     def _mcnp_unit(self, float_format, sim, cell):
         if self.settings[cell] == 'capture-gamma':     return "0"
@@ -3091,7 +3093,7 @@ class FissionTurnoff(ICellMod):
         elif self.settings[cell] == 'capture-nogamma': return "2"
         else:
             raise Exception("Unexpected input {0!r}.".format(
-                self.settings[cell])
+                self.settings[cell]))
 
     @property
     def settings(self): return self._settings
@@ -4321,7 +4323,7 @@ class DXTRANSpheres(IUniqueParticle):
 
         """
         self.spheres[sph_name] = self.Sphere(
-                sph_name, point, inner_radius, outer_radius)
+                sph_name, center, inner_radius, outer_radius)
 
     def comment(self):
         upcut = self.upper_cutoff
