@@ -865,16 +865,18 @@ class TestSystemDefinition(unittest.TestCase):
         fto = cards.FissionTurnoff(self.fuel, 'real-gamma',
                                    self.coolant, 'capture-nogamma')
         self.assertEquals(fto.comment(), "Fission turnoff 'fissionturnoff': "
-                "cell 'fuel' real-grammar, cell 'coolant' capture-nogamma.")
+                "cell 'fuel' real-gamma, cell 'coolant' capture-nogamma.")
         self.assertEquals(fto.mcnp('%g', self.sim), "NONU 1 2 4J")
         # set()
         fto = cards.FissionTurnoff()
         fto.set(self.fuel, 'real-gamma')
         fto.set(self.coolant, 'capture-nogamma')
         self.assertEquals(fto.comment(), "Fission turnoff 'fissionturnoff': "
-                "cell 'fuel' real-grammar, cell 'coolant' capture-nogamma.")
+                "cell 'fuel' real-gamma, cell 'coolant' capture-nogamma.")
         self.assertEquals(fto.mcnp('%g', self.sim), "NONU 1 2 4J")
         # Modifying.
+        fto.set(self.coolant, 'capture-gamma')
+        self.assertEquals(fto.mcnp('%g', self.sim), "NONU 1 0 4J")
 
 
     def test_Transformation(self):
