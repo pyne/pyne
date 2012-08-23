@@ -48,14 +48,16 @@ cdef extern from "json/json.h" namespace "Json":
 
         Value get(int, Value) except +
         Value get(std.string, Value) except +
+        Value & operator[](int) except +
         Value & operator[](std.string) except +
+        Value & operator[](const_char *) except +
 
         void swap(Value &) except +
         void swap(Value *) except +
         #Value & operator=(Value) except +
 
         int size() except +
-
+        void resize(int) except +
 
     cdef cppclass Reader:
         Reader() except +
