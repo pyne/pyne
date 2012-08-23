@@ -49,6 +49,7 @@ the module.
 
 import abc
 import collections
+import warnings
 
 import numpy as np
 
@@ -522,7 +523,7 @@ class CellMCNP(Cell):
                     weight_win_bound=('neutron', 3, 1, 'killall'))
 
         The following specifies the probability that neutrons from this cell
-        will tally in detector `det1` (assuming a sphere with this name will be
+        will tally in DXTRAN sphere 'sph1' (assuming a sphere with this name will be
         in the simulation, on the :py:class:`DXTRANSpheres` card)::
         
             cellA = CellMCNP(..., dxtran_contrib=('neutron', 'det1', 0.5))
@@ -534,8 +535,8 @@ class CellMCNP(Cell):
         can be provided if the first element is a float, but defaults to False
         otherwise)::
 
-            cellA = CellMCNP(..., photon_weight=('one'))
-            cellA = CellMCNP(..., photon_weight=(0.5))
+            cellA = CellMCNP(..., photon_weight=('one',))
+            cellA = CellMCNP(..., photon_weight=(0.5,))
             cellA = CellMCNP(..., photon_weight=(0.5, True))
 
         The following turns off fission in this cell, but still requests that
@@ -565,7 +566,7 @@ class CellMCNP(Cell):
         must specify the 3rd element even though it has its default value::
 
             cellA = CellMCNP(..., transformation=([1, 0, 0], np.eye(3),
-                    True, False))
+                    True, True))
 
         If the user wants to supply an exponential transform keyword, with a
         transform of '0.7V2', on their own, they can do the following::
@@ -644,7 +645,7 @@ class CellMCNP(Cell):
             dxtran_contrib = self._make_list(self.dxtran_contrib)
             for entry in self._make_list(self.dxtran_contrib):
                 card = DXTRANContribution(entry[0], entry[1], self, entry[2])
-                string += " DXC{0!r}:{1}=".format( 
+                string += " DXC{0!r}:{1}={2}".format( 
                         entry[1], self.mcnp_particle[entry[0]],
                         card._comment_unit(self))
         # photon_weight
@@ -669,10 +670,10 @@ class CellMCNP(Cell):
             entry = self.transformation
             string += " TRCL "
             if type(entry) is str:
-                string += "{0!r}".format(transform)
+                string += "{0!r}".format(entry)
             else:
                 card = Transformation('temp', *list(entry))
-                string += card._comment_unit()
+                string += card._comment_unit()[:-1]
         # user_custom
         if self.user_custom: string += " and user's custom input"
         return string + "."
@@ -721,7 +722,7 @@ class CellMCNP(Cell):
                 string += " WWN{0}:{1}={2}".format( 
                         card.i_linear(entry[1], entry[2]),
                         self.mcnp_particle[entry[0]], 
-                        card._mcnp_unit(float_format, sim, self, entry[1],
+                        card._mcnp_unit(float_format, self, entry[1],
                             entry[2]))
         # dxtran_contrib
         if self.dxtran_contrib:
@@ -729,9 +730,7 @@ class CellMCNP(Cell):
                 card = DXTRANContribution(entry[0], entry[1], self, entry[2])
                 string += " DXC{0}:{1}={2}".format( 
                         card.sph_index(sim), self.mcnp_particle[entry[0]], 
-                        card._mcnp_unit(float_format, sim, self, entry[1],
-                            entry[2]))
-                string += float_format % entry[2]
+                        card._mcnp_unit(float_format, sim, self))
         # photon_weight
         if self.photon_weight:
             card = PhotonWeight()
@@ -740,7 +739,8 @@ class CellMCNP(Cell):
                     card._mcnp_unit(float_format, sim, self))
         if self.fission_turnoff:
             card = FissionTurnoff(self, self.fission_turnoff)
-            string += " NONU=" + card._mcnp_unit(float_format, sim, self)
+            string += " NONU={0}".format(
+                card._mcnp_unit(float_format, sim, self))
         # det_contrib
         if self.det_contrib:
             for entry in self._make_list(self.det_contrib):
@@ -753,15 +753,13 @@ class CellMCNP(Cell):
             # For brevity.
             entry = self.transformation
             string += " "
-            if type(transform) is str:
+            if type(entry) is str:
                 string += "TRCL={0}".format(sim.transformation_num(entry))
             else:
-                if (len(entry) < 4 or
-                        (len(entry) == 4 and entry[4])):
+                if len(entry) == 4 and entry[3]:
                     string += "*"
                 card = Transformation('temp', *list(entry))
-                string += "TRCL ({0})".format(card._mcnp_unit[float_format])
-                
+                string += "TRCL ({0})".format(card._mcnp_unit(float_format))
         # user_custom
         if self.user_custom: string += " {0}".format(self.user_custom)
         return string
@@ -817,7 +815,10 @@ class CellMCNP(Cell):
     def photon_weight(self): return self._photon_weight
     
     @photon_weight.setter
-    def photon_weight(self, value): self._photon_weight = value
+    def photon_weight(self, value):
+        if value and type(value) is not tuple:
+            raise ValueError("Photon weight keyword argument must be a tuple.")
+        self._photon_weight = value
     
     @property
     def fission_turnoff(self): return self._fission_turnoff
@@ -3472,6 +3473,14 @@ class Temperature(ICellMod):
 
         """
         super(Temperature, self).set(cell)
+        if temp < 200:
+            warnings.warn("Temperature set as less than 200 K. "
+                    "Are you trying to specify temperature in degrees "
+                    "Celcius, etc.? User provided {0:g}.".format(temp))
+        if temp < 1:
+            warnings.warn("Temperature set as less than 1 K. "
+                    "Are you trying to specify temperature as 'kT'? "
+                    "User provided {0:g}.".format(temp))
         self.temps[cell] = temp
 
     def comment(self):
@@ -3502,16 +3511,6 @@ class Temperature(ICellMod):
 
     @temps.setter
     def temps(self, value): 
-        for arg in value:
-            if arg is not None:
-                if arg < 200:
-                    raise UserWarning("Temperature set as less than 200 K. "
-                            "Are you trying to specify temperature in degrees "
-                            "Celcius, etc.? User provided {0:g}.".format(arg))
-                if arg < 1:
-                    raise UserWarning("Temperature set as less than 1 K. "
-                            "Are you trying to specify temperature as 'kT'? "
-                            "User provided {0:g}.".format(arg))
         self._temps = value
 
 class TemperatureTimes(IMisc):
@@ -4156,19 +4155,17 @@ class WeightWindowBound(ICellModParticle):
                         # Is this cell on this card, and is there a bound
                         # defined for it, for this energy and time?
                         if cell in self.cells and self.bounds[cell][i_e][i_t]:
-                            string += self._mcnp_unit(
+                            string += " " + self._mcnp_unit(
                                     float_format, cell, i_e, i_t)
                         else:
                             string += " 0"
         return string
 
     def _mcnp_unit(self, float_format, cell, i_e, i_t):
-        string = " "
         this_bound = self.bounds[cell][i_e][i_t]
-        if type(this_bound) is float: string += float_format % this_bound
-        elif this_bound == 'killall': string += "-1"
+        if type(this_bound) is float: return float_format % this_bound
+        elif this_bound == 'killall': return "-1"
         else:                         raise ValueError("Unexpected input.")
-        return string
  
     def _n_vals_for(self, i_e, i_t):
         # TODO may not need this check.
