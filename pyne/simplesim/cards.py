@@ -3191,7 +3191,7 @@ class DetectorContribution(ICellMod):
         self.probs[cell] = prob
  
     def comment(self):
-        string = "Detector contribution to {0!r}.".format(self.det_name)
+        string = "Detector contribution" # to {0!r}".format(self.det_name)
         return super(DetectorContribution, self).comment(string)
 
     def _comment_unit(self, cell):
@@ -3199,7 +3199,7 @@ class DetectorContribution(ICellMod):
 
     def mcnp(self, float_format, sim):
         # TODO exception if the detector doesn't exist.
-        string = "PD{0}".format(self.sim.tally_num(self.det_name))
+        string = "PD{0}".format(sim.tally_num(self.det_name))
         return super(DetectorContribution, self).mcnp(
                 float_format, sim, string)
 
