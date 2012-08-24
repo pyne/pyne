@@ -45,6 +45,7 @@ cdef extern from "json/json.h" namespace "Json":
         bint isString() except +
         bint isArray() except +
         bint isObject() except +
+        ValueType type() except +
 
         Value get(int, Value) except +
         Value get(std.string, Value) except +
