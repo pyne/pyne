@@ -89,7 +89,6 @@ Definition Module
 .. automodule:: pyne.simplesim.definition
     :member-order: 'bysource'
     :members:
-    :inherited-members:
 
 ************
 Input Module
@@ -98,7 +97,6 @@ Input Module
 .. automodule:: pyne.simplesim.inputfile
     :member-order: 'bysource'
     :members:
-    :inherited-members:
 
 ************
 Cards Module
@@ -107,7 +105,6 @@ Cards Module
 .. automodule:: pyne.simplesim.cards
     :member-order: 'groupwise'
     :members:
-    :inherited-members:
     :show-inheritance:
 
 

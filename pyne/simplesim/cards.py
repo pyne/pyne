@@ -9,6 +9,10 @@ the :py:mod:`definition` module. Instances of classes in the :py:mod:`definition
 contains instances of the classes in this module.  Below is the reference for
 the module.
 
+>>> from pyne.simplesim import definition
+>>> sys = definition.SystemDefinition(verbose=False)
+>>> sim = definition.MCNPSimulation(sys, verbose=False)
+
 """
 
 # TODO in the Sphinx documentation, create a developers and a user's version of
@@ -53,7 +57,7 @@ import warnings
 
 import numpy as np
 
-from pyne import material
+from pyne import material, nucname
 
 class ICard(object):
     """This class is not used by the user. Abstract base class for all cards.
@@ -164,7 +168,60 @@ class ICard(object):
                     "be empty.")
         self._name = value
 
-   
+
+class Material(ICard, material.Material):
+    """Adds the attribute :py:attr:`description` and the methods
+    :py:meth:`comment` and :py:meth:`mcnp` to
+    :py:class:`pyne.material.Material`. The :py:attr:`name` must be provided
+    before the card is added to a system. The user can specify a description
+    that is printed in an appropriate location in the input file.
+
+    .. inheritance-diagram:: pyne.simplesim.cards.Material
+
+    """
+    def __init__(self, *args, *kwargs):
+        """
+        Parameters
+        ----------
+        see :py:class:`pyne.material.Material` for superclass parameters.
+        name : str
+            This is a keyword argument, but `must` be supplied.
+        description : str
+            A description of this material that perhaps explains where the
+            material came from (whether it's recycled, any references, etc.).
+
+        Examples
+        --------
+        The usage of this card is nearly identical to that of
+        :py:class:`pyne.material.Material`::
+
+        >>> from pyne.simplesim import definition
+        >>> sys = definition.SystemDefinition(verbose=False)
+        >>> sim = definition.MCNPSimulation(sys, verbose=False)
+        >>> h2o = Material(name='water')
+        >>> h2o.from_atom_frac({10010: 1.0, 'O16': 2.0})
+        >>> h2o.description = "I found this water in a well a few years ago."
+        >>> sys.add_material(h2o)
+        >>> print h2o.comment()
+
+        >>> print h2o.mcnp('%g', sim)
+        M1
+             1001 1
+             8016 2
+
+        """
+    def comment(self): 
+        string = "Material {0!r}: {1}".format(self.name, self.description)
+
+    def mcnp(self, float_format, sim):
+        string = "M{0}".format(sim.sys.material_num(self.name))
+        mats = self.to_atom_frac()
+        for zaid, den in mats.items():
+            string += "\n     {0}".format(nucname.mcnp(zaid))
+            string += " " + float_format % den
+        return string
+
+
 class Cell(ICard):
     """A cell is a region of space filled with a material. If requesting a void
     cell, the ``material``, ``density``, and ``density_units`` attributes are
