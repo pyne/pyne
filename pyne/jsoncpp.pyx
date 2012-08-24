@@ -17,7 +17,6 @@ try:
 except ImportError:
     import json
 
-
 cdef cpp_jsoncpp.Value * toboolval(bint b):
     # NOTE: This is a little hack-y but has to be done since
     # Cython bints are not actually C++ bools
@@ -62,6 +61,10 @@ cdef cpp_jsoncpp.Value * tocppval(object doc) except NULL:
 
 
 cdef class Value(object):
+
+    _value_type_names = ['null', 'int', 'uint', 'real', 'string', 'boolean',
+                         'array', 'object']
+
     def __cinit__(self, document=None, bint view=False):
         """Value C++ constuctor."""
         self._view = view
@@ -169,12 +172,45 @@ cdef class Value(object):
             return NotImplemented
 
     def isnull(self):
+        """True if JSON null, False otherwise."""
         return self._inst.isNull()
+
+    def isbool(self):
+        """True if JSON boolean, False otherwise."""
+        return self._inst.isBool()
+
+    def isint(self):
+        """True if is any JSON integer type, False otherwise."""
+        return self._inst.isIntegral()
+
+    def isfloat(self):
+        """True if is any JSON float or double type, False otherwise."""
+        return self._inst.isDouble()
+
+    def isstring(self):
+        """True if JSON string, False otherwise."""
+        return self._inst.isString()
+
+    def isarray(self):
+        """True if JSON array or null, False otherwise."""
+        return self._inst.isArray()
+
+    def isobject(self):
+        """True if JSON object or null, False otherwise."""
+        return self._inst.isObject()
+
+    def type(self):
+        """The type number of this JSON value."""
+        return self._inst.type()
+
+    def type_name(self):
+        """The type name of this JSON value."""
+        return self._value_type_names[self._inst.type()]
 
 
 cdef class Reader:
     def __cinit__(self):
-        """Reade C++ constuctor."""
+        """Reader C++ constuctor."""
         self._inst = new cpp_jsoncpp.Reader()
 
     def __dealloc__(self):
