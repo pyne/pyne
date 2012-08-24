@@ -107,14 +107,19 @@ class MCNPInput(IInputFile):
                 plug, float_format)
         self.description = description
         self.cont_by_blanks = cont_by_blanks
-        self.commentwrap = textwrap.TextWrapper(initial_indent='C',
-                subsequent_indent='C', break_long_words=True)
-        if self.cont_by_blanks:
-            card_cont = 5 * ' '
-        else:
-            raise # TODO ampersand goes at the beginning of the line.
-            card_cont = '& '
-        self.cardwrap = textwrap.TextWrapper(subsequent_indent=card_cont,
+        # Comment wrapping.
+        self.commentwrap = textwrap.TextWrapper(
+                width=80,
+                initial_indent='C ',
+                subsequent_indent='C ',
+                break_long_words=True)
+        # TODO ampersand goes at the beginning of the line.
+        if self.cont_by_blanks: card_cont = 5 * ' '
+        else:                   raise Exception("Unimplemented.")
+        # Card wrpaping.
+        self.cardwrap = textwrap.TextWrapper(
+                width=80,
+                subsequent_indent=card_cont,
                 break_long_words=True)
 
     def _write_subclass(self):
