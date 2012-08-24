@@ -40,7 +40,8 @@ cdef cpp_map[int, double] dict_to_comp(dict nucvec):
 cdef class _Material:
 
     def __cinit__(self, nucvec=None, double mass=-1.0, char * name='',
-                  double atoms_per_mol=-1.0, bint free_mat=True):
+                  double atoms_per_mol=-1.0, bint free_mat=True,
+                  *args, **kwargs):
         """Material C++ constuctor."""
         cdef cpp_map[int, double] comp
 
