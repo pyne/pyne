@@ -46,6 +46,7 @@ the module.
 # TODO improve inheritance around ICellMod.
 # TODO rewrite WeightWindowBound so that there is a separate card for each
 # index.
+# TODO big opportunity to clean up what the mcnp() output looks like.
 # TODO consistent plural card names when appropriate.
 # Temperature < 200, < 1 warnings, remove?
 # Refactor CellMCNP so all relevant classes have a method _mcnp_cell_comment
@@ -116,7 +117,7 @@ class ICard(object):
                      'heavy_ions': '#'
                      }
     
-    def __init__(self, name, unique=False):
+    def __init__(self, name, unique=False, *args, **kwargs):
         """
         Parameters
         ----------
@@ -130,12 +131,10 @@ class ICard(object):
         """
         # Somebody on the internet said to use super() even when only
         # subclassing from object.
-        super(ICard, self).__init__()
+        super(ICard, self).__init__(*args, **kwargs)
         self._unique = unique
-        if self._unique:
-            self._name = name
-        else:
-            self.name = name
+        if self._unique: self._name = name
+        else:            self.name = name
 
     # All subclasses must define a comment() method.
     @abc.abstractmethod
@@ -170,7 +169,8 @@ class ICard(object):
 
 
 class Material(ICard, material.Material):
-    """Adds the attribute :py:attr:`description` and the methods
+    """In MCNP, this is the **M** card. Adds the attributes
+    :py:attr:`description`, :py:attr:`tables` and the methods
     :py:meth:`comment` and :py:meth:`mcnp` to
     :py:class:`pyne.material.Material`. The :py:attr:`name` must be provided
     before the card is added to a system. The user can specify a description
@@ -184,42 +184,107 @@ class Material(ICard, material.Material):
         Parameters
         ----------
         see :py:class:`pyne.material.Material` for superclass parameters.
-        name : str
+        name : str as keyword argument
             This is a keyword argument, but `must` be supplied.
-        description : str
+        description : str as keyword argument, optional
             A description of this material that perhaps explains where the
             material came from (whether it's recycled, any references, etc.).
+        tables : dict
+            Sometimes it is necessary to specify a library/table identifier for
+            a given nuclide. These can be provided in this dictionary. Leave
+            out the period. See examples.
 
         Examples
         --------
         The usage of this card is nearly identical to that of
-        :py:class:`pyne.material.Material`::
+        :py:class:`pyne.material.Material`, but we show the usage of the 2 new
+        attributes and 2 new methods::
 
         >>> from pyne.simplesim import definition
         >>> sys = definition.SystemDefinition(verbose=False)
         >>> sim = definition.MCNPSimulation(sys, verbose=False)
+        >>> originstory = "I found this water in a well a few years ago."
         >>> h2o = Material(name='water')
         >>> h2o.from_atom_frac({10010: 1.0, 'O16': 2.0})
-        >>> h2o.description = "I found this water in a well a few years ago."
+        >>> h2o.tables = {10010: '06c'}
         >>> sys.add_material(h2o)
         >>> print h2o.comment()
-
+        Material 'water': I found this water in a well a few years ago.
         >>> print h2o.mcnp('%g', sim)
         M1
-             1001 1
+             1001.71c 1
+             8016 2
+
+        Alternatively, the tables can be specified with the constructor::
+
+        >>> h2o = Material(name='water', tables={10010: '71c'})
+        >>> h2o.from_atom_frac({10010: 1.0, 'O16': 2.0})
+        >>> print h2o.mcnp('%g', sim)
+        M1
+             1001.71c 1
+             8016 2
+
+        The ``nucname``s used for ``tables`` can be different from those used
+        for ``comp``::
+
+        >>> h2o = Material(name='water', tables={'H1': '71c'})
+        >>> h2o.from_atom_frac({10010: 1.0, 'O16': 2.0})
+        >>> print h2o.mcnp('%g', sim)
+        M1
+             1001.71c 1
              8016 2
 
         """
+        super(Material, self).__init__(*args, **kwargs)
+        self.description = kwargs.get('description', None)
+        self.tables = kwargs.get('tables', dict())
+
     def comment(self): 
-        string = "Material {0!r}: {1}".format(self.name, self.description)
+        string = "Material {0!r}".format(self.name)
+        if self.description: string += ": {0}"format(self.description)
+        else: string += "."
+        return string
 
     def mcnp(self, float_format, sim):
+        # TODO assumes a single line won't go over 80 columns.
         string = "M{0}".format(sim.sys.material_num(self.name))
         mats = self.to_atom_frac()
-        for zaid, den in mats.items():
-            string += "\n     {0}".format(nucname.mcnp(zaid))
+        for nuc, den in mats.items():
+            # ZAID.
+            string += "\n     {:06d}".format(nucname.mcnp(nuc))
+            # Table ID. Loop allows flexible keys for tables.
+
+            for key in self.tables:
+                if nucname.mcnp(key) == nucname.mcnp(nuc):
+                    string += ".{0}".format(self.tables[key])
+            # Concentration/density.
             string += " " + float_format % den
+            # Nuclide name.
+            string += " $ {0}".format(nucname.name(nuc))
         return string
+
+    @property
+    def description(self): return self._description
+
+    @description.setter
+    def description(self, value): self._description = value
+
+    @property
+    def tables(self): return self._tables
+
+    @tables.setter
+    def tables(self, value): self._tables = value
+
+
+class MaterialMCNP(Material):
+    # TODO automates the selection of table identifiers.
+    pass
+    """
+
+    """
+
+
+class ScatteringLaw(
 
 
 class Cell(ICard):
