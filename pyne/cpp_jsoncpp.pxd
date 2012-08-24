@@ -24,6 +24,7 @@ cdef extern from "json/json.h" namespace "Json":
         Value(int) except +
         Value(bint) except +
         Value(bint, enum) except +
+        Value(Value &) except +
 
         const_char * asCString() except +
         std.string asString() except +
@@ -55,7 +56,7 @@ cdef extern from "json/json.h" namespace "Json":
 
         void swap(Value &) except +
         void swap(Value *) except +
-        #Value & operator=(Value) except +
+        #Value & operator=(Value &) except +
 
         int size() except +
         void resize(int) except +
