@@ -131,6 +131,26 @@ def test_mapsetitem():
         v[key] = value
     assert_equal(dict([(k, v[k]) for k in m.keys()]), m)
 
+def test_getslice():
+    a = [1, 2, 5, 3]
+    v = Value(a)
+
+    t = v[1:-1]
+    obs = [t[i] for i in range(2)]
+    exp = [2, 5]
+    assert_equal(obs, exp)
+
+    t = v[::-1]
+    obs = [t[i] for i in range(4)]
+    exp = a[::-1]
+    assert_equal(obs, exp)
+
+    t = v[3::-1]
+    obs = [t[i] for i in range(3)]
+    exp = a[3::-1]
+    assert_equal(obs, exp)
+
+
 #r = jsoncpp.Reader()
 #root = r.parse({'a': 10, 'b': 'Hello', 'c': {'d': [1, 2, 10.0]}})
 
@@ -144,7 +164,7 @@ q = root['c']['d']
 print q
 r = root['c']['d']
 print r
-
+x
 print "len root = ", len(root)
 root['ORLY'] = 'YARLY'
 print "len root = ", len(root)
