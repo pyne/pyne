@@ -60,6 +60,14 @@ cdef cpp_jsoncpp.Value * tocppval(object doc) except NULL:
     return cval
 
 
+cdef int tovalidindex(int i, int I) except -1:
+    cdef int valid_i = i 
+    if valid_i < 0:
+        valid_i = I + valid_i
+    if (I <= valid_i) or (valid_i < 0):
+        raise IndexError
+    return valid_i
+
 cdef class Value(object):
 
     _value_type_names = ['null', 'int', 'uint', 'real', 'string', 'boolean',
@@ -87,19 +95,29 @@ cdef class Value(object):
         # convert key and get value
         if isinstance(pykey, basestring):
             cvalue = &self._inst[0][<const_char *> pykey]
-        elif isinstance(pykey, int) and self._inst.isArray():
-            curr_size = self._inst[0].size()
-            if pykey < 0:
-                pykey = curr_size + pykey
-            if (curr_size <= pykey) or (pykey < 0):
-                raise IndexError
+        elif isinstance(pykey, int) and (self._inst.type() == cpp_jsoncpp.arrayValue):
+            pykey = tovalidindex(pykey, self._inst[0].size())
             cvalue = &self._inst[0][<int> pykey]
-        elif isinstance(pykey, slice) and self._inst.isArray():
-            N = self._inst.size()
-            #for 
+        elif isinstance(pykey, slice) and (self._inst.type() == cpp_jsoncpp.arrayValue):
+            pyvalue._view = False
+            cvalue = new cpp_jsoncpp.Value(<cpp_jsoncpp.ValueType> cpp_jsoncpp.arrayValue)
+            curr_size = self._inst.size()
+            start = 0 if pykey.start is None else tovalidindex(pykey.start, curr_size)
+            stop = curr_size if (pykey.stop is None) or (pykey.stop == curr_size) else tovalidindex(pykey.stop, curr_size)
+            step = 1 if pykey.step is None else pykey.step
+            new_size = (stop - start)/abs(step) + bool((stop - start)%step)
+            cvalue.resize(new_size)
+            if step < 0:
+                start, stop = stop-1, start-1
+                #start, stop = -1*start, -1*stop
+            for i, j in enumerate(range(start, stop, step)):
+                if j < 0:
+                    j += curr_size
+                cvalue[0][<int> i].swap(cpp_jsoncpp.Value(self._inst[0][<int> j]))
         else:
-            if (isinstance(pykey, int) or isinstance(pykey, slice)) and not self._inst.isArray():
-                raise KeyError('key is int but object is not an array')
+            if (isinstance(pykey, int) or isinstance(pykey, slice)) and not \
+               (self._inst.type() == cpp_jsoncpp.arrayValue):
+                raise KeyError('key is int or slice but object is not an array')
             else:            
                 raise KeyError('key not of appropriate type, got {0}'.format(type(pykey)))
 
