@@ -81,20 +81,16 @@ def test_nestedvalue():
     lofl = [[1, 2, 3, False, 5, 6], '1', {'a': {'b': 42.0}}]
     lofl = [[1, 2, 3, None, 5, 6], '1', {'a': {'b': 42.0}}]
     v = Value(lofl)
-    #print len(v[0])
-    a = v[0]
-    print a[3]
-    #print v[0][3]
-    #print v[2]['a']['b']
-    assert False
+    assert_equal(len(v), len(lofl))
+    assert_equal(len(v[0]), len(lofl[0]))
+    assert_equal(v[0][1], lofl[0][1])
+    assert_equal(v[-1]['a']['b'], lofl[-1]['a']['b'])
 
 def test_arrsetitem():
-    #l = ['Terry Jones', 1, None, 42.0, {}]
-    l = ['Terry Jones', 1, 42.0]
+    l = ['Terry Jones', 1, None, 42.0]
     v = Value([None] * len(l))
     for i, value in enumerate(l):
         v[i] = value
-    #assert False
     assert_equal([v[i] for i in range(len(l))], l)
 
 def test_mapsetitem():
@@ -103,8 +99,6 @@ def test_mapsetitem():
     for key, value in m.items():
         v[key] = value
     assert_equal(dict([(k, v[k]) for k in m.keys()]), m)
-"""\
-"""
 
 #r = jsoncpp.Reader()
 #root = r.parse({'a': 10, 'b': 'Hello', 'c': {'d': [1, 2, 10.0]}})
