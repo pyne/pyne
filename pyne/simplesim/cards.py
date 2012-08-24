@@ -51,6 +51,10 @@ the module.
 # Temperature < 200, < 1 warnings, remove?
 # Refactor CellMCNP so all relevant classes have a method _mcnp_cell_comment
 # and _mcnp_cell_card
+# TODO I think the __comment__() method should just be __str__()?
+# TODO in Cell, require that the material is not pyne.card.Material, but is a
+# card here.
+# TODO explain that names must only be unique within a category.
 
 import abc
 import collections
@@ -136,6 +140,9 @@ class ICard(object):
         if self._unique: self._name = name
         else:            self.name = name
 
+    def __str__(self):
+        return self.comment()
+
     # All subclasses must define a comment() method.
     @abc.abstractmethod
     def comment(self):
@@ -179,7 +186,7 @@ class Material(ICard, material.Material):
     .. inheritance-diagram:: pyne.simplesim.cards.Material
 
     """
-    def __init__(self, *args, *kwargs):
+    def __init__(self, *args, **kwargs):
         """
         Parameters
         ----------
@@ -189,7 +196,7 @@ class Material(ICard, material.Material):
         description : str as keyword argument, optional
             A description of this material that perhaps explains where the
             material came from (whether it's recycled, any references, etc.).
-        tables : dict
+        tables : dict of :py:class:`nucname`: str pairs
             Sometimes it is necessary to specify a library/table identifier for
             a given nuclide. These can be provided in this dictionary. Leave
             out the period. See examples.
@@ -204,25 +211,21 @@ class Material(ICard, material.Material):
         >>> sys = definition.SystemDefinition(verbose=False)
         >>> sim = definition.MCNPSimulation(sys, verbose=False)
         >>> originstory = "I found this water in a well a few years ago."
-        >>> h2o = Material(name='water')
+        >>> h2o = Material(name='water', description=originstory)
         >>> h2o.from_atom_frac({10010: 1.0, 'O16': 2.0})
-        >>> h2o.tables = {10010: '06c'}
+        >>> h2o.tables = {10010: '71c'}
         >>> sys.add_material(h2o)
         >>> print h2o.comment()
         Material 'water': I found this water in a well a few years ago.
         >>> print h2o.mcnp('%g', sim)
         M1
-             1001.71c 1
-             8016 2
+               1001.71c  1 $ H1
+               8016      2 $ O16
 
         Alternatively, the tables can be specified with the constructor::
 
         >>> h2o = Material(name='water', tables={10010: '71c'})
         >>> h2o.from_atom_frac({10010: 1.0, 'O16': 2.0})
-        >>> print h2o.mcnp('%g', sim)
-        M1
-             1001.71c 1
-             8016 2
 
         The ``nucname``s used for ``tables`` can be different from those used
         for ``comp``::
@@ -231,34 +234,41 @@ class Material(ICard, material.Material):
         >>> h2o.from_atom_frac({10010: 1.0, 'O16': 2.0})
         >>> print h2o.mcnp('%g', sim)
         M1
-             1001.71c 1
-             8016 2
+               1001.71c  1 $ H1
+               8016      2 $ O16
 
         """
         super(Material, self).__init__(*args, **kwargs)
         self.description = kwargs.get('description', None)
         self.tables = kwargs.get('tables', dict())
+        # Find longest table ID. Used in card printing for prettiness.
 
     def comment(self): 
+        if self.name == '':
+            raise ValueError("The ``name`` property of the material cannot "
+                    "be empty.")
         string = "Material {0!r}".format(self.name)
-        if self.description: string += ": {0}"format(self.description)
+        if self.description: string += ": {0}".format(self.description)
         else: string += "."
         return string
 
     def mcnp(self, float_format, sim):
         # TODO assumes a single line won't go over 80 columns.
         string = "M{0}".format(sim.sys.material_num(self.name))
-        mats = self.to_atom_frac()
-        for nuc, den in mats.items():
+        for nuc, den in self.to_atom_frac().items():
             # ZAID.
-            string += "\n     {:06d}".format(nucname.mcnp(nuc))
+            string += "\n     {: 6d}".format(nucname.mcnp(nuc))
             # Table ID. Loop allows flexible keys for tables.
-
+            flag = False 
             for key in self.tables:
                 if nucname.mcnp(key) == nucname.mcnp(nuc):
+                    flag = True
                     string += ".{0}".format(self.tables[key])
+            if not flag:
+                # +1 for he decimal point.
+                string += (self._max_table_len + 1) * " "
             # Concentration/density.
-            string += " " + float_format % den
+            string += 2 * " " + float_format % den
             # Nuclide name.
             string += " $ {0}".format(nucname.name(nuc))
         return string
@@ -273,18 +283,76 @@ class Material(ICard, material.Material):
     def tables(self): return self._tables
 
     @tables.setter
-    def tables(self, value): self._tables = value
+    def tables(self, value):
+        self._tables = value
+        max_table_len = 0
+        for key, val in self.tables.items():
+            if len(val) > max_table_len:
+                max_table_len = len(val)
+        self._max_table_len = max_table_len
 
 
 class MaterialMCNP(Material):
     # TODO automates the selection of table identifiers.
     pass
-    """
+
+
+class ScatteringLaw(ICard):
+    """Scattering law for a material. Unique card for a given material, with
+    name `scatlaw-<matname>`. In MCNP, this is the **MT** card.
+
+    .. inheritance-diagram:: pyne.simplesim.cards.ScatteringLaw
 
     """
+    def __init__(self, mat_name, libraries):
+        """
+        Parameters
+        ----------
+        mat_name : str
+            Name of the material for which this card applies.
+        libraries : dict of :py:class:`nucname`: str pairs
+            The keys are the nuclides on the material for which a library is
+            being provided, and the values are the appropriate library
+            identifiers as strings.
 
+        Examples
+        --------
+        This specifies hydrogen bound in water, in MCNP::
 
-class ScatteringLaw(
+        >>> from pyne.simplesim import definition
+        >>> sys = definition.SystemDefinition(verbose=False)
+        >>> sim = definition.MCNPSimulation(sys, verbose=False)
+        >>> h2o = Material(name='water')
+        >>> h2o.from_atom_frac({10010: 1.0, 'O16': 2.0})
+        >>> sys.add_material(h2o)
+        >>> sl = ScatteringLaw('water', {'H1': 'lwtr.16t'})
+        >>> print sl.comment()
+        Scattering law 'scatlaw-water': H1: lwtr.16t.
+        >>> print sl.mcnp('%g', sim)
+        MT1 lwtr.16t
+
+        """
+        super(ScatteringLaw, self).__init__('scatlaw-{0}'.format(mat_name))
+        self.mat_name = mat_name
+        self.libraries = libraries
+
+    def comment(self):
+        string = "Scattering law {0!r}:".format(self.name)
+        for nuc, lib in self.libraries.items():
+            string += " {0}: {1},".format(nucname.name(nuc), lib)
+        return string[:-1] + "."
+
+    def mcnp(self, float_format, sim):
+        string = "MT{0}".format(sim.sys.material_num(self.mat_name))
+        for nuc, lib in self.libraries.items():
+            string += " {0}".format(lib)
+        return string
+
+    @property
+    def libraries(self): return self._libraries
+
+    @libraries.setter
+    def libraries(self, value): self._libraries = value
 
 
 class Cell(ICard):
@@ -303,11 +371,11 @@ class Cell(ICard):
         region : :py:class:`Region` subclass
             Defines the region of space that this cell occupies (see
             :py:class:`Region`).
-        material : :py:class:`pyne.material.Material`, None for void
+        material : :py:class:`pyne.simplesim.cards.Material`, None for void
             A material definition using the :py:mod:`pyne.material` module.
             For use here, the material's :py:attr:`name` property must be set
-            to something other than '' and must be unique. See
-            :py:class:`pyne.material.Material`.
+            to something other than '' and must be unique within the materials.
+            See :py:class:`pyne.material.Material`.
         density : float, None for void
             Density for the material, in units of density_units.
         density_units : str, None for void
@@ -413,10 +481,10 @@ class Cell(ICard):
     @material.setter
     def material(self, obj):
         # This check is redundant.
-        if obj and type(obj) is not material.Material:
+        if obj and type(obj) is not Material:
             raise ValueError("The property ``material`` must be instance "
-                    "of ``pyne.material.Material``. User provided {0}.".format(
-                    obj))
+                    "of ``pyne.simplesim.cards.Material``. "
+                    "User provided {0}.".format( obj))
         if obj and obj.name == '':
             raise ValueError("The ``name`` property of the material cannot "
                     "be empty.")
@@ -480,7 +548,7 @@ class CellMCNP(Cell):
             See :py:class:`ICard`.
         region : :py:class:`Region`
             See :py:class:`Cell`.
-        material : :py:class:`pyne.material.Material`, None for void
+        material : :py:class:`pyne.simplesim.cards.Material`, None for void
             See :py:class:`Cell`.
         density : float, None for void
             See :py:class:`Cell`.

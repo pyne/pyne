@@ -23,6 +23,8 @@ extension to other codes may require more effort.
 # dict.
 # TODO let users enter cell or surface cards to a certain location or number;
 # describe how the remaining cards are modified.
+# TODO let user specify number format for different types of floats
+# TODO provision for printing materials...
 
 import abc
 import datetime
