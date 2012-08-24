@@ -54,10 +54,7 @@ cdef cpp_jsoncpp.Value * tocppval(object doc) except NULL:
     elif isinstance(doc, int):
         cval = new cpp_jsoncpp.Value(<int> doc)
     elif doc is None:
-        print "I AM NONE"
         cval = new cpp_jsoncpp.Value(<cpp_jsoncpp.ValueType> cpp_jsoncpp.nullValue)
-        if cval.isNull():
-            print "AND I AM NULL"
         #cval = <cpp_jsoncpp.Value *> &((new cpp_jsoncpp.Value()).null)
     else:
         raise ValueError("{0} not of known type".format(doc))
@@ -83,12 +80,16 @@ cdef class Value(object):
     def __getitem__(self, pykey):
         cdef cpp_jsoncpp.Value * cvalue
         cdef Value pyvalue = Value(view=True)
-        print "Getting item"
 
         # convert key and get value
         if isinstance(pykey, basestring):
             cvalue = &self._inst[0][<const_char *> pykey]
         elif isinstance(pykey, int) and self._inst.isArray():
+            curr_size = self._inst[0].size()
+            if pykey < 0:
+                pykey = curr_size + pykey
+            if (curr_size <= pykey) or (pykey < 0):
+                raise IndexError
             cvalue = &self._inst[0][<int> pykey]
         elif isinstance(pykey, slice) and self._inst.isArray():
             N = self._inst.size()
@@ -100,10 +101,9 @@ cdef class Value(object):
                 raise KeyError('key not of appropriate type, got {0}'.format(type(pykey)))
 
         # convert value
-        if cvalue.isObject() or cvalue.isArray():
-            print "I AM OBJ"
+        if (cvalue.type() == cpp_jsoncpp.objectValue) or \
+           (cvalue.type() == cpp_jsoncpp.arrayValue):
             pyvalue._inst = cvalue
-            print "I AM STILL OBJ"
             return pyvalue
         elif cvalue.isString():
             return <char *> cvalue.asCString()
@@ -114,10 +114,9 @@ cdef class Value(object):
         elif cvalue.isIntegral():
             return cvalue.asInt()
         elif cvalue.isNull():
-            print "I AM LOW NULL"
             return None
         else:
-            raise ValueError("{0} not of know type".format(pykey))
+            raise ValueError("{0} not of known type".format(pykey))
 
     def __setitem__(self, key, value):
         cdef cpp_jsoncpp.Value * ckey 
@@ -126,7 +125,7 @@ cdef class Value(object):
         elif isinstance(key, int):
             curr_size = self._inst[0].size()
             if key < 0:
-                key = curr_size - key
+                key = curr_size + key
             if (curr_size <= key) or (key < 0):
                 raise IndexError
             ckey = &self._inst[0][<int> key]
@@ -148,7 +147,7 @@ cdef class Value(object):
             s = self._inst.asCString()
         else:
             # FIXME: add writer here
-            pass
+            s = "Nothing here yet!"
         return s
 
     def __float__(self):
