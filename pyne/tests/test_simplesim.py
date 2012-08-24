@@ -399,6 +399,8 @@ class TestSystemDefinition(unittest.TestCase):
         self.rxr.add_cell(self.graveyard)
         self.sim = definition.MCNPSimulation(self.rxr, verbose=False)
 
+    def test_Material(self):
+
     def test_Cell(self):
         """Tests :py:class:`cards.Cell`'s methods, properties, and
         exceptions.
