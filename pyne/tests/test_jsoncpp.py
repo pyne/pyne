@@ -1,5 +1,6 @@
 """JsonCpp tests"""
 import os
+import collections
 try:
     import simplejson as json
 except ImportError:
@@ -102,6 +103,7 @@ def test_mapvalue():
     assert_true(v.isobject())
     assert_equal(v.type(), 7)
     assert_equal(v.type_name(), 'object')
+    assert_true(isinstance(v, collections.Mapping))
 
 def test_badmapvalue():
     m = {'name': 'Terry Jones', 42: 42.0}
@@ -244,6 +246,35 @@ def test_vals():
 def test_items():
     a = Value({'i': 10, 'j': "rawr"})
     assert_equal(a.items(), [('i', 10), ('j', 'rawr')])
+
+def test_iter():
+    a = Value({'i': 10, 'j': "rawr"})
+    assert_equal(a.keys(), [k for k in a])
+
+    a = Value([1, 2, 5, 3])
+    assert_equal([i for i in a], [1, 2, 5, 3] )
+
+    a = Value('rawr')
+    assert_equal([i for i in a], ['r', 'a', 'w', 'r'] )
+
+def test_get():
+    a = Value({'i': 10, 'j': "rawr"})
+    assert_equal(a.get('i'), 10)
+    assert_equal(a.get('wahhh'), None)
+    assert_equal(a.get('wahhh', 42.0), 42.0)
+
+def test_cmp():
+    a = Value({'i': 10, 'j': "rawr"})
+    assert_true(a == {'i': 10, 'j': "rawr"})
+    assert_true(a != {'i': 10})
+
+    a = Value(10)
+    assert_true(a == 10)
+    assert_true(a != 11)
+    assert_true(a < 11)
+    assert_true(a <= 11)
+    assert_true(a > 9)
+    assert_true(a >= 9)
 
 
 #r = jsoncpp.Reader()

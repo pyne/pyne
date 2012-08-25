@@ -61,6 +61,13 @@ cdef extern from "json/json.h" namespace "Json":
 
         bint isMember(std_string) except +
         bint isMember(const_char *) except +
+        bint operator<(Value &) except +
+        bint operator<=(Value &) except +
+        bint operator==(Value &) except +
+        bint operator!=(Value &) except +
+        bint operator>(Value &) except +
+        bint operator>=(Value &) except +
+        int compare(Value &) except +
 
         std_vector[std_string] getMemberNames() except +
 
