@@ -1237,7 +1237,7 @@ class TestSystemDefinition(unittest.TestCase):
         tally = cards.SurfaceCurrent('fuel', 'electron', [self.pin,
                 self.cellbound], total=True)
         self.assertEquals(tally.name, 'fuel')
-        self.assertEquals(tally.particle, 'electron')
+        self.assertEquals(tally.particle.name, 'electron')
         self.assertIs(tally.cards[0], self.pin)
         self.assertIs(tally.cards[1], self.cellbound)
         self.assertTrue(len(tally.cards), 2)
@@ -1248,9 +1248,14 @@ class TestSystemDefinition(unittest.TestCase):
         self.assertEquals(tally.comment(), "Surface current tally 'fuel' of "
                 "electrons: surfaces 'fuelpin'; 'bound'; and total of all "
                 "provided.")
-        tally = cards.SurfaceCurrent('fuel', 'photon', [[self.pin,
+        # mcnp()
+        self.sim.add_tally(tally)
+        self.assertEquals(tally.mcnp('%5g', self.sim),
+                "F11:E  1 2 T")
+
+        tally = cards.SurfaceCurrent('fuel2', 'photon', [[self.pin,
                 self.cellbound]], alt_units=True)
-        self.assertEquals(tally.particle, 'photon')
+        self.assertEquals(tally.particle.name, 'photon')
         self.assertTrue(len(tally.cards), 1)
         self.assertTrue(len(tally.cards[0]), 2)
         self.assertIs(tally.cards[0][0], self.pin)
@@ -1258,14 +1263,18 @@ class TestSystemDefinition(unittest.TestCase):
         self.assertFalse(tally.total)
         self.assertTrue(tally.alt_units)
         # comment()
-        self.assertEquals(tally.comment(), "Surface current tally 'fuel' "
-                "of photons: total in 'fuelpin', 'bound'.")
+        self.assertEquals(tally.comment(), "Surface current tally 'fuel2' "
+                "in alt. units of photons: total in 'fuelpin', 'bound'.")
+        # mcnp()
+        self.sim.add_tally(tally)
+        self.assertEquals(tally.mcnp('%5g', self.sim),
+                "*F21:P  ( 1 2)")
 
         ## SurfaceFlux
         tally = cards.SurfaceFlux('fuel', 'electron', [self.pin,
                 self.cellbound], average=True)
         self.assertEquals(tally.name, 'fuel')
-        self.assertEquals(tally.particle, 'electron')
+        self.assertEquals(tally.particle.name, 'electron')
         self.assertIs(tally.cards[0], self.pin)
         self.assertIs(tally.cards[1], self.cellbound)
         self.assertTrue(len(tally.cards), 2)
@@ -1275,9 +1284,14 @@ class TestSystemDefinition(unittest.TestCase):
         self.assertEquals(tally.comment(), "Surface flux tally 'fuel' "
                 "of electrons: surfaces 'fuelpin'; 'bound'; and avg. "
                 "of all provided.")
-        tally = cards.SurfaceFlux('fuel', 'proton', [[self.pin, self.cellbound]],
+        # mcnp()
+        self.sim.add_tally(tally)
+        self.assertEquals(tally.mcnp('%5g', self.sim), 
+                "F12:E  1 2 T")
+
+        tally = cards.SurfaceFlux('fuel2', 'proton', [[self.pin, self.cellbound]],
                     alt_units=True)
-        self.assertEquals(tally.particle, 'proton')
+        self.assertEquals(tally.particle.name, 'proton')
         self.assertTrue(len(tally.cards), 1)
         self.assertTrue(len(tally.cards[0]), 2)
         self.assertIs(tally.cards[0][0], self.pin)
@@ -1285,37 +1299,33 @@ class TestSystemDefinition(unittest.TestCase):
         self.assertFalse(tally.average)
         self.assertTrue(tally.alt_units)
         # comment()
-        self.assertEquals(tally.comment(), "Surface flux tally 'fuel' "
-                "of protons: avg. in 'fuelpin', 'bound'.")
+        self.assertEquals(tally.comment(), "Surface flux tally 'fuel2' "
+                "in alt. units of protons: avg. in 'fuelpin', 'bound'.")
+        # mcnp()
+        self.sim.add_tally(tally)
+        self.assertEquals(tally.mcnp('%5g', self.sim), 
+                "*F22:H  ( 1 2)")
 
         ## CellFlux
         # One cell.
         tally = cards.CellFlux('fuel', 'neutron', self.fuel)
         self.assertEquals(tally.name, 'fuel')
-        self.assertEquals(tally.particle, 'neutron')
-        # Test ``particle`` property.
-        tally = cards.CellFlux('fuel', 'photon', self.fuel)
-        self.assertEquals(tally.particle, 'photon')
-        tally = cards.CellFlux('fuel', 'electron', self.fuel)
-        self.assertEquals(tally.particle, 'electron')
-        tally = cards.CellFlux('fuel', 'proton', self.fuel)
-        self.assertEquals(tally.particle, 'proton')
-        # Test exception on ``particle`` property.
-        self.assertRaises(ValueError, setattr, tally, 'particle', 'test')
-        try:
-            tally.particle = 'test'
-        except ValueError as e:
-            self.assertEquals(e.message, 
-                    "The property ``particle`` must be 'neutron', "
-                    "'photon', 'electron', or 'proton'. "
-                    "User provided 'test'.")
+        self.assertEquals(tally.particle.name, 'neutron')
         self.assertEquals(tally.comment(), "Cell flux tally 'fuel' "
-                "of protons: cell 'fuel'.")
+                "of neutrons: cell 'fuel'.")
+        # mcnp()
+        self.sim.add_tally(tally)
+        self.assertEquals(tally.mcnp('%5g', self.sim), 
+                "F14:N  1")
         self.assertIs(tally._unique_card_list()[0], self.fuel)
         # Two individual cells.
         tally = cards.CellFlux('both', 'neutron', [self.fuel, self.coolant])
         self.assertEquals(tally.comment(), "Cell flux tally 'both' "
                 "of neutrons: cells 'fuel'; 'coolant'.")
+        # mcnp()
+        self.sim.add_tally(tally)
+        self.assertEquals(tally.mcnp('%5g', self.sim), 
+                "F24:N  1 2")
         self.assertIs(tally._unique_card_list()[0], self.fuel)
         self.assertIs(tally._unique_card_list()[1], self.coolant)
         # Two individual cells, with average over all.
@@ -1324,6 +1334,10 @@ class TestSystemDefinition(unittest.TestCase):
         self.assertEquals(tally.comment(), "Cell flux tally 'withavg' "
                 "of neutrons: cells 'fuel'; 'coolant'; and avg. of all "
                 "provided.")
+        # mcnp()
+        self.sim.add_tally(tally)
+        self.assertEquals(tally.mcnp('%5g', self.sim), 
+                "F34:N  1 2 T")
         self.assertIs(tally._unique_card_list()[0], self.fuel)
         self.assertIs(tally._unique_card_list()[1], self.coolant)
         # Two individual cells, and an averaging, with an average over all.
@@ -1332,6 +1346,10 @@ class TestSystemDefinition(unittest.TestCase):
         self.assertEquals(tally.comment(), "Cell flux tally 'withavg' "
                 "of neutrons: cells 'fuel'; avg. in 'fuel', 'coolant'; "
                 "'coolant'; and avg. of all provided.")
+        # mcnp()
+        self.sim.add_tally(tally)
+        self.assertEquals(tally.mcnp('%5g', self.sim), 
+                "F34:N  1 ( 1 2) 2 T")
         self.assertIs(tally._unique_card_list()[0], self.fuel)
         self.assertIs(tally._unique_card_list()[1], self.coolant)
         self.assertTrue(len(tally._unique_card_list()) == 2)
@@ -1339,20 +1357,33 @@ class TestSystemDefinition(unittest.TestCase):
         ## CellEnergyDeposition
         tally = cards.CellEnergyDeposition('energy', 'neutron', self.fuel)
         self.assertEquals(tally.name, 'energy')
-        self.assertEquals(tally.particle, 'neutron')
+        self.assertEquals(tally.particle.name, 'neutron')
         self.assertIs(tally.cards, self.fuel)
+        # comment()
         self.assertEquals(tally.comment(), "Energy deposition tally "
                 "'energy' of neutrons: cell 'fuel'.")
-        tally = cards.CellEnergyDeposition('energy', ['neutron', 'proton'],
+        # mcnp()
+        self.sim.add_tally(tally)
+        self.assertEquals(tally.mcnp('%5g', self.sim), 
+                "F16:N  1")
+        tally = cards.CellEnergyDeposition('energy2', ['neutron', 'proton'],
                 self.fuel)
         self.assertIs(type(tally.particle), list)
-        self.assertEquals(tally.particle[0], 'neutron')
-        self.assertEquals(tally.particle[1], 'proton')
+        self.assertEquals(tally.particle[0].name, 'neutron')
+        self.assertEquals(tally.particle[1].name, 'proton')
         self.assertEquals(tally.comment(), "Energy deposition tally " 
-                "'energy' of neutrons, protons: cell 'fuel'.")
-        tally = cards.CellEnergyDeposition('energy', 'all', self.fuel)
+                "'energy2' of neutrons, protons: cell 'fuel'.")
+        # mcnp()
+        self.sim.add_tally(tally)
+        self.assertEquals(tally.mcnp('%5g', self.sim), 
+                "F26:N,H  1")
+        tally = cards.CellEnergyDeposition('energy3', 'all', self.fuel)
         self.assertEquals(tally.comment(), "Energy deposition tally "
-                "'energy' of all: cell 'fuel'.")
+                "'energy3' of all: cell 'fuel'.")
+        # mcnp()
+        self.sim.add_tally(tally)
+        self.assertEquals(tally.mcnp('%5g', self.sim), 
+                "+F36  1")
         # Test exceptions.
         self.assertRaises(ValueError, cards.CellEnergyDeposition, 'energy',
                 ['neutron', 'all'], self.fuel)
@@ -1363,7 +1394,7 @@ class TestSystemDefinition(unittest.TestCase):
         tally = cards.CellFissionEnergyDeposition('fuel', [self.fuel,
                 self.coolant], average=True)
         self.assertEquals(tally.name, 'fuel')
-        self.assertEquals(tally.particle, 'neutron')
+        self.assertEquals(tally.particle.name, 'neutron')
         self.assertIs(type(tally.cards), list)
         self.assertIs(tally.cards[0], self.fuel)
         self.assertIs(tally.cards[1], self.coolant)
@@ -1372,6 +1403,10 @@ class TestSystemDefinition(unittest.TestCase):
         self.assertEquals(tally.comment(), "Fission energy deposition tally "
                 "'fuel' of neutrons: cells 'fuel'; 'coolant'; and avg. of "
                 "all provided.")
+        # mcnp()
+        self.sim.add_tally(tally)
+        self.assertEquals(tally.mcnp('%5g', self.sim), 
+                "F17:N  1 2 T")
         tally = cards.CellFissionEnergyDeposition('fuel', [[self.fuel,
                 self.coolant]], alt_units=True)
         self.assertTrue(len(tally.cards), 1)
@@ -1380,37 +1415,51 @@ class TestSystemDefinition(unittest.TestCase):
         self.assertIs(tally.cards[0][1], self.coolant)
         self.assertFalse(tally.average)
         self.assertTrue(tally.alt_units)
+        self.assertEquals(tally.comment(), "Fission energy deposition tally "
+                "'fuel' in alt. units of neutrons: avg. in 'fuel', 'coolant'.")
+        # mcnp()
+        self.sim.add_tally(tally)
+        self.assertEquals(tally.mcnp('%5g', self.sim), 
+                "*F17:N  ( 1 2)")
 
         ## CellPulseHeight
         tally = cards.CellPulseHeight('fuel', ['proton', 'electron'], [self.fuel,
                 self.coolant], alt_units=True)
         self.assertEquals(tally.name, 'fuel')
-        self.assertEquals(tally.particle[0], 'proton')
-        self.assertEquals(tally.particle[1], 'electron')
+        self.assertEquals(tally.particle[0].name, 'proton')
+        self.assertEquals(tally.particle[1].name, 'electron')
         self.assertIs(tally.cards[0], self.fuel)
         self.assertIs(tally.cards[1], self.coolant)
         self.assertFalse(tally.average)
         self.assertTrue(tally.alt_units)
         tally.average = True
         self.assertTrue(tally.average)
+        # mcnp()
+        self.sim.add_tally(tally)
+        self.assertEquals(tally.mcnp('%5g', self.sim), 
+                "*F18:H,E  1 2 T")
 
         ## CellChargeDeposition
         tally = cards.CellChargeDeposition('fuel', ['proton', 'electron'],
                 [self.fuel, self.coolant])
         self.assertEquals(tally.name, 'fuel')
-        self.assertEquals(tally.particle[0], 'proton')
-        self.assertEquals(tally.particle[1], 'electron')
+        self.assertEquals(tally.particle[0].name, 'proton')
+        self.assertEquals(tally.particle[1].name, 'electron')
         self.assertIs(tally.cards[0], self.fuel)
         self.assertIs(tally.cards[1], self.coolant)
         self.assertFalse(tally.average)
         self.assertFalse(tally.alt_units)
         tally.average = True
         self.assertTrue(tally.average)
+        # mcnp()
+        self.sim.add_tally(tally)
+        self.assertEquals(tally.mcnp('%5g', self.sim), 
+                "+F18:H,E  1 2 T")
 
         ## PointDetector
         det = cards.PointDetector('point', 'neutron', ([0, 0, 0], 0))
         self.assertEquals(det.name, 'point')
-        self.assertEquals(det.particle, 'neutron')
+        self.assertEquals(det.particle.name, 'neutron')
         self.assertEquals(det.spec[0], [0, 0, 0])
         self.assertEquals(det.spec[1], 0)
         self.assertEquals(det.sep_direct, True)
@@ -1446,7 +1495,7 @@ class TestSystemDefinition(unittest.TestCase):
         ## RingDetector
         det = cards.RingDetector('ring', 'neutron', ('x', 10.0, 2.0,  1.0))
         self.assertEquals(det.name, 'ring')
-        self.assertEquals(det.particle, 'neutron')
+        self.assertEquals(det.particle.name, 'neutron')
         self.assertTrue(det.sep_direct)
         self.assertEquals(det.comment(), "Ring detector tally 'ring' of "
                 "neutrons: ring x = 10 cm, radius 2 cm, s.o.e. "
@@ -1505,66 +1554,66 @@ class TestMCNPInput(unittest.TestCase):
         #os.unlink('inptest')
         pass
 
-    def test_InfLattice(self):
-        """Tests the input file for an infinite lattice reactor. Checks
-        generated output against the text file `inflattice_compare`.
-
-        """
-        # Define system.
-        # Materials.
-        uo2 = cards.Material(name='UO2')
-        uo2.from_atom_frac({'U235': 0.05,
-                            'U238': 0.95,
-                            'O16' : 2.00})
-        h2o = cards.Material(name='H1')
-        h2o.from_atom_frac({'H1' : 2.0,
-                            'O16': 1.0})
-        # Surfaces.
-        radius = 0.40
-        pin = cards.AxisCylinder('pin', 'X', radius)
-        pitch = 1.2
-        cellbound = cards.Parallelepiped('bound',
-                -pitch / 2, pitch / 2, -pitch / 2, pitch / 2, 0, 0,
-                reflecting=True)
-        # Cells.
-        fuel = cards.CellMCNP('fuel', pin.neg, uo2,
-                11.0, 'g/cm^3',
-                importance=('neutron', 1))
-        coolant = cards.CellMCNP('coolant', pin.pos & cellbound.neg, h2o,
-                1.0, 'g/cm^3',
-                importance=('neutron', 1))
-        graveyard = cards.CellMCNP('graveyard', cellbound.pos,
-                importance=('neutron', 0))
-
-        # Add cells to the system.
-        self.sys.add_cell(fuel)
-        self.sys.add_cell(coolant)
-        self.sys.add_cell(graveyard)
-
-        # Add source, tallies to simulation.
-        self.sim.add_source(cards.Criticality())
-        self.sim.add_source(cards.CriticalityPoints())
-        self.sim.add_tally(cards.CellFlux('flux', 'neutron', [fuel, coolant]))
-        self.sim.add_misc(cards.EnergyGrid('egrid0', None,
-                10**np.arange(-9.9, 1.1, 0.1)))
-
-        # Create input file.
-        inp = inputfile.MCNPInput(self.sim)
-        inp.write('simplesim_inflattice_default')
-        # Check against text file.
-        #self.assertEquals(
-        #        open('simplesim_inflattice_default').readlines(),
-        #        open('simplesim_inflattice_default_compare').readlines())
-
-        # Test the & line continuation.
-        # TODO
-        #inp = inputfile.MCNPInput(self.sim, cont_by_amp=True)
-        #inp.write('simplesim_inflattice')
-    def test_bypass_wrap(self):
-        # TODO expecting a warning.
-        self.sim.add_source(cards.CriticalityPoints([[np.pi, np.pi, 0]]))
-        inp = inputfile.MCNPInput(self.sim, float_format="%.50e")
-        inp.write('simplesim_bypass_wrap')
+#    def test_InfLattice(self):
+#        """Tests the input file for an infinite lattice reactor. Checks
+#        generated output against the text file `inflattice_compare`.
+#
+#        """
+#        # Define system.
+#        # Materials.
+#        uo2 = cards.Material(name='UO2')
+#        uo2.from_atom_frac({'U235': 0.05,
+#                            'U238': 0.95,
+#                            'O16' : 2.00})
+#        h2o = cards.Material(name='H1')
+#        h2o.from_atom_frac({'H1' : 2.0,
+#                            'O16': 1.0})
+#        # Surfaces.
+#        radius = 0.40
+#        pin = cards.AxisCylinder('pin', 'X', radius)
+#        pitch = 1.2
+#        cellbound = cards.Parallelepiped('bound',
+#                -pitch / 2, pitch / 2, -pitch / 2, pitch / 2, 0, 0,
+#                reflecting=True)
+#        # Cells.
+#        fuel = cards.CellMCNP('fuel', pin.neg, uo2,
+#                11.0, 'g/cm^3',
+#                importance=('neutron', 1))
+#        coolant = cards.CellMCNP('coolant', pin.pos & cellbound.neg, h2o,
+#                1.0, 'g/cm^3',
+#                importance=('neutron', 1))
+#        graveyard = cards.CellMCNP('graveyard', cellbound.pos,
+#                importance=('neutron', 0))
+#
+#        # Add cells to the system.
+#        self.sys.add_cell(fuel)
+#        self.sys.add_cell(coolant)
+#        self.sys.add_cell(graveyard)
+#
+#        # Add source, tallies to simulation.
+#        self.sim.add_source(cards.Criticality())
+#        self.sim.add_source(cards.CriticalityPoints())
+#        self.sim.add_tally(cards.CellFlux('flux', 'neutron', [fuel, coolant]))
+#        self.sim.add_misc(cards.EnergyGrid('egrid0', None,
+#                10**np.arange(-9.9, 1.1, 0.1)))
+#
+#        # Create input file.
+#        inp = inputfile.MCNPInput(self.sim)
+#        inp.write('simplesim_inflattice_default')
+#        # Check against text file.
+#        #self.assertEquals(
+#        #        open('simplesim_inflattice_default').readlines(),
+#        #        open('simplesim_inflattice_default_compare').readlines())
+#
+#        # Test the & line continuation.
+#        # TODO
+#        #inp = inputfile.MCNPInput(self.sim, cont_by_amp=True)
+#        #inp.write('simplesim_inflattice')
+#    def test_bypass_wrap(self):
+#        # TODO expecting a warning.
+#        self.sim.add_source(cards.CriticalityPoints([[np.pi, np.pi, 0]]))
+#        inp = inputfile.MCNPInput(self.sim, float_format="%.50e")
+#        inp.write('simplesim_bypass_wrap')
 
 
 ## The following tests are redundant, but are to make sure that the examples in

@@ -8,6 +8,7 @@ Below is the reference for this module.
 
 """
 # TODO check overwriting warning.
+# TODO test the exceptions for getting *_num() not in list/dict.
 import abc
 import collections
 import pickle
@@ -176,14 +177,23 @@ class SystemDefinition(IDefinition):
     def cell_num(self, name):
         # TODO removing cards.
         # Must add one because indices start at 0 but card numbers at 1.
+        if name not in self.cells:
+            raise StandardError("Cell {0!r} is not in the system.".format(
+                    name))
         return self.cells.keys().index(name) + 1
 
     def surface_num(self, name):
         # Must add one because indices start at 0 but card numbers at 1.
+        if name not in self.surfaces:
+            raise StandardError("Surface {0!r} is not in the system.".format(
+                    name))
         return self.surfaces.keys().index(name) + 1
 
     def material_num(self, name):
         # Must add one because indices start at 0 but card numbers at 1.
+        if name not in self.materials:
+            raise StandardError("Material {0!r} is not in the system.".format(
+                    name))
         return self.materials.keys().index(name) + 1
 
     def remove_cell(self, name):
