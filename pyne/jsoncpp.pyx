@@ -196,6 +196,17 @@ cdef class Value(object):
         else:
             raise KeyError('key or object not of appropriate type')
 
+    def __iter__(self):
+        if (self._inst.type() == cpp_jsoncpp.objectValue):
+            return iter(self.keys())
+        elif (self._inst.type() == cpp_jsoncpp.arrayValue):
+            return iter([self[i] for i in range(len(self))])
+        elif (self._inst.type() == cpp_jsoncpp.stringValue):
+            return iter(str(self))
+        else:
+            raise TypeError('JSON Value not of appropriate type')
+        
+
     def __len__(self):
         if self._inst.isObject() or self._inst.isArray():
             return self._inst.size()
@@ -293,6 +304,33 @@ cdef class Value(object):
         its = [(k, self[k]) for k in ckeys]
         return its
 
+    def get(self, key, default=None):
+        """Returns key if present, or default otherwise."""
+        if (self._inst.type() != cpp_jsoncpp.objectValue):
+            raise TypeError("no keys, not JSON object.")
+        if self._inst.isMember(<const_char *> key):
+            return self[key]
+        else:
+            return default
+
+    def __richcmp__(self, other, int op):
+        cdef Value cother = Value(other)
+        if op == 0:
+            return ((<Value> self)._inst[0] < cother._inst[0])
+        elif op == 1:
+            return ((<Value> self)._inst[0] <= cother._inst[0])
+        elif op == 2:
+            return ((<Value> self)._inst[0] == cother._inst[0])
+        elif op == 3:
+            return ((<Value> self)._inst[0] != cother._inst[0])
+        elif op == 4:
+            return ((<Value> self)._inst[0] > cother._inst[0])
+        elif op == 5:
+            return ((<Value> self)._inst[0] >= cother._inst[0])
+
+    def __cmp__(self, other):
+        cdef Value cother = Value(other)
+        return self._inst.compare((<Value> other)._inst[0])
 
 cdef class Reader:
     def __cinit__(self):
