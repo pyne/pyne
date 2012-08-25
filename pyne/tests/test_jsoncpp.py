@@ -145,9 +145,30 @@ def test_getslice():
     exp = a[::-1]
     assert_equal(obs, exp)
 
-    t = v[3::-1]
-    obs = [t[i] for i in range(3)]
-    exp = a[3::-1]
+    t = v[-3::-1]
+    obs = [t[i] for i in range(2)]
+    exp = a[-3::-1]
+    assert_equal(obs, exp)
+
+def test_setslice():
+    a = [1, 2, 5, 3]
+    v = Value(a)
+
+    v[1:-1] = [42, 65]
+    obs = [v[i] for i in range(len(a))]
+    exp = [1, 42, 65, 3]
+    assert_equal(obs, exp)
+
+    v = Value(a)
+    v[::-1] = 'abcd'
+    obs = [v[i] for i in range(4)]
+    exp = ['d', 'c', 'b', 'a']
+    assert_equal(obs, exp)
+
+    v = Value(a)
+    v[-3::-1] = [65, 42]
+    obs = [v[i] for i in range(4)]
+    exp = [42, 65, 5, 3]
     assert_equal(obs, exp)
 
 
