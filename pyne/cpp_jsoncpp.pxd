@@ -74,6 +74,7 @@ cdef extern from "json/json.h" namespace "Json":
         int size() except +
         void resize(int) except +
         void clear() except +
+        Value & append(Value &) except +
 
     cdef cppclass Reader:
         Reader() except +
