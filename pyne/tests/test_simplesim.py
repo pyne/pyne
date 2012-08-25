@@ -1520,14 +1520,21 @@ class TestSystemDefinition(unittest.TestCase):
         egrid = cards.EnergyGrid('grid0', None, [1e-4, 1, 100e3, 10e6])
         self.assertEquals(egrid.comment(), "Energy grid 'grid0' for "
                 "all tallies: 4 groups.")
+        self.assertEquals(egrid.mcnp('%.5g', self.sim),
+                "E0 0.0001 1 1e+05 1e+07")
         egrid = cards.EnergyGrid('grid0', None, np.array([1e-4, 1, 100e3,
                     10e6]))
         self.assertEquals(egrid.comment(), "Energy grid 'grid0' for "
                 "all tallies: 4 groups.")
+        self.assertEquals(egrid.mcnp('%.5g', self.sim),
+                "E0 0.0001 1 1e+05 1e+07")
         # For a specific tally.
         egrid = cards.EnergyGrid('grid1', det, np.array([1, 2]))
+        self.sim.add_tally(det)
         self.assertEquals(egrid.comment(), "Energy grid 'grid1' for "
                 "tally ring: 2 groups.")
+        self.assertEquals(egrid.mcnp('%.5g', self.sim),
+                "E1 1 2")
 
 
 class TestMisc(unittest.TestCase):
