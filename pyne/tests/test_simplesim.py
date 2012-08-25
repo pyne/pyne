@@ -369,11 +369,13 @@ class TestSystemDefinition(unittest.TestCase):
     """Tests the :py:class:`definition.SystemDefinition` class."""
 
     def setUp(self):
-        self.uo2 = material.from_atom_frac({'U235': 0.05,
-                            'U238': 0.95,
-                            'O16' : 2.0}, name='UO2')
-        self.h2o = material.from_atom_frac({'H1' : 2.0,
-                            'O16': 1.0}, name='H2O')
+        self.uo2 = cards.Material(name='UO2')
+        self.uo2.from_atom_frac({'U235': 0.05,
+                                 'U238': 0.95,
+                                 'O16' : 2.0})
+        self.h2o = cards.Material(name='H2O')
+        self.h2o.from_atom_frac({'H1' : 2.0,
+                                 'O16': 1.0})
         
         # Surfaces.
         radius = 0.40 # cm
@@ -399,7 +401,43 @@ class TestSystemDefinition(unittest.TestCase):
         self.rxr.add_cell(self.graveyard)
         self.sim = definition.MCNPSimulation(self.rxr, verbose=False)
 
+    def test_MCNPInput(self):
+        """ TODO """
+        inp = inputfile.MCNPInput('ha', self.sim)
+        #inp.write()
+
+
     def test_Material(self):
+        """Tests :py:class:`pyne.simplesim.cards.Material`."""
+
+        originstory = "I found this water in a well a few years ago."
+        h2o = cards.Material(name='water', description=originstory)
+        h2o.from_atom_frac({10010: 1.0, 'O16': 2.0})
+        h2o.tables = {10010: '71c'}
+        self.sim.sys.add_material(h2o)
+        self.assertEquals(h2o.comment(), "Material 'water': "
+                "I found this water in a well a few years ago.")
+        self.assertEquals(h2o.mcnp('%g', self.sim), "M3\n"
+        "       1001.71c  1 $ H1\n"
+        "       8016      2 $ O16")
+
+        h2o = cards.Material(name='water', tables={10010: '71c'})
+        h2o.from_atom_frac({10010: 1.0, 'O16': 2.0})
+        self.assertEquals(h2o.mcnp('%g', self.sim), "M3\n"
+        "       1001.71c  1 $ H1\n"
+        "       8016      2 $ O16")
+
+        h2o = cards.Material(name='water', tables={'H1': '71c'})
+        h2o.from_atom_frac({10010: 1.0, 'O16': 2.0})
+        self.assertEquals(h2o.mcnp('%g', self.sim), "M3\n"
+        "       1001.71c  1 $ H1\n"
+        "       8016      2 $ O16")
+
+        ## ScatteringLaw
+        sl = cards.ScatteringLaw('water', {'H1': 'lwtr.16t', 80160: 'madeup'})
+        self.assertEquals(sl.comment(), "Scattering law 'scatlaw-water': "
+                "O16: madeup, H1: lwtr.16t.")
+        self.assertEquals(sl.mcnp('%g', self.sim), "MT3 madeup lwtr.16t")
 
     def test_Cell(self):
         """Tests :py:class:`cards.Cell`'s methods, properties, and

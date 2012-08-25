@@ -297,7 +297,7 @@ class SimulationDefinition(IDefinition):
     @property
     def source(self):
         """Ordered dictionary of source cards (from
-        :py:source:`cards.ISource`)
+        :py:class:`cards.ISource`)
 
         """
         return self._source
