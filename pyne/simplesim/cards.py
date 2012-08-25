@@ -51,7 +51,10 @@ the module.
 # TODO in Cell, require that the material is not pyne.card.Material, but is a
 # card here.
 # TODO explain that names must only be unique within a category.
-# TODO altunits for detectors. and also in the comments.
+# TODO altunits for detectors. and also in the comments, and in tests. revisit
+# detector tests completely: need to test altunits, card_type (naasok),
+# altunits printed in comments, and described in detector documentation. check
+# mcnpx for altunits and +/* flags.
 
 import abc
 import collections
@@ -73,8 +76,15 @@ class ICard(object):
     # k is Boltzmann's constant in eV/K, and T is temperature in K
     kelvin2kT = 8.6173423e-11
     secs2shakes = 1e+8
+
+    @abc.staticmethod
+    def part_abbrev(key):
+        if key not in self.mcnp_particle:
+            raise ValueError("Particle {0!r} not recognized.".format(key))
+        return self.mcnp_particle[key]
+
     # These are provided in the order in which they are listed in the MCNP
-    # manual.
+    # manual. TODO may need to escape some of these characters?
     mcnp_particle = {'neutron': 'N',
                      'anti-neutron': '-N',
                      'photon': 'P',
@@ -133,7 +143,7 @@ class ICard(object):
         """
         # Somebody on the internet said to use super() even when only
         # subclassing from object.
-        super(ICard, self).__init__(*args, **kwargs)
+        super(ICard, self).__init__()
         self._unique = unique
         if self._unique: self._name = name
         else:            self.name = name
@@ -634,7 +644,7 @@ class CellMCNP(Cell):
             for entry in self._make_list(self.importance):
                 card = Importance(entry[0], self, entry[1])
                 string += " IMP:{0}={1}".format(
-                        self.mcnp_particle[entry[0]],
+                        self.part_abbrev(entry[0]),
                         card._comment_unit(self))
         # exp_transform
         if self.exp_transform:
@@ -642,14 +652,14 @@ class CellMCNP(Cell):
                 card = ExponentialTransform(
                         entry[0], self, entry[1], entry[2], entry[3])
                 string += " EXT:{0}={1}".format(
-                        self.mcnp_particle[entry[0]],
+                        self.part_abbrev(entry[0]),
                         card._comment_unit(self))
         # forced_coll
         if self.forced_coll:
             for entry in self._make_list(self.forced_coll):
                 card = ForcedCollision(entry[0], self, entry[1], entry[2])
                 string += " FCL:{0}={1}".format(
-                        self.mcnp_particle[entry[0]],
+                        self.part_abbrev(entry[0]),
                         card._comment_unit(self))
         # weight_win_bound
         if self.weight_win_bound:
@@ -657,7 +667,7 @@ class CellMCNP(Cell):
                 card = WeightWindowBound(
                         entry[0], entry[1], entry[2], self, entry[3])
                 string += " WWN({0},{1}):{2}={3}".format(
-                        entry[1], entry[2], self.mcnp_particle[entry[0]],
+                        entry[1], entry[2], self.part_abbrev(entry[0]),
                         card._comment_unit(self, entry[1], entry[2]))
         # dxtran_contrib
         if self.dxtran_contrib:
@@ -665,7 +675,7 @@ class CellMCNP(Cell):
             for entry in self._make_list(self.dxtran_contrib):
                 card = DXTRANContribution(entry[0], entry[1], self, entry[2])
                 string += " DXC{0!r}:{1}={2}".format( 
-                        entry[1], self.mcnp_particle[entry[0]],
+                        entry[1], self.part_abbrev(entry[0]),
                         card._comment_unit(self))
         # photon_weight
         if self.photon_weight:
@@ -714,7 +724,7 @@ class CellMCNP(Cell):
             for entry in self._make_list(self.importance):
                 card = Importance(entry[0], self, entry[1])
                 string += " IMP:{0}={1}".format(
-                        self.mcnp_particle[entry[0]], 
+                        self.part_abbrev(entry[0]), 
                         card._mcnp_unit(float_format, sim, self))
         # exp_transform
         if self.exp_transform:
@@ -722,14 +732,14 @@ class CellMCNP(Cell):
                 card = ExponentialTransform(
                         entry[0], self, entry[1], entry[2], entry[3])
                 string += " EXT:{0}={1}".format(
-                        self.mcnp_particle[entry[0]], 
+                        self.part_abbrev(entry[0]), 
                         card._mcnp_unit(float_format, sim, self))
         # forced_coll
         if self.forced_coll:
             for entry in self._make_list(self.forced_coll):
                 card = ForcedCollision(entry[0], self, entry[1], entry[2])
                 string += " FCL:{0}={1}".format(
-                        self.mcnp_particle[entry[0]], 
+                        self.part_abbrev(entry[0]), 
                         card._mcnp_unit(float_format, sim, self))
         # weight_win_bound
         if self.weight_win_bound:
@@ -740,7 +750,7 @@ class CellMCNP(Cell):
                 card._find_n_energies(sim)
                 string += " WWN{0}:{1}={2}".format( 
                         card.i_linear(entry[1], entry[2]),
-                        self.mcnp_particle[entry[0]], 
+                        self.part_abbrev(entry[0]), 
                         card._mcnp_unit(float_format, self, entry[1],
                             entry[2]))
         # dxtran_contrib
@@ -748,7 +758,7 @@ class CellMCNP(Cell):
             for entry in self._make_list(self.dxtran_contrib):
                 card = DXTRANContribution(entry[0], entry[1], self, entry[2])
                 string += " DXC{0}:{1}={2}".format( 
-                        card.sph_index(sim), self.mcnp_particle[entry[0]], 
+                        card.sph_index(sim), self.part_abbrev(entry[0]), 
                         card._mcnp_unit(float_format, sim, self))
         # photon_weight
         if self.photon_weight:
@@ -765,7 +775,7 @@ class CellMCNP(Cell):
             for entry in self._make_list(self.det_contrib):
                 card = DetectorContribution(entry[0], self, entry[1])
                 string += " PD{0}={1}".format(
-                    sim.tally_num(entry[0]),
+                    sim.tally_num(entry[0]) * 10 + 5,
                     card._mcnp_unit(float_format, sim, self))
         # transform
         if self.transformation:
@@ -2152,7 +2162,7 @@ class ITally(ICard):
             pcounter = 0
             for part in self.particle:
                 pcounter += 1
-                string += "{0}".format(self.mcnp_particle[self.particle])
+                string += "{0}".format(self.part_abbrev(self.particle))
                 if pcounter < len(self.particle): string += ", "
         return string + " "
 
@@ -2196,6 +2206,7 @@ class ICellSurfTally(ITally):
             averages is desired, then this set must be nested in two lists. See
             the examples.
         alt_units : bool, optional
+            See :py:class:`ITally`.
 
         Examples
         --------
@@ -2220,7 +2231,8 @@ class ICellSurfTally(ITally):
         # Affects behavior in comment() and mcnp(), etc.
         self.card_type = kwargs.get('card_type', None)
         if self.card_type != 'cell' and self.card_type != 'surface':
-            raise Exception("Card type must be 'cell' or 'surface".)
+            raise Exception("Card type must be 'cell' or 'surface. "
+                    "Got {0}.".format(self.card_type))
 
     @abc.abstractmethod
     def comment(self, title, union_type):
@@ -2230,10 +2242,10 @@ class ICellSurfTally(ITally):
         if self.card_type == 'cell':      classcheck = Cell
         elif self.card_type == 'surface': classcheck = ISurface
         if type(self.cards) is not list: # issubclass(self.cards, classcheck):
-            string += "{0} {1!r}".format(card_type, self.cards.name)
+            string += "{0} {1!r}".format(self.card_type, self.cards.name)
         elif type(self.cards) is list:
             if type(self.cards[0]) is not list:
-                string += "{0}s ".format(card_type)
+                string += "{0}s ".format(self.card_type)
             outcounter = 0
             for obj in self.cards:
                 outcounter += 1
@@ -2250,12 +2262,12 @@ class ICellSurfTally(ITally):
                 # TODO an anti-duck-typing exception:
                 #else:
                 #    raise ValueError("Expected {0} or list, got {1}.".format(
-                #            card_type, type(obj)))
+                #            self.card_type, type(obj)))
                 if outcounter < len(self.cards): string += "; "
         # TODO an anti-duck-typing exception:
         #else:
         #    raise ValueError("Expected {0} or list, got {1}.".format(
-        #            card_type, type(self.cards)))
+        #            self.card_type, type(self.cards)))
         return string
 
     @abc.abstractmethod
@@ -2359,12 +2371,12 @@ class SurfaceCurrent(ICellSurfTally):
 
         """
         super(SurfaceCurrent, self).__init__(name, particle, cards,
-                                             cell_type='surface', **kwargs)
+                                             card_type='surface', **kwargs)
         self.total = total
 
     def comment(self):
-        string = super(SurfaceCurrent, self).comment("Surface current", 'total',
-                'surface')
+        string = super(SurfaceCurrent, self).comment("Surface current",
+                                                     'total')
         if self.total: string += "; and total of all provided."
         else:          string += "."
         return string
@@ -2383,7 +2395,7 @@ class IAverageTally(ICellSurfTally):
     """
     __metaclass__ = abc.ABCMeta
 
-    def __init__(self, name, particle, cards, average=False, *args, **kwargs):
+    def __init__(self, name, particle, cards, average=False, **kwargs):
         """
         Parameters
         ----------
@@ -2410,8 +2422,7 @@ class IAverageTally(ICellSurfTally):
                     average=True)
 
         """
-        super(IAverageTally, self).__init__(name, particle, cards, *args,
-                                            **kwargs)
+        super(IAverageTally, self).__init__(name, particle, cards, **kwargs)
         self.average = average
 
     @abc.abstractmethod
@@ -2473,7 +2484,7 @@ class SurfaceFlux(IAverageTally):
         See base classes for more examples.
 
         """
-        super(SurfaceFlux, self).__init__(name, particle, cards, average,
+        super(SurfaceFlux, self).__init__(name, particle, cards,
                                           card_type='surface', **kwargs)
 
     def comment(self):
@@ -2527,8 +2538,8 @@ class CellFlux(IAverageTally):
         See base classes for more examples.
 
         """
-        super(CellFlux, self).__init__(name, particle, cards, average,
-                                       card_type='cell', **kwargs)
+        super(CellFlux, self).__init__(name, particle, cards, card_type='cell',
+                                       **kwargs)
 
     def comment(self):
         return super(CellFlux, self).comment("Cell flux")
@@ -2593,7 +2604,7 @@ class CellEnergyDeposition(IAverageTally):
 
         """
         super(CellEnergyDeposition, self).__init__(name, particles, cards,
-                average, card_type='cell', **kwargs)
+                                                   card_type='cell', **kwargs)
         # TODO move this error check to the MCNP method.
         if self.particle == 'all' and self.alt_units:
             raise ValueError("The particle cannot be 'all' if alt_units is "
@@ -2654,7 +2665,7 @@ class CellFissionEnergyDeposition(IAverageTally):
 
         """
         super(CellFissionEnergyDeposition, self).__init__(name, 'neutron',
-                cards, average, card_type='cell', **kwargs)
+                cards, card_type='cell', **kwargs)
 
     def comment(self):
         return super(CellFissionEnergyDeposition, self).comment(
@@ -2701,7 +2712,7 @@ class CellPulseHeight(IAverageTally):
         See base classes for more examples.
 
         """
-        super(CellPulseHeight, self).__init__(name, particles, cards, average,
+        super(CellPulseHeight, self).__init__(name, particles, cards,
                                               card_type='cell', **kwargs)
 
     def comment(self):
@@ -2878,8 +2889,7 @@ class PointDetector(IDetector):
                     sep_direct=False)
 
         """
-        super(PointDetector, self).__init__(name, particle, spec, sep_direct,
-                                            **kwargs)
+        super(PointDetector, self).__init__(name, particle, spec, **kwargs)
 
     def comment(self):
         return super(PointDetector, self).comment("Point detector")
@@ -2914,12 +2924,12 @@ class RingDetector(IDetector):
             photons are allowed.
         spec : tuple, list of tuples [centimeters/mean free paths]
             The tuple has 4 elements: a Cartesian axis string ('x', 'y', 'z'),
-            a position (float) along that axis, the radius (float) of the ring, and the
-            radius (float) of the sphere of exclusion. A negative radius for the sphere
-            changes the units to mean free paths. To request multiple ring
-            detectors, a list of these tuples can be provided. The Cartesian
-            axis strings can be upper or lower case ('x', 'X', 'y', 'Y', 'z',
-            'Z').
+            a position (float) along that axis, the radius (float) of the ring,
+            and the radius (float) of the sphere of exclusion. A negative
+            radius for the sphere changes the units to mean free paths. To
+            request multiple ring detectors, a list of these tuples can be
+            provided. The Cartesian axis strings can be upper or lower case
+            ('x', 'X', 'y', 'Y', 'z', 'Z').
         sep_direct : bool, optional
             In MCNP, the direct contribution to the tally is printed
             separately. Set to False to disable the separate printing. This is
@@ -3674,7 +3684,7 @@ class DetectorContribution(ICellMod):
 
     def mcnp(self, float_format, sim):
         # TODO exception if the detector doesn't exist.
-        string = "PD{0}".format(sim.tally_num(self.det_name))
+        string = "PD{0}".format(sim.tally_num(self.det_name) * 10 + 5)
         return super(DetectorContribution, self).mcnp(
                 float_format, sim, string)
 
@@ -3935,7 +3945,7 @@ class ICellModParticle(IUniqueParticle):
         # TODO this ordering might not be correct, particularly once we add
         # support for universes, etc.
         string = "{0}:{1!s}".format(
-                keystring, self.mcnp_particle[self.particle])
+                keystring, self.part_abbrev(self.particle))
         # TODO this should loop through in the print order.
         for key, cell in sim.sys.cells.iteritems(): 
             if cell in self.cells:
@@ -4463,7 +4473,7 @@ class WeightWindowBound(ICellModParticle):
                     string += "{0}WWN{1}:{2}".format(
                             "\n" if counter > 1 else "",
                             self.i_linear(i_e, i_t),
-                            self.mcnp_particle[self.particle])
+                            self.part_abbrev(self.particle))
                     # Check all cells in the system.
                     for key, cell in sim.sys.cells.iteritems():
                         # Is this cell on this card, and is there a bound
@@ -4506,7 +4516,7 @@ class WeightWindowBound(ICellModParticle):
             self._n_energies = sim.misc[wwe_name].n_bounds
         else:
             raise Exception("No WWGT:{0} or WWT:{0} card found in the "
-                    "simulation.".format(self.mcnp_particle[self.particle]))
+                    "simulation.".format(self.part_abbrev(self.particle)))
 
     def i_linear(self, i_e, i_t):
         return (i_t - 1) * self._n_energies + i_e
@@ -4605,7 +4615,7 @@ class WeightWindowEnergies(IUniqueParticle):
 
     def mcnp(self, float_format, sim):
         string = "WW{0}E:{1}".format("G" if self.for_gen else "",
-                self.mcnp_particle[self.particle])
+                self.part_abbrev(self.particle))
         float_format = " " + float_format
         for bound in self.bounds: string += float_format % bound
         return string
@@ -4685,7 +4695,7 @@ class WeightWindowTimes(IUniqueParticle):
 
     def mcnp(self, float_format, sim):
         string = "WW{0}T:{1}".format("G" if self.for_gen else "",
-                self.mcnp_particle[self.particle])
+                self.part_abbrev(self.particle))
         float_format = " " + float_format
         for bound in self.bounds: 
             string += float_format % (bound * self.secs2shakes)
@@ -4793,7 +4803,7 @@ class DXTRANContribution(ICellMod):
 
     def mcnp(self, float_format, sim):
         string = "DXC{0}:{1}".format(
-                self.sph_index(sim), self.mcnp_particle[self.particle])
+                self.sph_index(sim), self.part_abbrev(self.particle))
         return super(DXTRANContribution, self).mcnp(float_format, sim, string)
 
     def sph_index(self, sim):
@@ -4952,7 +4962,7 @@ class DXTRANSpheres(IUniqueParticle):
 
     def mcnp(self, float_format, sim):
         mpw = self.min_photon_weight
-        string = "DXT:{0}".format(self.mcnp_particle[self.particle])
+        string = "DXT:{0}".format(self.part_abbrev(self.particle))
         for name in self.spheres:
             string += "  " + self._mcnp_unit(float_format, sim, name)
         string += 2 * " "
