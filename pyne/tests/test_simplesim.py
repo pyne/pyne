@@ -432,8 +432,8 @@ class TestSystemDefinition(unittest.TestCase):
 
         ## mcnp()
         self.sim.sys.add_surface(pp)
-        self.assertEquals(plane.mcnp('%g', self.sim), 
-                "3 RPP -2 3  -4 5 -6 7")
+        self.assertEquals(pp.mcnp('% g', self.sim), 
+                "3 RPP -2  3  -4  5  -6  7")
 
         ## shift()
         pp.shift([2, 1, -1])
