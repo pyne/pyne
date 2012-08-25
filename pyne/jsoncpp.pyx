@@ -3,7 +3,7 @@ from cython.operator cimport dereference as deref
 from cython.operator cimport preincrement as inc
 from libc.stdlib cimport malloc, free
 from cython cimport pointer
-from libc.string cimport const_char
+from libc.string cimport const_char, memcpy
 
 # Python imports
 import collections
@@ -30,7 +30,11 @@ cdef cpp_jsoncpp.Value * toboolval(bint b):
 
 cdef cpp_jsoncpp.Value * tocppval(object doc) except NULL:
     cdef cpp_jsoncpp.Value * cval = NULL
-    if isinstance(doc, collections.Mapping):
+    cdef Value cdoc
+    if isinstance(doc, Value):
+        cdoc = doc
+        cval = new cpp_jsoncpp.Value(<cpp_jsoncpp.Value &> cdoc._inst[0])
+    elif isinstance(doc, collections.Mapping):
         cval = new cpp_jsoncpp.Value(<cpp_jsoncpp.ValueType> cpp_jsoncpp.objectValue)
         for k, v in doc.items():
             if not isinstance(k, basestring):
@@ -134,8 +138,19 @@ cdef class Value(object):
 
     def __setitem__(self, key, value):
         cdef cpp_jsoncpp.Value * ckey = NULL
+        cdef cpp_jsoncpp.Value cval 
+        cdef Value val
         if isinstance(key, basestring):
             ckey = &self._inst[0][<const_char *> key]
+            #if isinstance(value, Value):
+            #    val = value
+                #cval = new cpp_jsoncpp.Value(<cpp_jsoncpp.Value &> val._inst[0])
+                #cval = cpp_jsoncpp.Value(<cpp_jsoncpp.Value &> val._inst[0])
+                #cval = cpp_jsoncpp.Value(deref(val._inst))
+            #    cval = deref(val._inst)
+            #    ckey.swap(cval)
+            #else:
+            #    ckey.swap(deref(tocppval(value)))
             ckey.swap(deref(tocppval(value)))
         elif isinstance(key, int):
             curr_size = self._inst[0].size()
@@ -149,8 +164,6 @@ cdef class Value(object):
                 i = toposindex(i, curr_size)
                 ckey = &self._inst[0][<int> i]
                 ckey.swap(deref(tocppval(v)))
-            for i in r:
-                ckey = &self._inst[0][<int> i]
         else:
             raise KeyError('key not of appropriate type, got {0}'.format(type(key)))
 

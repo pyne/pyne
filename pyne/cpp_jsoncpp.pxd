@@ -55,7 +55,6 @@ cdef extern from "json/json.h" namespace "Json":
         Value & operator[](const_char *) except +
 
         void swap(Value &) except +
-        void swap(Value *) except +
         #Value & operator=(Value &) except +
 
         int size() except +
