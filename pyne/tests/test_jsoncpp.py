@@ -193,7 +193,45 @@ def test_setvalue():
     a['counter'] = b
     assert_equal(a['i'], 10)
     assert_equal(a['j'], "rawr")
+    assert_equal([b[i] for i in range(4)], [1, 2, 5, 3])
     assert_equal([a['counter'][i] for i in range(4)], [b[i] for i in range(4)])
+
+    a = Value([1, 2, 5, 3])
+    b = Value([42, 65])
+    a[1:-1] = b
+    assert_equal([b[i] for i in range(2)], [42, 65])
+    assert_equal([a[i] for i in range(4)], [1, 42, 65, 3])
+
+def test_delitem_contains():
+    a = Value({'i': 10, 'j': "rawr"})
+    assert_true('i' in a)
+    del a['i']
+    assert_false('i' in a)
+
+    a = Value([1, 2, 5, 3])
+    assert_equal(len(a), 4)
+    assert_true(2 in a)
+    del a[1]
+    assert_false(2 in a)
+    assert_equal(len(a), 3)
+
+    a = Value([1, 2, 5, 3])
+    assert_equal(len(a), 4)
+    assert_true(2 in a)
+    assert_true(5 in a)
+    del a[1:-1]
+    assert_false(2 in a)
+    assert_false(5 in a)
+    assert_equal(len(a), 2)
+
+    a = Value([1, 2, 5, 3])
+    assert_equal(len(a), 4)
+    assert_true(1 in a)
+    assert_true(2 in a)
+    del a[-3::-1]
+    assert_false(1 in a)
+    assert_false(2 in a)
+    assert_equal(len(a), 2)
 
 #r = jsoncpp.Reader()
 #root = r.parse({'a': 10, 'b': 'Hello', 'c': {'d': [1, 2, 10.0]}})
