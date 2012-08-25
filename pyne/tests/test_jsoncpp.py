@@ -171,6 +171,29 @@ def test_setslice():
     exp = [42, 65, 5, 3]
     assert_equal(obs, exp)
 
+def test_setvalue():
+    a = Value({'i': 10, 'j': "rawr"})
+    b = Value(65.0)
+    a['counter'] = b
+    assert_equal(a['i'], 10)
+    assert_equal(a['j'], "rawr")
+    assert_equal(float(b), 65.0)
+    assert_equal(a['counter'], 65.0)
+
+    a = Value({'i': 10, 'j': "rawr"})
+    b = Value("burninating")
+    a['counter'] = b
+    assert_equal(a['i'], 10)
+    assert_equal(a['j'], "rawr")
+    assert_equal(str(b), "burninating")
+    assert_equal(a['counter'], "burninating")
+
+    a = Value({'i': 10, 'j': "rawr"})
+    b = Value([1, 2, 5, 3])
+    a['counter'] = b
+    assert_equal(a['i'], 10)
+    assert_equal(a['j'], "rawr")
+    assert_equal([a['counter'][i] for i in range(4)], [b[i] for i in range(4)])
 
 #r = jsoncpp.Reader()
 #root = r.parse({'a': 10, 'b': 'Hello', 'c': {'d': [1, 2, 10.0]}})
