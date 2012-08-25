@@ -2143,11 +2143,6 @@ class ITally(ICard):
 
     @particle.setter
     def particle(self, value):
-        if (value != 'neutron' and value != 'photon' and 
-                value != 'electron' and value != 'proton'):
-            raise ValueError("The property ``particle`` must be 'neutron', "
-                    "'photon', 'electron', or 'proton'. "
-                    "User provided {0!r}.".format(value))
         self._particle = value
 
 
