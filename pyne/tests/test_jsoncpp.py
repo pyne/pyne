@@ -233,6 +233,19 @@ def test_delitem_contains():
     assert_false(2 in a)
     assert_equal(len(a), 2)
 
+def test_keys():
+    a = Value({'i': 10, 'j': "rawr"})
+    assert_equal(a.keys(), ['i', 'j'])
+
+def test_vals():
+    a = Value({'i': 10, 'j': "rawr"})
+    assert_equal(a.values(), [10, 'rawr'])
+
+def test_items():
+    a = Value({'i': 10, 'j': "rawr"})
+    assert_equal(a.items(), [('i', 10), ('j', 'rawr')])
+
+
 #r = jsoncpp.Reader()
 #root = r.parse({'a': 10, 'b': 'Hello', 'c': {'d': [1, 2, 10.0]}})
 
