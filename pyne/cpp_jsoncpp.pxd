@@ -1,6 +1,7 @@
 """C++ wrapper for jsoncpp."""
 from libc.string cimport const_char
-cimport std
+from libcpp.string cimport string as std_string
+from libcpp.vector cimport vector as std_vector
 
 cdef extern from "json/json.h" namespace "Json":
     cdef enum ValueType:
@@ -19,7 +20,7 @@ cdef extern from "json/json.h" namespace "Json":
         Value() except +
         Value(ValueType) except +
         Value(char *) except +
-        Value(std.string) except +
+        Value(std_string) except +
         Value(double) except +
         Value(int) except +
         Value(bint) except +
@@ -27,7 +28,7 @@ cdef extern from "json/json.h" namespace "Json":
         Value(Value &) except +
 
         const_char * asCString() except +
-        std.string asString() except +
+        std_string asString() except +
         int asInt() except +
         #uint asUInt() except +
         #double int asInt64() except +
@@ -49,22 +50,24 @@ cdef extern from "json/json.h" namespace "Json":
         ValueType type() except +
 
         Value get(int, Value) except +
-        Value get(std.string, Value) except +
+        Value get(std_string, Value) except +
         Value & operator[](int) except +
-        Value & operator[](std.string) except +
+        Value & operator[](std_string) except +
         Value & operator[](const_char *) except +
         void swap(Value &) except +
         #Value & operator=(Value &) except +
-        Value removeMember(std.string) except +
+        Value removeMember(std_string) except +
         Value removeMember(const_char *) except +
 
-        bint isMember(std.string) except +
+        bint isMember(std_string) except +
         bint isMember(const_char *) except +
+
+        std_vector[std_string] getMemberNames() except +
 
         int size() except +
         void resize(int) except +
 
     cdef cppclass Reader:
         Reader() except +
-        bint parse(std.string, Value) except +
-        bint parse(std.string, Value, bint) except +
+        bint parse(std_string, Value) except +
+        bint parse(std_string, Value, bint) except +
