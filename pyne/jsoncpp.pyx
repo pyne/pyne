@@ -30,10 +30,8 @@ cdef cpp_jsoncpp.Value * toboolval(bint b):
 
 cdef cpp_jsoncpp.Value * tocppval(object doc) except NULL:
     cdef cpp_jsoncpp.Value * cval = NULL
-    cdef Value cdoc
     if isinstance(doc, Value):
-        cdoc = doc
-        cval = new cpp_jsoncpp.Value(<cpp_jsoncpp.Value &> cdoc._inst[0])
+        cval = new cpp_jsoncpp.Value(<cpp_jsoncpp.Value &> (<Value> doc)._inst[0])
     elif isinstance(doc, collections.Mapping):
         cval = new cpp_jsoncpp.Value(<cpp_jsoncpp.ValueType> cpp_jsoncpp.objectValue)
         for k, v in doc.items():
@@ -138,19 +136,8 @@ cdef class Value(object):
 
     def __setitem__(self, key, value):
         cdef cpp_jsoncpp.Value * ckey = NULL
-        cdef cpp_jsoncpp.Value cval 
-        cdef Value val
         if isinstance(key, basestring):
             ckey = &self._inst[0][<const_char *> key]
-            #if isinstance(value, Value):
-            #    val = value
-                #cval = new cpp_jsoncpp.Value(<cpp_jsoncpp.Value &> val._inst[0])
-                #cval = cpp_jsoncpp.Value(<cpp_jsoncpp.Value &> val._inst[0])
-                #cval = cpp_jsoncpp.Value(deref(val._inst))
-            #    cval = deref(val._inst)
-            #    ckey.swap(cval)
-            #else:
-            #    ckey.swap(deref(tocppval(value)))
             ckey.swap(deref(tocppval(value)))
         elif isinstance(key, int):
             curr_size = self._inst[0].size()
@@ -166,6 +153,47 @@ cdef class Value(object):
                 ckey.swap(deref(tocppval(v)))
         else:
             raise KeyError('key not of appropriate type, got {0}'.format(type(key)))
+
+    def __delitem__(self, key):
+        cdef int i, ikey, curr_size, end_size
+        cdef cpp_jsoncpp.Value ctemp
+        if isinstance(key, basestring) and (self._inst.type() == cpp_jsoncpp.objectValue):
+            self._inst.removeMember(<const_char *> key)
+        elif isinstance(key, int) and (self._inst.type() == cpp_jsoncpp.arrayValue):
+            curr_size = self._inst[0].size()
+            ikey = key
+            ikey = toposindex(ikey, curr_size)
+            for i in range(ikey+1, curr_size):
+                self._inst[0][i-1].swap(self._inst[0][i])
+            self._inst.resize(curr_size-1)
+        elif isinstance(key, slice) and (self._inst.type() == cpp_jsoncpp.arrayValue):
+            curr_size = self._inst[0].size()
+            r = range(curr_size)
+            del r[key]
+            end_size = len(r)
+            ctemp = cpp_jsoncpp.Value(cpp_jsoncpp.arrayValue)
+            ctemp.resize(end_size)
+            for i, r_i in enumerate(r):
+                ctemp[i].swap(self._inst[0][<int> r_i])
+            for i in range(end_size):
+                self._inst[0][i].swap(ctemp[i])
+            self._inst.resize(end_size)
+        else:
+            raise KeyError('key or object not of appropriate type')
+
+    def __contains__(self, item):
+        cdef int i, curr_size
+        if isinstance(item, basestring) and (self._inst.type() == cpp_jsoncpp.objectValue):
+            return self._inst.isMember(<const_char *> item)
+        elif (self._inst.type() == cpp_jsoncpp.arrayValue):
+            i = 0
+            curr_size = self._inst[0].size()
+            for i in range(curr_size):
+                if item == self[i]:
+                    return True
+            return False
+        else:
+            raise KeyError('key or object not of appropriate type')
 
     def __len__(self):
         if self._inst.isObject() or self._inst.isArray():
