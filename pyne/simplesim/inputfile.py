@@ -25,7 +25,8 @@ extension to other codes may require more effort.
 # describe how the remaining cards are modified.
 # TODO let user specify number format for different types of floats
 # TODO provision for printing materials...
-# TODo filename should be with write
+# TODO filename should be with write
+# TODO special treatment for Material card.
 
 import abc
 import datetime
@@ -116,17 +117,17 @@ class MCNPInput(IInputFile):
         self.commentwrap = textwrap.TextWrapper(
                 width=80,
                 initial_indent='C ',
-                subsequent_indent='C ',
+                subsequent_indent='c   ',
                 break_long_words=True)
         # Card wrapping.
         if self.cont_by_amp:
             self.cardwrap = textwrap.TextWrapper(width=78)
-            self.card_end_line = ' &\n'
+            self._card_end_line = ' &\n'
         else:
             self.cardwrap = textwrap.TextWrapper(
                     width=80,
                     subsequent_indent=5 * ' ')
-            self.card_end_line = '\n'
+            self._card_end_line = '\n'
 
     def _write_subclass(self):
         # Header
@@ -169,7 +170,7 @@ class MCNPInput(IInputFile):
         for key, card in dictionary.iteritems():
             if self.comments:
                 self._write_comment(card.comment())
-            self._write_card(card.mcnp(self.float_format, self.sim))
+            self._write_card(card)
 
     def add_user_card(self, block, card, comment=None):
         # TODO
@@ -203,10 +204,19 @@ class MCNPInput(IInputFile):
         for entry in strlist:
             self.fid.write(entry + '\n')
 
-    def _write_card(self, string):
-        strlist = self.cardwrap.wrap(string)
-        for entry in strlist:
-            self.fid.write(entry + self.card_end_line)
+    def _write_card(self, card):
+        string = card.mcnp(self.float_format, self.sim)
+        if card._bypass_wrap:
+            self.fid.writelines(string)
+        else:
+            strlist = self.cardwrap.wrap(string)
+            counter = 0
+            for entry in strlist:
+                counter += 1
+                self.fid.write(entry)
+                if counter < len(strlist):
+                    self.fid.writelines(self._card_end_line)
+        self._new_line()
 
     def _new_line(self):
         self.fid.write('\n')
