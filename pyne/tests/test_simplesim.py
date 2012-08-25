@@ -21,6 +21,7 @@ class TestCells(unittest.TestCase):
         # test '-inf' test.
         # test dxtran sphere reference.
         # test mcnp particle designators.
+    pass
 
 class TestSurfaces(unittest.TestCase):
     """Tests the :py:class:`cards.ISurface` class and its
@@ -40,114 +41,6 @@ class TestOptions(unittest.TestCase):
     from :py:class:`cards.ICard` and are in the :py:mod:`cards` module.
     
     """
-    def tests_Criticality(self):
-        """Tests :py:class:`cards.Criticality`'s methods, properties, and
-        exceptions.
-        
-        """
-        ## __init__()
-        # Default arguments.
-        critsrc = cards.Criticality()
-        self.assertEquals(critsrc.name, 'criticality')
-        # Test trying to change the name.
-        self.assertRaises(StandardError, setattr, critsrc, 'name', 'testname')
-        try:
-            critsrc.name = 'testname'
-        except StandardError as e:
-            self.assertEquals(e.message, "This is a unique card, meaning "
-                    "only one card of this type can be found in a "
-                    "``definition``. Accordingly, the name is read-only.")
-        self.assertEquals(critsrc.n_histories, 1000)
-        self.assertEquals(critsrc.keff_guess, 1)
-        self.assertEquals(critsrc.n_skip_cycles, 30)
-        self.assertEquals(critsrc.n_cycles, 130)
-        # Testing keyword argument functionality.
-        critsrc = cards.Criticality(n_cycles=300)
-        self.assertEquals(critsrc.n_histories, 1000)
-        self.assertEquals(critsrc.keff_guess, 1)
-        self.assertEquals(critsrc.n_skip_cycles, 30)
-        self.assertEquals(critsrc.n_cycles, 300)
-        # Testing documentation example.
-        critsrc = cards.Criticality(2000, 1.5, 30, 300)
-        self.assertEquals(critsrc.n_histories, 2000)
-        self.assertEquals(critsrc.keff_guess, 1.5)
-        self.assertEquals(critsrc.n_skip_cycles, 30)
-        self.assertEquals(critsrc.n_cycles, 300)
-
-        # Test exceptions for each of the properties.
-        self.assertRaises(ValueError, setattr, critsrc, 'n_histories', 0.5)
-        self.assertRaises(ValueError, setattr, critsrc, 'n_histories', -1)
-        self.assertRaises(ValueError, setattr, critsrc, 'keff_guess', -1)
-        self.assertRaises(ValueError, setattr, critsrc, 'n_skip_cycles', 0.5)
-        self.assertRaises(ValueError, setattr, critsrc, 'n_skip_cycles', -1)
-        self.assertRaises(ValueError, setattr, critsrc, 'n_cycles', 0.5)
-        self.assertRaises(ValueError, setattr, critsrc, 'n_cycles', -1)
-        # Test the exception messages.
-        try:
-            critsrc.n_histories = 0.5
-        except ValueError as e:
-            self.assertEquals(e.message, "The property ``n_histories`` "
-                    "must be an integer. User provided 0.5.")
-        try:
-            critsrc.n_histories = -1
-        except ValueError as e:
-            self.assertEquals(e.message, "The property ``n_histories`` "
-                    "must be positive. User provided -1.")
-        try:
-            critsrc.keff_guess = -1
-        except ValueError as e:
-            self.assertEquals(e.message, "The property ``keff_guess`` "
-                    "must be non-negative. User provided -1.")
-        try:
-            critsrc.n_skip_cycles = 0.5
-        except ValueError as e:
-            self.assertEquals(e.message, "The property ``n_skip_cycles`` "
-                    "must be an integer. User provided 0.5.")
-        try:
-            critsrc.n_skip_cycles = -1
-        except ValueError as e:
-            self.assertEquals(e.message, "The property ``n_skip_cycles`` "
-                    "must be positive. User provided -1.")
-        try:
-            critsrc.n_cycles = 0.5
-        except ValueError as e:
-            self.assertEquals(e.message, "The property ``n_cycles`` "
-                    "must be an integer. User provided 0.5.")
-        try:
-            critsrc.n_cycles = -1
-        except ValueError as e:
-            self.assertEquals(e.message, "The property ``n_cycles`` "
-                    "must be equal to or greater than ``n_skip_cycles``. "
-                    "User provided -1.")
-
-        ## comment()
-        critsrc = cards.Criticality()
-        self.assertEquals(critsrc.comment(), "Criticality source "
-                "'criticality': n_histories: 1000, keff_guess: 1"
-                ", n_skip_cycles: 30, n_cycles: 130.")
-            
-    def test_CriticalityPoints(self):
-        """Tests :py:class:`cards.CriticalityPoints`'s methods, properties, and
-        exceptions.
-        
-        """
-        ## __init__()
-        # Default arguments.
-        critpts = cards.CriticalityPoints()
-        self.assertEquals(critpts.name, 'criticalitypoints')
-        self.assertTrue(critpts.points == [[0, 0, 0]])
-        critpts = cards.CriticalityPoints([[1, 2, 3],
-                                        np.array([3.1416, 2.7183, 0])])
-        self.assertEquals(critpts.comment(), "Criticality points "
-                "'criticalitypoints': (1, 2, 3), "
-                "(3.1416, 2.7183, 0).")
-        self.assertRaises(ValueError, setattr, critpts, 'points', 
-                [[0, 0, 0], [1]])
-        try:
-            critpts.points = [[0, 0, 0], [1]]
-        except ValueError as e:
-            self.assertEquals(e.message, "Length of all point lists/arrays "
-                    "must be 3. User provided a point [1].")
 
 
 class TestSystemDefinition(unittest.TestCase):
@@ -185,20 +78,6 @@ class TestSystemDefinition(unittest.TestCase):
         self.rxr.add_cell(self.coolant)
         self.rxr.add_cell(self.graveyard)
         self.sim = definition.MCNPSimulation(self.rxr, verbose=False)
-
-    def tearDown(self):
-        #os.unlink('inptest')
-        pass
-
-    def test_MCNPInput(self):
-        """ TODO """
-        ## Check against text file.
-        inp = inputfile.MCNPInput(self.sim, comments=False)
-        inp.write('inptest')
-
-        ## Test the & line continuation.
-        # TODO
-
 
     def test_Material(self):
         """Tests :py:class:`pyne.simplesim.cards.Material`."""
@@ -1229,6 +1108,126 @@ class TestSystemDefinition(unittest.TestCase):
                 "7.0 8.0 9.0 "
                 "10.0 11.0 12.0 1")
 
+    def tests_Criticality(self):
+        """Tests :py:class:`cards.Criticality`'s methods, properties, and
+        exceptions.
+        
+        """
+        ## __init__()
+        # Default arguments.
+        critsrc = cards.Criticality()
+        self.assertEquals(critsrc.name, 'criticality')
+        # Test trying to change the name.
+        self.assertRaises(StandardError, setattr, critsrc, 'name', 'testname')
+        try:
+            critsrc.name = 'testname'
+        except StandardError as e:
+            self.assertEquals(e.message, "This is a unique card, meaning "
+                    "only one card of this type can be found in a "
+                    "``definition``. Accordingly, the name is read-only.")
+        self.assertEquals(critsrc.n_histories, 1000)
+        self.assertEquals(critsrc.keff_guess, 1)
+        self.assertEquals(critsrc.n_skip_cycles, 30)
+        self.assertEquals(critsrc.n_cycles, 130)
+        # Testing keyword argument functionality.
+        critsrc = cards.Criticality(n_cycles=300)
+        self.assertEquals(critsrc.n_histories, 1000)
+        self.assertEquals(critsrc.keff_guess, 1)
+        self.assertEquals(critsrc.n_skip_cycles, 30)
+        self.assertEquals(critsrc.n_cycles, 300)
+        # Testing documentation example.
+        critsrc = cards.Criticality(2000, 1.5, 30, 300)
+        self.assertEquals(critsrc.n_histories, 2000)
+        self.assertEquals(critsrc.keff_guess, 1.5)
+        self.assertEquals(critsrc.n_skip_cycles, 30)
+        self.assertEquals(critsrc.n_cycles, 300)
+
+        # Test exceptions for each of the properties.
+        self.assertRaises(ValueError, setattr, critsrc, 'n_histories', 0.5)
+        self.assertRaises(ValueError, setattr, critsrc, 'n_histories', -1)
+        self.assertRaises(ValueError, setattr, critsrc, 'keff_guess', -1)
+        self.assertRaises(ValueError, setattr, critsrc, 'n_skip_cycles', 0.5)
+        self.assertRaises(ValueError, setattr, critsrc, 'n_skip_cycles', -1)
+        self.assertRaises(ValueError, setattr, critsrc, 'n_cycles', 0.5)
+        self.assertRaises(ValueError, setattr, critsrc, 'n_cycles', -1)
+        # Test the exception messages.
+        try:
+            critsrc.n_histories = 0.5
+        except ValueError as e:
+            self.assertEquals(e.message, "The property ``n_histories`` "
+                    "must be an integer. User provided 0.5.")
+        try:
+            critsrc.n_histories = -1
+        except ValueError as e:
+            self.assertEquals(e.message, "The property ``n_histories`` "
+                    "must be positive. User provided -1.")
+        try:
+            critsrc.keff_guess = -1
+        except ValueError as e:
+            self.assertEquals(e.message, "The property ``keff_guess`` "
+                    "must be non-negative. User provided -1.")
+        try:
+            critsrc.n_skip_cycles = 0.5
+        except ValueError as e:
+            self.assertEquals(e.message, "The property ``n_skip_cycles`` "
+                    "must be an integer. User provided 0.5.")
+        try:
+            critsrc.n_skip_cycles = -1
+        except ValueError as e:
+            self.assertEquals(e.message, "The property ``n_skip_cycles`` "
+                    "must be positive. User provided -1.")
+        try:
+            critsrc.n_cycles = 0.5
+        except ValueError as e:
+            self.assertEquals(e.message, "The property ``n_cycles`` "
+                    "must be an integer. User provided 0.5.")
+        try:
+            critsrc.n_cycles = -1
+        except ValueError as e:
+            self.assertEquals(e.message, "The property ``n_cycles`` "
+                    "must be equal to or greater than ``n_skip_cycles``. "
+                    "User provided -1.")
+
+        ## comment()
+        critsrc = cards.Criticality()
+        self.assertEquals(critsrc.comment(), "Criticality source "
+                "'criticality': n_histories: 1000, keff_guess: 1"
+                ", n_skip_cycles: 30, n_cycles: 130.")
+
+        ## mcnp()
+        self.assertEquals(critsrc.mcnp('%g', self.sim), 
+                "KCODE 1000 1 30 130")
+
+    def test_CriticalityPoints(self):
+        """Tests :py:class:`cards.CriticalityPoints`'s methods, properties, and
+        exceptions.
+        
+        """
+        ## __init__()
+        # Default arguments.
+        critpts = cards.CriticalityPoints()
+        self.assertEquals(critpts.name, 'criticalitypoints')
+        self.assertTrue(critpts.points == [[0, 0, 0]])
+        critpts = cards.CriticalityPoints([[1, 2, 3],
+                                        np.array([3.1416, 2.7183, 0])])
+
+        ## comment()
+        self.assertEquals(critpts.comment(), "Criticality points "
+                "'criticalitypoints': (1, 2, 3) cm, "
+                "(3.1416, 2.7183, 0) cm.")
+        self.assertRaises(ValueError, setattr, critpts, 'points', 
+                [[0, 0, 0], [1]])
+        try:
+            critpts.points = [[0, 0, 0], [1]]
+        except ValueError as e:
+            self.assertEquals(e.message, "Length of all point lists/arrays "
+                    "must be 3. User provided a point [1].")
+
+        ## mcnp()
+        self.assertEquals(critpts.mcnp('%g', self.sim),
+                "KSRC 1 2 3\n"
+                "     3.1416 2.7183 0")
+
     def test_ITally(self):
         """Tests :py:class:`cards.ITally`'s methods, properties, and
         exceptions, and those of its subclasses.
@@ -1484,6 +1483,7 @@ class TestSystemDefinition(unittest.TestCase):
 
 class TestMisc(unittest.TestCase):
     """Tests subclasses of :py:class:`cards.IMisc`."""
+    pass
 
 
 class TestSimulationDefinition(unittest.TestCase):
@@ -1493,6 +1493,79 @@ class TestSimulationDefinition(unittest.TestCase):
     #sim = definition.MCNPSimulation(rxr)
     #sim.add_card(cards.Criticality())
     #sim.add_card(cards.CriticalityPoints())
+    pass
+
+class TestMCNPInput(unittest.TestCase):
+
+    def setUp(self):
+        self.sys = definition.SystemDefinition()
+        self.sim = definition.MCNPSimulation(self.sys)
+
+    def tearDown(self):
+        #os.unlink('inptest')
+        pass
+
+    def test_InfLattice(self):
+        """Tests the input file for an infinite lattice reactor. Checks
+        generated output against the text file `inflattice_compare`.
+
+        """
+        # Define system.
+        # Materials.
+        uo2 = cards.Material(name='UO2')
+        uo2.from_atom_frac({'U235': 0.05,
+                            'U238': 0.95,
+                            'O16' : 2.00})
+        h2o = cards.Material(name='H1')
+        h2o.from_atom_frac({'H1' : 2.0,
+                            'O16': 1.0})
+        # Surfaces.
+        radius = 0.40
+        pin = cards.AxisCylinder('pin', 'X', radius)
+        pitch = 1.2
+        cellbound = cards.Parallelepiped('bound',
+                -pitch / 2, pitch / 2, -pitch / 2, pitch / 2, 0, 0,
+                reflecting=True)
+        # Cells.
+        fuel = cards.CellMCNP('fuel', pin.neg, uo2,
+                11.0, 'g/cm^3',
+                importance=('neutron', 1))
+        coolant = cards.CellMCNP('coolant', pin.pos & cellbound.neg, h2o,
+                1.0, 'g/cm^3',
+                importance=('neutron', 1))
+        graveyard = cards.CellMCNP('graveyard', cellbound.pos,
+                importance=('neutron', 0))
+
+        # Add cells to the system.
+        self.sys.add_cell(fuel)
+        self.sys.add_cell(coolant)
+        self.sys.add_cell(graveyard)
+
+        # Add source, tallies to simulation.
+        self.sim.add_source(cards.Criticality())
+        self.sim.add_source(cards.CriticalityPoints())
+        self.sim.add_tally(cards.CellFlux('flux', 'neutron', [fuel, coolant]))
+        self.sim.add_misc(cards.EnergyGrid('egrid0', None,
+                10**np.arange(-9.9, 1.1, 0.1)))
+
+        # Create input file.
+        inp = inputfile.MCNPInput(self.sim)
+        inp.write('simplesim_inflattice_default')
+        # Check against text file.
+        #self.assertEquals(
+        #        open('simplesim_inflattice_default').readlines(),
+        #        open('simplesim_inflattice_default_compare').readlines())
+
+        # Test the & line continuation.
+        # TODO
+        #inp = inputfile.MCNPInput(self.sim, cont_by_amp=True)
+        #inp.write('simplesim_inflattice')
+    def test_bypass_wrap(self):
+        # TODO expecting a warning.
+        self.sim.add_source(cards.CriticalityPoints([[np.pi, np.pi, 0]])
+        inp = inputfile.MCNPInput(self.sim, float_format="%.50e")
+        inp.write('simplesim_bypass_wrap')
+
 
 ## The following tests are redundant, but are to make sure that the examples in
 # the documentation function as expected.
