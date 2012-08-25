@@ -4,12 +4,13 @@ from cython.operator cimport preincrement as inc
 from libc.stdlib cimport malloc, free
 from cython cimport pointer
 from libc.string cimport const_char, memcpy
+from libcpp.string cimport string as std_string
+from libcpp.vector cimport vector as std_vector
 
 # Python imports
 import collections
 
 # local imports
-cimport std
 cimport cpp_jsoncpp
 
 try:
@@ -266,6 +267,32 @@ cdef class Value(object):
         """The type name of this JSON value."""
         return self._value_type_names[self._inst.type()]
 
+    def keys(self):
+        """Returns a list of keys in JSON object."""
+        cdef std_vector[std_string] ckeys
+        if (self._inst.type() != cpp_jsoncpp.objectValue):
+            raise TypeError("no keys, not JSON object.")
+        ckeys = self._inst.getMemberNames()
+        return ckeys
+
+    def values(self):
+        """Returns a list of values in JSON object."""
+        cdef std_vector[std_string] ckeys
+        if (self._inst.type() != cpp_jsoncpp.objectValue):
+            raise TypeError("no values, not JSON object.")
+        ckeys = self._inst.getMemberNames()
+        vals = [self[k] for k in ckeys]
+        return vals
+
+    def items(self):
+        """Returns a list of items in JSON object."""
+        cdef std_vector[std_string] ckeys
+        if (self._inst.type() != cpp_jsoncpp.objectValue):
+            raise TypeError("no values, not JSON object.")
+        ckeys = self._inst.getMemberNames()
+        its = [(k, self[k]) for k in ckeys]
+        return its
+
 
 cdef class Reader:
     def __cinit__(self):
@@ -294,8 +321,8 @@ cdef class Reader:
 
         """
         cdef Value root = Value()
-        cdef std.string cdoc
+        cdef std_string cdoc
         pydoc = json.JSONEncoder(separators=(',', ':')).encode(document)
-        cdoc = std.string(pydoc)
+        cdoc = pydoc
         self._inst.parse(cdoc, root._inst[0], collect_comments)
         return root
