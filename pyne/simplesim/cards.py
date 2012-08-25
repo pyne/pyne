@@ -9,9 +9,19 @@ the :py:mod:`definition` module. Instances of classes in the :py:mod:`definition
 contains instances of the classes in this module.  Below is the reference for
 the module.
 
->>> from pyne.simplesim import definition
->>> sys = definition.SystemDefinition(verbose=False)
->>> sim = definition.MCNPSimulation(sys, verbose=False)
+.. testsetup::
+
+    >>> from pyne.simplesim import definition
+    >>> sys = definition.SystemDefinition(verbose=False)
+    >>> sim = definition.MCNPSimulation(sys, verbose=False)
+
+.. testcode::
+
+   print "HI"
+
+.. testoutput::
+
+   HO
 
 """
 
@@ -207,35 +217,22 @@ class Material(ICard, material.Material):
         :py:class:`pyne.material.Material`, but we show the usage of the 2 new
         attributes and 2 new methods::
 
-        >>> from pyne.simplesim import definition
-        >>> sys = definition.SystemDefinition(verbose=False)
-        >>> sim = definition.MCNPSimulation(sys, verbose=False)
-        >>> originstory = "I found this water in a well a few years ago."
-        >>> h2o = Material(name='water', description=originstory)
-        >>> h2o.from_atom_frac({10010: 1.0, 'O16': 2.0})
-        >>> h2o.tables = {10010: '71c'}
-        >>> sys.add_material(h2o)
-        >>> print h2o.comment()
-        Material 'water': I found this water in a well a few years ago.
-        >>> print h2o.mcnp('%g', sim)
-        M1
-               1001.71c  1 $ H1
-               8016      2 $ O16
+            originstory = "I found this water in a well a few years ago."
+            h2o = Material(name='water', description=originstory)
+            h2o.from_atom_frac({10010: 1.0, 'O16': 2.0})
+            h2o.tables = {10010: '71c'}
+            sys.add_material(h2o)
 
         Alternatively, the tables can be specified with the constructor::
 
-        >>> h2o = Material(name='water', tables={10010: '71c'})
-        >>> h2o.from_atom_frac({10010: 1.0, 'O16': 2.0})
+           h2o = Material(name='water', tables={10010: '71c'})
+           h2o.from_atom_frac({10010: 1.0, 'O16': 2.0})
 
         The ``nucname``s used for ``tables`` can be different from those used
         for ``comp``::
 
-        >>> h2o = Material(name='water', tables={'H1': '71c'})
-        >>> h2o.from_atom_frac({10010: 1.0, 'O16': 2.0})
-        >>> print h2o.mcnp('%g', sim)
-        M1
-               1001.71c  1 $ H1
-               8016      2 $ O16
+           h2o = Material(name='water', tables={'H1': '71c'})
+           h2o.from_atom_frac({10010: 1.0, 'O16': 2.0})
 
         """
         super(Material, self).__init__(*args, **kwargs)
@@ -319,17 +316,10 @@ class ScatteringLaw(ICard):
         --------
         This specifies hydrogen bound in water, in MCNP::
 
-        >>> from pyne.simplesim import definition
-        >>> sys = definition.SystemDefinition(verbose=False)
-        >>> sim = definition.MCNPSimulation(sys, verbose=False)
-        >>> h2o = Material(name='water')
-        >>> h2o.from_atom_frac({10010: 1.0, 'O16': 2.0})
-        >>> sys.add_material(h2o)
-        >>> sl = ScatteringLaw('water', {'H1': 'lwtr.16t'})
-        >>> print sl.comment()
-        Scattering law 'scatlaw-water': H1: lwtr.16t.
-        >>> print sl.mcnp('%g', sim)
-        MT1 lwtr.16t
+           h2o = Material(name='water')
+           h2o.from_atom_frac({10010: 1.0, 'O16': 2.0})
+           sys.add_material(h2o)
+           sl = ScatteringLaw('water', {'H1': 'lwtr.16t'})
 
         """
         super(ScatteringLaw, self).__init__('scatlaw-{0}'.format(mat_name))
@@ -1572,14 +1562,14 @@ class Parallelepiped(IMacrobody):
         name : str
             See :py:class:`ICard`.
         xmin, xmax, ymin, ymax, zmin, zmax : float [centimeters]
-            Bounds of the parallelepiped in the given direction. The *min value
-            must be less than the *max value. Setting both min and max in a
+            Bounds of the parallelepiped in the given direction. The min value
+            must be less than the max value. Setting both min and max in a
             given direction to 0 indicates the parallelepiped is infinite in
             that direction.
         reflecting : bool, optional
-            See :py:class:`ISurface`
+            See :py:class:`ISurface`.
         white : bool, optional
-            See :py:class:`ISurface`
+            See :py:class:`ISurface`.
 
         Examples
         --------
@@ -4878,7 +4868,7 @@ class DXTRANSpheres(IUniqueParticle):
 class Vector(IMisc):
     """Position vector. In MCNP, this is the **VECT** card. Unique card with name
     `vector`. Vector are added to the card via the :py:meth:`add`. The card is
-    used with the :py:card:`ExponentialTransform` card in MCNP.
+    used with the :py:class:`ExponentialTransform` card in MCNP.
 
     .. inheritance-diagram:: pyne.simplesim.cards.Vector
 

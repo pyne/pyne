@@ -25,6 +25,7 @@ extension to other codes may require more effort.
 # describe how the remaining cards are modified.
 # TODO let user specify number format for different types of floats
 # TODO provision for printing materials...
+# TODo filename should be with write
 
 import abc
 import datetime
@@ -62,7 +63,7 @@ class IInputFile(object):
     def write(self):
         self.set_up()
         # Should write the plug in the appropriate place.
-        self._writesubclass()
+        self._write_subclass()
         self.fid.close()
 
     def set_up(self):
