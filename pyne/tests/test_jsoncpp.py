@@ -1,6 +1,5 @@
 """JsonCpp tests"""
 import os
-import collections
 try:
     import simplejson as json
 except ImportError:
@@ -103,7 +102,6 @@ def test_mapvalue():
     assert_true(v.isobject())
     assert_equal(v.type(), 7)
     assert_equal(v.type_name(), 'object')
-    assert_true(isinstance(v, collections.Mapping))
 
 def test_badmapvalue():
     m = {'name': 'Terry Jones', 42: 42.0}
@@ -275,6 +273,17 @@ def test_cmp():
     assert_true(a <= 11)
     assert_true(a > 9)
     assert_true(a >= 9)
+
+def test_mutablemap():
+    a = Value({'i': 10, 'j': "rawr"})
+    assert_equal(a.pop('i'), 10)
+    assert_equal(a.popitem('j'), ('j', 'rawr'))
+    a.setdefault('z', 'man')
+    assert_true(a == {'z': 'man'})
+    a.update({'i': 10, 'j': "rawr"})
+    assert_true(a == {'i': 10, 'j': "rawr", 'z': 'man'})
+    a.clear()
+    assert_equal(len(a), 0)
 
 
 #r = jsoncpp.Reader()

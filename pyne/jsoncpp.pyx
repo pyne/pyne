@@ -332,6 +332,30 @@ cdef class Value(object):
         cdef Value cother = Value(other)
         return self._inst.compare((<Value> other)._inst[0])
 
+    def clear(self):
+        """Removes all elements of JSON value."""
+        self._inst.clear()
+
+    def pop(self, i):
+        v = self[i]
+        del self[i]
+        return v
+
+    def popitem(self, k):
+        v = self[k]
+        del self[k]
+        return (k, v)
+
+    def setdefault(self, k, d=None):
+        if not self._inst.isMember(<const_char *> k):
+            self[k] = d
+        v = self[k]
+        return v
+
+    def update(self, d):
+        for k in d.keys():
+            self[k] = d[k]
+
 cdef class Reader:
     def __cinit__(self):
         """Reader C++ constuctor."""
