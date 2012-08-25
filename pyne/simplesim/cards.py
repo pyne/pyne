@@ -2761,12 +2761,12 @@ class IDetector(ITally):
     def comment(self, name):
         string = super(IDetector, self).comment(name)
         if type(self.spec) is tuple:
-            string += self._tuple_tostring(self.spec)
+            string += self._comment_unit(self.spec)
         else:
             counter = 0
             for point in self.spec:
                 counter += 1
-                string += self._tuple_tostring(point)
+                string += self._comment_unit(point)
                 if counter < len(self.spec): string += ";"
         string += "; direct contrib is {0}separate.".format(
                 '' if self.sep_direct else 'not ')
@@ -2777,7 +2777,7 @@ class IDetector(ITally):
         return super(IDetector, self).mcnp(float_format, sim, num, **kwargs)
     
     @abc.abstractmethod
-    def _tuple_tostring(self):
+    def _comment_unit(self):
         raise NotImplementedError
 
     @property
@@ -2868,7 +2868,7 @@ class PointDetector(IDetector):
         string = super(PointDetector, self).mcnp(float_format, sim, 5)
         # TODO
 
-    def _tuple_tostring(self, apoint):
+    def _comment_unit(self, apoint):
         string = (" point ({0[0]:g}, {0[1]:g}, {0[2]:g}) cm, radius "
                 "{1:g} {2}".format(
                 apoint[0], abs(apoint[1]), 'mfp' if apoint[1] < 0 else 'cm'))
@@ -2941,7 +2941,7 @@ class RingDetector(IDetector):
                                                  post='a')
         # TODO
 
-    def _tuple_tostring(self, aring):
+    def _comment_unit(self, aring):
         string = (" ring {0} = {1:g} cm, radius {2:g} cm, s.o.e. "
                 "radius {3:g} {4}".format(aring[0], aring[1], aring[2],
                     abs(aring[3]), 'mfp' if aring[3] < 0 else 'cm'))
