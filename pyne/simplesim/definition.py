@@ -351,20 +351,20 @@ class MCNPSimulation(SimulationDefinition):
         card = self.tally[name]
         # Must add one because indices start at 0 but card numbers at 1.
         if isinstance(card, cards.SurfaceCurrent):
-            return (self._tally_surfacecurrent.keys().index(name) + 1) * 10 + 1
+            return self._tally_surfacecurrent.keys().index(name) + 1
         elif isinstance(card, cards.SurfaceFlux):
-            return (self._tally_surfaceflux.keys().index(name) + 1) * 10 + 2
+            return self._tally_surfaceflux.keys().index(name) + 1
         elif isinstance(card, cards.CellFlux):
-            return (self._tally_cellflux.keys().index(name) + 1) * 10 + 4
+            return self._tally_cellflux.keys().index(name) + 1
         elif isinstance(card, cards.CellEnergyDeposition):
-            return (self._tally_cellenergydep.keys().index(name) + 1) * 10 + 6
+            return self._tally_cellenergydep.keys().index(name) + 1
         elif isinstance(card, cards.CellFissionEnergyDeposition):
-            return (self._tally_cellfissiondep.keys().index(name) + 1) * 10 + 7
+            return self._tally_cellfissiondep.keys().index(name) + 1
         elif isinstance(card, (cards.CellPulseHeight,
                 cards.CellChargeDeposition)):
-            return (self._tally_pulseheight.keys().index(name) + 1) * 10 + 8
+            return self._tally_pulseheight.keys().index(name) + 1
         elif isinstance(card, cards.IDetector):
-            return (self._tally_detector.keys().index(name) + 1) * 10 + 5
+            return self._tally_detector.keys().index(name) + 1
         else:
             raise Exception
 

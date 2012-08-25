@@ -51,6 +51,7 @@ the module.
 # TODO in Cell, require that the material is not pyne.card.Material, but is a
 # card here.
 # TODO explain that names must only be unique within a category.
+# TODO altunits for detectors. and also in the comments.
 
 import abc
 import collections
@@ -2103,7 +2104,7 @@ class ITally(ICard):
     """
     __metaclass__ = abc.ABCMeta
 
-    def __init__(self, name, particle, *args, **kwargs):
+    def __init__(self, name, particle, alt_units=False, *args, **kwargs):
         """
         Parameters
         ----------
@@ -2111,16 +2112,21 @@ class ITally(ICard):
             See :py:class:`ICard`. Used for, e.g., tally multiplier cards.
         particle : str
             Either 'neutron', 'photon', electron', or 'proton'.
+        alt_units : bool, optional
+            If set to True and the tally can use alternative units, alternative
+            units are used for the tally. See subclasses.
 
         """
         super(ITally, self).__init__(name, *args, **kwargs)
         self.particle = particle
+        self.alt_units = alt_units
 
     @abc.abstractmethod
     def comment(self, title):
         string = "{0} tally {1!r} of ".format(title, self.name)
         if type(self.particle) is not list:
             string += self.particle
+            # 'all' is only for CellEnergyDeposition.
             if self.particle != 'all': string += "s"
         else:
             pcounter = 0
@@ -2132,11 +2138,23 @@ class ITally(ICard):
         return string
     
     @abc.abstractmethod
-    def mcnp(self, float_format, sim):
-        string = "F{0}:".format(sim.tally_num(self.name))
-        if type(self.particle) is list:
-
-                self.mcnp_particle[self.particle])
+    def mcnp(self, float_format, sim, num, pre='', post=''):
+        if pre != '' and self.alt_units:
+            raise Exception("Can't have * and + as tally prefix.")
+        if self.alt_units: pre = '*'
+        string = "{0}F{1}{2}".format(
+                pre, 10 * sim.tally_num(self.name) + num, post)
+        if self.particle != 'all':
+            # 'all' is only for CellEnergyDeposition.
+            string += ":"
+            if type(self.particle) is list: plist = self.particle
+            else:                           plist = [self.particle]
+            pcounter = 0
+            for part in self.particle:
+                pcounter += 1
+                string += "{0}".format(self.mcnp_particle[self.particle])
+                if pcounter < len(self.particle): string += ", "
+        return string + " "
 
     @property
     def particle(self): return self._particle
@@ -2144,6 +2162,12 @@ class ITally(ICard):
     @particle.setter
     def particle(self, value):
         self._particle = value
+
+    @property
+    def alt_units(self): return self._alt_units
+
+    @alt_units.setter
+    def alt_units(self, value): self._alt_units = value
 
 
 class ICellSurfTally(ITally):
@@ -2155,7 +2179,7 @@ class ICellSurfTally(ITally):
     """
     __metaclass__ = abc.ABCMeta
 
-    def __init__(self, name, particle, cards, alt_units=False, *args, **kwargs):
+    def __init__(self, name, particle, cards, *args, **kwargs):
         """
         Parameters
         ----------
@@ -2172,8 +2196,6 @@ class ICellSurfTally(ITally):
             averages is desired, then this set must be nested in two lists. See
             the examples.
         alt_units : bool, optional
-            If set to True and the tally can use alternative units, alternative
-            units are used for the tally. See subclasses.
 
         Examples
         --------
@@ -2195,16 +2217,18 @@ class ICellSurfTally(ITally):
         """
         super(ICellSurfTally, self).__init__(name, particle, *args, **kwargs)
         self.cards = cards
-        self.alt_units = alt_units
+        # Affects behavior in comment() and mcnp(), etc.
+        self.card_type = kwargs.get('card_type', None)
+        if self.card_type != 'cell' and self.card_type != 'surface':
+            raise Exception("Card type must be 'cell' or 'surface".)
 
     @abc.abstractmethod
-    def comment(self, title, union_type, card_type):
-        # card_type is either 'cell', or 'surface'
+    def comment(self, title, union_type):
         # Assuming the user has provided objects of the appropriate type; the
         # issubclass check was not working with little effort. TODO
         string = super(ICellSurfTally, self).comment(title) + " "
-        if card_type == 'cell':      classcheck = Cell
-        elif card_type == 'surface': classcheck = ISurface
+        if self.card_type == 'cell':      classcheck = Cell
+        elif self.card_type == 'surface': classcheck = ISurface
         if type(self.cards) is not list: # issubclass(self.cards, classcheck):
             string += "{0} {1!r}".format(card_type, self.cards.name)
         elif type(self.cards) is list:
@@ -2234,39 +2258,26 @@ class ICellSurfTally(ITally):
         #            card_type, type(self.cards)))
         return string
 
-    def mcnp(self, float_format, sim):
-        string = super(ICellSurfTally, self).mcnp(self, float_format, sim)
-        if card_type == 'cell':      classcheck = Cell
-        elif card_type == 'surface': classcheck = ISurface
-        if type(self.cards) is not list: # issubclass(self.cards, classcheck):
-            string += "{0} {1!r}".format(card_type, self.cards.name)
-        elif type(self.cards) is list:
-            if type(self.cards[0]) is not list:
-                string += "{0}s ".format(card_type)
-            outcounter = 0
-            for obj in self.cards:
-                outcounter += 1
-                if type(obj) is not list: # issubclass(obj, classcheck):
-                    string += "{0!r}".format(obj.name)
-                elif type(obj) is list:
-                    string += "{0} in ".format(union_type)
-                    incounter = 0
-                    for avgobj in obj:
-                        incounter += 1
-                        # Must be a cell/surface card.
-                        string += "{0!r}".format(avgobj.name)
-                        if incounter < len(obj): string += ", "
-                # TODO an anti-duck-typing exception:
-                #else:
-                #    raise ValueError("Expected {0} or list, got {1}.".format(
-                #            card_type, type(obj)))
-                if outcounter < len(self.cards): string += "; "
-        # TODO an anti-duck-typing exception:
-        #else:
-        #    raise ValueError("Expected {0} or list, got {1}.".format(
-        #            card_type, type(self.cards)))
+    @abc.abstractmethod
+    def mcnp(self, float_format, sim, num, **kwargs):
+        string = super(ICellSurfTally, self).mcnp(self, float_format, sim, num,
+                                                  **kwargs)
+        if self.card_type == 'cell':      getname = sim.sys.cell_num
+        elif self.card_type == 'surface': getname = sim.sys.surface_num
+        if type(self.cards) is list: clist = self.cards
+        else:                        clist = [self.cards]
+        outcounter = 0
+        for obj in clist:
+            outcounter += 1
+            if type(obj) is not list:
+                string += " {0:d}".format(getname(obj.name))
+            elif type(obj) is list:
+                string += "("
+                for avgobj in obj:
+                    # Must be a cell/surface card.
+                    string += " {0:d}".format(getname(avgobj.name))
+                string += ")"
         return string
-
 
     def _unique_card_list(self):
         # Returns a unique list of all the cards provided in self.cards.
@@ -2315,7 +2326,7 @@ class SurfaceCurrent(ICellSurfTally):
     .. inheritance-diagram:: pyne.simplesim.cards.SurfaceCurrent
 
     """
-    def __init__(self, name, particle, cards, total=False, alt_units=False):
+    def __init__(self, name, particle, cards, total=False, **kwargs):
         """
         Parameters
         ----------
@@ -2331,6 +2342,7 @@ class SurfaceCurrent(ICellSurfTally):
             `problem`).
         alt_units : bool, optional
             If True, Tally is additionally weighted by particle energy.
+            See :py:class:`ITally`.
 
         Examples
         --------
@@ -2346,7 +2358,8 @@ class SurfaceCurrent(ICellSurfTally):
                     alt_units=True)
 
         """
-        super(SurfaceCurrent, self).__init__(name, particle, cards, alt_units)
+        super(SurfaceCurrent, self).__init__(name, particle, cards,
+                                             cell_type='surface', **kwargs)
         self.total = total
 
     def comment(self):
@@ -2356,6 +2369,10 @@ class SurfaceCurrent(ICellSurfTally):
         else:          string += "."
         return string
 
+    def mcnp(self, float_format, sim):
+        string = super(SurfaceCurrent, self).mcnp(float_format, sim, 1)
+        if self.total: string += " T"
+        return string
 
 class IAverageTally(ICellSurfTally):
     """This class is not used by the user. Abstract base class for
@@ -2382,7 +2399,7 @@ class IAverageTally(ICellSurfTally):
             `problem`).
         alt_units : bool, optional
             If set to True and the tally can use alternative units, alternative
-            units are used for the tally. See subclasses.
+            units are used for the tally. See subclasses, and :py:class:`ITally`.
 
         Examples
         --------
@@ -2398,11 +2415,17 @@ class IAverageTally(ICellSurfTally):
         self.average = average
 
     @abc.abstractmethod
-    def comment(self, title, card_type):
+    def comment(self, title):
         avgstr = 'avg.'
-        string = super(IAverageTally, self).comment(title, avgstr, card_type)
+        string = super(IAverageTally, self).comment(title, avgstr)
         if self.average: string += "; and {0} of all provided.".format(avgstr)
         else:            string += "."
+        return string
+
+    def mcnp(self, float_format, sim, num, **kwargs):
+        string = super(IAverageTally, self).mcnp(float_format, sim, num,
+                                                 **kwargs)
+        if self.average: string += " T"
         return string
 
     @property
@@ -2418,7 +2441,7 @@ class SurfaceFlux(IAverageTally):
     .. inheritance-diagram:: pyne.simplesim.cards.SurfaceFlux
 
     """
-    def __init__(self, name, particle, cards, average=False, alt_units=False):
+    def __init__(self, name, particle, cards, **kwargs):
         """
         Parameters
         ----------
@@ -2432,6 +2455,7 @@ class SurfaceFlux(IAverageTally):
             See :py:class:`IAverageTally`.
         alt_units : bool, optional
             If True, Tally is additionally weighted by particle energy.
+            See :py:class:`ITally`.
 
         Examples
         --------
@@ -2450,10 +2474,13 @@ class SurfaceFlux(IAverageTally):
 
         """
         super(SurfaceFlux, self).__init__(name, particle, cards, average,
-                                          alt_units)
+                                          card_type='surface', **kwargs)
 
     def comment(self):
-        return super(SurfaceFlux, self).comment("Surface flux", 'surface')
+        return super(SurfaceFlux, self).comment("Surface flux")
+
+    def mcnp(self, float_format, sim):
+        return super(SurfaceFlux, self).mcnp(float_format, sim, 2)
 
     @property
     def total(self): return self._total
@@ -2468,7 +2495,7 @@ class CellFlux(IAverageTally):
     .. inheritance-diagram:: pyne.simplesim.cards.CellFlux
 
     """
-    def __init__(self, name, particle, cards, average=False, alt_units=False):
+    def __init__(self, name, particle, cards, **kwargs):
         """
         Parameters
         ----------
@@ -2482,6 +2509,7 @@ class CellFlux(IAverageTally):
             See :py:class:`IAverageTally`.
         alt_units : bool, optional
             If True, Tally is additionally weighted by particle energy.
+            See :py:class:`ITally`.
 
         Examples
         --------
@@ -2500,10 +2528,13 @@ class CellFlux(IAverageTally):
 
         """
         super(CellFlux, self).__init__(name, particle, cards, average,
-                                       alt_units)
+                                       card_type='cell', **kwargs)
 
     def comment(self):
-        return super(CellFlux, self).comment("Cell flux", 'cell')
+        return super(CellFlux, self).comment("Cell flux")
+
+    def mcnp(self, float_format, sim):
+        return super(SurfaceFlux, self).mcnp(float_format, sim, 4)
 
 
 class CellEnergyDeposition(IAverageTally):
@@ -2514,7 +2545,7 @@ class CellEnergyDeposition(IAverageTally):
 
     """
     # TODO in mcnp input, prevent particle all and alt_units
-    def __init__(self, name, particles, cards, average=False, alt_units=False):
+    def __init__(self, name, particles, cards, **kwargs):
         """
         Parameters
         ----------
@@ -2524,7 +2555,7 @@ class CellEnergyDeposition(IAverageTally):
             See :py:class:`ITally`. For this tally, the user can specify the
             particle type as a list of strs to tally more than one type of
             particle. Also, the additional value of 'all' is allowed, and
-            specifies collision heating. As is expected, 'all' cannot be
+            specifies collision heating. As may be expected, 'all' cannot be
             provided as part of a list.
         cards : :py:class:`Cell`, list, list of lists
             See :py:class:`IAverageTally`.
@@ -2533,6 +2564,7 @@ class CellEnergyDeposition(IAverageTally):
         alt_units : bool, optional
             If True, alternative units are used for the tally. In MCNP, the
             default units are MeV/g and the alternative units are jerks/g.
+            See :py:class:`ITally`.
 
         Examples
         --------
@@ -2561,38 +2593,25 @@ class CellEnergyDeposition(IAverageTally):
 
         """
         super(CellEnergyDeposition, self).__init__(name, particles, cards,
-                average, alt_units)
+                average, card_type='cell', **kwargs)
         # TODO move this error check to the MCNP method.
         if self.particle == 'all' and self.alt_units:
             raise ValueError("The particle cannot be 'all' if alt_units is "
                     "True.")
 
     def comment(self):
-        return super(CellEnergyDeposition, self).comment("Energy deposition",
-                                                         'cell')
+        return super(CellEnergyDeposition, self).comment("Energy deposition")
+
+    def mcnp(self, float_format, sim):
+        if self.particle == 'all': pre = '+'
+        else:                      pre = ''
+        return super(SurfaceFlux, self).mcnp(float_format, sim, 6, pre)
 
     @property
     def particle(self): return self._particle
 
     @particle.setter
-    def particle(self, value):
-        if type(value) is list:
-            for string in value:
-                if (string != 'neutron' and string != 'photon' and 
-                        string != 'electron' and string != 'proton'):
-                    raise ValueError("The ``particle`` list must "
-                            "contain only 'neutron', 'photon', 'electron',"
-                            " or 'proton'. User provided {0!r}.".format(
-                                string))
-        else:
-            # A single string is provided.
-            if (value != 'neutron' and value != 'photon' and 
-                    value != 'electron' and value != 'proton' and 
-                    value != 'all'):
-                raise ValueError("The property ``particle`` must be "
-                        "'neutron', 'photon', 'electron', 'proton', or 'all'."
-                        "User provided {0!r}.".format(value))
-        self._particle = value
+    def particle(self, value): self._particle = value
 
 
 class CellFissionEnergyDeposition(IAverageTally):        
@@ -2603,7 +2622,7 @@ class CellFissionEnergyDeposition(IAverageTally):
 
     """
     # TODO prevent user from specifying a different particle.
-    def __init__(self, name, cards, average=False, alt_units=False):
+    def __init__(self, name, cards, **kwargs):
         """
         Parameters
         ----------
@@ -2616,6 +2635,7 @@ class CellFissionEnergyDeposition(IAverageTally):
         alt_units : bool, optional
             If True, alternative units are used for the tally. In MCNP, the
             default units are MeV/g and the alternative units are jerks/g.
+            See :py:class:`ITally`.
 
         Examples
         --------
@@ -2634,11 +2654,14 @@ class CellFissionEnergyDeposition(IAverageTally):
 
         """
         super(CellFissionEnergyDeposition, self).__init__(name, 'neutron',
-                cards, average, alt_units)
+                cards, average, card_type='cell', **kwargs)
 
     def comment(self):
         return super(CellFissionEnergyDeposition, self).comment(
-                "Fission energy deposition", 'cell')
+                "Fission energy deposition")
+
+    def mcnp(self, float_format, sim):
+        return super(SurfaceFlux, self).mcnp(float_format, sim, 7)
 
 
 class CellPulseHeight(IAverageTally):
@@ -2648,7 +2671,7 @@ class CellPulseHeight(IAverageTally):
     .. inheritance-diagram:: pyne.simplesim.cards.CellPulseHeight
 
     """
-    def __init__(self, name, particles, cards, average=False, alt_units=False):
+    def __init__(self, name, particles, cards, **kwargs):
         """
         Parameters
         ----------
@@ -2665,6 +2688,7 @@ class CellPulseHeight(IAverageTally):
         alt_units : bool, optional
             If True, alternative units are used for the tally. In MCNP, the
             default units are pulses and the alternative units are MeV.
+            See :py:class:`ITally`.
 
         Examples
         --------
@@ -2678,10 +2702,13 @@ class CellPulseHeight(IAverageTally):
 
         """
         super(CellPulseHeight, self).__init__(name, particles, cards, average,
-                                              alt_units)
+                                              card_type='cell', **kwargs)
 
     def comment(self):
-        return super(CellPulseHeight, self).comment("Pulse height", 'cell')
+        return super(CellPulseHeight, self).comment("Pulse height")
+
+    def mcnp(self, float_format, sim):
+        return super(SurfaceFlux, self).mcnp(float_format, sim, 8)
 
     @property
     def particle(self): return self._particle
@@ -2689,20 +2716,7 @@ class CellPulseHeight(IAverageTally):
     @particle.setter
     def particle(self, value):
         # Copied from CellEnergyDeposition.particle
-        if type(value) is list:
-            for string in value:
-                self._assert_particle(string)
-        else:
-            # A single string is provided.
-            self._assert_particle(string)
         self._particle = value
-
-    def _assert_particle(self, string):
-        if (string != 'neutron' and string != 'photon' and 
-                string != 'electron' and string != 'proton'):
-            raise ValueError("The ``particle`` list must "
-                    "contain only 'neutron', 'photon', 'electron',"
-                    " or 'proton'. User provided '%s'." % string)
 
 
 class CellChargeDeposition(CellPulseHeight):
@@ -2714,7 +2728,7 @@ class CellChargeDeposition(CellPulseHeight):
     """
     # TODO it doesn't make sense that the user can provide the particle type
     # here, at least for MCNP.
-    def __init__(self, name, particles, cards, average=False):
+    def __init__(self, name, particles, cards, **kwargs):
         """
         Parameters
         ----------
@@ -2740,10 +2754,15 @@ class CellChargeDeposition(CellPulseHeight):
         See base classes for more examples.
 
         """
-        super(CellPulseHeight, self).__init__(name, particles, cards, average)
+        super(CellPulseHeight, self).__init__(name, particles, cards,
+                                              card_type='cell', **kwargs)
 
     def comment(self):
-        return super(CellPulseHeight, self).comment("Charge deposition", 'cell')
+        return super(CellPulseHeight, self).comment("Charge deposition")
+
+    def mcnp(self, float_format, sim):
+        return super(SurfaceFlux, self).mcnp(float_format, sim, 8,
+                                             pre='+')
 
 
 class RepeatedStructure(IAverageTally):
@@ -2771,6 +2790,10 @@ class IDetector(ITally):
         string += "; direct contrib is {0}separate.".format(
                 '' if self.sep_direct else 'not ')
         return string
+
+    @abc.abstractmethod
+    def mcnp(self, float_format, sim, num, **kwargs):
+        return super(IDetector, self).mcnp(float_format, sim, num, **kwargs)
     
     @abc.abstractmethod
     def _tuple_tostring(self):
@@ -2801,15 +2824,15 @@ class PointDetector(IDetector):
     # TODO I wish we could avoid the use of negative numbers to signal
     # somethign semantic other than a negative number, but other alternatives
     # here seem to not be as clean or easy or general.
-    def __init__(self, name, particle, spec, sep_direct=True):
+    def __init__(self, name, particle, spec, **kwargs):
         """
         Parameters
         ----------
         name : str
             See :py:class:`ITally`.
         particles : str, list of str
-            See :py:class:`ITally`. In MCNP for this tally, only neutrons and
-            photons are allowed.
+            See :py:class:`ITally`. In MCNP, this tally is only for neutrons and
+            photons.
         spec : tuple, list of tuples [centimeters/mean free paths]
             The tuple has 2 elements: a 3-element list of floats and a float.
             The 3-element list provides the location of the point detector, and
@@ -2822,6 +2845,9 @@ class PointDetector(IDetector):
             In MCNP, the direct contribution to the tally is printed
             separately. Set to False to disable the separate printing. This is
             a property of the undocumented :py:class:`IDetector`.
+        alt_units : bool, optional
+            If True, Tally is additionally weighted by particle energy.
+            See :py:class:`ITally`.
 
         Examples
         --------
@@ -2852,10 +2878,15 @@ class PointDetector(IDetector):
                     sep_direct=False)
 
         """
-        super(PointDetector, self).__init__(name, particle, spec, sep_direct)
+        super(PointDetector, self).__init__(name, particle, spec, sep_direct,
+                                            **kwargs)
 
     def comment(self):
         return super(PointDetector, self).comment("Point detector")
+
+    def mcnp(self, float_format, sim):
+        string = super(PointDetector, self).mcnp(float_format, sim, 5)
+        # TODO
 
     def _tuple_tostring(self, apoint):
         string = (" point ({0[0]:g}, {0[1]:g}, {0[2]:g}) cm, radius "
@@ -2872,7 +2903,7 @@ class RingDetector(IDetector):
 
     """
     # TODO use *args instead of these silly lists.
-    def __init__(self, name, particle, spec, sep_direct=True):
+    def __init__(self, name, particle, spec, **kwargs):
         """
         Parameters
         ----------
@@ -2893,6 +2924,9 @@ class RingDetector(IDetector):
             In MCNP, the direct contribution to the tally is printed
             separately. Set to False to disable the separate printing. This is
             a property of the undocumented :py:class:`IDetector`.
+        alt_units : bool, optional
+            If True, Tally is additionally weighted by particle energy.
+            See :py:class:`ITally`.
 
         Examples
         --------
@@ -2917,10 +2951,15 @@ class RingDetector(IDetector):
                     sep_direct=False)
 
         """
-        super(RingDetector, self).__init__(name, particle, spec, sep_direct)
+        super(RingDetector, self).__init__(name, particle, spec, **kwargs)
 
     def comment(self):
         return super(RingDetector, self).comment("Ring detector")
+
+    def mcnp(self, float_format, sim):
+        string = super(PointDetector, self).mcnp(float_format, sim, 5,
+                                                 post='a')
+        # TODO
 
     def _tuple_tostring(self, aring):
         string = (" ring {0} = {1:g} cm, radius {2:g} cm, s.o.e. "
