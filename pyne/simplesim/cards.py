@@ -260,8 +260,10 @@ class Cell(ICard):
             # Material number.
             string += " {0} ".format(sim.sys.material_num(self.material.name))
             # Density, with units prefix.
-            string += self._mcnp_density_prefix(self.density_units)
-            string += float_format % self.density
+            if self.density_units == 'g/cm^3':
+                string += float_format % -self.density
+            else:
+                string += float_format % self.density
         else:
             # Void.
             string += " 0"
