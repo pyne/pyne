@@ -250,7 +250,12 @@ class Cell(ICard):
 
     def mcnp(self, float_format, sim):
         # Card number.
-        string = "{0}".format(sim.sys.cell_num(self.name))
+        if self.name not in sim.sys.cells:
+            raise StandardError("Cell {0!r} not in simulation.".format(
+                self.name))
+        formatstr = "{{: <{0}d}}".format(
+                int(np.log10(len(sim.sys.cells))) + 1)
+        string = formatstr.format(sim.sys.cell_num(self.name))
         if self.material and self.density and self.density_units:
             # Material number.
             string += " {0} ".format(sim.sys.material_num(self.material.name))
@@ -1107,7 +1112,7 @@ class ISurface(ICard):
                 self.name))
         formatstr = "{{: <{0}d}} ".format(
                 int(np.log10(len(sim.sys.surfaces))) + 1)
-        return formatstr.format(sim.sys.surfaces.keys().index(self.name) + 1)
+        return formatstr.format(sim.sys.surface_num(self.name))
 
     @abc.abstractmethod
     def shift(self, vector):
