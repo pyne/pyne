@@ -40,7 +40,7 @@ class IInputFile(object):
     __metaclass__ = abc.ABCMeta
 
     def __init__(self, fname, simdef, comments=True, header=None, plug=True,
-                 float_format="%.5g"):
+                 float_format="% .5g"):
         """
 
         Parameters
@@ -99,7 +99,7 @@ class MCNPInput(IInputFile):
     """
     # TODO user can overload commenting methods
     def __init__(self, fname, simdef, comments=True, header=None,
-            description=None, plug=True, float_format="%.5g",
+            description=None, plug=True, float_format="% .5g",
             cont_by_blanks=True):
         """
 
