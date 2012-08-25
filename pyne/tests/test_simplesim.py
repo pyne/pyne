@@ -1562,7 +1562,7 @@ class TestMCNPInput(unittest.TestCase):
         #inp.write('simplesim_inflattice')
     def test_bypass_wrap(self):
         # TODO expecting a warning.
-        self.sim.add_source(cards.CriticalityPoints([[np.pi, np.pi, 0]])
+        self.sim.add_source(cards.CriticalityPoints([[np.pi, np.pi, 0]]))
         inp = inputfile.MCNPInput(self.sim, float_format="%.50e")
         inp.write('simplesim_bypass_wrap')
 
