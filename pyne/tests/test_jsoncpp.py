@@ -285,34 +285,64 @@ def test_mutablemap():
     a.clear()
     assert_equal(len(a), 0)
 
+def test_mutableseq():
+    pya = [1, 2, 5, 3]
+    a = Value(pya)
+    assert_equal([i for i in reversed(a)], pya[::-1])
+    assert_equal(a.index(5), 2)
+    assert_equal(a.index(5, 2), 2)
+    assert_equal(a.index(2, 1, -1), 1)
 
-#r = jsoncpp.Reader()
-#root = r.parse({'a': 10, 'b': 'Hello', 'c': {'d': [1, 2, 10.0]}})
+    pya = [1, 2, 5, 3, 1, 1, 6]
+    a = Value(pya)
+    assert_equal(a.count(1), pya.count(1))
+    assert_equal(a.count(5), pya.count(5))
 
-"""\
-print root
-print root['a']
-print root['b']
-print root['c']['d'][1]
+    assert_equal(len(a), len(pya))
+    a.append(42)
+    assert_equal(len(a), len(pya)+1)
 
-q = root['c']['d']
-print q
-r = root['c']['d']
-print r
-x
-print "len root = ", len(root)
-root['ORLY'] = 'YARLY'
-print "len root = ", len(root)
-print len(root['ORLY'])
-print root['ORLY']
+    pya = [1, 2, 5, 3]
+    a = Value(pya)
+    a.insert(2, 42)
+    pya.insert(2, 42)
+    assert_equal([i for i in a], pya)
+    a.insert(-3, 65)
+    pya.insert(-3, 65)
+    assert_equal([i for i in a], pya)
 
+    pya = [1, 2, 5, 3]
+    a = Value(pya)
+    a.reverse()
+    assert_equal([i for i in a], pya[::-1])
+    pya = [1, 2, 42, 5, 3]
+    a = Value(pya)
+    a.reverse()
+    assert_equal([i for i in a], pya[::-1])
 
-t = root['b']
-print t
-t = "Ho!"
-print root['b']
-"""
+    pya = [1, 2, 5, 3]
+    a = Value(pya)
+    a.extend([42, 65])
+    pya.extend([42, 65])
+    assert_equal([i for i in a], pya)
 
+    pya = [1, 2, 5, 3]
+    a = Value(pya)
+    a.pop(-2)
+    pya.pop(-2)
+    assert_equal([i for i in a], pya)
+
+    pya = [1, 2, 5, 3]
+    a = Value(pya)
+    a.remove(5)
+    pya.remove(5)
+    assert_equal([i for i in a], pya)
+
+    pya = [1, 2, 5, 3]
+    a = Value(pya)
+    a += [42, 65]
+    pya += [42, 65]
+    assert_equal([i for i in a], pya)
 
 if __name__ == "__main__":
     nose.runmodule()
