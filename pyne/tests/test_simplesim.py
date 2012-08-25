@@ -430,6 +430,11 @@ class TestSystemDefinition(unittest.TestCase):
                 "[-2, 3] x [-4, 5] x "
                 "[-6, 7] cm.")
 
+        ## mcnp()
+        self.sim.sys.add_surface(pp)
+        self.assertEquals(plane.mcnp('%g', self.sim), 
+                "3 RPP -2 3  -4 5 -6 7")
+
         ## shift()
         pp.shift([2, 1, -1])
         self.assertTrue((pp.xlims == np.array([0, 5])).all())
