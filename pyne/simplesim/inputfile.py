@@ -33,8 +33,11 @@ extension to other codes may require more effort.
 
 import abc
 import datetime
+import re
 import textwrap
 import warnings
+
+import numpy as np
 
 class IInputFile(object):
     """Abstract base class for classes that take system and option definitions
