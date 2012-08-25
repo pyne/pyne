@@ -188,8 +188,11 @@ class TestSystemDefinition(unittest.TestCase):
 
     def test_MCNPInput(self):
         """ TODO """
+        ## Check against text file.
         inp = inputfile.MCNPInput('inptest', self.sim)
         inp.write()
+
+        ## Test the & line continuation.
 
 
     def test_Material(self):
