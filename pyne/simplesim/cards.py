@@ -135,6 +135,10 @@ class ICard(object):
         self._unique = unique
         if self._unique: self._name = name
         else:            self.name = name
+        # The following can be set False in a subclass's constructor if
+        # simplesim.inputfile classes should not attempt to wrap the output of
+        # methods like mcnp().
+        self._bypass_wrap = False
 
     def __str__(self):
         return self.comment()
@@ -253,7 +257,7 @@ class Cell(ICard):
         if self.name not in sim.sys.cells:
             raise StandardError("Cell {0!r} not in simulation.".format(
                 self.name))
-        formatstr = "{{: <{0}d}}".format(
+        formatstr = " {{: <{0}d}}".format(
                 int(np.log10(len(sim.sys.cells))) + 1)
         string = formatstr.format(sim.sys.cell_num(self.name))
         if self.material and self.density and self.density_units:
@@ -959,6 +963,7 @@ class Material(ICard, material.Material):
         super(Material, self).__init__(*args, **kwargs)
         self.description = kwargs.get('description', None)
         self.tables = kwargs.get('tables', dict())
+        self._bypass_wrap = True
         # Find longest table ID. Used in card printing for prettiness.
 
     def comment(self): 
