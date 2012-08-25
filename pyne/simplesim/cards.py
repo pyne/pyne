@@ -257,7 +257,7 @@ class Cell(ICard):
         if self.name not in sim.sys.cells:
             raise StandardError("Cell {0!r} not in simulation.".format(
                 self.name))
-        formatstr = " {{: <{0}d}}".format(
+        formatstr = "{{: <{0}d}}".format(
                 int(np.log10(len(sim.sys.cells))) + 1)
         string = formatstr.format(sim.sys.cell_num(self.name))
         if self.material and self.density and self.density_units:
@@ -1113,12 +1113,12 @@ class ISurface(ICard):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def mcnp(self, float_format, sim):
+    def mcnp(self, float_format, sim, keystring):
         if self.name not in sim.sys.surfaces:
             raise StandardError("Surface {0!r} not in simulation.".format(
                 self.name))
-        formatstr = "{{: <{0}d}} ".format(
-                int(np.log10(len(sim.sys.surfaces))) + 1)
+        formatstr = "{{: <{0}d}} {1:<4}".format(
+                int(np.log10(len(sim.sys.surfaces))) + 1, keystring)
         return formatstr.format(sim.sys.surface_num(self.name))
 
     @abc.abstractmethod
@@ -1272,8 +1272,8 @@ class IAxisSurface(ISurface):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def mcnp(self, float_format, sim):
-        return super(IAxisSurface, self).mcnp(float_format, sim)
+    def mcnp(self, *args):
+        return super(IAxisSurface, self).mcnp(*args)
     
     @abc.abstractmethod
     def shift(self, vector):
@@ -1344,8 +1344,8 @@ class AxisCylinder(IAxisSurface):
                     self.cartesian_axis, self.radius, 2 * self.radius))
 
     def mcnp(self, float_format, sim):
-        string = super(AxisCylinder, self).mcnp(float_format, sim)
-        string += "C{0} ".format(self.cartesian_axis.upper())
+        string = super(AxisCylinder, self).mcnp(float_format, sim,
+                "C{0}".format(self.cartesian_axis.upper()))
         string += float_format % self.radius
         return string
     
@@ -1491,8 +1491,8 @@ class AxisPlane(IAxisSurface):
                 self.name, self.cartesian_axis, self.position)
 
     def mcnp(self, float_format, sim):
-        string = super(AxisPlane, self).mcnp(float_format, sim)
-        string += "P{0} ".format(self.cartesian_axis.upper())
+        string = super(AxisPlane, self).mcnp(float_format, sim,
+                "P{0}".format(self.cartesian_axis.upper()))
         string += float_format % self.position
         return string
 
@@ -1570,8 +1570,8 @@ class IMacrobody(ISurface):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def mcnp(self, float_format, sim):
-        return super(IMacrobody, self).mcnp(float_format, sim)
+    def mcnp(self, *args):
+        return super(IMacrobody, self).mcnp(*args)
 
 
 class Parallelepiped(IMacrobody):
@@ -1616,8 +1616,8 @@ class Parallelepiped(IMacrobody):
                     self.name, self.xlims, self.ylims, self.zlims))
 
     def mcnp(self, float_format, sim):
-        string = super(Parallelepiped, self).mcnp(float_format, sim)
-        formatstr =  "RPP {0} {0}  {0} {0}  {0} {0}".format(float_format)
+        string = super(Parallelepiped, self).mcnp(float_format, sim, "RPP")
+        formatstr =  "{0} {0}  {0} {0}  {0} {0}".format(float_format)
         return string + formatstr % (
                 tuple(self.xlims) + tuple(self.ylims) + tuple(self.zlims))
 
