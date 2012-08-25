@@ -186,6 +186,9 @@ class TestSystemDefinition(unittest.TestCase):
         self.rxr.add_cell(self.graveyard)
         self.sim = definition.MCNPSimulation(self.rxr, verbose=False)
 
+    def tearDown(self):
+        os.unlink('inptest')
+
     def test_MCNPInput(self):
         """ TODO """
         ## Check against text file.
