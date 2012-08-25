@@ -77,58 +77,6 @@ class ICard(object):
     kelvin2kT = 8.6173423e-11
     secs2shakes = 1e+8
 
-    @abc.staticmethod
-    def part_abbrev(key):
-        if key not in self.mcnp_particle:
-            raise ValueError("Particle {0!r} not recognized.".format(key))
-        return self.mcnp_particle[key]
-
-    # These are provided in the order in which they are listed in the MCNP
-    # manual. TODO may need to escape some of these characters?
-    mcnp_particle = {'neutron': 'N',
-                     'anti-neutron': '-N',
-                     'photon': 'P',
-                     'electron': 'E',
-                     'positron': '-E',
-                     'muon': '|',
-                     'anti-muon': '-|',
-                     'tau': '*',
-                     'electron_neutrino': 'U',
-                     'anti-electron_neutrino': '-U',
-                     'muon_neutrino': 'V',
-                     'tau_neutrino': 'W',
-                     'proton': 'H',
-                     'anti-proton': '-H',
-                     'lambda': 'L',
-                     'sigma+': '+',
-                     'sigma-': '-',
-                     'cascade0': 'X',
-                     'cascade-': 'Y',
-                     'omega': 'O',
-                     'lambdac+': 'C',
-                     'cascadec+': '!',
-                     'cascadec0': '?',
-                     'lambdab0': '<',
-                     'pion+': '/',
-                     'pion-': '-/',
-                     'neutral_pion': 'Z',
-                     'kaon+': 'K',
-                     'kaon-': '-K',
-                     'K0-short': '%',
-                     'K0-long': '^',
-                     'D+': 'G',
-                     'D0': '@',
-                     'Ds+': 'f',
-                     'B+': '>',
-                     'B0': 'B',
-                     'Bs0': 'Q',
-                     'deuteron': 'D',
-                     'triton': 'T',
-                     'helium-3': 'S',
-                     'helium-4': 'A',
-                     'heavy_ions': '#'
-                     }
-    
     def __init__(self, name, unique=False, *args, **kwargs):
         """
         Parameters
@@ -5085,11 +5033,78 @@ class Vector(IMisc):
         return self.vectors.keys().index(vecname)
 
 
+class Particle(object):
+    """Facilitates the use of particle abbreviations, and is an attribute in
+    various cards (:py:class:`ITally` cards, and other :py:class:`IMisc` cards.)
+    
+    """
+    # These are provided in the order in which they are listed in the MCNP
+    # manual. TODO may need to escape some of these characters?
+    mcnp_abbrev = {'neutron': 'N',
+                   'anti-neutron': '-N',
+                   'photon': 'P',
+                   'electron': 'E',
+                   'positron': '-E',
+                   'muon': '|',
+                   'anti-muon': '-|',
+                   'tau': '*',
+                   'electron_neutrino': 'U',
+                   'anti-electron_neutrino': '-U',
+                   'muon_neutrino': 'V',
+                   'tau_neutrino': 'W',
+                   'proton': 'H',
+                   'anti-proton': '-H',
+                   'lambda': 'L',
+                   'sigma+': '+',
+                   'sigma-': '-',
+                   'cascade0': 'X',
+                   'cascade-': 'Y',
+                   'omega': 'O',
+                   'lambdac+': 'C',
+                   'cascadec+': '!',
+                   'cascadec0': '?',
+                   'lambdab0': '<',
+                   'pion+': '/',
+                   'pion-': '-/',
+                   'neutral_pion': 'Z',
+                   'kaon+': 'K',
+                   'kaon-': '-K',
+                   'K0-short': '%',
+                   'K0-long': '^',
+                   'D+': 'G',
+                   'D0': '@',
+                   'Ds+': 'f',
+                   'B+': '>',
+                   'B0': 'B',
+                   'Bs0': 'Q',
+                   'deuteron': 'D',
+                   'triton': 'T',
+                   'helium-3': 'S',
+                   'helium-4': 'A',
+                   'heavy_ions': '#'
+                   }
 
+    def __init__(self, name):
+        """
+        Parameters
+        ----------
+        name : str
+            Name of the particle. Acceptable names depend on the use. For
+            example, the particles acceptable for MCNP are in
+            :py:attr:`mcnp_abbrev`.
+            
+        """
+        self.name = name
 
+    def mcnp(self):
+        """
+        Returns
+        -------
+        abbrev : str
+            MCNP's one or two character abbreviation for a particle.
 
-
-
-
-
-
+        """
+        if self.name not in self.mcnp_abbrev:
+            raise ValueError("Particle {0!r} not recognized.".format(
+                    self.name))
+        return self.mcnp_abbrev[self.name]
