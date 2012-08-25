@@ -25,3 +25,6 @@ Simple infinite lattice
 ******
 Burnup
 ******
+
+Explain a possible use scenario for manipulating a reactor: have a script that
+creates the reactor, and have scripts that analyze results, etc...

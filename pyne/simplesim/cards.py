@@ -54,6 +54,7 @@ the module.
 
 import abc
 import collections
+import copy
 import warnings
 
 import numpy as np
@@ -154,7 +155,7 @@ class ICard(object):
     def mcnp(self, float_format, sim):
         # sim is an instance of
         # :py:class:`pyne.simplesim.definition.SimulationDefinition`.
-        raise NotImplementedError("Object {0}.".format(self))
+        raise NotImplementedError("Card {0}.".format(self.name))
 
     @property
     def name(self):
@@ -1974,6 +1975,11 @@ class Criticality(ISource):
                     self.n_histories, self.keff_guess, self.n_skip_cycles,
                     self.n_cycles))
 
+    def mcnp(self, float_format, sim):
+        formatstr = "KCODE {0} {1} {2} {3}".format(self.n_histories,
+                float_format, self.n_skip_cycles, self.n_cycles)
+        return formatstr % self.keff_guess
+
     @property
     def n_histories(self): return self._n_histories
 
@@ -2055,14 +2061,27 @@ class CriticalityPoints(ISource):
         super(CriticalityPoints, self).__init__('criticalitypoints',
                                                 unique=True)
         self.points = points
+        self._bypass_wrap = True
 
     def comment(self):
-        string = "Criticality points 'criticalitypoints': "
+        string = "Criticality points {0!r}:".format(self.name)
         counter = 0
         for point in self.points:
             counter += 1
-            string += "({0[0]:g}, {0[1]:g}, {0[2]:g}){1}".format(point,
-                ", " if counter < len(self.points) else ".")
+            string += " ({0[0]:g}, {0[1]:g}, {0[2]:g}) cm{1}".format(point,
+                "," if counter < len(self.points) else ".")
+        return string
+
+    def mcnp(self, float_format, sim):
+        # TODO risk of going over the line if the user requests some oddly
+        # insane precision...
+        # Will be editing the points list through popping, so make a copy.
+        points = copy.deepcopy(self.points)
+        formatstr = "KSRC {0} {0} {0}".format(float_format)
+        string = formatstr % tuple(points.pop(0))
+        formatstr = "\n{0}{1} {1} {1}".format(5 * " ", float_format)
+        for point in points:
+            string += formatstr % tuple(point)
         return string
 
     @property
@@ -2111,6 +2130,13 @@ class ITally(ICard):
                 if pcounter < len(self.particle): string += ", "
         string += ":"
         return string
+    
+    @abc.abstractmethod
+    def mcnp(self, float_format, sim):
+        string = "F{0}:".format(sim.tally_num(self.name))
+        if type(self.particle) is list:
+
+                self.mcnp_particle[self.particle])
 
     @property
     def particle(self): return self._particle
@@ -2182,10 +2208,8 @@ class ICellSurfTally(ITally):
         # Assuming the user has provided objects of the appropriate type; the
         # issubclass check was not working with little effort. TODO
         string = super(ICellSurfTally, self).comment(title) + " "
-        if card_type == 'cell':
-            classcheck = Cell
-        elif card_type == 'surface':
-            classcheck = ISurface
+        if card_type == 'cell':      classcheck = Cell
+        elif card_type == 'surface': classcheck = ISurface
         if type(self.cards) is not list: # issubclass(self.cards, classcheck):
             string += "{0} {1!r}".format(card_type, self.cards.name)
         elif type(self.cards) is list:
@@ -2214,6 +2238,40 @@ class ICellSurfTally(ITally):
         #    raise ValueError("Expected {0} or list, got {1}.".format(
         #            card_type, type(self.cards)))
         return string
+
+    def mcnp(self, float_format, sim):
+        string = super(ICellSurfTally, self).mcnp(self, float_format, sim)
+        if card_type == 'cell':      classcheck = Cell
+        elif card_type == 'surface': classcheck = ISurface
+        if type(self.cards) is not list: # issubclass(self.cards, classcheck):
+            string += "{0} {1!r}".format(card_type, self.cards.name)
+        elif type(self.cards) is list:
+            if type(self.cards[0]) is not list:
+                string += "{0}s ".format(card_type)
+            outcounter = 0
+            for obj in self.cards:
+                outcounter += 1
+                if type(obj) is not list: # issubclass(obj, classcheck):
+                    string += "{0!r}".format(obj.name)
+                elif type(obj) is list:
+                    string += "{0} in ".format(union_type)
+                    incounter = 0
+                    for avgobj in obj:
+                        incounter += 1
+                        # Must be a cell/surface card.
+                        string += "{0!r}".format(avgobj.name)
+                        if incounter < len(obj): string += ", "
+                # TODO an anti-duck-typing exception:
+                #else:
+                #    raise ValueError("Expected {0} or list, got {1}.".format(
+                #            card_type, type(obj)))
+                if outcounter < len(self.cards): string += "; "
+        # TODO an anti-duck-typing exception:
+        #else:
+        #    raise ValueError("Expected {0} or list, got {1}.".format(
+        #            card_type, type(self.cards)))
+        return string
+
 
     def _unique_card_list(self):
         # Returns a unique list of all the cards provided in self.cards.
@@ -2882,6 +2940,7 @@ class EnergyGrid(IMisc):
     .. inheritance-diagram:: pyne.simplesim.cards.EnergyGrid
 
     """
+    # TODO make this a unique-by-tally card.
     def __init__(self, name, tally, energies):
         """
         Parameters
@@ -2896,6 +2955,15 @@ class EnergyGrid(IMisc):
 
         Examples
         --------
+        The following energy grid applies to all tallies::
+
+            egrid = EnergyGrid('grid0', None, [1e-4, 1, 100e3, 10e6])
+
+        The following applies to tally ``tallyA``::
+
+            egrid = EnergyGrid('grid0', tallyA,
+                    np.array([1e-4, 1, 100e3, 10e6]))
+
         """
         super(EnergyGrid, self).__init__(name)
         self.tally = tally
