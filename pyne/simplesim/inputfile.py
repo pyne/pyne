@@ -100,8 +100,10 @@ class MCNPInput(IInputFile):
     # TODO user can overload commenting methods
     def __init__(self, fname, simdef, comments=True, header=None,
             description=None, plug=True, float_format="% .5g",
-            cont_by_blanks=True):
+            cont_by_amp=True):
         """
+        cont_by_amp : bool, optional
+
 
         """
         # TODO could cleanup keyword arguments wiht **kwarg.
@@ -109,21 +111,22 @@ class MCNPInput(IInputFile):
         super(MCNPInput, self).__init__(fname, simdef, comments, header,
                 plug, float_format)
         self.description = description
-        self.cont_by_blanks = cont_by_blanks
+        self.cont_by_amp = cont_by_amp
         # Comment wrapping.
         self.commentwrap = textwrap.TextWrapper(
                 width=80,
                 initial_indent='C ',
                 subsequent_indent='C ',
                 break_long_words=True)
-        # TODO ampersand goes at the beginning of the line.
-        if self.cont_by_blanks: card_cont = 5 * ' '
-        else:                   raise Exception("Unimplemented.")
-        # Card wrpaping.
-        self.cardwrap = textwrap.TextWrapper(
-                width=80,
-                subsequent_indent=card_cont,
-                break_long_words=True)
+        # Card wrapping.
+        if self.cont_by_amp:
+            self.cardwrap = textwrap.TextWrapper(width=78)
+            self.card_end_line = ' &\n'
+        else:
+            self.cardwrap = textwrap.TextWrapper(
+                    width=80,
+                    subsequent_indent=5 * ' ')
+            self.card_end_line = '\n'
 
     def _write_subclass(self):
         # Header
@@ -203,7 +206,7 @@ class MCNPInput(IInputFile):
     def _write_card(self, string):
         strlist = self.cardwrap.wrap(string)
         for entry in strlist:
-            self.fid.write(entry + '\n')
+            self.fid.write(entry + self.card_end_line)
 
     def _new_line(self):
         self.fid.write('\n')
