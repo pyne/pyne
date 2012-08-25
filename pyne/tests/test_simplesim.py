@@ -187,13 +187,14 @@ class TestSystemDefinition(unittest.TestCase):
         self.sim = definition.MCNPSimulation(self.rxr, verbose=False)
 
     def tearDown(self):
-        os.unlink('inptest')
+        #os.unlink('inptest')
+        pass
 
     def test_MCNPInput(self):
         """ TODO """
         ## Check against text file.
-        inp = inputfile.MCNPInput('inptest', self.sim)
-        inp.write()
+        inp = inputfile.MCNPInput(self.sim, comments=False)
+        inp.write('inptest')
 
         ## Test the & line continuation.
         # TODO
@@ -278,7 +279,7 @@ class TestSystemDefinition(unittest.TestCase):
 
         ## mcnp()
         self.sim.sys.add_surface(cyl)
-        self.assertEquals(cyl.mcnp('%g', self.sim), "3 CX 0.4")
+        self.assertEquals(cyl.mcnp('%g', self.sim), "3 CX  0.4")
 
         ## shift()
         # z-aligned
@@ -381,7 +382,7 @@ class TestSystemDefinition(unittest.TestCase):
 
         ## mcnp()
         self.sim.sys.add_surface(plane)
-        self.assertEquals(plane.mcnp('%g', self.sim), "3 PX 3")
+        self.assertEquals(plane.mcnp('%g', self.sim), "3 PX  3")
 
         ## shift()
         plane = cards.AxisPlane('myplane', 'x', 3)
