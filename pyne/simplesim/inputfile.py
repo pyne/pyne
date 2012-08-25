@@ -182,14 +182,14 @@ class MCNPInput(IInputFile):
         self._write_comment(string)
 
     def _write_deck_heading(self, heading):
-        heading = " {0} Cards".format(heading)
+        heading = "{0} Cards".format(heading)
         n_chars = len(heading)
         self._write_comment(n_chars * "=")
         self._write_comment(heading)
         self._write_comment(n_chars * "=")
 
     def _write_data_heading(self, heading):
-        heading = " {0} Cards".format(heading)
+        heading = "{0} Cards".format(heading)
         n_chars = len(heading)
         self._write_comment(n_chars * "*")
         self._write_comment(heading)
