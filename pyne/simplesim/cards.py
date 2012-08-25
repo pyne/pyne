@@ -55,6 +55,7 @@ the module.
 # detector tests completely: need to test altunits, card_type (naasok),
 # altunits printed in comments, and described in detector documentation. check
 # mcnpx for altunits and +/* flags.
+# TODO names can be unique to tally type even.
 
 import abc
 import collections
@@ -299,9 +300,9 @@ class CellMCNP(Cell):
     """A cell card with keyword options that are available in MCNP. Thus, it
     only makes sense to use this card if writing an input for MCNP. A number of
     the keyword arguments are for a particular particle. The particles
-    available are given in :py:attr:`mcnp_particle`. The user provides the full
-    name of the particle, as given as keys in :py:attr:`mcnp_particle`. The
-    card will then use the appropriate particle designator when writing the
+    available are given in py:class:`Particle`. The user provides the full
+    name of the particle, as given as keys in py:attr:`Particle.mcnp_abbrev`.
+    The card will then use the appropriate particle designator when writing the
     card.
     
     The U, LAT, and FILL keywords are not available; as this functionality
@@ -350,7 +351,7 @@ class CellMCNP(Cell):
             Particle importance, :py:class:`Importance`, **IMP**. The tuple
             contains:
             
-            1. (str) particle name (see :py:attr:`mcnp_particle`)
+            1. (str) particle name (see py:class:`Particle`)
             2. (int) the importance
 
             Refer to :py:class:`Importance` for more information.
@@ -360,7 +361,7 @@ class CellMCNP(Cell):
             An exponential transform, :py:class:`ExponentialTransform`,
             **EXT**. The tuple contains:
 
-            1. (str) particle name (see :py:attr:`mcnp_particle`)
+            1. (str) particle name (see py:class:`Particle`)
             2. (str/float) stretch
             3. (str) direction
             4. (str) sign ('toward', 'away')
@@ -373,7 +374,7 @@ class CellMCNP(Cell):
             Forced collisions, :py:class:`ForcedCollision`, **FCL**. The tuple
             contains:
 
-            1. (str) particle name (see :py:attr:`mcnp_particle`)
+            1. (str) particle name (see py:class:`Particle`)
             2. (float) probability
             3. (bool) only entering the cell triggers forced collision
 
@@ -385,7 +386,7 @@ class CellMCNP(Cell):
             Weight window lower bound, :py:class:`WeightWindowBound`, **WWN**.
             The tuple contains:
 
-            1. (str) particle name (see :py:attr:`mcnp_particle`)
+            1. (str) particle name (see py:class:`Particle`)
             2. (int) energy index
             3. (int) time index
             4. (float/str) lower bound, or 'killall'
@@ -398,7 +399,7 @@ class CellMCNP(Cell):
             Probability of contribution to a DXTRAN sphere,
             :py:class:`DXTRANContribution`, **DXC**.  The tuple contains:
             
-            1. (str) particle name (see :py:attr:`mcnp_particle`)
+            1. (str) particle name (see py:class:`Particle`)
             2. (str/None) DXTRAN sphere name (None for all spheres)
             3. (float) probabilility of contribution
             
@@ -2077,21 +2078,25 @@ class ITally(ICard):
 
         """
         super(ITally, self).__init__(name, *args, **kwargs)
-        self.particle = particle
+        if type(particle) is list:
+            self.particle = [Particle(el) for el in particle]
+        else:
+            self.particle = Particle(particle)
         self.alt_units = alt_units
 
     @abc.abstractmethod
     def comment(self, title):
-        string = "{0} tally {1!r} of ".format(title, self.name)
+        string = "{0} tally {1!r}{2} of ".format(title, self.name,
+                " in alt. units" if self.alt_units else "")
         if type(self.particle) is not list:
-            string += self.particle
+            string += self.particle.name
             # 'all' is only for CellEnergyDeposition.
-            if self.particle != 'all': string += "s"
+            if self.particle.name != 'all': string += "s"
         else:
             pcounter = 0
-            for part in self.particle:
+            for par in self.particle:
                 pcounter += 1
-                string += "{0}s".format(part)
+                string += "{0}s".format(par)
                 if pcounter < len(self.particle): string += ", "
         string += ":"
         return string
@@ -2103,16 +2108,18 @@ class ITally(ICard):
         if self.alt_units: pre = '*'
         string = "{0}F{1}{2}".format(
                 pre, 10 * sim.tally_num(self.name) + num, post)
-        if self.particle != 'all':
+        if type(self.particle) is not list and self.particle.name == 'all':
+            pass
+        else:
             # 'all' is only for CellEnergyDeposition.
             string += ":"
             if type(self.particle) is list: plist = self.particle
             else:                           plist = [self.particle]
             pcounter = 0
-            for part in self.particle:
+            for part in plist:
                 pcounter += 1
-                string += "{0}".format(self.part_abbrev(self.particle))
-                if pcounter < len(self.particle): string += ", "
+                string += part.mcnp()
+                if pcounter < len(plist): string += ","
         return string + " "
 
     @property
@@ -2221,7 +2228,7 @@ class ICellSurfTally(ITally):
 
     @abc.abstractmethod
     def mcnp(self, float_format, sim, num, **kwargs):
-        string = super(ICellSurfTally, self).mcnp(self, float_format, sim, num,
+        string = super(ICellSurfTally, self).mcnp(float_format, sim, num,
                                                   **kwargs)
         if self.card_type == 'cell':      getname = sim.sys.cell_num
         elif self.card_type == 'surface': getname = sim.sys.surface_num
@@ -2233,7 +2240,7 @@ class ICellSurfTally(ITally):
             if type(obj) is not list:
                 string += " {0:d}".format(getname(obj.name))
             elif type(obj) is list:
-                string += "("
+                string += " ("
                 for avgobj in obj:
                     # Must be a cell/surface card.
                     string += " {0:d}".format(getname(avgobj.name))
@@ -2494,7 +2501,7 @@ class CellFlux(IAverageTally):
         return super(CellFlux, self).comment("Cell flux")
 
     def mcnp(self, float_format, sim):
-        return super(SurfaceFlux, self).mcnp(float_format, sim, 4)
+        return super(CellFlux, self).mcnp(float_format, sim, 4)
 
 
 class CellEnergyDeposition(IAverageTally):
@@ -2555,7 +2562,8 @@ class CellEnergyDeposition(IAverageTally):
         super(CellEnergyDeposition, self).__init__(name, particles, cards,
                                                    card_type='cell', **kwargs)
         # TODO move this error check to the MCNP method.
-        if self.particle == 'all' and self.alt_units:
+        if (type(self.particle) is not list and self.particle.name == 'all' and
+                self.alt_units):
             raise ValueError("The particle cannot be 'all' if alt_units is "
                     "True.")
 
@@ -2563,15 +2571,26 @@ class CellEnergyDeposition(IAverageTally):
         return super(CellEnergyDeposition, self).comment("Energy deposition")
 
     def mcnp(self, float_format, sim):
-        if self.particle == 'all': pre = '+'
-        else:                      pre = ''
-        return super(SurfaceFlux, self).mcnp(float_format, sim, 6, pre)
+        if type(self.particle) is not list and self.particle.name == 'all':
+            pre = '+'
+        else:
+            pre = ''
+        return super(CellEnergyDeposition, self).mcnp(float_format, sim, 6,
+                                                      pre=pre)
 
     @property
     def particle(self): return self._particle
 
     @particle.setter
-    def particle(self, value): self._particle = value
+    def particle(self, value):
+        # Make sure that if there is more than one particle, that none of them
+        # has name 'all'.
+        if type(value) is list:
+            for par in value:
+                if par.name == 'all':
+                    raise ValueError("The particle 'all' cannot be given with"
+                            " other particles.")
+        self._particle = value
 
 
 class CellFissionEnergyDeposition(IAverageTally):        
@@ -2621,7 +2640,8 @@ class CellFissionEnergyDeposition(IAverageTally):
                 "Fission energy deposition")
 
     def mcnp(self, float_format, sim):
-        return super(SurfaceFlux, self).mcnp(float_format, sim, 7)
+        return super(CellFissionEnergyDeposition, self).mcnp(
+                float_format, sim, 7)
 
 
 class CellPulseHeight(IAverageTally):
@@ -2667,8 +2687,9 @@ class CellPulseHeight(IAverageTally):
     def comment(self):
         return super(CellPulseHeight, self).comment("Pulse height")
 
-    def mcnp(self, float_format, sim):
-        return super(SurfaceFlux, self).mcnp(float_format, sim, 8)
+    def mcnp(self, float_format, sim, **kwargs):
+        return super(CellPulseHeight, self).mcnp(float_format, sim, 8,
+                                                 **kwargs)
 
     @property
     def particle(self): return self._particle
@@ -2714,15 +2735,15 @@ class CellChargeDeposition(CellPulseHeight):
         See base classes for more examples.
 
         """
-        super(CellPulseHeight, self).__init__(name, particles, cards,
-                                              card_type='cell', **kwargs)
+        super(CellChargeDeposition, self).__init__(name, particles, cards,
+                                                   **kwargs)
 
     def comment(self):
-        return super(CellPulseHeight, self).comment("Charge deposition")
+        return super(CellChargeDeposition, self).comment("Charge deposition")
 
     def mcnp(self, float_format, sim):
-        return super(SurfaceFlux, self).mcnp(float_format, sim, 8,
-                                             pre='+')
+        return super(CellChargeDeposition, self).mcnp(float_format, sim,
+                                                      pre='+')
 
 
 class RepeatedStructure(IAverageTally):
@@ -3663,22 +3684,19 @@ class IUniqueParticle(IMisc):
             First part of card :py:attr:`name`. Names are of the form
             ``<pre_name>-<particle>``.
         particle : str
-            A particle string, taken from the keys of :py:attr:`mcnp_particle`.
+            A particle string, taken from the keys of
+            :py:attr:`Particle.mcnp_abbrev`.
 
         """
         super(IUniqueParticle, self).__init__(
                 "{0}-{1}".format(pre_name, particle), unique=True)
-        self.particle = particle
+        self.particle = Particle(particle)
 
     @property
     def particle(self): return self._particle
 
     @particle.setter
-    def particle(self, value):
-        if value not in self.mcnp_particle:
-            raise LookupError("The particle {0} is not in the "
-                    "``mcnp_particle`` dictionary.".format(value))
-        self._particle = value
+    def particle(self, value): self._particle = value
 
 
 class Temperature(ICellMod):
@@ -3893,8 +3911,7 @@ class ICellModParticle(IUniqueParticle):
     def mcnp(self, float_format, sim, keystring):
         # TODO this ordering might not be correct, particularly once we add
         # support for universes, etc.
-        string = "{0}:{1!s}".format(
-                keystring, self.part_abbrev(self.particle))
+        string = "{0}:{1!s}".format(keystring, self.particle.mcnp())
         # TODO this should loop through in the print order.
         for key, cell in sim.sys.cells.iteritems(): 
             if cell in self.cells:
@@ -4422,7 +4439,7 @@ class WeightWindowBound(ICellModParticle):
                     string += "{0}WWN{1}:{2}".format(
                             "\n" if counter > 1 else "",
                             self.i_linear(i_e, i_t),
-                            self.part_abbrev(self.particle))
+                            self.particle.mcnp())
                     # Check all cells in the system.
                     for key, cell in sim.sys.cells.iteritems():
                         # Is this cell on this card, and is there a bound
@@ -4465,7 +4482,7 @@ class WeightWindowBound(ICellModParticle):
             self._n_energies = sim.misc[wwe_name].n_bounds
         else:
             raise Exception("No WWGT:{0} or WWT:{0} card found in the "
-                    "simulation.".format(self.part_abbrev(self.particle)))
+                    "simulation.".format(self.particle.mcnp()))
 
     def i_linear(self, i_e, i_t):
         return (i_t - 1) * self._n_energies + i_e
@@ -4564,7 +4581,7 @@ class WeightWindowEnergies(IUniqueParticle):
 
     def mcnp(self, float_format, sim):
         string = "WW{0}E:{1}".format("G" if self.for_gen else "",
-                self.part_abbrev(self.particle))
+                self.particle.mcnp())
         float_format = " " + float_format
         for bound in self.bounds: string += float_format % bound
         return string
@@ -4644,7 +4661,7 @@ class WeightWindowTimes(IUniqueParticle):
 
     def mcnp(self, float_format, sim):
         string = "WW{0}T:{1}".format("G" if self.for_gen else "",
-                self.part_abbrev(self.particle))
+                self.particle.mcnp())
         float_format = " " + float_format
         for bound in self.bounds: 
             string += float_format % (bound * self.secs2shakes)
@@ -4712,7 +4729,7 @@ class DXTRANContribution(ICellMod):
                 'dxtrancont{0}-{1}'.format(
                     "-" + sph_name if sph_name else "", particle),
                 2, *args)
-        self.particle = particle
+        self.particle = Particle(particle)
         self.sph_name = sph_name
         self.probs = dict()
         self._process_varargs(args)
@@ -4752,7 +4769,7 @@ class DXTRANContribution(ICellMod):
 
     def mcnp(self, float_format, sim):
         string = "DXC{0}:{1}".format(
-                self.sph_index(sim), self.part_abbrev(self.particle))
+                self.sph_index(sim), self.particle.mcnp())
         return super(DXTRANContribution, self).mcnp(float_format, sim, string)
 
     def sph_index(self, sim):
@@ -4776,11 +4793,7 @@ class DXTRANContribution(ICellMod):
     def particle(self): return self._particle
 
     @particle.setter
-    def particle(self, value):
-        if value not in self.mcnp_particle:
-            raise LookupError("The particle {0} is not in the "
-                    "``mcnp_particle`` dictionary.".format(value))
-        self._particle = value
+    def particle(self, value): self._particle = value
 
     @property
     def probs(self): return self._probs
@@ -4911,7 +4924,7 @@ class DXTRANSpheres(IUniqueParticle):
 
     def mcnp(self, float_format, sim):
         mpw = self.min_photon_weight
-        string = "DXT:{0}".format(self.part_abbrev(self.particle))
+        string = "DXT:{0}".format(self.particle.mcnp())
         for name in self.spheres:
             string += "  " + self._mcnp_unit(float_format, sim, name)
         string += 2 * " "
@@ -5096,6 +5109,9 @@ class Particle(object):
             
         """
         self.name = name
+
+    def __str__(self):
+        return self.name
 
     def mcnp(self):
         """
