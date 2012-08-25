@@ -2989,6 +2989,13 @@ class EnergyGrid(IMisc):
         else:                  string += "tally {0}".format(self.tally.name)
         return string + ": {0} groups.".format(len(self.energies))
 
+    def mcnp(self, float_format, sim):
+        string = "E{0}".format(
+                sim.tally_num(self.tally.name) if self.tally else "0")
+        for val in self.energies:
+            string += (" " + float_format) % val
+        return string
+
     @property
     def energies(self): return self._energies
 
