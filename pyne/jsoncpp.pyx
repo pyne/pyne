@@ -356,6 +356,71 @@ cdef class Value(object):
         for k in d.keys():
             self[k] = d[k]
 
+    def __reversed__(self):
+        return iter(self[::-1])
+
+    def index(self, value, start=None, stop=None):
+        """Finds the first index of value on range from start to stop."""
+        cdef int i, curr_size, stt, stp
+        cdef Value cval = Value(value)
+        curr_size = self._inst.size()
+        stt, stp, _ = slice(start, stop, None).indices(curr_size)
+        for i in range(stt, stp):
+            if (<Value> self)._inst[0][i] == cval._inst[0]:
+                return i
+        raise ValueError
+
+    def count(self, value):
+        """Counts the number of instances of value."""
+        cdef int i, curr_size, n
+        cdef Value cval = Value(value)
+        curr_size = self._inst.size()
+        n = 0
+        for i in range(curr_size):
+            if (<Value> self)._inst[0][i] == cval._inst[0]:
+                n += 1
+        return n
+
+    def append(self, value):
+        """Adds the value to the end of the array."""
+        self._inst.resize(self._inst.size()+1)
+        self[-1] = value
+
+    def insert(self, int ind, value):
+        """Inserts the value at position ind."""
+        cdef int curr_size, i
+        curr_size = self._inst[0].size()
+        self._inst.resize(curr_size+1)
+        ind = toposindex(ind, curr_size)
+        for i in range(curr_size-1, ind-1, -1):
+            self._inst[0][i].swap(self._inst[0][i+1])
+        self[ind] = value
+
+    def reverse(self):
+        """Reverses the array in place."""
+        cdef int curr_size, i
+        curr_size = self._inst[0].size()
+        for i in range(curr_size/2):
+            self._inst[0][i].swap(self._inst[0][curr_size-i-1])
+
+    def extend(self, itr):
+        """Exetend the array by adding elements from the iterable to the end."""
+        for v in itr:
+            self.append(v)
+
+    def remove(self, value):
+        """Removes the first instance of value from the array."""
+        i = self.index(value)
+        del self[i]
+
+    def __iadd__(self, value):
+        """x.__iadd__(y) <==> x+=y"""
+        cdef int curr_size = self._inst.size()
+        self._inst.resize(curr_size + len(value))
+        self[curr_size:] = value
+        return self
+
+
 cdef class Reader:
     def __cinit__(self):
         """Reader C++ constuctor."""
