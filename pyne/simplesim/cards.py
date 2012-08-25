@@ -592,7 +592,7 @@ class CellMCNP(Cell):
             for entry in self._make_list(self.importance):
                 card = Importance(entry[0], self, entry[1])
                 string += " IMP:{0}={1}".format(
-                        self.part_abbrev(entry[0]),
+                        Particle(entry[0]).mcnp(),
                         card._comment_unit(self))
         # exp_transform
         if self.exp_transform:
@@ -600,14 +600,14 @@ class CellMCNP(Cell):
                 card = ExponentialTransform(
                         entry[0], self, entry[1], entry[2], entry[3])
                 string += " EXT:{0}={1}".format(
-                        self.part_abbrev(entry[0]),
+                        Particle(entry[0]).mcnp(),
                         card._comment_unit(self))
         # forced_coll
         if self.forced_coll:
             for entry in self._make_list(self.forced_coll):
                 card = ForcedCollision(entry[0], self, entry[1], entry[2])
                 string += " FCL:{0}={1}".format(
-                        self.part_abbrev(entry[0]),
+                        Particle(entry[0]).mcnp(),
                         card._comment_unit(self))
         # weight_win_bound
         if self.weight_win_bound:
@@ -615,7 +615,7 @@ class CellMCNP(Cell):
                 card = WeightWindowBound(
                         entry[0], entry[1], entry[2], self, entry[3])
                 string += " WWN({0},{1}):{2}={3}".format(
-                        entry[1], entry[2], self.part_abbrev(entry[0]),
+                        entry[1], entry[2], Particle(entry[0]).mcnp(),
                         card._comment_unit(self, entry[1], entry[2]))
         # dxtran_contrib
         if self.dxtran_contrib:
@@ -623,7 +623,7 @@ class CellMCNP(Cell):
             for entry in self._make_list(self.dxtran_contrib):
                 card = DXTRANContribution(entry[0], entry[1], self, entry[2])
                 string += " DXC{0!r}:{1}={2}".format( 
-                        entry[1], self.part_abbrev(entry[0]),
+                        entry[1], Particle(entry[0]).mcnp(),
                         card._comment_unit(self))
         # photon_weight
         if self.photon_weight:
@@ -672,7 +672,7 @@ class CellMCNP(Cell):
             for entry in self._make_list(self.importance):
                 card = Importance(entry[0], self, entry[1])
                 string += " IMP:{0}={1}".format(
-                        self.part_abbrev(entry[0]), 
+                        Particle(entry[0]).mcnp(), 
                         card._mcnp_unit(float_format, sim, self))
         # exp_transform
         if self.exp_transform:
@@ -680,14 +680,14 @@ class CellMCNP(Cell):
                 card = ExponentialTransform(
                         entry[0], self, entry[1], entry[2], entry[3])
                 string += " EXT:{0}={1}".format(
-                        self.part_abbrev(entry[0]), 
+                        Particle(entry[0]).mcnp(), 
                         card._mcnp_unit(float_format, sim, self))
         # forced_coll
         if self.forced_coll:
             for entry in self._make_list(self.forced_coll):
                 card = ForcedCollision(entry[0], self, entry[1], entry[2])
                 string += " FCL:{0}={1}".format(
-                        self.part_abbrev(entry[0]), 
+                        Particle(entry[0]).mcnp(), 
                         card._mcnp_unit(float_format, sim, self))
         # weight_win_bound
         if self.weight_win_bound:
@@ -698,7 +698,7 @@ class CellMCNP(Cell):
                 card._find_n_energies(sim)
                 string += " WWN{0}:{1}={2}".format( 
                         card.i_linear(entry[1], entry[2]),
-                        self.part_abbrev(entry[0]), 
+                        Particle(entry[0]).mcnp(), 
                         card._mcnp_unit(float_format, self, entry[1],
                             entry[2]))
         # dxtran_contrib
@@ -706,7 +706,7 @@ class CellMCNP(Cell):
             for entry in self._make_list(self.dxtran_contrib):
                 card = DXTRANContribution(entry[0], entry[1], self, entry[2])
                 string += " DXC{0}:{1}={2}".format( 
-                        card.sph_index(sim), self.part_abbrev(entry[0]), 
+                        card.sph_index(sim), Particle(entry[0]).mcnp(), 
                         card._mcnp_unit(float_format, sim, self))
         # photon_weight
         if self.photon_weight:
@@ -2068,8 +2068,9 @@ class ITally(ICard):
         ----------
         name : str
             See :py:class:`ICard`. Used for, e.g., tally multiplier cards.
-        particle : str
-            Either 'neutron', 'photon', electron', or 'proton'.
+        particle : str, list of str
+            Name of the particle to tally, e.g. 'neutron', 'photon', electron',
+            or 'proton'. For some tallies, may be a list of particle names.
         alt_units : bool, optional
             If set to True and the tally can use alternative units, alternative
             units are used for the tally. See subclasses.
