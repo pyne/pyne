@@ -137,33 +137,33 @@ class MCNPInput(IInputFile):
         self._write_plug()
 
         # Write cell cards.
-        self._write_deck_header("Cell")
+        self._write_deck_heading("Cell")
         self._write_dictionary(self.sim.sys.cells)
 
         # Write surface cards.
         self._new_line()
-        self._write_deck_header("Surface")
+        self._write_deck_heading("Surface")
         self._write_dictionary(self.sim.sys.surfaces)
 
         # Write data cards.
         self._new_line()
-        self._write_deck_header("Data")
+        self._write_deck_heading("Data")
         # TODO WWN card will not work with the card wrapper as it is....
         # Material cards.
-        self._write_data_header("Material")
-        self._write_dictionary(self.sim.material)
+        self._write_data_heading("Material")
+        self._write_dictionary(self.sim.sys.materials)
         # Source cards.
-        self._write_data_header("Source")
+        self._write_data_heading("Source")
         self._write_dictionary(self.sim.source)
         # Tally cards.
-        self._write_data_header("Tally")
+        self._write_data_heading("Tally")
         self._write_dictionary(self.sim.tally)
         # Misc cards.
-        self._write_data_header("Miscellaneous")
+        self._write_data_heading("Miscellaneous")
         self._write_dictionary(self.sim.misc)
 
     def _write_dictionary(self, dictionary):
-        for card in dictionary:
+        for key, card in dictionary.iteritems():
             if self.comments:
                 self._write_comment(card.comment())
             self._write_card(card.mcnp(self.float_format, self.sim))
@@ -181,25 +181,29 @@ class MCNPInput(IInputFile):
     def _write_plug_subclass(self, string):
         self._write_comment(string)
 
-    def _write_deck_heading(self, string):
-        heading = " %s Cards" % heading
-        n_chars = len(" %s Cards" % heading)
+    def _write_deck_heading(self, heading):
+        heading = " {0} Cards".format(heading)
+        n_chars = len(heading)
         self._write_comment(n_chars * "=")
         self._write_comment(heading)
         self._write_comment(n_chars * "=")
 
-    def _write_data_heading(self, string):
-        heading = " %s Cards" % heading
-        n_chars = len(" %s Cards" % heading)
+    def _write_data_heading(self, heading):
+        heading = " {0} Cards".format(heading)
+        n_chars = len(heading)
         self._write_comment(n_chars * "*")
         self._write_comment(heading)
         self._write_comment(n_chars * "*")
 
     def _write_comment(self, comment=""):
-        self.fid.write(self.commentwrap.wrap(comment))
+        strlist = self.commentwrap.wrap(comment)
+        for entry in strlist:
+            self.fid.write(entry + '\n')
 
     def _write_card(self, string):
-        self.fid.write(self.cardwrap.wrap(string))
+        strlist = self.cardwrap.wrap(string)
+        for entry in strlist:
+            self.fid.write(entry + '\n')
 
     def _new_line(self):
         self.fid.write('\n')

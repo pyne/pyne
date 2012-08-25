@@ -9,20 +9,6 @@ the :py:mod:`definition` module. Instances of classes in the :py:mod:`definition
 contains instances of the classes in this module.  Below is the reference for
 the module.
 
-.. testsetup::
-
-    >>> from pyne.simplesim import definition
-    >>> sys = definition.SystemDefinition(verbose=False)
-    >>> sim = definition.MCNPSimulation(sys, verbose=False)
-
-.. testcode::
-
-   print "HI"
-
-.. testoutput::
-
-   HO
-
 """
 
 # TODO in the Sphinx documentation, create a developers and a user's version of
@@ -164,7 +150,7 @@ class ICard(object):
     def mcnp(self, float_format, sim):
         # sim is an instance of
         # :py:class:`pyne.simplesim.definition.SimulationDefinition`.
-        raise NotImplementedError
+        raise NotImplementedError("Object {0}.".format(self))
 
     @property
     def name(self):
@@ -183,166 +169,6 @@ class ICard(object):
             raise ValueError("The ``name`` property of the cell cannot "
                     "be empty.")
         self._name = value
-
-
-class Material(ICard, material.Material):
-    """In MCNP, this is the **M** card. Adds the attributes
-    :py:attr:`description`, :py:attr:`tables` and the methods
-    :py:meth:`comment` and :py:meth:`mcnp` to
-    :py:class:`pyne.material.Material`. The :py:attr:`name` must be provided
-    before the card is added to a system. The user can specify a description
-    that is printed in an appropriate location in the input file.
-
-    .. inheritance-diagram:: pyne.simplesim.cards.Material
-
-    """
-    def __init__(self, *args, **kwargs):
-        """
-        Parameters
-        ----------
-        see :py:class:`pyne.material.Material` for superclass parameters.
-        name : str as keyword argument
-            This is a keyword argument, but `must` be supplied.
-        description : str as keyword argument, optional
-            A description of this material that perhaps explains where the
-            material came from (whether it's recycled, any references, etc.).
-        tables : dict of :py:class:`nucname`: str pairs
-            Sometimes it is necessary to specify a library/table identifier for
-            a given nuclide. These can be provided in this dictionary. Leave
-            out the period. See examples.
-
-        Examples
-        --------
-        The usage of this card is nearly identical to that of
-        :py:class:`pyne.material.Material`, but we show the usage of the 2 new
-        attributes and 2 new methods::
-
-            originstory = "I found this water in a well a few years ago."
-            h2o = Material(name='water', description=originstory)
-            h2o.from_atom_frac({10010: 1.0, 'O16': 2.0})
-            h2o.tables = {10010: '71c'}
-            sys.add_material(h2o)
-
-        Alternatively, the tables can be specified with the constructor::
-
-           h2o = Material(name='water', tables={10010: '71c'})
-           h2o.from_atom_frac({10010: 1.0, 'O16': 2.0})
-
-        The ``nucname``s used for ``tables`` can be different from those used
-        for ``comp``::
-
-           h2o = Material(name='water', tables={'H1': '71c'})
-           h2o.from_atom_frac({10010: 1.0, 'O16': 2.0})
-
-        """
-        super(Material, self).__init__(*args, **kwargs)
-        self.description = kwargs.get('description', None)
-        self.tables = kwargs.get('tables', dict())
-        # Find longest table ID. Used in card printing for prettiness.
-
-    def comment(self): 
-        if self.name == '':
-            raise ValueError("The ``name`` property of the material cannot "
-                    "be empty.")
-        string = "Material {0!r}".format(self.name)
-        if self.description: string += ": {0}".format(self.description)
-        else: string += "."
-        return string
-
-    def mcnp(self, float_format, sim):
-        # TODO assumes a single line won't go over 80 columns.
-        string = "M{0}".format(sim.sys.material_num(self.name))
-        for nuc, den in self.to_atom_frac().items():
-            # ZAID.
-            string += "\n     {: 6d}".format(nucname.mcnp(nuc))
-            # Table ID. Loop allows flexible keys for tables.
-            flag = False 
-            for key in self.tables:
-                if nucname.mcnp(key) == nucname.mcnp(nuc):
-                    flag = True
-                    string += ".{0}".format(self.tables[key])
-            if not flag:
-                # +1 for he decimal point.
-                string += (self._max_table_len + 1) * " "
-            # Concentration/density.
-            string += 2 * " " + float_format % den
-            # Nuclide name.
-            string += " $ {0}".format(nucname.name(nuc))
-        return string
-
-    @property
-    def description(self): return self._description
-
-    @description.setter
-    def description(self, value): self._description = value
-
-    @property
-    def tables(self): return self._tables
-
-    @tables.setter
-    def tables(self, value):
-        self._tables = value
-        max_table_len = 0
-        for key, val in self.tables.items():
-            if len(val) > max_table_len:
-                max_table_len = len(val)
-        self._max_table_len = max_table_len
-
-
-class MaterialMCNP(Material):
-    # TODO automates the selection of table identifiers.
-    pass
-
-
-class ScatteringLaw(ICard):
-    """Scattering law for a material. Unique card for a given material, with
-    name `scatlaw-<matname>`. In MCNP, this is the **MT** card.
-
-    .. inheritance-diagram:: pyne.simplesim.cards.ScatteringLaw
-
-    """
-    def __init__(self, mat_name, libraries):
-        """
-        Parameters
-        ----------
-        mat_name : str
-            Name of the material for which this card applies.
-        libraries : dict of :py:class:`nucname`: str pairs
-            The keys are the nuclides on the material for which a library is
-            being provided, and the values are the appropriate library
-            identifiers as strings.
-
-        Examples
-        --------
-        This specifies hydrogen bound in water, in MCNP::
-
-           h2o = Material(name='water')
-           h2o.from_atom_frac({10010: 1.0, 'O16': 2.0})
-           sys.add_material(h2o)
-           sl = ScatteringLaw('water', {'H1': 'lwtr.16t'})
-
-        """
-        super(ScatteringLaw, self).__init__('scatlaw-{0}'.format(mat_name))
-        self.mat_name = mat_name
-        self.libraries = libraries
-
-    def comment(self):
-        string = "Scattering law {0!r}:".format(self.name)
-        for nuc, lib in self.libraries.items():
-            string += " {0}: {1},".format(nucname.name(nuc), lib)
-        return string[:-1] + "."
-
-    def mcnp(self, float_format, sim):
-        string = "MT{0}".format(sim.sys.material_num(self.mat_name))
-        for nuc, lib in self.libraries.items():
-            string += " {0}".format(lib)
-        return string
-
-    @property
-    def libraries(self): return self._libraries
-
-    @libraries.setter
-    def libraries(self, value): self._libraries = value
 
 
 class Cell(ICard):
@@ -1073,6 +899,166 @@ class LatticeByArray(ICard):
         pass
         
 
+class Material(ICard, material.Material):
+    """In MCNP, this is the **M** card. Adds the attributes
+    :py:attr:`description`, :py:attr:`tables` and the methods
+    :py:meth:`comment` and :py:meth:`mcnp` to
+    :py:class:`pyne.material.Material`. The :py:attr:`name` must be provided
+    before the card is added to a system. The user can specify a description
+    that is printed in an appropriate location in the input file.
+
+    .. inheritance-diagram:: pyne.simplesim.cards.Material
+
+    """
+    def __init__(self, *args, **kwargs):
+        """
+        Parameters
+        ----------
+        see :py:class:`pyne.material.Material` for superclass parameters.
+        name : str as keyword argument
+            This is a keyword argument, but `must` be supplied.
+        description : str as keyword argument, optional
+            A description of this material that perhaps explains where the
+            material came from (whether it's recycled, any references, etc.).
+        tables : dict of :py:class:`nucname`: str pairs
+            Sometimes it is necessary to specify a library/table identifier for
+            a given nuclide. These can be provided in this dictionary. Leave
+            out the period. See examples.
+
+        Examples
+        --------
+        The usage of this card is nearly identical to that of
+        :py:class:`pyne.material.Material`, but we show the usage of the 2 new
+        attributes and 2 new methods::
+
+            originstory = "I found this water in a well a few years ago."
+            h2o = Material(name='water', description=originstory)
+            h2o.from_atom_frac({10010: 1.0, 'O16': 2.0})
+            h2o.tables = {10010: '71c'}
+            sys.add_material(h2o)
+
+        Alternatively, the tables can be specified with the constructor::
+
+           h2o = Material(name='water', tables={10010: '71c'})
+           h2o.from_atom_frac({10010: 1.0, 'O16': 2.0})
+
+        The ``nucname``'s used for ``tables`` can be different from those used
+        for ``comp``::
+
+           h2o = Material(name='water', tables={'H1': '71c'})
+           h2o.from_atom_frac({10010: 1.0, 'O16': 2.0})
+
+        """
+        super(Material, self).__init__(*args, **kwargs)
+        self.description = kwargs.get('description', None)
+        self.tables = kwargs.get('tables', dict())
+        # Find longest table ID. Used in card printing for prettiness.
+
+    def comment(self): 
+        if self.name == '':
+            raise ValueError("The ``name`` property of the material cannot "
+                    "be empty.")
+        string = "Material {0!r}".format(self.name)
+        if self.description: string += ": {0}".format(self.description)
+        else: string += "."
+        return string
+
+    def mcnp(self, float_format, sim):
+        # TODO assumes a single line won't go over 80 columns.
+        string = "M{0}".format(sim.sys.material_num(self.name))
+        for nuc, den in self.to_atom_frac().items():
+            # ZAID.
+            string += "\n     {: 6d}".format(nucname.mcnp(nuc))
+            # Table ID. Loop allows flexible keys for tables.
+            flag = False 
+            for key in self.tables:
+                if nucname.mcnp(key) == nucname.mcnp(nuc):
+                    flag = True
+                    string += ".{0}".format(self.tables[key])
+            if not flag:
+                # +1 for he decimal point.
+                string += (self._max_table_len + 1) * " "
+            # Concentration/density.
+            string += 2 * " " + float_format % den
+            # Nuclide name.
+            string += " $ {0}".format(nucname.name(nuc))
+        return string
+
+    @property
+    def description(self): return self._description
+
+    @description.setter
+    def description(self, value): self._description = value
+
+    @property
+    def tables(self): return self._tables
+
+    @tables.setter
+    def tables(self, value):
+        self._tables = value
+        max_table_len = 0
+        for key, val in self.tables.items():
+            if len(val) > max_table_len:
+                max_table_len = len(val)
+        self._max_table_len = max_table_len
+
+
+class MaterialMCNP(Material):
+    # TODO automates the selection of table identifiers.
+    pass
+
+
+class ScatteringLaw(ICard):
+    """Scattering law for a material. Unique card for a given material, with
+    name `scatlaw-<matname>`. In MCNP, this is the **MT** card.
+
+    .. inheritance-diagram:: pyne.simplesim.cards.ScatteringLaw
+
+    """
+    def __init__(self, mat_name, libraries):
+        """
+        Parameters
+        ----------
+        mat_name : str
+            Name of the material for which this card applies.
+        libraries : dict of :py:class:`nucname`: str pairs
+            The keys are the nuclides on the material for which a library is
+            being provided, and the values are the appropriate library
+            identifiers as strings.
+
+        Examples
+        --------
+        This specifies hydrogen bound in water, in MCNP::
+
+           h2o = Material(name='water')
+           h2o.from_atom_frac({10010: 1.0, 'O16': 2.0})
+           sys.add_material(h2o)
+           sl = ScatteringLaw('water', {'H1': 'lwtr.16t'})
+
+        """
+        super(ScatteringLaw, self).__init__('scatlaw-{0}'.format(mat_name))
+        self.mat_name = mat_name
+        self.libraries = libraries
+
+    def comment(self):
+        string = "Scattering law {0!r}:".format(self.name)
+        for nuc, lib in self.libraries.items():
+            string += " {0}: {1},".format(nucname.name(nuc), lib)
+        return string[:-1] + "."
+
+    def mcnp(self, float_format, sim):
+        string = "MT{0}".format(sim.sys.material_num(self.mat_name))
+        for nuc, lib in self.libraries.items():
+            string += " {0}".format(lib)
+        return string
+
+    @property
+    def libraries(self): return self._libraries
+
+    @libraries.setter
+    def libraries(self, value): self._libraries = value
+
+
 class ISurface(ICard):
     """This class is not used by the user. Abstract base class for all
     surface cards.
@@ -1113,6 +1099,15 @@ class ISurface(ICard):
     @abc.abstractmethod
     def comment(self):
         raise NotImplementedError
+
+    @abc.abstractmethod
+    def mcnp(self, float_format, sim):
+        if self.name not in sim.sys.surfaces:
+            raise StandardError("Surface {0!r} not in simulation.".format(
+                self.name))
+        formatstr = "{{: <{0}d}} ".format(
+                int(np.log10(len(sim.sys.surfaces))) + 1)
+        return formatstr.format(sim.sys.surfaces.keys().index(self.name) + 1)
 
     @abc.abstractmethod
     def shift(self, vector):
@@ -1263,6 +1258,10 @@ class IAxisSurface(ISurface):
     @abc.abstractmethod
     def comment(self):
         raise NotImplementedError
+
+    @abc.abstractmethod
+    def mcnp(self, float_format, sim):
+        return super(IAxisSurface, self).mcnp(float_format, sim)
     
     @abc.abstractmethod
     def shift(self, vector):
@@ -1331,6 +1330,12 @@ class AxisCylinder(IAxisSurface):
         return ("Axis cylinder {0!r}: aligned and centered on {1} axis, "
                 "with radius {2:g} cm (diameter {3:g} cm).".format(self.name,
                     self.cartesian_axis, self.radius, 2 * self.radius))
+
+    def mcnp(self, float_format, sim):
+        string = super(AxisCylinder, self).mcnp(float_format, sim)
+        string += "C{0} ".format(self.cartesian_axis.upper())
+        string += float_format % self.radius
+        return string
     
     def shift(self, vector):
         """See :py:meth:`ISurface.shift`. Axis cylinders can only be shifted along
@@ -1473,6 +1478,12 @@ class AxisPlane(IAxisSurface):
         return "Axis plane {0!r}: {1} = {2:g} cm.".format(
                 self.name, self.cartesian_axis, self.position)
 
+    def mcnp(self, float_format, sim):
+        string = super(AxisPlane, self).mcnp(float_format, sim)
+        string += "P{0} ".format(self.cartesian_axis.upper())
+        string += float_format % self.position
+        return string
+
     def shift(self, vector):
         """See :py:meth:`ISurface.shift`. Axis planes can be shifted in any
         direction, but only shifts along their axis have an effect.
@@ -1546,6 +1557,10 @@ class IMacrobody(ISurface):
     def comment(self):
         raise NotImplementedError
 
+    @abc.abstractmethod
+    def mcnp(self, float_format, sim):
+        return super(IMacrobody, self).mcnp(float_format, sim)
+
 
 class Parallelepiped(IMacrobody):
     """Rectangular parallelepiped in which all surfaces are parallel to the
@@ -1584,10 +1599,15 @@ class Parallelepiped(IMacrobody):
         self.zlims = np.array([zmin, zmax])
 
     def comment(self):
-        return ("Parallelepiped {0!r}: [{1:g}, {2:g}] x [{3:g}, {4:g}] x "
-                "[{5:g}, {6:g}] cm.".format(self.name, self.xlims[0],
-                    self.xlims[1], self.ylims[0], self.ylims[1], self.zlims[0],
-                    self.zlims[1]))
+        return ("Parallelepiped {0!r}: [{1[0]:g}, {1[1]:g}] x "
+                "[{2[0]:g}, {2[1]:g}] x [{3[0]:g}, {3[1]:g}] cm.".format(
+                    self.name, self.xlims, self.ylims, self.zlims))
+
+    def mcnp(self, float_format, sim):
+        string = super(Parallelepiped, self).mcnp(float_format, sim)
+        formatstr =  "RPP {0} {0}  {0} {0}  {0} {0}".format(float_format)
+        return string + formatstr % (
+                tuple(self.xlims) + tuple(self.ylims) + tuple(self.zlims))
 
     def shift(self, vector):
         """See :py:meth:`ISurface.shift`.
