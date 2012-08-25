@@ -60,7 +60,7 @@ cdef cpp_jsoncpp.Value * tocppval(object doc) except NULL:
     return cval
 
 
-cdef int tovalidindex(int i, int I) except -1:
+cdef int toposindex(int i, int I) except -1:
     cdef int valid_i = i 
     if valid_i < 0:
         valid_i = I + valid_i
@@ -96,23 +96,16 @@ cdef class Value(object):
         if isinstance(pykey, basestring):
             cvalue = &self._inst[0][<const_char *> pykey]
         elif isinstance(pykey, int) and (self._inst.type() == cpp_jsoncpp.arrayValue):
-            pykey = tovalidindex(pykey, self._inst[0].size())
+            pykey = toposindex(pykey, self._inst[0].size())
             cvalue = &self._inst[0][<int> pykey]
         elif isinstance(pykey, slice) and (self._inst.type() == cpp_jsoncpp.arrayValue):
             pyvalue._view = False
             cvalue = new cpp_jsoncpp.Value(<cpp_jsoncpp.ValueType> cpp_jsoncpp.arrayValue)
             curr_size = self._inst.size()
-            start = 0 if pykey.start is None else tovalidindex(pykey.start, curr_size)
-            stop = curr_size if (pykey.stop is None) or (pykey.stop == curr_size) else tovalidindex(pykey.stop, curr_size)
-            step = 1 if pykey.step is None else pykey.step
-            new_size = (stop - start)/abs(step) + bool((stop - start)%step)
-            cvalue.resize(new_size)
-            if step < 0:
-                start, stop = stop-1, start-1
-                #start, stop = -1*start, -1*stop
-            for i, j in enumerate(range(start, stop, step)):
-                if j < 0:
-                    j += curr_size
+            r = range(*pykey.indices(curr_size))
+            cvalue.resize(<int> len(r))
+            for i, j in enumerate(r):
+                j = toposindex(j, curr_size)
                 cvalue[0][<int> i].swap(cpp_jsoncpp.Value(self._inst[0][<int> j]))
         else:
             if (isinstance(pykey, int) or isinstance(pykey, slice)) and not \
@@ -140,19 +133,26 @@ cdef class Value(object):
             raise ValueError("{0} not of known type".format(pykey))
 
     def __setitem__(self, key, value):
-        cdef cpp_jsoncpp.Value * ckey 
+        cdef cpp_jsoncpp.Value * ckey = NULL
         if isinstance(key, basestring):
             ckey = &self._inst[0][<const_char *> key]
+            ckey.swap(deref(tocppval(value)))
         elif isinstance(key, int):
             curr_size = self._inst[0].size()
-            if key < 0:
-                key = curr_size + key
-            if (curr_size <= key) or (key < 0):
-                raise IndexError
+            key = toposindex(key, curr_size)
             ckey = &self._inst[0][<int> key]
+            ckey.swap(deref(tocppval(value)))
+        elif isinstance(key, slice):
+            curr_size = self._inst[0].size()
+            r = range(*key.indices(curr_size))
+            for i, v in zip(r, value):
+                i = toposindex(i, curr_size)
+                ckey = &self._inst[0][<int> i]
+                ckey.swap(deref(tocppval(v)))
+            for i in r:
+                ckey = &self._inst[0][<int> i]
         else:
             raise KeyError('key not of appropriate type, got {0}'.format(type(key)))
-        ckey.swap(deref(tocppval(value)))
 
     def __len__(self):
         if self._inst.isObject() or self._inst.isArray():
