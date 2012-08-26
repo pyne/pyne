@@ -1018,8 +1018,10 @@ class ISurface(ICard):
                     "white, but can only be neither or one of the two.")
 
     @abc.abstractmethod
-    def comment(self):
-        raise NotImplementedError
+    def comment(self, title):
+        return "{0} {1!r}:{2}{3} ".format(title, self.name, 
+                " reflecting." if self.reflecting else "",
+                " white." if self.white else "")
 
     @abc.abstractmethod
     def mcnp(self, float_format, sim, keystring):
@@ -1178,8 +1180,8 @@ class IAxisSurface(ISurface):
         self.cartesian_axis = cartesian_axis
 
     @abc.abstractmethod
-    def comment(self):
-        raise NotImplementedError
+    def comment(self, *args):
+        return super(IAxisSurface, self).comment(*args)
 
     @abc.abstractmethod
     def mcnp(self, *args):
@@ -1247,8 +1249,9 @@ class AxisCylinder(IAxisSurface):
         self.radius = radius
 
     def comment(self):
-        return ("Axis cylinder {0!r}: aligned and centered on {1} axis, "
-                "with radius {2:g} cm (diameter {3:g} cm).".format(self.name,
+        string = super(AxisCylinder, self).comment("Axis cylinder")
+        return string + ("aligned and centered on {0} axis, "
+                "with radius {1:g} cm (diameter {2:g} cm).".format(
                     self.cartesian_axis, self.radius, 2 * self.radius))
 
     def mcnp(self, float_format, sim):
@@ -1361,7 +1364,7 @@ class AxisCylinder(IAxisSurface):
 class AxisPlane(IAxisSurface):
     """Plane perpendicular to one of the Cartesian axes.
 
-    .. inheritance-diagram:: pyne.simplesim.cards.AxisCylinder
+    .. inheritance-diagram:: pyne.simplesim.cards.AxisPlane
     
     """
 
@@ -1393,8 +1396,9 @@ class AxisPlane(IAxisSurface):
         self.position = position
     
     def comment(self):
-        return "Axis plane {0!r}: {1} = {2:g} cm.".format(
-                self.name, self.cartesian_axis, self.position)
+        string = super(AxisPlane, self).comment("Axis plane")
+        return string + "{0} = {1:g} cm.".format(
+                self.cartesian_axis, self.position)
 
     def mcnp(self, float_format, sim):
         string = super(AxisPlane, self).mcnp(float_format, sim,
@@ -1463,7 +1467,9 @@ class IMacrobody(ISurface):
     """
     __metaclass__ = abc.ABCMeta
 
-    # TODO abstract method for obtaining "sub"-surfaces.
+    # TODO abstract method for obtaining "sub"-surfaces. This is one reason why
+    # you'd pass objects rather than just object names around: I could pass
+    # IMacrobody.top, etc.
     def __init__(self, name, *args, **kwargs):
         """
 
@@ -1471,8 +1477,8 @@ class IMacrobody(ISurface):
         super(IMacrobody, self).__init__(name, *args, **kwargs)
 
     @abc.abstractmethod
-    def comment(self):
-        raise NotImplementedError
+    def comment(self, *args):
+        return super(IMacrobody, self).comment(*args)
 
     @abc.abstractmethod
     def mcnp(self, *args):
@@ -1515,9 +1521,10 @@ class Parallelepiped(IMacrobody):
         self.zlims = np.array([zmin, zmax])
 
     def comment(self):
-        return ("Parallelepiped {0!r}: [{1[0]:g}, {1[1]:g}] x "
-                "[{2[0]:g}, {2[1]:g}] x [{3[0]:g}, {3[1]:g}] cm.".format(
-                    self.name, self.xlims, self.ylims, self.zlims))
+        string = super(Parallelepiped, self).comment("Parallelepiped")
+        return string + ("[{0[0]:g}, {0[1]:g}] x "
+                "[{1[0]:g}, {1[1]:g}] x [{2[0]:g}, {2[1]:g}] cm.".format(
+                    self.xlims, self.ylims, self.zlims))
 
     def mcnp(self, float_format, sim):
         string = super(Parallelepiped, self).mcnp(float_format, sim, "RPP")
