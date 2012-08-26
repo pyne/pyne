@@ -44,26 +44,27 @@ cdef cpp_map[int, double] dict_to_comp(dict nucvec):
 cdef class _Material:
 
     def __cinit__(self, nucvec=None, double mass=-1.0, char * name='',
-                  double atoms_per_mol=-1.0, bint free_mat=True):
+                  double atoms_per_mol=-1.0, attrs=None, bint free_mat=True):
         """Material C++ constuctor."""
         cdef cpp_map[int, double] comp
+        cdef jsoncpp.Value cattrs = jsoncpp.Value({} if attrs is None else attrs)
 
         if isinstance(nucvec, dict):
             # Material from dict
             comp = dict_to_comp(nucvec)
             self.mat_pointer = new cpp_material.Material(
-                    comp, mass, std.string(name), atoms_per_mol)
+                    comp, mass, std.string(name), atoms_per_mol, deref(cattrs._inst))
 
         elif isinstance(nucvec, basestring):
             # Material from file
             self.mat_pointer = new cpp_material.Material(
-                    <char *> nucvec, mass, std.string(name), atoms_per_mol)
+                    <char *> nucvec, mass, std.string(name), atoms_per_mol, deref(cattrs._inst))
 
         elif (nucvec is None):
             if free_mat:
                 # Make empty mass stream
                 self.mat_pointer = new cpp_material.Material(comp, 
-                                        mass, std.string(name), atoms_per_mol)
+                                        mass, std.string(name), atoms_per_mol, deref(cattrs._inst))
             else:
                 self.mat_pointer = NULL
 
@@ -1143,6 +1144,10 @@ class Material(_Material, collections.MutableMapping):
         Number of atoms to per molecule of material.  Needed to obtain proper
         scaling of molecular weights.  For example, this value for water is
         3.0.
+    attrs : JSON-convertable Python object, optional
+        Initial attributes to build the material with.  At the top-level this is
+        usually a dictionary with string keys.  This container is used to store
+        arbitrary metadata about the material.
     free_mat : bool, optional
         Flag for whether this wrapper 'owns' this underlying C++ pyne::Material
         object, and thus determines whether or not to deallocate it on wrapper
@@ -1171,7 +1176,7 @@ class Material(_Material, collections.MutableMapping):
 #####################################
 
 def from_atom_frac(atom_fracs, double mass=-1.0, char * name='', double
-                   atoms_per_mol=-1.0):
+                   atoms_per_mol=-1.0, attrs=None):
     """from_atom_frac(atom_fracs, double mass=-1.0, char * name='', double atoms_per_mol=-1.0)
     Create a Material from a mapping of atom fractions.
 
@@ -1193,6 +1198,10 @@ def from_atom_frac(atom_fracs, double mass=-1.0, char * name='', double
         Number of atoms to per molecule of material.  Needed to obtain proper
         scaling of molecular weights.  For example, this value for water is
         3.0.
+    attrs : JSON-convertable Python object, optional
+        Initial attributes to build the material with.  At the top-level this is
+        usually a dictionary with string keys.  This container is used to store
+        arbitrary metadata about the material.
 
     Returns
     -------
@@ -1223,7 +1232,7 @@ def from_atom_frac(atom_fracs, double mass=-1.0, char * name='', double
     Material.from_atom_frac : Underlying method class method.
 
     """
-    mat = Material()
+    mat = Material(attrs=attrs)
     mat.from_atom_frac(atom_fracs)
     mat.name = name
 
@@ -1279,7 +1288,7 @@ def from_hdf5(char * filename, char * datapath, int row=-1, int protocol=1):
 
 
 def from_text(char * filename, double mass=-1.0, char * name='', double
-              atoms_per_mol=-1.0):
+              atoms_per_mol=-1.0, attrs=None):
     """from_text(char * filename, double mass=-1.0, char * name='', double atoms_per_mol=-1.0)
     Create a Material object from a simple text file.
 
@@ -1299,6 +1308,10 @@ def from_text(char * filename, double mass=-1.0, char * name='', double
         Number of atoms to per molecule of material.  Needed to obtain proper
         scaling of molecular weights.  For example, this value for water is
         3.0.
+    attrs : JSON-convertable Python object, optional
+        Initial attributes to build the material with.  At the top-level this is
+        usually a dictionary with string keys.  This container is used to store
+        arbitrary metadata about the material.
 
     Returns
     -------
@@ -1316,8 +1329,7 @@ def from_text(char * filename, double mass=-1.0, char * name='', double
     Material.from_text : Underlying method class method.
 
     """
-    mat = Material()
-
+    mat = Material(attrs=attrs)
     mat.name = name
 
     if 0.0 <= mass:
