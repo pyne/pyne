@@ -1668,7 +1668,7 @@ class TestMCNPInput(unittest.TestCase):
                 10**np.arange(-9.9, 1.1, 0.1)))
 
         # Create input file.
-        inp = inputfile.MCNPInput(self.sim, heading="Infinite lattice.")
+        inp = inputfile.MCNPInput(self.sim, title="Infinite lattice.")
         inp.write(fname + '_default')
         # Check against text file.
         self.assertEquals(
@@ -1677,7 +1677,7 @@ class TestMCNPInput(unittest.TestCase):
         os.unlink(fname + '_default')
 
         # Test the & line continuation.
-        inp = inputfile.MCNPInput(self.sim, heading="Infinite lattice.",
+        inp = inputfile.MCNPInput(self.sim, title="Infinite lattice.",
                 cont_by_amp=True)
         inp.write(fname + '_amp')
         self.assertEquals(
@@ -1698,6 +1698,12 @@ class TestMCNPInput(unittest.TestCase):
         inp.write(fname)
         #self.assertTrue(mock_warn.called)
         os.unlink(fname)
+
+    def test_user_card(self):
+        # TODO
+        pass
+
+
 
 
 class TestModifying(unittest.TestCase):
