@@ -142,6 +142,7 @@ def test_hdf5_protocol_1():
 
     for i in range(2, 11):
         leu = Material({'U235': 0.04, 'U238': 0.96}, i*4.2, "LEU", 1.0*i)
+        leu.attrs['comment'] = 'fire in the disco'
         leu.write_hdf5('proto1.h5')
 
     # Loads with protocol 1 now.
@@ -158,7 +159,7 @@ def test_hdf5_protocol_1():
     assert_equal(m.mass, 16.8)
     assert_equal(m.comp, {922350: 0.04, 922380: 0.96})
 
-    os.remove('proto1.h5')
+    #os.remove('proto1.h5')
 
 
 
