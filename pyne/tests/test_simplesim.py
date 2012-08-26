@@ -1470,18 +1470,24 @@ class TestSystemDefinition(unittest.TestCase):
         # mcnp()
         self.sim.add_tally(det)
         self.assertEquals(det.mcnp('%.5g', self.sim), "F15:N  0 0 0 0")
-        det = cards.PointDetector('point', 'neutron', np.array([1, 2, 3]), 4,
+        det = cards.PointDetector('point2', 'neutron', np.array([1, 2, 3]), 4,
                 'cm')
         self.assertTrue((det.detectors[0].pos == np.array([1, 2, 3])).all())
         self.assertEquals(det.detectors[0].soe_rad, 4)
         self.assertEquals(det.sep_direct, True)
-        self.assertEquals(det.comment(), "Point detector tally 'point' of "
+        self.assertEquals(det.comment(), "Point detector tally 'point2' of "
                 "neutrons: point (1, 2, 3) cm, "
                 "radius 4 cm; direct contrib is separate.")
+        # mcnp()
+        self.sim.add_tally(det)
+        self.assertEquals(det.mcnp('%.5g', self.sim), "F25:N  1 2 3 4")
         det = cards.PointDetector('point', 'neutron', [1, 0, 0], 3, 'mfp')
         self.assertEquals(det.comment(), "Point detector tally 'point' of "
                 "neutrons: point (1, 0, 0) cm, "
                 "radius 3 mfp; direct contrib is separate.")
+        # mcnp()
+        self.sim.add_tally(det)
+        self.assertEquals(det.mcnp('%.5g', self.sim), "F15:N  1 0 0 -3")
         det = cards.PointDetector('point', 'photon', [0, 0, 0], 0, 'cm',
                                                      [1, 0, 0], 3, 'mfp')
         self.assertEquals(det.detectors[0].pos, [0, 0, 0])
@@ -1493,9 +1499,17 @@ class TestSystemDefinition(unittest.TestCase):
                 "radius 0 cm; "
                 "point (1, 0, 0) cm, radius 3 mfp; "
                 "direct contrib is separate.")
+        # mcnp()
+        self.sim.add_tally(det)
+        self.assertEquals(det.mcnp('%.5g', self.sim),
+                "F15:P  0 0 0 0\n     1 0 0 -3")
         det = cards.PointDetector('point', 'photon', [0, 0, 0], 0, 'cm',
                 sep_direct=False)
         self.assertFalse(det.sep_direct)
+        # mcnp()
+        self.sim.add_tally(det)
+        self.assertEquals(det.mcnp('%.5g', self.sim),
+                "F15:P  0 0 0 0 ND")
 
         ## RingDetector
         det = cards.RingDetector('ring', 'neutron', 'x', 10.0, 2.0, 1.0, 'cm')
@@ -1505,22 +1519,43 @@ class TestSystemDefinition(unittest.TestCase):
         self.assertEquals(det.comment(), "Ring detector tally 'ring' of "
                 "neutrons: along x axis. ring x = 10 cm, radius 2 cm, s.o.e. "
                 "radius 1 cm; direct contrib is separate.")
+        # mcnp()
+        self.sim.add_tally(det)
+        self.assertEquals(det.mcnp('%.5g', self.sim),
+                "F35X:N  10 2 1")
         det = cards.RingDetector('ring', 'neutron', 'x', 10.0, 2.0, 1.0, 'mfp')
         self.assertEquals(det.comment(), "Ring detector tally 'ring' of "
                 "neutrons: along x axis. ring x = 10 cm, radius 2 cm, s.o.e. "
                 "radius 1 mfp; direct contrib is separate.")
+        # mcnp()
+        self.sim.add_tally(det)
+        self.assertEquals(det.mcnp('%.5g', self.sim),
+                "F35X:N  10 2 -1")
         det = cards.RingDetector('ring', 'neutron', 'x', 10.0, 2.0, 1.0, 'mfp',
                                                          20.0, 3.0, 1.0, 'cm')
         self.assertEquals(det.comment(), "Ring detector tally 'ring' of "
                 "neutrons: along x axis. ring x = 10 cm, radius 2 cm, s.o.e. "
                 "radius 1 mfp; ring x = 20 cm, radius 3 "
                 "cm, s.o.e. radius 1 cm; direct contrib is separate.")
+        # mcnp()
+        self.sim.add_tally(det)
+        self.assertEquals(det.mcnp('%.5g', self.sim),
+                "F35X:N  10 2 -1\n     20 3 1")
         det = cards.RingDetector('ring', 'neutron', 'x', 10.0, 2.0, 1.0, 'mfp',
                 sep_direct=False)
         self.assertEquals(det.comment(), "Ring detector tally 'ring' of "
                 "neutrons: along x axis. ring x = 10 cm, radius 2 cm, s.o.e. "
                 "radius 1 mfp; direct contrib is not separate.")
+        # mcnp()
+        self.sim.add_tally(det)
+        self.assertEquals(det.mcnp('%.5g', self.sim),
+                "F35X:N  10 2 -1 ND")
 
+    def test_EnergyGrid(self):
+        """Tests :py:class:`cards.EnergyGrid`."""
+
+        det = cards.RingDetector('ring', 'neutron', 'x', 10.0, 2.0, 1.0, 'mfp',
+                sep_direct=False)
         ## EnergyGrid
         egrid = cards.EnergyGrid('grid0', None, [1e-4, 1, 100e3, 10e6])
         self.assertEquals(egrid.comment(), "Energy grid 'grid0' for "
