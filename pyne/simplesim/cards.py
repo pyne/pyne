@@ -2788,6 +2788,10 @@ class IDetector(ITally):
         string += "; direct contrib is {0}separate.".format(
                 '' if self.sep_direct else 'not ')
         return string
+    
+    @abc.abstractmethod
+    def _comment_unit(self):
+        raise NotImplementedError
 
     @abc.abstractmethod
     def mcnp(self, float_format, sim, num, **kwargs):
@@ -2800,8 +2804,7 @@ class IDetector(ITally):
         if not self.sep_direct: string += " ND"
         return string
     
-    @abc.abstractmethod
-    def _comment_unit(self):
+    def _mcnp_unit(self):
         raise NotImplementedError
 
     @property
@@ -3302,7 +3305,6 @@ class ICellMod(IMisc):
                     string += " {0}J".format(empty_count)
         return string
 
-    @abc.abstractmethod
     def _mcnp_unit(self):
         raise NotImplementedError
 
