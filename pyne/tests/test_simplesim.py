@@ -1681,6 +1681,10 @@ class TestMCNPInput(unittest.TestCase):
 
     #@mock.patch_object(warnings, 'warn')
     def test_bypass_wrap(self): #, mock_warn):
+        """Test that a warning is raised when a card requesting wrapping to be
+        bypassed ever violates the 80-column rule.
+
+        """
         # TODO expecting a warning.
         fname = 'simplesim_bypass_wrap'
         self.sim.add_source(cards.CriticalityPoints([[np.pi, np.pi, 0]]))
