@@ -19,7 +19,7 @@ def test_strvalue():
     s = "No one expects the Spanish Inquisition!!!!"
     v = Value(s)
     assert_equal(len(v), 42)
-    assert_equal(str(v), s)
+    assert_equal(repr(v), s)
     assert_true(v.isstring())
     assert_equal(v.type(), 4)
     assert_equal(v.type_name(), 'string')
@@ -343,6 +343,13 @@ def test_mutableseq():
     a += [42, 65]
     pya += [42, 65]
     assert_equal([i for i in a], pya)
+
+def test_str_repr():
+    assert_equal(repr(Value({'hello': 1})), '{"hello":1}')
+    assert_equal(str(Value({'hello': 1})), '{\n   "hello" : 1\n}')
+    assert_equal(repr(Value('hello')), "hello")
+    assert_equal(str(Value('hello')), 'hello')
+
 
 if __name__ == "__main__":
     nose.runmodule()
