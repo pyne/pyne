@@ -4,16 +4,14 @@ try:
     import simplejson as json
 except ImportError:
     import json
+from StringIO import StringIO
 
 import nose 
 from nose.tools import assert_equal, assert_not_equal, assert_raises, raises, assert_in, \
                        assert_true, assert_false
 
-from pyne.jsoncpp import Value
+from pyne.jsoncpp import Value, Reader, FastWriter, StyledWriter
 
-
-#def test_reader():
-#    pass
 
 def test_strvalue():
     s = "No one expects the Spanish Inquisition!!!!"
@@ -349,6 +347,27 @@ def test_str_repr():
     assert_equal(str(Value({'hello': 1})), '{\n   "hello" : 1\n}')
     assert_equal(repr(Value('hello')), "hello")
     assert_equal(str(Value('hello')), 'hello')
+
+def test_reader():
+    r = Reader()
+    value = Value({'hello': 1})
+    valstr = repr(value)
+    obs = r.parse(valstr)
+    assert_true(value == obs)
+
+    strio = StringIO(valstr)
+    obs = r.parse(valstr)
+    assert_true(value == obs)
+
+def test_fastwriter():
+    fw = FastWriter()
+    assert_equal(fw.write(Value({'hello': 1})), '{"hello":1}\n')
+    assert_equal(fw.write(Value('hello')), '"hello"\n')
+
+def test_styledwriter():
+    sw = StyledWriter()
+    assert_equal(sw.write(Value({'hello': 1})), '{\n   "hello" : 1\n}\n')
+    assert_equal(sw.write(Value('hello')), '"hello"\n')
 
 
 if __name__ == "__main__":
