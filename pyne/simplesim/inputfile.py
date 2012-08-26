@@ -111,7 +111,7 @@ class MCNPInput(IInputFile):
     # TODO user can overload commenting methods
     def __init__(self, simdef, comments=True, heading=None,
             description=None, plug=True, float_format="% .5g",
-            cont_by_amp=True):
+            cont_by_amp=False):
         """
         cont_by_amp : bool, optional
 
