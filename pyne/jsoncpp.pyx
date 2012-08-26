@@ -446,8 +446,8 @@ cdef class Reader(object):
 
         Parameters
         ----------
-        document : string, dict, file-object, list, etc
-            Anything sufficiently JSON-izable
+        document : string or file-like object
+            Any JSON formatted string
         collect_comments : bool, optional 
             True to collect comment and allow writing them back during
             serialization, and False to discard comments.
@@ -460,8 +460,10 @@ cdef class Reader(object):
         """
         cdef Value root = Value()
         cdef std_string cdoc
-        pydoc = json.JSONEncoder(separators=(',', ':')).encode(document)
-        cdoc = pydoc
+        if isinstance(document, basestring):
+            cdoc = document
+        else:
+            cdoc = document.read()
         self._inst.parse(cdoc, root._inst[0], collect_comments)
         return root
 
