@@ -5139,6 +5139,20 @@ class Vector(IMisc):
         return self.vectors.keys().index(vecname)
 
 
+class Burn(IMisc):
+
+    def __init__(self, times=None, power_fracs=None, power=None,
+            materials=None, matl_omit=None, min_frac=None,
+            chain_convergence=None, fp_tier=None,
+            out_order=None, out_per_step=False, model_opt=None,
+            volume=None, conc_change=None)
+        # TODO
+        pass
+    #def __init__(self, times=[1], power_fracs, power=1, materials=None,
+    #        matl_omit=None, min_frac=1e-10, chain_convergence=1e-10, fp_tier=1,
+    #        out_order='mass', out_per_step=False, model_opt='fatal',
+    #        volume=None, conc_change=None)
+
 class Particle(object):
     """Facilitates the use of particle abbreviations, and is an attribute in
     various cards (:py:class:`ITally` cards, and other :py:class:`IMisc` cards.)
