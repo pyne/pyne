@@ -2752,39 +2752,61 @@ class RepeatedStructure(IAverageTally):
 
 
 class IDetector(ITally):
-    def __init__(self, name, particle, spec, sep_direct=True, *args, **kwargs):
+    """This class is not used by the detector. Abstract base class for detector
+    tallies.
+    
+    """
+
+    def __init__(self, name, particle, args_per_set, sep_direct=True, *args,
+                 **kwargs):
+        """
+        Parameters
+        ----------
+        particles : str, list of str
+            See :py:class:`ITally`. In MCNP, this tally is only for neutrons and
+            photons.
+        sep_direct : bool, optional
+            In MCNP, the direct contribution to the tally is printed
+            separately. Set to False to disable the separate printing. 
+
+        """
         super(IDetector, self).__init__(name, particle, *args, **kwargs)
-        self.spec = spec
+        self.detectors = []
         self.sep_direct = sep_direct
+        self._args_per_set = args_per_set
+        for i_set in range(len(args) / self._args_per_set):
+            i_start = self._args_per_set * i _set
+            self.set(*args[i_start:i_start+self._args_per_set)
 
     @abc.abstractmethod
     def comment(self, name):
         string = super(IDetector, self).comment(name)
-        if type(self.spec) is tuple:
-            string += self._comment_unit(self.spec)
-        else:
-            counter = 0
-            for point in self.spec:
-                counter += 1
-                string += self._comment_unit(point)
-                if counter < len(self.spec): string += ";"
+        counter = 0
+        for det in self.detectors:
+            counter += 1
+            string += self._comment_unit(det)
+            if counter < len(self.detectors): string += ";"
         string += "; direct contrib is {0}separate.".format(
                 '' if self.sep_direct else 'not ')
         return string
 
     @abc.abstractmethod
     def mcnp(self, float_format, sim, num, **kwargs):
-        return super(IDetector, self).mcnp(float_format, sim, num, **kwargs)
+        string = super(IDetector, self).mcnp(float_format, sim, num, **kwargs)
+        for det in self.detectors:
+            string += "  {0}".format(self._mcnp_unit(float_format, sim, det))
+        if self.sep_direct: string += " ND"
+        return string
     
     @abc.abstractmethod
     def _comment_unit(self):
         raise NotImplementedError
 
     @property
-    def spec(self): return self._spec
+    def detectors(self): return self._detectors
 
-    @spec.setter
-    def spec(self, value): self._spec = value
+    @detectors.setter
+    def detectors(self, value): self._detectors = value
 
     @property
     def sep_direct(self): return self._sep_direct
@@ -2800,12 +2822,9 @@ class PointDetector(IDetector):
     .. inheritance-diagram:: pyne.simplesim.cards.PointDetector
 
     """
-    # TODO ideally *args would be used to let the user specify any number of
-    # points.
-    # TODO I wish we could avoid the use of negative numbers to signal
-    # somethign semantic other than a negative number, but other alternatives
-    # here seem to not be as clean or easy or general.
-    def __init__(self, name, particle, spec, **kwargs):
+    Point = collections.namedtuple('Point', ['pos', 'soe_rad', 'soe_units'])
+
+    def __init__(self, name, particles, *args, **kwargs):
         """
         Parameters
         ----------
@@ -2814,18 +2833,19 @@ class PointDetector(IDetector):
         particles : str, list of str
             See :py:class:`ITally`. In MCNP, this tally is only for neutrons and
             photons.
-        spec : tuple, list of tuples [centimeters/mean free paths]
-            The tuple has 2 elements: a 3-element list of floats and a float.
-            The 3-element list provides the location of the point detector, and
-            the float is the radius of a sphere of exclusion. The list can also
-            be a :py:mod:`numpy` array. By default, the units for the radius is
-            also centimeters, but can be changed to mean free paths by
-            providing a negative radius. If requesting multiple point
-            detectors, a list of point-radius tuples can be provided.
+        position : 3-element list, or :py:class:`np.array`
+            Location of the point detector.
+        soe_radius : float
+            Radius of the sphere of exclusion.
+        soe_units : str
+            Units for the radius of the sphere of exclusion. Either 'cm' or
+            'mfp' for mean free paths.
+        *args : position, soe_radius, soe_units, ...
+            To request more than one detector, supply the last 3 arguments for
+            the additional detectors. See examples. This can also be done using
+            :py:meth:`add`.
         sep_direct : bool, optional
-            In MCNP, the direct contribution to the tally is printed
-            separately. Set to False to disable the separate printing. This is
-            a property of the undocumented :py:class:`IDetector`.
+            See :py:class:`IDetector`.
         alt_units : bool, optional
             If True, Tally is additionally weighted by particle energy.
             See :py:class:`ITally`.
@@ -2835,44 +2855,69 @@ class PointDetector(IDetector):
         The following creates a single point detector at the origin, without a
         sphere of exclusion::
 
-            det = PointDetector('point', 'neutron', ([0, 0, 0], 0))
+            det = PointDetector('point', 'neutron', [0, 0, 0], 0, 'cm')
 
         The following creates a detector at (1, 1, 1) cm with a sphere of
         exclusion with a radius of 1 cm, where we have imported :py:mod:`numpy`
         as ``np``)::
 
-            det = PointDetector('point', 'neutron', (np.array([1, 1, 1]), 1))
+            det = PointDetector('point', 'neutron', np.array([1, 1, 1]), 1,
+                    'cm')
 
         The radius for the sphere of exclusion here is 3 mfp::
 
-            det = PointDetector('point', 'neutron', ([1, 0, 0], -3))
+            det = PointDetector('point', 'neutron', [1, 0, 0], 3, 'mfp')
 
         This is an example of requesting two point detectors::
         
-            det = PointDetector('point', 'photon', [([0, 0, 0],  0),
-                                                     ([1, 0, 0], -3)])
+            det = PointDetector('point', 'photon', [0, 0, 0],  0, 'cm',
+                                                   [1, 0, 0], 3, 'mfp')
 
         Here, it is requested that the direct contribution is not tallied
-        separately::
+        separately and that alternative units are used for the output::
 
-            det = PointDetector('point', 'photon', ([0, 0, 0], 0),
-                    sep_direct=False)
+            det = PointDetector('point', 'photon', [0, 0, 0], 0, 'cm',
+                    sep_direct=False, alt_units=True)
 
         """
-        super(PointDetector, self).__init__(name, particle, spec, **kwargs)
+        super(PointDetector, self).__init__(name, particle, 3, **kwargs)
 
+    def add(self, position, soe_radius, soe_units):
+        """
+        Parameters
+        ----------
+        position : 3-element list, or :py:class:`np.array`
+        soe_radius : float
+        soe_units : str
+
+        Examples
+        --------
+        The last example above can also be achieved by the following::
+
+            det = PointDetector('point', 'photon', sep_direct=False,
+                    alt_units=True)
+            det.add([0, 0, 0], 0, 'cm')
+
+        """
+        if soe_units != 'cm' and soe_units != 'mfp':
+            return ValueError("The input ``soe_units`` must be 'cm' or "
+                    "'mfp'. User provided {0}.".format(soe_units))
+        self.detectors += [self.Point(position, soe_radius, soe_units)]
+        
     def comment(self):
         return super(PointDetector, self).comment("Point detector")
 
-    def mcnp(self, float_format, sim):
-        string = super(PointDetector, self).mcnp(float_format, sim, 5)
-        # TODO
+    def _comment_unit(self, det):
+        return (" point ({0[0]:g}, {0[1]:g}, {0[2]:g}) cm, radius "
+                "{1:g} {2}".format(det.point, det.soe_rad, det.soe_units))
 
-    def _comment_unit(self, apoint):
-        string = (" point ({0[0]:g}, {0[1]:g}, {0[2]:g}) cm, radius "
-                "{1:g} {2}".format(
-                apoint[0], abs(apoint[1]), 'mfp' if apoint[1] < 0 else 'cm'))
-        return string
+    def mcnp(self, float_format, sim):
+        return super(PointDetector, self).mcnp(float_format, sim, 5)
+
+    def _mcnp_unit(self, float_format, sim, det):
+        formatstr = "{0} {0} {0} {0}".format(float_format)
+        return formatstr % (tuple(det.pos) + (det.soe_rad * (
+            -1 if det.soe_units == 'mfp' else 1),))
 
 
 class RingDetector(IDetector):
@@ -2882,8 +2927,10 @@ class RingDetector(IDetector):
     .. inheritance-diagram:: pyne.simplesim.cards.RingDetector
 
     """
-    # TODO use *args instead of these silly lists.
-    def __init__(self, name, particle, spec, **kwargs):
+    Ring = collections.namedtuple('Ring',
+                ['pos', 'rad', 'soe_rad', 'soe_units'])
+    
+    def __init__(self, name, particles, cartesian_axis, *args, **kwargs):
         """
         Parameters
         ----------
@@ -2892,18 +2939,22 @@ class RingDetector(IDetector):
         particles : str, list of str
             See :py:class:`ITally`. In MCNP for this tally, only neutrons and
             photons are allowed.
-        spec : tuple, list of tuples [centimeters/mean free paths]
-            The tuple has 4 elements: a Cartesian axis string ('x', 'y', 'z'),
-            a position (float) along that axis, the radius (float) of the ring,
-            and the radius (float) of the sphere of exclusion. A negative
-            radius for the sphere changes the units to mean free paths. To
-            request multiple ring detectors, a list of these tuples can be
-            provided. The Cartesian axis strings can be upper or lower case
-            ('x', 'X', 'y', 'Y', 'z', 'Z').
+        cartesian_axis : str
+            Cartesian axis string ('x', 'X', 'y', 'Y', 'z', or 'Z').
+        position : float
+            Position along the cartesian axis.
+        radius : float
+            Radius of the ring.
+        soe_radius : float
+            Radius of the sphere of exclusion.
+        soe_units : float
+            Units for the radius of the sphere of exclusion.
+        *args : position, radius, soe_radius, soe_units, ...
+            To request more than one detector, supply the last 4 arguments for
+            the additional detectors. See examples. This can also be done using
+            :py:meth:`add`.
         sep_direct : bool, optional
-            In MCNP, the direct contribution to the tally is printed
-            separately. Set to False to disable the separate printing. This is
-            a property of the undocumented :py:class:`IDetector`.
+            See :py:class:`IDetector`.
         alt_units : bool, optional
             If True, Tally is additionally weighted by particle energy.
             See :py:class:`ITally`.
@@ -2913,39 +2964,71 @@ class RingDetector(IDetector):
         The following creates a single ring detector at x = 10.0 cm, with a
         2.0 cm radius, and a 1.0 cm radius sphere of exclusion::
 
-            det = RingDetector('ring', 'neutron', ('x', 10.0, 2.0,  1.0))
+            det = RingDetector('ring', 'neutron', 'x', 10.0, 2.0,  1.0, 'cm')
 
         In the following, the sphere of exclusion has a radius of 1.0 mfp::
 
-            det = RingDetector('ring', 'neutron', ('x', 10.0, 2.0, -1.0))
+            det = RingDetector('ring', 'neutron', 'x', 10.0, 2.0, 1.0, 'mfp')
 
         This is an example of requesting two ring detectors::
 
-            det = RingDetector('ring', 'neutron', [('x', 10.0, 2.0, -1.0),
-                                                   ('y', 20.0, 3.0, 1.0)])
+            det = RingDetector('ring', 'neutron', 'y', 10.0, 2.0, 1.0, 'mfp',
+                                                       20.0, 3.0, 1.0, 'cm')
 
         Here it is requested that the direct contribution is not tallied
-        separately::
+        separately, and alternative units are used for the output::
         
-            det = RingDetector('ring', 'neutron', ('x', 10.0, 2.0, -1.0), 
-                    sep_direct=False)
+            det = RingDetector('ring', 'neutron', 'x', 10.0, 2.0, 1.0, 'cm'
+                    sep_direct=False, alt_units=True)
 
         """
-        super(RingDetector, self).__init__(name, particle, spec, **kwargs)
+        super(RingDetector, self).__init__(name, particle, 4, **kwargs)
+        self.cartesian_axis = cartesian_axis
+
+    def add(self, position, radius, soe_radius, soe_units):
+        """
+        Parameters
+        ----------
+        position : float
+        radius : float
+        soe_radius : float
+        soe_units : float
+
+        Examples
+        --------
+        The last example above can be achieved with the following::
+
+            det = RingDetector('ring', 'neutron', 'x', sep_direct=False,
+                    alt_units=True)
+            det.add(10.0, 2.0, 1.0, 'cm')
+
+        """
+        self.detectors += [Ring(cartesian_axis, position, radius, soe_radius,
+                soe_units)]
 
     def comment(self):
-        return super(RingDetector, self).comment("Ring detector")
+        return super(RingDetector, self).comment(
+                "Ring detector along {0}".format(self.cartesian_axis))
+
+    def _comment_unit(self, det):
+        return (" ring {0} = {1:g} cm, radius {2:g} cm, s.o.e. "
+                "radius {3:g} {4}".format(det.axis, det.pos, det.rad,
+                    det.soe_rad, det.soe_units))
 
     def mcnp(self, float_format, sim):
-        string = super(PointDetector, self).mcnp(float_format, sim, 5,
-                                                 post='a')
-        # TODO
+        return super(PointDetector, self).mcnp(float_format, sim, 5,
+                post=self.cartesian_axis.upper())
 
-    def _comment_unit(self, aring):
-        string = (" ring {0} = {1:g} cm, radius {2:g} cm, s.o.e. "
-                "radius {3:g} {4}".format(aring[0], aring[1], aring[2],
-                    abs(aring[3]), 'mfp' if aring[3] < 0 else 'cm'))
-        return string
+    def _mcnp_unit(self, float_format, sim, det):
+        formatstr = "{0} {0} {0}".format(float_format)
+        return formatstr % (tuple(det.pos) + (det.rad, det.soe_rad * (
+            -1 if det.soe_units == 'mfp' else 1)))
+
+    @property
+    def cartesian_axis(self): return self._cartesian_axis
+
+    @cartesian_axis.setter
+    def cartesian_axis(self, value): self._cartesian_axis = value
 
 
 class EnergyGrid(IMisc):
