@@ -47,7 +47,7 @@ class IDefinition(object):
         """Save object data to a JSON file."""
         fid = open(fname, 'w')
         #pickle.dump(self, fid)
-        fid.write(DefinitionEncoder().encode(self))
+        fid.write(DefinitionEncoder(indent=3).encode(self))
         fid.close()
 
     @abc.abstractmethod
@@ -91,19 +91,10 @@ class IDefinition(object):
             #        "another %s" % (card_type, card.name, card_type))
 
     @property
-    def verbose(self):
-        return self._verbose
+    def verbose(self): return self._verbose
 
     @verbose.setter
-    def verbose(self, value):
-        self._verbose = verbose
-
-    @verbose.setter
-    def verbose(self, value):
-        # TODO boolean, check or rely on ducktyping?
-        if type(value) is not bool:
-            raise TypeError("The ``verbose`` property must be of type bool.")
-        self._verbose = value
+    def verbose(self, value): self._verbose = value
 
 
 class SystemDefinition(IDefinition):
