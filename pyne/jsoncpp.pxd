@@ -12,3 +12,9 @@ cdef class Value:
 
 cdef class Reader:
     cdef cpp_jsoncpp.Reader * _inst
+
+cdef class FastWriter:
+    cdef cpp_jsoncpp.FastWriter * _inst
+
+cdef class StyledWriter:
+    cdef cpp_jsoncpp.StyledWriter * _inst
