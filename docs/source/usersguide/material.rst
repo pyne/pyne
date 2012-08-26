@@ -33,7 +33,7 @@ dictionaries of compositions are shown below.
     In [2]: leu = Material({'U238': 0.96, 'U235': 0.04}, 42, 'LEU')
 
     In [3]: leu
-    Out[3]: pyne.material.Material({922350: 0.04, 922380: 0.96}, 42.0, 'LEU', -1.0)
+    Out[3]: pyne.material.Material({922350: 0.04, 922380: 0.96}, 42.0, 'LEU', -1.0, {})
 
     In [4]: nucvec = {10010:  1.0, 80160:  1.0, 691690: 1.0, 922350: 1.0,
        ...:           922380: 1.0, 942390: 1.0, 942410: 1.0, 952420: 1.0,
@@ -91,7 +91,7 @@ of the two original. Multiplying a Material by 2, however, will simply double th
     Out[12]: pyne.material.Material({10010: 0.111111111111, 80160: 0.111111111111, 691690: 0.111111111111, 
        ...:                          922350: 0.111111111111, 922380: 0.111111111111, 942390: 0.111111111111, 
        ...:                          942410: 0.111111111111, 952420: 0.111111111111, 962440: 0.111111111111}, 
-       ...:                          2.0, '')
+       ...:                          2.0, '', {})
 
     In [13]: other_mat.mass
     Out[13]: 2.0
@@ -114,9 +114,10 @@ of the two original. Multiplying a Material by 2, however, will simply double th
     CM244  0.0333333333333
 
 
-Raw Attribute Access
+Raw Member Access
 --------------------
-You may also change the attributes of a material directly without generating a new material instance.
+You may also change the attributes of a material directly without generating a new 
+material instance.
 
 .. code-block:: ipython
 
@@ -167,7 +168,7 @@ the material may be performed with integer-keys, string-keys, slices, or sequenc
     Out[23]: 1.68
 
     In [24]: weird_mat['U':'Am']
-    Out[24]: pyne.material.Material({922350: 0.0736, 922380: 0.8464, 942390: 0.04, 942410: 0.04}, 50.0, '', -1.0)
+    Out[24]: pyne.material.Material({922350: 0.0736, 922380: 0.8464, 942390: 0.04, 942410: 0.04}, 50.0, '', -1.0, {})
 
     In [25]: other_mat[:920000] = 42.0
 
@@ -184,7 +185,7 @@ the material may be performed with integer-keys, string-keys, slices, or sequenc
     In [28]: mat[:]
     Out[28]: pyne.material.Material({10010: 0.166666666667, 922350: 0.166666666667, 922380: 0.166666666667, 
        ...:                          942390: 0.166666666667, 942410: 0.166666666667, 952420: 0.166666666667}, 
-       ...:                          0.666666666667, '', -1.0)
+       ...:                          0.666666666667, '', -1.0, {})
 
 Other methods also exist for obtaining commonly used sub-materials, such as gathering the Uranium or 
 Plutonium vector.  
@@ -292,5 +293,67 @@ and low-enriched uranium.
 .. note:: Materials may be used as keys in a dictionary because they are hashable.
 
 
-Further information on the Material class may be seen in the library reference :ref:`pyne_material`.
+User-defined Metadata
+----------------------------------
+Materials also have an ``attrs`` attribute which allows users to store arbitrary 
+custom information about the material.  This can include things like units, comments, 
+provenance information, or anything else the user desires.  This is implemented as an
+in-memory JSON object attached to the C++ class.  Therefore, what may be stored in
+the ``attrs`` is subject to the same restrictions as JSON itself.  The top-level 
+of the attrs *should* be a dictionary, though this is not explicitly enforced.
+
+.. code-block:: ipython
+
+    In [48]: leu = Material({922350: 0.05, 922380: 0.95}, 15, attrs={'units': 'kg'})
+
+    In [49]: print leu
+    Material: 
+    mass = 15.0
+    atoms per molecule = -1.0
+    units = kg
+    -------------------------
+    U235   0.05
+    U238   0.95
+
+    In [50]: leu
+    Out[50]: pyne.material.Material({922350: 0.05, 922380: 0.95}, 15.0, '', -1.0 {"units":"kg"})
+
+    In [51]: leu.attrs
+    Out[51]: {"units":"kg"}
+
+    In [52]: a = leu.attrs
+
+    In [53]: a['comments'] = ['Anthony made this material.']
+
+    In [54]: leu.attrs['comments'].append('And then Katy made it better!')
+
+    In [55]: a['id'] = 42
+
+    In [56]: leu.attrs
+    Out[56]: {"comments":["Anthony made this material.","And then Katy made it better!"],\
+              "id":42,"units":"kg"}
+
+    In [57]: leu.attr = {'units': 'solar mass'}
+
+    In [58]: leu.attr
+    Out[58]: {'units': 'solar mass'}
+
+    In [59]: a
+    Out[59]: {"comments":["Anthony made this material.","And then Katy made it better!"],\
+              "id":42,"units":"kg"}
+
+    In [60]: leu.attr['units'] = 'not solar masses'
+
+    In [61]: leu.attr['units']
+    Out[61]: 'not solar masses'
+
+As you can see from the above, the attrs interface provides a view into the underlying 
+JSON object.  This can be manipulated directly or by renaming it to another variable.
+Additionally, ``attrs`` can be replaced with a new object of the appropriate type.  
+Doing so invalidates any previous views into this container.
+
+------------------
+
+Further information on the Material class may be seen in the library reference 
+:ref:`pyne_material`.
 

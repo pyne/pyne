@@ -1158,6 +1158,9 @@ class Material(_Material, collections.MutableMapping):
         header = ["Material: {0}".format(self.name)]
         header += ["mass = {0}".format(self.mass)]
         header += ["atoms per molecule = {0}".format(self.atoms_per_mol)]
+        if self.attrs.isobject():
+            for key, value in self.attrs.items():
+                header += ["{0} = {1}".format(key, value)]
         header += ['-' * max([len(h) for h in header])]
         header = "\n".join(header) + "\n"
 
@@ -1166,9 +1169,9 @@ class Material(_Material, collections.MutableMapping):
         return s
 
     def __repr__(self):
-        return "pyne.material.Material({0}, {1}, {2}, {3})".format(
+        return "pyne.material.Material({0}, {1}, {2}, {3}, {4})".format(
                 repr(self.comp), self.mass, repr(self.name),
-                self.atoms_per_mol,)
+                self.atoms_per_mol, repr(self.attrs))
 
 
 #####################################
