@@ -1626,7 +1626,7 @@ class TestMCNPInput(unittest.TestCase):
         uo2.from_atom_frac({'U235': 0.05,
                             'U238': 0.95,
                             'O16' : 2.00})
-        h2o = cards.Material(name='H1')
+        h2o = cards.Material(name='H2O')
         h2o.from_atom_frac({'H1' : 2.0,
                             'O16': 1.0})
         # Surfaces.
@@ -1654,7 +1654,7 @@ class TestMCNPInput(unittest.TestCase):
         self.sys.add_cell(graveyard)
 
         # Add source, tallies to simulation.
-        self.sim.add_misc(cards.ScatteringLaw('UO2', {'H1': 'lwtr'}))
+        self.sim.add_misc(cards.ScatteringLaw('H2O', {'H1': 'lwtr'}))
         self.sim.add_source(cards.Criticality())
         self.sim.add_source(cards.CriticalityPoints())
         self.sim.add_tally(cards.CellFlux('flux', 'neutron', [fuel, coolant]))
@@ -1663,17 +1663,21 @@ class TestMCNPInput(unittest.TestCase):
 
         # Create input file.
         inp = inputfile.MCNPInput(self.sim, heading="Infinite lattice.")
-        inp.write(fname)
+        inp.write(fname + '_default')
         # Check against text file.
-        #self.assertEquals(
-        #        open('simplesim_inflattice_default').readlines(),
-        #        open('simplesim_inflattice_default_compare').readlines())
+        self.assertEquals(
+                open(fname + '_default').readlines(),
+                open(fname + '_default_compare').readlines())
+        os.unlink(fname + '_default')
 
         # Test the & line continuation.
-        # TODO
-        #inp = inputfile.MCNPInput(self.sim, cont_by_amp=True)
-        #inp.write('simplesim_inflattice')
-        #os.unlink(fname)
+        inp = inputfile.MCNPInput(self.sim, heading="Infinite lattice.",
+                cont_by_amp=True)
+        inp.write(fname + '_amp')
+        self.assertEquals(
+                open(fname + '_amp').readlines(),
+                open(fname + '_amp_compare').readlines())
+        os.unlink(fname + '_amp')
 
     #@mock.patch_object(warnings, 'warn')
     def test_bypass_wrap(self): #, mock_warn):
