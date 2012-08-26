@@ -1700,8 +1700,23 @@ class TestMCNPInput(unittest.TestCase):
         os.unlink(fname)
 
     def test_user_card(self):
-        # TODO
-        pass
+        """Tests the functionality that a user can add their own card."""
+
+        fname = 'simplesim_user'
+        inp = inputfile.MCNPInput(self.sim, float_format="%.5e", title="1")
+        inp.add_user_card('cell', '11 0 -5 IMP:N=0', comment='Graveyard.')
+        inp.add_user_literal('cell', 'M1 1001 1\n     8016 2')
+        inp.add_user_card('surface', '11 0 -5 IMP:N=0', comment='Graveyard.')
+        inp.add_user_literal('surface', 'M1 1001 1\n     8016 2')
+        inp.add_user_card('data', '11 0 -5 IMP:N=0', comment='Graveyard.')
+        inp.add_user_literal('data', 'M1 1001 1\n     8016 2')
+        inp.write(fname + '_first')
+        self.assertEquals(
+                open(fname + '_first').readlines(),
+                open(fname + '_first_compare').readlines())
+        os.unlink(fname + '_first')
+        
+
 
 
 
