@@ -9,7 +9,7 @@ from pyne import material
 from pyne.simplesim import definition, cards, inputfile
 
 # TODO test the exception that setting a name to '' is not aight.
-
+# TODO use assertRaisesRegexp
 
 class TestCells(unittest.TestCase):
     """Tests the :py:class:`cards.Cell` class and its subclasses, all of which
@@ -121,16 +121,16 @@ class TestSystemDefinition(unittest.TestCase):
         self.assertEquals(cyl.name, 'mycyl')
         self.assertEquals(cyl.cartesian_axis, 'z')
         self.assertEquals(cyl.radius, 0.4)
-        self.assertIsNone(cyl.reflecting)
-        self.assertIsNone(cyl.white)
+        self.assertFalse(cyl.reflecting)
+        self.assertFalse(cyl.white)
         # Set reflecting.
         cyl = cards.AxisCylinder('mycyl', 'z', 0.4, reflecting=True)
         self.assertEquals(cyl.reflecting, True)
-        self.assertIsNone(cyl.white)
+        self.assertFalse(cyl.white)
         # Set white.
         cyl = cards.AxisCylinder('mycyl', 'z', 0.4, white=True)
-        self.assertIsNone(cyl.reflecting)
-        self.assertEquals(cyl.white, True)
+        self.assertFalse(cyl.reflecting)
+        self.assertTrue(cyl.white)
         # Set reflecting and white.
         self.assertRaises(ValueError, cards.AxisCylinder, 'mycyl', 'z', 0.4,
                 reflecting=True, white=True)
@@ -254,14 +254,14 @@ class TestSystemDefinition(unittest.TestCase):
         self.assertEquals(plane.position, 3)
         # test_AxisCylinder() checks these booleans more thoroughly.
         self.assertEquals(plane.reflecting, True)
-        self.assertIsNone(plane.white)
+        self.assertFalse(plane.white)
 
         ## comment()
         self.assertEquals(plane.comment(), "Axis plane 'myplane': x = 3 cm.")
 
         ## mcnp()
         self.sim.sys.add_surface(plane)
-        self.assertEquals(plane.mcnp('%g', self.sim), "3 PX  3")
+        self.assertEquals(plane.mcnp('%g', self.sim), "*3 PX  3")
 
         ## shift()
         plane = cards.AxisPlane('myplane', 'x', 3)
@@ -320,7 +320,7 @@ class TestSystemDefinition(unittest.TestCase):
         ## mcnp()
         self.sim.sys.add_surface(pp)
         self.assertEquals(pp.mcnp('% g', self.sim), 
-                "3 RPP -2  3  -4  5  -6  7")
+                "*3 RPP -2  3  -4  5  -6  7")
 
         ## shift()
         pp.shift([2, 1, -1])
@@ -1594,73 +1594,84 @@ class TestSimulationDefinition(unittest.TestCase):
 class TestMCNPInput(unittest.TestCase):
 
     def setUp(self):
-        self.sys = definition.SystemDefinition()
-        self.sim = definition.MCNPSimulation(self.sys)
+        self.sys = definition.SystemDefinition(verbose=False)
+        self.sim = definition.MCNPSimulation(self.sys, verbose=False)
 
     def tearDown(self):
         #os.unlink('inptest')
         pass
 
-#    def test_InfLattice(self):
-#        """Tests the input file for an infinite lattice reactor. Checks
-#        generated output against the text file `inflattice_compare`.
-#
-#        """
-#        # Define system.
-#        # Materials.
-#        uo2 = cards.Material(name='UO2')
-#        uo2.from_atom_frac({'U235': 0.05,
-#                            'U238': 0.95,
-#                            'O16' : 2.00})
-#        h2o = cards.Material(name='H1')
-#        h2o.from_atom_frac({'H1' : 2.0,
-#                            'O16': 1.0})
-#        # Surfaces.
-#        radius = 0.40
-#        pin = cards.AxisCylinder('pin', 'X', radius)
-#        pitch = 1.2
-#        cellbound = cards.Parallelepiped('bound',
-#                -pitch / 2, pitch / 2, -pitch / 2, pitch / 2, 0, 0,
-#                reflecting=True)
-#        # Cells.
-#        fuel = cards.CellMCNP('fuel', pin.neg, uo2,
-#                11.0, 'g/cm^3',
-#                importance=('neutron', 1))
-#        coolant = cards.CellMCNP('coolant', pin.pos & cellbound.neg, h2o,
-#                1.0, 'g/cm^3',
-#                importance=('neutron', 1))
-#        graveyard = cards.CellMCNP('graveyard', cellbound.pos,
-#                importance=('neutron', 0))
-#
-#        # Add cells to the system.
-#        self.sys.add_cell(fuel)
-#        self.sys.add_cell(coolant)
-#        self.sys.add_cell(graveyard)
-#
-#        # Add source, tallies to simulation.
-#        self.sim.add_source(cards.Criticality())
-#        self.sim.add_source(cards.CriticalityPoints())
-#        self.sim.add_tally(cards.CellFlux('flux', 'neutron', [fuel, coolant]))
-#        self.sim.add_misc(cards.EnergyGrid('egrid0', None,
-#                10**np.arange(-9.9, 1.1, 0.1)))
-#
-#        # Create input file.
-#        inp = inputfile.MCNPInput(self.sim)
-#        inp.write('simplesim_inflattice_default')
-#        # Check against text file.
-#        #self.assertEquals(
-#        #        open('simplesim_inflattice_default').readlines(),
-#        #        open('simplesim_inflattice_default_compare').readlines())
-#
-#        # Test the & line continuation.
-#        # TODO
-#        #inp = inputfile.MCNPInput(self.sim, cont_by_amp=True)
-#        #inp.write('simplesim_inflattice')
-#    def test_bypass_wrap(self):
-#        # TODO expecting a warning.
-#        self.sim.add_source(cards.CriticalityPoints([[np.pi, np.pi, 0]]))
-#        inp = inputfile.MCNPInput(self.sim, float_format="%.50e")
-#        inp.write('simplesim_bypass_wrap')
+    def test_InfLattice(self):
+        """Tests the input file for an infinite lattice reactor. Checks
+        generated output against the text file `inflattice_compare`.
+
+        """
+        fname = 'simplesim_inflattice'
+
+        # Define system.
+        # Materials.
+        uo2 = cards.Material(name='UO2')
+        uo2.from_atom_frac({'U235': 0.05,
+                            'U238': 0.95,
+                            'O16' : 2.00})
+        h2o = cards.Material(name='H1')
+        h2o.from_atom_frac({'H1' : 2.0,
+                            'O16': 1.0})
+        # Surfaces.
+        radius = 0.40
+        pin = cards.AxisCylinder('pin', 'X', radius)
+        pitch = 1.2
+        cellbound = cards.Parallelepiped('bound',
+                -pitch / 2, pitch / 2, -pitch / 2, pitch / 2, 0, 0,
+                reflecting=True)
+        # Cells.
+        fuel = cards.CellMCNP('fuel', pin.neg, uo2,
+                11.0, 'g/cm^3',
+                importance=('neutron', 1),
+                volume=1)
+        coolant = cards.CellMCNP('coolant', pin.pos & cellbound.neg, h2o,
+                1.0, 'g/cm^3',
+                importance=('neutron', 1),
+                volume=1)
+        graveyard = cards.CellMCNP('graveyard', cellbound.pos,
+                importance=('neutron', 0))
+
+        # Add cells to the system.
+        self.sys.add_cell(fuel)
+        self.sys.add_cell(coolant)
+        self.sys.add_cell(graveyard)
+
+        # Add source, tallies to simulation.
+        self.sim.add_misc(cards.ScatteringLaw('UO2', {'H1': 'lwtr'}))
+        self.sim.add_source(cards.Criticality())
+        self.sim.add_source(cards.CriticalityPoints())
+        self.sim.add_tally(cards.CellFlux('flux', 'neutron', [fuel, coolant]))
+        self.sim.add_misc(cards.EnergyGrid('egrid0', None,
+                10**np.arange(-9.9, 1.1, 0.1)))
+
+        # Create input file.
+        inp = inputfile.MCNPInput(self.sim, heading="Infinite lattice.")
+        inp.write(fname)
+        # Check against text file.
+        #self.assertEquals(
+        #        open('simplesim_inflattice_default').readlines(),
+        #        open('simplesim_inflattice_default_compare').readlines())
+
+        # Test the & line continuation.
+        # TODO
+        #inp = inputfile.MCNPInput(self.sim, cont_by_amp=True)
+        #inp.write('simplesim_inflattice')
+        #os.unlink(fname)
+
+    #@mock.patch_object(warnings, 'warn')
+    def test_bypass_wrap(self): #, mock_warn):
+        # TODO expecting a warning.
+        fname = 'simplesim_bypass_wrap'
+        self.sim.add_source(cards.CriticalityPoints([[np.pi, np.pi, 0]]))
+        inp = inputfile.MCNPInput(self.sim, float_format="%.50e")
+        inp.write(fname)
+        #self.assertTrue(mock_warn.called)
+        os.unlink(fname)
 
 
 ## The following tests are redundant, but are to make sure that the examples in

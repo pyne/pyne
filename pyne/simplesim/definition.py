@@ -154,14 +154,15 @@ class SystemDefinition(IDefinition):
     def _add_unique_surfaces(self, regionleaf):
         name = regionleaf.surface.name
         if self.verbose:
-            print "Trying to add surface %s..." % name
+            print "Trying to add surface {0!r}...".format(name)
         if name not in self.surfaces:
             self.add_surface(regionleaf.surface)
             if self.verbose:
-                print "Surface %s added successfully." % name
+                print "  Surface {0!r} added successfully.".format(name)
         else:
             if self.verbose:
-                print "Surface %s already exists in the definition." % name
+                print ("  Surface {0!r} already exists in the "
+                        "definition.".format(name))
 
     def add_material(self, material):
         """This method is only used by the user for materials that are not on a

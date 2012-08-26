@@ -47,7 +47,7 @@ class IInputFile(object):
     """
     __metaclass__ = abc.ABCMeta
 
-    def __init__(self, simdef, comments=True, header=None, plug=True,
+    def __init__(self, simdef, comments=True, heading=None, plug=True,
                  float_format="% .5g"):
         """
 
@@ -61,7 +61,7 @@ class IInputFile(object):
         """
         self.sim = simdef
         self.comments = comments
-        self.header = header
+        self.heading = heading
         self.plug = plug
         self.float_format = float_format
 
@@ -109,7 +109,7 @@ class MCNPInput(IInputFile):
     """Contains a write method for each type of surface.
     """
     # TODO user can overload commenting methods
-    def __init__(self, simdef, comments=True, header=None,
+    def __init__(self, simdef, comments=True, heading=None,
             description=None, plug=True, float_format="% .5g",
             cont_by_amp=True):
         """
@@ -119,7 +119,7 @@ class MCNPInput(IInputFile):
         """
         # TODO could cleanup keyword arguments wiht **kwarg.
         # Be careful with the order of inputs here for the kwargs.
-        super(MCNPInput, self).__init__(simdef, comments, header,
+        super(MCNPInput, self).__init__(simdef, comments, heading,
                 plug, float_format)
         self.description = description
         self.cont_by_amp = cont_by_amp
@@ -146,8 +146,8 @@ class MCNPInput(IInputFile):
 
     def _write_subclass(self):
         # Header
-        if self.header:
-            self._write_comment(self.header)
+        if self.heading:
+            self._write_comment(self.heading)
         else:
             # MCNP files need a first 'comment' line.
             self._write_comment("datetime: %s" % str(datetime.datetime.now()))
@@ -225,15 +225,16 @@ class MCNPInput(IInputFile):
 
     def _write_card(self, card):
         string = card.mcnp(self.float_format, self.sim)
-        if card._bypass_wrap:
+        if card.bypass_wrap:
             # Check that the number of characters between any two newlines is
             # not greater than 80. Got this line of code from activestate.com.
-            starts = [match.start() for match in re.finditer('\n', string)]
+            starts = [0]
+            starts += [match.start() for match in re.finditer('\n', string)]
             # Account for the fact that the string does not end in a newline.
             starts += [len(string) - 1]
             if (np.diff(np.array(starts)) > 79).any():
                 warnings.warn("Card {0} contains lines longer than "
-                        "80 columns.".format(card.name))
+                        "79 columns.".format(card.name))
             self.fid.writelines(string)
         else:
             strlist = self.cardwrap.wrap(string)
