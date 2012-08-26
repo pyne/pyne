@@ -56,6 +56,10 @@ the module.
 # altunits printed in comments, and described in detector documentation. check
 # mcnpx for altunits and +/* flags.
 # TODO names can be unique to tally type even.
+# TODO for read/writing, using repr makes recreating really easy; otherwise
+# decoding would take some effort. repr also means that i probably should use
+# name referencing everywhere, not object passing. however using json() would
+# create something more human-readable.
 
 import abc
 import collections
@@ -102,6 +106,7 @@ class ICard(object):
         self.bypass_wrap = bypass_wrap
 
     def __str__(self):
+        # TODO Do we actually want to do this?
         return self.comment()
 
     # All subclasses must define a comment() method.
@@ -110,12 +115,14 @@ class ICard(object):
         """All cards define a comment describing the content of the card."""
         raise NotImplementedError
 
-    # TODO
-    #@abc.abstractmethod
     def mcnp(self, float_format, sim):
         # sim is an instance of
         # :py:class:`pyne.simplesim.definition.SimulationDefinition`.
         raise NotImplementedError("Card {0}.".format(self.name))
+
+    def json(self):
+        # return self.__repr__()
+        return self.__dict__
 
     @property
     def name(self):
