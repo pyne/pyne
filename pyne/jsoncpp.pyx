@@ -216,13 +216,24 @@ cdef class Value(object):
             raise TypeError("JSON Value has no length")
 
     def __str__(self):
-        cdef const_char * s = NULL
-        if self._inst.isString():
-            s = self._inst.asCString()
+        cdef StyledWriter sw = StyledWriter()
+        cdef std_string s = sw.write(self)
+        pys = str(s)
+        if (self._inst.type() == cpp_jsoncpp.stringValue):
+            pys = pys[1:-2]
         else:
-            # FIXME: add writer here
-            s = "Nothing here yet!"
-        return s
+            pys = pys[:-1]
+        return pys
+
+    def __repr__(self):
+        cdef FastWriter fw = FastWriter()
+        cdef std_string s = fw.write(self)
+        pys = str(s)
+        if (self._inst.type() == cpp_jsoncpp.stringValue):
+            pys = pys[1:-2]
+        else:
+            pys = pys[:-1]
+        return pys
 
     def __float__(self):
         if self._inst.isNumeric():
@@ -421,7 +432,7 @@ cdef class Value(object):
         return self
 
 
-cdef class Reader:
+cdef class Reader(object):
     def __cinit__(self):
         """Reader C++ constuctor."""
         self._inst = new cpp_jsoncpp.Reader()
@@ -453,3 +464,57 @@ cdef class Reader:
         cdoc = pydoc
         self._inst.parse(cdoc, root._inst[0], collect_comments)
         return root
+
+
+cdef class FastWriter(object):
+    def __cinit__(self):
+        """Fast writer C++ constuctor."""
+        self._inst = new cpp_jsoncpp.FastWriter()
+
+    def __dealloc__(self):
+        """Fast writer C++ destructor."""
+        del self._inst
+
+    def enable_yaml_compatibility(self):
+        """Enables YAML compatability for output."""
+        self._inst.enableYAMLCompatibility()
+
+    def write(self, value):
+        """Writes a value out to a compact, not human-readable JSON string.
+
+        Parameters
+        ----------
+        value : Value or anything Value-convertable
+
+        Returns
+        -------
+        s : str
+
+        """
+        cdef std_string s = self._inst.write(deref(tocppval(value)))
+        return s
+
+
+cdef class StyledWriter(object):
+    def __cinit__(self):
+        """Styled writer C++ constuctor."""
+        self._inst = new cpp_jsoncpp.StyledWriter()
+
+    def __dealloc__(self):
+        """Styled writer C++ destructor."""
+        del self._inst
+
+    def write(self, value):
+        """Writes a value out to a human-readable JSON string.
+
+        Parameters
+        ----------
+        value : Value or anything Value-convertable
+
+        Returns
+        -------
+        s : str
+
+        """
+        cdef std_string s = self._inst.write(deref(tocppval(value)))
+        return s
