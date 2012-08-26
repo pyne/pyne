@@ -1456,7 +1456,7 @@ class TestSystemDefinition(unittest.TestCase):
         self.sim.add_tally(tally)
         self.assertEquals(tally.mcnp('%5g', self.sim), 
                 "+F18:H,E  1 2 T")
-        print "HEYY"
+
         ## PointDetector
         det = cards.PointDetector('point', 'neutron', [0, 0, 0], 0, 'cm')
         self.assertEquals(det.name, 'point')
@@ -1467,6 +1467,9 @@ class TestSystemDefinition(unittest.TestCase):
         self.assertEquals(det.comment(), "Point detector tally 'point' of "
                 "neutrons: point (0, 0, 0) cm, "
                 "radius 0 cm; direct contrib is separate.")
+        # mcnp()
+        self.sim.add_tally(det)
+        self.assertEquals(det.mcnp('%.5g', self.sim), "F15:N  0 0 0 0")
         det = cards.PointDetector('point', 'neutron', np.array([1, 2, 3]), 4,
                 'cm')
         self.assertTrue((det.detectors[0].pos == np.array([1, 2, 3])).all())
