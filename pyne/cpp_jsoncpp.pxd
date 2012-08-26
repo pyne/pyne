@@ -80,3 +80,13 @@ cdef extern from "json/json.h" namespace "Json":
         Reader() except +
         bint parse(std_string, Value) except +
         bint parse(std_string, Value, bint) except +
+
+    cdef cppclass FastWriter:
+        FastWriter() except +
+        void enableYAMLCompatibility() except +
+        std_string write(Value &)
+
+    cdef cppclass StyledWriter:
+        StyledWriter() except +
+        std_string write(Value &)
+
