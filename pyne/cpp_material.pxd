@@ -4,6 +4,7 @@ from libcpp.set cimport set
 
 cimport std
 
+cimport cpp_jsoncpp 
 
 cdef extern from "material.h" namespace "pyne":
     # Cython does not allow for typdef'ing tamplated types :( 
@@ -27,6 +28,7 @@ cdef extern from "material.h" namespace "pyne":
         double mass
         std.string name
         double atoms_per_mol
+        cpp_jsoncpp.Value attrs
 
         # Methods
         void norm_comp() except +
