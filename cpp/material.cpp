@@ -508,6 +508,7 @@ pyne::Material::Material()
   mass = -1.0;
   name = std::string("");
   atoms_per_mol = -1.0;
+  attrs = Json::Value(Json::objectValue);
 }
 
 
