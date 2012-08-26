@@ -6,8 +6,6 @@
 
 Below is the reference for this module.
 
-
-
 This module employs the modules `reactordef` and `material` to generate
 plaintext input files for a general code. Support is provided for MCNPX, and
 support for Serpent is not complete but should be straightforward. The
@@ -39,6 +37,8 @@ import warnings
 
 import numpy as np
 
+from pyne.simplesim import definition, cards
+
 class IInputFile(object):
     """Abstract base class for classes that take system and option definitions
     to create an input file for a certain code (e.g. MCNPX, Serpent, MCODE,
@@ -47,28 +47,40 @@ class IInputFile(object):
     """
     __metaclass__ = abc.ABCMeta
 
-    def __init__(self, simdef, comments=True, heading=None, plug=True,
-                 float_format="% .5g"):
+    def __init__(self, simdef, comments=True, title=None, plug=True,
+                 float_format="% .5g", *args, **kwargs):
         """
 
         Parameters
         ----------
-        simdef: :py:class:`SimulationDefinition` or subclass.
-            TODO
+        simdef: :py:class:`definition.SimulationDefinition` or subclass.
+            The simulation for which the user desires an input file.
         comments : bool, optional
-            TODO
+            Display comments along with cards. The comments are rather long.
+        title : str, optional
+            A short (one line) title for the input.
+        plug : bool, optional
+            Prints a plug for PyNE somewhere in the input file =p. 
+        float_format : str, optional
+            The format with which floating point numbers should be printed.
+            Uses familiar ``sprintf`` style format specifications that is
+            common in many languages.
 
         """
+        super(IInputFile, self).__init__()
         self.sim = simdef
         self.comments = comments
-        self.heading = heading
+        self.title = title
         self.plug = plug
         self.float_format = float_format
 
     def write(self, fname):
         """
+        Parameters
+        ----------
         fname : str
             Filename/path at which to create the input file.
+
         """
         self.fname = fname
         self.set_up()
@@ -97,11 +109,11 @@ class IInputFile(object):
         return NotImplementedError
 
     @abc.abstractmethod
-    def add_user_card(self, block, card, comment=None):
+    def add_user_card(self, *args):
         return NotImplementedError
 
     @abc.abstractmethod
-    def add_user_card_literal(self, block, string):
+    def add_user_literal(self, *args):
         return NotImplementedError
 
 
@@ -109,18 +121,32 @@ class MCNPInput(IInputFile):
     """Contains a write method for each type of surface.
     """
     # TODO user can overload commenting methods
-    def __init__(self, simdef, comments=True, heading=None,
-            description=None, plug=True, float_format="% .5g",
-            cont_by_amp=False):
+    def __init__(self, simdef, description=None, cont_by_amp=False, **kwargs):
         """
+        simdef : :py:class:`definition.MCNPSimulation`
+            See :py:class:`IInputFile`. This cannot be a
+            :py:class:`definition.SimulationDefinition`.
+        description : str, optional
+            An arbitrarily long commented description placed after the title
+            but before any cards.
         cont_by_amp : bool, optional
-
+            In MCNP, line continuation for lines with more than 80 characters
+            can be achieved via 5 or more spaces on subsequent lines or by
+            appending an ampersand (&) before the continued line.
+        comments : bool, optional
+            See :py:class:`IInputFile`.
+        title : str, optional
+            See :py:class:`IInputFile`. If not provided, the title defaults to
+            a datetime string.
+        plug : bool, optional
+            See :py:class:`IInputFile`.
+        float_format : str, optional
+            See :py:class:`IInputFile`.
 
         """
         # TODO could cleanup keyword arguments wiht **kwarg.
         # Be careful with the order of inputs here for the kwargs.
-        super(MCNPInput, self).__init__(simdef, comments, heading,
-                plug, float_format)
+        super(MCNPInput, self).__init__(simdef, **kwargs)
         self.description = description
         self.cont_by_amp = cont_by_amp
         # Comment wrapping.
@@ -143,14 +169,23 @@ class MCNPInput(IInputFile):
                     #initial_indent=2 * ' ',
                     subsequent_indent=5 * ' ')
             self._card_end_line = '\n'
+        # User cards.
+        self.user_cards_cell = []
+        self.user_cards_surface = []
+        self.user_cards_data = []
+        self.user_literal_cell = []
+        self.user_literal_surface = []
+        self.user_literal_data = []
 
     def _write_subclass(self):
         # Header
-        if self.heading:
-            self._write_comment(self.heading)
+        if self.title:
+            if len(self.title) > 80:
+                raise ValueError("MCNP titles must be less than 80 chars.")
+            self.fid.write(self.title + '\n')
         else:
             # MCNP files need a first 'comment' line.
-            self._write_comment("datetime: %s" % str(datetime.datetime.now()))
+            self.fid.write("datetime: %s\n" % str(datetime.datetime.now()))
         if self.description:
             self._write_comment(self.description)
         self._write_plug()
@@ -190,13 +225,26 @@ class MCNPInput(IInputFile):
                 self._write_comment()
 
     def add_user_card(self, block, card, comment=None):
-        # TODO
-        # use textwrap
-        pass
+        """
+        Parameters
+        ----------
 
+        Examples
+        --------
 
-    def add_user_card_literal(self, block, string):
-        # TODO
+        """
+        # Uses textwrap
+        self.user_cards
+
+    def add_user_literal(self, block, string):
+        """
+        Parameters
+        ----------
+
+        Examples
+        --------
+
+        """
         pass
 
     def _write_plug_subclass(self, string):
