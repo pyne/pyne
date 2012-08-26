@@ -50,7 +50,6 @@ class IInputFile(object):
     def __init__(self, simdef, comments=True, title=None, plug=True,
                  float_format="% .5g", *args, **kwargs):
         """
-
         Parameters
         ----------
         simdef: :py:class:`definition.SimulationDefinition` or subclass.
@@ -118,11 +117,15 @@ class IInputFile(object):
 
 
 class MCNPInput(IInputFile):
-    """Contains a write method for each type of surface.
+    """An input file for MCNP. To write the file, call :py:meth:`write`. The
+    user can modify the format of the input file by subclassing this class and
+    overloading the _write_ methods.
+
     """
-    # TODO user can overload commenting methods
     def __init__(self, simdef, description=None, cont_by_amp=False, **kwargs):
         """
+        Parameters
+        ----------
         simdef : :py:class:`definition.MCNPSimulation`
             See :py:class:`IInputFile`. This cannot be a
             :py:class:`definition.SimulationDefinition`.
@@ -144,8 +147,6 @@ class MCNPInput(IInputFile):
             See :py:class:`IInputFile`.
 
         """
-        # TODO could cleanup keyword arguments wiht **kwarg.
-        # Be careful with the order of inputs here for the kwargs.
         super(MCNPInput, self).__init__(simdef, **kwargs)
         self.description = description
         self.cont_by_amp = cont_by_amp
@@ -169,13 +170,92 @@ class MCNPInput(IInputFile):
                     #initial_indent=2 * ' ',
                     subsequent_indent=5 * ' ')
             self._card_end_line = '\n'
-        # User cards.
-        self.user_cards_cell = []
-        self.user_cards_surface = []
-        self.user_cards_data = []
-        self.user_literal_cell = []
-        self.user_literal_surface = []
-        self.user_literal_data = []
+        # User cards. comments:
+        self.user_cell_comm = []
+        self.user_surface_comm = []
+        self.user_data_comm = []
+        # cards:
+        self.user_cell_cards = []
+        self.user_surface_cards = []
+        self.user_data_cards = []
+        # literal:
+        self.user_cell_literal = []
+        self.user_surface_literal = []
+        self.user_data_literal = []
+
+    def add_user_card(self, block, card, comment=None):
+        """It is possible that the user wants to insert a card for which there
+        is no :py:class:`ICard`. The user can supply such cards with this
+        method or with :py:meth:`add_user_literal`. This method allows the user
+        to supply a comment along with the card, and automatically wraps the
+        card if it is longer than 80 characters. Any number of cards can be
+        added to a block, and they are placed at the end of the block, but
+        before text added by :py:class:`add_user_literal`. Cards are printed in
+        the order they are added.
+
+        Parameters
+        ----------
+        block : str
+            The block to which the user desires to add a card. Either 'cell',
+            'surface', or 'data'.
+        card : str
+            The card, including the card number.
+        comment : str, optional
+            A comment placed before the card.
+
+        Examples
+        --------
+        The following shows how the user can provide a cell card::
+
+            inp.add_user_card('cell', '11 0 -5 IMP:N=0', comment='Graveyard.')
+
+        """
+        if block == 'cell':
+            self.user_cell_comm += [comment]
+            self.user_cell_cards += [card]
+        elif block == 'surface':
+            self.user_surface_comm += [comment]
+            self.user_surface_cards += [card]
+        elif block == 'data':
+            self.user_data_comm += [comment]
+            self.user_data_cards += [card]
+        else:
+            raise ValueError("The input ``block`` must be 'cell', 'surface', "
+                    "or 'data'. User provided {0!r}.".format(block))
+
+    def add_user_literal(self, block, string):
+        """This method is used instead of :py:meth:`add_user_card` if line
+        wrapping is not desired, such as if the user wants to specify a
+        multi-line card on their own. This can also be used by the user to
+        provide comments. A newline is appended to the end of the
+        string. Any number of cards can be added to a block, and they are
+        placed after `:py:class:`add_user_card` cards. Cards are printed in
+        the order they are added.
+
+        Parameters
+        ----------
+        block : str
+            The block to which the user desires to add a card. Either 'cell',
+            'surface', or 'data'.
+        string : str
+            The card, possibly including newlines.
+
+        Examples
+        --------
+        In this case, line wrapping is `not` automatically performed::
+
+            inp.add_user_literal('data', 'M1 1001 1\n     8016 2')
+
+        """
+        if block == 'cell':
+            self.user_cell_literal += [string]
+        elif block == 'surface':
+            self.user_surface_literal += [string]
+        elif block == 'data':
+            self.user_data_literal += [string]
+        else:
+            raise ValueError("The input ``block`` must be 'cell', 'surface', "
+                    "or 'data'. User provided {0!r}.".format(block))
 
     def _write_subclass(self):
         # Header
@@ -193,16 +273,23 @@ class MCNPInput(IInputFile):
         # Write cell cards.
         self._write_deck_heading("Cell")
         self._write_dictionary(self.sim.sys.cells)
+        # User cards.
+        self._write_user("cell", self.user_cell_comm, self.user_cell_cards)
+        self._write_user_literal("cell", self.user_cell_literal)
+
 
         # Write surface cards.
         self._new_line()
         self._write_deck_heading("Surface")
         self._write_dictionary(self.sim.sys.surfaces)
+        # User cards.
+        self._write_user("surface", self.user_surface_comm,
+                self.user_surface_cards)
+        self._write_user_literal("surface", self.user_surface_literal)
 
         # Write data cards.
         self._new_line()
         self._write_deck_heading("Data")
-        # TODO WWN card will not work with the card wrapper as it is....
         # Material cards.
         self._write_data_heading("Material")
         self._write_dictionary(self.sim.sys.materials)
@@ -215,6 +302,9 @@ class MCNPInput(IInputFile):
         # Misc cards.
         self._write_data_heading("Miscellaneous")
         self._write_dictionary(self.sim.misc)
+        # User cards.
+        self._write_user("data", self.user_data_comm, self.user_data_cards)
+        self._write_user_literal("data", self.user_data_literal)
 
     def _write_dictionary(self, dictionary):
         for key, card in dictionary.iteritems():
@@ -224,28 +314,19 @@ class MCNPInput(IInputFile):
             if self.comments:
                 self._write_comment()
 
-    def add_user_card(self, block, card, comment=None):
-        """
-        Parameters
-        ----------
+    def _write_user(self, block, comm, cards):
+        if len(comm) > 0:
+            self._write_comment("User {0} cards.".format(block))
+            for idx in range(len(comm)):
+                if comm[idx]: self._write_comment(comm[idx])
+                self._write_cardwrap(cards[idx])
+            self._new_line()
 
-        Examples
-        --------
-
-        """
-        # Uses textwrap
-        self.user_cards
-
-    def add_user_literal(self, block, string):
-        """
-        Parameters
-        ----------
-
-        Examples
-        --------
-
-        """
-        pass
+    def _write_user_literal(self, block, lit):
+        if len(lit) > 0:
+            self._write_comment("User literal {0} cards.".format(block))
+            for string in lit:
+                self.fid.write(string + '\n')
 
     def _write_plug_subclass(self, string):
         self._write_comment(string)
@@ -285,14 +366,16 @@ class MCNPInput(IInputFile):
                         "79 columns.".format(card.name))
             self.fid.writelines(string)
         else:
-            strlist = self.cardwrap.wrap(string)
-            counter = 0
-            for entry in strlist:
-                counter += 1
-                self.fid.write(entry)
-                if counter < len(strlist):
-                    self.fid.writelines(self._card_end_line)
+            self._write_cardwrap(string)
         self._new_line()
+
+    def _write_cardwrap(self, string):
+        strlist = self.cardwrap.wrap(string)
+        counter = 0
+        for entry in strlist:
+            counter += 1
+            self.fid.write(entry)
+            if counter < len(strlist): self.fid.write(self._card_end_line)
 
     def _new_line(self):
         self.fid.write('\n')
