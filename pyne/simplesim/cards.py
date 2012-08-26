@@ -78,7 +78,7 @@ class ICard(object):
     kelvin2kT = 8.6173423e-11
     secs2shakes = 1e+8
 
-    def __init__(self, name, unique=False, *args, **kwargs):
+    def __init__(self, name, unique=False, bypass_wrap=False, *args, **kwargs):
         """
         Parameters
         ----------
@@ -93,13 +93,13 @@ class ICard(object):
         # Somebody on the internet said to use super() even when only
         # subclassing from object.
         super(ICard, self).__init__()
-        self._unique = unique
-        if self._unique: self._name = name
+        self.unique = unique
+        if self.unique: self._name = name
         else:            self.name = name
         # The following can be set False in a subclass's constructor if
         # simplesim.inputfile classes should not attempt to wrap the output of
         # methods like mcnp().
-        self._bypass_wrap = False
+        self.bypass_wrap = bypass_wrap
 
     def __str__(self):
         return self.comment()
@@ -126,7 +126,7 @@ class ICard(object):
         if value.find(' ') != -1:
             raise ValueError("The property ``name`` cannot contain spaces. "
                     "User provided {0}.".format(value))
-        if self._unique:
+        if self.unique:
             raise StandardError("This is a unique card, meaning only one card"
                     " of this type can be found in a ``definition``. "
                     "Accordingly, the name is read-only.")
@@ -921,10 +921,9 @@ class Material(ICard, material.Material):
            h2o.from_atom_frac({10010: 1.0, 'O16': 2.0})
 
         """
-        super(Material, self).__init__(*args, **kwargs)
+        super(Material, self).__init__(*args, bypass_wrap=True, **kwargs)
         self.description = kwargs.get('description', None)
         self.tables = kwargs.get('tables', dict())
-        self._bypass_wrap = True
         # Find longest table ID. Used in card printing for prettiness.
 
     def comment(self): 
@@ -2019,9 +2018,9 @@ class CriticalityPoints(ISource):
 
         """
         super(CriticalityPoints, self).__init__('criticalitypoints',
-                                                unique=True)
+                                                unique=True,
+                                                bypass_wrap=True)
         self.points = points
-        self._bypass_wrap = True
 
     def comment(self):
         string = "Criticality points {0!r}:".format(self.name)
@@ -2768,7 +2767,8 @@ class IDetector(ITally):
             separately. Set to False to disable the separate printing. 
 
         """
-        super(IDetector, self).__init__(name, particle, **kwargs)
+        super(IDetector, self).__init__(name, particle, bypass_wrap=True,
+                                        **kwargs)
         self.detectors = []
         self.sep_direct = kwargs.get('sep_direct', True)
         self._args_per_set = args_per_set
@@ -2792,9 +2792,12 @@ class IDetector(ITally):
     @abc.abstractmethod
     def mcnp(self, float_format, sim, num, **kwargs):
         string = super(IDetector, self).mcnp(float_format, sim, num, **kwargs)
+                
         for det in self.detectors:
-            string += "  {0}".format(self._mcnp_unit(float_format, sim, det))
-        if self.sep_direct: string += " ND"
+            if det is self.detectors[0]: string += 1 * " "
+            else:                        string += "\n{0}".format(5 * " ")
+            string += self._mcnp_unit(float_format, sim, det)
+        if not self.sep_direct: string += " ND"
         return string
     
     @abc.abstractmethod
@@ -3004,6 +3007,9 @@ class RingDetector(IDetector):
             det.add(10.0, 2.0, 1.0, 'cm')
 
         """
+        if soe_units != 'cm' and soe_units != 'mfp':
+            return ValueError("The input ``soe_units`` must be 'cm' or "
+                    "'mfp'. User provided {0}.".format(soe_units))
         self.detectors += [self.Ring(position, radius, soe_radius, soe_units)]
 
     def comment(self):
@@ -3016,13 +3022,13 @@ class RingDetector(IDetector):
                     det.rad, det.soe_rad, det.soe_units))
 
     def mcnp(self, float_format, sim):
-        return super(PointDetector, self).mcnp(float_format, sim, 5,
+        return super(RingDetector, self).mcnp(float_format, sim, 5,
                 post=self.cartesian_axis.upper())
 
     def _mcnp_unit(self, float_format, sim, det):
         formatstr = "{0} {0} {0}".format(float_format)
-        return formatstr % (tuple(det.pos) + (det.rad, det.soe_rad * (
-            -1 if det.soe_units == 'mfp' else 1)))
+        return formatstr % (det.pos, det.rad, det.soe_rad * (
+            -1 if det.soe_units == 'mfp' else 1))
 
     @property
     def cartesian_axis(self): return self._cartesian_axis
