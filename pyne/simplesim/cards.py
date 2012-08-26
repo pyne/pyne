@@ -980,57 +980,6 @@ class MaterialMCNP(Material):
     pass
 
 
-class ScatteringLaw(ICard):
-    """Scattering law for a material. Unique card for a given material, with
-    name `scatlaw-<matname>`. In MCNP, this is the **MT** card.
-
-    .. inheritance-diagram:: pyne.simplesim.cards.ScatteringLaw
-
-    """
-    def __init__(self, mat_name, libraries):
-        """
-        Parameters
-        ----------
-        mat_name : str
-            Name of the material for which this card applies.
-        libraries : dict of :py:class:`nucname`: str pairs
-            The keys are the nuclides on the material for which a library is
-            being provided, and the values are the appropriate library
-            identifiers as strings.
-
-        Examples
-        --------
-        This specifies hydrogen bound in water, in MCNP::
-
-           h2o = Material(name='water')
-           h2o.from_atom_frac({10010: 1.0, 'O16': 2.0})
-           sys.add_material(h2o)
-           sl = ScatteringLaw('water', {'H1': 'lwtr.16t'})
-
-        """
-        super(ScatteringLaw, self).__init__('scatlaw-{0}'.format(mat_name))
-        self.mat_name = mat_name
-        self.libraries = libraries
-
-    def comment(self):
-        string = "Scattering law {0!r}:".format(self.name)
-        for nuc, lib in self.libraries.items():
-            string += " {0}: {1},".format(nucname.name(nuc), lib)
-        return string[:-1] + "."
-
-    def mcnp(self, float_format, sim):
-        string = "MT{0}".format(sim.sys.material_num(self.mat_name))
-        for nuc, lib in self.libraries.items():
-            string += " {0}".format(lib)
-        return string
-
-    @property
-    def libraries(self): return self._libraries
-
-    @libraries.setter
-    def libraries(self, value): self._libraries = value
-
-
 class ISurface(ICard):
     """This class is not used by the user. Abstract base class for all
     surface cards.
@@ -1048,7 +997,7 @@ class ISurface(ICard):
     # TODO support rotation.
     __metaclass__ = abc.ABCMeta
     
-    def __init__(self, name, reflecting, white, *args, **kwargs):
+    def __init__(self, name, reflecting=False, white=False, **kwargs):
         """
         Parameters
         ----------
@@ -1061,7 +1010,7 @@ class ISurface(ICard):
             cosine distribution with respect to the surface normal).
 
         """
-        super(ISurface, self).__init__(name, *args, **kwargs)
+        super(ISurface, self).__init__(name, **kwargs)
         self.reflecting = reflecting
         self.white = white 
         if self.reflecting and self.white:
@@ -1077,8 +1026,12 @@ class ISurface(ICard):
         if self.name not in sim.sys.surfaces:
             raise StandardError("Surface {0!r} not in simulation.".format(
                 self.name))
-        formatstr = "{{: <{0}d}} {1:<4}".format(
-                int(np.log10(len(sim.sys.surfaces))) + 1, keystring)
+        formatstr = "{0}{1}{{: <{2}d}} {3:<4}".format(
+                "*" if self.reflecting else "",
+                "+" if self.white else "",
+                int(np.log10(len(sim.sys.surfaces))) + 2 - \
+                    (self.reflecting or self.white),
+                keystring)
         return formatstr.format(sim.sys.surface_num(self.name))
 
     @abc.abstractmethod
@@ -1176,24 +1129,22 @@ class ISurface(ICard):
         return RegionLeaf(self, True)
     
     @property
-    def reflecting(self):
-        return self._reflecting
+    def reflecting(self): return self._reflecting
 
     @reflecting.setter
     def reflecting(self, value):
-        if value is not None and type(value) is not bool:
-            raise TypeError("The property ``reflecting`` must be None or of "
+        if type(value) is not bool:
+            raise TypeError("The property ``reflecting`` must be of "
                     "boolean type. User provided {0}.".format(value))
         self._reflecting = value
 
     @property
-    def white(self):
-        return self._white
+    def white(self): return self._white
 
     @white.setter
     def white(self, value):
-        if value is not None and type(value) is not bool:
-            raise TypeError("The property ``white`` must be None or of "
+        if type(value) is not bool:
+            raise TypeError("The property ``white`` must be of "
                     "boolean type. User provided {0}.".format(value))
         self._white = value
 
@@ -1208,7 +1159,7 @@ class IAxisSurface(ISurface):
     """
     __metaclass__ = abc.ABCMeta
 
-    def __init__(self, name, cartesian_axis, reflecting, white, *args, **kwargs):
+    def __init__(self, name, cartesian_axis, *args, **kwargs):
         """
         Parameters
         ----------
@@ -1223,8 +1174,7 @@ class IAxisSurface(ISurface):
             See :py:class:`ISurface`
 
         """
-        super(IAxisSurface, self).__init__(name, reflecting, white, *args,
-                                           **kwargs)
+        super(IAxisSurface, self).__init__(name, *args, **kwargs)
         self.cartesian_axis = cartesian_axis
 
     @abc.abstractmethod
@@ -1269,8 +1219,7 @@ class AxisCylinder(IAxisSurface):
     """
 
     # TODO if this is shifted, then it becomes not an axis-cylinder.
-    def __init__(self, name, cartesian_axis, radius,
-                 reflecting=None, white=None):
+    def __init__(self, name, cartesian_axis, radius, **kwargs):
         """
         Parameters
         ----------
@@ -1294,8 +1243,7 @@ class AxisCylinder(IAxisSurface):
             cyl = AxisCylinder('mycyl', 'z', 0.4)
 
         """
-        super(AxisCylinder, self).__init__(name, cartesian_axis, 
-                                           reflecting, white)
+        super(AxisCylinder, self).__init__(name, cartesian_axis, **kwargs)
         self.radius = radius
 
     def comment(self):
@@ -1417,8 +1365,7 @@ class AxisPlane(IAxisSurface):
     
     """
 
-    def __init__(self, name, cartesian_axis, position,
-                 reflecting=None, white=None):
+    def __init__(self, name, cartesian_axis, position, **kwargs):
         """
         Parameters
         ----------
@@ -1442,8 +1389,7 @@ class AxisPlane(IAxisSurface):
            plane = AxisPlane('myplane', 'x', 3, reflecting=True) 
 
         """
-        super(AxisPlane, self).__init__(name, cartesian_axis,
-                                    reflecting, white)
+        super(AxisPlane, self).__init__(name, cartesian_axis, **kwargs)
         self.position = position
     
     def comment(self):
@@ -1518,12 +1464,11 @@ class IMacrobody(ISurface):
     __metaclass__ = abc.ABCMeta
 
     # TODO abstract method for obtaining "sub"-surfaces.
-    def __init__(self, name, reflecting, white, *args, **kwargs):
+    def __init__(self, name, *args, **kwargs):
         """
 
         """
-        super(IMacrobody, self).__init__(name, reflecting, white, *args,
-                                         **kwargs)
+        super(IMacrobody, self).__init__(name, *args, **kwargs)
 
     @abc.abstractmethod
     def comment(self):
@@ -1541,8 +1486,7 @@ class Parallelepiped(IMacrobody):
     .. inheritance-diagram::pyne.simplesim.cards.Parallelepiped
 
     """
-    def __init__(self, name, xmin, xmax, ymin, ymax, zmin, zmax,
-                 reflecting=False, white=False):
+    def __init__(self, name, xmin, xmax, ymin, ymax, zmin, zmax, **kwargs):
         """
         Parameters
         ----------
@@ -1565,7 +1509,7 @@ class Parallelepiped(IMacrobody):
             pp = Parallelepiped('mypp', -2, 2, -2, 2, -2, 2)
 
         """
-        super(Parallelepiped, self).__init__(name, reflecting, white)
+        super(Parallelepiped, self).__init__(name, **kwargs)
         self.xlims = np.array([xmin, xmax])
         self.ylims = np.array([ymin, ymax])
         self.zlims = np.array([zmin, zmax])
@@ -1668,10 +1612,8 @@ class Cuboid(Parallelepiped):
     brevity.
 
     """
-    def __init__(self, name, xmin, xmax, ymin, ymax, zmin, zmax,
-                 reflecting=False, white=False):
-        super(Cuboid, self).__init__(name, xmin, xmax, ymin, ymax, zmin, zmax,
-                                     reflecting, white)
+    def __init__(self, *args, **kwargs):
+        super(Cuboid, self).__init__(*args, **kwargs)
 
 
 class IRegion(ICard):
@@ -1874,6 +1816,57 @@ class IMisc(ICard):
     @abc.abstractmethod
     def comment(self):
         raise NotImplementedError
+
+
+class ScatteringLaw(IMisc):
+    """Scattering law for a material. Unique card for a given material, with
+    name `scatlaw-<matname>`. In MCNP, this is the **MT** card.
+
+    .. inheritance-diagram:: pyne.simplesim.cards.ScatteringLaw
+
+    """
+    def __init__(self, mat_name, libraries):
+        """
+        Parameters
+        ----------
+        mat_name : str
+            Name of the material for which this card applies.
+        libraries : dict of :py:class:`nucname`: str pairs
+            The keys are the nuclides on the material for which a library is
+            being provided, and the values are the appropriate library
+            identifiers as strings.
+
+        Examples
+        --------
+        This specifies hydrogen bound in water, in MCNP::
+
+           h2o = Material(name='water')
+           h2o.from_atom_frac({10010: 1.0, 'O16': 2.0})
+           sys.add_material(h2o)
+           sl = ScatteringLaw('water', {'H1': 'lwtr.16t'})
+
+        """
+        super(ScatteringLaw, self).__init__('scatlaw-{0}'.format(mat_name))
+        self.mat_name = mat_name
+        self.libraries = libraries
+
+    def comment(self):
+        string = "Scattering law {0!r}:".format(self.name)
+        for nuc, lib in self.libraries.items():
+            string += " {0}: {1},".format(nucname.name(nuc), lib)
+        return string[:-1] + "."
+
+    def mcnp(self, float_format, sim):
+        string = "MT{0}".format(sim.sys.material_num(self.mat_name))
+        for nuc, lib in self.libraries.items():
+            string += " {0}".format(lib)
+        return string
+
+    @property
+    def libraries(self): return self._libraries
+
+    @libraries.setter
+    def libraries(self, value): self._libraries = value
 
 
 class ISource(ICard):
