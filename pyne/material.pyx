@@ -17,6 +17,10 @@ cimport cpp_material
 cimport pyne.stlconverters as conv
 import pyne.stlconverters as conv
 
+cimport cpp_jsoncpp
+cimport jsoncpp
+import jsoncpp
+
 cimport pyne.nucname as nucname
 import pyne.nucname as nucname
 import os
@@ -141,6 +145,17 @@ cdef class _Material:
 
         def __set__(self, double value):
             self.mat_pointer.atoms_per_mol = value
+
+    property attrs:
+        def __get__(self):
+            cdef jsoncpp.Value val = jsoncpp.Value(view=True)
+            val._inst = &self.mat_pointer.attrs
+            return val
+
+        def __set__(self, value):
+            cdef jsoncpp.Value val = jsoncpp.Value(value)
+            val._view = True
+            self.mat_pointer.attrs = deref(val._inst)
 
     #
     # Class Methods
