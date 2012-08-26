@@ -153,6 +153,40 @@ void pyne::Material::_load_comp_protocol1(hid_t db, std::string datapath, int ro
   delete[] mat_data;
   H5Tclose(str_attr);
   H5Tclose(str20);
+
+  //
+  // Get attrs from associated dataset, if available
+  //
+  std::string attrpath = datapath + "_attrs";
+  bool attrpath_exists = h5wrap::path_exists(db, attrpath);
+  if (!attrpath_exists)
+    return;
+
+  hid_t attrspace, attrtype, attrset, attrslab, attrmemspace;
+  int attrrank; 
+  hvl_t attrdata [1];
+
+  attrtype = H5Tvlen_create(H5T_NATIVE_CHAR);
+
+  // Get the attrs from the file
+  attrset = H5Dopen2(db, attrpath.c_str(), H5P_DEFAULT);
+  attrslab = H5Dget_space(attrset);
+  H5Sselect_hyperslab(attrslab, H5S_SELECT_SET, data_offset, NULL, data_count, NULL);
+  attrmemspace = H5Screate_simple(1, data_count, NULL);
+  H5Dread(attrset, attrtype, attrmemspace, attrslab, H5P_DEFAULT, attrdata);
+
+  // convert to in-memory JSON
+  Json::Reader reader;
+  reader.parse((char *) attrdata[0].p, (char *) attrdata[0].p+attrdata[0].len, attrs, false);
+  
+  // close attr data objects
+  H5Fflush(db, H5F_SCOPE_GLOBAL);
+  H5Dclose(attrset);
+  H5Sclose(attrspace);
+  H5Tclose(attrtype);
+
+  // Close out the HDF5 file
+  H5Fclose(db);
 };
 
 
