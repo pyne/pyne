@@ -229,6 +229,8 @@ class MCNPInput(IInputFile):
             # Check that the number of characters between any two newlines is
             # not greater than 80. Got this line of code from activestate.com.
             starts = [match.start() for match in re.finditer('\n', string)]
+            # Account for the fact that the string does not end in a newline.
+            starts += [len(string) - 1]
             if (np.diff(np.array(starts)) > 79).any():
                 warnings.warn("Card {0} contains lines longer than "
                         "80 columns.".format(card.name))
