@@ -379,9 +379,6 @@ void pyne::Material::write_hdf5(std::string filename, std::string datapath, std:
     delete[] data_fill_value;
   };
 
-  H5Dclose(data_set);
-  data_set = H5Dopen2(db, datapath.c_str(), H5P_DEFAULT);  
-
   // Get the data hyperslab
   data_hyperslab = H5Dget_space(data_set);
   hsize_t data_count[1] = {1};
@@ -418,7 +415,12 @@ void pyne::Material::write_hdf5(std::string filename, std::string datapath, std:
     attrrank = H5Sget_simple_extent_dims(attrspace, data_dims, data_max_dims);
 
     if (data_dims[0] <= row_num)
+    {
+      // row == -0, extend to data set so that we can append, or
+      // row_num is larger than current dimension, resize to accomodate.
+      data_dims[0] = row_num + 1;
       H5Dset_extent(attrset, data_dims);
+    }
     else if (data_dims[0] < 0)
       throw h5wrap::HDF5BoundsError();
 
@@ -445,8 +447,6 @@ void pyne::Material::write_hdf5(std::string filename, std::string datapath, std:
                          H5P_DEFAULT, attrsetparams, H5P_DEFAULT);
     H5Dset_extent(attrset, data_dims);
   };
-  H5Dclose(attrset);
-  attrset = H5Dopen2(db, attrpath.c_str(), H5P_DEFAULT);  
 
   // set the attr string
   hvl_t attrdata [1];
