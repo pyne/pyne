@@ -138,6 +138,7 @@ def test_hdf5_protocol_1():
 
     # Test material writing
     leu = Material({'U235': 0.04, 'U238': 0.96}, 4.2, "LEU", 1.0)
+    leu.attrs['comment'] = 'first light'
     leu.write_hdf5('proto1.h5', chunksize=10)
 
     for i in range(2, 11):
