@@ -18,6 +18,7 @@ import numpy as np
 
 from pyne import material
 from pyne.simplesim import cards
+from pyne import stlconverters
 
 class IDefinition(object):
     __metaclass__ = abc.ABCMeta
@@ -292,7 +293,7 @@ class SimulationDefinition(IDefinition):
     def save(self, fname):
         """Saves definition to a JSON file. It is unlikely that the class will
         be amenable to json.dump()."""
-        return
+        super(SimulationDefinition, self).save(fname)
 
     def _open(self, fname):
         pass
@@ -402,15 +403,21 @@ class DefinitionEncoder(json.JSONEncoder):
     # TODO circular reference issue.
     def default(self, obj):
         try:
-            if issubclass(obj, cards.ISurface):
+            if isinstance(obj, cards.ISurface):
                 # TODO something like this to get around the circular
                 # reference.
                 return obj.name
+            if isinstance(obj, material.Material):
+                return repr(obj)
             if hasattr(obj, '__dict__'):
                 print "a"
                 print type(obj)
                 print obj.__dict__
-                return obj.__dict__
+                mydict = obj.__dict__
+                for key, val in mydict.items():
+                    if isinstance(val, np.ndarray):
+                        mydict[key] = val.tolist()
+                return mydict
             if isinstance(obj, np.ndarray):
                 print "b"
                 print type(obj)
@@ -419,10 +426,9 @@ class DefinitionEncoder(json.JSONEncoder):
             #if isinstance(obj, cards.Cell) or issubclass(obj, cards.Cell):
             #    print "cell"
             #    return ''
-            else:
-                print "c"
-                print type(obj)
-                return json.JSONEncoder.default(self, obj)
+            print "c"
+            print type(obj)
+            return json.JSONEncoder.default(self, obj)
         except:
             print "exception: "
             print type(obj)
