@@ -2756,7 +2756,6 @@ class IDetector(ITally):
     tallies.
     
     """
-
     def __init__(self, name, particle, args_per_set, *args, **kwargs):
         """
         Parameters
@@ -2780,7 +2779,7 @@ class IDetector(ITally):
     @abc.abstractmethod
     def comment(self, name, post=None):
         string = super(IDetector, self).comment(name)
-        if post: string += " {0}".format(post)
+        if post: string += "{0}".format(post)
         counter = 0
         for det in self.detectors:
             counter += 1
@@ -3009,7 +3008,7 @@ class RingDetector(IDetector):
 
     def comment(self):
         return super(RingDetector, self).comment("Ring detector",
-                "along {0} axis.".format(self.cartesian_axis))
+                " along {0} axis.".format(self.cartesian_axis))
 
     def _comment_unit(self, det):
         return (" ring {0} = {1:g} cm, radius {2:g} cm, s.o.e. "
