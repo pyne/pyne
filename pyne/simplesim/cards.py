@@ -1636,12 +1636,10 @@ class IRegion(ICard):
     # __not__ operator and defining a complement boolean property that is set
     # by the __not__ operator.
     # TODO add transformation methods.
-    # TODO describe how parent works. it is not actually needed...
     __metaclass__ = abc.ABCMeta
 
     def __init__(self, name, *args, **kwargs):
         super(IRegion, self).__init__(name, *args, **kwargs)
-        self.parent = None
 
     @abc.abstractmethod
     def comment(self):
@@ -1655,7 +1653,6 @@ class IRegion(ICard):
             self = RegionOr(region.left_child, region.right_child, self.name)
         elif issubclass(region, RegionAnd):
             self = RegionAnd(region.left_child, region.right_child, self.name)
-        self.parent = region.parent
 
     def __and__(self, arg):
         return self.intersect(arg)
@@ -1695,14 +1692,6 @@ class IRegion(ICard):
             if or_func and isinstance(self, or_func):
                 or_func.im_func(or_func.im_func, self)
             self.right_child.walk(leaf_func)
-        
-    @property
-    def parent(self):
-        return self._parent
-
-    @parent.setter
-    def parent(self, value):
-        self._parent = value
 
 
 class IRegionBool(IRegion):
@@ -1716,8 +1705,6 @@ class IRegionBool(IRegion):
         super(IRegionBool, self).__init__(name, *args, **kwargs)
         self.left_child = left_child
         self.right_child = right_child
-        self.left_child.parent = self
-        self.right_child.parent = self
 
     @abc.abstractmethod
     def comment(self, midchar):
