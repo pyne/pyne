@@ -64,15 +64,17 @@ def test_mat3():
     assert_equal(mat.name, 'My Material')
 
 def test_mat4():
-    mat = Material({922350: 0.05, 922380: 0.95}, 15, "Dict Try")
+    mat = Material({922350: 0.05, 922380: 0.95}, 15, "Dict Try", attrs={'units': 'kg'})
     assert_equal(mat.comp, {922350: 0.05, 922380: 0.95})
     assert_equal(mat.mass, 15.0)
     assert_equal(mat.name, 'Dict Try')
+    assert_equal(mat.attrs['units'], 'kg')
 
 def test_from_text():
-    mat = Material()
+    mat = Material(attrs={'units': 'kg'})
     mat.from_text("mat.txt")
     assert_equal(mat.comp, {922350: 0.05, 922380: 0.95})
+    assert_equal(mat.attrs['units'], 'kg')
 
 
 def test_write_text():
