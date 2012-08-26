@@ -399,6 +399,7 @@ class DefinitionEncoder(json.JSONEncoder):
                 # reference.
                 return obj.name
             if isinstance(obj, material.Material):
+                # Issue with stlconverters.
                 return repr(obj)
             if hasattr(obj, '__dict__'):
                 mydict = obj.__dict__
