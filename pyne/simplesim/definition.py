@@ -401,24 +401,16 @@ class DefinitionEncoder(json.JSONEncoder):
             if isinstance(obj, material.Material):
                 return repr(obj)
             if hasattr(obj, '__dict__'):
-                print "a"
-                print type(obj)
-                print obj.__dict__
                 mydict = obj.__dict__
                 for key, val in mydict.items():
                     if isinstance(val, np.ndarray):
                         mydict[key] = val.tolist()
                 return mydict
             if isinstance(obj, np.ndarray):
-                print "b"
-                print type(obj)
-                print obj.tolist()
                 return obj.tolist()
             #if isinstance(obj, cards.Cell) or issubclass(obj, cards.Cell):
             #    print "cell"
             #    return ''
-            print "c"
-            print type(obj)
             return json.JSONEncoder.default(self, obj)
         except:
             print "exception: "
