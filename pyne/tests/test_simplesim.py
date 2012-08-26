@@ -131,6 +131,16 @@ class TestSystemDefinition(unittest.TestCase):
         cyl = cards.AxisCylinder('mycyl', 'z', 0.4, white=True)
         self.assertFalse(cyl.reflecting)
         self.assertTrue(cyl.white)
+        ## comment()
+        self.assertEquals(cyl.comment(),
+                "Axis cylinder 'mycyl': white. "
+                "aligned and centered on z axis, "
+                "with radius 0.4 cm (diameter 0.8 cm).")
+
+        ## mcnp()
+        self.sim.sys.add_surface(cyl)
+        self.assertEquals(cyl.mcnp('%g', self.sim), "+3 CZ  0.4")
+
         # Set reflecting and white.
         self.assertRaises(ValueError, cards.AxisCylinder, 'mycyl', 'z', 0.4,
                 reflecting=True, white=True)
@@ -158,7 +168,7 @@ class TestSystemDefinition(unittest.TestCase):
 
         ## mcnp()
         self.sim.sys.add_surface(cyl)
-        self.assertEquals(cyl.mcnp('%g', self.sim), "3 CX  0.4")
+        self.assertEquals(cyl.mcnp('%g', self.sim), "3  CX  0.4")
 
         ## shift()
         # z-aligned
@@ -257,7 +267,8 @@ class TestSystemDefinition(unittest.TestCase):
         self.assertFalse(plane.white)
 
         ## comment()
-        self.assertEquals(plane.comment(), "Axis plane 'myplane': x = 3 cm.")
+        self.assertEquals(plane.comment(), "Axis plane 'myplane': "
+                "reflecting. x = 3 cm.")
 
         ## mcnp()
         self.sim.sys.add_surface(plane)
@@ -314,6 +325,7 @@ class TestSystemDefinition(unittest.TestCase):
 
         ## comment()
         self.assertEquals(pp.comment(), "Parallelepiped 'mypp': "
+                "reflecting. "
                 "[-2, 3] x [-4, 5] x "
                 "[-6, 7] cm.")
 
@@ -1673,6 +1685,13 @@ class TestMCNPInput(unittest.TestCase):
         #self.assertTrue(mock_warn.called)
         os.unlink(fname)
 
+
+class TestModifying(unittest.TestCase):
+    """Ensures that the code is amenable to modifications made after initial
+    creation.
+    
+    """
+    pass
 
 ## The following tests are redundant, but are to make sure that the examples in
 # the documentation function as expected.
