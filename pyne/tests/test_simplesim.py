@@ -79,6 +79,12 @@ class TestSystemDefinition(unittest.TestCase):
         self.rxr.add_cell(self.graveyard)
         self.sim = definition.MCNPSimulation(self.rxr, verbose=False)
 
+    def test_Saving(self):
+        """Tests saving a system definition to a JSON file."""
+
+        self.sim.save('simplesim_sys.json')
+
+
     def test_Material(self):
         """Tests :py:class:`pyne.simplesim.cards.Material`."""
 
