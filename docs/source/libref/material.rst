@@ -25,7 +25,7 @@ The material class is presented below.  For more information please refer to :re
 **************
 Material Class
 **************
-.. autoclass:: Material(comp, mass=-1.0, name='', atoms_per_mol=-1.0)
+.. autoclass:: Material(comp, mass=-1.0, name='', atoms_per_mol=-1.0, attrs=None)
    :members:
    :inherited-members:
 
