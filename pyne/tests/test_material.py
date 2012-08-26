@@ -8,6 +8,7 @@ from nose.tools import assert_equal, assert_not_equal, assert_raises, raises, \
 
 import os
 from pyne.material import Material, from_atom_frac, from_hdf5, from_text, MapStrMaterial
+from pyne import jsoncpp 
 import numpy  as np
 import tables as tb
 
@@ -882,6 +883,22 @@ def test_map_str_material():
     assert_equal(n['heu'].mass, 42.0)
     assert_equal(n['heu']['U238'], 0.42)
 
+
+def test_attrs():
+    mat = Material(leu)
+    assert_equal(len(mat.attrs), 0)
+    mat.attrs['units'] = 'kg'
+    assert_equal(len(mat.attrs), 1)
+    assert_equal(mat.attrs['units'], 'kg')
+    
+    mat.attrs = {'comment': 'rawr', 'amount': 42.0}
+    assert_equal(mat.attrs.keys(), ['amount', 'comment'])
+    assert_true(isinstance(mat.attrs, jsoncpp.Value))
+
+    aview = mat.attrs
+    aview['omnomnom'] = [1, 2, 5, 3]
+    assert_equal(len(mat.attrs), 3)
+    assert_equal(list(mat.attrs['omnomnom']), [1, 2, 5, 3])
 
 #
 # Run as script
