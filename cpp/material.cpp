@@ -222,8 +222,11 @@ void pyne::Material::write_hdf5(char * fchar, char * gchar, char * nchar, float 
 
 
 
-void pyne::Material::write_hdf5(std::string filename, std::string datapath, std::string nucpath, float row, int chunksize)
+void pyne::Material::write_hdf5(std::string filename, std::string datapath, std::string nucpath, 
+                                float row, int chunksize)
 {
+  int row_num = (int) row;
+
   // Turn off annoying HDF5 errors
   H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
 
@@ -274,7 +277,7 @@ void pyne::Material::write_hdf5(std::string filename, std::string datapath, std:
 
 
   //
-  // Write out to the file
+  // Write out the data itself to the file
   //
   hid_t data_set, data_space, data_hyperslab;
   int data_rank = 1;
@@ -324,8 +327,6 @@ void pyne::Material::write_hdf5(std::string filename, std::string datapath, std:
     data_rank = H5Sget_simple_extent_dims(data_space, data_dims, data_max_dims);
 
     // Determine the row size.
-    int row_num = (int) row;
-
     if (std::signbit(row))
       row_num = data_dims[0] + row;  // careful, row is negative
 
@@ -392,12 +393,81 @@ void pyne::Material::write_hdf5(std::string filename, std::string datapath, std:
   // Write the row...
   H5Dwrite(data_set, desc, mem_space, data_hyperslab, H5P_DEFAULT, mat_data);
 
-  // Close out the HDF5 file
+  // Close out the Dataset
   H5Fflush(db, H5F_SCOPE_GLOBAL);
   H5Dclose(data_set);
   H5Sclose(data_space);
   H5Tclose(str20);
   H5Tclose(desc);
+
+  //
+  // Write out the attrs to the file
+  //
+  std::string attrpath = datapath + "_attrs";
+  hid_t attrspace, attrtype, attrset, attrslab, attrmemspace;
+  int attrrank; 
+
+  attrtype = H5Tvlen_create(H5T_NATIVE_CHAR);
+
+  // get / make the data set
+  bool attrpath_exists = h5wrap::path_exists(db, attrpath);
+  if (attrpath_exists)
+  {
+    attrset = H5Dopen2(db, attrpath.c_str(), H5P_DEFAULT);
+    attrspace = H5Dget_space(attrset);
+    attrrank = H5Sget_simple_extent_dims(attrspace, data_dims, data_max_dims);
+
+    if (data_dims[0] <= row_num)
+      H5Dset_extent(attrset, data_dims);
+    else if (data_dims[0] < 0)
+      throw h5wrap::HDF5BoundsError();
+
+    data_offset[0] = row_num;
+  }
+  else
+  {
+    hid_t attrsetparams;
+    hsize_t attrchunkdims [1];
+
+    // Make data set properties to enable chunking
+    attrsetparams = H5Pcreate(H5P_DATASET_CREATE);
+    attrchunkdims[0] = chunksize; 
+    H5Pset_chunk(attrsetparams, 1, attrchunkdims);
+
+    hvl_t attrfillvalue [1];
+    attrfillvalue[0].len = 3;
+    attrfillvalue[0].p = (char *) "{}\n";
+    H5Pset_fill_value(attrsetparams, attrtype, &attrfillvalue);
+
+    // make dataset
+    attrspace = H5Screate_simple(1, data_dims, data_max_dims);
+    attrset = H5Dcreate2(db, attrpath.c_str(), attrtype, attrspace, 
+                         H5P_DEFAULT, attrsetparams, H5P_DEFAULT);
+    H5Dset_extent(attrset, data_dims);
+  };
+  H5Dclose(attrset);
+  attrset = H5Dopen2(db, attrpath.c_str(), H5P_DEFAULT);  
+
+  // set the attr string
+  hvl_t attrdata [1];
+  Json::FastWriter writer;
+  std::string attrstr = writer.write(attrs);
+  attrdata[0].p = (char *) attrstr.c_str();
+  attrdata[0].len = attrstr.length();
+
+  // write the attr
+  attrslab = H5Dget_space(attrset);
+  H5Sselect_hyperslab(attrslab, H5S_SELECT_SET, data_offset, NULL, data_count, NULL);
+  attrmemspace = H5Screate_simple(1, data_count, data_max_dims);
+  H5Dwrite(attrset, attrtype, attrmemspace, attrslab, H5P_DEFAULT, attrdata);
+
+  // close attr data objects
+  H5Fflush(db, H5F_SCOPE_GLOBAL);
+  H5Dclose(attrset);
+  H5Sclose(attrspace);
+  H5Tclose(attrtype);
+
+  // Close out the HDF5 file
   H5Fclose(db);
 
   // Remember the milk!  
