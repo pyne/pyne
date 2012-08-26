@@ -2086,8 +2086,7 @@ class ITally(ICard):
 
     @abc.abstractmethod
     def comment(self, title):
-        string = "{0} tally {1!r}{2} of ".format(title, self.name,
-                " in alt. units" if self.alt_units else "")
+        string = "{0} tally {1!r} of ".format(title, self.name)
         if type(self.particle) is not list:
             string += self.particle.name
             # 'all' is only for CellEnergyDeposition.
@@ -2098,7 +2097,8 @@ class ITally(ICard):
                 pcounter += 1
                 string += "{0}s".format(par)
                 if pcounter < len(self.particle): string += ", "
-        string += ":"
+        string += "{0}:".format(
+                " (in alt. units)" if self.alt_units else "")
         return string
     
     @abc.abstractmethod
@@ -2757,30 +2757,30 @@ class IDetector(ITally):
     
     """
 
-    def __init__(self, name, particle, args_per_set, sep_direct=True, *args,
-                 **kwargs):
+    def __init__(self, name, particle, args_per_set, *args, **kwargs):
         """
         Parameters
         ----------
         particles : str, list of str
             See :py:class:`ITally`. In MCNP, this tally is only for neutrons and
             photons.
-        sep_direct : bool, optional
+        sep_direct : bool, optional (default: True)
             In MCNP, the direct contribution to the tally is printed
             separately. Set to False to disable the separate printing. 
 
         """
-        super(IDetector, self).__init__(name, particle, *args, **kwargs)
+        super(IDetector, self).__init__(name, particle, **kwargs)
         self.detectors = []
-        self.sep_direct = sep_direct
+        self.sep_direct = kwargs.get('sep_direct', True)
         self._args_per_set = args_per_set
         for i_set in range(len(args) / self._args_per_set):
-            i_start = self._args_per_set * i _set
-            self.set(*args[i_start:i_start+self._args_per_set)
+            i_start = self._args_per_set * i_set
+            self.add(*args[i_start:i_start+self._args_per_set])
 
     @abc.abstractmethod
-    def comment(self, name):
+    def comment(self, name, post=None):
         string = super(IDetector, self).comment(name)
+        if post: string += " {0}".format(post)
         counter = 0
         for det in self.detectors:
             counter += 1
@@ -2880,7 +2880,8 @@ class PointDetector(IDetector):
                     sep_direct=False, alt_units=True)
 
         """
-        super(PointDetector, self).__init__(name, particle, 3, **kwargs)
+        super(PointDetector, self).__init__(name, particles, 3, *args,
+                                            **kwargs)
 
     def add(self, position, soe_radius, soe_units):
         """
@@ -2909,7 +2910,7 @@ class PointDetector(IDetector):
 
     def _comment_unit(self, det):
         return (" point ({0[0]:g}, {0[1]:g}, {0[2]:g}) cm, radius "
-                "{1:g} {2}".format(det.point, det.soe_rad, det.soe_units))
+                "{1:g} {2}".format(det.pos, det.soe_rad, det.soe_units))
 
     def mcnp(self, float_format, sim):
         return super(PointDetector, self).mcnp(float_format, sim, 5)
@@ -2982,7 +2983,8 @@ class RingDetector(IDetector):
                     sep_direct=False, alt_units=True)
 
         """
-        super(RingDetector, self).__init__(name, particle, 4, **kwargs)
+        super(RingDetector, self).__init__(name, particles, 4, *args, 
+                                           **kwargs)
         self.cartesian_axis = cartesian_axis
 
     def add(self, position, radius, soe_radius, soe_units):
@@ -3003,17 +3005,16 @@ class RingDetector(IDetector):
             det.add(10.0, 2.0, 1.0, 'cm')
 
         """
-        self.detectors += [Ring(cartesian_axis, position, radius, soe_radius,
-                soe_units)]
+        self.detectors += [self.Ring(position, radius, soe_radius, soe_units)]
 
     def comment(self):
-        return super(RingDetector, self).comment(
-                "Ring detector along {0}".format(self.cartesian_axis))
+        return super(RingDetector, self).comment("Ring detector",
+                "along {0} axis.".format(self.cartesian_axis))
 
     def _comment_unit(self, det):
         return (" ring {0} = {1:g} cm, radius {2:g} cm, s.o.e. "
-                "radius {3:g} {4}".format(det.axis, det.pos, det.rad,
-                    det.soe_rad, det.soe_units))
+                "radius {3:g} {4}".format(self.cartesian_axis, det.pos,
+                    det.rad, det.soe_rad, det.soe_units))
 
     def mcnp(self, float_format, sim):
         return super(PointDetector, self).mcnp(float_format, sim, 5,
