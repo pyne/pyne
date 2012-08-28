@@ -30,10 +30,10 @@ dictionaries of compositions are shown below.
 
     In [1]: from pyne.material import Material
 
-    In [2]: leu = Material({'U238': 0.96, 'U235': 0.04}, 42, 'LEU')
+    In [2]: leu = Material({'U238': 0.96, 'U235': 0.04}, 42)
 
     In [3]: leu
-    Out[3]: pyne.material.Material({922350: 0.04, 922380: 0.96}, 42.0, 'LEU', -1.0, {})
+    Out[3]: pyne.material.Material({922350: 0.04, 922380: 0.96}, 42.0, -1.0, {})
 
     In [4]: nucvec = {10010:  1.0, 80160:  1.0, 691690: 1.0, 922350: 1.0,
        ...:           922380: 1.0, 942390: 1.0, 942410: 1.0, 952420: 1.0,
@@ -91,7 +91,7 @@ of the two original. Multiplying a Material by 2, however, will simply double th
     Out[12]: pyne.material.Material({10010: 0.111111111111, 80160: 0.111111111111, 691690: 0.111111111111, 
        ...:                          922350: 0.111111111111, 922380: 0.111111111111, 942390: 0.111111111111, 
        ...:                          942410: 0.111111111111, 952420: 0.111111111111, 962440: 0.111111111111}, 
-       ...:                          2.0, '', {})
+       ...:                          2.0, {})
 
     In [13]: other_mat.mass
     Out[13]: 2.0
@@ -123,12 +123,10 @@ material instance.
 
     In [16]: other_mat.mass = 10
 
-    In [17]: other_mat.name = "Other Material"
-
     In [18]: other_mat.comp = {'H2': 3, 922350: 15.0}
 
     In [19]: print other_mat
-    Material: Other Material
+    Material:
     mass = 10.0
     atoms per molecule = -1.0
     -------------------------
@@ -143,7 +141,7 @@ of sync.  This may always be fixed with normalization.
     In [20]: other_mat.norm_comp()
 
     In [21]: print other_mat
-    Material: Other Material
+    Material:
     mass = 10.0
     atoms per molecule = -1.0
     -------------------------
@@ -168,12 +166,12 @@ the material may be performed with integer-keys, string-keys, slices, or sequenc
     Out[23]: 1.68
 
     In [24]: weird_mat['U':'Am']
-    Out[24]: pyne.material.Material({922350: 0.0736, 922380: 0.8464, 942390: 0.04, 942410: 0.04}, 50.0, '', -1.0, {})
+    Out[24]: pyne.material.Material({922350: 0.0736, 922380: 0.8464, 942390: 0.04, 942410: 0.04}, 50.0, -1.0, {})
 
     In [25]: other_mat[:920000] = 42.0
 
     In [26]: print other_mat
-    Material: Other Material
+    Material:
     mass = 50.3333333333
     atoms per molecule = -1.0
     -------------------------
@@ -185,7 +183,7 @@ the material may be performed with integer-keys, string-keys, slices, or sequenc
     In [28]: mat[:]
     Out[28]: pyne.material.Material({10010: 0.166666666667, 922350: 0.166666666667, 922380: 0.166666666667, 
        ...:                          942390: 0.166666666667, 942410: 0.166666666667, 952420: 0.166666666667}, 
-       ...:                          0.666666666667, '', -1.0, {})
+       ...:                          0.666666666667, -1.0, {})
 
 Other methods also exist for obtaining commonly used sub-materials, such as gathering the Uranium or 
 Plutonium vector.  
@@ -277,12 +275,10 @@ and low-enriched uranium.
 
     In [44]: uox = Material()
 
-    In [45]: uox.name = "UOX"
-
     In [46]: uox.from_atom_frac({leu: 1.0, 'O16': 2.0})
 
     In [47]: print uox
-    Material: UOX
+    Material:
     mass = 269.918868043
     atoms per molecule = 3.0
     ------------------------
@@ -316,7 +312,7 @@ of the attrs *should* be a dictionary, though this is not explicitly enforced.
     U238   0.95
 
     In [50]: leu
-    Out[50]: pyne.material.Material({922350: 0.05, 922380: 0.95}, 15.0, '', -1.0 {"units":"kg"})
+    Out[50]: pyne.material.Material({922350: 0.05, 922380: 0.95}, 15.0, -1.0 {"units":"kg"})
 
     In [51]: leu.attrs
     Out[51]: {"units":"kg"}
