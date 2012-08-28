@@ -79,6 +79,70 @@ class TestSystemDefinition(unittest.TestCase):
         self.rxr.add_cell(self.graveyard)
         self.sim = definition.MCNPSimulation(self.rxr, verbose=False)
 
+    def test_Distribution(self):
+        """Tests the :py:class:`cards.Distribution` class."""
+
+        sd = cards.Distribution('distA', [-2, 2], [0, 1])
+        self.sim.add_dist(sd)
+        self.assertEquals(sd.comment(), "Source distribution 'distA': "
+                "key setting default, val setting default, "
+                "KEYS: -2, 2, VALS: 0, 1.")
+        self.assertEquals(sd.mcnp('%.5g', self.sim), 
+                "SI1 -2 2\nSP1 0 1")
+        sd = cards.Distribution('distA', [-2, 2], [0, 1], 'histogram', 'prob')
+        self.sim.add_dist(sd)
+        self.assertEquals(sd.comment(), "Source distribution 'distA': "
+                "key setting histogram, val setting prob, "
+                "KEYS: -2, 2, VALS: 0, 1.")
+        self.assertEquals(sd.mcnp('%.5g', self.sim), 
+                "SI1 H -2 2\nSP1 D 0 1")
+        sd = cards.Distribution('distA', 
+                ['neutron', 'photon', 'spont-fiss-by-hist', 92238],
+                [1, 1, 'fuel', 2],
+                key_setting='discrete',
+                val_setting='partint')
+        self.sim.add_dist(sd)
+        self.assertEquals(sd.comment(), "Source distribution 'distA': "
+                "key setting discrete, val setting partint, "
+                "KEYS: neutron, photon, spont-fiss-by-hist, 92238, "
+                "VALS: 1, 1, fuel, 2.")
+        self.assertEquals(sd.mcnp('%.5g', self.sim),
+                "SI1 L N P -SF 92238\nSP1 W 1 1 -1 2")
+        sd = cards.Distribution('distA', ['distB', 'distC'], [0.3, 0.7],
+                'dist')
+        sdB = cards.Distribution('distB', [-2, 2], [0, 1])
+        sdC = cards.Distribution('distC', [-2, 2], [0, 1])
+        self.sim.add_dist(sd)
+        self.sim.add_dist(sdB)
+        self.sim.add_dist(sdC)
+        self.assertEquals(sd.comment(), "Source distribution 'distA': "
+                "key setting dist, val setting default, "
+                "KEYS: distB, distC, "
+                "VALS: 0.3, 0.7.")
+        self.assertEquals(sd.mcnp('%.5g', self.sim),
+                "SI1 S 2 3\nSP1 0.3 0.7")
+        sd = cards.Distribution('distA', [], [], 'analytic', 'maxwell')
+        self.sim.add_dist(sd)
+        self.assertEquals(sd.comment(), "Source distribution 'distA': "
+                "key setting analytic, val setting maxwell, "
+                "KEYS: default, VALS: default.")
+        self.assertEquals(sd.mcnp('%.5g', self.sim), "SP1 -2")
+        sd = cards.Distribution('distA', [], [], key_setting='analytic',
+                                                 val_setting='maxwell')
+        self.sim.add_dist(sd)
+        self.assertEquals(sd.comment(), "Source distribution 'distA': "
+                "key setting analytic, val setting maxwell, "
+                "KEYS: default, VALS: default.")
+        self.assertEquals(sd.mcnp('%.5g', self.sim),
+                "SP1 -2")
+        sd = cards.Distribution('distA', [0, 10], [1, 3], 'analytic', 'watt')
+        self.sim.add_dist(sd)
+        self.assertEquals(sd.comment(), "Source distribution 'distA': "
+                "key setting analytic, val setting watt, "
+                "KEYS: 0, 10, VALS: 1, 3.")
+        self.assertEquals(sd.mcnp('%.5g', self.sim),
+                "SI1 0 10\nSP1 -3 1 3")
+
     def test_Saving(self):
         """Tests saving a system definition to a JSON file."""
 
@@ -1609,6 +1673,7 @@ class TestSimulationDefinition(unittest.TestCase):
     #sim.add_card(cards.CriticalityPoints())
     pass
 
+
 class TestMCNPInput(unittest.TestCase):
 
     def setUp(self):
@@ -1717,16 +1782,13 @@ class TestMCNPInput(unittest.TestCase):
         os.unlink(fname + '_first')
         
 
-
-
-
-
 class TestModifying(unittest.TestCase):
     """Ensures that the code is amenable to modifications made after initial
     creation.
     
     """
     pass
+
 
 ## The following tests are redundant, but are to make sure that the examples in
 # the documentation function as expected.
