@@ -45,32 +45,31 @@ namespace pyne
     void _load_comp_protocol0(hid_t, std::string, int);
     void _load_comp_protocol1(hid_t, std::string, int);
 
-    void from_hdf5 (char *, char *, int=-1, int=1);
-    void from_hdf5 (std::string, std::string="/material", int=-1, int=1);
+    void from_hdf5(char *, char *, int=-1, int=1);
+    void from_hdf5(std::string, std::string="/material", int=-1, int=1);
 
-    void write_hdf5 (char *, char *, char *, float=-0.0, int=100);
-    void write_hdf5 (std::string, std::string="/material", std::string nuclist="/nuc_zz", float=-0.0, int=100);
+    void write_hdf5(char *, char *, char *, float=-0.0, int=100);
+    void write_hdf5(std::string, std::string="/material", std::string nuclist="/nuc_zz", float=-0.0, int=100);
 
-    void from_text (char *);
-    void from_text (std::string);
+    void from_text(char *);
+    void from_text(std::string);
 
-    void write_text (char *);
-    void write_text (std::string);
+    void write_text(char *);
+    void write_text(std::string);
 
     //Fundemental mass stream data
     comp_map comp;
     double mass;
-    std::string name;
     double atoms_per_mol;
     Json::Value attrs;
 
     //Material Constructors
     Material ();
-    Material(comp_map, double=-1.0, std::string="", double=-1.0, 
+    Material(comp_map, double=-1.0, double=-1.0, 
              Json::Value=Json::Value(Json::objectValue));
-    Material(char *, double=-1.0, std::string="", double=-1.0, 
+    Material(char *, double=-1.0, double=-1.0, 
              Json::Value=Json::Value(Json::objectValue));
-    Material(std::string, double=-1.0, std::string="", double=-1.0,
+    Material(std::string, double=-1.0, double=-1.0,
              Json::Value=Json::Value(Json::objectValue));
     ~Material ();
 
@@ -80,26 +79,26 @@ namespace pyne
     double molecular_weight(double=-1.0);
 
     //Sub-Stream Computation
-    Material sub_mat(std::set<int>, std::string n = "");
-    Material sub_mat(std::set<std::string>, std::string n = "");
+    Material sub_mat(std::set<int>);
+    Material sub_mat(std::set<std::string>);
 
-    Material set_mat(std::set<int>, double, std::string n = "");
-    Material set_mat(std::set<std::string>, double, std::string n = "");
+    Material set_mat(std::set<int>, double);
+    Material set_mat(std::set<std::string>, double);
 
-    Material del_mat(std::set<int>,  std::string n = "");
-    Material del_mat(std::set<std::string>,  std::string n = "");
+    Material del_mat(std::set<int>);
+    Material del_mat(std::set<std::string>);
 
-    Material sub_range(int=0, int=10000000, std::string n = "");
-    Material set_range(int=0, int=10000000, double=0.0, std::string n = "");
-    Material del_range(int=0, int=10000000, std::string n = "");
+    Material sub_range(int=0, int=10000000);
+    Material set_range(int=0, int=10000000, double=0.0);
+    Material del_range(int=0, int=10000000);
 
-    Material sub_u   (std::string = "");
-    Material sub_pu  (std::string = "");
-    Material sub_lan (std::string = "");
-    Material sub_act (std::string = "");
-    Material sub_tru (std::string = "");
-    Material sub_ma  (std::string = "");
-    Material sub_fp  (std::string = "");
+    Material sub_u();
+    Material sub_pu();
+    Material sub_lan();
+    Material sub_act();
+    Material sub_tru();
+    Material sub_ma();
+    Material sub_fp();
 
     // Atom fraction functions
     std::map<int, double> to_atom_frac();
@@ -115,7 +114,6 @@ namespace pyne
   std::ostream& operator<< (std::ostream& os, Material mat);
 
   typedef struct material_struct {
-    char name [20];
     double mass;
     double atoms_per_mol;
     double comp [];
