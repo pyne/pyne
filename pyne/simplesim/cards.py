@@ -1897,58 +1897,71 @@ class GeneralSource(ISource):
         ----------
         particle : str, :py:class:`Distribution` name, optional (default: None)
             Name of a particle, 'spont-fiss-by-neut', 'spont-fiss-by-hist', or
-            'spont-phot'.
-    TODO string uniqueness
+            'spont-phot', or the name of a :py:class:`Distribution` card. If
+            the string is the name of a distribution in the simulation, then
+            that distribution is used, and the other possible inputs are
+            ignored. Therefore, be careful with how distribution cards are
+            name.
         cell : str, :py:class:`Distribution` name, optional (default: None)
-            Name of a cell in which the source exists. **CEL** in MCNP.
+            Name of a cell in which the source exists, or the name of a
+            :py:class:`Distribution`. If both a cell and distribution have the
+            same card name (ambiguous input), an exception is raised. **CEL**
+            in MCNP.
         surface : str, :py:class:`Distribution` name, optional (default: None)
-            Name of a surface. **SUR** in MCNP.
-        energy : float, :py:class:`Distribution` name, optional [MeV] (default: None)
-            Particle energy. **ERG** in MCNP.
-        time : float [seconds] (default: None)
-   TODO
-            Time at which the source particles are created. **TME** in MCNP.
+            Name of a surface, or the name of a :py:class:`Surface`. If both a
+            surface and a distribution have the same card name (ambiguous
+            input), an exception is
+            raised. **SUR** in MCNP.
+        energy : float, :py:class:`Distribution` name, optional (default: None) [MeV] 
+            Particle energy, or a distribution of energies. **ERG** in MCNP.
+        time : float, :py:class:`Distribution` name, (default: None) [seconds]
+            Time at which the source particles are created, or a distribution
+            of times. **TME** in MCNP.
         ref_dir : 3-element list, optional (default: None)
             Reference vector for sampling particle's direction of travel.
             **VEC** in MCNP.
-        cosine : float, optional (default: None)
+        cosine : float, :py:class:`Distribution` name, optional (default: None)
             Cosine of the angle between the reference vector
-            `:py:attr:`ref_dir` and the particle's direction of travel. **DIR**
+            `:py:attr:`ref_dir` and the particle's direction of travel, or
+            distribution. **DIR**
             in MCNP. **DIR** in MCNP.
         normal_sign : str, optional (default: None)
             'pos' for a positive surface normal, 'neg' for a negative surface
             normal. **NRM** in MCNP.
-        ref_pos : 3-element list, optional (default: None)
-            Reference point for position sampling. **POS** in MCNP. For
+        ref_pos : 3-element list, :py:class:`Distribution` name, optional (default: None) [cm]
+            Reference point for position sampling. **POS** in MCNP, or
+            distribution. For
             cylinders, it is the point at the center of the base of the
             cylinder.
-        offset : float, optional (default: None)
-            **EXT** in MCNP. Meaning varies. For cylinders, it is the length of
-            the cylinder.
-        radius : float, optional (default: None)
+        offset : float, :py:class:`Distribution` name, optional (default: None) [cm]
+            **EXT** in MCNP. Meaning varies, or distribution. For cylinders, it
+            is the length of the cylinder.
+        radius : float, :py:class:`Distribution` name, optional (default: None) [cm]
             Radial distance of sampled points from :py:attr:`ref_pos` or
-            :py:attr:`axis`. **RAD** in MCNP. For cylinders, it is the radius
-            of the cylinder.
-        axis : 3-element list, optional (default: None)
-            Reference vector for use in conjunction with :py:attr:`offset` and
-            :py:attr:`radius`. **AXS** in MCNP. For cylinders, it is the axis
-            of the cylinder.
-        x : float, optional (default: None)
-            x-coordinate for source position sampling. **X** in MCNP.
-        y : float, optional (default: None)
-            y-coordiante for source position sampling. **Y** in MCNP.
-        z : float, optional (default: None)
-            z-coordiante for source position sampling. **Z** in MCNP.
-        cookie_cutter : str, optional (default: None)
-            Name of a cell to use as cookie-cutter. **CCC** in MCNP.
-    TODO string uniqueness
-        area : float, optional (default: None)
+            :py:attr:`axis`, or distribution. **RAD** in MCNP. For cylinders,
+            it is the radius of the cylinder.
+        axis : 3-element list, :py:class:`Distribution` name, optional (default: None)
+            Reference vector or distribution for use in conjunction with
+            :py:attr:`offset` and :py:attr:`radius`. **AXS** in MCNP. For
+            cylinders, it is the axis of the cylinder.
+        x : float, :py:class:`Distribution` name, optional (default: None) [cm]
+            x-coordinate or distribution for source position sampling. **X** in
+            MCNP.
+        y : float, :py:class:`Distribution` name, optional (default: None) [cm]
+            y-coordinate or distribution for source position sampling. **Y** in
+            MCNP.
+        z : float, :py:class:`Distribution` name, optional (default: None) [cm]
+            z-coordinate or distribution for source position sampling. **Z** in
+            MCNP.
+        cookie_cutter : str, :py:class:`Distribution` name, optional (default: None)
+            Name of a cell to use as cookie-cutter, or distribution Be wary of
+            naming cells and distributions with the same name. **CCC** in MCNP.
+        area : float, optional (default: None) [cm^2]
             Area of the surface, if this is a surface source. **ARA** in MCNP.
         weight : float, optional (default: None)
             Explicit particle weight. **WGT** in MCNP.
         transformation : str, optional (default: None)
             Name of a :py:class:`Transformation` in the simulation.
-    TODO string uniqueness
         eff : float, optional (default: None)
             **EFF** in MCNP. Explicit value. See MCNP manual.
         beam_emit : 3-element tuple, optional (default: None)
@@ -2039,6 +2052,9 @@ class GeneralSource(ISource):
             string += " PAR="
             if self.particle in sim.dist:
                 string += "D{0}".format(sim.dist_num(self.particle))
+            elif self.particle == 'spont-fiss-by-neut': string += "SF"
+            elif self.particle == 'spint-fiss-by-hist': string += "-SF"
+            elif self.particle == 'spont-phot':         string += "SP"
             else: string += Particle(self.particle).mcnp()
         elif self.cell:
             string += " CEL="
