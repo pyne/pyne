@@ -685,7 +685,7 @@ cdef class _Material:
 
         """
         cdef _Material pymat = Material()
-        pymat.mat_pointer[0] = self.mat_pointer.sub_tru(std.string(name))
+        pymat.mat_pointer[0] = self.mat_pointer.sub_tru()
         return pymat
 
 
@@ -1217,7 +1217,7 @@ def from_hdf5(char * filename, char * datapath, int row=-1, int protocol=1):
 
 
 
-def from_text(char * filename, double mass=-1.0, double, atoms_per_mol=-1.0, attrs=None):
+def from_text(char * filename, double mass=-1.0, double atoms_per_mol=-1.0, attrs=None):
     """from_text(char * filename, double mass=-1.0, double atoms_per_mol=-1.0)
     Create a Material object from a simple text file.
 
