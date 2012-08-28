@@ -13,19 +13,22 @@ import abc
 import collections
 import pickle
 import json
+import warnings
 
 import numpy as np
 
 from pyne import material
 from pyne.simplesim import cards
-from pyne import stlconverters
 
 class IDefinition(object):
+    """
+    TODO
+    """
     __metaclass__ = abc.ABCMeta
 
     def __init__(self, fname=None, verbose=True):
         """
-
+        TODO
         """
         self.verbose = verbose
         if fname is not None:
@@ -78,12 +81,14 @@ class IDefinition(object):
             dict_to_check = self.misc
         elif card_type == 'transformation':
             dict_to_check = self.transformations
+        elif card_type == 'dist':
+            dict_to_check = self.dists
         else:
             raise ValueError("The input ``card_type`` must be either "
                     "'cell', 'surface', 'material', 'source', "
                     "'tally', or 'misc'.")
         if card.name in dict_to_check and self.verbose:
-            print ("Card {0!r}, type {1!r} is already part of the "
+            warnings.warn("Card {0!r}, type {1!r} is already part of the "
                     "definition; overwriting.".format(card.name, card_type))
             #raise UserWarning("Card {0!r}, type {0!r} is already part of the "
             #        "definition; overwriting.".format(card.name, card_type))
@@ -190,13 +195,13 @@ class SystemDefinition(IDefinition):
         return self.materials.keys().index(name) + 1
 
     def remove_cell(self, name):
-        raise
+        raise Exception("Not implemented.")
 
     def remove_surface(self, name):
-        raise
+        raise Exception("Not implemented.")
 
     def remove_material(self, name):
-        raise
+        raise Exception("Not implemented.")
 
     def save(self, fname):
         """Saves definition to a JSON file. It is unlikely that the class will
@@ -225,18 +230,18 @@ class SystemDefinition(IDefinition):
 
 
 class SimulationDefinition(IDefinition):
-    """This is basically where all the data cards are stored. The easy name for
+    """
+    
+    This is basically where all the data cards are stored. The easy name for
     this class is either OptionsDefinition (Serpent) or DataDefinition (MCNP),
     but I'm not too happy with either. I'd like any ideas for this. This may
     need to be subclassed for different codes, because different codes do not
     provide the same options.
 
     """
-    # TODO when adding a criticality points card, check that a criticality card
-    # has been added as well.
-
     def __init__(self, systemdef, fname=None, verbose=True):
-        """Creates a new options definition or loads one from a JSON file."""
+        """Creates a new options definition or loads one from a file."""
+
         super(SimulationDefinition, self).__init__(fname, verbose)
         # TODO when saving a simulation def, the the system def should also be
         # saved, and so this assignment that happens on this next line
@@ -245,6 +250,7 @@ class SimulationDefinition(IDefinition):
 
     def _create_new(self):
         """Initialize any attributes/properties."""
+
         self._source = collections.OrderedDict()
         self._tally = collections.OrderedDict()
         self._misc = collections.OrderedDict()
@@ -252,7 +258,7 @@ class SimulationDefinition(IDefinition):
     def add_source(self, card):
         if not isinstance(card, cards.ISource):
             raise ValueError("Only cards subclassed from ``ISource`` can be "
-                    "added by this method. User provided {}.".format(card))
+                    "added by this method. User provided {0}.".format(card))
         self._assert_unique('source', card)
         self._source[card.name] = card
 
@@ -260,7 +266,7 @@ class SimulationDefinition(IDefinition):
         # TODO check cells and surfaces? only if moving to string refs.
         if not isinstance(card, cards.ITally):
             raise ValueError("Only cards subclassed from ``ITally`` can be "
-                    "added by this method. User provided {}.".format(card))
+                    "added by this method. User provided {0}.".format(card))
         self._assert_unique('tally', card)
         self._tally[card.name] = card
 
@@ -268,18 +274,18 @@ class SimulationDefinition(IDefinition):
         # TODO check references to tallies? only if moving to string refs.
         if not isinstance(card, cards.IMisc):
             raise ValueError("Only cards subclassed from ``IMisc`` can be "
-                    "added by this method. User provided {}.".format(card))
+                    "added by this method. User provided {0}.".format(card))
         self._assert_unique('misc', card)
         self._misc[card.name] = card
 
     def remove_source(self, name):
-        raise
+        raise Exception("Not implemented.")
 
     def remove_tally(self, name):
-        raise
+        raise Exception("Not implemented.")
 
     def remove_misc(self, name):
-        raise
+        raise Exception("Not implemented.")
 
     def save(self, fname):
         """Saves definition to a JSON file. It is unlikely that the class will
@@ -299,8 +305,7 @@ class SimulationDefinition(IDefinition):
 
     @property
     def source(self):
-        """Ordered dictionary of source cards (from
-        :py:class:`cards.ISource`)
+        """Ordered dictionary of source cards (from :py:class:`cards.ISource`)
 
         """
         return self._source
@@ -317,7 +322,9 @@ class SimulationDefinition(IDefinition):
 
 
 class MCNPSimulation(SimulationDefinition):
+    """
 
+    """
     def _create_new(self):
         """Initialize any attributes/properties."""
         super(MCNPSimulation, self)._create_new()
@@ -329,8 +336,17 @@ class MCNPSimulation(SimulationDefinition):
         self._tally_cellfissiondep = collections.OrderedDict()
         self._tally_pulseheight = collections.OrderedDict()
         self._tally_detector = collections.OrderedDict()
+        self._dists = collections.OrderedDict()
 
     def add_tally(self, card):
+        """Adds a tally card to the simulation.
+
+        Parameters
+        ----------
+        card : :py:class:`cards.ICard` or subclass
+            The tally card to be added to the simulation.
+
+        """
         super(MCNPSimulation, self).add_tally(card)
         if isinstance(card, cards.SurfaceCurrent):
             self._tally_surfacecurrent[card.name] = card
@@ -348,9 +364,24 @@ class MCNPSimulation(SimulationDefinition):
         elif isinstance(card, cards.IDetector):
             self._tally_detector[card.name] = card
         else:
-            raise Exception
+            raise Exception("Unrecognized tally card {0}.".format(card))
 
     def tally_num(self, name):
+        """Retrieve the number of a :py:class:`cards.ITally` card in the MCNP
+        input file.
+
+        Parameters
+        ----------
+        name : str
+            Name of the tally. Names must be unique across all tally types.
+
+        Returns
+        -------
+        tally_num : int
+            The tally number for a given tally type. For the first cell flux
+            tally, a value of 1 is returned, not 14.
+
+        """
         card = self.tally[name]
         # Must add one because indices start at 0 but card numbers at 1.
         if isinstance(card, cards.SurfaceCurrent):
@@ -369,12 +400,20 @@ class MCNPSimulation(SimulationDefinition):
         elif isinstance(card, cards.IDetector):
             return self._tally_detector.keys().index(name) + 1
         else:
-            raise Exception
+            raise Exception("Unrecognized tally type. name {0}.".format(name))
 
     def remove_tally(self, name):
-        raise
+        raise Exception("Not implemented.")
 
     def add_transformation(self, card):
+        """Adds a transformation card to the simulation.
+
+        Parameters
+        ----------
+        card : :py:class:`cards.Transformation` or subclass
+            The card to be added to the simulation.
+
+        """
         if not isinstance(card, cards.Transformation):
             raise ValueError("Only ``Transformation``s can be "
                     "added by this method. User provided {0}.".format(card))
@@ -382,12 +421,78 @@ class MCNPSimulation(SimulationDefinition):
         self._transformations[card.name] = card
 
     def transformation_num(self, name):
+        """Retrieve the number of a :py:class:`cards.Transformation` card in
+        the MCNP input file.
+
+        Parameters
+        ----------
+        name : str
+            Name of the :py:class:`cards.Transformation`. Names must be unique
+            across all transformations.
+
+        Returns
+        -------
+        transformation_num : int
+            The transformation number.
+
+        """
+        if name not in self.transformations:
+            raise StandardError("Transformation {0!r} is not in "
+                    "the simulation.".format(name))
         return self.transformations.keys().index(name) + 1
+
+    def add_dist(self, card):
+        """Adds a distribution card to the simulation.
+
+        Parameters
+        ----------
+        card : :py:class:`cards.Distribution` or subclass
+            The card to be added to the simulation.
+
+        """
+        if not isinstance(card, cards.Distribution):
+            raise ValueError("Only ``Distribution`` cards can be "
+                    "added by this method. User provided {0}.".format(card))
+        self._assert_unique('dist', card)
+        self._dists[card.name] = card
+
+    def dist_num(self, name):
+        """Retrieve the number of a :py:class:`cards.Distribution` card in
+        the MCNP input file.
+
+        Parameters
+        ----------
+        name : str
+            Name of the :py:class:`cards.Distribution`. Names must be unique
+            across all distributions, and perhaps across cell and surface
+            cards.
+
+        Returns
+        -------
+        dist_num : int
+            The distribution number.
+
+        """
+        if name not in self.dists:
+            raise StandardError("Distribution {0!r} is not in "
+                    "the simulation.".format(name))
+        return self.dists.keys().index(name) + 1
 
     @property
     def transformations(self):
-        """Ordered dictionary of misc. cards (from :py:class:`cards.IMisc`)."""
+        """Ordered dictionary of transformation cards (from
+        :py:class:`cards.Transformation`).
+
+        """
         return self._transformations
+
+    @property
+    def dists(self):
+        """Ordered dictionary of distribution cards (from
+        :py:class:`cards.Distribution`).
+
+        """
+        return self._dists
 
 
 class DefinitionEncoder(json.JSONEncoder):
