@@ -2401,6 +2401,11 @@ class Distribution(ICard):
         self.val_setting = val_setting
         self.dist = dist
 
+    def comment(self):
+        pass
+
+    def mcnp(self, float_format, sim):
+        pass
 
     @property
     def key_setting(self): return self._key_setting
@@ -5694,7 +5699,7 @@ class Burn(IMisc):
             materials=None, matl_omit=None, min_frac=None,
             chain_convergence=None, fp_tier=None,
             out_order=None, out_per_step=False, model_opt=None,
-            volume=None, conc_change=None)
+            volume=None, conc_change=None):
         # TODO
         pass
     #def __init__(self, times=[1], power_fracs, power=1, materials=None,
