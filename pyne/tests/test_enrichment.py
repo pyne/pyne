@@ -95,7 +95,7 @@ def test_default_uranium_cascade():
     assert_equal(casc.x_prod_j, 0.05)
     assert_equal(casc.x_tail_j, 0.0025)
     assert_equal(casc.mat_feed, Material({922340: 5.5e-05, 922350: 0.0072, 
-                                922380: 0.992745}, 1.0, 'Natural Uranium', 1.0))
+                                922380: 0.992745}, 1.0, 1.0))
 
 def test_prod_per_feed():
     xf, xp, xt = 0.0072, 0.05, 0.0025

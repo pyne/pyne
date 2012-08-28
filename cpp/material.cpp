@@ -80,7 +80,6 @@ void pyne::Material::_load_comp_protocol0(hid_t db, std::string datapath, int ro
   };
 
   // Set meta data
-  name = datapath.substr(datapath.rfind("/")+1, datapath.length());
   atoms_per_mol = -1.0;
 };
 
@@ -410,7 +409,6 @@ void pyne::Material::write_hdf5(std::string filename, std::string datapath, std:
   H5Fflush(db, H5F_SCOPE_GLOBAL);
   H5Dclose(data_set);
   H5Sclose(data_space);
-  H5Tclose(str20);
   H5Tclose(desc);
 
   //
@@ -587,7 +585,6 @@ pyne::Material::Material()
 {
   // Empty Material constructor
   mass = -1.0;
-  name = std::string("");
   atoms_per_mol = -1.0;
   attrs = Json::Value(Json::objectValue);
 }
@@ -923,7 +920,7 @@ pyne::Material pyne::Material::sub_u()
 pyne::Material pyne::Material::sub_pu()
 {
   // Returns a material of Plutonium that is a sub-material of this one.
-  return sub_range(940000, 950000, n);
+  return sub_range(940000, 950000);
 };
 
 
