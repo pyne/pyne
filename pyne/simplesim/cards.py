@@ -2021,29 +2021,54 @@ class GeneralSource(ISource):
         #             transformation=None, ec*, direction*, normal_sign, 
 
     def comment(self):
+        string = "General source {0!r}:".format(self.name)
         if self.particle:
+            string += " particle={0},".format(self.particle)
         elif self.cell:
+            string += " cell={0},".format(self.cell)
         elif self.surface:
+            string += " surface={0},".format(self.surface)
         elif self.energy:
+            string += " energy={0},".format(self.energy)
         elif self.time:
+            string += " string={0},".format(self.time)
         elif self.ref_dir:
+            string += " ref. dir={0},".format(self.ref_dir)
         elif self.cosine:
+            string += " cosine={0},".format(self.cosine)
         elif self.normal_sign:
+            string += " {0} surf. normal,".format(self.normal_sign)
         elif self.ref_pos:
+            string += " ref. pos={0},".format(self.ref_pos)
         elif self.offset:
+            string += " offset={0},".format(self.offset)
         elif self.radius:
+            string += " radius={0},".format(self.radius)
         elif self.axis:
+            string += " axis={0},".format(self.axis)
         elif self.x:
+            string += " x={0},".format(self.x)
         elif self.y:
+            string += " y={0},".format(self.y)
         elif self.z:
+            string += " z={0},".format(self.z)
         elif self.cookie_cutter:
+            string += " c. cutter cell={0},".format(self.cookie_cutter)
         elif self.area:
+            string += " area={0},".format(self.area)
         elif self.weight:
+            string += " weight={0},".format(self.weight)
         elif self.transformation:
+            string += " trans.={0},".format(self.transformation)
         elif self.eff:
+            string += " eff.={0},".format(self.eff)
         elif self.beam_emit:
+            string += " beam emit.={0},".format(self.beam_emit)
         elif self.beam_aper:
+            string += " beam aper.={0},".format(self.beam_aper)
         elif self.user:
+            string += " and user input."
+        return string[:-1] + "."
 
     def mcnp(self, float_format, sim):
         vecformat = "{0} {0} {0}".format(float_format)
@@ -2179,6 +2204,7 @@ class GeneralSource(ISource):
             string += formatstr % self.beam_aper
         elif self.user:
             string += " {0}".format(self.user)
+        return string
 
     @property
     def particle(self): return self._particle
