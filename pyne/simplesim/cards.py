@@ -74,7 +74,7 @@ class ICard(object):
     kelvin2kT = 8.6173423e-11
     secs2shakes = 1e+8
 
-    def __init__(self, name, unique=False, bypass_wrap=False, *args, **kwargs):
+    def __init__(self, name, unique=False, *args, **kwargs):
         """
         Parameters
         ----------
@@ -92,10 +92,6 @@ class ICard(object):
         self.unique = unique
         if self.unique: self._name = name
         else:            self.name = name
-        # The following can be set False in a subclass's constructor if
-        # simplesim.inputfile classes should not attempt to wrap the output of
-        # methods like mcnp().
-        self.bypass_wrap = bypass_wrap
 
     def __str__(self):
         # TODO Do we actually want to do this?
@@ -920,7 +916,7 @@ class Material(ICard, material.Material):
            h2o.from_atom_frac({10010: 1.0, 'O16': 2.0})
 
         """
-        super(Material, self).__init__(*args, bypass_wrap=True, **kwargs)
+        super(Material, self).__init__(*args, **kwargs)
         self.description = kwargs.get('description', None)
         self.tables = kwargs.get('tables', dict())
         # Find longest table ID. Used in card printing for prettiness.
@@ -2566,8 +2562,7 @@ class CriticalityPoints(ISource):
 
         """
         super(CriticalityPoints, self).__init__('criticalitypoints',
-                                                unique=True,
-                                                bypass_wrap=True)
+                                                unique=True)
         self.points = points
 
     def comment(self):
@@ -3315,8 +3310,7 @@ class IDetector(ITally):
             separately. Set to False to disable the separate printing. 
 
         """
-        super(IDetector, self).__init__(name, particle, bypass_wrap=True,
-                                        **kwargs)
+        super(IDetector, self).__init__(name, particle, **kwargs)
         self.detectors = []
         self.sep_direct = kwargs.get('sep_direct', True)
         self._args_per_set = args_per_set
