@@ -127,12 +127,9 @@ void pyne::Material::_load_comp_protocol1(hid_t db, std::string datapath, int ro
   // Get material type
   size_t material_struct_size = sizeof(pyne::material_struct) + sizeof(double)*nuc_size;
   hid_t desc = H5Tcreate(H5T_COMPOUND, material_struct_size);
-  hid_t str20 = H5Tcopy(H5T_C_S1);
-  H5Tset_size(str20, 20);
   hid_t comp_values_array_type = H5Tarray_create2(H5T_NATIVE_DOUBLE, 1, nuc_dims);
 
   // make the data table type
-  H5Tinsert(desc, "name", HOFFSET(pyne::material_struct, name), str20);
   H5Tinsert(desc, "mass", HOFFSET(pyne::material_struct, mass), H5T_NATIVE_DOUBLE);
   H5Tinsert(desc, "atoms_per_mol", HOFFSET(pyne::material_struct, atoms_per_mol), 
               H5T_NATIVE_DOUBLE);
@@ -144,7 +141,6 @@ void pyne::Material::_load_comp_protocol1(hid_t db, std::string datapath, int ro
   // Finally, get data and put in on this instance
   H5Dread(data_set, desc, mem_space, data_hyperslab, H5P_DEFAULT, mat_data);
 
-  name = std::string((*mat_data).name);
   mass = (*mat_data).mass;
   atoms_per_mol = (*mat_data).atoms_per_mol;
   for (int i = 0; i < nuc_size; i++)
@@ -152,7 +148,6 @@ void pyne::Material::_load_comp_protocol1(hid_t db, std::string datapath, int ro
 
   delete[] mat_data;
   H5Tclose(str_attr);
-  H5Tclose(str20);
 
   //
   // Get attrs from associated dataset, if available
@@ -304,7 +299,7 @@ void pyne::Material::write_hdf5(std::string filename, std::string datapath, std:
     nuc_dims[0] = nuc_size;
     hid_t nuc_space = H5Screate_simple(1, nuc_dims, NULL);
     hid_t nuc_set = H5Dcreate2(db, nucpath.c_str(), H5T_NATIVE_INT, nuc_space, 
-                                H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+                               H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     H5Dwrite(nuc_set, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, nuc_data);
     H5Fflush(db, H5F_SCOPE_GLOBAL);
   };
@@ -321,12 +316,9 @@ void pyne::Material::write_hdf5(std::string filename, std::string datapath, std:
 
   size_t material_struct_size = sizeof(pyne::material_struct) + sizeof(double)*nuc_size;
   hid_t desc = H5Tcreate(H5T_COMPOUND, material_struct_size);
-  hid_t str20 = H5Tcopy(H5T_C_S1);
-  H5Tset_size(str20, 20);
   hid_t comp_values_array_type = H5Tarray_create2(H5T_NATIVE_DOUBLE, 1, nuc_dims);
 
   // make the data table type
-  H5Tinsert(desc, "name", HOFFSET(pyne::material_struct, name), str20);
   H5Tinsert(desc, "mass", HOFFSET(pyne::material_struct, mass), H5T_NATIVE_DOUBLE);
   H5Tinsert(desc, "atoms_per_mol", HOFFSET(pyne::material_struct, atoms_per_mol), 
                       H5T_NATIVE_DOUBLE);
@@ -334,14 +326,6 @@ void pyne::Material::write_hdf5(std::string filename, std::string datapath, std:
 
   // make the data array, have to over-allocate
   material_struct * mat_data  = new material_struct[material_struct_size];
-  int name_len = name.length();
-  for (int i=0; i < 20; i++)
-  {
-    if (i < name_len)
-      (*mat_data).name[i] = name[i];
-    else
-      (*mat_data).name[i] = NULL;
-  };
   (*mat_data).mass = mass;
   (*mat_data).atoms_per_mol = atoms_per_mol;
   for (int n = 0; n != nuc_size; n++)
@@ -387,8 +371,6 @@ void pyne::Material::write_hdf5(std::string filename, std::string datapath, std:
     H5Pset_chunk(data_set_params, 1, chunk_dims);
 
     material_struct * data_fill_value  = new material_struct[material_struct_size];
-    for (int i=0; i < 20; i++)
-      (*data_fill_value).name[i] = NULL;
     (*data_fill_value).mass = -1.0;
     (*data_fill_value).atoms_per_mol = -1.0;
     for (int n = 0; n != nuc_size; n++)
@@ -549,9 +531,7 @@ void pyne::Material::from_text(std::string filename)
     else 
       f >> valstr;
 
-    if (keystr == "Name")
-      name = valstr;
-    else if (keystr == "Mass")
+    if (keystr == "Mass")
       mass = pyne::to_dbl(valstr);
     else if (keystr == "APerM")
       atoms_per_mol = pyne::to_dbl(valstr);
@@ -576,9 +556,6 @@ void pyne::Material::write_text (std::string filename)
 {
   std::ofstream f;
   f.open(filename.c_str(), std::ios_base::trunc);
-
-  if (0 < name.length())
-    f << "Name    " << name << "\n";
 
   if (0 <= mass)
     f << "Mass    " << mass << "\n";
@@ -616,13 +593,12 @@ pyne::Material::Material()
 }
 
 
-pyne::Material::Material(pyne::comp_map cm, double m, std::string s, double apm,
+pyne::Material::Material(pyne::comp_map cm, double m, double apm,
                          Json::Value attributes)
 {
   // Initializes the mass stream based on an isotopic component dictionary.
   comp = cm;
   mass = m;
-  name = s;
   atoms_per_mol = apm;
   attrs = attributes;
   if (!comp.empty()) 
@@ -631,12 +607,11 @@ pyne::Material::Material(pyne::comp_map cm, double m, std::string s, double apm,
 
 
 
-pyne::Material::Material(char * fchar, double m, std::string s, double apm,
+pyne::Material::Material(char * fchar, double m, double apm,
                          Json::Value attributes)
 {
   // Initializes the mass stream based on an isotopic composition file with a (char *) name.
   mass = m;
-  name = s;
   atoms_per_mol = apm;
   attrs = attributes;
 
@@ -654,12 +629,11 @@ pyne::Material::Material(char * fchar, double m, std::string s, double apm,
 };
 
 
-pyne::Material::Material(std::string filename, double m, std::string s, double apm,
+pyne::Material::Material(std::string filename, double m, double apm,
                          Json::Value attributes)
 {
   // Initializes the mass stream based on an isotopic composition file with a string name.
   mass = m;
-  name = s;
   atoms_per_mol = apm;
   attrs = attributes;
 
@@ -688,7 +662,6 @@ pyne::Material::~Material()
 std::ostream& operator<<(std::ostream& os, pyne::Material mat)
 {
   //print the Mass Stream to stdout
-  os << "Material: " << mat.name << "\n";
   os << "\tMass: " << mat.mass << "\n";
   os << "\t---------\n";
   for(pyne::comp_iter i = mat.comp.begin(); i != mat.comp.end(); i++)
@@ -754,7 +727,7 @@ double pyne::Material::molecular_weight(double apm)
 
 /*--- Stub-Stream Computation ---*/
 
-pyne::Material pyne::Material::sub_mat (std::set<int> nucset,  std::string n)
+pyne::Material pyne::Material::sub_mat(std::set<int> nucset)
 {
   // Grabs a sub-material from this mat based on a set of integers.
   // Integers can either be of zzaaam form -OR- they can be a z-numer (is 8 for O, 93 for Np, etc).
@@ -767,12 +740,12 @@ pyne::Material pyne::Material::sub_mat (std::set<int> nucset,  std::string n)
       cm[i->first] = (i->second) * mass;
   };
 
-  return pyne::Material(cm, -1, n);
+  return pyne::Material(cm, -1);
 };
 
 
 
-pyne::Material pyne::Material::sub_mat (std::set<std::string> nucset,  std::string n)
+pyne::Material pyne::Material::sub_mat(std::set<std::string> nucset)
 {
   // Grabs a substream from this stream based on a set of strings.
   // Strings can be of any form.
@@ -782,12 +755,12 @@ pyne::Material pyne::Material::sub_mat (std::set<std::string> nucset,  std::stri
     iset.insert(pyne::nucname::zzaaam(*i));
   };
 
-  return sub_mat(iset, n);
+  return sub_mat(iset);
 };
 
 
 
-pyne::Material pyne::Material::set_mat (std::set<int> nucset, double value, std::string n)
+pyne::Material pyne::Material::set_mat (std::set<int> nucset, double value)
 {
   // Sets a sub-material from this mat based on a set of integers.
   // Integers can either be of zzaaam form -OR- they can be a z-numer (is 8 for O, 93 for Np, etc).
@@ -806,12 +779,12 @@ pyne::Material pyne::Material::set_mat (std::set<int> nucset, double value, std:
   for (std::set<int>::iterator nuc = nucset.begin(); nuc != nucset.end(); nuc++)
     cm[*nuc] = value;
   
-  return pyne::Material(cm, -1, n);
+  return pyne::Material(cm, -1);
 };
 
 
 
-pyne::Material pyne::Material::set_mat (std::set<std::string> nucset, double value, std::string n)
+pyne::Material pyne::Material::set_mat(std::set<std::string> nucset, double value)
 {
   // Sets a substream from this stream based on a set of strings.
   // Strings can be of any form.
@@ -821,13 +794,13 @@ pyne::Material pyne::Material::set_mat (std::set<std::string> nucset, double val
     iset.insert(pyne::nucname::zzaaam(*i));
   };
 
-  return set_mat(iset, value, n);
+  return set_mat(iset, value);
 };
 
 
 
 
-pyne::Material pyne::Material::del_mat (std::set<int> nucset,  std::string n)
+pyne::Material pyne::Material::del_mat(std::set<int> nucset)
 {
   // Removes a sub-material from this mat based on a set of integers.
   // Integers can either be of zzaaam form -OR- they can be a z-numer (is 8 for O, 93 for Np, etc).
@@ -841,12 +814,12 @@ pyne::Material pyne::Material::del_mat (std::set<int> nucset,  std::string n)
       cm[i->first] = (i->second) * mass;
   };
 
-  return pyne::Material(cm, -1, n);
+  return pyne::Material(cm, -1);
 };
 
 
 
-pyne::Material pyne::Material::del_mat (std::set<std::string> nucset,  std::string n)
+pyne::Material pyne::Material::del_mat (std::set<std::string> nucset)
 {
   // Removes a substream from this stream based on a set of strings.
   // Strings can be of any form.
@@ -856,7 +829,7 @@ pyne::Material pyne::Material::del_mat (std::set<std::string> nucset,  std::stri
     iset.insert(pyne::nucname::zzaaam(*i));
   };
 
-  return del_mat(iset, n);
+  return del_mat(iset);
 };
 
 
@@ -864,7 +837,7 @@ pyne::Material pyne::Material::del_mat (std::set<std::string> nucset,  std::stri
 
 
 
-pyne::Material pyne::Material::sub_range(int lower, int upper, std::string n)
+pyne::Material pyne::Material::sub_range(int lower, int upper)
 {
   // Grabs a sub-material from this mat based on a range of integers.
   if (upper < lower)
@@ -881,12 +854,12 @@ pyne::Material pyne::Material::sub_range(int lower, int upper, std::string n)
       cm[i->first] = (i->second) * mass;
   };
 
-  return pyne::Material(cm, -1, n);
+  return pyne::Material(cm, -1);
 };
 
 
 
-pyne::Material pyne::Material::set_range(int lower, int upper, double value, std::string n)
+pyne::Material pyne::Material::set_range(int lower, int upper, double value)
 {
   // Sets a sub-material from this mat based on a range of integers.
   if (upper < lower)
@@ -905,12 +878,12 @@ pyne::Material pyne::Material::set_range(int lower, int upper, double value, std
       cm[i->first] = (i->second) * mass;
   };
 
-  return pyne::Material(cm, -1, n);
+  return pyne::Material(cm, -1);
 };
 
 
 
-pyne::Material pyne::Material::del_range(int lower, int upper, std::string n)
+pyne::Material pyne::Material::del_range(int lower, int upper)
 {
   // Removes a sub-material from this mat based on a range of integers.
   if (upper < lower)
@@ -927,7 +900,7 @@ pyne::Material pyne::Material::del_range(int lower, int upper, std::string n)
       cm[i->first] = (i->second) * mass;
   };
 
-  return pyne::Material(cm, -1, n);
+  return pyne::Material(cm, -1);
 };
 
 
@@ -939,15 +912,15 @@ pyne::Material pyne::Material::del_range(int lower, int upper, std::string n)
 
 
 
-pyne::Material pyne::Material::sub_u (std::string n)
+pyne::Material pyne::Material::sub_u()
 {
   // Returns a material of Uranium that is a submaterial of this one.
-  return sub_range(920000, 930000, n);
+  return sub_range(920000, 930000);
 };
 
 
 
-pyne::Material pyne::Material::sub_pu (std::string n)
+pyne::Material pyne::Material::sub_pu()
 {
   // Returns a material of Plutonium that is a sub-material of this one.
   return sub_range(940000, 950000, n);
@@ -955,41 +928,41 @@ pyne::Material pyne::Material::sub_pu (std::string n)
 
 
 
-pyne::Material pyne::Material::sub_lan (std::string n)
+pyne::Material pyne::Material::sub_lan()
 {
   // Returns a material of Lanthanides that is a sub-material of this one.
-  return sub_range(570000, 720000, n);
+  return sub_range(570000, 720000);
 };
 
 
 
-pyne::Material pyne::Material::sub_act (std::string n)
+pyne::Material pyne::Material::sub_act()
 {
   //Returns a material of Actindes that is a sub-material of this one.
-  return sub_range(890000, 1040000, n);
+  return sub_range(890000, 1040000);
 };
 
 
-pyne::Material pyne::Material::sub_tru (std::string n)
+pyne::Material pyne::Material::sub_tru()
 {
   // Returns a material of Transuranics that is a sub-material of this one.
-  return sub_range(930000, 10000000, n);
+  return sub_range(930000, 10000000);
 };
 
 
 
-pyne::Material pyne::Material::sub_ma (std::string n)
+pyne::Material pyne::Material::sub_ma()
 {
   // Returns a material of Minor Actinides that is a sub-material of this one.
-  return sub_range(930000, 1040000).del_range(940000, 950000, n);
+  return sub_range(930000, 1040000).del_range(940000, 950000);
 };
 
 
 
-pyne::Material pyne::Material::sub_fp (std::string n)
+pyne::Material pyne::Material::sub_fp()
 {
   // Returns a material of Fission Products that is a sub-material of this one.
-  return sub_range(0, 890000, n);
+  return sub_range(0, 890000);
 };
 
 
@@ -1041,7 +1014,7 @@ void pyne::Material::from_atom_frac(std::map<int, double> atom_fracs)
 pyne::Material pyne::Material::operator+ (double y)
 {
   // Overloads x + y
-  return pyne::Material(comp, mass + y, name);
+  return pyne::Material(comp, mass + y);
 };
 
 
@@ -1067,7 +1040,7 @@ pyne::Material pyne::Material::operator+ (Material y)
       cm[i->first] = ywgt[i->first];			
   };
 
-  return pyne::Material(cm, -1, "");
+  return pyne::Material(cm, -1);
 };
 
 
@@ -1075,7 +1048,7 @@ pyne::Material pyne::Material::operator+ (Material y)
 pyne::Material pyne::Material::operator* (double y)
 {
   // Overloads x * y
-  return pyne::Material(comp, mass * y, name);
+  return pyne::Material(comp, mass * y);
 };
 
 
@@ -1083,6 +1056,6 @@ pyne::Material pyne::Material::operator* (double y)
 pyne::Material pyne::Material::operator/ (double y)
 {
   // Overloads x / y
-  return pyne::Material(comp, mass / y, name);
+  return pyne::Material(comp, mass / y);
 }
 
