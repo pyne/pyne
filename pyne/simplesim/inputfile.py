@@ -26,8 +26,6 @@ extension to other codes may require more effort.
 # TODO filename should be with write
 # TODO special treatment for Material card.
 # TODO improve how the $ nucname.name is printed on material cards: alignment!
-# TODO raise exception or warning whenever, if bypass_wrap, when the number of
-# characters between newlines is larger than 80.
 
 import abc
 import datetime
