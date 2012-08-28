@@ -16,19 +16,12 @@ the module.
 # TODO in the Sphinx documentation, provide a list of all classes without any
 # docstrings. autosummary
 # autosummary, :nosignatures: pyne.simplesim.cards
-# TODO use sphinx domains where possible instead of double single quotes.
 # TODO write a development guide next to the usersguide.
-# TODO make error messages valuable: give back to the user their input.
-# TODO sphinx inheritance diagrams.
 # TODO if i make a material card, make sure to revert back to the Material
 # object that Anthony has once they implement a comment.
 # Maybe I place an underscore for abstract base classes so that the user
 # doesn't see them, but I want them to see them...
-# TODO Comment number format to exponential.
 # TODO mcnp_particle ref's.
-# TODO rewrite detectors to work with more than 1 input.
-# TODO move the functionality of ExponentialTransform's constructor to its add
-# method.
 # TODO allow card suppression (don't delete but don't print it).
 # TODO allow readfile commands.
 # TODO emphasize how easy it is to modify the cards, just subclass it
@@ -44,7 +37,6 @@ the module.
 # index.
 # TODO big opportunity to clean up what the mcnp() output looks like.
 # TODO consistent plural card names when appropriate.
-# Temperature < 200, < 1 warnings, remove?
 # Refactor CellMCNP so all relevant classes have a method _mcnp_cell_comment
 # and _mcnp_cell_card
 # TODO I think the __comment__() method should just be __str__()?
@@ -1880,6 +1872,521 @@ class ISource(ICard):
     @abc.abstractmethod
     def comment(self):
         raise NotImplementedError
+
+
+class GeneralSource(ISource):
+    """A general source. Unique with name `gensource`. In MCNP, this is the
+    **SDEF** card. See the respective code (e.g. MCNP) for the default behavior
+    of the arguments. Note that the x, y, and z coordinates of the
+    source are separate inputs because they might each be on their own
+    distributions. To learn about Python keyword arguments, visit
+    :ref:`docs.python.org/tutorial/controlflow.html#keyword-arguments`.
+
+    .. inheritance-diagram:: pyne.simplesim.cards.GeneralSource
+
+    Limitations
+    -----------
+    - Keyword cannot depend on other keywords, as they can in MCNP.
+    """
+    # TODO non-ambiguous names required.
+    # TODO cell card for repeated structures is not simple.
+    def __init__(self, **keyword_args):
+        # Using 'keyword_args' instead of 'kwargs' to help PyNovices.
+        """
+        Parameters
+        ----------
+        particle : str, :py:class:`Distribution` name, optional (default: None)
+            Name of a particle, 'spont-fiss-by-neut', 'spont-fiss-by-hist', or
+            'spont-phot'.
+    TODO string uniqueness
+        cell : str, :py:class:`Distribution` name, optional (default: None)
+            Name of a cell in which the source exists. **CEL** in MCNP.
+        surface : str, :py:class:`Distribution` name, optional (default: None)
+            Name of a surface. **SUR** in MCNP.
+        energy : float, :py:class:`Distribution` name, optional [MeV] (default: None)
+            Particle energy. **ERG** in MCNP.
+        time : float [seconds] (default: None)
+   TODO
+            Time at which the source particles are created. **TME** in MCNP.
+        ref_dir : 3-element list, optional (default: None)
+            Reference vector for sampling particle's direction of travel.
+            **VEC** in MCNP.
+        cosine : float, optional (default: None)
+            Cosine of the angle between the reference vector
+            `:py:attr:`ref_dir` and the particle's direction of travel. **DIR**
+            in MCNP. **DIR** in MCNP.
+        normal_sign : str, optional (default: None)
+            'pos' for a positive surface normal, 'neg' for a negative surface
+            normal. **NRM** in MCNP.
+        ref_pos : 3-element list, optional (default: None)
+            Reference point for position sampling. **POS** in MCNP. For
+            cylinders, it is the point at the center of the base of the
+            cylinder.
+        offset : float, optional (default: None)
+            **EXT** in MCNP. Meaning varies. For cylinders, it is the length of
+            the cylinder.
+        radius : float, optional (default: None)
+            Radial distance of sampled points from :py:attr:`ref_pos` or
+            :py:attr:`axis`. **RAD** in MCNP. For cylinders, it is the radius
+            of the cylinder.
+        axis : 3-element list, optional (default: None)
+            Reference vector for use in conjunction with :py:attr:`offset` and
+            :py:attr:`radius`. **AXS** in MCNP. For cylinders, it is the axis
+            of the cylinder.
+        x : float, optional (default: None)
+            x-coordinate for source position sampling. **X** in MCNP.
+        y : float, optional (default: None)
+            y-coordiante for source position sampling. **Y** in MCNP.
+        z : float, optional (default: None)
+            z-coordiante for source position sampling. **Z** in MCNP.
+        cookie_cutter : str, optional (default: None)
+            Name of a cell to use as cookie-cutter. **CCC** in MCNP.
+    TODO string uniqueness
+        area : float, optional (default: None)
+            Area of the surface, if this is a surface source. **ARA** in MCNP.
+        weight : float, optional (default: None)
+            Explicit particle weight. **WGT** in MCNP.
+        transformation : str, optional (default: None)
+            Name of a :py:class:`Transformation` in the simulation.
+    TODO string uniqueness
+        eff : float, optional (default: None)
+            **EFF** in MCNP. Explicit value. See MCNP manual.
+        beam_emit : 3-element tuple, optional (default: None)
+            **BEM** in MCNP. The tuple contains:
+
+            1. parameter for x coordinate [pi-cm-rad]
+            2. parameter for y coordinate [pi-cm-rad]
+            3. distance [cm]
+
+            See MCNP manual.
+        beam_aper : 2-element tuple, optional
+            **BAP** in MCNP. The tuple contains:
+
+            1. parameter for x [cm]
+            2. parameter for y [cm]
+
+            See MCNP manual.
+        user_custom : str, optional
+            Appended to the end of :py:meth:`mcnp` output. The user can use
+            this to account for functionality that is not otherwise provided by
+            this class.
+
+        Examples
+        --------
+
+        """
+        super(GeneralSource, self).__init__('gensource')
+        self.particle = keyword_args.get('particle', None)
+        self.cell = keyword_args.get('cell', None)
+        self.surface = keyword_args.get('surface', None)
+        self.energy = keyword_args.get('energy', None)
+        self.time = keyword_args.get('time', None)
+        self.ref_dir = keyword_args.get('ref_dir', None)
+        self.cosine = keyword_args.get('cosine', None)
+        self.normal_sign = keyword_args.get('normal_sign', None)
+        self.ref_pos = keyword_args.get('ref_pos', None)
+        self.offset = keyword_args.get('offset', None)
+        self.radius = keyword_args.get('radius', None)
+        self.axis = keyword_args.get('axis', None)
+        self.x = keyword_args.get('x', None)
+        self.y = keyword_args.get('y', None)
+        self.z = keyword_args.get('z', None)
+        self.cookie_cutter = keyword_args.get('cookie_cutter', None)
+        self.area = keyword_args.get('area', None)
+        self.weight = keyword_args.get('weight', None)
+        self.transformation = keyword_args.get('transformation', None)
+        self.eff = keyword_args.get('eff', None)
+        self.beam_emit = keyword_args.get('beam_emit', None)
+        self.beam_aper = keyword_args.get('beam_aper', None)
+        self.user_custom = keyword_args.get('user_custom', None)
+        # TODO which fields can be a distribution?
+        # Old constructor:
+        #def __init__(self, cell=None, surface=None, energy=None, time=None, 
+        #             ref_dir=None, cosine=None, normal_sign=None, ref_pos=None,
+        #             offset=None, radius=None, axis=None, x=None, y=None,
+        #             z=None, cookie-cutter=None, area=None, weight=None,
+        #             transformation=None, ec*, direction*, normal_sign, 
+
+    def comment(self):
+        if self.particle:
+        elif self.cell:
+        elif self.surface:
+        elif self.energy:
+        elif self.time:
+        elif self.ref_dir:
+        elif self.cosine:
+        elif self.normal_sign:
+        elif self.ref_pos:
+        elif self.offset:
+        elif self.radius:
+        elif self.axis:
+        elif self.x:
+        elif self.y:
+        elif self.z:
+        elif self.cookie_cutter:
+        elif self.area:
+        elif self.weight:
+        elif self.transformation:
+        elif self.eff:
+        elif self.beam_emit:
+        elif self.beam_aper:
+        elif self.user:
+
+    def mcnp(self, float_format, sim):
+        vecformat = "{0} {0} {0}".format(float_format)
+        string = "SDEF"
+        if self.particle:
+            string += " PAR="
+            if self.particle in sim.dist:
+                string += "D{0}".format(sim.dist_num(self.particle))
+            else: string += Particle(self.particle).mcnp()
+        elif self.cell:
+            string += " CEL="
+            #if isinstance(self.cell, Cell): 
+            #    string += "{0}".format(sim.sys.cell_num(self.cell.name))
+            #elif isinstance(self.cell, Distribution):
+            #    string += "{0}".format(sim.dist_num(self.cell.name))
+            if self.cell in sim.sys.cells and self.cell in sim.dist:
+                raise Exception("Name {0!r} is both a cell and dist.".format(
+                    self.cell))
+            elif self.cell in sim.sys.cells:
+                string += "{0}".format(sim.sys.cell_num(self.cell))
+            elif self.cell in sim.dist:
+                string += "D{0}".format(sim.dist_num(self.cell))
+            else:
+                raise Exception("Name {0!r} is not a cell or dist.".format(
+                    self.cell))
+        elif self.surface:
+            string += " SUR"
+            if self.surface in sim.sys.surfaces and self.surface in sim.dist:
+                raise Exception("Name {0!r} is both surface and dist.".format(
+                    self.surface))
+            elif self.surface in sim.sys.surfaces:
+                string += "{0}".format(sim.sys.surface_num(self.surface))
+            elif self.surface in sim.dist:
+                string += "D{0}".format(sim.dist_num(self.surface))
+            else:
+                raise Exception("Name {0!r} is not a surface or dist.".format(
+                    self.surface))
+        elif self.energy:
+            string += " ERG="
+            if type(self.energy) is str:
+                string += "D{0}".format(sim.dist_num(self.energy))
+            else: string += float_format % self.energy
+        elif self.time:
+            string += " TME="
+            if type(self.time) is str:
+                string += "D{0}".format(sim.dist_num(self.time))
+            else: string += float_format % (self.time * self.secs2shakes)
+        elif self.ref_dir:
+            string += " VEC=" + vecformat % tuple(self.ref_dir)
+        elif self.cosine:
+            string += " DIR="
+            if type(self.cosine) is str:
+                string += "D{0}".format(sim.dist_num(self.cosine))
+            else: string += float_format % self.cosine
+        elif self.normal_sign:
+            string += " NRM="
+            if   self.normal_sign == 'neg': string += "-1"
+            elif self.normal_sign == 'pos': string += "+1"
+            else:
+                raise Exception("Input ``normal_sign`` cannot be {0}.".format(
+                    self.normal_sign))
+        elif self.ref_pos:
+            string += " POS="
+            if type(self.ref_pos) is str:
+                string += "D{0}".format(sim.dist_num(self.ref_pos))
+            else: formatstr = vecformat % tuple(self.ref_pos)
+        elif self.offset:
+            string += " EXT="
+            if type(self.offset) is str:
+                string += "D{0}".format(sim.dist_num(self.offset))
+            else: string += float_format % self.offset
+        elif self.radius:
+            string += " RAD="
+            if type(self.radius) is str:
+                string += "D{0}".format(sim.dist_num(self.radius))
+            else: string += float_format % self.radius
+        elif self.axis:
+            string += " AXS="
+            if type(self.axis) is str:
+                string += "D{0}".format(sim.dist_num(self.axis))
+            else: string += vecformat % self.axis
+        elif self.x:
+            string += " X="
+            if type(self.x) is str:
+                string += "D{0}".format(sim.dist_num(self.x))
+            else: string += float_format % self.x
+        elif self.y:
+            string += " Y="
+            if type(self.y) is str:
+                string += "D{0}".format(sim.dist_num(self.y))
+            else: string += float_format % self.y
+        elif self.z:
+            string += " Z="
+            if type(self.z) is str:
+                string += "D{0}".format(sim.dist_num(self.z))
+            else: string += float_format % self.z
+        elif self.cookie_cutter:
+            string += " CCC="
+            if (self.cookie_cutter in sim.sys.cells and 
+                    self.cookie_cutter in sim.dist):
+                raise Exception("Name {0!r} is both a cell and dist.".format(
+                    self.cookie_cutter))
+            elif self.cookie_cutter in sim.sys.cells:
+                string += "{0}".format(sim.sys.cell_num(self.cookie_cutter))
+            elif self.cookie_cutter in sim.dist:
+                string += "D{0}".format(sim.dist_num(self.cookie_cutter))
+            else:
+                raise Exception("Name {0!r} is not a cell or dist.".format(
+                    self.cookie_cutter))
+        elif self.area:
+            string += " ARA="
+            #if type(self.area) is str:
+            #    string += "D{0}".format(sim.dist_num(self.area))
+            #else:
+            string += float_format % self.area
+        elif self.weight:
+            string += " WGT="
+            string += float_format % self.weight
+        elif self.transformation:
+            string += " TR={0}".format(
+                    sim.transformation_num(self.transformation))
+        elif self.eff:
+            string += " EFF="
+            string += float_format % self.eff
+        elif self.beam_emit:
+            formatstr = " BEM={0} {0} {0}".format(float_format)
+            string += formatstr % self.beam_emit
+        elif self.beam_aper:
+            formatstr = " BAP={0} {0}".format(float_format)
+            string += formatstr % self.beam_aper
+        elif self.user:
+            string += " {0}".format(self.user)
+
+    @property
+    def particle(self): return self._particle
+
+    @particle.setter
+    def particle(self, value): self._particle = value
+
+    @property
+    def cell(self): return self._cell
+
+    @cell.setter
+    def cell(self, value): self._cell = value
+
+    @property
+    def surface(self): return self._surface
+
+    @surface.setter
+    def surface(self, value): self._surface = value
+
+    @property
+    def energy(self): return self._energy
+
+    @energy.setter
+    def energy(self, value): self._energy = value
+
+    @property
+    def time(self): return self._time
+
+    @time.setter
+    def time(self, value): self._time = value
+
+    @property
+    def ref_dir(self): return self._ref_dir
+
+    @ref_dir.setter
+    def ref_dir(self, value): self._ref_dir = value
+
+    @property
+    def cosine(self): return self._cosine
+
+    @cosine.setter
+    def cosine(self, value): self._cosine = value
+
+    @property
+    def normal_sign(self): return self._normal_sign
+
+    @normal_sign.setter
+    def normal_sign(self, value): self._normal_sign = value
+
+    @property
+    def ref_pos(self): return self._ref_pos
+
+    @ref_pos.setter
+    def ref_pos(self, value): self._ref_pos = value
+
+    @property
+    def offset(self): return self._offset
+
+    @offset.setter
+    def offset(self, value): self._offset = value
+
+    @property
+    def radius(self): return self._radius
+
+    @radius.setter
+    def radius(self, value): self._radius = value
+
+    @property
+    def axis(self): return self._axis
+
+    @axis.setter
+    def axis(self, value): self._axis = value
+
+    @property
+    def x(self): return self._x
+
+    @x.setter
+    def x(self, value): self._x = value
+
+    @property
+    def y(self): return self._y
+
+    @y.setter
+    def y(self, value): self._y = value
+
+    @property
+    def z(self): return self._z
+
+    @z.setter
+    def z(self, value): self._z = value
+
+    @property
+    def cookie_cutter(self): return self._cookie_cutter
+
+    @cookie_cutter.setter
+    def cookie_cutter(self, value): self._cookie_cutter = value
+
+    @property
+    def area(self): return self._area
+
+    @area.setter
+    def area(self, value): self._area = value
+
+    @property
+    def weight(self): return self._weight
+
+    @weight.setter
+    def weight(self, value): self._weight = value
+
+    @property
+    def transformation(self): return self._transformation
+
+    @transformation.setter
+    def transformation(self, value): self._transformation = value
+
+    @property
+    def eff(self): return self._eff
+    
+    @eff.setter
+    def eff(self, value): self._eff = value
+
+    @property
+    def beam_emit(self): return self._beam_emit
+    
+    @beam_emit.setter
+    def beam_emit(self, value): self._beam_emit = value
+
+    @property
+    def beam_aper(self): return self._beam_aper
+    
+    @beam_aper.setter
+    def beam_aper(self, value): self._beam_aper = value
+
+    @property
+    def user(self): return self._user
+
+    @user.setter
+    def user(self, value): self._user = value
+
+
+class Distribution(ICard):
+    """A distribution used in conjunction with source variables. The value of a
+    source variable can be sampled from a distribution, described by this
+    class.  In MCNP, this card is implemented with a pair of **SI** and **SP**
+    cards.
+
+    """
+    # TODO keys can be vectors (3 elements)
+    def __init__(self, name, key_setting, val_setting, dist):
+        """The ``dist`` input is typically a dictionary, where the keys are the
+        independent variable, and the values are probability values for the
+        independent variable.
+
+        Parameters
+        ----------
+        name : str
+            See :py:class:`ICard`. Used to reference this card from the
+            :py:class:`GeneralSource` card.
+        key_setting : str, optional
+            Specifies what the keys represent. The following settings are allowed:
+
+            - 'histogram': bin upper boundaries. **H** in MCNP.
+            - 'discrete': source variable values. **L** in MCNP.
+            - 'pdf_indep': independent variable for probability density
+              function. **A** in MCNP.
+            - 'dist': names of other distributions. **S** in MCNP.
+
+        val_setting : str, optional
+            Specifies what the values represent. The following settings are
+            allowed:
+
+            - 'prob': bin probabilities. ** D** in MCNP.
+            - 'cumprob': cumulative bin probabilities. **C** in MCNP.
+            - 'propvol': probability proportional to cell vol. **V** in MCNP.
+            - 'partint': intensities of particle sources. Values can be the
+              name of a cell for spontaneous fission or spontaneous photon
+              sources. **W** in MCNP.
+            - 'analytic': ``dist`` contains the parameters of a built-in
+              analytic probability density function.
+              TODO
+        dist : dict
+            Keys are the independent variable, and values are probabilities
+            associated with the keys. If ``val-setting`` is 'analytic', TODO.
+
+        Examples
+        --------
+        TODO
+
+        """
+        # TODO analytic: need to provide the type of analytic function, e.g.
+        # -41
+        super(Distribution, self).__init__(name)
+        self.key_setting = key_setting
+        self.val_setting = val_setting
+        self.dist
+
+
+    @property
+    def key_setting(self): return self._key_setting
+
+    @key_setting.setter
+    def key_setting(self, value):
+        acceptable = ['histogram', 'discrete', 'pdf_indep', 'dist']
+        if value not in acceptable:
+            raise ValueError("The ``key_setting`` {0!r} is "
+                "unacceptable.".format(value))
+        self._key_setting = value
+
+    @property
+    def val_setting(self): return self._val_setting
+
+    @val_setting.setter
+    def val_setting(self, value):
+        acceptable = ['prob', 'cumprob', 'propvol', 'partint', 'analytic']
+        if value not in acceptable:
+            raise ValueError("The ``val_setting`` {0!r} is "
+                "unacceptable.".format(value))
+        self._val_setting = value
+
+    @property
+    def dist(self): return self._dist
+
+    @dist.setter
+    def dist(self, value): self._dist = value
 
 
 class Criticality(ISource):
