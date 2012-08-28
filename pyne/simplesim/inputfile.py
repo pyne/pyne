@@ -365,23 +365,6 @@ class MCNPInput(IInputFile):
             if currstr[2] == '': cont = False
             else: string = currstr[2]
 
-#    def _write_card(self, card):
-#        string = card.mcnp(self.float_format, self.sim)
-#        if card.bypass_wrap:
-#            # Check that the number of characters between any two newlines is
-#            # not greater than 80. Got this line of code from activestate.com.
-#            starts = [0]
-#            starts += [match.start() for match in re.finditer('\n', string)]
-#            # Account for the fact that the string does not end in a newline.
-#            starts += [len(string) - 1]
-#            if (np.diff(np.array(starts)) > 79).any():
-#                warnings.warn("Card {0} contains lines longer than "
-#                        "79 columns.".format(card.name))
-#            self.fid.writelines(string)
-#        else:
-#            self._write_cardwrap(string)
-#        self._new_line()
-
     def _write_cardwrap(self, string):
         strlist = self.cardwrap.wrap(string)
         counter = 0
