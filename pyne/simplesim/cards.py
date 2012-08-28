@@ -2399,7 +2399,7 @@ class Distribution(ICard):
         super(Distribution, self).__init__(name)
         self.key_setting = key_setting
         self.val_setting = val_setting
-        self.dist
+        self.dist = dist
 
 
     @property
