@@ -1876,7 +1876,12 @@ class GeneralSource(ISource):
     of the arguments. Note that the x, y, and z coordinates of the
     source are separate inputs because they might each be on their own
     distributions. To learn about Python keyword arguments, visit
-    :ref:`docs.python.org/tutorial/controlflow.html#keyword-arguments`.
+    :ref:`docs.python.org/tutorial/controlflow.html#keyword-arguments`. Each
+    keyword argument is also an attribute of this class, and can be modified
+    individually after the card is created::
+
+        src = GeneralSource()
+        src.cell = 'fuel'
 
     .. inheritance-diagram:: pyne.simplesim.cards.GeneralSource
 
@@ -1891,9 +1896,10 @@ class GeneralSource(ISource):
         """
         Parameters
         ----------
-        particle : str, :py:class:`Distribution` name, optional (default: None)
+        particle : str, int, :py:class:`Distribution` name, optional (default: None)
             Name of a particle, 'spont-fiss-by-neut', 'spont-fiss-by-hist', or
-            'spont-phot', or the name of a :py:class:`Distribution` card. If
+            'spont-phot', integer to specify a heavy ion ZAID, or the name of a
+            :py:class:`Distribution` card. If
             the string is the name of a distribution in the simulation, then
             that distribution is used, and the other possible inputs are
             ignored. Therefore, be careful with how distribution cards are
@@ -2076,7 +2082,10 @@ class GeneralSource(ISource):
             elif self.particle == 'spont-fiss-by-neut': string += "SF"
             elif self.particle == 'spint-fiss-by-hist': string += "-SF"
             elif self.particle == 'spont-phot':         string += "SP"
-            else: string += Particle(self.particle).mcnp()
+            elif type(self.particle) is str:
+                string += Particle(self.particle).mcnp()
+            else:
+                string += "{0}".format(self.particle)
         elif self.cell:
             string += " CEL="
             #if isinstance(self.cell, Cell): 
@@ -2342,17 +2351,50 @@ class GeneralSource(ISource):
 
 
 class Distribution(ICard):
-    """A distribution used in conjunction with source variables. The value of a
+    """A distribution used in conjunction with source variables on the
+    :py:class:`GeneralSource` card. The value of a
     source variable can be sampled from a distribution, described by this
     class.  In MCNP, this card is implemented with a pair of **SI** and **SP**
     cards.
 
+    Limititations
+    -------------
+    - Embedded sources are not supported; to use this the user must provide an
+      explicit string for ``keys``.
+    - In MCNP, particles also have a number associated with them. It is
+      necessary to use those numbers, instead of the abbreviations like 'N' or
+      'H' (see :py:attr:`Particle.mcnp_abbrev`), to avoid conflict with the key
+      settings. Specifying a particle name like 'proton' will not cause this
+      code to find the particle number, but in such cases the user can provide
+      the particle number on their own. Alternatively, the user can provide
+      their ``keys`` input explicitly as a string .
+    - Particles that are heavy ions are not supported through
+      ``pyne.nucname``, but the user can provide the ZAID integer as part of the
+      ``keys`` list
+
     """
+    mcnp_keys = {'histogram': 'H',
+                 'discrete' : 'L',
+                 'pdf_indep': 'A',
+                 'dist'     : 'S'}
+    mcnp_vals = {'prob'     : 'D',
+                 'cumprob'  : 'C',
+                 'propvol'  : 'V',
+                 'partint'  : 'W'}
+    analytic = {'maxwell'   :  2,
+                'watt'      :  3,  
+                'gauss'     :  4,  
+                'evap'      :  5,  
+                'muir'      :  6,  
+                'exp_decay' :  7,  
+                'power'     : 21, 
+                'exp'       : 31, 
+                'gauss_beam': 41} 
+
     # TODO keys can be vectors (3 elements)
-    def __init__(self, name, key_setting, val_setting, dist):
-        """The ``dist`` input is typically a dictionary, where the keys are the
-        independent variable, and the values are probability values for the
-        independent variable.
+    def __init__(self, name, keys, vals, key_setting=None, val_setting=None):
+        """The ``keys`` are the independent variable in the distribution, and
+        the ``vals`` are probability values for the independent variable.
 
         Parameters
         ----------
@@ -2367,6 +2409,11 @@ class Distribution(ICard):
             - 'pdf_indep': independent variable for probability density
               function. **A** in MCNP.
             - 'dist': names of other distributions. **S** in MCNP.
+            - 'analytic': ``vals`` contains the parameters of a built-in
+              analytic probability density function, and the function is
+              determined by the ``key_setting``. In this case, ``keys`` must be
+              an empty list ``[]`` or ``list()``, or the bounds of the domain
+              for the function.
 
         val_setting : str, optional
             Specifies what the values represent. The following settings are
@@ -2378,38 +2425,174 @@ class Distribution(ICard):
             - 'partint': intensities of particle sources. Values can be the
               name of a cell for spontaneous fission or spontaneous photon
               sources. **W** in MCNP.
-            - 'analytic': ``dist`` contains the parameters of a built-in
-              analytic probability density function.
-              TODO
-        dist : dict
-            Keys are the independent variable, and values are probabilities
-            associated with the keys. If ``val-setting`` is 'analytic', TODO.
+            - if ``key_setting`` == 'analytic', this value is one of the
+              following, with parameters specified in a list on ``vals``:
+                - 'maxwell': 1 parameter
+                - 'watt': 2 parameters
+                - 'gauss': 2 parameters
+                - 'evap': 1 parameter
+                - 'muir': 2 parameters
+                - 'exp_decay': 1 parameter
+                - 'power': 1 parameter
+                - 'exp': 1 parameter
+                - 'gauss_beam': 2 parameters
+
+             All the analytic parameters have defaults, and the defaults can be
+             invoked if ``vals`` is an empty list. See MCNP manual for more
+             information.
+        keys : list, str
+             If a string, the string is printed after the
+            ``key_setting``, if provided. A string is used if the class does
+            not provide the desired functionality, and the user wants to
+            provide their own input. If a list, elements can be:
+            
+            - particle names (keys of :py:attr:`Particle.mcnp_abbrev`),
+            - 'spont-fiss-by-neut', 'spont-fiss-by-hist', 'spont-phot',
+            - a 3-element list or :py:class:`np.array`,
+            - the name of another :py:class:`Distribution`, or
+            - anything else.
+
+            The list should be as long as ``vals``, unless ``key_setting`` is
+            ``analytic``, in which case it is an empty list or the bounds of
+            the domain of the analytic function.
+        vals : list, str
+            If a string, the string is printed after the ``val_setting``, if
+            provided. A string is used if the class does not provide the
+            desired functionality, and the user wants to provide their own
+            input. If a list, elements can be:
+            
+            - cell name,
+            - analytic function parameters, or
+            - anything else (a normal bin probability).
+
+            The list should be as long as ``keys``, unless ``key_setting`` is
+            'analytic', in which case the list contains the 1 or 2 parameters
+            for the analytic function, or can be an empty list to use the
+            default parameters.
 
         Examples
         --------
-        TODO
+        The following might be used for the ``x`` source variable::
+
+            sd = Distribution('distA', [-2, 2], [0, 1])
+            sd = Distribution('distA', [-2, 2], [0, 1], 'histogram', 'prob')
+
+        The following specifies multiple particle types and their intensities,
+        also showing how a cell name can be provided as an intensity value, and
+        a heavy ion can be specified::
+
+            sd = Distribution('distA', 
+                    ['neutron', 'photon', 'spont-fiss-by-neut', 92238],
+                    [1, 1, 'cellA', 2],
+                    key_setting='discrete',
+                    val_setting='partint')
+
+        The names of other distributions can be provided as well. It is assumed
+        in this example that 'distB' and 'distC' are the names of
+        :py:class:`Distribution`'s that will be added to the simulation before
+        an input is created::
+
+            sd = Distribution('distA', ['distB', 'distC'], [0.3, 0.7], 'dist')
+
+        The following two commands specify an unbounded analytic distribution
+        using the default parameters::
+
+            sd = Distribution('distA', [], [], 'analytic', 'maxwell')
+            sd = Distribution('distA', [], [], key_setting='analytic',
+                                               val_setting='maxwell')
+
+        The following is a bounded analytic distribution, with parameters
+        specified::
+
+            sd = Distribution('distA', [0, 10], [1, 3], 'analytic', 'watt')
 
         """
-        # TODO analytic: need to provide the type of analytic function, e.g.
-        # -41
         super(Distribution, self).__init__(name)
         self.key_setting = key_setting
         self.val_setting = val_setting
-        self.dist = dist
+        self.keys = keys
+        self.vals = vals
 
     def comment(self):
-        pass
+        vecformat = " {0} {0} {0}"
+        string = "Source distribution {0!r}:".format(self.name)
+        string += " key setting {0},".format(
+                self.key_setting if self.key_setting else "default")
+        string += " val setting {0},".format(
+                self.val_setting if self.val_setting else "default")
+        string += " KEYS:"
+        # Independent variable.
+        if type(self.keys) is str:
+            string += " {0}".format(self.keys)
+        elif type(self.keys) is list and len(self.keys) == 0:
+            string += " default,"
+        else:
+            for key in self.keys:
+                string += " {0},".format(key)
+        # Probability values.
+        string += " VALS:"
+        if type(self.vals) is str:
+            string += " {0}".format(self.vals)
+        elif type(self.vals) is list and len(self.vals) == 0:
+            string += " default,"
+        else:
+            for val in self.vals:
+                string += " {0},".format(val)
+        return string[:-1] + "."
 
     def mcnp(self, float_format, sim):
-        pass
+        vecformat = " {0} {0} {0}"
+        # Independent variable.
+        info = "SI{0}".format(sim.dist_num(self.name))
+        if self.key_setting:
+            if self.key_setting != 'analytic':
+                info += " {0}".format(self.mcnp_keys[self.key_setting])
+        if type(self.keys) is str:
+            info += " {0}".format(self.keys)
+        else:
+            for key in self.keys:
+                if key in Particle.mcnp_abbrev:
+                    info += " {0}".format(Particle(key).mcnp())
+                elif key == 'spont-fiss-by-neut': info += " SF"
+                elif key == 'spont-fiss-by-hist': info += " -SF"
+                elif key == 'spont-phot':         info += " SP"
+                elif type(key) is list or isinstance(key, np.ndarray):
+                    info += vecformat % tuple(key)
+                elif key in sim.dists:
+                    info += " {0}".format(sim.dist_num(key))
+                else:
+                    info += " {0}".format(key)
+        # Probability values.
+        prob = "SP{0}".format(sim.dist_num(self.name))
+        if self.val_setting:
+            if self.key_setting == 'analytic':
+                prob += " {0}".format(-self.analytic[self.val_setting])
+            else:
+                prob += " {0}".format(self.mcnp_vals[self.val_setting])
+        if type(self.vals) is str:
+            prob += " {0}".format(self.vals)
+        else:
+            for val in self.vals:
+                if val in sim.sys.cells:
+                    prob += " {0}".format(-sim.sys.cell_num(val))
+                elif type(val) is float:
+                    prob += " " + float_format % val
+                else:
+                    prob += " {0}".format(val)
+        # Don't print an SI card if ``keys`` is an empty list.
+        if type(self.keys) is list and len(self.keys) == 0:
+            string = prob
+        else:
+            string = "{0}\n{1}".format(info, prob)
+        return string
 
     @property
     def key_setting(self): return self._key_setting
 
     @key_setting.setter
     def key_setting(self, value):
-        acceptable = ['histogram', 'discrete', 'pdf_indep', 'dist']
-        if value not in acceptable:
+        acceptable = self.mcnp_keys.keys() + ['analytic']
+        if value and value not in acceptable:
             raise ValueError("The ``key_setting`` {0!r} is "
                 "unacceptable.".format(value))
         self._key_setting = value
@@ -2419,17 +2602,23 @@ class Distribution(ICard):
 
     @val_setting.setter
     def val_setting(self, value):
-        acceptable = ['prob', 'cumprob', 'propvol', 'partint', 'analytic']
-        if value not in acceptable:
+        acceptable = self.mcnp_vals.keys() + self.analytic.keys()
+        if value and value not in acceptable:
             raise ValueError("The ``val_setting`` {0!r} is "
                 "unacceptable.".format(value))
         self._val_setting = value
 
     @property
-    def dist(self): return self._dist
+    def keys(self): return self._keys
 
-    @dist.setter
-    def dist(self, value): self._dist = value
+    @keys.setter
+    def keys(self, value): self._keys = value
+
+    @property
+    def vals(self): return self._vals
+
+    @vals.setter
+    def vals(self, value): self._vals = value
 
 
 class Criticality(ISource):
