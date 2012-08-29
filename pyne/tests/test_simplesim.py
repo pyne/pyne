@@ -103,6 +103,7 @@ class TestSystemDefinition(unittest.TestCase):
         uni = cards.Universes(self.fuel, 'unitcell', True, 
                             self.coolant, 'unitcell', True,
                             self.graveyard, 'grave', False)
+        self.sim.add_misc(uni)
         self.assertEquals(uni.comment(), "Universes 'universes': "
                 "cell 'fuel' unitcell (truncated), "
                 "cell 'coolant' unitcell (truncated), "
@@ -113,6 +114,7 @@ class TestSystemDefinition(unittest.TestCase):
         uni = cards.Universes()
         uni.set(self.fuel, 'unitcell', True)
         uni.set(self.coolant, 'unitcell', True)
+        self.sim.add_misc(uni)
         self.assertEquals(uni.comment(), "Universes 'universes': "
                 "cell 'fuel' unitcell (truncated), "
                 "cell 'coolant' unitcell (truncated).")
@@ -127,7 +129,7 @@ class TestSystemDefinition(unittest.TestCase):
         self.sim.add_misc(uni) 
 
         uni = cards.Fill(self.fuel, 'unitcell',
-                         self.coolant, 'unitcell')
+                         self.coolant, 'otheruniv')
         self.assertEquals(uni.comment(), "Fill 'fill': "
                 "cell 'fuel' unitcell, "
                 "cell 'coolant' otheruniv.")
@@ -135,9 +137,9 @@ class TestSystemDefinition(unittest.TestCase):
                 "FILL 1 2 1J")
 
         uni = cards.Fill()
-        uni.set(self.fuel, 'unitcell', True)
-        uni.set(self.coolant, 'otheruniv', True)
-        self.assertEquals(uni.comment(), "Fill 'universes': "
+        uni.set(self.fuel, 'unitcell')
+        uni.set(self.coolant, 'otheruniv')
+        self.assertEquals(uni.comment(), "Fill 'fill': "
                 "cell 'fuel' unitcell, "
                 "cell 'coolant' otheruniv.")
         self.assertEquals(uni.mcnp('%.5g', self.sim), 
