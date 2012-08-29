@@ -94,6 +94,8 @@ class IDefinition(object):
             #        "definition; overwriting.".format(card.name, card_type))
             #raise Exception("The %s name %s has already been used for "
             #        "another %s" % (card_type, card.name, card_type))
+            return False
+        return True
 
     @property
     def verbose(self): return self._verbose
@@ -117,6 +119,7 @@ class SystemDefinition(IDefinition):
         self._surfaces = collections.OrderedDict()
         self._materials = collections.OrderedDict()
         self._cells = collections.OrderedDict()
+        self._universes = list()
 
     def add_cell(self, cell):
         """
@@ -172,6 +175,16 @@ class SystemDefinition(IDefinition):
         self._assert_unique('material', material)
         self._materials[material.name] = material
 
+    def _register_universe(self, univ_name):
+        """This method is not used by the user. It is called by
+        :py:meth:`cards.Cell.mcnp` and :py:meth:`cards.Universes._mcnp_unit` to
+        register universe names with the system definition.
+
+        """
+        #self._assert_unique('universe', univ_name)
+        if univ_name not in self.universes:
+            self._universes += univ_name
+
     def cell_num(self, name):
         # TODO removing cards.
         # Must add one because indices start at 0 but card numbers at 1.
@@ -187,6 +200,8 @@ class SystemDefinition(IDefinition):
                     name))
         num = self.surfaces.keys().index(name) + 1
         if isinstance(self.surfaces[name], cards.Facet):
+            # This does not work, as self.surfaces is the macrobody with the
+            # same name, not the facet.
             return num + self.surfaces[name].number / 10
         return num
 
@@ -197,6 +212,12 @@ class SystemDefinition(IDefinition):
                     name))
         return self.materials.keys().index(name) + 1
 
+    def universe_num(self, name):
+        if name not in self.universes:
+            raise StandardError("Universe {0!r} is not in the system.".format(
+                    name))
+        return self.universes.index(name) + 1
+
     def remove_cell(self, name):
         raise Exception("Not implemented.")
 
@@ -204,6 +225,9 @@ class SystemDefinition(IDefinition):
         raise Exception("Not implemented.")
 
     def remove_material(self, name):
+        raise Exception("Not implemented.")
+
+    def remove_universe(self, name):
         raise Exception("Not implemented.")
 
     def save(self, fname):
@@ -230,6 +254,13 @@ class SystemDefinition(IDefinition):
     def cells(self):
         """Ordered dictionary of cells (:py:class:`cards.Cell` or subclass)."""
         return self._cells
+
+    @property
+    def universes(self):
+        """List of universe names (see :py:class:`cards.Universes`)."""
+        # TODO would become an ordered dictionary when Universes become their
+        # own cards.
+        return self._universes
 
 
 class SimulationDefinition(IDefinition):

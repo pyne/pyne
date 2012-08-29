@@ -50,6 +50,7 @@ the module.
 # decoding would take some effort. repr also means that i probably should use
 # name referencing everywhere, not object passing. however using json() would
 # create something more human-readable.
+# TODO talk aobut how i'd prefer for universes to work.
 
 import abc
 import collections
@@ -140,7 +141,8 @@ class Cell(ICard):
 
     """
     def __init__(self, name, region, material=None, density=None,
-                 density_units=None, *args, **kwargs):
+                 density_units=None, universe=None, fill=None, lattice=None,
+                 *args, **kwargs):
         """
         Parameters
         ----------
@@ -158,6 +160,23 @@ class Cell(ICard):
             Density for the material, in units of density_units.
         density_units : str, None for void
             Either 'g/cm^3', or 'atoms/b/cm'.
+        universe : str, optional
+            To make this cell part of a universe, provide the name of that
+            universe. Universes are often composed of more than one cell, and
+            so this name is likely to appear on other cell cars as well.
+        fill : str, 4-element tuple, optional
+            The name of a universe with which to fill this cell. Typically,
+            cells that are filled with a universe are void themselves. If
+            tuple, it contains:
+
+            1. 2-element list of x-index bounds ([], or [0, 0] for 1 row/col)
+            2. 2-element list of y-index bounds ([], or [0, 0] for 1 row/col)
+            3. 2-element list of z-index bounds ([], or [0, 0] for 1 row/col)
+            4. 1-D, 2-D, or 3-D list of universe names. See examples.
+
+        lattice : str, optional
+            Makes this cell is a repeating lattice. Can be either
+            'square' for 6-sided elements or 'triangle' for 8-sided elements.
 
         Examples
         --------
@@ -302,9 +321,8 @@ class CellMCNP(Cell):
     The card will then use the appropriate particle designator when writing the
     card.
     
-    The U, LAT, and FILL keywords are not available; as this functionality
-        should be obtained by using Universe and Lattice cards.
-
+    See :py:class:`Cell` for universes, fill, and lattices.
+    
     Note this card was written with MCNPX version 2.7 in mind.
 
     .. inheritance-diagram:: pyne.simplesim.cards.CellMCNP
@@ -825,6 +843,8 @@ class IUniverse(ICard):
     universe cards.
 
     """
+    # TODO
+    # Ideally universes would be their own objects.
     __metaclass__ = abc.ABCMeta
 
     def __init__(self, name, *args, **kwargs):
@@ -832,36 +852,29 @@ class IUniverse(ICard):
 
 
 class UniverseByRegion(IUniverse):
-    """
-
-    """
+    """Unimplemented. Use cell card keywords."""
     # TODO
     def __init__(self, name, region):
         pass
 
 
 class UniverseByLattice(IUniverse):
-    """
-
-    """
+    """Unimplemented. Use cell card keywords."""
     # TODO
     def __init__(self, name, lattice):
         pass
 
 
 class Lattice(ICard):
-    """
-
-    """
-    # TODO 
+    """Unimplemented. Use cell card keywords."""
+    # TODO
     def __init__(self, name, geom, universe):
         pass
 
 
 class LatticeByArray(ICard):
-    """
-
-    """
+    """Unimplemented. Use cell card keywords."""
+    # TODO
     # TODO support of 3D arrays.
     def __init(self, name, geom, xindices, yindices, zindices,
                universe_array):
@@ -1503,6 +1516,8 @@ class Facet(ISurface):
     """
     # TODO ideally we would dynamically subclass this using whatever class
     # surface is.
+    # TODO facets do not work right now because they have the same name as an
+    # already-existant surface.
     def __init__(self, macrobody, descriptor, number):
         """The user does not use this constructor. The user creates facets
         using :py:meth:`IMacrobody.facet`.
@@ -4125,7 +4140,7 @@ class ICellMod(IMisc):
     cell.
 
     """
-    # The mcnp() method of the class implements the jump feature, which
+    # The mcnp() method of this class implements the jump feature, which
     # ICellModParticle does not.
     __metaclass__ = abc.ABCMeta
 
@@ -4135,8 +4150,6 @@ class ICellMod(IMisc):
         ----------
         name : str
             See :py:class:`ICard`.
-        cell : :py:class:`Cell` or subclass
-            The cell for which the card applies.
         n_args_per_cell : int
             The number of arguments the subclass expects per cell.
 
@@ -4206,6 +4219,93 @@ class ICellMod(IMisc):
                 raise ValueError("The ``cell`` must be a ``Cell``. User "
                         "provided {0}.".format(arg))
         self._cells = value
+
+
+class Universes(ICellMod):
+    """Universe names for each cell. Unique card with name `universes`. In
+    MCNP, this is the **U** card. The user can initialize this card without
+    providing any universe names.
+
+    .. inheritance-diagram:: pyne.simplesim.cards.Universes
+
+    """
+    def __init__(self, *args):
+        """
+        Parameters
+        ----------
+        cell : :py:class:`Cell` or subclass
+            The cell for which a universe name is being provided.
+        univ_name : str
+            The name of the universe that the cell is a part of.
+        truncate : bool
+            By default, the cell is truncated by the boundary of higher-level
+            cells. Not an optional argument, but is typically True.
+        *args : cell, univ_name, truncate, ...
+            To provide universe names for more than one cell, supply the last
+            three arguments for the other cells. See example. This can also be
+            done using :py:meht:`set`.
+
+        Examples
+        --------
+        The following adds the cell cards ``pincell`` and ``coolantcell`` to
+        the universe 'unitcell'. All other cell cards, as of yet, are then part
+        of the real world universe::
+
+            uni = Universes(pincell, 'unitcell', coolantcell, 'unitcell')
+
+        """
+        super(Universes, self).__init__('universes', 3, *args)
+        self.univ_names = dict()
+        self.truncates = dict()
+        self._process_varargs(args)
+
+    def set(self, cell, univ_name, truncate):
+        """
+        Parameters
+        ----------
+        cell : :py:class:`Cell` or subclass
+        univ_name : str
+        truncate : bool
+
+        Examples
+        --------
+        The example above can be achieved by the following::
+
+            uni = Universes()
+            uni.set(pincell, 'unitcell')
+            uni.set(coolantcell, 'unitcell')
+
+        """
+        super(Universes, self).set(cell)
+        self.univ_names[cell] = univ_name
+        self.truncates[cell] = truncate
+
+    def comment(self):
+        return super(Universes, self).comment("Universes")
+
+    def _comment_unit(self, cell):
+        return " {0} ({1}truncated)".format(self.univ_names[cell],
+                "" if self.truncates[cell] else "not ")
+
+    def mcnp(self, float_format, sim):
+        return super(Universes, self).mcnp(float_format, sim, "U")
+
+    def _mcnp_unit(self, float_format, sim, cell):
+        # TODO this code really should go elsewhere.
+        sim.sys._register_universe(self.univ_names[cell])
+        return "{0}".format(sim.sys.universe_num(self.univ_names[cell]))
+
+    @property
+    def univ_names(self): return self._univ_names
+
+    @univ_names.setter
+    def univ_names(self, value): self._univ_names = value
+
+    @property
+    def truncates(self): return self._truncates
+
+    @truncates.setter
+    def truncates(self, value): self._truncates = value
 
 
 class Volume(ICellMod):
