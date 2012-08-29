@@ -185,7 +185,10 @@ class SystemDefinition(IDefinition):
         if name not in self.surfaces:
             raise StandardError("Surface {0!r} is not in the system.".format(
                     name))
-        return self.surfaces.keys().index(name) + 1
+        num = self.surfaces.keys().index(name) + 1
+        if isinstance(self.surfaces[name], cards.Facet):
+            return num + self.surfaces[name].number / 10
+        return num
 
     def material_num(self, name):
         # Must add one because indices start at 0 but card numbers at 1.
