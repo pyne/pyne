@@ -4330,7 +4330,7 @@ class Lattice(ICellMod):
     """
     acceptable = ['hexahedra', 'hexagonal']
 
-    def __init__(sef, *args):
+    def __init__(self, *args):
         """
         Parameters
         ----------
@@ -4404,7 +4404,7 @@ class Lattice(ICellMod):
         for val in value:
             if val not in self.acceptable:
                 raise ValueError("``setting`` {0!r} not acceptable.".format(
-                        val)
+                        val))
         self._settings = value
 
 
