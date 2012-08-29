@@ -4249,7 +4249,7 @@ class Universes(ICellMod):
         *args : cell, univ_name, truncate, ...
             To provide universe names for more than one cell, supply the last
             three arguments for the other cells. See example. This can also be
-            done using :py:meht:`set`.
+            done using :py:meth:`set`.
 
         Examples
         --------
@@ -4314,6 +4314,98 @@ class Universes(ICellMod):
 
     @truncates.setter
     def truncates(self, value): self._truncates = value
+
+
+class Fill(ICellMod):
+    pass
+
+
+class Lattice(ICellMod):
+    """Sets cells to be lattice cells. Unique card with name `lattice`. In MCNP,
+    this is the **LAT** card. The user can initialize this card without
+    providing any inputs.
+
+    .. inheritance-diagram:: pyne.simplesim.cards.Lattice
+
+    """
+    acceptable = ['hexahedra', 'hexagonal']
+
+    def __init__(sef, *args):
+        """
+        Parameters
+        ----------
+        cell : :py:class:`Cell` or subclass
+            The cell for which the lattice setting is being provided.
+        setting : str
+            'hexahedra', or 'hexagonal'.
+        *args : cell, setting, ...
+            To provide lattice settings for more than one cell, supply the last
+            2 arguments for the other cells. This can also be done using
+            :py:meth:`set`.
+
+        Examples
+        --------
+        The following shows a typical usage, where ``pincell`` is a cell
+        representing a fuel pin, ``coolantcell`` is a cell representing the
+        coolant flowing around the pin, ``unit`` is a cell filled with the
+        'unitcell' universe, and is made into a hexahedra lattice::
+            
+            uni = Universes()
+            uni.set(pincell, 'unitcell', True)
+            uni.set(coolantcell, 'unitcell', True)
+            fill = Fill(unit, 'unitcell')
+            lat = Lattice(unit, 'hexahedra')
+
+        Inputs for multiple cells can be provided::
+
+            lat = Lattice(cellA, 'hexahedra', cellB, 'hexagonal')
+
+        """
+        super(Lattice, self).__init__('lattice', 2, *args)
+        self.settings = dict()
+        self._process_varargs(args)
+
+    def set(self, cell, setting):
+        """
+        Parameters
+        ----------
+        cell : :py:class:`Cell` or subclass
+        setting : str
+
+        Examples
+        --------
+        The example above can be achieved by the following::
+
+            lat = Lattice()
+            lat.set(cellA, 'hexahedra')
+            lat.set(cellB, 'hexagonal')
+
+        """
+        super(Lattice, self).set(cell)
+        self.settings[cell] = setting
+
+    def comment(self):
+        return super(Lattice, self).comment("Lattice")
+
+    def _comment_unit(self, cell):
+        return " {0}".format(self.settings[cell])
+
+    def mcnp(self, float_format, sim):
+        return super(Lattice, self).mcnp(float_format, sim, "LAT")
+
+    def _mcnp_unit(self, float_format, sim, cell):
+        return "{0:d}".format(1 if self.settings[cell] == 'hexahedra' else 2)
+
+    @property
+    def settings(self): return self._settings
+
+    @settings.setter
+    def settings(self, value):
+        for val in value:
+            if val not in self.acceptable:
+                raise ValueError("``setting`` {0!r} not acceptable.".format(
+                        val)
+        self._settings = value
 
 
 class Volume(ICellMod):
