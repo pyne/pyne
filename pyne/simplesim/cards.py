@@ -1883,11 +1883,19 @@ class GeneralSource(ISource):
         src = GeneralSource()
         src.cell = 'fuel'
 
+    A source is added to a simulation as follows::
+        
+        sys = definition.SystemDefinition()
+        ...
+        sim = definition.MCNPSimulation(sys)
+        sim.add_source(src)
+
     .. inheritance-diagram:: pyne.simplesim.cards.GeneralSource
 
     Limitations
     -----------
     - Keyword cannot depend on other keywords, as they can in MCNP.
+    
     """
     # TODO non-ambiguous names required.
     # TODO cell card for repeated structures is not simple.
@@ -1988,6 +1996,53 @@ class GeneralSource(ISource):
 
         Examples
         --------
+        The following creates the default source::
+
+            gs = GeneralSource()
+
+        The following creates a photon source in cell 'cellA'::
+
+            gs = GeneralSource(particle='photon', cell='cellA')
+
+        The cookie-cutter input operates the same way as the cell input. The
+        following uses a :py:class:`Distribution` for both the particle and the
+        cell, assuming that the user has created distributions with the names
+        'partdist' and 'celldist', and that there is no cell with the name
+        'celldist'::
+
+            gs = GeneralSource(particle='partdist', cell='celldist')
+
+        Surfaces work the same way as cells. The following shows the
+        specification of energies from a distribution, as well as a time::
+
+            gs = GeneralSource(energy='energydist', time=2e10)
+
+        The following shows the specification of a reference direction and the
+        cosine from that reference vector::
+
+            gs = GeneralSource(ref_dir=[1, 0, 0], cosine=0.5)
+
+        The following shows how a distribution for ``x``, ``y``, and ``z`` can
+        be requested (make sure to add the distributions to the simulation)::
+
+            gs = GeneralSource(x='xdist', y='ydist', z='zdist')
+            xd = Distribution('xdist', [0, 10], [0, 1])
+            yd = Distribution('ydist', [-5, 5], [0, 1])
+            zd = Distribution('zdist', [0, 1], [0, 1])
+
+        The following shows how a transformation can be applied to the source
+        (assuming the transformation is added to the simulation)::
+
+            tr = Transformation('source', ...)
+            gs = GeneralSource(transformation='source')
+
+
+        The following shows how ``beam_emit`` and ``beam_aper`` are used::
+
+            gs = GeneralSource(beam_aper=(1, 2, 3), beam_aper=(4, 5))
+
+        All variables for which an example was not given function similarly to
+        the other variables.
 
         """
         super(GeneralSource, self).__init__('gensource')
@@ -2014,7 +2069,6 @@ class GeneralSource(ISource):
         self.beam_emit = keyword_args.get('beam_emit', None)
         self.beam_aper = keyword_args.get('beam_aper', None)
         self.user_custom = keyword_args.get('user_custom', None)
-        # TODO which fields can be a distribution?
         # Old constructor:
         #def __init__(self, cell=None, surface=None, energy=None, time=None, 
         #             ref_dir=None, cosine=None, normal_sign=None, ref_pos=None,
@@ -2026,49 +2080,49 @@ class GeneralSource(ISource):
         string = "General source {0!r}:".format(self.name)
         if self.particle:
             string += " particle={0},".format(self.particle)
-        elif self.cell:
+        if self.cell:
             string += " cell={0},".format(self.cell)
-        elif self.surface:
+        if self.surface:
             string += " surface={0},".format(self.surface)
-        elif self.energy:
+        if self.energy:
             string += " energy={0},".format(self.energy)
-        elif self.time:
+        if self.time:
             string += " string={0},".format(self.time)
-        elif self.ref_dir:
+        if self.ref_dir:
             string += " ref. dir={0},".format(self.ref_dir)
-        elif self.cosine:
+        if self.cosine:
             string += " cosine={0},".format(self.cosine)
-        elif self.normal_sign:
+        if self.normal_sign:
             string += " {0} surf. normal,".format(self.normal_sign)
-        elif self.ref_pos:
+        if self.ref_pos:
             string += " ref. pos={0},".format(self.ref_pos)
-        elif self.offset:
+        if self.offset:
             string += " offset={0},".format(self.offset)
-        elif self.radius:
+        if self.radius:
             string += " radius={0},".format(self.radius)
-        elif self.axis:
+        if self.axis:
             string += " axis={0},".format(self.axis)
-        elif self.x:
+        if self.x:
             string += " x={0},".format(self.x)
-        elif self.y:
+        if self.y:
             string += " y={0},".format(self.y)
-        elif self.z:
+        if self.z:
             string += " z={0},".format(self.z)
-        elif self.cookie_cutter:
+        if self.cookie_cutter:
             string += " c. cutter cell={0},".format(self.cookie_cutter)
-        elif self.area:
+        if self.area:
             string += " area={0},".format(self.area)
-        elif self.weight:
+        if self.weight:
             string += " weight={0},".format(self.weight)
-        elif self.transformation:
+        if self.transformation:
             string += " trans.={0},".format(self.transformation)
-        elif self.eff:
+        if self.eff:
             string += " eff.={0},".format(self.eff)
-        elif self.beam_emit:
+        if self.beam_emit:
             string += " beam emit.={0},".format(self.beam_emit)
-        elif self.beam_aper:
+        if self.beam_aper:
             string += " beam aper.={0},".format(self.beam_aper)
-        elif self.user:
+        if self.user:
             string += " and user input."
         return string[:-1] + "."
 
@@ -2086,7 +2140,7 @@ class GeneralSource(ISource):
                 string += Particle(self.particle).mcnp()
             else:
                 string += "{0}".format(self.particle)
-        elif self.cell:
+        if self.cell:
             string += " CEL="
             #if isinstance(self.cell, Cell): 
             #    string += "{0}".format(sim.sys.cell_num(self.cell.name))
@@ -2102,7 +2156,7 @@ class GeneralSource(ISource):
             else:
                 raise Exception("Name {0!r} is not a cell or dist.".format(
                     self.cell))
-        elif self.surface:
+        if self.surface:
             string += " SUR"
             if self.surface in sim.sys.surfaces and self.surface in sim.dist:
                 raise Exception("Name {0!r} is both surface and dist.".format(
@@ -2114,66 +2168,66 @@ class GeneralSource(ISource):
             else:
                 raise Exception("Name {0!r} is not a surface or dist.".format(
                     self.surface))
-        elif self.energy:
+        if self.energy:
             string += " ERG="
             if type(self.energy) is str:
                 string += "D{0}".format(sim.dist_num(self.energy))
             else: string += float_format % self.energy
-        elif self.time:
+        if self.time:
             string += " TME="
             if type(self.time) is str:
                 string += "D{0}".format(sim.dist_num(self.time))
             else: string += float_format % (self.time * self.secs2shakes)
-        elif self.ref_dir:
+        if self.ref_dir:
             string += " VEC=" + vecformat % tuple(self.ref_dir)
-        elif self.cosine:
+        if self.cosine:
             string += " DIR="
             if type(self.cosine) is str:
                 string += "D{0}".format(sim.dist_num(self.cosine))
             else: string += float_format % self.cosine
-        elif self.normal_sign:
+        if self.normal_sign:
             string += " NRM="
             if   self.normal_sign == 'neg': string += "-1"
             elif self.normal_sign == 'pos': string += "+1"
             else:
                 raise Exception("Input ``normal_sign`` cannot be {0}.".format(
                     self.normal_sign))
-        elif self.ref_pos:
+        if self.ref_pos:
             string += " POS="
             if type(self.ref_pos) is str:
                 string += "D{0}".format(sim.dist_num(self.ref_pos))
             else: formatstr = vecformat % tuple(self.ref_pos)
-        elif self.offset:
+        if self.offset:
             string += " EXT="
             if type(self.offset) is str:
                 string += "D{0}".format(sim.dist_num(self.offset))
             else: string += float_format % self.offset
-        elif self.radius:
+        if self.radius:
             string += " RAD="
             if type(self.radius) is str:
                 string += "D{0}".format(sim.dist_num(self.radius))
             else: string += float_format % self.radius
-        elif self.axis:
+        if self.axis:
             string += " AXS="
             if type(self.axis) is str:
                 string += "D{0}".format(sim.dist_num(self.axis))
             else: string += vecformat % self.axis
-        elif self.x:
+        if self.x:
             string += " X="
             if type(self.x) is str:
                 string += "D{0}".format(sim.dist_num(self.x))
             else: string += float_format % self.x
-        elif self.y:
+        if self.y:
             string += " Y="
             if type(self.y) is str:
                 string += "D{0}".format(sim.dist_num(self.y))
             else: string += float_format % self.y
-        elif self.z:
+        if self.z:
             string += " Z="
             if type(self.z) is str:
                 string += "D{0}".format(sim.dist_num(self.z))
             else: string += float_format % self.z
-        elif self.cookie_cutter:
+        if self.cookie_cutter:
             string += " CCC="
             if (self.cookie_cutter in sim.sys.cells and 
                     self.cookie_cutter in sim.dist):
@@ -2186,28 +2240,28 @@ class GeneralSource(ISource):
             else:
                 raise Exception("Name {0!r} is not a cell or dist.".format(
                     self.cookie_cutter))
-        elif self.area:
+        if self.area:
             string += " ARA="
             #if type(self.area) is str:
             #    string += "D{0}".format(sim.dist_num(self.area))
             #else:
             string += float_format % self.area
-        elif self.weight:
+        if self.weight:
             string += " WGT="
             string += float_format % self.weight
-        elif self.transformation:
+        if self.transformation:
             string += " TR={0}".format(
                     sim.transformation_num(self.transformation))
-        elif self.eff:
+        if self.eff:
             string += " EFF="
             string += float_format % self.eff
-        elif self.beam_emit:
+        if self.beam_emit:
             formatstr = " BEM={0} {0} {0}".format(float_format)
             string += formatstr % self.beam_emit
-        elif self.beam_aper:
+        if self.beam_aper:
             formatstr = " BAP={0} {0}".format(float_format)
             string += formatstr % self.beam_aper
-        elif self.user:
+        if self.user:
             string += " {0}".format(self.user)
         return string
 
@@ -2354,8 +2408,9 @@ class Distribution(ICard):
     """A distribution used in conjunction with source variables on the
     :py:class:`GeneralSource` card. The value of a
     source variable can be sampled from a distribution, described by this
-    class.  In MCNP, this card is implemented with a pair of **SI** and **SP**
-    cards.
+    class. Distributions are added to a simulation using
+    :py:attr:`definition.MCNPSimulation.add_dist`. In MCNP, this card is
+    implemented with a pair of **SI** and **SP** cards.
 
     Limititations
     -------------

@@ -143,6 +143,25 @@ class TestSystemDefinition(unittest.TestCase):
         self.assertEquals(sd.mcnp('%.5g', self.sim),
                 "SI1 0 10\nSP1 -3 1 3")
 
+    def test_GeneralSource(self):
+        """Tests the :py:class:`cards.GeneralSource` class."""
+
+        gs = cards.GeneralSource()
+        self.assertEquals(gs.name, 'gensource')
+        self.assertEquals(gs.comment(), "General source 'gensource': .")
+        self.assertEquals(gs.mcnp('%.5g', self.sim), "SDEF")
+        gs = GeneralSource(particle='photon', cell='cellA')
+        gs = GeneralSource(particle='partdist', cell='celldist')
+        gs = GeneralSource(energy='energydist', time=2e10)
+        gs = GeneralSource(ref_dir=[1, 0, 0], cosine=0.5)
+        gs = GeneralSource(x='xdist', y='ydist', z='zdist')
+        xd = Distribution('xdist', [0, 10], [0, 1])
+        yd = Distribution('ydist', [-5, 5], [0, 1])
+        zd = Distribution('zdist', [0, 1], [0, 1])
+        tr = Transformation('source', ...)
+        gs = GeneralSource(transformation='source')
+        gs = GeneralSource(beam_aper=(1, 2, 3), beam_aper=(4, 5))
+
     def test_Saving(self):
         """Tests saving a system definition to a JSON file."""
 
