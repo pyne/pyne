@@ -2039,7 +2039,7 @@ class GeneralSource(ISource):
 
         The following shows how ``beam_emit`` and ``beam_aper`` are used::
 
-            gs = GeneralSource(beam_aper=(1, 2, 3), beam_aper=(4, 5))
+            gs = GeneralSource(beam_emit=(1, 2, 3), beam_aper=(4, 5))
 
         All variables for which an example was not given function similarly to
         the other variables.
@@ -2087,7 +2087,7 @@ class GeneralSource(ISource):
         if self.energy:
             string += " energy={0},".format(self.energy)
         if self.time:
-            string += " string={0},".format(self.time)
+            string += " time={0},".format(self.time)
         if self.ref_dir:
             string += " ref. dir={0},".format(self.ref_dir)
         if self.cosine:
@@ -2122,7 +2122,7 @@ class GeneralSource(ISource):
             string += " beam emit.={0},".format(self.beam_emit)
         if self.beam_aper:
             string += " beam aper.={0},".format(self.beam_aper)
-        if self.user:
+        if self.user_custom:
             string += " and user input."
         return string[:-1] + "."
 
@@ -2131,7 +2131,7 @@ class GeneralSource(ISource):
         string = "SDEF"
         if self.particle:
             string += " PAR="
-            if self.particle in sim.dist:
+            if self.particle in sim.dists:
                 string += "D{0}".format(sim.dist_num(self.particle))
             elif self.particle == 'spont-fiss-by-neut': string += "SF"
             elif self.particle == 'spint-fiss-by-hist': string += "-SF"
@@ -2146,12 +2146,12 @@ class GeneralSource(ISource):
             #    string += "{0}".format(sim.sys.cell_num(self.cell.name))
             #elif isinstance(self.cell, Distribution):
             #    string += "{0}".format(sim.dist_num(self.cell.name))
-            if self.cell in sim.sys.cells and self.cell in sim.dist:
+            if self.cell in sim.sys.cells and self.cell in sim.dists:
                 raise Exception("Name {0!r} is both a cell and dist.".format(
                     self.cell))
             elif self.cell in sim.sys.cells:
                 string += "{0}".format(sim.sys.cell_num(self.cell))
-            elif self.cell in sim.dist:
+            elif self.cell in sim.dists:
                 string += "D{0}".format(sim.dist_num(self.cell))
             else:
                 raise Exception("Name {0!r} is not a cell or dist.".format(
@@ -2163,7 +2163,7 @@ class GeneralSource(ISource):
                     self.surface))
             elif self.surface in sim.sys.surfaces:
                 string += "{0}".format(sim.sys.surface_num(self.surface))
-            elif self.surface in sim.dist:
+            elif self.surface in sim.dists:
                 string += "D{0}".format(sim.dist_num(self.surface))
             else:
                 raise Exception("Name {0!r} is not a surface or dist.".format(
@@ -2230,12 +2230,12 @@ class GeneralSource(ISource):
         if self.cookie_cutter:
             string += " CCC="
             if (self.cookie_cutter in sim.sys.cells and 
-                    self.cookie_cutter in sim.dist):
+                    self.cookie_cutter in sim.dists):
                 raise Exception("Name {0!r} is both a cell and dist.".format(
                     self.cookie_cutter))
             elif self.cookie_cutter in sim.sys.cells:
                 string += "{0}".format(sim.sys.cell_num(self.cookie_cutter))
-            elif self.cookie_cutter in sim.dist:
+            elif self.cookie_cutter in sim.dists:
                 string += "D{0}".format(sim.dist_num(self.cookie_cutter))
             else:
                 raise Exception("Name {0!r} is not a cell or dist.".format(
@@ -2261,8 +2261,8 @@ class GeneralSource(ISource):
         if self.beam_aper:
             formatstr = " BAP={0} {0}".format(float_format)
             string += formatstr % self.beam_aper
-        if self.user:
-            string += " {0}".format(self.user)
+        if self.user_custom:
+            string += " {0}".format(self.user_custom)
         return string
 
     @property
@@ -2398,10 +2398,10 @@ class GeneralSource(ISource):
     def beam_aper(self, value): self._beam_aper = value
 
     @property
-    def user(self): return self._user
+    def user_custom(self): return self._user_custom
 
-    @user.setter
-    def user(self, value): self._user = value
+    @user_custom.setter
+    def user_custom(self, value): self._user_custom = value
 
 
 class Distribution(ICard):
