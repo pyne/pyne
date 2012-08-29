@@ -139,6 +139,9 @@ class SystemDefinition(IDefinition):
             self.add_material(cell.material)
         # Constituent surfaces and material have been added, so we can added
         # the cell.
+        # Add universes to system.
+        if cell.universe:
+            self._register_universe(cell.universe[0])
         self._cells[cell.name] = cell
 
     def add_surface(self, surface):
@@ -309,6 +312,10 @@ class SimulationDefinition(IDefinition):
         if not isinstance(card, cards.IMisc):
             raise ValueError("Only cards subclassed from ``IMisc`` can be "
                     "added by this method. User provided {0}.".format(card))
+        # Add universes to system.
+        if isinstance(card, cards.Universes):
+            for uni in card.univ_names:
+                self.sys._register_universe(uni)
         self._assert_unique('misc', card)
         self._misc[card.name] = card
 
