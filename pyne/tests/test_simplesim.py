@@ -89,22 +89,36 @@ class TestSystemDefinition(unittest.TestCase):
         self.assertEquals(self.cellbound.ylims.tolist(), [-1.2, 1.2])
         self.assertEquals(self.cellbound.zlims.tolist(), [0, 0])
 
-    def test_Facet(self):
-        """Tests the usage of macrobody :py:class:`cards.Facet`'s."""
-        myreg = self.cellbound.facet('east').neg
-        cell = cards.Cell('facettest', myreg)
-        self.rxr.add_cell(cell)
-        self.assertEquals(cell.comment(),
-                "Cell 'facettest': region -bound, void.")
-        self.assertEquals(cell.mcnp('%.5g', self.sim), "4 0 -2.1")
+#    def test_Facet(self):
+#        """Tests the usage of macrobody :py:class:`cards.Facet`'s."""
+#        myreg = self.cellbound.facet('east').neg
+#        cell = cards.Cell('facettest', myreg)
+#        self.rxr.add_cell(cell)
+#        self.assertEquals(cell.comment(),
+#                "Cell 'facettest': region -bound, void.")
+#        self.assertEquals(cell.mcnp('%.5g', self.sim), "4 0 -2.1")
 
     def test_Universes(self):
         """Tests :py:class:`cards.Universes`."""
-        uni = Universes(self.fuel, 'unitcell', self.coolant, 'unitcell',
-                self.graveyard, 'grave')
+        uni = cards.Universes(self.fuel, 'unitcell', True, 
+                            self.coolant, 'unitcell', True,
+                            self.graveyard, 'grave', False)
         self.assertEquals(uni.comment(), "Universes 'universes': "
-                "cell 'fuel': unitcell, cell 'coolant': unitcell, "
-                "cell 'graveyard': 'grave'.")
+                "cell 'fuel' unitcell (truncated), "
+                "cell 'coolant' unitcell (truncated), "
+                "cell 'graveyard' grave (not truncated).")
+        self.assertEquals(uni.mcnp('%.5g', self.sim), 
+                "U 1 1 -2")
+
+        uni.set(self.fuel, 'unitcell', True)
+        uni.set(self.coolant, 'unitcell', True)
+        uni.set(self.graveyard, 'grave', False)
+        self.assertEquals(uni.comment(), "Universes 'universes': "
+                "cell 'fuel' unitcell (truncated), "
+                "cell 'coolant' unitcell (truncated), "
+                "cell 'graveyard' grave (not truncated).")
+        self.assertEquals(uni.mcnp('%.5g', self.sim), 
+                "U 1 1 -2")
 
     def test_Distribution(self):
         """Tests the :py:class:`cards.Distribution` class."""
