@@ -119,6 +119,14 @@ class TestSystemDefinition(unittest.TestCase):
         self.assertEquals(uni.mcnp('%.5g', self.sim), 
                 "U 1 1 1J")
 
+    def test_Lattice(self):
+        """Tests :py:class:`Lattice`."""
+
+        lat = Lattice(self.fuel, 'hexahedra', self.coolant, 'hexagonal')
+        self.assertEquals(lat.comment(), "Lattice 'lattice': "
+                "cell 'fuel' hexahedra, cell 'coolant' hexagonal.")
+        self.assertEquals(lat.mcnp('%.5g', self.sim), "LAT 1 2 1J")
+
     def test_Distribution(self):
         """Tests the :py:class:`cards.Distribution` class."""
 
