@@ -57,7 +57,7 @@ class TestSystemDefinition(unittest.TestCase):
         
         # Surfaces.
         radius = 0.40 # cm
-        self.pin = cards.AxisCylinder('fuelpin', 'X', radius)
+        self.pin = cards.AxisCylinder('fuelpin', 'Z', radius)
         pitch = 1.2 # cm
         self.cellbound = cards.Parallelepiped('bound',
                 -pitch / 2, pitch / 2, -pitch / 2, pitch / 2, 0, 0,
@@ -79,14 +79,14 @@ class TestSystemDefinition(unittest.TestCase):
         self.rxr.add_cell(self.graveyard)
         self.sim = definition.MCNPSimulation(self.rxr, verbose=False)
 
-    def test_Region(self0:
+    def test_Region(self):
         """Tests the shifting and stretching of surfaces in a Region."""
 
         reg1 = self.pin.pos & self.cellbound.neg
-        reg1.stretch([2, 3, 4])
+        reg1.stretch([2, 2, 4])
         self.assertEquals(self.pin.radius, 0.8)
-        self.assertEquals(self.cellbound.xlims.tolist(), [-2.4, 2.4])
-        self.assertEquals(self.cellbound.ylims.tolist(), [-3.6, 3.6])
+        self.assertEquals(self.cellbound.xlims.tolist(), [-1.2, 1.2])
+        self.assertEquals(self.cellbound.ylims.tolist(), [-1.2, 1.2])
         self.assertEquals(self.cellbound.zlims.tolist(), [0, 0])
 
     def test_Distribution(self):
