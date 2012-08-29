@@ -119,6 +119,30 @@ class TestSystemDefinition(unittest.TestCase):
         self.assertEquals(uni.mcnp('%.5g', self.sim), 
                 "U 1 1 1J")
 
+    def test_Fill(self):
+        """Tests :py:class:`cards.Fill`."""
+        uni = cards.Universes()
+        uni.set(self.fuel, 'unitcell', True)
+        uni.set(self.coolant, 'otheruniv', True)
+        self.sim.add_misc(uni) 
+
+        uni = cards.Fill(self.fuel, 'unitcell',
+                         self.coolant, 'unitcell')
+        self.assertEquals(uni.comment(), "Fill 'fill': "
+                "cell 'fuel' unitcell, "
+                "cell 'coolant' otheruniv.")
+        self.assertEquals(uni.mcnp('%.5g', self.sim), 
+                "FILL 1 2 1J")
+
+        uni = cards.Fill()
+        uni.set(self.fuel, 'unitcell', True)
+        uni.set(self.coolant, 'otheruniv', True)
+        self.assertEquals(uni.comment(), "Fill 'universes': "
+                "cell 'fuel' unitcell, "
+                "cell 'coolant' otheruniv.")
+        self.assertEquals(uni.mcnp('%.5g', self.sim), 
+                "FILL 1 2 1J")
+
     def test_Lattice(self):
         """Tests :py:class:`Lattice`."""
 
