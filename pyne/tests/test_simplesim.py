@@ -110,15 +110,14 @@ class TestSystemDefinition(unittest.TestCase):
         self.assertEquals(uni.mcnp('%.5g', self.sim), 
                 "U 1 1 -2")
 
+        uni = cards.Universes()
         uni.set(self.fuel, 'unitcell', True)
         uni.set(self.coolant, 'unitcell', True)
-        uni.set(self.graveyard, 'grave', False)
         self.assertEquals(uni.comment(), "Universes 'universes': "
                 "cell 'fuel' unitcell (truncated), "
-                "cell 'coolant' unitcell (truncated), "
-                "cell 'graveyard' grave (not truncated).")
+                "cell 'coolant' unitcell (truncated).")
         self.assertEquals(uni.mcnp('%.5g', self.sim), 
-                "U 1 1 -2")
+                "U 1 1 1J")
 
     def test_Distribution(self):
         """Tests the :py:class:`cards.Distribution` class."""

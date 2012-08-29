@@ -160,11 +160,17 @@ class Cell(ICard):
             Density for the material, in units of density_units.
         density_units : str, None for void
             Either 'g/cm^3', or 'atoms/b/cm'.
-        universe : str, optional
+        universe : 2-element tuple, optional
             To make this cell part of a universe, provide the name of that
             universe. Universes are often composed of more than one cell, and
-            so this name is likely to appear on other cell cars as well.
-        fill : str, 4-element tuple, optional
+            so this name is likely to appear on other cell cars as well. Tuple
+            contains:
+
+            1. (str) name of universe
+            2. (bool) True for truncating, False otherwise.
+
+            Refer to :py:class:`Universes` for more information.
+        fill : str, or 4-element tuple, optional
             The name of a universe with which to fill this cell. Typically,
             cells that are filled with a universe are void themselves. If
             tuple, it contains:
