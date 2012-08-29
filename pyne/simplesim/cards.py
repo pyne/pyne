@@ -182,7 +182,8 @@ class Cell(ICard):
 
         lattice : str, optional
             Makes this cell is a repeating lattice. Can be either
-            'square' for 6-sided elements or 'triangle' for 8-sided elements.
+            'hexahedra' for 6-sided elements or 'hexagonal' for 8-sided
+            elements.
 
         Examples
         --------
@@ -216,6 +217,9 @@ class Cell(ICard):
         self.region = region
         self.material = material
         self.density = density
+        self.universe = universe
+        self.fill = fill
+        self.lattice = lattice
         self.density_units = density_units
         if ((self.material and not (self.density and self.density_units)) or
                 (self.density and not (self.density_units and self.material)) or
@@ -256,6 +260,28 @@ class Cell(ICard):
             string += " 0"
         # Print surfaces.
         string += " {0}".format(self.region.mcnp(sim))
+        # Univ, fill, lattice
+        if self.universe:
+            card = Universes(self, self.universe[0], self.universe[1])
+            string += " U={0}".format(card._mcnp_unit(float_format, sim, self))
+        if self.fill:
+            string += " FILL="
+            if type(self.fill) is tuple:
+                # TODO
+                string += "{0[0]}:{0[1]} {1[0]}:{1[1]} {2[0]}:{2[1]}".format(
+                        self.fill[0] if len(self.fill[0]) == 2 else [0, 0],
+                        self.fill[1] if len(self.fill[1]) == 2 else [0, 0],
+                        self.fill[2] if len(self.fill[2]) == 2 else [0, 0])
+                #string += TODOloop through matrix
+            else:
+                card = Fill(self, self.fill)
+                string += "{0}".format(card._mcnp_unit(
+                    float_format, sim, self))
+        # Lattice
+        if self.lattice:
+            card = Lattice(self, self.lattice)
+            string += " LAT={0}".format(card._mcnp_unit(
+                float_forat, sim, self))
         return string
 
     def _mcnp_density_prefix(self, density_units):
@@ -4262,8 +4288,8 @@ class Universes(ICellMod):
 
         """
         super(Universes, self).__init__('universes', 3, *args)
-        self.univ_names = dict()
-        self.truncates = dict()
+        self.univ_names = collections.OrderedDict()
+        self.truncates = collections.OrderedDict()
         self._process_varargs(args)
 
     def set(self, cell, univ_name, truncate):
@@ -4357,8 +4383,8 @@ class Fill(ICellMod):
             fill = Fill(unit, 'unitcell', cellB, 'otheruniv')
 
         """
-        super(Fill, self).__init__('fill', *args)
-        self.univ_names = dict()
+        super(Fill, self).__init__('fill', 2, *args)
+        self.univ_names = collections.OrderedDict()
         self._process_varargs(args)
 
     def set(self, cell, univ_name):
@@ -4442,7 +4468,7 @@ class Lattice(ICellMod):
 
         """
         super(Lattice, self).__init__('lattice', 2, *args)
-        self.settings = dict()
+        self.settings = collections.OrderedDict()
         self._process_varargs(args)
 
     def set(self, cell, setting):
