@@ -89,6 +89,18 @@ class TestSystemDefinition(unittest.TestCase):
         self.assertEquals(self.cellbound.ylims.tolist(), [-1.2, 1.2])
         self.assertEquals(self.cellbound.zlims.tolist(), [0, 0])
 
+    def test_Facet(self):
+        """Tests the usage of macrobody :py:class:`cards.Facet`'s."""
+        myreg = self.cellbound.facet('east').neg
+        cell = cards.Cell('facettest', myreg)
+        self.rxr.add_cell(cell)
+        self.assertEquals(cell.comment(),
+                "Cell 'facettest': region -bound, void.")
+        self.assertEquals(cell.mcnp('%.5g', self.sim), "4 0 -2.1")
+
+
+
+
     def test_Distribution(self):
         """Tests the :py:class:`cards.Distribution` class."""
 
