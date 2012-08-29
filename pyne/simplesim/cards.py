@@ -4251,7 +4251,8 @@ class Universes(ICellMod):
         the universe 'unitcell'. All other cell cards, as of yet, are then part
         of the real world universe::
 
-            uni = Universes(pincell, 'unitcell', coolantcell, 'unitcell')
+            uni = Universes(pincell, 'unitcell', True,
+                            coolantcell, 'unitcell', True)
 
         """
         super(Universes, self).__init__('universes', 3, *args)
@@ -4272,8 +4273,8 @@ class Universes(ICellMod):
         The example above can be achieved by the following::
 
             uni = Universes()
-            uni.set(pincell, 'unitcell')
-            uni.set(coolantcell, 'unitcell')
+            uni.set(pincell, 'unitcell', True)
+            uni.set(coolantcell, 'unitcell', True)
 
         """
         super(Universes, self).set(cell)
@@ -4291,9 +4292,10 @@ class Universes(ICellMod):
         return super(Universes, self).mcnp(float_format, sim, "U")
 
     def _mcnp_unit(self, float_format, sim, cell):
-        # TODO this code really should go elsewhere.
+        # TODO this next line really should go elsewhere.
         sim.sys._register_universe(self.univ_names[cell])
-        return "{0}".format(sim.sys.universe_num(self.univ_names[cell]))
+        return "{0}".format(sim.sys.universe_num(self.univ_names[cell]) * (
+            1 if self.truncates[cell] else -1))
 
     @property
     def univ_names(self): return self._univ_names

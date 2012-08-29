@@ -183,7 +183,7 @@ class SystemDefinition(IDefinition):
         """
         #self._assert_unique('universe', univ_name)
         if univ_name not in self.universes:
-            self._universes += univ_name
+            self._universes += [univ_name]
 
     def cell_num(self, name):
         # TODO removing cards.
