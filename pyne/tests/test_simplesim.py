@@ -98,8 +98,13 @@ class TestSystemDefinition(unittest.TestCase):
                 "Cell 'facettest': region -bound, void.")
         self.assertEquals(cell.mcnp('%.5g', self.sim), "4 0 -2.1")
 
-
-
+    def test_Universes(self):
+        """Tests :py:class:`cards.Universes`."""
+        uni = Universes(self.fuel, 'unitcell', self.coolant, 'unitcell',
+                self.graveyard, 'grave')
+        self.assertEquals(uni.comment(), "Universes 'universes': "
+                "cell 'fuel': unitcell, cell 'coolant': unitcell, "
+                "cell 'graveyard': 'grave'.")
 
     def test_Distribution(self):
         """Tests the :py:class:`cards.Distribution` class."""
