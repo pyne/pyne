@@ -33,8 +33,6 @@ the module.
 # exception, (3) weightwindowbound
 # TODO check WWGT default arg effect in WWN.
 # TODO improve inheritance around ICellMod.
-# TODO rewrite WeightWindowBound so that there is a separate card for each
-# index.
 # TODO big opportunity to clean up what the mcnp() output looks like.
 # TODO consistent plural card names when appropriate.
 # Refactor CellMCNP so all relevant classes have a method _mcnp_cell_comment
@@ -982,9 +980,10 @@ class ISurface(ICard):
     The Surface superclass contains properties to set the surface as reflecting
     or white. For codes other than MCNPX, reflecting or white surfaces may be
     specified on a separate boundary condition card (i.e. in Serpent) or may
-    not even be available. For other codes, then, the appropriate :py:mod:`inputfile`
-    class needs to pick up this information and print the appropriate string to
-    the code's input file, or in the latter case return an exception.
+    not even be available. For other codes, then, the appropriate
+    :py:mod:`inputfile` class needs to pick up this information and print the
+    appropriate string to the code's input file, or in the latter case return
+    an exception.
 
     .. inheritance-diagram:: pyne.simplesim.cards.ISurface
 
@@ -1641,7 +1640,7 @@ class IRegion(ICard):
         raise NotImplementedError
 
     def set(self, region):
-        # TODO copy?
+        # TODO deepcopy?
         if issubclass(region, RegionLeaf):
             self = RegionLeaf(region.surface, region.pos_sense, self.name)
         elif issubclass(region, RegionOr):
@@ -1662,22 +1661,31 @@ class IRegion(ICard):
         return RegionOr(self, arg)
 
     def shift(self, vector):
-        """The surfaces themselves are modified; copies are not made.
-
+        """Shifts all the surfaces that this region is composed of. Note that
+        the surfaces themselves are modified, and are not copied, so the
+        dimensions of the surfaces in other regions is also modified.
+        
         """
-        # TODO walk.
+        self.left_child.shift(vector)
+        self.right_child.shift(vector)
+
 
     def stretch(self, vector):
+        """Stretches all the surfaces that this region is composed of. Note that
+        the surfaces themselves are modified, and are not copied, so the
+        dimensions of the surfaces in other regions is also modified.
+        
         """
-
-        """
-        # TODO walk.
+        self.left_child.stretch(vector)
+        self.right_child.stretch(vector)
 
     def walk(self, leaf_func, and_func=None, or_func=None):
-        """
+        """Walks the Region tree, calling ``leaf_func`` if the Region is a
+        ``RegionLeaf``, ``and_func`` if the Region is a ``RegionAnd``, and
+        ``or_func`` if the Region is a ``RegionOr``. This is used in
+        ``pyne.definition`` to discover all surfaces in the Region.
 
         """
-        # TODO
         if isinstance(self, RegionLeaf):
             leaf_func.im_func(leaf_func.im_self, self)
         else:
@@ -1773,6 +1781,16 @@ class RegionLeaf(IRegion):
         else:
             prefix = '-'
         return "{0}{1}".format(prefix, sim.sys.surface_num(self.surface.name))
+
+    def shift(self, vector):
+        """Calls the shift method of the surface."""
+
+        self.surface.shift(vector)
+
+    def stretch(self, vector):
+        """Calls the stretch method of the surface."""
+
+        self.surface.stretch(vector)
 
     @property
     def surface(self):
