@@ -211,7 +211,7 @@ class Cell(ICard):
         
         """
         # TODO decide how I will do cross-referencing.
-
+        # TODO specify universe as None if real world.
         super(Cell, self).__init__(name, *args, **kwargs)
         self.region = region
         self.material = material
@@ -4299,7 +4299,9 @@ class Universes(ICellMod):
 
     def _mcnp_unit(self, float_format, sim, cell):
         # TODO this next line really should go elsewhere.
-        sim.sys._register_universe(self.univ_names[cell])
+        #sim.sys._register_universe(self.univ_names[cell])
+        if self.univ_names[cell] not in sim.sys.universes:
+            raise Exception("This card has not been added to the simulation.")
         return "{0}".format(sim.sys.universe_num(self.univ_names[cell]) * (
             1 if self.truncates[cell] else -1))
 
@@ -4317,7 +4319,85 @@ class Universes(ICellMod):
 
 
 class Fill(ICellMod):
-    pass
+    """Allows the user to fill certain cells with a universe or lattice. Unique
+    card with name `fill`. In MCNP, this is the **FILL** card. The user can
+    initialize this card without providing any inputs. 
+    
+
+    .. inheritance-diagram:: pyne.simplesim.cards.Fill
+
+    Limitations
+    -----------
+    - Combining transformations with the fill is not supported.
+
+    """
+    # The following is no longer true:
+    #The :py:class:`Universe`
+    #card, or keywords on the :py:class:`Cell` card, must be added to the
+    #simulation before this card. Otherwise, the code will not be able to find
+    #the universes specified on this card.
+    def __init__(self, *args):
+        """
+        Parameters
+        ----------
+        cell : :py:class:`Cell or subclass
+            The cell being filled by a universe.
+        univ_name : str
+            The name of the universe filling this cell.
+        *args : cell, univ_name, ...
+            To fill more than one cell, supply the last 2 arguments for the
+            other cells. See examples. This can also be done using
+            :py:meth:`set`.
+
+        Examples
+        --------
+        If ``unit`` and ``cellB`` are cells and 'unitcell' and 'otheruniv` are
+        the names of universes, the user can do the following::
+
+            fill = Fill(unit, 'unitcell', cellB, 'otheruniv')
+
+        """
+        super(Fill, self).__init__('fill', *args)
+        self.univ_names = dict()
+        self._process_varargs(args)
+
+    def set(self, cell, univ_name):
+        """
+        Parameters
+        ----------
+        cell : :py:class:`Cell` or subclass
+        univ_name : str
+
+        Examples
+        --------
+        The example above can be achieved by the following::
+
+            fill = Fill()
+            fill.set(unit, 'unitcell')
+            fill.set(ellB, 'otheruniv')
+
+        """
+        super(Fill, self).set(cell)
+        self.univ_names[cell] = univ_name
+
+    def comment(self):
+        return super(Fill, self).comment("Fill")
+
+    def _comment_unit(self, cell):
+        return " {0}".format(self.univ_names[cell])
+
+    def mcnp(self, float_format, sim):
+        return super(Fill, self).mcnp(float_format, sim, "FILL")
+
+    def _mcnp_unit(self, float_format, sim, cell):
+        # TODO this next line really should go elsewhere.
+        return "{0}".format(sim.sys.universe_num(self.univ_names[cell]))
+
+    @property
+    def univ_names(self): return self._univ_names
+
+    @univ_names.setter
+    def univ_names(self, value): self._univ_names = value
 
 
 class Lattice(ICellMod):
