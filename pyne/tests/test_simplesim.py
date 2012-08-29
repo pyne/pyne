@@ -122,7 +122,14 @@ class TestSystemDefinition(unittest.TestCase):
     def test_Lattice(self):
         """Tests :py:class:`Lattice`."""
 
-        lat = Lattice(self.fuel, 'hexahedra', self.coolant, 'hexagonal')
+        lat = cards.Lattice(self.fuel, 'hexahedra', self.coolant, 'hexagonal')
+        self.assertEquals(lat.comment(), "Lattice 'lattice': "
+                "cell 'fuel' hexahedra, cell 'coolant' hexagonal.")
+        self.assertEquals(lat.mcnp('%.5g', self.sim), "LAT 1 2 1J")
+
+        lat = cards.Lattice()
+        lat.set(self.fuel, 'hexahedra')
+        lat.set(self.coolant, 'hexagonal')
         self.assertEquals(lat.comment(), "Lattice 'lattice': "
                 "cell 'fuel' hexahedra, cell 'coolant' hexagonal.")
         self.assertEquals(lat.mcnp('%.5g', self.sim), "LAT 1 2 1J")
