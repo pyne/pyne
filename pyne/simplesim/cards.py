@@ -107,6 +107,10 @@ class ICard(object):
         raise NotImplementedError("Card {0}.".format(self.name))
 
     def json(self):
+        """Returns something that can be used to encode this class in a JSON
+        file.
+
+        """
         # return self.__repr__()
         return self.__dict__
 
@@ -1030,7 +1034,6 @@ class ISurface(ICard):
                 keystring)
         return formatstr.format(sim.sys.surface_num(self.name))
 
-    @abc.abstractmethod
     def shift(self, vector):
         """Translates the surface. This is an abstract method, and must be
         defined by each surface card. Shifts may not be permitted for all
@@ -1050,9 +1053,9 @@ class ISurface(ICard):
             surf.shift(np.array([3, 0, 0]))
         
         """
-        raise NotImplementedError
+        raise NotImplementedError("Shifting not implemented for "
+                "{0}.".format(self))
 
-    @abc.abstractmethod
     def stretch(self, vector):
         """Stretches (scales) the surface from the origin. This is an abstract
         method, and must be defined by each surface card. Stretches may not be
@@ -1076,7 +1079,8 @@ class ISurface(ICard):
             surf.stretch(np.array([0, 2, 0]))
         
         """
-        raise NotImplementedError
+        raise NotImplementedError("Stretching not implemented for "
+                "{0}.".format(self))
 
     @property
     def neg(self):
@@ -1454,7 +1458,8 @@ class AxisPlane(IAxisSurface):
 
 class IMacrobody(ISurface):
     """This class is not used by the user. Abstract base class for all
-    macrobody cards. Macrobodies are an MCNP concept.
+    macrobody cards. Macrobodies are an MCNP concept. The classes here account
+    for the notion of facets.
 
     .. inheritance-diagram:: pyne.simplesim.cards.IMacrobody
 
@@ -1465,9 +1470,6 @@ class IMacrobody(ISurface):
     # you'd pass objects rather than just object names around: I could pass
     # IMacrobody.top, etc.
     def __init__(self, name, *args, **kwargs):
-        """
-
-        """
         super(IMacrobody, self).__init__(name, *args, **kwargs)
 
     @abc.abstractmethod
@@ -1478,6 +1480,52 @@ class IMacrobody(ISurface):
     def mcnp(self, *args):
         return super(IMacrobody, self).mcnp(*args)
 
+    def facet(self, descriptor):
+        """
+        Returns
+        -------
+        facet : :py:class:`Facet`
+            The facet can be used as a normal surface, though logically there
+            is no MCNP surface card for just a facet. The facet can be used in
+            constructing a :py:class:`IRegion`.
+
+        """
+        raise NotImplementedError("Facets not implemented for {0!r}.".format(
+            self))
+
+
+class Facet(ISurface):
+    """Used in conjunction with macrobodies. See
+    :py:meth:`pyne.simplesim.definition.SystemDefinition.surface_num` to see
+    how the appropriate surface number is obtained. The name of the surface is
+    the same as that of the macrobody.
+    
+    """
+    # TODO ideally we would dynamically subclass this using whatever class
+    # surface is.
+    def __init__(self, macrobody, descriptor, number):
+        """The user does not use this constructor. The user creates facets
+        using :py:meth:`IMacrobody.facet`.
+
+        """
+        super(Facet, self).__init__(macrobody.name)
+        self.macrobody = macrobody
+        self.descriptor = descriptor
+        self.number = number
+
+    def comment(self):
+        return "{0}. facet {0!r}.".format(
+                self.macrobody.comment(), self.descriptor)
+
+    def mcnp(self):
+        raise Exception("There is no notion of a facet surface card.")
+
+    def shift(self, vector):
+        self.macrobody.shift(vector)
+
+    def stretch(self, vector):
+        self.macrobody.stretch(vector)
+
 
 class Parallelepiped(IMacrobody):
     """Rectangular parallelepiped in which all surfaces are parallel to the
@@ -1486,6 +1534,13 @@ class Parallelepiped(IMacrobody):
     .. inheritance-diagram::pyne.simplesim.cards.Parallelepiped
 
     """
+    facets = {'east'  : 1,
+              'west'  : 2,
+              'north' : 3,
+              'south' : 4,
+              'top'   : 5,
+              'bottom': 6}
+
     def __init__(self, name, xmin, xmax, ymin, ymax, zmin, zmax, **kwargs):
         """
         Parameters
@@ -1525,6 +1580,33 @@ class Parallelepiped(IMacrobody):
         formatstr =  "{0} {0}  {0} {0}  {0} {0}".format(float_format)
         return string + formatstr % (
                 tuple(self.xlims) + tuple(self.ylims) + tuple(self.zlims))
+
+    def facet(self, descriptor):
+        """See :py:meth:`IMacrobody.facet`.
+        
+        Parameters
+        ----------
+        descriptor : str
+            One of the following:
+
+            - 'east': x = xmax plane
+            - 'west': x = xmin plane
+            - 'north': y = ymax plane
+            - 'south': y = ymin plane
+            - 'top': z = zmax plane
+            - 'bottom': z = zmin plane
+
+        Returns
+        -------
+        facet : :py:class:`Facet`
+            The facet can be used as a normal surface, though logically there
+            is no MCNP surface card for just a facet.
+
+        """
+        if descriptor not in self.facets:
+            raise ValueError("Facet descriptor {0!r} unacceptable.".format(
+                descriptor))
+        return Facet(self, descriptor, self.facets[descriptor])
 
     def shift(self, vector):
         """See :py:meth:`ISurface.shift`.
@@ -1666,6 +1748,7 @@ class IRegion(ICard):
         dimensions of the surfaces in other regions is also modified.
         
         """
+        # TODO make copies of the surfaces?
         self.left_child.shift(vector)
         self.right_child.shift(vector)
 
@@ -1676,6 +1759,7 @@ class IRegion(ICard):
         dimensions of the surfaces in other regions is also modified.
         
         """
+        # TODO make copies of the surfaces?
         self.left_child.stretch(vector)
         self.right_child.stretch(vector)
 
