@@ -148,19 +148,57 @@ class TestSystemDefinition(unittest.TestCase):
 
         gs = cards.GeneralSource()
         self.assertEquals(gs.name, 'gensource')
-        self.assertEquals(gs.comment(), "General source 'gensource': .")
+        self.assertEquals(gs.comment(), "General source 'gensource'.")
         self.assertEquals(gs.mcnp('%.5g', self.sim), "SDEF")
-        gs = GeneralSource(particle='photon', cell='cellA')
-        gs = GeneralSource(particle='partdist', cell='celldist')
-        gs = GeneralSource(energy='energydist', time=2e10)
-        gs = GeneralSource(ref_dir=[1, 0, 0], cosine=0.5)
-        gs = GeneralSource(x='xdist', y='ydist', z='zdist')
-        xd = Distribution('xdist', [0, 10], [0, 1])
-        yd = Distribution('ydist', [-5, 5], [0, 1])
-        zd = Distribution('zdist', [0, 1], [0, 1])
-        tr = Transformation('source', ...)
-        gs = GeneralSource(transformation='source')
-        gs = GeneralSource(beam_aper=(1, 2, 3), beam_aper=(4, 5))
+        gs = cards.GeneralSource(particle='photon', cell='fuel')
+        self.assertEquals(gs.comment(), "General source 'gensource': "
+                "particle=photon, cell=fuel.")
+        self.assertEquals(gs.mcnp('%.5g', self.sim), "SDEF PAR=P CEL=1")
+
+        gs = cards.GeneralSource(particle='partdist', cell='celldist')
+        sdA = cards.Distribution('partdist', [-2, 2], [0, 1])
+        sdB = cards.Distribution('celldist', [-2, 2], [0, 1])
+        self.sim.add_dist(sdA)
+        self.sim.add_dist(sdB)
+        self.assertEquals(gs.comment(), "General source 'gensource': "
+                "particle=partdist, cell=celldist.")
+        self.assertEquals(gs.mcnp('%.5g', self.sim), "SDEF PAR=D1 CEL=D2")
+
+        gs = cards.GeneralSource(energy='energydist', time=2e10)
+        sdA = cards.Distribution('energydist', [-2, 2], [0, 1])
+        self.sim.add_dist(sdA)
+        self.assertEquals(gs.comment(), "General source 'gensource': "
+                "energy=energydist, time=20000000000.0.")
+        self.assertEquals(gs.mcnp('%.5g', self.sim), "SDEF ERG=D3 TME=2e+18")
+
+        gs = cards.GeneralSource(ref_dir=[1, 0, 0], cosine=0.5)
+        self.assertEquals(gs.comment(), "General source 'gensource': "
+                "ref. dir=[1, 0, 0], cosine=0.5.")
+        self.assertEquals(gs.mcnp('%.5g', self.sim), "SDEF VEC=1 0 0 DIR=0.5")
+
+        gs = cards.GeneralSource(x='xdist', y='ydist', z='zdist')
+        sdA = cards.Distribution('xdist', [-2, 2], [0, 1])
+        sdB = cards.Distribution('ydist', [-2, 2], [0, 1])
+        sdC = cards.Distribution('zdist', [-2, 2], [0, 1])
+        self.sim.add_dist(sdA)
+        self.sim.add_dist(sdB)
+        self.sim.add_dist(sdC)
+        self.assertEquals(gs.comment(), "General source 'gensource': "
+                "x=xdist, y=ydist, z=zdist.")
+        self.assertEquals(gs.mcnp('%.5g', self.sim), "SDEF X=D4 Y=D5 Z=D6")
+        
+        tr = cards.Transformation('source', [1, 0, 0], np.eye(3))
+        self.sim.add_transformation(tr)
+        gs = cards.GeneralSource(transformation='source')
+        self.assertEquals(gs.comment(), "General source 'gensource': "
+                "trans.=source.")
+        self.assertEquals(gs.mcnp('%.5g', self.sim), "SDEF TR=1")
+
+        gs = cards.GeneralSource(beam_emit=(1, 2, 3), beam_aper=(4, 5))
+        self.assertEquals(gs.comment(), "General source 'gensource': "
+                "beam emit.=(1, 2, 3), beam aper.=(4, 5).")
+        self.assertEquals(gs.mcnp('%.5g', self.sim), 
+                "SDEF BEM=1 2 3 BAP=4 5")
 
     def test_Saving(self):
         """Tests saving a system definition to a JSON file."""
