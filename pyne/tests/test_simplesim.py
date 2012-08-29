@@ -79,6 +79,16 @@ class TestSystemDefinition(unittest.TestCase):
         self.rxr.add_cell(self.graveyard)
         self.sim = definition.MCNPSimulation(self.rxr, verbose=False)
 
+    def test_Region(self0:
+        """Tests the shifting and stretching of surfaces in a Region."""
+
+        reg1 = self.pin.pos & self.cellbound.neg
+        reg1.stretch([2, 3, 4])
+        self.assertEquals(self.pin.radius, 0.8)
+        self.assertEquals(self.cellbound.xlims.tolist(), [-2.4, 2.4])
+        self.assertEquals(self.cellbound.ylims.tolist(), [-3.6, 3.6])
+        self.assertEquals(self.cellbound.zlims.tolist(), [0, 0])
+
     def test_Distribution(self):
         """Tests the :py:class:`cards.Distribution` class."""
 
