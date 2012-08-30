@@ -653,10 +653,10 @@ class TestSystemDefinition(unittest.TestCase):
                 "-fuelpin, void lattice hexagonal fill long format.")
         self.assertEquals(cellF.mcnp('%.5g', self.sim), "9 0 -1 LAT=2\n     "
                 "FILL=0:2 0:1 -1:0\n     "
-                "k = -1\n     "
+                "$ k = -1\n     "
                 "2 3 2\n     "
                 "3 2 3\n     "
-                "k = 0\n     "
+                "$ k = 0\n     "
                 "2 0 2\n     "
                 "3 2 3")
 
@@ -940,10 +940,10 @@ class TestSystemDefinition(unittest.TestCase):
         self.assertEquals(cellF.mcnp('%.5g', self.sim), "7  0 -1 LAT=2 VOL=1"
                 "\n     "
                 "FILL=0:2 0:1 -1:0\n     "
-                "k = -1\n     "
+                "$ k = -1\n     "
                 "2 3 2\n     "
                 "3 2 3\n     "
-                "k = 0\n     "
+                "$ k = 0\n     "
                 "2 0 2\n     "
                 "3 2 3")
 
