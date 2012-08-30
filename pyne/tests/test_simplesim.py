@@ -597,6 +597,76 @@ class TestSystemDefinition(unittest.TestCase):
         self.assertRaises(ValueError, cards.Cell, 'B', self.pin.neg &
             self.cellbound.pos, density_units='g/cm^3')
 
+        # Universes, fill, lattice.
+        cellC = cards.Cell('C', self.pin.neg & self.cellbound.pos, self.uo2,
+                density=1,
+                density_units='g/cm^3',
+                universe=('unitcell', True))
+        self.rxr.add_cell(cellC)
+        self.assertEquals(cellC.comment(), "Cell 'C': region "
+                "(-fuelpin & +bound), "
+                "material 'UO2' density 1 g/cm^3 "
+                "univ unitcell (truncated).")
+        self.assertEquals(cellC.mcnp('%.5g', self.sim), "6 1 -1 (-1 2) U=1")
+
+        cellD = cards.Cell('D', self.pin.neg, self.uo2, density=2,
+                density_units='g/cm^3',
+                universe=('unitcell', False))
+        self.rxr.add_cell(cellD)
+        self.assertEquals(cellD.comment(), "Cell 'D': region "
+                "-fuelpin, "
+                "material 'UO2' density 2 g/cm^3 "
+                "univ unitcell (not truncated).")
+        self.assertEquals(cellD.mcnp('%.5g', self.sim), "7 1 -2 -1 U=-1")
+
+        cellE = cards.Cell('E', self.pin.neg, fill='unitcell')
+        self.rxr.add_cell(cellE)
+        self.assertEquals(cellE.comment(), "Cell 'E': region "
+                "-fuelpin, void "
+                "fill unitcell.")
+        self.assertEquals(cellE.mcnp('%.5g', self.sim), "8 0 -1 FILL=1")
+
+        univ_names = [['A', 'B', 'A', 'B', 'A'],
+                      ['B', 'A', 'B', 'A', 'B'],
+                      ['B', 'A', 'B', 'A', 'B']]
+        cellF = cards.Cell('F', self.pin.neg, lattice='hexahedra',
+                fill=([0, 4], [0, 2], [], univ_names))
+        self.rxr.add_cell(cellF)
+        self.rxr._register_universe('A')
+        self.rxr._register_universe('B')
+        self.assertEquals(cellF.comment(), "Cell 'F': region "
+                "-fuelpin, void lattice hexahedra fill long format.")
+        self.assertEquals(cellF.mcnp('%.5g', self.sim), "9 0 -1 LAT=1\n     "
+                "FILL=0:4 0:2 0:0\n     "
+                "2 3 2 3 2\n     "
+                "3 2 3 2 3\n     "
+                "3 2 3 2 3")
+
+        univ_names2 = [[['A',  'B',  'A'], 
+                        ['B',  'A',  'B']],
+                       [['A',  None, 'A'],
+                        ['B',  'A',  'B']]]
+        cellF = cards.Cell('F', self.pin.neg, lattice='hexagonal',
+                fill=([0, 2], [0, 1], [-1, 0], univ_names2))
+        self.rxr.add_cell(cellF)
+        self.assertEquals(cellF.comment(), "Cell 'F': region "
+                "-fuelpin, void lattice hexagonal fill long format.")
+        self.assertEquals(cellF.mcnp('%.5g', self.sim), "9 0 -1 LAT=2\n     "
+                "FILL=0:2 0:1 -1:0\n     "
+                "2 3 2\n     "
+                "3 2 3\n     "
+                "2 0 2\n     "
+                "3 2 3")
+
+        univ_names2 = ['A',  'B',  'A']
+        cellF = cards.Cell('F', self.pin.neg, lattice='hexagonal',
+                fill=([0, 2], [], [], univ_names2))
+        self.rxr.add_cell(cellF)
+        self.assertEquals(cellF.comment(), "Cell 'F': region "
+                "-fuelpin, void lattice hexagonal fill long format.")
+        self.assertEquals(cellF.mcnp('%.5g', self.sim), "9 0 -1 LAT=2\n     "
+                "FILL=0:2 0:0 0:0 2 3 2")
+
     def test_CellMCNP(self):
         """Tests :py:class:`cards.CellMCNP`'s methods, properties, and
         exceptions. Tests each kwarg, and test a
