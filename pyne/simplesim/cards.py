@@ -335,6 +335,8 @@ class Cell(ICard):
             card = Lattice(self, self.lattice)
             string += " LAT={0}".format(card._mcnp_unit(
                 float_format, sim, self))
+        if isinstance(self, CellMCNP):
+            string += self._mcnp_keywords(float_format, sim)
         if self.fill and type(self.fill) is tuple:
             string += self._mcnp_long_fill(float_format, sim)
         return string
@@ -350,10 +352,14 @@ class Cell(ICard):
                 y_idxs if len(y_idxs) == 2 else [0, 0],
                 z_idxs if len(z_idxs) == 2 else [0, 0])
         n_dim = (len(x_idxs) == 2) + (len(y_idxs) == 2) + (len(z_idxs) == 2)
+        if n_dim == 3: counter = z_idxs[0]
         for zdim in univ_names:
             # Allow easy looping if 1 dimension only.
             if type(zdim) is str: zdim = [zdim]
             if n_dim == 2: string += "\n{0}".format(4 * " ")
+            if n_dim == 3:
+                string += "\n{0}k = {1}".format(5 * " ", counter)
+                counter += 1
             for ydim in zdim:
                 # Allow easy looping if 2 dimensions only.
                 if type(ydim) is str: ydim = [ydim]
@@ -422,6 +428,24 @@ class Cell(ICard):
                     "{0!r}".format(value))
         self._density_units = value
 
+    @property
+    def universe(self): return self._universe
+
+    @universe.setter
+    def universe(self, value): self._universe = value
+
+    @property
+    def fill(self): return self._fill
+
+    @fill.setter
+    def fill(self, value): self._fill = value
+
+    @property
+    def lattice(self): return self._lattice
+
+    @lattice.setter
+    def lattice(self, value): self._lattice = value
+
 
 class CellMCNP(Cell):
     """A cell card with keyword options that are available in MCNP. Thus, it
@@ -453,7 +477,8 @@ class CellMCNP(Cell):
                  fission_turnoff=None,
                  det_contrib=None,
                  transformation=None,
-                 user_custom=None
+                 user_custom=None,
+                 **kwargs
                  ):
         """
         Parameters
@@ -689,7 +714,7 @@ class CellMCNP(Cell):
         # TODO check that the importance isn't set for the same particle
         # multiple times.
         super(CellMCNP, self).__init__(name, region, material, density,
-                                       density_units)
+                                       density_units, **kwargs)
         # Assign keyword arguments.
         self.temperature = temperature
         self.volume = volume
@@ -783,7 +808,10 @@ class CellMCNP(Cell):
         return string + "."
 
     def mcnp(self, float_format, sim):
-        string = super(CellMCNP, self).mcnp(float_format, sim)
+        return super(CellMCNP, self).mcnp(float_format, sim)
+
+    def _mcnp_keywords(self, float_format, sim):
+        string = ""
         # temperature
         if self.temperature:
             card = Temperature(self, self.temperature)
