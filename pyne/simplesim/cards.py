@@ -977,6 +977,49 @@ class CellMCNP(Cell):
     
     @user_custom.setter
     def user_custom(self, value): self._user_custom = value
+    
+
+class IUniverse(ICard):
+    """This class is not used by the user. Abstract base class for all
+    universe cards.
+
+    """
+    # TODO
+    # Ideally universes would be their own objects.
+    __metaclass__ = abc.ABCMeta
+
+    def __init__(self, name, *args, **kwargs):
+        pass
+
+
+class UniverseByRegion(IUniverse):
+    """Unimplemented. Use cell card keywords."""
+    # TODO
+    def __init__(self, name, region):
+        pass
+
+
+class UniverseByLattice(IUniverse):
+    """Unimplemented. Use cell card keywords."""
+    # TODO
+    def __init__(self, name, lattice):
+        pass
+
+
+class Lattice(ICard):
+    """Unimplemented. Use cell card keywords."""
+    # TODO
+    def __init__(self, name, geom, universe):
+        pass
+
+
+class LatticeByArray(ICard):
+    """Unimplemented. Use cell card keywords."""
+    # TODO
+    # TODO support of 3D arrays.
+    def __init(self, name, geom, xindices, yindices, zindices,
+               universe_array):
+        pass
         
 
 class Material(ICard, material.Material):
@@ -3137,6 +3180,96 @@ class ITally(ICard):
     def alt_units(self, value): self._alt_units = value
 
 
+#class ICellSurfTally(ITally):
+#    """This class is not used by the user. Abstract base class for
+#    tallies over cells and surfaces, as opposed to detector tallies. In MCNP,
+#    these are the **F1**, **F2**, **F4**, **F6**, **F7** and **F8** tallies.
+#    Some of these are for cells, and some are for surfaces.
+#
+#    """
+#    __metaclass__ = abc.ABCMeta
+#
+#    def __init__(self, name, particle, cards, *args, **kwargs):
+#        """
+#        Parameters
+#        ----------
+#        name : str
+#            See :py:class:`ITally`.
+#        particle : str
+#            See :py:class:`ITally`.
+#        cards : :py:class:`Cell` or :py:class:`ISurface`, list, list of lists
+#            If tallying 1 cell/surface, the input is that cell/surface card. If
+#            tallying multiple cells/surfaces, the individual cell/surface cards
+#            are provided in a list. To obtain the average tally across multiple
+#            cells/surfaces, these cell/surface cards are provided in their own
+#            list, within the outer list. To avoid ambiguity, if only one set of
+#            averages is desired, then this set must be nested in two lists. See
+#            the examples.
+#        alt_units : bool, optional
+#            See :py:class:`ITally`.
+#
+#        Examples
+#        --------
+#        The following gives the tally in cell A::
+#
+#            tally = CellFlux('fuel', 'neutron', cellA)
+#
+#        The following two cards give the tally in surface A and B, and
+#        the average across surfaces B and C::
+#
+#            tally = SurfaceFlux('fuel', 'photon', [surfA, surfB, [surfB,
+#                    surfC]], average=True)
+#
+#        To obtain the average across surface A and B only, a nested list is
+#        required to distinguish the case of tallying on A and B individually::
+#
+#            tally = SurfaceFlux('fuel', 'neutron', [[surfA, surfB]])
+#
+#        Repeated Structures
+#        -------------------
+#        Okay, so the ``cards`` input can actually be substantially more
+#        complicated for tallies on repeated structures. To tally surfaces or
+#        cells only when they are within other cells or universes, the ``cards``
+#        input is a tuple.
+#
+#        -tuple, each separate element represents the nesting
+#        -can provide universe TODO this goes above, not really related to
+#        repeated structures.
+#
+#        The following string in MCNP (<LAT-SPEC> is discussed below)::
+#
+#        (scA, scB) < (cC, cD[<LAT-SPEC>]) < U=u1 < (cE, cF, cG)
+#
+#        is obtained with the following input::
+#
+#        ([scA, scB], [cC, (cD, ([li0,li1],[lj0,lj1],[lk0,lk1]))], 'u1', [cE, cF, cG])
+#
+#        The optional <LAT-SPEC> specifies which lattice elements to consider
+#        from a lattice cell. It has 3 possible forms, and the MCNP syntax is
+#        compared to the syntax used here::
+#
+#        MCNP
+#        li0:li1 lj0:lj1 lk0:lk1
+#        [li0,li1],[lj0,lj1],[lk0,lk1]
+#
+#        li0 lj0 lk0, li1 lj1 lk1, ...
+#        [[li0, lj0, lk0], [li1, lj1, lk1], ...]
+#
+#        univA '<UNIV-NAME>'
+#        union of scA, scB, scC ('
+#        union of univA
+#        scA in scB
+#        scA in scB in scC
+#        scA in univA
+#        scA in univA in scB
+#        scA in scB, lattice elements <LAT-SPEC>
+#        scA in (scB, lattice elements <LAT-SPEC>), in scC
+#        (scA and scB) in scC in (scD and scE)
+#        
+#
+#        """
+
+
 class ICellSurfTally(ITally):
     """This class is not used by the user. Abstract base class for
     tallies over cells and surfaces, as opposed to detector tallies. In MCNP,
@@ -3154,35 +3287,33 @@ class ICellSurfTally(ITally):
             See :py:class:`ITally`.
         particle : str
             See :py:class:`ITally`.
-        cards : str name of :py:class:`Cell` or :py:class:`ISurface`, list, list of lists
-            If tallying 1 cell/surface, the input is the name of that
-            cell/surface card. If tallying multiple cells/surfaces, the
-            individual cell/surface names are provided in a list. To obtain the
-            average/total tally across multiple cells/surfaces, these
-            cell/surface names are provided in their own list, within the outer
-            list. To avoid ambiguity, if only one set of averages/totals is
-            desired, then this set must be nested in two lists. See the
-            examples.
+        cards : :py:class:`Cell` or :py:class:`ISurface`, list, list of lists
+            If tallying 1 cell/surface, the input is that cell/surface card. If
+            tallying multiple cells/surfaces, the individual cell/surface cards
+            are provided in a list. To obtain the average tally across multiple
+            cells/surfaces, these cell/surface cards are provided in their own
+            list, within the outer list. To avoid ambiguity, if only one set of
+            averages is desired, then this set must be nested in two lists. See
+            the examples.
         alt_units : bool, optional
             See :py:class:`ITally`.
 
         Examples
         --------
-        The following gives the tally in cell 'cA'::
+        The following gives the tally in cell A::
 
-            tally = CellFlux('fuel', 'neutron', 'cA')
+            tally = CellFlux('fuel', 'neutron', cellA)
 
-        The following two cards give the tally in surface 'sA' and 'sB', and
-        the average across surfaces 'sB' and 'sC'::
+        The following two cards give the tally in surface A and B, and
+        the average across surfaces B and C::
 
-            tally = SurfaceFlux('fuel', 'photon', ['sA', 'sB', ['sB', 'sC']],
-                    average=True)
+            tally = SurfaceFlux('fuel', 'photon', [surfA, surfB, [surfB,
+                    surfC]], average=True)
 
-        To obtain the average across surface 'sA' and 'sB' only, a nested list
-        is required to distinguish the case of tallying on 'sA' and 'sB'
-        individually::
+        To obtain the average across surface A and B only, a nested list is
+        required to distinguish the case of tallying on A and B individually::
 
-            tally = SurfaceFlux('fuel', 'neutron', [['sA', 'sB']])
+            tally = SurfaceFlux('fuel', 'neutron', [[surfA, surfB]])
 
         """
         super(ICellSurfTally, self).__init__(name, particle, *args, **kwargs)
@@ -3201,7 +3332,7 @@ class ICellSurfTally(ITally):
         if self.card_type == 'cell':      classcheck = Cell
         elif self.card_type == 'surface': classcheck = ISurface
         if type(self.cards) is not list: # issubclass(self.cards, classcheck):
-            string += "{0} {1!r}".format(self.card_type, self.cards)
+            string += "{0} {1!r}".format(self.card_type, self.cards.name)
         elif type(self.cards) is list:
             if type(self.cards[0]) is not list:
                 string += "{0}s ".format(self.card_type)
@@ -3209,14 +3340,14 @@ class ICellSurfTally(ITally):
             for obj in self.cards:
                 outcounter += 1
                 if type(obj) is not list: # issubclass(obj, classcheck):
-                    string += "{0!r}".format(obj)
+                    string += "{0!r}".format(obj.name)
                 elif type(obj) is list:
                     string += "{0} in ".format(union_type)
                     incounter = 0
                     for avgobj in obj:
                         incounter += 1
                         # Must be a cell/surface card.
-                        string += "{0!r}".format(avgobj)
+                        string += "{0!r}".format(avgobj.name)
                         if incounter < len(obj): string += ", "
                 # TODO an anti-duck-typing exception:
                 #else:
@@ -3233,26 +3364,26 @@ class ICellSurfTally(ITally):
     def mcnp(self, float_format, sim, num, **kwargs):
         string = super(ICellSurfTally, self).mcnp(float_format, sim, num,
                                                   **kwargs)
-        if self.card_type == 'cell':      getnum = sim.sys.cell_num
-        elif self.card_type == 'surface': getnum = sim.sys.surface_num
+        if self.card_type == 'cell':      getname = sim.sys.cell_num
+        elif self.card_type == 'surface': getname = sim.sys.surface_num
         if type(self.cards) is list: clist = self.cards
         else:                        clist = [self.cards]
         outcounter = 0
         for obj in clist:
             outcounter += 1
             if type(obj) is not list:
-                string += " {0:d}".format(getnum(obj))
+                string += " {0:d}".format(getname(obj.name))
             elif type(obj) is list:
                 string += " ("
                 for avgobj in obj:
                     # Must be a cell/surface card.
-                    string += " {0:d}".format(getnum(avgobj))
+                    string += " {0:d}".format(getname(avgobj.name))
                 string += ")"
         return string
 
     def _unique_card_list(self):
         # Returns a unique list of all the cards provided in self.cards.
-        # This method could be called by
+        # This method is called by
         # :py:class:`pyne.simplesim.SimulationDefinition` for error-checking.
         # TODO this is ideally recursive, and maybe can be implemented in a
         # cleaner way.
@@ -3305,7 +3436,7 @@ class SurfaceCurrent(ICellSurfTally):
             See :py:class:`ITally`.
         particle : str
             See :py:class:`ITally`.
-        cards : str name of :py:class:`ISurface`, list, list of lists
+        cards : :py:class:`ISurface`, list, list of lists
             See :py:class:`ICellSurfTally`.
         total : bool, optional
             Include a tally for the total current across all surfaces
@@ -3317,15 +3448,15 @@ class SurfaceCurrent(ICellSurfTally):
 
         Examples
         --------
-        The following requests the tally in 'sA', 'sB', as well as the
-        total across 'sA' and 'sB'::
+        The following requests the tally in surface A, surface B, as well as the
+        total across A and B::
 
-            tally = SurfaceCurrent('fuel', 'electron', ['sA', 'sB'],
+            tally = SurfaceCurrent('fuel', 'electron', [surfA, surfB],
                     total=True)
 
         In the following, the tally is also weighted by particle energy::
 
-            tally = SurfaceCurrent('fuel', 'photon', [['sA', 'sB']],
+            tally = SurfaceCurrent('fuel', 'photon', [[surfA, surfB]],
                     alt_units=True)
 
         """
@@ -3362,7 +3493,7 @@ class IAverageTally(ICellSurfTally):
             See :py:class:`ITally`.
         particle : str
             See :py:class:`ITally`.
-        cards : str name of :py:class:`Cell` or :py:class:`ISurface`, list, list of lists
+        cards : :py:class:`Cell` or :py:class:`ISurface`, list, list of lists
             See :py:class:`ICellSurfTally`.
         average : bool, optional
             Include a tally for the average flux across all cells/surfaces
@@ -3374,10 +3505,10 @@ class IAverageTally(ICellSurfTally):
 
         Examples
         --------
-        The following requests the tally in 'cA', 'cB', as well as the
-        average across 'cA' and 'cB'::
+        The following requests the tally in cell A, cell B, as well as the
+        average across A and B::
 
-            tally = CellEnergyDeposition('fuel', 'neutron', ['cA', 'cB'],
+            tally = CellEnergyDeposition('fuel', 'neutron', [cellA, cellB],
                     average=True)
 
         """
@@ -3419,7 +3550,7 @@ class SurfaceFlux(IAverageTally):
             See :py:class:`ITally`.
         particle : str
             See :py:class:`ITally`.
-        cards : str name of :py:class:`ISurface`, list, list of lists
+        cards : :py:class:`ISurface`, list, list of lists
             See :py:class:`IAverageTally`.
         average : bool, optional
             See :py:class:`IAverageTally`.
@@ -3429,15 +3560,15 @@ class SurfaceFlux(IAverageTally):
 
         Examples
         --------
-        The following requests the tally in surface 'sA', surface 'sB', as well
-        as the average across 'sA' and 'sB'::
+        The following requests the tally in surface A, surface B, as well as
+        the average across A and B::
 
-            tally = SurfaceFlux('fuel', 'electron', ['sB', 'sB'],
+            tally = SurfaceFlux('fuel', 'electron', [surfA, surfB],
                     average=True)
 
         In the following, the tally is also weighted by particle energy::
 
-            tally = SurfaceFlux('fuel', 'proton', [['sA', 'sB']],
+            tally = SurfaceFlux('fuel', 'proton', [[surfA, surfB]],
                     alt_units=True)
         
         See base classes for more examples.
@@ -3473,7 +3604,7 @@ class CellFlux(IAverageTally):
             See :py:class:`ITally`.
         particle : str
             See :py:class:`ITally`.
-        cards : str name of :py:class:`Cell`, list, list of lists
+        cards : :py:class:`Cell`, list, list of lists
             See :py:class:`IAverageTally`.
         average : bool, optional
             See :py:class:`IAverageTally`.
@@ -3483,15 +3614,15 @@ class CellFlux(IAverageTally):
 
         Examples
         --------
-        The following requests the tally in cell 'cA', cell 'cB', as well as the
-        average across 'cA' and 'cB'::
+        The following requests the tally in cell A, cell B, as well as the
+        average across A and B::
 
-            tally = CellFlux('fuel', 'electron', ['cA', 'cB'],
+            tally = CellFlux('fuel', 'electron', [cellA, cellB],
                     average=True)
 
         In the following, the tally is also weighted by particle energy::
 
-            tally = CellFlux('fuel', 'proton', [['cA', 'cB']],
+            tally = CellFlux('fuel', 'proton', [[cellA, cellB]],
                     alt_units=True)
         
         See base classes for more examples.
@@ -3527,7 +3658,7 @@ class CellEnergyDeposition(IAverageTally):
             particle. Also, the additional value of 'all' is allowed, and
             specifies collision heating. As may be expected, 'all' cannot be
             provided as part of a list.
-        cards : str name of :py:class:`Cell`, list, list of lists
+        cards : :py:class:`Cell`, list, list of lists
             See :py:class:`IAverageTally`.
         average : bool, optional
             See :py:class:`IAverageTally`.
@@ -3538,25 +3669,26 @@ class CellEnergyDeposition(IAverageTally):
 
         Examples
         --------
-        The following requests the energy deposited by neutrons in cell 'cA'::
+        The following requests the energy deposited by neutrons in cell A::
 
-            tally = CellEnergyDeposition('energy', 'neutron', 'cA')
+            tally = CellEnergyDeposition('energy', 'neutron', cellA)
 
 
         The following requests the energy deposited by neutrons and protons in
-        cell 'cA'::
+        cell A::
 
-            tally = CellEnergyDeposition('energy', ['neutron', 'proton'], 'cA')
+            tally = CellEnergyDeposition('energy', ['neutron', 'proton'],
+                    cellA)
         
         The following requests the energy deposited by all particles in cell
-        'cA'::
+        A::
 
-            tally = CellEnergyDeposition('energy', 'all', 'cA')
+            tally = CellEnergyDeposition('energy', 'all', cellA)
 
         The following are not allowed in MCNP::
             
-            tally = CellEnergyDeposition('energy', ['neutron', 'all'], 'cA')
-            tally = CellEnergyDeposition('energy', 'all', 'cA', alt_units=True)
+            tally = CellEnergyDeposition('energy', ['neutron', 'all'], cellA)
+            tally = CellEnergyDeposition('energy', 'all', cellA, alt_units=True)
 
         See base classes for more examples.
 
@@ -3609,7 +3741,7 @@ class CellFissionEnergyDeposition(IAverageTally):
         ----------
         name : str
             See :py:class:`ITally`.
-        cards : str name of :py:class:`Cell`, list, list of lists
+        cards : :py:class:`Cell`, list, list of lists
             See :py:class:`IAverageTally`.
         average : bool, optional
             See :py:class:`IAverageTally`.
@@ -3620,16 +3752,16 @@ class CellFissionEnergyDeposition(IAverageTally):
 
         Examples
         --------
-        The following requests the tally in cells 'cA', 'cB', as well as the
-        average across 'cA' and 'cB'::
+        The following requests the tally in cell A, cell B, as well as the
+        average across A and B::
 
-            tally = CellFissionEnergyDeposition('fuel', ['cA', 'cB'],
-                    average=True)
+            tally = CellFissionEnergyDeposition('fuel', [cellA,
+                    cellB], average=True)
 
         In the following, the alternate units are used::
 
-            tally = CellFissionEnergyDeposition('fuel', [['cA', 'cB']],
-                    alt_units=True)
+            tally = CellFissionEnergyDeposition('fuel', [[cellA,
+                    cellB]], alt_units=True)
         
         See base classes for more examples.
 
@@ -3663,7 +3795,7 @@ class CellPulseHeight(IAverageTally):
             See :py:class:`ITally`. Multiple particles can be provided in a
             list of str. In MCNP, if only 'proton', or 'electron' is
             specified, both are automatically included.
-        cards : str name of :py:class:`Cell`, list, list of lists
+        cards : :py:class:`Cell`, list, list of lists
             See :py:class:`IAverageTally`.
         average : bool, optional
             See :py:class:`IAverageTally`.
@@ -3674,11 +3806,11 @@ class CellPulseHeight(IAverageTally):
 
         Examples
         --------
-        The following requests the tally in cell 'cA' and cell 'cB' for both
-        protons and electrons, and requests units of MeV::
+        The following requests the tally in cell A and cell B for both protons
+        and electrons, and requests units of MeV::
 
-            tally = CellPulseHeight('fuel', ['proton', 'electron'], 
-                    ['cA', 'cB'], alt_units=True)
+            tally = CellPulseHeight('fuel', ['proton', 'electron'], [cellA,
+                    cellB], alt_units=True)
 
         See base classes for more examples.
 
@@ -3721,18 +3853,18 @@ class CellChargeDeposition(CellPulseHeight):
             See :py:class:`ITally`. Multiple particles can be provided in a
             list of str. In MCNP, if only 'proton', or 'electron' is
             specified, both are automatically included.
-        cards : str name of :py:class:`Cell`, list, list of lists
+        cards : :py:class:`Cell`, list, list of lists
             See :py:class:`IAverageTally`.
         average : bool, optional
             See :py:class:`IAverageTally`.
 
         Examples
         --------
-        The following requests the tally in cell 'cA' and cell 'cB' for both
-        protons and electrons::
+        The following requests the tally in cell A and cell B for both protons
+        and electrons::
 
-            tally = CellChargeDeposition('fuel', ['proton', 'electron'], 
-                    ['cA', 'cB'])
+            tally = CellChargeDeposition('fuel', ['proton', 'electron'], [cellA,
+                    cellB])
 
         See base classes for more examples.
 
@@ -3746,6 +3878,11 @@ class CellChargeDeposition(CellPulseHeight):
     def mcnp(self, float_format, sim):
         return super(CellChargeDeposition, self).mcnp(float_format, sim,
                                                       pre='+')
+
+
+class RepeatedStructure(IAverageTally):
+    # TODO
+    pass
 
 
 class IDetector(ITally):
@@ -6455,41 +6592,6 @@ class MiscCustom(Custom, IMisc):
 
 class TransformationCustom(Custom, Transformation):
     pass
-    
-
-class IUniverse(ICard):
-    """This class is not used by the user. Abstract base class for all
-    universe cards.
-
-    """
-    # TODO
-    # Ideally universes would be their own objects.
-    __metaclass__ = abc.ABCMeta
-
-    def __init__(self, name, *args, **kwargs):
-        pass
-class UniverseByRegion(IUniverse):
-    """Unimplemented. Use cell card keywords."""
-    # TODO
-    def __init__(self, name, region):
-        pass
-class UniverseByLattice(IUniverse):
-    """Unimplemented. Use cell card keywords."""
-    # TODO
-    def __init__(self, name, lattice):
-        pass
-class Lattice(ICard):
-    """Unimplemented. Use cell card keywords."""
-    # TODO
-    def __init__(self, name, geom, universe):
-        pass
-class LatticeByArray(ICard):
-    """Unimplemented. Use cell card keywords."""
-    # TODO
-    # TODO support of 3D arrays.
-    def __init(self, name, geom, xindices, yindices, zindices,
-               universe_array):
-        pass
 
 
 class Particle(object):
@@ -6571,91 +6673,3 @@ class Particle(object):
                     self.name))
         return self.mcnp_abbrev[self.name]
 
-#class ICellSurfTally(ITally):
-#    """This class is not used by the user. Abstract base class for
-#    tallies over cells and surfaces, as opposed to detector tallies. In MCNP,
-#    these are the **F1**, **F2**, **F4**, **F6**, **F7** and **F8** tallies.
-#    Some of these are for cells, and some are for surfaces.
-#
-#    """
-#    __metaclass__ = abc.ABCMeta
-#
-#    def __init__(self, name, particle, cards, *args, **kwargs):
-#        """
-#        Parameters
-#        ----------
-#        name : str
-#            See :py:class:`ITally`.
-#        particle : str
-#            See :py:class:`ITally`.
-#        cards : :py:class:`Cell` or :py:class:`ISurface`, list, list of lists
-#            If tallying 1 cell/surface, the input is that cell/surface card. If
-#            tallying multiple cells/surfaces, the individual cell/surface cards
-#            are provided in a list. To obtain the average tally across multiple
-#            cells/surfaces, these cell/surface cards are provided in their own
-#            list, within the outer list. To avoid ambiguity, if only one set of
-#            averages is desired, then this set must be nested in two lists. See
-#            the examples.
-#        alt_units : bool, optional
-#            See :py:class:`ITally`.
-#
-#        Examples
-#        --------
-#        The following gives the tally in cell A::
-#
-#            tally = CellFlux('fuel', 'neutron', cellA)
-#
-#        The following two cards give the tally in surface A and B, and
-#        the average across surfaces B and C::
-#
-#            tally = SurfaceFlux('fuel', 'photon', [surfA, surfB, [surfB,
-#                    surfC]], average=True)
-#
-#        To obtain the average across surface A and B only, a nested list is
-#        required to distinguish the case of tallying on A and B individually::
-#
-#            tally = SurfaceFlux('fuel', 'neutron', [[surfA, surfB]])
-#
-#        Repeated Structures
-#        -------------------
-#        Okay, so the ``cards`` input can actually be substantially more
-#        complicated for tallies on repeated structures. To tally surfaces or
-#        cells only when they are within other cells or universes, the ``cards``
-#        input is a tuple.
-#
-#        -tuple, each separate element represents the nesting
-#        -can provide universe TODO this goes above, not really related to
-#        repeated structures.
-#
-#        The following string in MCNP (<LAT-SPEC> is discussed below)::
-#
-#        (scA, scB) < (cC, cD[<LAT-SPEC>]) < U=u1 < (cE, cF, cG)
-#
-#        is obtained with the following input::
-#
-#        ([scA, scB], [cC, (cD, ([li0,li1],[lj0,lj1],[lk0,lk1]))], 'u1', [cE, cF, cG])
-#
-#        The optional <LAT-SPEC> specifies which lattice elements to consider
-#        from a lattice cell. It has 3 possible forms, and the MCNP syntax is
-#        compared to the syntax used here::
-#
-#        MCNP
-#        li0:li1 lj0:lj1 lk0:lk1
-#        [li0,li1],[lj0,lj1],[lk0,lk1]
-#
-#        li0 lj0 lk0, li1 lj1 lk1, ...
-#        [[li0, lj0, lk0], [li1, lj1, lk1], ...]
-#
-#        univA '<UNIV-NAME>'
-#        union of scA, scB, scC ('
-#        union of univA
-#        scA in scB
-#        scA in scB in scC
-#        scA in univA
-#        scA in univA in scB
-#        scA in scB, lattice elements <LAT-SPEC>
-#        scA in (scB, lattice elements <LAT-SPEC>), in scC
-#        (scA and scB) in scC in (scD and scE)
-#        
-#
-#        """
