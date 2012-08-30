@@ -25,6 +25,7 @@ definitions: system definitions and simulation definitions:
 """
 # TODO check overwriting warning.
 # TODO test the exceptions for getting *_num() not in list/dict.
+# TODO facet bucket.
 import abc
 import collections
 import pickle
@@ -228,7 +229,8 @@ class SystemDefinition(IDefinition):
 
     def cell_num(self, name):
         """Returns the cell number for the cell name provided. If a cell with
-        that name is not in the system, an exception is raised.
+        that name is not in the system, an exception is raised. The user should
+        only need this method if writing a custom card.
 
         """
         # TODO removing cards.
@@ -241,6 +243,7 @@ class SystemDefinition(IDefinition):
     def surface_num(self, name):
         """Returns the surface number for the surface name provided. If a
         surface with that name is not in the system, an exception is raised.
+        The user should only need this method if writing a custom card.
 
         """
         # Must add one because indices start at 0 but card numbers at 1.
@@ -249,8 +252,8 @@ class SystemDefinition(IDefinition):
                     name))
         num = self.surfaces.keys().index(name) + 1
         if isinstance(self.surfaces[name], cards.Facet):
-            # This does not work, as self.surfaces is the macrobody with the
-            # same name, not the facet.
+            # TODO This does not work, as self.surfaces is the macrobody with
+            # the same name, not the facet.
             return num + self.surfaces[name].number / 10
         return num
 
@@ -387,7 +390,8 @@ class SimulationDefinition(IDefinition):
 
     def dist_num(self, name):
         """Retrieve the number of a :py:class:`cards.Distribution` card in
-        the MCNP input file.
+        the MCNP input file. The user should only need this method if writing a
+        custom card.
 
         Parameters
         ----------
