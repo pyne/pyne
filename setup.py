@@ -384,7 +384,9 @@ packages = ['pyne', 'pyne.lib', 'pyne.dbgen', 'pyne.xs']
 
 pack_dir = {'pyne': 'pyne', 'pyne.dbgen': 'pyne/dbgen', 'pyne.xs': 'pyne/xs'}
 
-pack_data = {'pyne': ['includes/*.h', 'includes/pyne/*.pxd', '*.json'],
+pack_data = {'pyne': ['includes/*.h', 'includes/*/*.h', 'includes/*/*/*.h', 
+                      'includes/*/*/*/*.h', 'includes/pyne/*.pxd', 'includes/pyne/*/*.pxd', 
+                      'includes/pyne/*/*/*.pxd', 'includes/pyne/*/*/*/*.pxd', '*.json'],
              'pyne.dbgen': ['*.html'],
             }
 
@@ -445,6 +447,27 @@ def final_message(setup_success=True, metadata=None):
     print msg
 
 
+def make_includes():
+    ds = ['pyne/includes', 'pyne/includes/pyne']
+    cpfs = []
+
+    for root, dirs, files in os.walk('cpp'):
+        incroot = root.replace('cpp', 'pyne/includes')
+        ds += [os.path.join(incroot, d) for d in dirs]
+        cpfs += [(os.path.join(root, f), incroot) for f in files if f.endswith('.h')]
+
+    for root, dirs, files in os.walk('pyne'):
+        incroot = root.replace('pyne', 'pyne/includes/pyne')
+        ds += [os.path.join(incroot, d) for d in dirs]
+        cpfs += [(os.path.join(root, f), incroot) for f in files if f.endswith('.pxd')]
+
+    for d in ds:
+        mkpath(d)
+
+    for src, dst in cpfs:
+        copy_file(src, dst)
+
+
 ###################
 ### Call setup! ###
 ###################
@@ -454,14 +477,7 @@ def pyne_setup():
     # clean includes dir and recopy files over
     if os.path.exists('pyne/includes'):
         remove_tree('pyne/includes')
-
-    mkpath('pyne/includes')
-    for header in glob.glob('cpp/*.h'):
-        copy_file(header, 'pyne/includes')
-
-    mkpath('pyne/includes/pyne')
-    for header in glob.glob('pyne/*.pxd'):
-        copy_file(header, 'pyne/includes/pyne')
+    make_includes()
 
     # Create metadata file
     mdpath = "pyne/metadata.json"
