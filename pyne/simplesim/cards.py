@@ -3137,7 +3137,6 @@ class ITally(ICard):
     def alt_units(self, value): self._alt_units = value
 
 
-
 class ICellSurfTally(ITally):
     """This class is not used by the user. Abstract base class for
     tallies over cells and surfaces, as opposed to detector tallies. In MCNP,
