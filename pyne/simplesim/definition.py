@@ -4,7 +4,23 @@
 
     from pyne.simplesim import definition
 
-Below is the reference for this module.
+Below is the reference for this module. There are primarily two types of
+definitions: system definitions and simulation definitions:
+
+    - System definitions describe the geometry and material composition of a
+      system, and nothing else. It is intended that the definition is
+      completely code-dependent (i.e. independent of codes such as MCNP),
+      though the way in which geometry is specified is very similar to how it
+      is done for MCNP.
+    - Simulation definitions, which require a system definition, contain
+      information about how to simulate the system: where to place particle
+      sources, what information is desired from the simulation, etc. The
+      simulation definition may have different information depending on the
+      code being used to perform the simulation (e.g. MCNP, etc.), though it is
+      likely that these codes do have some common elements. The common elements
+      are to be found/placed in :py:class:`SimulationDefinition`, while the
+      elements relevant to the abilities of specific codes would be found in
+      classes such as :py:class:`MCNPSimulation`.
 
 """
 # TODO check overwriting warning.
@@ -21,14 +37,23 @@ from pyne import material
 from pyne.simplesim import cards
 
 class IDefinition(object):
-    """
-    TODO
+    """This class is not used by the user. Abstract base class for
+    system and simulation definitions.
+
     """
     __metaclass__ = abc.ABCMeta
 
     def __init__(self, fname=None, verbose=True):
-        """
-        TODO
+        """Creates a new definition or loads one from ``fname``.
+
+        Parameters
+        ----------
+        fname : str, optional
+            If not provided, then a new definition is created. Otherwise, an
+            existing definition is loaded from file ``fname``.
+        verbose : bool, optional
+            Prints updates about what is going on.
+
         """
         self.verbose = verbose
         if fname is not None:
@@ -62,11 +87,18 @@ class IDefinition(object):
         fid.close()
 
     def _assert_unique(self, card_type, card):
-        """Checks that the name on a card has not already been used for another
-        card.
+        """Checks if the name on a card has already been used for another
+        card. If so, a warning is issued.
+
+        Returns
+        -------
+        unique : bool
+            True if card with the name is not in the simulation, otherwise
+            False.
 
         """
-        # TODO Don't require the user to pass the card_type string.
+        # TODO Don't require the user to pass the card_type string; just get
+        # the class of the object passed in.
         if card_type == 'cell':
             dict_to_check = self.cells
         elif card_type == 'surface':
@@ -107,8 +139,12 @@ class IDefinition(object):
 class SystemDefinition(IDefinition):
     """This class creates a system definition as is done in MCNPX: homogeneous
     regions in space in the reactor, called cells, are defined through the
-    intersection, union, etc of surfaces and are filled by materials. The
-    definition of materials is done using the `material` module of PyNE.
+    intersection, union, etc of surfaces and are filled by materials. The user
+    uses the following methods of this class:
+
+    - :py
+
+        TODO
 
     """
     def __init__(self, fname=None, verbose=True):
@@ -123,6 +159,7 @@ class SystemDefinition(IDefinition):
 
     def add_cell(self, cell):
         """
+        TODO
 
         """
         if self.verbose:
@@ -170,6 +207,7 @@ class SystemDefinition(IDefinition):
     def add_material(self, material):
         """This method is only used by the user for materials that are not on a
         cell card.  Materials on cell cards are added automatically.
+        TODO
 
         """
         if material.name == None or material.name == '':
@@ -189,6 +227,10 @@ class SystemDefinition(IDefinition):
             self._universes += [univ_name]
 
     def cell_num(self, name):
+        """Returns the cell number for the cell name provided. If a cell with
+        that name is not in the simulation, an exception is raised.
+
+        """
         # TODO removing cards.
         # Must add one because indices start at 0 but card numbers at 1.
         if name not in self.cells:
