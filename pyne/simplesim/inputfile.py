@@ -80,16 +80,16 @@ class IInputFile(object):
 
         """
         self.fname = fname
-        self.set_up()
+        self._set_up()
         # Should write the plug in the appropriate place.
         self._write_subclass()
-        self.fid.close()
+        self._clean_up()
         self.fname = None
 
-    def set_up(self):
+    def _set_up(self):
         self.fid = open(self.fname, 'w')
 
-    def clean_up(self):
+    def _clean_up(self):
         self.fid.close()
     
     @abc.abstractmethod

@@ -228,7 +228,7 @@ class SystemDefinition(IDefinition):
 
     def cell_num(self, name):
         """Returns the cell number for the cell name provided. If a cell with
-        that name is not in the simulation, an exception is raised.
+        that name is not in the system, an exception is raised.
 
         """
         # TODO removing cards.
@@ -239,6 +239,10 @@ class SystemDefinition(IDefinition):
         return self.cells.keys().index(name) + 1
 
     def surface_num(self, name):
+        """Returns the surface number for the surface name provided. If a
+        surface with that name is not in the system, an exception is raised.
+
+        """
         # Must add one because indices start at 0 but card numbers at 1.
         if name not in self.surfaces:
             raise StandardError("Surface {0!r} is not in the system.".format(
@@ -251,6 +255,10 @@ class SystemDefinition(IDefinition):
         return num
 
     def material_num(self, name):
+        """Returns the material number for the material name provided. If a
+        material with that name is not in the system, an exception is raised.
+
+        """
         # Must add one because indices start at 0 but card numbers at 1.
         if name not in self.materials:
             raise StandardError("Material {0!r} is not in the system.".format(
@@ -333,6 +341,7 @@ class SimulationDefinition(IDefinition):
         self._source = collections.OrderedDict()
         self._tally = collections.OrderedDict()
         self._misc = collections.OrderedDict()
+        self._dists = collections.OrderedDict()
 
     def add_source(self, card):
         if not isinstance(card, cards.ISource):
@@ -361,6 +370,43 @@ class SimulationDefinition(IDefinition):
         self._assert_unique('misc', card)
         self._misc[card.name] = card
 
+    def add_dist(self, card):
+        """Adds a distribution card to the simulation.
+
+        Parameters
+        ----------
+        card : :py:class:`cards.Distribution` or subclass
+            The card to be added to the simulation.
+
+        """
+        if not isinstance(card, cards.Distribution):
+            raise ValueError("Only ``Distribution`` cards can be "
+                    "added by this method. User provided {0}.".format(card))
+        self._assert_unique('dist', card)
+        self._dists[card.name] = card
+
+    def dist_num(self, name):
+        """Retrieve the number of a :py:class:`cards.Distribution` card in
+        the MCNP input file.
+
+        Parameters
+        ----------
+        name : str
+            Name of the :py:class:`cards.Distribution`. Names must be unique
+            across all distributions, and perhaps across cell and surface
+            cards.
+
+        Returns
+        -------
+        dist_num : int
+            The distribution number.
+
+        """
+        if name not in self.dists:
+            raise StandardError("Distribution {0!r} is not in "
+                    "the simulation.".format(name))
+        return self.dists.keys().index(name) + 1
+
     def remove_source(self, name):
         raise Exception("Not implemented.")
 
@@ -368,6 +414,9 @@ class SimulationDefinition(IDefinition):
         raise Exception("Not implemented.")
 
     def remove_misc(self, name):
+        raise Exception("Not implemented.")
+
+    def remove_dist(self, name):
         raise Exception("Not implemented.")
 
     def save(self, fname):
@@ -403,6 +452,14 @@ class SimulationDefinition(IDefinition):
         """Ordered dictionary of misc. cards (from :py:class:`cards.IMisc`)."""
         return self._misc
 
+    @property
+    def dists(self):
+        """Ordered dictionary of distribution cards (from
+        :py:class:`cards.Distribution`).
+
+        """
+        return self._dists
+
 
 class MCNPSimulation(SimulationDefinition):
     """
@@ -419,7 +476,6 @@ class MCNPSimulation(SimulationDefinition):
         self._tally_cellfissiondep = collections.OrderedDict()
         self._tally_pulseheight = collections.OrderedDict()
         self._tally_detector = collections.OrderedDict()
-        self._dists = collections.OrderedDict()
 
     def add_tally(self, card):
         """Adds a tally card to the simulation.
@@ -524,43 +580,6 @@ class MCNPSimulation(SimulationDefinition):
                     "the simulation.".format(name))
         return self.transformations.keys().index(name) + 1
 
-    def add_dist(self, card):
-        """Adds a distribution card to the simulation.
-
-        Parameters
-        ----------
-        card : :py:class:`cards.Distribution` or subclass
-            The card to be added to the simulation.
-
-        """
-        if not isinstance(card, cards.Distribution):
-            raise ValueError("Only ``Distribution`` cards can be "
-                    "added by this method. User provided {0}.".format(card))
-        self._assert_unique('dist', card)
-        self._dists[card.name] = card
-
-    def dist_num(self, name):
-        """Retrieve the number of a :py:class:`cards.Distribution` card in
-        the MCNP input file.
-
-        Parameters
-        ----------
-        name : str
-            Name of the :py:class:`cards.Distribution`. Names must be unique
-            across all distributions, and perhaps across cell and surface
-            cards.
-
-        Returns
-        -------
-        dist_num : int
-            The distribution number.
-
-        """
-        if name not in self.dists:
-            raise StandardError("Distribution {0!r} is not in "
-                    "the simulation.".format(name))
-        return self.dists.keys().index(name) + 1
-
     @property
     def transformations(self):
         """Ordered dictionary of transformation cards (from
@@ -568,14 +587,6 @@ class MCNPSimulation(SimulationDefinition):
 
         """
         return self._transformations
-
-    @property
-    def dists(self):
-        """Ordered dictionary of distribution cards (from
-        :py:class:`cards.Distribution`).
-
-        """
-        return self._dists
 
 
 class DefinitionEncoder(json.JSONEncoder):
