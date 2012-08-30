@@ -16,6 +16,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#define JSON_IS_AMALGAMATION
 #include <json/json-forwards.h>
 #include <json/json.h>
 #include "h5wrap.h"
