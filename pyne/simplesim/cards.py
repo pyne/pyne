@@ -51,6 +51,8 @@ the module.
 # name referencing everywhere, not object passing. however using json() would
 # create something more human-readable.
 # TODO talk aobut how i'd prefer for universes to work.
+# TODO move user_custom out of inputfile, and just make CellCustom,
+# SurfaceCustom
 
 import abc
 import collections
@@ -6459,6 +6461,48 @@ class Burn(IMisc):
     #        matl_omit=None, min_frac=1e-10, chain_convergence=1e-10, fp_tier=1,
     #        out_order='mass', out_per_step=False, model_opt='fatal',
     #        volume=None, conc_change=None)
+
+
+class Custom(ICard):
+    def __init__(self, comment=None, mcnp=None):
+        self.comment_string = comment
+        self.mcnp_string = mcnp
+
+    def comment(self):
+        return self.comment_string
+
+    def mcnp(self):
+        if not self.mcnp_string:
+            raise Exception("mcnp not defined on custom {0}.".format(
+                self))
+        return self.mcnp_string
+
+
+class CellCustom(Custom, Cell):
+    pass
+#    def __init__(self, **kwargs):
+#        super(CellCustom, self).__init__(**kwargs)
+
+
+class DistributionCustom(Custom, Distribution):
+    pass
+
+
+class SurfaceCustom(Custom, ISurface):
+    pass
+
+
+class TallyCustom(Custom, ITally):
+    pass
+
+
+class MiscCustom(Custom, IMisc):
+    pass
+
+
+class TransformationCustom(Custom, Transformation):
+    pass
+
 
 class Particle(object):
     """Facilitates the use of particle abbreviations, and is an attribute in
