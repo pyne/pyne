@@ -358,7 +358,7 @@ class Cell(ICard):
             if type(zdim) is str: zdim = [zdim]
             if n_dim == 2: string += "\n{0}".format(4 * " ")
             if n_dim == 3:
-                string += "\n{0}k = {1}".format(5 * " ", counter)
+                string += "\n{0}$ k = {1}".format(5 * " ", counter)
                 counter += 1
             for ydim in zdim:
                 # Allow easy looping if 2 dimensions only.
