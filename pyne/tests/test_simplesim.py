@@ -653,8 +653,10 @@ class TestSystemDefinition(unittest.TestCase):
                 "-fuelpin, void lattice hexagonal fill long format.")
         self.assertEquals(cellF.mcnp('%.5g', self.sim), "9 0 -1 LAT=2\n     "
                 "FILL=0:2 0:1 -1:0\n     "
+                "k = -1\n     "
                 "2 3 2\n     "
                 "3 2 3\n     "
+                "k = 0\n     "
                 "2 0 2\n     "
                 "3 2 3")
 
@@ -872,6 +874,90 @@ class TestSystemDefinition(unittest.TestCase):
         #        self.uo2, 10.0, 'g/cm^3',
         #        temperature=100)
         #self.assertRaises(UserWarning, cellE.comment)
+
+        # Universes, fill, lattice.
+        cellC = cards.CellMCNP('C', self.pin.neg & self.cellbound.pos, self.uo2,
+                density=1,
+                density_units='g/cm^3',
+                volume=1,
+                universe=('unitcell', True))
+        self.rxr.add_cell(cellC)
+        self.assertEquals(cellC.comment(), "Cell 'C': region "
+                "(-fuelpin & +bound), "
+                "material 'UO2' density 1 g/cm^3 "
+                "univ unitcell (truncated) VOL= 1 cm^3.")
+        self.assertEquals(cellC.mcnp('%.5g', self.sim), "4  1 -1 (-1 2) "
+                "U=1 VOL=1")
+
+        cellD = cards.CellMCNP('D', self.pin.neg, self.uo2, density=2,
+                density_units='g/cm^3',
+                volume=1,
+                universe=('unitcell', False))
+        self.rxr.add_cell(cellD)
+        self.assertEquals(cellD.comment(), "Cell 'D': region "
+                "-fuelpin, "
+                "material 'UO2' density 2 g/cm^3 "
+                "univ unitcell (not truncated) VOL= 1 cm^3.")
+        self.assertEquals(cellD.mcnp('%.5g', self.sim), "5  1 -2 -1 U=-1 VOL=1")
+
+        cellE = cards.CellMCNP('E', self.pin.neg, fill='unitcell', volume=1)
+        self.rxr.add_cell(cellE)
+        self.assertEquals(cellE.comment(), "Cell 'E': region "
+                "-fuelpin, void "
+                "fill unitcell VOL= 1 cm^3.")
+        self.assertEquals(cellE.mcnp('%.5g', self.sim), "6  0 -1 FILL=1 VOL=1")
+
+        univ_names = [['A', 'B', 'A', 'B', 'A'],
+                      ['B', 'A', 'B', 'A', 'B'],
+                      ['B', 'A', 'B', 'A', 'B']]
+        cellF = cards.CellMCNP('F', self.pin.neg, lattice='hexahedra',
+                volume=1,
+                fill=([0, 4], [0, 2], [], univ_names))
+        self.rxr.add_cell(cellF)
+        self.rxr._register_universe('A')
+        self.rxr._register_universe('B')
+        self.assertEquals(cellF.comment(), "Cell 'F': region "
+                "-fuelpin, void lattice hexahedra fill long format "
+                "VOL= 1 cm^3.")
+        self.assertEquals(cellF.mcnp('%.5g', self.sim), "7  0 -1 LAT=1 VOL=1"
+                "\n     "
+                "FILL=0:4 0:2 0:0\n     "
+                "2 3 2 3 2\n     "
+                "3 2 3 2 3\n     "
+                "3 2 3 2 3")
+
+        univ_names2 = [[['A',  'B',  'A'], 
+                        ['B',  'A',  'B']],
+                       [['A',  None, 'A'],
+                        ['B',  'A',  'B']]]
+        cellF = cards.CellMCNP('F', self.pin.neg, lattice='hexagonal',
+                volume=1,
+                fill=([0, 2], [0, 1], [-1, 0], univ_names2))
+        self.rxr.add_cell(cellF)
+        self.assertEquals(cellF.comment(), "Cell 'F': region "
+                "-fuelpin, void lattice hexagonal fill long format "
+                "VOL= 1 cm^3.")
+        self.assertEquals(cellF.mcnp('%.5g', self.sim), "7  0 -1 LAT=2 VOL=1"
+                "\n     "
+                "FILL=0:2 0:1 -1:0\n     "
+                "k = -1\n     "
+                "2 3 2\n     "
+                "3 2 3\n     "
+                "k = 0\n     "
+                "2 0 2\n     "
+                "3 2 3")
+
+        univ_names2 = ['A',  'B',  'A']
+        cellF = cards.CellMCNP('F', self.pin.neg, lattice='hexagonal',
+                volume=1,
+                fill=([0, 2], [], [], univ_names2))
+        self.rxr.add_cell(cellF)
+        self.assertEquals(cellF.comment(), "Cell 'F': region "
+                "-fuelpin, void lattice hexagonal fill long format "
+                "VOL= 1 cm^3.")
+        self.assertEquals(cellF.mcnp('%.5g', self.sim), "7  0 -1 LAT=2 VOL=1"
+                "\n     "
+                "FILL=0:2 0:0 0:0 2 3 2")
 
     def test_ExponentialTransform(self):
         """Tests :py:class:`cards.ExponentialTransform` and the related
