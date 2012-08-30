@@ -10,6 +10,8 @@ run a simulation in.
 Examples that are too complicated are useless, but all features still need to
 be shown. It's better to have many small examples than to have a few big ones.
 
+.. image:: simplesimdiagram.svg
+
 ******
 Godiva
 ******
