@@ -173,12 +173,13 @@ class Cell(ICard):
         fill : str, or 4-element tuple, optional
             The name of a universe with which to fill this cell. Typically,
             cells that are filled with a universe are void themselves. If
-            tuple, it contains:
+            tuple (only makes sense for lattice cells), it contains:
 
             1. 2-element list of x-index bounds ([], or [0, 0] for 1 row/col)
             2. 2-element list of y-index bounds ([], or [0, 0] for 1 row/col)
             3. 2-element list of z-index bounds ([], or [0, 0] for 1 row/col)
-            4. 1-D, 2-D, or 3-D list of universe names. See examples.
+            4. 1-D, 2-D, or 3-D list of universe names, or None to use the
+               real world universe. See examples.
 
         lattice : str, optional
             Makes this cell is a repeating lattice. Can be either
@@ -209,10 +210,54 @@ class Cell(ICard):
             cellB = Cell('B', surfA.neg & surfB.pos, density=1)
             cellB = Cell('B', surfA.neg & surfB.pos, 
                     density_units='g/cm^3')
-        
+
+        The following creates a new universe, and places two cells in it::
+
+            cellC = Cell('C', surfA.neg & surfB.pos, matA, density=1,
+                    density_units='g/cm^3',
+                    universe=('unitcell', True))
+            cellD = Cell('D', surfC.neg, matC, density=2,
+                    density_units='g/cm^3',
+                    universe=('unitcell', False))
+
+        Note that the universe isn't actually `created` until this card is
+        added to a system::
+
+            sys = definition.SystemDefinition()
+            sys.add_cell(cellD)
+
+        Now, we can create a cell filled with the 'unitcell' universe::
+
+            cellE = Cell('E', fill='unitcell')
+
+        If we had two universes 'A' and 'B', we could fill a finite lattice
+        cell as follows::
+       
+            #                 element (0, 0, 0)   element (4, 0, 0)
+            #                /                   /
+            univ_names = [['A', 'B', 'A', 'B', 'A'],
+                          ['B', 'A', 'B', 'A', 'B']]
+            #               ^                   ^
+            #               element (0, 1, 0)   element (4, 1, 0)
+            cellF = Cell('F', surfA.neg, lattice='hexahedra',
+                    fill=([0, 4], [0, 1], [], univ_names))
+
+        Here is an example for a 3-D finite lattice::
+
+            #                 (0, 0, -1)  (2, 0, -1)
+            #                /           /
+            univ_names = [[['A',  'B',  'A'], 
+                           ['B',  'A',  'B']],
+                          [['A',  None, 'A'],
+                           ['B',  'A',  'B']]]
+            #                ^           ^
+            #                (0, 1, 0)  (2, 1, 0)
+            #
+            cellF = Cell('F', surfA.neg, lattice='hexahedra',
+                    fill=([0, 2], [0, 1], [-1, 0], univ_names))
+
         """
         # TODO decide how I will do cross-referencing.
-        # TODO specify universe as None if real world.
         super(Cell, self).__init__(name, *args, **kwargs)
         self.region = region
         self.material = material
@@ -236,6 +281,21 @@ class Cell(ICard):
                     self.material.name, self.density, self.density_units)
         else:
             string += "void"
+        # Univ, fill, lattice
+        if self.universe:
+            card = Universes(self, self.universe[0], self.universe[1])
+            string += " univ{0}".format(card._comment_unit(self))
+        if self.fill:
+            if type(self.fill) is not tuple:
+                # if IS tuple, mcnp_long_tuple is called.
+                card = Fill(self, self.fill)
+                string += " fill{0}".format(card._comment_unit(self))
+        # Lattice
+        if self.lattice:
+            card = Lattice(self, self.lattice)
+            string += " lattice{0}".format(card._comment_unit(self))
+        if self.fill and type(self.fill) is tuple:
+            string += " fill long format"
         if period: string += "."
         return string
 
@@ -265,23 +325,42 @@ class Cell(ICard):
             card = Universes(self, self.universe[0], self.universe[1])
             string += " U={0}".format(card._mcnp_unit(float_format, sim, self))
         if self.fill:
-            string += " FILL="
-            if type(self.fill) is tuple:
-                # TODO
-                string += "{0[0]}:{0[1]} {1[0]}:{1[1]} {2[0]}:{2[1]}".format(
-                        self.fill[0] if len(self.fill[0]) == 2 else [0, 0],
-                        self.fill[1] if len(self.fill[1]) == 2 else [0, 0],
-                        self.fill[2] if len(self.fill[2]) == 2 else [0, 0])
-                #string += TODOloop through matrix
-            else:
+            if type(self.fill) is not tuple:
+                # if IS tuple, mcnp_long_tuple is called.
                 card = Fill(self, self.fill)
-                string += "{0}".format(card._mcnp_unit(
+                string += " FILL={0}".format(card._mcnp_unit(
                     float_format, sim, self))
         # Lattice
         if self.lattice:
             card = Lattice(self, self.lattice)
             string += " LAT={0}".format(card._mcnp_unit(
-                float_forat, sim, self))
+                float_format, sim, self))
+        if self.fill and type(self.fill) is tuple:
+            string += self._mcnp_long_fill(float_format, sim)
+        return string
+
+    def _mcnp_long_fill(self, float_format, sim):
+        x_idxs = self.fill[0]
+        y_idxs = self.fill[1]
+        z_idxs = self.fill[2]
+        univ_names = self.fill[3]
+        string = "\n{0}FILL={1[0]}:{1[1]} {2[0]}:{2[1]} {3[0]}:{3[1]}".format(
+                5 * " ",
+                x_idxs if len(x_idxs) == 2 else [0, 0],
+                y_idxs if len(y_idxs) == 2 else [0, 0],
+                z_idxs if len(z_idxs) == 2 else [0, 0])
+        n_dim = (len(x_idxs) == 2) + (len(y_idxs) == 2) + (len(z_idxs) == 2)
+        for zdim in univ_names:
+            # Allow easy looping if 1 dimension only.
+            if type(zdim) is str: zdim = [zdim]
+            if n_dim == 2: string += "\n{0}".format(4 * " ")
+            for ydim in zdim:
+                # Allow easy looping if 2 dimensions only.
+                if type(ydim) is str: ydim = [ydim]
+                if n_dim == 3: string += "\n{0}".format(4 * " ")
+                for univ_name in ydim:
+                    string += " {0}".format(
+                        sim.sys.universe_num(univ_name) if univ_name else 0)
         return string
 
     def _mcnp_density_prefix(self, density_units):
@@ -947,20 +1026,20 @@ class Material(ICard, material.Material):
 
             originstory = "I found this water in a well a few years ago."
             h2o = Material(name='water', description=originstory)
-            h2o.from_atom_frac({10010: 1.0, 'O16': 2.0})
+            h2o.from_atom_frac({10010: 2.0, 'O16': 1.0})
             h2o.tables = {10010: '71c'}
             sys.add_material(h2o)
 
         Alternatively, the tables can be specified with the constructor::
 
            h2o = Material(name='water', tables={10010: '71c'})
-           h2o.from_atom_frac({10010: 1.0, 'O16': 2.0})
+           h2o.from_atom_frac({10010: 2.0, 'O16': 1.0})
 
         The ``nucname``'s used for ``tables`` can be different from those used
         for ``comp``::
 
            h2o = Material(name='water', tables={'H1': '71c'})
-           h2o.from_atom_frac({10010: 1.0, 'O16': 2.0})
+           h2o.from_atom_frac({10010: 2.0, 'O16': 1.0})
 
         """
         super(Material, self).__init__(*args, **kwargs)
@@ -1979,7 +2058,7 @@ class ScatteringLaw(IMisc):
         This specifies hydrogen bound in water, in MCNP::
 
            h2o = Material(name='water')
-           h2o.from_atom_frac({10010: 1.0, 'O16': 2.0})
+           h2o.from_atom_frac({10010: 2.0, 'O16': 1.0})
            sys.add_material(h2o)
            sl = ScatteringLaw('water', {'H1': 'lwtr.16t'})
 
