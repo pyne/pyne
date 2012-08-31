@@ -94,9 +94,10 @@ class ICard(object):
         if self.unique: self._name = name
         else:            self.name = name
 
-    def __str__(self):
-        # TODO Do we actually want to do this?
-        return self.comment()
+        # TODO Do we actually want to do this? No, it is causing recursion
+        # issues via IRegion.
+    #def __str__(self):
+    #    return self.comment()
 
     # All subclasses must define a comment() method.
     @abc.abstractmethod
@@ -285,17 +286,17 @@ class Cell(ICard):
             string += "void"
         # Univ, fill, lattice
         if self.universe:
-            card = Universes(self, self.universe[0], self.universe[1])
-            string += " univ{0}".format(card._comment_unit(self))
+            card = Universes(self.name, self.universe[0], self.universe[1])
+            string += " univ{0}".format(card._comment_unit(self.name))
         if self.fill:
             if type(self.fill) is not tuple:
                 # if IS tuple, mcnp_long_tuple is called.
-                card = Fill(self, self.fill)
-                string += " fill{0}".format(card._comment_unit(self))
+                card = Fill(self.name, self.fill)
+                string += " fill{0}".format(card._comment_unit(self.name))
         # Lattice
         if self.lattice:
-            card = Lattice(self, self.lattice)
-            string += " lattice{0}".format(card._comment_unit(self))
+            card = Lattice(self.name, self.lattice)
+            string += " lattice{0}".format(card._comment_unit(self.name))
         if self.fill and type(self.fill) is tuple:
             string += " fill long format"
         if period: string += "."
@@ -324,19 +325,20 @@ class Cell(ICard):
         string += " {0}".format(self.region.mcnp(sim))
         # Univ, fill, lattice
         if self.universe:
-            card = Universes(self, self.universe[0], self.universe[1])
-            string += " U={0}".format(card._mcnp_unit(float_format, sim, self))
+            card = Universes(self.name, self.universe[0], self.universe[1])
+            string += " U={0}".format(card._mcnp_unit(
+                float_format, sim, self.name))
         if self.fill:
             if type(self.fill) is not tuple:
                 # if IS tuple, mcnp_long_tuple is called.
-                card = Fill(self, self.fill)
+                card = Fill(self.name, self.fill)
                 string += " FILL={0}".format(card._mcnp_unit(
-                    float_format, sim, self))
+                    float_format, sim, self.name))
         # Lattice
         if self.lattice:
-            card = Lattice(self, self.lattice)
+            card = Lattice(self.name, self.lattice)
             string += " LAT={0}".format(card._mcnp_unit(
-                float_format, sim, self))
+                float_format, sim, self.name))
         if isinstance(self, CellMCNP):
             string += self._mcnp_keywords(float_format, sim)
         if self.fill and type(self.fill) is tuple:
@@ -370,27 +372,6 @@ class Cell(ICard):
                     string += " {0}".format(
                         sim.sys.universe_num(univ_name) if univ_name else 0)
         return string
-
-    def _mcnp_density_prefix(self, density_units):
-        """In MCNP, mass densities are represented by prepending a minus sign.
-
-        Parameters
-        ----------
-        density_units : str
-            Must be either 'g/cm^3' or 'atoms/b/cm'.
-
-        Returns
-        -------
-        prefix : str
-            Returns a minus sign for mass densities and an empty string for
-            number densities.
-
-        """
-        if density_units == 'g/cm^3':          return '-'
-        elif density_units == 'atoms/b/cm':    return ''
-        else:
-            raise Exception("Invalid string to specify density units: "
-                "{0!r}.".format(density_units))
 
     @property
     def region(self): return self._region
@@ -735,66 +716,66 @@ class CellMCNP(Cell):
         string = super(CellMCNP, self).comment(period=False)
         # temperature
         if self.temperature:
-            card = Temperature(self, self.temperature)
-            string += " TMP=" + card._comment_unit(self)
+            card = Temperature(self.name, self.temperature)
+            string += " TMP=" + card._comment_unit(self.name)
         # volume
         if self.volume:
-            card = Volume(self, self.volume)
-            string += " VOL=" + card._comment_unit(self)
+            card = Volume(self.name, self.volume)
+            string += " VOL=" + card._comment_unit(self.name)
         # importance
         if self.importance:
             for entry in self._make_list(self.importance):
-                card = Importance(entry[0], self, entry[1])
+                card = Importance(entry[0], self.name, entry[1])
                 string += " IMP:{0}={1}".format(
                         Particle(entry[0]).mcnp(),
-                        card._comment_unit(self))
+                        card._comment_unit(self.name))
         # exp_transform
         if self.exp_transform:
             for entry in self._make_list(self.exp_transform):
                 card = ExponentialTransform(
-                        entry[0], self, entry[1], entry[2], entry[3])
+                        entry[0], self.name, entry[1], entry[2], entry[3])
                 string += " EXT:{0}={1}".format(
                         Particle(entry[0]).mcnp(),
-                        card._comment_unit(self))
+                        card._comment_unit(self.name))
         # forced_coll
         if self.forced_coll:
             for entry in self._make_list(self.forced_coll):
-                card = ForcedCollision(entry[0], self, entry[1], entry[2])
+                card = ForcedCollision(entry[0], self.name, entry[1], entry[2])
                 string += " FCL:{0}={1}".format(
                         Particle(entry[0]).mcnp(),
-                        card._comment_unit(self))
+                        card._comment_unit(self.name))
         # weight_win_bound
         if self.weight_win_bound:
             for entry in self._make_list(self.weight_win_bound):
                 card = WeightWindowBound(
-                        entry[0], entry[1], entry[2], self, entry[3])
+                        entry[0], entry[1], entry[2], self.name, entry[3])
                 string += " WWN({0},{1}):{2}={3}".format(
                         entry[1], entry[2], Particle(entry[0]).mcnp(),
-                        card._comment_unit(self, entry[1], entry[2]))
+                        card._comment_unit(self.name, entry[1], entry[2]))
         # dxtran_contrib
         if self.dxtran_contrib:
             dxtran_contrib = self._make_list(self.dxtran_contrib)
             for entry in self._make_list(self.dxtran_contrib):
-                card = DXTRANContribution(entry[0], entry[1], self, entry[2])
+                card = DXTRANContribution(entry[0], entry[1], self.name, entry[2])
                 string += " DXC{0!r}:{1}={2}".format( 
                         entry[1], Particle(entry[0]).mcnp(),
-                        card._comment_unit(self))
+                        card._comment_unit(self.name))
         # photon_weight
         if self.photon_weight:
             # TODO this might cause issues.
             card = PhotonWeight()
-            card.set(self, *list(self.photon_weight))
-            string += " PWT={0}".format(card._comment_unit(self))
+            card.set(self.name, *list(self.photon_weight))
+            string += " PWT={0}".format(card._comment_unit(self.name))
         # fission_turnoff
         if self.fission_turnoff:
-            card = FissionTurnoff(self, self.fission_turnoff)
-            string += " NONU={0}".format(card._comment_unit(self))
+            card = FissionTurnoff(self.name, self.fission_turnoff)
+            string += " NONU={0}".format(card._comment_unit(self.name))
         # det_contrib
         if self.det_contrib:
             for entry in self._make_list(self.det_contrib):
-                card = DetectorContribution(entry[0], self, entry[1])
+                card = DetectorContribution(entry[0], self.name, entry[1])
                 string += " PD for tally {0!r}={1}".format(
-                        entry[0], card._comment_unit(self))
+                        entry[0], card._comment_unit(self.name))
         # transform
         if self.transformation:
             # For brevity.
@@ -816,72 +797,73 @@ class CellMCNP(Cell):
         string = ""
         # temperature
         if self.temperature:
-            card = Temperature(self, self.temperature)
+            card = Temperature(self.name, self.temperature)
             string += " TMP={0}".format(
-                    card._mcnp_unit(float_format, sim, self))
+                    card._mcnp_unit(float_format, sim, self.name))
         # volume
         if self.volume:
-            card = Volume(self, self.volume)
+            card = Volume(self.name, self.volume)
             string += " VOL={0}".format(
-                    card._mcnp_unit(float_format, sim, self))
+                    card._mcnp_unit(float_format, sim, self.name))
         # importance
         if self.importance:
             for entry in self._make_list(self.importance):
-                card = Importance(entry[0], self, entry[1])
+                card = Importance(entry[0], self.name, entry[1])
                 string += " IMP:{0}={1}".format(
                         Particle(entry[0]).mcnp(), 
-                        card._mcnp_unit(float_format, sim, self))
+                        card._mcnp_unit(float_format, sim, self.name))
         # exp_transform
         if self.exp_transform:
             for entry in self._make_list(self.exp_transform):
                 card = ExponentialTransform(
-                        entry[0], self, entry[1], entry[2], entry[3])
+                        entry[0], self.name, entry[1], entry[2], entry[3])
                 string += " EXT:{0}={1}".format(
                         Particle(entry[0]).mcnp(), 
-                        card._mcnp_unit(float_format, sim, self))
+                        card._mcnp_unit(float_format, sim, self.name))
         # forced_coll
         if self.forced_coll:
             for entry in self._make_list(self.forced_coll):
-                card = ForcedCollision(entry[0], self, entry[1], entry[2])
+                card = ForcedCollision(entry[0], self.name, entry[1], entry[2])
                 string += " FCL:{0}={1}".format(
                         Particle(entry[0]).mcnp(), 
-                        card._mcnp_unit(float_format, sim, self))
+                        card._mcnp_unit(float_format, sim, self.name))
         # weight_win_bound
         if self.weight_win_bound:
             for entry in self._make_list(self.weight_win_bound):
                 card = WeightWindowBound(
-                        entry[0], entry[1], entry[2], self, entry[3])
+                        entry[0], entry[1], entry[2], self.name, entry[3])
                 # Need the next line to obtain the linear index.
                 card._find_n_energies(sim)
                 string += " WWN{0}:{1}={2}".format( 
                         card.i_linear(entry[1], entry[2]),
                         Particle(entry[0]).mcnp(), 
-                        card._mcnp_unit(float_format, self, entry[1],
+                        card._mcnp_unit(float_format, self.name, entry[1],
                             entry[2]))
         # dxtran_contrib
         if self.dxtran_contrib:
             for entry in self._make_list(self.dxtran_contrib):
-                card = DXTRANContribution(entry[0], entry[1], self, entry[2])
+                card = DXTRANContribution(entry[0], entry[1], self.name,
+                            entry[2])
                 string += " DXC{0}:{1}={2}".format( 
                         card.sph_index(sim), Particle(entry[0]).mcnp(), 
-                        card._mcnp_unit(float_format, sim, self))
+                        card._mcnp_unit(float_format, sim, self.name))
         # photon_weight
         if self.photon_weight:
             card = PhotonWeight()
-            card.set(self, *list(self.photon_weight))
+            card.set(self.name, *list(self.photon_weight))
             string += " PWT={0}".format(
-                    card._mcnp_unit(float_format, sim, self))
+                    card._mcnp_unit(float_format, sim, self.name))
         if self.fission_turnoff:
-            card = FissionTurnoff(self, self.fission_turnoff)
+            card = FissionTurnoff(self.name, self.fission_turnoff)
             string += " NONU={0}".format(
-                card._mcnp_unit(float_format, sim, self))
+                card._mcnp_unit(float_format, sim, self.name))
         # det_contrib
         if self.det_contrib:
             for entry in self._make_list(self.det_contrib):
-                card = DetectorContribution(entry[0], self, entry[1])
+                card = DetectorContribution(entry[0], self.name, entry[1])
                 string += " PD{0}={1}".format(
                     sim.tally_num(entry[0]) * 10 + 5,
-                    card._mcnp_unit(float_format, sim, self))
+                    card._mcnp_unit(float_format, sim, self.name))
         # transform
         if self.transformation:
             # For brevity.
@@ -4390,7 +4372,7 @@ class ICellMod(IMisc):
         counter = 0
         for cell in self.cells:
             counter += 1
-            string += " cell {0!r}".format(cell.name)
+            string += " cell {0!r}".format(cell)
             string += self._comment_unit(cell)
             if counter < len(self.cells): string += ","
         return string + "."
@@ -4407,16 +4389,16 @@ class ICellMod(IMisc):
         # TODO this should loop through in the print order.
         # `gathering` empty cells (cells for which no value is given).
         empty_count = 0
-        for key, cell in sim.sys.cells.iteritems(): 
-            if cell in self.cells:
+        for key in sim.sys.cells: 
+            if key in self.cells:
                 if empty_count > 0:
                     string += " {0}J".format(empty_count)
                     empty_count = 0
-                string += " " + self._mcnp_unit(float_format, sim, cell)
+                string += " " + self._mcnp_unit(float_format, sim, key)
             else:
                 empty_count += 1
                 # Account for running out of cells with empty baggage.
-                if cell is sim.sys.cells.values()[-1]:
+                if key is sim.sys.cells.keys()[-1]:
                     string += " {0}J".format(empty_count)
         return string
 
@@ -4428,10 +4410,9 @@ class ICellMod(IMisc):
 
     @cells.setter
     def cells(self, value):
-        for arg in value:
-            if not isinstance(arg, Cell):
-                raise ValueError("The ``cell`` must be a ``Cell``. User "
-                        "provided {0}.".format(arg))
+        for val in value:
+            if type(val) is not str:
+                raise Exception("Expected cell name, got {0}".format(val))
         self._cells = value
 
 
@@ -5372,7 +5353,7 @@ class ICellModParticle(IUniqueParticle):
         counter = 0
         for cell in self.cells:
             counter += 1
-            string += " cell {0!r}".format(cell.name)
+            string += " cell {0!r}".format(cell)
             string += self._comment_unit(cell)
             if counter < len(self.cells): string += ";"
         return string + "."
@@ -5387,9 +5368,9 @@ class ICellModParticle(IUniqueParticle):
         # support for universes, etc.
         string = "{0}:{1!s}".format(keystring, self.particle.mcnp())
         # TODO this should loop through in the print order.
-        for key, cell in sim.sys.cells.iteritems(): 
-            if cell in self.cells:
-                string += " " + self._mcnp_unit(float_format, sim, cell)
+        for key in sim.sys.cells: 
+            if key in self.cells:
+                string += " " + self._mcnp_unit(float_format, sim, key)
             else: 
                 string += " 0"
         return string
@@ -5403,10 +5384,6 @@ class ICellModParticle(IUniqueParticle):
 
     @cells.setter
     def cells(self, value):
-        for arg in value:
-            if not isinstance(arg, Cell):
-                raise ValueError("The ``cell`` must be a ``Cell``. User "
-                        "provided {0}.".format(arg))
         self._cells = value
 
 
@@ -5888,7 +5865,7 @@ class WeightWindowBound(ICellModParticle):
                 for cell in self.cells:
                     if self.bounds[cell][i_e][i_t]:
                         # The 3-dim dict's entries are initialized to None
-                        string += " cell {0!r}:".format( cell.name)
+                        string += " cell {0!r}:".format(cell)
                         string += self._comment_unit(cell, i_e, i_t)
                         string += ","
         # Change last character from a comma to a period.
@@ -5915,12 +5892,12 @@ class WeightWindowBound(ICellModParticle):
                             self.i_linear(i_e, i_t),
                             self.particle.mcnp())
                     # Check all cells in the system.
-                    for key, cell in sim.sys.cells.iteritems():
+                    for key in sim.sys.cells:
                         # Is this cell on this card, and is there a bound
                         # defined for it, for this energy and time?
-                        if cell in self.cells and self.bounds[cell][i_e][i_t]:
+                        if key in self.cells and self.bounds[key][i_e][i_t]:
                             string += " " + self._mcnp_unit(
-                                    float_format, cell, i_e, i_t)
+                                    float_format, key, i_e, i_t)
                         else:
                             string += " 0"
         return string
