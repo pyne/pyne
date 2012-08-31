@@ -117,24 +117,24 @@ class IUnit(object):
         return self.union(right)
 
     def union(self, right):
-        """Returns a :py:class:`union` of ``self`` with ``right``."""
-        if isinstance(self, union):
+        """Returns a :py:class:`Union` of ``self`` with ``right``."""
+        if isinstance(self, Union):
             self.brothers += [right]
             return self
         else:
-            return union(self, right)
+            return Union(self, right)
 
     def __and__(self, right):
         """A convenient way to call :py:meth:`vector`."""
         return self.vector(right)
 
     def vector(self, right):
-        """Returns a :py:class:`vec` of ``self`` with ``right."""
-        if isinstance(self, vec):
+        """Returns a :py:class:`Vec` of ``self`` with ``right."""
+        if isinstance(self, Vec):
             self.sisters += [right]
             return self
         else:
-            return vec(self, right)
+            return Vec(self, right)
 
     def comment(self, inner):
         return "{0}{1}{2}{3}".format(
@@ -155,7 +155,7 @@ class ICellSurf(IUnit):
     """Abstract base class for surfaces and cells in the lowest level of the
     nested geometry. The user directly uses the subclasses of this class. For
     cells in higher levels of nesting (e.g. closer to the real world), see
-    :py:class:`ucell`.
+    :py:class:`UCell`.
 
     """
     def __init__(self, name):
@@ -172,45 +172,45 @@ class ICellSurf(IUnit):
         self.name = name
 
 
-class surf(ICellSurf):
+class Surf(ICellSurf):
     """The user uses this class directly to reference a surface in the system
     definition for tallying.
 
-    .. inheritance-diagram:: pyne.simplesim.nestedgeom.surf
+    .. inheritance-diagram:: pyne.simplesim.nestedgeom.Surf
 
     """
     def comment(self):
-        return super(surf, self).comment(" surf {0!r}".format(self.name))
+        return super(Surf, self).comment(" surf {0!r}".format(self.name))
 
     def mcnp(self, float_format, sim):
-        return super(surf, self).mcnp(float_format, sim,
+        return super(Surf, self).mcnp(float_format, sim,
                 " {0}".format(sim.sys.surface_num(self.name)))
 
 
-class cell(ICellSurf):
+class Cell(ICellSurf):
     """The user uses this class directly to reference a cell in the system
     definition for tallying.
 
-    .. inheritance-diagram:: pyne.simplesim.nestedgeom.cell
+    .. inheritance-diagram:: pyne.simplesim.nestedgeom.Cell
 
     """
     def comment(self, inner=None):
-        return super(cell, self).comment(" cell {0!r}{1}".format(self.name,
+        return super(Cell, self).comment(" cell {0!r}{1}".format(self.name,
                 inner if inner else ""))
 
     def mcnp(self, float_format, sim, inner=None):
-        return super(cell, self).mcnp(float_format, sim,
+        return super(Cell, self).mcnp(float_format, sim,
                 " {0}{1}".format(sim.sys.cell_num(self.name),
                     inner if inner else ""))
 
 
-class ucell(cell):
-    """This is subclassed from :py:class:`cell`. It is to be used for
+class UCell(Cell):
+    """This is subclassed from :py:class:`Cell`. It is to be used for
     higher-level cells (closer to the real world), and has an additional
     attribute to specify specific lattice elements from this cell if it is a
     lattice cell.
 
-    .. inheritance-diagram:: pyne.simplesim.nestedgeom.ucell
+    .. inheritance-diagram:: pyne.simplesim.nestedgeom.UCell
 
     """
     def __init__(self, name, lat_spec=None):
@@ -222,24 +222,24 @@ class ucell(cell):
         lat_sec : subclass of :py:class:`LatticeSpec`
 
         """
-        super(ucell, self).__init__(name)
+        super(UCell, self).__init__(name)
         self.lat_spec = lat_spec
 
     def comment(self):
-        return super(ucell, self).comment(
+        return super(UCell, self).comment(
                 self.lat_spec.comment() if self.lat_spec else "")
 
     def mcnp(self, float_format, sim):
-        return super(ucell, self).mcnp(float_format, sim,
+        return super(UCell, self).mcnp(float_format, sim,
                 self.lat_spec.mcnp(float_format, sim) if self.lat_spec else "")
 
 
-class univ(IUnit):
+class Univ(IUnit):
     """A universe. It is used in higher levels of nesting (closer to the real
     world). The class, given the name of a universe in the system, looks up the
     appropriate universe number.
 
-    .. inheritance-diagram:: pyne.simplesim.nestedgeom.univ
+    .. inheritance-diagram:: pyne.simplesim.nestedgeom.Univ
 
     """
     def __init__(self, name):
@@ -250,21 +250,21 @@ class univ(IUnit):
             Name of the universe in the system definition.  
 
         """
-        super(univ, self).__init__()
+        super(Univ, self).__init__()
         self.name = name
 
     def comment(self):
-        return super(univ, self).comment(" univ {0!r}".format(self.name))
+        return super(Univ, self).comment(" univ {0!r}".format(self.name))
 
     def mcnp(self, float_format, sim):
-        return super(univ, self).mcnp(float_format, sim,
+        return super(Univ, self).mcnp(float_format, sim,
                 " U={0}".format(sim.sys.universe_num(self.name)))
 
 
-class union(IUnit):
+class Union(IUnit):
     """A union of surfaces, cells, or of a single universe.
 
-    .. inheritance-diagram:: pyne.simplesim.nestedgeom.union
+    .. inheritance-diagram:: pyne.simplesim.nestedgeom.Union
 
     """
     def __init__(self, *args):
@@ -276,7 +276,7 @@ class union(IUnit):
         """
         # all args must be a instance of Unit or its subclasses.
         self.brothers = args
-        super(union, self).__init__()
+        super(Union, self).__init__()
 
     def comment(self):
         string = ""
@@ -285,34 +285,34 @@ class union(IUnit):
             counter += 1
             string += bro.comment()
             if counter < len(self.brothers): string += ","
-        return super(union, self).comment(" union of ({0})".format(string))
+        return super(Union, self).comment(" union of ({0})".format(string))
 
     def mcnp(self, float_format, sim):
         string = ""
         for bro in self.brothers:
             string += bro.mcnp(float_format, sim)
-        return super(union, self).mcnp(float_format, sim, 
+        return super(Union, self).mcnp(float_format, sim, 
                 " ({0})".format(string))
 
 
-class vec(IUnit):
+class Vec(IUnit):
     """A "vector" of surfaces or cells. This class named after the vectorized
     notation that can be used in MATLAB, as this class allows the specification
-    of multiple units of input in a single unit. Typically, a :py:class:`vec`
+    of multiple units of input in a single unit. Typically, a :py:class:`Vec`
     is the first or last element in a nested unit. The following are two
     example usages of this class, and their equivalent in comment as two
     separate units::
 
-        # surf('A') < ucell('C')     surf('B') < ucell('C')
-        vec(surf('A'), surf('B')) < ucell('C')
-        # surf('A') < ucell('C')     surf('A') < ucell('D')
-        surf('A') < vec(ucell('C'), ucell('D'))
+        # Surf('A') < UCell('C')     Surf('B') < UCell('C')
+        Vec(Surf('A'), Surf('B')) < UCell('C')
+        # Surf('A') < UCell('C')     Surf('A') < UCell('D')
+        Surf('A') < Vec(UCell('C'), UCell('D'))
     """
     # Named after matlab's vectorized notation
     def __init__(self, *args):
         # all args must be a instance of Unit or its subclasses.
         self.sisters = args
-        super(vec, self).__init__()
+        super(Vec, self).__init__()
 
     def comment(self):
         string = ""
@@ -321,22 +321,22 @@ class vec(IUnit):
             counter += 1
             string += sis.comment()
             if counter < len(self.sisters): string += ","
-        return super(vec, self).comment(" over ({0})".format(string))
+        return super(Vec, self).comment(" over ({0})".format(string))
 
     def mcnp(self, float_format, sim):
         string = ""
         for sis in self.sisters:
             string += sis.mcnp(float_format, sim)
-        return super(vec, self).mcnp(float_format, sim, string)
+        return super(Vec, self).mcnp(float_format, sim, string)
 
 
 class ILatticeSpec(object):
     """Abstract base class for lattice element specifiers. The user does not
     use this class directly. There are 3 subclasses:
 
-    - :py:class:`lin` : a single linear index of a lattice element.
-    - :py:class:`rng` : x, y, and z index range of lattice elements.
-    - :py:class:`cor` : list coordinates of lattice elments.
+    - :py:class:`Lin` : a single linear index of a lattice element.
+    - :py:class:`Rng` : x, y, and z index range of lattice elements.
+    - :py:class:`Cor` : list coordinates of lattice elments.
     
     """
     def comment(self, inner):
@@ -347,10 +347,10 @@ class ILatticeSpec(object):
         return "[{0}]".format(inner)
 
 
-class lin(ILatticeSpec):
+class Lin(ILatticeSpec):
     """A single linear index of a lattice element.
 
-    .. inheritance-diagram:: pyne.simplesim.nestedgeom.lin
+    .. inheritance-diagram:: pyne.simplesim.nestedgeom.Lin
 
     """
     def __init__(self, linear_index):
@@ -365,17 +365,17 @@ class lin(ILatticeSpec):
         self.index = linear_index
 
     def comment(self):
-        return super(lin, self).comment("linear idx {0:d}".format(self.index))
+        return super(Lin, self).comment("linear idx {0:d}".format(self.index))
 
     def mcnp(self, float_format, sim):
-        return super(lin, self).mcnp(float_format, sim,
+        return super(Lin, self).mcnp(float_format, sim,
                 "{0:d}".format(self.index))
 
 
-class rng(ILatticeSpec):
+class Rng(ILatticeSpec):
     """A range of lattice elements.
 
-    .. inheritance-diagram:: pyne.simplesim.nestedgeom.rng
+    .. inheritance-diagram:: pyne.simplesim.nestedgeom.Rng
 
     """
     def __init__(self, x_bounds=[0, 0], y_bounds=[0, 0], z_bounds=[0, 0]):
@@ -397,30 +397,30 @@ class rng(ILatticeSpec):
         --------
         In the following, there is no y dimension::
 
-            myrange = rng([0, 5], z_bounds=[0, 2])
+            myrange = Rng([0, 5], z_bounds=[0, 2])
 
         """
-        super(rng, self).__init__()
+        super(Rng, self).__init__()
         self.x_bounds = x_bounds
         self.y_bounds = y_bounds
         self.z_bounds = z_bounds
 
     def comment(self):
-        return super(rng, self).comment(
+        return super(Rng, self).comment(
                 "x range {0[0]:d}:{0[1]:d}, y range {1[0]:d}:{1[1]:d}, "
                 "z range {2[0]:d}:{2[1]:d}".format(
                 self.x_bounds, self.y_bounds, self.z_bounds))
 
     def mcnp(self, float_format, sim):
-        return super(rng, self).mcnp(float_format, sim,
+        return super(Rng, self).mcnp(float_format, sim,
                 "{0[0]:d}:{0[1]:d} {1[0]:d}:{1[1]:d} {2[0]:d}:{2[1]:d}".format(
                 self.x_bounds, self.y_bounds, self.z_bounds))
 
 
-class cor(LatticeSpec):
+class Cor(ILatticeSpec):
     """A list of lattice element coordinates (in indices).
 
-    .. inheritance-diagram:: pyne.simplesim.nestedgeom.cor
+    .. inheritance-diagram:: pyne.simplesim.nestedgeom.Cor
 
     """
     def __init__(self, points=[0, 0, 0]):
@@ -434,12 +434,12 @@ class cor(LatticeSpec):
         --------
         The following work::
 
-            latspec = cor()
-            latspec = cor([1, 2, 3])
-            latspec = cor([ [1, 2, 3], [-1, 3, -2]])
+            latspec = Cor()
+            latspec = Cor([1, 2, 3])
+            latspec = Cor([ [1, 2, 3], [-1, 3, -2]])
 
         """
-        super(cor, self).__init__()
+        super(Cor, self).__init__()
         # We want a nested list, even if the user doesn't provide it. If the
         # first element of the list is an int, then it's not a 3-element list
         # or numpy array, so we need to nest it in a loop for the methods to
@@ -454,7 +454,7 @@ class cor(LatticeSpec):
             counter += 1
             string += " ({0[0]:d}, {0[1]:d}, {0[2]:d})".format(pt)
             if counter < len(self.points): string += ","
-        return super(cor, self).comment(string)
+        return super(Cor, self).comment(string)
 
     def mcnp(self, float_format, sim):
         string = ""
@@ -463,7 +463,7 @@ class cor(LatticeSpec):
             counter += 1
             string += " {0[0]:d} {0[1]:d} {0[2]:d}".format(pt)
             if counter < len(self.points): string += ","
-        return super(cor, self).mcnp(float_format, sim, string)
+        return super(Cor, self).mcnp(float_format, sim, string)
 
 
 
