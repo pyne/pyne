@@ -7,7 +7,7 @@ Infinite lattice.
   c     IMP:N= 1.
 1 1 -11 -1 VOL= 1 IMP:N=1
   C
-  C Cell 'coolant': region (+pin & -bound), material 'H2O' density 1 g/cm^3 VOL=
+  C Cell 'coolant': region (+pin | -bound), material 'H2O' density 1 g/cm^3 VOL=
   c     1 cm^3 IMP:N= 1.
 2 2 -1 (1 -2) VOL= 1 IMP:N=1
   C
