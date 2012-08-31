@@ -19,18 +19,38 @@ The subclasses of :py:class:`ICellSurfTally` can take as input any subclass of
 :py:class:`IUnit`. The following shows different ways in which complex units
 can be built.
 
+========
+category
+========
+basic
+union
+nesting
+vectorized
+lattice
+
 ===========
 description
 ===========
 surface 1 (s1)
 cell 1 (c1)
 universe 1 (u1)
-union of s1 and s2
-union of c1, c2, and c2
-union of cells in u1
-s1 in c1
-c1 in c2 in c3
 
+union of s1 and s2
+union of c1, c2, and c3
+union of cells in u1
+
+s1 in filled cell 2 (fc2)
+c1 in fc3 in fc3
+s1 in union of fc2 and fc3
+s1 in (union of fc2 and fc3) in fc4
+s1 in u1 in fc4
+
+(over s1 and s2) in fc2
+s1 in (over fc2 and fc3)
+s1 in (union of fc2 and (fc3 in lattice elem 5)) in fc4
+s1 in (fc2 in lattice x range 0:1, y range 0:2, z range 0:3)
+s1 in (fc2 in lattice coord (0, 1, 2))
+s1 in (fc2 in lattice coords (0, 1, 2), (3, 2, 1))
 
 ==========
 nestedgeom
@@ -38,12 +58,24 @@ nestedgeom
 s1 = Surf('1')
 c1 = Cell('1')
 u1 = Univ('1')
-Union(s1, s1)
-Union(c1, c2, c3)
-Union(u1)
-uc1 = FCell('1'): s1 < uc1  /  uc1
-c1 < uc1
 
+Union(s1, s2)  /  (s1 | s2)
+Union(c1, c2, c3)  /  (c1 | c2 | c3)
+Union(u1)
+
+fc2 = FCell('2'): s1 < fc2  /  s1.of(fc2)
+c1 < fc2 < fc3  /  c1.of( fc2.of(fc3) )
+s1 < Union(fc2, fc3)  /  s1.of( Union(fc2, fc3) )
+s1 < Union(fc2, fc3) < fc4  /  s1.of( Union(fc2, fc3).of(fc4) )
+s1 < u1 < fc4  /  s1.of( u1.of(fc4) )
+
+ng.Vec(s1, s2) < fc2  /  ng.Vec(s1, s2).of(fc2)  /  (s1 & s2) < fc2
+s1 < ng.Vec(fc2, fc3)  /  s1 < (fc2 & fc3)
+
+la = Lin(5): s1 < (fc2 | FCell('3', la)) < fc4  /  s1 < (fc2 | fc3.lat(la)) < fc4
+s1 < fc2.lat(Rng([0,1], [0,2], [0,3])
+s1 < fc2.lat(Cor([0, 1, 2]))
+s1 < fc2.lat( Cor([ [0, 1, 2], [3, 2, 1]]) )
 
 
 ====
@@ -52,10 +84,23 @@ MCNP
 1
 1
 U=1
-(1 2)
-(U=1)
-1 < 1
 
+(1 2)
+(1 2 3)
+(U=1)
+
+(1 < 1)
+(1 < 2 < 3)
+(1 < (2 3))
+(1 < (2 3) < 4)
+
+(1 2 < 2)
+(1 < 2 3)
+
+1 < (2 3[5]) < 4
+1 < 2[0:1 0:2 0:3]
+1 < 2[0 1 2]
+1 < 2[0 1 2, 3 2 1]
 
 
 
@@ -264,6 +309,10 @@ class FCell(Cell):
         """
         super(FCell, self).__init__(name)
         self.lat_spec = lat_spec
+
+    def lat(self, lat_spec):
+        self.lat_spec = lat_spec
+        return self
 
     def comment(self):
         return super(FCell, self).comment(
