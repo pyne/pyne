@@ -94,10 +94,10 @@ class ICard(object):
         if self.unique: self._name = name
         else:            self.name = name
 
-        # TODO Do we actually want to do this? No, it is causing recursion
-        # issues via IRegion.
-    #def __str__(self):
-    #    return self.comment()
+        # TODO Do we actually want to do this? Perhaps not; it may lead to
+        # recursion.
+    def __str__(self):
+        return self.comment()
 
     # All subclasses must define a comment() method.
     @abc.abstractmethod
@@ -4387,6 +4387,7 @@ class ICellMod(IMisc):
         # support for universes, etc.
         string = "{0}".format(keystring)
         # TODO this should loop through in the print order.
+        #
         # `gathering` empty cells (cells for which no value is given).
         empty_count = 0
         for key in sim.sys.cells: 
@@ -4428,8 +4429,8 @@ class Universes(ICellMod):
         """
         Parameters
         ----------
-        cell : :py:class:`Cell` or subclass
-            The cell for which a universe name is being provided.
+        cell : str name of :py:class:`Cell` or subclass
+            The name of the cell for which a universe name is being provided.
         univ_name : str
             The name of the universe that the cell is a part of.
         truncate : bool
@@ -4442,12 +4443,12 @@ class Universes(ICellMod):
 
         Examples
         --------
-        The following adds the cell cards ``pincell`` and ``coolantcell`` to
-        the universe 'unitcell'. All other cell cards, as of yet, are then part
-        of the real world universe::
+        The following adds the cell cards with names 'pincell' and
+        'coolantcell' to the universe 'unitcell'. All other cell cards, as of
+        yet, are then part of the real world universe::
 
-            uni = Universes(pincell, 'unitcell', True,
-                            coolantcell, 'unitcell', True)
+            uni = Universes('pincell', 'unitcell', True,
+                            'coolantcell', 'unitcell', True)
 
         """
         super(Universes, self).__init__('universes', 3, *args)
@@ -4459,7 +4460,7 @@ class Universes(ICellMod):
         """
         Parameters
         ----------
-        cell : :py:class:`Cell` or subclass
+        cell : str name of :py:class:`Cell` or subclass
         univ_name : str
         truncate : bool
 
@@ -4468,8 +4469,8 @@ class Universes(ICellMod):
         The example above can be achieved by the following::
 
             uni = Universes()
-            uni.set(pincell, 'unitcell', True)
-            uni.set(coolantcell, 'unitcell', True)
+            uni.set('pincell', 'unitcell', True)
+            uni.set('coolantcell', 'unitcell', True)
 
         """
         super(Universes, self).set(cell)
@@ -4529,8 +4530,8 @@ class Fill(ICellMod):
         """
         Parameters
         ----------
-        cell : :py:class:`Cell or subclass
-            The cell being filled by a universe.
+        cell : str name of :py:class:`Cell` or subclass
+            The name of the cell being filled by a universe.
         univ_name : str
             The name of the universe filling this cell.
         *args : cell, univ_name, ...
@@ -4540,10 +4541,10 @@ class Fill(ICellMod):
 
         Examples
         --------
-        If ``unit`` and ``cellB`` are cells and 'unitcell' and 'otheruniv` are
-        the names of universes, the user can do the following::
+        If 'unit' and 'cellB' are names of cells and 'unitcell' and 'otheruniv`
+        are the names of universes, the user can do the following::
 
-            fill = Fill(unit, 'unitcell', cellB, 'otheruniv')
+            fill = Fill('unit', 'unitcell', 'cellB', 'otheruniv')
 
         """
         super(Fill, self).__init__('fill', 2, *args)
@@ -4554,7 +4555,7 @@ class Fill(ICellMod):
         """
         Parameters
         ----------
-        cell : :py:class:`Cell` or subclass
+        cell : str name of :py:class:`Cell` or subclass
         univ_name : str
 
         Examples
@@ -4562,8 +4563,8 @@ class Fill(ICellMod):
         The example above can be achieved by the following::
 
             fill = Fill()
-            fill.set(unit, 'unitcell')
-            fill.set(ellB, 'otheruniv')
+            fill.set('unit', 'unitcell')
+            fill.set('cellB', 'otheruniv')
 
         """
         super(Fill, self).set(cell)
@@ -4579,7 +4580,6 @@ class Fill(ICellMod):
         return super(Fill, self).mcnp(float_format, sim, "FILL")
 
     def _mcnp_unit(self, float_format, sim, cell):
-        # TODO this next line really should go elsewhere.
         return "{0}".format(sim.sys.universe_num(self.univ_names[cell]))
 
     @property
@@ -4603,8 +4603,9 @@ class Lattice(ICellMod):
         """
         Parameters
         ----------
-        cell : :py:class:`Cell` or subclass
-            The cell for which the lattice setting is being provided.
+        cell : str name of :py:class:`Cell` or subclass
+            The name of the cell for which the lattice setting is being
+            provided.
         setting : str
             'hexahedra', or 'hexagonal'.
         *args : cell, setting, ...
@@ -4614,20 +4615,20 @@ class Lattice(ICellMod):
 
         Examples
         --------
-        The following shows a typical usage, where ``pincell`` is a cell
-        representing a fuel pin, ``coolantcell`` is a cell representing the
-        coolant flowing around the pin, ``unit`` is a cell filled with the
+        The following shows a typical usage, where 'pincell' is a cell
+        representing a fuel pin, 'coolantcell' is a cell representing the
+        coolant flowing around the pin, 'unit' is a cell filled with the
         'unitcell' universe, and is made into a hexahedra lattice::
             
             uni = Universes()
-            uni.set(pincell, 'unitcell', True)
-            uni.set(coolantcell, 'unitcell', True)
-            fill = Fill(unit, 'unitcell')
-            lat = Lattice(unit, 'hexahedra')
+            uni.set('pincell', 'unitcell', True)
+            uni.set('coolantcell', 'unitcell', True)
+            fill = Fill('unit', 'unitcell')
+            lat = Lattice('unit', 'hexahedra')
 
         Inputs for multiple cells can be provided::
 
-            lat = Lattice(cellA, 'hexahedra', cellB, 'hexagonal')
+            lat = Lattice('cellA', 'hexahedra', 'cellB', 'hexagonal')
 
         """
         super(Lattice, self).__init__('lattice', 2, *args)
@@ -4638,7 +4639,7 @@ class Lattice(ICellMod):
         """
         Parameters
         ----------
-        cell : :py:class:`Cell` or subclass
+        cell : str name of :py:class:`Cell` or subclass
         setting : str
 
         Examples
@@ -4646,8 +4647,8 @@ class Lattice(ICellMod):
         The example above can be achieved by the following::
 
             lat = Lattice()
-            lat.set(cellA, 'hexahedra')
-            lat.set(cellB, 'hexagonal')
+            lat.set('cellA', 'hexahedra')
+            lat.set('cellB', 'hexagonal')
 
         """
         super(Lattice, self).set(cell)
@@ -4689,8 +4690,8 @@ class Volume(ICellMod):
         """
         Parameters
         ----------
-        cell : :py:class:`Cell` or subclass
-            The cell for which the volume is being provided.
+        cell : str name of :py:class:`Cell` or subclass
+            The name of the cell for which the volume is being provided.
         vol : float [centimeters^3]
             Volume of the cell.
         *args : cell, vol, ...
@@ -4705,8 +4706,8 @@ class Volume(ICellMod):
         --------
         The following are examples of the usage of this card::
 
-            vol = Volume(cellA, 1)
-            vol = Volume(cellA, 1, cellB, 2, manual=True)
+            vol = Volume('cellA', 1)
+            vol = Volume('cellA', 1, cellB, 2, manual=True)
 
         """
         super(Volume, self).__init__('volume', 2, *args)
@@ -4718,7 +4719,7 @@ class Volume(ICellMod):
         """
         Parameters
         ----------
-        cell : :py:class:`Cell` or subclass
+        cell : str name of :py:class:`Cell` or subclass
         vol : float
 
         Examples
@@ -4726,12 +4727,12 @@ class Volume(ICellMod):
         The example above can be achieved by the following::
 
             vol = Volume(manual=True)
-            vol.set(cellA, 1)
-            vol.set(cellB, 2)
+            vol.set('cellA', 1)
+            vol.set('cellB', 2)
 
         Previously provided values can be modified later on::
 
-            vol.set(cellB, 3)
+            vol.set('cellB', 3)
 
         """
         super(Volume, self).set(cell)
@@ -4778,8 +4779,8 @@ class Area(ICellMod):
         """
         Parameters
         ----------
-        cell : :py:class:`Cell` or subclass
-            The cell for which the area is being provided.
+        cell : str name of :py:class:`Cell` or subclass
+            The name of the cell for which the area is being provided.
         area : float [centimeters^2]
             Surface area of the cell.
         *args : cell, area, ...
@@ -4791,8 +4792,8 @@ class Area(ICellMod):
         --------
         The follow are examples of the usage of this card::
 
-            area = Area(cellA, 10)
-            area = Area(cellA, 10, cellB, 20)
+            area = Area('cellA', 10)
+            area = Area('cellA', 10, cellB, 20)
 
         """
         super(Area, self).__init__('area', 2, *args)
@@ -4803,7 +4804,7 @@ class Area(ICellMod):
         """
         Parameters
         ----------
-        cell : :py:class:`Cell` or subclass
+        cell : str name of :py:class:`Cell` or subclass
         area : float [centimeters^2]
 
         Examples
@@ -4811,12 +4812,12 @@ class Area(ICellMod):
         The example above can be achieved by the following::
 
             area = Area()
-            area.set(cellA, 10)
-            area.set(cellB, 20)
+            area.set('cellA', 10)
+            area.set('cellB', 20)
 
         Previously provided values can be modified later on::
 
-            area.set(cellB, 30)
+            area.set('cellB', 30)
 
         """
         super(Area, self).set(cell)
@@ -4853,8 +4854,8 @@ class FissionTurnoff(ICellMod):
         """
         Parameters
         ----------
-        cell : :py:class:`Cell` or subclass
-            The cell for which input is provided.
+        cell : str name of :py:class:`Cell` or subclass
+            The name of the cell for which input is provided.
         setting : str
             One of the following 3 strings: 'capture-gamma' to request fissions
             to count as capture, but still cause gamma radiation; 'real-gamma'
@@ -4874,7 +4875,8 @@ class FissionTurnoff(ICellMod):
 
         The followings specifies settings for more than one cell::
 
-            fto = FissionTurnoff(cellA, 'real-gamma', cellB, 'capture-nogamma')
+            fto = FissionTurnoff('cellA', 'real-gamma', 'cellB',
+                    'capture-nogamma')
 
         """
         super(FissionTurnoff, self).__init__('fissionturnoff', 2, *args)
@@ -4885,7 +4887,7 @@ class FissionTurnoff(ICellMod):
         """
         Parameters
         ----------
-        cell : :py:class:`Cell` or subclass
+        cell : str name of :py:class:`Cell` or subclass
         setting : str
 
         Examples
@@ -4893,12 +4895,12 @@ class FissionTurnoff(ICellMod):
         The example above can be achieved by the following::
         
             fto = FissionTurnoff()
-            fto.set(cellA, 'real-gamma')
-            fto.set(cellB, 'capture-nogamma')
+            fto.set('cellA', 'real-gamma')
+            fto.set('cellB', 'capture-nogamma')
 
         Previously provided values can be modified later on::
 
-            fto.set(cellB, 'real-gamma')
+            fto.set('cellB', 'real-gamma')
 
         """
         super(FissionTurnoff, self).set(cell)
@@ -4958,8 +4960,8 @@ class PhotonWeight(ICellMod):
         """
         Parameters
         ----------
-        cell : :py:class:`Cell` or subclass
-            The cell for which the photon weight is being provided.
+        cell : str name of :py:class:`Cell` or subclass
+            The name of the cell for which the photon weight is being provided.
         setting : str/float
             The setting 'off' turns of photon production, the setting 'one'
             produces one photon per neutron collision if photon production is
@@ -4974,28 +4976,28 @@ class PhotonWeight(ICellMod):
         --------
         The card is first initialized, after which weights can be added using
         this method. The following turns off neutron-induced photon
-        production for ``cellA``::
+        production for 'cellA'::
 
             pw = PhotonWeight()
-            pw.set(cellA, 'off')
+            pw.set('cellA', 'off')
 
         The following requests that one photon is produced for every neutron
-        collision in ``cellB``::
+        collision in 'cellB'::
 
-            pw.set(cellB, 'one')
+            pw.set('cellB', 'one')
 
         An explicit weight can be given, as well::
 
-            pw.set(cellC, 0.5)
+            pw.set('cellC', 0.5)
 
         The starting neutorn weight can be incorporated in the weight
         threshold::
 
-            pw.set(cellD, 0.5, pre_weight=True)
+            pw.set('cellD', 0.5, pre_weight=True)
 
         Previously provided values may be modified later on::
 
-            pw.set(cellD, 0.7, pre_weight=True)
+            pw.set('cellD', 0.7, pre_weight=True)
 
         """
         super(PhotonWeight, self).set(cell)
@@ -5048,9 +5050,9 @@ class DetectorContribution(ICellMod):
         det_name : str
             Name of the detector (subclass of :py:class:`IDetector`) for which
             this card stores probabilities of contribution.
-        cell : :py:class:`Cell` or subclass
-            The cell for which the probability of contribution is being
-            provided.
+        cell : str name of :py:class:`Cell` or subclass
+            The name of the cell for which the probability of contribution is
+            being provided.
         prob : float
             Probability that this cell contributes to this detector.
         *args : cell, prob, ...
@@ -5060,14 +5062,14 @@ class DetectorContribution(ICellMod):
 
         Examples
         --------
-        Suppose a cell ``cellA`` and a detector ``det1`` have been
+        Suppose a cell 'cellA' and a detector 'det1' have been
         defined and are in the simulation. Then, we can do the following::
 
-            dc = DetectorContribution('det1', cellA, 0.5)
+            dc = DetectorContribution('det1', 'cellA', 0.5)
 
-        or, if we also have a ``cellB``:
+        or, if we also have a 'cellB':
 
-            dc = DetectorContribution('det1', cellA, 0.5, cellB, 0.6)
+            dc = DetectorContribution('det1', 'cellA', 0.5, 'cellB', 0.6)
 
 
         """
@@ -5081,7 +5083,7 @@ class DetectorContribution(ICellMod):
         """
         Parameters
         ----------
-        cell : :py:class:`Cell` or subclass
+        cell : str name of :py:class:`Cell` or subclass
         prob : float
 
         Examples
@@ -5090,11 +5092,11 @@ class DetectorContribution(ICellMod):
 
             dc = DetectorContribution('det1')
             dc.set(cellA, 0.5)
-            dc.set(cellB, 0.6)
+            dc.set('cellB', 0.6)
 
         Previously provided values can be modified later on::
 
-            dc.set(cellB, 0.7)
+            dc.set('cellB', 0.7)
 
         """
         super(DetectorContribution, self).set(cell)
@@ -5169,8 +5171,8 @@ class Temperature(ICellMod):
         """
         Parameters
         ----------
-        cell : :py:class:`Cell` or subclass.
-            Cell for which the temperature is being specified.
+        cell : str name of :py:class:`Cell` or subclass
+            Name of the cell for which the temperature is being specified.
         temp : float [Kelvin]
             Temperature of the cell. For MCNP, this is converted into MeV.
         *args : cell, temp, ...
@@ -5187,8 +5189,8 @@ class Temperature(ICellMod):
         --------
         The following are examples of the usage of this card:
 
-            temp = Temperature(cellA, 600)
-            temp = Temperature(cellA, 600, cellB, 900, index=2)
+            temp = Temperature('cellA', 600)
+            temp = Temperature('cellA', 600, cellB, 900, index=2)
 
         """
         self.index = kwargs.get('index', None)
@@ -5202,7 +5204,7 @@ class Temperature(ICellMod):
         """
         Parameters
         ----------
-        cell : :py:class:`Cell` or subclass.
+        cell : str name of :py:class:`Cell` or subclass
         temp : float [Kelvin]
 
         Examples
@@ -5210,12 +5212,12 @@ class Temperature(ICellMod):
         The following does the same as the example above::
 
             temp = Temperature(index=2)
-            temp.set(cellA, 600)
-            temp.set(cellB, 900)
+            temp.set('cellA', 600)
+            temp.set('cellB', 900)
 
         Previously provided values can be modified later on::
 
-            temp.set(cellB, 950)
+            temp.set('cellB', 950)
 
         """
         super(Temperature, self).set(cell)
@@ -5325,8 +5327,8 @@ class ICellModParticle(IUniqueParticle):
             See :py:class:`IUniqueParticle`.
         particle : str
             See :py:class:`IUniqueParticle`.
-        cell : :py:class:`Cell` or subclass
-            The cell for which the card applies.
+        cell : str name of :py:class:`Cell` or subclass.
+            The name of the cell for which the card applies.
         n_args_per_cell : int
             The number of arguments the subclass expects per cell.
 
@@ -5405,7 +5407,7 @@ class Importance(ICellModParticle):
         ----------
         particle : str
             See :py:class:`ICellMod`.
-        cell : :py:class:`Cell` or subclass
+        cell : str name of :py:class:`Cell` or subclass.
             See :py:class:`ICellMod`.
         imp : int
             Cell importance.
@@ -5416,15 +5418,15 @@ class Importance(ICellModParticle):
 
         Examples
         --------
-        The following specifies the neutron importance in cells ``cellA`` and
-        ``cellB``::
+        The following specifies the neutron importance in cells 'cellA' and
+        'cellB'::
 
-            impn = Importance('neutron', cellA, 1, cellB, 2)
+            impn = Importance('neutron', 'cellA', 1, 'cellB', 2)
 
         If providing importances for many cells it may be easier to do the
         following::
 
-            args = [cellA, 1, cellB, 1, cellC, 0]
+            args = ['cellA', 1, 'cellB', 1, 'cellC', 0]
             impn = cards.Importance('neutron', *args)
 
         """
@@ -5436,7 +5438,7 @@ class Importance(ICellModParticle):
         """
         Parameters
         ----------
-        cell : :py:class:`Cell` or subclass
+        cell : str name of :py:class:`Cell` or subclass.
         imp : int
 
         Examples
@@ -5444,12 +5446,12 @@ class Importance(ICellModParticle):
         The example above can be achieved by the following::
 
             impn = Importance('neutron')
-            impn.set(cellA, 1)
-            impn.set(cellB, 2)
+            impn.set('cellA', 1)
+            impn.set('cellB', 2)
 
         Previously provided values can be modified later on::
 
-            impn.set(cellB, 1)
+            impn.set('cellB', 1)
 
         """
         super(Importance, self).set(cell)
@@ -5492,7 +5494,7 @@ class ExponentialTransform(ICellModParticle):
         ----------
         particle : str
             See :py:class:`ICellMod`.
-        cell : :py:class:`Cell` or subclass
+        cell : str name of :py:class:`Cell` or subclass
             See :py:class:`ICellMod`.
         stretch : str or float
             The stretch factor. If 'capture-to-total', the stretch factor is
@@ -5514,28 +5516,28 @@ class ExponentialTransform(ICellModParticle):
  
         Examples
         --------
-        Consider cell ``cellA``. The following requests a
+        Consider cell 'cellA'. The following requests a
         transformation that stretches by the ratio of the capture cross section
         to the total cross section, in the direction of the particle's travel.
         The name of the card will be `exptransform-neutron`::
 
-            extn = ExponentialTransform('neutron', cellA, 'capture-to-total',
+            extn = ExponentialTransform('neutron', 'cellA', 'capture-to-total',
                     'currdir', 'toward')
             assert extn.name == 'exptransform-neutron'
         
         The following requests a transformation that stretches by a factor of
         0.5 in the direction of the particle's travel::
 
-            extn = ExponentialTransform('neutron', cellA, 0.5, 'currdir',
+            extn = ExponentialTransform('neutron', 'cellA', 0.5, 'currdir',
                     'toward')
 
         The following requests a transformation with respect to the x axis::
 
-            extn = ExponentialTransform('neutron', cellA, 0.5, 'x', 'toward')
+            extn = ExponentialTransform('neutron', 'cellA', 0.5, 'x', 'toward')
 
         The following requests a transformation away from the origin::
 
-            extn = ExponentialTransform('neutron', cellA, 0.5, 'vec1',
+            extn = ExponentialTransform('neutron', 'cellA', 0.5, 'vec1',
                     'away')
 
         where somewhere else the user has added::
@@ -5544,13 +5546,13 @@ class ExponentialTransform(ICellModParticle):
             vec.set('vec1', [0, 0, 0])
 
         to the simulation. If the user wants to request an exponential
-        transform for cells ``cellB`` and ``cellC`` as well, they can do the
+        transform for cells 'cellB' and 'cellC' as well, they can do the
         following::
 
             extn = ExponentialTransform('neutron', 
-                    cellA, 'capture-to-total', 'currdir', 'toward', 
-                    cellB, 0.5, 'currdir', 'toward',
-                    cellC, 0.5, 'vec1', 'away')
+                    'cellA', 'capture-to-total', 'currdir', 'toward', 
+                    'cellB', 0.5, 'currdir', 'toward',
+                    'cellC', 0.5, 'vec1', 'away')
 
         """
         super(ExponentialTransform, self).__init__('exptransform', particle,
@@ -5569,7 +5571,7 @@ class ExponentialTransform(ICellModParticle):
 
         Parameters
         ----------
-        cell : :py:class:`Cell` or subclass
+        cell : str name of :py:class:`Cell` or subclass
         stretch : str or float
         direction : str 
         sign : str
@@ -5577,16 +5579,16 @@ class ExponentialTransform(ICellModParticle):
         Examples
         --------
         The last example above can also be achieved by the following, assuming
-        cell cards ``cellA``, ``cellB`` and ``cellC`` have been created::
+        cell cards 'cellA', 'cellB' and 'cellC' have been created::
 
             extn = ExponentialTransform('neutron') 
-            extn.set(cellA, 'capture-to-total', 'currdir', 'toward')
-            extn.set(cellB, 0.5, 'currdir', 'toward')
-            extn.set(cellC, 0.5, 'vec1', 'away')
+            extn.set('cellA', 'capture-to-total', 'currdir', 'toward')
+            extn.set('cellB', 0.5, 'currdir', 'toward')
+            extn.set('cellC', 0.5, 'vec1', 'away')
 
         Previously provided values can be modified later on::
 
-            extn.set(cellC, 0.7, 'vec1', 'away')
+            extn.set('cellC', 0.7, 'vec1', 'away')
 
         """
         super(ExponentialTransform, self).set(cell)
@@ -5671,7 +5673,7 @@ class ForcedCollision(ICellModParticle):
         ----------
         particle : str
             See :py:class:`ICellMod`.
-        cell : :py:class:`Cell` or subclass
+        cell : str name of :py:class:`Cell` or subclass
             See :py:class:`ICellMod`.
         prob : float
             If 'none', there is no forced collision for this cell.
@@ -5689,16 +5691,16 @@ class ForcedCollision(ICellModParticle):
         Examples
         --------
         The following cards request forced collisions with neutrons in the cell
-        defined by cell card ``cellA``::  
+        defined by cell card 'cellA'::  
 
-            fcl = ForcedCollision('neutron', cellA, 0.5, True)
-            fcl = ForcedCollision('neutron', cellA, 0.5, False)
+            fcl = ForcedCollision('neutron', 'cellA', 0.5, True)
+            fcl = ForcedCollision('neutron', 'cellA', 0.5, False)
 
-        If the user wants to request forced collisions for ``cellB`` as well,
+        If the user wants to request forced collisions for 'cellB' as well,
         they can do the following::
 
-            fcl = ForcedCollision('neutron', cellA, 0.5, True,
-                                             cellB, 0.5, False)
+            fcl = ForcedCollision('neutron', 'cellA', 0.5, True,
+                                             'cellB', 0.5, False)
 
         """
         super(ForcedCollision, self).__init__('forcedcoll', particle, 3, *args)
@@ -5714,7 +5716,7 @@ class ForcedCollision(ICellModParticle):
 
         Parameters
         ----------
-        cell : :py:class:`Cell` or subclass
+        cell : str name of :py:class:`Cell` or subclass
         prob : float
         only_entering : bool
 
@@ -5723,12 +5725,12 @@ class ForcedCollision(ICellModParticle):
         The last example above can also be achieved by the following::
 
             fcl = ForcedCollision('neutron')
-            fcl.set(cellA, 0.5, True)
-            fcl.set(cellB, 0.5, False)
+            fcl.set('cellA', 0.5, True)
+            fcl.set('cellB', 0.5, False)
 
         Previously provided values can be modified later on::
 
-            fcl.set(cellB, 0.7, False)
+            fcl.set('cellB', 0.7, False)
 
         """
         super(ForcedCollision, self).set(cell)
@@ -5788,8 +5790,8 @@ class WeightWindowBound(ICellModParticle):
             for which a bound is being specified. If no time intervals are
             specified in the problem (e.g. 1 time interval for weight windows),
             provide 1. The index starts at 1.
-        cell : :py:class:`Cell` or subclass
-            See :py:class:`ICellMod`
+        cell : str name of :py:class:`Cell` or subclass
+            See :py:class:`ICellMod`.
         bound : str or float
             Lower bound for the weight to cause rouletting, or 'killall' to
             kill all particles entering the cell.
@@ -5800,20 +5802,20 @@ class WeightWindowBound(ICellModParticle):
 
         Examples
         --------
-        The following specifies the weight window bounds for ``cellB`` if the
-        :py:class:`WeightWindowEnergies` and :py:class:`WeightWindowTimes` cards
-        are not used::
+        The following specifies the weight window bounds for 'cellB' if the
+        :py:class:`WeightWindowEnergies` and :py:class:`WeightWindowTimes`
+        cards are not used::
 
-            wwn = WeightWindowBound('neutron', 1, 1, cellB, 0.01)
+            wwn = WeightWindowBound('neutron', 1, 1, 'cellB', 0.01)
 
-        The value of ``bound`` can be ``'killall'``::
+        The value of ``bound`` can be 'killall'::
 
-            wwn = WeightWindowBound('neutron', 1, 1, cellB, 'killall')
+            wwn = WeightWindowBound('neutron', 1, 1, 'cellB', 'killall')
 
         The following::
 
-            wwn = WeightWindowBound('neutron', 1, 1, cellB, 0.01,
-                                               2, 3, cellB, 0.01)
+            wwn = WeightWindowBound('neutron', 1, 1, 'cellB', 0.01,
+                                               2, 3, 'cellB', 0.01)
 
         assumes that cards such as the following have been added to the
         simulation::
@@ -5837,7 +5839,7 @@ class WeightWindowBound(ICellModParticle):
         ----------
         idx_energy : int
         idx_time : int
-        cell : :py:class:`Cell` or subclass
+        cell : str name of :py:class:`Cell` or subclass
         bound : str or float
 
         Examples
@@ -5845,12 +5847,12 @@ class WeightWindowBound(ICellModParticle):
         The following does the same as the second example above::
 
             wwn = WeightWindowBound('neutron')
-            wwn.set(1, 1, cellB, 0.01)
-            wwn.set(2, 3, cellB, 0.01)
+            wwn.set(1, 1, 'cellB', 0.01)
+            wwn.set(2, 3, 'cellB', 0.01)
 
         Previously provided values can be modified later on::
 
-            wwn.set(1, 1, cellB, 0.02)
+            wwn.set(1, 1, 'cellB', 0.02)
 
         """
         super(WeightWindowBound, self).set(cell)
@@ -6155,7 +6157,7 @@ class DXTRANContribution(ICellMod):
             Name of the DXTRAN sphere, on the :py:class:`DXTRANSpheres` card,
             for which this card applies. To apply this card to all spheres, set
             to None.
-        cell : :py:class:`Cell` or subclass
+        cell : str name of :py:class:`Cell` or subclass
             See :py:class:`ICellMod`.
         prob : float
             The probability of contribution to the sphere.
@@ -6165,17 +6167,17 @@ class DXTRANContribution(ICellMod):
         The following shows how this card is used to specify contribution
         probabilities for all DXTRAN spheres::
 
-            dxc = DXTRANContribution('neutron', None, cellA, 0.5)
+            dxc = DXTRANContribution('neutron', None, 'cellA', 0.5)
 
         The following applies for only 'sph1' on the :py:class:`DXTRANSpheres`
         card::
 
-            dxc = DXTRANContribution('neutron', 'sph1', cellA, 0.5)
+            dxc = DXTRANContribution('neutron', 'sph1', 'cellA', 0.5)
 
         The following provides probabilities for two different cells::
 
-            dxc = DXTRANContribution('neutron', 'sph1', cellA, 0.5,
-                                                        cellB, 0.75)
+            dxc = DXTRANContribution('neutron', 'sph1', 'cellA', 0.5,
+                                                        'cellB', 0.75)
 
         """
         # DXTRANSphere must be added first before this can be used?
@@ -6192,7 +6194,7 @@ class DXTRANContribution(ICellMod):
         """
         Parameters
         ----------
-        cell : :py:class:`Cell` or subclass
+        cell : str name of :py:class:`Cell` or subclass
         prob : float
 
         Examples
@@ -6201,12 +6203,12 @@ class DXTRANContribution(ICellMod):
         method::
 
             dxc = DXTRANContribution('neutron', 'sph1')
-            dxc.set(cellA, 0.5)
-            dxc.set(cellB, 0.75)
+            dxc.set('cellA', 0.5)
+            dxc.set('cellB', 0.75)
 
         Previously provided values can be modified later on::
 
-            dxc.set(cellB, 0.8)
+            dxc.set('cellB', 0.8)
 
         """
         super(DXTRANContribution, self).set(cell)
