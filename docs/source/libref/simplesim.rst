@@ -108,7 +108,11 @@ Cards Module
     :show-inheritance:
 
 
-:ref:`pyne_simplesim_nestedgeom`
+.. toctree::
+    :maxdepth: 1
+
+    simplesim_nestedgeom
+
 
 .. autosummary::
    :nosignatures:
