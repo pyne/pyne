@@ -17,7 +17,10 @@ Usage Examples
 --------------
 The subclasses of :py:class:`ICellSurfTally` can take as input any subclass of
 :py:class:`IUnit`. The following shows different ways in which complex units
-can be built.
+can be built. Here it is assumed that there is a cell named '1' in the system,
+a surface named '1' in the system, a universe named '1' in the system, etc. The
+unions represent averaging or totaling the units, depending on the type of
+tally.
 
 +-----------+-------------------------------------------------------------+------------------------------------------------------------+-----------------------+
 |category   |description                                                  |nestedgeom                                                  |mcnp                   |
@@ -84,8 +87,6 @@ can be built.
 
 import numpy as np
 
-from pyne.simplesim import cards, definition
-
 class IUnit(object):
     """Abstract base class for tally units. The user does not use this class
     directly.
@@ -137,7 +138,7 @@ class IUnit(object):
         return self.vector(right)
 
     def vector(self, right):
-        """Returns a :py:class:`Vec` of ``self`` with ``right."""
+        """Returns a :py:class:`Vec` of ``self`` with ``right``."""
         if isinstance(self, Vec):
             self.sisters += [right]
             return self
