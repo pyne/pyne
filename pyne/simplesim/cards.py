@@ -3187,69 +3187,6 @@ class ICellSurfTally(ITally):
         alt_units : bool, optional
             See :py:class:`ITally`.
 
-        Repeated Structures
-        -------------------
-        Okay, so the ``cards`` input can actually be substantially more
-        complicated for tallies on repeated structures. To tally surfaces or
-        cells only when they are within other cells or universes, the ``cards``
-        input is a tuple:
-
-        - tuple, each separate element represents the nesting
-        - can provide universe TODO this goes above, not really related to
-        repeated structures.
-
-        The following string in MCNP (<LAT-SPEC> is discussed below)::
-
-        (scA, scB) < (cC, cD[<LAT-SPEC>]) < U=u1 < (cE, cF, cG)
-
-        is obtained with the following input::
-
-        ([scA, scB], [cC, (cD, ([li0,li1],[lj0,lj1],[lk0,lk1]))], 'u1', [cE, cF, cG])
-
-        The optional <LAT-SPEC> specifies which lattice elements to consider
-        from a lattice cell. It has 3 possible forms, and the MCNP syntax is
-        compared to the syntax used here::
-
-        MCNP
-        li0:li1 lj0:lj1 lk0:lk1
-        [li0,li1],[lj0,lj1],[lk0,lk1]
-
-        li0 lj0 lk0, li1 lj1 lk1, ...
-        [[li0, lj0, lk0], [li1, lj1, lk1], ...]
-
-        The following is a non-exhaustive table of eligible units of input::
-
-        generic                                             simplesim
-        scA                                                 'scA'
-        union of scA, scB, scC                              ['scA', 'scB', 'scC'] 
-        univA                                               'univA'
-        union of univA                                      ['univA']
-        scA in scB                                          ('scA', 'scB')
-        scA in scB in scC                                   ('scA', 'scB', 'scC')
-        scA in univA                                        ('scA', 'univA')
-        scA in union of univA                               ('scA', ['univA'])
-        scA in union of scB and scC             ('scA', ['scB', 'scC'])
-        scA in univA in scB                           ('scA', 'univA', 'scB')
-        scA in scB, lattice elements <LAT-SPEC> ('scA', ('scB', <LAT-SPEC>))
-        (scA and scB) in scC in (scD and scE)  ((scA, scB), 
-
-        union('scA', 'scB', 'scC')   union(sc('A'), sc('B'), sc('C'))
-        univ('univA') 
-        union(univ('univA'))
-        'scA' in 'scB'             surf('A').in(surf('B'))
-        'scA' in 'scB' in 'scC'        surf('A').in(surf('B').in('scC'))
-        'scA' in univ('univA')       sc('A').in(univ('A'))
-        'scA' in union(univ('A'))    sc('A').in(union(univ('A')))
-        'scA' in union('scB', 'scC') sc('A').in(union('scB', 'scC'))
-        'scA' in univ('univA') in 'scC'  sc('A').in(univ('A').in(sc('C')))
-        'scA' in lat('scB', []) in ...   sc('A').in(sc('B').lat([]))
-
-        vec('scA', 'scB').in(sc('C').in(vec('scD', 'scE')))
-
-
-        The last of these is called `multiple bin format` in MCNP, and creates
-        a total of 4 tally `units`, one for 'scA' through'scD'.
-
         Examples
         --------
         The following gives the tally in cell 'cA'::
@@ -3268,6 +3205,70 @@ class ICellSurfTally(ITally):
 
             tally = SurfaceFlux('fuel', 'neutron', [['sA', 'sB']])
 
+
+Repeated Structures
+-------------------
+
+Okay, so the ``cards`` input can actually be substantially more
+complicated for tallies on repeated structures. To tally surfaces or
+cells only when they are within other cells or universes, the ``cards``
+input is a tuple:
+
+- tuple, each separate element represents the nesting
+- can provide universe TODO this goes above, not really related to
+repeated structures.
+
+The following string in MCNP (<LAT-SPEC> is discussed below)::
+
+(scA, scB) < (cC, cD[<LAT-SPEC>]) < U=u1 < (cE, cF, cG)
+
+is obtained with the following input::
+
+([scA, scB], [cC, (cD, ([li0,li1],[lj0,lj1],[lk0,lk1]))], 'u1', [cE, cF, cG])
+
+The optional <LAT-SPEC> specifies which lattice elements to consider
+from a lattice cell. It has 3 possible forms, and the MCNP syntax is
+compared to the syntax used here::
+
+MCNP
+li0:li1 lj0:lj1 lk0:lk1
+[li0,li1],[lj0,lj1],[lk0,lk1]
+
+li0 lj0 lk0, li1 lj1 lk1, ...
+[[li0, lj0, lk0], [li1, lj1, lk1], ...]
+
+The following is a non-exhaustive table of eligible units of input::
+
+generic                                             simplesim
+scA                                                 'scA'
+union of scA, scB, scC                              ['scA', 'scB', 'scC'] 
+univA                                               'univA'
+union of univA                                      ['univA']
+scA in scB                                          ('scA', 'scB')
+scA in scB in scC                                   ('scA', 'scB', 'scC')
+scA in univA                                        ('scA', 'univA')
+scA in union of univA                               ('scA', ['univA'])
+scA in union of scB and scC             ('scA', ['scB', 'scC'])
+scA in univA in scB                           ('scA', 'univA', 'scB')
+scA in scB, lattice elements <LAT-SPEC> ('scA', ('scB', <LAT-SPEC>))
+(scA and scB) in scC in (scD and scE)  ((scA, scB), 
+
+union('scA', 'scB', 'scC')   union(sc('A'), sc('B'), sc('C'))
+univ('univA') 
+union(univ('univA'))
+'scA' in 'scB'             surf('A').in(surf('B'))
+'scA' in 'scB' in 'scC'        surf('A').in(surf('B').in('scC'))
+'scA' in univ('univA')       sc('A').in(univ('A'))
+'scA' in union(univ('A'))    sc('A').in(union(univ('A')))
+'scA' in union('scB', 'scC') sc('A').in(union('scB', 'scC'))
+'scA' in univ('univA') in 'scC'  sc('A').in(univ('A').in(sc('C')))
+'scA' in lat('scB', []) in ...   sc('A').in(sc('B').lat([]))
+
+vec('scA', 'scB').in(sc('C').in(vec('scD', 'scE')))
+
+
+The last of these is called `multiple bin format` in MCNP, and creates
+a total of 4 tally `units`, one for 'scA' through'scD'.
         """
         super(ICellSurfTally, self).__init__(name, particle, *args, **kwargs)
         self.cards = cards
