@@ -25,5 +25,4 @@ The following modules and sub-packages are discussed:
     stlconverters
     dbgen/index
     mcnp
-    mcnpcard
     simplesim
