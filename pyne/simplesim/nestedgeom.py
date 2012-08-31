@@ -19,16 +19,32 @@ The subclasses of :py:class:`ICellSurfTally` can take as input any subclass of
 :py:class:`IUnit`. The following shows different ways in which complex units
 can be built.
 
-========
-category
-========
-basic
-union
-nesting
-vectorized
-lattice
-
-===========
++-----------+-------------------------------------------------------------+
+|category   |description                                                  |
++===========+=============================================================+
+|basic      |surface 1 (s1)                                               |
+|           |cell 1 (c1)                                                  |
+|           |universe 1 (u1)                                              |
++-----------+-------------------------------------------------------------+
+|union      |union of s1 and s2                                           |
+|           |union of c1, c2, and c3                                      |
+|           |union of cells in u1                                         |
++-----------+-------------------------------------------------------------+
+|nesting    |s1 in filled cell 2 (fc2)                                    |
+|           |c1 in fc3 in fc3                                             |
+|           |s1 in union of fc2 and fc3                                   |
+|           |s1 in (union of fc2 and fc3) in fc4                          |
+|           |s1 in u1 in fc4                                              |
++-----------+-------------------------------------------------------------+
+|vectorized |(over s1 and s2) in fc2                                      |
+|           |s1 in (over fc2 and fc3)                                     |
++-----------+-------------------------------------------------------------+
+|lattice    |s1 in (union of fc2 and (fc3 in lattice elem 5)) in fc4      |
+|           |s1 in (fc2 in lattice x range 0:1, y range 0:2, z range 0:3) |
+|           |s1 in (fc2 in lattice coord (0, 1, 2))                       |
+|           |s1 in (fc2 in lattice coords (0, 1, 2), (3, 2, 1))           |
++-----------+-------------------------------------------------------------+
+-----------
 description
 ===========
 surface 1 (s1)
@@ -47,6 +63,7 @@ s1 in u1 in fc4
 
 (over s1 and s2) in fc2
 s1 in (over fc2 and fc3)
+
 s1 in (union of fc2 and (fc3 in lattice elem 5)) in fc4
 s1 in (fc2 in lattice x range 0:1, y range 0:2, z range 0:3)
 s1 in (fc2 in lattice coord (0, 1, 2))
@@ -101,60 +118,6 @@ U=1
 1 < 2[0:1 0:2 0:3]
 1 < 2[0 1 2]
 1 < 2[0 1 2, 3 2 1]
-
-
-
-The following string in MCNP (<LAT-SPEC> is discussed below)::
-
-(scA, scB) < (cC, cD[<LAT-SPEC>]) < U=u1 < (cE, cF, cG)
-
-is obtained with the following input::
-
-([scA, scB], [cC, (cD, ([li0,li1],[lj0,lj1],[lk0,lk1]))], 'u1', [cE, cF, cG])
-
-The optional <LAT-SPEC> specifies which lattice elements to consider
-from a lattice cell. It has 3 possible forms, and the MCNP syntax is
-compared to the syntax used here::
-
-MCNP
-li0:li1 lj0:lj1 lk0:lk1
-[li0,li1],[lj0,lj1],[lk0,lk1]
-
-li0 lj0 lk0, li1 lj1 lk1, ...
-[[li0, lj0, lk0], [li1, lj1, lk1], ...]
-
-The following is a non-exhaustive table of eligible units of input::
-
-generic                                             simplesim
-scA                                                 'scA'
-union of scA, scB, scC                              ['scA', 'scB', 'scC'] 
-univA                                               'univA'
-union of univA                                      ['univA']
-scA in scB                                          ('scA', 'scB')
-scA in scB in scC                                   ('scA', 'scB', 'scC')
-scA in univA                                        ('scA', 'univA')
-scA in union of univA                               ('scA', ['univA'])
-scA in union of scB and scC             ('scA', ['scB', 'scC'])
-scA in univA in scB                           ('scA', 'univA', 'scB')
-scA in scB, lattice elements <LAT-SPEC> ('scA', ('scB', <LAT-SPEC>))
-(scA and scB) in scC in (scD and scE)  ((scA, scB), 
-
-union('scA', 'scB', 'scC')   union(sc('A'), sc('B'), sc('C'))
-univ('univA') 
-union(univ('univA'))
-'scA' in 'scB'             surf('A').in(surf('B'))
-'scA' in 'scB' in 'scC'        surf('A').in(surf('B').in('scC'))
-'scA' in univ('univA')       sc('A').in(univ('A'))
-'scA' in union(univ('A'))    sc('A').in(union(univ('A')))
-'scA' in union('scB', 'scC') sc('A').in(union('scB', 'scC'))
-'scA' in univ('univA') in 'scC'  sc('A').in(univ('A').in(sc('C')))
-'scA' in lat('scB', []) in ...   sc('A').in(sc('B').lat([]))
-
-vec('scA', 'scB').in(sc('C').in(vec('scD', 'scE')))
-
-
-The last of these is called `multiple bin format` in MCNP, and creates
-a total of 4 tally `units`, one for 'scA' through'scD'.
 
 
 """
