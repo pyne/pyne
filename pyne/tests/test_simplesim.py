@@ -100,9 +100,9 @@ class TestSystemDefinition(unittest.TestCase):
 
     def test_Universes(self):
         """Tests :py:class:`cards.Universes`."""
-        uni = cards.Universes(self.fuel, 'unitcell', True, 
-                            self.coolant, 'unitcell', True,
-                            self.graveyard, 'grave', False)
+        uni = cards.Universes('fuel', 'unitcell', True, 
+                            'coolant', 'unitcell', True,
+                            'graveyard', 'grave', False)
         self.sim.add_misc(uni)
         self.assertEquals(uni.comment(), "Universes 'universes': "
                 "cell 'fuel' unitcell (truncated), "
@@ -112,8 +112,8 @@ class TestSystemDefinition(unittest.TestCase):
                 "U 1 1 -2")
 
         uni = cards.Universes()
-        uni.set(self.fuel, 'unitcell', True)
-        uni.set(self.coolant, 'unitcell', True)
+        uni.set('fuel', 'unitcell', True)
+        uni.set('coolant', 'unitcell', True)
         self.sim.add_misc(uni)
         self.assertEquals(uni.comment(), "Universes 'universes': "
                 "cell 'fuel' unitcell (truncated), "
@@ -124,12 +124,12 @@ class TestSystemDefinition(unittest.TestCase):
     def test_Fill(self):
         """Tests :py:class:`cards.Fill`."""
         uni = cards.Universes()
-        uni.set(self.fuel, 'unitcell', True)
-        uni.set(self.coolant, 'otheruniv', True)
+        uni.set('fuel', 'unitcell', True)
+        uni.set('coolant', 'otheruniv', True)
         self.sim.add_misc(uni) 
 
-        uni = cards.Fill(self.fuel, 'unitcell',
-                         self.coolant, 'otheruniv')
+        uni = cards.Fill('fuel', 'unitcell',
+                         'coolant', 'otheruniv')
         self.assertEquals(uni.comment(), "Fill 'fill': "
                 "cell 'fuel' unitcell, "
                 "cell 'coolant' otheruniv.")
@@ -137,8 +137,8 @@ class TestSystemDefinition(unittest.TestCase):
                 "FILL 1 2 1J")
 
         uni = cards.Fill()
-        uni.set(self.fuel, 'unitcell')
-        uni.set(self.coolant, 'otheruniv')
+        uni.set('fuel', 'unitcell')
+        uni.set('coolant', 'otheruniv')
         self.assertEquals(uni.comment(), "Fill 'fill': "
                 "cell 'fuel' unitcell, "
                 "cell 'coolant' otheruniv.")
@@ -148,14 +148,14 @@ class TestSystemDefinition(unittest.TestCase):
     def test_Lattice(self):
         """Tests :py:class:`Lattice`."""
 
-        lat = cards.Lattice(self.fuel, 'hexahedra', self.coolant, 'hexagonal')
+        lat = cards.Lattice('fuel', 'hexahedra', 'coolant', 'hexagonal')
         self.assertEquals(lat.comment(), "Lattice 'lattice': "
                 "cell 'fuel' hexahedra, cell 'coolant' hexagonal.")
         self.assertEquals(lat.mcnp('%.5g', self.sim), "LAT 1 2 1J")
 
         lat = cards.Lattice()
-        lat.set(self.fuel, 'hexahedra')
-        lat.set(self.coolant, 'hexagonal')
+        lat.set('fuel', 'hexahedra')
+        lat.set('coolant', 'hexagonal')
         self.assertEquals(lat.comment(), "Lattice 'lattice': "
                 "cell 'fuel' hexahedra, cell 'coolant' hexagonal.")
         self.assertEquals(lat.mcnp('%.5g', self.sim), "LAT 1 2 1J")
@@ -177,6 +177,7 @@ class TestSystemDefinition(unittest.TestCase):
                 "KEYS: -2, 2, VALS: 0, 1.")
         self.assertEquals(sd.mcnp('%.5g', self.sim), 
                 "SI1 H -2 2\nSP1 D 0 1")
+
         sd = cards.Distribution('distA', 
                 ['neutron', 'photon', 'spont-fiss-by-hist', 92238],
                 [1, 1, 'fuel', 2],
@@ -189,8 +190,10 @@ class TestSystemDefinition(unittest.TestCase):
                 "VALS: 1, 1, fuel, 2.")
         self.assertEquals(sd.mcnp('%.5g', self.sim),
                 "SI1 L N P -SF 92238\nSP1 W 1 1 -1 2")
+
         sd = cards.Distribution('distA', ['distB', 'distC'], [0.3, 0.7],
                 'dist')
+
         sdB = cards.Distribution('distB', [-2, 2], [0, 1])
         sdC = cards.Distribution('distC', [-2, 2], [0, 1])
         self.sim.add_dist(sd)
@@ -202,12 +205,14 @@ class TestSystemDefinition(unittest.TestCase):
                 "VALS: 0.3, 0.7.")
         self.assertEquals(sd.mcnp('%.5g', self.sim),
                 "SI1 S 2 3\nSP1 0.3 0.7")
+
         sd = cards.Distribution('distA', [], [], 'analytic', 'maxwell')
         self.sim.add_dist(sd)
         self.assertEquals(sd.comment(), "Source distribution 'distA': "
                 "key setting analytic, val setting maxwell, "
                 "KEYS: default, VALS: default.")
         self.assertEquals(sd.mcnp('%.5g', self.sim), "SP1 -2")
+
         sd = cards.Distribution('distA', [], [], key_setting='analytic',
                                                  val_setting='maxwell')
         self.sim.add_dist(sd)
@@ -216,6 +221,7 @@ class TestSystemDefinition(unittest.TestCase):
                 "KEYS: default, VALS: default.")
         self.assertEquals(sd.mcnp('%.5g', self.sim),
                 "SP1 -2")
+
         sd = cards.Distribution('distA', [0, 10], [1, 3], 'analytic', 'watt')
         self.sim.add_dist(sd)
         self.assertEquals(sd.comment(), "Source distribution 'distA': "
@@ -990,30 +996,30 @@ class TestSystemDefinition(unittest.TestCase):
                 "0.0e+00 V1 2.0e+00 1.0e+00 3.0e+00")
 
         ## ExponentialTransform
-        extn = cards.ExponentialTransform('neutron', self.fuel, 'capture-to-total',
+        extn = cards.ExponentialTransform('neutron', 'fuel', 'capture-to-total',
                 'currdir', 'toward')
         self.assertEquals(extn.name, 'exptransform-neutron')
-        self.assertIs(extn.cells[0], self.fuel)
-        self.assertEquals(extn.stretchs[self.fuel], 'capture-to-total')
-        self.assertEquals(extn.directions[self.fuel], 'currdir')
-        self.assertEquals(extn.signs[self.fuel], 'toward')
+        self.assertIs(extn.cells[0], 'fuel')
+        self.assertEquals(extn.stretchs['fuel'], 'capture-to-total')
+        self.assertEquals(extn.directions['fuel'], 'currdir')
+        self.assertEquals(extn.signs['fuel'], 'toward')
         self.assertEquals(extn.comment(), "Exponential transform "
                 "'exptransform-neutron': cell 'fuel' stretch by "
                 "capture-to-total toward currdir.")
         self.assertEquals(extn.mcnp('%.1e', self.sim), "EXT:N S 0 0")
-        extn = cards.ExponentialTransform('neutron', self.coolant, 0.5,
+        extn = cards.ExponentialTransform('neutron', 'coolant', 0.5,
                 'currdir', 'toward')
         self.assertEquals(extn.comment(), "Exponential transform "
                 "'exptransform-neutron': cell 'coolant' stretch by "
                 "0.5 toward currdir.")
         self.assertEquals(extn.mcnp('%.1e', self.sim), "EXT:N 0 5.0e-01 0")
-        extn = cards.ExponentialTransform('neutron', self.fuel, 0.5, 'x',
+        extn = cards.ExponentialTransform('neutron', 'fuel', 0.5, 'x',
                 'toward')
         self.assertEquals(extn.comment(), "Exponential transform "
                 "'exptransform-neutron': cell 'fuel' stretch by "
                 "0.5 toward x.")
         self.assertEquals(extn.mcnp('%.1e', self.sim), "EXT:N 5.0e-01X 0 0")
-        extn = cards.ExponentialTransform('neutron', self.fuel, 0.5, 'origin',
+        extn = cards.ExponentialTransform('neutron', 'fuel', 0.5, 'origin',
                 'away')
         self.assertEquals(extn.comment(), "Exponential transform "
                 "'exptransform-neutron': cell 'fuel' stretch by "
@@ -1021,9 +1027,9 @@ class TestSystemDefinition(unittest.TestCase):
         self.assertEquals(extn.mcnp('%.1e', self.sim), "EXT:N -5.0e-01V0 0 0")
         # Multiple cells.
         extn = cards.ExponentialTransform('neutron', 
-                self.fuel, 'capture-to-total', 'currdir', 'toward', 
-                self.coolant, 0.5, 'currdir', 'toward',
-                self.graveyard, 0.5, 'x-axis', 'away')
+                'fuel', 'capture-to-total', 'currdir', 'toward', 
+                'coolant', 0.5, 'currdir', 'toward',
+                'graveyard', 0.5, 'x-axis', 'away')
         self.assertEquals(extn.comment(), "Exponential transform "
                 "'exptransform-neutron': cell 'fuel' stretch by "
                 "capture-to-total toward currdir; cell 'coolant' stretch by "
@@ -1033,9 +1039,9 @@ class TestSystemDefinition(unittest.TestCase):
                 "EXT:N S 5.0e-01 -5.0e-01V1")
         # Using set().
         ext2 = cards.ExponentialTransform('neutron')
-        ext2.set(self.fuel, 'capture-to-total', 'currdir', 'toward')
-        ext2.set(self.coolant, 0.5, 'currdir', 'toward')
-        ext2.set(self.graveyard, 0.5, 'x-axis', 'away')
+        ext2.set('fuel', 'capture-to-total', 'currdir', 'toward')
+        ext2.set('coolant', 0.5, 'currdir', 'toward')
+        ext2.set('graveyard', 0.5, 'x-axis', 'away')
         self.assertEquals(ext2.comment(), "Exponential transform "
                 "'exptransform-neutron': cell 'fuel' stretch by "
                 "capture-to-total toward currdir; cell 'coolant' stretch by "
@@ -1044,7 +1050,7 @@ class TestSystemDefinition(unittest.TestCase):
         self.assertEquals(ext2.mcnp('%.1e', self.sim), 
                 "EXT:N S 5.0e-01 -5.0e-01V1")
         # Modifying.
-        ext2.set(self.graveyard, 0.7, 'x-axis', 'away')
+        ext2.set('graveyard', 0.7, 'x-axis', 'away')
         self.assertEquals(ext2.mcnp('%.1e', self.sim), 
                 "EXT:N S 5.0e-01 -7.0e-01V1")
         # Manage order-of-cells issue/question.
@@ -1052,33 +1058,33 @@ class TestSystemDefinition(unittest.TestCase):
 
     def test_ForcedCollision(self):
         ## ForcedCollision
-        fcl = cards.ForcedCollision('neutron', self.fuel, 0.5, True)
+        fcl = cards.ForcedCollision('neutron', 'fuel', 0.5, True)
         self.assertEquals(fcl.name, 'forcedcoll-neutron')
-        self.assertEquals(fcl.cells[0], self.fuel)
-        self.assertEquals(fcl.probs[self.fuel], 0.5)
-        self.assertTrue(fcl.only_enterings[self.fuel])
+        self.assertEquals(fcl.cells[0], 'fuel')
+        self.assertEquals(fcl.probs['fuel'], 0.5)
+        self.assertTrue(fcl.only_enterings['fuel'])
         self.assertEquals(fcl.comment(), "Forced collision "
                 "'forcedcoll-neutron': cell 'fuel' prob 0.5 for entering only.")
         self.assertEquals(fcl.mcnp('%.1e', self.sim), "FCL:N -5.0e-01 0 0")
-        fcl = cards.ForcedCollision('neutron', self.fuel, 0.5, False)
+        fcl = cards.ForcedCollision('neutron', 'fuel', 0.5, False)
         self.assertEquals(fcl.comment(), "Forced collision "
                 "'forcedcoll-neutron': cell 'fuel' prob 0.5 for entering "
                 "and weight games.")
         self.assertEquals(fcl.mcnp('%.1e', self.sim), "FCL:N 5.0e-01 0 0")
-        fcl = cards.ForcedCollision('neutron', self.fuel, 0.5, True,
-                                               self.coolant, 0.5, False)
+        fcl = cards.ForcedCollision('neutron', 'fuel', 0.5, True,
+                                               'coolant', 0.5, False)
         self.assertEquals(fcl.comment(), "Forced collision "
                 "'forcedcoll-neutron': cell 'fuel' prob 0.5 for entering "
                 "only; cell 'coolant' prob 0.5 for entering and weight games.")
         self.assertEquals(fcl.mcnp('%.1e', self.sim), "FCL:N -5.0e-01 5.0e-01 0")
         fcl = cards.ForcedCollision('neutron')
-        fcl.set(self.fuel, 0.5, True)
-        fcl.set(self.coolant, 0.5, False)
+        fcl.set('fuel', 0.5, True)
+        fcl.set('coolant', 0.5, False)
         self.assertEquals(fcl.comment(), "Forced collision "
                 "'forcedcoll-neutron': cell 'fuel' prob 0.5 for entering "
                 "only; cell 'coolant' prob 0.5 for entering and weight games.")
         self.assertEquals(fcl.mcnp('%.1e', self.sim), "FCL:N -5.0e-01 5.0e-01 0")
-        fcl.set(self.coolant, 0.7, False)
+        fcl.set('coolant', 0.7, False)
         self.assertEquals(fcl.comment(), "Forced collision "
                 "'forcedcoll-neutron': cell 'fuel' prob 0.5 for entering "
                 "only; cell 'coolant' prob 0.7 for entering and weight games.")
@@ -1093,32 +1099,36 @@ class TestSystemDefinition(unittest.TestCase):
         self.assertEquals(wwe.comment(), "Weight window energies "
                 "'weightwinenergy-photon' for photons: 2 bins.")
         self.assertEquals(wwe.mcnp('%.1g', self.sim), "WWE:P 1 1e+01")
+
         wwe = cards.WeightWindowEnergies('photon', [1, 10], for_gen=True)
         self.assertEquals(wwe.name, 'weightwingenenergy-photon')
         self.assertEquals(wwe.comment(), "Weight window generator energies "
                 "'weightwingenenergy-photon' for photons: 2 bins.")
         self.assertEquals(wwe.mcnp('%.1g', self.sim), "WWGE:P 1 1e+01")
+
         wwe = cards.WeightWindowEnergies('photon', [], for_gen=True)
         self.assertEquals(wwe.name, 'weightwingenenergy-photon')
         self.assertEquals(wwe.comment(), "Weight window generator energies "
                 "'weightwingenenergy-photon' for photons: default bins.")
         self.assertEquals(wwe.mcnp('%.1g', self.sim), "WWGE:P")
+
         wwt = cards.WeightWindowTimes('proton', [1, 1e12])
         self.assertEquals(wwt.name, 'weightwintime-proton')
         self.assertEquals(wwt.comment(), "Weight window times "
                 "'weightwintime-proton' for protons: 2 intervals.")
         self.assertEquals(wwt.mcnp('%.1g', self.sim), "WWT:H 1e+08 1e+20")
+
         wwt = cards.WeightWindowTimes('proton', [1, 1e12], for_gen=True)
         self.assertEquals(wwt.name, 'weightwingentime-proton')
         self.assertEquals(wwt.comment(), "Weight window generator times "
                 "'weightwingentime-proton' for protons: 2 intervals.")
         self.assertEquals(wwt.mcnp('%.1g', self.sim), "WWGT:H 1e+08 1e+20")
+
         wwt = cards.WeightWindowTimes('proton', [], for_gen=True)
         self.assertEquals(wwt.name, 'weightwingentime-proton')
         self.assertEquals(wwt.comment(), "Weight window generator times "
                 "'weightwingentime-proton' for protons: default intervals.")
         self.assertEquals(wwt.mcnp('%.1g', self.sim), "WWGT:H")
-        
         
         cellC = cards.Cell('C', self.pin.neg & self.cellbound.pos)
         cellD = cards.Cell('D', self.pin.neg & self.cellbound.pos)
@@ -1132,16 +1142,16 @@ class TestSystemDefinition(unittest.TestCase):
         self.sim.add_misc(wwe)
         self.sim.add_misc(wwt)
 
-        wwn = cards.WeightWindowBound('photon', 1, 1, cellD, 0.01)
+        wwn = cards.WeightWindowBound('photon', 1, 1, 'D', 0.01)
         self.assertEquals(wwn.name, 'weightwinbound-photon')
         self.assertEquals(wwn.comment(), "Weight window bounds "
                 "'weightwinbound-photon' for photons: energy idx 1: "
                 "time idx 1: cell 'D': 0.01.")
         self.assertEquals(wwn.mcnp('%g', self.sim), "WWN1:P 0 0 0 0 0.01 0")
         # More than one cell.
-        wwn = cards.WeightWindowBound('photon' , 1, 1, cellD, 0.01 , 1, 1,
-                cellE, 0.02 , 2, 1, cellE, 0.03 , 1, 3, cellD, 0.04 , 2, 3,
-                cellD, 0.05 , 2, 3, cellE, 0.06)
+        wwn = cards.WeightWindowBound('photon' , 1, 1, 'D', 0.01 , 1, 1,
+                'E', 0.02 , 2, 1, 'E', 0.03 , 1, 3, 'D', 0.04 , 2, 3,
+                'D', 0.05 , 2, 3, 'E', 0.06)
         self.assertEquals(wwn.comment(), "Weight window bounds "
                 "'weightwinbound-photon' for photons: energy idx 1: "
                 "time idx 1: cell 'D': 0.01, cell 'E': 0.02, "
@@ -1155,12 +1165,12 @@ class TestSystemDefinition(unittest.TestCase):
                 "WWN10:P 0 0 0 0 0.05 0.06")
         # Make sure set() works.
         wwn = cards.WeightWindowBound('photon')
-        wwn.set(1, 1, cellD, 0.01)
-        wwn.set(1, 1, cellE, 0.02)
-        wwn.set(2, 1, cellE, 0.03)
-        wwn.set(1, 3, cellD, 0.04)
-        wwn.set(2, 3, cellD, 0.05)
-        wwn.set(2, 3, cellE, 0.06)
+        wwn.set(1, 1, 'D', 0.01)
+        wwn.set(1, 1, 'E', 0.02)
+        wwn.set(2, 1, 'E', 0.03)
+        wwn.set(1, 3, 'D', 0.04)
+        wwn.set(2, 3, 'D', 0.05)
+        wwn.set(2, 3, 'E', 0.06)
         self.assertEquals(wwn.comment(), "Weight window bounds "
                 "'weightwinbound-photon' for photons: energy idx 1: "
                 "time idx 1: cell 'D': 0.01, cell 'E': 0.02, "
@@ -1178,14 +1188,14 @@ class TestSystemDefinition(unittest.TestCase):
         # Overwriting a card.
         self.sim.add_misc(wwe)
         #self.assertRaises(UserWarning, self.sim.add_misc, wwe)
-        wwn = cards.WeightWindowBound('photon', 8, 6, cellD, 0.01)
+        wwn = cards.WeightWindowBound('photon', 8, 6, 'D', 0.01)
         self.assertEquals(wwn.comment(), "Weight window bounds "
                 "'weightwinbound-photon' for photons: energy idx 8: "
                 "time idx 6: cell 'D': 0.01.")
         self.assertEquals(wwn.mcnp('%g', self.sim), "WWN58:P 0 0 0 0 0.01 0")
 
         # Test killall
-        wwn = cards.WeightWindowBound('photon', 1, 1, cellD, 'killall')
+        wwn = cards.WeightWindowBound('photon', 1, 1, 'D', 'killall')
         self.assertEquals(wwn.comment(), "Weight window bounds "
                 "'weightwinbound-photon' for photons: energy idx 1: "
                 "time idx 1: cell 'D': killall.")
@@ -1193,7 +1203,7 @@ class TestSystemDefinition(unittest.TestCase):
 
         # Check exception when using a particle type for which WWE/WWT cards
         # are not defined.
-        wwn = cards.WeightWindowBound('neutron', 1, 1, cellD, 0.01)
+        wwn = cards.WeightWindowBound('neutron', 1, 1, 'D', 0.01)
         self.assertRaises(Exception, wwn.mcnp,'%g', self.sim)
         try:
             wwn.mcnp('%g', self.sim)
@@ -1201,57 +1211,57 @@ class TestSystemDefinition(unittest.TestCase):
             self.assertEquals(e.message, "No WWGT:N or WWT:N card found in "
                     "the simulation.")
         ## Importance
-        impn = cards.Importance('neutron', self.fuel, 1, self.coolant, 2)
+        impn = cards.Importance('neutron', 'fuel', 1, 'coolant', 2)
         self.assertEquals(impn.name, 'importance-neutron')
         self.assertEquals(impn.comment(), "Importance 'importance-neutron': "
                 "cell 'fuel' 1; cell 'coolant' 2.")
         self.assertEquals(impn.mcnp('%g', self.sim), "IMP:N 1 2 0 0 0 0")
-        impn.set(self.graveyard, 0)
+        impn.set('graveyard', 0)
         self.assertEquals(impn.comment(), "Importance 'importance-neutron': "
                 "cell 'fuel' 1; cell 'coolant' 2; cell 'graveyard' 0.")
         self.assertEquals(impn.mcnp('%g', self.sim), "IMP:N 1 2 0 0 0 0")
         # Modifying.
-        impn.set(self.graveyard, 1)
+        impn.set('graveyard', 1)
         self.assertEquals(impn.comment(), "Importance 'importance-neutron': "
                 "cell 'fuel' 1; cell 'coolant' 2; cell 'graveyard' 1.")
         self.assertEquals(impn.mcnp('%g', self.sim), "IMP:N 1 2 1 0 0 0")
         # Using args.
-        args = [self.fuel, 1, self.coolant, 2, self.graveyard, 3]
+        args = ['fuel', 1, 'coolant', 2, 'graveyard', 3]
         impn = cards.Importance('neutron', *args)
         self.assertEquals(impn.comment(), "Importance 'importance-neutron': "
                 "cell 'fuel' 1; cell 'coolant' 2; cell 'graveyard' 3.")
         self.assertEquals(impn.mcnp('%g', self.sim), "IMP:N 1 2 3 0 0 0")
 
         ## Volume
-        vol = cards.Volume(self.fuel, 1)
+        vol = cards.Volume('fuel', 1)
         self.assertEquals(vol.name, 'volume')
         self.assertEquals(vol.comment(), "Volume 'volume': cell 'fuel' 1 cm^3.")
         self.assertEquals(vol.mcnp('%g', self.sim), "VOL 1 5J")
-        vol = cards.Volume(cellD, 1)
+        vol = cards.Volume('D', 1)
         self.assertEquals(vol.mcnp('%g', self.sim), "VOL 4J 1 1J")
         # Multiple cells
-        vol = cards.Volume(self.fuel, 1, self.coolant, 2, manual=True)
+        vol = cards.Volume('fuel', 1, 'coolant', 2, manual=True)
         self.assertEquals(vol.comment(), "Volume 'volume': (all manual) "
                 "cell 'fuel' 1 cm^3, cell 'coolant' 2 cm^3.")
         self.assertEquals(vol.mcnp('%g', self.sim), "VOL NO 1 2 4J")
         # Using set()
-        vol.set(self.coolant, 3)
+        vol.set('coolant', 3)
         self.assertEquals(vol.mcnp('%g', self.sim), "VOL NO 1 3 4J")
 
         ## Area
-        are = cards.Area(self.fuel, 10)
+        are = cards.Area('fuel', 10)
         self.assertEquals(are.name, 'area')
         self.assertEquals(are.comment(), "Area 'area': cell 'fuel' 10 cm^2.")
         self.assertEquals(are.mcnp('%g', self.sim), "AREA 10 5J")
-        are = cards.Area(cellD, 10)
+        are = cards.Area('D', 10)
         self.assertEquals(are.mcnp('%g', self.sim), "AREA 4J 10 1J")
         # Multiple cells
-        are = cards.Area(self.fuel, 10, self.coolant, 20)
+        are = cards.Area('fuel', 10, 'coolant', 20)
         self.assertEquals(are.comment(), "Area 'area': "
                 "cell 'fuel' 10 cm^2, cell 'coolant' 20 cm^2.")
         self.assertEquals(are.mcnp('%g', self.sim), "AREA 10 20 4J")
         # Using set()
-        are.set(self.coolant, 30)
+        are.set('coolant', 30)
         self.assertEquals(are.mcnp('%g', self.sim), "AREA 10 30 4J")
 
         ## TemperatureTimes
@@ -1262,13 +1272,13 @@ class TestSystemDefinition(unittest.TestCase):
         self.assertEquals(thtme.mcnp('%g', self.sim), "THTME 1e+18 2e+18")
 
         ## Temperature
-        temp = cards.Temperature(self.fuel, 600)
+        temp = cards.Temperature('fuel', 600)
         self.assertEquals(temp.name, 'temperature')
         self.assertEquals(temp.comment(), "Temperatures 'temperature': "
                 "cell 'fuel' 600 K.")
         self.assertEquals(temp.mcnp('%g', self.sim),
                 "TMP 5.17041e-08 5J")
-        temp = cards.Temperature(self.fuel, 600, cellE, 900, index=2)
+        temp = cards.Temperature('fuel', 600, 'E', 900, index=2)
         self.assertEquals(temp.comment(), "Temperatures for time index "
                 "2 'temperature-idx2': cell 'fuel' 600 K, "
                 "cell 'E' 900 K.")
@@ -1276,15 +1286,15 @@ class TestSystemDefinition(unittest.TestCase):
                 "TMP2 5.17041e-08 4J 7.75561e-08")
         # set()
         temp = cards.Temperature(index=2)
-        temp.set(self.fuel, 600)
-        temp.set(cellE, 900)
+        temp.set('fuel', 600)
+        temp.set('E', 900)
         self.assertEquals(temp.comment(), "Temperatures for time index "
                 "2 'temperature-idx2': cell 'fuel' 600 K, "
                 "cell 'E' 900 K.")
         self.assertEquals(temp.mcnp('%g', self.sim),
                 "TMP2 5.17041e-08 4J 7.75561e-08")
         # Modifying.
-        temp.set(cellE, 950)
+        temp.set('E', 950)
         self.assertEquals(temp.comment(), "Temperatures for time index "
                 "2 'temperature-idx2': cell 'fuel' 600 K, "
                 "cell 'E' 950 K.")
@@ -1329,30 +1339,30 @@ class TestSystemDefinition(unittest.TestCase):
         self.sim.add_misc(dsph)
 
         # DXTRANContribution
-        dxc = cards.DXTRANContribution('neutron', None, self.fuel, 0.5)
+        dxc = cards.DXTRANContribution('neutron', None, 'fuel', 0.5)
         self.assertEquals(dxc.name, 'dxtrancont-neutron')
         self.assertEquals(dxc.comment(), "DXTRAN contribution "
                 "for all spheres 'dxtrancont-neutron': cell 'fuel' 0.5.")
         self.assertEquals(dxc.mcnp('%g', self.sim), "DXC:N 0.5 5J")
-        dxc = cards.DXTRANContribution('neutron', 'sph2', self.fuel, 0.5)
+        dxc = cards.DXTRANContribution('neutron', 'sph2', 'fuel', 0.5)
         self.assertEquals(dxc.comment(), "DXTRAN contribution "
                 "for sphere 'sph2' 'dxtrancont-sph2-neutron': "
                 "cell 'fuel' 0.5.")
         self.assertEquals(dxc.mcnp('%g', self.sim), "DXC2:N 0.5 5J")
-        dxc = cards.DXTRANContribution('neutron', 'sph2', self.fuel, 0.5,
-                                                       self.coolant, 0.7)
+        dxc = cards.DXTRANContribution('neutron', 'sph2', 'fuel', 0.5,
+                                                       'coolant', 0.7)
         self.assertEquals(dxc.comment(), "DXTRAN contribution "
                 "for sphere 'sph2' 'dxtrancont-sph2-neutron': "
                 "cell 'fuel' 0.5, cell 'coolant' 0.7.")
         self.assertEquals(dxc.mcnp('%g', self.sim), "DXC2:N 0.5 0.7 4J")
         dxc = cards.DXTRANContribution('neutron', 'sph2')
-        dxc.set(self.fuel, 0.5)
-        dxc.set(self.coolant, 0.7)
+        dxc.set('fuel', 0.5)
+        dxc.set('coolant', 0.7)
         self.assertEquals(dxc.comment(), "DXTRAN contribution "
                 "for sphere 'sph2' 'dxtrancont-sph2-neutron': "
                 "cell 'fuel' 0.5, cell 'coolant' 0.7.")
         self.assertEquals(dxc.mcnp('%g', self.sim), "DXC2:N 0.5 0.7 4J")
-        dxc.set(self.coolant, 0.8)
+        dxc.set('coolant', 0.8)
         self.assertEquals(dxc.mcnp('%g', self.sim), "DXC2:N 0.5 0.8 4J")
 
         ## FissionTurnoff
@@ -1363,20 +1373,20 @@ class TestSystemDefinition(unittest.TestCase):
                 "capture-gamma for all cells.")
         self.assertEquals(fto.mcnp('%g', self.sim), "NONU")
         # With an argument.
-        fto = cards.FissionTurnoff(self.fuel, 'real-gamma',
-                                   self.coolant, 'capture-nogamma')
+        fto = cards.FissionTurnoff('fuel', 'real-gamma',
+                                   'coolant', 'capture-nogamma')
         self.assertEquals(fto.comment(), "Fission turnoff 'fissionturnoff': "
                 "cell 'fuel' real-gamma, cell 'coolant' capture-nogamma.")
         self.assertEquals(fto.mcnp('%g', self.sim), "NONU 1 2 4J")
         # set()
         fto = cards.FissionTurnoff()
-        fto.set(self.fuel, 'real-gamma')
-        fto.set(self.coolant, 'capture-nogamma')
+        fto.set('fuel', 'real-gamma')
+        fto.set('coolant', 'capture-nogamma')
         self.assertEquals(fto.comment(), "Fission turnoff 'fissionturnoff': "
                 "cell 'fuel' real-gamma, cell 'coolant' capture-nogamma.")
         self.assertEquals(fto.mcnp('%g', self.sim), "NONU 1 2 4J")
         # Modifying.
-        fto.set(self.coolant, 'capture-gamma')
+        fto.set('coolant', 'capture-gamma')
         self.assertEquals(fto.mcnp('%g', self.sim), "NONU 1 0 4J")
 
         ## DetectorContribution
@@ -1384,43 +1394,43 @@ class TestSystemDefinition(unittest.TestCase):
         det2 = cards.PointDetector('point2', 'neutron', [0, 0, 0], 0, 'cm')
         self.sim.add_tally(det)
         self.sim.add_tally(det2)
-        dc = cards.DetectorContribution('point2', self.fuel, 0.5)
+        dc = cards.DetectorContribution('point2', 'fuel', 0.5)
         self.assertEquals(dc.name, 'detcontrib-point2')
         self.assertEquals(dc.comment(), "Detector contribution "
                 "'detcontrib-point2': cell 'fuel' 0.5.")
         self.assertEquals(dc.mcnp('%g', self.sim), "PD25 0.5 5J")
-        dc = cards.DetectorContribution('point2', self.fuel, 0.5, self.coolant,
+        dc = cards.DetectorContribution('point2', 'fuel', 0.5, 'coolant',
                 0.6)
         self.assertEquals(dc.comment(), "Detector contribution "
                 "'detcontrib-point2': cell 'fuel' 0.5, cell 'coolant' 0.6.")
         self.assertEquals(dc.mcnp('%g', self.sim), "PD25 0.5 0.6 4J")
         dc = cards.DetectorContribution('point2')
-        dc.set(self.fuel, 0.5)
-        dc.set(self.coolant, 0.6)
+        dc.set('fuel', 0.5)
+        dc.set('coolant', 0.6)
         self.assertEquals(dc.comment(), "Detector contribution "
                 "'detcontrib-point2': cell 'fuel' 0.5, cell 'coolant' 0.6.")
         self.assertEquals(dc.mcnp('%g', self.sim), "PD25 0.5 0.6 4J")
-        dc.set(self.coolant, 0.7)
+        dc.set('coolant', 0.7)
         self.assertEquals(dc.mcnp('%g', self.sim), "PD25 0.5 0.7 4J")
 
         ## PhotonWeight
         pw = cards.PhotonWeight()
         self.assertEquals(pw.name, 'photonweight')
-        pw.set(self.fuel, 'off')
+        pw.set('fuel', 'off')
         self.assertEquals(pw.comment(), "Photon weight thresholds "
                 "'photonweight': cell 'fuel' off.")
         self.assertEquals(pw.mcnp('%g', self.sim), "PWT -1.0E6 5J")
-        pw.set(self.coolant, 'one')
+        pw.set('coolant', 'one')
         self.assertEquals(pw.comment(), "Photon weight thresholds "
                 "'photonweight': cell 'fuel' off, "
                 "cell 'coolant' one.")
         self.assertEquals(pw.mcnp('%g', self.sim), "PWT -1.0E6 0 4J")
-        pw.set(self.coolant, 0.5)
+        pw.set('coolant', 0.5)
         self.assertEquals(pw.comment(), "Photon weight thresholds "
                 "'photonweight': cell 'fuel' off, "
                 "cell 'coolant' 0.5.")
         self.assertEquals(pw.mcnp('%g', self.sim), "PWT -1.0E6 0.5 4J")
-        pw.set(self.coolant, 0.5, pre_weight=True)
+        pw.set('coolant', 0.5, pre_weight=True)
         self.assertEquals(pw.comment(), "Photon weight thresholds "
                 "'photonweight': cell 'fuel' off, "
                 "cell 'coolant' 0.5 (pre-weighted).")
