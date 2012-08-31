@@ -5384,6 +5384,9 @@ class ICellModParticle(IUniqueParticle):
 
     @cells.setter
     def cells(self, value):
+        for val in value:
+            if type(val) is not str:
+                raise Exception("Expected cell name, got {0}".format(val))
         self._cells = value
 
 
