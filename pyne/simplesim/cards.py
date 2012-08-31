@@ -436,7 +436,7 @@ class CellMCNP(Cell):
     only makes sense to use this card if writing an input for MCNP. A number of
     the keyword arguments are for a particular particle. The particles
     available are given in py:class:`Particle`. The user provides the full
-    name of the particle, as given as keys in py:attr:`Particle.mcnp_abbrev`.
+    name of the particle, as given as keys in :py:attr:`Particle.mcnp_abbrev`.
     The card will then use the appropriate particle designator when writing the
     card.
     
@@ -1364,7 +1364,7 @@ class AxisCylinder(IAxisSurface):
             See :py:class:`ICard`.
         cartesian_axis : str
             The axis with which the cylinder is aligned and centered.
-            See :py:class`IAxisSurface`.
+            See :py:class:`IAxisSurface`.
         radius : float [centimeters]
             Radius of the cylinder.
         reflecting : bool, optional
