@@ -83,145 +83,145 @@ class TestSystemDefinition(unittest.TestCase):
     def test_nestedgeom(self):
         """Tests the nestedgeom module."""
 
-        unit = ng.surf('fuelpin')
+        unit = ng.Surf('fuelpin')
         self.assertEquals(unit.comment(), " surf 'fuelpin'")
         self.assertEquals(unit.mcnp('', self.sim), " 1")
         
-        unit = ng.cell('coolant')
+        unit = ng.Cell('coolant')
         self.assertEquals(unit.comment(), " cell 'coolant'")
         self.assertEquals(unit.mcnp('', self.sim), " 2")
 
-        unit = ng.univ('ha')
+        unit = ng.Univ('ha')
         self.sim.sys._register_universe('ha')
         self.assertEquals(unit.comment(), " univ 'ha'")
         self.assertEquals(unit.mcnp('', self.sim), " U=1")
         
-        unit = ng.union(ng.surf('fuelpin'), ng.surf('bound'))
+        unit = ng.Union(ng.Surf('fuelpin'), ng.Surf('bound'))
         self.assertEquals(unit.comment(),
                 " union of ( surf 'fuelpin', surf 'bound')")
         self.assertEquals(unit.mcnp('', self.sim), " ( 1 2)")
 
-        unit = ng.union(ng.cell('fuel'), ng.cell('coolant'),
-                ng.cell('graveyard'))
+        unit = ng.Union(ng.Cell('fuel'), ng.Cell('coolant'),
+                ng.Cell('graveyard'))
         self.assertEquals(unit.comment(), 
                 " union of ( cell 'fuel', cell 'coolant', cell 'graveyard')")
         self.assertEquals(unit.mcnp('', self.sim), " ( 1 2 3)")
 
-        unit = ng.union(ng.univ('ha'))
+        unit = ng.Union(ng.Univ('ha'))
         self.assertEquals(unit.comment(), " union of ( univ 'ha')")
         self.assertEquals(unit.mcnp('', self.sim), " ( U=1)")
 
         # nesting
-        unit = ng.cell('fuel') < ng.ucell('coolant')
+        unit = ng.Cell('fuel') < ng.UCell('coolant')
         self.assertEquals(unit.comment(), " ( cell 'fuel' in cell 'coolant')")
         self.assertEquals(unit.mcnp('', self.sim), " ( 1 < 2)")
 
-        unit = ng.cell('fuel').of(ng.ucell('coolant'))
+        unit = ng.Cell('fuel').of(ng.UCell('coolant'))
         self.assertEquals(unit.comment(), " ( cell 'fuel' in cell 'coolant')")
         self.assertEquals(unit.mcnp('', self.sim), " ( 1 < 2)")
 
-        unit = ng.cell('fuel') < ng.ucell('coolant') < ng.ucell('graveyard')
+        unit = ng.Cell('fuel') < ng.UCell('coolant') < ng.UCell('graveyard')
         self.assertEquals(unit.comment(),
                 " ( cell 'fuel' in cell 'coolant' in cell 'graveyard')")
         self.assertEquals(unit.mcnp('', self.sim), " ( 1 < 2 < 3)")
 
-        unit = ng.cell('fuel').of(ng.ucell('coolant').of(ng.ucell('graveyard')))
+        unit = ng.Cell('fuel').of(ng.UCell('coolant').of(ng.UCell('graveyard')))
         self.assertEquals(unit.comment(),
                 " ( cell 'fuel' in cell 'coolant' in cell 'graveyard')")
         self.assertEquals(unit.mcnp('', self.sim), " ( 1 < 2 < 3)")
 
         # unions and nesting, various syntax.
-        unit = ng.surf('fuelpin').of(ng.union(ng.ucell('fuel'),
-                                              ng.ucell('coolant')))
+        unit = ng.Surf('fuelpin').of(ng.Union(ng.UCell('fuel'),
+                                              ng.UCell('coolant')))
         self.assertEquals(unit.comment(), 
                 " ( surf 'fuelpin' in union of ( cell 'fuel', cell "
                 "'coolant'))")
         self.assertEquals(unit.mcnp('', self.sim), " ( 1 < ( 1 2))")
 
-        unit = ng.surf('fuelpin').of(ng.ucell('fuel').union(
-            ng.ucell('coolant')))
+        unit = ng.Surf('fuelpin').of(ng.UCell('fuel').union(
+            ng.UCell('coolant')))
         self.assertEquals(unit.comment(), 
                 " ( surf 'fuelpin' in union of ( cell 'fuel', cell "
                 "'coolant'))")
         self.assertEquals(unit.mcnp('', self.sim), " ( 1 < ( 1 2))")
 
-        unit = ng.surf('fuelpin').of(ng.ucell('fuel') | ng.ucell('coolant'))
+        unit = ng.Surf('fuelpin').of(ng.UCell('fuel') | ng.UCell('coolant'))
         self.assertEquals(unit.comment(), 
                 " ( surf 'fuelpin' in union of ( cell 'fuel', cell "
                 "'coolant'))")
         self.assertEquals(unit.mcnp('', self.sim), " ( 1 < ( 1 2))")
 
-        unit = ng.surf('fuelpin').of(
-                ng.ucell('fuel').union(ng.ucell('coolant')).of(
-                    ng.ucell('fuel')))
+        unit = ng.Surf('fuelpin').of(
+                ng.UCell('fuel').union(ng.UCell('coolant')).of(
+                    ng.UCell('fuel')))
         self.assertEquals(unit.comment(), 
                 " ( surf 'fuelpin' in union of ( cell 'fuel', cell "
                 "'coolant') in cell 'fuel')")
         self.assertEquals(unit.mcnp('', self.sim), " ( 1 < ( 1 2) < 1)")
 
-        unit = ng.surf('fuelpin').of((ng.ucell('fuel') | 
-            ng.ucell('coolant')).of(
-            ng.ucell('fuel')))
+        unit = ng.Surf('fuelpin').of((ng.UCell('fuel') | 
+            ng.UCell('coolant')).of(
+            ng.UCell('fuel')))
         self.assertEquals(unit.comment(), 
                 " ( surf 'fuelpin' in union of ( cell 'fuel', cell "
                 "'coolant') in cell 'fuel')")
         self.assertEquals(unit.mcnp('', self.sim), " ( 1 < ( 1 2) < 1)")
 
-        unit = ng.surf('fuelpin') < (ng.ucell('fuel') | ng.ucell('coolant')) < \
-                ng.ucell('fuel')
+        unit = ng.Surf('fuelpin') < (ng.UCell('fuel') | ng.UCell('coolant')) < \
+                ng.UCell('fuel')
         self.assertEquals(unit.comment(), 
                 " ( surf 'fuelpin' in union of ( cell 'fuel', cell "
                 "'coolant') in cell 'fuel')")
         self.assertEquals(unit.mcnp('', self.sim), " ( 1 < ( 1 2) < 1)")
 
         # nesting with universe, and union
-        unit = ng.surf('fuelpin') < ng.univ('ha') < ng.ucell('graveyard')
+        unit = ng.Surf('fuelpin') < ng.Univ('ha') < ng.UCell('graveyard')
         self.assertEquals(unit.comment(), 
                 " ( surf 'fuelpin' in univ 'ha' in cell 'graveyard')")
         self.assertEquals(unit.mcnp('', self.sim), " ( 1 < U=1 < 3)")
 
-        unit = ng.surf('fuelpin') < ng.union(ng.univ('ha')) < \
-                ng.ucell('graveyard')
+        unit = ng.Surf('fuelpin') < ng.Union(ng.Univ('ha')) < \
+                ng.UCell('graveyard')
         self.assertEquals(unit.comment(), 
                 " ( surf 'fuelpin' in union of ( univ 'ha') "
                 "in cell 'graveyard')")
         self.assertEquals(unit.mcnp('', self.sim), " ( 1 < ( U=1) < 3)")
 
         # vectorized
-        unit = ng.vec(ng.surf('fuelpin'), ng.surf('bound')) < \
-                ng.ucell('fuel')
+        unit = ng.Vec(ng.Surf('fuelpin'), ng.Surf('bound')) < \
+                ng.UCell('fuel')
         self.assertEquals(unit.comment(), 
                 " ( over ( surf 'fuelpin', surf 'bound') in cell 'fuel')")
         self.assertEquals(unit.mcnp('', self.sim), " ( 1 2 < 1)")
 
-        unit = ng.surf('fuelpin') < ng.vec(ng.ucell('fuel'), 
-                ng.ucell('coolant'))
+        unit = ng.Surf('fuelpin') < ng.Vec(ng.UCell('fuel'), 
+                ng.UCell('coolant'))
         self.assertEquals(unit.comment(), 
                 " ( surf 'fuelpin' in over ( cell 'fuel', cell 'coolant'))")
         self.assertEquals(unit.mcnp('', self.sim), " ( 1 < 1 2)")
 
         # using overloaded operator
-        unit = (ng.surf('fuelpin') & ng.surf('bound')) < \
-                ng.ucell('fuel')
+        unit = (ng.Surf('fuelpin') & ng.Surf('bound')) < \
+                ng.UCell('fuel')
         self.assertEquals(unit.comment(), 
                 " ( over ( surf 'fuelpin', surf 'bound') in cell 'fuel')")
         self.assertEquals(unit.mcnp('', self.sim), " ( 1 2 < 1)")
 
-        unit = ng.surf('fuelpin') < (ng.ucell('fuel') & ng.ucell('coolant'))
+        unit = ng.Surf('fuelpin') < (ng.UCell('fuel') & ng.UCell('coolant'))
         self.assertEquals(unit.comment(), 
                 " ( surf 'fuelpin' in over ( cell 'fuel', cell 'coolant'))")
         self.assertEquals(unit.mcnp('', self.sim), " ( 1 < 1 2)")
 
         # lattice
-        unit = ng.surf('fuelpin') < (ng.ucell('fuel') | ng.ucell('coolant',
-            ng.lin(5))) < ng.ucell('fuel')
+        unit = ng.Surf('fuelpin') < (ng.UCell('fuel') | ng.UCell('coolant',
+            ng.Lin(5))) < ng.UCell('fuel')
         self.assertEquals(unit.comment(), 
                 " ( surf 'fuelpin' in union of ( cell 'fuel', cell "
                 "'coolant'-lat linear idx 5) in cell 'fuel')")
         self.assertEquals(unit.mcnp('', self.sim), " ( 1 < ( 1 2[5]) < 1)")
 
-        unit = ng.surf('fuelpin') < (ng.ucell('fuel') | ng.ucell('coolant',
-            ng.rng([0,1], [3,5], np.array([-1,4])))) < ng.ucell('fuel')
+        unit = ng.Surf('fuelpin') < (ng.UCell('fuel') | ng.UCell('coolant',
+            ng.Rng([0,1], [3,5], np.array([-1,4])))) < ng.UCell('fuel')
         self.assertEquals(unit.comment(), 
                 " ( surf 'fuelpin' in union of ( cell 'fuel', cell "
                 "'coolant'-lat x range 0:1, y range 3:5, z range -1:4) "
@@ -229,8 +229,8 @@ class TestSystemDefinition(unittest.TestCase):
         self.assertEquals(unit.mcnp('', self.sim), 
                 " ( 1 < ( 1 2[0:1 3:5 -1:4]) < 1)")
 
-        unit = ng.surf('fuelpin') < (ng.ucell('fuel') | ng.ucell('coolant',
-            ng.cor([1, 3, 2]))) < ng.ucell('fuel')
+        unit = ng.Surf('fuelpin') < (ng.UCell('fuel') | ng.UCell('coolant',
+            ng.Cor([1, 3, 2]))) < ng.UCell('fuel')
         self.assertEquals(unit.comment(), 
                 " ( surf 'fuelpin' in union of ( cell 'fuel', cell "
                 "'coolant'-lat coords (1, 3, 2)) "
@@ -238,8 +238,8 @@ class TestSystemDefinition(unittest.TestCase):
         self.assertEquals(unit.mcnp('', self.sim), 
                 " ( 1 < ( 1 2[ 1 3 2]) < 1)")
 
-        unit = ng.surf('fuelpin') < (ng.ucell('fuel') | ng.ucell('coolant',
-            ng.cor([np.array([1, 3, 2])]))) < ng.ucell('fuel')
+        unit = ng.Surf('fuelpin') < (ng.UCell('fuel') | ng.UCell('coolant',
+            ng.Cor([np.array([1, 3, 2])]))) < ng.UCell('fuel')
         self.assertEquals(unit.comment(), 
                 " ( surf 'fuelpin' in union of ( cell 'fuel', cell "
                 "'coolant'-lat coords (1, 3, 2)) "
@@ -247,8 +247,8 @@ class TestSystemDefinition(unittest.TestCase):
         self.assertEquals(unit.mcnp('', self.sim), 
                 " ( 1 < ( 1 2[ 1 3 2]) < 1)")
 
-        unit = ng.surf('fuelpin') < (ng.ucell('fuel') | ng.ucell('coolant',
-            ng.cor([[1, 3, 2], [-1, -2, -3]]))) < ng.ucell('fuel')
+        unit = ng.Surf('fuelpin') < (ng.UCell('fuel') | ng.UCell('coolant',
+            ng.Cor([[1, 3, 2], [-1, -2, -3]]))) < ng.UCell('fuel')
         self.assertEquals(unit.comment(), 
                 " ( surf 'fuelpin' in union of ( cell 'fuel', cell "
                 "'coolant'-lat coords (1, 3, 2), (-1, -2, -3)) "
