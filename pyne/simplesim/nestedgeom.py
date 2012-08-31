@@ -19,6 +19,45 @@ The subclasses of :py:class:`ICellSurfTally` can take as input any subclass of
 :py:class:`IUnit`. The following shows different ways in which complex units
 can be built.
 
+===========
+description
+===========
+surface 1 (s1)
+cell 1 (c1)
+universe 1 (u1)
+union of s1 and s2
+union of c1, c2, and c2
+union of cells in u1
+s1 in c1
+c1 in c2 in c3
+
+
+==========
+nestedgeom
+==========
+s1 = Surf('1')
+c1 = Cell('1')
+u1 = Univ('1')
+Union(s1, s1)
+Union(c1, c2, c3)
+Union(u1)
+uc1 = FCell('1'): s1 < uc1  /  uc1
+c1 < uc1
+
+
+
+====
+MCNP
+====
+1
+1
+U=1
+(1 2)
+(U=1)
+1 < 1
+
+
+
 
 The following string in MCNP (<LAT-SPEC> is discussed below)::
 
@@ -84,6 +123,7 @@ class IUnit(object):
     directly.
     
     """
+    # TODO need to define a 'recursive' __repr__.
     def __init__(self, up=None, down=None):
         """Currently, the two keyword arguments are not actually used, but are
         sometimes set directly, after initialization.
@@ -155,7 +195,7 @@ class ICellSurf(IUnit):
     """Abstract base class for surfaces and cells in the lowest level of the
     nested geometry. The user directly uses the subclasses of this class. For
     cells in higher levels of nesting (e.g. closer to the real world), see
-    :py:class:`UCell`.
+    :py:class:`FCell`.
 
     """
     def __init__(self, name):
@@ -204,13 +244,13 @@ class Cell(ICellSurf):
                     inner if inner else ""))
 
 
-class UCell(Cell):
-    """This is subclassed from :py:class:`Cell`. It is to be used for
-    higher-level cells (closer to the real world), and has an additional
-    attribute to specify specific lattice elements from this cell if it is a
-    lattice cell.
+class FCell(Cell):
+    """This is subclassed from :py:class:`Cell`. Its name stands for filled
+    cell. It is to be used for higher-level cells (closer to the real world),
+    and has an additional attribute to specify specific lattice elements from
+    this cell if it is a lattice cell.
 
-    .. inheritance-diagram:: pyne.simplesim.nestedgeom.UCell
+    .. inheritance-diagram:: pyne.simplesim.nestedgeom.FCell
 
     """
     def __init__(self, name, lat_spec=None):
@@ -222,15 +262,15 @@ class UCell(Cell):
         lat_sec : subclass of :py:class:`LatticeSpec`
 
         """
-        super(UCell, self).__init__(name)
+        super(FCell, self).__init__(name)
         self.lat_spec = lat_spec
 
     def comment(self):
-        return super(UCell, self).comment(
+        return super(FCell, self).comment(
                 self.lat_spec.comment() if self.lat_spec else "")
 
     def mcnp(self, float_format, sim):
-        return super(UCell, self).mcnp(float_format, sim,
+        return super(FCell, self).mcnp(float_format, sim,
                 self.lat_spec.mcnp(float_format, sim) if self.lat_spec else "")
 
 
@@ -303,10 +343,10 @@ class Vec(IUnit):
     example usages of this class, and their equivalent in comment as two
     separate units::
 
-        # Surf('A') < UCell('C')     Surf('B') < UCell('C')
-        Vec(Surf('A'), Surf('B')) < UCell('C')
-        # Surf('A') < UCell('C')     Surf('A') < UCell('D')
-        Surf('A') < Vec(UCell('C'), UCell('D'))
+        # Surf('A') < FCell('C')     Surf('B') < FCell('C')
+        Vec(Surf('A'), Surf('B')) < FCell('C')
+        # Surf('A') < FCell('C')     Surf('A') < FCell('D')
+        Surf('A') < Vec(FCell('C'), FCell('D'))
     """
     # Named after matlab's vectorized notation
     def __init__(self, *args):
