@@ -3260,13 +3260,13 @@ class ICellSurfTally(ITally):
             for obj in self.cards:
                 outcounter += 1
                 if type(obj) is not list:
-                    if isinstance(self.cards, ng.IUnit):
+                    if isinstance(obj, ng.IUnit):
                         string += obj.comment()
                     elif type(obj) is str:
                         string += "{0!r}".format(obj)
                     else:
                         raise ValueError("Expected list, string, or IUnit; "
-                                "got {0}".format(self.cards))
+                                "got {0}".format(obj))
                 elif type(obj) is list:
                     # Not a unit.
                     string += "{0} in ".format(union_type)
@@ -3312,7 +3312,8 @@ class ICellSurfTally(ITally):
         return string
 
     def _unique_card_list(self):
-        # TODO Broken after implementing IUnit, but seems unneeded.
+        # TODO Broken after implementing IUnit (does not expect card to contain
+        # any IUnits) but seems unneeded.
         # Returns a unique list of all the card names provided in self.cards.
         # This method, in the future, may be called by
         # :py:class:`pyne.simplesim.SimulationDefinition` for error-checking.
