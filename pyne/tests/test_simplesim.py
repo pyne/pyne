@@ -194,11 +194,11 @@ class TestSystemDefinition(unittest.TestCase):
                 " ( over ( surf 'fuelpin', surf 'bound') in cell 'fuel')")
         self.assertEquals(unit.mcnp('', self.sim), " ( 1 2 < 1)")
 
-        unit = ng.Surf('fuelpin') < ng.Vec(ng.FCell('fuel'), 
+        usedlater = ng.Surf('fuelpin') < ng.Vec(ng.FCell('fuel'), 
                 ng.FCell('coolant'))
-        self.assertEquals(unit.comment(), 
+        self.assertEquals(usedlater.comment(), 
                 " ( surf 'fuelpin' in over ( cell 'fuel', cell 'coolant'))")
-        self.assertEquals(unit.mcnp('', self.sim), " ( 1 < 1 2)")
+        self.assertEquals(usedlater.mcnp('', self.sim), " ( 1 < 1 2)")
 
         # using overloaded operator
         unit = (ng.Surf('fuelpin') & ng.Surf('bound')) < \
@@ -262,6 +262,32 @@ class TestSystemDefinition(unittest.TestCase):
                 "in cell 'fuel')")
         self.assertEquals(unit.mcnp('', self.sim), 
                 " ( 1 < ( 1 2[ 1 3 2, -1 -2 -3]) < 1)")
+
+        tally = cards.SurfaceFlux('fuel', 'neutron', unit)
+        self.sim.add_tally(tally)
+        self.assertEquals(tally.comment(), "Surface flux tally 'fuel' "
+                "of neutrons:  ( surf 'fuelpin' in union of ( cell "
+                "'fuel', cell 'coolant'-lat coords (1, 3, 2), (-1, -2, -3)"
+                ") in cell 'fuel').")
+        self.assertEquals(tally.mcnp('%.5g', self.sim), 
+                "F12:N  ( 1 < ( 1 2[ 1 3 2, -1 -2 -3]) < 1)")
+
+        tally = cards.SurfaceFlux('fuel', 'neutron', ['bound', unit])
+        self.assertEquals(tally.comment(), "Surface flux tally 'fuel' "
+                "of neutrons: surfaces 'bound';  ( surf 'fuelpin' in "
+                "union of ( cell 'fuel', cell 'coolant'-lat coords "
+                "(1, 3, 2), (-1, -2, -3)) in cell 'fuel').")
+        self.assertEquals(tally.mcnp('%.5g', self.sim), 
+                "F12:N  2 ( 1 < ( 1 2[ 1 3 2, -1 -2 -3]) < 1)")
+
+        tally = cards.SurfaceFlux('fuel', 'neutron', [unit, usedlater])
+        self.assertEquals(tally.comment(), "Surface flux tally 'fuel' "
+                "of neutrons: surfaces  ( surf 'fuelpin' in "
+                "union of ( cell 'fuel', cell 'coolant'-lat coords "
+                "(1, 3, 2), (-1, -2, -3)) in cell 'fuel');  "
+                "( surf 'fuelpin' in over ( cell 'fuel', cell 'coolant')).")
+        self.assertEquals(tally.mcnp('%.5g', self.sim), 
+                "F12:N  ( 1 < ( 1 2[ 1 3 2, -1 -2 -3]) < 1) ( 1 < 1 2)")
 
 
     def test_Region(self):
