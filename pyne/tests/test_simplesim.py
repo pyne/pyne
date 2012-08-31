@@ -1610,12 +1610,12 @@ class TestSystemDefinition(unittest.TestCase):
 
         """
         ## SurfaceCurrent
-        tally = cards.SurfaceCurrent('fuel', 'electron', [self.pin,
-                self.cellbound], total=True)
+        tally = cards.SurfaceCurrent('fuel', 'electron', ['fuelpin',
+                'bound'], total=True)
         self.assertEquals(tally.name, 'fuel')
         self.assertEquals(tally.particle.name, 'electron')
-        self.assertIs(tally.cards[0], self.pin)
-        self.assertIs(tally.cards[1], self.cellbound)
+        self.assertIs(tally.cards[0], 'fuelpin')
+        self.assertIs(tally.cards[1], 'bound')
         self.assertTrue(len(tally.cards), 2)
         self.assertFalse(hasattr(tally, 'average'))
         self.assertTrue(tally.total)
@@ -1629,13 +1629,13 @@ class TestSystemDefinition(unittest.TestCase):
         self.assertEquals(tally.mcnp('%5g', self.sim),
                 "F11:E  1 2 T")
 
-        tally = cards.SurfaceCurrent('fuel2', 'photon', [[self.pin,
-                self.cellbound]], alt_units=True)
+        tally = cards.SurfaceCurrent('fuel2', 'photon', [['fuelpin',
+                'bound']], alt_units=True)
         self.assertEquals(tally.particle.name, 'photon')
         self.assertTrue(len(tally.cards), 1)
         self.assertTrue(len(tally.cards[0]), 2)
-        self.assertIs(tally.cards[0][0], self.pin)
-        self.assertIs(tally.cards[0][1], self.cellbound)
+        self.assertIs(tally.cards[0][0], 'fuelpin')
+        self.assertIs(tally.cards[0][1], 'bound')
         self.assertFalse(tally.total)
         self.assertTrue(tally.alt_units)
         # comment()
@@ -1647,12 +1647,12 @@ class TestSystemDefinition(unittest.TestCase):
                 "*F21:P  ( 1 2)")
 
         ## SurfaceFlux
-        tally = cards.SurfaceFlux('fuel', 'electron', [self.pin,
-                self.cellbound], average=True)
+        tally = cards.SurfaceFlux('fuel', 'electron', ['fuelpin',
+                'bound'], average=True)
         self.assertEquals(tally.name, 'fuel')
         self.assertEquals(tally.particle.name, 'electron')
-        self.assertIs(tally.cards[0], self.pin)
-        self.assertIs(tally.cards[1], self.cellbound)
+        self.assertIs(tally.cards[0], 'fuelpin')
+        self.assertIs(tally.cards[1], 'bound')
         self.assertTrue(len(tally.cards), 2)
         self.assertTrue(tally.average)
         self.assertFalse(tally.alt_units)
@@ -1665,13 +1665,13 @@ class TestSystemDefinition(unittest.TestCase):
         self.assertEquals(tally.mcnp('%5g', self.sim), 
                 "F12:E  1 2 T")
 
-        tally = cards.SurfaceFlux('fuel2', 'proton', [[self.pin, self.cellbound]],
+        tally = cards.SurfaceFlux('fuel2', 'proton', [['fuelpin', 'bound']],
                     alt_units=True)
         self.assertEquals(tally.particle.name, 'proton')
         self.assertTrue(len(tally.cards), 1)
         self.assertTrue(len(tally.cards[0]), 2)
-        self.assertIs(tally.cards[0][0], self.pin)
-        self.assertIs(tally.cards[0][1], self.cellbound)
+        self.assertIs(tally.cards[0][0], 'fuelpin')
+        self.assertIs(tally.cards[0][1], 'bound')
         self.assertFalse(tally.average)
         self.assertTrue(tally.alt_units)
         # comment()
@@ -1684,7 +1684,7 @@ class TestSystemDefinition(unittest.TestCase):
 
         ## CellFlux
         # One cell.
-        tally = cards.CellFlux('fuel', 'neutron', self.fuel)
+        tally = cards.CellFlux('fuel', 'neutron', 'fuel')
         self.assertEquals(tally.name, 'fuel')
         self.assertEquals(tally.particle.name, 'neutron')
         self.assertEquals(tally.comment(), "Cell flux tally 'fuel' "
@@ -1693,19 +1693,19 @@ class TestSystemDefinition(unittest.TestCase):
         self.sim.add_tally(tally)
         self.assertEquals(tally.mcnp('%5g', self.sim), 
                 "F14:N  1")
-        self.assertIs(tally._unique_card_list()[0], self.fuel)
+        self.assertIs(tally._unique_card_list()[0], 'fuel')
         # Two individual cells.
-        tally = cards.CellFlux('both', 'neutron', [self.fuel, self.coolant])
+        tally = cards.CellFlux('both', 'neutron', ['fuel', 'coolant'])
         self.assertEquals(tally.comment(), "Cell flux tally 'both' "
                 "of neutrons: cells 'fuel'; 'coolant'.")
         # mcnp()
         self.sim.add_tally(tally)
         self.assertEquals(tally.mcnp('%5g', self.sim), 
                 "F24:N  1 2")
-        self.assertIs(tally._unique_card_list()[0], self.fuel)
-        self.assertIs(tally._unique_card_list()[1], self.coolant)
+        self.assertIs(tally._unique_card_list()[0], 'fuel')
+        self.assertIs(tally._unique_card_list()[1], 'coolant')
         # Two individual cells, with average over all.
-        tally = cards.CellFlux('withavg', 'neutron', [self.fuel, self.coolant],
+        tally = cards.CellFlux('withavg', 'neutron', ['fuel', 'coolant'],
                 average=True)
         self.assertEquals(tally.comment(), "Cell flux tally 'withavg' "
                 "of neutrons: cells 'fuel'; 'coolant'; and avg. of all "
@@ -1714,11 +1714,11 @@ class TestSystemDefinition(unittest.TestCase):
         self.sim.add_tally(tally)
         self.assertEquals(tally.mcnp('%5g', self.sim), 
                 "F34:N  1 2 T")
-        self.assertIs(tally._unique_card_list()[0], self.fuel)
-        self.assertIs(tally._unique_card_list()[1], self.coolant)
+        self.assertIs(tally._unique_card_list()[0], 'fuel')
+        self.assertIs(tally._unique_card_list()[1], 'coolant')
         # Two individual cells, and an averaging, with an average over all.
-        tally = cards.CellFlux('withavg', 'neutron', [self.fuel,
-                [self.fuel, self.coolant], self.coolant], average=True)
+        tally = cards.CellFlux('withavg', 'neutron', ['fuel',
+                ['fuel', 'coolant'], 'coolant'], average=True)
         self.assertEquals(tally.comment(), "Cell flux tally 'withavg' "
                 "of neutrons: cells 'fuel'; avg. in 'fuel', 'coolant'; "
                 "'coolant'; and avg. of all provided.")
@@ -1726,15 +1726,15 @@ class TestSystemDefinition(unittest.TestCase):
         self.sim.add_tally(tally)
         self.assertEquals(tally.mcnp('%5g', self.sim), 
                 "F34:N  1 ( 1 2) 2 T")
-        self.assertIs(tally._unique_card_list()[0], self.fuel)
-        self.assertIs(tally._unique_card_list()[1], self.coolant)
+        self.assertIs(tally._unique_card_list()[0], 'fuel')
+        self.assertIs(tally._unique_card_list()[1], 'coolant')
         self.assertTrue(len(tally._unique_card_list()) == 2)
 
         ## CellEnergyDeposition
-        tally = cards.CellEnergyDeposition('energy', 'neutron', self.fuel)
+        tally = cards.CellEnergyDeposition('energy', 'neutron', 'fuel')
         self.assertEquals(tally.name, 'energy')
         self.assertEquals(tally.particle.name, 'neutron')
-        self.assertIs(tally.cards, self.fuel)
+        self.assertIs(tally.cards, 'fuel')
         # comment()
         self.assertEquals(tally.comment(), "Energy deposition tally "
                 "'energy' of neutrons: cell 'fuel'.")
@@ -1743,7 +1743,7 @@ class TestSystemDefinition(unittest.TestCase):
         self.assertEquals(tally.mcnp('%5g', self.sim), 
                 "F16:N  1")
         tally = cards.CellEnergyDeposition('energy2', ['neutron', 'proton'],
-                self.fuel)
+                'fuel')
         self.assertIs(type(tally.particle), list)
         self.assertEquals(tally.particle[0].name, 'neutron')
         self.assertEquals(tally.particle[1].name, 'proton')
@@ -1753,7 +1753,7 @@ class TestSystemDefinition(unittest.TestCase):
         self.sim.add_tally(tally)
         self.assertEquals(tally.mcnp('%5g', self.sim), 
                 "F26:N,H  1")
-        tally = cards.CellEnergyDeposition('energy3', 'all', self.fuel)
+        tally = cards.CellEnergyDeposition('energy3', 'all', 'fuel')
         self.assertEquals(tally.comment(), "Energy deposition tally "
                 "'energy3' of all: cell 'fuel'.")
         # mcnp()
@@ -1762,18 +1762,18 @@ class TestSystemDefinition(unittest.TestCase):
                 "+F36  1")
         # Test exceptions.
         self.assertRaises(ValueError, cards.CellEnergyDeposition, 'energy',
-                ['neutron', 'all'], self.fuel)
+                ['neutron', 'all'], 'fuel')
         self.assertRaises(ValueError, cards.CellEnergyDeposition,
-                'energy', 'all', self.fuel, alt_units=True)
+                'energy', 'all', 'fuel', alt_units=True)
 
         ## CellFissionEnergyDeposition
-        tally = cards.CellFissionEnergyDeposition('fuel', [self.fuel,
-                self.coolant], average=True)
+        tally = cards.CellFissionEnergyDeposition('fuel', ['fuel',
+                'coolant'], average=True)
         self.assertEquals(tally.name, 'fuel')
         self.assertEquals(tally.particle.name, 'neutron')
         self.assertIs(type(tally.cards), list)
-        self.assertIs(tally.cards[0], self.fuel)
-        self.assertIs(tally.cards[1], self.coolant)
+        self.assertIs(tally.cards[0], 'fuel')
+        self.assertIs(tally.cards[1], 'coolant')
         self.assertTrue(tally.average)
         self.assertFalse(tally.alt_units)
         self.assertEquals(tally.comment(), "Fission energy deposition tally "
@@ -1783,12 +1783,12 @@ class TestSystemDefinition(unittest.TestCase):
         self.sim.add_tally(tally)
         self.assertEquals(tally.mcnp('%5g', self.sim), 
                 "F17:N  1 2 T")
-        tally = cards.CellFissionEnergyDeposition('fuel', [[self.fuel,
-                self.coolant]], alt_units=True)
+        tally = cards.CellFissionEnergyDeposition('fuel', [['fuel',
+                'coolant']], alt_units=True)
         self.assertTrue(len(tally.cards), 1)
         self.assertTrue(len(tally.cards[0]), 2)
-        self.assertIs(tally.cards[0][0], self.fuel)
-        self.assertIs(tally.cards[0][1], self.coolant)
+        self.assertIs(tally.cards[0][0], 'fuel')
+        self.assertIs(tally.cards[0][1], 'coolant')
         self.assertFalse(tally.average)
         self.assertTrue(tally.alt_units)
         self.assertEquals(tally.comment(), "Fission energy deposition tally "
@@ -1800,13 +1800,13 @@ class TestSystemDefinition(unittest.TestCase):
                 "*F17:N  ( 1 2)")
 
         ## CellPulseHeight
-        tally = cards.CellPulseHeight('fuel', ['proton', 'electron'], [self.fuel,
-                self.coolant], alt_units=True)
+        tally = cards.CellPulseHeight('fuel', ['proton', 'electron'], ['fuel',
+                'coolant'], alt_units=True)
         self.assertEquals(tally.name, 'fuel')
         self.assertEquals(tally.particle[0].name, 'proton')
         self.assertEquals(tally.particle[1].name, 'electron')
-        self.assertIs(tally.cards[0], self.fuel)
-        self.assertIs(tally.cards[1], self.coolant)
+        self.assertIs(tally.cards[0], 'fuel')
+        self.assertIs(tally.cards[1], 'coolant')
         self.assertFalse(tally.average)
         self.assertTrue(tally.alt_units)
         tally.average = True
@@ -1818,12 +1818,12 @@ class TestSystemDefinition(unittest.TestCase):
 
         ## CellChargeDeposition
         tally = cards.CellChargeDeposition('fuel', ['proton', 'electron'],
-                [self.fuel, self.coolant])
+                ['fuel', 'coolant'])
         self.assertEquals(tally.name, 'fuel')
         self.assertEquals(tally.particle[0].name, 'proton')
         self.assertEquals(tally.particle[1].name, 'electron')
-        self.assertIs(tally.cards[0], self.fuel)
-        self.assertIs(tally.cards[1], self.coolant)
+        self.assertIs(tally.cards[0], 'fuel')
+        self.assertIs(tally.cards[1], 'coolant')
         self.assertFalse(tally.average)
         self.assertFalse(tally.alt_units)
         tally.average = True
@@ -2022,7 +2022,8 @@ class TestMCNPInput(unittest.TestCase):
         self.sim.add_misc(cards.ScatteringLaw('H2O', {'H1': 'lwtr'}))
         self.sim.add_source(cards.Criticality())
         self.sim.add_source(cards.CriticalityPoints())
-        self.sim.add_tally(cards.CellFlux('flux', 'neutron', [fuel, coolant]))
+        self.sim.add_tally(cards.CellFlux('flux', 'neutron', 
+                ['fuel', 'coolant']))
         self.sim.add_misc(cards.EnergyGrid('egrid0', None,
                 10**np.arange(-9.9, 1.1, 0.1)))
 
