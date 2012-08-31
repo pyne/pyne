@@ -62,6 +62,7 @@ import warnings
 import numpy as np
 
 from pyne import material, nucname
+import pyne.simplesim.nestedgeom as ng
 
 class ICard(object):
     """This class is not used by the user. Abstract base class for all cards.
@@ -3177,14 +3178,24 @@ class ICellSurfTally(ITally):
             See :py:class:`ITally`.
         particle : str
             See :py:class:`ITally`.
-        cards : str name of :py:class:`Cell` or :py:class:`ISurface`, list, list of lists
-            If tallying 1 cell/surface, the input is that cell/surface card. If
-            tallying multiple cells/surfaces, the individual cell/surface cards
-            are provided in a list. To obtain the average tally across multiple
-            cells/surfaces, these cell/surface cards are provided in their own
-            list, within the outer list. To avoid ambiguity, if only one set of
-            averages is desired, then this set must be nested in two lists. See
-            the examples.
+        cards : str name of :py:class:`Cell` or :py:class:`ISurface`, OR :py:class:`pyne.simplesim.nestedgeom.IUnit`, list, list of lists
+            **Basic** If tallying 1 cell/surface, the input is that
+            cell/surface card. If tallying multiple cells/surfaces, the
+            individual cell/surface cards are provided in a list. To obtain the
+            average tally across multiple cells/surfaces, these cell/surface
+            cards are provided in their own list, within the outer list. To
+            avoid ambiguity, if only one set of averages is desired, then this
+            set must be nested in two lists. See the examples.
+
+            **Unit** For a more complex tally, specifically for nested geometry
+            or what is called `repeated structures` in MCNP, the user can
+            supply an instance of a subclass of
+            :py:class:`pyne.simplesim.nestedgeom.IUnit`, or such an instance as
+            part of the list of card names. However, a unit cannot be averaged
+            with other units (e.g. nested within another list); there is
+            functionality within the units for averaging/unioning. There is a
+            good amount of documentation in that module, and there are examples
+            below.
         alt_units : bool, optional
             See :py:class:`ITally`.
 
@@ -3206,70 +3217,20 @@ class ICellSurfTally(ITally):
 
             tally = SurfaceFlux('fuel', 'neutron', [['sA', 'sB']])
 
+        Alternatively, the cards can be specified by something like the
+        following (see :py:mod:`pyne.simplesim.nestedgeom`)::
 
-Repeated Structures
--------------------
+            import pyne.simplesim.nestedgeom as ng
+            unit = ng.Surf('sA') < ng.FCell('cA')
+            tally = SurfaceFlux('fuel', 'neutron', unit)
 
-Okay, so the ``cards`` input can actually be substantially more
-complicated for tallies on repeated structures. To tally surfaces or
-cells only when they are within other cells or universes, the ``cards``
-input is a tuple:
+        The basic input and the unit input can be mixed, and two different
+        units can be requested::
 
-- tuple, each separate element represents the nesting
-- can provide universe TODO this goes above, not really related to
-repeated structures.
+            tally = SurfaceFlux('fuel', 'neutron', ['sA', unit])
+            unit2 = ng.Surf('sA') < ng.FCell('cA').lat(Lin(2))
+            tally = SurfaceFlux('fuel', 'neutron', [unit, unit])
 
-The following string in MCNP (<LAT-SPEC> is discussed below)::
-
-(scA, scB) < (cC, cD[<LAT-SPEC>]) < U=u1 < (cE, cF, cG)
-
-is obtained with the following input::
-
-([scA, scB], [cC, (cD, ([li0,li1],[lj0,lj1],[lk0,lk1]))], 'u1', [cE, cF, cG])
-
-The optional <LAT-SPEC> specifies which lattice elements to consider
-from a lattice cell. It has 3 possible forms, and the MCNP syntax is
-compared to the syntax used here::
-
-MCNP
-li0:li1 lj0:lj1 lk0:lk1
-[li0,li1],[lj0,lj1],[lk0,lk1]
-
-li0 lj0 lk0, li1 lj1 lk1, ...
-[[li0, lj0, lk0], [li1, lj1, lk1], ...]
-
-The following is a non-exhaustive table of eligible units of input::
-
-generic                                             simplesim
-scA                                                 'scA'
-union of scA, scB, scC                              ['scA', 'scB', 'scC'] 
-univA                                               'univA'
-union of univA                                      ['univA']
-scA in scB                                          ('scA', 'scB')
-scA in scB in scC                                   ('scA', 'scB', 'scC')
-scA in univA                                        ('scA', 'univA')
-scA in union of univA                               ('scA', ['univA'])
-scA in union of scB and scC             ('scA', ['scB', 'scC'])
-scA in univA in scB                           ('scA', 'univA', 'scB')
-scA in scB, lattice elements <LAT-SPEC> ('scA', ('scB', <LAT-SPEC>))
-(scA and scB) in scC in (scD and scE)  ((scA, scB), 
-
-union('scA', 'scB', 'scC')   union(sc('A'), sc('B'), sc('C'))
-univ('univA') 
-union(univ('univA'))
-'scA' in 'scB'             surf('A').in(surf('B'))
-'scA' in 'scB' in 'scC'        surf('A').in(surf('B').in('scC'))
-'scA' in univ('univA')       sc('A').in(univ('A'))
-'scA' in union(univ('A'))    sc('A').in(union(univ('A')))
-'scA' in union('scB', 'scC') sc('A').in(union('scB', 'scC'))
-'scA' in univ('univA') in 'scC'  sc('A').in(univ('A').in(sc('C')))
-'scA' in lat('scB', []) in ...   sc('A').in(sc('B').lat([]))
-
-vec('scA', 'scB').in(sc('C').in(vec('scD', 'scE')))
-
-
-The last of these is called `multiple bin format` in MCNP, and creates
-a total of 4 tally `units`, one for 'scA' through'scD'.
         """
         super(ICellSurfTally, self).__init__(name, particle, *args, **kwargs)
         self.cards = cards
@@ -3285,7 +3246,13 @@ a total of 4 tally `units`, one for 'scA' through'scD'.
         if self.card_type == 'cell':      classcheck = Cell
         elif self.card_type == 'surface': classcheck = ISurface
         if type(self.cards) is not list: 
-            string += "{0} {1!r}".format(self.card_type, self.cards)
+            if isinstance(self.cards, ng.IUnit):
+                string += self.cards.comment()
+            elif type(self.cards) is str:
+                string += "{0} {1!r}".format(self.card_type, self.cards)
+            else:
+                raise ValueError("Expected list, string, or IUnit; "
+                        "got {0}".format(self.cards))
         elif type(self.cards) is list:
             if type(self.cards[0]) is not list:
                 string += "{0}s ".format(self.card_type)
@@ -3293,11 +3260,20 @@ a total of 4 tally `units`, one for 'scA' through'scD'.
             for obj in self.cards:
                 outcounter += 1
                 if type(obj) is not list:
-                    string += "{0!r}".format(obj)
+                    if isinstance(self.cards, ng.IUnit):
+                        string += obj.comment()
+                    elif type(obj) is str:
+                        string += "{0!r}".format(obj)
+                    else:
+                        raise ValueError("Expected list, string, or IUnit; "
+                                "got {0}".format(self.cards))
                 elif type(obj) is list:
+                    # Not a unit.
                     string += "{0} in ".format(union_type)
                     incounter = 0
                     for avgobj in obj:
+                        if type(avgobj) is not str:
+                            raise("Expected string; got {0}".format(avgobj))
                         incounter += 1
                         # Must be a cell/surface card name.
                         string += "{0!r}".format(avgobj)
@@ -3317,16 +3293,26 @@ a total of 4 tally `units`, one for 'scA' through'scD'.
         for obj in clist:
             outcounter += 1
             if type(obj) is not list:
-                string += " {0:d}".format(getname(obj))
+                if isinstance(obj, ng.IUnit):
+                    string += obj.mcnp(float_format, sim)
+                elif type(obj) is str:
+                    string += " {0:d}".format(getname(obj))
+                else:
+                    raise ValueError("Expected string or IUnit; got "
+                            "{0}".format(obj))
             elif type(obj) is list:
                 string += " ("
                 for avgobj in obj:
                     # Must be a cell/surface card name.
+                    if type(avgobj) is not str:
+                        raise ValueError("Expected string; got "
+                                "{0}".format(avgobj))
                     string += " {0:d}".format(getname(avgobj))
                 string += ")"
         return string
 
     def _unique_card_list(self):
+        # TODO Broken after implementing IUnit, but seems unneeded.
         # Returns a unique list of all the card names provided in self.cards.
         # This method, in the future, may be called by
         # :py:class:`pyne.simplesim.SimulationDefinition` for error-checking.
