@@ -142,7 +142,18 @@ KDEMeshTally* KDEMeshTally::setup( const fmesh_card& fmesh,
   KDEMeshTally *kde = new KDEMeshTally( fmesh, mbi, moab_set, bandwidth,
                                         type, kernel, subtracks );
   kde->output_filename = output_filename;
-  kde->tally_set = moab_set;
+
+  // create a tally set that contains only the 3D mesh cells (i.e. hexes/tets)
+  moab::ErrorCode rval;
+  rval = mbi->create_meshset( moab::MESHSET_SET, kde->tally_set );
+  assert( rval == moab::MB_SUCCESS );
+
+  moab::Range mesh_cells;
+  rval = mbi->get_entities_by_dimension( moab_set, 3, mesh_cells );
+  assert( rval == moab::MB_SUCCESS );
+   
+  rval = mbi->add_entities( kde->tally_set, mesh_cells );
+  assert( rval == moab::MB_SUCCESS );
 
   return kde;
 
