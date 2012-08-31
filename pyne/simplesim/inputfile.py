@@ -50,7 +50,7 @@ class IInputFile(object):
         """
         Parameters
         ----------
-        simdef: :py:class:`definition.SimulationDefinition` or subclass.
+        simdef : :py:class:`definition.SimulationDefinition` or subclass.
             The simulation for which the user desires an input file.
         comments : bool, optional
             Display comments along with cards. The comments are rather long.
@@ -227,7 +227,7 @@ class MCNPInput(IInputFile):
         multi-line card on their own. This can also be used by the user to
         provide comments. A newline is appended to the end of the
         string. Any number of cards can be added to a block, and they are
-        placed after `:py:class:`add_user_card` cards. Cards are printed in
+        placed after :py:class:`add_user_card` cards. Cards are printed in
         the order they are added.
 
         Parameters
