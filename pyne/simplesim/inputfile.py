@@ -242,7 +242,7 @@ class MCNPInput(IInputFile):
         --------
         In this case, line wrapping is `not` automatically performed::
 
-            inp.add_user_literal('data', 'M1 1001 1\n     8016 2')
+            inp.add_user_literal('data', 'M1 1001 1\\n     8016 2')
 
         """
         if block == 'cell':
