@@ -36,8 +36,12 @@ class IUnit(object):
         else:
             return vec(self, right)
 
-    def comment(self):
-        raise NotImplementedError
+    def comment(self, inner):
+        return "{0}{1}{2}{3}".format(
+                " (" if self.up and not self.down else "",
+                inner,
+                (" in" + self.up.comment()) if self.up else "",
+                ")" if self.down and not self.up else "")
 
     def mcnp(self, float_format, sim, inner):
         return "{0}{1}{2}{3}".format(
@@ -52,17 +56,23 @@ class CellSurf(IUnit):
         super(CellSurf, self).__init__()
         self.name = name
 
-    def comment(self):
-        return super(CellSurf, self).comment(" {0!r}".format(self.name))
-
 
 class surf(CellSurf):
+
+    def comment(self):
+        return super(surf, self).comment(" surf {0!r}".format(self.name))
+
     def mcnp(self, float_format, sim):
         return super(surf, self).mcnp(float_format, sim,
                 " {0}".format(sim.sys.surface_num(self.name)))
 
 
 class cell(CellSurf):
+
+    def comment(self, inner=None):
+        return super(cell, self).comment(" cell {0!r}{1}".format(self.name,
+                inner if inner else ""))
+
     def mcnp(self, float_format, sim, inner=None):
         return super(cell, self).mcnp(float_format, sim,
                 " {0}{1}".format(sim.sys.cell_num(self.name),
@@ -74,18 +84,24 @@ class ucell(cell):
         super(ucell, self).__init__(name)
         self.lat_spec = lat_spec
 
+    def comment(self):
+        return super(ucell, self).comment(self.lat_spec.comment())
+
     def mcnp(self, float_format, sim):
         return super(ucell, self).mcnp(float_format, sim,
                 self.lat_spec.mcnp(float_format, sim))
 
 
-class uni(IUnit):
+class univ(IUnit):
     def __init__(self, name):
-        super(uni, self).__init__()
+        super(univ, self).__init__()
         self.name = name
 
+    def comment(self):
+        return super(univ, self).comment(" univ {0!r}".format(self.name))
+
     def mcnp(self, float_format, sim):
-        return super(uni, self).mcnp(float_format, sim,
+        return super(univ, self).mcnp(float_format, sim,
                 " U={0}".format(sim.sys.universe_num(self.name)))
 
 
@@ -94,6 +110,15 @@ class union(IUnit):
         # all args must be a instance of Unit or its subclasses.
         self.brothers = args
         super(union, self).__init__()
+
+    def comment(self):
+        string = ""
+        counter = 0
+        for bro in self.brothers:
+            counter += 1
+            string += bro.comment()
+            if counter < len(self.brothers): string += ","
+        return super(union, self).comment(" union of ({0})".format(string))
 
     def mcnp(self, float_format, sim):
         string = ""
@@ -104,9 +129,20 @@ class union(IUnit):
 
 
 class vec(IUnit):
+    # Named after matlab's vectorized notation
     def __init__(self, *args):
+        # all args must be a instance of Unit or its subclasses.
         self.sisters = args
         super(vec, self).__init__()
+
+    def comment(self):
+        string = ""
+        counter = 0
+        for sis in self.sisters:
+            counter += 1
+            string += sis.comment()
+            if counter < len(self.sisters): string += ","
+        return super(vec, self).comment(" over ({0})".format(string))
 
     def mcnp(self, float_format, sim):
         string = ""
@@ -116,6 +152,10 @@ class vec(IUnit):
 
 
 class LatticeSpec(object):
+
+    def comment(self, inner):
+        return "-lat {0}".format(inner)
+
     def mcnp(self, float_format, sim, inner):
         # Lattice specification goes in square brackets.
         return "[{0}]".format(inner)
@@ -124,6 +164,9 @@ class LatticeSpec(object):
 class lin(LatticeSpec):
     def __init__(self, linear_index):
         self.index = linear_index
+
+    def comment(self):
+        return super(lin, self).comment("linear idx {0:d}".format(self.index))
 
     def mcnp(self, float_format, sim):
         return super(lin, self).mcnp(float_format, sim,
@@ -136,6 +179,12 @@ class rng(LatticeSpec):
         self.x_bounds = x_bounds
         self.y_bounds = y_bounds
         self.z_bounds = z_bounds
+
+    def comment(self):
+        return super(rng, self).comment(
+                "x range {0[0]:d}:{0[1]:d}, y range {1[0]:d}:{1[1]:d}, "
+                "z range {2[0]:d}:{2[1]:d}".format(
+                self.x_bounds, self.y_bounds, self.z_bounds))
 
     def mcnp(self, float_format, sim):
         return super(rng, self).mcnp(float_format, sim,
@@ -152,6 +201,15 @@ class cor(LatticeSpec):
         # work.
         if type(points[0]) is int: points = [points]
         self.points = points
+
+    def comment(self):
+        string = "coords"
+        counter = 0
+        for pt in self.points:
+            counter += 1
+            string += " ({0[0]:d}, {0[1]:d}, {0[2]:d})".format(pt)
+            if counter < len(self.points): string += ","
+        return super(cor, self).comment(string)
 
     def mcnp(self, float_format, sim):
         string = ""
