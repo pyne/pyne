@@ -1963,7 +1963,7 @@ class RegionAnd(IRegionBool):
         return super(RegionAnd, self).comment('&')
 
     def mcnp(self, sim):
-        return super(RegionAnd, self).mcnp(sim, ' ')
+        return super(RegionAnd, self).mcnp(sim, ':')
 
 
 class RegionOr(IRegionBool):
@@ -1974,7 +1974,7 @@ class RegionOr(IRegionBool):
         return super(RegionOr, self).comment('|')
 
     def mcnp(self, sim):
-        return super(RegionOr, self).mcnp(sim, ':')
+        return super(RegionOr, self).mcnp(sim, ' ')
 
 
 class RegionLeaf(IRegion):
