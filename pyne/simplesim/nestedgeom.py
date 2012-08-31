@@ -16,7 +16,7 @@ class IUnit(object):
         if self.down: return self.down
         else:         return self
 
-    def __and__(self, right):
+    def __or__(self, right):
         return self.union(right)
 
     def union(self, right):
@@ -25,6 +25,16 @@ class IUnit(object):
             return self
         else:
             return union(self, right)
+
+    def __and__(self, right):
+        return self.vector(right)
+
+    def vector(self, right):
+        if isinstance(self, vec):
+            self.sisters += [right]
+            return self
+        else:
+            return vec(self, right)
 
     def comment(self):
         raise NotImplementedError
