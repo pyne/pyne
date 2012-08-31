@@ -33,6 +33,7 @@ Contents
     libref/index
     cppapi
     previous/index
+    devsguide/index
     dev_team
 
 ------------
