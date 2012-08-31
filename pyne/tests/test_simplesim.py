@@ -1945,7 +1945,7 @@ class TestSystemDefinition(unittest.TestCase):
         self.assertEquals(egrid.mcnp('%.5g', self.sim),
                 "E0 0.0001 1 1e+05 1e+07")
         # For a specific tally.
-        egrid = cards.EnergyGrid('grid1', det, np.array([1, 2]))
+        egrid = cards.EnergyGrid('grid1', 'ring', np.array([1, 2]))
         self.sim.add_tally(det)
         self.assertEquals(egrid.comment(), "Energy grid 'grid1' for "
                 "tally ring: 2 groups.")
