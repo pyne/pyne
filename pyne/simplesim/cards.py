@@ -2131,8 +2131,8 @@ class GeneralSource(ISource):
 
     .. inheritance-diagram:: pyne.simplesim.cards.GeneralSource
 
-    Limitations
-    -----------
+    Limitations:
+
     - Keyword cannot depend on other keywords, as they can in MCNP.
     
     """
@@ -2651,8 +2651,8 @@ class Distribution(ICard):
     :py:attr:`definition.MCNPSimulation.add_dist`. In MCNP, this card is
     implemented with a pair of **SI** and **SP** cards.
 
-    Limititations
-    -------------
+    Limititations:
+
     - Embedded sources are not supported; to use this the user must provide an
       explicit string for ``keys``.
     - In MCNP, particles also have a number associated with them. It is
@@ -2696,7 +2696,8 @@ class Distribution(ICard):
             See :py:class:`ICard`. Used to reference this card from the
             :py:class:`GeneralSource` card.
         key_setting : str, optional
-            Specifies what the keys represent. The following settings are allowed:
+            Specifies what the keys represent. The following settings are
+            allowed:
 
             - 'histogram': bin upper boundaries. **H** in MCNP.
             - 'discrete': source variable values. **L** in MCNP.
@@ -2721,6 +2722,7 @@ class Distribution(ICard):
               sources. **W** in MCNP.
             - if ``key_setting`` == 'analytic', this value is one of the
               following, with parameters specified in a list on ``vals``:
+                 
                 - 'maxwell': 1 parameter
                 - 'watt': 2 parameters
                 - 'gauss': 2 parameters
@@ -2731,14 +2733,14 @@ class Distribution(ICard):
                 - 'exp': 1 parameter
                 - 'gauss_beam': 2 parameters
 
-             All the analytic parameters have defaults, and the defaults can be
-             invoked if ``vals`` is an empty list. See MCNP manual for more
-             information.
+            All the analytic parameters have defaults, and the defaults can be
+            invoked if ``vals`` is an empty list. See MCNP manual for more
+            information.
         keys : list, str
-             If a string, the string is printed after the
-            ``key_setting``, if provided. A string is used if the class does
-            not provide the desired functionality, and the user wants to
-            provide their own input. If a list, elements can be:
+            If a string, the string is printed after the ``key_setting``, if
+            provided. A string is used if the class does not provide the
+            desired functionality, and the user wants to provide their own
+            input. If a list, elements can be:
             
             - particle names (keys of :py:attr:`Particle.mcnp_abbrev`),
             - 'spont-fiss-by-neut', 'spont-fiss-by-hist', 'spont-phot',
@@ -2793,7 +2795,7 @@ class Distribution(ICard):
 
             sd = Distribution('distA', [], [], 'analytic', 'maxwell')
             sd = Distribution('distA', [], [], key_setting='analytic',
-                                               val_setting='maxwell')
+                    val_setting='maxwell')
 
         The following is a bounded analytic distribution, with parameters
         specified::
@@ -3403,6 +3405,7 @@ class SurfaceCurrent(ICellSurfTally):
         string = super(SurfaceCurrent, self).mcnp(float_format, sim, 1)
         if self.total: string += " T"
         return string
+
 
 class IAverageTally(ICellSurfTally):
     """This class is not used by the user. Abstract base class for
@@ -4475,8 +4478,8 @@ class Fill(ICellMod):
 
     .. inheritance-diagram:: pyne.simplesim.cards.Fill
 
-    Limitations
-    -----------
+    Limitations:
+
     - Combining transformations with the fill is not supported.
 
     """

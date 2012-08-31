@@ -282,7 +282,7 @@ class Union(IUnit):
     """
     def __init__(self, *args):
         """
-        Paramemters
+        Parameters
         -----------
         *args : list of instances of :py:class:`IUnit` subclasses.
 
