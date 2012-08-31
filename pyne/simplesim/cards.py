@@ -4169,9 +4169,10 @@ class EnergyGrid(IMisc):
         ----------
         name : str
             See :py:class:`ICard`.
-        tally : :py:class:`ITally`, None
-            The tally for which this energy grid should apply. If requesting
-            for this grid to apply to all tallies, then this is None.
+        tally : str name of :py:class:`ITally`, None
+            The name of the tally for which this energy grid should apply. If
+            requesting for this grid to apply to all tallies, then this is
+            None.
         energies : list, :py:class:`np.array`
             The upper bounds of the energy groups.
 
@@ -4181,9 +4182,9 @@ class EnergyGrid(IMisc):
 
             egrid = EnergyGrid('grid0', None, [1e-4, 1, 100e3, 10e6])
 
-        The following applies to tally ``tallyA``::
+        The following applies to tally 'tallyA'::
 
-            egrid = EnergyGrid('grid0', tallyA,
+            egrid = EnergyGrid('grid0', 'tallyA',
                     np.array([1e-4, 1, 100e3, 10e6]))
 
         """
@@ -4194,12 +4195,12 @@ class EnergyGrid(IMisc):
     def comment(self):
         string = "Energy grid {0!r} for ".format(self.name)
         if self.tally is None: string += "all tallies"
-        else:                  string += "tally {0}".format(self.tally.name)
+        else:                  string += "tally {0}".format(self.tally)
         return string + ": {0} groups.".format(len(self.energies))
 
     def mcnp(self, float_format, sim):
         string = "E{0}".format(
-                sim.tally_num(self.tally.name) if self.tally else "0")
+                sim.tally_num(self.tally) if self.tally else "0")
         for val in self.energies:
             string += (" " + float_format) % val
         return string
