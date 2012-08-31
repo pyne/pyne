@@ -1,5 +1,8 @@
 .. _usersguide_simplesim-dev:
 
+============================================================
+Simple Simulation Input Definitions -- :mod:`pyne.simplesim`
+============================================================
 
 When adding a card to :py:mod:`pyne.simplesim.cards`, the following tasks need
 to be completed:
@@ -18,9 +21,9 @@ If introducing a new abstract base class:
 
 TODO Serpent region/cell macros.
 
-================
+****************
 Design decisions
-================
+****************
 
 Why SimulationDefinition and Inputfile are separate.
 
