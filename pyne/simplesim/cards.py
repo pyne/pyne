@@ -2113,7 +2113,8 @@ class GeneralSource(ISource):
     of the arguments. Note that the x, y, and z coordinates of the
     source are separate inputs because they might each be on their own
     distributions. To learn about Python keyword arguments, visit
-    :ref:`docs.python.org/tutorial/controlflow.html#keyword-arguments`. Each
+    `the Python docs
+    <docs.python.org/tutorial/controlflow.html#keyword-arguments>`_. Each
     keyword argument is also an attribute of this class, and can be modified
     individually after the card is created::
 
