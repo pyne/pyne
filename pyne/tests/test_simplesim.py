@@ -220,6 +220,13 @@ class TestSystemDefinition(unittest.TestCase):
                 "'coolant'-lat linear idx 5) in cell 'fuel')")
         self.assertEquals(unit.mcnp('', self.sim), " ( 1 < ( 1 2[5]) < 1)")
 
+        unit = ng.Surf('fuelpin') < (ng.FCell('fuel') |
+                ng.FCell('coolant').lat(ng.Lin(5))) < ng.FCell('fuel')
+        self.assertEquals(unit.comment(), 
+                " ( surf 'fuelpin' in union of ( cell 'fuel', cell "
+                "'coolant'-lat linear idx 5) in cell 'fuel')")
+        self.assertEquals(unit.mcnp('', self.sim), " ( 1 < ( 1 2[5]) < 1)")
+
         unit = ng.Surf('fuelpin') < (ng.FCell('fuel') | ng.FCell('coolant',
             ng.Rng([0,1], [3,5], np.array([-1,4])))) < ng.FCell('fuel')
         self.assertEquals(unit.comment(), 
