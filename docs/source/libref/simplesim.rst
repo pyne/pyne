@@ -107,6 +107,7 @@ Cards Module
     :members:
     :show-inheritance:
 
+:ref:`pyne_simplesim_nestedgeom`
 
 .. autosummary::
    :nosignatures:
