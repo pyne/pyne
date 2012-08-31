@@ -7,6 +7,7 @@ import numpy as np
 
 from pyne import material
 from pyne.simplesim import definition, cards, inputfile
+import pyne.simplesim.nestedgeom as ng
 
 # TODO test the exception that setting a name to '' is not aight.
 # TODO use assertRaisesRegexp
@@ -78,6 +79,108 @@ class TestSystemDefinition(unittest.TestCase):
         self.rxr.add_cell(self.coolant)
         self.rxr.add_cell(self.graveyard)
         self.sim = definition.MCNPSimulation(self.rxr, verbose=False)
+
+    def test_nestedgeom(self):
+        """Tests the nestedgeom module."""
+
+        unit = ng.surf('fuelpin')
+        self.assertEquals(unit.mcnp('', self.sim), " 1")
+
+        unit = ng.cell('coolant')
+        self.assertEquals(unit.mcnp('', self.sim), " 2")
+
+        unit = ng.uni('ha')
+        self.sim.sys._register_universe('ha')
+        self.assertEquals(unit.mcnp('', self.sim), " U=1")
+        
+        unit = ng.union(ng.surf('fuelpin'), ng.surf('bound'))
+        self.assertEquals(unit.mcnp('', self.sim), " ( 1 2)")
+
+        unit = ng.union(ng.cell('fuel'), ng.cell('coolant'),
+                ng.cell('graveyard'))
+        self.assertEquals(unit.mcnp('', self.sim), " ( 1 2 3)")
+
+        unit = ng.union(ng.uni('ha'))
+        self.assertEquals(unit.mcnp('', self.sim), " ( U=1)")
+
+        # nesting
+        unit = ng.cell('fuel') < ng.cell('coolant')
+        self.assertEquals(unit.mcnp('', self.sim), " ( 1 < 2)")
+
+        unit = ng.cell('fuel').of(ng.cell('coolant'))
+        self.assertEquals(unit.mcnp('', self.sim), " ( 1 < 2)")
+
+        unit = ng.cell('fuel') < ng.cell('coolant') < ng.cell('graveyard')
+        self.assertEquals(unit.mcnp('', self.sim), " ( 1 < 2 < 3)")
+
+        unit = ng.cell('fuel').of(ng.cell('coolant').of(ng.cell('graveyard')))
+        self.assertEquals(unit.mcnp('', self.sim), " ( 1 < 2 < 3)")
+
+        # unions and nesting, various syntax.
+        unit = ng.surf('fuelpin').of(ng.union(ng.cell('fuel'),
+                                              ng.cell('coolant')))
+        self.assertEquals(unit.mcnp('', self.sim), " ( 1 < ( 1 2))")
+
+        unit = ng.surf('fuelpin').of(ng.cell('fuel').union(ng.cell('coolant')))
+        self.assertEquals(unit.mcnp('', self.sim), " ( 1 < ( 1 2))")
+
+        unit = ng.surf('fuelpin').of(ng.cell('fuel') & ng.cell('coolant'))
+        self.assertEquals(unit.mcnp('', self.sim), " ( 1 < ( 1 2))")
+
+        unit = ng.surf('fuelpin').of(
+                ng.cell('fuel').union(ng.cell('coolant')).of(
+                    ng.cell('fuel')))
+        self.assertEquals(unit.mcnp('', self.sim), " ( 1 < ( 1 2) < 1)")
+
+        unit = ng.surf('fuelpin').of((ng.cell('fuel') & ng.cell('coolant')).of(
+            ng.cell('fuel')))
+        self.assertEquals(unit.mcnp('', self.sim), " ( 1 < ( 1 2) < 1)")
+
+        unit = ng.surf('fuelpin') < (ng.cell('fuel') & ng.cell('coolant')) < \
+                ng.cell('fuel')
+        self.assertEquals(unit.mcnp('', self.sim), " ( 1 < ( 1 2) < 1)")
+
+        # nesting with universe, and union
+        unit = ng.surf('fuelpin') < ng.uni('ha') < ng.cell('graveyard')
+        self.assertEquals(unit.mcnp('', self.sim), " ( 1 < U=1 < 3)")
+
+        unit = ng.surf('fuelpin') < ng.union(ng.uni('ha')) < \
+                ng.cell('graveyard')
+        self.assertEquals(unit.mcnp('', self.sim), " ( 1 < ( U=1) < 3)")
+
+        # vectorized
+        unit = ng.vec(ng.surf('fuelpin'), ng.surf('bound')) < \
+                ng.cell('fuel')
+        self.assertEquals(unit.mcnp('', self.sim), " ( 1 2 < 1)")
+
+        unit = ng.surf('fuelpin') < ng.vec(ng.cell('fuel'), ng.cell('coolant'))
+        self.assertEquals(unit.mcnp('', self.sim), " ( 1 < 1 2)")
+
+        # lattice
+        unit = ng.surf('fuelpin') < (ng.cell('fuel') & ng.ucell('coolant',
+            ng.lin(5))) < ng.cell('fuel')
+        self.assertEquals(unit.mcnp('', self.sim), " ( 1 < ( 1 2[5]) < 1)")
+
+        unit = ng.surf('fuelpin') < (ng.cell('fuel') & ng.ucell('coolant',
+            ng.rng([0,1], [3,5], np.array([-1,4])))) < ng.cell('fuel')
+        self.assertEquals(unit.mcnp('', self.sim), 
+                " ( 1 < ( 1 2[0:1 3:5 -1:4]) < 1)")
+
+        unit = ng.surf('fuelpin') < (ng.cell('fuel') & ng.ucell('coolant',
+            ng.cor([1, 3, 2]))) < ng.cell('fuel')
+        self.assertEquals(unit.mcnp('', self.sim), 
+                " ( 1 < ( 1 2[ 1 3 2]) < 1)")
+
+        unit = ng.surf('fuelpin') < (ng.cell('fuel') & ng.ucell('coolant',
+            ng.cor([[1, 3, 2]]))) < ng.cell('fuel')
+        self.assertEquals(unit.mcnp('', self.sim), 
+                " ( 1 < ( 1 2[ 1 3 2]) < 1)")
+
+        unit = ng.surf('fuelpin') < (ng.cell('fuel') & ng.ucell('coolant',
+            ng.cor([[1, 3, 2], [-1, -2, -3]]))) < ng.cell('fuel')
+        self.assertEquals(unit.mcnp('', self.sim), 
+                " ( 1 < ( 1 2[ 1 3 2, -1 -2 -3]) < 1)")
+
 
     def test_Region(self):
         """Tests the shifting and stretching of surfaces in a Region."""
