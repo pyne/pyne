@@ -157,43 +157,45 @@ class SystemDefinition(IDefinition):
         self._cells = collections.OrderedDict()
         self._universes = list()
 
-    def add_cell(self, cell):
+    def add_cell(self, *args):
         """
         TODO
 
         """
-        # Warn the user if a cell with this name is already in the system.
-        # already.
-        self._assert_unique('cell', cell)
-        # Custom card; just add and move on.
-        if isinstance(cell, cards.Custom):
+        for cell in args:
+            # Warn the user if a cell with this name is already in the system.
+            # already.
+            self._assert_unique('cell', cell)
+            # Custom card; just add and move on.
+            if isinstance(cell, cards.Custom):
+                self._cells[cell.name] = cell
+                return
+            if self.verbose:
+                print "Adding cell %s." % cell.name
+            # Add all surfaces that aren't already added. Do this by walking the
+            # region tree and calling _add_unique_surfaces() at the leaves.
+            cell.region.walk(self._add_unique_surfaces)
+            # Only add the material if this is not a void cell and if it doesn't
+            # already exist.
+            if (cell.material and cell.material.name not in self.materials):
+                self.add_material(cell.material)
+            # Constituent surfaces and material have been added, so we can added
+            # the cell.
+            # Add universes to system.
+            if cell.universe:
+                self._register_universe(cell.universe[0])
             self._cells[cell.name] = cell
-            return
-        if self.verbose:
-            print "Adding cell %s." % cell.name
-        # Add all surfaces that aren't already added. Do this by walking the
-        # region tree and calling _add_unique_surfaces() at the leaves.
-        cell.region.walk(self._add_unique_surfaces)
-        # Only add the material if this is not a void cell and if it doesn't
-        # already exist.
-        if (cell.material and cell.material.name not in self.materials):
-            self.add_material(cell.material)
-        # Constituent surfaces and material have been added, so we can added
-        # the cell.
-        # Add universes to system.
-        if cell.universe:
-            self._register_universe(cell.universe[0])
-        self._cells[cell.name] = cell
 
-    def add_surface(self, surface):
+    def add_surface(self, *args):
         """This method is only used by the user for surfaces that are not on a
         cell card. Surfaces on a cell card are added automatically. Duplication
         is checked by card name, not by using Python's 'is' operator to compare
         the objects.
 
         """
-        self._assert_unique('surface', surface)
-        self._surfaces[surface.name] = surface
+        for surface in args:
+            self._assert_unique('surface', surface)
+            self._surfaces[surface.name] = surface
 
     def _add_unique_surfaces(self, regionleaf):
         name = regionleaf.surface.name
@@ -208,17 +210,18 @@ class SystemDefinition(IDefinition):
                 print ("  Surface {0!r} already exists in the "
                         "definition.".format(name))
 
-    def add_material(self, material):
+    def add_material(self, *args):
         """This method is only used by the user for materials that are not on a
         cell card.  Materials on cell cards are added automatically.
         TODO
 
         """
-        if material.name == None or material.name == '':
-            raise ValueError("The ``name`` property of the material cannot "
-                    "be empty.")
-        self._assert_unique('material', material)
-        self._materials[material.name] = material
+        for material in args:
+            if material.name == None or material.name == '':
+                raise ValueError("The ``name`` property of the material cannot "
+                        "be empty.")
+            self._assert_unique('material', material)
+            self._materials[material.name] = material
 
     def _register_universe(self, univ_name):
         """This method is not used by the user. It is called by
@@ -347,47 +350,60 @@ class SimulationDefinition(IDefinition):
         self._misc = collections.OrderedDict()
         self._dists = collections.OrderedDict()
 
-    def add_source(self, card):
-        if not isinstance(card, cards.ISource):
-            raise ValueError("Only cards subclassed from ``ISource`` can be "
-                    "added by this method. User provided {0}.".format(card))
-        self._assert_unique('source', card)
-        self._source[card.name] = card
+    def add_source(self, *args):
+        """ TODO """
+        for card in args:
+            if not isinstance(card, cards.ISource):
+                raise ValueError("Only cards subclassed from ``ISource`` can be "
+                        "added by this method. User provided {0}.".format(card))
+            self._assert_unique('source', card)
+            self._source[card.name] = card
 
-    def add_tally(self, card):
-        # TODO check cells and surfaces? only if moving to string refs.
-        if not isinstance(card, cards.ITally):
-            raise ValueError("Only cards subclassed from ``ITally`` can be "
-                    "added by this method. User provided {0}.".format(card))
-        self._assert_unique('tally', card)
-        self._tally[card.name] = card
+    def add_tally(self, *args):
+        """ TODO """
+        for card in args:
+            # TODO check cells and surfaces? only if moving to string refs.
+            if not isinstance(card, cards.ITally):
+                raise ValueError("Only cards subclassed from ``ITally`` can be "
+                        "added by this method. User provided {0}.".format(card))
+            self._assert_unique('tally', card)
+            self._tally[card.name] = card
 
-    def add_misc(self, card):
-        # TODO check references to tallies? only if moving to string refs.
-        if not isinstance(card, cards.IMisc):
-            raise ValueError("Only cards subclassed from ``IMisc`` can be "
-                    "added by this method. User provided {0}.".format(card))
-        # Add universes to system.
-        if isinstance(card, cards.Universes):
-            for uni in card.univ_names.values():
-                self.sys._register_universe(uni)
-        self._assert_unique('misc', card)
-        self._misc[card.name] = card
+    def add_misc(self, *args):
+        """ TODO """
+        for card in args:
+            # TODO check references to tallies? only if moving to string refs.
+            if not isinstance(card, cards.IMisc):
+                raise ValueError("Only cards subclassed from ``IMisc`` can be "
+                        "added by this method. User provided {0}.".format(card))
+            # Add universes to system.
+            if isinstance(card, cards.Universes):
+                for uni in card.univ_names.values():
+                    self.sys._register_universe(uni)
+            self._assert_unique('misc', card)
+            self._misc[card.name] = card
 
-    def add_dist(self, card):
-        """Adds a distribution card to the simulation.
+    def add_dist(self, *args):
+        """Adds distribution cards to the simulation.
 
         Parameters
         ----------
         card : :py:class:`cards.Distribution` or subclass
             The card to be added to the simulation.
+        *args :
+            Any number of such cards.
+
+        Examples
+        --------
+        TODO
 
         """
-        if not isinstance(card, cards.Distribution):
-            raise ValueError("Only ``Distribution`` cards can be "
-                    "added by this method. User provided {0}.".format(card))
-        self._assert_unique('dist', card)
-        self._dists[card.name] = card
+        for card in args:
+            if not isinstance(card, cards.Distribution):
+                raise ValueError("Only ``Distribution`` cards can be "
+                        "added by this method. User provided {0}.".format(card))
+            self._assert_unique('dist', card)
+            self._dists[card.name] = card
 
     def dist_num(self, name):
         """Retrieve the number of a :py:class:`cards.Distribution` card in
@@ -481,53 +497,57 @@ class MCNPSimulation(SimulationDefinition):
         self._tally_pulseheight = collections.OrderedDict()
         self._tally_detector = collections.OrderedDict()
 
-    def add_tally(self, card):
-        """Adds a tally card to the simulation.
+    def add_tally(self, *args):
+        """Adds tally cards to the simulation.
 
         Parameters
         ----------
         card : :py:class:`cards.ICard` or subclass
             The tally card to be added to the simulation.
+        *args :
+            Any number of such cards.
 
         """
-        super(MCNPSimulation, self).add_tally(card)
-        if isinstance(card, cards.SurfaceCurrent):
-            self._tally_surfacecurrent[card.name] = card
-        elif isinstance(card, cards.SurfaceFlux):
-            self._tally_surfaceflux[card.name] = card
-        elif isinstance(card, cards.CellFlux):
-            self._tally_cellflux[card.name] = card
-        elif isinstance(card, cards.CellEnergyDeposition):
-            self._tally_cellenergydep[card.name] = card
-        elif isinstance(card, cards.CellFissionEnergyDeposition):
-            self._tally_cellfissiondep[card.name] = card
-        elif isinstance(card, (cards.CellPulseHeight,
-                cards.CellChargeDeposition)):
-            self._tally_pulseheight[card.name] = card
-        elif isinstance(card, cards.IDetector):
-            self._tally_detector[card.name] = card
-        elif isinstance(card, cards.Custom):
-            # See if class attribute has something
-            if card.tallyclass:
-                if issubclass(card.tallyclass, cards.SurfaceCurrent):
-                    self._tally_surfacecurrent[card.name] = card
-                elif issubclass(card.tallyclass, cards.SurfaceFlux):
-                    self._tally_surfaceflux[card.name] = card
-                elif issubclass(card.tallyclass, cards.CellFlux):
-                    self._tally_cellflux[card.name] = card
-                elif issubclass(card.tallyclass, cards.CellEnergyDeposition):
-                    self._tally_cellenergydep[card.name] = card
-                elif issubclass(card.tallyclass, cards.CellFissionEnergyDeposition):
-                    self._tally_cellfissiondep[card.name] = card
-                elif issubclass(card.tallyclass, (cards.CellPulseHeight,
-                        cards.CellChargeDeposition)):
-                    self._tally_pulseheight[card.name] = card
-                elif issubclass(card.tallyclass, cards.IDetector):
-                    self._tally_detector[card.name] = card
-                else:
-                    raise Exception("Unrecognized tally card {0}.".format(card))
-        else:
-            raise Exception("Unrecognized tally card {0}.".format(card))
+        for card in args:
+            # Can move this line out of the loop.
+            super(MCNPSimulation, self).add_tally(card)
+            if isinstance(card, cards.SurfaceCurrent):
+                self._tally_surfacecurrent[card.name] = card
+            elif isinstance(card, cards.SurfaceFlux):
+                self._tally_surfaceflux[card.name] = card
+            elif isinstance(card, cards.CellFlux):
+                self._tally_cellflux[card.name] = card
+            elif isinstance(card, cards.CellEnergyDeposition):
+                self._tally_cellenergydep[card.name] = card
+            elif isinstance(card, cards.CellFissionEnergyDeposition):
+                self._tally_cellfissiondep[card.name] = card
+            elif isinstance(card, (cards.CellPulseHeight,
+                    cards.CellChargeDeposition)):
+                self._tally_pulseheight[card.name] = card
+            elif isinstance(card, cards.IDetector):
+                self._tally_detector[card.name] = card
+            elif isinstance(card, cards.Custom):
+                # See if class attribute has something
+                if card.tallyclass:
+                    if issubclass(card.tallyclass, cards.SurfaceCurrent):
+                        self._tally_surfacecurrent[card.name] = card
+                    elif issubclass(card.tallyclass, cards.SurfaceFlux):
+                        self._tally_surfaceflux[card.name] = card
+                    elif issubclass(card.tallyclass, cards.CellFlux):
+                        self._tally_cellflux[card.name] = card
+                    elif issubclass(card.tallyclass, cards.CellEnergyDeposition):
+                        self._tally_cellenergydep[card.name] = card
+                    elif issubclass(card.tallyclass, cards.CellFissionEnergyDeposition):
+                        self._tally_cellfissiondep[card.name] = card
+                    elif issubclass(card.tallyclass, (cards.CellPulseHeight,
+                            cards.CellChargeDeposition)):
+                        self._tally_pulseheight[card.name] = card
+                    elif issubclass(card.tallyclass, cards.IDetector):
+                        self._tally_detector[card.name] = card
+                    else:
+                        raise Exception("Unrecognized tally card {0}.".format(card))
+            else:
+                raise Exception("Unrecognized tally card {0}.".format(card))
 
     def tally_num(self, name):
         """Retrieve the number of a :py:class:`cards.ITally` card in the MCNP
@@ -569,20 +589,23 @@ class MCNPSimulation(SimulationDefinition):
     def remove_tally(self, name):
         raise Exception("Not implemented.")
 
-    def add_transformation(self, card):
-        """Adds a transformation card to the simulation.
+    def add_transformation(self, *args):
+        """Adds transformation cards to the simulation.
 
         Parameters
         ----------
         card : :py:class:`cards.Transformation` or subclass
             The card to be added to the simulation.
+        *args : 
+            Any number of such cards.
 
         """
-        if not isinstance(card, cards.Transformation):
-            raise ValueError("Only ``Transformation``s can be "
-                    "added by this method. User provided {0}.".format(card))
-        self._assert_unique('transformation', card)
-        self._transformations[card.name] = card
+        for card in args:
+            if not isinstance(card, cards.Transformation):
+                raise ValueError("Only ``Transformation``s can be "
+                        "added by this method. User provided {0}.".format(card))
+            self._assert_unique('transformation', card)
+            self._transformations[card.name] = card
 
     def transformation_num(self, name):
         """Retrieve the number of a :py:class:`cards.Transformation` card in
