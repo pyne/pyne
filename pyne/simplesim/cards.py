@@ -11,21 +11,37 @@ contains instances of the classes in this module.
 TODO
 Below is the reference for
 the module.
+have a nice TOC here with 2 levels of depth
+
 
 .. moduleauthor:: Chris Dembia <cld72@cornell.edu>
+
 
 *****
 Index
 *****
 
+This section presents a listing of the cell cards, with links to their
+reference, based on the category to which the cell cards belong. The categories
+are important because cards must have a unique name within their category.
+
 An inheritance diagram of all the classes in this module can be found at
-:ref:`pyne_simplesim_inheritance`.
+:ref:`pyne_simplesim_inheritance`. All cards are subclassed from
+:py:class:`ICard`, which is not part of any of the categories below. The only
+exception is the :py:class:`Particle` class, which is a helper class used
+whenever a particle must be specified as part of a card.
 
 ------------
 System cards
 ------------
 These are the cards that are provided in a
-:py:class:`pyne.simplesim.definition.SystemDefinition`.
+:py:class:`pyne.simplesim.definition.SystemDefinition`. See further down for
+more subcategories. Cell cards are added to a simulation using
+:py:meth:`pyne.simplesim.definition.SystemDefinition.add_cell`, and cell card
+names must be unique among cell cards.
+Material cards are added using
+:py:meth:`pyne.simplesim.definition.SystemDefinition.add_material`, and
+material card names must be unique among material cards.
 
 .. autosummary::
     :nosignatures:
@@ -48,11 +64,146 @@ Surface cards are added to a system using
     AxisCylinder
     AxisPlane
 
+
+Macrobodies
+^^^^^^^^^^^
+These are surfaces built from simpler surfaces, and accordingly have (will
+have) facet functionality. These cards are still added via
+:py:meth:`pyne.simplesim.definition.SystemDefinition.add_surface`, and so their
+names must be unique among the surfaces.
+
+.. autosummary::
+    :nosignatures:
+
+    IMacrobody
+    Facet
+    Parallelepiped
+    Cuboid
+
+
+Region
+^^^^^^
+Cells require a region, and regions are constructed using surfaces. These
+classes are used to form a binary tree. The & and | operators are overloaded to
+facilitate the construction of solid regions from surfaces. These cards can be
+named if so desired, but otherwise are not really part of a system like cell,
+surface, and material cards are.
+
+.. autosummary::
+    :nosignatures:
+
+    IRegion
+    IRegionBool
+    RegionAnd
+    RegionOr
+    RegionLeaf
+
+
+----------------
+Simulation cards
+----------------
+These are the cards that are provided in a
+:py:class:`pyne.simplesim.definition.SimulationDefinition`. Some of the cards
+can only be used in subclasses of :py:class:`SimulationDefinition`, such as
+:py:class:`Transformation`.
+
+The following two cars form their own categories, and are the only card in
+their respective category. Distributions are added to simulations using
+:py:meth:`pyne.simplesim.definition.SimulationDefinition.add_dist`, and
+transformations are added using
+:py:meth:`pyne.simplesim.definition.MCNPSimulation.add_transformation` (they
+are only available for MCNP simulations). Card names must be unique within
+their own category.
+
+.. autosummary::
+    :nosignatures:
+
+    Distribution
+    Transformation
+
+
+Source
+^^^^^^
+These cards are used to define particle sources.
+Add these cards to a simulation using
+:py:meth:`pyne.simplesim.definition.SimulationDefinition.add_source`. Card
+names must be unique among source cards.
+
+.. autosummary::
+    :nosignatures:
+
+    ISource
+    GeneralSource
+    Criticality
+    CriticalityPoints
+
+
+Tally
+^^^^^
+Particle tallies/detectors.
+Add these cards to a simulation using
+:py:meth:`pyne.simplesim.definition.SimulationDefinition.add_tally`. Card names
+must be unique among tally cards.
+
+.. autosummary::
+    :nosignatures:
+
+    ITally
+    ICellSurfTally
+    SurfaceCurrent
+    CellFlux
+    CellEnergyDeposition
+    CellFissionEnergyDeposition
+    CellPulseHeight
+    CellChargeDeposition
+    IDetector
+    PointDetector
+    RingDetector
+
+
+Miscellaneous
+^^^^^^^^^^^^^
+These cars do not have card numbers and do not fit into any other category.
+Add these cards to a simulation using
+:py:meth:`pyne.simplesim.definition.SimulationDefinition.add_misc`. Card names
+must be unique among misc scards.
+
+.. autosummary::
+    :nosignatures:
+
+    IMisc
+    ScatteringLaw
+    EnergyGrid
+    ICellMod
+    Universes
+    Fill
+    Lattice
+    Volume
+    Area
+    FissionTurnoff
+    PhotonWeight
+    DetectorContribution
+    IUniqueParticle
+    Temperature
+    TemperatureTimes
+    ICellModParticle
+    Importance
+    ExponentialTransform
+    ForcedCollision
+    WeightWindowBound
+    WeightWindowEnergies
+    WeightWindowTimes
+    DXTRANContribution
+    DXTRANSpheres
+    Vector
+
+
 ------------
 Custom cards
 ------------
 A custom card is used when other cards, within a given category, do not satisfy
-the needs of the user.
+the needs of the user. They are added to the system or simulation using the
+``add_*`` method for their category, and the names must be unique within their category.
 
 .. autosummary::
     :nosignatures:
@@ -68,23 +219,48 @@ the needs of the user.
     TransformationCustom
 
 
+-------------
+Unimplemented
+-------------
+The following cards are defined but are unimplemented.
+
+.. autosummary::
+    :nosignatures:
+
+    MaterialMCNP
+    Comment
+    Mode
+    NeutronPhysics
+    PhotonPhysics
+    ElectronPhysics
+    ProtonPhysics
+    Burnup
+
+
+Nested Geometry
+^^^^^^^^^^^^^^^
+These cards would allow the preferred way of constructing universes and
+lattices. Currently, universe and lattice functionality `is` implemented, but
+not through these cards.
+
+.. autosummary::
+    :nosignatures:
+
+    IUniverse
+    UniverseByRegion
+    UniverseByLattice
+    Lattice
+    LatticeByArray
+
+
 *********
 Reference
 *********
 
-
 """
 
-# TODO in the Sphinx documentation, create a developers and a user's version of
-# this documentation.
-# TODO in the Sphinx documentation, provide a list of all classes without any
-# docstrings. autosummary
-# autosummary, :nosignatures: pyne.simplesim.cards
-# TODO write a development guide next to the usersguide.
 # TODO if i make a material card, make sure to revert back to the Material
 # object that Anthony has once they implement a comment.
-# Maybe I place an underscore for abstract base classes so that the user
-# doesn't see them, but I want them to see them...
 # TODO allow card suppression (don't delete but don't print it).
 # TODO allow readfile commands.
 # TODO emphasize how easy it is to modify the cards, just subclass it
@@ -95,14 +271,14 @@ Reference
 # TODO testing backlog: (1) modification of ICellMod (2) no vector card
 # exception, (3) weightwindowbound
 # TODO check WWGT default arg effect in WWN.
-# TODO improve inheritance around ICellMod.
-# TODO big opportunity to clean up what the mcnp() output looks like.
+# TODO improve inheritance around ICellMod; lots of copied code from
+# ICellModParticle.
+# TODO big opportunity to pretty-up what the mcnp() output looks like.
 # TODO consistent plural card names when appropriate.
 # Refactor CellMCNP so all relevant classes have a method _mcnp_cell_comment
 # and _mcnp_cell_card
-# TODO I think the __comment__() method should just be __str__()?
 # TODO in Cell, require that the material is not pyne.card.Material, but is a
-# card here.
+# card here (error check).
 # TODO explain that names must only be unique within a category.
 # TODO altunits for detectors. and also in the comments, and in tests. revisit
 # detector tests completely: need to test altunits, card_type (naasok),
@@ -551,7 +727,7 @@ class CellMCNP(Cell):
             Particle importance, :py:class:`Importance`, **IMP**. The tuple
             contains:
             
-            1. (str) particle name (see py:class:`Particle`)
+            1. (str) particle name (see :py:class:`Particle`)
             2. (int) the importance
 
             Refer to :py:class:`Importance` for more information.
@@ -561,7 +737,7 @@ class CellMCNP(Cell):
             An exponential transform, :py:class:`ExponentialTransform`,
             **EXT**. The tuple contains:
 
-            1. (str) particle name (see py:class:`Particle`)
+            1. (str) particle name (see :py:class:`Particle`)
             2. (str/float) stretch
             3. (str) direction
             4. (str) sign ('toward', 'away')
@@ -574,7 +750,7 @@ class CellMCNP(Cell):
             Forced collisions, :py:class:`ForcedCollision`, **FCL**. The tuple
             contains:
 
-            1. (str) particle name (see py:class:`Particle`)
+            1. (str) particle name (see :py:class:`Particle`)
             2. (float) probability
             3. (bool) only entering the cell triggers forced collision
 
@@ -586,7 +762,7 @@ class CellMCNP(Cell):
             Weight window lower bound, :py:class:`WeightWindowBound`, **WWN**.
             The tuple contains:
 
-            1. (str) particle name (see py:class:`Particle`)
+            1. (str) particle name (see :py:class:`Particle`)
             2. (int) energy index
             3. (int) time index
             4. (float/str) lower bound, or 'killall'
@@ -599,7 +775,7 @@ class CellMCNP(Cell):
             Probability of contribution to a DXTRAN sphere,
             :py:class:`DXTRANContribution`, **DXC**.  The tuple contains:
             
-            1. (str) particle name (see py:class:`Particle`)
+            1. (str) particle name (see :py:class:`Particle`)
             2. (str/None) DXTRAN sphere name (None for all spheres)
             3. (float) probabilility of contribution
             
@@ -759,7 +935,6 @@ class CellMCNP(Cell):
         See :py:class:`Cell` for more examples.
 
         """
-        # TODO allow use of U, LAT, and FILL keywords?
         # TODO check that the importance isn't set for the same particle
         # multiple times.
         super(CellMCNP, self).__init__(name, region, material, density,
@@ -1083,10 +1258,10 @@ class Material(ICard, material.Material):
 
     """
     def __init__(self, name, *args, **kwargs):
-        """
+        """See :py:class:`pyne.material.Material` for superclass parameters.
+
         Parameters
         ----------
-        see :py:class:`pyne.material.Material` for superclass parameters.
         name : str as keyword argument
             This is a keyword argument, but `must` be supplied.
         description : str as keyword argument, optional
@@ -1136,7 +1311,6 @@ class Material(ICard, material.Material):
         return string
 
     def mcnp(self, float_format, sim):
-        # TODO assumes a single line won't go over 80 columns.
         string = "M{0}".format(sim.sys.material_num(self.name))
         for nuc, den in self.to_atom_frac().items():
             # ZAID.
@@ -1176,7 +1350,8 @@ class Material(ICard, material.Material):
 
 
 class MaterialMCNP(Material):
-    # TODO automates the selection of table identifiers.
+    """Unimplemented; would automate the selection of table identifiers. """
+    # TODO
     pass
 
 
@@ -1267,7 +1442,7 @@ class ISurface(ICard):
 
         Parameters
         ----------
-        vector : 3-element list or :py:class`np.array`, float [unitless]
+        vector : 3-element list or :py:class:`np.array`, float [unitless]
             The elements specify a stretch in the x, y, and z directions, in
             this order. A zero in any of the directions indicates that no
             stretch is done in that direction. Negative values are allowed, and
@@ -1507,7 +1682,7 @@ class AxisCylinder(IAxisSurface):
         Examples
         --------
         The following stretches are okay for a cylinder aligned with the x axis
-        (where we have imported :py:mod`numpy` as ``np``)::
+        (where we have imported :py:mod:`numpy` as ``np``)::
             
             cyl = AxisCylinder('mycyl', 'z', 0.4)
             cyl.stretch([0, 0, 2])
@@ -1677,7 +1852,6 @@ class IMacrobody(ISurface):
     # macrobody and not the facet. I don't know how to solve this yet.
     def __init__(self, name, *args, **kwargs):
         super(IMacrobody, self).__init__(name, *args, **kwargs)
-        raise Exception("Facets are not implemented properly yet.")
 
     @abc.abstractmethod
     def comment(self, *args):
@@ -1717,6 +1891,7 @@ class Facet(ISurface):
         using :py:meth:`IMacrobody.facet`.
 
         """
+        raise Exception("Facets are not implemented properly yet.")
         super(Facet, self).__init__(macrobody.name)
         self.macrobody = macrobody
         self.descriptor = descriptor
@@ -1937,21 +2112,52 @@ class IRegion(ICard):
             self = RegionAnd(region.left_child, region.right_child, self.name)
 
     def __and__(self, arg):
+        """Calls :py:meth:`intersect`."""
         return self.intersect(arg)
 
     def __or__(self, arg):
+        """Calls :py:meth:`union`."""
         return self.union(arg)
 
     def intersect(self, arg):
+        """
+        Parameters
+        ----------
+        arg : :py:class:`IRegion` subclass
+            The region with which to intersect this region.
+
+        Returns
+        -------
+        reg : :py:class:`RegionAnd`
+            A region that has been intersected with the input.
+
+        """
         return RegionAnd(self, arg)
 
     def union(self, arg):
+        """
+        Parameters
+        ----------
+        arg : :py:class:`IRegion` subclass
+            The region with which to union this region.
+
+        Returns
+        -------
+        reg : :py:class:`RegionAnd`
+            A region that has been unioned with the input.
+
+        """
         return RegionOr(self, arg)
 
     def shift(self, vector):
         """Shifts all the surfaces that this region is composed of. Note that
         the surfaces themselves are modified, and are not copied, so the
         dimensions of the surfaces in other regions is also modified.
+
+        Parameters
+        ----------
+        vector : 3-element list or :py:class:`np.array`
+            See :py:class:`ISurface`.
         
         """
         # TODO make copies of the surfaces?
@@ -1963,7 +2169,12 @@ class IRegion(ICard):
         """Stretches all the surfaces that this region is composed of. Note that
         the surfaces themselves are modified, and are not copied, so the
         dimensions of the surfaces in other regions is also modified.
-        
+
+        Parameters
+        ----------
+        vector : 3-element list or :py:class:`np.array`
+            See :py:class:`ISurface`.
+
         """
         # TODO make copies of the surfaces?
         self.left_child.stretch(vector)
@@ -2011,6 +2222,7 @@ class IRegionBool(IRegion):
 
     @property
     def left_child(self):
+        """Left child"""
         return self._left_child
 
     @left_child.setter
@@ -2019,6 +2231,7 @@ class IRegionBool(IRegion):
 
     @property
     def right_child(self):
+        """Right child."""
         return self._right_child
 
     @right_child.setter
@@ -2027,7 +2240,8 @@ class IRegionBool(IRegion):
 
 
 class RegionAnd(IRegionBool):
-    """
+    """The intersection of two regions, held in :py:attr:`left_child` and
+    :py:attr:`right_child`.
 
     """
     def comment(self):
@@ -2038,7 +2252,8 @@ class RegionAnd(IRegionBool):
 
 
 class RegionOr(IRegionBool):
-    """
+    """The union of two regions, held in :py:attr:`left_child` and
+    :py:attr:`right_child`.
 
     """
     def comment(self):
@@ -2049,37 +2264,43 @@ class RegionOr(IRegionBool):
 
 
 class RegionLeaf(IRegion):
-    """
-    """
+    """The region of space to one side of a surface (constructed by calling
+    :py:attr:`ISurface.neg` or :py:attr:`ISurface.pos`).
 
+    """
     def __init__(self, surface, pos_sense, name='<Empty>'):
-        # TODO Default name is an empty string.
+        """
+        Parameters
+        ----------
+        surface : :py:class:`ISurface` subclass
+            The surface that defines the edge of this region.
+        pos_sense : bool
+            True if this region is on the side of the surface with a positive
+            sense, False otherwise.
+        name : str, optional
+            The name of this surface. Currently, it is not really needed.
+
+        """
         super(RegionLeaf, self).__init__(name)
         self.surface = surface
         self.pos_sense = pos_sense
 
     def comment(self):
-        if self.pos_sense:
-            prefix = '+'
-        else:
-            prefix = '-'
+        if self.pos_sense:  prefix = '+'
+        else:               prefix = '-'
         return prefix + self.surface.name
 
     def mcnp(self, sim):
-        if self.pos_sense:
-            prefix = ''
-        else:
-            prefix = '-'
+        if self.pos_sense:  prefix = ''
+        else:               prefix = '-'
         return "{0}{1}".format(prefix, sim.sys.surface_num(self.surface.name))
 
     def shift(self, vector):
         """Calls the shift method of the surface."""
-
         self.surface.shift(vector)
 
     def stretch(self, vector):
         """Calls the stretch method of the surface."""
-
         self.surface.stretch(vector)
 
     @property
@@ -2104,7 +2325,10 @@ class RegionLeaf(IRegion):
 
 
 class IMisc(ICard):
-    """ """
+    """This class is not used by the user. Abstract base class for unnumbered
+    cards that do not fit in other categories.
+
+    """
     __metaclass__ = abc.ABCMeta
 
     def __init__(self, name, *args, **kwargs):
@@ -2167,7 +2391,10 @@ class ScatteringLaw(IMisc):
 
 
 class ISource(ICard):
-    """ """
+    """This class is not used by the user. Abstract base class for all source
+    cards.
+
+    """
     __metaclass__ = abc.ABCMeta
 
     def __init__(self, name, *args, **kwargs):
@@ -2241,7 +2468,7 @@ class GeneralSource(ISource):
             **VEC** in MCNP.
         cosine : float, :py:class:`Distribution` name, optional (default: None)
             Cosine of the angle between the reference vector
-            `:py:attr:`ref_dir` and the particle's direction of travel, or
+            :py:attr:`ref_dir` and the particle's direction of travel, or
             distribution. **DIR**
             in MCNP. **DIR** in MCNP.
         normal_sign : str, optional (default: None)
@@ -2755,7 +2982,6 @@ class Distribution(ICard):
                 'exp'       : 31, 
                 'gauss_beam': 41} 
 
-    # TODO keys can be vectors (3 elements)
     def __init__(self, name, keys, vals, key_setting=None, val_setting=None,
                  **kwargs):
         """The ``keys`` are the independent variable in the distribution, and
@@ -2995,8 +3221,6 @@ class Criticality(ISource):
     .. inheritance-diagram:: pyne.simplesim.cards.Criticality
 
     """
-
-    # TODO in the example, include the resulting MCNP output?
     def __init__(self, n_histories=1000, keff_guess=1.0,
             n_skip_cycles=30, n_cycles=130):
         """
@@ -3131,8 +3355,6 @@ class CriticalityPoints(ISource):
         return string
 
     def mcnp(self, float_format, sim):
-        # TODO risk of going over the line if the user requests some oddly
-        # insane precision...
         # Will be editing the points list through popping, so make a copy.
         points = copy.deepcopy(self.points)
         formatstr = "KSRC {0} {0} {0}".format(float_format)
@@ -4245,31 +4467,37 @@ class EnergyGrid(IMisc):
     def energies(self, value): self._energies = value
 
 
-class Comment(ITally):
+class Comment(IMisc):
+    """Unimplemented."""
     pass
 
 
 class Mode(IMisc):
+    """Unimplemented."""
     pass
 
 
 class NeutronPhysics(IMisc):
+    """Unimplemented."""
     pass
 
 
 class PhotonPhysics(IMisc):
+    """Unimplemented."""
     pass
 
 
 class ElectronPhysics(IMisc):
+    """Unimplemented."""
     pass
 
 
 class ProtonPhysics(IMisc):
+    """Unimplemented."""
     pass
 
 
-class Transformation(IMisc):
+class Transformation(ICard):
     """A coordinate transformation. In MCNP, this is the **TR** card. MCNP
     allows the specification of less than 9 values in the rotation matrix; this
     is not supported here. Note that if generating an input for MCNP, this card
@@ -4542,8 +4770,6 @@ class Universes(ICellMod):
         return super(Universes, self).mcnp(float_format, sim, "U")
 
     def _mcnp_unit(self, float_format, sim, cell):
-        # TODO this next line really should go elsewhere.
-        #sim.sys._register_universe(self.univ_names[cell])
         if self.univ_names[cell] not in sim.sys.universes:
             raise Exception("This card has not been added to the simulation.")
         return "{0}".format(sim.sys.universe_num(self.univ_names[cell]) * (
@@ -5325,7 +5551,7 @@ class Temperature(ICellMod):
         self._temps = value
 
 class TemperatureTimes(IMisc):
-    """Times at which temperatuers are specified on the :py:class:`Temperature
+    """Times at which temperatuers are specified on the :py:class:`Temperature`
     card. Unique card with name `temptimes`. In MCNP, this is the **THTME**
     card.
 
@@ -5551,8 +5777,6 @@ class ExponentialTransform(ICellModParticle):
     .. inheritance-diagram:: pyne.simplesim.cards.ExponentialTransform
 
     """
-    # TODO make all the lists into cell-keyed dictionaries so the user can edit
-    # per-cell entries.
     def __init__(self, particle, *args):
         """
         Parameters
@@ -5680,7 +5904,6 @@ class ExponentialTransform(ICellModParticle):
                 "EXT")
 
     def _mcnp_unit(self, float_format, sim, cell):
-        # TODO add exception if there is no Vector card.
         string = ""
         if self.signs[cell] == 'away': string += "-"
         if self.stretchs[cell] == 'capture-to-total': string += "S"
@@ -6334,9 +6557,6 @@ class DXTRANSpheres(IUniqueParticle):
     .. inheritance-diagram:: pyne.simplesim.cards.DXTRANSpheres
 
     """
-    # TODO maybe the constructor just has the options, must use add method.
-    # Is this a unique card?
-    # I (Chris) wish I learned about namedtuples when I started this project.
     Sphere = collections.namedtuple('Sphere',
             ['name', 'center', 'inrad', 'outrad'])
 
@@ -6571,7 +6791,8 @@ class Vector(IMisc):
         return self.vectors.keys().index(vecname)
 
 
-class Burn(IMisc):
+class Burnup(IMisc):
+    """Unimplemented."""
 
     def __init__(self,
                  times=None,
