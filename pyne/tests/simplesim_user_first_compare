@@ -23,22 +23,6 @@ M1 1001 1
   C ==========
   C Data Cards
   C ==========
-  C
-  C **************
-  C Material Cards
-  C **************
-  C
-  C ************
-  C Source Cards
-  C ************
-  C
-  C ***********
-  C Tally Cards
-  C ***********
-  C
-  C *******************
-  C Miscellaneous Cards
-  C *******************
   C User data cards.
   C Graveyard.
 11 0 -5 IMP:N=0
