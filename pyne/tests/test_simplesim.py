@@ -1,4 +1,8 @@
-"""PyNE Simple Simulation Input Definitions tests"""
+"""PyNE Simple Simulation Input Definitions tests
+
+.. moduleauthor:: Chris Dembia <cld72@cornell.edu>
+
+"""
 
 import os
 import unittest
