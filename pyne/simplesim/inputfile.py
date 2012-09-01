@@ -6,13 +6,17 @@
 
 Below is the reference for this module.
 
+TODO
 This module employs the modules `reactordef` and `material` to generate
 plaintext input files for a general code. Support is provided for MCNPX, and
 support for Serpent is not complete but should be straightforward. The
 extension to other codes may require more effort.
 
-- Write out
-- Read in a JSON file input def.
+An inheritance diagram of all the classes in this module can be found at
+:ref:`pyne_simplesim_inheritance`.
+
+.. moduleauthor:: Chris Dembia <cld72@cornell.edu>
+
 """
 # TODO need to be able to tell the user the numbers given to the different
 # cards, for parsing.

@@ -1,4 +1,4 @@
-.. _usersguide_simplesim-dev:
+.. _devsgide_simplesim:
 
 ============================================================
 Simple Simulation Input Definitions -- :mod:`pyne.simplesim`
@@ -10,6 +10,7 @@ to be completed:
 * Choose the appropriate base class.
 * If the card is `unique`, such as the Criticality card, then make sure to pass
 * TODO super()
+* TODO autosummary in docs.
 
 If introducing a new abstract base class: 
 
@@ -32,3 +33,6 @@ Why SimulationDefinition and Inputfile are separate.
 
 float_format % uses dollar rather than str.format() because the % syntax is
 more conventional outside of python.
+
+
+
