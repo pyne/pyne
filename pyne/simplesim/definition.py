@@ -527,7 +527,7 @@ class MCNPSimulation(SimulationDefinition):
             elif isinstance(card, cards.IDetector):
                 self._tally_detector[card.name] = card
             elif isinstance(card, cards.Custom):
-                # See if class attribute has something
+                # See if class attribute is not None.
                 if card.tallyclass:
                     if issubclass(card.tallyclass, cards.SurfaceCurrent):
                         self._tally_surfacecurrent[card.name] = card
@@ -583,6 +583,26 @@ class MCNPSimulation(SimulationDefinition):
             return self._tally_pulseheight.keys().index(name) + 1
         elif isinstance(card, cards.IDetector):
             return self._tally_detector.keys().index(name) + 1
+        elif isinstance(card, cards.Custom):
+            # See if class attribute is not None.
+            if card.tallyclass:
+                if issubclass(card.tallyclass, cards.SurfaceCurrent):
+                    return self._tally_surfacecurrent.keys().index(name) + 1
+                elif issubclass(card.tallyclass, cards.SurfaceFlux):
+                    return self._tally_surfaceflux.keys().index(name) + 1
+                elif issubclass(card.tallyclass, cards.CellFlux):
+                    return self._tally_cellflux.keys().index(name) + 1
+                elif issubclass(card.tallyclass, cards.CellEnergyDeposition):
+                    return self._tally_cellenergydep.keys().index(name) + 1
+                elif issubclass(card.tallyclass, cards.CellFissionEnergyDeposition):
+                    return self._tally_cellfissiondep.keys().index(name) + 1
+                elif issubclass(card.tallyclass, (cards.CellPulseHeight,
+                        cards.CellChargeDeposition)):
+                    return self._tally_pulseheight.keys().index(name) + 1
+                elif issubclass(card.tallyclass, cards.IDetector):
+                    return self._tally_detector.keys().index(name) + 1
+                else:
+                    raise Exception("Unrecognized tally card {0}.".format(card))
         else:
             raise Exception("Unrecognized tally type. name {0}.".format(name))
 
