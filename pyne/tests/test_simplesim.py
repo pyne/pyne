@@ -5,6 +5,7 @@
 """
 
 import os
+import pickle
 import unittest
 
 import numpy as np
@@ -84,8 +85,55 @@ class TestSystemDefinition(unittest.TestCase):
         self.rxr.add_cell(self.graveyard)
         self.sim = definition.MCNPSimulation(self.rxr, verbose=False)
 
+    def test_saving(self):
+        """Tests saving the simulation."""
+        fname = 'simplesim_saving'
+        fid = open(fname, 'w')
+        #pickle.dump(self.rxr, fid)
+        fid.close()
+        os.unlink(fname)
+
+    def test_SystemManipulation(self):
+        """Tests the add and remove methods of
+        :py:class:`pyne.simplesim.definition.SystemDefinition.
+        
+        """
+        play1 = cards.Cell('play1', self.pin.neg)
+        play2 = cards.Cell('play2', self.pin.neg)
+        play3 = cards.Cell('play3', self.pin.neg)
+        # Just making sure an exception is NOT raised.
+        self.rxr.add_cell(play1, play2, play3)
+        ncells = len(self.rxr.cells)
+
+        radius = 0.40 # cm
+        surf1 = cards.AxisCylinder('1', 'Z', radius)
+        surf2 = cards.AxisCylinder('2', 'Z', radius)
+        self.rxr.add_surface(surf1, surf2)
+        nsurfs = len(self.rxr.surfaces)
+
+        mat1 = cards.Material(name='H2O2')
+        mat2 = cards.Material(name='H2O3')
+        self.rxr.add_material(mat1, mat2)
+        nmats = len(self.rxr.materials)
+
+        self.rxr._register_universe('harhar')
+
+        # Removal. TODO this check isn't thorough at all.
+        self.rxr.remove_cell('play1')
+        self.assertEquals(len(self.rxr.cells), ncells - 1)
+
+        self.rxr.remove_surface('1')
+        self.assertEquals(len(self.rxr.surfaces), nsurfs - 1)
+
+        self.rxr.remove_material('H2O2')
+        self.assertEquals(len(self.rxr.materials), nmats - 1)
+
+        self.rxr.remove_universe('harhar')
+        self.assertEquals(len(self.rxr.universes), 0)
+
+
     def test_nestedgeom(self):
-        """Tests the nestedgeom module."""
+        """Tests the :py:mod:`pyne.simplesim.nestedgeom` module."""
 
         unit = ng.Surf('fuelpin')
         self.assertEquals(unit.comment(), " surf 'fuelpin'")
