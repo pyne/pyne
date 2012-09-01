@@ -4197,6 +4197,7 @@ class PointDetector(IDetector):
 
     """
     Point = collections.namedtuple('Point', ['pos', 'soe_rad', 'soe_units'])
+    """Named tuple with which input entries are stored."""
 
     def __init__(self, name, particles, *args, **kwargs):
         """
@@ -4305,6 +4306,7 @@ class RingDetector(IDetector):
     """
     Ring = collections.namedtuple('Ring',
                 ['pos', 'rad', 'soe_rad', 'soe_units'])
+    """Named tuple with which input entries are stored."""
     
     def __init__(self, name, particles, cartesian_axis, *args, **kwargs):
         """
@@ -4530,6 +4532,7 @@ class Transformation(ICard):
 
         Examples
         --------
+        Here's a number of examples::
 
             trans = Transformation('trans1', [1, 2, 3],
                     [[4, 5, 6], [7, 8, 9], [10, 11, 12]])
@@ -4989,7 +4992,7 @@ class Volume(ICellMod):
         The following are examples of the usage of this card::
 
             vol = Volume('cellA', 1)
-            vol = Volume('cellA', 1, cellB, 2, manual=True)
+            vol = Volume('cellA', 1, 'cellB', 2, manual=True)
 
         """
         super(Volume, self).__init__('volume', 2, *args)
@@ -5076,7 +5079,7 @@ class Area(ICellMod):
         The follow are examples of the usage of this card::
 
             area = Area('cellA', 10)
-            area = Area('cellA', 10, cellB, 20)
+            area = Area('cellA', 10, 'cellB', 20)
 
         """
         super(Area, self).__init__('area', 2, *args)
@@ -5475,10 +5478,10 @@ class Temperature(ICellMod):
 
         Examples
         --------
-        The following are examples of the usage of this card:
+        The following are examples of the usage of this card::
 
             temp = Temperature('cellA', 600)
-            temp = Temperature('cellA', 600, cellB, 900, index=2)
+            temp = Temperature('cellA', 600, 'cellB', 900, index=2)
 
         """
         self.index = kwargs.get('index', None)
@@ -6559,6 +6562,7 @@ class DXTRANSpheres(IUniqueParticle):
     """
     Sphere = collections.namedtuple('Sphere',
             ['name', 'center', 'inrad', 'outrad'])
+    """Named tuple with which input entries are stored."""
 
     def __init__(self, particle, *args, **kwargs):
         """
