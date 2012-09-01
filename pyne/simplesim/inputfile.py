@@ -275,7 +275,6 @@ class MCNPInput(IInputFile):
         self._write_user("cell", self.user_cell_comm, self.user_cell_cards)
         self._write_user_literal("cell", self.user_cell_literal)
 
-
         # Write surface cards.
         self._new_line()
         self._write_deck_heading("Surface")
@@ -289,17 +288,29 @@ class MCNPInput(IInputFile):
         self._new_line()
         self._write_deck_heading("Data")
         # Material cards.
-        self._write_data_heading("Material")
-        self._write_dictionary(self.sim.sys.materials)
+        if len(self.sim.sys.materials) > 0:
+            self._write_data_heading("Material")
+            self._write_dictionary(self.sim.sys.materials)
         # Source cards.
-        self._write_data_heading("Source")
-        self._write_dictionary(self.sim.source)
+        if len(self.sim.source) > 0:
+            self._write_data_heading("Source")
+            self._write_dictionary(self.sim.source)
+        # Distribution cards.
+        if len(self.sim.dists) > 0:
+            self._write_data_heading("Distribution")
+            self._write_dictionary(self.sim.dists)
         # Tally cards.
-        self._write_data_heading("Tally")
-        self._write_dictionary(self.sim.tally)
+        if len(self.sim.tally) > 0:
+            self._write_data_heading("Tally")
+            self._write_dictionary(self.sim.tally)
+        # Transformation cards.
+        if len(self.sim.transformations) > 0:
+            self._write_data_heading("Transformation")
+            self._write_dictionary(self.sim.transformations)
         # Misc cards.
-        self._write_data_heading("Miscellaneous")
-        self._write_dictionary(self.sim.misc)
+        if len(self.sim.misc) > 0:
+            self._write_data_heading("Miscellaneous")
+            self._write_dictionary(self.sim.misc)
         # User cards.
         self._write_user("data", self.user_data_comm, self.user_data_cards)
         self._write_user_literal("data", self.user_data_literal)
