@@ -2199,6 +2199,90 @@ class TestMCNPInput(unittest.TestCase):
         #os.unlink('inptest')
         pass
 
+    def test_CustomCards(self):
+        """Tests :py:class:`pyne.simplesim.cards.Custom and subclasses."""
+
+        fname = 'simplesim_custom'
+
+        # Define system.
+        # Materials.
+        uo2 = cards.Material(name='UO2')
+        uo2.from_atom_frac({'U235': 0.05,
+                            'U238': 0.95,
+                            'O16' : 2.00})
+        h2o = cards.Material(name='H2O')
+        h2o.from_atom_frac({'H1' : 2.0,
+                            'O16': 1.0})
+        mc = cards.MaterialCustom(name='matc', comment="mathey", mcnp="mathey")
+        self.sim.sys.add_material(mc)
+
+        # Surfaces.
+        sc = cards.SurfaceCustom('surfc', comment="surfhey", mcnp="surfhey")
+        self.sim.sys.add_surface(sc)
+
+        radius = 0.40
+        pin = cards.AxisCylinder('pin', 'X', radius)
+        pitch = 1.2
+        cellbound = cards.Parallelepiped('bound',
+                -pitch / 2, pitch / 2, -pitch / 2, pitch / 2, 0, 0,
+                reflecting=True)
+        # Cells.
+        fuel = cards.CellMCNP('fuel', pin.neg, uo2,
+                11.0, 'g/cm^3',
+                importance=('neutron', 1),
+                volume=1)
+        coolant = cards.CellMCNP('coolant', pin.pos | cellbound.neg, h2o,
+                1.0, 'g/cm^3',
+                importance=('neutron', 1),
+                volume=1)
+        graveyard = cards.CellMCNP('graveyard', cellbound.pos,
+                importance=('neutron', 0))
+        cc = cards.CellCustom('cellc', comment="cellhey", mcnp="cellhey")
+
+        # Add cells to the system.
+        self.sys.add_cell(fuel)
+        self.sys.add_cell(cc)
+        self.sys.add_cell(coolant)
+        self.sys.add_cell(graveyard)
+
+        # Add source, tallies to simulation.
+        self.sim.add_misc(cards.ScatteringLaw('H2O', {'H1': 'lwtr'}))
+        self.sim.add_source(cards.Criticality())
+        self.sim.add_source(cards.CriticalityPoints())
+        self.sim.add_tally(cards.CellFlux('flux', 'neutron', 
+                ['fuel', 'coolant']))
+        self.sim.add_misc(cards.EnergyGrid('egrid0', None,
+                10**np.arange(-9.9, 1.1, 0.1)))
+
+        
+        #sc = cards.SourceCustom('sourcec', comment="sourcehey",
+        #    mcnp="sourcehey")
+        #
+        #
+        #dc = cards.DistributionCustom('distc', comment="disthey",
+        #    mcnp="disthey")
+        #
+        #
+        ## ?
+        #tc = cards.TallyCustom('tallyc', comment="tallyhey", mcnp="tallyhey")
+        #
+        #
+        #mc = cards.MiscCustom('miscc', comment="mischey", mcnp="mischey")
+        #
+        #
+        #tc = cards.TransformationCustom('transc', comment="transhey",
+        #        mcnp="transhey")
+
+        # Create input file.
+        inp = inputfile.MCNPInput(self.sim, title="Infinite lattice.")
+        inp.write(fname)
+        # Check against text file.
+        self.assertEquals(
+                open(fname).readlines(),
+                open(fname + '_compare').readlines())
+        os.unlink(fname)
+
+
     def test_InfLattice(self):
         """Tests the input file for an infinite lattice reactor. Checks
         generated output against the text file `inflattice_compare`.
@@ -2265,20 +2349,6 @@ class TestMCNPInput(unittest.TestCase):
                 open(fname + '_amp').readlines(),
                 open(fname + '_amp_compare').readlines())
         os.unlink(fname + '_amp')
-
-    #@mock.patch_object(warnings, 'warn')
-    def test_bypass_wrap(self): #, mock_warn):
-        """Test that a warning is raised when a card requesting wrapping to be
-        bypassed ever violates the 80-column rule.
-
-        """
-        # TODO expecting a warning.
-        fname = 'simplesim_bypass_wrap'
-        self.sim.add_source(cards.CriticalityPoints([[np.pi, np.pi, 0]]))
-        inp = inputfile.MCNPInput(self.sim, float_format="%.50e")
-        inp.write(fname)
-        #self.assertTrue(mock_warn.called)
-        os.unlink(fname)
 
     def test_user_card(self):
         """Tests the functionality that a user can add their own card."""
