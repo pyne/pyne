@@ -89,8 +89,9 @@ class ICard(object):
 
         """
         # Somebody on the internet said to use super() even when only
-        # subclassing from object.
-        super(ICard, self).__init__()
+        # subclassing from object. I'm commenting this out because it prevents
+        # MaterialCustom from working.
+        #super(ICard, self).__init__()
         self.unique = unique
         if self.unique: self._name = name
         else:            self.name = name
@@ -435,7 +436,7 @@ class CellMCNP(Cell):
     """A cell card with keyword options that are available in MCNP. Thus, it
     only makes sense to use this card if writing an input for MCNP. A number of
     the keyword arguments are for a particular particle. The particles
-    available are given in py:class:`Particle`. The user provides the full
+    available are given in :py:class:`Particle`. The user provides the full
     name of the particle, as given as keys in :py:attr:`Particle.mcnp_abbrev`.
     The card will then use the appropriate particle designator when writing the
     card.
@@ -1016,7 +1017,7 @@ class Material(ICard, material.Material):
     .. inheritance-diagram:: pyne.simplesim.cards.Material
 
     """
-    def __init__(self, *args, **kwargs):
+    def __init__(self, name, *args, **kwargs):
         """
         Parameters
         ----------
@@ -1055,7 +1056,7 @@ class Material(ICard, material.Material):
            h2o.from_atom_frac({10010: 2.0, 'O16': 1.0})
 
         """
-        super(Material, self).__init__(*args, **kwargs)
+        super(Material, self).__init__(*args, name=name, **kwargs)
         self.description = kwargs.get('description', None)
         self.tables = kwargs.get('tables', dict())
         # Find longest table ID. Used in card printing for prettiness.
@@ -2686,7 +2687,8 @@ class Distribution(ICard):
                 'gauss_beam': 41} 
 
     # TODO keys can be vectors (3 elements)
-    def __init__(self, name, keys, vals, key_setting=None, val_setting=None):
+    def __init__(self, name, keys, vals, key_setting=None, val_setting=None,
+                 **kwargs):
         """The ``keys`` are the independent variable in the distribution, and
         the ``vals`` are probability values for the independent variable.
 
@@ -2803,7 +2805,7 @@ class Distribution(ICard):
             sd = Distribution('distA', [0, 10], [1, 3], 'analytic', 'watt')
 
         """
-        super(Distribution, self).__init__(name)
+        super(Distribution, self).__init__(name, **kwargs)
         self.key_setting = key_setting
         self.val_setting = val_setting
         self.keys = keys
@@ -4192,7 +4194,7 @@ class Transformation(IMisc):
     """
     # TODO support for MCNP's less-than-9-element transformation matrices.
     def __init__(self, name, displacement, rotation, aux_in_main=True,
-                 degrees=False):
+                 degrees=False, **kwargs):
         """
         Parameters
         ----------
@@ -4228,7 +4230,7 @@ class Transformation(IMisc):
                     degrees=True)
 
         """
-        super(Transformation, self).__init__(name)
+        super(Transformation, self).__init__(name, **kwargs)
         self.displacement = displacement
         # For numpy matrices.
         if hasattr(rotation, 'tolist'): self.rotation = rotation.tolist()
@@ -4910,6 +4912,7 @@ class PhotonWeight(ICellMod):
 
     """
     Weight = collections.namedtuple('Weight', ['setting', 'pre_weight'])
+    """Named tuple with which input entries are stored."""
 
     def __init__(self):
         # The reason for the basic constructor is that it is important that I
@@ -6467,11 +6470,20 @@ class Vector(IMisc):
 
 class Burn(IMisc):
 
-    def __init__(self, times=None, power_fracs=None, power=None,
-            materials=None, matl_omit=None, min_frac=None,
-            chain_convergence=None, fp_tier=None,
-            out_order=None, out_per_step=False, model_opt=None,
-            volume=None, conc_change=None):
+    def __init__(self,
+                 times=None,
+                 power_fracs=None,
+                 power=None,
+                 materials=None,
+                 matl_omit=None,
+                 min_frac=None,
+                 chain_convergence=None,
+                 fp_tier=None,
+                 out_order=None,
+                 out_per_step=False,
+                 model_opt=None,
+                 volume=None,
+                 conc_change=None):
         # TODO
         pass
     #def __init__(self, times=[1], power_fracs, power=1, materials=None,
@@ -6481,44 +6493,143 @@ class Burn(IMisc):
 
 
 class Custom(ICard):
-    def __init__(self, comment=None, mcnp=None):
-        self.comment_string = comment
-        self.mcnp_string = mcnp
+    """Allows the user to specify a custom card. It is logical for this class,
+    in the future, to have attributes like ``serpent``."""
+
+    def __init__(self, *args, **kwargs):
+        """
+        Parameters
+        ----------
+        name : str
+            Name of the card. Must be unique within the type of card.
+        comment : str, optional
+            A comment to be placed in the input file, if comments are
+            requested.
+        mcnp : str, optional
+            The card to be printed in an MCNP input. Must be given for any card
+            that will be used in generating an MCNP input.
+
+        """
+        # I am intentionally avoiding using super().
+        ICard.__init__(self, *args, **kwargs)
+        self.comment_string = kwargs.get('comment', None)
+        self.mcnp_string = kwargs.get('mcnp', None)
 
     def comment(self):
+        if not self.comment_string:
+            return "Custom card."
         return self.comment_string
 
-    def mcnp(self):
+    def mcnp(self, float_format, sim, number=None):
+        """Raises an exception if the ``mcnp`` attribute is not defined."""
         if not self.mcnp_string:
             raise Exception("mcnp not defined on custom {0}.".format(
                 self))
-        return self.mcnp_string
+        return "{0}{1}".format(
+                "{0} ".format(number) if number else "",
+                self.mcnp_string)
 
 
 class CellCustom(Custom, Cell):
-    pass
-#    def __init__(self, **kwargs):
-#        super(CellCustom, self).__init__(**kwargs)
-
-
-class DistributionCustom(Custom, Distribution):
-    pass
+    """Custom :py:class:`Cell` card."""
+    # Provide number automatically.
+    # TODO correct spacing given the number.
+    def mcnp(self, float_format, sim):
+        return super(CellCustom, self).mcnp(float_format, sim,
+                sim.sys.cell_num(self.name))
 
 
 class SurfaceCustom(Custom, ISurface):
+    """Custom :py:class:`ISurface` card."""
+    # Provide number automatically.
+    # TODO correct spacing given the number.
+    def mcnp(self, float_format, sim):
+        return super(SurfaceCustom, self).mcnp(float_format, sim,
+                sim.sys.surface_num(self.name))
+
+
+class MaterialCustom(Custom, Material):
+    """Custom :py:class:`Material` card. NOTE The name of the MaterialCustom
+    card must be given as a keyword argument, otherwise an error will arise::
+
+        mc = MaterialCustom(name='matc', comment='Made in USA', mcnp='...')
+
+    """
+    # Provide number automatically.
+    # TODO correct spacing given the number.
+    def mcnp(self, float_format, sim):
+        return super(MaterialCustom, self).mcnp(float_format, sim,
+                sim.sys.material_num(self.name))
+
+
+class SourceCustom(Custom, ISource):
+    """Custom :py:class:`ISource` card."""
     pass
+
+
+class DistributionCustom(Custom, Distribution):
+    """Custom :py:class:`Distribution` card."""
+    # Provide number automatically.
+    # TODO correct spacing given the number.
+    def mcnp(self, float_format, sim):
+        return super(DistributionCustom, self).mcnp(float_format, sim,
+                sim.dist_num(self.name))
 
 
 class TallyCustom(Custom, ITally):
-    pass
+    """Custom :py:class:`ITally` card. The card is printed in the order that it
+    is added, but unlike with the other custom cards the user must provide
+    their own tally number.
+
+    """
+    def __init__(self, *args, **kwargs):
+        """
+        Parameters
+        ----------
+        name : str
+            Name of the card. Must be unique within the type of card.
+        comment : str, optional
+            A comment to be placed in the input file, if comments are
+            requested.
+        mcnp : str, optional
+            The card to be printed in an MCNP input. Must be given for any card
+            that will be used in generating an MCNP input. If ``class`` not
+            given, must include tally number. Otherwise, does not include a
+            tally number.
+        tallyclass : :py:class:`ITally` class object, optional
+            Since each type of tally is numbered separately, the user may want
+            to specify which tally class to use so that the custom tally is
+            added in the right place. If this is not provided, then the user
+            must provide the tally number in the output string (e.g. in
+            ``mcnp``).
+
+        """
+        # I am intentionally avoiding using super().
+        super(TallyCustom, self).__init__(*args, **kwargs)
+        self.comment_string = kwargs.get('comment', None)
+        self.mcnp_string = kwargs.get('mcnp', None)
+        self.tallyclass = kwargs.get('tallyclass', None)
+
+    def mcnp(self, float_format, sim):
+        if self.tallyclass:
+            return super(TallyCustom, self).mcnp(float_format, sim,
+                    sim.tally_num(self.name))
+        else:
+            return super(TallyCustom, self).mcnp(float_format, sim)
 
 
 class MiscCustom(Custom, IMisc):
+    """Custom :py:class:`IMisc` card."""
     pass
 
 
 class TransformationCustom(Custom, Transformation):
-    pass
+    """Custom :py:class:`Transformation` card."""
+    # Provide number automatically.
+    # TODO correct spacing given the number.
+    def mcnp(self, float_format, sim):
+        return super(TransformationCustom, self).mcnp(float_format, sim,
+                sim.transformation_num(self.name))
 
 
 class Particle(object):
@@ -6571,6 +6682,7 @@ class Particle(object):
                    'helium-4': 'A',
                    'heavy_ions': '#'
                    }
+    """Map of particle names to their abbreviations in MCNP."""
 
     def __init__(self, name):
         """
