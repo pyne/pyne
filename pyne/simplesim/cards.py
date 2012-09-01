@@ -3360,6 +3360,8 @@ class SurfaceCurrent(ICellSurfTally):
     .. inheritance-diagram:: pyne.simplesim.cards.SurfaceCurrent
 
     """
+    mcnp_num = 1
+
     def __init__(self, name, particle, cards, total=False, **kwargs):
         """
         Parameters
@@ -3404,7 +3406,8 @@ class SurfaceCurrent(ICellSurfTally):
         return string
 
     def mcnp(self, float_format, sim):
-        string = super(SurfaceCurrent, self).mcnp(float_format, sim, 1)
+        string = super(SurfaceCurrent, self).mcnp(float_format, sim,
+                self.mcnp_num)
         if self.total: string += " T"
         return string
 
@@ -3475,6 +3478,8 @@ class SurfaceFlux(IAverageTally):
     .. inheritance-diagram:: pyne.simplesim.cards.SurfaceFlux
 
     """
+    mcnp_num = 2
+
     def __init__(self, name, particle, cards, **kwargs):
         """
         Parameters
@@ -3514,7 +3519,7 @@ class SurfaceFlux(IAverageTally):
         return super(SurfaceFlux, self).comment("Surface flux")
 
     def mcnp(self, float_format, sim):
-        return super(SurfaceFlux, self).mcnp(float_format, sim, 2)
+        return super(SurfaceFlux, self).mcnp(float_format, sim, self.mcnp_num)
 
     @property
     def total(self): return self._total
@@ -3529,6 +3534,8 @@ class CellFlux(IAverageTally):
     .. inheritance-diagram:: pyne.simplesim.cards.CellFlux
 
     """
+    mcnp_num = 4
+
     def __init__(self, name, particle, cards, **kwargs):
         """
         Parameters
@@ -3568,7 +3575,7 @@ class CellFlux(IAverageTally):
         return super(CellFlux, self).comment("Cell flux")
 
     def mcnp(self, float_format, sim):
-        return super(CellFlux, self).mcnp(float_format, sim, 4)
+        return super(CellFlux, self).mcnp(float_format, sim, self.mcnp_num)
 
 
 class CellEnergyDeposition(IAverageTally):
@@ -3578,6 +3585,8 @@ class CellEnergyDeposition(IAverageTally):
     .. inheritance-diagram:: pyne.simplesim.cards.CellEnergyDeposition
 
     """
+    mcnp_num = 6
+
     # TODO in mcnp input, prevent particle all and alt_units
     def __init__(self, name, particles, cards, **kwargs):
         """
@@ -3642,7 +3651,8 @@ class CellEnergyDeposition(IAverageTally):
             pre = '+'
         else:
             pre = ''
-        return super(CellEnergyDeposition, self).mcnp(float_format, sim, 6,
+        return super(CellEnergyDeposition, self).mcnp(float_format, sim,
+                                                      self.mcnp_num,
                                                       pre=pre)
 
     @property
@@ -3667,6 +3677,7 @@ class CellFissionEnergyDeposition(IAverageTally):
     .. inheritance-diagram:: pyne.simplesim.cards.CellFissionEnergyDeposition
 
     """
+    mcnp_num = 7
     # TODO prevent user from specifying a different particle.
     def __init__(self, name, cards, **kwargs):
         """
@@ -3708,7 +3719,7 @@ class CellFissionEnergyDeposition(IAverageTally):
 
     def mcnp(self, float_format, sim):
         return super(CellFissionEnergyDeposition, self).mcnp(
-                float_format, sim, 7)
+                float_format, sim, self.mcnp_num)
 
 
 class CellPulseHeight(IAverageTally):
@@ -3718,6 +3729,8 @@ class CellPulseHeight(IAverageTally):
     .. inheritance-diagram:: pyne.simplesim.cards.CellPulseHeight
 
     """
+    mcnp_num = 8
+
     def __init__(self, name, particles, cards, **kwargs):
         """
         Parameters
@@ -3755,7 +3768,8 @@ class CellPulseHeight(IAverageTally):
         return super(CellPulseHeight, self).comment("Pulse height")
 
     def mcnp(self, float_format, sim, **kwargs):
-        return super(CellPulseHeight, self).mcnp(float_format, sim, 8,
+        return super(CellPulseHeight, self).mcnp(float_format, sim,
+                                                 self.mcnp_num,
                                                  **kwargs)
 
     @property
@@ -3818,6 +3832,8 @@ class IDetector(ITally):
     tallies.
     
     """
+    mcnp_num = 5
+
     def __init__(self, name, particle, args_per_set, *args, **kwargs):
         """
         Parameters
@@ -3980,7 +3996,8 @@ class PointDetector(IDetector):
                 "{1:g} {2}".format(det.pos, det.soe_rad, det.soe_units))
 
     def mcnp(self, float_format, sim):
-        return super(PointDetector, self).mcnp(float_format, sim, 5)
+        return super(PointDetector, self).mcnp(float_format, sim,
+                                               self.mcnp_num)
 
     def _mcnp_unit(self, float_format, sim, det):
         formatstr = "{0} {0} {0} {0}".format(float_format)
@@ -4087,7 +4104,8 @@ class RingDetector(IDetector):
                     det.rad, det.soe_rad, det.soe_units))
 
     def mcnp(self, float_format, sim):
-        return super(RingDetector, self).mcnp(float_format, sim, 5,
+        return super(RingDetector, self).mcnp(float_format, sim,
+                self.mcnp_num,
                 post=self.cartesian_axis.upper())
 
     def _mcnp_unit(self, float_format, sim, det):
@@ -6494,8 +6512,9 @@ class Burn(IMisc):
 
 class Custom(ICard):
     """Allows the user to specify a custom card. It is logical for this class,
-    in the future, to have attributes like ``serpent``."""
-
+    in the future, to have attributes like ``serpent``.
+    
+    """
     def __init__(self, *args, **kwargs):
         """
         Parameters
@@ -6507,7 +6526,15 @@ class Custom(ICard):
             requested.
         mcnp : str, optional
             The card to be printed in an MCNP input. Must be given for any card
-            that will be used in generating an MCNP input.
+            that will be used in generating an MCNP input. This excludes the
+            card number, except for one case with tallies.
+
+        Examples
+        --------
+        Except for materials, custom cards look like the following::
+
+            cust = SurfaceCustom('customsurf', comment='My Surface', 
+                                               mcnp='RPP ...')
 
         """
         # I am intentionally avoiding using super().
@@ -6520,12 +6547,13 @@ class Custom(ICard):
             return "Custom card."
         return self.comment_string
 
-    def mcnp(self, float_format, sim, number=None):
+    def mcnp(self, float_format, sim, number=None, pre=None):
         """Raises an exception if the ``mcnp`` attribute is not defined."""
         if not self.mcnp_string:
             raise Exception("mcnp not defined on custom {0}.".format(
                 self))
-        return "{0}{1}".format(
+        return "{0}{1}{2}".format(
+                pre if pre else "",
                 "{0} ".format(number) if number else "",
                 self.mcnp_string)
 
@@ -6559,7 +6587,7 @@ class MaterialCustom(Custom, Material):
     # TODO correct spacing given the number.
     def mcnp(self, float_format, sim):
         return super(MaterialCustom, self).mcnp(float_format, sim,
-                sim.sys.material_num(self.name))
+                sim.sys.material_num(self.name), pre="M")
 
 
 class SourceCustom(Custom, ISource):
@@ -6569,11 +6597,46 @@ class SourceCustom(Custom, ISource):
 
 class DistributionCustom(Custom, Distribution):
     """Custom :py:class:`Distribution` card."""
+    def __init__(self, *args, **kwargs):
+        """
+        Parameters
+        ----------
+        name : str
+            See :py:class:`Custom`.
+        comment : str, optional
+            See :py:class:`Custom`.
+        mcnp : list of 2-element tuples, optional
+            Unlike with :py:class:`Custom`, this is a list of 2-element tuples,
+            since a distribution in MCNP is done with a number of cards (i.e.
+            SI, SP, SB).
+
+        Examples
+        --------
+        The following is expected::
+
+            dc = DistributionCustom('disti', comment='My dist.',
+                    mcnp=[('SP', 'prob string')])
+            dc = DistributionCustom('disti', comment='My dist.',
+                    mcnp=[('SI', 'info string'), ('SP', 'prob string')])
+
+        """
+        super(DistributionCustom, self).__init__(*args, **kwargs)
+
     # Provide number automatically.
     # TODO correct spacing given the number.
     def mcnp(self, float_format, sim):
-        return super(DistributionCustom, self).mcnp(float_format, sim,
-                sim.dist_num(self.name))
+        # Use superclass's exception, but not its output.
+        super(DistributionCustom, self).mcnp(float_format, sim)
+        string = ""
+        for pair in self.mcnp_string:
+            prestr = pair[0]
+            content = pair[1]
+            string += "{0}{1} {2}\n".format(
+                    prestr,
+                    sim.dist_num(self.name),
+                    content)
+
+        return string
 
 
 class TallyCustom(Custom, ITally):
@@ -6587,15 +6650,14 @@ class TallyCustom(Custom, ITally):
         Parameters
         ----------
         name : str
-            Name of the card. Must be unique within the type of card.
+            See :py:class:`Custom`.
         comment : str, optional
-            A comment to be placed in the input file, if comments are
-            requested.
+            See :py:class:`Custom`.
         mcnp : str, optional
-            The card to be printed in an MCNP input. Must be given for any card
-            that will be used in generating an MCNP input. If ``class`` not
-            given, must include tally number. Otherwise, does not include a
-            tally number.
+            See :py:class:`Custom`.
+        mcnp_pre : str, optional
+            A string (i.e. '+' or '*') to print before the tally number (i.e.
+            'F14').
         tallyclass : :py:class:`ITally` class object, optional
             Since each type of tally is numbered separately, the user may want
             to specify which tally class to use so that the custom tally is
@@ -6603,19 +6665,37 @@ class TallyCustom(Custom, ITally):
             must provide the tally number in the output string (e.g. in
             ``mcnp``).
 
+        Examples
+        --------
+        The tallyclass does not need to be provided::
+
+            tal1 = TallyCustom('tal1', comment="", mcnp="F14:N 1 2 3")
+
+        But if it is provided, the class takes care of printing the begining of
+        the card::
+
+            tal1 = TallyCustom('tal1', comment="", mcnp=":N 1 2 3",
+                    tallyclass=CellFlux)
+            tal1 = TallyCustom('tal1', comment="", mcnp=":N 1 2 3",
+                    tallyclass=CellFlux)
+            tal1 = TallyCustom('tal1', comment="", mcnp=":N 1 2 3",
+                    mcnp_pre='*',
+                    tallyclass=CellFlux)
+
         """
         # I am intentionally avoiding using super().
         super(TallyCustom, self).__init__(*args, **kwargs)
-        self.comment_string = kwargs.get('comment', None)
-        self.mcnp_string = kwargs.get('mcnp', None)
+        self.mcnp_pre = kwargs.get('mcnp_pre', "")
         self.tallyclass = kwargs.get('tallyclass', None)
 
     def mcnp(self, float_format, sim):
         if self.tallyclass:
             return super(TallyCustom, self).mcnp(float_format, sim,
-                    sim.tally_num(self.name))
+                    10 * sim.tally_num(self.name) + tallyclass.mcnp_num,
+                    pre=(self.mcnp_pre + "F"))
         else:
-            return super(TallyCustom, self).mcnp(float_format, sim)
+            return super(TallyCustom, self).mcnp(float_format, sim,
+                    pre=(self.mcnp_pre + "F"))
 
 
 class MiscCustom(Custom, IMisc):
@@ -6629,7 +6709,7 @@ class TransformationCustom(Custom, Transformation):
     # TODO correct spacing given the number.
     def mcnp(self, float_format, sim):
         return super(TransformationCustom, self).mcnp(float_format, sim,
-                sim.transformation_num(self.name))
+                sim.transformation_num(self.name), pre="TR")
 
 
 class Particle(object):
