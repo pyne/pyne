@@ -2254,24 +2254,32 @@ class TestMCNPInput(unittest.TestCase):
         self.sim.add_misc(cards.EnergyGrid('egrid0', None,
                 10**np.arange(-9.9, 1.1, 0.1)))
 
+        # Customs.
+        sc = cards.SourceCustom('sourcec', comment="sourcehey",
+            mcnp="sourcehey")
+        self.sim.add_source(sc)
+
+        dc = cards.DistributionCustom('distc', comment="disthey",
+            mcnp=[('SI', "disthey"), ('SP', 'distheyp')])
+        self.sim.add_dist(dc)
+
+        # More complicated.
+        t1 = cards.TallyCustom('tallyc', comment="tallyhey", mcnp="tallyhey")
+        t2 = cards.TallyCustom('tally2', comment="tallyhey", mcnp="tallyhey",
+                tallyclass=cards.CellFlux)
+        t3 = cards.TallyCustom('tally3', comment="tallyhey", mcnp="tallyhey",
+                tallyclass=cards.CellFlux,
+                mcnp_pre='*')
+        self.sim.add_tally(t1)
+        self.sim.add_tally(t2)
+        self.sim.add_tally(t3)
+
+        mc = cards.MiscCustom('miscc', comment="mischey", mcnp="mischey")
+        self.sim.add_misc(mc) 
         
-        #sc = cards.SourceCustom('sourcec', comment="sourcehey",
-        #    mcnp="sourcehey")
-        #
-        #
-        #dc = cards.DistributionCustom('distc', comment="disthey",
-        #    mcnp="disthey")
-        #
-        #
-        ## ?
-        #tc = cards.TallyCustom('tallyc', comment="tallyhey", mcnp="tallyhey")
-        #
-        #
-        #mc = cards.MiscCustom('miscc', comment="mischey", mcnp="mischey")
-        #
-        #
-        #tc = cards.TransformationCustom('transc', comment="transhey",
-        #        mcnp="transhey")
+        tc = cards.TransformationCustom('transc', comment="transhey",
+                mcnp="transhey")
+        self.sim.add_transformation(tc)
 
         # Create input file.
         inp = inputfile.MCNPInput(self.sim, title="Infinite lattice.")
