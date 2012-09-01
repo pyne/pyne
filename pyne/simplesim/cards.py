@@ -6,8 +6,72 @@
 
 The user does not interact with this module. Rather, the user interacts with
 the :py:mod:`definition` module. Instances of classes in the :py:mod:`definition` module
-contains instances of the classes in this module.  Below is the reference for
+contains instances of the classes in this module.
+
+TODO
+Below is the reference for
 the module.
+
+.. moduleauthor:: Chris Dembia <cld72@cornell.edu>
+
+*****
+Index
+*****
+
+An inheritance diagram of all the classes in this module can be found at
+:ref:`pyne_simplesim_inheritance`.
+
+------------
+System cards
+------------
+These are the cards that are provided in a
+:py:class:`pyne.simplesim.definition.SystemDefinition`.
+
+.. autosummary::
+    :nosignatures:
+
+    Cell
+    CellMCNP
+    Material
+
+
+Surface cards
+^^^^^^^^^^^^^
+Surface cards are added to a system using 
+:py:meth:`pyne.simplesim.definition.SystemDefinition.add_surface`.
+
+.. autosummary::
+    :nosignatures:
+
+    ISurface
+    IAxisSurface
+    AxisCylinder
+    AxisPlane
+
+------------
+Custom cards
+------------
+A custom card is used when other cards, within a given category, do not satisfy
+the needs of the user.
+
+.. autosummary::
+    :nosignatures:
+
+    Custom
+    CellCustom
+    SurfaceCustom
+    MaterialCustom
+    SourceCustom
+    DistributionCustom
+    TallyCustom
+    MiscCustom
+    TransformationCustom
+
+
+*********
+Reference
+*********
+
 
 """
 
@@ -21,7 +85,6 @@ the module.
 # object that Anthony has once they implement a comment.
 # Maybe I place an underscore for abstract base classes so that the user
 # doesn't see them, but I want them to see them...
-# TODO mcnp_particle ref's.
 # TODO allow card suppression (don't delete but don't print it).
 # TODO allow readfile commands.
 # TODO emphasize how easy it is to modify the cards, just subclass it
@@ -433,7 +496,8 @@ class Cell(ICard):
 
 
 class CellMCNP(Cell):
-    """A cell card with keyword options that are available in MCNP. Thus, it
+    """A cell card with keyword options that are available in MCNP.
+    Thus, it
     only makes sense to use this card if writing an input for MCNP. A number of
     the keyword arguments are for a particular particle. The particles
     available are given in :py:class:`Particle`. The user provides the full
@@ -1007,7 +1071,8 @@ class LatticeByArray(ICard):
         
 
 class Material(ICard, material.Material):
-    """In MCNP, this is the **M** card. Adds the attributes
+    """In MCNP, this is the **M** card.
+    Adds the attributes
     :py:attr:`description`, :py:attr:`tables` and the methods
     :py:meth:`comment` and :py:meth:`mcnp` to
     :py:class:`pyne.material.Material`. The :py:attr:`name` must be provided
@@ -1607,8 +1672,12 @@ class IMacrobody(ISurface):
     # TODO abstract method for obtaining "sub"-surfaces. This is one reason why
     # you'd pass objects rather than just object names around: I could pass
     # IMacrobody.top, etc.
+    # TODO facets are not functional because they have the same name as their
+    # macrobody, so when the System Definition looks it up, it only finds the
+    # macrobody and not the facet. I don't know how to solve this yet.
     def __init__(self, name, *args, **kwargs):
         super(IMacrobody, self).__init__(name, *args, **kwargs)
+        raise Exception("Facets are not implemented properly yet.")
 
     @abc.abstractmethod
     def comment(self, *args):
@@ -4346,6 +4415,8 @@ class ICellMod(IMisc):
 
     @abc.abstractmethod
     def set(self, cell):
+        """Add an entry or modify an existing one. See subclasses."""
+
         if cell not in self.cells: self.cells += [cell]
 
     @abc.abstractmethod
@@ -4439,7 +4510,8 @@ class Universes(ICellMod):
         self._process_varargs(args)
 
     def set(self, cell, univ_name, truncate):
-        """
+        """Add an entry or modify an existing one.
+
         Parameters
         ----------
         cell : str name of :py:class:`Cell` or subclass
@@ -4534,7 +4606,8 @@ class Fill(ICellMod):
         self._process_varargs(args)
 
     def set(self, cell, univ_name):
-        """
+        """Add an entry or modify an existing one.
+
         Parameters
         ----------
         cell : str name of :py:class:`Cell` or subclass
@@ -4618,7 +4691,8 @@ class Lattice(ICellMod):
         self._process_varargs(args)
 
     def set(self, cell, setting):
-        """
+        """Add an entry or modify an existing one.
+
         Parameters
         ----------
         cell : str name of :py:class:`Cell` or subclass
@@ -4698,7 +4772,8 @@ class Volume(ICellMod):
         self._process_varargs(args)
 
     def set(self, cell, vol):
-        """
+        """Add an entry or modify an existing one.
+
         Parameters
         ----------
         cell : str name of :py:class:`Cell` or subclass
@@ -4783,7 +4858,8 @@ class Area(ICellMod):
         self._process_varargs(args)
 
     def set(self, cell, area):
-        """
+        """Add an entry or modify an existing one.
+
         Parameters
         ----------
         cell : str name of :py:class:`Cell` or subclass
@@ -4866,7 +4942,8 @@ class FissionTurnoff(ICellMod):
         self._process_varargs(args)
 
     def set(self, cell, setting):
-        """
+        """Add an entry or modify an existing one.
+
         Parameters
         ----------
         cell : str name of :py:class:`Cell` or subclass
@@ -4940,7 +5017,8 @@ class PhotonWeight(ICellMod):
         self.weights = dict()
 
     def set(self, cell, setting, pre_weight=False):
-        """
+        """Add an entry or modify an existing one.
+
         Parameters
         ----------
         cell : str name of :py:class:`Cell` or subclass
@@ -5063,7 +5141,8 @@ class DetectorContribution(ICellMod):
         self._process_varargs(args)
 
     def set(self, cell, prob):
-        """
+        """Add an entry or modify an existing one.
+
         Parameters
         ----------
         cell : str name of :py:class:`Cell` or subclass
@@ -5184,7 +5263,8 @@ class Temperature(ICellMod):
         self._process_varargs(args)
 
     def set(self, cell, temp):
-        """
+        """Add an entry or modify an existing one.
+
         Parameters
         ----------
         cell : str name of :py:class:`Cell` or subclass
@@ -5330,6 +5410,7 @@ class ICellModParticle(IUniqueParticle):
 
     @abc.abstractmethod
     def set(self, cell):
+        """Add an entry or modify an existing one. See subclasses."""
         if cell not in self.cells: self.cells += [cell]
 
     @abc.abstractmethod
@@ -5418,7 +5499,8 @@ class Importance(ICellModParticle):
         self._process_varargs(args)
 
     def set(self, cell, imp):
-        """
+        """Add an entry or modify an existing one.
+
         Parameters
         ----------
         cell : str name of :py:class:`Cell` or subclass.
@@ -5817,7 +5899,8 @@ class WeightWindowBound(ICellModParticle):
         self._process_varargs(args)
 
     def set(self, idx_energy, idx_time, cell, bound):
-        """
+        """Add an entry or modify an existing one.
+
         Parameters
         ----------
         idx_energy : int
@@ -6174,7 +6257,8 @@ class DXTRANContribution(ICellMod):
         self._process_varargs(args)
 
     def set(self, cell, prob):
-        """
+        """Add an entry or modify an existing one.
+
         Parameters
         ----------
         cell : str name of :py:class:`Cell` or subclass
@@ -6309,7 +6393,8 @@ class DXTRANSpheres(IUniqueParticle):
             self.set(*args[i_start:i_start+self._n_args_per_set])
 
     def set(self, sph_name, center, inner_radius, outer_radius):
-        """
+        """Add an entry or modify an existing one.
+
         Parameters
         ----------
         sph_name : str
@@ -6577,7 +6662,8 @@ class SurfaceCustom(Custom, ISurface):
 
 
 class MaterialCustom(Custom, Material):
-    """Custom :py:class:`Material` card. NOTE The name of the MaterialCustom
+    """Custom :py:class:`Material` card.
+    NOTE The name of the MaterialCustom
     card must be given as a keyword argument, otherwise an error will arise::
 
         mc = MaterialCustom(name='matc', comment='Made in USA', mcnp='...')
@@ -6640,7 +6726,8 @@ class DistributionCustom(Custom, Distribution):
 
 
 class TallyCustom(Custom, ITally):
-    """Custom :py:class:`ITally` card. The card is printed in the order that it
+    """Custom :py:class:`ITally` card.
+    The card is printed in the order that it
     is added, but unlike with the other custom cards the user must provide
     their own tally number.
 
