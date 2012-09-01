@@ -22,6 +22,13 @@ definitions: system definitions and simulation definitions:
       elements relevant to the abilities of specific codes would be found in
       classes such as :py:class:`MCNPSimulation`.
 
+
+An inheritance diagram of all the classes in this module can be found at
+:ref:`pyne_simplesim_inheritance`.
+
+.. moduleauthor:: Chris Dembia <cld72@cornell.edu>
+
+
 """
 # TODO check overwriting warning.
 # TODO test the exceptions for getting *_num() not in list/dict.

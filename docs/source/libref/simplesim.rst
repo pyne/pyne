@@ -78,43 +78,20 @@ Though the ``cards`` module contains the most basic information needed to use
 this class, its reference below is given after the references for
 ``definition`` and ``input``, since this module is by far the largest.
 
-The original author of this package is Chris Dembia, and it was developed in
-consultation with Anthony Scopatz and Paul Wilson. See :ref:`dev_team` for
-contact information.
 
-*****************
-Definition Module
-*****************
-
-.. automodule:: pyne.simplesim.definition
-    :member-order: 'bysource'
-    :members:
-
-************
-Input Module
-************
-
-.. automodule:: pyne.simplesim.inputfile
-    :member-order: 'bysource'
-    :members:
-
-************
-Cards Module
-************
-
-.. automodule:: pyne.simplesim.cards
-    :member-order: 'groupwise'
-    :members:
-    :show-inheritance:
-
+TODO describe toctree
 
 .. toctree::
     :maxdepth: 1
 
+    simplesim_cards 
     simplesim_nestedgeom
+    simplesim_definition
+    simplesim_inputfile
+    simplesim_inheritance
 
 
-.. autosummary::
-   :nosignatures:
+The original author of this package is Chris Dembia, and it was developed in
+consultation with Anthony Scopatz and Paul Wilson. See :ref:`dev_team` for
+contact information.
 
-   pyne.simplesim.cards

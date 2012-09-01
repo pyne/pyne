@@ -13,6 +13,10 @@ the entire namespace. A suggested way to import the module is::
     import pyne.simplesim.nestedgeom as ng
 
 
+An inheritance diagram of all the classes in this module can be found at
+:ref:`pyne_simplesim_inheritance`.
+
+
 Usage Examples
 --------------
 The subclasses of :py:class:`ICellSurfTally` can take as input any subclass of
