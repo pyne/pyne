@@ -332,6 +332,10 @@ class SystemDefinition(IDefinition):
         return self.materials.keys().index(name) + 1
 
     def universe_num(self, name):
+        """Returns the universe number for the universe name provided. If a
+        universe with that name is not in the system, an exception is raised.
+
+        """
         if name not in self.universes:
             raise StandardError("Universe {0!r} is not in the system.".format(
                     name))
