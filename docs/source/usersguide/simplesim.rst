@@ -34,3 +34,7 @@ Burnup
 
 Explain a possible use scenario for manipulating a reactor: have a script that
 creates the reactor, and have scripts that analyze results, etc...
+
+when card  names need to be unique
+
+search for mcnp name and you will find the card.
