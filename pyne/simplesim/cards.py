@@ -6691,11 +6691,11 @@ class TallyCustom(Custom, ITally):
     def mcnp(self, float_format, sim):
         if self.tallyclass:
             return super(TallyCustom, self).mcnp(float_format, sim,
-                    10 * sim.tally_num(self.name) + tallyclass.mcnp_num,
+                    10 * sim.tally_num(self.name) + self.tallyclass.mcnp_num,
                     pre=(self.mcnp_pre + "F"))
         else:
             return super(TallyCustom, self).mcnp(float_format, sim,
-                    pre=(self.mcnp_pre + "F"))
+                    pre=self.mcnp_pre)
 
 
 class MiscCustom(Custom, IMisc):
