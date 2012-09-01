@@ -95,3 +95,6 @@ The original author of this package is Chris Dembia, and it was developed in
 consultation with Anthony Scopatz and Paul Wilson. See :ref:`dev_team` for
 contact information.
 
+.. moduleauthor:: Chris Dembia <cld72@cornell.edu>
+
+
