@@ -4,15 +4,14 @@
 
     from pyne.simplesim import cards
 
-The user does not interact with this module. Rather, the user interacts with
-the :py:mod:`definition` module. Instances of classes in the :py:mod:`definition` module
-contains instances of the classes in this module.
+The user creates cards, typically only working with the constructors, and then
+adds the cards to a :py:class:`pyne.simplesim.definition.IDefinition`. The user
+can modify cards later on by modifying attributes after the card has been
+created.
 
-TODO
-Below is the reference for
-the module.
-have a nice TOC here with 2 levels of depth
-
+The first section on this page, Index, list all the cards with their category.
+The second section is Reference, which contains the reference for all the
+classes. In the Reference, the classes are listed in alphabeticla order.
 
 .. moduleauthor:: Chris Dembia <cld72@cornell.edu>
 
@@ -257,6 +256,10 @@ not through these cards.
 Reference
 *********
 
+All classes are listed in alphabetical order. Cards that are available in MCNP
+have their MCNP card name in the reference; feel free to search for it to find
+the related simplesim card.
+
 """
 
 # TODO if i make a material card, make sure to revert back to the Material
@@ -268,8 +271,6 @@ Reference
 # Disadvantage of actually providing the cell card is now if you want to modify
 # something later, you have to go grab the appropriate cell card, since you
 # don't have the object anymore.
-# TODO testing backlog: (1) modification of ICellMod (2) no vector card
-# exception, (3) weightwindowbound
 # TODO check WWGT default arg effect in WWN.
 # TODO improve inheritance around ICellMod; lots of copied code from
 # ICellModParticle.
@@ -279,19 +280,11 @@ Reference
 # and _mcnp_cell_card
 # TODO in Cell, require that the material is not pyne.card.Material, but is a
 # card here (error check).
-# TODO explain that names must only be unique within a category.
-# TODO altunits for detectors. and also in the comments, and in tests. revisit
-# detector tests completely: need to test altunits, card_type (naasok),
-# altunits printed in comments, and described in detector documentation. check
-# mcnpx for altunits and +/* flags.
 # TODO names can be unique to tally type even.
 # TODO for read/writing, using repr makes recreating really easy; otherwise
 # decoding would take some effort. repr also means that i probably should use
 # name referencing everywhere, not object passing. however using json() would
 # create something more human-readable.
-# TODO talk aobut how i'd prefer for universes to work.
-# TODO move user_custom out of inputfile, and just make CellCustom,
-# SurfaceCustom
 
 import abc
 import collections
@@ -1257,7 +1250,7 @@ class Material(ICard, material.Material):
     .. inheritance-diagram:: pyne.simplesim.cards.Material
 
     """
-    def __init__(self, name, *args, **kwargs):
+    def __init__(self, *args, **kwargs):
         """See :py:class:`pyne.material.Material` for superclass parameters.
 
         Parameters
@@ -1286,17 +1279,17 @@ class Material(ICard, material.Material):
 
         Alternatively, the tables can be specified with the constructor::
 
-           h2o = Material(name='water', tables={10010: '71c'})
-           h2o.from_atom_frac({10010: 2.0, 'O16': 1.0})
+            h2o = Material(name='water', tables={10010: '71c'})
+            h2o.from_atom_frac({10010: 2.0, 'O16': 1.0})
 
         The ``nucname``'s used for ``tables`` can be different from those used
         for ``comp``::
 
-           h2o = Material(name='water', tables={'H1': '71c'})
-           h2o.from_atom_frac({10010: 2.0, 'O16': 1.0})
+            h2o = Material(name='water', tables={'H1': '71c'})
+            h2o.from_atom_frac({10010: 2.0, 'O16': 1.0})
 
         """
-        super(Material, self).__init__(*args, name=name, **kwargs)
+        super(Material, self).__init__(*args, **kwargs)
         self.description = kwargs.get('description', None)
         self.tables = kwargs.get('tables', dict())
         # Find longest table ID. Used in card printing for prettiness.

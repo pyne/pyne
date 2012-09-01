@@ -59,13 +59,13 @@ class IDefinition(object):
             If not provided, then a new definition is created. Otherwise, an
             existing definition is loaded from file ``fname``.
         verbose : bool, optional
-            Prints updates about what is going on.
+            Prints updates about what the class is doing.
 
         """
         self.verbose = verbose
         if fname is not None:
             if self.verbose:
-                print "Opening definition stored in %s." % fname
+                print "Opening definition stored in {0!r}.".format(fname)
             self._open(fname)
         else:
             if self.verbose:
@@ -79,7 +79,7 @@ class IDefinition(object):
 
     @abc.abstractmethod
     def save(self, fname):
-        """Save object data to a JSON file."""
+        """Save object data to a JSON file. Unimplemented."""
         fid = open(fname, 'w')
         #pickle.dump(self, fid)
         fid.write(DefinitionEncoder(indent=3).encode(self))
@@ -87,15 +87,22 @@ class IDefinition(object):
 
     @abc.abstractmethod
     def _open(self, fname):
-        """Open object data from a JSON file."""
+        """Open object data from a JSON file. Unimplemented."""
         # TODO Ensure the file exists.
         fid = open(fname)
-        self = pickle.load(fname)
+        # Process.
+        #self = pickle.load(fname)
         fid.close()
 
     def _assert_unique(self, card_type, card):
         """Checks if the name on a card has already been used for another
         card. If so, a warning is issued.
+
+        Parameters
+        ----------
+        card_type : str
+            String identifying a type/category of card.
+        card : :py:class:`pyne.simplesim.cards.ICard` or subclass
 
         Returns
         -------
@@ -146,17 +153,15 @@ class IDefinition(object):
 class SystemDefinition(IDefinition):
     """This class creates a system definition as is done in MCNPX: homogeneous
     regions in space in the reactor, called cells, are defined through the
-    intersection, union, etc of surfaces and are filled by materials. The user
-    uses the following methods of this class:
-
-    - :py
-
-        TODO
+    intersection, union, etc of surfaces and are filled by materials.
 
     """
-    def __init__(self, fname=None, verbose=True):
-        """Creates a new reactor definition or loads one from a JSON file."""
-        super(SystemDefinition, self).__init__(fname, verbose)
+    def __init__(self, **kwargs):
+        """Creates a new reactor definition or loads one from a JSON file. See
+        :py:class:`IDefinition`.
+        
+        """
+        super(SystemDefinition, self).__init__(**kwargs)
 
     def _create_new(self):
         self._surfaces = collections.OrderedDict()
@@ -165,8 +170,24 @@ class SystemDefinition(IDefinition):
         self._universes = list()
 
     def add_cell(self, *args):
-        """
-        TODO
+        """Adds a cell to the system, and also adds the materials and surfaces
+        in those cells to the system. This method can also be used to replace a
+        cell that has already been given to the system. If this cell is part of
+        a universe, that universe is also registered with the system.
+
+        Parameters
+        ----------
+        cell : :py:class:`pyne.simplesim.cards.Cell` or subclass
+        *args : cell, ...
+            Any number of cells.
+
+        Examples
+        --------
+        This card is used as follows::
+
+            sys = SystemDefinition()
+            sys.add_cell(cellA)
+            sys.add_cell(cellB, cellC)
 
         """
         for cell in args:
@@ -196,8 +217,22 @@ class SystemDefinition(IDefinition):
     def add_surface(self, *args):
         """This method is only used by the user for surfaces that are not on a
         cell card. Surfaces on a cell card are added automatically. Duplication
-        is checked by card name, not by using Python's 'is' operator to compare
-        the objects.
+        is checked by card name, therefore surface names should be unique
+        unless the user intends to replace a surface.
+
+        Parameters
+        ----------
+        surface : :py:class:`pyne.simplesim.cards.ISurface` subclass
+        *args : surface, ...
+            Any number of surfaces.
+
+        Examples
+        --------
+        This card is used as follows::
+
+            sys = SystemDefinition()
+            sys.add_surface(surfA)
+            sys.add_surface(surfB, surfC)
 
         """
         for surface in args:
@@ -205,6 +240,7 @@ class SystemDefinition(IDefinition):
             self._surfaces[surface.name] = surface
 
     def _add_unique_surfaces(self, regionleaf):
+        # Used by add_cell().
         name = regionleaf.surface.name
         if self.verbose:
             print "Trying to add surface {0!r}...".format(name)
@@ -220,7 +256,23 @@ class SystemDefinition(IDefinition):
     def add_material(self, *args):
         """This method is only used by the user for materials that are not on a
         cell card.  Materials on cell cards are added automatically.
-        TODO
+        Alternatively, this method can be used to replace an existing material.
+        Note that this must be a :py:class:`pyne.simplesim.cards.Material`, not
+        just a :py:class:`pyne.material.Material`.
+
+        Parameters
+        ----------
+        material : :py:class:`pyne.simplesim.cards.Material` subclass
+        *args : material, ...
+            Any number of materials.
+
+        Examples
+        --------
+        This card is used as follows::
+
+            sys = SystemDefinition()
+            sys.add_material(matA)
+            sys.add_material(matB, matC)
 
         """
         for material in args:
@@ -286,20 +338,74 @@ class SystemDefinition(IDefinition):
         return self.universes.index(name) + 1
 
     def remove_cell(self, name):
-        raise Exception("Not implemented.")
+        """Removes a cell from the system. No dependency check is performed.
+
+        Parameters
+        ----------
+        name : str
+            Name of the cell to remove.
+
+        Returns
+        -------
+        cell : :py:class:`pyne.simplesim.cards.ICell`
+            The cell that has been removed from the system.
+
+        """
+        # TODO Perform a dependency check.
+        self._cells.pop(name)
 
     def remove_surface(self, name):
-        raise Exception("Not implemented.")
+        """Removes a surface from the system. No dependency check is performed.
+
+        Parameters
+        ----------
+        name : str
+            Name of the surface to remove.
+
+        Returns
+        -------
+        surface : :py:class:`pyne.simplesim.cards.ISurface`
+            The surface that has been removed from the system.
+
+        """
+        # TODO Perform a dependency check.
+        self._surfaces.pop(name)
 
     def remove_material(self, name):
-        raise Exception("Not implemented.")
+        """Removes a material from the system. No dependency check is performed.
+
+        Parameters
+        ----------
+        name : str
+            Name of the material to remove.
+
+        Returns
+        -------
+        material : :py:class:`pyne.simplesim.cards.Material`
+            The material that has been removed from the system.
+
+        """
+        # TODO Perform a dependency check.
+        self._materials.pop(name)
 
     def remove_universe(self, name):
-        raise Exception("Not implemented.")
+        """Removes a universe from the system. No dependency check is performed.
+
+        Parameters
+        ----------
+        name : str
+            Name of the universe to remove.
+
+        Returns
+        -------
+        universe : str
+            The name of the universe that has been removed from the system.
+
+        """
+        # TODO Perform a dependency check.
+        self._universes.pop(self.universes.index(name))
 
     def save(self, fname):
-        """Saves definition to a JSON file. It is unlikely that the class will
-        be amenable to json.dump()."""
         super(SystemDefinition, self).save(fname)
 
     def _open(self, fname):
@@ -307,19 +413,22 @@ class SystemDefinition(IDefinition):
 
     @property
     def surfaces(self):
-        """Ordered dictionary of surfaces (from :py:class:`cards.ISurface`)."""
-        # TODO document that the user should not add cards directly, but can
-        # modify them if so inclined.
+        """Ordered dictionary of surfaces (:py:class:`cards.ISurface`)."""
         return self._surfaces
 
     @property
     def materials(self):
-        """Ordered dictionary of materials (from :py:mod:`pyne.material`)."""
+        """Ordered dictionary of materials
+        (:py:class:`pyne.simplesim.cards.Material`).
+        
+        """
         return self._materials
 
     @property
     def cells(self):
-        """Ordered dictionary of cells (:py:class:`cards.Cell` or subclass)."""
+        """Ordered dictionary of cells (:py:class:`pyne.simplesim.cards.Cell`).
+        
+        """
         return self._cells
 
     @property
