@@ -12,6 +12,10 @@ be shown. It's better to have many small examples than to have a few big ones.
 
 .. image:: simplesimdiagram.svg
 
+
+
+talk about custom cards.
+
 ******
 Godiva
 ******

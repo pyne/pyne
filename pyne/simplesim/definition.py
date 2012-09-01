@@ -162,11 +162,15 @@ class SystemDefinition(IDefinition):
         TODO
 
         """
-        if self.verbose:
-            print "Adding cell %s." % cell.name
-        # Only add the cell if a cell with the same name hasn't been added
+        # Warn the user if a cell with this name is already in the system.
         # already.
         self._assert_unique('cell', cell)
+        # Custom card; just add and move on.
+        if isinstance(cell, cards.Custom):
+            self._cells[cell.name] = cell
+            return
+        if self.verbose:
+            print "Adding cell %s." % cell.name
         # Add all surfaces that aren't already added. Do this by walking the
         # region tree and calling _add_unique_surfaces() at the leaves.
         cell.region.walk(self._add_unique_surfaces)
@@ -502,12 +506,33 @@ class MCNPSimulation(SimulationDefinition):
             self._tally_pulseheight[card.name] = card
         elif isinstance(card, cards.IDetector):
             self._tally_detector[card.name] = card
+        elif isinstance(card, cards.Custom):
+            # See if class attribute has something
+            if card.tallyclass:
+                if issubclass(card.tallyclass, cards.SurfaceCurrent):
+                    self._tally_surfacecurrent[card.name] = card
+                elif issubclass(card.tallyclass, cards.SurfaceFlux):
+                    self._tally_surfaceflux[card.name] = card
+                elif issubclass(card.tallyclass, cards.CellFlux):
+                    self._tally_cellflux[card.name] = card
+                elif issubclass(card.tallyclass, cards.CellEnergyDeposition):
+                    self._tally_cellenergydep[card.name] = card
+                elif issubclass(card.tallyclass, cards.CellFissionEnergyDeposition):
+                    self._tally_cellfissiondep[card.name] = card
+                elif issubclass(card.tallyclass, (cards.CellPulseHeight,
+                        cards.CellChargeDeposition)):
+                    self._tally_pulseheight[card.name] = card
+                elif issubclass(card.tallyclass, cards.IDetector):
+                    self._tally_detector[card.name] = card
+                else:
+                    raise Exception("Unrecognized tally card {0}.".format(card))
         else:
             raise Exception("Unrecognized tally card {0}.".format(card))
 
     def tally_num(self, name):
         """Retrieve the number of a :py:class:`cards.ITally` card in the MCNP
-        input file.
+        input file. Note that :py:class:`pyne.simplesim.cards.TallyCustom`
+        cards with :py:attr:`tallyclass` as None do not have a tally number.
 
         Parameters
         ----------
