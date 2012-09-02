@@ -128,8 +128,49 @@ class TestSystemDefinition(unittest.TestCase):
         self.rxr.remove_material('H2O2')
         self.assertEquals(len(self.rxr.materials), nmats - 1)
 
-        self.rxr.remove_universe('harhar')
+        self.assertEquals(self.rxr.remove_universe('harhar'), 'harhar')
         self.assertEquals(len(self.rxr.universes), 0)
+
+    def test_SimManipulation(self):
+        """Tests the add and remove methods of
+        :py:class:`pyne.simplesim.definition.SimulationDefinition.
+        
+        """
+        cs = cards.Criticality()
+        self.sim.add_source(cs)
+        self.assertEquals(self.sim.remove_source('criticality'), cs)
+        self.assertEquals(len(self.sim.source), 0)
+
+        egrid = cards.EnergyGrid('g1', None, [0, 1])
+        self.sim.add_misc(egrid)
+        self.assertEquals(self.sim.remove_misc('g1'), egrid)
+        self.assertEquals(len(self.sim.misc), 0)
+
+        sd = cards.Distribution('distA', [-2, 2], [0, 1])
+        self.sim.add_dist(sd)
+        self.assertEquals(self.sim.remove_dist('distA'), sd)
+        self.assertEquals(len(self.sim.dists), 0)
+        
+        tr = cards.Transformation('source', [1, 0, 0], np.eye(3))
+        self.sim.add_transformation(tr)
+        self.assertEquals(self.sim.remove_transformation('source'), tr)
+        self.assertEquals(len(self.sim.transformations), 0)
+
+        tally = cards.CellFlux('fuel', 'neutron', 'fuel')
+        self.sim.add_tally(tally)
+
+        self.assertEquals(self.sim.remove_tally('fuel'), tally)
+        self.assertEquals(len(self.sim.tally), 0)
+
+
+    @property
+    def dists(self):
+        """Ordered dictionary of distribution cards (from
+        :py:class:`cards.Distribution`).
+
+        """
+        return self._dists
+
 
 
     def test_nestedgeom(self):

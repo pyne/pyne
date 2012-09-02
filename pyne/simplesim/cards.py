@@ -6862,7 +6862,11 @@ class Custom(ICard):
 
 
 class CellCustom(Custom, Cell):
-    """Custom :py:class:`Cell` card."""
+    """Custom :py:class:`Cell` card.
+    
+    .. inheritance-diagram:: CellCustom
+
+    """
     # Provide number automatically.
     # TODO correct spacing given the number.
     def mcnp(self, float_format, sim):
@@ -6871,7 +6875,11 @@ class CellCustom(Custom, Cell):
 
 
 class SurfaceCustom(Custom, ISurface):
-    """Custom :py:class:`ISurface` card."""
+    """Custom :py:class:`ISurface` card.
+    
+    .. inheritance-diagram:: SurfaceCustom
+
+    """
     # Provide number automatically.
     # TODO correct spacing given the number.
     def mcnp(self, float_format, sim):
@@ -6881,6 +6889,9 @@ class SurfaceCustom(Custom, ISurface):
 
 class MaterialCustom(Custom, Material):
     """Custom :py:class:`Material` card.
+
+    .. inheritance-diagram:: MaterialCustom
+
     NOTE The name of the MaterialCustom
     card must be given as a keyword argument, otherwise an error will arise::
 
@@ -6895,12 +6906,20 @@ class MaterialCustom(Custom, Material):
 
 
 class SourceCustom(Custom, ISource):
-    """Custom :py:class:`ISource` card."""
+    """Custom :py:class:`ISource` card.
+    
+    .. inheritance-diagram:: SourceCustom
+    
+    """
     pass
 
 
 class DistributionCustom(Custom, Distribution):
-    """Custom :py:class:`Distribution` card."""
+    """Custom :py:class:`Distribution` card.
+    
+    .. inheritance-diagram:: DistributionCustom
+
+    """
     def __init__(self, *args, **kwargs):
         """
         Parameters
@@ -6948,6 +6967,8 @@ class TallyCustom(Custom, ITally):
     The card is printed in the order that it
     is added, but unlike with the other custom cards the user must provide
     their own tally number.
+
+    .. inheritance-diagram:: TallyCustom
 
     """
     def __init__(self, *args, **kwargs):
@@ -7004,12 +7025,20 @@ class TallyCustom(Custom, ITally):
 
 
 class MiscCustom(Custom, IMisc):
-    """Custom :py:class:`IMisc` card."""
+    """Custom :py:class:`IMisc` card.
+    
+    .. inheritance-diagram:: MiscCustom
+
+    """
     pass
 
 
 class TransformationCustom(Custom, Transformation):
-    """Custom :py:class:`Transformation` card."""
+    """Custom :py:class:`Transformation` card.
+
+    .. inheritance-diagram:: TransformationCustom
+
+    """
     # Provide number automatically.
     # TODO correct spacing given the number.
     def mcnp(self, float_format, sim):
