@@ -4,7 +4,11 @@
 
     from pyne.simplesim import definition
 
-Below is the reference for this module. There are primarily two types of
+********
+Overview
+********
+
+There are primarily two types of
 definitions: system definitions and simulation definitions:
 
     - System definitions describe the geometry and material composition of a
@@ -23,11 +27,25 @@ definitions: system definitions and simulation definitions:
       classes such as :py:class:`MCNPSimulation`.
 
 
+***********
+Limitations
+***********
+- Saving and loading simulations is not implemented, though some preliminary
+  work with JSON encoding has been performed. At the bottm of this module is a
+  subclass of :py:class:`json.JSONEncoder` that is intended to aid the
+  reading/writing of simulations.
+- MCNP is the only code for which simulations have been explored.
+
+
 An inheritance diagram of all the classes in this module can be found at
 :ref:`pyne_simplesim_inheritance`.
 
 .. moduleauthor:: Chris Dembia <cld72@cornell.edu>
 
+
+*********
+Reference
+*********
 
 """
 # TODO check overwriting warning.
@@ -151,7 +169,7 @@ class IDefinition(object):
 
 
 class SystemDefinition(IDefinition):
-    """This class creates a system definition as is done in MCNPX: homogeneous
+    """This class creates a system definition as is done in MCNP: homogeneous
     regions in space in the reactor, called cells, are defined through the
     intersection, union, etc of surfaces and are filled by materials.
 
@@ -351,12 +369,12 @@ class SystemDefinition(IDefinition):
 
         Returns
         -------
-        cell : :py:class:`pyne.simplesim.cards.ICell`
+        cell : :py:class:`pyne.simplesim.cards.Cell`
             The cell that has been removed from the system.
 
         """
         # TODO Perform a dependency check.
-        self._cells.pop(name)
+        return self._cells.pop(name)
 
     def remove_surface(self, name):
         """Removes a surface from the system. No dependency check is performed.
@@ -373,7 +391,7 @@ class SystemDefinition(IDefinition):
 
         """
         # TODO Perform a dependency check.
-        self._surfaces.pop(name)
+        return self._surfaces.pop(name)
 
     def remove_material(self, name):
         """Removes a material from the system. No dependency check is performed.
@@ -390,7 +408,7 @@ class SystemDefinition(IDefinition):
 
         """
         # TODO Perform a dependency check.
-        self._materials.pop(name)
+        return self._materials.pop(name)
 
     def remove_universe(self, name):
         """Removes a universe from the system. No dependency check is performed.
@@ -407,7 +425,7 @@ class SystemDefinition(IDefinition):
 
         """
         # TODO Perform a dependency check.
-        self._universes.pop(self.universes.index(name))
+        return self._universes.pop(self.universes.index(name))
 
     def save(self, fname):
         super(SystemDefinition, self).save(fname)
@@ -444,34 +462,60 @@ class SystemDefinition(IDefinition):
 
 
 class SimulationDefinition(IDefinition):
-    """
-    
-    This is basically where all the data cards are stored. The easy name for
-    this class is either OptionsDefinition (Serpent) or DataDefinition (MCNP),
-    but I'm not too happy with either. I'd like any ideas for this. This may
-    need to be subclassed for different codes, because different codes do not
-    provide the same options.
+    """This definition contains source, source distribution, tally/detector,
+    and miscellaneous cards. Code-specific functionality/cards is found in
+    subclasses of this class.
 
     """
-    def __init__(self, systemdef, fname=None, verbose=True):
-        """Creates a new options definition or loads one from a file."""
+    def __init__(self, systemdef, **kwargs):
+        """Creates a new definition or loads one from a file.
+        
+        Parameters
+        ----------
+        systemdef: :py:class:`SystemDefinition`
+            A system definition for which this simulation is defined. This
+            system definition is stored in :py:attr:`sys`, from where it can be
+            modified.
+        fname : str, optional
+            See :py:class:`IDefinition`.
+        verbose : bool, optional
+            See :py:class:`IDefinition`.
+        
+        """
 
-        super(SimulationDefinition, self).__init__(fname, verbose)
+        super(SimulationDefinition, self).__init__(**kwargs)
         # TODO when saving a simulation def, the the system def should also be
         # saved, and so this assignment that happens on this next line
         # shouldn't happen this way.
         self.sys = systemdef
 
     def _create_new(self):
-        """Initialize any attributes/properties."""
-
+        """Initializes attributes/properties."""
         self._source = collections.OrderedDict()
         self._tally = collections.OrderedDict()
         self._misc = collections.OrderedDict()
         self._dists = collections.OrderedDict()
 
     def add_source(self, *args):
-        """ TODO """
+        """Adds source cards to the simulation, or replaces existing ones if
+        the added card has the same name as a source card in the simulation.
+        
+        Parameters
+        ----------
+        source : :py:class:`pyne.simplesim.cards.ISource` or subclass
+        *args : source, ...
+            Any number of source cards.
+
+        Examples
+        --------
+        This card is used as follows::
+
+            sys = SystemDefinition()
+            sim = SimulationDefinition(sys)
+            sim.add_source(sourceA)
+            sim.add_source(sourceB, sourceC)
+
+        """
         for card in args:
             if not isinstance(card, cards.ISource):
                 raise ValueError("Only cards subclassed from ``ISource`` can be "
@@ -480,7 +524,26 @@ class SimulationDefinition(IDefinition):
             self._source[card.name] = card
 
     def add_tally(self, *args):
-        """ TODO """
+        """Adds tally cards to the simulation, or replaces existing ones if
+        the added card has the same name as a tally card in the simulation.
+        
+
+        Parameters
+        ----------
+        tally : :py:class:`pyne.simplesim.cards.ITally` or subclass
+        *args : tally, ...
+            Any number of tally cards.
+
+        Examples
+        --------
+        This card is used as follows::
+
+            sys = SystemDefinition()
+            sim = SimulationDefinition(sys)
+            sim.add_tally(tallyA)
+            sim.add_tally(tallyB, tallyC)
+
+        """
         for card in args:
             # TODO check cells and surfaces? only if moving to string refs.
             if not isinstance(card, cards.ITally):
@@ -490,7 +553,26 @@ class SimulationDefinition(IDefinition):
             self._tally[card.name] = card
 
     def add_misc(self, *args):
-        """ TODO """
+        """Adds miscellaneous cards to the simulation, or replaces existing
+        ones if the added card has the same name as a misc card in the
+        simulation.
+
+        Parameters
+        ----------
+        misc : :py:class:`pyne.simplesim.cards.IMisc` or subclass
+        *args : misc, ...
+            Any number of misc cards.
+
+        Examples
+        --------
+        This card is used as follows::
+
+            sys = SystemDefinition()
+            sim = SimulationDefinition(sys)
+            sim.add_misc(miscA)
+            sim.add_misc(miscB, miscC)
+
+        """
         for card in args:
             # TODO check references to tallies? only if moving to string refs.
             if not isinstance(card, cards.IMisc):
@@ -504,18 +586,24 @@ class SimulationDefinition(IDefinition):
             self._misc[card.name] = card
 
     def add_dist(self, *args):
-        """Adds distribution cards to the simulation.
+        """Adds distribution cards to the simulation, or replaces existing ones if the added
+        card has the same name as a distribution card in the simulation.
 
         Parameters
         ----------
-        card : :py:class:`cards.Distribution` or subclass
+        dist : :py:class:`cards.Distribution` or subclass
             The card to be added to the simulation.
-        *args :
+        *args : dist, ...
             Any number of such cards.
 
         Examples
         --------
-        TODO
+        This card is used as follows::
+
+            sys = SystemDefinition()
+            sim = SimulationDefinition(sys)
+            sim.add_dist(distA)
+            sim.add_dist(distB, distC)
 
         """
         for card in args:
@@ -548,32 +636,88 @@ class SimulationDefinition(IDefinition):
         return self.dists.keys().index(name) + 1
 
     def remove_source(self, name):
-        raise Exception("Not implemented.")
+        """Removes a source card from the system. No dependency check is
+        performed.
+
+        Parameters
+        ----------
+        name : str
+            Name of the source card to remove.
+
+        Returns
+        -------
+        source : :py:class:`pyne.simplesim.cards.ISource`
+            The source card that has been removed from the system.
+
+        """
+        # TODO Perform a dependency check.
+        return self._source.pop(name)
 
     def remove_tally(self, name):
-        raise Exception("Not implemented.")
+        """Removes a tally card from the system. No dependency check is
+        performed.
+
+        Parameters
+        ----------
+        name : str
+            Name of the tally card to remove.
+
+        Returns
+        -------
+        tally : :py:class:`pyne.simplesim.cards.ITally`
+            The tally card that has been removed from the system.
+
+        """
+        # TODO Perform a dependency check.
+        return self._tally.pop(name)
 
     def remove_misc(self, name):
-        raise Exception("Not implemented.")
+        """Removes a misc card from the system. No dependency check is
+        performed.
+
+        Parameters
+        ----------
+        name : str
+            Name of the misc card to remove.
+
+        Returns
+        -------
+        misc : :py:class:`pyne.simplesim.cards.IMisc`
+            The misc card that has been removed from the system.
+
+        """
+        # TODO Perform a dependency check.
+        return self._misc.pop(name)
 
     def remove_dist(self, name):
-        raise Exception("Not implemented.")
+        """Removes a distribution card from the system. No dependency check is
+        performed.
+
+        Parameters
+        ----------
+        name : str
+            Name of the distribution card to remove.
+
+        Returns
+        -------
+        dist : :py:class:`pyne.simplesim.cards.Distribution`
+            The distribution card that has been removed from the system.
+
+        """
+        # TODO Perform a dependency check.
+        return self._dists.pop(name)
 
     def save(self, fname):
-        """Saves definition to a JSON file. It is unlikely that the class will
-        be amenable to json.dump()."""
         super(SimulationDefinition, self).save(fname)
 
     def _open(self, fname):
-        pass
+        super(SimulationDefinition, self)._save(fname)
 
     @property
-    def sys(self):
-        return self._sys
+    def sys(self): return self._sys
 
     @sys.setter
-    def sys(self, value):
-        self._sys = value
+    def sys(self, value): self._sys = value
 
     @property
     def source(self):
@@ -602,11 +746,12 @@ class SimulationDefinition(IDefinition):
 
 
 class MCNPSimulation(SimulationDefinition):
-    """
+    """Adds transformation and more tally functionality to
+    :py:class:`SimulationDefinition`. See the constructor there.
 
     """
     def _create_new(self):
-        """Initialize any attributes/properties."""
+        """Initializes any attributes/properties."""
         super(MCNPSimulation, self)._create_new()
         self._transformations = collections.OrderedDict()
         self._tally_surfacecurrent = collections.OrderedDict()
@@ -727,7 +872,44 @@ class MCNPSimulation(SimulationDefinition):
             raise Exception("Unrecognized tally type. name {0}.".format(name))
 
     def remove_tally(self, name):
-        raise Exception("Not implemented.")
+        """See :py:meth:`SimulationDefinition.remove_tally`."""
+        card = self.tally[name]
+        # Must add one because indices start at 0 but card numbers at 1.
+        if isinstance(card, cards.SurfaceCurrent):
+            self._tally_surfacecurrent.pop(name)
+        elif isinstance(card, cards.SurfaceFlux):
+            return self._tally_surfaceflux.pop(name)
+        elif isinstance(card, cards.CellFlux):
+            return self._tally_cellflux.pop(name)
+        elif isinstance(card, cards.CellEnergyDeposition):
+            return self._tally_cellenergydep.pop(name)
+        elif isinstance(card, cards.CellFissionEnergyDeposition):
+            return self._tally_cellfissiondep.pop(name)
+        elif isinstance(card, (cards.CellPulseHeight,
+                cards.CellChargeDeposition)):
+            return self._tally_pulseheight.pop(name)
+        elif isinstance(card, cards.IDetector):
+            return self._tally_detector.pop(name)
+        elif isinstance(card, cards.Custom):
+            # See if class attribute is not None.
+            if card.tallyclass:
+                if issubclass(card.tallyclass, cards.SurfaceCurrent):
+                    return self._tally_surfacecurrent.pop(name)
+                elif issubclass(card.tallyclass, cards.SurfaceFlux):
+                    return self._tally_surfaceflux.pop(name)
+                elif issubclass(card.tallyclass, cards.CellFlux):
+                    return self._tally_cellflux.pop(name)
+                elif issubclass(card.tallyclass, cards.CellEnergyDeposition):
+                    return self._tally_cellenergydep.pop(name)
+                elif issubclass(card.tallyclass, cards.CellFissionEnergyDeposition):
+                    return self._tally_cellfissiondep.pop(name)
+                elif issubclass(card.tallyclass, (cards.CellPulseHeight,
+                        cards.CellChargeDeposition)):
+                    return self._tally_pulseheight.pop(name)
+                elif issubclass(card.tallyclass, cards.IDetector):
+                    return self._tally_detector.pop(name)
+        #return super(MCNPSimulation, self).remove_tally(name)
+        return self._tally.pop(name)
 
     def add_transformation(self, *args):
         """Adds transformation cards to the simulation.
@@ -736,7 +918,7 @@ class MCNPSimulation(SimulationDefinition):
         ----------
         card : :py:class:`cards.Transformation` or subclass
             The card to be added to the simulation.
-        *args : 
+        *args : card, ...
             Any number of such cards.
 
         """
@@ -768,6 +950,24 @@ class MCNPSimulation(SimulationDefinition):
                     "the simulation.".format(name))
         return self.transformations.keys().index(name) + 1
 
+    def remove_transformation(self, name):
+        """Removes a transformation card from the system. No dependency check is
+        performed.
+
+        Parameters
+        ----------
+        name : str
+            Name of the transformation card to remove.
+
+        Returns
+        -------
+        transformation : :py:class:`pyne.simplesim.cards.Transformation`
+            The transformation card that has been removed from the system.
+
+        """
+        # TODO Perform a dependency check.
+        return self._transformations.pop(name)
+
     @property
     def transformations(self):
         """Ordered dictionary of transformation cards (from
@@ -778,7 +978,13 @@ class MCNPSimulation(SimulationDefinition):
 
 
 class DefinitionEncoder(json.JSONEncoder):
-    # TODO circular reference issue.
+    """Used to encode definitions into JSON files. Unimplemented."""
+    # TODO circular reference issue with Regions.
+
+    def __init__(self, *args, **kwargs):
+        """ """
+        super(DefinitionEncoder, self).__init__(*args, **kwargs)
+
     def default(self, obj):
         try:
             if isinstance(obj, cards.ISurface):

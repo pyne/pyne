@@ -36,4 +36,4 @@ more conventional outside of python.
 
 debacle between object vs string.
 
-
+looking at the source code is ont working; idk where that source code is coming from.
