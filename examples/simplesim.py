@@ -4,9 +4,9 @@ from pyne.simplesim import cards, definition, inputfile
 import pyne.simplesim.nestedgeom as ng
 
 class InfLattice(object):
-    """Creates an MCNP input file named `ex_inflattice` for a 2-cell (fuel and
-    moderator) infinite lattice reactor. The user executes this code by
-    instantiating an object of this class and calling :py:meth:`write`::
+    """Creates an MCNP input file named `ex_simplesim_inflattice` for a 2-cell
+    (fuel and moderator) infinite lattice reactor. The user executes this code
+    by instantiating an object of this class and calling :py:meth:`write`::
 
         inflat = InfLattice()
         inflat.write()
@@ -44,7 +44,8 @@ class InfLattice(object):
         # axis, with radius 0.40 cm.
         self.pin = cards.AxisCylinder('pin', 'Z', radius)
         # The Parallelepiped is a macrobody. The surface is reflecting,
-        # creating an infinte geometry.
+        # creating an infinte geometry. The surface is infinite in the z
+        # direction.
         pitch = 1.2
         self.cellbound = cards.Parallelepiped('bound',
                 -pitch / 2, pitch / 2, -pitch / 2, pitch / 2, 0, 0,
@@ -68,7 +69,7 @@ class InfLattice(object):
         # coolant cell.
         # The region is between the pin and the unit cell boundary.
         self.coolantregion = self.pin.pos | self.cellbound.neg
-        self.coolant = cards.CellMCNP('coolant', coolantregion, self.h2o,
+        self.coolant = cards.CellMCNP('coolant', self.coolantregion, self.h2o,
                 1.0, 'g/cm^3',
                 importance=('neutron', 1),
                 volume=1)
@@ -106,11 +107,11 @@ class InfLattice(object):
                 10**np.arange(-9.9, 1.1, 0.1)))
 
     def write(self):
-        """Writes the input to 'ex_inflattice'."""
+        """Writes the input to 'ex_simplesim_inflattice'."""
 
         # Create input file, specifying the title of the input.
         self.inp = inputfile.MCNPInput(self.sim, title="Infinite lattice.")
-        self.inp.write('ex_inflattice')
+        self.inp.write('ex_simplesim_inflattice')
 
 
 # Create all relevant objects for the infinite lattice example.
@@ -147,7 +148,7 @@ rxr.add_cell(cards.CellMCNP('coolant', pinsurf.pos & boundsurf.neg,
 rxr.add_cell(cards.CellVoidMCNP('graveyard', boundsurf.pos, neutron_imp=0))
 
 """
-
+"""
 # Geometry and materials
 
 # Materials.
@@ -203,6 +204,7 @@ inp = inputfile.MCNPInput("input1", sim)
 print fuel.mcnp(sim)
 #rxr.save('test')
 
+"""
 """
 # 
 opts = definition.SimulationDefinition(rxr)
