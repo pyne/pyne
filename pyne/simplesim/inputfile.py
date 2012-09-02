@@ -4,31 +4,32 @@
 
     from pyne.simplesim import inputfile
 
-Below is the reference for this module.
 
-TODO
-This module employs the modules `reactordef` and `material` to generate
-plaintext input files for a general code. Support is provided for MCNPX, and
-support for Serpent is not complete but should be straightforward. The
-extension to other codes may require more effort.
+********
+Overview
+********
+
+The classes in this module are used to create an input file for various codes,
+such as MCNP.  The input file class needs a simulation definition from
+:py:mod:`pyne.simplesim.definition`.  For each code, there is a different
+subclass of :py:class:`IInputFile`. Right now, only MCNP is supported.
 
 An inheritance diagram of all the classes in this module can be found at
 :ref:`pyne_simplesim_inheritance`.
 
 .. moduleauthor:: Chris Dembia <cld72@cornell.edu>
 
+*********
+Reference
+*********
+
 """
-# TODO need to be able to tell the user the numbers given to the different
-# cards, for parsing.
-# TODO check uniqueness
 # TODO manage print order of cell cards, this may just be given by the ordered
 # dict.
 # TODO let users enter cell or surface cards to a certain location or number;
 # describe how the remaining cards are modified.
-# TODO let user specify number format for different types of floats
-# TODO provision for printing materials...
-# TODO filename should be with write
-# TODO special treatment for Material card.
+# TODO let user specify number format for different types of floats, not just
+# one
 # TODO improve how the $ nucname.name is printed on material cards: alignment!
 
 import abc
@@ -42,16 +43,17 @@ import numpy as np
 from pyne.simplesim import definition, cards
 
 class IInputFile(object):
-    """Abstract base class for classes that take system and option definitions
-    to create an input file for a certain code (e.g. MCNPX, Serpent, MCODE,
-    etc.).
+    """This class is not used directly by the user. Abstract base class for
+    classes that take system and option definitions to create an input file for
+    a certain code (e.g. MCNPX, Serpent, MCODE, etc.).
 
     """
     __metaclass__ = abc.ABCMeta
 
     def __init__(self, simdef, comments=True, title=None, plug=True,
                  float_format="% .5g", *args, **kwargs):
-        """
+        """Creates an input file, given a simulation definition.
+
         Parameters
         ----------
         simdef : :py:class:`definition.SimulationDefinition` or subclass.
@@ -76,7 +78,8 @@ class IInputFile(object):
         self.float_format = float_format
 
     def write(self, fname):
-        """
+        """Writes the input file to an actual file.
+
         Parameters
         ----------
         fname : str
@@ -104,7 +107,7 @@ class IInputFile(object):
         if self.plug:
             self._write_plug_subclass(
                     "Generated with the Python package PyNE (pyne.github.com).")
-    
+
     @abc.abstractmethod
     def _write_plug_subclass(self, string):
         return NotImplementedError
@@ -121,11 +124,12 @@ class IInputFile(object):
 class MCNPInput(IInputFile):
     """An input file for MCNP. To write the file, call :py:meth:`write`. The
     user can modify the format of the input file by subclassing this class and
-    overloading the _write_ methods.
+    overloading the undocumented ``_write_*()`` methods.
 
     """
     def __init__(self, simdef, description=None, cont_by_amp=False, **kwargs):
-        """
+        """Creates an input file, given a simulation definition.
+
         Parameters
         ----------
         simdef : :py:class:`definition.MCNPSimulation`
@@ -388,12 +392,3 @@ class MCNPInput(IInputFile):
 
     def _new_line(self):
         self.fid.write('\n')
-
-
-class SerpentInput(IInputFile):
-    """Must find the cell used for a given material, and would need to create
-    more than one material if necessary.
-
-    """
-    pass
-
