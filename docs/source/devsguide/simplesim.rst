@@ -183,6 +183,13 @@ Float formatting
     of floats, and that the user would want each of these types of floats to be
     formatted differently.  This is not supported currently.
 
+Default arguments
+    Since codes like MCNP have default arguments themselves when arguments are
+    left out, those arguments are left out the cards in this package. That is,
+    the default values that a particular code uses are not stored in the
+    package, as the defaults may change or may be different across different
+    codes. Instead, default arguments are set to None, which usually means to
+    omit that input from the input file. This may not be true for all cards.
 
 
 ***********
@@ -213,6 +220,11 @@ Card numbers
    as they are in MCNP. This is fine for the simulations, since those are
    expected to be subclassed for a specific code. However, the system supposed
    to be completely code-independent.
+
+MCNP Macrobody facets
+   In MCNP, the user is able to specify a facet of a macrobody surface on a
+   cell card (i.e. 3.2 is facet 2 of surface 3). Preliminary work has been done
+   to implement this, but this is not functional.
 
 
 *******************
