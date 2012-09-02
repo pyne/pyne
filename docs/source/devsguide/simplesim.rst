@@ -11,8 +11,10 @@ Simple Simulation Input Definitions -- :mod:`pyne.simplesim`
 How it works
 ************
 number referencing
-the mcnp(float_format, sim) thing
+    Similar to LaTeX TODO
 
+the mcnp(float_format, sim) thing
+    Passing sim and float_format
 
 *************
 Adding a card
@@ -146,7 +148,12 @@ modules: ``cards``, ``definition``, and ``inputfile``:
 ***********
 Limitations
 ***********
-- The biggest limitation is currently that
+
+Saving and loading definitions
+    This is the biggest limitation, that definitions and cards cannot be saved
+    in a persistent manner. Work has been done on this front, however. TODO
+    JSON
+    
 
 
 
@@ -159,14 +166,13 @@ Further Development
   MCNP). This is certainly possible for the cards associated with the system
   definition, but doing so with the simulation definition seems very difficult
   and likely not possible.
-- The author believes that an additional module, ``run``, may provide the
-  much-desired functionality of executing the correct program (MCNPX, etc.) and
+- An additional module, ``run``, may provide the
+  much-desired functionality of executing the correct program (MCNP, etc.) and
   connecting the run to the appropriate input parsers provided in other modules
   of `PyNE`. Furthermore, such a module could contain a method to perform a
   parameter study simply with one method call (something like ``keff_vector =
-  run.parameter_study(param_name, param_values``). This module has not been
-  implemented.
-
+  run.parameter_study(param_name, param_values``).
+- **TODO** nodes for small items can be found scattered among the code.
 
 
 

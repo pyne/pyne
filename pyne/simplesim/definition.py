@@ -878,38 +878,37 @@ class MCNPSimulation(SimulationDefinition):
         if isinstance(card, cards.SurfaceCurrent):
             self._tally_surfacecurrent.pop(name)
         elif isinstance(card, cards.SurfaceFlux):
-            return self._tally_surfaceflux.pop(name)
+            self._tally_surfaceflux.pop(name)
         elif isinstance(card, cards.CellFlux):
-            return self._tally_cellflux.pop(name)
+            self._tally_cellflux.pop(name)
         elif isinstance(card, cards.CellEnergyDeposition):
-            return self._tally_cellenergydep.pop(name)
+            self._tally_cellenergydep.pop(name)
         elif isinstance(card, cards.CellFissionEnergyDeposition):
-            return self._tally_cellfissiondep.pop(name)
+            self._tally_cellfissiondep.pop(name)
         elif isinstance(card, (cards.CellPulseHeight,
                 cards.CellChargeDeposition)):
-            return self._tally_pulseheight.pop(name)
+            self._tally_pulseheight.pop(name)
         elif isinstance(card, cards.IDetector):
-            return self._tally_detector.pop(name)
+            self._tally_detector.pop(name)
         elif isinstance(card, cards.Custom):
             # See if class attribute is not None.
             if card.tallyclass:
                 if issubclass(card.tallyclass, cards.SurfaceCurrent):
-                    return self._tally_surfacecurrent.pop(name)
+                    self._tally_surfacecurrent.pop(name)
                 elif issubclass(card.tallyclass, cards.SurfaceFlux):
-                    return self._tally_surfaceflux.pop(name)
+                    self._tally_surfaceflux.pop(name)
                 elif issubclass(card.tallyclass, cards.CellFlux):
-                    return self._tally_cellflux.pop(name)
+                    self._tally_cellflux.pop(name)
                 elif issubclass(card.tallyclass, cards.CellEnergyDeposition):
-                    return self._tally_cellenergydep.pop(name)
+                    self._tally_cellenergydep.pop(name)
                 elif issubclass(card.tallyclass, cards.CellFissionEnergyDeposition):
-                    return self._tally_cellfissiondep.pop(name)
+                    self._tally_cellfissiondep.pop(name)
                 elif issubclass(card.tallyclass, (cards.CellPulseHeight,
                         cards.CellChargeDeposition)):
-                    return self._tally_pulseheight.pop(name)
+                    self._tally_pulseheight.pop(name)
                 elif issubclass(card.tallyclass, cards.IDetector):
-                    return self._tally_detector.pop(name)
-        #return super(MCNPSimulation, self).remove_tally(name)
-        return self._tally.pop(name)
+                    self._tally_detector.pop(name)
+        return super(MCNPSimulation, self).remove_tally(name)
 
     def add_transformation(self, *args):
         """Adds transformation cards to the simulation.
