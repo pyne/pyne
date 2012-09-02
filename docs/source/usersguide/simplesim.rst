@@ -135,8 +135,9 @@ changes. This makes it easy to do parameter space studies and the like. See the
 examples to see how this is done.
 
 Furthermore, if the functionality of a card is silly, the user can override it
-themselves. Say the user does not like how the :py:meth:`
-in python, a method can be overwritten by the user
+themselves. Say the user does not like how the method
+:py:meth:`cards.ICellSurfTally.mcnp` works: a method can be overloaded by
+subclassing the card and overloading the method.
 
 
 ********
