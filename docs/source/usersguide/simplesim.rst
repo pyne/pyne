@@ -131,17 +131,20 @@ Modifying
 
 In general, a definition, or the cards that make up the definition, can be
 modified at any point, and a new input file can be generated with these
-changes. This facilitates 
+changes. This makes it easy to do parameter space studies and the like. See the
+examples to see how this is done.
 
-Explain a possible use scenario for manipulating a reactor: have a script that
-creates the reactor, and have scripts that analyze results, etc...
-
+Furthermore, if the functionality of a card is silly, the user can override it
+themselves. Say the user does not like how the :py:meth:`
 in python, a method can be overwritten by the user
 
 
 ********
 Examples
 ********
+
+These pages contain examples of how the package is expected to be used. The
+examples all come from  `pyne/examples/simplesim.py`.
 
 .. toctree::
     :maxdepth: 1
