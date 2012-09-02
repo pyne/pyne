@@ -93,6 +93,28 @@ class TestSystemDefinition(unittest.TestCase):
         fid.close()
         os.unlink(fname)
 
+    def test_CardNumReturn(self):
+        """Tests that a card number is returned when adding a card to a
+        definition.
+        
+        """
+        play1 = cards.Cell('play1', self.pin.neg)
+        self.assertEquals(self.rxr.add_cell(play1), 4)
+        
+        radius = 0.40 # cm
+        surf1 = cards.AxisCylinder('1', 'Z', radius)
+        self.assertEquals(self.rxr.add_surface(surf1), 3)
+        
+        mat1 = cards.Material(name='H2O2')
+        self.assertEquals(self.rxr.add_material(mat1), 3)
+
+        sd = cards.Distribution('distA', [-2, 2], [0, 1])
+        self.assertEquals(self.sim.add_dist(sd), 1)
+        
+        tr = cards.Transformation('source', [1, 0, 0], np.eye(3))
+        self.assertEquals(self.sim.add_transformation(tr), 1)
+
+
     def test_SystemManipulation(self):
         """Tests the add and remove methods of
         :py:class:`pyne.simplesim.definition.SystemDefinition.
@@ -161,17 +183,6 @@ class TestSystemDefinition(unittest.TestCase):
 
         self.assertEquals(self.sim.remove_tally('fuel'), tally)
         self.assertEquals(len(self.sim.tally), 0)
-
-
-    @property
-    def dists(self):
-        """Ordered dictionary of distribution cards (from
-        :py:class:`cards.Distribution`).
-
-        """
-        return self._dists
-
-
 
     def test_nestedgeom(self):
         """Tests the :py:mod:`pyne.simplesim.nestedgeom` module."""

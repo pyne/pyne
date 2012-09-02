@@ -7,10 +7,9 @@ Simple Simulation Input Definitions
 .. currentmodule:: pyne.simplesim
 
 This page presents an overview of the :py:mod:`simplesim` package, including a
-discussion of why it was made, how it is used, and some examples. This is not
-intended by any means to be a replacmenet for a specific code's own
+discussion of why it was made, how it is used, and some examples. This guide is
+not intended by any means to be a replacmenet for a specific code's own
 documentation.
-
 
 It is expected that when using this package, the user has the library
 reference, at :ref:`pyne_simplesim`, open. The reference contains descriptions
@@ -28,7 +27,20 @@ Some may feel that it is fairly easy and straight-forward to create input files
 for the popular codes in nuclear science and engineering. However, the
 following functionality may be desirable:
 
-1.  TODO
+1. Card numbers are managed automatically using card names, like how labels and
+   references work in LaTeX.
+2. An object-oriented interface that allows changes to the input to be made
+   only in one place.
+3. An abstract way to define a system and the simulation of the system that does not 
+   depend on a specific code's syntax. It is truly valuable to be able to
+   define a reactor in a way that can be used to generate input for two or more
+   different codes. However, the definition is not necessarily generalizable
+   across different codes.
+4. The input is persisent and amenable to modification (e.g. for parameter
+   space studies).
+
+This package aims to achieve these four objectives. Currently, only MCNP is
+supported.
 
 
 *****
@@ -108,6 +120,8 @@ changes. This facilitates
 
 Explain a possible use scenario for manipulating a reactor: have a script that
 creates the reactor, and have scripts that analyze results, etc...
+
+in python, a method can be overwritten by the user
 
 
 ********
