@@ -1,8 +1,8 @@
 .. _devsguide_simplesim:
 
-============================================================
-Simple Simulation Input Definitions -- :mod:`pyne.simplesim`
-============================================================
+================================================
+Simple Simulation Input -- :mod:`pyne.simplesim`
+================================================
 
 .. currentmodule:: pyne.simplesim
 
@@ -13,15 +13,25 @@ This guide is intended to be the friend of anyone who wants to develop
 support. The guide is not comprehensive, and any prospective developer should
 feel comfortable contacting Chris Dembia with any questions.
 
+:py:class:`cards.ICard`.
 
 ************
 How it works
 ************
-number referencing
-    Similar to LaTeX TODO
-
-the mcnp(float_format, sim) thing
-    Passing sim and float_format
+Referencing a card
+    Nowhere does a user ever need to specify a card number, which at sight has
+    little meaning, provides no insight to what it represents, and can make
+    modification a real pain. So, as is done in LaTeX, cards are given names
+    (labels), and when that card number is needed on another card, the user
+    references the other card by its name (or with the card object itself).
+    Now, the cards themselves live in the definition. The definition stores
+    cards in ordered dictionaries, and right now the card numbers are the
+    card's index in the dictionary (+ 1 because of zero-indexing). That means
+    that at the time a card is written, it needs access to access the
+    simulation, which knows the card numbers. Therefore, the
+    :py:meth:`cards.ICard.mcnp` method takes in the simulation.
+    These methods are called by the input file object, which has the
+    simulation.
 
 *************
 Adding a card
@@ -30,8 +40,8 @@ Adding a card
 When adding a card to :py:mod:`pyne.simplesim.cards`, the following tasks need
 to be completed:
 
-* Choose the appropriate base class (most likely :py:class:`pyne.simplesim.cards.IMisc`), and
-  subclass from this.
+* Choose the appropriate base class (most likely
+  :py:class:`cards.IMisc`), and subclass from this.
 * If the card is `unique`, such as the Criticality card, then make sure to pass
   the unique name to the base class constructor, and to pass the
   ``unique=True`` keyword argument.
@@ -49,11 +59,12 @@ to be completed:
   define a :py:meth:`serpent` method.
 * Place the card under the appropriate category in the index in the module's
   docstring.
+* Add tests in `pyne/tests/test_simplesim.py`.
 
 Adding a new abstract base class
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 If introducing a new abstract base class or card category (i.e.
-:py:class:`pyne.simplesim.cards.IMisc`): 
+:py:class:`cards.IMisc`): 
 
 * Make sure to prepend the name of the class with `I`, a notation which stands
   for interface in Java.
@@ -62,16 +73,14 @@ If introducing a new abstract base class or card category (i.e.
 * The constructor takes ``*args`` and ``**kwargs``, and passes ``*args`` and
   ``**kwargs`` to the next constructor in the MRO (method resolution order)
   through the call to :py:meth:`super`. One reason for this is that
-  :py:class:`pyne.simplesim.cards.ICard` takes a ``unique`` keyword and it is not enjoyable to carry
-  this keyword through all subclass constructors.
+  :py:class:`cards.ICard` takes a ``unique`` keyword and it is
+  not enjoyable to carry this keyword through all subclass constructors.
 
 
 ****************
 Design decisions
 ****************
 
-Abstraction
-^^^^^^^^^^^
 MCNP
    The most important thing to the initial developer was to have something that
    worked for MCNP, given his limited development time. Therefore, the content
@@ -103,25 +112,25 @@ MCNP
    falls short for all codes (including MCNP).`
 
 
-:py:meth:`pyne.simplesim.cards.ICard.mcnp`
+:py:meth:`cards.ICard.mcnp`
    It was initially advised that the MCNP card functionality would be separated
    from the card classes. It seemed preferable to place all code-specific
    functionality in one class (i.e.
-   :py:class:`pyne.simplesim.inputfile.MCNPInput` for MCNP). Given time
+   :py:class:`inputfile.MCNPInput` for MCNP). Given time
    constraints, it was not possible to do this.  Furthermore, it seems that the
    structure as it is now, where each card has a :py:meth:`mcnp` method, makes
    a lot of sense: it allows us to take advantange of inheritance and similar
    structure between cards in the same category.
 
-Separation of :py:class:`pyne.simplesim.definition.SimulationDefinition` and :py:class:`pyne.simplesim.inputfile.InputFile`
+Separation of :py:class:`definition.SimulationDefinition` and :py:class:`inputfile.IInputFile`
    At first glance it may not make sense to separate the defintion from the
    input file object.
-   Since :py:class:`pyne.simplesim.definition.SimulationDefinition` is
-   subclassed to create :py:class:`pyne.simplesim.definition.MCNPSimulation`,
+   Since :py:class:`definition.SimulationDefinition` is
+   subclassed to create :py:class:`definition.MCNPSimulation`,
    there is MCNP-related information in more than one place, and it may seem
    that all the code-specific information could be contained in one class.
    However, there should be code-independent simulation definition parameters
-   that belong in `pyne.simplesim.definition.SimulationDefintion`. It is
+   that belong in `definition.SimulationDefintion`. It is
    possible that it becomes clear that the input file task can be roped into
    the simulation definition, but the additional modularization should be easy
    to 'undo'. Also, it was thought that the input file classes would eventually
@@ -154,9 +163,9 @@ Referencing other cards using strings or the objects themselves
 
     This issue has been managed for tallies by creating the
     :py:mod:`pyne.simplesim.nestedgeom` module. In this module, there are
-    classes such as :py:class:`pyne.simplesim.nestedgeom.Cell`,
-    :py:class:`pyne.simplesim.nestedgeom.Surf`,
-    :py:class:`pyne.simplesim.nestedgeom.Univ` that only hold a string name of
+    classes such as :py:class:`nestedgeom.Cell`,
+    :py:class:`nestedgeom.Surf`,
+    :py:class:`nestedgeom.Univ` that only hold a string name of
     a cell/surface/universe (they are not cells/surfaces/universes themselves),
     but make it clear thta the string name represents a cell/surface/universe.
     The problem here is that the notation becomes quite verbose.
@@ -166,13 +175,13 @@ Float formatting
     the floats that appear in the input file. Therefore, the user can set the
     ``float_format`` in the input file. The syntax used for specifying the
     float format is what is typically found in C++ and MATLAB (i.e. '%.5g').
-    Python now expects users to use their own syntax (i.e. '{:.5g}'. The former
-    has been used to make it easier for people who are new to Python to use
-    this package. This does cause code to be more verbose, as for everything
-    except these floats, string formatting is done with :py:meth:`str.format`.
-    It is possible that there are different categories of floats, and that the
-    user would want each of these types of floats to be formatted differently.
-    This is not supported currently.
+    Python now expects users to use their own syntax (i.e. '{:.5g}'. Here, the
+    former has been used to make it easier for people who are new to Python to
+    use this package. This does cause code to be more verbose, as for
+    everything except these floats, string formatting is done with
+    :py:meth:`str.format`.  It is possible that there are different categories
+    of floats, and that the user would want each of these types of floats to be
+    formatted differently.  This is not supported currently.
 
 
 
@@ -205,6 +214,7 @@ Card numbers
    expected to be subclassed for a specific code. However, the system supposed
    to be completely code-independent.
 
+
 *******************
 Further Development
 *******************
@@ -221,7 +231,7 @@ Further Development
   parameter study simply with one method call (something like ``keff_vector =
   run.parameter_study(param_name, param_values``).
 - Universes, lattices, and fill are done either using IMisc cards or on the
-  :py:class:`pyne.simplesim.cards.Cell` card. However, it is preferable that
+  :py:class:`cards.Cell` card. However, it is preferable that
   there are actual Universe and Lattice cards/objects (this is not the same
   thing as the current Universes and Lattice cards, that are just an
   implementation of MCNP's U and LAT cards) that can be used to fill cells
@@ -239,6 +249,9 @@ Further Development
   pick the correct nuclide library table identifiers for a given temperature
   (e.g. .71c for 600 K), though this would change over time. A manual override
   should also be allowed.
+- MCNP cards are mostly printed in a sloppy way (except material cards); it
+  would be nice to exploit the automated card string generation in order to
+  have the strings print in a pretty way.
 - **TODO** nodes for small items can be found scattered among the code.
 - There is a `github wiki <https://github.com/fitze/pyne/wiki/simplesim>`_ page
   that has a list of some ideas for future development.

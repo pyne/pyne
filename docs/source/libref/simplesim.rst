@@ -1,8 +1,8 @@
 .. _pyne_simplesim:
 
-============================================================
-Simple Simulation Input Definitions -- :mod:`pyne.simplesim`
-============================================================
+================================================
+Simple Simulation Input -- :mod:`pyne.simplesim`
+================================================
 
 .. currentmodule:: pyne.simplesim
 
