@@ -3516,8 +3516,8 @@ class ICellSurfTally(ITally):
         units can be requested::
 
             tally = SurfaceFlux('fuel', 'neutron', ['sA', unit])
-            unit2 = ng.Surf('sA') < ng.FCell('cA').lat(Lin(2))
-            tally = SurfaceFlux('fuel', 'neutron', [unit, unit])
+            unit2 = ng.Surf('sA') < ng.FCell('cA').lat(ng.Lin(2))
+            tally = SurfaceFlux('fuel', 'neutron', [unit, unit2])
 
         """
         super(ICellSurfTally, self).__init__(name, particle, *args, **kwargs)
@@ -3654,7 +3654,7 @@ class SurfaceCurrent(ICellSurfTally):
             See :py:class:`ITally`.
         particle : str
             See :py:class:`ITally`.
-        cards : str name of :py:class:`ISurface`, list, list of lists
+        cards : str name of :py:class:`ISurface`, OR :py:class:`pyne.simplesim.nestedgeom.IUnit`, list, list of lists
             See :py:class:`ICellSurfTally`.
         total : bool, optional
             Include a tally for the total current across all surfaces
@@ -3713,7 +3713,7 @@ class IAverageTally(ICellSurfTally):
             See :py:class:`ITally`.
         particle : str
             See :py:class:`ITally`.
-        cards : str name of :py:class:`Cell` or :py:class:`ISurface`, list, list of lists
+        cards : str name of :py:class:`Cell` or :py:class:`ISurface`, OR :py:class:`pyne.simplesim.nestedgeom.IUnit`, list, list of lists
             See :py:class:`ICellSurfTally`.
         average : bool, optional
             Include a tally for the average flux across all cells/surfaces
@@ -3772,7 +3772,7 @@ class SurfaceFlux(IAverageTally):
             See :py:class:`ITally`.
         particle : str
             See :py:class:`ITally`.
-        cards : str name of :py:class:`ISurface`, list, list of lists
+        cards : str name of :py:class:`ISurface`, OR :py:class:`pyne.simplesim.nestedgeom.IUnit`, list, list of lists
             See :py:class:`IAverageTally`.
         average : bool, optional
             See :py:class:`IAverageTally`.
@@ -3828,7 +3828,7 @@ class CellFlux(IAverageTally):
             See :py:class:`ITally`.
         particle : str
             See :py:class:`ITally`.
-        cards : str name of :py:class:`Cell`, list, list of lists
+        cards : str name of :py:class:`Cell`, OR :py:class:`pyne.simplesim.nestedgeom.IUnit`, list, list of lists
             See :py:class:`IAverageTally`.
         average : bool, optional
             See :py:class:`IAverageTally`.
@@ -3884,7 +3884,7 @@ class CellEnergyDeposition(IAverageTally):
             particle. Also, the additional value of 'all' is allowed, and
             specifies collision heating. As may be expected, 'all' cannot be
             provided as part of a list.
-        cards : str name of :py:class:`Cell`, list, list of lists
+        cards : str name of :py:class:`Cell`, OR :py:class:`pyne.simplesim.nestedgeom.IUnit`, list, list of lists
             See :py:class:`IAverageTally`.
         average : bool, optional
             See :py:class:`IAverageTally`.
@@ -3969,7 +3969,7 @@ class CellFissionEnergyDeposition(IAverageTally):
         ----------
         name : str
             See :py:class:`ITally`.
-        cards : str name of :py:class:`Cell`, list, list of lists
+        cards : str name of :py:class:`Cell`, OR :py:class:`pyne.simplesim.nestedgeom.IUnit`, list, list of lists
             See :py:class:`IAverageTally`.
         average : bool, optional
             See :py:class:`IAverageTally`.
@@ -4025,7 +4025,7 @@ class CellPulseHeight(IAverageTally):
             See :py:class:`ITally`. Multiple particles can be provided in a
             list of str. In MCNP, if only 'proton', or 'electron' is
             specified, both are automatically included.
-        cards : str name of :py:class:`Cell`, list, list of lists
+        cards : str name of :py:class:`Cell`, OR :py:class:`pyne.simplesim.nestedgeom.IUnit`, list, list of lists
             See :py:class:`IAverageTally`.
         average : bool, optional
             See :py:class:`IAverageTally`.
@@ -4084,7 +4084,7 @@ class CellChargeDeposition(CellPulseHeight):
             See :py:class:`ITally`. Multiple particles can be provided in a
             list of str. In MCNP, if only 'proton', or 'electron' is
             specified, both are automatically included.
-        cards : str name of :py:class:`Cell`, list, list of lists
+        cards : str name of :py:class:`Cell`, OR :py:class:`pyne.simplesim.nestedgeom.IUnit`, list, list of lists
             See :py:class:`IAverageTally`.
         average : bool, optional
             See :py:class:`IAverageTally`.
