@@ -1,9 +1,64 @@
-import json
-
 import numpy as np
 
-from pyne.simplesim import definition, cards, inputfile
-from pyne import material
+from pyne.simplesim import cards, definition, inputfile
+import pyne.simplesim.nestedgeom as ng
+
+def inflattice(self):
+
+    # Define system.
+    # Materials.
+    uo2 = cards.Material(name='UO2')
+    uo2.from_atom_frac({'U235': 0.05,
+                        'U238': 0.95,
+                        'O16' : 2.00})
+    h2o = cards.Material(name='H2O')
+    h2o.from_atom_frac({'H1' : 2.0,
+                        'O16': 1.0})
+    # Surfaces.
+    radius = 0.40
+    pin = cards.AxisCylinder('pin', 'X', radius)
+    pitch = 1.2
+    cellbound = cards.Parallelepiped('bound',
+            -pitch / 2, pitch / 2, -pitch / 2, pitch / 2, 0, 0,
+            reflecting=True)
+    # Cells.
+    fuel = cards.CellMCNP('fuel', pin.neg, uo2,
+            11.0, 'g/cm^3',
+            importance=('neutron', 1),
+            volume=1)
+    coolant = cards.CellMCNP('coolant', pin.pos | cellbound.neg, h2o,
+            1.0, 'g/cm^3',
+            importance=('neutron', 1),
+            volume=1)
+    graveyard = cards.CellMCNP('graveyard', cellbound.pos,
+            importance=('neutron', 0))
+
+    # Add cells to the system.
+    self.sys.add_cell(fuel)
+    self.sys.add_cell(coolant)
+    self.sys.add_cell(graveyard)
+
+    # Add source, tallies to simulation.
+    self.sim.add_misc(cards.ScatteringLaw('H2O', {'H1': 'lwtr'}))
+    self.sim.add_source(cards.Criticality())
+    self.sim.add_source(cards.CriticalityPoints())
+    self.sim.add_tally(cards.CellFlux('flux', 'neutron', 
+            ['fuel', 'coolant']))
+    self.sim.add_misc(cards.EnergyGrid('egrid0', None,
+            10**np.arange(-9.9, 1.1, 0.1)))
+
+    # Create input file.
+    inp = inputfile.MCNPInput(self.sim, title="Infinite lattice.")
+
+
+
+
+
+
+
+
+
+
 
 """
 
