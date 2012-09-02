@@ -2360,7 +2360,8 @@ class ScatteringLaw(IMisc):
            sl = ScatteringLaw('water', {'H1': 'lwtr.16t'})
 
         """
-        super(ScatteringLaw, self).__init__('scatlaw-{0}'.format(mat_name))
+        super(ScatteringLaw, self).__init__('scatlaw-{0}'.format(mat_name),
+                unique=True)
         self.mat_name = mat_name
         self.libraries = libraries
 
@@ -2574,7 +2575,7 @@ class GeneralSource(ISource):
         the other variables.
 
         """
-        super(GeneralSource, self).__init__('gensource')
+        super(GeneralSource, self).__init__('gensource', unique=True)
         self.particle = keyword_args.get('particle', None)
         self.cell = keyword_args.get('cell', None)
         self.surface = keyword_args.get('surface', None)
@@ -5570,7 +5571,7 @@ class TemperatureTimes(IMisc):
             thtme = TemperatureTimes([1e10, 2e10])
 
         """
-        super(TemperatureTimes, self).__init__('temptimes')
+        super(TemperatureTimes, self).__init__('temptimes', unique=True)
         self.times = times
 
     def comment(self):
