@@ -199,6 +199,13 @@ class SystemDefinition(IDefinition):
         *args : cell, ...
             Any number of cells.
 
+        Returns
+        -------
+        num : int
+            If only one card is added, the method returns the card number
+            of that card. Be careful; the card number may change if other cards
+            are deleted. May be useful when defining unique cards.
+
         Examples
         --------
         This card is used as follows::
@@ -231,6 +238,8 @@ class SystemDefinition(IDefinition):
             if cell.universe:
                 self._register_universe(cell.universe[0])
             self._cells[cell.name] = cell
+        if len(args) == 1:
+            return self.cell_num(args[0].name)
 
     def add_surface(self, *args):
         """This method is only used by the user for surfaces that are not on a
@@ -244,6 +253,13 @@ class SystemDefinition(IDefinition):
         *args : surface, ...
             Any number of surfaces.
 
+        Returns
+        -------
+        num : int
+            If only one card is added, the method returns the card number
+            of that card. Be careful; the card number may change if other cards
+            are deleted. May be useful when defining unique cards.
+
         Examples
         --------
         This card is used as follows::
@@ -256,6 +272,8 @@ class SystemDefinition(IDefinition):
         for surface in args:
             self._assert_unique('surface', surface)
             self._surfaces[surface.name] = surface
+        if len(args) == 1:
+            return self.surface_num(args[0].name)
 
     def _add_unique_surfaces(self, regionleaf):
         # Used by add_cell().
@@ -284,6 +302,13 @@ class SystemDefinition(IDefinition):
         *args : material, ...
             Any number of materials.
 
+        Returns
+        -------
+        num : int
+            If only one card is added, the method returns the card number
+            of that card. Be careful; the card number may change if other cards
+            are deleted. May be useful when defining unique cards.
+
         Examples
         --------
         This card is used as follows::
@@ -299,6 +324,8 @@ class SystemDefinition(IDefinition):
                         "be empty.")
             self._assert_unique('material', material)
             self._materials[material.name] = material
+        if len(args) == 1:
+            return self.material_num(args[0].name)
 
     def _register_universe(self, univ_name):
         """This method is not used by the user. It is called by
@@ -596,6 +623,13 @@ class SimulationDefinition(IDefinition):
         *args : dist, ...
             Any number of such cards.
 
+        Returns
+        -------
+        num : int
+            If only one card is added, the method returns the card number
+            of that card. Be careful; the card number may change if other cards
+            are deleted. May be useful when defining unique cards.
+
         Examples
         --------
         This card is used as follows::
@@ -612,6 +646,8 @@ class SimulationDefinition(IDefinition):
                         "added by this method. User provided {0}.".format(card))
             self._assert_unique('dist', card)
             self._dists[card.name] = card
+        if len(args) == 1:
+            return self.dist_num(args[0].name)
 
     def dist_num(self, name):
         """Retrieve the number of a :py:class:`cards.Distribution` card in
@@ -920,6 +956,13 @@ class MCNPSimulation(SimulationDefinition):
         *args : card, ...
             Any number of such cards.
 
+        Returns
+        -------
+        num : int
+            If only one card is added, the method returns the card number
+            of that card. Be careful; the card number may change if other cards
+            are deleted. May be useful when defining unique cards.
+
         """
         for card in args:
             if not isinstance(card, cards.Transformation):
@@ -927,6 +970,8 @@ class MCNPSimulation(SimulationDefinition):
                         "added by this method. User provided {0}.".format(card))
             self._assert_unique('transformation', card)
             self._transformations[card.name] = card
+        if len(args) == 1:
+            return self.transformation_num(args[0].name)
 
     def transformation_num(self, name):
         """Retrieve the number of a :py:class:`cards.Transformation` card in
