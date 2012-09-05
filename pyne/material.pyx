@@ -1102,7 +1102,7 @@ class Material(_Material, collections.MutableMapping):
         return s
 
     def __repr__(self):
-        return "pyne.material.Material({0}, {1}, {2}, {3}, {4})".format(
+        return "pyne.material.Material({0}, {1}, {2}, {3})".format(
                 repr(self.comp), self.mass, self.atoms_per_mol, repr(self.attrs))
 
 
