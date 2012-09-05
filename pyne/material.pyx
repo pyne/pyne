@@ -44,7 +44,8 @@ cdef cpp_map[int, double] dict_to_comp(dict nucvec):
 cdef class _Material:
 
     def __cinit__(self, nucvec=None, double mass=-1.0,
-                  double atoms_per_mol=-1.0, attrs=None, bint free_mat=True):
+                  double atoms_per_mol=-1.0, attrs=None, bint free_mat=True,
+                  *args, **kwargs):
         """Material C++ constuctor."""
         cdef cpp_map[int, double] comp
         cdef jsoncpp.Value cattrs = jsoncpp.Value({} if attrs is None else attrs)
@@ -71,7 +72,7 @@ cdef class _Material:
         else:
             # Bad Material
             raise TypeError("The mass stream nucvec must be a dict, str, "
-                    "or None.")
+                    "or None, but is a {0}".format(type(nucvec)))
 
         # Init some meta-data
         self._comp = None
@@ -1126,7 +1127,7 @@ def from_atom_frac(atom_fracs, double mass=-1.0, double
         sum of compdict's components before normalization.  If the mass here is
         positive or zero, then this mass overrides the calculated one.
     atoms_per_mol : float, optional
-        Number of atoms to per molecule of material.  Needed to obtain proper
+        Number of atoms per molecule of material.  Needed to obtain proper
         scaling of molecular weights.  For example, this value for water is
         3.0.
     attrs : JSON-convertable Python object, optional
