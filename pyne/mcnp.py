@@ -11,11 +11,16 @@ classes.
 
 """
 
+import collections
+import string
 import struct
 import math 
 import os
 
+import numpy as np
+
 from binaryreader import _BinaryReader, _FortranRecord
+
 
 class Mctal(object):
     def __init__(self):

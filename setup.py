@@ -380,9 +380,13 @@ exts.append(cpp_ext("pyne.enrichment", ['enrichment.pyx'], ['pyne_enrichment', '
 ##########################
 ### Setup Package Data ###
 ##########################
-packages = ['pyne', 'pyne.lib', 'pyne.dbgen', 'pyne.xs']
+packages = ['pyne', 'pyne.lib', 'pyne.dbgen', 'pyne.xs', 'pyne.simplesim']
 
-pack_dir = {'pyne': 'pyne', 'pyne.dbgen': 'pyne/dbgen', 'pyne.xs': 'pyne/xs'}
+pack_dir = {'pyne': 'pyne',
+            'pyne.dbgen': 'pyne/dbgen',
+            'pyne.xs': 'pyne/xs',
+            'pyne.simplesim': 'pyne/simplesim'
+            }
 
 pack_data = {'pyne': ['includes/*.h', 'includes/*/*.h', 'includes/*/*/*.h', 
                       'includes/*/*/*/*.h', 'includes/pyne/*.pxd', 'includes/pyne/*/*.pxd', 
