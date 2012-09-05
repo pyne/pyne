@@ -24,3 +24,5 @@ The following modules and sub-packages are discussed:
     utils
     stlconverters
     dbgen/index
+    mcnp
+    simplesim
