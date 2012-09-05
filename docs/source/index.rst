@@ -25,6 +25,8 @@ For Windows install instructions please :ref:`go here <win_install>`.
 Contents
 --------
 
+Usage:
+
 .. toctree::
     :maxdepth: 1
 
@@ -33,6 +35,13 @@ Contents
     libref/index
     cppapi
     previous/index
+
+Development:
+
+.. toctree::
+    :maxdepth: 1
+
+    devsguide/index
     dev_team
 
 ------------
