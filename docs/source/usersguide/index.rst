@@ -1,8 +1,8 @@
 .. _usersguide:
 
-=================
-PyNE User's Guide
-=================
+============
+User's Guide
+============
 Welcome to the PyNE User's Guide!  This tutorial will guide you through the 
 essential aspects of using PyNE to do nuclear engineering.
 
@@ -11,9 +11,11 @@ essential aspects of using PyNE to do nuclear engineering.
 
     nucname
     material
+    mcnp
     njoy
     cccc
     ace
     origen22
     enrichment
+    simplesim
     stlconverters

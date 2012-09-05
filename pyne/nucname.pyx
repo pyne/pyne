@@ -110,6 +110,7 @@ def current_form(nuc):
     -------
     form_flag : str
         The form identifier string from ["zzaaam", "name", "MCNP"].
+
     """
     cdef std.string cpp_curr_form 
 
@@ -139,6 +140,7 @@ def zzaaam(nuc):
     -------
     newnuc : int 
         Output nuclide in zzaaam form.
+
     """
 
     if isinstance(nuc, basestring):
@@ -163,6 +165,7 @@ def name(nuc):
     -------
     newnuc : str 
         Output nuclide in name form.
+
     """
     cdef std.string newnuc
 
@@ -220,6 +223,7 @@ def serpent(nuc):
     -------
     newnuc : str 
         Output nuclide in serpent form.
+
     """
     cdef std.string newnuc
 
@@ -246,6 +250,7 @@ def nist(nuc):
     -------
     newnuc : str 
         Output nuclide in nist form.
+
     """
     cdef std.string newnuc
 
@@ -271,6 +276,7 @@ def cinder(nuc):
     -------
     newnuc : int 
         Output nuclide in CINDER (aaazzzm) form.
+
     """
 
     if isinstance(nuc, basestring):
