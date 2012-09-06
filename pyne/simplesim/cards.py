@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 """The :py:mod:`cards` module can be imported as such::
 
     from pyne.simplesim import cards
@@ -309,7 +307,8 @@ class ICard(object):
     secs2shakes = 1e+8
 
     def __init__(self, name, unique=False, *args, **kwargs):
-        """
+        """\
+
         Parameters
         ----------
         name : str
@@ -380,7 +379,8 @@ class Cell(ICard):
     def __init__(self, name, region, material=None, density=None,
                  density_units=None, universe=None, fill=None, lattice=None,
                  *args, **kwargs):
-        """
+        """\
+
         Parameters
         ----------
         name : str
@@ -698,7 +698,8 @@ class CellMCNP(Cell):
                  user_custom=None,
                  **kwargs
                  ):
-        """
+        """\
+
         Parameters
         ----------
         name : str
@@ -4194,7 +4195,8 @@ class PointDetector(IDetector):
     """Named tuple with which input entries are stored."""
 
     def __init__(self, name, particles, *args, **kwargs):
-        """
+        """\
+
         Parameters
         ----------
         name : str
@@ -4303,7 +4305,8 @@ class RingDetector(IDetector):
     """Named tuple with which input entries are stored."""
     
     def __init__(self, name, particles, cartesian_axis, *args, **kwargs):
-        """
+        """\
+
         Parameters
         ----------
         name : str
@@ -4359,7 +4362,8 @@ class RingDetector(IDetector):
         self.cartesian_axis = cartesian_axis
 
     def add(self, position, radius, soe_radius, soe_units):
-        """
+        """\
+
         Parameters
         ----------
         position : float
@@ -4415,7 +4419,8 @@ class EnergyGrid(IMisc):
     """
     # TODO make this a unique-by-tally card.
     def __init__(self, name, tally, energies):
-        """
+        """\
+
         Parameters
         ----------
         name : str
@@ -4506,7 +4511,8 @@ class Transformation(ICard):
     # TODO support for MCNP's less-than-9-element transformation matrices.
     def __init__(self, name, displacement, rotation, aux_in_main=True,
                  degrees=False, **kwargs):
-        """
+        """\
+
         Parameters
         ----------
         name : str
@@ -4617,7 +4623,8 @@ class ICellMod(IMisc):
     __metaclass__ = abc.ABCMeta
 
     def __init__(self, name, n_args_per_cell, *args, **kwargs):
-        """
+        """\
+
         Parameters
         ----------
         name : str
@@ -7100,7 +7107,7 @@ class Particle(object):
     """Map of particle names to their abbreviations in MCNP."""
 
     def __init__(self, name):
-        """
+        """ 
         Parameters
         ----------
         name : str
@@ -7115,7 +7122,7 @@ class Particle(object):
         return self.name
 
     def mcnp(self):
-        """
+        """ 
         Returns
         -------
         abbrev : str
