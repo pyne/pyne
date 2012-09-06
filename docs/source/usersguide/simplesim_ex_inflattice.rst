@@ -31,11 +31,11 @@ First come materials::
         # documentation for :py:mod:`pyne.material` for more information.
         self.uo2 = cards.Material(name='UO2')
         self.uo2.from_atom_frac({'U235': 0.05,
-                            'U238': 0.95,
-                            'O16' : 2.00})
+                                 'U238': 0.95,
+                                 'O16' : 2.00})
         self.h2o = cards.Material(name='H2O')
         self.h2o.from_atom_frac({'H1' : 2.0,
-                            'O16': 1.0})
+                                 'O16': 1.0})
 
 Then surfaces and regions::
 
@@ -43,9 +43,11 @@ Then surfaces and regions::
         # There are two surfaces: one for the pin and one for the unit cell
         # boundary.
         radius = 0.40
+
         # This creates an axis-aligned and axis-centered cylinder along the z
         # axis, with radius 0.40 cm.
         self.pin = cards.AxisCylinder('pin', 'Z', radius)
+
         # The Parallelepiped is a macrobody. The surface is reflecting,
         # creating an infinte geometry. The surface is infinite in the z
         # direction.
@@ -65,6 +67,7 @@ Then we create cells::
         # fuel cell.
         # The fuel is the region of space inside the pin, pin.neg. 
         self.fuelregion = self.pin.neg
+
         # The neutron importance is 1, and the user-provided volume is 1 cm^3.
         self.fuel = cards.CellMCNP('fuel', self.fuelregion, self.uo2,
                 11.0, 'g/cm^3',
@@ -82,6 +85,7 @@ Then we create cells::
         # graveyard cell: where particles go to die.
         # The region is everything beyond the unit cell boundary.
         self.graveyardregion = self.cellbound.pos
+
         # This is a void cell, meaning it does not have a material.
         self.graveyard = cards.CellMCNP('graveyard', self.graveyardregion,
                 importance=('neutron', 0))
@@ -89,6 +93,7 @@ Then we create cells::
         # We add the cells to the system. The order we add them is the order
         # they are printed in the input file.
         self.sys.add_cell(self.fuel)
+
         # We can add multiple cells at once.
         self.sys.add_cell(self.coolant, self.graveyard)
        
@@ -103,17 +108,21 @@ We have source and tally cards::
         # Specify a thermal scattering law for the H2O material. This is a
         # unique card per material.
         self.sim.add_misc(cards.ScatteringLaw('H2O', {'H1': 'lwtr'}))
+
         # Add a criticality source, use default values. This is a unique card,
         # so we do not provide a card name.
         self.sim.add_source(cards.Criticality())
+
         # Add points at which to start neutrons; use default point (0, 0, 0).
         self.sim.add_source(cards.CriticalityPoints())
+
         # Tally neutron flux in both the fuel and coolant cells.
         self.sim.add_tally(cards.CellFlux('flux', 'neutron', 
-                ['fuel', 'coolant']))
+                                          ['fuel', 'coolant']))
+
         # The energy grid on which to tally neutrons, applied to all tallies.
         self.sim.add_misc(cards.EnergyGrid('egrid0', None,
-                10**np.arange(-9.9, 1.1, 0.1)))
+                                           10**np.arange(-9.9, 1.1, 0.1)))
 
 That's it for the constructor. In our class we define the following method that
 actually creates the input::
@@ -138,12 +147,18 @@ See below for what this generates.
 ************************
 Playing around afterward
 ************************
-We might want to do a second run of the code for different parameters. It's super easy to update our input file. First let's change the radius of the pin and write the input again::
+We might want to do a second run of the code for different parameters. 
+It's super easy to update our input file. First let's change the radius 
+of the pin and write the input again::
 
         inflat.pin.radius = 0.45
         inflat.write()
 
-If you open the input you'll find the radius has been updated. Sometimes we don't have the card object, and so to change a card we need to access it from its place in a dictionary in the definition. In this case we need to know its category, and its name. Here is an example of how we access a source card whose name we know, and how we can modify it::
+If you open the input you'll find the radius has been updated. Sometimes 
+we don't have the card object, and so to change a card we need to access 
+it from its place in a dictionary in the definition. In this case we need 
+to know its category, and its name. Here is an example of how we access a 
+source card whose name we know, and how we can modify it::
 
         inflat.sim.source['criticality'].keff_guess = 1.5
         inflat.write()
@@ -151,9 +166,9 @@ If you open the input you'll find the radius has been updated. Sometimes we don'
 The input is updated as we hoped.
 
 
-******************
-The output (input)
-******************
+*****************************
+The output (ie an input deck)
+*****************************
 
 This is what is generated::
 
