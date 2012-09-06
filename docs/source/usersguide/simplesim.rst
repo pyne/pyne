@@ -59,6 +59,8 @@ defintions, and the definition is handed over to an input file object which
 actually creates the input file.
 
 .. image:: simplesimdiagram.svg
+    :align: center
+    :scale: +180%
 
 .. The image above was made using Inkscape, and is completey editable as an
    Inkscape SVG file.
@@ -150,8 +152,8 @@ examples all come from  `pyne/examples/simplesim.py`.
 .. toctree::
     :maxdepth: 1
 
-    simplesim_ex_godiva
     simplesim_ex_inflattice
+    simplesim_ex_godiva
     simplesim_ex_raddetect
     simplesim_ex_custom
 

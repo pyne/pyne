@@ -13,8 +13,6 @@ This guide is intended to be the friend of anyone who wants to develop
 support. The guide is not comprehensive, and any prospective developer should
 feel comfortable contacting Chris Dembia with any questions.
 
-:py:class:`cards.ICard`.
-
 ************
 How it works
 ************
