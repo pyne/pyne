@@ -29,13 +29,11 @@ First come materials::
         ## Materials.
         # Must provide a name as a keyword argument for material cards. See the
         # documentation for :py:mod:`pyne.material` for more information.
-        self.uo2 = cards.Material(name='UO2')
-        self.uo2.from_atom_frac({'U235': 0.05,
-                                 'U238': 0.95,
-                                 'O16' : 2.00})
-        self.h2o = cards.Material(name='H2O')
-        self.h2o.from_atom_frac({'H1' : 2.0,
-                                 'O16': 1.0})
+        uo2 = material.from_atom_frac({'U235': 0.05, 'U238': 0.95, 'O16' : 2.00})
+        self.uo2 = cards.Material(uo2, name='UO2')
+
+        h2o = material.from_atom_frac({'H1' : 2.0, 'O16': 1.0}, attrs={'name': 'H2O'})
+        self.h2o = cards.Material(h2o)
 
 Then surfaces and regions::
 

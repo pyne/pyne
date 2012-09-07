@@ -291,8 +291,21 @@ import warnings
 
 import numpy as np
 
-from pyne import material, nucname
+from pyne import nucname
+from pyne import material
 import pyne.simplesim.nestedgeom as ng
+
+def _validate_name(value, isunique=False):
+    if value.find(' ') != -1:
+        raise ValueError("The property ``name`` cannot contain spaces. "
+                         "User provided {0}.".format(value))
+    if isunique:
+        raise StandardError("This is a unique card, meaning only one card"
+                            " of this type can be found in a ``definition``. "
+                            "Accordingly, the name is read-only.")
+    if value == '':
+        raise ValueError("The ``name`` property of the cannot be empty.")
+
 
 class ICard(object):
     """This class is not used by the user. Abstract base class for all cards.
@@ -307,7 +320,7 @@ class ICard(object):
     secs2shakes = 1e+8
 
     def __init__(self, name, unique=False, *args, **kwargs):
-        """\
+        """ 
 
         Parameters
         ----------
@@ -324,8 +337,10 @@ class ICard(object):
         # MaterialCustom from working.
         #super(ICard, self).__init__()
         self.unique = unique
-        if self.unique: self._name = name
-        else:            self.name = name
+        if self.unique:
+            self._name = name
+        else:
+            self.name = name
 
         # TODO Do we actually want to do this? Perhaps not; it may lead to
         # recursion.
@@ -357,16 +372,7 @@ class ICard(object):
 
     @name.setter
     def name(self, value):
-        if value.find(' ') != -1:
-            raise ValueError("The property ``name`` cannot contain spaces. "
-                    "User provided {0}.".format(value))
-        if self.unique:
-            raise StandardError("This is a unique card, meaning only one card"
-                    " of this type can be found in a ``definition``. "
-                    "Accordingly, the name is read-only.")
-        if value == '':
-            raise ValueError("The ``name`` property of the cell cannot "
-                    "be empty.")
+        _validate_name(value, self.unique)
         self._name = value
 
 
@@ -1239,7 +1245,7 @@ class LatticeByArray(ICard):
         pass
         
 
-class Material(ICard, material.Material):
+class Material(ICard):
     """In MCNP, this is the **M** card.
     Adds the attributes
     :py:attr:`description`, :py:attr:`tables` and the methods
@@ -1251,96 +1257,132 @@ class Material(ICard, material.Material):
     .. inheritance-diagram:: pyne.simplesim.cards.Material
 
     """
-    def __init__(self, *args, **kwargs):
+    def __init__(self, mat, name=None, description=None, tables=None, *args, **kwargs):
         """See :py:class:`pyne.material.Material` for superclass parameters.
 
         Parameters
         ----------
-        name : str as keyword argument
-            This is a keyword argument, but `must` be supplied.
-        description : str as keyword argument, optional
+        mat : pyne.material.Material
+            Material to base this card on.
+        name : str, optional
+            Must either be present in mat.attrs or supplied here.
+        description : str, optional
             A description of this material that perhaps explains where the
             material came from (whether it's recycled, any references, etc.).
-        tables : dict of :py:class:`nucname`: str pairs
+            If not supplied here, may be present in mat.attrs.
+        tables : dict of (nucname, str) pairs
             Sometimes it is necessary to specify a library/table identifier for
             a given nuclide. These can be provided in this dictionary. Leave
-            out the period. See examples.
+            out the period. If not supplied here, may be present in mat.attrs.  
+            See examples.
 
         Examples
         --------
-        The usage of this card is nearly identical to that of
-        :py:class:`pyne.material.Material`, but we show the usage of the 2 new
-        attributes and 2 new methods::
+        The usage of this card is meant to ensure that only valid instances of
+        :py:class:`pyne.material.Material` are used as cards.  Additionally, 
+        there are two new methods::
 
             originstory = "I found this water in a well a few years ago."
-            h2o = Material(name='water', description=originstory)
-            h2o.from_atom_frac({10010: 2.0, 'O16': 1.0})
+            h2o = Material(pyne.material.from_atom_frac({10010: 2.0, 'O16': 1.0}),
+                           name='water', description=originstory)
             h2o.tables = {10010: '71c'}
             sys.add_material(h2o)
 
         Alternatively, the tables can be specified with the constructor::
 
-            h2o = Material(name='water', tables={10010: '71c'})
-            h2o.from_atom_frac({10010: 2.0, 'O16': 1.0})
+            h2o = Material(pyne.material.from_atom_frac({10010: 2.0, 'O16': 1.0}),
+                           name='water', tables={10010: '71c'})
 
         The ``nucname``'s used for ``tables`` can be different from those used
         for ``comp``::
 
-            h2o = Material(name='water', tables={'H1': '71c'})
-            h2o.from_atom_frac({10010: 2.0, 'O16': 1.0})
+            h2o = Material(pyne.material.from_atom_frac({10010: 2.0, 'O16': 1.0}),
+                           name='water', tables={'H1': '71c'})
 
         """
-        super(Material, self).__init__(*args, **kwargs)
-        self.description = kwargs.get('description', None)
-        self.tables = kwargs.get('tables', dict())
+        name = name if name is not None else  mat.attrs['name']
+        self._mat = mat
+        super(Material, self).__init__(name=name, description=description,
+                                       tables=tables, *args, **kwargs)
+        self.mat = mat
+        if description is not None:
+            self.description = description
+        if tables is not None:
+            self.tables = tables
         # Find longest table ID. Used in card printing for prettiness.
 
     def comment(self): 
         if self.name == '':
-            raise ValueError("The ``name`` property of the material cannot "
-                    "be empty.")
-        string = "Material {0!r}".format(self.name)
-        if self.description: string += ": {0}".format(self.description)
-        else: string += "."
-        return string
+            raise ValueError("The ``name`` property of the material cannot be empty.")
+        s = "Material {0!r}".format(self.name)
+        if self.description:
+            s += ": {0}".format(self.description)
+        else:
+            s += "."
+        return s
 
     def mcnp(self, float_format, sim):
-        string = "M{0}".format(sim.sys.material_num(self.name))
-        for nuc, den in self.to_atom_frac().items():
+        s = "M{0}".format(sim.sys.material_num(self.name))
+        for nuc, den in self._mat.to_atom_frac().items():
             # ZAID.
-            string += "\n     {: 6d}".format(nucname.mcnp(nuc))
+            s += "\n     {: 6d}".format(nucname.mcnp(nuc))
             # Table ID. Loop allows flexible keys for tables.
             flag = False 
             for key in self.tables:
                 if nucname.mcnp(key) == nucname.mcnp(nuc):
                     flag = True
-                    string += ".{0}".format(self.tables[key])
+                    s += ".{0}".format(self.tables[key])
             if not flag:
                 # +1 for he decimal point.
-                string += (self._max_table_len + 1) * " "
+                s += (self._max_table_len + 1) * " "
             # Concentration/density.
-            string += 2 * " " + float_format % den
+            s += 2 * " " + float_format % den
             # Nuclide name.
-            string += " $ {0}".format(nucname.name(nuc))
-        return string
+            s += " $ {0}".format(nucname.name(nuc))
+        return s
 
     @property
-    def description(self): return self._description
+    def mat(self):
+        return self._mat
+
+    @mat.setter
+    def mat(self, value):
+        _validate_name(self.mat.attrs['name'], self.unique)
+        self._mat = value
+        if 'tables' in value.attrs:
+            self._max_table_len = max([len(v) for v in value.attrs['tables'].values()])
+        else:
+            self._max_table_len = 0
+
+    @property
+    def name(self):
+        return self._mat.attrs['name']
+
+    @name.setter
+    def name(self, value):
+        _validate_name(value, self.unique)
+        self._mat.attrs['name'] = value
+
+    @property
+    def description(self):
+        if 'description' not in self._mat.attrs:
+            self._mat.attrs['description'] = None
+        return self._mat.attrs['description']
 
     @description.setter
-    def description(self, value): self._description = value
+    def description(self, value):
+        self._mat.attrs['description'] = value
 
     @property
-    def tables(self): return self._tables
+    def tables(self):
+        if 'tables' not in self._mat.attrs:
+            self._mat.attrs['tables'] = {}
+        return self._mat.attrs['tables']
 
     @tables.setter
     def tables(self, value):
-        self._tables = value
-        max_table_len = 0
-        for key, val in self.tables.items():
-            if len(val) > max_table_len:
-                max_table_len = len(val)
-        self._max_table_len = max_table_len
+        self._mat.attrs['tables'] = value
+        self._max_table_len = max([len(val) for val in value.values()])
 
 
 class MaterialMCNP(Material):
@@ -6827,7 +6869,7 @@ class Custom(ICard):
     
     """
     def __init__(self, *args, **kwargs):
-        """
+        """ 
         Parameters
         ----------
         name : str
@@ -6896,6 +6938,7 @@ class SurfaceCustom(Custom, ISurface):
 
 
 class MaterialCustom(Custom, Material):
+#class MaterialCustom(Material, Custom):
     """Custom :py:class:`Material` card.
 
     .. inheritance-diagram:: MaterialCustom
@@ -6906,6 +6949,11 @@ class MaterialCustom(Custom, Material):
         mc = MaterialCustom(name='matc', comment='Made in USA', mcnp='...')
 
     """
+    def __init__(self, mat, name=None, *args, **kwargs):
+        name = name if name is not None else  mat.attrs['name']
+        self._mat = mat
+        super(MaterialCustom, self).__init__(name=name, *args, **kwargs)
+
     # Provide number automatically.
     # TODO correct spacing given the number.
     def mcnp(self, float_format, sim):
