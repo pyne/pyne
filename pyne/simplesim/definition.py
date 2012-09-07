@@ -53,8 +53,12 @@ Reference
 import abc
 import collections
 import pickle
-import json
 import warnings
+
+try:
+    import simplejson as json
+except ImportError:
+    import json
 
 import numpy as np
 
