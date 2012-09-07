@@ -1,6 +1,9 @@
 import numpy as np
 
-from pyne.simplesim import cards, definition, inputfile
+from pyne import material 
+from pyne.simplesim import cards
+from pyne.simplesim import definition
+from pyne.simplesim import inputfile
 import pyne.simplesim.nestedgeom as ng
 
 class InfLattice(object):
@@ -28,13 +31,11 @@ class InfLattice(object):
         ## Materials.
         # Must provide a name as a keyword argument for material cards. See the
         # documentation for :py:mod:`pyne.material` for more information.
-        self.uo2 = cards.Material(name='UO2')
-        self.uo2.from_atom_frac({'U235': 0.05,
-                            'U238': 0.95,
-                            'O16' : 2.00})
-        self.h2o = cards.Material(name='H2O')
-        self.h2o.from_atom_frac({'H1' : 2.0,
-                            'O16': 1.0})
+        uo2 = material.from_atom_frac({'U235': 0.05, 'U238': 0.95, 'O16' : 2.00})
+        self.uo2 = cards.Material(uo2, name='UO2')
+
+        h2o = material.from_atom_frac({'H1' : 2.0, 'O16': 1.0}, attrs={'name': 'H2O'})
+        self.h2o = cards.Material(h2o)
 
         ## Surfaces.
         # There are two surfaces: one for the pin and one for the unit cell
@@ -113,23 +114,20 @@ class InfLattice(object):
         self.inp = inputfile.MCNPInput(self.sim, title="Infinite lattice.")
         self.inp.write('ex_simplesim_inflattice')
 
+if __name__ == '__main__':
+    # Create all relevant objects for the infinite lattice example.
+    inflat = InfLattice()
 
-# Create all relevant objects for the infinite lattice example.
-inflat = InfLattice()
-# Write to a file.
-inflat.write()
-
-
-
+    # Write to a file.
+    inflat.write()
 
 
 
+###################################
+#### Some example Notes follow! ###
+###################################
 
-
-
-
-
-"""
+""" 
 
 # super brief
 rxr = simplesim.definition.SystemDefinition()
@@ -148,7 +146,7 @@ rxr.add_cell(cards.CellMCNP('coolant', pinsurf.pos & boundsurf.neg,
 rxr.add_cell(cards.CellVoidMCNP('graveyard', boundsurf.pos, neutron_imp=0))
 
 """
-"""
+""" 
 # Geometry and materials
 
 # Materials.
@@ -205,7 +203,7 @@ print fuel.mcnp(sim)
 #rxr.save('test')
 
 """
-"""
+""" 
 # 
 opts = definition.SimulationDefinition(rxr)
 
@@ -230,7 +228,7 @@ for this_enrich in enrichments:
 
 
 """
-"""
+""" 
 # Create cards.
 channel = cards.AxisCylinder("channel", 'X', 2.54)
 leftbound = cards.AxisPlane("leftbound", 'X', -500.0)
@@ -272,7 +270,7 @@ print pipemid.comment()
 print polyshield.comment()
 """
 
-"""
+""" 
 rxr.add_lattice
 
 rxr.add_universe
