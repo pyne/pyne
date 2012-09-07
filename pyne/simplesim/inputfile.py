@@ -40,7 +40,8 @@ import warnings
 
 import numpy as np
 
-from pyne.simplesim import definition, cards
+from pyne.simplesim import definition
+from pyne.simplesim import cards
 
 class IInputFile(object):
     """This class is not used directly by the user. Abstract base class for

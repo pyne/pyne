@@ -53,13 +53,10 @@ class TestSystemDefinition(unittest.TestCase):
     """Tests the :py:class:`definition.SystemDefinition` class."""
 
     def setUp(self):
-        self.uo2 = cards.Material(name='UO2')
-        self.uo2.from_atom_frac({'U235': 0.05,
-                                 'U238': 0.95,
-                                 'O16' : 2.0})
-        self.h2o = cards.Material(name='H2O')
-        self.h2o.from_atom_frac({'H1' : 2.0,
-                                 'O16': 1.0})
+        uo2 = material.from_atom_frac({'U235': 0.05, 'U238': 0.95, 'O16' : 2.00})
+        self.uo2 = cards.Material(uo2, name='UO2')
+        h2o = material.from_atom_frac({'H1' : 2.0, 'O16': 1.0}, attrs={'name': 'H2O'})
+        self.h2o = cards.Material(h2o)
         
         # Surfaces.
         radius = 0.40 # cm
@@ -105,7 +102,7 @@ class TestSystemDefinition(unittest.TestCase):
         surf1 = cards.AxisCylinder('1', 'Z', radius)
         self.assertEquals(self.rxr.add_surface(surf1), 3)
         
-        mat1 = cards.Material(name='H2O2')
+        mat1 = cards.Material(material.Material(), name='H2O2')
         self.assertEquals(self.rxr.add_material(mat1), 3)
 
         sd = cards.Distribution('distA', [-2, 2], [0, 1])
@@ -133,8 +130,8 @@ class TestSystemDefinition(unittest.TestCase):
         self.rxr.add_surface(surf1, surf2)
         nsurfs = len(self.rxr.surfaces)
 
-        mat1 = cards.Material(name='H2O2')
-        mat2 = cards.Material(name='H2O3')
+        mat1 = cards.Material(material.Material(), name='H2O2')
+        mat2 = cards.Material(material.Material(), name='H2O3')
         self.rxr.add_material(mat1, mat2)
         nmats = len(self.rxr.materials)
 
@@ -605,15 +602,16 @@ class TestSystemDefinition(unittest.TestCase):
     def test_Saving(self):
         """Tests saving a system definition to a JSON file."""
         self.sim.save('simplesim_sys.json')
+        os.remove('simplesim_sys.json')
 
 
     def test_Material(self):
         """Tests :py:class:`pyne.simplesim.cards.Material`."""
 
         originstory = "I found this water in a well a few years ago."
-        h2o = cards.Material(name='water', description=originstory)
-        h2o.from_atom_frac({10010: 1.0, 'O16': 2.0})
-        h2o.tables = {10010: '71c'}
+        h2o = cards.Material(material.from_atom_frac({10010: 1.0, 'O16': 2.0}), 
+                             name='water', description=originstory)
+        h2o.tables = {'10010': '71c'}
         self.sim.sys.add_material(h2o)
         self.assertEquals(h2o.comment(), "Material 'water': "
                 "I found this water in a well a few years ago.")
@@ -621,14 +619,14 @@ class TestSystemDefinition(unittest.TestCase):
         "       1001.71c  1 $ H1\n"
         "       8016      2 $ O16")
 
-        h2o = cards.Material(name='water', tables={10010: '71c'})
-        h2o.from_atom_frac({10010: 1.0, 'O16': 2.0})
+        h2o = cards.Material(material.from_atom_frac({10010: 1.0, 'O16': 2.0}),
+                             name='water', tables={'10010': '71c'})
         self.assertEquals(h2o.mcnp('%g', self.sim), "M3\n"
         "       1001.71c  1 $ H1\n"
         "       8016      2 $ O16")
 
-        h2o = cards.Material(name='water', tables={'H1': '71c'})
-        h2o.from_atom_frac({10010: 1.0, 'O16': 2.0})
+        h2o = cards.Material(material.from_atom_frac({10010: 1.0, 'O16': 2.0}),
+                             name='water', tables={'H1': '71c'})
         self.assertEquals(h2o.mcnp('%g', self.sim), "M3\n"
         "       1001.71c  1 $ H1\n"
         "       8016      2 $ O16")
@@ -2309,14 +2307,12 @@ class TestMCNPInput(unittest.TestCase):
 
         # Define system.
         # Materials.
-        uo2 = cards.Material(name='UO2')
-        uo2.from_atom_frac({'U235': 0.05,
-                            'U238': 0.95,
-                            'O16' : 2.00})
-        h2o = cards.Material(name='H2O')
-        h2o.from_atom_frac({'H1' : 2.0,
-                            'O16': 1.0})
-        mc = cards.MaterialCustom(name='matc', comment="mathey", mcnp="mathey")
+        uo2 = material.from_atom_frac({'U235': 0.05, 'U238': 0.95, 'O16' : 2.00})
+        uo2 = cards.Material(uo2, name='UO2')
+        h2o = material.from_atom_frac({'H1' : 2.0, 'O16': 1.0}, attrs={'name': 'H2O'})
+        h2o = cards.Material(h2o)
+        mc = cards.MaterialCustom(mat=material.Material(), name='matc', 
+                                  comment="mathey", mcnp="mathey")
         self.sim.sys.add_material(mc)
 
         # Surfaces.
@@ -2403,13 +2399,11 @@ class TestMCNPInput(unittest.TestCase):
 
         # Define system.
         # Materials.
-        uo2 = cards.Material(name='UO2')
-        uo2.from_atom_frac({'U235': 0.05,
-                            'U238': 0.95,
-                            'O16' : 2.00})
-        h2o = cards.Material(name='H2O')
-        h2o.from_atom_frac({'H1' : 2.0,
-                            'O16': 1.0})
+        uo2 = material.from_atom_frac({'U235': 0.05, 'U238': 0.95, 'O16' : 2.00})
+        uo2 = cards.Material(uo2, name='UO2')
+        h2o = material.from_atom_frac({'H1' : 2.0, 'O16': 1.0}, attrs={'name': 'H2O'})
+        h2o = cards.Material(h2o)
+
         # Surfaces.
         radius = 0.40
         pin = cards.AxisCylinder('pin', 'X', radius)
