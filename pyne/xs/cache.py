@@ -362,3 +362,5 @@ def get_eaf_xs(nuc, rx):
 
 # Make a singleton of the cross-section cache
 xs_cache = XSCache()
+
+
