@@ -119,8 +119,8 @@ def half_life(ensdf):
         if m is not None and valid_from_nuc:
             g = m.groups()
             dat = dict([d.split('=')[:2] for d in g[-1].replace('$', ' ').split() if '=' in d])
-            dat = {_decay_to[key](from_nuc): _to_float(val)*0.01 
-                        for key, val in dat.items() if key in _decay_to.keys()}
+            dat = dict([(_decay_to[key](from_nuc), _to_float(val)*0.01) 
+                        for key, val in dat.items() if key in _decay_to.keys()])
             data += [(from_nuc, level, to_nuc, half_life, br) for to_nuc, br in dat.items() if 0.0 < br]
             continue
 

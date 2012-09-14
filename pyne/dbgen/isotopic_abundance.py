@@ -19,7 +19,7 @@ def get_isotopic_abundances():
 
     # Create dictionary
     abundance = {}
-    abundance_by_Z = {i: [] for i in range(1,93)}
+    abundance_by_Z = dict([(i, []) for i in range(1,93)])
 
     # Read data
     for line in abundance_file:
