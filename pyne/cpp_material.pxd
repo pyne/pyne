@@ -4,6 +4,7 @@ from libcpp.set cimport set
 
 cimport std
 
+cimport cpp_jsoncpp 
 
 cdef extern from "material.h" namespace "pyne":
     # Cython does not allow for typdef'ing tamplated types :( 
@@ -16,21 +17,19 @@ cdef extern from "material.h" namespace "pyne":
         Material(map[int, double]) except +
         Material(map[int, double], double) except +
         Material(map[int, double], double, double) except +
-        Material(map[int, double], double, std.string) except +
-        Material(map[int, double], double, double, std.string) except +
-        Material(map[int, double], double, double,std.string, double) except +
+        Material(map[int, double], double, double, double, cpp_jsoncpp.Value) except +
         Material(char *) except +
         Material(char *, double) except +
         Material(char *, double, double) except +
-        Material(char *, double, double, std.string) except +
-        Material(char *, double, double, std.string, double) except +
+        Material(char *, double, double, double) except +
+        Material(char *, double, double, double, cpp_jsoncpp.Value) except +
 
         # Attributes
         map[int, double] comp
         double mass
         double density
-        std.string name
         double atoms_per_mol
+        cpp_jsoncpp.Value attrs
 
         # Methods
         void norm_comp() except +
@@ -51,21 +50,21 @@ cdef extern from "material.h" namespace "pyne":
         double molecular_weight(double) except +
 
         # Substream Methods
-        Material sub_mat(set[int], std.string) except +
-        Material set_mat(set[int], double, std.string) except +
-        Material del_mat(set[int], std.string) except +
+        Material sub_mat(set[int]) except +
+        Material set_mat(set[int], double) except +
+        Material del_mat(set[int]) except +
 
-        Material sub_range(int, int, std.string) except +
-        Material set_range(int, int, double, std.string) except +
-        Material del_range(int, int, std.string) except +
+        Material sub_range(int, int) except +
+        Material set_range(int, int, double) except +
+        Material del_range(int, int) except +
 
-        Material sub_u(std.string) except +
-        Material sub_pu(std.string) except +
-        Material sub_lan(std.string) except +
-        Material sub_act(std.string) except +
-        Material sub_tru(std.string) except +
-        Material sub_ma(std.string) except +
-        Material sub_fp(std.string) except +
+        Material sub_u() except +
+        Material sub_pu() except +
+        Material sub_lan() except +
+        Material sub_act() except +
+        Material sub_tru() except +
+        Material sub_ma() except +
+        Material sub_fp() except +
 
         # Atom frac member functions
         map[int, double] to_atom_frac() except +

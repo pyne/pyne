@@ -8,6 +8,7 @@ build_nuc_data/
 *.pyc
 *.save
 *.bak
+*~
 
 # Ignore Cython'd files
 pyne/*.c

@@ -37,7 +37,7 @@ def grab_ensdf_decay(build_dir=""):
     for f in ensdf_zip:
         fpath = os.path.join(build_dir, f)
         if f not in os.listdir(build_dir):
-            print "  grabing {0} and placing it in {1}".format(f, fpath)
+            print "  grabbing {0} and placing it in {1}".format(f, fpath)
             urllib.urlretrieve(iaea_base_url + f, fpath)
 
             if os.path.getsize(fpath) < 1048576: 
@@ -45,20 +45,23 @@ def grab_ensdf_decay(build_dir=""):
                 os.remove(fpath)
                 urllib.urlretrieve(s3_base_url + f, fpath)
 
-        with ZipFile(fpath) as zf:
+        # not using ZipFile context manager (with statement for Python 2.6)
+        try:
+            zf = ZipFile(fpath)
             for name in zf.namelist():
                 if not os.path.exists(os.path.join(build_dir, name)):
                     print "    extracting {0} from {1}".format(name, f)
                     zf.extract(name, build_dir)
+        finally:
+            zf.close()
+        
 
 
 
 atomic_decay_dtype = np.dtype([
-    ('from_nuc_name', 'S6'),
-    ('from_nuc_zz',   int),
+    ('from_nuc',   int),
     ('level',         float),
-    ('to_nuc_name',   'S6'),
-    ('to_nuc_zz',     int), 
+    ('to_nuc',     int), 
     ('half_life',     float),
     ('decay_const',   float),
     ('branch_ratio',  float),
@@ -77,12 +80,14 @@ def parse_decay(build_dir=""):
         decay_data += ensdf.half_life(f)
 
     ln2 = np.log(2.0)
-    decay_data = [(nucname.name(fn), fn, lvl, nucname.name(tn), tn, hl, ln2/hl, br) for fn, lvl, tn, hl, br in decay_data]
+    decay_data = [(fn, lvl, tn, hl, ln2/hl, br) for fn, lvl, tn, hl, br in decay_data]
+    decay_data = set(decay_data)
+    decay_data = sorted(decay_data, key=lambda x: (x[1], x[4]))
 
     decay_array = np.array(decay_data, dtype=atomic_decay_dtype)
-    da, mask = np.unique(decay_array, return_index=True)
-    mask.sort()
-    decay_array = decay_array[mask]
+    #da, mask = np.unique(decay_array, return_index=True)
+    #mask.sort()
+    #decay_array = decay_array[mask]
     return decay_array
     
     
@@ -127,7 +132,7 @@ def make_decay(args):
             return 
 
     # grab the decay data
-    print "Grabing the ENSDF decay data from IAEA"
+    print "Grabbing the ENSDF decay data from IAEA"
     grab_ensdf_decay(build_dir)
 
     # Make atomic weight table once we have the array
