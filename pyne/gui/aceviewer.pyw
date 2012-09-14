@@ -80,7 +80,7 @@ class AceViewer(QMainWindow):
 
         # File menu
         self.actionOpen = QAction("&Open Library...", self)
-        self.actionOpenPartial = QAction("&Open Partial Library...", self)
+        self.actionOpenPartial = QAction("Open &Partial Library...", self)
         self.actionExit = QAction("E&xit", self)
         self.menuFile.addActions([self.actionOpen, self.actionOpenPartial,
                                   self.actionExit])
@@ -221,15 +221,16 @@ class MyTreeWidget(QTreeWidget):
 
     def mousePressEvent(self, event):
         if event.button() == Qt.RightButton:
-            self.temporaryPos = event.globalPos()
+            self.temporaryPos = self.viewport().mapFromGlobal(event.globalPos())
             menu = QMenu()
             menu.addAction("Plot Angle Distribution", self.create_angle)
             menu.addAction("Plot Angle Distribution (Polar)", self.create_angle_polar)
+            menu.addAction("Plot Energy Distribution", self.create_energy)
             menu.exec_(event.globalPos())
         else:
             super(MyTreeWidget, self).mousePressEvent(event)
 
-    def create_angle(self):
+    def create_angle(self, polar=False):
         # Get QTreeWidgetItem that was right-clicked
         item = self.itemAt(self.temporaryPos)
 
@@ -249,11 +250,14 @@ class MyTreeWidget(QTreeWidget):
             # Plot angular distribution
             if completed:
                 energies = map(float, str(energies).split())
-                anglePlot = DistributionPlot(reaction, energies,
+                anglePlot = DistributionPlot(reaction, energies, polar=polar,
                                              parent=self.parent())
                 anglePlot.show()
 
     def create_angle_polar(self):
+        self.create_angle(polar=True)
+
+    def create_energy(self):
         # Get QTreeWidgetItem that was right-clicked
         item = self.itemAt(self.temporaryPos)
 
@@ -268,34 +272,39 @@ class MyTreeWidget(QTreeWidget):
             # Ask user for incoming energies
             energies, completed = QInputDialog.getText(
                 self.parent(), "Energies", "Enter incoming energies at "
-                "which to plot angular distribution (MeV):")
+                "which to plot energy distribution (MeV):")
 
             # Plot angular distribution
             if completed:
                 energies = map(float, str(energies).split())
-                anglePlot = DistributionPlot(reaction, energies, polar=True,
-                                             parent=self.parent())
+                anglePlot = DistributionPlot(
+                    reaction, energies, energydist=True, parent=self.parent())
                 anglePlot.show()
 
 class DistributionPlot(QMainWindow):
 
-    def __init__(self, reaction, energies, polar=False, parent=None):
+    def __init__(self, reaction, energies, polar=False, energydist=False,
+                 parent=None):
         super(DistributionPlot, self).__init__(parent)
 
         # Initialize data
         self.reaction = reaction
         self.energies = energies
         self.polar = polar
+        self.energydist = energydist
 
         # Draw widgets
         self._create_gui()
 
         # Draw plot
-        self.draw_plot()
+        self._draw_plot()
 
     def _create_gui(self):
         # Set title of window
-        self.setWindowTitle("Angle Distribution Plot")
+        if self.energydist:
+            self.setWindowTitle("Energy Distribution")
+        else:
+            self.setWindowTitle("Angle Distribution")
 
         # Create widgets
         self.main = QWidget()
@@ -316,7 +325,7 @@ class DistributionPlot(QMainWindow):
         # Set layout
         self.main.setLayout(layout)
 
-    def draw_plot(self):
+    def _draw_plot(self):
         # Create instance of Axes on the Figure
         if self.polar:
             self.axes = self.fig.add_subplot(111, polar=True)
@@ -325,10 +334,15 @@ class DistributionPlot(QMainWindow):
 
         # Loop over each incoming energy
         for E in self.energies:
-            if self.polar:
-                self._plot_angle_polar(E)
+            if self.energydist:
+                self._plot_energy_dist(E)
+                self.axes.grid(True)
             else:
-                self._plot_angle_dist(E)
+                if self.polar:
+                    self._plot_angle_dist_polar(E)
+                else:
+                    self._plot_angle_dist(E)
+                    self.axes.grid(True)
         self.axes.legend()
 
     def _plot_angle_dist(self, E_in):
@@ -341,7 +355,7 @@ class DistributionPlot(QMainWindow):
                        self.reaction.ang_pdf[index],
                        label='E = {0} MeV'.format(E_in))
 
-    def _plot_angle_polar(self, E_in):
+    def _plot_angle_dist_polar(self, E_in):
         """
         Plots the secondary angle distribution for this reaction at a
         given incoming energy of the particle.
@@ -363,18 +377,25 @@ class DistributionPlot(QMainWindow):
         # plot angle distribution
         self.axes.plot(theta, r, label='E = {0} MeV'.format(E_in))
 
-    def plot_energy_dist(self, E_in):
+    def _plot_energy_dist(self, E_in):
         """
         Plots the secondary energy distribution for this reaction at a
         given incoming energy if data are available.
         """
 
-        # determine index for incoming energy
-        index = bisect_right(self.reaction.e_dist_energy_in, E_in)
+        try:
+            # determine index for incoming energy
+            index = bisect_right(self.reaction.e_dist_energy_in, E_in)
 
-        # plot energy distribution
-        self.axes.semilogx(self.reaction.e_dist_energy_out[index],
-                           self.reaction.e_dist_pdf[index])
+            # plot energy distribution
+            self.axes.semilogx(self.reaction.e_dist_energy_out[index],
+                               self.reaction.e_dist_pdf[index],
+                               label='E = {0} MeV'.format(E_in))
+        except:
+            QMessageBox.warning(
+                self, "Unsupported Energy Distribution",
+                "Energy distribution for law {0} not yet supported!".format(
+                    self.reaction.e_dist_law))
 
 
 if __name__ == '__main__':

@@ -1,0 +1,1 @@
+@python -c "import sys; from pyne.dbgen.nuc_data_make import main; sys.exit(main())"
