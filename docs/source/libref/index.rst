@@ -13,12 +13,16 @@ The following modules and sub-packages are discussed:
     data
     material
     bins
+    njoy
     cccc
     ace
     ensdf
     xs/index
     origen22
     serpent
+    enrichment
     utils
     stlconverters
     dbgen/index
+    mcnp
+    simplesim

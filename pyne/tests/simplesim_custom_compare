@@ -1,0 +1,129 @@
+Infinite lattice.
+  C Generated with the Python package PyNE (pyne.github.com).
+  C ==========
+  C Cell Cards
+  C ==========
+  C Cell 'fuel': region -pin, material 'UO2' density 11 g/cm^3 VOL= 1 cm^3
+  c     IMP:N= 1.
+1 2 -11 -2 VOL= 1 IMP:N=1
+  C
+  C cellhey
+2 cellhey
+  C
+  C Cell 'coolant': region (+pin | -bound), material 'H2O' density 1 g/cm^3 VOL=
+  c     1 cm^3 IMP:N= 1.
+3 3 -1 (2 -3) VOL= 1 IMP:N=1
+  C
+  C Cell 'graveyard': region +bound, void IMP:N= 0.
+4 0 3 IMP:N=0
+  C
+
+  C =============
+  C Surface Cards
+  C =============
+  C surfhey
+1 surfhey
+  C
+  C Axis cylinder 'pin': aligned and centered on x axis, with radius 0.4 cm
+  c     (diameter 0.8 cm).
+2  CX   0.4
+  C
+  C Parallelepiped 'bound': reflecting. [-0.6, 0.6] x [-0.6, 0.6] x [0, 0] cm.
+*3 RPP -0.6  0.6  -0.6  0.6   0  0
+  C
+
+  C ==========
+  C Data Cards
+  C ==========
+  C
+  C **************
+  C Material Cards
+  C **************
+  C mathey
+M1 mathey
+  C
+  C Material 'UO2'.
+M2
+       8016    2 $ O16
+      92235    0.05 $ U235
+      92238    0.95 $ U238
+  C
+  C Material 'H2O'.
+M3
+       1001    2 $ H1
+       8016    1 $ O16
+  C
+  C
+  C ************
+  C Source Cards
+  C ************
+  C Criticality source 'criticality': n_histories: 1000, keff_guess: 1,
+  c     n_skip_cycles: 30, n_cycles: 130.
+KCODE 1000  1 30 130
+  C
+  C Criticality points 'criticalitypoints': (0, 0, 0) cm.
+KSRC  0  0  0
+  C
+  C sourcehey
+sourcehey
+  C
+  C
+  C ******************
+  C Distribution Cards
+  C ******************
+  C disthey
+SI1 disthey
+SP1 distheyp
+  C
+  C
+  C ***********
+  C Tally Cards
+  C ***********
+  C Cell flux tally 'flux' of neutrons: cells 'fuel'; 'coolant'.
+F14:N  1 3
+  C
+  C tallyhey
+tallyhey
+  C
+  C tallyhey
+F24 tallyhey
+  C
+  C tallyhey
+*F34 tallyhey
+  C
+  C
+  C ********************
+  C Transformation Cards
+  C ********************
+  C transhey
+TR1 transhey
+  C
+  C
+  C *******************
+  C Miscellaneous Cards
+  C *******************
+  C Scattering law 'scatlaw-H2O': H1: lwtr.
+MT3 lwtr
+  C
+  C Energy grid 'egrid0' for all tallies: 110 groups.
+E0  1.2589e-10  1.5849e-10  1.9953e-10  2.5119e-10  3.1623e-10  3.9811e-10
+     5.0119e-10  6.3096e-10  7.9433e-10  1e-09  1.2589e-09  1.5849e-09
+     1.9953e-09  2.5119e-09  3.1623e-09  3.9811e-09  5.0119e-09  6.3096e-09
+     7.9433e-09  1e-08  1.2589e-08  1.5849e-08  1.9953e-08  2.5119e-08
+     3.1623e-08  3.9811e-08  5.0119e-08  6.3096e-08  7.9433e-08  1e-07
+     1.2589e-07  1.5849e-07  1.9953e-07  2.5119e-07  3.1623e-07  3.9811e-07
+     5.0119e-07  6.3096e-07  7.9433e-07  1e-06  1.2589e-06  1.5849e-06
+     1.9953e-06  2.5119e-06  3.1623e-06  3.9811e-06  5.0119e-06  6.3096e-06
+     7.9433e-06  1e-05  1.2589e-05  1.5849e-05  1.9953e-05  2.5119e-05
+     3.1623e-05  3.9811e-05  5.0119e-05  6.3096e-05  7.9433e-05  0.0001
+     0.00012589  0.00015849  0.00019953  0.00025119  0.00031623  0.00039811
+     0.00050119  0.00063096  0.00079433  0.001  0.0012589  0.0015849  0.0019953
+     0.0025119  0.0031623  0.0039811  0.0050119  0.0063096  0.0079433  0.01
+     0.012589  0.015849  0.019953  0.025119  0.031623  0.039811  0.050119
+     0.063096  0.079433  0.1  0.12589  0.15849  0.19953  0.25119  0.31623
+     0.39811  0.50119  0.63096  0.79433  1  1.2589  1.5849  1.9953  2.5119
+     3.1623  3.9811  5.0119  6.3096  7.9433  10
+  C
+  C mischey
+mischey
+  C
