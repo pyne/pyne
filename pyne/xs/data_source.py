@@ -55,6 +55,7 @@ class DataSource(object):
         self.dst_group_struct = dst_group_struct
         self.src_phi_g = np.ones(self._src_ngroups, dtype='f8') if src_phi_g is None \
                             else np.asarray(src_phi_g)
+        self.rxcache = {}
         
 
     @property
@@ -94,6 +95,12 @@ class DataSource(object):
     def src_to_dst_matrix(self):
         return self._src_to_dst_matrix
 
+    def reaction(self, nuc, rx):
+        rxkey = (nuc, rx)
+        if rxkey not in rxcache:
+            self.rxcache[rxkey] = _load_reaction(nuc, rx)
+        return self.rxcache[rxkey]
+
     def discretize(self, nuc, rx, src_phi_g=None, dst_phi_g=None):
         src_phi_g = self.src_phi_g if src_phi_g is None else np.asarray(src_phi_g) 
         src_sigma = self.reaction(nuc, rx)
@@ -103,14 +110,14 @@ class DataSource(object):
         return dst_sigma
 
     # Mix-in methods to implement
-    def _load_group_structure(self):
-        raise NotImplementedError
-
     @property
     def exists(self):
         raise NotImplementedError
 
-    def reaction(self, nuc, rx):
+    def _load_group_structure(self):
+        raise NotImplementedError
+
+    def _load_reaction(self, nuc, rx):
         raise NotImplementedError
 
 
@@ -131,7 +138,7 @@ class NullDataSource(DataSource):
             self._exists = True
         return self._exists
 
-    def reaction(self, nuc, rx):
+    def _load_reaction(self, nuc, rx):
         return np.zeros(self.src_ngroups, dtype='f8')
 
     def discretize(self, nuc, rx, src_phi_g=None, dst_phi_g=None):
@@ -173,7 +180,7 @@ class CinderDataSource(DataSource):
                 self._exists = ('/neutron/cinder_xs' in f)
         return self._exists
 
-    def reaction(self, nuc, rx):
+    def _load_reaction(self, nuc, rx):
         nuc = nucname.zzaaam(nuc)
         rx = _munge_rx(rx)
         f = tb.openFile(nuc_data, 'r')
