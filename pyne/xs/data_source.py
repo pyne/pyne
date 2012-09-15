@@ -97,8 +97,8 @@ class DataSource(object):
 
     def reaction(self, nuc, rx):
         rxkey = (nuc, rx)
-        if rxkey not in rxcache:
-            self.rxcache[rxkey] = _load_reaction(nuc, rx)
+        if rxkey not in self.rxcache:
+            self.rxcache[rxkey] = self._load_reaction(nuc, rx)
         return self.rxcache[rxkey]
 
     def discretize(self, nuc, rx, src_phi_g=None, dst_phi_g=None):
@@ -183,27 +183,34 @@ class CinderDataSource(DataSource):
     def _load_reaction(self, nuc, rx):
         nuc = nucname.zzaaam(nuc)
         rx = _munge_rx(rx)
-        f = tb.openFile(nuc_data, 'r')
-        node = f.root.neutron.cinder_xs.fission if rx == 'f' else \
-               f.root.neutron.cinder_xs.absorption
 
         # Set query condition
         if rx == 'f':
             cond = 'nuc == {0}'.format(nuc)
-        elif rx == 'a':
-            cond = "(from_nuc == {0}) & (reaction_type != 'c')".format(nuc)
         elif rx in RX_TYPES:
             cond = "(from_nuc == {0}) & (reaction_type == '{1}')".format(nuc, rx)
         else:
             return None
 
-        rows = [np.array(row['xs']) for row in node.where(cond)]
-        f.close()
-        if len(rows) == 1:
+        with tb.openFile(nuc_data, 'r') as f:
+            node = f.root.neutron.cinder_xs.fission if rx == 'f' else \
+                   f.root.neutron.cinder_xs.absorption
+            rows = [np.array(row['xs']) for row in node.where(cond)]
+
+        if 1 == len(rows):
             rxdata = rows[0]
-        elif 1 < len(rows) and rx == 'a':
+        elif 1 < len(rows):
             rows = np.array(rows)
             rxdata = rows.sum(axis=0)
+        elif 0 == len(rows) and (rx == 'a'):
+            # in case absorption doesn't exist, we compute it
+            fdata = self._load_reaction(nuc, 'f')
+            cond = "(from_nuc == {0}) & (reaction_type != 'c')".format(nuc)
+            f = tb.openFile(nuc_data, 'r')
+            with tb.openFile(nuc_data, 'r') as f:
+                node = f.root.neutron.cinder_xs.absorption
+                rows = np.array([row['xs'] for row in node.where(cond)])
+            rxdata = rows.sum(axis=0) + fdata
         else:
             rxdata = None
         return rxdata
