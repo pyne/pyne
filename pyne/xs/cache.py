@@ -12,8 +12,19 @@ from pyne.xs.models import partial_energy_matrix, phi_g
 from pyne.xs import data_source
 
 
-same_arr_or_none = lambda a, b: (a is b) or ((len(a) == len(b)) and (a == b).all())
+def _same_arr_or_none(a, b): 
+    if a is None or b is None:
+        return a is b
+    else:
+        return (len(a) == len(b)) and (a == b).all()
 
+def _valid_group_struct(E_g):
+    if E_g is None:
+        return None
+    E_g = np.asarray(E_g, dtype='f8')
+    if E_g[0] < E_g[-1]:
+        E_g = E_g[::-1]
+    return E_g
 
 
 ###############################################################################
@@ -43,7 +54,7 @@ class XSCache(MutableMapping):
             ds = cls(dst_group_struct=group_struct)
             if ds.exists:
                 self.data_sources.append(ds)
-        self._cache['E_g'] = None if group_struct is None else np.asarray(group_struct)
+        self._cache['E_g'] = _valid_group_struct(group_struct) 
         self._cache['phi_g'] = None
 
     #
@@ -91,25 +102,33 @@ class XSCache(MutableMapping):
         """Key setting via custom cache functionality."""
         # Set the E_g
         if (key == 'E_g'):
-            value = value if value is None else np.asarray(value, dtype='f8')
+            value = _valid_group_struct(value)
             cache_value = self._cache['E_g']
-            if same_arr_or_none(value, cache_value):
+            if _same_arr_or_none(value, cache_value):
                 return 
-            self._cache.clear()
+            self.clear()
             self._cache['phi_g'] = None
+            for ds in self.data_sources:
+                ds.dst_group_struct = value
         elif (key == 'phi_g'):
             value = value if value is None else np.asarray(value, dtype='f8')
             cache_value = self._cache['phi_g']
-            if same_arr_or_none(value, cache_value):
+            if _same_arr_or_none(value, cache_value):
                 return
             E_g = self._cache['E_g']
             if len(value) + 1 == len(E_g):
-                self._cache.clear()
-                self._cache['E_g'] = E_g
+                self.clear()
             else:
                 raise ValueError("phi_g does not match existing group structure E_g!")
         # Set the value normally
         self._cache[key] = value
+
+    def clear(self):
+        """Clears the cache, retaining E_g and phi_g."""
+        E_g, phi_g = self._cache['E_g'], self._cache['phi_g'] 
+        self._cache.clear()
+        self._cache['E_g'], self._cache['phi_g'] = E_g, phi_g
+        
 
 
 #EAF_RX = set(["", 'np *', 'a  *', 'h  *', '2p *', '3n *', 'd  *', 'np/d', 

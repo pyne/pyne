@@ -51,11 +51,11 @@ class DataSource(object):
         self._exists = None
         if not self.exists:
             return 
+        self.rxcache = {}
         self._load_group_structure()
         self.dst_group_struct = dst_group_struct
         self.src_phi_g = np.ones(self._src_ngroups, dtype='f8') if src_phi_g is None \
                             else np.asarray(src_phi_g)
-        self.rxcache = {}
         
 
     @property
@@ -206,11 +206,15 @@ class CinderDataSource(DataSource):
             # in case absorption doesn't exist, we compute it
             fdata = self._load_reaction(nuc, 'f')
             cond = "(from_nuc == {0}) & (reaction_type != 'c')".format(nuc)
-            f = tb.openFile(nuc_data, 'r')
             with tb.openFile(nuc_data, 'r') as f:
                 node = f.root.neutron.cinder_xs.absorption
                 rows = np.array([row['xs'] for row in node.where(cond)])
-            rxdata = rows.sum(axis=0) + fdata
+            if 0 == len(rows) and fdata is None:
+                rxdata = None
+            else:
+                rxdata = rows.sum(axis=0)
+                if fdata is not None:
+                    rxdata += fdata
         else:
             rxdata = None
         return rxdata

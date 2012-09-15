@@ -3,17 +3,22 @@ import os
 import numpy as np
 import tables as tb
 
-from nose.tools import assert_equal, assert_not_equal, assert_almost_equal, assert_true, \
-                       assert_raises
+from nose.tools import assert_equal, assert_not_equal, assert_almost_equal, \
+                       assert_true, assert_raises
 from numpy.testing import assert_array_equal, assert_array_almost_equal
 
-from pyne.xs.models import partial_energy_matrix, partial_energy_matrix_mono, chi, alpha, k, \
-    m_n, beta, alpha_at_theta_0, alpha_at_theta_pi, one_over_gamma_squared, E_prime_min, \
-    sigma_s_const, sigma_s, phi_g, group_collapse
+import pyne
+from pyne.xs.models import partial_energy_matrix, partial_energy_matrix_mono, chi, \
+                           alpha, k, m_n, beta, alpha_at_theta_0, alpha_at_theta_pi, \
+                           one_over_gamma_squared, E_prime_min, sigma_s_const, \
+                           sigma_s, phi_g, group_collapse 
 from pyne.pyne_config import pyne_conf
 
 nuc_data = pyne_conf.NUC_DATA_PATH
 
+# These tests require nuc_data
+if not os.path.isfile(pyne.nuc_data):
+    raise RuntimeError("Tests require nuc_data.h5.  Please run nuc_data_make.")
 
 #
 # Test Partial Energy Matrix
