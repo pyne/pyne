@@ -46,12 +46,16 @@ def _munge_rx(rx):
 
 class DataSource(object):
     
-    def __init__(self, dst_group_struct=None, **kwargs):
+    def __init__(self, src_phi_g=None, dst_group_struct=None, **kwargs):
         """Cross section data source."""
-        if not self.exists():
+        self._exists = None
+        if not self.exists:
             return 
         self._load_group_structure()
         self.dst_group_struct = dst_group_struct
+        self.src_phi_g = np.ones(self._src_ngroups, dtype='f8') if src_phi_g is None \
+                            else np.asarray(src_phi_g)
+        
 
     @property
     def src_group_struct(self):
@@ -91,22 +95,61 @@ class DataSource(object):
         return self._src_to_dst_matrix
 
     def discretize(self, nuc, rx, src_phi_g=None, dst_phi_g=None):
-        src_phi_g = np.asarray(src_phi_g) if src_phi_g is not None else \
-                    np.ones(self._src_ngroups, dtype='float64')
+        src_phi_g = self.src_phi_g if src_phi_g is None else np.asarray(src_phi_g) 
         src_sigma = self.reaction(nuc, rx)
-        dst_sigma = group_collapse(src_sigma, src_phi_g, dst_phi_g, 
-                                   self._src_to_dst_matrix)
+        dst_sigma = None if src_sigma is None else group_collapse(src_sigma, 
+                                                        src_phi_g, dst_phi_g, 
+                                                        self._src_to_dst_matrix)
         return dst_sigma
 
     # Mix-in methods to implement
     def _load_group_structure(self):
         raise NotImplementedError
 
+    @property
     def exists(self):
         raise NotImplementedError
 
     def reaction(self, nuc, rx):
         raise NotImplementedError
+
+
+class NullDataSource(DataSource):
+    
+    def __init__(self, **kwargs):
+        """Cross section data source that always returns zeros."""
+        super(NullDataSource, self).__init__(**kwargs)
+
+    def _load_group_structure(self):
+        """Loads a meaningless bounds array.
+        """
+        self.src_group_struct = np.array([0.0])
+
+    @property
+    def exists(self):
+        if self._exists is None:
+            self._exists = True
+        return self._exists
+
+    def reaction(self, nuc, rx):
+        return np.zeros(self.src_ngroups, dtype='f8')
+
+    def discretize(self, nuc, rx, src_phi_g=None, dst_phi_g=None):
+        return np.zeros(self.dst_ngroups, dtype='f8')
+
+    @property
+    def dst_group_struct(self):
+        return self._dst_group_struct
+
+    @dst_group_struct.setter
+    def dst_group_struct(self, dst_group_struct):
+        if dst_group_struct is None:
+            self._dst_group_struct = None
+            self._dst_ngroups = 0
+        else:
+            self._dst_group_struct = np.asarray(dst_group_struct)
+            self._dst_ngroups = len(dst_group_struct) - 1
+        self._src_to_dst_matrix = None
 
 
 class CinderDataSource(DataSource):
@@ -123,10 +166,12 @@ class CinderDataSource(DataSource):
             E_g = np.array(f.root.neutron.cinder_xs.E_g)
         self.src_group_struct = E_g
 
+    @property
     def exists(self):
-        with tb.openFile(nuc_data, 'r') as f:
-            rtn = ('/neutron/cinder_xs' in f)
-        return rtn
+        if self._exists is None:
+            with tb.openFile(nuc_data, 'r') as f:
+                self._exists = ('/neutron/cinder_xs' in f)
+        return self._exists
 
     def reaction(self, nuc, rx):
         nuc = nucname.zzaaam(nuc)

@@ -1,5 +1,5 @@
-"""This module provides a cross-section cache which automatically extracts cross-sections
-from the nuclear database."""
+"""This module provides a cross-section cache which automatically extracts 
+cross-sections from the nuclear database."""
 from itertools import product
 from collections import MutableMapping
 
@@ -9,35 +9,42 @@ import tables as tb
 from pyne import nucname
 from pyne.pyne_config import pyne_conf
 from pyne.xs.models import partial_energy_matrix, phi_g
+from pyne.xs import data_source
+
+
+same_arr_or_none = lambda a, b: (a is b) or ((len(a) == len(b)) and (a == b).all())
+
 
 
 ###############################################################################
 ### Set up a cross-section cache so the same data isn't loaded repetitively ###
 ###############################################################################
 
-def is_g_indexed(key):
-    if isinstance(key, basestring):
-        is_g = '_g' in key
-    else:
-        is_g = '_g' in key[0]
-    return is_g
-
 class XSCache(MutableMapping):
     """A lightweight multigroup cross-section cache based off of python dictionaries.
-    High resolution (``*_n``) data will be read from nuc_data.  Note, that this requires
-    that nuc_data.h5 was built with CINDER data.
+    High resolution (``*_n``) data will be read from nuc_data.  Note, that this 
+    requires that nuc_data.h5 was built with CINDER data.
     """
 
-    def __init__(self):
+    def __init__(self, group_struct=None, 
+                 data_source_classes=(data_source.CinderDataSource,
+                                      data_source.NullDataSource,)):
+        """ 
+        Parameters
+        ----------
+        data_source_classes : list of DataSource classes, optional
+            Sequence of DataSource classes (not instances!) from which to grab cross 
+            section data. Data from a source earlier in the sequence (eg, index 1)
+            will take precednce over data later in the sequence (eg, index 5).
+        """
         self._cache = {}
-
-        self._get_fns = {'E_n': get_E_n,
-                         'sigma_f_n': get_sigma_f_n,
-                         'sigma_a_n': get_sigma_a_n,
-                         'sigma_rx_n': get_sigma_a_reaction_n,
-                         'phi_g': lambda: phi_g(self['E_g'], self['E_n'], self['phi_n']),
-                         'eaf_xs': get_eaf_xs,
-                        }
+        self.data_sources = []
+        for cls in data_source_classes:
+            ds = cls(dst_group_struct=group_struct)
+            if ds.exists:
+                self.data_sources.append(ds)
+        self._cache['E_g'] = None if group_struct is None else np.asarray(group_struct)
+        self._cache['phi_g'] = None
 
     #
     # Mutable mapping pass-through interface
@@ -61,13 +68,21 @@ class XSCache(MutableMapping):
 
     def __getitem__(self, key):
         """Key lookup by via custom loading from the nuc_data database file."""
-
-        if (key not in self._cache) and (key in self._get_fns or key[0] in self._get_fns):
-            if isinstance(key, basestring):
-                self._cache[key] = self._get_fns[key]()
+        if (key not in self._cache) and not isinstance(key, basestring):
+            E_g = self._cache['E_g']
+            if E_g is None:
+                for ds in self.data_sources:
+                    xsdata = ds.reaction(*key)
+                    if xsdata is not None:
+                        self._cache[key] = xsdata
+                        break
             else:
-                self._cache[key] = self._get_fns[key[0]](*key[1:])
-
+                kw = {'nuc': key[0], 'rx': key[1], 'dst_phi_g': self._cache['phi_g']}
+                for ds in self.data_sources:
+                    xsdata = ds.discretize(**kw)
+                    if xsdata is not None:
+                        self._cache[key] = xsdata
+                        break            
         # Return the value requested
         return self._cache[key]
 
@@ -76,50 +91,23 @@ class XSCache(MutableMapping):
         """Key setting via custom cache functionality."""
         # Set the E_g
         if (key == 'E_g'):
-            value = np.array(value, dtype=float)
-
-            # If the E_gs are the same, don't set anything
-            if ('E_g' in self):
-                if (len(value) == len(self['E_g'])) and (value == self['E_g']).all():
-                    return 
-
-            # Otherwise, preload some stuff.
-            self._cache['partial_energy_matrix'] = partial_energy_matrix(value, self['E_n'])
-
-            # And remove any previous paramters dependent on E_g
-            dirty_keys = [k for k in self._cache if is_g_indexed(k)]
-            for dk in dirty_keys:
-                del self._cache[dk]
-
-
-        # Set the E_n
-        if (key == 'E_n'):
-            value = np.array(value, dtype=float)
-            
-            # If the E_gs are the same, don't set anything
-            if ('E_n' in self):
-                if (len(value) == len(self['E_n'])) and (value == self['E_n']).all():
-                    return 
-
-            # Otherwise, preload some stuff.
-            if 'E_g' in self:
-                self._cache['partial_energy_matrix'] = partial_energy_matrix(self['E_g'], value)
-
-
-        # Set the high resolution flux, phi_n
-        if key == 'phi_n':
-            value = np.array(value, dtype=float)
-
-            # If the flux is same, don't set or remove anything
-            if ('phi_n' in self):
-                if (len(value) == len(self['phi_n'])) and (value == self['phi_n']).all():
-                    return 
-
-            # And remove any previous paramters dependent on phi_n
-            dirty_keys = [k for k in self._cache if (is_g_indexed(k) and k != 'E_g')]
-            for dk in dirty_keys:
-                del self._cache[dk]
-
+            value = value if value is None else np.asarray(value, dtype='f8')
+            cache_value = self._cache['E_g']
+            if same_arr_or_none(value, cache_value):
+                return 
+            self._cache.clear()
+            self._cache['phi_g'] = None
+        elif (key == 'phi_g'):
+            value = value if value is None else np.asarray(value, dtype='f8')
+            cache_value = self._cache['phi_g']
+            if same_arr_or_none(value, cache_value):
+                return
+            E_g = self._cache['E_g']
+            if len(value) + 1 == len(E_g):
+                self._cache.clear()
+                self._cache['E_g'] = E_g
+            else:
+                raise ValueError("phi_g does not match existing group structure E_g!")
         # Set the value normally
         self._cache[key] = value
 
