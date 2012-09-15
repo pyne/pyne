@@ -193,12 +193,15 @@ def group_collapse(sigma_n, phi_n, phi_g=None, partial_energies=None, E_g=None, 
     """
     if (phi_g is not None) and (partial_energies is not None):
         pem = partial_energies
+    elif (phi_g is None) and (partial_energies is not None):
+        pem = partial_energies
+        phi_g = np.dot(pem, phi_n)
     elif (E_g is not None) and (E_n is not None):
         pem =  partial_energy_matrix(E_g, E_n)
         phi_g = np.dot(pem, phi_n)
     else:
-        raise ValueError("Either phi_g and partial_energies or E_g and E_n must "
-                         "both not be None.")
+        msg = "Either partial_energies or E_g and E_n must both not be None."
+        raise ValueError(msg)
 
     # Calulate partial group collapse
     sigma_g = np.dot(pem, sigma_n * phi_n) / phi_g
