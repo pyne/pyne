@@ -88,7 +88,8 @@ class XSCache(MutableMapping):
                         self._cache[key] = xsdata
                         break
             else:
-                kw = {'nuc': key[0], 'rx': key[1], 'dst_phi_g': self._cache['phi_g']}
+                kw = dict(zip(['nuc', 'rx', 'temp'], key))
+                kw['dst_phi_g'] = self._cache['phi_g']
                 for ds in self.data_sources:
                     xsdata = ds.discretize(**kw)
                     if xsdata is not None:
