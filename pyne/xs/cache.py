@@ -1,4 +1,4 @@
-"""This module provides a cross-section cache which automatically extracts 
+"""This module provides a cross section cache which automatically extracts 
 cross-sections from the nuclear database."""
 from itertools import product
 from collections import MutableMapping
@@ -32,22 +32,28 @@ def _valid_group_struct(E_g):
 ###############################################################################
 
 class XSCache(MutableMapping):
-    """A lightweight multigroup cross-section cache based off of python dictionaries.
-    High resolution (``*_n``) data will be read from nuc_data.  Note, that this 
-    requires that nuc_data.h5 was built with CINDER data.
+    """A lightweight multigroup cross section cache based off of python 
+    dictionaries. This relies on a list of cross section data source from which
+    discretized group constants may be computed from raw, underlying data.  
+    Normally this requires that some cross section data be built into nuc_data.
+    A default instance of this class is provided (pyne.xs.cache.xs_cache).
+
+    Parameters
+    ----------
+    group_struct : array-like of floats, optional
+        Energy group structure E_g [MeV] from highest-to-lowest energy, length G+1.
+        If the group structure is not present in the cache or is None, all cross 
+        sections pulled from the sources will not be discretized or collapsed.
+    data_source_classes : list of DataSource classes, optional
+        Sequence of DataSource classes (not instances!) from which to grab cross 
+        section data. Data from a source earlier in the sequence (eg, index 1)
+        will take precednce over data later in the sequence (eg, index 5).
+
     """
 
     def __init__(self, group_struct=None, 
                  data_source_classes=(data_source.CinderDataSource,
                                       data_source.NullDataSource,)):
-        """ 
-        Parameters
-        ----------
-        data_source_classes : list of DataSource classes, optional
-            Sequence of DataSource classes (not instances!) from which to grab cross 
-            section data. Data from a source earlier in the sequence (eg, index 1)
-            will take precednce over data later in the sequence (eg, index 5).
-        """
         self._cache = {}
         self.data_sources = []
         for cls in data_source_classes:

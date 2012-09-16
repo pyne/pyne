@@ -25,8 +25,7 @@ RX_TYPES_MAP = {
     }
 
 def _munge_rx(rx):
-    '''munge the reaction rate name
-    '''
+    """Munge the reaction rate name."""
     if rx not in RX_TYPES:
         while any([(key in rx) for key in RX_TYPES_MAP]):
             for key, value in RX_TYPES_MAP.items():
@@ -45,9 +44,54 @@ def _munge_rx(rx):
 
 
 class DataSource(object):
+    """Base cross section data source.
+
+    This is an abstract class which provides default functionality when subclassed
+    and certain methods are overridden.  A data source should know how to find cross 
+    section information for a given nuclide, reaction type, and temperature, if 
+    available.  If such data is not present for this source, then the source should
+    return None.
+
+    Furthermore, a data source must be able to declare whether the data is present
+    on the users system.
+
+    Finally, data sources distinguish between group structure information coming
+    from or for the source itself (src) and optional user-defined destination (dst) 
+    group structure information.  This allows the data source to define how it wishes
+    to discretize its data to the custom destination form.
+
+    The following methods must be overridden in all DataSource subclasses::
+
+        @property
+        def exists(self):
+            # Is this DataSource available on the user's system?
+            return (True or False)
+
+        def _load_group_structure(self):
+            # Sets the source group structure, E_g, native to this DataSource
+            ...
+            self.src_group_struct = E_g (array-like)
+
+        def _load_reaction(self, nuc, rx, temp=300.0):
+            # Returns the rection channel for a nuclide at a given temperature
+            # or returns None, if this unavailable in this DataSource.
+            ...
+            return rxdata (ndarray of floats, length self.src_ngroups, or None)
+
+    These data sources may be used independenly or in conjunction with a cross
+    section cache instance.
+
+    Parameters
+    ----------
+    src_phi_g : array-like, optional
+        Group fluxes which must match the group structure for this data source.
+    dst_group_struct : array-like, optional
+        The group structure of the destination cross sections.  Used when 
+        discretizing cross sections from this source.
+
+    """
     
     def __init__(self, src_phi_g=None, dst_group_struct=None, **kwargs):
-        """Cross section data source."""
         self._exists = None
         if not self.exists:
             return 
@@ -64,7 +108,7 @@ class DataSource(object):
 
     @src_group_struct.setter
     def src_group_struct(self, src_group_struct):
-        self._src_group_struct = src_group_struct
+        self._src_group_struct = np.asarray(src_group_struct, dtype='f8')
         self._src_ngroups = len(src_group_struct) - 1        
 
     @property
