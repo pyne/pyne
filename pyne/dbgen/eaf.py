@@ -140,3 +140,4 @@ def make_eaf(args):
 
     print "Making EAF activation data table."
     make_eaf_table(nuc_data, build_dir)
+
