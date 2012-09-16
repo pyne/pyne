@@ -1,5 +1,5 @@
-"""This module provides a cross-section cache which automatically extracts cross-sections
-from the nuclear database."""
+"""This module provides a cross-section cache which automatically extracts 
+cross-sections from the nuclear database."""
 from itertools import product
 from collections import MutableMapping
 
@@ -9,12 +9,29 @@ import tables as tb
 from pyne import nucname
 from pyne.pyne_config import pyne_conf
 from pyne.xs.models import partial_energy_matrix, phi_g
+from pyne.xs import data_source
+
+
+def _same_arr_or_none(a, b): 
+    if a is None or b is None:
+        return a is b
+    else:
+        return (len(a) == len(b)) and (a == b).all()
+
+def _valid_group_struct(E_g):
+    if E_g is None:
+        return None
+    E_g = np.asarray(E_g, dtype='f8')
+    if E_g[0] < E_g[-1]:
+        E_g = E_g[::-1]
+    return E_g
 
 
 ###############################################################################
 ### Set up a cross-section cache so the same data isn't loaded repetitively ###
 ###############################################################################
 
+<<<<<<< HEAD
 def is_g_indexed(key):
     """Check if key is group-based, (_g)"""
     if isinstance(key, basestring):
@@ -23,22 +40,33 @@ def is_g_indexed(key):
         is_g = '_g' in key[0]
     return is_g
 
+=======
+>>>>>>> 5d38bd0679d79d5e540220584cfccdfa51169a55
 class XSCache(MutableMapping):
     """A lightweight multigroup cross-section cache based off of python dictionaries.
-    High resolution (``*_n``) data will be read from nuc_data.  Note, that this requires
-    that nuc_data.h5 was built with CINDER data.
+    High resolution (``*_n``) data will be read from nuc_data.  Note, that this 
+    requires that nuc_data.h5 was built with CINDER data.
     """
 
-    def __init__(self):
+    def __init__(self, group_struct=None, 
+                 data_source_classes=(data_source.CinderDataSource,
+                                      data_source.NullDataSource,)):
+        """ 
+        Parameters
+        ----------
+        data_source_classes : list of DataSource classes, optional
+            Sequence of DataSource classes (not instances!) from which to grab cross 
+            section data. Data from a source earlier in the sequence (eg, index 1)
+            will take precednce over data later in the sequence (eg, index 5).
+        """
         self._cache = {}
-
-        self._get_fns = {'E_n': get_E_n,
-                         'sigma_f_n': get_sigma_f_n,
-                         'sigma_a_n': get_sigma_a_n,
-                         'sigma_rx_n': get_sigma_a_reaction_n,
-                         'phi_g': lambda: phi_g(self['E_g'], self['E_n'], self['phi_n']),
-                         'eaf_xs': get_eaf_xs,
-                        }
+        self.data_sources = []
+        for cls in data_source_classes:
+            ds = cls(dst_group_struct=group_struct)
+            if ds.exists:
+                self.data_sources.append(ds)
+        self._cache['E_g'] = _valid_group_struct(group_struct) 
+        self._cache['phi_g'] = None
 
     #
     # Mutable mapping pass-through interface
@@ -62,13 +90,21 @@ class XSCache(MutableMapping):
 
     def __getitem__(self, key):
         """Key lookup by via custom loading from the nuc_data database file."""
-
-        if (key not in self._cache) and (key in self._get_fns or key[0] in self._get_fns):
-            if isinstance(key, basestring):
-                self._cache[key] = self._get_fns[key]()
+        if (key not in self._cache) and not isinstance(key, basestring):
+            E_g = self._cache['E_g']
+            if E_g is None:
+                for ds in self.data_sources:
+                    xsdata = ds.reaction(*key)
+                    if xsdata is not None:
+                        self._cache[key] = xsdata
+                        break
             else:
-                self._cache[key] = self._get_fns[key[0]](*key[1:])
-
+                kw = {'nuc': key[0], 'rx': key[1], 'dst_phi_g': self._cache['phi_g']}
+                for ds in self.data_sources:
+                    xsdata = ds.discretize(**kw)
+                    if xsdata is not None:
+                        self._cache[key] = xsdata
+                        break            
         # Return the value requested
         return self._cache[key]
 
@@ -77,204 +113,33 @@ class XSCache(MutableMapping):
         """Key setting via custom cache functionality."""
         # Set the E_g
         if (key == 'E_g'):
-            value = np.array(value, dtype=float)
-
-            # If the E_gs are the same, don't set anything
-            if ('E_g' in self):
-                if (len(value) == len(self['E_g'])) and (value == self['E_g']).all():
-                    return 
-
-            # Otherwise, preload some stuff.
-            self._cache['partial_energy_matrix'] = partial_energy_matrix(value, self['E_n'])
-
-            # And remove any previous paramters dependent on E_g
-            dirty_keys = [k for k in self._cache if is_g_indexed(k)]
-            for dk in dirty_keys:
-                del self._cache[dk]
-
-
-        # Set the E_n
-        if (key == 'E_n'):
-            value = np.array(value, dtype=float)
-            
-            # If the E_gs are the same, don't set anything
-            if ('E_n' in self):
-                if (len(value) == len(self['E_n'])) and (value == self['E_n']).all():
-                    return 
-
-            # Otherwise, preload some stuff.
-            if 'E_g' in self:
-                self._cache['partial_energy_matrix'] = partial_energy_matrix(self['E_g'], value)
-
-
-        # Set the high resolution flux, phi_n
-        if key == 'phi_n':
-            value = np.array(value, dtype=float)
-
-            # If the flux is same, don't set or remove anything
-            if ('phi_n' in self):
-                if (len(value) == len(self['phi_n'])) and (value == self['phi_n']).all():
-                    return 
-
-            # And remove any previous paramters dependent on phi_n
-            dirty_keys = [k for k in self._cache if (is_g_indexed(k) and k != 'E_g')]
-            for dk in dirty_keys:
-                del self._cache[dk]
-
+            value = _valid_group_struct(value)
+            cache_value = self._cache['E_g']
+            if _same_arr_or_none(value, cache_value):
+                return 
+            self.clear()
+            self._cache['phi_g'] = None
+            for ds in self.data_sources:
+                ds.dst_group_struct = value
+        elif (key == 'phi_g'):
+            value = value if value is None else np.asarray(value, dtype='f8')
+            cache_value = self._cache['phi_g']
+            if _same_arr_or_none(value, cache_value):
+                return
+            E_g = self._cache['E_g']
+            if len(value) + 1 == len(E_g):
+                self.clear()
+            else:
+                raise ValueError("phi_g does not match existing group structure E_g!")
         # Set the value normally
         self._cache[key] = value
 
-
-#################################
-### Get functions for XSCache ### 
-#################################
-
-def get_E_n():
-    """Loads and returns the cinder energy bounds array, E_n, from the nuc_data library."""
-    nuc_data = pyne_conf.NUC_DATA_PATH
-    with tb.openFile(nuc_data, 'r') as f:
-        E_n = np.array(f.root.neutron.cinder_xs.E_g)
-    return E_n
-
-
-def get_sigma_f_n(nuc):
-    """Grabs a nuclide's fission cross-section from the nuc_data library.
-
-    Parameters
-    ----------
-    nuc : int
-        nuclide in zzaaam form.
-
-    Returns
-    -------
-    sigma_f_n : numpy array 
-        This nuclide's fission cross-section pulled from the nuc_data library file.  If not 
-        present in the library, a zero-array is returned.
-    """
-    nuc_data = pyne_conf.NUC_DATA_PATH
-    with tb.openFile(nuc_data, 'r') as f:
-        N = f.root.neutron.cinder_xs.fission.coldescrs['xs'].shape[0]
-        cond = 'nuc == {0}'.format(nuc)
-        rows = [np.array(row['xs']) for row in f.root.neutron.cinder_xs.fission.where(cond)]
-
-    if len(rows) == 0:
-        # Not fissionable, return zero-array
-        sigma_f_n = np.zeros(N, dtype=float)
-    elif len(rows) == 1:
-        # Return cross-section from file
-        sigma_f_n = rows[0]
-    else:
-        nuc_name = nucname.name(nuc)
-        err_str = "The database contains multiple entries for the fission cross-section for {0}!".format(nuc_name)
-        raise ValueError(err_str)
-
-    return sigma_f_n
-
-
-def get_sigma_a_n(nuc):
-    """Grabs a nuclide's absorption cross-section from the nuc_data library.
-
-    Parameters
-    ----------
-    nuc : int
-        nuclide in zzaaam form.
-
-    Returns
-    -------
-    sigma_a_n : numpy array
-        This nuclide's absorption cross-section pulled from the database library file.  If not 
-        present in the library, a zero-array is returned.
-    """
-    nuc_data = pyne_conf.NUC_DATA_PATH
-    with tb.openFile(nuc_data, 'r') as f:
-        N = f.root.neutron.cinder_xs.absorption.coldescrs['xs'].shape[0]
-        cond = "(from_nuc == {0}) & (reaction_type != 'c')".format(nuc)
-        rows = [np.array(row['xs']) for row in f.root.neutron.cinder_xs.absorption.where(cond)]
-
-    if len(rows) == 0:
-        # No absportion, return zero-array
-        sigma_a_n = np.zeros(N, dtype=float)
-    else:
-        rows = np.array(rows)
-        sigma_a_n = rows.sum(axis=0)
-
-    # Add in the fission cross-section
-    sigma_f_n = get_sigma_f_n(nuc)
-    sigma_a_n += sigma_f_n
-
-    return sigma_a_n
-
-
-
-ABSORPTION_RX = set(["", 'np *', 'a  *', 'h  *', '2p *', '3n *', 'd  *', 'np/d', 
-                     'na', '*', 'nd', 'g  *', '3n', 'np', 'nt', 't', 'nt *', 
-                     'x  *', '4n *', 'na *', 'nd *', 't  *', 'a', 'c', '2p', 'd', 
-                     'g', 'h', 'n', '4n', 'p', 'n  *', '2a', '2n *', 'x', '2n', 
-                     'nh *', 'p  *'])
-
-ABSORPTION_RX_MAP = {
-    'neutron': 'n',
-    'gamma': 'g', 
-    'alpha': 'a',
-    'proton': 'p',
-    'trit': 't',
-    'triton': 't',
-    'deut': 'd',
-    'deuteron': 'd',
-    }
-
-def get_sigma_a_reaction_n(nuc, rx):
-    """Grabs a nuclide's absorption reaction cross-section from the nuc_data library.
-
-    Parameters
-    ----------
-    nuc : int
-        Nuclide in zzaaam form.
-    rx : str 
-        Reaction key: 'gamma', 'alpha', 'p', etc.
-
-    Returns
-    -------
-    sigma_rx_n : numpy array
-        This nuclide's absorption reaction cross-section pulled from the nuc_data library 
-        file.  If not present in the library, a zero-array is returned.
-
-    See Also
-    --------
-    pyne.xs.cache.ABSORPTION_RX
-    pyne.xs.cache.ABSORPTION_RX_MAP
-    """
-    # munge the reaction rate
-    if rx not in ABSORPTION_RX:
-        while any([(key in rx) for key in ABSORPTION_RX_MAP]):
-            for key, value in ABSORPTION_RX_MAP.items():
-                rx = rx.replace(key, value)
-
-    if '_x' in rx:
-        if len(rx) == 3:
-            rx = rx.replace('_x', '  *')
-        else:
-            rx = rx.replace('_x', ' *')
-
-    if rx not in ABSORPTION_RX:
-        msg = "the reaction '{rx}' is not valid.".format(rx=rx)
-        raise IndexError(msg)
-
-    # Read in the data
-    nuc_data = pyne_conf.NUC_DATA_PATH
-    with tb.openFile(nuc_data, 'r') as f:
-        N = f.root.neutron.cinder_xs.absorption.coldescrs['xs'].shape[0]
-        cond = "(from_nuc == {0}) & (reaction_type == '{1}')".format(nuc, rx)
-        rows = [np.array(row['xs']) for row in f.root.neutron.cinder_xs.absorption.where(cond)]
-
-    if len(rows) == 0:
-        # No absportion, return zero-array
-         sigma_rx_n = np.zeros(N, dtype=float)
-    else:
-        rows = np.array(rows)
-        sigma_rx_n = rows.sum(axis=0)
-
-    return sigma_rx_n
+    def clear(self):
+        """Clears the cache, retaining E_g and phi_g."""
+        E_g, phi_g = self._cache['E_g'], self._cache['phi_g'] 
+        self._cache.clear()
+        self._cache['E_g'], self._cache['phi_g'] = E_g, phi_g
+        
 
 
 #EAF_RX = set(["", 'np *', 'a  *', 'h  *', '2p *', '3n *', 'd  *', 'np/d', 
@@ -363,3 +228,5 @@ def get_eaf_xs(nuc, rx):
 
 # Make a singleton of the cross-section cache
 xs_cache = XSCache()
+
+
