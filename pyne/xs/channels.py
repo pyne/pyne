@@ -1,36 +1,33 @@
 import collections
 
 import numpy as np
-import scipy.integrate
-import tables as tb
-
-import pyne.data
-import pyne.xs.models
-from pyne import nucname
-from pyne.xs.cache import xs_cache
-from pyne.xs.models import group_collapse
-from pyne.pyne_config import pyne_conf
-from pyne.material import Material
-
 # Hide warnings from numpy
 np.seterr(divide='ignore')
 
+import scipy.integrate
+import tables as tb
 
-def _prep_cache(E_g=None, E_n=None, phi_n=None):
+import pyne
+import pyne.data
+import pyne.xs.models
+from pyne import nucname
+from pyne.xs import cache
+from pyne.xs.models import group_collapse
+from pyne.material import Material
+
+
+def _prep_cache(xs_cache, E_g=None, phi_g=None):
     """Ensures that certain values are in the cache safely."""
-    if E_n is not None:
-        xs_cache['E_n'] = E_n
-
-    # needs to follow E_n to calc collapse matrix properly
     if E_g is not None:
         xs_cache['E_g'] = E_g
 
-    if phi_n is not None:
-        xs_cache['phi_n'] = phi_n
+    if phi_g is not None:
+        xs_cache['phi_g'] = phi_g
 
 
 def _atom_weight_channel(chanfunc, nucspec, *args, **kwargs):
     """Convolves a channel for several nuclides based on atomic weights."""
+    xs_cache = kwargs['xs_cache'] if 'xs_cache' in kwargs else cache.xs_cache
     # convert to atom weights
     if isinstance(nucspec, Material):
         aws = nucspec.to_atom_frac()
@@ -54,7 +51,7 @@ def _atom_weight_channel(chanfunc, nucspec, *args, **kwargs):
     return chan
 
 
-def sigma_f(nuc, E_g=None, E_n=None, phi_n=None):
+def sigma_f(nuc, temp=300.0, group_struct=None, phi_g=None, xs_cache=None):
     """Calculates the neutron fission cross-section for a nuclide for a new, 
     lower resolution group structure using a higher fidelity flux.  Note that 
     g indexes G, n indexes N, and G < N.  If any of these are None-valued, 
@@ -84,33 +81,16 @@ def sigma_f(nuc, E_g=None, E_n=None, phi_n=None):
     This always pulls the fission cross-section out of nuc_data library.    
 
     """
-    _prep_cache(E_g, E_n, phi_n)
-
+    xs_cache = cache.xs_cache if xs_cache is None else xs_cache
+    _prep_cache(xs_cache, group_struct, phi_g)
     if isinstance(nuc, collections.Iterable) and not isinstance(nuc, basestring):
-        return _atom_weight_channel(sigma_f, nuc)
-
-    # Get the fission XS
+        return _atom_weight_channel(sigma_f, nuc, temp=temp, xs_cache=xs_cache)
     nuc = nucname.zzaaam(nuc)
-    sigma_f_n_nuc = ('sigma_f_n', nuc)
-    sigma_f_g_nuc = ('sigma_f_g', nuc)
-
-    # Don't recalculate anything if you don't have to
-    if sigma_f_g_nuc in xs_cache:
-        return xs_cache[sigma_f_g_nuc]
-    else:
-        sigma_f_n = xs_cache[sigma_f_n_nuc]
-
-    # Perform the group collapse, knowing that the right data is in the cache
-    sigma_f_g = group_collapse(sigma_f_n, xs_cache['phi_n'], phi_g=xs_cache['phi_g'], 
-                               partial_energies=xs_cache['partial_energy_matrix'])
-
-    # Put this value back into the cache, with the appropriate label
-    xs_cache[sigma_f_g_nuc] = sigma_f_g
-
-    return sigma_f_g
+    key = (nuc, 'f', temp)
+    return xs_cache[key]
 
 
-def sigma_s_gh(nuc, T, E_g=None, E_n=None, phi_n=None):
+def sigma_s_gh(nuc, temp=300.0, group_struct=None, phi_g=None, xs_cache=None):
     """Calculates the neutron scattering cross-section kernel for a nuclide for a new, 
     lower resolution group structure using a higher fidelity flux.  Note that g, h index G, 
     n indexes N, and G < N.  g is for the incident energy and h is for the exiting energy.
@@ -149,20 +129,20 @@ def sigma_s_gh(nuc, T, E_g=None, E_n=None, phi_n=None):
     the h-index.
 
     """
-    _prep_cache(E_g, E_n, phi_n)
-
+    xs_cache = cache.xs_cache if xs_cache is None else xs_cache
+    _prep_cache(xs_cache, group_struct, phi_g)
     if isinstance(nuc, collections.Iterable) and not isinstance(nuc, basestring):
-        return _atom_weight_channel(sigma_s_gh, nuc, T)
-
+        return _atom_weight_channel(sigma_s_gh, nuc, temp=temp, xs_cache=xs_cache)
     nuc = nucname.zzaaam(nuc)
-    key = ('sigma_s_gh', nuc, T)
+    key = (nuc, 's_gh', temp)
 
     # Don't recalculate anything if you don't have to
     if key in xs_cache:
         return xs_cache[key]
 
     # Get some needed data
-    G = len(xs_cache['E_g']) - 1
+    E_g = xs_cache['E_g']
+    G = len(E_g) - 1
     b = pyne.data.b(nuc)
     aw = pyne.data.atomic_mass(nuc)
 
@@ -189,18 +169,15 @@ def sigma_s_gh(nuc, T, E_g=None, E_n=None, phi_n=None):
     #    sig_s_gh[g, h] = numer / denom
 
     # Temporary stub
-    E_g = xs_cache['E_g']
     E_g_centers = (E_g[1:] + E_g[:-1]) / 2.0
-    sig_s = pyne.xs.models.sigma_s(E_g_centers, b, aw, T)
+    sig_s = pyne.xs.models.sigma_s(E_g_centers, b, aw, temp)
     sig_s_gh = np.diag(sig_s)
 
-    # Put this value back into the cache, with the appropriate label
     xs_cache[key] = sig_s_gh
-
     return sig_s_gh
 
 
-def sigma_s(nuc, T, E_g=None, E_n=None, phi_n=None):
+def sigma_s(nuc, temp=300.0, group_struct=None, phi_g=None, xs_cache=None):
     """Calculates the neutron scattering cross-section for a nuclide. 
 
     .. math::
@@ -227,14 +204,13 @@ def sigma_s(nuc, T, E_g=None, E_n=None, phi_n=None):
         An array of the scattering cross section.
 
     """
-    _prep_cache(E_g, E_n, phi_n)
-
+    xs_cache = cache.xs_cache if xs_cache is None else xs_cache
+    _prep_cache(xs_cache, group_struct, phi_g)
     if isinstance(nuc, collections.Iterable) and not isinstance(nuc, basestring):
-        return _atom_weight_channel(sigma_s, nuc, T)
-
+        return _atom_weight_channel(sigma_s, nuc, temp=temp, xs_cache=xs_cache)
     nuc = nucname.zzaaam(nuc)
-    key_g = ('sigma_s_g', nuc, T)
-    key_gh = ('sigma_s_gh', nuc, T)
+    key_g  = (nuc, 's_g', temp)
+    key_gh = (nuc, 's_gh', temp)
 
     # Don't recalculate anything if you don't have to
     if key_g in xs_cache:
@@ -242,18 +218,17 @@ def sigma_s(nuc, T, E_g=None, E_n=None, phi_n=None):
 
     # This calculation requires the scattering kernel
     if key_gh not in xs_cache:
-        xs_cache[key_gh] = sigma_s_gh(nuc, T, E_g, E_n, phi_n)
+        xs_cache[key_gh] = sigma_s_gh(nuc, temp, group_struct, phi_g, xs_cache)
 
     # Sum over all h
     sig_s_g = xs_cache[key_gh].sum(axis=1)
 
     # Put this value back into the cache, with the appropriate label
     xs_cache[key_g] = sig_s_g
-
     return sig_s_g
 
 
-def sigma_a_reaction(nuc, rx, E_g=None, E_n=None, phi_n=None):
+def sigma_a_reaction(nuc, rx, temp=300.0, group_struct=None, phi_g=None, xs_cache=None):
     """Calculates the neutron absorption reaction cross-section for a nuclide for a 
     new, lower resolution group structure using a higher fidelity flux.  Note that 
     g indexes G, n indexes N, and G < N.
@@ -287,33 +262,17 @@ def sigma_a_reaction(nuc, rx, E_g=None, E_n=None, phi_n=None):
     pyne.xs.cache.ABSORPTION_RX
     pyne.xs.cache.ABSORPTION_RX_MAP 
     """
-    _prep_cache(E_g, E_n, phi_n)
-
+    xs_cache = cache.xs_cache if xs_cache is None else xs_cache
+    _prep_cache(xs_cache, group_struct, phi_g)
     if isinstance(nuc, collections.Iterable) and not isinstance(nuc, basestring):
-        return _atom_weight_channel(sigma_a_reaction, nuc, rx)
-
-    # Get the absorption XS
+        return _atom_weight_channel(sigma_a_reaction, nuc, rx=rx, temp=temp, 
+                                    xs_cache=xs_cache)
     nuc = nucname.zzaaam(nuc)
-    key_n = ('sigma_rx_n', nuc, rx)
-    key_g = ('sigma_rx_g', nuc, rx)
-
-    # Don't recalculate anything if you don't have to
-    if key_g in xs_cache:
-        return xs_cache[key_g]
-    else:
-        sigma_rx_n = xs_cache[key_n]
-
-    # Perform the group collapse, knowing that the right data is in the cache
-    sigma_rx_g = group_collapse(sigma_rx_n, xs_cache['phi_n'], phi_g=xs_cache['phi_g'], 
-                                partial_energies=xs_cache['partial_energy_matrix'])
-
-    # Put this value back into the cache, with the appropriate label
-    xs_cache[key_g] = sigma_rx_g
-
-    return sigma_rx_g
+    key= (nuc, rx, temp)
+    return xs_cache[key]
 
 
-def metastable_ratio(nuc, rx, E_g=None, E_n=None, phi_n=None):
+def metastable_ratio(nuc, rx, temp=300.0, group_struct=None, phi_g=None, xs_cache=None):
     """Calculates the ratio between a reaction that leaves the nuclide in a 
     metastable state and the equivalent reaction that leaves the nuclide in 
     the ground state.  This allows the calculation of metastable cross sections 
@@ -352,9 +311,17 @@ def metastable_ratio(nuc, rx, E_g=None, E_n=None, phi_n=None):
     pyne.xs.cache.ABSORPTION_RX
     pyne.xs.cache.ABSORPTION_RX_MAP 
     """
+    if isinstance(nuc, int) or isinstance(nuc, basestring):
+        xs_cache = cache.xs_cache if xs_cache is None else xs_cache
+        _prep_cache(xs_cache, group_struct, phi_g)
+        nuc = nucname.zzaaam(nuc)
+        key = (nuc, rx + '_x_ratio', temp)
+        if key in xs_cache:
+            return xs_cache[key]
+
     # Get the cross-sections
-    sigma_rx = sigma_a_reaction(nuc, rx, E_g, E_n, phi_n)
-    sigma_rx_x = sigma_a_reaction(nuc, rx + '_x', E_g, E_n, phi_n)
+    sigma_rx = sigma_a_reaction(nuc, rx, temp, group_struct, phi_g, xs_cache)
+    sigma_rx_x = sigma_a_reaction(nuc, rx + '_x', temp, group_struct, phi_g, xs_cache)
 
     # Get the ratio
     ratio_rx_g = sigma_rx_x / sigma_rx
@@ -362,10 +329,12 @@ def metastable_ratio(nuc, rx, E_g=None, E_n=None, phi_n=None):
     ratio_rx_g[ratio_rx_g == np.inf] = 0.0
     ratio_rx_g[np.isnan(ratio_rx_g)] = 0.0
 
+    if isinstance(nuc, int):
+        xs_cache[key] = ratio_rx_g
     return ratio_rx_g
 
 
-def sigma_a(nuc, E_g=None, E_n=None, phi_n=None):
+def sigma_a(nuc, temp=300.0, group_struct=None, phi_g=None, xs_cache=None):
     """Calculates the neutron absorption cross section for a nuclide for a new, 
     lower resolution group structure using a higher fidelity flux.  Note that 
     g indexes G, n indexes N, and G < N.
@@ -393,33 +362,16 @@ def sigma_a(nuc, E_g=None, E_n=None, phi_n=None):
     This always pulls the absorption cross section out of the nuc_data.    
 
     """
-    _prep_cache(E_g, E_n, phi_n)
-
+    xs_cache = cache.xs_cache if xs_cache is None else xs_cache
+    _prep_cache(xs_cache, group_struct, phi_g)
     if isinstance(nuc, collections.Iterable) and not isinstance(nuc, basestring):
-        return _atom_weight_channel(sigma_a, nuc)
-
-    # Get the absorption XS
+        return _atom_weight_channel(sigma_a, nuc, temp=temp, xs_cache=xs_cache)
     nuc = nucname.zzaaam(nuc)
-    key_n = ('sigma_a_n', nuc)
-    key_g = ('sigma_a_g', nuc)
-
-    # Don't recalculate anything if you don't have to
-    if key_g in xs_cache:
-        return xs_cache[key_g]
-    else:
-        sigma_a_n = xs_cache[key_n]
-
-    # Perform the group collapse, knowing that the right data is in the cache
-    sigma_a_g = group_collapse(sigma_a_n, xs_cache['phi_n'], phi_g=xs_cache['phi_g'], 
-                               partial_energies=xs_cache['partial_energy_matrix'])
-
-    # Put this value back into the cache, with the appropriate label
-    xs_cache[key_g] = sigma_a_g
-
-    return sigma_a_g
+    key = (nuc, 'a', temp)
+    return xs_cache[key]
 
 
-def chi(nuc, E_g=None, E_n=None, phi_n=None, eres=101):
+def chi(nuc, temp=300.0, group_struct=None, phi_g=None, xs_cache=None, eres=101):
     """Calculates the neutron fission energy spectrum for an isotope for a new, 
     lower resolution group structure using a higher fidelity flux.  Note that 
     g indexes G, n indexes N, and G < N.
@@ -448,14 +400,12 @@ def chi(nuc, E_g=None, E_n=None, phi_n=None, eres=101):
     --------
     pyne.xs.models.chi : used under the covers by this function.
     """
-    _prep_cache(E_g, E_n, phi_n)
-
+    xs_cache = cache.xs_cache if xs_cache is None else xs_cache
+    _prep_cache(xs_cache, group_struct, phi_g)
     if isinstance(nuc, collections.Iterable) and not isinstance(nuc, basestring):
-        return _atom_weight_channel(chi, nuc)
-
-    # Get the fission XS
+        return _atom_weight_channel(chi, nuc, temp=temp, xs_cache=xs_cache)
     nuc = nucname.zzaaam(nuc)
-    key = ('chi_g', nuc)
+    key = (nuc, 'chi', temp)
 
     # Don't recalculate anything if you don't have to
     if key in xs_cache:
@@ -463,39 +413,36 @@ def chi(nuc, E_g=None, E_n=None, phi_n=None, eres=101):
 
     # Get the the set of nuclides we know we need chi for.  
     if 'fissionable_nucs' not in xs_cache:
-        with tb.openFile(pyne_conf.NUC_DATA_PATH, 'r') as f:
-            fn = set(f.root.neutron.cinder_xs.fission.cols.nuc)
+        with tb.openFile(pyne.nuc_data, 'r') as f:
+            if '/neutron/cinder_xs/fission' in f:
+                fn = set(f.root.neutron.cinder_xs.fission.cols.nuc)
+            else:
+                fn = set()
         xs_cache['fissionable_nucs'] = fn
     fissionable_nucs = xs_cache['fissionable_nucs']
-
     if (nuc not in fissionable_nucs) and (86 <= nuc/10000):
         fissionable_nucs.add(nuc)
 
     # Perform the group collapse on a continuous chi
-    G = len(xs_cache['E_g']) - 1
-    chi_g = np.zeros(G, dtype=float)
-
+    E_g = xs_cache['E_g']
+    G = len(E_g) - 1
+    chi_g = np.zeros(G, dtype='f8')
     if (nuc in fissionable_nucs):
         for g in range(G):
-            E_space = np.logspace(np.log10(xs_cache['E_g'][g]), 
-                                  np.log10(xs_cache['E_g'][g+1]), eres)
+            E_space = np.logspace(np.log10(E_g[g]), np.log10(E_g[g+1]), eres)
             dnumer = pyne.xs.models.chi(E_space)
-
             numer = scipy.integrate.trapz(dnumer, E_space)
-            denom = (xs_cache['E_g'][g+1] - xs_cache['E_g'][g])
-
+            denom = (E_g[g+1] - E_g[g])
             chi_g[g] = (numer / denom)
-
         # renormalize chi
         chi_g = chi_g / chi_g.sum()
-
     # Put this value back into the cache, with the appropriate label
     xs_cache[key] = chi_g
     return chi_g
 
 
 
-def sigma_t(nuc, T=300.0, E_g=None, E_n=None, phi_n=None):
+def sigma_t(nuc, temp=300.0, group_struct=None, phi_g=None, xs_cache=None):
     """Calculates the total neutron cross section for a nuclide. 
 
     .. math::
@@ -522,16 +469,14 @@ def sigma_t(nuc, T=300.0, E_g=None, E_n=None, phi_n=None):
         An array of the total cross section.
 
     """
-    _prep_cache(E_g, E_n, phi_n)
-
+    xs_cache = cache.xs_cache if xs_cache is None else xs_cache
+    _prep_cache(xs_cache, group_struct, phi_g)
     if isinstance(nuc, collections.Iterable) and not isinstance(nuc, basestring):
-        return _atom_weight_channel(sigma_t, nuc, T)
-
-    # Get the total XS
+        return _atom_weight_channel(sigma_t, nuc, temp=temp, xs_cache=xs_cache)
     nuc = nucname.zzaaam(nuc)
-    key_a = ('sigma_a_g', nuc)
-    key_s = ('sigma_t_g', nuc, T)
-    key_t = ('sigma_t_g', nuc, T)
+    key_a = (nuc, 'a', temp)
+    key_s = (nuc, 's', temp)
+    key_t = (nuc, 't', temp)
 
     # Don't recalculate anything if you don't have to
     if key_t in xs_cache:
@@ -539,16 +484,10 @@ def sigma_t(nuc, T=300.0, E_g=None, E_n=None, phi_n=None):
 
     # This calculation requires the abosorption cross-section
     if key_a not in xs_cache:
-        xs_cache[key_a] = sigma_a(nuc, E_g, E_n, phi_n)
-
-    # This calculation requires the scattering cross-section
+        xs_cache[key_a] = sigma_a(nuc, temp, group_struct, phi_g, xs_cache)
     if key_s not in xs_cache:
-        xs_cache[key_s] = sigma_s(nuc, T, E_g, E_n, phi_n)
-
-    # Sum over all h indeces
+        xs_cache[key_s] = sigma_s(nuc, temp, group_struct, phi_g, xs_cache)
     sig_t_g = xs_cache[key_a] + xs_cache[key_s]
-
-    # Put this value back into the cache, with the appropriate label
     xs_cache[key_t] = sig_t_g
     return sig_t_g
 
