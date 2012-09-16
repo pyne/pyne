@@ -95,13 +95,13 @@ class DataSource(object):
     def src_to_dst_matrix(self):
         return self._src_to_dst_matrix
 
-    def reaction(self, nuc, rx):
-        rxkey = (nuc, rx)
+    def reaction(self, nuc, rx, temp=300.0):
+        rxkey = (nuc, rx, temp)
         if rxkey not in self.rxcache:
-            self.rxcache[rxkey] = self._load_reaction(nuc, rx)
+            self.rxcache[rxkey] = self._load_reaction(nuc, rx, temp)
         return self.rxcache[rxkey]
 
-    def discretize(self, nuc, rx, src_phi_g=None, dst_phi_g=None):
+    def discretize(self, nuc, rx, temp=300.0, src_phi_g=None, dst_phi_g=None):
         src_phi_g = self.src_phi_g if src_phi_g is None else np.asarray(src_phi_g) 
         src_sigma = self.reaction(nuc, rx)
         dst_sigma = None if src_sigma is None else group_collapse(src_sigma, 
@@ -117,7 +117,7 @@ class DataSource(object):
     def _load_group_structure(self):
         raise NotImplementedError
 
-    def _load_reaction(self, nuc, rx):
+    def _load_reaction(self, nuc, rx, temp=300.0):
         raise NotImplementedError
 
 
@@ -138,10 +138,10 @@ class NullDataSource(DataSource):
             self._exists = True
         return self._exists
 
-    def _load_reaction(self, nuc, rx):
+    def _load_reaction(self, nuc, rx, temp=300.0):
         return np.zeros(self.src_ngroups, dtype='f8')
 
-    def discretize(self, nuc, rx, src_phi_g=None, dst_phi_g=None):
+    def discretize(self, nuc, rx, temp=300.0, src_phi_g=None, dst_phi_g=None):
         return np.zeros(self.dst_ngroups, dtype='f8')
 
     @property
@@ -180,7 +180,7 @@ class CinderDataSource(DataSource):
                 self._exists = ('/neutron/cinder_xs' in f)
         return self._exists
 
-    def _load_reaction(self, nuc, rx):
+    def _load_reaction(self, nuc, rx, temp=300.0):
         nuc = nucname.zzaaam(nuc)
         rx = _munge_rx(rx)
 
