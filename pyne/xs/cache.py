@@ -1,5 +1,5 @@
-"""This module provides a cross-section cache which automatically extracts 
-cross-sections from the nuclear database."""
+"""This module provides a cross section cache which automatically extracts 
+cross-sections from provided nuclear data sets."""
 from itertools import product
 from collections import MutableMapping
 
@@ -43,22 +43,28 @@ def is_g_indexed(key):
 =======
 >>>>>>> 5d38bd0679d79d5e540220584cfccdfa51169a55
 class XSCache(MutableMapping):
-    """A lightweight multigroup cross-section cache based off of python dictionaries.
-    High resolution (``*_n``) data will be read from nuc_data.  Note, that this 
-    requires that nuc_data.h5 was built with CINDER data.
+    """A lightweight multigroup cross section cache based off of python 
+    dictionaries. This relies on a list of cross section data source from which
+    discretized group constants may be computed from raw, underlying data.  
+    Normally this requires that some cross section data be built into nuc_data.
+    A default instance of this class is provided (pyne.xs.cache.xs_cache).
+
+    Parameters
+    ----------
+    group_struct : array-like of floats, optional
+        Energy group structure E_g [MeV] from highest-to-lowest energy, length G+1.
+        If the group structure is not present in the cache or is None, all cross 
+        sections pulled from the sources will not be discretized or collapsed.
+    data_source_classes : list of DataSource classes, optional
+        Sequence of DataSource classes (not instances!) from which to grab cross 
+        section data. Data from a source earlier in the sequence (eg, index 1)
+        will take precednce over data later in the sequence (eg, index 5).
+
     """
 
     def __init__(self, group_struct=None, 
                  data_source_classes=(data_source.CinderDataSource,
                                       data_source.NullDataSource,)):
-        """ 
-        Parameters
-        ----------
-        data_source_classes : list of DataSource classes, optional
-            Sequence of DataSource classes (not instances!) from which to grab cross 
-            section data. Data from a source earlier in the sequence (eg, index 1)
-            will take precednce over data later in the sequence (eg, index 5).
-        """
         self._cache = {}
         self.data_sources = []
         for cls in data_source_classes:
@@ -99,7 +105,8 @@ class XSCache(MutableMapping):
                         self._cache[key] = xsdata
                         break
             else:
-                kw = {'nuc': key[0], 'rx': key[1], 'dst_phi_g': self._cache['phi_g']}
+                kw = dict(zip(['nuc', 'rx', 'temp'], key))
+                kw['dst_phi_g'] = self._cache['phi_g']
                 for ds in self.data_sources:
                     xsdata = ds.discretize(**kw)
                     if xsdata is not None:
@@ -176,7 +183,7 @@ def get_eaf_xs(nuc, rx):
         Nuclide in zzaaam form.
     rx : str 
         Reaction MT # in nnnm form.
-      OR: (eventually)
+        OR: (eventually)
         Reaction key: 'gamma', 'alpha', 'p', etc.
 
     Returns
@@ -189,6 +196,7 @@ def get_eaf_xs(nuc, rx):
     --------
     pyne.xs.cache.EAF_RX
     pyne.xs.cache.EAF_RX_MAP
+
     """
     # munge the reaction rate
     #TODO:
