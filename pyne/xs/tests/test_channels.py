@@ -7,6 +7,7 @@ from nose.tools import assert_equal, assert_not_equal, assert_almost_equal, asse
                        assert_raises
 from numpy.testing import assert_array_equal, assert_array_almost_equal
 
+import pyne
 import pyne.data
 import pyne.xs.models
 from pyne.xs.cache import xs_cache
@@ -14,6 +15,11 @@ from pyne.xs.channels import sigma_f, sigma_s_gh, sigma_s, sigma_a_reaction, \
     metastable_ratio, sigma_a, chi, sigma_t, _atom_weight_channel
 from pyne.pyne_config import pyne_conf
 from pyne.material import Material
+
+# These tests require nuc_data
+if not os.path.isfile(pyne.nuc_data):
+    raise RuntimeError("Tests require nuc_data.h5.  Please run nuc_data_make.")
+
 
 np.seterr(divide='ignore')
 
