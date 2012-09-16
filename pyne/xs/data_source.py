@@ -25,8 +25,7 @@ RX_TYPES_MAP = {
     }
 
 def _munge_rx(rx):
-    '''munge the reaction rate name
-    '''
+    """Munge the reaction rate name."""
     if rx not in RX_TYPES:
         while any([(key in rx) for key in RX_TYPES_MAP]):
             for key, value in RX_TYPES_MAP.items():
@@ -45,9 +44,60 @@ def _munge_rx(rx):
 
 
 class DataSource(object):
+    """Base cross section data source.
+
+    This is an abstract class which provides default functionality when subclassed
+    and certain methods are overridden.  A data source should know how to find cross 
+    section information for a given nuclide, reaction type, and temperature, if 
+    available.  If such data is not present for this source, then the source should
+    return None.
+
+    Furthermore, a data source must be able to declare whether the data is present
+    on the users system.
+
+    Finally, data sources distinguish between group structure information coming
+    from or for the source itself (src) and optional user-defined destination (dst) 
+    group structure information.  This allows the data source to define how it wishes
+    to discretize its data to the custom destination form.
+
+    The following methods must be overridden in all DataSource subclasses:
+
+    .. code-block:: python
+
+        @property
+        def exists(self):
+            # Is this DataSource available on the user's system?
+            return (True or False)
+
+        def _load_group_structure(self):
+            # Sets the source group structure, E_g, native to this DataSource
+            ...
+            self.src_group_struct = E_g (array-like)
+
+        def _load_reaction(self, nuc, rx, temp=300.0):
+            # Returns the rection channel for a nuclide at a given temperature
+            # or returns None, if this unavailable in this DataSource.
+            ...
+            return rxdata (ndarray of floats, length self.src_ngroups, or None)
+
+    Note that non-multigroup data sources should also override the discretize()
+    method.  Other methods and properties may also need to be overriden depending
+    on the data source at hand.
+
+    All data sources may be used independenly or in conjunction with a cross
+    section cache instance.
+
+    Parameters
+    ----------
+    src_phi_g : array-like, optional
+        Group fluxes which must match the group structure for this data source.
+    dst_group_struct : array-like, optional
+        The energy group structure [MeV] of the destination cross sections.  Used when 
+        discretizing cross sections from this source.
+
+    """
     
     def __init__(self, src_phi_g=None, dst_group_struct=None, **kwargs):
-        """Cross section data source."""
         self._exists = None
         if not self.exists:
             return 
@@ -64,7 +114,7 @@ class DataSource(object):
 
     @src_group_struct.setter
     def src_group_struct(self, src_group_struct):
-        self._src_group_struct = src_group_struct
+        self._src_group_struct = np.asarray(src_group_struct, dtype='f8')
         self._src_ngroups = len(src_group_struct) - 1        
 
     @property
@@ -95,13 +145,55 @@ class DataSource(object):
     def src_to_dst_matrix(self):
         return self._src_to_dst_matrix
 
-    def reaction(self, nuc, rx):
-        rxkey = (nuc, rx)
+    def reaction(self, nuc, rx, temp=300.0):
+        """Gets the cross section data for this reaction channel either directly from
+        the data source or from the rxcache.
+
+        Parameters
+        ----------
+        nuc : int or str
+            A nuclide.
+        rx : int or str
+            Reaction key ('gamma', 'alpha', 'p', etc.) or MT number.
+        temp : float, optional
+            Temperature [K] of material, defaults to 300.0.
+
+        Returns
+        -------
+        rxdata : ndarry
+            Source cross section data, length src_ngroups.
+
+        """
+        rxkey = (nuc, rx, temp)
         if rxkey not in self.rxcache:
-            self.rxcache[rxkey] = self._load_reaction(nuc, rx)
+            self.rxcache[rxkey] = self._load_reaction(nuc, rx, temp)
         return self.rxcache[rxkey]
 
-    def discretize(self, nuc, rx, src_phi_g=None, dst_phi_g=None):
+    def discretize(self, nuc, rx, temp=300.0, src_phi_g=None, dst_phi_g=None):
+        """Discretizes the reaction channel from the source group structure to that 
+        of the destination weighted by the group fluxes.  This implemenation is only
+        valid for multi-group data sources.  Non-multigroup data source should also
+        override this method.
+
+        Parameters
+        ----------
+        nuc : int or str
+            A nuclide.
+        rx : int or str
+            Reaction key ('gamma', 'alpha', 'p', etc.) or MT number.
+        temp : float, optional
+            Temperature [K] of material, defaults to 300.0.
+        src_phi_g : array-like, optional
+            Group fluxes for this data source, length src_ngroups.
+        dst_phi_g : array-like, optional
+            Group fluxes for the destiniation structure, length dst_ngroups.
+
+        Returns
+        -------
+        dst_sigma : ndarry
+            Destination cross section data, length dst_ngroups.
+
+        """
         src_phi_g = self.src_phi_g if src_phi_g is None else np.asarray(src_phi_g) 
         src_sigma = self.reaction(nuc, rx)
         dst_sigma = None if src_sigma is None else group_collapse(src_sigma, 
@@ -117,19 +209,25 @@ class DataSource(object):
     def _load_group_structure(self):
         raise NotImplementedError
 
-    def _load_reaction(self, nuc, rx):
+    def _load_reaction(self, nuc, rx, temp=300.0):
         raise NotImplementedError
 
 
 class NullDataSource(DataSource):
+    """Cross section data source that always exists and always returns zeros.
+
+    Parameters
+    ----------
+    kwargs : optional
+        Keyword arguments to be sent to base class.
+
+    """
     
     def __init__(self, **kwargs):
-        """Cross section data source that always returns zeros."""
         super(NullDataSource, self).__init__(**kwargs)
 
     def _load_group_structure(self):
-        """Loads a meaningless bounds array.
-        """
+        """Loads a meaningless bounds array."""
         self.src_group_struct = np.array([0.0])
 
     @property
@@ -138,10 +236,11 @@ class NullDataSource(DataSource):
             self._exists = True
         return self._exists
 
-    def _load_reaction(self, nuc, rx):
+    def _load_reaction(self, nuc, rx, temp=300.0):
         return np.zeros(self.src_ngroups, dtype='f8')
 
-    def discretize(self, nuc, rx, src_phi_g=None, dst_phi_g=None):
+    def discretize(self, nuc, rx, temp=300.0, src_phi_g=None, dst_phi_g=None):
+        """Returns zeros."""
         return np.zeros(self.dst_ngroups, dtype='f8')
 
     @property
@@ -160,15 +259,21 @@ class NullDataSource(DataSource):
 
 
 class CinderDataSource(DataSource):
+    """Cinder cross section data source. The relevant cinder cross section data must
+    be present in the nuc_data for this data source to exist.
+
+    Parameters
+    ----------
+    kwargs : optional
+        Keyword arguments to be sent to base class.
+
+    """
     
     def __init__(self, **kwargs):
-        """Cinder cross section data source."""
         super(CinderDataSource, self).__init__(**kwargs)
 
     def _load_group_structure(self):
-        """Loads and returns the cinder energy bounds array, E_g, 
-        from the nuc_data library.
-        """
+        """Loads and returns the cinder energy bounds array, E_g, from nuc_data."""
         with tb.openFile(nuc_data, 'r') as f:
             E_g = np.array(f.root.neutron.cinder_xs.E_g)
         self.src_group_struct = E_g
@@ -180,7 +285,7 @@ class CinderDataSource(DataSource):
                 self._exists = ('/neutron/cinder_xs' in f)
         return self._exists
 
-    def _load_reaction(self, nuc, rx):
+    def _load_reaction(self, nuc, rx, temp=300.0):
         nuc = nucname.zzaaam(nuc)
         rx = _munge_rx(rx)
 
