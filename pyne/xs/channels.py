@@ -1,3 +1,9 @@
+"""This module provides an easy interface to very quickly grab multigroup cross 
+sections from the cross section cache and collapse them to the appropriate group 
+structure.  Additionally, it provides interfaces for some higher level functionality, 
+such as computing cross sections for materials, fission energy spectra, metastable
+ratios, etc.
+"""
 import collections
 
 import numpy as np
