@@ -15,8 +15,8 @@ Top-level functionality may be be found in this package's API module::
 
     from pyne.xs.api import *
 
-In the future, this package should support generating multigroup cross sections from user-specified 
-pointwise data sources (such as ENDF or ACE files).
+In the future, this package should support generating multigroup cross sections from 
+user-specified pointwise data sources (such as ENDF or ACE files).
 
 **Cross Section Modules**
 
@@ -24,5 +24,6 @@ pointwise data sources (such as ENDF or ACE files).
     :maxdepth: 1
 
     models
+    data_source
     cache
     channels
