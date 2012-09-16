@@ -1,8 +1,7 @@
 import collections
 
 import numpy as np
-# Hide warnings from numpy
-np.seterr(divide='ignore')
+np.seterr(all='ignore')
 
 import scipy.integrate
 import tables as tb
@@ -52,33 +51,31 @@ def _atom_weight_channel(chanfunc, nucspec, *args, **kwargs):
 
 
 def sigma_f(nuc, temp=300.0, group_struct=None, phi_g=None, xs_cache=None):
-    """Calculates the neutron fission cross-section for a nuclide for a new, 
-    lower resolution group structure using a higher fidelity flux.  Note that 
-    g indexes G, n indexes N, and G < N.  If any of these are None-valued, 
-    values from the cache are used.  The energy groups and fluxes are normally 
-    ordered from highest-to-lowest energy.
+    """Calculates the neutron fission cross section for a nuclide. 
 
     Parameters
     ----------
     nuc : int, str, Material, or dict-like 
-        A nuclide or nuclide-atom fraction mapping for which to calculate the 
-        fission cross-section.
-    E_g : array-like of floats, optional
-        New, lower fidelity energy group structure [MeV] that is of length G+1. 
-    E_n : array-like of floats, optional
-        Higher resolution energy group structure [MeV] that is of length N+1. 
-    phi_n : array-like of floats, optional
-        The high-fidelity flux [n/cm^2/s] to collapse the fission cross-section over.  
-        Length N.  
+        A nuclide or nuclide-atom fraction mapping.
+    temp : float, optional
+        Temperature [K] of material, defaults to 300.0.
+    group_struct : array-like of floats, optional
+        Energy group structure E_g [MeV] from highest-to-lowest energy, length G+1,
+        defaults to xs_cache['E_g'].
+    phi_g : array-like of floats, optional
+        Group fluxes [n/cm^2/s] matching group_struct, length G, defaults to 
+        xs_cache['phi_g'].
+    xs_cache : XSCache, optional
+        Cross section cache to use, defaults to pyne.xs.cache.xs_cache. 
 
     Returns
     -------
     sigma_f_g : ndarray 
-        An array of the collapsed fission cross-section.
+        The fission cross-section, length G.
 
     Notes
     -----
-    This always pulls the fission cross-section out of nuc_data library.    
+    This always pulls the fission cross section out of the cache.
 
     """
     xs_cache = cache.xs_cache if xs_cache is None else xs_cache
@@ -91,29 +88,27 @@ def sigma_f(nuc, temp=300.0, group_struct=None, phi_g=None, xs_cache=None):
 
 
 def sigma_s_gh(nuc, temp=300.0, group_struct=None, phi_g=None, xs_cache=None):
-    """Calculates the neutron scattering cross-section kernel for a nuclide for a new, 
-    lower resolution group structure using a higher fidelity flux.  Note that g, h index G, 
-    n indexes N, and G < N.  g is for the incident energy and h is for the exiting energy.
+    """Calculates the neutron scattering kernel for a nuclide.
 
     Parameters
     ----------
     nuc : int, str, Material, or dict-like 
-        A nuclide or nuclide-atom fraction mapping for which to calculate the 
-        scattering kernel.
-    T : float
-        Tempurature of the target material [kelvin].
-    E_g : array-like of floats, optional
-        New, lower fidelity energy group structure [MeV] that is of length G+1. 
-    E_n : array-like of floats, optional
-        Higher resolution energy group structure [MeV] that is of length N+1. 
-    phi_n : array-like of floats, optional
-        The high-fidelity flux [n/cm^2/s] to collapse the fission cross-section over.  
-        Length N.  
+        A nuclide or nuclide-atom fraction mapping.
+    temp : float, optional
+        Temperature [K] of material, defaults to 300.0.
+    group_struct : array-like of floats, optional
+        Energy group structure E_g [MeV] from highest-to-lowest energy, length G+1,
+        defaults to xs_cache['E_g'].
+    phi_g : array-like of floats, optional
+        Group fluxes [n/cm^2/s] matching group_struct, length G, defaults to 
+        xs_cache['phi_g'].
+    xs_cache : XSCache, optional
+        Cross section cache to use, defaults to pyne.xs.cache.xs_cache. 
 
     Returns
     -------
     sig_s_gh : ndarray 
-        An array of the scattering kernel.
+        The scattering kernel, shape GxG.
 
     Notes
     -----
@@ -178,7 +173,7 @@ def sigma_s_gh(nuc, temp=300.0, group_struct=None, phi_g=None, xs_cache=None):
 
 
 def sigma_s(nuc, temp=300.0, group_struct=None, phi_g=None, xs_cache=None):
-    """Calculates the neutron scattering cross-section for a nuclide. 
+    """Calculates the neutron scattering cross section for a nuclide. 
 
     .. math::
         \\sigma_{s, g} = \\sum_{h} \\sigma_{s, g\\to h} 
@@ -186,22 +181,22 @@ def sigma_s(nuc, temp=300.0, group_struct=None, phi_g=None, xs_cache=None):
     Parameters
     ----------
     nuc : int, str, Material, or dict-like 
-        A nuclide or nuclide-atom fraction mapping for which to calculate the 
-        scattering cross section.
-    T : float
-        Tempurature of the target material [kelvin].
-    E_g : array-like of floats, optional
-        New, lower fidelity energy group structure [MeV] that is of length G+1. 
-    E_n : array-like of floats, optional
-        Higher resolution energy group structure [MeV] that is of length N+1. 
-    phi_n : array-like of floats, optional
-        The high-fidelity flux [n/cm^2/s] to collapse the fission cross-section over.  
-        Length N.  
+        A nuclide or nuclide-atom fraction mapping.
+    temp : float, optional
+        Temperature [K] of material, defaults to 300.0.
+    group_struct : array-like of floats, optional
+        Energy group structure E_g [MeV] from highest-to-lowest energy, length G+1,
+        defaults to xs_cache['E_g'].
+    phi_g : array-like of floats, optional
+        Group fluxes [n/cm^2/s] matching group_struct, length G, defaults to 
+        xs_cache['phi_g'].
+    xs_cache : XSCache, optional
+        Cross section cache to use, defaults to pyne.xs.cache.xs_cache. 
 
     Returns
     -------
     sig_s_g : ndarray 
-        An array of the scattering cross section.
+        The scattering cross section, length G.
 
     """
     xs_cache = cache.xs_cache if xs_cache is None else xs_cache
@@ -229,29 +224,29 @@ def sigma_s(nuc, temp=300.0, group_struct=None, phi_g=None, xs_cache=None):
 
 
 def sigma_a_reaction(nuc, rx, temp=300.0, group_struct=None, phi_g=None, xs_cache=None):
-    """Calculates the neutron absorption reaction cross-section for a nuclide for a 
-    new, lower resolution group structure using a higher fidelity flux.  Note that 
-    g indexes G, n indexes N, and G < N.
+    """Calculates the neutron absorption reaction cross section for a nuclide.
 
     Parameters
     ----------
     nuc : int, str, Material, or dict-like 
-        A nuclide or nuclide-atom fraction mapping for which to calculate the 
-        absorption reaction cross-section.
+        A nuclide or nuclide-atom fraction mapping.
     rx : str
         Reaction key. ('gamma', 'alpha', 'p', etc.)
-    E_g : array-like of floats, optional
-        New, lower fidelity energy group structure [MeV] that is of length G+1. 
-    E_n : array-like of floats, optional
-        Higher resolution energy group structure [MeV] that is of length N+1. 
-    phi_n : array-like of floats, optional
-        The high-fidelity flux [n/cm^2/s] to collapse the fission cross-section over.  
-        Length N.  
+    temp : float, optional
+        Temperature [K] of material, defaults to 300.0.
+    group_struct : array-like of floats, optional
+        Energy group structure E_g [MeV] from highest-to-lowest energy, length G+1,
+        defaults to xs_cache['E_g'].
+    phi_g : array-like of floats, optional
+        Group fluxes [n/cm^2/s] matching group_struct, length G, defaults to 
+        xs_cache['phi_g'].
+    xs_cache : XSCache, optional
+        Cross section cache to use, defaults to pyne.xs.cache.xs_cache. 
 
     Returns
     -------
     sigma_rx_g : ndarray 
-        An array of the collapsed absorption reaction cross section.
+        The collapsed absorption reaction cross section, length G.
 
     Notes
     -----
@@ -259,8 +254,9 @@ def sigma_a_reaction(nuc, rx, temp=300.0, group_struct=None, phi_g=None, xs_cach
 
     See Also
     --------
-    pyne.xs.cache.ABSORPTION_RX
-    pyne.xs.cache.ABSORPTION_RX_MAP 
+    pyne.xs.data_source.RX_TYPES
+    pyne.xs.data_source.RX_TYPES_MAP 
+
     """
     xs_cache = cache.xs_cache if xs_cache is None else xs_cache
     _prep_cache(xs_cache, group_struct, phi_g)
@@ -276,25 +272,24 @@ def metastable_ratio(nuc, rx, temp=300.0, group_struct=None, phi_g=None, xs_cach
     """Calculates the ratio between a reaction that leaves the nuclide in a 
     metastable state and the equivalent reaction that leaves the nuclide in 
     the ground state.  This allows the calculation of metastable cross sections 
-    via sigma_ms = ratio * sigma_ground.  Note that g indexes G, n indexes N, 
-    and G < N.
-
-    Note: This always pulls the absorption reaction cross-sections out of the nuc_data library.    
+    via sigma_ms = ratio * sigma_ground. 
 
     Parameters
     ----------
     nuc : int, str, Material, or dict-like 
-        A nuclide or nuclide-atom fraction mapping for which to calculate the 
-        metastable ratio.
+        A nuclide or nuclide-atom fraction mapping.
     rx : str
         Reaction key. ('gamma', 'alpha', 'p', etc.)
-    E_g : array-like of floats, optional
-        New, lower fidelity energy group structure [MeV] that is of length G+1. 
-    E_n : array-like of floats, optional
-        Higher resolution energy group structure [MeV] that is of length N+1. 
-    phi_n : array-like of floats, optional
-        The high-fidelity flux [n/cm^2/s] to collapse the fission cross-section over.  
-        Length N.  
+    temp : float, optional
+        Temperature [K] of material, defaults to 300.0.
+    group_struct : array-like of floats, optional
+        Energy group structure E_g [MeV] from highest-to-lowest energy, length G+1,
+        defaults to xs_cache['E_g'].
+    phi_g : array-like of floats, optional
+        Group fluxes [n/cm^2/s] matching group_struct, length G, defaults to 
+        xs_cache['phi_g'].
+    xs_cache : XSCache, optional
+        Cross section cache to use, defaults to pyne.xs.cache.xs_cache. 
 
     Returns
     -------
@@ -304,12 +299,13 @@ def metastable_ratio(nuc, rx, temp=300.0, group_struct=None, phi_g=None, xs_cach
 
     Notes
     -----
-    This always pulls the absorption reaction cross section out of the nuc_data.
+    This always pulls the absorption reaction cross section out of the cache.
 
     See Also
     --------
-    pyne.xs.cache.ABSORPTION_RX
-    pyne.xs.cache.ABSORPTION_RX_MAP 
+    pyne.xs.data_source.RX_TYPES
+    pyne.xs.data_source.RX_TYPES_MAP 
+
     """
     if isinstance(nuc, int) or isinstance(nuc, basestring):
         xs_cache = cache.xs_cache if xs_cache is None else xs_cache
@@ -335,31 +331,31 @@ def metastable_ratio(nuc, rx, temp=300.0, group_struct=None, phi_g=None, xs_cach
 
 
 def sigma_a(nuc, temp=300.0, group_struct=None, phi_g=None, xs_cache=None):
-    """Calculates the neutron absorption cross section for a nuclide for a new, 
-    lower resolution group structure using a higher fidelity flux.  Note that 
-    g indexes G, n indexes N, and G < N.
+    """Calculates the neutron absorption cross section for a nuclide.
 
     Parameters
     ----------
     nuc : int, str, Material, or dict-like 
-        A nuclide or nuclide-atom fraction mapping for which to calculate the 
-        absorption cross section.
-    E_g : array-like of floats, optional
-        New, lower fidelity energy group structure [MeV] that is of length G+1. 
-    E_n : array-like of floats, optional
-        Higher resolution energy group structure [MeV] that is of length N+1. 
-    phi_n : array-like of floats, optional
-        The high-fidelity flux [n/cm^2/s] to collapse the fission cross-section over.  
-        Length N.  
+        A nuclide or nuclide-atom fraction mapping.
+    temp : float, optional
+        Temperature [K] of material, defaults to 300.0.
+    group_struct : array-like of floats, optional
+        Energy group structure E_g [MeV] from highest-to-lowest energy, length G+1,
+        defaults to xs_cache['E_g'].
+    phi_g : array-like of floats, optional
+        Group fluxes [n/cm^2/s] matching group_struct, length G, defaults to 
+        xs_cache['phi_g'].
+    xs_cache : XSCache, optional
+        Cross section cache to use, defaults to pyne.xs.cache.xs_cache. 
 
     Returns
     -------
     sigma_a_g : ndarray 
-        An array of the collapsed absorption cross section.
+        The collapsed absorption cross section, length G.
 
     Notes
     -----
-    This always pulls the absorption cross section out of the nuc_data.    
+    This always pulls the absorption cross section out of the cache. 
 
     """
     xs_cache = cache.xs_cache if xs_cache is None else xs_cache
@@ -372,38 +368,39 @@ def sigma_a(nuc, temp=300.0, group_struct=None, phi_g=None, xs_cache=None):
 
 
 def chi(nuc, temp=300.0, group_struct=None, phi_g=None, xs_cache=None, eres=101):
-    """Calculates the neutron fission energy spectrum for an isotope for a new, 
-    lower resolution group structure using a higher fidelity flux.  Note that 
-    g indexes G, n indexes N, and G < N.
+    """Calculates the neutron fission energy spectrum for a nuclide.
 
     Parameters
     ----------
     nuc : int, str, Material, or dict-like 
-        A nuclide or nuclide-atom fraction mapping for which to calculate the 
-        neutron fission energy spectrum.
-    E_g : array-like of floats, optional
-        New, lower fidelity energy group structure [MeV] that is of length G+1. 
-    E_n : array-like of floats, optional
-        Higher resolution energy group structure [MeV] that is of length N+1. 
-    phi_n : array-like of floats, optional
-        The high-fidelity flux [n/cm^2/s] to collapse the fission cross-section over.  
-        Length N.
-    eres : int
+        A nuclide or nuclide-atom fraction mapping.
+    temp : float, optional
+        Temperature [K] of material, defaults to 300.0.
+    group_struct : array-like of floats, optional
+        Energy group structure E_g [MeV] from highest-to-lowest energy, length G+1,
+        defaults to xs_cache['E_g'].
+    phi_g : array-like of floats, optional
+        Group fluxes [n/cm^2/s] matching group_struct, length G, defaults to 
+        xs_cache['phi_g'].
+    xs_cache : XSCache, optional
+        Cross section cache to use, defaults to pyne.xs.cache.xs_cache. 
+    eres : int, optional
         Number of energy-points to integrate over per group.
 
     Returns
     -------
     chi_g : ndarray 
-        An array of the fission energy spectrum.
+        The fission energy spectrum, length G.
 
     See Also
     --------
     pyne.xs.models.chi : used under the covers by this function.
+
     """
     xs_cache = cache.xs_cache if xs_cache is None else xs_cache
     _prep_cache(xs_cache, group_struct, phi_g)
     if isinstance(nuc, collections.Iterable) and not isinstance(nuc, basestring):
-        return _atom_weight_channel(chi, nuc, temp=temp, xs_cache=xs_cache)
+        return _atom_weight_channel(chi, nuc, temp=temp, xs_cache=xs_cache, eres=eres)
     nuc = nucname.zzaaam(nuc)
     key = (nuc, 'chi', temp)
 
@@ -441,7 +438,6 @@ def chi(nuc, temp=300.0, group_struct=None, phi_g=None, xs_cache=None, eres=101)
     return chi_g
 
 
-
 def sigma_t(nuc, temp=300.0, group_struct=None, phi_g=None, xs_cache=None):
     """Calculates the total neutron cross section for a nuclide. 
 
@@ -451,22 +447,22 @@ def sigma_t(nuc, temp=300.0, group_struct=None, phi_g=None, xs_cache=None):
     Parameters
     ----------
     nuc : int, str, Material, or dict-like 
-        A nuclide or nuclide-atom fraction mapping for which to calculate the 
-        total cross section.
-    T : float, optional
-        Tempurature of the target material [kelvin].
-    E_g : array-like of floats, optional
-        New, lower fidelity energy group structure [MeV] that is of length G+1. 
-    E_n : array-like of floats, optional
-        Higher resolution energy group structure [MeV] that is of length N+1. 
-    phi_n : array-like of floats, optional
-        The high-fidelity flux [n/cm^2/s] to collapse the fission cross-section over.  
-        Length N.  
+        A nuclide or nuclide-atom fraction mapping.
+    temp : float, optional
+        Temperature [K] of material, defaults to 300.0.
+    group_struct : array-like of floats, optional
+        Energy group structure E_g [MeV] from highest-to-lowest energy, length G+1,
+        defaults to xs_cache['E_g'].
+    phi_g : array-like of floats, optional
+        Group fluxes [n/cm^2/s] matching group_struct, length G, defaults to 
+        xs_cache['phi_g'].
+    xs_cache : XSCache, optional
+        Cross section cache to use, defaults to pyne.xs.cache.xs_cache. 
 
     Returns
     -------
     sig_t_g : ndarray 
-        An array of the total cross section.
+        The total cross section, length G.
 
     """
     xs_cache = cache.xs_cache if xs_cache is None else xs_cache
