@@ -60,7 +60,9 @@ class DataSource(object):
     group structure information.  This allows the data source to define how it wishes
     to discretize its data to the custom destination form.
 
-    The following methods must be overridden in all DataSource subclasses::
+    The following methods must be overridden in all DataSource subclasses:
+
+    .. code-block:: python
 
         @property
         def exists(self):
@@ -90,7 +92,7 @@ class DataSource(object):
     src_phi_g : array-like, optional
         Group fluxes which must match the group structure for this data source.
     dst_group_struct : array-like, optional
-        The group structure of the destination cross sections.  Used when 
+        The energy group structure [MeV] of the destination cross sections.  Used when 
         discretizing cross sections from this source.
 
     """
