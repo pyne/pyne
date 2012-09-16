@@ -1,5 +1,5 @@
 """This module provides a cross section cache which automatically extracts 
-cross-sections from the nuclear database."""
+cross-sections from provided nuclear data sets."""
 from itertools import product
 from collections import MutableMapping
 
@@ -172,7 +172,7 @@ def get_eaf_xs(nuc, rx):
         Nuclide in zzaaam form.
     rx : str 
         Reaction MT # in nnnm form.
-      OR: (eventually)
+        OR: (eventually)
         Reaction key: 'gamma', 'alpha', 'p', etc.
 
     Returns
@@ -185,6 +185,7 @@ def get_eaf_xs(nuc, rx):
     --------
     pyne.xs.cache.EAF_RX
     pyne.xs.cache.EAF_RX_MAP
+
     """
     # munge the reaction rate
     #TODO:

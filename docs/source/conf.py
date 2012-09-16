@@ -234,7 +234,7 @@ latex_documents = [
 # If false, no module index is generated.
 #latex_use_modindex = True
 
-#Autodocumentation Flags
+# Autodocumentation Flags
 autodoc_member_order = "groupwise"
 autoclass_content = "both"
 autosummary_generate = []
