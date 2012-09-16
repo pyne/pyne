@@ -16,6 +16,7 @@ from pyne.xs.models import partial_energy_matrix, phi_g
 ###############################################################################
 
 def is_g_indexed(key):
+    """Check if key is group-based, (_g)"""
     if isinstance(key, basestring):
         is_g = '_g' in key
     else:
@@ -289,7 +290,7 @@ EAF_RX = set(['1020', '1021', '1022', '1030', '1031', '1032', '1040',
                      '320', '321', '322', '330', '331', '332', '340', '341',
                      '342', '370', '371', '40', '41', '42', '420'])
 
-EAF_RX_MAP = {
+EAF_RX_MAP = { #TODO
     'neutron': 'n',
     'gamma': 'g', 
     'alpha': 'a',
@@ -302,7 +303,7 @@ EAF_RX_MAP = {
 
 
 def get_eaf_xs(nuc, rx):
-    """Grabs group-wise cross section values fro a given nuclide and reaction from the EAF format activation library.
+    """Grabs group-wise cross section values from a given nuclide and reaction from the EAF format activation library.
 
     Parameters
     ----------
