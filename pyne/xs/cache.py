@@ -31,17 +31,6 @@ def _valid_group_struct(E_g):
 ### Set up a cross-section cache so the same data isn't loaded repetitively ###
 ###############################################################################
 
-<<<<<<< HEAD
-def is_g_indexed(key):
-    """Check if key is group-based, (_g)"""
-    if isinstance(key, basestring):
-        is_g = '_g' in key
-    else:
-        is_g = '_g' in key[0]
-    return is_g
-
-=======
->>>>>>> 5d38bd0679d79d5e540220584cfccdfa51169a55
 class XSCache(MutableMapping):
     """A lightweight multigroup cross section cache based off of python 
     dictionaries. This relies on a list of cross section data source from which
