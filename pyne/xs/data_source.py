@@ -323,3 +323,22 @@ class CinderDataSource(DataSource):
         else:
             rxdata = None
         return rxdata
+
+
+
+class EAFDataSource(DataSource):
+    """European Activation File cross section data source.  The relevant EAF
+    cross section data must be present in the nuc-data for this data source to exist.
+
+    Parameters
+    ----------
+
+    """
+
+    def __init__(self):
+        super(EAFDataSource, self).__init__()
+
+    def _load_group_structure(self):
+        """ """
+        with tb.openFile(nuc_data, 'r') as f:
+            E_g = np.array(f.root.neutron.eaf_xs.E_g
