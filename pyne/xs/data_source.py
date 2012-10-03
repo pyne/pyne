@@ -195,7 +195,7 @@ class DataSource(object):
 
         """
         src_phi_g = self.src_phi_g if src_phi_g is None else np.asarray(src_phi_g) 
-        src_sigma = self.reaction(nuc, rx)
+        src_sigma = self.reaction(nuc, rx, temp)
         dst_sigma = None if src_sigma is None else group_collapse(src_sigma, 
                                                         src_phi_g, dst_phi_g, 
                                                         self._src_to_dst_matrix)
@@ -304,10 +304,15 @@ class SimpleDataSource(DataSource):
         return rxdata
 
     def discretize(self, nuc, rx, temp=300.0, src_phi_g=None, dst_phi_g=None):
-        """Discretizes the reaction channel from the source group structure to that 
-        of the destination weighted by the group fluxes.  This implemenation is only
-        valid for multi-group data sources.  Non-multigroup data source should also
-        override this method.
+        """Discretizes the reaction channel from simple group structure to that 
+        of the destination weighted by the group fluxes.  Since the simple data 
+        source consists of only thermal (2.53E-8 MeV), fission (1 MeV), and 14 MeV
+        data points, the following piecewise functional form is assumed:
+
+        .. math::  
+
+            \sigma(E) = \sigma(2.53E-8) \sqrt{\frac{2.53E-8}{E}} 
+            \sigma(E) = \frac{\sigma(14) - \sigma(1)}{14 - 1} (E - 1) + \sigma(1) 
 
         Parameters
         ----------
@@ -318,7 +323,7 @@ class SimpleDataSource(DataSource):
         temp : float, optional
             Temperature [K] of material, defaults to 300.0.
         src_phi_g : array-like, optional
-            Group fluxes for this data source, length src_ngroups.
+            IGNORED!!!  Included for API compatability
         dst_phi_g : array-like, optional
             Group fluxes for the destiniation structure, length dst_ngroups.
 
@@ -329,10 +334,18 @@ class SimpleDataSource(DataSource):
 
         """
         src_phi_g = self.src_phi_g if src_phi_g is None else np.asarray(src_phi_g) 
-        src_sigma = self.reaction(nuc, rx)
-        dst_sigma = None if src_sigma is None else group_collapse(src_sigma, 
-                                                        src_phi_g, dst_phi_g, 
-                                                        self._src_to_dst_matrix)
+        src_sigma = self.reaction(nuc, rx, temp)
+        if src_sigma is None:
+            return None
+        # not the most efficient, but data sizes should be smallish
+        center_g = self._dst_centers
+        dst_sigma = (src_sigma[2] * np.sqrt(2.53E-8)) / np.sqrt(center_g)
+        dst_fissn = ((src_sigma[0] - src_sigma[1])/13.0) * (center_g - 1.0) + \
+                                                                        src_sigma[1]
+        mask = (dst_sigma < dst_fissn)
+        dst_sigma[mask] = dst_fissn[mask]
+        if dst_phi_g is not None:
+            dst_sigma = (dst_sigma * dst_phi_g) / dst_phi_g.sum()
         return dst_sigma
 
     @property
@@ -343,9 +356,12 @@ class SimpleDataSource(DataSource):
     def dst_group_struct(self, dst_group_struct):
         if dst_group_struct is None:
             self._dst_group_struct = None
+            self._dst_centers = None
             self._dst_ngroups = 0
         else:
             self._dst_group_struct = np.asarray(dst_group_struct)
+            self._dst_centers = (self._dst_group_struct[1:] + 
+                                 self._dst_group_struct[:-1])/2.0
             self._dst_ngroups = len(dst_group_struct) - 1
         self._src_to_dst_matrix = None
 
