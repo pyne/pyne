@@ -16,6 +16,7 @@ nuc_data = pyne_conf.NUC_DATA_PATH
 if not os.path.isfile(nuc_data):
     raise RuntimeError("Tests require nuc_data.h5.  Please run nuc_data_make.")
 
+simpleds = data_source.SimpleDataSource()
 cinderds = data_source.CinderDataSource()
 
 
@@ -230,4 +231,81 @@ def test_get_sigma_a_n4():
     observed = cinderds.reaction(10420, 'a')
     expected = None
     assert_array_equal(observed, expected)
+
+
+
+def test_simple_E_g():
+    if not simpleds.exists:
+        return
+    assert_array_equal(np.array([14.0, 1.0, 2.53E-8, 0.0]), simpleds.src_group_struct)
+
+
+def test_simple_sigma_f():
+    if not simpleds.exists:
+        return
+    sigma_f_n_U235 = np.array([2.056, 1.235, 584.4])
+    obs = simpleds.reaction('U235', 'f')
+    assert_array_equal(sigma_f_n_U235, obs)
+    assert_equal(id(obs), id(simpleds.reaction('U235', 'f')))
+    assert_not_equal(id(obs), id(simpleds.reaction(922350, 'f')))
+
+
+def test_simple_sigma_a():
+    if not simpleds.exists:
+        return
+    sigma_a_n_H1 = np.array([2.983E-5, 3.927E-5, 0.332])
+    obs = simpleds.reaction(10010, 'a')
+    assert_array_almost_equal(sigma_a_n_H1, obs)
+    assert_equal(id(obs), id(simpleds.reaction(10010, 'a')))
+    assert_not_equal(id(obs), id(simpleds.reaction('H1', 'a')))
+
+
+def test_simple_not_in_table():
+    if not simpleds.exists:
+        return
+    exp = None
+    obs = simpleds.reaction(10030, '4n')
+    assert_equal(obs, exp)
+
+
+def test_simple_not_a_rx():
+    if not simpleds.exists:
+        return
+    exp = None
+    obs = simpleds.reaction(10010, '42')
+    assert_equal(obs, exp)
+
+
+def test_simple_discretize_no_weights1():
+    if not simpleds.exists:
+        return
+    dst_g = cinderds.src_group_struct
+    simpleds.dst_group_struct = dst_g
+    obs = simpleds.discretize('U235', 'f')
+    mask = obs[:-1] <= obs[1:]
+    assert_true((obs[mask][:-1] <= obs[mask][1:]).all())
+    assert_true((obs[~mask][:-1] >= obs[~mask][1:]).all())
+    simpleds.dst_group_struct = None
+
+
+def test_simple_discretize_no_weights2():
+    if not simpleds.exists:
+        return
+    dst_g = cinderds.src_group_struct
+    simpleds.dst_group_struct = dst_g
+    obs = simpleds.discretize(10010, 'a')
+    assert_true((obs[:-1] <= obs[1:]).all())
+    simpleds.dst_group_struct = None
+
+
+def test_simple_discretize_weights1():
+    if not simpleds.exists:
+        return
+    dst_g = cinderds.src_group_struct
+    phi_g = np.ones(cinderds.src_ngroups, dtype=float)
+    phi_g[:25] = 0.0
+    simpleds.dst_group_struct = dst_g
+    obs = simpleds.discretize('U235', 'f', dst_phi_g=phi_g)
+    assert_true((obs[:-1] <= obs[1:]).all())
+    simpleds.dst_group_struct = None
 
