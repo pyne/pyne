@@ -271,7 +271,7 @@ class SimpleDataSource(DataSource):
                      'deut', 'trit', '2n', '3n', '4n'])
 
     def __init__(self, **kwargs):
-        super(CinderDataSource, self).__init__(**kwargs)
+        super(SimpleDataSource, self).__init__(**kwargs)
 
     @property
     def exists(self):

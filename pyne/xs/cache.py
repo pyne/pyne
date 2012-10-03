@@ -53,6 +53,7 @@ class XSCache(MutableMapping):
 
     def __init__(self, group_struct=None, 
                  data_source_classes=(data_source.CinderDataSource,
+                                      data_source.SimpleDataSource,
                                       data_source.NullDataSource,)):
         self._cache = {}
         self.data_sources = []
