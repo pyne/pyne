@@ -1,5 +1,5 @@
 import numpy as np
-import scipy.linalg 
+import scipy as sp
 
 from pyne.material import Material
 from pyne import data
@@ -22,8 +22,6 @@ def decay(mat, t):
     """
     nucvec = mat.keys()
     A = _create_decay_matrix(nucvec)
-    print nucvec
-    print A
     eA = _solve_decay_matrix(A)
 
 
@@ -36,5 +34,5 @@ def _create_decay_matrix(nucs):
 
 
 def _solve_decay_matrix(A):
-    eA = scipy.linalg.expm(A)
+    eA = sp.linalg.expm(A)
     return eA
