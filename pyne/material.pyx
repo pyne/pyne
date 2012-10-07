@@ -1467,3 +1467,22 @@ class MapStrMaterial(_MapStrMaterial, collections.MutableMapping):
 
 
 
+class MultiMaterial(collections.MutableMapping):
+
+	def __init__(self, mats):
+		self._mats = mats
+
+	def __getitem__(self, key):
+		return self._mats[key]
+
+	def __setitem__(self, key, value):
+		self._mats[key] = value
+
+	def write_hdf5(self):
+		pass
+
+	def write_iter(self):
+		pass
+
+	def __add__(self, other):
+		pass
