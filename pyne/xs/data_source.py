@@ -195,7 +195,7 @@ class DataSource(object):
 
         """
         src_phi_g = self.src_phi_g if src_phi_g is None else np.asarray(src_phi_g) 
-        src_sigma = self.reaction(nuc, rx)
+        src_sigma = self.reaction(nuc, rx, temp)
         dst_sigma = None if src_sigma is None else group_collapse(src_sigma, 
                                                         src_phi_g, dst_phi_g, 
                                                         self._src_to_dst_matrix)
@@ -258,6 +258,114 @@ class NullDataSource(DataSource):
         self._src_to_dst_matrix = None
 
 
+class SimpleDataSource(DataSource):
+    """Simple cross section data source based off of KAERI data.
+
+    Parameters
+    ----------
+    kwargs : optional
+        Keyword arguments to be sent to base class.
+
+    """
+    _rx_avail = set(['t', 's', 'e', 'i', 'a', 'gamma', 'f', 'alpha', 'proton', 
+                     'deut', 'trit', '2n', '3n', '4n'])
+
+    def __init__(self, **kwargs):
+        super(SimpleDataSource, self).__init__(**kwargs)
+
+    @property
+    def exists(self):
+        if self._exists is None:
+            with tb.openFile(nuc_data, 'r') as f:
+                self._exists = ('/neutron/simple_xs' in f)
+        return self._exists
+
+    def _load_group_structure(self):
+        """Sets the simple energy bounds array, E_g."""
+        self.src_group_struct = np.array([14.0, 1.0, 2.53E-8, 0.0], dtype='float64')
+
+    def _load_reaction(self, nuc, rx, temp=300.0):
+        nuc = nucname.zzaaam(nuc)
+        if rx not in self._rx_avail:
+            return None
+        cond = "nuc == {0}".format(nuc)
+        sig = 'sigma_' + rx
+        with tb.openFile(nuc_data, 'r') as f:
+            simple_xs = f.root.neutron.simple_xs
+            fteen = [row[sig] for row in simple_xs.fourteen_MeV.where(cond)]
+            fissn = [row[sig] for row in simple_xs.fission_spectrum_ave.where(cond)]
+            therm = [row[sig] for row in simple_xs.thermal.where(cond)]
+            if 0 == len(therm):
+                therm = [row[sig] for row in simple_xs.thermal_maxwell_ave.where(cond)]
+            if 0 == len(fteen) and 0 == len(fissn) and 0 == len(therm):
+                rxdata = None
+            else:
+                rxdata = np.array([fteen[0], fissn[0], therm[0]], dtype='float64')
+        return rxdata
+
+    def discretize(self, nuc, rx, temp=300.0, src_phi_g=None, dst_phi_g=None):
+        """Discretizes the reaction channel from simple group structure to that 
+        of the destination weighted by the group fluxes.  Since the simple data 
+        source consists of only thermal (2.53E-8 MeV), fission (1 MeV), and 14 MeV
+        data points, the following piecewise functional form is assumed:
+
+        .. math::  
+
+            \sigma(E) = \sigma(2.53E-8) \sqrt{\frac{2.53E-8}{E}} 
+            \sigma(E) = \frac{\sigma(14) - \sigma(1)}{14 - 1} (E - 1) + \sigma(1) 
+
+        Parameters
+        ----------
+        nuc : int or str
+            A nuclide.
+        rx : int or str
+            Reaction key ('gamma', 'alpha', 'p', etc.) or MT number.
+        temp : float, optional
+            Temperature [K] of material, defaults to 300.0.
+        src_phi_g : array-like, optional
+            IGNORED!!!  Included for API compatability
+        dst_phi_g : array-like, optional
+            Group fluxes for the destiniation structure, length dst_ngroups.
+
+        Returns
+        -------
+        dst_sigma : ndarry
+            Destination cross section data, length dst_ngroups.
+
+        """
+        src_phi_g = self.src_phi_g if src_phi_g is None else np.asarray(src_phi_g) 
+        src_sigma = self.reaction(nuc, rx, temp)
+        if src_sigma is None:
+            return None
+        # not the most efficient, but data sizes should be smallish
+        center_g = self._dst_centers
+        dst_sigma = (src_sigma[2] * np.sqrt(2.53E-8)) / np.sqrt(center_g)
+        dst_fissn = ((src_sigma[0] - src_sigma[1])/13.0) * (center_g - 1.0) + \
+                                                                        src_sigma[1]
+        mask = (dst_sigma < dst_fissn)
+        dst_sigma[mask] = dst_fissn[mask]
+        if dst_phi_g is not None:
+            dst_sigma = (dst_sigma * dst_phi_g) / dst_phi_g.sum()
+        return dst_sigma
+
+    @property
+    def dst_group_struct(self):
+        return self._dst_group_struct
+
+    @dst_group_struct.setter
+    def dst_group_struct(self, dst_group_struct):
+        if dst_group_struct is None:
+            self._dst_group_struct = None
+            self._dst_centers = None
+            self._dst_ngroups = 0
+        else:
+            self._dst_group_struct = np.asarray(dst_group_struct)
+            self._dst_centers = (self._dst_group_struct[1:] + 
+                                 self._dst_group_struct[:-1])/2.0
+            self._dst_ngroups = len(dst_group_struct) - 1
+        self._src_to_dst_matrix = None
+
+
 class CinderDataSource(DataSource):
     """Cinder cross section data source. The relevant cinder cross section data must
     be present in the nuc_data for this data source to exist.
@@ -273,7 +381,7 @@ class CinderDataSource(DataSource):
         super(CinderDataSource, self).__init__(**kwargs)
 
     def _load_group_structure(self):
-        """Loads and returns the cinder energy bounds array, E_g, from nuc_data."""
+        """Loads the cinder energy bounds array, E_g, from nuc_data."""
         with tb.openFile(nuc_data, 'r') as f:
             E_g = np.array(f.root.neutron.cinder_xs.E_g)
         self.src_group_struct = E_g
