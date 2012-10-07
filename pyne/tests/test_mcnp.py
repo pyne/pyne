@@ -139,6 +139,29 @@ class TestSurfSrc(unittest.TestCase):
             self.assertAlmostEqual(trackData.w       , 0.80104937) 
         return
 
+    def test_print_header(self):
+        """Check SurfSrc.print_header() against expected resulting string.
+        We use a file with a single track for this test, but only use the
+        header of this file.
+        """
+        ssr = mcnp.SurfSrc(ssrname_onetrack, "rb")
+        ssr.read_header()
+        # If comparison output needs to be updated, uncomment the below
+        #  and do: nosetests test_mcnp.py --nocapture
+        #print ssr.print_header()
+        self.assertEqual(ssr.print_header(),
+                "Code: mcnp     (version: 5    ) [01232009]\n" \
+                "Problem info: ( 07/05/12 17:50:19 )  07/05/12 17:50:16 \n" \
+                "c Test deck with H20 cube, point n source, SSW of top surface interactions      \n" \
+                "Showing dump #2\n" \
+                "1 histories, 1 tracks, 11 record size, 1 surfaces, 1 histories\n" \
+                "0 cells, source particle: 3, macrobody facet flag: 0\n" \
+                "Surface [6]: facet -1, type [4] with 1 parameters: ( [5.0])\n" \
+                "Summary Table: [0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0]"
+            )
+ 
+        return
+
     def test_print_tracklist(self):
         """Check SurfSrc.print_tracklist() against expected resulting string.
         We use a file with a single track for this test.
@@ -146,8 +169,11 @@ class TestSurfSrc(unittest.TestCase):
         ssr = mcnp.SurfSrc(ssrname_onetrack, "rb")
         ssr.read_header()
         ssr.read_tracklist()
-        # If this needs to be updated, uncomment the below
-        #  and do: nosetests test_mcnp.py -v
-        # print ssr.print_tracklist()
+        # If comparison output needs to be updated, uncomment the below
+        #  and do: nosetests test_mcnp.py --nocapture
+        #print ssr.print_tracklist()
         self.assertEqual(ssr.print_tracklist(), 'Track Data\n       nps   BITARRAY        WGT        ERG        TME             X             Y             Z          U          V     COSINE  |       W\n         1 8.00005e+06    0.99996      5.542    0.17144  -8.05902e-02   3.12267e+00   5.00000e+00   -0.35133    0.48465    0.80105  |    0.80105 \n')
+
         return
+
+
