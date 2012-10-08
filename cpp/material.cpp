@@ -879,10 +879,10 @@ lower = temp_upper;
 pyne::comp_map cm;
 for (pyne::comp_iter i = comp.begin(); i != comp.end(); i++)
 {
-if ((lower <= (i->first)) && ((i->first) < upper))
-cm[i->first] = value;
-else
-cm[i->first] = (i->second) * mass;
+  if ((lower <= (i->first)) && ((i->first) < upper))
+    cm[i->first] = value;
+  else
+    cm[i->first] = (i->second) * mass;
 };
 
   return pyne::Material(cm, -1,-1);
