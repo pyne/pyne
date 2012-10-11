@@ -259,7 +259,7 @@ class SurfSrc(_BinaryReader):
             pass
         
         self.orignp1 = self.np1
-        print self.np1
+        
         self.np1 = abs(self.np1)
 
         # get info for each surface
