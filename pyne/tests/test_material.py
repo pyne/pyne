@@ -77,12 +77,13 @@ def test_write_text():
     if 'leu.txt' in os.listdir('.'):
         os.remove('leu.txt')
 
-    leu = Material({'U235': 0.04, 'U238': 0.96}, 42.0, 1.0)
+    leu = Material({'U235': 0.04, 'U238': 0.96}, 42.0, 1.0, 1.0)
     leu.write_text('leu.txt')
 
     with open('leu.txt') as f:
         written = f.read()
     expected = ("Mass    42\n"
+                "Density 1\n"
                 "APerM   1\n"
                 "U235    0.04\n"
                 "U238    0.96\n")
@@ -133,24 +134,26 @@ def test_hdf5_protocol_1():
         os.remove('proto1.h5')
 
     # Test material writing
-    leu = Material({'U235': 0.04, 'U238': 0.96}, 4.2, 1.0)
+    leu = Material({'U235': 0.04, 'U238': 0.96}, 4.2, 2.72, 1.0)
     leu.attrs['comment'] = 'first light'
     leu.write_hdf5('proto1.h5', chunksize=10)
 
     for i in range(2, 11):
-        leu = Material({'U235': 0.04, 'U238': 0.96}, i*4.2, 1.0*i)
+        leu = Material({'U235': 0.04, 'U238': 0.96}, i*4.2, 2.72, 1.0*i)
         leu.attrs['comment'] = 'fire in the disco - {0}'.format(i)
         leu.write_hdf5('proto1.h5')
 
     # Loads with protocol 1 now.
     m = Material()
     m.from_hdf5('proto1.h5', '/material', -3, 1)
+    assert_equal(m.density, 2.72)
     assert_equal(m.atoms_per_mol, 8.0)
     assert_equal(m.mass, 33.6)
     assert_equal(m.comp, {922350: 0.04, 922380: 0.96})
     assert_equal(m.attrs['comment'], 'fire in the disco - 8')
 
     m = from_hdf5('proto1.h5', '/material', 3, 1)
+    assert_equal(m.density, 2.72)
     assert_equal(m.atoms_per_mol, 4.0)
     assert_equal(m.mass, 16.8)
     assert_equal(m.comp, {922350: 0.04, 922380: 0.96})

@@ -17,6 +17,7 @@ cdef extern from "material.h" namespace "pyne":
         Material(map[int, double]) except +
         Material(map[int, double], double) except +
         Material(map[int, double], double, double) except +
+        Material(map[int, double], double, double, double) except +
         Material(map[int, double], double, double, double, cpp_jsoncpp.Value) except +
         Material(char *) except +
         Material(char *, double) except +
