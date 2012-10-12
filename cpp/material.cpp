@@ -130,8 +130,10 @@ void pyne::Material::_load_comp_protocol1(hid_t db, std::string datapath, int ro
 
   // make the data table type
   H5Tinsert(desc, "mass", HOFFSET(pyne::material_struct, mass), H5T_NATIVE_DOUBLE);
+  H5Tinsert(desc, "density", HOFFSET(pyne::material_struct, density), 
+            H5T_NATIVE_DOUBLE);
   H5Tinsert(desc, "atoms_per_mol", HOFFSET(pyne::material_struct, atoms_per_mol), 
-              H5T_NATIVE_DOUBLE);
+            H5T_NATIVE_DOUBLE);
   H5Tinsert(desc, "comp", HOFFSET(pyne::material_struct, comp), comp_values_array_type);
 
   // make the data array, have to over-allocate
@@ -141,6 +143,7 @@ void pyne::Material::_load_comp_protocol1(hid_t db, std::string datapath, int ro
   H5Dread(data_set, desc, mem_space, data_hyperslab, H5P_DEFAULT, mat_data);
 
   mass = (*mat_data).mass;
+  density = (*mat_data).density;
   atoms_per_mol = (*mat_data).atoms_per_mol;
   for (int i = 0; i < nuc_size; i++)
     comp[nuclides[i]] = (double) (*mat_data).comp[i];
@@ -318,10 +321,13 @@ void pyne::Material::write_hdf5(std::string filename, std::string datapath, std:
   hid_t comp_values_array_type = H5Tarray_create2(H5T_NATIVE_DOUBLE, 1, nuc_dims);
 
   // make the data table type
-  data_desc.insertMember("mass", HOFFSET(pyne::material_struct, mass), H5::PredType::NATIVE_DOUBLE);
-  data_desc.insertMember("density", HOFFSET(pyne::material_struct, density), H5::PredType::NATIVE_DOUBLE);
-  data_desc.insertMember("atoms_per_mol", HOFFSET(pyne::material_struct, atoms_per_mol), H5::PredType::NATIVE_DOUBLE);
-  data_desc.insertMember("comp", HOFFSET(pyne::material_struct, comp), comp_values_array_type);
+  H5Tinsert(desc, "mass", HOFFSET(pyne::material_struct, mass), H5T_NATIVE_DOUBLE);
+  H5Tinsert(desc, "density", HOFFSET(pyne::material_struct, density), 
+            H5T_NATIVE_DOUBLE);
+  H5Tinsert(desc, "atoms_per_mol", HOFFSET(pyne::material_struct, atoms_per_mol), 
+            H5T_NATIVE_DOUBLE);
+  H5Tinsert(desc, "comp", HOFFSET(pyne::material_struct, comp), 
+            comp_values_array_type);
 
   material_struct * mat_data  = new material_struct[material_struct_size];
   (*mat_data).mass = mass;
@@ -562,7 +568,7 @@ void pyne::Material::write_text (std::string filename)
     f << "Mass    " << mass << "\n";
 
   if (0 <= density)
-    f << "Density    "  << density << "\n";
+    f << "Density "  << density << "\n";
   
   if (0 <= atoms_per_mol)
     f << "APerM   " << atoms_per_mol << "\n";

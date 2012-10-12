@@ -64,8 +64,8 @@ cdef class _Material:
         elif (nucvec is None):
             if free_mat:
                 # Make empty mass stream
-                self.mat_pointer = new cpp_material.Material(comp, 
-                                        mass, atoms_per_mol, deref(cattrs._inst))
+                self.mat_pointer = new cpp_material.Material(comp, mass, density,
+                                        atoms_per_mol, deref(cattrs._inst))
             else:
                 self.mat_pointer = NULL
 
@@ -1469,20 +1469,20 @@ class MapStrMaterial(_MapStrMaterial, collections.MutableMapping):
 
 class MultiMaterial(collections.MutableMapping):
 
-	def __init__(self, mats):
-		self._mats = mats
+    def __init__(self, mats):
+        self._mats = mats
 
-	def __getitem__(self, key):
-		return self._mats[key]
+    def __getitem__(self, key):
+        return self._mats[key]
 
-	def __setitem__(self, key, value):
-		self._mats[key] = value
+    def __setitem__(self, key, value):
+        self._mats[key] = value
 
-	def write_hdf5(self):
-		pass
+    def write_hdf5(self):
+        pass
 
-	def write_iter(self):
-		pass
+    def write_iter(self):
+        pass
 
-	def __add__(self, other):
-		pass
+    def __add__(self, other):
+        pass
