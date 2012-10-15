@@ -192,7 +192,7 @@ void pyne_enr::_recompute_prod_tail_mats(pyne_enr::Cascade & casc)
 
     // calc tail comp
     numer_tail = casc.mat_feed.comp[nuc] * (1.0 - pow(astar_i, -N));
-	  denom_tail = (pow(astar_i, M+1.0) - pow(astar_i, -N)) / tpf;
+    denom_tail = (pow(astar_i, M+1.0) - pow(astar_i, -N)) / tpf;
     comp_tail[nuc] = numer_tail / denom_tail;
   };
 
