@@ -61,16 +61,17 @@ namespace pyne
     //Fundemental mass stream data
     comp_map comp;
     double mass;
+    double density;
     double atoms_per_mol;
     Json::Value attrs;
 
     //Material Constructors
     Material ();
-    Material(comp_map, double=-1.0, double=-1.0, 
+    Material(comp_map, double=-1.0, double=-1.0, double=-1.0,
              Json::Value=Json::Value(Json::objectValue));
-    Material(char *, double=-1.0, double=-1.0, 
+    Material(char *, double=-1.0, double=-1.0, double=-1.0,
              Json::Value=Json::Value(Json::objectValue));
-    Material(std::string, double=-1.0, double=-1.0,
+    Material(std::string, double=-1.0, double=-1.0, double=-1.0,
              Json::Value=Json::Value(Json::objectValue));
     ~Material ();
 
@@ -116,6 +117,7 @@ namespace pyne
 
   typedef struct material_struct {
     double mass;
+    double density;
     double atoms_per_mol;
     double comp [];
   } material_struct;
