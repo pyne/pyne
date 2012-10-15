@@ -544,12 +544,15 @@ class NeutronTable(AceTable):
                 self.nu_d_precursor_prob[group]   = self.xss[i+3+2*NR+NE : i+3+2*NR+2*NE]
                 i = i+3+2*NR+2*NE
 
-            # FIXME The following code never will save LOCC on the object!
             # Energy distribution for delayed fission neutrons
-            #LED = self.jxs[26]
-            #LOCC = {}
-            #for group in range(n_group):
-            #    LOCC[group] = self.xss[LED + group]
+            LED = self.jxs[26]
+            self.nu_d_energy_dist = []
+            for group in range(n_group):
+                location_start = self.xss[LED + group]
+                energy_dist = self._get_energy_distribution(
+                    location_start, delayed_n=True)
+                self.nu_d_energy_dist.append(energy_dist)
+                    
 
     def _read_angular_distributions(self):
         """Find the angular distribution for each reaction MT
