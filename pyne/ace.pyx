@@ -1085,7 +1085,7 @@ class NeutronTable(AceTable):
             NE = self.NXS[3]
 
             # Read total photon production cross section
-            ind = JXS12
+            ind = jxs12
             self.sigma_photon = self.XSS[ind:ind+NE]
 
             # The MCNP manual also specifies that this block contains secondary
@@ -1107,7 +1107,7 @@ class NeutronTable(AceTable):
             # # Read equiprobable outgoing photon energies
             # # Equiprobable outgoing photon energies for incident neutron
             # # energy i
-            # e_out_photon_equi = self.XSS[ind:ind+600]
+            # e_out_photon_equi = self.xss[ind:ind+600]
             # if len(e_out_photon_equi) == 600:
             #     self.e_out_photon_equi = e_out_photon_equi
             #     self.e_out_photon_equi.shape = (30, 20)
