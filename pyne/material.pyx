@@ -1008,6 +1008,7 @@ cdef class _Material:
                 return
             mbm = self.mult_by_mass()
             mbm.map_ptr.erase(<int> key)
+            new_matp = new cpp_material.Material(mbm.map_ptr[0], -1.0)
             new_matp = new cpp_material.Material(mbm.map_ptr[0], -1.0, -1.0)
             self.mat_pointer = new_matp
             self._comp = None
