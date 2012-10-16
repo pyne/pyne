@@ -4,8 +4,13 @@ from cython.operator cimport preincrement as inc
 from libc.stdlib cimport malloc, free
 from cython cimport pointer
 from libc.string cimport const_char, memcpy
-from libcpp.string cimport string as std_string
 from libcpp.vector cimport vector as std_vector
+
+include "includes/cython_version.pxi"
+IF CYTHON_VERSION_MAJOR == 0 and CYTHON_VERSION_MINOR >= 16:
+    from libcpp.string cimport string as std_string
+ELSE:
+    from std cimport string as std_string
 
 # Python imports
 import collections
