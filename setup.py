@@ -15,6 +15,7 @@ from distutils.file_util import copy_file, move_file
 from distutils.dir_util import mkpath, remove_tree
 from distutils.sysconfig import get_python_version, get_config_vars, get_python_lib
 from Cython.Distutils import build_ext
+from Cython.Compiler.Version import version as CYTHON_VERSION
 
 
 import numpy as np
@@ -451,6 +452,20 @@ def final_message(setup_success=True, metadata=None):
     print msg
 
 
+def make_cython_version():
+    pxi = ("# Cython compile-time version information\n"
+           "DEF CYTHON_VERSION_MAJOR = {major}\n"
+           "DEF CYTHON_VERSION_MINOR = {minor}\n"
+           "DEF CYTHON_VERSION_BUILD = {build}")
+    cyver = CYTHON_VERSION.split('-')[0].split('.')
+    while len(cyver) < 3:
+        cyver = cyver + [0]
+    cyver = dict([(k, int(cv)) for k, cv in zip(['major', 'minor', 'build'], cyver)])
+    pxi = pxi.format(**cyver)
+    with open('pyne/includes/cython_version.pxi', 'w') as f:
+        f.write(pxi)
+
+
 def make_includes():
     ds = ['pyne/includes', 'pyne/includes/pyne']
     cpfs = []
@@ -482,6 +497,7 @@ def pyne_setup():
     if os.path.exists('pyne/includes'):
         remove_tree('pyne/includes')
     make_includes()
+    make_cython_version()
 
     # Create metadata file
     mdpath = "pyne/metadata.json"

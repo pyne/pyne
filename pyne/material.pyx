@@ -43,7 +43,7 @@ cdef cpp_map[int, double] dict_to_comp(dict nucvec):
 
 cdef class _Material:
 
-    def __cinit__(self, nucvec=None, double mass=-1.0,
+    def __cinit__(self, nucvec=None, double mass=-1.0, double density=-1.0,
                   double atoms_per_mol=-1.0, attrs=None, bint free_mat=True,
                   *args, **kwargs):
         """Material C++ constuctor."""
@@ -54,18 +54,18 @@ cdef class _Material:
             # Material from dict
             comp = dict_to_comp(nucvec)
             self.mat_pointer = new cpp_material.Material(
-                    comp, mass, atoms_per_mol, deref(cattrs._inst))
+                    comp, mass, density, atoms_per_mol, deref(cattrs._inst))
 
         elif isinstance(nucvec, basestring):
             # Material from file
             self.mat_pointer = new cpp_material.Material(
-                    <char *> nucvec, mass,  atoms_per_mol, deref(cattrs._inst))
+                    <char *> nucvec, mass, density, atoms_per_mol, deref(cattrs._inst))
 
         elif (nucvec is None):
             if free_mat:
                 # Make empty mass stream
-                self.mat_pointer = new cpp_material.Material(comp, 
-                                        mass, atoms_per_mol, deref(cattrs._inst))
+                self.mat_pointer = new cpp_material.Material(comp, mass, density,
+                                        atoms_per_mol, deref(cattrs._inst))
             else:
                 self.mat_pointer = NULL
 
@@ -130,6 +130,13 @@ cdef class _Material:
 
         def __set__(self, double value):
             self.mat_pointer.mass = value
+
+    property density:
+        def __get__(self):
+            return self.mat_pointer.density
+
+        def __set__(self, double value):
+            self.mat_pointer.density = value
 
     property atoms_per_mol:
         def __get__(self):
@@ -952,7 +959,7 @@ cdef class _Material:
         if isinstance(key, int):
             mbm = self.mult_by_mass()
             mbm.map_ptr[0][key] = value
-            new_matp = new cpp_material.Material(mbm.map_ptr[0], -1.0)
+            new_matp = new cpp_material.Material(mbm.map_ptr[0], -1.0, -1.0)
             self.mat_pointer = new_matp
             self._comp = None
 
@@ -1002,6 +1009,7 @@ cdef class _Material:
             mbm = self.mult_by_mass()
             mbm.map_ptr.erase(<int> key)
             new_matp = new cpp_material.Material(mbm.map_ptr[0], -1.0)
+            new_matp = new cpp_material.Material(mbm.map_ptr[0], -1.0, -1.0)
             self.mat_pointer = new_matp
             self._comp = None
 
@@ -1073,6 +1081,8 @@ class Material(_Material, collections.MutableMapping):
         (default -1.0) then the mass of the new stream is calculated from the
         sum of compdict's components before normalization.  If the mass here is
         positive or zero, then this mass overrides the calculated one.
+    density : float, optional
+        This is the density of the material.
     atoms_per_mol : float, optional
         Number of atoms to per molecule of material.  Needed to obtain proper
         scaling of molecular weights.  For example, this value for water is
@@ -1090,6 +1100,7 @@ class Material(_Material, collections.MutableMapping):
     def __str__(self):
         header = ["Material:"]
         header += ["mass = {0}".format(self.mass)]
+        header += ["density= {0}".format(self.density)]
         header += ["atoms per molecule = {0}".format(self.atoms_per_mol)]
         if self.attrs.isobject():
             for key, value in self.attrs.items():
@@ -1102,8 +1113,8 @@ class Material(_Material, collections.MutableMapping):
         return s
 
     def __repr__(self):
-        return "pyne.material.Material({0}, {1}, {2}, {3})".format(
-                repr(self.comp), self.mass, self.atoms_per_mol, repr(self.attrs))
+        return "pyne.material.Material({0}, {1}, {2}, {3}, {4})".format(
+                repr(self.comp), self.mass, self.density, self.atoms_per_mol, repr(self.attrs))
 
 
 #####################################
@@ -1457,3 +1468,22 @@ class MapStrMaterial(_MapStrMaterial, collections.MutableMapping):
 
 
 
+class MultiMaterial(collections.MutableMapping):
+
+    def __init__(self, mats):
+        self._mats = mats
+
+    def __getitem__(self, key):
+        return self._mats[key]
+
+    def __setitem__(self, key, value):
+        self._mats[key] = value
+
+    def write_hdf5(self):
+        pass
+
+    def write_iter(self):
+        pass
+
+    def __add__(self, other):
+        pass
