@@ -159,7 +159,7 @@ double pyne::natural_abund(int nuc)
   if((nuc/10)%1000 == 0)
 	  na = 1.0;
   else
-      na = 0.0;
+      na = 0.5;
   natural_abund_map[nuc]=na;
   return na;
 };

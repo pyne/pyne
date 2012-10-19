@@ -57,9 +57,26 @@ with tb.openFile('test.h5', 'w', filters=tb.Filters(complevel=5, complib='zlib',
 	f.createArray('/', 'nuc_zz', np.array(list(nuc_zz)))
 
 for nuc in nuc_zz:
-	elem = nuc/10000
-	abund = pd.natural_abund(nuc)
-	elems.add(elem)
+	zz = nuc/10000
+	elems.add(zz)
+
+elem_comp={}
+elem_mats=[]
+
+print elems
+
+for elem in elems:
+	elem_comp.clear()
+	for nuc in nuc_zz:
+		zz = nuc/10000
+		if zz == elem:
+			elem_comp[nuc] = pd.natural_abund(nuc)
+			print elem, nuc, pd.natural_abund(nuc)
+		else:
+			pass
+
+print elem_mats
+
 
 for i in range(len(mats)):
 	mats[i].attrs = {'name': names[i]}
