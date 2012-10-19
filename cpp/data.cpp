@@ -43,8 +43,10 @@ void pyne::_load_atomic_mass_map()
   H5Fclose(nuc_data_h5);
 
   // Ok now that we have the array of stucts, put it in the map
-  for(int n = 0; n < atomic_weight_length; n++)
+  for(int n = 0; n < atomic_weight_length; n++){
     atomic_mass_map[atomic_weight_array[n].nuc] = atomic_weight_array[n].mass;
+    natural_abund_map[atomic_weight_array[n].nuc] = atomic_weight_array[n].abund;
+  }
 };
 
 
@@ -108,8 +110,73 @@ double pyne::atomic_mass(std::string nuc)
 };
 
 
+/*******************************/
+/*** natural_abund functions ***/
+/*******************************/
+
+std::map<int, double> pyne::natural_abund_map = std::map<int, double>();
+
+double pyne::natural_abund(int nuc)
+{
+  // Find the nuclide's natural abundance
+  std::map<int, double>::iterator nuc_iter, nuc_end;
+
+  nuc_iter = natural_abund_map.find(nuc);
+  nuc_end = natural_abund_map.end();
+
+  // First check if we already have the nuc weight in the map
+  if (nuc_iter != nuc_end)
+    return (*nuc_iter).second;
+
+  // Next, fill up the map with values from the 
+  // nuc_data.h5, if the map is empty.
+  if (natural_abund_map.empty())
+  {
+    // Don't fail if we can't load the library
+    try
+    {
+      _load_atomic_mass_map();
+      return natural_abund(nuc);
+    }
+    catch(...){};
+  };
+
+  double na;
+  int nuc_zz = nucname::zzaaam(nuc);
+
+  // If in an excited state, return the ground
+  // state abundance...not strictly true, but good guess.
+  if (0 < nuc_zz%10)
+  {
+    na = natural_abund((nuc_zz/10)*10);
+    atomic_mass_map[nuc] = na;
+    return na;
+  };
+
+  // Finally, if none of these work, 
+  // take a best guess based on the 
+  // aaa number.
+  if((nuc/10)%1000 == 0)
+	  na = 1.0;
+  else
+      na = 0.0;
+  natural_abund_map[nuc]=na;
+  return na;
+};
 
 
+double pyne::natural_abund(char * nuc)
+{
+  int nuc_zz = nucname::zzaaam(nuc);
+  return natural_abund(nuc_zz);
+};
+
+
+double pyne::natural_abund(std::string nuc)
+{
+  int nuc_zz = nucname::zzaaam(nuc);
+  return natural_abund(nuc_zz);
+};
 
 
 

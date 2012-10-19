@@ -5,10 +5,13 @@ import tables as tb
 import numpy as np
 from pyne import nucname
 import os
+import pyne.data as pd
 
 nuc_zz = set()
 mats = []
 names = []
+elems = set()
+
 
 def starting_row(row):
 	if re.match('\d{1,3}\.  ', row[0]):
@@ -25,10 +28,12 @@ def elemental_row(row):
 		#print row
 		element = nucname.zzaaam(row[0])
 		weight_frac = row[3]
-		composition[element]=float(weight_frac)
+		composition[element] = float(weight_frac)
 		nuc_zz.add(element)
 	else:
 		pass
+
+
 		
 def ending_row(row):
 	if re.match('Total$', row[0]):
@@ -51,6 +56,10 @@ with open('materials_compendium.csv', 'r') as f:
 with tb.openFile('test.h5', 'w', filters=tb.Filters(complevel=5, complib='zlib', shuffle=True, fletcher32=False)) as f:
 	f.createArray('/', 'nuc_zz', np.array(list(nuc_zz)))
 
+for nuc in nuc_zz:
+	elem = nuc/10000
+	abund = pd.natural_abund(nuc)
+	elems.add(elem)
 
 for i in range(len(mats)):
 	mats[i].attrs = {'name': names[i]}
