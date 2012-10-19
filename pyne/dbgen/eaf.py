@@ -2,16 +2,12 @@
 the data to PyNE's HDF5 storage.
 """
 
-import os
 import re
-import shutil
-from glob import glob
 
 import numpy as np
 import tables as tb
 
 from pyne import nucname
-from pyne.utils import to_barns, failure
 from pyne.dbgen.api import BASIC_FILTERS
 
 
@@ -21,7 +17,7 @@ eaf_dtype = np.dtype([
     ('rxnum',         'S7'         ),
     ('rxstr',         'S4'         ),
     ('daughter',      'S5'         ),
-    ('xsec',          float, (175,))
+    ('xs',          float, (175,))
     ])
 
 # Regular expression for parsing an individual set of EAF data
@@ -30,10 +26,10 @@ eaf_info_pattern = \
     "(?P<iso>\d{5,7})\s*(?P<rxnum>\d{2,4})\s*(?P<ngrps>\d{1,3})" \
     + "\s*(?P<parent>[a-zA-Z]{1,2}\s{0,3}\d{1,3}[M ][12 ])" \
     + "(?P<rxstr>\(N,[\w\s]{3}\))(?P<daugh>[a-zA-Z.]{1,2}\s{0,3}\d{1,3})(.*?)"
-eaf_bin_pattern = "(?P<xsec>(\d\.\d{5}E[-+]\d{2}\s*){1,175})"
+eaf_bin_pattern = "(?P<xs>(\d\.\d{5}E[-+]\d{2}\s*){1,175})"
 
 
-def parse_eaf_xsec(build_dir):
+def parse_eaf_xs(build_dir):
     """Create numpy array by parsing EAF data
 
     Parameters
@@ -62,8 +58,8 @@ def parse_eaf_xsec(build_dir):
     for m in re.finditer(eaf_pattern, raw_data, re.DOTALL):
         md = m.groupdict()
 
-        xsec_list = [float(x) for x in md['xsec'].split()]
-        xsec_list += (175-len(xsec_list))*[0.0]
+        xs_list = [float(x) for x in md['xs'].split()]
+        xs_list += (175-len(xs_list))*[0.0]
 
         # Store information in new row of array.
         eafrow = (
@@ -71,7 +67,7 @@ def parse_eaf_xsec(build_dir):
                   md['rxnum'],
                   md['rxstr'],
                   md['daugh'],
-                  xsec_list
+                  xs_list
                   )
         
         eaf_data.append(eafrow)
@@ -94,7 +90,7 @@ def make_eaf_table(nuc_data, build_dir=""):
         Directory where EAF data is located.
     
     """
-    eaf_array = parse_eaf_xsec(build_dir)
+    eaf_array = parse_eaf_xs(build_dir)
 
     # Open the HDF5 file
     db = tb.openFile(nuc_data, 'a', filters=BASIC_FILTERS)
@@ -198,7 +194,7 @@ def make_eaf(args):
 
     #
     print "Grabbing the EAF activation data."
-    parse_eaf_xsec(build_dir)
+    parse_eaf_xs(build_dir)
 
     print "Making EAF activation data table."
     make_eaf_table(nuc_data, build_dir)
