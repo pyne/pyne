@@ -433,7 +433,6 @@ class CinderDataSource(DataSource):
         return rxdata
 
 
-
 class EAFDataSource(DataSource):
     """European Activation File cross section data source.  The relevant EAF
     cross section data must be present in the nuc-data for this data source to exist.
@@ -441,12 +440,96 @@ class EAFDataSource(DataSource):
     Parameters
     ----------
 
+    Notes
+    -----
+    EAF data does not use temperature information.
     """
 
-    def __init__(self):
-        super(EAFDataSource, self).__init__()
+    def __init__(self, **kwargs):
+        super(EAFDataSource, self).__init__(**kwargs)
 
     def _load_group_structure(self):
         """ """
         with tb.openFile(nuc_data, 'r') as f:
-            E_g = np.array(f.root.neutron.eaf_xs.E_g
+            E_g = np.array(f.root.neutron.eaf_xs.E_g)
+        self.src_group_struct = E_g
+
+    @property
+    def exists(self):
+        if self._exists is None:
+            with tb.openFile(nuc_data, 'r') as f:
+                self._exists = ('/neutron/eaf_xs' in f)
+        return self._exists
+
+    def _load_reaction(self, nuc, rx, temp=300.0):
+        """
+
+        Note: EAF data does not use temperature information (temp)
+
+        Parameters
+        ----------
+        nuc : int
+            Nuclide in zzaaam form.
+        rx : str 
+            Reaction MT # in nnnm form.
+            OR: (eventually)
+            Reaction key: 'gamma', 'alpha', 'p', etc.
+
+        See Also
+        --------
+        EAF_RX
+        EAF_RX_MAP
+
+        """
+        nuc = nucname.zzaaam(nuc)
+        rx = _munge_rx(rx)
+
+        try:
+            int(rx)
+        except ValueError:
+            msg = "the reaction '{rx}' is not valid.\n".format(rx=rx) + \
+                    "Note that EAF data only supports numeric reactions (rrrm)"
+            raise IndexError(msg)
+
+        with tb.openFile(nuc_data, 'r') as f:
+            cond = "(nuc_zz == {0}) & (rxnum == '{1}')".format(nuc, rx)
+            node = f.root.neutron.eaf_xs.eaf_xs
+            rows = np.array([row['xs'] for row in node.where(cond)])
+
+        if len(rows) == 0:
+            rxdata = None
+        elif 1 < len(rows):
+            rows = np.array(rows)
+            rxdata = rows.sum(axis=0)
+
+
+
+        return rxdata
+
+    #TODO: figure out what to do with/how to use these...
+
+    #EAF_RX = set(["", 'np *', 'a  *', 'h  *', '2p *', '3n *', 'd  *', 'np/d', 
+    #                     'na', '*', 'nd', 'g  *', '3n', 'np', 'nt', 't', 'nt *', 
+    #                     'x  *', '4n *', 'na *', 'nd *', 't  *', 'a', 'c', '2p', 'd', 
+    #                     'g', 'h', 'n', '4n', 'p', 'n  *', '2a', '2n *', 'x', '2n', 
+    #                     'nh *', 'p  *',
+    EAF_RX = set(['1020', '1021', '1022', '1030', '1031', '1032', '1040', 
+                         '1041', '1042', '1050', '1051', '1052', '1060', '1061', 
+                         '1062', '1070', '1071', '1072', '1080', '1110', '1111', 
+                         '1112', '160', '161', '162', '170', '171', '172', '180',
+                         '220', '221', '222', '240', '280', '281', '282', '290',
+                         '320', '321', '322', '330', '331', '332', '340', '341',
+                         '342', '370', '371', '40', '41', '42', '420'])
+
+    EAF_RX_MAP = { #TODO
+        'neutron': 'n',
+        'gamma': 'g', 
+        'alpha': 'a',
+        'proton': 'p',
+        'trit': 't',
+        'triton': 't',
+        'deut': 'd',
+        'deuteron': 'd',
+        }
+
+
