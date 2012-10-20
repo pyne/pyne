@@ -12,6 +12,11 @@ cdef extern from "data.h" namespace "pyne":
     double atomic_mass(char *) except +
     double atomic_mass(std.string) except +
 
+    # natural_abund functions
+    map[int, double] natural_abund_map
+    double natural_abund(int) except +
+    double natural_abund(char *) except +
+    double natural_abund(std.string) except +
 
     # Scattering length functions
     map[int, extra_types.complex_t] b_coherent_map
