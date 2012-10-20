@@ -39,6 +39,13 @@ namespace pyne
   double atomic_mass(char *);
   double atomic_mass(std::string);
 
+  /*******************************/
+  /*** natural_abund functions ***/
+  /*******************************/
+  extern std::map<int, double> natural_abund_map;
+  double natural_abund(int);
+  double natural_abund(char *);
+  double natural_abund(std::string);
 
   /***********************************/
   /*** scattering length functions ***/
