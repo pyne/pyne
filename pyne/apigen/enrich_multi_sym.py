@@ -10,7 +10,9 @@ from sympy import Symbol, pprint, latex, diff, count_ops, simplify, cse, Eq, Q, 
 from sympy.solvers import solve
 from sympy.utilities.iterables import numbered_symbols
 
-def cgen_ncomp(ncomp=3, nporder=2):
+from utils import cse_to_c
+
+def cgen_ncomp(ncomp=3, nporder=2, verbose=True):
     """Generates a C function for ncomp (int) number of components.
     The jth key component is always in the first position and the kth
     key component is always in the second.  The number of enrichment 
@@ -18,6 +20,7 @@ def cgen_ncomp(ncomp=3, nporder=2):
     order of this approximation may be set with nporder.  Only values
     of 1 or 2 are allowed.
     """
+    print "generating {0} component enrichment".format(ncomp)
     r = range(0, ncomp)
     j = 0
     k = 1
@@ -25,10 +28,12 @@ def cgen_ncomp(ncomp=3, nporder=2):
     # setup-symbols
     alpha = Symbol('alpha', positive=True, real=True)
     LpF = Symbol('LpF', positive=True, real=True)
-    NP = Symbol('NP', positive=True, real=True)    # Enrichment Stages
-    NT = Symbol('NT', positive=True, real=True)    # De-enrichment Stages
-    NP0 = Symbol('NP0', positive=True, real=True)  # Enrichment Stages Initial Guess
-    NT0 = Symbol('NT0', positive=True, real=True)  # De-enrichment Stages Initial Guess
+    NP = Symbol('NP', positive=True, real=True)   # Enrichment Stages
+    NT = Symbol('NT', positive=True, real=True)   # De-enrichment Stages
+    NP0 = Symbol('NP0', positive=True, real=True) # Enrichment Stages Initial Guess
+    NT0 = Symbol('NT0', positive=True, real=True) # De-enrichment Stages Initial Guess
+    NP1 = Symbol('NP1', positive=True, real=True) # Enrichment Stages Computed Value
+    NT1 = Symbol('NT1', positive=True, real=True) # De-enrichment Stages Computed Value
     Mstar = Symbol('Mstar', positive=True, real=True)
     MW = [Symbol('MW[{0}]'.format(i), positive=True, real=True) for i in r]
     beta = [alpha**(Mstar - MWi) for MWi in MW]
@@ -57,7 +62,7 @@ def cgen_ncomp(ncomp=3, nporder=2):
 
     prod_constraint = (xPj/xFj)*ppf - (beta[j]**(NT+1) - 1)/\
                       (beta[j]**(NT+1) - beta[j]**(-NP))
-    tail_constraint = (xTj/xFj)*(reduce(sumtwo, xT)) - (1 - beta[j]**(-NP))/\
+    tail_constraint = (xTj/xFj)*(sum(xT)) - (1 - beta[j]**(-NP))/\
                       (beta[j]**(NT+1) - beta[j]**(-NP))
     #xp_constraint = 1.0 - sum(xP)
     #xf_constraint = 1.0 - sum(xF)
@@ -79,12 +84,13 @@ def cgen_ncomp(ncomp=3, nporder=2):
     # Define the constraint equation with which to solve NP. This is chosen such to 
     # minimize the number of ops in the derivatives (and thus np_closed).  Other, 
     # more verbose possibilities are commented out.
-    #np_constraint = (xP[j]/reduce(sumtwo, xP) - xPj).xreplace({NT: nt_closed})
-    #np_constraint = (xP[j]- reduce(sumtwo, xP)*xPj).xreplace({NT: nt_closed})
-    #np_constraint = (xT[j]/reduce(sumtwo, xT) - xTj).xreplace({NT: nt_closed})
+    #np_constraint = (xP[j]/sum(xP) - xPj).xreplace({NT: nt_closed})
+    #np_constraint = (xP[j]- sum(xP)*xPj).xreplace({NT: nt_closed})
+    #np_constraint = (xT[j]/sum(xT) - xTj).xreplace({NT: nt_closed})
     np_constraint = (xT[j]- sum(xT)*xTj).xreplace({NT: nt_closed})
 
     # get closed form approximation of NP via symbolic derivatives
+    print "  order-{0} NP approximation".format(nporder)
     d0NP = np_constraint.xreplace({NP: NP0})
     d1NP = diff(np_constraint, NP, 1).xreplace({NP: NP0})
     if 1 == nporder:
@@ -102,7 +108,19 @@ def cgen_ncomp(ncomp=3, nporder=2):
         raise ValueError("nporder must be 1 or 2")
 
     # generate cse for writing out
-    cse_stages = cse([Eq(NT, nt_closed), Eq(NP, np_closed)], numbered_symbols('n'))
-    cse_others = cse([Eq(LpF, LoverF)] + [Eq(*z) for z in zip(xPi, xP)] + \
-                     [Eq(*z) for z in zip(xTi, xT)], numbered_symbols('g'))
+    print "  minimizing ops by eliminating common sub-expressions"
+    exprstages = [Eq(NT1, nt_closed), Eq(NP1, np_closed)]
+    cse_stages = cse(exprstages, numbered_symbols('n'))
+    exprothers = [Eq(LpF, LoverF)] + [Eq(*z) for z in zip(xPi, xP)] + \
+                                     [Eq(*z) for z in zip(xTi, xT)]
+    exprothers = [e.xreplace({NP: NP1, NT: NT1}) for e in exprothers]
+    cse_others = cse(exprothers, numbered_symbols('g'))
 
+    # create function body
+    ccode = cse_to_c(*cse_stages)
+    ccode += cse_to_c(*cse_others)
+    return ccode
+
+
+if __name__ == '__main__':
+    print cgen_ncomp()
