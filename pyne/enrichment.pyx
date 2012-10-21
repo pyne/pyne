@@ -400,8 +400,8 @@ def solve_symbolic(Cascade orig_casc):
     return casc
 
 
-def ltot_per_feed(Cascade orig_casc, double tolerance=1.0E-7, int max_iter=100):
-    """ltot_per_feed(orig_casc, tolerance=1.0E-7, max_iter=100)
+def solve_numeric(Cascade orig_casc, double tolerance=1.0E-7, int max_iter=100):
+    """solve_numeric(orig_casc, tolerance=1.0E-7, max_iter=100)
     Calculates the total flow rate (:math:`L_t`) over the feed flow 
     rate (:math:`F`).
 
@@ -423,13 +423,14 @@ def ltot_per_feed(Cascade orig_casc, double tolerance=1.0E-7, int max_iter=100):
 
     """
     cdef Cascade casc = Cascade()
-    cdef cpp_enrichment.Cascade ccasc = cpp_enrichment.ltot_per_feed(orig_casc._inst[0], tolerance, max_iter)
+    cdef cpp_enrichment.Cascade ccasc = cpp_enrichment.solve_numeric(orig_casc._inst[0], tolerance, max_iter)
     casc._inst[0] = ccasc
     return casc
 
 
-def multicomponent(Cascade orig_casc, double tolerance=1.0E-7, int max_iter=100):
-    """multicomponent(orig_casc, tolerance=1.0E-7, max_iter=100)
+def multicomponent(Cascade orig_casc, char * solver="symbolic", 
+                   double tolerance=1.0E-7, int max_iter=100):
+    """multicomponent(orig_casc, solver="symbolic", tolerance=1.0E-7, max_iter=100)
     Calculates the optimal value of Mstar by minimzing the seperative power.
     The minimizing the seperative power is equivelent to minimizing :math:`L_t/F`,
     or the total flow rate for the cascade divided by the feed flow rate. 
@@ -441,6 +442,9 @@ def multicomponent(Cascade orig_casc, double tolerance=1.0E-7, int max_iter=100)
     ----------
     orig_casc : Cascade
         A cascade to optimize.
+    solver : str, optional
+        Flag for underlying cascade solver function to use. Current options 
+        are either "symbolic" or "numeric".
     tolerance : float, optional
         Numerical tolerance for underlying solvers, default=1E-7.
     max_iter : int, optional
@@ -455,6 +459,8 @@ def multicomponent(Cascade orig_casc, double tolerance=1.0E-7, int max_iter=100)
 
     """
     cdef Cascade casc = Cascade()
-    cdef cpp_enrichment.Cascade ccasc = cpp_enrichment.multicomponent(orig_casc._inst[0], tolerance, max_iter)
+    cdef std.string strsolver = std.string(solver)
+    cdef cpp_enrichment.Cascade ccasc = cpp_enrichment.multicomponent(\
+                                    orig_casc._inst[0], strsolver, tolerance, max_iter)
     casc._inst[0] = ccasc
     return casc
