@@ -163,7 +163,7 @@ _func_header = \
 """
 
 _func_footer = """ 
-  }
+  };
 
   int i = 2;
   casc.mat_prod.comp[j] = xP[0];
@@ -182,6 +182,9 @@ _func_footer = """
   casc.mat_prod.norm_comp();
   casc.mat_tail.norm_comp();
 
+  casc.N = NP1;
+  casc.M = NT1;
+
   delete [] MW;
   delete [] xP;
   delete [] xF;
@@ -195,10 +198,14 @@ def cgen_func(max_ncomp=40):
     """Generate C function to compute multicoponent enrichment cascades for 
     a number of components between 3 and max_ncomp. 
     """
+    ccode = _func_header
     ncomps = range(3, max_ncomp+1)
     for ncomp in ncomps:
-        ncode = cgen_ncomp(ncomp)
-
+        ccode += "    case {0}:\n".format(ncomp)
+        ccode += cgen_ncomp(ncomp)
+        ccode += "      break;"
+    ccode += _func_footer
+    return ccode
 
 if __name__ == '__main__':
     print cgen_func(3)
