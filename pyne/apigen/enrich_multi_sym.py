@@ -29,8 +29,8 @@ def cgen_ncomp(ncomp=3, nporder=2, verbose=True, debug=False):
     # setup-symbols
     alpha = Symbol('alpha', positive=True, real=True)
     LpF = Symbol('LpF', positive=True, real=True)
-    PpF = Symbol('TpF', positive=True, real=True)
-    TpF = Symbol('PpF', positive=True, real=True)
+    PpF = Symbol('PpF', positive=True, real=True)
+    TpF = Symbol('TpF', positive=True, real=True)
     SWUpF = Symbol('SWUpF', positive=True, real=True)
     SWUpP = Symbol('SWUpP', positive=True, real=True)
     NP = Symbol('NP', positive=True, real=True)   # Enrichment Stages
@@ -50,7 +50,7 @@ def cgen_ncomp(ncomp=3, nporder=2, verbose=True, debug=False):
     xFj = xF[j]
     xTj = Symbol('xTj', positive=True, real=True)
     ppf = (xFj - xTj)/(xPj - xTj)
-    tpf = (xFj - xPj)/(xTj - xFj)
+    tpf = (xFj - xPj)/(xTj - xPj)
 
     xP = [((ppf*xF[i]*(beta[i]**(NT+1) - 1))/(beta[i]**(NT+1) - beta[i]**(-NP))) \
                                                                             for i in r]
