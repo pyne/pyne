@@ -11,9 +11,9 @@ from sympy import Symbol, pprint, latex, diff, count_ops, simplify, cse, Eq, Q, 
 from sympy.solvers import solve
 from sympy.utilities.iterables import numbered_symbols
 
-from pyne.apigen.utils import cse_to_c
+from utils import cse_to_c
 
-def cgen_ncomp(ncomp=3, nporder=2, verbose=True):
+def cgen_ncomp(ncomp=3, nporder=2, verbose=True, debug=False):
     """Generates a C function for ncomp (int) number of components.
     The jth key component is always in the first position and the kth
     key component is always in the second.  The number of enrichment 
@@ -29,6 +29,10 @@ def cgen_ncomp(ncomp=3, nporder=2, verbose=True):
     # setup-symbols
     alpha = Symbol('alpha', positive=True, real=True)
     LpF = Symbol('LpF', positive=True, real=True)
+    PpF = Symbol('TpF', positive=True, real=True)
+    TpF = Symbol('PpF', positive=True, real=True)
+    SWUpF = Symbol('SWUpF', positive=True, real=True)
+    SWUpP = Symbol('SWUpP', positive=True, real=True)
     NP = Symbol('NP', positive=True, real=True)   # Enrichment Stages
     NT = Symbol('NT', positive=True, real=True)   # De-enrichment Stages
     NP0 = Symbol('NP0', positive=True, real=True) # Enrichment Stages Initial Guess
@@ -60,6 +64,8 @@ def cgen_ncomp(ncomp=3, nporder=2, verbose=True):
     numer = [ppf*xP[i]*log(rprod) + tpf*xT[i]*log(rtail) - xF[i]*log(rfeed) for i in r]
     denom = [log(beta[j]) * ((beta[i] - 1.0)/(beta[i] + 1.0)) for i in r]
     LoverF = sum([n/d for n, d in zip(numer, denom)])
+    SWUoverF = -1.0 * sum(numer)
+    SWUoverP = SWUoverF / ppf
 
     prod_constraint = (xPj/xFj)*ppf - (beta[j]**(NT+1) - 1)/\
                       (beta[j]**(NT+1) - beta[j]**(-NP))
@@ -75,12 +81,13 @@ def cgen_ncomp(ncomp=3, nporder=2, verbose=True):
     # However, this is NT(NP,...) rewritten (by hand) to minimize the number of NP 
     # and M* instances in the expression.  Luckily this is only depends on the key 
     # component and remains general no matter the number of components.
-    nt_closed = (-MW[j]*log(alpha) + Mstar*log(alpha) + log(xTj) + log(xF[j] - xPj) - \
-        log(alpha**((MW[j]-Mstar)*NP)*(xF[j]*xPj - xPj*xTj)/(xF[j]*xTj - xF[j]*xPj) + \
-        1) - log(xF[j]*xTj - xF[j]*xPj))/((MW[j] - Mstar)*log(alpha))
+    nt_closed = (-MW[0]*log(alpha) + Mstar*log(alpha) + log(xTj) + log((-1.0 + xPj/\
+        xF[0])/(xPj - xTj)) - log(alpha**(NP*(MW[0] - Mstar))*(xF[0]*xPj - xPj*xTj)/\
+        (-xF[0]*xPj + xF[0]*xTj) + 1))/((MW[0] - Mstar)*log(alpha))
 
     # new expression for normalized flow rate
-    loverf = LoverF.xreplace({NT: nt_closed})
+    # NOTE: not needed, solved below
+    #loverf = LoverF.xreplace({NT: nt_closed})
 
     # Define the constraint equation with which to solve NP. This is chosen such to 
     # minimize the number of ops in the derivatives (and thus np_closed).  Other, 
@@ -110,16 +117,17 @@ def cgen_ncomp(ncomp=3, nporder=2, verbose=True):
 
     # generate cse for writing out
     print "  minimizing ops by eliminating common sub-expressions"
-    exprstages = [Eq(NT1, nt_closed), Eq(NP1, np_closed)]
+    exprstages = [Eq(NP1, np_closed), Eq(NT1, nt_closed).xreplace({NP: NP1})]
     cse_stages = cse(exprstages, numbered_symbols('n'))
-    exprothers = [Eq(LpF, LoverF)] + [Eq(*z) for z in zip(xPi, xP)] + \
-                                     [Eq(*z) for z in zip(xTi, xT)]
+    exprothers = [Eq(LpF, LoverF), Eq(PpF, ppf), Eq(TpF, tpf), 
+                  Eq(SWUpF, SWUoverF), Eq(SWUpP, SWUoverP)] + \
+                 [Eq(*z) for z in zip(xPi, xP)] + [Eq(*z) for z in zip(xTi, xT)]
     exprothers = [e.xreplace({NP: NP1, NT: NT1}) for e in exprothers]
     cse_others = cse(exprothers, numbered_symbols('g'))
 
     # create function body
-    ccode = cse_to_c(*cse_stages, indent=6)
-    ccode += cse_to_c(*cse_others, indent=6)
+    ccode = cse_to_c(*cse_stages, indent=6, debug=debug)
+    ccode += cse_to_c(*cse_others, indent=6, debug=debug)
     return ccode
 
 
@@ -131,13 +139,13 @@ _func_header = \
   int k = casc.k;
   double alpha = casc.alpha;
   double NP0 = casc.N;
-  double NT0 = casc.M;
-  double Mstar = casc.Mstar
+  //double NT0 = casc.M;
+  double Mstar = casc.Mstar;
   double xPj = casc.x_prod_j;
-  double xFj = casc.x_feed_j;
+  //double xFj = casc.x_feed_j;
   double xTj = casc.x_tail_j;
-  int ncomp = casc.mat_feed.size();
-  double LpF, NP1, NT1;
+  int ncomp = casc.mat_feed.comp.size();
+  double LpF, PpF, TpF, SWUpF, SWUpP, NP1, NT1;
   double * MW = new double [ncomp];
   double * xP = new double [ncomp];
   double * xF = new double [ncomp];
@@ -166,7 +174,7 @@ _func_header = \
 _func_footer = """ 
   };
 
-  int i = 2;
+  i = 2;
   casc.mat_prod.comp[j] = xP[0];
   casc.mat_prod.comp[k] = xP[1];
   casc.mat_tail.comp[j] = xT[0];
@@ -182,9 +190,14 @@ _func_footer = """
   };
   casc.mat_prod.norm_comp();
   casc.mat_tail.norm_comp();
+  casc.mat_prod.mass = PpF;
+  casc.mat_tail.mass = TpF;
 
   casc.N = NP1;
   casc.M = NT1;
+  casc.l_t_per_feed = LpF;
+  casc.swu_per_feed = SWUpF;
+  casc.swu_per_prod = SWUpP;
 
   delete [] MW;
   delete [] xP;
@@ -195,7 +208,7 @@ _func_footer = """
 };
 """
 
-def cgen_func(max_ncomp=40):
+def cgen_func(max_ncomp=40, debug=False):
     """Generate C function to compute multicoponent enrichment cascades for 
     a number of components between 3 and max_ncomp. 
     """
@@ -203,7 +216,7 @@ def cgen_func(max_ncomp=40):
     ncomps = range(3, max_ncomp+1)
     for ncomp in ncomps:
         ccode += "    case {0}:\n".format(ncomp)
-        ccode += cgen_ncomp(ncomp)
+        ccode += cgen_ncomp(ncomp, debug=debug)
         ccode += "      break;"
     ccode += _func_footer
     return ccode
@@ -219,12 +232,7 @@ _header_file = """
 #define _PYNE_ENRICHMENT_SYMBOLIC_
 
 #include <math.h>
-
-#include "pyne.h"
-#include "nucname.h"
-#include "data.h"
-#include "material.h"
-#include "enrichment.h"
+#include "enrichment_cascade.h"
 
 namespace pyne {
 namespace enrichment {
@@ -249,16 +257,16 @@ _source_file_header_template = """
 
 """
 
-def cgen_source_file(filename="temp", max_ncomp=40):
+def cgen_source_file(filename="temp", max_ncomp=40, debug=False):
     """ Generates a valid C/C++ source file for multicomponent enrichment cascades.
     """
     ccode = _source_file_header_template.format(filename=os.path.split(filename)[-1])
-    ccode += cgen_func(max_ncomp)
+    ccode += cgen_func(max_ncomp, debug=debug)
     return ccode
 
 
 
-def cgen_file(filename="temp", lang='C++', max_ncomp=40):
+def cgen_file(filename="temp", lang='C++', max_ncomp=40, debug=False):
     """Generate C/C++ header and source file to compute multicoponent enrichment 
     cascades for a number of components between 3 and max_ncomp. The filename 
     argument should not end in extension ('.h', '.c', or '.cpp') as it will be 
@@ -266,7 +274,7 @@ def cgen_file(filename="temp", lang='C++', max_ncomp=40):
     """
     hfname = filename + '.h'
     sfname = filename + '.' + {'C': 'c', 'C++': 'cpp', 'CPP': 'cpp'}[lang.upper()]
-    ccode = cgen_source_file(filename, max_ncomp)
+    ccode = cgen_source_file(filename, max_ncomp, debug=debug)
     with open(hfname, 'w') as f:
         f.write(_header_file)
     with open(sfname, 'w') as f:

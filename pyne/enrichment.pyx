@@ -377,6 +377,29 @@ def alphastar_i(double alpha, double Mstar, double M_i):
     return cpp_enrichment.alphastar_i(alpha, Mstar, M_i)
 
 
+def solve_symbolic(Cascade orig_casc):
+    """solve_symbolic(orig_casc)
+    Computes the cascade parameters based on a given initial state.
+
+    Parameters
+    ----------
+    orig_casc : Cascade
+        A cascade to compute the l_t_per_feed, swu_per_feed, swu_per_prod,
+        mat_prod, and mat_tail attributes for.
+
+    Returns
+    -------
+    casc : Cascade
+        A new cascade object, copied from the original, with the appropriate
+        attributes computed.
+
+    """
+    cdef Cascade casc = Cascade()
+    cdef cpp_enrichment.Cascade ccasc = cpp_enrichment.solve_symbolic(orig_casc._inst[0])
+    casc._inst[0] = ccasc
+    return casc
+
+
 def ltot_per_feed(Cascade orig_casc, double tolerance=1.0E-7, int max_iter=100):
     """ltot_per_feed(orig_casc, tolerance=1.0E-7, max_iter=100)
     Calculates the total flow rate (:math:`L_t`) over the feed flow 

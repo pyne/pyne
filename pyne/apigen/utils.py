@@ -4,7 +4,7 @@ import re
 
 from sympy.utilities.codegen import codegen
 
-def cse_to_c(replacements, reduced_exprs, indent=2):
+def cse_to_c(replacements, reduced_exprs, indent=2, debug=False):
     """Converts the return value sympy.cse() to a single C code snippet.
     """
     ccode = ""
@@ -26,6 +26,8 @@ def cse_to_c(replacements, reduced_exprs, indent=2):
             genexpr = rtn_pattern.search(genexpr).group(1)
         genline = repline_template.format(ind=ws, name=repname, expr=genexpr)
         ccode += genline
+        if debug:
+            ccode += ws + 'std::cout << "{0} = " << {0} << "\\n";\n'.format(repname)
 
     for redexpr in reduced_exprs:
         gencode = codegen(("redname", redexpr), "C", "temp", header=False, empty=False)
@@ -35,6 +37,8 @@ def cse_to_c(replacements, reduced_exprs, indent=2):
             genname = m.group(1)
             genexpr = m.group(2)
             genline = redline_template.format(ind=ws, name=genname, expr=genexpr)
+            if debug:
+                ccode += ws+'std::cout << "{0} = " << {0} << "\\n";\n'.format(genname)
         else:
             genexpr = rtn_pattern.search(genexpr).group(1)
             genline = redrtnline_template.format(ind=ws, expr=genexpr)
