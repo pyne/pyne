@@ -10,7 +10,7 @@ from sympy import Symbol, pprint, latex, diff, count_ops, simplify, cse, Eq, Q, 
 from sympy.solvers import solve
 from sympy.utilities.iterables import numbered_symbols
 
-from utils import cse_to_c
+from pyne.apigen.utils import cse_to_c
 
 def cgen_ncomp(ncomp=3, nporder=2, verbose=True):
     """Generates a C function for ncomp (int) number of components.
@@ -117,10 +117,88 @@ def cgen_ncomp(ncomp=3, nporder=2, verbose=True):
     cse_others = cse(exprothers, numbered_symbols('g'))
 
     # create function body
-    ccode = cse_to_c(*cse_stages)
-    ccode += cse_to_c(*cse_others)
+    ccode = cse_to_c(*cse_stages, indent=6)
+    ccode += cse_to_c(*cse_others, indent=6)
     return ccode
 
 
+_func_header = \
+"""pyne::enrichment::Cascade pyne::enrichment::solve_symbolic(pyne::enrichment::Cascade & orig_casc)
+{
+  pyne::enrichment::Cascade casc = orig_casc;
+  int j = casc.j;
+  int k = casc.k;
+  double alpha = casc.alpha;
+  double NP0 = casc.N;
+  double NT0 = casc.M;
+  double Mstar = casc.Mstar
+  double xPj = casc.x_prod_j;
+  double xFj = casc.x_feed_j;
+  double xTj = casc.x_tail_j;
+  int ncomp = casc.mat_feed.size();
+  double LpF, NP1, NT1;
+  double * MW = new double [ncomp];
+  double * xP = new double [ncomp];
+  double * xF = new double [ncomp];
+  double * xT = new double [ncomp];
+
+  int nuc;
+  int i = 2;
+  MW[0] = pyne::atomic_mass(j);
+  MW[1] = pyne::atomic_mass(k);
+  xF[0] = casc.mat_feed.comp[j];
+  xF[1] = casc.mat_feed.comp[k];
+  for(pyne::comp_iter ci = casc.mat_feed.comp.begin(); ci != casc.mat_feed.comp.end(); ci++)
+  {
+    nuc = (*ci).first;
+    if (nuc == j || nuc == k)
+        continue;
+    MW[i] = pyne::atomic_mass(nuc);
+    xF[i] = (*ci).second;
+    i++;
+  };
+
+  switch (ncomp)
+  {
+"""
+
+_func_footer = """ 
+  }
+
+  int i = 2;
+  casc.mat_prod.comp[j] = xP[0];
+  casc.mat_prod.comp[k] = xP[1];
+  casc.mat_tail.comp[j] = xT[0];
+  casc.mat_tail.comp[k] = xT[1];
+  for(pyne::comp_iter ci = casc.mat_feed.comp.begin(); ci != casc.mat_feed.comp.end(); ci++)
+  {
+    nuc = (*ci).first;
+    if (nuc == j || nuc == k)
+        continue;
+    casc.mat_prod.comp[nuc] = xP[i];
+    casc.mat_tail.comp[nuc] = xT[i];
+    i++;
+  };
+  casc.mat_prod.norm_comp();
+  casc.mat_tail.norm_comp();
+
+  delete [] MW;
+  delete [] xP;
+  delete [] xF;
+  delete [] xT;
+
+  return casc;
+}
+"""
+
+def cgen_func(max_ncomp=40):
+    """Generate C function to compute multicoponent enrichment cascades for 
+    a number of components between 3 and max_ncomp. 
+    """
+    ncomps = range(3, max_ncomp+1)
+    for ncomp in ncomps:
+        ncode = cgen_ncomp(ncomp)
+
+
 if __name__ == '__main__':
-    print cgen_ncomp()
+    print cgen_func(3)
