@@ -5,6 +5,7 @@ from being used with infinities.  For a work around see [1].
 1. https://groups.google.com/forum/#!msg/sympy/YL1R_hR6OKQ/axKrCsCSMQsJ
 """
 import os
+import time
 
 from sympy import Symbol, pprint, latex, diff, count_ops, simplify, cse, Eq, Q, \
     log, logcombine, Abs, exp, sqrt, series, separate, powsimp, collect, expand
@@ -21,6 +22,7 @@ def cgen_ncomp(ncomp=3, nporder=2, verbose=True, debug=False):
     order of this approximation may be set with nporder.  Only values
     of 1 or 2 are allowed.
     """
+    start_time = time.time()
     print "generating {0} component enrichment".format(ncomp)
     r = range(0, ncomp)
     j = 0
@@ -124,10 +126,15 @@ def cgen_ncomp(ncomp=3, nporder=2, verbose=True, debug=False):
                  [Eq(*z) for z in zip(xPi, xP)] + [Eq(*z) for z in zip(xTi, xT)]
     exprothers = [e.xreplace({NP: NP1, NT: NT1}) for e in exprothers]
     cse_others = cse(exprothers, numbered_symbols('g'))
+    exprops = count_ops(exprstages + exprothers)
+    cse_ops = count_ops(cse_stages + cse_others)
+    print "    reduced {0} ops to {1}".format(exprops, cse_ops)
 
     # create function body
     ccode = cse_to_c(*cse_stages, indent=6, debug=debug)
     ccode += cse_to_c(*cse_others, indent=6, debug=debug)
+
+    print "  completed in {0:.3G} s".format(time.time() - start_time)
     return ccode
 
 
