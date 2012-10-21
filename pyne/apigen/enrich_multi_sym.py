@@ -4,6 +4,7 @@ from being used with infinities.  For a work around see [1].
 
 1. https://groups.google.com/forum/#!msg/sympy/YL1R_hR6OKQ/axKrCsCSMQsJ
 """
+import os
 
 from sympy import Symbol, pprint, latex, diff, count_ops, simplify, cse, Eq, Q, \
     log, logcombine, Abs, exp, sqrt, series, separate, powsimp, collect, expand
@@ -191,7 +192,7 @@ _func_footer = """
   delete [] xT;
 
   return casc;
-}
+};
 """
 
 def cgen_func(max_ncomp=40):
@@ -207,5 +208,69 @@ def cgen_func(max_ncomp=40):
     ccode += _func_footer
     return ccode
 
+_header_file = """ 
+/*********************************************************/
+/***            Symbolic Enrichment Functions          ***/
+/*** WARNING: This file is auto-generated.             ***/
+/***                  DO NOT MODIFY!!!                 ***/
+/*********************************************************/
+
+#if !defined(_PYNE_ENRICHMENT_SYMBOLIC_)
+#define _PYNE_ENRICHMENT_SYMBOLIC_
+
+#include <math.h>
+
+#include "pyne.h"
+#include "nucname.h"
+#include "data.h"
+#include "material.h"
+#include "enrichment.h"
+
+namespace pyne {
+namespace enrichment {
+
+  Cascade solve_symbolic(Cascade &);
+
+// end enrichment
+};
+// end pyne
+};
+
+#endif
+"""
+
+_source_file_header_template = """ 
+/*********************************************************/
+/***            Symbolic Enrichment Functions          ***/
+/*** WARNING: This file is auto-generated.             ***/
+/***                  DO NOT MODIFY!!!                 ***/
+/*********************************************************/
+#include "{filename}.h"
+
+"""
+
+def cgen_source_file(filename="temp", max_ncomp=40):
+    """ Generates a valid C/C++ source file for multicomponent enrichment cascades.
+    """
+    ccode = _source_file_header_template.format(filename=os.path.split(filename)[-1])
+    ccode += cgen_func(max_ncomp)
+    return ccode
+
+
+
+def cgen_file(filename="temp", lang='C++', max_ncomp=40):
+    """Generate C/C++ header and source file to compute multicoponent enrichment 
+    cascades for a number of components between 3 and max_ncomp. The filename 
+    argument should not end in extension ('.h', '.c', or '.cpp') as it will be 
+    appended automatically.
+    """
+    hfname = filename + '.h'
+    sfname = filename + '.' + {'C': 'c', 'C++': 'cpp', 'CPP': 'cpp'}[lang.upper()]
+    ccode = cgen_source_file(filename, max_ncomp)
+    with open(hfname, 'w') as f:
+        f.write(_header_file)
+    with open(sfname, 'w') as f:
+        f.write(ccode)
+
 if __name__ == '__main__':
-    print cgen_func(3)
+    cgen_file(max_ncomp=3)
