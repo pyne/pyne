@@ -52,9 +52,9 @@ def cgen_ncomp(ncomp=3, nporder=2, verbose=True, debug=False):
     ppf = (xFj - xTj)/(xPj - xTj)
     tpf = (xFj - xPj)/(xTj - xPj)
 
-    xP = [((ppf*xF[i]*(beta[i]**(NT+1) - 1))/(beta[i]**(NT+1) - beta[i]**(-NP))) \
+    xP = [(((xF[i]/ppf)*(beta[i]**(NT+1) - 1))/(beta[i]**(NT+1) - beta[i]**(-NP))) \
                                                                             for i in r]
-    xT = [((tpf*xF[i]*(1 - beta[i]**(-NP)))/(beta[i]**(NT+1) - beta[i]**(-NP))) \
+    xT = [(((xF[i]/tpf)*(1 - beta[i]**(-NP)))/(beta[i]**(NT+1) - beta[i]**(-NP))) \
                                                                             for i in r]
     rfeed = xFj / xF[k]
     rprod = xPj / xP[k]
@@ -95,7 +95,7 @@ def cgen_ncomp(ncomp=3, nporder=2, verbose=True, debug=False):
     #np_constraint = (xP[j]/sum(xP) - xPj).xreplace({NT: nt_closed})
     #np_constraint = (xP[j]- sum(xP)*xPj).xreplace({NT: nt_closed})
     #np_constraint = (xT[j]/sum(xT) - xTj).xreplace({NT: nt_closed})
-    np_constraint = (xT[j]- sum(xT)*xTj).xreplace({NT: nt_closed})
+    np_constraint = (xT[j] - sum(xT)*xTj).xreplace({NT: nt_closed})
 
     # get closed form approximation of NP via symbolic derivatives
     print "  order-{0} NP approximation".format(nporder)
@@ -188,6 +188,7 @@ _func_footer = """
     casc.mat_tail.comp[nuc] = xT[i];
     i++;
   };
+  // must renormalize to eliminate numerical error
   casc.mat_prod.norm_comp();
   casc.mat_tail.norm_comp();
   casc.mat_prod.mass = PpF;
