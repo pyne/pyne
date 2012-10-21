@@ -2,7 +2,7 @@
 from pyne cimport std
 from pyne cimport cpp_material
 
-cdef extern from "enrichment.h" namespace "pyne::enrichment":
+cdef extern from "enrichment_cascade.h" namespace "pyne::enrichment":
 
     cdef cppclass Cascade:
         # Constructors
@@ -31,6 +31,12 @@ cdef extern from "enrichment.h" namespace "pyne::enrichment":
         double swu_per_prod
 
         void _reset_xjs() except +
+
+cdef extern from "enrichment_symbolic.h" namespace "pyne::enrichment":
+
+    Cascade solve_symbolic(Cascade &) except +
+
+cdef extern from "enrichment.h" namespace "pyne::enrichment":
 
     Cascade _fill_default_uranium_cascade() except +
     extern Cascade default_uranium_cascade

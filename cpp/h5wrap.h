@@ -335,7 +335,7 @@ namespace h5wrap
   /********************************/
   /*** Support for complex data ***/
   /********************************/
-  hid_t _get_PYTABLES_COMPLEX128()
+  inline hid_t _get_PYTABLES_COMPLEX128()
   {
     hid_t ct = H5Tcreate(H5T_COMPOUND, sizeof(extra_types::complex_t));
     H5Tinsert(ct, "r", HOFFSET(extra_types::complex_t, re), H5T_NATIVE_DOUBLE);
@@ -343,11 +343,11 @@ namespace h5wrap
     return ct;
   };
 
-  hid_t PYTABLES_COMPLEX128 = _get_PYTABLES_COMPLEX128();
+  static hid_t PYTABLES_COMPLEX128 = _get_PYTABLES_COMPLEX128();
 
 
   /*** Helper functions ***/
-  bool path_exists(hid_t h5file, std::string path)
+  inline bool path_exists(hid_t h5file, std::string path)
   {
     bool rtn = false;
     hid_t ds = H5Dopen2(h5file, path.c_str(), H5P_DEFAULT);
