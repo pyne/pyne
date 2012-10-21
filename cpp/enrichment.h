@@ -24,8 +24,9 @@ namespace enrichment {
   Cascade _norm_comp_secant(Cascade &, double=1.0E-7, int=100);
   double _deltaU_i_OverG(Cascade &, int);
 
-  Cascade ltot_per_feed(Cascade &, double=1.0E-7, int=100);
-  Cascade multicomponent(Cascade &, double=1.0E-7, int=100);
+  Cascade solve_numeric(Cascade &, double=1.0E-7, int=100);
+  Cascade multicomponent(Cascade &, char *, double=1.0E-7, int=100);
+  Cascade multicomponent(Cascade &, std::string="symbolic", double=1.0E-7, int=100);
 
   /******************/
   /*** Exceptions ***/

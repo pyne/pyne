@@ -52,5 +52,14 @@ cdef extern from "enrichment.h" namespace "pyne::enrichment":
     Cascade _norm_comp_secant(Cascade &, double, int) except +
     double _deltaU_i_OverG(Cascade &, int) except +
 
-    Cascade ltot_per_feed(Cascade &, double, int) except +
-    Cascade multicomponent(Cascade &, double, int) except +
+    Cascade solve_numeric(Cascade &) except +
+    Cascade solve_numeric(Cascade &, double) except +
+    Cascade solve_numeric(Cascade &, double, int) except +
+
+    Cascade multicomponent(Cascade &, char *) except +
+    Cascade multicomponent(Cascade &, char *, double) except +
+    Cascade multicomponent(Cascade &, char *, double, int) except +
+    Cascade multicomponent(Cascade &) except +
+    Cascade multicomponent(Cascade &, std.string) except +
+    Cascade multicomponent(Cascade &, std.string, double) except +
+    Cascade multicomponent(Cascade &, std.string, double, int) except +
