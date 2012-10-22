@@ -147,17 +147,19 @@ def cgen_ncomp(ncomp=3, nporder=2, aggstat=False, debug=False):
     stat = _aggstatus(stat, msg, aggstat)
 
     # create function body
-    ccode = cse_to_c(*cse_stages, indent=6, debug=debug)
-    ccode += cse_to_c(*cse_others, indent=6, debug=debug)
+    ccode, repnames = cse_to_c(*cse_stages, indent=6, debug=debug)
+    ccode_others, repnames_others = cse_to_c(*cse_others, indent=6, debug=debug)
+    ccode += ccode_others
+    repnames |= repnames_others
 
     msg = "  completed in {0:.3G} s".format(time.time() - start_time)
     stat = _aggstatus(stat, msg, aggstat)
     if aggstat:
         print stat
-    return ccode
+    return ccode, repnames
 
 
-_func_header = \
+_func_header1 = \
 """pyne::enrichment::Cascade pyne::enrichment::solve_symbolic(pyne::enrichment::Cascade & orig_casc)
 {
   pyne::enrichment::Cascade casc = orig_casc;
@@ -171,12 +173,16 @@ _func_header = \
   //double xFj = casc.x_feed_j;
   double xTj = casc.x_tail_j;
   int ncomp = casc.mat_feed.comp.size();
-  double LpF, PpF, TpF, SWUpF, SWUpP, NP1, NT1;
+  double LpF = -1.0, PpF = -1.0, TpF = -1.0, 
+         SWUpF = -1.0, SWUpP = -1.0, 
+         NP1 = -1.0, NT1 = -1.0;
   double * MW = new double [ncomp];
   double * xP = new double [ncomp];
   double * xF = new double [ncomp];
   double * xT = new double [ncomp];
+"""
 
+_func_header2 = """ 
   int nuc;
   int i = 2;
   MW[0] = pyne::atomic_mass(j);
@@ -243,21 +249,31 @@ def cgen_func(max_ncomp=40, debug=False):
     """Generate C function to compute multicoponent enrichment cascades for 
     a number of components between 3 and max_ncomp. 
     """
-    ccode = _func_header
     ncomps = range(3, max_ncomp+1)
     if 1 == NPROCS:
         ncomp_kwargs = [{'ncomp': n, 'debug': debug, 'aggstat': False} for n in ncomps]
-        ccode_ncomps = map(_mapable_cgen_ncomp, ncomp_kwargs)
+        cgened = map(_mapable_cgen_ncomp, ncomp_kwargs)
     elif 1 < NPROCS:
         ncomp_kwargs = [{'ncomp': n, 'debug': debug, 'aggstat': True} for n in ncomps]
         pool = multiprocessing.Pool(NPROCS)
-        ccode_ncomps = pool.map(_mapable_cgen_ncomp, ncomp_kwargs)
+        cgened = pool.map(_mapable_cgen_ncomp, ncomp_kwargs)
     else:
         raise ValueError("NPROCS must be greater than or equal to 1")
-    for ncomp, ccode_ncomp in zip(ncomps, ccode_ncomps):
-        ccode += "    case {0}:\n".format(ncomp)
-        ccode += ccode_ncomp
-        ccode += "      break;\n"
+    cases = ''
+    repnames = set()
+    for ncomp, (ccode_ncomp, repnames_ncomp) in zip(ncomps, cgened):
+        repnames |= repnames_ncomp
+        cases += "    case {0}:\n".format(ncomp)
+        cases += ccode_ncomp
+        cases += "      break;\n"
+    repdeclare = "  double " + repnames.pop() + " = 0.0,\n"
+    repdectemp = "         {0} = 0.0"
+    repdeclare += ",\n".join([repdectemp.format(r) for r in repnames])
+    repdeclare += ";\n"
+    ccode  = _func_header1
+    ccode += repdeclare
+    ccode += _func_header2
+    ccode += cases
     ccode += _func_footer
     return ccode
 
