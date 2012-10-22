@@ -1,0 +1,311 @@
+import os
+
+import numpy as np
+import tables as tb
+
+from nose.tools import assert_equal, assert_not_equal, assert_almost_equal, \
+                       assert_true
+from numpy.testing import assert_array_equal, assert_array_almost_equal
+
+from pyne.xs import data_source
+from pyne.pyne_config import pyne_conf
+
+nuc_data = pyne_conf.NUC_DATA_PATH
+
+# These tests require nuc_data
+if not os.path.isfile(nuc_data):
+    raise RuntimeError("Tests require nuc_data.h5.  Please run nuc_data_make.")
+
+simpleds = data_source.SimpleDataSource()
+cinderds = data_source.CinderDataSource()
+
+
+def test_cinder_E_g():
+    if not cinderds.exists:
+        return
+    with tb.openFile(nuc_data, 'r') as f:
+        E_g = np.array(f.root.neutron.cinder_xs.E_g)
+    assert_array_equal(E_g, cinderds.src_group_struct)
+
+
+def test_cinder_sigma_f():
+    if not cinderds.exists:
+        return
+    with tb.openFile(nuc_data, 'r') as f:
+        sigma_f_n_U235 = np.array(f.root.neutron.cinder_xs.fission[28]['xs'])
+    obs = cinderds.reaction('U235', 'f')
+    assert_array_equal(sigma_f_n_U235, obs)
+    assert_equal(id(obs), id(cinderds.reaction('U235', 'f')))
+    assert_not_equal(id(obs), id(cinderds.reaction(922350, 'f')))
+
+
+def test_cinder_sigma_a():
+    if not cinderds.exists:
+        return
+    with tb.openFile(nuc_data, 'r') as f:
+        sigma_a_n_H1 = np.array(f.root.neutron.cinder_xs.absorption[0]['xs'])
+    obs = cinderds.reaction(10010, 'a')
+    assert_array_equal(sigma_a_n_H1, obs)
+    assert_equal(id(obs), id(cinderds.reaction(10010, 'a')))
+    assert_not_equal(id(obs), id(cinderds.reaction('H1', 'a')))
+
+
+def test_cinder_sigma_f_n1():
+    if not cinderds.exists:
+        return
+    observed = cinderds.reaction(922350, 'f')
+    expected = np.array([1.74780000e+03,   1.09570000e+03,   8.54720000e+02,
+                         8.21910000e+02,   5.96110000e+02,   6.55820000e+02,
+                         4.85430000e+02,   5.24960000e+02,   4.01070000e+02,
+                         3.84060000e+02,   8.32680000e+02,   3.68510000e+02,
+                         2.66930000e+02,   2.27710000e+02,   1.83750000e+02,
+                         1.67020000e+02,   7.96280000e+01,   6.53830000e+01,
+                         2.87850000e+01,   1.43510000e+01,   1.87710000e+01,
+                         1.92710000e+01,   7.72680000e+01,   4.90740000e+01,
+                         5.32240000e+01,   4.62680000e+01,   2.47770000e+01,
+                         2.08130000e+01,   2.07720000e+01,   1.36800000e+01,
+                         1.30990000e+01,   8.23490000e+00,   6.81700000e+00,
+                         8.26300000e+00,   5.23320000e+00,   4.96880000e+00,
+                         4.32240000e+00,   3.26220000e+00,   2.71850000e+00,
+                         2.31530000e+00,   2.16830000e+00,   1.98670000e+00,
+                         1.80300000e+00,   1.61870000e+00,   1.46980000e+00,
+                         1.32110000e+00,   1.23810000e+00,   1.18940000e+00,
+                         1.15190000e+00,   1.13810000e+00,   1.18470000e+00,
+                         1.22020000e+00,   1.25640000e+00,   1.29290000e+00,
+                         1.26850000e+00,   1.19820000e+00,   1.12000000e+00,
+                         1.06560000e+00,   1.53220000e+00,   2.06170000e+00,
+                         2.10070000e+00,   1.96770000e+00,   1.96770000e+00][::-1])
+    assert_array_equal(observed, expected)
+
+def test_cinder_sigma_f_n2():
+    if not cinderds.exists:
+        return
+    observed = cinderds.reaction(10010, 'f')
+    expected = None
+    assert_array_equal(observed, expected)
+
+def test_get_sigma_a_n1():
+    # Test example with one entry
+    if not cinderds.exists:
+        return
+    observed = cinderds.reaction(10010, 'a')
+    expected = np.array([
+         9.96360000e-01,   6.07160000e-01,   4.72250000e-01,
+         3.99360000e-01,   3.52130000e-01,   3.18550000e-01,
+         2.93030000e-01,   2.69290000e-01,   2.46390000e-01,
+         2.27390000e-01,   2.11380000e-01,   1.95050000e-01,
+         1.76480000e-01,   1.50820000e-01,   1.20850000e-01,
+         9.42780000e-02,   7.26880000e-02,   5.65930000e-02,
+         4.38660000e-02,   3.42250000e-02,   2.68640000e-02,
+         2.08190000e-02,   1.61410000e-02,   1.27460000e-02,
+         9.89720000e-03,   7.70440000e-03,   5.88870000e-03,
+         4.59450000e-03,   3.57770000e-03,   2.78980000e-03,
+         2.18600000e-03,   1.74630000e-03,   1.32340000e-03,
+         1.13220000e-03,   1.04010000e-03,   9.54700000e-04,
+         7.95210000e-04,   6.03360000e-04,   4.53900000e-04,
+         3.60530000e-04,   2.99660000e-04,   2.36340000e-04,
+         1.71240000e-04,   1.19680000e-04,   8.19370000e-05,
+         5.64050000e-05,   4.48700000e-05,   3.98850000e-05,
+         3.71800000e-05,   3.54070000e-05,   3.45980000e-05,
+         3.44370000e-05,   3.43310000e-05,   3.43120000e-05,
+         3.49470000e-05,   3.58100000e-05,   3.62750000e-05,
+         3.60950000e-05,   3.48160000e-05,   2.97130000e-05,
+         2.89150000e-05,   2.67690000e-05,   2.60400000e-05][::-1])
+    assert_array_equal(observed, expected)
+
+
+def test_get_sigma_a_n2():
+    # Test example with multiple entries but not that have reaction_type = 'c'
+    if not cinderds.exists:
+        return
+    observed = cinderds.reaction(10020, 'a')
+    expected = np.array([
+        0.       ,  0.       ,  0.       ,  0.       ,  0.       ,
+        0.       ,  0.       ,  0.       ,  0.       ,  0.       ,
+        0.       ,  0.       ,  0.       ,  0.       ,  0.       ,
+        0.       ,  0.       ,  0.       ,  0.       ,  0.       ,
+        0.       ,  0.       ,  0.       ,  0.       ,  0.       ,
+        0.       ,  0.       ,  0.       ,  0.       ,  0.       ,
+        0.       ,  0.       ,  0.       ,  0.       ,  0.       ,
+        0.       ,  0.       ,  0.       ,  0.       ,  0.       ,
+        0.       ,  0.       ,  0.       ,  0.       ,  0.       ,
+        0.       ,  0.       ,  0.       ,  0.       ,  0.       ,
+        0.       ,  0.       ,  0.       ,  0.       ,  0.       ,
+        0.0011439,  0.019188 ,  0.047752 ,  0.087012 ,  0.18032  ,
+        0.18847  ,  0.20148  ,  0.2053   ][::-1])
+    expected += np.array([
+         1.52240000e-03,   9.30720000e-04,   7.23200000e-04,
+         6.13370000e-04,   5.40020000e-04,   4.89210000e-04,
+         4.49150000e-04,   4.13780000e-04,   3.78790000e-04,
+         3.48940000e-04,   3.24070000e-04,   2.99220000e-04,
+         2.70960000e-04,   2.31220000e-04,   1.85480000e-04,
+         1.44650000e-04,   1.11350000e-04,   8.69150000e-05,
+         6.73760000e-05,   5.26030000e-05,   4.15620000e-05,
+         3.20750000e-05,   2.48770000e-05,   1.95970000e-05,
+         1.52790000e-05,   1.17130000e-05,   9.09390000e-06,
+         7.05040000e-06,   5.53650000e-06,   4.39520000e-06,
+         3.43240000e-06,   2.68440000e-06,   2.00390000e-06,
+         1.70200000e-06,   1.58790000e-06,   1.46300000e-06,
+         1.28160000e-06,   1.09490000e-06,   1.01380000e-06,
+         1.04050000e-06,   1.07440000e-06,   1.17800000e-06,
+         1.41250000e-06,   1.77080000e-06,   2.30510000e-06,
+         2.96130000e-06,   3.51820000e-06,   3.92870000e-06,
+         4.43470000e-06,   4.95710000e-06,   5.57910000e-06,
+         6.32150000e-06,   7.01920000e-06,   7.69640000e-06,
+         8.43000000e-06,   9.14600000e-06,   9.83610000e-06,
+         1.03010000e-05,   1.06530000e-05,   9.44650000e-06,
+         9.18780000e-06,   8.38510000e-06,   8.10500000e-06][::-1])
+    assert_array_equal(observed, expected)
+
+
+def test_get_sigma_a_n3():
+    # Test example with multiple entries including one that has reaction_type = 'c'
+    if not cinderds.exists:
+        return
+    observed = cinderds.reaction(20030, 'a')
+    expected = np.array([
+        0.       ,  0.       ,  0.       ,  0.       ,  0.       ,
+        0.       ,  0.       ,  0.       ,  0.       ,  0.       ,
+        0.       ,  0.       ,  0.       ,  0.       ,  0.       ,
+        0.       ,  0.       ,  0.       ,  0.       ,  0.       ,
+        0.       ,  0.       ,  0.       ,  0.       ,  0.       ,
+        0.       ,  0.       ,  0.       ,  0.       ,  0.       ,
+        0.       ,  0.       ,  0.       ,  0.       ,  0.       ,
+        0.       ,  0.       ,  0.       ,  0.       ,  0.       ,
+        0.       ,  0.       ,  0.       ,  0.       ,  0.       ,
+        0.       ,  0.       ,  0.       ,  0.       ,  0.       ,
+        0.       ,  0.       ,  0.       ,  0.       ,  0.       ,
+        0.       ,  0.0043036,  0.060056 ,  0.11588  ,  0.15215  ,
+        0.15165  ,  0.12801  ,  0.112    ][::-1])
+    expected += np.array([
+         1.59870000e+04,   9.74200000e+03,   7.57740000e+03,
+         6.40770000e+03,   5.65000000e+03,   5.11100000e+03,
+         4.70140000e+03,   4.32040000e+03,   3.95290000e+03,
+         3.64790000e+03,   3.39100000e+03,   3.12890000e+03,
+         2.83090000e+03,   2.41910000e+03,   1.93810000e+03,
+         1.51180000e+03,   1.16550000e+03,   9.07320000e+02,
+         7.03200000e+02,   5.48580000e+02,   4.30550000e+02,
+         3.33630000e+02,   2.58630000e+02,   2.04220000e+02,
+         1.58550000e+02,   1.23410000e+02,   9.43150000e+01,
+         7.36280000e+01,   5.73090000e+01,   4.46360000e+01,
+         3.50230000e+01,   2.79830000e+01,   2.10090000e+01,
+         1.78020000e+01,   1.61630000e+01,   1.46700000e+01,
+         1.20900000e+01,   9.13540000e+00,   6.93580000e+00,
+         5.58270000e+00,   4.72330000e+00,   3.83980000e+00,
+         2.91150000e+00,   2.19690000e+00,   1.63240000e+00,
+         1.22460000e+00,   1.05240000e+00,   9.59460000e-01,
+         9.20880000e-01,   9.06540000e-01,   8.90440000e-01,
+         8.79710000e-01,   8.66060000e-01,   8.25060000e-01,
+         7.46760000e-01,   6.08280000e-01,   4.47760000e-01,
+         3.38630000e-01,   2.50370000e-01,   1.21070000e-01,
+         1.11410000e-01,   8.97170000e-02,   8.20000000e-02][::-1])
+    expected += np.array([
+         1.40840000e-03,   1.10660000e-03,   8.04470000e-04,
+         5.02330000e-04,   2.00200000e-04,   3.15200000e-05,
+         3.10000000e-05,   3.10000000e-05,   3.10000000e-05,
+         3.10000000e-05,   3.10000000e-05,   3.10000000e-05,
+         3.10000000e-05,   3.10000000e-05,   3.10000000e-05,
+         3.10000000e-05,   3.10000000e-05,   3.10000000e-05,
+         3.10000000e-05,   3.10000000e-05,   3.10000000e-05,
+         3.10000000e-05,   3.09990000e-05,   3.09990000e-05,
+         3.09980000e-05,   3.09970000e-05,   3.09950000e-05,
+         3.09920000e-05,   3.09860000e-05,   3.09770000e-05,
+         3.09630000e-05,   3.09390000e-05,   3.08990000e-05,
+         3.08620000e-05,   3.08380000e-05,   3.08080000e-05,
+         3.07250000e-05,   3.05460000e-05,   3.02520000e-05,
+         2.99180000e-05,   2.95930000e-05,   2.89430000e-05,
+         2.76470000e-05,   2.54710000e-05,   2.18830000e-05,
+         1.59690000e-05,   9.60350000e-06,   3.53490000e-06,
+         5.38530000e-07,   1.74800000e-06,   3.50630000e-06,
+         5.50360000e-06,   7.86570000e-06,   1.11590000e-05,
+         1.53870000e-05,   2.08170000e-05,   2.86970000e-05,
+         3.76470000e-05,   5.65300000e-05,   8.97390000e-05,
+         1.15640000e-04,   1.34700000e-04,   1.46310000e-04][::-1])
+    assert_array_equal(observed, expected)
+
+
+def test_get_sigma_a_n4():
+    if not cinderds.exists:
+        return
+    # Test that a zeros array is returned for an entry that is not in the table
+    observed = cinderds.reaction(10420, 'a')
+    expected = None
+    assert_array_equal(observed, expected)
+
+
+
+def test_simple_E_g():
+    if not simpleds.exists:
+        return
+    assert_array_equal(np.array([14.0, 1.0, 2.53E-8, 0.0]), simpleds.src_group_struct)
+
+
+def test_simple_sigma_f():
+    if not simpleds.exists:
+        return
+    sigma_f_n_U235 = np.array([2.056, 1.235, 584.4])
+    obs = simpleds.reaction('U235', 'f')
+    assert_array_equal(sigma_f_n_U235, obs)
+    assert_equal(id(obs), id(simpleds.reaction('U235', 'f')))
+    assert_not_equal(id(obs), id(simpleds.reaction(922350, 'f')))
+
+
+def test_simple_sigma_a():
+    if not simpleds.exists:
+        return
+    sigma_a_n_H1 = np.array([2.983E-5, 3.927E-5, 0.332])
+    obs = simpleds.reaction(10010, 'a')
+    assert_array_almost_equal(sigma_a_n_H1, obs)
+    assert_equal(id(obs), id(simpleds.reaction(10010, 'a')))
+    assert_not_equal(id(obs), id(simpleds.reaction('H1', 'a')))
+
+
+def test_simple_not_in_table():
+    if not simpleds.exists:
+        return
+    exp = None
+    obs = simpleds.reaction(10030, '4n')
+    assert_equal(obs, exp)
+
+
+def test_simple_not_a_rx():
+    if not simpleds.exists:
+        return
+    exp = None
+    obs = simpleds.reaction(10010, '42')
+    assert_equal(obs, exp)
+
+
+def test_simple_discretize_no_weights1():
+    if not simpleds.exists:
+        return
+    dst_g = cinderds.src_group_struct
+    simpleds.dst_group_struct = dst_g
+    obs = simpleds.discretize('U235', 'f')
+    mask = obs[:-1] <= obs[1:]
+    assert_true((obs[mask][:-1] <= obs[mask][1:]).all())
+    assert_true((obs[~mask][:-1] >= obs[~mask][1:]).all())
+    simpleds.dst_group_struct = None
+
+
+def test_simple_discretize_no_weights2():
+    if not simpleds.exists:
+        return
+    dst_g = cinderds.src_group_struct
+    simpleds.dst_group_struct = dst_g
+    obs = simpleds.discretize(10010, 'a')
+    assert_true((obs[:-1] <= obs[1:]).all())
+    simpleds.dst_group_struct = None
+
+
+def test_simple_discretize_weights1():
+    if not simpleds.exists:
+        return
+    dst_g = cinderds.src_group_struct
+    phi_g = np.ones(cinderds.src_ngroups, dtype=float)
+    phi_g[:25] = 0.0
+    simpleds.dst_group_struct = dst_g
+    obs = simpleds.discretize('U235', 'f', dst_phi_g=phi_g)
+    assert_true((obs[:-1] <= obs[1:]).all())
+    simpleds.dst_group_struct = None
+

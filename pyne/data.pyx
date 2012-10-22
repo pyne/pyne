@@ -62,6 +62,41 @@ def atomic_mass(nuc):
 
 
 #
+# natural_abund functions
+#
+cdef conv._MapIntDouble natural_abund_map_proxy = conv.MapIntDouble(False)
+natural_abund_map_proxy.map_ptr = &cpp_data.natural_abund_map
+natural_abund_map = natural_abund_map_proxy
+
+def natural_abund(nuc):
+    """Finds the natural abundance of a nuclide.
+
+    Parameters
+    ----------
+    nuc : int or str
+        Input nuclide.
+
+    Returns
+    -------
+    abund : float
+        Natural abundance of this nuclide.
+
+    Notes
+    -----
+    If the nuclide is not found, abundance is 0.
+    """
+    if isinstance(nuc, int):
+        abund = cpp_data.natural_abund(<int> nuc)
+    elif isinstance(nuc, basestring):
+        abund = cpp_data.natural_abund(<char *> nuc)
+    else:
+        raise pyne.nucname.NucTypeError(nuc)
+
+    return abund
+
+
+
+#
 # scattering length functions
 #
 cdef conv._MapIntComplex b_coherent_map_proxy = conv.MapIntComplex(False)

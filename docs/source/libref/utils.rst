@@ -14,7 +14,7 @@ All functionality may be found in the ``utils`` module::
  from pyne import utils
 
 -------------------------
-Unit Convertion Functions
+Unit Conversion Functions
 -------------------------
 
 .. autofunction:: to_sec(input_time, units)

@@ -17,6 +17,10 @@ cimport cpp_material
 cimport pyne.stlconverters as conv
 import pyne.stlconverters as conv
 
+cimport cpp_jsoncpp
+cimport jsoncpp
+import jsoncpp
+
 cimport pyne.nucname as nucname
 import pyne.nucname as nucname
 import os
@@ -39,34 +43,36 @@ cdef cpp_map[int, double] dict_to_comp(dict nucvec):
 
 cdef class _Material:
 
-    def __cinit__(self, nucvec=None, double mass=-1.0, char * name='',
-                  double atoms_per_mol=-1.0, bint free_mat=True):
+    def __cinit__(self, nucvec=None, double mass=-1.0, double density=-1.0,
+                  double atoms_per_mol=-1.0, attrs=None, bint free_mat=True,
+                  *args, **kwargs):
         """Material C++ constuctor."""
         cdef cpp_map[int, double] comp
+        cdef jsoncpp.Value cattrs = jsoncpp.Value({} if attrs is None else attrs)
 
         if isinstance(nucvec, dict):
             # Material from dict
             comp = dict_to_comp(nucvec)
             self.mat_pointer = new cpp_material.Material(
-                    comp, mass, std.string(name), atoms_per_mol)
+                    comp, mass, density, atoms_per_mol, deref(cattrs._inst))
 
         elif isinstance(nucvec, basestring):
             # Material from file
             self.mat_pointer = new cpp_material.Material(
-                    <char *> nucvec, mass, std.string(name), atoms_per_mol)
+                    <char *> nucvec, mass, density, atoms_per_mol, deref(cattrs._inst))
 
         elif (nucvec is None):
             if free_mat:
                 # Make empty mass stream
-                self.mat_pointer = new cpp_material.Material(comp, 
-                                        mass, std.string(name), atoms_per_mol)
+                self.mat_pointer = new cpp_material.Material(comp, mass, density,
+                                        atoms_per_mol, deref(cattrs._inst))
             else:
                 self.mat_pointer = NULL
 
         else:
             # Bad Material
             raise TypeError("The mass stream nucvec must be a dict, str, "
-                    "or None.")
+                    "or None, but is a {0}".format(type(nucvec)))
 
         # Init some meta-data
         self._comp = None
@@ -125,15 +131,12 @@ cdef class _Material:
         def __set__(self, double value):
             self.mat_pointer.mass = value
 
-
-    property name:
+    property density:
         def __get__(self):
-            cdef std.string mat_name = self.mat_pointer.name
-            return mat_name.c_str()
+            return self.mat_pointer.density
 
-        def __set__(self, char * value):
-            self.mat_pointer.name = std.string(value)
-
+        def __set__(self, double value):
+            self.mat_pointer.density = value
 
     property atoms_per_mol:
         def __get__(self):
@@ -141,6 +144,17 @@ cdef class _Material:
 
         def __set__(self, double value):
             self.mat_pointer.atoms_per_mol = value
+
+    property attrs:
+        def __get__(self):
+            cdef jsoncpp.Value val = jsoncpp.Value(view=True)
+            val._inst = &self.mat_pointer.attrs
+            return val
+
+        def __set__(self, value):
+            cdef jsoncpp.Value val = jsoncpp.Value(value)
+            val._view = True
+            self.mat_pointer.attrs = deref(val._inst)
 
     #
     # Class Methods
@@ -398,8 +412,8 @@ cdef class _Material:
     # submaterial Methods
     #
 
-    def sub_mat(self, nuc_sequence, char * name=""):
-        """sub_mat(nuc_sequence, char * name="")
+    def sub_mat(self, nuc_sequence):
+        """sub_mat(nuc_sequence)
         Grabs a subset of the material and returns a new material comprised
         of only the specified nuclides.
 
@@ -409,8 +423,6 @@ cdef class _Material:
             Elements and nuctopes to be taken from current stream.
             Members of this list must be integers.  For example, [92, 942390]
             would take all uranium atoms and Pu-239.
-        name : str, optional
-            The name of the submaterial.
 
         Returns
         -------
@@ -432,13 +444,12 @@ cdef class _Material:
 
         # Make new python version of this material
         cdef _Material pymat = Material()
-        pymat.mat_pointer[0] = self.mat_pointer.sub_mat(
-                nuc_set, std.string(name))
+        pymat.mat_pointer[0] = self.mat_pointer.sub_mat(nuc_set)
         return pymat
 
 
-    def set_mat(self, nuc_sequence, value, char * name=""):
-        """set_mat(nuc_sequence, value, char * name="")
+    def set_mat(self, nuc_sequence, value):
+        """set_mat(nuc_sequence, value)
         Sets a subset of the material to a new value and returns a new
         material.
 
@@ -450,8 +461,6 @@ cdef class _Material:
             would take all uranium atoms and Pu-239.
         value : float
             Mass value to set all nuclides in sequence to on the material.
-        name : str, optional
-            The name of the submaterial.
 
         Returns
         -------
@@ -467,13 +476,12 @@ cdef class _Material:
 
         # Make new python version of this material
         cdef _Material pymat = Material()
-        pymat.mat_pointer[0] = self.mat_pointer.set_mat(
-                nuc_set, <double> value, std.string(name))
+        pymat.mat_pointer[0] = self.mat_pointer.set_mat(nuc_set, <double> value)
         return pymat
 
 
-    def del_mat(self, nuc_sequence, char * name=""):
-        """del_mat(nuc_sequence, char * name="")
+    def del_mat(self, nuc_sequence):
+        """del_mat(nuc_sequence)
         Removes a subset of the material and returns a new material
         comprised of only the non-specified nuclides.
 
@@ -481,8 +489,6 @@ cdef class _Material:
         ----------
         nuc_sequence : sequence
             Nuclides to be taken out of the current material.
-        name : str, optional
-            The name of the submaterial.
 
         Returns
         -------
@@ -503,13 +509,12 @@ cdef class _Material:
 
         # Make new python version of this material
         cdef _Material pymat = Material()
-        pymat.mat_pointer[0] = self.mat_pointer.del_mat(
-                nuc_set, std.string(name))
+        pymat.mat_pointer[0] = self.mat_pointer.del_mat(nuc_set)
         return pymat
 
 
-    def sub_range(self, lower=0, upper=10000000, char * name=""):
-        """sub_range(lower=0, upper=10000000, char * name="")
+    def sub_range(self, lower=0, upper=10000000):
+        """sub_range(lower=0, upper=10000000)
         Grabs a sub-material from this mat based on a range [lower, upper)
         of values.
 
@@ -519,8 +524,6 @@ cdef class _Material:
             Lower bound on nuclide range.
         upper : nuclide-name, optional
             Upper bound on nuclide range.
-        name : str, optional
-            The name of the submaterial.
 
         Returns
         -------
@@ -541,13 +544,12 @@ cdef class _Material:
             cupper = nucname.zzaaam(upper)
 
         cdef _Material pymat = Material()
-        pymat.mat_pointer[0] = self.mat_pointer.sub_range(
-                clower, cupper, std.string(name))
+        pymat.mat_pointer[0] = self.mat_pointer.sub_range(clower, cupper)
         return pymat
 
 
-    def set_range(self, lower=0, upper=10000000, value=0.0, char * name=""):
-        """set_range(lower=0, upper=10000000, value=0.0, char * name="")
+    def set_range(self, lower=0, upper=10000000, value=0.0):
+        """set_range(lower=0, upper=10000000, value=0.0)
         Sets a sub-material from this mat based on a range [lower, upper) to
         a new mass weight value.
 
@@ -559,8 +561,6 @@ cdef class _Material:
             Upper bound on nuclide range.
         value : float
             Mass value to set all nuclides on the range to on the material.
-        name : str, optional
-            The name of the submaterial.
 
         Returns
         -------
@@ -581,13 +581,12 @@ cdef class _Material:
             cupper = nucname.zzaaam(upper)
 
         cdef _Material pymat = Material()
-        pymat.mat_pointer[0] = self.mat_pointer.set_range(
-                clower, cupper, <double> value, std.string(name))
+        pymat.mat_pointer[0] = self.mat_pointer.set_range(clower, cupper, <double> value)
         return pymat
 
 
-    def del_range(self, lower=0, upper=10000000, char * name=""):
-        """del_range(lower=0, upper=10000000, char * name="")
+    def del_range(self, lower=0, upper=10000000):
+        """del_range(lower=0, upper=10000000)
         Remove a range [lower, upper) of nuclides from this material and
         returns a submaterial.
 
@@ -597,8 +596,6 @@ cdef class _Material:
             Lower bound on nuclide range.
         upper : nuclide-name, optional
             Upper bound on nuclide range.
-        name : str, optional
-            The name of the submaterial.
 
         Returns
         -------
@@ -620,19 +617,13 @@ cdef class _Material:
             cupper = nucname.zzaaam(upper)
 
         cdef _Material pymat = Material()
-        pymat.mat_pointer[0] = self.mat_pointer.del_range(
-                clower, cupper, std.string(name))
+        pymat.mat_pointer[0] = self.mat_pointer.del_range(clower, cupper)
         return pymat
 
 
-    def sub_u(self, char * name=""):
-        """sub_u(char * name="")
+    def sub_u(self):
+        """sub_u()
         Convenience method that gets the Uranium portion of a mass stream.
-
-        Parameters
-        ----------
-        name : str, optional
-            The name of the submaterial.
 
         Returns
         -------
@@ -641,18 +632,13 @@ cdef class _Material:
 
         """
         cdef _Material pymat = Material()
-        pymat.mat_pointer[0] = self.mat_pointer.sub_u(std.string(name))
+        pymat.mat_pointer[0] = self.mat_pointer.sub_u()
         return pymat
 
 
-    def sub_pu(self, char * name=""):
-        """sub_pu(char * name="")
+    def sub_pu(self):
+        """sub_pu()
         Convenience method that gets the Plutonium portion of a mass stream.
-
-        Parameters
-        ----------
-        name : str, optional
-            The name of the submaterial.
 
         Returns
         -------
@@ -661,18 +647,13 @@ cdef class _Material:
 
         """
         cdef _Material pymat = Material()
-        pymat.mat_pointer[0] = self.mat_pointer.sub_pu(std.string(name))
+        pymat.mat_pointer[0] = self.mat_pointer.sub_pu()
         return pymat
 
 
-    def sub_lan(self, char * name=""):
-        """sub_lan(char * name="")
+    def sub_lan(self):
+        """sub_lan()
         Convenience method that gets the Lanthanide portion of a mass stream.
-
-        Parameters
-        ----------
-        name : str, optional
-            The name of the submaterial.
 
         Returns
         -------
@@ -681,18 +662,13 @@ cdef class _Material:
 
         """
         cdef _Material pymat = Material()
-        pymat.mat_pointer[0] = self.mat_pointer.sub_lan(std.string(name))
+        pymat.mat_pointer[0] = self.mat_pointer.sub_lan()
         return pymat
 
 
-    def sub_act(self, char * name=""):
-        """sub_act(char * name="")
+    def sub_act(self):
+        """sub_act()
         Convenience method that gets the Actinide portion of a mass stream.
-
-        Parameters
-        ----------
-        name : str, optional
-            The name of the submaterial.
 
         Returns
         -------
@@ -701,19 +677,14 @@ cdef class _Material:
 
         """
         cdef _Material pymat = Material()
-        pymat.mat_pointer[0] = self.mat_pointer.sub_act(std.string(name))
+        pymat.mat_pointer[0] = self.mat_pointer.sub_act()
         return pymat
 
 
-    def sub_tru(self, char * name=""):
-        """sub_tru(char * name="")
+    def sub_tru(self):
+        """sub_tru()
         Convenience method that gets the Transuranic portion of a mass
         stream.
-
-        Parameters
-        ----------
-        name : str, optional
-            The name of the submaterial.
 
         Returns
         -------
@@ -722,19 +693,14 @@ cdef class _Material:
 
         """
         cdef _Material pymat = Material()
-        pymat.mat_pointer[0] = self.mat_pointer.sub_tru(std.string(name))
+        pymat.mat_pointer[0] = self.mat_pointer.sub_tru()
         return pymat
 
 
-    def sub_ma(self, char * name=""):
-        """sub_ma(char * name="")
+    def sub_ma(self):
+        """sub_ma()
         Convenience method that gets the Minor Actinide portion of a mass
         stream.
-
-        Parameters
-        ----------
-        name : str, optional
-            The name of the submaterial.
 
         Returns
         -------
@@ -743,19 +709,14 @@ cdef class _Material:
 
         """
         cdef _Material pymat = Material()
-        pymat.mat_pointer[0] = self.mat_pointer.sub_ma(std.string(name))
+        pymat.mat_pointer[0] = self.mat_pointer.sub_ma()
         return pymat
 
 
-    def sub_fp(self, char * name=""):
-        """sub_fp(char * name="")
+    def sub_fp(self):
+        """sub_fp()
         Convenience method that gets the Fission Product portion of a mass
         stream.
-
-        Parameters
-        ----------
-        name : str, optional
-            The name of the submaterial.
 
         Returns
         -------
@@ -764,7 +725,7 @@ cdef class _Material:
 
         """
         cdef _Material pymat = Material()
-        pymat.mat_pointer[0] = self.mat_pointer.sub_fp(std.string(name))
+        pymat.mat_pointer[0] = self.mat_pointer.sub_fp()
         return pymat
 
 
@@ -802,18 +763,18 @@ cdef class _Material:
         To get a material from water, based on atom fractions::
 
             h2o = {10010: 2.0, 'O16': 1.0}
-            mat = Material(name='water')
+            mat = Material()
             mat.from_atom_frac(h2o)
 
         Or for Uranium-Oxide, based on an initial fuel vector::
 
             # Define initial heavy metal
-            ihm = Material(name='IHM')
+            ihm = Material()
             ihm.from_atom_frac({'U235': 0.05, 'U238': 0.95})
 
             # Define Uranium-Oxide
             uox = {ihm: 1.0, 80160: 2.0}
-            mat = Material(name='UOX')
+            mat = Material()
             mat.from_atom_frac(uox)
 
         Note that the initial heavy metal was used as a key in a dictionary.
@@ -998,8 +959,7 @@ cdef class _Material:
         if isinstance(key, int):
             mbm = self.mult_by_mass()
             mbm.map_ptr[0][key] = value
-            new_matp = new cpp_material.Material(
-                    mbm.map_ptr[0], -1.0, self.mat_pointer.name)
+            new_matp = new cpp_material.Material(mbm.map_ptr[0], -1.0, -1.0)
             self.mat_pointer = new_matp
             self._comp = None
 
@@ -1019,20 +979,20 @@ cdef class _Material:
                 upper = 10000000
 
             # set values back on instance
-            new_mat = self.set_range(lower, upper, value, self.name)
+            new_mat = self.set_range(lower, upper, value)
             self.mat_pointer[0] = new_mat.mat_pointer[0]
             self._comp = None
 
         # Set sequance-based sub-material
         elif hasattr(key, '__len__'):
-            new_mat = self.set_mat(key, value, self.name)
+            new_mat = self.set_mat(key, value)
             self.mat_pointer[0] = new_mat.mat_pointer[0]
             self._comp = None
 
         # Fail-Yurt
         else:
-            raise TypeError("key {0} is of unsupported type {1}".format(
-                    repr(key), type(key)))
+            msg = "key {0} is of unsupported type {1}".format(repr(key), type(key))
+            raise TypeError(msg)
 
 
     def __delitem__(self, key):
@@ -1048,8 +1008,8 @@ cdef class _Material:
                 return
             mbm = self.mult_by_mass()
             mbm.map_ptr.erase(<int> key)
-            new_matp = new cpp_material.Material(
-                    mbm.map_ptr[0], -1.0, self.mat_pointer.name)
+            new_matp = new cpp_material.Material(mbm.map_ptr[0], -1.0)
+            new_matp = new cpp_material.Material(mbm.map_ptr[0], -1.0, -1.0)
             self.mat_pointer = new_matp
             self._comp = None
 
@@ -1069,13 +1029,13 @@ cdef class _Material:
                 upper = 10000000
 
             # set values back on instance
-            new_mat = self.del_range(lower, upper, self.name)
+            new_mat = self.del_range(lower, upper)
             self.mat_pointer[0] = new_mat.mat_pointer[0]
             self._comp = None
 
         # Remove sequance-based sub-material
         elif hasattr(key, '__len__'):
-            new_mat = self.del_mat(key, self.name)
+            new_mat = self.del_mat(key)
             self.mat_pointer[0] = new_mat.mat_pointer[0]
             self._comp = None
 
@@ -1121,13 +1081,16 @@ class Material(_Material, collections.MutableMapping):
         (default -1.0) then the mass of the new stream is calculated from the
         sum of compdict's components before normalization.  If the mass here is
         positive or zero, then this mass overrides the calculated one.
-    name : str, optional
-        A string label for the material.  Helpful for large numbers of
-        streams. Default ''.
+    density : float, optional
+        This is the density of the material.
     atoms_per_mol : float, optional
         Number of atoms to per molecule of material.  Needed to obtain proper
         scaling of molecular weights.  For example, this value for water is
         3.0.
+    attrs : JSON-convertable Python object, optional
+        Initial attributes to build the material with.  At the top-level this is
+        usually a dictionary with string keys.  This container is used to store
+        arbitrary metadata about the material.
     free_mat : bool, optional
         Flag for whether this wrapper 'owns' this underlying C++ pyne::Material
         object, and thus determines whether or not to deallocate it on wrapper
@@ -1135,9 +1098,13 @@ class Material(_Material, collections.MutableMapping):
 
     """
     def __str__(self):
-        header = ["Material: {0}".format(self.name)]
+        header = ["Material:"]
         header += ["mass = {0}".format(self.mass)]
+        header += ["density= {0}".format(self.density)]
         header += ["atoms per molecule = {0}".format(self.atoms_per_mol)]
+        if self.attrs.isobject():
+            for key, value in self.attrs.items():
+                header += ["{0} = {1}".format(key, value)]
         header += ['-' * max([len(h) for h in header])]
         header = "\n".join(header) + "\n"
 
@@ -1146,18 +1113,17 @@ class Material(_Material, collections.MutableMapping):
         return s
 
     def __repr__(self):
-        return "pyne.material.Material({0}, {1}, {2}, {3})".format(
-                repr(self.comp), self.mass, repr(self.name),
-                self.atoms_per_mol,)
+        return "pyne.material.Material({0}, {1}, {2}, {3}, {4})".format(
+                repr(self.comp), self.mass, self.density, self.atoms_per_mol, repr(self.attrs))
 
 
 #####################################
 ### Material generation functions ###
 #####################################
 
-def from_atom_frac(atom_fracs, double mass=-1.0, char * name='', double
-                   atoms_per_mol=-1.0):
-    """from_atom_frac(atom_fracs, double mass=-1.0, char * name='', double atoms_per_mol=-1.0)
+def from_atom_frac(atom_fracs, double mass=-1.0, double
+                   atoms_per_mol=-1.0, attrs=None):
+    """from_atom_frac(atom_fracs, double mass=-1.0, double atoms_per_mol=-1.0)
     Create a Material from a mapping of atom fractions.
 
     Parameters
@@ -1171,13 +1137,14 @@ def from_atom_frac(atom_fracs, double mass=-1.0, char * name='', double
         (default -1.0) then the mass of the new stream is calculated from the
         sum of compdict's components before normalization.  If the mass here is
         positive or zero, then this mass overrides the calculated one.
-    name : str, optional
-        A string label for the material.  Helpful for large numbers of
-        streams. Default ''.
     atoms_per_mol : float, optional
-        Number of atoms to per molecule of material.  Needed to obtain proper
+        Number of atoms per molecule of material.  Needed to obtain proper
         scaling of molecular weights.  For example, this value for water is
         3.0.
+    attrs : JSON-convertable Python object, optional
+        Initial attributes to build the material with.  At the top-level this is
+        usually a dictionary with string keys.  This container is used to store
+        arbitrary metadata about the material.
 
     Returns
     -------
@@ -1189,16 +1156,16 @@ def from_atom_frac(atom_fracs, double mass=-1.0, char * name='', double
     To get a material from water, based on atom fractions::
 
         h2o = {10010: 2.0, 'O16': 1.0}
-        mat = from_atom_frac(h2o, name='water')
+        mat = from_atom_frac(h2o)
 
     Or for Uranium-Oxide, based on an initial fuel vector::
 
         # Define initial heavy metal
-        ihm = from_atom_frac({'U235': 0.05, 'U238': 0.95}, name='IHM')
+        ihm = from_atom_frac({'U235': 0.05, 'U238': 0.95})
 
         # Define Uranium-Oxide
         uox = {ihm: 1.0, 80160: 2.0}
-        mat = from_atom_frac(uox, name='UOX')
+        mat = from_atom_frac(uox)
 
     Note that the initial heavy metal was used as a key in a dictionary.
     This is possible because Materials are hashable.
@@ -1208,9 +1175,8 @@ def from_atom_frac(atom_fracs, double mass=-1.0, char * name='', double
     Material.from_atom_frac : Underlying method class method.
 
     """
-    mat = Material()
+    mat = Material(attrs=attrs)
     mat.from_atom_frac(atom_fracs)
-    mat.name = name
 
     if 0.0 <= mass:
         mat.mass = mass
@@ -1263,9 +1229,8 @@ def from_hdf5(char * filename, char * datapath, int row=-1, int protocol=1):
 
 
 
-def from_text(char * filename, double mass=-1.0, char * name='', double
-              atoms_per_mol=-1.0):
-    """from_text(char * filename, double mass=-1.0, char * name='', double atoms_per_mol=-1.0)
+def from_text(char * filename, double mass=-1.0, double atoms_per_mol=-1.0, attrs=None):
+    """from_text(char * filename, double mass=-1.0, double atoms_per_mol=-1.0)
     Create a Material object from a simple text file.
 
     Parameters
@@ -1277,13 +1242,14 @@ def from_text(char * filename, double mass=-1.0, char * name='', double
         (default -1.0) then the mass of the new stream is calculated from the
         sum of compdict's components before normalization.  If the mass here is
         positive or zero, then this mass overrides the calculated one.
-    name : str, optional
-        A string label for the material.  Helpful for large numbers of
-        streams. Default ''.
     atoms_per_mol : float, optional
         Number of atoms to per molecule of material.  Needed to obtain proper
         scaling of molecular weights.  For example, this value for water is
         3.0.
+    attrs : JSON-convertable Python object, optional
+        Initial attributes to build the material with.  At the top-level this is
+        usually a dictionary with string keys.  This container is used to store
+        arbitrary metadata about the material.
 
     Returns
     -------
@@ -1301,9 +1267,7 @@ def from_text(char * filename, double mass=-1.0, char * name='', double
     Material.from_text : Underlying method class method.
 
     """
-    mat = Material()
-
-    mat.name = name
+    mat = Material(attrs=attrs)
 
     if 0.0 <= mass:
         mat.mass = mass
@@ -1504,3 +1468,22 @@ class MapStrMaterial(_MapStrMaterial, collections.MutableMapping):
 
 
 
+class MultiMaterial(collections.MutableMapping):
+
+    def __init__(self, mats):
+        self._mats = mats
+
+    def __getitem__(self, key):
+        return self._mats[key]
+
+    def __setitem__(self, key, value):
+        self._mats[key] = value
+
+    def write_hdf5(self):
+        pass
+
+    def write_iter(self):
+        pass
+
+    def __add__(self, other):
+        pass
