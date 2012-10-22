@@ -6,6 +6,7 @@ from being used with infinities.  For a work around see [1].
 """
 import os
 import time
+import multiprocessing
 
 from sympy import Symbol, pprint, latex, diff, count_ops, simplify, cse, Eq, Q, \
     log, logcombine, Abs, exp, sqrt, series, separate, powsimp, collect, expand
@@ -14,16 +15,29 @@ from sympy.utilities.iterables import numbered_symbols
 
 from utils import cse_to_c
 
-def cgen_ncomp(ncomp=3, nporder=2, verbose=True, debug=False):
+NPROCS = 1
+
+def _aggstatus(stat, msg, aggstat):
+    if aggstat:
+        stat += msg + '\n'
+    else:
+        print msg
+        stat = None
+    return stat
+
+
+def cgen_ncomp(ncomp=3, nporder=2, aggstat=False, debug=False):
     """Generates a C function for ncomp (int) number of components.
     The jth key component is always in the first position and the kth
     key component is always in the second.  The number of enrichment 
     stages (NP) is calculated via a taylor series approximation.  The
     order of this approximation may be set with nporder.  Only values
-    of 1 or 2 are allowed.
+    of 1 or 2 are allowed. The aggstat argument determines whether the
+    status messages should be aggreated and printed at the end or output
+    as the function executes.
     """
     start_time = time.time()
-    print "generating {0} component enrichment".format(ncomp)
+    stat = _aggstatus('', "generating {0} component enrichment".format(ncomp), aggstat)
     r = range(0, ncomp)
     j = 0
     k = 1
@@ -100,7 +114,7 @@ def cgen_ncomp(ncomp=3, nporder=2, verbose=True, debug=False):
     np_constraint = (xT[j] - sum(xT)*xTj).xreplace({NT: nt_closed})
 
     # get closed form approximation of NP via symbolic derivatives
-    print "  order-{0} NP approximation".format(nporder)
+    stat = _aggstatus(stat, "  order-{0} NP approximation".format(nporder), aggstat)
     d0NP = np_constraint.xreplace({NP: NP0})
     d1NP = diff(np_constraint, NP, 1).xreplace({NP: NP0})
     if 1 == nporder:
@@ -118,7 +132,8 @@ def cgen_ncomp(ncomp=3, nporder=2, verbose=True, debug=False):
         raise ValueError("nporder must be 1 or 2")
 
     # generate cse for writing out
-    print "  minimizing ops by eliminating common sub-expressions"
+    msg = "  minimizing ops by eliminating common sub-expressions"
+    stat = _aggstatus(stat, msg, aggstat)
     exprstages = [Eq(NP1, np_closed), Eq(NT1, nt_closed).xreplace({NP: NP1})]
     cse_stages = cse(exprstages, numbered_symbols('n'))
     exprothers = [Eq(LpF, LoverF), Eq(PpF, ppf), Eq(TpF, tpf), 
@@ -128,13 +143,17 @@ def cgen_ncomp(ncomp=3, nporder=2, verbose=True, debug=False):
     cse_others = cse(exprothers, numbered_symbols('g'))
     exprops = count_ops(exprstages + exprothers)
     cse_ops = count_ops(cse_stages + cse_others)
-    print "    reduced {0} ops to {1}".format(exprops, cse_ops)
+    msg = "    reduced {0} ops to {1}".format(exprops, cse_ops)
+    stat = _aggstatus(stat, msg, aggstat)
 
     # create function body
     ccode = cse_to_c(*cse_stages, indent=6, debug=debug)
     ccode += cse_to_c(*cse_others, indent=6, debug=debug)
 
-    print "  completed in {0:.3G} s".format(time.time() - start_time)
+    msg = "  completed in {0:.3G} s".format(time.time() - start_time)
+    stat = _aggstatus(stat, msg, aggstat)
+    if aggstat:
+        print stat
     return ccode
 
 
@@ -216,16 +235,29 @@ _func_footer = """
 };
 """
 
+def _mapable_cgen_ncomp(kwargs):
+    return cgen_ncomp(**kwargs)
+
+
 def cgen_func(max_ncomp=40, debug=False):
     """Generate C function to compute multicoponent enrichment cascades for 
     a number of components between 3 and max_ncomp. 
     """
     ccode = _func_header
     ncomps = range(3, max_ncomp+1)
-    for ncomp in ncomps:
+    if 1 == NPROCS:
+        ncomp_kwargs = [{'ncomp': n, 'debug': debug, 'aggstat': False} for n in ncomps]
+        ccode_ncomps = map(_mapable_cgen_ncomp, ncomp_kwargs)
+    elif 1 < NPROCS:
+        ncomp_kwargs = [{'ncomp': n, 'debug': debug, 'aggstat': True} for n in ncomps]
+        pool = multiprocessing.Pool(NPROCS)
+        ccode_ncomps = pool.map(_mapable_cgen_ncomp, ncomp_kwargs)
+    else:
+        raise ValueError("NPROCS must be greater than or equal to 1")
+    for ncomp, ccode_ncomp in zip(ncomps, ccode_ncomps):
         ccode += "    case {0}:\n".format(ncomp)
-        ccode += cgen_ncomp(ncomp, debug=debug)
-        ccode += "      break;"
+        ccode += ccode_ncomp
+        ccode += "      break;\n"
     ccode += _func_footer
     return ccode
 
