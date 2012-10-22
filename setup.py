@@ -15,6 +15,7 @@ from distutils.file_util import copy_file, move_file
 from distutils.dir_util import mkpath, remove_tree
 from distutils.sysconfig import get_python_version, get_config_vars, get_python_lib
 from Cython.Distutils import build_ext
+from Cython.Compiler.Version import version as CYTHON_VERSION
 
 
 import numpy as np
@@ -255,6 +256,7 @@ def cpp_ext(name, sources, libs=None, use_hdf5=False):
     ext['include_dirs'] = [pyt_dir, cpp_dir, numpy_include]
     if 0 < len(HDF5_DIR):
         ext['include_dirs'].append(os.path.join(HDF5_DIR, 'include'))
+    ext['define_macros'] = [('JSON_IS_AMALGAMATION', None)]
     ext['language'] = "c++"
 
     # may need to be more general
@@ -306,7 +308,7 @@ def cpp_ext(name, sources, libs=None, use_hdf5=False):
                                   ]
     elif sys.platform == 'win32':
         ext["extra_compile_args"] = ["__COMPILER__"]
-        ext["define_macros"] = ["__COMPILER__"]
+        ext["define_macros"] += ["__COMPILER__"]
 
         if use_hdf5:
             ext["libraries"].append("__USE_HDF5__")
@@ -328,7 +330,7 @@ exts = []
 
 # Pure C/C++ share libraries
 # pyne lib
-exts.append(cpp_ext("pyne.lib.libpyne", ['pyne.cpp']))
+exts.append(cpp_ext("pyne.lib.libpyne", ['jsoncpp.cpp', 'pyne.cpp']))
 
 # nucname
 exts.append(cpp_ext("pyne.lib.libpyne_nucname", ['nucname.cpp'], ['pyne']))
@@ -346,6 +348,9 @@ exts.append(cpp_ext("pyne.lib.libpyne_enrichment", ['enrichment.cpp'], ['pyne_ma
 # Python extension modules
 # STL converters
 exts.append(cpp_ext("pyne.stlconverters", ['stlconverters.pyx']))
+
+# JsonCpp Wrapper
+exts.append(cpp_ext("pyne.jsoncpp", ['jsoncpp.pyx'], ['pyne']))
 
 # pyne_config
 exts.append(cpp_ext("pyne.pyne_config", ['pyne_config.pyx'], ['pyne']))
@@ -376,11 +381,17 @@ exts.append(cpp_ext("pyne.enrichment", ['enrichment.pyx'], ['pyne_enrichment', '
 ##########################
 ### Setup Package Data ###
 ##########################
-packages = ['pyne', 'pyne.lib', 'pyne.dbgen', 'pyne.xs']
+packages = ['pyne', 'pyne.lib', 'pyne.dbgen', 'pyne.xs', 'pyne.simplesim']
 
-pack_dir = {'pyne': 'pyne', 'pyne.dbgen': 'pyne/dbgen', 'pyne.xs': 'pyne/xs'}
+pack_dir = {'pyne': 'pyne',
+            'pyne.dbgen': 'pyne/dbgen',
+            'pyne.xs': 'pyne/xs',
+            'pyne.simplesim': 'pyne/simplesim'
+            }
 
-pack_data = {'pyne': ['includes/*.h', 'includes/pyne/*.pxd', '*.json'],
+pack_data = {'pyne': ['includes/*.h', 'includes/*/*.h', 'includes/*/*/*.h', 
+                      'includes/*/*/*/*.h', 'includes/pyne/*.pxd', 'includes/pyne/*/*.pxd', 
+                      'includes/pyne/*/*/*.pxd', 'includes/pyne/*/*/*/*.pxd', '*.json'],
              'pyne.dbgen': ['*.html'],
             }
 
@@ -441,6 +452,41 @@ def final_message(setup_success=True, metadata=None):
     print msg
 
 
+def make_cython_version():
+    pxi = ("# Cython compile-time version information\n"
+           "DEF CYTHON_VERSION_MAJOR = {major}\n"
+           "DEF CYTHON_VERSION_MINOR = {minor}\n"
+           "DEF CYTHON_VERSION_BUILD = {build}")
+    cyver = CYTHON_VERSION.split('-')[0].split('.')
+    while len(cyver) < 3:
+        cyver = cyver + [0]
+    cyver = dict([(k, int(cv)) for k, cv in zip(['major', 'minor', 'build'], cyver)])
+    pxi = pxi.format(**cyver)
+    with open('pyne/includes/cython_version.pxi', 'w') as f:
+        f.write(pxi)
+
+
+def make_includes():
+    ds = ['pyne/includes', 'pyne/includes/pyne']
+    cpfs = []
+
+    for root, dirs, files in os.walk('cpp'):
+        incroot = root.replace('cpp', 'pyne/includes')
+        ds += [os.path.join(incroot, d) for d in dirs]
+        cpfs += [(os.path.join(root, f), incroot) for f in files if f.endswith('.h')]
+
+    for root, dirs, files in os.walk('pyne'):
+        incroot = root.replace('pyne', 'pyne/includes/pyne')
+        ds += [os.path.join(incroot, d) for d in dirs]
+        cpfs += [(os.path.join(root, f), incroot) for f in files if f.endswith('.pxd')]
+
+    for d in ds:
+        mkpath(d)
+
+    for src, dst in cpfs:
+        copy_file(src, dst)
+
+
 ###################
 ### Call setup! ###
 ###################
@@ -450,14 +496,8 @@ def pyne_setup():
     # clean includes dir and recopy files over
     if os.path.exists('pyne/includes'):
         remove_tree('pyne/includes')
-
-    mkpath('pyne/includes')
-    for header in glob.glob('cpp/*.h'):
-        copy_file(header, 'pyne/includes')
-
-    mkpath('pyne/includes/pyne')
-    for header in glob.glob('pyne/*.pxd'):
-        copy_file(header, 'pyne/includes/pyne')
+    make_includes()
+    make_cython_version()
 
     # Create metadata file
     mdpath = "pyne/metadata.json"

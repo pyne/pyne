@@ -11,11 +11,16 @@ classes.
 
 """
 
+import collections
+import string
 import struct
 import math 
 import os
 
+import numpy as np
+
 from binaryreader import _BinaryReader, _FortranRecord
+
 
 class Mctal(object):
     def __init__(self):
@@ -254,7 +259,7 @@ class SurfSrc(_BinaryReader):
             pass
         
         self.orignp1 = self.np1
-        print self.np1
+        
         self.np1 = abs(self.np1)
 
         # get info for each surface

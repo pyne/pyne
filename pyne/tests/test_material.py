@@ -8,6 +8,7 @@ from nose.tools import assert_equal, assert_not_equal, assert_raises, raises, \
 
 import os
 from pyne.material import Material, from_atom_frac, from_hdf5, from_text, MapStrMaterial
+from pyne import jsoncpp 
 import numpy  as np
 import tables as tb
 
@@ -48,50 +49,47 @@ def test_mat1():
     mat = Material("mat.txt")
     assert_equal(mat.comp, {922350: 0.05, 922380: 0.95})
     assert_equal(mat.mass, 1.0)
-    assert_equal(mat.name, '')
 
 def test_mat2():
     mat = Material("mat.txt", 42)
     assert_equal(mat.comp, {922350: 0.05, 922380: 0.95})
     assert_equal(mat.mass, 42.0)
-    assert_equal(mat.name, '')
 
 def test_mat3():
-    mat = Material("mat.txt", -42, "My Material")
+    mat = Material("mat.txt", -42)
     assert_equal(mat.comp, {922350: 0.05, 922380: 0.95})
     assert_equal(mat.mass, 1.0)
-    assert_equal(mat.name, 'My Material')
 
 def test_mat4():
-    mat = Material({922350: 0.05, 922380: 0.95}, 15, "Dict Try")
+    mat = Material({922350: 0.05, 922380: 0.95}, 15, attrs={'units': 'kg'})
     assert_equal(mat.comp, {922350: 0.05, 922380: 0.95})
     assert_equal(mat.mass, 15.0)
-    assert_equal(mat.name, 'Dict Try')
+    assert_equal(mat.attrs['units'], 'kg')
 
 def test_from_text():
-    mat = Material()
+    mat = Material(attrs={'units': 'kg'})
     mat.from_text("mat.txt")
     assert_equal(mat.comp, {922350: 0.05, 922380: 0.95})
+    assert_equal(mat.attrs['units'], 'kg')
 
 
 def test_write_text():
     if 'leu.txt' in os.listdir('.'):
         os.remove('leu.txt')
 
-    leu = Material({'U235': 0.04, 'U238': 0.96}, 42.0, "LEU", 1.0)
+    leu = Material({'U235': 0.04, 'U238': 0.96}, 42.0, 1.0, 1.0)
     leu.write_text('leu.txt')
 
     with open('leu.txt') as f:
         written = f.read()
-    expected = ("Name    LEU\n"
-                "Mass    42\n"
+    expected = ("Mass    42\n"
+                "Density 1\n"
                 "APerM   1\n"
                 "U235    0.04\n"
                 "U238    0.96\n")
     assert_equal(written, expected)
 
     read_leu = from_text('leu.txt')
-    assert_equal(leu.name, read_leu.name)
     assert_equal(leu.mass, read_leu.mass)
     assert_equal(leu.atoms_per_mol, read_leu.atoms_per_mol)
     assert_equal(leu.comp, read_leu.comp)
@@ -136,30 +134,32 @@ def test_hdf5_protocol_1():
         os.remove('proto1.h5')
 
     # Test material writing
-    leu = Material({'U235': 0.04, 'U238': 0.96}, 4.2, "LEU", 1.0)
+    leu = Material({'U235': 0.04, 'U238': 0.96}, 4.2, 2.72, 1.0)
+    leu.attrs['comment'] = 'first light'
     leu.write_hdf5('proto1.h5', chunksize=10)
 
     for i in range(2, 11):
-        leu = Material({'U235': 0.04, 'U238': 0.96}, i*4.2, "LEU", 1.0*i)
+        leu = Material({'U235': 0.04, 'U238': 0.96}, i*4.2, 2.72, 1.0*i)
+        leu.attrs['comment'] = 'fire in the disco - {0}'.format(i)
         leu.write_hdf5('proto1.h5')
 
     # Loads with protocol 1 now.
     m = Material()
     m.from_hdf5('proto1.h5', '/material', -3, 1)
-    assert_equal(m.name, 'LEU')
+    assert_equal(m.density, 2.72)
     assert_equal(m.atoms_per_mol, 8.0)
     assert_equal(m.mass, 33.6)
     assert_equal(m.comp, {922350: 0.04, 922380: 0.96})
+    assert_equal(m.attrs['comment'], 'fire in the disco - 8')
 
     m = from_hdf5('proto1.h5', '/material', 3, 1)
-    assert_equal(m.name, 'LEU')
+    assert_equal(m.density, 2.72)
     assert_equal(m.atoms_per_mol, 4.0)
     assert_equal(m.mass, 16.8)
     assert_equal(m.comp, {922350: 0.04, 922380: 0.96})
+    assert_equal(m.attrs['comment'], 'fire in the disco - 4')
 
     os.remove('proto1.h5')
-
-
 
 
 class TestMaterialMethods(TestCase):
@@ -201,84 +201,74 @@ class TestMassSubMaterialMethods(TestCase):
     "Tests that the Material sub-Material ter member functions work."
 
     def test_sub_mat_int_1(self):
-        mat = Material(nucvec, -1, "Old Material")
+        mat = Material(nucvec, -1)
         mat1 = mat.sub_mat([922350, 922380, 80160])
         assert_almost_equal(mat1.comp[80160],  0.3333333333333)
         assert_almost_equal(mat1.comp[922350], 0.3333333333333)
         assert_almost_equal(mat1.comp[922380], 0.3333333333333)
         assert_equal(mat1.mass, 3.0)
-        assert_equal(mat1.name, '')
 
     def test_sub_mat_int_2(self):
         mat = Material(nucvec)
-        mat1 = mat.sub_mat([922350, 922380, 80160], "New Material")
+        mat1 = mat.sub_mat([922350, 922380, 80160])
         assert_almost_equal(mat1.comp[80160],  0.3333333333333)
         assert_almost_equal(mat1.comp[922350], 0.3333333333333)
         assert_almost_equal(mat1.comp[922380], 0.3333333333333)
         assert_equal(mat1.mass, 3.0)
-        assert_equal(mat1.name, 'New Material')
 
     def test_sub_mat_attr_1(self):
-        mat = Material(nucvec, -1, "Old Material")
+        mat = Material(nucvec, -1)
         mat1 = mat.sub_mat(["U235", "U238", "80160", "H1"])
         assert_almost_equal(mat1.comp[10010],  0.25)
         assert_almost_equal(mat1.comp[80160],  0.25)
         assert_almost_equal(mat1.comp[922350], 0.25)
         assert_almost_equal(mat1.comp[922380], 0.25)
         assert_equal(mat1.mass, 4.0)
-        assert_equal(mat1.name, '')
 
     def test_sub_mat_attr_2(self):
         mat = Material(nucvec)
-        mat1 = mat.sub_mat(["U235", "U238", "80160", "H1"], "New Material")
+        mat1 = mat.sub_mat(["U235", "U238", "80160", "H1"])
         assert_almost_equal(mat1.comp[10010],  0.25)
         assert_almost_equal(mat1.comp[80160],  0.25)
         assert_almost_equal(mat1.comp[922350], 0.25)
         assert_almost_equal(mat1.comp[922380], 0.25)
         assert_equal(mat1.mass, 4.0)
-        assert_equal(mat1.name, 'New Material')
 
     def test_sub_u_1(self):
         mat = Material(nucvec)
         mat1 = mat.sub_u()
         assert_equal(mat1.comp, {922350: 0.5, 922380: 0.5})
         assert_equal(mat1.mass, 2.0)
-        assert_equal(mat1.name, '')
 
     def test_sub_u_2(self):
         mat = Material(nucvec)
-        mat1 = mat.sub_u("U Material")
+        mat1 = mat.sub_u()
         assert_equal(mat1.comp, {922350: 0.5, 922380: 0.5})
         assert_equal(mat1.mass, 2.0)
-        assert_equal(mat1.name, 'U Material')
 
     def test_pu_1(self):
         mat = Material(nucvec)
         mat1 = mat.sub_pu()
         assert_equal(mat1.comp, {942390: 0.5, 942410: 0.5})
         assert_equal(mat1.mass, 2.0)
-        assert_equal(mat1.name, '')
 
     def test_pu_2(self):
         mat = Material(nucvec)
-        mat1 = mat.sub_pu("PU Material")
+        mat1 = mat.sub_pu()
         assert_equal(mat1.comp, {942390: 0.5, 942410: 0.5})
         assert_equal(mat1.mass, 2.0)
-        assert_equal(mat1.name, 'PU Material')
 
     def test_lan_1(self):
         mat = Material(nucvec)
         mat1 = mat.sub_lan()
         assert_equal(mat1.comp, {691690: 1.0})
         assert_equal(mat1.mass, 1.0)
-        assert_equal(mat1.name, '')
 
     def test_lan_2(self):
         mat = Material(nucvec)
-        mat1 = mat.sub_lan("LAN Material")
+        mat1 = mat.sub_lan()
         assert_equal(mat1.comp, {691690: 1.0})
         assert_equal(mat1.mass, 1.0)
-        assert_equal(mat1.name, 'LAN Material')
 
     def test_act_1(self):
         mat = Material(nucvec)
@@ -290,11 +280,10 @@ class TestMassSubMaterialMethods(TestCase):
         assert_equal(mat1.comp[952420], 1.0/6.0)
         assert_equal(mat1.comp[962440], 1.0/6.0)
         assert_equal(mat1.mass, 6.0)
-        assert_equal(mat1.name, '')
 
     def test_act_2(self):
         mat = Material(nucvec)
-        mat1 = mat.sub_act("ACT Material")
+        mat1 = mat.sub_act()
         assert_equal(mat1.comp[922350], 1.0/6.0)
         assert_equal(mat1.comp[922380], 1.0/6.0)
         assert_equal(mat1.comp[942390], 1.0/6.0)
@@ -302,7 +291,6 @@ class TestMassSubMaterialMethods(TestCase):
         assert_equal(mat1.comp[952420], 1.0/6.0)
         assert_equal(mat1.comp[962440], 1.0/6.0)
         assert_equal(mat1.mass, 6.0)
-        assert_equal(mat1.name, 'ACT Material')
 
     def test_tru_1(self):
         mat = Material(nucvec)
@@ -312,17 +300,15 @@ class TestMassSubMaterialMethods(TestCase):
         assert_equal(mat1.comp[952420], 1.0/4.0)
         assert_equal(mat1.comp[962440], 1.0/4.0)
         assert_equal(mat1.mass, 4.0)
-        assert_equal(mat1.name, '')
 
     def test_tru_2(self):
         mat = Material(nucvec)
-        mat1 = mat.sub_tru("TRU Material")
+        mat1 = mat.sub_tru()
         assert_equal(mat1.comp[942390], 1.0/4.0)
         assert_equal(mat1.comp[942410], 1.0/4.0)
         assert_equal(mat1.comp[952420], 1.0/4.0)
         assert_equal(mat1.comp[962440], 1.0/4.0)
         assert_equal(mat1.mass, 4.0)
-        assert_equal(mat1.name, 'TRU Material')
 
     def test_ma_1(self):
         mat = Material(nucvec)
@@ -330,15 +316,13 @@ class TestMassSubMaterialMethods(TestCase):
         assert_equal(mat1.comp[952420], 1.0/2.0)
         assert_equal(mat1.comp[962440], 1.0/2.0)
         assert_equal(mat1.mass, 2.0)
-        assert_equal(mat1.name, '')
 
     def test_ma_2(self):
         mat = Material(nucvec)
-        mat1 = mat.sub_ma("MA Material")
+        mat1 = mat.sub_ma()
         assert_equal(mat1.comp[952420], 1.0/2.0)
         assert_equal(mat1.comp[962440], 1.0/2.0)
         assert_equal(mat1.mass, 2.0)
-        assert_equal(mat1.name, 'MA Material')
 
     def test_fp_1(self):
         mat = Material(nucvec)
@@ -347,16 +331,14 @@ class TestMassSubMaterialMethods(TestCase):
         assert_equal(mat1.comp[80160],  1.0/3.0)
         assert_equal(mat1.comp[691690], 1.0/3.0)
         assert_equal(mat1.mass, 3.0)
-        assert_equal(mat1.name, '')
 
     def test_fp_2(self):
         mat = Material(nucvec)
-        mat1 = mat.sub_fp("FP Material")
+        mat1 = mat.sub_fp()
         assert_equal(mat1.comp[10010],  1.0/3.0)
         assert_equal(mat1.comp[80160],  1.0/3.0)
         assert_equal(mat1.comp[691690], 1.0/3.0)
         assert_equal(mat1.mass, 3.0)
-        assert_equal(mat1.name, 'FP Material')
 
 
     def test_sub_range(self):
@@ -389,7 +371,6 @@ class TestMaterialOperatorOverloading(TestCase):
         mat = self.u235 + self.u238
         assert_equal(mat.comp, {922350: 0.5, 922380: 0.5})
         assert_equal(mat.mass, 2.0)
-        assert_equal(mat.name, '')
 
     def test_mul_num(self):
         mat = self.u235 * 2.0
@@ -436,7 +417,7 @@ def test_from_atom_frac_meth():
     assert_equal(mat.comp[80160], 0.8880851267119192)
     assert_equal(mat.molecular_weight(), 18.01056468403)    
 
-    ihm = Material(name='IHM')
+    ihm = Material()
     ihm.from_atom_frac({922350: 0.5, 922380: 0.5})
     uox = {ihm: 1.0, 'O16': 2.0}
     mat = Material()
@@ -801,7 +782,7 @@ def test_from_atom_frac_func():
     assert_equal(mat.comp[80160], 0.8880851267119192)
     assert_equal(mat.molecular_weight(), 18.01056468403)    
 
-    ihm = from_atom_frac({922350: 0.5, 922380: 0.5}, name='IHM')
+    ihm = from_atom_frac({922350: 0.5, 922380: 0.5})
     uox = {ihm: 1.0, 'O16': 2.0}
     mat = from_atom_frac(uox)
     assert_equal(mat.atoms_per_mol, 3.0)
@@ -882,6 +863,22 @@ def test_map_str_material():
     assert_equal(n['heu'].mass, 42.0)
     assert_equal(n['heu']['U238'], 0.42)
 
+
+def test_attrs():
+    mat = Material(leu)
+    assert_equal(len(mat.attrs), 0)
+    mat.attrs['units'] = 'kg'
+    assert_equal(len(mat.attrs), 1)
+    assert_equal(mat.attrs['units'], 'kg')
+    
+    mat.attrs = {'comment': 'rawr', 'amount': 42.0}
+    assert_equal(mat.attrs.keys(), ['amount', 'comment'])
+    assert_true(isinstance(mat.attrs, jsoncpp.Value))
+
+    aview = mat.attrs
+    aview['omnomnom'] = [1, 2, 5, 3]
+    assert_equal(len(mat.attrs), 3)
+    assert_equal(list(mat.attrs['omnomnom']), [1, 2, 5, 3])
 
 #
 # Run as script
