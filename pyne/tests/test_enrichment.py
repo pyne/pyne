@@ -16,6 +16,8 @@ from pyne import enrichment as enr
 if not os.path.isfile(pyne.nuc_data):
     raise RuntimeError("Tests require nuc_data.h5.  Please run nuc_data_make.")
 
+SOLVERS = ["symbolic", "numeric"]
+
 
 #
 # Tests the cascade helper class.
@@ -126,7 +128,7 @@ def test_alphastar_i():
 # Intergration tests which test multicomponent() and ltot_per_feed()
 #
 
-def test_sample_feed():
+def check_sample_feed(solver):
     orig_casc = enr.default_uranium_cascade()
     orig_casc.x_prod_j = 0.06
     feed = Material({
@@ -137,7 +139,7 @@ def test_sample_feed():
             922380: 0.9863899989,
             })
     orig_casc.mat_feed = feed
-    casc = enr.multicomponent(orig_casc, tolerance=1E-11, max_iter=100)
+    casc = enr.multicomponent(orig_casc, solver=solver, tolerance=1E-11, max_iter=100)
 
     assert_almost_equal(casc.mat_prod.comp[922350], 0.06,   5) 
     assert_almost_equal(casc.mat_tail.comp[922350], 0.0025, 5)
@@ -155,7 +157,12 @@ def test_sample_feed():
     assert_almost_equal(casc.swu_per_feed / 0.932280175218, 1.0, 5)
     assert_almost_equal(casc.swu_per_prod / 8.0009119515,   1.0, 5)
 
-def test_NU():
+def test_sample_feed():
+    for solver in SOLVERS:
+        yield check_sample_feed, solver
+
+
+def check_NU(solver):
     orig_casc = enr.default_uranium_cascade()
     orig_casc.x_prod_j = 0.05
     feed = Material({
@@ -164,7 +171,7 @@ def test_NU():
             922380: 0.992745,
             })
     orig_casc.mat_feed = feed
-    casc = enr.multicomponent(orig_casc, tolerance=1E-11)
+    casc = enr.multicomponent(orig_casc, solver=solver, tolerance=1E-11)
 
     assert_almost_equal(casc.mat_prod.comp[922350], 0.05,   5) 
     assert_almost_equal(casc.mat_tail.comp[922350], 0.0025, 5)
@@ -182,7 +189,12 @@ def test_NU():
     assert_almost_equal(casc.swu_per_feed / 0.761263453429, 1.0, 5)
     assert_almost_equal(casc.swu_per_prod / 7.69362000806,  1.0, 5)
 
-def test_vision():
+def test_NU():
+    for solver in SOLVERS:
+        yield check_NU, solver
+
+
+def check_vision(solver):
     orig_casc = enr.default_uranium_cascade()
     orig_casc.x_prod_j = 0.055
     feed = Material({
@@ -192,7 +204,7 @@ def test_vision():
             922380: 0.985523854246919,
             })
     orig_casc.mat_feed = feed
-    casc = enr.multicomponent(orig_casc, tolerance=1E-11)
+    casc = enr.multicomponent(orig_casc, solver=solver, tolerance=1E-11)
 
     assert_almost_equal(casc.mat_prod.comp[922350], 0.055,  5) 
     assert_almost_equal(casc.mat_tail.comp[922350], 0.0025, 5)
@@ -210,7 +222,12 @@ def test_vision():
     assert_almost_equal(casc.swu_per_feed / 0.85102089049,  1.0, 4)
     assert_almost_equal(casc.swu_per_prod / 7.85797310499,  1.0, 4)
 
-def test_tungsten():
+def test_vision():
+    for solver in SOLVERS:
+        yield check_vision, solver
+
+
+def check_tungsten(solver):
     # This test comes from 'Multicomponent Isotope Separation in Matched
     # Abundance Ratio Cascades Composed of Stages with Large Separation Factors' 
     # by casc. von Halle, 1987.
@@ -232,7 +249,7 @@ def test_tungsten():
             741860: 0.28417,
             })
     orig_casc.mat_feed = feed
-    casc = enr.multicomponent(orig_casc, tolerance=1E-5)
+    casc = enr.multicomponent(orig_casc, solver=solver, tolerance=1E-5)
 
     assert_almost_equal(casc.mat_prod.comp[741800], 0.5109,  5) 
     assert_almost_equal(casc.mat_tail.comp[741800], 0.00014, 5)
@@ -249,6 +266,11 @@ def test_tungsten():
     assert_almost_equal(casc.l_t_per_feed / 96.8179316719, 1.0, 3)
     assert_almost_equal(casc.swu_per_feed / 2.22221945305, 1.0, 3)
     assert_almost_equal(casc.swu_per_prod / 900.810164953, 1.0, 3)
+
+def test_tungsten():
+    for solver in SOLVERS:
+        yield check_tungsten, solver
+
 
 if __name__ == "__main__":
     noscasc.main()
