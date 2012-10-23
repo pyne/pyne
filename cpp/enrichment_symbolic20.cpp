@@ -4,7 +4,7 @@
 /*** WARNING: This file is auto-generated.             ***/
 /***                  DO NOT MODIFY!!!                 ***/
 /*********************************************************/
-#include "enrichment_symbolic20.h"
+#include "enrichment_symbolic.h"
 
 pyne::enrichment::Cascade pyne::enrichment::solve_symbolic(pyne::enrichment::Cascade & orig_casc)
 {
