@@ -45,13 +45,7 @@ def parse_eaf_xs(build_file):
 
     """
     
-    #TODO: change eaf_file to something more universal
-    eaf_file = "/filespace/groups/cnerg/opt/FENDL2.0-A/fendlg-2.0_175"
-
-    if not os.path.exists(eaf_file):
-        return
-
-    with open(eaf_file, 'r') as f:
+    with open(build_file, 'r') as f:
         raw_data = f.read()
 
     eaf_data = list()
