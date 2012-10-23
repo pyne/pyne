@@ -16,7 +16,7 @@ from sympy.utilities.iterables import numbered_symbols
 
 from utils import cse_to_c
 
-NPROCS = 2
+NPROCS = 1
 
 def _aggstatus(stat, msg, aggstat):
     if not aggstat:

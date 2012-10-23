@@ -258,8 +258,8 @@ pyne::enrichment::Cascade pyne::enrichment::solve_symbolic(pyne::enrichment::Cas
          n44 = 0.0,
          n47 = 0.0,
          n46 = 0.0,
-         n8 = 0.0,
-         n9 = 0.0,
+         n107 = 0.0,
+         n106 = 0.0,
          g68 = 0.0,
          g69 = 0.0,
          g62 = 0.0,
@@ -280,8 +280,8 @@ pyne::enrichment::Cascade pyne::enrichment::solve_symbolic(pyne::enrichment::Cas
          g90 = 0.0,
          g99 = 0.0,
          g98 = 0.0,
-         n107 = 0.0,
-         n106 = 0.0,
+         n8 = 0.0,
+         n9 = 0.0,
          n105 = 0.0,
          n104 = 0.0,
          n103 = 0.0,
@@ -690,10 +690,10 @@ pyne::enrichment::Cascade pyne::enrichment::solve_symbolic(pyne::enrichment::Cas
       g48 = g25 + g35;
       g49 = pow(alpha, g15*g4) + g30;
       g50 = pow(alpha, g15*g5) + g31;
-      g51 = xF[0]/g47;
+      g51 = xF[3]/g50;
       g52 = xF[1]/g48;
-      g53 = xF[3]/g50;
-      g54 = xF[2]/g49;
+      g53 = xF[2]/g49;
+      g54 = xF[0]/g47;
       g55 = xF[1]/g43;
       g56 = xF[0]/g44;
       g57 = xF[3]/g46;
@@ -712,7 +712,7 @@ pyne::enrichment::Cascade pyne::enrichment::solve_symbolic(pyne::enrichment::Cas
       g70 = 1.0*g67;
       g71 = log(g23*g43*g9/g34);
       g72 = 1.0*g69;
-      g73 = -g25*g52*g70 - g32*xF[0] - g32*xF[1] - g32*xF[2] - g32*xF[3] - g35*g52*g72 - g51*g70*(g29 + 1) - g51*g72*(pow(alpha, g1*g15) - 1) - g53*g70*(g31 + 1) - g53*g72*(pow(alpha, g15*g5) - 1) - g54*g70*(g30 + 1) - g54*g72*(pow(alpha, g15*g4) - 1);
+      g73 = -g25*g52*g70 - g32*xF[0] - g32*xF[1] - g32*xF[2] - g32*xF[3] - g35*g52*g72 - g51*g70*(g31 + 1) - g51*g72*(pow(alpha, g15*g5) - 1) - g53*g70*(g30 + 1) - g53*g72*(pow(alpha, g15*g4) - 1) - g54*g70*(g29 + 1) - g54*g72*(pow(alpha, g1*g15) - 1);
       LpF = xF[0]*(g10 + 1.0)*(g21 + g59*g68 + g65*g71)/(g18*(g10 - 1.0)) + xF[1]*(g11 + 1.0)*(g21 + g61*g68 + g63*g71)/(g18*(g11 - 1.0)) + xF[2]*(g12 + 1.0)*(g21 + g62*g68 + g64*g71)/(g18*(g12 - 1.0)) + xF[3]*(g13 + 1.0)*(g21 + g60*g68 + g66*g71)/(g18*(g13 - 1.0));
       PpF = g23;
       TpF = -g7/g3;
