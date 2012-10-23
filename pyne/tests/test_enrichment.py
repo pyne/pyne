@@ -249,7 +249,7 @@ def check_tungsten(solver):
             741860: 0.28417,
             })
     orig_casc.mat_feed = feed
-    casc = enr.multicomponent(orig_casc, solver=solver, tolerance=1E-5)
+    casc = enr.multicomponent(orig_casc, solver=solver, tolerance=1E-6)
 
     assert_almost_equal(casc.mat_prod.comp[741800], 0.5109,  5) 
     assert_almost_equal(casc.mat_tail.comp[741800], 0.00014, 5)
