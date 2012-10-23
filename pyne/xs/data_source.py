@@ -501,6 +501,8 @@ class EAFDataSource(DataSource):
         elif 1 < len(rows):
             rows = np.array(rows)
             rxdata = rows.sum(axis=0)
+        else:
+            rxdata = rows
 
 
 

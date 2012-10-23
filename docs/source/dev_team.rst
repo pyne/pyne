@@ -13,6 +13,7 @@ The Python for Nuclear Engineering Team includes:
 * Katy Huff
 * Josh Peterson
 * `Chris Dembia`_
+* `Eric Relson`_
 
 .. _Anthony Scopatz: http://www.scopatz.com/
 
@@ -21,5 +22,7 @@ The Python for Nuclear Engineering Team includes:
 .. _Paul Romano: mailto:romano7@gmail.com
 
 .. _Chris Dembia: mailto:cld72@cornell.edu
+
+.. _Eric Relson: mailto:erelson@umich.edu
 
 Contact us via pyne-dev@googlegroups.com
