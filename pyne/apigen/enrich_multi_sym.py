@@ -7,6 +7,7 @@ from being used with infinities.  For a work around see [1].
 import os
 import time
 import multiprocessing
+import logging
 
 from sympy import Symbol, pprint, latex, diff, count_ops, simplify, cse, Eq, Q, \
     log, logcombine, Abs, exp, sqrt, series, separate, powsimp, collect, expand, Abs
@@ -18,11 +19,9 @@ from utils import cse_to_c
 NPROCS = 2
 
 def _aggstatus(stat, msg, aggstat):
-    if aggstat:
-        stat += msg + '\n'
-    else:
+    if not aggstat:
         print msg
-        stat = None
+    stat += msg + '\n'
     return stat
 
 
@@ -171,7 +170,7 @@ def cgen_ncomp(ncomp=3, nporder=2, aggstat=False, debug=False):
     stat = _aggstatus(stat, msg, aggstat)
     if aggstat:
         print stat
-    return ccode, repnames
+    return ccode, repnames, stat
 
 
 _func_header1 = \
@@ -265,7 +264,6 @@ def cgen_func(max_ncomp=40, debug=False):
     """Generate C function to compute multicoponent enrichment cascades for 
     a number of components between 3 and max_ncomp. 
     """
-    #ncomps = range(3, max_ncomp+1)
     ncomps = range(3, max_ncomp+1)
     if 1 == NPROCS:
         ncomp_kwargs = [{'ncomp': n, 'debug': debug, 'aggstat': False} for n in ncomps]
@@ -278,11 +276,12 @@ def cgen_func(max_ncomp=40, debug=False):
         raise ValueError("NPROCS must be greater than or equal to 1")
     cases = ''
     repnames = set()
-    for ncomp, (ccode_ncomp, repnames_ncomp) in zip(ncomps, cgened):
-        repnames |= repnames_ncomp
+    for ncomp, (ccode_ncomp, repnames_ncomp, statmsg) in zip(ncomps, cgened):
         cases += "    case {0}:\n".format(ncomp)
         cases += ccode_ncomp
         cases += "      break;\n"
+        repnames |= repnames_ncomp
+        logging.info(statmsg)
     repdeclare = "  double " + repnames.pop() + " = 0.0,\n"
     repdectemp = "         {0} = 0.0"
     repdeclare += ",\n".join([repdectemp.format(r) for r in repnames])
@@ -326,28 +325,38 @@ _source_file_header_template = """
 /*** WARNING: This file is auto-generated.             ***/
 /***                  DO NOT MODIFY!!!                 ***/
 /*********************************************************/
-#include "{filename}.h"
+#include "{hfname}"
 
 """
 
-def cgen_source_file(filename="temp", max_ncomp=40, debug=False):
+def cgen_source_file(hfname="temp", max_ncomp=40, debug=False):
     """ Generates a valid C/C++ source file for multicomponent enrichment cascades.
     """
-    ccode = _source_file_header_template.format(filename=os.path.split(filename)[-1])
+    ccode = _source_file_header_template.format(hfname=os.path.split(hfname)[-1])
     ccode += cgen_func(max_ncomp, debug=debug)
     return ccode
 
 
 
-def cgen_file(filename="temp", lang='C++', max_ncomp=40, debug=False):
+def cgen_file(filename="temp", header_filename=None, lang='C++', max_ncomp=40, 
+              debug=False):
     """Generate C/C++ header and source file to compute multicoponent enrichment 
     cascades for a number of components between 3 and max_ncomp. The filename 
     argument should not end in extension ('.h', '.c', or '.cpp') as it will be 
     appended automatically.
     """
-    hfname = filename + '.h'
+    logfile = 'sme{0}.log'.format(max_ncomp)
+    if os.path.exists(logfile):
+        os.remove(logfile)
+    logging.basicConfig(filename=logfile, level=logging.DEBUG)
+    hfname = filename + '.h' if header_filename is None else header_filename
     sfname = filename + '.' + {'C': 'c', 'C++': 'cpp', 'CPP': 'cpp'}[lang.upper()]
-    ccode = cgen_source_file(filename, max_ncomp, debug=debug)
+    logging.info("header filename: " + hfname)
+    logging.info("source filename: " + sfname)
+    logging.info("language: " + lang)
+    logging.info("maximum number of components: {0}".format(max_ncomp))
+    logging.info("debug enabled: {0}".format(debug))
+    ccode = cgen_source_file(hfname, max_ncomp, debug=debug)
     with open(hfname, 'w') as f:
         f.write(_header_file)
     with open(sfname, 'w') as f:
