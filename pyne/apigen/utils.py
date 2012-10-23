@@ -15,6 +15,7 @@ def cse_to_c(replacements, reduced_exprs, indent=2, debug=False):
     repline_template = '{ind}{name} = {expr}\n'
     redline_template = '{ind}{name} = {expr}\n'
     redrtnline_template = '{ind}return {expr}\n'
+    debug_template = ws + 'std::cout << "{0} = " << {0} << "\\n";\n'
 
     repnames = set()
     for repsym, repexpr in replacements:
@@ -29,7 +30,7 @@ def cse_to_c(replacements, reduced_exprs, indent=2, debug=False):
         genline = repline_template.format(ind=ws, name=repname, expr=genexpr)
         ccode += genline
         if debug:
-            ccode += ws + 'std::cout << "{0} = " << {0} << "\\n";\n'.format(repname)
+            ccode += debug_template.format(repname)
 
     for redexpr in reduced_exprs:
         gencode = codegen(("redname", redexpr), "C", "temp", header=False, empty=False)
@@ -40,7 +41,7 @@ def cse_to_c(replacements, reduced_exprs, indent=2, debug=False):
             genexpr = m.group(2)
             genline = redline_template.format(ind=ws, name=genname, expr=genexpr)
             if debug:
-                ccode += ws+'std::cout << "{0} = " << {0} << "\\n";\n'.format(genname)
+                genline += debug_template.format(genname)
         else:
             genexpr = rtn_pattern.search(genexpr).group(1)
             genline = redrtnline_template.format(ind=ws, expr=genexpr)

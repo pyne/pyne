@@ -9,13 +9,13 @@ import time
 import multiprocessing
 
 from sympy import Symbol, pprint, latex, diff, count_ops, simplify, cse, Eq, Q, \
-    log, logcombine, Abs, exp, sqrt, series, separate, powsimp, collect, expand
+    log, logcombine, Abs, exp, sqrt, series, separate, powsimp, collect, expand, Abs
 from sympy.solvers import solve
 from sympy.utilities.iterables import numbered_symbols
 
 from utils import cse_to_c
 
-NPROCS = 1
+NPROCS = 2
 
 def _aggstatus(stat, msg, aggstat):
     if aggstat:
@@ -58,6 +58,12 @@ def cgen_ncomp(ncomp=3, nporder=2, aggstat=False, debug=False):
     Mstar = Symbol('Mstar', positive=True, real=True)
     MW = [Symbol('MW[{0}]'.format(i), positive=True, real=True) for i in r]
     beta = [alpha**(Mstar - MWi) for MWi in MW]
+
+    # np_closed helper terms
+    NP_b = Symbol('NP_b', real=True)
+    NP_2a = Symbol('NP_2a', real=True)
+    NP_sqrt_base = Symbol('NP_sqrt_base', real=True)
+
 
     xF = [Symbol('xF[{0}]'.format(i), positive=True, real=True) for i in r]
     xPi = [Symbol('xP[{0}]'.format(i), positive=True, real=True) for i in r]
@@ -127,14 +133,23 @@ def cgen_ncomp(ncomp=3, nporder=2, aggstat=False, debug=False):
         b = d1NP - 2*NP0*d2NP
         c = d0NP - NP0*d1NP + NP0*NP0*d2NP
         # quadratic eq. (minus only)
-        np_closed = (-b - sqrt(b**2 - 4*a*c)) / (2*a) 
+        #np_closed = (-b - sqrt(b**2 - 4*a*c)) / (2*a)
+        # However, we need to break up this expr as follows to prevent 
+        # a floating point arithmetic bug if b**2 - 4*a*c is very close
+        # to zero but happens to be negative.  LAME!!!
+        np_2a = 2*a
+        np_sqrt_base = b**2 - 4*a*c
+        np_closed = (-NP_b - sqrt(NP_sqrt_base)) / (NP_2a)
     else:
         raise ValueError("nporder must be 1 or 2")
 
     # generate cse for writing out
     msg = "  minimizing ops by eliminating common sub-expressions"
     stat = _aggstatus(stat, msg, aggstat)
-    exprstages = [Eq(NP1, np_closed), Eq(NT1, nt_closed).xreplace({NP: NP1})]
+    exprstages = [Eq(NP_b, b), Eq(NP_2a, np_2a), 
+                  # fix for floating point sqrt() error
+                  Eq(NP_sqrt_base, np_sqrt_base), Eq(NP_sqrt_base, Abs(NP_sqrt_base)), 
+                  Eq(NP1, np_closed), Eq(NT1, nt_closed).xreplace({NP: NP1})]
     cse_stages = cse(exprstages, numbered_symbols('n'))
     exprothers = [Eq(LpF, LoverF), Eq(PpF, ppf), Eq(TpF, tpf), 
                   Eq(SWUpF, SWUoverF), Eq(SWUpP, SWUoverP)] + \
@@ -175,6 +190,7 @@ _func_header1 = \
   int ncomp = casc.mat_feed.comp.size();
   double LpF = -1.0, PpF = -1.0, TpF = -1.0, 
          SWUpF = -1.0, SWUpP = -1.0, 
+         NP_b = -1.0, NP_sqrt_base = -1.0, NP_2a = -1.0, 
          NP1 = -1.0, NT1 = -1.0;
   double * MW = new double [ncomp];
   double * xP = new double [ncomp];
@@ -249,6 +265,7 @@ def cgen_func(max_ncomp=40, debug=False):
     """Generate C function to compute multicoponent enrichment cascades for 
     a number of components between 3 and max_ncomp. 
     """
+    #ncomps = range(3, max_ncomp+1)
     ncomps = range(3, max_ncomp+1)
     if 1 == NPROCS:
         ncomp_kwargs = [{'ncomp': n, 'debug': debug, 'aggstat': False} for n in ncomps]
