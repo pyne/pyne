@@ -29,13 +29,13 @@ eaf_info_pattern = \
 eaf_bin_pattern = "(?P<xs>(\d\.\d{5}E[-+]\d{2}\s*){1,175})"
 
 
-def parse_eaf_xs(build_dir):
+def parse_eaf_xs(build_file):
     """Create numpy array by parsing EAF data
 
     Parameters
     ----------
-    build_dir : str
-        Directory where EAF data is stored (TODO).
+    build_file : str
+        Path where EAF data is stored.
     
     Returns
     ---------
@@ -47,6 +47,9 @@ def parse_eaf_xs(build_dir):
     
     #TODO: change eaf_file to something more universal
     eaf_file = "/filespace/groups/cnerg/opt/FENDL2.0-A/fendlg-2.0_175"
+
+    if not os.path.exists(eaf_file):
+        return
 
     with open(eaf_file, 'r') as f:
         raw_data = f.read()
@@ -79,18 +82,20 @@ def parse_eaf_xs(build_dir):
     return eaf_array
 
 
-def make_eaf_table(nuc_data, build_dir=""):
+def make_eaf_table(nuc_data, build_path=""):
     """Function for adding EAF group and table to HDF5 storage.
 
     Parameters
     ----------
     nuc_data : str
         Path to nuclide data file.
-    build_dir : str
+    build_path : str
         Directory where EAF data is located.
     
     """
-    eaf_array = parse_eaf_xs(build_dir)
+
+    print "Grabbing the EAF activation data."
+    eaf_array = parse_eaf_xs(build_path)
 
     # Open the HDF5 file
     db = tb.openFile(nuc_data, 'a', filters=BASIC_FILTERS)
@@ -192,10 +197,18 @@ def make_eaf(args):
         if hasattr(f.root, 'neutron') and hasattr(f.root.neutron, 'eaf_xs'):
             return
 
-    #
-    print "Grabbing the EAF activation data."
-    parse_eaf_xs(build_dir)
+    #TODO: change eaf_file to something more universal
+    eaf_file = "/filespace/groups/cnerg/opt/FENDL2.0-A/fendlg-2.0_175"
+    build_filename = os.path.join(build_dir, 'fendlg-2.0_175')
 
+    if os.path.exists(build_filename):
+        build_path = build_filename
+    elif os.path.exists(eaf_file):
+        build_path = eaf_file
+    else:
+        return
+
+    #
     print "Making EAF activation data table."
-    make_eaf_table(nuc_data, build_dir)
+    make_eaf_table(nuc_data, build_path)
 
