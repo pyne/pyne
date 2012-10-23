@@ -3,6 +3,7 @@ import scipy as sp
 
 from pyne.material import Material
 from pyne import data
+from pyne.xs.cache import xs_cache
 
 
 def decay(mat, t):
@@ -36,3 +37,4 @@ def _create_decay_matrix(nucs):
 def _solve_decay_matrix(A):
     eA = sp.linalg.expm(A)
     return eA
+
