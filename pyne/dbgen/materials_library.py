@@ -81,7 +81,6 @@ def make_materials_compendium(nuc_data):
     with tb.openFile(nuc_data, 'a') as f:
         f.createGroup('/', 'materials_library')
         f.createArray('/materials_library', 'nuc_zz', np.array(list(nuc_zz)))
-
     # Writes elements for which we have compositional data to file
     for zz in elemental_mats:
         if 0 == len(elemental_mats[zz]):
@@ -104,7 +103,6 @@ def make_materials_library(args):
         with tb.openFile(nuc_data, 'r') as f:
             if '/materials_library' in f:
                 return
-        f.close()
 
     # First make the elements
     print "Making the elements"
