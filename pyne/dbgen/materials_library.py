@@ -8,6 +8,10 @@ import os
 from pyne.data import natural_abund, natural_abund_map
 
 elemental_mats = {}
+names = []
+nuc_zz = set()
+mats = []
+densities = []  
 
 # Make a dictionary that represents elements as dicts of their isotopes
 def make_elements():
@@ -25,18 +29,13 @@ def make_elements():
     
 # Parses data from .csv
 def grab_materials_compendium(location = 'materials_compendium.csv'):
-    nuc_zz = set()
-    mats = []
-    names = []
-    densities = []    
     # grabs name from starting row, starts a new dictionary for composition
     def starting_row(row):
         if re.match('\d{1,3}\.  ', row[0]):
             #print row
-			name = row[1]
+            name = row[1]
             names.append(name)
             composition.clear()
-            #print name
         else:
             pass
     # grabs density data        
@@ -77,8 +76,7 @@ def grab_materials_compendium(location = 'materials_compendium.csv'):
 # Writes to file
 def make_materials_compendium(nuc_data):
     # open nuc_data, make nuc_zz an array
-    #with tb.openFile(nuc_data, 'r+', filters=tb.Filters(complevel=5, complib='zlib', shuffle=True, fletcher32=False)) as f:
-    with tb.openFile(nuc_data, 'a') as f:
+    with tb.openFile(nuc_data, 'r+', filters=tb.Filters(complevel=5, complib='zlib', shuffle=True, fletcher32=False)) as f:
         f.createGroup('/', 'materials_library')
         f.createArray('/materials_library', 'nuc_zz', np.array(list(nuc_zz)))
     # Writes elements for which we have compositional data to file
@@ -93,26 +91,24 @@ def make_materials_compendium(nuc_data):
         mats[i].mass = 1.0
         mats[i].density = float(densities[i])
         mats[i].attrs = {'name': names[i]}
-        mats[i].write_hdf5(nuc_data, datapath="/material_library/materials", nucpath="/material_library/nuc_zz", chunksize=70)
+        mats[i].write_hdf5(nuc_data, datapath="/materials_library/materials", nucpath="/materials_library/nuc_zz", chunksize=70)
     
 def make_materials_library(args):
     """Controller function for adding materials library."""
     nuc_data = args.nuc_data
-
     if os.path.exists(nuc_data):
         with tb.openFile(nuc_data, 'r') as f:
             if '/materials_library' in f:
                 return
 
     # First make the elements
-    print "Making the elements"
-    elemental_mats = {}
+    print "Making the elements..."
     make_elements()
 
     # Then grab the materials compendium
-    print "Grabbing materials compendium"
+    print "Grabbing materials compendium..."
     grab_materials_compendium(os.path.join(os.path.split(__file__)[0], 'materials_compendium.csv'))
 
     # Make atomic weight table once we have the array
-    print "Making materials compendium"
+    print "Making materials library..."
     make_materials_compendium(nuc_data)
