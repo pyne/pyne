@@ -2,16 +2,12 @@
 the data to PyNE's HDF5 storage.
 """
 
-import os
 import re
-import shutil
-from glob import glob
 
 import numpy as np
 import tables as tb
 
 from pyne import nucname
-from pyne.utils import to_barns, failure
 from pyne.dbgen.api import BASIC_FILTERS
 
 
@@ -21,7 +17,7 @@ eaf_dtype = np.dtype([
     ('rxnum',         'S7'         ),
     ('rxstr',         'S4'         ),
     ('daughter',      'S5'         ),
-    ('xsec',          float, (175,))
+    ('xs',          float, (175,))
     ])
 
 # Regular expression for parsing an individual set of EAF data
@@ -30,16 +26,16 @@ eaf_info_pattern = \
     "(?P<iso>\d{5,7})\s*(?P<rxnum>\d{2,4})\s*(?P<ngrps>\d{1,3})" \
     + "\s*(?P<parent>[a-zA-Z]{1,2}\s{0,3}\d{1,3}[M ][12 ])" \
     + "(?P<rxstr>\(N,[\w\s]{3}\))(?P<daugh>[a-zA-Z.]{1,2}\s{0,3}\d{1,3})(.*?)"
-eaf_bin_pattern = "(?P<xsec>(\d\.\d{5}E[-+]\d{2}\s*){1,175})"
+eaf_bin_pattern = "(?P<xs>(\d\.\d{5}E[-+]\d{2}\s*){1,175})"
 
 
-def parse_eaf_xsec(build_dir):
+def parse_eaf_xs(build_file):
     """Create numpy array by parsing EAF data
 
     Parameters
     ----------
-    build_dir : str
-        Directory where EAF data is stored (TODO).
+    build_file : str
+        Path where EAF data is stored.
     
     Returns
     ---------
@@ -49,10 +45,7 @@ def parse_eaf_xsec(build_dir):
 
     """
     
-    #TODO: change eaf_file to something more universal
-    eaf_file = "/filespace/groups/cnerg/opt/FENDL2.0-A/fendlg-2.0_175"
-
-    with open(eaf_file, 'r') as f:
+    with open(build_file, 'r') as f:
         raw_data = f.read()
 
     eaf_data = list()
@@ -62,8 +55,8 @@ def parse_eaf_xsec(build_dir):
     for m in re.finditer(eaf_pattern, raw_data, re.DOTALL):
         md = m.groupdict()
 
-        xsec_list = [float(x) for x in md['xsec'].split()]
-        xsec_list += (175-len(xsec_list))*[0.0]
+        xs_list = [float(x) for x in md['xs'].split()]
+        xs_list += (175-len(xs_list))*[0.0]
 
         # Store information in new row of array.
         eafrow = (
@@ -71,7 +64,7 @@ def parse_eaf_xsec(build_dir):
                   md['rxnum'],
                   md['rxstr'],
                   md['daugh'],
-                  xsec_list
+                  xs_list
                   )
         
         eaf_data.append(eafrow)
@@ -83,18 +76,20 @@ def parse_eaf_xsec(build_dir):
     return eaf_array
 
 
-def make_eaf_table(nuc_data, build_dir=""):
+def make_eaf_table(nuc_data, build_path=""):
     """Function for adding EAF group and table to HDF5 storage.
 
     Parameters
     ----------
     nuc_data : str
         Path to nuclide data file.
-    build_dir : str
+    build_path : str
         Directory where EAF data is located.
     
     """
-    eaf_array = parse_eaf_xsec(build_dir)
+
+    print "Grabbing the EAF activation data."
+    eaf_array = parse_eaf_xs(build_path)
 
     # Open the HDF5 file
     db = tb.openFile(nuc_data, 'a', filters=BASIC_FILTERS)
@@ -196,10 +191,18 @@ def make_eaf(args):
         if hasattr(f.root, 'neutron') and hasattr(f.root.neutron, 'eaf_xs'):
             return
 
-    #
-    print "Grabbing the EAF activation data."
-    parse_eaf_xsec(build_dir)
+    #TODO: change eaf_file to something more universal
+    eaf_file = "/filespace/groups/cnerg/opt/FENDL2.0-A/fendlg-2.0_175"
+    build_filename = os.path.join(build_dir, 'fendlg-2.0_175')
 
+    if os.path.exists(build_filename):
+        build_path = build_filename
+    elif os.path.exists(eaf_file):
+        build_path = eaf_file
+    else:
+        return
+
+    #
     print "Making EAF activation data table."
-    make_eaf_table(nuc_data, build_dir)
+    make_eaf_table(nuc_data, build_path)
 
