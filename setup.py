@@ -392,7 +392,7 @@ pack_dir = {'pyne': 'pyne',
 pack_data = {'pyne': ['includes/*.h', 'includes/*/*.h', 'includes/*/*/*.h', 
                       'includes/*/*/*/*.h', 'includes/pyne/*.pxd', 'includes/pyne/*/*.pxd', 
                       'includes/pyne/*/*/*.pxd', 'includes/pyne/*/*/*/*.pxd', '*.json'],
-             'pyne.dbgen': ['*.html'],
+             'pyne.dbgen': ['*.html', '*.csv'],
             }
 
 ext_modules=[Extension(**ext) for ext in exts]

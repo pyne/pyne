@@ -7,14 +7,13 @@ from pyne import nucname
 import os
 from pyne.data import natural_abund, natural_abund_map
 
+elemental_mats = {}
 
 # Make a dictionary that represents elements as dicts of their isotopes
 def make_elements():
 	habund = natural_abund('H')
-	elemental_mats = {}
 	for name, zz in nucname.name_zz.items():
 		elemental_mats[name] = {}
-		
 	for nuc, abund in natural_abund_map.items():
 		if 0 == nuc%10000 or abund == 0.0:
 			continue
@@ -64,7 +63,7 @@ def grab_materials_compendium(location = 'materials_compendium.csv'):
 			mats.append(mat)
 		else:
 			pass
-	# opens file, parses it
+	# opens .csv, parses it
 	with open(location, 'r') as f:
 		reader = csv.reader(f)
 		composition = {}
@@ -75,9 +74,11 @@ def grab_materials_compendium(location = 'materials_compendium.csv'):
 			elemental_row(row)
 			ending_row(row)
 
+# Writes to file
 def make_materials_compendium(nuc_data):
-	# make nuc_zz an array
-	with tb.openFile(nuc_data, 'w', filters=tb.Filters(complevel=5, complib='zlib', shuffle=True, fletcher32=False)) as f:
+	# open nuc_data, make nuc_zz an array
+	#with tb.openFile(nuc_data, 'r+', filters=tb.Filters(complevel=5, complib='zlib', shuffle=True, fletcher32=False)) as f:
+	with tb.openFile(nuc_data, 'a') as f:
 		f.createGroup('/', 'materials_library')
 		f.createArray('/materials_library', 'nuc_zz', np.array(list(nuc_zz)))
 
@@ -86,32 +87,33 @@ def make_materials_compendium(nuc_data):
 		if 0 == len(elemental_mats[zz]):
 			continue
 		element = Material(elemental_mats[zz], mass = 1.0, attrs = {'name':nucname.name(zz)})
-		element.write_hdf5(nuc_data, datapath = "/materials_library/materials", nucpath = "/materials_library/nuc_zz", chunksize = 70)
+		element.write_hdf5(nuc_data, datapath="/materials_library/materials", nucpath="/materials_library/nuc_zz", chunksize=70)
 
 	# Writes materials from mats to file, and names them.
 	for i in range(len(mats)):
 		mats[i].mass = 1.0
 		mats[i].density = float(densities[i])
 		mats[i].attrs = {'name': names[i]}
-		mats[i].write_hdf5(nuc_data, datapath = "/material_library/materials", nucpath = "/material_library/nuc_zz", chunksize = 70)
+		mats[i].write_hdf5(nuc_data, datapath="/material_library/materials", nucpath="/material_library/nuc_zz", chunksize=70)
 	
 def make_materials_library(args):
-    """Controller function for adding atomic_weights."""
+    """Controller function for adding materials library."""
     nuc_data = args.nuc_data
 
     if os.path.exists(nuc_data):
         with tb.openFile(nuc_data, 'r') as f:
             if '/materials_library' in f:
                 return
+        f.close()
 
     # First make the elements
     print "Making the elements"
+    elemental_mats = {}
     make_elements()
 
     # Then grab the materials compendium
     print "Grabbing materials compendium"
-    
-    grab_materials_compendium(os.path.join(os.path.split(__file__)[0], 'materials_compendium.py')
+    grab_materials_compendium(os.path.join(os.path.split(__file__)[0], 'materials_compendium.csv'))
 
     # Make atomic weight table once we have the array
     print "Making materials compendium"
