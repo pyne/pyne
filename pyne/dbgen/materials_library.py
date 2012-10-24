@@ -78,16 +78,16 @@ def grab_materials_compendium(location = 'materials_compendium.csv'):
 def make_materials_compendium(nuc_data):
 	# open nuc_data, make nuc_zz an array
 	#with tb.openFile(nuc_data, 'r+', filters=tb.Filters(complevel=5, complib='zlib', shuffle=True, fletcher32=False)) as f:
-	with tb.openFile(nuc_data, 'a') as f:
+    with tb.openFile(nuc_data, 'a') as f:
 		f.createGroup('/', 'materials_library')
 		f.createArray('/materials_library', 'nuc_zz', np.array(list(nuc_zz)))
 
 	# Writes elements for which we have compositional data to file
-	for zz in elemental_mats:
-		if 0 == len(elemental_mats[zz]):
-			continue
-		element = Material(elemental_mats[zz], mass = 1.0, attrs = {'name':nucname.name(zz)})
-		element.write_hdf5(nuc_data, datapath="/materials_library/materials", nucpath="/materials_library/nuc_zz", chunksize=70)
+    for zz in elemental_mats:
+        if 0 == len(elemental_mats[zz]):
+            continue
+        element = Material(elemental_mats[zz], mass = 1.0, attrs = {'name':nucname.name(zz)})
+        element.write_hdf5(nuc_data, datapath="/materials_library/materials", nucpath="/materials_library/nuc_zz", chunksize=70)
 
 	# Writes materials from mats to file, and names them.
 	for i in range(len(mats)):
@@ -104,7 +104,6 @@ def make_materials_library(args):
         with tb.openFile(nuc_data, 'r') as f:
             if '/materials_library' in f:
                 return
-        f.close()
 
     # First make the elements
     print "Making the elements"
