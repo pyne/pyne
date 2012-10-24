@@ -3,6 +3,7 @@ the data to PyNE's HDF5 storage.
 """
 
 import re
+import os
 
 import numpy as np
 import tables as tb
