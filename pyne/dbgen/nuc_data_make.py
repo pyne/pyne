@@ -67,12 +67,12 @@ def main():
     print message(pyne_logo)
 
     make_funcs = [('atomic_weight', make_atomic_weight),
-				  ('materials', make_materials_library),
                   ('scattering_lengths', make_scattering_lengths),
                   ('decay', make_decay), 
                   ('simple_xs', make_simple_xs), 
                   ('cinder', make_cinder), 
-                  ('eaf', make_eaf)
+				  ('materials', make_materials_library),
+                  ('eaf', make_eaf),
                   ]
     make_map = dict(make_funcs)
     make_open = set(['atomic_weight', 'scattering_lengths', 'simple_xs', 'materials'])
