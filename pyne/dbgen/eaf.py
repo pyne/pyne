@@ -39,7 +39,7 @@ def parse_eaf_xs(build_file):
         Path where EAF data is stored.
     
     Returns
-    ---------
+    -------
     eaf_array : numpy array
         Numpy array with a row for each isotope+reaction combination
         found in the EAF data.
