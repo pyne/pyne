@@ -374,7 +374,7 @@ void pyne::Material::write_hdf5(std::string filename, std::string datapath, std:
     hid_t data_set_params = H5Pcreate(H5P_DATASET_CREATE);
     hsize_t chunk_dims[1] ={chunksize}; 
     H5Pset_chunk(data_set_params, 1, chunk_dims);
-    H5Pset_deflate(data_set_params, 5);
+    H5Pset_deflate(data_set_params, 1);
 
     material_struct * data_fill_value  = new material_struct[material_struct_size];
     (*data_fill_value).mass = -1.0;
@@ -457,7 +457,7 @@ void pyne::Material::write_hdf5(std::string filename, std::string datapath, std:
     attrsetparams = H5Pcreate(H5P_DATASET_CREATE);
     attrchunkdims[0] = chunksize; 
     H5Pset_chunk(attrsetparams, 1, attrchunkdims);
-    H5Pset_deflate(attrsetparams, 5);
+    H5Pset_deflate(attrsetparams, 1);
 
     hvl_t attrfillvalue [1];
     attrfillvalue[0].len = 3;
