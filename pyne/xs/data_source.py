@@ -64,6 +64,7 @@ class DataSource(object):
 
     .. code-block:: python
 
+
         @property
         def exists(self):
             # Is this DataSource available on the user's system?
@@ -433,12 +434,51 @@ class CinderDataSource(DataSource):
         return rxdata
 
 
+# Dictionary matching products with MT#'s
+EAF_RX_MAP = {          'x':50,      'c':1010,    'f':180,
+        'na':220,       '2na':240,   'np':280,    'n2a':290,
+        'nd':320,       'nt':330,    'nhe3':340,
+        'pd':1150,      'np/d':None,
+        'g':1020,
+        'h':1030,       'p':1030,    '2p':1110, 
+        'd':1040,       't':1050,    '3he':1060,                
+        'a':1070,       '2a':1080,   
+        'n':40,         '2n':160,    '3n':170,    '4n':370,
+        # metastable not supported yet
+        '3n *':None,    'd  *':None, 'n  *':None, 'g  *':None,
+        'np *':None,    'a  *':None, 'h  *':None, '2p *':None,
+        'x  *':None,    '4n *':None, 'na *':None, 'nd *':None,
+        'nh *':None,    'p  *':None, 'nt *':None, 't  *':None,  
+        '2n *':None,    '*':None,
+        # handling words
+        'neutron':40,
+        'gamma':1020, 
+        'alpha':1070,
+        'proton':1030,
+        'trit':1050,
+        'triton':1050,
+        'deut':1040,
+        'deuteron':1040,
+        }
+
+# list/set of the MT#s included in the EAF data
+EAF_RX = set(['1020', '1021', '1022', '1030', '1031', '1032', '1040', 
+                     '1041', '1042', '1050', '1051', '1052', '1060', '1061',
+                     '1062', '1070', '1071', '1072', '1080', '1110', '1111',
+                     '1112', '160', '161', '162', '170', '171', '172', '180',
+                     '220', '221', '222', '240', '280', '281', '282', '290',
+                     '320', '321', '322', '330', '331', '332', '340', '341',
+                     '342', '370', '371', '40', '41', '42', '420'])
+
 class EAFDataSource(DataSource):
     """European Activation File cross section data source.  The relevant EAF
-    cross section data must be present in the nuc-data for this data source to exist.
+    cross section data must be present in the nuc-data for this data source
+    to exist.
 
     Parameters
     ----------
+    kwargs : optional
+        Keyword arguments to be sent to base class.
 
     Notes
     -----
@@ -449,7 +489,7 @@ class EAFDataSource(DataSource):
         super(EAFDataSource, self).__init__(**kwargs)
 
     def _load_group_structure(self):
-        """ """
+        """Loads the EAF energy bounds array, E_g, from nuc_data."""
         with tb.openFile(nuc_data, 'r') as f:
             E_g = np.array(f.root.neutron.eaf_xs.E_g)
         self.src_group_struct = E_g
@@ -477,19 +517,27 @@ class EAFDataSource(DataSource):
 
         See Also
         --------
-        EAF_RX
-        EAF_RX_MAP
+        EAF_RX : list
+            List of valid MT #s in the EAF data.
+        EAF_RX_MAP : dict
+            Dictionary for converting string reaction identifiers to MT #s.
 
         """
         nuc = nucname.zzaaam(nuc)
-        rx = _munge_rx(rx)
+        #rx = _munge_rx(rx)
 
+        # Munging the rx to an MT#
         try:
             int(rx)
         except ValueError:
-            msg = "the reaction '{rx}' is not valid.\n".format(rx=rx) + \
-                    "Note that EAF data only supports numeric reactions (rrrm)"
-            raise IndexError(msg)
+            try:
+                rx = EAF_RX_MAP[rx]
+            except KeyError:
+                return None
+
+        # Check if usable rx #
+        if rx is None or rx not in EAF_RX:
+            return None
 
         with tb.openFile(nuc_data, 'r') as f:
             cond = "(nuc_zz == {0}) & (rxnum == '{1}')".format(nuc, rx)
@@ -507,31 +555,5 @@ class EAFDataSource(DataSource):
 
 
         return rxdata
-
-    #TODO: figure out what to do with/how to use these...
-
-    #EAF_RX = set(["", 'np *', 'a  *', 'h  *', '2p *', '3n *', 'd  *', 'np/d', 
-    #                     'na', '*', 'nd', 'g  *', '3n', 'np', 'nt', 't', 'nt *', 
-    #                     'x  *', '4n *', 'na *', 'nd *', 't  *', 'a', 'c', '2p', 'd', 
-    #                     'g', 'h', 'n', '4n', 'p', 'n  *', '2a', '2n *', 'x', '2n', 
-    #                     'nh *', 'p  *',
-    EAF_RX = set(['1020', '1021', '1022', '1030', '1031', '1032', '1040', 
-                         '1041', '1042', '1050', '1051', '1052', '1060', '1061', 
-                         '1062', '1070', '1071', '1072', '1080', '1110', '1111', 
-                         '1112', '160', '161', '162', '170', '171', '172', '180',
-                         '220', '221', '222', '240', '280', '281', '282', '290',
-                         '320', '321', '322', '330', '331', '332', '340', '341',
-                         '342', '370', '371', '40', '41', '42', '420'])
-
-    EAF_RX_MAP = { #TODO
-        'neutron': 'n',
-        'gamma': 'g', 
-        'alpha': 'a',
-        'proton': 'p',
-        'trit': 't',
-        'triton': 't',
-        'deut': 'd',
-        'deuteron': 'd',
-        }
 
 
