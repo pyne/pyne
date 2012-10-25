@@ -542,7 +542,7 @@ class EAFDataSource(DataSource):
         with tb.openFile(nuc_data, 'r') as f:
             cond = "(nuc_zz == {0}) & (rxnum == '{1}')".format(nuc, rx)
             node = f.root.neutron.eaf_xs.eaf_xs
-            rows = np.array([row['xs'] for row in node.where(cond)])
+            rows = [np.array(row['xs']) for row in node.where(cond)]
 
         if len(rows) == 0:
             rxdata = None
@@ -550,9 +550,7 @@ class EAFDataSource(DataSource):
             rows = np.array(rows)
             rxdata = rows.sum(axis=0)
         else:
-            rxdata = rows
-
-
+            rxdata = rows[0]
 
         return rxdata
 
