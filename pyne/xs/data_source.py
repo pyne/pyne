@@ -147,8 +147,8 @@ class DataSource(object):
         return self._src_to_dst_matrix
 
     def reaction(self, nuc, rx, temp=300.0):
-        """Gets the cross section data for this reaction channel either directly from
-        the data source or from the rxcache.
+        """Gets the cross section data for this reaction channel either directly
+        from the data source or from the rxcache.
 
         Parameters
         ----------
@@ -435,15 +435,15 @@ class CinderDataSource(DataSource):
 
 
 # Dictionary matching products with MT#'s
-EAF_RX_MAP = {          'x':50,      'c':1010,    'f':180,
-        'na':220,       '2na':240,   'np':280,    'n2a':290,
-        'nd':320,       'nt':330,    'nhe3':340,
-        'pd':1150,      'np/d':None,
-        'g':1020,
-        'h':1030,       'p':1030,    '2p':1110, 
-        'd':1040,       't':1050,    '3he':1060,                
-        'a':1070,       '2a':1080,   
-        'n':40,         '2n':160,    '3n':170,    '4n':370,
+EAF_RX_MAP = {            'x':'50',      'c':'1010',    'f':'180',
+        'n':'40',         '2n':'160',    '3n':'170',    '4n':'370',
+        'na':'220',       '2na':'240',   'np':'280',    'n2a':'290',
+        'nd':'320',       'nt':'330',    'nhe3':'340',
+        'pd':'1150',      'np/d':None,
+        'g':'1020',
+        'h':'1030',       'p':'1030',    '2p':'1110',
+        'd':'1040',       't':'1050',    '3he':'1060',                
+        'a':'1070',       '2a':'1080',   
         # metastable not supported yet
         '3n *':None,    'd  *':None, 'n  *':None, 'g  *':None,
         'np *':None,    'a  *':None, 'h  *':None, '2p *':None,
@@ -451,14 +451,14 @@ EAF_RX_MAP = {          'x':50,      'c':1010,    'f':180,
         'nh *':None,    'p  *':None, 'nt *':None, 't  *':None,  
         '2n *':None,    '*':None,
         # handling words
-        'neutron':40,
-        'gamma':1020, 
-        'alpha':1070,
-        'proton':1030,
-        'trit':1050,
-        'triton':1050,
-        'deut':1040,
-        'deuteron':1040,
+        'neutron':'40',
+        'gamma':'1020', 
+        'alpha':'1070',
+        'proton':'1030',
+        'trit':'1050',
+        'triton':'1050',
+        'deut':'1040',
+        'deuteron':'1040',
         }
 
 # list/set of the MT#s included in the EAF data
@@ -524,7 +524,6 @@ class EAFDataSource(DataSource):
 
         """
         nuc = nucname.zzaaam(nuc)
-        #rx = _munge_rx(rx)
 
         # Munging the rx to an MT#
         try:
@@ -536,9 +535,10 @@ class EAFDataSource(DataSource):
                 return None
 
         # Check if usable rx #
-        if rx is None or rx not in EAF_RX:
+        if rx is None or str(rx) not in EAF_RX:
             return None
 
+        # Grab data
         with tb.openFile(nuc_data, 'r') as f:
             cond = "(nuc_zz == {0}) & (rxnum == '{1}')".format(nuc, rx)
             node = f.root.neutron.eaf_xs.eaf_xs
