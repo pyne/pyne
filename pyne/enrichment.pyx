@@ -377,8 +377,31 @@ def alphastar_i(double alpha, double Mstar, double M_i):
     return cpp_enrichment.alphastar_i(alpha, Mstar, M_i)
 
 
-def ltot_per_feed(Cascade orig_casc, double tolerance=1.0E-7, int max_iter=100):
-    """ltot_per_feed(orig_casc, tolerance=1.0E-7, max_iter=100)
+def solve_symbolic(Cascade orig_casc):
+    """solve_symbolic(orig_casc)
+    Computes the cascade parameters based on a given initial state.
+
+    Parameters
+    ----------
+    orig_casc : Cascade
+        A cascade to compute the l_t_per_feed, swu_per_feed, swu_per_prod,
+        mat_prod, and mat_tail attributes for.
+
+    Returns
+    -------
+    casc : Cascade
+        A new cascade object, copied from the original, with the appropriate
+        attributes computed.
+
+    """
+    cdef Cascade casc = Cascade()
+    cdef cpp_enrichment.Cascade ccasc = cpp_enrichment.solve_symbolic(orig_casc._inst[0])
+    casc._inst[0] = ccasc
+    return casc
+
+
+def solve_numeric(Cascade orig_casc, double tolerance=1.0E-7, int max_iter=100):
+    """solve_numeric(orig_casc, tolerance=1.0E-7, max_iter=100)
     Calculates the total flow rate (:math:`L_t`) over the feed flow 
     rate (:math:`F`).
 
@@ -400,13 +423,14 @@ def ltot_per_feed(Cascade orig_casc, double tolerance=1.0E-7, int max_iter=100):
 
     """
     cdef Cascade casc = Cascade()
-    cdef cpp_enrichment.Cascade ccasc = cpp_enrichment.ltot_per_feed(orig_casc._inst[0], tolerance, max_iter)
+    cdef cpp_enrichment.Cascade ccasc = cpp_enrichment.solve_numeric(orig_casc._inst[0], tolerance, max_iter)
     casc._inst[0] = ccasc
     return casc
 
 
-def multicomponent(Cascade orig_casc, double tolerance=1.0E-7, int max_iter=100):
-    """multicomponent(orig_casc, tolerance=1.0E-7, max_iter=100)
+def multicomponent(Cascade orig_casc, char * solver="symbolic", 
+                   double tolerance=1.0E-7, int max_iter=100):
+    """multicomponent(orig_casc, solver="symbolic", tolerance=1.0E-7, max_iter=100)
     Calculates the optimal value of Mstar by minimzing the seperative power.
     The minimizing the seperative power is equivelent to minimizing :math:`L_t/F`,
     or the total flow rate for the cascade divided by the feed flow rate. 
@@ -418,6 +442,9 @@ def multicomponent(Cascade orig_casc, double tolerance=1.0E-7, int max_iter=100)
     ----------
     orig_casc : Cascade
         A cascade to optimize.
+    solver : str, optional
+        Flag for underlying cascade solver function to use. Current options 
+        are either "symbolic" or "numeric".
     tolerance : float, optional
         Numerical tolerance for underlying solvers, default=1E-7.
     max_iter : int, optional
@@ -432,6 +459,8 @@ def multicomponent(Cascade orig_casc, double tolerance=1.0E-7, int max_iter=100)
 
     """
     cdef Cascade casc = Cascade()
-    cdef cpp_enrichment.Cascade ccasc = cpp_enrichment.multicomponent(orig_casc._inst[0], tolerance, max_iter)
+    cdef std.string strsolver = std.string(solver)
+    cdef cpp_enrichment.Cascade ccasc = cpp_enrichment.multicomponent(\
+                                    orig_casc._inst[0], strsolver, tolerance, max_iter)
     casc._inst[0] = ccasc
     return casc

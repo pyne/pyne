@@ -10,6 +10,7 @@ from pyne.utils import message
 from pyne.dbgen.api import build_dir
 from pyne.dbgen.decay import make_decay
 from pyne.dbgen.atomic_weight import make_atomic_weight
+from pyne.dbgen.materials_library import make_materials_library
 from pyne.dbgen.scattering_lengths import make_scattering_lengths
 from pyne.dbgen.simple_xs import make_simple_xs
 from pyne.dbgen.cinder import make_cinder
@@ -70,10 +71,11 @@ def main():
                   ('decay', make_decay), 
                   ('simple_xs', make_simple_xs), 
                   ('cinder', make_cinder), 
-                  ('eaf', make_eaf)
+				  ('materials', make_materials_library),
+                  ('eaf', make_eaf),
                   ]
     make_map = dict(make_funcs)
-    make_open = set(['atomic_weight', 'scattering_lengths', 'simple_xs'])
+    make_open = set(['atomic_weight', 'scattering_lengths', 'simple_xs', 'materials'])
 
     # Parse the command line arguments
     parser = argparse.ArgumentParser(description='Make a nuclear data library.')

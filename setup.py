@@ -342,7 +342,7 @@ exts.append(cpp_ext("pyne.lib.libpyne_data", ['data.cpp'], ['pyne', 'pyne_nucnam
 exts.append(cpp_ext("pyne.lib.libpyne_material", ['material.cpp'], ['pyne', 'pyne_nucname', 'pyne_data'], True))
 
 # enrichment
-exts.append(cpp_ext("pyne.lib.libpyne_enrichment", ['enrichment.cpp'], ['pyne_material',]))
+exts.append(cpp_ext("pyne.lib.libpyne_enrichment", ['enrichment_cascade.cpp', 'enrichment_symbolic.cpp', 'enrichment.cpp'], ['pyne_material',]))
 
 
 # Python extension modules
@@ -381,7 +381,7 @@ exts.append(cpp_ext("pyne.enrichment", ['enrichment.pyx'], ['pyne_enrichment', '
 ##########################
 ### Setup Package Data ###
 ##########################
-packages = ['pyne', 'pyne.lib', 'pyne.dbgen', 'pyne.xs', 'pyne.simplesim']
+packages = ['pyne', 'pyne.lib', 'pyne.dbgen', 'pyne.apigen', 'pyne.xs', 'pyne.simplesim']
 
 pack_dir = {'pyne': 'pyne',
             'pyne.dbgen': 'pyne/dbgen',
@@ -392,7 +392,7 @@ pack_dir = {'pyne': 'pyne',
 pack_data = {'pyne': ['includes/*.h', 'includes/*/*.h', 'includes/*/*/*.h', 
                       'includes/*/*/*/*.h', 'includes/pyne/*.pxd', 'includes/pyne/*/*.pxd', 
                       'includes/pyne/*/*/*.pxd', 'includes/pyne/*/*/*/*.pxd', '*.json'],
-             'pyne.dbgen': ['*.html'],
+             'pyne.dbgen': ['*.html', '*.csv'],
             }
 
 ext_modules=[Extension(**ext) for ext in exts]
