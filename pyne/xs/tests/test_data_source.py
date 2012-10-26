@@ -18,6 +18,7 @@ if not os.path.isfile(nuc_data):
 
 simpleds = data_source.SimpleDataSource()
 cinderds = data_source.CinderDataSource()
+eafds = data_source.EAFDataSource()
 
 
 def test_cinder_E_g():
@@ -77,12 +78,14 @@ def test_cinder_sigma_f_n1():
                          2.10070000e+00,   1.96770000e+00,   1.96770000e+00][::-1])
     assert_array_equal(observed, expected)
 
+
 def test_cinder_sigma_f_n2():
     if not cinderds.exists:
         return
     observed = cinderds.reaction(10010, 'f')
     expected = None
     assert_array_equal(observed, expected)
+
 
 def test_get_sigma_a_n1():
     # Test example with one entry
@@ -308,4 +311,64 @@ def test_simple_discretize_weights1():
     obs = simpleds.discretize('U235', 'f', dst_phi_g=phi_g)
     assert_true((obs[:-1] <= obs[1:]).all())
     simpleds.dst_group_struct = None
+
+
+def test_eaf_E_g():
+    if not eafds.exists:
+        return
+    with tb.openFile(nuc_data, 'r') as f:
+        E_g = np.array(f.root.neutron.eaf_xs.E_g)
+    assert_array_equal(E_g, eafds.src_group_struct)
+
+
+def test_eaf_valid_mtnum_RX():
+    if not eafds.exists:
+        return
+    observed = eafds.reaction(250550, '220')
+    expected = [4.48860E-02, 2.89454E-02, 2.36589E-02, 1.61601E-02,
+                6.04350E-03, 3.65975E-03, 2.11363E-03, 1.14410E-03,
+                7.26727E-04, 4.03486E-04, 6.35067E-05, 3.15836E-05,
+                4.62556E-06, 1.31764E-06, 1.09397E-06, 8.81033E-07,
+                6.73990E-07, 4.81856E-07, 2.99065E-07, 1.25156E-07,
+                5.38030E-09]
+    while len(expected) < 175: expected.append(0.0)
+    expected = np.array(expected)
+    assert_array_equal(observed, expected)
+
+
+def test_eaf_invalid_mtnum_RX():
+    if not eafds.exists:
+        return
+    observed = eafds.reaction(250550, '240')
+    expected = None
+    assert_array_equal(observed, expected)
+
+
+def test_eaf_valid_str_RX():
+    if not eafds.exists:
+        return
+    observed = eafds.reaction(250550, 'na')
+    expected = [4.48860E-02, 2.89454E-02, 2.36589E-02, 1.61601E-02,
+                6.04350E-03, 3.65975E-03, 2.11363E-03, 1.14410E-03,
+                7.26727E-04, 4.03486E-04, 6.35067E-05, 3.15836E-05,
+                4.62556E-06, 1.31764E-06, 1.09397E-06, 8.81033E-07,
+                6.73990E-07, 4.81856E-07, 2.99065E-07, 1.25156E-07,
+                5.38030E-09]
+    while len(expected) < 175: expected.append(0.0)
+    expected = np.array(expected)
+    assert_array_equal(observed, expected)
+
+
+def test_eaf_invalid_str_RX():
+    if not eafds.exists:
+        return
+    observed = eafds.reaction(10010, 'f')
+    expected = None
+    assert_array_equal(observed, expected)
+
+
+def test_eaf_multiple_xs():
+    # Currently no case where multiple rows from nuc_data should be combined...
+    pass
+
 
