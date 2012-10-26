@@ -40,6 +40,7 @@ void pyne::_load_atomic_mass_map()
   H5Dread(atomic_weight_set, desc, H5S_ALL, H5S_ALL, H5P_DEFAULT, atomic_weight_array);
 
   // close the nuc_data library, before doing anythng stupid
+  H5Dclose(atomic_weight_set);
   H5Fclose(nuc_data_h5);
 
   // Ok now that we have the array of stucts, put it in the map
@@ -225,6 +226,7 @@ void pyne::_load_scattering_lengths()
   status = H5Dread(scat_len_set, desc, H5S_ALL, H5S_ALL, H5P_DEFAULT, scat_len_array);
 
   // close the nuc_data library, before doing anythng stupid
+  status = H5Dclose(scat_len_set);
   status = H5Fclose(nuc_data_h5);
 
   // Ok now that we have the array of stucts, put it in the maps
@@ -490,6 +492,7 @@ void pyne::_load_atomic_decay()
   status = H5Dread(atom_dec_set, desc, H5S_ALL, H5S_ALL, H5P_DEFAULT, atom_dec_array);
 
   // close the nuc_data library, before doing anythng stupid
+  status = H5Dclose(atom_dec_set);
   status = H5Fclose(nuc_data_h5);
 
   // Ok now that we have the array of stucts, put it in the maps

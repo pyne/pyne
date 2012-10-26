@@ -4,47 +4,6 @@
 
 namespace pyne_enr = pyne::enrichment;
 
-/*********************************/
-/*** Enrichment Helper Classes ***/
-/*********************************/
-pyne_enr::Cascade::Cascade()
-{
-  alpha = 0.0;
-  Mstar = 0.0;
-
-  j = 0;
-  k = 0;
-
-  N = 0.0;
-  M = 0.0;
-
-  x_feed_j = 0.0;
-  x_prod_j = 0.0;
-  x_tail_j = 0.0;
-
-  mat_feed = pyne::Material();
-  mat_prod = pyne::Material();
-  mat_tail = pyne::Material();
-
-  l_t_per_feed = 0.0;
-  swu_per_feed = 0.0;
-  swu_per_prod = 0.0;
-};
-
-
-pyne_enr::Cascade::~Cascade()
-{
-};
-
-
-void pyne_enr::Cascade::_reset_xjs()
-{
-  // resets the key enriment member variables
-  x_feed_j = mat_feed.comp[j];
-  x_prod_j = mat_prod.comp[j];
-  x_tail_j = mat_tail.comp[j];
-};
-
 pyne_enr::Cascade pyne_enr::_fill_default_uranium_cascade()
 {
   // Default cascade for uranium-based enrichment
@@ -338,7 +297,7 @@ double pyne_enr::_deltaU_i_OverG(pyne_enr::Cascade & casc, int i)
 };
 
 
-pyne_enr::Cascade pyne_enr::ltot_per_feed(pyne_enr::Cascade & orig_casc, \
+pyne_enr::Cascade pyne_enr::solve_numeric(pyne_enr::Cascade & orig_casc, \
                                           double tolerance, int max_iter)
 {
   // This function finds the total flow rate (L) over the feed flow rate (F)
@@ -387,18 +346,31 @@ pyne_enr::Cascade pyne_enr::ltot_per_feed(pyne_enr::Cascade & orig_casc, \
   return casc;
 };
 
-
+pyne_enr::Cascade pyne_enr::multicomponent(pyne_enr::Cascade & orig_casc, \
+                                    char * solver, double tolerance, int max_iter)
+{
+  std::string strsolver(solver);
+  return multicomponent(orig_casc, strsolver, tolerance, max_iter);
+};
 
 pyne_enr::Cascade pyne_enr::multicomponent(pyne_enr::Cascade & orig_casc, \
-                                           double tolerance, int max_iter)
+                                    std::string solver, double tolerance, int max_iter)
 {
   // The multicomponent() function finds a value of Mstar by minimzing the seperative power.  
   // Note that Mstar0 represents an intial guess at what Mstar might be.
   // This is the final function that actually solves for an optimized M* that makes the cascade!
-
   pyne_enr::Cascade temp_casc;
   pyne_enr::Cascade prev_casc = orig_casc;
   pyne_enr::Cascade curr_casc = orig_casc;
+
+  // define the solver to use
+  int solver_code;
+  if (solver == "symbolic")
+    solver_code = 0;
+  else if (solver == "numeric")
+    solver_code = 1;
+  else 
+    throw "solver not known: " + solver;
 
   // validate Mstar or pick new value
   if ((orig_casc.Mstar < pyne::atomic_mass(orig_casc.j) &&  \
@@ -416,11 +388,27 @@ pyne_enr::Cascade pyne_enr::multicomponent(pyne_enr::Cascade & orig_casc, \
   double xpn = 1.0;
 
   // Initialize previous point
-  prev_casc = ltot_per_feed(prev_casc, tolerance, max_iter);
+  switch (solver_code)
+  {
+    case 0:
+      prev_casc = solve_symbolic(prev_casc);
+      break;
+    case 1:
+      prev_casc = solve_numeric(prev_casc, tolerance, max_iter);
+      break;
+  };
 
   // Initialize curr_ent point
   curr_casc.Mstar = (pyne::atomic_mass(curr_casc.j) + curr_casc.Mstar) / 2.0;
-  curr_casc = ltot_per_feed(curr_casc, tolerance, max_iter);
+  switch (solver_code)
+  {
+    case 0:
+      curr_casc = solve_symbolic(curr_casc);
+      break;
+    case 1:
+      curr_casc = solve_numeric(curr_casc, tolerance, max_iter);
+      break;
+  };
 
   double m = pyne::slope(curr_casc.Mstar, curr_casc.l_t_per_feed, \
                          prev_casc.Mstar, prev_casc.l_t_per_feed);
@@ -439,13 +427,29 @@ pyne_enr::Cascade pyne_enr::multicomponent(pyne_enr::Cascade & orig_casc, \
     prev_casc = curr_casc;
 
     curr_casc.Mstar = curr_casc.Mstar - (m_sign * pow(10.0, -xpn));
-    curr_casc = ltot_per_feed(curr_casc, tolerance, max_iter);
+    switch (solver_code)
+    {
+      case 0:
+        curr_casc = solve_symbolic(curr_casc);
+        break;
+      case 1:
+        curr_casc = solve_numeric(curr_casc, tolerance, max_iter);
+        break;
+    };
 
     if (prev_casc.l_t_per_feed < curr_casc.l_t_per_feed)
     {
       temp_casc = curr_casc;
       temp_casc.Mstar = temp_casc.Mstar - (m_sign * pow(10.0, -xpn));
-      temp_casc = ltot_per_feed(temp_casc, tolerance, max_iter);
+      switch (solver_code)
+      {
+        case 0:
+          temp_casc = solve_symbolic(temp_casc);
+          break;
+        case 1:
+          temp_casc = solve_numeric(temp_casc, tolerance, max_iter);
+          break;
+      };
 
       temp_m = pyne::slope(curr_casc.Mstar, curr_casc.l_t_per_feed, \
                            temp_casc.Mstar, temp_casc.l_t_per_feed);
@@ -463,7 +467,15 @@ pyne_enr::Cascade pyne_enr::multicomponent(pyne_enr::Cascade & orig_casc, \
 
         temp_casc = prev_casc;
         temp_casc.Mstar = temp_casc.Mstar + (m_sign * pow(10.0, -xpn));
-        temp_casc = ltot_per_feed(temp_casc, tolerance, max_iter);
+        switch (solver_code)
+        {
+          case 0:
+            temp_casc = solve_symbolic(temp_casc);
+            break;
+          case 1:
+            temp_casc = solve_numeric(temp_casc, tolerance, max_iter);
+            break;
+        };
         temp_m = pyne::slope(prev_casc.Mstar, prev_casc.l_t_per_feed, \
                              temp_casc.Mstar, temp_casc.l_t_per_feed);
 
