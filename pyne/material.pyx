@@ -12,7 +12,11 @@ from libc.stdlib cimport malloc, free
 import collections
 
 # local imports
-cimport std
+include "includes/cython_version.pxi"
+IF CYTHON_VERSION_MAJOR == 0 and CYTHON_VERSION_MINOR >= 17:
+    from libcpp.string cimport string as std_string
+ELSE:
+    from _includes.libcpp.string cimport string as std_string
 cimport cpp_material
 cimport pyne.stlconverters as conv
 import pyne.stlconverters as conv
@@ -1288,26 +1292,26 @@ def from_text(char * filename, double mass=-1.0, double atoms_per_mol=-1.0, attr
 
 # <string, Material *>
 
-cdef cpp_map[std.string, matp] dict_to_map_str_matp(dict pydict):
+cdef cpp_map[std_string, matp] dict_to_map_str_matp(dict pydict):
     cdef _Material pymat
     cdef cpp_material.Material * cpp_matp
-    cdef cpp_map[std.string, matp] cppmap = cpp_map[std.string, matp]()
-    cdef cpp_pair[std.string, matp] item
+    cdef cpp_map[std_string, matp] cppmap = cpp_map[std_string, matp]()
+    cdef cpp_pair[std_string, matp] item
 
     for key, value in pydict.items():
         pymat = value
         cpp_matp = pymat.mat_pointer
-        #cppmap[std.string(key)] = cpp_matp
-        item = cpp_pair[std.string, matp](std.string(key), cpp_matp)
+        #cppmap[std_string(key)] = cpp_matp
+        item = cpp_pair[std_string, matp](std_string(<char *> key), cpp_matp)
         cppmap.insert(item)
 
     return cppmap
 
 
-cdef dict map_to_dict_str_matp(cpp_map[std.string, matp] cppmap):
+cdef dict map_to_dict_str_matp(cpp_map[std_string, matp] cppmap):
     pydict = {}
     cdef _Material pymat
-    cdef cpp_map[std.string, matp].iterator mapiter = cppmap.begin()
+    cdef cpp_map[std_string, matp].iterator mapiter = cppmap.begin()
 
     while mapiter != cppmap.end():
         pymat = Material()
@@ -1321,13 +1325,13 @@ cdef dict map_to_dict_str_matp(cpp_map[std.string, matp] cppmap):
 
 # (Str, Material)
 cdef class MapIterStrMaterial(object):
-    cdef void init(self, cpp_map[std.string, matp] * map_ptr):
-        cdef cpp_map[std.string, matp].iterator * itn = <cpp_map[std.string,
+    cdef void init(self, cpp_map[std_string, matp] * map_ptr):
+        cdef cpp_map[std_string, matp].iterator * itn = <cpp_map[std_string,
                 matp].iterator *> malloc(sizeof(map_ptr.begin()))
         itn[0] = map_ptr.begin()
         self.iter_now = itn
 
-        cdef cpp_map[std.string, matp].iterator * ite = <cpp_map[std.string,
+        cdef cpp_map[std_string, matp].iterator * ite = <cpp_map[std_string,
                 matp].iterator *> malloc(sizeof(map_ptr.end()))
         ite[0] = map_ptr.end()
         self.iter_end = ite
@@ -1340,8 +1344,8 @@ cdef class MapIterStrMaterial(object):
         return self
 
     def __next__(self):
-        cdef cpp_map[std.string, matp].iterator inow = deref(self.iter_now)
-        cdef cpp_map[std.string, matp].iterator iend = deref(self.iter_end)
+        cdef cpp_map[std_string, matp].iterator inow = deref(self.iter_now)
+        cdef cpp_map[std_string, matp].iterator iend = deref(self.iter_end)
 
         if inow != iend:
             pyval = str(deref(inow).first.c_str())
@@ -1354,8 +1358,8 @@ cdef class MapIterStrMaterial(object):
 
 cdef class _MapStrMaterial:
     def __cinit__(self, new_map=True, bint free_map=True):
-        cdef std.string s
-        cdef cpp_pair[std.string, matp] item
+        cdef std_string s
+        cdef cpp_pair[std_string, matp] item
 
         # Cache needed to prevent Python from deref'ing
         # pointers before their time.
@@ -1366,23 +1370,23 @@ cdef class _MapStrMaterial:
             self.map_ptr = (<_MapStrMaterial> new_map).map_ptr
             self._cache = (<_MapStrMaterial> new_map)._cache
         elif hasattr(new_map, 'items'):
-            self.map_ptr = new cpp_map[std.string, matp]()
+            self.map_ptr = new cpp_map[std_string, matp]()
             for key, value in new_map.items():
-                #s = std.string(key)
-                #item = cpp_pair[std.string, matp](s, (<_Material>
+                #s = std_string(key)
+                #item = cpp_pair[std_string, matp](s, (<_Material>
                 # value).mat_pointer)
                 #self.map_ptr.insert(item)
                 self[key] = value
         elif hasattr(new_map, '__len__'):
-            self.map_ptr = new cpp_map[std.string, matp]()
+            self.map_ptr = new cpp_map[std_string, matp]()
             for i in new_map:
-                #s = std.string(i[0])
-                #item = cpp_pair[std.string, matp](s, (<_Material>
+                #s = std_string(i[0])
+                #item = cpp_pair[std_string, matp](s, (<_Material>
                 # i[1]).mat_pointer)
                 #self.map_ptr.insert(item)
                 self[i[0]] = i[1]
         elif bool(new_map):
-            self.map_ptr = new cpp_map[std.string, matp]()
+            self.map_ptr = new cpp_map[std_string, matp]()
 
         # Store free_map
         self._free_map = free_map
@@ -1392,9 +1396,9 @@ cdef class _MapStrMaterial:
             del self.map_ptr
 
     def __contains__(self, key):
-        cdef std.string s
+        cdef std_string s
         if isinstance(key, str):
-            s = std.string(key)
+            s = std_string(<char *> key)
         else:
             return False
 
@@ -1412,11 +1416,11 @@ cdef class _MapStrMaterial:
         return mi
 
     def __getitem__(self, key):
-        cdef std.string s
+        cdef std_string s
         cdef _Material pymat
 
         if isinstance(key, basestring):
-            s = std.string(key)
+            s = std_string(<char *> key)
         else:
             raise TypeError("Only string keys are valid.")
 
@@ -1430,18 +1434,18 @@ cdef class _MapStrMaterial:
             raise KeyError(repr(key) + " not in map.")
 
     def __setitem__(self, char * key, value):
-        cdef std.string s = std.string(key)
+        cdef std_string s = std_string(key)
         if not isinstance(value, _Material):
             raise TypeError("may only set materials into this mapping.")
-        cdef cpp_pair[std.string, matp] item = cpp_pair[std.string, matp](s,
+        cdef cpp_pair[std_string, matp] item = cpp_pair[std_string, matp](s,
                 (<_Material> value).mat_pointer)
         self.map_ptr.insert(item)
         self._cache[key] = value
 
     def __delitem__(self, char * key):
-        cdef std.string s
+        cdef std_string s
         if key in self:
-            s = std.string(key)
+            s = std_string(key)
             self.map_ptr.erase(s)
             del self._cache[key]
 

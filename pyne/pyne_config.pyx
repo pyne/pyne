@@ -65,20 +65,20 @@ cdef class PyneConf:
 
     property PYNE_DATA:
         def __get__(self):
-            cdef std.string value = cpp_pyne.PYNE_DATA
+            cdef std_string value = cpp_pyne.PYNE_DATA
             return value.c_str()
 
         def __set__(self, char * value):
-            cpp_pyne.PYNE_DATA = std.string(value)
+            cpp_pyne.PYNE_DATA = std_string(value)
 
 
     property NUC_DATA_PATH:
         def __get__(self):
-            cdef std.string value = cpp_pyne.NUC_DATA_PATH
+            cdef std_string value = cpp_pyne.NUC_DATA_PATH
             return value.c_str()
 
         def __set__(self, char * value):
-            cpp_pyne.NUC_DATA_PATH = std.string(value)
+            cpp_pyne.NUC_DATA_PATH = std_string(value)
 
 
         

@@ -15,7 +15,11 @@ cimport numpy as np
 import numpy as np
 
 # Local imports
-cimport std
+include "includes/cython_version.pxi"
+IF CYTHON_VERSION_MAJOR == 0 and CYTHON_VERSION_MINOR >= 17:
+    from libcpp.string cimport string as std_string
+ELSE:
+    from _includes.libcpp.string cimport string as std_string
 cimport extra_types
 
 #
@@ -63,15 +67,15 @@ cdef dict map_to_dict_int_dbl(cpp_map[int, double] cppmap):
 
 # <string, int> conversions
 
-cdef cpp_map[std.string, int] dict_to_map_str_int(dict pydict):
-    cdef cpp_map[std.string, int] cppmap = cpp_map[std.string, int]()
+cdef cpp_map[std_string, int] dict_to_map_str_int(dict pydict):
+    cdef cpp_map[std_string, int] cppmap = cpp_map[std_string, int]()
     for key, value in pydict.items():
-        cppmap[std.string(key)] = value
+        cppmap[std_string(<char *> key)] = value
     return cppmap
 
-cdef dict map_to_dict_str_int(cpp_map[std.string, int] cppmap):
+cdef dict map_to_dict_str_int(cpp_map[std_string, int] cppmap):
     pydict = {}
-    cdef cpp_map[std.string, int].iterator mapiter = cppmap.begin()
+    cdef cpp_map[std_string, int].iterator mapiter = cppmap.begin()
 
     while mapiter != cppmap.end():
         pydict[deref(mapiter).first.c_str()] = deref(mapiter).second
@@ -82,16 +86,16 @@ cdef dict map_to_dict_str_int(cpp_map[std.string, int] cppmap):
 
 # <int, string> conversions
 
-cdef cpp_map[int, std.string] dict_to_map_int_str(dict pydict):
-    cdef cpp_map[int, std.string] cppmap = cpp_map[int, std.string]()
+cdef cpp_map[int, std_string] dict_to_map_int_str(dict pydict):
+    cdef cpp_map[int, std_string] cppmap = cpp_map[int, std_string]()
     for key, value in pydict.items():
-        cppmap[key] = std.string(value)
+        cppmap[key] = std_string(<char *> value)
     return cppmap
 
 
-cdef dict map_to_dict_int_str(cpp_map[int, std.string] cppmap):
+cdef dict map_to_dict_int_str(cpp_map[int, std_string] cppmap):
     pydict = {}
-    cdef cpp_map[int, std.string].iterator mapiter = cppmap.begin()
+    cdef cpp_map[int, std_string].iterator mapiter = cppmap.begin()
 
     while mapiter != cppmap.end():
         pydict[deref(mapiter).first] = deref(mapiter).second.c_str()
@@ -102,15 +106,15 @@ cdef dict map_to_dict_int_str(cpp_map[int, std.string] cppmap):
 
 # <string, double> conversions
 
-cdef cpp_map[std.string, double] dict_to_map_str_dbl(dict pydict):
-    cdef cpp_map[std.string, double] cppmap = cpp_map[std.string, double]()
+cdef cpp_map[std_string, double] dict_to_map_str_dbl(dict pydict):
+    cdef cpp_map[std_string, double] cppmap = cpp_map[std_string, double]()
     for key, value in pydict.items():
-        cppmap[std.string(key)] = value
+        cppmap[std_string(<char *> key)] = value
     return cppmap
 
-cdef dict map_to_dict_str_dbl(cpp_map[std.string, double] cppmap):
+cdef dict map_to_dict_str_dbl(cpp_map[std_string, double] cppmap):
     pydict = {}
-    cdef cpp_map[std.string, double].iterator mapiter = cppmap.begin()
+    cdef cpp_map[std_string, double].iterator mapiter = cppmap.begin()
 
     while mapiter != cppmap.end():
         pydict[deref(mapiter).first.c_str()] = deref(mapiter).second
@@ -146,19 +150,19 @@ cdef set cpp_to_py_set_int(cpp_set[int] cppset):
 
 # String sets
 
-cdef cpp_set[std.string] py_to_cpp_set_str(set pyset):
-    cdef std.string s
-    cdef cpp_set[std.string] cppset = cpp_set[std.string]()
+cdef cpp_set[std_string] py_to_cpp_set_str(set pyset):
+    cdef std_string s
+    cdef cpp_set[std_string] cppset = cpp_set[std_string]()
 
     for item in pyset:
-        s = std.string(item)
+        s = std_string(<char *> item)
         cppset.insert(s)
 
     return cppset
 
-cdef set cpp_to_py_set_str(cpp_set[std.string] cppset):
+cdef set cpp_to_py_set_str(cpp_set[std_string] cppset):
     pyset = set()
-    cdef cpp_set[std.string].iterator setiter = cppset.begin()
+    cdef cpp_set[std_string].iterator setiter = cppset.begin()
 
     while setiter != cppset.end():
         pyset.add(deref(setiter).c_str())
@@ -397,20 +401,20 @@ cdef dict map_to_dict_int_vector_to_array_3d_dbl(cpp_map[int, cpp_vector[cpp_vec
 
 
 # {str: np.array()} 
-cdef cpp_map[std.string, cpp_vector[double]] dict_to_map_str_array_to_vector_1d_dbl(dict pydict):
-    cdef std.string s
-    cdef cpp_map[std.string, cpp_vector[double]] cppmap = cpp_map[std.string, cpp_vector[double]]()
+cdef cpp_map[std_string, cpp_vector[double]] dict_to_map_str_array_to_vector_1d_dbl(dict pydict):
+    cdef std_string s
+    cdef cpp_map[std_string, cpp_vector[double]] cppmap = cpp_map[std_string, cpp_vector[double]]()
 
     for key, value in pydict.items():
-        s = std.string(key)
+        s = std_string(<char *> key)
         cppmap[s] = array_to_vector_1d_dbl(value)
 
     return cppmap
 
 
-cdef dict map_to_dict_str_vector_to_array_1d_dbl(cpp_map[std.string, cpp_vector[double]] cppmap):
+cdef dict map_to_dict_str_vector_to_array_1d_dbl(cpp_map[std_string, cpp_vector[double]] cppmap):
     pydict = {}
-    cdef cpp_map[std.string, cpp_vector[double]].iterator mapiter = cppmap.begin()
+    cdef cpp_map[std_string, cpp_vector[double]].iterator mapiter = cppmap.begin()
 
     while mapiter != cppmap.end():
         pydict[(deref(mapiter).first).c_str()] = vector_to_array_1d_dbl(deref(mapiter).second)
@@ -558,12 +562,12 @@ class SetInt(_SetInt, collections.MutableSet):
 
 # Str
 cdef class SetIterStr(object):
-    cdef void init(self, cpp_set[std.string] * set_ptr):
-        cdef cpp_set[std.string].iterator * itn = <cpp_set[std.string].iterator *> malloc(sizeof(set_ptr.begin()))
+    cdef void init(self, cpp_set[std_string] * set_ptr):
+        cdef cpp_set[std_string].iterator * itn = <cpp_set[std_string].iterator *> malloc(sizeof(set_ptr.begin()))
         itn[0] = set_ptr.begin()
         self.iter_now = itn
 
-        cdef cpp_set[std.string].iterator * ite = <cpp_set[std.string].iterator *> malloc(sizeof(set_ptr.end()))
+        cdef cpp_set[std_string].iterator * ite = <cpp_set[std_string].iterator *> malloc(sizeof(set_ptr.end()))
         ite[0] = set_ptr.end()
         self.iter_end = ite
         
@@ -575,8 +579,8 @@ cdef class SetIterStr(object):
         return self
 
     def __next__(self):
-        cdef cpp_set[std.string].iterator inow = deref(self.iter_now)
-        cdef cpp_set[std.string].iterator iend = deref(self.iter_end)
+        cdef cpp_set[std_string].iterator inow = deref(self.iter_now)
+        cdef cpp_set[std_string].iterator iend = deref(self.iter_end)
 
         if inow != iend:
             pyval = str(deref(inow).c_str())
@@ -589,7 +593,7 @@ cdef class SetIterStr(object):
 
 cdef class _SetStr:
     def __cinit__(self, new_set=True, bint free_set=True):
-        cdef std.string s
+        cdef std_string s
 
         # Decide how to init set, if at all
         if isinstance(new_set, _SetStr):
@@ -597,12 +601,12 @@ cdef class _SetStr:
         elif hasattr(new_set, '__iter__') or \
                 (hasattr(new_set, '__len__') and
                 hasattr(new_set, '__getitem__')):
-            self.set_ptr = new cpp_set[std.string]()
+            self.set_ptr = new cpp_set[std_string]()
             for value in new_set:
-                s = std.string(value)
+                s = std_string(<char *> value)
                 self.set_ptr.insert(s)
         elif bool(new_set):
-            self.set_ptr = new cpp_set[std.string]()
+            self.set_ptr = new cpp_set[std_string]()
 
         # Store free_set
         self._free_set = free_set
@@ -612,9 +616,9 @@ cdef class _SetStr:
             del self.set_ptr
 
     def __contains__(self, value):
-        cdef std.string s
+        cdef std_string s
         if isinstance(value, basestring):
-            s = std.string(value)
+            s = std_string(<char *> value)
         else:
             return False
 
@@ -634,15 +638,15 @@ cdef class _SetStr:
     # Add mutable interface
 
     def add(self, char * value):
-        cdef std.string s
-        s = std.string(value)
+        cdef std_string s
+        s = std_string(value)
         self.set_ptr.insert(s)
         return 
 
     def discard(self, char * value):
-        cdef std.string s
+        cdef std_string s
         if value in self:
-            s = std.string(value)
+            s = std_string(value)
             self.set_ptr.erase(s)
         return 
 
@@ -675,12 +679,12 @@ class SetStr(_SetStr, collections.Set):
 
 # (Str, Int)
 cdef class MapIterStrInt(object):
-    cdef void init(self, cpp_map[std.string, int] * map_ptr):
-        cdef cpp_map[std.string, int].iterator * itn = <cpp_map[std.string, int].iterator *> malloc(sizeof(map_ptr.begin()))
+    cdef void init(self, cpp_map[std_string, int] * map_ptr):
+        cdef cpp_map[std_string, int].iterator * itn = <cpp_map[std_string, int].iterator *> malloc(sizeof(map_ptr.begin()))
         itn[0] = map_ptr.begin()
         self.iter_now = itn
 
-        cdef cpp_map[std.string, int].iterator * ite = <cpp_map[std.string, int].iterator *> malloc(sizeof(map_ptr.end()))
+        cdef cpp_map[std_string, int].iterator * ite = <cpp_map[std_string, int].iterator *> malloc(sizeof(map_ptr.end()))
         ite[0] = map_ptr.end()
         self.iter_end = ite
         
@@ -692,8 +696,8 @@ cdef class MapIterStrInt(object):
         return self
 
     def __next__(self):
-        cdef cpp_map[std.string, int].iterator inow = deref(self.iter_now)
-        cdef cpp_map[std.string, int].iterator iend = deref(self.iter_end)
+        cdef cpp_map[std_string, int].iterator inow = deref(self.iter_now)
+        cdef cpp_map[std_string, int].iterator iend = deref(self.iter_end)
 
         if inow != iend:
             pyval = str(deref(inow).first.c_str())
@@ -706,26 +710,26 @@ cdef class MapIterStrInt(object):
 
 cdef class _MapStrInt:
     def __cinit__(self, new_map=True, bint free_map=True):
-        cdef std.string s
-        cdef pair[std.string, int] item
+        cdef std_string s
+        cdef pair[std_string, int] item
 
         # Decide how to init map, if at all
         if isinstance(new_map, _MapStrInt):
             self.map_ptr = (<_MapStrInt> new_map).map_ptr
         elif hasattr(new_map, 'items'):
-            self.map_ptr = new cpp_map[std.string, int]()
+            self.map_ptr = new cpp_map[std_string, int]()
             for key, value in new_map.items():
-                s = std.string(key)
-                item = pair[std.string, int](s, value)
+                s = std_string(<char *> key)
+                item = pair[std_string, int](s, value)
                 self.map_ptr.insert(item)
         elif hasattr(new_map, '__len__'):
-            self.map_ptr = new cpp_map[std.string, int]()
+            self.map_ptr = new cpp_map[std_string, int]()
             for i in new_map:
-                s = std.string(i[0])
-                item = pair[std.string, int](s, i[1])
+                s = std_string(<char *> i[0])
+                item = pair[std_string, int](s, i[1])
                 self.map_ptr.insert(item)
         elif bool(new_map):
-            self.map_ptr = new cpp_map[std.string, int]()
+            self.map_ptr = new cpp_map[std_string, int]()
 
         # Store free_map
         self._free_map = free_map
@@ -735,9 +739,9 @@ cdef class _MapStrInt:
             del self.map_ptr
 
     def __contains__(self, key):
-        cdef std.string s
+        cdef std_string s
         if isinstance(key, str):
-            s = std.string(key)
+            s = std_string(<char *> key)
         else:
             return False
 
@@ -755,9 +759,9 @@ cdef class _MapStrInt:
         return mi
 
     def __getitem__(self, key):
-        cdef std.string s
+        cdef std_string s
         if isinstance(key, basestring):
-            s = std.string(key)
+            s = std_string(<char *> key)
         else:
             raise TypeError("Only string keys are valid.")
 
@@ -767,14 +771,14 @@ cdef class _MapStrInt:
             raise KeyError
 
     def __setitem__(self, char * key, int value):
-        cdef std.string s = std.string(key)
-        cdef pair[std.string, int] item = pair[std.string, int](s, value)
+        cdef std_string s = std_string(key)
+        cdef pair[std_string, int] item = pair[std_string, int](s, value)
         self.map_ptr.insert(item)
         
     def __delitem__(self, char * key):
-        cdef std.string s
+        cdef std_string s
         if key in self:
-            s = std.string(key)
+            s = std_string(key)
             self.map_ptr.erase(s)
 
 
@@ -804,12 +808,12 @@ class MapStrInt(_MapStrInt, collections.MutableMapping):
 
 # (Int, Str)
 cdef class MapIterIntStr(object):
-    cdef void init(self, cpp_map[int, std.string] * map_ptr):
-        cdef cpp_map[int, std.string].iterator * itn = <cpp_map[int, std.string].iterator *> malloc(sizeof(map_ptr.begin()))
+    cdef void init(self, cpp_map[int, std_string] * map_ptr):
+        cdef cpp_map[int, std_string].iterator * itn = <cpp_map[int, std_string].iterator *> malloc(sizeof(map_ptr.begin()))
         itn[0] = map_ptr.begin()
         self.iter_now = itn
 
-        cdef cpp_map[int, std.string].iterator * ite = <cpp_map[int, std.string].iterator *> malloc(sizeof(map_ptr.end()))
+        cdef cpp_map[int, std_string].iterator * ite = <cpp_map[int, std_string].iterator *> malloc(sizeof(map_ptr.end()))
         ite[0] = map_ptr.end()
         self.iter_end = ite
         
@@ -821,8 +825,8 @@ cdef class MapIterIntStr(object):
         return self
 
     def __next__(self):
-        cdef cpp_map[int, std.string].iterator inow = deref(self.iter_now)
-        cdef cpp_map[int, std.string].iterator iend = deref(self.iter_end)
+        cdef cpp_map[int, std_string].iterator inow = deref(self.iter_now)
+        cdef cpp_map[int, std_string].iterator iend = deref(self.iter_end)
 
         if inow != iend:
             pyval = int(deref(inow).first)
@@ -835,26 +839,26 @@ cdef class MapIterIntStr(object):
 
 cdef class _MapIntStr:
     def __cinit__(self, new_map=True, bint free_map=True):
-        cdef std.string s
-        cdef pair[int, std.string] item
+        cdef std_string s
+        cdef pair[int, std_string] item
 
         # Decide how to init map, if at all
         if isinstance(new_map, _MapIntStr):
             self.map_ptr = (<_MapIntStr> new_map).map_ptr
         elif hasattr(new_map, 'items'):
-            self.map_ptr = new cpp_map[int, std.string]()
+            self.map_ptr = new cpp_map[int, std_string]()
             for key, value in new_map.items():
-                s = std.string(value)
-                item = pair[int, std.string](key, s)
+                s = std_string(<char *> value)
+                item = pair[int, std_string](key, s)
                 self.map_ptr.insert(item)
         elif hasattr(new_map, '__len__'):
-            self.map_ptr = new cpp_map[int, std.string]()
+            self.map_ptr = new cpp_map[int, std_string]()
             for i in new_map:
-                s = std.string(i[1])
-                item = pair[int, std.string](i[0], s)
+                s = std_string(<char *> i[1])
+                item = pair[int, std_string](i[0], s)
                 self.map_ptr.insert(item)
         elif bool(new_map):
-            self.map_ptr = new cpp_map[int, std.string]()
+            self.map_ptr = new cpp_map[int, std_string]()
 
         # Store free_map
         self._free_map = free_map
@@ -890,8 +894,8 @@ cdef class _MapIntStr:
             raise KeyError
 
     def __setitem__(self, int key, char * value):
-        cdef std.string s = std.string(value)
-        cdef pair[int, std.string] item = pair[int, std.string](key, s)
+        cdef std_string s = std_string(value)
+        cdef pair[int, std_string] item = pair[int, std_string](key, s)
         self.map_ptr.insert(item)
         
     def __delitem__(self, int key):
@@ -924,12 +928,12 @@ class MapIntStr(_MapIntStr, collections.MutableMapping):
 
 # (Str, Double)
 cdef class MapIterStrDouble(object):
-    cdef void init(self, cpp_map[std.string, double] * map_ptr):
-        cdef cpp_map[std.string, double].iterator * itn = <cpp_map[std.string, double].iterator *> malloc(sizeof(map_ptr.begin()))
+    cdef void init(self, cpp_map[std_string, double] * map_ptr):
+        cdef cpp_map[std_string, double].iterator * itn = <cpp_map[std_string, double].iterator *> malloc(sizeof(map_ptr.begin()))
         itn[0] = map_ptr.begin()
         self.iter_now = itn
 
-        cdef cpp_map[std.string, double].iterator * ite = <cpp_map[std.string, double].iterator *> malloc(sizeof(map_ptr.end()))
+        cdef cpp_map[std_string, double].iterator * ite = <cpp_map[std_string, double].iterator *> malloc(sizeof(map_ptr.end()))
         ite[0] = map_ptr.end()
         self.iter_end = ite
         
@@ -941,8 +945,8 @@ cdef class MapIterStrDouble(object):
         return self
 
     def __next__(self):
-        cdef cpp_map[std.string, double].iterator inow = deref(self.iter_now)
-        cdef cpp_map[std.string, double].iterator iend = deref(self.iter_end)
+        cdef cpp_map[std_string, double].iterator inow = deref(self.iter_now)
+        cdef cpp_map[std_string, double].iterator iend = deref(self.iter_end)
 
         if inow != iend:
             pyval = str(deref(inow).first.c_str())
@@ -955,26 +959,26 @@ cdef class MapIterStrDouble(object):
 
 cdef class _MapStrDouble:
     def __cinit__(self, new_map=True, bint free_map=True):
-        cdef std.string s
-        cdef pair[std.string, double] item
+        cdef std_string s
+        cdef pair[std_string, double] item
 
         # Decide how to init map, if at all
         if isinstance(new_map, _MapStrDouble):
             self.map_ptr = (<_MapStrDouble> new_map).map_ptr
         elif hasattr(new_map, 'items'):
-            self.map_ptr = new cpp_map[std.string, double]()
+            self.map_ptr = new cpp_map[std_string, double]()
             for key, value in new_map.items():
-                s = std.string(key)
-                item = pair[std.string, double](s, value)
+                s = std_string(<char *> key)
+                item = pair[std_string, double](s, value)
                 self.map_ptr.insert(item)
         elif hasattr(new_map, '__len__'):
-            self.map_ptr = new cpp_map[std.string, double]()
+            self.map_ptr = new cpp_map[std_string, double]()
             for i in new_map:
-                s = std.string(i[0])
-                item = pair[std.string, double](s, i[1])
+                s = std_string(<char *> i[0])
+                item = pair[std_string, double](s, i[1])
                 self.map_ptr.insert(item)
         elif bool(new_map):
-            self.map_ptr = new cpp_map[std.string, double]()
+            self.map_ptr = new cpp_map[std_string, double]()
 
         # Store free_map
         self._free_map = free_map
@@ -984,9 +988,9 @@ cdef class _MapStrDouble:
             del self.map_ptr
 
     def __contains__(self, key):
-        cdef std.string s
+        cdef std_string s
         if isinstance(key, str):
-            s = std.string(key)
+            s = std_string(<char *> key)
         else:
             return False
 
@@ -1004,9 +1008,9 @@ cdef class _MapStrDouble:
         return mi
 
     def __getitem__(self, key):
-        cdef std.string s
+        cdef std_string s
         if isinstance(key, basestring):
-            s = std.string(key)
+            s = std_string(<char *> key)
         else:
             raise TypeError("Only string keys are valid.")
 
@@ -1016,14 +1020,14 @@ cdef class _MapStrDouble:
             raise KeyError
 
     def __setitem__(self, char * key, value):
-        cdef std.string s = std.string(key)
-        cdef pair[std.string, double] item = pair[std.string, double](s, value)
+        cdef std_string s = std_string(key)
+        cdef pair[std_string, double] item = pair[std_string, double](s, value)
         self.map_ptr.insert(item)
         
     def __delitem__(self, char * key):
-        cdef std.string s
+        cdef std_string s
         if key in self:
-            s = std.string(key)
+            s = std_string(key)
             self.map_ptr.erase(s)
 
 

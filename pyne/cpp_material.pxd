@@ -2,7 +2,11 @@
 from libcpp.map cimport map
 from libcpp.set cimport set
 
-cimport std
+include "includes/cython_version.pxi"
+IF CYTHON_VERSION_MAJOR == 0 and CYTHON_VERSION_MINOR >= 17:
+    from libcpp.string cimport string as std_string
+ELSE:
+    from _includes.libcpp.string cimport string as std_string
 
 cimport cpp_jsoncpp 
 
