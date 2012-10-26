@@ -8,6 +8,7 @@ build_nuc_data/
 *.pyc
 *.save
 *.bak
+.*.swp
 *~
 
 # Ignore Cython'd files
