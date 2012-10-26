@@ -12,7 +12,11 @@ from cython.operator cimport dereference as deref
 from cython.operator cimport preincrement as inc
 from libc.stdlib cimport free
 
-from pyne cimport std
+include "includes/cython_version.pxi"
+IF CYTHON_VERSION_MAJOR == 0 and CYTHON_VERSION_MINOR >= 17:
+    from libcpp.string cimport string as std_string
+ELSE:
+    from _includes.libcpp.string cimport string as std_string
 
 from pyne cimport nucname
 from pyne import nucname
@@ -459,7 +463,7 @@ def multicomponent(Cascade orig_casc, char * solver="symbolic",
 
     """
     cdef Cascade casc = Cascade()
-    cdef std.string strsolver = std.string(solver)
+    cdef std_string strsolver = std_string(solver)
     cdef cpp_enrichment.Cascade ccasc = cpp_enrichment.multicomponent(\
                                     orig_casc._inst[0], strsolver, tolerance, max_iter)
     casc._inst[0] = ccasc

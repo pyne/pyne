@@ -14,7 +14,11 @@ cimport numpy as np
 import numpy as np
 
 # Local imports
-cimport std
+include "includes/cython_version.pxi"
+IF CYTHON_VERSION_MAJOR == 0 and CYTHON_VERSION_MINOR >= 17:
+    from libcpp.string cimport string as std_string
+ELSE:
+    from _includes.libcpp.string cimport string as std_string
 cimport extra_types
 
 
@@ -31,16 +35,16 @@ cdef cpp_map[int, double] dict_to_map_int_dbl(dict)
 cdef dict map_to_dict_int_dbl(cpp_map[int, double])
 
 # <string, int> conversions
-cdef cpp_map[std.string, int] dict_to_map_str_int(dict)
-cdef dict map_to_dict_str_int(cpp_map[std.string, int])
+cdef cpp_map[std_string, int] dict_to_map_str_int(dict)
+cdef dict map_to_dict_str_int(cpp_map[std_string, int])
 
 # <int, string> conversions
-cdef cpp_map[int, std.string] dict_to_map_int_str(dict)
-cdef dict map_to_dict_int_str(cpp_map[int, std.string])
+cdef cpp_map[int, std_string] dict_to_map_int_str(dict)
+cdef dict map_to_dict_int_str(cpp_map[int, std_string])
 
 # <string, double> conversions
-cdef cpp_map[std.string, double] dict_to_map_str_dbl(dict)
-cdef dict map_to_dict_str_dbl(cpp_map[std.string, double])
+cdef cpp_map[std_string, double] dict_to_map_str_dbl(dict)
+cdef dict map_to_dict_str_dbl(cpp_map[std_string, double])
 
 
 #
@@ -52,8 +56,8 @@ cdef cpp_set[int] py_to_cpp_set_int(set)
 cdef set cpp_to_py_set_int(cpp_set[int])
 
 # String sets
-cdef cpp_set[std.string] py_to_cpp_set_str(set)
-cdef set cpp_to_py_set_str(cpp_set[std.string])
+cdef cpp_set[std_string] py_to_cpp_set_str(set)
+cdef set cpp_to_py_set_str(cpp_set[std_string])
 
 
 #
@@ -96,8 +100,8 @@ cdef cpp_map[int, cpp_vector[cpp_vector[cpp_vector[double]]]] dict_to_map_int_ar
 cdef dict map_to_dict_int_vector_to_array_3d_dbl(cpp_map[int, cpp_vector[cpp_vector[cpp_vector[double]]]])
 
 # {string: np.array()} 
-cdef cpp_map[std.string, cpp_vector[double]] dict_to_map_str_array_to_vector_1d_dbl(dict)
-cdef dict map_to_dict_str_vector_to_array_1d_dbl(cpp_map[std.string, cpp_vector[double]])
+cdef cpp_map[std_string, cpp_vector[double]] dict_to_map_str_array_to_vector_1d_dbl(dict)
+cdef dict map_to_dict_str_vector_to_array_1d_dbl(cpp_map[std_string, cpp_vector[double]])
 
 
 #
@@ -135,12 +139,12 @@ cdef class _SetInt:
 
 # Str
 cdef class SetIterStr(object):
-    cdef cpp_set[std.string].iterator * iter_now
-    cdef cpp_set[std.string].iterator * iter_end
-    cdef void init(SetIterStr, cpp_set[std.string] *)
+    cdef cpp_set[std_string].iterator * iter_now
+    cdef cpp_set[std_string].iterator * iter_end
+    cdef void init(SetIterStr, cpp_set[std_string] *)
 
 cdef class _SetStr:
-    cdef cpp_set[std.string] * set_ptr
+    cdef cpp_set[std_string] * set_ptr
     cdef public bint _free_set
 
 
@@ -150,34 +154,34 @@ cdef class _SetStr:
 
 # (Str, Int)
 cdef class MapIterStrInt(object):
-    cdef cpp_map[std.string, int].iterator * iter_now
-    cdef cpp_map[std.string, int].iterator * iter_end
-    cdef void init(MapIterStrInt, cpp_map[std.string, int] *)
+    cdef cpp_map[std_string, int].iterator * iter_now
+    cdef cpp_map[std_string, int].iterator * iter_end
+    cdef void init(MapIterStrInt, cpp_map[std_string, int] *)
 
 cdef class _MapStrInt:
-    cdef cpp_map[std.string, int] * map_ptr
+    cdef cpp_map[std_string, int] * map_ptr
     cdef public bint _free_map
 
 
 # (Int, Str)
 cdef class MapIterIntStr(object):
-    cdef cpp_map[int, std.string].iterator * iter_now
-    cdef cpp_map[int, std.string].iterator * iter_end
-    cdef void init(MapIterIntStr, cpp_map[int, std.string] *)
+    cdef cpp_map[int, std_string].iterator * iter_now
+    cdef cpp_map[int, std_string].iterator * iter_end
+    cdef void init(MapIterIntStr, cpp_map[int, std_string] *)
 
 cdef class _MapIntStr:
-    cdef cpp_map[int, std.string] * map_ptr
+    cdef cpp_map[int, std_string] * map_ptr
     cdef public bint _free_map
 
 
 # (Str, Double)
 cdef class MapIterStrDouble(object):
-    cdef cpp_map[std.string, double].iterator * iter_now
-    cdef cpp_map[std.string, double].iterator * iter_end
-    cdef void init(MapIterStrDouble, cpp_map[std.string, double] *)
+    cdef cpp_map[std_string, double].iterator * iter_now
+    cdef cpp_map[std_string, double].iterator * iter_end
+    cdef void init(MapIterStrDouble, cpp_map[std_string, double] *)
 
 cdef class _MapStrDouble:
-    cdef cpp_map[std.string, double] * map_ptr
+    cdef cpp_map[std_string, double] * map_ptr
     cdef public bint _free_map
 
 

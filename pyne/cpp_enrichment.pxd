@@ -1,5 +1,10 @@
 """Cython header for enrichment library."""
-from pyne cimport std
+include "includes/cython_version.pxi"
+IF CYTHON_VERSION_MAJOR == 0 and CYTHON_VERSION_MINOR >= 17:
+    from libcpp.string cimport string as std_string
+ELSE:
+    from _includes.libcpp.string cimport string as std_string
+
 from pyne cimport cpp_material
 
 cdef extern from "enrichment_cascade.h" namespace "pyne::enrichment":
@@ -60,6 +65,6 @@ cdef extern from "enrichment.h" namespace "pyne::enrichment":
     Cascade multicomponent(Cascade &, char *, double) except +
     Cascade multicomponent(Cascade &, char *, double, int) except +
     Cascade multicomponent(Cascade &) except +
-    Cascade multicomponent(Cascade &, std.string) except +
-    Cascade multicomponent(Cascade &, std.string, double) except +
-    Cascade multicomponent(Cascade &, std.string, double, int) except +
+    Cascade multicomponent(Cascade &, std_string) except +
+    Cascade multicomponent(Cascade &, std_string, double) except +
+    Cascade multicomponent(Cascade &, std_string, double, int) except +
