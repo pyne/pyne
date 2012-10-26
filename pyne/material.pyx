@@ -1487,3 +1487,12 @@ class MultiMaterial(collections.MutableMapping):
 
     def __add__(self, other):
         pass
+
+    def __delitem__(self, key):
+        pass
+
+    def __iter__(self):
+        pass
+
+    def  __len__(self):
+        pass
