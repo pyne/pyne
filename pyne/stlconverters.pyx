@@ -78,7 +78,7 @@ cdef dict map_to_dict_str_int(cpp_map[std_string, int] cppmap):
     cdef cpp_map[std_string, int].iterator mapiter = cppmap.begin()
 
     while mapiter != cppmap.end():
-        pydict[deref(mapiter).first.c_str()] = deref(mapiter).second
+        pydict[<char *> deref(mapiter).first.c_str()] = deref(mapiter).second
         inc(mapiter)
 
     return pydict
@@ -98,7 +98,7 @@ cdef dict map_to_dict_int_str(cpp_map[int, std_string] cppmap):
     cdef cpp_map[int, std_string].iterator mapiter = cppmap.begin()
 
     while mapiter != cppmap.end():
-        pydict[deref(mapiter).first] = deref(mapiter).second.c_str()
+        pydict[<char *> deref(mapiter).first] = <char *> deref(mapiter).second.c_str()
         inc(mapiter)
 
     return pydict
@@ -117,7 +117,7 @@ cdef dict map_to_dict_str_dbl(cpp_map[std_string, double] cppmap):
     cdef cpp_map[std_string, double].iterator mapiter = cppmap.begin()
 
     while mapiter != cppmap.end():
-        pydict[deref(mapiter).first.c_str()] = deref(mapiter).second
+        pydict[<char *> deref(mapiter).first.c_str()] = deref(mapiter).second
         inc(mapiter)
 
     return pydict
@@ -165,7 +165,7 @@ cdef set cpp_to_py_set_str(cpp_set[std_string] cppset):
     cdef cpp_set[std_string].iterator setiter = cppset.begin()
 
     while setiter != cppset.end():
-        pyset.add(deref(setiter).c_str())
+        pyset.add(<char *> deref(setiter).c_str())
         inc(setiter)
 
     return pyset
@@ -417,7 +417,8 @@ cdef dict map_to_dict_str_vector_to_array_1d_dbl(cpp_map[std_string, cpp_vector[
     cdef cpp_map[std_string, cpp_vector[double]].iterator mapiter = cppmap.begin()
 
     while mapiter != cppmap.end():
-        pydict[(deref(mapiter).first).c_str()] = vector_to_array_1d_dbl(deref(mapiter).second)
+        pydict[<char *> (deref(mapiter).first).c_str()] = \
+                                        vector_to_array_1d_dbl(deref(mapiter).second)
         inc(mapiter)
 
     return pydict
@@ -583,7 +584,7 @@ cdef class SetIterStr(object):
         cdef cpp_set[std_string].iterator iend = deref(self.iter_end)
 
         if inow != iend:
-            pyval = str(deref(inow).c_str())
+            pyval = str(<char *> deref(inow).c_str())
         else:
             raise StopIteration    
 
@@ -700,7 +701,7 @@ cdef class MapIterStrInt(object):
         cdef cpp_map[std_string, int].iterator iend = deref(self.iter_end)
 
         if inow != iend:
-            pyval = str(deref(inow).first.c_str())
+            pyval = str(<char *> deref(inow).first.c_str())
         else:
             raise StopIteration    
 
@@ -889,7 +890,7 @@ cdef class _MapIntStr:
             raise TypeError("Only integer keys are valid.")
 
         if 0 < self.map_ptr.count(key):
-            return str(deref(self.map_ptr)[key].c_str())
+            return str(<char *> deref(self.map_ptr)[key].c_str())
         else:
             raise KeyError
 
@@ -949,7 +950,7 @@ cdef class MapIterStrDouble(object):
         cdef cpp_map[std_string, double].iterator iend = deref(self.iter_end)
 
         if inow != iend:
-            pyval = str(deref(inow).first.c_str())
+            pyval = str(<char *> deref(inow).first.c_str())
         else:
             raise StopIteration    
 
