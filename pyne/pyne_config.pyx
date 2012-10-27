@@ -70,7 +70,7 @@ cdef class PyneConf:
     property PYNE_DATA:
         def __get__(self):
             cdef std_string value = cpp_pyne.PYNE_DATA
-            return value.c_str()
+            return <char *> value.c_str()
 
         def __set__(self, char * value):
             cpp_pyne.PYNE_DATA = std_string(value)
@@ -79,7 +79,7 @@ cdef class PyneConf:
     property NUC_DATA_PATH:
         def __get__(self):
             cdef std_string value = cpp_pyne.NUC_DATA_PATH
-            return value.c_str()
+            return <char *> value.c_str()
 
         def __set__(self, char * value):
             cpp_pyne.NUC_DATA_PATH = std_string(value)
