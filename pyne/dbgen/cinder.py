@@ -788,6 +788,7 @@ def make_cinder(args):
 
     with tb.openFile(nuc_data, 'a', filters=BASIC_FILTERS) as f:
         if hasattr(f.root, 'neutron') and hasattr(f.root.neutron, 'cinder_xs') and hasattr(f.root.neutron, 'cinder_fission_products'):
+            print "skipping Cinder XS data table creation; already exists."
             return
 
     # First grab the atomic abundance data

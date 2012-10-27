@@ -142,6 +142,7 @@ def make_scattering_lengths(args):
     # Check that the table exists
     with tb.openFile(nuc_data, 'a', filters=BASIC_FILTERS) as f:
         if hasattr(f.root, 'neutron') and hasattr(f.root.neutron, 'scattering_lengths'):
+            print "skipping scattering lengths data table creation; already exists."
             return
 
     # Grab the raw data
