@@ -1316,7 +1316,7 @@ cdef dict map_to_dict_str_matp(cpp_map[std_string, matp] cppmap):
     while mapiter != cppmap.end():
         pymat = Material()
         pymat.mat_pointer[0] = deref(deref(mapiter).second)
-        pydict[deref(mapiter).first.c_str()] = pymat
+        pydict[<char *> deref(mapiter).first.c_str()] = pymat
         inc(mapiter)
 
     return pydict
@@ -1348,7 +1348,7 @@ cdef class MapIterStrMaterial(object):
         cdef cpp_map[std_string, matp].iterator iend = deref(self.iter_end)
 
         if inow != iend:
-            pyval = str(deref(inow).first.c_str())
+            pyval = str(<char *> deref(inow).first.c_str())
         else:
             raise StopIteration
 

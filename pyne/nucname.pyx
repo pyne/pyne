@@ -125,7 +125,7 @@ def current_form(nuc):
     else:
         raise NucTypeError(nuc)
 
-    return cpp_curr_form.c_str()
+    return <char *> cpp_curr_form.c_str()
 
 
 #
@@ -180,7 +180,7 @@ def name(nuc):
     else:
         raise NucTypeError(nuc)
 
-    return newnuc.c_str()
+    return <char *> newnuc.c_str()
 
 
 def mcnp(nuc):
@@ -238,7 +238,7 @@ def serpent(nuc):
     else:
         raise NucTypeError(nuc)
 
-    return newnuc.c_str()
+    return <char *> newnuc.c_str()
 
 
 
@@ -265,7 +265,7 @@ def nist(nuc):
     else:
         raise NucTypeError(nuc)
 
-    return newnuc.c_str()
+    return <char *> newnuc.c_str()
 
 
 def cinder(nuc):
