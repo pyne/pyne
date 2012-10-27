@@ -20,9 +20,9 @@ def grab_ensdf_decay(build_dir=""):
     Parameters
     ----------
     build_dir : str
-        Major directory to place html files in. 'KAERI/' will be appended.
+        Major directory to place html files in. 'ENSDF/' will be appended.
     """
-    # Add kaeri to build_dir
+    # Add ENSDF to build_dir
     build_dir = os.path.join(build_dir, 'ENSDF')
     try:
         os.makedirs(build_dir)
@@ -129,6 +129,7 @@ def make_decay(args):
 
     with tb.openFile(nuc_data, 'r') as f:
         if hasattr(f.root, 'atomic_decay'):
+            print "skipping ENSDF decay data table creation; already exists."
             return 
 
     # grab the decay data

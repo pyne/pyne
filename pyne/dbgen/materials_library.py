@@ -99,6 +99,7 @@ def make_materials_library(args):
     if os.path.exists(nuc_data):
         with tb.openFile(nuc_data, 'r') as f:
             if '/materials_library' in f:
+                print "skipping materials library data table creation; already exists."
                 return
 
     # First make the elements

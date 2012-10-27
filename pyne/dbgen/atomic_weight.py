@@ -203,6 +203,7 @@ def make_atomic_weight(args):
     if os.path.exists(nuc_data):
         with tb.openFile(nuc_data, 'r') as f:
             if hasattr(f.root, 'atomic_weight'):
+                print "skipping atomic weights data table creation; already exists."
                 return 
 
     # First grab the atomic abundance data
