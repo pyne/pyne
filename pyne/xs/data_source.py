@@ -532,11 +532,12 @@ class EAFDataSource(DataSource):
             try:
                 rx = EAF_RX_MAP[rx]
             except KeyError:
-                return None
+                pass
 
         # Check if usable rx #
         if rx is None or str(rx) not in EAF_RX:
-            return None
+            msg = "the reaction '{rx}' is not valid.".format(rx=rx)
+            raise IndexError(msg)
 
         # Grab data
         with tb.openFile(nuc_data, 'r') as f:
