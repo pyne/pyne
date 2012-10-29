@@ -235,6 +235,7 @@ def make_simple_xs(args):
 
     with tb.openFile(nuc_data, 'a', filters=BASIC_FILTERS) as f:
         if hasattr(f.root, 'neutron') and hasattr(f.root.neutron, 'simple_xs'):
+            print "skipping simple XS data table creation; already exists."
             return 
 
     # First grab the atomic abundance data

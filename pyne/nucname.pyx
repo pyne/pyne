@@ -10,7 +10,11 @@ from cython.operator cimport preincrement as inc
 #from cython cimport pointer
 
 # local imports 
-cimport std
+include "includes/cython_version.pxi"
+IF CYTHON_VERSION_MAJOR == 0 and CYTHON_VERSION_MINOR >= 17:
+    from libcpp.string cimport string as std_string
+ELSE:
+    from _includes.libcpp.string cimport string as std_string
 cimport pyne.cpp_pyne
 cimport pyne.pyne_config
 import pyne.pyne_config
@@ -112,7 +116,7 @@ def current_form(nuc):
         The form identifier string from ["zzaaam", "name", "MCNP"].
 
     """
-    cdef std.string cpp_curr_form 
+    cdef std_string cpp_curr_form 
 
     if isinstance(nuc, basestring):
         cpp_curr_form = cpp_nucname.current_form(<char *> nuc)
@@ -121,7 +125,7 @@ def current_form(nuc):
     else:
         raise NucTypeError(nuc)
 
-    return cpp_curr_form.c_str()
+    return <char *> cpp_curr_form.c_str()
 
 
 #
@@ -167,7 +171,7 @@ def name(nuc):
         Output nuclide in name form.
 
     """
-    cdef std.string newnuc
+    cdef std_string newnuc
 
     if isinstance(nuc, basestring):
         newnuc = cpp_nucname.name(<char *> nuc)
@@ -176,7 +180,7 @@ def name(nuc):
     else:
         raise NucTypeError(nuc)
 
-    return newnuc.c_str()
+    return <char *> newnuc.c_str()
 
 
 def mcnp(nuc):
@@ -225,7 +229,7 @@ def serpent(nuc):
         Output nuclide in serpent form.
 
     """
-    cdef std.string newnuc
+    cdef std_string newnuc
 
     if isinstance(nuc, basestring):
         newnuc = cpp_nucname.serpent(<char *> nuc)
@@ -234,7 +238,7 @@ def serpent(nuc):
     else:
         raise NucTypeError(nuc)
 
-    return newnuc.c_str()
+    return <char *> newnuc.c_str()
 
 
 
@@ -252,7 +256,7 @@ def nist(nuc):
         Output nuclide in nist form.
 
     """
-    cdef std.string newnuc
+    cdef std_string newnuc
 
     if isinstance(nuc, basestring):
         newnuc = cpp_nucname.nist(<char *> nuc)
@@ -261,7 +265,7 @@ def nist(nuc):
     else:
         raise NucTypeError(nuc)
 
-    return newnuc.c_str()
+    return <char *> newnuc.c_str()
 
 
 def cinder(nuc):

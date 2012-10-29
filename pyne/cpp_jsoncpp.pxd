@@ -6,7 +6,6 @@ IF CYTHON_VERSION_MAJOR == 0 and CYTHON_VERSION_MINOR >= 17:
     from libcpp.string cimport string as std_string
     from libcpp.vector cimport vector as std_vector
 ELSE:
-    #from std cimport string as std_string
     from _includes.libcpp.string cimport string as std_string
     from _includes.libcpp.vector cimport vector as std_vector
 
