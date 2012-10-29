@@ -7,7 +7,7 @@ from nose.tools import assert_equal, assert_not_equal, assert_raises, raises, \
     assert_almost_equal, assert_true, assert_false, assert_in
 
 import os
-from pyne.material import Material, from_atom_frac, from_hdf5, from_text, MapStrMaterial
+from pyne.material import Material, from_atom_frac, from_hdf5, from_text, MapStrMaterial, MultiMaterial
 from pyne import jsoncpp 
 import numpy  as np
 import tables as tb
@@ -879,7 +879,28 @@ def test_attrs():
     aview['omnomnom'] = [1, 2, 5, 3]
     assert_equal(len(mat.attrs), 3)
     assert_equal(list(mat.attrs['omnomnom']), [1, 2, 5, 3])
+#
+# Test MultiMaterial
+#
+mat1=Material(nucvec={120240:0.3, 300000:0.2, 10010:0.1}, density=2.71)
+mat2=Material(nucvec={60120:0.2, 280640:0.5, 10010:0.12}, density= 8.0)
+mix=MultiMaterial({mat1:0.5, mat2:0.21})
+mat3=mix.mix_by_mass()
+mat4=mix.mix_by_volume()
 
+assert_equal(mat3.density, -1.0)
+assert_equal(mat3.comp[10010], 0.16065498683155846)
+assert_equal(mat3.comp[60120], 0.0721401580212985)
+assert_equal(mat3.comp[120240], 0.352112676056338)
+assert_equal(mat3.comp[280640], 0.18035039505324627)
+assert_equal(mat3.comp[300000], 0.2347417840375587)
+
+assert_equal(mat4.density, -1.0)
+assert_equal(mat4.comp[10010], 0.15541581280722197)
+assert_equal(mat4.comp[60120], 0.13501024631333625)
+assert_equal(mat4.comp[120240], 0.2232289950576606)
+assert_equal(mat4.comp[280640], 0.33752561578334067)
+assert_equal(mat4.comp[300000], 0.14881933003844042)
 #
 # Run as script
 #
