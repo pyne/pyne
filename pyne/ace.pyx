@@ -17,8 +17,6 @@ generates ACE-format cross sections.
 
 .. moduleauthor:: Paul Romano <paul.k.romano@gmail.com>, Anthony Scopatz <scopatz@gmail.com>
 """
-cimport std
-
 import struct
 from warnings import warn
 from collections import OrderedDict

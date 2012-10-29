@@ -8,7 +8,11 @@ from cython.operator cimport preincrement as inc
 from libc.stdlib cimport free
 
 # local imports 
-cimport std
+include "includes/cython_version.pxi"
+IF CYTHON_VERSION_MAJOR == 0 and CYTHON_VERSION_MINOR >= 17:
+    from libcpp.string cimport string as std_string
+ELSE:
+    from _includes.libcpp.string cimport string as std_string
 cimport cpp_pyne
 
 import os
@@ -65,20 +69,20 @@ cdef class PyneConf:
 
     property PYNE_DATA:
         def __get__(self):
-            cdef std.string value = cpp_pyne.PYNE_DATA
-            return value.c_str()
+            cdef std_string value = cpp_pyne.PYNE_DATA
+            return <char *> value.c_str()
 
         def __set__(self, char * value):
-            cpp_pyne.PYNE_DATA = std.string(value)
+            cpp_pyne.PYNE_DATA = std_string(value)
 
 
     property NUC_DATA_PATH:
         def __get__(self):
-            cdef std.string value = cpp_pyne.NUC_DATA_PATH
-            return value.c_str()
+            cdef std_string value = cpp_pyne.NUC_DATA_PATH
+            return <char *> value.c_str()
 
         def __set__(self, char * value):
-            cpp_pyne.NUC_DATA_PATH = std.string(value)
+            cpp_pyne.NUC_DATA_PATH = std_string(value)
 
 
         

@@ -4,12 +4,61 @@ the data to PyNE's HDF5 storage.
 
 import re
 import os
+import urllib
+import urllib2
+from gzip import GzipFile
 
 import numpy as np
 import tables as tb
 
 from pyne import nucname
 from pyne.dbgen.api import BASIC_FILTERS
+
+
+def grab_eaf_data(build_dir=""):
+    """Grabs the EAF activation data files
+    if not already present.
+
+    Parameters
+    ----------
+    build_dir : str
+        Major directory to place EAF data file(s) in. 'EAF/' will be appended.
+    """
+    # Add EAF to build_dir
+    build_dir = os.path.join(build_dir, 'EAF')
+    try:
+        os.makedirs(build_dir)
+        print build_dir, 'created'
+    except OSError:
+        pass
+
+    # Grab ENSDF files and unzip them.
+    iaea_url = 'http://www-nds.iaea.org/fendl2/activation/processed/vitj_e/libout/fendlg-2.0_175-gz'
+    # Pending decision to mirror data on Amazon AWS storage...
+    #s3_base_url = 'http://s3.amazonaws.com/pyne/'
+    eaf_gzip = 'fendlg-2.0_175-gz'
+
+    fpath = os.path.join(build_dir, eaf_gzip)
+    if eaf_gzip not in os.listdir(build_dir):
+        print "  grabbing {0} and placing it in {1}".format(eaf_gzip, fpath)
+        urllib.urlretrieve(iaea_url, fpath)
+
+        if os.path.getsize(fpath) < 3215713: 
+            print "  could not get {0} from IAEA;".format(iaea_url)
+            os.remove(fpath)
+            return False
+
+    # Write contents of single-file gzip archive to a new file
+    try:
+        gf = GzipFile(fpath)
+        ofile = os.path.join(build_dir, 'fendlg-2.0_175')
+        with open(ofile, 'w') as fw:
+            for line in gf:
+                fw.write(line)
+    finally:
+        gf.close()
+        
+    return True
 
 
 # numpy array row storage information for EAF data
@@ -21,7 +70,7 @@ eaf_dtype = np.dtype([
     ('xs',          float, (175,))
     ])
 
-# Regular expression for parsing an individual set of EAF data
+# Regular expression for parsing an individual set of EAF data.
 # Includes some groupnames that are currently unused.
 eaf_info_pattern = \
     "(?P<iso>\d{5,7})\s*(?P<rxnum>\d{2,4})\s*(?P<ngrps>\d{1,3})" \
@@ -29,9 +78,9 @@ eaf_info_pattern = \
     + "(?P<rxstr>\(N,[\w\s]{3}\))(?P<daugh>[a-zA-Z.]{1,2}\s{0,3}\d{1,3})(.*?)"
 eaf_bin_pattern = "(?P<xs>(\d\.\d{5}E[-+]\d{2}\s*){1,175})"
 
-
 def parse_eaf_xs(build_file):
     """Create numpy array by parsing EAF data
+    using regular expressions
 
     Parameters
     ----------
@@ -100,7 +149,7 @@ def make_eaf_table(nuc_data, build_path=""):
         neutron_group = db.createGroup('/', 'neutron', \
                 'Neutron Interaction Data')
 
-    # Create xs group
+    # Create eaf_xs group
     if not hasattr(db.root.neutron, 'eaf_xs'):
         eaf_group = db.createGroup("/neutron", "eaf_xs", \
             "EAF 175-Group Neutron Activation Cross Section Data")
@@ -190,16 +239,20 @@ def make_eaf(args):
     # Check if the table already exists
     with tb.openFile(nuc_data, 'a', filters=BASIC_FILTERS) as f:
         if hasattr(f.root, 'neutron') and hasattr(f.root.neutron, 'eaf_xs'):
+            print "skipping EAF activation data table creation; already exists."
             return
 
-    #TODO: change eaf_file to something more universal
-    eaf_file = "/filespace/groups/cnerg/opt/FENDL2.0-A/fendlg-2.0_175"
-    build_filename = os.path.join(build_dir, 'fendlg-2.0_175')
+    # grab the EAF data
+    print "Grabbing the EAF activation data from IAEA"
+    grabbed = grab_eaf_data(build_dir)
+
+    if not grabbed:
+        return
+
+    build_filename = os.path.join(build_dir, 'EAF/fendlg-2.0_175')
 
     if os.path.exists(build_filename):
         build_path = build_filename
-    elif os.path.exists(eaf_file):
-        build_path = eaf_file
     else:
         return
 
