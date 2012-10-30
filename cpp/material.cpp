@@ -571,6 +571,7 @@ void pyne::Material::write_text (std::string filename)
 
   if (0 <= density)
     f << "Density "  << density << "\n";
+    f << "Density    "  << density << "\n";
   
   if (0 <= atoms_per_mol)
     f << "APerM   " << atoms_per_mol << "\n";

@@ -1474,20 +1474,26 @@ class MapStrMaterial(_MapStrMaterial, collections.MutableMapping):
 
 class MultiMaterial(collections.MutableMapping):
 
+# This function reads a dict of materails and either mass or volume factions,
+# then normalizes the fraction and assigns the dict as an attribute of self.
     def __init__(self, mats):
-        self._mats = mats
+     #Normalize Mixture fractions
+        #First calculate the normalization factor:
+        norm = 0
+        for mat, mix_frac in mats.items():
+            norm = norm + mix_frac
+        #Now divide all mixture fraction by the normalization factor
+        #and assign them as MultiMaterial attributes
+        for mat, mix_frac in mats.items():
+            mats[mat] = mix_frac / norm
+            mat.mass = 1 # set all mass to 1 for mixing
+        self._mats = mats    
 
     def __getitem__(self, key):
         return self._mats[key]
 
     def __setitem__(self, key, value):
         self._mats[key] = value
-
-    def write_hdf5(self):
-        pass
-
-    def write_iter(self):
-        pass
 
     def __add__(self, other):
         pass
@@ -1500,3 +1506,21 @@ class MultiMaterial(collections.MutableMapping):
 
     def  __len__(self):
         pass
+
+# This function reads in a python dict of materials and mass fractions
+# then mixes the material by mass fractions and returns  a material of mass=1
+    def mix_by_mass(self):
+        mix = Material()
+        for mat, mat_frac in self._mats.items():
+            mix = mix + mat * mat_frac
+        mix.mass = 1
+        return mix
+    
+# This function reads in a python dict of materials and volume fractions
+# then mixes the material by volume fractions and returns  a material of mass=1
+    def mix_by_volume(self):
+        mix = Material()
+        for mat, mat_frac in self._mats.items():
+            mix=mix + mat * mat_frac * mat.density
+        mix.mass = 1 
+        return mix
