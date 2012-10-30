@@ -1500,3 +1500,32 @@ class MultiMaterial(collections.MutableMapping):
 
     def  __len__(self):
         pass
+
+
+def mats_latex_table(mats, labels=None, align=None, format=".5g"):
+    if align is None:
+        align = '|l|' + 'c|'*len(mats)
+    if labels is None:
+        labels = []
+    if isinstance(format, basestring):
+        format = [format] * len(mats)
+
+    nucs = set()
+    colnames = ["Nuclide"]
+    for i, mat in enumerate(mats):
+        nucs |= set(mat.comp.keys())
+        name = mat.attrs['name'] if 'name' in mat.attrs else "mat{0}".format(i)
+        colnames.append(name)
+    nucs = sorted(nucs)
+    colnames = labels + colnames[len(labels):]
+    colnames = " & ".join([r"\bf{"+n+'}' for n in colnames]) + r" \\ " + "\n"
+
+    tab = r"\begin{tabular}{" + align + "}\n\\hline\n" + colnames + "\\hline\n"
+    for nuc in nucs:
+        tab += nucname.name(nuc)
+        for mat, f in zip(mats, format):
+            val = mat[nuc] if nuc in mat else 0.0
+            tab += " & {v:{f}}".format(v=val, f=f)
+        tab += r" \\ " + "\n\\hline\n"
+    tab += "\\end{tabular}\n"
+    return tab
