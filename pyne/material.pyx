@@ -1012,7 +1012,10 @@ cdef class _Material:
                 return
             mbm = self.mult_by_mass()
             mbm.map_ptr.erase(<int> key)
+<<<<<<< HEAD
             new_matp = new cpp_material.Material(mbm.map_ptr[0], -1.0)
+=======
+>>>>>>> 28a3807353f21ea90338f913f6b6f4892f165355
             new_matp = new cpp_material.Material(mbm.map_ptr[0], -1.0, -1.0)
             self.mat_pointer = new_matp
             self._comp = None
@@ -1479,15 +1482,15 @@ class MultiMaterial(collections.MutableMapping):
     def __init__(self, mats):
      #Normalize Mixture fractions
         #First calculate the normalization factor:
-        norm=0;
+        norm = 0
         for mat, mix_frac in mats.items():
-            norm=norm+mix_frac
+            norm = norm + mix_frac
         #Now divide all mixture fraction by the normalization factor
         #and assign them as MultiMaterial attributes
         for mat, mix_frac in mats.items():
-            mats[mat]=mix_frac/norm
-            mat.mass=1 # set all mass to 1 for mixing
-        self._mats=mats    
+            mats[mat] = mix_frac / norm
+            mat.mass = 1 # set all mass to 1 for mixing
+        self._mats = mats    
 
     def __getitem__(self, key):
         return self._mats[key]
@@ -1510,23 +1513,17 @@ class MultiMaterial(collections.MutableMapping):
 # This function reads in a python dict of materials and mass fractions
 # then mixes the material by mass fractions and returns  a material of mass=1
     def mix_by_mass(self):
-        mix=Material()
+        mix = Material()
         for mat, mat_frac in self._mats.items():
-            mix=mix+mat*mat_frac
-        mix.mass=1;
+            mix = mix + mat * mat_frac
+        mix.mass = 1
         return mix
     
 # This function reads in a python dict of materials and volume fractions
 # then mixes the material by volume fractions and returns  a material of mass=1
     def mix_by_volume(self):
-        mix=Material()
+        mix = Material()
         for mat, mat_frac in self._mats.items():
-            mix=mix+mat*mat_frac*mat.density
-        mix.mass=1; 
+            mix=mix + mat * mat_frac * mat.density
+        mix.mass = 1 
         return mix
-
-#    def write_hdf5(self):
-#        pass
-
-#    def write_iter(self):
-#        pass
