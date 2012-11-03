@@ -49,8 +49,8 @@ def metadata(path="pyne/metadata.json"):
     return md
 
 
-def final_message(setup_success=True, metadata=None):
-    if setup_success:
+def final_message(success=True, metadata=None):
+    if success:
         return
         
     if metadata is not None:
@@ -98,6 +98,27 @@ def cython_version():
         os.mkdir(incldir)
     with open(os.path.join(incldir, 'cython_version.pxi'), 'w') as f:
         f.write(pxi)
+
+def setup():
+    from distutils.core import setup
+    scripts=['scripts/nuc_data_make']
+    if os.name == 'nt':
+        scripts = [s + '.bat' for s in scripts]
+    setup_kwargs = {
+        "name": "pyne",
+        "version": INFO['version'],
+        "description": 'Python for Nuclear Engineering',
+        "author": 'PyNE Development Team',
+        "author_email": 'scopatz@gmail.com',
+        "url": 'http://pyne.github.com/',
+        "packages": packages,
+        "package_dir": pack_dir,
+        "package_data": pack_data,
+        "cmdclass": {'build_ext': build_ext},
+        "ext_modules": ext_modules,
+        "scripts": scripts,
+        }
+    rtn = setup(**setup_kwargs)
 
 
 if __name__ == "__main__":
