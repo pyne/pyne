@@ -8,6 +8,11 @@ set_source_files_properties(${PROJECT_SOURCE_DIR}/pyne/stlconverters.pyx
                             PROPERTIES CYTHON_IS_CXX TRUE)
 cython_add_module(stlconverters stlconverters.pyx)
                             
+# jsoncpp
+set_source_files_properties(${PROJECT_SOURCE_DIR}/pyne/jsoncpp.pyx 
+                            PROPERTIES CYTHON_IS_CXX TRUE)
+cython_add_module(jsoncpp jsoncpp.pyx)
+target_link_libraries(jsoncpp dl pyne)
 
 # pyne_config
 set_source_files_properties(${PROJECT_SOURCE_DIR}/pyne/pyne_config.pyx 
@@ -29,7 +34,7 @@ target_link_libraries(nucname dl  pyne)
 # data
 set_source_files_properties(${PROJECT_SOURCE_DIR}/pyne/data.pyx 
                             PROPERTIES CYTHON_IS_CXX TRUE)
-cython_add_module(data  data.pyx)
+cython_add_module(data data.pyx)
 target_link_libraries(data dl pyne pyne_nucname pyne_data hdf5)
 
 # material

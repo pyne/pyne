@@ -56,3 +56,14 @@ add_subdirectory(pyne/xs)
 get_property(inc_dirs DIRECTORY PROPERTY INCLUDE_DIRECTORIES)
 message("-- C_INCLUDE_PATH for ${CMAKE_CURRENT_SOURCE_DIR}: ${inc_dirs}")
 
+message("-- Copying C/C++ header files.")
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/cpp/ DESTINATION
+    ${CMAKE_BINARY_DIR}/pyne/include/ FILES_MATCHING PATTERN "*.h")
+
+message("-- Copying Cython header files.")
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/pyne/ 
+    DESTINATION ${CMAKE_BINARY_DIR}/pyne/include/pyne/ 
+    FILES_MATCHING PATTERN "*.pxd"
+                   PATTERN "lib" EXCLUDE
+                   PATTERN "include" EXCLUDE)
+

@@ -47,15 +47,6 @@ def metadata(path):
 
     return md
 
-def cleanup(mdpath="<None>"):
-    # Clean includes after setup has run
-    if os.path.exists('pyne/includes'):
-        remove_tree('pyne/includes')
-
-    # clean up metadata file
-    if os.path.exists(mdpath):
-        os.remove(mdpath)
-
 
 def final_message(setup_success=True, metadata=None):
     if setup_success:
@@ -101,33 +92,11 @@ def cython_version():
     cyver = dict([(k, int(cv)) for k, cv in zip(['major', 'minor', 'micro'], cyver)])
     pxi = pxi.format(**cyver)
     basedir = os.path.split(__file__)[0]
-    incldir = os.path.join(basedir, 'pyne', 'includes')
+    incldir = os.path.join(basedir, 'pyne', 'include')
     if not os.path.exists(incldir):
         os.mkdir(incldir)
     with open(os.path.join(incldir, 'cython_version.pxi'), 'w') as f:
         f.write(pxi)
-
-
-def includes():
-    ds = ['pyne/includes', 'pyne/includes/pyne']
-    cpfs = []
-
-    for root, dirs, files in os.walk('cpp'):
-        incroot = root.replace('cpp', 'pyne/includes')
-        ds += [os.path.join(incroot, d) for d in dirs]
-        cpfs += [(os.path.join(root, f), incroot) for f in files if f.endswith('.h')]
-
-    for root, dirs, files in os.walk('pyne'):
-        incroot = root.replace('pyne', 'pyne/includes/pyne')
-        ds += [os.path.join(incroot, d) for d in dirs]
-        cpfs += [(os.path.join(root, f), incroot) for f in files if f.endswith('.pxd')]
-
-    for d in ds:
-        mkpath(d)
-
-    for src, dst in cpfs:
-        copy_file(src, dst)
-
 
 
 if __name__ == "__main__":
