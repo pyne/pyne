@@ -100,6 +100,8 @@ def cython_version():
         cyver = cyver + [0]
     cyver = dict([(k, int(cv)) for k, cv in zip(['major', 'minor', 'micro'], cyver)])
     pxi = pxi.format(**cyver)
+    if not os.path.exists('pyne'):
+        os.mkdir('pyne')
     if not os.path.exists('pyne/includes'):
         os.mkdir('pyne/includes')
     with open('pyne/includes/cython_version.pxi', 'w') as f:
