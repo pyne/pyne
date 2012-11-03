@@ -59,6 +59,7 @@ execute_process(COMMAND python configure.py cython_version)
 
 add_subdirectory(cpp)
 add_subdirectory(pyne)
+add_subdirectory(pyne/xs)
 
 # Print include dir
 get_property(inc_dirs DIRECTORY PROPERTY INCLUDE_DIRECTORIES)
