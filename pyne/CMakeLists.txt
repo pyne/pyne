@@ -7,6 +7,7 @@ include_directories(${PYNE_INCLUDE_DIRS})
 set_source_files_properties(${PROJECT_SOURCE_DIR}/pyne/stlconverters.pyx 
                             PROPERTIES CYTHON_IS_CXX TRUE)
 cython_add_module(stlconverters stlconverters.pyx)
+                            
 
 # pyne_config
 set_source_files_properties(${PROJECT_SOURCE_DIR}/pyne/pyne_config.pyx 
