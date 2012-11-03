@@ -42,6 +42,9 @@ set(LIBS ${LIBS} ${HDF5_CXX_LIBRARIES})
 find_package(Numpy REQUIRED)
 include_directories(${NUMPY_INCLUDE_DIR})
 
+# Add JsonCpp Flag
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DJSON_IS_AMALGAMATION")
+
 # With CMake, a clean separation can be made between the source tree and the
 # build tree.  When all source is compiled, as with pure C/C++, the source is
 # no-longer needed in the build tree.  However, with pure *.py source, the
@@ -51,6 +54,8 @@ add_custom_target( ReplicatePythonSourceTree ALL ${CMAKE_COMMAND} -P
   ${CMAKE_CURRENT_SOURCE_DIR}/cmake/ReplicatePythonSourceTree.cmake
   ${CMAKE_CURRENT_BINARY_DIR}
   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} )
+
+execute_process(COMMAND python configure.py cython_version)
 
 add_subdirectory(cpp)
 add_subdirectory(pyne)
