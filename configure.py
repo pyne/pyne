@@ -100,11 +100,11 @@ def cython_version():
         cyver = cyver + [0]
     cyver = dict([(k, int(cv)) for k, cv in zip(['major', 'minor', 'micro'], cyver)])
     pxi = pxi.format(**cyver)
-    if not os.path.exists('pyne'):
-        os.mkdir('pyne')
-    if not os.path.exists('pyne/includes'):
-        os.mkdir('pyne/includes')
-    with open('pyne/includes/cython_version.pxi', 'w') as f:
+    basedir = os.path.split(__file__)[0]
+    incldir = os.path.join(basedir, 'pyne', 'includes')
+    if not os.path.exists(incldir):
+        os.mkdir(incldir)
+    with open(os.path.join(incldir, 'cython_version.pxi'), 'w') as f:
         f.write(pxi)
 
 
