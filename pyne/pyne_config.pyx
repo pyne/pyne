@@ -8,7 +8,7 @@ from cython.operator cimport preincrement as inc
 from libc.stdlib cimport free
 
 # local imports 
-include "includes/cython_version.pxi"
+include "include/cython_version.pxi"
 IF CYTHON_VERSION_MAJOR == 0 and CYTHON_VERSION_MINOR >= 17:
     from libcpp.string cimport string as std_string
 ELSE:
@@ -22,7 +22,7 @@ import pyne.__init__
 _local_dir = os.path.split(pyne.__init__.__file__)[0]
 
 lib = os.path.join(_local_dir, 'lib')
-includes = os.path.join(_local_dir, 'includes')
+includes = os.path.join(_local_dir, 'include')
 nuc_data = os.path.join(_local_dir, 'nuc_data.h5')
 
 
