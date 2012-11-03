@@ -2,25 +2,29 @@ set(PYNE_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR} ${PYNE_INCLUDE_DIRS} PARENT_SC
 
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DJSON_IS_AMALGAMATION")
-
-add_lib_to_pyne(pyne jsoncpp.cpp pyne.cpp)
+# pyne
+add_library(pyne jsoncpp.cpp pyne.cpp)
 install_lib(pyne)
 
-add_lib_to_pyne(pyne_nucname nucname.cpp)
-target_link_libraries(pyne_nucname ${PYNE_LIBRARIES})
+# pyne_nucname
+add_library(pyne_nucname nucname.cpp)
+target_link_libraries(pyne_nucname pyne)
 install_lib(pyne_nucname)
 
-add_lib_to_pyne(pyne_data data.cpp)
-target_link_libraries(pyne_data ${PYNE_LIBRARIES})
+# pyne_data
+add_library(pyne_data data.cpp)
+target_link_libraries(pyne_data pyne pyne_nucname hdf5)
 install_lib(pyne_data)
 
+# pyne_material
 add_lib_to_pyne(pyne_material material.cpp)
-target_link_libraries(pyne_material ${PYNE_LIBRARIES})
+target_link_libraries(pyne_material pyne pyne_nucname pyne_data hdf5)
 install_lib(pyne_material)
 
-add_lib_to_pyne(pyne_enrichment enrichment_cascade.cpp enrichment_symbolic.cpp enrichment.cpp)
-target_link_libraries(pyne_enrichment material)
+# pyne_enrichment
+add_lib_to_pyne(pyne_enrichment enrichment_cascade.cpp 
+                                enrichment_symbolic.cpp enrichment.cpp)
+target_link_libraries(pyne_enrichment pyne_material)
 install_lib(pyne_enrichment)
 
 # Print include dir
