@@ -17,7 +17,7 @@ target_link_libraries(pyne_config dl pyne)
 # _utils
 set_source_files_properties(${PROJECT_SOURCE_DIR}/pyne/_utils.pyx 
                             PROPERTIES CYTHON_IS_CXX TRUE)
-cython_add_module(_utils  _utils.pyx)
+cython_add_module(_utils _utils.pyx)
 
 # nucname
 set_source_files_properties(${PROJECT_SOURCE_DIR}/pyne/nucname.pyx 
@@ -41,10 +41,10 @@ target_link_libraries(material dl pyne pyne_nucname pyne_data pyne_material hdf5
 set_source_files_properties(${PROJECT_SOURCE_DIR}/pyne/ace.pyx 
                             PROPERTIES CYTHON_IS_CXX TRUE)
 cython_add_module(ace ace.pyx)
-target_link_libraries(ace  pyne pyne_nucname)
+target_link_libraries(ace pyne pyne_nucname)
 
-# material
+# enrichment
 set_source_files_properties(${PROJECT_SOURCE_DIR}/pyne/enrichment.pyx 
                             PROPERTIES CYTHON_IS_CXX TRUE)
-cython_add_module(enrichment  enrichment.pyx)
-target_link_libraries(enrichment  pyne_enrichment pyne_material)
+cython_add_module(enrichment enrichment.pyx)
+target_link_libraries(enrichment pyne_enrichment pyne_material)
