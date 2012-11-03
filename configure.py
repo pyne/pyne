@@ -13,7 +13,7 @@ from Cython.Compiler.Version import version as CYTHON_VERSION
 
 
 INFO = {
-    'version': '0.1',
+    'version': '0.2-dev',
     }
 
 
@@ -35,11 +35,12 @@ def main():
             raise SystemExit(cmd + " not callable")
 
 
-def metadata(path):
+def metadata(path="pyne/metadata.json"):
     """Build a metadata file."""
-    md = {"HDF5_DIR": HDF5_DIR,
-          }
+    md = {}
     md.update(INFO)
+
+    # FIXME: Add the contents of CMakeCache.txt to the metadata dictionary
 
     # write the metadata file
     with open(path, 'w') as f:
