@@ -49,10 +49,15 @@ def metadata(path="pyne/metadata.json"):
     return md
 
 
-def final_message(success=True, metadata=None):
+def final_message(success=True):
     if success:
         return
-        
+
+    metadata = None
+    mdpath = os.path.join('pyne', 'metadata.json')
+    if os.path.exists(mdpath):
+        with open(mdpath) as f:
+            metadata = json.load(f.read())
     if metadata is not None:
         msg = "\n\nCURRENT METADATA:\n"
         for k, v in sorted(metadata.items()):

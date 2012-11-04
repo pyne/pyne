@@ -4,6 +4,7 @@ import os
 import sys
 import subprocess
 
+import configure
 
 # Thanks to http://patorjk.com/software/taag/  
 # and http://www.chris.com/ascii/index.php?art=creatures/dragons
@@ -36,11 +37,22 @@ pyne_logo = """\
                                      `  
 """
 
+def main_body():
+    if not os.path.exists('build'):
+        os.mkdir('build')
+    makefile = os.path.join('build', 'Makefile')
+    if not os.path.exists(makefile):
+        rtn = subprocess.check_call(['cmake', '..'], cwd='build')
+    rtn = subprocess.check_call(['make'], cwd='build')
+    configure.setup()
+
 def main():
-    pass
-
-
-
+    success = False
+    try:
+        main_body()
+        success = True
+    finally:
+        configure.final_message(success)
 
 if __name__ == "__main__":
     main()
