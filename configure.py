@@ -100,10 +100,25 @@ def cython_version():
         f.write(pxi)
 
 def setup():
-    from distutils.core import setup
-    scripts=['scripts/nuc_data_make']
-    if os.name == 'nt':
-        scripts = [s + '.bat' for s in scripts]
+    from distutils import core
+    scripts = [os.path.join('scripts', f) for f in os.listdir('scripts')]
+    scripts = [s for s in scripts if (os.name == 'nt' and s.endswith('.bat')) or 
+                                     (os.name != 'nt' and not s.endswith('.bat'))]
+    packages = ['pyne', 'pyne.lib', 'pyne.dbgen', 'pyne.apigen', 'pyne.xs', 
+                'pyne.simplesim']
+    pack_dir = {
+        'pyne': 'pyne',
+        'pyne.xs': 'pyne/xs',
+        'pyne.dbgen': 'pyne/dbgen',
+        'pyne.apigen': 'pyne/apigen',
+        'pyne.simplesim': 'pyne/simplesim',
+        }
+    pack_data = {
+        'pyne': ['includes/*.h', 'includes/*/*.h', 'includes/*/*/*.h',
+                 'includes/*/*/*/*.h', 'includes/pyne/*.pxd', 'includes/pyne/*/*.pxd'
+                 'includes/pyne/*/*/*.pxd', 'includes/pyne/*/*/*/*.pxd', '*.json',],
+        'pyne.dbgen': ['*.html', '*.csv'],
+        }
     setup_kwargs = {
         "name": "pyne",
         "version": INFO['version'],
@@ -114,11 +129,9 @@ def setup():
         "packages": packages,
         "package_dir": pack_dir,
         "package_data": pack_data,
-        "cmdclass": {'build_ext': build_ext},
-        "ext_modules": ext_modules,
         "scripts": scripts,
         }
-    rtn = setup(**setup_kwargs)
+    rtn = core.setup(**setup_kwargs)
 
 
 if __name__ == "__main__":
