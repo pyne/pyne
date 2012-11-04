@@ -3,6 +3,7 @@ doc/build/
 build/
 *egg-info/
 build_nuc_data/
+pyne/include/
 
 # Ignore temp files
 *.pyc

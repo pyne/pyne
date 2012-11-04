@@ -67,6 +67,9 @@ file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/pyne/
                    PATTERN "lib" EXCLUDE
                    PATTERN "include" EXCLUDE)
 
+message("-- Copying scripts.")
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/scripts DESTINATION ${CMAKE_BINARY_DIR})
+
 # Add cython version info to source tree
 message("-- Making Metadata.")
 execute_process(COMMAND python ${CMAKE_CURRENT_SOURCE_DIR}/configure.py metadata)
