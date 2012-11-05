@@ -50,8 +50,8 @@ def pyne_start():
     libdll = 'dll' if os.name == 'nt' else 'lib'
     ldpath = 'PATH' if os.name == 'nt' else 'LD_LIBRARY_PATH'
     sepcha = ';' if os.name == 'nt' else ':'
-    if isinstance(md['HDF5_DIR'], basestring) and 0 < len(md['HDF5_DIR']):
-        os.environ[ldpath] += sepcha + os.path.join(md['HDF5_DIR'], libdll)
+    #if isinstance(md['HDF5_DIR'], basestring) and 0 < len(md['HDF5_DIR']):
+    #    os.environ[ldpath] += sepcha + os.path.join(md['HDF5_DIR'], libdll)
     
     # Call the C-version of pyne_start
     cpp_pyne.pyne_start()

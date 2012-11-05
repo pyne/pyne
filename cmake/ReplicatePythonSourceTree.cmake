@@ -2,5 +2,7 @@
 # build dir.
 file( COPY setup.py configure.py pyne DESTINATION "${CMAKE_ARGV3}"
     FILES_MATCHING PATTERN "*.py" 
+                   PATTERN "*.csv" 
                    PATTERN "*.txt" 
+                   PATTERN "*.html" 
                    PATTERN "*.pxi")
