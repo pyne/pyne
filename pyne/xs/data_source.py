@@ -22,6 +22,7 @@ RX_TYPES_MAP = {
     'triton': 't',
     'deut': 'd',
     'deuteron': 'd',
+    'helion': 'h',
     }
 
 def _munge_rx(rx):
@@ -435,30 +436,31 @@ class CinderDataSource(DataSource):
 
 
 # Dictionary matching products with MT#'s
-EAF_RX_MAP = {            'x':'50',      'c':'1010',    'f':'180',
-        'n':'40',         '2n':'160',    '3n':'170',    '4n':'370',
-        'na':'220',       '2na':'240',   'np':'280',    'n2a':'290',
-        'nd':'320',       'nt':'330',    'nhe3':'340',
-        'pd':'1150',      'np/d':None,
-        'g':'1020',
-        'h':'1030',       'p':'1030',    '2p':'1110',
-        'd':'1040',       't':'1050',    '3he':'1060',                
-        'a':'1070',       '2a':'1080',   
+EAF_RX_MAP = {         'x': '50',      'c': '1010',    'f': '180',
+        'n': '40',      '2n': '160',    '3n': '170',    '4n': '370',
+        'na': '220',    '2na': '240',   'np': '280',    'n2a': '290',
+        'nd': '320',    'nt': '330',    'nh': '340',    'nhe3': '340',
+        'pd': '1150',   'np/d':None,
+        'g': '1020',
+        'p': '1030',    '2p': '1110',
+        'd': '1040',    't': '1050',    'h': '1060',    'he3': '1060',          
+        'a': '1070',    '2a': '1080',   
         # metastable not supported yet
-        '3n *':None,    'd  *':None, 'n  *':None, 'g  *':None,
-        'np *':None,    'a  *':None, 'h  *':None, '2p *':None,
-        'x  *':None,    '4n *':None, 'na *':None, 'nd *':None,
-        'nh *':None,    'p  *':None, 'nt *':None, 't  *':None,  
-        '2n *':None,    '*':None,
+        '3n *':None,   'd  *':None,   'n  *':None,   'g  *':None,
+        'np *':None,   'a  *':None,   'h  *':None,   '2p *':None,
+        'x  *':None,   '4n *':None,   'na *':None,   'nd *':None,
+        'nh *':None,   'p  *':None,   'nt *':None,   't  *':None,  
+        '2n *':None,   '*':None,
         # handling words
-        'neutron':'40',
-        'gamma':'1020', 
-        'alpha':'1070',
-        'proton':'1030',
-        'trit':'1050',
-        'triton':'1050',
-        'deut':'1040',
-        'deuteron':'1040',
+        'neutron': '40',
+        'gamma': '1020', 
+        'alpha': '1070',
+        'proton': '1030',
+        'trit': '1050',
+        'triton': '1050',
+        'deut': '1040',
+        'deuteron': '1040',
+        'helion': '1060'
         }
 
 # list/set of the MT#s included in the EAF data
