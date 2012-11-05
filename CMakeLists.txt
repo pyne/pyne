@@ -47,6 +47,8 @@ add_custom_target( ReplicatePythonSourceTree ALL ${CMAKE_COMMAND} -P
 # Add cython version info to source tree
 message("-- Making Cython Version.")
 execute_process(COMMAND python ${CMAKE_CURRENT_SOURCE_DIR}/configure.py cython_version)
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/pyne/_includes/
+     DESTINATION ${CMAKE_BINARY_DIR}/pyne/_includes/)
 
 add_subdirectory(cpp)
 add_subdirectory(pyne)
