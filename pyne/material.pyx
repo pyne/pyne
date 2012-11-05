@@ -12,7 +12,7 @@ from libc.stdlib cimport malloc, free
 import collections
 
 # local imports
-include "includes/cython_version.pxi"
+include "include/cython_version.pxi"
 IF CYTHON_VERSION_MAJOR == 0 and CYTHON_VERSION_MINOR >= 17:
     from libcpp.string cimport string as std_string
 ELSE:
@@ -1475,19 +1475,25 @@ class MapStrMaterial(_MapStrMaterial, collections.MutableMapping):
 class MultiMaterial(collections.MutableMapping):
 
     def __init__(self, mats):
-        self._mats = mats
+        # This function reads a dict of materails and either mass or volume factions,
+        # then normalizes the fraction and assigns the dict as an attribute of self.
+        # Normalize Mixture fractions
+        # First calculate the normalization factor:
+        norm = 0
+        for mat, mix_frac in mats.items():
+            norm = norm + mix_frac
+        # Now divide all mixture fraction by the normalization factor
+        # and assign them as MultiMaterial attributes
+        for mat, mix_frac in mats.items():
+            mats[mat] = mix_frac / norm
+            mat.mass = 1 # set all mass to 1 for mixing
+        self._mats = mats    
 
     def __getitem__(self, key):
         return self._mats[key]
 
     def __setitem__(self, key, value):
         self._mats[key] = value
-
-    def write_hdf5(self):
-        pass
-
-    def write_iter(self):
-        pass
 
     def __add__(self, other):
         pass
@@ -1500,3 +1506,52 @@ class MultiMaterial(collections.MutableMapping):
 
     def  __len__(self):
         pass
+
+    def mix_by_mass(self):
+        """This function reads in a python dict of materials and mass fractions
+        then mixes the material by mass fractions and returns a material of mass=1.
+        """
+        mix = Material()
+        for mat, mat_frac in self._mats.items():
+            mix = mix + mat * mat_frac
+        mix.mass = 1
+        return mix
+    
+    def mix_by_volume(self):
+        """This function reads in a python dict of materials and volume fractions
+        then mixes the material by volume fractions and returns a material of mass=1.
+        """
+        mix = Material()
+        for mat, mat_frac in self._mats.items():
+            mix=mix + mat * mat_frac * mat.density
+        mix.mass = 1 
+        return mix
+
+
+def mats_latex_table(mats, labels=None, align=None, format=".5g"):
+    if align is None:
+        align = '|l|' + 'c|'*len(mats)
+    if labels is None:
+        labels = []
+    if isinstance(format, basestring):
+        format = [format] * len(mats)
+
+    nucs = set()
+    colnames = ["Nuclide"]
+    for i, mat in enumerate(mats):
+        nucs |= set(mat.comp.keys())
+        name = mat.attrs['name'] if 'name' in mat.attrs else "mat{0}".format(i)
+        colnames.append(name)
+    nucs = sorted(nucs)
+    colnames = labels + colnames[len(labels):]
+    colnames = " & ".join([r"\bf{"+n+'}' for n in colnames]) + r" \\ " + "\n"
+
+    tab = r"\begin{tabular}{" + align + "}\n\\hline\n" + colnames + "\\hline\n"
+    for nuc in nucs:
+        tab += nucname.name(nuc)
+        for mat, f in zip(mats, format):
+            val = mat[nuc] if nuc in mat else 0.0
+            tab += " & {v:{f}}".format(v=val, f=f)
+        tab += r" \\ " + "\n\\hline\n"
+    tab += "\\end{tabular}\n"
+    return tab
