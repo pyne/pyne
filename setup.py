@@ -44,7 +44,10 @@ def main_body():
     if not os.path.exists(makefile):
         rtn = subprocess.check_call(['cmake', '..'], cwd='build')
     rtn = subprocess.check_call(['make'], cwd='build')
+    cwd = os.getcwd()
+    os.chdir('build')
     configure.setup()
+    os.chdir(cwd)
 
 def main():
     success = False
