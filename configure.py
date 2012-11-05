@@ -114,14 +114,19 @@ def setup():
     pack_dir = {
         'pyne': 'pyne',
         'pyne.xs': 'pyne/xs',
+        'pyne.lib': 'pyne/lib',
         'pyne.dbgen': 'pyne/dbgen',
         'pyne.apigen': 'pyne/apigen',
         'pyne.simplesim': 'pyne/simplesim',
         }
+    extpttn = ['*.dll', '*.so', '*.dylib', '*.pyd', '*.pyo']
     pack_data = {
         'pyne': ['includes/*.h', 'includes/*/*.h', 'includes/*/*/*.h',
                  'includes/*/*/*/*.h', 'includes/pyne/*.pxd', 'includes/pyne/*/*.pxd'
-                 'includes/pyne/*/*/*.pxd', 'includes/pyne/*/*/*/*.pxd', '*.json',],
+                 'includes/pyne/*/*/*.pxd', 'includes/pyne/*/*/*/*.pxd', '*.json',
+                 ] + extpttn,
+        'pyne.xs': extpttn,
+        'pyne.lib': extpttn,
         'pyne.dbgen': ['*.html', '*.csv'],
         }
     setup_kwargs = {
