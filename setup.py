@@ -40,6 +40,9 @@ pyne_logo = """\
 def main_body():
     if not os.path.exists('build'):
         os.mkdir('build')
+    hdf5opt = [o.split('=')[1] for o in sys.argv if o.startswith('--hdf5=')]
+    if 0 < len(hdf5opt):
+        os.environ['HDF5_ROOT'] = hdf5opt[0]  # Expose to CMake
     makefile = os.path.join('build', 'Makefile')
     if not os.path.exists(makefile):
         cmake_cmd = ['cmake', '..']
