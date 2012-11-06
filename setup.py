@@ -42,7 +42,19 @@ def main_body():
         os.mkdir('build')
     makefile = os.path.join('build', 'Makefile')
     if not os.path.exists(makefile):
-        rtn = subprocess.check_call(['cmake', '..'], cwd='build')
+        cmake_cmd = ['cmake', '..']
+        if os.name == 'nt':
+            files_on_path = set()
+            for p in os.environ['PATH'].split(';')[::-1]:
+                files_on_path.update(os.listdir(p))
+            if 'cl.exe' in files_on_path:
+                pass
+            elif 'sh.exe' in files_on_path:
+                cmake_cmd += ['-G "MSYS Makefiles"']
+            elif 'gcc.exe' in files_on_path:
+                cmake_cmd += ['-G "MinGW Makefiles"']
+            cmake_cmd = ' '.join(cmake_cmd)
+        rtn = subprocess.check_call(cmake_cmd, cwd='build', shell=(os.name=='nt'))
     rtn = subprocess.check_call(['make'], cwd='build')
     cwd = os.getcwd()
     os.chdir('build')
