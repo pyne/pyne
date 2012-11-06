@@ -24,6 +24,8 @@ set(BUILD_SHARED_LIBS true)
 # Include the HDF5 library and c++ headers
 find_package( HDF5 COMPONENTS CXX )
 include_directories(${HDF5_INCLUDE_DIRS})
+link_directories(${HDF5_LIBRARY_DIRS})
+message("HDF5_LIBRARY_DIRS = ${HDF5_LIBRARY_DIRS}")
 add_definitions(${HDF5_DEFINITIONS})
 set(LIBS ${LIBS} ${HDF5_CXX_LIBRARIES})
 
