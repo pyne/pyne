@@ -1,3 +1,8 @@
+set(HDF5_SO hdf5)
+if(WIN32)
+    set(HDF5_SO hdf5)
+endif(WIN32)
+
 macro( add_lib_to_pyne _name _source )
   # add the library
   add_library(${_name}             ${_source})
@@ -7,9 +12,11 @@ endmacro()
 
 macro( install_lib _name )
   # install it
-  install(TARGETS ${_name}
-    LIBRARY DESTINATION ${CMAKE_INSTALL_PREFIX}/lib
-    )
+  set(lib_type LIBRARY)
+  if(WIN32)
+    set(lib_type RUNTIME)
+  endif(WIN32)
+  install(TARGETS ${_name} ${lib_type} DESTINATION ${CMAKE_INSTALL_PREFIX}/lib)
 endmacro()
 
 macro( print_logo )
@@ -17,7 +24,8 @@ macro( print_logo )
   if(WIN32)
     set(cat_prog type)
   endif(WIN32)
-  exec_program(${cat_prog} ARGS ${PROJECT_SOURCE_DIR}/cmake/logo.txt 
-    OUTPUT_VARIABLE variable)
-  message("${variable}")
+  message("PRINT CAT!!!")
+  #execute_process(COMMAND ${cat_prog} ${PROJECT_SOURCE_DIR}\\cmake\\logo.txt)
+  execute_process(COMMAND ${cat_prog} ${PROJECT_SOURCE_DIR}/cmake/logo.txt OUTPUT_VARIABLE variable)
+  message("var = ${variable}")
 endmacro()
