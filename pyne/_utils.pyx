@@ -9,8 +9,8 @@ IF CYTHON_VERSION_MAJOR == 0 and CYTHON_VERSION_MINOR >= 17:
     from libc.stdlib cimport atof
     from libc.string cimport strtok, strcpy
 ELSE:
-    from _includes.libc.stdlib cimport atof
-    from _includes.libc.string cimport strtok, strcpy
+    from pyne._includes.libc.stdlib cimport atof
+    from pyne._includes.libc.string cimport strtok, strcpy
 
 
 

@@ -1,4 +1,3 @@
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/pyne/lib)
 set(PYNE_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR} ${PYNE_INCLUDE_DIRS} PARENT_SCOPE)
 
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
@@ -14,7 +13,8 @@ install_lib(pyne_nucname)
 
 # pyne_data
 add_library(pyne_data data.cpp)
-target_link_libraries(pyne_data pyne pyne_nucname hdf5)
+#target_link_libraries(pyne_data pyne pyne_nucname hdf5)
+target_link_libraries(pyne_data pyne pyne_nucname ${HDF5_SO})
 install_lib(pyne_data)
 
 # pyne_material
