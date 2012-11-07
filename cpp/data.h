@@ -11,6 +11,7 @@
 #include <stdio.h>
 
 #include "hdf5.h"
+#include "hdf5_hl.h"
 #include "h5wrap.h"
 
 #include "extra_types.h"

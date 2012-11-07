@@ -13,13 +13,15 @@
 #include <cmath>
 #include <exception>
 #include <sys/stat.h> 
+#include <sys/types.h> 
+#include <cstdlib>
 #include <vector>
 #include <algorithm>
 
 /*** Macros ***/
 #define length_array(a) ( sizeof ( a ) / sizeof ( *a ) )
 
-#if defined(__APPLE__)
+#if defined __APPLE__ || defined __WIN_GNUC__
 #if (__GNUC__ >= 4)
   #include <cmath>
   #define isnan(x) std::isnan(x)
@@ -29,7 +31,7 @@
 #endif
 #endif
 
-#ifdef _WIN32_MSVC
+#ifdef __WIN_MSVC__
     #define isnan(x) ((x) != (x))
 #endif
 

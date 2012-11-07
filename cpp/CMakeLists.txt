@@ -13,8 +13,7 @@ install_lib(pyne_nucname)
 
 # pyne_data
 add_library(pyne_data data.cpp)
-#target_link_libraries(pyne_data pyne pyne_nucname hdf5)
-target_link_libraries(pyne_data pyne pyne_nucname ${HDF5_SO})
+target_link_libraries(pyne_data pyne pyne_nucname hdf5)
 install_lib(pyne_data)
 
 # pyne_material
