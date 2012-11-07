@@ -43,6 +43,7 @@ def main_body():
     hdf5opt = [o.split('=')[1] for o in sys.argv if o.startswith('--hdf5=')]
     if 0 < len(hdf5opt):
         os.environ['HDF5_ROOT'] = hdf5opt[0]  # Expose to CMake
+        sys.argv = [o for o in sys.argv if not o.startswith('--hdf5=')]
     makefile = os.path.join('build', 'Makefile')
     if not os.path.exists(makefile):
         cmake_cmd = ['cmake', '..']

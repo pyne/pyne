@@ -175,7 +175,7 @@ pyne_enr::Cascade pyne_enr::_norm_comp_secant(pyne_enr::Cascade & casc, \
   pyne_enr::Cascade curr_casc = casc;
 
   // Is the history of N and M that has been input
-  uint h;
+  unsigned int h;
   int niter = 0;
   int max_hist = max_iter / 10;
   std::vector<double> historyN;

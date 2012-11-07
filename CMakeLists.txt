@@ -8,6 +8,18 @@ project( pyne )
 # 'include()' command, 'find_package()' command.
 set( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_LIST_DIR}/cmake )
 
+# Include the HDF5 library and c++ headers
+find_package( HDF5 COMPONENTS C )
+include_directories(${HDF5_INCLUDE_DIRS})
+if(WIN32)
+    # FindHDF5 finds the includes but not the libraries on Windows (MSYS).  Annoying!
+    get_filename_component(_hdf5libdir ${HDF5_INCLUDE_DIRS} PATH)
+    list(APPEND HDF5_LIBRARY_DIRS "${_hdf5libdir}/bin")
+endif(WIN32)
+link_directories(${HDF5_LIBRARY_DIRS})
+add_definitions(${HDF5_DEFINITIONS})
+set(LIBS ${LIBS} ${HDF5_C_LIBRARIES})
+
 # Include the CMake script UseCython.cmake.  This defines add_cython_module().
 # Instruction for use can be found at the top of cmake/UseCython.cmake.
 include( UseCython )
@@ -20,18 +32,6 @@ print_logo()
 
 # This makes all the libraries build as SHARED
 set(BUILD_SHARED_LIBS true)
-
-# Include the HDF5 library and c++ headers
-find_package( HDF5 COMPONENTS CXX )
-include_directories("${HDF5_INCLUDE_DIRS}")
-if(WIN32)
-    # FindHDF5 finds the includes but not the libraries on Windows (MSYS).  Annoying!
-    get_filename_component(_hdf5libdir ${HDF5_INCLUDE_DIRS} PATH)
-    list(APPEND HDF5_LIBRARY_DIRS "${_hdf5libdir}/dll")
-endif(WIN32)
-link_directories(${HDF5_LIBRARY_DIRS})
-add_definitions(${HDF5_DEFINITIONS})
-set(LIBS ${LIBS} ${HDF5_CXX_LIBRARIES})
 
 # find numpy and include the numpy headers
 find_package(Numpy REQUIRED)
