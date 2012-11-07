@@ -32,6 +32,7 @@ print_logo()
 
 # This makes all the libraries build as SHARED
 set(BUILD_SHARED_LIBS true)
+message("-- CMake Install Prefix: ${CMAKE_INSTALL_PREFIX}")
 
 # find numpy and include the numpy headers
 find_package(Numpy REQUIRED)

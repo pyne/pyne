@@ -30,6 +30,7 @@ macro( install_lib _name )
   install(TARGETS ${_name} ${lib_type} DESTINATION ${CMAKE_INSTALL_PREFIX}/lib)
 endmacro()
 
+
 macro( print_logo )
   set(cat_prog cat)
   if(WIN32)

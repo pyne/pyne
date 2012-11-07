@@ -10,7 +10,7 @@ std::string pyne::NUC_DATA_PATH = "";
 
 void pyne::pyne_start()
 {
-#ifdef __WIN_MSVC__
+#if defined __WIN_MSVC__
   char * tmpPYNE_DATA;
   size_t lenPYNE_DATA;
   errno_t errPYNE_DATA = _dupenv_s(&tmpPYNE_DATA, &lenPYNE_DATA, "PYNE_DATA");
