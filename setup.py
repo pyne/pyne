@@ -50,7 +50,8 @@ def main_body():
         if os.name == 'nt':
             files_on_path = set()
             for p in os.environ['PATH'].split(';')[::-1]:
-                files_on_path.update(os.listdir(p))
+                if os.path.exists(p):
+                    files_on_path.update(os.listdir(p))
             if 'cl.exe' in files_on_path:
                 pass
             elif 'sh.exe' in files_on_path:
