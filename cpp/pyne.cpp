@@ -15,26 +15,26 @@ void pyne::pyne_start()
   size_t lenPYNE_DATA;
   errno_t errPYNE_DATA = _dupenv_s(&tmpPYNE_DATA, &lenPYNE_DATA, "PYNE_DATA");
   if (errPYNE_DATA)
-    tmpPYNE_DATA = "<NOT_FOUND>";
+    tmpPYNE_DATA = (char *) "<NOT_FOUND>";
   PYNE_DATA = (std::string) tmpPYNE_DATA;
 
   char * tmpNUC_DATA_PATH;
   size_t lenNUC_DATA_PATH;
   errno_t errNUC_DATA_PATH = _dupenv_s(&tmpNUC_DATA_PATH, &lenNUC_DATA_PATH, "NUC_DATA_PATH");
   if (errPYNE_DATA)
-    tmpNUC_DATA_PATH = "<NOT_FOUND>";
+    tmpNUC_DATA_PATH = (char *) "<NOT_FOUND>";
   NUC_DATA_PATH = (std::string) tmpNUC_DATA_PATH;
 #else
   char * tmppath;
   tmppath = getenv("PYNE_DATA");
   if (tmppath == NULL)
-      tmppath = "<NOT_FOUND>";
-  PYNE_DATA = (std::string) tmppath;
+      tmppath = (char *) "<NOT_FOUND>";
+  PYNE_DATA = std::string(tmppath);
   
   tmppath = getenv("NUC_DATA_PATH");
   if (tmppath == NULL)
-      tmppath = "<NOT_FOUND>";
-  NUC_DATA_PATH = (std::string) tmppath;
+      tmppath = (char *) "<NOT_FOUND>";
+  NUC_DATA_PATH = std::string(tmppath);
 #endif
   return;
 };
