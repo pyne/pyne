@@ -73,7 +73,11 @@ def final_message(success=True):
     except ImportError:
         h5ver = '1.8.5-patch1'
 
-    msg = ("\n\nIf compilation is failing with HDF5 issues please try the "
+    msg = ("\n\nUSAGE: "
+           "python setup.py <distutils-args> [-- <cmake-arg>] [-- <make-args>]\n"
+           "CMake and make command line arguments are optional, but must be preceeded "
+           "by '--'.\n"
+           "\n\nIf compilation is failing with HDF5 issues please try the "
            "following steps:\n\n"
            "    1. Install EPD [1].\n"
            "    2. Download the HDF5 Windows binarys from [2].\n"
