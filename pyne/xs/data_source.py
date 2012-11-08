@@ -450,7 +450,12 @@ EAF_RX_MAP = {         'x': '50',      'c': '1010',    'f': '180',
         'np *':None,   'a  *':None,   'h  *':None,   '2p *':None,
         'x  *':None,   '4n *':None,   'na *':None,   'nd *':None,
         'nh *':None,   'p  *':None,   'nt *':None,   't  *':None,  
-        '2n *':None,   '*':None,
+        '2n *':None,   '*': None,
+        '3n_x':None,   'd_x':None,    'n_x':None,    'g_x':None,
+        'np_x':None,   'a_x':None,    'h_x':None,    '2p_x':None,
+        'x_x':None,    '4n_x':None,   'na_x':None,   'nd_x':None,
+        'nh_x':None,   'p_x':None,    'nt_x':None,   't_x':None,  
+        '2n_x':None,
         # handling words
         'neutron': '40',
         'gamma': '1020', 
@@ -460,7 +465,16 @@ EAF_RX_MAP = {         'x': '50',      'c': '1010',    'f': '180',
         'triton': '1050',
         'deut': '1040',
         'deuteron': '1040',
-        'helion': '1060'
+        'helion': '1060',
+        'neutron_x': None,
+        'gamma_x': None, 
+        'alpha_x': None,
+        'proton_x':None,
+        'trit_x': None,
+        'triton_x': None,
+        'deut_x': None,
+        'deuteron_x': None,
+        'helion_x': None,
         }
 
 # list/set of the MT#s included in the EAF data
@@ -504,8 +518,7 @@ class EAFDataSource(DataSource):
         return self._exists
 
     def _load_reaction(self, nuc, rx, temp=300.0):
-        """
-
+        """ 
         Note: EAF data does not use temperature information (temp)
 
         Parameters
@@ -537,7 +550,9 @@ class EAFDataSource(DataSource):
                 pass
 
         # Check if usable rx #
-        if rx is None or str(rx) not in EAF_RX:
+        if rx is None:
+            return None
+        if str(rx) not in EAF_RX:
             msg = "the reaction '{rx}' is not valid.".format(rx=rx)
             raise IndexError(msg)
 

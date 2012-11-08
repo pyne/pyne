@@ -12,13 +12,13 @@ cython_add_module(stlconverters stlconverters.pyx)
 set_source_files_properties(${PROJECT_SOURCE_DIR}/pyne/jsoncpp.pyx 
                             PROPERTIES CYTHON_IS_CXX TRUE)
 cython_add_module(jsoncpp jsoncpp.pyx)
-target_link_libraries(jsoncpp dl pyne)
+target_link_libraries(jsoncpp pyne)
 
 # pyne_config
 set_source_files_properties(${PROJECT_SOURCE_DIR}/pyne/pyne_config.pyx 
                             PROPERTIES CYTHON_IS_CXX TRUE)
 cython_add_module(pyne_config  pyne_config.pyx)
-target_link_libraries(pyne_config dl pyne)
+target_link_libraries(pyne_config pyne)
 
 # _utils
 set_source_files_properties(${PROJECT_SOURCE_DIR}/pyne/_utils.pyx 
@@ -29,19 +29,19 @@ cython_add_module(_utils _utils.pyx)
 set_source_files_properties(${PROJECT_SOURCE_DIR}/pyne/nucname.pyx 
                             PROPERTIES CYTHON_IS_CXX TRUE)
 cython_add_module(nucname  nucname.pyx)
-target_link_libraries(nucname dl pyne pyne_nucname)
+target_link_libraries(nucname pyne pyne_nucname)
 
 # data
 set_source_files_properties(${PROJECT_SOURCE_DIR}/pyne/data.pyx 
                             PROPERTIES CYTHON_IS_CXX TRUE)
 cython_add_module(data data.pyx)
-target_link_libraries(data dl pyne pyne_nucname pyne_data hdf5)
+target_link_libraries(data pyne pyne_nucname pyne_data hdf5)
 
 # material
 set_source_files_properties(${PROJECT_SOURCE_DIR}/pyne/material.pyx 
                             PROPERTIES CYTHON_IS_CXX TRUE)
 cython_add_module(material  material.pyx)
-target_link_libraries(material dl pyne pyne_nucname pyne_data pyne_material hdf5)
+target_link_libraries(material pyne pyne_nucname pyne_data pyne_material hdf5)
 
 # ace
 set_source_files_properties(${PROJECT_SOURCE_DIR}/pyne/ace.pyx 
