@@ -57,7 +57,7 @@ def final_message(success=True):
     mdpath = os.path.join('pyne', 'metadata.json')
     if os.path.exists(mdpath):
         with open(mdpath) as f:
-            metadata = json.load(f.read())
+            metadata = json.load(f)
     if metadata is not None:
         msg = "\n\nCURRENT METADATA:\n"
         for k, v in sorted(metadata.items()):
@@ -73,7 +73,11 @@ def final_message(success=True):
     except ImportError:
         h5ver = '1.8.5-patch1'
 
-    msg = ("\n\nIf compilation is failing with HDF5 issues please try the "
+    msg = ("\n\nUSAGE: "
+           "python setup.py <distutils-args> [-- <cmake-arg>] [-- <make-args>]\n"
+           "CMake and make command line arguments are optional, but must be preceeded "
+           "by '--'.\n"
+           "\n\nIf compilation is failing with HDF5 issues please try the "
            "following steps:\n\n"
            "    1. Install EPD [1].\n"
            "    2. Download the HDF5 Windows binarys from [2].\n"
@@ -110,11 +114,12 @@ def setup():
     scripts = [s for s in scripts if (os.name == 'nt' and s.endswith('.bat')) or 
                                      (os.name != 'nt' and not s.endswith('.bat'))]
     packages = ['pyne', 'pyne.lib', 'pyne.dbgen', 'pyne.apigen', 'pyne.xs', 
-                'pyne.simplesim']
+                'pyne.simplesim', 'pyne.gui']
     pack_dir = {
         'pyne': 'pyne',
         'pyne.xs': 'pyne/xs',
         'pyne.lib': 'pyne/lib',
+        'pyne.gui': 'pyne/gui',
         'pyne.dbgen': 'pyne/dbgen',
         'pyne.apigen': 'pyne/apigen',
         'pyne.simplesim': 'pyne/simplesim',
@@ -127,6 +132,7 @@ def setup():
                  ] + extpttn,
         'pyne.xs': extpttn,
         'pyne.lib': extpttn,
+        'pyne.gui': ['*.pyw'],
         'pyne.dbgen': ['*.html', '*.csv'],
         }
     setup_kwargs = {

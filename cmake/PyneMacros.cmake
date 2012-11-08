@@ -1,7 +1,18 @@
-set(HDF5_SO hdf5)
-if(WIN32)
-    set(HDF5_SO hdf5dll)
-endif(WIN32)
+# set platform preprocessor macro
+set(PYNE_PLATFORM "__${CMAKE_SYSTEM_NAME}__")
+if(APPLE)
+    set(PYNE_PLATFORM "__APPLE__")
+elseif(WIN32)
+    if(MSVC)
+        set(PYNE_PLATFORM "__WIN_MSVC__")
+    elseif(CMAKE_COMPILER_IS_GNUC OR CMAKE_COMPILER_IS_GNUCXX)
+        set(PYNE_PLATFORM "__WIN_GNUC__")
+    endif(MSVC)
+else(APPLE)
+    set(PYNE_PLATFORM "__LINUX__")
+endif(APPLE)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D${PYNE_PLATFORM}")
+message("-- Pyne platform defined as: ${PYNE_PLATFORM}")
 
 macro( add_lib_to_pyne _name _source )
   # add the library
@@ -18,6 +29,7 @@ macro( install_lib _name )
   endif(WIN32)
   install(TARGETS ${_name} ${lib_type} DESTINATION ${CMAKE_INSTALL_PREFIX}/lib)
 endmacro()
+
 
 macro( print_logo )
   set(cat_prog cat)
