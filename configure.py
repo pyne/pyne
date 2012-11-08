@@ -114,11 +114,12 @@ def setup():
     scripts = [s for s in scripts if (os.name == 'nt' and s.endswith('.bat')) or 
                                      (os.name != 'nt' and not s.endswith('.bat'))]
     packages = ['pyne', 'pyne.lib', 'pyne.dbgen', 'pyne.apigen', 'pyne.xs', 
-                'pyne.simplesim']
+                'pyne.simplesim', 'pyne.gui']
     pack_dir = {
         'pyne': 'pyne',
         'pyne.xs': 'pyne/xs',
         'pyne.lib': 'pyne/lib',
+        'pyne.gui': 'pyne/gui',
         'pyne.dbgen': 'pyne/dbgen',
         'pyne.apigen': 'pyne/apigen',
         'pyne.simplesim': 'pyne/simplesim',
@@ -131,6 +132,7 @@ def setup():
                  ] + extpttn,
         'pyne.xs': extpttn,
         'pyne.lib': extpttn,
+        'pyne.gui': ['*.pyw'],
         'pyne.dbgen': ['*.html', '*.csv'],
         }
     setup_kwargs = {

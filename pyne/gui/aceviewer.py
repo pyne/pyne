@@ -398,9 +398,12 @@ class DistributionPlot(QMainWindow):
                     self.reaction.e_dist_law))
 
 
-if __name__ == '__main__':
+def main():
     app = QApplication(sys.argv)
     window = AceViewer()
     window.show()
     app.exec_()
     sys.exit()
+
+if __name__ == '__main__':
+    main()
