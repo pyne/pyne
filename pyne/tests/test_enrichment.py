@@ -273,5 +273,5 @@ def test_tungsten():
 
 
 if __name__ == "__main__":
-    noscasc.main()
+    nose.main()
 
