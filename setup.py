@@ -37,16 +37,31 @@ pyne_logo = """\
                                      `  
 """
 
+def parse_args():
+    distutils = []
+    cmake = []
+    make = []
+    argsets = [distutils, cmake, make]
+    i = 0
+    for arg in sys.argv:
+        if arg == '--':
+            i += 1
+        else:
+            argsets[i].append(arg)
+    hdf5opt = [o.split('=')[1] for o in distutils if o.startswith('--hdf5=')]
+    if 0 < len(hdf5opt):
+        os.environ['HDF5_ROOT'] = hdf5opt[0]  # Expose to CMake
+        distutils = [o for o in distutils if not o.startswith('--hdf5=')]
+    return distutils, cmake, make
+
+
 def main_body():
     if not os.path.exists('build'):
         os.mkdir('build')
-    hdf5opt = [o.split('=')[1] for o in sys.argv if o.startswith('--hdf5=')]
-    if 0 < len(hdf5opt):
-        os.environ['HDF5_ROOT'] = hdf5opt[0]  # Expose to CMake
-        sys.argv = [o for o in sys.argv if not o.startswith('--hdf5=')]
+    sys.argv, cmake_args, make_args = parse_args()
     makefile = os.path.join('build', 'Makefile')
     if not os.path.exists(makefile):
-        cmake_cmd = ['cmake', '..']
+        cmake_cmd = ['cmake', '..'] + cmake_args
         if os.name == 'nt':
             files_on_path = set()
             for p in os.environ['PATH'].split(';')[::-1]:
@@ -60,7 +75,7 @@ def main_body():
                 cmake_cmd += ['-G "MinGW Makefiles"']
             cmake_cmd = ' '.join(cmake_cmd)
         rtn = subprocess.check_call(cmake_cmd, cwd='build', shell=(os.name=='nt'))
-    rtn = subprocess.check_call(['make'], cwd='build')
+    rtn = subprocess.check_call(['make'] + make_args, cwd='build')
     cwd = os.getcwd()
     os.chdir('build')
     configure.setup()
