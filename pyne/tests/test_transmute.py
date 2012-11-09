@@ -13,6 +13,7 @@ import numpy  as np
 import scipy  as sp
 import tables as tb
 from pyne import transmute
+from pyne.transmute import import_eaf_data
 from scipy import linalg
 
 """def test_decay1():
@@ -37,6 +38,10 @@ def test_expm():
     assert_equal(eA.all(),transA.all())
     # Check convergence to high level Taylor Series solution
     assert_almost_equal(tayA.all(),transA.all())
+
+def test_import_eaf():
+    eaf_array = import_eaf_data
+    print(eaf_array)
 
 #
 # Run as script

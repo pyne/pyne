@@ -1,9 +1,14 @@
 import numpy as np
 import scipy as sp
+import tables as tb
 
-from pyne.material import Material
 from pyne import data
 from pyne.xs.cache import xs_cache
+from pyne import nucname
+from pyne import nuc_data
+from pyne.material import Material
+from pyne.xs.cache import xs_cache
+from pyne.dbgen import eaf#, BASIC_FILTERS
 
 
 def decay(mat, t):
@@ -38,3 +43,24 @@ def _solve_decay_matrix(A):
     eA = sp.linalg.expm(A)
     return eA
 
+def import_eaf_data():
+    """Creates numpy array by parsing EAF data.
+
+    Location of EAF data hard-coded for CNERG machines
+
+    Returns
+    -------
+    eaf_table : PyTables table
+
+    """
+
+    #eaf_array = eaf.parse_eaf_xs('/filespace/groups/cnerg/opt/FENDL2.0-A/fendlg-2.0_175')
+    eaf.make_eaf_table("nuc_data", \
+                   "/filespace/groups/cnerg/opt/FENDL2.0-A/fendlg-2.0_175")
+    #return eaf_array
+
+def _get_daughters(nuc):
+    eaf_table = tb.openFile('nuc_data')
+    daughters = [row['daughter'] for row in \
+        eaf_table.root.neutron.eaf_xs.eaf_xs.where('nuc_zz == nuc')]
+    return daughters
