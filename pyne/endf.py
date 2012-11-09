@@ -24,6 +24,78 @@ libraries = {0: "ENDF/B", 1: "ENDF/A", 2: "JEFF", 3: "EFF",
              31: "INDL/V", 32: "INDL/A", 33: "FENDL", 34: "IRDF",
              35: "BROND", 36: "INGDB-90", 37: "FENDL/A", 41: "BROND"}
 
+class Library(object):
+    """
+    Library is a class for an ENDF evaluation which contains a number
+    of Files.
+    """
+
+    def __init__(self, filename):
+        self.fh = open(filename, 'r')
+        self.files = []
+        self.verbose = True
+        self.veryverbose = False
+        self.mts = {}
+        self.comments = ''
+        self.filename = filename
+        # First we need to read MF=1, MT=451 which has a description of the ENDF
+        # file and a list of what data exists in the file
+        self._read_header()
+        self._read_data()
+
+    def _read_header(self):
+        if self.verbose:
+            print("Reading File 1...")
+        self.fh.seek(76)
+        line = self.fh.readline()
+        za = float(line[1:8]) * 10 ** int(line[10])
+        arw = float(line[12:19]) * 10 ** int(line[21])
+        self.fh.seek(400)
+        mf = 1
+        start = 1
+        stop = 0
+        while re.search('1451 +\d{1,3}', line):
+            if re.match(' +\d{1,2} +\d{1,3} +\d+ +0', line):
+                old_mf = mf
+                mf, mt = int(line[31:33]), int(line[41:44])
+                mt_length = int(line[50:55])
+                if old_mf == mf:
+                    start = stop + 1
+                else:
+                    start = stop + 2
+                stop = start + mt_length
+                self.mts.update({(mf, mt):(start, stop)})
+                line = self.fh.readline()
+            elif re.search('C O N T E N T S', line):
+                line = self.fh.readline()
+                continue
+            else:
+                self.comments = self.comments + '\n' + line[0:66]
+                line = self.fh.readline()
+    
+    def _read_data(self):
+        if self.verbose:
+            print("Reading data...")
+        self.data = np.genfromtxt(self.filename, 
+                                  delimiter = 11, 
+                                  usecols = (0, 1, 2, 3, 4, 5), 
+                                  skip_header = self.mts[(1, 451)][1] + 2, 
+                                  skip_footer = 4, 
+                                  converters = {0: convert,
+                                                1: convert,
+                                                2: convert,
+                                                3: convert,
+                                                4: convert,
+                                                5: convert})
+    def _read_mfmt(self, mf, mt):
+        if self.verbose:
+            print "Reading File %d, MT %d" % (mf, mt)
+        
+        start = (self.mts[(mf, mt)][0] - self.mts[(1,451)][1] - 2)* 6
+        stop = (self.mts[(mf, mt)][1] - self.mts[(1,451)][1] - 2) * 6
+        print self.data.flat[start:stop]
+
+
 class Evaluation(object):
     """
     Evaluation is the main class for an ENDF evaluation which contains a number
@@ -1108,7 +1180,6 @@ class RMatrixLimited(Resonance):
     def __init__(self):
         pass
 
-
 def convert(string):
     """
     This function converts a number listed on an ENDF tape into a float or int
@@ -1305,8 +1376,8 @@ class NotFound(Exception):
 if __name__ == '__main__':
     #
     # Some tests. The test files can be downloaded from:
-    #    http://www.oecd-nea.org/dbforms/data/eva/evatapes/endfb_7/tsl-ENDF-VII0.endf/
-    #    http://www.oecd-nea.org/dbforms/data/eva/evatapes/endfb_7/n-ENDF-VII0.endf/
+       # http://www.oecd-nea.org/dbforms/data/eva/evatapes/endfb_7/tsl-ENDF-VII0.endf/
+       # http://www.oecd-nea.org/dbforms/data/eva/evatapes/endfb_7/n-ENDF-VII0.endf/
     #
     u235 = Evaluation('n-092_U_235.endf')
     u235.read()
