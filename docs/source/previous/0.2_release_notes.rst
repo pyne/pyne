@@ -1,0 +1,126 @@
+======================
+PyNE 0.2 Release Notes
+======================
+
+PyNE 0.2 is the second release of Python for Nuclear Engineering project after an 
+additional six months effort.  PyNE is a free and open source (BSD licensed) project 
+whose goal is to become a necessary package in the computational nuclear engineer's 
+toolkit.  It is meant to play nicely with existing, industry standard nuclear 
+engineering tools.  PyNE is meant to be both fast and useful.  
+
+Release highlights:
+
+  - Multicomponent enrichment solvers.
+  - Simple simulation input file generator.
+  - CMake based build system.
+
+Please visit our website for more information: http://pyne.github.com/
+
+New Features
+============
+
+Basic Nuclear Data (``pyne.dbgen``)
+-----------------------------------------
+The ``nuc_data_make`` utility has been expanded to now include EAF cross section 
+data from the IAEA [EAF]_ as well PNNL's recent materials compendium [MATCOMP]_.
+
+
+Nuclear Data (``pyne.data``)
+------------------------------------
+Natural isotopic abundance ratio information has been exposed via the natural_abund()
+function.
+
+
+Material (``pyne.material``)
+-----------------------------------
+Materials have been revamped to now include an ``attrs`` namespace which can store
+arbitrary metadata.  In light of this, the ``name`` field has been removed as 
+names may now be stored via ``mat.attrs['name']``.  Materials now follow the 
+convention that all extrinsic variables should be stored in the ``attrs`` while
+intrinsic (physical) properties may be stored as class-level fields.  Thus 
+``density`` has been added as a class-level field.   A skeletal MultiMaterial class
+has also been introduced to handle many materials simultaneously without mixing 
+their constituent nuclides.
+
+
+Simple Simulation Input (``pyne.simplesim``)
+------------------------------------------------
+The ``simplesim`` package provides modules for the definition of a system (its
+geometry and material composition), the definition of simulation parameters,
+and for the generation of input files to codes that can perform such
+simulations (MCNP, Serpent, MCODE, etc.).
+
+
+Mulicomponent Enrichment (``pyne.enrichment``)
+-----------------------------------------------
+The enrichment module contains tools for defining and manipulating enrichment 
+cascades. The Cascade class is a simple container for storing parameters which
+define and enrichment setup. These include feed, product, and tail materials, 
+target enrichments, and separation factors. The main functions in this modules 
+computes the total flow rate and separation factors from an initial cascade. 
+Other helper function compute relative flow rates and nuclide-specific separation 
+factors.  Both a standard numeric solver and a fast symbolic solver have been 
+implemented.
+
+
+Cross Section Interface (``pyne.xs``)
+---------------------------------------
+The cross section interface has been refactored to include the concept of data 
+sources, which expose information and manipulation routines for all valid reactions.
+To date null, simple, Cinder, and EAF data sources have been implemented.  The cross
+section cache XSCache has been refactored to pull raw data from data source classes.
+
+
+JsonCpp (``pyne.jsoncpp``)
+---------------------------------------
+A Cython wrapper around the JsonCpp project, which is automatically included in 
+PyNE.  This provides an in-memory, C++ level representation of JSON objects.
+This is mainly used as a Python independent C++ dictionary to store arbitrary metadata.
+Interoperation in both Python and C++ is very natural.  For more information please
+refer to [JSONCPP]_.
+
+
+GUI Tools (``pyne.gui``)
+------------------------------------
+The aceviewer tool is now installed as a command line utility, available anywhere
+on the system.
+
+
+Authors
+=======
+This release contains code written by the following people (in alphabetical 
+order).  An (*) indicates a first-time contributor to PyNE.
+
+* Elliott Biondo*
+* Christopher Dembia
+* Robert Flanagan
+* Katy Huff*
+* Matt McCormick*
+* Eric Relson
+* Paul Romano
+* Anthony Scopatz
+* Paul Wilson
+* John Xia*
+
+
+Additionally, we would like to thank the following people for their 
+inspiration, guidance, and testing:
+
+* Seth Johnson
+* Ronald J. McConn Jr (for help with PNNL Materials Compendium)
+* Joshua Peterson
+* Rachel Slaybaugh
+* Nick Touran
+* Morgan White
+
+References
+===================
+
+.. [EAF] A.B. Pashchenko and H. Wienke, "FENDL2/A-MCNP, FENDL2/A-VITJ_E and 
+         FENDL2/A-VITJ_FLAT, the processed FENDL-2 neutron activation cross-section 
+         data files", report IAEA-NDS-174, International Atomic Energy Agency, 
+         March 1997.
+
+.. [MATCOMP] http://www.pnnl.gov/main/publications/external/technical_reports/PNNL-15870Rev1.pdf
+
+.. [JSONCPP] http://jsoncpp.sourceforge.net/
