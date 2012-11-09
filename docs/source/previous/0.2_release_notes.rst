@@ -71,6 +71,13 @@ To date null, simple, Cinder, and EAF data sources have been implemented.  The c
 section cache XSCache has been refactored to pull raw data from data source classes.
 
 
+Preliminary NJOY Integration (``pyne.njoy``)
+---------------------------------------------
+NJOY input file generation has started to be integrated with the inclusion of 
+PyNjoy into PyNE.  Some PEP8 based-clean up has already occured.  More work will 
+likely follow.
+
+
 JsonCpp (``pyne.jsoncpp``)
 ---------------------------------------
 A Cython wrapper around the JsonCpp project, which is automatically included in 
