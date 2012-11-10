@@ -1,3 +1,10 @@
+"""Module handles the construction of a reference materials library in nuc_data.h5.
+This currently consists to natural element materials and those coming from PNNL's
+`Materials Compendium`_.
+
+.. _Materials Compendium: http://www.pnnl.gov/main/publications/external/technical_reports/PNNL-15870Rev1.pdf
+"""
+
 import csv    
 import re
 from pyne.material import Material
@@ -15,6 +22,7 @@ densities = []
 
 # Make a dictionary that represents elements as dicts of their isotopes
 def make_elements():
+    """Makes natural elemental materials based on isotopic abundances."""
     habund = natural_abund('H')
     for name, zz in nucname.name_zz.items():
         elemental_mats[name] = {}
@@ -29,6 +37,7 @@ def make_elements():
     
 # Parses data from .csv
 def grab_materials_compendium(location = 'materials_compendium.csv'):
+    """Parses data from a materials compendium csv file."""
     # grabs name from starting row, starts a new dictionary for composition
     def starting_row(row):
         if re.match('\d{1,3}\.  ', row[0]):
@@ -75,6 +84,7 @@ def grab_materials_compendium(location = 'materials_compendium.csv'):
 
 # Writes to file
 def make_materials_compendium(nuc_data):
+    """Adds materials compendium to nuc_data.h5."""
     # open nuc_data, make nuc_zz an array
     with tb.openFile(nuc_data, 'r+', filters=tb.Filters(complevel=5, complib='zlib', shuffle=True, fletcher32=False)) as f:
         f.createGroup('/', 'materials_library')

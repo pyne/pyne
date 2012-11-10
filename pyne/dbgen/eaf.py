@@ -1,5 +1,6 @@
 """Module handles parsing EAF formatted cross section files and adding
-the data to PyNE's HDF5 storage.
+the data to PyNE's HDF5 storage.  The data here is autonatically grabbed from
+the IAEA. 
 """
 
 import re
