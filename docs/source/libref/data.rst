@@ -24,6 +24,16 @@ Atomic Mass
     A mapping from zzaaam-nuclides to their mass weights.
     This is used by :func:`atomic_mass` under the hood.
 
+------------------------
+Natural Abundance Ratios
+------------------------
+
+.. autofunction:: natural_abund(nuc)
+
+.. data:: natural_abund_map
+
+    A mapping from zzaaam-nuclides to their mass weights.
+    This is used by :func:`natural_abund` under the hood.
 
 ----------
 Decay Data

@@ -32,20 +32,28 @@ divided conceptually into three parts, run in series:
     scattering_lengths
     simple_xs
     cinder
+    eaf
+    materials_library
 
 ++++++++++++++++
 Attribution
 ++++++++++++++++
 The PyNE development team would like to thank the following people and organizations
-for allowing us to redistribute open nuclear data in binary form as part of ``nuc_data_make``.
+for allowing us to redistribute open nuclear data in binary form as part of 
+``nuc_data_make``.
 
 * **KAERI** and **Jonghwa Chang** for the data available at the excellent 
   http://atom.kaeri.re.kr website.
 * **NIST** and **Alan Munter** for `neutron scattering length data`_.
-* **The Atomic Mass Data Center**, **Georges Audi**, and **Wang Meng**  for `atomic mass related data`_.
+* **The Atomic Mass Data Center**, **Georges Audi**, and **Wang Meng**  for 
+  `atomic mass related data`_.
+* **PNNL** and **Ronald J. McConn Jr** for providing us with the 
+  `materials compendium data`_.
+  
 
 .. _neutron scattering length data: http://www.ncnr.nist.gov/resources/n-lengths/list.html
 .. _atomic mass related data: http://amdc.in2p3.fr/
+.. _materials compendium data: http://www.pnnl.gov/main/publications/external/technical_reports/PNNL-15870Rev1.pdf
 
 ++++++++++++++++++++++++++++
 Prebuilt Nuclear Data
