@@ -17,8 +17,9 @@ pyne/*.c
 pyne/*.cpp
 pyne/*/*.cpp
 
-# Ignore binary files
+# Ignore data &binary files
 *.h5
+*.ace
 
 # Ignore specific files
 examples/BASE_TAPE9.INP
