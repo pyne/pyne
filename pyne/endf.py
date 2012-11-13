@@ -16,6 +16,7 @@ For more information on this module, contact Paul Romano <romano7@gmail.com>
 import re
 import numpy as np
 import matplotlib.pyplot as plt
+import os
 
 number = " (\d.\d+(?:\+|\-)\d)"
 
@@ -32,30 +33,47 @@ class Library(object):
 
     def __init__(self, filename):
         self.fh = open(filename, 'r')
-        self.files = []
         self.verbose = True
-        self.veryverbose = False
+        self.mats = {}
         self.mts = {}
-        self.comments = ''
         self.filename = filename
+        self.more_files = True
+        self.chars_til_now = 0
+        self.offset = 1
+
         # First we need to read MF=1, MT=451 which has a description of the ENDF
         # file and a list of what data exists in the file
-        self._read_header()
+        while self.more_files:
+            self._read_headers()
         self._read_data()
 
-    def _read_header(self):
-        if self.verbose:
-            print("Reading File 1...")
-        self.fh.seek(76)
+    def _read_headers(self):
+        
+        print 'Reading headers ...'
+        # skip the first line and get the material id
+        self.fh.seek(self.chars_til_now+81)
         line = self.fh.readline()
-        za = float(line[1:8]) * 10 ** int(line[10])
-        arw = float(line[12:19]) * 10 ** int(line[21])
-        self.fh.seek(400)
+        mat_id = line[67:70]
+        print mat_id
+        # za = float(line[1:8]) * 10 ** int(line[10])
+        # arw = float(line[12:19]) * 10 ** int(line[21])
+        
+        # parse header (all lines with 1451)
+        
+        comments = ''
         mf = 1
-        start = 1
-        stop = 0
+        stop = self.chars_til_now/81
+        
         while re.search('1451 +\d{1,3}', line):
-            if re.match(' +\d{1,2} +\d{1,3} +\d+ +0', line):
+            # parse contents
+            
+            if re.match(' +\d{1,2} +\d{1,3} +\d{1,4} +', line):
+                print self.mats, mat_id, self.offset
+                print self.mats
+                if int(mat_id) not in self.mats:
+                    self.offset -= 1
+                print self.offset
+                self.mats.update({int(mat_id):(self.chars_til_now / 81)})
                 old_mf = mf
                 mf, mt = int(line[31:33]), int(line[41:44])
                 mt_length = int(line[50:55])
@@ -64,37 +82,49 @@ class Library(object):
                 else:
                     start = stop + 2
                 stop = start + mt_length
-                self.mts.update({(mf, mt):(start, stop)})
+                
+                self.mts.update({(int(mat_id), mf, mt):(start+self.offset, stop+self.offset)})
                 line = self.fh.readline()
             elif re.search('C O N T E N T S', line):
                 line = self.fh.readline()
                 continue
+            
+            # parse comments
+            
             else:
-                self.comments = self.comments + '\n' + line[0:66]
+                comments = comments + '\n' + line[0:66]
                 line = self.fh.readline()
-    
+                
+        self.chars_til_now = (stop + 4)*81        
+        self.fh.seek(self.chars_til_now)
+        if self.fh.readline() == '':
+            self.more_files = False
+        if mat_id != '':
+            self.mats.update({int(mat_id):(self.chars_til_now / 81)})
+        print self.mats
+        
     def _read_data(self):
         if self.verbose:
-            print("Reading data...")
+            print 'Reading data ...'
         self.data = np.genfromtxt(self.filename, 
                                   delimiter = 11, 
                                   usecols = (0, 1, 2, 3, 4, 5), 
-                                  skip_header = self.mts[(1, 451)][1] + 2, 
-                                  skip_footer = 4, 
+                                  invalid_raise = False,
+                                  skip_header = 1,                                    
                                   converters = {0: convert,
-                                                1: convert,
+                                                1: convert, 
                                                 2: convert,
-                                                3: convert,
-                                                4: convert,
+                                                3: convert, 
+                                                4: convert, 
                                                 5: convert})
-    def _read_mfmt(self, mf, mt):
+                                                
+    def read_mfmt(self, mat_id, mf, mt):
         if self.verbose:
-            print "Reading File %d, MT %d" % (mf, mt)
-        
-        start = (self.mts[(mf, mt)][0] - self.mts[(1,451)][1] - 2)* 6
-        stop = (self.mts[(mf, mt)][1] - self.mts[(1,451)][1] - 2) * 6
+            print "Reading Material %d, File %d, MT %d" % (mat_id, mf, mt)
+        start = (self.mts[(mat_id, mf, mt)][0] - 1) * 6
+        stop = (self.mts[(mat_id, mf, mt)][1] - 1)* 6
+        print start, stop
         print self.data.flat[start:stop]
-
 
 class Evaluation(object):
     """
@@ -1185,11 +1215,13 @@ def convert(string):
     This function converts a number listed on an ENDF tape into a float or int
     depending on whether an exponent is present.
     """
-
-    if string[-2] in '+-':
+  
+    if re.search('[^ 0-9+\-\.]', string):
+        return None
+    elif string[-2] in '+-':
         return float(string[:-2] + 'e' + string[-2:])
     else:
-        return eval(string)
+        return float(string)
 
 MTname = {1: "(n,total) Neutron total",
           2: "(z,z0) Elastic scattering",
