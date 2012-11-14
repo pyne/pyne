@@ -53,11 +53,12 @@ class Library(object):
 
     def _read_headers(self):
         
-        print 'Reading headers ...'
         # skip the first line and get the material id
         self.fh.seek(self.chars_til_now+81)
         line = self.fh.readline()
         mat_id = line[67:70]
+        
+        print 'Reading headers for material id %d ...' % int(mat_id)
         
         # parse header (all lines with 1451)
         comments = ''
@@ -65,6 +66,7 @@ class Library(object):
         stop = self.chars_til_now/81
         
         while re.search('1451 +\d{1,3}', line):
+    
             # parse contents section
             if re.match(' +\d{1,2} +\d{1,3} +\d{1,4} +', line):
                 
