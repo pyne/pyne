@@ -20,10 +20,15 @@ namespace rxname
 {
   extern std::string _names[NUM_RX_NAMES];
   extern std::set<std::string> names;
+  extern std::map<unsigned int, std::string> id_name;
+  extern std::map<std::string, unsigned int> name_id;
 
-  extern std::map<std::string, std::string> labels;
+  extern std::map<unsigned int, std::string> labels;
   void * _fill_maps();
   extern void * _;
+
+  unsigned int hash(std::string);
+  unsigned int hash(const char *);
 
   /******************/
   /*** Exceptions ***/

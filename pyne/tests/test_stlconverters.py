@@ -54,6 +54,26 @@ def test_set_str():
 # 
 
 
+def test_map_str_str():
+    m = conv.MapStrStr()
+    m['worm'] = 'yes'
+    m['drum'] = 'no'
+    assert_equal(len(m), 2)
+    assert_equal(m['worm'], 'yes')
+
+    m = conv.MapStrStr({'yes': '1', 'no': '0'})
+    assert_equal(len(m), 2)
+    assert_equal(m['no'], '0')
+
+    n = conv.MapStrStr(m, False)
+    assert_equal(len(n), 2)
+    assert_equal(n['yes'], '1')
+
+    # points to the same underlying map
+    n['maybe'] = '-1' 
+    assert_equal(m['maybe'], '-1')
+
+
 def test_map_str_int():
     m = conv.MapStrInt()
     m['worm'] = 69
