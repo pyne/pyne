@@ -33,47 +33,51 @@ class Library(object):
 
     def __init__(self, filename):
         self.fh = open(filename, 'r')
-        self.verbose = True
         self.mats = {}
         self.mts = {}
         self.filename = filename
+        
+        # are there more files to read the headers of?
         self.more_files = True
+        
+        # tracks theoretical length of file, based on headers
         self.chars_til_now = 0
+        
+        # tracks how many lines would have been skipped when reading data
         self.offset = 1
 
-        # First we need to read MF=1, MT=451 which has a description of the ENDF
-        # file and a list of what data exists in the file
+        # read ALL the headers!
         while self.more_files:
             self._read_headers()
         self._read_data()
 
     def _read_headers(self):
         
-        print 'Reading headers ...'
         # skip the first line and get the material id
         self.fh.seek(self.chars_til_now+81)
         line = self.fh.readline()
         mat_id = line[67:70]
-        print mat_id
-        # za = float(line[1:8]) * 10 ** int(line[10])
-        # arw = float(line[12:19]) * 10 ** int(line[21])
+        
+        print 'Reading headers for material id %d ...' % int(mat_id)
         
         # parse header (all lines with 1451)
-        
         comments = ''
         mf = 1
         stop = self.chars_til_now/81
         
         while re.search('1451 +\d{1,3}', line):
-            # parse contents
-            
+    
+            # parse contents section
             if re.match(' +\d{1,2} +\d{1,3} +\d{1,4} +', line):
-                print self.mats, mat_id, self.offset
-                print self.mats
+                
+                # while reading data we skip a line at the beginning
+                # of every material, so we need an offset
                 if int(mat_id) not in self.mats:
                     self.offset -= 1
-                print self.offset
+                    
                 self.mats.update({int(mat_id):(self.chars_til_now / 81)})
+                
+                # accounting for skipped lines between MF's and MT's
                 old_mf = mf
                 mf, mt = int(line[31:33]), int(line[41:44])
                 mt_length = int(line[50:55])
@@ -81,31 +85,34 @@ class Library(object):
                     start = stop + 1
                 else:
                     start = stop + 2
+                    
                 stop = start + mt_length
-                
                 self.mts.update({(int(mat_id), mf, mt):(start+self.offset, stop+self.offset)})
                 line = self.fh.readline()
             elif re.search('C O N T E N T S', line):
                 line = self.fh.readline()
                 continue
-            
             # parse comments
-            
             else:
                 comments = comments + '\n' + line[0:66]
                 line = self.fh.readline()
-                
-        self.chars_til_now = (stop + 4)*81        
+
+        # find where end of material is
+        self.chars_til_now = (stop + 4)*81
+        
+        # jump to end of this material         
         self.fh.seek(self.chars_til_now)
+        
+        # are we at the end of the file?
         if self.fh.readline() == '':
             self.more_files = False
+        
+        # update materials list
         if mat_id != '':
-            self.mats.update({int(mat_id):(self.chars_til_now / 81)})
-        print self.mats
+            self.mats.update({int(mat_id):(self.chars_til_now / 81, comments)})
         
     def _read_data(self):
-        if self.verbose:
-            print 'Reading data ...'
+        print 'Reading data ...'
         self.data = np.genfromtxt(self.filename, 
                                   delimiter = 11, 
                                   usecols = (0, 1, 2, 3, 4, 5), 
@@ -119,12 +126,14 @@ class Library(object):
                                                 5: convert})
                                                 
     def read_mfmt(self, mat_id, mf, mt):
-        if self.verbose:
+        if (mat_id, mf, mt) in self.mts:
             print "Reading Material %d, File %d, MT %d" % (mat_id, mf, mt)
-        start = (self.mts[(mat_id, mf, mt)][0] - 1) * 6
-        stop = (self.mts[(mat_id, mf, mt)][1] - 1)* 6
-        print start, stop
-        print self.data.flat[start:stop]
+            start = (self.mts[(mat_id, mf, mt)][0] - 1) * 6
+            stop = (self.mts[(mat_id, mf, mt)][1] - 1)* 6
+            return self.data.flat[start:stop]
+        else:
+            print "Material %d, File %d, MT %d does not exist." % (mat_id, mf, mt)
+            return False
 
 class Evaluation(object):
     """
