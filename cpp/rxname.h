@@ -12,11 +12,13 @@
 
 #include "pyne.h"
 
+#define NUM_RX_NAMES 328
+
 namespace pyne
 {
 namespace rxname 
 {
-  extern std::string _names[15];
+  extern std::string _names[NUM_RX_NAMES];
   extern std::set<std::string> names;
 
   /******************/
