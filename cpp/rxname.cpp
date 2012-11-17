@@ -336,6 +336,7 @@ std::set<std::string> pyne::rxname::names(pyne::rxname::_names,
 void * pyne::rxname::_fill_maps()
 {
   std::string rx;
+  unsigned int rxid;
   std::string _labels[NUM_RX_NAMES] = {
     "(n,total)",
     "(n,elastic)",
@@ -667,10 +668,29 @@ void * pyne::rxname::_fill_maps()
     "(n,ac)",
   };
 
+  // actually fill the maps
   for (int i = 0; i < NUM_RX_NAMES; i++)
   {
     rx = _names[i];
-    labels[rx] = _labels[i];
+    rxid = pyne::rxnames::hash(rx);
+    id_name[rxid] = rx;
+    name_id[rx] = rxid;
+    labels[rxid] = _labels[i];
   };
 };
 void * pyne::rxname::_ = pyne::rxname::_fill_maps();
+
+
+
+unsigned int pyne::rxname::hash(std::string s){return pyne::rxname::hash(s.c_str());};
+unsigned int pyne::rxname::hash(const char * s)
+{
+  int c;
+  // starting from 1000, rather than 0, to reserve space for MT numbers
+  unsigned int h = 1000; 
+  while((c = *s++))
+  {
+    h = ((h << 5) + h) ^ c;
+  }
+  return h;
+};
