@@ -13,6 +13,12 @@ set_target_properties(pyne_nucname PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_
 target_link_libraries(pyne_nucname pyne)
 install_lib(pyne_nucname)
 
+# pyne_rxname
+add_library(pyne_rxname rxname.cpp)
+set_target_properties(pyne_rxname PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/pyne/lib")
+target_link_libraries(pyne_rxname pyne)
+install_lib(pyne_rxname)
+
 # pyne_data
 add_library(pyne_data data.cpp)
 set_target_properties(pyne_data PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/pyne/lib")
