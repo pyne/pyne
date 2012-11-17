@@ -21,6 +21,10 @@ namespace rxname
   extern std::string _names[NUM_RX_NAMES];
   extern std::set<std::string> names;
 
+  extern std::map<std::string, std::string> labels;
+  void * _fill_maps();
+  extern void * _;
+
   /******************/
   /*** Exceptions ***/
   /******************/
@@ -128,9 +132,11 @@ namespace rxname
   /************************/
   /*** name functions *****/
   /************************/
+/*
   std::string name(int);
   std::string name(char *);
   std::string name(std::string);
+*/
 
   /********************/
   /*** mt functions ***/
