@@ -1059,9 +1059,6 @@ class MapIntStr(_MapIntStr, collections.MutableMapping):
         return "{" + ", ".join(["{0}: {1}".format(key, repr(value)) for key, value in self.items()]) + "}"
 
 
-
-
-
 # (Str, Double)
 cdef class MapIterStrDouble(object):
     cdef void init(self, cpp_map[std_string, double] * map_ptr):
