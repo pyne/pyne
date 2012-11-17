@@ -678,6 +678,141 @@ class SetStr(_SetStr, collections.Set):
 # --- Maps
 #
 
+# (Str, Str)
+cdef class MapIterStrStr(object):
+    cdef void init(self, cpp_map[std_string, std_string] * map_ptr):
+        cdef cpp_map[std_string, std_string].iterator * itn = \
+            <cpp_map[std_string, std_string].iterator *> malloc(sizeof(map_ptr.begin()))
+        itn[0] = map_ptr.begin()
+        self.iter_now = itn
+
+        cdef cpp_map[std_string, std_string].iterator * ite = \
+            <cpp_map[std_string, std_string].iterator *> malloc(sizeof(map_ptr.end()))
+        ite[0] = map_ptr.end()
+        self.iter_end = ite
+        
+    def __dealloc__(self):
+        free(self.iter_now)
+        free(self.iter_end)
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        cdef cpp_map[std_string, std_string].iterator inow = deref(self.iter_now)
+        cdef cpp_map[std_string, std_string].iterator iend = deref(self.iter_end)
+
+        if inow != iend:
+            pyval = str(<char *> deref(inow).first.c_str())
+        else:
+            raise StopIteration    
+
+        inc(deref(self.iter_now))
+        return pyval
+
+
+cdef class _MapStrStr:
+    def __cinit__(self, new_map=True, bint free_map=True):
+        cdef std_string skey
+        cdef std_string sval
+        cdef pair[std_string, std_string] item
+
+        # Decide how to init map, if at all
+        if isinstance(new_map, _MapStrStr):
+            self.map_ptr = (<_MapStrStr> new_map).map_ptr
+        elif hasattr(new_map, 'items'):
+            self.map_ptr = new cpp_map[std_string, std_string]()
+            for key, value in new_map.items():
+                skey = std_string(<char *> key)
+                sval = std_string(<char *> value)
+                item = pair[std_string, std_string](skey, sval)
+                self.map_ptr.insert(item)
+        elif hasattr(new_map, '__len__'):
+            self.map_ptr = new cpp_map[std_string, std_string]()
+            for i in new_map:
+                skey = std_string(<char *> i[0])
+                sval = std_string(<char *> i[1])
+                item = pair[std_string, std_string](skey, sval)
+                self.map_ptr.insert(item)
+        elif bool(new_map):
+            self.map_ptr = new cpp_map[std_string, std_string]()
+
+        # Store free_map
+        self._free_map = free_map
+        
+    def __dealloc__(self):
+        if self._free_map:
+            del self.map_ptr
+
+    def __contains__(self, key):
+        cdef std_string s
+        if isinstance(key, str):
+            s = std_string(<char *> key)
+        else:
+            return False
+
+        if 0 < self.map_ptr.count(s):
+            return True
+        else:
+            return False
+
+    def __len__(self):
+        return self.map_ptr.size()
+
+    def __iter__(self):
+        cdef MapIterStrStr mi = MapIterStrStr()
+        mi.init(self.map_ptr)
+        return mi
+
+    def __getitem__(self, key):
+        cdef std_string s
+        if isinstance(key, basestring):
+            s = std_string(<char *> key)
+        else:
+            raise TypeError("Only string keys are valid.")
+
+        if 0 < self.map_ptr.count(s):
+            return deref(self.map_ptr)[s]
+        else:
+            raise KeyError
+
+    def __setitem__(self, char * key, char * value):
+        cdef std_string skey = std_string(key)
+        cdef std_string sval = std_string(value)
+        cdef pair[std_string, std_string] item = \
+                                            pair[std_string, std_string](skey, sval)
+        self.map_ptr.insert(item)
+        
+    def __delitem__(self, char * key):
+        cdef std_string s
+        if key in self:
+            s = std_string(key)
+            self.map_ptr.erase(s)
+
+
+class MapStrStr(_MapStrStr, collections.MutableMapping):
+    """Wrapper class for C++ standard library maps of type <string, string>.
+    Provides dictionary like interface on the Python level.
+
+    Parameters
+    ----------
+    new_map : bool or dict-like
+        Boolean on whether to make a new map or not, or dict-like object
+        with keys and values which are castable to the appropriate type.
+    free_map : bool
+        Flag for whether the pointer to the C++ map should be deallocated
+        when the wrapper is dereferenced.
+
+    """
+    def __str__(self):
+        return self.__repr__()
+
+    def __repr__(self):
+        return "{" + ", ".join(["{0}: {1}".format(repr(key), repr(value)) \
+                                for key, value in self.items()]) + "}"
+
+
+
 # (Str, Int)
 cdef class MapIterStrInt(object):
     cdef void init(self, cpp_map[std_string, int] * map_ptr):
