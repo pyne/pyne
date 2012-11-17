@@ -152,6 +152,17 @@ cdef class _SetStr:
 # --- Maps
 #
 
+# (Str, Str)
+cdef class MapIterStrStr(object):
+    cdef cpp_map[std_string, std_string].iterator * iter_now
+    cdef cpp_map[std_string, std_string].iterator * iter_end
+    cdef void init(MapIterStrStr, cpp_map[std_string, std_string] *)
+
+cdef class _MapStrStr:
+    cdef cpp_map[std_string, std_string] * map_ptr
+    cdef public bint _free_map
+
+
 # (Str, Int)
 cdef class MapIterStrInt(object):
     cdef cpp_map[std_string, int].iterator * iter_now
