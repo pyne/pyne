@@ -84,7 +84,9 @@ testvals = {
     'complex': [1.0, 42+42j, -65.55-1j, 0.18j],
     }
 
-
+#
+# Sets
+#
 
 _pyxset = '''# Set{clsname}
 cdef class SetIter{clsname}(object):
@@ -238,7 +240,196 @@ def gentest_set(t):
     return _testset.format(*[repr(i) for i in testvals[t]], clsname=class_names[t],
                            fncname=func_names[t])
 
+#
+# Maps
+#
+_pyxmap = '''# Map({tclsname}, {uclsname})
+cdef class MapIter{tclsname}{uclsname}(object):
+    cdef void init(self, cpp_map[{tctype}, {uctype}] * map_ptr):
+        cdef cpp_map[{tctype}, {uctype}].iterator * itn = <cpp_map[{tctype}, {uctype}].iterator *> malloc(sizeof(map_ptr.begin()))
+        itn[0] = map_ptr.begin()
+        self.iter_now = itn
 
+        cdef cpp_map[{tctype}, {uctype}].iterator * ite = <cpp_map[{tctype}, {uctype}].iterator *> malloc(sizeof(map_ptr.end()))
+        ite[0] = map_ptr.end()
+        self.iter_end = ite
+
+    def __dealloc__(self):
+        free(self.iter_now)
+        free(self.iter_end)
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        cdef cpp_map[{tctype}, {uctype}].iterator inow = deref(self.iter_now)
+        cdef cpp_map[{tctype}, {uctype}].iterator iend = deref(self.iter_end)
+
+        if inow != iend:
+            pyval = {iterkey}
+        else:
+            raise StopIteration
+
+        inc(deref(self.iter_now))
+        return pyval
+
+cdef class _Map{tclsname}{uclsname}:
+    def __cinit__(self, new_map=True, bint free_map=True):
+        cdef pair[{tctype}, {uctype}] item
+
+        # Decide how to init map, if at all
+        if isinstance(new_map, _Map{tclsname}{uclsname}):
+            self.map_ptr = (<_Map{tclsname}{uclsname}> new_map).map_ptr
+        elif hasattr(new_map, 'items'):
+            self.map_ptr = new cpp_map[{tctype}, {uctype}]()
+            for key, value in new_map.items():
+                item = pair[{tctype}, {uctype}]({initkey}, {initval})
+                self.map_ptr.insert(item)
+        elif hasattr(new_map, '__len__'):
+            self.map_ptr = new cpp_map[{tctype}, {uctype}]()
+            for key, value in new_map:
+                item = pair[{tctype}, {uctype}]({initkey}, {initval})
+                self.map_ptr.insert(item)
+        elif bool(new_map):
+            self.map_ptr = new cpp_map[{tctype}, {uctype}]()
+
+        # Store free_map
+        self._free_map = free_map
+
+    def __dealloc__(self):
+        if self._free_map:
+            del self.map_ptr
+
+    def __contains__(self, key):
+        cdef {tctype} k
+        if not isinstance(key, {tpytype}):
+            return False
+        k = {initkey}
+
+        if 0 < self.map_ptr.count(k):
+            return True
+        else:
+            return False
+
+    def __len__(self):
+        return self.map_ptr.size()
+
+    def __iter__(self):
+        cdef MapIter{tclsname}{uclsname} mi = MapIter{tclsname}{uclsname}()
+        mi.init(self.map_ptr)
+        return mi
+
+    def __getitem__(self, key):
+        cdef {tctype} k
+        cdef {uctype} v
+
+        if not isinstance(key, {tpytype}):
+            raise TypeError("Only {thumname} keys are valid.")
+        k = {initkey}
+
+        if 0 < self.map_ptr.count(k):
+            v = deref(self.map_ptr)[k]
+            return {convval}
+        else:
+            raise KeyError
+
+    def __setitem__(self, key, value):
+        cdef pair[{tctype}, {uctype}] item = pair[{tctype}, {uctype}]({initkey}, {initval})
+        self.map_ptr.insert(item)
+
+    def __delitem__(self, key):
+        cdef {tctype} k
+        if key in self:
+            k = {initkey}
+            self.map_ptr.erase(k)
+
+
+class Map{tclsname}{uclsname}(_Map{tclsname}{uclsname}, collections.MutableMapping):
+    """Wrapper class for C++ standard library maps of type <{thumname}, {uhumname}>.
+    Provides dictionary like interface on the Python level.
+
+    Parameters
+    ----------
+    new_map : bool or dict-like
+        Boolean on whether to make a new map or not, or dict-like object
+        with keys and values which are castable to the appropriate type.
+    free_map : bool
+        Flag for whether the pointer to the C++ map should be deallocated
+        when the wrapper is dereferenced.
+    """
+
+    def __str__(self):
+        return self.__repr__()
+
+    def __repr__(self):
+        return "{{" + ", ".join(["{{0}}: {{1}}".format(key, value) for key, value in self.items()]) + "}}"
+
+'''
+def genpyx_map(t, u):
+    """Returns the pyx snippet for a map of type <t, u>."""
+    iterkey = c2py_exprs[t].format(var="deref(inow).first")
+    convval = c2py_exprs[u].format(var="v")
+    initkey = py2c_exprs[t].format(var="key")
+    initval = py2c_exprs[u].format(var="value")
+    return _pyxmap.format(tclsname=class_names[t], uclsname=class_names[u],
+                          thumname=human_names[t], uhumname=human_names[u],
+                          tctype=ctypes[t], uctype=ctypes[u],
+                          tpytype=pytypes[t], upytype=pytypes[u],
+                          tcytype=cytypes[t], ucytype=cytypes[u],
+                          iterkey=iterkey, convval=convval, 
+                          initkey=initkey, initval=initval,)
+
+_pxdmap = """# Map{tclsname}{uclsname}
+cdef class MapIter{tclsname}{uclsname}(object):
+    cdef cpp_map[{tctype}, {uctype}].iterator * iter_now
+    cdef cpp_map[{tctype}, {uctype}].iterator * iter_end
+    cdef void init(MapIter{tclsname}{uclsname}, cpp_map[{tctype}, {uctype}] *)
+
+cdef class _Map{tclsname}{uclsname}:
+    cdef cpp_map[{tctype}, {uctype}] * map_ptr
+    cdef public bint _free_map
+
+
+"""
+def genpxd_map(t, u):
+    """Returns the pxd snippet for a set of type t."""
+    return _pxdmap.format(tclsname=class_names[t], uclsname=class_names[u],
+                          thumname=human_names[t], uhumname=human_names[u],
+                          tctype=ctypes[t], uctype=ctypes[u],)
+
+
+_testmap = """# Map{tclsname}{uclsname}
+def test_map_{tfncname}_{ufncname}():
+    m = conv.Map{tclsname}{uclsname}()
+    m[{0}] = {4}
+    m[{1}] = {5}
+    assert_equal(len(m), 2)
+    assert_equal(m[{1}], {5})
+
+    m = conv.Map{tclsname}{uclsname}({{{2}: {6}, {3}: {7}}})
+    assert_equal(len(m), 2)
+    assert_equal(m[{2}], {6})
+
+    n = conv.Map{tclsname}{uclsname}(m, False)
+    assert_equal(len(n), 2)
+    assert_equal(n[{2}], {4})
+
+    # points to the same underlying map
+    n[{1}] = {5}
+    assert_equal(m[{1}], {5})
+
+"""
+def gentest_map(t, u):
+    """Returns the test snippet for a set of type t."""
+    return _testmap.format(*[repr(i) for i in testvals[t] + testvals[u][::-1]], 
+                           tclsname=class_names[t], uclsname=class_names[u],
+                           tfncname=func_names[t], ufncname=func_names[u])
+
+
+
+#
+# Controlers 
+#
 
 _pyxheader = """###################
 ###  WARNING!!! ###
@@ -289,7 +480,7 @@ def genpyx(template, header=None):
     return pyx
 
 
-_pyxheader = """###################
+_pxdheader = """###################
 ###  WARNING!!! ###
 ###################
 # This file has been autogenerated
@@ -382,5 +573,8 @@ def genfiles(template, fname='temp', pxdname=None, testname=None,
 
 if __name__ == "__main__":
     #t = [('set', 'int')]
-    t = [('set', 'str')]
-    print gentest(t)
+    #t = [('set', 'str')]
+    t = [('map', 'int', 'int')]
+    #print gentest(t)
+    print genpxd(t)
+    #print genpyx(t)
