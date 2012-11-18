@@ -493,7 +493,7 @@ class MapStrStr(_MapStrStr, collections.MutableMapping):
         return self.__repr__()
 
     def __repr__(self):
-        return "{" + ", ".join(["{0}: {1}".format(key, value) for key, value in self.items()]) + "}"
+        return "{" + ", ".join(["{0}: {1}".format(repr(key), repr(value)) for key, value in self.items()]) + "}"
 
 
 
@@ -616,7 +616,7 @@ class MapStrInt(_MapStrInt, collections.MutableMapping):
         return self.__repr__()
 
     def __repr__(self):
-        return "{" + ", ".join(["{0}: {1}".format(key, value) for key, value in self.items()]) + "}"
+        return "{" + ", ".join(["{0}: {1}".format(repr(key), repr(value)) for key, value in self.items()]) + "}"
 
 
 
@@ -739,18 +739,18 @@ class MapIntStr(_MapIntStr, collections.MutableMapping):
         return self.__repr__()
 
     def __repr__(self):
-        return "{" + ", ".join(["{0}: {1}".format(key, value) for key, value in self.items()]) + "}"
+        return "{" + ", ".join(["{0}: {1}".format(repr(key), repr(value)) for key, value in self.items()]) + "}"
 
 
 
 # Map(Str, UInt)
 cdef class MapIterStrUInt(object):
-    cdef void init(self, cpp_map[std_string, unsigned int] * map_ptr):
-        cdef cpp_map[std_string, unsigned int].iterator * itn = <cpp_map[std_string, unsigned int].iterator *> malloc(sizeof(map_ptr.begin()))
+    cdef void init(self, cpp_map[std_string, extra_types.uint] * map_ptr):
+        cdef cpp_map[std_string, extra_types.uint].iterator * itn = <cpp_map[std_string, extra_types.uint].iterator *> malloc(sizeof(map_ptr.begin()))
         itn[0] = map_ptr.begin()
         self.iter_now = itn
 
-        cdef cpp_map[std_string, unsigned int].iterator * ite = <cpp_map[std_string, unsigned int].iterator *> malloc(sizeof(map_ptr.end()))
+        cdef cpp_map[std_string, extra_types.uint].iterator * ite = <cpp_map[std_string, extra_types.uint].iterator *> malloc(sizeof(map_ptr.end()))
         ite[0] = map_ptr.end()
         self.iter_end = ite
 
@@ -762,8 +762,8 @@ cdef class MapIterStrUInt(object):
         return self
 
     def __next__(self):
-        cdef cpp_map[std_string, unsigned int].iterator inow = deref(self.iter_now)
-        cdef cpp_map[std_string, unsigned int].iterator iend = deref(self.iter_end)
+        cdef cpp_map[std_string, extra_types.uint].iterator inow = deref(self.iter_now)
+        cdef cpp_map[std_string, extra_types.uint].iterator iend = deref(self.iter_end)
 
         if inow != iend:
             pyval = str(<char *> deref(inow).first.c_str())
@@ -775,23 +775,23 @@ cdef class MapIterStrUInt(object):
 
 cdef class _MapStrUInt:
     def __cinit__(self, new_map=True, bint free_map=True):
-        cdef pair[std_string, unsigned int] item
+        cdef pair[std_string, extra_types.uint] item
 
         # Decide how to init map, if at all
         if isinstance(new_map, _MapStrUInt):
             self.map_ptr = (<_MapStrUInt> new_map).map_ptr
         elif hasattr(new_map, 'items'):
-            self.map_ptr = new cpp_map[std_string, unsigned int]()
+            self.map_ptr = new cpp_map[std_string, extra_types.uint]()
             for key, value in new_map.items():
-                item = pair[std_string, unsigned int](std_string(<char *> key), <unsigned int> value)
+                item = pair[std_string, extra_types.uint](std_string(<char *> key), <unsigned int> value)
                 self.map_ptr.insert(item)
         elif hasattr(new_map, '__len__'):
-            self.map_ptr = new cpp_map[std_string, unsigned int]()
+            self.map_ptr = new cpp_map[std_string, extra_types.uint]()
             for key, value in new_map:
-                item = pair[std_string, unsigned int](std_string(<char *> key), <unsigned int> value)
+                item = pair[std_string, extra_types.uint](std_string(<char *> key), <unsigned int> value)
                 self.map_ptr.insert(item)
         elif bool(new_map):
-            self.map_ptr = new cpp_map[std_string, unsigned int]()
+            self.map_ptr = new cpp_map[std_string, extra_types.uint]()
 
         # Store free_map
         self._free_map = free_map
@@ -821,7 +821,7 @@ cdef class _MapStrUInt:
 
     def __getitem__(self, key):
         cdef std_string k
-        cdef unsigned int v
+        cdef extra_types.uint v
 
         if not isinstance(key, basestring):
             raise TypeError("Only string keys are valid.")
@@ -829,12 +829,12 @@ cdef class _MapStrUInt:
 
         if 0 < self.map_ptr.count(k):
             v = deref(self.map_ptr)[k]
-            return <int> v
+            return v
         else:
             raise KeyError
 
     def __setitem__(self, key, value):
-        cdef pair[std_string, unsigned int] item = pair[std_string, unsigned int](std_string(<char *> key), <unsigned int> value)
+        cdef pair[std_string, extra_types.uint] item = pair[std_string, extra_types.uint](std_string(<char *> key), <unsigned int> value)
         self.map_ptr.insert(item)
 
     def __delitem__(self, key):
@@ -862,18 +862,18 @@ class MapStrUInt(_MapStrUInt, collections.MutableMapping):
         return self.__repr__()
 
     def __repr__(self):
-        return "{" + ", ".join(["{0}: {1}".format(key, value) for key, value in self.items()]) + "}"
+        return "{" + ", ".join(["{0}: {1}".format(repr(key), repr(value)) for key, value in self.items()]) + "}"
 
 
 
 # Map(UInt, Str)
 cdef class MapIterUIntStr(object):
-    cdef void init(self, cpp_map[unsigned int, std_string] * map_ptr):
-        cdef cpp_map[unsigned int, std_string].iterator * itn = <cpp_map[unsigned int, std_string].iterator *> malloc(sizeof(map_ptr.begin()))
+    cdef void init(self, cpp_map[extra_types.uint, std_string] * map_ptr):
+        cdef cpp_map[extra_types.uint, std_string].iterator * itn = <cpp_map[extra_types.uint, std_string].iterator *> malloc(sizeof(map_ptr.begin()))
         itn[0] = map_ptr.begin()
         self.iter_now = itn
 
-        cdef cpp_map[unsigned int, std_string].iterator * ite = <cpp_map[unsigned int, std_string].iterator *> malloc(sizeof(map_ptr.end()))
+        cdef cpp_map[extra_types.uint, std_string].iterator * ite = <cpp_map[extra_types.uint, std_string].iterator *> malloc(sizeof(map_ptr.end()))
         ite[0] = map_ptr.end()
         self.iter_end = ite
 
@@ -885,11 +885,11 @@ cdef class MapIterUIntStr(object):
         return self
 
     def __next__(self):
-        cdef cpp_map[unsigned int, std_string].iterator inow = deref(self.iter_now)
-        cdef cpp_map[unsigned int, std_string].iterator iend = deref(self.iter_end)
+        cdef cpp_map[extra_types.uint, std_string].iterator inow = deref(self.iter_now)
+        cdef cpp_map[extra_types.uint, std_string].iterator iend = deref(self.iter_end)
 
         if inow != iend:
-            pyval = <int> deref(inow).first
+            pyval = deref(inow).first
         else:
             raise StopIteration
 
@@ -898,23 +898,23 @@ cdef class MapIterUIntStr(object):
 
 cdef class _MapUIntStr:
     def __cinit__(self, new_map=True, bint free_map=True):
-        cdef pair[unsigned int, std_string] item
+        cdef pair[extra_types.uint, std_string] item
 
         # Decide how to init map, if at all
         if isinstance(new_map, _MapUIntStr):
             self.map_ptr = (<_MapUIntStr> new_map).map_ptr
         elif hasattr(new_map, 'items'):
-            self.map_ptr = new cpp_map[unsigned int, std_string]()
+            self.map_ptr = new cpp_map[extra_types.uint, std_string]()
             for key, value in new_map.items():
-                item = pair[unsigned int, std_string](<unsigned int> key, std_string(<char *> value))
+                item = pair[extra_types.uint, std_string](<unsigned int> key, std_string(<char *> value))
                 self.map_ptr.insert(item)
         elif hasattr(new_map, '__len__'):
-            self.map_ptr = new cpp_map[unsigned int, std_string]()
+            self.map_ptr = new cpp_map[extra_types.uint, std_string]()
             for key, value in new_map:
-                item = pair[unsigned int, std_string](<unsigned int> key, std_string(<char *> value))
+                item = pair[extra_types.uint, std_string](<unsigned int> key, std_string(<char *> value))
                 self.map_ptr.insert(item)
         elif bool(new_map):
-            self.map_ptr = new cpp_map[unsigned int, std_string]()
+            self.map_ptr = new cpp_map[extra_types.uint, std_string]()
 
         # Store free_map
         self._free_map = free_map
@@ -924,8 +924,8 @@ cdef class _MapUIntStr:
             del self.map_ptr
 
     def __contains__(self, key):
-        cdef unsigned int k
-        if not isinstance(key, int):
+        cdef extra_types.uint k
+        if not isinstance(key, long):
             return False
         k = <unsigned int> key
 
@@ -943,10 +943,10 @@ cdef class _MapUIntStr:
         return mi
 
     def __getitem__(self, key):
-        cdef unsigned int k
+        cdef extra_types.uint k
         cdef std_string v
 
-        if not isinstance(key, int):
+        if not isinstance(key, long):
             raise TypeError("Only unsigned integer keys are valid.")
         k = <unsigned int> key
 
@@ -957,11 +957,11 @@ cdef class _MapUIntStr:
             raise KeyError
 
     def __setitem__(self, key, value):
-        cdef pair[unsigned int, std_string] item = pair[unsigned int, std_string](<unsigned int> key, std_string(<char *> value))
+        cdef pair[extra_types.uint, std_string] item = pair[extra_types.uint, std_string](<unsigned int> key, std_string(<char *> value))
         self.map_ptr.insert(item)
 
     def __delitem__(self, key):
-        cdef unsigned int k
+        cdef extra_types.uint k
         if key in self:
             k = <unsigned int> key
             self.map_ptr.erase(k)
@@ -985,7 +985,7 @@ class MapUIntStr(_MapUIntStr, collections.MutableMapping):
         return self.__repr__()
 
     def __repr__(self):
-        return "{" + ", ".join(["{0}: {1}".format(key, value) for key, value in self.items()]) + "}"
+        return "{" + ", ".join(["{0}: {1}".format(repr(key), repr(value)) for key, value in self.items()]) + "}"
 
 
 
@@ -1108,7 +1108,7 @@ class MapStrDouble(_MapStrDouble, collections.MutableMapping):
         return self.__repr__()
 
     def __repr__(self):
-        return "{" + ", ".join(["{0}: {1}".format(key, value) for key, value in self.items()]) + "}"
+        return "{" + ", ".join(["{0}: {1}".format(repr(key), repr(value)) for key, value in self.items()]) + "}"
 
 
 
@@ -1231,7 +1231,7 @@ class MapIntInt(_MapIntInt, collections.MutableMapping):
         return self.__repr__()
 
     def __repr__(self):
-        return "{" + ", ".join(["{0}: {1}".format(key, value) for key, value in self.items()]) + "}"
+        return "{" + ", ".join(["{0}: {1}".format(repr(key), repr(value)) for key, value in self.items()]) + "}"
 
 
 
@@ -1354,7 +1354,7 @@ class MapIntDouble(_MapIntDouble, collections.MutableMapping):
         return self.__repr__()
 
     def __repr__(self):
-        return "{" + ", ".join(["{0}: {1}".format(key, value) for key, value in self.items()]) + "}"
+        return "{" + ", ".join(["{0}: {1}".format(repr(key), repr(value)) for key, value in self.items()]) + "}"
 
 
 
@@ -1477,7 +1477,7 @@ class MapIntComplex(_MapIntComplex, collections.MutableMapping):
         return self.__repr__()
 
     def __repr__(self):
-        return "{" + ", ".join(["{0}: {1}".format(key, value) for key, value in self.items()]) + "}"
+        return "{" + ", ".join(["{0}: {1}".format(repr(key), repr(value)) for key, value in self.items()]) + "}"
 
 
 

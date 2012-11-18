@@ -132,12 +132,12 @@ cdef class _MapIntStr:
 
 # MapStrUInt
 cdef class MapIterStrUInt(object):
-    cdef cpp_map[std_string, unsigned int].iterator * iter_now
-    cdef cpp_map[std_string, unsigned int].iterator * iter_end
-    cdef void init(MapIterStrUInt, cpp_map[std_string, unsigned int] *)
+    cdef cpp_map[std_string, extra_types.uint].iterator * iter_now
+    cdef cpp_map[std_string, extra_types.uint].iterator * iter_end
+    cdef void init(MapIterStrUInt, cpp_map[std_string, extra_types.uint] *)
 
 cdef class _MapStrUInt:
-    cdef cpp_map[std_string, unsigned int] * map_ptr
+    cdef cpp_map[std_string, extra_types.uint] * map_ptr
     cdef public bint _free_map
 
 
@@ -145,12 +145,12 @@ cdef class _MapStrUInt:
 
 # MapUIntStr
 cdef class MapIterUIntStr(object):
-    cdef cpp_map[unsigned int, std_string].iterator * iter_now
-    cdef cpp_map[unsigned int, std_string].iterator * iter_end
-    cdef void init(MapIterUIntStr, cpp_map[unsigned int, std_string] *)
+    cdef cpp_map[extra_types.uint, std_string].iterator * iter_now
+    cdef cpp_map[extra_types.uint, std_string].iterator * iter_end
+    cdef void init(MapIterUIntStr, cpp_map[extra_types.uint, std_string] *)
 
 cdef class _MapUIntStr:
-    cdef cpp_map[unsigned int, std_string] * map_ptr
+    cdef cpp_map[extra_types.uint, std_string] * map_ptr
     cdef public bint _free_map
 
 
