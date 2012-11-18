@@ -20,13 +20,24 @@ cimport cpp_rxname
 cimport pyne.stlconverters as conv
 import pyne.stlconverters as conv
 
-
+# names
 cdef conv._SetStr names_proxy = conv.SetStr(False)
-names_proxy.set_ptr = &cpp_nucname.names
+names_proxy.set_ptr = &cpp_rxname.names
 names = names_proxy
 
-cdef conv._MapStrStr labels_proxy = conv.MapStrStr(False)
-labels_proxy.map_ptr = &cpp_nucname.labels
+# labels
+cdef conv._MapUIntStr labels_proxy = conv.MapUIntStr(False)
+labels_proxy.map_ptr = &cpp_rxname.labels
 labels = labels_proxy
+
+# id_name
+cdef conv._MapUIntStr id_name_proxy = conv.MapUIntStr(False)
+id_name_proxy.map_ptr = &cpp_rxname.id_name
+id_name = id_name_proxy
+
+# name_id
+cdef conv._MapStrUInt name_id_proxy = conv.MapStrUInt(False)
+name_id_proxy.map_ptr = &cpp_rxname.name_id
+name_id = name_id_proxy
 
 

@@ -31,7 +31,7 @@ std::string pyne::rxname::_names[NUM_RX_NAMES] = {
   "fission_fourth",
   "z_2np",
   "z_3np",
-  "z_2np",
+  "n2p",
   "npa",
   "n_0",
   "n_1",
@@ -124,9 +124,9 @@ std::string pyne::rxname::_names[NUM_RX_NAMES] = {
   "fission_product_yield_cumulative",
   "gamma_delayed",
   "stopping_power",
-  "gamma_total",
-  "gamma_coherent",
-  "gamma_incoherent",
+  "photon_total",
+  "photon_coherent",
+  "photon_incoherent",
   "scattering_factor_imag",
   "scattering_factor_real",
   "pair_prod_elec",
@@ -333,6 +333,11 @@ std::string pyne::rxname::_names[NUM_RX_NAMES] = {
 std::set<std::string> pyne::rxname::names(pyne::rxname::_names, 
                                           pyne::rxname::_names+NUM_RX_NAMES);
 
+
+std::map<unsigned int, std::string> pyne::rxname::id_name;
+std::map<std::string, unsigned int> pyne::rxname::name_id;
+std::map<unsigned int, std::string> pyne::rxname::labels;
+
 void * pyne::rxname::_fill_maps()
 {
   std::string rx;
@@ -368,7 +373,7 @@ void * pyne::rxname::_fill_maps()
     "(n,3nf)",
     "(n,2np)",
     "(n,3np)",
-    "(n,2np)",
+    "(n,n2p)",
     "(n,npa)",
     "(n,n0)",
     "(n,n1)",
@@ -687,7 +692,7 @@ unsigned int pyne::rxname::hash(const char * s)
 {
   int c;
   // starting from 1000, rather than 0, to reserve space for MT numbers
-  unsigned int h = 1000; 
+  unsigned int h = 32; 
   while((c = *s++))
   {
     h = ((h << 5) + h) ^ c;

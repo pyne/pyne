@@ -6,7 +6,7 @@ containters to the associated python types.
 ctypes = {
     'str': 'std_string',
     'int': 'int',
-    'uint': 'unsigned int',
+    'uint': 'extra_types.uint',  # 'unsigned int'
     'float': 'float',
     'double': 'double',
     'complex': 'extra_types.complex_t',
@@ -15,7 +15,7 @@ ctypes = {
 cytypes = {
     'str': 'char *',
     'int': 'int',
-    'uint': 'int',
+    'uint': 'long',
     'float': 'float',
     'double': 'float',
     'complex': 'object',
@@ -24,7 +24,7 @@ cytypes = {
 pytypes = {
     'str': 'basestring',
     'int': 'int',
-    'uint': 'int',
+    'uint': 'long',
     'float': 'float',
     'double': 'float',
     'complex': 'complex',
@@ -60,7 +60,7 @@ human_names = {
 c2py_exprs = {
     'str': 'str(<char *> {var}.c_str())',
     'int': '{var}',
-    'uint': '<int> {var}',
+    'uint': '{var}',
     'float': '{var}',
     'double': '{var}',
     'complex': 'complex(float({var}.re), float({var}.im))',
@@ -78,7 +78,7 @@ py2c_exprs = {
 testvals = {
     'str': ["Aha", "Take", "Me", "On"], 
     'int': [1, 42, -65, 18], 
-    'uint': [1, 42, 65, 18],
+    'uint': [1L, 42L, 65L, 18L],
     'float': [1.0, 42.42, -65.5555, 18],
     'double': [1.0, 42.42, -65.5555, 18],
     'complex': [1.0, 42+42j, -65.55-1j, 0.18j],
@@ -362,7 +362,7 @@ class Map{tclsname}{uclsname}(_Map{tclsname}{uclsname}, collections.MutableMappi
         return self.__repr__()
 
     def __repr__(self):
-        return "{{" + ", ".join(["{{0}}: {{1}}".format(key, value) for key, value in self.items()]) + "}}"
+        return "{{" + ", ".join(["{{0}}: {{1}}".format(repr(key), repr(value)) for key, value in self.items()]) + "}}"
 
 '''
 def genpyx_map(t, u):
