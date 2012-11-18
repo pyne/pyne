@@ -17,6 +17,7 @@ import re
 import numpy as np
 import matplotlib.pyplot as plt
 import os
+import pyne.rx_data as rx
 
 number = " (\d.\d+(?:\+|\-)\d)"
 
@@ -25,7 +26,7 @@ libraries = {0: "ENDF/B", 1: "ENDF/A", 2: "JEFF", 3: "EFF",
              31: "INDL/V", 32: "INDL/A", 33: "FENDL", 34: "IRDF",
              35: "BROND", 36: "INGDB-90", 37: "FENDL/A", 41: "BROND"}
 
-class Library(object):
+class Library(rx.rx_data):
     """
     Library is a class for an ENDF evaluation which contains a number
     of Files.
@@ -33,10 +34,11 @@ class Library(object):
 
     def __init__(self, filename):
         self.fh = open(filename, 'r')
+
+        # initialize some dicts that will act as an index
         self.mats = {}
         self.mts = {}
-        self.filename = filename
-        
+
         # are there more files to read the headers of?
         self.more_files = True
         
@@ -45,11 +47,16 @@ class Library(object):
         
         # tracks how many lines would have been skipped when reading data
         self.offset = 1
-
+        
+        # read in the data    
+        data = self._read_data(filename)
+        rx.rx_data.__init__(self, data)
+        
         # read ALL the headers!
         while self.more_files:
             self._read_headers()
-        self._read_data()
+        
+        self.fh.close()
 
     def _read_headers(self):
         
@@ -111,19 +118,20 @@ class Library(object):
         if mat_id != '':
             self.mats.update({int(mat_id):(self.chars_til_now / 81, comments)})
         
-    def _read_data(self):
+    def _read_data(self, filename):
         print 'Reading data ...'
-        self.data = np.genfromtxt(self.filename, 
-                                  delimiter = 11, 
-                                  usecols = (0, 1, 2, 3, 4, 5), 
-                                  invalid_raise = False,
-                                  skip_header = 1,                                    
-                                  converters = {0: convert,
-                                                1: convert, 
-                                                2: convert,
-                                                3: convert, 
-                                                4: convert, 
-                                                5: convert})
+        data = np.genfromtxt(filename, 
+                             delimiter = 11, 
+                             usecols = (0, 1, 2, 3, 4, 5), 
+                             invalid_raise = False,
+                             skip_header = 1,                                    
+                             converters = {0: convert,
+                                           1: convert, 
+                                           2: convert,
+                                           3: convert, 
+                                           4: convert, 
+                                           5: convert})
+        return data
                                                 
     def read_mfmt(self, mat_id, mf, mt):
         if (mat_id, mf, mt) in self.mts:
@@ -134,6 +142,12 @@ class Library(object):
         else:
             print "Material %d, File %d, MT %d does not exist." % (mat_id, mf, mt)
             return False
+        
+    def get(self, mat_id, mf, mt):
+        return rx.rx_data.get(self, mat_id, mf, mt, 'endf')
+    
+    def write(self, filename, file_type_out):
+        return rx.rx_data.write(self, filename, 'endf', file_type_out)
 
 class Evaluation(object):
     """
