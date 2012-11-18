@@ -426,6 +426,58 @@ def gentest_map(t, u):
                            tfncname=func_names[t], ufncname=func_names[u])
 
 
+#
+# Python <-> Map Cython Converter Functions
+#
+
+
+_pyxpy2cmap = '''# <{thumname}, {uhumname}> conversions
+cdef cpp_map[{tctype}, {uctype}] dict_to_map_{tfncname}_{ufncname}(dict pydict):
+    cdef cpp_map[{tctype}, {uctype}] cppmap = cpp_map[{tctype}, {uctype}]()
+    for key, value in pydict.items():
+        cppmap[{initkey}] = {initval}
+    return cppmap
+
+cdef dict map_to_dict_{tfncname}_{ufncname}(cpp_map[{tctype}, {uctype}] cppmap):
+    pydict = {{}}
+    cdef cpp_map[{tctype}, {uctype}].iterator mapiter = cppmap.begin()
+    while mapiter != cppmap.end():
+        pydict[{iterkey}] = {iterval}
+        inc(mapiter)
+    return pydict
+'''
+def genpyx_py2c_map(t, u):
+    """Returns the pyx snippet for a map of type <t, u>."""
+    iterkey = c2py_exprs[t].format(var="deref(mapiter).first")
+    iterval = c2py_exprs[u].format(var="deref(mapiter).second")
+    initkey = py2c_exprs[t].format(var="key")
+    initval = py2c_exprs[u].format(var="value")
+    return _pyxpy2cmap.format(tclsname=class_names[t], uclsname=class_names[u],
+                              thumname=human_names[t], uhumname=human_names[u],
+                              tctype=ctypes[t], uctype=ctypes[u],
+                              tpytype=pytypes[t], upytype=pytypes[u],
+                              tcytype=cytypes[t], ucytype=cytypes[u],
+                              iterkey=iterkey, iterval=iterval, 
+                              initkey=initkey, initval=initval,
+                              tfncname=func_names[t], ufncname=func_names[u],
+                              )
+
+_pxdpy2cmap = """# <{thumname}, {uhumname}> conversions
+cdef cpp_map[{tctype}, {uctype}] dict_to_map_{tfncname}_{ufncname}(dict)
+cdef dict map_to_dict_{tfncname}_{ufncname}(cpp_map[{tctype}, {uctype}])
+
+"""
+def genpxd_py2c_map(t, u):
+    """Returns the pxd snippet for a set of type t."""
+    return _pxdpy2cmap.format(tclsname=class_names[t], uclsname=class_names[u],
+                              thumname=human_names[t], uhumname=human_names[u],
+                              tctype=ctypes[t], uctype=ctypes[u],
+                              tfncname=func_names[t], ufncname=func_names[u])
+
+
+def gentest_py2c_map(t, u):
+    return ""
+
 
 #
 # Controlers 
@@ -574,7 +626,7 @@ def genfiles(template, fname='temp', pxdname=None, testname=None,
 if __name__ == "__main__":
     #t = [('set', 'int')]
     #t = [('set', 'str')]
-    t = [('map', 'int', 'int')]
+    t = [('py2c_map', 'int', 'int')]
     #print gentest(t)
-    print genpxd(t)
-    #print genpyx(t)
+    #print genpxd(t)
+    print genpyx(t)
