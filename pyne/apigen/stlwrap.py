@@ -126,7 +126,7 @@ cdef class _Set{clsname}:
         # Decide how to init set, if at all
         if isinstance(new_set, _Set{clsname}):
             self.set_ptr = (<_Set{clsname}> new_set).set_ptr
-        elif hasattr(new_set, '__iter__') or \
+        elif hasattr(new_set, '__iter__') or \\
                 (hasattr(new_set, '__len__') and
                 hasattr(new_set, '__getitem__')):
             self.set_ptr = new cpp_set[{ctype}]()
@@ -220,7 +220,7 @@ cdef class _Set{clsname}:
 """
 def genpxd_set(t):
     """Returns the pxd snippet for a set of type t."""
-    return _pyxset.format(clsname=class_names[t], ctype=ctypes[t])
+    return _pxdset.format(clsname=class_names[t], ctype=ctypes[t])
 
 
 _testset = """# Set{clsname}
@@ -412,7 +412,7 @@ def test_map_{tfncname}_{ufncname}():
 
     n = conv.Map{tclsname}{uclsname}(m, False)
     assert_equal(len(n), 2)
-    assert_equal(n[{2}], {4})
+    assert_equal(n[{2}], {6})
 
     # points to the same underlying map
     n[{1}] = {5}
@@ -561,7 +561,7 @@ ELSE:
 cimport extra_types
 
 
-cdef extra_types.complex_t _py2c_complex(object pyv):
+cdef extra_types.complex_t py2c_complex(object pyv):
     cdef extra_types.complex_t cv
     pyv = complex(pyv)
     cv = extra_types.complex_t()
@@ -628,7 +628,7 @@ _testheader = '''"""Tests the part of stlconverters that is accessible from Pyth
 from unittest import TestCase
 import nose
 
-from nose.tools import assert_equal, assert_not_equal, assert_raises, raises, \
+from nose.tools import assert_equal, assert_not_equal, assert_raises, raises, \\
     assert_almost_equal, assert_true, assert_false, assert_in
 
 import os
@@ -661,14 +661,13 @@ def genfiles(template, fname='temp', pxdname=None, testname=None,
     fname += '.pyx'
 
     pyx = genpyx(template, pyxheader)
+    pxd = genpxd(template, pxdheader)
+    test = gentest(template, testheader)
+
     with open(fname, 'w') as f:
         f.write(pyx)
-
-    pxd = genpxd(template, pxdheader)
     with open(pxdname, 'w') as f:
         f.write(pxd)
-
-    test = gentest(template, testheader)
     with open(testname, 'w') as f:
         f.write(test)
 

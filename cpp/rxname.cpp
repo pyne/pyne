@@ -672,7 +672,7 @@ void * pyne::rxname::_fill_maps()
   for (int i = 0; i < NUM_RX_NAMES; i++)
   {
     rx = _names[i];
-    rxid = pyne::rxnames::hash(rx);
+    rxid = pyne::rxname::hash(rx);
     id_name[rxid] = rx;
     name_id[rx] = rxid;
     labels[rxid] = _labels[i];
