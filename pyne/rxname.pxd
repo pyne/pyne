@@ -14,8 +14,6 @@ ELSE:
     from pyne._includes.libcpp.string cimport string as std_string
 cimport pyne.cpp_pyne
 cimport pyne.pyne_config
-import pyne.pyne_config
 
 cimport cpp_rxname
 cimport pyne.stlconverters as conv
-import pyne.stlconverters as conv
