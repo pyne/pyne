@@ -430,7 +430,6 @@ def gentest_map(t, u):
 # Python <-> Map Cython Converter Functions
 #
 
-
 _pyxpy2cmap = '''# <{thumname}, {uhumname}> conversions
 cdef cpp_map[{tctype}, {uctype}] dict_to_map_{tfncname}_{ufncname}(dict pydict):
     cdef cpp_map[{tctype}, {uctype}] cppmap = cpp_map[{tctype}, {uctype}]()
@@ -474,9 +473,59 @@ def genpxd_py2c_map(t, u):
                               tctype=ctypes[t], uctype=ctypes[u],
                               tfncname=func_names[t], ufncname=func_names[u])
 
-
 def gentest_py2c_map(t, u):
     return ""
+
+
+#
+# Python <-> C++ Set Cython Converter Functions
+#
+
+_pyxpy2cset = '''# {humname} sets
+cdef cpp_set[{ctype}] py_to_cpp_set_{fncname}(set pyset):
+    cdef {ctype} v
+    cdef cpp_set[{ctype}] cppset = cpp_set[{ctype}]()
+    for value in pyset:
+        v = {initval}
+        cppset.insert(v)
+    return cppset
+
+cdef set cpp_to_py_set_{fncname}(cpp_set[{ctype}] cppset):
+    pyset = set()
+    cdef cpp_set[{ctype}].iterator setiter = cppset.begin()
+    while setiter != cppset.end():
+        pyset.add({iterval})
+        inc(setiter)
+    return pyset
+'''
+def genpyx_py2c_set(t):
+    """Returns the pyx snippet for a set of type t."""
+    iterval = c2py_exprs[t].format(var="deref(setiter)")
+    initval = py2c_exprs[t].format(var="value")
+    return _pyxpy2cset.format(clsname=class_names[t], 
+                              humname=human_names[t], 
+                              ctype=ctypes[t], 
+                              pytype=pytypes[t], 
+                              cytype=cytypes[t],
+                              iterval=iterval, 
+                              initval=initval,
+                              fncname=func_names[t], 
+                              )
+
+_pxdpy2cset = """# {humname} sets
+cdef cpp_set[{ctype}] py_to_cpp_set_{fncname}(set)
+cdef set cpp_to_py_set_{fncname}(cpp_set[{ctype}])
+"""
+def genpxd_py2c_set(t):
+    """Returns the pxd snippet for a set of type t."""
+    return _pxdpy2cset.format(clsname=class_names[t],
+                              humname=human_names[t], 
+                              ctype=ctypes[t], 
+                              fncname=func_names[t])
+
+def gentest_py2c_set(t):
+    return ""
+
 
 
 #
@@ -626,7 +675,8 @@ def genfiles(template, fname='temp', pxdname=None, testname=None,
 if __name__ == "__main__":
     #t = [('set', 'int')]
     #t = [('set', 'str')]
-    t = [('py2c_map', 'int', 'int')]
+    #t = [('py2c_map', 'int', 'int')]
+    t = [('py2c_set', 'str')]
     #print gentest(t)
     #print genpxd(t)
     print genpyx(t)
