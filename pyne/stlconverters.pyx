@@ -743,6 +743,252 @@ class MapIntStr(_MapIntStr, collections.MutableMapping):
 
 
 
+# Map(Str, UInt)
+cdef class MapIterStrUInt(object):
+    cdef void init(self, cpp_map[std_string, unsigned int] * map_ptr):
+        cdef cpp_map[std_string, unsigned int].iterator * itn = <cpp_map[std_string, unsigned int].iterator *> malloc(sizeof(map_ptr.begin()))
+        itn[0] = map_ptr.begin()
+        self.iter_now = itn
+
+        cdef cpp_map[std_string, unsigned int].iterator * ite = <cpp_map[std_string, unsigned int].iterator *> malloc(sizeof(map_ptr.end()))
+        ite[0] = map_ptr.end()
+        self.iter_end = ite
+
+    def __dealloc__(self):
+        free(self.iter_now)
+        free(self.iter_end)
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        cdef cpp_map[std_string, unsigned int].iterator inow = deref(self.iter_now)
+        cdef cpp_map[std_string, unsigned int].iterator iend = deref(self.iter_end)
+
+        if inow != iend:
+            pyval = str(<char *> deref(inow).first.c_str())
+        else:
+            raise StopIteration
+
+        inc(deref(self.iter_now))
+        return pyval
+
+cdef class _MapStrUInt:
+    def __cinit__(self, new_map=True, bint free_map=True):
+        cdef pair[std_string, unsigned int] item
+
+        # Decide how to init map, if at all
+        if isinstance(new_map, _MapStrUInt):
+            self.map_ptr = (<_MapStrUInt> new_map).map_ptr
+        elif hasattr(new_map, 'items'):
+            self.map_ptr = new cpp_map[std_string, unsigned int]()
+            for key, value in new_map.items():
+                item = pair[std_string, unsigned int](std_string(<char *> key), <unsigned int> value)
+                self.map_ptr.insert(item)
+        elif hasattr(new_map, '__len__'):
+            self.map_ptr = new cpp_map[std_string, unsigned int]()
+            for key, value in new_map:
+                item = pair[std_string, unsigned int](std_string(<char *> key), <unsigned int> value)
+                self.map_ptr.insert(item)
+        elif bool(new_map):
+            self.map_ptr = new cpp_map[std_string, unsigned int]()
+
+        # Store free_map
+        self._free_map = free_map
+
+    def __dealloc__(self):
+        if self._free_map:
+            del self.map_ptr
+
+    def __contains__(self, key):
+        cdef std_string k
+        if not isinstance(key, basestring):
+            return False
+        k = std_string(<char *> key)
+
+        if 0 < self.map_ptr.count(k):
+            return True
+        else:
+            return False
+
+    def __len__(self):
+        return self.map_ptr.size()
+
+    def __iter__(self):
+        cdef MapIterStrUInt mi = MapIterStrUInt()
+        mi.init(self.map_ptr)
+        return mi
+
+    def __getitem__(self, key):
+        cdef std_string k
+        cdef unsigned int v
+
+        if not isinstance(key, basestring):
+            raise TypeError("Only string keys are valid.")
+        k = std_string(<char *> key)
+
+        if 0 < self.map_ptr.count(k):
+            v = deref(self.map_ptr)[k]
+            return <int> v
+        else:
+            raise KeyError
+
+    def __setitem__(self, key, value):
+        cdef pair[std_string, unsigned int] item = pair[std_string, unsigned int](std_string(<char *> key), <unsigned int> value)
+        self.map_ptr.insert(item)
+
+    def __delitem__(self, key):
+        cdef std_string k
+        if key in self:
+            k = std_string(<char *> key)
+            self.map_ptr.erase(k)
+
+
+class MapStrUInt(_MapStrUInt, collections.MutableMapping):
+    """Wrapper class for C++ standard library maps of type <string, unsigned integer>.
+    Provides dictionary like interface on the Python level.
+
+    Parameters
+    ----------
+    new_map : bool or dict-like
+        Boolean on whether to make a new map or not, or dict-like object
+        with keys and values which are castable to the appropriate type.
+    free_map : bool
+        Flag for whether the pointer to the C++ map should be deallocated
+        when the wrapper is dereferenced.
+    """
+
+    def __str__(self):
+        return self.__repr__()
+
+    def __repr__(self):
+        return "{" + ", ".join(["{0}: {1}".format(key, value) for key, value in self.items()]) + "}"
+
+
+
+# Map(UInt, Str)
+cdef class MapIterUIntStr(object):
+    cdef void init(self, cpp_map[unsigned int, std_string] * map_ptr):
+        cdef cpp_map[unsigned int, std_string].iterator * itn = <cpp_map[unsigned int, std_string].iterator *> malloc(sizeof(map_ptr.begin()))
+        itn[0] = map_ptr.begin()
+        self.iter_now = itn
+
+        cdef cpp_map[unsigned int, std_string].iterator * ite = <cpp_map[unsigned int, std_string].iterator *> malloc(sizeof(map_ptr.end()))
+        ite[0] = map_ptr.end()
+        self.iter_end = ite
+
+    def __dealloc__(self):
+        free(self.iter_now)
+        free(self.iter_end)
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        cdef cpp_map[unsigned int, std_string].iterator inow = deref(self.iter_now)
+        cdef cpp_map[unsigned int, std_string].iterator iend = deref(self.iter_end)
+
+        if inow != iend:
+            pyval = <int> deref(inow).first
+        else:
+            raise StopIteration
+
+        inc(deref(self.iter_now))
+        return pyval
+
+cdef class _MapUIntStr:
+    def __cinit__(self, new_map=True, bint free_map=True):
+        cdef pair[unsigned int, std_string] item
+
+        # Decide how to init map, if at all
+        if isinstance(new_map, _MapUIntStr):
+            self.map_ptr = (<_MapUIntStr> new_map).map_ptr
+        elif hasattr(new_map, 'items'):
+            self.map_ptr = new cpp_map[unsigned int, std_string]()
+            for key, value in new_map.items():
+                item = pair[unsigned int, std_string](<unsigned int> key, std_string(<char *> value))
+                self.map_ptr.insert(item)
+        elif hasattr(new_map, '__len__'):
+            self.map_ptr = new cpp_map[unsigned int, std_string]()
+            for key, value in new_map:
+                item = pair[unsigned int, std_string](<unsigned int> key, std_string(<char *> value))
+                self.map_ptr.insert(item)
+        elif bool(new_map):
+            self.map_ptr = new cpp_map[unsigned int, std_string]()
+
+        # Store free_map
+        self._free_map = free_map
+
+    def __dealloc__(self):
+        if self._free_map:
+            del self.map_ptr
+
+    def __contains__(self, key):
+        cdef unsigned int k
+        if not isinstance(key, int):
+            return False
+        k = <unsigned int> key
+
+        if 0 < self.map_ptr.count(k):
+            return True
+        else:
+            return False
+
+    def __len__(self):
+        return self.map_ptr.size()
+
+    def __iter__(self):
+        cdef MapIterUIntStr mi = MapIterUIntStr()
+        mi.init(self.map_ptr)
+        return mi
+
+    def __getitem__(self, key):
+        cdef unsigned int k
+        cdef std_string v
+
+        if not isinstance(key, int):
+            raise TypeError("Only unsigned integer keys are valid.")
+        k = <unsigned int> key
+
+        if 0 < self.map_ptr.count(k):
+            v = deref(self.map_ptr)[k]
+            return str(<char *> v.c_str())
+        else:
+            raise KeyError
+
+    def __setitem__(self, key, value):
+        cdef pair[unsigned int, std_string] item = pair[unsigned int, std_string](<unsigned int> key, std_string(<char *> value))
+        self.map_ptr.insert(item)
+
+    def __delitem__(self, key):
+        cdef unsigned int k
+        if key in self:
+            k = <unsigned int> key
+            self.map_ptr.erase(k)
+
+
+class MapUIntStr(_MapUIntStr, collections.MutableMapping):
+    """Wrapper class for C++ standard library maps of type <unsigned integer, string>.
+    Provides dictionary like interface on the Python level.
+
+    Parameters
+    ----------
+    new_map : bool or dict-like
+        Boolean on whether to make a new map or not, or dict-like object
+        with keys and values which are castable to the appropriate type.
+    free_map : bool
+        Flag for whether the pointer to the C++ map should be deallocated
+        when the wrapper is dereferenced.
+    """
+
+    def __str__(self):
+        return self.__repr__()
+
+    def __repr__(self):
+        return "{" + ", ".join(["{0}: {1}".format(key, value) for key, value in self.items()]) + "}"
+
+
+
 # Map(Str, Double)
 cdef class MapIterStrDouble(object):
     cdef void init(self, cpp_map[std_string, double] * map_ptr):
