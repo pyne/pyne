@@ -15,11 +15,12 @@ cdef extern from "rxname.h" namespace "pyne::rxname":
     set[std_string] names
 
     # Conversion dictionaries
-    map[extra_types.uint, std_string] labels
     map[extra_types.uint, std_string] id_name
     map[std_string, extra_types.uint] name_id
     map[extra_types.uint, extra_types.uint] id_mt
     map[extra_types.uint, extra_types.uint] mt_id
+    map[extra_types.uint, std_string] labels
+    map[extra_types.uint, std_string] docs
 
     extra_types.uint hash(std_string) except +
     extra_types.uint hash(const_char *) except +
