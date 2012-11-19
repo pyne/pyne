@@ -167,6 +167,28 @@ def test_map_uint_str():
 
 
 
+# MapUIntUInt
+def test_map_uint_uint():
+    m = conv.MapUIntUInt()
+    m[1] = 42L
+    m[65] = 4043370667L
+    assert_equal(len(m), 2)
+    assert_equal(m[65], 4043370667L)
+
+    m = conv.MapUIntUInt({4043370667L: 65, 42L: 1})
+    assert_equal(len(m), 2)
+    assert_equal(m[4043370667L], 65)
+
+    n = conv.MapUIntUInt(m, False)
+    assert_equal(len(n), 2)
+    assert_equal(n[4043370667L], 65)
+
+    # points to the same underlying map
+    n[65] = 4043370667L
+    assert_equal(m[65], 4043370667L)
+
+
+
 # MapStrDouble
 def test_map_str_dbl():
     m = conv.MapStrDouble()

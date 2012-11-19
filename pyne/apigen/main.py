@@ -31,6 +31,7 @@ def main():
                     ('map', 'int', 'str'),
                     ('map', 'str', 'uint'),
                     ('map', 'uint', 'str'),
+                    ('map', 'uint', 'uint'),
                     ('map', 'str', 'double'),
                     ('map', 'int', 'int'),
                     ('map', 'int', 'double'),
