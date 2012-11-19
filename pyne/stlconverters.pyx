@@ -783,12 +783,12 @@ cdef class _MapStrUInt:
         elif hasattr(new_map, 'items'):
             self.map_ptr = new cpp_map[std_string, extra_types.uint]()
             for key, value in new_map.items():
-                item = pair[std_string, extra_types.uint](std_string(<char *> key), <unsigned int> value)
+                item = pair[std_string, extra_types.uint](std_string(<char *> key), <extra_types.uint> long(value))
                 self.map_ptr.insert(item)
         elif hasattr(new_map, '__len__'):
             self.map_ptr = new cpp_map[std_string, extra_types.uint]()
             for key, value in new_map:
-                item = pair[std_string, extra_types.uint](std_string(<char *> key), <unsigned int> value)
+                item = pair[std_string, extra_types.uint](std_string(<char *> key), <extra_types.uint> long(value))
                 self.map_ptr.insert(item)
         elif bool(new_map):
             self.map_ptr = new cpp_map[std_string, extra_types.uint]()
@@ -829,12 +829,12 @@ cdef class _MapStrUInt:
 
         if 0 < self.map_ptr.count(k):
             v = deref(self.map_ptr)[k]
-            return v
+            return int(v)
         else:
             raise KeyError
 
     def __setitem__(self, key, value):
-        cdef pair[std_string, extra_types.uint] item = pair[std_string, extra_types.uint](std_string(<char *> key), <unsigned int> value)
+        cdef pair[std_string, extra_types.uint] item = pair[std_string, extra_types.uint](std_string(<char *> key), <extra_types.uint> long(value))
         self.map_ptr.insert(item)
 
     def __delitem__(self, key):
@@ -889,7 +889,7 @@ cdef class MapIterUIntStr(object):
         cdef cpp_map[extra_types.uint, std_string].iterator iend = deref(self.iter_end)
 
         if inow != iend:
-            pyval = deref(inow).first
+            pyval = int(deref(inow).first)
         else:
             raise StopIteration
 
@@ -906,12 +906,12 @@ cdef class _MapUIntStr:
         elif hasattr(new_map, 'items'):
             self.map_ptr = new cpp_map[extra_types.uint, std_string]()
             for key, value in new_map.items():
-                item = pair[extra_types.uint, std_string](<unsigned int> key, std_string(<char *> value))
+                item = pair[extra_types.uint, std_string](<extra_types.uint> long(key), std_string(<char *> value))
                 self.map_ptr.insert(item)
         elif hasattr(new_map, '__len__'):
             self.map_ptr = new cpp_map[extra_types.uint, std_string]()
             for key, value in new_map:
-                item = pair[extra_types.uint, std_string](<unsigned int> key, std_string(<char *> value))
+                item = pair[extra_types.uint, std_string](<extra_types.uint> long(key), std_string(<char *> value))
                 self.map_ptr.insert(item)
         elif bool(new_map):
             self.map_ptr = new cpp_map[extra_types.uint, std_string]()
@@ -925,9 +925,9 @@ cdef class _MapUIntStr:
 
     def __contains__(self, key):
         cdef extra_types.uint k
-        if not isinstance(key, long):
+        if not isinstance(key, int) and not isinstance(key, long):
             return False
-        k = <unsigned int> key
+        k = <extra_types.uint> long(key)
 
         if 0 < self.map_ptr.count(k):
             return True
@@ -946,9 +946,9 @@ cdef class _MapUIntStr:
         cdef extra_types.uint k
         cdef std_string v
 
-        if not isinstance(key, long):
+        if not isinstance(key, int) and not isinstance(key, long):
             raise TypeError("Only unsigned integer keys are valid.")
-        k = <unsigned int> key
+        k = <extra_types.uint> long(key)
 
         if 0 < self.map_ptr.count(k):
             v = deref(self.map_ptr)[k]
@@ -957,13 +957,13 @@ cdef class _MapUIntStr:
             raise KeyError
 
     def __setitem__(self, key, value):
-        cdef pair[extra_types.uint, std_string] item = pair[extra_types.uint, std_string](<unsigned int> key, std_string(<char *> value))
+        cdef pair[extra_types.uint, std_string] item = pair[extra_types.uint, std_string](<extra_types.uint> long(key), std_string(<char *> value))
         self.map_ptr.insert(item)
 
     def __delitem__(self, key):
         cdef extra_types.uint k
         if key in self:
-            k = <unsigned int> key
+            k = <extra_types.uint> long(key)
             self.map_ptr.erase(k)
 
 
