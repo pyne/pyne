@@ -690,8 +690,9 @@ void * pyne::rxname::_ = pyne::rxname::_fill_maps();
 unsigned int pyne::rxname::hash(std::string s){return pyne::rxname::hash(s.c_str());};
 unsigned int pyne::rxname::hash(const char * s)
 {
+  // Modified from http://cboard.cprogramming.com/tech-board/114650-string-hashing-algorithm.html#post853145
+  // starting from h = 32*2^5 > 1000, rather than 0, to reserve space for MT numbers
   int c;
-  // starting from 1000, rather than 0, to reserve space for MT numbers
   unsigned int h = 32; 
   while((c = *s++))
   {

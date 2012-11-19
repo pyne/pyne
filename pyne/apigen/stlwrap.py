@@ -22,12 +22,12 @@ cytypes = {
     }
 
 pytypes = {
-    'str': 'basestring',
-    'int': 'int',
-    'uint': 'long',
-    'float': 'float',
-    'double': 'float',
-    'complex': 'complex',
+    'str': ['basestring'],
+    'int': ['int'],
+    'uint': ['int', 'long'],
+    'float': ['float'],
+    'double': ['float'],
+    'complex': ['complex'],
     }
 
 class_names = {
@@ -60,7 +60,7 @@ human_names = {
 c2py_exprs = {
     'str': 'str(<char *> {var}.c_str())',
     'int': '{var}',
-    'uint': '{var}',
+    'uint': 'int({var})',
     'float': '{var}',
     'double': '{var}',
     'complex': 'complex(float({var}.re), float({var}.im))',
@@ -69,7 +69,7 @@ c2py_exprs = {
 py2c_exprs = {
     'str': 'std_string(<char *> {var})',
     'int': '{var}',
-    'uint': '<unsigned int> {var}',
+    'uint': '<extra_types.uint> long({var})',
     'float': '<float> {var}',
     'double': '<double> {var}',
     'complex': 'py2c_complex({var})',
@@ -78,7 +78,7 @@ py2c_exprs = {
 testvals = {
     'str': ["Aha", "Take", "Me", "On"], 
     'int': [1, 42, -65, 18], 
-    'uint': [1L, 42L, 65L, 18L],
+    'uint': [1, 65, 4043370667L, 42L],
     'float': [1.0, 42.42, -65.5555, 18],
     'double': [1.0, 42.42, -65.5555, 18],
     'complex': [1.0, 42+42j, -65.55-1j, 0.18j],
@@ -145,7 +145,7 @@ cdef class _Set{clsname}:
 
     def __contains__(self, value):
         cdef {ctype} s
-        if isinstance(value, {pytype}):
+        if {isinst}:
             s = {initval}
         else:
             return False
@@ -200,11 +200,12 @@ class Set{clsname}(_Set{clsname}, collections.Set):
 '''
 def genpyx_set(t):
     """Returns the pyx snippet for a set of type t."""
+    isinst = " or ".join(["isinstance(value, {0})".format(x) for x in pytypes[t]])
     iterval = c2py_exprs[t].format(var="deref(inow)")
     initval = py2c_exprs[t].format(var="value")
     return _pyxset.format(clsname=class_names[t], humname=human_names[t], 
                           ctype=ctypes[t], pytype=pytypes[t], cytype=cytypes[t], 
-                          iterval=iterval, initval=initval)
+                          iterval=iterval, initval=initval, isinst=isinst)
 
 _pxdset = """# Set{clsname}
 cdef class SetIter{clsname}(object):
@@ -302,7 +303,7 @@ cdef class _Map{tclsname}{uclsname}:
 
     def __contains__(self, key):
         cdef {tctype} k
-        if not isinstance(key, {tpytype}):
+        if {tisnotinst}:
             return False
         k = {initkey}
 
@@ -323,7 +324,7 @@ cdef class _Map{tclsname}{uclsname}:
         cdef {tctype} k
         cdef {uctype} v
 
-        if not isinstance(key, {tpytype}):
+        if {tisnotinst}:
             raise TypeError("Only {thumname} keys are valid.")
         k = {initkey}
 
@@ -367,6 +368,7 @@ class Map{tclsname}{uclsname}(_Map{tclsname}{uclsname}, collections.MutableMappi
 '''
 def genpyx_map(t, u):
     """Returns the pyx snippet for a map of type <t, u>."""
+    tisnotinst = " and ".join(["not isinstance(key, {0})".format(x) for x in pytypes[t]])
     iterkey = c2py_exprs[t].format(var="deref(inow).first")
     convval = c2py_exprs[u].format(var="v")
     initkey = py2c_exprs[t].format(var="key")
@@ -377,7 +379,7 @@ def genpyx_map(t, u):
                           tpytype=pytypes[t], upytype=pytypes[u],
                           tcytype=cytypes[t], ucytype=cytypes[u],
                           iterkey=iterkey, convval=convval, 
-                          initkey=initkey, initval=initval,)
+                          initkey=initkey, initval=initval, tisnotinst=tisnotinst)
 
 _pxdmap = """# Map{tclsname}{uclsname}
 cdef class MapIter{tclsname}{uclsname}(object):
