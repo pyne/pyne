@@ -17,6 +17,7 @@ import re
 import numpy as np
 import matplotlib.pyplot as plt
 import os
+import warnings
 import pyne.rx_data as rx
 
 number = " (\d.\d+(?:\+|\-)\d)"
@@ -119,6 +120,7 @@ class Library(rx.rx_data):
             self.mats.update({int(mat_id):(self.chars_til_now / 81, comments)})
         
     def _read_data(self, filename):
+        warnings.simplefilter('ignore')
         print 'Reading data ...'
         data = np.genfromtxt(filename, 
                              delimiter = 11, 
