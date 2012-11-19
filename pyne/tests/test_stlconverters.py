@@ -126,44 +126,44 @@ def test_map_int_str():
 # MapStrUInt
 def test_map_str_uint():
     m = conv.MapStrUInt()
-    m['Aha'] = 18L
-    m['Take'] = 65L
+    m['Aha'] = 42L
+    m['Take'] = 4043370667L
     assert_equal(len(m), 2)
-    assert_equal(m['Take'], 65L)
+    assert_equal(m['Take'], 4043370667L)
 
-    m = conv.MapStrUInt({'Me': 42L, 'On': 1L})
+    m = conv.MapStrUInt({'Me': 65, 'On': 1})
     assert_equal(len(m), 2)
-    assert_equal(m['Me'], 42L)
+    assert_equal(m['Me'], 65)
 
     n = conv.MapStrUInt(m, False)
     assert_equal(len(n), 2)
-    assert_equal(n['Me'], 42L)
+    assert_equal(n['Me'], 65)
 
     # points to the same underlying map
-    n['Take'] = 65L
-    assert_equal(m['Take'], 65L)
+    n['Take'] = 4043370667L
+    assert_equal(m['Take'], 4043370667L)
 
 
 
 # MapUIntStr
 def test_map_uint_str():
     m = conv.MapUIntStr()
-    m[1L] = 'On'
-    m[42L] = 'Me'
+    m[1] = 'On'
+    m[65] = 'Me'
     assert_equal(len(m), 2)
-    assert_equal(m[42L], 'Me')
+    assert_equal(m[65], 'Me')
 
-    m = conv.MapUIntStr({65L: 'Take', 18L: 'Aha'})
+    m = conv.MapUIntStr({4043370667L: 'Take', 42L: 'Aha'})
     assert_equal(len(m), 2)
-    assert_equal(m[65L], 'Take')
+    assert_equal(m[4043370667L], 'Take')
 
     n = conv.MapUIntStr(m, False)
     assert_equal(len(n), 2)
-    assert_equal(n[65L], 'Take')
+    assert_equal(n[4043370667L], 'Take')
 
     # points to the same underlying map
-    n[42L] = 'Me'
-    assert_equal(m[42L], 'Me')
+    n[65] = 'Me'
+    assert_equal(m[65], 'Me')
 
 
 
