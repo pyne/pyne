@@ -24,8 +24,8 @@ namespace rxname
   extern std::map<std::string, unsigned int> name_id;
   extern std::map<unsigned int, unsigned int> id_mt;
   extern std::map<unsigned int, unsigned int> mt_id;
-
   extern std::map<unsigned int, std::string> labels;
+  extern std::map<unsigned int, std::string> docs;
   void * _fill_maps();
   extern void * _;
 
