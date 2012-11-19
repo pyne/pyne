@@ -120,7 +120,7 @@ class Library(rx.rx_data):
             self.mats.update({int(mat_id):(self.chars_til_now / 81, comments)})
         
     def _read_data(self, filename):
-        warnings.simplefilter('ignore')
+        # warnings.filterwarnings("ignore"
         print 'Reading data ...'
         data = np.genfromtxt(filename, 
                              delimiter = 11, 
