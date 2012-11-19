@@ -3,6 +3,7 @@
 # Cython imports
 from libcpp.map cimport map
 from libcpp.set cimport set as cpp_set
+from libc.string cimport const_char
 from cython.operator cimport dereference as deref
 from cython.operator cimport preincrement as inc
 

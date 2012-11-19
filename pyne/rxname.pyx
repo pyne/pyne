@@ -3,6 +3,7 @@
 # Cython imports
 from libcpp.map cimport map
 from libcpp.set cimport set as cpp_set
+from libc.string cimport const_char
 from cython.operator cimport dereference as deref
 from cython.operator cimport preincrement as inc
 
@@ -40,4 +41,19 @@ cdef conv._MapStrUInt name_id_proxy = conv.MapStrUInt(False)
 name_id_proxy.map_ptr = &cpp_rxname.name_id
 name_id = name_id_proxy
 
+# id_mt
+cdef conv._MapUIntUInt id_mt_proxy = conv.MapUIntUInt(False)
+id_mt_proxy.map_ptr = &cpp_rxname.id_mt
+id_mt = id_mt_proxy
 
+# mt_id
+cdef conv._MapUIntUInt mt_id_proxy = conv.MapUIntUInt(False)
+mt_id_proxy.map_ptr = &cpp_rxname.mt_id
+mt_id = mt_id_proxy
+
+
+def hash(char * s):
+    """Hashes a string to be used as a reaction id.  This hash specifically reserves
+    the h < 1000 for MT numbers.
+    """
+    return int(cpp_rxname.hash(<const_char *> s))

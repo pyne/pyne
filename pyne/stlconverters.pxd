@@ -156,6 +156,19 @@ cdef class _MapUIntStr:
 
 
 
+# MapUIntUInt
+cdef class MapIterUIntUInt(object):
+    cdef cpp_map[extra_types.uint, extra_types.uint].iterator * iter_now
+    cdef cpp_map[extra_types.uint, extra_types.uint].iterator * iter_end
+    cdef void init(MapIterUIntUInt, cpp_map[extra_types.uint, extra_types.uint] *)
+
+cdef class _MapUIntUInt:
+    cdef cpp_map[extra_types.uint, extra_types.uint] * map_ptr
+    cdef public bint _free_map
+
+
+
+
 # MapStrDouble
 cdef class MapIterStrDouble(object):
     cdef cpp_map[std_string, double].iterator * iter_now
