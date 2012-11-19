@@ -22,6 +22,8 @@ namespace rxname
   extern std::set<std::string> names;
   extern std::map<unsigned int, std::string> id_name;
   extern std::map<std::string, unsigned int> name_id;
+  extern std::map<unsigned int, unsigned int> id_mt;
+  extern std::map<unsigned int, unsigned int> mt_id;
 
   extern std::map<unsigned int, std::string> labels;
   void * _fill_maps();
