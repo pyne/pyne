@@ -26,11 +26,6 @@ cdef conv._SetStr names_proxy = conv.SetStr(False)
 names_proxy.set_ptr = &cpp_rxname.names
 names = names_proxy
 
-# labels
-cdef conv._MapUIntStr labels_proxy = conv.MapUIntStr(False)
-labels_proxy.map_ptr = &cpp_rxname.labels
-labels = labels_proxy
-
 # id_name
 cdef conv._MapUIntStr id_name_proxy = conv.MapUIntStr(False)
 id_name_proxy.map_ptr = &cpp_rxname.id_name
@@ -50,6 +45,17 @@ id_mt = id_mt_proxy
 cdef conv._MapUIntUInt mt_id_proxy = conv.MapUIntUInt(False)
 mt_id_proxy.map_ptr = &cpp_rxname.mt_id
 mt_id = mt_id_proxy
+
+# labels
+cdef conv._MapUIntStr labels_proxy = conv.MapUIntStr(False)
+labels_proxy.map_ptr = &cpp_rxname.labels
+labels = labels_proxy
+
+# docs
+cdef conv._MapUIntStr docs_proxy = conv.MapUIntStr(False)
+docs_proxy.map_ptr = &cpp_rxname.docs
+docs = docs_proxy
+
 
 
 def hash(char * s):
