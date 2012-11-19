@@ -30,16 +30,14 @@ class rx_data(object):
             return False
 
         return result
-
     
-        if file_type_in.lower() == 'endf':
     def write(self, filename, file_type_in, file_type_out):
-            f = open(filename, 'w')
+        # just a placeholder at this point
+        # f = open(filename, 'w')
+        if file_type_in.lower() == 'endf':
             for mat in self.mats:
-                f.write f[1]
-            f.close()
-            return filename
+                # f.close()
+                return filename
         else:
             return filename, file_type
-        # return self.data.flat[start:stop]
-        
+        pass

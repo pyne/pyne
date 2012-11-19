@@ -2,6 +2,8 @@ import numpy as np
 from pyne.endf import Library
 import nose 
 from nose.tools import assert_equal, assert_not_equal, assert_raises, raises, assert_in
+import warnings
+
 
 library = Library('endftest_small.txt')    
 
