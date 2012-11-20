@@ -33,10 +33,11 @@ class rx_data(object):
     
     def write(self, filename, file_type_in, file_type_out):
         # just a placeholder at this point
-        # f = open(filename, 'w')
+        f = open(filename, 'w')
         if file_type_in.lower() == 'endf':
             for mat in self.mats:
-                # f.close()
+                np.savetxt(filename, self.data, fmt='%s 9.6e')
+                f.close()
                 return filename
         else:
             return filename, file_type
