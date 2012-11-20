@@ -148,3 +148,43 @@ def id(x, y=None, char * z="n"):
             to_nuc = cpp_nucname.zzaaam(<int> y)
         rxid = cpp_rxname.id(from_nuc, to_nuc, std_string(z))
     return int(rxid)
+
+
+def mt(x, y=None, char * z="n"):
+    """mt(x, y=None, z="n")
+
+    Gives the reaction MT number. This may not be greater than 1000. 
+
+    Parameters
+    ----------
+    x : str, int, or long
+        name, abbreviation, id, MT number, or from nuclide.
+    y : str, int, or None, optional
+        to nuclide.
+    z : str, optional
+        incident particle type ("n", "p", ...) when x and y are nuclides.
+
+    Returns
+    -------
+    mtnum : int or long
+        a unique MT number.
+    """
+    cdef int from_nuc, to_nuc
+    if y is None:
+        if isinstance(x, basestring):
+            mtnum = cpp_rxname.mt(std_string(<char *> x))
+        elif isinstance(x, int):
+            mtnum = cpp_rxname.mt(<extra_types.uint> long(x))
+        elif isinstance(x, long):
+            mtnum = cpp_rxname.mt(<extra_types.uint> x)
+    else:
+        if isinstance(x, basestring):
+            from_nuc = cpp_nucname.zzaaam(std_string(<char *> x))
+        elif isinstance(x, int):
+            from_nuc = cpp_nucname.zzaaam(<int> x)
+        if isinstance(y, basestring):
+            to_nuc = cpp_nucname.zzaaam(std_string(<char *> y))
+        elif isinstance(y, int):
+            to_nuc = cpp_nucname.zzaaam(<int> y)
+        mtnum = cpp_rxname.mt(from_nuc, to_nuc, std_string(z))
+    return int(mtnum)

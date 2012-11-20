@@ -1543,3 +1543,71 @@ unsigned int pyne::rxname::id(std::string from_nuc, std::string to_nuc, std::str
   return pyne::rxname::id(pyne::nucname::zzaaam(from_nuc), 
                           pyne::nucname::zzaaam(to_nuc), z);
 };
+
+
+// **********************
+// *** MT functions *****
+// **********************
+unsigned int pyne::rxname::mt(int x)
+{
+  unsigned int rxid = pyne::rxname::id(x);
+  if (0 == id_mt.count(rxid))
+    throw NotAReaction();
+  return id_mt[rxid];
+};
+  
+unsigned int pyne::rxname::mt(unsigned int x)
+{
+  unsigned int rxid = pyne::rxname::id(x);
+  if (0 == id_mt.count(rxid))
+    throw NotAReaction();
+  return id_mt[rxid];
+};
+  
+unsigned int pyne::rxname::mt(char * x)
+{
+  unsigned int rxid = pyne::rxname::id(x);
+  if (0 == id_mt.count(rxid))
+    throw NotAReaction();
+  return id_mt[rxid];
+};
+  
+unsigned int pyne::rxname::mt(std::string x)
+{
+  unsigned int rxid = pyne::rxname::id(x);
+  if (0 == id_mt.count(rxid))
+    throw NotAReaction();
+  return id_mt[rxid];
+};
+  
+unsigned int pyne::rxname::mt(int from_nuc, int to_nuc, std::string z)
+{
+  unsigned int rxid = pyne::rxname::id(from_nuc, to_nuc, z);
+  if (0 == id_mt.count(rxid))
+    throw NotAReaction();
+  return id_mt[rxid];
+};
+  
+unsigned int pyne::rxname::mt(int from_nuc, std::string to_nuc, std::string z)
+{
+  unsigned int rxid = pyne::rxname::id(from_nuc, to_nuc, z);
+  if (0 == id_mt.count(rxid))
+    throw NotAReaction();
+  return id_mt[rxid];
+};
+  
+unsigned int pyne::rxname::mt(std::string from_nuc, int to_nuc, std::string z)
+{
+  unsigned int rxid = pyne::rxname::id(from_nuc, to_nuc, z);
+  if (0 == id_mt.count(rxid))
+    throw NotAReaction();
+  return id_mt[rxid];
+};
+  
+unsigned int pyne::rxname::mt(std::string from_nuc, std::string to_nuc, std::string z)
+{
+  unsigned int rxid = pyne::rxname::id(from_nuc, to_nuc, z);
+  if (0 == id_mt.count(rxid))
+    throw NotAReaction();
+  return id_mt[rxid];
+};

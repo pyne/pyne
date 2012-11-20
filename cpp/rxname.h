@@ -60,13 +60,16 @@ namespace rxname
   unsigned int id(std::string, std::string, std::string="n");
 
   /********************/
-  /*** mt functions ***/
+  /*** MT functions ***/
   /********************/
-/*
-  int mt(int);
-  int mt(char *);
-  int mt(std::string);
-*/
+  unsigned int mt(int);
+  unsigned int mt(unsigned int);
+  unsigned int mt(char *);
+  unsigned int mt(std::string);
+  unsigned int mt(int, int, std::string="n");
+  unsigned int mt(int, std::string, std::string="n");
+  unsigned int mt(std::string, int, std::string="n");
+  unsigned int mt(std::string, std::string, std::string="n");
 
   /******************/
   /*** Exceptions ***/
