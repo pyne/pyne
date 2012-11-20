@@ -11,6 +11,7 @@
 #include <stdio.h>
 
 #include "pyne.h"
+#include "nucname.h"
 
 #define NUM_RX_NAMES 328
 
@@ -27,6 +28,7 @@ namespace rxname
   extern std::map<unsigned int, unsigned int> mt_id;
   extern std::map<unsigned int, std::string> labels;
   extern std::map<unsigned int, std::string> docs;
+  extern std::map<std::string, std::map<int, std::map<int, unsigned int> > > zadelta;
   void * _fill_maps();
   extern void * _;
 
@@ -40,6 +42,10 @@ namespace rxname
   std::string name(unsigned int);
   std::string name(char *);
   std::string name(std::string);
+  std::string name(int, int, std::string="n");
+  std::string name(int, std::string, std::string="n");
+  std::string name(std::string, int, std::string="n");
+  std::string name(std::string, std::string, std::string="n");
 
   /********************/
   /*** mt functions ***/

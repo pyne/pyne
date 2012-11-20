@@ -29,3 +29,12 @@ cdef extern from "rxname.h" namespace "pyne::rxname":
     std_string name(extra_types.uint) except +
     std_string name(char *) except +
     std_string name(std_string) except +
+    std_string name(int, int) except +
+    std_string name(int, std_string) except +
+    std_string name(std_string, int) except +
+    std_string name(std_string, std_string) except + 
+    std_string name(int, int, std_string) except +
+    std_string name(int, std_string, std_string) except +
+    std_string name(std_string, int, std_string) except +
+    std_string name(std_string, std_string, std_string) except + 
+

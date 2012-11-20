@@ -31,7 +31,7 @@ set_source_files_properties(${PROJECT_SOURCE_DIR}/pyne/nucname.pyx
 cython_add_module(nucname nucname.pyx)
 target_link_libraries(nucname pyne pyne_nucname)
 
-# nucname
+# rxname
 set_source_files_properties(${PROJECT_SOURCE_DIR}/pyne/rxname.pyx 
                             PROPERTIES CYTHON_IS_CXX TRUE)
 cython_add_module(rxname rxname.pyx)
