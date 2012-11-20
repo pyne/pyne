@@ -334,6 +334,7 @@ std::set<std::string> pyne::rxname::names(pyne::rxname::_names,
                                           pyne::rxname::_names+NUM_RX_NAMES);
 
 
+std::map<std::string, unsigned int> pyne::rxname::altnames;
 std::map<unsigned int, std::string> pyne::rxname::id_name;
 std::map<std::string, unsigned int> pyne::rxname::name_id;
 std::map<unsigned int, unsigned int> pyne::rxname::id_mt;
@@ -1336,18 +1337,41 @@ void * pyne::rxname::_fill_maps()
     "(n,ac)",
   };
 
-  // actually fill the maps
+  // fill the maps
   for (int i = 0; i < NUM_RX_NAMES; i++)
   {
     rx = _names[i];
     rxid = pyne::rxname::hash(rx);
     id_name[rxid] = rx;
     name_id[rx] = rxid;
-    id_mt[rxid] = _mts[i];
-    mt_id[_mts[i]] = rxid;
+    if (0 < _mts[i]) {
+      id_mt[rxid] = _mts[i];
+      mt_id[_mts[i]] = rxid;
+    };
     labels[rxid] = _labels[i];
     docs[rxid] = _docs[i];
   };
+
+  // set alternative names
+  altnames["tot"] = name_id["total"];
+  altnames["abs"] = name_id["absorption"];
+  altnames["fis"] = name_id["fission"];
+  altnames["fiss"] = name_id["fission"];
+  altnames["alpha"] = name_id["a"];
+  altnames["deut"] = name_id["d"];
+  altnames["deuteron"] = name_id["d"];
+  altnames["deuterium"] = name_id["d"];
+  altnames["trit"] = name_id["t"];
+  altnames["triton"] = name_id["t"];
+  altnames["tritium"] = name_id["t"];
+  altnames["proton"] = name_id["p"];
+  altnames["he3"] = name_id["He3"];
+  altnames["HE3"] = name_id["He3"];
+  altnames["3HE"] = name_id["He3"];
+  altnames["3He"] = name_id["He3"];
+  altnames["3he"] = name_id["He3"];
+  altnames["he-3"] = name_id["He3"];
+  altnames["HE-3"] = name_id["He3"];
 };
 void * pyne::rxname::_ = pyne::rxname::_fill_maps();
 
@@ -1365,4 +1389,39 @@ unsigned int pyne::rxname::hash(const char * s)
     h = ((h << 5) + h) ^ c;
   }
   return h;
+};
+
+
+
+std::string pyne::rxname::name(char * s){return pyne::rxname::name(std::string(s));};
+std::string pyne::rxname::name(std::string s)
+{
+  if (0 < names.count(s))
+    return s;
+  if (0 < altnames.count(s))
+    return id_name[altnames[s]];
+  // see if id in string form
+  int i = 0;
+  int I = s.length();
+  int found = 0;
+  while(0 <= found && i < I)
+  {
+    found = pyne::digits.find(s[i]);
+    i++;
+  }
+  if (0<=found)
+    return pyne::rxname::name(atoi(s.c_str()));
+  // dead...
+  throw NotAReaction(s, "???");
+};
+
+
+std::string pyne::rxname::name(int n){return pyne::rxname::name((unsigned int) n);};
+std::string pyne::rxname::name(unsigned int n)
+{
+  if (0 < id_name.count(n))
+    return id_name[n];
+  if (0 < mt_id.count(n))
+    return id_name[mt_id[n]];
+  throw NotAReaction(n, "???");
 };

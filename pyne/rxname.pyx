@@ -13,6 +13,7 @@ IF CYTHON_VERSION_MAJOR == 0 and CYTHON_VERSION_MINOR >= 17:
     from libcpp.string cimport string as std_string
 ELSE:
     from pyne._includes.libcpp.string cimport string as std_string
+cimport extra_types
 cimport pyne.cpp_pyne
 cimport pyne.pyne_config
 import pyne.pyne_config
@@ -63,3 +64,28 @@ def hash(char * s):
     the h < 1000 for MT numbers.
     """
     return int(cpp_rxname.hash(<const_char *> s))
+
+
+def name(x):
+    """name(x)
+
+    Gives the unique reaction name.  Note that this name follows the 'natural naming' 
+    convention and may be used as a variable in most languages.
+
+    Parameters
+    ----------
+    x : str, int, or long
+        name, abbreviation, id, or MT number.
+
+    Returns
+    -------
+    n : str
+        a unique reaction name.
+    """
+    if isinstance(x, basestring):
+        n = cpp_rxname.name(std_string(<char *> x))
+    elif isinstance(x, int):
+        n = cpp_rxname.name(<extra_types.uint> long(x))
+    elif isinstance(x, long):
+        n = cpp_rxname.name(<extra_types.uint> x)
+    return n
