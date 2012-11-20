@@ -47,6 +47,18 @@ namespace rxname
   std::string name(std::string, int, std::string="n");
   std::string name(std::string, std::string, std::string="n");
 
+  /**********************/
+  /*** id functions *****/
+  /**********************/
+  unsigned int id(int);
+  unsigned int id(unsigned int);
+  unsigned int id(char *);
+  unsigned int id(std::string);
+  unsigned int id(int, int, std::string="n");
+  unsigned int id(int, std::string, std::string="n");
+  unsigned int id(std::string, int, std::string="n");
+  unsigned int id(std::string, std::string, std::string="n");
+
   /********************/
   /*** mt functions ***/
   /********************/
