@@ -25,3 +25,7 @@ cdef extern from "rxname.h" namespace "pyne::rxname":
     extra_types.uint hash(std_string) except +
     extra_types.uint hash(const_char *) except +
 
+    std_string name(int) except +
+    std_string name(extra_types.uint) except +
+    std_string name(char *) except +
+    std_string name(std_string) except +
