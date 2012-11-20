@@ -232,3 +232,45 @@ def label(x, y=None, char * z="n"):
         clab = cpp_rxname.label(from_nuc, to_nuc, std_string(z))
     lab = clab.c_str()
     return lab
+
+
+def doc(x, y=None, char * z="n"):
+    """doc(x, y=None, z="n")
+
+    Gives documentation string for the reaction.
+
+    Parameters
+    ----------
+    x : str, int, or long
+        name, abbreviation, id, MT number, or from nuclide.
+    y : str, int, or None, optional
+        to nuclide.
+    z : str, optional
+        incident particle type ("n", "p", ...) when x and y are nuclides.
+
+    Returns
+    -------
+    d : str
+        a reaction docstring.
+    """
+    cdef std_string cd
+    cdef int from_nuc, to_nuc
+    if y is None:
+        if isinstance(x, basestring):
+            cd = cpp_rxname.doc(std_string(<char *> x))
+        elif isinstance(x, int):
+            cd = cpp_rxname.doc(<extra_types.uint> long(x))
+        elif isinstance(x, long):
+            cd = cpp_rxname.doc(<extra_types.uint> x)
+    else:
+        if isinstance(x, basestring):
+            from_nuc = cpp_nucname.zzaaam(std_string(<char *> x))
+        elif isinstance(x, int):
+            from_nuc = cpp_nucname.zzaaam(<int> x)
+        if isinstance(y, basestring):
+            to_nuc = cpp_nucname.zzaaam(std_string(<char *> y))
+        elif isinstance(y, int):
+            to_nuc = cpp_nucname.zzaaam(<int> y)
+        cd = cpp_rxname.doc(from_nuc, to_nuc, std_string(z))
+    d = cd.c_str()
+    return d

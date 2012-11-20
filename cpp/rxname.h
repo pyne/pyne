@@ -35,9 +35,9 @@ namespace rxname
   unsigned int hash(std::string);
   unsigned int hash(const char *);
 
-  /************************/
-  /*** name functions *****/
-  /************************/
+  /**********************/
+  /*** name functions ***/
+  /**********************/
   std::string name(int);
   std::string name(unsigned int);
   std::string name(char *);
@@ -47,9 +47,9 @@ namespace rxname
   std::string name(std::string, int, std::string="n");
   std::string name(std::string, std::string, std::string="n");
 
-  /**********************/
-  /*** id functions *****/
-  /**********************/
+  /********************/
+  /*** id functions ***/
+  /********************/
   unsigned int id(int);
   unsigned int id(unsigned int);
   unsigned int id(char *);
@@ -71,9 +71,9 @@ namespace rxname
   unsigned int mt(std::string, int, std::string="n");
   unsigned int mt(std::string, std::string, std::string="n");
 
-  /*************************/
-  /*** lebel functions *****/
-  /*************************/
+  /***********************/
+  /*** label functions ***/
+  /***********************/
   std::string label(int);
   std::string label(unsigned int);
   std::string label(char *);
@@ -82,6 +82,18 @@ namespace rxname
   std::string label(int, std::string, std::string="n");
   std::string label(std::string, int, std::string="n");
   std::string label(std::string, std::string, std::string="n");
+
+  /*********************/
+  /*** doc functions ***/
+  /*********************/
+  std::string doc(int);
+  std::string doc(unsigned int);
+  std::string doc(char *);
+  std::string doc(std::string);
+  std::string doc(int, int, std::string="n");
+  std::string doc(int, std::string, std::string="n");
+  std::string doc(std::string, int, std::string="n");
+  std::string doc(std::string, std::string, std::string="n");
 
   /******************/
   /*** Exceptions ***/
