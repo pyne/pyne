@@ -1401,6 +1401,9 @@ unsigned int pyne::rxname::hash(const char * s)
 };
 
 
+// ************************
+// *** name functions *****
+// ************************
 
 std::string pyne::rxname::name(char * s){return pyne::rxname::name(std::string(s));};
 std::string pyne::rxname::name(std::string s)
@@ -1470,4 +1473,73 @@ std::string pyne::rxname::name(std::string from_nuc, std::string to_nuc, std::st
 {
   return pyne::rxname::name(pyne::nucname::zzaaam(from_nuc), 
                             pyne::nucname::zzaaam(to_nuc), z);
+};
+
+
+
+// **********************
+// *** id functions *****
+// **********************
+unsigned int pyne::rxname::id(int x)
+{
+  return name_id[pyne::rxname::name(x)];
+};
+  
+unsigned int pyne::rxname::id(unsigned int x)
+{
+  if (0 < id_name.count(x))
+    return x;
+  if (0 < mt_id.count(x))
+    return mt_id[x];
+  return name_id[pyne::rxname::name(x)];
+};
+  
+unsigned int pyne::rxname::id(char * x)
+{
+  return name_id[pyne::rxname::name(x)];
+};
+  
+unsigned int pyne::rxname::id(std::string x)
+{
+  if (0 < names.count(x))
+    return name_id[x];
+  if (0 < altnames.count(x))
+    return altnames[x];
+  return name_id[pyne::rxname::name(x)];  
+};
+  
+unsigned int pyne::rxname::id(int from_nuc, int to_nuc, std::string z)
+{
+  // This assumes nuclides are in zzaaam form
+  int dz = (to_nuc/10000) - (from_nuc/10000);
+  int da = ((to_nuc/10)%1000) - ((from_nuc/10)%1000);
+  if (0 == zadelta.count(z))
+    throw IndeterminateReactionForm("z=" + z, "???");
+  if (0 == zadelta[z].count(dz))
+    throw IndeterminateReactionForm(pyne::to_str(from_nuc) + ", " + \
+                                    pyne::to_str(to_nuc), "delta Z = " + \
+                                    pyne::to_str(dz));
+  if (0 == zadelta[z][dz].count(da))
+    throw IndeterminateReactionForm(pyne::to_str(from_nuc) + ", " + \
+                                    pyne::to_str(to_nuc), "delta A = " + \
+                                    pyne::to_str(da));
+  return zadelta[z][dz][da];
+};
+  
+unsigned int pyne::rxname::id(int from_nuc, std::string to_nuc, std::string z)
+{
+  return pyne::rxname::id(pyne::nucname::zzaaam(from_nuc), 
+                          pyne::nucname::zzaaam(to_nuc), z);
+};
+  
+unsigned int pyne::rxname::id(std::string from_nuc, int to_nuc, std::string z)
+{
+  return pyne::rxname::id(pyne::nucname::zzaaam(from_nuc), 
+                          pyne::nucname::zzaaam(to_nuc), z);
+};
+  
+unsigned int pyne::rxname::id(std::string from_nuc, std::string to_nuc, std::string z)
+{
+  return pyne::rxname::id(pyne::nucname::zzaaam(from_nuc), 
+                          pyne::nucname::zzaaam(to_nuc), z);
 };
