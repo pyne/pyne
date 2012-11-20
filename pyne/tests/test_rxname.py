@@ -98,6 +98,43 @@ def test_id_not():
     assert_raises(RuntimeError, rxname.id, "Waka waka")
     assert_raises(RuntimeError, rxname.id, 0)
 
+def test_mt_names():
+    assert_equal(rxname.mt("a"), 107)
+    assert_equal(rxname.mt("total"), 1)
+
+def test_mt_alts():
+    assert_equal(rxname.mt("alpha"), 107)
+    assert_equal(rxname.mt("tot"), 1)
+
+def test_mt_ids():
+    assert_equal(rxname.mt(_hash("a")), 107)
+    assert_equal(rxname.mt(_hash("total")), 1)
+
+    assert_equal(rxname.mt(long(_hash("a"))), 107)
+    assert_equal(rxname.mt(long(_hash("total"))), 1)    
+
+    assert_equal(rxname.mt(str(_hash("a"))), 107)
+    assert_equal(rxname.mt(str(_hash("total"))), 1)    
+
+def test_mt_mts():
+    assert_equal(rxname.mt(107), 107)
+    assert_equal(rxname.mt(1), 1)
+
+    assert_equal(rxname.mt(107L), 107)
+    assert_equal(rxname.mt(1L), 1)
+
+    assert_equal(rxname.mt("107"), 107)
+    assert_equal(rxname.mt("1"), 1)
+
+def test_mt_nucdelta():
+    assert_equal(rxname.mt("U235", "U236"), 27)
+    assert_equal(rxname.mt("U235", "Np236", "p"), 27)
+    assert_equal(rxname.mt(922350, 912350), 103)
+
+def test_mt_not():
+    assert_raises(RuntimeError, rxname.mt, "Waka waka")
+    assert_raises(RuntimeError, rxname.mt, 0)
+
 
 
 if __name__ == "__main__":
