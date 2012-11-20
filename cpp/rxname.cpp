@@ -1613,9 +1613,9 @@ unsigned int pyne::rxname::mt(std::string from_nuc, std::string to_nuc, std::str
 };
 
 
-// *************************
-// *** label functions *****
-// *************************
+// ***********************
+// *** label functions ***
+// ***********************
 std::string pyne::rxname::label(int x)
 {
   return labels[pyne::rxname::id(x)];
@@ -1654,4 +1654,48 @@ std::string pyne::rxname::label(std::string from_nuc, int to_nuc, std::string z)
 std::string pyne::rxname::label(std::string from_nuc, std::string to_nuc, std::string z)
 {
   return labels[pyne::rxname::id(from_nuc, to_nuc, z)];
+};
+
+
+// *********************
+// *** doc functions ***
+// *********************
+std::string pyne::rxname::doc(int x)
+{
+  return docs[pyne::rxname::id(x)];
+};
+  
+std::string pyne::rxname::doc(unsigned int x)
+{
+  return docs[pyne::rxname::id(x)];
+};
+  
+std::string pyne::rxname::doc(char * x)
+{
+  return docs[pyne::rxname::id(x)];
+};
+  
+std::string pyne::rxname::doc(std::string x)
+{
+  return docs[pyne::rxname::id(x)];
+};
+  
+std::string pyne::rxname::doc(int from_nuc, int to_nuc, std::string z)
+{
+  return docs[pyne::rxname::id(from_nuc, to_nuc, z)];
+};
+  
+std::string pyne::rxname::doc(int from_nuc, std::string to_nuc, std::string z)
+{
+  return docs[pyne::rxname::id(from_nuc, to_nuc, z)];
+};
+  
+std::string pyne::rxname::doc(std::string from_nuc, int to_nuc, std::string z)
+{
+  return docs[pyne::rxname::id(from_nuc, to_nuc, z)];
+};
+  
+std::string pyne::rxname::doc(std::string from_nuc, std::string to_nuc, std::string z)
+{
+  return docs[pyne::rxname::id(from_nuc, to_nuc, z)];
 };

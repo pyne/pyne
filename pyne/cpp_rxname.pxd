@@ -76,3 +76,16 @@ cdef extern from "rxname.h" namespace "pyne::rxname":
     std_string label(int, std_string, std_string) except +
     std_string label(std_string, int, std_string) except +
     std_string label(std_string, std_string, std_string) except + 
+
+    std_string doc(int) except +
+    std_string doc(extra_types.uint) except +
+    std_string doc(char *) except +
+    std_string doc(std_string) except +
+    std_string doc(int, int) except +
+    std_string doc(int, std_string) except +
+    std_string doc(std_string, int) except +
+    std_string doc(std_string, std_string) except + 
+    std_string doc(int, int, std_string) except +
+    std_string doc(int, std_string, std_string) except +
+    std_string doc(std_string, int, std_string) except +
+    std_string doc(std_string, std_string, std_string) except + 
