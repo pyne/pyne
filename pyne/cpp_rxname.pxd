@@ -51,3 +51,15 @@ cdef extern from "rxname.h" namespace "pyne::rxname":
     extra_types.uint id(std_string, int, std_string) except +
     extra_types.uint id(std_string, std_string, std_string) except + 
 
+    extra_types.uint mt(int) except +
+    extra_types.uint mt(extra_types.uint) except +
+    extra_types.uint mt(char *) except +
+    extra_types.uint mt(std_string) except +
+    extra_types.uint mt(int, int) except +
+    extra_types.uint mt(int, std_string) except +
+    extra_types.uint mt(std_string, int) except +
+    extra_types.uint mt(std_string, std_string) except + 
+    extra_types.uint mt(int, int, std_string) except +
+    extra_types.uint mt(int, std_string, std_string) except +
+    extra_types.uint mt(std_string, int, std_string) except +
+    extra_types.uint mt(std_string, std_string, std_string) except + 
