@@ -106,7 +106,7 @@ def name(x, y=None, char * z="n"):
         elif isinstance(y, int):
             to_nuc = cpp_nucname.zzaaam(<int> y)
         cn = cpp_rxname.name(from_nuc, to_nuc, std_string(z))
-    n = cn.c_str()
+    n = <char *> cn.c_str()
     return n
 
 
@@ -230,7 +230,7 @@ def label(x, y=None, char * z="n"):
         elif isinstance(y, int):
             to_nuc = cpp_nucname.zzaaam(<int> y)
         clab = cpp_rxname.label(from_nuc, to_nuc, std_string(z))
-    lab = clab.c_str()
+    lab = <char *> clab.c_str()
     return lab
 
 
@@ -272,5 +272,5 @@ def doc(x, y=None, char * z="n"):
         elif isinstance(y, int):
             to_nuc = cpp_nucname.zzaaam(<int> y)
         cd = cpp_rxname.doc(from_nuc, to_nuc, std_string(z))
-    d = cd.c_str()
+    d = <char *> cd.c_str()
     return d
