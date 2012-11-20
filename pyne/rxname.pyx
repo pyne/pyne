@@ -87,14 +87,15 @@ def name(x, y=None, char * z="n"):
     n : str
         a unique reaction name.
     """
+    cdef std_string cn 
     cdef int from_nuc, to_nuc
     if y is None:
         if isinstance(x, basestring):
-            n = cpp_rxname.name(std_string(<char *> x))
+            cn = cpp_rxname.name(std_string(<char *> x))
         elif isinstance(x, int):
-            n = cpp_rxname.name(<extra_types.uint> long(x))
+            cn = cpp_rxname.name(<extra_types.uint> long(x))
         elif isinstance(x, long):
-            n = cpp_rxname.name(<extra_types.uint> x)
+            cn = cpp_rxname.name(<extra_types.uint> x)
     else:
         if isinstance(x, basestring):
             from_nuc = cpp_nucname.zzaaam(std_string(<char *> x))
@@ -104,7 +105,8 @@ def name(x, y=None, char * z="n"):
             to_nuc = cpp_nucname.zzaaam(std_string(<char *> y))
         elif isinstance(y, int):
             to_nuc = cpp_nucname.zzaaam(<int> y)
-        n = cpp_rxname.name(from_nuc, to_nuc, std_string(z))
+        cn = cpp_rxname.name(from_nuc, to_nuc, std_string(z))
+    n = cn.c_str()
     return n
 
 
@@ -188,3 +190,45 @@ def mt(x, y=None, char * z="n"):
             to_nuc = cpp_nucname.zzaaam(<int> y)
         mtnum = cpp_rxname.mt(from_nuc, to_nuc, std_string(z))
     return int(mtnum)
+
+
+def label(x, y=None, char * z="n"):
+    """label(x, y=None, z="n")
+
+    Gives a short reaction label, useful for user interfaces.
+
+    Parameters
+    ----------
+    x : str, int, or long
+        name, abbreviation, id, MT number, or from nuclide.
+    y : str, int, or None, optional
+        to nuclide.
+    z : str, optional
+        incident particle type ("n", "p", ...) when x and y are nuclides.
+
+    Returns
+    -------
+    lab : str
+        a reaction label.
+    """
+    cdef std_string clab
+    cdef int from_nuc, to_nuc
+    if y is None:
+        if isinstance(x, basestring):
+            clab = cpp_rxname.label(std_string(<char *> x))
+        elif isinstance(x, int):
+            clab = cpp_rxname.label(<extra_types.uint> long(x))
+        elif isinstance(x, long):
+            clab = cpp_rxname.label(<extra_types.uint> x)
+    else:
+        if isinstance(x, basestring):
+            from_nuc = cpp_nucname.zzaaam(std_string(<char *> x))
+        elif isinstance(x, int):
+            from_nuc = cpp_nucname.zzaaam(<int> x)
+        if isinstance(y, basestring):
+            to_nuc = cpp_nucname.zzaaam(std_string(<char *> y))
+        elif isinstance(y, int):
+            to_nuc = cpp_nucname.zzaaam(<int> y)
+        clab = cpp_rxname.label(from_nuc, to_nuc, std_string(z))
+    lab = clab.c_str()
+    return lab

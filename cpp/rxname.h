@@ -71,6 +71,18 @@ namespace rxname
   unsigned int mt(std::string, int, std::string="n");
   unsigned int mt(std::string, std::string, std::string="n");
 
+  /*************************/
+  /*** lebel functions *****/
+  /*************************/
+  std::string label(int);
+  std::string label(unsigned int);
+  std::string label(char *);
+  std::string label(std::string);
+  std::string label(int, int, std::string="n");
+  std::string label(int, std::string, std::string="n");
+  std::string label(std::string, int, std::string="n");
+  std::string label(std::string, std::string, std::string="n");
+
   /******************/
   /*** Exceptions ***/
   /******************/
