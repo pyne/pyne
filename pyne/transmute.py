@@ -9,7 +9,7 @@ from pyne import nucname
 from pyne import nuc_data
 from pyne.material import Material
 from pyne.xs.cache import xs_cache
-from pyne.dbgen import eaf#, BASIC_FILTERS
+from pyne.dbgen import eaf
 
 
 def decay(nuc, phi, t_sim, tol):
@@ -31,16 +31,33 @@ def decay(nuc, phi, t_sim, tol):
     decay_nuc : NumPy array of nucnames
         The daughters.
     """
+    # Check parameters
     # Convert nuc to zzaaam
     nuc = nucname.zzaaam(nuc)
     # Check length of phi
     if not(phi.size == 175):
         sys.exit('Incorrect phi dimension for FENDL data.')
+    # Import EAF data
+    #_import_eaf_data()
+    eaf_table = tb.openFile('/filespace/people/k/klebenow/.local/lib\
+        /python2.6/site-packages/pyne/nuc_data.h5')
     A = _create_decay_matrix(nuc)
     eA = _solve_decay_matrix(A)
 
 
 def _create_decay_matrix(nucs):
+    """Creates a NumPy matrix representing the nuclide list nucs.
+
+    Parameters
+    ----------
+    nucs : NumPy array of nucnames
+        Names of nuclides to build decay matrix around.
+
+    Returns
+    -------
+    A : NumPy matrix of floats
+        The decay matrix.
+    """
     nnucs = len(nucs)
     nucsrange = np.arange(nnucs)
     A = np.zeros((nnucs, nnucs), dtype=float)
