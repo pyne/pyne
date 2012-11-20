@@ -68,7 +68,7 @@ def hash(char * s):
 
 
 def name(x, y=None, char * z="n"):
-    """name(x)
+    """name(x, y=None, z="n")
 
     Gives the unique reaction name.  Note that this name follows the 'natural naming' 
     convention and may be used as a variable in most languages.
@@ -106,3 +106,45 @@ def name(x, y=None, char * z="n"):
             to_nuc = cpp_nucname.zzaaam(<int> y)
         n = cpp_rxname.name(from_nuc, to_nuc, std_string(z))
     return n
+
+
+def id(x, y=None, char * z="n"):
+    """id(x, y=None, z="n")
+
+    Gives the unique reaction id.  This is originally calculated as the hash of the
+    name.  This id may not be less than 1000, since these integers are reserved for
+    MT numbers.
+
+    Parameters
+    ----------
+    x : str, int, or long
+        name, abbreviation, id, MT number, or from nuclide.
+    y : str, int, or None, optional
+        to nuclide.
+    z : str, optional
+        incident particle type ("n", "p", ...) when x and y are nuclides.
+
+    Returns
+    -------
+    rxid : int or long
+        a unique reaction identifier.
+    """
+    cdef int from_nuc, to_nuc
+    if y is None:
+        if isinstance(x, basestring):
+            rxid = cpp_rxname.id(std_string(<char *> x))
+        elif isinstance(x, int):
+            rxid = cpp_rxname.id(<extra_types.uint> long(x))
+        elif isinstance(x, long):
+            rxid = cpp_rxname.id(<extra_types.uint> x)
+    else:
+        if isinstance(x, basestring):
+            from_nuc = cpp_nucname.zzaaam(std_string(<char *> x))
+        elif isinstance(x, int):
+            from_nuc = cpp_nucname.zzaaam(<int> x)
+        if isinstance(y, basestring):
+            to_nuc = cpp_nucname.zzaaam(std_string(<char *> y))
+        elif isinstance(y, int):
+            to_nuc = cpp_nucname.zzaaam(<int> y)
+        rxid = cpp_rxname.id(from_nuc, to_nuc, std_string(z))
+    return int(rxid)

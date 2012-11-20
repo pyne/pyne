@@ -61,6 +61,44 @@ def test_name_not():
     assert_raises(RuntimeError, rxname.name, "Waka waka")
     assert_raises(RuntimeError, rxname.name, 0)
 
+def test_id_names():
+    assert_equal(rxname.id("a"), _hash("a"))
+    assert_equal(rxname.id("total"), _hash("total"))
+
+def test_id_alts():
+    assert_equal(rxname.id("alpha"), _hash("a"))
+    assert_equal(rxname.id("tot"), _hash("total"))
+
+def test_id_ids():
+    assert_equal(rxname.id(_hash("a")), _hash("a"))
+    assert_equal(rxname.id(_hash("total")), _hash("total"))
+
+    assert_equal(rxname.id(long(_hash("a"))), _hash("a"))
+    assert_equal(rxname.id(long(_hash("total"))), _hash("total"))    
+
+    assert_equal(rxname.id(str(_hash("a"))), _hash("a"))
+    assert_equal(rxname.id(str(_hash("total"))), _hash("total"))    
+
+def test_id_mts():
+    assert_equal(rxname.id(107), _hash("a"))
+    assert_equal(rxname.id(1), _hash("total"))
+
+    assert_equal(rxname.id(107L), _hash("a"))
+    assert_equal(rxname.id(1L), _hash("total"))
+
+    assert_equal(rxname.id("107"), _hash("a"))
+    assert_equal(rxname.id("1"), _hash("total"))
+
+def test_id_nucdelta():
+    assert_equal(rxname.id("U235", "U236"), _hash("absorption"))
+    assert_equal(rxname.id("U235", "Np236", "p"), _hash("absorption"))
+    assert_equal(rxname.id(922350, 912350), _hash("p"))
+
+def test_id_not():
+    assert_raises(RuntimeError, rxname.id, "Waka waka")
+    assert_raises(RuntimeError, rxname.id, 0)
+
+
 
 if __name__ == "__main__":
     nose.main()
