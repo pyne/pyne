@@ -12,7 +12,6 @@ http://www-nds.iaea.org/ndspub/documents/endf/endf102/endf102.pdf
 
 For more information on this module, contact Paul Romano <romano7@gmail.com>
 """
-
 import re
 import numpy as np
 import matplotlib.pyplot as plt
@@ -57,6 +56,7 @@ class Library(rx.rx_data):
         while self.more_files:
             self._read_headers()
         
+        # close the file before we have a chance to break anything
         self.fh.close()
 
     def _read_headers(self):
@@ -123,16 +123,16 @@ class Library(rx.rx_data):
         warnings.filterwarnings("ignore", "Some errors were detected !")
         print 'Reading data ...'
         data = np.genfromtxt(filename, 
-                             delimiter = 11, 
-                             usecols = (0, 1, 2, 3, 4, 5), 
-                             invalid_raise = False,
-                             skip_header = 1,                                    
-                             converters = {0: convert,
-                                           1: convert, 
-                                           2: convert,
-                                           3: convert, 
-                                           4: convert, 
-                                           5: convert})
+                         delimiter = 11, 
+                         usecols = (0, 1, 2, 3, 4, 5), 
+                         invalid_raise = False,
+                         skip_header = 1,                                    
+                         converters = {0: convert,
+                                       1: convert, 
+                                       2: convert,
+                                       3: convert, 
+                                       4: convert, 
+                                       5: convert})
         return data
                                                 
     def read_mfmt(self, mat_id, mf, mt):
@@ -1248,6 +1248,26 @@ def convert(string):
     else:
         return float(string)
 
+def numpy_to_ENDF(num):
+    """
+    This function converts a number into ENDF format.
+    """
+    if int(num) == num:
+        result = '           '
+        num = int(num)
+        result = result[0:-len(str(num))] + (str(num))
+        return result
+    elif type(num) is float:
+        result = '% 9.6e' % num
+        return result[:-4] + result[-3:-2] + result[-1]
+    else:
+        return ''
+                
+print numpy_to_ENDF(-1.0123456789e+0)
+print numpy_to_ENDF(1.0123456789e+0)
+print numpy_to_ENDF(-1.0000000000e+0)
+
+
 MTname = {1: "(n,total) Neutron total",
           2: "(z,z0) Elastic scattering",
           3: "(z,nonelas) Nonelastic neutron",
@@ -1430,28 +1450,28 @@ class NotFound(Exception):
     def __str__(self):
         return repr(self.value)
 
-if __name__ == '__main__':
+# if __name__ == '__main__':
     #
     # Some tests. The test files can be downloaded from:
        # http://www.oecd-nea.org/dbforms/data/eva/evatapes/endfb_7/tsl-ENDF-VII0.endf/
        # http://www.oecd-nea.org/dbforms/data/eva/evatapes/endfb_7/n-ENDF-VII0.endf/
     #
-    u235 = Evaluation('n-092_U_235.endf')
-    u235.read()
-    for file in u235.files:
-        print '>>>', file, file.reactions
-    water = Evaluation('tsl-HinH2O.endf')
-    water.read()
-    for file in water.files:
-        print '>>>', file, file.reactions
-    graphite = Evaluation('tsl-graphite.endf')
-    graphite.read()
-    for file in graphite.files:
-        print '>>>', file, file.reactions
-    zrh = Evaluation('tsl-HinZrH.endf')
-    zrh.read()
-    for file in zrh.files:
-        print '>>>', file, file.reactions
+    # u235 = Evaluation('n-092_U_235.endf')
+    # u235.read()
+    # for file in u235.files:
+        # print '>>>', file, file.reactions
+    # water = Evaluation('tsl-HinH2O.endf')
+    # water.read()
+    # for file in water.files:
+        # print '>>>', file, file.reactions
+    # graphite = Evaluation('tsl-graphite.endf')
+    # graphite.read()
+    # for file in graphite.files:
+        # print '>>>', file, file.reactions
+    # zrh = Evaluation('tsl-HinZrH.endf')
+    # zrh.read()
+    # for file in zrh.files:
+        # print '>>>', file, file.reactions
 
 
 
