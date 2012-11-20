@@ -4,13 +4,13 @@ from libc.stdlib cimport malloc, free
 cimport numpy as np
 import numpy as np
 
-include "includes/cython_version.pxi"
+include "include/cython_version.pxi"
 IF CYTHON_VERSION_MAJOR == 0 and CYTHON_VERSION_MINOR >= 17:
     from libc.stdlib cimport atof
     from libc.string cimport strtok, strcpy
 ELSE:
-    from _includes.libc.stdlib cimport atof
-    from _includes.libc.string cimport strtok, strcpy
+    from pyne._includes.libc.stdlib cimport atof
+    from pyne._includes.libc.string cimport strtok, strcpy
 
 
 

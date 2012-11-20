@@ -19,3 +19,4 @@ essential aspects of using PyNE to do nuclear engineering.
     enrichment
     simplesim
     stlconverters
+    jsoncpp

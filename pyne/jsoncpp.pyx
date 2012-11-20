@@ -5,13 +5,13 @@ from libc.stdlib cimport malloc, free
 from cython cimport pointer
 from libc.string cimport const_char, memcpy
 
-include "includes/cython_version.pxi"
+include "include/cython_version.pxi"
 IF CYTHON_VERSION_MAJOR == 0 and CYTHON_VERSION_MINOR >= 17:
     from libcpp.string cimport string as std_string
     from libcpp.vector cimport vector as std_vector
 ELSE:
-    from _includes.libcpp.string cimport string as std_string
-    from _includes.libcpp.vector cimport vector as std_vector
+    from pyne._includes.libcpp.string cimport string as std_string
+    from pyne._includes.libcpp.vector cimport vector as std_vector
 
 # Python imports
 import collections
@@ -84,6 +84,17 @@ cdef int toposindex(int i, int I) except -1:
     return valid_i
 
 cdef class Value(object):
+    """Value(document=None, view=False)
+
+    An in-memory JSON value.
+
+    Parameters
+    ----------
+    document : object, optional
+        Python value to convert to a JSONic form.
+    view : bool, optional
+        Flag for whether this is a view or a copy of its underlying value. 
+    """
 
     _value_type_names = ['null', 'int', 'uint', 'real', 'string', 'boolean',
                          'array', 'object']
@@ -480,6 +491,8 @@ cdef class Value(object):
 
 
 cdef class Reader(object):
+    """A class to convert strings and files to values in memory."""
+
     def __cinit__(self):
         """Reader C++ constuctor."""
         self._inst = new cpp_jsoncpp.Reader()
@@ -519,6 +532,8 @@ cdef class Reader(object):
 
 
 cdef class FastWriter(object):
+    """A class to convert values in memory to minified strings."""
+
     def __cinit__(self):
         """Fast writer C++ constuctor."""
         self._inst = new cpp_jsoncpp.FastWriter()
@@ -551,6 +566,8 @@ cdef class FastWriter(object):
 
 
 cdef class StyledWriter(object):
+    """A class to convert values in memory to expanded strings."""
+
     def __cinit__(self):
         """Styled writer C++ constuctor."""
         self._inst = new cpp_jsoncpp.StyledWriter()

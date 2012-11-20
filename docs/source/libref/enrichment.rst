@@ -24,7 +24,11 @@ Enrichment Solvers
 
 ------------
 
-.. autofunction:: ltot_per_feed
+.. autofunction:: solve_numeric
+
+------------
+
+.. autofunction:: solve_symbolic
 
 ****************
 Helper Functions
