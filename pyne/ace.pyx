@@ -79,7 +79,9 @@ class Library(object):
         self.tables = {}
 
     def read(self, table_names=None):
-        """Read through and parse the ACE-format library.
+        """read(table_names=None)
+
+        Read through and parse the ACE-format library.
 
         Parameters
         ----------
@@ -255,7 +257,9 @@ class Library(object):
         f.seek(0)
 
     def find_table(self, name):
-        """Returns a cross-section table with a given name.
+        """find_table(name)
+
+        Returns a cross-section table with a given name.
 
         Parameters
         ----------
@@ -1378,7 +1382,9 @@ class SabTable(AceTable):
 
             
 class Reaction(object):
-    """A Reaction object represents a single reaction channel for a nuclide with
+    """Reaction(MT, table=None)
+
+    A Reaction object represents a single reaction channel for a nuclide with
     an associated cross section and, if present, a secondary angle and energy
     distribution. These objects are stored within the ``reactions`` attribute on
     subclasses of AceTable, e.g. NeutronTable.
@@ -1448,7 +1454,10 @@ class Reaction(object):
         pass        
 
     def threshold(self):
-        """Return energy threshold for this reaction"""
+        """threshold()
+
+        Return energy threshold for this reaction.
+        """
         return self.table.energy[self.IE]
 
     def __repr__(self):

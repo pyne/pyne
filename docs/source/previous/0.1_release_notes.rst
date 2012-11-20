@@ -3,8 +3,8 @@ PyNE 0.1 Release Notes
 ======================
 
 PyNE 0.1 is the first release of Python for Nuclear Engineering project 
-after an initial last year of effort.  PyNE is a free and open source 
-(BSD licensed) project which is meant to compliment other project, such
+after an initial year of effort.  PyNE is a free and open source (BSD 
+licensed) project which is meant to compliment other projects, such
 as NumPy and SciPy, as a necessary package in the computational nuclear
 engineer's toolkit.  It is meant to play nicely with existing, industry
 standard nuclear engineering tools.  The goal of PyNE is to be both fast 

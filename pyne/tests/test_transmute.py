@@ -1,10 +1,11 @@
 """Transmute tests"""
 
-from unittest import TestCase
 import nose
 
 from nose.tools import assert_equal, assert_not_equal, assert_raises, raises, \
     assert_almost_equal, assert_true, assert_false
+
+from numpy.testing import dec
 
 import os
 from pyne.material import Material

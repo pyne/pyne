@@ -1,9 +1,9 @@
 """Cython header for enrichment library."""
-include "includes/cython_version.pxi"
+include "include/cython_version.pxi"
 IF CYTHON_VERSION_MAJOR == 0 and CYTHON_VERSION_MINOR >= 17:
     from libcpp.string cimport string as std_string
 ELSE:
-    from _includes.libcpp.string cimport string as std_string
+    from pyne._includes.libcpp.string cimport string as std_string
 
 from pyne cimport cpp_material
 

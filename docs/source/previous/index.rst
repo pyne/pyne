@@ -5,6 +5,7 @@ The following are notes for and links to previously released versions of PyNE:
 .. toctree::
     :maxdepth: 1
 
+    0.2_release_notes
     0.1_release_notes
 
 ======= ========== ============== ==============

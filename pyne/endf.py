@@ -12,10 +12,12 @@ http://www-nds.iaea.org/ndspub/documents/endf/endf102/endf102.pdf
 
 For more information on this module, contact Paul Romano <romano7@gmail.com>
 """
-
 import re
 import numpy as np
 import matplotlib.pyplot as plt
+import os
+import warnings
+import pyne.rx_data as rx
 
 number = " (\d.\d+(?:\+|\-)\d)"
 
@@ -23,6 +25,131 @@ libraries = {0: "ENDF/B", 1: "ENDF/A", 2: "JEFF", 3: "EFF",
              4: "ENDF/B High Energy", 5: "CENDL", 6: "JENDL",
              31: "INDL/V", 32: "INDL/A", 33: "FENDL", 34: "IRDF",
              35: "BROND", 36: "INGDB-90", 37: "FENDL/A", 41: "BROND"}
+
+class Library(rx.rx_data):
+    """
+    Library is a class for an ENDF evaluation which contains a number
+    of Files.
+    """
+
+    def __init__(self, filename):
+        self.fh = open(filename, 'r')
+
+        # initialize some dicts that will act as an index
+        self.mats = {}
+        self.mts = {}
+
+        # are there more files to read the headers of?
+        self.more_files = True
+        
+        # tracks theoretical length of file, based on headers
+        self.chars_til_now = 0
+        
+        # tracks how many lines would have been skipped when reading data
+        self.offset = 1
+        
+        # read in the data    
+        data = self._read_data(filename)
+        rx.rx_data.__init__(self, data)
+        
+        # read ALL the headers!
+        while self.more_files:
+            self._read_headers()
+        
+        # close the file before we have a chance to break anything
+        self.fh.close()
+
+    def _read_headers(self):
+        
+        # skip the first line and get the material id
+        self.fh.seek(self.chars_til_now+81)
+        line = self.fh.readline()
+        mat_id = line[67:70]
+        
+        print 'Reading headers for material id %d ...' % int(mat_id)
+        
+        # parse header (all lines with 1451)
+        comments = ''
+        mf = 1
+        stop = self.chars_til_now/81
+        
+        while re.search('1451 +\d{1,3}', line):
+    
+            # parse contents section
+            if re.match(' +\d{1,2} +\d{1,3} +\d{1,4} +', line):
+                
+                # while reading data we skip a line at the beginning
+                # of every material, so we need an offset
+                if int(mat_id) not in self.mats:
+                    self.offset -= 1
+                    
+                self.mats.update({int(mat_id):(self.chars_til_now / 81)})
+                
+                # accounting for skipped lines between MF's and MT's
+                old_mf = mf
+                mf, mt = int(line[31:33]), int(line[41:44])
+                mt_length = int(line[50:55])
+                if old_mf == mf:
+                    start = stop + 1
+                else:
+                    start = stop + 2
+                    
+                stop = start + mt_length
+                self.mts.update({(int(mat_id), mf, mt):(start+self.offset, stop+self.offset)})
+                line = self.fh.readline()
+            elif re.search('C O N T E N T S', line):
+                line = self.fh.readline()
+                continue
+            # parse comments
+            else:
+                comments = comments + '\n' + line[0:66]
+                line = self.fh.readline()
+
+        # find where end of material is
+        self.chars_til_now = (stop + 4)*81
+        
+        # jump to end of this material         
+        self.fh.seek(self.chars_til_now)
+        
+        # are we at the end of the file?
+        if self.fh.readline() == '':
+            self.more_files = False
+        
+        # update materials list
+        if mat_id != '':
+            self.mats.update({int(mat_id):(self.chars_til_now / 81, comments)})
+        
+    def _read_data(self, filename):
+        warnings.filterwarnings("ignore", "Some errors were detected !")
+        print 'Reading data ...'
+        data = np.genfromtxt(filename, 
+                         delimiter = 11, 
+                         usecols = (0, 1, 2, 3, 4, 5), 
+                         invalid_raise = False,
+                         skip_header = 1,                                    
+                         converters = {0: convert,
+                                       1: convert, 
+                                       2: convert,
+                                       3: convert, 
+                                       4: convert, 
+                                       5: convert})
+        return data
+                                                
+    def read_mfmt(self, mat_id, mf, mt):
+        if (mat_id, mf, mt) in self.mts:
+            print "Reading Material %d, File %d, MT %d" % (mat_id, mf, mt)
+            start = (self.mts[(mat_id, mf, mt)][0] - 1) * 6
+            stop = (self.mts[(mat_id, mf, mt)][1] - 1)* 6
+            return self.data.flat[start:stop]
+        else:
+            print "Material %d, File %d, MT %d does not exist." % (mat_id, mf, mt)
+            return False
+        
+    def get(self, mat_id, mf, mt):
+        return rx.rx_data.get(self, mat_id, mf, mt, 'endf')
+    
+    def write(self, filename, file_type_out):
+        return rx.rx_data.write(self, filename, 'endf', file_type_out)
 
 class Evaluation(object):
     """
@@ -1108,17 +1235,38 @@ class RMatrixLimited(Resonance):
     def __init__(self):
         pass
 
-
 def convert(string):
     """
     This function converts a number listed on an ENDF tape into a float or int
     depending on whether an exponent is present.
     """
-
-    if string[-2] in '+-':
+  
+    if re.search('[^ 0-9+\-\.]', string):
+        return None
+    elif string[-2] in '+-':
         return float(string[:-2] + 'e' + string[-2:])
     else:
-        return eval(string)
+        return float(string)
+
+def numpy_to_ENDF(num):
+    """
+    This function converts a number into ENDF format.
+    """
+    if int(num) == num:
+        result = '           '
+        num = int(num)
+        result = result[0:-len(str(num))] + (str(num))
+        return result
+    elif type(num) is float:
+        result = '% 9.6e' % num
+        return result[:-4] + result[-3:-2] + result[-1]
+    else:
+        return ''
+                
+print numpy_to_ENDF(-1.0123456789e+0)
+print numpy_to_ENDF(1.0123456789e+0)
+print numpy_to_ENDF(-1.0000000000e+0)
+
 
 MTname = {1: "(n,total) Neutron total",
           2: "(z,z0) Elastic scattering",
@@ -1302,28 +1450,28 @@ class NotFound(Exception):
     def __str__(self):
         return repr(self.value)
 
-if __name__ == '__main__':
+# if __name__ == '__main__':
     #
     # Some tests. The test files can be downloaded from:
-    #    http://www.oecd-nea.org/dbforms/data/eva/evatapes/endfb_7/tsl-ENDF-VII0.endf/
-    #    http://www.oecd-nea.org/dbforms/data/eva/evatapes/endfb_7/n-ENDF-VII0.endf/
+       # http://www.oecd-nea.org/dbforms/data/eva/evatapes/endfb_7/tsl-ENDF-VII0.endf/
+       # http://www.oecd-nea.org/dbforms/data/eva/evatapes/endfb_7/n-ENDF-VII0.endf/
     #
-    u235 = Evaluation('n-092_U_235.endf')
-    u235.read()
-    for file in u235.files:
-        print '>>>', file, file.reactions
-    water = Evaluation('tsl-HinH2O.endf')
-    water.read()
-    for file in water.files:
-        print '>>>', file, file.reactions
-    graphite = Evaluation('tsl-graphite.endf')
-    graphite.read()
-    for file in graphite.files:
-        print '>>>', file, file.reactions
-    zrh = Evaluation('tsl-HinZrH.endf')
-    zrh.read()
-    for file in zrh.files:
-        print '>>>', file, file.reactions
+    # u235 = Evaluation('n-092_U_235.endf')
+    # u235.read()
+    # for file in u235.files:
+        # print '>>>', file, file.reactions
+    # water = Evaluation('tsl-HinH2O.endf')
+    # water.read()
+    # for file in water.files:
+        # print '>>>', file, file.reactions
+    # graphite = Evaluation('tsl-graphite.endf')
+    # graphite.read()
+    # for file in graphite.files:
+        # print '>>>', file, file.reactions
+    # zrh = Evaluation('tsl-HinZrH.endf')
+    # zrh.read()
+    # for file in zrh.files:
+        # print '>>>', file, file.reactions
 
 
 

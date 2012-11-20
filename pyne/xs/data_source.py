@@ -22,6 +22,7 @@ RX_TYPES_MAP = {
     'triton': 't',
     'deut': 'd',
     'deuteron': 'd',
+    'helion': 'h',
     }
 
 def _munge_rx(rx):
@@ -312,8 +313,8 @@ class SimpleDataSource(DataSource):
 
         .. math::  
 
-            \sigma(E) = \sigma(2.53E-8) \sqrt{\frac{2.53E-8}{E}} 
-            \sigma(E) = \frac{\sigma(14) - \sigma(1)}{14 - 1} (E - 1) + \sigma(1) 
+            \\sigma(E) = \\sigma(2.53E-8) \\sqrt{\\frac{2.53E-8}{E}} 
+            \\sigma(E) = \\frac{\sigma(14) - \\sigma(1)}{14 - 1} (E - 1) + \\sigma(1) 
 
         Parameters
         ----------
@@ -435,30 +436,45 @@ class CinderDataSource(DataSource):
 
 
 # Dictionary matching products with MT#'s
-EAF_RX_MAP = {            'x':'50',      'c':'1010',    'f':'180',
-        'n':'40',         '2n':'160',    '3n':'170',    '4n':'370',
-        'na':'220',       '2na':'240',   'np':'280',    'n2a':'290',
-        'nd':'320',       'nt':'330',    'nhe3':'340',
-        'pd':'1150',      'np/d':None,
-        'g':'1020',
-        'h':'1030',       'p':'1030',    '2p':'1110',
-        'd':'1040',       't':'1050',    '3he':'1060',                
-        'a':'1070',       '2a':'1080',   
+EAF_RX_MAP = {         'x': '50',      'c': '1010',    'f': '180',
+        'n': '40',      '2n': '160',    '3n': '170',    '4n': '370',
+        'na': '220',    '2na': '240',   'np': '280',    'n2a': '290',
+        'nd': '320',    'nt': '330',    'nh': '340',    'nhe3': '340',
+        'pd': '1150',   'np/d':None,
+        'g': '1020',
+        'p': '1030',    '2p': '1110',
+        'd': '1040',    't': '1050',    'h': '1060',    'he3': '1060',          
+        'a': '1070',    '2a': '1080',   
         # metastable not supported yet
-        '3n *':None,    'd  *':None, 'n  *':None, 'g  *':None,
-        'np *':None,    'a  *':None, 'h  *':None, '2p *':None,
-        'x  *':None,    '4n *':None, 'na *':None, 'nd *':None,
-        'nh *':None,    'p  *':None, 'nt *':None, 't  *':None,  
-        '2n *':None,    '*':None,
+        '3n *':None,   'd  *':None,   'n  *':None,   'g  *':None,
+        'np *':None,   'a  *':None,   'h  *':None,   '2p *':None,
+        'x  *':None,   '4n *':None,   'na *':None,   'nd *':None,
+        'nh *':None,   'p  *':None,   'nt *':None,   't  *':None,  
+        '2n *':None,   '*': None,
+        '3n_x':None,   'd_x':None,    'n_x':None,    'g_x':None,
+        'np_x':None,   'a_x':None,    'h_x':None,    '2p_x':None,
+        'x_x':None,    '4n_x':None,   'na_x':None,   'nd_x':None,
+        'nh_x':None,   'p_x':None,    'nt_x':None,   't_x':None,  
+        '2n_x':None,
         # handling words
-        'neutron':'40',
-        'gamma':'1020', 
-        'alpha':'1070',
-        'proton':'1030',
-        'trit':'1050',
-        'triton':'1050',
-        'deut':'1040',
-        'deuteron':'1040',
+        'neutron': '40',
+        'gamma': '1020', 
+        'alpha': '1070',
+        'proton': '1030',
+        'trit': '1050',
+        'triton': '1050',
+        'deut': '1040',
+        'deuteron': '1040',
+        'helion': '1060',
+        'neutron_x': None,
+        'gamma_x': None, 
+        'alpha_x': None,
+        'proton_x':None,
+        'trit_x': None,
+        'triton_x': None,
+        'deut_x': None,
+        'deuteron_x': None,
+        'helion_x': None,
         }
 
 # list/set of the MT#s included in the EAF data
@@ -502,8 +518,7 @@ class EAFDataSource(DataSource):
         return self._exists
 
     def _load_reaction(self, nuc, rx, temp=300.0):
-        """
-
+        """ 
         Note: EAF data does not use temperature information (temp)
 
         Parameters
@@ -535,7 +550,9 @@ class EAFDataSource(DataSource):
                 pass
 
         # Check if usable rx #
-        if rx is None or str(rx) not in EAF_RX:
+        if rx is None:
+            return None
+        if str(rx) not in EAF_RX:
             msg = "the reaction '{rx}' is not valid.".format(rx=rx)
             raise IndexError(msg)
 
