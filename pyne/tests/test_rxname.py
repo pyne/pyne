@@ -52,6 +52,11 @@ def test_name_mts():
     assert_equal(rxname.name("107"), "a")
     assert_equal(rxname.name("1"), "total")
 
+def test_name_nucdelta():
+    assert_equal(rxname.name("U235", "U236"), "absorption")
+    assert_equal(rxname.name("U235", "Np236", "p"), "absorption")
+    assert_equal(rxname.name(922350, 912350), "p")
+
 def test_name_not():
     assert_raises(RuntimeError, rxname.name, "Waka waka")
     assert_raises(RuntimeError, rxname.name, 0)

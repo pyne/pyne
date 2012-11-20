@@ -16,5 +16,6 @@ ELSE:
 cimport pyne.cpp_pyne
 cimport pyne.pyne_config
 
+cimport cpp_nucname
 cimport cpp_rxname
 cimport pyne.stlconverters as conv
