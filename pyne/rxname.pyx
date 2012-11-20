@@ -18,6 +18,7 @@ cimport pyne.cpp_pyne
 cimport pyne.pyne_config
 import pyne.pyne_config
 
+cimport cpp_nucname
 cimport cpp_rxname
 cimport pyne.stlconverters as conv
 import pyne.stlconverters as conv
@@ -66,7 +67,7 @@ def hash(char * s):
     return int(cpp_rxname.hash(<const_char *> s))
 
 
-def name(x):
+def name(x, y=None, char * z="n"):
     """name(x)
 
     Gives the unique reaction name.  Note that this name follows the 'natural naming' 
@@ -75,17 +76,33 @@ def name(x):
     Parameters
     ----------
     x : str, int, or long
-        name, abbreviation, id, or MT number.
+        name, abbreviation, id, MT number, or from nuclide.
+    y : str, int, or None, optional
+        to nuclide.
+    z : str, optional
+        incident particle type ("n", "p", ...) when x and y are nuclides.
 
     Returns
     -------
     n : str
         a unique reaction name.
     """
-    if isinstance(x, basestring):
-        n = cpp_rxname.name(std_string(<char *> x))
-    elif isinstance(x, int):
-        n = cpp_rxname.name(<extra_types.uint> long(x))
-    elif isinstance(x, long):
-        n = cpp_rxname.name(<extra_types.uint> x)
+    cdef int from_nuc, to_nuc
+    if y is None:
+        if isinstance(x, basestring):
+            n = cpp_rxname.name(std_string(<char *> x))
+        elif isinstance(x, int):
+            n = cpp_rxname.name(<extra_types.uint> long(x))
+        elif isinstance(x, long):
+            n = cpp_rxname.name(<extra_types.uint> x)
+    else:
+        if isinstance(x, basestring):
+            from_nuc = cpp_nucname.zzaaam(std_string(<char *> x))
+        elif isinstance(x, int):
+            from_nuc = cpp_nucname.zzaaam(<int> x)
+        if isinstance(y, basestring):
+            to_nuc = cpp_nucname.zzaaam(std_string(<char *> y))
+        elif isinstance(y, int):
+            to_nuc = cpp_nucname.zzaaam(<int> y)
+        n = cpp_rxname.name(from_nuc, to_nuc, std_string(z))
     return n

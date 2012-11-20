@@ -341,6 +341,7 @@ std::map<unsigned int, unsigned int> pyne::rxname::id_mt;
 std::map<unsigned int, unsigned int> pyne::rxname::mt_id;
 std::map<unsigned int, std::string> pyne::rxname::labels;
 std::map<unsigned int, std::string> pyne::rxname::docs;
+std::map<std::string, std::map<int, std::map<int, unsigned int> > > pyne::rxname::zadelta;
 
 void * pyne::rxname::_fill_maps()
 {
@@ -1372,6 +1373,14 @@ void * pyne::rxname::_fill_maps()
   altnames["3he"] = name_id["He3"];
   altnames["he-3"] = name_id["He3"];
   altnames["HE-3"] = name_id["He3"];
+
+  // set the nulcide difference mappings, zadelta
+  // zadelta[incident particle type "n", "p", ...][delta Z num][delta A num][rxid]
+  zadelta["n"][0][1] = name_id["absorption"];
+  zadelta["n"][-1][0] = name_id["p"];
+  zadelta["n"][-1][-1] = name_id["d"];
+  zadelta["p"][1][1] = name_id["absorption"];
+
 };
 void * pyne::rxname::_ = pyne::rxname::_fill_maps();
 
@@ -1424,4 +1433,41 @@ std::string pyne::rxname::name(unsigned int n)
   if (0 < mt_id.count(n))
     return id_name[mt_id[n]];
   throw NotAReaction(n, "???");
+};
+
+
+std::string pyne::rxname::name(int from_nuc, int to_nuc, std::string z)
+{
+  // This assumes nuclides are in zzaaam form
+  int dz = (to_nuc/10000) - (from_nuc/10000);
+  int da = ((to_nuc/10)%1000) - ((from_nuc/10)%1000);
+  if (0 == zadelta.count(z))
+    throw IndeterminateReactionForm("z=" + z, "???");
+  if (0 == zadelta[z].count(dz))
+    throw IndeterminateReactionForm(pyne::to_str(from_nuc) + ", " + \
+                                    pyne::to_str(to_nuc), "delta Z = " + \
+                                    pyne::to_str(dz));
+  if (0 == zadelta[z][dz].count(da))
+    throw IndeterminateReactionForm(pyne::to_str(from_nuc) + ", " + \
+                                    pyne::to_str(to_nuc), "delta A = " + \
+                                    pyne::to_str(da));
+  return id_name[zadelta[z][dz][da]];
+};
+
+std::string pyne::rxname::name(std::string from_nuc, int to_nuc, std::string z)
+{
+  return pyne::rxname::name(pyne::nucname::zzaaam(from_nuc), 
+                            pyne::nucname::zzaaam(to_nuc), z);
+};
+
+std::string pyne::rxname::name(int from_nuc, std::string to_nuc, std::string z)
+{
+  return pyne::rxname::name(pyne::nucname::zzaaam(from_nuc), 
+                            pyne::nucname::zzaaam(to_nuc), z);
+};
+
+std::string pyne::rxname::name(std::string from_nuc, std::string to_nuc, std::string z)
+{
+  return pyne::rxname::name(pyne::nucname::zzaaam(from_nuc), 
+                            pyne::nucname::zzaaam(to_nuc), z);
 };
