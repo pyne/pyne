@@ -24,6 +24,38 @@ def test_hash():
         yield assert_equal, rxname.hash(rx), _hash(rx)
 
 
+def test_name_names():
+    assert_equal(rxname.name("a"), "a")
+    assert_equal(rxname.name("total"), "total")
+
+def test_name_alts():
+    assert_equal(rxname.name("alpha"), "a")
+    assert_equal(rxname.name("tot"), "total")
+
+def test_name_ids():
+    assert_equal(rxname.name(_hash("a")), "a")
+    assert_equal(rxname.name(_hash("total")), "total")    
+
+    assert_equal(rxname.name(long(_hash("a"))), "a")
+    assert_equal(rxname.name(long(_hash("total"))), "total")    
+
+    assert_equal(rxname.name(str(_hash("a"))), "a")
+    assert_equal(rxname.name(str(_hash("total"))), "total")    
+
+def test_name_mts():
+    assert_equal(rxname.name(107), "a")
+    assert_equal(rxname.name(1), "total")
+
+    assert_equal(rxname.name(107L), "a")
+    assert_equal(rxname.name(1L), "total")
+
+    assert_equal(rxname.name("107"), "a")
+    assert_equal(rxname.name("1"), "total")
+
+def test_name_not():
+    assert_raises(RuntimeError, rxname.name, "Waka waka")
+    assert_raises(RuntimeError, rxname.name, 0)
+
 
 if __name__ == "__main__":
     nose.main()
