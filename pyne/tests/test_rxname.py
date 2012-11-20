@@ -137,6 +137,49 @@ def test_mt_not():
 
 
 
+alabel = "(z,a)"
+plabel = "(z,p)"
+abslabel = "(z,abs) Absorption"
+totlabel = "(z,total)"
+
+def test_label_names():
+    assert_equal(rxname.label("a"), alabel)
+    assert_equal(rxname.label("total"), totlabel)
+
+def test_label_alts():
+    assert_equal(rxname.label("alpha"), alabel)
+    assert_equal(rxname.label("tot"), totlabel)
+
+def test_label_ids():
+    assert_equal(rxname.label(_hash("a")), alabel)
+    assert_equal(rxname.label(_hash("total")), totlabel)
+
+    assert_equal(rxname.label(long(_hash("a"))), alabel)
+    assert_equal(rxname.label(long(_hash("total"))), totlabel)    
+
+    assert_equal(rxname.label(str(_hash("a"))), alabel)
+    assert_equal(rxname.label(str(_hash("total"))), totlabel)    
+
+def test_label_mts():
+    assert_equal(rxname.label(107), alabel)
+    assert_equal(rxname.label(1), totlabel)
+
+    assert_equal(rxname.label(107L), alabel)
+    assert_equal(rxname.label(1L), totlabel)
+
+    assert_equal(rxname.label("107"), alabel)
+    assert_equal(rxname.label("1"), totlabel)
+
+def test_label_nucdelta():
+    assert_equal(rxname.label("U235", "U236"), abslabel)
+    assert_equal(rxname.label("U235", "Np236", "p"), abslabel)
+    assert_equal(rxname.label(922350, 912350), plabel)
+
+def test_label_not():
+    assert_raises(RuntimeError, rxname.label, "Waka waka")
+    assert_raises(RuntimeError, rxname.label, 0)
+
+
 if __name__ == "__main__":
     nose.main()
 
