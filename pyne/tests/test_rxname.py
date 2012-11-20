@@ -180,6 +180,49 @@ def test_label_not():
     assert_raises(RuntimeError, rxname.label, 0)
 
 
+adoc = "(z,a) Production of alpha"
+pdoc = "(z,p) Production of p"
+absdoc = "(n,abs) Absorption"
+totdoc = "(n,total) Neutron total"
+
+def test_doc_names():
+    assert_equal(rxname.doc("a"), adoc)
+    assert_equal(rxname.doc("total"), totdoc)
+
+def test_doc_alts():
+    assert_equal(rxname.doc("alpha"), adoc)
+    assert_equal(rxname.doc("tot"), totdoc)
+
+def test_doc_ids():
+    assert_equal(rxname.doc(_hash("a")), adoc)
+    assert_equal(rxname.doc(_hash("total")), totdoc)
+
+    assert_equal(rxname.doc(long(_hash("a"))), adoc)
+    assert_equal(rxname.doc(long(_hash("total"))), totdoc)    
+
+    assert_equal(rxname.doc(str(_hash("a"))), adoc)
+    assert_equal(rxname.doc(str(_hash("total"))), totdoc)    
+
+def test_doc_mts():
+    assert_equal(rxname.doc(107), adoc)
+    assert_equal(rxname.doc(1), totdoc)
+
+    assert_equal(rxname.doc(107L), adoc)
+    assert_equal(rxname.doc(1L), totdoc)
+
+    assert_equal(rxname.doc("107"), adoc)
+    assert_equal(rxname.doc("1"), totdoc)
+
+def test_doc_nucdelta():
+    assert_equal(rxname.doc("U235", "U236"), absdoc)
+    assert_equal(rxname.doc("U235", "Np236", "p"), absdoc)
+    assert_equal(rxname.doc(922350, 912350), pdoc)
+
+def test_doc_not():
+    assert_raises(RuntimeError, rxname.doc, "Waka waka")
+    assert_raises(RuntimeError, rxname.doc, 0)
+
+
 if __name__ == "__main__":
     nose.main()
 
