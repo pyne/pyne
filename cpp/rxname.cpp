@@ -1611,3 +1611,47 @@ unsigned int pyne::rxname::mt(std::string from_nuc, std::string to_nuc, std::str
     throw NotAReaction();
   return id_mt[rxid];
 };
+
+
+// *************************
+// *** label functions *****
+// *************************
+std::string pyne::rxname::label(int x)
+{
+  return labels[pyne::rxname::id(x)];
+};
+  
+std::string pyne::rxname::label(unsigned int x)
+{
+  return labels[pyne::rxname::id(x)];
+};
+  
+std::string pyne::rxname::label(char * x)
+{
+  return labels[pyne::rxname::id(x)];
+};
+  
+std::string pyne::rxname::label(std::string x)
+{
+  return labels[pyne::rxname::id(x)];
+};
+  
+std::string pyne::rxname::label(int from_nuc, int to_nuc, std::string z)
+{
+  return labels[pyne::rxname::id(from_nuc, to_nuc, z)];
+};
+  
+std::string pyne::rxname::label(int from_nuc, std::string to_nuc, std::string z)
+{
+  return labels[pyne::rxname::id(from_nuc, to_nuc, z)];
+};
+  
+std::string pyne::rxname::label(std::string from_nuc, int to_nuc, std::string z)
+{
+  return labels[pyne::rxname::id(from_nuc, to_nuc, z)];
+};
+  
+std::string pyne::rxname::label(std::string from_nuc, std::string to_nuc, std::string z)
+{
+  return labels[pyne::rxname::id(from_nuc, to_nuc, z)];
+};
