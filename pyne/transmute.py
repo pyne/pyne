@@ -2,6 +2,7 @@ import numpy as np
 import scipy as sp
 import tables as tb
 import sys
+import os
 
 from pyne import data
 from pyne import nucname
@@ -34,7 +35,7 @@ def decay(nuc, phi, t_sim, tol):
     nuc = nucname.zzaaam(nuc)
     # Check length of phi
     if not(phi.size == 175):
-        sys.exit("Incorrect phi dimension for FENDL data.")
+        sys.exit('Incorrect phi dimension for FENDL data.')
     A = _create_decay_matrix(nuc)
     eA = _solve_decay_matrix(A)
 
@@ -65,9 +66,9 @@ def _import_eaf_data():
     eaf_table : PyTables table
         hdf5 table format of FENDL data.
     """
-
-    eaf.make_eaf_table("nuc_data", \
-                   "/filespace/groups/cnerg/opt/FENDL2.0-A/fendlg-2.0_175")
+    if not os.path.isfile('nuc_data'):
+        eaf.make_eaf_table('nuc_data', \
+                   '/filespace/groups/cnerg/opt/FENDL2.0-A/fendlg-2.0_175')
 
 
 def _get_daughters(nuc):
@@ -79,12 +80,16 @@ def _get_daughters(nuc):
     daughters : list
         Daughter nuclides of nuc in human-readable format.
     """
-
-    eaf_table = tb.openFile('../build_nuc_data/prebuilt_nuc_data.h5')
+# Prebuilt nuc data is broken 11/19
+    #eaf_table = tb.openFile('../build_nuc_data/prebuilt_nuc_data.h5')
+    _import_eaf_data()
+    eaf_table = tb.openFile('nuc_data')
     daughters = [row['daughter'] for row in \
         eaf_table.root.neutron.eaf_xs.eaf_xs.where('nuc_zz == nuc')]
-#Problem with daughter formatting (e.g. '.. 0')
+# Problem with daughter formatting (e.g. '.. 0')
+# This code would convert the names from human to zzaaam
     #for i in range(len(daughters)):
         #daughters[i] = nucname.zzaaam(daughters[i].replace(' ',''))
     eaf_table.close()
+    os.remove('nuc_data')
     return daughters

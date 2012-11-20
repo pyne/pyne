@@ -11,9 +11,10 @@ from pyne.material import Material
 import numpy  as np
 import scipy  as sp
 import tables as tb
-from pyne import transmute
-from pyne.transmute import import_eaf_data
+from pyne import transmute, nucname
+#from pyne.transmute import import_eaf_data
 from scipy import linalg
+import os
 
 
 """def test_decay1():
@@ -35,9 +36,31 @@ def test_expm():
     # Check convergence to high level Taylor Series solution
     assert_almost_equal(tayA.all(),transA.all())
 
-def test_import_eaf():
+"""def test_import_eaf():
     eaf_array = import_eaf_data
     print(eaf_array)
+"""
+
+def test_phi_size_check():
+    nuc = nucname.zzaaam("U235")
+    phi = np.arange(1.,175.)
+    t_sim = 1.0
+    tol = 1.0e-15
+    assert_raises(SystemExit,transmute.decay,nuc,phi,t_sim,tol)
+
+
+def test_get_daughters():
+    nuc = nucname.zzaaam("O16")
+    transmute._import_eaf_data()
+    eaf_table = tb.openFile('nuc_data')
+    daughtersTest = [row['daughter'] for row in \
+        eaf_table.root.neutron.eaf_xs.eaf_xs.where('nuc_zz == nuc')]
+    daughters = transmute._get_daughters(nuc)
+    assert_equal(daughters, daughtersTest)
+    eaf_table.close()
+# File does not exist...where does nose create files?
+    #os.remove('nuc_data')
+
 
 #
 # Run as script
