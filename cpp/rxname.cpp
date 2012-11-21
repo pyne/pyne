@@ -2,9 +2,10 @@
 
 std::string pyne::rxname::_names[NUM_RX_NAMES] = {
   "total",
+  "scattering",
   "elastic",
   "nonelastic",
-  "inelastic",
+  "n",
   "misc",
   "continuum",
   "z_2nd",
@@ -538,6 +539,7 @@ void * pyne::rxname::_fill_maps()
   unsigned int rxid;
   unsigned int _mts [NUM_RX_NAMES] = {
     1,
+    0,
     2,
     3,
     4,
@@ -1057,9 +1059,10 @@ void * pyne::rxname::_fill_maps()
   };
   std::string _labels[NUM_RX_NAMES] = {
     "(z,total)",
+    "(z,scattering)",
     "(z,elastic)",
     "(z,nonelastic)",
-    "(z,inelastic)",
+    "(z,n)",
     "(misc)",
     "(z,continuum)",
     "(z,2nd )",
@@ -1576,6 +1579,7 @@ void * pyne::rxname::_fill_maps()
   };
   std::string _docs[NUM_RX_NAMES] = {
     "(n,total) Neutron total",
+    "Total scattering",
     "(z,z0) Elastic scattering",
     "(z,nonelas) Nonelastic neutron",
     "(z,n) One neutron in exit channel",
@@ -2111,6 +2115,13 @@ void * pyne::rxname::_fill_maps()
 
   // set alternative names
   altnames["tot"] = name_id["total"];
+  altnames["s"] = name_id["scattering"];
+  altnames["scat"] = name_id["scattering"];
+  altnames["e"] = name_id["elastic"];
+  altnames["elas"] = name_id["elastic"];
+  altnames["i"] = name_id["n"];
+  altnames["inel"] = name_id["n"];
+  altnames["inelastic"] = name_id["n"];
   altnames["abs"] = name_id["absorption"];
   altnames["fis"] = name_id["fission"];
   altnames["fiss"] = name_id["fission"];
@@ -2132,10 +2143,100 @@ void * pyne::rxname::_fill_maps()
 
   // set the nulcide difference mappings, zadelta
   // zadelta[incident particle type "n", "p", ...][delta Z num][delta A num][rxid]
+  // neutrons:
+  zadelta["n"][0][0] = name_id["scattering"];
   zadelta["n"][0][1] = name_id["absorption"];
+  zadelta["n"][0][-1] = name_id["z_2n"];
+  zadelta["n"][0][-2] = name_id["z_3n"];
+  zadelta["n"][0][-3] = name_id["z_4n"];
   zadelta["n"][-1][0] = name_id["p"];
+  zadelta["n"][-2][-1] = name_id["z_2p"];
   zadelta["n"][-1][-1] = name_id["d"];
+  zadelta["n"][-1][-2] = name_id["t"];
+  zadelta["n"][-2][-2] = name_id["He3"];
+  zadelta["n"][-2][-3] = name_id["a"];
+  // proton:
+  zadelta["p"][0][0] = name_id["scattering"];
   zadelta["p"][1][1] = name_id["absorption"];
+  zadelta["p"][1][0] = name_id["n"];
+  zadelta["p"][1][-1] = name_id["z_2n"];
+  zadelta["p"][1][-2] = name_id["z_3n"];
+  zadelta["p"][1][-3] = name_id["z_4n"];
+  zadelta["p"][-1][-1] = name_id["z_2p"];
+  zadelta["p"][0][-1] = name_id["d"];
+  zadelta["p"][0][-2] = name_id["t"];
+  zadelta["p"][-1][-2] = name_id["He3"];
+  zadelta["p"][-1][-3] = name_id["a"];
+  // deuterium:
+  zadelta["d"][0][0] = name_id["scattering"];
+  zadelta["d"][1][2] = name_id["absorption"];
+  zadelta["d"][1][1] = name_id["n"];
+  zadelta["d"][1][0] = name_id["z_2n"];
+  zadelta["d"][1][-1] = name_id["z_3n"];
+  zadelta["d"][1][-2] = name_id["z_4n"];
+  zadelta["d"][0][1] = name_id["p"];
+  zadelta["d"][-1][0] = name_id["z_2p"];
+  zadelta["d"][0][-1] = name_id["t"];
+  zadelta["d"][-1][-1] = name_id["He3"];
+  zadelta["d"][-1][-2] = name_id["a"];
+  // tritium:
+  zadelta["t"][0][0] = name_id["scattering"];
+  zadelta["t"][1][3] = name_id["absorption"];
+  zadelta["t"][1][2] = name_id["n"];
+  zadelta["t"][1][1] = name_id["z_2n"];
+  zadelta["t"][1][0] = name_id["z_3n"];
+  zadelta["t"][1][-1] = name_id["z_4n"];
+  zadelta["t"][0][2] = name_id["p"];
+  zadelta["t"][-1][1] = name_id["z_2p"];
+  zadelta["t"][0][1] = name_id["d"];
+  zadelta["t"][-1][0] = name_id["He3"];
+  zadelta["t"][-1][-1] = name_id["a"];
+  // He3:
+  zadelta["He3"][0][0] = name_id["scattering"];
+  zadelta["He3"][2][3] = name_id["absorption"];
+  zadelta["He3"][2][2] = name_id["n"];
+  zadelta["He3"][2][1] = name_id["z_2n"];
+  zadelta["He3"][2][0] = name_id["z_3n"];
+  zadelta["He3"][2][-1] = name_id["z_4n"];
+  zadelta["He3"][1][2] = name_id["p"];
+  zadelta["He3"][0][1] = name_id["z_2p"];
+  zadelta["He3"][1][1] = name_id["d"];
+  zadelta["He3"][1][0] = name_id["t"];
+  zadelta["He3"][0][-1] = name_id["a"];
+  // alpha:
+  zadelta["a"][0][0] = name_id["scattering"];
+  zadelta["a"][2][4] = name_id["absorption"];
+  zadelta["a"][2][3] = name_id["n"];
+  zadelta["a"][2][2] = name_id["z_2n"];
+  zadelta["a"][2][1] = name_id["z_3n"];
+  zadelta["a"][2][0] = name_id["z_4n"];
+  zadelta["a"][1][3] = name_id["p"];
+  zadelta["a"][0][2] = name_id["z_2p"];
+  zadelta["a"][1][2] = name_id["d"];
+  zadelta["a"][1][1] = name_id["t"];
+  zadelta["a"][0][1] = name_id["He3"];
+  // gamma:
+  zadelta["gamma"][0][-1] = name_id["n"];
+  zadelta["gamma"][0][-2] = name_id["z_2n"];
+  zadelta["gamma"][0][-3] = name_id["z_3n"];
+  zadelta["gamma"][0][-4] = name_id["z_4n"];
+  zadelta["gamma"][-1][-1] = name_id["p"];
+  zadelta["gamma"][-2][-2] = name_id["z_2p"];
+  zadelta["gamma"][-1][-2] = name_id["d"];
+  zadelta["gamma"][-1][-3] = name_id["t"];
+  zadelta["gamma"][-2][-3] = name_id["He3"];
+  zadelta["gamma"][-2][-4] = name_id["a"];
+  // decay:
+  zadelta["decay"][0][-1] = name_id["n"];
+  zadelta["decay"][0][-2] = name_id["z_2n"];
+  zadelta["decay"][0][-3] = name_id["z_3n"];
+  zadelta["decay"][0][-4] = name_id["z_4n"];
+  zadelta["decay"][-1][-1] = name_id["p"];
+  zadelta["decay"][-2][-2] = name_id["z_2p"];
+  zadelta["decay"][-1][-2] = name_id["d"];
+  zadelta["decay"][-1][-3] = name_id["t"];
+  zadelta["decay"][-2][-3] = name_id["He3"];
+  zadelta["decay"][-2][-4] = name_id["a"];
 
 };
 void * pyne::rxname::_ = pyne::rxname::_fill_maps();
