@@ -13,7 +13,7 @@
 #include "pyne.h"
 #include "nucname.h"
 
-#define NUM_RX_NAMES 328
+#define NUM_RX_NAMES 517
 
 namespace pyne
 {
