@@ -117,7 +117,7 @@ std::string pyne::rxname::_names[NUM_RX_NAMES] = {
   "erel_total",
   "erel_elastic",
   "erel_nonelastic",
-  "erel_inelastic",
+  "erel_n",
   "erel_misc",
   "erel_continuum",
   "erel_2nd",
