@@ -2,7 +2,7 @@
 import nose 
 
 from nose.tools import assert_equal, assert_not_equal, assert_raises, raises, \
-    assert_in
+    assert_in, assert_greater_equal
 
 from pyne import rxname
 
@@ -221,6 +221,13 @@ def test_doc_nucdelta():
 def test_doc_not():
     assert_raises(RuntimeError, rxname.doc, "Waka waka")
     assert_raises(RuntimeError, rxname.doc, 0)
+
+def test_unique_ids():
+    assert_equal(len(rxname.id_name), len(rxname.name_id))
+
+def test_no_id_mt_clash():
+    badids = [rxid for rxid in rxname.id_name.keys() if rxid < 1000]
+    assert_equal(0, len(badids))
 
 
 if __name__ == "__main__":
