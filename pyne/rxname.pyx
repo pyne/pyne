@@ -1,4 +1,114 @@
-"""Python wrapper for rxname library."""
+"""Python wrapper for rxname library.
+
+The rxname module provides a string-based canonical form for reaction channel names, 
+an integer identifier, labeling and documentation, and conversion to/from other
+conventions for these names.
+
+    **Reaction Names:**  The names themselves are strings chosen such that they are 
+    valid variable names in most programming languages (including Python and C/C++).
+    This strategy is known as *natural naming* and enables a *namespace* of reactions.
+    Therefore, all names must match the regular expression "[A-Za-z_][A-Za-z0-9_]*".
+    For example, the elastic scattering cross section is simply "elastic" while the 
+    pair production reaction is given by "pair_prod".
+
+    A number of patterns dictate how a reaction should be named.  Foremost among these
+    are particle names.  Where required, "z" is a variable for any incident particle.
+    The following table displays particle types and their names:
+
+        =========  ========
+        particle   name (z)
+        =========  ========
+        neutron    n
+        proton     p
+        deuterium  d
+        tritium    t
+        Helium-3   He3
+        alpha      a
+        gamma      gamma
+        =========  ========
+
+    From this we can see that a reaction which produces a neutron and a proton is 
+    called "np".  If multiple particles of the same type are produced, then the 
+    number precedes the particle type.  Thus, one neutron and two protons are given
+    by "n2p".  However if this would result in the name starting with a number, then
+    the name is prepended with "z_" to indicate any incident particle.  For example,
+    the reaction which yields two neutrons is "z_2n" (because "2n" is not a valid
+    variable name in most programming languages).
+
+    Furthermore, if a reaction name ends in "_[0-9]+" (underscore plus a number), then
+    this means that the nucleus is left in the nth excited state after the interaction.
+    For example, "n_0" produces a neutron and leaves the nucleus in the ground state,
+    "n_1" produces a neutron and the nucleus is in the first excited state, and so on.
+    However, "_continuum" means that the nucleus in an energy state in the continuum.
+
+    If a reaction name begins with "erel_", then this channel is for the energy 
+    release from the reaction by the name without "erel_".  E.g. "erel_p" is the energy
+    release from proton emission.
+
+    **Reaction IDs:**  While the reaction names are sufficient for defining all 
+    possible reactions in a partially physically meaningful way, they do so using a
+    variable length format (strings).  It is often advantageous to have a fixed-width
+    format, namely for storage.  To this end, unique unsigned 32-bit integers are 
+    given to each name.  These identifiers are computed based on a custom hash of the
+    reaction name.  This hash function reserves space for MT numbers by not producing
+    values below 1000.  It is recommended that the reaction identifiers be used for
+    most performance critical tasks, rather than the names that they are calculated 
+    from.
+
+    **Reaction Labels:**  Reaction labels are short, human-readable strings.  These 
+    do not follow the naming convention restrictions that the names themselves are 
+    subject to.  Additionally, labels need not be unique.  The labels are provided
+    as a convenience for building user interfaces with.
+
+    **Reaction Docstrings:**  Similar to labels, reactions also come with a 
+    documentation string which gives a description of the reaction in a sentence or
+    two. These provide more help and information for a reaction.  This may be useful
+    in a tool tip context for user interfaces.
+
+    **Other Canonical Forms:**  This module provides mappings between other reaction
+    canonical forms and the naming conventions and IDs used here.  The most widespread
+    of these are arguably the MT numbers.  MT numbers are a strict subset of the 
+    reactions used here.  Further information may be found at [T2]_ & [JAEA]_.
+
+The rxname module implements a suite of functions for computing or retrieving 
+reaction names and their associated data described above.  These functions have a
+variety of interfaces. Lookup may occur either by name, ID, MT number, a string of
+ID, or a string of MT number.
+
+However, lookup may also occur via alternate names or abbreviations.  For example, 
+"tot" and "abs" will give the names "total" and "absorption".  Spelling out particles
+will also work; "alpha" and "duet" will give "a" and "d".  For a listing of all 
+alternative names see the ``altnames`` variable.
+
+Furthermore, certain reactions may be inferred from the nuclide prior and post
+reaction.  For example, if an incident neutron hit U-235 and Th-232 was produced then
+an alpha production reaction is assumed to have occurred. Thus most of the functions
+in rxname will take a from nuclide, a to nuclide, and an incident particle type 
+(which defaults to "n" neutron).
+
+-------------------------
+Adding New Reaction Names
+-------------------------
+If for some reason the existing reaction names are insufficient, the following 
+procedure will add a new reaction to the suite provided.
+
+1. Increment ``NUM_RX_NAMES`` in "rxname.h".
+2. Add the name to the ``_names`` array at the top of "rxname.cpp".
+   Note the location in this array that the new name was added.
+3. In the ``_fill_maps()`` function in "rxname.cpp", add the MT number 
+   to the ``_mts`` array at the same index the name was added in step 2.
+   If the reaction does not have a corresponding MT number, add a zero (0)
+   at this location instead.
+4. In the ``_fill_maps()`` function in "rxname.cpp", add a short label to 
+   the ``_labels`` array at the same index the name was added in step 2.
+5. In the ``_fill_maps()`` function in "rxname.cpp", add a docstring to 
+   the ``_docs`` array at the same index the name was added in step 2.
+
+Repeat this procedure as necessary.  
+
+.. [T2] http://t2.lanl.gov/endf/mts.html
+.. [JAEA] http://wwwndc.jaea.go.jp/form/ENDF6/mt.html
+"""
 
 # Cython imports
 from libcpp.map cimport map
@@ -27,6 +137,11 @@ import pyne.stlconverters as conv
 cdef conv._SetStr names_proxy = conv.SetStr(False)
 names_proxy.set_ptr = &cpp_rxname.names
 names = names_proxy
+
+# altnames
+cdef conv._MapStrUInt altnames_proxy = conv.MapStrUInt(False)
+altnames_proxy.map_ptr = &cpp_rxname.altnames
+altnames = altnames_proxy
 
 # id_name
 cdef conv._MapUIntStr id_name_proxy = conv.MapUIntStr(False)

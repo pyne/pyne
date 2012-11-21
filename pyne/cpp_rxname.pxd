@@ -15,6 +15,7 @@ cdef extern from "rxname.h" namespace "pyne::rxname":
     set[std_string] names
 
     # Conversion dictionaries
+    map[std_string, extra_types.uint] altnames
     map[extra_types.uint, std_string] id_name
     map[std_string, extra_types.uint] name_id
     map[extra_types.uint, extra_types.uint] id_mt
