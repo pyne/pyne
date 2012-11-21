@@ -7,7 +7,7 @@ conventions for these names.
     **Reaction Names:**  The names themselves are strings chosen such that they are 
     valid variable names in most programming languages (including Python and C/C++).
     This strategy is known as *natural naming* and enables a *namespace* of reactions.
-    Therefore, all names must match the regular expression "[A-Za-z_][A-Za-z0-9_]*".
+    Therefore, all names must match the regular expression ``[A-Za-z_][A-Za-z0-9_]*``.
     For example, the elastic scattering cross section is simply "elastic" while the 
     pair production reaction is given by "pair_prod".
 
@@ -15,9 +15,9 @@ conventions for these names.
     are particle names.  Where required, "z" is a variable for any incident particle.
     The following table displays particle types and their names:
 
-        =========  ========
+        =========  =========
         particle   name (z)
-        =========  ========
+        =========  =========
         neutron    n
         proton     p
         deuterium  d
@@ -25,25 +25,25 @@ conventions for these names.
         Helium-3   He3
         alpha      a
         gamma      gamma
-        =========  ========
+        =========  =========
 
     From this we can see that a reaction which produces a neutron and a proton is 
     called "np".  If multiple particles of the same type are produced, then the 
     number precedes the particle type.  Thus, one neutron and two protons are given
     by "n2p".  However if this would result in the name starting with a number, then
-    the name is prepended with "z_" to indicate any incident particle.  For example,
+    the name is prepended with ``z_`` to indicate any incident particle.  For example,
     the reaction which yields two neutrons is "z_2n" (because "2n" is not a valid
     variable name in most programming languages).
 
-    Furthermore, if a reaction name ends in "_[0-9]+" (underscore plus a number), then
+    Furthermore, if a reaction name ends in ``_[0-9]+`` (underscore plus digits), then
     this means that the nucleus is left in the nth excited state after the interaction.
     For example, "n_0" produces a neutron and leaves the nucleus in the ground state,
     "n_1" produces a neutron and the nucleus is in the first excited state, and so on.
     However, "_continuum" means that the nucleus in an energy state in the continuum.
 
-    If a reaction name begins with "erel_", then this channel is for the energy 
-    release from the reaction by the name without "erel_".  E.g. "erel_p" is the energy
-    release from proton emission.
+    If a reaction name begins with ``erel_``, then this channel is for the energy 
+    release from the reaction by the name without ``erel_``.  E.g. "erel_p" is the 
+    energy release from proton emission.
 
     **Reaction IDs:**  While the reaction names are sufficient for defining all 
     possible reactions in a partially physically meaningful way, they do so using a
@@ -83,8 +83,9 @@ alternative names see the ``altnames`` variable.
 Furthermore, certain reactions may be inferred from the nuclide prior and post
 reaction.  For example, if an incident neutron hit U-235 and Th-232 was produced then
 an alpha production reaction is assumed to have occurred. Thus most of the functions
-in rxname will take a from nuclide, a to nuclide, and an incident particle type 
-(which defaults to "n" neutron).
+in rxname will take a from nuclide, a to nuclide, and z -- the incident particle type 
+(which defaults to "n" neutron).  Note that z may also be "decay", indicating a 
+radioactive decay occurrence.
 
 -------------------------
 Adding New Reaction Names
@@ -106,8 +107,13 @@ procedure will add a new reaction to the suite provided.
 
 Repeat this procedure as necessary.  
 
+--------------------------
+
 .. [T2] http://t2.lanl.gov/endf/mts.html
 .. [JAEA] http://wwwndc.jaea.go.jp/form/ENDF6/mt.html
+
+--------------------------
+
 """
 
 # Cython imports
@@ -176,7 +182,9 @@ docs = docs_proxy
 
 
 def hash(char * s):
-    """Hashes a string to be used as a reaction id.  This hash specifically reserves
+    """hash(s)
+
+    Hashes a string to be used as a reaction id.  This hash specifically reserves
     the h < 1000 for MT numbers.
     """
     return int(cpp_rxname.hash(<const_char *> s))
