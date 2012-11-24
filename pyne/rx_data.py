@@ -1,5 +1,6 @@
 import re
 import numpy as np
+# import pyne.endf as endf
 
 class rx_data(object):
     def __init__(self, data):
@@ -31,14 +32,11 @@ class rx_data(object):
 
         return result
     
-    def write(self, filename, file_type_in, file_type_out):
+    def write(self, filename, file_type_out):
         # just a placeholder at this point
-        f = open(filename, 'w')
-        if file_type_in.lower() == 'endf':
-            for mat in self.mats:
-                np.savetxt(filename, self.data, fmt='%s 9.6e')
-                f.close()
-                return filename
+        if file_type_out.lower() == 'endf':
+            self.write_to_file(filename)
+            # return filename
         else:
-            return filename, file_type
+            return filename, file_type_out
         pass
