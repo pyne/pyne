@@ -148,8 +148,20 @@ class Library(rx.rx_data):
     def get(self, mat_id, mf, mt):
         return rx.rx_data.get(self, mat_id, mf, mt, 'endf')
     
-    def write(self, filename, file_type_out):
-        return rx.rx_data.write(self, filename, 'endf', file_type_out)
+    # def write(self, filename, file_type_out):
+        # return rx.rx_data.write(self, filename, file_type_out)
+    
+    def write_to_file(self, filename):
+        full_text = ' $Rev:: 512      $  $Date:: 2006-12-05#$                             1 0  0    0\n'
+        for mat_id in self.mats:
+            line_number = 0
+            for line_number in range(3):
+                for i in range(6):
+                    full_text = full_text + numpy_to_ENDF(self.get(mat_id, 1, 451)[line_number*6 + i])
+                full_text += ' %3d%2d%3d%5d\n' %(mat_id, 1, 451, line_number)
+        with open(filename, 'w') as f:
+            f.write(full_text)
+
 
 class Evaluation(object):
     """
@@ -1252,20 +1264,19 @@ def numpy_to_ENDF(num):
     """
     This function converts a number into ENDF format.
     """
-    if int(num) == num:
-        result = '           '
-        num = int(num)
-        result = result[0:-len(str(num))] + (str(num))
-        return result
-    elif type(num) is float:
-        result = '% 9.6e' % num
-        return result[:-4] + result[-3:-2] + result[-1]
-    else:
-        return ''
+    # if int(num) == num:
+        # result = '           '
+        # num = int(num)
+        # result = result[0:-len(str(num))] + (str(num))
+        # return result
+    # if type(num) is float:
+    result = '% 9.6e' % num
+    return result[:-4] + result[-3:-2] + result[-1]
+    # else:
+        # return 'fuck'
+        
+print numpy_to_ENDF(7.99687)
                 
-print numpy_to_ENDF(-1.0123456789e+0)
-print numpy_to_ENDF(1.0123456789e+0)
-print numpy_to_ENDF(-1.0000000000e+0)
 
 
 MTname = {1: "(n,total) Neutron total",
