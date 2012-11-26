@@ -68,7 +68,8 @@ conventions for these names.
     **Other Canonical Forms:**  This module provides mappings between other reaction
     canonical forms and the naming conventions and IDs used here.  The most widespread
     of these are arguably the MT numbers.  MT numbers are a strict subset of the 
-    reactions used here.  Further information may be found at [T2]_ & [JAEA]_.
+    reactions used here.  Further information may be found at [NNDC]_, [NEA]_, [T2]_, 
+    and [JAEA]_.
 
 The rxname module implements a suite of functions for computing or retrieving 
 reaction names and their associated data described above.  These functions have a
@@ -109,6 +110,8 @@ Repeat this procedure as necessary.
 
 --------------------------
 
+.. [NNDC] http://www.nndc.bnl.gov/endfdocs/ENDF-102-2001.pdf
+.. [NEA] http://www.oecd-nea.org/dbdata/data/manual-endf/endf102_MT.pdf
 .. [T2] http://t2.lanl.gov/endf/mts.html
 .. [JAEA] http://wwwndc.jaea.go.jp/form/ENDF6/mt.html
 
