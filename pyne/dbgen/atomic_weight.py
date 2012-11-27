@@ -13,6 +13,8 @@ from pyne.dbgen.kaeri import grab_kaeri_nuclide, parse_for_natural_isotopes
 # Note that since ground state and meta-stable isotopes are of the same atomic weight, 
 # the meta-stables have been discluded from the following data sets.
 
+MASS_FILE = 'mass.mas12'
+
 
 def grab_kaeri_atomic_abund(build_dir=""):
     """Grabs the KAERI files needed for the atomic abundance calculation, 
@@ -78,18 +80,15 @@ def parse_atomic_abund(build_dir=""):
     return atomic_abund
 
 
-
 def grab_atmoic_mass_adjustment(build_dir=""):
     """Grabs the current atomic mass adjustment from the Atomic
     Mass Data Center.  These are courtesy of Georges Audi and 
-    Wang Meng via a private communication, April 2011."""
-    mass_file = 'mass.mas114'
-    bd_files = os.listdir(build_dir)
-    if mass_file in bd_files:
+    Wang Meng via a private communication, November 2012."""
+    if os.path.exists(os.path.join(build_dir, MASS_FILE)):
         return 
 
-    mass = urllib2.urlopen('http://amdc.in2p3.fr/masstables/Ame2011int/mass.mas114')
-    with open(os.path.join(build_dir, mass_file), 'w') as f:
+    mass = urllib2.urlopen('http://amdc.in2p3.fr/masstables/Ame2012/mass.mas12')
+    with open(os.path.join(build_dir, MASS_FILE), 'w') as f:
         f.write(mass.read())
 
 
@@ -100,8 +99,7 @@ amdc_regex = re.compile('[ \d-]*? (\d{1,3})[ ]{1,4}(\d{1,3}) [A-Z][a-z]? .*? (\d
 def parse_atmoic_mass_adjustment(build_dir=""):
     """Parses the atomic mass adjustment data into a list of tuples of 
     the nuclide, atomic mass, and error."""
-    mass_file = 'mass.mas114'
-    f = open(os.path.join(build_dir, mass_file), 'r')
+    f = open(os.path.join(build_dir, MASS_FILE), 'r')
 
     atomic_masses = []
 
