@@ -2133,6 +2133,7 @@ void * pyne::rxname::_fill_maps()
   altnames["triton"] = name_id["t"];
   altnames["tritium"] = name_id["t"];
   altnames["proton"] = name_id["p"];
+  altnames["h"] = name_id["He3"];  // 'h' stands for helion
   altnames["he3"] = name_id["He3"];
   altnames["HE3"] = name_id["He3"];
   altnames["3HE"] = name_id["He3"];
