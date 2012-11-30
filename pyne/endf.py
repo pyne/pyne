@@ -3,7 +3,7 @@
 """
 Module for parsing and manipulating data from ENDF evaluations. Currently, it
 only can read several MTs from File 1, but with time it will be expanded to
-include the entire ENDF format.
+      include the entire ENDF format.
 
 All the classes and functions in this module are based on document ENDF-102
 titled "Data Formats and Procedures for the Evaluated Nuclear Data File
@@ -17,7 +17,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import os
 import warnings
-import pyne.rx_data as rx
+import pyne.rx_data as rx_data
 
 number = " (\d.\d+(?:\+|\-)\d)"
 
@@ -26,7 +26,7 @@ libraries = {0: "ENDF/B", 1: "ENDF/A", 2: "JEFF", 3: "EFF",
              31: "INDL/V", 32: "INDL/A", 33: "FENDL", 34: "IRDF",
              35: "BROND", 36: "INGDB-90", 37: "FENDL/A", 41: "BROND"}
 
-class Library(rx.rx_data):
+class Library(rx.RxLib):
     """
     Library is a class for an ENDF evaluation which contains a number
     of Files.
@@ -38,7 +38,7 @@ class Library(rx.rx_data):
         # initialize some dicts that will act as an index
         self.mats = {}
         self.mts = {}
-
+        self.data = {}
         # are there more files to read the headers of?
         self.more_files = True
         
@@ -65,6 +65,12 @@ class Library(rx.rx_data):
         self.fh.seek(self.chars_til_now+81)
         line = self.fh.readline()
         mat_id = line[67:70]
+
+        # put this material id  in the dict of data as a nested dict
+        self.data.update({mat_id:{RxStyles:'',
+                                  RxDocs:'',
+                                  RxParticles:[],
+                                  data}})
         
         print 'Reading headers for material id %d ...' % int(mat_id)
         
@@ -97,12 +103,18 @@ class Library(rx.rx_data):
                 stop = start + mt_length
                 self.mts.update({(int(mat_id), mf, mt):(start+self.offset, stop+self.offset)})
                 line = self.fh.readline()
-            elif re.search('C O N T E N T S', line):
+            # elif re.search('C O N T E N T S', line):
+                # line = self.fh.readline()
+                # continue
+            # parse comments
+            elif re.match(' {66}', line):
+                comments += line[0:67]
+                line = self.fh.readline()
+            elif re.match('[\d+. ]{80}\n$', line):
                 line = self.fh.readline()
                 continue
-            # parse comments
             else:
-                comments = comments + '\n' + line[0:66]
+                comments += line[0:67]
                 line = self.fh.readline()
 
         # find where end of material is
@@ -118,7 +130,6 @@ class Library(rx.rx_data):
         # update materials list
         if mat_id != '':
             self.mats.update({int(mat_id):(self.chars_til_now / 81, comments)})
-        
     def _read_data(self, filename):
         warnings.filterwarnings("ignore", "Some errors were detected !")
         print 'Reading data ...'
@@ -137,7 +148,7 @@ class Library(rx.rx_data):
                                                 
     def read_mfmt(self, mat_id, mf, mt):
         if (mat_id, mf, mt) in self.mts:
-            print "Reading Material %d, File %d, MT %d" % (mat_id, mf, mt)
+            # print "Reading Material %d, File %d, MT %d" % (mat_id, mf, mt)
             start = (self.mts[(mat_id, mf, mt)][0] - 1) * 6
             stop = (self.mts[(mat_id, mf, mt)][1] - 1)* 6
             return self.data.flat[start:stop]
@@ -152,13 +163,45 @@ class Library(rx.rx_data):
         # return rx.rx_data.write(self, filename, file_type_out)
     
     def write_to_file(self, filename):
-        full_text = ' $Rev:: 512      $  $Date:: 2006-12-05#$                             1 0  0    0\n'
+
+        def make_line(line_number, mat_id, mf, mt):
+            line_text = ''
+            for i in range(6):
+                line_text = line_text + numpy_to_ENDF(self.get(mat_id, 1, 451)[line_number*6 + i])
+            line_text += ' %3d%2d%3d%5d\n' %(mat_id, mf, mt, line_number+1)
+            return line_text
+
+        def make_comments(line_number, mat_id, mf, mt, comments):
+            num_lines = len(comments)/66
+            return str(num_lines)
+            # line_text = comments[comment_line_number*67:]
+            
+        full_text = ''
+        def make_header(mat_id):
+            pass
+        def make_mt(line_number, mat_id, mf, mt):
+            if mt == 1:
+                make_header(mat_id)
+            else:
+                starting_line = self.mts[(mat_id, mf, mt)][0]    
+                ending_line = self.mts[(mat_id, mf, mt)][1]
+                for line_number in range(starting_line, ending_line):
+                    make_line(line_number, mat_id, mf, mt)
+        def make_mf(line_number, mat_id, mf, mt):
+            self.mts[
+            pass
+        def make_mat_id():
+            pass
+
         for mat_id in self.mats:
+            full_text += ' $Rev:: 512      $  $Date:: 2006-12-05#$                             1 0  0    0\n'
             line_number = 0
-            for line_number in range(3):
-                for i in range(6):
-                    full_text = full_text + numpy_to_ENDF(self.get(mat_id, 1, 451)[line_number*6 + i])
-                full_text += ' %3d%2d%3d%5d\n' %(mat_id, 1, 451, line_number)
+            for line_number in range(4):
+                full_text += make_line(line_number, mat_id, 1, 451)
+            full_text += make_comments(line_number, mat_id, 1, 451, str(self.mats[mat_id][1]) + '\n')
+                # for i in range(6):
+                    # full_text = full_text + numpy_to_ENDF(self.get(mat_id, 1, 451)[line_number*6 + i])
+                # full_text += ' %3d%2d%3d%5d\n' %(mat_id, 1, 451, line_number)
         with open(filename, 'w') as f:
             f.write(full_text)
 
