@@ -53,7 +53,7 @@ void pyne::_load_atomic_mass_map()
 
 double pyne::atomic_mass(int nuc)
 {
-  // Find the nuclide;s weight in AMU
+  // Find the nuclide's weight in AMU
   std::map<int, double>::iterator nuc_iter, nuc_end;
 
   nuc_iter = atomic_mass_map.find(nuc);

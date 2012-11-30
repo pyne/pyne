@@ -9,6 +9,7 @@ from nose.tools import assert_equal, assert_not_equal, assert_raises, raises, \
 import os
 from pyne.material import Material, from_atom_frac, from_hdf5, from_text, MapStrMaterial, MultiMaterial
 from pyne import jsoncpp 
+from pyne import data
 import numpy  as np
 import tables as tb
 
@@ -195,6 +196,15 @@ class TestMaterialMethods(TestCase):
         except AssertionError:
             assert_almost_equal(mw_mixed/236.5, 1.0, 4)
 
+
+def test_expand_elements():
+    natmat = Material({'C': 1.0, 902320: 0.5, 'PU': 4.0, 'U': 3.0})
+    expmat = natmat.expand_elements()
+    print expmat
+    print data.natural_abund_map[930000]
+    assert_true(60120 in expmat.comp)
+    assert_false(60000 in expmat.comp)
+    assert_almost_equal(data.natural_abund('C12'), expmat['C12']) 
 
 
 class TestMassSubMaterialMethods(TestCase):

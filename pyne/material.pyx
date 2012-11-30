@@ -413,6 +413,22 @@ cdef class _Material:
         return self.mat_pointer.molecular_weight(atoms_per_mol)
 
 
+    def expand_elements(self):
+        """expand_elements(self)
+        Exapnds the elements ('U', 'C', etc) in the material by replacing them
+        with their natural isotopic distributions.  This function returns a copy.
+
+        Returns
+        -------
+        newmat : Material
+            A copied and expanded material.
+
+        """
+        cdef _Material newmat = Material()
+        newmat.mat_pointer[0] = self.mat_pointer.expand_elements()
+        return newmat
+
+
     #
     # submaterial Methods
     #
