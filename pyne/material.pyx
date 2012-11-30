@@ -96,12 +96,10 @@ cdef class _Material:
     property comp:
         def __get__(self):
             cdef conv._MapIntDouble comp_proxy
-
             if self._comp is None:
                 comp_proxy = conv.MapIntDouble(False, False)
                 comp_proxy.map_ptr = &self.mat_pointer.comp
                 self._comp = comp_proxy
-
             return self._comp
 
         def __set__(self, value):
