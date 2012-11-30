@@ -48,9 +48,10 @@ namespace pyne {
   static std::string alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
   static std::string words = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_";
 
-  std::string to_str (int);
-  std::string to_str (double);
-  std::string to_str (bool);
+  std::string to_str(int);
+  std::string to_str(unsigned int);
+  std::string to_str(double);
+  std::string to_str(bool);
 
   int to_int (std::string);
 

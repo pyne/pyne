@@ -53,7 +53,7 @@ namespace nucname
   extern name_group ACT;
   extern zz_group act;
 
-  extern name_t TRU_array[19];
+  extern name_t TRU_array[22];
   extern name_group TRU;
   extern zz_group tru;
 
