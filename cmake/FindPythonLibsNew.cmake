@@ -67,15 +67,7 @@ endif()
 # testing whether sys has the gettotalrefcount function is a reliable, cross-platform
 # way to detect a CPython debug interpreter.
 execute_process(COMMAND "${PYTHON_EXECUTABLE}" "-c"
-    "from distutils import sysconfig as s;import sys;import struct;
-print('.'.join(str(v) for v in sys.version_info));
-print(s.PREFIX);
-print(s.get_python_inc(plat_specific=True));
-print(s.get_python_lib(plat_specific=True));
-print(s.get_config_var('SO'));
-print(hasattr(sys, 'gettotalrefcount')+0);
-print(struct.calcsize('@P'));
-"
+    "from distutils import sysconfig as s;import sys;import struct; print('.'.join(str(v) for v in sys.version_info)); print(s.PREFIX); print(s.get_python_inc(plat_specific=True)); print(s.get_python_lib(plat_specific=True)); print(s.get_config_var('SO')); print(hasattr(sys, 'gettotalrefcount')+0); print(struct.calcsize('@P'));"
     RESULT_VARIABLE _PYTHON_SUCCESS
     OUTPUT_VARIABLE _PYTHON_VALUES
     ERROR_VARIABLE _PYTHON_ERROR_VALUE
