@@ -25,7 +25,8 @@ def test_ACT():
             
 def test_TRU():
     assert_equal(nucname.TRU, set(['AM', 'BH', 'BK', 'CF', 'CM', 'DB', 'DS', 
-     'ES', 'FM', 'HS', 'LR', 'MD', 'MT', 'NO', 'NP', 'PU', 'RF', 'RG', 'SG']))
+     'ES', 'FM', 'HS', 'LR', 'MD', 'MT', 'NO', 'NP', 'PU', 'RF', 'RG', 'SG', 
+     'FL', 'LV', 'CN']))
 
 def test_MA():
     assert_equal(nucname.MA, set(["NP", "AM", "CM", "BK", "CF", "ES", "FM", "MD", \
@@ -53,7 +54,7 @@ def test_act():
 
 def test_tru():
     assert_equal(nucname.tru, set([93,  94,  95,  96,  97,  98,  99,  100, 101, 102, 
-                                   103, 104, 105, 106, 107, 108, 109, 110, 111]))
+                         103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 114, 116]))
 
 def test_ma():
     assert_equal(nucname.ma, set([93, 95, 96, 97, 98, 99, 100, 101, 102, 103]))

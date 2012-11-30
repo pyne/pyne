@@ -118,8 +118,8 @@ The groups are defined as follows::
 
    nucname.ACT = set(['AC', 'AM', 'BK', 'CF', 'CM', 'ES', 'FM', 'LR', 'MD', 'NO', 'NP', 'PA', 'PU', 'TH', 'U'])
 
-   nucname.TRU = set(['AM', 'BH', 'BK', 'CF', 'CM', 'DB', 'DS', 'ES', 'FM', 'HS', 'LR', 'MD', 'MT', 'NO', 'NP',
-                      'PU', 'RF', 'RG', 'SG'])
+   nucname.TRU = set(['AM', 'BH', 'BK', 'CF', 'CM', 'CN', 'DB', 'DS', 'ES', 'FL', 'FM', 'HS', 'LR', 'LV', 'MD', 
+                      'MT', 'NO', 'NP', 'PU', 'RF', 'RG', 'SG'])
 
    nucname.MA  = set(['AM', 'BK', 'CF', 'CM', 'ES', 'FM', 'LR', 'MD', 'NO', 'NP'])
 
@@ -155,7 +155,7 @@ The groups are defined as follows::
    nucname.act = set([89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103])
 
    nucname.tru = set([93,  94,  95,  96,  97,  98, 99, 100, 101, 102, 103, 104, 105,
-                      106, 107, 108, 109, 110, 111])
+                      106, 107, 108, 109, 110, 111, 112, 114, 116])
 
    nucname.ma  = set([93, 95, 96, 97, 98, 99, 100, 101, 102, 103])
 

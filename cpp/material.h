@@ -79,6 +79,7 @@ namespace pyne
     void normalize ();
     comp_map mult_by_mass();
     double molecular_weight(double=-1.0);
+    Material expand_elements();
 
     //Sub-Stream Computation
     Material sub_mat(std::set<int>);

@@ -9,6 +9,7 @@ from nose.tools import assert_equal, assert_not_equal, assert_raises, raises, \
 import os
 from pyne.material import Material, from_atom_frac, from_hdf5, from_text, MapStrMaterial, MultiMaterial
 from pyne import jsoncpp 
+from pyne import data
 import numpy  as np
 import tables as tb
 
@@ -184,7 +185,7 @@ class TestMaterialMethods(TestCase):
         mat_u238 = Material({922380: 1.0})
         mw_u238 = mat_u238.molecular_weight()
         try:
-            assert_almost_equal(mw_u238, 238.050789466)
+            assert_almost_equal(mw_u238, 238.050788423)
         except AssertionError:
             assert_almost_equal(mw_u238, 238.0)            
 
@@ -195,6 +196,15 @@ class TestMaterialMethods(TestCase):
         except AssertionError:
             assert_almost_equal(mw_mixed/236.5, 1.0, 4)
 
+
+def test_expand_elements():
+    natmat = Material({'C': 1.0, 902320: 0.5, 'PU': 4.0, 'U': 3.0}, attrs={'y': 1.0})
+    expmat = natmat.expand_elements()
+    assert_true(60120 in expmat.comp)
+    assert_false(60000 in expmat.comp)
+    assert_almost_equal(data.natural_abund('C12'), expmat['C12']) 
+    assert_true(natmat.attrs == expmat.attrs)
+    assert_false(natmat.attrs is expmat.attrs)
 
 
 class TestMassSubMaterialMethods(TestCase):
@@ -423,10 +433,10 @@ def test_from_atom_frac_meth():
     mat = Material()
     mat.from_atom_frac(uox)
     assert_equal(mat.atoms_per_mol, 3.0)
-    assert_almost_equal(mat.comp[80160], 0.11912625316479536, 16)
-    assert_almost_equal(mat.comp[922350], 0.43763757948940346, 15)
-    assert_almost_equal(mat.comp[922380], 0.44323616734580107, 15)
-    assert_almost_equal(mat.molecular_weight()/268.53718965614, 1.0, 15)
+    assert_almost_equal(mat.comp[80160], 0.11912625367051276, 16)
+    assert_almost_equal(mat.comp[922350], 0.43763757904405304, 15)
+    assert_almost_equal(mat.comp[922380], 0.44323616728543414, 15)
+    assert_almost_equal(mat.molecular_weight()/268.53718851614, 1.0, 15)
 
 
 #
@@ -786,10 +796,10 @@ def test_from_atom_frac_func():
     uox = {ihm: 1.0, 'O16': 2.0}
     mat = from_atom_frac(uox)
     assert_equal(mat.atoms_per_mol, 3.0)
-    assert_almost_equal(mat.comp[80160], 0.11912625316479536, 16)
-    assert_almost_equal(mat.comp[922350], 0.43763757948940346, 15)
-    assert_almost_equal(mat.comp[922380], 0.44323616734580107, 15)
-    assert_almost_equal(mat.molecular_weight()/268.53718965614, 1.0, 15)
+    assert_almost_equal(mat.comp[80160], 0.11912625367051276, 16)
+    assert_almost_equal(mat.comp[922350], 0.43763757904405304, 15)
+    assert_almost_equal(mat.comp[922380], 0.44323616728543414, 15)
+    assert_almost_equal(mat.molecular_weight()/268.53718851614, 1.0, 15)
 
 
 
