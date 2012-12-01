@@ -32,8 +32,8 @@ Usage:
 
     install
     usersguide/index
-    libref/index
-    cppapi
+    pyapi/index
+    cppapi/index
     previous/index
 
 Development:
