@@ -32,6 +32,14 @@ namespace pyne
   typedef comp_map::iterator comp_iter;
 
   /// Super awesome material class
+  ///
+  /// \rst
+  ///
+  /// .. note:: 
+  ///    
+  ///       please love me
+  ///
+  /// \endrst
   class Material
   {
   // Parent Class for Handling Mass Streams"
