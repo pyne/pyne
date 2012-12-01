@@ -57,6 +57,7 @@ the authors if you require additional assistance.
     ========== ===================== =================
     pyne       libpyne.so            'pyne'
     nucname    libpyne_nucname.so    'pyne_nucname'
+    data       libpyne_data.so       'pyne_data'
     rxname     libpyne_rxname.so     'pyne_rxname'
     material   libpyne_material.so   'pyne_material'
     enrichment libpyne_enrichment.so 'pyne_enrichment'
