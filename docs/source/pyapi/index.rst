@@ -1,8 +1,8 @@
-.. _libref:
+.. _pyapi:
 
-=================
-Library Reference
-=================
+====================
+Python API
+====================
 This document presents information on the PyNE API.
 The following modules and sub-packages are discussed:
 
