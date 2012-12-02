@@ -212,7 +212,6 @@ namespace nucname
     std::string nucnow; ///< current nuclide state
   };
 
-
   /// \name Current Form Functions
   /// \{
   /// These functions compute the current form of the nuclide.
@@ -236,45 +235,74 @@ namespace nucname
   int zzaaam(std::string nuc);
   /// \}
 
+  /// \name Name Form Functions
+  /// \{
+  /// The 'name' nuclide naming convention is the more common, human readable 
+  /// notation. The chemical symbol (one or two characters long) is first, followed 
+  /// by the nucleon number. Lastly if the nuclide is metastable, the letter M is 
+  /// concatenated to the end. For example, ‘H-1’ and ‘Am242M’ are both valid. 
+  /// Note that nucname will always return name form with the dash removed and all 
+  /// letters uppercase.
+  /// \param nuc a nuclide
+  /// \return a string nuclide identifier.
+  std::string name(int nuc);
+  std::string name(char * nuc);
+  std::string name(std::string nuc);
+  /// \}
 
-  /************************/
-  /*** name functions ***/
-  /************************/
-  std::string name(int);
-  std::string name(char *);
-  std::string name(std::string);
+  /// \name MCNP Form Functions
+  /// \{
+  /// This is the naming convention used by the MCNP suite of codes.
+  /// The MCNP format for entering nuclides is unfortunately non-standard. 
+  /// In most ways it is similar to zzaaam form, except that it lacks the metastable 
+  /// flag. For information on how metastable isotopes are named, please consult the 
+  /// MCNP documentation for more information.
+  /// \param nuc a nuclide
+  /// \return a string nuclide identifier.
+  int mcnp(int nuc);
+  int mcnp(char * nuc);
+  int mcnp(std::string nuc);
+  /// \}
 
+  /// \name Serpent Form Functions
+  /// \{
+  /// This is the string-based naming convention used by the Serpent suite of codes.
+  /// The serpent naming convention is similar to name form. However, only the first 
+  /// letter in the chemical symbol is uppercase, the dash is always present, and the 
+  /// the meta-stable flag is lowercase. For instance, ‘Am-242m’ is the valid serpent 
+  /// notation for this nuclide.
+  /// \param nuc a nuclide
+  /// \return a string nuclide identifier.
+  std::string serpent(int nuc);
+  std::string serpent(char * nuc);
+  std::string serpent(std::string nuc);
+  /// \}
 
-  /**********************/
-  /*** mcnp functions ***/
-  /**********************/
-  int mcnp(int);
-  int mcnp(char *);
-  int mcnp(std::string);
+  /// \name NIST Form Functions
+  /// \{
+  /// This is the string-based naming convention used by NIST.
+  /// The NIST naming convention is also similar to the Serpent form. However, this 
+  /// convention contains no metastable information. Moreover, the A-number comes 
+  /// before the element symbol. For example, ‘242Am’ is the valid NIST notation.
+  /// \param nuc a nuclide
+  /// \return a string nuclide identifier.
+  std::string nist(int nuc);
+  std::string nist(char * nuc);
+  std::string nist(std::string nuc);
+  /// \}
 
-
-  /*************************/
-  /*** serpent functions ***/
-  /*************************/
-  std::string serpent(int);
-  std::string serpent(char *);
-  std::string serpent(std::string);
-
-
-  /**********************/
-  /*** nist functions ***/
-  /**********************/
-  std::string nist(int);
-  std::string nist(char *);
-  std::string nist(std::string);
-
-
-  /************************/
-  /*** cinder functions ***/
-  /************************/
-  int cinder(int);
-  int cinder(char *);
-  int cinder(std::string);
+  /// \name CINDER Form Functions
+  /// \{
+  /// This is the naming convention used by the CINDER burnup ibrary.
+  /// The CINDER format is similar to zzaaam form except that the placement of the 
+  /// Z- and A-numbers are swapped. Therefore, this format is effectively aaazzzm. 
+  /// For example, ‘2420951’ is the valid cinder notation for ‘AM242M’.
+  /// \param nuc a nuclide
+  /// \return a string nuclide identifier.
+  int cinder(int nuc);
+  int cinder(char * nuc);
+  int cinder(std::string nuc);
+  /// \}
 
 };
 };
