@@ -31,7 +31,7 @@ namespace pyne
   typedef std::map<int, double> comp_map;
   typedef comp_map::iterator comp_iter;
 
-
+  /// Super awesome material class
   class Material
   {
   // Parent Class for Handling Mass Streams"
@@ -79,6 +79,7 @@ namespace pyne
     void normalize ();
     comp_map mult_by_mass();
     double molecular_weight(double=-1.0);
+    Material expand_elements();
 
     //Sub-Stream Computation
     Material sub_mat(std::set<int>);

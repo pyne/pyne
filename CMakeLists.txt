@@ -20,6 +20,10 @@ link_directories(${HDF5_LIBRARY_DIRS})
 add_definitions(${HDF5_DEFINITIONS})
 set(LIBS ${LIBS} ${HDF5_C_LIBRARIES})
 
+# Use new Python library finder
+find_package(PythonInterp REQUIRED)
+find_package(PythonLibsNew REQUIRED)
+
 # Include the CMake script UseCython.cmake.  This defines add_cython_module().
 # Instruction for use can be found at the top of cmake/UseCython.cmake.
 include( UseCython )
