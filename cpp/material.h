@@ -1,9 +1,12 @@
-// Material.h
-// Class that defines material flows for the Fuel Cycle.  Input into most FCComp objects.
-// Effectively an normalized isotopic linked list with associated mass.
-// Contains other functions for mixing mass streams and setting up sub streams.
-//
-// Initial Author --- Anthony Scopatz
+/// \file material.h
+/// \author Anthony Scopatz (scopatz\@gmail.com)
+///
+/// \brief The ever-important material class and related helpers.
+/// 
+/// The material class is effectively a normalized nuclide linked list with 
+/// associated mass, density, atoms per mol, and metadata.  However, this 
+/// implementation also contains other functions for mixing materials and generating 
+/// related materials.
 
 #if !defined(_PYNE_MATERIAL_)
 #define _PYNE_MATERIAL_
@@ -28,43 +31,85 @@
 namespace pyne
 {
   // Set Type Definitions
-  typedef std::map<int, double> comp_map;
-  typedef comp_map::iterator comp_iter;
+  typedef std::map<int, double> comp_map; ///< Nuclide-mass composition map type
+  typedef comp_map::iterator comp_iter;   ///< Nuclide-mass composition iter type
 
-  /// Super awesome material class
-  ///
-  /// \rst
-  ///
-  /// .. note:: 
-  ///    
-  ///       please love me
-  ///
-  /// \endrst
+  /// Material composed of nuclides.
   class Material
   {
-  // Parent Class for Handling Mass Streams"
   protected:
-    //Material function definitions
+
+    /// Computes the total mass stored in the composition.
     double get_comp_sum ();
 
   public:
+
+    /// Normalizes the mass values in the composition.
     void norm_comp ();
 
     // Persistence functions.
-    void _load_comp_protocol0(hid_t, std::string, int);
-    void _load_comp_protocol1(hid_t, std::string, int);
 
-    void from_hdf5(char *, char *, int=-1, int=1);
-    void from_hdf5(std::string, std::string="/material", int=-1, int=1);
+    /// Loads the matrial composition from an HDF5 file according to the layout 
+    /// defined by protocol 0.  This protocol is depratacted.
+    /// \param db HDF5 id for the open HDF5 file.
+    /// \param datapath Path to the base node for the material in \a db.
+    /// \param row The index to read out, may be negative.
+    void _load_comp_protocol0(hid_t db, std::string datapath, int row);
 
-    void write_hdf5(char *, char *, char *, float=-0.0, int=100);
-    void write_hdf5(std::string, std::string="/material", std::string nuclist="/nuc_zz", float=-0.0, int=100);
+    /// Loads the matrial composition from an HDF5 file according to the layout 
+    /// defined by protocol 1.  This protocol should be used in favor of protocol 0.
+    /// \param db HDF5 id for the open HDF5 file.
+    /// \param datapath Path to the base node for the material in \a db.
+    /// \param row The index to read out, may be negative.
+    void _load_comp_protocol1(hid_t db, std::string datapath, int row);
 
-    void from_text(char *);
-    void from_text(std::string);
+    /// Loads a material from an HDF5 file into this object.
+    /// \param filename Path on disk to the HDF5 file.
+    /// \param datapath Path to the the material in the file.
+    /// \param row The index to read out, may be negative.
+    /// \param protocol Flag for layout of material on disk.
+    void from_hdf5(char * filename, char * datapath, int row=-1, int protocol=1);
 
-    void write_text(char *);
-    void write_text(std::string);
+    /// Loads a material from an HDF5 file into this object.
+    /// \param filename Path on disk to the HDF5 file.
+    /// \param datapath Path to the the material in the file.
+    /// \param row The index to read out, may be negative.
+    /// \param protocol Flag for layout of material on disk.
+    void from_hdf5(std::string filename, std::string datapath="/material", 
+                                                          int row=-1, int protocol=1);
+
+    /// Writes this material out to an HDF5 file.  
+    /// This happens according to protocol 1.
+    /// \param filename Path on disk to the HDF5 file.
+    /// \param datapath Path to the the material in the file.
+    /// \param nucpath Path to the nuclides set in the file.
+    /// \param row The index to read out, may be negative. Also note that this is a
+    ///            float.  A value of -0.0 indicates that the material should be 
+    ///            appended to the end of the dataset.
+    /// \param chunksize The chunksize for all material data on disk.
+    void write_hdf5(char * filename, char * datapath, char * nucpath, float row=-0.0, 
+                                                                    int chunksize=100);
+    /// Writes this material out to an HDF5 file.  
+    /// This happens according to protocol 1.
+    /// \param filename Path on disk to the HDF5 file.
+    /// \param datapath Path to the the material in the file.
+    /// \param nucpath Path to the nuclides set in the file.
+    /// \param row The index to read out, may be negative. Also note that this is a
+    ///            float.  A value of -0.0 indicates that the material should be 
+    ///            appended to the end of the dataset.
+    /// \param chunksize The chunksize for all material data on disk.
+    void write_hdf5(std::string filename, std::string datapath="/material", 
+                    std::string nucpath="/nuc_zz", float row=-0.0, int chunksize=100);
+
+    /// Reads data from a plaintext file at \a filename into this Material instance.
+    void from_text(char * filename);
+    /// Reads data from a plaintext file at \a filename into this Material instance.
+    void from_text(std::string filname);
+
+    /// Writes the Material out to a simple plaintext file readable by from_text().
+    void write_text(char * filename);
+    /// Writes the Material out to a simple plaintext file readable by from_text().
+    void write_text(std::string filename);
 
     //Fundemental mass stream data
     comp_map comp;
