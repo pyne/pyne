@@ -81,60 +81,83 @@ namespace pyne {
   /// Returns an all lower case copy of the string.
   std::string to_lower(std::string s);
 
-  std::string get_flag(char [], int);
+  /// Finds and returns the first white-space delimited token of a line.
+  /// \param line a character array to take the first token from.
+  /// \param max_l an upper bound to the length of the token.  Must be 11 or less.
+  /// \returns a the flag as a string
+  std::string get_flag(char line[], int max_l);
 
-  std::string remove_substring(std::string, std::string);
+  /// Creates a copy of \a s with all instances of \a substr taken out.
+  std::string remove_substring(std::string s, std::string substr);
 
-  std::string remove_characters(std::string, std::string);
+  /// Removes all characters in the string \a chars from \a s.
+  std::string remove_characters(std::string s, std::string chars);
 
-  std::string replace_all_substrings(std::string, std::string, std::string);
+  /// Replaces all instance of \a substr in \a s with \a repstr.
+  std::string replace_all_substrings(std::string s, std::string substr, 
+                                                    std::string repstr);
 
-  std::string last_char(std::string);
+  /// Returns the last character in a string.
+  std::string last_char(std::string s);
 
-  std::string slice_from_end(std::string, int = -1, int = 1);
+  /// Returns the slice of a string \a s using the negative index \a n and the 
+  /// length of the slice \a l.
+  std::string slice_from_end(std::string s, int n=-1, int l=1);
 
-  bool ternary_ge(int, int, int);
+  /// Returns true if \a a <= \a b <= \a c and flase otherwise.
+  bool ternary_ge(int a, int b, int c);
 
-  bool contains_substring(std::string, std::string);
+  /// Returns true if \a substr is in \a s.
+  bool contains_substring(std::string s, std::string substr);
 
-  std::string natural_naming(std::string);
+  /// Calculates a version of the string \a name that is also a valid variable name. 
+  /// That is to say that the return value uses only word characters.
+  std::string natural_naming(std::string name);
 
 
-  // Math Helpers
-  extern const double pi;
-  extern const double N_A;	//Avagardo's Number
-  extern const double barns_per_cm2; 	// barns per cm^2
-  extern const double cm2_per_barn; 	// cm^2 per barn
-  extern const double sec_per_day; 	// seconds per day
+  /// \name Mathematical and Physical Constants
+  /// \{
+  extern const double pi;   ///< pi = 3.14159265359
+  extern const double N_A;  ///< Avagardo's Number
+  extern const double barns_per_cm2;  ///< barns per cm^2
+  extern const double cm2_per_barn; 	///< cm^2 per barn
+  extern const double sec_per_day; 	  ///< seconds per day
+  /// \}
 
-  double slope (double, double, double, double);
-  double solve_line (double, double, double, double, double);
+  /// Finds the slope of a line from the points (\a x1, \a y1) and (\a x2, \a y2).
+  double slope (double x2, double y2, double x1, double y1);
 
-  double tanh(double);
-  double coth(double);
+  /// Solves the equation for the line y = mx + b, given \a x and the points that 
+  /// form the line: (\a x1, \a y1) and (\a x2, \a y2).
+  double solve_line (double x, double x2, double y2, double x1, double y2);
+
+  double tanh(double x);  ///< The hyperbolic tangent function.
+  double coth(double x);  ///< The hyperbolic cotangent function.
 
 
   // File Helpers
-  bool file_exists(std::string); 
+  /// Returns true if the file can be found.
+  bool file_exists(std::string strfilename);  
 
-
-
-  /******************/
-  /*** Exceptions ***/
-  /******************/
-
+  /// Custom exception to be thrown in the event that a required file is not able to
+  /// be found.
   class FileNotFound : public std::exception
   {
   public:
+
+    /// default constructor
     FileNotFound () {};
 
+    /// default destructor
     ~FileNotFound () throw () {};
 
+    /// constructor with the filename \a fname.
     FileNotFound(std::string fname)
     {
       filename = fname;
     };
 
+    /// Creates a helpful error message.
     virtual const char* what() const throw()
     {
       std::string FNFstr ("File not found: ");
@@ -145,7 +168,7 @@ namespace pyne {
     };
 
   private:
-    std::string filename;
+    std::string filename; ///< unfindable filename.
   };
 
 
