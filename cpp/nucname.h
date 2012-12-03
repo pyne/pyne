@@ -1,7 +1,7 @@
-// Converts between naming conventions for nuclides.
-// zzaaam is for numerals only (923350).
-// name is for letters  as well (U-235).
-// MCNP is for numerals without the meta-stable flag (92235), as used in MCNP.
+/// \file nucname.h
+/// \author Anthony Scopatz (scopatz\@gmail.com)
+///
+/// \brief Converts between naming conventions for nuclides.
 
 #ifndef _PYNE_NUCNAME_
 #define _PYNE_NUCNAME_
