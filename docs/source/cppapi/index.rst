@@ -8,6 +8,7 @@ The following files and libraries in the PyNE C++ interface:
 .. toctree::
     :maxdepth: 1
 
+    pyne
     nucname
     material
     
