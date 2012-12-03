@@ -44,6 +44,47 @@ namespace pyne
 
   public:
 
+    // Material Constructors
+    Material ();  ///< empty constructor
+    /// Constructor from composition map
+    /// \param cm composition map
+    /// \param m mass value, the mass is set to the sum of the values in the 
+    ///          composition if \a m is negative.
+    /// \param d density value
+    /// \param apm atoms per mole
+    /// \param attributes initial metadata
+    Material(comp_map cm, double m=-1.0, double d=-1.0, double apm=-1.0,
+             Json::Value attributes=Json::Value(Json::objectValue));
+    /// Constructor from file
+    /// \param filename path to file on disk, this file may be either in plaintext
+    ///                 or HDF5 format.
+    /// \param m mass value, the mass is set to the sum of the values in the 
+    ///          composition if \a m is negative, 
+    ///          may be overridden by the value from disk.
+    /// \param d density value,
+    ///          may be overridden by the value from disk.
+    /// \param apm atoms per mole,
+    ///          may be overridden by the value from disk.
+    /// \param attributes initial metadata,
+    ///          may be overridden by the value from disk.
+    Material(char * filename, double m=-1.0, double d=-1.0, double apm=-1.0,
+             Json::Value attributes=Json::Value(Json::objectValue));
+    /// Constructor from file
+    /// \param filename path to file on disk, this file may be either in plaintext
+    ///                 or HDF5 format.
+    /// \param m mass value, the mass is set to the sum of the values in the 
+    ///          composition if \a m is negative, 
+    ///          may be overridden by the value from disk.
+    /// \param d density value,
+    ///          may be overridden by the value from disk.
+    /// \param apm atoms per mole,
+    ///          may be overridden by the value from disk.
+    /// \param attributes initial metadata,
+    ///          may be overridden by the value from disk.
+    Material(std::string filename, double m=-1.0, double d=-1.0, double apm=-1.0,
+             Json::Value attributes=Json::Value(Json::objectValue));
+    ~Material (); ///< default destructor
+
     /// Normalizes the mass values in the composition.
     void norm_comp ();
 
@@ -111,78 +152,111 @@ namespace pyne
     /// Writes the Material out to a simple plaintext file readable by from_text().
     void write_text(std::string filename);
 
-    //Fundemental mass stream data
-    comp_map comp;
-    double mass;
-    double density;
-    double atoms_per_mol;
-    Json::Value attrs;
+    // Fundemental mass stream data
+    /// composition, maps nuclides in zzaaam form to normalized mass weights.
+    comp_map comp;  
+    double mass;  ///< mass (in arbitrary units) of the Material.
+    double density; ///< density (in arbitrary units) of the Material.
+    double atoms_per_mol; ///< The number of atoms per mole.
+    /// container for arbitrary metadata, following the JSON rules.
+    Json::Value attrs;  
 
-    //Material Constructors
-    Material ();
-    Material(comp_map, double=-1.0, double=-1.0, double=-1.0,
-             Json::Value=Json::Value(Json::objectValue));
-    Material(char *, double=-1.0, double=-1.0, double=-1.0,
-             Json::Value=Json::Value(Json::objectValue));
-    Material(std::string, double=-1.0, double=-1.0, double=-1.0,
-             Json::Value=Json::Value(Json::objectValue));
-    ~Material ();
-
-    //Material function definitions
-    void normalize ();
+    // Material function definitions
+    void normalize ();  ///< Normalizes the mass.
+    /// Returns a composition map that has been unnormalized by multiplying each 
+    /// mass weight by the actual mass of the material.
     comp_map mult_by_mass();
-    double molecular_weight(double=-1.0);
+    /// Calculates the atomic weight of this material based on the composition
+    /// and the number of atoms per mol.  If \a apm is non-negative then it is
+    /// used (and stored on the instance) as the atoms_per_mol for this calculation.
+    /// If \a apm and atoms_per_mol on this instance are both negative, then the best
+    /// guess value calculated from the normailized composition is used here.
+    double molecular_weight(double apm=-1.0);
+    /// Returns a copy of the current material where all natural elements in the 
+    /// composition are expanded to their natural isotopic abundances.
     Material expand_elements();
 
-    //Sub-Stream Computation
-    Material sub_mat(std::set<int>);
-    Material sub_mat(std::set<std::string>);
+    // Sub-Stream Computation
+    /// Creates a sub-Material with only the nuclides present in \a nucset.
+    /// Elements of this set may be either in zzaaam form or simple Z numbers.
+    Material sub_mat(std::set<int> nucset);
+    /// Creates a sub-Material with only the nuclides present in \a nucset.
+    /// Elements of this set may be in any form.
+    Material sub_mat(std::set<std::string> nucset);
 
-    Material set_mat(std::set<int>, double);
-    Material set_mat(std::set<std::string>, double);
+    /// Creates a new Material with the mass weights for all nuclides in \a nucset 
+    /// set to \a value.
+    /// Elements of \a nucset may be either in zzaaam form or simple Z numbers.
+    Material set_mat(std::set<int> nucset, double value);
+    /// Creates a new Material with the mass weights for all nuclides in \a nucset 
+    /// set to \a value.  Elements of \a nucset may be in any form.
+    Material set_mat(std::set<std::string> nucset, double value);
 
-    Material del_mat(std::set<int>);
-    Material del_mat(std::set<std::string>);
+    /// Creates a new Material with the all nuclides in \a nucset removed.
+    /// Elements of \a nucset may be either in zzaaam form or simple Z numbers.
+    Material del_mat(std::set<int> nucset);
+    /// Creates a new Material with the all nuclides in \a nucset removed.
+    /// Elements of \a nucset may be in any form.
+    Material del_mat(std::set<std::string> nucset);
 
-    Material sub_range(int=0, int=10000000);
-    Material set_range(int=0, int=10000000, double=0.0);
-    Material del_range(int=0, int=10000000);
+    /// Creates a sub-Material based on a range of zzaaam-form integers.
+    Material sub_range(int lower=0, int upper=10000000);
+    /// Creates a new Material with the mass weights for all nuclides in the zzaaam
+    /// range set to \a value.
+    Material set_range(int lower=0, int upper=10000000, double value=0.0);
+    /// Creates a new Material with the all nuclides in the zzaaam range removed.
+    Material del_range(int lower=0, int upper=10000000);
 
+    /// Creates a sub-Material of only uranium.
     Material sub_u();
+    /// Creates a sub-Material of only plutonium.
     Material sub_pu();
+    /// Creates a sub-Material of only lanthanides.
     Material sub_lan();
+    /// Creates a sub-Material of only actinides.
     Material sub_act();
+    /// Creates a sub-Material of only transuranics.
     Material sub_tru();
+    /// Creates a sub-Material of only minor actinides.
     Material sub_ma();
+    /// Creates a sub-Material of only fission products.
     Material sub_fp();
 
     // Atom fraction functions
+    /// Returns a mapping of the nuclides in this material to their atom fractions.
+    /// This calculation is based off of the materials molecular weight.
     std::map<int, double> to_atom_frac();
-    void from_atom_frac(std::map<int, double>);
+    /// Sets the composition, mass, and atoms_per_mol of this material to those 
+    /// calculated from \a atom_fracs, a mapping of nuclides to atom fractions values.
+    void from_atom_frac(std::map<int, double> atom_fracs);
 
-    //Overloaded Operators
+    // Overloaded Operators
+    /// Adds mass to a material instance.
     Material operator+ (double);
+    /// Adds two materials together.
     Material operator+ (Material);
+    /// Multiplies a material's mass.
     Material operator* (double);
+    /// Divides a material's mass.
     Material operator/ (double);
   };
 
+  /// Converts a Material to a string stream representation.
   std::ostream& operator<< (std::ostream& os, Material mat);
 
+  /// A stuct for reprensenting fundemental data in a material.
+  /// Useful for HDF5 representations.
   typedef struct material_struct {
-    double mass;
-    double density;
-    double atoms_per_mol;
-    double comp [];
+    double mass;  ///< material mass
+    double density; ///< material density
+    double atoms_per_mol; ///< material atoms per mole
+    double comp []; ///< array of material composition mass weights.
   } material_struct;
 
-
-  /******************/
-  /*** Exceptions ***/
-  /******************/
-
+  /// Custom exception for invalid HDF5 protocol numbers
   class MaterialProtocolError: public std::exception
   {
+    /// marginally helpful error message.
     virtual const char* what() const throw()
     {
       return "Invalid loading protocol number; please use 0 or 1.";
