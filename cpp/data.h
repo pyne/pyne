@@ -28,6 +28,7 @@ namespace pyne
 
   /// \name Atomic Mass Data
   /// \{
+
   /// Mapping from nuclides in zzaaam form to their atomic masses.
   extern std::map<int, double> atomic_mass_map;
 
@@ -43,8 +44,6 @@ namespace pyne
   /// into memory.
   void _load_atomic_mass_map(); 
 
-  /// \name Atomic Mass Functions
-  /// \{
   /// \brief Returns the atomic mass of a nuclide \a nuc.  
   /// 
   /// This function will first try to find the atomic mass data in the atomic_mass_map.
@@ -52,18 +51,29 @@ namespace pyne
   /// excited state and not found in the map, it will give the value for the ground
   /// state nuclide.  If the nuclide simply cannot be found, the A number is returned.
   double atomic_mass(int nuc);
-  double atomic_mass(char * nuc);
-  double atomic_mass(std::string nuc);
-  /// \}
+  /// Returns the atomic mass of a nuclide \a nuc.
+  double atomic_mass(char * nuc); 
+  /// Returns the atomic mass of a nuclide \a nuc.
+  double atomic_mass(std::string nuc); 
   /// \}
 
-  /*******************************/
-  /*** natural_abund functions ***/
-  /*******************************/
+  /// \name Natural Abundance Data
+  /// \{
+
+  /// Mapping from nuclides in zzaaam form to their natural abundances.
   extern std::map<int, double> natural_abund_map;
-  double natural_abund(int);
-  double natural_abund(char *);
-  double natural_abund(std::string);
+
+  /// \brief Returns the natural abundance of a nuclide \a nuc.  
+  /// 
+  /// This follows the same the basic rules for finding or computing the natural
+  /// abundances as the atomic_mass() functions do.  However, if the nuclide cannot
+  /// be found, the default value returned is 0.0.
+  double natural_abund(int nuc);
+  /// Returns the natural abundance of a nuclide \a nuc. 
+  double natural_abund(char * nuc); 
+  /// Returns the natural abundance of a nuclide \a nuc. 
+  double natural_abund(std::string nuc); 
+  /// \}
 
   /***********************************/
   /*** scattering length functions ***/
