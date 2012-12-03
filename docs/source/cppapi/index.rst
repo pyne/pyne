@@ -12,6 +12,8 @@ The following files and libraries in the PyNE C++ interface:
     nucname
     data
     material
+    extra_types
+    h5wrap
     
 
 -----------------
