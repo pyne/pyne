@@ -7,17 +7,15 @@ from nose.tools import assert_equal, assert_not_equal, assert_raises, raises, \
 
 from numpy.testing import dec
 
-import os
 from pyne.material import Material
 import numpy  as np
 import scipy  as sp
 import tables as tb
-from pyne import transmute, nucname
-#from pyne.transmute import import_eaf_data
+from pyne import transmute, nucname, data
 from scipy import linalg
-import os
 
 
+"""Example test for future reference"""
 """def test_decay1():
     mat = Material({'C14': 1.0, 'N14': 0.0, 'C13': 0.0})
     obs = transmute.decay(mat, 1.0)
@@ -37,11 +35,8 @@ def test_expm():
     # Check convergence to high level Taylor Series solution
     assert_almost_equal(tayA.all(),transA.all())
 
-"""def test_import_eaf():
-    eaf_array = import_eaf_data
-    print(eaf_array)
-"""
 
+"""Ensures the flux vector size check is completing"""
 def test_phi_size_check():
     nuc = nucname.zzaaam("U235")
     phi = np.arange(1.,175.)
@@ -50,17 +45,16 @@ def test_phi_size_check():
     assert_raises(SystemExit,transmute.decay,nuc,phi,t_sim,tol)
 
 
+"""Tests correct application of the _get_daughters function"""
 def test_get_daughters():
     nuc = nucname.zzaaam("O16")
-    transmute._import_eaf_data()
-    eaf_table = tb.openFile('nuc_data')
+    eaf_table = tb.openFile('/filespace/people/k/klebenow/.local/lib\
+/python2.6/site-packages/pyne/nuc_data.h5')
     daughtersTest = [row['daughter'] for row in \
         eaf_table.root.neutron.eaf_xs.eaf_xs.where('nuc_zz == nuc')]
-    daughters = transmute._get_daughters(nuc)
+    daughters = transmute._get_daughters(nuc,eaf_table)
     assert_equal(daughters, daughtersTest)
     eaf_table.close()
-# File does not exist...where does nose create files?
-    #os.remove('nuc_data')
 
 
 #
