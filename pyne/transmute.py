@@ -102,7 +102,7 @@ def _get_daughters(nuc,eaf_table):
     Returns
     -------
     daughters : list
-        Daughter nuclides of nuc {in human-readable format}.
+        Daughter nuclides of nuc in human-readable format.
     """
     daughters = [row['daughter'] for row in \
         eaf_table.root.neutron.eaf_xs.eaf_xs.where('nuc_zz == nuc')]
