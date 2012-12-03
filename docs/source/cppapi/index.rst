@@ -10,6 +10,7 @@ The following files and libraries in the PyNE C++ interface:
 
     pyne
     nucname
+    data
     material
     
 

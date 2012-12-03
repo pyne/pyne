@@ -227,9 +227,9 @@ std::string pyne::natural_naming(std::string name)
 //
 
 const double pyne::pi = 3.14159265359;
-const double pyne::N_A = 6.0221415 * pow(10.0, 23);
-const double pyne::barns_per_cm2 = pow(10.0, 24); 
-const double pyne::cm2_per_barn = pow(10.0, -24); 
+const double pyne::N_A = 6.0221415e+23;
+const double pyne::barns_per_cm2 = 1e24; 
+const double pyne::cm2_per_barn = 1e-24; 
 const double pyne::sec_per_day = 24.0 * 3600.0; 
 
 double pyne::slope(double x2, double y2, double x1, double y1)
