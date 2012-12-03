@@ -1,4 +1,7 @@
-// Implements basic nuclear data functions.
+/// \file data.h
+/// \author Anthony Scopatz (scopatz\@gmail.com)
+///
+/// \brief Implements basic nuclear data functions.
 
 #ifndef _PYNE_DATA_
 #define _PYNE_DATA_
@@ -21,24 +24,38 @@
 
 namespace pyne
 {
-  extern std::string NUC_DATA_PATH;
+  extern std::string NUC_DATA_PATH; ///< Path to the nuc_data.h5 file.
 
-  /*****************************/
-  /*** atomic_mass Functions ***/
-  /*****************************/
+  /// \name Atomic Mass Data
+  /// \{
+  /// Mapping from nuclides in zzaaam form to their atomic masses.
   extern std::map<int, double> atomic_mass_map;
 
+  /// a struct match the atomic_weight table in nuc_data.h5.
   typedef struct atomic_weight_struct {
-    int nuc;
-    double mass;
-    double error;
-    double abund;
-  } atomic_weight_struct;
+    int nuc;      ///< nuclide in zzaaam form
+    double mass;  ///< nuclide atomic mass [amu]
+    double error; ///< error in atomic mass [amu]
+    double abund; ///< natural abundance of nuclide [atom fraction]
+  } atomic_weight_struct; 
 
-  void _load_atomic_mass_map();
-  double atomic_mass(int);
-  double atomic_mass(char *);
-  double atomic_mass(std::string);
+  /// Loads the atomic mass and natural abundance data from the nuc_data.h5 file
+  /// into memory.
+  void _load_atomic_mass_map(); 
+
+  /// \name Atomic Mass Functions
+  /// \{
+  /// \brief Returns the atomic mass of a nuclide \a nuc.  
+  /// 
+  /// This function will first try to find the atomic mass data in the atomic_mass_map.
+  /// If this map is empty, it will load the data from disk.  If the nuclide is in an
+  /// excited state and not found in the map, it will give the value for the ground
+  /// state nuclide.  If the nuclide simply cannot be found, the A number is returned.
+  double atomic_mass(int nuc);
+  double atomic_mass(char * nuc);
+  double atomic_mass(std::string nuc);
+  /// \}
+  /// \}
 
   /*******************************/
   /*** natural_abund functions ***/
