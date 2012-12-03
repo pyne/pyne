@@ -1,3 +1,12 @@
+/// \file pyne.h
+/// \author Anthony Scopatz (scopatz\@gmail.com)
+///
+/// \brief This is the base PyNE library.
+/// 
+/// It contains a lot of utility functions and constants that are globaly useful
+/// through out the rest of the PyNE infrastructure.
+///
+
 // Header for general library file.
 
 #if !defined(_PYNE_)
@@ -19,6 +28,7 @@
 #include <algorithm>
 
 /*** Macros ***/
+/// Determines the length of an array using sizeof().
 #define length_array(a) ( sizeof ( a ) / sizeof ( *a ) )
 
 #if defined __APPLE__ || defined __WIN_GNUC__
@@ -35,31 +45,41 @@
     #define isnan(x) ((x) != (x))
 #endif
 
+/// The 'pyne' namespace all PyNE functionality is included in.
 namespace pyne {
 
-  // PyNE Globals
-  void pyne_start ();
+  void pyne_start (); ///< Initializes PyNE based on environment.
 
-  extern std::string PYNE_DATA;
-  extern std::string NUC_DATA_PATH;
+  /// Path to the driectory containing the PyNE data.
+  extern std::string PYNE_DATA;     
+  extern std::string NUC_DATA_PATH; ///< Path to the nuc_data.h5 file.
 
   // String Transformations
+  /// string of digit characters
   static std::string digits = "0123456789";
+  /// uppercase alphabetical characters
   static std::string alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  /// string of all valid word characters for variable names in programing languages.
   static std::string words = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_";
 
-  std::string to_str(int);
-  std::string to_str(unsigned int);
-  std::string to_str(double);
-  std::string to_str(bool);
+  /// \name String Conversion Functions
+  /// \{
+  /// Converts the variables of various types to their C++ string representation.
+  std::string to_str(int t);
+  std::string to_str(unsigned int t);
+  std::string to_str(double t);
+  std::string to_str(bool t);
+  /// \}
 
-  int to_int (std::string);
+  int to_int(std::string s);  ///< Converts a string of digits to an int using atoi().
 
-  double to_dbl (std::string);
+  double to_dbl(std::string s);  ///< Converts a valid string to a float usinf atof().
 
-  std::string to_upper(std::string);
+  /// Returns an all upper case copy of the string.
+  std::string to_upper(std::string s);  
 
-  std::string to_lower(std::string);
+  /// Returns an all lower case copy of the string.
+  std::string to_lower(std::string s);
 
   std::string get_flag(char [], int);
 
