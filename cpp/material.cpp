@@ -623,7 +623,6 @@ pyne::Material::Material(pyne::comp_map cm, double m, double d, double apm,
 pyne::Material::Material(char * filename, double m, double d, double apm,
                          Json::Value attributes)
 {
-  // Initializes the mass stream based on an isotopic composition file with a (char *) name.
   mass = m;
   density=d;
   atoms_per_mol = apm;
@@ -795,7 +794,6 @@ pyne::Material pyne::Material::sub_mat(std::set<int> nucset)
 {
   // Grabs a sub-material from this mat based on a set of integers.
   // Integers can either be of zzaaam form -OR- they can be a z-numer (is 8 for O, 93 for Np, etc).
-  // n is the name of the new material.
 
   pyne::comp_map cm;
   for (pyne::comp_iter i = comp.begin(); i != comp.end(); i++)
@@ -1072,8 +1070,6 @@ void pyne::Material::from_atom_frac(std::map<int, double> atom_fracs)
 
 
 
-
-/*--- Overloaded Operators ---*/
 
 pyne::Material pyne::Material::operator+ (double y)
 {
