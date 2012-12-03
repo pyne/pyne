@@ -735,6 +735,55 @@ double pyne::Material::molecular_weight(double apm)
 };
 
 
+pyne::Material pyne::Material::expand_elements()
+{
+  // Expands the natural elements of a material and returns a new material
+  // note that this implementation relies on the fact that maps of ints are sored
+  // in a sorted manner in C++.
+  int n, nabund, znuc, zabund;
+  comp_map newcomp;
+  std::map<int, double>::iterator abund_itr, abund_end;
+  if (pyne::natural_abund_map.empty())
+    pyne::_load_atomic_mass_map();
+  abund_itr = pyne::natural_abund_map.begin();
+  abund_end = pyne::natural_abund_map.end();
+  zabund = (*abund_itr).first/10000;
+  for (comp_iter nuc = comp.begin(); nuc != comp.end(); nuc++)
+  {
+    if(abund_itr == abund_end)
+      newcomp.insert(*nuc);
+    else if(0 == (*nuc).first%10000)
+    {
+      n = (*nuc).first;
+      znuc = n/10000;
+      if (znuc < zabund)
+      {
+        newcomp.insert(*nuc);
+        continue;
+      }
+      while(zabund <= znuc)
+      {
+        nabund = (*abund_itr).first;
+        if (zabund == znuc && 0 != nabund%10000 && 0.0 != (*abund_itr).second)
+          newcomp[nabund] = (*abund_itr).second * (*nuc).second * \
+                            atomic_mass_map[nabund] / atomic_mass_map[n];
+        else if (n == nabund && 0.0 == (*abund_itr).second)
+          newcomp.insert(*nuc);
+        abund_itr++;
+        if (abund_itr == abund_end)
+        {
+          zabund = 9999999;
+          break;
+        }
+        zabund = nabund/10000;
+      };
+    }
+    else
+      newcomp.insert(*nuc);
+  };
+  return Material(newcomp, mass, density, atoms_per_mol, attrs);
+};
+
 
 
 
