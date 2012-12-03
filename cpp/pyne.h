@@ -129,7 +129,7 @@ namespace pyne {
 
   /// Solves the equation for the line y = mx + b, given \a x and the points that 
   /// form the line: (\a x1, \a y1) and (\a x2, \a y2).
-  double solve_line (double x, double x2, double y2, double x1, double y2);
+  double solve_line (double x, double x2, double y2, double x1, double y1);
 
   double tanh(double x);  ///< The hyperbolic tangent function.
   double coth(double x);  ///< The hyperbolic cotangent function.
