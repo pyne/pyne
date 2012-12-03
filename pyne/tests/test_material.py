@@ -197,14 +197,22 @@ class TestMaterialMethods(TestCase):
             assert_almost_equal(mw_mixed/236.5, 1.0, 4)
 
 
-def test_expand_elements():
+def test_expand_elements1():
     natmat = Material({'C': 1.0, 902320: 0.5, 'PU': 4.0, 'U': 3.0}, attrs={'y': 1.0})
     expmat = natmat.expand_elements()
     assert_true(60120 in expmat.comp)
     assert_false(60000 in expmat.comp)
-    assert_almost_equal(data.natural_abund('C12'), expmat['C12']) 
     assert_true(natmat.attrs == expmat.attrs)
     assert_false(natmat.attrs is expmat.attrs)
+
+
+def test_expand_elements2():
+    """Inspired by #86"""
+    natmat = Material({'C': 1.0})
+    expmat = natmat.expand_elements()
+    afrac = expmat.to_atom_frac()
+    assert_equal(data.natural_abund(60120), afrac[60120])
+    assert_equal(data.natural_abund(60130), afrac[60130])
 
 
 class TestMassSubMaterialMethods(TestCase):
