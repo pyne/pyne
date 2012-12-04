@@ -1,3 +1,8 @@
+/// \file enrichment.h
+/// \author Anthony Scopatz (scopatz\@gmail.com)
+///
+/// \brief Top-level enrichment functionality.
+
 #if !defined(_PYNE_ENRICHMENT_)
 #define _PYNE_ENRICHMENT_
 
@@ -10,12 +15,14 @@
 namespace pyne {
 namespace enrichment {
 
+  /// Greates a cascade instance with default values for a uranium enrichment.
   Cascade _fill_default_uranium_cascade();
+  /// a cascade instance with default values for a uranium enrichment.
   extern Cascade default_uranium_cascade;
 
-  double prod_per_feed(double, double, double);
-  double tail_per_feed(double, double, double);
-  double tail_per_prod(double, double, double);
+  double prod_per_feed(double x_feed, double x_prod, double x_tail);
+  double tail_per_feed(double x_feed, double x_prod, double x_tail);
+  double tail_per_prod(double x_feed, double x_prod, double x_tail);
 
   double alphastar_i(double, double, double);
 
