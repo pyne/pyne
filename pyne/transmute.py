@@ -38,11 +38,10 @@ def decay(nuc, phi, t_sim, tol):
     if not(phi.size == 175):
         sys.exit('Incorrect phi dimension for FENDL data.')
     # Fetch nuc_data.h5
-    eaf_table = tb.openFile('/filespace/people/k/klebenow/.local/lib\
-/python2.6/site-packages/pyne/nuc_data.h5')
+    data_table = tb.openFile(nuc_data)
     A = _create_decay_matrix(nuc)
     eA = _solve_decay_matrix(A)
-    eaf_table.close()
+    data_table.close()
 
 
 def _create_decay_matrix(nucs):
@@ -70,25 +69,7 @@ def _solve_decay_matrix(A):
     return eA
 
 
-def _import_eaf_data():
-    """Creates hdf5 table "nuc_data" in local directory from FENDL data.
-
-    Location of EAF data hard-coded for CNERG machines.
-    
-    Method may be deprecated; hdf5 table already exists, though location has
-    been hard-coded again.
-
-    Returns
-    -------
-    eaf_table : PyTables table
-        hdf5 table format of FENDL data.
-    """
-    if not os.path.isfile('nuc_data'):
-        eaf.make_eaf_table('nuc_data', \
-                   '/filespace/groups/cnerg/opt/FENDL2.0-A/fendlg-2.0_175')
-
-
-def _get_daughters(nuc,eaf_table):
+def _get_daughters(nuc, data_table):
     """Returns an array of nuclides which are daughters of nuc in a numpy
     array.
 
@@ -96,8 +77,8 @@ def _get_daughters(nuc,eaf_table):
     ----------
     nuc : nucname
         Name of parent nuclide to get daughters of.
-    eaf_table : PyTables table
-        Local nuc_data.h5 file with eaf_xs data
+    data_table : PyTables table
+        nuc_data.h5 file
 
     Returns
     -------
@@ -105,7 +86,7 @@ def _get_daughters(nuc,eaf_table):
         Daughter nuclides of nuc in human-readable format.
     """
     daughters = [row['daughter'] for row in \
-        eaf_table.root.neutron.eaf_xs.eaf_xs.where('nuc_zz == nuc')]
+        data_table.root.neutron.eaf_xs.eaf_xs.where('nuc_zz == nuc')]
 # Problem with daughter formatting (e.g. '.. 0')
 # This code would convert the names from human to zzaaam
     #for i in range(len(daughters)):
