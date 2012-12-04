@@ -13,6 +13,7 @@ The following files and libraries are part of the PyNE C++ interface:
     rxname
     data
     material
+    enrichment
     extra_types
     h5wrap
     
