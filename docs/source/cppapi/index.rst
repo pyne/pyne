@@ -3,13 +3,14 @@
 =================
 C++ API
 =================
-The following files and libraries in the PyNE C++ interface:
+The following files and libraries are part of the PyNE C++ interface:
 
 .. toctree::
     :maxdepth: 1
 
     pyne
     nucname
+    rxname
     data
     material
     extra_types
