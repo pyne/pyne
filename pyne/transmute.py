@@ -3,11 +3,10 @@ import scipy as sp
 import tables as tb
 
 from pyne import data
-from pyne.xs.cache import xs_cache
 from pyne import nucname
 from pyne import nuc_data
 from pyne.material import Material
-from pyne.xs.cache import xs_cache
+#from pyne.xs.cache import xs_cache
 from pyne.dbgen import eaf#, BASIC_FILTERS
 
 
