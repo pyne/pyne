@@ -121,6 +121,9 @@ pyne::nucname::name_zz_t pyne::nucname::get_name_zz()
   lzd["Y"] = 39;
   lzd["N"] = 07;
   lzd["XE"] = 54;
+  lzd["CN"] = 112;
+  lzd["FL"] = 114;
+  lzd["LV"] = 116;
 
   return lzd;
 };
@@ -168,10 +171,10 @@ pyne::nucname::name_group pyne::nucname::ACT (pyne::nucname::ACT_array, pyne::nu
 pyne::nucname::zz_group pyne::nucname::act = pyne::nucname::name_to_zz_group(pyne::nucname::ACT);
 
 // Transuarnics
-pyne::nucname::name_t pyne::nucname::TRU_array[19] = {"NP", "PU", "AM", "CM", "BK", "CF", "ES", "FM", \
+pyne::nucname::name_t pyne::nucname::TRU_array[22] = {"NP", "PU", "AM", "CM", "BK", "CF", "ES", "FM", \
                                         "MD", "NO", "LR", "RF", "DB", "SG", "BH", "HS", \
-                                        "MT", "DS", "RG"};
-pyne::nucname::name_group pyne::nucname::TRU (pyne::nucname::TRU_array, pyne::nucname::TRU_array+19);
+                                        "MT", "DS", "RG", "CN", "FL", "LV"};
+pyne::nucname::name_group pyne::nucname::TRU (pyne::nucname::TRU_array, pyne::nucname::TRU_array+22);
 pyne::nucname::zz_group pyne::nucname::tru = pyne::nucname::name_to_zz_group(pyne::nucname::TRU);
 
 //Minor Actinides
