@@ -11,7 +11,7 @@ from pyne.material import Material
 import numpy  as np
 import scipy  as sp
 import tables as tb
-from pyne import transmute, nucname, data
+from pyne import transmute, nucname, data, nuc_data
 from scipy import linalg
 
 
@@ -48,13 +48,12 @@ def test_phi_size_check():
 """Tests correct application of the _get_daughters function"""
 def test_get_daughters():
     nuc = nucname.zzaaam("O16")
-    eaf_table = tb.openFile('/filespace/people/k/klebenow/.local/lib\
-/python2.6/site-packages/pyne/nuc_data.h5')
+    data_table = tb.openFile(nuc_data)
     daughtersTest = [row['daughter'] for row in \
-        eaf_table.root.neutron.eaf_xs.eaf_xs.where('nuc_zz == nuc')]
-    daughters = transmute._get_daughters(nuc,eaf_table)
+        data_table.root.neutron.eaf_xs.eaf_xs.where('nuc_zz == nuc')]
+    daughters = transmute._get_daughters(nuc, data_table)
     assert_equal(daughters, daughtersTest)
-    eaf_table.close()
+    data_table.close()
 
 
 #
