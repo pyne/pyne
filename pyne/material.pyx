@@ -1,7 +1,6 @@
 """Python wrapper for material library."""
 # Cython imports
 from libcpp.utility cimport pair as cpp_pair
-from libcpp.map cimport map as cpp_map
 from libcpp.set cimport set as cpp_set
 #from cython.operator cimport reference as ref
 from cython.operator cimport dereference as deref
@@ -15,8 +14,10 @@ import collections
 include "include/cython_version.pxi"
 IF CYTHON_VERSION_MAJOR == 0 and CYTHON_VERSION_MINOR >= 17:
     from libcpp.string cimport string as std_string
+    from libcpp.map cimport map as cpp_map
 ELSE:
     from pyne._includes.libcpp.string cimport string as std_string
+    from pyne._includes.libcpp.map cimport map as cpp_map
 cimport cpp_material
 cimport pyne.stlconverters as conv
 import pyne.stlconverters as conv
@@ -95,12 +96,10 @@ cdef class _Material:
     property comp:
         def __get__(self):
             cdef conv._MapIntDouble comp_proxy
-
             if self._comp is None:
                 comp_proxy = conv.MapIntDouble(False, False)
                 comp_proxy.map_ptr = &self.mat_pointer.comp
                 self._comp = comp_proxy
-
             return self._comp
 
         def __set__(self, value):
@@ -410,6 +409,22 @@ cdef class _Material:
 
         """
         return self.mat_pointer.molecular_weight(atoms_per_mol)
+
+
+    def expand_elements(self):
+        """expand_elements(self)
+        Exapnds the elements ('U', 'C', etc) in the material by replacing them
+        with their natural isotopic distributions.  This function returns a copy.
+
+        Returns
+        -------
+        newmat : Material
+            A copied and expanded material.
+
+        """
+        cdef _Material newmat = Material()
+        newmat.mat_pointer[0] = self.mat_pointer.expand_elements()
+        return newmat
 
 
     #

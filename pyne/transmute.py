@@ -8,7 +8,6 @@ from pyne import data
 from pyne import nucname
 from pyne import nuc_data
 from pyne.material import Material
-from pyne.xs.cache import xs_cache
 from pyne.dbgen import eaf
 
 

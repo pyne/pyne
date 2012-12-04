@@ -49,6 +49,13 @@ std::string pyne::to_str (int t)
   return ss.str();
 }
 
+std::string pyne::to_str(unsigned int t)
+{
+  std::stringstream ss;
+  ss << t;
+  return ss.str();
+}
+
 std::string pyne::to_str (double t)
 {
   std::stringstream ss;
@@ -130,7 +137,7 @@ std::string pyne::remove_substring(std::string s, std::string substr)
 
 std::string pyne::remove_characters(std::string s, std::string chars)
 {
-  // Removes all characters in the string chars from thr string s
+  // Removes all characters in the string chars from the string s
   for (int i = 0; i < chars.length(); i++ )
   {
     s = remove_substring(s, chars.substr(i, 1) );
