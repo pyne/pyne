@@ -552,13 +552,16 @@ class EAFDataSource(DataSource):
         # Check if usable rx #
         if rx is None:
             return None
-        if str(rx) not in EAF_RX:
+        if str(rx) not in EAF_RX and 0 != rx
             msg = "the reaction '{rx}' is not valid.".format(rx=rx)
             raise IndexError(msg)
 
         # Grab data
         with tb.openFile(nuc_data, 'r') as f:
-            cond = "(nuc_zz == {0}) & (rxnum == '{1}')".format(nuc, rx)
+            if rx == 0:
+                cond = "(nuc_zz == {0})".format(nuc)
+            else:
+                cond = "(nuc_zz == {0}) & (rxnum == '{1}')".format(nuc, rx)
             node = f.root.neutron.eaf_xs.eaf_xs
             rows = [np.array(row['xs']) for row in node.where(cond)]
 
