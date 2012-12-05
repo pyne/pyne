@@ -34,6 +34,7 @@ def grab_eaf_data(build_dir=""):
         pass
 
     # Grab ENSDF files and unzip them.
+    # This link was taken from 'http://www-nds.iaea.org/fendl/fen-activation.htm'
     iaea_url = 'http://www-nds.iaea.org/fendl2/activation/processed/vitj_e/libout/fendlg-2.0_175-gz'
     # Pending decision to mirror data on Amazon AWS storage...
     #s3_base_url = 'http://s3.amazonaws.com/pyne/'
@@ -66,8 +67,8 @@ def grab_eaf_data(build_dir=""):
 eaf_dtype = np.dtype([
     ('nuc_zz',        int          ),
     ('rxnum',         'S7'         ),
-    ('rxstr',         'S4'         ),
-    ('daughter',      'S5'         ),
+    ('rxstr',         'S7'         ),
+    ('daughter',      'S7'         ),
     ('xs',            float, (175,))
     ])
 
