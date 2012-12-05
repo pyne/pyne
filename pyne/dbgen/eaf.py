@@ -68,15 +68,19 @@ eaf_dtype = np.dtype([
     ('rxnum',         'S7'         ),
     ('rxstr',         'S4'         ),
     ('daughter',      'S5'         ),
-    ('xs',          float, (175,))
+    ('xs',            float, (175,))
     ])
 
 # Regular expression for parsing an individual set of EAF data.
 # Includes some groupnames that are currently unused.
 eaf_info_pattern = \
-    "(?P<iso>\d{5,7})\s*(?P<rxnum>\d{2,4})\s*(?P<ngrps>\d{1,3})" \
-    + "\s*(?P<parent>[a-zA-Z]{1,2}\s{0,3}\d{1,3}[M ][12 ])" \
-    + "(?P<rxstr>\(N,[\w\s]{3}\))(?P<daugh>[a-zA-Z.]{1,2}\s{0,3}\d{1,3})(.*?)"
+    "(?P<iso>\d{5,7})\s*" + \
+    "(?P<rxnum>\d{2,4})\s*" + \
+    "(?P<ngrps>\d{1,3})\s*" + \
+    "(?P<parent>[a-zA-Z]{1,2}\s{0,3}\d{1,3}[M ][12 ])" + \
+    "(?P<rxstr>\(N,[\w\s]{3}\))" + \
+    "(?P<daugh>[a-zA-Z.]{1,2}\s{0,3}\d{1,3}[MG]{0,1}\d{0,1})" + \
+    "(.*?)"
 eaf_bin_pattern = "(?P<xs>(\d\.\d{5}E[-+]\d{2}\s*){1,175})"
 
 def parse_eaf_xs(build_file):
