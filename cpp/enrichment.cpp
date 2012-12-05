@@ -169,7 +169,7 @@ pyne_enr::Cascade pyne_enr::_norm_comp_secant(pyne_enr::Cascade & casc, \
   // to find the roots for the enriching and stripping stage numbers.  It then 
   // checks to see if the product and waste streams meet their target enrichments
   // for the jth component like they should.  If they don't then it trys other values 
-  // of N and M varied by Newton's Method.  Rinse and repeat as needed.
+  // of N and M varied by the Secant ethod.  Rinse and repeat as needed.
   int j = casc.j;
   pyne_enr::Cascade prev_casc = casc;
   pyne_enr::Cascade curr_casc = casc;
