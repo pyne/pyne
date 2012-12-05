@@ -451,6 +451,8 @@ double pyne::b(std::string nuc)
 /******************************/
 std::map<int, double> pyne::half_life_map = std::map<int, double>();
 std::map<int, double> pyne::decay_const_map = std::map<int, double>();
+std::map<std::pair<int, int>, double> pyne::branch_ratio_map = \
+                                              std::map<std::pair<int, int>, double>();
 
 
 void pyne::_load_atomic_decay()
@@ -499,16 +501,21 @@ void pyne::_load_atomic_decay()
   // giving precednece to ground state values or those seen first.
   int from_nuc;
   double level;
+  std::pair<int, int> from_to;
   for(int n = 0; n < atom_dec_length; n++)
   {
     from_nuc = atom_dec_array[n].from_nuc;
     level = atom_dec_array[n].level;
+    from_to = std::pair<int, int>(from_nuc, atom_dec_array[n].to_nuc);
 
     if (0 == half_life_map.count(from_nuc) || 0.0 == level)
       half_life_map[from_nuc] = atom_dec_array[n].half_life;
 
     if (0 == decay_const_map.count(from_nuc) || 0.0 == level)
       decay_const_map[from_nuc] = atom_dec_array[n].decay_const;
+
+    if (0 == branch_ratio_map.count(from_to) || 0.0 == level)
+      branch_ratio_map[from_to] = atom_dec_array[n].branch_ratio;
   };
 };
 
@@ -566,7 +573,7 @@ double pyne::half_life(std::string nuc)
 
 double pyne::decay_const(int nuc)
 {
-  // Find the nuclide's half life in s
+  // Find the nuclide's decay constant in 1/s
   std::map<int, double>::iterator nuc_iter, nuc_end;
 
   nuc_iter = decay_const_map.find(nuc);
@@ -608,3 +615,52 @@ double pyne::decay_const(std::string nuc)
 
 
 
+//
+// Branch ratio data
+//
+
+double pyne::branch_ratio(std::pair<int, int> from_to)
+{
+  // Find the parent/child pair branch ratio as a fraction
+  std::map<std::pair<int, int>, double>::iterator br_iter, br_end;
+
+  br_iter = branch_ratio_map.find(from_to);
+  br_end = branch_ratio_map.end();
+
+  // First check if we already have the pair in the map
+  if (br_iter != br_end)
+    return (*br_iter).second;
+
+  // Next, fill up the map with values from the 
+  // nuc_data.h5, if the map is empty.
+  if (branch_ratio_map.empty())
+  {
+    _load_atomic_decay();
+    return branch_ratio(from_to);
+  };
+
+  // Finally, if none of these work, 
+  // assume the value is stable
+  double br = 0.0;
+  branch_ratio_map[from_to] = br;
+  return br;
+};
+
+
+double pyne::branch_ratio(int from_nuc, int to_nuc)
+{
+  return branch_ratio(std::pair<int, int>(nucname::zzaaam(from_nuc), 
+                                          nucname::zzaaam(to_nuc)));
+};
+
+double pyne::branch_ratio(char * from_nuc, char * to_nuc)
+{
+  return branch_ratio(std::pair<int, int>(nucname::zzaaam(from_nuc), 
+                                          nucname::zzaaam(to_nuc)));
+};
+
+double pyne::branch_ratio(std::string from_nuc, std::string to_nuc)
+{
+  return branch_ratio(std::pair<int, int>(nucname::zzaaam(from_nuc), 
+                                          nucname::zzaaam(to_nuc)));
+};
