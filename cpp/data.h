@@ -7,6 +7,7 @@
 #define _PYNE_DATA_
 #include <iostream>
 #include <string>
+#include <utility>
 #include <map>
 #include <set>
 #include <exception>
@@ -137,6 +138,10 @@ namespace pyne
   /// Mapping from nuclides in zzaaam form to their decay constants [1/s].
   extern std::map<int, double> decay_const_map;
 
+  /// Mapping from parent/child nuclide pairs in zzaaam form to their 
+  /// branch ratio [fraction].
+  extern std::map<std::pair<int, int>, double> branch_ratio_map;
+
   /// a struct matching the '/atomic_decay' table in nuc_data.h5.
   typedef struct atomic_decay_struct {
     int from_nuc; ///< parent species in zzaaam form
@@ -171,6 +176,20 @@ namespace pyne
   double decay_const(char * nuc);
   /// Returns the decay constant for a nuclide \a nuc.
   double decay_const(std::string nuc);
+  /// \}
+
+  /// \brief Returns the branch ratio for a parent/child nuclide pair.
+  ///
+  /// This function works by first checking the branch_ratio_map.  If this is empty it
+  /// loads the data from disk.  If the parent/child nuclide pair is still not found, 
+  /// then the decay is assumed to be impossible and 0.0 is returned.
+  double branch_ratio(std::pair<int, int> from_to);
+  /// Returns the branch ratio for a parent/child nuclide pair.
+  double branch_ratio(int from_nuc, int to_nuc);
+  /// Returns the branch ratio for a parent/child nuclide pair.
+  double branch_ratio(char * from_nuc, char * to_nuc);
+  /// Returns the branch ratio for a parent/child nuclide pair.
+  double branch_ratio(std::string from_nuc, std::string to_nuc);
   /// \}
 }
 
