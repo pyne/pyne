@@ -25,7 +25,7 @@ sys.path.insert(0, os.path.abspath('../sphinxext'))
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
 extensions = ['sphinx.ext.autodoc', 'sphinx.ext.doctest', 'sphinx.ext.pngmath', 
               'sphinx.ext.inheritance_diagram', 'numpydoc', 'sphinx.ext.autosummary',
-              'ipython_console_highlighting', 'sphinx.ext.viewcode',
+              'ipython_console_highlighting', 'sphinx.ext.viewcode', 'breathe',
               ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -238,3 +238,8 @@ latex_documents = [
 autodoc_member_order = "groupwise"
 autoclass_content = "both"
 autosummary_generate = []
+
+# C++ Autodocumentation Flags
+breathe_projects = {"pyne": None,}
+breathe_default_project = 'pyne'
+breathe_domain_by_extension = {"h" : "cpp",}

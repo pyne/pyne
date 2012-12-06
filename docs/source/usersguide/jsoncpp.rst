@@ -13,9 +13,9 @@ This module is mirror at the `PyJsonCpp project`_.
 
 .. _PyJsonCpp project: https://github.com/scopatz/pyjsoncpp
 
-=============
+-------------
 Usage Example
-=============
+-------------
 The Value object is the main interface for 
 Values may be converted to and from regular Python types.  These have the 
 normal behavior for their type.
