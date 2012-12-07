@@ -453,6 +453,7 @@ std::map<int, double> pyne::half_life_map = std::map<int, double>();
 std::map<int, double> pyne::decay_const_map = std::map<int, double>();
 std::map<std::pair<int, int>, double> pyne::branch_ratio_map = \
                                               std::map<std::pair<int, int>, double>();
+std::map<int, double> pyne::state_energy_map = std::map<int, double>();
 
 
 void pyne::_load_atomic_decay()
@@ -516,6 +517,8 @@ void pyne::_load_atomic_decay()
 
     if (0 == branch_ratio_map.count(from_to) || 0.0 == level)
       branch_ratio_map[from_to] = atom_dec_array[n].branch_ratio;
+
+    state_energy_map[from_nuc] = level;
   };
 };
 
@@ -663,4 +666,49 @@ double pyne::branch_ratio(std::string from_nuc, std::string to_nuc)
 {
   return branch_ratio(std::pair<int, int>(nucname::zzaaam(from_nuc), 
                                           nucname::zzaaam(to_nuc)));
+};
+
+
+
+//
+// Excitation state energy data
+//
+
+double pyne::state_energy(int nuc)
+{
+  // Find the nuclide's state energy in MeV
+  std::map<int, double>::iterator nuc_iter, nuc_end;
+
+  nuc_iter = state_energy_map.find(nuc);
+  nuc_end = state_energy_map.end();
+
+  // First check if we already have the nuc in the map
+  if (nuc_iter != nuc_end)
+    return (*nuc_iter).second;
+
+  // Next, fill up the map with values from the 
+  // nuc_data.h5, if the map is empty.
+  if (state_energy_map.empty())
+  {
+    _load_atomic_decay();
+    return state_energy(nuc);
+  };
+
+  // Finally, if none of these work, 
+  // assume the value is stable
+  double se = 0.0;
+  state_energy_map[nuc] = se;
+  return se;
+};
+
+
+double pyne::state_energy(char * nuc)
+{
+  return state_energy(nucname::zzaaam(nuc));
+};
+
+
+double pyne::state_energy(std::string nuc)
+{
+  return state_energy(nucname::zzaaam(nuc));
 };

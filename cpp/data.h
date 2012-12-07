@@ -134,13 +134,13 @@ namespace pyne
 
   /// Mapping from nuclides in zzaaam form to their half lives [s].
   extern std::map<int, double> half_life_map;
-
   /// Mapping from nuclides in zzaaam form to their decay constants [1/s].
   extern std::map<int, double> decay_const_map;
-
   /// Mapping from parent/child nuclide pairs in zzaaam form to their 
   /// branch ratio [fraction].
   extern std::map<std::pair<int, int>, double> branch_ratio_map;
+  /// Mapping from nuclides in zzaaam form to their excitation energy [MeV].
+  extern std::map<int, double> state_energy_map;
 
   /// a struct matching the '/atomic_decay' table in nuc_data.h5.
   typedef struct atomic_decay_struct {
@@ -176,7 +176,6 @@ namespace pyne
   double decay_const(char * nuc);
   /// Returns the decay constant for a nuclide \a nuc.
   double decay_const(std::string nuc);
-  /// \}
 
   /// \brief Returns the branch ratio for a parent/child nuclide pair.
   ///
@@ -190,6 +189,18 @@ namespace pyne
   double branch_ratio(char * from_nuc, char * to_nuc);
   /// Returns the branch ratio for a parent/child nuclide pair.
   double branch_ratio(std::string from_nuc, std::string to_nuc);
+
+  /// \brief Returns the excitation energy [MeV] of a \a nuc in a given state.
+  ///
+  /// This function works by first checking the state_energy_map.  If this is empty it
+  /// loads the data from disk.  If the nuclide is still not found, then the species
+  /// is assumed to be in a ground state and 0.0 is returned.
+  double state_energy(int nuc);
+  /// Returns the decay constant for a nuclide \a nuc.
+  double state_energy(char * nuc);
+  /// Returns the decay constant for a nuclide \a nuc.
+  double state_energy(std::string nuc);
+
   /// \}
 }
 
