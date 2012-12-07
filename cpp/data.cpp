@@ -454,6 +454,8 @@ std::map<int, double> pyne::decay_const_map = std::map<int, double>();
 std::map<std::pair<int, int>, double> pyne::branch_ratio_map = \
                                               std::map<std::pair<int, int>, double>();
 std::map<int, double> pyne::state_energy_map = std::map<int, double>();
+std::map<int, std::set<int> > pyne::decay_children_map = \
+                                                      std::map<int, std::set<int> >();
 
 
 void pyne::_load_atomic_decay()
@@ -711,4 +713,49 @@ double pyne::state_energy(char * nuc)
 double pyne::state_energy(std::string nuc)
 {
   return state_energy(nucname::zzaaam(nuc));
+};
+
+
+
+//
+// Decay children data
+//
+
+std::set<int> pyne::decay_children(int nuc)
+{
+  // Find the nuclide's decay constant in 1/s
+  std::map<int, std::set<int> >::iterator nuc_iter, nuc_end;
+
+  nuc_iter = decay_children_map.find(nuc);
+  nuc_end = decay_children_map.end();
+
+  // First check if we already have the nuc in the map
+  if (nuc_iter != nuc_end)
+    return (*nuc_iter).second;
+
+  // Next, fill up the map with values from the 
+  // nuc_data.h5, if the map is empty.
+  if (decay_children_map.empty())
+  {
+    _load_atomic_decay();
+    return decay_children(nuc);
+  };
+
+  // Finally, if none of these work, 
+  // assume the value is stable
+  std::set<int> dc = std::set<int>();
+  decay_children_map[nuc] = dc;
+  return dc;
+};
+
+
+std::set<int> pyne::decay_children(char * nuc)
+{
+  return decay_children(nucname::zzaaam(nuc));
+};
+
+
+std::set<int> pyne::decay_children(std::string nuc)
+{
+  return decay_children(nucname::zzaaam(nuc));
 };
