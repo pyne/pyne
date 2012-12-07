@@ -60,4 +60,13 @@ cdef extern from "data.h" namespace "pyne":
     double branch_ratio(char *, char *) except +
     double branch_ratio(std_string, std_string) except +
 
+    map[int, double] state_energy_map
+    double state_energy(int) except +
+    double state_energy(char *) except +
+    double state_energy(std_string) except +
+
+    map[int, set[int]] decay_children_map
+    set[int] decay_children(int) except +
+    set[int] decay_children(char *) except +
+    set[int] decay_children(std_string) except +
 

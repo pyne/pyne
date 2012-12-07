@@ -183,9 +183,9 @@ class Set{clsname}(_Set{clsname}, collections.Set):
 
     Parameters
     ----------
-    new_set : bool or dict-like
+    new_set : bool or set-like
         Boolean on whether to make a new set or not, or set-like object
-        with keys and values which are castable to the appropriate type.
+        with values which are castable to the appropriate type.
     free_set : bool
         Flag for whether the pointer to the C++ set should be deallocated
         when the wrapper is dereferenced.
