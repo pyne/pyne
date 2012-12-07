@@ -12,9 +12,13 @@ from cython.operator cimport preincrement as inc
 # local imports 
 include "include/cython_version.pxi"
 IF CYTHON_VERSION_MAJOR == 0 and CYTHON_VERSION_MINOR >= 17:
+    from libcpp.map cimport map as cpp_map
+    from libcpp.set cimport set as cpp_set
     from libcpp.string cimport string as std_string
     from libcpp.utility cimport pair as cpp_pair
 ELSE:
+    from pyne._includes.libcpp.map cimport map as cpp_map
+    from pyne._includes.libcpp.set cimport set as cpp_set
     from pyne._includes.libcpp.string cimport string as std_string
     from pyne._includes.libcpp.utility cimport pair as cpp_pair
 cimport extra_types
@@ -330,3 +334,63 @@ def branch_ratio(from_nuc, to_nuc):
     return br
 
 
+cdef conv._MapIntDouble state_energy_map_proxy = conv.MapIntDouble(False)
+state_energy_map_proxy.map_ptr = &cpp_data.state_energy_map
+state_energy_map = state_energy_map_proxy
+
+def state_energy(nuc):
+    """Finds the excitation energy [MeV] of a nuclide in a given state.
+
+    Parameters
+    ----------
+    nuc : int or str 
+        Input nuclide.
+
+    Returns
+    -------
+    se : float
+        Excitation energy of this nuclide [MeV].
+
+    Notes
+    -----
+    If the nuclide is not found, the nuclide is assumed to be stable.
+    """
+    if isinstance(nuc, int):
+        se = cpp_data.state_energy(<int> nuc)
+    elif isinstance(nuc, basestring):
+        se = cpp_data.state_energy(<char *> nuc)
+    else:
+        raise pyne.nucname.NucTypeError(nuc)
+
+    return se
+
+
+def decay_children(nuc):
+    """Finds the decay children of a nuclide.
+
+    Parameters
+    ----------
+    nuc : int or str 
+        Input nuclide.
+
+    Returns
+    -------
+    dc : set of ints
+        Decay children in zzaaam form.
+
+    Notes
+    -----
+    If the nuclide is not found or is stable, the empty set is returned.
+    """
+    cdef cpp_set[int] cpp_dc
+    cdef conv._SetInt dc = conv.SetInt(False)
+
+    if isinstance(nuc, int):
+        cpp_dc = cpp_data.decay_children(<int> nuc)
+    elif isinstance(nuc, basestring):
+        cpp_dc = cpp_data.decay_children(<char *> nuc)
+    else:
+        raise pyne.nucname.NucTypeError(nuc)
+
+    dc.set_ptr = &cpp_dc
+    return dc
