@@ -12,9 +12,15 @@ from cython.operator cimport preincrement as inc
 # local imports 
 include "include/cython_version.pxi"
 IF CYTHON_VERSION_MAJOR == 0 and CYTHON_VERSION_MINOR >= 17:
+    from libcpp.map cimport map as cpp_map
+    from libcpp.set cimport set as cpp_set
     from libcpp.string cimport string as std_string
+    from libcpp.utility cimport pair as cpp_pair
 ELSE:
+    from pyne._includes.libcpp.map cimport map as cpp_map
+    from pyne._includes.libcpp.set cimport set as cpp_set
     from pyne._includes.libcpp.string cimport string as std_string
+    from pyne._includes.libcpp.utility cimport pair as cpp_pair
 cimport extra_types
 
 cimport pyne.cpp_pyne
@@ -289,3 +295,100 @@ def decay_const(nuc):
     return dc
 
 
+
+def branch_ratio(from_nuc, to_nuc):
+    """Finds a branch ratio for a from -> to nuclide pair [fraction].
+
+    Parameters
+    ----------
+    from_nuc : int or str 
+        Parent nuclide.
+    to_nuc : int or str 
+        Child nuclide.
+
+    Returns
+    -------
+    br : float
+        Branch ratio of this nuclide pair [fraction].
+
+    Notes
+    -----
+    If this pair is not found, it is assumed to be impossible, and the branch ratio
+    is set to zero.
+    """
+    if isinstance(from_nuc, int):
+        fn = pyne.cpp_nucname.zzaaam(<int> from_nuc)
+    elif isinstance(from_nuc, basestring):
+        fn = pyne.cpp_nucname.zzaaam(std_string(<char *> from_nuc))
+    else:
+        raise pyne.nucname.NucTypeError(from_nuc)
+
+    if isinstance(to_nuc, int):
+        tn = pyne.cpp_nucname.zzaaam(<int> to_nuc)
+    elif isinstance(to_nuc, basestring):
+        tn = pyne.cpp_nucname.zzaaam(std_string(<char *> to_nuc))
+    else:
+        raise pyne.nucname.NucTypeError(to_nuc)
+
+    br = cpp_data.branch_ratio(cpp_pair[int, int](fn, tn))
+    return br
+
+
+cdef conv._MapIntDouble state_energy_map_proxy = conv.MapIntDouble(False)
+state_energy_map_proxy.map_ptr = &cpp_data.state_energy_map
+state_energy_map = state_energy_map_proxy
+
+def state_energy(nuc):
+    """Finds the excitation energy [MeV] of a nuclide in a given state.
+
+    Parameters
+    ----------
+    nuc : int or str 
+        Input nuclide.
+
+    Returns
+    -------
+    se : float
+        Excitation energy of this nuclide [MeV].
+
+    Notes
+    -----
+    If the nuclide is not found, the nuclide is assumed to be stable.
+    """
+    if isinstance(nuc, int):
+        se = cpp_data.state_energy(<int> nuc)
+    elif isinstance(nuc, basestring):
+        se = cpp_data.state_energy(<char *> nuc)
+    else:
+        raise pyne.nucname.NucTypeError(nuc)
+
+    return se
+
+
+def decay_children(nuc):
+    """Finds the decay children of a nuclide.
+
+    Parameters
+    ----------
+    nuc : int or str 
+        Input nuclide.
+
+    Returns
+    -------
+    dc : set of ints
+        Decay children in zzaaam form.
+
+    Notes
+    -----
+    If the nuclide is not found or is stable, the empty set is returned.
+    """
+    cdef conv._SetInt dc = conv.SetInt()
+
+    if isinstance(nuc, int):
+        dc.set_ptr[0] = cpp_data.decay_children(<int> nuc)
+    elif isinstance(nuc, basestring):
+        dc.set_ptr[0] = cpp_data.decay_children(<char *> nuc)
+    else:
+        raise pyne.nucname.NucTypeError(nuc)
+
+    return dc
