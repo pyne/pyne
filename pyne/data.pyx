@@ -382,15 +382,13 @@ def decay_children(nuc):
     -----
     If the nuclide is not found or is stable, the empty set is returned.
     """
-    cdef cpp_set[int] cpp_dc
-    cdef conv._SetInt dc = conv.SetInt(False)
+    cdef conv._SetInt dc = conv.SetInt()
 
     if isinstance(nuc, int):
-        cpp_dc = cpp_data.decay_children(<int> nuc)
+        dc.set_ptr[0] = cpp_data.decay_children(<int> nuc)
     elif isinstance(nuc, basestring):
-        cpp_dc = cpp_data.decay_children(<char *> nuc)
+        dc.set_ptr[0] = cpp_data.decay_children(<char *> nuc)
     else:
         raise pyne.nucname.NucTypeError(nuc)
 
-    dc.set_ptr = &cpp_dc
     return dc

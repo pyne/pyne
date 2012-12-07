@@ -522,7 +522,9 @@ void pyne::_load_atomic_decay()
       branch_ratio_map[from_to] = atom_dec_array[n].branch_ratio;
 
     state_energy_map[from_nuc] = level;
-    decay_children_map[from_nuc].insert(to_nuc);
+
+    if (0.0 != atom_dec_array[n].decay_const)
+      decay_children_map[from_nuc].insert(to_nuc);
   };
 };
 
@@ -710,7 +712,7 @@ double pyne::state_energy(char * nuc)
 {
   return state_energy(nucname::zzaaam(nuc));
 };
-
+ 
 
 double pyne::state_energy(std::string nuc)
 {
@@ -732,8 +734,9 @@ std::set<int> pyne::decay_children(int nuc)
   nuc_end = decay_children_map.end();
 
   // First check if we already have the nuc in the map
-  if (nuc_iter != nuc_end)
+  if (nuc_iter != nuc_end){
     return (*nuc_iter).second;
+  };
 
   // Next, fill up the map with values from the 
   // nuc_data.h5, if the map is empty.
