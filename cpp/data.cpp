@@ -502,14 +502,15 @@ void pyne::_load_atomic_decay()
 
   // Ok now that we have the array of stucts, put it in the maps
   // giving precednece to ground state values or those seen first.
-  int from_nuc;
+  int from_nuc, to_nuc;
   double level;
   std::pair<int, int> from_to;
   for(int n = 0; n < atom_dec_length; n++)
   {
     from_nuc = atom_dec_array[n].from_nuc;
     level = atom_dec_array[n].level;
-    from_to = std::pair<int, int>(from_nuc, atom_dec_array[n].to_nuc);
+    to_nuc = atom_dec_array[n].to_nuc;
+    from_to = std::pair<int, int>(from_nuc, to_nuc);
 
     if (0 == half_life_map.count(from_nuc) || 0.0 == level)
       half_life_map[from_nuc] = atom_dec_array[n].half_life;
@@ -521,6 +522,7 @@ void pyne::_load_atomic_decay()
       branch_ratio_map[from_to] = atom_dec_array[n].branch_ratio;
 
     state_energy_map[from_nuc] = level;
+    decay_children_map[from_nuc].insert(to_nuc);
   };
 };
 
