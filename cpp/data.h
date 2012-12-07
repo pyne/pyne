@@ -141,6 +141,8 @@ namespace pyne
   extern std::map<std::pair<int, int>, double> branch_ratio_map;
   /// Mapping from nuclides in zzaaam form to their excitation energy [MeV].
   extern std::map<int, double> state_energy_map;
+  /// Mapping from nuclides in zzaaam form to its decay children, if any.
+  extern std::map<int, std::set<int> > decay_children_map;
 
   /// a struct matching the '/atomic_decay' table in nuc_data.h5.
   typedef struct atomic_decay_struct {
@@ -196,10 +198,21 @@ namespace pyne
   /// loads the data from disk.  If the nuclide is still not found, then the species
   /// is assumed to be in a ground state and 0.0 is returned.
   double state_energy(int nuc);
-  /// Returns the decay constant for a nuclide \a nuc.
+  /// Returns the excitation energy [MeV] of a \a nuc in a given state.
   double state_energy(char * nuc);
-  /// Returns the decay constant for a nuclide \a nuc.
+  /// Returns the excitation energy [MeV] of a \a nuc in a given state.
   double state_energy(std::string nuc);
+
+  /// \brief Returns a set of decay children of a \a nuc.
+  ///
+  /// This function works by first checking decay_chidlren_map.  If this is empty it
+  /// loads the data from disk.  If the nuclide is still not found, then the species
+  /// is assumed to be stable and an empty set is returned.
+  std::set<int> decay_children(int nuc);
+  /// Returns the decay constant for a nuclide \a nuc.
+  std::set<int> decay_children(char * nuc);
+  /// Returns the decay constant for a nuclide \a nuc.
+  std::set<int> decay_children(std::string nuc);
 
   /// \}
 }
