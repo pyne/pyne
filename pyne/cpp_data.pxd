@@ -4,10 +4,12 @@ IF CYTHON_VERSION_MAJOR == 0 and CYTHON_VERSION_MINOR >= 17:
     from libcpp.string cimport string as std_string
     from libcpp.map cimport map
     from libcpp.set cimport set
+    from libcpp.utility cimport pair
 ELSE:
     from pyne._includes.libcpp.string cimport string as std_string
     from pyne._includes.libcpp.map cimport map
     from pyne._includes.libcpp.set cimport set
+    from pyne._includes.libcpp.utility cimport pair
 
 cimport extra_types
 
@@ -51,5 +53,11 @@ cdef extern from "data.h" namespace "pyne":
     double decay_const(int) except +
     double decay_const(char *) except +
     double decay_const(std_string) except +
+
+    map[pair[int, int], double] branch_ratio_map
+    double branch_ratio(pair[int, int]) except +
+    double branch_ratio(int, int) except +
+    double branch_ratio(char *, char *) except +
+    double branch_ratio(std_string, std_string) except +
 
 
