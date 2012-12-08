@@ -451,6 +451,11 @@ double pyne::b(std::string nuc)
 /******************************/
 std::map<int, double> pyne::half_life_map = std::map<int, double>();
 std::map<int, double> pyne::decay_const_map = std::map<int, double>();
+std::map<std::pair<int, int>, double> pyne::branch_ratio_map = \
+                                              std::map<std::pair<int, int>, double>();
+std::map<int, double> pyne::state_energy_map = std::map<int, double>();
+std::map<int, std::set<int> > pyne::decay_children_map = \
+                                                      std::map<int, std::set<int> >();
 
 
 void pyne::_load_atomic_decay()
@@ -497,18 +502,29 @@ void pyne::_load_atomic_decay()
 
   // Ok now that we have the array of stucts, put it in the maps
   // giving precednece to ground state values or those seen first.
-  int from_nuc;
+  int from_nuc, to_nuc;
   double level;
+  std::pair<int, int> from_to;
   for(int n = 0; n < atom_dec_length; n++)
   {
     from_nuc = atom_dec_array[n].from_nuc;
     level = atom_dec_array[n].level;
+    to_nuc = atom_dec_array[n].to_nuc;
+    from_to = std::pair<int, int>(from_nuc, to_nuc);
 
     if (0 == half_life_map.count(from_nuc) || 0.0 == level)
       half_life_map[from_nuc] = atom_dec_array[n].half_life;
 
     if (0 == decay_const_map.count(from_nuc) || 0.0 == level)
       decay_const_map[from_nuc] = atom_dec_array[n].decay_const;
+
+    if (0 == branch_ratio_map.count(from_to) || 0.0 == level)
+      branch_ratio_map[from_to] = atom_dec_array[n].branch_ratio;
+
+    state_energy_map[from_nuc] = level;
+
+    if (0.0 != atom_dec_array[n].decay_const)
+      decay_children_map[from_nuc].insert(to_nuc);
   };
 };
 
@@ -566,7 +582,7 @@ double pyne::half_life(std::string nuc)
 
 double pyne::decay_const(int nuc)
 {
-  // Find the nuclide's half life in s
+  // Find the nuclide's decay constant in 1/s
   std::map<int, double>::iterator nuc_iter, nuc_end;
 
   nuc_iter = decay_const_map.find(nuc);
@@ -608,3 +624,143 @@ double pyne::decay_const(std::string nuc)
 
 
 
+//
+// Branch ratio data
+//
+
+double pyne::branch_ratio(std::pair<int, int> from_to)
+{
+  // Find the parent/child pair branch ratio as a fraction
+  std::map<std::pair<int, int>, double>::iterator br_iter, br_end;
+
+  br_iter = branch_ratio_map.find(from_to);
+  br_end = branch_ratio_map.end();
+
+  // First check if we already have the pair in the map
+  if (br_iter != br_end)
+    return (*br_iter).second;
+
+  // Next, fill up the map with values from the 
+  // nuc_data.h5, if the map is empty.
+  if (branch_ratio_map.empty())
+  {
+    _load_atomic_decay();
+    return branch_ratio(from_to);
+  };
+
+  // Finally, if none of these work, 
+  // assume the value is stable
+  double br = 0.0;
+  branch_ratio_map[from_to] = br;
+  return br;
+};
+
+
+double pyne::branch_ratio(int from_nuc, int to_nuc)
+{
+  return branch_ratio(std::pair<int, int>(nucname::zzaaam(from_nuc), 
+                                          nucname::zzaaam(to_nuc)));
+};
+
+double pyne::branch_ratio(char * from_nuc, char * to_nuc)
+{
+  return branch_ratio(std::pair<int, int>(nucname::zzaaam(from_nuc), 
+                                          nucname::zzaaam(to_nuc)));
+};
+
+double pyne::branch_ratio(std::string from_nuc, std::string to_nuc)
+{
+  return branch_ratio(std::pair<int, int>(nucname::zzaaam(from_nuc), 
+                                          nucname::zzaaam(to_nuc)));
+};
+
+
+
+//
+// Excitation state energy data
+//
+
+double pyne::state_energy(int nuc)
+{
+  // Find the nuclide's state energy in MeV
+  std::map<int, double>::iterator nuc_iter, nuc_end;
+
+  nuc_iter = state_energy_map.find(nuc);
+  nuc_end = state_energy_map.end();
+
+  // First check if we already have the nuc in the map
+  if (nuc_iter != nuc_end)
+    return (*nuc_iter).second;
+
+  // Next, fill up the map with values from the 
+  // nuc_data.h5, if the map is empty.
+  if (state_energy_map.empty())
+  {
+    _load_atomic_decay();
+    return state_energy(nuc);
+  };
+
+  // Finally, if none of these work, 
+  // assume the value is stable
+  double se = 0.0;
+  state_energy_map[nuc] = se;
+  return se;
+};
+
+
+double pyne::state_energy(char * nuc)
+{
+  return state_energy(nucname::zzaaam(nuc));
+};
+ 
+
+double pyne::state_energy(std::string nuc)
+{
+  return state_energy(nucname::zzaaam(nuc));
+};
+
+
+
+//
+// Decay children data
+//
+
+std::set<int> pyne::decay_children(int nuc)
+{
+  // Find the nuclide's decay constant in 1/s
+  std::map<int, std::set<int> >::iterator nuc_iter, nuc_end;
+
+  nuc_iter = decay_children_map.find(nuc);
+  nuc_end = decay_children_map.end();
+
+  // First check if we already have the nuc in the map
+  if (nuc_iter != nuc_end){
+    return (*nuc_iter).second;
+  };
+
+  // Next, fill up the map with values from the 
+  // nuc_data.h5, if the map is empty.
+  if (decay_children_map.empty())
+  {
+    _load_atomic_decay();
+    return decay_children(nuc);
+  };
+
+  // Finally, if none of these work, 
+  // assume the value is stable
+  std::set<int> dc = std::set<int>();
+  decay_children_map[nuc] = dc;
+  return dc;
+};
+
+
+std::set<int> pyne::decay_children(char * nuc)
+{
+  return decay_children(nucname::zzaaam(nuc));
+};
+
+
+std::set<int> pyne::decay_children(std::string nuc)
+{
+  return decay_children(nucname::zzaaam(nuc));
+};

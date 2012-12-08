@@ -1,5 +1,5 @@
 =====================================
-PyNE: Python for Nuclear Engineering
+PyNE: The Nuclear Engineering Toolkit
 =====================================
 PyNE, or Python for Nuclear Engineering, is a suite of tools to aid in 
 computational nuclear science & engineering.  PyNE seeks to provide 
@@ -17,7 +17,7 @@ For a quick install from source, please  clone from the official repo::
     git clone git://github.com/pyne/pyne.git
     cd pyne/
     python setup.py install --user
-    nuc_data_make
+    scripts/nuc_data_make
 
 For Windows install instructions please :ref:`go here <win_install>`.
 
@@ -32,8 +32,8 @@ Usage:
 
     install
     usersguide/index
-    libref/index
-    cppapi
+    pyapi/index
+    cppapi/index
     previous/index
 
 Development:
