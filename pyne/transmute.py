@@ -36,8 +36,6 @@ def decay(nuc, phi, t_sim, tol):
     # Check length of phi
     if not(phi.size == 175):
         sys.exit('Incorrect phi dimension for FENDL data.')
-    # Fetch nuc_data.h5
-    data_table = tb.openFile(nuc_data)
     A = _create_decay_matrix(nuc)
     eA = _solve_decay_matrix(A)
     data_table.close()
@@ -68,7 +66,7 @@ def _solve_decay_matrix(A):
     return eA
 
 
-def _get_daughters(nuc, data_table):
+def _get_daughters(nuc):
     """Returns an array of nuclides which are daughters of nuc in a numpy
     array.
 
@@ -84,13 +82,9 @@ def _get_daughters(nuc, data_table):
     daughters : list
         Daughter nuclides of nuc in human-readable format.
     """
-    daughters = [row['daughter'] for row in \
-        data_table.root.neutron.eaf_xs.eaf_xs.where('nuc_zz == nuc')]
-# Problem with daughter formatting (e.g. '.. 0')
-# This code would convert the names from human to zzaaam
-    #for i in range(len(daughters)):
-        #daughters[i] = nucname.zzaaam(daughters[i].replace(' ',''))
+    with tb.openFile(nuc_data, 'r') as f:
+        daughters = [row['daughter'] for row in \
+            f.root.neutron.eaf_xs.eaf_xs.where('nuc_zz == nuc')]
     return daughters
-
 
 
