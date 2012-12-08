@@ -51,7 +51,7 @@ def test_get_daughters():
     data_table = tb.openFile(nuc_data)
     daughtersTest = [row['daughter'] for row in \
         data_table.root.neutron.eaf_xs.eaf_xs.where('nuc_zz == nuc')]
-    daughters = transmute._get_daughters(nuc, data_table)
+    daughters = transmute._get_daughters(nuc)
     assert_equal(daughters, daughtersTest)
     data_table.close()
 
