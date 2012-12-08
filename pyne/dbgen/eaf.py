@@ -34,6 +34,7 @@ def grab_eaf_data(build_dir=""):
         pass
 
     # Grab ENSDF files and unzip them.
+    # This link was taken from 'http://www-nds.iaea.org/fendl/fen-activation.htm'
     iaea_url = 'http://www-nds.iaea.org/fendl2/activation/processed/vitj_e/libout/fendlg-2.0_175-gz'
     # Pending decision to mirror data on Amazon AWS storage...
     #s3_base_url = 'http://s3.amazonaws.com/pyne/'
@@ -66,17 +67,21 @@ def grab_eaf_data(build_dir=""):
 eaf_dtype = np.dtype([
     ('nuc_zz',        int          ),
     ('rxnum',         'S7'         ),
-    ('rxstr',         'S4'         ),
-    ('daughter',      'S5'         ),
-    ('xs',          float, (175,))
+    ('rxstr',         'S7'         ),
+    ('daughter',      'S7'         ),
+    ('xs',            float, (175,))
     ])
 
 # Regular expression for parsing an individual set of EAF data.
 # Includes some groupnames that are currently unused.
 eaf_info_pattern = \
-    "(?P<iso>\d{5,7})\s*(?P<rxnum>\d{2,4})\s*(?P<ngrps>\d{1,3})" \
-    + "\s*(?P<parent>[a-zA-Z]{1,2}\s{0,3}\d{1,3}[M ][12 ])" \
-    + "(?P<rxstr>\(N,[\w\s]{3}\))(?P<daugh>[a-zA-Z.]{1,2}\s{0,3}\d{1,3})(.*?)"
+    "(?P<iso>\d{5,7})\s*" + \
+    "(?P<rxnum>\d{2,4})\s*" + \
+    "(?P<ngrps>\d{1,3})\s*" + \
+    "(?P<parent>[a-zA-Z]{1,2}\s{0,3}\d{1,3}[M ][12 ])" + \
+    "(?P<rxstr>\(N,[\w\s]{3}\))" + \
+    "(?P<daugh>[a-zA-Z.]{1,2}\s{0,3}\d{1,3}[MG]{0,1}\d{0,1})" + \
+    "(.*?)"
 eaf_bin_pattern = "(?P<xs>(\d\.\d{5}E[-+]\d{2}\s*){1,175})"
 
 def parse_eaf_xs(build_file):

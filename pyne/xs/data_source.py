@@ -401,7 +401,7 @@ class CinderDataSource(DataSource):
 
         # Set query condition
         if rx == 'f':
-            cond = 'nuc == {0}'.format(nuc)
+            cond = 'from_nuc == {0}'.format(nuc)
         elif rx in RX_TYPES:
             cond = "(from_nuc == {0}) & (reaction_type == '{1}')".format(nuc, rx)
         else:
@@ -525,9 +525,9 @@ class EAFDataSource(DataSource):
         ----------
         nuc : int
             Nuclide in zzaaam form.
-        rx : str 
+        rx : int or str 
             Reaction MT # in nnnm form.
-            OR: (eventually)
+            OR:
             Reaction key: 'gamma', 'alpha', 'p', etc.
 
         See Also

@@ -190,11 +190,11 @@ void pyne::Material::_load_comp_protocol1(hid_t db, std::string datapath, int ro
 
 
 
-void pyne::Material::from_hdf5(char * fchar, char * dchar, int row, int protocol)
+void pyne::Material::from_hdf5(char * filename, char * datapath, int row, int protocol)
 {
-  std::string filename (fchar);
-  std::string datapath (dchar);
-  from_hdf5(filename, datapath, row, protocol);  
+  std::string fname (filename);
+  std::string dpath (datapath);
+  from_hdf5(fname, dpath, row, protocol);  
 };
 
 
@@ -243,12 +243,12 @@ void pyne::Material::from_hdf5(std::string filename, std::string datapath, int r
 
 
 
-void pyne::Material::write_hdf5(char * fchar, char * gchar, char * nchar, float row, int chunksize)
+void pyne::Material::write_hdf5(char * filename, char * datapath, char * nucpath, float row, int chunksize)
 {
-  std::string filename (fchar);
-  std::string groupname (gchar);
-  std::string nuclist (nchar);
-  write_hdf5(filename, groupname, nuclist, row, chunksize);  
+  std::string fname (filename);
+  std::string groupname (datapath);
+  std::string nuclist (nucpath);
+  write_hdf5(fname, groupname, nuclist, row, chunksize);  
 };
 
 
@@ -508,10 +508,10 @@ void pyne::Material::write_hdf5(std::string filename, std::string datapath, std:
 
 
 
-void pyne::Material::from_text(char * fchar)
+void pyne::Material::from_text(char * filename)
 {
-  std::string filename (fchar);
-  from_text(filename);
+  std::string fname (filename);
+  from_text(fname);
 };
 
 
@@ -554,10 +554,10 @@ void pyne::Material::from_text(std::string filename)
 
 
 
-void pyne::Material::write_text(char * fchar)
+void pyne::Material::write_text(char * filename)
 {
-  std::string filename (fchar);
-  write_text(filename);
+  std::string fname (filename);
+  write_text(fname);
 };
 
 
@@ -620,26 +620,25 @@ pyne::Material::Material(pyne::comp_map cm, double m, double d, double apm,
 
 
 
-pyne::Material::Material(char * fchar, double m, double d, double apm,
+pyne::Material::Material(char * filename, double m, double d, double apm,
                          Json::Value attributes)
 {
-  // Initializes the mass stream based on an isotopic composition file with a (char *) name.
   mass = m;
   density=d;
   atoms_per_mol = apm;
   attrs = attributes;
 
   // Check that the file is there
-  std::string filename (fchar);
-  if (!pyne::file_exists(filename))
-    throw pyne::FileNotFound(filename);
+  std::string fname (filename);
+  if (!pyne::file_exists(fname))
+    throw pyne::FileNotFound(fname);
 
   // Check to see if the file is in HDF5 format.
-  bool ish5 = H5Fis_hdf5(filename.c_str());
+  bool ish5 = H5Fis_hdf5(fname.c_str());
   if (ish5)
-    from_hdf5(filename);
+    from_hdf5(fname);
   else
-    from_text(filename);
+    from_text(fname);
 };
 
 
@@ -795,7 +794,6 @@ pyne::Material pyne::Material::sub_mat(std::set<int> nucset)
 {
   // Grabs a sub-material from this mat based on a set of integers.
   // Integers can either be of zzaaam form -OR- they can be a z-numer (is 8 for O, 93 for Np, etc).
-  // n is the name of the new material.
 
   pyne::comp_map cm;
   for (pyne::comp_iter i = comp.begin(); i != comp.end(); i++)
@@ -1072,8 +1070,6 @@ void pyne::Material::from_atom_frac(std::map<int, double> atom_fracs)
 
 
 
-
-/*--- Overloaded Operators ---*/
 
 pyne::Material pyne::Material::operator+ (double y)
 {
