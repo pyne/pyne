@@ -7,6 +7,15 @@
 #  PYNE_PREFIX                - path to the PyNE installation
 #  PYNE_LIBS_DIR              - path to the PyNE libs dir
 #  PYNE_INCLUDE_DIR           - path to where PyNE header files are
+#
+# To use PyNE add the following lines to your main CMakeLists.txt file:
+# 
+#   # Find the Pyne installation
+#   find_package(Pyne REQUIRED)
+#   link_directories(${PYNE_LIBS_DIR})
+#   include_directories(${PYNE_INCLUDE_DIR})
+#
+# Enjoy!
 
 # Use the Python interpreter to find the libs.
 if(Pyne_FIND_REQUIRED)
