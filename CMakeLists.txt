@@ -38,6 +38,26 @@ print_logo()
 set(BUILD_SHARED_LIBS true)
 message("-- CMake Install Prefix: ${CMAKE_INSTALL_PREFIX}")
 
+# RPATH Settings
+set(CMAKE_SKIP_BUILD_RPATH  FALSE)
+set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE) 
+set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+if(APPLE)
+    # I think that this is the right thing to do for MacOSX 10.5+ --Anthony
+    set(CMAKE_INSTALL_RPATH "@rpath/lib")
+elseif(WIN32)
+    if(MSVC)
+        # ??? Who knows what to do here?! --Anthony
+    elseif(CMAKE_COMPILER_IS_GNUC OR CMAKE_COMPILER_IS_GNUCXX)
+        set(CMAKE_INSTALL_RPATH "\$ORIGIN/lib")
+    endif(MSVC)
+else(APPLE)
+    # For linux
+    set(CMAKE_INSTALL_RPATH "\$ORIGIN/lib")
+endif(APPLE)
+message("-- RPATH: ${CMAKE_INSTALL_RPATH}")
+
+
 # find numpy and include the numpy headers
 find_package(Numpy REQUIRED)
 include_directories(${NUMPY_INCLUDE_DIR})
@@ -75,7 +95,8 @@ file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/cpp/ DESTINATION
 
 message("-- Copying Cython header files.")
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/pyne/ 
-    DESTINATION ${CMAKE_BINARY_DIR}/pyne/include/pyne/ 
+#    DESTINATION ${CMAKE_BINARY_DIR}/pyne/include/pyne/ 
+    DESTINATION ${CMAKE_BINARY_DIR}/pyne/
     FILES_MATCHING PATTERN "*.pxd"
                    PATTERN "lib" EXCLUDE
                    PATTERN "include" EXCLUDE)
