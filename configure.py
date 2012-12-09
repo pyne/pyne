@@ -126,9 +126,9 @@ def setup():
         }
     extpttn = ['*.dll', '*.so', '*.dylib', '*.pyd', '*.pyo']
     pack_data = {
-        'pyne': ['includes/*.h', 'includes/*/*.h', 'includes/*/*/*.h',
-                 'includes/*/*/*/*.h', 'includes/pyne/*.pxd', 'includes/pyne/*/*.pxd'
-                 'includes/pyne/*/*/*.pxd', 'includes/pyne/*/*/*/*.pxd', '*.json',
+        'pyne': ['include/*.h', 'include/*/*.h', 'include/*/*/*.h',
+                 'include/*/*/*/*.h', 'include/pyne/*.pxd', 'include/pyne/*/*.pxd'
+                 'include/pyne/*/*/*.pxd', 'include/pyne/*/*/*/*.pxd', '*.json',
                  ] + extpttn,
         'pyne.xs': extpttn,
         'pyne.lib': extpttn,
