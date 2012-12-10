@@ -19,7 +19,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define JSON_IS_AMALGAMATION
+#if !defined(JSON_IS_AMALGAMATION)
+  #define JSON_IS_AMALGAMATION
+#endif
 #include <json/json-forwards.h>
 #include <json/json.h>
 #include "h5wrap.h"
