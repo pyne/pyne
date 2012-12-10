@@ -1,6 +1,11 @@
 # Python extension modules
 include_directories(${PYNE_INCLUDE_DIRS})
 
+# Print include dir
+get_property(inc_dirs DIRECTORY PROPERTY INCLUDE_DIRECTORIES)
+message("-- C_INCLUDE_PATH for ${CMAKE_CURRENT_SOURCE_DIR}: ${inc_dirs}")
+
+
 # STL converters
 # If the pyx file is a C++ file, we should specify that here.
 # then, add the module
