@@ -95,7 +95,6 @@ file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/cpp/ DESTINATION
 
 message("-- Copying Cython header files.")
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/pyne/ 
-#    DESTINATION ${CMAKE_BINARY_DIR}/pyne/include/pyne/ 
     DESTINATION ${CMAKE_BINARY_DIR}/pyne/
     FILES_MATCHING PATTERN "*.pxd"
                    PATTERN "lib" EXCLUDE
