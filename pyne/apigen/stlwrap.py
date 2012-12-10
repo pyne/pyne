@@ -10,6 +10,7 @@ ctypes = {
     'float': 'float',
     'double': 'double',
     'complex': 'extra_types.complex_t',
+    'set[int]': 'set[int]',
     }
 
 cytypes = {
@@ -19,6 +20,7 @@ cytypes = {
     'float': 'float',
     'double': 'float',
     'complex': 'object',
+    'set[int]': '_SetInt',
     }
 
 pytypes = {
@@ -28,6 +30,7 @@ pytypes = {
     'float': ['float'],
     'double': ['float'],
     'complex': ['complex'],
+    'set[int]': ['set', 'list', 'basestring', 'tuple'],
     }
 
 class_names = {
@@ -37,6 +40,7 @@ class_names = {
     'float': 'Float',
     'double': 'Double',
     'complex': 'Complex',
+    'set[int]': 'SetInt'
     }
 
 func_names = {
@@ -46,6 +50,7 @@ func_names = {
     'float': 'flt',
     'double': 'dbl',
     'complex': 'complex',
+    'set[int]': 'set_int'
     }
 
 human_names = {
@@ -55,6 +60,7 @@ human_names = {
     'float': 'float',
     'double': 'double',
     'complex': 'complex',
+    'set[int]': 'set of integers',
     }
 
 c2py_exprs = {
