@@ -8,7 +8,7 @@ from pyne import data
 from pyne import nucname
 from pyne import nuc_data
 from pyne.material import Material
-from pyne.dbgen import eaf
+from pyne.xs.data_source import EAF_RX
 
 
 def decay(nuc, phi, t_sim, tol):
@@ -67,24 +67,88 @@ def _solve_decay_matrix(A):
 
 
 def _get_daughters(nuc):
-    """Returns an array of nuclides which are daughters of nuc in a numpy
-    array.
+    """Returns a dictionary that contains the neutron-reaction daughters of
+    nuc as keys to the 175-group neutron cross sections for that daughter's
+    reaction.
 
     Parameters
     ----------
     nuc : nucname
         Name of parent nuclide to get daughters of.
-    data_table : PyTables table
-        nuc_data.h5 file
 
     Returns
     -------
-    daughters : list
-        Daughter nuclides of nuc in human-readable format.
+    daugh_dict : dictionary
+        Keys are the neutron-reaction daughters of nuc in zzaaam format.
+        Values are a NumPy array containing the EAF cross section data.
+            (all Values should have size 175)
     """
+    daugh_dict = {}
+    # Remove fission MT# (cannot handle)
+    EAF_RX.remove('180')
+    # Open nuc_data.h5
     with tb.openFile(nuc_data, 'r') as f:
-        daughters = [row['daughter'] for row in \
-            f.root.neutron.eaf_xs.eaf_xs.where('nuc_zz == nuc')]
-    return daughters
+        # Set working node that contains EAF cross sections
+        node = f.root.neutron.eaf_xs.eaf_xs
+        cond = "(nuc_zz == {0})".format(nuc)
+        daughters = [row['daughter'] for row in node.where(cond)]
+        all_xs = [np.array(row['xs']) for row in node.where(cond)]
+        all_rx = [row['rxnum'] for row in node.where(cond)]
+    for i in range(len(daughters)):
+        if all_rx[i] not in EAF_RX:
+            continue
+        daugh = _convert_eaf(daughters[i])
+        xs = all_xs[i]
+        daugh_dict[daugh] = xs
+    return daugh_dict
 
 
+def _convert_eaf(daugh):
+    """Returns the zzaaam format of a daugh string in parsed EAF format.
+
+    Parameters
+    ----------
+    daugh : String
+        String representation of a daughter in EAF format.
+
+    Returns
+    -------
+    daugh_conv : nucname
+        Name of daugh in zzaaam format appropriate for PyNE.
+    """
+    # Remove possible space from string
+    daugh = daugh.replace(' ', '')
+    # Check for 'G' suffix
+    daugh = daugh.replace('G', '')
+    # Check for metastable suffix
+    if daugh.endswith('M1') or daugh.endswith('M2'):
+        # Convert appropriately
+        parts = daugh.rsplit('M',1)
+        daugh_conv = nucname.zzaaam(parts[0]) + int(parts[1])
+    else:
+        daugh_conv = nucname.zzaaam(daugh)
+    return daugh_conv
+
+
+def _get_decay(nuc):
+    """Returns a dictionary that contains the decay children of nuc as keys
+    to the branch ratio of that child's decay process.
+
+    Parameters
+    ----------
+    nuc : nucname
+        Name of parent nuclide to get decay children of.
+
+    Returns
+    -------
+    decay_dict : dictionary
+        Keys are decay children of nuc in zzaaam format.
+        Values are the branch ratio of the decay child.
+    """
+    decay_dict = {}
+    nuc = nucname.zzaaam(nuc)
+    children = data.decay_children(nuc)
+    for child in children:
+        branch = data.branch_ratio(nuc,child)
+        decay_dict[child] = branch
+    return decay_dict

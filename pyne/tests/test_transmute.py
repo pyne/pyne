@@ -7,21 +7,18 @@ from nose.tools import assert_equal, assert_not_equal, assert_raises, raises, \
 
 from numpy.testing import dec
 
-from pyne.material import Material
 import numpy  as np
 import scipy  as sp
 import tables as tb
-from pyne import transmute, nucname, data, nuc_data
 from scipy import linalg
 
+from pyne.material import Material
+from pyne import nuc_data
+from pyne import nucname
+from pyne import data
+from pyne import transmute
+from pyne.xs.data_source import EAF_RX
 
-"""Example test for future reference"""
-"""def test_decay1():
-    mat = Material({'C14': 1.0, 'N14': 0.0, 'C13': 0.0})
-    obs = transmute.decay(mat, 1.0)
-
-    assert False
-"""
 
 """Tests _solve_decay_matrix calculating the matrix exponential"""
 def test_expm():
@@ -51,9 +48,39 @@ def test_get_daughters():
     data_table = tb.openFile(nuc_data)
     daughtersTest = [row['daughter'] for row in \
         data_table.root.neutron.eaf_xs.eaf_xs.where('nuc_zz == nuc')]
-    daughters = transmute._get_daughters(nuc)
-    assert_equal(daughters, daughtersTest)
     data_table.close()
+    for i in range(len(daughtersTest)):
+        daughtersTest[i] = transmute._convert_eaf(daughtersTest[i])
+    daughter_dict = transmute._get_daughters(nuc)
+    for daugh in daughter_dict.keys():
+        assert(daugh in daughtersTest)
+
+
+"""Tests conversion of EAF formatted nuc strings to zzaaam format"""
+def test_convert_eaf():
+    nuc1 = nucname.zzaaam('O16')
+    test1 = transmute._convert_eaf('O 16')
+    assert_equal(nuc1, test1)
+    nuc2 = nucname.zzaaam('AU196')
+    test2 = transmute._convert_eaf('AU196G')
+    assert_equal(nuc2, test2)
+    nuc3 = nucname.zzaaam('AU196M')
+    test3 = transmute._convert_eaf('AU196M1')
+    assert_equal(nuc3, test3)
+    nuc4 = nucname.zzaaam('AU196') + 2
+    test4 = transmute._convert_eaf('AU196M2')
+    assert_equal(nuc4, test4)
+
+"""Tests correct implementation of the _get_decay(nuc) function"""
+def test_get_decay():
+    manual_dict = {}
+    nuc = nucname.zzaaam('O16')
+    children = data.decay_children(nuc)
+    for child in children:
+        branch = data.branch_ratio(nuc,child)
+        manual_dict[child] = branch
+    transmute_dict = transmute._get_decay(nuc)
+    assert_equal(manual_dict,transmute_dict)
 
 
 #
