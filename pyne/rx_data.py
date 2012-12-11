@@ -25,5 +25,8 @@ class RxLib(object):
         pass
 
 class RxMaterial(RxLib):
-    def __init__(self, material_data):
-        
+    def __init__(self, mat_id, header, data, contents):
+        self.mat_id = mat_id
+        self.header = header
+        self.data = data
+        self.contents = contents
