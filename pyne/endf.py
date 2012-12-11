@@ -1,23 +1,24 @@
 #!/usr/bin/env python
 
 """
-Module for parsing and manipulating data from ENDF evaluations. Currently, it
-only can read several MTs from File 1, but with time it will be expanded to
-      include the entire ENDF format.
+Module for parsing and manipulating data from ENDF
+evaluations. Currently, it only can read several MTs from File 1, but
+with time it will be expanded to include the entire ENDF format.
 
-All the classes and functions in this module are based on document ENDF-102
-titled "Data Formats and Procedures for the Evaluated Nuclear Data File
-ENDF-6". The latest version from June 2009 can be found at
+All the classes and functions in this module are based on document
+ENDF-102 titled "Data Formats and Procedures for the Evaluated Nuclear
+Data File ENDF-6". The latest version from June 2009 can be found at
 http://www-nds.iaea.org/ndspub/documents/endf/endf102/endf102.pdf
 
-For more information on this module, contact Paul Romano <romano7@gmail.com>
+For more information on this module, contact Paul Romano
+<romano7@gmail.com>
 """
 import re
 import numpy as np
 import matplotlib.pyplot as plt
 import os
 import warnings
-import pyne.rx_data as rx_data
+import pyne.rx_data as rx
 
 number = " (\d.\d+(?:\+|\-)\d)"
 
@@ -34,176 +35,217 @@ class Library(rx.RxLib):
 
     def __init__(self, filename):
         self.fh = open(filename, 'r')
-
         # initialize some dicts that will act as an index
         self.mats = {}
         self.mts = {}
-        self.data = {}
+        self.structure = {}
         # are there more files to read the headers of?
         self.more_files = True
-        
         # tracks theoretical length of file, based on headers
         self.chars_til_now = 0
-        
         # tracks how many lines would have been skipped when reading data
         self.offset = 1
-        
         # read in the data    
-        data = self._read_data(filename)
-        rx.rx_data.__init__(self, data)
-        
+        self.data = self.load(filename)
         # read ALL the headers!
         while self.more_files:
             self._read_headers()
-        
         # close the file before we have a chance to break anything
         self.fh.close()
 
+    def load(self, filename):
+        warnings.filterwarnings("ignore", "Some errors were detected !")
+        print 'Reading data ...'
+        data = np.genfromtxt(filename, 
+                             delimiter = 11, 
+                             usecols = (0, 1, 2, 3, 4, 5), 
+                             invalid_raise = False,
+                             skip_header = 1,                                    
+                             converters = {0: convert,
+                                           1: convert, 
+                                           2: convert,
+                                           3: convert, 
+                                           4: convert, 
+                                           5: convert})
+        return data
+                                                
     def _read_headers(self):
-        
         # skip the first line and get the material id
         self.fh.seek(self.chars_til_now+81)
         line = self.fh.readline()
-        mat_id = line[67:70]
-
-        # put this material id  in the dict of data as a nested dict
-        self.data.update({mat_id:{RxStyles:'',
-                                  RxDocs:'',
-                                  RxParticles:[],
-                                  data}})
-        
+        mat_id = int(line[67:70])
+        # While reading data we skip a line at the beginning
+        # of every material, so we need an offset.
+        if mat_id not in self.structure:
+            self.offset -= 1
+        # We need to make a structure to hold all the metadata.
+        self.structure.update({mat_id:{'RxStyles':'',
+                                       'RxDocs':[],
+                                       'RxParticles':[],
+                                       'RxData':{'RxResonances':{'Resolved':[],
+                                                                 'Unresolved':[]},
+                                                 'RxDataDocs':[],
+                                                 'Rxxs':[],
+                                                 'RxOutput':{'channel1':[],
+                                                             'channel2':[]}},
+                                       'end_line':[],
+                                       'mfs':{},
+                                       'flags':{}}})
         print 'Reading headers for material id %d ...' % int(mat_id)
-        
         # parse header (all lines with 1451)
         comments = ''
         mf = 1
         stop = self.chars_til_now/81
-        
         while re.search('1451 +\d{1,3}', line):
-    
             # parse contents section
             if re.match(' +\d{1,2} +\d{1,3} +\d{1,4} +', line):
-                
-                # while reading data we skip a line at the beginning
-                # of every material, so we need an offset
-                if int(mat_id) not in self.mats:
-                    self.offset -= 1
-                    
-                self.mats.update({int(mat_id):(self.chars_til_now / 81)})
-                
-                # accounting for skipped lines between MF's and MT's
+                # SEND and FEND records are not counted in the contents,
+                # but still take up space.  We need to account for that.
                 old_mf = mf
                 mf, mt = int(line[31:33]), int(line[41:44])
                 mt_length = int(line[50:55])
                 if old_mf == mf:
                     start = stop + 1
+                    stop = start+mt_length
                 else:
                     start = stop + 2
-                    
+                    stop = start + mt_length
                 stop = start + mt_length
-                self.mts.update({(int(mat_id), mf, mt):(start+self.offset, stop+self.offset)})
+                
+                mat_dict = self.structure[mat_id]                
+                mat_dict['mfs'][mf] = {}
+                mat_dict['mfs'][mf][mt] = (start+self.offset,
+                                           stop+self.offset)
                 line = self.fh.readline()
-            # elif re.search('C O N T E N T S', line):
-                # line = self.fh.readline()
-                # continue
             # parse comments
             elif re.match(' {66}', line):
-                comments += line[0:67]
+                self.structure[mat_id]['RxDocs'].append(line[0:67])
                 line = self.fh.readline()
             elif re.match('[\d+. ]{80}\n$', line):
                 line = self.fh.readline()
                 continue
             else:
-                comments += line[0:67]
+                self.structure[mat_id]['RxDocs'].append(line[0:67])
                 line = self.fh.readline()
-
-        # find where end of material is
+        # Find where the end of the material is and then jump to it.
         self.chars_til_now = (stop + 4)*81
-        
-        # jump to end of this material         
         self.fh.seek(self.chars_til_now)
-        
-        # are we at the end of the file?
+        # Are we at the end of the file?
         if self.fh.readline() == '':
             self.more_files = False
-        
         # update materials list
         if mat_id != '':
-            self.mats.update({int(mat_id):(self.chars_til_now / 81, comments)})
-    def _read_data(self, filename):
-        warnings.filterwarnings("ignore", "Some errors were detected !")
-        print 'Reading data ...'
-        data = np.genfromtxt(filename, 
-                         delimiter = 11, 
-                         usecols = (0, 1, 2, 3, 4, 5), 
-                         invalid_raise = False,
-                         skip_header = 1,                                    
-                         converters = {0: convert,
-                                       1: convert, 
-                                       2: convert,
-                                       3: convert, 
-                                       4: convert, 
-                                       5: convert})
-        return data
-                                                
+            # self.mats.update({mat_id:(self.chars_til_now / 81, comments)})
+            self.structure[mat_id]['end_line'] = self.chars_til_now/81
+            setattr(self, "mat%d" %mat_id, self.structure[mat_id])
+        # Read flags from MT 1.
+        header = self.read_mfmt(mat_id, 1, 451)
+        self.structure[mat_id].update({'flags':{'ZA': header[0],
+                                                'AWR': header[1],
+                                                'LRP': header[2],
+                                                'LFI': header[3],
+                                                'NLIB': header[4],
+                                                'NMOD': header[5],
+                                                'ELIS': header[6],
+                                                'STA': header[7],
+                                                'LIS': header[8],
+                                                'LIS0': header[9],
+                                                'NFOR': header[11],
+                                                'AWI': header[12],
+                                                'EMAX': header[13],
+                                                'LREL': header[14],
+                                                'NSUB': header[16],
+                                                'NVER': header[17],
+                                                'TEMP': header[18],
+                                                'LDRV': header[20],
+                                                'NWD': header[22],
+                                                'NXC': header[23]}})
+
+    def is_range_line(self,line):
+        """ Line format must match EL, EH, LRU, LRF, NRO, NAPS """
+
+        def check_nro_naps(nro, naps):
+            if nro == 0 and naps in (0, 1):
+                nro_naps = True
+            elif nro == 1 and naps in (0, 1, 2):
+                nro_naps = True
+            else:
+                nro_naps = False
+            return nro_naps
+            
+        is_range_line = False
+        el = line[0]
+        eh = line[1]
+        lru = line[2]
+        lrf = line[3]
+        nro = line[4]
+        naps = line[5]
+        if el < eh:
+            if lru == 0 and lrf == 0:
+                is_range_line = check_nro_naps(nro, naps)
+            elif lru == 1 and lrf in range(1,8):
+                is_range_line = check_nro_naps(nro, naps)
+            elif lru == 2 and lrf in (1,2):
+                is_range_line = check_nro_naps(nro, naps)
+            else:
+                pass
+        else:
+            pass
+        return is_range_line
+    def is_isotope_line(self, line):
+        zai = line[0]
+        abn = line[1]
+        lfw = line[3]
+        ner = line[4]
+        if line[2] == line[5] == 0:
+            if lfw in (1,0) and int(ner) == ner and abn <= 1:
+                if zai >= 1000:
+                    return True
+        else:
+             return False
+
+    def make_resonances(self):
+        range_lines = []
+        isotope_lines = []
+        for mat_id in self.structure:
+            LRP = self.structure[mat_id]['flags']['LRP']
+            if LRP == -1:
+                pass
+            else:
+                mf2 = np.reshape(self.read_mfmt(mat_id, 2, 151), (-1, 6))
+                za = mf2[0][0]
+                awr = mf2[0][1]
+                nis = mf2[0][4]
+            if LRP == 0:
+                pass
+            elif LRP == 1:
+                for i in range(len(mf2)):
+                    if self.is_range_line(mf2[i]):
+                        range_lines.append(mf2[i])
+                    if self.is_isotope_line(mf2[i]):
+                        isotope_lines.append(mf2[i])
+            else:
+                pass
+        return range_lines, isotope_lines
+
+
+    
     def read_mfmt(self, mat_id, mf, mt):
-        if (mat_id, mf, mt) in self.mts:
-            # print "Reading Material %d, File %d, MT %d" % (mat_id, mf, mt)
-            start = (self.mts[(mat_id, mf, mt)][0] - 1) * 6
-            stop = (self.mts[(mat_id, mf, mt)][1] - 1)* 6
+        if mat_id in self.structure:
+            start, stop = self.structure[mat_id]['mfs'][mf][mt]
+            start = (start - 1) * 6
+            stop = (stop-1)*6
             return self.data.flat[start:stop]
         else:
-            print "Material %d, File %d, MT %d does not exist." % (mat_id, mf, mt)
+            print "Material %d does not exist." % mat_id
             return False
-        
+
     def get(self, mat_id, mf, mt):
-        return rx.rx_data.get(self, mat_id, mf, mt, 'endf')
+        return self.read_mfmt(mat_id, mf, mt)
     
     # def write(self, filename, file_type_out):
         # return rx.rx_data.write(self, filename, file_type_out)
     
-    def write_to_file(self, filename):
-
-        def make_line(line_number, mat_id, mf, mt):
-            line_text = ''
-            for i in range(6):
-                line_text = line_text + numpy_to_ENDF(self.get(mat_id, 1, 451)[line_number*6 + i])
-            line_text += ' %3d%2d%3d%5d\n' %(mat_id, mf, mt, line_number+1)
-            return line_text
-
-        def make_comments(line_number, mat_id, mf, mt, comments):
-            num_lines = len(comments)/66
-            return str(num_lines)
-            # line_text = comments[comment_line_number*67:]
-            
-        full_text = ''
-        def make_header(mat_id):
-            pass
-        def make_mt(line_number, mat_id, mf, mt):
-            if mt == 1:
-                make_header(mat_id)
-            else:
-                starting_line = self.mts[(mat_id, mf, mt)][0]    
-                ending_line = self.mts[(mat_id, mf, mt)][1]
-                for line_number in range(starting_line, ending_line):
-                    make_line(line_number, mat_id, mf, mt)
-        def make_mf(line_number, mat_id, mf, mt):
-            self.mts[
-            pass
-        def make_mat_id():
-            pass
-
-        for mat_id in self.mats:
-            full_text += ' $Rev:: 512      $  $Date:: 2006-12-05#$                             1 0  0    0\n'
-            line_number = 0
-            for line_number in range(4):
-                full_text += make_line(line_number, mat_id, 1, 451)
-            full_text += make_comments(line_number, mat_id, 1, 451, str(self.mats[mat_id][1]) + '\n')
-                # for i in range(6):
-                    # full_text = full_text + numpy_to_ENDF(self.get(mat_id, 1, 451)[line_number*6 + i])
-                # full_text += ' %3d%2d%3d%5d\n' %(mat_id, 1, 451, line_number)
-        with open(filename, 'w') as f:
-            f.write(full_text)
 
 
 class Evaluation(object):
@@ -1315,8 +1357,6 @@ def numpy_to_ENDF(num):
     # if type(num) is float:
     result = '% 9.6e' % num
     return result[:-4] + result[-3:-2] + result[-1]
-    # else:
-        # return 'fuck'
         
 print numpy_to_ENDF(7.99687)
                 
