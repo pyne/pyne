@@ -127,4 +127,19 @@ def half_life(ensdf):
     if opened_here:
         ensdf.close()
 
+    # Hack to calculate metastable state number, make sure it doesn't go over 10,
+    # and then change the from_nuc value, and remove all other states
+    # FIXME: while the renaming bases on level should still happen, the limit
+    # of the 10 lowest levels should be removed when zzaaam is removed.
+    nuclvl = {}
+    for row in data:
+        from_nuc, level, to_nuc, half_life, br = row
+        if from_nuc not in nuclvl:
+            nuclvl[from_nuc] = set()
+        nuclvl[from_nuc].add(level)
+    for nuc in nuclvl.keys():
+        nuclvl[nuc] = dict([(lvl, i) for i,lvl in enumerate(sorted(nuclvl[nuc])[:10])])
+    data = [(row[0] + nuclvl[row[0]][row[1]],) + row[1:] for row in data \
+                if (row[0] in nuclvl) and (row[1] in nuclvl[row[0]])]
+
     return data
