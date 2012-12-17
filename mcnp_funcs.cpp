@@ -473,7 +473,7 @@ void dagmcchkcel_by_angle_( double *uuu, double *vvv, double *www,
         *j = 0; // inside==  1 -> inside volume -> j=0
         break;
       case 0:
-        *j = 1; // inside== 0  -> outside volume -> j=1
+        *j = 1; // outside== 0  -> outside volume -> j=1
         break;
       default:
         std::cerr << "Impossible result in dagmcchkcel_by_angle" << std::endl;
@@ -517,10 +517,10 @@ void dagmcchkcel_(double *uuu,double *vvv,double *www,double *xxx,
         *j = 0; // inside==  1 -> inside volume -> j=0
         break;
       case 0:
-        *j = 1; // inside== 0  -> outside volume -> j=1
+        *j = 1; // outside== 0  -> outside volume -> j=1
         break;
       case -1:
-        *j = 1; // inside== -1 -> on boundary -> j=1 (assume leaving volume)
+        *j = 1; // onboundary== -1 -> on boundary -> j=1 (assume leaving volume)
         break;
       default:
         std::cerr << "Impossible result in dagmcchkcel" << std::endl;
