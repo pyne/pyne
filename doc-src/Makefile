@@ -1,7 +1,7 @@
 # Makefile for Sphinx documentation
 #
 
-GH_PAGES_SOURCES = doc Makefile
+GH_PAGES_SOURCES = doc-src
 
 # You can set these variables from the command line.
 SPHINXOPTS    =
@@ -23,7 +23,7 @@ gh-pages:
 	git checkout master $(GH_PAGES_SOURCES)
 	git reset HEAD 
 	rm -rf _static _sources build
-	make html
+	make -f doc-src/Makefile html
 	mv -fv build/html/* .
 	rm -rf $(GH_PAGES_SOURCES) build
 	git add -A 
