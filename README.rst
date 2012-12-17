@@ -2,8 +2,9 @@ Direct Accelerated Geometry Monte Carlo (DAGMC) Toolkit
 ==========================================================
 
 The Direct Acclerated Geometry Monte Carlo (DAGMC) Toolkit is an
-interface to the MOAB mesh database that provides the methods
-necessary for ray tracing on a CAD-based geometric model.
+interface to the `MOAB mesh database
+<http://trac.mcs.anl.gov/projects/ITAPS/wiki/MOAB>`_ that provides the
+methods necessary for ray tracing on a CAD-based geometric model.
 
 This repository provides implementations of that interface for various
 Monte Carlo radiation transport codes.  Depending on the distribution
