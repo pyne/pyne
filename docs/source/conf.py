@@ -17,7 +17,7 @@ import sys, os
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 sys.path.insert(0, os.path.abspath('../sphinxext'))
-
+sys.path.insert(0, os.path.abspath(os.path.join(os.getenv('HOME'), 'nbconvert')))
 
 # -- General configuration -----------------------------------------------------
 
@@ -26,6 +26,7 @@ sys.path.insert(0, os.path.abspath('../sphinxext'))
 extensions = ['sphinx.ext.autodoc', 'sphinx.ext.doctest', 'sphinx.ext.pngmath', 
               'sphinx.ext.inheritance_diagram', 'numpydoc', 'sphinx.ext.autosummary',
               'ipython_console_highlighting', 'sphinx.ext.viewcode', 'breathe',
+              'notebook_sphinxext',
               ]
 
 # Add any paths that contain templates here, relative to this directory.
