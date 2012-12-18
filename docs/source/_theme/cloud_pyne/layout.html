@@ -32,6 +32,7 @@
 {# make root link redirectable #}
 {%- set theme_roottarget = (theme_roottarget == "<toc>" and master_doc or theme_roottarget) %}
 {% block rootrellink %}
+    <li><a href="{{ pathto("gallery/index") }}">Gallery</a> | </li>
     <li><a href="{{ pathto(theme_roottarget) }}">{{shorttitle|e}}</a>{{reldelim1}}</li>
 {% endblock %}
 
