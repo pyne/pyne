@@ -43,6 +43,7 @@ Development:
     :maxdepth: 1
 
     devsguide/index
+    pubs
     dev_team
 
 ------------
