@@ -4,6 +4,7 @@ you can find at https://github.com/ipython/nbconvert
 
 :Author: Anthony Scopatz <scopatz@gmail.com>
 """
+import re
 import os.path
 import shutil
 from codecs import open
@@ -12,6 +13,8 @@ from sphinx.util import ensuredir
 from docutils import nodes
 from docutils import utils
 from docutils.parsers.rst import Directive
+from docutils.parsers.rst.directives import unchanged_required, unchanged, flag
+
 
 # Style is based off off SIAM
 BASE_STYLE = """<div class="bibtex_template">
@@ -19,15 +22,12 @@ BASE_STYLE = """<div class="bibtex_template">
   <span class="if author">
     <span class="author"></span>.
   </span>
-  <span class="title"></span>.
-  <span style="if journal" style="font-style: italic;">
-    <span class="journal"></span>,
+  "<span class="title"></span>,"
+  <span style="if journal">
+    <span class="journal" style="font-style: italic;"></span>
   </span>
-  <span style="if booktitle" style="font-style: italic;">
-    <span class="booktitle"></span>,
-  </span>
-  <span style="if publisher">
-    <span class="publisher"></span>,
+  <span style="if booktitle">
+    <span class="booktitle" style="font-style: italic;"></span>,
   </span>
   <span style="if school">
     <span class="school"></span>
@@ -56,6 +56,13 @@ BASE_STYLE = """<div class="bibtex_template">
 </li>
 </div>
 """
+
+ENTRY_TYPES = ['article', 'book', 'booklet', 'conference', 'inbook', 'incollection',
+               'inproceedings', 'manual', 'mastersthesis', 'misc', 'phdthesis', 
+               'proceedings', 'techreport', 'unpublished']
+
+nested_brace_pattern = re.compile('({.*?){(.*?)}(.*?})')
+nested_brace_replace = lambda m: ''.join(m.groups())
 
 class Bibtex(Directive):
     """Uses bibtex-js to expose a bibtex file to sphinx.  This directive has
@@ -101,12 +108,18 @@ class Bibtex(Directive):
         if an entry has the url field. For all other elements, the contents is 
         replaced by the field-name specified as its class.
 
+    This directive also has a 'no-count' options which may be used to supress
+    the number of publication entries at the top::
+
+        .. bibtex:: ../path/to/refs.bib
+            :no-count:
+
     1. http://code.google.com/p/bibtex-js/wiki/styles
     """
     required_arguments = 1
-    optional_arguments = 0
+    optional_arguments = 1
     final_argument_whitespace = True
-    option_spec = {}
+    option_spec = {'no-count': flag}
     has_content = True
 
     def run(self):
@@ -116,6 +129,7 @@ class Bibtex(Directive):
 
         # set up encoding
         attributes = {'format': 'html'}
+        show_count = 'no-count' not in self.options
 
         # get path to bibtex file
         source_file = self.state.document.current_source
@@ -128,6 +142,14 @@ class Bibtex(Directive):
             bibtext = f.read()
         bibtext = bibtext.replace(r'\&', '&')
         bibtext = bibtext.replace(r'\bf', '')
+        n = 1
+        while 0 < n:
+            bibtext, n = nested_brace_pattern.subn(nested_brace_replace, bibtext)
+        if show_count:
+            lower_bibtext = bibtext.lower()
+            num_entries = 0
+            for entry_type in ENTRY_TYPES:
+                num_entries += lower_bibtext.count('@' + entry_type)
 
         styletext = BASE_STYLE if 0 == len(self.content) else '\n'.join(self.content)
 
@@ -135,6 +157,9 @@ class Bibtex(Directive):
         text += bibtext
         text += '</textarea>\n'
         text += styletext
+        if show_count:
+            text += ('<a style="font-style: bold;">Number of entries: '
+                     '{0}</a><br/><br/>\n'.format(num_entries))
         text += '<div id="bibtex_display"></div>\n'
 
         # add dependency
