@@ -66,6 +66,8 @@ def test_decay_children():
     assert_equal(data.decay_children('H1'), set())
     assert_equal(data.decay_children(922351), set([922350]))
     assert_equal(data.decay_children(611460), set([601460, 621460]))
+    assert_equal(data.decay_children('O16'), set())
+    assert_equal(data.decay_children('80161'), set([60120, 80160]))
 
 if __name__ == "__main__":
     nose.runmodule()

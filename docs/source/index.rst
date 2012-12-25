@@ -31,6 +31,7 @@ Usage:
     :maxdepth: 1
 
     install
+    gallery/index
     usersguide/index
     pyapi/index
     cppapi/index
@@ -42,6 +43,7 @@ Development:
     :maxdepth: 1
 
     devsguide/index
+    pubs
     dev_team
 
 ------------
