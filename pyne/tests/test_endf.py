@@ -5,7 +5,8 @@ from nose.tools import assert_equal, assert_not_equal, assert_raises, raises, as
 import warnings
 
 
-library = Library('endftest_small.txt')    
+library = Library('endftest_small.txt')   
+cs137 = Library('137.txt') 
 
 def test_mats():
     for mat_id in library.mats:
@@ -13,15 +14,24 @@ def test_mats():
 
 def test_get():
     result = library.get(419, 4, 2)
-    print result
-    expected = np.array([4.898421e+3, 6.768123e+0, 0, 1, 0, 0, 2.123124e+6, 8.123142e-6, 2.123212e+6, 8.231231e-6, -2.231211e+6, 8.123421e-6])    
+    # print result
+    # print library.mat128
+    expected = np.array([4.898421e+3, 6.768123e+0, 0, 
+                         1, 0, 0, 2.123124e+6, 8.123142e-6, 
+                         2.123212e+6, 8.231231e-6,
+                         -2.231211e+6, 8.123421e-6])    
     badkey = library.get(111, 1, 1)
-    assert (np.array_equal(result, expected))
+    assert(np.array_equal(result, expected))
+    print cs137.make_resonances()
     assert_equal(badkey, False)
+    assert(True == False)
 
+def test_flags():
+    print library.mat128['flags']
+    assert(True == True)
 # def do_not_test_write():
     # write library to test.txt
-    library.write('test.txt', 'endf')
+    # library.write('test.txt', 'endf')
     # result = library.write('test.txt', 'txt')
     # written = Library('test')
     # result = written.get(419, 4, 2)

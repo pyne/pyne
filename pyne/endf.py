@@ -82,8 +82,8 @@ class Library(rx.RxLib):
         self.structure.update({mat_id:{'RxStyles':'',
                                        'RxDocs':[],
                                        'RxParticles':[],
-                                       'RxData':{'RxResonances':{'Resolved':[],
-                                                                 'Unresolved':[]},
+                                       'RxData':{'ResolvedResonances':{},
+                                                 'UnresolvedResonances':{},
                                                  'RxDataDocs':[],
                                                  'Rxxs':[],
                                                  'RxOutput':{'channel1':[],
@@ -162,9 +162,12 @@ class Library(rx.RxLib):
                                                 'NXC': header[23]}})
 
     def is_range_line(self,line):
-        """ Line format must match EL, EH, LRU, LRF, NRO, NAPS """
+        """ Determines whether this line is the beginning of a new resonance 
+        range. Line format must match EL, EH, LRU, LRF, NRO, NAPS """
 
         def check_nro_naps(nro, naps):
+            # This checks to see if the places where NRO and NAPS should be
+            # are indeed filled with parameters in the expected ranges.
             if nro == 0 and naps in (0, 1):
                 nro_naps = True
             elif nro == 1 and naps in (0, 1, 2):
@@ -181,6 +184,8 @@ class Library(rx.RxLib):
         nro = line[4]
         naps = line[5]
         if el < eh:
+            # If energy bounds make sense and the flag values check out,
+            # treat this as a range line
             if lru == 0 and lrf == 0:
                 is_range_line = check_nro_naps(nro, naps)
             elif lru == 1 and lrf in range(1,8):
@@ -192,6 +197,21 @@ class Library(rx.RxLib):
         else:
             pass
         return is_range_line
+
+    def parse_range_line(self, line):
+        """ If the line is the beginning of a resonance range, makes
+        a dictionary of the flags for easy access. """
+        if self.is_range_line(line):
+            range_flags = {'EL':line[0],
+                           'EH':line[1],
+                           'LRU':line[2],
+                           'LRF':line[3],
+                           'NRO':line[4],
+                           'NAPS':line[5]}
+        else:
+            range_flags = None
+        return range_flags
+        
     def is_isotope_line(self, line):
         zai = line[0]
         abn = line[1]
@@ -203,33 +223,99 @@ class Library(rx.RxLib):
                     return True
         else:
              return False
+        
+    def parse_isotope_line(self, line):
+        if self.is_isotope_line(line):
+            isotope_flags = {'ZAI':line[0],
+                             'ABN':line[1],
+                             'LFW':line[3],
+                             'NER':line[4]}
+        return isotope_flags
 
     def make_resonances(self):
         range_lines = []
         isotope_lines = []
+        resonance_ranges = {'Resolved':[],
+                            'Unresolved':[]}
         for mat_id in self.structure:
             LRP = self.structure[mat_id]['flags']['LRP']
             if LRP == -1:
                 pass
             else:
                 mf2 = np.reshape(self.read_mfmt(mat_id, 2, 151), (-1, 6))
-                za = mf2[0][0]
-                awr = mf2[0][1]
-                nis = mf2[0][4]
+                head = mf2[0]
+                za = head[0]
+                awr = head[1]
+                nis = head[4]
             if LRP == 0:
                 pass
             elif LRP == 1:
+                isotope_flags = {}
+                range_flags = {}
                 for i in range(len(mf2)):
-                    if self.is_range_line(mf2[i]):
-                        range_lines.append(mf2[i])
                     if self.is_isotope_line(mf2[i]):
+                        isotope_flags = self.parse_isotope_line(mf2[i])
                         isotope_lines.append(mf2[i])
+                    elif self.is_range_line(mf2[i]):
+                        range_flags = self.parse_range_line(mf2[i])
+                        range_lines.append(mf2[i])
+                    else:
+                        # If this line is neither a range nor an isotope line:
+                        if self.is_range_line(mf2[i-1]):
+                            # If this is a new resonance range:
+                            try:
+                                if range_flags['LRU'] == 1:
+                                    resonance_ranges['Resolved'].append(
+                                        {'flags': range_flags,
+                                         'data':[]})
+                                elif range_flags['LRU'] == 2:
+                                    resonance_ranges['Unresolved'].append(
+                                        {'flags': range_flags,
+                                         'data':[]})
+                                else: pass
+                            except KeyError:
+                                print 'No LRU!'
+                                
+                        try:
+                            if range_flags['LRU'] == 1:
+                                last_range = resonance_ranges['Resolved'][-1]
+                                last_range['data'].append(mf2[i])
+                            # self.parse_resonance_data(mf2[i], 
+                            #                           isotope_flags,
+                            #                           range_flags)
+                            if range_flags['LRU'] == 2:
+                                last_range = resonance_ranges['Unresolved'][-1]
+                                last_range['data'].append(mf2[i])
+                        except KeyError:
+                            print 'No LRU!'
+            elif LRP == 2:
+                pass
             else:
                 pass
-        return range_lines, isotope_lines
+        return resonance_ranges
+        
+    def parse_resonance_data(self, line, isotope_flags, range_flags):
+        lfw = isotope_flags['LFW']
+        lru = range_flags['LRU']
+        lrf = range_flags['LRF']
+        if lru == 1:
+            # This is the case for data in a resolved resonance range.
+            pass
+        elif lru == 2:
+            # This is the case for data in an unresolved resonance range.
+            if (lfw, lrf) == (0, 1):
+                # This is Case A from the ENDF manual, pp.69-70.
+                pass
+            if (lfw, lrf) == (1, 1):
+                # Case B
+                pass
+            if lrf == 2:
+                # Case C
+                pass
+        else: 
+            # This should never happen. Throw some error here.
+            pass
 
-
-    
     def read_mfmt(self, mat_id, mf, mt):
         if mat_id in self.structure:
             start, stop = self.structure[mat_id]['mfs'][mf][mt]
