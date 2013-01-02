@@ -1,6 +1,15 @@
 =====================================
 PyNE: The Nuclear Engineering Toolkit
 =====================================
+
+.. container:: frontpage-images
+
+    .. image:: gallery/half_life_thumb.png
+    .. image:: gallery/data_sources_thumb.png
+    .. image:: gallery/enrichment_mstar_vs_flowrate_thumb.png
+    .. image:: gallery/origen22_h1_xs_thumb.png
+
+
 PyNE, or Python for Nuclear Engineering, is a suite of tools to aid in 
 computational nuclear science & engineering.  PyNE seeks to provide 
 native implementations of common nuclear algorithms, as well as Python
