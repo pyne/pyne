@@ -15,7 +15,10 @@ computational nuclear science & engineering.  PyNE seeks to provide
 native implementations of common nuclear algorithms, as well as Python
 bindings and I/O support for other industry standard nuclear codes.
 
-PyNE development is a continuing effort and we are always looking for
+Please email us at pyne-users@googlegroups.com if you have any questions 
+on how to use or install PyNE.
+
+Note that PyNE development is a continuing effort and we are always looking for
 more developers, testers, and users.  If you are interested in being
 involved with this project, please contact us via pyne-dev@googlegroups.com, 
 or `github`_.
