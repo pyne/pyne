@@ -13,26 +13,19 @@
 
 import sys, os
 
-# If extensions (or modules to document with autodoc) are in another directory,
-# add these directories to sys.path here. If the directory is relative to the
-# documentation root, use os.path.abspath to make it absolute, like shown here.
-#sys.path.insert(0, os.path.abspath('../sphinxext'))
-#sys.path.insert(0, os.path.abspath(os.path.join(os.getenv('HOME'), 'nbconvert')))
-
 # -- General configuration -----------------------------------------------------
 
-# Add any Sphinx extension module names here, as strings. They can be extensions
-# coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
-#extensions = ['sphinx.ext.autodoc', 'sphinx.ext.doctest', 'sphinx.ext.pngmath', 
-#              'sphinx.ext.inheritance_diagram', 'numpydoc', 'sphinx.ext.autosummary',
-#              'ipython_console_highlighting', 'sphinx.ext.viewcode', 'breathe',
-#              'notebook_sphinxext', 'bibtex_sphinxext'
-#              ]
-extensions = ['sphinx.ext.autodoc', 'sphinx.ext.doctest', 'sphinx.ext.pngmath', 
-              'sphinx.ext.inheritance_diagram', 'scisphinx.numpydoc', 
-              'sphinx.ext.autosummary', 'scisphinx.ipython_console_highlighting', 
-              'sphinx.ext.viewcode', 'breathe',
-              'nbconvert.notebook_sphinxext', 'scisphinx.bibtex'
+extensions = ['sphinx.ext.autodoc', 
+              'sphinx.ext.doctest', 
+              'sphinx.ext.pngmath', 
+              'sphinx.ext.inheritance_diagram', 
+              #'sphinx.ext.autosummary',  # autosummary doesn't work with numpydoc...
+              'sphinx.ext.viewcode', 
+              'scisphinx.numpydoc', 
+              'scisphinx.ipython_console_highlighting', 
+              'breathe',
+              'nbconvert.notebook_sphinxext', 
+              'scisphinx.bibtex',
               ]
 
 # Add any paths that contain templates here, relative to this directory.
