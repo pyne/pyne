@@ -1,14 +1,18 @@
-########################################################################
+          ########################################################################
 #
 # Julie Zachman
 # December 14, 2012
 # Rudimentary makefile to test compiling and linking of heterogenous sources 
 # 
-
+# Since we will be testing on various systems it makes sense to make this a variable for easy changes
+MOAB = /data/opt/dagmc/moab
 FLUKA_LIBS_LINK = -L${FLUPRO} -lflukahp
-MOAB_INCLUDES  = -I/filespace/people/z/zachman/dagmc_bld/MOAB/include
-MOAB_LIBDIR    =   /filespace/people/z/zachman/dagmc_bld/MOAB/lib
-MOAB_LIBS_LINK = -L${MOAB_LIBDIR} -lMOAB  -lm  -lnetcdf  -ldagmc -L/filespace/people/z/zachman/dagmc_bld/bin
+# MOAB_INCLUDES now uses the ${MOAB} var to simplify compilation on different systems
+MOAB_INCLUDES  = -I${MOAB}/include
+MOAB_LIBDIR    =   ${MOAB}/lib
+# MOAB_FLAGS determine what libraries we wish to include (In my case I have no netcdf)
+MOAB_FLAGS = -lMOAB  -ldagmc
+MOAB_LIBS_LINK = -L${MOAB_LIBDIR} -lm ${MOAB_FLAGS}
 
 FSRCS = 
 
