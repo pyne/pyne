@@ -11,9 +11,9 @@
  * *dls - output distnace of intersection
  * *jap - Next intersected surface, or zero if none
  */
-  void dagmctrack_(int *ih, double *uuu,double *vvv,double *www,double *xxx,
-                   double *yyy,double *zzz,double *huge,double *dls,int *jap,int *jsu,
-                   int *nps );
+  // void dagmctrack_(int *ih, double *uuu,double *vvv,double *www,double *xxx,
+    //                double *yyy,double *zzz,double *huge,double *dls,int *jap,int *jsu,
+      //             int *nps );
 
 
 using namespace moab;
