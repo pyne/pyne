@@ -42,11 +42,11 @@ for all the classes in each module.
 .. toctree::
     :maxdepth: 1
 
-    simplesim_cards 
-    simplesim_nestedgeom
-    simplesim_definition
-    simplesim_inputfile
-    simplesim_inheritance
+    cards 
+    nestedgeom
+    definition
+    inputfile
+    inheritance
 
 For an explanation of how to use the module, with full examples, visit
 :ref:`usersguide_simplesim`. If you are interested in developing this package
