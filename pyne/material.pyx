@@ -8,7 +8,7 @@ from cython.operator cimport preincrement as inc
 from libc.stdlib cimport malloc, free
 
 # Python imports
-import collections
+import collections, math, linecache
 
 # local imports
 include "include/cython_version.pxi"
@@ -29,6 +29,9 @@ import jsoncpp
 cimport pyne.nucname as nucname
 import pyne.nucname as nucname
 import os
+
+cimport pyne.data as data
+import pyne.data as data
 
 
 cdef cpp_map[int, double] dict_to_comp(dict nucvec):
@@ -835,6 +838,20 @@ cdef class _Material:
 
         self.mat_pointer.from_atom_frac(af)
 
+    def mass_density_from_atom_density(self, num_den) :
+    
+        '''This function returns an mass density for agiven number density,
+           using the mass fractions material.comp'''
+        avogadro = 6.02211415E23
+        mol_sum = 0
+        for nuc, mass_frac in self.comp.items() :
+            mol_sum += mass_frac/data.atomic_mass(nuc)
+    
+        mass_density = num_den * 1/avogadro  * 1/mol_sum
+    
+        return mass_density
+
+
 
     #
     # Operator Overloads
@@ -1136,6 +1153,84 @@ class Material(_Material, collections.MutableMapping):
                 repr(self.comp), self.mass, self.density, self.atoms_per_mol, repr(self.attrs))
 
 
+    def write_mcnp_mass_fracs(self, filename):
+        '''The method appends an mcnp mass fraction definition, with
+         attributes to the file with the supplied filename'''
+
+        output=file(filename, 'a')
+
+        if 'name' in self.attrs:
+            output.write('C {0}\n'.format(self.attrs['name']))
+
+        if str(self.density) != '-1.0' :
+            output.write('C density = {0}\n'.format(self.density))
+
+        if 'source' in self.attrs:
+            output.write('C source: {0}\n'.format(self.attrs['source']))
+
+        if 'comments' in self.attrs:
+            output.write('C comments:\n')
+            # split up lines so comments are less than 80 characters 
+            for n in range(0, int(math.ceil(float(len(self.attrs['comments']))/77))) :
+                 output.write('C {0}\n'.format(self.attrs['comments'][n*77:(n + 1)*77])) 
+
+        if 'mat_number' in self.attrs : 
+            mat_num = self.attrs['mat_number']
+        else :
+            mat_num = '?'
+
+        output.write('m{0}\n'.format(mat_num))
+
+        for iso, frac in self.comp.items() :
+          
+           if 'table_ids' in self.attrs :
+               output.write('     {0}.{1} -{2:.4E}\n'\
+                         .format(str(iso)[:-1], self.attrs['table_ids'][str(iso)], frac))
+           else :
+               output.write('     {0} -{1:.4E}\n'.format(iso, frac))
+
+
+
+    def write_alara(self, filename):
+        '''The method appends an ALARAA definition, with
+         attributes to the file with the supplied filename'''
+
+        output=file(filename, 'a')
+
+        if 'name' in self.attrs:
+            output.write('# {0}\n'.format(self.attrs['name']))
+
+        if 'source' in self.attrs:
+            output.write('# source: {0}\n'.format(self.attrs['source']))
+
+        if 'comments' in self.attrs:
+            output.write('# comments:\n')
+
+            # split up lines so comments are less than 80 characters 
+            for n in range(0, int(math.ceil(float(len(self.attrs['comments']))/77))) :
+                 output.write('# {0}\n'.format(self.attrs['comments'][n*77:(n + 1)*77])) 
+
+        if 'mat_number' in self.attrs : 
+            mat_num = self.attrs['mat_number']
+        else :
+            mat_num = '<mat_number>'
+
+        if str(self.density) != '-1.0' :
+            density = self.density
+        else :
+            density = '<rho>'
+
+        output.write('m{0} {1} {2}\n'\
+                    .format(self.attrs['mat_number'], density, len(self.comp)))
+
+        for iso, frac in self.comp.items() :
+            output.write('     {0} {1:.4E} {2}\n'.format(str(iso)[:-1], frac, str(iso)[:-4]))
+
+
+
+
+
+
 #####################################
 ### Material generation functions ###
 #####################################
@@ -1296,9 +1391,6 @@ def from_text(char * filename, double mass=-1.0, double atoms_per_mol=-1.0, attr
 
     mat.from_text(filename)
     return mat
-
-
-
 
 
 ###########################
@@ -1488,9 +1580,15 @@ class MapStrMaterial(_MapStrMaterial, collections.MutableMapping):
 
 
 class MultiMaterial(collections.MutableMapping):
-
+    ''' This class is serves as a way of storing a collection of materials.
+        There sole argument of this function is a dictionary with material
+        objects and keys and vol/mass fractions as values. There are two 
+        main uses cases. A collection of materials can be mixed together 
+        by volume of mass. Alternatively, a collection of materials can be 
+        used to describe a materials with multiple densities. In this latter
+        case, the dict values are irrevelant'''
     def __init__(self, mats):
-        # This function reads a dict of materails and either mass or volume factions,
+        # This function reads a dict of materials and either mass or volume factions,
         # then normalizes the fraction and assigns the dict as an attribute of self.
         # Normalize Mixture fractions
         # First calculate the normalization factor:
@@ -1570,3 +1668,161 @@ def mats_latex_table(mats, labels=None, align=None, format=".5g"):
         tab += r" \\ " + "\n\\hline\n"
     tab += "\\end{tabular}\n"
     return tab
+
+###############################################################################
+###############################################################################
+###############################################################################
+
+def read_mcnp_inp(inp) :
+#reads an mcnp inp file and returns a list of materials
+
+    mat_lines = [] # line of lines that begin material cards
+    densities = {} # dictionary to be populated with material numbers and densities
+    mat_nums = [] # list of material numbers to be printed to stdout
+    material_list = [] # to be populated with material objectes and returned
+
+    line_count = 1
+    line = linecache.getline(inp, line_count)
+    # scroll through every line of the mcnp inp file
+    while line != '' :
+        line = linecache.getline(inp, line_count)
+        ''' check to see if line contains a cell card. If so, grab the density.
+        information is stored in a dictionary where:
+        key = material number, value = list of densities'''
+        if len(line.split()) > 3 :
+            if line.split()[0].isdigit() is True \
+            and line.split()[1].isdigit() is True \
+            and line[0:5] != '     ' \
+            and line.split()[1] != '0':
+
+                if line.split()[1] not in densities.keys() :
+                    densities[line.split()[1]] = [float(line.split()[2])]
+
+                else : 
+                    same_bool = False
+                    for j in range(0, len(densities[line.split()[1]])) :
+                        if abs((float(line.split()[2]) \
+                                 - densities[line.split()[1]][j])\
+                                 / float(line.split()[2])) < 1E-4 :
+                            same_bool = True
+                   
+                    if same_bool == False :
+                        densities[line.split()[1]]\
+                                                .append(float(line.split()[2]))            
+
+        '''check line to see if it contain a material card, in the form m* where * 
+        is a digit. If so store the line number and material number'''
+        if line.split() != [] :
+            if line.split()[0][0] == 'm' or line.split()[0][0] == 'M' :
+                if line.split()[0][1].isdigit() is True:
+                    mat_lines.append(line_count)   
+                    mat_nums.append(line.split()[0][1:])                                    
+
+        line_count += 1
+        line = linecache.getline(inp, line_count)
+
+    for i in range(0, len(mat_nums)) :
+        if mat_nums[i] in densities.keys():
+            material_list.append(mat_from_mcnp(inp, mat_lines[i], densities[mat_nums[i]]))
+        else :
+            material_list.append(mat_from_mcnp(inp, mat_lines[i]))
+    print '{0} materials/multimaterials created from {1} with material numbers:\n {2}'\
+                                     .format(len(mat_nums), inp, mat_nums)
+    return material_list
+
+
+def mat_from_mcnp(filename, mat_line, densities = 'None') :
+    '''This is a function that recieves and MCNP input filename and the 
+       line number and list of densities associated with the material and
+       returns a material object. This function is typically called by
+       read_mcnp_inp. If a material has multiple densities, a multimaterial
+       object is returned'''
+
+    data_string = linecache.getline(filename, mat_line).split('$')[0]
+    ''' collect all material card data on one string '''
+    line_index = 1
+    line = linecache.getline(filename, mat_line + line_index)
+    while line[0:5] == '     ' :
+        '''make sure element/isotope is not commented out'''
+        if line.split()[0][0] != 'c' and line.split()[0][0] != 'C' :
+             data_string += line.split('$')[0]
+        line_index += 1
+        line =linecache.getline(filename, mat_line + line_index)
+
+
+    ''' create dictionaries nucvec and table_ids'''
+    nucvec = {}
+    table_ids = {}
+    for i in range(1, len(data_string.split())) :
+        if i & 1 == 1 :
+            zzzaaam = int(data_string.split()[i].split('.')[0]+'0')
+            nucvec[zzzaaam] = float(data_string.split()[i+1])
+            if len(data_string.split()[i].split('.')) > 1 :
+                table_ids[str(zzzaaam)] = data_string.split()[i].split('.')[1]
+ 
+    ''' Check to see it material is definted my mass or atom fracs.
+         If atom fracs, convert. '''
+    mass_bool = False # boolean to describe whether mass fractions are used
+    atom_bool = False # boolean to describe whether atom fractions are used
+    for key, value in nucvec.items() :
+        if value < 0 :
+           mass_bool = True
+        else:
+            atom_bool = True
+    try:
+        mass_bool != atom_bool
+    except ValueError :
+        print 'Mixed atom and mass fractions not suppported.\
+               See material defined on line {0}'.format(mat_line)
+    
+    ''' apply all data to material object'''
+    if atom_bool == True :
+        mat = Material()
+        mat.from_atom_frac(nucvec)
+    else :
+        mat = Material(nucvec = nucvec) # set nucvec attribute to the nucvec dict from above
+
+    mat.attrs['table_ids'] = table_ids
+    mat.attrs['mat_number'] = data_string.split()[0][1:]
+
+    ''' collect metadata, if present '''
+    attrs = ['source', 'comments', 'name'] 
+    for i in range(1, 5): # iterate through the 4 lines preceding the m*
+        attrs_line = linecache.getline(filename, mat_line - i)
+        if len(attrs_line.split()) > 1 :
+            if attrs_line.split()[0] == 'c' or attrs_line.split()[0] == 'C' :
+                possible_attr = attrs_line.split()[1].split(':')[0].lower()
+                if possible_attr in attrs :
+                    mat.attrs[possible_attr] = attrs_line.split(':', 1) # set metadata
+
+    '''Check all the densities. If they are atom densities, convert them to mass
+       densities. If they are mass densities they willl be negative, so make
+       them positive.'''
+    if densities != 'None' :
+        converted_densities = []
+        for den in densities :
+            if den <= 0 :
+                converted_densities.append(-1*float(den))
+            else:
+                print den                
+                converted_densities.append(mat.mass_density_from_atom_density(float(den)))
+        '''check to see how many densities are associated with this material.
+        if there is more than one, create a multimaterial'''
+
+        if len(converted_densities) == 1 :
+            mat.density = converted_densities[0]
+            finished_mat = mat
+  
+        elif len(converted_densities) > 1   :
+            mat_dict = {}
+            for density in converted_densities :
+                mat.density = density
+                mat_dict[mat] = 1
+            finished_mat = MultiMaterial(mat_dict)
+            print 'Material {0} has {1} densities, MultiMaterial created'\
+                   .format(mat.attrs['mat_number'], len(converted_densities))
+    else :
+       finished_mat = mat         
+        
+    return finished_mat
+     
