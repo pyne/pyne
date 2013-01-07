@@ -1245,6 +1245,8 @@ def convert(string):
         return None
     elif string[-2] in '+-':
         return float(string[:-2] + 'e' + string[-2:])
+    elif string[-3] in '+-':
+        return float(string[:-3] + 'e' + string[-3:])
     else:
         return float(string)
 
