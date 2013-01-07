@@ -50,3 +50,14 @@ separately as an enhancement for their software (MCNP5), the
 distribution mechanism will be as a patch to their source code, since
 we generally are not authorized to redistribute their code.
 
+Building Documentation
+-------------------------
+
+The documentation for DAGMC has been configured such that the source is 
+in the master branch, to be distributed with the source code.  The HTML 
+version can be generated and pushed automatically to the gh-pages branch 
+by running::
+
+     make -f doc-src/Makefile gh-pages
+
+in the top-level directory.
