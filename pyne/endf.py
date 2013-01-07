@@ -1263,10 +1263,6 @@ def numpy_to_ENDF(num):
     else:
         return ''
                 
-print numpy_to_ENDF(-1.0123456789e+0)
-print numpy_to_ENDF(1.0123456789e+0)
-print numpy_to_ENDF(-1.0000000000e+0)
-
 
 MTname = {1: "(n,total) Neutron total",
           2: "(z,z0) Elastic scattering",
@@ -1449,30 +1445,3 @@ class NotFound(Exception):
         self.value = value
     def __str__(self):
         return repr(self.value)
-
-# if __name__ == '__main__':
-    #
-    # Some tests. The test files can be downloaded from:
-       # http://www.oecd-nea.org/dbforms/data/eva/evatapes/endfb_7/tsl-ENDF-VII0.endf/
-       # http://www.oecd-nea.org/dbforms/data/eva/evatapes/endfb_7/n-ENDF-VII0.endf/
-    #
-    # u235 = Evaluation('n-092_U_235.endf')
-    # u235.read()
-    # for file in u235.files:
-        # print '>>>', file, file.reactions
-    # water = Evaluation('tsl-HinH2O.endf')
-    # water.read()
-    # for file in water.files:
-        # print '>>>', file, file.reactions
-    # graphite = Evaluation('tsl-graphite.endf')
-    # graphite.read()
-    # for file in graphite.files:
-        # print '>>>', file, file.reactions
-    # zrh = Evaluation('tsl-HinZrH.endf')
-    # zrh.read()
-    # for file in zrh.files:
-        # print '>>>', file, file.reactions
-
-
-
-
