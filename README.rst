@@ -54,10 +54,15 @@ Building Documentation
 -------------------------
 
 The documentation for DAGMC has been configured such that the source is 
-in the master branch, to be distributed with the source code.  The HTML 
-version can be generated and pushed automatically to the gh-pages branch 
-by running::
+in the master branch, to be distributed with the source code.  After making 
+changes to any of the ReST files and commiting those changes to the master 
+branch (but not pushing!), the HTML version can be generated and pushed 
+automatically to the gh-pages branch by running::
 
      make -f doc-src/Makefile gh-pages
 
 in the top-level directory.
+
+You can then preview these changes by checking out the gh-pages branch and 
+opening the local file in your browser.  When you are satisfied with the 
+changes, be sure to push the master branch back to github to share the changes.
