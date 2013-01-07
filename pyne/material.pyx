@@ -1786,14 +1786,31 @@ def mat_from_mcnp(filename, mat_line, densities = 'None') :
     mat.attrs['mat_number'] = data_string.split()[0][1:]
 
     ''' collect metadata, if present '''
-    attrs = ['source', 'comments', 'name'] 
-    for i in range(1, 5): # iterate through the 4 lines preceding the m*
-        attrs_line = linecache.getline(filename, mat_line - i)
-        if len(attrs_line.split()) > 1 :
-            if attrs_line.split()[0] == 'c' or attrs_line.split()[0] == 'C' :
-                possible_attr = attrs_line.split()[1].split(':')[0].lower()
-                if possible_attr in attrs :
-                    mat.attrs[possible_attr] = attrs_line.split(':', 1) # set metadata
+    attrs = ['source', 'comments', 'name']
+    line_index = 1
+    attrs_line = linecache.getline(filename, mat_line - line_index)
+    while attrs_line not in ['c', 'C', ''] and attrs_line.split()[0] in ['c', 'C'] :        
+        if attrs_line.split()[0] == 'c' or attrs_line.split()[0] == 'C' \
+           and len(attrs_line.split()) > 1:
+            possible_attr = attrs_line.split()[1].split(':')[0].lower()
+            if possible_attr in attrs :
+                if possible_attr.lower() == 'comments' :
+                    print ''.join(attrs_line.split(':')[1:])
+                    comments_string = str(''.join(attrs_line.split(':')[1:]).split('\n')[0])
+                    comment_index = 1
+                    comment_line = linecache.getline(filename, mat_line - line_index + comment_index)
+                    while comment_line.split()[0] in ['c', 'C'] :
+                        if comment_line.split()[1].split(':')[0].lower() in attrs :
+                            break
+                        comments_string += ' '.join(comment_line.split()[1:])
+                        comment_index += 1
+                        comment_line = linecache.getline(filename, mat_line - line_index + comment_index)
+                    mat.attrs[possible_attr] = comments_string
+                else :
+                   mat.attrs[possible_attr] = ''.join(attrs_line.split(':')[1:]).split('\n')[0] # set metadata
+        line_index += 1
+        attrs_line = linecache.getline(filename, mat_line - line_index)
+
 
     '''Check all the densities. If they are atom densities, convert them to mass
        densities. If they are mass densities they willl be negative, so make
@@ -1804,7 +1821,6 @@ def mat_from_mcnp(filename, mat_line, densities = 'None') :
             if den <= 0 :
                 converted_densities.append(-1*float(den))
             else:
-                print den                
                 converted_densities.append(mat.mass_density_from_atom_density(float(den)))
         '''check to see how many densities are associated with this material.
         if there is more than one, create a multimaterial'''
