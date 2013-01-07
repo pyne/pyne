@@ -134,6 +134,7 @@ html_theme_options = {'sidebarbgcolor': '#F1FFF0',
                       #'rubricbgcolor': '#69A74E',
                       'rubricbgcolor': '#996600',
                       #'min_height': 'bottom',
+                      'googleanalytics_id': 'UA-37452818-1', 
                       }
 
 # Add any paths that contain custom themes here, relative to this directory.
