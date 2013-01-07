@@ -900,7 +900,7 @@ def test_attrs():
 #
 # Test MultiMaterial
 #
-def test_multi_material():
+def test_multimaterial():
     mat1 = Material(nucvec={120240:0.3, 300000:0.2, 10010:0.1}, density=2.71)
     mat2 = Material(nucvec={60120:0.2, 280640:0.5, 10010:0.12}, density= 8.0)
     mix = MultiMaterial({mat1:0.5, mat2:0.21})
@@ -920,6 +920,93 @@ def test_multi_material():
     assert_equal(mat4.comp[120240], 0.2232289950576606)
     assert_equal(mat4.comp[280640], 0.33752561578334067)
     assert_equal(mat4.comp[300000], 0.14881933003844042)
+
+def test_write_mcnp_mass_fracs():
+    if 'mcnp_mass_fracs.txt' in os.listdir('.'):
+        os.remove('mcnp_mass_fracs.txt')
+
+    leu = Material( nucvec={'U235': 0.04, 'U238': 0.96}, attrs={\
+          'mat_number':2, 'table_ids':{'922350':'15c', '922380':'25c'},\
+          'mat_name':'LEU', 'source':'Some URL', \
+          'comments': 'comments can go here'}, density = 19.1 )
+
+    leu.write_mcnp_mass_fracs('mcnp_mass_fracs.txt')
+
+    with open('mcnp_mass_fracs.txt') as f:
+        written = f.read()
+    expected = (an'C density = 19.1\n'
+                'C source: Some URL\n'
+                'C comments:\n'
+                'C comments can go here\n'
+                'm2\n'
+                '     92235.15c -4.0000E-02\n'
+                '     92238.25c -9.6000E-01\n')
+    assert_equal(written, expected)
+    os.remove('mcnp_mass_fracs.txt')
+
+def test_write_alara():
+    if 'alara.txt' in os.listdir('.'):
+        os.remove('alara.txt')
+
+    leu = Material( nucvec={'U235': 0.04, 'U238': 0.96}, attrs={\
+          'mat_number':2, 'table_ids':{'922350':'15c', '922380':'25c'},\
+          'mat_name':'LEU', 'source':'Some URL', \
+          'comments': 'comments can go here'}, density = 19.1 )
+
+    leu.write_alara('alara.txt')
+
+    with open('alara.txt') as f:
+        written = f.read()
+    expected = ('# source: Some URL\n'
+                '# comments:\n'
+                '# comments can go here\n'
+                'm2 19.1 2\n'
+                '     92235 4.0000E-02 92\n'
+                '     92238 9.6000E-01 92\n')
+    assert_equal(written, expected)
+    os.remove('alara.txt')
+'''
+def test_read_mcnp() :
+    expected = [Material( nucvec={'U235': 0.04, 'U238': 0.96}, attrs={\
+          'mat_number':2, 'table_ids':{'922350':'15c', '922380':'25c'},\
+          'mat_name':'LEU', 'source':'Some URL', \
+          'comments': 'comments can go here'}, density = 19.1 ),
+    assert_equal(expected, read)
+'''
+
+    
+
+
+
+
+'''
+def test_write_text():
+    if 'test_mat.txt' in os.listdir('.'):
+        os.remove('leu.txt')
+
+    leu = Material({'U235': 0.04, 'U238': 0.96}, 42.0, 1.0, 1.0)
+    leu.write_text('leu.txt')
+
+    with open('leu.txt') as f:
+        written = f.read()
+    expected = ("Mass    42\n"
+                "Density 1\n"
+                "APerM   1\n"
+                "U235    0.04\n"
+                "U238    0.96\n")
+    assert_equal(written, expected)
+
+    read_leu = from_text('leu.txt')
+    assert_equal(leu.mass, read_leu.mass)
+    assert_equal(leu.atoms_per_mol, read_leu.atoms_per_mol)
+    assert_equal(leu.comp, read_leu.comp)
+
+    os.remove('leu.txt')
+'''
+
+
+
+
 
 #
 # Run as script
