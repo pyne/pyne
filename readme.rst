@@ -28,6 +28,11 @@ PyNE has the following dependencies:
    #. `HDF5 <http://www.hdfgroup.org/HDF5/>`_
    #. `PyTables <http://www.pytables.org/>`_
 
+Additionally, building the documentation requires the following:
+
+   #. `Sphinx <http://sphinx-doc.org/>`_
+   #. `SciSphinx <https://github.com/numfocus/scisphinx>`_
+
 ------
 Binary
 ------

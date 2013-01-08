@@ -110,7 +110,7 @@ def main():
             pass
 
     # Make the build dir
-    if args.clean == 2:
+    if args.clean == 2 and os.path.exists(args.build_dir):
         print "Removing build_dir from {0}".format(args.build_dir)
         remove_tree(args.build_dir)
     mkpath(args.build_dir)
