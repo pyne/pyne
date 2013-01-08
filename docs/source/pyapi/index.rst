@@ -26,5 +26,5 @@ The following modules and sub-packages are discussed:
     stlconverters
     dbgen/index
     mcnp
-    simplesim
+    simplesim/index
     jsoncpp
