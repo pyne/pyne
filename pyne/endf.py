@@ -769,7 +769,7 @@ class Evaluation(object):
 
             # Get data for each yield
             iyield.data[E] = {}
-            iyield.data[E]['zafp'] = itemList[0::4] # ZA for fission products
+            iyield.data[E]['zafp'] = [int(i) for i in itemList[0::4]] # ZA for fission products
             iyield.data[E]['fps'] = itemList[1::4] # State designator
             iyield.data[E]['yi'] = zip(itemList[2::4],itemList[3::4]) # Independent yield
 
@@ -809,7 +809,7 @@ class Evaluation(object):
 
             # Get data for each yield
             cyield.data[E] = {}
-            cyield.data[E]['zafp'] = itemList[0::4] # ZA for fission products
+            cyield.data[E]['zafp'] = [int(i) for i in itemList[0::4]] # ZA for fission products
             cyield.data[E]['fps'] = itemList[1::4] # State designator
             cyield.data[E]['yc'] = zip(itemList[2::4],itemList[3::4]) # Cumulative yield
 
