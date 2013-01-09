@@ -8,7 +8,7 @@ from cython.operator cimport preincrement as inc
 from libc.stdlib cimport malloc, free
 
 # Python imports
-import collections, math, linecache
+import collections, math, linecache, copy
 
 # local imports
 include "include/cython_version.pxi"
@@ -1160,7 +1160,7 @@ class Material(_Material, collections.MutableMapping):
         output=file(filename, 'a')
 
         if 'name' in self.attrs:
-            output.write('C {0}\n'.format(self.attrs['name']))
+            output.write('C name: {0}\n'.format(self.attrs['name']))
 
         if str(self.density) != '-1.0' :
             output.write('C density = {0}\n'.format(self.density))
@@ -1169,10 +1169,10 @@ class Material(_Material, collections.MutableMapping):
             output.write('C source: {0}\n'.format(self.attrs['source']))
 
         if 'comments' in self.attrs:
-            output.write('C comments:\n')
+            comment_string= 'comments: ' + self.attrs['comments']
             # split up lines so comments are less than 80 characters 
-            for n in range(0, int(math.ceil(float(len(self.attrs['comments']))/77))) :
-                 output.write('C {0}\n'.format(self.attrs['comments'][n*77:(n + 1)*77])) 
+            for n in range(0, int(math.ceil(float(len(comment_string))/77))) :
+                 output.write('C {0}\n'.format(comment_string[n*77:(n + 1)*77])) 
 
         if 'mat_number' in self.attrs : 
             mat_num = self.attrs['mat_number']
@@ -1192,23 +1192,22 @@ class Material(_Material, collections.MutableMapping):
 
 
     def write_alara(self, filename):
-        '''The method appends an ALARAA definition, with
+        '''The method appends an ALARA definition, with
          attributes to the file with the supplied filename'''
 
         output=file(filename, 'a')
 
         if 'name' in self.attrs:
-            output.write('# {0}\n'.format(self.attrs['name']))
+            output.write('# name: {0}\n'.format(self.attrs['name']))
 
         if 'source' in self.attrs:
             output.write('# source: {0}\n'.format(self.attrs['source']))
 
         if 'comments' in self.attrs:
-            output.write('# comments:\n')
-
+            comment_string= 'comments: ' + self.attrs['comments']
             # split up lines so comments are less than 80 characters 
-            for n in range(0, int(math.ceil(float(len(self.attrs['comments']))/77))) :
-                 output.write('# {0}\n'.format(self.attrs['comments'][n*77:(n + 1)*77])) 
+            for n in range(0, int(math.ceil(float(len(comment_string))/77))) :
+                 output.write('# {0}\n'.format(comment_string[n*77:(n + 1)*77])) 
 
         if 'mat_number' in self.attrs : 
             mat_num = self.attrs['mat_number']
@@ -1225,10 +1224,6 @@ class Material(_Material, collections.MutableMapping):
 
         for iso, frac in self.comp.items() :
             output.write('     {0} {1:.4E} {2}\n'.format(str(iso)[:-1], frac, str(iso)[:-4]))
-
-
-
-
 
 
 #####################################
@@ -1789,25 +1784,29 @@ def mat_from_mcnp(filename, mat_line, densities = 'None') :
     attrs = ['source', 'comments', 'name']
     line_index = 1
     attrs_line = linecache.getline(filename, mat_line - line_index)
-    while attrs_line not in ['c', 'C', ''] and attrs_line.split()[0] in ['c', 'C'] :        
+    while attrs_line not in ['c', 'C', ''] \
+    and attrs_line.split()[0] in ['c', 'C'] :        
         if attrs_line.split()[0] == 'c' or attrs_line.split()[0] == 'C' \
            and len(attrs_line.split()) > 1:
             possible_attr = attrs_line.split()[1].split(':')[0].lower()
             if possible_attr in attrs :
                 if possible_attr.lower() == 'comments' :
-                    print ''.join(attrs_line.split(':')[1:])
-                    comments_string = str(''.join(attrs_line.split(':')[1:]).split('\n')[0])
+                    comments_string = \
+                    str(''.join(attrs_line.split(':')[1:]).split('\n')[0])
                     comment_index = 1
-                    comment_line = linecache.getline(filename, mat_line - line_index + comment_index)
+                    comment_line = linecache.getline(filename, mat_line\
+                                    - line_index + comment_index)
                     while comment_line.split()[0] in ['c', 'C'] :
                         if comment_line.split()[1].split(':')[0].lower() in attrs :
                             break
-                        comments_string += ' '.join(comment_line.split()[1:])
+                        comments_string += ' '+' '.join(comment_line.split()[1:])
                         comment_index += 1
-                        comment_line = linecache.getline(filename, mat_line - line_index + comment_index)
+                        comment_line = linecache.getline(filename, mat_line \
+                                                   - line_index + comment_index)
                     mat.attrs[possible_attr] = comments_string
                 else :
-                   mat.attrs[possible_attr] = ''.join(attrs_line.split(':')[1:]).split('\n')[0] # set metadata
+                   mat.attrs[possible_attr] = \
+                   ''.join(attrs_line.split(':')[1:]).split('\n')[0] # set metadata
         line_index += 1
         attrs_line = linecache.getline(filename, mat_line - line_index)
 
@@ -1832,13 +1831,18 @@ def mat_from_mcnp(filename, mat_line, densities = 'None') :
         elif len(converted_densities) > 1   :
             mat_dict = {}
             for density in converted_densities :
-                mat.density = density
-                mat_dict[mat] = 1
+                mat2 = Material()
+                mat2.comp = mat.comp
+                mat2.atoms_per_mol = mat.atoms_per_mol
+                mat2.mass = mat.mass
+                mat2.attrs = mat.attrs 
+                mat2.density = density
+                mat_dict[mat2] = 1
             finished_mat = MultiMaterial(mat_dict)
             print 'Material {0} has {1} densities, MultiMaterial created'\
                    .format(mat.attrs['mat_number'], len(converted_densities))
     else :
-       finished_mat = mat         
+       finished_mat = mat
         
     return finished_mat
      
