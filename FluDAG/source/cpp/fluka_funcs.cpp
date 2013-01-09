@@ -52,7 +52,6 @@ static double dist_limit; // needs to be thread-local
 
 
 void dagmcinit_(char *cfile, int *clen,  // geom
-// jcz:  do not use ftlen and ftol; instead use dagmc_preproc to create facets 
                 char *ftol,  int *ftlen, // faceting tolerance
                 int *parallel_file_mode, // parallel read mode
                 double* dagmc_version, int* moab_version, int* max_pbl )
@@ -69,9 +68,7 @@ void dagmcinit_(char *cfile, int *clen,  // geom
   *moab_version = DAG->interface_revision();
   
     // terminate all filenames with null char
-  // cfile[*clen] = ftol[*ftlen] = '\0';
-  // jcz remove reference to ftol
-  cfile[*clen] = '\0';
+  cfile[*clen] = ftol[*ftlen] = '\0';
 
     // initialize this as -1 so that DAGMC internal defaults are preserved
     // user doesn't set this

@@ -11,14 +11,6 @@ C       Declarations
 	INTEGER CLEN, FTLEN, PARALLEL_READ, MOAB_VERSION, MAX_PBL
 	CHARACTER*8 FTOL
 	DOUBLE PRECISION DAGMC_VERSION
-C       character(len=8) :: filename
-C	integer :: clen
-C	character(len=8) :: ftol
-C	integer :: ftlen
-C	integer :: parallel_read
-C 	double precision :: dagmc_version
-C	integer :: moab_version
-C	integer :: max_pbl
 
 
 C2345678
@@ -28,9 +20,11 @@ C       Externally defined C_FUNCTION is in test.c
 C        CALL C_FUNCTION
         	
         PARALLEL_READ = 0;
-        FILENAME = 'myfile'
-	CLEN = 6
-	CALL DAGMCINIT(FILENAME,CLEN,FTOL, FTLEN, PARALLEL_READ, 
+        FILENAME = "test.h5m"
+	CLEN = 8
+	FTOL = "meshfile"
+        FTLEN = 8
+	CALL DAGMCINIT(FILENAME,CLEN, FTOL, FTLEN, PARALLEL_READ, 
      +		DAGMC_VERSION,MOAB_VERSION,MAX_PBL)
         X = 1.2;
         Y = 0.0;

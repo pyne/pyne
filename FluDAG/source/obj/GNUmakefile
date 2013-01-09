@@ -26,38 +26,42 @@ MOAB_FLAGS = -lMOAB -ldagmc
 MOAB_LIBS_LINK = -L${MOAB_LIBDIR} -lm ${MOAB_FLAGS} 
 
 
+FSRCS = 
+
+CCSRCS = 
+
+OBJS = $(FSRCS:.f=.o) $(CCSRCS:.c=.o)
+PRGS = $(FSRCS:.f=) $(CCSRCS:.c=)
+
+.SUFFIXES:
+.SUFFIXES: .f .c .o
+
+.f.o:
+	cd obj; make $<; cd ..
+
+.c.o: 
+	g++ -c $<
+
 CPPFLAGS = ${MOAB_INCLUDES} ${FLUDAG_INCLUDES}
 CXXFLAGS = -g
 
 default: all
 
-all: mainf
-
-# Create a cpp main that links in fluka libraries to get flukam_
-mainDag: obj/mainDag.o obj/fludagW.o
-	$(CXX) -o $@ $< $(MOAB_LIBS_LINK) $(FLUKA_LIBS_LINK) -lgfortran
-        
-mainDag.o : cpp/mainDag.cpp
-	cd cpp
-	g++ -c $< $(CPPFLAGS) 
-	mv -f $@ obj
-	cd ..
 
 fludagW.o : cpp/fludagW.cpp
-	cd cpp
 	g++ -c $(CPPFLAGS) $<
-	mv -f $@ obj
-	cd ..
  
 # Create a fortrain main linking object files compiled from fortran, C and C++
-mainf: 
-	cd obj; make main_f.o fluka_funcs.o; cd ..
-	gfortran -o $@ obj/main_f.o  obj/fluka_funcs.o $(MOAB_LIBS_LINK) $(FLUKA_LIBS_LINK) -lstdc++
+
+main_f.o: ../for/main_f.f
+	gfortran -c $<
+
+fluka_funcs.o: ../cpp/fluka_funcs.cpp
+	g++ -c $(CPPFLAGS) $< 
 
 
 clean:
-	rm obj/*.o
-	rm ./mainf
+	rm *.o
 
 print-%:
 	@echo $* = $($*)
