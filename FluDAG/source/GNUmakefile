@@ -12,12 +12,15 @@ MOAB = /filespace/people/z/zachman/dagmc_bld/MOAB
 # FLUPRO is an environment variable that should be set to the directory of the FLUKA installation
 FLUKA_LIBS_LINK = -L${FLUPRO} -lflukahp
 
+# Local includes
+FLUDAG_INCLUDES = -I./include
+
 # MOAB_INCLUDES uses the ${MOAB} var to simplify compilation on different systems
 MOAB_INCLUDES  = -I${MOAB}/include
 MOAB_LIBDIR    =   ${MOAB}/lib
 
 # MOAB_FLAGS determine what libraries we wish to include. Note: netcdf does not seem to be needed
-MOAB_FLAGS = -lMOAB -ldagmc 
+MOAB_FLAGS = -lMOAB -ldagmc
 MOAB_LIBS_LINK = -L${MOAB_LIBDIR} -lm ${MOAB_FLAGS} 
 
 
@@ -40,7 +43,7 @@ PRGS = $(FSRCS:.f=) $(CCSRCS:.c=)
 .c.o: 
 	g++ -c $<
 
-CPPFLAGS = ${MOAB_INCLUDES}
+CPPFLAGS = ${MOAB_INCLUDES} ${FLUDAG_INCLUDES}
 CXXFLAGS = -g
 
 default: all
@@ -64,8 +67,8 @@ fludagW.o : cpp/fludagW.cpp
 	cd ..
  
 # Create a fortrain main linking object files compiled from fortran, C and C++
-mainf: obj/main_f.o obj/simple.o obj/test.o obj/fludagW.o obj/fluka_funcs.o
-	gfortran -o $@ obj/main_f.o  obj/simple.o obj/test.o obj/fludagW.o  obj/fluka_funcs.o $(MOAB_LIBS_LINK) $(FLUKA_LIBS_LINK) -lstdc++
+mainf: obj/main_f.o  obj/fluka_funcs.o
+	gfortran -o $@ obj/main_f.o  obj/fluka_funcs.o $(MOAB_LIBS_LINK) $(FLUKA_LIBS_LINK) -lstdc++
 
 main_f.o: for/main_f.f
 	cd for
@@ -87,7 +90,13 @@ test.o: c/test.c
 
 fluka_funcs.o: cpp/fluka_funcs.cpp
 	cd cpp
-	g++ -c $(CPPFLAGS) $< -I./include
+	g++ -c $(CPPFLAGS) $< 
+	mv -f $@ obj
+	cd ..; ls
+
+dagmcinit.o: cpp/dagmcinit.cpp
+	cd cpp
+	g++ -c $(CPPFLAGS) $< 
 	mv -f $@ obj
 	cd ..; ls
 

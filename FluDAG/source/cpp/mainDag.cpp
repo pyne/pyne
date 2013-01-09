@@ -25,7 +25,7 @@ int main() {
 // 0 for FLUKA
 // 2 for Rubia
 // 3 for Dagmc
-    const int flag = 1;
+    const int flag = 3;
 
 //call fortran
     flukam(flag);
