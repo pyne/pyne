@@ -116,7 +116,7 @@ bigger or smaller to ensure coincidence surfaces). In many instances
 this method could compromise the physics of the solution and is then
 undesirable. However, in other instances, this solution is very
 logical. One particularly significant example is if different volumes
-were modeled with different unit system. For example, one volume/part
+were modeled with different unit systems. For example, one volume/part
 might have been model in [in] while its neighbor was modeled in [cm];
 while the surfaces may be nearly coincidence, rounding errors might
 prevent coincidence from occurring. A simple change to one dimension
