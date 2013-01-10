@@ -26,6 +26,10 @@ libraries = {0: "ENDF/B", 1: "ENDF/A", 2: "JEFF", 3: "EFF",
              31: "INDL/V", 32: "INDL/A", 33: "FENDL", 34: "IRDF",
              35: "BROND", 36: "INGDB-90", 37: "FENDL/A", 41: "BROND"}
 
+decay_type = {0: 'gamma', 1: 'beta', 2: 'ec/positron', 3: 'IT',
+              4: 'alpha', 5: 'n', 6: 'SF', 7: 'p', 8: 'electron', 
+              9: 'xray', 10: 'unknown'}
+
 class Library(rx.rx_data):
     """
     Library is a class for an ENDF evaluation which contains a number
@@ -222,6 +226,18 @@ class Evaluation(object):
                             self._read_thermal_elastic()
                         if MT == 4:
                             self._read_thermal_inelastic()
+                    elif MF == 8:
+                        # Read File 8 -- decay and fission yield data
+                        file8 = self.find_file(8)
+                        if not file8:
+                            file8 = ENDFFile8()
+                            self.files.append(file8)
+                        if MT == 454:
+                            self._read_independent_yield()
+                        elif MT == 459:
+                            self._read_cumulative_yield()
+                        elif MT == 457:
+                            self._read_decay()
             if not found:
                 if self.verbose:
                     print 'Reaction not found'
@@ -720,6 +736,161 @@ class Evaluation(object):
         inel.teff = teffrecord.y
         file7.reactions.append(inel)
 
+    def _read_independent_yield(self):
+        self.print_info(454)
+
+        # Find file8
+        file8 = self.find_file(8)
+
+        # Create MT for resonances
+        iyield = ENDFReaction(454)
+        file8.reactions.append(iyield)
+
+        # Seek File 8
+        self.seek_mfmt(8, 454)
+
+        # Initialize energies and yield dictionary
+        iyield.energies = []
+        iyield.data = {}
+        iyield.interp = []
+
+        items = self._get_head_record()
+        iyield.ZA = items[0]
+        iyield.AWR = items[1]
+        LE = items[2] - 1 # Determine energy-dependence
+
+        for i in range(LE):
+            items, itemList = self._get_list_record()
+            E = items[0] # Incident particle energy
+            iyield.energies.append(E)
+            NFP = items[5] # Number of fission product nuclide states
+            if i > 0:
+                iyield.interp.append(items[2]) # Interpolation scheme
+
+            # Get data for each yield
+            iyield.data[E] = {}
+            iyield.data[E]['zafp'] = [int(i) for i in itemList[0::4]] # ZA for fission products
+            iyield.data[E]['fps'] = itemList[1::4] # State designator
+            iyield.data[E]['yi'] = zip(itemList[2::4],itemList[3::4]) # Independent yield
+
+        # Skip SEND record
+        self.fh.readline()        
+
+    def _read_cumulative_yield(self):
+        self.print_info(459)
+
+        # Find file8
+        file8 = self.find_file(8)
+
+        # Create MT for resonances
+        cyield = ENDFReaction(459)
+        file8.reactions.append(cyield)
+
+        # Seek File 8
+        self.seek_mfmt(8, 459)
+
+        # Initialize energies and yield dictionary
+        cyield.energies = []
+        cyield.data = {}
+        cyield.interp = []
+
+        items = self._get_head_record()
+        cyield.ZA = items[0]
+        cyield.AWR = items[1]
+        LE = items[2] - 1 # Determine energy-dependence
+
+        for i in range(LE):
+            items, itemList = self._get_list_record()
+            E = items[0] # Incident particle energy
+            cyield.energies.append(E)
+            NFP = items[5] # Number of fission product nuclide states
+            if i > 0:
+                cyield.interp.append(items[2]) # Interpolation scheme
+
+            # Get data for each yield
+            cyield.data[E] = {}
+            cyield.data[E]['zafp'] = [int(i) for i in itemList[0::4]] # ZA for fission products
+            cyield.data[E]['fps'] = itemList[1::4] # State designator
+            cyield.data[E]['yc'] = zip(itemList[2::4],itemList[3::4]) # Cumulative yield
+
+        # Skip SEND record
+        self.fh.readline()        
+
+    def _read_decay(self):
+        self.print_info(457)
+
+        # Find file8
+        file8 = self.find_file(8)
+
+        # Create MT for resonances
+        decay = ENDFReaction(457)
+        file8.reactions.append(decay)
+
+        # Find reaction
+        self.seek_mfmt(8, 457)
+
+        # Get head record
+        items = self._get_head_record()
+        decay.ZA = items[0] # ZA identifier
+        decay.AWR = items[1] # AWR
+        decay.LIS = items[2] # State of the original nuclide
+        decay.LISO = items[3] # Isomeric state for the original nuclide
+        decay.NST = items[4] # Nucleus stability flag
+
+        # Determine if radioactive (0)/stable (1)
+        if decay.NST == 0:
+            decay.NSP = items[5] # Number of radiation types
+
+            # Half-life and decay energies
+            items, itemList = self._get_list_record()
+            decay.half_life = (items[0], items[1])
+            decay.NC = items[4]/2
+            decay.energies = zip(itemList[0::2], itemList[1::2])
+
+            # Decay mode information
+            items, itemList = self._get_list_record()
+            decay.SPI = items[0] # Spin of the nuclide
+            decay.PAR = items[1] # Parity of the nuclide
+            decay.NDK = items[5] # Number of decay modes
+            # Decay type (beta, gamma, etc.)
+            decay.RTYP = []
+            for i in itemList[0::6]:
+                if i % 1.0 == 0:
+                    decay.RTYP.append(decay_type[int(i)])
+                else:
+                    # TODO: Handle multiple decay
+                    raise
+            decay.RFS = itemList[1::6] # Isomeric state for daughter
+            decay.Q = zip(itemList[2::6], itemList[3::6]) # Total decay energy
+            decay.BR = zip(itemList[4::6], itemList[5::6]) # Branching ratios
+
+            # Read spectra
+            for i in range(decay.NSP):
+                items, itemList = self._get_list_record()
+                STYP = decay_type[items[1]] # Decay radiation type
+                LCON = items[2] # Continuous spectrum flag
+                NER = items[5] # Number of tabulated discrete energies
+
+                if LCON != 1:
+                    for j in range(NER):
+                        items, itemList = self._get_list_record()
+
+                if LCON != 0:
+                    r = self._get_tab1_record()
+                    LCOV = r.params[3]
+
+                    if LCOV != 0:
+                        items, itemList = self._get_list_record()                    
+
+        elif decay.NST == 1:
+            items, itemList = self._get_list_record()
+            items, itemList = self._get_list_record()
+            decay.SPI = items[0]
+            decay.PAR = items[1]
+
+        # Skip SEND record
+        self.fh.readline()            
+
     def _get_text_record(self, line=None):
         if not line:
             line = self.fh.readline()
@@ -1182,6 +1353,7 @@ class ENDFFile8(ENDFFile):
     """
 
     def __init__(self):
+        super(ENDFFile8,self).__init__()
         self.fileNumber = 8
 
 class ENDFFile9(ENDFFile):
@@ -1245,6 +1417,8 @@ def convert(string):
         return None
     elif string[-2] in '+-':
         return float(string[:-2] + 'e' + string[-2:])
+    elif string[-3] in '+-':
+        return float(string[:-3] + 'e' + string[-3:])
     else:
         return float(string)
 
@@ -1263,10 +1437,6 @@ def numpy_to_ENDF(num):
     else:
         return ''
                 
-print numpy_to_ENDF(-1.0123456789e+0)
-print numpy_to_ENDF(1.0123456789e+0)
-print numpy_to_ENDF(-1.0000000000e+0)
-
 
 MTname = {1: "(n,total) Neutron total",
           2: "(z,z0) Elastic scattering",
@@ -1380,15 +1550,15 @@ MTname = {1: "(n,total) Neutron total",
           251: "Average cosine of scattering angle",
           252: "Average logarithmic energy decrement",
           253: "Average xi^2/(2*xi)",
-          451: "Desciptive Data",
-          452: "Total Neutrons per Fission",
+          451: "Desciptive data",
+          452: "Total neutrons per fission",
           454: "Independent fission product yield",
-          455: "Delayed Neutron Data",
-          456: "Prompt Neutrons per Fission",
-          457: "Radioactive Decay Data",
-          458: "Energy Release Due to Fission",
-          459: "Cumulative Fission Product Yield",
-          460: "Delayed Photon Data",
+          455: "Delayed neutron data",
+          456: "Prompt neutrons per fission",
+          457: "Radioactive decay data",
+          458: "Energy release due to fission",
+          459: "Cumulative fission product yield",
+          460: "Delayed photon data",
           500: "Total charged-particle stopping power",
           501: "Total photon interaction",
           502: "Photon coherent scattering",
@@ -1449,30 +1619,3 @@ class NotFound(Exception):
         self.value = value
     def __str__(self):
         return repr(self.value)
-
-# if __name__ == '__main__':
-    #
-    # Some tests. The test files can be downloaded from:
-       # http://www.oecd-nea.org/dbforms/data/eva/evatapes/endfb_7/tsl-ENDF-VII0.endf/
-       # http://www.oecd-nea.org/dbforms/data/eva/evatapes/endfb_7/n-ENDF-VII0.endf/
-    #
-    # u235 = Evaluation('n-092_U_235.endf')
-    # u235.read()
-    # for file in u235.files:
-        # print '>>>', file, file.reactions
-    # water = Evaluation('tsl-HinH2O.endf')
-    # water.read()
-    # for file in water.files:
-        # print '>>>', file, file.reactions
-    # graphite = Evaluation('tsl-graphite.endf')
-    # graphite.read()
-    # for file in graphite.files:
-        # print '>>>', file, file.reactions
-    # zrh = Evaluation('tsl-HinZrH.endf')
-    # zrh.read()
-    # for file in zrh.files:
-        # print '>>>', file, file.reactions
-
-
-
-
