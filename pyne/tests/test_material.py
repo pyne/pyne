@@ -7,7 +7,8 @@ from nose.tools import assert_equal, assert_not_equal, assert_raises, raises, \
     assert_almost_equal, assert_true, assert_false, assert_in
 
 import os
-from pyne.material import Material, from_atom_frac, from_hdf5, from_text, MapStrMaterial, MultiMaterial
+from pyne.material import Material, from_atom_frac, from_hdf5, from_text, MapStrMaterial, MultiMaterial,\
+    read_mcnp_inp
 from pyne import jsoncpp 
 from pyne import data
 import numpy  as np
@@ -900,7 +901,7 @@ def test_attrs():
 #
 # Test MultiMaterial
 #
-def test_multi_material():
+def test_multimaterial():
     mat1 = Material(nucvec={120240:0.3, 300000:0.2, 10010:0.1}, density=2.71)
     mat2 = Material(nucvec={60120:0.2, 280640:0.5, 10010:0.12}, density= 8.0)
     mix = MultiMaterial({mat1:0.5, mat2:0.21})
@@ -921,7 +922,118 @@ def test_multi_material():
     assert_equal(mat4.comp[280640], 0.33752561578334067)
     assert_equal(mat4.comp[300000], 0.14881933003844042)
 
-#
+def test_write_mcnp_mass_fracs():
+    if 'mcnp_mass_fracs.txt' in os.listdir('.'):
+        os.remove('mcnp_mass_fracs.txt')
+
+    leu = Material( nucvec={'U235': 0.04, 'U238': 0.96}, attrs={\
+          'mat_number':2, 'table_ids':{'922350':'15c', '922380':'25c'},\
+          'mat_name':'LEU', 'source':'Some URL', \
+          'comments': \
+'this is a long comment that will definitly go over the 80 character limit, for science', \
+          'name':'leu'}, density = 19.1 )
+
+    leu.write_mcnp_mass_fracs('mcnp_mass_fracs.txt')
+
+    with open('mcnp_mass_fracs.txt') as f:
+        written = f.read()
+    expected = ('C name: leu\n'
+                'C density = 19.1\n'
+                'C source: Some URL\n'
+                'C comments: this is a long comment that will definitly go over the 80 character\n'
+                'C  limit, for science\n'
+                'm2\n'
+                '     92235.15c -4.0000E-02\n'
+                '     92238.25c -9.6000E-01\n')
+    assert_equal(written, expected)
+    os.remove('mcnp_mass_fracs.txt')
+
+
+def test_write_alara():
+    if 'alara.txt' in os.listdir('.'):
+        os.remove('alara.txt')
+
+    leu = Material( nucvec={'U235': 0.04, 'U238': 0.96}, attrs={\
+          'mat_number':2, 'table_ids':{'922350':'15c', '922380':'25c'},\
+          'mat_name':'LEU', 'source':'Some URL', \
+          'comments': \
+'this is a long comment that will definitly go over the 80 character limit, for science', \
+          'name':'leu'}, density = 19.1 )
+
+    leu.write_alara('alara.txt')
+
+    with open('alara.txt') as f:
+        written = f.read()
+    expected = ('# name: leu\n'
+                '# source: Some URL\n'
+                '# comments: this is a long comment that will definitly go over the 80 character\n'
+                '#  limit, for science\n'
+                'm2 19.1 2\n'
+                '     92235 4.0000E-02 92\n'
+                '     92238 9.6000E-01 92\n')
+    assert_equal(written, expected)
+    os.remove('alara.txt')
+
+
+def test_read_mcnp() :
+
+    expected_material = Material(nucvec={922350: 0.04, 922380: 0.96}, mass=-1.0, 
+    density=19.1, attrs={"comments":" first line of comments second line of \
+comments third line of comments forth line of comments","mat_number":"1",\
+    "name":" leu", "source":" Some http://URL.com",\
+    "table_ids":{"922350":"15c","922380":"25c"}})
+    expected_material.mass = -1.0 # to avoid reassignment to +1.0
+
+    expected_multimaterial =MultiMaterial({Material(\
+    {10000: 0.11190248274452597, 80000: 0.888097517255474}, -1.0, 0.9, 3, \
+    {"comments":" Here are comments the comments continue here are more \
+even more","mat_number":"2","name":" water","source":" internet",\
+    "table_ids":{"10000":"05c","80000":"06c"}}): 1,\
+     Material({10000: 0.11190248274452597, 80000: 0.888097517255474}, \
+    -1.0, 1.002158184090557, 3, {"comments":" Here are comments the comments \
+continue here are more even more","mat_number":"2","name":" water",\
+     "source":" internet","table_ids":{"10000":"05c","80000":"06c"}}): 1})
+
+    read_materials = read_mcnp_inp('mcnp_inp.txt')
+
+    assert_equal(expected_material, read_materials[0])
+
+    assert_equal(expected_multimaterial._mats.keys()[0].comp,\
+                                        read_materials[1]._mats.keys()[0].comp)
+    assert_equal(expected_multimaterial._mats.keys()[0].mass,\
+                                        read_materials[1]._mats.keys()[0].mass)
+    assert_equal(expected_multimaterial._mats.keys()[0].density,\
+                                      read_materials[1]._mats.keys()[0].density)
+    assert_equal(expected_multimaterial._mats.keys()[0].atoms_per_mol,\
+                                read_materials[1]._mats.keys()[0].atoms_per_mol)
+    assert_equal(expected_multimaterial._mats.keys()[0].attrs,\
+                                      read_materials[1]._mats.keys()[0].attrs)
+
+    assert_equal(expected_multimaterial._mats.keys()[1].comp,\
+                                        read_materials[1]._mats.keys()[1].comp)
+    assert_equal(expected_multimaterial._mats.keys()[1].mass,\
+                                        read_materials[1]._mats.keys()[1].mass)
+    assert_equal(expected_multimaterial._mats.keys()[1].density,\
+                                      read_materials[1]._mats.keys()[1].density)
+    assert_equal(expected_multimaterial._mats.keys()[1].atoms_per_mol,\
+                                read_materials[1]._mats.keys()[1].atoms_per_mol)
+    assert_equal(expected_multimaterial._mats.keys()[1].attrs,\
+                                      read_materials[1]._mats.keys()[1].attrs)
+
+def test_natural_elements() :
+    water = Material()
+    water.from_atom_frac({10000: 2.0, 80000: 1.0})
+    expected_comp = {10000: 0.11190248274452597, 80000: 0.888097517255474}
+    assert_equal(water.comp, expected_comp)
+
+def test_mass_density_from_atom_density() :
+    ethanol = Material()
+    ethanol.from_atom_frac({'C':2, 'H':6, 'O':1})
+    atom_density_ethanol = 9.282542841E22 # atom density not molecule density
+    mass_density = ethanol.mass_density_from_atom_density(atom_density_ethanol)
+    expected_mass_density = 0.7890206250055379
+    assert_equal(mass_density, expected_mass_density)
+
 # Run as script
 #
 if __name__ == "__main__":
