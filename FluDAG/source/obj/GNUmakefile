@@ -58,8 +58,11 @@ main_f.o: ../for/main_f.f
 
 fluka_funcs.o: ../cpp/fluka_funcs.cpp
 	g++ -c $(CPPFLAGS) $< 
+	mv ../cpp/fluka_funcs.o .
 
-
+userini.o: ../for/userini.f
+	${FLUPRO}/flutil/fff ../for/userini.f
+	mv ../for/userini.o .
 clean:
 	rm *.o
 

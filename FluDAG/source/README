@@ -1,0 +1,6 @@
+Workflow in source: update for/userini.f or cpp/fluka_funcs.cpp
+> 'make userini.o' (and/or 'make fluka_funcs.o)
+> 'make'
+> cd userini_example
+> source runme
+Then look at the .out file in the fluka_xxxx subdir to verify changes took effect.

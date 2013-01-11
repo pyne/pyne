@@ -31,7 +31,7 @@ CXXFLAGS = -g
 
 default: all
 
-all: mainf
+all: myfluka
 
 # Create a cpp main that links in fluka libraries to get flukam_
 mainDag: obj/mainDag.o obj/fludagW.o
@@ -54,6 +54,14 @@ mainf:
 	cd obj; make main_f.o fluka_funcs.o; cd ..
 	gfortran -o $@ obj/main_f.o  obj/fluka_funcs.o $(MOAB_LIBS_LINK) $(FLUKA_LIBS_LINK) -lstdc++
 
+myfluka: obj/userini.o obj/fluka_funcs.o
+	${FLUPRO}/flutil/lfluka -o myfluka -a MOAB -a dagmc -m fluka obj/userini.o -L ${FLUPRO} -L ${MOAB_LIBDIR} obj/fluka_funcs.o
+
+userini.o : for/userini.f
+	cd obj; make userini.o
+
+fluka_funcs.o : cpp/fluka_funcs.o
+	cd obj; make fluka_funcs.o
 
 clean:
 	rm obj/*.o
