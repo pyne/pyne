@@ -59,6 +59,8 @@ void dagmcinit_(char *cfile, int *clen,  // geom
  
   MBErrorCode rval;
 
+  std::cout << "Entering  function dagmcinit_" << std::endl;
+
 #ifdef ENABLE_RAYSTAT_DUMPS
   // the file to which ray statistics dumps will be written
   raystat_dump = new std::ofstream("dagmc_raystat_dump.csv");
@@ -83,6 +85,7 @@ void dagmcinit_(char *cfile, int *clen,  // geom
     std::cerr << "DAGMC failed to read input file: " << cfile << std::endl;
     exit(EXIT_FAILURE);
   }
+  std::cout << "xyzzy In function dagmcinit_ after load_file" << std::endl;
 
 #ifdef CUBIT_LIBS_PRESENT
   // The Cubit 10.2 libraries enable floating point exceptions.  
@@ -104,9 +107,108 @@ void dagmcinit_(char *cfile, int *clen,  // geom
     exit(EXIT_FAILURE);
   }
 
+  std::cout << "xyzzy In function dagmcinit_ after call to init_OBBTree" << std::endl;
+
   pblcm_history_stack.resize( *max_pbl+1 ); // fortran will index from 1
+  std::cout << "xyzzy :Leaving function dagmcinit_" << std::endl;
 
 }
+
+
+/**************************************************************************************************/
+/******                                Some FLUKA stubs                                    ********/
+/**************************************************************************************************/
+/*
+ * Allows tracking initialization.
+ * Same input and output as LOOKMG.
+*/
+extern "C" int lookz_ (double *X, double *Y, double *Z,
+                  double dir[3], // Direction cosines vector
+		  int *RegionNum, // region number
+                  int *newCell,    // region # of p'le after step ("IRPRIM" in FLUKA)
+                  int *Ierr        // error code
+)
+{
+        std::cout << "In C++ function lookz_" << std::endl;
+	std::cout << "\tINPUT: Position X,Y,Z  " << *X << ", " \
+                           <<  *Y  << ", "  << *Z << std::endl;
+	std::cout << "\tINPUT: Direction cosines   " << dir[1] << ", " \
+                           <<  dir[2]  << ", "  << dir[3] << std::endl;
+	std::cout << "\tINPUT: RegionNum " << *RegionNum << std::endl;
+
+
+        *newCell = *RegionNum + 1;
+	std::cout << "OUTPUT: int *newCell = " << *newCell << std::endl;
+	return *Ierr;
+}
+
+/*
+ * Returns a unit vector at the previous point of the tracking (in case a boundary
+ * crossing occurred), that is the intersection point between the path and the
+ * preceding boundary.  The call is done from the routine GEONOR and all
+ * cosines must be normalized at 10e-16, and they must be consistent with the
+ * actual normal, with similar accuracy.
+*/
+extern "C" int norml_(double *U, double *V, double *W)
+{
+	
+	std::cout << " Norml unit vector: U, V, W = " << *U << ", " \
+                           <<  *V  << ", "  << *W << std::endl;
+        *U = 98.7;
+	*V = 6e-5;
+	*W = 4.3e2;	
+	return 1;
+}
+/**
+*
+*  From "Building an Interface between FLUKA and the GEANT4 Geometry Package":
+*  G1FLU calculates the distance travelled in the present zone/region and the 
+*  number of the next zone/region to be entered by the particle.
+*  NOTE:  All the variables are in double precision.
+* 
+*  Input
+*   int *SurfaceNum Surface number hit by the p'le at the preceding step 
+*                   (-1 if the p'le changed its direction or if it's a new
+*                    particle)
+* Output
+*  int *SurfaceNum  number of surface hit by the particle (1 for normal
+*                   tracking, 0 otherwise      
+*  double *tol      parameter with value less than or equal to the 
+*                   MINIMUM of the distances between the particle and each
+*                   boundary (if the boundary surface is too complex 0 is returned)
+*
+* Return
+*  double *tol      Per the documentation G1FLU returns DSNEAR
+*/
+extern "C" double g1flu_(double pos[3], // Cartesian coordinate vector
+                  double dir[3], // Direction cosines vector
+		  int *RegionNum, // region number
+                  double *dist,   // step length SUGGESTED
+                  int *SurfaceNum, // "NASC" in FLUKA, see above for text
+                  double *step,    // step length approved
+                  int *newCell,    // region # of p'le after step ("IRPRIM" in FLUKA)
+                  double *tol,     // "DSNEAR" in FLUKA, see above for text
+                  int *Ierr        // error code
+)
+{
+	std::cout << " Cartesian coordinate vector: pos[3] = " << pos[0]<< ", " \
+                           <<  pos[1]  << ", "  << pos[2] << std::endl;
+	double huge = 10e10;
+	double dls;
+        int jap;
+	int jsu;
+	int nps;
+
+/* ToDo:  
+        dagmctrack_(RegionNum, &(dir[0]), &(dir[1]), &(dir[2]), &(pos[0]), &(pos[1]), &(pos[2]), 
+                     &huge, &dls, &jap, &jsu, &nps);
+*/
+	return *tol;
+}
+
+/**************************************************************************************************/
+/******                                End of FLUKA stubs                                  ********/
+/**************************************************************************************************/
 
 void dagmcwritefacets_(char *ffile, int *flen)  // facet file
 {
