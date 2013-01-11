@@ -16,8 +16,13 @@ import string
 import struct
 import math 
 import os
+import linecache
 
 import numpy as np
+
+from pyne.material import Material
+from pyne.material import MultiMaterial
+import pyne.nucname as nucname
 
 from binaryreader import _BinaryReader, _FortranRecord
 
@@ -647,3 +652,180 @@ class XsdirTable(object):
 
     def __repr__(self):
         return "<XsDirTable: {0}>".format(self.name)
+
+def read_mcnp_inp(inp):
+    """This function reads an MCNP inp file and returns a list of Materials
+    material objects (for single density materials) and MultiMaterial objects
+    (for multiple density materials). This function relys on
+    mat_from_mcnp."""
+
+    mat_lines = []  # line of lines that begin material cards
+    densities = {}  # dictionary to be populated with material numbers and densities
+    mat_nums = []  # list of material numbers to be printed to stdout
+    material_list = []  # to be populated with material objectes and returned
+
+    line_count = 1
+    line = linecache.getline(inp, line_count)
+    # scroll through every line of the mcnp inp file
+    while line != '':
+        line = linecache.getline(inp, line_count)
+        # check to see if line contains a cell card. If so, grab the density.
+        # information is stored in a dictionary where:
+        # key = material number, value = list of densities
+        if len(line.split()) > 3:
+            if line.split()[0].isdigit() is True \
+            and line.split()[1].isdigit() is True \
+            and line[0:5] != '     ' \
+            and line.split()[1] != '0':
+
+                if line.split()[1] not in densities.keys():
+                    densities[line.split()[1]] = [float(line.split()[2])]
+
+                else:
+                    same_bool = False
+                    for j in range(0, len(densities[line.split()[1]])):
+                        if abs((float(line.split()[2]) \
+                                 - densities[line.split()[1]][j])\
+                                 / float(line.split()[2])) < 1E-4:
+                            same_bool = True
+
+                    if same_bool == False:
+                        densities[line.split()[1]]\
+                                                .append(float(line.split()[2]))
+
+        #check line to see if it contain a material card, in the form m* where *
+        #is a digit. If so store the line number and material number
+        if line.split() != []:
+            if line.split()[0][0] == 'm' or line.split()[0][0] == 'M':
+                if line.split()[0][1].isdigit() is True:
+                    mat_lines.append(line_count)
+                    mat_nums.append(line.split()[0][1:])
+
+        line_count += 1
+        line = linecache.getline(inp, line_count)
+
+    for i in range(0, len(mat_nums)):
+        if mat_nums[i] in densities.keys():
+            material_list.append(mat_from_mcnp(inp, mat_lines[i], densities[mat_nums[i]]))
+        else:
+            material_list.append(mat_from_mcnp(inp, mat_lines[i]))
+
+    return material_list
+
+
+def mat_from_mcnp(filename, mat_line, densities='None'):
+    """This is a function that recieves and MCNP input filename, the
+    line number, and list of densities associated with the material and
+    returns a material object. This function is typically called by
+    read_mcnp_inp. If a material has multiple densities, a multimaterial
+    object is returned."""
+
+    data_string = linecache.getline(filename, mat_line).split('$')[0]
+    #collect all material card data on one string
+    line_index = 1
+    line = linecache.getline(filename, mat_line + line_index)
+    while line[0:5] == '     ':
+        #make sure element/isotope is not commented out
+        if line.split()[0][0] != 'c' and line.split()[0][0] != 'C':
+            data_string += line.split('$')[0]
+        line_index += 1
+        line =linecache.getline(filename, mat_line + line_index)
+
+
+   #create dictionaries nucvec and table_ids
+    nucvec = {}
+    table_ids = {}
+    for i in range(1, len(data_string.split())):
+        if i & 1 == 1:
+            zzzaaam = str(nucname.zzaaam(int(data_string.split()[i].split('.')[0])))
+            nucvec[zzzaaam] = float(data_string.split()[i+1])
+            if len(data_string.split()[i].split('.')) > 1:
+                table_ids[str(zzzaaam)] = data_string.split()[i].split('.')[1]
+
+    #Check to see it material is definted my mass or atom fracs.
+    #Do this by comparing the first non-zero fraction to the rest
+    #If atom fracs, convert.
+    nucvecvals = nucvec.values()
+    n = 0
+    isatom = 0 < nucvecvals[n]
+    while 0 == nucvecvals[n]:
+        n += 1
+        isatom = 0 < nucvecvals[n]
+    for value in nucvecvals[n+1:]:
+        if isatom != (0 <= value):
+            msg = 'Mixed atom and mass fractions not supported.  See material defined on line {0}'.format(mat_line)
+            warnings.warn(msg)
+
+    #apply all data to material object
+    if isatom:
+        mat = Material()
+        mat.from_atom_frac(nucvec)
+    else:
+        mat = Material(nucvec=nucvec)  # set nucvec attribute to the nucvec dict from above
+
+    mat.attrs['table_ids'] = table_ids
+    mat.attrs['mat_number'] = data_string.split()[0][1:]
+
+    #collect metadata, if present
+    attrs = ['source', 'comments', 'name']
+    line_index = 1
+    attrs_line = linecache.getline(filename, mat_line - line_index)
+    while attrs_line not in ['c', 'C', ''] \
+    and attrs_line.split()[0] in ['c', 'C']:
+        if attrs_line.split()[0] == 'c' or attrs_line.split()[0] == 'C' \
+           and len(attrs_line.split()) > 1:
+            possible_attr = attrs_line.split()[1].split(':')[0].lower()
+            if possible_attr in attrs:
+                if possible_attr.lower() == 'comments':
+                    comments_string = \
+                    str(''.join(attrs_line.split(':')[1:]).split('\n')[0])
+                    comment_index = 1
+                    comment_line = linecache.getline(filename, mat_line\
+                                    - line_index + comment_index)
+                    while comment_line.split()[0] in ['c', 'C']:
+                        if comment_line.split()[1].split(':')[0].lower() in attrs:
+                            break
+                        comments_string += ' '+' '.join(comment_line.split()[1:])
+                        comment_index += 1
+                        comment_line = linecache.getline(filename, mat_line \
+                                                   - line_index + comment_index)
+                    mat.attrs[possible_attr] = comments_string
+                else:
+                    mat.attrs[possible_attr] = \
+                    ''.join(attrs_line.split(':')[1:]).split('\n')[0]  # set metadata
+        line_index += 1
+        attrs_line = linecache.getline(filename, mat_line - line_index)
+
+
+    # Check all the densities. If they are atom densities, convert them to mass
+    # densities. If they are mass densities they willl be negative, so make
+    # them positive.
+    if densities != 'None':
+        converted_densities = []
+        for den in densities:
+            if den <= 0:
+                converted_densities.append(-1*float(den))
+            else:
+                converted_densities.append(mat.mass_density_from_atom_density(float(den)))
+
+        #check to see how many densities are associated with this material.
+        #if there is more than one, create a multimaterial"""
+        if len(converted_densities) == 1:
+            mat.density = converted_densities[0]
+            finished_mat = mat
+
+        elif len(converted_densities) > 1:
+            mat_dict = {}
+            for density in converted_densities:
+                mat2 = Material()
+                mat2.comp = mat.comp
+                mat2.atoms_per_mol = mat.atoms_per_mol
+                mat2.mass = mat.mass
+                mat2.attrs = mat.attrs
+                mat2.density = density
+                mat_dict[mat2] = 1
+            finished_mat = MultiMaterial(mat_dict)
+    else:
+        finished_mat = mat
+
+    return finished_mat
