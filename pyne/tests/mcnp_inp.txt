@@ -14,7 +14,7 @@ c third line of comments
 c forth line of comments
 m1
      92235.15c -4.0000E-02 $ herere
-     92238.25c -9.6000E-01
+     92238     -9.6000E-01
 C    92233.45C -0.01 $ Testing comment out capability
 C name: water
 C source: internet
@@ -22,5 +22,5 @@ C comments: Here are comments:
 C the comments continue
 C here are more
 c even more
-m2 1000.05c 2 8000.06c 1 $ Testing single line capability 
+m2 1000.05c 2 8000 1 $ Testing single line capability 
 
