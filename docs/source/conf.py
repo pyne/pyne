@@ -247,5 +247,5 @@ breathe_projects = {"pyne": None,}
 breathe_default_project = 'pyne'
 breathe_domain_by_extension = {"h" : "cpp",}
 
-
+# Prevent numpy from making silly tables 
 numpydoc_show_class_members = False
