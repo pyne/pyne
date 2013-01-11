@@ -7,8 +7,7 @@ from nose.tools import assert_equal, assert_not_equal, assert_raises, raises, \
     assert_almost_equal, assert_true, assert_false, assert_in
 
 import os
-from pyne.material import Material, from_atom_frac, from_hdf5, from_text, MapStrMaterial, MultiMaterial,\
-    read_mcnp_inp
+from pyne.material import Material, from_atom_frac, from_hdf5, from_text, MapStrMaterial, MultiMaterial
 from pyne import jsoncpp 
 from pyne import data
 import numpy  as np
@@ -934,7 +933,7 @@ def test_write_mcnp():
           'name':'leu'}, density=19.1)
 
     leu.write_mcnp('mcnp_mass_fracs.txt')
-    leu.write_mcnp('mcnp_mass_fracs.txt', frac_type = 'atom')
+    leu.write_mcnp('mcnp_mass_fracs.txt', frac_type='atom')
 
     with open('mcnp_mass_fracs.txt') as f:
         written = f.read()
@@ -984,50 +983,7 @@ def test_write_alara():
     os.remove('alara.txt')
 
 
-def test_read_mcnp():
 
-    expected_material = Material(nucvec={922350: 0.04, 922380: 0.96}, mass=-1.0, 
-    density=19.1, attrs={"comments":" first line of comments second line of \
-comments third line of comments forth line of comments","mat_number":"1",\
-    "name":" leu", "source":" Some http://URL.com",\
-    "table_ids":{'922350':"15c"}})
-    expected_material.mass = -1.0  # to avoid reassignment to +1.0
-
-    expected_multimaterial =MultiMaterial({Material(\
-    {10000: 0.11190248274452597, 80000: 0.888097517255474}, -1.0, 0.9, 3, \
-    {"comments":" Here are comments the comments continue here are more \
-even more","mat_number":"2","name":" water","source":" internet",\
-    "table_ids":{'10000':"05c"}}): 1,\
-     Material({10000: 0.11190248274452597, 80000: 0.888097517255474}, \
-    -1.0, 1.002158184090557, 3, {"comments":" Here are comments the comments \
-continue here are more even more","mat_number":"2","name":" water",\
-     "source":" internet","table_ids":{'10000':"05c"}}): 1})
-
-    read_materials = read_mcnp_inp('mcnp_inp.txt')
-
-    assert_equal(expected_material, read_materials[0])
-
-    assert_equal(expected_multimaterial._mats.keys()[0].comp,\
-                                        read_materials[1]._mats.keys()[0].comp)
-    assert_equal(expected_multimaterial._mats.keys()[0].mass,\
-                                        read_materials[1]._mats.keys()[0].mass)
-    assert_equal(expected_multimaterial._mats.keys()[0].density,\
-                                      read_materials[1]._mats.keys()[0].density)
-    assert_equal(expected_multimaterial._mats.keys()[0].atoms_per_mol,\
-                                read_materials[1]._mats.keys()[0].atoms_per_mol)
-    assert_equal(expected_multimaterial._mats.keys()[0].attrs,\
-                                      read_materials[1]._mats.keys()[0].attrs)
-
-    assert_equal(expected_multimaterial._mats.keys()[1].comp,\
-                                        read_materials[1]._mats.keys()[1].comp)
-    assert_equal(expected_multimaterial._mats.keys()[1].mass,\
-                                        read_materials[1]._mats.keys()[1].mass)
-    assert_equal(expected_multimaterial._mats.keys()[1].density,\
-                                      read_materials[1]._mats.keys()[1].density)
-    assert_equal(expected_multimaterial._mats.keys()[1].atoms_per_mol,\
-                                read_materials[1]._mats.keys()[1].atoms_per_mol)
-    assert_equal(expected_multimaterial._mats.keys()[1].attrs,\
-                                      read_materials[1]._mats.keys()[1].attrs)
 
 def test_natural_elements():
     water = Material()
