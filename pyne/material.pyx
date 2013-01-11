@@ -9,7 +9,6 @@ from libc.stdlib cimport malloc, free
 
 # Python imports
 import collections
-import linecache
 import warnings
 cimport numpy as np
 import numpy as np
@@ -1184,27 +1183,18 @@ class Material(_Material, collections.MutableMapping):
 
         s += 'm{0}\n'.format(mat_num)
 
-        # if atom fracs are requested, calculate the total number of moles per
-        # 1 g basis
-        if frac_type == 'atom':
-            total_mol = 0.0
-            for iso, frac in self.comp.items():
-                total_mol += frac / data.atomic_mass(iso)
-
-        for iso, frac in self.comp.items():
+        fracs = self.to_atom_frac() if frac_type == 'atom' else self.comp
+        frac_sign = '' if  frac_type == 'atom' else '-'
+        for nuc, frac in fracs.items():
             if 'table_ids' in self.attrs:
-                s += '     {0}.{1} '.format(str(iso)[:-1], self.attrs['table_ids'][str(iso)])
+                s += '     {0}.{1} '.format(str(nuc)[:-1], self.attrs['table_ids'][str(nuc)])
             else:
-                s += '     {0} '.format(iso)
+                s += '     {0} '.format(nuc)
+            s += '{0}{1:.4E}\n'.format(frac_sign, frac)
 
-            if frac_type == 'mass':
-                s += '-{0:.4E}\n'.format(frac)
-            elif frac_type == 'atom':
-                s += '{0:.4E}\n'.format(frac/data.atomic_mass(iso)/total_mol)
-
+        # write s to output file
         with open(filename, 'a') as f:
             f.write(s)
-            f.close()
 
 
     def write_alara(self, filename):
@@ -1243,7 +1233,6 @@ class Material(_Material, collections.MutableMapping):
 
         with open(filename, 'a') as f:
             f.write(s)
-            f.close()
 
 #####################################
 ### Material generation functions ###

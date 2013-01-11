@@ -22,7 +22,7 @@ import numpy as np
 
 from pyne.material import Material
 from pyne.material import MultiMaterial
-import pyne.nucname as nucname
+from pyne import nucname
 
 from binaryreader import _BinaryReader, _FortranRecord
 
@@ -729,7 +729,7 @@ def mat_from_mcnp(filename, mat_line, densities='None'):
         if line.split()[0][0] != 'c' and line.split()[0][0] != 'C':
             data_string += line.split('$')[0]
         line_index += 1
-        line =linecache.getline(filename, mat_line + line_index)
+        line = linecache.getline(filename, mat_line + line_index)
 
 
    #create dictionaries nucvec and table_ids
