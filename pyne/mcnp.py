@@ -32,8 +32,7 @@ class Mctal(object):
         pass
 
     def read(self, filename):
-        """
-        Parses a 'mctal' tally output file from MCNP. Currently this
+        """Parses a 'mctal' tally output file from MCNP. Currently this
         only supports reading the kcode data- the remaining tally data
         will not be read.
         """
@@ -693,8 +692,8 @@ def read_mcnp_inp(inp):
                         densities[line.split()[1]]\
                                                 .append(float(line.split()[2]))
 
-        #check line to see if it contain a material card, in the form m* where *
-        #is a digit. If so store the line number and material number
+        # check line to see if it contain a material card, in the form m* where *
+        # is a digit. If so store the line number and material number
         if line.split() != []:
             if line.split()[0][0] == 'm' or line.split()[0][0] == 'M':
                 if line.split()[0][1].isdigit() is True:
@@ -721,18 +720,18 @@ def mat_from_mcnp(filename, mat_line, densities='None'):
     object is returned."""
 
     data_string = linecache.getline(filename, mat_line).split('$')[0]
-    #collect all material card data on one string
+    # collect all material card data on one string
     line_index = 1
     line = linecache.getline(filename, mat_line + line_index)
     while line[0:5] == '     ':
-        #make sure element/isotope is not commented out
+        # make sure element/isotope is not commented out
         if line.split()[0][0] != 'c' and line.split()[0][0] != 'C':
             data_string += line.split('$')[0]
         line_index += 1
         line = linecache.getline(filename, mat_line + line_index)
 
 
-   #create dictionaries nucvec and table_ids
+   # create dictionaries nucvec and table_ids
     nucvec = {}
     table_ids = {}
     for i in range(1, len(data_string.split())):
@@ -742,9 +741,9 @@ def mat_from_mcnp(filename, mat_line, densities='None'):
             if len(data_string.split()[i].split('.')) > 1:
                 table_ids[str(zzzaaam)] = data_string.split()[i].split('.')[1]
 
-    #Check to see it material is definted my mass or atom fracs.
-    #Do this by comparing the first non-zero fraction to the rest
-    #If atom fracs, convert.
+    # Check to see it material is definted my mass or atom fracs.
+    # Do this by comparing the first non-zero fraction to the rest
+    # If atom fracs, convert.
     nucvecvals = nucvec.values()
     n = 0
     isatom = 0 < nucvecvals[n]
@@ -756,7 +755,7 @@ def mat_from_mcnp(filename, mat_line, densities='None'):
             msg = 'Mixed atom and mass fractions not supported.  See material defined on line {0}'.format(mat_line)
             warnings.warn(msg)
 
-    #apply all data to material object
+    # apply all data to material object
     if isatom:
         mat = Material()
         mat.from_atom_frac(nucvec)
@@ -766,7 +765,7 @@ def mat_from_mcnp(filename, mat_line, densities='None'):
     mat.attrs['table_ids'] = table_ids
     mat.attrs['mat_number'] = data_string.split()[0][1:]
 
-    #collect metadata, if present
+    # collect metadata, if present
     attrs = ['source', 'comments', 'name']
     line_index = 1
     attrs_line = linecache.getline(filename, mat_line - line_index)
@@ -807,8 +806,8 @@ def mat_from_mcnp(filename, mat_line, densities='None'):
             else:
                 converted_densities.append(mat.mass_density_from_atom_density(float(den)))
 
-        #check to see how many densities are associated with this material.
-        #if there is more than one, create a multimaterial"""
+        # check to see how many densities are associated with this material.
+        # if there is more than one, create a multimaterial"""
         if len(converted_densities) == 1:
             mat.density = converted_densities[0]
             finished_mat = mat
