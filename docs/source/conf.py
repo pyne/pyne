@@ -239,13 +239,13 @@ latex_documents = [
 # Autodocumentation Flags
 autodoc_member_order = "groupwise"
 autoclass_content = "both"
-#autosummary_generate = []
-import glob
-import pyne
-autosummary_generate = glob.glob(os.path.join(os.path.split(pyne.__file__)[0], '*.py'))
+autosummary_generate = []
 
 
 # C++ Autodocumentation Flags
 breathe_projects = {"pyne": None,}
 breathe_default_project = 'pyne'
 breathe_domain_by_extension = {"h" : "cpp",}
+
+
+numpydoc_show_class_members = False
