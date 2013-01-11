@@ -796,7 +796,6 @@ def mat_from_mcnp(filename, mat_line, densities='None'):
         line_index += 1
         attrs_line = linecache.getline(filename, mat_line - line_index)
 
-
     # Check all the densities. If they are atom densities, convert them to mass
     # densities. If they are mass densities they willl be negative, so make
     # them positive.
