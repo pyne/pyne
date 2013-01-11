@@ -1184,10 +1184,11 @@ class Material(_Material, collections.MutableMapping):
         s += 'm{0}\n'.format(mat_num)
 
         fracs = self.to_atom_frac() if frac_type == 'atom' else self.comp
-        frac_sign = '' if  frac_type == 'atom' else '-'
+        frac_sign = "" if  frac_type == 'atom' else '-'
         for nuc, frac in fracs.items():
             if 'table_ids' in self.attrs:
-                s += '     {0}.{1} '.format(str(nuc)[:-1], self.attrs['table_ids'][str(nuc)])
+                s += '     {0}.{1} '.format(str(nuc)[:-1], 
+                                            self.attrs['table_ids'][str(nuc)])
             else:
                 s += '     {0} '.format(nuc)
             s += '{0}{1:.4E}\n'.format(frac_sign, frac)
@@ -1229,7 +1230,8 @@ class Material(_Material, collections.MutableMapping):
                     .format(self.attrs['mat_number'], density, len(self.comp))
 
         for iso, frac in self.comp.items():
-            s += '     {0} {1:.4E} {2}\n'.format(nucname.name(iso), frac, str(iso)[:-4])
+            s += '     {0} {1:.4E} {2}\n'.format(nucname.name(iso), 
+                                                 frac, str(iso)[:-4])
 
         with open(filename, 'a') as f:
             f.write(s)
@@ -1584,12 +1586,12 @@ class MapStrMaterial(_MapStrMaterial, collections.MutableMapping):
 
 class MultiMaterial(collections.MutableMapping):
     """ This class is serves as a way of storing a collection of materials.
-        There sole argument of this function is a dictionary with material
-        objects and keys and vol/mass fractions as values. There are two
-        main uses cases. A collection of materials can be mixed together
-        by volume of mass. Alternatively, a collection of materials can be
-        used to describe a materials with multiple densities. In this latter
-        case, the dict values are irrevelant"""
+    There sole argument of this function is a dictionary with material
+    objects and keys and vol/mass fractions as values. There are two
+    main uses cases. A collection of materials can be mixed together
+    by volume of mass. Alternatively, a collection of materials can be
+    used to describe a materials with multiple densities. In this latter
+    case, the dict values are irrevelant"""
     def __init__(self, mats):
         # This function reads a dict of materials and either mass or volume factions,
         # then normalizes the fraction and assigns the dict as an attribute of self.
