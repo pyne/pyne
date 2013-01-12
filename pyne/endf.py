@@ -238,6 +238,13 @@ class Evaluation(object):
                             self._read_cumulative_yield()
                         elif MT == 457:
                             self._read_decay()
+                    elif MF == 9:
+                        # Read File 9 -- multiplicities
+                        file9 = self.find_file(9)
+                        if not file9:
+                            file9 = ENDFFile9()
+                            self.files.append(file9)
+                        self._read_multiplicity(MT)
             if not found:
                 if self.verbose:
                     print 'Reaction not found'
@@ -885,7 +892,38 @@ class Evaluation(object):
             decay.PAR = items[1]
 
         # Skip SEND record
-        self.fh.readline()            
+        self.fh.readline()
+
+    def _read_multiplicity(self, MT):
+        self.print_info(9, MT)
+
+        # Find file9
+        file9 = self.find_file(9)
+
+        # Create MT for resonances
+        mp = ENDFReaction(MT)
+        file9.reactions.append(mp)
+
+        # Find reaction
+        self.seek_mfmt(9, MT)
+
+        # Get head record
+        items = self._get_head_record()
+        mp.ZA = items[0]
+        mp.AWR = items[1] # Atomic weight ratio
+        mp.LIS = items[2] # Level number of the target
+        mp.NS = items[4] # Number of final states
+
+        mp.multiplicities = []
+        for i in range(mp.NS):
+            state = self._get_tab1_record()
+            state.QM = state.params[0] # Mass difference Q value (eV)
+            state.QI = state.params[1] # Reaction Q value (eV)
+            state.IZAP = state.params[2] # 1000Z + A
+            state.LFS = state.params[3] # Level number of the nuclide
+            state.NR = state.params[4] # Number of energy ranges
+            state.NP = state.params[5] # Number of energy points
+            mp.multiplicities.append(state)
 
     def _get_text_record(self, line=None):
         if not line:
@@ -1358,6 +1396,7 @@ class ENDFFile9(ENDFFile):
     """
 
     def __init__(self):
+        super(ENDFFile9,self).__init__()
         self.fileNumber = 9
 
 class ENDFFile10(ENDFFile):
