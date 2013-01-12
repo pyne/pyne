@@ -244,9 +244,7 @@ class Evaluation(object):
                 raise NotFound('Reaction')
 
     def _read_header(self):
-        if self.verbose:
-            print("Reading File 1...")
-        self.print_info(451)
+        self.print_info(1, 451)
 
         # Find reaction
         self.seek_mfmt(1, 451)
@@ -331,7 +329,7 @@ class Evaluation(object):
             self.reactionList.append((MF,MT,NC,MOD))
 
     def _read_total_nu(self):
-        self.print_info(452)
+        self.print_info(1, 452)
 
         # Find file 1
         file1 = self.find_file(1)
@@ -358,7 +356,7 @@ class Evaluation(object):
         self.fh.readline()
 
     def _read_delayed_nu(self):
-        self.print_info(455)
+        self.print_info(1, 455)
 
         # Find file 1
         file1 = self.find_file(1)
@@ -388,7 +386,7 @@ class Evaluation(object):
             raise NotImplementedError
 
     def _read_prompt_nu(self):
-        self.print_info(456)
+        self.print_info(1, 456)
 
         # Create delayed nu reaction
         nuPrompt = ENDFReaction(456)
@@ -412,7 +410,7 @@ class Evaluation(object):
         self.fh.readline()
 
     def _read_fission_energy(self):
-        self.print_info(458)
+        self.print_info(1, 458)
 
         # Create fission energy release reaction
         eRelease = ENDFReaction(458)
@@ -453,7 +451,7 @@ class Evaluation(object):
         self.fh.readline()
 
     def _read_delayed_photon(self):
-        self.print_info(460)
+        self.print_info(1, 460)
 
         # Create delayed photon data reaction
         dp = ENDFReaction(460)
@@ -489,9 +487,7 @@ class Evaluation(object):
             dp.NNF = len(dp.decayConst)
 
     def _read_resonances(self):
-        if self.verbose:
-            print("Reading File 2...")
-        self.print_info(151)
+        self.print_info(2, 151)
 
         # Find reaction
         self.seek_mfmt(2, 151)
@@ -619,7 +615,7 @@ class Evaluation(object):
 
         # Create MT for resonances
         elast = ENDFReaction(2)
-        self.print_info(2)
+        self.print_info(7, 2)
 
         # Seek File 7
         self.seek_mfmt(7, 2)
@@ -677,7 +673,7 @@ class Evaluation(object):
 
         # Create MT for resonances
         inel = ENDFReaction(4)
-        self.print_info(4)
+        self.print_info(7, 4)
 
         # Seek File 7
         self.seek_mfmt(7, 4)
@@ -737,7 +733,7 @@ class Evaluation(object):
         file7.reactions.append(inel)
 
     def _read_independent_yield(self):
-        self.print_info(454)
+        self.print_info(8, 454)
 
         # Find file8
         file8 = self.find_file(8)
@@ -777,7 +773,7 @@ class Evaluation(object):
         self.fh.readline()        
 
     def _read_cumulative_yield(self):
-        self.print_info(459)
+        self.print_info(8, 459)
 
         # Find file8
         file8 = self.find_file(8)
@@ -817,7 +813,7 @@ class Evaluation(object):
         self.fh.readline()        
 
     def _read_decay(self):
-        self.print_info(457)
+        self.print_info(8, 457)
 
         # Find file8
         file8 = self.find_file(8)
@@ -1033,9 +1029,9 @@ class Evaluation(object):
                 self.fh.seek(position)
                 break
 
-    def print_info(self, MT):
+    def print_info(self, MF, MT):
         if self.verbose:
-            print("   MT={0} {1}".format(MT, MTname[MT]))
+            print("Reading MF={0}, MT={1} {2}".format(MF, MT, MTname[MT]))
 
     def __iter__(self):
         for f in self.files:
