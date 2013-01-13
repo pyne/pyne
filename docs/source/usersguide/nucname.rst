@@ -37,6 +37,9 @@ supported by PyNE.  Functions to convert between forms may be seen in :ref:`name
  #. **CINDER**: The CINDER format is similar to zzaaam form except that the placement of the Z- and
     A-numbers are swapped. Therefore, this format is effectively aaazzzm.  For example, '2420951' is
     the valid cinder notation for 'AM242M'.
+ #. **ALARA**: In ALARA format, elements are denoted by the lower case atomic symbol. Isotopes are
+    specified by appending a semicolon and A-number. For example, "fe" and "fe:56" represent
+    elemental iron and iron-56 respectively. No metastable flag exists.
 
 If there are more conventions that you would like to see supported, please contact the :ref:`dev_team`.
 
@@ -102,6 +105,10 @@ Examples of Use
 
     In [7]: nucname.zz_name[57]
     Out[7]: 'LA'
+
+    In [8]: nucname.alara('FE56')
+    Out[8]: 'fe:56'
+
 
 
 Further information on the naming module may be seen in the library reference :ref:`pyne_nucname`.
