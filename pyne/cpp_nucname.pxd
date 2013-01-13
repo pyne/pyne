@@ -62,3 +62,7 @@ cdef extern from "nucname.h" namespace "pyne::nucname":
     int cinder(char *) except + 
     int cinder(std_string) except + 
 
+    # ALARA Functions
+    std_string alara(int) except +
+    std_string alara(char *) except +
+    std_string alara(std_string) except +

@@ -1230,7 +1230,7 @@ class Material(_Material, collections.MutableMapping):
                     .format(self.attrs['mat_number'], density, len(self.comp))
 
         for iso, frac in self.comp.items():
-            s += '     {0} {1:.4E} {2}\n'.format(nucname.name(iso), 
+            s += '     {0} {1:.4E} {2}\n'.format(nucname.alara(iso), 
                                                  frac, str(iso)[:-4])
 
         with open(filename, 'a') as f:
