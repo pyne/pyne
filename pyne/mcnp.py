@@ -804,7 +804,7 @@ def mat_from_mcnp(filename, mat_line, densities='None'):
             if den <= 0:
                 converted_densities.append(-1*float(den))
             else:
-                converted_densities.append(mat.mass_density_from_atom_density(float(den)))
+                converted_densities.append(mat.mass_density(float(den)))
 
         # check to see how many densities are associated with this material.
         # if there is more than one, create a multimaterial"""

@@ -784,8 +784,25 @@ pyne::Material pyne::Material::expand_elements()
 };
 
 
+double pyne::Material::mass_density(double num_dens, double apm)
+{
+  if (0.0 <= num_dens)
+  {
+    double mw = molecular_weight(apm);
+    density = num_dens * mw / pyne::N_A / atoms_per_mol;
+  };
+  return density;
+};
 
 
+double pyne::Material::number_density(double mass_dens, double apm)
+{
+  if (0 <= mass_dens)
+    density = mass_dens;
+  double mw = molecular_weight(apm);
+  double num_dens = density * pyne::N_A * atoms_per_mol / mw;
+  return num_dens;
+};
 
 
 /*--- Stub-Stream Computation ---*/
