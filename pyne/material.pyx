@@ -1187,7 +1187,7 @@ class Material(_Material, collections.MutableMapping):
         frac_sign = "" if  frac_type == 'atom' else '-'
         for nuc, frac in fracs.items():
             if 'table_ids' in self.attrs:
-                s += '     {0}.{1} '.format(str(nuc)[:-1], 
+                s += '     {0}.{1} '.format(str(nuc)[:-1],
                                             self.attrs['table_ids'][str(nuc)])
             else:
                 s += '     {0} '.format(nuc)
@@ -1230,7 +1230,7 @@ class Material(_Material, collections.MutableMapping):
                     .format(self.attrs['mat_number'], density, len(self.comp))
 
         for iso, frac in self.comp.items():
-            s += '     {0} {1:.4E} {2}\n'.format(nucname.alara(iso), 
+            s += '     {0} {1:.4E} {2}\n'.format(nucname.alara(iso),
                                                  frac, str(iso)[:-4])
 
         with open(filename, 'a') as f:
