@@ -977,8 +977,8 @@ def test_write_alara():
                 '# comments: this is a long comment that will definitly go over the 80 character\n'
                 '#  limit, for science\n'
                 'm2 19.1 2\n'
-                '     U235 4.0000E-02 92\n'
-                '     U238 9.6000E-01 92\n')
+                '     u:235 4.0000E-02 92\n'
+                '     u:238 9.6000E-01 92\n')
     assert_equal(written, expected)
     os.remove('alara.txt')
 

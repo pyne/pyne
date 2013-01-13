@@ -462,7 +462,6 @@ std::string pyne::nucname::name(std::string nuc)
 
 
 
-
 /**********************/
 /*** mcnp functions ***/
 /**********************/
@@ -656,3 +655,53 @@ int pyne::nucname::cinder(std::string nuc)
 
 
 
+/**********************/
+/*** ALARA functions ***/
+/**********************/
+std::string pyne::nucname::alara(int nuc)
+{
+  int nucint = zzaaam(nuc);
+  std::string newnuc = "";
+  std::string ll = "";
+
+  int mod_10 = nucint%10;
+  int mod_10000 = nucint % 10000;
+  int div_10000 = nucint / 10000;
+  int mod_10000_div_10 = mod_10000 / 10;
+
+  // Make sure the LL value is correct
+  if (0 == zz_name.count(div_10000))
+    throw NotANuclide(nuc, nucint);
+
+  // Add LL, in lower case
+  ll += zz_name[div_10000];
+
+  for(int i = 0; ll[i] != '\0'; i++){
+    ll[i] = tolower(ll[i]);
+    }
+   newnuc += ll;
+
+  // Add A-number
+  if (0 < mod_10000){
+    newnuc += ":";
+    newnuc += pyne::to_str(mod_10000_div_10);
+    }
+
+  // Note, ALARA input format does not use metastable flag
+
+  return newnuc;
+};
+
+
+std::string pyne::nucname::alara(char * nuc)
+{
+  std::string newnuc (nuc);
+  return alara(newnuc);
+}
+
+
+std::string pyne::nucname::alara(std::string nuc)
+{
+  int newnuc = zzaaam(nuc);
+  return alara(newnuc);
+}
