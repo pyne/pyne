@@ -800,25 +800,17 @@ def mat_from_mcnp(filename, mat_line, densities='None'):
     # them positive.
     if densities != 'None':
         converted_densities = []
-        orig_a_dens = {} # dictionary of original atom densities
         for den in densities:
             if den <= 0:
                 converted_densities.append(-1*float(den))
             else:
-                m_den = mat.mass_density_from_atom_density(float(den))
-                converted_densities.append(m_den)
-                orig_a_dens[m_den] = str(den)
+                converted_densities.append(mat.mass_density_from_atom_density(float(den)))
 
         # check to see how many densities are associated with this material.
-        # if there is more than one, create a multimaterial
- 
+        # if there is more than one, create a multimaterial"""
         if len(converted_densities) == 1:
             mat.density = converted_densities[0]
-            if mat.density in orig_a_dens.keys():
-                mat.attrs['origonal_atom_density'] = \
-                    orig_a_dens[mat.density]
             finished_mat = mat
-            
 
         elif len(converted_densities) > 1:
             mat_dict = {}
@@ -830,13 +822,6 @@ def mat_from_mcnp(filename, mat_line, densities='None'):
                 mat2.attrs = mat.attrs
                 mat2.density = density
                 mat_dict[mat2] = 1
-                print mat2.density
-                print orig_a_dens.keys()
-                if mat.density in orig_a_dens.keys():
-                    print 'hello'
-                    mat2.attrs['origonal_atom_density'] = \
-                        orig_a_dens[mat2.density]
-
             finished_mat = MultiMaterial(mat_dict)
     else:
         finished_mat = mat
