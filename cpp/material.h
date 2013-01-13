@@ -159,7 +159,7 @@ namespace pyne
     comp_map comp;  
     double mass;  ///< mass (in arbitrary units) of the Material.
     double density; ///< density (in arbitrary units) of the Material.
-    double atoms_per_mol; ///< The number of atoms per mole.
+    double atoms_per_mol; ///< The number of atoms per molecule.
     /// container for arbitrary metadata, following the JSON rules.
     Json::Value attrs;  
 
@@ -177,6 +177,15 @@ namespace pyne
     /// Returns a copy of the current material where all natural elements in the 
     /// composition are expanded to their natural isotopic abundances.
     Material expand_elements();
+    /// Computes, sets, and returns the mass density when \a num_dens is greater
+    /// than or equal zero.  If \a num_dens is negative, this simply returns the
+    /// current value of the density member variable.  You may also use / set the
+    /// atoms per molecule (atoms_per_mol) in this function using \a apm.
+    double mass_density(double num_dens=-1.0, double apm=-1.0);
+    /// Computes and returns the number density of the material using the 
+    /// current (mass) density member variable.  You may also use / set the
+    /// atoms per molecule (atoms_per_mol) in this function using \a apm.
+    double number_density(double apm=-1.0);
 
     // Sub-Stream Computation
     /// Creates a sub-Material with only the nuclides present in \a nucset.
