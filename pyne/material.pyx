@@ -1156,8 +1156,9 @@ class Material(_Material, collections.MutableMapping):
 
 
     def write_mcnp(self, filename, frac_type='mass'):
-        """The method appends an mcnp mass fraction definition, with
-         attributes to the file with the supplied filename"""
+        """write_mcnp(self, filename, frac_type='mass')
+        The method appends an mcnp mass fraction definition, with
+        attributes to the file with the supplied filename."""
 
         s = ''  # string to output
 
@@ -1199,8 +1200,9 @@ class Material(_Material, collections.MutableMapping):
 
 
     def write_alara(self, filename):
-        """The method appends an ALARA definition, with
-         attributes to the file with the supplied filename"""
+        """write_alara(self, filename)
+        The method appends an ALARA definition, with
+        attributes to the file with the supplied filename."""
 
         s = ''
 
