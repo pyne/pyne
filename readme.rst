@@ -32,6 +32,8 @@ Additionally, building the documentation requires the following:
 
    #. `Sphinx <http://sphinx-doc.org/>`_
    #. `SciSphinx <https://github.com/numfocus/scisphinx>`_
+   #. `Anthony's fork of breathe <https://github.com/scopatz/breathe>`_ 
+      (must be installed after SciSphinx)
 
 ------
 Binary
