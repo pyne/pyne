@@ -416,7 +416,6 @@ cdef class _Material:
         """
         return self.mat_pointer.molecular_weight(atoms_per_mol)
 
-
     def expand_elements(self):
         """expand_elements(self)
         Exapnds the elements ('U', 'C', etc) in the material by replacing them
@@ -431,6 +430,50 @@ cdef class _Material:
         cdef _Material newmat = Material()
         newmat.mat_pointer[0] = self.mat_pointer.expand_elements()
         return newmat
+
+    def mass_density(self, double num_dens=-1.0, double atoms_per_mol=-1.0):
+        """mass_density(self, num_dens=-1.0, atoms_per_mol=-1.0)
+        Computes, sets, and returns the mass density when num_dens is greater
+        than or equal zero.  If num_dens is negative, this simply returns the
+        current value of the density member variable.  
+
+        Parameters
+        ----------
+        num_dens : float, optional
+            The number density from which to compute the mass density in units
+            of [1/cc].
+        atoms_per_mol : float, optional
+            Number of atoms to per molecule of material. For example, this value 
+            for water is 3.0.
+
+        Returns
+        -------
+        density : float
+            The density attr [g/cc].
+
+        """
+        return self.mat_pointer.mass_density(num_dens, atoms_per_mol)
+
+    def number_density(self, double atoms_per_mol=-1.0):
+        """number_density(self, atoms_per_mol=-1.0)
+        Computes, sets, and returns the mass density when num_dens is greater
+        than or equal zero.  If num_dens is negative, this simply returns the
+        current value of the density member variable.  
+
+        Parameters
+        ----------
+        atoms_per_mol : float, optional
+            Number of atoms to per molecule of material. For example, this value 
+            for water is 3.0.
+
+        Returns
+        -------
+        num_dens : float
+            The number density [1/cc] of the material.
+
+        """
+        return self.mat_pointer.number_density(atoms_per_mol)
+
 
 
     #
