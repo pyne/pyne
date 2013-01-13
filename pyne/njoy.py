@@ -25,7 +25,7 @@ class PyNjoyError(Exception):
     pass
 
 class Njoy99(object):
-   """The NJOY99 wrapper class."""
+    """The NJOY99 wrapper class."""
 
     def __init__(self):
         self.iwt = 4
