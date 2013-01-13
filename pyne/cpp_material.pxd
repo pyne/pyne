@@ -61,6 +61,7 @@ cdef extern from "material.h" namespace "pyne":
         double mass_density(double, double) except +
         double number_density() except +
         double number_density(double) except +
+        double number_density(double, double) except +
 
         # Substream Methods
         Material sub_mat(set[int]) except +
