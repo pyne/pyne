@@ -963,27 +963,36 @@ def test_write_alara():
 
     leu = Material(nucvec={'U235': 0.04, 'U238': 0.96}, attrs={\
           'mat_number':2, 'table_ids':{'922350':'15c', '922380':'25c'},\
-          'mat_name':'LEU', 'source':'Some URL', \
+          'name':'LEU', 'source':'Some URL', \
           'comments': \
 'this is a long comment that will definitly go over the 80 character limit, for science', \
-          'name':'leu'}, density=19.1)
+            }, density=19.1)
+    leu2 = Material(nucvec={'U235': 0.04, 'U238': 0.96}, attrs={\
+          'mat_number':2,}, density=19.1)
+    leu3 = Material(nucvec={'U235': 0.04, 'U238': 0.96})
 
     leu.write_alara('alara.txt')
+    leu2.write_alara('alara.txt')
+    leu3.write_alara('alara.txt')
 
     with open('alara.txt') as f:
         written = f.read()
-    expected = ('# name: leu\n'
+    expected = ('# mat number: 2\n'
                 '# source: Some URL\n'
                 '# comments: this is a long comment that will definitly go over the 80 character\n'
                 '#  limit, for science\n'
-                'm2 19.1 2\n'
+                'LEU 19.1 2\n'
+                '     u:235 4.0000E-02 92\n'
+                '     u:238 9.6000E-01 92\n'
+                '# mat number: 2\n'
+                'mat2_rho-19.1 19.1 2\n'
+                '     u:235 4.0000E-02 92\n'
+                '     u:238 9.6000E-01 92\n'
+                'mat<mat_num>_rho-<rho> <rho> 2\n'
                 '     u:235 4.0000E-02 92\n'
                 '     u:238 9.6000E-01 92\n')
     assert_equal(written, expected)
     os.remove('alara.txt')
-
-
-
 
 def test_natural_elements():
     water = Material()
