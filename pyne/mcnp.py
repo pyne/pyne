@@ -752,7 +752,7 @@ def mat_from_mcnp(filename, mat_line, densities='None'):
         isatom = 0 < nucvecvals[n]
     for value in nucvecvals[n+1:]:
         if isatom != (0 <= value):
-            msg = 'Mixed atom and mass fractions not supported.  See material defined on line {0}'.format(mat_line)
+            msg = 'Mixed atom and mass fractions not supported. See material defined on line {0}'.format(mat_line)
             warnings.warn(msg)
 
     # apply all data to material object

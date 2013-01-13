@@ -1188,7 +1188,7 @@ class Material(_Material, collections.MutableMapping):
         frac_sign = "" if  frac_type == 'atom' else '-'
         for nuc, frac in fracs.items():
             if 'table_ids' in self.attrs:
-                s += '     {0}.{1} '.format(str(nuc)[:-1], 
+                s += '     {0}.{1} '.format(str(nuc)[:-1],
                                             self.attrs['table_ids'][str(nuc)])
             else:
                 s += '     {0} '.format(nuc)
@@ -1206,8 +1206,11 @@ class Material(_Material, collections.MutableMapping):
 
         s = ''
 
-        if 'name' in self.attrs:
-            s += '# name: {0}\n'.format(self.attrs['name'])
+        if 'mat_number' in self.attrs:
+            s += '# mat number: {0}\n'.format(self.attrs['mat_number'])
+            mat_num = self.attrs['mat_number']  # for use in mat_name
+        else:
+            mat_num = '<mat_num>'
 
         if 'source' in self.attrs:
             s += '# source: {0}\n'.format(self.attrs['source'])
@@ -1218,21 +1221,24 @@ class Material(_Material, collections.MutableMapping):
             for n in range(0, int(np.ceil(float(len(comment_string))/77))):
                 s += '# {0}\n'.format(comment_string[n*77:(n + 1)*77])
 
-        if 'mat_number' in self.attrs:
-            mat_num = self.attrs['mat_number']
-        else:
-            mat_num = '<mat_number>'
-
+        # set density. If not present, set it equal to "<rho>"
         if str(self.density) != '-1.0':
             density = self.density
         else:
             density = '<rho>'
 
-        s += 'm{0} {1} {2}\n'\
-                    .format(self.attrs['mat_number'], density, len(self.comp))
+        # if a name is present, use it. Otherwise the name is is:
+        # mat<mat_number>_rho<rho>
+        if 'name' in self.attrs:
+            mat_name = self.attrs['name']
+        else:
+            mat_name = 'mat{0}_rho-{1}'.format(mat_num, density)
+
+        s += '{0} {1} {2}\n'\
+                    .format(mat_name, density, len(self.comp))
 
         for iso, frac in self.comp.items():
-            s += '     {0} {1:.4E} {2}\n'.format(nucname.name(iso), 
+            s += '     {0} {1:.4E} {2}\n'.format(nucname.alara(iso),
                                                  frac, str(iso)[:-4])
 
         with open(filename, 'a') as f:
