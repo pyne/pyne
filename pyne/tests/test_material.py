@@ -1010,14 +1010,6 @@ def test_natural_elements():
     expected_comp = {10000: 0.11190248274452597, 80000: 0.888097517255474}
     assert_equal(water.comp, expected_comp)
 
-def test_mass_density_from_atom_density():
-    ethanol = Material()
-    ethanol.from_atom_frac({'C':2, 'H':6, 'O':1})
-    atom_density_ethanol = 9.282542841E22  # atom density not molecule density
-    mass_density = ethanol.mass_density_from_atom_density(atom_density_ethanol)
-    expected_mass_density = 0.7890206250055379
-    assert_equal(mass_density, expected_mass_density)
-
 # Run as script
 #
 if __name__ == "__main__":
