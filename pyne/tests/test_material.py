@@ -215,6 +215,22 @@ def test_expand_elements2():
     assert_equal(data.natural_abund(60130), afrac[60130])
 
 
+def test_mass_density():
+    ethanol = from_atom_frac({'C':2, 'H':6, 'O':1})
+    atom_density_ethanol = 9.282542841E22  # atom density not molecule density
+    mass_density = ethanol.mass_density(atom_density_ethanol)
+    expected_mass_density = 0.78900
+    assert_almost_equal(mass_density, expected_mass_density, 4)
+
+
+def test_number_density():
+    ethanol = from_atom_frac({'C':2, 'H':6, 'O':1}, density=0.78900)
+    obs = ethanol.number_density()
+    exp = 9.2825E22
+    assert_almost_equal(obs / exp, 1.0, 4)
+
+
+
 class TestMassSubMaterialMethods(TestCase):
     "Tests that the Material sub-Material ter member functions work."
 
@@ -925,12 +941,15 @@ def test_write_mcnp():
     if 'mcnp_mass_fracs.txt' in os.listdir('.'):
         os.remove('mcnp_mass_fracs.txt')
 
-    leu = Material(nucvec={'U235': 0.04, 'U238': 0.96}, attrs={\
-          'mat_number':2, 'table_ids':{'922350':'15c', '922380':'25c'},\
-          'mat_name':'LEU', 'source':'Some URL', \
-          'comments': \
-'this is a long comment that will definitly go over the 80 character limit, for science', \
-          'name':'leu'}, density=19.1)
+    leu = Material(nucvec={'U235': 0.04, 'U238': 0.96}, 
+                   attrs={'mat_number':2, 
+                          'table_ids': {'922350':'15c', '922380':'25c'},
+                          'mat_name':'LEU', 
+                          'source':'Some URL',
+                          'comments': ('this is a long comment that will definitly '
+                                       'go over the 80 character limit, for science'),
+                          'name':'leu'}, 
+                   density=19.1)
 
     leu.write_mcnp('mcnp_mass_fracs.txt')
     leu.write_mcnp('mcnp_mass_fracs.txt', frac_type='atom')

@@ -183,9 +183,11 @@ namespace pyne
     /// atoms per molecule (atoms_per_mol) in this function using \a apm.
     double mass_density(double num_dens=-1.0, double apm=-1.0);
     /// Computes and returns the number density of the material using the 
-    /// current (mass) density member variable.  You may also use / set the
-    /// atoms per molecule (atoms_per_mol) in this function using \a apm.
-    double number_density(double apm=-1.0);
+    /// mass density if \a mass_dens is greater than or equal to zero.  If 
+    /// \a mass_dens is negative, the denisty member variable is used instead.  
+    /// You may also use / set the atoms per molecule (atoms_per_mol) in this 
+    /// function using \a apm.
+    double number_density(double mass_dens=-1.0, double apm=-1.0);
 
     // Sub-Stream Computation
     /// Creates a sub-Material with only the nuclides present in \a nucset.

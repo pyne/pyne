@@ -435,7 +435,7 @@ cdef class _Material:
         """mass_density(self, num_dens=-1.0, atoms_per_mol=-1.0)
         Computes, sets, and returns the mass density when num_dens is greater
         than or equal zero.  If num_dens is negative, this simply returns the
-        current value of the density member variable.  
+        current value of the density attribute.  
 
         Parameters
         ----------
@@ -454,14 +454,17 @@ cdef class _Material:
         """
         return self.mat_pointer.mass_density(num_dens, atoms_per_mol)
 
-    def number_density(self, double atoms_per_mol=-1.0):
-        """number_density(self, atoms_per_mol=-1.0)
-        Computes, sets, and returns the mass density when num_dens is greater
-        than or equal zero.  If num_dens is negative, this simply returns the
-        current value of the density member variable.  
+    def number_density(self, double mass_dens=-1.0, double atoms_per_mol=-1.0):
+        """number_density(self, mass_dens=-1.0, atoms_per_mol=-1.0)
+        Computes and returns the number density from the mass_dens argument if this 
+        is greater than or equal zero.  If mass_dens is negative, then the number 
+        density is computed using the current value of the density attribute.  
 
         Parameters
         ----------
+        mass_dens : float, optional
+            The mass density from which to compute the number density in units
+            of [g/cc].
         atoms_per_mol : float, optional
             Number of atoms to per molecule of material. For example, this value 
             for water is 3.0.
@@ -472,7 +475,7 @@ cdef class _Material:
             The number density [1/cc] of the material.
 
         """
-        return self.mat_pointer.number_density(atoms_per_mol)
+        return self.mat_pointer.number_density(mass_dens, atoms_per_mol)
 
 
 
@@ -1285,8 +1288,8 @@ class Material(_Material, collections.MutableMapping):
 ### Material generation functions ###
 #####################################
 
-def from_atom_frac(atom_fracs, double mass=-1.0, double
-                   atoms_per_mol=-1.0, attrs=None):
+def from_atom_frac(atom_fracs, double mass=-1.0, double density=-1.0,
+                   double atoms_per_mol=-1.0, attrs=None):
     """from_atom_frac(atom_fracs, double mass=-1.0, double atoms_per_mol=-1.0)
     Create a Material from a mapping of atom fractions.
 
@@ -1301,6 +1304,8 @@ def from_atom_frac(atom_fracs, double mass=-1.0, double
         (default -1.0) then the mass of the new stream is calculated from the
         sum of compdict's components before normalization.  If the mass here is
         positive or zero, then this mass overrides the calculated one.
+    density : float, optional
+        This is the density of the material.
     atoms_per_mol : float, optional
         Number of atoms per molecule of material.  Needed to obtain proper
         scaling of molecular weights.  For example, this value for water is
@@ -1344,6 +1349,9 @@ def from_atom_frac(atom_fracs, double mass=-1.0, double
 
     if 0.0 <= mass:
         mat.mass = mass
+
+    if 0.0 <= density:
+        mat.density = density
 
     if 0.0 <= atoms_per_mol:
         mat.atoms_per_mol = atoms_per_mol
