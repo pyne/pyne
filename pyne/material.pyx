@@ -887,19 +887,6 @@ cdef class _Material:
 
         self.mat_pointer.from_atom_frac(af)
 
-    def mass_density_from_atom_density(self, num_den):
-        """This function returns an mass density for a given number density,
-           using the mass fractions material.comp"""
-        avogadro = 6.02211415E23
-        mol_sum = 0
-        for nuc, mass_frac in self.comp.items():
-            mol_sum += mass_frac/data.atomic_mass(nuc)
-
-        mass_density = num_den * 1/avogadro * 1/mol_sum
-
-        return mass_density
-
-
 
     #
     # Operator Overloads
