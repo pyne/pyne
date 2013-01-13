@@ -221,27 +221,13 @@ namespace nucname
   std::string current_form(int nuc);
   /// \}
 
-  /// \name ID Functions
-  /// \{
-  /// The id nuclide naming convention is currently equivalent to the SZA form  
-  /// for representing nuclides in PyNE. This places any state of the nucleus in
-  /// front, then has three digits for the atomic mass number, and ends with a 
-  /// metastable flag (0 = ground, 1 = first excited state, 2 = second excited 
-  /// state, etc).  Uranium-235 here would be expressed as ‘922350’.
-  /// \param nuc a nuclide
-  /// \return an integer nuclide identifier.
-  int id(int nuc);
-  int id(char * nuc);
-  int id(std::string nuc);
-  /// \}
-
   /// \name ZZAAAM Form Functions
   /// \{
-  /// The ZZAAAM nuclide naming convention is the former canonical form for 
-  /// representing nuclides in PyNE. This places the charge of the nucleus out 
-  /// front, then has three digits for the atomic mass number, and ends with a 
-  /// metastable flag (0 = ground, 1 = first excited state, 2 = second excited 
-  /// state, etc).  Uranium-235 here would be expressed as ‘922350’.
+  /// The ZZAAAM nuclide naming convention is the canonical form for representing
+  /// nuclides in PyNE. This places the charge of the nucleus out front, then has 
+  /// three digits for the atomic mass number, and ends with a metastable flag 
+  /// (0 = ground, 1 = first excited state, 2 = second excited state, etc). 
+  /// Uranium-235 here would be expressed as ‘922350’.
   /// \param nuc a nuclide
   /// \return an integer nuclide identifier.
   int zzaaam(int nuc);
