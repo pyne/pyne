@@ -6,7 +6,7 @@ BEAM         50.E+00                                                  PROTON
 BEAMPOS          0.0       0.0     -50.0
 *
 *...+....1....+....2....+....3....+....4....+....5....+....6....+....7....+....8
-USRICALL        123.      456.       1.0      -2.0      18.0      18. TEST.STL
+USRICALL        123.      456.       1.0      -2.0      18.0      18. test.h5m
 GEOBEGIN                                                              COMBNAME
   0 0                       A simple Be target inside vacuum
 RPP body1 -5000000.0 +5000000.0 -5000000.0 +5000000.0 -5000000.0 +5000000.0
