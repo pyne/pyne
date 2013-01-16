@@ -27,18 +27,11 @@ libraries = {0: "ENDF/B", 1: "ENDF/A", 2: "JEFF", 3: "EFF",
              31: "INDL/V", 32: "INDL/A", 33: "FENDL", 34: "IRDF",
              35: "BROND", 36: "INGDB-90", 37: "FENDL/A", 41: "BROND"}
 
-<<<<<<< HEAD
-class Library(rx.RxLib):
-=======
-decay_type = {0: 'gamma', 1: 'beta', 2: 'ec/positron', 3: 'IT',
-              4: 'alpha', 5: 'n', 6: 'SF', 7: 'p', 8: 'electron', 
-              9: 'xray', 10: 'unknown'}
 
-class Library(rx.rx_data):
->>>>>>> upstream/staging
+class Library(rx.RxLib):
     """
     Library is a class for an ENDF evaluation which contains a number
-    of Files.
+    of Materials and Files.
     """
 
     def __init__(self, filename):
@@ -61,6 +54,8 @@ class Library(rx.rx_data):
         # close the file before we have a chance to break anything
         self.fh.close()
 
+        self.make_resonances()
+
     def load(self, filename):
         warnings.filterwarnings("ignore", "Some errors were detected !")
         print 'Reading data ...'
@@ -81,7 +76,7 @@ class Library(rx.rx_data):
         # skip the first line and get the material id
         self.fh.seek(self.chars_til_now+81)
         line = self.fh.readline()
-        mat_id = int(line[67:70])
+        mat_id = int(line[66:70])
         # While reading data we skip a line at the beginning
         # of every material, so we need an offset.
         if mat_id not in self.structure:
@@ -98,7 +93,8 @@ class Library(rx.rx_data):
                                                              'channel2':[]}},
                                        'end_line':[],
                                        'mfs':{},
-                                       'flags':{}}})
+                                       'flags':{}}}) 
+
         print 'Reading headers for material id %d ...' % int(mat_id)
         # parse header (all lines with 1451)
         comments = ''
@@ -127,25 +123,25 @@ class Library(rx.rx_data):
                 line = self.fh.readline()
             # parse comments
             elif re.match(' {66}', line):
-                self.structure[mat_id]['RxDocs'].append(line[0:67])
+                self.structure[mat_id]['RxDocs'].append(line[0:66])
                 line = self.fh.readline()
             elif re.match('[\d+. ]{80}\n$', line):
                 line = self.fh.readline()
                 continue
             else:
-                self.structure[mat_id]['RxDocs'].append(line[0:67])
+                self.structure[mat_id]['RxDocs'].append(line[0:66])
                 line = self.fh.readline()
         # Find where the end of the material is and then jump to it.
         self.chars_til_now = (stop + 4)*81
         self.fh.seek(self.chars_til_now)
-        # Are we at the end of the file?
         if self.fh.readline() == '':
             self.more_files = False
+
         # update materials list
         if mat_id != '':
-            # self.mats.update({mat_id:(self.chars_til_now / 81, comments)})
             self.structure[mat_id]['end_line'] = self.chars_til_now/81
             setattr(self, "mat%d" %mat_id, self.structure[mat_id])
+
         # Read flags from MT 1.
         header = self.read_mfmt(mat_id, 1, 451)
         self.structure[mat_id].update({'flags':{'ZA': header[0],
@@ -168,6 +164,20 @@ class Library(rx.rx_data):
                                                 'LDRV': header[20],
                                                 'NWD': header[22],
                                                 'NXC': header[23]}})
+
+    def is_isotope_line(self, line):
+        """ If the line is the beginning of resonance data for an isotope,
+        returns True."""
+        ZAI = line[0]
+        ABN = line[1]
+        LFW = line[3]
+        NER = line[4]
+        if line[2] == line[5] == 0:
+            if LFW in (1,0) and int(NER) == NER and ABN <= 1:
+                if ZAI >= 1000:
+                    return True
+        else:
+             return False
 
     def is_range_line(self,line):
         """ Determines whether this line is the beginning of a new resonance 
@@ -206,6 +216,16 @@ class Library(rx.rx_data):
             pass
         return is_range_line
 
+    def parse_isotope_line(self, line):
+        """ If the line is the beginning of resonance data for an isotope,
+        makes a dictionary of the isotope-specific flags for easy access."""
+        if self.is_isotope_line(line):
+            isotope_flags = {'ZAI':line[0],
+                             'ABN':line[1],
+                             'LFW':line[3],
+                             'NER':line[4]}
+        return isotope_flags
+
     def parse_range_line(self, line):
         """ If the line is the beginning of a resonance range, makes
         a dictionary of the flags for easy access. """
@@ -220,30 +240,6 @@ class Library(rx.rx_data):
             range_flags = None
         return range_flags
         
-    def is_isotope_line(self, line):
-        """ If the line is the beginning of resonance data for an isotope,
-        returns True."""
-        ZAI = line[0]
-        ABN = line[1]
-        LFW = line[3]
-        NER = line[4]
-        if line[2] == line[5] == 0:
-            if LFW in (1,0) and int(NER) == NER and ABN <= 1:
-                if ZAI >= 1000:
-                    return True
-        else:
-             return False
-        
-    def parse_isotope_line(self, line):
-        """ If the line is the beginning of resonance data for an isotope,
-        makes a dictionary of the isotope-specific flags for easy access."""
-        if self.is_isotope_line(line):
-            isotope_flags = {'ZAI':line[0],
-                             'ABN':line[1],
-                             'LFW':line[3],
-                             'NER':line[4]}
-        return isotope_flags
-
     def make_resonances(self):
         """ This reads the resonance data from all the materials and returns
         a nested dictionary with the resonance data. """
@@ -275,10 +271,12 @@ class Library(rx.rx_data):
                 for i in range(len(mf2)):
                     if self.is_isotope_line(mf2[i]):
                         isotope_flags = self.parse_isotope_line(mf2[i])
-                        # isotope_lines.append(mf2[i])
                     elif self.is_range_line(mf2[i]):
                         range_flags = self.parse_range_line(mf2[i])
-                        # range_lines.append(mf2[i])
+                        # try:
+                        #     welp = range_flags[0]
+                        # except:
+                        #     self.debug = range_flags
                     else:
                         # If this line is neither a range nor an isotope line:
                         if self.is_range_line(mf2[i-1]):
@@ -296,35 +294,37 @@ class Library(rx.rx_data):
                             except KeyError:
                                 print 'No LRU!'
 
-                        # Add the line of data to the appropriate dict.
+                        # Make the current line the last line of the range as
+                        # specified in the dict.
                         try:
                             if range_flags['LRU'] == 1:
                                 last_range = resonance_ranges['Resolved'][-1]
-                                last_range['data'][1] = i + 1
-
-                            if range_flags['LRU'] == 2:
+                            elif range_flags['LRU'] == 2:
                                 last_range = resonance_ranges['Unresolved'][-1]
-                                last_range['data'][1] = i + 1
-                                last_range['data'][2] = mf2[last_range['data'][0]:
-                                                            last_range['data'][1]]
+                            last_range['data'][1] = i + 1
+                            last_range['data'][2] = mf2[last_range['data'][0]:
+                                                        last_range['data'][1]]
                         except KeyError:
                             print 'No LRU!'
 
                 for resonance_range in resonance_ranges['Unresolved']:
-                    structured_data = self.parse_resonance_range(resonance_range, 
-                                                                 isotope_flags)
-                    resonance_range['data'][2] = structured_data
+                    try:
+                        structured_data = self.parse_resonance_range(resonance_range, 
+                                                                     isotope_flags,
+                                                                     mat_id)
+                    # except KeyError:
+                    #     self.debug = mat_id, resonance_range['flags'], isotope_flags
+                    resonance_range['data'] = structured_data
+                    self.structure[mat_id]['RxData'].update(resonance_ranges)
 
-                        
-                    
             elif LRP == 2:
                 pass
             else:
                 pass
-            
-        return resonance_ranges
         
-    def parse_resonance_range(self, resonance_range, isotope_flags):
+        return self.structure
+        
+    def parse_resonance_range(self, resonance_range, isotope_flags, mat_id):
         lfw = isotope_flags['LFW']
         lru = resonance_range['flags']['LRU']
         lrf = resonance_range['flags']['LRF']
@@ -337,11 +337,58 @@ class Library(rx.rx_data):
             # This is the case for data in an unresolved resonance range.
             if (lfw, lrf) == (0, 1):
                 # This is Case A from the ENDF manual, pp.69-70.
-                pass
-            if (lfw, lrf) == (1, 1):
+                def is_SPI_line(line):
+                    SPI = line[0]
+                    LSSF = line[2]
+                    NLS = line[4]
+                    if (LSSF in (0,1) and 
+                        line[3] == line[5] == 0 and 
+                        (2*SPI+NLS) == int(2*SPI+NLS) and
+                        SPI < 1000): # To differentiate from some false positives,
+                                     # we assume that the nuclear spin is <1000.
+                        return True
+                    else:
+                        return False
+                    
+                def is_L_line(line):
+                    L = line[2]
+                    six_NJS = line[4]
+                    NJS = line[5]
+                    if (not line[1:4:2].any() and 
+                        (L+NJS) == int(L+NJS) and
+                         6*NJS == six_NJS):
+                        return True
+                    else:
+                        return False           
+                for i in range(len(raw_data)):
+                    line = raw_data[i]
+                    if is_SPI_line(line):
+                        SPI = line[0]
+                        if SPI in structured_data:
+                            pass
+                        else:
+                            structured_data[SPI] = {}
+                    elif is_L_line(line):
+                        L = line[2]
+                        six_NJS = line[4]
+                        NJS = line[5]
+                        current_SPI_region = structured_data[max(structured_data)]
+                        current_L_region = raw_data[i+1:i+1+NJS].flat
+                        if L in current_SPI_region:
+                            pass
+                        else:
+                            current_SPI_region[L] = {'D':current_L_region[0::6], 
+                                                     'AJ':current_L_region[1::6],
+                                                     'AMUN':current_L_region[2::6],
+                                                     'GNO':current_L_region[3::6],
+                                                     'GG':current_L_region[4::6]}
+                        
+                return structured_data
+
+            elif (lfw, lrf) == (1, 1):
                 # Case B
                 pass
-            if lrf == 2:
+            elif lrf == 2:
                 # Case C:
                 # The data ends up looking like {SPI:{L:{R:{'ES':[], ..., 'GG':[]}
                 
@@ -379,42 +426,40 @@ class Library(rx.rx_data):
                     else:
                         return False
 
-            for i in range(len(raw_data)):
-                line = raw_data[i]
-                if is_SPI_line(line):
-                    SPI = line[0]
-                    if SPI in structured_data:
-                        pass
-                    else:
-                        if SPI > 10:
-                            structured_data[0] = line
-                        structured_data[SPI] = {}
-                if is_L_line(line):
-                    L = line[2]
-                    current_SPI_region = structured_data[max(structured_data)]
-                    if L in current_SPI_region:
-                        pass
-                    else:
-                        current_SPI_region[L] = {}
-                elif is_J_line(line):
-                    AJ = line[0]
-                    NE = line[5]
-                    num_entries = line[4]
-                    INT = line[2]
-                    current_L_region = current_SPI_region[max(current_SPI_region)]
-                    current_AJ_region = raw_data.flat[6*(i+1):6*(i+1)+num_entries]
-
-                    if AJ in current_L_region:
-                        pass
-                    else:
-                        current_L_region[AJ]={'ES':current_AJ_region[0::6], 
-                                              'D':current_AJ_region[1::6],
-                                              'GX':current_AJ_region[2::6],
-                                              'GNO':current_AJ_region[3::6],
-                                              'GG':current_AJ_region[4::6],
-                                              'GF':current_AJ_region[5::6]}                
-
+                for i in range(len(raw_data)):
+                    line = raw_data[i]
+                    if is_SPI_line(line):
+                        SPI = line[0]
+                        if SPI in structured_data:
+                            pass
+                        else:
+                            structured_data[SPI] = {}
+                    elif is_L_line(line):
+                        L = line[2]
+                        current_SPI_region = structured_data[max(structured_data)]
+                        if L in current_SPI_region:
+                            pass
+                        else:
+                            current_SPI_region[L] = {}
+                    elif is_J_line(line):
+                        AJ = line[0]
+                        NE = line[5]
+                        num_entries = line[4]
+                        INT = line[2]
+                        current_L_region = current_SPI_region[max(current_SPI_region)]
+                        current_AJ_region = raw_data.flat[6*(i+2):6*(i+1)+num_entries]
+                                
+                        if AJ in current_L_region:
+                            pass
+                        else:
+                            current_L_region[AJ]={'ES':current_AJ_region[0::6], 
+                                                  'D':current_AJ_region[1::6],
+                                                  'GX':current_AJ_region[2::6],
+                                                  'GNO':current_AJ_region[3::6],
+                                                  'GG':current_AJ_region[4::6],
+                                                  'GF':current_AJ_region[5::6]}                
         
+                # self.structure[mat_id]['RxData']['Unresolved'].update(structured_data)
         return structured_data
 
     def read_mfmt(self, mat_id, mf, mt):
@@ -1717,11 +1762,6 @@ def numpy_to_ENDF(num):
         
 print numpy_to_ENDF(7.99687)
                 
-<<<<<<< HEAD
-
-=======
->>>>>>> upstream/staging
-
 MTname = {1: "(n,total) Neutron total",
           2: "(z,z0) Elastic scattering",
           3: "(z,nonelas) Nonelastic neutron",
