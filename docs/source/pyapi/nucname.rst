@@ -33,7 +33,9 @@ Currently the following naming conventions are supported:
     placement of the Z- and A-numbers are swapped. Therefore, this format is
     effectively aaazzzm.  For example, '2420951' is the valid cinder notation
     for 'AM242M'.
-
+ #. **ALARA**: In ALARA format, elements are denoted by the lower case atomic symbol. Isotopes are
+    specified by appending a semicolon and A-number. For example, "fe" and "fe:56" represent
+    elemental iron and iron-56 respectively. No metastable flag exists.
 
 .. currentmodule:: pyne.nucname
 
@@ -71,6 +73,10 @@ Naming Convention Casting Functions
 -----
 
 .. autofunction:: cinder(nuc)
+
+-----
+
+.. autofunction:: alara(nuc)
 
 
 -----------------------

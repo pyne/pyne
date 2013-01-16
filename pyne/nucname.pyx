@@ -293,6 +293,32 @@ def cinder(nuc):
     return newnuc
 
 
+def alara(nuc):
+    """Converts a nuclide to its ALARA form ('am:242'). 
+
+    Parameters
+    ----------
+    nuc : int or str 
+        Input nuclide.
+
+    Returns
+    -------
+    newnuc : str 
+        Output nuclide in name form.
+
+    """
+    cdef std_string newnuc
+
+    if isinstance(nuc, basestring):
+        newnuc = cpp_nucname.alara(<char *> nuc)
+    elif isinstance(nuc, int):
+        newnuc = cpp_nucname.alara(<int> nuc)
+    else:
+        raise NucTypeError(nuc)
+
+    return <char *> newnuc.c_str()
+
+
 
 
 #
@@ -308,5 +334,3 @@ cdef cpp_set[int] zzaaam_set(object nuc_sequence):
         nuc_set.insert(nuc_zz)
 
     return nuc_set
-
-
