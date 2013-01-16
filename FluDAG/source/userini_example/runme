@@ -1,0 +1,1 @@
+$FLUPRO/flutil/rfluka -e myfluka -N0 -M5 example &
