@@ -246,6 +246,7 @@ class Library(rx.RxLib):
         resonance_ranges = {'Resolved':[],
                             'Unresolved':[]}
         for mat_id in self.structure:
+            self.structure[mat_id]['RxData'] = {'Resolved':[], 'Unresolved':[]}
             LRP = self.structure[mat_id]['flags']['LRP']
             if LRP == -1:
                 # If the LRP flag for the material is -1, there is no
@@ -308,14 +309,20 @@ class Library(rx.RxLib):
                             print 'No LRU!'
 
                 for resonance_range in resonance_ranges['Unresolved']:
-                    # try:
-                    structured_data = self.parse_resonance_range(resonance_range, 
-                                                                 isotope_flags,
-                                                                 mat_id)
-                    # except KeyError:
-                    #     self.debug = mat_id, resonance_range['flags'], isotope_flags
-                    resonance_range['data'] = structured_data
-                    self.structure[mat_id]['RxData'].update(resonance_ranges)
+                    try:
+                        structured_data = self.parse_resonance_range(resonance_range, 
+                                                                     isotope_flags,
+                                                                     mat_id)
+                        resonance_range['data'][2] = structured_data
+                        EL = resonance_range['flags']['EL']
+                        EH = resonance_range['flags']['EH']
+                        to_append = (EL, EH, resonance_range['data'][2])
+                        self.structure[mat_id]['RxData']['Unresolved'].append(to_append)
+                        self.structure[mat_id]['RxData']['Unresolved'].sort()
+                        self.debug = (mat_id, resonance_range['data'])
+                    except KeyError:
+                        self.debug = mat_id, resonance_range['data'], isotope_flags
+                    # resonance_range['data'] = structured_data
 
             elif LRP == 2:
                 pass
@@ -427,7 +434,9 @@ class Library(rx.RxLib):
                         return False
 
                 for i in range(len(raw_data)):
+                    # try: 
                     line = raw_data[i]
+
                     if is_SPI_line(line):
                         SPI = line[0]
                         if SPI in structured_data:
@@ -448,7 +457,7 @@ class Library(rx.RxLib):
                         INT = line[2]
                         current_L_region = current_SPI_region[max(current_SPI_region)]
                         current_AJ_region = raw_data.flat[6*(i+2):6*(i+1)+num_entries]
-                                
+                        
                         if AJ in current_L_region:
                             pass
                         else:
@@ -458,6 +467,8 @@ class Library(rx.RxLib):
                                                   'GNO':current_AJ_region[3::6],
                                                   'GG':current_AJ_region[4::6],
                                                   'GF':current_AJ_region[5::6]}                
+                    # except KeyError:
+                    #     self.debug = mat_id, raw_data
         
                 # self.structure[mat_id]['RxData']['Unresolved'].update(structured_data)
         return structured_data
