@@ -22,7 +22,7 @@ Dependencies
 -------------
 PyNE has the following dependencies:
 
-   #. `NumPy <http://numpy.scipy.org/>`_
+   #. `NumPy <http://www.numpy.org/>`_
    #. `SciPy <http://www.scipy.org/>`_
    #. `Cython <http://cython.org/>`_
    #. `HDF5 <http://www.hdfgroup.org/HDF5/>`_
