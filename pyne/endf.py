@@ -308,10 +308,10 @@ class Library(rx.RxLib):
                             print 'No LRU!'
 
                 for resonance_range in resonance_ranges['Unresolved']:
-                    try:
-                        structured_data = self.parse_resonance_range(resonance_range, 
-                                                                     isotope_flags,
-                                                                     mat_id)
+                    # try:
+                    structured_data = self.parse_resonance_range(resonance_range, 
+                                                                 isotope_flags,
+                                                                 mat_id)
                     # except KeyError:
                     #     self.debug = mat_id, resonance_range['flags'], isotope_flags
                     resonance_range['data'] = structured_data
