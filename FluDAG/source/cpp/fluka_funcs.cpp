@@ -50,6 +50,14 @@ static bool visited_surface = false;
 static bool use_dist_limit = false;
 static double dist_limit; // needs to be thread-local
 
+std::string ExePath() {
+    int MAX_PATH = 256;
+    char buffer[MAX_PATH];
+    getcwd(  buffer, MAX_PATH );
+    // std::string::size_type pos = std::string( buffer ).find_last_of( "\\/" );
+    // return std::string( buffer ).substr( 0, pos);
+    return std::string( buffer );
+}
 
 void dagmcinit_(char *cfile, int *clen,  // geom
                 char *ftol,  int *ftlen, // faceting tolerance
@@ -58,8 +66,6 @@ void dagmcinit_(char *cfile, int *clen,  // geom
 {
  
   MBErrorCode rval;
-
-  std::cout << "Entering  function dagmcinit_" << std::endl;
 
 #ifdef ENABLE_RAYSTAT_DUMPS
   // the file to which ray statistics dumps will be written
@@ -71,6 +77,13 @@ void dagmcinit_(char *cfile, int *clen,  // geom
   
     // terminate all filenames with null char
   cfile[*clen] = ftol[*ftlen] = '\0';
+  std::string str1="../";
+  std::string str2= std::string(cfile);
+  str1.append(str2);
+  std::cout << "\nmy file is " << str1 << "\n" << std::endl;
+  char *myfile;
+  myfile = &str1[0];
+  
 
     // initialize this as -1 so that DAGMC internal defaults are preserved
     // user doesn't set this
@@ -78,14 +91,14 @@ void dagmcinit_(char *cfile, int *clen,  // geom
                                                                         
   // jcz: leave arg_facet_tolerance as defined on previous line
   // if ( *ftlen > 0 ) arg_facet_tolerance = atof(ftol);
-  
+
   // read geometry
-  rval = DAG->load_file(cfile, arg_facet_tolerance );
+  // rval = DAG->load_file(cfile, arg_facet_tolerance );
+  rval = DAG->load_file(myfile, arg_facet_tolerance );
   if (MB_SUCCESS != rval) {
     std::cerr << "DAGMC failed to read input file: " << cfile << std::endl;
     exit(EXIT_FAILURE);
   }
-  std::cout << "xyzzy In function dagmcinit_ after load_file" << std::endl;
 
 #ifdef CUBIT_LIBS_PRESENT
   // The Cubit 10.2 libraries enable floating point exceptions.  
@@ -107,17 +120,40 @@ void dagmcinit_(char *cfile, int *clen,  // geom
     exit(EXIT_FAILURE);
   }
 
-  std::cout << "xyzzy In function dagmcinit_ after call to init_OBBTree" << std::endl;
-
   pblcm_history_stack.resize( *max_pbl+1 ); // fortran will index from 1
-  std::cout << "xyzzy :Leaving function dagmcinit_" << std::endl;
-
 }
 
 
 /**************************************************************************************************/
-/******                                Some FLUKA stubs                                    ********/
+/******                                FLUKA stubs                                         ********/
 /**************************************************************************************************/
+extern "C" int lookdb_ (double *X, double *Y, double *Z, int *numErrLm)
+{
+	std::cout << __FILE__ << ", " << __func__ << ":" << __LINE__ << std::endl;
+	return *numErrLm;
+}
+extern "C" int lookmg_ (double *X, double *Y, double *Z,
+                  double dir[3], // Direction cosines vector
+		  int *RegionNum, // region number
+                  int *newCell,    // Output: region # of p'le after step ("IRPRIM" in FLUKA)
+                  int *Ierr        // Output: error code
+)
+{
+	std::cout << __FILE__ << ", " << __func__ << ":" << __LINE__ << std::endl;
+	return *Ierr;
+}
+
+extern "C" int lookfx_ (double *X, double *Y, double *Z,
+                  double dir[3], // Direction cosines vector
+		  int *RegionNum, // region number
+                  int *newCell,    // Output: region # of p'le after step ("IRPRIM" in FLUKA)
+                  int *Ierr        // Output: error code
+)
+{
+	std::cout << __FILE__ << ", " << __func__ << ":" << __LINE__ << std::endl;
+	return *Ierr;
+}
+
 /*
  * Allows tracking initialization.
  * Same input and output as LOOKMG.
@@ -129,6 +165,7 @@ extern "C" int lookz_ (double *X, double *Y, double *Z,
                   int *Ierr        // error code
 )
 {
+	std::cout << __FILE__ << ", " << __func__ << ":" << __LINE__ << std::endl;
         std::cout << "In C++ function lookz_" << std::endl;
 	std::cout << "\tINPUT: Position X,Y,Z  " << *X << ", " \
                            <<  *Y  << ", "  << *Z << std::endl;
@@ -152,6 +189,7 @@ extern "C" int lookz_ (double *X, double *Y, double *Z,
 extern "C" int norml_(double *U, double *V, double *W)
 {
 	
+	std::cout << __FILE__ << ", " << __func__ << ":" << __LINE__ << std::endl;
 	std::cout << " Norml unit vector: U, V, W = " << *U << ", " \
                            <<  *V  << ", "  << *W << std::endl;
         *U = 98.7;
@@ -191,6 +229,7 @@ extern "C" double g1flu_(double pos[3], // Cartesian coordinate vector
                   int *Ierr        // error code
 )
 {
+	std::cout << __FILE__ << ", " << __func__ << ":" << __LINE__ << std::endl;
 	std::cout << " Cartesian coordinate vector: pos[3] = " << pos[0]<< ", " \
                            <<  pos[1]  << ", "  << pos[2] << std::endl;
 	double huge = 10e10;
