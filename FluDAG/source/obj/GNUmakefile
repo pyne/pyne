@@ -47,6 +47,7 @@ CXXFLAGS = -g
 
 default: all
 
+all: fluka_funcs.o userini.o
 
 fludagW.o : cpp/fludagW.cpp
 	g++ -c $(CPPFLAGS) $<

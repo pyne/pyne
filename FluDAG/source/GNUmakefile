@@ -27,7 +27,9 @@ MOAB_LIBS_LINK = -L${MOAB_LIBDIR} -lm ${MOAB_FLAGS}
 
 
 CPPFLAGS = ${MOAB_INCLUDES} ${FLUDAG_INCLUDES}
-CXXFLAGS = -g
+# CXXFLAGS = -g
+# Modify this to the name of the directory from which myfluka is run
+RUNDIR = ./userini_example
 
 default: all
 
@@ -56,6 +58,7 @@ mainf:
 
 myfluka: obj/userini.o obj/fluka_funcs.o
 	${FLUPRO}/flutil/lfluka -o myfluka -a MOAB -a dagmc -m fluka obj/userini.o -L ${FLUPRO} -L ${MOAB_LIBDIR} obj/fluka_funcs.o
+	cp myfluka ${RUNDIR}
 
 userini.o : for/userini.f
 	cd obj; make userini.o
@@ -63,9 +66,15 @@ userini.o : for/userini.f
 fluka_funcs.o : cpp/fluka_funcs.o
 	cd obj; make fluka_funcs.o
 
+obj: 
+	make -f obj/GNUmakefile all
+
+test.stl : test.h5m
+	mbconvert $< $@
+
 clean:
 	rm obj/*.o
-	rm ./mainf
+	rm ./myfluka
 
 print-%:
 	@echo $* = $($*)
