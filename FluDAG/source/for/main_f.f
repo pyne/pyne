@@ -43,13 +43,13 @@ C       Externally defined C++ function in fludagW.cpp
 C       This tests that a fortran main (such as FLUKA) can make a call
 C       to an app-defined function that happens to be compiled from
 C       C++ source.
-C       CALL LOOKZ(X, Y, Z, DIR, 49, NEWCELL, IERR)
-C       WRITE(*,*) 'Back in mainf_f after call to LOOKZ.'
+        CALL LOOKZ(X, Y, Z, DIR, 49, NEWCELL, IERR)
+        WRITE(*,*) 'Back in mainf_f after call to LOOKZ.'
 C       Externally defined C++ function in fludagW.cpp
-C       CALL NORML(U, V, W)
-C       WRITE(*,*) 'Back in mainf_f after call to NORML.'
-C	WRITE(*,*) 'After the call to NORML U,V,W is:'
-C	WRITE(*,*) U, ', ', V, ', ', W
+        CALL NORML(U, V, W)
+        WRITE(*,*) 'Back in mainf_f after call to NORML.'
+ 	WRITE(*,*) 'After the call to NORML U,V,W is:'
+ 	WRITE(*,*) U, ', ', V, ', ', W
 
 C 	Externally defined C++ function in fluka_funcs.cpp
 C       CALL DAGMCINIT(
