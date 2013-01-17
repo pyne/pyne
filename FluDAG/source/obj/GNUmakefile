@@ -7,6 +7,7 @@
 
 # Modify MOAB to point to the local MOAB installation
 # MOAB = /data/opt/dagmc/moab
+COMPILEDIR = ${HOME}/storage/DAGMC/FluDAG/source
 MOAB = ${HOME}/dagmc_bld/MOAB
 FLUDAG = ${HOME}/DAGMC/FluDAG
 FLUDAG_SOURCE = ${FLUDAG}/source
@@ -59,11 +60,11 @@ main_f.o: ../for/main_f.f
 
 fluka_funcs.o: ../cpp/fluka_funcs.cpp
 	g++ -c $(CPPFLAGS) $< 
-	mv ../cpp/fluka_funcs.o .
 
 userini.o: ../for/userini.f
 	${FLUPRO}/flutil/fff ../for/userini.f
 	mv ../for/userini.o .
+
 clean:
 	rm *.o
 

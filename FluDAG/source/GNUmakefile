@@ -63,11 +63,10 @@ myfluka: obj/userini.o obj/fluka_funcs.o
 userini.o : for/userini.f
 	cd obj; make userini.o
 
-fluka_funcs.o : cpp/fluka_funcs.o
+fluka_funcs.o : cpp/fluka_funcs.cpp
 	cd obj; make fluka_funcs.o
 
-obj: 
-	make -f obj/GNUmakefile all
+obj: userini.o fluka_funcs.o
 
 test.stl : test.h5m
 	mbconvert $< $@
