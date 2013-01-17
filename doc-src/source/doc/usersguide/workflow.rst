@@ -130,7 +130,7 @@ surfaces are coincident. Some volumes/parts will inherently hurt the
 model's effectiveness either due to its complex features or small
 dimensions. A volume/part's effect on the model cannot truly be
 assessed until a DAGMC-based analysis is run. This final method is
-usually implemented in attempt to reduce the number of lost particles
+usually implemented in an attempt to reduce the number of lost particles
 while maintaining the most important characteristics of the system.
 
 *Note: Of all steps, the removal of superfluous details is the most
