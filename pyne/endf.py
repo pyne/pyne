@@ -216,6 +216,12 @@ class Evaluation(object):
                             self.files.append(file2)
                         if MT == 151:
                             self._read_resonances()
+                    elif MF == 3:
+                        file3 = self.find_file(3)
+                        if not file3:
+                            file3 = ENDFFile3()
+                            self.files.append(file3)
+                        self._read_reaction_xs(MT)
                     elif MF == 7:
                         # Now read File7
                         file7 = self.find_file(7)
@@ -462,6 +468,33 @@ class Evaluation(object):
             eRelease.neutrinos = zip(values[12::18], values[13::18])
             eRelease.pseudoQ = zip(values[14::18], values[15::18])
             eRelease.total = zip(values[16::18], values[16::18])
+
+        # Skip SEND record
+        self.fh.readline()
+
+    def _read_reaction_xs(self, MT):
+        self.print_info(3, MT)
+
+        # Find file3
+        file3 = self.find_file(3)
+
+        # Create MT for reaction cross section
+        xs = ENDFReaction(MT)
+        file3.reactions.append(xs)
+
+        # Find reaction
+        self.seek_mfmt(3, MT)
+
+        # Read HEAD record with ZA and atomic weight ratio
+        items = self._get_head_record()
+        xs.ZA = items[0]
+        xs.AWR = items[1]
+
+        # Read TAB1 record with reaction cross section
+        xs.sigma = self._get_tab1_record()
+        xs.QM = xs.sigma.params[0] # Mass difference Q value
+        xs.QI = xs.sigma.params[1] # Reaction Q value
+        xs.LR = xs.sigma.params[3] # Complex breakup flag
 
         # Skip SEND record
         self.fh.readline()
@@ -1386,6 +1419,7 @@ class ENDFFile3(ENDFFile):
     """
 
     def __init__(self):
+        super(ENDFFile3, self).__init__()
         self.fileNumber = 3
 
 class ENDFFile4(ENDFFile):
