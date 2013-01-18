@@ -11,6 +11,7 @@ before_install:
   - sudo apt-get install -qq libhdf5-serial-dev python-numexpr python-tables
   - popd
   - python -V
+  - python -c "import sys; print '\n'.join(sys.path)"
   - python -c "import numpy; print 'numpy version:', numpy.__version__"
   - python -c "import scipy; print 'scipy version:', scipy.__version__"
   - python -c "import Cython; print 'cython version:', Cython.__version__"
