@@ -53,7 +53,7 @@ the unzipped directory::
 
     cd pyne/
     python setup.py install --user
-    nuc_data_make
+    scripts/nuc_data_make
 
 The ``setup.py`` command compiles and installs the PyNE source code.
 The ``nuc_data_make`` builds and installs a database of nuclear data.
