@@ -36,8 +36,7 @@ def grab_eaf_data(build_dir=""):
     # Grab ENSDF files and unzip them.
     # This link was taken from 'http://www-nds.iaea.org/fendl/fen-activation.htm'
     iaea_url = 'http://www-nds.iaea.org/fendl2/activation/processed/vitj_e/libout/fendlg-2.0_175-gz'
-    # Pending decision to mirror data on Amazon AWS storage...
-    #s3_base_url = 'http://s3.amazonaws.com/pyne/'
+    s3_base_url = 'http://s3.amazonaws.com/pyne/'
     eaf_gzip = 'fendlg-2.0_175-gz'
 
     fpath = os.path.join(build_dir, eaf_gzip)
@@ -46,9 +45,12 @@ def grab_eaf_data(build_dir=""):
         urllib.urlretrieve(iaea_url, fpath)
 
         if os.path.getsize(fpath) < 3215713: 
-            print "  could not get {0} from IAEA;".format(iaea_url)
+            print "  could not get {0} from IAEA; trying S3 mirror".format(f)
             os.remove(fpath)
-            return False
+            urllib.urlretrieve(s3_base_url + eaf_gzip, fpath)
+            if os.path.getsize(fpath) < 3215713: 
+                print "  could not get {0} from S3 mirror".format(f)
+                return False
 
     # Write contents of single-file gzip archive to a new file
     try:
