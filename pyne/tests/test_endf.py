@@ -6,7 +6,6 @@ import warnings
 
 
 library = Library('endftest_small.txt')   
-cs137 = Library('137.txt') 
 
 def test_mats():
     for mat_id in library.mats:
@@ -28,24 +27,35 @@ def test_unresolved_resonances_a():
     # Case A (ENDF Manual p.70)
     
     obs = library.mat131['RxData']['Unresolved'][0][2][3.5][1.0]
+
     obs_D = obs['D']
     exp_D = np.array([1.810000e3,
                       2.110000e3,
                       3.110000e3])
+
     obs_GNO = obs['GNO']
     exp_GNO = np.array([4.489400e-1,
                         8.497500e-1,
                         9.524900e-1])
-    print obs
+
     assert(np.array_equal(exp_D, obs_D))
     assert(np.array_equal(exp_GNO, obs_GNO))
 
+def test_unresolved_resonances_b():
+    # Case B (ENDF Manual p. 70)
+    obs = library.mat419['RxData']['Unresolved'][-1][2][3.5]
+    obs_ES = obs['ES']
+    exp_ES = 100 * np.array([10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20])
+
+    assert(np.array_equal(exp_ES, obs_ES))
+
 def test_unresolved_resonances_c():
     # Case C (ENDF Manual p. 70)
-    print library.structure
     obs = library.mat128['RxData']['Unresolved'][0][2][3.5][1.0][4.0]
+
     obs_ES = obs['ES']
     exp_ES = np.array([1.74e3, 2.04e3, 3.04e3])
+
     obs_D = obs['D']
     exp_D = np.array([7.762320e3, 6.766400e3, 2.780300e3])
 
@@ -54,13 +64,6 @@ def test_unresolved_resonances_c():
 
     
 
-# def test_unresolved_resonances():
-#     resonances = library.make_resonances()
-    
-
-def test_flags():
-    print library.mat128['flags']
-    assert(True == True)
 # def do_not_test_write():
     # write library to test.txt
     # library.write('test.txt', 'endf')
