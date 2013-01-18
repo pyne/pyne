@@ -7,13 +7,9 @@ python:
 before_install:
   - mkdir builds
   - pushd builds
-  - pip install nose -q
-  - pip install numpy -q
-  - pip install scipy -q
-  - pip intall Cython -q
   - sudo apt-get update -qq
-  - sudo apt-get install -qq libhdf5-serial-dev
-  - pip install tables -q
+  - sudo apt-get install -qq python-nose python-numpy python-scipy cython
+  - sudo apt-get install -qq libhdf5-serial-dev python-numexpr python-tables
   - python -V
   - popd
 install:
