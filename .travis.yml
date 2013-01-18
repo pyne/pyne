@@ -27,9 +27,9 @@ install:
   - scripts/nuc_data_make
 script:
   - cd pyne/tests
-  - nosetests
+  - nosetests -x
   - cd pyne/xs/tests
-  - nosetests
+  - nosetests -x
 notifications:
   email:
     scopatz@gmail.com
