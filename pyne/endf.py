@@ -243,9 +243,10 @@ class Library(rx.RxLib):
     def make_resonances(self):
         """ This reads the resonance data from all the materials and returns
         a nested dictionary with the resonance data. """
-        resonance_ranges = {'Resolved':[],
-                            'Unresolved':[]}
         for mat_id in self.structure:
+            resonance_ranges = {'Resolved':[],
+                                'Unresolved':[]}
+
             self.structure[mat_id]['RxData'] = {'Resolved':[], 'Unresolved':[]}
             LRP = self.structure[mat_id]['flags']['LRP']
             if LRP == -1:
@@ -274,10 +275,6 @@ class Library(rx.RxLib):
                         isotope_flags = self.parse_isotope_line(mf2[i])
                     elif self.is_range_line(mf2[i]):
                         range_flags = self.parse_range_line(mf2[i])
-                        # try:
-                        #     welp = range_flags[0]
-                        # except:
-                        #     self.debug = range_flags
                     else:
                         # If this line is neither a range nor an isotope line:
                         if self.is_range_line(mf2[i-1]):
@@ -309,20 +306,30 @@ class Library(rx.RxLib):
                             print 'No LRU!'
 
                 for resonance_range in resonance_ranges['Unresolved']:
-                    try:
-                        structured_data = self.parse_resonance_range(resonance_range, 
-                                                                     isotope_flags,
-                                                                     mat_id)
-                        resonance_range['data'][2] = structured_data
-                        EL = resonance_range['flags']['EL']
-                        EH = resonance_range['flags']['EH']
-                        to_append = (EL, EH, resonance_range['data'][2])
-                        self.structure[mat_id]['RxData']['Unresolved'].append(to_append)
-                        self.structure[mat_id]['RxData']['Unresolved'].sort()
-                        self.debug = (mat_id, resonance_range['data'])
-                    except KeyError:
-                        self.debug = mat_id, resonance_range['data'], isotope_flags
-                    # resonance_range['data'] = structured_data
+                    # try:
+                    #     structured_data = self.parse_resonance_range(resonance_range, 
+                    #                                                  isotope_flags,
+                    #                                                  mat_id)
+                    #     resonance_range['data'][2] = structured_data
+                    #     EL = resonance_range['flags']['EL']
+                    #     EH = resonance_range['flags']['EH']
+                    #     to_append = (EL, EH, resonance_range['data'][2])
+                    #     self.structure[mat_id]['RxData']['Unresolved'].append(to_append)
+                    #     self.structure[mat_id]['RxData']['Unresolved'].sort()
+                    #     # self.debug = (mat_id, resonance_range['data'])
+                    # except KeyError:
+                    #     self.debug = resonance_range['data'][2]
+
+                    structured_data = self.parse_resonance_range(resonance_range, 
+                                                                 isotope_flags,
+                                                                 mat_id)
+                    resonance_range['data'].append(structured_data)
+                    EL = resonance_range['flags']['EL']
+                    EH = resonance_range['flags']['EH']
+                    to_append = (EL, EH, resonance_range['data'][3])
+                    self.structure[mat_id]['RxData']['Unresolved'].append(to_append)
+                    self.structure[mat_id]['RxData']['Unresolved'].sort()
+
 
             elif LRP == 2:
                 pass
@@ -368,7 +375,7 @@ class Library(rx.RxLib):
                     else:
                         return False           
                 for i in range(len(raw_data)):
-                    line = raw_data[i]
+                    line = resonance_range['data'][2][i]
                     if is_SPI_line(line):
                         SPI = line[0]
                         if SPI in structured_data:
@@ -411,13 +418,21 @@ class Library(rx.RxLib):
                 
                 for i in range(len(raw_data)):
                     line = raw_data[i]
+                    mat_data = self.structure[mat_id]['RxData']
+                                       
                     if is_SPI_line(line):
                         SPI = line[0]
                         NE = line[4]
                         if SPI in structured_data:
                             pass
                         else:                           
-                            structured_data[SPI] = {'ES':raw.data.flat[6*(i+1)+1:(6*i+1)+1+NE]}                        
+                            start = 6 * (i+1)
+                            stop = start + NE
+                            structured_data[SPI] = {'ES':raw_data.flat[start:stop]}
+
+
+                return structured_data
+
             elif lrf == 2:
                 # Case C:
                 # The data ends up looking like {SPI:{L:{R:{'ES':[], ..., 'GG':[]}
@@ -457,7 +472,6 @@ class Library(rx.RxLib):
                         return False
 
                 for i in range(len(raw_data)):
-                    # try: 
                     line = raw_data[i]
 
                     if is_SPI_line(line):
@@ -490,10 +504,7 @@ class Library(rx.RxLib):
                                                   'GNO':current_AJ_region[3::6],
                                                   'GG':current_AJ_region[4::6],
                                                   'GF':current_AJ_region[5::6]}                
-                    # except KeyError:
-                    #     self.debug = mat_id, raw_data
-        
-                # self.structure[mat_id]['RxData']['Unresolved'].update(structured_data)
+
         return structured_data
 
     def read_mfmt(self, mat_id, mf, mt):
