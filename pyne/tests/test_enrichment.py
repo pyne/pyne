@@ -173,6 +173,7 @@ def check_NU(solver):
     orig_casc.mat_feed = feed
     casc = enr.multicomponent(orig_casc, solver=solver, tolerance=1E-11)
 
+    print "casc.mat_prod = " + repr(casc.mat_prod)
     assert_almost_equal(casc.mat_prod.comp[922350], 0.05,   5) 
     assert_almost_equal(casc.mat_tail.comp[922350], 0.0025, 5)
 
