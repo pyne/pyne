@@ -393,8 +393,31 @@ class Library(rx.RxLib):
                 return structured_data
 
             elif (lfw, lrf) == (1, 1):
-                # Case B
-                pass
+                # Case B:
+                def is_SPI_line(line):
+                    SPI = line[0]
+                    LSSF = line[2]
+                    NE = line[4]
+                    NLS = line[5]
+                    if (LSSF in (0,1) and 
+                        line[3] == 0 and 
+                        (2*SPI+NLS) == int(2*SPI+NLS) and
+                        SPI < 1000): # To differentiate from some false 
+                                     # positives, assume the nuclear 
+                                     # spin is <1000.
+                        return True
+                    else:
+                        return False
+                
+                for i in range(len(raw_data)):
+                    line = raw_data[i]
+                    if is_SPI_line(line):
+                        SPI = line[0]
+                        NE = line[4]
+                        if SPI in structured_data:
+                            pass
+                        else:                           
+                            structured_data[SPI] = {'ES':raw.data.flat[6*(i+1)+1:(6*i+1)+1+NE]}                        
             elif lrf == 2:
                 # Case C:
                 # The data ends up looking like {SPI:{L:{R:{'ES':[], ..., 'GG':[]}
