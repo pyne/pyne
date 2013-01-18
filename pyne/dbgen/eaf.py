@@ -45,11 +45,11 @@ def grab_eaf_data(build_dir=""):
         urllib.urlretrieve(iaea_url, fpath)
 
         if os.path.getsize(fpath) < 3215713: 
-            print "  could not get {0} from IAEA; trying S3 mirror".format(f)
+            print "  could not get {0} from IAEA; trying S3 mirror".format(eaf_gzip)
             os.remove(fpath)
             urllib.urlretrieve(s3_base_url + eaf_gzip, fpath)
             if os.path.getsize(fpath) < 3215713: 
-                print "  could not get {0} from S3 mirror".format(f)
+                print "  could not get {0} from S3 mirror".format(eaf_gzip)
                 return False
 
     # Write contents of single-file gzip archive to a new file
