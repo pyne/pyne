@@ -8,6 +8,7 @@ before_install:
   - pushd builds
   - sudo apt-get update -qq
   - sudo apt-get install libhdf5-serial-dev libatlas3gf-base libblas-dev liblapack-dev
+  - sudo apt-get install gfortran python-scipy
   - pip install numpy -q --use-mirrors
   - pip install scipy --use-mirrors
   - pip install cython -q --use-mirrors
