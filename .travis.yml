@@ -14,6 +14,7 @@ before_install:
   - pip install cython -q --use-mirrors
   - pip install numexpr -q --use-mirrors
   - pip install tables -q --use-mirrors
+  - pip install matplotlib -q --use-mirrors
   - popd
   - python -V
   - python -c "import sys; print '\n'.join(sys.path)"
