@@ -161,10 +161,10 @@ class Evaluation(object):
     of Files.
     """
 
-    def __init__(self, filename):
+    def __init__(self, filename, verbose=True):
         self.fh = open(filename, 'r')
         self.files = []
-        self.verbose = True
+        self.verbose = verbose
         self.veryverbose = False
 
         # First we need to read MT=1, MT=451 which has a description of the ENDF
@@ -245,6 +245,15 @@ class Evaluation(object):
                             file9 = ENDFFile9()
                             self.files.append(file9)
                         self._read_multiplicity(MT)
+                    elif MF == 10:
+                        # Read File 10 -- cross sections for production of
+                        # radioactive nuclides
+                        file10 = self.find_file(10)
+                        if not file10:
+                            file10 = ENDFFile10()
+                            self.files.append(file10)
+                        self._read_production_xs(MT)
+
             if not found:
                 if self.verbose:
                     print 'Reaction not found'
@@ -925,6 +934,37 @@ class Evaluation(object):
             state.NP = state.params[5] # Number of energy points
             mp.multiplicities.append(state)
 
+    def _read_production_xs(self, MT):
+        self.print_info(10, MT)
+
+        # Find file10
+        file10 = self.find_file(10)
+
+        # Create MT for resonances
+        rxn = ENDFReaction(MT)
+        file10.reactions.append(rxn)
+
+        # Find reaction
+        self.seek_mfmt(10, MT)
+
+        # Get head record
+        items = self._get_head_record()
+        rxn.ZA = items[0]
+        rxn.AWR = items[1] # Atomic weight ratio
+        rxn.LIS = items[2] # Level number of the target
+        rxn.NS = items[4] # Number of final states
+
+        rxn.xs = []
+        for i in range(rxn.NS):
+            state = self._get_tab1_record()
+            state.QM = state.params[0] # Mass difference Q value (eV)
+            state.QI = state.params[1] # Reaction Q value (eV)
+            state.IZAP = state.params[2] # 1000Z + A
+            state.LFS = state.params[3] # Level number of the nuclide
+            state.NR = state.params[4] # Number of energy ranges
+            state.NP = state.params[5] # Number of energy points
+            rxn.xs.append(state)
+
     def _get_text_record(self, line=None):
         if not line:
             line = self.fh.readline()
@@ -1405,6 +1445,7 @@ class ENDFFile10(ENDFFile):
     """
 
     def __init__(self):
+        super(ENDFFile10,self).__init__()
         self.fileNumber = 10
 
 class ENDFReaction(ENDFFile):
