@@ -66,7 +66,7 @@ endif()
 # According to http://stackoverflow.com/questions/646518/python-how-to-detect-debug-interpreter
 # testing whether sys has the gettotalrefcount function is a reliable, cross-platform
 # way to detect a CPython debug interpreter.
-execute_process(COMMAND "${PYTHON_EXECUTABLE}" "-c"
+execute_process(COMMAND "${PYTHON_EXECUTABLE}" "-vc"
     "from distutils import sysconfig as s;import sys;import struct; print('.'.join(str(v) for v in sys.version_info)); print(s.PREFIX); print(s.get_python_inc(plat_specific=True)); print(s.get_python_lib(plat_specific=True)); print(s.get_config_var('SO')); print(hasattr(sys, 'gettotalrefcount')+0); print(struct.calcsize('@P'));"
     RESULT_VARIABLE _PYTHON_SUCCESS
     OUTPUT_VARIABLE _PYTHON_VALUES
@@ -75,6 +75,7 @@ execute_process(COMMAND "${PYTHON_EXECUTABLE}" "-c"
 
 if(NOT _PYTHON_SUCCESS MATCHES 0)
     if(PythonLibsNew_FIND_REQUIRED)
+        message("-- PYTHON EXECUTABLE: ${PYTHON_EXECUTABLE}")
         message(FATAL_ERROR
             "Python config failure:\n${_PYTHON_ERROR_VALUE}")
     endif()
