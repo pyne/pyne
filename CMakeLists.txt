@@ -23,9 +23,7 @@ set(LIBS ${LIBS} ${HDF5_C_LIBRARIES})
 # Use new Python library finder
 find_package(PythonInterp REQUIRED)
 find_package(PythonLibsNew REQUIRED)
-include_directories(${PYTHON_INCLUDE_DIR})
-include_directories("${PYTHON_INCLUDE_DIR}/python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}")
-message("-- PYTHON_INCLUDE_DIR: ${PYTHON_INCLUDE_DIR}")
+#include_directories("${PYTHON_INCLUDE_DIR}/python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}")
 
 # Include the CMake script UseCython.cmake.  This defines add_cython_module().
 # Instruction for use can be found at the top of cmake/UseCython.cmake.
@@ -68,6 +66,13 @@ include_directories(${NUMPY_INCLUDE_DIR})
 # Add JsonCpp Flag
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DJSON_IS_AMALGAMATION")
 
+include_directories(${PYTHON_INCLUDE_DIR})
+message("-- PYTHON_INCLUDE_DIR: ${PYTHON_INCLUDE_DIR}")
+
+execute_process(COMMAND python -V)
+execute_process(COMMAND ${PYTHON_EXECUTABLE} -V)
+
+
 # With CMake, a clean separation can be made between the source tree and the
 # build tree.  When all source is compiled, as with pure C/C++, the source is
 # no-longer needed in the build tree.  However, with pure *.py source, the
@@ -80,7 +85,8 @@ add_custom_target( ReplicatePythonSourceTree ALL ${CMAKE_COMMAND} -P
 
 # Add cython version info to source tree
 message("-- Making Cython Version.")
-execute_process(COMMAND python ${CMAKE_CURRENT_SOURCE_DIR}/configure.py cython_version)
+#execute_process(COMMAND python ${CMAKE_CURRENT_SOURCE_DIR}/configure.py cython_version)
+execute_process(COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/configure.py cython_version)
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/pyne/_includes/
      DESTINATION ${CMAKE_BINARY_DIR}/pyne/_includes/)
 
@@ -108,5 +114,6 @@ file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/scripts DESTINATION ${CMAKE_BINARY_DIR})
 
 # Add cython version info to source tree
 message("-- Making Metadata.")
-execute_process(COMMAND python ${CMAKE_CURRENT_SOURCE_DIR}/configure.py metadata)
+#execute_process(COMMAND python ${CMAKE_CURRENT_SOURCE_DIR}/configure.py metadata)
+execute_process(COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/configure.py metadata)
 
