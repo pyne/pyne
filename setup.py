@@ -74,7 +74,8 @@ def main_body():
             elif 'gcc.exe' in files_on_path:
                 cmake_cmd += ['-G "MinGW Makefiles"']
             cmake_cmd = ' '.join(cmake_cmd)
-        rtn = subprocess.check_call(cmake_cmd, cwd='build', shell=(os.name=='nt'))
+        print "ENV = \n  " + "\n  ".join(["{0} = {1}".format(k,v) for k,v in sorted(os.environ.items())])
+        rtn = subprocess.check_call(cmake_cmd, cwd='build', shell=(os.name=='nt'), env=os.environ)
     rtn = subprocess.check_call(['make'] + make_args, cwd='build')
     cwd = os.getcwd()
     os.chdir('build')
