@@ -1,5 +1,5 @@
 # Defines the CMake commands/policies
-cmake_minimum_required( VERSION 2.8.5 )
+cmake_minimum_required( VERSION 2.8 )
 
 # Set the project name
 project( pyne )
