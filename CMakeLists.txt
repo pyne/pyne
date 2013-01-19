@@ -24,6 +24,7 @@ set(LIBS ${LIBS} ${HDF5_C_LIBRARIES})
 find_package(PythonInterp REQUIRED)
 find_package(PythonLibsNew REQUIRED)
 include_directories(${PYTHON_INCLUDE_DIR})
+include_directories("${PYTHON_INCLUDE_DIR}/${PYTHON_LIBRARY}")
 message("-- PYTHON_INCLUDE_DIR: ${PYTHON_INCLUDE_DIR}")
 
 # Include the CMake script UseCython.cmake.  This defines add_cython_module().
