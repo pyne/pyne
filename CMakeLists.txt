@@ -67,7 +67,7 @@ include_directories(${NUMPY_INCLUDE_DIR})
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DJSON_IS_AMALGAMATION")
 
 #include_directories(${PYTHON_INCLUDE_DIR})
-include_directories("${HOME}/anaconda/include/python2.7")
+include_directories("/home/slave/anaconda/include/python2.7")
 #message("-- PYTHON_INCLUDE_DIR: ${PYTHON_INCLUDE_DIR}")
 
 # With CMake, a clean separation can be made between the source tree and the
