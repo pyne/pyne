@@ -401,7 +401,7 @@ class CinderDataSource(DataSource):
 
         # Set query condition
         if rx == 'f':
-            cond = 'from_nuc == {0}'.format(nuc)
+            cond = 'nuc == {0}'.format(nuc)
         elif rx in RX_TYPES:
             cond = "(from_nuc == {0}) & (reaction_type == '{1}')".format(nuc, rx)
         else:
