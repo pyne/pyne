@@ -41,13 +41,12 @@ vpath %.f   for
 vpath %.c   c
 vpath %.o   obj
 
-# Create a fortrain main linking object files compiled from fortran, C and C++
+# Create a fortran main linking object files compiled from fortran, C and C++
 mainf: main_f.o fluka_funcs.o
 	gfortran -o $@ obj/main_f.o obj/fluka_funcs.o $(MOAB_LIBS_LINK) $(FLUKA_LIBS_LINK) -lstdc++
 
 myfluka: userini.o fluka_funcs.o
 	${FLUPRO}/flutil/lfluka -o $@ -a MOAB -a dagmc -m fluka obj/userini.o -L ${FLUPRO} -L ${MOAB_LIBDIR} obj/fluka_funcs.o
-	cp myfluka ${RUNDIR}
 
 main_f.o : main_f.f
 	gfortran -c $<

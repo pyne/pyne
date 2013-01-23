@@ -1,6 +1,15 @@
-Workflow in source: update for/userini.f or cpp/fluka_funcs.cpp
-> 'make userini.o' (and/or 'make fluka_funcs.o)
+The subdirectory of source called "userini_example" contains test runs and inputs.
+
+Workflow in source: 
+> 'make clean' 
 > 'make'
 > cd userini_example
+> mkdir myrundir
+> cp ../myfluka myrundir
+> cp example.inp myrundir
+> cp test.h5m myrundir
+> cp runme myrundir
+> cd myrundir
 > source runme
-Then look at the .out file in the fluka_xxxx subdir to verify changes took effect.
+This creates a fluka_xxx subdirectory that will be deleted if there are no errors.
+
