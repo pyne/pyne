@@ -7,10 +7,12 @@ from nose.tools import assert_equal, assert_not_equal, assert_almost_equal, \
                        assert_true, assert_false
 from numpy.testing import assert_array_equal, assert_array_almost_equal
 
+from pyne.xs import data_source
 from pyne.xs.cache import xs_cache
 from pyne.pyne_config import pyne_conf
 
 nuc_data = pyne_conf.NUC_DATA_PATH
+cinderds = data_source.CinderDataSource()
 
 # These tests require nuc_data
 if not os.path.isfile(nuc_data):
@@ -19,6 +21,8 @@ if not os.path.isfile(nuc_data):
 
 def test_xs_cache_sigma_f_n():
     xs_cache.clear()
+    if not cinderds.exists:
+        return
 
     with tb.openFile(nuc_data, 'r') as f:
         sigma_f_n_U235 = np.array(f.root.neutron.cinder_xs.fission[28]['xs'])
@@ -31,6 +35,8 @@ def test_xs_cache_sigma_f_n():
 
 def test_xs_cache_sigma_a_n():
     xs_cache.clear()
+    if not cinderds.exists:
+        return
 
     with tb.openFile(nuc_data, 'r') as f:
         sigma_a_n_H1 = np.array(f.root.neutron.cinder_xs.absorption[0]['xs'])

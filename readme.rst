@@ -9,7 +9,6 @@ and contribute, please let us know either on the mailing list
 
 .. _github: https://github.com/pyne/pyne
 
-
 .. install-start
 
 .. _install:
