@@ -7,7 +7,6 @@
 
 # Modify MOAB to point to the local MOAB installation
 # MOAB = /data/opt/dagmc/moab
-COMPILEDIR = ${HOME}/storage/DAGMC/FluDAG/source
 MOAB = ${HOME}/dagmc_bld/MOAB
 FLUDAG = ${HOME}/DAGMC/FluDAG
 FLUDAG_SOURCE = ${FLUDAG}/source
@@ -27,46 +26,48 @@ MOAB_FLAGS = -lMOAB -ldagmc
 MOAB_LIBS_LINK = -L${MOAB_LIBDIR} -lm ${MOAB_FLAGS} 
 
 
-FSRCS = 
-
-CCSRCS = 
-
-OBJS = $(FSRCS:.f=.o) $(CCSRCS:.c=.o)
-PRGS = $(FSRCS:.f=) $(CCSRCS:.c=)
-
-.SUFFIXES:
-.SUFFIXES: .f .c .o
-
-.f.o:
-	cd obj; make $<; cd ..
-
-.c.o: 
-	g++ -c $<
-
 CPPFLAGS = ${MOAB_INCLUDES} ${FLUDAG_INCLUDES}
-CXXFLAGS = -g
+# CXXFLAGS = -g
+# Modify this to the name of the directory from which myfluka is run
+RUNDIR = ./userini_example
 
 default: all
 
-all: fluka_funcs.o userini.o
+all: myfluka
 
-fludagW.o : cpp/fludagW.cpp
-	g++ -c $(CPPFLAGS) $<
- 
+# Look in directory arg2 for file-pattern arg1
+vpath %.cpp cpp
+vpath %.f   for
+vpath %.c   c
+vpath %.o   obj
+
 # Create a fortrain main linking object files compiled from fortran, C and C++
+mainf: main_f.o fluka_funcs.o
+	gfortran -o $@ obj/main_f.o obj/fluka_funcs.o $(MOAB_LIBS_LINK) $(FLUKA_LIBS_LINK) -lstdc++
 
-main_f.o: ../for/main_f.f
+myfluka: userini.o fluka_funcs.o
+	${FLUPRO}/flutil/lfluka -o $@ -a MOAB -a dagmc -m fluka obj/userini.o -L ${FLUPRO} -L ${MOAB_LIBDIR} obj/fluka_funcs.o
+	cp myfluka ${RUNDIR}
+
+main_f.o : main_f.f
 	gfortran -c $<
+	mv $@ obj
 
-fluka_funcs.o: ../cpp/fluka_funcs.cpp
+userini.o : userini.f
+	${FLUPRO}/flutil/fff $<
+	mv for/$@ obj
+	 
+fluka_funcs.o : fluka_funcs.cpp
 	g++ -c $(CPPFLAGS) $< 
+	mv $@ obj
 
-userini.o: ../for/userini.f
-	${FLUPRO}/flutil/fff ../for/userini.f
-	mv ../for/userini.o .
+test.stl : test.h5m
+	mbconvert $< $@
 
+.PHONY : clean
 clean:
-	rm *.o
+	rm obj/*.o
+	rm myfluka
 
 print-%:
 	@echo $* = $($*)

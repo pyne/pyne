@@ -7,24 +7,9 @@ BEAMPOS          0.0       0.0     -50.0
 *
 *...+....1....+....2....+....3....+....4....+....5....+....6....+....7....+....8
 USRICALL        123.      456.       1.0      -2.0      18.0      18. test.h5m
-GEOBEGIN                                                              COMBNAME
-  0 0                       A simple Be target inside vacuum
-RPP body1 -5000000.0 +5000000.0 -5000000.0 +5000000.0 -5000000.0 +5000000.0
-RPP body2 -1000000.0 +1000000.0 -1000000.0 +1000000.0    -100.0  +1000000.0
-RPP body3     -10.0      +10.0      -10.0      +10.0        0.0       +5.0
-* plane to separate the upstream and downstream part of the target
-XYP body4       2.5
-END
-* black hole
-regBH1    5     +body1 -body2
-* vacuum around
-regVA2    5     +body2 -body3
-* Be target 1st half
-regBE3    5     +body3 +body4  
-* Be target 2nd half
-regBE4    5     +body3 -body4  
-END
+GEOBEGIN                                                              FLUGG
 GEOEND
+STOP
 *...+....1....+....2....+....3....+....4....+....5....+....6....+....7....+....8
 MATERIAL         4.0    9.0122     1.848       5.0                    BERYLLIU
 *...+....1....+....2....+....3....+....4....+....5....+....6....+....7....+....8
