@@ -81,15 +81,15 @@ class Library(rx.RxLib):
             self.offset -= 1
         # We need to make a data structure modeled after GND.
         self.structure.update(
-            {mat_id:{'rxstyles':'',
-                     'rxdocs':[],
-                     'rxparticles':[],
-                     'rxdata':{'resolved':{},
-                               'unresolved':{},
-                               'rxdatadocs':[],
-                               'rxxs':[],
-                               'rxoutput':{'channel1':[],
-                                           'channel2':[]}},
+            {mat_id:{'styles':'',
+                     'docs':[],
+                     'particles':[],
+                     'data':{'resolved':{},
+                             'unresolved':{},
+                             'datadocs':[],
+                             'xs':[],
+                             'output':{'channel1':[],
+                                       'channel2':[]}},
                      'matflags':{}}})
 
         self.mat_dict.update({mat_id:{'end_line':[],
@@ -122,13 +122,13 @@ class Library(rx.RxLib):
                 line = self.fh.readline()
             # parse comment
             elif re.match(' {66}', line):
-                self.structure[mat_id]['rxdocs'].append(line[0:66])
+                self.structure[mat_id]['docs'].append(line[0:66])
                 line = self.fh.readline()
             elif re.match('[\d+. ]{80}\n$', line):
                 line = self.fh.readline()
                 continue
             else:
-                self.structure[mat_id]['rxdocs'].append(line[0:66])
+                self.structure[mat_id]['docs'].append(line[0:66])
                 line = self.fh.readline()
         # Find where the end of the material is and then jump to it.
         self.chars_til_now = (stop + 4)*81
@@ -220,7 +220,7 @@ class Library(rx.RxLib):
         for mat_id in self.structure:
             resonance_ranges = {'resolved':[],
                                 'unresolved':[]}
-            self.structure[mat_id]['rxdata'] = {'resolved':[], 'unresolved':[]}
+            self.structure[mat_id]['data'] = {'resolved':[], 'unresolved':[]}
             lrp = self.structure[mat_id]['matflags']['LRP']
 
             if lrp == -1:
@@ -421,9 +421,9 @@ class Library(rx.RxLib):
             # and sort the list.
             el = resonance_range['rangeflags']['EL']
             eh = resonance_range['rangeflags']['EH']
-            self.structure[mat_id]['rxdata']['unresolved'].append(
+            self.structure[mat_id]['data']['unresolved'].append(
                 (el, eh, range_data, range_flags))
-            self.structure[mat_id]['rxdata']['unresolved'].sort()
+            self.structure[mat_id]['data']['unresolved'].sort()
         
     def read_mfmt(self, mat_id, mf, mt):
         if mat_id in self.structure:
