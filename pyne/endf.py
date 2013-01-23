@@ -14,11 +14,13 @@ For more information on this module, contact Paul Romano
 <romano7@gmail.com> or John Xia <john.danger.xia@gmail.com>. 
 """
 import re
-import numpy as np
-import matplotlib.pyplot as plt
 import os
 import warnings
-import pyne.rx_data as rx
+
+import numpy as np
+import matplotlib.pyplot as plt
+
+import pyne.rxdata as rx
 
 number = " (\d.\d+(?:\+|\-)\d)"
 
@@ -36,22 +38,20 @@ class Library(rx.RxLib):
 
     def __init__(self, filename):
         self.fh = open(filename, 'r')
-        # initialize some dicts that will act as an index
         self.mats = {}
         self.mts = {}
         self.structure = {}
-        # are there more files to read the headers of?
         self.more_files = True
-        # tracks theoretical length of file, based on headers
+        # This counts the calculated position in the file.
         self.chars_til_now = 0
-        # tracks how many lines would have been skipped when reading data
+        # The offset accounts for lines skipped in data entry.
         self.offset = 1
-        # read in the data    
+
         self.data = self.load(filename)
-        # read ALL the headers!
+
         while self.more_files:
             self._read_headers()        
-        # close the file before we have a chance to break anything
+        # Close the file before we have a chance to break anything.
         self.fh.close()
 
         self.make_resonances()
@@ -73,29 +73,28 @@ class Library(rx.RxLib):
         return data
                                                 
     def _read_headers(self):
-        # skip the first line and get the material id
+        # Skip the first line and get the material ID.
         self.fh.seek(self.chars_til_now+81)
         line = self.fh.readline()
         mat_id = int(line[66:70])
-        # While reading data we skip a line at the beginning
-        # of every material, so we need an offset.
+        # Adjust the offset every time we get to a new material.
         if mat_id not in self.structure:
             self.offset -= 1
-        # We need to make a structure to hold all the metadata.
-        self.structure.update({mat_id:{'RxStyles':'',
-                                       'RxDocs':[],
-                                       'RxParticles':[],
-                                       'RxData':{'Resolved':{},
-                                                 'Unresolved':{},
-                                                 'RxDataDocs':[],
-                                                 'Rxxs':[],
-                                                 'RxOutput':{'channel1':[],
-                                                             'channel2':[]}},
-                                       'end_line':[],
-                                       'mfs':{},
-                                       'flags':{}}}) 
+        # We need to make a data structure modeled after GND.
+        self.structure.update(
+            {mat_id:{'RxStyles':'',
+                     'RxDocs':[],
+                     'RxParticles':[],
+                     'RxData':{'Resolved':{},
+                               'Unresolved':{},
+                               'RxDataDocs':[],
+                               'Rxxs':[],
+                               'RxOutput':{'channel1':[],
+                                           'channel2':[]}},
+                     'end_line':[],
+                     'mfs':{},
+                     'flags':{}}}) 
 
-        print 'Reading headers for material id %d ...' % int(mat_id)
         # parse header (all lines with 1451)
         comments = ''
         mf = 1
@@ -168,13 +167,13 @@ class Library(rx.RxLib):
     def is_isotope_line(self, line):
         """ If the line is the beginning of resonance data for an isotope,
         returns True."""
-        ZAI = line[0]
-        ABN = line[1]
-        LFW = line[3]
-        NER = line[4]
+        zai = line[0]
+        abn = line[1]
+        lfw = line[3]
+        ner = line[4]
         if line[2] == line[5] == 0:
-            if LFW in (1,0) and int(NER) == NER and ABN <= 1:
-                if ZAI >= 1000:
+            if lfw in (1,0) and int(ner) == ner and abn <= 1:
+                if zai >= 1000:
                     return True
         else:
              return False
@@ -183,33 +182,33 @@ class Library(rx.RxLib):
         """ Determines whether this line is the beginning of a new resonance 
         range.  Line format must match EL, EH, LRU, LRF, NRO, NAPS. """
 
-        def check_NRO_NAPS(NRO, NAPS):
+        def check_nro_naps(nro, naps):
             # This checks to see if the places where NRO and NAPS should be
             # are indeed filled with parameters in the expected ranges.
-            if NRO == 0 and NAPS in (0, 1):
-                NRO_NAPS = True
-            elif NRO == 1 and NAPS in (0, 1, 2):
-                NRO_NAPS = True
+            if nro == 0 and naps in (0, 1):
+                nro_naps = True
+            elif nro == 1 and naps in (0, 1, 2):
+                nro_naps = True
             else:
-                NRO_NAPS = False
-            return NRO_NAPS
+                nro_naps = False
+            return nro_naps
             
         is_range_line = False
-        EL = line[0]
-        EH = line[1]
-        LRU = line[2]
-        LRF = line[3]
-        NRO = line[4]
-        NAPS = line[5]
-        if EL < EH:
+        el = line[0]
+        eh = line[1]
+        lru = line[2]
+        lrf = line[3]
+        nro = line[4]
+        naps = line[5]
+        if el < eh:
             # If energy bounds make sense and the flag values check out,
             # treat this as a range line
-            if LRU == 0 and LRF == 0:
-                is_range_line = check_NRO_NAPS(NRO, NAPS)
-            elif LRU == 1 and LRF in range(1,8):
-                is_range_line = check_NRO_NAPS(NRO, NAPS)
-            elif LRU == 2 and LRF in (1,2):
-                is_range_line = check_NRO_NAPS(NRO, NAPS)
+            if lru == 0 and lrf == 0:
+                is_range_line = check_nro_naps(nro, naps)
+            elif lru == 1 and lrf in range(1,8):
+                is_range_line = check_nro_naps(nro, naps)
+            elif lru == 2 and lrf in (1,2):
+                is_range_line = check_nro_naps(nro, naps)
             else:
                 pass
         else:
@@ -246,10 +245,10 @@ class Library(rx.RxLib):
         for mat_id in self.structure:
             resonance_ranges = {'Resolved':[],
                                 'Unresolved':[]}
-
             self.structure[mat_id]['RxData'] = {'Resolved':[], 'Unresolved':[]}
-            LRP = self.structure[mat_id]['flags']['LRP']
-            if LRP == -1:
+            lrp = self.structure[mat_id]['flags']['LRP']
+
+            if lrp == -1:
                 # If the LRP flag for the material is -1, there is no
                 # resonance data provided.
                 pass
@@ -262,11 +261,11 @@ class Library(rx.RxLib):
                 awr = head[1]
                 nis = head[4]
 
-            if LRP == 0:
+            if lrp == 0:
                 # In this case, only scattering radius is provided.
                 pass
             
-            elif LRP == 1:
+            elif lrp == 1:
                 # Resonance contributions are all present and accounted for.
                 isotope_flags = {}
                 range_flags = {}
@@ -278,7 +277,7 @@ class Library(rx.RxLib):
                     else:
                         # If this line is neither a range nor an isotope line:
                         if self.is_range_line(mf2[i-1]):
-                            # If this is a new resonance range, add a dict for it:
+                            # If this is a new resonance range, add a new dict:
                             try:
                                 if range_flags['LRU'] == 1:
                                     resonance_ranges['Resolved'].append(
@@ -310,204 +309,191 @@ class Library(rx.RxLib):
                                                isotope_flags,
                                                mat_id)
 
-            elif LRP == 2:
+            elif lrp == 2:
                 pass
-            else:
-                pass
-        
-        return self.structure
-        
+
     def parse_resonance_range(self, resonance_range, isotope_flags, mat_id):
 
-        LFW = isotope_flags['LFW']
+        lfw = isotope_flags['LFW']
         range_flags = resonance_range['flags']
-        LRU = range_flags['LRU']
-        LRF = range_flags['LRF']
+        lru = range_flags['LRU']
+        lrf = range_flags['LRF']
 
         raw_data = resonance_range['data'][2]
         range_data = rx.double_spin_dict({})
 
-        if LRU == 1:
+        if lru == 1:
             # This is the case for data in a resolved resonance range.
             pass
-        elif LRU == 2:
+        elif lru == 2:
             # This is the case for data in an unresolved resonance range.
-            if (LFW, LRF) == (0, 1):
+            if (lfw, lrf) == (0, 1):
                 # This is Case A from the ENDF manual, pp.69-70.
-                def is_SPI_line(line):
-                    SPI = line[0]
-                    LSSF = line[2]
-                    NLS = line[4]
-                    if (LSSF in (0,1) and 
+                def is_spi_line(line):
+                    spi = line[0]
+                    lssf = line[2]
+                    nls = line[4]
+                    if (lssf in (0,1) and 
                         line[3] == line[5] == 0 and 
-                        (2*SPI+NLS) == int(2*SPI+NLS) and
-                        SPI < 1000): # To differentiate from some false positives,
+                        (2*spi+nls) == int(2*spi+nls) and
+                        spi < 1000): # To eliminate some false positives,
                                      # we assume that the nuclear spin is <1000.
                         return True
                     else:
                         return False
                     
-                def is_L_line(line):
+                def is_l_line(line):
                     L = line[2]
-                    six_NJS = line[4]
-                    NJS = line[5]
+                    num_entries = line[4]
+                    njs = line[5]
                     if (not line[1:4:2].any() and 
-                        (L+NJS) == int(L+NJS) and
-                         6*NJS == six_NJS):
+                        (L+njs) == int(L+njs) and
+                         6*njs == num_entries):
                         return True
                     else:
                         return False           
 
                 for i in range(len(raw_data)):
-
                     line = resonance_range['data'][2][i]
-                    
-                    # Doubles SPI to get an integer value.
-                    if is_SPI_line(line):
-                        SPI = line[0]
-
-                    elif is_L_line(line):
+                    if is_spi_line(line):
+                        spi = line[0]
+                    elif is_l_line(line):
                         L = int(round(line[2]))
-                        NJS = line[5]
-                        current_L_region = raw_data[i+1:i+1+NJS]
+                        njs = line[5]
+                        current_L_region = raw_data[i+1:i+1+njs]
                         for line in current_L_region:
                             # Since each line has its own AJ value and
                             # corresponding D, AMUN, GNO, GG values, we
                             # parse case A line-by-line.
-                            AJ = int(round(line[1]))
-                            to_update = {(SPI, L, AJ):{'D':line[0], 
+                            aj = int(round(line[1]))
+                            to_update = {(spi, L, aj):{'D':line[0], 
                                                        'AMUN':line[2],
                                                        'GNO':line[3],
                                                        'GG':line[4]}}
-                            
                             range_data.update(to_update)
                         
-
-            elif (LFW, LRF) == (1, 1):
+            elif (lfw, lrf) == (1, 1):
                 # Case B:
-                def is_SPI_line(line):
-                    SPI = line[0]
-                    LSSF = line[2]
-                    NE = line[4]
-                    NLS = line[5]
-                    if (LSSF in (0,1) and 
+                def is_spi_line(line):
+                    spi = line[0]
+                    lssf = line[2]
+                    ne = line[4]
+                    nls = line[5]
+                    if (lssf in (0,1) and 
                         line[3] == 0 and 
-                        (2*SPI+NLS) == int(2*SPI+NLS) and
-                        SPI < 1000): # To differentiate from some false 
+                        (2*spi+nls) == int(2*spi+nls) and
+                        spi < 1000): # To eliminate some false 
                                      # positives, assume the nuclear 
                                      # spin is <1000.
                         return True
                     else:
                         return False
-                def is_L_line(line):
-                    AWRI = line[0]
+                def is_l_line(line):
+                    awri = line[0]
                     L = line[2]
-                    NJS = line[4]
+                    njs = line[4]
                     if ((np.array_equal(line[1::2], [0,0,0])) and
-                        int(NJS) == NJS and
-                        NJS < 6 and
+                        int(njs) == njs and
+                        njs < 6 and
                         int(L) == L):
                         return True
                     else:
                         return False
                                 
                 for i in range(len(raw_data)):
-
                     line = raw_data[i]
-
-                    if is_SPI_line(line):
-                        SPI = line[0]
-                        NE = line[4]
-                        ES_start = 6*(i+1)
-                        ES_stop = ES_start+NE
+                    if is_spi_line(line):
+                        spi = line[0]
+                        ne = line[4]
+                        es_start = 6*(i+1)
+                        es_stop = es_start+ne
                         # In case B, most things are ES-independent
                         # except for GF, so the ES is stored separately
                         # in the file; this means we have a common ES
                         # array for everything with the same spin.
-                        ES_array = raw_data.flat[ES_start:ES_stop]
-
-                    elif is_L_line(line):
+                        es_array = raw_data.flat[es_start:es_stop]
+                    elif is_l_line(line):
                         L = int(line[2])
-                            
-                        AJ_line = raw_data[i+2]
-                        AJ = int(AJ_line[0])
+                        aj_line = raw_data[i+2]
+                        aj = int(aj_line[0])
                         num_entries = raw_data[i+1][4]-6
+                        gf_start = 6*(i+3)
+                        gf_stop = gf_start + num_entries
 
-                        GF_start = 6*(i+3)
-                        GF_stop = GF_start + num_entries
-                        to_update = {(SPI, L, AJ):{'ES': ES_array,
-                                                   'D': AJ_line[0],
-                                                   'AMUN': AJ_line[2],
-                                                   'GNO': AJ_line[3],
-                                                   'GG': AJ_line[4],
-                                                   'GF': raw_data.flat[GF_start:GF_stop]}}
+                        to_update = {(spi, L, aj):{
+                            'ES': es_array,
+                            'D': aj_line[0],
+                            'AMUN': aj_line[2],
+                            'GNO': aj_line[3],
+                            'GG': aj_line[4],
+                            'GF': raw_data.flat[gf_start:gf_stop]}}
                         range_data.update(to_update)
                             
-            elif LRF == 2:
+            elif lrf == 2:
                 # Case C:
-                
-                def is_SPI_line(line):
-                    SPI = line[0]
-                    LSSF = line[2]
-                    NLS = line[4]
-                    if (LSSF in (0,1) and 
+                def is_spi_line(line):
+                    spi = line[0]
+                    lssf = line[2]
+                    nls = line[4]
+                    if (lssf in (0,1) and 
                         line[3] == line[5] == 0 and 
-                        (2*SPI+NLS) == int(2*SPI+NLS) and
-                        SPI < 1000): # To differentiate from some false positives,
+                        (2*spi+nls) == int(2*spi+nls) and
+                        spi < 1000): # To eliminate some false positives,
                                      # we assume that the nuclear spin is <1000.
                         return True
                     else:
                         return False
                     
-                def is_J_line(line):
-                    AJ = line[0]
-                    INT = line[2]
-                    NE = line[5]
+                def is_j_line(line):
+                    aj = line[0]
+                    ne = line[5]
                     num_entries = line[4]
-                    if (int(2*AJ) == 2*AJ and 
-                        6*NE + 6 == num_entries and 
+                    if (int(2*aj) == 2*aj and 
+                        6*ne + 6 == num_entries and 
                         not line[1:4:2].any()):
                         return True
                     else:
                         return False
                     
-                def is_L_line(line):
+                def is_l_line(line):
                     L = line[2]
-                    NJS = line[4]
-                    if (not (line[1::2].any() or is_J_line(line)) and 
-                        (L+NJS) == int(L+NJS)):
+                    njs = line[4]
+                    if (not (line[1::2].any() or is_j_line(line)) and 
+                        (L+njs) == int(L+njs)):
                         return True
                     else:
                         return False
 
                 for i in range(len(raw_data)):
                     line = raw_data[i]
-
-                    if is_SPI_line(line):
-                        SPI = line[0]
-                    elif is_L_line(line):
+                    if is_spi_line(line):
+                        spi = line[0]
+                    elif is_l_line(line):
                         L = int(round(line[2]))
-                    elif is_J_line(line):
-                        AJ = int(round(line[0]))
+                    elif is_j_line(line):
+                        aj = int(round(line[0]))
                         num_entries = line[4]
-                        current_AJ_region = raw_data.flat[6*(i+2):6*(i+1)+num_entries]
-                        to_update = {(SPI, L, AJ):{'ES':current_AJ_region[0::6], 
-                                                   'D':current_AJ_region[1::6],
-                                                   'GX':current_AJ_region[2::6],
-                                                   'GNO':current_AJ_region[3::6],
-                                                   'GG':current_AJ_region[4::6],
-                                                   'GF':current_AJ_region[5::6]}}
+                        current_aj_region = raw_data.flat[6*(i+2):
+                                                          6*(i+1)+num_entries]
+
+                        to_update = {(spi, L, aj):{
+                            'ES':current_aj_region[0::6], 
+                            'D':current_aj_region[1::6],
+                            'GX':current_aj_region[2::6],
+                            'GNO':current_aj_region[3::6],
+                            'GG':current_aj_region[4::6],
+                            'GF':current_aj_region[5::6]}}
                         range_data.update(to_update)
                         
             # Now that the range's data has been fully updated, we can drop
             # it in a tuple, drop *that* into the list of unresolved resonances,
             # and sort the list.
-            EL = resonance_range['flags']['EL']
-            EH = resonance_range['flags']['EH']
-            self.structure[mat_id]['RxData']['Unresolved'].append((EL, EH, range_data, range_flags))
+            el = resonance_range['flags']['EL']
+            eh = resonance_range['flags']['EH']
+            self.structure[mat_id]['RxData']['Unresolved'].append(
+                (el, eh, range_data, range_flags))
             self.structure[mat_id]['RxData']['Unresolved'].sort()
         
-
     def read_mfmt(self, mat_id, mf, mt):
         if mat_id in self.structure:
             start, stop = self.structure[mat_id]['mfs'][mf][mt]
