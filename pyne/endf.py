@@ -339,8 +339,9 @@ class Library(rx.RxLib):
         
     def parse_resonance_range(self, resonance_range, isotope_flags, mat_id):
         lfw = isotope_flags['LFW']
-        lru = resonance_range['flags']['LRU']
-        lrf = resonance_range['flags']['LRF']
+        range_flags = resonance_range['flags']
+        lru = range_flags['LRU']
+        lrf = range_flags['LRF']
         raw_data = resonance_range['data'][2]
         structured_data = {}
         if lru == 1:
@@ -505,6 +506,8 @@ class Library(rx.RxLib):
                     else:
                         return False
 
+                range_data = {}
+
                 for i in range(len(raw_data)):
                     line = raw_data[i]
 
@@ -528,27 +531,27 @@ class Library(rx.RxLib):
                         INT = line[2]
                         current_L_region = current_SPI_region[max(current_SPI_region)]
                         current_AJ_region = raw_data.flat[6*(i+2):6*(i+1)+num_entries]
-                        range_data = self.structure[mat_id]['RxData']['Unresolved']
                         
                         if AJ in current_L_region:
                             pass
                         else:
-                            EL = resonance_range['flags']['EL']
-                            EH = resonance_range['flags']['EH']
                             to_update = {(SPI, L, AJ):{'ES':current_AJ_region[0::6], 
                                                        'D':current_AJ_region[1::6],
                                                        'GX':current_AJ_region[2::6],
                                                        'GNO':current_AJ_region[3::6],
                                                        'GG':current_AJ_region[4::6],
-                                                       'GF':current_AJ_region[5::6]}})
-                            range_data.append(to_update)
+                                                       'GF':current_AJ_region[5::6]}}
+                            range_data.update(to_update)
                             # current_L_region[AJ]={'ES':current_AJ_region[0::6], 
                             #                       'D':current_AJ_region[1::6],
                             #                       'GX':current_AJ_region[2::6],
                             #                       'GNO':current_AJ_region[3::6],
                             #                       'GG':current_AJ_region[4::6],
                             #                       'GF':current_AJ_region[5::6]}   
-
+        EL = resonance_range['flags']['EL']
+        EH = resonance_range['flags']['EH']
+        self.structure[mat_id]['RxData']['Unresolved'].append((EL, EH, range_data, range_flags))
+        self.structure[mat_id]['RxData']['Unresolved'].sort()
         return structured_data
 
     def read_mfmt(self, mat_id, mf, mt):
