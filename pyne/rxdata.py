@@ -32,7 +32,7 @@ class RxMaterial(RxLib):
         self.data = data
         self.contents = contents
 
-class double_spin_dict(collections.MutableMapping):
+class DoubleSpinDict(collections.MutableMapping):
 
 
     def __init__(self, double_spin_dict):
