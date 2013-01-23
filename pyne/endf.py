@@ -306,29 +306,9 @@ class Library(rx.RxLib):
                             print 'No LRU!'
 
                 for resonance_range in resonance_ranges['Unresolved']:
-                    # try:
-                    #     structured_data = self.parse_resonance_range(resonance_range, 
-                    #                                                  isotope_flags,
-                    #                                                  mat_id)
-                    #     resonance_range['data'][2] = structured_data
-                    #     EL = resonance_range['flags']['EL']
-                    #     EH = resonance_range['flags']['EH']
-                    #     to_append = (EL, EH, resonance_range['data'][2])
-                    #     self.structure[mat_id]['RxData']['Unresolved'].append(to_append)
-                    #     self.structure[mat_id]['RxData']['Unresolved'].sort()
-                    #     # self.debug = (mat_id, resonance_range['data'])
-                    # except KeyError:
-                    #     self.debug = resonance_range['data'][2]
-                    structured_data = self.parse_resonance_range(resonance_range, 
-                                                                 isotope_flags,
-                                                                 mat_id)
-                    # resonance_range['data'].append(structured_data)
-                    # EL = resonance_range['flags']['EL']
-                    # EH = resonance_range['flags']['EH']
-                    # to_append = (EL, EH, resonance_range['data'][3])
-                    # self.structure[mat_id]['RxData']['Unresolved'].append(to_append)
-                    # self.structure[mat_id]['RxData']['Unresolved'].sort()
-
+                    self.parse_resonance_range(resonance_range,
+                                               isotope_flags,
+                                               mat_id)
 
             elif LRP == 2:
                 pass
@@ -338,18 +318,21 @@ class Library(rx.RxLib):
         return self.structure
         
     def parse_resonance_range(self, resonance_range, isotope_flags, mat_id):
-        lfw = isotope_flags['LFW']
+
+        LFW = isotope_flags['LFW']
         range_flags = resonance_range['flags']
-        lru = range_flags['LRU']
-        lrf = range_flags['LRF']
+        LRU = range_flags['LRU']
+        LRF = range_flags['LRF']
+
         raw_data = resonance_range['data'][2]
-        structured_data = {}
-        if lru == 1:
+        range_data = rx.double_spin_dict({})
+
+        if LRU == 1:
             # This is the case for data in a resolved resonance range.
             pass
-        elif lru == 2:
+        elif LRU == 2:
             # This is the case for data in an unresolved resonance range.
-            if (lfw, lrf) == (0, 1):
+            if (LFW, LRF) == (0, 1):
                 # This is Case A from the ENDF manual, pp.69-70.
                 def is_SPI_line(line):
                     SPI = line[0]
@@ -374,32 +357,33 @@ class Library(rx.RxLib):
                         return True
                     else:
                         return False           
+
                 for i in range(len(raw_data)):
+
                     line = resonance_range['data'][2][i]
+                    
+                    # Doubles SPI to get an integer value.
                     if is_SPI_line(line):
                         SPI = line[0]
-                        if SPI in structured_data:
-                            pass
-                        else:
-                            structured_data[SPI] = {}
-                    elif is_L_line(line):
-                        L = line[2]
-                        six_NJS = line[4]
-                        NJS = line[5]
-                        current_SPI_region = structured_data[max(structured_data)]
-                        current_L_region = raw_data[i+1:i+1+NJS].flat
-                        if L in current_SPI_region:
-                            pass
-                        else:
-                            current_SPI_region[L] = {'D':current_L_region[0::6], 
-                                                     'AJ':current_L_region[1::6],
-                                                     'AMUN':current_L_region[2::6],
-                                                     'GNO':current_L_region[3::6],
-                                                     'GG':current_L_region[4::6]}
-                        
-                return structured_data
 
-            elif (lfw, lrf) == (1, 1):
+                    elif is_L_line(line):
+                        L = int(round(line[2]))
+                        NJS = line[5]
+                        current_L_region = raw_data[i+1:i+1+NJS]
+                        for line in current_L_region:
+                            # Since each line has its own AJ value and
+                            # corresponding D, AMUN, GNO, GG values, we
+                            # parse case A line-by-line.
+                            AJ = int(round(line[1]))
+                            to_update = {(SPI, L, AJ):{'D':line[0], 
+                                                       'AMUN':line[2],
+                                                       'GNO':line[3],
+                                                       'GG':line[4]}}
+                            
+                            range_data.update(to_update)
+                        
+
+            elif (LFW, LRF) == (1, 1):
                 # Case B:
                 def is_SPI_line(line):
                     SPI = line[0]
@@ -415,7 +399,7 @@ class Library(rx.RxLib):
                         return True
                     else:
                         return False
-                def is_AWRI_line(line):
+                def is_L_line(line):
                     AWRI = line[0]
                     L = line[2]
                     NJS = line[4]
@@ -428,49 +412,39 @@ class Library(rx.RxLib):
                         return False
                                 
                 for i in range(len(raw_data)):
+
                     line = raw_data[i]
+
                     if is_SPI_line(line):
                         SPI = line[0]
                         NE = line[4]
-                        NLS = line[5]
-                        if SPI in structured_data:
-                            pass
-                        else:                           
-                            ES_start = 6 * (i+1)
-                            ES_stop = ES_start + NE
-                            structured_data[SPI] = {'ES':
-                                                    raw_data.flat[ES_start:ES_stop]}
+                        ES_start = 6*(i+1)
+                        ES_stop = ES_start+NE
+                        # In case B, most things are ES-independent
+                        # except for GF, so the ES is stored separately
+                        # in the file; this means we have a common ES
+                        # array for everything with the same spin.
+                        ES_array = raw_data.flat[ES_start:ES_stop]
 
-                    if is_AWRI_line(line):
-                        L = line[2]
-                        if L in structured_data[SPI]:
-                            pass
-                        else:
-                            structured_data[SPI][L] = {}
+                    elif is_L_line(line):
+                        L = int(line[2])
                             
                         AJ_line = raw_data[i+2]
-                        AJ = AJ_line[0]
-                        if AJ in structured_data[SPI][L]:
-                            pass
-                        else:
-                            num_entries = raw_data[i+1][4]-6
-                            GF_start = 6*(i+3)
-                            GF_stop = GF_start + num_entries
-                            structured_data[SPI][L][AJ] = {'D': AJ_line[0],
-                                                           'AMUN': AJ_line[2],
-                                                           'GNO': AJ_line[3],
-                                                           'GG': AJ_line[4],
-                                                           'GF': raw_data.flat[GF_start:GF_stop]}
+                        AJ = int(AJ_line[0])
+                        num_entries = raw_data[i+1][4]-6
+
+                        GF_start = 6*(i+3)
+                        GF_stop = GF_start + num_entries
+                        to_update = {(SPI, L, AJ):{'ES': ES_array,
+                                                   'D': AJ_line[0],
+                                                   'AMUN': AJ_line[2],
+                                                   'GNO': AJ_line[3],
+                                                   'GG': AJ_line[4],
+                                                   'GF': raw_data.flat[GF_start:GF_stop]}}
+                        range_data.update(to_update)
                             
-                            
-
-
-                return structured_data
-
-            elif lrf == 2:
+            elif LRF == 2:
                 # Case C:
-                # The data ends up looking like {SPI:{L:{AJ:{'ES':[], ..., 'GG':[]}
-                # Want: {(SPI, L, AJ):{'ES':[...], ..., 'GG':[...]}, (SPI, L, AJ): }
                 
                 def is_SPI_line(line):
                     SPI = line[0]
@@ -506,53 +480,33 @@ class Library(rx.RxLib):
                     else:
                         return False
 
-                range_data = {}
-
                 for i in range(len(raw_data)):
                     line = raw_data[i]
 
                     if is_SPI_line(line):
                         SPI = line[0]
-                        if SPI in structured_data:
-                            pass
-                        else:
-                            structured_data[SPI] = {}
                     elif is_L_line(line):
-                        L = line[2]
-                        current_SPI_region = structured_data[max(structured_data)]
-                        if L in current_SPI_region:
-                            pass
-                        else:
-                            current_SPI_region[L] = {}
+                        L = int(round(line[2]))
                     elif is_J_line(line):
-                        AJ = line[0]
-                        NE = line[5]
+                        AJ = int(round(line[0]))
                         num_entries = line[4]
-                        INT = line[2]
-                        current_L_region = current_SPI_region[max(current_SPI_region)]
                         current_AJ_region = raw_data.flat[6*(i+2):6*(i+1)+num_entries]
+                        to_update = {(SPI, L, AJ):{'ES':current_AJ_region[0::6], 
+                                                   'D':current_AJ_region[1::6],
+                                                   'GX':current_AJ_region[2::6],
+                                                   'GNO':current_AJ_region[3::6],
+                                                   'GG':current_AJ_region[4::6],
+                                                   'GF':current_AJ_region[5::6]}}
+                        range_data.update(to_update)
                         
-                        if AJ in current_L_region:
-                            pass
-                        else:
-                            to_update = {(SPI, L, AJ):{'ES':current_AJ_region[0::6], 
-                                                       'D':current_AJ_region[1::6],
-                                                       'GX':current_AJ_region[2::6],
-                                                       'GNO':current_AJ_region[3::6],
-                                                       'GG':current_AJ_region[4::6],
-                                                       'GF':current_AJ_region[5::6]}}
-                            range_data.update(to_update)
-                            # current_L_region[AJ]={'ES':current_AJ_region[0::6], 
-                            #                       'D':current_AJ_region[1::6],
-                            #                       'GX':current_AJ_region[2::6],
-                            #                       'GNO':current_AJ_region[3::6],
-                            #                       'GG':current_AJ_region[4::6],
-                            #                       'GF':current_AJ_region[5::6]}   
-        EL = resonance_range['flags']['EL']
-        EH = resonance_range['flags']['EH']
-        self.structure[mat_id]['RxData']['Unresolved'].append((EL, EH, range_data, range_flags))
-        self.structure[mat_id]['RxData']['Unresolved'].sort()
-        return structured_data
+            # Now that the range's data has been fully updated, we can drop
+            # it in a tuple, drop *that* into the list of unresolved resonances,
+            # and sort the list.
+            EL = resonance_range['flags']['EL']
+            EH = resonance_range['flags']['EH']
+            self.structure[mat_id]['RxData']['Unresolved'].append((EL, EH, range_data, range_flags))
+            self.structure[mat_id]['RxData']['Unresolved'].sort()
+        
 
     def read_mfmt(self, mat_id, mf, mt):
         if mat_id in self.structure:
@@ -567,10 +521,6 @@ class Library(rx.RxLib):
     def get(self, mat_id, mf, mt):
         return self.read_mfmt(mat_id, mf, mt)
     
-    # def write(self, filename, file_type_out):
-        # return rx.rx_data.write(self, filename, file_type_out)
-    
-
 
 class Evaluation(object):
     """
