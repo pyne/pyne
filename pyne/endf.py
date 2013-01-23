@@ -215,8 +215,16 @@ class Library(rx.RxLib):
         return range_flags
         
     def make_resonances(self):
-        """ This reads the resonance data from all the materials and returns
-        a nested dictionary with the resonance data. """
+        """ This reads the resonance data from all the materials in the library
+        and returns a nested dictionary with the resonance data. To get at the 
+        resonance data, use: 
+
+        'library.mat{0}['data'][{1}][{2}][2][{3}]'.format(mat_id,
+                                                          'resolved' or 
+                                                              'unresolved',
+                                                          range number,
+                                                          data type you want)
+        """
         for mat_id in self.structure:
             resonance_ranges = {'resolved':[],
                                 'unresolved':[]}
@@ -257,11 +265,11 @@ class Library(rx.RxLib):
                                 if range_flags['LRU'] == 1:
                                     resonance_ranges['resolved'].append(
                                         {'rangeflags': range_flags,
-                                         'RangeData':[i-2,i,0]})
+                                         'rangedata':[i-2,i,0]})
                                 elif range_flags['LRU'] == 2:
                                     resonance_ranges['unresolved'].append(
                                         {'rangeflags': range_flags,
-                                         'RangeData':[i-2,i,0]})
+                                         'rangedata':[i-2,i,0]})
                                 else: pass
                             except KeyError:
                                 print 'No LRU!'
@@ -273,9 +281,9 @@ class Library(rx.RxLib):
                                 last_range = resonance_ranges['resolved'][-1]
                             elif range_flags['LRU'] == 2:
                                 last_range = resonance_ranges['unresolved'][-1]
-                            last_range['RangeData'][1] = i + 1
-                            last_range['RangeData'][2] = mf2[
-                                last_range['RangeData'][0]:last_range['RangeData'][1]]
+                            last_range['rangedata'][1] = i + 1
+                            last_range['rangedata'][2] = mf2[
+                                last_range['rangedata'][0]:last_range['rangedata'][1]]
                         except KeyError:
                             print 'No LRU!'
 
@@ -288,13 +296,24 @@ class Library(rx.RxLib):
                 pass
 
     def parse_resonance_range(self, resonance_range, isotope_flags, mat_id):
+        """Turns a resonance range and labels the data for use.
 
+        Parameters
+        ----------
+        resonance_range: dictionary with a dictionary of flags and a list of data
+            The flag list is keyed to 'rangeflags'. The data is itself a list
+            which contains starting/stopping positions and a numpy array.
+
+        isotope_flags: dictionary of flags specific to the isotope
+        
+        mat_id: integer material id as represented in ENDF standard
+        """
         lfw = isotope_flags['LFW']
         range_flags = resonance_range['rangeflags']
         lru = range_flags['LRU']
         lrf = range_flags['LRF']
 
-        raw_data = resonance_range['RangeData'][2]
+        raw_data = resonance_range['rangedata'][2]
         range_data = rx.DoubleSpinDict({})
 
         if lru == 1:
@@ -426,6 +445,14 @@ class Library(rx.RxLib):
             self.structure[mat_id]['data']['unresolved'].sort()
         
     def read_mfmt(self, mat_id, mf, mt):
+        """Grabs the raw data from one MT number.
+
+        Parameters
+        ----------
+        mat_id: ENDF material ID number
+        mf: ENDF file number (MF)
+        mt: ENDF reaction number (MT)
+        """
         if mat_id in self.structure:
             start, stop = self.mat_dict[mat_id]['mfs'][mf][mt]
             start = (start - 1) * 6
