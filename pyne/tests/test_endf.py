@@ -51,18 +51,17 @@ def test_unresolved_resonances_b():
 
 def test_unresolved_resonances_c():
     # Case C (ENDF Manual p. 70)
-    # obs = library.mat128['RxData']['Unresolved'][0][2][3.5][1.0][4.0]
-    obs = library.mat128['RxData']['Unresolved']
-    print obs
-    assert(1==2)
-    # obs_ES = obs['ES']
-    # exp_ES = np.array([1.74e3, 2.04e3, 3.04e3])
 
-    # obs_D = obs['D']
-    # exp_D = np.array([7.762320e3, 6.766400e3, 2.780300e3])
+    obs = library.mat128['RxData']['Unresolved'][0][2][3.5,1.0,4.0]
 
-    # assert(np.array_equal(exp_ES, obs_ES))
-    # assert(np.array_equal(exp_D, obs_D))
+    obs_ES = obs['ES']
+    exp_ES = np.array([1.74e3, 2.04e3, 3.04e3])
+
+    obs_D = obs['D']
+    exp_D = np.array([7.762320e3, 6.766400e3, 2.780300e3])
+
+    assert(np.array_equal(exp_ES, obs_ES))
+    assert(np.array_equal(exp_D, obs_D))
 
     
 
