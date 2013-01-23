@@ -22,7 +22,7 @@
 # limitations under the License.
 #=============================================================================
 
-find_program( CYTHON_EXECUTABLE NAMES cython )
+find_program( CYTHON_EXECUTABLE NAMES cython cython.bat )
 
 include( FindPackageHandleStandardArgs )
 FIND_PACKAGE_HANDLE_STANDARD_ARGS( Cython REQUIRED_VARS CYTHON_EXECUTABLE )
