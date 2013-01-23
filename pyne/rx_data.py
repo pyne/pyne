@@ -32,20 +32,30 @@ class RxMaterial(RxLib):
         self.data = data
         self.contents = contents
 
-class SPI_L_AJ_dict(collections.MutableMapping):
+class double_spin_dict(collections.MutableMapping):
+
+
     def __init__(self, double_spin_dict):
         self.dict = double_spin_dict
-        double_spin = (int(round(2.0*key[0])), key[1], key[2])
+        
     def __len__(self):
         return len(self.dict)
+
     def __iter__(self):
-        self.iter(self.dict)
+        return self.dict.iterkeys()
+
     def __contains__(self, key):
-        return double_spin in self.dict
+        return self.double_spin(key) in self.dict
+
     def __getitem__(self, key):
-        return self.dict.get(double_spin)
+        return self.dict.get(self.double_spin(key))
+
     def __setitem__(self, key, value):
-        self.dict[double_spin] = value
-    def __delitem(self, key):
-        del self.dict[double_spin]
+        self.dict[self.double_spin(key)] = value
+
+    def __delitem__(self, key):
+        del self.dict[self.double_spin(key)]
+
+    def double_spin(self, key):
+        return (int(round(2.0*key[0])), key[1], key[2])
 
