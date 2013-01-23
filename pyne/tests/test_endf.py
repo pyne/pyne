@@ -33,7 +33,7 @@ def test_get():
 def test_unresolved_resonances_a():
     # Case A (ENDF Manual p.70)
     
-    obs = library.mat131['RxData']['Unresolved']
+    obs = library.mat131['rxdata']['unresolved']
     # print obs
     # assert(1==2)
 
@@ -60,7 +60,7 @@ def test_unresolved_resonances_a():
 
 def test_unresolved_resonances_b():
     # Case B (ENDF Manual p. 70)
-    obs = library.mat419['RxData']['Unresolved'][0][2]
+    obs = library.mat419['rxdata']['unresolved'][0][2]
 
     obs_ES = obs[3.5,0,419]['ES']
     exp_ES = 100 * np.array([10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]) 
@@ -76,7 +76,7 @@ def test_unresolved_resonances_b():
 def test_unresolved_resonances_c():
     # Case C (ENDF Manual p. 70)
 
-    obs = library.mat128['RxData']['Unresolved'][0][2][3.5,1,4]
+    obs = library.mat128['rxdata']['unresolved'][0][2][3.5,1,4]
 
     obs_ES = obs['ES']
     exp_ES = np.array([1.74e3, 2.04e3, 3.04e3])
