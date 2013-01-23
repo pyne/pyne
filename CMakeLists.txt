@@ -18,10 +18,12 @@ if(WIN32)
     # FindHDF5 finds the includes but not the libraries on Windows (MSYS).  Annoying!
     get_filename_component(_hdf5libdir ${HDF5_INCLUDE_DIRS} PATH)
     list(APPEND HDF5_LIBRARY_DIRS "${_hdf5libdir}/bin")
+	list(APPEND HDF5_LIBRARY_DIRS "${_hdf5libdir}/lib")
 endif(WIN32)
 link_directories(${HDF5_LIBRARY_DIRS})
 add_definitions(${HDF5_DEFINITIONS})
 set(LIBS ${LIBS} ${HDF5_C_LIBRARIES})
+message("-- HDF5_LIBRARY_DIRS = ${HDF5_LIBRARY_DIRS}")
 
 # Use new Python library finder
 find_package(PythonInterp REQUIRED)
