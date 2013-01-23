@@ -1,0 +1,219 @@
+At line 259 of file flkcgi.f
+Fortran runtime error: Bad value during integer read
+ENSE CONDITIONS
+   
+  Copyright Italian  National  Institute  for  Nuclear  Physics
+  (INFN) and European Organization for Nuclear Research (CERN),
+  1989-2011.    All rights  not  expressly  granted  under this
+  license are reserved.   Requests  for permissions not granted
+  under this license shall be addressed to the FLUKA Collabora-
+  tion Committee, through fcc@fluka.org.     Any permission may
+  only be granted in writing.          This software results in
+  particular from  work  performed  by  Alberto Fassò,  Alfredo
+  Ferrari,  Johannes Ranft,  Paola Sala  (the "Authors"),   and
+  their collaborators (the "Collaborators").  INFN and CERN are
+  the exclusive source of distribution of the code,  bug  fixes
+  and documentation of the FLUKA software (FLUKA website),  and
+  may authorise distribution by mirror sites.      This license
+  cancels and replaces any prior license conditions  but  their
+  warranty and liability provisions shall continue to  apply to
+  any use  or  modifications  made  under  such  prior  license
+  conditions.
+   
+  DEFINITIONS
+   
+  The FLUKA  software  ("FLUKA")  means  the  fully  integrated
+  particle  physics  Monte Carlo  simulation  software  package
+  being developed since 1989, available from the official FLUKA
+  website  (http://www.fluka.org)  and authorised mirror sites.
+  FLUKA is made up of FLUKA core code and FLUKA User Routines.
+   
+  The FLUKA Copyright Holders means both CERN and INFN.
+   
+  FLUKA User Routines means the set of subroutines collected in
+  the usermvax  section  of  FLUKA  and  forming  part  of  the
+  standard distribution of FLUKA.
+   
+  The Licensee  means  any  person acting individually within a
+  non-profit organisation, exercising any permission granted by
+  this license.
+   
+  LICENSE GRANT
+   
+  1.
+  Subject to the  terms  and  conditions  of this license,  the
+  FLUKA  Copyright  Holders  herewith  grant to the  Licensee a
+  worldwide,  non-exclusive,  royalty-free,  source  and object
+  code  license  to  use  and  reproduce   FLUKA  for  internal
+  scientific non commercial non-military purposes only.
+  Notwithstanding the foregoing, the Licensee shall not execute
+  FLUKA in a manner that produces an output whose contents  are
+  directly useable or easily employable to simulate the physics
+  models embedded within FLUKA in a generic manner,  or  excise
+  portions of  FLUKA source or object code,  and  execute  them
+  independently of FLUKA.  Extracting specific isolated results
+  from any of the individual internal  physics  models embedded
+  within FLUKA is not permitted. Permitted use and reproduction
+  are referred to below as "Use".
+   
+  2.
+  Modification (including translation)  of  FLUKA,  in whole or
+  in part,  is not permitted,  except for modification of FLUKA
+  User  Routines that do not  circumvent,  replace,  add to  or
+  modify any of the functions of the FLUKA core code. Permitted
+  modifications are referred to below as "Modifications".
+   
+  3.
+  FLUKA is  licensed for  Use by the  Licensee  only,  and  the
+  Licensee shall not market,  distribute,  transfer, license or
+  sub-license, or in any way make available  ("Make Available")
+  FLUKA  or  Modifications,  in  whole  or  in  part,  to third
+  parties, without prior written permission. The Licensee shall
+  not assign or transfer this license.
+   
+  4.
+  Notwithstanding section 3,  the Licensee may  Make  Available
+  his Modifications  of  FLUKA User Routines  to third  parties
+  under these license conditions.
+   
+  5.
+  The  Licensee  shall  not insert FLUKA code or Modifications,
+  in whole or  in  part, into other codes without prior written
+  permission.
+   
+  6.
+  Any use of FLUKA outside the scope of this license is subject
+  to prior written permission.
+   
+   
+  GRANT BACK
+   
+  7.
+  The   Licensee   shall   in  a  timely   fashion   notify  to
+  fcc@fluka.org  any  Modifications carried out by him.  Except
+  for  Authors,  Collaborators,  and  employees  of  the  FLUKA
+  Copyright Holders, the copyright in whose Modifications shall
+  automatically be vested in  the FLUKA Copyright Holders,  the
+  Licensee  herewith  grants  the  FLUKA  Copyright  Holders  a
+  perpetual,  royalty- free,   irrevocable   and  non-exclusive
+  license to his Modifications, with no limitation of use.  The
+  Licensee acknowledges that the  FLUKA  Copyright  Holders may
+  insert  such  Modifications into future  releases  of  FLUKA,
+  subject  to  appropriate  acknowledgment  of  the  Licensee's
+  contribution.
+   
+  8.
+  The Licensee  shall report as soon as practical any errors or
+  bugs found in any portion of FLUKA to fluka-discuss@fluka.org
+   
+   
+  PUBLICATIONS AND ACKNOWLEDGEMENT
+   
+  9.
+  The Licensee shall explicitly acknowledge his use of FLUKA in
+  any publication or communication,  scientific  or  otherwise,
+  relating to such use,  by  citing the FLUKA set of references
+  (http://www.fluka.org, see below)  and  the  FLUKA  copyright
+  notice.
+   
+  10.
+  The  Licensee  shall ensure that the FLUKA set of references,
+  the  FLUKA  copyright notice and these license conditions are
+  not altered or removed from FLUKA and that all embodiments of
+  FLUKA  and  Modifications  contain  in  full the FLUKA set of
+  references,  the FLUKA  copyright  notice,  and these license
+  conditions.
+   
+  11.
+  Any insertion of FLUKA code or Modifications,  in whole or in
+  part,  into other codes with permission under section 5 shall
+  preserve the  FLUKA set of references,  the  FLUKA  copyright
+  notice  and  these  license  conditions in the  FLUKA code or
+  Modifications concerned, and must also reproduce these within
+  any  additional  global  notices included  along  or embedded
+  within  the  software  into  which  the  FLUKA  code  or  the
+  Modifications have been integrated, in whole or in part.  Any
+  part of  the FLUKA code  or  Modifications so  inserted shall
+  continue to be subject to these license conditions.
+   
+  12.
+  Publication   of  any  results  of  comparisons  of  specific
+  internal physics models  extracted from FLUKA with permission
+  under  section 6  with  data or with other codes or models is
+  subject to prior written permission.
+   
+  13.
+  Contributions  to  any formal code comparisons and validation
+  exercises pertaining to FLUKA, sponsored by recognised bodies
+  or   within  the  framework  of  recognised  conferences  and
+  workshops, are subject to prior written permission.
+   
+   
+  WARRANTY AND LIABILITY
+   
+  14.
+  DISCLAIMER  FLUKA  IS PROVIDED BY THE FLUKA COPYRIGHT HOLDERS
+  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT
+  NOT LIMITED TO, IMPLIED  WARRANTIES  OF  MERCHANTABILITY,  OF
+  SATISFACTORY QUALITY, AND FITNESS FOR A PARTICULAR PURPOSE OR
+  USE ARE DISCLAIMED.  THE  FLUKA  COPYRIGHT  HOLDERS  AND  THE
+  AUTHORS MAKE NO REPRESENTATION THAT  FLUKA  AND MODIFICATIONS
+  THEREOF WILL NOT INFRINGE ANY PATENT, COPYRIGHT, TRADE SECRET
+  OR OTHER PROPRIETARY RIGHT.
+   
+  15.
+  LIMITATION OF LIABILITY THE  FLUKA COPYRIGHT  HOLDERS AND ANY
+  CONTRIBUTOR SHALL  HAVE  NO  LIABILITY FOR  DIRECT, INDIRECT,
+  SPECIAL,  INCIDENTAL,  CONSEQUENTIAL,  EXEMPLARY, PUNITIVE OR
+  OTHER DAMAGES OF ANY CHARACTER INCLUDING, WITHOUT LIMITATION,
+  PROCUREMENT  OF  SUBSTITUTE  GOODS  OR SERVICES, LOSS OF USE,
+  DATA OR PROFITS, OR BUSINESS INTERRUPTION, HOWEVER CAUSED AND
+  ON  ANY  THEORY  OF  CONTRACT,   WARRANTY,  TORT   (INCLUDING
+  NEGLIGENCE),  PRODUCT  LIABILITY OR OTHERWISE, ARISING IN ANY
+  WAY  OUT  OF  THE  USE  OF  FLUKA,  EVEN  IF ADVISED  OF  THE
+  POSSIBILITY OF SUCH DAMAGES,  AND THE LICENSEE SHALL HOLD THE
+  COPYRIGHT HOLDERS AND ANY CONTRIBUTOR FREE  AND HARMLESS FROM
+  ANY LIABILITY, INCLUDING CLAIMS BY THIRD PARTIES, IN RELATION
+  TO SUCH USE.
+   
+   
+  TERMINATION
+   
+  16.
+  This  license  shall  terminate  with  immediate  effect  and
+  without  notice  if  the Licensee fails to comply with any of
+  the terms of  this license,  or  if  the  Licensee  initiates
+  litigation against any of the  FLUKA Copyright Holders or any
+  contributors with regard to FLUKA.  It  shall  also terminate
+  with immediate effect from the date on which a new version of
+  FLUKA  becomes  available.  In either case sections 14 and 15
+  above shall  continue  to apply to any  Use  or Modifications
+  made under these license conditions.
+   
+   
+    FLUKA set of references, subject to change
+   
+  "The FLUKA code: Description and benchmarking"
+  G. Battistoni, S. Muraro, P.R. Sala, F. Cerutti, A. Ferrari,
+  S. Roesler, A. Fasso`, J. Ranft,
+  Proceedings of the Hadronic Shower Simulation Workshop 2006,
+  Fermilab 6--8 September 2006, M.Albrow, R. Raja eds.,
+  AIP Conference Proceeding 896, 31-49, (2007)
+   
+  "FLUKA: a multi-particle transport code"
+  A. Fasso`, A. Ferrari, J. Ranft, and P.R. Sala,
+  CERN-2005-10 (2005), INFN/TC_05/11, SLAC-R-773
+   
+  Additional FLUKA references can be added, provided they are
+  relevant for the FLUKA version under consideration.
+   
+
+     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+     !!!! DOWNLOAD/USE OF THE FLUKA SOFTWARE IMPLIES FULL     !!!!
+     !!!! ACCEPTANCE  AND  COMPLIANCE  WITH  THE  LICENSE     !!!!
+     !!!! CONDITIONS                                          !!!!
+     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+   Note:  The Nuclear Energy Agency Data Bank is an authorized
+          distributor of the code
+
