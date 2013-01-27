@@ -159,42 +159,30 @@ class Library(rx.RxLib):
     def is_isotope_line(self, line):
         """ If the line is the beginning of resonance data for an isotope,
         returns True."""
-        zai = line[0]
-        abn = line[1]
-        lfw = line[3]
-        ner = line[4]
-        if line[2] == line[5] == 0:
-            if lfw in (1,0) and int(ner) == ner and abn <= 1:
-                if zai >= 1000:
-                    return True
-        else:
-             return False
+        zai, abn, lfw, ner = line[0], line[1], line[3], line[4]
+        return ((line[2] == line[5] == 0) and
+                lfw in (1,0) and 
+                int(ner) == ner and 
+                abn <= 1 and
+                zai >= 1000)
 
-    def check_nro_naps(self, nro, naps):
-        """This checks to see if the places where NRO and NAPS should be
-        are indeed filled with parameters in the expected ranges.
-        """
-        return ((nro == 0 and naps in (0, 1)) or
-                (nro == 1 and naps in (0, 1, 2)))
-    
-
-    def is_range_line(self,line):
-        """ Determines whether this line is the beginning of a new resonance 
+    def is_range_line(self, line):
+        """ Determine whether this line is the beginning of a new resonance 
         range.  Line format must match EL, EH, LRU, LRF, NRO, NAPS. """
-
-        is_range_line = False
-        el = line[0]
-        eh = line[1]
-        lru = line[2]
-        lrf = line[3]
-        nro = line[4]
-        naps = line[5]
+        el, eh, lru, lrf, nro, naps = line
         return (el < eh and
                 self.check_nro_naps(nro, naps) and
                 (lru == 0 and lrf == 0) or
                 (lru == 1 and lrf in range(1,8)) or
                 (lru == 2 and lrf in (1,2)))
 
+    def check_nro_naps(self, nro, naps):
+        """Check to see if the places where NRO and NAPS should be
+        are indeed filled with parameters in the expected ranges.
+        """
+        return ((nro == 0 and naps in (0, 1)) or
+                (nro == 1 and naps in (0, 1, 2)))
+    
     def parse_isotope_line(self, line):
         """ If the line is the beginning of resonance data for an isotope,
         makes a dictionary of the isotope-specific flags for easy access."""
@@ -220,8 +208,8 @@ class Library(rx.RxLib):
         return range_flags
         
     def make_resonances(self):
-        """ This reads the resonance data from all the materials in the library
-        and returns a nested dictionary with the resonance data. To get at the 
+        """ Read the resonance data from all the materials in the library
+        and return a nested dictionary with the resonance data. To get at the 
         resonance data, use: 
 
         'library.mat{0}['data'][{1}][{2}][2][{3}]'.format(mat_id,
