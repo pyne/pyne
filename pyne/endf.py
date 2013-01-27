@@ -35,8 +35,12 @@ class Library(rx.RxLib):
     of Materials and Files.
     """
 
-    def __init__(self, filename):
-        self.fh = open(filename, 'r')
+    def __init__(self, fh):
+        opened_here = False
+        self.fh = fh
+        if isinstance(fh, basestring):
+            self.fh = open(fh, 'r')
+            opened_here = True
         self.mats = {}
         self.mts = {}
         self.structure = {}
@@ -47,22 +51,23 @@ class Library(rx.RxLib):
         # The offset accounts for lines skipped in data entry.
         self.offset = 1
 
-        self.data = self.load(filename)
+        self.data = self.load()
 
         while self.more_files:
             self._read_headers()        
         # Close the file before we have a chance to break anything.
-        self.fh.close()
+        if opened_here:
+            self.fh.close()
 
         self.make_resonances()
 
-    def load(self, filename):
+    def load(self):
         warnings.filterwarnings("ignore", "Some errors were detected !")
-        data = np.genfromtxt(filename, 
+        data = np.genfromtxt(self.fh, 
                              delimiter = 11, 
                              usecols = (0, 1, 2, 3, 4, 5), 
                              invalid_raise = False,
-                             skip_header = 1,                                    
+                             skip_header = 1,
                              converters = {0: convert,
                                            1: convert, 
                                            2: convert,
