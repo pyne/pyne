@@ -85,7 +85,8 @@ def _get_daughters(nuc):
     """
     daugh_dict = {}
     # Remove fission MT# (cannot handle)
-    EAF_RX.remove('180')
+    if '180' in EAF_RX:
+        EAF_RX.remove('180')
     # Open nuc_data.h5
     with tb.openFile(nuc_data, 'r') as f:
         # Set working node that contains EAF cross sections
