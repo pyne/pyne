@@ -153,3 +153,34 @@ def _get_decay(nuc):
         branch = data.branch_ratio(nuc,child)
         decay_dict[child] = branch
     return decay_dict
+
+def _get_destruction(nuc, phi, rxn_dict = None)
+    """Returns the destruction rate of the nuclide.
+
+    Parameters
+    ----------
+    nuc : nucname
+        Name of the nuclide in question
+
+    rxn_dict : dictionary
+        Contains the dictionary of neutron reactions for nuc that follows the
+        structure of _get_daughters() output. This variable avoids a second
+        lookup of the information if the user has already called 
+        _get_daughters().
+
+    Returns
+    -------
+    d : float
+        Destruction rate of the nuclide.
+    """
+    nuc = nucname.zzaaam(nuc)
+    if rxn_dict is None:
+        rxn_dict = _get_daughters(nuc)
+    xs_total = np.zeros((175))
+    for nuc in rxn_dict.keys():
+        xs_total = xs_total + rxn_dict[nuc]
+    decay_const = data.decay_const(nuc)
+    d = decay_const + sum(xs_total*phi)
+    return d
+
+
