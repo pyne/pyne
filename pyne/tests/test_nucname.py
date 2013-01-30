@@ -205,6 +205,27 @@ def test_cinder():
     assert_equal(nucname.cinder(2420951), 2420951)
 
 
+def test_alara():
+    assert_equal(nucname.alara(942390), "pu:239")
+    assert_equal(nucname.alara(952421), "am:242")
+
+    assert_equal(nucname.alara("PU239"), "pu:239")
+
+    assert_equal(nucname.alara(94239), "pu:239")
+    assert_equal(nucname.alara(95242), "am:242")
+    assert_equal(nucname.alara(95642), "am:242")
+    assert_equal(nucname.alara(92636), "u:236")
+    assert_equal(nucname.alara(2000),  "he")
+
+    assert_equal(nucname.alara("Am-242m"), "am:242")
+
+    assert_equal(nucname.alara(40020),   "he:4")
+    assert_equal(nucname.alara(20000),   "he")
+    assert_equal(nucname.alara(2440961), "cm:244")
+    assert_equal(nucname.alara(2390940), "pu:239")
+    assert_equal(nucname.alara(2420950), "am:242")
+
+
 
 if __name__ == "__main__":
     nose.main()

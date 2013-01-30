@@ -9,6 +9,9 @@ from libc.stdlib cimport malloc, free
 
 # Python imports
 import collections
+import warnings
+cimport numpy as np
+import numpy as np
 
 # local imports
 include "include/cython_version.pxi"
@@ -29,6 +32,9 @@ import jsoncpp
 cimport pyne.nucname as nucname
 import pyne.nucname as nucname
 import os
+
+cimport pyne.data as data
+import pyne.data as data
 
 
 cdef cpp_map[int, double] dict_to_comp(dict nucvec):
@@ -410,7 +416,6 @@ cdef class _Material:
         """
         return self.mat_pointer.molecular_weight(atoms_per_mol)
 
-
     def expand_elements(self):
         """expand_elements(self)
         Exapnds the elements ('U', 'C', etc) in the material by replacing them
@@ -425,6 +430,53 @@ cdef class _Material:
         cdef _Material newmat = Material()
         newmat.mat_pointer[0] = self.mat_pointer.expand_elements()
         return newmat
+
+    def mass_density(self, double num_dens=-1.0, double atoms_per_mol=-1.0):
+        """mass_density(self, num_dens=-1.0, atoms_per_mol=-1.0)
+        Computes, sets, and returns the mass density when num_dens is greater
+        than or equal zero.  If num_dens is negative, this simply returns the
+        current value of the density attribute.  
+
+        Parameters
+        ----------
+        num_dens : float, optional
+            The number density from which to compute the mass density in units
+            of [1/cc].
+        atoms_per_mol : float, optional
+            Number of atoms to per molecule of material. For example, this value 
+            for water is 3.0.
+
+        Returns
+        -------
+        density : float
+            The density attr [g/cc].
+
+        """
+        return self.mat_pointer.mass_density(num_dens, atoms_per_mol)
+
+    def number_density(self, double mass_dens=-1.0, double atoms_per_mol=-1.0):
+        """number_density(self, mass_dens=-1.0, atoms_per_mol=-1.0)
+        Computes and returns the number density from the mass_dens argument if this 
+        is greater than or equal zero.  If mass_dens is negative, then the number 
+        density is computed using the current value of the density attribute.  
+
+        Parameters
+        ----------
+        mass_dens : float, optional
+            The mass density from which to compute the number density in units
+            of [g/cc].
+        atoms_per_mol : float, optional
+            Number of atoms to per molecule of material. For example, this value 
+            for water is 3.0.
+
+        Returns
+        -------
+        num_dens : float
+            The number density [1/cc] of the material.
+
+        """
+        return self.mat_pointer.number_density(mass_dens, atoms_per_mol)
+
 
 
     #
@@ -1136,12 +1188,101 @@ class Material(_Material, collections.MutableMapping):
                 repr(self.comp), self.mass, self.density, self.atoms_per_mol, repr(self.attrs))
 
 
+    def write_mcnp(self, filename, frac_type='mass'):
+        """write_mcnp(self, filename, frac_type='mass')
+        The method appends an mcnp mass fraction definition, with
+        attributes to the file with the supplied filename."""
+
+        s = ''  # string to output
+
+        if 'name' in self.attrs:
+            s += 'C name: {0}\n'.format(self.attrs['name'])
+
+        if self.density != -1.0:
+            s += 'C density = {0}\n'.format(self.density)
+
+        if 'source' in self.attrs:
+            s += 'C source: {0}\n'.format(self.attrs['source'])
+
+        if 'comments' in self.attrs:
+            comment_string= 'comments: ' + self.attrs['comments']
+            # split up lines so comments are less than 80 characters
+            for n in range(0, int(np.ceil(float(len(comment_string))/77))):
+                s += 'C {0}\n'.format(comment_string[n*77:(n + 1)*77])
+
+        if 'mat_number' in self.attrs:
+            mat_num = self.attrs['mat_number']
+        else:
+            mat_num = '?'
+
+        s += 'm{0}\n'.format(mat_num)
+
+        fracs = self.to_atom_frac() if frac_type == 'atom' else self.comp
+        frac_sign = "" if  frac_type == 'atom' else '-'
+        for nuc, frac in fracs.items():
+            if 'table_ids' in self.attrs:
+                s += '     {0}.{1} '.format(str(nuc)[:-1],
+                                            self.attrs['table_ids'][str(nuc)])
+            else:
+                s += '     {0} '.format(nuc)
+            s += '{0}{1:.4E}\n'.format(frac_sign, frac)
+
+        # write s to output file
+        with open(filename, 'a') as f:
+            f.write(s)
+
+
+    def write_alara(self, filename):
+        """write_alara(self, filename)
+        The method appends an ALARA definition, with
+        attributes to the file with the supplied filename."""
+
+        s = ''
+
+        if 'mat_number' in self.attrs:
+            s += '# mat number: {0}\n'.format(self.attrs['mat_number'])
+            mat_num = self.attrs['mat_number']  # for use in mat_name
+        else:
+            mat_num = '<mat_num>'
+
+        if 'source' in self.attrs:
+            s += '# source: {0}\n'.format(self.attrs['source'])
+
+        if 'comments' in self.attrs:
+            comment_string= 'comments: ' + self.attrs['comments']
+            # split up lines so comments are less than 80 characters
+            for n in range(0, int(np.ceil(float(len(comment_string))/77))):
+                s += '# {0}\n'.format(comment_string[n*77:(n + 1)*77])
+
+        # set density. If not present, set it equal to "<rho>"
+        if str(self.density) != '-1.0':
+            density = self.density
+        else:
+            density = '<rho>'
+
+        # if a name is present, use it. Otherwise the name is is:
+        # mat<mat_number>_rho<rho>
+        if 'name' in self.attrs:
+            mat_name = self.attrs['name']
+        else:
+            mat_name = 'mat{0}_rho-{1}'.format(mat_num, density)
+
+        s += '{0} {1} {2}\n'\
+                    .format(mat_name, density, len(self.comp))
+
+        for iso, frac in self.comp.items():
+            s += '     {0} {1:.4E} {2}\n'.format(nucname.alara(iso),
+                                                 frac, str(iso)[:-4])
+
+        with open(filename, 'a') as f:
+            f.write(s)
+
 #####################################
 ### Material generation functions ###
 #####################################
 
-def from_atom_frac(atom_fracs, double mass=-1.0, double
-                   atoms_per_mol=-1.0, attrs=None):
+def from_atom_frac(atom_fracs, double mass=-1.0, double density=-1.0,
+                   double atoms_per_mol=-1.0, attrs=None):
     """from_atom_frac(atom_fracs, double mass=-1.0, double atoms_per_mol=-1.0)
     Create a Material from a mapping of atom fractions.
 
@@ -1156,6 +1297,8 @@ def from_atom_frac(atom_fracs, double mass=-1.0, double
         (default -1.0) then the mass of the new stream is calculated from the
         sum of compdict's components before normalization.  If the mass here is
         positive or zero, then this mass overrides the calculated one.
+    density : float, optional
+        This is the density of the material.
     atoms_per_mol : float, optional
         Number of atoms per molecule of material.  Needed to obtain proper
         scaling of molecular weights.  For example, this value for water is
@@ -1199,6 +1342,9 @@ def from_atom_frac(atom_fracs, double mass=-1.0, double
 
     if 0.0 <= mass:
         mat.mass = mass
+
+    if 0.0 <= density:
+        mat.density = density
 
     if 0.0 <= atoms_per_mol:
         mat.atoms_per_mol = atoms_per_mol
@@ -1296,9 +1442,6 @@ def from_text(char * filename, double mass=-1.0, double atoms_per_mol=-1.0, attr
 
     mat.from_text(filename)
     return mat
-
-
-
 
 
 ###########################
@@ -1488,9 +1631,15 @@ class MapStrMaterial(_MapStrMaterial, collections.MutableMapping):
 
 
 class MultiMaterial(collections.MutableMapping):
-
+    """ This class is serves as a way of storing a collection of materials.
+    There sole argument of this function is a dictionary with material
+    objects and keys and vol/mass fractions as values. There are two
+    main uses cases. A collection of materials can be mixed together
+    by volume of mass. Alternatively, a collection of materials can be
+    used to describe a materials with multiple densities. In this latter
+    case, the dict values are irrevelant"""
     def __init__(self, mats):
-        # This function reads a dict of materails and either mass or volume factions,
+        # This function reads a dict of materials and either mass or volume factions,
         # then normalizes the fraction and assigns the dict as an attribute of self.
         # Normalize Mixture fractions
         # First calculate the normalization factor:
@@ -1501,8 +1650,8 @@ class MultiMaterial(collections.MutableMapping):
         # and assign them as MultiMaterial attributes
         for mat, mix_frac in mats.items():
             mats[mat] = mix_frac / norm
-            mat.mass = 1 # set all mass to 1 for mixing
-        self._mats = mats    
+            mat.mass = 1  # set all mass to 1 for mixing
+        self._mats = mats
 
     def __getitem__(self, key):
         return self._mats[key]
@@ -1531,7 +1680,7 @@ class MultiMaterial(collections.MutableMapping):
             mix = mix + mat * mat_frac
         mix.mass = 1
         return mix
-    
+
     def mix_by_volume(self):
         """This function reads in a python dict of materials and volume fractions
         then mixes the material by volume fractions and returns a material of mass=1.
@@ -1539,7 +1688,7 @@ class MultiMaterial(collections.MutableMapping):
         mix = Material()
         for mat, mat_frac in self._mats.items():
             mix=mix + mat * mat_frac * mat.density
-        mix.mass = 1 
+        mix.mass = 1
         return mix
 
 
