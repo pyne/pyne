@@ -1,0 +1,36 @@
+# After changing this file, check it on:
+#   http://lint.travis-ci.org/
+language: python
+python:
+  - 2.7
+before_install:
+  - mkdir builds
+  - pushd builds
+  - sudo apt-get update -qq
+  - sudo apt-get install libhdf5-serial-dev libatlas3gf-base libblas-dev liblapack-dev
+  - sudo apt-get install gfortran python-scipy
+  - pip install numpy -q --use-mirrors
+  - pip install scipy -q --use-mirrors
+  - pip install cython -q --use-mirrors
+  - pip install numexpr -q --use-mirrors
+  - pip install tables -q --use-mirrors
+  - pip install matplotlib -q --use-mirrors
+  - popd
+  - python -V
+  - python -c "import sys; print '\n'.join(sys.path)"
+  - python -c "import numpy; print 'numpy version:', numpy.__version__"
+  - python -c "import scipy; print 'scipy version:', scipy.__version__"
+  - python -c "import Cython; print 'cython version:', Cython.__version__"
+  - python -c "import numexpr; print 'numexpr version:', numexpr.__version__"
+  - python -c "import tables; print 'pytables version:', tables.__version__"
+install:
+  - python setup.py install
+  - scripts/nuc_data_make
+script:
+  - cd pyne/tests
+  - nosetests -x
+  - cd pyne/xs/tests
+  - nosetests -x
+notifications:
+  email:
+    scopatz@gmail.com

@@ -75,6 +75,7 @@ execute_process(COMMAND "${PYTHON_EXECUTABLE}" "-c"
 
 if(NOT _PYTHON_SUCCESS MATCHES 0)
     if(PythonLibsNew_FIND_REQUIRED)
+        message("-- PYTHON EXECUTABLE: ${PYTHON_EXECUTABLE}")
         message(FATAL_ERROR
             "Python config failure:\n${_PYTHON_ERROR_VALUE}")
     endif()

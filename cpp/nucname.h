@@ -293,7 +293,7 @@ namespace nucname
 
   /// \name CINDER Form Functions
   /// \{
-  /// This is the naming convention used by the CINDER burnup ibrary.
+  /// This is the naming convention used by the CINDER burnup library.
   /// The CINDER format is similar to zzaaam form except that the placement of the 
   /// Z- and A-numbers are swapped. Therefore, this format is effectively aaazzzm. 
   /// For example, ‘2420951’ is the valid cinder notation for ‘AM242M’.
@@ -302,6 +302,18 @@ namespace nucname
   int cinder(int nuc);
   int cinder(char * nuc);
   int cinder(std::string nuc);
+  /// \}
+
+  /// \alara ALARA Form Functions
+  /// \{
+  /// This is the format used in the ALARA activation code elements library.
+  /// For elements, the form is "ll" where ll is the atomic symbol. For isotopes
+  /// the form is "ll:AAA". No metastable isotope flag is used.
+  /// \param nuc a nuclide
+  /// \return a string nuclide identifier.
+  std::string alara(int nuc);
+  std::string alara(char * nuc);
+  std::string alara(std::string nuc);
   /// \}
 
 };

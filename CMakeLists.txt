@@ -8,6 +8,9 @@ project( pyne )
 # 'include()' command, 'find_package()' command.
 set( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_LIST_DIR}/cmake )
 
+# give an option for whether this should be built as a CI project
+option(IS_CI "Is this project being built under continuous integration?" FALSE)
+
 # Include the HDF5 library and c++ headers
 find_package( HDF5 COMPONENTS C )
 include_directories(${HDF5_INCLUDE_DIRS})
@@ -15,14 +18,17 @@ if(WIN32)
     # FindHDF5 finds the includes but not the libraries on Windows (MSYS).  Annoying!
     get_filename_component(_hdf5libdir ${HDF5_INCLUDE_DIRS} PATH)
     list(APPEND HDF5_LIBRARY_DIRS "${_hdf5libdir}/bin")
+	list(APPEND HDF5_LIBRARY_DIRS "${_hdf5libdir}/lib")
 endif(WIN32)
 link_directories(${HDF5_LIBRARY_DIRS})
 add_definitions(${HDF5_DEFINITIONS})
 set(LIBS ${LIBS} ${HDF5_C_LIBRARIES})
+message("-- HDF5_LIBRARY_DIRS = ${HDF5_LIBRARY_DIRS}")
 
 # Use new Python library finder
 find_package(PythonInterp REQUIRED)
 find_package(PythonLibsNew REQUIRED)
+message("-- PYTHON_EXECUTABLE: ${PYTHON_EXECUTABLE}")
 
 # Include the CMake script UseCython.cmake.  This defines add_cython_module().
 # Instruction for use can be found at the top of cmake/UseCython.cmake.
@@ -65,6 +71,12 @@ include_directories(${NUMPY_INCLUDE_DIR})
 # Add JsonCpp Flag
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DJSON_IS_AMALGAMATION")
 
+# Add some CI-dependent stuff
+message("-- Is CI: ${IS_CI}")
+if(${IS_CI})
+    include_directories("/home/slave/anaconda/include/python2.7")
+endif(${IS_CI})
+
 # With CMake, a clean separation can be made between the source tree and the
 # build tree.  When all source is compiled, as with pure C/C++, the source is
 # no-longer needed in the build tree.  However, with pure *.py source, the
@@ -77,7 +89,8 @@ add_custom_target( ReplicatePythonSourceTree ALL ${CMAKE_COMMAND} -P
 
 # Add cython version info to source tree
 message("-- Making Cython Version.")
-execute_process(COMMAND python ${CMAKE_CURRENT_SOURCE_DIR}/configure.py cython_version)
+execute_process(COMMAND ${PYTHON_EXECUTABLE} 
+                        ${CMAKE_CURRENT_SOURCE_DIR}/configure.py cython_version)
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/pyne/_includes/
      DESTINATION ${CMAKE_BINARY_DIR}/pyne/_includes/)
 
@@ -105,5 +118,6 @@ file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/scripts DESTINATION ${CMAKE_BINARY_DIR})
 
 # Add cython version info to source tree
 message("-- Making Metadata.")
-execute_process(COMMAND python ${CMAKE_CURRENT_SOURCE_DIR}/configure.py metadata)
+execute_process(COMMAND ${PYTHON_EXECUTABLE} 
+                        ${CMAKE_CURRENT_SOURCE_DIR}/configure.py metadata)
 

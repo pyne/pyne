@@ -9,7 +9,6 @@ and contribute, please let us know either on the mailing list
 
 .. _github: https://github.com/pyne/pyne
 
-
 .. install-start
 
 .. _install:
@@ -22,11 +21,18 @@ Dependencies
 -------------
 PyNE has the following dependencies:
 
-   #. `NumPy <http://numpy.scipy.org/>`_
+   #. `NumPy <http://www.numpy.org/>`_
    #. `SciPy <http://www.scipy.org/>`_
    #. `Cython <http://cython.org/>`_
    #. `HDF5 <http://www.hdfgroup.org/HDF5/>`_
    #. `PyTables <http://www.pytables.org/>`_
+
+Additionally, building the documentation requires the following:
+
+   #. `Sphinx <http://sphinx-doc.org/>`_
+   #. `SciSphinx <https://github.com/numfocus/scisphinx>`_
+   #. `Anthony's fork of breathe <https://github.com/scopatz/breathe>`_ 
+      (must be installed after SciSphinx)
 
 ------
 Binary
@@ -46,7 +52,7 @@ the unzipped directory::
 
     cd pyne/
     python setup.py install --user
-    nuc_data_make
+    scripts/nuc_data_make
 
 The ``setup.py`` command compiles and installs the PyNE source code.
 The ``nuc_data_make`` builds and installs a database of nuclear data.

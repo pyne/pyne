@@ -280,7 +280,7 @@ def test_simple_not_a_rx():
 
 
 def test_simple_discretize_no_weights1():
-    if not simpleds.exists:
+    if not simpleds.exists or not cinderds.exists:
         return
     dst_g = cinderds.src_group_struct
     simpleds.dst_group_struct = dst_g
@@ -292,7 +292,7 @@ def test_simple_discretize_no_weights1():
 
 
 def test_simple_discretize_no_weights2():
-    if not simpleds.exists:
+    if not simpleds.exists or not cinderds.exists:
         return
     dst_g = cinderds.src_group_struct
     simpleds.dst_group_struct = dst_g
@@ -302,7 +302,7 @@ def test_simple_discretize_no_weights2():
 
 
 def test_simple_discretize_weights1():
-    if not simpleds.exists:
+    if not simpleds.exists or not cinderds.exists:
         return
     dst_g = cinderds.src_group_struct
     phi_g = np.ones(cinderds.src_ngroups, dtype=float)

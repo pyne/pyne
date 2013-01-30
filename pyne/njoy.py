@@ -1,7 +1,4 @@
-#!/usr/bin/env python
-
-"""
-Purpose:
+"""Purpose:
   Automatic generation of Njoy input data, including dragr data.
   Generation of DRAGLIB and ACELIB.
 
@@ -28,6 +25,8 @@ class PyNjoyError(Exception):
     pass
 
 class Njoy99(object):
+    """The NJOY99 wrapper class."""
+
     def __init__(self):
         self.iwt = 4
         self.legendre = 1
