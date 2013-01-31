@@ -1,6 +1,6 @@
-"""This module is for reading ACE-format cross sections. ACE stands for "A Compact
-ENDF" format and originated from work on MCNP_. It is used in a number of other
-Monte Carlo particle transport codes.
+"""This module is for reading ACE-format cross sections. ACE stands for "A
+Compact ENDF" format and originated from work on MCNP_. It is used in a number
+of other Monte Carlo particle transport codes.
 
 ACE-format cross sections are typically generated from ENDF_ files through a
 cross section processing program like NJOY_. The ENDF data consists of tabulated
@@ -10,9 +10,7 @@ ENDF data has been reconstructed and Doppler-broadened, the ACER module
 generates ACE-format cross sections.
 
 .. _MCNP: https://laws.lanl.gov/vhosts/mcnp.lanl.gov/
-
 .. _NJOY: http://t2.lanl.gov/codes.shtml
-
 .. _ENDF: http://www.nndc.bnl.gov/endf
 
 .. moduleauthor:: Paul Romano <paul.k.romano@gmail.com>, Anthony Scopatz <scopatz@gmail.com>
