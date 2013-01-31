@@ -268,9 +268,9 @@ bool pyne::nucname::isnuclide(int nuc)
   };
   int znum = n / 10000;
   int anum = (n % 10000) / 10;
-  std::cout << n << " = n \n";
-  std::cout << znum << " = znum \n";
-  std::cout << anum << " = anum \n";
+  //std::cout << n << " = n \n";
+  //std::cout << znum << " = znum \n";
+  //std::cout << anum << " = anum \n";
   if (anum < znum)
     return false;
   return true;
