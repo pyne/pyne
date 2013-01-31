@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
-"""
-Module for parsing and manipulating data from ENDF evaluations. Currently, it
+"""Module for parsing and manipulating data from ENDF evaluations. Currently, it
 only can read several MTs from File 1, but with time it will be expanded to
 include the entire ENDF format.
 
@@ -13,11 +12,14 @@ http://www-nds.iaea.org/ndspub/documents/endf/endf102/endf102.pdf
 For more information on this module, contact Paul Romano
 <paul.k.romano@gmail.com>
 """
+
 import re
-import numpy as np
-import matplotlib.pyplot as plt
 import os
 import warnings
+
+import numpy as np
+import matplotlib.pyplot as plt
+
 import pyne.rx_data as rx
 from pyne.rxname import label
 
