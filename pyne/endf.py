@@ -35,8 +35,12 @@ class Library(rx.RxLib):
     of Materials and Files.
     """
 
-    def __init__(self, filename):
-        self.fh = open(filename, 'r')
+    def __init__(self, fh):
+        opened_here = False
+        self.fh = fh
+        if isinstance(fh, basestring):
+            self.fh = open(fh, 'r')
+            opened_here = True
         self.mats = {}
         self.mts = {}
         self.structure = {}
@@ -47,22 +51,23 @@ class Library(rx.RxLib):
         # The offset accounts for lines skipped in data entry.
         self.offset = 1
 
-        self.data = self.load(filename)
+        self.data = self.load()
 
         while self.more_files:
             self._read_headers()        
         # Close the file before we have a chance to break anything.
-        self.fh.close()
+        if opened_here:
+            self.fh.close()
 
         self.make_resonances()
 
-    def load(self, filename):
+    def load(self):
         warnings.filterwarnings("ignore", "Some errors were detected !")
-        data = np.genfromtxt(filename, 
+        data = np.genfromtxt(self.fh, 
                              delimiter = 11, 
                              usecols = (0, 1, 2, 3, 4, 5), 
                              invalid_raise = False,
-                             skip_header = 1,                                    
+                             skip_header = 1,
                              converters = {0: convert,
                                            1: convert, 
                                            2: convert,
@@ -81,16 +86,16 @@ class Library(rx.RxLib):
             self.offset -= 1
         # We need to make a data structure modeled after GND.
         self.structure.update(
-            {mat_id:{'RxStyles':'',
-                     'RxDocs':[],
-                     'RxParticles':[],
-                     'RxData':{'Resolved':{},
-                               'Unresolved':{},
-                               'RxDataDocs':[],
-                               'Rxxs':[],
-                               'RxOutput':{'Channel1':[],
-                                           'Channel2':[]}},
-                     'MatFlags':{}}})
+            {mat_id:{'styles':'',
+                     'docs':[],
+                     'particles':[],
+                     'data':{'resolved':{},
+                             'unresolved':{},
+                             'datadocs':[],
+                             'xs':[],
+                             'output':{'channel1':[],
+                                       'channel2':[]}},
+                     'matflags':{}}})
 
         self.mat_dict.update({mat_id:{'end_line':[],
                                       'mfs':{}}}) 
@@ -122,13 +127,13 @@ class Library(rx.RxLib):
                 line = self.fh.readline()
             # parse comment
             elif re.match(' {66}', line):
-                self.structure[mat_id]['RxDocs'].append(line[0:66])
+                self.structure[mat_id]['docs'].append(line[0:66])
                 line = self.fh.readline()
             elif re.match('[\d+. ]{80}\n$', line):
                 line = self.fh.readline()
                 continue
             else:
-                self.structure[mat_id]['RxDocs'].append(line[0:66])
+                self.structure[mat_id]['docs'].append(line[0:66])
                 line = self.fh.readline()
         # Find where the end of the material is and then jump to it.
         self.chars_til_now = (stop + 4)*81
@@ -147,49 +152,37 @@ class Library(rx.RxLib):
                     'LIS', 'LIS0', None, 'NFOR', 'AWI', 'EMAX', 'LREL', None,
                     'NSUB', 'NVER', 'TEMP', None, 'LDRV', None, 'NWD', 'NXC']
 
-        self.structure[mat_id].update({'MatFlags': 
+        self.structure[mat_id].update({'matflags': 
             dict(zip(flagkeys, header[:len(flagkeys)]))})
-        del self.structure[mat_id]['MatFlags'][None]
+        del self.structure[mat_id]['matflags'][None]
 
     def is_isotope_line(self, line):
         """ If the line is the beginning of resonance data for an isotope,
         returns True."""
-        zai = line[0]
-        abn = line[1]
-        lfw = line[3]
-        ner = line[4]
-        if line[2] == line[5] == 0:
-            if lfw in (1,0) and int(ner) == ner and abn <= 1:
-                if zai >= 1000:
-                    return True
-        else:
-             return False
+        zai, abn, lfw, ner = line[0], line[1], line[3], line[4]
+        return ((line[2] == line[5] == 0) and
+                lfw in (1,0) and 
+                int(ner) == ner and 
+                abn <= 1 and
+                zai >= 1000)
 
-    def check_nro_naps(self, nro, naps):
-        """This checks to see if the places where NRO and NAPS should be
-        are indeed filled with parameters in the expected ranges.
-        """
-        return ((nro == 0 and naps in (0, 1)) or
-                (nro == 1 and naps in (0, 1, 2)))
-    
-
-    def is_range_line(self,line):
-        """ Determines whether this line is the beginning of a new resonance 
+    def is_range_line(self, line):
+        """ Determine whether this line is the beginning of a new resonance 
         range.  Line format must match EL, EH, LRU, LRF, NRO, NAPS. """
-
-        is_range_line = False
-        el = line[0]
-        eh = line[1]
-        lru = line[2]
-        lrf = line[3]
-        nro = line[4]
-        naps = line[5]
+        el, eh, lru, lrf, nro, naps = line
         return (el < eh and
                 self.check_nro_naps(nro, naps) and
                 (lru == 0 and lrf == 0) or
                 (lru == 1 and lrf in range(1,8)) or
                 (lru == 2 and lrf in (1,2)))
 
+    def check_nro_naps(self, nro, naps):
+        """Check to see if the places where NRO and NAPS should be
+        are indeed filled with parameters in the expected ranges.
+        """
+        return ((nro == 0 and naps in (0, 1)) or
+                (nro == 1 and naps in (0, 1, 2)))
+    
     def parse_isotope_line(self, line):
         """ If the line is the beginning of resonance data for an isotope,
         makes a dictionary of the isotope-specific flags for easy access."""
@@ -215,13 +208,21 @@ class Library(rx.RxLib):
         return range_flags
         
     def make_resonances(self):
-        """ This reads the resonance data from all the materials and returns
-        a nested dictionary with the resonance data. """
+        """ Read the resonance data from all the materials in the library
+        and return a nested dictionary with the resonance data. To get at the 
+        resonance data, use: 
+
+        'library.mat{0}['data'][{1}][{2}][2][{3}]'.format(mat_id,
+                                                          'resolved' or 
+                                                              'unresolved',
+                                                          range number,
+                                                          data type you want)
+        """
         for mat_id in self.structure:
-            resonance_ranges = {'Resolved':[],
-                                'Unresolved':[]}
-            self.structure[mat_id]['RxData'] = {'Resolved':[], 'Unresolved':[]}
-            lrp = self.structure[mat_id]['MatFlags']['LRP']
+            resonance_ranges = {'resolved':[],
+                                'unresolved':[]}
+            self.structure[mat_id]['data'] = {'resolved':[], 'unresolved':[]}
+            lrp = self.structure[mat_id]['matflags']['LRP']
 
             if lrp == -1:
                 # If the LRP flag for the material is -1, there is no
@@ -255,13 +256,13 @@ class Library(rx.RxLib):
                             # If this is a new resonance range, add a new dict:
                             try:
                                 if range_flags['LRU'] == 1:
-                                    resonance_ranges['Resolved'].append(
-                                        {'RangeFlags': range_flags,
-                                         'RangeData':[i-2,i,0]})
+                                    resonance_ranges['resolved'].append(
+                                        {'rangeflags': range_flags,
+                                         'rangedata':[i-2,i,0]})
                                 elif range_flags['LRU'] == 2:
-                                    resonance_ranges['Unresolved'].append(
-                                        {'RangeFlags': range_flags,
-                                         'RangeData':[i-2,i,0]})
+                                    resonance_ranges['unresolved'].append(
+                                        {'rangeflags': range_flags,
+                                         'rangedata':[i-2,i,0]})
                                 else: pass
                             except KeyError:
                                 print 'No LRU!'
@@ -270,16 +271,16 @@ class Library(rx.RxLib):
                         # specified in the dict.
                         try:
                             if range_flags['LRU'] == 1:
-                                last_range = resonance_ranges['Resolved'][-1]
+                                last_range = resonance_ranges['resolved'][-1]
                             elif range_flags['LRU'] == 2:
-                                last_range = resonance_ranges['Unresolved'][-1]
-                            last_range['RangeData'][1] = i + 1
-                            last_range['RangeData'][2] = mf2[
-                                last_range['RangeData'][0]:last_range['RangeData'][1]]
+                                last_range = resonance_ranges['unresolved'][-1]
+                            last_range['rangedata'][1] = i + 1
+                            last_range['rangedata'][2] = mf2[
+                                last_range['rangedata'][0]:last_range['rangedata'][1]]
                         except KeyError:
                             print 'No LRU!'
 
-                for resonance_range in resonance_ranges['Unresolved']:
+                for resonance_range in resonance_ranges['unresolved']:
                     self.parse_resonance_range(resonance_range,
                                                isotope_flags,
                                                mat_id)
@@ -288,13 +289,24 @@ class Library(rx.RxLib):
                 pass
 
     def parse_resonance_range(self, resonance_range, isotope_flags, mat_id):
+        """Turns a resonance range and labels the data for use.
 
+        Parameters
+        ----------
+        resonance_range: dictionary with a dictionary of flags and a list of data
+            The flag list is keyed to 'rangeflags'. The data is itself a list
+            which contains starting/stopping positions and a numpy array.
+
+        isotope_flags: dictionary of flags specific to the isotope
+        
+        mat_id: integer material id as represented in ENDF standard
+        """
         lfw = isotope_flags['LFW']
-        range_flags = resonance_range['RangeFlags']
+        range_flags = resonance_range['rangeflags']
         lru = range_flags['LRU']
         lrf = range_flags['LRF']
 
-        raw_data = resonance_range['RangeData'][2]
+        raw_data = resonance_range['rangedata'][2]
         range_data = rx.DoubleSpinDict({})
 
         if lru == 1:
@@ -419,13 +431,21 @@ class Library(rx.RxLib):
             # Now that the range's data has been fully updated, we can drop
             # it in a tuple, drop *that* into the list of unresolved resonances,
             # and sort the list.
-            el = resonance_range['RangeFlags']['EL']
-            eh = resonance_range['RangeFlags']['EH']
-            self.structure[mat_id]['RxData']['Unresolved'].append(
+            el = resonance_range['rangeflags']['EL']
+            eh = resonance_range['rangeflags']['EH']
+            self.structure[mat_id]['data']['unresolved'].append(
                 (el, eh, range_data, range_flags))
-            self.structure[mat_id]['RxData']['Unresolved'].sort()
+            self.structure[mat_id]['data']['unresolved'].sort()
         
     def read_mfmt(self, mat_id, mf, mt):
+        """Grabs the raw data from one MT number.
+
+        Parameters
+        ----------
+        mat_id: ENDF material ID number
+        mf: ENDF file number (MF)
+        mt: ENDF reaction number (MT)
+        """
         if mat_id in self.structure:
             start, stop = self.mat_dict[mat_id]['mfs'][mf][mt]
             start = (start - 1) * 6
@@ -858,10 +878,10 @@ class Evaluation(object):
                     res.SPI = items[0]
                     res.AP = items[1]
                     res.NLS = items[4]
-                # Resolved resonance region
+                # resolved resonance region
                 elif res.LRU == 1:
                     self._read_resolved(res)
-                # Unresolved resonance region
+                # unresolved resonance region
                 elif res.LRU == 2:
                     self._read_unresolved(res)
 
