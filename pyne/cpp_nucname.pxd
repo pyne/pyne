@@ -32,6 +32,11 @@ cdef extern from "nucname.h" namespace "pyne::nucname":
     std_string current_form(char *) except +
     std_string current_form(std_string) except +
 
+    # isnuclide
+    bint isnuclide(int) except +
+    bint isnuclide(char *) except +
+    bint isnuclide(std_string) except +
+
     # zzaaam Functions
     int zzaaam(int) except +
     int zzaaam(char *) except +
