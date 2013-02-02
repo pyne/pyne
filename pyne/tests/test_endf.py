@@ -7,7 +7,7 @@ from numpy.testing import assert_array_equal
 from pyne.endf import Library
 from pyne.rxdata import DoubleSpinDict
 
-import nose 
+import nose
 from nose.tools import assert_equal
 
 new_library = StringIO.StringIO(
@@ -216,10 +216,10 @@ def test_mats():
 def test_get():
     obs = library.get(419, 4, 2)
 
-    exp = np.array([4.898421e+3, 6.768123e+0, 0, 
-                    1, 0, 0, 2.123124e+6, 8.123142e-6, 
+    exp = np.array([4.898421e+3, 6.768123e+0, 0,
+                    1, 0, 0, 2.123124e+6, 8.123142e-6,
                     2.123212e+6, 8.231231e-6,
-                    -2.231211e+6, 8.123421e-6])    
+                    -2.231211e+6, 8.123421e-6])
     badkey = library.get(111, 1, 1)
     assert_array_equal(exp, obs)
     assert_equal(badkey, False)
@@ -227,7 +227,7 @@ def test_get():
 
 def test_unresolved_resonances_a():
     # Case A (ENDF Manual p.70)
-    
+
     obs = library.mat131['data']['unresolved']
     # print obs
     # assert(1==2)
@@ -237,7 +237,7 @@ def test_unresolved_resonances_a():
 
     obs_GNO = obs[0][2][3.5,1,10]['GNO']
     exp_GNO = 8.497500e-1
-    
+
     new_obs = obs[1][2][2,2,1]
 
     new_obs_D = new_obs['D']
@@ -263,7 +263,7 @@ def test_unresolved_resonances_b():
     obs_419_GF = obs[3.5,0,419]['GF']
     exp_419_GF = np.array([2.000000e3, 2.100000e3, 2.200000e3, 2.300000e3, 2.400000e3, 2.500000e3,
                         2.600000e3, 2.700000e3, 2.800000e3, 2.900000e3, 3.000000e3])
-    
+
     assert_array_equal(exp_ES, obs_ES)
     assert_array_equal(exp_419_GF, obs_419_GF)
 
@@ -282,15 +282,19 @@ def test_unresolved_resonances_c():
     assert_array_equal(exp_ES, obs_ES)
     assert_array_equal(exp_D, obs_D)
 
-    
 def test_DoubleSpinDict():
     subject = DoubleSpinDict({(3.499999999998, 2, 1):{'A':'a', 'B':'b'},
                               (2.000000000012, 3, 4):{'C':'c', 'D':'d'}})
     subject.update({(3.500000000011,8,9):{'E':'e', 'F':'f'}})
-    
+
     obs = subject[(3.48, 8, 9)]
     exp = {'E':'e', 'F':'f'}
     assert_equal(exp, obs)
+
+# def test_U235():
+#     u235 = Library('U235.txt')
+#     print u235.debug
+#     assert(True)
 
 
 if __name__ == "__main__":
