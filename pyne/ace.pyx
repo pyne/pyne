@@ -15,6 +15,7 @@ generates ACE-format cross sections.
 
 .. moduleauthor:: Paul Romano <paul.k.romano@gmail.com>, Anthony Scopatz <scopatz@gmail.com>
 """
+
 import struct
 from warnings import warn
 from collections import OrderedDict
@@ -417,7 +418,7 @@ class NeutronTable(AceTable):
                                       n_reactions], dtype=float)
         tys = np.asarray(self.xss[self.jxs[5]:self.jxs[5] + n_reactions], dtype=int)
 
-                             # Create all reactions other than elastic scatter
+        # Create all reactions other than elastic scatter
         reactions = [(mt, Reaction(mt, self)) for mt in mts]
         self.reactions.update(reactions)
 
