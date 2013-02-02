@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 
-"""
-Module for parsing and manipulating data from ENDF
-evaluations. Currently, it only can read several MTs from File 1, but
-with time it will be expanded to include the entire ENDF format.
+
+"""Module for parsing and manipulating data from ENDF evaluations. Currently, it
+only can read several MTs from File 1, but with time it will be expanded to
+include the entire ENDF format.
 
 All the classes and functions in this module are based on document
 ENDF-102 titled "Data Formats and Procedures for the Evaluated Nuclear
@@ -11,15 +11,19 @@ Data File ENDF-6". The latest version from June 2009 can be found at
 http://www-nds.iaea.org/ndspub/documents/endf/endf102/endf102.pdf
 
 For more information on this module, contact Paul Romano
-<romano7@gmail.com> or John Xia <john.danger.xia@gmail.com>. 
+<paul.k.romano@gmail.com>
 """
+
 import re
 import os
 import warnings
 
 import numpy as np
 
+import matplotlib.pyplot as plt
+
 import pyne.rxdata as rx
+from pyne.rxname import label
 
 number = " (\d.\d+(?:\+|\-)\d)"
 
@@ -1442,7 +1446,7 @@ class Evaluation(object):
 
     def print_info(self, MF, MT):
         if self.verbose:
-            print("Reading MF={0}, MT={1} {2}".format(MF, MT, MTname[MT]))
+            print("Reading MF={0}, MT={1} {2}".format(MF, MT, label(MT)))
 
     def __iter__(self):
         for f in self.files:
@@ -1789,7 +1793,7 @@ class ENDFReaction(ENDFFile):
         self.MT = MT
 
     def __repr__(self):
-        return "<ENDF Reaction: MT={0}, {1}>".format(self.MT, MTname[self.MT])
+        return "<ENDF Reaction: MT={0}, {1}>".format(self.MT, label(self.MT))
 
 class Resonance(object):
     def __init__(self):
@@ -1847,6 +1851,7 @@ def numpy_to_ENDF(num):
         
 print numpy_to_ENDF(7.99687)
                 
+<<<<<<< HEAD
 MTname = {1: "(n,total) Neutron total",
           2: "(z,z0) Elastic scattering",
           3: "(z,nonelas) Nonelastic neutron",
@@ -2022,6 +2027,8 @@ MTname = {1: "(n,total) Neutron total",
           570: "Q1 (7s1/2) subshell",
           571: "Q2 (7p1/2) subshell",
           572: "Q3 (7p3/2) subshell"}
+=======
+>>>>>>> upstream/staging
 
 class NotFound(Exception):
     def __init__(self, value):
