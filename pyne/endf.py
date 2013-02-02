@@ -1848,10 +1848,7 @@ def numpy_to_ENDF(num):
     # if type(num) is float:
     result = '% 9.6e' % num
     return result[:-4] + result[-3:-2] + result[-1]
-        
-print numpy_to_ENDF(7.99687)
-                
-<<<<<<< HEAD
+
 MTname = {1: "(n,total) Neutron total",
           2: "(z,z0) Elastic scattering",
           3: "(z,nonelas) Nonelastic neutron",
@@ -2027,8 +2024,7 @@ MTname = {1: "(n,total) Neutron total",
           570: "Q1 (7s1/2) subshell",
           571: "Q2 (7p1/2) subshell",
           572: "Q3 (7p3/2) subshell"}
-=======
->>>>>>> upstream/staging
+
 
 class NotFound(Exception):
     def __init__(self, value):
