@@ -10,7 +10,7 @@ from pyne.rxdata import DoubleSpinDict
 import nose
 from nose.tools import assert_equal
 
-new_library = StringIO.StringIO(
+str_library = StringIO.StringIO(
 """ $Rev:: 532      $  $Date:: 2011-12-05#$                             1 0  0    0
  1.002000+3 1.996800+0          1          0          0          0 128 1451    1
  0.000000+0 0.000000+0          0          0          0          6 128 1451    2
@@ -205,7 +205,8 @@ convallis tristique sem.                                           419 1451   14
  0.000000+0 0.000000+0          0          0          0          0  -1 0  0    0
 """)
 
-library = Library(new_library)
+
+library = Library(str_library)
 
 
 def test_mats():
@@ -258,11 +259,12 @@ def test_unresolved_resonances_b():
     obs = library.mat419['data']['unresolved'][0][2]
 
     obs_ES = obs[3.5,0,419]['ES']
-    exp_ES = 100 * np.array([10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]) 
+    exp_ES = 100 * np.array([10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20])
 
     obs_419_GF = obs[3.5,0,419]['GF']
-    exp_419_GF = np.array([2.000000e3, 2.100000e3, 2.200000e3, 2.300000e3, 2.400000e3, 2.500000e3,
-                        2.600000e3, 2.700000e3, 2.800000e3, 2.900000e3, 3.000000e3])
+    exp_419_GF = np.array([2.000000e3, 2.100000e3, 2.200000e3, 2.300000e3,
+                           2.400000e3, 2.500000e3, 2.600000e3, 2.700000e3,
+                           2.800000e3, 2.900000e3, 3.000000e3])
 
     assert_array_equal(exp_ES, obs_ES)
     assert_array_equal(exp_419_GF, obs_419_GF)
@@ -292,9 +294,11 @@ def test_DoubleSpinDict():
     assert_equal(exp, obs)
 
 # def test_U235():
+# This test file can be found here:
+# http://t2.lanl.gov/data/data/ENDFB-VII.1-neutron/U/235
+# It is very big (51 MB), so it is not included.
 #     u235 = Library('U235.txt')
-#     print u235.debug
-#     assert(True)
+#     assert(True==False)
 
 
 if __name__ == "__main__":

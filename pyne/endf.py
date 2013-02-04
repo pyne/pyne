@@ -17,6 +17,7 @@ For more information on this module, contact Paul Romano
 import re
 import os
 import warnings
+import StringIO
 
 import numpy as np
 
@@ -39,7 +40,7 @@ class Library(rx.RxLib):
     of Materials and Files.
     """
 
-    def __init__(self, fh):
+    def __init__(self, fh, resonances=True):
         opened_here = False
         self.fh = fh
         if isinstance(fh, basestring):
@@ -56,14 +57,13 @@ class Library(rx.RxLib):
         self.offset = 1
 
         self.data = self.load()
-
         while self.more_files:
             self._read_headers()
         # Close the file before we have a chance to break anything.
         if opened_here:
             self.fh.close()
-
-        self.make_resonances()
+        if resonances:
+            self.make_resonances()
 
     def load(self):
         warnings.filterwarnings("ignore", "Some errors were detected !")
@@ -80,7 +80,21 @@ class Library(rx.RxLib):
                                            5: convert})
         return data
 
+    def seek_matmfmt(self, mat_id, mf, mt):
+        self.fh.seek(0)
+        searchString = '{0:4}{1:2}{2:3}'.format(mat_id, mf, mt)
+        while True:
+            position = self.fh.tell()
+            line = self.fh.readline()
+            if line == '':
+                # Reached EOF
+                raise NotFound('Reaction not found:{0}'.format(searchString))
+            if line[66:75] == searchString:
+                self.fh.seek(position)
+                break
+
     def _read_headers(self):
+
         # Skip the first line and get the material ID.
         self.fh.seek(self.chars_til_now+81)
         line = self.fh.readline()
@@ -89,20 +103,20 @@ class Library(rx.RxLib):
         if mat_id not in self.structure:
             self.offset -= 1
         # We need to make a data structure modeled after GND.
-        self.structure.update(
-            {mat_id:{'styles':'',
-                     'docs':[],
-                     'particles':[],
-                     'data':{'resolved':{},
-                             'unresolved':{},
-                             'datadocs':[],
-                             'xs':[],
-                             'output':{'channel1':[],
-                                       'channel2':[]}},
-                     'matflags':{}}})
+            self.structure.update(
+                {mat_id:{'styles':'',
+                         'docs':[],
+                         'particles':[],
+                         'data':{'resolved':{},
+                                 'unresolved':{},
+                                 'datadocs':[],
+                                 'xs':[],
+                                 'output':{'channel1':[],
+                                           'channel2':[]}},
+                         'matflags':{}}})
 
-        self.mat_dict.update({mat_id:{'end_line':[],
-                                      'mfs':{}}})
+            self.mat_dict.update({mat_id:{'end_line':[],
+                                          'mfs':{}}})
 
         # parse header (all lines with 1451)
         comments = ''
@@ -110,12 +124,12 @@ class Library(rx.RxLib):
         stop = self.chars_til_now/81
         while re.search('1451 +\d{1,3}', line):
             # parse contents section
-            if re.match(' +\d{1,2} +\d{1,3} +\d{1,4} +', line):
+            if re.match(' +\d{1,2} +\d{1,3} +\d{1,10} +', line):
                 # SEND and FEND records are not counted in the contents,
                 # but still take up space.  We need to account for that.
                 old_mf = mf
-                mf, mt = int(line[31:33]), int(line[41:44])
-                mt_length = int(line[50:55])
+                mf, mt = int(line[22:33]), int(line[33:44])
+                mt_length = int(line[44:55])
                 if old_mf == mf:
                     start = stop + 1
                     stop = start+mt_length
@@ -123,10 +137,8 @@ class Library(rx.RxLib):
                     start = stop + 2
                     stop = start + mt_length
                 stop = start + mt_length
-                self.mat_dict[mat_id]['mfs'][mf]={}
-                self.mat_dict[mat_id]['mfs'][mf][mt] = (start+self.offset,
-                                                stop+self.offset)
-
+                self.mat_dict[mat_id]['mfs'][mf,mt] = (start+self.offset,
+                                                       stop+self.offset)
                 line = self.fh.readline()
             # parse comment
             elif re.match(' {66}', line):
@@ -150,13 +162,22 @@ class Library(rx.RxLib):
             setattr(self, "mat{0}".format(mat_id), self.structure[mat_id])
 
         # Read flags from MT 1.
-        header = self.read_mfmt(mat_id, 1, 451)
-        flagkeys = ['ZA', 'AWR', 'LRP', 'LFI', 'NLIB', 'NMOD', 'ELIS', 'STA',
-                    'LIS', 'LIS0', None, 'NFOR', 'AWI', 'EMAX', 'LREL', None,
-                    'NSUB', 'NVER', 'TEMP', None, 'LDRV', None, 'NWD', 'NXC']
+        flagvals = []
+        # if mat_id in (-1, 0):
+        #     pass
+        # else:
+        self.seek_matmfmt(mat_id, 1, 451)
+        for i in range(2):
+            line = self.fh.readline()
+            for j in range(6):
+                flagvals.append(convert(line[j*11:(j+1)*11]))
+        flagkeys = ['ZA', 'AWR', 'LRP', 'LFI', 'NLIB', 'NMOD', 'ELIS',
+                    'STA', 'LIS', 'LIS0', None, 'NFOR', 'AWI', 'EMAX',
+                    'LREL', None, 'NSUB', 'NVER', 'TEMP', None, 'LDRV',
+                    None, 'NWD', 'NXC']
 
         self.structure[mat_id].update({'matflags':
-            dict(zip(flagkeys, header[:len(flagkeys)]))})
+                                       dict(zip(flagkeys, flagvals))})
         del self.structure[mat_id]['matflags'][None]
 
     def is_isotope_line(self, line):
@@ -231,10 +252,15 @@ class Library(rx.RxLib):
                 # If the LRP flag for the material is -1, there is no
                 # resonance data provided.
                 pass
+            elif mat_id in (-1,0):
+                pass
             else:
                 # Put the line structure back in the array.  Let's get down
                 # to business to read the HEAD record.
-                mf2 = np.reshape(self.read_mfmt(mat_id, 2, 151), (-1, 6))
+                try:
+                    mf2 = np.reshape(self.read_mfmt(mat_id, 2, 151), (-1, 6))
+                except ValueError:
+                    raise ValueError(self.read_mfmt(mat_id, 2, 151))
                 head = mf2[0]
                 za, awr, nis = head[0], head[1], head[4]
 
@@ -447,7 +473,7 @@ class Library(rx.RxLib):
         mt: ENDF reaction number (MT)
         """
         if mat_id in self.structure:
-            start, stop = self.mat_dict[mat_id]['mfs'][mf][mt]
+            start, stop = self.mat_dict[mat_id]['mfs'][mf,mt]
             start = (start - 1) * 6
             stop = (stop-1)*6
             return self.data.flat[start:stop]
@@ -1123,7 +1149,7 @@ class Evaluation(object):
             iyield.data[E]['yi'] = zip(itemList[2::4],itemList[3::4]) # Independent yield
 
         # Skip SEND record
-        self.fh.readline()        
+        self.fh.readline()
 
     def _read_cumulative_yield(self):
         self.print_info(8, 459)
@@ -1826,15 +1852,17 @@ def convert(string):
     This function converts a number listed on an ENDF tape into a float or int
     depending on whether an exponent is present.
     """
-  
-    if re.search('[^ 0-9+\-\.]', string):
+    try:
+        if re.search('[^ 0-9+\-\.]', string):
+            return float(string)
+        elif string[-2] in '+-':
+            return float(string[:-2] + 'e' + string[-2:])
+        elif string[-3] in '+-':
+            return float(string[:-3] + 'e' + string[-3:])
+        else:
+            return float(string)
+    except ValueError:
         return None
-    elif string[-2] in '+-':
-        return float(string[:-2] + 'e' + string[-2:])
-    elif string[-3] in '+-':
-        return float(string[:-3] + 'e' + string[-3:])
-    else:
-        return float(string)
 
 def numpy_to_ENDF(num):
     """
