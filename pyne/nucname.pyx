@@ -129,6 +129,33 @@ def current_form(nuc):
 
 
 #
+# Is Nuclide Function
+#
+
+def isnuclide(nuc):
+    """Test if nuc is a valid nuclide.
+
+    Parameters
+    ----------
+    nuc : int or str 
+        Input nuclide(s).
+
+    Returns
+    -------
+    flag : bool
+
+    """
+    if isinstance(nuc, basestring):
+        flag = cpp_nucname.isnuclide(<char *> nuc)
+    elif isinstance(nuc, int) or isinstance(nuc, long):
+        flag = cpp_nucname.isnuclide(<int> nuc)
+    else:
+        raise NucTypeError(nuc)
+
+    return flag
+
+
+#
 # zzaaam Functions
 #
 

@@ -1,6 +1,6 @@
-"""This module is for reading ACE-format cross sections. ACE stands for "A Compact
-ENDF" format and originated from work on MCNP_. It is used in a number of other
-Monte Carlo particle transport codes.
+"""This module is for reading ACE-format cross sections. ACE stands for "A
+Compact ENDF" format and originated from work on MCNP_. It is used in a number
+of other Monte Carlo particle transport codes.
 
 ACE-format cross sections are typically generated from ENDF_ files through a
 cross section processing program like NJOY_. The ENDF data consists of tabulated
@@ -10,13 +10,12 @@ ENDF data has been reconstructed and Doppler-broadened, the ACER module
 generates ACE-format cross sections.
 
 .. _MCNP: https://laws.lanl.gov/vhosts/mcnp.lanl.gov/
-
 .. _NJOY: http://t2.lanl.gov/codes.shtml
-
 .. _ENDF: http://www.nndc.bnl.gov/endf
 
 .. moduleauthor:: Paul Romano <paul.k.romano@gmail.com>, Anthony Scopatz <scopatz@gmail.com>
 """
+
 import struct
 from warnings import warn
 from collections import OrderedDict
@@ -27,6 +26,7 @@ from bisect import bisect_right
 
 from pyne cimport nucname
 from pyne import nucname
+from pyne.rxname import label
 
 # fromstring func should depend on numpy verison
 from pyne._utils import fromstring_split, fromstring_token
@@ -418,7 +418,7 @@ class NeutronTable(AceTable):
                                       n_reactions], dtype=float)
         tys = np.asarray(self.xss[self.jxs[5]:self.jxs[5] + n_reactions], dtype=int)
 
-                             # Create all reactions other than elastic scatter
+        # Create all reactions other than elastic scatter
         reactions = [(mt, Reaction(mt, self)) for mt in mts]
         self.reactions.update(reactions)
 
@@ -1461,7 +1461,7 @@ class Reaction(object):
         return self.table.energy[self.IE]
 
     def __repr__(self):
-        name = reaction_names.get(self.MT, None)
+        name = label(self.MT)
         if name is not None:
             rep = "<ACE Reaction: MT={0} {1}>".format(self.MT, name)
         else:
@@ -1562,78 +1562,6 @@ table_types = {
     "g": PhotoatomicMGTable,
     "e": ElectronTable,
     "u": PhotonuclearTable}
-
-reaction_names = {
-    # TODO: This should be provided as part of the ENDF module functionality
-    1: '(n,total)',
-    2: '(n,elastic)',
-    3: '(n,nonelastic)',
-    4: '(n,inelastic)',
-    5: '(misc)',
-    10: '(n,continuum)',
-    11: '(n,2n d)',
-    16: '(n,2n)',
-    17: '(n,3n)',
-    18: '(n,fission)',
-    19: '(n,f)',
-    20: '(n,nf)',
-    21: '(n,2nf)',
-    22: '(n,na)',
-    23: '(n,n3a)',
-    24: '(n,2na)',
-    25: '(n,3na)',
-    28: '(n,np)',
-    29: '(n,n2a)',
-    30: '(n,2n2a)',
-    32: '(n,nd)',
-    33: '(n,nt)',
-    34: '(n,n He-3)',
-    35: '(n,nd3a)',
-    36: '(n,nt2a)',
-    37: '(n,4n)',
-    38: '(n,3nf)',
-    41: '(n,2np)',
-    42: '(n,3np)',
-    44: '(n,2np)',
-    45: '(n,npa)',
-    91: '(n,nc)',
-    102: '(n,gamma)',
-    103: '(n,p)',
-    104: '(n,d)',
-    105: '(n,t)',
-    106: '(n,3He)',
-    107: '(n,a)',
-    108: '(n,2a)',
-    109: '(n,3a)',
-    111: '(n,2p)',
-    112: '(n,pa)',
-    113: '(n,t2a)',
-    114: '(n,d2a)',
-    115: '(n,pd)',
-    116: '(n,pt)',
-    117: '(n,da)',
-    201: '(n,Xn)',
-    202: '(n,Xgamma)',
-    203: '(n,Xp)',
-    204: '(n,Xd)',
-    205: '(n,Xt)',
-    206: '(n,X3He)',
-    207: '(n,Xa)',
-    444: '(damage)',
-    649: '(n,pc)',
-    699: '(n,dc)',
-    749: '(n,tc)',
-    799: '(n,3Hec)',
-    849: '(n,ac)',
-    }
-"""Dictionary of MT reaction labels"""
-reaction_names.update({mt: '(n,n{0})'.format(mt - 50) for mt in range(50, 91)})
-reaction_names.update({mt: '(n,p{0})'.format(mt - 600) for mt in range(600, 649)})
-reaction_names.update({mt: '(n,d{0})'.format(mt - 650) for mt in range(650, 699)})
-reaction_names.update({mt: '(n,t{0})'.format(mt - 700) for mt in range(700, 649)})
-reaction_names.update({mt: '(n,3He{0})'.format(mt - 750) for mt in range(750, 799)})
-reaction_names.update({mt: '(n,a{0})'.format(mt - 800) for mt in range(700, 649)})
-
 
 if __name__ == '__main__':
     # Might be nice to check environment variable DATAPATH to search for xsdir
