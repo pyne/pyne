@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 
-"""
-Module for parsing and manipulating data from ENDF
-evaluations. Currently, it only can read several MTs from File 1, but
-with time it will be expanded to include the entire ENDF format.
+
+"""Module for parsing and manipulating data from ENDF evaluations. Currently, it
+only can read several MTs from File 1, but with time it will be expanded to
+include the entire ENDF format.
 
 All the classes and functions in this module are based on document
 ENDF-102 titled "Data Formats and Procedures for the Evaluated Nuclear
@@ -11,15 +11,20 @@ Data File ENDF-6". The latest version from June 2009 can be found at
 http://www-nds.iaea.org/ndspub/documents/endf/endf102/endf102.pdf
 
 For more information on this module, contact Paul Romano
-<romano7@gmail.com> or John Xia <john.danger.xia@gmail.com>. 
+<paul.k.romano@gmail.com>
 """
+
 import re
 import os
 import warnings
+import StringIO
 
 import numpy as np
 
+import matplotlib.pyplot as plt
+
 import pyne.rxdata as rx
+from pyne.rxname import label
 
 number = " (\d.\d+(?:\+|\-)\d)"
 
@@ -35,7 +40,7 @@ class Library(rx.RxLib):
     of Materials and Files.
     """
 
-    def __init__(self, fh):
+    def __init__(self, fh, resonances=True):
         opened_here = False
         self.fh = fh
         if isinstance(fh, basestring):
@@ -52,31 +57,44 @@ class Library(rx.RxLib):
         self.offset = 1
 
         self.data = self.load()
-
         while self.more_files:
-            self._read_headers()        
+            self._read_headers()
         # Close the file before we have a chance to break anything.
         if opened_here:
             self.fh.close()
-
-        self.make_resonances()
+        if resonances:
+            self.make_resonances()
 
     def load(self):
         warnings.filterwarnings("ignore", "Some errors were detected !")
-        data = np.genfromtxt(self.fh, 
-                             delimiter = 11, 
-                             usecols = (0, 1, 2, 3, 4, 5), 
+        data = np.genfromtxt(self.fh,
+                             delimiter = 11,
+                             usecols = (0, 1, 2, 3, 4, 5),
                              invalid_raise = False,
                              skip_header = 1,
                              converters = {0: convert,
-                                           1: convert, 
+                                           1: convert,
                                            2: convert,
-                                           3: convert, 
-                                           4: convert, 
+                                           3: convert,
+                                           4: convert,
                                            5: convert})
         return data
-                                                
+
+    def seek_matmfmt(self, mat_id, mf, mt):
+        self.fh.seek(0)
+        searchString = '{0:4}{1:2}{2:3}'.format(mat_id, mf, mt)
+        while True:
+            position = self.fh.tell()
+            line = self.fh.readline()
+            if line == '':
+                # Reached EOF
+                raise NotFound('Reaction not found:{0}'.format(searchString))
+            if line[66:75] == searchString:
+                self.fh.seek(position)
+                break
+
     def _read_headers(self):
+
         # Skip the first line and get the material ID.
         self.fh.seek(self.chars_til_now+81)
         line = self.fh.readline()
@@ -85,20 +103,20 @@ class Library(rx.RxLib):
         if mat_id not in self.structure:
             self.offset -= 1
         # We need to make a data structure modeled after GND.
-        self.structure.update(
-            {mat_id:{'styles':'',
-                     'docs':[],
-                     'particles':[],
-                     'data':{'resolved':{},
-                             'unresolved':{},
-                             'datadocs':[],
-                             'xs':[],
-                             'output':{'channel1':[],
-                                       'channel2':[]}},
-                     'matflags':{}}})
+            self.structure.update(
+                {mat_id:{'styles':'',
+                         'docs':[],
+                         'particles':[],
+                         'data':{'resolved':{},
+                                 'unresolved':{},
+                                 'datadocs':[],
+                                 'xs':[],
+                                 'output':{'channel1':[],
+                                           'channel2':[]}},
+                         'matflags':{}}})
 
-        self.mat_dict.update({mat_id:{'end_line':[],
-                                      'mfs':{}}}) 
+            self.mat_dict.update({mat_id:{'end_line':[],
+                                          'mfs':{}}})
 
         # parse header (all lines with 1451)
         comments = ''
@@ -106,12 +124,12 @@ class Library(rx.RxLib):
         stop = self.chars_til_now/81
         while re.search('1451 +\d{1,3}', line):
             # parse contents section
-            if re.match(' +\d{1,2} +\d{1,3} +\d{1,4} +', line):
+            if re.match(' +\d{1,2} +\d{1,3} +\d{1,10} +', line):
                 # SEND and FEND records are not counted in the contents,
                 # but still take up space.  We need to account for that.
                 old_mf = mf
-                mf, mt = int(line[31:33]), int(line[41:44])
-                mt_length = int(line[50:55])
+                mf, mt = int(line[22:33]), int(line[33:44])
+                mt_length = int(line[44:55])
                 if old_mf == mf:
                     start = stop + 1
                     stop = start+mt_length
@@ -119,11 +137,8 @@ class Library(rx.RxLib):
                     start = stop + 2
                     stop = start + mt_length
                 stop = start + mt_length
-                
-                self.mat_dict[mat_id]['mfs'][mf]={}
-                self.mat_dict[mat_id]['mfs'][mf][mt] = (start+self.offset,
-                                                stop+self.offset)
-
+                self.mat_dict[mat_id]['mfs'][mf,mt] = (start+self.offset,
+                                                       stop+self.offset)
                 line = self.fh.readline()
             # parse comment
             elif re.match(' {66}', line):
@@ -147,13 +162,22 @@ class Library(rx.RxLib):
             setattr(self, "mat{0}".format(mat_id), self.structure[mat_id])
 
         # Read flags from MT 1.
-        header = self.read_mfmt(mat_id, 1, 451)
-        flagkeys = ['ZA', 'AWR', 'LRP', 'LFI', 'NLIB', 'NMOD', 'ELIS', 'STA', 
-                    'LIS', 'LIS0', None, 'NFOR', 'AWI', 'EMAX', 'LREL', None,
-                    'NSUB', 'NVER', 'TEMP', None, 'LDRV', None, 'NWD', 'NXC']
+        flagvals = []
+        # if mat_id in (-1, 0):
+        #     pass
+        # else:
+        self.seek_matmfmt(mat_id, 1, 451)
+        for i in range(2):
+            line = self.fh.readline()
+            for j in range(6):
+                flagvals.append(convert(line[j*11:(j+1)*11]))
+        flagkeys = ['ZA', 'AWR', 'LRP', 'LFI', 'NLIB', 'NMOD', 'ELIS',
+                    'STA', 'LIS', 'LIS0', None, 'NFOR', 'AWI', 'EMAX',
+                    'LREL', None, 'NSUB', 'NVER', 'TEMP', None, 'LDRV',
+                    None, 'NWD', 'NXC']
 
-        self.structure[mat_id].update({'matflags': 
-            dict(zip(flagkeys, header[:len(flagkeys)]))})
+        self.structure[mat_id].update({'matflags':
+                                       dict(zip(flagkeys, flagvals))})
         del self.structure[mat_id]['matflags'][None]
 
     def is_isotope_line(self, line):
@@ -161,13 +185,13 @@ class Library(rx.RxLib):
         returns True."""
         zai, abn, lfw, ner = line[0], line[1], line[3], line[4]
         return ((line[2] == line[5] == 0) and
-                lfw in (1,0) and 
-                int(ner) == ner and 
+                lfw in (1,0) and
+                int(ner) == ner and
                 abn <= 1 and
                 zai >= 1000)
 
     def is_range_line(self, line):
-        """ Determine whether this line is the beginning of a new resonance 
+        """ Determine whether this line is the beginning of a new resonance
         range.  Line format must match EL, EH, LRU, LRF, NRO, NAPS. """
         el, eh, lru, lrf, nro, naps = line
         return (el < eh and
@@ -182,7 +206,7 @@ class Library(rx.RxLib):
         """
         return ((nro == 0 and naps in (0, 1)) or
                 (nro == 1 and naps in (0, 1, 2)))
-    
+
     def parse_isotope_line(self, line):
         """ If the line is the beginning of resonance data for an isotope,
         makes a dictionary of the isotope-specific flags for easy access."""
@@ -206,14 +230,14 @@ class Library(rx.RxLib):
         else:
             range_flags = None
         return range_flags
-        
+
     def make_resonances(self):
         """ Read the resonance data from all the materials in the library
-        and return a nested dictionary with the resonance data. To get at the 
-        resonance data, use: 
+        and return a nested dictionary with the resonance data. To get at the
+        resonance data, use:
 
         'library.mat{0}['data'][{1}][{2}][2][{3}]'.format(mat_id,
-                                                          'resolved' or 
+                                                          'resolved' or
                                                               'unresolved',
                                                           range number,
                                                           data type you want)
@@ -228,28 +252,31 @@ class Library(rx.RxLib):
                 # If the LRP flag for the material is -1, there is no
                 # resonance data provided.
                 pass
+            elif mat_id in (-1,0):
+                pass
             else:
                 # Put the line structure back in the array.  Let's get down
                 # to business to read the HEAD record.
-                mf2 = np.reshape(self.read_mfmt(mat_id, 2, 151), (-1, 6))
+                try:
+                    mf2 = np.reshape(self.read_mfmt(mat_id, 2, 151), (-1, 6))
+                except ValueError:
+                    raise ValueError(self.read_mfmt(mat_id, 2, 151))
                 head = mf2[0]
-                za = head[0]
-                awr = head[1]
-                nis = head[4]
+                za, awr, nis = head[0], head[1], head[4]
 
             if lrp == 0:
                 # In this case, only scattering radius is provided.
                 pass
-            
+
             elif lrp == 1:
                 # Resonance contributions are all present and accounted for.
                 isotope_flags = {}
                 range_flags = {}
-                for i in range(len(mf2)):
-                    if self.is_isotope_line(mf2[i]):
-                        isotope_flags = self.parse_isotope_line(mf2[i])
-                    elif self.is_range_line(mf2[i]):
-                        range_flags = self.parse_range_line(mf2[i])
+                for i, line in enumerate(mf2):
+                    if self.is_isotope_line(line):
+                        isotope_flags = self.parse_isotope_line(line)
+                    elif self.is_range_line(line):
+                        range_flags = self.parse_range_line(line)
                     else:
                         # If this line is neither a range nor an isotope line:
                         if self.is_range_line(mf2[i-1]):
@@ -298,7 +325,7 @@ class Library(rx.RxLib):
             which contains starting/stopping positions and a numpy array.
 
         isotope_flags: dictionary of flags specific to the isotope
-        
+
         mat_id: integer material id as represented in ENDF standard
         """
         lfw = isotope_flags['LFW']
@@ -318,19 +345,18 @@ class Library(rx.RxLib):
                 # This is Case A from the ENDF manual, pp.69-70.
                 def is_spi_line(line):
                     spi, lssf, nls = line[0::2]
-                    return (lssf in (0,1) and 
-                            line[3] == line[5] == 0 and 
+                    return (lssf in (0,1) and
+                            line[3] == line[5] == 0 and
                             (2*spi+nls) == int(2*spi+nls) and
                             spi < 1000)
-                    
+
                 def is_l_line(line):
                     L, num_entries, njs  = line[2], line[4], line[5]
-                    return (not line[1:4:2].any() and 
+                    return (not line[1:4:2].any() and
                             (L+njs) == int(L+njs) and
                             6*njs == num_entries)
 
-                for i in range(len(raw_data)):
-                    line = raw_data[i]
+                for i, line in enumerate(raw_data):
                     if is_spi_line(line):
                         spi = line[0]
                     elif is_l_line(line):
@@ -340,18 +366,18 @@ class Library(rx.RxLib):
                         for line in current_L_region:
                             # Each line has an AJ value; we parse line-by-line.
                             aj = int(round(line[1]))
-                            aj_data = {(spi, L, aj):{'D': line[0], 
+                            aj_data = {(spi, L, aj):{'D': line[0],
                                                      'AMUN': line[2],
                                                      'GNO': line[3],
                                                      'GG': line[4]}}
                             range_data.update(aj_data)
-                        
+
             elif (lfw, lrf) == (1, 1):
                 # Case B:
                 def is_spi_line(line):
                     spi, lssf, ne, nls = line[0], line[2], line[4], line[5]
-                    return (lssf in (0,1) and 
-                            line[3] == 0 and 
+                    return (lssf in (0,1) and
+                            line[3] == 0 and
                             (2*spi+nls) == int(2*spi+nls) and
                             spi < 1000)
 
@@ -361,14 +387,14 @@ class Library(rx.RxLib):
                             int(njs) == njs and
                             njs < 6 and
                             int(L) == L)
-                                
+
                 for i in range(len(raw_data)):
                     line = raw_data[i]
                     if is_spi_line(line):
                         spi, ne = line[0], line[4]
                         es_start = 6*(i+1)
                         es_stop = es_start+ne
-                        # Case B data is ES-independent except for GF, so we 
+                        # Case B data is ES-independent except for GF, so we
                         # have a common ES array.
                         es_array = raw_data.flat[es_start:es_stop]
                     elif is_l_line(line):
@@ -387,25 +413,25 @@ class Library(rx.RxLib):
                             'GG': aj_line[4],
                             'GF': raw_data.flat[gf_start:gf_stop]}}
                         range_data.update(aj_data)
-                            
+
             elif lrf == 2:
                 # Case C:
                 def is_spi_line(line):
                     spi, lssf, nls = line[0::2]
-                    return (lssf in (0,1) and 
-                            line[3] == line[5] == 0 and 
+                    return (lssf in (0,1) and
+                            line[3] == line[5] == 0 and
                             (2*spi+nls) == int(2*spi+nls) and
                             spi < 1000)
-                    
+
                 def is_j_line(line):
                     aj, num_entries, ne = line[0], line[4], line[5]
-                    return (int(2*aj) == 2*aj and 
-                            6*ne + 6 == num_entries and 
+                    return (int(2*aj) == 2*aj and
+                            6*ne + 6 == num_entries and
                             not line[1:4:2].any())
-                    
+
                 def is_l_line(line):
                     L, njs = line[2], line[4]
-                    return (not (line[1::2].any() or is_j_line(line)) and 
+                    return (not (line[1::2].any() or is_j_line(line)) and
                             (L+njs) == int(L+njs))
 
                 for i in range(len(raw_data)):
@@ -420,14 +446,14 @@ class Library(rx.RxLib):
                         current_aj_region = raw_data.flat[6*(i+2):
                                                           6*(i+1)+num_entries]
                         aj_data = {(spi, L, aj): {
-                            'ES': current_aj_region[0::6], 
+                            'ES': current_aj_region[0::6],
                             'D': current_aj_region[1::6],
                             'GX': current_aj_region[2::6],
                             'GNO': current_aj_region[3::6],
                             'GG': current_aj_region[4::6],
                             'GF': current_aj_region[5::6]}}
                         range_data.update(aj_data)
-                        
+
             # Now that the range's data has been fully updated, we can drop
             # it in a tuple, drop *that* into the list of unresolved resonances,
             # and sort the list.
@@ -436,7 +462,7 @@ class Library(rx.RxLib):
             self.structure[mat_id]['data']['unresolved'].append(
                 (el, eh, range_data, range_flags))
             self.structure[mat_id]['data']['unresolved'].sort()
-        
+
     def read_mfmt(self, mat_id, mf, mt):
         """Grabs the raw data from one MT number.
 
@@ -447,7 +473,7 @@ class Library(rx.RxLib):
         mt: ENDF reaction number (MT)
         """
         if mat_id in self.structure:
-            start, stop = self.mat_dict[mat_id]['mfs'][mf][mt]
+            start, stop = self.mat_dict[mat_id]['mfs'][mf,mt]
             start = (start - 1) * 6
             stop = (stop-1)*6
             return self.data.flat[start:stop]
@@ -457,7 +483,7 @@ class Library(rx.RxLib):
 
     def get(self, mat_id, mf, mt):
         return self.read_mfmt(mat_id, mf, mt)
-    
+
 
 class Evaluation(object):
     """
@@ -1123,7 +1149,7 @@ class Evaluation(object):
             iyield.data[E]['yi'] = zip(itemList[2::4],itemList[3::4]) # Independent yield
 
         # Skip SEND record
-        self.fh.readline()        
+        self.fh.readline()
 
     def _read_cumulative_yield(self):
         self.print_info(8, 459)
@@ -1446,7 +1472,7 @@ class Evaluation(object):
 
     def print_info(self, MF, MT):
         if self.verbose:
-            print("Reading MF={0}, MT={1} {2}".format(MF, MT, MTname[MT]))
+            print("Reading MF={0}, MT={1} {2}".format(MF, MT, label(MT)))
 
     def __iter__(self):
         for f in self.files:
@@ -1793,7 +1819,7 @@ class ENDFReaction(ENDFFile):
         self.MT = MT
 
     def __repr__(self):
-        return "<ENDF Reaction: MT={0}, {1}>".format(self.MT, MTname[self.MT])
+        return "<ENDF Reaction: MT={0}, {1}>".format(self.MT, label(self.MT))
 
 class Resonance(object):
     def __init__(self):
@@ -1826,15 +1852,17 @@ def convert(string):
     This function converts a number listed on an ENDF tape into a float or int
     depending on whether an exponent is present.
     """
-  
-    if re.search('[^ 0-9+\-\.]', string):
+    try:
+        if re.search('[^ 0-9+\-\.]', string):
+            return float(string)
+        elif string[-2] in '+-':
+            return float(string[:-2] + 'e' + string[-2:])
+        elif string[-3] in '+-':
+            return float(string[:-3] + 'e' + string[-3:])
+        else:
+            return float(string)
+    except ValueError:
         return None
-    elif string[-2] in '+-':
-        return float(string[:-2] + 'e' + string[-2:])
-    elif string[-3] in '+-':
-        return float(string[:-3] + 'e' + string[-3:])
-    else:
-        return float(string)
 
 def numpy_to_ENDF(num):
     """
@@ -1848,9 +1876,7 @@ def numpy_to_ENDF(num):
     # if type(num) is float:
     result = '% 9.6e' % num
     return result[:-4] + result[-3:-2] + result[-1]
-        
-print numpy_to_ENDF(7.99687)
-                
+
 MTname = {1: "(n,total) Neutron total",
           2: "(z,z0) Elastic scattering",
           3: "(z,nonelas) Nonelastic neutron",
@@ -2026,6 +2052,7 @@ MTname = {1: "(n,total) Neutron total",
           570: "Q1 (7s1/2) subshell",
           571: "Q2 (7p1/2) subshell",
           572: "Q3 (7p3/2) subshell"}
+
 
 class NotFound(Exception):
     def __init__(self, value):

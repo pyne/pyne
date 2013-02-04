@@ -221,6 +221,17 @@ namespace nucname
   std::string current_form(int nuc);
   /// \}
 
+  /// \name isnuclide functions
+  /// \{
+  /// These functions test if an input \a nuc is a valid nuclide.
+  /// \param nuc a possible nuclide
+  /// \return a bool
+  bool isnuclide(std::string nuc);
+  bool isnuclide(char * nuc);
+  bool isnuclide(int nuc);
+  /// \}
+
+
   /// \name ZZAAAM Form Functions
   /// \{
   /// The ZZAAAM nuclide naming convention is the canonical form for representing
