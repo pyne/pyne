@@ -4,37 +4,22 @@
 #include <stdio.h>
 #include <fstream>
 
-// #include "moab/Types.hpp"
 #include "DagWrapUtils.hh"
 #include "MBInterface.hpp"
 #include "MBCartVect.hpp"
 #include "DagMC.hpp"
-#include <map>
+// #include <map>
 
 using namespace moab;
 
 #define DAG DagMC::instance()
 #define NO_NAMES 1;
 #define DAGGEOMETRY_DEBUG 1;
-// Define these maps per FGeometryInit.hh
-/* As they were in FGeometryInit.hh
-  std::map<G4VPhysicalVolume*, int, std::less<G4VPhysicalVolume*> > fRegionVolumeMap;
-  std::map<G4Material*, FlukaMaterial*, std::less<G4Material*> > G4FlukaMaterialMap;
-  std::map<G4Material*, FlukaCompound*, std::less<G4Material*> > G4FlukaCompoundMap;
-*/
-std::map<EntityHandle*, int, std::less<EntityHandle*> > dRegionVolumeMap;
-std::map<int, std::string> dRegionNameMap;
-typedef std::map<int, std::string>::const_iterator DRegionIterator;
-typedef std::map<EntityHandle*, int, std::less<EntityHandle*> >::const_iterator RegionIterator;
-void BuildRegionsMap();
-void PrintRegionsMap(std::ostream& os);
-void PrintEntityRegionNames(std::ostream& os);
 
 
 //*****************************************************************************
 
 
-// void FGeometryInit::createFlukaMatFile() 
 void createFlukaMatFile() 
 {
   
@@ -53,9 +38,6 @@ void createFlukaMatFile()
 
 
   std::ofstream vos("Volumes_index.inp");
-  //Regions map
- // BuildRegionsMap();
- // PrintRegionsMap(vos);
   PrintEntityRegionNames(vos);
   vos.close();
 
@@ -76,106 +58,7 @@ void createFlukaMatFile()
 }
 
 ////////////////////////////////////////////////////////////////////////
-// 
-// void FGeometryInit::BuildRegionsMap() {
-void BuildRegionsMap() 
-{
-#ifdef DAGGEOMETRY_DEBUG
-  std::cout << "==> FluDAG BuildRegionsMap()" << std::endl;
-#endif
-
-  //Find number of Volumes in physical volume store
-////////////////////////////////////////////////////////////////////////
-  // G4PhysicalVolumeStore * pVolStore = G4PhysicalVolumeStore::GetInstance();
-////////////////////////////////////////////////////////////////////////
-  // unsigned int numVol = pVolStore->size();
-  unsigned int numVol = DAG->num_entities(3);
-
-  // cout << "\t* G4PhysicalVolumeStore (" << pVolStore 
-  std::cout << "\t* number of entities is " << numVol << " volumes. Iterating..." << std::endl;
-
-  std::string VVname;
-  std::string Vname;
-  EntityHandle entity = NULL;
-  for(unsigned int l=0; l < numVol; l++) 
-  {
-    // jcz:  FLUGG's G4VPhysicalVolume == DagMC's EntityHandle, I hope
-    //Get each of the physical volumes
-    // G4VPhysicalVolume * physicalvolume = (*pVolStore)[l];
-    entity = DAG->entity_by_id(3, l);
-    int iRegion = l+1;
-    dRegionVolumeMap[&entity] = iRegion;
-    // fRegionVolumeMap[physicalvolume] = iFlukaRegion;
-    //    cout << iRegion << " index,name " << G4Vname << endl;
-// jcz - hardcode 
-#ifdef NO_NAMES
-    char vname[8];
-    sprintf(vname,"%-8u",iRegion);
-    Vname.replace(0,8,vname);
-    //   cout<<iFlukaRegion<<" vname" << vname <<" Vname " << Vname<<endl;
-#else
-    // DString G4Vname =  physicalvolume->GetName();
-    // Vname = G4Vname;
-#endif
-    // ToDo: remove
-    // unsigned int s=Vname.size();
-    unsigned int found=Vname.rfind(" ",7);
-    // take out blanks
-    while (found<Vname.size()-1){
-      found=Vname.rfind(" ",7);
-      if (found<Vname.size()-1){
-	  std::string temp=Vname.substr(found+1);
-	  Vname.replace(found, temp.size(), temp);
-	  Vname.erase(Vname.size()-1);
-	  std::cout << Vname << std::endl;
-      } 
-    }
-
-    unsigned int nameSize=Vname.size();
-    if (nameSize > 8 ) {VVname=Vname.substr(0,7);}
-    else {VVname=Vname;}
-    std::cout << "VVname "<<VVname<< std::endl;
-    // check that name is unique, if not add numbering
-    unsigned int matrep = 1;
-    unsigned int ii=VVname.size()+3;
-    unsigned int  newSize = ii < 8 ? ii : 8;
-    bool old=true;
-    char smatrep[3];
-       while (old)
-       {
-	 old=false;
-         for ( DRegionIterator i=dRegionNameMap.begin(); i!=dRegionNameMap.end();i++)
-         {
-           sprintf(smatrep,"%03u",matrep);
-           Vname=(*i).second;
-           if (Vname==VVname)
-           {
-   	      old=true;
-   	      if (VVname.size()<=5)
-              {
-   	          VVname+=smatrep;
-              }
-   	      else
-              {
-   	          VVname.resize(newSize);
-   	          VVname.replace(VVname.size()-3, 3,smatrep);
-              }
-	   matrep++;
-           }
-         }
-       }
-      std::cout<< "VVname "<< VVname<< std::endl;
-      dRegionNameMap[iRegion]=VVname;
-  }
-  //add blackhole
-  int iRegion = numVol + 1;
-  dRegionNameMap[iRegion]="BLACKHOL";
-
-#ifdef DAGGEOMETRY_DEBUG
-  std::cout << "==> FluDAG BuildRegionsMap()" << std::endl;
-#endif
-}
-
+//  			makeRegionName()
 //////////////////////////////////////////////////////////////////////
 ///////				Create a name for Entity l
 ////// No Maps!
@@ -209,7 +92,11 @@ std::string makeRegionName(int l)
     if (nameSize > 8 ) {VVname=Vname.substr(0,7);}
     else {VVname=Vname;}
     std::cout << "VVname "<<VVname<< std::endl;
+    // ToDo:  Re-implement the maps if we need to check that the name is unique and there
+    // isn't another way.
+    // jcz - ask about this
     // check that name is unique, if not add numbering
+/*
     unsigned int matrep = 1;
     unsigned int ii=VVname.size()+3;
     unsigned int  newSize = ii < 8 ? ii : 8;
@@ -239,12 +126,16 @@ std::string makeRegionName(int l)
          }
        }
       std::cout<< "VVname "<< VVname<< std::endl;
+*/
       return VVname;
 }
 //////////////////////////////////////////////////////////////////////
 ///////			End makeRegionName
 /////////////////////////////////////////////////////////////////////
 
+//////////////////////////////////////////////////////////////////////
+///////			PrintEntityRegionNames()
+/////////////////////////////////////////////////////////////////////
 void PrintEntityRegionNames(std::ostream& os)
 {
 #ifdef DAGGEOMETRY_DEBUG
@@ -255,70 +146,31 @@ void PrintEntityRegionNames(std::ostream& os)
   unsigned int numVol = DAG->num_entities(3);
   for(unsigned int l=0; l < numVol; l++) 
   {
-    // entity = DAG->entity_by_id(3, l);
     int iRegion = l+1;
     Vname = makeRegionName(iRegion);
     //Print index and region name in some fixed format
-    os.setf(std::ios::left, std::ios::adjustfield);
-    os << setw10 << iRegion;
-    // jcz - Money call:  how to get the name out of MBEntity?
-    // ToDo:  replace fakename
-    // os << std::setw(20) << entity->GetName() << std::setw(20) << "";
-    os << std::setw(20) << "entname"  << std::setw(20) << "";
-    os << std::setw(5) << Vname << std::setw(5) << "";
-    os << std::endl;
+    writeRegionLine(os, iRegion, Vname);
   }
   int iRegion = numVol + 1;
   Vname = "BLACKHOL";
-  // ToDo:  Make these four lines a convenience function
-    os.setf(std::ios::left, std::ios::adjustfield);
-    os << setw10 << iRegion;
-    os << std::setw(20) << "entname"  << std::setw(20) << "";
-    os << std::setw(5) << Vname << std::setw(5) << "";
-  os << std::endl;
+  writeRegionLine(os, iRegion, Vname);
+
 #ifdef DAGGEOMETRY_DEBUG
   std::cout << "<== FluDAG PrintEntityRegionNames()" << std::endl;
 #endif
 }
 
-/**
-  The map created by the BuildRegionsMap() call is sent to a file (ostream).
-*/
-void PrintRegionsMap(std::ostream& os) 
+// Convenience function that is re-used
+void writeRegionLine(std::ostream& os, int iRegion, std::string name)
 {
-#ifdef DAGGEOMETRY_DEBUG
-  std::cout << "==> FluDAG PrintRegionsMap()" << std::endl;
-#endif
-
-  //Print some header
-#ifdef NO_NAMES
-  PrintHeader(os, "VOLUMES, and Fake Names");
-#else
-  PrintHeader(os, "GEANT4 VOLUMES, and Fluka names");
-#endif
-  // ToDo:  Change this to a call to get all the entities and remove the region iterators.
-  //Iterate over all volumes in the map
-  for (RegionIterator iter = dRegionVolumeMap.begin(); 
-       iter != dRegionVolumeMap.end(); 
-       iter++) 
-  {
-    
-    //Get info in the map
-    // G4VPhysicalVolume* ptrVol = (*i).first;
-    EntityHandle *entity = (*iter).first;
-    int index = (*iter).second;
-    // long unsigned int entityI = eh->second;
-    std::string Vname = dRegionNameMap[index];
-    //Print index and region name in some fixed format
     os.setf(std::ios::left, std::ios::adjustfield);
-    os << setw10 << index;
+    os << setw10 << iRegion;
     // jcz - Money call:  how to get the name out of MBEntity?
-    // ToDo:  replace fakename
+    // ToDo:  replace "entname" if possible
     // os << std::setw(20) << entity->GetName() << std::setw(20) << "";
     os << std::setw(20) << "entname"  << std::setw(20) << "";
-    os << std::setw(5) << Vname << std::setw(5) << "";
-
-    // ToDo:  duplicate this for DAG calls, if possible
+    os << std::setw(5) << name << std::setw(5) << "";
+    // ToDo:  duplicate this for DAG calls, if possible and necessary
     //If volume is a replica... print some more stuff
 /*
     if(ptrVol->IsReplicated()) 
@@ -334,13 +186,11 @@ void PrintRegionsMap(std::ostream& os)
     }
 */
     os << std::endl;
-    
-  }
-  
-#ifdef DAGGEOMETRY_DEBUG
-  std::cout << "<== FluDAG PrintRegionsMap()" << std::endl;
-#endif
 }
+//////////////////////////////////////////////////////////////////////
+///////			End PrintEntityRegionNames()
+/////////////////////////////////////////////////////////////////////
+
 
 ////////////////////////////////////////////////////////////////////////
 // 
@@ -732,6 +582,7 @@ void FGeometryInit::PrintMaterialTables(std::ostream& os) {
 */
 ////////////////////////////////////////////////////////////////////////
 // 
+/*
 void PrintAssignmat(std::ostream& os) 
 {
 #ifdef DAGGEOMETRY_DEBUG
@@ -778,7 +629,6 @@ void PrintAssignmat(std::ostream& os)
     int matIndex = 2;
     std::string mName ;
 
-/*
     if (G4FlukaCompoundMap[material]) 
     {
     matIndex = G4FlukaCompoundMap[material]->GetIndex();
@@ -792,9 +642,8 @@ void PrintAssignmat(std::ostream& os)
     // cout << "material, index  " <<matIndex<< endl;
     mName =  G4FlukaMaterialMap[material]->GetRealName(); 
     }
-*/
     //    cout << "mName " <<mName << endl;
-/*  jcz:  The following two if's assign matIndex, which is only used in a
+//  jcz:  The following two if's assign matIndex, which is only used in a
           commented cout.
     if (G4FlukaCompoundMap[material]) 
     {
@@ -812,7 +661,7 @@ void PrintAssignmat(std::ostream& os)
     G4FieldManager * pMagFieldMan = logicalVol->GetFieldManager();
     if(pMagFieldMan && pMagFieldMan->GetDetectorField())
       flagField = 1.0;
-*/    
+
     //Print card
     os << setw10 << "ASSIGNMAT ";
     os.setf(static_cast<std::ios::fmtflags>(0),std::ios::floatfield);
@@ -848,7 +697,7 @@ void PrintAssignmat(std::ostream& os)
   std::cout << "==> FluDAG PrintAssignmat()" << std::endl;
 #endif
 }
-
+*/
 /*
 void FGeometryInit::PrintMagneticField(std::ostream& os) {
 #ifdef DAGGEOMETRY_DEBUG
