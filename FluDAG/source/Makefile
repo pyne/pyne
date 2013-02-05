@@ -40,7 +40,7 @@ vpath %.f   for
 vpath %.c   c
 vpath %.o   obj
 
-mainfludag: mainFluDAG.o fluka_funcs.o readVol.o
+mainfludag: mainFluDAG.o fluka_funcs.o readVol.o createRegionAndMatFiles.o
 	gfortran -o $@ $^ $(MOAB_LIBS_LINK) $(FLUKA_LIBS_LINK) -lstdc++
 # Try this as well - 
 #	 g++ -o $@ $^ $(MOAB_LIBS_LINK) $(FLUKA_LIBS_LINK) 
@@ -78,6 +78,11 @@ mainFluDAG.o : mainFluDAG.cpp
 readVol.o : readVol.cpp 
 	g++ -c $(CXXFLAGS) $< 
 	mv $@ obj
+
+createRegionAndMatFiles.o : createRegionAndMatFiles.cpp
+	g++ -c $(CXXFLAGS) $< 
+	mv $@ obj
+
 
 test.stl : test.h5m
 	mbconvert $< $@
