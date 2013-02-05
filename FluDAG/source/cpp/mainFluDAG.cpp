@@ -18,6 +18,7 @@ extern "C" {
 
  // ToDo: move to header
  ErrorCode readVol(char *file);
+ void createFlukaMatFile();
 
 int main() {
 
@@ -43,6 +44,7 @@ int main() {
        std::string keyword = *kwdp;
        std::cout << "    " << keyword << std::endl;
   }
+  createFlukaMatFile();
 // Answer for test.h5m:
 ///////////////////////
 

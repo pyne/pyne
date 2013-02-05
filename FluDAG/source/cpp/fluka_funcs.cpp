@@ -37,6 +37,8 @@ static std::ostream* raystat_dump = NULL;
 
 #endif 
 
+#define DEBUG 1
+
 
 /* Static values used by dagmctrack_ */
 
@@ -59,10 +61,29 @@ std::string ExePath() {
     return std::string( buffer );
 }
 
+
+/**	
+  dagmcinit_ is meant to be called from a fortran caller.  Strings have to be 
+  accompanied by their length, and will need to be null-appended.
+*/
 void dagmcinit_(char *cfile, int *clen,  // geom
                 char *ftol,  int *ftlen, // faceting tolerance
                 int *parallel_file_mode, // parallel read mode
                 double* dagmc_version, int* moab_version, int* max_pbl )
+{
+
+        // Presumably this serves as output to a calling fortran program
+        *dagmc_version= DAG->version();
+        *moab_version = DAG->interface_revision();
+        // terminate all filenames with null char
+        cfile[*clen] = ftol[*ftlen] = '\0';
+	cpp_dagmcinit(cfile, *parallel_file_mode, *max_pbl);
+}
+
+
+void cpp_dagmcinit(char *cfile,     // geom
+                int parallel_file_mode, // parallel read mode
+                int max_pbl )
 {
  
   MBErrorCode rval;
@@ -72,17 +93,14 @@ void dagmcinit_(char *cfile, int *clen,  // geom
   raystat_dump = new std::ofstream("dagmc_raystat_dump.csv");
 #endif 
   
-  *dagmc_version = DAG->version();
-  *moab_version = DAG->interface_revision();
-  
-    // terminate all filenames with null char
-  cfile[*clen] = ftol[*ftlen] = '\0';
-  std::string str1="../";
-  std::string str2= std::string(cfile);
-  str1.append(str2);
-  std::cout << "\nmy file is " << str1 << "\n" << std::endl;
+  std::string prefixedFilename="../";
+  prefixedFilename.append(cfile);
+  if (DEBUG)
+  {
+  	std::cout << "\nmy file is " << prefixedFilename << "\n" << std::endl;
+  }
   char *myfile;
-  myfile = &str1[0];
+  myfile = &prefixedFilename[0];
   
 
     // initialize this as -1 so that DAGMC internal defaults are preserved
@@ -120,7 +138,7 @@ void dagmcinit_(char *cfile, int *clen,  // geom
     exit(EXIT_FAILURE);
   }
 
-  pblcm_history_stack.resize( *max_pbl+1 ); // fortran will index from 1
+  pblcm_history_stack.resize( max_pbl+1 ); // fortran will index from 1
 }
 
 
@@ -132,7 +150,7 @@ extern "C" int lookdb_ (double *X, double *Y, double *Z, int *numErrLm)
 	std::cout << __FILE__ << ", " << __func__ << ":" << __LINE__ << std::endl;
 	return *numErrLm;
 }
-extern "C" int lookmg_ (double *X, double *Y, double *Z,
+extern "C" int lkmgwr (double *X, double *Y, double *Z,
                   double dir[3], // Direction cosines vector
 		  int *RegionNum, // region number
                   int *newCell,    // Output: region # of p'le after step ("IRPRIM" in FLUKA)

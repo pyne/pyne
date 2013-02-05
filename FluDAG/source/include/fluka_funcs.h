@@ -1,6 +1,8 @@
 #ifndef DAGMC_MCNP_IFACE_H
 #define DAGMC_MCNP_IFACE_H
 
+#include <string>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -13,6 +15,16 @@ extern "C" {
                   char *ftol,  int *ftlen, 
                   int *parallel_file_mode,
                   double* dagmc_version, int* moab_version, int* max_pbl );
+
+/* 
+ * This signature is intended to be called from a c++ function.  
+ * It assumes the caller does not need to know the dagmc_version or the moab_version.
+ * The original dagmcinit_, which is to be called by a Fortran method, has been reworked 
+ * to set up variables and then call this version.
+ */
+  void cpp_dagmcinit(char *cfile, 
+                int parallel_file_mode, // parallel read mode
+                int max_pbl );
 
 /* Add the current particle state to the bank */
   void dagmc_bank_push_( int* nbnk );
