@@ -294,7 +294,7 @@ class Library(rx.RxLib):
                             except KeyError:
                                 print 'No LRU!'
 
-                        # Make the current line the last line of the range as
+                        # Make the current line the last known line of range as
                         # specified in the dict.
                         try:
                             if range_flags['LRU'] == 1:
@@ -303,7 +303,8 @@ class Library(rx.RxLib):
                                 last_range = resonance_ranges['unresolved'][-1]
                             last_range['rangedata'][1] = i + 1
                             last_range['rangedata'][2] = mf2[
-                                last_range['rangedata'][0]:last_range['rangedata'][1]]
+                                last_range['rangedata'][0]:
+                                last_range['rangedata'][1]]
                         except KeyError:
                             print 'No LRU!'
 
@@ -338,7 +339,8 @@ class Library(rx.RxLib):
 
         if lru == 1:
             # This is the case for data in a resolved resonance range.
-            pass
+            self.structure['data']['resolved'] = """Resolved resonance ranges
+not yet implemented!"""
         elif lru == 2:
             # This is the case for data in an unresolved resonance range.
             if (lfw, lrf) == (0, 1):
