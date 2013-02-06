@@ -293,12 +293,13 @@ def test_DoubleSpinDict():
     exp = {'E':'e', 'F':'f'}
     assert_equal(exp, obs)
 
-# def test_U235():
+def test_U235():
 # This test file can be found here:
 # http://t2.lanl.gov/data/data/ENDFB-VII.1-neutron/U/235
 # It is very big (51 MB), so it is not included.
-#     u235 = Library('U235.txt')
-#     assert(True==False)
+    u235 = Library('U235.txt')
+    print u235.mat9228['data']['unresolved'][0][2][3.5,1,5]
+    assert(True==False)
 
 
 if __name__ == "__main__":
