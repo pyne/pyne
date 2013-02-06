@@ -316,6 +316,81 @@ class Library(rx.RxLib):
             elif lrp == 2:
                 pass
 
+    def _read_resolved(self, resonance_range, isotope_flags, mat_id):
+        range_flags = resonance_range['rangeflags']
+        # Single- or Multi-level Breit Wigner
+        if range_flags['LRF'] in (1,2):
+            # Read energy-dependent scattering radius if present
+            if range_flags['NRO'] > 0:
+                res.AP = self._get_tab1_record()
+
+            # Other scatter radius parameters
+            # items = self._get_cont_record()
+            # res.SPI = items[0] # Spin, I, of the target nucleus
+            # if res.NRO == 0:
+            #     res.AP = items[1]
+            # res.NLS = items[4] # Number of l-values
+
+            # # Read resonance widths, J values, etc
+            # for l in range(res.NLS):
+            #     headerItems, items = self._get_list_record()
+            #     QX, L, LRX = headerItems[1:4]
+            #     energy = items[0::6]
+            #     spin = items[1::6]
+            #     GT = items[2::6]
+            #     GN = items[3::6]
+            #     GG = items[4::6]
+            #     GF = items[5::6]
+            #     for i, E in enumerate(energy):
+            #         resonance = BreitWigner()
+            #         resonance.QX = QX
+            #         resonance.L = L
+            #         resonance.LRX = LRX
+            #         resonance.E = energy[i]
+            #         resonance.J = spin[i]
+            #         resonance.GT = GT[i]
+            #         resonance.GN = GN[i]
+            #         resonance.GG = GG[i]
+            #         resonance.GF = GF[i]
+            #         res.resonances.append(resonance)
+
+        # Reich-Moore
+        # elif res.LRF == 3:
+            # Read energy-dependent scattering radius if present
+            # if res.NRO > 0:
+            #     res.AP = self._get_tab1_record()
+
+            # Other scatter radius parameters
+            # items = self._get_cont_record()
+            # res.SPI = items[0] # Spin, I, of the target nucleus
+            # if res.NRO == 0:
+            #     res.AP = items[1]
+            # res.LAD = items[3] # Flag for angular distribution
+            # res.NLS = items[4] # Number of l-values
+            # res.NLSC = items[5] # Number of l-values for convergence
+
+            # Read resonance widths, J values, etc
+            # for l in range(res.NLS):
+            #     headerItems, items = self._get_list_record()
+            #     APL, L = headerItems[1:3]
+            #     energy = items[0::6]
+            #     spin = items[1::6]
+            #     GN = items[2::6]
+            #     GG = items[3::6]
+            #     GFA = items[4::6]
+            #     GFB = items[5::6]
+            #     for i, E in enumerate(energy):
+            #         resonance = ReichMoore()
+            #         resonance.APL = APL
+            #         resonance.L = L
+            #         resonance.E = energy[i]
+            #         resonance.J = spin[i]
+            #         resonance.GN = GN[i]
+            #         resonance.GG = GG[i]
+            #         resonance.GFA = GFA[i]
+            #         resonance.GFB = GFB[i]
+            #         res.resonances.append(resonance)
+
     def parse_resonance_range(self, resonance_range, isotope_flags, mat_id):
         """Turns a resonance range and labels the data for use.
 
@@ -1191,7 +1266,7 @@ class Evaluation(object):
             cyield.data[E]['yc'] = zip(itemList[2::4],itemList[3::4]) # Cumulative yield
 
         # Skip SEND record
-        self.fh.readline()        
+        self.fh.readline()
 
     def _read_decay(self):
         self.print_info(8, 457)

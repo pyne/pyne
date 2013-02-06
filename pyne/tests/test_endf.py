@@ -293,13 +293,26 @@ def test_DoubleSpinDict():
     exp = {'E':'e', 'F':'f'}
     assert_equal(exp, obs)
 
-def test_U235():
-# This test file can be found here:
+def test_unresolved_1_2():
+ # The section looks like this:
+ #         EL         EH        LRU        LRF        NRO       NAPS 419 2151    3
+ # 0.000000+0 0.000000+0          0          0         NR         NP 419 2151    4
+ #        SPI         AP          0          0        NLS          0 419 2151    5
+ #       AWRI         QX          L        LRX      6*NRS        NRS 419 2151    6
+ #         ER         AJ         GT         GN         GG         GF 419 2151    7
+ #         ER         AJ         GT         GN         GG         GF 419 2151    8
+ #       AWRI         QX          L        LRX      6*NRS        NRS 419 2151    6
+ #         ER         AJ         GT         GN         GG         GF 419 2151    7
+ #         ER         AJ         GT         GN         GG         GF 419 2151    8
+    pass
+
+# def test_U235():
+# """This test file can be found here:
 # http://t2.lanl.gov/data/data/ENDFB-VII.1-neutron/U/235
-# It is very big (51 MB), so it is not included.
-    u235 = Library('U235.txt')
-    print u235.mat9228['data']['unresolved'][0][2][3.5,1,5]
-    assert(True==False)
+# It is very big (51 MB), so it is not included."""
+    # u235 = Library('U235.txt')
+    # print u235.mat9228['data']['unresolved'][0][2][3.5,1,5]
+    # assert(True==False)
 
 
 if __name__ == "__main__":
