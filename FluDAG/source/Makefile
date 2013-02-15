@@ -30,22 +30,52 @@ RUNDIR = ./userini_example
 
 TARGETS = mainfludag mainf
 
+wrapobjects = WrapInit.o \
+	WrapLookDB.o \
+	WrapSavHist.o \
+	WrapLookZ.o \
+	WrapG1.o \
+	WrapDN.o \
+	WrapReg2Name.o \
+	WrapNorml.o \
+	WrapLookMG.o \
+	WrapMag.o \
+	WrapLookFX.o \
+	WrapReg.o \
+	WrapIniHist.o \
+	WrapIncrHist.o \
+	WrapFlgfwr.o \
+	WrapG1RT.o
+
 default: all
 
-all: myfluka mainfludag
+all: myfluka mainfludag $(wrapobjects)
 
 # Look in directory arg2 for file-pattern arg1
 vpath %.cpp cpp
+vpath %.cc  cpp
 vpath %.f   for
 vpath %.c   c
 vpath %.o   obj
+vpath %.h   include 
+vpath %.hh  include
 
-mainfludag: mainFluDAG.o fluka_funcs.o readVol.o createRegionAndMatFiles.o
+
+# Removed linking of createRegionAndmatFiles.o, FlukaMaterial.o
+mainfludag: mainFluDAG.o \
+	fluka_funcs.o \
+	$(wrapobjects) 
 	gfortran -o $@ $^ $(MOAB_LIBS_LINK) $(FLUKA_LIBS_LINK) -lstdc++
+
 # Try this as well - 
 #	 g++ -o $@ $^ $(MOAB_LIBS_LINK) $(FLUKA_LIBS_LINK) 
 	
-myfludag: 
+myfludag: userini.o fluka_funcs.o WrapInit.o createRegionAndMatFiles.o
+	${FLUPRO}/flutil/lfluka -o $@ -a MOAB -a dagmc -m fluka obj/userini.o -L ${FLUPRO} -L ${MOAB_LIBDIR} \
+	obj/fluka_funcs.o \
+	obj/WrapInit.o \
+	obj/createRegionAndMatFiles.o
+
 # Create a fortran main linking object files compiled from fortran, C and C++
 mainf: main_f.o fluka_funcs.o
 #	gfortran -o $@ obj/main_f.o obj/fluka_funcs.o $(MOAB_LIBS_LINK) $(FLUKA_LIBS_LINK) -lstdc++
@@ -75,6 +105,10 @@ mainFluDAG.o : mainFluDAG.cpp
 	g++ -c $(CXXFLAGS) $< 
 	mv $@ obj
 
+$(wrapobjects): %.o: %.cc
+	g++ -c $(CXXFLAGS) $< 
+	mv $@ obj
+	
 readVol.o : readVol.cpp 
 	g++ -c $(CXXFLAGS) $< 
 	mv $@ obj
@@ -83,6 +117,9 @@ createRegionAndMatFiles.o : createRegionAndMatFiles.cpp
 	g++ -c $(CXXFLAGS) $< 
 	mv $@ obj
 
+# FlukaMaterial.o : FlukaMaterial.cc 
+#	g++ -c $(CXXFLAGS) $< 
+#	mv $@ obj
 
 test.stl : test.h5m
 	mbconvert $< $@
