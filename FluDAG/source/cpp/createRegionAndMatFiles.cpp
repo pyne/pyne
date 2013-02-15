@@ -1,20 +1,14 @@
 #include <iostream>
 #include <stdlib.h>
-#include <string>
+//#include <string>
 #include <stdio.h>
 #include <fstream>
 
 #include "DagWrapUtils.hh"
-#include "MBInterface.hpp"
-#include "MBCartVect.hpp"
-#include "DagMC.hpp"
-// #include <map>
 
 using namespace moab;
 
 #define DAG DagMC::instance()
-#define NO_NAMES 1;
-#define DAGGEOMETRY_DEBUG 1;
 
 
 //*****************************************************************************
@@ -23,14 +17,6 @@ using namespace moab;
 void createFlukaMatFile() 
 {
   
-  // last modification Sara Vanini 1/III/99
-  // NAMES OF ELEMENTS AND COMPOUNDS: the names must be written in upper case,
-  // according to the fluka standard. In addition,. they must be equal to the
-  // names of the fluka materials - see fluka manual - in order that the 
-  // program load the right cross sections,
-  // Otherwise the user must define the LOW-MAT CARDS, 
-  // in order to get the right cross sections loaded in memory.
-
 #ifdef DAGGEOMETRY_DEBUG
   std::cout << "==> FluDAG createFlukaMatFile()" << std::endl;
   std::cout << "================== FILEWR =================" << std::endl;
@@ -42,10 +28,9 @@ void createFlukaMatFile()
   vos.close();
 
   //Materials and compounds
-// jcz:  This is lower priority
-/*
   BuildMaterialTables();
   std::ofstream fos("flukaMat.inp");  
+/*
   PrintMaterialTables(fos);
   PrintAssignmat(fos);
   PrintMagneticField(fos);
@@ -69,24 +54,27 @@ std::string makeRegionName(int l)
   std::string VVname;
   std::string Vname;
   EntityHandle entity = NULL;
-    entity = DAG->entity_by_id(3, l);
-    int iRegion = l+1;
-    std::cout << iRegion << " index,name " << std::endl;
-    char vname[8];
-    sprintf(vname,"%-8u",iRegion);
-    Vname.replace(0,8,vname);
-    std::cout<<iRegion<<" vname" << vname <<" Vname " << Vname<<std::endl;
-    unsigned int found=Vname.rfind(" ",7);
-    // take out blanks
-    while (found<Vname.size()-1){
+  entity = DAG->entity_by_id(3, l);
+  // Don't add 1
+  int iRegion = l;
+  std::cout << iRegion << " index,name " << std::endl;
+  char vname[8];
+  sprintf(vname,"%-8u",iRegion);
+  Vname.replace(0,8,vname);
+  std::cout<<iRegion<<" vname" << vname <<" Vname " << Vname<<std::endl;
+  unsigned int found=Vname.rfind(" ",7);
+  // take out blanks
+  while (found<Vname.size()-1)
+  {
       found=Vname.rfind(" ",7);
-      if (found<Vname.size()-1){
+      if (found<Vname.size()-1)
+      {
 	  std::string temp=Vname.substr(found+1);
 	  Vname.replace(found, temp.size(), temp);
 	  Vname.erase(Vname.size()-1);
 	  std::cout << Vname << std::endl;
       } 
-    }
+  }
 
     unsigned int nameSize=Vname.size();
     if (nameSize > 8 ) {VVname=Vname.substr(0,7);}
@@ -160,7 +148,10 @@ void PrintEntityRegionNames(std::ostream& os)
 #endif
 }
 
+/////////////////////////////////////////////////////////////////////
+// Write one line of the *.inp file
 // Convenience function that is re-used
+/////////////////////////////////////////////////////////////////////
 void writeRegionLine(std::ostream& os, int iRegion, std::string name)
 {
     os.setf(std::ios::left, std::ios::adjustfield);
@@ -214,14 +205,14 @@ int FGeometryInit::GetRegionFromName(const char* volName) const {
 
 ////////////////////////////////////////////////////////////////////////
 // 
-/*
-void FGeometryInit::BuildMaterialTables() {
+void BuildMaterialTables() 
+{
 #ifdef DAGGEOMETRY_DEBUG
-  cout << "==> Flugg FGeometryInit::BuildMaterialTables()" << endl;
+  std::cout << "==> FluDAG BuildMaterialTables()" << std::endl;
 #endif
 
   //some terminal printout also
-  cout << "\t* Storing information..." << endl;
+  std::cout << "\t* Storing information..." << std::endl;
 
   //The logic is the folloing:
   //Get the Material Table and:
@@ -234,10 +225,10 @@ void FGeometryInit::BuildMaterialTables() {
   // initialize with predefined materials
   initmat = InitFlukaMat();
 #ifdef DAGGEOMETRY_DEBUG
-  cout << "end init predef mat  "  << endl;
+  std::cout << "end init predef mat  "  << std::endl;
 #endif
   //Get the Material Table and iterate
-  const G4MaterialTable* matTable = G4Material::GetMaterialTable();
+  const G4MaterialTable* matTable = DagG4Material::GetMaterialTable();
   for (MatTableIterator i = matTable->begin(); i != matTable->end(); i++) {
 
     //Get some basic material information
@@ -246,28 +237,28 @@ void FGeometryInit::BuildMaterialTables() {
     const G4double matDensity = material->GetDensity();
     const int nMatElements  = material->GetNumberOfElements();
 #ifdef DAGGEOMETRY_DEBUG
-    cout << " treating material " << matName    << endl;
+    std::cout << " treating material " << matName    << std::endl;
 #endif
 
-    cout << " mat " << matName 
+    std::cout << " mat " << matName 
 	   << ": dens. = " << matDensity/(g/cm3) << "g/cm3"
-	   << ", nElem = " << nMatElements << endl;
+	   << ", nElem = " << nMatElements << std::endl;
 
     // 1) For materials with density <= 1.00e-10*g/cm3 assign vacuum
     //    FlukaMaterial* is  in that case
     if (matDensity <= 1.00e-10*g/cm3) {
 #ifdef DAGGEOMETRY_DEBUG
-    cout << " vacuum?  "<< matDensity    << endl;
+    std::cout << " vacuum?  "<< matDensity    << std::endl;
 #endif
       DString elemName("VACUUM");
       FlukaMaterial *flukamat = FlukaMaterial::GetFlukaMaterial(elemName);
       G4FlukaMaterialMap[material] = flukamat;
-      cout << "\t\t  Stored as " << flukamat->GetRealName() << endl;
+      std::cout << "\t\t  Stored as " << flukamat->GetRealName() << std::endl;
     }
     // 2) For each single element material build a material equivalent
     else if (nMatElements == 1) {
 #ifdef DAGGEOMETRY_DEBUG
-    cout << " single element "     << endl;
+    std::cout << " single element "     << std::endl;
 #endif
       
       FlukaMaterial *flukamat = 
@@ -275,7 +266,7 @@ void FGeometryInit::BuildMaterialTables() {
 				      matDensity);
       
       G4FlukaMaterialMap[material] = flukamat;
-      cout << "  Stored as " << flukamat->GetRealName() << endl;
+      std::cout << "  Stored as " << flukamat->GetRealName() << std::endl;
       
     } //else if (material->GetNumberOfElements() == 1)
     
@@ -284,20 +275,20 @@ void FGeometryInit::BuildMaterialTables() {
     //   3.b) Build the compound out of them
     else {
 #ifdef DAGGEOMETRY_DEBUG
-      cout << " not  vacuum : call Comp. "<< matDensity/(g/cm3)   << endl;
+      std::cout << " not  vacuum : call Comp. "<< matDensity/(g/cm3)   << std::endl;
 #endif
       FlukaCompound* flukacomp = 
 	BuildFlukaCompoundFromMaterial(material);
       G4FlukaCompoundMap[material] = flukacomp;
-      cout << "\t\t  Stored as " << flukacomp->GetRealName() << endl;
+      std::cout << "\t\t  Stored as " << flukacomp->GetRealName() << std::endl;
     } //else for case 3)
   } //for (materials)
   
 #ifdef DAGGEOMETRY_DEBUG
-  cout << "<== Flugg FGeometryInit::BuildMaterialTables()" << endl;
+  std::cout << "<== Flugg FGeometryInit::BuildMaterialTables()" << std::endl;
 #endif
 }
-*/
+
 
 /*
 FlukaMaterial* 
@@ -498,11 +489,10 @@ FGeometryInit::BuildFlukaCompoundFromElement(const G4Element* element,
 */
 
 
-/*
-int FGeometryInit::InitFlukaMat()
+int InitFlukaMat()
 {
   int NumFlukaMat = 25 ;  
-DString FlukaNames[25] = { "BLCKHOLE" , "VACUUM", 
+  DString FlukaNames[25] = { "BLCKHOLE" , "VACUUM", 
 				 "HYDROGEN" ,   "HELIUM"  , 
                                   "BERYLLIU"  ,   "CARBON"  , 
 	"NITROGEN"  ,   "OXYGEN"  ,   "MAGNESIU"  ,   "ALUMINUM"  , 
@@ -510,20 +500,20 @@ DString FlukaNames[25] = { "BLCKHOLE" , "VACUUM",
 	    "GOLD"  ,   "MERCURY"  ,   "LEAD"  ,   "TANTALUM"  ,
 	      "SODIUM"  ,   "ARGON"  ,   "CALCIUM "  ,   "TIN"  ,
 	"TUNGSTEN"  ,"TITANIUM"  ,"NICKEL" } ;
- G4double AFluka[25] = {        0.0     ,    0.0     ,
+  double AFluka[25] = {        0.0     ,    0.0     ,
         1.00794 ,   4.002602,   9.012182,  12.0107  ,
        14.0067  ,  15.9994  ,  24.3050  ,  26.981538,
        55.845   ,  63.546   , 107.8682  ,  28.0855  ,
       196.96655 , 200.59    , 207.2     , 180.9479  ,
        22.989770,  39.948   ,  40.078   , 118.710   ,
        183.84    ,  47.867   ,  58.6934 };
- int ZFluka[25] = {       0, 0,    1 ,   2 ,   4 ,   6 ,
+  int ZFluka[25] = {       0, 0,    1 ,   2 ,   4 ,   6 ,
         7 ,   8 ,  12 ,  13 ,
        26 ,  29 ,  47 ,  14 ,
        79 ,  80 ,  82 ,  73 ,
        11 ,  18 ,  20 ,  50 ,
        74 ,  22 ,  28  };
-  G4double RhoFluka[25] ={      0.0     ,    0.0     ,
+  double RhoFluka[25] ={      0.0     ,    0.0     ,
        0.0837e-3,   0.166e-3,   1.848 ,   2.000  ,
         1.17e-3,   1.33e-3,   1.740 ,   2.699,
         7.874,   8.960,  10.500,   2.329,
@@ -531,22 +521,21 @@ DString FlukaNames[25] = { "BLCKHOLE" , "VACUUM",
         0.971,   1.66e-3,   1.550,   7.310,
 	19.300,   4.540,   8.902 };
 
-  for ( int i=0; i != 25; i++ ) {
+  for ( int i=0; i != 25; i++ ) 
+  {
     DString elemName = FlukaNames[i] ;
-   G4double elemA = AFluka[i];
-   int elemZ =ZFluka[i];
-   G4double matDensity = RhoFluka[i];
-   FlukaMaterial *flukamat = new FlukaMaterial(elemName,
+    double elemA = AFluka[i];
+    int    elemZ = ZFluka[i];
+    double matDensity = RhoFluka[i];
+    FlukaMaterial *flukamat = new FlukaMaterial(elemName,
 				   elemZ,
 				   elemA,
 				   matDensity);
-     cout << " predef fluka mat " << flukamat->GetRealName() << endl;
-}
+     std::cout << " predef fluka mat " << flukamat->GetRealName() << std::endl;
+  }
 
 return  NumFlukaMat;
 }
-*/
-
 
 
 /*
