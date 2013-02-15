@@ -1,6 +1,12 @@
-Workflow in source: update for/userini.f or cpp/fluka_funcs.cpp
-> 'make userini.o' (and/or 'make fluka_funcs.o)
-> 'make'
-> cd userini_example
-> source runme
-Then look at the .out file in the fluka_xxxx subdir to verify changes took effect.
+# Workflow for mainfludag:
+# delete targets and objects
+source> make clean
+# Fill ./obj with object files
+source> make objs
+# compile and link mainfludag; cpp/mainFluDAG.cpp is the main 
+source> make mainfludag
+# Give mainfludag an argument to produce a mat.inp file
+source> ./mainfludag xxx.h5m
+# insert mat.inp into a fluka input file "xxx.inp" after GEOEND
+# run the program per the fluka manual
+$FLUPRO/flutil/rfluka -M1 -N0 -e ./mainfludag xxx

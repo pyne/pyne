@@ -97,25 +97,29 @@ userini.o : userini.f
 	${FLUPRO}/flutil/fff $<
 	mv for/$@ obj
 	 
+objs: $(wrapobjects) mainFluDAG.o fluka_funcs.o
+
 fluka_funcs.o : fluka_funcs.cpp
 	g++ -c $(CXXFLAGS) $< 
 	mv $@ obj
+
 
 mainFluDAG.o : mainFluDAG.cpp 
 	g++ -c $(CXXFLAGS) $< 
 	mv $@ obj
 
+
 $(wrapobjects): %.o: %.cc
 	g++ -c $(CXXFLAGS) $< 
 	mv $@ obj
 	
-readVol.o : readVol.cpp 
-	g++ -c $(CXXFLAGS) $< 
-	mv $@ obj
+# readVol.o : readVol.cpp 
+#	g++ -c $(CXXFLAGS) $< 
+#	mv $@ obj
 
-createRegionAndMatFiles.o : createRegionAndMatFiles.cpp
-	g++ -c $(CXXFLAGS) $< 
-	mv $@ obj
+# createRegionAndMatFiles.o : createRegionAndMatFiles.cpp
+#	g++ -c $(CXXFLAGS) $< 
+#	mv $@ obj
 
 # FlukaMaterial.o : FlukaMaterial.cc 
 #	g++ -c $(CXXFLAGS) $< 
@@ -130,6 +134,6 @@ install :
 .PHONY : clean
 clean:
 	rm obj/*.o
-	rm myfluka
+	rm mainfludag
 print-%:
 	@echo $* = $($*)
