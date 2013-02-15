@@ -1,0 +1,5 @@
+#!/bin/bash
+
+#FLUPRO already set
+
+../../run/rfluka -N0 -M1 test1.inp
