@@ -154,7 +154,7 @@ def _get_decay(nuc):
         decay_dict[child] = branch
     return decay_dict
 
-def _get_destruction(nuc, phi, rxn_dict = None)
+def _get_destruction(nuc, phi, rxn_dict = None):
     """Returns the destruction rate of the nuclide.
 
     Parameters
