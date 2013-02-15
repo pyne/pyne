@@ -16,9 +16,7 @@ C       Declarations
 C2345678
         WRITE(*,*) 'I AM IN MAINF, A FORTRAN 77 PROGRAM...'
 	WRITE(*,*) '   calling dagmcinit'
-C       Externally defined C_FUNCTION is in test.c
-C        CALL C_FUNCTION
-        	
+
         PARALLEL_READ = 0;
         FILENAME = "test.h5m"
 	CLEN = 8
@@ -26,9 +24,12 @@ C        CALL C_FUNCTION
         FTLEN = 8
 	CALL DAGMCINIT(FILENAME,CLEN, FTOL, FTLEN, PARALLEL_READ, 
      +		DAGMC_VERSION,MOAB_VERSION,MAX_PBL)
-        X = 1.2;
-        Y = 0.0;
-        Z = 10;
+C	Try calling the fluka main with the FLUGG switch
+	CALL FLUKAM(2)
+
+        X = 1.2
+        Y = 0.0
+        Z = 10
 C	WRITE(*,*) 'In mainf_f X, Y, Z = ', X, Y, Z
     
 	U = 11.2
@@ -51,8 +52,6 @@ C       WRITE(*,*) 'Back in mainf_f after call to NORML.'
 C	WRITE(*,*) 'After the call to NORML U,V,W is:'
 C	WRITE(*,*) U, ', ', V, ', ', W
 
-C 	Externally defined C++ function in fluka_funcs.cpp
-C       CALL DAGMCINIT(
 C       Externally defined Fortran Function in simple.f
 C        CALL FORTRAN_FUNCTION
 C       WRITE(*,*) 'Back in mainf_f after call to FORTRAN_FUNCTION.'
