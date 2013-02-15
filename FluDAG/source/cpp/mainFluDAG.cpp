@@ -4,6 +4,7 @@
 #include "DagMC.hpp"
 #include <iostream>
 #include <stdlib.h>
+#include <cstring>
 #include <string.h>
 
 
@@ -16,45 +17,41 @@ extern "C" {
  void flukam(const int &GeoFlag);
 }
 
- // ToDo: move to header
- ErrorCode readVol(char *file);
- void createFlukaMatFile();
 
-int main() {
+int main(int argc, char* argv[]) {
 
-  int max_pbl = 1;
-  // ToDo: Hardcode the filename temporarily
+  bool flukarun = false;
+
+  // std::string infile = "model_complete.h5m";
   std::string infile = "test.h5m";
-  char *fileptr;
-  fileptr = &(infile[0]);
-  
-  // Load the h5m file, init the obb tree   
-  cpp_dagmcinit(fileptr, 0, max_pbl);
-  
-  ErrorCode returncode;
-  // ToDo: fileptr does not need to be passed, just used for a print statement
-  returncode = readVol(fileptr);
-  std::vector<std::string> detected;
-  DAG->detect_available_props(detected);
-  DAG->parse_properties (detected);
-  std::cout << detected.size() << " metadata properties detected:" << std::endl;
-  for( std::vector<std::string>::iterator kwdp = detected.begin();
-          kwdp != detected.end(); ++kwdp )
-  {
-       std::string keyword = *kwdp;
-       std::cout << "    " << keyword << std::endl;
-  }
-  createFlukaMatFile();
-// Answer for test.h5m:
-///////////////////////
 
-// 5 metadata properties detected:
-//    graveyard
-//    mat
-//    rho
-//    surf.flux
-//    tally
-/////////////////
+  char * fileptr = new char [infile.length()+1];
+  std::strcpy(fileptr, infile.c_str());
+  // No filename => do a fluka run using test.h5m in higher directory
+  if (argc < 2) {
+                // Tell the user how to run the program
+                std::cerr << "Using " << infile << std::endl;
+                std::cerr << "   or call: " << argv[0] << " h5mfile" << std::endl;
+                /* "Usage messages" are a conventional way of telling the user
+                 * how to run a program if they enter the command incorrectly.
+                 */
+                flukarun = true;
+  }
+  else  // Give a file name to write out the material file and stop
+  {
+      std::strcpy(fileptr, argv[1]);
+      std::cerr << "Using " << fileptr << std::endl;
+      flukarun = false;
+  }
+  int max_pbl = 1;
+  // Load the h5m file, init the obb tree   
+  cpp_dagmcinit(fileptr, 0, max_pbl, flukarun);
+  
+  if (!flukarun)
+  {
+    std::string lcad = "mat.inp";
+    fludagwrite_assignma(lcad);
+  }
 
 //flag for geometry:
 // 1 for GEANT4
@@ -65,7 +62,10 @@ int main() {
 
 //call fortran
 // Temporarily comment out while testing the writing of FlukaMat
-    // flukam(flag);
+    if (flukarun)
+    {
+       flukam(flag);
+    }
 
 //end
   return 0;
