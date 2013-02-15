@@ -21,10 +21,18 @@ extern "C" {
  * It assumes the caller does not need to know the dagmc_version or the moab_version.
  * The original dagmcinit_, which is to be called by a Fortran method, has been reworked 
  * to set up variables and then call this version.
+ * 
+ * 14 Feb 2013  jcz added boolean running_with_fluka, which prepends "../" to the file name
  */
   void cpp_dagmcinit(char *cfile, 
                 int parallel_file_mode, // parallel read mode
-                int max_pbl );
+                int max_pbl, bool running_with_fluka );
+
+/*
+ * Write the material assignment for each volume to a file named matfile
+ */
+  void fludagwrite_assignma(std::string matfile);  
+
 
 /* Add the current particle state to the bank */
   void dagmc_bank_push_( int* nbnk );
