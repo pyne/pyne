@@ -61,8 +61,22 @@ def _create_decay_matrix(nucs):
     return A
 
 
-def _solve_decay_matrix(A):
-    eA = sp.linalg.expm(A)
+def _matrix_exp(A, t):
+    """Takes the matrix exponential of the product At.
+
+    Parameters
+    ----------
+    A : NumPy 2-dimensional array
+        Coupled equation matrix.
+    t : float
+        Time required for transmutation simulation.
+
+    Returns
+    -------
+    eA : NumPy 2-dimensional array
+        Result after calculating the matrix exponential of At
+    """
+    eA = sp.linalg.expm(A * t)
     return eA
 
 
@@ -154,19 +168,17 @@ def _get_decay(nuc):
         decay_dict[child] = branch
     return decay_dict
 
-def _get_destruction(nuc, phi, rxn_dict = None):
+
+def _get_destruction(nuc, phi):
     """Returns the destruction rate of the nuclide.
 
     Parameters
     ----------
     nuc : nucname
         Name of the nuclide in question
-
-    rxn_dict : dictionary
-        Contains the dictionary of neutron reactions for nuc that follows the
-        structure of _get_daughters() output. This variable avoids a second
-        lookup of the information if the user has already called 
-        _get_daughters().
+    phi : NumPy 1-dimensional array
+        Flux vector for use in simulation. The vector should be 175 entries
+        in length for proper usage with EAF data.
 
     Returns
     -------
@@ -174,8 +186,7 @@ def _get_destruction(nuc, phi, rxn_dict = None):
         Destruction rate of the nuclide.
     """
     nuc = nucname.zzaaam(nuc)
-    if rxn_dict is None:
-        rxn_dict = _get_daughters(nuc)
+    rxn_dict = _get_daughters(nuc)
     xs_total = np.zeros((175))
     for nuc in rxn_dict.keys():
         xs_total = xs_total + rxn_dict[nuc]
@@ -183,4 +194,111 @@ def _get_destruction(nuc, phi, rxn_dict = None):
     d = decay_const + sum(xs_total*phi)
     return d
 
+
+def _traversal(nuc, A, phi, t, N_ini, out, tol):
+    """Nuclide transmutation traversal method.
+
+    This method will traverse the reaction tree recursively, using a DFS
+    algorithm. On termination, the method will return all number densities
+    after a given time that are a result of the starting nuclide.
+
+    Parameters
+    ----------
+    nuc : nucname
+        Name of the active nuclide for the traversal.
+    A : NumPy 2-dimensional array
+        Current state of the coupled equation matrix.
+    phi : NumPy 1-dimensional array
+        Flux vector for use in simulation. The vector should be 175 entries
+        in length for proper usage with EAF data.
+    t : float
+        Time at which to evaluate transmutation events.
+    N_ini : float
+        Number density of initial nuclide at root of transmutation tree.
+    out : dictionary
+        A dictionary containing the final recorded number densities for each
+        nuclide. Keys are nuclide names in integer (zzaaam) form. Values are
+        number densities for the coupled nuclide in float format.
+    tol : float
+        Tolerance level to reference for tree truncation.
+    
+    Returns
+    -------
+    out : dictionary
+        A dictionary containing the final recorded number densities for each
+        nuclide. Keys are nuclide names in integer (zzaaam) form. Values are
+        number densities for the coupled nuclide in float format.
+    """
+    # Store current matrix size
+    shape = A.shape
+    n = shape[0]
+    # Find decay constant of current nuclide
+    lam = data.decay_const(nuc)
+    # Cycle decay children
+    decay_dict = _get_decay(nuc)
+    for decay_child in decay_dict.keys():
+        # Lookup branch ratio
+        branch_rat = decay_dict[key]
+        # Find destruction rate of decay_child for appending to matrix
+        dest = _get_destruction(decay_child, phi)
+        # Add row and column to matrix
+        B = A
+        B = np.append(A, np.zeros((1,n)), 0)
+        B = np.append(B, np.zeros((n+1,1)), 1)
+        # Create initial density vector
+        N0 = np.zeros((n+1,1))
+        N0[0] = N_ini
+        # Determine production rate of decay_child
+        prod = lam * branch_rat
+        # Update new matrix B
+        B[n,n-1] = prod
+        B[n,n] = -dest
+        # Calculate density of decay_child
+        eB = _matrix_exp(B, t)
+        N_final = np.dot(eB, N0)
+        # Check against tolerance
+        if N_final[-1] > tol:
+            # Continue traversal
+            out = _traversal(decay_child, B, phi, t, N_ini, out, tol)
+        # On recursion exit or truncation, write data from this nuclide
+        if decay_child in out.keys():
+            # If already in output dictionary, increment instead
+            out[decay_child] = out[decay_child] + N_final[-1]
+        else:
+            out[decay_child] = N_final[-1]
+       
+    # Cycle neutron reaction daughters
+    daugh_dict = _get_daughters(nuc)
+    for daugh in daugh_dict.keys():
+        # Lookup appropriate cross section for daugh
+        xs = daugh_dict[daugh]
+        # Find destruction rate of daugh
+        dest = _get_destruction(daugh, phi)
+        # Add row and column to matrix
+        B = A
+        B = np.append(A, np.zeros((1,n)), 0)
+        B = np.append(B, np.zeros((n+1,1)), 1)
+        # Create initial density vector
+        N0 = np.zeros((n+1,1))
+        N0[0] = N_ini
+        # Determine production rate of daugh
+        prod = sum(xs*phi)
+        # Update new matrix B
+        B[n,n-1] = prod
+        B[n,n] = dest
+        # Calculate density of daugh
+        eB = _matrix_exp(B, t)
+        N_final = np.dot(eB,N0)
+        # Check against tolerance
+        if N_final[-1] > tol:
+            # Continue traversal
+            out = _traversal(daugh, B, phi, t, N_ini, out, tol)
+        # On recursion exit or truncation, write data from this nuclide
+        if daugh in out.keys():
+            # If already in output dictionary, increment density
+            out[daugh] = out[daugh] + N_final[-1]
+        else:
+            out[daugh] = N_final[-1]
+
+    return out
 
