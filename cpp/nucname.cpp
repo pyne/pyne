@@ -236,6 +236,47 @@ std::string pyne::nucname::current_form(int nuc)
 
 
 
+/***************************/
+/*** isnuclide functions ***/
+/***************************/
+
+bool pyne::nucname::isnuclide(std::string nuc)
+{
+  int n;
+  try {
+    n = zzaaam(nuc);
+  }
+  catch(NotANuclide) {
+    return false;
+  };
+  return isnuclide(n);
+};
+
+bool pyne::nucname::isnuclide(char * nuc)
+{
+  return isnuclide(std::string(nuc));
+};
+
+bool pyne::nucname::isnuclide(int nuc)
+{
+  int n;
+  try {
+    n = zzaaam(nuc);
+  }
+  catch(NotANuclide) {
+    return false;
+  };
+  int znum = n / 10000;
+  int anum = (n % 10000) / 10;
+  //std::cout << n << " = n \n";
+  //std::cout << znum << " = znum \n";
+  //std::cout << anum << " = anum \n";
+  if (anum < znum)
+    return false;
+  return true;
+};
+
+
 
 /************************/
 /*** zzaaam functions ***/

@@ -1,23 +1,30 @@
 #!/usr/bin/env python
 
-"""
-Module for parsing and manipulating data from ENDF evaluations. Currently, it
+
+"""Module for parsing and manipulating data from ENDF evaluations. Currently, it
 only can read several MTs from File 1, but with time it will be expanded to
 include the entire ENDF format.
 
-All the classes and functions in this module are based on document ENDF-102
-titled "Data Formats and Procedures for the Evaluated Nuclear Data File
-ENDF-6". The latest version from June 2009 can be found at
+All the classes and functions in this module are based on document
+ENDF-102 titled "Data Formats and Procedures for the Evaluated Nuclear
+Data File ENDF-6". The latest version from June 2009 can be found at
 http://www-nds.iaea.org/ndspub/documents/endf/endf102/endf102.pdf
 
-For more information on this module, contact Paul Romano <romano7@gmail.com>
+For more information on this module, contact Paul Romano
+<paul.k.romano@gmail.com>
 """
+
 import re
-import numpy as np
-import matplotlib.pyplot as plt
 import os
 import warnings
-import pyne.rx_data as rx
+import StringIO
+
+import numpy as np
+
+import matplotlib.pyplot as plt
+
+import pyne.rxdata as rx
+from pyne.rxname import label
 
 number = " (\d.\d+(?:\+|\-)\d)"
 
@@ -26,134 +33,457 @@ libraries = {0: "ENDF/B", 1: "ENDF/A", 2: "JEFF", 3: "EFF",
              31: "INDL/V", 32: "INDL/A", 33: "FENDL", 34: "IRDF",
              35: "BROND", 36: "INGDB-90", 37: "FENDL/A", 41: "BROND"}
 
-decay_type = {0: 'gamma', 1: 'beta', 2: 'ec/positron', 3: 'IT',
-              4: 'alpha', 5: 'n', 6: 'SF', 7: 'p', 8: 'electron', 
-              9: 'xray', 10: 'unknown'}
 
-class Library(rx.rx_data):
+class Library(rx.RxLib):
     """
     Library is a class for an ENDF evaluation which contains a number
-    of Files.
+    of Materials and Files.
     """
 
-    def __init__(self, filename):
-        self.fh = open(filename, 'r')
-
-        # initialize some dicts that will act as an index
+    def __init__(self, fh, resonances=True):
+        opened_here = False
+        self.fh = fh
+        if isinstance(fh, basestring):
+            self.fh = open(fh, 'r')
+            opened_here = True
         self.mats = {}
         self.mts = {}
-
-        # are there more files to read the headers of?
+        self.structure = {}
+        self.mat_dict = {}
         self.more_files = True
-        
-        # tracks theoretical length of file, based on headers
+        # This counts the calculated position in the file.
         self.chars_til_now = 0
-        
-        # tracks how many lines would have been skipped when reading data
+        # The offset accounts for lines skipped in data entry.
         self.offset = 1
-        
-        # read in the data    
-        data = self._read_data(filename)
-        rx.rx_data.__init__(self, data)
-        
-        # read ALL the headers!
+
+        self.data = self.load()
         while self.more_files:
             self._read_headers()
-        
-        # close the file before we have a chance to break anything
-        self.fh.close()
+        # Close the file before we have a chance to break anything.
+        if opened_here:
+            self.fh.close()
+        if resonances:
+            self.make_resonances()
+
+    def load(self):
+        warnings.filterwarnings("ignore", "Some errors were detected !")
+        data = np.genfromtxt(self.fh,
+                             delimiter = 11,
+                             usecols = (0, 1, 2, 3, 4, 5),
+                             invalid_raise = False,
+                             skip_header = 1,
+                             converters = {0: convert,
+                                           1: convert,
+                                           2: convert,
+                                           3: convert,
+                                           4: convert,
+                                           5: convert})
+        return data
+
+    def seek_matmfmt(self, mat_id, mf, mt):
+        self.fh.seek(0)
+        searchString = '{0:4}{1:2}{2:3}'.format(mat_id, mf, mt)
+        while True:
+            position = self.fh.tell()
+            line = self.fh.readline()
+            if line == '':
+                # Reached EOF
+                raise NotFound('Reaction not found:{0}'.format(searchString))
+            if line[66:75] == searchString:
+                self.fh.seek(position)
+                break
 
     def _read_headers(self):
-        
-        # skip the first line and get the material id
+
+        # Skip the first line and get the material ID.
         self.fh.seek(self.chars_til_now+81)
         line = self.fh.readline()
-        mat_id = line[67:70]
-        
-        print 'Reading headers for material id %d ...' % int(mat_id)
-        
+        mat_id = int(line[66:70])
+        # Adjust the offset every time we get to a new material.
+        if mat_id not in self.structure:
+            self.offset -= 1
+        # We need to make a data structure modeled after GND.
+            self.structure.update(
+                {mat_id:{'styles':'',
+                         'docs':[],
+                         'particles':[],
+                         'data':{'resolved':{},
+                                 'unresolved':{},
+                                 'datadocs':[],
+                                 'xs':[],
+                                 'output':{'channel1':[],
+                                           'channel2':[]}},
+                         'matflags':{}}})
+
+            self.mat_dict.update({mat_id:{'end_line':[],
+                                          'mfs':{}}})
+
         # parse header (all lines with 1451)
         comments = ''
         mf = 1
         stop = self.chars_til_now/81
-        
         while re.search('1451 +\d{1,3}', line):
-    
             # parse contents section
-            if re.match(' +\d{1,2} +\d{1,3} +\d{1,4} +', line):
-                
-                # while reading data we skip a line at the beginning
-                # of every material, so we need an offset
-                if int(mat_id) not in self.mats:
-                    self.offset -= 1
-                    
-                self.mats.update({int(mat_id):(self.chars_til_now / 81)})
-                
-                # accounting for skipped lines between MF's and MT's
+            if re.match(' +\d{1,2} +\d{1,3} +\d{1,10} +', line):
+                # SEND and FEND records are not counted in the contents,
+                # but still take up space.  We need to account for that.
                 old_mf = mf
-                mf, mt = int(line[31:33]), int(line[41:44])
-                mt_length = int(line[50:55])
+                mf, mt = int(line[22:33]), int(line[33:44])
+                mt_length = int(line[44:55])
                 if old_mf == mf:
                     start = stop + 1
+                    stop = start+mt_length
                 else:
                     start = stop + 2
-                    
+                    stop = start + mt_length
                 stop = start + mt_length
-                self.mts.update({(int(mat_id), mf, mt):(start+self.offset, stop+self.offset)})
+                self.mat_dict[mat_id]['mfs'][mf,mt] = (start+self.offset,
+                                                       stop+self.offset)
                 line = self.fh.readline()
-            elif re.search('C O N T E N T S', line):
+            # parse comment
+            elif re.match(' {66}', line):
+                self.structure[mat_id]['docs'].append(line[0:66])
+                line = self.fh.readline()
+            elif re.match('[\d+. ]{80}\n$', line):
                 line = self.fh.readline()
                 continue
-            # parse comments
             else:
-                comments = comments + '\n' + line[0:66]
+                self.structure[mat_id]['docs'].append(line[0:66])
                 line = self.fh.readline()
-
-        # find where end of material is
+        # Find where the end of the material is and then jump to it.
         self.chars_til_now = (stop + 4)*81
-        
-        # jump to end of this material         
         self.fh.seek(self.chars_til_now)
-        
-        # are we at the end of the file?
         if self.fh.readline() == '':
             self.more_files = False
-        
+
         # update materials list
         if mat_id != '':
-            self.mats.update({int(mat_id):(self.chars_til_now / 81, comments)})
-        
-    def _read_data(self, filename):
-        warnings.filterwarnings("ignore", "Some errors were detected !")
-        print 'Reading data ...'
-        data = np.genfromtxt(filename, 
-                         delimiter = 11, 
-                         usecols = (0, 1, 2, 3, 4, 5), 
-                         invalid_raise = False,
-                         skip_header = 1,                                    
-                         converters = {0: convert,
-                                       1: convert, 
-                                       2: convert,
-                                       3: convert, 
-                                       4: convert, 
-                                       5: convert})
-        return data
-                                                
+            self.mat_dict[mat_id]['end_line'] = self.chars_til_now/81
+            setattr(self, "mat{0}".format(mat_id), self.structure[mat_id])
+
+        # Read flags from MT 1.
+        flagvals = []
+        # if mat_id in (-1, 0):
+        #     pass
+        # else:
+        self.seek_matmfmt(mat_id, 1, 451)
+        for i in range(2):
+            line = self.fh.readline()
+            for j in range(6):
+                flagvals.append(convert(line[j*11:(j+1)*11]))
+        flagkeys = ['ZA', 'AWR', 'LRP', 'LFI', 'NLIB', 'NMOD', 'ELIS',
+                    'STA', 'LIS', 'LIS0', None, 'NFOR', 'AWI', 'EMAX',
+                    'LREL', None, 'NSUB', 'NVER', 'TEMP', None, 'LDRV',
+                    None, 'NWD', 'NXC']
+
+        self.structure[mat_id].update({'matflags':
+                                       dict(zip(flagkeys, flagvals))})
+        del self.structure[mat_id]['matflags'][None]
+
+    def is_isotope_line(self, line):
+        """ If the line is the beginning of resonance data for an isotope,
+        returns True."""
+        zai, abn, lfw, ner = line[0], line[1], line[3], line[4]
+        return ((line[2] == line[5] == 0) and
+                lfw in (1,0) and
+                int(ner) == ner and
+                abn <= 1 and
+                zai >= 1000)
+
+    def is_range_line(self, line):
+        """ Determine whether this line is the beginning of a new resonance
+        range.  Line format must match EL, EH, LRU, LRF, NRO, NAPS. """
+        el, eh, lru, lrf, nro, naps = line
+        return (el < eh and
+                self.check_nro_naps(nro, naps) and
+                (lru == 0 and lrf == 0) or
+                (lru == 1 and lrf in range(1,8)) or
+                (lru == 2 and lrf in (1,2)))
+
+    def check_nro_naps(self, nro, naps):
+        """Check to see if the places where NRO and NAPS should be
+        are indeed filled with parameters in the expected ranges.
+        """
+        return ((nro == 0 and naps in (0, 1)) or
+                (nro == 1 and naps in (0, 1, 2)))
+
+    def parse_isotope_line(self, line):
+        """ If the line is the beginning of resonance data for an isotope,
+        makes a dictionary of the isotope-specific flags for easy access."""
+        if self.is_isotope_line(line):
+            isotope_flags = {'ZAI':line[0],
+                             'ABN':line[1],
+                             'LFW':line[3],
+                             'NER':line[4]}
+        return isotope_flags
+
+    def parse_range_line(self, line):
+        """ If the line is the beginning of a resonance range, makes
+        a dictionary of the flags for easy access. """
+        if self.is_range_line(line):
+            range_flags = {'EL':line[0],
+                           'EH':line[1],
+                           'LRU':line[2],
+                           'LRF':line[3],
+                           'NRO':line[4],
+                           'NAPS':line[5]}
+        else:
+            range_flags = None
+        return range_flags
+
+    def make_resonances(self):
+        """ Read the resonance data from all the materials in the library
+        and return a nested dictionary with the resonance data. To get at the
+        resonance data, use:
+
+        'library.mat{0}['data'][{1}][{2}][2][{3}]'.format(mat_id,
+                                                          'resolved' or
+                                                              'unresolved',
+                                                          range number,
+                                                          data type you want)
+        """
+        for mat_id in self.structure:
+            resonance_ranges = {'resolved':[],
+                                'unresolved':[]}
+            self.structure[mat_id]['data'] = {'resolved':[], 'unresolved':[]}
+            lrp = self.structure[mat_id]['matflags']['LRP']
+
+            if lrp == -1:
+                # If the LRP flag for the material is -1, there is no
+                # resonance data provided.
+                pass
+            elif mat_id in (-1,0):
+                pass
+            else:
+                # Put the line structure back in the array.  Let's get down
+                # to business to read the HEAD record.
+                try:
+                    mf2 = np.reshape(self.read_mfmt(mat_id, 2, 151), (-1, 6))
+                except ValueError:
+                    raise ValueError(self.read_mfmt(mat_id, 2, 151))
+                head = mf2[0]
+                za, awr, nis = head[0], head[1], head[4]
+
+            if lrp == 0:
+                # In this case, only scattering radius is provided.
+                pass
+
+            elif lrp == 1:
+                # Resonance contributions are all present and accounted for.
+                isotope_flags = {}
+                range_flags = {}
+                for i, line in enumerate(mf2):
+                    if self.is_isotope_line(line):
+                        isotope_flags = self.parse_isotope_line(line)
+                    elif self.is_range_line(line):
+                        range_flags = self.parse_range_line(line)
+                    else:
+                        # If this line is neither a range nor an isotope line:
+                        if self.is_range_line(mf2[i-1]):
+                            # If this is a new resonance range, add a new dict:
+                            try:
+                                if range_flags['LRU'] == 1:
+                                    resonance_ranges['resolved'].append(
+                                        {'rangeflags': range_flags,
+                                         'rangedata':[i-2,i,0]})
+                                elif range_flags['LRU'] == 2:
+                                    resonance_ranges['unresolved'].append(
+                                        {'rangeflags': range_flags,
+                                         'rangedata':[i-2,i,0]})
+                                else: pass
+                            except KeyError:
+                                print 'No LRU!'
+
+                        # Make the current line the last line of the range as
+                        # specified in the dict.
+                        try:
+                            if range_flags['LRU'] == 1:
+                                last_range = resonance_ranges['resolved'][-1]
+                            elif range_flags['LRU'] == 2:
+                                last_range = resonance_ranges['unresolved'][-1]
+                            last_range['rangedata'][1] = i + 1
+                            last_range['rangedata'][2] = mf2[
+                                last_range['rangedata'][0]:last_range['rangedata'][1]]
+                        except KeyError:
+                            print 'No LRU!'
+
+                for resonance_range in resonance_ranges['unresolved']:
+                    self.parse_resonance_range(resonance_range,
+                                               isotope_flags,
+                                               mat_id)
+
+            elif lrp == 2:
+                pass
+
+    def parse_resonance_range(self, resonance_range, isotope_flags, mat_id):
+        """Turns a resonance range and labels the data for use.
+
+        Parameters
+        ----------
+        resonance_range: dictionary with a dictionary of flags and a list of data
+            The flag list is keyed to 'rangeflags'. The data is itself a list
+            which contains starting/stopping positions and a numpy array.
+
+        isotope_flags: dictionary of flags specific to the isotope
+
+        mat_id: integer material id as represented in ENDF standard
+        """
+        lfw = isotope_flags['LFW']
+        range_flags = resonance_range['rangeflags']
+        lru = range_flags['LRU']
+        lrf = range_flags['LRF']
+
+        raw_data = resonance_range['rangedata'][2]
+        range_data = rx.DoubleSpinDict({})
+
+        if lru == 1:
+            # This is the case for data in a resolved resonance range.
+            pass
+        elif lru == 2:
+            # This is the case for data in an unresolved resonance range.
+            if (lfw, lrf) == (0, 1):
+                # This is Case A from the ENDF manual, pp.69-70.
+                def is_spi_line(line):
+                    spi, lssf, nls = line[0::2]
+                    return (lssf in (0,1) and
+                            line[3] == line[5] == 0 and
+                            (2*spi+nls) == int(2*spi+nls) and
+                            spi < 1000)
+
+                def is_l_line(line):
+                    L, num_entries, njs  = line[2], line[4], line[5]
+                    return (not line[1:4:2].any() and
+                            (L+njs) == int(L+njs) and
+                            6*njs == num_entries)
+
+                for i, line in enumerate(raw_data):
+                    if is_spi_line(line):
+                        spi = line[0]
+                    elif is_l_line(line):
+                        L = int(round(line[2]))
+                        njs = line[5]
+                        current_L_region = raw_data[i+1:i+1+njs]
+                        for line in current_L_region:
+                            # Each line has an AJ value; we parse line-by-line.
+                            aj = int(round(line[1]))
+                            aj_data = {(spi, L, aj):{'D': line[0],
+                                                     'AMUN': line[2],
+                                                     'GNO': line[3],
+                                                     'GG': line[4]}}
+                            range_data.update(aj_data)
+
+            elif (lfw, lrf) == (1, 1):
+                # Case B:
+                def is_spi_line(line):
+                    spi, lssf, ne, nls = line[0], line[2], line[4], line[5]
+                    return (lssf in (0,1) and
+                            line[3] == 0 and
+                            (2*spi+nls) == int(2*spi+nls) and
+                            spi < 1000)
+
+                def is_l_line(line):
+                    awri, L, njs = line[0::2]
+                    return ((np.array_equal(line[1::2], [0,0,0])) and
+                            int(njs) == njs and
+                            njs < 6 and
+                            int(L) == L)
+
+                for i in range(len(raw_data)):
+                    line = raw_data[i]
+                    if is_spi_line(line):
+                        spi, ne = line[0], line[4]
+                        es_start = 6*(i+1)
+                        es_stop = es_start+ne
+                        # Case B data is ES-independent except for GF, so we
+                        # have a common ES array.
+                        es_array = raw_data.flat[es_start:es_stop]
+                    elif is_l_line(line):
+                        L = int(line[2])
+                        aj_line = raw_data[i+2]
+                        aj = int(aj_line[0])
+                        num_entries = raw_data[i+1][4]-6
+                        gf_start = 6*(i+3)
+                        gf_stop = gf_start + num_entries
+
+                        aj_data = {(spi, L, aj):{
+                            'ES': es_array,
+                            'D': aj_line[0],
+                            'AMUN': aj_line[2],
+                            'GNO': aj_line[3],
+                            'GG': aj_line[4],
+                            'GF': raw_data.flat[gf_start:gf_stop]}}
+                        range_data.update(aj_data)
+
+            elif lrf == 2:
+                # Case C:
+                def is_spi_line(line):
+                    spi, lssf, nls = line[0::2]
+                    return (lssf in (0,1) and
+                            line[3] == line[5] == 0 and
+                            (2*spi+nls) == int(2*spi+nls) and
+                            spi < 1000)
+
+                def is_j_line(line):
+                    aj, num_entries, ne = line[0], line[4], line[5]
+                    return (int(2*aj) == 2*aj and
+                            6*ne + 6 == num_entries and
+                            not line[1:4:2].any())
+
+                def is_l_line(line):
+                    L, njs = line[2], line[4]
+                    return (not (line[1::2].any() or is_j_line(line)) and
+                            (L+njs) == int(L+njs))
+
+                for i in range(len(raw_data)):
+                    line = raw_data[i]
+                    if is_spi_line(line):
+                        spi = line[0]
+                    elif is_l_line(line):
+                        L = int(round(line[2]))
+                    elif is_j_line(line):
+                        aj = int(round(line[0]))
+                        num_entries = line[4]
+                        current_aj_region = raw_data.flat[6*(i+2):
+                                                          6*(i+1)+num_entries]
+                        aj_data = {(spi, L, aj): {
+                            'ES': current_aj_region[0::6],
+                            'D': current_aj_region[1::6],
+                            'GX': current_aj_region[2::6],
+                            'GNO': current_aj_region[3::6],
+                            'GG': current_aj_region[4::6],
+                            'GF': current_aj_region[5::6]}}
+                        range_data.update(aj_data)
+
+            # Now that the range's data has been fully updated, we can drop
+            # it in a tuple, drop *that* into the list of unresolved resonances,
+            # and sort the list.
+            el = resonance_range['rangeflags']['EL']
+            eh = resonance_range['rangeflags']['EH']
+            self.structure[mat_id]['data']['unresolved'].append(
+                (el, eh, range_data, range_flags))
+            self.structure[mat_id]['data']['unresolved'].sort()
+
     def read_mfmt(self, mat_id, mf, mt):
-        if (mat_id, mf, mt) in self.mts:
-            print "Reading Material %d, File %d, MT %d" % (mat_id, mf, mt)
-            start = (self.mts[(mat_id, mf, mt)][0] - 1) * 6
-            stop = (self.mts[(mat_id, mf, mt)][1] - 1)* 6
+        """Grabs the raw data from one MT number.
+
+        Parameters
+        ----------
+        mat_id: ENDF material ID number
+        mf: ENDF file number (MF)
+        mt: ENDF reaction number (MT)
+        """
+        if mat_id in self.structure:
+            start, stop = self.mat_dict[mat_id]['mfs'][mf,mt]
+            start = (start - 1) * 6
+            stop = (stop-1)*6
             return self.data.flat[start:stop]
         else:
-            print "Material %d, File %d, MT %d does not exist." % (mat_id, mf, mt)
+            print "Material %d does not exist." % mat_id
             return False
-        
+
     def get(self, mat_id, mf, mt):
-        return rx.rx_data.get(self, mat_id, mf, mt, 'endf')
-    
-    def write(self, filename, file_type_out):
-        return rx.rx_data.write(self, filename, 'endf', file_type_out)
+        return self.read_mfmt(mat_id, mf, mt)
+
 
 class Evaluation(object):
     """
@@ -574,10 +904,10 @@ class Evaluation(object):
                     res.SPI = items[0]
                     res.AP = items[1]
                     res.NLS = items[4]
-                # Resolved resonance region
+                # resolved resonance region
                 elif res.LRU == 1:
                     self._read_resolved(res)
-                # Unresolved resonance region
+                # unresolved resonance region
                 elif res.LRU == 2:
                     self._read_unresolved(res)
 
@@ -819,7 +1149,7 @@ class Evaluation(object):
             iyield.data[E]['yi'] = zip(itemList[2::4],itemList[3::4]) # Independent yield
 
         # Skip SEND record
-        self.fh.readline()        
+        self.fh.readline()
 
     def _read_cumulative_yield(self):
         self.print_info(8, 459)
@@ -1142,7 +1472,7 @@ class Evaluation(object):
 
     def print_info(self, MF, MT):
         if self.verbose:
-            print("Reading MF={0}, MT={1} {2}".format(MF, MT, MTname[MT]))
+            print("Reading MF={0}, MT={1} {2}".format(MF, MT, label(MT)))
 
     def __iter__(self):
         for f in self.files:
@@ -1489,7 +1819,7 @@ class ENDFReaction(ENDFFile):
         self.MT = MT
 
     def __repr__(self):
-        return "<ENDF Reaction: MT={0}, {1}>".format(self.MT, MTname[self.MT])
+        return "<ENDF Reaction: MT={0}, {1}>".format(self.MT, label(self.MT))
 
 class Resonance(object):
     def __init__(self):
@@ -1522,31 +1852,30 @@ def convert(string):
     This function converts a number listed on an ENDF tape into a float or int
     depending on whether an exponent is present.
     """
-  
-    if re.search('[^ 0-9+\-\.]', string):
+    try:
+        if re.search('[^ 0-9+\-\.]', string):
+            return float(string)
+        elif string[-2] in '+-':
+            return float(string[:-2] + 'e' + string[-2:])
+        elif string[-3] in '+-':
+            return float(string[:-3] + 'e' + string[-3:])
+        else:
+            return float(string)
+    except ValueError:
         return None
-    elif string[-2] in '+-':
-        return float(string[:-2] + 'e' + string[-2:])
-    elif string[-3] in '+-':
-        return float(string[:-3] + 'e' + string[-3:])
-    else:
-        return float(string)
 
 def numpy_to_ENDF(num):
     """
     This function converts a number into ENDF format.
     """
-    if int(num) == num:
-        result = '           '
-        num = int(num)
-        result = result[0:-len(str(num))] + (str(num))
-        return result
-    elif type(num) is float:
-        result = '% 9.6e' % num
-        return result[:-4] + result[-3:-2] + result[-1]
-    else:
-        return ''
-                
+    # if int(num) == num:
+        # result = '           '
+        # num = int(num)
+        # result = result[0:-len(str(num))] + (str(num))
+        # return result
+    # if type(num) is float:
+    result = '% 9.6e' % num
+    return result[:-4] + result[-3:-2] + result[-1]
 
 MTname = {1: "(n,total) Neutron total",
           2: "(z,z0) Elastic scattering",
@@ -1723,6 +2052,7 @@ MTname = {1: "(n,total) Neutron total",
           570: "Q1 (7s1/2) subshell",
           571: "Q2 (7p1/2) subshell",
           572: "Q3 (7p3/2) subshell"}
+
 
 class NotFound(Exception):
     def __init__(self, value):
