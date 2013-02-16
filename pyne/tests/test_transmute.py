@@ -23,8 +23,9 @@ from pyne.xs.data_source import EAF_RX
 """Tests _solve_decay_matrix calculating the matrix exponential"""
 def test_expm():
     A = np.zeros((3,3))
+    t = 1.
     np.fill_diagonal(A,[-1,-2,-3])
-    transA = transmute._solve_decay_matrix(A)
+    transA = transmute._matrix_exp(A, t)
     eA = linalg.expm(A)
     tayA = linalg.expm3(A,q=20)
     # Check the equivalence of _solve_decay_matrix
