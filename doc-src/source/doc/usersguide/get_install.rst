@@ -21,7 +21,7 @@ It is useful to consider how users will use the DAGMC workflow prior
 to making some installation decisions.  There are three main stages
 for the workflow:
  * manual preparation of geometric models
- * automated pre-processing of models
+ qqqutomated pre-processing of models
  * use of the models in analysis
 
 While the second and third stages can be combined, these instructions
@@ -219,7 +219,7 @@ Apply DAGMC Patch to MCNP5 v1.60
 Perform the following steps:
 ::
     prompt%> cd $HOME/dagmc_bld/MCNP5/Source
-    prompt%> patch -p 0 < ~/dagmc_install.patch.5.1.60
+    prompt%> patch -p1 < ~/dagmc.patch.5.1.60
 
 
 Build DAG-MCNP5 from modified code
