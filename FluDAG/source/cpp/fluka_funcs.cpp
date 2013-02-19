@@ -380,7 +380,7 @@ void fludagwrite_assignma(std::string lfname)  // file with cell/surface cards
 /////////////		region2name - modified from dagmcwrite
 /////////////
 //////////////////////////////////////////////////////////////////////////
-void region2name(int volindex, char * vname )  // file with cell/surface cards
+void region2name(int volindex, char *vname )  // file with cell/surface cards
 {
   MBErrorCode rval;
 
