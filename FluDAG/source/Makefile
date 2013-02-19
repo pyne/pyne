@@ -49,7 +49,7 @@ wrapobjects = WrapInit.o \
 
 default: all
 
-all: myfluka mainfludag $(wrapobjects)
+all: $(wrapobjects) mainfludag 
 
 # Look in directory arg2 for file-pattern arg1
 vpath %.cpp cpp
@@ -109,6 +109,8 @@ $(wrapobjects): %.o: %.cc
 	g++ -c $(CXXFLAGS) $< 
 	mv $@ obj
 	
+obj: $(wrapobjects) mainFluDAG.o fluka_funcs.o
+
 readVol.o : readVol.cpp 
 	g++ -c $(CXXFLAGS) $< 
 	mv $@ obj

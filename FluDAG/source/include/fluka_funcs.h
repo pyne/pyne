@@ -32,7 +32,9 @@ extern "C" {
  * Write the material assignment for each volume to a file named matfile
  */
   void fludagwrite_assignma(std::string matfile);  
-
+ // void fludagwrite(std::string fname );  // file with cell/surface cards
+  void fludagwrite_mat(std::string fname);
+ //  void region2name(int volindex, char * vname );
 
 /* Add the current particle state to the bank */
   void dagmc_bank_push_( int* nbnk );

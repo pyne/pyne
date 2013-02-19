@@ -1,6 +1,5 @@
 
 
-
 ///////////////////////////////////////////////////////////////////
 //
 // Interface for Dag Wrappers
@@ -10,9 +9,6 @@
 #ifndef DAGWRAPPERS_HH
 #define DAGWRAPPERS_HH
 
-// #include "DagMC.hpp"
-// #define DAG DagMC::instance()
-// #include "globals.hh"
 
 #define idnrwr idnrwr_
 #define g1wr g1wr_
@@ -113,5 +109,5 @@ extern "C" int isvhwr(const int& fCheck, const int& intHist);
 
 extern "C" void rg2nwr(const int& mreg, char* Vname);
 
-#endif //WRAPPERS_HH
+#endif //DAGWRAPPERS_HH
 

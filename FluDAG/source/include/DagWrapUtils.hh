@@ -19,7 +19,6 @@
 
 #define NO_NAMES 1;
 #define DAGGEOMETRY_DEBUG 1;
-#define DString std::string;
 
 //Forward declarations
 
@@ -33,5 +32,6 @@ void PrintEntityRegionNames(std::ostream& os);
 void writeRegionLine(std::ostream& os, int iRegion, std::string name);
 void createFlukaMatFile();
 
+void region2name(int volindex, char * vname );
 
 #endif

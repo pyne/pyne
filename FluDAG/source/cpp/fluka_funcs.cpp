@@ -117,7 +117,6 @@ void cpp_dagmcinit(char *cfile,         // geom
   char *myfile;
   myfile = &prefixedFilename[0];
   
-
   // initialize this as -1 so that DAGMC internal defaults are preserved
   // user doesn't set this
   double arg_facet_tolerance = -1;
@@ -126,7 +125,6 @@ void cpp_dagmcinit(char *cfile,         // geom
   // if ( *ftlen > 0 ) arg_facet_tolerance = atof(ftol);
 
   // read geometry
-  // rval = DAG->load_file(cfile, arg_facet_tolerance );
   rval = DAG->load_file(myfile, arg_facet_tolerance );
   if (MB_SUCCESS != rval) {
     std::cerr << "DAGMC failed to read input file: " << cfile << std::endl;
@@ -304,7 +302,11 @@ static char* get_tallyspec( std::string spec, int& dim ){
 
 }
 
-
+//////////////////////////////////////////////////////////////////////////
+/////////////
+/////////////		fludagwrite_assignma
+/////////////
+//////////////////////////////////////////////////////////////////////////
 /**
    After mcnp_funcs:dagmcwritemcnp_
 */
@@ -320,8 +322,7 @@ void fludagwrite_assignma(std::string lfname)  // file with cell/surface cards
 
   std::vector< std::string > keywords;
   ret = DAG->detect_available_props( keywords );
-  // parse data from geometry
-  // If you don't parse, props from make_property_string will be empty.
+  // parse data from geometry so that property can be found
   ret = DAG->parse_properties( keywords );
 
 // if (MB_SUCCESS != ret) {
@@ -351,7 +352,7 @@ void fludagwrite_assignma(std::string lfname)  // file with cell/surface cards
       }
   }
   // Show the output string just created
-  std::cout << ostr.str();
+  // std::cout << ostr.str();
 
   // Prepare an output file of the given name; put a header and the output string in it
   std::cerr << "Going to write an lcad file = " << lfname << std::endl;
@@ -374,49 +375,292 @@ void fludagwrite_assignma(std::string lfname)  // file with cell/surface cards
 }
 
 
-
-void dagmcwritemcnp_(char *lfile, int *llen)  // file with cell/surface cards
+//////////////////////////////////////////////////////////////////////////
+/////////////
+/////////////		region2name - modified from dagmcwrite
+/////////////
+//////////////////////////////////////////////////////////////////////////
+void region2name(int volindex, char * vname )  // file with cell/surface cards
 {
   MBErrorCode rval;
 
-  lfile[*llen]  = '\0';
-
-  std::vector< std::string > mcnp5_keywords;
-  std::map< std::string, std::string > mcnp5_keyword_synonyms;
-
-  mcnp5_keywords.push_back( "mat" );
-  mcnp5_keywords.push_back( "rho" );
-  mcnp5_keywords.push_back( "comp" );
-  mcnp5_keywords.push_back( "imp.n" );
-  mcnp5_keywords.push_back( "imp.p" );
-  mcnp5_keywords.push_back( "imp.e" );
-  mcnp5_keywords.push_back( "tally" );
-  mcnp5_keywords.push_back( "spec.reflect" );
-  mcnp5_keywords.push_back( "white.reflect" );
-  mcnp5_keywords.push_back( "graveyard" );
-  
-  mcnp5_keyword_synonyms[ "rest.of.world" ] = "graveyard";
-  mcnp5_keyword_synonyms[ "outside.world" ] = "graveyard";
+  std::vector< std::string > fluka_keywords;
+  fluka_keywords.push_back( "mat" );
+  fluka_keywords.push_back( "rho" );
+  fluka_keywords.push_back( "comp" );
+  fluka_keywords.push_back( "graveyard" );
 
   // parse data from geometry
-  rval = DAG->parse_properties( mcnp5_keywords, mcnp5_keyword_synonyms );
+  rval = DAG->parse_properties (fluka_keywords);
   if (MB_SUCCESS != rval) {
     std::cerr << "DAGMC failed to parse metadata properties" <<  std::endl;
     exit(EXIT_FAILURE);
   }
 
-  std::string lfname(lfile, *llen);
-  std::cerr << "Going to write an lcad file = " << lfname << std::endl;
+// std::ostringstream ostr;
+
+  int cmat = 0;
+  double crho;
+
+  MBEntityHandle vol = DAG->entity_by_index( 3, volindex );
+  int cellid = DAG->id_by_index( 3, volindex);
+
+  bool graveyard = DAG->has_prop( vol, "graveyard" );
+
+  std::ostringstream istr;
+  if( graveyard )
+  {
+     istr << "BLCKHOLE";
+     if( DAG->has_prop(vol, "comp") )
+     {
+       // material for the implicit complement has been specified.
+       get_int_prop( vol, cellid, "mat", cmat );
+       get_real_prop( vol, cellid, "rho", crho );
+       std::cout << "Detected material and density specified for implicit complement: " << cmat <<", " << crho << std::endl;
+     }
+   }
+   else if( DAG->is_implicit_complement(vol) )
+   {
+      istr << "mat_" << cmat;
+      if( cmat != 0 ) istr << "_rho_" << crho;
+   }
+   else
+   {
+      int mat = 0;
+      get_int_prop( vol, cellid, "mat", mat );
+
+      if( mat == 0 )
+      {
+        istr << "0";
+      }
+      else
+      {
+        double rho = 1.0;
+        get_real_prop( vol, cellid, "rho", rho );
+        istr << "mat_" << mat << "_rho_" << rho;
+      }
+   }
+   char *cstr = new char[istr.str().length()+1];
+   std:strcpy(cstr,istr.str().c_str());
+   vname = cstr;
+}
+
+//////////////////////////////////////////////////////////////////////////
+/////////////
+/////////////		fludagwrite_mat - modified from dagmcwrite
+/////////////
+//////////////////////////////////////////////////////////////////////////
+void fludagwrite_mat(std::string fname )  // file with cell/surface cards
+{
+  MBErrorCode rval;
+
+  std::vector< std::string > fluka_keywords;
+  std::map< std::string, std::string > fluka_keyword_synonyms;
+
+  fluka_keywords.push_back( "mat" );
+  fluka_keywords.push_back( "rho" );
+  fluka_keywords.push_back( "comp" );
+ // fluka_keywords.push_back( "imp.n" );
+ // fluka_keywords.push_back( "imp.p" );
+ // fluka_keywords.push_back( "imp.e" );
+ // fluka_keywords.push_back( "tally" );
+//  fluka_keywords.push_back( "spec.reflect" );
+//  fluka_keywords.push_back( "white.reflect" );
+  fluka_keywords.push_back( "graveyard" );
+  
+
+  // parse data from geometry
+  rval = DAG->parse_properties (fluka_keywords);
+  if (MB_SUCCESS != rval) {
+    std::cerr << "DAGMC failed to parse metadata properties" <<  std::endl;
+    exit(EXIT_FAILURE);
+  }
+
+  std::cerr << "Going to write an lcad file = " << fname << std::endl;
   // Before opening file for writing, check for an existing file
-  if( lfname != "lcad" ){
+  if( fname != "lcad" ){
     // Do not overwrite a lcad file if it already exists, except if it has the default name "lcad"
-    if( access( lfname.c_str(), R_OK ) == 0 ){
-      std::cout << "DagMC: reading from existing lcad file " << lfname << std::endl;
+    if( access( fname.c_str(), R_OK ) == 0 ){
+      std::cout << "DagMC: reading from existing lcad file " << fname << std::endl;
       return; 
     }
   }
 
-  std::ofstream lcadfile( lfname.c_str() );
+  std::ofstream lcadfile( fname.c_str() );
+
+  int num_cells = DAG->num_entities( 3 );
+
+  int cmat = 0;
+  double crho, cimp = 1.0;
+
+  // write the cell cards
+  for( int i = 1; i <= num_cells; ++i ){
+
+    MBEntityHandle vol = DAG->entity_by_index( 3, i );
+    int cellid = DAG->id_by_index( 3, i );
+    // set default importances for p and e to negative, indicating no card should be printed.
+/*
+    double imp_n = 1, imp_p = -1, imp_e = -1;
+
+
+    if( DAG->has_prop( vol, "imp.n" )){
+      get_real_prop( vol, cellid, "imp.n", imp_n );
+    }
+
+    if( DAG->has_prop( vol, "imp.p" )){
+      get_real_prop( vol, cellid, "imp.p", imp_p );
+    }
+
+    if( DAG->has_prop( vol, "imp.e" )){
+      get_real_prop( vol, cellid, "imp.e", imp_e );
+    }
+*/
+
+    // for model_complete goes from 1-88, 93, 94
+    lcadfile << cellid << " ";
+
+    bool graveyard = DAG->has_prop( vol, "graveyard" );
+
+    if( graveyard )
+    {
+      lcadfile << "BLCKHOLE";
+      if( DAG->has_prop(vol, "comp") )
+      {
+        // material for the implicit complement has been specified.
+        get_int_prop( vol, cellid, "mat", cmat );
+        get_real_prop( vol, cellid, "rho", crho );
+        std::cout << "Detected material and density specified for implicit complement: " << cmat <<", " << crho << std::endl;
+      //  cimp = imp_n;
+      }
+    }
+    else if( DAG->is_implicit_complement(vol) )
+    {
+      lcadfile << "mat_" << cmat;
+      if( cmat != 0 ) lcadfile << "_rho_" << crho;
+      lcadfile << " $ implicit complement";
+/*
+      lcadfile << " imp:n=" << cimp << " $ implicit complement";
+*/
+    }
+    else
+    {
+      int mat = 0;
+      get_int_prop( vol, cellid, "mat", mat );
+
+      if( mat == 0 )
+      {
+        lcadfile << "0";
+      }
+      else
+      {
+        double rho = 1.0;
+        get_real_prop( vol, cellid, "rho", rho );
+        lcadfile << "mat_" << mat << "_rho_" << rho;
+      }
+//    lcadfile << " imp:n=" << imp_n;
+//    if( imp_p > 0 ) lcadfile << " imp:p=" << imp_p;
+//    if( imp_e > 0 ) lcadfile << " imp:e=" << imp_e;
+    }
+
+    lcadfile << std::endl;
+  } // end iteration through cells
+
+  // cells finished, skip a line
+  lcadfile << std::endl;
+  
+  // write the tally cards
+/*
+  std::vector<std::string> tally_specifiers;
+  rval = DAG->get_all_prop_values( "tally", tally_specifiers );
+  if( rval != MB_SUCCESS ) exit(EXIT_FAILURE);
+
+  for( std::vector<std::string>::iterator i = tally_specifiers.begin();
+       i != tally_specifiers.end(); ++i )
+  {
+    int dim = 0;
+    char* card = get_tallyspec( *i, dim );
+    if( card == NULL ){
+      std::cerr << "Invalid dag-mcnp tally specifier: " << *i << std::endl;
+      std::cerr << "This tally will not appear in the problem." << std::endl;
+      continue;
+    }
+    std::stringstream tally_card;
+
+    tally_card << card;
+    std::vector<MBEntityHandle> handles;
+    std::string s = *i;
+    rval = DAG->entities_by_property( "tally", handles, dim, &s );
+    if( rval != MB_SUCCESS ) exit (EXIT_FAILURE);
+
+    for( std::vector<MBEntityHandle>::iterator j = handles.begin();
+         j != handles.end(); ++j )
+    {
+      tally_card << " " << DAG->get_entity_id(*j);
+    }
+
+    tally_card  << " T";
+    delete[] card;
+
+    // write the contents of the the tally_card without exceeding 80 chars
+    std::string cardstr = tally_card.str();
+    while( cardstr.length() > 72 ){
+        size_t pos = cardstr.rfind(' ',72);
+        lcadfile << cardstr.substr(0,pos) << " &" << std::endl;
+        lcadfile << "     ";
+        cardstr.erase(0,pos);
+    }
+    lcadfile << cardstr << std::endl;
+  }
+*/
+}
+
+//////////////////////////////////////////////////////////////////////////
+/////////////
+/////////////		fludagwrite modified from dagmcwritemcnp_
+/////////////
+//////////////////////////////////////////////////////////////////////////
+// void dagmcwritemcnp_(char *lfile, int *llen)  // file with cell/surface cards
+void fludagwrite(std::string fname )  // file with cell/surface cards
+{
+  MBErrorCode rval;
+
+  // lfile[*llen]  = '\0';
+
+  std::vector< std::string > fluka_keywords;
+  std::map< std::string, std::string > fluka_keyword_synonyms;
+
+  fluka_keywords.push_back( "mat" );
+  fluka_keywords.push_back( "rho" );
+  fluka_keywords.push_back( "comp" );
+  fluka_keywords.push_back( "imp.n" );
+  fluka_keywords.push_back( "imp.p" );
+  fluka_keywords.push_back( "imp.e" );
+  fluka_keywords.push_back( "tally" );
+  fluka_keywords.push_back( "spec.reflect" );
+  fluka_keywords.push_back( "white.reflect" );
+  fluka_keywords.push_back( "graveyard" );
+  
+  // fluka_keyword_synonyms[ "rest.of.world" ] = "graveyard";
+  // fluka_keyword_synonyms[ "outside.world" ] = "graveyard";
+
+  // parse data from geometry
+  rval = DAG->parse_properties (fluka_keywords);
+  if (MB_SUCCESS != rval) {
+    std::cerr << "DAGMC failed to parse metadata properties" <<  std::endl;
+    exit(EXIT_FAILURE);
+  }
+
+  std::cerr << "Going to write an lcad file = " << fname << std::endl;
+  // Before opening file for writing, check for an existing file
+  if( fname != "lcad" ){
+    // Do not overwrite a lcad file if it already exists, except if it has the default name "lcad"
+    if( access( fname.c_str(), R_OK ) == 0 ){
+      std::cout << "DagMC: reading from existing lcad file " << fname << std::endl;
+      return; 
+    }
+  }
+
+  std::ofstream lcadfile( fname.c_str() );
 
   int num_cells = DAG->num_entities( 3 );
   int num_surfs = DAG->num_entities( 2 );
@@ -481,12 +725,14 @@ void dagmcwritemcnp_(char *lfile, int *llen)  // file with cell/surface cards
     }
 
     lcadfile << std::endl;
-  }
+  } // end iteration through cells
 
   // cells finished, skip a line
   lcadfile << std::endl;
   
+  // jcz - do we need this?
   // write the surface cards
+/*
   for( int i = 1; i <= num_surfs; ++i ){
     MBEntityHandle surf = DAG->entity_by_index( 2, i );
     int surfid = DAG->id_by_index( 2, i );
@@ -502,7 +748,7 @@ void dagmcwritemcnp_(char *lfile, int *llen)  // file with cell/surface cards
 
   // surfaces finished, skip a line
   lcadfile << std::endl;
-
+*/
   // write the tally cards
   std::vector<std::string> tally_specifiers;
   rval = DAG->get_all_prop_values( "tally", tally_specifiers );
@@ -545,9 +791,11 @@ void dagmcwritemcnp_(char *lfile, int *llen)  // file with cell/surface cards
     }
     lcadfile << cardstr << std::endl;
   }
-  
 }
 
+////////////////////////////////////////////////////////////////////////////
+///////////////
+//////////////
 void dagmcangl_(int *jsu, double *xxx, double *yyy, double *zzz, double *ang)
 {
   MBEntityHandle surf = DAG->entity_by_index( 2, *jsu );

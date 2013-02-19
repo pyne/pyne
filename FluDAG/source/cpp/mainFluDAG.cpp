@@ -22,6 +22,7 @@ int main(int argc, char* argv[]) {
 
   bool flukarun = false;
 
+  // Default h5m filename is for fluka runs
   // std::string infile = "model_complete.h5m";
   std::string infile = "test.h5m";
 
@@ -37,33 +38,31 @@ int main(int argc, char* argv[]) {
                  */
                 flukarun = true;
   }
-  else  // Give a file name to write out the material file and stop
+  else  // Given a file name, write out the material file and stop
   {
       std::strcpy(fileptr, argv[1]);
       std::cerr << "Using " << fileptr << std::endl;
       flukarun = false;
   }
+  // Load the h5m file, init the obb tree;  flukarun changes the expected
+  // relative location of the file
   int max_pbl = 1;
-  // Load the h5m file, init the obb tree   
-  cpp_dagmcinit(fileptr, 0, max_pbl, flukarun);
-  
+  cpp_dagmcinit(fileptr, 0, max_pbl, flukarun); 
   if (!flukarun)
   {
     std::string lcad = "mat.inp";
     fludagwrite_assignma(lcad);
+    fludagwrite_mat("mat1.inp");
   }
-
+  else // call flukarun
+  {
 //flag for geometry:
 // 1 for GEANT4
 // 0 for FLUKA
 // 2 for Rubia
 // 3 for Dagmc ?
-    const int flag = 1;
 
-//call fortran
-// Temporarily comment out while testing the writing of FlukaMat
-    if (flukarun)
-    {
+       const int flag = 1;
        flukam(flag);
     }
 
