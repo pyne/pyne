@@ -769,10 +769,10 @@ def mat_from_mcnp(filename, mat_line, densities='None'):
     attrs = ['source', 'comments', 'name']
     line_index = 1
     attrs_line = linecache.getline(filename, mat_line - line_index)
-    while attrs_line not in ['c', 'C', ''] \
+    while attrs_line.split() not in [['c'], ['C']] \
     and attrs_line.split()[0] in ['c', 'C']:
-        if attrs_line.split()[0] == 'c' or attrs_line.split()[0] == 'C' \
-           and len(attrs_line.split()) > 1:
+        if attrs_line.split()[0] in ['c', 'C'] \
+        and len(attrs_line.split()) > 1:
             possible_attr = attrs_line.split()[1].split(':')[0].lower()
             if possible_attr in attrs:
                 if possible_attr.lower() == 'comments':
