@@ -330,7 +330,7 @@ void fludagwrite_assignma(std::string lfname)  // file with cell/surface cards
 //    exit(EXIT_FAILURE);
 //    }
 
-  // Open an outpustring
+  // Open an outputstring
   std::ostringstream ostr;
   // Loop through 3d entities.  In model_complete.h5m there are 90 vols
   for (unsigned i = 0; i<num_vols; i++)
@@ -455,17 +455,9 @@ void fludagwrite_mat(std::string fname )  // file with cell/surface cards
   MBErrorCode rval;
 
   std::vector< std::string > fluka_keywords;
-  std::map< std::string, std::string > fluka_keyword_synonyms;
 
   fluka_keywords.push_back( "mat" );
-  fluka_keywords.push_back( "rho" );
   fluka_keywords.push_back( "comp" );
- // fluka_keywords.push_back( "imp.n" );
- // fluka_keywords.push_back( "imp.p" );
- // fluka_keywords.push_back( "imp.e" );
- // fluka_keywords.push_back( "tally" );
-//  fluka_keywords.push_back( "spec.reflect" );
-//  fluka_keywords.push_back( "white.reflect" );
   fluka_keywords.push_back( "graveyard" );
   
 
@@ -476,7 +468,7 @@ void fludagwrite_mat(std::string fname )  // file with cell/surface cards
     exit(EXIT_FAILURE);
   }
 
-  std::cerr << "Going to write an lcad file = " << fname << std::endl;
+  std::cerr << "Going to write file = " << fname << std::endl;
   // Before opening file for writing, check for an existing file
   if( fname != "lcad" ){
     // Do not overwrite a lcad file if it already exists, except if it has the default name "lcad"
@@ -486,61 +478,41 @@ void fludagwrite_mat(std::string fname )  // file with cell/surface cards
     }
   }
 
-  std::ofstream lcadfile( fname.c_str() );
 
   int num_cells = DAG->num_entities( 3 );
 
   int cmat = 0;
-  double crho, cimp = 1.0;
+
+  // Open an outputstring
+  std::ostringstream ostr;
 
   // write the cell cards
   for( int i = 1; i <= num_cells; ++i ){
 
     MBEntityHandle vol = DAG->entity_by_index( 3, i );
     int cellid = DAG->id_by_index( 3, i );
-    // set default importances for p and e to negative, indicating no card should be printed.
-/*
-    double imp_n = 1, imp_p = -1, imp_e = -1;
-
-
-    if( DAG->has_prop( vol, "imp.n" )){
-      get_real_prop( vol, cellid, "imp.n", imp_n );
-    }
-
-    if( DAG->has_prop( vol, "imp.p" )){
-      get_real_prop( vol, cellid, "imp.p", imp_p );
-    }
-
-    if( DAG->has_prop( vol, "imp.e" )){
-      get_real_prop( vol, cellid, "imp.e", imp_e );
-    }
-*/
 
     // for model_complete goes from 1-88, 93, 94
-    lcadfile << cellid << " ";
+    ostr << std::setw(10) << std::left  << "ASSIGNMAT";
 
     bool graveyard = DAG->has_prop( vol, "graveyard" );
 
     if( graveyard )
     {
-      lcadfile << "BLCKHOLE";
+      // lcadfile << "BLCKHOLE";
+      ostr << "BLCKHOLE";
       if( DAG->has_prop(vol, "comp") )
       {
         // material for the implicit complement has been specified.
         get_int_prop( vol, cellid, "mat", cmat );
-        get_real_prop( vol, cellid, "rho", crho );
-        std::cout << "Detected material and density specified for implicit complement: " << cmat <<", " << crho << std::endl;
-      //  cimp = imp_n;
       }
     }
     else if( DAG->is_implicit_complement(vol) )
     {
-      lcadfile << "mat_" << cmat;
-      if( cmat != 0 ) lcadfile << "_rho_" << crho;
-      lcadfile << " $ implicit complement";
-/*
-      lcadfile << " imp:n=" << cimp << " $ implicit complement";
-*/
+      // lcadfile << "mat_" << cmat;
+      // lcadfile << " $ implicit complement";
+      ostr << "mat_" << cmat;
+      ostr << " $ implicit complement";
     }
     else
     {
@@ -549,69 +521,28 @@ void fludagwrite_mat(std::string fname )  // file with cell/surface cards
 
       if( mat == 0 )
       {
-        lcadfile << "0";
+        // lcadfile << "0";
+        ostr << std::setw(10) << std::right << "0";
       }
       else
       {
-        double rho = 1.0;
-        get_real_prop( vol, cellid, "rho", rho );
-        lcadfile << "mat_" << mat << "_rho_" << rho;
+        ostr << std::setw(10) << std::right << "mat_" << mat;
       }
-//    lcadfile << " imp:n=" << imp_n;
-//    if( imp_p > 0 ) lcadfile << " imp:p=" << imp_p;
-//    if( imp_e > 0 ) lcadfile << " imp:e=" << imp_e;
     }
 
-    lcadfile << std::endl;
+    ostr << std::setw(10) << std::right << cellid << std::endl;
   } // end iteration through cells
 
-  // cells finished, skip a line
-  lcadfile << std::endl;
-  
-  // write the tally cards
-/*
-  std::vector<std::string> tally_specifiers;
-  rval = DAG->get_all_prop_values( "tally", tally_specifiers );
-  if( rval != MB_SUCCESS ) exit(EXIT_FAILURE);
+  // Show the output string just created
+  std::cout << ostr.str();
 
-  for( std::vector<std::string>::iterator i = tally_specifiers.begin();
-       i != tally_specifiers.end(); ++i )
-  {
-    int dim = 0;
-    char* card = get_tallyspec( *i, dim );
-    if( card == NULL ){
-      std::cerr << "Invalid dag-mcnp tally specifier: " << *i << std::endl;
-      std::cerr << "This tally will not appear in the problem." << std::endl;
-      continue;
-    }
-    std::stringstream tally_card;
+  // Prepare an output file of the given name; put a header and the output string in it
+  std::ofstream lcadfile( fname.c_str() );
+  std::string header = "*...+....1....+....2....+....3....+....4....+....5....+....6....+....7...";
+  lcadfile << header << std::endl;
+  lcadfile << ostr.str();
 
-    tally_card << card;
-    std::vector<MBEntityHandle> handles;
-    std::string s = *i;
-    rval = DAG->entities_by_property( "tally", handles, dim, &s );
-    if( rval != MB_SUCCESS ) exit (EXIT_FAILURE);
-
-    for( std::vector<MBEntityHandle>::iterator j = handles.begin();
-         j != handles.end(); ++j )
-    {
-      tally_card << " " << DAG->get_entity_id(*j);
-    }
-
-    tally_card  << " T";
-    delete[] card;
-
-    // write the contents of the the tally_card without exceeding 80 chars
-    std::string cardstr = tally_card.str();
-    while( cardstr.length() > 72 ){
-        size_t pos = cardstr.rfind(' ',72);
-        lcadfile << cardstr.substr(0,pos) << " &" << std::endl;
-        lcadfile << "     ";
-        cardstr.erase(0,pos);
-    }
-    lcadfile << cardstr << std::endl;
-  }
-*/
+  std::cerr << "Writing lcad file = " << fname << std::endl;
 }
 
 //////////////////////////////////////////////////////////////////////////
