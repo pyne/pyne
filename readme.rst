@@ -21,6 +21,7 @@ Dependencies
 -------------
 PyNE has the following dependencies:
 
+   #. `CMake <http://www.cmake.org/>`_ (>= 2.8.5)
    #. `NumPy <http://www.numpy.org/>`_
    #. `SciPy <http://www.scipy.org/>`_
    #. `Cython <http://cython.org/>`_
