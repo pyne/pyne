@@ -10,6 +10,7 @@ ELSE:
     from pyne._includes.libcpp.vector cimport vector as std_vector
 
 cdef extern from "json/json.h" namespace "Json":
+
     cdef enum ValueType:
         nullValue,
         intValue,      
