@@ -1,0 +1,50 @@
+*...+....1....+....2....+....3....+....4....+....5....+....6....+....7....+....8
+TITLE
+Charged pion fluence inside and around a proton-irradiated Be target
+*...+....1....+....2....+....3....+....4....+....5....+....6....+....7....+....8
+BEAM         50.E+00                                                  PROTON
+BEAMPOS          0.0       0.0     -50.0
+*
+*...+....1....+....2....+....3....+....4....+....5....+....6....+....7....+....8
+*USRICALL        123.      456.       1.0      -2.0      18.0      18. test.h5m
+GEOBEGIN                                                              FLUGG
+GEOEND
+*...+....1....+....2....+....3....+....4....+....5....+....6....+....7...
+ASSIGNMAT     VACUUM         1
+ASSIGNMAT     VACUUM         2
+ASSIGNMAT     VACUUM         3
+ASSIGNMAT   BLCKHOLE         4
+*...+....1....+....2....+....3....+....4....+....5....+....6....+....7....+....8
+* MATERIAL         4.0    9.0122     1.848       5.0                    BERYLLIU
+*...+....1....+....2....+....3....+....4....+....5....+....6....+....7....+....8
+*  Be target, 1st and 2nd half
+*  External Black Hole
+*  Vacuum
+*...+....1....+....2....+....3....+....4....+....5....+....6....+....7....+....8
+* e+e- and gamma production threshold set at 10 MeV
+* EMFCUT        -0.010     0.010       1.0  BERYLLIU                    PROD-CUT
+* score in each region energy deposition and stars produced by primaries
+SCORE       ENERGY    BEAMPART 
+* Boundary crossing fluence in the middle of the target (log intervals, one-way)
+USRBDX          99.0   PIONS+-     -47.0   regBE3  regBE4        400. piFluenUD
+USRBDX         +50.0               +50.0                 0.0      10.0 &
+* Boundary crossing current in the middle of the target (log intervals, one-way)
+USRBDX          -1.0   PIONS+-     -47.0   regBE3  regBE4        400. piCurrUD
+USRBDX         +50.0               +50.0                 0.0      10.0 &
+* Tracklength fluence inside the target, Upstream part and Downstream part
+* Logarithmic energy intervals
+USRTRACK        -1.0   PIONS+-     -48.0   regBE3     1000.0      20. piFluenU
+USRTRACK        50.0     0.001                                           &
+USRTRACK        -1.0   PIONS+-     -49.0   regBE4     1000.0      20. piFluenD
+USRTRACK        50.0     0.001                                           &
+* Cartesian binning of the pion fluence inside and around the target 
+USRBIN          10.0   PIONS+-     -50.0      50.0      50.0      50. piFluBin
+USRBIN         -50.0     -50.0     -10.0     100.0     100.0      60.0   &
+* Cartesian binning of the deposited energy inside the target
+USRBIN          10.0    ENERGY     -51.0      10.0      10.0       5. Edeposit
+USRBIN         -10.0     -10.0       0.0      20.0      20.0       5.0   &
+*...+....1....+....2....+....3....+....4....+....5....+....6....+....7....+....8
+RANDOMIZE        1.0
+*...+....1....+....2....+....3....+....4....+....5....+....6....+....7....+....8
+START       100000.0
+STOP
