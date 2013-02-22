@@ -26,9 +26,8 @@ MOAB_FLAGS = -lMOAB -ldagmc
 MOAB_LIBS_LINK = -L${MOAB_LIBDIR} -lm ${MOAB_FLAGS} 
 
 CXXFLAGS = ${MOAB_INCLUDES} ${FLUDAG_INCLUDES} # Modify this to the name of the directory from which myfluka is run
-RUNDIR = ./userini_example
 
-TARGETS = mainfludag mainf
+TARGETS = obj mainfludag 
 
 wrapobjects = WrapInit.o \
 	WrapLookDB.o \
@@ -49,7 +48,7 @@ wrapobjects = WrapInit.o \
 
 default: all
 
-all: $(wrapobjects) mainfludag 
+all: obj mainfludag 
 
 # Look in directory arg2 for file-pattern arg1
 vpath %.cpp cpp
@@ -97,9 +96,13 @@ userini.o : userini.f
 	${FLUPRO}/flutil/fff $<
 	mv for/$@ obj
 	 
-fluka_funcs.o : fluka_funcs.cpp
+%.o: %.cpp
 	g++ -c $(CXXFLAGS) $< 
 	mv $@ obj
+
+#fluka_funcs.o : fluka_funcs.cpp
+#	g++ -c $(CXXFLAGS) $< 
+#	mv $@ obj
 
 mainFluDAG.o : mainFluDAG.cpp 
 	g++ -c $(CXXFLAGS) $< 
@@ -119,9 +122,6 @@ createRegionAndMatFiles.o : createRegionAndMatFiles.cpp
 	g++ -c $(CXXFLAGS) $< 
 	mv $@ obj
 
-# FlukaMaterial.o : FlukaMaterial.cc 
-#	g++ -c $(CXXFLAGS) $< 
-#	mv $@ obj
 
 test.stl : test.h5m
 	mbconvert $< $@
