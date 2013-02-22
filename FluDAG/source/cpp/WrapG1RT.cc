@@ -13,16 +13,12 @@
 //
 ///////////////////////////////////////////////////////////////////
 
-
 #include "DagWrappers.hh"
-// #include "globals.hh"
+#include "DagWrapUtils.hh"
 
 void g1rtwr(void)
 {
-//flag
-#ifdef DAGGEOMETRY_DEBUG
     std::cout<<"============ G1RTWR ============="<<std::endl;
-#endif
 
 //dummy wrapper
 }

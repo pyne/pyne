@@ -1,5 +1,5 @@
 
-// Dag tag 
+// FluDAG tag 
 
 ///////////////////////////////////////////////////////////////////
 //
@@ -18,19 +18,13 @@
 //
 ///////////////////////////////////////////////////////////////////
 
-//#ifndef idnrwr
-//#define idnrwr idnrwr_
-
 #include "DagWrappers.hh"
-// #include "globals.hh"
+#include "DagWrapUtils.hh"
 
 int idnrwr(const int & nreg, const int & mlat) 
 
 {
-//flag
-#ifdef DAGGEOMETRY_DEBUG
 	std::cout<<"================== IDNRWR ================="<<std::endl;
-#endif 
 
 // returns 0 if user doesn't want Fluka to use DNEAR to compute the 
 // step (the same effect is obtained with the GLOBAL (WHAT(3)=-1)
@@ -39,4 +33,3 @@ int idnrwr(const int & nreg, const int & mlat)
 
 return 0;
 }
-//#endif
