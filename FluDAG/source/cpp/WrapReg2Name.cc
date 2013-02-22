@@ -17,15 +17,11 @@
 
 void rg2nwr(const int& mreg, const char* Vname)
 {
-  //flag
-#ifdef DAGGEOMETRY_DEBUG
   std::cout << "============= RG2NWR ==============" << std::endl;    
   std::cout << "mreg=" << mreg << std::endl;
-#endif 
   char * vvname;
   region2name(mreg, vvname);
   Vname = vvname;
-  //Geoinit, Navigator, VolStore pointers
 /*
   static FGeometryInit * ptrGeoInit = FGeometryInit::GetInstance();
 
