@@ -18,9 +18,8 @@
 #include "DagMC.hpp"
 
 #define NO_NAMES 1;
-#define DAGGEOMETRY_DEBUG 1;
 
-//Forward declarations
+#define DAG DagMC::instance()
 
 // Common print utilities used in /*FGeometryInit.cc*/ creatRegionAndMatFiles.cpp
 inline std::ostream& setw10(std::ostream& os) { return os << std::setw(10);}
@@ -32,6 +31,7 @@ void PrintEntityRegionNames(std::ostream& os);
 void writeRegionLine(std::ostream& os, int iRegion, std::string name);
 void createFlukaMatFile();
 
+// Defined in fluka_funcs, perhaps should be in fluka_funcs.h
 void region2name(int volindex, char * vname );
 
 #endif
