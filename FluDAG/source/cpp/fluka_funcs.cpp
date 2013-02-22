@@ -333,7 +333,7 @@ void fludagwrite_assignma(std::string lfname)  // file with cell/surface cards
   // Open an outputstring
   std::ostringstream ostr;
   // Loop through 3d entities.  In model_complete.h5m there are 90 vols
-  for (unsigned i = 0; i<num_vols; i++)
+  for (unsigned i = 1; i<=num_vols; i++)
   {
       entity = DAG->entity_by_index(3, i);
       // std::string props = make_property_string(*DAG, entity, keywords);
@@ -454,6 +454,7 @@ void fludagwrite_mat(std::string fname )  // file with cell/surface cards
 {
   MBErrorCode rval;
 
+  std::cout << __FILE__ << ", " << __func__ << ":" << __LINE__ << "_______________" << std::endl;
   std::vector< std::string > fluka_keywords;
 
   fluka_keywords.push_back( "mat" );
@@ -478,9 +479,7 @@ void fludagwrite_mat(std::string fname )  // file with cell/surface cards
     }
   }
 
-
   int num_cells = DAG->num_entities( 3 );
-
   int cmat = 0;
 
   // Open an outputstring
