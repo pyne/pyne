@@ -220,18 +220,9 @@ class Library(rx.RxLib):
     def parse_range_line(self, line):
         """ If the line is the beginning of a resonance range, makes
         a dictionary of the flags for easy access. """
-        # if self.is_range_line(line):
-        #     range_flags = {'EL':line[0],
-        #                    'EH':line[1],
-        #                    'LRU':line[2],
-        #                    'LRF':line[3],
-        #                    'NRO':line[4],
-        #                    'NAPS':line[5]}
         return {'EL':line[0], 'EH':line[1], 'LRU':line[2], 'LRF':line[3],
                 'NRO':line[4], 'NAPS':line[5]}
-        # else:
-        #     range_flags = None
-        # return range_flags
+
 
     def make_resonances(self):
         """ Read the resonance data from all the materials in the library
@@ -245,8 +236,6 @@ class Library(rx.RxLib):
                                                           data type you want)
         """
         for mat_id in self.structure:
-            # resonance_ranges = {'resolved':[],
-            #                     'unresolved':[]}
             resonance_ranges = []
             self.structure[mat_id]['data'] = {'resolved':[], 'unresolved':[]}
             lrp = self.structure[mat_id]['matflags']['LRP']
@@ -285,11 +274,6 @@ class Library(rx.RxLib):
                         if self.is_range_line(mf2[i-1]):
                             # If this is a new resonance range, add a new dict:
                             try:
-                                # if range_flags['LRU'] == 1:
-                                #     resonance_ranges['resolved'].append(
-                                #         {'rangeflags': range_flags,
-                                #          'rangedata': [i-2,i,0]})
-                                # elif range_flags['LRU'] == 2:
                                 resonance_ranges.append(
                                     {'rangeflags': range_flags,
                                      'rangedata': [i,i,0]})
@@ -318,6 +302,7 @@ class Library(rx.RxLib):
     def _read_resolved(self, resonance_range, isotope_flags, mat_id):
         range_flags = resonance_range['rangeflags']
         range_data_list = []
+        range_data = rx.DoubleSpinDict({})
         raw_data = resonance_range['rangedata'][2]
         # Single- or Multi-level Breit Wigner
         if range_flags['LRF'] in (1,2):
@@ -336,9 +321,9 @@ class Library(rx.RxLib):
 
             # Read resonance widths, J values, etc
             for L_section in range(int(round(range_flags['NLS']))):
-                current_line = 3
-                headerItems, items = self._get_list_record(raw_data[3:])
-                current_line += 1 + len(items)
+                cur_line = 2
+                headerItems, items = self._get_list_record(raw_data[cur_line:])
+                cur_line += 1 + len(items)
                 qx, L, lrx = headerItems[1:4]
                 for row in items:
                     aj = row[1]
@@ -349,35 +334,34 @@ class Library(rx.RxLib):
                     range_data_list.append(((range_flags['SPI'], L, aj),
                                             row_dict))
 
-            self.structure[mat_id]['data']['resolved'].append((range_flags['EL'],
-                                                               range_flags['EH'],
-                                                               range_flags,
-                                                               dict(range_data_list)))
+
+            range_data_list.sort()
+            range_data.update(range_data_list)
+            self.structure[mat_id]['data']['resolved'].append(
+                (range_flags['EL'],
+                 range_flags['EH'],
+                 range_flags,
+                 range_data))
             self.structure[mat_id]['data']['resolved'].sort()
 
-                # er = items[0::6]
-                # aj = items[1::6]
-                # gt = items[2::6]
-                # gn = items[3::6]
-                # gg = items[4::6]
-                # gf = items[5::6]
-                # for i, j in enumerate(aj):
-                #     resonance.QX = QX
-                #     resonance.L = L
-                #     resonance.LRX = LRX
-                #     resonance.E = energy[i]
-                #     resonance.J = spin[i]
-                #     resonance.GT = GT[i]
-                #     resonance.GN = GN[i]
-                #     resonance.GG = GG[i]
-                #     resonance.GF = GF[i]
-                #     res.resonances.append(resonance)
 
         # Reich-Moore
-        # elif res.LRF == 3:
+        elif range_flags['LRF'] == 3:
             # Read energy-dependent scattering radius if present
-            # if res.NRO > 0:
-            #     res.AP = self._get_tab1_record()
+            if range_flags['NRO'] > 0:
+                range_flags.update({'AP(E)': raw_data[0][5],
+                                    'AP': raw_data[1][1],
+                                    'SPI': raw_data[1][0],
+                                    'LAD': raw_data[1][2],
+                                    'NLS': raw_data[1][4],
+                                    'NLSC': raw_data[1][5]})
+            # Other scatter radius parameters
+            else:
+                range_flags.update({'AP': raw_data[1][1],
+                                    'SPI': raw_data[1][0],
+                                    'LAD': raw_data[1][2],
+                                    'NLS': raw_data[1][4],
+                                    'NLSC': raw_data[1][5]})
 
             # Other scatter radius parameters
             # items = self._get_cont_record()
@@ -387,6 +371,7 @@ class Library(rx.RxLib):
             # res.LAD = items[3] # Flag for angular distribution
             # res.NLS = items[4] # Number of l-values
             # res.NLSC = items[5] # Number of l-values for convergence
+
 
             # Read resonance widths, J values, etc
             # for l in range(res.NLS):
