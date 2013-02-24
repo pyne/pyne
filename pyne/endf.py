@@ -56,14 +56,16 @@ class Library(rx.RxLib):
         # The offset accounts for lines skipped in data entry.
         self.offset = 1
 
+        self.debug = []
+
         self.data = self.load()
         while self.more_files:
             self._read_headers()
         # Close the file before we have a chance to break anything.
         if opened_here:
             self.fh.close()
-        if resonances:
-            self.make_resonances()
+        # if resonances:
+        #     self.make_resonances()
 
     def load(self):
         warnings.filterwarnings("ignore", "Some errors were detected !")
@@ -107,8 +109,8 @@ class Library(rx.RxLib):
                 {mat_id:{'styles':'',
                          'docs':[],
                          'particles':[],
-                         'data':{'resolved':{},
-                                 'unresolved':{},
+                         'data':{'resolved':[],
+                                 'unresolved':[],
                                  'datadocs':[],
                                  'xs':[],
                                  'output':{'channel1':[],
@@ -223,6 +225,356 @@ class Library(rx.RxLib):
         return {'EL':line[0], 'EH':line[1], 'LRU':line[2], 'LRF':line[3],
                 'NRO':line[4], 'NAPS':line[5]}
 
+    def _get_cont(self, keys, line):
+        """Read one line of the array, treating it as a CONT record.
+
+        Parameters
+        ----------
+        keys: iterable
+            An iterable containing the labels for each field in the CONT record.
+            For empty/unassigned fields, use 0.
+        line: array-like
+            The line to be read.
+        """
+        cont = dict(zip(keys, line))
+        if 0 in cont:
+            del cont[0]
+        return cont
+
+    def _get_head(self, keys, line):
+        """Read one line of the array, treating it as a HEAD record.
+
+        Parameters
+        ----------
+        keys: iterable
+            An iterable containing the labels for each field in the HEAD record.
+            For empty/unassigned fields, use 0.
+        line: array-like
+            The line to be read.
+        """
+        # Just calls self._get_cont because HEAD is just a special case of CONT
+        if (keys[0] == 'ZA' and keys[1] == 'AWR'):
+            return self._get_cont(keys, line)
+        else:
+            raise ValueError('This is not a HEAD record: {}'.format(
+                    dict(zip(keys,line))))
+
+    def _get_list(self, headkeys, itemkeys, lines):
+        """Read some lines of the array, treating it as a LIST record.
+
+        Parameters:
+        -----------
+        headkeys: iterable
+            An iterable containing the labels for each field in the first
+            record. For empty/unassigned fields, use 0.
+        itemkeys: iterable
+            An iterable containing the labels for each field in the next
+            records. For empty/unassigned fields, use 0.
+        lines: two-dimensional array-like
+            The lines to be read. Each line should have 6 elements. The first
+            line should be the first line of the LIST record; since we don't
+            know the length of the LIST record, the last line should be the last
+            line it is plausible for the LIST record to end.
+
+        Returns:
+        --------
+        head: dict
+            Contains elements of the first line paired with their labels.
+        items: dict
+            Contains columns of the LIST array paired with their labels.
+        total_lines: int
+            The number of lines the LIST record takes up.
+        """
+
+        head = dict(zip(headkeys, lines[0]))
+        if 0 in head:
+            del head[0]
+
+        npl, n2  = lines[0][4:]
+        items_transposed = np.transpose(lines[1:1+npl/6].reshape(-1,len(itemkeys)))
+        items = dict(zip(itemkeys, items_transposed))
+
+        total_lines = int(round(npl/6.0)+1)
+        return head, items, total_lines
+
+    def _get_tab1(self, headkeys, xykeys,lines):
+        """Read some lines of the array, treating it as a TAB1 record.
+
+        Parameters:
+        -----------
+        headkeys: iterable, length 6
+            An iterable containing the labels for each field in the first
+            line. For empty/unassigned fields, use 0.
+        xykeys: iterable, length 2
+            An iterable containing the labels for the interpolation data. The
+            first key should be xint, the second should be y(x).
+        lines: two-dimensional array-like
+            The lines to be read. Each line should have 6 elements. The first
+            line should be the first line of the TAB1 record; since we don't
+            know the length of the TAB1 record, the last line should be the last
+            line it is plausible for the TAB1 record to end.
+
+        Returns:
+        --------
+        head: dict
+            Contains elements of the first card paired with their labels.
+        intdata: dict
+            Contains the interpolation data.
+        total_lines: int
+            The number of lines the TAB1 record takes up.
+        """
+        head = dict(zip(headkeys, lines[0]))
+        if 0 in head:
+            del head[0]
+
+        nr, _np = lines[0][4:]
+        intdata = dict(zip(xykeys,
+                           (np.array([lines[1:].flat[:nr*2:2],
+                                      lines[1:].flat[1:nr*2:2]]))))
+        total_lines = int(np.ceil(nr*2/6.0) + 1)
+
+        return head, intdata, total_lines
+
+    def _read_mf2(self, mat_id):
+        """Read the resonance data from one material in the library and updates
+        self.structure.
+
+        Parameters:
+        -----------
+        mat_id: int
+            The ENDF material ID. Will later be expanded to understand PyNE
+            canonical form.
+        """
+        lrp = self.structure[mat_id]['matflags']['LRP']
+
+        if (lrp == -1 or mat_id in (-1,0)):
+            # If the LRP flag for the material is -1, there's no resonance data.
+            # Also if the mat id is invalid.
+            pass
+        else:
+            # Load the resonance data.
+            try:
+                mf2 = self.read_mfmt(mat_id,2,151).reshape(-1, 6)
+            except ValueError:
+                raise ValueError(self.read_mfmt(mat_id,2,151))
+
+            self.structure[mat_id]['matflags'].update(
+                self._get_head(['ZA','AWR',0,0,'NIS',0],mf2[0]))
+            for isotope_num in range(
+                    int(self.structure[mat_id]['matflags']['NIS'])):
+                cur_line = 1
+                cur_line += self._read_nis(mf2[cur_line:], lrp, mat_id)
+        self.structure[mat_id]['data']['resolved'].sort()
+        self.structure[mat_id]['data']['unresolved'].sort()
+
+    def _read_nis(self, isotope_data, lrp, mat_id):
+        """Read resonance data for a specific isotope.
+
+        Parameters:
+        -----------
+        isotope_data: 2D array
+            The section of the resonance data to read. The isotope starts at the
+            top of this.
+        lrp: int
+            A flag denoting the type of data in the isotope. Exact meaning of
+            this flag can be found in ENDF Manual pp.50-51.
+        mat_id: int
+            ENDF material ID.
+
+        Returns:
+        --------
+        total_lines: int
+            The number of lines the isotope takes up.
+        """
+        isotope_flags = self._get_cont(['ZAI','ABN',0,'LFW','NER',0],
+                                       isotope_data[0])
+        line_of_isotope = 1
+        for er in range(int(isotope_flags['NER'])):
+            line_of_isotope += self._read_ner(isotope_data[line_of_isotope:],
+                                              isotope_flags,
+                                              mat_id)
+
+        total_lines = line_of_isotope
+        return total_lines
+
+    def _read_ner(self, range_data, isotope_flags, mat_id):
+        """Read resonance data for a specific energy range.
+
+        Parameters:
+        -----------
+        range_data: 2D array
+            The section of the resonance data to read. The energy range starts
+            at the top of this.
+        isotope_flags: dict
+            Dictionary of flags inherited from the isotope.
+        mat_id:
+            ENDF material ID.
+
+        Returns:
+        --------
+        total_lines: int
+            The number of lines the energy range takes up.
+        """
+        range_flags = self._get_cont(['EL','EH','LRU','LRF','NRO','NAPS'],
+                                     range_data[0])
+        total_lines = 1
+        total_lines += self._read_subsection(range_data[1:],
+                                             range_flags,
+                                             isotope_flags,
+                                             mat_id)
+        return total_lines
+
+    def _read_subsection(self, subsection, range_flags, isotope_flags, mat_id):
+        """Read resonance data for a specific energy range subsection.
+
+        Parameters:
+        -----------
+        subsection: 2D array
+            The section of the resonance data to read. The energy range
+            subsection starts at the top of this.
+        range_flags: dict
+            Dictionary of flags inherited from the range.
+        isotope_flags: dict
+            Dictionary of flags inherited from the isotope.
+        mat_id: int
+            ENDF material ID.
+
+        Returns:
+        --------
+        total_lines: int
+            The number of lines the energy range subsection takes up.
+        """
+        lru = range_flags['LRU']
+        if lru == 0:
+            total_lines = self._read_ap_only(subsection,
+                                             range_flags,
+                                             isotope_flags,
+                                             mat_id)
+        if lru == 1:
+            total_lines = self._new_read_resolved(subsection,
+                                                  range_flags,
+                                                  isotope_flags,
+                                                  mat_id)
+        if lru == 2:
+            total_lines = self._new_read_unresolved(subsection,
+                                                    range_flags,
+                                                    isotope_flags,
+                                                    mat_id)
+        return total_lines
+
+    def _new_read_resolved(self, subsection, range_flags, isotope_flags, mat_id):
+        """ Read the subsection for a resolved energy range.
+
+        Parameters:
+        -----------
+        subsection: 2D array
+            The section of the resonance data to read. The energy range
+            subsection starts at the top of this.
+        range_flags: dict
+            Dictionary of flags inherited from the range.
+        isotope_flags: dict
+            Dictionary of flags inherited from the isotope.
+        mat_id: int
+            ENDF material ID.
+
+        Returns:
+        --------
+        total_lines: int
+            The number of lines taken up by the subsection.
+        """
+        lrf = range_flags['LRF']
+        if range_flags['NRO'] > 0:
+            tabhead,intdata,total_lines=self._get_tab1([0,0,0,0,'NR','NP'],
+                                                       ['E','AP(E)'],
+                                                       subsection)
+        else:
+            intdata, total_lines = False, 0
+
+        if lrf in (1,2):
+            # Breit-Wigner
+            range_flags.update(self._get_cont(['SPI','AP',0,0,'NLS',0],
+                                              subsection[total_lines]))
+            total_lines += 1
+
+            subsection_dict = rx.DoubleSpinDict({})
+            for i in range(int(range_flags['NLS'])):
+                L_flags, items, lines = self._get_list(['AWRI','QX','L','LRX',
+                                                     '6*NRS','NRS'],
+                                                    ['ER','AJ','GT','GN','GG',
+                                                     'GF'],
+                                                    subsection[total_lines:])
+                total_lines += lines
+                spi, L = range_flags['SPI'], L_flags['L']
+                subsection_dict.update({(spi, L): items})
+
+        if lrf == 3:
+            # Reich-Moore
+            range_flags.update(self._get_cont(['SPI','AP','LAD',0,'NLS','NLSC'],
+                                              subsection[total_lines]))
+            total_lines += 1
+
+            subsection_dict = rx.DoubleSpinDict({})
+            for i in range(int(range_flags['NLS'])):
+                L_flags, items, lines = self._get_list(['AWRI','APL','L',0,
+                                                        '6*NRS','NRS'],
+                                                       ['ER','AJ','GN','GG','GFA',
+                                                        'GFB'],
+                                                       subsection[total_lines:])
+
+                total_lines += lines
+                spi, L = range_flags['SPI'], L_flags['L']
+                subsection_dict.update({(spi, L): items})
+
+
+        if lrf == 4:
+            # Adler-Adler
+            range_flags.update(self._get_cont(['SPI','AP',0,0,'NLS',0],
+                                              subsection[total_lines]))
+            total_lines += 1
+
+            subsection_dict = rx.DoubleSpinDict({})
+
+            nx_flags, nx, nxlines=self._get_list(['AWRI',0,'LI',0,'6*NX','NX'],
+                                                 ['A1','A2','A3','A4','B1',
+                                                  'B2'],
+                                                 subsection[total_lines:])
+
+            # The ENDF Manual says to check Appendix D for how to calculate
+            # background corrections (see pp.59-60). That is omitted for now.
+
+            total_lines += nxlines
+
+            for nls_iter in range(int(range_flags['NLS'])):
+                L_flags = self._get_cont([0,0,'L',0,'NJS',0],
+                                         subsection[total_lines])
+                total_lines += 1
+                for njs_iter in range(int(L_flags['NJS'])):
+                    j_flags, items, lines = self._get_list(
+                        ['AJ',0,0,0,'12*NLJ','NLJ'],
+                        ['DET','DWT','GRT','GIT','DEF','DWF','GRF','GIF','DEC',
+                         'DWC','GRC','GIC'],
+                        subsection[total_lines:])
+                    total_lines += lines
+                    spi, L, aj = range_flags['SPI'], L_flags['L'], j_flags['AJ']
+                    subsection_dict.update({(spi, L, aj): items})
+
+        el, eh = range_flags['EL'], range_flags['EH']
+        if intdata:
+            subsection_data = (el,eh,subsection_dict,intdata,range_flags)
+        else:
+            subsection_data = (el,eh,subsection_dict,range_flags)
+        self.structure[mat_id]['data']['resolved'].append(subsection_data)
+
+
+        return total_lines
+
+    def _new_read_unresolved(self, subsection, range_flags, isotope_flags):
+        
+        return 1
+
+    def _read_ap_only(self, subsection, range_flags, isotope_flags):
+        return 1
+
 
     def make_resonances(self):
         """ Read the resonance data from all the materials in the library
@@ -240,11 +592,9 @@ class Library(rx.RxLib):
             self.structure[mat_id]['data'] = {'resolved':[], 'unresolved':[]}
             lrp = self.structure[mat_id]['matflags']['LRP']
 
-            if lrp == -1:
+            if (lrp == -1 or mat_id in (-1,0)):
                 # If the LRP flag for the material is -1, there is no
                 # resonance data provided.
-                pass
-            elif mat_id in (-1,0):
                 pass
             else:
                 # Put the line structure back in the array.  Let's get down
