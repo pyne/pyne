@@ -1,0 +1,14 @@
+The subdirectory src containts inputs files and run-scripts.
+
+Workflow in src to make and run mainfludag: 
+> make clean 
+> make obj
+> make
+If it doesn't exist
+> mkdir myrun
+> cd myrun
+> cp ../input/* .
+> cp ../mainfludag .
+> source runme
+This creates a fluka_xxx subdirectory that will be deleted if there are no errors.
+
