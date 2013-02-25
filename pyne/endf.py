@@ -297,14 +297,19 @@ class Library(rx.RxLib):
 
         headlines = np.ceil(len(headkeys)/6.0)
         arraylines = np.ceil(npl/6.0)
-        items_transposed = np.transpose(
-            lines[headlines:headlines+arraylines].reshape(-1,
-                                                                 len(itemkeys)))
-        items = dict(zip(itemkeys, items_transposed))
+        if len(itemkeys) == 1:
+            array_len = npl - (headlines-1) * 6
+            items={itemkeys[0]: lines[headlines:].flat[:array_len]}
+        else:
+            items_transposed = np.transpose(
+                lines[headlines:headlines+arraylines].reshape(-1,
+                                                               len(itemkeys)))
+            items = dict(zip(itemkeys, items_transposed))
+
         if 0 in items:
             del items[0]
 
-        total_lines = headlines+arraylines
+        total_lines = 1+arraylines
 
         return head, items, total_lines
 
@@ -371,10 +376,11 @@ class Library(rx.RxLib):
 
             self.structure[mat_id]['matflags'].update(
                 self._get_head(['ZA','AWR',0,0,'NIS',0],mf2[0]))
+            total_lines = 1
             for isotope_num in range(
                     int(self.structure[mat_id]['matflags']['NIS'])):
-                cur_line = 1
-                cur_line += self._read_nis(mf2[cur_line:], lrp, mat_id)
+                total_lines += self._read_nis(mf2[total_lines:], lrp, mat_id)
+
         self.structure[mat_id]['data']['resolved'].sort()
         self.structure[mat_id]['data']['unresolved'].sort()
 
@@ -399,13 +405,12 @@ class Library(rx.RxLib):
         """
         isotope_flags = self._get_cont(['ZAI','ABN',0,'LFW','NER',0],
                                        isotope_data[0])
-        line_of_isotope = 1
+        total_lines = 1
         for er in range(int(isotope_flags['NER'])):
-            line_of_isotope += self._read_ner(isotope_data[line_of_isotope:],
-                                              isotope_flags,
-                                              mat_id)
+            total_lines += self._read_ner(isotope_data[total_lines:],
+                                          isotope_flags,
+                                          mat_id)
 
-        total_lines = line_of_isotope
         return total_lines
 
     def _read_ner(self, range_data, isotope_flags, mat_id):
@@ -455,8 +460,8 @@ class Library(rx.RxLib):
         total_lines: int
             The number of lines the energy range subsection takes up.
         """
-
         lru = int(round(range_flags['LRU']))
+
         if lru == 0:
             total_lines = self._read_ap_only(subsection,
                                              range_flags,
@@ -607,14 +612,16 @@ class Library(rx.RxLib):
         lrf = range_flags['LRF']
         lfw = isotope_flags['LFW']
 
+        subsection_dict = rx.DoubleSpinDict({})
+
         if range_flags['NRO'] > 0:
             tabhead,intdata,total_lines=self._get_tab1((0,0,0,0,'NR','NP'),
                                                        ('E','AP(E)'),
                                                        subsection)
+            subsection_dict['int']= intdata
         else:
-            intdata, total_lines = False, 0
+            total_lines = 0
 
-        subsection_dict = rx.DoubleSpinDict({})
         if (lfw, lrf) == (0,1):
             range_flags.update(self._get_cont(['SPI','AP','LSSF',0,'NLS',0],
                                               subsection[total_lines]))
@@ -633,32 +640,26 @@ class Library(rx.RxLib):
                 ('SPI','AP','LSSF',0,'NE','NLS'),
                 ('ES'),
                 subsection[total_lines:])
+            subsection_dict['ES'] = es_array
             total_lines += lines
             range_flags.update(head_flags)
-            # range_flags.update(self._get_cont(['SPI','AP','LSSF',0,'NE','NLS'],
-            #                                   subsection[total_lines]))
-            # total_lines += 1
 
-            # ne = range_flags['NE']
-            # es = subsection[total_lines:].flat[:ne]
-            # total_lines += np.ceil(ne/6.0) * 6
-
-            subsection_dict = rx.DoubleSpinDict({})
             for num_L_sections in range(int(range_flags['NLS'])):
-                L_flags, lines = self._get_cont(['AWRI',0,'L',0,'NJS',0],
-                                                subsection[total_lines])
+                L_flags = self._get_cont(['AWRI',0,'L',0,'NJS',0],
+                                             subsection[total_lines])
                 total_lines += 1
+
                 for num_J_sections in range(int(L_flags['NJS'])):
-                    J_flags, items, lines = self._get_list(
+                    j_flags, j_items, lines = self._get_list(
                         [0,0,'L','MUF','NE+6',0,'D','AJ','AMUN','GN0','GG',0],
-                        ['ES'],
+                        ['GF'],
                         subsection[total_lines:])
                     total_lines += lines
-                    spi, L, aj = range_flags['SPI'], J_flags['L'], J_flags['AJ']
+                    spi, L, aj = range_flags['SPI'], j_flags['L'], j_flags['AJ']
+                    subsection_dict.update({(spi, L, aj): j_items})
 
         el, eh = range_flags['EL'], range_flags['EH']
         subsection_data = (el,eh,subsection_dict,range_flags)
-
         self.structure[mat_id]['data']['unresolved'].append(subsection_data)
 
         return total_lines
