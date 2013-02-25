@@ -269,7 +269,8 @@ class Library(rx.RxLib):
             record. For empty/unassigned fields, use 0.
         itemkeys: iterable
             An iterable containing the labels for each field in the next
-            records. For empty/unassigned fields, use 0.
+            records. For empty/unassigned fields, use 0. If itemkeys has length
+            1, the array is flattened and assigned to that key.
         lines: two-dimensional array-like
             The lines to be read. Each line should have 6 elements. The first
             line should be the first line of the LIST record; since we don't
@@ -281,20 +282,30 @@ class Library(rx.RxLib):
         head: dict
             Contains elements of the first line paired with their labels.
         items: dict
-            Contains columns of the LIST array paired with their labels.
+            Contains columns of the LIST array paired with their labels, unless
+            itemkeys has length 1, in which case items contains the flattened
+            LIST array paired with its label.
         total_lines: int
             The number of lines the LIST record takes up.
         """
 
-        head = dict(zip(headkeys, lines[0]))
+        # head = dict(zip(headkeys, lines[0]))
+        head = dict(zip(headkeys, lines[0:].flat[:len(headkeys)]))
         if 0 in head:
             del head[0]
-
         npl, n2  = lines[0][4:]
-        items_transposed = np.transpose(lines[1:1+npl/6].reshape(-1,len(itemkeys)))
-        items = dict(zip(itemkeys, items_transposed))
 
-        total_lines = int(round(npl/6.0)+1)
+        headlines = np.ceil(len(headkeys)/6.0)
+        arraylines = np.ceil(npl/6.0)
+        items_transposed = np.transpose(
+            lines[headlines:headlines+arraylines].reshape(-1,
+                                                                 len(itemkeys)))
+        items = dict(zip(itemkeys, items_transposed))
+        if 0 in items:
+            del items[0]
+
+        total_lines = headlines+arraylines
+
         return head, items, total_lines
 
     def _get_tab1(self, headkeys, xykeys,lines):
@@ -444,7 +455,8 @@ class Library(rx.RxLib):
         total_lines: int
             The number of lines the energy range subsection takes up.
         """
-        lru = range_flags['LRU']
+
+        lru = int(round(range_flags['LRU']))
         if lru == 0:
             total_lines = self._read_ap_only(subsection,
                                              range_flags,
@@ -460,6 +472,7 @@ class Library(rx.RxLib):
                                                     range_flags,
                                                     isotope_flags,
                                                     mat_id)
+
         return total_lines
 
     def _new_read_resolved(self, subsection, range_flags, isotope_flags, mat_id):
@@ -484,24 +497,24 @@ class Library(rx.RxLib):
         """
         lrf = range_flags['LRF']
         if range_flags['NRO'] > 0:
-            tabhead,intdata,total_lines=self._get_tab1([0,0,0,0,'NR','NP'],
-                                                       ['E','AP(E)'],
+            tabhead,intdata,total_lines=self._get_tab1((0,0,0,0,'NR','NP'),
+                                                       ('E','AP(E)'),
                                                        subsection)
         else:
             intdata, total_lines = False, 0
 
         if lrf in (1,2):
             # Breit-Wigner
-            range_flags.update(self._get_cont(['SPI','AP',0,0,'NLS',0],
+            range_flags.update(self._get_cont(('SPI','AP',0,0,'NLS',0),
                                               subsection[total_lines]))
             total_lines += 1
 
             subsection_dict = rx.DoubleSpinDict({})
             for i in range(int(range_flags['NLS'])):
-                L_flags, items, lines = self._get_list(['AWRI','QX','L','LRX',
-                                                     '6*NRS','NRS'],
-                                                    ['ER','AJ','GT','GN','GG',
-                                                     'GF'],
+                L_flags, items, lines = self._get_list(('AWRI','QX','L','LRX',
+                                                     '6*NRS','NRS'),
+                                                    ('ER','AJ','GT','GN','GG',
+                                                     'GF'),
                                                     subsection[total_lines:])
                 total_lines += lines
                 spi, L = range_flags['SPI'], L_flags['L']
@@ -509,16 +522,16 @@ class Library(rx.RxLib):
 
         if lrf == 3:
             # Reich-Moore
-            range_flags.update(self._get_cont(['SPI','AP','LAD',0,'NLS','NLSC'],
+            range_flags.update(self._get_cont(('SPI','AP','LAD',0,'NLS','NLSC'),
                                               subsection[total_lines]))
             total_lines += 1
 
             subsection_dict = rx.DoubleSpinDict({})
             for i in range(int(range_flags['NLS'])):
-                L_flags, items, lines = self._get_list(['AWRI','APL','L',0,
-                                                        '6*NRS','NRS'],
-                                                       ['ER','AJ','GN','GG','GFA',
-                                                        'GFB'],
+                L_flags, items, lines = self._get_list(('AWRI','APL','L',0,
+                                                        '6*NRS','NRS'),
+                                                       ('ER','AJ','GN','GG','GFA',
+                                                        'GFB'),
                                                        subsection[total_lines:])
 
                 total_lines += lines
@@ -528,51 +541,129 @@ class Library(rx.RxLib):
 
         if lrf == 4:
             # Adler-Adler
-            range_flags.update(self._get_cont(['SPI','AP',0,0,'NLS',0],
+            range_flags.update(self._get_cont(('SPI','AP',0,0,'NLS',0),
                                               subsection[total_lines]))
             total_lines += 1
 
             subsection_dict = rx.DoubleSpinDict({})
 
-            nx_flags, nx, nxlines=self._get_list(['AWRI',0,'LI',0,'6*NX','NX'],
-                                                 ['A1','A2','A3','A4','B1',
-                                                  'B2'],
+            bg_flags, bg, bglines=self._get_list(('AWRI',0,'LI',0,'6*NX','NX'),
+                                                 ('A1','A2','A3','A4','B1',
+                                                  'B2'),
                                                  subsection[total_lines:])
 
             # The ENDF Manual says to check Appendix D for how to calculate
             # background corrections (see pp.59-60). That is omitted for now.
 
-            total_lines += nxlines
+            total_lines += bglines
 
             for nls_iter in range(int(range_flags['NLS'])):
-                L_flags = self._get_cont([0,0,'L',0,'NJS',0],
+                L_flags = self._get_cont((0,0,'L',0,'NJS',0),
                                          subsection[total_lines])
                 total_lines += 1
                 for njs_iter in range(int(L_flags['NJS'])):
                     j_flags, items, lines = self._get_list(
-                        ['AJ',0,0,0,'12*NLJ','NLJ'],
-                        ['DET','DWT','GRT','GIT','DEF','DWF','GRF','GIF','DEC',
-                         'DWC','GRC','GIC'],
+                        ('AJ',0,0,0,'12*NLJ','NLJ'),
+                        ('DET','DWT','GRT','GIT','DEF','DWF','GRF','GIF','DEC',
+                         'DWC','GRC','GIC'),
                         subsection[total_lines:])
                     total_lines += lines
                     spi, L, aj = range_flags['SPI'], L_flags['L'], j_flags['AJ']
                     subsection_dict.update({(spi, L, aj): items})
 
-        el, eh = range_flags['EL'], range_flags['EH']
-        if intdata:
-            subsection_data = (el,eh,subsection_dict,intdata,range_flags)
-        else:
-            subsection_data = (el,eh,subsection_dict,range_flags)
-        self.structure[mat_id]['data']['resolved'].append(subsection_data)
+            subsection_dict['bg'] = bg
 
+
+        if lrf == 7:
+            # R-Matrix Limited Format
+
+            # The documentation in the manual is hella confusing and possibly has typos.
+            #
+            range_flags.update(self._get_cont([0,0,'IFG','KRM','NJS','KRL'],
+                                              subsection[total_lines]))
+            total_lines += 1
+
+            # subsection_dict = rx.DoubleSpinDict({})
+            # for i in range(int(range_flags['NLS'])):
+            #     L_flags, items, lines = self._get_list(['AWRI','QX','L','LRX',
+            #                                          '6*NRS','NRS'],
+            #                                         ['ER','AJ','GT','GN','GG',
+            #                                          'GF'],
+            #                                         subsection[total_lines:])
+            #     total_lines += lines
+            #     spi, L = range_flags['SPI'], L_flags['L']
+            #     subsection_dict.update({(spi, L):
+
+        el, eh = range_flags['EL'], range_flags['EH']
+        subsection_data = (el,eh,subsection_dict,range_flags)
+
+        if intdata:
+            subsection_dict['int'] = intdata
+        self.structure[mat_id]['data']['resolved'].append(subsection_data)
 
         return total_lines
 
-    def _new_read_unresolved(self, subsection, range_flags, isotope_flags):
-        
-        return 1
+    def _new_read_unresolved(self, subsection, range_flags, isotope_flags, mat_id):
+        lrf = range_flags['LRF']
+        lfw = isotope_flags['LFW']
 
-    def _read_ap_only(self, subsection, range_flags, isotope_flags):
+        if range_flags['NRO'] > 0:
+            tabhead,intdata,total_lines=self._get_tab1((0,0,0,0,'NR','NP'),
+                                                       ('E','AP(E)'),
+                                                       subsection)
+        else:
+            intdata, total_lines = False, 0
+
+        subsection_dict = rx.DoubleSpinDict({})
+        if (lfw, lrf) == (0,1):
+            range_flags.update(self._get_cont(['SPI','AP','LSSF',0,'NLS',0],
+                                              subsection[total_lines]))
+            total_lines += 1
+            for i in range(int(range_flags['NLS'])):
+                L_flags, items, lines = self._get_list(
+                    ('AWRI',0,'L',0,'6*NJS','NJS'),
+                    ('D','AJ','AMUN','GN0','GG',0),
+                    subsection[total_lines:])
+                total_lines += lines
+                spi, L = range_flags['SPI'], L_flags['L']
+                subsection_dict.update({(spi, L): items})
+
+        if (lfw, lrf) == (1,1):
+            head_flags, es_array, lines = self._get_list(
+                ('SPI','AP','LSSF',0,'NE','NLS'),
+                ('ES'),
+                subsection[total_lines:])
+            total_lines += lines
+            range_flags.update(head_flags)
+            # range_flags.update(self._get_cont(['SPI','AP','LSSF',0,'NE','NLS'],
+            #                                   subsection[total_lines]))
+            # total_lines += 1
+
+            # ne = range_flags['NE']
+            # es = subsection[total_lines:].flat[:ne]
+            # total_lines += np.ceil(ne/6.0) * 6
+
+            subsection_dict = rx.DoubleSpinDict({})
+            for num_L_sections in range(int(range_flags['NLS'])):
+                L_flags, lines = self._get_cont(['AWRI',0,'L',0,'NJS',0],
+                                                subsection[total_lines])
+                total_lines += 1
+                for num_J_sections in range(int(L_flags['NJS'])):
+                    J_flags, items, lines = self._get_list(
+                        [0,0,'L','MUF','NE+6',0,'D','AJ','AMUN','GN0','GG',0],
+                        ['ES'],
+                        subsection[total_lines:])
+                    total_lines += lines
+                    spi, L, aj = range_flags['SPI'], J_flags['L'], J_flags['AJ']
+
+        el, eh = range_flags['EL'], range_flags['EH']
+        subsection_data = (el,eh,subsection_dict,range_flags)
+
+        self.structure[mat_id]['data']['unresolved'].append(subsection_data)
+
+        return total_lines
+
+    def _read_ap_only(self, subsection, range_flags, isotope_flags, mat_id):
         return 1
 
 
