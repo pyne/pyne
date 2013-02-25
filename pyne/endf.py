@@ -638,25 +638,27 @@ class Library(rx.RxLib):
         if (lfw, lrf) == (1,1):
             head_flags, es_array, lines = self._get_list(
                 ('SPI','AP','LSSF',0,'NE','NLS'),
-                ('ES'),
+                ('ES',),
                 subsection[total_lines:])
-            subsection_dict['ES'] = es_array
+            subsection_dict['ES'] = es_array['ES']
             total_lines += lines
             range_flags.update(head_flags)
 
             for num_L_sections in range(int(range_flags['NLS'])):
-                L_flags = self._get_cont(['AWRI',0,'L',0,'NJS',0],
+                L_flags = self._get_cont(('AWRI',0,'L',0,'NJS',0),
                                              subsection[total_lines])
                 total_lines += 1
 
                 for num_J_sections in range(int(L_flags['NJS'])):
                     j_flags, j_items, lines = self._get_list(
-                        [0,0,'L','MUF','NE+6',0,'D','AJ','AMUN','GN0','GG',0],
-                        ['GF'],
+                        (0,0,'L','MUF','NE+6',0,'D','AJ','AMUN','GN0','GG',0),
+                        ('GF',),
                         subsection[total_lines:])
                     total_lines += lines
-                    spi, L, aj = range_flags['SPI'], j_flags['L'], j_flags['AJ']
-                    subsection_dict.update({(spi, L, aj): j_items})
+                    j_items.update(j_flags)
+                    j_items['AWRI'] = L_flags['AWRI']
+                    spi, L, aj = range_flags['SPI'], L_flags['L'], j_flags['AJ']
+                    subsection_dict[(spi, L, aj)] = j_items
 
         el, eh = range_flags['EL'], range_flags['EH']
         subsection_data = (el,eh,subsection_dict,range_flags)

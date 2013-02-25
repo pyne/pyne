@@ -276,39 +276,63 @@ def test_get():
 def test_unresolved_resonances_a():
     # Case A (ENDF Manual p.70)
 
-#     obs = library.mat131['data']['unresolved']
+    obs = library.mat131['data']['unresolved']
 
-#     exp_string = StringIO.StringIO(
-#         """1.801000+3          0 1.100000+0 3.078520-1 1.000000-2 0.000000+0
-# 2.101000+3          1 2.100000+0 7.088000-1 2.000000-2 0.000000+0
-# 3.101000+3          2 3.100000+0 2.120000-1 3.000000-2 0.000000+0""")
-#     exp_LIST = dict(zip(('D','AJ','AMUN','GN0','GG'),
-#                         array_from_ENDF(exp_string).transpose()))
-#     obs_LIST = obs[1][2][2,2]
+    exp_string = StringIO.StringIO(
+        """ 1.801000+3          0 1.100000+0 3.078520-1 1.000000-2 0.000000+0
+2.101000+3          1 2.100000+0 7.088000-1 2.000000-2 0.000000+0
+3.101000+3          2 3.100000+0 2.120000-1 3.000000-2 0.000000+0""")
+    exp_LIST = dict(zip(('D','AJ','AMUN','GN0','GG'),
+                        array_from_ENDF(exp_string).transpose()))
+    obs_LIST = obs[1][2][2,2]
 
-#     for key in exp_LIST:
-#         assert_array_equal(exp_LIST[key], obs_LIST[key])
+    for key in exp_LIST:
+        assert_array_equal(exp_LIST[key], obs_LIST[key])
     pass
 
 def test_unresolved_resonances_b():
     # Case B (ENDF Manual p. 70)
     obs = library.mat419['data']['unresolved']
-    # print obs[0][2][1.5,4,3]
-    # print obs[1][2][1.5,4,3]
-    print obs
-    print library.debug
-    assert(False)
+    # For the spin=4.5, L=3, J=4 section in the first isotope
+    obs_1 = obs[0][2][4.5,3,4]
+    exp_string_1 = StringIO.StringIO(
+        """ 0.000000+0 0.000000+0 3.000000+0          3         12          0
+ 2.804009-5 4.000000+0 3.181707+3 3.885315-9-3.382438+3 0.000000+0
+ 2.376630+2 7.198625-2-5.887887-8-4.380016-5 1.747888-6-4.104291-9
+""")
+    exp_array_1 = array_from_ENDF(exp_string_1)
+    exp_1 = dict(zip((0,0,'L','MUF','NE+6',0),exp_array_1[0]))
+    exp_1.update(dict(zip(('D','AJ','AMUN','GN0','GG'),exp_array_1[1])))
+    exp_1.update({'GF':exp_array_1[2]})
+    exp_1['AWRI'] = np.array((4.648092e-4))
+    del exp_1[0]
+    for key in exp_1:
+        assert_array_equal(obs_1[key], exp_1[key])
+    # For the spin=3.5, L=4, J=5 section in the second isotope
+    obs_2 = obs[1][2][3.5,4,5]
+    exp_string_2 = StringIO.StringIO(
+        """ 0.000000+0 0.000000+0 4.000000+0          4         13          0
+-9.824193-5 5.000000+0 4.676826-4-4.336597+0-9.045122+2 0.000000+0
+ 3.699655-9-3.919000+5 8.467144-3-3.737007+9-5.750577+7-9.588021+8
+-3.280571+7                                                       
+""")
+    exp_array_2 = array_from_ENDF(exp_string_2)
+    exp_2 = dict(zip((0,0,'L','MUF','NE+6',0),exp_array_2[0]))
+    exp_2.update(dict(zip(('D','AJ','AMUN','GN0','GG'),exp_array_2[1])))
+    exp_2.update({'GF':exp_array_2[2:].flat[:exp_2['NE+6']-6]})
+    exp_2['AWRI'] = np.array((-2.368259e-8))
+    del exp_2[0]
+    for key in exp_2:
+        assert_array_equal(obs_2[key], exp_2[key])
 
-#     obs_ES = obs[3.5,0,419]['ES']
-#     exp_ES = 100 * np.array([10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20])
-
-#     obs_419_GF = obs[3.5,0,419]['GF']
-#     exp_419_GF = np.array([2.000000e3, 2.100000e3, 2.200000e3, 2.300000e3,
-#                            2.400000e3, 2.500000e3, 2.600000e3, 2.700000e3,
-#                            2.800000e3, 2.900000e3, 3.000000e3])
-
-#     assert_array_equal(exp_ES, obs_ES)
-#     assert_array_equal(exp_419_GF, obs_419_GF)
+    # for the ES
+    obs_ES = obs[1][2]['ES']
+    exp_ES_string = StringIO.StringIO(
+        """-2.723837-2-8.755303-2 2.245337-2-9.034520+2 2.252098+5 2.666587+2
+ 3.747872-3                                                       
+""")
+    exp_ES = array_from_ENDF(exp_ES_string).flat[:7]
+    assert_array_equal(obs_ES, exp_ES)
 
 
 # def test_unresolved_resonances_c():
