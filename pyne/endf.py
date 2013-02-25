@@ -182,49 +182,6 @@ class Library(rx.RxLib):
                                        dict(zip(flagkeys, flagvals))})
         del self.structure[mat_id]['matflags'][None]
 
-    def is_isotope_line(self, line):
-        """ If the line is the beginning of resonance data for an isotope,
-        returns True."""
-        zai, abn, lfw, ner = line[0], line[1], line[3], line[4]
-        return ((line[2] == line[5] == 0) and
-                lfw in (1,0) and
-                int(ner) == ner and
-                abn <= 1 and
-                zai >= 1000)
-
-    def is_range_line(self, line):
-        """ Determine whether this line is the beginning of a new resonance
-        range.  Line format must match EL, EH, LRU, LRF, NRO, NAPS. """
-        el, eh, lru, lrf, nro, naps = line
-        return (el < eh and
-                self.check_nro_naps(nro, naps) and
-                ((lru == 0 and lrf == 0) or
-                 (lru == 1 and lrf in range(1,8)) or
-                 (lru == 2 and lrf in (1,2))))
-
-    def check_nro_naps(self, nro, naps):
-        """Check to see if the places where NRO and NAPS should be
-        are indeed filled with parameters in the expected ranges.
-        """
-        return ((nro == 0 and naps in (0, 1)) or
-                (nro == 1 and naps in (0, 1, 2)))
-
-    def parse_isotope_line(self, line):
-        """ If the line is the beginning of resonance data for an isotope,
-        makes a dictionary of the isotope-specific flags for easy access."""
-        if self.is_isotope_line(line):
-            isotope_flags = {'ZAI':line[0],
-                             'ABN':line[1],
-                             'LFW':line[3],
-                             'NER':line[4]}
-        return isotope_flags
-
-    def parse_range_line(self, line):
-        """ If the line is the beginning of a resonance range, makes
-        a dictionary of the flags for easy access. """
-        return {'EL':line[0], 'EH':line[1], 'LRU':line[2], 'LRF':line[3],
-                'NRO':line[4], 'NAPS':line[5]}
-
     def _get_cont(self, keys, line):
         """Read one line of the array, treating it as a CONT record.
 
@@ -623,6 +580,7 @@ class Library(rx.RxLib):
             total_lines = 0
 
         if (lfw, lrf) == (0,1):
+            # Case A in ENDF manual pp. 69-70
             range_flags.update(self._get_cont(['SPI','AP','LSSF',0,'NLS',0],
                                               subsection[total_lines]))
             total_lines += 1
@@ -636,6 +594,7 @@ class Library(rx.RxLib):
                 subsection_dict.update({(spi, L): items})
 
         if (lfw, lrf) == (1,1):
+            # Case B in ENDF manual p.70
             head_flags, es_array, lines = self._get_list(
                 ('SPI','AP','LSSF',0,'NE','NLS'),
                 ('ES',),
@@ -660,6 +619,28 @@ class Library(rx.RxLib):
                     spi, L, aj = range_flags['SPI'], L_flags['L'], j_flags['AJ']
                     subsection_dict[(spi, L, aj)] = j_items
 
+        if lrf == 2:
+            range_flags.update(self._get_cont(('SPI','AP','LSSF',0,'NLS',0),
+                                              subsection[total_lines]))
+            total_lines += 1
+
+            for L_section in range(int(range_flags['NLS'])):
+                L_flags = self._get_cont(('AWRI',0,'L',0,'NJS',0),
+                                         subsection[total_lines])
+                total_lines += 1
+
+                for j_section in range(int(L_flags['NJS'])):
+                    j_flags, j_items, j_size = self._get_list(
+                        ('AJ',0,'INT',0,'6*NE+6','NE',0,0,'AMUX','AMUN','AMUG',
+                         'AMUF'),
+                        ('ES','D','GX','GN0','GG','GF'),
+                        subsection[total_lines:])
+                    total_lines += j_size
+                    j_items.update(j_flags)
+                    j_items['AWRI'] = L_flags['AWRI']
+                    spi, L, aj = range_flags['SPI'], L_flags['L'], j_flags['AJ']
+                    subsection_dict[(spi, L, aj)] = j_items
+
         el, eh = range_flags['EL'], range_flags['EH']
         subsection_data = (el,eh,subsection_dict,range_flags)
         self.structure[mat_id]['data']['unresolved'].append(subsection_data)
@@ -668,337 +649,6 @@ class Library(rx.RxLib):
 
     def _read_ap_only(self, subsection, range_flags, isotope_flags, mat_id):
         return 1
-
-
-    def make_resonances(self):
-        """ Read the resonance data from all the materials in the library
-        and return a nested dictionary with the resonance data. To get at the
-        resonance data, use:
-
-        'library.mat{0}['data'][{1}][{2}][2][{3}]'.format(mat_id,
-                                                          'resolved' or
-                                                              'unresolved',
-                                                          range number,
-                                                          data type you want)
-        """
-        for mat_id in self.structure:
-            resonance_ranges = []
-            self.structure[mat_id]['data'] = {'resolved':[], 'unresolved':[]}
-            lrp = self.structure[mat_id]['matflags']['LRP']
-
-            if (lrp == -1 or mat_id in (-1,0)):
-                # If the LRP flag for the material is -1, there is no
-                # resonance data provided.
-                pass
-            else:
-                # Put the line structure back in the array.  Let's get down
-                # to business to read the HEAD record.
-                try:
-                    mf2 = np.reshape(self.read_mfmt(mat_id, 2, 151), (-1, 6))
-                except ValueError:
-                    raise ValueError(self.read_mfmt(mat_id, 2, 151))
-                head = mf2[0]
-                za, awr, nis = head[0], head[1], head[4]
-
-            if lrp == 0:
-                # In this case, only scattering radius is provided.
-                pass
-
-            elif lrp == 1:
-                # Resonance contributions are all present and accounted for.
-                isotope_flags = {}
-                range_flags = {}
-                for i, line in enumerate(mf2):
-                    if self.is_isotope_line(line):
-                        isotope_flags = self.parse_isotope_line(line)
-                    elif self.is_range_line(line):
-                        range_flags = self.parse_range_line(line)
-                    else:
-                        # If this line is neither a range nor an isotope line:
-                        if self.is_range_line(mf2[i-1]):
-                            # If this is a new resonance range, add a new dict:
-                            try:
-                                resonance_ranges.append(
-                                    {'rangeflags': range_flags,
-                                     'rangedata': [i,i,0]})
-                            except KeyError:
-                                print 'No LRU!'
-
-                        # Make the current line the last known line of range as
-                        # specified in the dict.
-                        try:
-                            last_range = resonance_ranges[-1]
-                            last_range['rangedata'][1] = i + 1
-                            last_range['rangedata'][2] = mf2[
-                                last_range['rangedata'][0]:
-                                last_range['rangedata'][1]]
-                        except IndexError:
-                            print 'Nothing there yet!'
-
-                for resonance_range in resonance_ranges:
-                    self.parse_resonance_range(resonance_range,
-                                               isotope_flags,
-                                               mat_id)
-
-            elif lrp == 2:
-                pass
-
-    def _read_resolved(self, resonance_range, isotope_flags, mat_id):
-        range_flags = resonance_range['rangeflags']
-        range_data_list = []
-        range_data = rx.DoubleSpinDict({})
-        raw_data = resonance_range['rangedata'][2]
-        # Single- or Multi-level Breit Wigner
-        if range_flags['LRF'] in (1,2):
-            # Read energy-dependent scattering radius if present
-            if range_flags['NRO'] > 0:
-                range_flags.update({'AP(E)': raw_data[0][5],
-                                    'AP': raw_data[1][1],
-                                    'SPI': raw_data[1][0],
-                                    'NLS': raw_data[1][4]})
-            # Other scatter radius parameters
-            else:
-                range_flags.update({'AP': raw_data[1][1],
-                                    'SPI': raw_data[1][0],
-                                    'NLS': raw_data[1][4]})
-
-
-            # Read resonance widths, J values, etc
-            for L_section in range(int(round(range_flags['NLS']))):
-                cur_line = 2
-                headerItems, items = self._get_list_record(raw_data[cur_line:])
-                cur_line += 1 + len(items)
-                qx, L, lrx = headerItems[1:4]
-                for row in items:
-                    aj = row[1]
-                    row_dict = dict(zip(['ER', 'AJ', 'GT', 'GN', 'GG', 'GF'],
-                                        row))
-                    row_dict.update({'QX': qx, 'LRX': lrx})
-                    del row_dict['AJ']
-                    range_data_list.append(((range_flags['SPI'], L, aj),
-                                            row_dict))
-
-
-            range_data_list.sort()
-            range_data.update(range_data_list)
-            self.structure[mat_id]['data']['resolved'].append(
-                (range_flags['EL'],
-                 range_flags['EH'],
-                 range_flags,
-                 range_data))
-            self.structure[mat_id]['data']['resolved'].sort()
-
-
-        # Reich-Moore
-        elif range_flags['LRF'] == 3:
-            # Read energy-dependent scattering radius if present
-            if range_flags['NRO'] > 0:
-                range_flags.update({'AP(E)': raw_data[0][5],
-                                    'AP': raw_data[1][1],
-                                    'SPI': raw_data[1][0],
-                                    'LAD': raw_data[1][2],
-                                    'NLS': raw_data[1][4],
-                                    'NLSC': raw_data[1][5]})
-            # Other scatter radius parameters
-            else:
-                range_flags.update({'AP': raw_data[1][1],
-                                    'SPI': raw_data[1][0],
-                                    'LAD': raw_data[1][2],
-                                    'NLS': raw_data[1][4],
-                                    'NLSC': raw_data[1][5]})
-
-            # Other scatter radius parameters
-            # items = self._get_cont_record()
-            # res.SPI = items[0] # Spin, I, of the target nucleus
-            # if res.NRO == 0:
-            #     res.AP = items[1]
-            # res.LAD = items[3] # Flag for angular distribution
-            # res.NLS = items[4] # Number of l-values
-            # res.NLSC = items[5] # Number of l-values for convergence
-
-
-            # Read resonance widths, J values, etc
-            # for l in range(res.NLS):
-            #     headerItems, items = self._get_list_record()
-            #     APL, L = headerItems[1:3]
-            #     energy = items[0::6]
-            #     spin = items[1::6]
-            #     GN = items[2::6]
-            #     GG = items[3::6]
-            #     GFA = items[4::6]
-            #     GFB = items[5::6]
-            #     for i, E in enumerate(energy):
-            #         resonance = ReichMoore()
-            #         resonance.APL = APL
-            #         resonance.L = L
-            #         resonance.E = energy[i]
-            #         resonance.J = spin[i]
-            #         resonance.GN = GN[i]
-            #         resonance.GG = GG[i]
-            #         resonance.GFA = GFA[i]
-            #         resonance.GFB = GFB[i]
-            #         res.resonances.append(resonance)
-    def _get_list_record(self, raw_data, onlyList=False):
-        # determine how many items are in list
-        header = raw_data[0]
-        num_lines = header[5]
-        # read items
-        itemsList = raw_data[1:1+num_lines]
-        if onlyList:
-            return itemsList
-        else:
-            return (header, itemsList)
-
-    def parse_resonance_range(self, resonance_range, isotope_flags, mat_id):
-        """Turns a resonance range and labels the data for use.
-
-        Parameters
-        ----------
-        resonance_range: dict including a dict of flags and a list of data
-
-            The flag list is keyed to 'rangeflags'. The data, keyed to
-            'rangedata', is itself a list which contains starting/stopping
-            positions and a numpy array.
-
-        isotope_flags: dictionary of flags specific to the isotope
-
-        mat_id: integer material id as represented in ENDF standard
-        """
-        lfw = isotope_flags['LFW']
-        range_flags = resonance_range['rangeflags']
-        lru = range_flags['LRU']
-        lrf = range_flags['LRF']
-
-        raw_data = resonance_range['rangedata'][2]
-        range_data = rx.DoubleSpinDict({})
-
-        if lru == 1:
-            # This is the case for data in a resolved resonance range.
-            self._read_resolved(resonance_range, isotope_flags, mat_id)
-            pass
-        elif lru == 2:
-            # This is the case for data in an unresolved resonance range.
-            if (lfw, lrf) == (0, 1):
-                # This is Case A from the ENDF manual, pp.69-70.
-                def is_spi_line(line):
-                    spi, lssf, nls = line[0::2]
-                    return (lssf in (0,1) and
-                            line[3] == line[5] == 0 and
-                            (2*spi+nls) == int(2*spi+nls) and
-                            spi < 1000)
-
-                def is_l_line(line):
-                    L, num_entries, njs  = line[2], line[4], line[5]
-                    return (not line[1:4:2].any() and
-                            (L+njs) == int(L+njs) and
-                            6*njs == num_entries)
-
-                for i, line in enumerate(raw_data):
-                    if is_spi_line(line):
-                        spi = line[0]
-                    elif is_l_line(line):
-                        L = int(round(line[2]))
-                        njs = line[5]
-                        current_L_region = raw_data[i+1:i+1+njs]
-                        for line in current_L_region:
-                            # Each line has an AJ value; we parse line-by-line.
-                            aj = int(round(line[1]))
-                            aj_data = {(spi, L, aj):{'D': line[0],
-                                                     'AMUN': line[2],
-                                                     'GNO': line[3],
-                                                     'GG': line[4]}}
-                            range_data.update(aj_data)
-
-            elif (lfw, lrf) == (1, 1):
-                # Case B:
-                def is_spi_line(line):
-                    spi, lssf, ne, nls = line[0], line[2], line[4], line[5]
-                    return (lssf in (0,1) and
-                            line[3] == 0 and
-                            (2*spi+nls) == int(2*spi+nls) and
-                            spi < 1000)
-
-                def is_l_line(line):
-                    awri, L, njs = line[0::2]
-                    return ((np.array_equal(line[1::2], [0,0,0])) and
-                            int(njs) == njs and
-                            njs < 6 and
-                            int(L) == L)
-
-                for i in range(len(raw_data)):
-                    line = raw_data[i]
-                    if is_spi_line(line):
-                        spi, ne = line[0], line[4]
-                        es_start = 6*(i+1)
-                        es_stop = es_start+ne
-                        # Case B data is ES-independent except for GF, so we
-                        # have a common ES array.
-                        es_array = raw_data.flat[es_start:es_stop]
-                    elif is_l_line(line):
-                        L = int(line[2])
-                        aj_line = raw_data[i+2]
-                        aj = int(aj_line[0])
-                        num_entries = raw_data[i+1][4]-6
-                        gf_start = 6*(i+3)
-                        gf_stop = gf_start + num_entries
-
-                        aj_data = {(spi, L, aj):{
-                            'ES': es_array,
-                            'D': aj_line[0],
-                            'AMUN': aj_line[2],
-                            'GNO': aj_line[3],
-                            'GG': aj_line[4],
-                            'GF': raw_data.flat[gf_start:gf_stop]}}
-                        range_data.update(aj_data)
-
-            elif lrf == 2:
-                # Case C:
-                def is_spi_line(line):
-                    spi, lssf, nls = line[0::2]
-                    return (lssf in (0,1) and
-                            line[3] == line[5] == 0 and
-                            (2*spi+nls) == int(2*spi+nls) and
-                            spi < 1000)
-
-                def is_j_line(line):
-                    aj, num_entries, ne = line[0], line[4], line[5]
-                    return (int(2*aj) == 2*aj and
-                            6*ne + 6 == num_entries and
-                            not line[1:4:2].any())
-
-                def is_l_line(line):
-                    L, njs = line[2], line[4]
-                    return (not (line[1::2].any() or is_j_line(line)) and
-                            (L+njs) == int(L+njs))
-
-                for i in range(len(raw_data)):
-                    line = raw_data[i]
-                    if is_spi_line(line):
-                        spi = line[0]
-                    elif is_l_line(line):
-                        L = int(round(line[2]))
-                    elif is_j_line(line):
-                        aj = int(round(line[0]))
-                        num_entries = line[4]
-                        current_aj_region = raw_data.flat[6*(i+2):
-                                                          6*(i+1)+num_entries]
-                        aj_data = {(spi, L, aj): {
-                            'ES': current_aj_region[0::6],
-                            'D': current_aj_region[1::6],
-                            'GX': current_aj_region[2::6],
-                            'GNO': current_aj_region[3::6],
-                            'GG': current_aj_region[4::6],
-                            'GF': current_aj_region[5::6]}}
-                        range_data.update(aj_data)
-
-            # Now that the range's data has been fully updated, we can drop
-            # it in a tuple, drop *that* into the list of unresolved resonances,
-            # and sort the list.
-            el = resonance_range['rangeflags']['EL']
-            eh = resonance_range['rangeflags']['EH']
-            self.structure[mat_id]['data']['unresolved'].append(
-                (el, eh, range_data, range_flags))
-            self.structure[mat_id]['data']['unresolved'].sort()
 
     def read_mfmt(self, mat_id, mf, mt):
         """Grabs the raw data from one MT number.
