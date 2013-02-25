@@ -3,3 +3,4 @@ myfluka
 *.map
 *.stl
 *~
+.timer.out
