@@ -1,10 +1,13 @@
 diff --git a/Makefile b/Makefile
-index 552c43e..bea36b9 100755
+index 552c43e..1df0ad0 100755
 --- a/Makefile
 +++ b/Makefile
 @@ -22 +22 @@ ifneq (,$(premake))
 -  CONFIG = $(menup) $(menuproc) $(menub) $(debug) $(menuf90) $(menucc) $(MPI)
 +  CONFIG = $(menup) $(menudag) $(menuproc) $(menub) $(debug) $(menuf90) $(menucc) $(MPI)
+@@ -69,0 +70,2 @@ build:
++	@ rm -f dagmc
++	@ ln -s $(DAGMC_DIR) dagmc
 diff --git a/config/Linux.gcf b/config/Linux.gcf
 index ea765da..221831e 100755
 --- a/config/Linux.gcf
