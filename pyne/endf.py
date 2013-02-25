@@ -650,6 +650,20 @@ class Library(rx.RxLib):
     def _read_ap_only(self, subsection, range_flags, isotope_flags, mat_id):
         return 1
 
+    def _read_xs(self, mat_id, mt):
+        xsdata = self.read_mfmt(mat_id, 3, mt)
+        total_lines = 0
+        head_flags = self._get_head(('ZA','AWR',0,0,0,0),
+                                    xsdata[total_lines])
+        total_lines += 1
+        int_flags, int_data, int_size = self._get_tab1(
+            ('QM','QI',0,'LM','NR','NP'),
+            ('Eint','sigma(E'),
+            xsdata[total_lines:])
+        self.structure[mat_id]['data']['xs'].append((mt, int_data, int_flags))
+        total_lines += int_size
+
+
     def read_mfmt(self, mat_id, mf, mt):
         """Grabs the raw data from one MT number.
 
