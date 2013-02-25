@@ -4,10 +4,13 @@
 #include "MBCartVect.hpp"
 
 #include "DagMC.hpp"
+#include "moab/Types.hpp"
 using moab::DagMC;
 
 #include <limits>
+#include <ios>
 #include <iostream>
+#include <iomanip>
 #include <fstream>
 #include <sstream>
 #include <algorithm>
@@ -37,6 +40,8 @@ static std::ostream* raystat_dump = NULL;
 
 #endif 
 
+#define DEBUG 1
+
 
 /* Static values used by dagmctrack_ */
 
@@ -59,10 +64,32 @@ std::string ExePath() {
     return std::string( buffer );
 }
 
+/**	
+  dagmcinit_ is meant to be called from a fortran caller.  Strings have to be 
+  accompanied by their length, and will need to be null-appended.
+*/
 void dagmcinit_(char *cfile, int *clen,  // geom
                 char *ftol,  int *ftlen, // faceting tolerance
                 int *parallel_file_mode, // parallel read mode
                 double* dagmc_version, int* moab_version, int* max_pbl )
+{
+
+        // Presumably this serves as output to a calling fortran program
+        *dagmc_version= DAG->version();
+        *moab_version = DAG->interface_revision();
+        // terminate all filenames with null char
+        cfile[*clen] = ftol[*ftlen] = '\0';
+        // Call as if running with fluka (final param=true)
+	cpp_dagmcinit(cfile, *parallel_file_mode, *max_pbl, true);
+}
+
+
+/** 
+   cpp_dagmcinit is called directly from c++ or from a fortran-called wrapper.
+*/
+void cpp_dagmcinit(char *cfile,         // geom
+                int parallel_file_mode, // parallel read mode
+                int max_pbl , bool running_with_fluka)
 {
  
   MBErrorCode rval;
@@ -71,29 +98,33 @@ void dagmcinit_(char *cfile, int *clen,  // geom
   // the file to which ray statistics dumps will be written
   raystat_dump = new std::ofstream("dagmc_raystat_dump.csv");
 #endif 
-  
-  *dagmc_version = DAG->version();
-  *moab_version = DAG->interface_revision();
-  
-    // terminate all filenames with null char
-  cfile[*clen] = ftol[*ftlen] = '\0';
-  std::string str1="../";
-  std::string str2= std::string(cfile);
-  str1.append(str2);
-  std::cout << "\nmy file is " << str1 << "\n" << std::endl;
-  char *myfile;
-  myfile = &str1[0];
-  
 
-    // initialize this as -1 so that DAGMC internal defaults are preserved
-    // user doesn't set this
+  std::string prefixedFilename; 
+  // Prefix
+  if (running_with_fluka)  // h5m file is one level up
+  {
+     prefixedFilename="../";
+  }
+  else // file is in same directory as executable
+  {
+     prefixedFilename="";
+  }
+  prefixedFilename.append(cfile);
+  if (DEBUG)
+  {
+  	std::cout << "\nmy file is " << prefixedFilename << "\n" << std::endl;
+  }
+  char *myfile;
+  myfile = &prefixedFilename[0];
+  
+  // initialize this as -1 so that DAGMC internal defaults are preserved
+  // user doesn't set this
   double arg_facet_tolerance = -1;
                                                                         
   // jcz: leave arg_facet_tolerance as defined on previous line
   // if ( *ftlen > 0 ) arg_facet_tolerance = atof(ftol);
 
   // read geometry
-  // rval = DAG->load_file(cfile, arg_facet_tolerance );
   rval = DAG->load_file(myfile, arg_facet_tolerance );
   if (MB_SUCCESS != rval) {
     std::cerr << "DAGMC failed to read input file: " << cfile << std::endl;
@@ -120,130 +151,13 @@ void dagmcinit_(char *cfile, int *clen,  // geom
     exit(EXIT_FAILURE);
   }
 
-  pblcm_history_stack.resize( *max_pbl+1 ); // fortran will index from 1
+  pblcm_history_stack.resize( max_pbl+1 ); // fortran will index from 1
 }
 
 
 /**************************************************************************************************/
 /******                                FLUKA stubs                                         ********/
 /**************************************************************************************************/
-extern "C" int lookdb_ (double *X, double *Y, double *Z, int *numErrLm)
-{
-	std::cout << __FILE__ << ", " << __func__ << ":" << __LINE__ << std::endl;
-	return *numErrLm;
-}
-extern "C" int lookmg_ (double *X, double *Y, double *Z,
-                  double dir[3], // Direction cosines vector
-		  int *RegionNum, // region number
-                  int *newCell,    // Output: region # of p'le after step ("IRPRIM" in FLUKA)
-                  int *Ierr        // Output: error code
-)
-{
-	std::cout << __FILE__ << ", " << __func__ << ":" << __LINE__ << std::endl;
-	return *Ierr;
-}
-
-extern "C" int lookfx_ (double *X, double *Y, double *Z,
-                  double dir[3], // Direction cosines vector
-		  int *RegionNum, // region number
-                  int *newCell,    // Output: region # of p'le after step ("IRPRIM" in FLUKA)
-                  int *Ierr        // Output: error code
-)
-{
-	std::cout << __FILE__ << ", " << __func__ << ":" << __LINE__ << std::endl;
-	return *Ierr;
-}
-
-/*
- * Allows tracking initialization.
- * Same input and output as LOOKMG.
-*/
-extern "C" int lookz_ (double *X, double *Y, double *Z,
-                  double dir[3], // Direction cosines vector
-		  int *RegionNum, // region number
-                  int *newCell,    // region # of p'le after step ("IRPRIM" in FLUKA)
-                  int *Ierr        // error code
-)
-{
-	std::cout << __FILE__ << ", " << __func__ << ":" << __LINE__ << std::endl;
-        std::cout << "In C++ function lookz_" << std::endl;
-	std::cout << "\tINPUT: Position X,Y,Z  " << *X << ", " \
-                           <<  *Y  << ", "  << *Z << std::endl;
-	std::cout << "\tINPUT: Direction cosines   " << dir[1] << ", " \
-                           <<  dir[2]  << ", "  << dir[3] << std::endl;
-	std::cout << "\tINPUT: RegionNum " << *RegionNum << std::endl;
-
-
-        *newCell = *RegionNum + 1;
-	std::cout << "OUTPUT: int *newCell = " << *newCell << std::endl;
-	return *Ierr;
-}
-
-/*
- * Returns a unit vector at the previous point of the tracking (in case a boundary
- * crossing occurred), that is the intersection point between the path and the
- * preceding boundary.  The call is done from the routine GEONOR and all
- * cosines must be normalized at 10e-16, and they must be consistent with the
- * actual normal, with similar accuracy.
-*/
-extern "C" int norml_(double *U, double *V, double *W)
-{
-	
-	std::cout << __FILE__ << ", " << __func__ << ":" << __LINE__ << std::endl;
-	std::cout << " Norml unit vector: U, V, W = " << *U << ", " \
-                           <<  *V  << ", "  << *W << std::endl;
-        *U = 98.7;
-	*V = 6e-5;
-	*W = 4.3e2;	
-	return 1;
-}
-/**
-*
-*  From "Building an Interface between FLUKA and the GEANT4 Geometry Package":
-*  G1FLU calculates the distance travelled in the present zone/region and the 
-*  number of the next zone/region to be entered by the particle.
-*  NOTE:  All the variables are in double precision.
-* 
-*  Input
-*   int *SurfaceNum Surface number hit by the p'le at the preceding step 
-*                   (-1 if the p'le changed its direction or if it's a new
-*                    particle)
-* Output
-*  int *SurfaceNum  number of surface hit by the particle (1 for normal
-*                   tracking, 0 otherwise      
-*  double *tol      parameter with value less than or equal to the 
-*                   MINIMUM of the distances between the particle and each
-*                   boundary (if the boundary surface is too complex 0 is returned)
-*
-* Return
-*  double *tol      Per the documentation G1FLU returns DSNEAR
-*/
-extern "C" double g1flu_(double pos[3], // Cartesian coordinate vector
-                  double dir[3], // Direction cosines vector
-		  int *RegionNum, // region number
-                  double *dist,   // step length SUGGESTED
-                  int *SurfaceNum, // "NASC" in FLUKA, see above for text
-                  double *step,    // step length approved
-                  int *newCell,    // region # of p'le after step ("IRPRIM" in FLUKA)
-                  double *tol,     // "DSNEAR" in FLUKA, see above for text
-                  int *Ierr        // error code
-)
-{
-	std::cout << __FILE__ << ", " << __func__ << ":" << __LINE__ << std::endl;
-	std::cout << " Cartesian coordinate vector: pos[3] = " << pos[0]<< ", " \
-                           <<  pos[1]  << ", "  << pos[2] << std::endl;
-	double huge = 10e10;
-	double dls;
-        int jap;
-	int jsu;
-	int nps;
-
-/* ToDo:  
-        dagmctrack_(RegionNum, &(dir[0]), &(dir[1]), &(dir[2]), &(pos[0]), &(pos[1]), &(pos[2]), 
-                     &huge, &dls, &jap, &jsu, &nps);
-*/
-	return *tol;
-}
 
 /**************************************************************************************************/
 /******                                End of FLUKA stubs                                  ********/
@@ -388,40 +302,68 @@ static char* get_tallyspec( std::string spec, int& dim ){
 
 }
 
-void dagmcwritemcnp_(char *lfile, int *llen)  // file with cell/surface cards
-                     
+//////////////////////////////////////////////////////////////////////////
+/////////////
+/////////////		fludagwrite_assignma
+/////////////
+//////////////////////////////////////////////////////////////////////////
+/**
+   After mcnp_funcs:dagmcwritemcnp_
+*/
+void fludagwrite_assignma(std::string lfname)  // file with cell/surface cards
 {
-  MBErrorCode rval;
 
-  lfile[*llen]  = '\0';
+  int num_vols = DAG->num_entities(3);
+  std::cout << __FILE__ << ", " << __func__ << ":" << __LINE__ << "_______________" << std::endl;
+  std::cout << "\tnum_vols is " << num_vols << std::endl;
+  std::cout << "Graveyard list: " << std::endl;
+  MBErrorCode ret;
+  MBEntityHandle entity = NULL;
 
-  std::vector< std::string > mcnp5_keywords;
-  std::map< std::string, std::string > mcnp5_keyword_synonyms;
+  std::vector< std::string > keywords;
+  ret = DAG->detect_available_props( keywords );
+  // parse data from geometry so that property can be found
+  ret = DAG->parse_properties( keywords );
 
-  mcnp5_keywords.push_back( "mat" );
-  mcnp5_keywords.push_back( "rho" );
-  mcnp5_keywords.push_back( "comp" );
-  mcnp5_keywords.push_back( "imp.n" );
-  mcnp5_keywords.push_back( "imp.p" );
-  mcnp5_keywords.push_back( "imp.e" );
-  mcnp5_keywords.push_back( "tally" );
-  mcnp5_keywords.push_back( "spec.reflect" );
-  mcnp5_keywords.push_back( "white.reflect" );
-  mcnp5_keywords.push_back( "graveyard" );
-  
-  mcnp5_keyword_synonyms[ "rest.of.world" ] = "graveyard";
-  mcnp5_keyword_synonyms[ "outside.world" ] = "graveyard";
+// if (MB_SUCCESS != ret) {
+//    std::cerr << "DAGMC failed to parse metadata properties" <<  std::endl;
+//    exit(EXIT_FAILURE);
+//    }
 
-  // parse data from geometry
-  rval = DAG->parse_properties( mcnp5_keywords, mcnp5_keyword_synonyms );
-  if (MB_SUCCESS != rval) {
-    std::cerr << "DAGMC failed to parse metadata properties" <<  std::endl;
-    exit(EXIT_FAILURE);
+  // Open an outputstring
+  std::ostringstream ostr;
+  // Loop through 3d entities.  In model_complete.h5m there are 90 vols
+  for (unsigned i = 1; i<=num_vols; i++)
+  {
+      entity = DAG->entity_by_index(3, i);
+      // std::string props = make_property_string(*DAG, entity, keywords);
+      // if (props.length()) std::cout << "Parsed props: " << props << std::endl; 
+      if (DAG->has_prop(entity, "graveyard"))
+      {
+	 ostr << std::setw(10) << std::left  << "ASSIGNMAT";
+	 ostr << std::setw(10) << std::right << "BLCKHOLE";
+	 ostr << std::setw(10) << std::right << i + 1 << std::endl;
+      }
+      else
+      {
+	 ostr << std::setw(10) << std::left  << "ASSIGNMAT";
+	 ostr << std::setw(10) << std::right << "VACUUM";
+	 ostr << std::setw(10) << std::right << i + 1 << std::endl;
+      }
   }
+  // Show the output string just created
+  // std::cout << ostr.str();
 
-  std::string lfname(lfile, *llen);
+  // Prepare an output file of the given name; put a header and the output string in it
   std::cerr << "Going to write an lcad file = " << lfname << std::endl;
+  std::ofstream lcadfile( lfname.c_str());
+  std::string header = "*...+....1....+....2....+....3....+....4....+....5....+....6....+....7...";
+  lcadfile << header << std::endl;
+  lcadfile << ostr.str();
+
+  std::cerr << "Writing lcad file = " << lfname << std::endl;
   // Before opening file for writing, check for an existing file
+/*
   if( lfname != "lcad" ){
     // Do not overwrite a lcad file if it already exists, except if it has the default name "lcad"
     if( access( lfname.c_str(), R_OK ) == 0 ){
@@ -429,8 +371,226 @@ void dagmcwritemcnp_(char *lfile, int *llen)  // file with cell/surface cards
       return; 
     }
   }
+*/
+}
 
-  std::ofstream lcadfile( lfname.c_str() );
+
+//////////////////////////////////////////////////////////////////////////
+/////////////
+/////////////		region2name - modified from dagmcwrite
+/////////////
+//////////////////////////////////////////////////////////////////////////
+void region2name(int volindex, char * vname )  // file with cell/surface cards
+{
+  MBErrorCode rval;
+
+  std::vector< std::string > fluka_keywords;
+  fluka_keywords.push_back( "mat" );
+  fluka_keywords.push_back( "rho" );
+  fluka_keywords.push_back( "comp" );
+  fluka_keywords.push_back( "graveyard" );
+
+  // parse data from geometry
+  rval = DAG->parse_properties (fluka_keywords);
+  if (MB_SUCCESS != rval) {
+    std::cerr << "DAGMC failed to parse metadata properties" <<  std::endl;
+    exit(EXIT_FAILURE);
+  }
+
+// std::ostringstream ostr;
+
+  int cmat = 0;
+  double crho;
+
+  MBEntityHandle vol = DAG->entity_by_index( 3, volindex );
+  int cellid = DAG->id_by_index( 3, volindex);
+
+  bool graveyard = DAG->has_prop( vol, "graveyard" );
+
+  std::ostringstream istr;
+  if( graveyard )
+  {
+     istr << "BLCKHOLE";
+     if( DAG->has_prop(vol, "comp") )
+     {
+       // material for the implicit complement has been specified.
+       get_int_prop( vol, cellid, "mat", cmat );
+       get_real_prop( vol, cellid, "rho", crho );
+       std::cout << "Detected material and density specified for implicit complement: " << cmat <<", " << crho << std::endl;
+     }
+   }
+   else if( DAG->is_implicit_complement(vol) )
+   {
+      istr << "mat_" << cmat;
+      if( cmat != 0 ) istr << "_rho_" << crho;
+   }
+   else
+   {
+      int mat = 0;
+      get_int_prop( vol, cellid, "mat", mat );
+
+      if( mat == 0 )
+      {
+        istr << "0";
+      }
+      else
+      {
+        double rho = 1.0;
+        get_real_prop( vol, cellid, "rho", rho );
+        istr << "mat_" << mat << "_rho_" << rho;
+      }
+   }
+   char *cstr = new char[istr.str().length()+1];
+   std:strcpy(cstr,istr.str().c_str());
+   vname = cstr;
+}
+
+//////////////////////////////////////////////////////////////////////////
+/////////////
+/////////////		fludagwrite_mat - modified from dagmcwrite
+/////////////
+//////////////////////////////////////////////////////////////////////////
+void fludagwrite_mat(std::string fname )  // file with cell/surface cards
+{
+  MBErrorCode rval;
+
+  std::cout << __FILE__ << ", " << __func__ << ":" << __LINE__ << "_______________" << std::endl;
+  std::vector< std::string > fluka_keywords;
+
+  fluka_keywords.push_back( "mat" );
+  fluka_keywords.push_back( "comp" );
+  fluka_keywords.push_back( "graveyard" );
+  
+
+  // parse data from geometry
+  rval = DAG->parse_properties (fluka_keywords);
+  if (MB_SUCCESS != rval) {
+    std::cerr << "DAGMC failed to parse metadata properties" <<  std::endl;
+    exit(EXIT_FAILURE);
+  }
+
+  std::cerr << "Going to write file = " << fname << std::endl;
+  // Before opening file for writing, check for an existing file
+  if( fname != "lcad" ){
+    // Do not overwrite a lcad file if it already exists, except if it has the default name "lcad"
+    if( access( fname.c_str(), R_OK ) == 0 ){
+      std::cout << "DagMC: reading from existing lcad file " << fname << std::endl;
+      return; 
+    }
+  }
+
+  int num_cells = DAG->num_entities( 3 );
+  int cmat = 0;
+
+  // Open an outputstring
+  std::ostringstream ostr;
+
+  // write the cell cards
+  for( int i = 1; i <= num_cells; ++i ){
+
+    MBEntityHandle vol = DAG->entity_by_index( 3, i );
+    int cellid = DAG->id_by_index( 3, i );
+
+    // for model_complete goes from 1-88, 93, 94
+    ostr << std::setw(10) << std::left  << "ASSIGNMAT";
+
+    bool graveyard = DAG->has_prop( vol, "graveyard" );
+
+    if( graveyard )
+    {
+      // lcadfile << "BLCKHOLE";
+      ostr << "BLCKHOLE";
+      if( DAG->has_prop(vol, "comp") )
+      {
+        // material for the implicit complement has been specified.
+        get_int_prop( vol, cellid, "mat", cmat );
+      }
+    }
+    else if( DAG->is_implicit_complement(vol) )
+    {
+      // lcadfile << "mat_" << cmat;
+      // lcadfile << " $ implicit complement";
+      ostr << "mat_" << cmat;
+      ostr << " $ implicit complement";
+    }
+    else
+    {
+      int mat = 0;
+      get_int_prop( vol, cellid, "mat", mat );
+
+      if( mat == 0 )
+      {
+        // lcadfile << "0";
+        ostr << std::setw(10) << std::right << "0";
+      }
+      else
+      {
+        ostr << std::setw(10) << std::right << "mat_" << mat;
+      }
+    }
+
+    ostr << std::setw(10) << std::right << cellid << std::endl;
+  } // end iteration through cells
+
+  // Show the output string just created
+  std::cout << ostr.str();
+
+  // Prepare an output file of the given name; put a header and the output string in it
+  std::ofstream lcadfile( fname.c_str() );
+  std::string header = "*...+....1....+....2....+....3....+....4....+....5....+....6....+....7...";
+  lcadfile << header << std::endl;
+  lcadfile << ostr.str();
+
+  std::cerr << "Writing lcad file = " << fname << std::endl;
+}
+
+//////////////////////////////////////////////////////////////////////////
+/////////////
+/////////////		fludagwrite modified from dagmcwritemcnp_
+/////////////
+//////////////////////////////////////////////////////////////////////////
+// void dagmcwritemcnp_(char *lfile, int *llen)  // file with cell/surface cards
+void fludagwrite(std::string fname )  // file with cell/surface cards
+{
+  MBErrorCode rval;
+
+  // lfile[*llen]  = '\0';
+
+  std::vector< std::string > fluka_keywords;
+  std::map< std::string, std::string > fluka_keyword_synonyms;
+
+  fluka_keywords.push_back( "mat" );
+  fluka_keywords.push_back( "rho" );
+  fluka_keywords.push_back( "comp" );
+  fluka_keywords.push_back( "imp.n" );
+  fluka_keywords.push_back( "imp.p" );
+  fluka_keywords.push_back( "imp.e" );
+  fluka_keywords.push_back( "tally" );
+  fluka_keywords.push_back( "spec.reflect" );
+  fluka_keywords.push_back( "white.reflect" );
+  fluka_keywords.push_back( "graveyard" );
+  
+  // fluka_keyword_synonyms[ "rest.of.world" ] = "graveyard";
+  // fluka_keyword_synonyms[ "outside.world" ] = "graveyard";
+
+  // parse data from geometry
+  rval = DAG->parse_properties (fluka_keywords);
+  if (MB_SUCCESS != rval) {
+    std::cerr << "DAGMC failed to parse metadata properties" <<  std::endl;
+    exit(EXIT_FAILURE);
+  }
+
+  std::cerr << "Going to write an lcad file = " << fname << std::endl;
+  // Before opening file for writing, check for an existing file
+  if( fname != "lcad" ){
+    // Do not overwrite a lcad file if it already exists, except if it has the default name "lcad"
+    if( access( fname.c_str(), R_OK ) == 0 ){
+      std::cout << "DagMC: reading from existing lcad file " << fname << std::endl;
+      return; 
+    }
+  }
+
+  std::ofstream lcadfile( fname.c_str() );
 
   int num_cells = DAG->num_entities( 3 );
   int num_surfs = DAG->num_entities( 2 );
@@ -495,12 +655,14 @@ void dagmcwritemcnp_(char *lfile, int *llen)  // file with cell/surface cards
     }
 
     lcadfile << std::endl;
-  }
+  } // end iteration through cells
 
   // cells finished, skip a line
   lcadfile << std::endl;
   
+  // jcz - do we need this?
   // write the surface cards
+/*
   for( int i = 1; i <= num_surfs; ++i ){
     MBEntityHandle surf = DAG->entity_by_index( 2, i );
     int surfid = DAG->id_by_index( 2, i );
@@ -516,7 +678,7 @@ void dagmcwritemcnp_(char *lfile, int *llen)  // file with cell/surface cards
 
   // surfaces finished, skip a line
   lcadfile << std::endl;
-
+*/
   // write the tally cards
   std::vector<std::string> tally_specifiers;
   rval = DAG->get_all_prop_values( "tally", tally_specifiers );
@@ -559,9 +721,11 @@ void dagmcwritemcnp_(char *lfile, int *llen)  // file with cell/surface cards
     }
     lcadfile << cardstr << std::endl;
   }
-  
 }
 
+////////////////////////////////////////////////////////////////////////////
+///////////////
+//////////////
 void dagmcangl_(int *jsu, double *xxx, double *yyy, double *zzz, double *ang)
 {
   MBEntityHandle surf = DAG->entity_by_index( 2, *jsu );
