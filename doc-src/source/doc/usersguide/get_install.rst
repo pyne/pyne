@@ -177,7 +177,7 @@ Installing DAG-MCNP5
 If you would like to use DAGMC with MCNP5, known as DAG-MCNP5, you will also need:
 
 * MCNP5.1.51 source code from `RSICC <http://rsicc.ornl.gov>`_
-* UW-Madison `DAGMC git repo <https://github.com/svalinn/DAGMC>`_
+* a local copy of UW-Madison's `DAGMC git repo <https://github.com/svalinn/DAGMC>`_ 
 
 Automatic Installation
 '''''''''''''''''''''''
@@ -233,7 +233,8 @@ or similar.  Starting from these options, you can build DAG-MCNP5 from
 a patched source code with:
 ::
     prompt%> make build CONFIG="seq plot gfortran dagmc" FC=gfortran MARCH=M64 \
-                 MOAB_DIR=$HOME/dagmc_bld/MOAB CUBIT_DIR=/path/to/cubit/bin DAGMC_DIR=/path/to/DAGMC/MCNP5/dagmc
+                 MOAB_DIR=$HOME/dagmc_bld/MOAB CUBIT_DIR=/path/to/cubit/bin \
+		 DAGMC_DIR=/path/to/DAGMC/MCNP5/dagmc
 
 
 If you are less familiar with building MCNP5 from the ``makefile`` you
@@ -246,8 +247,7 @@ Within the ``install`` program you will need to set the DAGMC build options:
 * turn on DAGMC mode
 * provide the path to MOAB: ``$HOME/dagmc_bld/MOAB``
 * provide the path to CUBIT: ``/path/to/cubit``
-From the main menu, choose ``C`` to compile.
-
+src/Makefile gh-preview
 Your executable should be available as ``$HOME/dagmc_bld/MCNP5/Source/src/mcnp5``.
 
 Access to DAG-Tripoli4
@@ -256,4 +256,4 @@ Access to DAG-Tripoli4
 Tripoli4 is distributed by CEA/Saclay as a binary executable.  For
 access to DAG-Tripoli4, please contact `Jean-Christophe Trama
 <mailto:jean-christophe.trama@cea.fr>`_.
-
+make -f doc-src/Makefile gh-preview
