@@ -177,7 +177,7 @@ Installing DAG-MCNP5
 If you would like to use DAGMC with MCNP5, known as DAG-MCNP5, you will also need:
 
 * MCNP5.1.51 source code from `RSICC <http://rsicc.ornl.gov>`_
-* DAG-MCNP5.1.51 patch file from the UW-Madison
+* UW-Madison `DAGMC git repo <https://github.com/svalinn/DAGMC>`_
 
 Automatic Installation
 '''''''''''''''''''''''
@@ -198,12 +198,8 @@ Manual Installation
 The following steps are required to install DAG-MCNP5.  Most of these steps are described in more detail below.
 
 1. Install the DAGMC Toolkit as described above
-2. Download a copy of the patch file for your version of MCNP:
-    * `MCNP5 v1.60 <https://raw.github.com/svalinn/DAGMC/master/MCNP5/patch/dagmc.patch.5.1.60>`_
-    * `MCNP5 v1.51 <https://raw.github.com/svalinn/DAGMC/master/MCNP5/patch/dagmc.patch.5.1.51>`_
-    * `MCNP4 v1.40 <https://raw.github.com/svalinn/DAGMC/master/MCNP5/patch/dagmc.patch.5.1.40>`_
-3. Apply the patch your copy of the MCNP5.1.60 (or appropriate
-   version) source code
+2. Clone a copy of the DAGMC git repo.
+3. Apply the appropriate patch from DAGMC/MCNP5/patch/ to your copy of the MCNP5 source code
 4. Build & install the patched version of MCNP5
 
 Some assumptions/conventions:
@@ -212,6 +208,7 @@ Some assumptions/conventions:
 * path to CUBIT files is known, e.g. ``/path/to/cubit``
 * all tarballs reside in user's home directory
 * MCNP5 source code is available in location ``$HOME/dagmc_bld/MCNP5``
+* A cloned DAGMC git repo can be found at ``/path/to/DAGMC``
 
 Apply DAGMC Patch to MCNP5 v1.60
 ................................
@@ -219,7 +216,7 @@ Apply DAGMC Patch to MCNP5 v1.60
 Perform the following steps:
 ::
     prompt%> cd $HOME/dagmc_bld/MCNP5/Source
-    prompt%> patch -p1 < ~/dagmc.patch.5.1.60
+    prompt%> patch -p1 < /path/to/DAGMC/MCNP5/patch/dagmc.patch.5.1.60
 
 
 Build DAG-MCNP5 from modified code
@@ -236,7 +233,7 @@ or similar.  Starting from these options, you can build DAG-MCNP5 from
 a patched source code with:
 ::
     prompt%> make build CONFIG="seq plot gfortran dagmc" FC=gfortran MARCH=M64 \
-                 MOAB_DIR=$HOME/dagmc_bld/MOAB CUBIT_DIR=/path/to/cubit/bin
+                 MOAB_DIR=$HOME/dagmc_bld/MOAB CUBIT_DIR=/path/to/cubit/bin DAGMC_DIR=/path/to/DAGMC/MCNP5/dagmc
 
 
 If you are less familiar with building MCNP5 from the ``makefile`` you
