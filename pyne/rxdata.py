@@ -43,9 +43,12 @@ class DoubleSpinDict(collections.MutableMapping):
         del self.dict[self.double_spin(key)]
 
     def double_spin(self, key):
-        if len(key) == 1:
-            return int(round(2.0*key[0]))
-        if len(key) == 2:
-            return (int(round(2.0*key[0])), key[1])
-        if len(key) == 3:
-            return (int(round(2.0*key[0])), key[1], key[2])
+        try:
+            if len(key) == 1:
+                return int(round(2.0*key[0]))
+            if len(key) == 2:
+                return (int(round(2.0*key[0])), key[1])
+            if len(key) == 3:
+                return (int(round(2.0*key[0])), key[1], key[2])
+        except TypeError:
+            return key
