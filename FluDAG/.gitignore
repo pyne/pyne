@@ -1,0 +1,6 @@
+*.o
+myfluka
+*.map
+*.stl
+*~
+.timer.out
