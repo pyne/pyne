@@ -271,9 +271,9 @@ convallis tristique sem.                                           419 1451   14
 
 
 library = Library(str_library)
-library._read_mf2(128)
-library._read_mf2(131)
-library._read_mf2(419)
+library._read_res(128)
+library._read_res(131)
+library._read_res(419)
 
 def array_from_ENDF(fh):
     return np.genfromtxt(fh,
@@ -528,13 +528,13 @@ def test_xs():
     assert_equal(obs_600_flags, exp_600_flags)
 
 
-def test_U235():
-    """This test file can be found here:
-    http://t2.lanl.gov/data/data/ENDFB-VII.1-neutron/U/235
-    It is very big (51 MB), so it is not included."""
+# def test_U235():
+#     """This test file can be found here:
+#     http://t2.lanl.gov/data/data/ENDFB-VII.1-neutron/U/235
+#     It is very big (51 MB), so it is not included."""
     # u235 = Library('U235.txt')
-    # print u235.mat9228['data']['unresolved'][0]
-    pass
+    # u235._read_mf2(9228)
+
 
 if __name__ == "__main__":
     nose.main()

@@ -308,7 +308,7 @@ class Library(rx.RxLib):
 
         return head, intdata, total_lines
 
-    def _read_mf2(self, mat_id):
+    def _read_res(self, mat_id):
         """Read the resonance data from one material in the library and updates
         self.structure.
 
@@ -364,40 +364,13 @@ class Library(rx.RxLib):
                                        isotope_data[0])
         total_lines = 1
         for er in range(int(isotope_flags['NER'])):
-            total_lines += self._read_ner(isotope_data[total_lines:],
-                                          isotope_flags,
-                                          mat_id)
+            total_lines += self._read_subsection(isotope_data[total_lines:],
+                                                 isotope_flags,
+                                                 mat_id)
 
         return total_lines
 
-    def _read_ner(self, range_data, isotope_flags, mat_id):
-        """Read resonance data for a specific energy range.
-
-        Parameters:
-        -----------
-        range_data: 2D array
-            The section of the resonance data to read. The energy range starts
-            at the top of this.
-        isotope_flags: dict
-            Dictionary of flags inherited from the isotope.
-        mat_id:
-            ENDF material ID.
-
-        Returns:
-        --------
-        total_lines: int
-            The number of lines the energy range takes up.
-        """
-        range_flags = self._get_cont(['EL','EH','LRU','LRF','NRO','NAPS'],
-                                     range_data[0])
-        total_lines = 1
-        total_lines += self._read_subsection(range_data[1:],
-                                             range_flags,
-                                             isotope_flags,
-                                             mat_id)
-        return total_lines
-
-    def _read_subsection(self, subsection, range_flags, isotope_flags, mat_id):
+    def _read_subsection(self, subsection, isotope_flags, mat_id):
         """Read resonance data for a specific energy range subsection.
 
         Parameters:
@@ -417,27 +390,30 @@ class Library(rx.RxLib):
         total_lines: int
             The number of lines the energy range subsection takes up.
         """
+        range_flags = self._get_cont(('EL','EH','LRU','LRF','NRO','NAPS'),
+                                     subsection[0])
+        total_lines = 1
         lru = int(round(range_flags['LRU']))
 
         if lru == 0:
-            total_lines = self._read_ap_only(subsection,
-                                             range_flags,
-                                             isotope_flags,
-                                             mat_id)
+            total_lines += self._read_ap_only(subsection[1:],
+                                              range_flags,
+                                              isotope_flags,
+                                              mat_id)
         if lru == 1:
-            total_lines = self._new_read_resolved(subsection,
-                                                  range_flags,
-                                                  isotope_flags,
-                                                  mat_id)
+            total_lines += self._read_resolved(subsection[1:],
+                                               range_flags,
+                                               isotope_flags,
+                                               mat_id)
         if lru == 2:
-            total_lines = self._new_read_unresolved(subsection,
-                                                    range_flags,
-                                                    isotope_flags,
-                                                    mat_id)
+            total_lines += self._read_unresolved(subsection[1:],
+                                                 range_flags,
+                                                 isotope_flags,
+                                                 mat_id)
 
         return total_lines
 
-    def _new_read_resolved(self, subsection, range_flags, isotope_flags, mat_id):
+    def _read_resolved(self, subsection, range_flags, isotope_flags, mat_id):
         """ Read the subsection for a resolved energy range.
 
         Parameters:
@@ -539,13 +515,11 @@ class Library(rx.RxLib):
         if lrf == 7:
             # R-Matrix Limited Format
 
-            # The documentation in the manual is hella confusing and possibly has typos.
-            #
             range_flags.update(self._get_cont([0,0,'IFG','KRM','NJS','KRL'],
                                               subsection[total_lines]))
             total_lines += 1
 
-            # subsection_dict = rx.DoubleSpinDict({})
+            subsection_dict = rx.DoubleSpinDict({})
             # for i in range(int(range_flags['NLS'])):
             #     L_flags, items, lines = self._get_list(['AWRI','QX','L','LRX',
             #                                          '6*NRS','NRS'],
@@ -565,7 +539,7 @@ class Library(rx.RxLib):
 
         return total_lines
 
-    def _new_read_unresolved(self, subsection, range_flags, isotope_flags, mat_id):
+    def _read_unresolved(self, subsection, range_flags, isotope_flags, mat_id):
         lrf = range_flags['LRF']
         lfw = isotope_flags['LFW']
 
