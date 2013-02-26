@@ -1,5 +1,5 @@
 The subdirectory src containts inputs files and run-scripts.
-
+Makefile should be modified for local conditions.
 Workflow in src to make and run mainfludag: 
 > make clean 
 > make obj
