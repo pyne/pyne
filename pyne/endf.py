@@ -651,16 +651,18 @@ class Library(rx.RxLib):
         return 1
 
     def _read_xs(self, mat_id, mt):
-        xsdata = self.read_mfmt(mat_id, 3, mt)
+        xsdata = self.read_mfmt(mat_id, 3, mt).reshape(-1,6)
         total_lines = 0
         head_flags = self._get_head(('ZA','AWR',0,0,0,0),
                                     xsdata[total_lines])
         total_lines += 1
         int_flags, int_data, int_size = self._get_tab1(
             ('QM','QI',0,'LM','NR','NP'),
-            ('Eint','sigma(E'),
+            ('Eint','sigma(E)'),
             xsdata[total_lines:])
+        int_flags.update(head_flags)
         self.structure[mat_id]['data']['xs'].append((mt, int_data, int_flags))
+        self.structure[mat_id]['data']['xs'].sort()
         total_lines += int_size
 
 
