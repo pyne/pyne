@@ -183,8 +183,8 @@ convallis tristique sem.                                           419 1451   14
  ***************************************************************** 419 1451   15
                                 1        451         22          1 419 1451   16
                                 2        151         53          1 419 1451   17
-                                3          2          1          1 419 1451   18
-                                3        600          1          1 419 1451   19
+                                3          2          5          1 419 1451   18
+                                3        600          4          1 419 1451   19
                                 3        650          1          1 419 1451   20
                                 3        800          1          1 419 1451   21
                                 4          2          2          1 419 1451   22
@@ -246,8 +246,15 @@ convallis tristique sem.                                           419 1451   14
  0.000000+0 0.000000+0          0          0          0          0 419 2  099999
  0.000000+0 0.000000+0          0          0          0          0 419 0  0    0
  4.284918+3 6.292347+0          0          0          0          0 419 3  2    1
+ 4.047593+5-4.245658-8          0-4.651348+3          7         20 419 3  2    2
+          6          4          9          2         12          1 419 3  2    3
+         13          5         15          3         17          4 419 3  2    4
+         20          1                                             419 3  2    5
  0.000000+0 0.000000+0          0          0          0          0 419 3  099999
  4.193742+3 6.287192+0          0          0          0          0 419 3600    1
+ 3.863437-5-7.373532-7          0 8.675483-1          6         27 419 3600    2
+          2          6          8          5          9          4 419 3600    3
+         11          3         13          2         27          1 419 3600    4
  0.000000+0 0.000000+0          0          0          0          0 419 3  099999
  4.192847+3 6.874398+0          0          0          0          0 419 3650    1
  0.000000+0 0.000000+0          0          0          0          0 419 3  099999
@@ -478,6 +485,48 @@ def test_resolved_adleradler():
 
 def test_resolved_rmatrix():
     pass
+
+def test_xs():
+    # Read in the data
+    library._read_xs(419, 600)
+    library._read_xs(419, 2)
+
+    # Manually find where the data should be reading from and check if it is
+    # consistent with what the program is doing.
+    exp_2_str = StringIO.StringIO(
+        """ 4.284918+3 6.292347+0          0          0          0          0
+ 4.047593+5-4.245658-8          0-4.651348+3          7         20
+          6          4          9          2         12          1
+         13          5         15          3         17          4
+         20          1                                            """)
+    exp_2_a = array_from_ENDF(exp_2_str)
+    exp_2 = dict(zip(('Eint', 'sigma(E)'),
+                     (exp_2_a[2:].flat[:14:2], exp_2_a[2:].flat[1:14:2])))
+    obs_2 = library.mat419['data']['xs'][0][1]
+
+    exp_600_str = StringIO.StringIO(
+        """ 4.193742+3 6.287192+0          0          0          0          0
+ 3.863437-5-7.373532-7          0 8.675483-1          6         27
+          2          6          8          5          9          4
+         11          3         13          2         27          1""")
+
+    exp_600_a = array_from_ENDF(exp_600_str)
+    exp_600 = dict(zip(('Eint', 'sigma(E)'),
+                     (exp_600_a[2:].flat[::2], exp_600_a[2:].flat[1::2])))
+    obs_600 = library.mat419['data']['xs'][1][1]
+
+    for key in obs_2:
+        assert_array_equal(obs_2[key], exp_2[key])
+        assert_array_equal(obs_600[key], exp_600[key])
+
+    # Heck, why not check the flags too?
+    obs_600_flags = library.mat419['data']['xs'][1][2]
+    exp_600_flags = dict(zip(('QM','QI',0,'LM','NR','NP'),
+        exp_600_a[1]))#
+    exp_600_flags.update({'ZA': 4.193742e+3, 'AWR': 6.287192})
+    del exp_600_flags[0]
+    assert_equal(obs_600_flags, exp_600_flags)
+
 
 def test_U235():
     """This test file can be found here:
