@@ -184,14 +184,16 @@ be imprinted and merged.  Imprinting creates a common surface
 interface between touching volumes.  Merging then takes the touching
 surfaces and makes them into one surface.
 
-To imprint, issue the following command
+To imprint, issue the following command:
 ::
      imprint body all
 
 Should the imprint be successful, then the next step is to merge the
 geometry. Sometimes it may be important to specify a merge tolerance.
-To set the tolerance and merge, issue the following commands: :: merge
-tol 5e-7 merge all
+To set the tolerance and merge, issue the following commands:
+:: 
+    merge tol 5e-7
+    merge all
 
 This process can be very time consuming. For large models of several
 thousand volumes, the imprint and merge steps can take up to three
