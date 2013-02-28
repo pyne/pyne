@@ -46,7 +46,6 @@ class Library(rx.RxLib):
         if isinstance(fh, basestring):
             self.fh = open(fh, 'r')
             opened_here = True
-        self.mats = {}
         self.mts = {}
         self.structure = {}
         self.mat_dict = {}
@@ -101,12 +100,14 @@ class Library(rx.RxLib):
         self.fh.seek(self.chars_til_now+81)
         line = self.fh.readline()
         mat_id = int(line[66:70])
+        zzaaam = int(convert(line[:11])*10)
+
         # Adjust the offset every time we get to a new material.
-        if mat_id not in self.structure:
+        if zzaaam not in self.structure:
             self.offset -= 1
         # We need to make a data structure modeled after GND.
             self.structure.update(
-                {mat_id:{'styles':'',
+                {zzaaam:{'styles':'',
                          'docs':[],
                          'particles':[],
                          'data':{'resolved':[],
@@ -117,7 +118,7 @@ class Library(rx.RxLib):
                                            'channel2':[]}},
                          'matflags':{}}})
 
-            self.mat_dict.update({mat_id:{'end_line':[],
+            self.mat_dict.update({zzaaam:{'end_line':[],
                                           'mfs':{}}})
 
         # parse header (all lines with 1451)
@@ -139,34 +140,32 @@ class Library(rx.RxLib):
                     start = stop + 2
                     stop = start + mt_length
                 stop = start + mt_length
-                self.mat_dict[mat_id]['mfs'][mf,mt] = (start+self.offset,
+                self.mat_dict[zzaaam]['mfs'][mf,mt] = (start+self.offset,
                                                        stop+self.offset)
                 line = self.fh.readline()
             # parse comment
             elif re.match(' {66}', line):
-                self.structure[mat_id]['docs'].append(line[0:66])
+                self.structure[zzaaam]['docs'].append(line[0:66])
                 line = self.fh.readline()
             elif re.match('[\d+. ]{80}\n$', line):
                 line = self.fh.readline()
                 continue
             else:
-                self.structure[mat_id]['docs'].append(line[0:66])
+                self.structure[zzaaam]['docs'].append(line[0:66])
                 line = self.fh.readline()
         # Find where the end of the material is and then jump to it.
         self.chars_til_now = (stop + 4)*81
         self.fh.seek(self.chars_til_now)
-        if self.fh.readline() == '':
+        if (self.fh.readline() == '' or self.fh.readline()[68:70] == '-1'):
             self.more_files = False
 
         # update materials list
         if mat_id != '':
-            self.mat_dict[mat_id]['end_line'] = self.chars_til_now/81
-            setattr(self, "mat{0}".format(mat_id), self.structure[mat_id])
+            self.mat_dict[zzaaam]['end_line'] = self.chars_til_now/81
+            setattr(self, "mat{0}".format(zzaaam), self.structure[zzaaam])
 
         # Read flags from MT 1.
         flagvals = []
-        # if mat_id in (-1, 0):
-        #     pass
         # else:
         self.seek_matmfmt(mat_id, 1, 451)
         for i in range(2):
@@ -178,9 +177,9 @@ class Library(rx.RxLib):
                     'LREL', None, 'NSUB', 'NVER', 'TEMP', None, 'LDRV',
                     None, 'NWD', 'NXC']
 
-        self.structure[mat_id].update({'matflags':
+        self.structure[zzaaam].update({'matflags':
                                        dict(zip(flagkeys, flagvals))})
-        del self.structure[mat_id]['matflags'][None]
+        del self.structure[zzaaam]['matflags'][None]
 
     def _get_cont(self, keys, line):
         """Read one line of the array, treating it as a CONT record.
@@ -193,7 +192,7 @@ class Library(rx.RxLib):
         line: array-like
             The line to be read.
         """
-        cont = dict(zip(keys, line))
+        cont = dict(zip(keys, line.flat[:6]))
         if 0 in cont:
             del cont[0]
         return cont
@@ -246,21 +245,23 @@ class Library(rx.RxLib):
             The number of lines the LIST record takes up.
         """
 
-        # head = dict(zip(headkeys, lines[0]))
         head = dict(zip(headkeys, lines[0:].flat[:len(headkeys)]))
         if 0 in head:
             del head[0]
-        npl, n2  = lines[0][4:]
 
-        headlines = np.ceil(len(headkeys)/6.0)
-        arraylines = np.ceil(npl/6.0)
+        npl = int(lines[0][4])
+
+        headlines = (len(headkeys)-1)/6 + 1
+        arraylines = (npl-1)/6 + 1
+
         if len(itemkeys) == 1:
             array_len = npl - (headlines-1) * 6
             items={itemkeys[0]: lines[headlines:].flat[:array_len]}
         else:
+            array_width = ((len(itemkeys)-1)/6 + 1)*6
             items_transposed = np.transpose(
                 lines[headlines:headlines+arraylines].reshape(-1,
-                                                               len(itemkeys)))
+                                                               array_width))
             items = dict(zip(itemkeys, items_transposed))
 
         if 0 in items:
@@ -300,11 +301,11 @@ class Library(rx.RxLib):
         if 0 in head:
             del head[0]
 
-        nr, _np = lines[0][4:]
+        nr = int(lines[0][4])
         intdata = dict(zip(xykeys,
                            (np.array([lines[1:].flat[:nr*2:2],
                                       lines[1:].flat[1:nr*2:2]]))))
-        total_lines = int(np.ceil(nr*2/6.0) + 1)
+        total_lines = (nr*2-1)/6 + 2
 
         return head, intdata, total_lines
 
@@ -513,22 +514,48 @@ class Library(rx.RxLib):
 
 
         if lrf == 7:
-            # R-Matrix Limited Format
-
-            range_flags.update(self._get_cont([0,0,'IFG','KRM','NJS','KRL'],
+            # R-Matrix Limited Format (ENDF Manual pp. 62-67)
+            range_flags.update(self._get_cont((0,0,'IFG','KRM','NJS','KRL'),
                                               subsection[total_lines]))
             total_lines += 1
 
             subsection_dict = rx.DoubleSpinDict({})
-            # for i in range(int(range_flags['NLS'])):
-            #     L_flags, items, lines = self._get_list(['AWRI','QX','L','LRX',
-            #                                          '6*NRS','NRS'],
-            #                                         ['ER','AJ','GT','GN','GG',
-            #                                          'GF'],
-            #                                         subsection[total_lines:])
-            #     total_lines += lines
-            #     spi, L = range_flags['SPI'], L_flags['L']
-            #     subsection_dict.update({(spi, L):
+
+            # Particle pair descriptions for the whole range
+            particle_pair_data, pp_size = self._get_list(
+                (0,0,'NPP',0,'12*NPP','2*NPP'),
+                ('MA','MB','ZA','ZB','IA','IB','Q','PNT','SHF','MT','PA','PB'),
+                subsection[total_lines:])[1:3]
+            total_lines += pp_size
+            range_flags.update(particle_pair_data)
+
+            for j_section in range(int(range_flags['NJS'])):
+                # Read that first LIST record, with channel descriptions
+                ch_flags, ch_items, ch_size = self._get_list(
+                    ('AJ','PJ','KBK','KPS','6*NCH','NCH'),
+                    ('IPP','L','SCH','BND','APE','APT'),
+                    subsection[total_lines:])
+                total_lines += ch_size
+
+                # Second LIST record, with resonance energies and widths.
+                er_flags, er_data, er_size = self._get_list(
+                    (0,0,0,'NRS','6*NX','NX'), ('ER',), subsection[total_lines:])
+                total_lines += er_size
+
+                nch = ch_flags['NCH']
+                er_array_width = (int(nch)/6+1)*6
+                er_data = er_data['ER'].reshape(-1,er_array_width).transpose()
+
+                aj_data = {'ER': er_data[0], 'GAM': er_data[1:1+nch].transpose()}
+                aj_data.update(ch_items)
+
+                aj = ch_flags['AJ']
+
+                subsection_dict[aj] = aj_data
+
+                # Additional records
+                if ch_flags['KBK'] > 1:
+                    pass
 
         el, eh = range_flags['EL'], range_flags['EH']
         subsection_data = (el,eh,subsection_dict,range_flags)
@@ -640,26 +667,26 @@ class Library(rx.RxLib):
         total_lines += int_size
 
 
-    def read_mfmt(self, mat_id, mf, mt):
+    def read_mfmt(self, zzaaam, mf, mt):
         """Grabs the raw data from one MT number.
 
         Parameters
         ----------
-        mat_id: ENDF material ID number
-        mf: ENDF file number (MF)
-        mt: ENDF reaction number (MT)
+        zzaaam: int
+            ZZAAAM form of material to read from.
+        mf: int
+            ENDF file number (MF)
+        mt: int
+            ENDF reaction number (MT)
         """
-        if mat_id in self.structure:
-            start, stop = self.mat_dict[mat_id]['mfs'][mf,mt]
+        if zzaaam in self.structure:
+            start, stop = self.mat_dict[zzaaam]['mfs'][mf,mt]
             start = (start - 1) * 6
             stop = (stop-1)*6
             return self.data.flat[start:stop]
         else:
-            print "Material %d does not exist." % mat_id
+            print "Material %d does not exist." % zzaaam
             return False
-
-    def get(self, mat_id, mf, mt):
-        return self.read_mfmt(mat_id, mf, mt)
 
 
 class Evaluation(object):
@@ -2039,7 +2066,7 @@ def convert(string):
         else:
             return float(string)
     except ValueError:
-        return None
+        return float(string)
 
 def numpy_to_ENDF(num):
     """
