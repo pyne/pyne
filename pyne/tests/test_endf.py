@@ -33,7 +33,7 @@ str_library = StringIO.StringIO(
                                                                    128 1451   18
  ************************ C O N T E N T S ************************ 128 1451   19
                                 1        451         27          0 128 1451   20
-                                2        151         45          0 128 1451   21
+                                2        151         66          0 128 1451   21
                                 3          1          1          0 128 1451   22
                                 3          2          1          0 128 1451   23
                                 3          3          1          0 128 1451   24
@@ -43,7 +43,7 @@ str_library = StringIO.StringIO(
  0.000000+0 0.000000+0          0          0          0          0 128 1  099999
  0.000000+0 0.000000+0          0          0          0          0 128 0  0    0
  1.876876+3 1.776576+0          0          0          1          0 128 2151    1
- 5.513700+4 1.000000+0          0          0          4          0 128 2151    2
+ 5.513700+4 1.000000+0          0          0          5          0 128 2151    2
  2.700000+3 2.000000+5          1          1          1          2 128 2151    3
  0.000000+0 0.000000+0          0          0          4         10 128 2151    4
           2          3          5          2          7          1 128 2151    5
@@ -87,6 +87,27 @@ str_library = StringIO.StringIO(
  3.000000+0 0.000000+0          0          0         12          1 128 2151   43
 -3.211014+1-2.011165+3 4.178337+5 1.640997+2 1.122313-5 1.537114-2 128 2151   44
  4.634918-8-3.884155-4 2.384144-9-3.745465-7-1.646941-2-2.894650-8 128 2151   45
+ 1.685738+5 1.659888-5          1          7          0          0 128 2151   46
+ 0.000000+0 0.000000+0          1          3          2          1 128 2151   47
+ 0.000000+0 0.000000+0          2          0         24          4 128 2151   48
+ 7.916271+6-3.532347-6 4.469905+7-2.134022+4-3.500000+0-3.500000+0 128 2151   49
+ 5.307428-7          0          1          7          1         -1 128 2151   50
+ 2.807643-8-4.478596+0 3.274758+3-2.760395+9 1.356440+3 3.447654+4 128 2151   51
+ 4.790839-8          1         -1        800          1         -1 128 2151   52
+-4.000000+0          0 1.914541-3-4.683290+5         12          2 128 2151   53
+ 1.981937+3 9.740279-7-2.450194+5-1.304844+4 1.856158-9-1.218463-9 128 2151   54
+-4.097837+1-2.765873-9-0.913351+1 1.591290+5-2.379063+0 2.066455-6 128 2151   55
+ 0.000000+0 0.000000+0          0          3         18          3 128 2151   56
+ 2.949030-1 1.156625+7 7.255199-6                                  128 2151   57
+ 4.453964+1 5.062864-5-1.110875-3                                  128 2151   58
+ 2.208407-7 9.942677-6-3.134503-8                                  128 2151   59
+ 3.000000+0          0-2.924403-5-4.840218-1         12          2 128 2151   60
+ 0.951092+5 7.932944-5-3.716218-8 4.007761-3 1.277498-6 2.041832+6 128 2151   61
+-7.375896+8-4.822942+4 4.491725+9 3.018430+8 2.238307-5-3.591395+9 128 2151   62
+ 0.000000+0 0.000000+0          0          3         18          3 128 2151   63
+ 5.088175-6-2.282938+0-4.236786-6                                  128 2151   64
+ 8.930267-9-3.115607+8-2.521300-4                                  128 2151   65
+ 3.978418+5 4.821547-6 3.110373-3                                  128 2151   66
  0.000000+0 0.000000+0          0          0          0          0 128 2  099999
  0.000000+0 0.000000+0          0          0          0          0 128 0  0    0
  1.989875+3 1.998644+0          0          0          0          0 128 3  1    1
@@ -271,29 +292,29 @@ convallis tristique sem.                                           419 1451   14
 
 
 library = Library(str_library)
-library._read_res(128)
-library._read_res(131)
-library._read_res(419)
+# library._read_res(128)
+# library._read_res(131)
+# library._read_res(419)
+library._read_res(10020)
+library._read_res(10031)
+library._read_res(40192)
 
 def array_from_ENDF(fh):
     return np.genfromtxt(fh,
+                         dtype='float',
                          delimiter=11,
                          converters={0: conv, 1: conv, 2: conv,
                                      3: conv, 4: conv, 5: conv})
 
-def test_mats():
-    for mat_id in library.mats:
-        assert_in(mat_id, [128, 131, 419])
-
 
 def test_get():
-    obs = library.get(419, 4, 2)
+    obs = library.read_mfmt(40192, 4, 2)
 
     exp = np.array([4.898421e+3, 6.768123e+0, 0,
                     1, 0, 0, 2.123124e+6, 8.123142e-6,
                     2.123212e+6, 8.231231e-6,
                     -2.231211e+6, 8.123421e-6])
-    badkey = library.get(111, 1, 1)
+    badkey = library.read_mfmt(111, 1, 1)
     assert_array_equal(exp, obs)
     assert_equal(badkey, False)
 
@@ -301,7 +322,7 @@ def test_get():
 def test_unresolved_resonances_a():
     # Case A (ENDF Manual p.70)
 
-    obs = library.mat131['data']['unresolved']
+    obs = library.mat10031['data']['unresolved']
 
     exp_string = StringIO.StringIO(
         """ 1.801000+3          0 1.100000+0 3.078520-1 1.000000-2 0.000000+0
@@ -317,7 +338,7 @@ def test_unresolved_resonances_a():
 
 def test_unresolved_resonances_b():
     # Case B (ENDF Manual p. 70)
-    obs = library.mat419['data']['unresolved']
+    obs = library.mat40192['data']['unresolved']
     # For the spin=4.5, L=3, J=4 section in the first isotope
     obs_1 = obs[0][2][4.5,3,4]
     exp_string_1 = StringIO.StringIO(
@@ -368,7 +389,7 @@ def test_unresolved_resonances_c():
 -5.873521-3-4.808214+9 5.089619+5 4.836683+0 2.772702-3-4.865151-8
 -2.659480-9 1.044275+8-1.393749+2-4.189996-6-9.596467-4 3.942829+9
 """)
-    obs = library.mat419['data']['unresolved'][3][2][0.5,6,9]
+    obs = library.mat40192['data']['unresolved'][3][2][0.5,6,9]
     exp_array = array_from_ENDF(exp_str)
     exp = dict(zip(('ES','D','GX','GN0','GG','GF'),
                    exp_array[2:].transpose()))
@@ -390,27 +411,29 @@ def test_DoubleSpinDict():
     assert_equal(exp, obs)
 
 def test_resolved_breitwigner():
- # The section looks like this:
- #         EL         EH        LRU        LRF        NRO       NAPS 419 2151    3
- # 0.000000+0 0.000000+0          0          0         NR         NP 419 2151    4
- #        SPI         AP          0          0        NLS          0 419 2151    5
- #       AWRI         QX          L        LRX      6*NRS        NRS 419 2151    6
- #         ER         AJ         GT         GN         GG         GF 419 2151    7
- #         ER         AJ         GT         GN         GG         GF 419 2151    8
- #       AWRI         QX          L        LRX      6*NRS        NRS 419 2151    6
- #         ER         AJ         GT         GN         GG         GF 419 2151    7
- #         ER         AJ         GT         GN         GG         GF 419 2151    8
+    """ The section looks like this:
+         EL         EH        LRU        LRF        NRO       NAPS 419 2151    3
+ 0.000000+0 0.000000+0          0          0         NR         NP 419 2151    4
+        SPI         AP          0          0        NLS          0 419 2151    5
+       AWRI         QX          L        LRX      6*NRS        NRS 419 2151    6
+         ER         AJ         GT         GN         GG         GF 419 2151    7
+         ER         AJ         GT         GN         GG         GF 419 2151    8
+       AWRI         QX          L        LRX      6*NRS        NRS 419 2151    6
+         ER         AJ         GT         GN         GG         GF 419 2151    7
+         ER         AJ         GT         GN         GG         GF 419 2151    8
+"""
 
-    data = library.mat128['data']['resolved']
+    data = library.mat10020['data']['resolved']
     # Check to see if NRO is reading from the right place.
     # NRO = 0 case
-    assert_equal(data[-2][-1]['NRO'], 0)
+    range_nro_0 = data[2]
+    assert_equal(range_nro_0[-1]['NRO'], 0)
     # NRO = 1 case
     # Check to see if NAPS is reading from the right place
-    assert_equal(data[-2][-1]['NAPS'], 1)
+    assert_equal(range_nro_0[-1]['NAPS'], 1)
     # Check to see if SPI, NLS are reading from the right place
-    assert_equal(data[-2][-1]['SPI'], 0.5)
-    assert_equal(data[-2][-1]['NLS'], 1)
+    assert_equal(range_nro_0[-1]['SPI'], 0.5)
+    assert_equal(range_nro_0[-1]['NLS'], 1)
     # Check to see if the data is alright...
     expected = {'ER': np.array([350000.0, 4500000.0]),
                 'AJ': np.array([1.0, 2.0]),
@@ -418,18 +441,19 @@ def test_resolved_breitwigner():
                 'GN': np.array([2., 3.]),
                 'GG': np.array([1.1, 1.2]),
                 'GF': np.array([3.1,3.2])}
-    for key in data[-2][2][0.5,1]:
-        assert_array_equal(data[-2][2][0.5,1][key],expected[key])
+    for key in range_nro_0[2][0.5,1]:
+        assert_array_equal(range_nro_0[2][0.5,1][key],expected[key])
 
 def test_resolved_reichmoore():
-# The section looks like this:
-#         EL         EH        LRU        LRF        NRO       NAPS 419 2151    3
-# 0.000000+0 0.000000+0          0          0         NR         NP 419 2151    4
-#        SPI         AP        LAD          0        NLS       NLSC 419 2151    5
-#       AWRI        APL          L          0      6*NRS        NRS 419 2151    6
-#         ER         AJ         GN         GG        GFA        GFB 419 2151    7
+    """The section looks like this:
+        EL         EH        LRU        LRF        NRO       NAPS 419 2151    3
+0.000000+0 0.000000+0          0          0         NR         NP 419 2151    4
+       SPI         AP        LAD          0        NLS       NLSC 419 2151    5
+      AWRI        APL          L          0      6*NRS        NRS 419 2151    6
+        ER         AJ         GN         GG        GFA        GFB 419 2151    7
+"""
 
-    subsection = library.structure[128]['data']['resolved'][1]
+    subsection = library.mat10020['data']['resolved'][1]
     print subsection[2][2.5,2]
     assert_array_equal(subsection[2]['int']['E'], np.array([3,7]))
     assert_array_equal(subsection[2]['int']['AP(E)'], np.array([4,1]))
@@ -444,22 +468,23 @@ def test_resolved_reichmoore():
         assert_array_equal(obs_data[key], exp_data[key])
 
 def test_resolved_adleradler():
-# The section looks like this:
-# [MAT, 2,151/ 0.0, 0.0, 0, 0, NR, NP/ Eint / AP(E)] TAB1
-# [MAT, 2,151/ SPI, AP,0,0,NLS,0] CONT
-# [MAT, 2,151/ AWRI, 0.0, LI,0, 6*NX, NX
-# AT1 , AT2 , AT3 , AT4 , BT1 , BT2 ,
-# AF1 , --------------------, BF2 ,
-# AC1 , --------------------, BC2 ] LIST
-# [MAT, 2,151/ 0.0, 0.0,L,0,NJS,0] CONT(l)
-# [MAT, 2,151/ AJ, 0.0,0,0,12*NLJ, NLJ/
-# DET1 , DWT1 , GRT1 , GIT1 , DEF1 , DWF1 ,
-# GRF1 , GIF1 , DEC1 , DWC1 , GRC1 , GIC1 ,
-# DET2 , DWT2 , GIC2 , --------------
-# DET3 ,---------------------------
-# --------------------------------
-# ------------------------, GICN LJ ] LIST
-    subsection = library.structure[128]['data']['resolved'][0]
+    """The section looks like this:
+[MAT, 2,151/ 0.0, 0.0, 0, 0, NR, NP/ Eint / AP(E)] TAB1
+[MAT, 2,151/ SPI, AP,0,0,NLS,0] CONT
+[MAT, 2,151/ AWRI, 0.0, LI,0, 6*NX, NX
+AT1 , AT2 , AT3 , AT4 , BT1 , BT2 ,
+AF1 , --------------------, BF2 ,
+AC1 , --------------------, BC2 ] LIST
+[MAT, 2,151/ 0.0, 0.0,L,0,NJS,0] CONT(l)
+[MAT, 2,151/ AJ, 0.0,0,0,12*NLJ, NLJ/
+DET1 , DWT1 , GRT1 , GIT1 , DEF1 , DWF1 ,
+GRF1 , GIF1 , DEC1 , DWC1 , GRC1 , GIC1 ,
+DET2 , DWT2 , GIC2 , --------------
+DET3 ,---------------------------
+--------------------------------
+------------------------, GICN LJ ] LIST
+"""
+    subsection = library.mat10020['data']['resolved'][0]
     # Test to see if the LIST records read in right
     exp_LIST = {'DET': -3.211014e+1, 'DWT': -2.011165e+3,'GRT': 4.178337e+5,
                 'GIT': 1.640997e+2, 'DEF': 1.122313e-5, 'DWF': 1.537114e-2,
@@ -483,13 +508,74 @@ def test_resolved_adleradler():
     for key in exp_bg:
         assert_array_equal(exp_bg[key],obs_bg[key])
 
-def test_resolved_rmatrix():
-    pass
+def test_resolved_r_matrix():
+    pp_str = StringIO.StringIO(
+        """1.685738+5 1.659888-5          1          7          0          0
+ 0.000000+0 0.000000+0          1          3          2          1
+ 0.000000+0 0.000000+0          2          0         24          4
+ 7.916271+6-3.532347-6 4.469905+7-2.134022+4-3.500000+0-3.500000+0
+ 5.307428-7          0          1          7          1         -1
+ 2.807643-8-4.478596+0 3.274758+3-2.760395+9 1.356440+3 3.447654+4
+ 4.790839-8          1         -1        800          1         -1""")
+    pp_obs = library.mat10020['data']['resolved'][-1][3]
+    pp_exp_a = array_from_ENDF(pp_str)
+    pp_exp = dict(zip(('MA','MB','ZA','ZB','IA','IB','Q','PNT','SHF','MT',
+                       'PA','PB'),
+                      pp_exp_a[3:7].reshape(2,12).transpose()))
+    pp_exp.update(dict(zip((0,0,'IFG','KRM','NJS','KRL'),
+                           pp_exp_a[1])))
+    del pp_exp[0]
+
+    ch_str = StringIO.StringIO(
+        """-4.000000+0          0 1.914541-3-4.683290+5         12          2
+ 1.981937+3 9.740279-7-2.450194+5-1.304844+4 1.856158-9-1.218463-9
+-4.097837+1-2.765873-9-0.913351+1 1.591290+5-2.379063+0 2.066455-6
+ 3.000000+0          0-2.924403-5-4.840218-1         12          2
+ 0.951092+5 7.932944-5-3.716218-8 4.007761-3 1.277498-6 2.041832+6
+-7.375896+8-4.822942+4 4.491725+9 3.018430+8 2.238307-5-3.591395+9
+""")
+    ch_exp_a = array_from_ENDF(ch_str)
+    ch_exp = {}
+    ch_exp[3.0] = dict(zip(('IPP','L','SCH','BND','APE','APT'),
+                         ch_exp_a[4:6].transpose()))
+    ch_exp[-4.0] = dict(zip(('IPP','L','SCH','BND','APE','APT'),
+                          ch_exp_a[1:3].transpose()))
+    ch_obs = library.mat10020['data']['resolved'][-1][2]
+
+    gam_4_str = StringIO.StringIO(
+        """ 2.949030-1 1.156625+7 7.255199-6          0          0          0
+ 4.453964+1 5.062864-5-1.110875-3          0          0          0
+ 2.208407-7 9.942677-6-3.134503-8          0          0          0
+""")
+    gam_4_exp = array_from_ENDF(gam_4_str).transpose()
+    gam_4_exp = {'ER': gam_4_exp[0],
+                 'GAM': gam_4_exp[1:3].transpose()}
+    ch_exp[-4.0].update(gam_4_exp)
+
+    gam_3_str = StringIO.StringIO(
+        """ 5.088175-6-2.282938+0-4.236786-6          0          0          0
+ 8.930267-9-3.115607+8-2.521300-4          0          0          0
+ 3.978418+5 4.821547-6 3.110373-3          0          0          0
+""")
+    gam_3_a = array_from_ENDF(gam_3_str)
+    gam_3_exp = gam_3_a.transpose()
+    gam_3_exp = {'ER': gam_3_exp[0],
+                 'GAM': gam_3_exp[1:3].transpose()}
+
+    ch_exp[3.0].update(gam_3_exp)
+
+    for key in pp_exp:
+        assert_array_equal(pp_obs[key], pp_exp[key])
+    for spin_group in ch_obs:
+        spin_group_obs = ch_obs[spin_group]
+        spin_group_exp = ch_exp[spin_group]
+        for key in spin_group_obs:
+            assert_array_equal(spin_group_obs[key], spin_group_exp[key])
 
 def test_xs():
     # Read in the data
-    library._read_xs(419, 600)
-    library._read_xs(419, 2)
+    library._read_xs(40192, 600)
+    library._read_xs(40192, 2)
 
     # Manually find where the data should be reading from and check if it is
     # consistent with what the program is doing.
@@ -502,7 +588,7 @@ def test_xs():
     exp_2_a = array_from_ENDF(exp_2_str)
     exp_2 = dict(zip(('Eint', 'sigma(E)'),
                      (exp_2_a[2:].flat[:14:2], exp_2_a[2:].flat[1:14:2])))
-    obs_2 = library.mat419['data']['xs'][0][1]
+    obs_2 = library.mat40192['data']['xs'][0][1]
 
     exp_600_str = StringIO.StringIO(
         """ 4.193742+3 6.287192+0          0          0          0          0
@@ -513,14 +599,14 @@ def test_xs():
     exp_600_a = array_from_ENDF(exp_600_str)
     exp_600 = dict(zip(('Eint', 'sigma(E)'),
                      (exp_600_a[2:].flat[::2], exp_600_a[2:].flat[1::2])))
-    obs_600 = library.mat419['data']['xs'][1][1]
+    obs_600 = library.mat40192['data']['xs'][1][1]
 
     for key in obs_2:
         assert_array_equal(obs_2[key], exp_2[key])
         assert_array_equal(obs_600[key], exp_600[key])
 
     # Heck, why not check the flags too?
-    obs_600_flags = library.mat419['data']['xs'][1][2]
+    obs_600_flags = library.mat40192['data']['xs'][1][2]
     exp_600_flags = dict(zip(('QM','QI',0,'LM','NR','NP'),
         exp_600_a[1]))#
     exp_600_flags.update({'ZA': 4.193742e+3, 'AWR': 6.287192})
