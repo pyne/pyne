@@ -1,11 +1,15 @@
 diff --git a/Makefile b/Makefile
-index 6a3f273..e008c5b 100755
+index 6a3f273..1b75496 100755
 --- a/Makefile
 +++ b/Makefile
 @@ -20 +20 @@ ifneq (,$(premake))
 -  CONFIG = $(menup) $(menuproc) $(menub) $(debug) $(menuf90) $(menucc) $(MPI)
 +  CONFIG = $(menup) $(menudag) $(menuproc) $(menub) $(debug) $(menuf90) $(menucc) $(MPI)
-@@ -94 +94 @@ clean:
+@@ -67,0 +68,3 @@ build:
++	@ echo $(DAGMC_DIR)
++	@ rm -f dagmc
++	@ ln -s $(DAGMC_DIR) dagmc
+@@ -94 +97 @@ clean:
 -ealclean:	clean
 +realclean:	clean
 diff --git a/config/Linux.gcf b/config/Linux.gcf
