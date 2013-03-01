@@ -7,9 +7,10 @@
 
 # Modify MOAB to point to the local MOAB installation
 # MOAB = ${HOME}/dagmc_bld/MOAB
-MOAB = /data/opt/dagmc/moab
+# MOAB = /data/opt/dagmc/moab
 #FLUDAG = ${HOME}/storage/DAGMC/FluDAG
-FLUDAG = /data/opt/julry_dag/DAGMC/FluDAG/
+#FLUDAG = /data/opt/julry_dag/DAGMC/FluDAG/
+include makefile.local
 FLUDAG_SOURCE = ${FLUDAG}/src
 
 # FLUPRO is an environment variable that should be set to the directory of the FLUKA installation
