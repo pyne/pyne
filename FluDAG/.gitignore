@@ -4,3 +4,9 @@ myfluka
 *.stl
 *~
 .timer.out
+ran*
+mainfludag
+*fort*
+*.err
+*.log
+*.out
