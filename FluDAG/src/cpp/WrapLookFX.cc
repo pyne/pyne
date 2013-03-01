@@ -18,6 +18,8 @@ void lkfxwr(double& pSx, double& pSy, double& pSz,
             double* pV, const int& oldReg, const int& oldLttc,
 	    int& newReg, int& flagErr, int& newLttc)
 {
-  std::cout << "======= LKFXWR =======" << std::endl;
+  std::cerr << "======= LKFXWR =======" << std::endl;
+
+  return;
 }
 

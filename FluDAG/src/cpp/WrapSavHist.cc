@@ -25,9 +25,13 @@
 
 int isvhwr(const int& fCheck, const int& intHist)
 {
-  std::cout << "============= ISVHWR ==============" << std::endl;    
-  std::cout << "fCheck=" << fCheck << std::endl;
+  std::cerr << "============= ISVHWR ==============" << std::endl;    
+  std::cerr << "fCheck=" << fCheck << std::endl;
   if(fCheck==-1) 
-    std::cout << "intHist=" << intHist  << std::endl;
+    {
+      std::cerr << "intHist=" << intHist  << std::endl;
+    }
+
+  return 1;
 }
 

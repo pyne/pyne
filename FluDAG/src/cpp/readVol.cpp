@@ -21,26 +21,6 @@ ErrorCode readVol(char *fileptr)
   ErrorCode code;
   double volume_measure;
   
-  // use iterator on Range vols to get EntityHandle vols
-/*
-  DagMC& dagmc = *DagMC::instance();
-  Interface& moab = *dagmc.moab_instance();
-
-  Tag dim_tag = dagmc.geom_tag();
-  Range vols;
-  const int three = 3;
-  const void* ptr = &three;
-  code = moab.get_entities_by_type_and_tag( 0, MBENTITYSET, &dim_tag, &ptr, 1, vols);
-  std::cout << __FILE__ << ", " << __func__ << ":" << __LINE__ << "____iterator_____" << std::endl;
-  std::cout << "\tnumber of volumes is " << vols.size() << std::endl;
-  Range::iterator iter = vols.begin();
-  
-  for (unsigned i = 0; i<vols.size(); ++i, ++iter)
-  {
-      code = dagmc.measure_volume(*iter, volume_measure);
-      std::cout << "\tvolume of entity " << i << " is " << volume_measure << std::endl;
-  }
-*/
 
  // Get all properties (will depend on the input file) and list them.
   std::vector<std::string> detected;

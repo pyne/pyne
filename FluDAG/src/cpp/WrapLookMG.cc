@@ -20,6 +20,7 @@ void lkmgwr(double& pSx, double& pSy, double& pSz,
             double* pV, const int& oldReg, const int& oldLttc,
 	    int& flagErr, int& newReg, int& newLttc)
 {
-    std::cout<<"============= LKMGWR =============="<<std::endl;
+    std::cerr<<"============= LKMGWR =============="<<std::endl;
+    return;
 }
 

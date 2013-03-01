@@ -15,10 +15,13 @@
 
 void conhwr(int& intHist, int* incrCount)
 {
-  std::cout << "============= CONHWR ==============" << std::endl;    
-  std::cout << "Ptr History = " << intHist << std::endl;
+  std::cerr << "============= CONHWR ==============" << std::endl;    
+  std::cerr << "Ptr History = " << intHist << std::endl;
+  incrCount++;
+  std::cerr << "Counter = " << incrCount << std::endl;
+  std::cerr << "============= Out of CONHWR ==============" << std::endl;    
   
-  std::cout << "============= Out of CONHWR ==============" << std::endl;    
+  return;
  }
 
 

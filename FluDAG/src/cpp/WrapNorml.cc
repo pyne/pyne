@@ -43,7 +43,8 @@ void nrmlwr(double& pSx, double& pSy, double& pSz,
   norml[0]=0.0;
   norml[1]=0.0;
   norml[2]=0.0;
-  std::cout << "Normal: " << norml[0] << ", " << norml[1] << ", " << norml[2]  << std::endl;
+  std::cerr << "Normal: " << norml[0] << ", " << norml[1] << ", " << norml[2]  << std::endl;
+  return;
 }
 
 

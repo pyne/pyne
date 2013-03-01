@@ -21,9 +21,9 @@
 void rgrpwr(const int& flukaReg, const int& ptrLttc, int& g4Reg,
             int* indMother, int* repMother, int& depthFluka)
 {
-  std::cout << "============= RGRPWR ==============" << std::endl;    
-  std::cout << "ptrLttc=" << ptrLttc << std::endl;
-  
+  std::cerr << "============= RGRPWR ==============" << std::endl;    
+  std::cerr << "ptrLttc=" << ptrLttc << std::endl;
+  return;
 }
 
 

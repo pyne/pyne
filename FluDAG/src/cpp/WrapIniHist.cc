@@ -14,7 +14,8 @@
 
 void inihwr(int& intHist)
 {
-  std::cout << "============= INIHWR ==============" << std::endl;    
-  std::cout << "Ptr History=" <<intHist<< std::endl;
+  std::cerr << "============= INIHWR ==============" << std::endl;    
+  std::cerr << "Ptr History=" <<intHist<< std::endl;
+  return;
 }
 

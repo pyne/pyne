@@ -20,7 +20,8 @@ void fldwr(const double& pX, const double& pY, const double& pZ,
             double& Bmag, int& reg, int& idiscflag)
 
 {
-  std::cout<<"================== MAGFLD ================="<<std::endl;
+  std::cerr<<"================== MAGFLD ================="<<std::endl;
+  return;
 }
 
 

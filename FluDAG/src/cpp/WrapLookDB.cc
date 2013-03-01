@@ -16,10 +16,12 @@ void lkdbwr(double& pSx, double& pSy, double& pSz,
 	    double* pV, const int& oldReg, const int& oldLttc,
 	    int& newReg, int& flagErr, int& newLttc)
 {
-  std::cout<<"============= LKDBWR =============="<< std::endl;
+  std::cerr<<"============= LKDBWR =============="<< std::endl;
   
   //return region number and dummy variables
   newReg=0;   
   newLttc=0;
   flagErr=-1; 
+
+  return;
 }

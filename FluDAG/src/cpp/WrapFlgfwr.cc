@@ -13,5 +13,6 @@
 
 void flgfwr ( int& flkflg )
 {
-  std::cout << "=======FLGFWR =======" << std::endl;
+  std::cerr << "=======FLGFWR =======" << std::endl;
+  return;
 }

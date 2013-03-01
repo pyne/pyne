@@ -18,7 +18,6 @@
 
 void g1rtwr(void)
 {
-    std::cout<<"============ G1RTWR ============="<<std::endl;
-
-//dummy wrapper
+    std::cerr<<"============ G1RTWR ============="<<std::endl;
+    return;
 }
