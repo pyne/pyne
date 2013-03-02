@@ -29,9 +29,7 @@ def test_expm():
     eA = linalg.expm(A)
     tayA = linalg.expm3(A,q=20)
     # Check the equivalence of _solve_decay_matrix
-    assert_equal(eA.all(),transA.all())
-    # Check convergence to high level Taylor Series solution
-    assert_almost_equal(tayA.all(),transA.all())
+    assert_true(np.array_equal(eA, transA))
 
 
 """Ensures the flux vector size check is completing"""
@@ -72,7 +70,7 @@ def test_convert_eaf():
     test4 = transmute._convert_eaf('AU196M2')
     assert_equal(nuc4, test4)
 
-"""Tests correct implementation of the _get_decay(nuc) function"""
+"""Tests correct implementation of the _get_decay function"""
 def test_get_decay():
     manual_dict = {}
     nuc = nucname.zzaaam('O16')
@@ -81,8 +79,21 @@ def test_get_decay():
         branch = data.branch_ratio(nuc,child)
         manual_dict[child] = branch
     transmute_dict = transmute._get_decay(nuc)
-    assert_equal(manual_dict,transmute_dict)
+    assert_equal(manual_dict, transmute_dict)
 
+"""Tests correct implementation of the _grow_matrix function"""
+def test_grow_matrix():
+    orig = np.array([[-0.5,0.,0.],
+                     [0.25,-0.3,0.],
+                     [0.,0.123,-1.2]])
+    prod = 0.1848
+    dest = 1.337
+    manual = np.array([[-0.5,0.,0.,0.],
+                       [0.25,-0.3,0.,0.],
+                       [0.,0.123,-1.2,0.],
+                       [0.,0.,0.1848,-1.337]])
+    method = transmute._grow_matrix(orig, prod, dest)
+    assert_true(np.array_equal(manual, method))
 
 #
 # Run as script

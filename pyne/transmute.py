@@ -195,6 +195,35 @@ def _get_destruction(nuc, phi):
     return d
 
 
+def _grow_matrix(A, prod, dest):
+    """Grows the given matrix by one row and one column, adding necessary
+    production and destruction rates.
+
+    Parameters
+    ----------
+    A : NumPy 2-dimensional array
+        The original matrix that must be grown.
+    prod : float
+        The production rate of the next nuclide in the chain.
+    dest : float
+        The destruction rate of the next nuclide in the chain.
+
+    Returns
+    -------
+    B : NumPy 2-dimensional array
+        The grown matrix
+    """
+    shape = A.shape
+    n = shape[0]
+    # Add row and column to current matrix
+    B = np.append(A, np.zeros((1,n)), 0)
+    B = np.append(B, np.zeros((n+1,1)), 1)
+    # Update new matrix with provided data
+    B[n,n-1] = prod
+    B[n,n] = -dest
+    return B
+
+
 def _traversal(nuc, A, phi, t, N_ini, out, tol):
     """Nuclide transmutation traversal method.
 
@@ -229,76 +258,44 @@ def _traversal(nuc, A, phi, t, N_ini, out, tol):
         nuclide. Keys are nuclide names in integer (zzaaam) form. Values are
         number densities for the coupled nuclide in float format.
     """
-    # Store current matrix size
-    shape = A.shape
-    n = shape[0]
-    # Find decay constant of current nuclide
+    # Lookup decay constant of current nuclide
     lam = data.decay_const(nuc)
-    # Cycle decay children
+    # Lookup decay products and reaction daughters
     decay_dict = _get_decay(nuc)
+    daugh_dict = _get_daughters(nuc)
+    # Initialize production rate dictionary
+    prod_dict = {}
+    # Cycle decay children
     for decay_child in decay_dict.keys():
-        # Lookup branch ratio
-        branch_rat = decay_dict[key]
-        # Find destruction rate of decay_child for appending to matrix
-        dest = _get_destruction(decay_child, phi)
-        # Add row and column to matrix
-        B = A
-        B = np.append(A, np.zeros((1,n)), 0)
-        B = np.append(B, np.zeros((n+1,1)), 1)
+        prod_dict[decay_child] = lam * decay_dict[decay_child]
+    # Cycle reaction daughters
+    for decay_daugh in daugh_dict.keys():
+        # Increment current production rate if already in dictionary
+        if decay_daugh in prod_dict.keys():
+            prod_dict[decay_daugh] += sum(phi * daugh_dict[decay_daugh])
+        else:
+            prod_dict[decay_daugh] = sum(phi * daugh_dict[decay_daugh])
+    # Cycle production dictionary
+    for child in prod_dict.keys():
         # Create initial density vector
-        N0 = np.zeros((n+1,1))
+        shape = B.shape
+        n = shape[0]
+        N0 = np.zeros((n,1))
         N0[0] = N_ini
-        # Determine production rate of decay_child
-        prod = lam * branch_rat
-        # Update new matrix B
-        B[n,n-1] = prod
-        B[n,n] = -dest
-        # Calculate density of decay_child
+        # Grow matrix
+        B = _grow_matrix(A, prod_dict[child], _get_destruction(child, phi))
+        # Compute matrix exponential and dot with density vector
         eB = _matrix_exp(B, t)
         N_final = np.dot(eB, N0)
         # Check against tolerance
         if N_final[-1] > tol:
             # Continue traversal
-            out = _traversal(decay_child, B, phi, t, N_ini, out, tol)
+            out = _traversal(child, B, phi, t, N_ini, out, tol)
         # On recursion exit or truncation, write data from this nuclide
-        if decay_child in out.keys():
-            # If already in output dictionary, increment instead
-            out[decay_child] = out[decay_child] + N_final[-1]
+        if child in out.keys():
+            out[child] += N_final[-1]
         else:
-            out[decay_child] = N_final[-1]
-       
-    # Cycle neutron reaction daughters
-    daugh_dict = _get_daughters(nuc)
-    for daugh in daugh_dict.keys():
-        # Lookup appropriate cross section for daugh
-        xs = daugh_dict[daugh]
-        # Find destruction rate of daugh
-        dest = _get_destruction(daugh, phi)
-        # Add row and column to matrix
-        B = A
-        B = np.append(A, np.zeros((1,n)), 0)
-        B = np.append(B, np.zeros((n+1,1)), 1)
-        # Create initial density vector
-        N0 = np.zeros((n+1,1))
-        N0[0] = N_ini
-        # Determine production rate of daugh
-        prod = sum(xs*phi)
-        # Update new matrix B
-        B[n,n-1] = prod
-        B[n,n] = dest
-        # Calculate density of daugh
-        eB = _matrix_exp(B, t)
-        N_final = np.dot(eB,N0)
-        # Check against tolerance
-        if N_final[-1] > tol:
-            # Continue traversal
-            out = _traversal(daugh, B, phi, t, N_ini, out, tol)
-        # On recursion exit or truncation, write data from this nuclide
-        if daugh in out.keys():
-            # If already in output dictionary, increment density
-            out[daugh] = out[daugh] + N_final[-1]
-        else:
-            out[daugh] = N_final[-1]
-
+            out[child] = N_final[-1]
+    # Return final output dictionary
     return out
 
