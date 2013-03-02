@@ -761,6 +761,7 @@ class Library(rx.RxLib):
             ('QM','QI',0,'LM','NR','NP'),
             ('Eint','sigma(E)'),
             xsdata[total_lines:])
+        int_flags.update(head_flags)
         isotope_dict = self.structure[mat_id]['data'][zzaaam_i]
         isotope_dict['xs'].append((mt, int_data, int_flags))
         isotope_dict['xs'].sort()
