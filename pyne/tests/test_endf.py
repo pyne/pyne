@@ -711,7 +711,7 @@ def test_xs():
 #     http://t2.lanl.gov/data/data/ENDFB-VII.1-neutron/U/235
 #     It is very big (51 MB), so it is not included."""
 #     u235 = Library('U235.txt')
-#     u235._read_mf2(9228)
+
 
 
 if __name__ == "__main__":

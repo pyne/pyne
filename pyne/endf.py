@@ -301,8 +301,10 @@ class Library(rx.RxLib):
         head = dict(zip(headkeys, lines[0]))
         if 0 in head:
             del head[0]
-
-        nr = int(lines[0][4])
+        try:
+            nr = int(lines[0][4])
+        except ValueError:
+            raise ValueError(lines[0])
         intdata = dict(zip(xykeys,
                            (np.array([lines[1:].flat[:nr*2:2],
                                       lines[1:].flat[1:nr*2:2]]))))
@@ -742,10 +744,9 @@ class Library(rx.RxLib):
         isotope_dict = self.structure[mat_id]['data'][zzaaam_i]
         isotope_dict['unresolved'].append(subsection_data)
 
-
         return total_lines
 
-    def _read_ap_only(self, subsection, range_flags, isotope_flags, mat_id):
+    def _read_ap_only(self, subsection, range_flags, isotope_flags, mat_id, zzaaam_i):
         return 1
 
     def _read_xs(self, mat_id, mt, zzaaam_i = None):
@@ -760,7 +761,6 @@ class Library(rx.RxLib):
             ('QM','QI',0,'LM','NR','NP'),
             ('Eint','sigma(E)'),
             xsdata[total_lines:])
-        int_flags.update(head_flags)
         isotope_dict = self.structure[mat_id]['data'][zzaaam_i]
         isotope_dict['xs'].append((mt, int_data, int_flags))
         isotope_dict['xs'].sort()
