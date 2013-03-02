@@ -96,7 +96,10 @@ def cython_version():
            "DEF CYTHON_VERSION_MAJOR = {major}\n"
            "DEF CYTHON_VERSION_MINOR = {minor}\n"
            "DEF CYTHON_VERSION_MICRO = {micro}")
-    cyver = CYTHON_VERSION.split('-')[0].split('.')
+    cyver = CYTHON_VERSION
+    for c in ('-', 'r', 'a', 'b'):
+        cyver = cyver.split(c)[0]
+    cyver = cyver.split('.')
     while len(cyver) < 3:
         cyver = cyver + [0]
     cyver = dict([(k, int(cv)) for k, cv in zip(['major', 'minor', 'micro'], cyver)])
