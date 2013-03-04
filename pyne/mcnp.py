@@ -768,25 +768,27 @@ def mat_from_mcnp(filename, mat_line, densities='None'):
     attrs = ['source', 'comments', 'name']
     line_index = 1
     attrs_line = linecache.getline(filename, mat_line - line_index)
+    # while reading non-empty comment lines
     while attrs_line.strip() not in set('cC') \
-    and attrs_line.split()[0] in ['c', 'C']:
+            and attrs_line.split()[0] in ['c', 'C']:
         if attrs_line.split()[0] in ['c', 'C'] \
-        and len(attrs_line.split()) > 1:
+                and len(attrs_line.split()) > 1:
             possible_attr = attrs_line.split()[1].split(':')[0].lower()
             if possible_attr in attrs:
                 if possible_attr.lower() == 'comments':
                     comments_string = \
                     str(''.join(attrs_line.split(':')[1:]).split('\n')[0])
                     comment_index = 1
-                    comment_line = linecache.getline(filename, mat_line\
-                                    - line_index + comment_index)
+                    comment_line = linecache.getline(filename, \
+                            mat_line - line_index + comment_index)
                     while comment_line.split()[0] in ['c', 'C']:
                         if comment_line.split()[1].split(':')[0].lower() in attrs:
                             break
-                        comments_string += ' '+' '.join(comment_line.split()[1:])
+                        comments_string += ' ' + ' '.join( \
+                                comment_line.split()[1:])
                         comment_index += 1
-                        comment_line = linecache.getline(filename, mat_line \
-                                                   - line_index + comment_index)
+                        comment_line = linecache.getline(filename, \
+                                mat_line - line_index + comment_index)
                     mat.attrs[possible_attr] = comments_string
                 else:
                     mat.attrs[possible_attr] = \
