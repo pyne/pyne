@@ -55,6 +55,8 @@ class Library(rx.RxLib):
         # The offset accounts for lines skipped in data entry.
         self.offset = 1
 
+        self.debug = []
+
         self.data = self.load()
         while self.more_files:
             self._read_headers()
@@ -67,7 +69,7 @@ class Library(rx.RxLib):
     def load(self):
         # warnings.filterwarnings("ignore", "Some errors were detected !")
         data = np.genfromtxt(self.fh,
-                             delimiter = 11,
+                             delimiter = (11,11,11,11,11,11),
                              usecols = (0, 1, 2, 3, 4, 5),
                              # invalid_raise = False,
                              skip_header = 1,
@@ -76,7 +78,11 @@ class Library(rx.RxLib):
                                            2: convert,
                                            3: convert,
                                            4: convert,
-                                           5: convert})
+                                           5: convert})#,
+                                           # 6: convert,
+                                           # 7: convert,
+                                           # 8: convert,
+                                           # 9: convert})
         return data
 
     def seek_matmfmt(self, mat_id, mf, mt):
@@ -102,7 +108,7 @@ class Library(rx.RxLib):
 
         # Adjust the offset every time we get to a new material.
         if zzaaam not in self.structure:
-            self.offset -= 1
+            # self.offset -= 1
         # We need to make a data structure modeled after GND.
             # self.structure.update(
             #     {zzaaam:{'styles':'',
@@ -141,8 +147,7 @@ class Library(rx.RxLib):
                     start = stop + 2
                     stop = start + mt_length
                 stop = start + mt_length
-                self.mat_dict[zzaaam]['mfs'][mf,mt] = (start+self.offset,
-                                                       stop+self.offset)
+                self.mat_dict[zzaaam]['mfs'][mf,mt] = (start,stop)
                 line = self.fh.readline()
             # parse comment
             elif re.match(' {66}', line):
@@ -301,14 +306,17 @@ class Library(rx.RxLib):
         head = dict(zip(headkeys, lines[0]))
         if 0 in head:
             del head[0]
-        try:
-            nr = int(lines[0][4])
-        except ValueError:
-            raise ValueError(lines[0])
+        nr, np_ = int(lines[0][4]), int(lines[0][5])
+        meta_len = (nr*2-1)/6 + 1
+        data_len = (np_*2-1)/6 + 1
+        intmeta = dict(zip(('intpoints','intschemes'),
+                           (lines[1:1+meta_len].flat[:nr*2:2],
+                            lines[1:1+meta_len].flat[1:nr*2:2])))
         intdata = dict(zip(xykeys,
-                           (np.array([lines[1:].flat[:nr*2:2],
-                                      lines[1:].flat[1:nr*2:2]]))))
-        total_lines = (nr*2-1)/6 + 2
+                           (lines[1+meta_len:1+meta_len+data_len].flat[:np_*2:2],
+                            lines[1+meta_len:1+meta_len+data_len].flat[1:np_*2:2])))
+        intdata.update(intmeta)
+        total_lines = 1 + meta_len + data_len
         return head, intdata, total_lines
 
     def _read_res(self, mat_id):
@@ -513,9 +521,11 @@ class Library(rx.RxLib):
                         subsection[total_lines:])[1:3]
                     total_lines += psr_size
                     ch_data['PSR'] = psr
+                    # here goes
                     psi, psi_size = self._get_tab1(
                         (0,0,0,0,'NR','NP'), ('Eint','PSI(E)'),
                         (subsection[total_lines:]))[1:3]
+                    self.debug.append(('PSI',subsection[total_lines:]))
                     total_lines += psi_size
                     ch_data['PSI'] = psi
                     total_lines += psi_size
@@ -2160,9 +2170,9 @@ def convert(string):
     try:
         if re.search('[^ 0-9+\-\.]', string):
             return float(string)
-        elif string[-2] in '+-':
+        elif 1 < len(string) and string[-2] in '+-':
             return float(string[:-2] + 'e' + string[-2:])
-        elif string[-3] in '+-':
+        elif 2 < len(string) and  string[-3] in '+-':
             return float(string[:-3] + 'e' + string[-3:])
         else:
             return float(string)
