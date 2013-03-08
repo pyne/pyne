@@ -61,17 +61,18 @@ cdef class _Material:
         cdef cpp_map[int, double] comp
         cdef jsoncpp.Value cattrs = jsoncpp.Value({} if attrs is None else attrs)
 
-        if isinstance(nucvec, dict):
+        if isinstance(nucvec, _Material):
+            # Material from Material
+            self.mat_pointer = (<_Material> nucvec).mat_pointer
+        elif isinstance(nucvec, dict):
             # Material from dict
             comp = dict_to_comp(nucvec)
             self.mat_pointer = new cpp_material.Material(
                     comp, mass, density, atoms_per_mol, deref(cattrs._inst))
-
         elif isinstance(nucvec, basestring):
             # Material from file
             self.mat_pointer = new cpp_material.Material(
                     <char *> nucvec, mass, density, atoms_per_mol, deref(cattrs._inst))
-
         elif (nucvec is None):
             if free_mat:
                 # Make empty mass stream
@@ -79,7 +80,6 @@ cdef class _Material:
                                         atoms_per_mol, deref(cattrs._inst))
             else:
                 self.mat_pointer = NULL
-
         else:
             # Bad Material
             raise TypeError("The mass stream nucvec must be a dict, str, "
