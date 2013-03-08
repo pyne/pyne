@@ -65,11 +65,11 @@ class Library(rx.RxLib):
         #     self.make_resonances()
 
     def load(self):
-        warnings.filterwarnings("ignore", "Some errors were detected !")
+        # warnings.filterwarnings("ignore", "Some errors were detected !")
         data = np.genfromtxt(self.fh,
                              delimiter = 11,
                              usecols = (0, 1, 2, 3, 4, 5),
-                             invalid_raise = False,
+                             # invalid_raise = False,
                              skip_header = 1,
                              converters = {0: convert,
                                            1: convert,

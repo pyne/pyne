@@ -32,15 +32,18 @@ str_library = StringIO.StringIO(
  augue semper porta.                                               128 1451   17
                                                                    128 1451   18
  ************************ C O N T E N T S ************************ 128 1451   19
-                                1        451         27          0 128 1451   20
-                                2        151         87          0 128 1451   21
-                                3          1          1          0 128 1451   22
-                                3          2          1          0 128 1451   23
-                                3          3          1          0 128 1451   24
-                                3         16          1          0 128 1451   25
-                                3        102          1          0 128 1451   26
-                                4          2          1          0 128 1451   27
+                                1        451         28          0 128 1451   20
+                                1        452          1          0 128 1451   21
+                                2        151         87          0 128 1451   22
+                                3          1          1          0 128 1451   23
+                                3          2          1          0 128 1451   24
+                                3          3          1          0 128 1451   25
+                                3         16          1          0 128 1451   26
+                                3        102          1          0 128 1451   27
+                                4          2          1          0 128 1451   28
  0.000000+0 0.000000+0          0          0          0          0 128 1  099999
+ 1.111111+1                                                        128 1452    1
+                                                                   128 1  099999
  0.000000+0 0.000000+0          0          0          0          0 128 0  0    0
  1.876876+3 1.776576+0          0          0          1          0 128 2151    1
  1.002000+3 1.000000+0          0          0          5          0 128 2151    2
@@ -706,12 +709,15 @@ def test_xs():
     assert_equal(obs_600_flags, exp_600_flags)
 
 
-# def test_U235():
-#     """This test file can be found here:
-#     http://t2.lanl.gov/data/data/ENDFB-VII.1-neutron/U/235
-#     It is very big (51 MB), so it is not included."""
-#     u235 = Library('U235.txt')
-
+def test_U235():
+    """This test file can be found here:
+    http://t2.lanl.gov/data/data/ENDFB-VII.1-neutron/U/235
+    It is very big (51 MB), so it is not included."""
+    u235 = Library('U235.txt')
+    print u235.mat_dict[922350]['mfs'][1,451]
+    print u235.mat_dict[922350]['mfs'][1,452]
+    print u235.data[933]
+    assert(False)
 
 
 if __name__ == "__main__":
