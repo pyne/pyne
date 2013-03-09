@@ -11,6 +11,7 @@ ctypes = {
     'double': 'double',
     'complex': 'extra_types.complex_t',
     'set[int]': 'set[int]',
+    'vector[double]': 'vector[double]',
     }
 
 cytypes = {
@@ -21,6 +22,7 @@ cytypes = {
     'double': 'float',
     'complex': 'object',
     'set[int]': '_SetInt',
+    'vector[double]': 'np.ndarray[double]',
     }
 
 pytypes = {
@@ -31,6 +33,7 @@ pytypes = {
     'double': ['float'],
     'complex': ['complex'],
     'set[int]': ['set', 'list', 'basestring', 'tuple'],
+    'vector[double]': ['set', 'list', 'basestring', 'tuple', 'np.ndarray'],
     }
 
 class_names = {
@@ -40,7 +43,8 @@ class_names = {
     'float': 'Float',
     'double': 'Double',
     'complex': 'Complex',
-    'set[int]': 'SetInt'
+    'set[int]': 'SetInt',
+    'vector[double]': 'VectorDouble',
     }
 
 func_names = {
@@ -50,7 +54,8 @@ func_names = {
     'float': 'flt',
     'double': 'dbl',
     'complex': 'complex',
-    'set[int]': 'set_int'
+    'set[int]': 'set_int',
+    'vector[double]': 'vector_dbl',
     }
 
 human_names = {
@@ -61,6 +66,7 @@ human_names = {
     'double': 'double',
     'complex': 'complex',
     'set[int]': 'set of integers',
+    'vector[double]': 'vector [ndarray] of doubles',
     }
 
 c2py_exprs = {
@@ -70,6 +76,7 @@ c2py_exprs = {
     'float': 'float({var})',
     'double': 'float({var})',
     'complex': 'complex(float({var}.re), float({var}.im))',
+    'vector[double]': 'c2py_vector_dbl({var})',
     }
 
 py2c_exprs = {
@@ -79,6 +86,7 @@ py2c_exprs = {
     'float': '<float> {var}',
     'double': '<double> {var}',
     'complex': 'py2c_complex({var})',
+    'vector[double]': 'py2c_vector_dbl({var})',
     }
 
 testvals = {
@@ -88,6 +96,7 @@ testvals = {
     'float': [1.0, 42.42, -65.5555, 18],
     'double': [1.0, 42.42, -65.5555, 18],
     'complex': [1.0, 42+42j, -65.55-1j, 0.18j],
+    'vector[double]': [],
     }
 
 #
@@ -564,12 +573,13 @@ IF CYTHON_VERSION_MAJOR == 0 and CYTHON_VERSION_MINOR >= 17:
     from libcpp.string cimport string as std_string
     from libcpp.utility cimport pair
     from libcpp.map cimport map as cpp_map
+    from libcpp.vector cimport vector as cpp_vector
 ELSE:
     from pyne._includes.libcpp.string cimport string as std_string
     from pyne._includes.libcpp.utility cimport pair
     from pyne._includes.libcpp.map cimport map as cpp_map
+    from pyne._includes.libcpp.vector cimport vector as cpp_vector
 cimport extra_types
-
 
 cdef extra_types.complex_t py2c_complex(object pyv):
     cdef extra_types.complex_t cv
@@ -579,6 +589,28 @@ cdef extra_types.complex_t py2c_complex(object pyv):
     cv.im = pyv.imag
     return cv
 
+cdef np.ndarray c2py_vector_dbl(cpp_vector[double] v):
+    cdef np.ndarray[double] vview
+    cdef np.npy_intp vview_shape
+    vview_shape[0] = <np.npy_intp> v.size()
+    vview = np.PyArray_SimpleNewFromData(1, vview_shape, np.NPY_FLOAT64, &v[0])
+    return vview
+
+cdef cpp_vector[double] c2py_vector_dbl(object v):
+    cdef int i
+    cdef int v_size = len(v)
+    cdef double * v_data
+    cdef cpp_vector[double] vec
+    if isinstance(v, np.ndarray) and (<np.ndarray> v).descr.type_num == np.NPY_FLOAT64:
+        v_data = <double *> np.PyArray_DATA(<np.ndarray> v)
+        vec = cpp_vector[double](<size_t> v_size)
+        for i in range(v_size):
+            vec[i] = v_data[i]
+    else:
+        vec = cpp_vector[double](<size_t> v_size)
+        for i in range(v_size):
+            vec[i] = <double> v[i]
+    return vec
 
 """
 def genpyx(template, header=None):
@@ -611,14 +643,21 @@ IF CYTHON_VERSION_MAJOR == 0 and CYTHON_VERSION_MINOR >= 17:
     from libcpp.string cimport string as std_string
     from libcpp.utility cimport pair
     from libcpp.map cimport map as cpp_map
+    from libcpp.vector cimport vector as cpp_vector
 ELSE:
     from pyne._includes.libcpp.string cimport string as std_string
     from pyne._includes.libcpp.utility cimport pair
     from pyne._includes.libcpp.map cimport map as cpp_map
+    from pyne._includes.libcpp.vector cimport vector as cpp_vector
 cimport extra_types
 
+cimport numpy as np
 
 cdef extra_types.complex_t py2c_complex(object)
+
+cdef np.ndarray c2py_vector_dbl(cpp_vector[double])
+
+cdef cpp_vector[double] c2py_vector_dbl(object)
 
 """
 def genpxd(template, header=None):
