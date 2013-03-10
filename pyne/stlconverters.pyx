@@ -16,18 +16,21 @@ import collections
 cimport numpy as np
 import numpy as np
 
+np.import_array()
+
 # Local imports
 include "include/cython_version.pxi"
 IF CYTHON_VERSION_MAJOR == 0 and CYTHON_VERSION_MINOR >= 17:
     from libcpp.string cimport string as std_string
     from libcpp.utility cimport pair
     from libcpp.map cimport map as cpp_map
+    from libcpp.vector cimport vector as cpp_vector
 ELSE:
     from pyne._includes.libcpp.string cimport string as std_string
     from pyne._includes.libcpp.utility cimport pair
     from pyne._includes.libcpp.map cimport map as cpp_map
+    from pyne._includes.libcpp.vector cimport vector as cpp_vector
 cimport extra_types
-
 
 cdef extra_types.complex_t py2c_complex(object pyv):
     cdef extra_types.complex_t cv
@@ -37,6 +40,30 @@ cdef extra_types.complex_t py2c_complex(object pyv):
     cv.im = pyv.imag
     return cv
 
+cdef np.ndarray c2py_vector_dbl(cpp_vector[double] * v):
+    cdef np.ndarray vview
+    cdef np.ndarray pyv
+    cdef np.npy_intp v_shape[1]
+    v_shape[0] = <np.npy_intp> v.size()
+    vview = np.PyArray_SimpleNewFromData(1, v_shape, np.NPY_FLOAT64, &v[0][0])
+    pyv = np.PyArray_Copy(vview)
+    return pyv
+
+cdef cpp_vector[double] py2c_vector_dbl(object v):
+    cdef int i
+    cdef int v_size = len(v)
+    cdef double * v_data
+    cdef cpp_vector[double] vec
+    if isinstance(v, np.ndarray) and (<np.ndarray> v).descr.type_num == np.NPY_FLOAT64:
+        v_data = <double *> np.PyArray_DATA(<np.ndarray> v)
+        vec = cpp_vector[double](<size_t> v_size)
+        for i in range(v_size):
+            vec[i] = v_data[i]
+    else:
+        vec = cpp_vector[double](<size_t> v_size)
+        for i in range(v_size):
+            vec[i] = <double> v[i]
+    return vec
 
 # integer sets
 cdef cpp_set[int] py_to_cpp_set_int(set pyset):
@@ -249,9 +276,9 @@ class SetInt(_SetInt, collections.Set):
 
     Parameters
     ----------
-    new_set : bool or dict-like
+    new_set : bool or set-like
         Boolean on whether to make a new set or not, or set-like object
-        with keys and values which are castable to the appropriate type.
+        with values which are castable to the appropriate type.
     free_set : bool
         Flag for whether the pointer to the C++ set should be deallocated
         when the wrapper is dereferenced.
@@ -360,9 +387,9 @@ class SetStr(_SetStr, collections.Set):
 
     Parameters
     ----------
-    new_set : bool or dict-like
+    new_set : bool or set-like
         Boolean on whether to make a new set or not, or set-like object
-        with keys and values which are castable to the appropriate type.
+        with values which are castable to the appropriate type.
     free_set : bool
         Flag for whether the pointer to the C++ set should be deallocated
         when the wrapper is dereferenced.
@@ -1586,6 +1613,129 @@ cdef class _MapIntComplex:
 
 class MapIntComplex(_MapIntComplex, collections.MutableMapping):
     """Wrapper class for C++ standard library maps of type <integer, complex>.
+    Provides dictionary like interface on the Python level.
+
+    Parameters
+    ----------
+    new_map : bool or dict-like
+        Boolean on whether to make a new map or not, or dict-like object
+        with keys and values which are castable to the appropriate type.
+    free_map : bool
+        Flag for whether the pointer to the C++ map should be deallocated
+        when the wrapper is dereferenced.
+    """
+
+    def __str__(self):
+        return self.__repr__()
+
+    def __repr__(self):
+        return "{" + ", ".join(["{0}: {1}".format(repr(key), repr(value)) for key, value in self.items()]) + "}"
+
+
+
+# Map(Int, VectorDouble)
+cdef class MapIterIntVectorDouble(object):
+    cdef void init(self, cpp_map[int, cpp_vector[double]] * map_ptr):
+        cdef cpp_map[int, cpp_vector[double]].iterator * itn = <cpp_map[int, cpp_vector[double]].iterator *> malloc(sizeof(map_ptr.begin()))
+        itn[0] = map_ptr.begin()
+        self.iter_now = itn
+
+        cdef cpp_map[int, cpp_vector[double]].iterator * ite = <cpp_map[int, cpp_vector[double]].iterator *> malloc(sizeof(map_ptr.end()))
+        ite[0] = map_ptr.end()
+        self.iter_end = ite
+
+    def __dealloc__(self):
+        free(self.iter_now)
+        free(self.iter_end)
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        cdef cpp_map[int, cpp_vector[double]].iterator inow = deref(self.iter_now)
+        cdef cpp_map[int, cpp_vector[double]].iterator iend = deref(self.iter_end)
+
+        if inow != iend:
+            pyval = int(deref(inow).first)
+        else:
+            raise StopIteration
+
+        inc(deref(self.iter_now))
+        return pyval
+
+cdef class _MapIntVectorDouble:
+    def __cinit__(self, new_map=True, bint free_map=True):
+        cdef pair[int, cpp_vector[double]] item
+
+        # Decide how to init map, if at all
+        if isinstance(new_map, _MapIntVectorDouble):
+            self.map_ptr = (<_MapIntVectorDouble> new_map).map_ptr
+        elif hasattr(new_map, 'items'):
+            self.map_ptr = new cpp_map[int, cpp_vector[double]]()
+            for key, value in new_map.items():
+                item = pair[int, cpp_vector[double]](key, py2c_vector_dbl(value))
+                self.map_ptr.insert(item)
+        elif hasattr(new_map, '__len__'):
+            self.map_ptr = new cpp_map[int, cpp_vector[double]]()
+            for key, value in new_map:
+                item = pair[int, cpp_vector[double]](key, py2c_vector_dbl(value))
+                self.map_ptr.insert(item)
+        elif bool(new_map):
+            self.map_ptr = new cpp_map[int, cpp_vector[double]]()
+
+        # Store free_map
+        self._free_map = free_map
+
+    def __dealloc__(self):
+        if self._free_map:
+            del self.map_ptr
+
+    def __contains__(self, key):
+        cdef int k
+        if not isinstance(key, int):
+            return False
+        k = key
+
+        if 0 < self.map_ptr.count(k):
+            return True
+        else:
+            return False
+
+    def __len__(self):
+        return self.map_ptr.size()
+
+    def __iter__(self):
+        cdef MapIterIntVectorDouble mi = MapIterIntVectorDouble()
+        mi.init(self.map_ptr)
+        return mi
+
+    def __getitem__(self, key):
+        cdef int k
+        cdef cpp_vector[double] v
+
+        if not isinstance(key, int):
+            raise TypeError("Only integer keys are valid.")
+        k = key
+
+        if 0 < self.map_ptr.count(k):
+            v = deref(self.map_ptr)[k]
+            return c2py_vector_dbl(&v)
+        else:
+            raise KeyError
+
+    def __setitem__(self, key, value):
+        cdef pair[int, cpp_vector[double]] item = pair[int, cpp_vector[double]](key, py2c_vector_dbl(value))
+        self.map_ptr.insert(item)
+
+    def __delitem__(self, key):
+        cdef int k
+        if key in self:
+            k = key
+            self.map_ptr.erase(k)
+
+
+class MapIntVectorDouble(_MapIntVectorDouble, collections.MutableMapping):
+    """Wrapper class for C++ standard library maps of type <integer, vector [ndarray] of doubles>.
     Provides dictionary like interface on the Python level.
 
     Parameters
