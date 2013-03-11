@@ -104,14 +104,14 @@ class Library(rx.RxLib):
         self.fh.seek(self.chars_til_now+81)
         line = self.fh.readline()
         mat_id = int(line[66:70])
-        zzaaam = int(convert(line[:11])*10)
+        nuc = int(convert(line[:11])*10)
 
-        if zzaaam not in self.structure:
+        if nuc not in self.structure:
             self.structure.update(
-                {zzaaam:{'styles':'', 'docs':[], 'particles':[], 'data':{},
+                {nuc:{'styles':'', 'docs':[], 'particles':[], 'data':{},
                          'matflags':{}}})
 
-            self.mat_dict.update({zzaaam:{'end_line':[],
+            self.mat_dict.update({nuc:{'end_line':[],
                                           'mfs':{}}})
 
         # parse header (all lines with 1451)
@@ -133,17 +133,17 @@ class Library(rx.RxLib):
                     start = stop + 2
                     stop = start + mt_length
                 stop = start + mt_length
-                self.mat_dict[zzaaam]['mfs'][mf,mt] = (start,stop)
+                self.mat_dict[nuc]['mfs'][mf,mt] = (start,stop)
                 line = self.fh.readline()
             # parse comment
             elif re.match(' {66}', line):
-                self.structure[zzaaam]['docs'].append(line[0:66])
+                self.structure[nuc]['docs'].append(line[0:66])
                 line = self.fh.readline()
             elif re.match('[\d+. ]{80}\n$', line):
                 line = self.fh.readline()
                 continue
             else:
-                self.structure[zzaaam]['docs'].append(line[0:66])
+                self.structure[nuc]['docs'].append(line[0:66])
                 line = self.fh.readline()
         # Find where the end of the material is and then jump to it.
         self.chars_til_now = (stop + 4)*81
@@ -153,8 +153,8 @@ class Library(rx.RxLib):
 
         # update materials list
         if mat_id != '':
-            self.mat_dict[zzaaam]['end_line'] = self.chars_til_now/81
-            setattr(self, "mat{0}".format(zzaaam), self.structure[zzaaam])
+            self.mat_dict[nuc]['end_line'] = self.chars_til_now/81
+            setattr(self, "mat{0}".format(nuc), self.structure[nuc])
 
         # Read flags from MT 1.
         flagvals = []
@@ -169,9 +169,9 @@ class Library(rx.RxLib):
                     'LREL', None, 'NSUB', 'NVER', 'TEMP', None, 'LDRV',
                     None, 'NWD', 'NXC']
 
-        self.structure[zzaaam].update({'matflags':
+        self.structure[nuc].update({'matflags':
                                        dict(zip(flagkeys, flagvals))})
-        del self.structure[zzaaam]['matflags'][None]
+        del self.structure[nuc]['matflags'][None]
 
     def _get_cont(self, keys, line):
         """Read one line of the array, treating it as a CONT record.
@@ -312,7 +312,7 @@ class Library(rx.RxLib):
         Parameters:
         -----------
         mat_id: int
-            Material zzaaam.
+            Material ZZAAAM.
         """
         lrp = self.structure[mat_id]['matflags']['LRP']
 
@@ -348,7 +348,7 @@ class Library(rx.RxLib):
             A flag denoting the type of data in the isotope. Exact meaning of
             this flag can be found in ENDF Manual pp.50-51.
         mat_id: int
-            Material zzaaam.
+            Material ZZAAAM.
 
         Returns:
         --------
@@ -357,9 +357,9 @@ class Library(rx.RxLib):
         """
         isotope_flags = self._get_cont(['ZAI','ABN',0,'LFW','NER',0],
                                        isotope_data[0])
-        zzaaam_i = int(isotope_flags['ZAI']*10)
+        nuc_i = int(isotope_flags['ZAI']*10)
         self.structure[mat_id]['data'].update(
-            {zzaaam_i:{'resolved':[],
+            {nuc_i:{'resolved':[],
                        'unresolved':[],
                        'datadocs':[],
                        'xs':{},
@@ -371,11 +371,11 @@ class Library(rx.RxLib):
             total_lines += self._read_subsection(isotope_data[total_lines:],
                                                  isotope_flags,
                                                  mat_id,
-                                                 zzaaam_i)
+                                                 nuc_i)
 
         return total_lines
 
-    def _read_subsection(self, subsection, isotope_flags, mat_id, zzaaam_i):
+    def _read_subsection(self, subsection, isotope_flags, mat_id, nuc_i):
         """Read resonance data for a specific energy range subsection.
 
         Parameters:
@@ -388,9 +388,9 @@ class Library(rx.RxLib):
         isotope_flags: dict
             Dictionary of flags inherited from the isotope.
         mat_id: int
-            Material zzaaam.
-        zzaaam_i: int
-            Isotope_zzaaam.
+            Material ZZAAAM.
+        nuc_i: int
+            Isotope ZZAAAM.
 
         Returns:
         --------
@@ -407,24 +407,24 @@ class Library(rx.RxLib):
                                               range_flags,
                                               isotope_flags,
                                               mat_id,
-                                              zzaaam_i)
+                                              nuc_i)
         if lru == 1:
             total_lines += self._read_resolved(subsection[1:],
                                                range_flags,
                                                isotope_flags,
                                                mat_id,
-                                               zzaaam_i)
+                                               nuc_i)
         if lru == 2:
             total_lines += self._read_unresolved(subsection[1:],
                                                  range_flags,
                                                  isotope_flags,
                                                  mat_id,
-                                                 zzaaam_i)
+                                                 nuc_i)
 
         return total_lines
 
     def _read_resolved(self, subsection, range_flags, isotope_flags, mat_id,
-                       zzaaam_i):
+                       nuc_i):
         """ Read the subsection for a resolved energy range.
 
         Parameters:
@@ -437,9 +437,9 @@ class Library(rx.RxLib):
         isotope_flags: dict
             Dictionary of flags inherited from the isotope.
         mat_id: int
-            zzaaam of the material.
-        zzaaam_i: int
-            zzaaam of the isotope.
+            ZZAAAM of the material.
+        nuc_i: int
+            ZZAAAM of the isotope.
 
         Returns:
         --------
@@ -630,13 +630,13 @@ class Library(rx.RxLib):
         el, eh = range_flags['EL'], range_flags['EH']
         subsection_data = (el,eh,subsection_dict,range_flags)
 
-        isotope_dict = self.structure[mat_id]['data'][zzaaam_i]
+        isotope_dict = self.structure[mat_id]['data'][nuc_i]
         isotope_dict['resolved'].append(subsection_data)
 
         return total_lines
 
     def _read_unresolved(self, subsection, range_flags, isotope_flags, mat_id,
-                         zzaaam_i):
+                         nuc_i):
 
         """ Read unresolved resonances of an energy subsection.
 
@@ -649,9 +649,9 @@ class Library(rx.RxLib):
         isotope_flags: dict
             Contiains flags for isotope.
         mat_id: int
-            Material zzaaam.
-        zzaaam_i: int
-            Isotope zzaaam.
+            Material ZZAAAM.
+        nuc_i: int
+            Isotope ZZAAAM.
 
         Returns:
         --------
@@ -736,16 +736,16 @@ class Library(rx.RxLib):
         el, eh = range_flags['EL'], range_flags['EH']
         subsection_data = (el,eh,subsection_dict,range_flags)
 
-        isotope_dict = self.structure[mat_id]['data'][zzaaam_i]
+        isotope_dict = self.structure[mat_id]['data'][nuc_i]
         isotope_dict['unresolved'].append(subsection_data)
 
         return total_lines
 
     def _read_ap_only(self, subsection, range_flags, isotope_flags, mat_id,
-                      zzaaam_i):
+                      nuc_i):
         return 1
 
-    def _read_xs(self, mat_id, mt, zzaaam_i = None):
+    def _read_xs(self, mat_id, mt, nuc_i = None):
         """Reads in cross-section data. Read resonances with Library._read_res
         first.
 
@@ -755,11 +755,11 @@ class Library(rx.RxLib):
             ZZAAAM of material.
         mt: int
             Reaction number to find cross-section data of.
-        zzaaam_i: int
+        nuc_i: int
             Isotope to find; if None, defaults to mat_id.
         """
-        if zzaaam_i == None:
-            zzaaam_i = mat_id
+        if nuc_i == None:
+            nuc_i = mat_id
         xsdata = self.read_mfmt(mat_id, 3, mt).reshape(-1,6)
         total_lines = 0
         head_flags = self._get_head(('ZA','AWR',0,0,0,0),
@@ -770,17 +770,38 @@ class Library(rx.RxLib):
             ('Eint','sigma(E)'),
             xsdata[total_lines:])
         int_flags.update(head_flags)
-        isotope_dict = self.structure[mat_id]['data'][zzaaam_i]
+        isotope_dict = self.structure[mat_id]['data'][nuc_i]
         isotope_dict['xs'].update({mt: (int_data, int_flags)})
         total_lines += int_size
 
+    def get_xs(self, nuc, mt, nuc_i=None):
+        """Grabs xs data.
 
-    def read_mfmt(self, zzaaam, mf, mt):
+        Parameters:
+        -----------
+        nuc: int
+        mt: int
+        nuc_i: int
+
+        Returns:
+        --------
+        tuple
+            Returns a tuple with xs data in tuple[0] and flags in tuple[1].
+        """
+        if not nuc_i:
+            nuc_i = nuc
+        try:
+            return self.structure[nuc]['data'][nuc_i]['xs'][mt]
+        except KeyError:
+            self._read_xs(nuc, mt, nuc_i)
+            return self.structure[nuc]['data'][nuc_i]['xs'][mt]
+
+    def read_mfmt(self, nuc, mf, mt):
         """Grabs the data from one MT number.
 
         Parameters:
         -----------
-        zzaaam: int
+        nuc: int
             ZZAAAM form of material to read from.
         mf: int
             ENDF file number (MF)
@@ -792,13 +813,13 @@ class Library(rx.RxLib):
         data: NumPy array
             Contains the reaction data in an Nx6 array.
         """
-        if zzaaam in self.structure:
-            start, stop = self.mat_dict[zzaaam]['mfs'][mf,mt]
+        if nuc in self.structure:
+            start, stop = self.mat_dict[nuc]['mfs'][mf,mt]
             start = (start - 1) * 6
             stop = (stop-1)*6
             return self.data.flat[start:stop]
         else:
-            print "Material %d does not exist." % zzaaam
+            print "Material %d does not exist." % nuc
             return False
 
 
