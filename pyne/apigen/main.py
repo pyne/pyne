@@ -36,6 +36,8 @@ def main():
                     ('map', 'int', 'int'),
                     ('map', 'int', 'double'),
                     ('map', 'int', 'complex'),
+                    ('map', 'int', 'vector[double]'),
+                    ('map', 'str', 'vector[double]'),
                     ]
         stlwrap.genfiles(template, 
                          fname='pyne/stlconverters', 
