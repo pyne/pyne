@@ -52,10 +52,6 @@ class Library(rx.RxLib):
         self.more_files = True
         # This counts the calculated position in the file.
         self.chars_til_now = 0
-        # The offset accounts for lines skipped in data entry.
-        self.offset = 1
-
-        self.debug = []
 
         self.data = self.load()
         while self.more_files:
@@ -63,29 +59,33 @@ class Library(rx.RxLib):
         # Close the file before we have a chance to break anything.
         if opened_here:
             self.fh.close()
-        # if resonances:
-        #     self.make_resonances()
 
     def load(self):
-        # warnings.filterwarnings("ignore", "Some errors were detected !")
+        "Reads the ENDF file into a NumPy array."
         data = np.genfromtxt(self.fh,
                              delimiter = (11,11,11,11,11,11),
                              usecols = (0, 1, 2, 3, 4, 5),
-                             # invalid_raise = False,
                              skip_header = 1,
                              converters = {0: convert,
                                            1: convert,
                                            2: convert,
                                            3: convert,
                                            4: convert,
-                                           5: convert})#,
-                                           # 6: convert,
-                                           # 7: convert,
-                                           # 8: convert,
-                                           # 9: convert})
+                                           5: convert})
         return data
 
     def seek_matmfmt(self, mat_id, mf, mt):
+        """Finds the raw ENDF data for a certain material ID, file number, and
+        reaction number.
+
+        Parameters:
+        -----------
+        mat_id: int
+            The ENDF material ID in question.
+        mf: int
+            The ENDF file number to seek to.
+        mt: int
+            The ENDF reaction number to seek to."""
         self.fh.seek(0)
         searchString = '{0:4}{1:2}{2:3}'.format(mat_id, mf, mt)
         while True:
@@ -106,21 +106,7 @@ class Library(rx.RxLib):
         mat_id = int(line[66:70])
         zzaaam = int(convert(line[:11])*10)
 
-        # Adjust the offset every time we get to a new material.
         if zzaaam not in self.structure:
-            # self.offset -= 1
-        # We need to make a data structure modeled after GND.
-            # self.structure.update(
-            #     {zzaaam:{'styles':'',
-            #              'docs':[],
-            #              'particles':[],
-            #              'data':{'resolved':[],
-            #                      'unresolved':[],
-            #                      'datadocs':[],
-            #                      'xs':[],
-            #                      'output':{'channel1':[],
-            #                                'channel2':[]}},
-            #              'matflags':{}}})
             self.structure.update(
                 {zzaaam:{'styles':'', 'docs':[], 'particles':[], 'data':{},
                          'matflags':{}}})
@@ -132,7 +118,7 @@ class Library(rx.RxLib):
         comments = ''
         mf = 1
         stop = self.chars_til_now/81
-        while re.search('1451 +\d{1,3}', line):
+        while re.search('1451 *\d{1,5}$', line):
             # parse contents section
             if re.match(' +\d{1,2} +\d{1,3} +\d{1,10} +', line):
                 # SEND and FEND records are not counted in the contents,
@@ -256,7 +242,6 @@ class Library(rx.RxLib):
             del head[0]
 
         npl = int(lines[0][4])
-
         headlines = (len(headkeys)-1)/6 + 1
         arraylines = (npl-1)/6 + 1
 
@@ -274,7 +259,6 @@ class Library(rx.RxLib):
             del items[0]
 
         total_lines = 1+arraylines
-
         return head, items, total_lines
 
     def _get_tab1(self, headkeys, xykeys,lines):
@@ -309,13 +293,15 @@ class Library(rx.RxLib):
         nr, np_ = int(lines[0][4]), int(lines[0][5])
         meta_len = (nr*2-1)/6 + 1
         data_len = (np_*2-1)/6 + 1
+
         intmeta = dict(zip(('intpoints','intschemes'),
                            (lines[1:1+meta_len].flat[:nr*2:2],
                             lines[1:1+meta_len].flat[1:nr*2:2])))
         intdata = dict(zip(xykeys,
-                           (lines[1+meta_len:1+meta_len+data_len].flat[:np_*2:2],
-                            lines[1+meta_len:1+meta_len+data_len].flat[1:np_*2:2])))
+            (lines[1+meta_len:1+meta_len+data_len].flat[:np_*2:2],
+             lines[1+meta_len:1+meta_len+data_len].flat[1:np_*2:2])))
         intdata.update(intmeta)
+
         total_lines = 1 + meta_len + data_len
         return head, intdata, total_lines
 
@@ -376,7 +362,7 @@ class Library(rx.RxLib):
             {zzaaam_i:{'resolved':[],
                        'unresolved':[],
                        'datadocs':[],
-                       'xs':[],
+                       'xs':{},
                        'output':{'channel1':[],
                                  'channel2':[]},
                        'isotope_flags': isotope_flags}})
@@ -525,7 +511,6 @@ class Library(rx.RxLib):
                     psi, psi_size = self._get_tab1(
                         (0,0,0,0,'NR','NP'), ('Eint','PSI(E)'),
                         (subsection[total_lines:]))[1:3]
-                    self.debug.append(('PSI',subsection[total_lines:]))
                     total_lines += psi_size
                     ch_data['PSI'] = psi
                     total_lines += psi_size
@@ -773,8 +758,7 @@ class Library(rx.RxLib):
             xsdata[total_lines:])
         int_flags.update(head_flags)
         isotope_dict = self.structure[mat_id]['data'][zzaaam_i]
-        isotope_dict['xs'].append((mt, int_data, int_flags))
-        isotope_dict['xs'].sort()
+        isotope_dict['xs'].update({mt: (int_data, int_flags)})
         total_lines += int_size
 
 
@@ -2162,35 +2146,28 @@ class RMatrixLimited(Resonance):
     def __init__(self):
         pass
 
-def convert(string):
+def convert(s):
     """
     This function converts a number listed on an ENDF tape into a float or int
     depending on whether an exponent is present.
     """
-    try:
-        if re.search('[^ 0-9+\-\.]', string):
-            return float(string)
-        elif 1 < len(string) and string[-2] in '+-':
-            return float(string[:-2] + 'e' + string[-2:])
-        elif 2 < len(string) and  string[-3] in '+-':
-            return float(string[:-3] + 'e' + string[-3:])
-        else:
-            return float(string)
-    except ValueError:
-        return float(string)
+    m = re.search(r'(-?\d\.\d+)([+\-]\d+)', s)
+    if m:
+        return float(m.group(1)+'e'+ m.group(2))
+    else:
+        return float(s)
+    # try:
+    #     # if re.search(r'[^ \d+\-\.]', s):
+    #     #     return float(s)
+    #     if 1 < len(s) and s[-2] in '+-':
+    #         return float(s[:-2] + 'e' + s[-2:])
+    #     elif 2 < len(s) and  s[-3] in '+-':
+    #         return float(s[:-3] + 'e' + s[-3:])
+    #     else:
+    #         return float(s)
+    # except ValueError:
+    #     return float(s)
 
-def numpy_to_ENDF(num):
-    """
-    This function converts a number into ENDF format.
-    """
-    # if int(num) == num:
-        # result = '           '
-        # num = int(num)
-        # result = result[0:-len(str(num))] + (str(num))
-        # return result
-    # if type(num) is float:
-    result = '% 9.6e' % num
-    return result[:-4] + result[-3:-2] + result[-1]
 
 MTname = {1: "(n,total) Neutron total",
           2: "(z,z0) Elastic scattering",

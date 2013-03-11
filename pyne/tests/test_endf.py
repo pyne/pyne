@@ -369,44 +369,6 @@ def array_from_ENDF(fh):
                          converters={0: conv, 1: conv, 2: conv,
                                      3: conv, 4: conv, 5: conv})
 
-# def _get_tab1(headkeys, xykeys,lines):
-#     head = dict(zip(headkeys, lines[0]))
-#     if 0 in head:
-#         del head[0]
-#     nr, np_ = int(lines[0][4]), int(lines[0][5])
-#     meta_len = (nr*2-1)/6 + 1
-#     data_len = (np_*2-1)/6 + 1
-#     intmeta = dict(zip(('intpoints','intschemes'),
-#                        (lines[1:1+meta_len].flat[:nr*2:2],
-#                         lines[1:1+meta_len].flat[1:nr*2:2])))
-#     intdata = dict(zip(xykeys,
-#                        (lines[1+meta_len:1+meta_len+data_len].flat[:np_*2:2],
-#                         lines[1+meta_len:1+meta_len+data_len].flat[1:np_*2:2])))
-#     intdata.update(intmeta)
-#         # intdata = dict(zip(xykey,
-#     total_lines = 1 + meta_len + data_len
-#     return head, intdata, total_lines
-
-# def test_tab1():
-#     test_array = array_from_ENDF(StringIO.StringIO(
-#         """ 4.004000+3 6.287192+0          0          0          0          0
-#  3.863437-5-7.373532-7          0 8.675483-1          6         27
-#           2          6          8          5          9          4
-#          11          3         13          2         27          1
-#  3.466435+9-4.071020-5-1.327513+2-4.380357-8-1.945657+6 4.860245+3
-#  2.996919+4 1.566880+8 3.852136+6 1.795499+9 7.957804-9 2.355285+0
-# -2.548492-5 1.407193-4-1.740179+9 1.188455+8 3.960784+9-4.360968-6
-#  2.932958-2-2.204113-1 6.345382+4-4.462245-2 4.439669-2-1.072753-4
-#  3.363572+8 3.905778+9-2.345998+6 4.424309-7 1.664749+2-8.409107-8
-#  1.402644-8-3.924514+6-2.083729+1-3.933751-6 6.874812+7 2.533323+3
-#  3.629253+8-3.332270+5-3.405330+3 2.177075-7 3.802944+1 1.070481-1
-#  3.910696-2-4.361393+4 4.703875+6-2.637394+3 3.567077+7-2.700338+2
-# -3.285596-2-3.522920-6 4.022546-1 4.339912+3-3.724238+2 2.712721+0
-# """))
-#     print _get_tab1(('Whatever','QI',0,0,0,0), ('Eint', 'sigma(E)'), test_array[1:])
-#     assert(False)
-
-
 def test_get():
     obs = library.read_mfmt(40000, 4, 2)
 
@@ -447,10 +409,7 @@ def test_unresolved_resonances_b():
     del exp_1[0]
 
     for key in exp_1:
-        try:
-            assert_array_equal(obs_1[key], exp_1[key])
-        except TypeError:
-            raise TypeError(library.debug)
+        assert_array_equal(obs_1[key], exp_1[key])
 
     # For the spin=3.5, L=4, J=5 section in the second isotope
     obs_2 = obs[1][2][3.5,4,5]
@@ -467,7 +426,7 @@ def test_unresolved_resonances_b():
     for key in exp_2:
         assert_array_equal(obs_2[key], exp_2[key])
 
-    # for the ES
+    # Check the energy values.
     obs_ES = obs[1][2]['ES']
     exp_ES_a = array_from_ENDF(StringIO.StringIO(
         """-2.723837-2-8.755303-2 2.245337-2-9.034520+2 2.252098+5 2.666587+2
@@ -612,9 +571,16 @@ def test_resolved_r_matrix_kbk_kps():
  0.000000+0 0.000000+0 0.000000+0 0.000000+0 0.000000+0 0.000000+0
  0.000000+0 0.000000+0          0          0          1          3
           3          2                                            
+ 4.016335+2 2.076736-3 4.668090-5 9.776415+2-3.940740+2-2.296483+8
  0.000000+0 0.000000+0          0          0          3         10
           3          1          6          2         10          3
+-4.803282+6-1.114539-5 9.465304+2-1.436769-9 7.889727+2 4.824983+9
+ 4.020763+6 2.308443-6-4.188441-2 1.778263+8-3.408683+7 2.845463+7
+ 3.371147+1 2.054714+3-2.746606-3-9.635977-6-1.387257-2 7.042637+0
+ 6.917628+9-2.912896-7                                            
 """))
+
+
     ch0_obs = obs_3['ch0']
 
     # lbk = 3: [MAT,2,151/ ED, EU, 0, 0, LBK, 1/ R0, SO, GA, 0.0, 0.0, 0.0]LIST
@@ -632,12 +598,15 @@ def test_resolved_r_matrix_kbk_kps():
     #                      0.0,0.0,0,0, NR, NP/points/PSI(E)]TAB1
 
     ch1_exp = {'PSI':{'intpoints': [3.,6.,10.],
-                      'intschemes': [1.,2.,3.]},
+                      'intschemes': [1.,2.,3.],
+                      'Eint': exp_3[13:17].flat[:-4:2],
+                      'PSI(E)': exp_3[13:17].flat[1:-4:2]},
                'PSR':{'intpoints': 3.,
-                      'intschemes': 2.},
+                      'intschemes': 2.,
+                      'Eint': exp_3[10].flat[::2],
+                      'PSR(E)': exp_3[10].flat[1::2]},
                'LBK': 0.,
                'LPS': 1.}
-    print library.debug
     for key in ch1_exp:
         if isinstance(ch1_exp[key], dict):
             for intkey in ch1_exp[key]:
@@ -762,7 +731,7 @@ def test_xs():
     exp_2_a = array_from_ENDF(exp_2_str)
     exp_2 = dict(zip(('intpoints', 'intschemes'),
                      (exp_2_a[2:].flat[:14:2], exp_2_a[2:].flat[1:14:2])))
-    obs_2 = library.mat40000['data'][40192]['xs'][0][1]
+    obs_2 = library.mat40000['data'][40192]['xs'][2][0]
 
     exp_600_a = array_from_ENDF(StringIO.StringIO(
         """ 4.193742+3 6.287192+0          0          0          0          0
@@ -772,14 +741,14 @@ def test_xs():
 
     exp_600 = dict(zip(('intpoints', 'intschemes'),
                      (exp_600_a[2:].flat[::2], exp_600_a[2:].flat[1::2])))
-    obs_600 = library.mat40000['data'][40040]['xs'][0][1]
+    obs_600 = library.mat40000['data'][40040]['xs'][600][0]
 
     for key in exp_2:
         assert_array_equal(obs_2[key], exp_2[key])
         assert_array_equal(obs_600[key], exp_600[key])
 
     # Heck, why not check the flags too?
-    obs_600_flags = library.mat40000['data'][40040]['xs'][0][2]
+    obs_600_flags = library.mat40000['data'][40040]['xs'][600][1]
     exp_600_flags = dict(zip(('QM','QI',0,'LM','NR','NP'),
         exp_600_a[1]))#
     exp_600_flags.update({'ZA': 4.004e+3, 'AWR': 6.287192})
@@ -787,15 +756,27 @@ def test_xs():
     assert_equal(obs_600_flags, exp_600_flags)
 
 
-def test_U235():
-    """This test file can be found here:
-    http://t2.lanl.gov/data/data/ENDFB-VII.1-neutron/U/235
-    It is very big (51 MB), so it is not included."""
-    # u235 = Library('U235.txt')
-    # u235._read_res(922350)
-    # u235._read_xs(922350, 16)
-    # print u235.mat922350['data'][922350]['xs']
-    assert(False)
+# def test_U235():
+#     """This test file can be found here:
+#     http://t2.lanl.gov/data/data/ENDFB-VII.1-neutron/U/235
+#     It is very big (51 MB), so it is not included."""
+#     u235 = Library('U235.txt')
+#     u235._read_res(922350)
+#     u235._read_xs(922350, 37)
+#     exp_a = array_from_ENDF(StringIO.StringIO
+#          (""" 9.223500+4 2.330248+2          0          0          0          0
+# -1.788560+7-1.788560+7          0          0          1          6
+#           6          2                                            
+#  1.796240+7 5.05980-10 1.800000+7 3.810030-7 1.850000+7 8.441785-5
+#  1.900000+7 2.387410-4 1.950000+7 1.348763-3 2.000000+7 4.785594-3
+# """))
+#     obs =  u235.mat922350['data'][922350]['xs'][37][0]
+#     exp = {'intpoints': 6, 'intschemes': 2,
+#            'Eint': exp_a[3:5].flat[::2],
+#            'sigma(E)': exp_a[3:5].flat[1::2]}
+
+#     for key in obs:
+#         assert_array_equal(obs[key], exp[key])
 
 
 if __name__ == "__main__":
