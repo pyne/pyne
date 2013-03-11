@@ -676,7 +676,7 @@ class Library(rx.RxLib):
                                               subsection[total_lines]))
             total_lines += 1
 
-            for i in range(int(range_flags['NLS'])):
+            for num_L_sections in range(int(range_flags['NLS'])):
                 L_flags, items, lines = self._get_list(
                     ('AWRI',0,'L',0,'6*NJS','NJS'),
                     ('D','AJ','AMUN','GN0','GG',0),
@@ -741,10 +741,23 @@ class Library(rx.RxLib):
 
         return total_lines
 
-    def _read_ap_only(self, subsection, range_flags, isotope_flags, mat_id, zzaaam_i):
+    def _read_ap_only(self, subsection, range_flags, isotope_flags, mat_id,
+                      zzaaam_i):
         return 1
 
     def _read_xs(self, mat_id, mt, zzaaam_i = None):
+        """Reads in cross-section data. Read resonances with Library._read_res
+        first.
+
+        Parameters:
+        -----------
+        mat_id: int
+            ZZAAAM of material.
+        mt: int
+            Reaction number to find cross-section data of.
+        zzaaam_i: int
+            Isotope to find; if None, defaults to mat_id.
+        """
         if zzaaam_i == None:
             zzaaam_i = mat_id
         xsdata = self.read_mfmt(mat_id, 3, mt).reshape(-1,6)
@@ -763,16 +776,21 @@ class Library(rx.RxLib):
 
 
     def read_mfmt(self, zzaaam, mf, mt):
-        """Grabs the raw data from one MT number.
+        """Grabs the data from one MT number.
 
-        Parameters
-        ----------
+        Parameters:
+        -----------
         zzaaam: int
             ZZAAAM form of material to read from.
         mf: int
             ENDF file number (MF)
         mt: int
             ENDF reaction number (MT)
+
+        Returns:
+        --------
+        data: NumPy array
+            Contains the reaction data in an Nx6 array.
         """
         if zzaaam in self.structure:
             start, stop = self.mat_dict[zzaaam]['mfs'][mf,mt]
