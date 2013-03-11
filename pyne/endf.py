@@ -72,6 +72,7 @@ class Library(rx.RxLib):
                                            3: convert,
                                            4: convert,
                                            5: convert})
+        self.fh.seek(0)
         return data
 
     def seek_matmfmt(self, mat_id, mf, mt):
@@ -99,9 +100,8 @@ class Library(rx.RxLib):
                 break
 
     def _read_headers(self):
-
         # Skip the first line and get the material ID.
-        self.fh.seek(self.chars_til_now+81)
+        headline = self.fh.readline()
         line = self.fh.readline()
         mat_id = int(line[66:70])
         nuc = int(convert(line[:11])*10)
@@ -148,8 +148,8 @@ class Library(rx.RxLib):
         # Find where the end of the material is and then jump to it.
         self.chars_til_now = (stop + 4)*81
         self.fh.seek(self.chars_til_now)
-        if (self.fh.readline() == '' or self.fh.readline()[68:70] == '-1'):
-            self.more_files = False
+        nextline = self.fh.readline()
+        self.more_files = (nextline != '' and nextline[68:70] != "-1")
 
         # update materials list
         if mat_id != '':
