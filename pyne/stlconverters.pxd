@@ -243,3 +243,16 @@ cdef class _MapIntVectorDouble:
 
 
 
+# MapStrVectorDouble
+cdef class MapIterStrVectorDouble(object):
+    cdef cpp_map[std_string, cpp_vector[double]].iterator * iter_now
+    cdef cpp_map[std_string, cpp_vector[double]].iterator * iter_end
+    cdef void init(MapIterStrVectorDouble, cpp_map[std_string, cpp_vector[double]] *)
+
+cdef class _MapStrVectorDouble:
+    cdef cpp_map[std_string, cpp_vector[double]] * map_ptr
+    cdef public bint _free_map
+
+
+
+

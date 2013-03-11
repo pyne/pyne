@@ -301,3 +301,25 @@ def test_map_int_vector_dbl():
 
 
 
+# MapStrVectorDouble
+def test_map_str_vector_dbl():
+    m = conv.MapStrVectorDouble()
+    m['Aha'] = [0, 1, 2, 3, 4, 5]
+    m['Take'] = [1, 2]
+    assert_array_almost_equal(len(m), 2)
+    assert_array_almost_equal(m['Take'], [1, 2])
+
+    m = conv.MapStrVectorDouble({'Me': (1,), 'On': [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]})
+    assert_array_almost_equal(len(m), 2)
+    assert_array_almost_equal(m['Me'], (1,))
+
+    n = conv.MapStrVectorDouble(m, False)
+    assert_array_almost_equal(len(n), 2)
+    assert_array_almost_equal(n['Me'], (1,))
+
+    # points to the same underlying map
+    n['Take'] = [1, 2]
+    assert_array_almost_equal(m['Take'], [1, 2])
+
+
+
