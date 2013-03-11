@@ -11,6 +11,7 @@ ctypes = {
     'double': 'double',
     'complex': 'extra_types.complex_t',
     'set[int]': 'set[int]',
+    'vector[double]': 'cpp_vector[double]',
     }
 
 cytypes = {
@@ -21,6 +22,7 @@ cytypes = {
     'double': 'float',
     'complex': 'object',
     'set[int]': '_SetInt',
+    'vector[double]': 'np.ndarray[double]',
     }
 
 pytypes = {
@@ -31,6 +33,7 @@ pytypes = {
     'double': ['float'],
     'complex': ['complex'],
     'set[int]': ['set', 'list', 'basestring', 'tuple'],
+    'vector[double]': ['list', 'tuple', 'np.ndarray'],
     }
 
 class_names = {
@@ -40,7 +43,8 @@ class_names = {
     'float': 'Float',
     'double': 'Double',
     'complex': 'Complex',
-    'set[int]': 'SetInt'
+    'set[int]': 'SetInt',
+    'vector[double]': 'VectorDouble',
     }
 
 func_names = {
@@ -50,7 +54,8 @@ func_names = {
     'float': 'flt',
     'double': 'dbl',
     'complex': 'complex',
-    'set[int]': 'set_int'
+    'set[int]': 'set_int',
+    'vector[double]': 'vector_dbl',
     }
 
 human_names = {
@@ -61,6 +66,7 @@ human_names = {
     'double': 'double',
     'complex': 'complex',
     'set[int]': 'set of integers',
+    'vector[double]': 'vector [ndarray] of doubles',
     }
 
 c2py_exprs = {
@@ -70,6 +76,7 @@ c2py_exprs = {
     'float': 'float({var})',
     'double': 'float({var})',
     'complex': 'complex(float({var}.re), float({var}.im))',
+    'vector[double]': 'c2py_vector_dbl(&{var})',
     }
 
 py2c_exprs = {
@@ -79,6 +86,7 @@ py2c_exprs = {
     'float': '<float> {var}',
     'double': '<double> {var}',
     'complex': 'py2c_complex({var})',
+    'vector[double]': 'py2c_vector_dbl({var})',
     }
 
 testvals = {
@@ -88,6 +96,7 @@ testvals = {
     'float': [1.0, 42.42, -65.5555, 18],
     'double': [1.0, 42.42, -65.5555, 18],
     'complex': [1.0, 42+42j, -65.55-1j, 0.18j],
+    'vector[double]': [range(10), (1,), [1, 2], range(6)],
     }
 
 #
@@ -411,27 +420,29 @@ def test_map_{tfncname}_{ufncname}():
     m = conv.Map{tclsname}{uclsname}()
     m[{0}] = {4}
     m[{1}] = {5}
-    assert_equal(len(m), 2)
-    assert_equal(m[{1}], {5})
+    assert{array}_equal(len(m), 2)
+    assert{array}_equal(m[{1}], {5})
 
     m = conv.Map{tclsname}{uclsname}({{{2}: {6}, {3}: {7}}})
-    assert_equal(len(m), 2)
-    assert_equal(m[{2}], {6})
+    assert{array}_equal(len(m), 2)
+    assert{array}_equal(m[{2}], {6})
 
     n = conv.Map{tclsname}{uclsname}(m, False)
-    assert_equal(len(n), 2)
-    assert_equal(n[{2}], {6})
+    assert{array}_equal(len(n), 2)
+    assert{array}_equal(n[{2}], {6})
 
     # points to the same underlying map
     n[{1}] = {5}
-    assert_equal(m[{1}], {5})
+    assert{array}_equal(m[{1}], {5})
 
 """
 def gentest_map(t, u):
-    """Returns the test snippet for a set of type t."""
+    """Returns the test snippet for a map of type t."""
+    a = '_array_almost' if u.startswith('vector') else ''
     return _testmap.format(*[repr(i) for i in testvals[t] + testvals[u][::-1]], 
                            tclsname=class_names[t], uclsname=class_names[u],
-                           tfncname=func_names[t], ufncname=func_names[u])
+                           tfncname=func_names[t], ufncname=func_names[u], 
+                           array=a)
 
 
 #
@@ -558,18 +569,21 @@ import collections
 cimport numpy as np
 import numpy as np
 
+np.import_array()
+
 # Local imports
 include "include/cython_version.pxi"
 IF CYTHON_VERSION_MAJOR == 0 and CYTHON_VERSION_MINOR >= 17:
     from libcpp.string cimport string as std_string
     from libcpp.utility cimport pair
     from libcpp.map cimport map as cpp_map
+    from libcpp.vector cimport vector as cpp_vector
 ELSE:
     from pyne._includes.libcpp.string cimport string as std_string
     from pyne._includes.libcpp.utility cimport pair
     from pyne._includes.libcpp.map cimport map as cpp_map
+    from pyne._includes.libcpp.vector cimport vector as cpp_vector
 cimport extra_types
-
 
 cdef extra_types.complex_t py2c_complex(object pyv):
     cdef extra_types.complex_t cv
@@ -579,6 +593,30 @@ cdef extra_types.complex_t py2c_complex(object pyv):
     cv.im = pyv.imag
     return cv
 
+cdef np.ndarray c2py_vector_dbl(cpp_vector[double] * v):
+    cdef np.ndarray vview
+    cdef np.ndarray pyv
+    cdef np.npy_intp v_shape[1]
+    v_shape[0] = <np.npy_intp> v.size()
+    vview = np.PyArray_SimpleNewFromData(1, v_shape, np.NPY_FLOAT64, &v[0][0])
+    pyv = np.PyArray_Copy(vview)
+    return pyv
+
+cdef cpp_vector[double] py2c_vector_dbl(object v):
+    cdef int i
+    cdef int v_size = len(v)
+    cdef double * v_data
+    cdef cpp_vector[double] vec
+    if isinstance(v, np.ndarray) and (<np.ndarray> v).descr.type_num == np.NPY_FLOAT64:
+        v_data = <double *> np.PyArray_DATA(<np.ndarray> v)
+        vec = cpp_vector[double](<size_t> v_size)
+        for i in range(v_size):
+            vec[i] = v_data[i]
+    else:
+        vec = cpp_vector[double](<size_t> v_size)
+        for i in range(v_size):
+            vec[i] = <double> v[i]
+    return vec
 
 """
 def genpyx(template, header=None):
@@ -611,14 +649,21 @@ IF CYTHON_VERSION_MAJOR == 0 and CYTHON_VERSION_MINOR >= 17:
     from libcpp.string cimport string as std_string
     from libcpp.utility cimport pair
     from libcpp.map cimport map as cpp_map
+    from libcpp.vector cimport vector as cpp_vector
 ELSE:
     from pyne._includes.libcpp.string cimport string as std_string
     from pyne._includes.libcpp.utility cimport pair
     from pyne._includes.libcpp.map cimport map as cpp_map
+    from pyne._includes.libcpp.vector cimport vector as cpp_vector
 cimport extra_types
 
+cimport numpy as np
 
 cdef extra_types.complex_t py2c_complex(object)
+
+cdef np.ndarray c2py_vector_dbl(cpp_vector[double] *)
+
+cdef cpp_vector[double] py2c_vector_dbl(object)
 
 """
 def genpxd(template, header=None):
@@ -642,6 +687,8 @@ import nose
 
 from nose.tools import assert_equal, assert_not_equal, assert_raises, raises, \\
     assert_almost_equal, assert_true, assert_false, assert_in
+
+from numpy.testing import assert_array_equal, assert_array_almost_equal
 
 import os
 import numpy  as np

@@ -18,14 +18,21 @@ IF CYTHON_VERSION_MAJOR == 0 and CYTHON_VERSION_MINOR >= 17:
     from libcpp.string cimport string as std_string
     from libcpp.utility cimport pair
     from libcpp.map cimport map as cpp_map
+    from libcpp.vector cimport vector as cpp_vector
 ELSE:
     from pyne._includes.libcpp.string cimport string as std_string
     from pyne._includes.libcpp.utility cimport pair
     from pyne._includes.libcpp.map cimport map as cpp_map
+    from pyne._includes.libcpp.vector cimport vector as cpp_vector
 cimport extra_types
 
+cimport numpy as np
 
 cdef extra_types.complex_t py2c_complex(object)
+
+cdef np.ndarray c2py_vector_dbl(cpp_vector[double] *)
+
+cdef cpp_vector[double] py2c_vector_dbl(object)
 
 # integer sets
 cdef cpp_set[int] py_to_cpp_set_int(set)
@@ -218,6 +225,32 @@ cdef class MapIterIntComplex(object):
 
 cdef class _MapIntComplex:
     cdef cpp_map[int, extra_types.complex_t] * map_ptr
+    cdef public bint _free_map
+
+
+
+
+# MapIntVectorDouble
+cdef class MapIterIntVectorDouble(object):
+    cdef cpp_map[int, cpp_vector[double]].iterator * iter_now
+    cdef cpp_map[int, cpp_vector[double]].iterator * iter_end
+    cdef void init(MapIterIntVectorDouble, cpp_map[int, cpp_vector[double]] *)
+
+cdef class _MapIntVectorDouble:
+    cdef cpp_map[int, cpp_vector[double]] * map_ptr
+    cdef public bint _free_map
+
+
+
+
+# MapStrVectorDouble
+cdef class MapIterStrVectorDouble(object):
+    cdef cpp_map[std_string, cpp_vector[double]].iterator * iter_now
+    cdef cpp_map[std_string, cpp_vector[double]].iterator * iter_end
+    cdef void init(MapIterStrVectorDouble, cpp_map[std_string, cpp_vector[double]] *)
+
+cdef class _MapStrVectorDouble:
+    cdef cpp_map[std_string, cpp_vector[double]] * map_ptr
     cdef public bint _free_map
 
 
