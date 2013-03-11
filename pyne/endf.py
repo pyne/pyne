@@ -101,6 +101,7 @@ class Library(rx.RxLib):
 
     def _read_headers(self):
         # Skip the first line and get the material ID.
+        self.fh.seek(self.chars_til_now)
         headline = self.fh.readline()
         line = self.fh.readline()
         mat_id = int(line[66:70])
