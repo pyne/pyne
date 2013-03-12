@@ -51,7 +51,7 @@ str_library = StringIO.StringIO(
  0.000000+0 0.000000+0          0          0          4         10 128 2151    4
           2          3          5          2          7          1 128 2151    5
          10          6                                             128 2151    6
- 0.736435+8-2.862931+9-1.654883-4 5.067101+5 1.848039+3-1.523885+0 128 2151    7
+ 7.364350+7-2.862931+9-1.654883-4 5.067101+5 1.848039+3-1.523885+0 128 2151    7
 -4.444773-3 1.292684+4 7.128604-3-4.362816+7 9.971208+5 6.697571-7 128 2151    8
 -6.877209-5-8.102489+8 2.740343+8 1.809683+1-2.561444-7 1.803708+3 128 2151    9
 -4.434634-2-4.496024+2                                             128 2151   10
@@ -356,7 +356,6 @@ convallis tristique sem.                                           419 1451   14
 
 
 library = Library(str_library)
-
 library._read_res(10020)
 library._read_res(10031)
 library._read_res(40000)
@@ -377,7 +376,7 @@ def test_get():
 
     badkey = library.read_mfmt(111, 1, 1)
     assert_array_equal(exp, obs)
-    assert_equal(badkey, False)
+    assert_equal(badkey, None)
 
 
 def test_unresolved_resonances_a():
@@ -780,4 +779,4 @@ def test_xs():
 
 
 if __name__ == "__main__":
-    nose.main()
+    nose.runmodule()
