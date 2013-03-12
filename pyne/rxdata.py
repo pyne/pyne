@@ -10,23 +10,20 @@ class RxLib(object):
     """
     def __init__(self, data):
         self.data = data
-        
+
     def write(self, filename, file_type_out):
         pass
 
 class DoubleSpinDict(collections.MutableMapping):
-    """DoubleSpinDict is a dictionary that takes in half-spin numbers and represents
-    them as integers. This avoids floating point problems causing key errors in the 
-    dictionary.
-    
-    Parameters
-    ----------
-    spin_dict: a dictionary where the keys are (spi, L, j) tuples
-        No need to pre-double spin to get an integer.
+    """Sanitizes input, avoiding errors arising from half-integer values of spin.
+
+    Parameters:
+    -----------
+    spin_dict: a dictionary where the keys are (spi, [L], [j]) tuples.
     """
     def __init__(self, spin_dict):
         self.dict = spin_dict
-        
+
     def __len__(self):
         return len(self.dict)
 
@@ -46,5 +43,12 @@ class DoubleSpinDict(collections.MutableMapping):
         del self.dict[self.double_spin(key)]
 
     def double_spin(self, key):
-        return (int(round(2.0*key[0])), key[1], key[2])
-
+        try:
+            if len(key) == 1:
+                return int(round(2.0*key[0]))
+            if len(key) == 2:
+                return (int(round(2.0*key[0])), key[1])
+            if len(key) == 3:
+                return (int(round(2.0*key[0])), key[1], key[2])
+        except TypeError:
+            return key
