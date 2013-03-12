@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+W#!/usr/bin/env python
 
 """Module for parsing and manipulating data from ENDF evaluations. Currently, it
 only can read several MTs from File 1, but with time it will be expanded to
@@ -2175,40 +2175,17 @@ class RMatrixLimited(Resonance):
     def __init__(self):
         pass
 
-<<<<<<< HEAD
-_convert_num_r = re.compile(r'(-?\d\.\d+)([+\-]\d+)')
-
-=======
 _convert_r = re.compile(r'(-?\d\.\d+)([+\-]\d+)')
->>>>>>> 1c48f5444b2a7a0860c3eae01193a73a37e18d74
 def convert(s):
     """
     This function converts a number listed on an ENDF tape into a float or int
     depending on whether an exponent is present.
     """
-<<<<<<< HEAD
-    m = _convert_num_r.search(s)
-=======
     m = _convert_r.search(s)
->>>>>>> 1c48f5444b2a7a0860c3eae01193a73a37e18d74
     if m is None:
         return float(s)
     else:
         return float(m.group(1)+'e'+ m.group(2))
-<<<<<<< HEAD
-    # try:
-    #     # if re.search(r'[^ \d+\-\.]', s):
-    #     #     return float(s)
-    #     if 1 < len(s) and s[-2] in '+-':
-    #         return float(s[:-2] + 'e' + s[-2:])
-    #     elif 2 < len(s) and  s[-3] in '+-':
-    #         return float(s[:-3] + 'e' + s[-3:])
-    #     else:
-    #         return float(s)
-    # except ValueError:
-    #     return float(s)
-=======
->>>>>>> 1c48f5444b2a7a0860c3eae01193a73a37e18d74
 
 
 MTname = {1: "(n,total) Neutron total",
