@@ -780,4 +780,4 @@ def test_xs():
 
 
 if __name__ == "__main__":
-    nose.main()
+    nose.runmodule()

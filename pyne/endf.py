@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 
-
 """Module for parsing and manipulating data from ENDF evaluations. Currently, it
 only can read several MTs from File 1, but with time it will be expanded to
 include the entire ENDF format.
@@ -32,6 +31,10 @@ libraries = {0: "ENDF/B", 1: "ENDF/A", 2: "JEFF", 3: "EFF",
              4: "ENDF/B High Energy", 5: "CENDL", 6: "JENDL",
              31: "INDL/V", 32: "INDL/A", 33: "FENDL", 34: "IRDF",
              35: "BROND", 36: "INGDB-90", 37: "FENDL/A", 41: "BROND"}
+
+
+SPACE66_R = re.compile(' {66}')
+
 
 
 class Library(rx.RxLib):
@@ -137,7 +140,7 @@ class Library(rx.RxLib):
                 self.mat_dict[nuc]['mfs'][mf,mt] = (start,stop)
                 line = self.fh.readline()
             # parse comment
-            elif re.match(' {66}', line):
+            elif SPACE66_R.match(line):
                 self.structure[nuc]['docs'].append(line[0:66])
                 line = self.fh.readline()
             elif re.match('[\d+. ]{80}\n$', line):
@@ -453,6 +456,7 @@ class Library(rx.RxLib):
             flags.update(self._get_cont(keys, data[total_lines]))
             return flags, total_lines+1
 
+        @profile
         def nls_loop(headkeys, itemkeys, data, total_lines, range_flags,
                      subsection_dict):
             nls = int(range_flags['NLS'])
@@ -2186,16 +2190,18 @@ class RMatrixLimited(Resonance):
     def __init__(self):
         pass
 
+_convert_num_r = re.compile(r'(-?\d\.\d+)([+\-]\d+)')
+
 def convert(s):
     """
     This function converts a number listed on an ENDF tape into a float or int
     depending on whether an exponent is present.
     """
-    m = re.search(r'(-?\d\.\d+)([+\-]\d+)', s)
-    if m:
-        return float(m.group(1)+'e'+ m.group(2))
-    else:
+    m = _convert_num_r.search(s)
+    if m is None:
         return float(s)
+    else:
+        return float(m.group(1)+'e'+ m.group(2))
     # try:
     #     # if re.search(r'[^ \d+\-\.]', s):
     #     #     return float(s)
