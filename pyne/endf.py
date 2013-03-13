@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 
-
 """Module for parsing and manipulating data from ENDF evaluations. Currently, it
 only can read several MTs from File 1, but with time it will be expanded to
 include the entire ENDF format.
@@ -37,6 +36,10 @@ FILE1_R = re.compile(r'1451 *\d{1,5}$')
 CONTENTS_R = re.compile(' +\d{1,2} +\d{1,3} +\d{1,10} +')
 SPACE66_R = re.compile(' {66}')
 NUMERICAL_DATA_R = re.compile('[\d\-+. ]{80}\n$')
+
+SPACE66_R = re.compile(' {66}')
+
+
 
 class Library(rx.RxLib):
     """
