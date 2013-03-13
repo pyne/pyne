@@ -398,6 +398,29 @@ class Library(rx.RxLib):
         flags.update(self._get_cont(keys, data[total_lines]))
         return flags, total_lines+1
 
+    def nls_njs_loop(self, L_keys, j_keys, itemkeys, data, total_lines,
+                     range_flags, subsection_dict):
+        nls = int(range_flags['NLS'])
+        for nls_iter in range(nls):
+            if j_keys is None:
+                L_flags, items, lines = self._get_list(
+                    L_keys, itemkeys, data[total_lines:])
+                total_lines += lines
+                spi, L = range_flags['SPI'], L_flags['L']
+                subsection_dict[spi, L] = items
+            else:
+                L_flags = self._get_cont(L_keys, data[total_lines])
+                total_lines += 1
+                njs = int(L_flags['NJS'])
+                for njs_iter in range(njs):
+                    j_flags, items, lines = self._get_list(
+                        j_keys, itemkeys, data[total_lines:])
+                    total_lines += lines
+                    items.update(j_flags)
+                    spi, L, aj = range_flags['SPI'], L_flags['L'], j_flags['AJ']
+                    subsection_dict[(spi, L, aj)] = items
+        return total_lines
+
     def _read_resolved(self, subsection, range_flags, isotope_flags, mat_id,
                        nuc_i):
         """ Read the subsection for a resolved energy range.
@@ -421,7 +444,7 @@ class Library(rx.RxLib):
         total_lines: int
             The number of lines taken up by the subsection.
         """
-
+        @profile
         def read_kbks(nch, subsection, aj_data, total_lines):
             for ch in range(nch):
                 lbk = int(subsection[total_lines][4])
@@ -465,7 +488,7 @@ class Library(rx.RxLib):
                         subsection[total_lines:])[1:3]
                     total_lines += psr_size
                     ch_data['PSR'] = psr
-                    # here goes
+
                     psi, psi_size = self._get_tab1(
                         (0,0,0,0,'NR','NP'), ('Eint','PSI(E)'),
                         (subsection[total_lines:]))[1:3]
@@ -496,24 +519,18 @@ class Library(rx.RxLib):
         range_flags, total_lines = self.cont_and_update(
                 range_flags, headers[lrf], subsection, total_lines)
 
-        lrf_fns = [None, self.nls_njs_loop, self.nls_njs_loop, self.nls_njs_loop]
         lrf_L_keys = [None,
                       ('AWRI','QX','L','LRX','6*NRS','NRS'),
                       ('AWRI','QX','L','LRX','6*NRS','NRS'),
-                      ('AWRI','APL','L',0,'6*NRS','NRS')]
-        lrf_J_keys = [None, None, None, None]
+                      ('AWRI','APL','L',0,'6*NRS','NRS'),
+                      (0,0,'L',0,'NJS',0)]
+        lrf_J_keys = [None, None, None, None, ('AJ',0,0,0,'12*NLJ','NLJ')]
         lrf_itemkeys = [None,
                         ('ER','AJ','GT','GN','GG','GF'),
                         ('ER','AJ','GT','GN','GG','GF'),
-                        ('ER','AJ','GN','GG','GFA','GFB')]
-        if lrf < 4:
-            total_lines = lrf_fns[lrf](lrf_L_keys[lrf],
-                                       lrf_J_keys[lrf],
-                                       lrf_itemkeys[lrf],
-                                       subsection,
-                                       total_lines,
-                                       range_flags,
-                                       subsection_dict)
+                        ('ER','AJ','GN','GG','GFA','GFB'),
+                        ('DET','DWT','GRT','GIT','DEF','DWF','GRF','GIF','DEC',
+                         'DWC','GRC','GIC')]
 
         if lrf == 4:
             # Adler-Adler
@@ -522,23 +539,16 @@ class Library(rx.RxLib):
                 ('A1','A2','A3','A4','B1','B2'),
                 subsection[total_lines:])
             total_lines += bg_size
-
-            for nls_iter in range(int(range_flags['NLS'])):
-                L_flags = self._get_cont((0,0,'L',0,'NJS',0),
-                                         subsection[total_lines])
-                total_lines += 1
-                for njs_iter in range(int(L_flags['NJS'])):
-                    j_flags, items, lines = self._get_list(
-                        ('AJ',0,0,0,'12*NLJ','NLJ'),
-                        ('DET','DWT','GRT','GIT','DEF','DWF','GRF','GIF','DEC',
-                         'DWC','GRC','GIC'),
-                        subsection[total_lines:])
-                    total_lines += lines
-                    spi, L, aj = range_flags['SPI'], L_flags['L'], j_flags['AJ']
-                    subsection_dict.update({(spi, L, aj): items})
-
             subsection_dict['bg'] = bg
 
+        if lrf < 5:
+            total_lines = self.nls_njs_loop(lrf_L_keys[lrf],
+                                            lrf_J_keys[lrf],
+                                            lrf_itemkeys[lrf],
+                                            subsection,
+                                            total_lines,
+                                            range_flags,
+                                            subsection_dict)
 
         if lrf == 7:
             # R-Matrix Limited Format (ENDF Manual pp. 62-67)
@@ -552,7 +562,7 @@ class Library(rx.RxLib):
             range_flags.update(particle_pair_data)
 
             for aj_section in range(int(range_flags['NJS'])):
-                # Read that first LIST record, with channel descriptions
+                # Read first LIST record, with channel descriptions
                 aj_flags, ch_items, ch_size = self._get_list(
                     ('AJ','PJ','KBK','KPS','6*NCH','NCH'),
                     ('IPP','L','SCH','BND','APE','APT'),
@@ -594,29 +604,6 @@ class Library(rx.RxLib):
 
         return total_lines
 
-    def nls_njs_loop(self, L_keys, j_keys, itemkeys, data, total_lines,
-                     range_flags, subsection_dict):
-        nls = int(range_flags['NLS'])
-        for nls_iter in range(nls):
-            if j_keys is None:
-                L_flags, items, lines = self._get_list(
-                    L_keys, itemkeys, data[total_lines:])
-                total_lines += lines
-                spi, L = range_flags['SPI'], L_flags['L']
-                subsection_dict[spi, L] = items
-            else:
-                L_flags = self._get_cont(L_keys, data[total_lines])
-                total_lines += 1
-                njs = L_keys['NJS']
-                for njs_iter in range(njs):
-                    j_flags, items, lines = self._get_list(
-                        j_keys, itemkeys, subsection[total_lines:])
-                    total_lines += lines
-                    spi, L, aj = range_flags['SPI'], L_flags['L'], j_flags['AJ']
-                    subsection_dict[(spi, L, aj)] = items
-        return total_lines
-
-
     def _read_unresolved(self, subsection, range_flags, isotope_flags, mat_id,
                          nuc_i):
 
@@ -640,13 +627,27 @@ class Library(rx.RxLib):
         total_lines: int
         """
 
-        lfw, lrf = int(isotope_flags['LFW']), int(range_flags['LRF'])
         head_cont = ('SPI','AP','LSSF',0,'NLS',0)
         has_head_cont = {(0,1): True, (1,1): False, (0,2): True, (1,2): True}
+        L_keys = {(0,1): ('AWRI',0,'L',0,'6*NJS','NJS'),
+                  (1,1): ('AWRI',0,'L',0,'NJS',0),
+                  (0,2): ('AWRI',0,'L',0,'NJS',0),
+                  (1,2): ('AWRI',0,'L',0,'NJS',0)}
+        j_keys = {(0,1): None,
+                  (1,1): (0,0,'L','MUF','NE+6',0,'D','AJ','AMUN','GN0','GG',
+                          0),
+                  (0,2): ('AJ',0,'INT',0,'6*NE+6','NE',0,0,'AMUX','AMUN',
+                      'AMUG','AMUF'),
+                  (1,2): ('AJ',0,'INT',0,'6*NE+6','NE',0,0,'AMUX','AMUN',
+                      'AMUG','AMUF')}
+        itemkeys = {(0,1): ('D','AJ','AMUN','GN0','GG',0),
+                    (1,1): ('GF',),
+                    (0,2): ('ES','D','GX','GN0','GG','GF'),
+                    (1,2): ('ES','D','GX','GN0','GG','GF')}
+
+        lfw, lrf = int(isotope_flags['LFW']), int(range_flags['LRF'])
         subsection_dict = rx.DoubleSpinDict({})
-        L_keys = {}
-        J_keys = {}
-        itemkeys = {}
+
         if range_flags['NRO'] > 0:
             tabhead,intdata,total_lines=self._get_tab1((0,0,0,0,'NR','NP'),
                                                        ('E','AP(E)'),
@@ -654,24 +655,10 @@ class Library(rx.RxLib):
             subsection_dict['int']= intdata
         else:
             total_lines = 0
-
+ 
         if has_head_cont[(lfw, lrf)]:
-            range_flags.update(self._get_cont(head_cont, subsection[total_lines]))
-            total_lines += 1
-        if (lfw, lrf) == (0,1):
-            # Case A in ENDF manual pp. 69-70
-
-        # def nls_njs_loop(L_keys, j_keys, itemkeys, data, total_lines,
-        #                  range_flags, subsection_dict):
-
-            for num_L_sections in range(int(range_flags['NLS'])):
-                L_flags, items, lines = self._get_list(
-                    ('AWRI',0,'L',0,'6*NJS','NJS'),
-                    ('D','AJ','AMUN','GN0','GG',0),
-                    subsection[total_lines:])
-                total_lines += lines
-                spi, L = range_flags['SPI'], L_flags['L']
-                subsection_dict.update({(spi, L): items})
+            range_flags, total_lines = self.cont_and_update(
+                range_flags, head_cont, subsection, total_lines)
 
         if (lfw, lrf) == (1,1):
             # Case B in ENDF manual p.70
@@ -683,43 +670,13 @@ class Library(rx.RxLib):
             total_lines += lines
             range_flags.update(head_flags)
 
-            for num_L_sections in range(int(range_flags['NLS'])):
-                L_flags = self._get_cont(('AWRI',0,'L',0,'NJS',0),
-                                             subsection[total_lines])
-                total_lines += 1
-
-                for num_J_sections in range(int(L_flags['NJS'])):
-                    j_flags, j_items, lines = self._get_list(
-                        (0,0,'L','MUF','NE+6',0,'D','AJ','AMUN','GN0','GG',0),
-                        ('GF',),
-                        subsection[total_lines:])
-                    total_lines += lines
-                    j_items.update(j_flags)
-                    j_items['AWRI'] = L_flags['AWRI']
-                    spi, L, aj = range_flags['SPI'], L_flags['L'], j_flags['AJ']
-                    subsection_dict[(spi, L, aj)] = j_items
-
-        if lrf == 2:
-            # range_flags.update(self._get_cont(('SPI','AP','LSSF',0,'NLS',0),
-            #                                   subsection[total_lines]))
-            # total_lines += 1
-
-            for L_section in range(int(range_flags['NLS'])):
-                L_flags = self._get_cont(('AWRI',0,'L',0,'NJS',0),
-                                         subsection[total_lines])
-                total_lines += 1
-
-                for j_section in range(int(L_flags['NJS'])):
-                    j_flags, j_items, j_size = self._get_list(
-                        ('AJ',0,'INT',0,'6*NE+6','NE',0,0,'AMUX','AMUN','AMUG',
-                         'AMUF'),
-                        ('ES','D','GX','GN0','GG','GF'),
-                        subsection[total_lines:])
-                    total_lines += j_size
-                    j_items.update(j_flags)
-                    j_items['AWRI'] = L_flags['AWRI']
-                    spi, L, aj = range_flags['SPI'], L_flags['L'], j_flags['AJ']
-                    subsection_dict[(spi, L, aj)] = j_items
+        total_lines = self.nls_njs_loop(L_keys[(lfw, lrf)],
+                                        j_keys[(lfw, lrf)],
+                                        itemkeys[(lfw, lrf)],
+                                        subsection,
+                                        total_lines,
+                                        range_flags,
+                                        subsection_dict)
 
         el, eh = range_flags['EL'], range_flags['EH']
         subsection_data = (el,eh,subsection_dict,range_flags)
@@ -731,7 +688,16 @@ class Library(rx.RxLib):
 
     def _read_ap_only(self, subsection, range_flags, isotope_flags, mat_id,
                       nuc_i):
-        return 1
+        if range_flags['NRO'] > 0:
+            tabhead,intdata,total_lines=self._get_tab1((0,0,0,0,'NR','NP'),
+                                                       ('E','AP(E)'),
+                                                       subsection)
+            subsection_dict['int']= intdata
+        else:
+            total_lines = 0
+        range_flags, total_lines = self.cont_and_update(
+            range_flags, ('SPI','AP',0,0,'NLS',0), subsection, total_lines)
+        return total_lines
 
     def _read_xs(self, mat_id, mt, nuc_i = None):
         """Reads in cross-section data. Read resonances with Library._read_res

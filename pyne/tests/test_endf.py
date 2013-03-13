@@ -404,12 +404,11 @@ def test_unresolved_resonances_b():
  2.376630+2 7.198625-2-5.887887-8-4.380016-5 1.747888-6-4.104291-9"""))
     exp_1 = dict(zip((0,0,'L','MUF','NE+6',0,'D','AJ','AMUN','GN0','GG'),
                      exp_1_a[:2].flat))
-    exp_1['GF'], exp_1['AWRI'] = exp_1_a[2], 4.648092e-4
+    exp_1['GF'] = exp_1_a[2]
     del exp_1[0]
 
     for key in exp_1:
         assert_array_equal(obs_1[key], exp_1[key])
-
     # For the spin=3.5, L=4, J=5 section in the second isotope
     obs_2 = obs[1][2][3.5,4,5]
     exp_2_a = array_from_ENDF(StringIO.StringIO(
@@ -420,7 +419,7 @@ def test_unresolved_resonances_b():
     exp_2 = dict(zip((0,0,'L','MUF','NE+6',0,'D','AJ','AMUN','GN0','GG'),
                      exp_2_a[:2].flat))
     num_e = exp_2['NE+6']-6
-    exp_2['GF'], exp_2['AWRI'] = exp_2_a[2:].flat[:num_e], -2.368259e-8
+    exp_2['GF'] = exp_2_a[2:].flat[:num_e]
     del exp_2[0]
     for key in exp_2:
         assert_array_equal(obs_2[key], exp_2[key])
