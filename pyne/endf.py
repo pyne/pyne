@@ -447,7 +447,6 @@ class Library(rx.RxLib):
         total_lines: int
             The number of lines taken up by the subsection.
         """
-        @profile
         def read_kbks(nch, subsection, aj_data, total_lines):
             for ch in range(nch):
                 lbk = int(subsection[total_lines][4])
