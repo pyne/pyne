@@ -149,18 +149,13 @@ def fromendf_tok(char * s):
         Will always return a 1d float64 array.  You must reshape to the
         appropriate shape.
     """
-    # cdef int * toklens = [11,11,11,11,11,11,15]
     cdef int size, i, num_entries
     cdef char entry[12]
     cdef long pos = <long>malloc(sizeof(long))
-    # cdef char * source
-    # size = len(s)/81
     num_entries = len(s)/81 * 6
     cdef np.ndarray[np.float64_t, ndim=1] cdata
     cdata = np.empty(num_entries, dtype=np.float64)
     while i < num_entries:
-        # toklens_key = i%7
-        # toklen = toklens[toklens_key]
         pos = i*11 + i/6 * 15
         strncpy(entry, s+pos, 11)
         cdata[i] = convert(entry)
