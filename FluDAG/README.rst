@@ -41,11 +41,7 @@ link the fluka library as a main, along with predefined FLUKA user object
 codes that can be compiled from user-written Fortran source.  The link command
 looks like this:
 
-"${FLUPRO}/flutil/lfluka -o $@ -a MOAB -a dagmc -m fluka obj/userini.o \
-	-L ${FLUPRO} -L ${MOAB_LIBDIR} \
-	obj/fluka_funcs.o \
-	obj/WrapInit.o \
-	obj/createRegionAndMatFiles.o"
+${FLUPRO}/flutil/lfluka -o $@ -a MOAB -a dagmc -m fluka obj/userini.o  -L ${FLUPRO} -L ${MOAB_LIBDIR} obj/fluka_funcs.o obj/WrapInit.o obj/createRegionAndMatFiles.o
 
 
 This is how FLUKA is intended to be linked in with other codes, namely GEANT4.  
@@ -70,8 +66,7 @@ Code Project
 * Document Developer feature table
  
 * Building
-  - Currently two build systems are in use:  We started with GNU make, but are
-    moving to cmake where possible.
+  - Currently two build systems are in use:  We started with GNU make, but are moving to cmake where possible.
   - A README file in the source directory contains build notes and instructions.
 
 * Testing
@@ -82,6 +77,7 @@ Source Control
 The FluDAG project is under Git source control, under svalinn/DAGMC as a publicly
 visible repository.  It has been cloned and placed uder the julry repository, as 
 julry/DAGMC/FluDAG, for local collaboration.
+
 * Git
   - FluDAG Source Code
   - Doxygen project file Doxyfile
@@ -91,8 +87,8 @@ julry/DAGMC/FluDAG, for local collaboration.
   - Sample input files
   - Sample geometry files
 * Collaboration and Visibility
-  Public: svalinn, pushed weekly
-  Local:  julry - UW group, pushed as often as needed
+  - Public: svalinn, pushed weekly
+  - Local:  julry - UW group, pushed as often as needed
 
 The code is self-documenting, with Doxygen providing the ability to collect and view
 the hyperlinked code documentation in a browser window in file list or graphic form.
@@ -109,7 +105,8 @@ doc-src files, depending on the issue.
 
 Documentation
 ~~~~~~~~~~~~~
-* Code
+Code
+____
 Code comments will be formatted and tagged to be used by Doxygen in order to 
 document functions and classes as we go.
 We will use doxywizerd to run Doxygen 1.7.1 on the source file tree.
@@ -121,6 +118,8 @@ updated by individuals cloning or forking this repository.
 The html directory containing the graphical lists, trees, and diagrams produced 
 by doxygen will not be placed under git, since it is reproducable from the Doxyfile.
 
+Project
+_______
 The User Features and Workflow should be documented via Sphinx in the doc-src directory.
 The Developer Feature status, and its map to the User features should remain in the 
 git repo.
