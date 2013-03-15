@@ -60,19 +60,20 @@ class Library(rx.RxLib):
     of Materials and Files.
     """
     def __init__(self, fh, resonances=True):
-        opened_here = False
-        self.fh = fh
-        if isinstance(fh, basestring):
-            self.fh = open(fh, 'r')
-            opened_here = True
         self.mts = {}
         self.structure = {}
         self.mat_dict = {}
         self.more_files = True
         # This counts the calculated position in the file.
         self.chars_til_now = 0
+        self.fh = fh
 
-        self.data = self.load()
+        opened_here = False
+        if isinstance(fh, basestring):
+            self.fh = open(fh, 'r')
+            opened_here = True
+
+        # self.data = self.load()
         while self.more_files:
             self._read_headers()
         # Close the file before we have a chance to break anything.
@@ -99,6 +100,10 @@ class Library(rx.RxLib):
         data = fromendf_tok(self.fh.read())
         self.fh.seek(0)
         return data
+    def load_part(self, s):
+        "Reads the ENDF file into a NumPy array."
+        data = fromendf_tok(s)
+        return data
 
     def _read_headers(self):
         # Skip the first line and get the material ID.
@@ -107,7 +112,6 @@ class Library(rx.RxLib):
         line = self.fh.readline()
         mat_id = int(line[66:70])
         nuc = int(convert(line[:11])*10)
-
         if nuc not in self.structure:
             self.structure.update(
                 {nuc:{'styles':'', 'docs':[], 'particles':[], 'data':{},
@@ -115,9 +119,7 @@ class Library(rx.RxLib):
 
             self.mat_dict.update({nuc:{'end_line':[],
                                           'mfs':{}}})
-
         # parse header (all lines with 1451)
-        comments = ''
         mf = 1
         stop = self.chars_til_now/81
         while FILE1_R.search(line):
@@ -152,13 +154,12 @@ class Library(rx.RxLib):
         self.fh.seek(self.chars_til_now)
         nextline = self.fh.readline()
         self.more_files = (nextline != '' and nextline[68:70] != "-1")
-
         # update materials list
         if mat_id != '':
             self.mat_dict[nuc]['end_line'] = self.chars_til_now/81
             setattr(self, "mat{0}".format(nuc), self.structure[nuc])
-
         self._read_mat_flags(nuc)
+        self.fh.seek(0)
 
     def _read_mat_flags(self, nuc):
         """Reads the global flags for a certain material.
@@ -790,13 +791,31 @@ class Library(rx.RxLib):
             Contains the reaction data in an Nx6 array.
         """
         if nuc in self.structure:
-            start, stop = self.mat_dict[nuc]['mfs'][mf,mt]
-            start = (start - 1) * 6
-            stop = (stop-1)*6
-            return self.data.flat[start:stop]
+            # start, stop = self.mat_dict[nuc]['mfs'][mf,mt]
+            # start = (start - 1) * 6
+            # stop = (stop-1)*6
+            # return self.data.flat[start:stop]
+            return self._read_nucmfmt(nuc, mf, mt)
         else:
             print "Material %d does not exist." % nuc
 
+    def _read_nucmfmt(self, nuc, mf, mt):
+        """Loads in the data from one reaction into self.structure.
+
+        Parameters:
+        -----------
+        nuc : int
+            ZZAAAM of nuclide.
+        mf : int
+            ENDF file number (MF).
+        mt : int
+            ENDF reaction number (MT).
+        """
+        start, stop = self.mat_dict[nuc]['mfs'][mf,mt]
+        self.fh.readline()
+        self.fh.seek(81*start)
+        s = self.fh.read(81*(stop-start))
+        return self.load_part(s)
 
 class Evaluation(object):
     """
