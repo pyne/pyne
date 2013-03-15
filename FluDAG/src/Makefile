@@ -2,13 +2,11 @@
 #
 # Julie Zachman
 # December 14, 2012
-# Rudimentary makefile to test compiling and linking of heterogenous sources 
+# Compile and link of heterogenous sources 
 # 
 
-# Modify MOAB to point to the local MOAB installation
-# MOAB = /data/opt/dagmc/moab
-MOAB = ${HOME}/dagmc_bld/MOAB
-FLUDAG = ${HOME}/storage/DAGMC/FluDAG
+# local defines for MOAB and FLUDAG
+include makefile.local
 FLUDAG_SOURCE = ${FLUDAG}/src
 
 # FLUPRO is an environment variable that should be set to the directory of the FLUKA installation
@@ -26,6 +24,7 @@ MOAB_FLAGS = -lMOAB -ldagmc
 MOAB_LIBS_LINK = -L${MOAB_LIBDIR} -lm ${MOAB_FLAGS} 
 
 CXXFLAGS = ${MOAB_INCLUDES} ${FLUDAG_INCLUDES} # Modify this to the name of the directory from which myfluka is run
+CXXFLAGS += -m64 -pedantic
 
 TARGETS = obj mainfludag 
 
