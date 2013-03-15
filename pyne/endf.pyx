@@ -53,8 +53,8 @@ class Library(rx.RxLib):
         self.more_files = True
         # This counts the calculated position in the file.
         self.chars_til_now = 0
+        self.offset = 0
         self.fh = fh
-
         while self.more_files:
             self._read_headers()
 
@@ -111,7 +111,6 @@ class Library(rx.RxLib):
         return data
 
     def _read_headers(self):
-        "Read header of an ENDF evaluation."
         opened_here = False
         if isinstance(self.fh, basestring):
             fh = open(self.fh, 'r')
@@ -120,7 +119,8 @@ class Library(rx.RxLib):
             fh = self.fh
         # Skip the first line and get the material ID.
         fh.seek(self.chars_til_now)
-        headline = fh.readline()
+        len_headline = len(fh.readline())
+        self.offset += 81 - len_headline
         line = fh.readline()
         mat_id = int(line[66:70])
         nuc = int(convert(line[:11])*10)
@@ -133,7 +133,7 @@ class Library(rx.RxLib):
                                           'mfs':{}}})
         # Parse header (all lines with 1451)
         mf = 1
-        stop = self.chars_til_now/81
+        stop = (self.chars_til_now+self.offset)/81
         while FILE1_R.search(line):
             # parse contents section
             if CONTENTS_R.match(line):
@@ -146,7 +146,8 @@ class Library(rx.RxLib):
                 else:
                     start = stop + 2
                 stop = start + mt_length
-                self.mat_dict[nuc]['mfs'][mf,mt] = (start,stop)
+                self.mat_dict[nuc]['mfs'][mf,mt] = (81*start-self.offset,
+                                                    81*stop-self.offset)
                 line = fh.readline()
             # parse comment
             elif SPACE66_R.match(line):
@@ -159,13 +160,13 @@ class Library(rx.RxLib):
                 self.structure[nuc]['docs'].append(line[0:66])
                 line = fh.readline()
         # Find where the end of the material is and then jump to it.
-        self.chars_til_now = (stop + 4)*81
+        self.chars_til_now = (stop + 4)*81 - self.offset
         fh.seek(self.chars_til_now)
         nextline = fh.readline()
         self.more_files = (nextline != '' and nextline[68:70] != "-1")
         # Update materials dict
         if mat_id != '':
-            self.mat_dict[nuc]['end_line'] = self.chars_til_now/81
+            self.mat_dict[nuc]['end_line'] = (self.chars_til_now+self.offset)/81
             setattr(self, "mat{0}".format(nuc), self.structure[nuc])
         self._read_mat_flags(nuc)
         fh.seek(0)
@@ -808,8 +809,8 @@ class Library(rx.RxLib):
             fh = self.fh
         start, stop = self.mat_dict[nuc]['mfs'][mf,mt]
         fh.readline()
-        fh.seek(81*start)
-        s = fh.read(81*(stop-start))
+        fh.seek(start)
+        s = fh.read(stop-start)
         if opened_here:
             fh.close
         return self.load_part(s)
