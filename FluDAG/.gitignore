@@ -1,11 +1,12 @@
 *.o
 myfluka
+mainfludag
+readvol
 *.map
 *.stl
 *~
 .timer.out
 ran*
-mainfludag
 makefile.local
 html
 mainf
@@ -15,4 +16,4 @@ remove
 *.sat
 *.swp
 *.jou
-run
+
