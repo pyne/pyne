@@ -10,3 +10,4 @@ mainfludag
 *.err
 *.log
 *.out
+makefile.local
