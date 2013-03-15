@@ -41,15 +41,15 @@ link the fluka library as a main, along with predefined FLUKA user object
 codes that can be compiled from user-written Fortran source.  The link command
 looks like this:
 
-${FLUPRO}/flutil/lfluka -o $@ -a MOAB -a dagmc -m fluka obj/userini.o \
+"${FLUPRO}/flutil/lfluka -o $@ -a MOAB -a dagmc -m fluka obj/userini.o \
 	-L ${FLUPRO} -L ${MOAB_LIBDIR} \
 	obj/fluka_funcs.o \
 	obj/WrapInit.o \
-	obj/createRegionAndMatFiles.o
+	obj/createRegionAndMatFiles.o"
 
 
 This is how FLUKA is intended to be linked in with other codes, namely GEANT4.  
-However testing of this methodology showed that the input geometry file was 
+However testing of this methodology showed that the input geometry file was not
 read in early enough for material assignments to be set up programmatically
 in a user-defined function.
 
@@ -71,41 +71,52 @@ Code Project
  
   * Building
     - Currently two build systems are in use:  We started with GNU make, but are
-      moving to cmake.
-    - A README file in the source directory will contain build notes and instructions.
+      moving to cmake where possible.
+    - A README file in the source directory contains build notes and instructions.
   
   * Testing
-    - The choice of cmake as a build system also permits implementation of ctest
+    - The choice of cmake as a build system also permits implementation of ctest.
 
 Source Control
 ~~~~~~~~~~~~~~
+  The FluDAG project is under Git source control, under svalinn/DAGMC as a publicly
+  visible repository.  It has been cloned and placed uder the julry repository, as 
+  julry/DAGMC/FluDAG, for local collaboration.
   * Git
-    - Source Code
-    - Doxygen
+    - FluDAG Source Code
+    - Doxygen project file Doxyfile
     - CMakeLists.txt 
     - Makefile
-    - README's
+    - README files
     - Sample input files
     - Sample geometry files
-  * Collaboration
-    Public: svalinn
-    Local:  julry - Julie, Andy, Paul 
+  * Collaboration and Visibility
+    Public: svalinn, pushed weekly
+    Local:  julry - UW group, pushed as often as needed
+
+  The code is self-documenting, with Doxygen providing the ability to collect and view
+  the hyperlinked code documentation in a browser window in file list or graphic form.
+
+  Besides the files above, project planning and status documentation will be placed in 
+  the CNERG pages, which is part of the same git repository.
 
 Issue Tracking
 ~~~~~~~~~~~~~~
   Github, Huboard
   Closed issues will be reviewed for inclusion in the documentation.  They may be 
-  documented within code files, in git documentation files, or be in Sphinx-compiled
-  doc-src files, depending on the issus.
+  documented within code files, in separate documentation files, or be in Sphinx-compiled
+  doc-src files, depending on the issue.
 
 Documentation
 ~~~~~~~~~~~~~
+  * Code
   Code comments will be formatted and tagged to be used by Doxygen in order to 
   document functions and classes as we go.
   We will use doxywizerd to run Doxygen 1.7.1 on the source file tree.
   Class relationship diagrams and tables can be extracted via doxygen analysis.
-  The file named "Doxyfile" will be placed in the git repository.   This file  
-  contains the setting used by doxywizard to run doxygen
+  The file named "Doxyfile" has been placed in the git repository.   This file  
+  contains the setting used by doxywizard to run doxygen and will have to be
+  updated by individuals cloning or forking this repository.
 
   The html directory containing the graphical lists, trees, and diagrams produced 
   by doxygen will not be placed under git, since it is reproducable from the Doxyfile.
