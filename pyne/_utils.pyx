@@ -7,12 +7,10 @@ import numpy as np
 include "include/cython_version.pxi"
 IF CYTHON_VERSION_MAJOR == 0 and CYTHON_VERSION_MINOR >= 17:
     from libc.stdlib cimport atof
-    from libc.string cimport strtok, strcpy
+    from libc.string cimport strtok, strcpy, strncpy
 ELSE:
     from pyne._includes.libc.stdlib cimport atof
-    from pyne._includes.libc.string cimport strtok, strcpy
-
-
+    from pyne._includes.libc.string cimport strtok, strcpy, strncpy
 
 def fromstring_split(char * s, sep=None, dtype=float):
     """A replacement for numpy.fromstring() using the Python str.split() 
@@ -30,7 +28,7 @@ def fromstring_split(char * s, sep=None, dtype=float):
 
     Returns
     -------
-    data : ndarry, 1d
+    data : ndarray, 1d
         Will always return a 1d array of dtype.  You must reshape to the 
         appropriate shape.
 
@@ -66,7 +64,7 @@ def fromstring_token(char * s, char * sep=" ", bint inplace=False, int maxsize=-
 
     Returns
     -------
-    data : ndarry, 1d, float64
+    data : ndarray, 1d, float64
         Will always return a 1d float64 array.  You must cast and reshape 
         to the appropriate type and shape.
 
@@ -108,3 +106,63 @@ def fromstring_token(char * s, char * sep=" ", bint inplace=False, int maxsize=-
 
     data = data[:i].copy()
     return data
+
+def convert(char * s):
+    """
+    This function converts a number listed on an ENDF tape into a float or int
+    depending on whether an exponent is present.
+    """
+    cdef char char8 = s[8]
+    cdef char char9 = s[9]
+    cdef char * news = <char *>malloc(sizeof(char)*12)
+    cdef double v
+    if char9 == '+' or char9 == '-':
+        strncpy(news, s, 9)
+        news[9] = 'e'
+        news[10] = s[9]
+        news[11] = s[10]
+        v = atof(news)
+    elif char8 == '+' or char8 == '-':
+        strncpy(news, s, 8)
+        news[8] = 'e'
+        news[9] = s[8]
+        news[10] = s[9]
+        news[11] = s[10]
+        v = atof(news)
+    else:
+        v = atof(s)
+    free(news)
+    return v
+
+
+def fromendf_tok(char * s):
+    """A replacement for numpy.fromstring().
+
+    Parameters:
+    -----------
+    s : str
+        String of data, consisting of complete lines of ENDF data.
+
+    Returns:
+    --------
+    data : ndarray, 1d, float64
+        Will always return a 1d float64 array.  You must reshape to the
+        appropriate shape.
+    """
+    # cdef int * toklens = [11,11,11,11,11,11,15]
+    cdef int size, i, num_entries
+    cdef char entry[12]
+    cdef long pos = <long>malloc(sizeof(long))
+    # cdef char * source
+    # size = len(s)/81
+    num_entries = len(s)/81 * 6
+    cdef np.ndarray[np.float64_t, ndim=1] cdata
+    cdata = np.empty(num_entries, dtype=np.float64)
+    while i < num_entries:
+        # toklens_key = i%7
+        # toklen = toklens[toklens_key]
+        pos = i*11 + i/6 * 15
+        strncpy(entry, s+pos, 11)
+        cdata[i] = convert(entry)
+        i += 1
+    return cdata

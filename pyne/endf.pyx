@@ -24,6 +24,7 @@ import matplotlib.pyplot as plt
 
 import pyne.rxdata as rx
 from pyne.rxname import label
+from pyne._utils import fromendf_tok
 from libc.stdlib cimport malloc, free
 
 cimport numpy as np
@@ -78,7 +79,7 @@ class Library(rx.RxLib):
         if opened_here:
             self.fh.close()
 
-    def load(self):
+    def load_og(self):
         "Reads the ENDF file into a NumPy array."
         data = np.genfromtxt(self.fh,
                              delimiter = (11,11,11,11,11,11),
@@ -90,6 +91,12 @@ class Library(rx.RxLib):
                                            3: convert,
                                            4: convert,
                                            5: convert})
+        self.fh.seek(0)
+        return data
+    def load(self):
+        "Reads the ENDF file into a NumPy array."
+        self.fh.readline()
+        data = fromendf_tok(self.fh.read())
         self.fh.seek(0)
         return data
 

@@ -754,27 +754,27 @@ def test_xs():
     assert_equal(obs_600_flags, exp_600_flags)
 
 
-# def test_U235():
-#     """This test file can be found here:
-#     http://t2.lanl.gov/data/data/ENDFB-VII.1-neutron/U/235
-#     It is very big (51 MB), so it is not included."""
-#     u235 = Library('U235.txt')
-#     u235._read_res(922350)
-#     u235._read_xs(922350, 37)
-#     exp_a = array_from_ENDF(StringIO.StringIO
-#          (""" 9.223500+4 2.330248+2          0          0          0          0
-# -1.788560+7-1.788560+7          0          0          1          6
-#           6          2                                            
-#  1.796240+7 5.05980-10 1.800000+7 3.810030-7 1.850000+7 8.441785-5
-#  1.900000+7 2.387410-4 1.950000+7 1.348763-3 2.000000+7 4.785594-3
-# """))
-#     obs =  u235.mat922350['data'][922350]['xs'][37][0]
-#     exp = {'intpoints': 6, 'intschemes': 2,
-#            'Eint': exp_a[3:5].flat[::2],
-#            'sigma(E)': exp_a[3:5].flat[1::2]}
+def test_U235():
+    """This test file can be found here:
+    http://t2.lanl.gov/data/data/ENDFB-VII.1-neutron/U/235
+    It is very big (51 MB), so it is not included."""
+    u235 = Library('U235.txt')
+    u235._read_res(922350)
+    u235._read_xs(922350, 37)
+    exp_a = array_from_ENDF(StringIO.StringIO
+         (""" 9.223500+4 2.330248+2          0          0          0          0
+-1.788560+7-1.788560+7          0          0          1          6
+          6          2                                            
+ 1.796240+7 5.05980-10 1.800000+7 3.810030-7 1.850000+7 8.441785-5
+ 1.900000+7 2.387410-4 1.950000+7 1.348763-3 2.000000+7 4.785594-3
+"""))
+    obs =  u235.mat922350['data'][922350]['xs'][37][0]
+    exp = {'intpoints': 6, 'intschemes': 2,
+           'Eint': exp_a[3:5].flat[::2],
+           'sigma(E)': exp_a[3:5].flat[1::2]}
 
-#     for key in obs:
-#         assert_array_equal(obs[key], exp[key])
+    for key in obs:
+        assert_array_equal(obs[key], exp[key])
 
 
 if __name__ == "__main__":
