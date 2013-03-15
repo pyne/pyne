@@ -78,7 +78,8 @@ The FluDAG project is under Git source control, under svalinn/DAGMC as a publicl
 visible repository.  It has been cloned and placed uder the julry repository, as 
 julry/DAGMC/FluDAG, for local collaboration.
 
-* Git
+Git
+___
   - FluDAG Source Code
   - Doxygen project file Doxyfile
   - CMakeLists.txt 
@@ -86,7 +87,8 @@ julry/DAGMC/FluDAG, for local collaboration.
   - README files
   - Sample input files
   - Sample geometry files
-* Collaboration and Visibility
+Collaboration and Visibility
+____________________________
   - Publicly visible svalinn repository, pushed weekly
   - Local collaboration branch in julry, pushed as often as needed
 
