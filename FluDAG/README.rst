@@ -80,17 +80,17 @@ julry/DAGMC/FluDAG, for local collaboration.
 
 Git
 ___
-  - FluDAG Source Code
-  - Doxygen project file Doxyfile
-  - CMakeLists.txt 
-  - Makefile
-  - README files
-  - Sample input files
-  - Sample geometry files
+- FluDAG Source Code
+- Doxygen project file Doxyfile
+- CMakeLists.txt 
+- Makefile
+- README files
+- Sample input files
+- Sample geometry files
 Collaboration and Visibility
 ____________________________
-  - Publicly visible svalinn repository, pushed weekly
-  - Local collaboration branch in julry, pushed as often as needed
+- Publicly visible svalinn repository, pushed weekly
+- Local collaboration branch in julry, pushed as often as needed
 
 The code is self-documenting, with Doxygen providing the ability to collect and view
 the hyperlinked code documentation in a browser window in file list or graphic form.
