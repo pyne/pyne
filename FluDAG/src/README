@@ -1,5 +1,25 @@
-The subdirectory src containts inputs files and run-scripts.
+Make Notes 
+==========
 Makefile should be modified for local conditions.
+There are three ways to do this:
+1.  Modify the Makefile directory directly by defining 
+    local MOAB and FLUDAG locations 
+2.  Modify makefile.local, which is include'd by
+    Makefile, to define local MOAB and FLUDAG
+    locations.  CAUTION:  makefile.local is not
+    in the github repository so a github checkout
+    will delete it.  Keep a copy outside the github
+    directory tree.
+3.  Export definitions in your startup script, e.g.
+    via bash:
+export MOAB=${HOME}/dagmc_bld/MOAB
+export FLUDAG=${HOME}/DAGMC/FluDAG
+    
+Note that you can do a combination of these:  
+1. overwrites 2. (if the definition is done after
+the call to include makefile.local) and 
+2.  overwrites 3. 
+
 Workflow in src to make and run mainfludag: 
 > make clean 
 > make obj
@@ -12,3 +32,18 @@ If it doesn't exist
 > source runme
 This creates a fluka_xxx subdirectory that will be deleted if there are no errors.
 
+CMake Notes
+===========
+CMakeLists.txt is set up to create a target named "readvol".  To use it, go to 
+an empty directory outside of src (e.g. the bin that is parallel to src) and type,
+in the case of bin,
+>cmake ../src
+
+This will create a makefile that will allow you to type
+>make readvol
+
+When complete, there will be a readvol target in the bin directory, along with many
+files created by the cmake system.
+
+Note that cmake doesn't care where you are when you run it, you just need to refer 
+to the directory that contains the top level CMakeLists.txt.

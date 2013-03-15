@@ -2,14 +2,11 @@
 #
 # Julie Zachman
 # December 14, 2012
-# Rudimentary makefile to test compiling and linking of heterogenous sources 
+# Compile and link of heterogenous sources 
 # 
 
 # Modify MOAB to point to the local MOAB installation
-# MOAB = ${HOME}/dagmc_bld/MOAB
-# MOAB = /data/opt/dagmc/moab
-#FLUDAG = ${HOME}/storage/DAGMC/FluDAG
-#FLUDAG = /data/opt/julry_dag/DAGMC/FluDAG/
+# local defines for MOAB and FLUDAG
 include makefile.local
 FLUDAG_SOURCE = ${FLUDAG}/src
 
@@ -69,6 +66,9 @@ mainfludag: mainFluDAG.o \
 	$(wrapobjects) 
 	gfortran -o $@ $^ $(MOAB_LIBS_LINK) $(FLUKA_LIBS_LINK) -lstdc++
 
+readvol: readVol.o fluka_funcs.o dagmc_utils.o
+	g++ -o $@ $^ $(MOAB_LIBS_LINK) -lgfortran
+
 # Try this as well - 
 #	 g++ -o $@ $^ $(MOAB_LIBS_LINK) $(FLUKA_LIBS_LINK) 
 
@@ -103,10 +103,6 @@ userini.o : userini.f
 	g++ -c $(CXXFLAGS) $< 
 	mv $@ obj
 
-#fluka_funcs.o : fluka_funcs.cpp
-#	g++ -c $(CXXFLAGS) $< 
-#	mv $@ obj
-
 mainFluDAG.o : mainFluDAG.cpp 
 	g++ -c $(CXXFLAGS) $< 
 	mv $@ obj
@@ -116,10 +112,6 @@ $(wrapobjects): %.o: %.cc
 	mv $@ obj
 
 obj: $(wrapobjects) mainFluDAG.o fluka_funcs.o
-
-readVol.o : readVol.cpp 
-	g++ -c $(CXXFLAGS) $< 
-	mv $@ obj
 
 createRegionAndMatFiles.o : createRegionAndMatFiles.cpp
 	g++ -c $(CXXFLAGS) $< 
