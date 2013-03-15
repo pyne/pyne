@@ -369,14 +369,15 @@ def array_from_ENDF(fh):
                                      3: conv, 4: conv, 5: conv})
 
 def test_get():
-    obs = library.read_mfmt(40000, 4, 2)
-
+    obs = library.get_rx(40000, 4, 2)
     exp = [4.898421e+3,6.768123e+0,0,1,0,0,2.123124e+6,8.123142e-6,2.123212e+6,
            8.231231e-6,-2.231211e+6,8.123421e-6]
-
-    badkey = library.read_mfmt(111, 1, 1)
+    try:
+        badkey = library.get_rx(111, 1, 1)
+        assert(False)
+    except ValueError:
+        assert(True)
     assert_array_equal(exp, obs)
-    assert_equal(badkey, None)
 
 
 def test_unresolved_resonances_a():
@@ -598,11 +599,11 @@ def test_resolved_r_matrix_kbk_kps():
     ch1_exp = {'PSI':{'intpoints': [3.,6.,10.],
                       'intschemes': [1.,2.,3.],
                       'Eint': exp_3[13:17].flat[:-4:2],
-                      'PSI(E)': exp_3[13:17].flat[1:-4:2]},
+                      'PSI': exp_3[13:17].flat[1:-4:2]},
                'PSR':{'intpoints': 3.,
                       'intschemes': 2.,
                       'Eint': exp_3[10].flat[::2],
-                      'PSR(E)': exp_3[10].flat[1::2]},
+                      'PSR': exp_3[10].flat[1::2]},
                'LBK': 0.,
                'LPS': 1.}
     for key in ch1_exp:
@@ -771,7 +772,7 @@ def test_U235():
     obs =  u235.mat922350['data'][922350]['xs'][37][0]
     exp = {'intpoints': 6, 'intschemes': 2,
            'Eint': exp_a[3:5].flat[::2],
-           'sigma(E)': exp_a[3:5].flat[1::2]}
+           'xs': exp_a[3:5].flat[1::2]}
 
     for key in obs:
         assert_array_equal(obs[key], exp[key])
