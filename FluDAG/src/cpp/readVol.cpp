@@ -1,4 +1,19 @@
-// Test code that calls DagMC's readVol
+//----------------------------------*-C++-*----------------------------------//
+/*!
+ * \file   storage/DAGMC/FluDAG/src/cpp/readVol.cpp
+ * \author Julie Zachman 
+ * \date   Fri Mar 8 2013 
+ * \brief  Read properties from an h5m file
+ * \note   Includes a main
+ */
+//---------------------------------------------------------------------------//
+// $Id: 
+//---------------------------------------------------------------------------//
+
+#include "fluka_funcs.h"
+#include "dagmc_utils.hpp"
+
+#include "moab/Interface.hpp"
 #include "DagMC.hpp"
 #include <iostream>
 #include <stdlib.h>
@@ -11,18 +26,39 @@ using namespace moab;
 
 static std::string make_property_string( DagMC& , EntityHandle , std::vector<std::string> & );
 
-ErrorCode readVol(char *fileptr)
+//---------------------------------------------------------------------------//
+// readVol
+//---------------------------------------------------------------------------//
+/// Highest level cal; reads number of volumes
+// 
+// sample metadata properties detected:
+//    graveyard
+//    mat
+//    rho
+//    surf.flux
+//    tally
+/////////////////
+ErrorCode readVol(char *fileptr, const std::string* override_output_filename=NULL )
 {
-  // See if this works
+  // This code fragment is from TrackLengthMeshTally:write_results has no purpose other than to test 
+  // setting the arg NULL, so that I can implement the same signature in both extensions of MeshTally
+  // Case 1:  DONE no second arg to readVol:  Override = "myfilename"
+  // Case 2:  DONE second arg to readVol is null:  Override = "myfilename"
+  // Case 3:  DONE second arg to readVol is not null:  Override is same as second arg to readvol
+  // std::string output_filename = "myfilename";
+  // std::string override = override_output_filename ? *override_output_filename : output_filename;
+  // std::cout << "Output_filename = " << output_filename << std::endl;
+  // std::cout << "Override = " <<  override << std::endl;
+  // Note:  see main() in this file for the call
+  
   int num_vols = DAG->num_entities(3);
   std::cout << __FILE__ << ", " << __func__ << ":" << __LINE__ << "_______________" << std::endl;
   std::cout << "\tnum_vols in " << fileptr << " is " << num_vols << std::endl;
 
   ErrorCode code;
-  double volume_measure;
-  
+  // double volume_measure;
 
- // Get all properties (will depend on the input file) and list them.
+  // Get all properties (will depend on the input file) and list them.
   std::vector<std::string> detected;
   std::string spaces4 = "    ";
   DAG->detect_available_props(detected);
@@ -34,33 +70,24 @@ ErrorCode readVol(char *fileptr)
        std::string keyword = *kwdp;
        std::cout << spaces4 << keyword << std::endl;
   }
-// Answer for test.h5m:
-///////////////////////
 
-// 5 metadata properties detected:
-//    graveyard
-//    mat
-//    rho
-//    surf.flux
-//    tally
-/////////////////
-
-  // Loop through 3d entities.  In model_complete.h5m there are 90 vols
+  // Loop through 3d entities.  
   std::cout << __FILE__ << ", " << __func__ << ":" << __LINE__ << "___entity_by_id___" << std::endl;
-  std::cout << "\tnum_vols is " << num_vols << std::endl;
+
   std::cout << "Graveyard list: " << std::flush;
   EntityHandle entity = NULL;
   std::string gystr = "graveyard";
+  std::vector<int> graveyardList;
   for (unsigned i = 0; i<num_vols; i++)
   {
       entity = DAG->entity_by_id(3, i);
       std::string propstring;
-  //  Test code: no longer needed
   //  code = DAG->measure_volume(entity, volume_measure);
   //  std::cout << "\tvolume of entity " << i << " is " << volume_measure << std::endl;
       // make a property string; after obb_analysis.cpp:make_property_string(dag, eh, vector)
       if (DAG->has_prop(entity, gystr))
       {
+	 graveyardList.push_back(i);
          std::vector< std::string> vals;
          code = DAG->prop_values (entity, gystr, vals);
          propstring += gystr; 
@@ -82,6 +109,9 @@ ErrorCode readVol(char *fileptr)
          } // end if vals.size() > 1
          propstring += ", "; 
       } // end if DAG->has_prop
+      else if (DAG->has_prop(entity, "MAT"))
+      {
+      }
       std::ostream& out = std::cout;
       out << "\nVolume " << i  << " " << std::flush;
       if (propstring.length() )
@@ -92,14 +122,14 @@ ErrorCode readVol(char *fileptr)
          if (DAG->is_implicit_complement(entity) ) out << "Properties: " << propstring << std::endl;
          out << "(" << propstring << ")";
       }
-      else
-      {
-         out << "  this volume is not a graveyard ";
-      }
   }  // end this volume
   std::cout << std::endl;
 }
 
+//---------------------------------------------------------------------------//
+// readGraveyard
+//---------------------------------------------------------------------------//
+// 
 ErrorCode readGraveyard()
 {
   int num_vols = DAG->num_entities(3);
@@ -113,7 +143,7 @@ ErrorCode readGraveyard()
 
   std::vector< std::string > keywords;
   ret = DAG->detect_available_props( keywords );
-  // If you don't do this props from make_property_string will be empty.
+  // If you don't call parse_properties, props from make_property_string will be empty.
   ret = DAG->parse_properties( keywords);
 
    std::cout << keywords.size() << " metadata properties detected:" << std::endl;
@@ -135,6 +165,10 @@ ErrorCode readGraveyard()
 }
 
 
+//---------------------------------------------------------------------------//
+// makePropertyString
+//---------------------------------------------------------------------------//
+/// 
 static std::string make_property_string( DagMC& dag, EntityHandle eh, std::vector<std::string> &properties )
 {
   ErrorCode ret;
@@ -145,6 +179,7 @@ static std::string make_property_string( DagMC& dag, EntityHandle eh, std::vecto
     if( dag.has_prop( eh, *p ) ){
       std::vector< std::string> vals;
       ret = dag.prop_values( eh, *p, vals );
+      CHECKERR(dag,ret);
       propstring += *p;
       if( vals.size() == 1 ){
         propstring += "=";
@@ -170,4 +205,33 @@ static std::string make_property_string( DagMC& dag, EntityHandle eh, std::vecto
   }
   return propstring;
 }
+//---------------------------------------------------------------------------//
+// main
+//---------------------------------------------------------------------------//
+// 
+int main(int argc, char* argv[]) 
+{
+  ErrorCode code;
+  if (argc < 2)
+  {
+     std::cerr << "Usage:  " << argv[0] << " filename.h5m" << std::endl;
+     exit(0);
+  }
+  
+ 
+  int max_pbl = 1;
+  bool flukarun = false;
+  char *fileptr = argv[1];
+  cpp_dagmcinit(fileptr, 0, max_pbl,flukarun); 
 
+  // Test code
+  // std::string test;
+  // if (argc > 2)
+  // {
+  //  test = std::string(argv[2]);
+  // }
+  // code = readVol(argv[1], &test);
+
+  code = readVol(argv[1]);
+  return 0;
+}
