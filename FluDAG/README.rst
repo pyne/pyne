@@ -87,8 +87,8 @@ julry/DAGMC/FluDAG, for local collaboration.
   - Sample input files
   - Sample geometry files
 * Collaboration and Visibility
-  - Public: svalinn, pushed weekly
-  - Local:  julry - UW group, pushed as often as needed
+  - Publicly visible svalinn repository, pushed weekly
+  - Local collaboration branch in julry, pushed as often as needed
 
 The code is self-documenting, with Doxygen providing the ability to collect and view
 the hyperlinked code documentation in a browser window in file list or graphic form.
