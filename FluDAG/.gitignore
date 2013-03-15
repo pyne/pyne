@@ -1,4 +1,6 @@
+# Ignore objects
 *.o
+# Targets to ignore
 myfluka
 mainfludag
 readvol
@@ -8,11 +10,13 @@ readvol
 .timer.out
 ran*
 makefile.local
+# Directories to ignore
 html
 mainf
 test1
 *old
 remove
+run
 *.sat
 *.swp
 *.jou
