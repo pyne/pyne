@@ -5,7 +5,8 @@
 # Compile and link of heterogenous sources 
 # 
 
-# local defines for MOAB and FLUDAG
+# Makefile variables MOAB and FLUDAG should be modified in makefile.local
+# to point to the local FluDAG and MOAB installation
 include makefile.local
 FLUDAG_SOURCE = ${FLUDAG}/src
 
