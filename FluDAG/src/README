@@ -2,7 +2,7 @@ Make Notes
 ==========
 Makefile should be modified for local conditions.
 There are three ways to do this:
-1.  Export definitions in your startup script, e.g.
+1.  Export definitions in your startup script, i.e.
     via bash:
     export MOAB=${HOME}/dagmc_bld/MOAB
     export FLUDAG=${HOME}/DAGMC/FluDAG

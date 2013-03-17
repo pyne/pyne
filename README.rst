@@ -59,10 +59,23 @@ changes to any of the ReST files and commiting those changes to the master
 branch (but not pushing!), the HTML version can be generated and pushed 
 automatically to the gh-pages branch by running::
 
+     make -f doc-src/Makefile gh-preview
+
+in the top-level directory. This will build the html files and check out
+the html branch for viewing the local file in your browser.  If you would
+like to make changes, run::
+
+     make gh-revert
+
+and you will be returned to the master branch. If you are happy with the
+generated html you can run::
+
+     make gh-push
+
+to push the html files to github.
+
+If you would like to build and push html files in one step, you can run::
+
      make -f doc-src/Makefile gh-pages
 
 in the top-level directory.
-
-You can then preview these changes by checking out the gh-pages branch and 
-opening the local file in your browser.  When you are satisfied with the 
-changes, be sure to push the master branch back to github to share the changes.

@@ -1,0 +1,19 @@
+TITLE
+
+* Set the defaults for precision simulations
+DEFAULTS                                                              PRECISIO
+* Define the beam characteristics
+BEAM
+* Define the beam position
+BEAMPOS
+GEOBEGIN          1.                                                  FLUGG
+GEOEND
+* ..+....1....+....2....+....3....+....4....+....5....+....6....+....7..
+ASSIGNMA    BLCKHOLE   BLKBODY
+ASSIGNMA      VACUUM      VOID
+ASSIGNMA      COPPER     ARGET
+* Set the random number seed
+RANDOMIZ         1.0
+* Set the number of primary histories to be simulated in the run
+START
+STOP

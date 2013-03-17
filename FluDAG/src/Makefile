@@ -129,4 +129,3 @@ clean:
 	rm obj/*.o
 	rm myfluka
 print-%:
-	@echo $* = $($*)

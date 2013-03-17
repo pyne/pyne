@@ -9,6 +9,7 @@ readvol
 *~
 .timer.out
 ran*
+*fort*
 makefile.local
 # Directories to ignore
 html
@@ -17,7 +18,10 @@ test1
 *old
 remove
 run
+# Extensions to ignore
 *.sat
 *.swp
 *.jou
-
+*.err
+*.log
+*.out
