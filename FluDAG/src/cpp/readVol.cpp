@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 //----------------------------------*-C++-*----------------------------------//
 /*!
  * \file   storage/DAGMC/FluDAG/src/cpp/readVol.cpp
@@ -15,9 +14,6 @@
 #include "dagmc_utils.hpp"
 
 #include "moab/Interface.hpp"
-=======
-// Test code that calls DagMC's readVol
->>>>>>> svalinn/master
 #include "DagMC.hpp"
 #include <iostream>
 #include <stdlib.h>
@@ -30,7 +26,6 @@ using namespace moab;
 
 static std::string make_property_string( DagMC& , EntityHandle , std::vector<std::string> & );
 
-<<<<<<< HEAD
 //---------------------------------------------------------------------------//
 // readVol
 //---------------------------------------------------------------------------//
@@ -56,26 +51,14 @@ ErrorCode readVol(char *fileptr, const std::string* override_output_filename=NUL
   // std::cout << "Override = " <<  override << std::endl;
   // Note:  see main() in this file for the call
   
-=======
-ErrorCode readVol(char *fileptr)
-{
-  // See if this works
->>>>>>> svalinn/master
   int num_vols = DAG->num_entities(3);
   std::cout << __FILE__ << ", " << __func__ << ":" << __LINE__ << "_______________" << std::endl;
   std::cout << "\tnum_vols in " << fileptr << " is " << num_vols << std::endl;
 
   ErrorCode code;
-<<<<<<< HEAD
   // double volume_measure;
 
   // Get all properties (will depend on the input file) and list them.
-=======
-  double volume_measure;
-  
-
- // Get all properties (will depend on the input file) and list them.
->>>>>>> svalinn/master
   std::vector<std::string> detected;
   std::string spaces4 = "    ";
   DAG->detect_available_props(detected);
@@ -87,7 +70,6 @@ ErrorCode readVol(char *fileptr)
        std::string keyword = *kwdp;
        std::cout << spaces4 << keyword << std::endl;
   }
-<<<<<<< HEAD
 
   // Loop through 3d entities.  
   std::cout << __FILE__ << ", " << __func__ << ":" << __LINE__ << "___entity_by_id___" << std::endl;
@@ -96,42 +78,16 @@ ErrorCode readVol(char *fileptr)
   EntityHandle entity = NULL;
   std::string gystr = "graveyard";
   std::vector<int> graveyardList;
-=======
-// Answer for test.h5m:
-///////////////////////
-
-// 5 metadata properties detected:
-//    graveyard
-//    mat
-//    rho
-//    surf.flux
-//    tally
-/////////////////
-
-  // Loop through 3d entities.  In model_complete.h5m there are 90 vols
-  std::cout << __FILE__ << ", " << __func__ << ":" << __LINE__ << "___entity_by_id___" << std::endl;
-  std::cout << "\tnum_vols is " << num_vols << std::endl;
-  std::cout << "Graveyard list: " << std::flush;
-  EntityHandle entity = NULL;
-  std::string gystr = "graveyard";
->>>>>>> svalinn/master
   for (unsigned i = 0; i<num_vols; i++)
   {
       entity = DAG->entity_by_id(3, i);
       std::string propstring;
-<<<<<<< HEAD
-=======
-  //  Test code: no longer needed
->>>>>>> svalinn/master
   //  code = DAG->measure_volume(entity, volume_measure);
   //  std::cout << "\tvolume of entity " << i << " is " << volume_measure << std::endl;
       // make a property string; after obb_analysis.cpp:make_property_string(dag, eh, vector)
       if (DAG->has_prop(entity, gystr))
       {
-<<<<<<< HEAD
 	 graveyardList.push_back(i);
-=======
->>>>>>> svalinn/master
          std::vector< std::string> vals;
          code = DAG->prop_values (entity, gystr, vals);
          propstring += gystr; 
@@ -153,12 +109,9 @@ ErrorCode readVol(char *fileptr)
          } // end if vals.size() > 1
          propstring += ", "; 
       } // end if DAG->has_prop
-<<<<<<< HEAD
       else if (DAG->has_prop(entity, "MAT"))
       {
       }
-=======
->>>>>>> svalinn/master
       std::ostream& out = std::cout;
       out << "\nVolume " << i  << " " << std::flush;
       if (propstring.length() )
@@ -169,24 +122,14 @@ ErrorCode readVol(char *fileptr)
          if (DAG->is_implicit_complement(entity) ) out << "Properties: " << propstring << std::endl;
          out << "(" << propstring << ")";
       }
-<<<<<<< HEAD
-=======
-      else
-      {
-         out << "  this volume is not a graveyard ";
-      }
->>>>>>> svalinn/master
   }  // end this volume
   std::cout << std::endl;
 }
 
-<<<<<<< HEAD
 //---------------------------------------------------------------------------//
 // readGraveyard
 //---------------------------------------------------------------------------//
 // 
-=======
->>>>>>> svalinn/master
 ErrorCode readGraveyard()
 {
   int num_vols = DAG->num_entities(3);
@@ -200,11 +143,7 @@ ErrorCode readGraveyard()
 
   std::vector< std::string > keywords;
   ret = DAG->detect_available_props( keywords );
-<<<<<<< HEAD
   // If you don't call parse_properties, props from make_property_string will be empty.
-=======
-  // If you don't do this props from make_property_string will be empty.
->>>>>>> svalinn/master
   ret = DAG->parse_properties( keywords);
 
    std::cout << keywords.size() << " metadata properties detected:" << std::endl;
@@ -226,13 +165,10 @@ ErrorCode readGraveyard()
 }
 
 
-<<<<<<< HEAD
 //---------------------------------------------------------------------------//
 // makePropertyString
 //---------------------------------------------------------------------------//
 /// 
-=======
->>>>>>> svalinn/master
 static std::string make_property_string( DagMC& dag, EntityHandle eh, std::vector<std::string> &properties )
 {
   ErrorCode ret;
@@ -243,10 +179,7 @@ static std::string make_property_string( DagMC& dag, EntityHandle eh, std::vecto
     if( dag.has_prop( eh, *p ) ){
       std::vector< std::string> vals;
       ret = dag.prop_values( eh, *p, vals );
-<<<<<<< HEAD
       CHECKERR(dag,ret);
-=======
->>>>>>> svalinn/master
       propstring += *p;
       if( vals.size() == 1 ){
         propstring += "=";
@@ -272,7 +205,6 @@ static std::string make_property_string( DagMC& dag, EntityHandle eh, std::vecto
   }
   return propstring;
 }
-<<<<<<< HEAD
 //---------------------------------------------------------------------------//
 // main
 //---------------------------------------------------------------------------//
@@ -303,6 +235,3 @@ int main(int argc, char* argv[])
   code = readVol(argv[1]);
   return 0;
 }
-=======
-
->>>>>>> svalinn/master
