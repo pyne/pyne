@@ -272,7 +272,7 @@ def _tree_log(depth, nuc, N, filename):
     return None
 
 
-def _traversal(nuc, A, phi, t, N_ini, out, tol, tree, depth, filename):
+def _traversal(nuc, A, phi, t, N_ini, out, tol, tree, filename = None, depth = None):
     """Nuclide transmutation traversal method.
 
     This method will traverse the reaction tree recursively, using a DFS
@@ -301,11 +301,13 @@ def _traversal(nuc, A, phi, t, N_ini, out, tol, tree, depth, filename):
     tree : Boolean
         True if a tree output file is desired.
         False if a tree output file is not desired.
-    depth : integer
-        Current depth of traversal (root at 0).
     filename : String
         Name of file to write tree log to.
-    
+        Must be provided if 'tree' is True.
+    depth : integer
+        Current depth of traversal (root at 0).
+        Should never be provided by user.
+
     Returns
     -------
     out : dictionary
@@ -314,7 +316,10 @@ def _traversal(nuc, A, phi, t, N_ini, out, tol, tree, depth, filename):
         number densities for the coupled nuclide in float format.
     """
     # Log initial nuclide
-    if depth == 0 and tree:
+    if depth is None and tree:
+        if filename is None:
+            # Filename not provided, throw exception
+        depth = 0
         _tree_log(depth, nuc, N_ini, filename)
     # Lookup decay constant of current nuclide
     lam = data.decay_const(nuc)
@@ -351,7 +356,7 @@ def _traversal(nuc, A, phi, t, N_ini, out, tol, tree, depth, filename):
         # Check against tolerance
         if _check_tol(N_final, tol):
             # Continue traversal
-            out = _traversal(child, B, phi, t, N_ini, out, tol, tree, depth+1, filename)
+            out = _traversal(child, B, phi, t, N_ini, out, tol, tree, filename, depth+1)
         # On recursion exit or truncation, write data from this nuclide
         if child in out.keys():
             out[child] += N_final[-1]
