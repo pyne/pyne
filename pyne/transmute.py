@@ -351,7 +351,7 @@ def _traversal(nuc, A, phi, t, N_ini, out, tol, tree, depth, filename):
         # Check against tolerance
         if _check_tol(N_final, tol):
             # Continue traversal
-            out = _traversal(child, B, phi, t, N_ini, out, tol, tree, depth+1)
+            out = _traversal(child, B, phi, t, N_ini, out, tol, tree, depth+1, filename)
         # On recursion exit or truncation, write data from this nuclide
         if child in out.keys():
             out[child] += N_final[-1]
