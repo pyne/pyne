@@ -319,6 +319,7 @@ def _traversal(nuc, A, phi, t, N_ini, out, tol, tree, filename = None, depth = N
     if depth is None and tree:
         if filename is None:
             # Filename not provided, throw exception
+            pass
         depth = 0
         _tree_log(depth, nuc, N_ini, filename)
     # Lookup decay constant of current nuclide
