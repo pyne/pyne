@@ -224,6 +224,27 @@ def _grow_matrix(A, prod, dest):
     return B
 
 
+def _check_tol(N, tol)
+    """Method to check if the current nuclide concentration exceeds the
+    specified tolerance.
+
+    Parameters
+    ----------
+    N : NumPy 1-dimensional array
+        The calculated vector of nuclide number densities
+    tol : float
+        The specified tolerance for the simulation.
+
+    Returns
+    -------
+    fail : Boolean
+        False if the final nuclide density is less than the tolerance.
+        True if the final nuclide density is not less than the tolerance.
+    """
+    fail = N_final[-1] > tol
+    return fail
+
+
 def _traversal(nuc, A, phi, t, N_ini, out, tol):
     """Nuclide transmutation traversal method.
 
@@ -288,7 +309,7 @@ def _traversal(nuc, A, phi, t, N_ini, out, tol):
         eB = _matrix_exp(B, t)
         N_final = np.dot(eB, N0)
         # Check against tolerance
-        if N_final[-1] > tol:
+        if _check_tol(N_final, tol):
             # Continue traversal
             out = _traversal(child, B, phi, t, N_ini, out, tol)
         # On recursion exit or truncation, write data from this nuclide
