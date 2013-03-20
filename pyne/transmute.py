@@ -245,7 +245,34 @@ def _check_tol(N, tol):
     return fail
 
 
-def _traversal(nuc, A, phi, t, N_ini, out, tol):
+def _tree_log(depth, nuc, N, filename):
+    """Logging method to track path of _traversal.
+
+    Parameters
+    ----------
+    depth : integer
+        Current depth of traversal (root at 0).
+    nuc : nucname
+        Current nuclide in traversal.
+    N : float
+        Current density of nuc.
+    filename : String
+        Name of file to write tree log to.
+
+    Returns
+    -------
+    None
+    """
+    spacing = depth * '----'
+    name = nucname.name(nuc)
+    Nstr = str(N)
+    entry = spacing + '> ' + name + ' (' + Nstr + ')\n'
+    with open(filename, 'a') as f:
+        f.write(entry)
+    return None
+
+
+def _traversal(nuc, A, phi, t, N_ini, out, tol, tree, depth, filename):
     """Nuclide transmutation traversal method.
 
     This method will traverse the reaction tree recursively, using a DFS
@@ -271,6 +298,13 @@ def _traversal(nuc, A, phi, t, N_ini, out, tol):
         number densities for the coupled nuclide in float format.
     tol : float
         Tolerance level to reference for tree truncation.
+    tree : Boolean
+        True if a tree output file is desired.
+        False if a tree output file is not desired.
+    depth : integer
+        Current depth of traversal (root at 0).
+    filename : String
+        Name of file to write tree log to.
     
     Returns
     -------
@@ -279,6 +313,9 @@ def _traversal(nuc, A, phi, t, N_ini, out, tol):
         nuclide. Keys are nuclide names in integer (zzaaam) form. Values are
         number densities for the coupled nuclide in float format.
     """
+    # Log initial nuclide
+    if depth == 0 and tree:
+        _tree_log(depth, nuc, N_ini, filename)
     # Lookup decay constant of current nuclide
     lam = data.decay_const(nuc)
     # Lookup decay products and reaction daughters
@@ -308,10 +345,13 @@ def _traversal(nuc, A, phi, t, N_ini, out, tol):
         # Compute matrix exponential and dot with density vector
         eB = _matrix_exp(B, t)
         N_final = np.dot(eB, N0)
+        # Log child
+        if tree:
+            _tree_log(depth+1, child, N_final[-1], filename)
         # Check against tolerance
         if _check_tol(N_final, tol):
             # Continue traversal
-            out = _traversal(child, B, phi, t, N_ini, out, tol)
+            out = _traversal(child, B, phi, t, N_ini, out, tol, tree, depth+1)
         # On recursion exit or truncation, write data from this nuclide
         if child in out.keys():
             out[child] += N_final[-1]
