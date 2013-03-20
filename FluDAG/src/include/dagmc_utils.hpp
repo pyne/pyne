@@ -2,6 +2,7 @@
 #define DAGMC_UTILS_H
 
 #include <iostream>
+#include <stdlib.h>
 #include <moab/Interface.hpp>
 using namespace moab;
 namespace moab
