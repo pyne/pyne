@@ -224,7 +224,7 @@ def _grow_matrix(A, prod, dest):
     return B
 
 
-def _check_tol(N, tol)
+def _check_tol(N, tol):
     """Method to check if the current nuclide concentration exceeds the
     specified tolerance.
 
