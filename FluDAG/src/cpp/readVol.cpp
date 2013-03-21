@@ -17,15 +17,21 @@
 #include "DagMC.hpp"
 #include <fstream>
 #include "moab/Types.hpp"
+#include "moab/Core.hpp"
 #include "DagWrapUtils.hh"
 
 using namespace moab;
 
 #define DAG DagMC::instance()
 
+static std::vector<EntityHandle> null_list;
+
 static std::string make_property_string( DagMC& , EntityHandle , std::vector<std::string> & );
-ErrorCode get_prop_values (EntityHandle, std::vector<EntityHandle>, std::string, std::string &);
+ErrorCode get_prop_values (EntityHandle entity, std::string property, std::string& propstring, 
+                           std::vector<EntityHandle> entityList);
 std::string makeRegionName(int );
+ErrorCode mcnp5_property_names( Interface* MBI );
+
 
 //---------------------------------------------------------------------------//
 // readVol
@@ -91,9 +97,14 @@ ErrorCode readVol(char *fileptr, const std::string* override_output_filename=NUL
   //  code = DAG->measure_volume(entity, volume_measure);
   //  std::cout << "\tvolume of entity " << i << " is " << volume_measure << std::endl;
       // Append to a property string for selected properties
-      get_prop_values(entity, matVols,       matstr,      propstring);
-      get_prop_values(entity, usrtrackVols,  usrtrackstr, propstring);
-      get_prop_values(entity, graveyardList, gystr,       propstring);
+      get_prop_values(entity, matstr,             propstring, matVols);
+      get_prop_values(entity, usrtrackstr,        propstring, usrtrackVols);
+      // get_prop_values(entity, CATEGORY_TAG_NAME,  propstring, null_list);
+      // get_prop_values(entity, NAME_TAG_NAME,      propstring, null_list);
+      get_prop_values(entity, gystr,              propstring, graveyardList);
+
+      Core mbi;
+      mcnp5_property_names( &mbi );
 
       std::ostream& out = std::cout;
       out << "\nVolume " << i  << " " << std::flush;
@@ -116,17 +127,22 @@ ErrorCode readVol(char *fileptr, const std::string* override_output_filename=NUL
 //---------------------------------------------------------------------------//
 /// For the given property, append its values to the string.
 /// @param entity     - the volume to check
-/// @param entityList - fills with those volumes that have the given property
 /// @param property   - the given property
 /// @param propstring - string to append to
-ErrorCode get_prop_values (EntityHandle entity, std::vector<EntityHandle> entityList,
-                             std::string property, std::string& propstring)
+/// @param entityList - fills with those volumes that have the given property. 
+///                     If the statically-defined empty null_list was passed, don't do anything.
+ErrorCode get_prop_values (EntityHandle entity, std::string property, std::string& propstring, 
+                           std::vector<EntityHandle> entityList)
 {
   ErrorCode code;
   std::vector<std::string> vals;
   if (DAG->has_prop(entity, property))
   {
-     entityList.push_back(entity);
+	
+     if (&entityList != &null_list)
+     {
+        entityList.push_back(entity);
+     }
      code = DAG->prop_values (entity, property, vals);
      propstring += property; 
      if (vals.size() == 1)
@@ -147,11 +163,85 @@ ErrorCode get_prop_values (EntityHandle entity, std::vector<EntityHandle> entity
      } // end if vals.size() > 1
      propstring += ", "; 
   } // end if DAG->has_prop
-
-   return code;
+  return code;
 }
 
+
+
 //---------------------------------------------------------------------------//
+// get_signed_volume(..)
+//---------------------------------------------------------------------------//
+/// From dagmc_preproc
+/// 1. fill category tag with tag names
+ErrorCode mcnp5_property_names( Interface* MBI )
+{
+  ErrorCode rval;
+  Tag category_tag;
+  rval = MBI->tag_get_handle( CATEGORY_TAG_NAME, 32, MB_TYPE_OPAQUE, category_tag );
+  if (MB_SUCCESS != rval)
+    return rval;
+  
+  // group_val[]:  Set an array of pointers consisting of one ptr to string "Group"
+  char group_category[CATEGORY_TAG_SIZE];
+  std::fill(group_category, group_category+CATEGORY_TAG_SIZE, '\0');
+  sprintf(group_category, "%s", "Group");
+  const void* const group_val[] = {&group_category};
+
+  // groups:  Range filled with entities that have tags for group.  I think
+  Range groups;
+  rval = MBI->get_entities_by_type_and_tag(0, MBENTITYSET, &category_tag,
+                                           group_val, 1, groups);
+  if (MB_SUCCESS != rval)
+    return rval;
+
+  Tag name_tag;
+  rval = MBI->tag_get_handle( NAME_TAG_NAME, NAME_TAG_SIZE, MB_TYPE_OPAQUE, name_tag );
+  if (MB_SUCCESS != rval)
+    return rval;
+  // std::cout << __FILE__ << ", " << __func__ << ":" << __LINE__ << "_______________" << std::endl;
+  // Run through every entity in "groups"
+  for( Range::iterator i = groups.begin(); i != groups.end(); ++i )
+  {
+    EntityHandle grp = *i;
+    const void* p;
+    int ignored;
+    // Get the name_tag data for the current group
+    rval = MBI->tag_get_by_ptr( name_tag, &grp, 1, &p, &ignored );
+    if( MB_SUCCESS != rval ) return rval;
+
+    // string modname:  convert the name_tag data (in &p from previous call)
+    const char* grpname = static_cast<const char*>(p);
+    std::string modname(grpname);
+    std::cout << modname << std::endl;
+    /*
+    size_t idx;
+    if( modname.find("tally_") == 0 ){
+        std::string arg = modname.substr(6);
+        // replace up to 2 underscores
+        int count = 0;
+        while( count < 2 &&  (idx = arg.find_first_of("_")) != arg.npos )
+        {
+          count ++;
+          arg[idx] = '.';
+        }
+        modname = modname.substr(0,6) + arg;
+    }
+    else if( (idx = modname.find("imp_")) != modname.npos ){
+        modname[idx+3] = '.';
+    }
+
+    if( modname != grpname ){
+      std::cout << "Group name " << grpname << " changed to " << modname << std::endl;
+      p = static_cast<const void*>(modname.c_str());
+      int length = NAME_TAG_SIZE;
+      rval = MBI->tag_set_by_ptr( name_tag, &grp, 1, &p, &length);
+      if( MB_SUCCESS != rval ) return rval;
+    }
+*/
+  } // End iteration through groups
+  return MB_SUCCESS;
+}
+
 // readProperties()  -- not called
 //---------------------------------------------------------------------------//
 // 
