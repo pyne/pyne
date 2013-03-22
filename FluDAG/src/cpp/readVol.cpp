@@ -102,9 +102,15 @@ ErrorCode readVol(char *fileptr, const std::string* override_output_filename=NUL
       // get_prop_values(entity, CATEGORY_TAG_NAME,  propstring, null_list);
       // get_prop_values(entity, NAME_TAG_NAME,      propstring, null_list);
       get_prop_values(entity, gystr,              propstring, graveyardList);
+      
+
 
       Core mbi;
-      mcnp5_property_names( &mbi );
+      Tag t = DAG->name_tag();
+      std::string tagname; 
+      mbi.tag_get_name(t, tagname); 
+      std::cout << tagname << std::endl;
+     //  mcnp5_property_names( &mbi );
 
       std::ostream& out = std::cout;
       out << "\nVolume " << i  << " " << std::flush;
@@ -198,7 +204,8 @@ ErrorCode mcnp5_property_names( Interface* MBI )
   rval = MBI->tag_get_handle( NAME_TAG_NAME, NAME_TAG_SIZE, MB_TYPE_OPAQUE, name_tag );
   if (MB_SUCCESS != rval)
     return rval;
-  // std::cout << __FILE__ << ", " << __func__ << ":" << __LINE__ << "_______________" << std::endl;
+  std::cout <<  __func__ << ":" << __LINE__ <<  std::endl;
+   
   // Run through every entity in "groups"
   for( Range::iterator i = groups.begin(); i != groups.end(); ++i )
   {
