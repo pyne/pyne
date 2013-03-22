@@ -112,6 +112,7 @@ private:
   TrackLengthMeshTally& operator=( const TrackLengthMeshTally& mt ); // unimplemented
   TrackLengthMeshTally( const TrackLengthMeshTally& mt ); // unimplemented
 
+  int num_negative_tracks;
 };
 
 } // end namespace moab

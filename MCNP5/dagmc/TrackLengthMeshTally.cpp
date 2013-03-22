@@ -244,7 +244,7 @@ TrackLengthMeshTally::TrackLengthMeshTally( const fmesh_card& fmesh, Interface* 
   obb_tool( new OrientedBoxTreeTool(mb_p) ),
   last_visited_tet( 0 ), 
   convex( false ), conformality( NULL ), conformal_surface_source( false ),
-  mcnp_current_cell( NULL ), last_cell( -1 )
+  mcnp_current_cell( NULL ), last_cell( -1 ), num_negative_tracks(0)
 {}
   
 TrackLengthMeshTally::~TrackLengthMeshTally(){
@@ -487,6 +487,13 @@ ErrorCode TrackLengthMeshTally::write_results( double sp_norm, double mult_fact,
   rval = mb->write_file( filename.c_str(), NULL, NULL, &tally_set, 1, &(output_tags[0]), output_tags.size() );
   assert (rval == MB_SUCCESS );
  
+  if ( num_negative_tracks != 0 )
+  {
+    std::cout << std::endl;
+    std::cout << num_negative_tracks << " negative tracks occurred during the simulation." << std::endl;
+    std::cout << "These tracks were not included in the final tally results." << std::endl << std::endl;
+  }
+
   return MB_SUCCESS;
 }
 
@@ -924,10 +931,11 @@ void TrackLengthMeshTally::add_track_segment( CartVect& start, CartVect& vec,
           }
 
         }
+        // If track length is negative do not add score to the tally and end track early
         if( track_length < 0 ){
           std::cerr << "Warning-- negative track length.   Dubious continuation.." << std::endl;
-          track_length = -track_length; 
-          //return;
+          ++num_negative_tracks;
+          return;
         }
         
         double score;
