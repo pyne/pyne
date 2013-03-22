@@ -35,6 +35,7 @@ def main():
                     ('map', 'str', 'double'),
                     ('map', 'int', 'int'),
                     ('map', 'int', 'double'),
+                    ('map', 'uint', 'double'),
                     ('map', 'int', 'complex'),
                     ('map', 'int', 'vector[double]'),
                     ('map', 'str', 'vector[double]'),

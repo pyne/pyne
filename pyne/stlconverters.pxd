@@ -217,6 +217,19 @@ cdef class _MapIntDouble:
 
 
 
+# MapUIntDouble
+cdef class MapIterUIntDouble(object):
+    cdef cpp_map[extra_types.uint, double].iterator * iter_now
+    cdef cpp_map[extra_types.uint, double].iterator * iter_end
+    cdef void init(MapIterUIntDouble, cpp_map[extra_types.uint, double] *)
+
+cdef class _MapUIntDouble:
+    cdef cpp_map[extra_types.uint, double] * map_ptr
+    cdef public bint _free_map
+
+
+
+
 # MapIntComplex
 cdef class MapIterIntComplex(object):
     cdef cpp_map[int, extra_types.complex_t].iterator * iter_now

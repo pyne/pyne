@@ -257,6 +257,28 @@ def test_map_int_dbl():
 
 
 
+# MapUIntDouble
+def test_map_uint_dbl():
+    m = conv.MapUIntDouble()
+    m[1] = 18
+    m[65] = -65.5555
+    assert_equal(len(m), 2)
+    assert_equal(m[65], -65.5555)
+
+    m = conv.MapUIntDouble({4043370667L: 42.42, 42L: 1.0})
+    assert_equal(len(m), 2)
+    assert_equal(m[4043370667L], 42.42)
+
+    n = conv.MapUIntDouble(m, False)
+    assert_equal(len(n), 2)
+    assert_equal(n[4043370667L], 42.42)
+
+    # points to the same underlying map
+    n[65] = -65.5555
+    assert_equal(m[65], -65.5555)
+
+
+
 # MapIntComplex
 def test_map_int_complex():
     m = conv.MapIntComplex()
