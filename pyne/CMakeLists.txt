@@ -5,13 +5,17 @@ include_directories(${PYNE_INCLUDE_DIRS})
 get_property(inc_dirs DIRECTORY PROPERTY INCLUDE_DIRECTORIES)
 message("-- C_INCLUDE_PATH for ${CMAKE_CURRENT_SOURCE_DIR}: ${inc_dirs}")
 
+# extra_types
+set_source_files_properties(${PROJECT_SOURCE_DIR}/pyne/extra_types.pyx
+                            PROPERTIES CYTHON_IS_CXX TRUE)
+cython_add_module(extra_types extra_types.pyx)
 
-# STL converters
+# STL containers
 # If the pyx file is a C++ file, we should specify that here.
 # then, add the module
-set_source_files_properties(${PROJECT_SOURCE_DIR}/pyne/stlconverters.pyx 
+set_source_files_properties(${PROJECT_SOURCE_DIR}/pyne/stlcontainers.pyx 
                             PROPERTIES CYTHON_IS_CXX TRUE)
-cython_add_module(stlconverters stlconverters.pyx)
+cython_add_module(stlcontainers stlcontainers.pyx)
                             
 # jsoncpp
 set_source_files_properties(${PROJECT_SOURCE_DIR}/pyne/jsoncpp.pyx 
