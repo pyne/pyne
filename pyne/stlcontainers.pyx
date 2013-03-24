@@ -9,6 +9,10 @@ from libcpp.vector cimport vector as cpp_vector
 from cython.operator cimport dereference as deref
 from cython.operator cimport preincrement as inc
 from libc.stdlib cimport malloc, free
+from libcpp.string cimport string as std_string
+from libcpp.utility cimport pair
+from libcpp.map cimport map as cpp_map
+from libcpp.vector cimport vector as cpp_vector
 
 # Python Imports
 import collections
@@ -18,282 +22,10 @@ import numpy as np
 
 np.import_array()
 
-# Local imports
-include "include/cython_version.pxi"
-IF CYTHON_VERSION_MAJOR == 0 and CYTHON_VERSION_MINOR >= 17:
-    from libcpp.string cimport string as std_string
-    from libcpp.utility cimport pair
-    from libcpp.map cimport map as cpp_map
-    from libcpp.vector cimport vector as cpp_vector
-ELSE:
-    from pyne._includes.libcpp.string cimport string as std_string
-    from pyne._includes.libcpp.utility cimport pair
-    from pyne._includes.libcpp.map cimport map as cpp_map
-    from pyne._includes.libcpp.vector cimport vector as cpp_vector
 cimport extra_types
 
-cdef extra_types.complex_t py2c_complex(object pyv):
-    cdef extra_types.complex_t cv
-    pyv = complex(pyv)
-    cv = extra_types.complex_t()
-    cv.re = pyv.real
-    cv.im = pyv.imag
-    return cv
-
-cdef np.ndarray c2py_vector_dbl(cpp_vector[double] * v):
-    cdef np.ndarray vview
-    cdef np.ndarray pyv
-    cdef np.npy_intp v_shape[1]
-    v_shape[0] = <np.npy_intp> v.size()
-    vview = np.PyArray_SimpleNewFromData(1, v_shape, np.NPY_FLOAT64, &v[0][0])
-    pyv = np.PyArray_Copy(vview)
-    return pyv
-
-cdef cpp_vector[double] py2c_vector_dbl(object v):
-    cdef int i
-    cdef int v_size = len(v)
-    cdef double * v_data
-    cdef cpp_vector[double] vec
-    if isinstance(v, np.ndarray) and (<np.ndarray> v).descr.type_num == np.NPY_FLOAT64:
-        v_data = <double *> np.PyArray_DATA(<np.ndarray> v)
-        vec = cpp_vector[double](<size_t> v_size)
-        for i in range(v_size):
-            vec[i] = v_data[i]
-    else:
-        vec = cpp_vector[double](<size_t> v_size)
-        for i in range(v_size):
-            vec[i] = <double> v[i]
-    return vec
-
-# integer sets
-cdef cpp_set[int] py_to_cpp_set_int(set pyset):
-    cdef int v
-    cdef cpp_set[int] cppset = cpp_set[int]()
-    for value in pyset:
-        v = value
-        cppset.insert(v)
-    return cppset
-
-cdef set cpp_to_py_set_int(cpp_set[int] cppset):
-    pyset = set()
-    cdef cpp_set[int].iterator setiter = cppset.begin()
-    while setiter != cppset.end():
-        pyset.add(int(deref(setiter)))
-        inc(setiter)
-    return pyset
-
-
-# string sets
-cdef cpp_set[std_string] py_to_cpp_set_str(set pyset):
-    cdef std_string v
-    cdef cpp_set[std_string] cppset = cpp_set[std_string]()
-    for value in pyset:
-        v = std_string(<char *> value)
-        cppset.insert(v)
-    return cppset
-
-cdef set cpp_to_py_set_str(cpp_set[std_string] cppset):
-    pyset = set()
-    cdef cpp_set[std_string].iterator setiter = cppset.begin()
-    while setiter != cppset.end():
-        pyset.add(str(<char *> deref(setiter).c_str()))
-        inc(setiter)
-    return pyset
-
-
-# <integer, integer> conversions
-cdef cpp_map[int, int] dict_to_map_int_int(dict pydict):
-    cdef cpp_map[int, int] cppmap = cpp_map[int, int]()
-    for key, value in pydict.items():
-        cppmap[key] = value
-    return cppmap
-
-cdef dict map_to_dict_int_int(cpp_map[int, int] cppmap):
-    pydict = {}
-    cdef cpp_map[int, int].iterator mapiter = cppmap.begin()
-    while mapiter != cppmap.end():
-        pydict[int(deref(mapiter).first)] = int(deref(mapiter).second)
-        inc(mapiter)
-    return pydict
-
-
-# <integer, double> conversions
-cdef cpp_map[int, double] dict_to_map_int_dbl(dict pydict):
-    cdef cpp_map[int, double] cppmap = cpp_map[int, double]()
-    for key, value in pydict.items():
-        cppmap[key] = <double> value
-    return cppmap
-
-cdef dict map_to_dict_int_dbl(cpp_map[int, double] cppmap):
-    pydict = {}
-    cdef cpp_map[int, double].iterator mapiter = cppmap.begin()
-    while mapiter != cppmap.end():
-        pydict[int(deref(mapiter).first)] = float(deref(mapiter).second)
-        inc(mapiter)
-    return pydict
-
-
-# <string, integer> conversions
-cdef cpp_map[std_string, int] dict_to_map_str_int(dict pydict):
-    cdef cpp_map[std_string, int] cppmap = cpp_map[std_string, int]()
-    for key, value in pydict.items():
-        cppmap[std_string(<char *> key)] = value
-    return cppmap
-
-cdef dict map_to_dict_str_int(cpp_map[std_string, int] cppmap):
-    pydict = {}
-    cdef cpp_map[std_string, int].iterator mapiter = cppmap.begin()
-    while mapiter != cppmap.end():
-        pydict[str(<char *> deref(mapiter).first.c_str())] = int(deref(mapiter).second)
-        inc(mapiter)
-    return pydict
-
-
-# <integer, string> conversions
-cdef cpp_map[int, std_string] dict_to_map_int_str(dict pydict):
-    cdef cpp_map[int, std_string] cppmap = cpp_map[int, std_string]()
-    for key, value in pydict.items():
-        cppmap[key] = std_string(<char *> value)
-    return cppmap
-
-cdef dict map_to_dict_int_str(cpp_map[int, std_string] cppmap):
-    pydict = {}
-    cdef cpp_map[int, std_string].iterator mapiter = cppmap.begin()
-    while mapiter != cppmap.end():
-        pydict[int(deref(mapiter).first)] = str(<char *> deref(mapiter).second.c_str())
-        inc(mapiter)
-    return pydict
-
-
-# <string, double> conversions
-cdef cpp_map[std_string, double] dict_to_map_str_dbl(dict pydict):
-    cdef cpp_map[std_string, double] cppmap = cpp_map[std_string, double]()
-    for key, value in pydict.items():
-        cppmap[std_string(<char *> key)] = <double> value
-    return cppmap
-
-cdef dict map_to_dict_str_dbl(cpp_map[std_string, double] cppmap):
-    pydict = {}
-    cdef cpp_map[std_string, double].iterator mapiter = cppmap.begin()
-    while mapiter != cppmap.end():
-        pydict[str(<char *> deref(mapiter).first.c_str())] = float(deref(mapiter).second)
-        inc(mapiter)
-    return pydict
-
-
-# SetInt
-cdef class SetIterInt(object):
-    cdef void init(self, cpp_set[int] * set_ptr):
-        cdef cpp_set[int].iterator * itn = <cpp_set[int].iterator *> malloc(sizeof(set_ptr.begin()))
-        itn[0] = set_ptr.begin()
-        self.iter_now = itn
-
-        cdef cpp_set[int].iterator * ite = <cpp_set[int].iterator *> malloc(sizeof(set_ptr.end()))
-        ite[0] = set_ptr.end()
-        self.iter_end = ite
-
-    def __dealloc__(self):
-        free(self.iter_now)
-        free(self.iter_end)
-
-    def __iter__(self):
-        return self
-
-    def __next__(self):
-        cdef cpp_set[int].iterator inow = deref(self.iter_now)
-        cdef cpp_set[int].iterator iend = deref(self.iter_end)
-
-        if inow != iend:
-            pyval = int(deref(inow))
-        else:
-            raise StopIteration
-
-        inc(deref(self.iter_now))
-        return pyval
-
-
-cdef class _SetInt:
-    def __cinit__(self, new_set=True, bint free_set=True):
-        cdef int s
-
-        # Decide how to init set, if at all
-        if isinstance(new_set, _SetInt):
-            self.set_ptr = (<_SetInt> new_set).set_ptr
-        elif hasattr(new_set, '__iter__') or \
-                (hasattr(new_set, '__len__') and
-                hasattr(new_set, '__getitem__')):
-            self.set_ptr = new cpp_set[int]()
-            for value in new_set:
-                s = value
-                self.set_ptr.insert(s)
-        elif bool(new_set):
-            self.set_ptr = new cpp_set[int]()
-
-        # Store free_set
-        self._free_set = free_set
-
-    def __dealloc__(self):
-        if self._free_set:
-            del self.set_ptr
-
-    def __contains__(self, value):
-        cdef int s
-        if isinstance(value, int):
-            s = value
-        else:
-            return False
-
-        if 0 < self.set_ptr.count(s):
-            return True
-        else:
-            return False
-
-    def __len__(self):
-        return self.set_ptr.size()
-
-    def __iter__(self):
-        cdef SetIterInt si = SetIterInt()
-        si.init(self.set_ptr)
-        return si
-
-    def add(self, int value):
-        cdef int v
-        v = value
-        self.set_ptr.insert(v)
-        return
-
-    def discard(self, value):
-        cdef int v
-        if value in self:
-            v = value
-            self.set_ptr.erase(v)
-        return
-
-
-class SetInt(_SetInt, collections.Set):
-    """Wrapper class for C++ standard library sets of type <integer>.
-    Provides set like interface on the Python level.
-
-    Parameters
-    ----------
-    new_set : bool or set-like
-        Boolean on whether to make a new set or not, or set-like object
-        with values which are castable to the appropriate type.
-    free_set : bool
-        Flag for whether the pointer to the C++ set should be deallocated
-        when the wrapper is dereferenced.
-
-    """
-    def __str__(self):
-        return self.__repr__()
-
-    def __repr__(self):
-        return "set([" + ", ".join([repr(i) for i in self]) + "])"
-
-
-
 # SetStr
-cdef class SetIterStr(object):
+cdef class _SetIterStr(object):
     cdef void init(self, cpp_set[std_string] * set_ptr):
         cdef cpp_set[std_string].iterator * itn = <cpp_set[std_string].iterator *> malloc(sizeof(set_ptr.begin()))
         itn[0] = set_ptr.begin()
@@ -315,6 +47,7 @@ cdef class SetIterStr(object):
         cdef cpp_set[std_string].iterator iend = deref(self.iter_end)
 
         if inow != iend:
+
             pyval = str(<char *> deref(inow).c_str())
         else:
             raise StopIteration
@@ -327,6 +60,7 @@ cdef class _SetStr:
     def __cinit__(self, new_set=True, bint free_set=True):
         cdef std_string s
 
+
         # Decide how to init set, if at all
         if isinstance(new_set, _SetStr):
             self.set_ptr = (<_SetStr> new_set).set_ptr
@@ -335,6 +69,7 @@ cdef class _SetStr:
                 hasattr(new_set, '__getitem__')):
             self.set_ptr = new cpp_set[std_string]()
             for value in new_set:
+
                 s = std_string(<char *> value)
                 self.set_ptr.insert(s)
         elif bool(new_set):
@@ -349,7 +84,9 @@ cdef class _SetStr:
 
     def __contains__(self, value):
         cdef std_string s
+
         if isinstance(value, basestring):
+
             s = std_string(<char *> value)
         else:
             return False
@@ -363,19 +100,23 @@ cdef class _SetStr:
         return self.set_ptr.size()
 
     def __iter__(self):
-        cdef SetIterStr si = SetIterStr()
+        cdef _SetIterStr si = _SetIterStr()
         si.init(self.set_ptr)
         return si
 
     def add(self, char * value):
         cdef std_string v
+
+
         v = std_string(<char *> value)
         self.set_ptr.insert(v)
         return
 
     def discard(self, value):
         cdef std_string v
+
         if value in self:
+
             v = std_string(<char *> value)
             self.set_ptr.erase(v)
         return
@@ -403,8 +144,128 @@ class SetStr(_SetStr, collections.Set):
 
 
 
+# SetInt
+cdef class _SetIterInt(object):
+    cdef void init(self, cpp_set[int] * set_ptr):
+        cdef cpp_set[int].iterator * itn = <cpp_set[int].iterator *> malloc(sizeof(set_ptr.begin()))
+        itn[0] = set_ptr.begin()
+        self.iter_now = itn
+
+        cdef cpp_set[int].iterator * ite = <cpp_set[int].iterator *> malloc(sizeof(set_ptr.end()))
+        ite[0] = set_ptr.end()
+        self.iter_end = ite
+
+    def __dealloc__(self):
+        free(self.iter_now)
+        free(self.iter_end)
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        cdef cpp_set[int].iterator inow = deref(self.iter_now)
+        cdef cpp_set[int].iterator iend = deref(self.iter_end)
+
+        if inow != iend:
+
+            pyval = int(deref(inow))
+        else:
+            raise StopIteration
+
+        inc(deref(self.iter_now))
+        return pyval
+
+
+cdef class _SetInt:
+    def __cinit__(self, new_set=True, bint free_set=True):
+        cdef int s
+
+
+        # Decide how to init set, if at all
+        if isinstance(new_set, _SetInt):
+            self.set_ptr = (<_SetInt> new_set).set_ptr
+        elif hasattr(new_set, '__iter__') or \
+                (hasattr(new_set, '__len__') and
+                hasattr(new_set, '__getitem__')):
+            self.set_ptr = new cpp_set[int]()
+            for value in new_set:
+
+                s = value
+                self.set_ptr.insert(s)
+        elif bool(new_set):
+            self.set_ptr = new cpp_set[int]()
+
+        # Store free_set
+        self._free_set = free_set
+
+    def __dealloc__(self):
+        if self._free_set:
+            del self.set_ptr
+
+    def __contains__(self, value):
+        cdef int s
+
+        if isinstance(value, int) or isinstance(value, long):
+
+            s = value
+        else:
+            return False
+
+        if 0 < self.set_ptr.count(s):
+            return True
+        else:
+            return False
+
+    def __len__(self):
+        return self.set_ptr.size()
+
+    def __iter__(self):
+        cdef _SetIterInt si = _SetIterInt()
+        si.init(self.set_ptr)
+        return si
+
+    def add(self, int value):
+        cdef int v
+
+
+        v = value
+        self.set_ptr.insert(v)
+        return
+
+    def discard(self, value):
+        cdef int v
+
+        if value in self:
+
+            v = value
+            self.set_ptr.erase(v)
+        return
+
+
+class SetInt(_SetInt, collections.Set):
+    """Wrapper class for C++ standard library sets of type <integer>.
+    Provides set like interface on the Python level.
+
+    Parameters
+    ----------
+    new_set : bool or set-like
+        Boolean on whether to make a new set or not, or set-like object
+        with values which are castable to the appropriate type.
+    free_set : bool
+        Flag for whether the pointer to the C++ set should be deallocated
+        when the wrapper is dereferenced.
+
+    """
+    def __str__(self):
+        return self.__repr__()
+
+    def __repr__(self):
+        return "set([" + ", ".join([repr(i) for i in self]) + "])"
+
+
+
 # Map(Str, Str)
-cdef class MapIterStrStr(object):
+cdef class _MapIterStrStr(object):
     cdef void init(self, cpp_map[std_string, std_string] * map_ptr):
         cdef cpp_map[std_string, std_string].iterator * itn = <cpp_map[std_string, std_string].iterator *> malloc(sizeof(map_ptr.begin()))
         itn[0] = map_ptr.begin()
@@ -426,6 +287,7 @@ cdef class MapIterStrStr(object):
         cdef cpp_map[std_string, std_string].iterator iend = deref(self.iter_end)
 
         if inow != iend:
+
             pyval = str(<char *> deref(inow).first.c_str())
         else:
             raise StopIteration
@@ -437,17 +299,23 @@ cdef class _MapStrStr:
     def __cinit__(self, new_map=True, bint free_map=True):
         cdef pair[std_string, std_string] item
 
+
+
         # Decide how to init map, if at all
         if isinstance(new_map, _MapStrStr):
             self.map_ptr = (<_MapStrStr> new_map).map_ptr
         elif hasattr(new_map, 'items'):
             self.map_ptr = new cpp_map[std_string, std_string]()
             for key, value in new_map.items():
+
+
                 item = pair[std_string, std_string](std_string(<char *> key), std_string(<char *> value))
                 self.map_ptr.insert(item)
         elif hasattr(new_map, '__len__'):
             self.map_ptr = new cpp_map[std_string, std_string]()
             for key, value in new_map:
+
+
                 item = pair[std_string, std_string](std_string(<char *> key), std_string(<char *> value))
                 self.map_ptr.insert(item)
         elif bool(new_map):
@@ -462,8 +330,10 @@ cdef class _MapStrStr:
 
     def __contains__(self, key):
         cdef std_string k
+
         if not isinstance(key, basestring):
             return False
+
         k = std_string(<char *> key)
 
         if 0 < self.map_ptr.count(k):
@@ -475,7 +345,7 @@ cdef class _MapStrStr:
         return self.map_ptr.size()
 
     def __iter__(self):
-        cdef MapIterStrStr mi = MapIterStrStr()
+        cdef _MapIterStrStr mi = _MapIterStrStr()
         mi.init(self.map_ptr)
         return mi
 
@@ -483,23 +353,33 @@ cdef class _MapStrStr:
         cdef std_string k
         cdef std_string v
 
+
         if not isinstance(key, basestring):
             raise TypeError("Only string keys are valid.")
+
         k = std_string(<char *> key)
 
         if 0 < self.map_ptr.count(k):
             v = deref(self.map_ptr)[k]
-            return str(<char *> v.c_str())
+
+            return str(<char *> deref(self.map_ptr)[k].c_str())
         else:
             raise KeyError
 
     def __setitem__(self, key, value):
-        cdef pair[std_string, std_string] item = pair[std_string, std_string](std_string(<char *> key), std_string(<char *> value))
+
+
+        cdef pair[std_string, std_string] item
+
+
+        item = pair[std_string, std_string](std_string(<char *> key), std_string(<char *> value))
         self.map_ptr.insert(item)
 
     def __delitem__(self, key):
         cdef std_string k
+
         if key in self:
+
             k = std_string(<char *> key)
             self.map_ptr.erase(k)
 
@@ -527,7 +407,7 @@ class MapStrStr(_MapStrStr, collections.MutableMapping):
 
 
 # Map(Str, Int)
-cdef class MapIterStrInt(object):
+cdef class _MapIterStrInt(object):
     cdef void init(self, cpp_map[std_string, int] * map_ptr):
         cdef cpp_map[std_string, int].iterator * itn = <cpp_map[std_string, int].iterator *> malloc(sizeof(map_ptr.begin()))
         itn[0] = map_ptr.begin()
@@ -549,6 +429,7 @@ cdef class MapIterStrInt(object):
         cdef cpp_map[std_string, int].iterator iend = deref(self.iter_end)
 
         if inow != iend:
+
             pyval = str(<char *> deref(inow).first.c_str())
         else:
             raise StopIteration
@@ -560,17 +441,23 @@ cdef class _MapStrInt:
     def __cinit__(self, new_map=True, bint free_map=True):
         cdef pair[std_string, int] item
 
+
+
         # Decide how to init map, if at all
         if isinstance(new_map, _MapStrInt):
             self.map_ptr = (<_MapStrInt> new_map).map_ptr
         elif hasattr(new_map, 'items'):
             self.map_ptr = new cpp_map[std_string, int]()
             for key, value in new_map.items():
+
+
                 item = pair[std_string, int](std_string(<char *> key), value)
                 self.map_ptr.insert(item)
         elif hasattr(new_map, '__len__'):
             self.map_ptr = new cpp_map[std_string, int]()
             for key, value in new_map:
+
+
                 item = pair[std_string, int](std_string(<char *> key), value)
                 self.map_ptr.insert(item)
         elif bool(new_map):
@@ -585,8 +472,10 @@ cdef class _MapStrInt:
 
     def __contains__(self, key):
         cdef std_string k
+
         if not isinstance(key, basestring):
             return False
+
         k = std_string(<char *> key)
 
         if 0 < self.map_ptr.count(k):
@@ -598,7 +487,7 @@ cdef class _MapStrInt:
         return self.map_ptr.size()
 
     def __iter__(self):
-        cdef MapIterStrInt mi = MapIterStrInt()
+        cdef _MapIterStrInt mi = _MapIterStrInt()
         mi.init(self.map_ptr)
         return mi
 
@@ -606,23 +495,33 @@ cdef class _MapStrInt:
         cdef std_string k
         cdef int v
 
+
         if not isinstance(key, basestring):
             raise TypeError("Only string keys are valid.")
+
         k = std_string(<char *> key)
 
         if 0 < self.map_ptr.count(k):
             v = deref(self.map_ptr)[k]
-            return int(v)
+
+            return int(deref(self.map_ptr)[k])
         else:
             raise KeyError
 
     def __setitem__(self, key, value):
-        cdef pair[std_string, int] item = pair[std_string, int](std_string(<char *> key), value)
+
+
+        cdef pair[std_string, int] item
+
+
+        item = pair[std_string, int](std_string(<char *> key), value)
         self.map_ptr.insert(item)
 
     def __delitem__(self, key):
         cdef std_string k
+
         if key in self:
+
             k = std_string(<char *> key)
             self.map_ptr.erase(k)
 
@@ -650,7 +549,7 @@ class MapStrInt(_MapStrInt, collections.MutableMapping):
 
 
 # Map(Int, Str)
-cdef class MapIterIntStr(object):
+cdef class _MapIterIntStr(object):
     cdef void init(self, cpp_map[int, std_string] * map_ptr):
         cdef cpp_map[int, std_string].iterator * itn = <cpp_map[int, std_string].iterator *> malloc(sizeof(map_ptr.begin()))
         itn[0] = map_ptr.begin()
@@ -672,6 +571,7 @@ cdef class MapIterIntStr(object):
         cdef cpp_map[int, std_string].iterator iend = deref(self.iter_end)
 
         if inow != iend:
+
             pyval = int(deref(inow).first)
         else:
             raise StopIteration
@@ -683,17 +583,23 @@ cdef class _MapIntStr:
     def __cinit__(self, new_map=True, bint free_map=True):
         cdef pair[int, std_string] item
 
+
+
         # Decide how to init map, if at all
         if isinstance(new_map, _MapIntStr):
             self.map_ptr = (<_MapIntStr> new_map).map_ptr
         elif hasattr(new_map, 'items'):
             self.map_ptr = new cpp_map[int, std_string]()
             for key, value in new_map.items():
+
+
                 item = pair[int, std_string](key, std_string(<char *> value))
                 self.map_ptr.insert(item)
         elif hasattr(new_map, '__len__'):
             self.map_ptr = new cpp_map[int, std_string]()
             for key, value in new_map:
+
+
                 item = pair[int, std_string](key, std_string(<char *> value))
                 self.map_ptr.insert(item)
         elif bool(new_map):
@@ -708,8 +614,10 @@ cdef class _MapIntStr:
 
     def __contains__(self, key):
         cdef int k
-        if not isinstance(key, int):
+
+        if not isinstance(key, int) and not isinstance(key, long):
             return False
+
         k = key
 
         if 0 < self.map_ptr.count(k):
@@ -721,7 +629,7 @@ cdef class _MapIntStr:
         return self.map_ptr.size()
 
     def __iter__(self):
-        cdef MapIterIntStr mi = MapIterIntStr()
+        cdef _MapIterIntStr mi = _MapIterIntStr()
         mi.init(self.map_ptr)
         return mi
 
@@ -729,23 +637,33 @@ cdef class _MapIntStr:
         cdef int k
         cdef std_string v
 
-        if not isinstance(key, int):
+
+        if not isinstance(key, int) and not isinstance(key, long):
             raise TypeError("Only integer keys are valid.")
+
         k = key
 
         if 0 < self.map_ptr.count(k):
             v = deref(self.map_ptr)[k]
-            return str(<char *> v.c_str())
+
+            return str(<char *> deref(self.map_ptr)[k].c_str())
         else:
             raise KeyError
 
     def __setitem__(self, key, value):
-        cdef pair[int, std_string] item = pair[int, std_string](key, std_string(<char *> value))
+
+
+        cdef pair[int, std_string] item
+
+
+        item = pair[int, std_string](key, std_string(<char *> value))
         self.map_ptr.insert(item)
 
     def __delitem__(self, key):
         cdef int k
+
         if key in self:
+
             k = key
             self.map_ptr.erase(k)
 
@@ -773,7 +691,7 @@ class MapIntStr(_MapIntStr, collections.MutableMapping):
 
 
 # Map(Str, UInt)
-cdef class MapIterStrUInt(object):
+cdef class _MapIterStrUInt(object):
     cdef void init(self, cpp_map[std_string, extra_types.uint] * map_ptr):
         cdef cpp_map[std_string, extra_types.uint].iterator * itn = <cpp_map[std_string, extra_types.uint].iterator *> malloc(sizeof(map_ptr.begin()))
         itn[0] = map_ptr.begin()
@@ -795,6 +713,7 @@ cdef class MapIterStrUInt(object):
         cdef cpp_map[std_string, extra_types.uint].iterator iend = deref(self.iter_end)
 
         if inow != iend:
+
             pyval = str(<char *> deref(inow).first.c_str())
         else:
             raise StopIteration
@@ -806,17 +725,23 @@ cdef class _MapStrUInt:
     def __cinit__(self, new_map=True, bint free_map=True):
         cdef pair[std_string, extra_types.uint] item
 
+
+
         # Decide how to init map, if at all
         if isinstance(new_map, _MapStrUInt):
             self.map_ptr = (<_MapStrUInt> new_map).map_ptr
         elif hasattr(new_map, 'items'):
             self.map_ptr = new cpp_map[std_string, extra_types.uint]()
             for key, value in new_map.items():
+
+
                 item = pair[std_string, extra_types.uint](std_string(<char *> key), <extra_types.uint> long(value))
                 self.map_ptr.insert(item)
         elif hasattr(new_map, '__len__'):
             self.map_ptr = new cpp_map[std_string, extra_types.uint]()
             for key, value in new_map:
+
+
                 item = pair[std_string, extra_types.uint](std_string(<char *> key), <extra_types.uint> long(value))
                 self.map_ptr.insert(item)
         elif bool(new_map):
@@ -831,8 +756,10 @@ cdef class _MapStrUInt:
 
     def __contains__(self, key):
         cdef std_string k
+
         if not isinstance(key, basestring):
             return False
+
         k = std_string(<char *> key)
 
         if 0 < self.map_ptr.count(k):
@@ -844,7 +771,7 @@ cdef class _MapStrUInt:
         return self.map_ptr.size()
 
     def __iter__(self):
-        cdef MapIterStrUInt mi = MapIterStrUInt()
+        cdef _MapIterStrUInt mi = _MapIterStrUInt()
         mi.init(self.map_ptr)
         return mi
 
@@ -852,23 +779,33 @@ cdef class _MapStrUInt:
         cdef std_string k
         cdef extra_types.uint v
 
+
         if not isinstance(key, basestring):
             raise TypeError("Only string keys are valid.")
+
         k = std_string(<char *> key)
 
         if 0 < self.map_ptr.count(k):
             v = deref(self.map_ptr)[k]
-            return int(v)
+
+            return int(deref(self.map_ptr)[k])
         else:
             raise KeyError
 
     def __setitem__(self, key, value):
-        cdef pair[std_string, extra_types.uint] item = pair[std_string, extra_types.uint](std_string(<char *> key), <extra_types.uint> long(value))
+
+
+        cdef pair[std_string, extra_types.uint] item
+
+
+        item = pair[std_string, extra_types.uint](std_string(<char *> key), <extra_types.uint> long(value))
         self.map_ptr.insert(item)
 
     def __delitem__(self, key):
         cdef std_string k
+
         if key in self:
+
             k = std_string(<char *> key)
             self.map_ptr.erase(k)
 
@@ -896,7 +833,7 @@ class MapStrUInt(_MapStrUInt, collections.MutableMapping):
 
 
 # Map(UInt, Str)
-cdef class MapIterUIntStr(object):
+cdef class _MapIterUIntStr(object):
     cdef void init(self, cpp_map[extra_types.uint, std_string] * map_ptr):
         cdef cpp_map[extra_types.uint, std_string].iterator * itn = <cpp_map[extra_types.uint, std_string].iterator *> malloc(sizeof(map_ptr.begin()))
         itn[0] = map_ptr.begin()
@@ -918,6 +855,7 @@ cdef class MapIterUIntStr(object):
         cdef cpp_map[extra_types.uint, std_string].iterator iend = deref(self.iter_end)
 
         if inow != iend:
+
             pyval = int(deref(inow).first)
         else:
             raise StopIteration
@@ -929,17 +867,23 @@ cdef class _MapUIntStr:
     def __cinit__(self, new_map=True, bint free_map=True):
         cdef pair[extra_types.uint, std_string] item
 
+
+
         # Decide how to init map, if at all
         if isinstance(new_map, _MapUIntStr):
             self.map_ptr = (<_MapUIntStr> new_map).map_ptr
         elif hasattr(new_map, 'items'):
             self.map_ptr = new cpp_map[extra_types.uint, std_string]()
             for key, value in new_map.items():
+
+
                 item = pair[extra_types.uint, std_string](<extra_types.uint> long(key), std_string(<char *> value))
                 self.map_ptr.insert(item)
         elif hasattr(new_map, '__len__'):
             self.map_ptr = new cpp_map[extra_types.uint, std_string]()
             for key, value in new_map:
+
+
                 item = pair[extra_types.uint, std_string](<extra_types.uint> long(key), std_string(<char *> value))
                 self.map_ptr.insert(item)
         elif bool(new_map):
@@ -954,8 +898,10 @@ cdef class _MapUIntStr:
 
     def __contains__(self, key):
         cdef extra_types.uint k
+
         if not isinstance(key, int) and not isinstance(key, long):
             return False
+
         k = <extra_types.uint> long(key)
 
         if 0 < self.map_ptr.count(k):
@@ -967,7 +913,7 @@ cdef class _MapUIntStr:
         return self.map_ptr.size()
 
     def __iter__(self):
-        cdef MapIterUIntStr mi = MapIterUIntStr()
+        cdef _MapIterUIntStr mi = _MapIterUIntStr()
         mi.init(self.map_ptr)
         return mi
 
@@ -975,23 +921,33 @@ cdef class _MapUIntStr:
         cdef extra_types.uint k
         cdef std_string v
 
+
         if not isinstance(key, int) and not isinstance(key, long):
             raise TypeError("Only unsigned integer keys are valid.")
+
         k = <extra_types.uint> long(key)
 
         if 0 < self.map_ptr.count(k):
             v = deref(self.map_ptr)[k]
-            return str(<char *> v.c_str())
+
+            return str(<char *> deref(self.map_ptr)[k].c_str())
         else:
             raise KeyError
 
     def __setitem__(self, key, value):
-        cdef pair[extra_types.uint, std_string] item = pair[extra_types.uint, std_string](<extra_types.uint> long(key), std_string(<char *> value))
+
+
+        cdef pair[extra_types.uint, std_string] item
+
+
+        item = pair[extra_types.uint, std_string](<extra_types.uint> long(key), std_string(<char *> value))
         self.map_ptr.insert(item)
 
     def __delitem__(self, key):
         cdef extra_types.uint k
+
         if key in self:
+
             k = <extra_types.uint> long(key)
             self.map_ptr.erase(k)
 
@@ -1018,131 +974,8 @@ class MapUIntStr(_MapUIntStr, collections.MutableMapping):
 
 
 
-# Map(UInt, UInt)
-cdef class MapIterUIntUInt(object):
-    cdef void init(self, cpp_map[extra_types.uint, extra_types.uint] * map_ptr):
-        cdef cpp_map[extra_types.uint, extra_types.uint].iterator * itn = <cpp_map[extra_types.uint, extra_types.uint].iterator *> malloc(sizeof(map_ptr.begin()))
-        itn[0] = map_ptr.begin()
-        self.iter_now = itn
-
-        cdef cpp_map[extra_types.uint, extra_types.uint].iterator * ite = <cpp_map[extra_types.uint, extra_types.uint].iterator *> malloc(sizeof(map_ptr.end()))
-        ite[0] = map_ptr.end()
-        self.iter_end = ite
-
-    def __dealloc__(self):
-        free(self.iter_now)
-        free(self.iter_end)
-
-    def __iter__(self):
-        return self
-
-    def __next__(self):
-        cdef cpp_map[extra_types.uint, extra_types.uint].iterator inow = deref(self.iter_now)
-        cdef cpp_map[extra_types.uint, extra_types.uint].iterator iend = deref(self.iter_end)
-
-        if inow != iend:
-            pyval = int(deref(inow).first)
-        else:
-            raise StopIteration
-
-        inc(deref(self.iter_now))
-        return pyval
-
-cdef class _MapUIntUInt:
-    def __cinit__(self, new_map=True, bint free_map=True):
-        cdef pair[extra_types.uint, extra_types.uint] item
-
-        # Decide how to init map, if at all
-        if isinstance(new_map, _MapUIntUInt):
-            self.map_ptr = (<_MapUIntUInt> new_map).map_ptr
-        elif hasattr(new_map, 'items'):
-            self.map_ptr = new cpp_map[extra_types.uint, extra_types.uint]()
-            for key, value in new_map.items():
-                item = pair[extra_types.uint, extra_types.uint](<extra_types.uint> long(key), <extra_types.uint> long(value))
-                self.map_ptr.insert(item)
-        elif hasattr(new_map, '__len__'):
-            self.map_ptr = new cpp_map[extra_types.uint, extra_types.uint]()
-            for key, value in new_map:
-                item = pair[extra_types.uint, extra_types.uint](<extra_types.uint> long(key), <extra_types.uint> long(value))
-                self.map_ptr.insert(item)
-        elif bool(new_map):
-            self.map_ptr = new cpp_map[extra_types.uint, extra_types.uint]()
-
-        # Store free_map
-        self._free_map = free_map
-
-    def __dealloc__(self):
-        if self._free_map:
-            del self.map_ptr
-
-    def __contains__(self, key):
-        cdef extra_types.uint k
-        if not isinstance(key, int) and not isinstance(key, long):
-            return False
-        k = <extra_types.uint> long(key)
-
-        if 0 < self.map_ptr.count(k):
-            return True
-        else:
-            return False
-
-    def __len__(self):
-        return self.map_ptr.size()
-
-    def __iter__(self):
-        cdef MapIterUIntUInt mi = MapIterUIntUInt()
-        mi.init(self.map_ptr)
-        return mi
-
-    def __getitem__(self, key):
-        cdef extra_types.uint k
-        cdef extra_types.uint v
-
-        if not isinstance(key, int) and not isinstance(key, long):
-            raise TypeError("Only unsigned integer keys are valid.")
-        k = <extra_types.uint> long(key)
-
-        if 0 < self.map_ptr.count(k):
-            v = deref(self.map_ptr)[k]
-            return int(v)
-        else:
-            raise KeyError
-
-    def __setitem__(self, key, value):
-        cdef pair[extra_types.uint, extra_types.uint] item = pair[extra_types.uint, extra_types.uint](<extra_types.uint> long(key), <extra_types.uint> long(value))
-        self.map_ptr.insert(item)
-
-    def __delitem__(self, key):
-        cdef extra_types.uint k
-        if key in self:
-            k = <extra_types.uint> long(key)
-            self.map_ptr.erase(k)
-
-
-class MapUIntUInt(_MapUIntUInt, collections.MutableMapping):
-    """Wrapper class for C++ standard library maps of type <unsigned integer, unsigned integer>.
-    Provides dictionary like interface on the Python level.
-
-    Parameters
-    ----------
-    new_map : bool or dict-like
-        Boolean on whether to make a new map or not, or dict-like object
-        with keys and values which are castable to the appropriate type.
-    free_map : bool
-        Flag for whether the pointer to the C++ map should be deallocated
-        when the wrapper is dereferenced.
-    """
-
-    def __str__(self):
-        return self.__repr__()
-
-    def __repr__(self):
-        return "{" + ", ".join(["{0}: {1}".format(repr(key), repr(value)) for key, value in self.items()]) + "}"
-
-
-
 # Map(Str, Double)
-cdef class MapIterStrDouble(object):
+cdef class _MapIterStrDouble(object):
     cdef void init(self, cpp_map[std_string, double] * map_ptr):
         cdef cpp_map[std_string, double].iterator * itn = <cpp_map[std_string, double].iterator *> malloc(sizeof(map_ptr.begin()))
         itn[0] = map_ptr.begin()
@@ -1164,6 +997,7 @@ cdef class MapIterStrDouble(object):
         cdef cpp_map[std_string, double].iterator iend = deref(self.iter_end)
 
         if inow != iend:
+
             pyval = str(<char *> deref(inow).first.c_str())
         else:
             raise StopIteration
@@ -1175,17 +1009,23 @@ cdef class _MapStrDouble:
     def __cinit__(self, new_map=True, bint free_map=True):
         cdef pair[std_string, double] item
 
+
+
         # Decide how to init map, if at all
         if isinstance(new_map, _MapStrDouble):
             self.map_ptr = (<_MapStrDouble> new_map).map_ptr
         elif hasattr(new_map, 'items'):
             self.map_ptr = new cpp_map[std_string, double]()
             for key, value in new_map.items():
+
+
                 item = pair[std_string, double](std_string(<char *> key), <double> value)
                 self.map_ptr.insert(item)
         elif hasattr(new_map, '__len__'):
             self.map_ptr = new cpp_map[std_string, double]()
             for key, value in new_map:
+
+
                 item = pair[std_string, double](std_string(<char *> key), <double> value)
                 self.map_ptr.insert(item)
         elif bool(new_map):
@@ -1200,8 +1040,10 @@ cdef class _MapStrDouble:
 
     def __contains__(self, key):
         cdef std_string k
+
         if not isinstance(key, basestring):
             return False
+
         k = std_string(<char *> key)
 
         if 0 < self.map_ptr.count(k):
@@ -1213,7 +1055,7 @@ cdef class _MapStrDouble:
         return self.map_ptr.size()
 
     def __iter__(self):
-        cdef MapIterStrDouble mi = MapIterStrDouble()
+        cdef _MapIterStrDouble mi = _MapIterStrDouble()
         mi.init(self.map_ptr)
         return mi
 
@@ -1221,23 +1063,33 @@ cdef class _MapStrDouble:
         cdef std_string k
         cdef double v
 
+
         if not isinstance(key, basestring):
             raise TypeError("Only string keys are valid.")
+
         k = std_string(<char *> key)
 
         if 0 < self.map_ptr.count(k):
             v = deref(self.map_ptr)[k]
-            return float(v)
+
+            return float(deref(self.map_ptr)[k])
         else:
             raise KeyError
 
     def __setitem__(self, key, value):
-        cdef pair[std_string, double] item = pair[std_string, double](std_string(<char *> key), <double> value)
+
+
+        cdef pair[std_string, double] item
+
+
+        item = pair[std_string, double](std_string(<char *> key), <double> value)
         self.map_ptr.insert(item)
 
     def __delitem__(self, key):
         cdef std_string k
+
         if key in self:
+
             k = std_string(<char *> key)
             self.map_ptr.erase(k)
 
@@ -1264,8 +1116,150 @@ class MapStrDouble(_MapStrDouble, collections.MutableMapping):
 
 
 
+# Map(UInt, UInt)
+cdef class _MapIterUIntUInt(object):
+    cdef void init(self, cpp_map[extra_types.uint, extra_types.uint] * map_ptr):
+        cdef cpp_map[extra_types.uint, extra_types.uint].iterator * itn = <cpp_map[extra_types.uint, extra_types.uint].iterator *> malloc(sizeof(map_ptr.begin()))
+        itn[0] = map_ptr.begin()
+        self.iter_now = itn
+
+        cdef cpp_map[extra_types.uint, extra_types.uint].iterator * ite = <cpp_map[extra_types.uint, extra_types.uint].iterator *> malloc(sizeof(map_ptr.end()))
+        ite[0] = map_ptr.end()
+        self.iter_end = ite
+
+    def __dealloc__(self):
+        free(self.iter_now)
+        free(self.iter_end)
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        cdef cpp_map[extra_types.uint, extra_types.uint].iterator inow = deref(self.iter_now)
+        cdef cpp_map[extra_types.uint, extra_types.uint].iterator iend = deref(self.iter_end)
+
+        if inow != iend:
+
+            pyval = int(deref(inow).first)
+        else:
+            raise StopIteration
+
+        inc(deref(self.iter_now))
+        return pyval
+
+cdef class _MapUIntUInt:
+    def __cinit__(self, new_map=True, bint free_map=True):
+        cdef pair[extra_types.uint, extra_types.uint] item
+
+
+
+        # Decide how to init map, if at all
+        if isinstance(new_map, _MapUIntUInt):
+            self.map_ptr = (<_MapUIntUInt> new_map).map_ptr
+        elif hasattr(new_map, 'items'):
+            self.map_ptr = new cpp_map[extra_types.uint, extra_types.uint]()
+            for key, value in new_map.items():
+
+
+                item = pair[extra_types.uint, extra_types.uint](<extra_types.uint> long(key), <extra_types.uint> long(value))
+                self.map_ptr.insert(item)
+        elif hasattr(new_map, '__len__'):
+            self.map_ptr = new cpp_map[extra_types.uint, extra_types.uint]()
+            for key, value in new_map:
+
+
+                item = pair[extra_types.uint, extra_types.uint](<extra_types.uint> long(key), <extra_types.uint> long(value))
+                self.map_ptr.insert(item)
+        elif bool(new_map):
+            self.map_ptr = new cpp_map[extra_types.uint, extra_types.uint]()
+
+        # Store free_map
+        self._free_map = free_map
+
+    def __dealloc__(self):
+        if self._free_map:
+            del self.map_ptr
+
+    def __contains__(self, key):
+        cdef extra_types.uint k
+
+        if not isinstance(key, int) and not isinstance(key, long):
+            return False
+
+        k = <extra_types.uint> long(key)
+
+        if 0 < self.map_ptr.count(k):
+            return True
+        else:
+            return False
+
+    def __len__(self):
+        return self.map_ptr.size()
+
+    def __iter__(self):
+        cdef _MapIterUIntUInt mi = _MapIterUIntUInt()
+        mi.init(self.map_ptr)
+        return mi
+
+    def __getitem__(self, key):
+        cdef extra_types.uint k
+        cdef extra_types.uint v
+
+
+        if not isinstance(key, int) and not isinstance(key, long):
+            raise TypeError("Only unsigned integer keys are valid.")
+
+        k = <extra_types.uint> long(key)
+
+        if 0 < self.map_ptr.count(k):
+            v = deref(self.map_ptr)[k]
+
+            return int(deref(self.map_ptr)[k])
+        else:
+            raise KeyError
+
+    def __setitem__(self, key, value):
+
+
+        cdef pair[extra_types.uint, extra_types.uint] item
+
+
+        item = pair[extra_types.uint, extra_types.uint](<extra_types.uint> long(key), <extra_types.uint> long(value))
+        self.map_ptr.insert(item)
+
+    def __delitem__(self, key):
+        cdef extra_types.uint k
+
+        if key in self:
+
+            k = <extra_types.uint> long(key)
+            self.map_ptr.erase(k)
+
+
+class MapUIntUInt(_MapUIntUInt, collections.MutableMapping):
+    """Wrapper class for C++ standard library maps of type <unsigned integer, unsigned integer>.
+    Provides dictionary like interface on the Python level.
+
+    Parameters
+    ----------
+    new_map : bool or dict-like
+        Boolean on whether to make a new map or not, or dict-like object
+        with keys and values which are castable to the appropriate type.
+    free_map : bool
+        Flag for whether the pointer to the C++ map should be deallocated
+        when the wrapper is dereferenced.
+    """
+
+    def __str__(self):
+        return self.__repr__()
+
+    def __repr__(self):
+        return "{" + ", ".join(["{0}: {1}".format(repr(key), repr(value)) for key, value in self.items()]) + "}"
+
+
+
 # Map(Int, Int)
-cdef class MapIterIntInt(object):
+cdef class _MapIterIntInt(object):
     cdef void init(self, cpp_map[int, int] * map_ptr):
         cdef cpp_map[int, int].iterator * itn = <cpp_map[int, int].iterator *> malloc(sizeof(map_ptr.begin()))
         itn[0] = map_ptr.begin()
@@ -1287,6 +1281,7 @@ cdef class MapIterIntInt(object):
         cdef cpp_map[int, int].iterator iend = deref(self.iter_end)
 
         if inow != iend:
+
             pyval = int(deref(inow).first)
         else:
             raise StopIteration
@@ -1298,17 +1293,23 @@ cdef class _MapIntInt:
     def __cinit__(self, new_map=True, bint free_map=True):
         cdef pair[int, int] item
 
+
+
         # Decide how to init map, if at all
         if isinstance(new_map, _MapIntInt):
             self.map_ptr = (<_MapIntInt> new_map).map_ptr
         elif hasattr(new_map, 'items'):
             self.map_ptr = new cpp_map[int, int]()
             for key, value in new_map.items():
+
+
                 item = pair[int, int](key, value)
                 self.map_ptr.insert(item)
         elif hasattr(new_map, '__len__'):
             self.map_ptr = new cpp_map[int, int]()
             for key, value in new_map:
+
+
                 item = pair[int, int](key, value)
                 self.map_ptr.insert(item)
         elif bool(new_map):
@@ -1323,8 +1324,10 @@ cdef class _MapIntInt:
 
     def __contains__(self, key):
         cdef int k
-        if not isinstance(key, int):
+
+        if not isinstance(key, int) and not isinstance(key, long):
             return False
+
         k = key
 
         if 0 < self.map_ptr.count(k):
@@ -1336,7 +1339,7 @@ cdef class _MapIntInt:
         return self.map_ptr.size()
 
     def __iter__(self):
-        cdef MapIterIntInt mi = MapIterIntInt()
+        cdef _MapIterIntInt mi = _MapIterIntInt()
         mi.init(self.map_ptr)
         return mi
 
@@ -1344,23 +1347,33 @@ cdef class _MapIntInt:
         cdef int k
         cdef int v
 
-        if not isinstance(key, int):
+
+        if not isinstance(key, int) and not isinstance(key, long):
             raise TypeError("Only integer keys are valid.")
+
         k = key
 
         if 0 < self.map_ptr.count(k):
             v = deref(self.map_ptr)[k]
-            return int(v)
+
+            return int(deref(self.map_ptr)[k])
         else:
             raise KeyError
 
     def __setitem__(self, key, value):
-        cdef pair[int, int] item = pair[int, int](key, value)
+
+
+        cdef pair[int, int] item
+
+
+        item = pair[int, int](key, value)
         self.map_ptr.insert(item)
 
     def __delitem__(self, key):
         cdef int k
+
         if key in self:
+
             k = key
             self.map_ptr.erase(k)
 
@@ -1388,7 +1401,7 @@ class MapIntInt(_MapIntInt, collections.MutableMapping):
 
 
 # Map(Int, Double)
-cdef class MapIterIntDouble(object):
+cdef class _MapIterIntDouble(object):
     cdef void init(self, cpp_map[int, double] * map_ptr):
         cdef cpp_map[int, double].iterator * itn = <cpp_map[int, double].iterator *> malloc(sizeof(map_ptr.begin()))
         itn[0] = map_ptr.begin()
@@ -1410,6 +1423,7 @@ cdef class MapIterIntDouble(object):
         cdef cpp_map[int, double].iterator iend = deref(self.iter_end)
 
         if inow != iend:
+
             pyval = int(deref(inow).first)
         else:
             raise StopIteration
@@ -1421,17 +1435,23 @@ cdef class _MapIntDouble:
     def __cinit__(self, new_map=True, bint free_map=True):
         cdef pair[int, double] item
 
+
+
         # Decide how to init map, if at all
         if isinstance(new_map, _MapIntDouble):
             self.map_ptr = (<_MapIntDouble> new_map).map_ptr
         elif hasattr(new_map, 'items'):
             self.map_ptr = new cpp_map[int, double]()
             for key, value in new_map.items():
+
+
                 item = pair[int, double](key, <double> value)
                 self.map_ptr.insert(item)
         elif hasattr(new_map, '__len__'):
             self.map_ptr = new cpp_map[int, double]()
             for key, value in new_map:
+
+
                 item = pair[int, double](key, <double> value)
                 self.map_ptr.insert(item)
         elif bool(new_map):
@@ -1446,8 +1466,10 @@ cdef class _MapIntDouble:
 
     def __contains__(self, key):
         cdef int k
-        if not isinstance(key, int):
+
+        if not isinstance(key, int) and not isinstance(key, long):
             return False
+
         k = key
 
         if 0 < self.map_ptr.count(k):
@@ -1459,7 +1481,7 @@ cdef class _MapIntDouble:
         return self.map_ptr.size()
 
     def __iter__(self):
-        cdef MapIterIntDouble mi = MapIterIntDouble()
+        cdef _MapIterIntDouble mi = _MapIterIntDouble()
         mi.init(self.map_ptr)
         return mi
 
@@ -1467,23 +1489,33 @@ cdef class _MapIntDouble:
         cdef int k
         cdef double v
 
-        if not isinstance(key, int):
+
+        if not isinstance(key, int) and not isinstance(key, long):
             raise TypeError("Only integer keys are valid.")
+
         k = key
 
         if 0 < self.map_ptr.count(k):
             v = deref(self.map_ptr)[k]
-            return float(v)
+
+            return float(deref(self.map_ptr)[k])
         else:
             raise KeyError
 
     def __setitem__(self, key, value):
-        cdef pair[int, double] item = pair[int, double](key, <double> value)
+
+
+        cdef pair[int, double] item
+
+
+        item = pair[int, double](key, <double> value)
         self.map_ptr.insert(item)
 
     def __delitem__(self, key):
         cdef int k
+
         if key in self:
+
             k = key
             self.map_ptr.erase(k)
 
@@ -1510,131 +1542,8 @@ class MapIntDouble(_MapIntDouble, collections.MutableMapping):
 
 
 
-# Map(UInt, Double)
-cdef class MapIterUIntDouble(object):
-    cdef void init(self, cpp_map[extra_types.uint, double] * map_ptr):
-        cdef cpp_map[extra_types.uint, double].iterator * itn = <cpp_map[extra_types.uint, double].iterator *> malloc(sizeof(map_ptr.begin()))
-        itn[0] = map_ptr.begin()
-        self.iter_now = itn
-
-        cdef cpp_map[extra_types.uint, double].iterator * ite = <cpp_map[extra_types.uint, double].iterator *> malloc(sizeof(map_ptr.end()))
-        ite[0] = map_ptr.end()
-        self.iter_end = ite
-
-    def __dealloc__(self):
-        free(self.iter_now)
-        free(self.iter_end)
-
-    def __iter__(self):
-        return self
-
-    def __next__(self):
-        cdef cpp_map[extra_types.uint, double].iterator inow = deref(self.iter_now)
-        cdef cpp_map[extra_types.uint, double].iterator iend = deref(self.iter_end)
-
-        if inow != iend:
-            pyval = int(deref(inow).first)
-        else:
-            raise StopIteration
-
-        inc(deref(self.iter_now))
-        return pyval
-
-cdef class _MapUIntDouble:
-    def __cinit__(self, new_map=True, bint free_map=True):
-        cdef pair[extra_types.uint, double] item
-
-        # Decide how to init map, if at all
-        if isinstance(new_map, _MapUIntDouble):
-            self.map_ptr = (<_MapUIntDouble> new_map).map_ptr
-        elif hasattr(new_map, 'items'):
-            self.map_ptr = new cpp_map[extra_types.uint, double]()
-            for key, value in new_map.items():
-                item = pair[extra_types.uint, double](<extra_types.uint> long(key), <double> value)
-                self.map_ptr.insert(item)
-        elif hasattr(new_map, '__len__'):
-            self.map_ptr = new cpp_map[extra_types.uint, double]()
-            for key, value in new_map:
-                item = pair[extra_types.uint, double](<extra_types.uint> long(key), <double> value)
-                self.map_ptr.insert(item)
-        elif bool(new_map):
-            self.map_ptr = new cpp_map[extra_types.uint, double]()
-
-        # Store free_map
-        self._free_map = free_map
-
-    def __dealloc__(self):
-        if self._free_map:
-            del self.map_ptr
-
-    def __contains__(self, key):
-        cdef extra_types.uint k
-        if not isinstance(key, int) and not isinstance(key, long):
-            return False
-        k = <extra_types.uint> long(key)
-
-        if 0 < self.map_ptr.count(k):
-            return True
-        else:
-            return False
-
-    def __len__(self):
-        return self.map_ptr.size()
-
-    def __iter__(self):
-        cdef MapIterUIntDouble mi = MapIterUIntDouble()
-        mi.init(self.map_ptr)
-        return mi
-
-    def __getitem__(self, key):
-        cdef extra_types.uint k
-        cdef double v
-
-        if not isinstance(key, int) and not isinstance(key, long):
-            raise TypeError("Only unsigned integer keys are valid.")
-        k = <extra_types.uint> long(key)
-
-        if 0 < self.map_ptr.count(k):
-            v = deref(self.map_ptr)[k]
-            return float(v)
-        else:
-            raise KeyError
-
-    def __setitem__(self, key, value):
-        cdef pair[extra_types.uint, double] item = pair[extra_types.uint, double](<extra_types.uint> long(key), <double> value)
-        self.map_ptr.insert(item)
-
-    def __delitem__(self, key):
-        cdef extra_types.uint k
-        if key in self:
-            k = <extra_types.uint> long(key)
-            self.map_ptr.erase(k)
-
-
-class MapUIntDouble(_MapUIntDouble, collections.MutableMapping):
-    """Wrapper class for C++ standard library maps of type <unsigned integer, double>.
-    Provides dictionary like interface on the Python level.
-
-    Parameters
-    ----------
-    new_map : bool or dict-like
-        Boolean on whether to make a new map or not, or dict-like object
-        with keys and values which are castable to the appropriate type.
-    free_map : bool
-        Flag for whether the pointer to the C++ map should be deallocated
-        when the wrapper is dereferenced.
-    """
-
-    def __str__(self):
-        return self.__repr__()
-
-    def __repr__(self):
-        return "{" + ", ".join(["{0}: {1}".format(repr(key), repr(value)) for key, value in self.items()]) + "}"
-
-
-
 # Map(Int, Complex)
-cdef class MapIterIntComplex(object):
+cdef class _MapIterIntComplex(object):
     cdef void init(self, cpp_map[int, extra_types.complex_t] * map_ptr):
         cdef cpp_map[int, extra_types.complex_t].iterator * itn = <cpp_map[int, extra_types.complex_t].iterator *> malloc(sizeof(map_ptr.begin()))
         itn[0] = map_ptr.begin()
@@ -1656,6 +1565,7 @@ cdef class MapIterIntComplex(object):
         cdef cpp_map[int, extra_types.complex_t].iterator iend = deref(self.iter_end)
 
         if inow != iend:
+
             pyval = int(deref(inow).first)
         else:
             raise StopIteration
@@ -1667,18 +1577,24 @@ cdef class _MapIntComplex:
     def __cinit__(self, new_map=True, bint free_map=True):
         cdef pair[int, extra_types.complex_t] item
 
+
+
         # Decide how to init map, if at all
         if isinstance(new_map, _MapIntComplex):
             self.map_ptr = (<_MapIntComplex> new_map).map_ptr
         elif hasattr(new_map, 'items'):
             self.map_ptr = new cpp_map[int, extra_types.complex_t]()
             for key, value in new_map.items():
-                item = pair[int, extra_types.complex_t](key, py2c_complex(value))
+
+
+                item = pair[int, extra_types.complex_t](key, extra_types.py2c_complex(value))
                 self.map_ptr.insert(item)
         elif hasattr(new_map, '__len__'):
             self.map_ptr = new cpp_map[int, extra_types.complex_t]()
             for key, value in new_map:
-                item = pair[int, extra_types.complex_t](key, py2c_complex(value))
+
+
+                item = pair[int, extra_types.complex_t](key, extra_types.py2c_complex(value))
                 self.map_ptr.insert(item)
         elif bool(new_map):
             self.map_ptr = new cpp_map[int, extra_types.complex_t]()
@@ -1692,8 +1608,10 @@ cdef class _MapIntComplex:
 
     def __contains__(self, key):
         cdef int k
-        if not isinstance(key, int):
+
+        if not isinstance(key, int) and not isinstance(key, long):
             return False
+
         k = key
 
         if 0 < self.map_ptr.count(k):
@@ -1705,7 +1623,7 @@ cdef class _MapIntComplex:
         return self.map_ptr.size()
 
     def __iter__(self):
-        cdef MapIterIntComplex mi = MapIterIntComplex()
+        cdef _MapIterIntComplex mi = _MapIterIntComplex()
         mi.init(self.map_ptr)
         return mi
 
@@ -1713,23 +1631,33 @@ cdef class _MapIntComplex:
         cdef int k
         cdef extra_types.complex_t v
 
-        if not isinstance(key, int):
+
+        if not isinstance(key, int) and not isinstance(key, long):
             raise TypeError("Only integer keys are valid.")
+
         k = key
 
         if 0 < self.map_ptr.count(k):
             v = deref(self.map_ptr)[k]
-            return complex(float(v.re), float(v.im))
+
+            return complex(float(deref(self.map_ptr)[k].re), float(deref(self.map_ptr)[k].im))
         else:
             raise KeyError
 
     def __setitem__(self, key, value):
-        cdef pair[int, extra_types.complex_t] item = pair[int, extra_types.complex_t](key, py2c_complex(value))
+
+
+        cdef pair[int, extra_types.complex_t] item
+
+
+        item = pair[int, extra_types.complex_t](key, extra_types.py2c_complex(value))
         self.map_ptr.insert(item)
 
     def __delitem__(self, key):
         cdef int k
+
         if key in self:
+
             k = key
             self.map_ptr.erase(k)
 
@@ -1756,14 +1684,14 @@ class MapIntComplex(_MapIntComplex, collections.MutableMapping):
 
 
 
-# Map(Int, VectorDouble)
-cdef class MapIterIntVectorDouble(object):
-    cdef void init(self, cpp_map[int, cpp_vector[double]] * map_ptr):
-        cdef cpp_map[int, cpp_vector[double]].iterator * itn = <cpp_map[int, cpp_vector[double]].iterator *> malloc(sizeof(map_ptr.begin()))
+# Map(UInt, Double)
+cdef class _MapIterUIntDouble(object):
+    cdef void init(self, cpp_map[extra_types.uint, double] * map_ptr):
+        cdef cpp_map[extra_types.uint, double].iterator * itn = <cpp_map[extra_types.uint, double].iterator *> malloc(sizeof(map_ptr.begin()))
         itn[0] = map_ptr.begin()
         self.iter_now = itn
 
-        cdef cpp_map[int, cpp_vector[double]].iterator * ite = <cpp_map[int, cpp_vector[double]].iterator *> malloc(sizeof(map_ptr.end()))
+        cdef cpp_map[extra_types.uint, double].iterator * ite = <cpp_map[extra_types.uint, double].iterator *> malloc(sizeof(map_ptr.end()))
         ite[0] = map_ptr.end()
         self.iter_end = ite
 
@@ -1775,10 +1703,11 @@ cdef class MapIterIntVectorDouble(object):
         return self
 
     def __next__(self):
-        cdef cpp_map[int, cpp_vector[double]].iterator inow = deref(self.iter_now)
-        cdef cpp_map[int, cpp_vector[double]].iterator iend = deref(self.iter_end)
+        cdef cpp_map[extra_types.uint, double].iterator inow = deref(self.iter_now)
+        cdef cpp_map[extra_types.uint, double].iterator iend = deref(self.iter_end)
 
         if inow != iend:
+
             pyval = int(deref(inow).first)
         else:
             raise StopIteration
@@ -1786,25 +1715,31 @@ cdef class MapIterIntVectorDouble(object):
         inc(deref(self.iter_now))
         return pyval
 
-cdef class _MapIntVectorDouble:
+cdef class _MapUIntDouble:
     def __cinit__(self, new_map=True, bint free_map=True):
-        cdef pair[int, cpp_vector[double]] item
+        cdef pair[extra_types.uint, double] item
+
+
 
         # Decide how to init map, if at all
-        if isinstance(new_map, _MapIntVectorDouble):
-            self.map_ptr = (<_MapIntVectorDouble> new_map).map_ptr
+        if isinstance(new_map, _MapUIntDouble):
+            self.map_ptr = (<_MapUIntDouble> new_map).map_ptr
         elif hasattr(new_map, 'items'):
-            self.map_ptr = new cpp_map[int, cpp_vector[double]]()
+            self.map_ptr = new cpp_map[extra_types.uint, double]()
             for key, value in new_map.items():
-                item = pair[int, cpp_vector[double]](key, py2c_vector_dbl(value))
+
+
+                item = pair[extra_types.uint, double](<extra_types.uint> long(key), <double> value)
                 self.map_ptr.insert(item)
         elif hasattr(new_map, '__len__'):
-            self.map_ptr = new cpp_map[int, cpp_vector[double]]()
+            self.map_ptr = new cpp_map[extra_types.uint, double]()
             for key, value in new_map:
-                item = pair[int, cpp_vector[double]](key, py2c_vector_dbl(value))
+
+
+                item = pair[extra_types.uint, double](<extra_types.uint> long(key), <double> value)
                 self.map_ptr.insert(item)
         elif bool(new_map):
-            self.map_ptr = new cpp_map[int, cpp_vector[double]]()
+            self.map_ptr = new cpp_map[extra_types.uint, double]()
 
         # Store free_map
         self._free_map = free_map
@@ -1814,10 +1749,12 @@ cdef class _MapIntVectorDouble:
             del self.map_ptr
 
     def __contains__(self, key):
-        cdef int k
-        if not isinstance(key, int):
+        cdef extra_types.uint k
+
+        if not isinstance(key, int) and not isinstance(key, long):
             return False
-        k = key
+
+        k = <extra_types.uint> long(key)
 
         if 0 < self.map_ptr.count(k):
             return True
@@ -1828,37 +1765,47 @@ cdef class _MapIntVectorDouble:
         return self.map_ptr.size()
 
     def __iter__(self):
-        cdef MapIterIntVectorDouble mi = MapIterIntVectorDouble()
+        cdef _MapIterUIntDouble mi = _MapIterUIntDouble()
         mi.init(self.map_ptr)
         return mi
 
     def __getitem__(self, key):
-        cdef int k
-        cdef cpp_vector[double] v
+        cdef extra_types.uint k
+        cdef double v
 
-        if not isinstance(key, int):
-            raise TypeError("Only integer keys are valid.")
-        k = key
+
+        if not isinstance(key, int) and not isinstance(key, long):
+            raise TypeError("Only unsigned integer keys are valid.")
+
+        k = <extra_types.uint> long(key)
 
         if 0 < self.map_ptr.count(k):
             v = deref(self.map_ptr)[k]
-            return c2py_vector_dbl(&v)
+
+            return float(deref(self.map_ptr)[k])
         else:
             raise KeyError
 
     def __setitem__(self, key, value):
-        cdef pair[int, cpp_vector[double]] item = pair[int, cpp_vector[double]](key, py2c_vector_dbl(value))
+
+
+        cdef pair[extra_types.uint, double] item
+
+
+        item = pair[extra_types.uint, double](<extra_types.uint> long(key), <double> value)
         self.map_ptr.insert(item)
 
     def __delitem__(self, key):
-        cdef int k
+        cdef extra_types.uint k
+
         if key in self:
-            k = key
+
+            k = <extra_types.uint> long(key)
             self.map_ptr.erase(k)
 
 
-class MapIntVectorDouble(_MapIntVectorDouble, collections.MutableMapping):
-    """Wrapper class for C++ standard library maps of type <integer, vector [ndarray] of doubles>.
+class MapUIntDouble(_MapUIntDouble, collections.MutableMapping):
+    """Wrapper class for C++ standard library maps of type <unsigned integer, double>.
     Provides dictionary like interface on the Python level.
 
     Parameters
@@ -1880,7 +1827,7 @@ class MapIntVectorDouble(_MapIntVectorDouble, collections.MutableMapping):
 
 
 # Map(Str, VectorDouble)
-cdef class MapIterStrVectorDouble(object):
+cdef class _MapIterStrVectorDouble(object):
     cdef void init(self, cpp_map[std_string, cpp_vector[double]] * map_ptr):
         cdef cpp_map[std_string, cpp_vector[double]].iterator * itn = <cpp_map[std_string, cpp_vector[double]].iterator *> malloc(sizeof(map_ptr.begin()))
         itn[0] = map_ptr.begin()
@@ -1902,6 +1849,7 @@ cdef class MapIterStrVectorDouble(object):
         cdef cpp_map[std_string, cpp_vector[double]].iterator iend = deref(self.iter_end)
 
         if inow != iend:
+
             pyval = str(<char *> deref(inow).first.c_str())
         else:
             raise StopIteration
@@ -1913,18 +1861,45 @@ cdef class _MapStrVectorDouble:
     def __cinit__(self, new_map=True, bint free_map=True):
         cdef pair[std_string, cpp_vector[double]] item
 
+        cdef cpp_vector[double] value_proxy
+        cdef int i
+        cdef int value_size
+        cdef double * value_data
+
         # Decide how to init map, if at all
         if isinstance(new_map, _MapStrVectorDouble):
             self.map_ptr = (<_MapStrVectorDouble> new_map).map_ptr
         elif hasattr(new_map, 'items'):
             self.map_ptr = new cpp_map[std_string, cpp_vector[double]]()
             for key, value in new_map.items():
-                item = pair[std_string, cpp_vector[double]](std_string(<char *> key), py2c_vector_dbl(value))
+
+                value_size = len(value)
+                if isinstance(value, np.ndarray) and (<np.ndarray> value).descr.type_num == np.NPY_FLOAT64:
+                    value_data = <double *> np.PyArray_DATA(<np.ndarray> value)
+                    value_proxy = cpp_vector[double](<size_t> value_size)
+                    for i in range(value_size):
+                        value_proxy[i] = value_data[i]
+                else:
+                    value_proxy = cpp_vector[double](<size_t> value_size)
+                    for i in range(value_size):
+                        value_proxy[i] = <double> value[i]
+                item = pair[std_string, cpp_vector[double]](std_string(<char *> key), value_proxy)
                 self.map_ptr.insert(item)
         elif hasattr(new_map, '__len__'):
             self.map_ptr = new cpp_map[std_string, cpp_vector[double]]()
             for key, value in new_map:
-                item = pair[std_string, cpp_vector[double]](std_string(<char *> key), py2c_vector_dbl(value))
+
+                value_size = len(value)
+                if isinstance(value, np.ndarray) and (<np.ndarray> value).descr.type_num == np.NPY_FLOAT64:
+                    value_data = <double *> np.PyArray_DATA(<np.ndarray> value)
+                    value_proxy = cpp_vector[double](<size_t> value_size)
+                    for i in range(value_size):
+                        value_proxy[i] = value_data[i]
+                else:
+                    value_proxy = cpp_vector[double](<size_t> value_size)
+                    for i in range(value_size):
+                        value_proxy[i] = <double> value[i]
+                item = pair[std_string, cpp_vector[double]](std_string(<char *> key), value_proxy)
                 self.map_ptr.insert(item)
         elif bool(new_map):
             self.map_ptr = new cpp_map[std_string, cpp_vector[double]]()
@@ -1938,8 +1913,10 @@ cdef class _MapStrVectorDouble:
 
     def __contains__(self, key):
         cdef std_string k
+
         if not isinstance(key, basestring):
             return False
+
         k = std_string(<char *> key)
 
         if 0 < self.map_ptr.count(k):
@@ -1951,7 +1928,7 @@ cdef class _MapStrVectorDouble:
         return self.map_ptr.size()
 
     def __iter__(self):
-        cdef MapIterStrVectorDouble mi = MapIterStrVectorDouble()
+        cdef _MapIterStrVectorDouble mi = _MapIterStrVectorDouble()
         mi.init(self.map_ptr)
         return mi
 
@@ -1959,29 +1936,230 @@ cdef class _MapStrVectorDouble:
         cdef std_string k
         cdef cpp_vector[double] v
 
+        cdef np.ndarray v_proxy
+        cdef np.npy_intp v_proxy_shape[1]
         if not isinstance(key, basestring):
             raise TypeError("Only string keys are valid.")
+
         k = std_string(<char *> key)
 
         if 0 < self.map_ptr.count(k):
             v = deref(self.map_ptr)[k]
-            return c2py_vector_dbl(&v)
+            v_proxy_shape[0] = <np.npy_intp> deref(self.map_ptr)[k].size()
+            v_proxy = np.PyArray_SimpleNewFromData(1, v_proxy_shape, np.NPY_FLOAT64, &deref(self.map_ptr)[k][0])
+            return v_proxy
         else:
             raise KeyError
 
     def __setitem__(self, key, value):
-        cdef pair[std_string, cpp_vector[double]] item = pair[std_string, cpp_vector[double]](std_string(<char *> key), py2c_vector_dbl(value))
+
+        cdef cpp_vector[double] value_proxy
+        cdef int i
+        cdef int value_size
+        cdef double * value_data
+        cdef pair[std_string, cpp_vector[double]] item
+
+        value_size = len(value)
+        if isinstance(value, np.ndarray) and (<np.ndarray> value).descr.type_num == np.NPY_FLOAT64:
+            value_data = <double *> np.PyArray_DATA(<np.ndarray> value)
+            value_proxy = cpp_vector[double](<size_t> value_size)
+            for i in range(value_size):
+                value_proxy[i] = value_data[i]
+        else:
+            value_proxy = cpp_vector[double](<size_t> value_size)
+            for i in range(value_size):
+                value_proxy[i] = <double> value[i]
+        item = pair[std_string, cpp_vector[double]](std_string(<char *> key), value_proxy)
         self.map_ptr.insert(item)
 
     def __delitem__(self, key):
         cdef std_string k
+
         if key in self:
+
             k = std_string(<char *> key)
             self.map_ptr.erase(k)
 
 
 class MapStrVectorDouble(_MapStrVectorDouble, collections.MutableMapping):
-    """Wrapper class for C++ standard library maps of type <string, vector [ndarray] of doubles>.
+    """Wrapper class for C++ standard library maps of type <string, vector [ndarray] of double>.
+    Provides dictionary like interface on the Python level.
+
+    Parameters
+    ----------
+    new_map : bool or dict-like
+        Boolean on whether to make a new map or not, or dict-like object
+        with keys and values which are castable to the appropriate type.
+    free_map : bool
+        Flag for whether the pointer to the C++ map should be deallocated
+        when the wrapper is dereferenced.
+    """
+
+    def __str__(self):
+        return self.__repr__()
+
+    def __repr__(self):
+        return "{" + ", ".join(["{0}: {1}".format(repr(key), repr(value)) for key, value in self.items()]) + "}"
+
+
+
+# Map(Int, VectorDouble)
+cdef class _MapIterIntVectorDouble(object):
+    cdef void init(self, cpp_map[int, cpp_vector[double]] * map_ptr):
+        cdef cpp_map[int, cpp_vector[double]].iterator * itn = <cpp_map[int, cpp_vector[double]].iterator *> malloc(sizeof(map_ptr.begin()))
+        itn[0] = map_ptr.begin()
+        self.iter_now = itn
+
+        cdef cpp_map[int, cpp_vector[double]].iterator * ite = <cpp_map[int, cpp_vector[double]].iterator *> malloc(sizeof(map_ptr.end()))
+        ite[0] = map_ptr.end()
+        self.iter_end = ite
+
+    def __dealloc__(self):
+        free(self.iter_now)
+        free(self.iter_end)
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        cdef cpp_map[int, cpp_vector[double]].iterator inow = deref(self.iter_now)
+        cdef cpp_map[int, cpp_vector[double]].iterator iend = deref(self.iter_end)
+
+        if inow != iend:
+
+            pyval = int(deref(inow).first)
+        else:
+            raise StopIteration
+
+        inc(deref(self.iter_now))
+        return pyval
+
+cdef class _MapIntVectorDouble:
+    def __cinit__(self, new_map=True, bint free_map=True):
+        cdef pair[int, cpp_vector[double]] item
+
+        cdef cpp_vector[double] value_proxy
+        cdef int i
+        cdef int value_size
+        cdef double * value_data
+
+        # Decide how to init map, if at all
+        if isinstance(new_map, _MapIntVectorDouble):
+            self.map_ptr = (<_MapIntVectorDouble> new_map).map_ptr
+        elif hasattr(new_map, 'items'):
+            self.map_ptr = new cpp_map[int, cpp_vector[double]]()
+            for key, value in new_map.items():
+
+                value_size = len(value)
+                if isinstance(value, np.ndarray) and (<np.ndarray> value).descr.type_num == np.NPY_FLOAT64:
+                    value_data = <double *> np.PyArray_DATA(<np.ndarray> value)
+                    value_proxy = cpp_vector[double](<size_t> value_size)
+                    for i in range(value_size):
+                        value_proxy[i] = value_data[i]
+                else:
+                    value_proxy = cpp_vector[double](<size_t> value_size)
+                    for i in range(value_size):
+                        value_proxy[i] = <double> value[i]
+                item = pair[int, cpp_vector[double]](key, value_proxy)
+                self.map_ptr.insert(item)
+        elif hasattr(new_map, '__len__'):
+            self.map_ptr = new cpp_map[int, cpp_vector[double]]()
+            for key, value in new_map:
+
+                value_size = len(value)
+                if isinstance(value, np.ndarray) and (<np.ndarray> value).descr.type_num == np.NPY_FLOAT64:
+                    value_data = <double *> np.PyArray_DATA(<np.ndarray> value)
+                    value_proxy = cpp_vector[double](<size_t> value_size)
+                    for i in range(value_size):
+                        value_proxy[i] = value_data[i]
+                else:
+                    value_proxy = cpp_vector[double](<size_t> value_size)
+                    for i in range(value_size):
+                        value_proxy[i] = <double> value[i]
+                item = pair[int, cpp_vector[double]](key, value_proxy)
+                self.map_ptr.insert(item)
+        elif bool(new_map):
+            self.map_ptr = new cpp_map[int, cpp_vector[double]]()
+
+        # Store free_map
+        self._free_map = free_map
+
+    def __dealloc__(self):
+        if self._free_map:
+            del self.map_ptr
+
+    def __contains__(self, key):
+        cdef int k
+
+        if not isinstance(key, int) and not isinstance(key, long):
+            return False
+
+        k = key
+
+        if 0 < self.map_ptr.count(k):
+            return True
+        else:
+            return False
+
+    def __len__(self):
+        return self.map_ptr.size()
+
+    def __iter__(self):
+        cdef _MapIterIntVectorDouble mi = _MapIterIntVectorDouble()
+        mi.init(self.map_ptr)
+        return mi
+
+    def __getitem__(self, key):
+        cdef int k
+        cdef cpp_vector[double] v
+
+        cdef np.ndarray v_proxy
+        cdef np.npy_intp v_proxy_shape[1]
+        if not isinstance(key, int) and not isinstance(key, long):
+            raise TypeError("Only integer keys are valid.")
+
+        k = key
+
+        if 0 < self.map_ptr.count(k):
+            v = deref(self.map_ptr)[k]
+            v_proxy_shape[0] = <np.npy_intp> deref(self.map_ptr)[k].size()
+            v_proxy = np.PyArray_SimpleNewFromData(1, v_proxy_shape, np.NPY_FLOAT64, &deref(self.map_ptr)[k][0])
+            return v_proxy
+        else:
+            raise KeyError
+
+    def __setitem__(self, key, value):
+
+        cdef cpp_vector[double] value_proxy
+        cdef int i
+        cdef int value_size
+        cdef double * value_data
+        cdef pair[int, cpp_vector[double]] item
+
+        value_size = len(value)
+        if isinstance(value, np.ndarray) and (<np.ndarray> value).descr.type_num == np.NPY_FLOAT64:
+            value_data = <double *> np.PyArray_DATA(<np.ndarray> value)
+            value_proxy = cpp_vector[double](<size_t> value_size)
+            for i in range(value_size):
+                value_proxy[i] = value_data[i]
+        else:
+            value_proxy = cpp_vector[double](<size_t> value_size)
+            for i in range(value_size):
+                value_proxy[i] = <double> value[i]
+        item = pair[int, cpp_vector[double]](key, value_proxy)
+        self.map_ptr.insert(item)
+
+    def __delitem__(self, key):
+        cdef int k
+
+        if key in self:
+
+            k = key
+            self.map_ptr.erase(k)
+
+
+class MapIntVectorDouble(_MapIntVectorDouble, collections.MutableMapping):
+    """Wrapper class for C++ standard library maps of type <integer, vector [ndarray] of double>.
     Provides dictionary like interface on the Python level.
 
     Parameters
