@@ -1,3 +1,5 @@
+// MCNP5/dagmc/MeshTally.hpp
+
 #ifndef DAGMC_MESHTALLY_H
 #define DAGMC_MESHTALLY_H
 
@@ -9,46 +11,56 @@
 
 #include "moab/Range.hpp"
 
+//===========================================================================//
 /**
- * Data from the MCNP FMESH card and its associated dagmc FC card.
+ * \struct MeshTallyInput
+ * \brief Input data needed to set up a MeshTally
  */
-typedef struct {
+//===========================================================================//
+struct MeshTallyInput
+{
+    /// Typedef for map that stores optional MeshTally input parameters
+    typedef std::multimap<std::string, std::string> TallyOptions;
 
-  /// The user-specified tally ID, i.e. the NN in the fmeshNN card.
-  int id; 
-  /// The index in the fortran 'fm' array, also used to index arrays in meshtal_funcs.cpp
-  int fmesh_index;
+    /// User-specified ID for this MeshTally
+    int tally_id;
 
-  /// Pointer to array of energy bin boundaries, setup with emesh/eints keywords
-  /// These values live in fortran's memory and should not be modified from C
-  const double* energy_bin_bounds;
-  /// The length of energy_bin_boundaries
-  int num_ebin_bounds;
-  /// If true, an extra bin to tally all energy levels will be used
-  bool total_energy_bin;
+    // TODO temporary, see if we can remove this from the MeshTallyInput struct later on
+    /// The index in the fortran 'fm' array, also used to index arrays in meshtal_funcs.cpp
+    int fmesh_index;
 
-  /// Typedef for how to access FC card parameters; each key may have one or more values
-  typedef std::multimap<std::string,std::string> fc_params_t;
+    // TODO change pointer to Fortran memory into vector in C++ memory  
+    /// Energy bin boundaries defined for all mesh tally points
+    //std::vector<double> energy_bin_bounds;
+    const double* energy_bin_bounds;
 
-  /// The params for this tally's FC card. 
-  fc_params_t fc_params;
+    // TODO temporary, see if this is even needed based on size of vector
+    /// The length of energy_bin_boundaries
+    int num_ebin_bounds;
 
-}  fmesh_card;
+    /// If true, add an extra energy bin to tally all energy levels
+    bool total_energy_bin;
+
+    /// Optional input parameters requested by user for this MeshTally
+    TallyOptions options;
+};
 
 // forward declaration
 namespace moab{
   class Interface;
 }
 
+//===========================================================================//
 /**
  * MOAB-based mesh tally class
  */
+//===========================================================================//
 class MeshTally {
 
 protected:
 
 
-  MeshTally( const fmesh_card& input ):
+  MeshTally( const MeshTallyInput& input ):
     fmesh(input)
   {
     ebins = fmesh.num_ebin_bounds;
@@ -131,7 +143,7 @@ protected:
   moab::ErrorCode setup_tags( moab::Interface* mbi, const char* prefix="" );
 
   /// User's MCNP input parameters for this mesh tally
-  fmesh_card fmesh;
+  MeshTallyInput fmesh;
 
   /// data arrays
   std::vector<double> tally_data, error_data, temp_tally_data;
@@ -147,4 +159,6 @@ protected:
 
 };
 
-#endif /* DAGMC_MESHTALLY_H */
+#endif // DAGMC_MESHTALLY_H
+
+// end of MCNP5/dagmc/MeshTally.hpp

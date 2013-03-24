@@ -86,7 +86,7 @@ void dagmc_fmesh_initialize_( const int* mcnp_icl ){
  * @return true on success, or false if the input has serious enough formatting problems
  *         to make parameter parsing impossible.
  */
-static bool parse_fc_card( std::string& fc_content, fmesh_card::fc_params_t& results, int fcid ){
+static bool parse_fc_card( std::string& fc_content, MeshTallyInput::TallyOptions& results, int fcid ){
 
   // convert '=' chars to spaces 
   size_t found;
@@ -177,14 +177,14 @@ void dagmc_fmesh_setup_mesh_( int* /*ipt*/, int* id, int* fmesh_index,
 
   }
   
-  fmesh_card fmesh_settings;
-  fmesh_settings.id = *id;
+  MeshTallyInput fmesh_settings;
+  fmesh_settings.tally_id = *id;
   fmesh_settings.fmesh_index = *fmesh_index;
   fmesh_settings.num_ebin_bounds = *n_energy_mesh;
   fmesh_settings.energy_bin_bounds = energy_mesh;
   fmesh_settings.total_energy_bin = (*tot_energy_bin == 1);
 
-  fmesh_card::fc_params_t& fc_settings = fmesh_settings.fc_params;
+  MeshTallyInput::TallyOptions& fc_settings = fmesh_settings.options;
 
   bool success = parse_fc_card( comment_str, fc_settings, *id );
   if( !success ){

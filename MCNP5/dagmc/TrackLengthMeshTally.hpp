@@ -36,7 +36,7 @@ public:
   /**
    * Public constructor interface- actual constructor is protected.
    */
-  static TrackLengthMeshTally* setup( const fmesh_card& params, Interface* mbi, const int* cur_mcnp_cell );
+  static TrackLengthMeshTally* setup( const MeshTallyInput& params, Interface* mbi, const int* cur_mcnp_cell );
 
   /**
    * Tally a single particle track segment
@@ -106,7 +106,7 @@ protected:
   int last_cell;
   std::set<EntityHandle> visited_this_history; 
     
-  TrackLengthMeshTally( const fmesh_card& fmesh_params, Interface* mb_p, const std::string& output_filename );
+  TrackLengthMeshTally( const MeshTallyInput& fmesh_params, Interface* mb_p, const std::string& output_filename );
 
 private:
   TrackLengthMeshTally& operator=( const TrackLengthMeshTally& mt ); // unimplemented

@@ -62,7 +62,7 @@ static KDEKernel::KernelType set_kernel_type( const std::string& key,
 
 }
 //-----------------------------------------------------------------------------
-KDEMeshTally* KDEMeshTally::setup( const fmesh_card& fmesh, 
+KDEMeshTally* KDEMeshTally::setup( const MeshTallyInput& fmesh, 
                                    moab::Interface* mbi, TallyType type )
 {
 
@@ -72,10 +72,10 @@ KDEMeshTally* KDEMeshTally::setup( const fmesh_card& fmesh,
   KDEKernel::KernelType kernel = KDEKernel::EPANECHNIKOV;
   unsigned int subtracks = 0;
 
-  const fmesh_card::fc_params_t& params = fmesh.fc_params;
-  int id = fmesh.id;
+  const MeshTallyInput::TallyOptions& params = fmesh.options;
+  int id = fmesh.tally_id;
 
-  for( fmesh_card::fc_params_t::const_iterator i = params.begin(); i != params.end(); ++i )
+  for( MeshTallyInput::TallyOptions::const_iterator i = params.begin(); i != params.end(); ++i )
   {
     std::string key = (*i).first, val = (*i).second;
 
@@ -159,7 +159,7 @@ KDEMeshTally* KDEMeshTally::setup( const fmesh_card& fmesh,
 
 }
 //-----------------------------------------------------------------------------
-KDEMeshTally::KDEMeshTally( const fmesh_card& settings,
+KDEMeshTally::KDEMeshTally( const MeshTallyInput& settings,
                             moab::Interface* moabMesh,
                             moab::EntityHandle moabSet,
                             moab::CartVect bandwidth,

@@ -70,7 +70,7 @@ class KDEMeshTally : public MeshTally {
      * @param type The tally type
      * @return A newly allocated object, ready to receive collisions or tracks 
      */
-    static KDEMeshTally* setup( const fmesh_card& settings, 
+    static KDEMeshTally* setup( const MeshTallyInput& settings, 
                                 moab::Interface* mbi,
                                 TallyType type = COLLISION );
 
@@ -91,7 +91,7 @@ class KDEMeshTally : public MeshTally {
      * @param k (optional) the KernelType function to be used in the computation
      * @param numSubtracks (optional) the number of subtracks to be used
      */
-    KDEMeshTally( const fmesh_card& settings,
+    KDEMeshTally( const MeshTallyInput& settings,
                   moab::Interface* moabMesh,
                   moab::EntityHandle moabSet,
                   moab::CartVect bandwidth,

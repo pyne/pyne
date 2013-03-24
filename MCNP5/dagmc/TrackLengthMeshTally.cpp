@@ -127,11 +127,11 @@ namespace moab {
 
 
 
-TrackLengthMeshTally* TrackLengthMeshTally::setup( const fmesh_card& fmesh_params, 
+TrackLengthMeshTally* TrackLengthMeshTally::setup( const MeshTallyInput& fmesh_params, 
                                                    Interface* mbi, const int* current_mcnp_cell )
 {
 
-  const fmesh_card::fc_params_t& fc_params = fmesh_params.fc_params;
+  const MeshTallyInput::TallyOptions& fc_params = fmesh_params.options;
 
   std::string input_filename, output_filename, tag_name;
   std::vector<std::string> tag_values;
@@ -140,9 +140,9 @@ TrackLengthMeshTally* TrackLengthMeshTally::setup( const fmesh_card& fmesh_param
   std::set<int> conf_tmp, *conformality = NULL;
   bool conformal_surface_source = false;
 
-  int id = fmesh_params.id;
+  int id = fmesh_params.tally_id;
 
-  for( fmesh_card::fc_params_t::const_iterator i = fc_params.begin();
+  for( MeshTallyInput::TallyOptions::const_iterator i = fc_params.begin();
        i != fc_params.end(); ++i )
   {
     std::string key = (*i).first, val = (*i).second;
@@ -237,7 +237,7 @@ TrackLengthMeshTally* TrackLengthMeshTally::setup( const fmesh_card& fmesh_param
 }
 
   
-TrackLengthMeshTally::TrackLengthMeshTally( const fmesh_card& fmesh, Interface* mb_p, 
+TrackLengthMeshTally::TrackLengthMeshTally( const MeshTallyInput& fmesh, Interface* mb_p, 
                                             const std::string& output_filename_p ) :
   MeshTally( fmesh ),
   mb( mb_p ), output_filename(output_filename_p),  
