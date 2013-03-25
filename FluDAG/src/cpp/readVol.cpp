@@ -1,6 +1,6 @@
 //----------------------------------*-C++-*----------------------------------//
 /*!
- * \file   storage/DAGMC/FluDAG/src/cpp/readVol.cpp
+ * \file   ~/DAGMC/FluDAG/src/cpp/readVol.cpp
  * \author Julie Zachman 
  * \date   Fri Mar 8 2013 
  * \brief  Read properties from an h5m file
