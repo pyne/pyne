@@ -580,6 +580,7 @@ std::ostream& PrintHeader(std::ostream& os, const char* title)
 // main
 //---------------------------------------------------------------------------//
 // 
+/*
 int main(int argc, char* argv[]) 
 {
   ErrorCode code;
@@ -606,3 +607,4 @@ int main(int argc, char* argv[])
   code = readVol(argv[1]);
   return 0;
 }
+*/

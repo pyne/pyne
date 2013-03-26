@@ -33,10 +33,8 @@ wrapobjects = WrapInit.o \
 	WrapLookDB.o \
 	WrapSavHist.o \
 	WrapLookZ.o \
-	WrapG1.o \
 	WrapDN.o \
 	WrapReg2Name.o \
-	WrapNorml.o \
 	WrapLookMG.o \
 	WrapMag.o \
 	WrapLookFX.o \
@@ -66,8 +64,8 @@ mainfludag: mainFluDAG.o \
 	$(wrapobjects) 
 	gfortran -o $@ $^ $(MOAB_LIBS_LINK) $(FLUKA_LIBS_LINK) -lstdc++
 
-readvol: readVol.o fluka_funcs.o dagmc_utils.o
-	g++ -o $@ $^ $(MOAB_LIBS_LINK) -lgfortran
+# readvol: readVol.o fluka_funcs.o dagmc_utils.o
+#	g++ -o $@ $^ $(MOAB_LIBS_LINK) -lgfortran
 
 # Try this as well - 
 #	 g++ -o $@ $^ $(MOAB_LIBS_LINK) $(FLUKA_LIBS_LINK) 
@@ -128,4 +126,6 @@ install :
 clean:
 	rm obj/*.o
 	rm myfluka
+
 print-%:
+	@echo $* = $($*) 
