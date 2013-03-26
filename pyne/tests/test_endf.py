@@ -372,7 +372,7 @@ def array_from_ENDF(fh):
 def test_convert():
     exp = [-2.123124e+6, 1, 2.12312e+10]
     obs = [conv('-2.123124+6'),
-           conv(' 1.000000+0'),
+           conv('          1'),
            conv(' 2.12312+10')]
     assert_equal(exp, obs)
 
