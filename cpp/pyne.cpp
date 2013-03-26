@@ -30,7 +30,7 @@ void pyne::pyne_start()
   if (tmppath == NULL)
       tmppath = (char *) "<NOT_FOUND>";
   PYNE_DATA = std::string(tmppath);
-  
+
   tmppath = getenv("NUC_DATA_PATH");
   if (tmppath == NULL)
       tmppath = (char *) "<NOT_FOUND>";
@@ -177,7 +177,7 @@ std::string pyne::slice_from_end(std::string s, int n, int l)
 bool pyne::ternary_ge(int a, int b, int c)
 {
   // Returns true id a <= b <= c and flase otherwise.
-  return (a <= b && b <= c); 
+  return (a <= b && b <= c);
 }
 
 
@@ -216,7 +216,7 @@ std::string pyne::natural_naming(std::string name)
 
   // Make sure that the name doesn't begin with a number.
   if ( pyne::digits.find(nat_name[0]) != std::string::npos)
-    nat_name.insert(0, "_"); 
+    nat_name.insert(0, "_");
 
   return nat_name;
 };

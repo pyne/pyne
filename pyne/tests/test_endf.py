@@ -12,7 +12,7 @@ import nose
 from nose.tools import assert_equal
 
 str_library = StringIO.StringIO(
-""" $Rev:: 532      $  $Date:: 2011-12-05#$                             1 0  0    0
+""" $Rev:: 532      $  $Date:: 2011-12-05#$                             1 0  0
  1.002000+3 1.996800+0          1          0          0          0 128 1451    1
  0.000000+0 0.000000+0          0          0          0          6 128 1451    2
  1.000000+0 1.500000+8          1          0         10          7 128 1451    3
@@ -360,6 +360,7 @@ library._read_res(10020)
 library._read_res(10031)
 library._read_res(40000)
 
+
 def array_from_ENDF(fh):
     "Convert a chunk of ENDF, stripped of metadata, into a numpy array."
     return np.genfromtxt(fh,
@@ -367,6 +368,13 @@ def array_from_ENDF(fh):
                          delimiter=11,
                          converters={0: conv, 1: conv, 2: conv,
                                      3: conv, 4: conv, 5: conv})
+
+def test_convert():
+    exp = [-2.123124e+6, 1, 2.12312e+10]
+    obs = [conv('-2.123124+6'),
+           conv(' 1.000000+0'),
+           conv(' 2.12312+10')]
+    assert_equal(exp, obs)
 
 def test_get():
     obs = library.get_rx(40000, 4, 2)
