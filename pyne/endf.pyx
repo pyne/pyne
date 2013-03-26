@@ -76,7 +76,7 @@ class Library(rx.RxLib):
     def load(self):
         """Read the ENDF file into a NumPy array.
 
-        Returns:
+        Returns
         --------
         data : np.array, 1d, float64
             Returns a 1d float64 NumPy array.
@@ -94,15 +94,15 @@ class Library(rx.RxLib):
             fh.close()
         return data
 
-    def load_part(self, s):
+    def _load_part(self, s):
         """Read a section of the ENDF file into a NumPy array.
 
-        Parameters:
+        Parameters
         -----------
         s : string
             The ENDF data to read in.
 
-        Returns:
+        Returns
         --------
         data : np.array, 1d, float64
             Returns a 1d float64 NumPy array.
@@ -176,7 +176,7 @@ class Library(rx.RxLib):
     def _read_mat_flags(self, nuc):
         """Reads the global flags for a certain material.
 
-        Parameters:
+        Parameters
         -----------
         nuc: int
             ZZAAAM of material.
@@ -193,7 +193,7 @@ class Library(rx.RxLib):
     def _get_cont(self, keys, line):
         """Read one line of the array, treating it as a CONT record.
 
-        Parameters:
+        Parameters
         -----------
         keys: iterable
             An iterable containing the labels for each field in the CONT record.
@@ -201,7 +201,7 @@ class Library(rx.RxLib):
         line: array-like
             The line to be read.
 
-        Returns:
+        Returns
         --------
         cont : dict
             Contains labels and values mapped to each other.
@@ -214,7 +214,7 @@ class Library(rx.RxLib):
     def _get_head(self, keys, line):
         """Read one line of the array, treating it as a HEAD record.
 
-        Parameters:
+        Parameters
         -----------
         keys: iterable
             An iterable containing the labels for each field in the HEAD record.
@@ -222,7 +222,7 @@ class Library(rx.RxLib):
         line: array-like
             The line to be read.
 
-        Returns:
+        Returns
         --------
         cont : dict
             Contains labels and values mapped to each other.
@@ -237,7 +237,7 @@ class Library(rx.RxLib):
     def _get_list(self, headkeys, itemkeys, lines):
         """Read some lines of the array, treating it as a LIST record.
 
-        Parameters:
+        Parameters
         -----------
         headkeys: iterable
             An iterable containing the labels for each field in the first
@@ -252,7 +252,7 @@ class Library(rx.RxLib):
             know the length of the LIST record, the last line should be the last
             line it is plausible for the LIST record to end.
 
-        Returns:
+        Returns
         --------
         head: dict
             Contains elements of the first line paired with their labels.
@@ -288,7 +288,7 @@ class Library(rx.RxLib):
     def _get_tab1(self, headkeys, xykeys,lines):
         """Read some lines of the array, treating it as a TAB1 record.
 
-        Parameters:
+        Parameters
         -----------
         headkeys: iterable, length 6
             An iterable containing the labels for each field in the first
@@ -302,7 +302,7 @@ class Library(rx.RxLib):
             know the length of the TAB1 record, the last line should be the last
             line it is plausible for the TAB1 record to end.
 
-        Returns:
+        Returns
         --------
         head: dict
             Contains elements of the first card paired with their labels.
@@ -358,7 +358,7 @@ class Library(rx.RxLib):
         """Read the resonance data from one material in the library and updates
         self.structure.
 
-        Parameters:
+        Parameters
         -----------
         mat_id: int
             Material ZZAAAM.
@@ -385,7 +385,7 @@ class Library(rx.RxLib):
     def _read_nis(self, isotope_data, lrp, mat_id):
         """Read resonance data for a specific isotope.
 
-        Parameters:
+        Parameters
         -----------
         isotope_data: 2D array
             The section of the resonance data to read. The isotope starts at the
@@ -396,7 +396,7 @@ class Library(rx.RxLib):
         mat_id: int
             Material ZZAAAM.
 
-        Returns:
+        Returns
         --------
         total_lines: int
             The number of lines the isotope takes up.
@@ -424,7 +424,7 @@ class Library(rx.RxLib):
     def _read_subsection(self, subsection, isotope_flags, mat_id, nuc_i):
         """Read resonance data for a specific energy range subsection.
 
-        Parameters:
+        Parameters
         -----------
         subsection: 2D array
             The section of the resonance data to read. The energy range
@@ -438,7 +438,7 @@ class Library(rx.RxLib):
         nuc_i: int
             Isotope ZZAAAM.
 
-        Returns:
+        Returns
         --------
         total_lines: int
             The number of lines the energy range subsection takes up.
@@ -460,7 +460,7 @@ class Library(rx.RxLib):
                        nuc_i):
         """Read the subsection for a resolved energy range.
 
-        Parameters:
+        Parameters
         -----------
         subsection: 2D array
             The section of the resonance data to read. The energy range
@@ -474,7 +474,7 @@ class Library(rx.RxLib):
         nuc_i: int
             ZZAAAM of the isotope.
 
-        Returns:
+        Returns
         --------
         total_lines: int
             The number of lines taken up by the subsection.
@@ -624,7 +624,7 @@ class Library(rx.RxLib):
                          nuc_i):
         """Read unresolved resonances of an energy subsection.
 
-        Parameters:
+        Parameters
         -----------
         subsection: array
             Contains data for energy subsection.
@@ -637,7 +637,7 @@ class Library(rx.RxLib):
         nuc_i: int
             Isotope ZZAAAM.
 
-        Returns:
+        Returns
         --------
         total_lines: int
         """
@@ -712,7 +712,7 @@ class Library(rx.RxLib):
         """Read in cross-section data. Read resonances with Library._read_res
         first.
 
-        Parameters:
+        Parameters
         -----------
         mat_id: int
             ZZAAAM of material.
@@ -740,7 +740,7 @@ class Library(rx.RxLib):
     def get_xs(self, nuc, mt, nuc_i=None):
         """Grab cross-section data.
 
-        Parameters:
+        Parameters
         -----------
         nuc: int
             ZZAAAM of nuclide to read.
@@ -749,7 +749,7 @@ class Library(rx.RxLib):
         nuc_i: int
             ZZAAAM of isotope to read. Defaults to nuc.
 
-        Returns:
+        Returns
         --------
         tuple
             Returns a tuple with xs data in tuple[0] and flags in tuple[1].
@@ -765,7 +765,7 @@ class Library(rx.RxLib):
     def get_rx(self, nuc, mf, mt):
         """Grab the data from one reaction type.
 
-        Parameters:
+        Parameters
         -----------
         nuc: int
             ZZAAAM form of material to read from.
@@ -774,7 +774,7 @@ class Library(rx.RxLib):
         mt: int
             ENDF reaction number (MT).
 
-        Returns:
+        Returns
         --------
         data: NumPy array
             Contains the reaction data in an Nx6 array.
@@ -787,7 +787,7 @@ class Library(rx.RxLib):
     def _read_nucmfmt(self, nuc, mf, mt):
         """Load in the data from one reaction into self.structure.
 
-        Parameters:
+        Parameters
         -----------
         nuc : int
             ZZAAAM of nuclide.
@@ -796,7 +796,7 @@ class Library(rx.RxLib):
         mt : int
             ENDF reaction number (MT).
 
-        Returns:
+        Returns
         --------
         array, 1d, float64
             1d, float64 NumPy array containing the reaction data.
@@ -813,7 +813,7 @@ class Library(rx.RxLib):
         s = fh.read(stop-start)
         if opened_here:
             fh.close
-        return self.load_part(s)
+        return self._load_part(s)
 
 class Evaluation(object):
     """
@@ -1565,7 +1565,7 @@ class Evaluation(object):
                     decay.RTYP.append(decay_type[int(i)])
                 else:
                     # TODO: Handle multiple decay
-                    raise Exception
+                    raise NotImplementedError
             decay.RFS = itemList[1::6] # Isomeric state for daughter
             decay.Q = zip(itemList[2::6], itemList[3::6]) # Total decay energy
             decay.BR = zip(itemList[4::6], itemList[5::6]) # Branching ratios
