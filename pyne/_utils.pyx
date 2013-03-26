@@ -108,8 +108,7 @@ def fromstring_token(char * s, char * sep=" ", bint inplace=False, int maxsize=-
     return data
 
 def convert(char * s):
-    """
-    This function converts a number listed on an ENDF tape into a float or int
+    """This function converts a number listed on an ENDF tape into a float or int
     depending on whether an exponent is present.
     """
     cdef char char8 = s[8]
@@ -149,11 +148,12 @@ def fromendf_tok(char * s):
         Will always return a 1d float64 array.  You must reshape to the
         appropriate shape.
     """
-    cdef int size, i, num_entries
+    cdef int i, num_entries
     cdef char entry[12]
-    cdef long pos = <long>malloc(sizeof(long))
-    num_entries = len(s)/81 * 6
+    cdef long pos = 0
     cdef np.ndarray[np.float64_t, ndim=1] cdata
+    i = 0
+    num_entries = len(s)/81 * 6
     cdata = np.empty(num_entries, dtype=np.float64)
     while i < num_entries:
         pos = i*11 + i/6 * 15
