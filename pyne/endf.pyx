@@ -1586,7 +1586,7 @@ class Evaluation(object):
                     LCOV = r.params[3]
 
                     if LCOV != 0:
-                        items, itemList = self._get_list_record()                    
+                        items, itemList = self._get_list_record()
 
         elif decay.NST == 1:
             items, itemList = self._get_list_record()
