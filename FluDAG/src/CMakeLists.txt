@@ -15,7 +15,7 @@ include_directories(include ${MOAB_INCLUDE})
 set (commonfiles cpp/readVol.cpp cpp/fluka_funcs.cpp cpp/dagmc_utils.cpp)
 
 # add_executable(readvol cpp/readVol.cpp cpp/fluka_funcs.cpp)
-add_executable(readvol cpp/readVol.cpp cpp/fluka_funcs.cpp cpp/dagmc_utils.cpp)
+add_executable(readvol cpp/mainReadVol.cpp ${commonfiles})
 target_link_libraries(readvol ${moablibs})
 
 # This is not used yet, but may come into play when cmake can be used to link the fluka library
@@ -26,4 +26,6 @@ set (wrapperfiles cpp/WrapInit.cc cpp/WrapLookDB.cc cpp/WrapSavHist.cc cpp/WrapL
 
 # Create the executable that can call flukam_
 add_executable(mainfludag cpp/mainFluDAG.cpp ${commonfiles} ${wrapperfiles})
+set (CMAKE_Fortran_Compiler gfortran)
+ENABLE_LANGUAGE(Fortran)
 target_link_libraries(mainfludag ${moablibs} ${FLUPRO}/libflukahp.a /usr/lib/libgfortran.so.3)

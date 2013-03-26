@@ -4,7 +4,7 @@
  * \author Julie Zachman 
  * \date   Fri Mar 8 2013 
  * \brief  Read properties from an h5m file
- * \note   Includes a main
+ * \note   
  */
 //---------------------------------------------------------------------------//
 // $Id: 
@@ -56,7 +56,7 @@ ErrorCode readVol(char *fileptr, const std::string* override_output_filename=NUL
   // std::string override = override_output_filename ? *override_output_filename : output_filename;
   // std::cout << "Output_filename = " << output_filename << std::endl;
   // std::cout << "Override = " <<  override << std::endl;
-  // Note:  see main() in this file for the call
+  // Note:  see mainReadVol
  
   int num_vols = DAG->num_entities(3);
   std::cout << __FILE__ << ", " << __func__ << ":" << __LINE__ << "_______________" << std::endl;
@@ -572,39 +572,3 @@ std::ostream& PrintHeader(std::ostream& os, const char* title)
 // End PrintHeader
 ////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////
-///////////////// End Create Mat File Section ////////////////////////
-/////////////////////////////////////////////////////////////////////
-
-//---------------------------------------------------------------------------//
-// main
-//---------------------------------------------------------------------------//
-// 
-/*
-int main(int argc, char* argv[]) 
-{
-  ErrorCode code;
-  if (argc < 2)
-  {
-     std::cerr << "Usage:  " << argv[0] << " filename.h5m" << std::endl;
-     exit(0);
-  }
-  
- 
-  int max_pbl = 1;
-  bool flukarun = false;
-  char *fileptr = argv[1];
-  cpp_dagmcinit(fileptr, 0, max_pbl,flukarun); 
-
-  // Test code
-  // std::string test;
-  // if (argc > 2)
-  // {
-  //  test = std::string(argv[2]);
-  // }
-  // code = readVol(argv[1], &test);
-
-  code = readVol(argv[1]);
-  return 0;
-}
-*/
