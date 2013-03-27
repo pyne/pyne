@@ -1,1 +1,2 @@
-$FLUPRO/flutil/rfluka -e mainfludag -N0 -M1 example3
+# Reference mainfludag created by cmake system
+$FLUPRO/flutil/rfluka -e ../../bin/mainfludag -N0 -M1 example3
