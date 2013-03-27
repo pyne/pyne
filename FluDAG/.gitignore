@@ -4,24 +4,27 @@
 myfluka
 mainfludag
 readvol
-*.map
-*.stl
 *~
+# fortran stuff
 .timer.out
 ran*
 *fort*
+# extraneous build details
+*.map
 makefile.local
+local.cmake
 # Directories to ignore
 html
 mainf
-test1
 *old
 remove
 run
 # Extensions to ignore
-*.sat
-*.swp
-*.jou
+*.cmake
 *.err
+*.jou
 *.log
 *.out
+*.sat
+*.stl
+*.sw?
