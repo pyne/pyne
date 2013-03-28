@@ -176,11 +176,17 @@ void dagmc_fmesh_setup_mesh_( int* /*ipt*/, int* id, int* fmesh_index,
     delete[] c_comment;
 
   }
+
+  // Copy emesh bin boundaries from MCNP (includes 0 MeV)
+  std::vector<double> emesh_boundaries;
+
+  for( int i = 0; i < *n_energy_mesh; ++i ){
+    emesh_boundaries.push_back(energy_mesh[i]);
+  }
   
   MeshTallyInput fmesh_settings;
   fmesh_settings.tally_id = *id;
-  fmesh_settings.num_ebin_bounds = *n_energy_mesh;
-  fmesh_settings.energy_bin_bounds = energy_mesh;
+  fmesh_settings.energy_bin_bounds = emesh_boundaries;
   fmesh_settings.total_energy_bin = (*tot_energy_bin == 1);
 
   MeshTallyInput::TallyOptions& fc_settings = fmesh_settings.options;

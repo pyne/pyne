@@ -25,14 +25,8 @@ struct MeshTallyInput
     /// User-specified ID for this MeshTally
     int tally_id;
 
-    // TODO change pointer to Fortran memory into vector in C++ memory  
     /// Energy bin boundaries defined for all mesh tally points
-    //std::vector<double> energy_bin_bounds;
-    const double* energy_bin_bounds;
-
-    // TODO temporary, see if this is even needed based on size of vector
-    /// The length of energy_bin_boundaries
-    int num_ebin_bounds;
+    std::vector<double> energy_bin_bounds;
 
     /// If true, add an extra energy bin to tally all energy levels
     bool total_energy_bin;
@@ -59,9 +53,9 @@ protected:
   MeshTally( const MeshTallyInput& input ):
     fmesh(input)
   {
-    ebins = fmesh.num_ebin_bounds;
+    ebins = fmesh.energy_bin_bounds.size();
     if( !fmesh.total_energy_bin ){
-      ebins = fmesh.num_ebin_bounds - 1;
+      ebins = fmesh.energy_bin_bounds.size() - 1;
     }
     assert( ebins > 0 );
   }
