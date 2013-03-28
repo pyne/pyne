@@ -25,10 +25,6 @@ struct MeshTallyInput
     /// User-specified ID for this MeshTally
     int tally_id;
 
-    // TODO temporary, see if we can remove this from the MeshTallyInput struct later on
-    /// The index in the fortran 'fm' array, also used to index arrays in meshtal_funcs.cpp
-    int fmesh_index;
-
     // TODO change pointer to Fortran memory into vector in C++ memory  
     /// Energy bin boundaries defined for all mesh tally points
     //std::vector<double> energy_bin_bounds;
@@ -113,8 +109,6 @@ public:
     std::fill( error_data.begin(), error_data.end(), 0 );
     std::fill( temp_tally_data.begin(), temp_tally_data.end(), 0 );
   }
-
-  int get_fmesh_index() { return fmesh.fmesh_index; }
 
 protected:
   /**

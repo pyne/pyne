@@ -179,7 +179,6 @@ void dagmc_fmesh_setup_mesh_( int* /*ipt*/, int* id, int* fmesh_index,
   
   MeshTallyInput fmesh_settings;
   fmesh_settings.tally_id = *id;
-  fmesh_settings.fmesh_index = *fmesh_index;
   fmesh_settings.num_ebin_bounds = *n_energy_mesh;
   fmesh_settings.energy_bin_bounds = energy_mesh;
   fmesh_settings.total_energy_bin = (*tot_energy_bin == 1);
@@ -434,15 +433,17 @@ void dagmc_fmesh_print_( int* fmesh_index, double* sp_norm, double* fmesh_fact )
 void dagmc_kde_tally_( double* x, double* y, double* z, double* wgt,
                        double* ple, double* erg )
 {
+  // counter for determining the fmesh_index of the KDE collision tallies
+  int fmesh_index = 0;
+
   // Record collision on all valid KDE tallies
   for( std::vector<KDEMeshTally*>::iterator i = kde_coll_tallies.begin(); i!=kde_coll_tallies.end(); ++i ){
     if( *i ){
 
       int ien; // index of the energy bin for this collision 
-      int idx = (*i)->get_fmesh_index();
-      
+
       // ask Fortran to pick the energy bin for this collision
-      FMESH_FUNC( dagmc_mesh_choose_ebin )( &idx, erg, &ien );
+      FMESH_FUNC( dagmc_mesh_choose_ebin )( &fmesh_index, erg, &ien );
 
       if( ien == -1 ) continue; // erg falls outside of requested energy bins for this mesh
 
@@ -450,11 +451,12 @@ void dagmc_kde_tally_( double* x, double* y, double* z, double* wgt,
 
       moab::CartVect collision_loc( *x, *y, *z );
 
-      KDEWeightParam param( &idx, wgt, erg );
+      KDEWeightParam param( &fmesh_index, wgt, erg );
       param.total_xs = ple;
 
       (*i)->tally_collision( param, collision_loc, ien );
     }
+    ++fmesh_index;
   }
 }
 
