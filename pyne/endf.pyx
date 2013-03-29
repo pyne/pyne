@@ -24,7 +24,7 @@ import matplotlib.pyplot as plt
 
 import pyne.rxdata as rx
 from pyne.rxname import label
-from pyne._utils import fromendf_tok
+from pyne.utils import fromendf_tok, convert, endftod
 
 include "include/cython_version.pxi"
 IF CYTHON_VERSION_MAJOR == 0 and CYTHON_VERSION_MINOR >= 17:
@@ -58,20 +58,6 @@ class Library(rx.RxLib):
         while self.more_files:
             self._read_headers()
 
-    # def load_og(self):
-    #     "Reads the ENDF file into a NumPy array."
-    #     data = np.genfromtxt(self.fh,
-    #                          delimiter = (11,11,11,11,11,11),
-    #                          usecols = (0, 1, 2, 3, 4, 5),
-    #                          skip_header = 1,
-    #                          converters = {0: convert,
-    #                                        1: convert,
-    #                                        2: convert,
-    #                                        3: convert,
-    #                                        4: convert,
-    #                                        5: convert})
-    #     self.fh.seek(0)
-    #     return data
 
     def load(self):
         """Read the ENDF file into a NumPy array.
@@ -123,7 +109,7 @@ class Library(rx.RxLib):
         self.offset += 81 - len_headline
         line = fh.readline()
         mat_id = int(line[66:70])
-        nuc = int(convert(line[:11])*10)
+        nuc = int(endftod(line[:11])*10)
         # Make a new dict in self.structure to contain the material data.
         if nuc not in self.structure:
             self.structure.update(
@@ -1686,8 +1672,8 @@ class Evaluation(object):
             C1 = None
             C2 = None
         else:
-            C1 = convert(line[:11])
-            C2 = convert(line[11:22])
+            C1 = endftod(line[:11])
+            C2 = endftod(line[11:22])
         L1 = int(line[22:33])
         L2 = int(line[33:44])
         N1 = int(line[44:55])
@@ -1703,8 +1689,8 @@ class Evaluation(object):
             line = self.fh.readline()
         if self.veryverbose:
             print 'Get HEAD record'
-        ZA = int(convert(line[:11]))
-        AWR = convert(line[11:22])
+        ZA = int(endftod(line[:11]))
+        AWR = endftod(line[11:22])
         L1 = int(line[22:33])
         L2 = int(line[33:44])
         N1 = int(line[44:55])
@@ -1729,7 +1715,7 @@ class Evaluation(object):
             line = self.fh.readline()
             toRead = min(6,NPL-m)
             for j in range(toRead):
-                val = convert(line[0:11])
+                val = endftod(line[0:11])
                 itemsList.append(val)
                 line = line[11:]
             m = m + toRead
@@ -1834,8 +1820,8 @@ class ENDFTab1Record(object):
     def read(self, fh):
         # Determine how many interpolation regions and total points there are
         line = fh.readline()
-        C1 = convert(line[:11])
-        C2 = convert(line[11:22])
+        C1 = endftod(line[:11])
+        C2 = endftod(line[11:22])
         L1 = int(line[22:33])
         L2 = int(line[33:44])
         NR = int(line[44:55])
@@ -1861,8 +1847,8 @@ class ENDFTab1Record(object):
             line = fh.readline()
             toRead = min(3,NP-m)
             for j in range(toRead):
-                x = convert(line[:11])
-                y = convert(line[11:22])
+                x = endftod(line[:11])
+                y = endftod(line[11:22])
                 self.x.append(x)
                 self.y.append(y)
                 line = line[22:]
@@ -1876,8 +1862,8 @@ class ENDFTab2Record(object):
     def read(self, fh):
         # Determine how many interpolation regions and total points there are
         line = fh.readline()
-        C1 = convert(line[:11])
-        C2 = convert(line[11:22])
+        C1 = endftod(line[:11])
+        C2 = endftod(line[11:22])
         L1 = int(line[22:33])
         L2 = int(line[33:44])
         NR = int(line[44:55])
@@ -1932,8 +1918,8 @@ class ENDFContRecord(ENDFRecord):
         super(ENDFContRecord, self).__init__(fh)
 
     def read(self, line):
-        C1 = convert(line[:11])
-        C2 = convert(line[11:22])
+        C1 = endftod(line[:11])
+        C2 = endftod(line[11:22])
         L1 = int(line[22:33])
         L2 = int(line[33:44])
         N1 = int(line[44:55])
@@ -2031,9 +2017,9 @@ class ENDFHeadRecord(ENDFRecord):
 
     def read(self, char * line):
         za_str = line[:11]
-        ZA = int(convert(za_str))
+        ZA = int(endftod(za_str))
         awr_str = line[11:22]
-        AWR = convert(awr_str)
+        AWR = endftod(awr_str)
         L1 = int(line[22:33])
         L2 = int(line[33:44])
         N1 = int(line[44:55])
@@ -2185,8 +2171,7 @@ class AdlerAdler(Resonance):
 class RMatrixLimited(Resonance):
     def __init__(self):
         pass
-
-# _convert_r = re.compile(r'([ -]\d\.\d+)([+\-]\d+)')
+ _convert_r = re.compile(r'([ -]\d\.\d+)([+\-]\d+)')
 # 
 # def convert_og(char * s):
 #     """
@@ -2199,32 +2184,32 @@ class RMatrixLimited(Resonance):
 #     else:
 #         return float(m.group(1)+'e'+ m.group(2))
 # 
-def convert(char * s):
-    """
-    This function converts a number listed on an ENDF tape into a float or int
-    depending on whether an exponent is present.
-    """
-    cdef char char8 = s[8]
-    cdef char char9 = s[9]
-    cdef char * news = <char *>malloc(sizeof(char)*12)
-    cdef double v
-    if char9 == '+' or char9 == '-':
-        strncpy(news, s, 9)
-        news[9] = 'e'
-        news[10] = s[9]
-        news[11] = s[10]
-        v = atof(news)
-    elif char8 == '+' or char8 == '-':
-        strncpy(news, s, 8)
-        news[8] = 'e'
-        news[9] = s[8]
-        news[10] = s[9]
-        news[11] = s[10]
-        v = atof(news)
-    else:
-        v = atof(s)
-    free(news)
-    return v
+# def endftod(char * s):
+#     """
+#     This function converts a number listed on an ENDF tape into a float or int
+#     depending on whether an exponent is present.
+#     """
+#     cdef char char8 = s[8]
+#     cdef char char9 = s[9]
+#     cdef char * news = <char *>malloc(sizeof(char)*12)
+#     cdef double v
+#     if char9 == '+' or char9 == '-':
+#         strncpy(news, s, 9)
+#         news[9] = 'e'
+#         news[10] = s[9]
+#         news[11] = s[10]
+#         v = atof(news)
+#     elif char8 == '+' or char8 == '-':
+#         strncpy(news, s, 8)
+#         news[8] = 'e'
+#         news[9] = s[8]
+#         news[10] = s[9]
+#         news[11] = s[10]
+#         v = atof(news)
+#     else:
+#         v = atof(s)
+#     free(news)
+#     return v
 
 
 

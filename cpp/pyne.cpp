@@ -1,4 +1,4 @@
-// General Library 
+// General Library
 
 #include "pyne.h"
 
@@ -83,6 +83,7 @@ double pyne::to_dbl (std::string s)
 
 double pyne::endftod (char * s)
 {
+  // Converts string from ENDF to float64.
   static double powers_of_10[] =
     {
       10.,
@@ -100,16 +101,18 @@ double pyne::endftod (char * s)
 
   mant = exp = 0;
   mantsign = expsign = is_int = 1;
-  if (s[0] == '-')
-    {
-      mantsign = -1;
-    }
   if (s[2] == '.')
     {
       is_int = 0;
     }
+
+  // Convert an ENDF float
   if (is_int == 0)
     {
+      if (s[0] == '-')
+        {
+          mantsign = -1;
+        }
       if (s[9] == '+' or s[9] == '-')
         {
           if (s[9] == '-')
@@ -134,18 +137,23 @@ double pyne::endftod (char * s)
               mant = 10*mant + (c - '0');
             }
         }
-      for (pos = mantsize + 2; pos <= 10; pos++)
+      for (pos = mantsize + 2; pos <= 10; pos++) // +2 because of sign chars
         {
           c = s[pos];
           exp = 10*exp + (c - '0');
         }
       if (expsign == -1)
         {
-          exp = exp + (mantsize - 2);
+          exp = -exp - (mantsize - 2); // -2 because of mant sign and '.' char
         }
       else
         {
           exp = exp - (mantsize - 2);
+        }
+      if (exp < 0)
+        {
+          expsign = -1;
+          exp *= -1;
         }
       v = mant * mantsign;
       dbl_exp = 1.0;
@@ -164,8 +172,9 @@ double pyne::endftod (char * s)
         {
           v *= dbl_exp;
         }
-
     }
+
+  // Convert an ENDF int to float
   if (is_int == 1)
     {
       pos = v = 0;
@@ -174,7 +183,6 @@ double pyne::endftod (char * s)
           c = s[pos];
           if (c == ' ')
             {
-              v++;
             }
           else if (c == '-')
             {
