@@ -459,7 +459,7 @@ ErrorCode TrackLengthMeshTally::write_results( double sp_norm, double mult_fact,
 
     double volume = tet_volume( v[0], v[1], v[2], v[3] );
 
-    for( unsigned j = 0; j < ebins; ++j ){
+    for( unsigned j = 0; j < num_energy_bins; ++j ){
 
       double tally = data_ref( tally_data, t, j );
       double error = data_ref( error_data, t, j );
@@ -534,8 +534,8 @@ void TrackLengthMeshTally::add_score_to_mesh_cell( EntityHandle mesh_cell, doubl
 
   data_ref( temp_tally_data, mesh_cell, ebin ) += score;
 
-  if( fmesh.total_energy_bin ){
-    data_ref( temp_tally_data, mesh_cell, (ebins-1) ) += score;
+  if( input_data.total_energy_bin ){
+    data_ref( temp_tally_data, mesh_cell, (num_energy_bins-1) ) += score;
   }
 }
 
@@ -546,7 +546,7 @@ void TrackLengthMeshTally::end_history () {
 
   for( std::set< EntityHandle >::iterator i=visited_this_history.begin(); i!=visited_this_history.end(); ++i){
 
-    for( unsigned j = 0; j < ebins; ++j ){
+    for( unsigned j = 0; j < num_energy_bins; ++j ){
       double& d =     data_ref(temp_tally_data, *i, j );
       double& tally = data_ref(tally_data, *i, j );
       double& error = data_ref(error_data, *i, j );

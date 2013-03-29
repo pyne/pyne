@@ -328,7 +328,7 @@ void KDEMeshTally::end_history()
   // add results from current history to the tally for each calculation point
   for ( i = visited_this_history.begin() ; i != visited_this_history.end() ; ++i ) {
     
-    for( unsigned int j = 0; j < ebins; ++j ){
+    for( unsigned int j = 0; j < num_energy_bins; ++j ){
       double& history = data_ref( temp_tally_data, *i, j );
       double& tally =   data_ref( tally_data, *i, j );
       double& error =   data_ref( error_data, *i, j );
@@ -376,7 +376,7 @@ void KDEMeshTally::write_results( double sp_norm, double fmesh_fact )
 
     moab::EntityHandle point = *i;
 
-    for ( unsigned int j = 0; j < ebins; ++ j){
+    for ( unsigned int j = 0; j < num_energy_bins; ++ j){
 
       tally = data_ref( tally_data, point, j);
       error = data_ref( error_data, point, j );
@@ -542,8 +542,8 @@ void KDEMeshTally::add_score_to_tally( moab::EntityHandle mesh_point,
   data_ref( temp_tally_data, mesh_point, ebin ) += score;
 
   // tally the total energy bin if requested
-  if ( fmesh.total_energy_bin )
-    data_ref( temp_tally_data, mesh_point, (ebins-1) ) += score;
+  if ( input_data.total_energy_bin )
+    data_ref( temp_tally_data, mesh_point, (num_energy_bins-1) ) += score;
 
   visited_this_history.insert( mesh_point );
 
