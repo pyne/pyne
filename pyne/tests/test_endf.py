@@ -363,27 +363,30 @@ library._read_res(40000)
 def test_endftod():
     from pyne._utils import endftod
     obs = [endftod(" 3.28559+12"),
-           #endftod(" 2.328559+4"),
+           endftod(" 2.328559+4"),
            endftod(" 3.28559-12"),
            endftod(" 2.328559-2"),
            endftod("-3.28559+12"),
            endftod("-2.328559+2"),
            endftod("-3.28559-12"),
            endftod("-2.328559-2"),
-           endftod("         23"),
-           endftod("        -23")]
+           endftod("          1"),
+           endftod("         -1")]
     exp = [ 3.28559e+12,
-           # 2.328559e+4,
+            2.328559e+4,
             3.28559e-12,
             2.328559e-2,
            -3.28559e+12,
            -2.328559e+2,
            -3.28559e-12,
            -2.328559e-2,
-                    23,
-                   -23]
-
-    assert_equal(exp, obs)
+                    1.0,
+                   -1.0]
+    obs = np.array(obs)
+    exp = np.array(exp)
+    import pprint
+    pprint.pprint(obs)
+    assert_array_equal(exp, obs)
 
 def array_from_ENDF(fh):
     "Convert a chunk of ENDF, stripped of metadata, into a numpy array."
@@ -419,11 +422,12 @@ def test_unresolved_resonances_a():
 
     exp = array_from_ENDF(StringIO.StringIO(
         """ 1.801000+3          0 1.100000+0 3.078520-1 1.000000-2 0.000000+0
-2.101000+3          1 2.100000+0 7.088000-1 2.000000-2 0.000000+0
-3.101000+3          2 3.100000+0 2.120000-1 3.000000-2 0.000000+0"""))
+ 2.101000+3          1 2.100000+0 7.088000-1 2.000000-2 0.000000+0
+ 3.101000+3          2 3.100000+0 2.120000-1 3.000000-2 0.000000+0"""))
     exp_LIST = dict(zip(('D','AJ','AMUN','GN0','GG'), exp.transpose()))
 
     for key in exp_LIST:
+        print conv('2.000000-2')
         assert_array_equal(exp_LIST[key], obs_LIST[key])
 
 def test_unresolved_resonances_b():
@@ -699,7 +703,7 @@ def test_resolved_r_matrix():
     pp_obs = library.mat10020['data'][10020]['resolved'][-1][3]
     pp_exp = dict(zip(('MA','MB','ZA','ZB','IA','IB','Q','PNT','SHF','MT',
                        'PA','PB'),
-                      pp_exp_a[3:7].reshape(2,12).transpose()))
+                       pp_exp_a[3:7].reshape(2,12).transpose()))
     pp_exp.update(dict(zip((0,0,'IFG','KRM','NJS','KRL'),
                            pp_exp_a[1])))
     del pp_exp[0]
@@ -739,6 +743,7 @@ def test_resolved_r_matrix():
     ch_exp[3.0].update(gam_3_exp)
 
     for key in pp_exp:
+        print conv('       1-20')
         assert_array_equal(pp_obs[key], pp_exp[key])
     for spin_group in ch_exp:
         spin_group_obs = ch_obs[spin_group]
