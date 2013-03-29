@@ -2,6 +2,7 @@
 from libc.stdlib cimport malloc, free
 
 cimport numpy as np
+cimport pyne.cpp_pyne
 import numpy as np
 
 include "include/cython_version.pxi"
@@ -161,3 +162,6 @@ def fromendf_tok(char * s):
         cdata[i] = convert(entry)
         i += 1
     return cdata
+
+def endftod(char * s):
+    return pyne.cpp_pyne.endftod(<char *> s)

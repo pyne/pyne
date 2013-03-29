@@ -181,7 +181,7 @@ class Library(rx.RxLib):
         nuc: int
             ZZAAAM of material.
         """
-        mf1 = self.get_rx(nuc, 1, 451)
+        mf1 = self.get_rx(nuc, 1, 451, lines=4)
         flagkeys = ['ZA', 'AWR', 'LRP', 'LFI', 'NLIB', 'NMOD', 'ELIS',
                     'STA', 'LIS', 'LIS0', 0, 'NFOR', 'AWI', 'EMAX',
                     'LREL', 0, 'NSUB', 'NVER', 'TEMP', 0, 'LDRV',
@@ -762,7 +762,7 @@ class Library(rx.RxLib):
             self._read_xs(nuc, mt, nuc_i)
             return self.structure[nuc]['data'][nuc_i]['xs'][mt]
 
-    def get_rx(self, nuc, mf, mt):
+    def get_rx(self, nuc, mf, mt, lines=0):
         """Grab the data from one reaction type.
 
         Parameters
@@ -773,6 +773,9 @@ class Library(rx.RxLib):
             ENDF file number (MF).
         mt: int
             ENDF reaction number (MT).
+        lines: int
+            Number of lines to read from this reaction, starting from the top.
+            Default value is 0, which reads in the entire reaction.
 
         Returns
         --------
@@ -780,11 +783,11 @@ class Library(rx.RxLib):
             Contains the reaction data in an Nx6 array.
         """
         if nuc in self.structure:
-            return self._read_nucmfmt(nuc, mf, mt)
+            return self._read_nucmfmt(nuc, mf, mt, lines)
         else:
             raise ValueError("Material {} does not exist.".format(nuc))
 
-    def _read_nucmfmt(self, nuc, mf, mt):
+    def _read_nucmfmt(self, nuc, mf, mt, lines):
         """Load in the data from one reaction into self.structure.
 
         Parameters
@@ -810,7 +813,10 @@ class Library(rx.RxLib):
         start, stop = self.mat_dict[nuc]['mfs'][mf,mt]
         fh.readline()
         fh.seek(start)
-        s = fh.read(stop-start)
+        if lines == 0:
+            s = fh.read(stop-start)
+        else:
+            s = fh.read(lines*81)
         if opened_here:
             fh.close
         return self._load_part(s)

@@ -360,6 +360,30 @@ library._read_res(10020)
 library._read_res(10031)
 library._read_res(40000)
 
+def test_endftod():
+    from pyne._utils import endftod
+    obs = [endftod(" 3.28559+12"),
+           #endftod(" 2.328559+4"),
+           endftod(" 3.28559-12"),
+           endftod(" 2.328559-2"),
+           endftod("-3.28559+12"),
+           endftod("-2.328559+2"),
+           endftod("-3.28559-12"),
+           endftod("-2.328559-2"),
+           endftod("         23"),
+           endftod("        -23")]
+    exp = [ 3.28559e+12,
+           # 2.328559e+4,
+            3.28559e-12,
+            2.328559e-2,
+           -3.28559e+12,
+           -2.328559e+2,
+           -3.28559e-12,
+           -2.328559e-2,
+                    23,
+                   -23]
+
+    assert_equal(exp, obs)
 
 def array_from_ENDF(fh):
     "Convert a chunk of ENDF, stripped of metadata, into a numpy array."
