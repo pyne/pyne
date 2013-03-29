@@ -81,7 +81,114 @@ double pyne::to_dbl (std::string s)
   return strtod( s.c_str(), NULL );
 }
 
+double pyne::endftod (char * s)
+{
+  static double powers_of_10[] =
+    {
+      10.,
+      100.,
+      1.0e4,
+      1.0e8,
+      1.0e16,
+      1.0e32,
+      1.0e64,
+      1.0e128,
+      1.0e256
+    };
+  int pos, mant, exp, c, mantsign, expsign, mantsize, is_int;
+  double v, dbl_exp, * d;
 
+  mant = exp = 0;
+  mantsign = expsign = is_int = 1;
+  if (s[0] == '-')
+    {
+      mantsign = -1;
+    }
+  if (s[2] == '.')
+    {
+      is_int = 0;
+    }
+  if (is_int == 0)
+    {
+      if (s[9] == '+' or s[9] == '-')
+        {
+          if (s[9] == '-')
+            {
+              expsign = -1;
+            }
+          mantsize = 8;
+        }
+      else if (s[8] == '+' or s[8] == '-')
+        {
+          if (s[8] == '-')
+            {
+              expsign = -1;
+            }
+          mantsize = 7;
+        }
+      for (pos = 1; pos <= mantsize; pos++)
+        {
+          c = s[pos];
+          if (c != '.')
+            {
+              mant = 10*mant + (c - '0');
+            }
+        }
+      for (pos = mantsize + 2; pos <= 10; pos++)
+        {
+          c = s[pos];
+          exp = 10*exp + (c - '0');
+        }
+      if (expsign == -1)
+        {
+          exp = exp + (mantsize - 2);
+        }
+      else
+        {
+          exp = exp - (mantsize - 2);
+        }
+      v = mant * mantsign;
+      dbl_exp = 1.0;
+      for (d = powers_of_10; exp != 0; exp >>= 1, d += 1)
+        {
+          if (exp & 01)
+            {
+              dbl_exp *= *d;
+            }
+        }
+      if (expsign == -1)
+        {
+          v /= dbl_exp;
+        }
+      else
+        {
+          v *= dbl_exp;
+        }
+
+    }
+  if (is_int == 1)
+    {
+      pos = v = 0;
+      for (; pos <=10; pos++)
+        {
+          c = s[pos];
+          if (c == ' ')
+            {
+              v++;
+            }
+          else if (c == '-')
+            {
+              mantsign = -1;
+            }
+          else
+            {
+              mant = 10*mant + (c - '0');
+            }
+        }
+      v = mant * mantsign;
+    }
+  return v;
+}
 
 std::string pyne::to_upper(std::string s)
 {

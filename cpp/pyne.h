@@ -2,7 +2,7 @@
 /// \author Anthony Scopatz (scopatz\@gmail.com)
 ///
 /// \brief This is the base PyNE library.
-/// 
+///
 /// It contains a lot of utility functions and constants that are globaly useful
 /// through out the rest of the PyNE infrastructure.
 ///
@@ -21,8 +21,8 @@
 #include <iostream>
 #include <cmath>
 #include <exception>
-#include <sys/stat.h> 
-#include <sys/types.h> 
+#include <sys/stat.h>
+#include <sys/types.h>
 #include <cstdlib>
 #include <vector>
 #include <algorithm>
@@ -50,8 +50,8 @@ namespace pyne {
 
   void pyne_start (); ///< Initializes PyNE based on environment.
 
-  /// Path to the driectory containing the PyNE data.
-  extern std::string PYNE_DATA;     
+  /// Path to the directory containing the PyNE data.
+  extern std::string PYNE_DATA;
   extern std::string NUC_DATA_PATH; ///< Path to the nuc_data.h5 file.
 
   // String Transformations
@@ -73,10 +73,12 @@ namespace pyne {
 
   int to_int(std::string s);  ///< Converts a string of digits to an int using atoi().
 
-  double to_dbl(std::string s);  ///< Converts a valid string to a float usinf atof().
+  double to_dbl(std::string s);  ///< Converts a valid string to a float using atof().
+
+  double endftod(char * s); ///< Converts a string from ENDF format to a float.
 
   /// Returns an all upper case copy of the string.
-  std::string to_upper(std::string s);  
+  std::string to_upper(std::string s);
 
   /// Returns an all lower case copy of the string.
   std::string to_lower(std::string s);
@@ -94,13 +96,13 @@ namespace pyne {
   std::string remove_characters(std::string s, std::string chars);
 
   /// Replaces all instance of \a substr in \a s with \a repstr.
-  std::string replace_all_substrings(std::string s, std::string substr, 
+  std::string replace_all_substrings(std::string s, std::string substr,
                                                     std::string repstr);
 
   /// Returns the last character in a string.
   std::string last_char(std::string s);
 
-  /// Returns the slice of a string \a s using the negative index \a n and the 
+  /// Returns the slice of a string \a s using the negative index \a n and the
   /// length of the slice \a l.
   std::string slice_from_end(std::string s, int n=-1, int l=1);
 
@@ -137,7 +139,7 @@ namespace pyne {
 
   // File Helpers
   /// Returns true if the file can be found.
-  bool file_exists(std::string strfilename);  
+  bool file_exists(std::string strfilename);
 
   /// Custom exception to be thrown in the event that a required file is not able to
   /// be found.

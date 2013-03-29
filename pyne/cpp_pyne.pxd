@@ -14,4 +14,5 @@ cdef extern from "pyne.h" namespace "pyne":
     std_string PYNE_DATA
     std_string NUC_DATA_PATH
 
+    double endftod(char *) except +
     void pyne_start() except +
