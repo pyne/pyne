@@ -24,7 +24,7 @@ import matplotlib.pyplot as plt
 
 import pyne.rxdata as rx
 from pyne.rxname import label
-from pyne.utils import fromendf_tok, convert, endftod
+from pyne.utils import fromendf_tok, endftod
 
 include "include/cython_version.pxi"
 IF CYTHON_VERSION_MAJOR == 0 and CYTHON_VERSION_MINOR >= 17:
@@ -2171,46 +2171,6 @@ class AdlerAdler(Resonance):
 class RMatrixLimited(Resonance):
     def __init__(self):
         pass
- _convert_r = re.compile(r'([ -]\d\.\d+)([+\-]\d+)')
-# 
-# def convert_og(char * s):
-#     """
-#     This function converts a number listed on an ENDF tape into a float or int
-#     depending on whether an exponent is present.
-#     """
-#     m = _convert_r.match(s)
-#     if m is None:
-#         return float(s)
-#     else:
-#         return float(m.group(1)+'e'+ m.group(2))
-# 
-# def endftod(char * s):
-#     """
-#     This function converts a number listed on an ENDF tape into a float or int
-#     depending on whether an exponent is present.
-#     """
-#     cdef char char8 = s[8]
-#     cdef char char9 = s[9]
-#     cdef char * news = <char *>malloc(sizeof(char)*12)
-#     cdef double v
-#     if char9 == '+' or char9 == '-':
-#         strncpy(news, s, 9)
-#         news[9] = 'e'
-#         news[10] = s[9]
-#         news[11] = s[10]
-#         v = atof(news)
-#     elif char8 == '+' or char8 == '-':
-#         strncpy(news, s, 8)
-#         news[8] = 'e'
-#         news[9] = s[8]
-#         news[10] = s[9]
-#         news[11] = s[10]
-#         v = atof(news)
-#     else:
-#         v = atof(s)
-#     free(news)
-#     return v
-
 
 
 MTname = {1: "(n,total) Neutron total",
