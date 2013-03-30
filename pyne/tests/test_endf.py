@@ -5,7 +5,7 @@ import numpy as np
 from numpy.testing import assert_array_equal
 
 from pyne.endf import Library
-from pyne.endf import convert as conv
+from pyne.utils import endftod
 from pyne.rxdata import DoubleSpinDict
 
 import nose
@@ -360,6 +360,16 @@ library._read_res(10020)
 library._read_res(10031)
 library._read_res(40000)
 
+
+def array_from_ENDF(fh):
+    "Convert a chunk of ENDF, stripped of metadata, into a numpy array."
+    return np.genfromtxt(fh,
+                         dtype='float',
+                         delimiter=11,
+                         converters={0: endftod, 1: endftod, 2: endftod,
+                                     3: endftod, 4: endftod, 5: endftod})
+
+
 def test_endftod():
     from pyne._utils import endftod
     obs = [endftod(" 3.28559+12"),
@@ -388,20 +398,6 @@ def test_endftod():
     pprint.pprint(obs)
     assert_array_equal(exp, obs)
 
-def array_from_ENDF(fh):
-    "Convert a chunk of ENDF, stripped of metadata, into a numpy array."
-    return np.genfromtxt(fh,
-                         dtype='float',
-                         delimiter=11,
-                         converters={0: conv, 1: conv, 2: conv,
-                                     3: conv, 4: conv, 5: conv})
-
-def test_convert():
-    exp = [-2.123124e+6, 1, 2.12312e+10]
-    obs = [conv('-2.123124+6'),
-           conv('          1'),
-           conv(' 2.12312+10')]
-    assert_equal(exp, obs)
 
 def test_get():
     obs = library.get_rx(40000, 4, 2)
@@ -427,7 +423,6 @@ def test_unresolved_resonances_a():
     exp_LIST = dict(zip(('D','AJ','AMUN','GN0','GG'), exp.transpose()))
 
     for key in exp_LIST:
-        print conv('2.000000-2')
         assert_array_equal(exp_LIST[key], obs_LIST[key])
 
 def test_unresolved_resonances_b():
@@ -743,7 +738,6 @@ def test_resolved_r_matrix():
     ch_exp[3.0].update(gam_3_exp)
 
     for key in pp_exp:
-        print conv('       1-20')
         assert_array_equal(pp_obs[key], pp_exp[key])
     for spin_group in ch_exp:
         spin_group_obs = ch_obs[spin_group]
