@@ -347,12 +347,12 @@ ErrorCode TrackLengthMeshTally::load_mesh( const std::string& input_filename,
   rval = mb->add_entities( tally_set, all_tets );
   assert( rval == MB_SUCCESS );
 
-  tally_ents = all_tets;
+  tally_points = all_tets;
 
   // Measure the number of divisions in the moab::Range used to represent the tally tets
   // If there are many divisions (for some rather arbitrary definition of "many"), print
   // a warning about performance compromise
-  int psize = tally_ents.psize();
+  int psize = tally_points.psize();
   std::cout << "  Tally range has psize: " << psize << std::endl;
   if( psize > 4 ){
     std::cerr << "Warning: large tally range psize " << psize << ", may reduce performance." << std::endl;
@@ -381,7 +381,7 @@ ErrorCode TrackLengthMeshTally::load_mesh( const std::string& input_filename,
 
     Matrix3 a( p[1]-p[0], p[2]-p[0], p[3]-p[0] );
     a = a.transpose().inverse();
-    tet_baryc_data.at( ent_idx(tet) ) = a;
+    tet_baryc_data.at( get_entity_index(tet) ) = a;
 
   }
 
@@ -461,8 +461,8 @@ ErrorCode TrackLengthMeshTally::write_results( double sp_norm, double mult_fact,
 
     for( unsigned j = 0; j < num_energy_bins; ++j ){
 
-      double tally = data_ref( tally_data, t, j );
-      double error = data_ref( error_data, t, j );
+      double tally = get_data( tally_data, t, j );
+      double error = get_data( error_data, t, j );
       double score = (tally / (volume*sp_norm)) * mult_fact;
       
       rval = mb->tag_set_data( tally_tags[j], &t, 1, &score );
@@ -514,7 +514,7 @@ bool TrackLengthMeshTally::point_in_tet( const CartVect& point, const EntityHand
   rval = mb->get_coords( verts, 1, p0.array() );
   assert( rval == MB_SUCCESS );
 
-  Matrix3& Ainverse = tet_baryc_data[ ent_idx(*tet) ];
+  Matrix3& Ainverse = tet_baryc_data[ get_entity_index(*tet) ];
 
   CartVect bary = (Ainverse) * (point-p0);
   
@@ -532,10 +532,10 @@ void TrackLengthMeshTally::add_score_to_mesh_cell( EntityHandle mesh_cell, doubl
   
   visited_this_history.insert( mesh_cell );
 
-  data_ref( temp_tally_data, mesh_cell, ebin ) += score;
+  get_data( temp_tally_data, mesh_cell, ebin ) += score;
 
   if( input_data.total_energy_bin ){
-    data_ref( temp_tally_data, mesh_cell, (num_energy_bins-1) ) += score;
+    get_data( temp_tally_data, mesh_cell, (num_energy_bins-1) ) += score;
   }
 }
 
@@ -547,9 +547,9 @@ void TrackLengthMeshTally::end_history () {
   for( std::set< EntityHandle >::iterator i=visited_this_history.begin(); i!=visited_this_history.end(); ++i){
 
     for( unsigned j = 0; j < num_energy_bins; ++j ){
-      double& d =     data_ref(temp_tally_data, *i, j );
-      double& tally = data_ref(tally_data, *i, j );
-      double& error = data_ref(error_data, *i, j );
+      double& d =     get_data(temp_tally_data, *i, j );
+      double& tally = get_data(tally_data, *i, j );
+      double& error = get_data(error_data, *i, j );
       
       tally += d;
       error += (d * d);

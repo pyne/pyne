@@ -54,11 +54,16 @@ namespace moab{
  *     3) end_history
  *     4) write_results
  *
- * Note that three arrays are defined for storing mesh tally data
+ * Note that three arrays are available for storing mesh tally data
  *
  *    1) tally_data: stores sum of scores for all particle histories
  *    2) error_data: stores data needed to determine error in tally results
  *    3) temp_tally_data: stores sum of scores for a single history
+ *
+ * Each element in these three data arrays represents one tally point and
+ * one energy bin.  They are ordered first by tally point, and then by energy
+ * bin.  Derived classes can easily access/modify individual elements using
+ * the get_data function.
  */
 //===========================================================================//
 class MeshTally {
@@ -111,20 +116,26 @@ class MeshTally {
     /**
      * \brief get_tally_data(), get_error_data(), get_scratch_data()
      * \param length output parameter containing size of data array
-     * \return pointer to the tally data array
+     * \return pointer to the data array
      */
     virtual double* get_tally_data(int& length);
     virtual double* get_error_data(int& length);
     virtual double* get_scratch_data(int& length);
 
     /**
-     * /brief Resets all of the tally data arrays to zero
+     * /brief Resets all of the mesh tally data arrays to zero
      */
     virtual void zero_tally_data();
 
   protected:
     /// Input data defined by user for this mesh tally
     MeshTallyInput input_data;
+
+    /// Set of tally points (cells, nodes, etc) for this mesh tally
+    moab::Range tally_points;
+
+    /// Tag arrays for storing energy bin labels
+    std::vector<moab::Tag> tally_tags, error_tags;
 
     /// Data array for storing sum of scores for all particle histories
     std::vector<double> tally_data;
@@ -141,37 +152,45 @@ class MeshTally {
     // >>> PROTECTED FUNCTIONS
 
     /**
-     * /brief Resize data arrays to hold a given number of points
-     * /param size defines the new size of the data array
+     * /brief Resize data arrays to hold all of the mesh tally data
+     * /param num_tally_points number of tally points included in mesh tally
      *
-     * Arrays will be resized to the given size * the number of energy bins
+     * Arrays will be resized to the given number of tally points multiplied
+     * by the number of energy bins.
      */
-    void resize_data_arrays(unsigned int size);
+    void resize_data_arrays(unsigned int num_tally_points);
 
-    // >>> MOAB-BASED DATA/FUNCTIONS TODO still need to remove this MOAB dependency
+    /**
+     * \brief Determines entity index corresponding to tally point
+     * \param tally_point entity handle representing tally point
+     * \return entity index for given tally point 
+     */
+    unsigned int get_entity_index(moab::EntityHandle tally_point);
 
-    unsigned int ent_idx(moab::EntityHandle eh)
-    {
-        unsigned int ret = tally_ents.index(eh);
-        assert(ret < tally_ents.size());
-        return ret;
-    }
+    /**
+     * \brief Determines location of element in data array
+     * \param data array containing element to be accessed
+     * \param tally_point entity handle representing tally point
+     * \param energy_bin index representing energy bin
+     * \return reference to element in data array
+     *
+     * Enables direct access to the mesh tally data for the given tally point
+     * and energy bin.
+     */
+    double& get_data(std::vector<double>& data,
+                     moab::EntityHandle tally_point,
+                     unsigned energy_bin = 0);
 
-    double& data_ref(std::vector<double>& data,
-                     moab::EntityHandle eh,
-                     unsigned ebin = 0)
-    {
-        assert(ebin < num_energy_bins);
-        return data[ ent_idx(eh) * num_energy_bins + ebin ];
-    }
-
+    /**
+     * \brief Sets up tally value and error labels for all energy bins
+     * \param mbi the MOAB interface for this mesh tally
+     * \param prefix additional string to be added before each label
+     * \return the MOAB ErrorCode value
+     *
+     * Note that labels are stored as MOAB tag handles in the tally_tags
+     * and error_tags arrays.
+     */
     moab::ErrorCode setup_tags(moab::Interface* mbi, const char* prefix="");
-
-    /// entities on which to compute tally
-    moab::Range tally_ents;
-
-    /// Tag arrays
-    std::vector<moab::Tag> tally_tags, error_tags; 
 };
 
 #endif // DAGMC_MESHTALLY_H

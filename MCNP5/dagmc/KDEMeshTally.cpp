@@ -329,9 +329,9 @@ void KDEMeshTally::end_history()
   for ( i = visited_this_history.begin() ; i != visited_this_history.end() ; ++i ) {
     
     for( unsigned int j = 0; j < num_energy_bins; ++j ){
-      double& history = data_ref( temp_tally_data, *i, j );
-      double& tally =   data_ref( tally_data, *i, j );
-      double& error =   data_ref( error_data, *i, j );
+      double& history = get_data( temp_tally_data, *i, j );
+      double& tally =   get_data( tally_data, *i, j );
+      double& error =   get_data( error_data, *i, j );
       
       tally += history;
       error += ( history * history );
@@ -372,14 +372,14 @@ void KDEMeshTally::write_results( double sp_norm, double fmesh_fact )
   // tag tally and relative error results to the mesh for each entity
   moab::Range::iterator i;
   
-  for ( i = tally_ents.begin() ; i != tally_ents.end() ; ++i ) {
+  for ( i = tally_points.begin() ; i != tally_points.end() ; ++i ) {
 
     moab::EntityHandle point = *i;
 
     for ( unsigned int j = 0; j < num_energy_bins; ++ j){
 
-      tally = data_ref( tally_data, point, j);
-      error = data_ref( error_data, point, j );
+      tally = get_data( tally_data, point, j);
+      error = get_data( error_data, point, j );
       
       // compute relative error for the tally
       // Use 0 as the rel_err value if nothing has been computed for this tally point;
@@ -431,18 +431,18 @@ void KDEMeshTally::write_results( double sp_norm, double fmesh_fact )
 void KDEMeshTally::build_tree( moab::EntityHandle meshset )
 {
 
-  // Obtain all of the calculation points in the mesh and store into tally_ents
+  // Obtain all of the calculation points in the mesh and store into tally_points
   moab::EntityType type = moab::MBVERTEX;
   
-  moab::ErrorCode rval = mb->get_entities_by_type( meshset, type, tally_ents );
+  moab::ErrorCode rval = mb->get_entities_by_type( meshset, type, tally_points );
   assert( moab::MB_SUCCESS == rval );  
 
-  resize_data_arrays( tally_ents.size() );
+  resize_data_arrays( tally_points.size() );
     
   // Measure the number of divisions in the moab::Range used to represent the tally points
   // If there are many divisions (for some rather arbitrary definition of "many"), print
   // a warning about performance compromise
-  int psize = tally_ents.psize();
+  int psize = tally_points.psize();
   std::cout << "   Tally range has psize: " << psize << std::endl;
   if( psize > 4 ){
     std::cerr << "Warning: large tally range psize " << psize 
@@ -454,7 +454,7 @@ void KDEMeshTally::build_tree( moab::EntityHandle meshset )
   settings.maxTreeDepth = 30;
 
   tree = new moab::AdaptiveKDTree( mb );
-  rval = tree->build_tree( tally_ents, tree_root, &settings );
+  rval = tree->build_tree( tally_points, tree_root, &settings );
   assert( moab::MB_SUCCESS == rval );  
 
   rval = setup_tags( mb, "KDE_" );
@@ -539,11 +539,11 @@ void KDEMeshTally::add_score_to_tally( moab::EntityHandle mesh_point,
                                        int ebin )
 {
 
-  data_ref( temp_tally_data, mesh_point, ebin ) += score;
+  get_data( temp_tally_data, mesh_point, ebin ) += score;
 
   // tally the total energy bin if requested
   if ( input_data.total_energy_bin )
-    data_ref( temp_tally_data, mesh_point, (num_energy_bins-1) ) += score;
+    get_data( temp_tally_data, mesh_point, (num_energy_bins-1) ) += score;
 
   visited_this_history.insert( mesh_point );
 
