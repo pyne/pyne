@@ -2,17 +2,17 @@
 from libc.stdlib cimport malloc, free
 
 cimport numpy as np
+cimport pyne.cpp_pyne
+from cython.operator cimport dereference as deref
 import numpy as np
 
 include "include/cython_version.pxi"
 IF CYTHON_VERSION_MAJOR == 0 and CYTHON_VERSION_MINOR >= 17:
     from libc.stdlib cimport atof
-    from libc.string cimport strtok, strcpy
+    from libc.string cimport strtok, strcpy, strncpy
 ELSE:
     from pyne._includes.libc.stdlib cimport atof
-    from pyne._includes.libc.string cimport strtok, strcpy
-
-
+    from pyne._includes.libc.string cimport strtok, strcpy, strncpy
 
 def fromstring_split(char * s, sep=None, dtype=float):
     """A replacement for numpy.fromstring() using the Python str.split() 
@@ -30,7 +30,7 @@ def fromstring_split(char * s, sep=None, dtype=float):
 
     Returns
     -------
-    data : ndarry, 1d
+    data : ndarray, 1d
         Will always return a 1d array of dtype.  You must reshape to the 
         appropriate shape.
 
@@ -66,7 +66,7 @@ def fromstring_token(char * s, char * sep=" ", bint inplace=False, int maxsize=-
 
     Returns
     -------
-    data : ndarry, 1d, float64
+    data : ndarray, 1d, float64
         Will always return a 1d float64 array.  You must cast and reshape 
         to the appropriate type and shape.
 
@@ -108,3 +108,47 @@ def fromstring_token(char * s, char * sep=" ", bint inplace=False, int maxsize=-
 
     data = data[:i].copy()
     return data
+
+
+def endftod(char * s):
+    """Converts a string from ENDF number format to float64.
+
+    Parameters
+    ----------
+    s : char *
+        Plain string to convert.
+
+    Returns
+    -------
+    float64
+    """
+    return pyne.cpp_pyne.endftod(<char *> s)
+
+
+def fromendf_tok(char * s):
+    """A replacement for numpy.fromstring().
+
+    Parameters:
+    -----------
+    s : str
+        String of data, consisting of complete lines of ENDF data.
+
+    Returns:
+    --------
+    data : ndarray, 1d, float64
+        Will always return a 1d float64 array.  You must reshape to the
+        appropriate shape.
+    """
+    cdef int i, num_entries
+    cdef char entry[12]
+    cdef long pos = 0
+    cdef np.ndarray[np.float64_t, ndim=1] cdata
+    i = 0
+    num_entries = len(s)/81 * 6
+    cdata = np.empty(num_entries, dtype=np.float64)
+    while i < num_entries:
+        pos = i*11 + i/6 * 15
+        strncpy(entry, s+pos, 11)
+        cdata[i] = pyne.cpp_pyne.endftod(entry)
+        i += 1
+    return cdata
