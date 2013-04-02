@@ -380,8 +380,8 @@ def test_endftod():
            endftod("-2.328559+2"),
            endftod("-3.28559-12"),
            endftod("-2.328559-2"),
-           endftod("         21"),
-           endftod("        -21")]
+           endftod("        121"),
+           endftod("       -121")]
     exp = [ 3.28559e+12,
             2.328559e+4,
             3.28559e-12,
@@ -390,8 +390,8 @@ def test_endftod():
            -2.328559e+2,
            -3.28559e-12,
            -2.328559e-2,
-                   21.0,
-                  -21.0]
+                  121.0,
+                 -121.0]
     obs = np.array(obs)
     exp = np.array(exp)
     assert_allclose(obs, exp, rtol = 1e-8)
