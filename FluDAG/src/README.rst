@@ -1,15 +1,28 @@
 CMake Notes
 ===========
 CMakeLists.txt is set up to create targets named "readvol" and "mainfludag.  
-You will need a local.cmake file in the same directory as the src directory.
-local.cmake should define the following three variables:
+Three localization variables are needed.
 
+* HOME      - the path to your home directory
+* FLUPRO    - the path to the FLUKA directory
+* MOAB_HOME - the path to the MOAB directory
+
+Any or all of these may be defined in the shell initialization script, e.g.
+.bashrc, or they can be defined with the call to cmake, as in
+
+>cmake -DMOAB_HOME=$HOME/path/to/MOAB ../src
+
+If _at least one_ of the three variables is not defined, the file 
+local.cmake is INCLUDE'd.  
+
+Sample local.cmake
+------------------
 # Locally defined vars
-set(HOME /filespace/example/...)
+set(HOME /path/to/home_directory)
 set(FLUPRO ${HOME}/path/to/FLUKA)
 set(MOAB_HOME ${HOME}/path/to/MOAB)
 
-CMakeLists.txt has an INCLUDE directive that loads local.cmake.
+
 
 To use cmake, go to an empty directory outside of src (e.g. the bin that is 
 parallel to src) and type, in the case of bin,
