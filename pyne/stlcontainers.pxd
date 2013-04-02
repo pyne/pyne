@@ -12,6 +12,9 @@ from libcpp.string cimport string as std_string
 from libcpp.utility cimport pair
 from libcpp.map cimport map as cpp_map
 from libcpp.vector cimport vector as cpp_vector
+from libc cimport stdio
+from cpython.ref cimport PyTypeObject, Py_INCREF, Py_XDECREF
+from cpython.object cimport PyObject
 
 # Python Imports
 cimport numpy as np
@@ -20,6 +23,84 @@ cimport numpy as np
 cimport extra_types
 
 cimport numpy as np
+
+cdef extern from "Python.h":
+    ctypedef Py_ssize_t Py_ssize_t
+
+    ctypedef struct PyTypeObject:
+        char * tp_name
+        int tp_basicsize
+        int tp_itemsize
+        object tp_repr(object)
+        object tp_str(object)
+        PyTypeObject * tp_base
+
+cdef extern from "numpy/arrayobject.h":
+
+    ctypedef object (*PyArray_GetItemFunc)(void *, void *)
+    ctypedef int (*PyArray_SetItemFunc)(object, void *, void *)
+    ctypedef void (*PyArray_CopySwapNFunc)(void *, np.npy_intp, void *, np.npy_intp, np.npy_intp, int, void *)
+    ctypedef void (*PyArray_CopySwapFunc)(void *, void *, int, void *)
+    ctypedef int (*PyArray_CompareFunc)(const void* d1, const void *, void *)
+    ctypedef int (*PyArray_ArgFunc)(void *, np.npy_intp, np.npy_intp *, void *)
+    ctypedef void (*PyArray_DotFunc)(void *, np.npy_intp, void *, np.npy_intp, void *, np.npy_intp, void *)
+    ctypedef int (*PyArray_ScanFunc)(stdio.FILE *, void *, void *, void *)
+    ctypedef int (*PyArray_FromStrFunc)(char *, void *, char **, void *)
+    ctypedef np.npy_bool (*PyArray_NonzeroFunc)(void *, void *)
+    ctypedef void (*PyArray_FillFunc)(void *, np.npy_intp, void *)
+    ctypedef void (*PyArray_FillWithScalarFunc)(void *, np.npy_intp, void *, void *)
+    ctypedef int (*PyArray_SortFunc)(void *, np.npy_intp, void *)
+    ctypedef int (*PyArray_ArgSortFunc)(void *, np.npy_intp *, np.npy_intp, void *)
+    ctypedef np.NPY_SCALARKIND (*PyArray_ScalarKindFunc)(np.PyArrayObject *)
+
+    ctypedef struct PyArray_ArrFuncs:
+        #np.PyArray_VectorUnaryFunc *cast[np.NPY_NTYPES]
+        #np.PyArray_VectorUnaryFunc * cast
+        np.PyArray_VectorUnaryFunc ** cast
+        PyArray_GetItemFunc *getitem
+        PyArray_SetItemFunc *setitem
+        PyArray_CopySwapNFunc *copyswapn
+        PyArray_CopySwapFunc *copyswap
+        PyArray_CompareFunc *compare
+        PyArray_ArgFunc *argmax
+        PyArray_DotFunc *dotfunc
+        PyArray_ScanFunc *scanfunc
+        PyArray_FromStrFunc *fromstr
+        PyArray_NonzeroFunc *nonzero
+        PyArray_FillFunc *fill
+        PyArray_FillWithScalarFunc *fillwithscalar
+        PyArray_SortFunc *sort
+        PyArray_ArgSortFunc *argsort
+        PyObject *castdict
+        PyArray_ScalarKindFunc *scalarkind
+        int **cancastscalarkindto
+        int *cancastto
+        int listpickle
+
+    cdef void PyArray_InitArrFuncs(PyArray_ArrFuncs *)
+
+    ctypedef struct PyArray_ArrayDescr:
+        PyArray_Descr * base
+        PyObject  *shape
+
+    cdef void ** PyArray_API
+    
+    ctypedef struct PyArray_Descr:
+        Py_ssize_t ob_refcnt
+        PyTypeObject * ob_type
+        PyTypeObject * typeobj
+        char kind
+        char type
+        char byteorder
+        int flags
+        int type_num
+        int elsize
+        int alignment
+        PyArray_ArrayDescr * subarray
+        PyObject * fields
+        PyArray_ArrFuncs * f
+
+    cdef int PyArray_RegisterDataType(PyArray_Descr *)
 
 # SetStr
 cdef class _SetIterStr(object):

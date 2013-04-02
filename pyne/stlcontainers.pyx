@@ -9,10 +9,12 @@ from libcpp.vector cimport vector as cpp_vector
 from cython.operator cimport dereference as deref
 from cython.operator cimport preincrement as inc
 from libc.stdlib cimport malloc, free
+from libc.string cimport memcpy
 from libcpp.string cimport string as std_string
 from libcpp.utility cimport pair
 from libcpp.map cimport map as cpp_map
 from libcpp.vector cimport vector as cpp_vector
+from cpython.ref cimport PyTypeObject
 
 # Python Imports
 import collections
@@ -190,7 +192,7 @@ cdef class _SetInt:
             self.set_ptr = new cpp_set[int]()
             for value in new_set:
 
-                s = value
+                s = <int> value
                 self.set_ptr.insert(s)
         elif bool(new_set):
             self.set_ptr = new cpp_set[int]()
@@ -207,7 +209,7 @@ cdef class _SetInt:
 
         if isinstance(value, int) or isinstance(value, long):
 
-            s = value
+            s = <int> value
         else:
             return False
 
@@ -228,7 +230,7 @@ cdef class _SetInt:
         cdef int v
 
 
-        v = value
+        v = <int> value
         self.set_ptr.insert(v)
         return
 
@@ -237,7 +239,7 @@ cdef class _SetInt:
 
         if value in self:
 
-            v = value
+            v = <int> value
             self.set_ptr.erase(v)
         return
 
@@ -451,14 +453,14 @@ cdef class _MapStrInt:
             for key, value in new_map.items():
 
 
-                item = pair[std_string, int](std_string(<char *> key), value)
+                item = pair[std_string, int](std_string(<char *> key), <int> value)
                 self.map_ptr.insert(item)
         elif hasattr(new_map, '__len__'):
             self.map_ptr = new cpp_map[std_string, int]()
             for key, value in new_map:
 
 
-                item = pair[std_string, int](std_string(<char *> key), value)
+                item = pair[std_string, int](std_string(<char *> key), <int> value)
                 self.map_ptr.insert(item)
         elif bool(new_map):
             self.map_ptr = new cpp_map[std_string, int]()
@@ -514,7 +516,7 @@ cdef class _MapStrInt:
         cdef pair[std_string, int] item
 
 
-        item = pair[std_string, int](std_string(<char *> key), value)
+        item = pair[std_string, int](std_string(<char *> key), <int> value)
         self.map_ptr.insert(item)
 
     def __delitem__(self, key):
@@ -593,14 +595,14 @@ cdef class _MapIntStr:
             for key, value in new_map.items():
 
 
-                item = pair[int, std_string](key, std_string(<char *> value))
+                item = pair[int, std_string](<int> key, std_string(<char *> value))
                 self.map_ptr.insert(item)
         elif hasattr(new_map, '__len__'):
             self.map_ptr = new cpp_map[int, std_string]()
             for key, value in new_map:
 
 
-                item = pair[int, std_string](key, std_string(<char *> value))
+                item = pair[int, std_string](<int> key, std_string(<char *> value))
                 self.map_ptr.insert(item)
         elif bool(new_map):
             self.map_ptr = new cpp_map[int, std_string]()
@@ -618,7 +620,7 @@ cdef class _MapIntStr:
         if not isinstance(key, int) and not isinstance(key, long):
             return False
 
-        k = key
+        k = <int> key
 
         if 0 < self.map_ptr.count(k):
             return True
@@ -641,7 +643,7 @@ cdef class _MapIntStr:
         if not isinstance(key, int) and not isinstance(key, long):
             raise TypeError("Only integer keys are valid.")
 
-        k = key
+        k = <int> key
 
         if 0 < self.map_ptr.count(k):
             v = deref(self.map_ptr)[k]
@@ -656,7 +658,7 @@ cdef class _MapIntStr:
         cdef pair[int, std_string] item
 
 
-        item = pair[int, std_string](key, std_string(<char *> value))
+        item = pair[int, std_string](<int> key, std_string(<char *> value))
         self.map_ptr.insert(item)
 
     def __delitem__(self, key):
@@ -664,7 +666,7 @@ cdef class _MapIntStr:
 
         if key in self:
 
-            k = key
+            k = <int> key
             self.map_ptr.erase(k)
 
 
@@ -1303,14 +1305,14 @@ cdef class _MapIntInt:
             for key, value in new_map.items():
 
 
-                item = pair[int, int](key, value)
+                item = pair[int, int](<int> key, <int> value)
                 self.map_ptr.insert(item)
         elif hasattr(new_map, '__len__'):
             self.map_ptr = new cpp_map[int, int]()
             for key, value in new_map:
 
 
-                item = pair[int, int](key, value)
+                item = pair[int, int](<int> key, <int> value)
                 self.map_ptr.insert(item)
         elif bool(new_map):
             self.map_ptr = new cpp_map[int, int]()
@@ -1328,7 +1330,7 @@ cdef class _MapIntInt:
         if not isinstance(key, int) and not isinstance(key, long):
             return False
 
-        k = key
+        k = <int> key
 
         if 0 < self.map_ptr.count(k):
             return True
@@ -1351,7 +1353,7 @@ cdef class _MapIntInt:
         if not isinstance(key, int) and not isinstance(key, long):
             raise TypeError("Only integer keys are valid.")
 
-        k = key
+        k = <int> key
 
         if 0 < self.map_ptr.count(k):
             v = deref(self.map_ptr)[k]
@@ -1366,7 +1368,7 @@ cdef class _MapIntInt:
         cdef pair[int, int] item
 
 
-        item = pair[int, int](key, value)
+        item = pair[int, int](<int> key, <int> value)
         self.map_ptr.insert(item)
 
     def __delitem__(self, key):
@@ -1374,7 +1376,7 @@ cdef class _MapIntInt:
 
         if key in self:
 
-            k = key
+            k = <int> key
             self.map_ptr.erase(k)
 
 
@@ -1445,14 +1447,14 @@ cdef class _MapIntDouble:
             for key, value in new_map.items():
 
 
-                item = pair[int, double](key, <double> value)
+                item = pair[int, double](<int> key, <double> value)
                 self.map_ptr.insert(item)
         elif hasattr(new_map, '__len__'):
             self.map_ptr = new cpp_map[int, double]()
             for key, value in new_map:
 
 
-                item = pair[int, double](key, <double> value)
+                item = pair[int, double](<int> key, <double> value)
                 self.map_ptr.insert(item)
         elif bool(new_map):
             self.map_ptr = new cpp_map[int, double]()
@@ -1470,7 +1472,7 @@ cdef class _MapIntDouble:
         if not isinstance(key, int) and not isinstance(key, long):
             return False
 
-        k = key
+        k = <int> key
 
         if 0 < self.map_ptr.count(k):
             return True
@@ -1493,7 +1495,7 @@ cdef class _MapIntDouble:
         if not isinstance(key, int) and not isinstance(key, long):
             raise TypeError("Only integer keys are valid.")
 
-        k = key
+        k = <int> key
 
         if 0 < self.map_ptr.count(k):
             v = deref(self.map_ptr)[k]
@@ -1508,7 +1510,7 @@ cdef class _MapIntDouble:
         cdef pair[int, double] item
 
 
-        item = pair[int, double](key, <double> value)
+        item = pair[int, double](<int> key, <double> value)
         self.map_ptr.insert(item)
 
     def __delitem__(self, key):
@@ -1516,7 +1518,7 @@ cdef class _MapIntDouble:
 
         if key in self:
 
-            k = key
+            k = <int> key
             self.map_ptr.erase(k)
 
 
@@ -1587,14 +1589,14 @@ cdef class _MapIntComplex:
             for key, value in new_map.items():
 
 
-                item = pair[int, extra_types.complex_t](key, extra_types.py2c_complex(value))
+                item = pair[int, extra_types.complex_t](<int> key, extra_types.py2c_complex(value))
                 self.map_ptr.insert(item)
         elif hasattr(new_map, '__len__'):
             self.map_ptr = new cpp_map[int, extra_types.complex_t]()
             for key, value in new_map:
 
 
-                item = pair[int, extra_types.complex_t](key, extra_types.py2c_complex(value))
+                item = pair[int, extra_types.complex_t](<int> key, extra_types.py2c_complex(value))
                 self.map_ptr.insert(item)
         elif bool(new_map):
             self.map_ptr = new cpp_map[int, extra_types.complex_t]()
@@ -1612,7 +1614,7 @@ cdef class _MapIntComplex:
         if not isinstance(key, int) and not isinstance(key, long):
             return False
 
-        k = key
+        k = <int> key
 
         if 0 < self.map_ptr.count(k):
             return True
@@ -1635,7 +1637,7 @@ cdef class _MapIntComplex:
         if not isinstance(key, int) and not isinstance(key, long):
             raise TypeError("Only integer keys are valid.")
 
-        k = key
+        k = <int> key
 
         if 0 < self.map_ptr.count(k):
             v = deref(self.map_ptr)[k]
@@ -1650,7 +1652,7 @@ cdef class _MapIntComplex:
         cdef pair[int, extra_types.complex_t] item
 
 
-        item = pair[int, extra_types.complex_t](key, extra_types.py2c_complex(value))
+        item = pair[int, extra_types.complex_t](<int> key, extra_types.py2c_complex(value))
         self.map_ptr.insert(item)
 
     def __delitem__(self, key):
@@ -1658,7 +1660,7 @@ cdef class _MapIntComplex:
 
         if key in self:
 
-            k = key
+            k = <int> key
             self.map_ptr.erase(k)
 
 
@@ -2060,7 +2062,7 @@ cdef class _MapIntVectorDouble:
                     value_proxy = cpp_vector[double](<size_t> value_size)
                     for i in range(value_size):
                         value_proxy[i] = <double> value[i]
-                item = pair[int, cpp_vector[double]](key, value_proxy)
+                item = pair[int, cpp_vector[double]](<int> key, value_proxy)
                 self.map_ptr.insert(item)
         elif hasattr(new_map, '__len__'):
             self.map_ptr = new cpp_map[int, cpp_vector[double]]()
@@ -2076,7 +2078,7 @@ cdef class _MapIntVectorDouble:
                     value_proxy = cpp_vector[double](<size_t> value_size)
                     for i in range(value_size):
                         value_proxy[i] = <double> value[i]
-                item = pair[int, cpp_vector[double]](key, value_proxy)
+                item = pair[int, cpp_vector[double]](<int> key, value_proxy)
                 self.map_ptr.insert(item)
         elif bool(new_map):
             self.map_ptr = new cpp_map[int, cpp_vector[double]]()
@@ -2094,7 +2096,7 @@ cdef class _MapIntVectorDouble:
         if not isinstance(key, int) and not isinstance(key, long):
             return False
 
-        k = key
+        k = <int> key
 
         if 0 < self.map_ptr.count(k):
             return True
@@ -2118,7 +2120,7 @@ cdef class _MapIntVectorDouble:
         if not isinstance(key, int) and not isinstance(key, long):
             raise TypeError("Only integer keys are valid.")
 
-        k = key
+        k = <int> key
 
         if 0 < self.map_ptr.count(k):
             v = deref(self.map_ptr)[k]
@@ -2146,7 +2148,7 @@ cdef class _MapIntVectorDouble:
             value_proxy = cpp_vector[double](<size_t> value_size)
             for i in range(value_size):
                 value_proxy[i] = <double> value[i]
-        item = pair[int, cpp_vector[double]](key, value_proxy)
+        item = pair[int, cpp_vector[double]](<int> key, value_proxy)
         self.map_ptr.insert(item)
 
     def __delitem__(self, key):
@@ -2154,7 +2156,7 @@ cdef class _MapIntVectorDouble:
 
         if key in self:
 
-            k = key
+            k = <int> key
             self.map_ptr.erase(k)
 
 
