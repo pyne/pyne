@@ -14,7 +14,9 @@ from libcpp.map cimport map as cpp_map
 from libcpp.vector cimport vector as cpp_vector
 from libc cimport stdio
 from cpython.ref cimport PyTypeObject, Py_INCREF, Py_XDECREF
+from cpython.type cimport PyType_Ready
 from cpython.object cimport PyObject
+from cpython.object cimport Py_LT, Py_LE, Py_EQ, Py_NE, Py_GT, Py_GE
 
 # Python Imports
 cimport numpy as np
@@ -27,13 +29,34 @@ cimport numpy as np
 cdef extern from "Python.h":
     ctypedef Py_ssize_t Py_ssize_t
 
+    cdef long Py_TPFLAGS_DEFAULT 
+    cdef long Py_TPFLAGS_BASETYPE 
+    cdef long Py_TPFLAGS_CHECKTYPES
+
     ctypedef struct PyTypeObject:
         char * tp_name
         int tp_basicsize
         int tp_itemsize
-        object tp_repr(object)
+        object tp_alloc(PyTypeObject *, Py_ssize_t)
+        void tp_dealloc(object)
+        int tp_compare(object, object)
+        object tp_richcompare(object, object, int)
+        object tp_new(PyTypeObject *, object, object)
         object tp_str(object)
+        object tp_repr(object)
+        long tp_hash(object)
+        long tp_flags
+        char * tp_doc
+        PyMemberDef * tp_members
+        PyGetSetDef * tp_getset
         PyTypeObject * tp_base
+        void tp_free(void *)
+
+    ctypedef struct PyMemberDef:
+        char * name
+
+    ctypedef struct PyGetSetDef:
+        char * name
 
 cdef extern from "numpy/arrayobject.h":
 
@@ -54,8 +77,6 @@ cdef extern from "numpy/arrayobject.h":
     ctypedef np.NPY_SCALARKIND (*PyArray_ScalarKindFunc)(np.PyArrayObject *)
 
     ctypedef struct PyArray_ArrFuncs:
-        #np.PyArray_VectorUnaryFunc *cast[np.NPY_NTYPES]
-        #np.PyArray_VectorUnaryFunc * cast
         np.PyArray_VectorUnaryFunc ** cast
         PyArray_GetItemFunc *getitem
         PyArray_SetItemFunc *setitem
@@ -101,6 +122,15 @@ cdef extern from "numpy/arrayobject.h":
         PyArray_ArrFuncs * f
 
     cdef int PyArray_RegisterDataType(PyArray_Descr *)
+
+    cdef object PyArray_Scalar(void *, PyArray_Descr *, object)
+
+cdef extern from "extra_types.h" namespace "extra_types":
+    cdef cppclass MemoryKnight[T]:
+        MemoryKnight() nogil except +
+        T * defnew() nogil except +
+        T * renew(void *) nogil except +
+        void deall(T *) nogil except +
 
 # SetStr
 cdef class _SetIterStr(object):
