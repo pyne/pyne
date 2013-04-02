@@ -84,115 +84,125 @@ double pyne::to_dbl (std::string s)
 double pyne::endftod (char * s)
 {
   // Converts string from ENDF to float64.
-  static double powers_of_10[] =
-    {
-      10.,
-      100.,
-      1.0e4,
-      1.0e8,
-      1.0e16,
-      1.0e32,
-      1.0e64,
-      1.0e128,
-      1.0e256
-    };
-  int pos, mant, exp, c, mantsign, expsign, mantsize, is_int;
-  double v, dbl_exp, * d;
+  int pos, mant, exp, mantsign, expsign;
+  double v, dbl_exp;
 
   mant = exp = 0;
-  mantsign = expsign = is_int = 1;
+  mantsign = expsign = 1;
   if (s[2] == '.')
-    {
-      is_int = 0;
-    }
-
   // Convert an ENDF float
-  if (is_int == 0)
     {
-      if (s[0] == '-')
-        {
-          mantsign = -1;
-        }
+      // if (s[0] == '-')
+      //   mantsign = -1;
       if (s[9] == '+' or s[9] == '-')
         {
-          if (s[9] == '-')
-            {
-              expsign = -1;
-            }
-          mantsize = 8;
+          // if (s[9] == '-')
+          //   expsign = -1;
+          // mantsize = 8;
+          mant = s[8] + 10 * s[7] + 100 * s[6] + 1000 * s[5] + 10000 * s[4] + \
+            100000 * s[3] + 1000000 * s[1] - 1111111 * '0';
+          exp = s[10] - '0';
+          dbl_exp = (exp & 01? 10.: 1) * \
+                    ((exp >>= 1) & 01? 100.: 1) * \
+                    ((exp >>= 1) & 01? 1.0e4: 1) * \
+                    ((exp >>= 1) & 01? 1.0e8: 1) * \
+                    ((exp >>= 1) & 01? 1.0e16: 1) * \
+                    ((exp >>= 1) & 01? 1.0e32: 1) * \
+                    ((exp >>= 1) & 01? 1.0e64: 1);
+          dbl_exp = (s[9] == '-'? 1/dbl_exp: dbl_exp) * 1.0e-6;
+          // 3.12345+6 = 3123450 = 312345 * 10^(6-5)
+          // 3.12345-1 = 0.312345 = 312345 * 10^-(1+5)
+          // 3.12345+4 = 31234.5 = 312345 * 10^(4-5)
+          // exp = (s[9] == '-'? -1: 1) * (s[10] - '0') - 6;
+          v = mant * (s[0] == '-'? -1: 1) * dbl_exp;
         }
-      else if (s[8] == '+' or s[8] == '-')
+      else
         {
           if (s[8] == '-')
-            {
-              expsign = -1;
-            }
-          mantsize = 7;
+            expsign = -1;
+          // mantsize = 7;
+          mant = s[7] + 10 * s[6] + 100 * s[5] + 1000 * s[4] + 10000 * s[3] + \
+            100000 * s[1] - 111111 * '0';
+          // exp = (s[8] == '-'? -1: 1) * (s[10] + 10 * s[9] - 11 * '0') - 5;
+          exp = s[10] + 10 * s[9] - 11 * '0';
+          dbl_exp = (exp & 01? 10.: 1) * \
+                    ((exp >>= 1) & 01? 100.: 1) * \
+                    ((exp >>= 1) & 01? 1.0e4: 1) * \
+                    ((exp >>= 1) & 01? 1.0e8: 1) * \
+                    ((exp >>= 1) & 01? 1.0e16: 1) * \
+                    ((exp >>= 1) & 01? 1.0e32: 1) * \
+                    ((exp >>= 1) & 01? 1.0e64: 1);
+          dbl_exp = (s[8] == '-'? 1/dbl_exp: dbl_exp) * 1.0e-5;
+          // dbl_exp *= s[9] == '-'? 1: 1.0e-5;
+          // v = mant * (s[0] == '-'? -1: 1) * ((exp << 6) < 0? 1/dbl_exp: dbl_exp);
+          v = mant * (s[0] == '-'? -1: 1) * dbl_exp;
         }
-      for (pos = 1; pos <= mantsize; pos++)
-        {
-          c = s[pos];
-          if (c != '.')
-            {
-              mant = 10*mant + (c - '0');
-            }
-        }
-      for (pos = mantsize + 2; pos <= 10; pos++) // +2 because of sign chars
-        {
-          c = s[pos];
-          exp = 10*exp + (c - '0');
-        }
-      if (expsign == -1)
-        {
-          exp = -exp - (mantsize - 2); // -2 because of mant sign and '.' char
-        }
-      else
-        {
-          exp = exp - (mantsize - 2);
-        }
-      if (exp < 0)
-        {
-          expsign = -1;
-          exp *= -1;
-        }
-      v = mant * mantsign;
-      dbl_exp = 1.0;
-      for (d = powers_of_10; exp != 0; exp >>= 1, d += 1)
-        {
-          if (exp & 01)
-            {
-              dbl_exp *= *d;
-            }
-        }
-      if (expsign == -1)
-        {
-          v /= dbl_exp;
-        }
-      else
-        {
-          v *= dbl_exp;
-        }
+      // for (pos = 1; pos <= mantsize; pos++)
+      //   {
+      //     c = s[pos];
+      //     if (c != '.')
+      //       {
+      //         mant = 10*mant + (c - '0');
+      //       }
+      //   }
+      // for (pos = mantsize + 2; pos <= 10; pos++) // +2 because of sign chars
+      //   {
+      //     c = s[pos];
+      //     exp = 10*exp + (c - '0');
+      //   }
+      // if (expsign == -1)
+      //   exp = -exp - (mantsize - 2); // -2 because of mant sign and '.' char
+      // else
+      //   exp = exp - (mantsize - 2);
+      // if (exp < 0)
+      //   {
+      //     expsign = -1;
+      //     exp *= -1;
+      //   }
+      // v = mant * mantsign;
+      // v = mant * (s[0] == '-'? -1: 1);
+      // dbl_exp = (exp & 01? 10.: 1) * \
+      //           ((exp >>= 1) & 01? 100.: 1) * \
+      //           ((exp >>= 1) & 01? 1.0e4: 1) * \
+      //           ((exp >>= 1) & 01? 1.0e8: 1) * \
+      //           ((exp >>= 1) & 01? 1.0e16: 1) * \
+      //           ((exp >>= 1) & 01? 1.0e32: 1) * \
+      //           ((exp >>= 1) & 01? 1.0e64: 1);
+      // for (d = powers_of_10; exp != 0; exp >>= 1, d += 1)
+      //   {
+      //     if (exp & 01)
+      //       dbl_exp *= *d;
+      //   }
+      // if (expsign == -1)
+      //   v /= dbl_exp;
+      // else
+      //   v *= dbl_exp;
     }
 
   // Convert an ENDF int to float
-  if (is_int == 1)
+  else
     {
-      pos = v = 0;
-      for (; pos <=10; pos++)
+      mant = s[10] - '0';
+      pos = 9;
+      while (s[pos] != '-' and s[pos] != '+' and s[pos] != ' ' and pos > 0)
         {
-          c = s[pos];
-          if (c == ' ')
-            {
-            }
-          else if (c == '-')
-            {
-              mantsign = -1;
-            }
-          else
-            {
-              mant = 10*mant + (c - '0');
-            }
+          mant = mant + 10*(s[pos] - '0');
+          pos--;
         }
+      if (s[pos] == '-')
+        mantsign = -1;
+      // pos = v = 0;
+      // for (; pos <=10; pos++)
+      //   {
+      //     c = s[pos];
+      //     if (c == ' ')
+      //       {
+      //       }
+      //     else if (c == '-')
+      //       mantsign = -1;
+      //     else
+      //       mant = 10*mant + (c - '0');
+      //   }
       v = mant * mantsign;
     }
   return v;
