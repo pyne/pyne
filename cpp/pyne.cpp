@@ -84,11 +84,11 @@ double pyne::to_dbl (std::string s)
 double pyne::endftod (char * s)
 {
   // Converts string from ENDF to float64.
-  int pos, mant, exp, mantsign, expsign;
+  int pos, mant, exp;//, mantsign, expsign;
   double v, dbl_exp;
 
   mant = exp = 0;
-  mantsign = expsign = 1;
+  // mantsign = expsign = 1;
   if (s[2] == '.')
   // Convert an ENDF float
     {
