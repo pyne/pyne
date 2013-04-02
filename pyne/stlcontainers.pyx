@@ -15,6 +15,8 @@ from libcpp.utility cimport pair
 from libcpp.map cimport map as cpp_map
 from libcpp.vector cimport vector as cpp_vector
 from cpython.ref cimport PyTypeObject
+from cpython.type cimport PyType_Ready
+from cpython.object cimport Py_LT, Py_LE, Py_EQ, Py_NE, Py_GT, Py_GE
 
 # Python Imports
 import collections
@@ -25,6 +27,8 @@ import numpy as np
 np.import_array()
 
 cimport extra_types
+
+dtypes = {}
 
 # SetStr
 cdef class _SetIterStr(object):
