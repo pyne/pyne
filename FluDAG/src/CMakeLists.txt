@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 2.8)
 project (MyFluDAG)
-INCLUDE(local.cmake)
+if (NOT HOME AND NOT FLUPRO AND NOT MOAB_HOME)
+       	INCLUDE(local.cmake)
+endif (NOT HOME AND NOT FLUPRO AND NOT MOAB_HOME)
 
 set(MOAB_INCLUDE ${MOAB_HOME}/include)
 set(MOAB_LIB_DIR ${MOAB_HOME}/lib)
