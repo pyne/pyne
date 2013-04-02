@@ -1,18 +1,19 @@
+import os
 import warnings
 import StringIO
 
 import numpy as np
-from numpy.testing import assert_array_equal
+from numpy.testing import assert_array_equal, assert_allclose
 
 from pyne.endf import Library
-from pyne.endf import convert as conv
+from pyne.utils import endftod
 from pyne.rxdata import DoubleSpinDict
 
 import nose
 from nose.tools import assert_equal
 
 str_library = StringIO.StringIO(
-""" $Rev:: 532      $  $Date:: 2011-12-05#$                             1 0  0    0
+""" $Rev:: 532      $  $Date:: 2011-12-05#$                             1 0  0
  1.002000+3 1.996800+0          1          0          0          0 128 1451    1
  0.000000+0 0.000000+0          0          0          0          6 128 1451    2
  1.000000+0 1.500000+8          1          0         10          7 128 1451    3
@@ -170,7 +171,7 @@ str_library = StringIO.StringIO(
  0.000000+0 0.000000+0          0          0          0          0 128 0  0    0
  0.000000+0 0.000000+0          0          0          0          0   0 0  0    0
  0.000000+0 0.000000+0          0          0          0          0  -1 0  0    0
- $Rev:: 512      $  $Date:: 2006-12-05#$                             1 0  0    0
+ $Rev:: 513      $  $Date:: 2006-12-05#$                             1 0  0    0
  1.003100+3 2.098312+0          1          0          0          1 131 1451    1
  0.564324+0 1.123121+0          0          0          0          6 131 1451    2
  1.905018+0 2.401998+7          1          0         10          7 131 1451    3
@@ -230,7 +231,7 @@ inceptos himenaeos. Curabitur sodales ligula in libero. Sed        131 1451   13
  0.000000+0 0.000000+0          0          0          0          0 131 0  0    0
  0.000000+0 0.000000+0          0          0          0          0   0 0  0    0
  0.000000+0 0.000000+0          0          0          0          0  -1 0  0    0
- $Rev:: 512      $  $Date:: 2006-12-05#$                             1 0  0    0
+ $Rev:: 514      $  $Date:: 2006-12-05#$                             1 0  0    0
  4.000000+3 6.192500+0          1          0          0          1 419 1451    1
  0.123000+0 0.063200+0          0          0          0          6 419 1451    2
  1.000230+0 8.100130+6          1          0         10          7 419 1451    3
@@ -360,23 +361,53 @@ library._read_res(10020)
 library._read_res(10031)
 library._read_res(40000)
 
+
 def array_from_ENDF(fh):
     "Convert a chunk of ENDF, stripped of metadata, into a numpy array."
     return np.genfromtxt(fh,
                          dtype='float',
                          delimiter=11,
-                         converters={0: conv, 1: conv, 2: conv,
-                                     3: conv, 4: conv, 5: conv})
+                         converters={0: endftod, 1: endftod, 2: endftod,
+                                     3: endftod, 4: endftod, 5: endftod})
+
+
+def test_endftod():
+    from pyne._utils import endftod
+    obs = [endftod(" 3.28559+12"),
+           endftod(" 2.328559+4"),
+           endftod(" 3.28559-12"),
+           endftod(" 2.328559-2"),
+           endftod("-3.28559+12"),
+           endftod("-2.328559+2"),
+           endftod("-3.28559-12"),
+           endftod("-2.328559-2"),
+           endftod("        121"),
+           endftod("       -121")]
+    exp = [ 3.28559e+12,
+            2.328559e+4,
+            3.28559e-12,
+            2.328559e-2,
+           -3.28559e+12,
+           -2.328559e+2,
+           -3.28559e-12,
+           -2.328559e-2,
+                  121.0,
+                 -121.0]
+    obs = np.array(obs)
+    exp = np.array(exp)
+    assert_allclose(obs, exp, rtol = 1e-8)
+
 
 def test_get():
-    obs = library.read_mfmt(40000, 4, 2)
-
+    obs = library.get_rx(40000, 4, 2)
     exp = [4.898421e+3,6.768123e+0,0,1,0,0,2.123124e+6,8.123142e-6,2.123212e+6,
            8.231231e-6,-2.231211e+6,8.123421e-6]
-
-    badkey = library.read_mfmt(111, 1, 1)
+    try:
+        badkey = library.get_rx(111, 1, 1)
+        assert(False)
+    except ValueError:
+        assert(True)
     assert_array_equal(exp, obs)
-    assert_equal(badkey, None)
 
 
 def test_unresolved_resonances_a():
@@ -386,8 +417,8 @@ def test_unresolved_resonances_a():
 
     exp = array_from_ENDF(StringIO.StringIO(
         """ 1.801000+3          0 1.100000+0 3.078520-1 1.000000-2 0.000000+0
-2.101000+3          1 2.100000+0 7.088000-1 2.000000-2 0.000000+0
-3.101000+3          2 3.100000+0 2.120000-1 3.000000-2 0.000000+0"""))
+ 2.101000+3          1 2.100000+0 7.088000-1 2.000000-2 0.000000+0
+ 3.101000+3          2 3.100000+0 2.120000-1 3.000000-2 0.000000+0"""))
     exp_LIST = dict(zip(('D','AJ','AMUN','GN0','GG'), exp.transpose()))
 
     for key in exp_LIST:
@@ -404,12 +435,11 @@ def test_unresolved_resonances_b():
  2.376630+2 7.198625-2-5.887887-8-4.380016-5 1.747888-6-4.104291-9"""))
     exp_1 = dict(zip((0,0,'L','MUF','NE+6',0,'D','AJ','AMUN','GN0','GG'),
                      exp_1_a[:2].flat))
-    exp_1['GF'], exp_1['AWRI'] = exp_1_a[2], 4.648092e-4
+    exp_1['GF'] = exp_1_a[2]
     del exp_1[0]
 
     for key in exp_1:
         assert_array_equal(obs_1[key], exp_1[key])
-
     # For the spin=3.5, L=4, J=5 section in the second isotope
     obs_2 = obs[1][2][3.5,4,5]
     exp_2_a = array_from_ENDF(StringIO.StringIO(
@@ -420,7 +450,7 @@ def test_unresolved_resonances_b():
     exp_2 = dict(zip((0,0,'L','MUF','NE+6',0,'D','AJ','AMUN','GN0','GG'),
                      exp_2_a[:2].flat))
     num_e = exp_2['NE+6']-6
-    exp_2['GF'], exp_2['AWRI'] = exp_2_a[2:].flat[:num_e], -2.368259e-8
+    exp_2['GF'] = exp_2_a[2:].flat[:num_e]
     del exp_2[0]
     for key in exp_2:
         assert_array_equal(obs_2[key], exp_2[key])
@@ -491,7 +521,7 @@ def test_resolved_breitwigner():
                 'GN': [2., 3.], 'GG': [1.1, 1.2], 'GF': [3.1,3.2]}
 
     for key in range_nro_0[2][0.5,1]:
-        assert_array_equal(range_nro_0[2][0.5,1][key],expected[key])
+        assert_allclose(range_nro_0[2][0.5,1][key],expected[key], rtol = 1e-8)
 
 def test_resolved_reichmoore():
     """The section looks like this:
@@ -510,7 +540,7 @@ def test_resolved_reichmoore():
     exp_data = {'ER': 4.127773e+3, 'AJ': -3.956950e-7, 'GN': 3.739684e-5,
                 'GG': -3.872199e+7, 'GFA': 2.259559e+5, 'GFB': -3.096948e-8}
     for key in subsection[2][2.5,2]:
-        assert_array_equal(obs_data[key], exp_data[key])
+        assert_allclose(obs_data[key], exp_data[key], rtol = 1e-8)
 
 def test_resolved_adleradler():
     """The section looks like this:
@@ -542,7 +572,7 @@ def test_resolved_adleradler():
 
 
     for key in exp_LIST:
-        assert_array_equal(exp_LIST[key],obs_LIST[key])
+        assert_allclose(exp_LIST[key],obs_LIST[key], rtol = 1e-8)
 
     exp_bg_string = StringIO.StringIO(
         """ 9.143204-3 1.601509+1-3.312654-7-3.460776+8-3.947879-5-1.646877-5
@@ -599,11 +629,11 @@ def test_resolved_r_matrix_kbk_kps():
     ch1_exp = {'PSI':{'intpoints': [3.,6.,10.],
                       'intschemes': [1.,2.,3.],
                       'Eint': exp_3[13:17].flat[:-4:2],
-                      'PSI(E)': exp_3[13:17].flat[1:-4:2]},
+                      'PSI': exp_3[13:17].flat[1:-4:2]},
                'PSR':{'intpoints': 3.,
                       'intschemes': 2.,
                       'Eint': exp_3[10].flat[::2],
-                      'PSR(E)': exp_3[10].flat[1::2]},
+                      'PSR': exp_3[10].flat[1::2]},
                'LBK': 0.,
                'LPS': 1.}
     for key in ch1_exp:
@@ -667,7 +697,7 @@ def test_resolved_r_matrix():
     pp_obs = library.mat10020['data'][10020]['resolved'][-1][3]
     pp_exp = dict(zip(('MA','MB','ZA','ZB','IA','IB','Q','PNT','SHF','MT',
                        'PA','PB'),
-                      pp_exp_a[3:7].reshape(2,12).transpose()))
+                       pp_exp_a[3:7].reshape(2,12).transpose()))
     pp_exp.update(dict(zip((0,0,'IFG','KRM','NJS','KRL'),
                            pp_exp_a[1])))
     del pp_exp[0]
@@ -755,27 +785,30 @@ def test_xs():
     assert_equal(obs_600_flags, exp_600_flags)
 
 
-# def test_U235():
-#     """This test file can be found here:
-#     http://t2.lanl.gov/data/data/ENDFB-VII.1-neutron/U/235
-#     It is very big (51 MB), so it is not included."""
-#     u235 = Library('U235.txt')
-#     u235._read_res(922350)
-#     u235._read_xs(922350, 37)
-#     exp_a = array_from_ENDF(StringIO.StringIO
-#          (""" 9.223500+4 2.330248+2          0          0          0          0
-# -1.788560+7-1.788560+7          0          0          1          6
-#           6          2                                            
-#  1.796240+7 5.05980-10 1.800000+7 3.810030-7 1.850000+7 8.441785-5
-#  1.900000+7 2.387410-4 1.950000+7 1.348763-3 2.000000+7 4.785594-3
-# """))
-#     obs =  u235.mat922350['data'][922350]['xs'][37][0]
-#     exp = {'intpoints': 6, 'intschemes': 2,
-#            'Eint': exp_a[3:5].flat[::2],
-#            'sigma(E)': exp_a[3:5].flat[1::2]}
+def test_u235():
+    """This test file can be found here:
+    http://t2.lanl.gov/data/data/ENDFB-VII.1-neutron/U/235
+    It is very big (51 MB), so it is not included.
+    """
+    if not os.path.isfile('U235.txt'):
+        return 
+    u235 = Library('U235.txt')
+    u235._read_res(922350)
+    u235._read_xs(922350, 37)
+    exp_a = array_from_ENDF(StringIO.StringIO
+         (""" 9.223500+4 2.330248+2          0          0          0          0
+-1.788560+7-1.788560+7          0          0          1          6
+          6          2                                            
+ 1.796240+7 5.05980-10 1.800000+7 3.810030-7 1.850000+7 8.441785-5
+ 1.900000+7 2.387410-4 1.950000+7 1.348763-3 2.000000+7 4.785594-3
+"""))
+    obs =  u235.mat922350['data'][922350]['xs'][37][0]
+    exp = {'intpoints': 6, 'intschemes': 2,
+           'Eint': exp_a[3:5].flat[::2],
+           'xs': exp_a[3:5].flat[1::2]}
 
-#     for key in obs:
-#         assert_array_equal(obs[key], exp[key])
+    for key in obs:
+        assert_array_equal(obs[key], exp[key])
 
 
 if __name__ == "__main__":

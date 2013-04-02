@@ -1,5 +1,5 @@
 """Python wrapper for nucname library."""
-# Python imports 
+# Python imports
 #from collections import Iterable
 
 # Cython imports
@@ -9,7 +9,7 @@ from cython.operator cimport dereference as deref
 from cython.operator cimport preincrement as inc
 #from cython cimport pointer
 
-# local imports 
+# local imports
 include "include/cython_version.pxi"
 IF CYTHON_VERSION_MAJOR == 0 and CYTHON_VERSION_MINOR >= 17:
     from libcpp.string cimport string as std_string
@@ -23,4 +23,3 @@ import pyne.pyne_config
 cimport cpp_nucname
 cimport pyne.stlconverters as conv
 import pyne.stlconverters as conv
-
