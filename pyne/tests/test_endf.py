@@ -2,7 +2,7 @@ import warnings
 import StringIO
 
 import numpy as np
-from numpy.testing import assert_array_equal
+from numpy.testing import assert_array_equal, assert_allclose
 
 from pyne.endf import Library
 from pyne.utils import endftod
@@ -380,8 +380,8 @@ def test_endftod():
            endftod("-2.328559+2"),
            endftod("-3.28559-12"),
            endftod("-2.328559-2"),
-           endftod("          1"),
-           endftod("         -1")]
+           endftod("         21"),
+           endftod("        -21")]
     exp = [ 3.28559e+12,
             2.328559e+4,
             3.28559e-12,
@@ -390,13 +390,11 @@ def test_endftod():
            -2.328559e+2,
            -3.28559e-12,
            -2.328559e-2,
-                    1.0,
-                   -1.0]
+                   21.0,
+                  -21.0]
     obs = np.array(obs)
     exp = np.array(exp)
-    import pprint
-    pprint.pprint(obs)
-    assert_array_equal(exp, obs)
+    assert_allclose(obs, exp, rtol = 1e-8)
 
 
 def test_get():
@@ -522,7 +520,7 @@ def test_resolved_breitwigner():
                 'GN': [2., 3.], 'GG': [1.1, 1.2], 'GF': [3.1,3.2]}
 
     for key in range_nro_0[2][0.5,1]:
-        assert_array_equal(range_nro_0[2][0.5,1][key],expected[key])
+        assert_allclose(range_nro_0[2][0.5,1][key],expected[key], rtol = 1e-8)
 
 def test_resolved_reichmoore():
     """The section looks like this:
@@ -541,7 +539,7 @@ def test_resolved_reichmoore():
     exp_data = {'ER': 4.127773e+3, 'AJ': -3.956950e-7, 'GN': 3.739684e-5,
                 'GG': -3.872199e+7, 'GFA': 2.259559e+5, 'GFB': -3.096948e-8}
     for key in subsection[2][2.5,2]:
-        assert_array_equal(obs_data[key], exp_data[key])
+        assert_allclose(obs_data[key], exp_data[key], rtol = 1e-8)
 
 def test_resolved_adleradler():
     """The section looks like this:
@@ -573,7 +571,7 @@ def test_resolved_adleradler():
 
 
     for key in exp_LIST:
-        assert_array_equal(exp_LIST[key],obs_LIST[key])
+        assert_allclose(exp_LIST[key],obs_LIST[key], rtol = 1e-8)
 
     exp_bg_string = StringIO.StringIO(
         """ 9.143204-3 1.601509+1-3.312654-7-3.460776+8-3.947879-5-1.646877-5
