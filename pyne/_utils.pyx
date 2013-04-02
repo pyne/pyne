@@ -149,6 +149,6 @@ def fromendf_tok(char * s):
     while i < num_entries:
         pos = i*11 + i/6 * 15
         strncpy(entry, s+pos, 11)
-        cdata[i] = endftod(entry)
+        cdata[i] = pyne.cpp_pyne.endftod(entry)
         i += 1
     return cdata
