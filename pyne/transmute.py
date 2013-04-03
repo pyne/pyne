@@ -230,8 +230,8 @@ def _check_tol(N, tol):
 
     Parameters
     ----------
-    N : NumPy 1-dimensional array
-        The calculated vector of nuclide number densities
+    N : float
+        The calculated final nuclide number density.
     tol : float
         The specified tolerance for the simulation.
 
@@ -241,7 +241,7 @@ def _check_tol(N, tol):
         False if the final nuclide density is less than the tolerance.
         True if the final nuclide density is not less than the tolerance.
     """
-    fail = N_final[-1] > tol
+    fail = N > tol
     return fail
 
 
@@ -355,7 +355,7 @@ def _traversal(nuc, A, phi, t, N_ini, out, tol, tree, filename = None, depth = N
         if tree:
             _tree_log(depth+1, child, N_final[-1], filename)
         # Check against tolerance
-        if _check_tol(N_final, tol):
+        if _check_tol(N_final[-1], tol):
             # Continue traversal
             out = _traversal(child, B, phi, t, N_ini, out, tol, tree, filename, depth+1)
         # On recursion exit or truncation, write data from this nuclide
