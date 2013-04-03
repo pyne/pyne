@@ -1,3 +1,6 @@
+ENDF Tokenization
+-----------------
+
 Here is the implementation of the ENDF tokenizer. The bulk of the work is done
 by endftod() called in the third-to-last-line: it gets hit once for every data
 point in an ENDF file. So we want to make sure it runs quickly.
@@ -6,13 +9,13 @@ point in an ENDF file. So we want to make sure it runs quickly.
     def fromendf_tok_conv(char * s):
         """A replacement for numpy.fromstring().
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         s : str
             String of data, consisting of complete lines of ENDF data.
 
-        Returns:
-        --------
+        Returns
+        -------
         data : ndarray, 1d, float64
             Will always return a 1d float64 array.  You must reshape to the
             appropriate shape.
