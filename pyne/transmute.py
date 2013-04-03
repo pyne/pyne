@@ -11,13 +11,15 @@ from pyne.material import Material
 from pyne.xs.data_source import EAF_RX
 
 
-def decay(nuc, t_sim, tol, tree, phi = None, filename = None):
-    """Decays a material into its daughters.
+def transmute(inp, t_sim, tol, tree, phi = None, filename = None):
+    """Transmutes a material into its daughters.
 
     Parameters
     ----------
-    nuc : nucname
-        Name of the nuclide in decay.
+    inp : dictionary
+        Input dictionary for the transmutation simulation.
+        Keys are nuclides in integer (zzaaam) format.
+        Values are corresponding number densities represented by floats.
     t_sim : float
         Time to decay for.
     tol : float
@@ -28,6 +30,8 @@ def decay(nuc, t_sim, tol, tree, phi = None, filename = None):
     phi : NumPy 1-dimensional array of floats
         Neutron flux vector.
         If phi is None, the flux vector is set to zero.
+        If phi is less than 175 entries in length, zeros will be added
+        until it contains 175 entries.
     filename : String
         Name of file to write tree log to.
         Must be provided if 'tree' is True.
@@ -48,6 +52,15 @@ def decay(nuc, t_sim, tol, tree, phi = None, filename = None):
         phi = np.zeros((175, 1))
     else:
         phi = _format_phi(phi)
+    out = {}
+    for nuc in inp.keys():
+        A = np.zeros((1,1))
+        dest = _get_destruction(nuc,phi)
+        A[0,0] = -dest
+        N_ini = inp[nuc]
+        out = _traversal(nuc, A, phi, t_sim, N_ini, out, tol, tree, filename)
+    return out
+
 
 def _format_phi(phi):
     """Ensures that the flux vector phi is correctly formatted.
