@@ -349,22 +349,22 @@ namespace h5wrap
 
       // set data
       hid_t col_type;
-      T * col_buf;
+      T * col_buf = new T [shape[0]];
 
       data.clear();
       for(int n = 0; n < shape[1]; n++)
       {
         // Make a compound data type of just this column
         col_type = H5Tcreate(H5T_COMPOUND, sizeof(T));
-        H5Tinsert(col_type, cols[n].c_str(), n*sizeof(T), dtype);
+        H5Tinsert(col_type, cols[n].c_str(), 0, dtype);
 
         // Read in this column
-        col_buf = new T [shape[0]];
         H5Dread(h5_set, col_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, col_buf);
 
         // save this column as a vector in out data map
         data[cols[n]] = std::vector<T>(col_buf, col_buf+shape[0]);
       };
+      delete[] col_buf;
     };
 
     // Metadata attributes 

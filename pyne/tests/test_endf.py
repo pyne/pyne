@@ -1,3 +1,4 @@
+import os
 import warnings
 import StringIO
 
@@ -784,10 +785,13 @@ def test_xs():
     assert_equal(obs_600_flags, exp_600_flags)
 
 
-def test_U235():
+def test_u235():
     """This test file can be found here:
     http://t2.lanl.gov/data/data/ENDFB-VII.1-neutron/U/235
-    It is very big (51 MB), so it is not included."""
+    It is very big (51 MB), so it is not included.
+    """
+    if not os.path.isfile('U235.txt'):
+        return 
     u235 = Library('U235.txt')
     u235._read_res(922350)
     u235._read_xs(922350, 37)
