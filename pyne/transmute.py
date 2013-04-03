@@ -49,7 +49,7 @@ def decay(nuc, t_sim, tol, tree, phi = None, filename = None):
     else:
         phi = _format_phi(phi)
 
-def _format_phi(phi)
+def _format_phi(phi):
     """Ensures that the flux vector phi is correctly formatted.
 
     Parameters
