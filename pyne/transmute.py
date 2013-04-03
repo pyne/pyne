@@ -65,9 +65,10 @@ def _format_phi(phi):
     n = phi.shape[0]
     if phi.ndim == 1:
         phi = phi.reshape((n,1))
-    rem = 175 - n
-    app = np.zeros((rem,1))
-    phi = np.append(phi, app, 0)
+    if n < 175:
+        rem = 175 - n
+        app = np.zeros((rem,1))
+        phi = np.append(phi, app, 0)
     return phi
 
 

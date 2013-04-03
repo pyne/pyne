@@ -33,13 +33,15 @@ def test_expm():
     assert_true(np.array_equal(eA, transA))
 
 
-"""Ensures the flux vector size check is completing"""
+"""Ensures the flux vector format is completing"""
 def test_phi_size_check():
-    nuc = nucname.zzaaam("U235")
-    phi = np.arange(1.,175.)
-    t_sim = 1.0
-    tol = 1.0e-15
-    assert_raises(SystemExit,transmute.decay,nuc,phi,t_sim,tol)
+    phiPass = np.arange(175)
+    phiPass = phiPass.reshape((175,1))
+    assert_true(np.array_equal(phiPass, transmute._format_phi(phiPass)))
+    phi = np.arange(100)
+    phi2 = phi.reshape((100,1))
+    out = np.append(phi2, np.zeros((75,1)), 0)
+    assert_true(np.array_equal(out, transmute._format_phi(phi)))
 
 
 """Tests correct application of the _get_daughters function"""
