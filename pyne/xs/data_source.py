@@ -49,7 +49,7 @@ class DataSource(object):
 
     This is an abstract class which provides default functionality when subclassed
     and certain methods are overridden.  A data source should know how to find cross 
-    section information for a given nuclide, reaction type, and temperature, if 
+    section information for a given nuclide, reaction type, and temperature, if
     available.  If such data is not present for this source, then the source should
     return None.
 
@@ -86,7 +86,7 @@ class DataSource(object):
     method.  Other methods and properties may also need to be overriden depending
     on the data source at hand.
 
-    All data sources may be used independenly or in conjunction with a cross
+    All data sources may be used independently or in conjunction with a cross
     section cache instance.
 
     Parameters
@@ -98,17 +98,17 @@ class DataSource(object):
         discretizing cross sections from this source.
 
     """
-    
+
     def __init__(self, src_phi_g=None, dst_group_struct=None, **kwargs):
         self._exists = None
         if not self.exists:
-            return 
+            return
         self.rxcache = {}
         self._load_group_structure()
         self.dst_group_struct = dst_group_struct
         self.src_phi_g = np.ones(self._src_ngroups, dtype='f8') if src_phi_g is None \
                             else np.asarray(src_phi_g)
-        
+
 
     @property
     def src_group_struct(self):
@@ -117,7 +117,7 @@ class DataSource(object):
     @src_group_struct.setter
     def src_group_struct(self, src_group_struct):
         self._src_group_struct = np.asarray(src_group_struct, dtype='f8')
-        self._src_ngroups = len(src_group_struct) - 1        
+        self._src_ngroups = len(src_group_struct) - 1
 
     @property
     def src_ngroups(self):
@@ -136,7 +136,7 @@ class DataSource(object):
         else:
             self._dst_group_struct = np.asarray(dst_group_struct)
             self._dst_ngroups = len(dst_group_struct) - 1
-            self._src_to_dst_matrix = partial_energy_matrix(dst_group_struct, 
+            self._src_to_dst_matrix = partial_energy_matrix(dst_group_struct,
                                                             self._src_group_struct)
 
     @property
