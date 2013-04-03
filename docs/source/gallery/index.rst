@@ -12,7 +12,7 @@ Browse and borrow code from the PyNE gallery!
     *
 
 |half_life| |data_source| |enrichment_mstar_vs_flowrate| |materials| |origen22_h1_xs|
-|reaction_names|
+|reaction_names| |endf_reader|
 
 .. |half_life| image:: half_life_thumb.png
     :target: half_life.html
@@ -31,4 +31,7 @@ Browse and borrow code from the PyNE gallery!
 
 .. |reaction_names| image:: reaction_names_thumb.png
     :target: reaction_names.html
+
+.. |endf_reader| image:: endf_reader_thumb.png
+    :target: endf_reader.html
 
