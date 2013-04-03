@@ -44,9 +44,6 @@ def transmute(inp, t_sim, tol, tree, phi = None, filename = None):
         (zzaaam) form. Values are number densities for the coupled
         nuclide in float format.
     """
-    # Check parameters
-    # Convert nuc to zzaaam
-    nuc = nucname.zzaaam(nuc)
     # Check length of phi
     if phi is None:
         phi = np.zeros((175, 1))
