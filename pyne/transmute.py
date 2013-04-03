@@ -11,34 +11,64 @@ from pyne.material import Material
 from pyne.xs.data_source import EAF_RX
 
 
-def decay(nuc, phi, t_sim, tol):
+def decay(nuc, t_sim, tol, tree, phi = None, filename = None):
     """Decays a material into its daughters.
 
     Parameters
     ----------
     nuc : nucname
         Name of the nuclide in decay.
-    phi : NumPy array of floats
-        Neutron flux vector of length 175.
     t_sim : float
         Time to decay for.
     tol : float
         Tolerance level for chain truncation.
+    tree : Boolean
+        True if a tree output file is desired.
+        False if a tree output file is not desired.
+    phi : NumPy 1-dimensional array of floats
+        Neutron flux vector.
+        If phi is None, the flux vector is set to zero.
+    filename : String
+        Name of file to write tree log to.
+        Must be provided if 'tree' is True.
 
     Returns
     -------
-    decay_nuc : NumPy array of nucnames
-        The daughters.
+    out : dictionary
+        A dictionary containing number densities for each nuclide after
+        the simulation is carried out. Keys are nuclide names in integer
+        (zzaaam) form. Values are number densities for the coupled
+        nuclide in float format.
     """
     # Check parameters
     # Convert nuc to zzaaam
     nuc = nucname.zzaaam(nuc)
     # Check length of phi
-    if not(phi.size == 175):
-        sys.exit('Incorrect phi dimension for FENDL data.')
-    A = _create_decay_matrix(nuc)
-    eA = _solve_decay_matrix(A)
-    data_table.close()
+    if phi is None:
+        phi = np.zeros((175, 1))
+    else:
+        phi = _format_phi(phi)
+
+def _format_phi(phi)
+    """Ensures that the flux vector phi is correctly formatted.
+
+    Parameters
+    ----------
+    phi : NumPy 1-dimensional array
+        Phi may be of various acceptable formats.
+
+    Returns
+    -------
+    phi : NumPy 1-dimensional array
+        Phi will be returned with a shape of (175,1).
+    """
+    n = phi.shape[0]
+    if phi.ndim == 1:
+        phi = phi.reshape((n,1))
+    rem = 175 - n
+    app = np.zeros((rem,1))
+    phi = np.append(phi, app, 0)
+    return phi
 
 
 def _create_decay_matrix(nucs):
