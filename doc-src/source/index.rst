@@ -14,7 +14,7 @@ geometries such as those created in modern solid modeling software.
 
 DAGMC is designed in a modular fashion with the expectation that it
 can be integrated into a variety of Monte Carlo radiation tools. The
-CNERG group at UW-Madison has been focusing its development on the
+CNERG_ group at UW-Madison has been focusing its development on the
 MCNP5_ software developed at `Los Alamos National Laboratory
 <http://www.lanl.gov>`_ and distributed by the `Radiation Safety
 Information Computing Center <http://rsicc.ornl.gov>`_.
@@ -50,4 +50,6 @@ available for manipulating workflows like this.
 .. _MOAB: http://trac.mcs.anl.gov/projects/ITAPS/wiki/MOAB
 .. _MCNP5: http://mcnp-green.lanl.gov/
 .. _Cubit: http://cubit.sandia.gov
-.. _CGM: <http://trac.mcs.anl.gov/projects/ITAPS/wiki/CGM
+.. _CGM: http://trac.mcs.anl.gov/projects/ITAPS/wiki/CGM
+.. _CNERG: http://cnerg.engr.wisc.edu
+
