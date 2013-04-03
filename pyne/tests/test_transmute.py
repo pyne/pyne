@@ -96,6 +96,12 @@ def test_grow_matrix():
     method = transmute._grow_matrix(orig, prod, dest)
     assert_true(np.array_equal(manual, method))
 
+"""Tests correct implementation of the _check_tol function"""
+def test_check_tol():
+    current = 1848.3
+    tol = 1337.5
+    assert_true(transmute._check_tol(current, tol))
+
 """Tests corret implementation of the _tree_log() function"""
 def test_tree_log():
     filename = 'testTreeFile'
