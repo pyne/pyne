@@ -9,6 +9,7 @@ from pyne import nucname
 from pyne import nuc_data
 from pyne.material import Material
 from pyne.xs.data_source import EAF_RX
+from scipy import linalg
 
 
 def transmute(inp, t_sim, tol, tree, phi = None, filename = None):
@@ -155,7 +156,7 @@ def _get_daughters(nuc):
             continue
         daugh = _convert_eaf(daughters[i])
         xs = all_xs[i]
-        daugh_dict[daugh] = xs
+        daugh_dict[daugh] = xs.reshape((175,1))
     return daugh_dict
 
 
@@ -232,7 +233,7 @@ def _get_destruction(nuc, phi):
     for nuc in rxn_dict.keys():
         xs_total = xs_total + rxn_dict[nuc]
     decay_const = data.decay_const(nuc)
-    d = decay_const + sum(xs_total*phi)
+    d = decay_const + np.sum(xs_total*phi)
     return d
 
 
@@ -366,7 +367,10 @@ def _traversal(nuc, A, phi, t, N_ini, out, tol, tree, filename = None, depth = N
     # Lookup decay constant of current nuclide
     lam = data.decay_const(nuc)
     # Lookup decay products and reaction daughters
-    decay_dict = _get_decay(nuc)
+    if lam == 0:
+        decay_dict = {}
+    else:
+        decay_dict = _get_decay(nuc)
     daugh_dict = _get_daughters(nuc)
     # Initialize production rate dictionary
     prod_dict = {}
@@ -382,13 +386,12 @@ def _traversal(nuc, A, phi, t, N_ini, out, tol, tree, filename = None, depth = N
             prod_dict[decay_daugh] = sum(phi * daugh_dict[decay_daugh])
     # Cycle production dictionary
     for child in prod_dict.keys():
-        # Create initial density vector
-        shape = B.shape
-        n = shape[0]
-        N0 = np.zeros((n,1))
-        N0[0] = N_ini
         # Grow matrix
         B = _grow_matrix(A, prod_dict[child], _get_destruction(child, phi))
+        # Create initial density vector
+        n = B.shape[0]
+        N0 = np.zeros((n,1))
+        N0[0] = N_ini
         # Compute matrix exponential and dot with density vector
         eB = _matrix_exp(B, t)
         N_final = np.dot(eB, N0)
