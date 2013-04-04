@@ -12,14 +12,14 @@ set (moablibs ${MOAB_LIB_DIR}/libMOAB.so ${MOAB_LIB_DIR}/libdagmc.so)
 # Where to look for includes
 include_directories(include ${MOAB_INCLUDE})
 
-set (commonfiles cpp/readVol.cpp cpp/fluka_funcs.cpp cpp/dagmc_utils.cpp)
+set (commonfiles cpp/readVol.cpp cpp/fluka_funcs.cpp cpp/dagmc_utils.cpp cpp/Input.cpp)
 
 # add_executable(readvol cpp/readVol.cpp cpp/fluka_funcs.cpp)
 add_executable(readvol cpp/mainReadVol.cpp ${commonfiles})
 target_link_libraries(readvol ${moablibs})
 
 # This is not used yet, but may come into play when cmake can be used to link the fluka library
-set (wrapperfiles cpp/WrapInit.cc cpp/WrapLookDB.cc cpp/WrapSavHist.cc cpp/WrapLookZ.cc 
+set (wrapperfiles cpp/WrapInit.cc cpp/WrapLookDB.cc cpp/WrapSavHist.cc 
                   cpp/WrapDN.cc cpp/WrapReg2Name.cc cpp/WrapLookMG.cc cpp/WrapMag.cc 
 		  cpp/WrapLookFX.cc cpp/WrapReg.cc cpp/WrapIniHist.cc cpp/WrapIncrHist.cc 
 		  cpp/WrapFlgfwr.cc cpp/WrapG1RT.cc)
