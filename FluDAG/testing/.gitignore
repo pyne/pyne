@@ -3,5 +3,5 @@
 # Except this file
 !.gitignore
 !runsample
-!iface
+!iface/*
 !README.rst
