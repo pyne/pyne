@@ -26,7 +26,7 @@ extern "C" {
  */
   void cpp_dagmcinit(char *cfile, 
                 int parallel_file_mode, // parallel read mode
-                int max_pbl, bool running_with_fluka );
+                int max_pbl);
 
 /*
  * Write the material assignment for each volume to a file named matfile

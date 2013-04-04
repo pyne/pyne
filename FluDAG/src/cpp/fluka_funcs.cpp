@@ -11,12 +11,12 @@
 //---------------------------------------------------------------------------//
 
 #include "fluka_funcs.h"
+#include "fludag_utils.h"
 
 // For g1wr()
-// using namespace moab;
 #include "DagWrappers.hh"
 #include "DagWrapUtils.hh"
-// 
+
 #include "MBInterface.hpp"
 #include "MBCartVect.hpp"
 
@@ -84,6 +84,7 @@ std::string ExePath() {
 /**	
   dagmcinit_ is meant to be called from a fortran caller.  Strings have to be 
   accompanied by their length, and will need to be null-appended.
+  Precondition:  cfile exists and is readable
 */
 void dagmcinit_(char *cfile, int *clen,  // geom
                 char *ftol,  int *ftlen, // faceting tolerance
@@ -97,16 +98,17 @@ void dagmcinit_(char *cfile, int *clen,  // geom
         // terminate all filenames with null char
         cfile[*clen] = ftol[*ftlen] = '\0';
         // Call as if running with fluka (final param=true)
-	cpp_dagmcinit(cfile, *parallel_file_mode, *max_pbl, true);
+	cpp_dagmcinit(cfile, *parallel_file_mode, *max_pbl);
 }
 
 
 /** 
    cpp_dagmcinit is called directly from c++ or from a fortran-called wrapper.
+  Precondition:  myfile exists and is readable
 */
-void cpp_dagmcinit(char *cfile,         // geom
+void cpp_dagmcinit(char *myfile,        // geom
                 int parallel_file_mode, // parallel read mode
-                int max_pbl , bool running_with_fluka)
+                int max_pbl)
 {
  
   MBErrorCode rval;
@@ -116,24 +118,6 @@ void cpp_dagmcinit(char *cfile,         // geom
   raystat_dump = new std::ofstream("dagmc_raystat_dump.csv");
 #endif 
 
-  std::string prefixedFilename; 
-  // Prefix
-  if (running_with_fluka)  // h5m file is one level up
-  {
-     prefixedFilename="../";
-  }
-  else // file is in same directory as executable
-  {
-     prefixedFilename="";
-  }
-  prefixedFilename.append(cfile);
-  if (DEBUG)
-  {
-  	std::cout << "\nmy file is " << prefixedFilename << "\n" << std::endl;
-  }
-  char *myfile;
-  myfile = &prefixedFilename[0];
-  
   // initialize this as -1 so that DAGMC internal defaults are preserved
   // user doesn't set this
   double arg_facet_tolerance = -1;
@@ -144,7 +128,7 @@ void cpp_dagmcinit(char *cfile,         // geom
   // read geometry
   rval = DAG->load_file(myfile, arg_facet_tolerance );
   if (MB_SUCCESS != rval) {
-    std::cerr << "DAGMC failed to read input file: " << cfile << std::endl;
+    std::cerr << "DAGMC failed to read input file: " << myfile << std::endl;
     exit(EXIT_FAILURE);
   }
 
@@ -171,20 +155,31 @@ void cpp_dagmcinit(char *cfile,         // geom
   pblcm_history_stack.resize( max_pbl+1 ); // fortran will index from 1
 }
 
-
 /**************************************************************************************************/
 /******                                FLUKA stubs                                         ********/
 /**************************************************************************************************/
+/// From Flugg Wrappers
 
+double g1(int& oldRegion, double point[], double dir[],  int& newRegion);
 //---------------------------------------------------------------------------//
 // g1wr(..)
 //---------------------------------------------------------------------------//
 /// From Flugg Wrappers
-void g1wr(double& pSx, double& pSy, double& pSz, double* pV,
-          int& oldReg, const int& oldLttc, double& propStep,
-          int& nascFlag, double& retStep, int& newReg,
-          double& saf, int& newLttc, int& LttcFlag,
-          double* sLt, int* jrLt)
+void g1wr(double& pSx, 
+          double& pSy, 
+          double& pSz, 
+          double* pV,
+          int& oldReg,         // pass through
+          const int& oldLttc,  // ignore
+          double& propStep,    // .
+          int& nascFlag,       // .
+          double& retStep,     // reset in this method
+          int& newReg,         // return from callee
+          double& saf,         // ignore
+          int& newLttc,        // .
+          int& LttcFlag,       // . 
+          double* sLt,         // .
+          int* jrLt)           // .
 {
   std::cerr<<"============= G1WR =============="<<std::endl;    
 
@@ -193,28 +188,36 @@ void g1wr(double& pSx, double& pSy, double& pSz, double* pV,
   std::cerr << "Oldreg = " << oldReg << std::endl;
   std::cerr << "PropStep = " << propStep << std::endl;
   
-  MBEntityHandle vol = DAG->entity_by_index(3,oldReg);
-  //  MBEntityHandle prev = DAG->entity_by_index( 2, *jsu );
-  double next_surf_dist;
-  MBEntityHandle next_surf = 0;
-  MBEntityHandle newvol = 0;
-
   double point[3] = {pSx,pSy,pSz};
   double dir[3]   = {pV[0],pV[1],pV[2]};  
 
-  MBErrorCode result = DAG->ray_fire(vol, point, dir,next_surf, next_surf_dist );
-
-  retStep = next_surf_dist;
-
-  MBErrorCode rval = DAG->next_vol(next_surf,vol,newvol);
+  // Separate the body of this function to a testable call
+  retStep = g1(oldReg, point, dir, newReg);
   
-  newReg = DAG->index_by_handle(newvol);
-
   std::cerr << "newReg = " << newReg << std::endl;
 
   return;
 }
-///////			End g1wr
+
+//---------------------------------------------------------------------------//
+// g1(int& old Region, int& newRegion)
+//---------------------------------------------------------------------------//
+double g1(int& oldRegion, double point[], double dir[],  int& newRegion)
+{
+  MBEntityHandle vol = DAG->entity_by_index(3,oldRegion);
+
+  double next_surf_dist;
+  MBEntityHandle next_surf = 0;
+  MBEntityHandle newvol = 0;
+
+  MBErrorCode result = DAG->ray_fire(vol, point, dir, next_surf, next_surf_dist );
+
+  MBErrorCode rval = DAG->next_vol(next_surf,vol,newvol);
+
+  newRegion = DAG->index_by_handle(newvol);
+  return next_surf_dist;
+}
+///////			End g1wr and g1:w
 /////////////////////////////////////////////////////////////////////
 
 //---------------------------------------------------------------------------//
@@ -240,10 +243,65 @@ void nrmlwr(double& pSx, double& pSy, double& pSz,
 }
 ///////			End nrmlwr
 /////////////////////////////////////////////////////////////////////
+
+//---------------------------------------------------------------------------//
+// lkwr(..)
+//---------------------------------------------------------------------------//
+
+// Wrapper for localisation of starting point of particle.
+//
+// modified 20/III/00: history initialization moved to ISVHWR
+//////////////////////////////////////////////////////////////////
+
+using namespace moab;
+
+void lkwr(double& pSx, double& pSy, double& pSz,
+          double* pV, const int& oldReg, const int& oldLttc,
+          int& newReg, int& flagErr, int& newLttc)
+{
+  std::cerr << "======= LKWR =======" << std::endl;
+  std::cerr << "oldReg is " << oldReg << std::endl;
+  std::cerr << "position is " << pSx << " " << pSy << " " << pSz << std::endl; 
+
+
+  const double xyz[] = {pSx, pSy, pSz}; // location of the particle (xyz)
+  int is_inside = 0; // logical inside or outside of volume
+  int num_vols = DAG->num_entities(3); // number of volumes
+
+  for (int i = 1 ; i <= num_vols ; i++) // loop over all volumes
+    {
+      EntityHandle volume = DAG->entity_by_index(3, i); // get the volume by index
+      // No ray history or ray direction.
+      ErrorCode code = DAG->point_in_volume(volume, xyz, is_inside);
+
+      // check for non error
+      if(MB_SUCCESS != code) 
+	{
+	  std::cerr << "Error return from point_in_volume!" << std::endl;
+	  flagErr = 1;
+	  return;
+	}
+      
+      if (is_inside == 1 )  // we are inside the cell tested
+	{
+	  newReg = i;
+	  flagErr = i;
+          //BIZARRELY - WHEN WE ARE INSIDE A VOLUME, BOTH, newReg has to equal flagErr
+	  std::cerr << "newReg is " << newReg << std::endl;
+	  return;
+	}
+
+    }
+
+  std::cerr << "point is not in any volume" << std::endl;
+  return;
+}
+
 /**************************************************************************************************/
 /******                                End of FLUKA stubs                                  ********/
 /**************************************************************************************************/
 
+/*
 void dagmcwritefacets_(char *ffile, int *flen)  // facet file
 {
     // terminate all filenames with null char
@@ -258,7 +316,7 @@ void dagmcwritefacets_(char *ffile, int *flen)  // facet file
   return;
 
 }
-
+*/
 /**
  * Helper function for parsing DagMC properties that are integers.
  * Returns true on success, false if property does not exist on the volume,

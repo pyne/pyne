@@ -2,4 +2,6 @@
 *
 # Except this file
 !.gitignore
-!testsample
+!runsample
+!iface
+!README.rst
