@@ -14,25 +14,49 @@
 #include "fluka_funcs.h"
 
 std::string goodfile = "../iface/cases/test.h5m";
+char *goodfileptr = &goodfile[0];
+std::string prefix = "../iface/cases/";
+
 TEST(Issue22_Test, MissingFile)
 {
 //    const std::string s;
   //  EXPECT_STREQ(NULL, s.c_str());
 
    std::string s = "MissingFile.h5m";
-   char *fileptr;
-   fileptr = &s[0];
+   char *fileptr = &s[0];;
    EXPECT_FALSE(isFileReadable(fileptr));
-   fileptr = &goodfile[0];
-   EXPECT_TRUE(isFileReadable(fileptr));
+
+   EXPECT_TRUE(isFileReadable(goodfileptr));
 }
 
 TEST(Issue22_Test, NonEmptyFile)
 {
-   std::string s = "../iface/cases/EmptyFile.h5m";
-   char *fileptr;
-   fileptr = &s[0];
+   std::string s = prefix.append("EmptyFile.h5m");
+   char *fileptr = &s[0];;
    EXPECT_FALSE(isFileNonEmpty(fileptr));
-   fileptr = &goodfile[0];
-   EXPECT_TRUE(isFileNonEmpty(fileptr));
+
+   EXPECT_TRUE(isFileNonEmpty(goodfileptr));
+}
+
+TEST(Issue22_Test, Combo)
+{
+   std::string s = "MissingFile.h5m";
+   char *fileptr = &s[0];
+   EXPECT_FALSE(checkFile(fileptr));
+
+   s = prefix.append("EmptyFile.h5m");
+   fileptr = &s[0];
+   EXPECT_FALSE(checkFile(fileptr));
+
+   EXPECT_TRUE(checkFile(goodfileptr));
+}
+
+TEST(Issue22_Test, MalformedData)
+{
+   
+   std::string s = prefix.append("SomeTextFile.h5m");
+   char *fileptr = &s[0];
+   std::string fail_msg = "DAGMC failed to read input file: ";
+
+   ASSERT_DEATH({cpp_dagmcinit(fileptr,0,1);},fail_msg); 
 }
