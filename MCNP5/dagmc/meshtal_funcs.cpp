@@ -7,6 +7,7 @@
 
 #include "moab/Core.hpp"
 #include "MeshTally.hpp"
+#include "TallyEvent.hpp"
 #include "TrackLengthMeshTally.hpp"
 
 using moab::TrackLengthMeshTally;
@@ -405,11 +406,11 @@ void dagmc_fmesh_score_( int *fmesh_index, double *x, double *y, double *z,
 
     moab::CartVect loc( *x, *y, *z );
     moab::CartVect dir( *u, *v, *w );
+
+    TallyEvent event(*erg, *wgt);
+    event.set_track_event(*d, loc, dir);
     
-    KDEWeightParam param( fmesh_index, wgt, erg );
-    param.tracklength = d;    
-    
-    kde_track_tallies[*fmesh_index]->tally_track( param, loc, dir, (*ien)-1 ); 
+    kde_track_tallies[*fmesh_index]->tally_track(event, (*ien)-1); 
 
   }
 
@@ -457,10 +458,10 @@ void dagmc_kde_tally_( double* x, double* y, double* z, double* wgt,
 
       moab::CartVect collision_loc( *x, *y, *z );
 
-      KDEWeightParam param( &fmesh_index, wgt, erg );
-      param.total_xs = ple;
+      TallyEvent event(*erg, *wgt);
+      event.set_collision_event(*ple, collision_loc);
 
-      (*i)->tally_collision( param, collision_loc, ien );
+      (*i)->tally_collision(event, ien);
     }
     ++fmesh_index;
   }

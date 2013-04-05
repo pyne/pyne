@@ -12,36 +12,10 @@
 
 #include "KDEKernel.hpp"
 #include "MeshTally.hpp"
+#include "TallyEvent.hpp"
 
 // forward declarations
 class AdaptiveKDTree;
-
-/**
- * A struct that contains all the parameters needed to compute the tally
- * weighting factor of a KDEMeshTally score.
- *
- * @param fmesh_index the index of the KDE mesh tally
- * @param particle_wgt the current weight of the particle
- * @param energy the current energy of the particle
- * @param tracklength (optional) the track length the particle has traveled
- * @param total_xs (optional) the total macroscopic cross section
- */
-struct KDEWeightParam {
-
-  // parameters needed for all KDE tally types
-  int* fmesh_index;
-  double* particle_wgt;
-  double* energy;
-
-  // optional parameters, default to NULL
-  double* tracklength;  // only needed for TRACKLENGTH/SUBTRACK tallies
-  double* total_xs;     // only needed for COLLISION tallies
-
-  KDEWeightParam( int* index, double* wgt, double* erg ):
-    fmesh_index( index ), particle_wgt( wgt ), energy( erg ),
-    tracklength( NULL ), total_xs( NULL ) {}
-
-};
 
 /** 
  * A class that represents a mesh tally based on a kernel density estimator
@@ -104,33 +78,22 @@ class KDEMeshTally : public MeshTally {
      */
     ~KDEMeshTally();
 
+    // TODO combine tally_collision and tally_track into one function
     /**
-     * Computes the contribution for the given collision location and adds the
-     * results to the current mesh tally.  Note that the total cross section
-     * parameter in the KDEWeightParam object must be set to a non-NULL value.
-     *
-     * @param param the parameters needed to compute the tally weighting factor
-     * @param collision_loc a point where a collision has occurred
-     * @param ebin the energy bin to tally this collision into (calculated by fortran)
+     * \brief Computes mesh tally scores for the given collision event
+     * \param event the parameters needed to compute the mesh tally scores
+     * \param ebin the energy bin to tally this collision into (calculated by fortran)
+     * TODO remove ebin as a parameter
      */
-    void tally_collision( const KDEWeightParam & param,
-                          const moab::CartVect & collision_loc, 
-                          int ebin );
+    void tally_collision(const TallyEvent& event, int ebin);
 
     /**
-     * Computes the contribution for the given track segment and adds the
-     * results to the current mesh tally.  Note that the track length parameter
-     * in the KDEWeightParam object must be set to a non-NULL value.
-     *
-     * @param param the parameters needed to compute the tally weighting factor
-     * @param start_point the starting location of the track (xo, yo, zo)
-     * @param direction the direction the particle is traveling (uo, vo, wo)
-     * @param ebin the energy bin to tally this track into (calculated by fortran)
+     * \brief Computes mesh tally scores for the given track-based event
+     * \param event the parameters needed to compute the mesh tally scores
+     * \param ebin the energy bin to tally this track into (calculated by fortran)
+     * TODO remove ebin as a parameter
      */
-    void tally_track( const KDEWeightParam & param,
-                      const moab::CartVect & start_point,
-                      const moab::CartVect & direction, 
-                      int ebin );
+    void tally_track(const TallyEvent& event, int ebin);
 
     /** 
      * Implement MeshTally end_history interface 
@@ -203,7 +166,8 @@ class KDEMeshTally : public MeshTally {
      * @param param the parameters needed to compute the tally weighting factor
      * @return the tally weighting factor for a collision or track
      */
-    double get_score_weight( const KDEWeightParam & param );
+    // TODO ignoring score weight for now
+    //double get_score_weight( const KDEWeightParam & param );
 
     /**
      * Adds a tally contribution to one calculation point on the mesh.

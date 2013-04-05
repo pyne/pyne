@@ -19,6 +19,7 @@
 #include "KDEKernel.hpp"
 #include "KDETrack.hpp"
 #include "KDEMeshTally.hpp"
+#include "TallyEvent.hpp"
 #include "meshtal_funcs.h"
 
 moab::CartVect KDEMeshTally::default_bandwidth( 1, 1, 1 );
@@ -199,21 +200,17 @@ KDEMeshTally::~KDEMeshTally()
   
 }
 //-----------------------------------------------------------------------------
-void KDEMeshTally::tally_collision( const KDEWeightParam & param,
-                                    const moab::CartVect & collision_loc, 
-                                    int ebin )
+void KDEMeshTally::tally_collision(const TallyEvent& event, int ebin)
 {
-
-  // make sure cross section parameter has been set properly
-  if ( param.total_xs == NULL ) {
-
-    std::cerr << "\nError: cross section parameter set to NULL" << std::endl;
-    exit( EXIT_FAILURE );
-
+  // make sure tally event is a collision event
+  if (event.event_type != TallyEvent::COLLISION)
+  {
+    std::cerr << "\nError: Tally event is not a collision event" << std::endl;
+    exit(EXIT_FAILURE);
   } 
  
   // make a KDECollision object to represent a single collision location
-  KDECollision collision( collision_loc, bandwidth, kernel );
+  KDECollision collision( event.position, bandwidth, kernel );
 
   // get valid neighborhood dimensions for non-zero contributions to tally
   double min[3];
@@ -227,7 +224,7 @@ void KDEMeshTally::tally_collision( const KDEWeightParam & param,
   assert( moab::MB_SUCCESS == rval );  
 
   // get the tally weighting factor for this collision
-  double weight = get_score_weight( param );
+  double weight = 1; //get_score_weight( param );
 
   // compute the contribution for all calculation points in this neighborhood
   std::vector<moab::EntityHandle>::iterator i;
@@ -249,22 +246,17 @@ void KDEMeshTally::tally_collision( const KDEWeightParam & param,
   }
     
   // add collision to the running variance used in computing optimal bandwidth
-  update_bandwidth_variance( collision_loc );
+  update_bandwidth_variance(event.position);
 
 }
 //-----------------------------------------------------------------------------
-void KDEMeshTally::tally_track( const KDEWeightParam & param,
-                                const moab::CartVect & start_point,
-                                const moab::CartVect & direction, 
-                                int ebin )
+void KDEMeshTally::tally_track(const TallyEvent& event, int ebin)
 {
-
-  // make sure track length parameter has been set properly
-  if ( param.tracklength == NULL ) {
-
-    std::cerr << "\nError: track length parameter set to NULL" << std::endl;
-    exit( EXIT_FAILURE );
-
+  // make sure tally event is a track-based event
+  if (event.event_type != TallyEvent::TRACK)
+  {
+    std::cerr << "\nError: Tally event is not a track-based event" << std::endl;
+    exit(EXIT_FAILURE);
   } 
 
   // set the number of subtracks to be tallied only for SUBTRACK tallies
@@ -274,8 +266,8 @@ void KDEMeshTally::tally_track( const KDEWeightParam & param,
     tally_subtracks = subtracks;
 
   // make a KDETrack object to represent a single track segment
-  KDETrack track( start_point, direction, bandwidth, *(param.tracklength),
-                  kernel, tally_subtracks );
+  KDETrack track(event.position, event.direction, bandwidth, event.event_value,
+                 kernel, tally_subtracks);
     
   // get valid neighborhood dimensions for non-zero contributions to tally
   double min[3];
@@ -290,7 +282,7 @@ void KDEMeshTally::tally_track( const KDEWeightParam & param,
   assert( moab::MB_SUCCESS == rval );  
 
   // get the tally weighting factor for this track
-  double weight = get_score_weight( param );
+  double weight = 1; //get_score_weight( param );
 
   // compute the contribution for all calculation points in this neighborhood
   std::vector<moab::EntityHandle>::iterator i;
@@ -513,7 +505,7 @@ moab::CartVect KDEMeshTally::get_optimal_bandwidth()
 
 }
 //-----------------------------------------------------------------------------
-double KDEMeshTally::get_score_weight( const KDEWeightParam & param )
+/*double KDEMeshTally::get_score_weight( const KDEWeightParam & param )
 {
 
   double score_weight = 1;
@@ -532,7 +524,7 @@ double KDEMeshTally::get_score_weight( const KDEWeightParam & param )
 
   return score_weight;
 
-}
+}*/
 //-----------------------------------------------------------------------------
 void KDEMeshTally::add_score_to_tally( moab::EntityHandle mesh_point,
                                        double score,

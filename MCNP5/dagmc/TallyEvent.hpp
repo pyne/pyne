@@ -56,7 +56,7 @@ class TallyEvent
   private:
     /// MeshTally implementations that can access private TallyEvent data
     friend class KDEMeshTally;
-    friend class TrackLengthMeshTally;
+    //friend class TrackLengthMeshTally;
 
     /**
      * \brief Defines type of tally event
