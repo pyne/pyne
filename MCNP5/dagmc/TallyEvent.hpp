@@ -5,6 +5,11 @@
 
 #include "moab/CartVect.hpp"
 
+// forward declaration
+namespace moab {
+  class TrackLengthMeshTally;
+}
+
 //===========================================================================//
 /**
  * \class TallyEvent
@@ -56,7 +61,7 @@ class TallyEvent
   private:
     /// MeshTally implementations that can access private TallyEvent data
     friend class KDEMeshTally;
-    //friend class TrackLengthMeshTally;
+    friend class moab::TrackLengthMeshTally;
 
     /**
      * \brief Defines type of tally event

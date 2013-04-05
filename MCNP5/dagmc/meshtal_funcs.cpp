@@ -386,20 +386,21 @@ void dagmc_fmesh_end_history_(){
 void dagmc_fmesh_score_( int *fmesh_index, double *x, double *y, double *z,
                          double *u, double *v, double *w, double *erg,double *wgt,double *d, int* ien )
 {
-
+  // TODO combine these if statements into one when a common scoring function is created
   if( tracklen_tallies[*fmesh_index] ){
     score_count += 1;
     
     moab::CartVect ray = moab::CartVect(*x,*y,*z);
     moab::CartVect vec = moab::CartVect(*u,*v,*w);
     
-    MCNPTrackParam param( fmesh_index, erg, wgt );
+    TallyEvent event(*erg, *wgt);
+    event.set_track_event(*d, ray, vec);
     
 #ifdef MESHTAL_DEBUG
     std::cout << "meshtal particle: " << ray << " " << vec << " " << *d << std::endl;
 #endif
     
-    tracklen_tallies[*fmesh_index]->add_track_segment( ray, vec, *d, (*ien)-1, &param );
+    tracklen_tallies[*fmesh_index]->add_track_segment(event, (*ien)-1);
 
   }
   else if ( kde_track_tallies[*fmesh_index] ) {

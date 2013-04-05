@@ -12,16 +12,7 @@
 
 #include "Matrix3.hpp"
 #include "MeshTally.hpp"
-
-
-struct MCNPTrackParam {
-  int *fmesh_index;
-  double *erg;
-  double *wgt;
-
-  MCNPTrackParam(int *i, double *e, double *w): 
-    fmesh_index(i), erg(e), wgt(w) {}
-};
+#include "TallyEvent.hpp"
 
 namespace moab{
 
@@ -39,9 +30,12 @@ public:
   static TrackLengthMeshTally* setup( const MeshTallyInput& params, Interface* mbi, const int* cur_mcnp_cell );
 
   /**
-   * Tally a single particle track segment
+   * \brief Computes mesh tally scores for the given track-based event
+   * \param event the parameters needed to compute the mesh tally scores
+   * \param ebin the energy bin to tally this track into (calculated by fortran)
+   * TODO remove ebin as a parameter
    */
-  void add_track_segment( CartVect& start, CartVect& vec, double length, int ebin,  MCNPTrackParam* score_params );
+  void add_track_segment(const TallyEvent& event, int ebin);
   
   virtual void end_history ();
     
@@ -66,15 +60,15 @@ protected:
                                       EntityHandle& tetrahedron, EntityHandle vertices[3] );
 
 
-  EntityHandle find_next_tet_by_ray_fire( CartVect& start, CartVect& vec, double length, 
-                                          EntityHandle first_tri[3], double& first_t, 
-                                          EntityHandle last_crossing = 0 );
+  EntityHandle find_next_tet_by_ray_fire(const CartVect& start, const CartVect& vec, double length, 
+                                         EntityHandle first_tri[3], double& first_t, 
+                                         EntityHandle last_crossing = 0);
 
-  EntityHandle get_starting_tet( CartVect& start, CartVect& vec, double length, 
-                                 EntityHandle first_tri[3], double& first_t );
+  EntityHandle get_starting_tet(const CartVect& start, const CartVect& vec, double length, 
+                                EntityHandle first_tri[3], double& first_t);
     
 
-  EntityHandle get_starting_tet_conformal( CartVect& start, EntityHandle first_tri[3] );
+  EntityHandle get_starting_tet_conformal(const CartVect& start, EntityHandle first_tri[3]);
 
 
   void set_convex_flag( bool c ){ convex = c; } 

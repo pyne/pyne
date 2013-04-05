@@ -30,6 +30,7 @@
 #include <cassert>
 
 // the header file has at least one assert, so keep this include below the macro checks
+#include "TallyEvent.hpp"
 #include "TrackLengthMeshTally.hpp"
 #include "meshtal_funcs.h"
 
@@ -608,9 +609,9 @@ TrackLengthMeshTally::get_skin_triangle_adjacencies( EntityHandle triangle,
  * @return The tetrahedron intersected by this ray fire, or zero if none.
  */
 EntityHandle 
-TrackLengthMeshTally::find_next_tet_by_ray_fire( CartVect& start, CartVect& vec, double length, 
+TrackLengthMeshTally::find_next_tet_by_ray_fire(const CartVect& start, const CartVect& vec, double length, 
                                       EntityHandle first_tri[3], double& first_t, 
-                                      EntityHandle last_crossing )
+                                      EntityHandle last_crossing)
 {
   ErrorCode rval;
   EntityHandle first_tet = 0;
@@ -672,7 +673,7 @@ TrackLengthMeshTally::find_next_tet_by_ray_fire( CartVect& start, CartVect& vec,
  * @return The first tetrahedron along the ray.
  */
 EntityHandle
-TrackLengthMeshTally::get_starting_tet_conformal( CartVect& start, EntityHandle first_tri[3] )
+TrackLengthMeshTally::get_starting_tet_conformal(const CartVect& start, EntityHandle first_tri[3])
 {
   ErrorCode rval;
   CartVect tri_start;
@@ -711,8 +712,8 @@ TrackLengthMeshTally::get_starting_tet_conformal( CartVect& start, EntityHandle 
  */
 
 EntityHandle 
-TrackLengthMeshTally::get_starting_tet( CartVect& start, CartVect& vec, double length, 
-                                        EntityHandle first_tri[3], double& first_t )
+TrackLengthMeshTally::get_starting_tet(const CartVect& start, const CartVect& vec, double length, 
+                                       EntityHandle first_tri[3], double& first_t )
 {
   ErrorCode rval;
   EntityHandle first_tet = 0; 
@@ -775,15 +776,7 @@ static inline bool tris_eq( const EntityHandle *t1, const EntityHandle *t2 ){
   return CN::ConnectivityMatch( t1, t2, 3, ignored1, ignored2 );
 }
 
-/**
- * Score a given particle track on this TrackLengthMeshTally.
- * @param start Beginning of particle track
- * @param vec Unit vector of particle track direction
- * @param length Length of particle track
- * @param score_params Parameter structure to pass to score callback
- */
-void TrackLengthMeshTally::add_track_segment( CartVect& start, CartVect& vec, 
-                                              double length, int ebin, MCNPTrackParam* score_params )
+void TrackLengthMeshTally::add_track_segment(const TallyEvent& event, int ebin)
 {
   ErrorCode rval;
 
@@ -819,10 +812,10 @@ void TrackLengthMeshTally::add_track_segment( CartVect& start, CartVect& vec,
   EntityHandle first_tet;
 
   if( conformal_begin_track ){
-    first_tet = get_starting_tet_conformal( start, last_crossed_tri );
+    first_tet = get_starting_tet_conformal(event.position, last_crossed_tri);
   }
   else{
-    first_tet = get_starting_tet( start, vec, length, last_crossed_tri, last_t );
+    first_tet = get_starting_tet(event.position, event.direction, event.event_value, last_crossed_tri, last_t);
   }
 
   if( first_tet == 0 ){
@@ -863,9 +856,10 @@ void TrackLengthMeshTally::add_track_segment( CartVect& start, CartVect& vec,
       assert( rval == MB_SUCCESS );
 
       double t;
-      if( GeomUtil::ray_tri_intersect( tri_pts, start, vec, TRIANGLE_INTERSECTION_TOL, t ) ){
+      if( GeomUtil::ray_tri_intersect( tri_pts, event.position, event.direction, TRIANGLE_INTERSECTION_TOL, t ) ){
 
         double track_length;
+        double length = event.event_value;
 
         if( t >= length ){
           // track ends in this tetrahedron
@@ -892,7 +886,7 @@ void TrackLengthMeshTally::add_track_segment( CartVect& start, CartVect& vec,
 
           if( tri_sides.size() == 1 ){
             // the mesh ends here
-            CartVect crossing = start + (vec*t);
+            CartVect crossing = event.position + (event.direction*t);
 #ifdef MESHTAL_DEBUG
             std::cout << "  Ray departs from mesh at t = " << t << ", "  << crossing  << std::endl;
 #endif
@@ -908,7 +902,7 @@ void TrackLengthMeshTally::add_track_segment( CartVect& start, CartVect& vec,
               rval = mb->get_adjacencies( tri, 3, 2, false, last_tri_eh );
               assert( rval == MB_SUCCESS );
               assert( last_tri_eh.size() == 1 );
-              next_tet = find_next_tet_by_ray_fire( crossing, vec, length - t, last_crossed_tri, last_t, last_tri_eh[0] );
+              next_tet = find_next_tet_by_ray_fire( crossing, event.direction, length - t, last_crossed_tri, last_t, last_tri_eh[0] );
             }
 
 #ifdef MESHTAL_DEBUG
@@ -938,9 +932,10 @@ void TrackLengthMeshTally::add_track_segment( CartVect& start, CartVect& vec,
           return;
         }
         
-        double score;
-        mcnp_weight_calculation( score_params->fmesh_index, score_params->erg, score_params->wgt,
-                                 &track_length, &score );
+        double score = track_length;
+        // TODO ignoring score weight for now
+        //mcnp_weight_calculation( score_params->fmesh_index, score_params->erg, score_params->wgt,
+        //                         &track_length, &score );
         add_score_to_mesh_cell( tet, score, ebin );
         found_crossing = true;
       }
