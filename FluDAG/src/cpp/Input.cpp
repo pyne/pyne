@@ -24,8 +24,13 @@ char* checkInput(std::string infile, bool& flukarun)
 }
 
 
-// Test the non-prefixed file because the testing is done prior to calling fluka
 bool checkFile(char *fileptr)
+{
+     return isFileReadable(fileptr) && isFileNonEmpty(fileptr); 
+}
+
+// Test the non-prefixed file because the testing is done prior to calling fluka
+bool isFileReadable(char *fileptr)
 {
   if ( file_exists_and_can_be_read_from(fileptr) )
   {
@@ -35,6 +40,23 @@ bool checkFile(char *fileptr)
      std::cerr << "Input file: " << fileptr << " cannot be read." << std::endl;
      return false;
   }
+}
+
+bool isFileNonEmpty(char *fileptr)
+{
+	// std::string s = fileptr;
+	std::ifstream file(fileptr, std::ios::binary);
+        
+	file.seekg(0, std::ios::end);
+	if (file.tellg() == 0)
+	{
+		std::cout << "File is empty" << std::endl;
+                return false;
+	}
+        else
+        {
+               return true;
+        }
 }
 
 // If running_with_fluka, prefix "../" to the filename, as fluka runs from a subdirectory
@@ -59,4 +81,5 @@ char *prefixFilename(char *cfile, bool running_with_fluka)
   myfile = &prefixedFilename[0];
   return myfile;
 }  
+
 
