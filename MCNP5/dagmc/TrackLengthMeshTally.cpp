@@ -931,11 +931,10 @@ void TrackLengthMeshTally::add_track_segment(const TallyEvent& event, int ebin)
           ++num_negative_tracks;
           return;
         }
-        
-        double score = track_length;
-        // TODO ignoring score weight for now
-        //mcnp_weight_calculation( score_params->fmesh_index, score_params->erg, score_params->wgt,
-        //                         &track_length, &score );
+
+        double weight = event.tally_multiplier * event.particle_weight;
+        double score = weight * track_length;
+
         add_score_to_mesh_cell( tet, score, ebin );
         found_crossing = true;
       }

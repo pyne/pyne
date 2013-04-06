@@ -159,17 +159,6 @@ class KDEMeshTally : public MeshTally {
     moab::CartVect get_optimal_bandwidth();
 
     /**
-     * Determines the tally weighting factor for a collision or track
-     * contribution.  This weight includes the particle weight and any tally
-     * multipliers that were used for both tally types.
-     * 
-     * @param param the parameters needed to compute the tally weighting factor
-     * @return the tally weighting factor for a collision or track
-     */
-    // TODO ignoring score weight for now
-    //double get_score_weight( const KDEWeightParam & param );
-
-    /**
      * Adds a tally contribution to one calculation point on the mesh.
      *
      * @param mesh_point the calculation point on the mesh

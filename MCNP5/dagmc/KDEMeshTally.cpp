@@ -224,7 +224,10 @@ void KDEMeshTally::tally_collision(const TallyEvent& event, int ebin)
   assert( moab::MB_SUCCESS == rval );  
 
   // get the tally weighting factor for this collision
-  double weight = 1; //get_score_weight( param );
+  double weight = event.tally_multiplier * event.particle_weight;
+
+  // divide by the total cross section
+  weight /= event.event_value;
 
   // compute the contribution for all calculation points in this neighborhood
   std::vector<moab::EntityHandle>::iterator i;
@@ -282,7 +285,11 @@ void KDEMeshTally::tally_track(const TallyEvent& event, int ebin)
   assert( moab::MB_SUCCESS == rval );  
 
   // get the tally weighting factor for this track
-  double weight = 1; //get_score_weight( param );
+  double weight = event.tally_multiplier * event.particle_weight;
+
+  // if SUBTRACK mesh tally, multiply weight by the total track length
+  if (kde_tally == SUBTRACK)
+    weight *= event.event_value;
 
   // compute the contribution for all calculation points in this neighborhood
   std::vector<moab::EntityHandle>::iterator i;
@@ -504,27 +511,6 @@ moab::CartVect KDEMeshTally::get_optimal_bandwidth()
   return optimal_bandwidth;
 
 }
-//-----------------------------------------------------------------------------
-/*double KDEMeshTally::get_score_weight( const KDEWeightParam & param )
-{
-
-  double score_weight = 1;
-  double d = 1;  // track length set to 1 so it does not change weight
-  
-  if ( kde_tally == SUBTRACK )
-    d = *(param.tracklength);  // use actual track length for SUBTRACK tallies
-  
-  // determine the tally weighting factor from MCNP
-  mcnp_weight_calculation( param.fmesh_index, param.energy, param.particle_wgt,
-                           &d, &score_weight );
-  
-  // divide weight by total cross section for COLLISION tallies only
-  if ( kde_tally == COLLISION )
-    score_weight /= *(param.total_xs);
-
-  return score_weight;
-
-}*/
 //-----------------------------------------------------------------------------
 void KDEMeshTally::add_score_to_tally( moab::EntityHandle mesh_point,
                                        double score,

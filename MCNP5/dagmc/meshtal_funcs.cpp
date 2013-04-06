@@ -395,7 +395,14 @@ void dagmc_fmesh_score_( int *fmesh_index, double *x, double *y, double *z,
     
     TallyEvent event(*erg, *wgt);
     event.set_track_event(*d, ray, vec);
-    
+
+    // TODO temporary until dagmc_mesh_score has been modified
+    // determine energy-dependent tally multiplier from MCNP
+    double score = 1;
+    double ignore = 1;
+    mcnp_weight_calculation(fmesh_index, erg, &ignore, &ignore, &score);
+    event.set_tally_multiplier(score);
+
 #ifdef MESHTAL_DEBUG
     std::cout << "meshtal particle: " << ray << " " << vec << " " << *d << std::endl;
 #endif
@@ -410,6 +417,13 @@ void dagmc_fmesh_score_( int *fmesh_index, double *x, double *y, double *z,
 
     TallyEvent event(*erg, *wgt);
     event.set_track_event(*d, loc, dir);
+
+    // TODO temporary until dagmc_mesh_score has been modified
+    // determine energy-dependent tally multiplier from MCNP
+    double score = 1;
+    double ignore = 1;
+    mcnp_weight_calculation(fmesh_index, erg, &ignore, &ignore, &score);
+    event.set_tally_multiplier(score);
     
     kde_track_tallies[*fmesh_index]->tally_track(event, (*ien)-1); 
 
@@ -461,6 +475,13 @@ void dagmc_kde_tally_( double* x, double* y, double* z, double* wgt,
 
       TallyEvent event(*erg, *wgt);
       event.set_collision_event(*ple, collision_loc);
+
+      // TODO temporary until dagmc_mesh_score has been modified
+      // determine energy-dependent tally multiplier from MCNP
+      double score = 1;
+      double ignore = 1;
+      mcnp_weight_calculation(&fmesh_index, erg, &ignore, &ignore, &score);
+      event.set_tally_multiplier(score);
 
       (*i)->tally_collision(event, ien);
     }
