@@ -13,6 +13,7 @@ Testing for the FluDAG implementation consists of two major components:
 
 To create and run the interface tests you need the google test library,
 do the stepse listed below.
+
 a.  Set up the localization variables, see Localization below
 
 b.  In the current (testing) directory make a build subdirectory and move to it:
@@ -32,14 +33,14 @@ build> ./issuetest
 All tests should pass.
 
 Google Test Library
-------------------
+____________________
 If you or the system you are working on already has Google Test installed and libgtest.a built, 
 you can skip this step.  The CMakeLists.txt includes a directive that will find it.
 
 Otherwise, you can build libgtest from the this repository.
 
 Build libgtest
-______________
+------------------
 1. In FluDag/testing/gtest create a lib directory and move to it 
 gtest> mkdir lib
 gtest> cd lib
@@ -53,7 +54,7 @@ lib> make gtest
 When done you will have FluDAG/testing/gtest/lib/libgtest.a.
 
 Localization
-------------
+_______________
 Regarding the cmake file that controls the build, as with the source build
 three localization variables are required.
 
