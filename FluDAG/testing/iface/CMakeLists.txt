@@ -1,37 +1,34 @@
 cmake_minimum_required(VERSION 2.8)
-project (TestMyFluDAG)
+project (TestFluDAG)
 find_package(GTest REQUIRED)
-IF (NOT DEFINED HOME) 
-	set (HOME "$ENV{HOME}")
-ENDIF (NOT DEFINED HOME) 
+
+# If FLUKA is installed, $FLUPRO is probably an environment varaiable
+IF (NOT DEFINED FLUPRO)
+	set (FLUPRO "$ENV{FLUPRO}")
+ENDIF (NOT DEFINED FLUPRO)
+
+IF (NOT DEFINED MOAB_HOME OR NOT DEFINED TOPDIR)
+	INCLUDE(local.cmake)
+ENDIF (NOT DEFINED MOAB_HOME OR NOT DEFINED TOPDIR)
+
+IF (NOT DEFINED TOPDIR)
+	message("Please define the directory containing DAGMC/FluDAG.")
+	message("Definition can be done with the -D switch or in local.cmake.")
+ENDIF (NOT DEFINED TOPDIR)
 
 IF (NOT DEFINED FLUDAG)
-	set (FLUDAG  ${HOME}/DAGMC/FluDAG)
+	set (FLUDAG  ${TOPDIR}/DAGMC/FluDAG)
 	set (FLUDAG_SRC ${FLUDAG}/src)
 	set (FLUDAG_TST	${FLUDAG}/testing)
 ENDIF (NOT DEFINED FLUDAG)
 
-set (FLUPRO "$ENV{FLUPRO}")
-IF (NOT DEFINED MOAB_HOME)
-	INCLUDE(local.cmake)
-ENDIF (NOT DEFINED MOAB_HOME)
-
-message(${MOAB_HOME})
-
 set(MOAB_INCLUDE ${MOAB_HOME}/include)
 set(MOAB_LIB_DIR ${MOAB_HOME}/lib)
 set (moablibs ${MOAB_LIB_DIR}/libMOAB.so ${MOAB_LIB_DIR}/libdagmc.so)
-message(${moablibs})
-
-
-# Where to look for includes
-#include_directories(../src/include ${MOAB_INCLUDE} ${GTEST_DIR})
-IF(NOT DEFINED GTEST_DIR)
-	set(GTEST_DIR "$ENV{GTEST_DIR}")
-ENDIF(NOT DEFINED GTEST_DIR)
 
 include_directories(${GTEST_INCLUDE_DIRS})
-include_directories(${HOME}/DAGMC/FluDAG/src/include $MOAB_INCLUDE)
+include_directories(${FLUDAG}/src/include)
+include_directories(${MOAB_INCLUDE})
 
 set (ifacefiles ${FLUDAG_TST}/iface/issue22.cpp)
 set (srcfiles ${FLUDAG_SRC}/cpp/Input.cpp ${FLUDAG_SRC}/cpp/fluka_funcs.cpp)
