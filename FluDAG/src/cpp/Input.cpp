@@ -1,3 +1,12 @@
+//----------------------------------*-C++, Fortran-*----------------------------------//
+/*!
+ * \file   ~/DAGMC/FluDAG/src/cpp/Input.cpp
+ * \author Julie Zachman 
+ * \date   Apr 5 2013 
+ * \brief  Functions called by fluka
+ * \note   Unittested
+ */
+//---------------------------------------------------------------------------//
 #include "fludag_utils.h"
 #include <iostream>
 #include <stdlib.h>
@@ -6,42 +15,76 @@
 
 #define DEBUG 1
 
+//---------------------------------------------------------------------------//
+// checkInput(..)
+//---------------------------------------------------------------------------//
+/// Top level input checker
 // Precondition: argument number has already been checked
 // Handle error conditions gracefully
-char* checkInput(std::string infile, bool& flukarun)
-{
-  char *fileptr = new char [infile.length()+1];
-  std::strcpy(fileptr, infile.c_str());
+// bool checkInput(char *locatedFile)
+// {
+  //char *fileptr = new char [infile.length()+1];
+  //std::strcpy(fileptr, infile.c_str());
 
-  if (checkFile(fileptr))
-  {
-    return prefixFilename(fileptr, flukarun);
-  }
-  else
-  {
-    return NULL;
-  }
-}
+  // char *locatedFile =  prefixFilename(fileptr, flukarun);
+  // std::cout << "prefixed file is " << locatedFile << std::endl;
+//  return checkFile(locatedFile);
+//}
 
 
+//---------------------------------------------------------------------------//
+// checkFile(..)
+//---------------------------------------------------------------------------//
+/// Call inline function to check basic i/o
 bool checkFile(char *fileptr)
 {
-     return isFileReadable(fileptr) && isFileNonEmpty(fileptr); 
+     std::cerr << __FILE__ << ", " << __func__ << ":" << __LINE__ << "_______________" << std::endl;
+     std::cerr << "Checking file " << fileptr << std::endl;
+     bool readable = isFileReadable(fileptr);
+     std::cerr << "Is " << fileptr << " readable?  " << readable << std::endl;
+     bool nonEmpty = isFileNonEmpty(fileptr);
+     std::cerr << "Is " << fileptr << " nonempty?  " << nonEmpty << std::endl;
+     bool both = readable && nonEmpty;
+     std::cerr << "Is " << fileptr << " both?  " << both << std::endl;
+
+     return both;
+
+//   return isFileReadable(fileptr) && isFileNonEmpty(fileptr); 
 }
 
+bool checkFile(std::string filename)
+{
+  char *fileptr = new char[filename.length() + 1];
+  std::strcpy(fileptr, filename.c_str());
+ // return file_can_be_read(fileptr); 
+  bool success = std::ifstream(fileptr);
+  if (success)
+  {
+    std::cerr << "Input file: " << filename << " can be read." << std::endl;
+  }
+  return success;
+}
+
+
+//---------------------------------------------------------------------------//
+// checkFile(..)
+//---------------------------------------------------------------------------//
 // Test the non-prefixed file because the testing is done prior to calling fluka
 bool isFileReadable(char *fileptr)
 {
-  if ( file_exists_and_can_be_read_from(fileptr) )
+  
+  bool success =   std::ifstream(fileptr); 
+  if (success)
   {
-     return true;
+    std::cerr << "Input file: " << fileptr << " can be read." << std::endl;
   }
-  {
-     std::cerr << "Input file: " << fileptr << " cannot be read." << std::endl;
-     return false;
-  }
+  return success;
 }
 
+//---------------------------------------------------------------------------//
+// isFileNonEmpty(..)
+//---------------------------------------------------------------------------//
+// Test the prefixed file because the testing is done prior to calling fluka
 bool isFileNonEmpty(char *fileptr)
 {
 	// std::string s = fileptr;
@@ -50,7 +93,7 @@ bool isFileNonEmpty(char *fileptr)
 	file.seekg(0, std::ios::end);
 	if (file.tellg() == 0)
 	{
-		std::cout << "File is empty" << std::endl;
+		std::cerr << "File is empty" << std::endl;
                 return false;
 	}
         else
@@ -58,28 +101,3 @@ bool isFileNonEmpty(char *fileptr)
                return true;
         }
 }
-
-// If running_with_fluka, prefix "../" to the filename, as fluka runs from a subdirectory
-char *prefixFilename(char *cfile, bool running_with_fluka)
-{
-  std::string prefixedFilename; 
-  // Prefix
-  if (running_with_fluka)  // h5m file is one level up
-  {
-     prefixedFilename="../";
-  }
-  else // file is in same directory as executable
-  {
-     prefixedFilename="";
-  }
-  prefixedFilename.append(cfile);
-  if (DEBUG)
-  {
-  	std::cout << "\nmy file is " << prefixedFilename << "\n" << std::endl;
-  }
-  char *myfile;
-  myfile = &prefixedFilename[0];
-  return myfile;
-}  
-
-

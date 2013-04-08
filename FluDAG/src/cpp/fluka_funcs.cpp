@@ -391,6 +391,10 @@ static int tallytype( std::string& str, const char* key, int ret )
   return 0;
 }
 
+//---------------------------------------------------------------------------//
+// get_tallyspec(..)
+//---------------------------------------------------------------------------//
+/// Needed by fludagwrite
 // given a tally specifier like "1.surf.flux.n", return a printable card for the specifier
 // and set 'dim' to 2 or 3 depending on whether its a surf or volume tally
 static char* get_tallyspec( std::string spec, int& dim ){
