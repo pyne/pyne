@@ -776,7 +776,7 @@ static inline bool tris_eq( const EntityHandle *t1, const EntityHandle *t2 ){
   return CN::ConnectivityMatch( t1, t2, 3, ignored1, ignored2 );
 }
 
-void TrackLengthMeshTally::add_track_segment(const TallyEvent& event, int ebin)
+void TrackLengthMeshTally::compute_score(const TallyEvent& event, int ebin)
 {
   ErrorCode rval;
 

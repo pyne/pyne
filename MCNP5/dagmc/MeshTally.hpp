@@ -10,6 +10,13 @@
 
 #include "moab/Range.hpp"
 
+#include "TallyEvent.hpp"
+
+// forward declaration
+namespace moab {
+  class Interface;
+}
+
 //===========================================================================//
 /**
  * \struct MeshTallyInput
@@ -34,11 +41,6 @@ struct MeshTallyInput
     TallyOptions options;
 };
 
-// forward declaration
-namespace moab{
-  class Interface;
-}
-
 //===========================================================================//
 /**
  * \class MeshTally
@@ -50,9 +52,10 @@ namespace moab{
  * following functions must be implemented in all Derived classes
  * 
  *     1) get_score_weight
- *     2) add_score_to_tally
- *     3) end_history
- *     4) write_results
+ *     2) compute_score
+ *     3) add_score_to_tally
+ *     4) end_history
+ *     5) write_results
  *
  * Note that three arrays are available for storing mesh tally data
  *
@@ -87,6 +90,14 @@ class MeshTally {
      * \brief Computes weighting factor for individual tally scores
      */
     //virtual void get_score_weight() = 0;
+
+    /**
+     * \brief Computes mesh tally scores for the given tally event
+     * \param event the parameters needed to compute the mesh tally scores
+     * \param ebin index representing energy bin
+     * TODO remove ebin as parameter since this can be computed from energy?
+     */
+    virtual void compute_score(const TallyEvent& event, int ebin) = 0;
 
     /**
      * \brief Adds score to the mesh tally

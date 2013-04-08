@@ -30,12 +30,11 @@ public:
   static TrackLengthMeshTally* setup( const MeshTallyInput& params, Interface* mbi, const int* cur_mcnp_cell );
 
   /**
-   * \brief Computes mesh tally scores for the given track-based event
+   * \brief Computes mesh tally scores for the given tally event
    * \param event the parameters needed to compute the mesh tally scores
-   * \param ebin the energy bin to tally this track into (calculated by fortran)
-   * TODO remove ebin as a parameter
+   * \param ebin index representing energy bin
    */
-  void add_track_segment(const TallyEvent& event, int ebin);
+  void compute_score(const TallyEvent& event, int ebin);
   
   virtual void end_history ();
     

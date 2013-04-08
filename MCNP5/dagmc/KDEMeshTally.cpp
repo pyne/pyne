@@ -200,6 +200,25 @@ KDEMeshTally::~KDEMeshTally()
   
 }
 //-----------------------------------------------------------------------------
+void KDEMeshTally::compute_score(const TallyEvent& event, int ebin)
+{
+  // make sure tally event has been set
+  if (event.event_type == TallyEvent::NONE)
+  {
+    std::cerr << "\nError: Tally event type has not been set" << std::endl;
+    exit(EXIT_FAILURE);
+  }
+
+  if (event.event_type == TallyEvent::TRACK)
+  {
+    tally_track(event, ebin);
+  }
+  else if (event.event_type == TallyEvent::COLLISION)
+  {
+    tally_collision(event, ebin);
+  }
+}
+//-----------------------------------------------------------------------------
 void KDEMeshTally::tally_collision(const TallyEvent& event, int ebin)
 {
   // make sure tally event is a collision event

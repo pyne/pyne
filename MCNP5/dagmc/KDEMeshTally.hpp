@@ -78,6 +78,13 @@ class KDEMeshTally : public MeshTally {
      */
     ~KDEMeshTally();
 
+    /**
+     * \brief Computes mesh tally scores for the given tally event
+     * \param event the parameters needed to compute the mesh tally scores
+     * \param ebin index representing energy bin
+     */
+    void compute_score(const TallyEvent& event, int ebin);
+
     // TODO combine tally_collision and tally_track into one function
     /**
      * \brief Computes mesh tally scores for the given collision event
