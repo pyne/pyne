@@ -1,3 +1,12 @@
+//----------------------------------*-C++, Fortran-*----------------------------------//
+/*!
+ * \file   ~/DAGMC/FluDAG/src/cpp/mainFluDAG.cpp
+ * \author Julie Zachman 
+ * \date   Apr 5 2013 
+ * \brief  Functions called by fluka
+ * \note   Unittested
+ */
+//---------------------------------------------------------------------------//
 #include "fludag_utils.h"
 #include "fluka_funcs.h"
 
@@ -13,16 +22,10 @@ using namespace moab;
 
 #define flukam flukam_
 #define DAG DagMC::instance()
-#define DEBUG 1
 
 extern "C" {
  void flukam(const int &GeoFlag);
 }
-
-// Perform the task of argument and error checking
-void checkArgs(std::string infile, int numargs, char* argv[], bool& flukarun);
-// char *prefixFilename(char *cfile, bool running_with_fluka);
-std::string prefixFilename(char *cfile, bool running_with_fluka);
 
 int main(int argc, char* argv[]) 
 {
@@ -30,34 +33,27 @@ int main(int argc, char* argv[])
   
   // Default h5m filename is for fluka runs
   std::string infile = "test.h5m";
-  std::cerr << __FILE__ << ", " << __func__ << ":" << __LINE__ << "_______________" << std::endl;
   checkArgs(infile, argc, argv, flukarun);
 
-  char *fileptr;
-  fileptr = &infile[0];
-  // std::strcpy(fileptr, infile.c_str());
-  // char *locatedFile = prefixFilename(fileptr, flukarun);
-  std::string locatedFile = prefixFilename(fileptr, flukarun);
-  std::cerr << "prefixed file is " << locatedFile << std::endl;
+  std::string locatedFile = prefixFilename(infile, flukarun);
 
   bool success  = checkFile(locatedFile);
   if (!success)
   {
      exit(EXIT_FAILURE);
   }
-
+  char *ptr = new char[locatedFile.length()+1];
+  std::strcpy(ptr, locatedFile.c_str());
 
   // Load the h5m file, init the obb tree;  flukarun changes the expected
   // relative location of the file
   int max_pbl = 1;
-  char *ptr = new char[locatedFile.length()+1];
-  std::strcpy(ptr, locatedFile.c_str());
   cpp_dagmcinit(ptr, 0, max_pbl); 
   if (!flukarun)
   {
     std::string lcad = "mat.inp";
     fludagwrite_assignma(lcad);
-    fludagwrite_mat("mat1.inp");
+  //  fludagwrite_mat("mat1.inp");
   }
   else // call flukarun
   {
@@ -74,6 +70,9 @@ int main(int argc, char* argv[])
   return 0;
 }
 
+//---------------------------------------------------------------------------//
+// checkArgs(..)
+//---------------------------------------------------------------------------//
 // Perform argument and argument-dependent checks
 void checkArgs(std::string infile, int numargs, char* argv[], bool& flukarun)
 {
@@ -99,10 +98,13 @@ void checkArgs(std::string infile, int numargs, char* argv[], bool& flukarun)
 //---------------------------------------------------------------------------//
 // prefixFilename(..)
 //---------------------------------------------------------------------------//
-// If running_with_fluka, prefix "../" to the filename, as fluka runs from a subdirectory
-//char *prefixFilename(char *cfile, bool running_with_fluka)
-std::string prefixFilename(char *cfile, bool running_with_fluka)
+// When passing a filename to be used as fluka input, it must be prefixed
+// with "../" because it will be referenced from a subdirectory.
+std::string prefixFilename(std::string infile, bool running_with_fluka)
 {
+  char *fileptr;
+  fileptr = &infile[0];
+
   std::string prefixedFilename; 
   // Prefix
   if (running_with_fluka)  // h5m file is one level up
@@ -113,16 +115,7 @@ std::string prefixFilename(char *cfile, bool running_with_fluka)
   {
      prefixedFilename="";
   }
-  prefixedFilename.append(cfile);
-  if (DEBUG)
-  {
-  	std::cerr << "\nmy file is " << prefixedFilename << "\n" << std::endl;
-  }
-  char *myfile;
-  myfile = &prefixedFilename[0];
-  // return myfile;
+  prefixedFilename.append(fileptr);
   return prefixedFilename;
 }  
-
-
 

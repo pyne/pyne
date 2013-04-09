@@ -22,11 +22,11 @@ TEST(Issue22_Test, MissingFile)
 //    const std::string s;
   //  EXPECT_STREQ(NULL, s.c_str());
 
-   std::string s = "MissingFile.h5m";
-   char *fileptr = &s[0];;
-   EXPECT_FALSE(isFileReadable(fileptr));
+   std::string badFile = "MissingFile.h5m";
+   // char *fileptr = &s[0];;
+   EXPECT_FALSE(isFileReadable(badFile));
 
-   EXPECT_TRUE(isFileReadable(goodfileptr));
+   EXPECT_TRUE(isFileReadable(goodfile));
 }
 
 TEST(Issue22_Test, NonEmptyFile)
@@ -42,7 +42,7 @@ TEST(Issue22_Test, Combo)
 {
    std::string s = "MissingFile.h5m";
    char *fileptr = &s[0];
-   EXPECT_FALSE(checkFile(fileptr));
+   EXPECT_FALSE(checkFile(s));
 
    s = prefix.append("EmptyFile.h5m");
    fileptr = &s[0];
