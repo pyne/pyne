@@ -13,8 +13,7 @@
 #include "fluka_funcs.h"
 #include "fludag_utils.h"
 
-// For g1wr()
-// #include "DagWrappers.hh"
+#include "DagWrappers.hh"
 // #include "DagWrapUtils.hh"
 
 #include "MBInterface.hpp"
@@ -126,6 +125,7 @@ void cpp_dagmcinit(char *myfile,        // geom
   // if ( *ftlen > 0 ) arg_facet_tolerance = atof(ftol);
 
   // read geometry
+  std::cerr << "Loading " << myfile << std::endl;
   rval = DAG->load_file(myfile, arg_facet_tolerance );
   if (MB_SUCCESS != rval) {
     std::cerr << "DAGMC failed to read input file: " << myfile << std::endl;
@@ -159,8 +159,29 @@ void cpp_dagmcinit(char *myfile,        // geom
 /******                                FLUKA stubs                                         ********/
 /**************************************************************************************************/
 /// From Flugg Wrappers
+//---------------------------------------------------------------------------//
+void g1_fire(int& oldRegion, double point[], double dir[],  double& retStep, int& newRegion);
 
-double g1(int& oldRegion, double point[], double dir[],  int& newRegion);
+//---------------------------------------------------------------------------//
+// jomiwr(..)
+//---------------------------------------------------------------------------//
+/// Initialization routine, was in WrapInit.c
+void jomiwr(int & nge, const int& lin, const int& lou, int& flukaReg)
+{
+  std::cerr << "================== JOMIWR =================" << std::endl;
+  // return FLUGG code to fluka
+  // nge = 3;
+
+  //Original comment:  returns number of volumes + 1
+  unsigned int numVol = DAG->num_entities(3);
+  flukaReg = numVol;
+	
+  std::cerr << "Number of volumes: " << flukaReg << std::endl;
+  std::cerr << "================== Out of JOMIWR =================" << std::endl;
+
+  return;
+}
+
 //---------------------------------------------------------------------------//
 // g1wr(..)
 //---------------------------------------------------------------------------//
@@ -192,7 +213,7 @@ void g1wr(double& pSx,
   double dir[3]   = {pV[0],pV[1],pV[2]};  
 
   // Separate the body of this function to a testable call
-  retStep = g1(oldReg, point, dir, newReg);
+  g1_fire(oldReg, point, dir, retStep, newReg);
   
   std::cerr << "newReg = " << newReg << std::endl;
 
@@ -202,7 +223,7 @@ void g1wr(double& pSx,
 //---------------------------------------------------------------------------//
 // g1(int& old Region, int& newRegion)
 //---------------------------------------------------------------------------//
-double g1(int& oldRegion, double point[], double dir[],  int& newRegion)
+void g1_fire(int& oldRegion, double point[], double dir[], double& retStep,  int& newRegion)
 {
   MBEntityHandle vol = DAG->entity_by_index(3,oldRegion);
 
@@ -211,11 +232,13 @@ double g1(int& oldRegion, double point[], double dir[],  int& newRegion)
   MBEntityHandle newvol = 0;
 
   MBErrorCode result = DAG->ray_fire(vol, point, dir, next_surf, next_surf_dist );
+  retStep = next_surf_dist;
 
   MBErrorCode rval = DAG->next_vol(next_surf,vol,newvol);
 
   newRegion = DAG->index_by_handle(newvol);
-  return next_surf_dist;
+  std::cerr << "newRegion = " << newRegion << std::endl;
+  return;
 }
 ///////			End g1wr and g1:w
 /////////////////////////////////////////////////////////////////////
