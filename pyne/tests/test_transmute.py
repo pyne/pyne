@@ -97,6 +97,11 @@ def test_grow_matrix():
                        [0.,0.,0.1848,-1.337]])
     method = transmute._grow_matrix(orig, prod, dest)
     assert_true(np.array_equal(manual, method))
+    orig = np.array([[-1.]])
+    manual = np.array([[-1.,0.],
+                       [0.1848,-1.337]])
+    method = transmute._grow_matrix(orig, prod, dest)
+    assert_true(np.array_equal(manual, method))
 
 """Tests correct implementation of the _check_tol function"""
 def test_check_tol():
