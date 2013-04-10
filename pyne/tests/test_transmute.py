@@ -130,7 +130,7 @@ def test_tree_log():
     temp.append('--------> O18 (1.23456)\n')
     temp.append('----> HE4 (1111.0)\n')
     temp.append('> C12 (12.0)\n')
-    transmute._tree_log(d0, nuc0, N0, filename)
+    transmute._tree_log(d0, nuc0, N0, filename, True)
     transmute._tree_log(d1, nuc1, N1, filename)
     transmute._tree_log(d2, nuc2, N2, filename)
     transmute._tree_log(d11, nuc11, N11, filename)
@@ -139,6 +139,10 @@ def test_tree_log():
         lines = f.readlines()
     for i in range(len(lines)):
         assert_equal(lines[i], temp[i])
+    transmute._tree_log(d0, nuc0, N0, filename, True)
+    with open(filename, 'r') as f:
+        lines = f.readlines()
+    assert_true(len(lines) == 1)
     os.remove(filename)
 
 #

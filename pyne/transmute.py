@@ -287,7 +287,7 @@ def _check_tol(N, tol):
     return fail
 
 
-def _tree_log(depth, nuc, N, filename):
+def _tree_log(depth, nuc, N, filename, new = None):
     """Logging method to track path of _traversal.
 
     Parameters
@@ -300,6 +300,10 @@ def _tree_log(depth, nuc, N, filename):
         Current density of nuc.
     filename : String
         Name of file to write tree log to.
+    new : boolean
+        True if a new file should be created or existing file should be
+            overwritten.
+        False or None if the current filename should be appended to.
 
     Returns
     -------
@@ -309,8 +313,12 @@ def _tree_log(depth, nuc, N, filename):
     name = nucname.name(nuc)
     Nstr = str(N)
     entry = spacing + '> ' + name + ' (' + Nstr + ')\n'
-    with open(filename, 'a') as f:
-        f.write(entry)
+    if new:
+        with open(filename, 'w') as f:
+            f.write(entry)
+    else:
+        with open(filename, 'a') as f:
+            f.write(entry)
     return None
 
 
