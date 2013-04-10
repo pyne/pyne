@@ -119,7 +119,7 @@ def _matrix_exp(A, t):
     eA : NumPy 2-dimensional array
         Result after calculating the matrix exponential of At
     """
-    eA = sp.linalg.expm(A * t)
+    eA = linalg.expm(A * t)
     return eA
 
 
