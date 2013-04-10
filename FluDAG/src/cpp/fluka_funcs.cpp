@@ -179,12 +179,9 @@ void jomiwr(int & nge, const int& lin, const int& lou, int& flukaReg)
   //Original comment:  returns number of volumes + 1
   unsigned int numVol = DAG->num_entities(3);
   flukaReg = numVol;
-
-  if(debug)
-    {
-      std::cout << "Number of volumes: " << flukaReg << std::endl;
-      std::cout << "================== Out of JOMIWR =================" << std::endl;
-    }
+	
+  std::cerr << "Number of volumes: " << flukaReg << std::endl;
+  std::cerr << "================== Out of JOMIWR =================" << std::endl;
 
   return;
 }
@@ -237,9 +234,6 @@ void g1wr(double& pSx,
 //---------------------------------------------------------------------------//
 // g1(int& old Region, int& newRegion)
 //---------------------------------------------------------------------------//
-// oldRegion should be the region the point is in
-// retStep is set to next_surf_dist
-// newRegion is gotten from the volue returned by DAG->next_vol
 void g1_fire(int& oldRegion, double point[], double dir[], double& retStep,  int& newRegion)
 {
   if(false)
@@ -259,11 +253,7 @@ void g1_fire(int& oldRegion, double point[], double dir[], double& retStep,  int
 
   MBErrorCode rval = DAG->next_vol(next_surf,vol,newvol);
   newRegion = DAG->index_by_handle(newvol);
-  if(false)
-  {
-     std::cerr << "Region on other side of surface is  = " << newRegion << \
-                  ", Distance to next surf is " << retStep << std::endl;
-  }
+  std::cerr << "newRegion = " << newRegion << std::endl;
   return;
 }
 ///////			End g1wr and g1
