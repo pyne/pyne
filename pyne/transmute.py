@@ -397,9 +397,9 @@ def _traversal(nuc, A, phi, t, N_ini, out, tol, tree, filename = None, \
     for decay_daugh in daugh_dict.keys():
         # Increment current production rate if already in dictionary
         if decay_daugh in prod_dict.keys():
-            prod_dict[decay_daugh] += sum(phi * daugh_dict[decay_daugh])
+            prod_dict[decay_daugh] += np.sum(phi * daugh_dict[decay_daugh])
         else:
-            prod_dict[decay_daugh] = sum(phi * daugh_dict[decay_daugh])
+            prod_dict[decay_daugh] = np.sum(phi * daugh_dict[decay_daugh])
     # Cycle production dictionary
     for child in prod_dict.keys():
         # Grow matrix
