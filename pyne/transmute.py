@@ -56,7 +56,8 @@ def transmute(inp, t_sim, tol, tree, phi = None, filename = None):
         dest = _get_destruction(nuc,phi)
         A[0,0] = -dest
         N_ini = inp[nuc]
-        out = _traversal(nuc, A, phi, t_sim, N_ini, out, tol, tree, filename)
+        out = _traversal(nuc, A, phi, t_sim, N_ini, out, tol, tree, filename,\
+                            True)
     return out
 
 
@@ -322,7 +323,8 @@ def _tree_log(depth, nuc, N, filename, new = None):
     return None
 
 
-def _traversal(nuc, A, phi, t, N_ini, out, tol, tree, filename = None, depth = None):
+def _traversal(nuc, A, phi, t, N_ini, out, tol, tree, filename = None, \
+                first = None, depth = None):
     """Nuclide transmutation traversal method.
 
     This method will traverse the reaction tree recursively, using a DFS
@@ -354,6 +356,10 @@ def _traversal(nuc, A, phi, t, N_ini, out, tol, tree, filename = None, depth = N
     filename : String
         Name of file to write tree log to.
         Must be provided if 'tree' is True.
+    first : boolean
+        True if this is the first traversal for the problem,
+            False or None otherwise.
+        This argument is only required if a tree log is desired.
     depth : integer
         Current depth of traversal (root at 0).
         Should never be provided by user.
@@ -371,7 +377,10 @@ def _traversal(nuc, A, phi, t, N_ini, out, tol, tree, filename = None, depth = N
             # Filename not provided, throw exception
             pass
         depth = 0
-        _tree_log(depth, nuc, N_ini, filename)
+        if first:
+            _tree_log(depth, nuc, N_ini, filename, True)
+        else:
+            _tree_log(depth, nuc, N_ini, filename)
     # Lookup decay constant of current nuclide
     lam = data.decay_const(nuc)
     # Lookup decay products and reaction daughters
@@ -409,7 +418,8 @@ def _traversal(nuc, A, phi, t, N_ini, out, tol, tree, filename = None, depth = N
         # Check against tolerance
         if _check_tol(N_final[-1], tol):
             # Continue traversal
-            out = _traversal(child, B, phi, t, N_ini, out, tol, tree, filename, depth+1)
+            out = _traversal(child, B, phi, t, N_ini, out, tol, tree,\
+                                filename, False, depth+1)
         # On recursion exit or truncation, write data from this nuclide
         if child in out.keys():
             out[child] += N_final[-1]
