@@ -43,5 +43,4 @@ set (wrapperfiles cpp/WrapLookDB.cc cpp/WrapSavHist.cc
 add_executable(mainfludag cpp/mainFluDAG.cpp ${commonfiles} ${wrapperfiles})
 set (CMAKE_Fortran_Compiler gfortran)
 ENABLE_LANGUAGE(Fortran)
-#target_link_libraries(mainfludag ${moablibs} ${FLUPRO}/libflukahp.a /usr/lib/libgfortran.so.3)
 target_link_libraries(mainfludag ${moablibs} ${FLUPRO}/libflukahp.a gfortran)
