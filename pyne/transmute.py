@@ -230,11 +230,10 @@ def _get_destruction(nuc, phi):
     """
     nuc = nucname.zzaaam(nuc)
     rxn_dict = _get_daughters(nuc)
-    xs_total = np.zeros((175))
-    for nuc in rxn_dict.keys():
-        xs_total = xs_total + rxn_dict[nuc]
-    decay_const = data.decay_const(nuc)
-    d = decay_const + np.sum(xs_total*phi)
+    xs_total = np.zeros((175,1))
+    for key in rxn_dict.keys():
+        xs_total += rxn_dict[key]
+    d = data.decay_const(nuc) + np.sum(xs_total*phi)
     return d
 
 
