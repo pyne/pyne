@@ -1,0 +1,3 @@
+# Reference mainfludag created by cmake system
+# Add an extra directory level because of where mainludag is run from
+$FLUPRO/flutil/rfluka -e ../../../bin/mainfludag -N0 -M1 sphere
