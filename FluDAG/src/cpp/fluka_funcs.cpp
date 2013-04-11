@@ -71,6 +71,8 @@ static bool visited_surface = false;
 static bool use_dist_limit = false;
 static double dist_limit; // needs to be thread-local
 
+MBEntityHandle next_surf;
+
 std::string ExePath() {
     int MAX_PATH = 256;
     char buffer[MAX_PATH];
@@ -215,7 +217,7 @@ void g1wr(double& pSx,
   // Separate the body of this function to a testable call
   g1_fire(oldReg, point, dir, retStep, newReg);
   
-  std::cerr << "newReg = " << newReg << std::endl;
+  std::cerr << "newReg = " << newReg << " retStep = " << retStep << std::endl;
 
   return;
 }
@@ -228,7 +230,7 @@ void g1_fire(int& oldRegion, double point[], double dir[], double& retStep,  int
   MBEntityHandle vol = DAG->entity_by_index(3,oldRegion);
 
   double next_surf_dist;
-  MBEntityHandle next_surf = 0;
+  //  MBEntityHandle next_surf = 0;
   MBEntityHandle newvol = 0;
 
   MBErrorCode result = DAG->ray_fire(vol, point, dir, next_surf, next_surf_dist );
@@ -237,7 +239,7 @@ void g1_fire(int& oldRegion, double point[], double dir[], double& retStep,  int
   MBErrorCode rval = DAG->next_vol(next_surf,vol,newvol);
 
   newRegion = DAG->index_by_handle(newvol);
-  std::cerr << "newRegion = " << newRegion << std::endl;
+  //  std::cerr << "newRegion = " << newRegion << " Distance = " << retStep << std::endl;
   return;
 }
 ///////			End g1wr and g1:w
@@ -256,12 +258,20 @@ void nrmlwr(double& pSx, double& pSy, double& pSz,
   
   //dummy variables
   flagErr=0;
-  
+  double xyz[3]; //tmp storage of position
+  //MBEntityHandle surf = 0;
+  xyz[0]=pSx,xyz[1]=pSy,xyz[2]=pSz;
+  MBErrorCode ErrorCode = DAG->get_angle(next_surf,xyz,norml); // get the angle
+
   //return normal:
-  norml[0]=0.0;
-  norml[1]=0.0;
-  norml[2]=0.0;
+  norml[0]=pVx;
+  norml[1]=pVy;
+  norml[2]=pVz;
+  
   std::cerr << "Normal: " << norml[0] << ", " << norml[1] << ", " << norml[2]  << std::endl;
+  
+  std::cout << "out of nrmlwr " << std::endl;
+  
   return;
 }
 ///////			End nrmlwr
