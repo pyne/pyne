@@ -33,9 +33,9 @@ add_executable(readvol cpp/mainReadVol.cpp ${commonfiles})
 target_link_libraries(readvol ${moablibs})
 
 # This is not used yet, but may come into play when cmake can be used to link the fluka library
-                  cpp/WrapDN.cc cpp/WrapReg2Name.cc cpp/WrapLookMG.cc cpp/WrapMag.cc 
-		  cpp/WrapLookFX.cc cpp/WrapReg.cc cpp/WrapIniHist.cc cpp/WrapIncrHist.cc 
-		  cpp/WrapFlgfwr.cc cpp/WrapG1RT.cc
+set (wrapperfiles cpp/WrapReg2Name.cc cpp/WrapLookMG.cc cpp/WrapMag.cc 
+		  cpp/WrapLookFX.cc cpp/WrapReg.cc  
+		  cpp/WrapFlgfwr.cc 
 		  )
 
 # Create the executable that can call flukam_
