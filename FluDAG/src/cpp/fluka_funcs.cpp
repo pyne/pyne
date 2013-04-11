@@ -262,11 +262,17 @@ void nrmlwr(double& pSx, double& pSy, double& pSz,
   //MBEntityHandle surf = 0;
   xyz[0]=pSx,xyz[1]=pSy,xyz[2]=pSz;
   MBErrorCode ErrorCode = DAG->get_angle(next_surf,xyz,norml); // get the angle
+  if(ErrorCode != MB_SUCCESS)
+    {
+      std::cerr << "Could not determine normal" << std::endl;
+      flagErr = 2;
+      return;
+    }
 
   //return normal:
-  norml[0]=pVx;
-  norml[1]=pVy;
-  norml[2]=pVz;
+  //norml[0]=pVx;
+  //norml[1]=pVy;
+  //norml[2]=pVz;
   
   std::cerr << "Normal: " << norml[0] << ", " << norml[1] << ", " << norml[2]  << std::endl;
   
