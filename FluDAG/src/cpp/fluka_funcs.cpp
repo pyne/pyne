@@ -58,7 +58,7 @@ static std::ostream* raystat_dump = NULL;
 
 #define DEBUG 1
 
-bool debug = false;
+bool debug = true;
 
 /* Static values used by dagmctrack_ */
 
@@ -173,7 +173,7 @@ void jomiwr(int & nge, const int& lin, const int& lou, int& flukaReg)
 {
   if(debug)
     {
-      std::cerr << "================== JOMIWR =================" << std::endl;
+      std::cout << "================== JOMIWR =================" << std::endl;
     }
   // return FLUGG code to fluka
   // nge = 3;
@@ -184,8 +184,8 @@ void jomiwr(int & nge, const int& lin, const int& lou, int& flukaReg)
 
   if(debug)
     {
-      std::cerr << "Number of volumes: " << flukaReg << std::endl;
-      std::cerr << "================== Out of JOMIWR =================" << std::endl;
+      std::cout << "Number of volumes: " << flukaReg << std::endl;
+      std::cout << "================== Out of JOMIWR =================" << std::endl;
     }
 
   return;
@@ -213,11 +213,11 @@ void g1wr(double& pSx,
 {
   if(debug)
     {
-      std::cerr<<"============= G1WR =============="<<std::endl;    
-      std::cerr << "Position " << pSx << " " << pSy << " " << pSz << std::endl;
-      std::cerr << "Direction vector " << pV[0] << " " << pV[1] << " " << pV[2] << std::endl;
-      std::cerr << "Oldreg = " << oldReg << std::endl;
-      std::cerr << "PropStep = " << propStep << std::endl;
+      std::cout<<"============= G1WR =============="<<std::endl;    
+      std::cout << "Position " << pSx << " " << pSy << " " << pSz << std::endl;
+      std::cout << "Direction vector " << pV[0] << " " << pV[1] << " " << pV[2] << std::endl;
+      std::cout << "Oldreg = " << oldReg << std::endl;
+      std::cout << "PropStep = " << propStep << std::endl;
     }
   
   double point[3] = {pSx,pSy,pSz};
@@ -228,7 +228,7 @@ void g1wr(double& pSx,
   
   if(debug)
     {
-      std::cerr << "newReg = " << newReg << " retStep = " << retStep << std::endl;
+      std::cout << "newReg = " << newReg << " retStep = " << retStep << std::endl;
     }
 
   return;
@@ -279,7 +279,7 @@ void nrmlwr(double& pSx, double& pSy, double& pSz,
   MBErrorCode ErrorCode = DAG->get_angle(next_surf,xyz,norml); // get the angle
   if(ErrorCode != MB_SUCCESS)
     {
-      std::cerr << "Could not determine normal" << std::endl;
+      std::cout << "Could not determine normal" << std::endl;
       flagErr = 2;
       return;
     }
@@ -291,7 +291,7 @@ void nrmlwr(double& pSx, double& pSy, double& pSz,
   
   if(debug)
     {
-      std::cerr << "Normal: " << norml[0] << ", " << norml[1] << ", " << norml[2]  << std::endl;
+      std::cout << "Normal: " << norml[0] << ", " << norml[1] << ", " << norml[2]  << std::endl;
       std::cout << "out of nrmlwr " << std::endl;
     }
   
@@ -317,9 +317,9 @@ void lkwr(double& pSx, double& pSy, double& pSz,
 {
   if(debug)
     {
-      std::cerr << "======= LKWR =======" << std::endl;
-      std::cerr << "oldReg is " << oldReg << std::endl;
-      std::cerr << "position is " << pSx << " " << pSy << " " << pSz << std::endl; 
+      std::cout << "======= LKWR =======" << std::endl;
+      std::cout << "oldReg is " << oldReg << std::endl;
+      std::cout << "position is " << pSx << " " << pSy << " " << pSz << std::endl; 
     }
 
   const double xyz[] = {pSx, pSy, pSz}; // location of the particle (xyz)
@@ -335,7 +335,7 @@ void lkwr(double& pSx, double& pSy, double& pSz,
       // check for non error
       if(MB_SUCCESS != code) 
 	{
-	  std::cerr << "Error return from point_in_volume!" << std::endl;
+	  std::cout << "Error return from point_in_volume!" << std::endl;
 	  flagErr = 1;
 	  return;
 	}
@@ -351,7 +351,7 @@ void lkwr(double& pSx, double& pSy, double& pSz,
 
     }
 
-  std::cerr << "point is not in any volume" << std::endl;
+  std::cout << "point is not in any volume" << std::endl;
   return;
 }
 
@@ -360,14 +360,14 @@ void conhwr(int& intHist, int* incrCount)
 {
   if(debug)
     {
-      std::cerr << "============= CONHWR ==============" << std::endl;    
-      std::cerr << "Ptr History = " << intHist << std::endl;
+      std::cout << "============= CONHWR ==============" << std::endl;    
+      std::cout << "Ptr History = " << intHist << std::endl;
     }
   incrCount++;
   if(debug)
     {
-      std::cerr << "Counter = " << incrCount << std::endl;
-      std::cerr << "============= Out of CONHWR ==============" << std::endl;    
+      std::cout << "Counter = " << incrCount << std::endl;
+      std::cout << "============= Out of CONHWR ==============" << std::endl;    
     }
   return;
 }
@@ -378,7 +378,7 @@ void lkdbwr(double& pSx, double& pSy, double& pSz,
 {
   if(debug)
     {
-      std::cerr<<"============= LKDBWR =============="<< std::endl;
+      std::cout<<"============= LKDBWR =============="<< std::endl;
     }
   //return region number and dummy variables
   newReg=0;   
@@ -396,7 +396,7 @@ void g1rtwr(void)
 {
   if(debug)
     {
-      std::cerr<<"============ G1RTWR ============="<<std::endl;
+      std::cout<<"============ G1RTWR ============="<<std::endl;
     }
     return;
 }
@@ -408,8 +408,8 @@ void inihwr(int& intHist)
 {
   if(debug)
     {
-      std::cerr << "============= INIHWR ==============" << std::endl;    
-      std::cerr << "Ptr History=" <<intHist<< std::endl;
+      std::cout << "============= INIHWR ==============" << std::endl;    
+      std::cout << "Ptr History=" <<intHist<< std::endl;
     }
   return;
 }
@@ -421,11 +421,11 @@ int isvhwr(const int& fCheck, const int& intHist)
 {
   if(debug)
     {
-      std::cerr << "============= ISVHWR ==============" << std::endl;    
-      std::cerr << "fCheck=" << fCheck << std::endl;
+      std::cout << "============= ISVHWR ==============" << std::endl;    
+      std::cout << "fCheck=" << fCheck << std::endl;
       if(fCheck==-1) 
 	{
-	  std::cerr << "intHist=" << intHist  << std::endl;
+	  std::cout << "intHist=" << intHist  << std::endl;
 	}
 
     }
