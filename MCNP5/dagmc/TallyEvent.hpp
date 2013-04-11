@@ -82,6 +82,8 @@ class TallyEvent
      */
     TallyEvent();
 
+    // >>> PUBLIC INTERFACE
+
     /**
      * \brief Defines this tally event as a track-based event
      * \param data the physics data needed to set a track-based event
