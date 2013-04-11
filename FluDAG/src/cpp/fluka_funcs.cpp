@@ -223,10 +223,7 @@ void g1wr(double& pSx,
   // Separate the body of this function to a testable call
   g1_fire(oldReg, point, dir, retStep, newReg);
   
-  if(debug)
-    {
-      std::cout << "newReg = " << newReg << " retStep = " << retStep << std::endl;
-    }
+  std::cerr << "newReg = " << newReg << " retStep = " << retStep << std::endl;
 
   return;
 }
@@ -245,6 +242,7 @@ void g1_fire(int& oldRegion, double point[], double dir[], double& retStep,  int
   MBEntityHandle vol = DAG->entity_by_index(3,oldRegion);
 
   double next_surf_dist;
+  //  MBEntityHandle next_surf = 0;
   MBEntityHandle newvol = 0;
 
   // next_surf is a global
@@ -253,7 +251,7 @@ void g1_fire(int& oldRegion, double point[], double dir[], double& retStep,  int
 
   MBErrorCode rval = DAG->next_vol(next_surf,vol,newvol);
   newRegion = DAG->index_by_handle(newvol);
-  std::cerr << "newRegion = " << newRegion << std::endl;
+  //  std::cerr << "newRegion = " << newRegion << " Distance = " << retStep << std::endl;
   return;
 }
 ///////			End g1wr and g1
@@ -278,20 +276,19 @@ void nrmlwr(double& pSx, double& pSy, double& pSz,
 
   flagErr=0;
   double xyz[3]; //tmp storage of position
+  //MBEntityHandle surf = 0;
   xyz[0]=pSx,xyz[1]=pSy,xyz[2]=pSz;
-  MBErrorCode ErrorCode = DAG->get_angle(next_surf,xyz,norml); 
-  if(ErrorCode != MB_SUCCESS)
-  {
-      std::cout << "Could not determine normal" << std::endl;
-      flagErr = 2;
-      return;
-  }
-  // sense of next_surf with respect to oldRegion (volume)
-  int sense = getSense(oldRegion);
-  if(debug)
-  {
-      std::cout << "Normal: " << norml[0] << ", " << norml[1] << ", " << norml[2]  << std::endl;
-  }
+  MBErrorCode ErrorCode = DAG->get_angle(next_surf,xyz,norml); // get the angle
+
+  //return normal:
+  norml[0]=pVx;
+  norml[1]=pVy;
+  norml[2]=pVz;
+  
+  std::cerr << "Normal: " << norml[0] << ", " << norml[1] << ", " << norml[2]  << std::endl;
+  
+  std::cout << "out of nrmlwr " << std::endl;
+  
   return;
 }
 ///////			End nrmlwr
