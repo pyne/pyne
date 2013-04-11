@@ -5,10 +5,50 @@
 
 #include "moab/CartVect.hpp"
 
-// forward declaration
-namespace moab {
-  class TrackLengthMeshTally;
-}
+//===========================================================================//
+/**
+ * \struct TrackData
+ * \brief Stores physics data needed to construct a track-based tally event
+ */
+//===========================================================================//
+struct TrackData
+{
+    /// Energy of particle when event occurred
+    double particle_energy;
+
+    /// Weight of particle when event occurred
+    double particle_weight;
+
+    /// Total length of track segment
+    double track_length;
+
+    /// Starting location of track segment (xo, yo, zo)
+    moab::CartVect start_point;
+
+    /// Direction in which particle is traveling (uo, vo, wo)
+    moab::CartVect direction;
+};
+
+//===========================================================================//
+/**
+ * \struct CollisionData
+ * \brief Stores physics data needed to construct a collision tally event
+ */
+//===========================================================================//
+struct CollisionData
+{
+    /// Energy of particle when event occurred
+    double particle_energy;
+
+    /// Weight of particle when event occurred
+    double particle_weight;
+
+    /// Total macroscopic cross section for cell in which collision occurred
+    double total_cross_section;
+
+    /// Location of the collision (x, y, z)
+    moab::CartVect collision_point;
+};
 
 //===========================================================================//
 /**
@@ -17,8 +57,8 @@ namespace moab {
  *
  * TallyEvent is a class that represents a tally event that can be triggered
  * as part of a Monte Carlo particle transport simulation.  Both collision
- * and track-based events can be created.  Note that once an event has been
- * created, it cannot be changed.
+ * and track-based events can be created.  Note that once an event type has
+ * been set it cannot be changed.
  *
  * In addition to setting the required variables for each type of tally event,
  * there is also an optional function available to set the tally multiplier.
@@ -29,41 +69,6 @@ class TallyEvent
 {
   public:
     /**
-     * \brief Constructor
-     * \param energy, weight properties of particle triggering tally event
-     */
-    TallyEvent(double energy, double weight);
-
-    /**
-     * \brief Sets required variables for a track-based event
-     * \param track_length the length of the track segment
-     * \param start_point the starting location of the track (xo, yo, zo)
-     * \param direction the direction the particle is traveling (uo, vo, wo)
-     */
-    void set_track_event(double track_length,
-                         moab::CartVect& start_point,
-                         moab::CartVect& direction);
-
-    /**
-     * \brief Sets required variables for a collision event
-     * \param total_cross_section the total macroscopic cross section
-     * \param collision_point the (x, y, z) location of the collision
-     */
-    void set_collision_event(double total_cross_section,
-                             moab::CartVect& collision_point);
-
-    /**
-     * \brief Sets tally multiplier for the event
-     * \param value energy-dependent value for the tally multiplier
-     */
-    void set_tally_multiplier(double value);
-
-  private:
-    /// MeshTally implementations that can access private TallyEvent data
-    friend class KDEMeshTally;
-    friend class moab::TrackLengthMeshTally;
-
-    /**
      * \brief Defines type of tally event
      *
      *     1) NONE indicates no event has been set yet
@@ -72,8 +77,52 @@ class TallyEvent
      */
     enum EventType {NONE = 1, COLLISION = 2, TRACK = 3};
 
-    /// Type of tally event this event represents
-    EventType event_type;
+    /**
+     * \brief Constructor
+     */
+    TallyEvent();
+
+    /**
+     * \brief Defines this tally event as a track-based event
+     * \param data the physics data needed to set a track-based event
+     */
+    void set_track_event(const TrackData& data);
+
+    /**
+     * \brief Defines this tally event as a collision event
+     * \brief data the physics data needed to set a collision event
+     */
+    void set_collision_event(const CollisionData& data);
+
+    /**
+     * \brief Sets tally multiplier for the event
+     * \param value energy-dependent value for the tally multiplier
+     */
+    void set_tally_multiplier(double value);
+
+    // >>> TALLY EVENT DATA ACCESS FUNCTIONS
+
+    /**
+     * \brief get_track_data(), get_collision_data()
+     * \param data the struct to which the tally event data will be copied
+     * \return true if data was copied successfully, false otherwise
+     */
+    bool get_track_data(TrackData& data) const;
+    bool get_collision_data(CollisionData& data) const;
+
+    /**
+     * \brief get_tally_multiplier()
+     * \return current value of the tally multiplier for this event
+     */
+    double get_tally_multiplier() const;
+
+    /**
+     * \brief get_event_type()
+     * \return type of tally event this event represents
+     */
+    TallyEvent::EventType get_event_type() const;
+
+  private:
 
     /// Physical quantity needed to compute the score for this event
     double event_value;
@@ -88,6 +137,9 @@ class TallyEvent
     /// Position and direction of particle when event occurred
     moab::CartVect position;
     moab::CartVect direction;
+
+    /// Type of tally event this event represents
+    EventType event_type;
 };
 
 #endif // DAGMC_TALLYEVENT_H

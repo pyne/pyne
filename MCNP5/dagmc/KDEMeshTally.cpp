@@ -203,17 +203,19 @@ KDEMeshTally::~KDEMeshTally()
 void KDEMeshTally::compute_score(const TallyEvent& event, int ebin)
 {
   // make sure tally event has been set
-  if (event.event_type == TallyEvent::NONE)
+  TallyEvent::EventType type = event.get_event_type();
+
+  if (type == TallyEvent::NONE)
   {
     std::cerr << "\nError: Tally event type has not been set" << std::endl;
     exit(EXIT_FAILURE);
   }
 
-  if (event.event_type == TallyEvent::TRACK)
+  if (type == TallyEvent::TRACK)
   {
     tally_track(event, ebin);
   }
-  else if (event.event_type == TallyEvent::COLLISION)
+  else if (type == TallyEvent::COLLISION)
   {
     tally_collision(event, ebin);
   }
@@ -222,14 +224,23 @@ void KDEMeshTally::compute_score(const TallyEvent& event, int ebin)
 void KDEMeshTally::tally_collision(const TallyEvent& event, int ebin)
 {
   // make sure tally event is a collision event
-  if (event.event_type != TallyEvent::COLLISION)
+  if (event.get_event_type() != TallyEvent::COLLISION)
   {
     std::cerr << "\nError: Tally event is not a collision event" << std::endl;
     exit(EXIT_FAILURE);
   } 
  
   // make a KDECollision object to represent a single collision location
-  KDECollision collision( event.position, bandwidth, kernel );
+  CollisionData data;
+  bool set_data = event.get_collision_data(data);
+
+  if (!set_data)
+  {
+    std::cerr << "\nError: Invalid collision event data" << std::endl;
+    exit(EXIT_FAILURE);
+  }
+
+  KDECollision collision( data.collision_point, bandwidth, kernel );
 
   // get valid neighborhood dimensions for non-zero contributions to tally
   double min[3];
@@ -243,10 +254,10 @@ void KDEMeshTally::tally_collision(const TallyEvent& event, int ebin)
   assert( moab::MB_SUCCESS == rval );  
 
   // get the tally weighting factor for this collision
-  double weight = event.tally_multiplier * event.particle_weight;
+  double weight = event.get_tally_multiplier() * data.particle_weight;
 
   // divide by the total cross section
-  weight /= event.event_value;
+  weight /= data.total_cross_section;
 
   // compute the contribution for all calculation points in this neighborhood
   std::vector<moab::EntityHandle>::iterator i;
@@ -268,14 +279,14 @@ void KDEMeshTally::tally_collision(const TallyEvent& event, int ebin)
   }
     
   // add collision to the running variance used in computing optimal bandwidth
-  update_bandwidth_variance(event.position);
+  update_bandwidth_variance(data.collision_point);
 
 }
 //-----------------------------------------------------------------------------
 void KDEMeshTally::tally_track(const TallyEvent& event, int ebin)
 {
   // make sure tally event is a track-based event
-  if (event.event_type != TallyEvent::TRACK)
+  if (event.get_event_type() != TallyEvent::TRACK)
   {
     std::cerr << "\nError: Tally event is not a track-based event" << std::endl;
     exit(EXIT_FAILURE);
@@ -288,7 +299,16 @@ void KDEMeshTally::tally_track(const TallyEvent& event, int ebin)
     tally_subtracks = subtracks;
 
   // make a KDETrack object to represent a single track segment
-  KDETrack track(event.position, event.direction, bandwidth, event.event_value,
+  TrackData data;
+  bool set_data = event.get_track_data(data);
+
+  if (!set_data)
+  {
+    std::cerr << "\nError: Invalid track-based event data" << std::endl;
+    exit(EXIT_FAILURE);
+  }
+
+  KDETrack track(data.start_point, data.direction, bandwidth, data.track_length,
                  kernel, tally_subtracks);
     
   // get valid neighborhood dimensions for non-zero contributions to tally
@@ -304,11 +324,11 @@ void KDEMeshTally::tally_track(const TallyEvent& event, int ebin)
   assert( moab::MB_SUCCESS == rval );  
 
   // get the tally weighting factor for this track
-  double weight = event.tally_multiplier * event.particle_weight;
+  double weight = event.get_tally_multiplier() * data.particle_weight;
 
   // if SUBTRACK mesh tally, multiply weight by the total track length
   if (kde_tally == SUBTRACK)
-    weight *= event.event_value;
+    weight *= data.track_length;
 
   // compute the contribution for all calculation points in this neighborhood
   std::vector<moab::EntityHandle>::iterator i;

@@ -69,7 +69,8 @@ struct MeshTallyInput
  * the get_data function.
  */
 //===========================================================================//
-class MeshTally {
+class MeshTally
+{
 
   protected:
     /**
@@ -134,7 +135,7 @@ class MeshTally {
     virtual double* get_scratch_data(int& length);
 
     /**
-     * /brief Resets all of the mesh tally data arrays to zero
+     * \brief Resets all of the mesh tally data arrays to zero
      */
     virtual void zero_tally_data();
 
@@ -163,8 +164,8 @@ class MeshTally {
     // >>> PROTECTED FUNCTIONS
 
     /**
-     * /brief Resize data arrays to hold all of the mesh tally data
-     * /param num_tally_points number of tally points included in mesh tally
+     * \brief Resize data arrays to hold all of the mesh tally data
+     * \param num_tally_points number of tally points included in mesh tally
      *
      * Arrays will be resized to the given number of tally points multiplied
      * by the number of energy bins.

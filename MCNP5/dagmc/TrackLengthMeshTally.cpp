@@ -778,6 +778,13 @@ static inline bool tris_eq( const EntityHandle *t1, const EntityHandle *t2 ){
 
 void TrackLengthMeshTally::compute_score(const TallyEvent& event, int ebin)
 {
+  // make sure tally event is a track-based event
+  if (event.get_event_type() != TallyEvent::TRACK)
+  {
+    std::cerr << "\nError: Tally event is not a track-based event" << std::endl;
+    exit(EXIT_FAILURE);
+  } 
+
   ErrorCode rval;
 
   bool conformal_begin_track = false;
@@ -807,15 +814,25 @@ void TrackLengthMeshTally::compute_score(const TallyEvent& event, int ebin)
     }
   }
 
+  // Get the physics data for this tally event
+  TrackData data;
+  bool set_data = event.get_track_data(data);
+
+  if (!set_data)
+  {
+    std::cerr << "\nError: Invalid track-based event data" << std::endl;
+    exit(EXIT_FAILURE);
+  }
+
   EntityHandle last_crossed_tri[3] = {0,0,0};
   double last_t = 0;
   EntityHandle first_tet;
 
   if( conformal_begin_track ){
-    first_tet = get_starting_tet_conformal(event.position, last_crossed_tri);
+    first_tet = get_starting_tet_conformal(data.start_point, last_crossed_tri);
   }
   else{
-    first_tet = get_starting_tet(event.position, event.direction, event.event_value, last_crossed_tri, last_t);
+    first_tet = get_starting_tet(data.start_point, data.direction, data.track_length, last_crossed_tri, last_t);
   }
 
   if( first_tet == 0 ){
@@ -856,14 +873,13 @@ void TrackLengthMeshTally::compute_score(const TallyEvent& event, int ebin)
       assert( rval == MB_SUCCESS );
 
       double t;
-      if( GeomUtil::ray_tri_intersect( tri_pts, event.position, event.direction, TRIANGLE_INTERSECTION_TOL, t ) ){
+      if( GeomUtil::ray_tri_intersect( tri_pts, data.start_point, data.direction, TRIANGLE_INTERSECTION_TOL, t ) ){
 
         double track_length;
-        double length = event.event_value;
 
-        if( t >= length ){
+        if( t >= data.track_length ){
           // track ends in this tetrahedron
-          track_length = length - last_t;
+          track_length = data.track_length - last_t;
           next_tet = 0;
           this->last_visited_tet = tet;
 
@@ -886,7 +902,7 @@ void TrackLengthMeshTally::compute_score(const TallyEvent& event, int ebin)
 
           if( tri_sides.size() == 1 ){
             // the mesh ends here
-            CartVect crossing = event.position + (event.direction*t);
+            CartVect crossing = data.start_point + (data.direction*t);
 #ifdef MESHTAL_DEBUG
             std::cout << "  Ray departs from mesh at t = " << t << ", "  << crossing  << std::endl;
 #endif
@@ -902,7 +918,7 @@ void TrackLengthMeshTally::compute_score(const TallyEvent& event, int ebin)
               rval = mb->get_adjacencies( tri, 3, 2, false, last_tri_eh );
               assert( rval == MB_SUCCESS );
               assert( last_tri_eh.size() == 1 );
-              next_tet = find_next_tet_by_ray_fire( crossing, event.direction, length - t, last_crossed_tri, last_t, last_tri_eh[0] );
+              next_tet = find_next_tet_by_ray_fire( crossing, data.direction, data.track_length - t, last_crossed_tri, last_t, last_tri_eh[0] );
             }
 
 #ifdef MESHTAL_DEBUG
@@ -932,7 +948,7 @@ void TrackLengthMeshTally::compute_score(const TallyEvent& event, int ebin)
           return;
         }
 
-        double weight = event.tally_multiplier * event.particle_weight;
+        double weight = event.get_tally_multiplier() * data.particle_weight;
         double score = weight * track_length;
 
         add_score_to_mesh_cell( tet, score, ebin );
