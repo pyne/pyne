@@ -39,7 +39,7 @@ using moab::DagMC;
 #include <fenv.h>
 #endif
 
-  // globals
+// globals
 
 #define DAG DagMC::instance()
 
