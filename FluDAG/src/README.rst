@@ -24,9 +24,11 @@ set(MOAB_HOME ${HOME}/path/to/MOAB)
 
 
 
-To use cmake, go to an empty directory outside of src (e.g. the bin that is 
-parallel to src) and type, in the case of bin,
->cmake ../src
+To use cmake, go to an empty directory outside of src 
+> cd ..
+> mkdir bin
+> cd bin
+> cmake ../src
 
 This will create a makefile that will allow you to type
 >make readvol
