@@ -257,7 +257,7 @@ void g1_fire(int& oldRegion, double point[], double dir[], double& retStep,  int
 
   MBErrorCode rval = DAG->next_vol(next_surf,vol,newvol);
   newRegion = DAG->index_by_handle(newvol);
-  //  std::cerr << "newRegion = " << newRegion << " Distance = " << retStep << std::endl;
+  // std::cerr << "newRegion = " << newRegion << " Distance = " << retStep << std::endl;
   return;
 }
 ///////			End g1wr and g1
@@ -385,6 +385,8 @@ void lkwr(double& pSx, double& pSy, double& pSz,
   return;
 }
 
+// Defined in WrapIncrHist.cc
+// Called by WrapG1, WrapIniHist, WrapLookFX, and WrapLookZ
 // intHist is an array that stores secondary particle information
 // Using standard FLUKA version in libflukahp.a
 /*

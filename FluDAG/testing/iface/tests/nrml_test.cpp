@@ -18,206 +18,127 @@
 
 using moab::DagMC;
 
-double posx;
-double posy;
-double posz;
-double xyz[] = {posx, posy, posz};
+double pSx;
+double pSy;
+double pSz;
 
-double dirx;
-double diry;
-double dirz;
-
-double lastRetStep;
-int lastKnownRegion = -1;
-int curReg, newReg, nextReg, originReg;;
+double pVx;
+double pVy;
+double pVz;
+int oldReg;
 
 char *getfileptr(std::string name);
 
-int look( double& posx, double& posy, double& posz, double* dir, int& region);
-void normal (double& posx, double& posy, double& posz, double *norml, int& regionForSense);
-
-TEST(nrml_Test, spheres_sense)
+TEST(nrml_Test, RayFire)
 {
+   pSx = 0;
+   pSy = 0;
+   pSz = 0;
+   double xyz[] = {pSx, pSy, pSz};
+   
+   pVx = 1;
+   pVy = 0;
+   pVz = 0;
+   double dir[] = {pVx, pVy, pVz};
+   
+   int oldReg = 2;
    double retStep;
-   posx = 0.0;
-   posy = 0.0;
-   posz = 0.0;
-   
-   dirx = 1.0;
-   diry = 0.0;
-   dirz = 0.0;
-   double dir[] = {dirx, diry, dirz};
-   double* norml = new double(3); 
-   int flagErr;
-   
-   // Nested bricks: faces at 5, 7.5, and 10
-   // Concentric spheres at 12, 15, 20
-   char *fileptr = getfileptr("../cases/spheres.h5m");
-   std::cout << "********* Testing Concentric Spheres ************" << std::endl;
+   int newReg = 0;
+
+   char *fileptr;
+   // fileptr = getfileptr("../iface/cases/test.h5m");
+   fileptr = getfileptr("../iface/cases/test.h5m");
+
+   std::string fname = "../iface/cases/test.h5m";
 
    // Load the file and create the dag structure
+   // cpp_dagmcinit(fileptr,0,1);
    cpp_dagmcinit(fileptr,0,1);
-   
-   xyz = {posx, posy, posz}; 
-   // Find out what volume we are in: lastKnownRegion doesn't matter unless we are on a boundary
-   // curRegion should be 1 for nested cubes, 2 for nested spheres
-   curReg = look(posx, posy, posz, dir, lastKnownRegion );
-   originReg = curReg;
-
    // Fire a ray from the given point in the given direction
-   // calls ray_fire; sets retStep, nextReg and global next_surf
-   g1_fire(curReg, xyz, dir, retStep, nextReg); 
-   // nrmlwr(posx, posy, posz, dirx, diry, dirz, norml, curReg, newReg, flagErr);
-   normal(posx, posy, posz, norml, curReg);
-   // Potential Tests: 
-   //   o verify retStep = {12,5} at origin for spheres and bricks
-   //   o verify curReg = {2,1} at origin for spheres and bricks. 
-   //   o Reset the position to just a little off the origin, within the normaliztion amount
-   //     (1e-16) and verify nothing changes
-
-   // Set file global for later use
-   // lastRetStep = retStep;
+   // calls ray_fire, sets retStep and global next_surf
+   
+   g1_fire(oldReg, xyz, dir, retStep, newReg); 
    if (true)
    {
       std::cout<<"============= Result of g1_fire =============="<<std::endl;
-      std::cout << "Position " << posx << " " << posy << " " << posz << std::endl;
-      std::cout << "Point is in region = " << curReg<< std::endl;
-      std::cout << "Direction vector " << dirx << " " << diry << " " << dirz << std::endl;
+      std::cout << "Position " << pSx << " " << pSy << " " << pSz << std::endl;
+      std::cout << "Direction vector " << pVx << " " << pVy << " " << pVz << std::endl;
+      std::cout << "Oldreg = " << oldReg << std::endl;
       std::cout << "retStep = " << retStep << std::endl;
-      std::cout << "Point heading to region = " << nextReg << std::endl;
+      std::cout << "Newreg = " << newReg << std::endl;
    }
-   std::cout << std::endl;
-
-
-   // Testing calls (not otherwise necessary) 
-   // Test:  confirm near origin we are still in the volume of the origin 
-   std::cout << "Testing position close to origin " << std::endl;
-   posx += 1.0e-2;
-   lastKnownRegion = curReg;  // Copy position of previous region
-   curReg = look(posx, posy, posz, dir, lastKnownRegion);
-   EXPECT_EQ(originReg, curReg);
-
-   // Position is near the origin.  Nothing should change for the bricks.  For the sphere,
-   // it appears that slight changes in position pick up different facets on which to 
-   // calculate the normal.
-   normal(posx, posy, posz, norml, curReg);
-   // Get the sense of the normal with respect to the current region
-   int sense = getSense(curReg);
-   std::cout << "Sense of next_surf with respect to the point is " << sense << std::endl;
-   std::cout << std::endl;
-   EXPECT_EQ(1, sense);
-
-   std::cout << "Fire the ray in the opposite direction.  " << std::endl;
-   dir[0] *= -1.0;
-   xyz = {posx, posy, posz}; 
-   g1_fire(curReg, xyz, dir, retStep, nextReg);
-   if (true)
-   {
-      std::cout<<"============= Result of g1_fire =============="<<std::endl;
-      std::cout << "Position " << posx << " " << posy << " " << posz << std::endl;
-      std::cout << "Point is in region = " << curReg<< std::endl;
-      std::cout << "Direction vector " << dir[0] << " " << dir[1] << " " << dir[2] << std::endl;
-      std::cout << "retStep = " << retStep << std::endl;
-      std::cout << "Point heading to region = " << nextReg << std::endl;
-   }
-   std::cout << std::endl;
-   normal(posx, posy, posz, norml, curReg);
-   sense = getSense(curReg);
-   std::cout << "Sense of next_surf with respect to the point is " << sense << std::endl;
-}
-
-TEST(nrml_test, test2)
-{ 
+   // Now get the normal of next_surf, as set by the g1_fire call
+   // Question:  do I need to pretend fluka updated the particle to the boundary?
+   //            In this case I should reset pSx, pSy, pSz to the next_surf
    double* norml = new double(3); 
-   double retStep;
    int flagErr;
-   double dir[] = {-dirx, diry, dirz};
-   // Add distance to surface to current (already offset) point should put us into the next region
-   std::cout << std::endl;
-   posx = lastRetStep + .1;
-   lastKnownRegion = curReg;  // Copy position of previous region
-   curReg = look(posx, posy, posz, dir, lastKnownRegion);
-   // Expect curReg to = previous nextReg from knowledge of last g1_fire, but maybe not because we are such
-   // a short distance beyond the boundary.
-   // calls ray_fire, sets retStep, nextReg and global next_surf
-   // double original_retStep = retStep;  // save retstep
-   g1_fire(curReg, xyz, dir, retStep, nextReg); 
-   if (true)
-   {
-      std::cout<<"============= Result of g1_fire =============="<<std::endl;
-      std::cout << "Position " << posx << " " << posy << " " << posz << std::endl;
-      std::cout << "Direction vector " << dirx << " " << diry << " " << dirz << std::endl;
-      std::cout << "Point is in region = " << curReg<< std::endl;
-      std::cout << "retStep = " << retStep << std::endl;
-      std::cout << "Point heading to region = " << nextReg << std::endl;
-   }
-   nrmlwr(posx, posy, posz, dirx, diry, dirz, norml, curReg, newReg, flagErr);
-   int sense = getSense(curReg);
-   std::cout << "Sense of next_surf with respect to the point is " << sense << std::endl;
-   std::cout << std::endl;
+   nrmlwr(pSx, pSy, pSz, pVx, pVy, pVz, norml, 0,0, flagErr);
 
-   /////////////////////////////////////////////////////////////////////////////   
-   // Move this to another test
-   /*
-   std::cout << std::endl;
-   posx += retStep;
-   lastKnownRegion = curReg;  // Copy position of previous region
-   curReg = look(posx, posy, posz, dir, lastKnownRegion);
-   // Expect curReg to = previous nextReg from knowledge of last g1_fire, but maybe not because we are such
-   // a short distance beyond the boundary.
-   // calls ray_fire, sets retStep, nextReg and global next_surf
-   g1_fire(curReg, xyz, dir, retStep, nextReg); 
-   if (true)
-   {
-      std::cout<<"============= Result of g1_fire =============="<<std::endl;
-      std::cout << "Position " << posx << " " << posy << " " << posz << std::endl;
-      std::cout << "Direction vector " << dirx << " " << diry << " " << dirz << std::endl;
-      std::cout << "Point is in region = " << curReg<< std::endl;
-      std::cout << "retStep = " << retStep << std::endl;
-      std::cout << "Point heading to region = " << nextReg << std::endl;
-   }
-   nrmlwr(posx, posy, posz, dirx, diry, dirz, norml, curReg, newReg, flagErr);
-   */
+   std::cout<<"============= Norml after g1_fire =============="<<std::endl;
+   std::cout << "Normal: " << norml[0] << ", " << norml[1] << ", " << norml[2]  << std::endl;
+   std::cout << "retStep = " << retStep << std::endl;
+
+   pSx += retStep + .001;
+   nrmlwr(pSx, pSy, pSz, pVx, pVy, pVz, norml, 0,0, flagErr);
+
+   std::cout<<"============= Norml after g1_fire =============="<<std::endl;
+   std::cout << "Normal: " << norml[0] << ", " << norml[1] << ", " << norml[2]  << std::endl;
+   std::cout << "retStep = " << retStep << std::endl;
+
+   EXPECT_TRUE(true);
 }
 
-//---------------------------------------------------------------------------//
-// getfileptr
-//---------------------------------------------------------------------------//
-// helper function
 char *getfileptr(std::string name)
 {
    char* fileptr = new char(name.length()+1);
    std:strcpy(fileptr, name.c_str());
+   return fileptr;
 }
-
+/*
 //---------------------------------------------------------------------------//
-// look
+// nrmlwr(..)
 //---------------------------------------------------------------------------//
-// Local wrapper for fortran-called, fluka-set lkwr
-// This function signature shows what parameters are being used in our wrapper implementation
-// ASSUMES:  position is not on a boundary
-int look( double& posx, double& posy, double& posz, double* dir, int& region)
+/// From Flugg Wrappers WrapNorml.cc
+void nrmlwr(double& pSx, double& pSy, double& pSz,
+            double& pVx, double& pVy, double& pVz,
+	    double* norml, const int& oldReg, 
+	    const int& newReg, int& flagErr)
 {
-   int flagErr;
-   int lattice_dummy;  // not used
-   int nextRegion;     // looked at iff on boundry, but not set.
-   lkwr(posx, posy, posz, dir, region, lattice_dummy, nextRegion, flagErr, lattice_dummy);
-   return nextRegion;
-}
+  if(debug)
+    {
+      std::cout << "============ NRMLWR-DBG =============" << std::endl;
+    }
 
-//---------------------------------------------------------------------------//
-// normal
-//---------------------------------------------------------------------------//
-// Local wrapper for fortran-called, fluka-set nrmlwr
-// This function signature shows what parameters are being used in our wrapper implementation
-// ASSUMES:  no ray history
-// Notes
-// - direction is not taken into account 
-// - curRegion is not currently used.  It is expected to be implemented as a check
-//   on what the sign of the normal should be.  It is used in a call to DAG->surface_sense
-void normal (double& posx, double& posy, double& posz, double *norml, int& curRegion)
-{
-   int dummyFlagErr, dummyReg;
-   double dummyDirx, dummyDiry, dummyDirz;
-   nrmlwr(posx, posy, posz, dummyDirx, dummyDiry, dummyDirz, norml, curRegion, dummyReg, dummyFlagErr);
+  //dummy variables
+  flagErr=0;
+  double abc[] = {pSx, pSy, pSz};
+  double xyz[3]; //tmp storage of position
+  //MBEntityHandle surf = 0;
+  xyz[0]=pSx,xyz[1]=pSy,xyz[2]=pSz;
+  MBErrorCode ErrorCode = DAG->get_angle(next_surf,xyz,norml); // get the angle
+  if(ErrorCode != MB_SUCCESS)
+    {
+      std::cout << "Could not determine normal" << std::endl;
+      flagErr = 2;
+      return;
+    }
+
+  //return normal:
+  //norml[0]=pVx;
+  //norml[1]=pVy;
+  //norml[2]=pVz;
+
+  // to test:  create a simple model:  dag-> ray_fire in order to get next_sruf.  
+// then call normlwr with next_surf and it should return an opposite-pointing vector
+// ON the surface, normlwr should components of rnorml should be 0 or near
+// PAST the surface, norml components should point AWAY from current position
+  
+  if(debug)
+    {
+      std::cout << "Normal: " << norml[0] << ", " << norml[1] << ", " << norml[2]  << std::endl;
+      std::cout << "out of nrmlwr " << std::endl;
+    }
+  
+  return;
 }
+*/
