@@ -2,6 +2,11 @@
 
 #include <cstdlib>
 #include <iostream>
+#include <vector>
+
+#include "moab/AdaptiveKDTree.hpp"
+#include "moab/CartVect.hpp"
+#include "moab/Interface.hpp"
 
 #include "KDENeighborhood.hpp"
 #include "TallyEvent.hpp"
@@ -10,8 +15,14 @@
 // CONSTRUCTOR
 //---------------------------------------------------------------------------//
 KDENeighborhood::KDENeighborhood(const TallyEvent& event,
-                                 const moab::CartVect& bandwidth)
+                                 const moab::CartVect& bandwidth,
+                                 moab::AdaptiveKDTree& tree,
+                                 moab::EntityHandle& tree_root)
 {
+    // Copy KD-Tree to this neighborhood for the given tally event
+    this->tree = &tree;
+    this->tree_root = tree_root;
+
     // define the neighborhood region for this tally event
     TallyEvent::EventType type = event.get_event_type();
 
@@ -43,9 +54,12 @@ KDENeighborhood::KDENeighborhood(const TallyEvent& event,
 //---------------------------------------------------------------------------//
 // PUBLIC INTERFACE
 //---------------------------------------------------------------------------//
-void KDENeighborhood::get_calculation_points()
+moab::ErrorCode
+    KDENeighborhood::get_points(std::vector<moab::EntityHandle>& points)
 {
-// TODO implement this function when points_in_box exists here
+    // find all the points that exist within a rectangular neighborhood region
+    moab::ErrorCode rval = points_in_box(points);
+    return rval;
 }
 //---------------------------------------------------------------------------//
 // PRIVATE FUNCTIONS
@@ -88,6 +102,85 @@ void KDENeighborhood::set_neighborhood(double track_length,
     // set maximum radius around the track to hx^2 + hy^2 + hz^2
     radius = bandwidth.length();
 }                              
+//---------------------------------------------------------------------------//
+moab::ErrorCode
+    KDENeighborhood::points_in_box(std::vector<moab::EntityHandle>& points)
+{
+    // determine the center point of the box
+    double box_center[3];
+
+    for (int i = 0; i < 3; ++i)
+    {
+        box_center[i] = 0.5 * (max_corner[i] + min_corner[i]);
+    }
+
+    // set radius equal to distance from center to max corner of the box
+    moab::CartVect center_to_max_corner(max_corner);
+    moab::CartVect center(box_center);
+    center_to_max_corner -= center;
+    double radius = center_to_max_corner.length();
+
+    // find all leaves of the tree within the given radius
+    std::vector<moab::EntityHandle> leaves;
+    moab::ErrorCode rval = moab::MB_SUCCESS;
+
+    (*tree).leaves_within_distance(tree_root, box_center, radius, leaves);
+  
+    if (moab::MB_SUCCESS != rval) return rval;
+
+    // obtain the set of unique points in the box 
+    std::vector<moab::EntityHandle>::iterator i; 
+    moab::Interface* mb = tree->moab();
+    moab::Range leaf_points;
+    moab::Range::iterator j;
+    moab::EntityHandle point;
+    double coords[3];
+  
+    // iterate through the leaves
+    for (i = leaves.begin(); i != leaves.end(); ++i)
+    {
+        leaf_points.clear();
+        rval = mb->get_entities_by_type(*i, moab::MBVERTEX, leaf_points);
+    
+        if (moab::MB_SUCCESS != rval) return rval;
+  
+        // iterate through the points in each leaf  
+        for (j = leaf_points.begin(); j != leaf_points.end(); ++j)
+        {
+            point = *j;
+            rval = mb->get_coords(&point, 1, coords);
+    
+            if (moab::MB_SUCCESS != rval) return rval;
+
+            // check point is in the box
+            bool in_box = true;
+            int k = 0;
+
+            do
+            {
+                if (coords[k] < min_corner[k] || coords[k] > max_corner[k])
+                {
+                    in_box = false;
+                }
+
+                ++k;
+            }
+            while (true && k < 3);
+      
+            // add the point to the set if it is in the box
+            if (in_box)
+            {
+                points.push_back(point);
+            }
+        }
+    }
+  
+    // remove duplicates from points vector
+    std::sort(points.begin(), points.end());
+    points.erase(std::unique(points.begin(), points.end()), points.end());
+  
+    return moab::MB_SUCCESS;
+}
 //---------------------------------------------------------------------------//
 
 // end of MCNP5/dagmc/KDENeighborhood.cpp

@@ -176,22 +176,6 @@ class KDEMeshTally : public MeshTally {
                              double score,
                              int ebin );
 
-    /**
-     * Gets a unique set of all of the vertices that lie within the given box.
-     *
-     * @param tree a KD-Tree containing all vertices
-     * @param tree_root the root of the KD-Tree
-     * @param box_min the minimum corner of the box
-     * @param box_max the maximum corner of the box
-     * @param points  the unique set of vertices in the box
-     * @return the MOAB ErrorCode value
-     */
-    moab::ErrorCode points_in_box( moab::AdaptiveKDTree & tree,
-                                   moab::EntityHandle tree_root,
-                                   const double box_min[3],
-                                   const double box_max[3],
-                                   std::vector<moab::EntityHandle> & points );
-
     /// unimplemented 
     KDEMeshTally( const KDEMeshTally & obj );
     /// unimplemented

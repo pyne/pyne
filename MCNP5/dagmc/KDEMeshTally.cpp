@@ -17,6 +17,7 @@
 
 #include "KDECollision.hpp"
 #include "KDEKernel.hpp"
+#include "KDENeighborhood.hpp"
 #include "KDETrack.hpp"
 #include "KDEMeshTally.hpp"
 #include "TallyEvent.hpp"
@@ -242,16 +243,13 @@ void KDEMeshTally::tally_collision(const TallyEvent& event, int ebin)
 
   KDECollision collision( data.collision_point, bandwidth, kernel );
 
-  // get valid neighborhood dimensions for non-zero contributions to tally
-  double min[3];
-  double max[3];
+  // create the neighborhood region for this tally event
+  KDENeighborhood region(event, bandwidth, *tree, tree_root);
 
-  collision.get_neighborhood( min, max );
-
-  // find all the calculation points within the valid neighborhood
-  std::vector<moab::EntityHandle> calc_points;
-  moab::ErrorCode rval = points_in_box( *tree, tree_root, min, max, calc_points );
-  assert( moab::MB_SUCCESS == rval );  
+  // find all the calculation points within this neighborhood region
+  std::vector<moab::EntityHandle> calculation_points;
+  moab::ErrorCode rval = region.get_points(calculation_points);
+  assert(moab::MB_SUCCESS == rval);
 
   // get the tally weighting factor for this collision
   double weight = event.get_tally_multiplier() * data.particle_weight;
@@ -265,7 +263,8 @@ void KDEMeshTally::tally_collision(const TallyEvent& event, int ebin)
   double contribution = 0;
   double coords[3];
 
-  for ( i = calc_points.begin() ; i != calc_points.end() ; ++i ) {
+  for (i = calculation_points.begin(); i != calculation_points.end(); ++i)
+  {
 
     point = *i;
     rval = mb->get_coords( &point, 1, coords );
@@ -310,18 +309,14 @@ void KDEMeshTally::tally_track(const TallyEvent& event, int ebin)
 
   KDETrack track(data.start_point, data.direction, bandwidth, data.track_length,
                  kernel, tally_subtracks);
-    
-  // get valid neighborhood dimensions for non-zero contributions to tally
-  double min[3];
-  double max[3];
-  double radius = 0;
 
-  track.get_neighborhood( min, max, radius );
+  // create the neighborhood region for this tally event
+  KDENeighborhood region(event, bandwidth, *tree, tree_root);
 
-  // find all the calculation points within the valid neighborhood
-  std::vector<moab::EntityHandle> calc_points;
-  moab::ErrorCode rval = points_in_box( *tree, tree_root, min, max, calc_points );
-  assert( moab::MB_SUCCESS == rval );  
+  // find all the calculation points that exist in this neighborhood region
+  std::vector<moab::EntityHandle> calculation_points;
+  moab::ErrorCode rval = region.get_points(calculation_points);
+  assert(moab::MB_SUCCESS == rval);
 
   // get the tally weighting factor for this track
   double weight = event.get_tally_multiplier() * data.particle_weight;
@@ -336,7 +331,8 @@ void KDEMeshTally::tally_track(const TallyEvent& event, int ebin)
   double contribution = 0;
   double coords[3];
 
-  for ( i = calc_points.begin() ; i != calc_points.end() ; ++i ) {
+  for (i = calculation_points.begin(); i != calculation_points.end(); ++i)
+  {
 
     point = *i;
     rval = mb->get_coords( &point, 1, coords );
@@ -563,90 +559,6 @@ void KDEMeshTally::add_score_to_tally( moab::EntityHandle mesh_point,
     get_data( temp_tally_data, mesh_point, (num_energy_bins-1) ) += score;
 
   visited_this_history.insert( mesh_point );
-
-}
-//-----------------------------------------------------------------------------
-moab::ErrorCode
-  KDEMeshTally::points_in_box( moab::AdaptiveKDTree & tree,
-                               moab::EntityHandle tree_root,
-                               const double box_min[3],
-                               const double box_max[3],
-                               std::vector<moab::EntityHandle> & points )
-{
-  
-  // determine the center point of the box
-  double box_center[3];
-  
-  for ( int i = 0 ; i < 3 ; ++i )
-    box_center[i] = 0.5 * ( box_max[i] + box_min[i] );  
-  
-  // set radius equal to distance from the center to the max corner of box
-  moab::CartVect max_corner( box_max );
-  moab::CartVect center( box_center );
-  max_corner -= center;  
-  double radius = max_corner.length();
-  
-  // find all leaves of the tree within the given radius
-  std::vector<moab::EntityHandle> leaves;
-  moab::ErrorCode rval =
-    tree.leaves_within_distance( tree_root, box_center, radius, leaves );
-  
-  if ( moab::MB_SUCCESS != rval )
-    return rval;
-
-  // obtain the set of unique points in the box 
-  std::vector<moab::EntityHandle>::iterator i; 
-  moab::Interface* mb = tree.moab();
-  moab::Range leaf_points;
-  moab::Range::iterator j;
-  moab::EntityHandle point;
-  double coords[3];
-  
-  // iterate through the leaves
-  for ( i = leaves.begin() ; i != leaves.end() ; ++i) {
-
-    leaf_points.clear();
-    rval = mb->get_entities_by_type( *i, moab::MBVERTEX, leaf_points );
-    
-    if ( moab::MB_SUCCESS != rval )
-      return rval;
-  
-    // iterate through the points in each leaf  
-    for ( j = leaf_points.begin() ; j != leaf_points.end() ; ++j ) {
-
-      point = *j;
-      rval = mb->get_coords( &point, 1, coords );
-    
-      if ( moab::MB_SUCCESS != rval )
-        return rval;
-
-      // check point is in the box
-      bool in_box = true;
-      int k = 0;
-
-      do {
-
-        if ( coords[k] < box_min[k] || coords[k] > box_max[k] )
-          in_box = false;
-
-        ++k;
-
-      }
-      while ( true && k < 3 );
-      
-      // add the point to the set if it is in the box
-      if ( in_box )
-        points.push_back( point );
-
-    }
-
-  }
-  
-  // remove duplicates from points vector
-  std::sort( points.begin(), points.end() );
-  points.erase( std::unique( points.begin(), points.end() ), points.end() );
-  
-  return moab::MB_SUCCESS;
 
 }
 //-----------------------------------------------------------------------------
