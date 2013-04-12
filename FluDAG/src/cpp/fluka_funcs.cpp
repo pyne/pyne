@@ -163,7 +163,6 @@ void cpp_dagmcinit(char *myfile,        // geom
 /**************************************************************************************************/
 /// From Flugg Wrappers
 //---------------------------------------------------------------------------//
-void g1_fire(int& oldRegion, double point[], double dir[],  double& retStep, int& newRegion);
 
 //---------------------------------------------------------------------------//
 // jomiwr(..)
@@ -195,6 +194,8 @@ void jomiwr(int & nge, const int& lin, const int& lou, int& flukaReg)
 // g1wr(..)
 //---------------------------------------------------------------------------//
 /// From Flugg Wrappers
+//  returns approved step of particle and all variables that fluka G1 computes.
+//
 void g1wr(double& pSx, 
           double& pSy, 
           double& pSz, 
@@ -254,13 +255,13 @@ void g1_fire(int& oldRegion, double point[], double dir[], double& retStep,  int
   //  std::cerr << "newRegion = " << newRegion << " Distance = " << retStep << std::endl;
   return;
 }
-///////			End g1wr and g1:w
+///////			End g1wr and g1
 /////////////////////////////////////////////////////////////////////
 
 //---------------------------------------------------------------------------//
 // nrmlwr(..)
 //---------------------------------------------------------------------------//
-/// From Flugg Wrappers
+/// From Flugg Wrappers WrapNorml.cc
 void nrmlwr(double& pSx, double& pSy, double& pSz,
             double& pVx, double& pVy, double& pVz,
 	    double* norml, const int& oldReg, 
@@ -288,6 +289,11 @@ void nrmlwr(double& pSx, double& pSy, double& pSz,
   //norml[0]=pVx;
   //norml[1]=pVy;
   //norml[2]=pVz;
+
+  // to test:  create a simple model:  dag-> ray_fire in order to get next_sruf.  
+// then call normlwr with next_surf and it should return an opposite-pointing vector
+// ON the surface, normlwr should components of rnorml should be 0 or near
+// PAST the surface, norml components should point AWAY from current position
   
   if(debug)
     {
@@ -303,7 +309,7 @@ void nrmlwr(double& pSx, double& pSy, double& pSz,
 //---------------------------------------------------------------------------//
 // lkwr(..)
 //---------------------------------------------------------------------------//
-
+// Was in 
 // Wrapper for localisation of starting point of particle.
 //
 // modified 20/III/00: history initialization moved to ISVHWR
@@ -316,11 +322,11 @@ void lkwr(double& pSx, double& pSy, double& pSz,
           int& newReg, int& flagErr, int& newLttc)
 {
   if(debug)
-    {
+  {
       std::cout << "======= LKWR =======" << std::endl;
       std::cout << "oldReg is " << oldReg << std::endl;
       std::cout << "position is " << pSx << " " << pSy << " " << pSz << std::endl; 
-    }
+  }
 
   const double xyz[] = {pSx, pSy, pSz}; // location of the particle (xyz)
   int is_inside = 0; // logical inside or outside of volume
@@ -344,18 +350,23 @@ void lkwr(double& pSx, double& pSy, double& pSz,
 	{
 	  newReg = i;
 	  flagErr = i;
+          if(debug)
+          {
+              std::cout << "newReg is " << newReg << std::endl;
+          }
           //BIZARRELY - WHEN WE ARE INSIDE A VOLUME, BOTH, newReg has to equal flagErr
 	  //std::cerr << "newReg is " << newReg << std::endl;
 	  return;
 	}
-
     }
 
   std::cout << "point is not in any volume" << std::endl;
   return;
 }
 
-// FluDAG tag 
+// intHist is an array that stores secondary particle information
+// Using standard FLUKA version in libflukahp.a
+/*
 void conhwr(int& intHist, int* incrCount)
 {
   if(debug)
@@ -371,6 +382,7 @@ void conhwr(int& intHist, int* incrCount)
     }
   return;
 }
+*/
 
 void lkdbwr(double& pSx, double& pSy, double& pSz,
 	    double* pV, const int& oldReg, const int& oldLttc,

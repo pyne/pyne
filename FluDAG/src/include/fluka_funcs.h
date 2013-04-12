@@ -28,6 +28,15 @@ extern "C" {
                 int parallel_file_mode, // parallel read mode
                 int max_pbl);
 
+  /**
+   * oldRegion region of start point
+   * point     start point
+   * dir       direction vector
+   * retStep   set to distance to next surface
+   * newRegion region ofter step
+  */
+  void g1_fire(int& oldRegion, double point[], double dir[],  double& retStep, int& newRegion);
+
 /*
  * Write the material assignment for each volume to a file named matfile
  */
