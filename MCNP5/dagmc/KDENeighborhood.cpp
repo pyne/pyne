@@ -61,6 +61,39 @@ moab::ErrorCode
     moab::ErrorCode rval = points_in_box(points);
     return rval;
 }
+//-----------------------------------------------------------------------------
+bool KDENeighborhood::point_within_max_radius(const TallyEvent& event,
+                                              const moab::CartVect& point)
+{
+    // process track-based tally event only
+    if (event.get_event_type() == TallyEvent::TRACK)
+    {
+        // get track segment data
+        TrackData data;
+        event.get_track_data(data);
+
+        // create a temporary vector from start_point to point being tested
+        moab::CartVect temp;
+
+        for (int i = 0; i < 3; ++i)
+        {
+            temp[i] = point[i] - data.start_point[i];
+        }
+
+        // compute perpendicular distance from point being tested to line
+        // defined by track segment using the cross-product method
+        double distance_to_track = (data.direction * temp).length();
+
+        // return true if distance is less than radius of cylindrical region
+        if (distance_to_track < radius)
+        {
+            return true;
+        }
+    }
+
+    // otherwise return false
+    return false;
+}
 //---------------------------------------------------------------------------//
 // PRIVATE FUNCTIONS
 //---------------------------------------------------------------------------//

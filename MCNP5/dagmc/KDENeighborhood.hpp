@@ -13,19 +13,21 @@
  * \class KDENeighborhood
  * \brief Defines a neighborhood region for a KDE mesh tally event
  *
- * KDENeighborhood is a class that defines an approximation of the
- * neighborhood region for either a collision or track-based event that is
- * to be tallied as part of a Monte Carlo particle transport simulation.  This
- * neighborhood region is formally defined as the region in space for which the
- * kernel function produces a non-trivial result for any mesh node that exists
- * inside that region.  This set of mesh nodes is also known as the set of
- * calculation points for the KDE mesh tally.
+ * KDENeighborhood is a class that defines the neighborhood region for either
+ * a collision or track-based event that is to be tallied as part of a Monte
+ * Carlo particle transport simulation.  This neighborhood region is formally
+ * defined as the region in space for which the kernel function produces a
+ * non-trivial result for any mesh node that exists inside that region.  This
+ * set of mesh nodes is also known as the set of calculation points for the
+ * KDE mesh tally.
  *
  * Once a KDENeighborhood has been created, the calculation points for the
  * corresponding tally event can be obtained using the get_points() function.
- * Note that this may still include some mesh nodes that produce trivial tally
- * contributions because KDENeighborhood is only an approximation of the true
- * neighborhood region.
+ * For collision events this function will return a set of unique mesh nodes
+ * that are all guaranteed to produce non-trivial tally contributions.  For
+ * track-based events KDENeighborhood is only an approximation to the true
+ * neighborhood region.  Therefore, for these events the get_points() function
+ * may return some mesh nodes that produce trivial tally contributions.
  */
 class KDENeighborhood
 {
@@ -54,6 +56,18 @@ class KDENeighborhood
      * within the boxed region defined by min_corner and max_corner.
      */
     moab::ErrorCode get_points(std::vector<moab::EntityHandle>& points);
+
+    /**
+     * \brief Determines if point lies within radius of cylindrical region
+     * \param event the tally event containing the track segment data
+     * \param point the calculation point to be tested
+     * \return true if point is inside the region, false otherwise
+     *
+     * Note that this function is only valid for track-based events.  If the
+     * event is not a track-based event, then it will always return false.
+     */
+    bool point_within_max_radius(const TallyEvent& event,
+                                 const moab::CartVect& point);
 
   private:
     /// Minimum and maximum corner of a rectangular neighborhood region
