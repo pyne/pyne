@@ -24,7 +24,7 @@ extern "C" {
  * 
  * 14 Feb 2013  jcz added boolean running_with_fluka, which prepends "../" to the file name
  */
-  void cpp_dagmcinit(char *cfile, 
+  void cpp_dagmcinit(const char *cfile, 
                 int parallel_file_mode, // parallel read mode
                 int max_pbl);
 
