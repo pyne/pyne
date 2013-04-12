@@ -11,8 +11,13 @@ Testing for the FluDAG implementation consists of two major components:
 2. Integrated testing provides test cases for full physics analysis
    using the FluDAG interface.
 
+List of Tests
+_______________
+issuetest
+nrml
+
 To create and run the interface tests you need the google test library,
-do the stepse listed below.
+do the steps listed below.
 
 a.  Set up the localization variables, see Localization below
 
@@ -24,11 +29,13 @@ c.  In the build directory call cmake, referencing the iface directory:
 build> cmake ../iface
 
 d.  Several files and subdirectories will be created in the build directory.
-Build the tests by typing
-build> make issuetest
+Build the tests by typing the following command where 'testname' is one of the 
+names in the List of Tests above
+
+build> make 'testname'
 
 e.  Run the test by typing
-build> ./issuetest
+build> ./'testname'
 
 All tests should pass.
 
