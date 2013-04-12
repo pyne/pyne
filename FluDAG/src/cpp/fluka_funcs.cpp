@@ -267,9 +267,6 @@ void g1_fire(int& oldRegion, double point[], double dir[], double& retStep,  int
 // nrmlwr(..)
 //---------------------------------------------------------------------------//
 /// From Flugg Wrappers WrapNorml.cc
-//  Note:  The normal is calculated at the point on the surface nearest the 
-//         given point
-//  Does NOT set newReg.
 void nrmlwr(double& pSx, double& pSy, double& pSz,
             double& pVx, double& pVy, double& pVz,
 	    double* norml, const int& oldRegion, 
@@ -297,6 +294,11 @@ void nrmlwr(double& pSx, double& pSy, double& pSz,
   //norml[0]=pVx;
   //norml[1]=pVy;
   //norml[2]=pVz;
+
+  // to test:  create a simple model:  dag-> ray_fire in order to get next_sruf.  
+// then call normlwr with next_surf and it should return an opposite-pointing vector
+// ON the surface, normlwr should components of rnorml should be 0 or near
+// PAST the surface, norml components should point AWAY from current position
   
   if(debug)
     {
@@ -311,28 +313,6 @@ void nrmlwr(double& pSx, double& pSy, double& pSz,
 
 //---------------------------------------------------------------------------//
 // getSense(..)
-//---------------------------------------------------------------------------//
-// Helper function
-int getSense(int region)
-{
-
-  int sense;  // sense of next_surf with respect to oldRegion (volume)
-
-  MBEntityHandle vol = DAG->entity_by_index(3, region);
- 
-  MBErrorCode ErrorCode = DAG->surface_sense(vol, next_surf, sense); 
-  if(false)
-  {
-      std::cout << "Sense of next_surf with respect to the region is " << sense << std::endl;
-  }
-  return sense; 
-} 
-
-///////			End nrmlwr
-/////////////////////////////////////////////////////////////////////
-
-//---------------------------------------------------------------------------//
-// lkwr(..)
 //---------------------------------------------------------------------------//
 // Was in 
 // Wrapper for localisation of starting point of particle.
@@ -349,11 +329,11 @@ void lkwr(double& pSx, double& pSy, double& pSz,
           int& region, int& flagErr, int& newLttc)
 {
   if(debug)
-    {
+  {
       std::cout << "======= LKWR =======" << std::endl;
       std::cout << "oldReg is " << oldReg << std::endl;
       std::cout << "position is " << pSx << " " << pSy << " " << pSz << std::endl; 
-    }
+  }
 
   const double xyz[] = {pSx, pSy, pSz}; // location of the particle (xyz)
   int is_inside = 0; // logical inside or outside of volume
@@ -389,18 +369,22 @@ void lkwr(double& pSx, double& pSy, double& pSz,
 	  region = i;
           //BIZARRELY - WHEN WE ARE INSIDE A VOLUME, BOTH, region has to equal flagErr
 	  flagErr = i;
+          if(debug)
+          {
+              std::cout << "newReg is " << newReg << std::endl;
+          }
           //BIZARRELY - WHEN WE ARE INSIDE A VOLUME, BOTH, newReg has to equal flagErr
 	  //std::cerr << "newReg is " << newReg << std::endl;
 	  return;
 	}
-    }  // end loop over all volumes
+    }
+    return;
+}
 
   std::cout << "point is not in any volume" << std::endl;
   return;
 }
 
-// Defined in WrapIncrHist.cc
-// Called by WrapG1, WrapIniHist, WrapLookFX, and WrapLookZ
 // intHist is an array that stores secondary particle information
 // Using standard FLUKA version in libflukahp.a
 /*
@@ -420,56 +404,6 @@ void conhwr(int& intHist, int* incrCount)
   return;
 }
 */
-
-void lkdbwr(double& pSx, double& pSy, double& pSz,
-	    double* pV, const int& oldReg, const int& oldLttc,
-	    int& newReg, int& flagErr, int& newLttc)
-{
-  if(debug)
-    {
-      std::cout<<"============= LKDBWR =============="<< std::endl;
-    }
-  //return region number and dummy variables
-  newReg=0;   
-  newLttc=0;
-  flagErr=-1; 
-
-  return;
-}
-
-
-/*
- * G1RT
- */
-void g1rtwr(void)
-{
-  if(debug)
-    {
-      std::cout<<"============ G1RTWR ============="<<std::endl;
-    }
-    return;
-}
-
-  std::cout << "point is not in any volume" << std::endl;
-  return;
-}
-
-// FluDAG tag 
-void conhwr(int& intHist, int* incrCount)
-{
-  if(debug)
-    {
-      std::cout << "============= CONHWR ==============" << std::endl;    
-      std::cout << "Ptr History = " << intHist << std::endl;
-    }
-  incrCount++;
-  if(debug)
-    {
-      std::cout << "Counter = " << incrCount << std::endl;
-      std::cout << "============= Out of CONHWR ==============" << std::endl;    
-    }
-  return;
-}
 
 void lkdbwr(double& pSx, double& pSy, double& pSz,
 	    double* pV, const int& oldReg, const int& oldLttc,
