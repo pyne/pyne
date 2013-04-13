@@ -136,6 +136,9 @@ def _get_daughters(nuc):
         Keys are the neutron-reaction daughters of nuc in zzaaam format.
         Values are a NumPy array containing the EAF cross section data.
             (all Values should have size 175)
+        NOTE
+            Cross sections have been converted from units of b to units
+            of cm^2.
     """
     daugh_dict = {}
     # Remove fission MT# (cannot handle)
@@ -153,7 +156,7 @@ def _get_daughters(nuc):
         if all_rx[i] not in EAF_RX:
             continue
         daugh = _convert_eaf(daughters[i])
-        xs = all_xs[i]
+        xs = all_xs[i] * 1e-24
         daugh_dict[daugh] = xs.reshape((175,1))
     return daugh_dict
 
