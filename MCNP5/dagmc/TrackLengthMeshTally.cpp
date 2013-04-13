@@ -948,7 +948,8 @@ void TrackLengthMeshTally::compute_score(const TallyEvent& event, int ebin)
           return;
         }
 
-        double weight = event.get_tally_multiplier() * data.particle_weight;
+        double particle_weight = event.get_particle_data().second;
+        double weight = event.get_tally_multiplier() * particle_weight;
         double score = weight * track_length;
 
         add_score_to_mesh_cell( tet, score, ebin );

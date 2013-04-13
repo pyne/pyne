@@ -388,13 +388,11 @@ void dagmc_fmesh_score_( int *fmesh_index, double *x, double *y, double *z,
 
     // create a track-based tally event
     TrackData data;
-    data.particle_energy = *erg;
-    data.particle_weight = *wgt;
     data.track_length = *d;
     data.start_point = moab::CartVect(*x, *y, *z);
     data.direction = moab::CartVect(*u, *v, *w);
 
-    TallyEvent event;
+    TallyEvent event(*erg, *wgt);
     event.set_track_event(data);
 
 #ifdef MESHTAL_DEBUG
@@ -456,12 +454,10 @@ void dagmc_kde_tally_( double* x, double* y, double* z, double* wgt,
 
       // create a collision event
       CollisionData data;
-      data.particle_energy = *erg;
-      data.particle_weight = *wgt;
       data.total_cross_section = *ple;
       data.collision_point = moab::CartVect(*x, *y, *z);
 
-      TallyEvent event;
+      TallyEvent event(*erg, *wgt);
       event.set_collision_event(data);
 
       // TODO temporary until dagmc_mesh_score has been modified

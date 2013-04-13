@@ -252,7 +252,8 @@ void KDEMeshTally::tally_collision(const TallyEvent& event, int ebin)
   assert(moab::MB_SUCCESS == rval);
 
   // get the tally weighting factor for this collision
-  double weight = event.get_tally_multiplier() * data.particle_weight;
+  double particle_weight = event.get_particle_data().second;
+  double weight = event.get_tally_multiplier() * particle_weight;
 
   // divide by the total cross section
   weight /= data.total_cross_section;
@@ -319,7 +320,8 @@ void KDEMeshTally::tally_track(const TallyEvent& event, int ebin)
   assert(moab::MB_SUCCESS == rval);
 
   // get the tally weighting factor for this track
-  double weight = event.get_tally_multiplier() * data.particle_weight;
+  double particle_weight = event.get_particle_data().second;
+  double weight = event.get_tally_multiplier() * particle_weight;
 
   // if SUBTRACK mesh tally, multiply weight by the total track length
   if (kde_tally == SUBTRACK)

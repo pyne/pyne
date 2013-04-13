@@ -3,6 +3,8 @@
 #ifndef DAGMC_TALLYEVENT_H
 #define DAGMC_TALLYEVENT_H
 
+#include <utility>
+
 #include "moab/CartVect.hpp"
 
 //===========================================================================//
@@ -13,12 +15,6 @@
 //===========================================================================//
 struct TrackData
 {
-    /// Energy of particle when event occurred
-    double particle_energy;
-
-    /// Weight of particle when event occurred
-    double particle_weight;
-
     /// Total length of track segment
     double track_length;
 
@@ -37,12 +33,6 @@ struct TrackData
 //===========================================================================//
 struct CollisionData
 {
-    /// Energy of particle when event occurred
-    double particle_energy;
-
-    /// Weight of particle when event occurred
-    double particle_weight;
-
     /// Total macroscopic cross section for cell in which collision occurred
     double total_cross_section;
 
@@ -79,8 +69,9 @@ class TallyEvent
 
     /**
      * \brief Constructor
+     * \param energy, weight properties of particle triggering event
      */
-    TallyEvent();
+    TallyEvent(double energy, double weight);
 
     // >>> PUBLIC INTERFACE
 
@@ -103,6 +94,12 @@ class TallyEvent
     void set_tally_multiplier(double value);
 
     // >>> TALLY EVENT DATA ACCESS FUNCTIONS
+
+    /**
+     * \brief Gets particle energy and weight for this tally event
+     * \return the particle data in form of pair<energy, weight>
+     */
+    std::pair<double, double> get_particle_data() const;
 
     /**
      * \brief get_track_data(), get_collision_data()

@@ -2,6 +2,7 @@
 
 #include <cstdlib>
 #include <iostream>
+#include <utility>
 
 #include "moab/CartVect.hpp"
 
@@ -10,8 +11,8 @@
 //---------------------------------------------------------------------------//
 // CONSTRUCTOR
 //---------------------------------------------------------------------------//
-TallyEvent::TallyEvent()
-    : particle_energy(0), particle_weight(1), tally_multiplier(1),
+TallyEvent::TallyEvent(double energy, double weight)
+    : particle_energy(energy), particle_weight(weight), tally_multiplier(1),
       position(moab::CartVect(0, 0, 0)), direction(moab::CartVect(0, 0, 0))
 {
     // set this tally event to begin with no type
@@ -33,8 +34,6 @@ void TallyEvent::set_track_event(const TrackData& data)
     event_value = data.track_length;
     position = data.start_point;
     direction = data.direction;
-    particle_energy = data.particle_energy;
-    particle_weight = data.particle_weight;
 
     // set event type
     event_type = TRACK;
@@ -53,8 +52,6 @@ void TallyEvent::set_collision_event(const CollisionData& data)
     // set variables for collision event
     event_value = data.total_cross_section;
     position = data.collision_point;
-    particle_energy = data.particle_energy;
-    particle_weight = data.particle_weight;
 
     // set event type
     event_type = COLLISION;
@@ -70,6 +67,11 @@ void TallyEvent::set_tally_multiplier(double value)
 //---------------------------------------------------------------------------//
 // TALLY EVENT ACCESS FUNCTIONS
 //---------------------------------------------------------------------------//
+std::pair<double, double> TallyEvent::get_particle_data() const
+{
+    return std::make_pair(particle_energy, particle_weight);
+}
+//---------------------------------------------------------------------------//
 bool TallyEvent::get_track_data(TrackData& data) const
 {
     if (event_type == TRACK)
@@ -78,8 +80,6 @@ bool TallyEvent::get_track_data(TrackData& data) const
         data.track_length = event_value;
         data.start_point = position;
         data.direction = direction;
-        data.particle_energy = particle_energy;
-        data.particle_weight = particle_weight;
 
         return true;
     }
@@ -97,9 +97,7 @@ bool TallyEvent::get_collision_data(CollisionData& data) const
         // copy variables for collision event
         data.total_cross_section = event_value;
         data.collision_point = position;
-        data.particle_energy = particle_energy;
-        data.particle_weight = particle_weight;
-
+ 
         return true;
     }
     else
