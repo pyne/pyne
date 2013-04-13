@@ -51,8 +51,7 @@ def transmute(inp, t_sim, phi, tree = None, tol = 1e-7):
         dest = _get_destruction(nuc,phi)
         A[0,0] = -dest
         N_ini = inp[nuc]
-        out = _traversal(nuc, A, phi, t_sim, N_ini, out, tol, tree, filename,\
-                            True)
+        out = _traversal(nuc, A, phi, t_sim, N_ini, out, tol, tree)
     return out
 
 
@@ -298,10 +297,6 @@ def _tree_log(depth, nuc, N, tree):
         Current density of nuc.
     tree : File
         File to write tree log to.
-    new : boolean
-        True if a new file should be created or existing file should be
-            overwritten.
-        False or None if the current filename should be appended to.
 
     Returns
     -------
@@ -316,8 +311,7 @@ def _tree_log(depth, nuc, N, tree):
     return None
 
 
-def _traversal(nuc, A, phi, t, N_ini, out, tol, tree, filename = None, \
-                depth = None):
+def _traversal(nuc, A, phi, t, N_ini, out, tol, tree, depth = None):
     """Nuclide transmutation traversal method.
 
     This method will traverse the reaction tree recursively, using a DFS
@@ -346,9 +340,6 @@ def _traversal(nuc, A, phi, t, N_ini, out, tol, tree, filename = None, \
     tree : Boolean
         True if a tree output file is desired.
         False if a tree output file is not desired.
-    filename : String
-        Name of file to write tree log to.
-        Must be provided if 'tree' is True.
     depth : integer
         Current depth of traversal (root at 0).
         Should never be provided by user.
@@ -401,8 +392,7 @@ def _traversal(nuc, A, phi, t, N_ini, out, tol, tree, filename = None, \
         # Check against tolerance
         if _check_tol(N_final[-1], tol):
             # Continue traversal
-            out = _traversal(child, B, phi, t, N_ini, out, tol, tree,\
-                                filename, False, depth+1)
+            out = _traversal(child, B, phi, t, N_ini, out, tol, tree, depth+1)
         # On recursion exit or truncation, write data from this nuclide
         if child in out.keys():
             out[child] += N_final[-1]
