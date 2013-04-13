@@ -263,7 +263,7 @@ def _grow_matrix(A, prod, dest):
     return B
 
 
-def _check_tol(N, tol):
+def _check_tol(N, tol, N_ini):
     """Method to check if the current nuclide concentration exceeds the
     specified tolerance.
 
@@ -273,6 +273,8 @@ def _check_tol(N, tol):
         The calculated final nuclide number density.
     tol : float
         The specified tolerance for the simulation.
+    N_ini : float
+        The number density of the root nuclide.
 
     Returns
     -------
@@ -280,6 +282,8 @@ def _check_tol(N, tol):
         False if the final nuclide density is less than the tolerance.
         True if the final nuclide density is not less than the tolerance.
     """
+    # First, scale the tolerance by the root density
+    tol = tol * N_ini
     fail = N > tol
     return fail
 
@@ -390,7 +394,7 @@ def _traversal(nuc, A, phi, t, N_ini, out, tol, tree, depth = None):
         if tree:
             _tree_log(depth+1, child, N_final[-1], tree)
         # Check against tolerance
-        if _check_tol(N_final[-1], tol):
+        if _check_tol(N_final[-1], tol, N_ini):
             # Continue traversal
             out = _traversal(child, B, phi, t, N_ini, out, tol, tree, depth+1)
         # On recursion exit or truncation, write data from this nuclide
