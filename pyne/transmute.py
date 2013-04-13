@@ -55,6 +55,40 @@ def transmute(inp, t_sim, phi, tree = None, tol = 1e-7):
     return out
 
 
+def transmute_core(nuc, t_sim, phi, tree = None, tol = 1e-7):
+    """Core method to transmute a material into its daughters.
+
+    Parameters
+    ----------
+    nuc : nucname
+        Integer representation of nuclide to be transmuted.
+    t_sim : float
+        Time to decay for.
+    phi : NumPy 1-dimensional array of floats
+        Neutron flux vector.
+        If phi is None, the flux vector is set to zero.
+        If phi is less than 175 entries in length, zeros will be added
+        until it contains 175 entries.
+    tree : File
+        The file where the tree log should be written.
+        tree should be None if a tree log is not desired.
+    tol : float
+        Tolerance level for chain truncation.
+        Default tolerance level is 1e-7 for a root of unit density.
+
+    Returns
+    -------
+    out : dictionary
+        A dictionary containing number densities for each nuclide after
+        the simulation is carried out. Keys are nuclide names in integer
+        (zzaaam) form. Values are number densities for the coupled
+        nuclide in float format.
+    """
+    inp = {nuc : 1.0}
+    out = transmute(inp, t_sim, phi, tree, tol)
+    return out
+
+
 def _format_phi(phi):
     """Ensures that the flux vector phi is correctly formatted.
 
