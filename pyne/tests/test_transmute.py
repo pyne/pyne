@@ -112,9 +112,6 @@ def test_check_tol():
 """Tests corret implementation of the _tree_log() function"""
 def test_tree_log():
     filename = 'testTreeFile'
-    with open(filename, 'w') as f:
-        #f.write('File created by test_tree_log() in test_transmute.py\n')
-        f.write('')
     d0 = 0
     d1 = 1
     d2 = 2
@@ -135,19 +132,16 @@ def test_tree_log():
     temp.append('--------> O18 (1.23456)\n')
     temp.append('----> HE4 (1111.0)\n')
     temp.append('> C12 (12.0)\n')
-    transmute._tree_log(d0, nuc0, N0, filename, True)
-    transmute._tree_log(d1, nuc1, N1, filename)
-    transmute._tree_log(d2, nuc2, N2, filename)
-    transmute._tree_log(d11, nuc11, N11, filename)
-    transmute._tree_log(d20, nuc20, N20, filename)
+    with open(filename, 'w') as tree:
+        transmute._tree_log(d0, nuc0, N0, tree)
+        transmute._tree_log(d1, nuc1, N1, tree)
+        transmute._tree_log(d2, nuc2, N2, tree)
+        transmute._tree_log(d11, nuc11, N11, tree)
+        transmute._tree_log(d20, nuc20, N20, tree)
     with open(filename, 'r') as f:
         lines = f.readlines()
     for i in range(len(lines)):
         assert_equal(lines[i], temp[i])
-    transmute._tree_log(d0, nuc0, N0, filename, True)
-    with open(filename, 'r') as f:
-        lines = f.readlines()
-    assert_true(len(lines) == 1)
     os.remove(filename)
 
 #
