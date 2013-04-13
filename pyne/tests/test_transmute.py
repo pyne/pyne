@@ -109,6 +109,8 @@ def test_check_tol():
     tol = 1337.5
     N_ini = 1
     assert_true(transmute._check_tol(current, tol, N_ini))
+    N_ini = 2
+    assert_false(transmute._check_tol(current, tol, N_ini))
 
 """Tests corret implementation of the _tree_log() function"""
 def test_tree_log():
