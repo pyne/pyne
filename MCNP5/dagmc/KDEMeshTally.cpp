@@ -110,7 +110,7 @@ KDEMeshTally* KDEMeshTally::setup( const MeshTallyInput& fmesh,
   std::cout << "Creating KDE ";
 
   if ( type == COLLISION ) std::cout << "collision ";
-  else if ( type == TRACKLENGTH ) std::cout << "track ";
+  else if ( type == INTEGRAL_TRACK ) std::cout << "track ";
   else std::cout << "subtrack ";
  
   std::cout << "fmesh" << id 
@@ -181,7 +181,7 @@ KDEMeshTally::KDEMeshTally( const MeshTallyInput& settings,
   Sn = moab::CartVect( 0, 0, 0 );
 
   // check numSubtracks is a valid parameter for SUBTRACK tallies
-  if ( numSubtracks == 0 && kde_tally == SUBTRACK ) {
+  if ( numSubtracks == 0 && kde_tally == SUB_TRACK ) {
 
     std::cerr << "\nWarning: number of subtracks must be non-zero for KDE subtrack tallies" << std::endl;
     std::cerr << "      Using default value subtracks = 3\n" << std::endl;
@@ -203,84 +203,75 @@ KDEMeshTally::~KDEMeshTally()
 //-----------------------------------------------------------------------------
 void KDEMeshTally::compute_score(const TallyEvent& event, int ebin)
 {
-  // make sure tally event has been set
-  TallyEvent::EventType type = event.get_event_type();
+    // make sure tally event is valid for its KDE mesh tally type
+    TallyEvent::EventType event_type = event.get_event_type();
 
-  if (type == TallyEvent::NONE)
-  {
-    std::cerr << "\nError: Tally event type has not been set" << std::endl;
-    exit(EXIT_FAILURE);
-  }
+    switch (event_type)
+    {
+      case TallyEvent::COLLISION :
+        // only KDE collision tallies can process collision events
+        assert(kde_tally == COLLISION);
+        break;
 
-  if (type == TallyEvent::TRACK)
-  {
-    tally_track(event, ebin);
-  }
-  else if (type == TallyEvent::COLLISION)
-  {
-    tally_collision(event, ebin);
-  }
-}
-//-----------------------------------------------------------------------------
-void KDEMeshTally::tally_collision(const TallyEvent& event, int ebin)
-{
-  // make sure tally event is a collision event
-  if (event.get_event_type() != TallyEvent::COLLISION)
-  {
-    std::cerr << "\nError: Tally event is not a collision event" << std::endl;
-    exit(EXIT_FAILURE);
-  } 
- 
-  // make a KDECollision object to represent a single collision location
-  CollisionData data;
-  bool set_data = event.get_collision_data(data);
+      case TallyEvent::TRACK :
+        // only KDE track-based tallies can process track-based events
+        assert(kde_tally == INTEGRAL_TRACK || kde_tally == SUB_TRACK);
+        break;
 
-  if (!set_data)
-  {
-    std::cerr << "\nError: Invalid collision event data" << std::endl;
-    exit(EXIT_FAILURE);
-  }
+      default :
+        std::cerr << "\nError: Tally event is not valid for KDE mesh tallies";
+        std::cerr << std::endl;
+        exit(EXIT_FAILURE);
+    }
 
-  KDECollision collision( data.collision_point, bandwidth, kernel );
+    // TODO temporary until I remove tally_track function
+    if (kde_tally == INTEGRAL_TRACK || kde_tally == SUB_TRACK)
+    {
+        tally_track(event, ebin);
+        return;
+    }
 
-  // create the neighborhood region for this tally event
-  KDENeighborhood region(event, bandwidth, *tree, tree_root);
+    // create the neighborhood region for the tally event
+    KDENeighborhood region(event, bandwidth, *tree, tree_root);
 
-  // find all the calculation points within this neighborhood region
-  std::vector<moab::EntityHandle> calculation_points;
-  moab::ErrorCode rval = region.get_points(calculation_points);
-  assert(moab::MB_SUCCESS == rval);
+    // find all the calculation points within the neighborhood region
+    std::vector<moab::EntityHandle> tally_points;
+    moab::ErrorCode rval = region.get_points(tally_points);
+    assert(moab::MB_SUCCESS == rval);
 
-  // get the tally weighting factor for this collision
-  double particle_weight = event.get_particle_data().second;
-  double weight = event.get_tally_multiplier() * particle_weight;
+    // set the common weighting factor for the tally event
+    double particle_weight = event.get_particle_data().second;
+    double weight = event.get_tally_multiplier() * particle_weight;
 
-  // divide by the total cross section
-  weight /= data.total_cross_section;
+    // adjust weighting factor based on KDE mesh tally type
+    if (kde_tally == COLLISION)
+    {
+        // divide weight by total cross section
+        CollisionData data;
+        event.get_collision_data(data);
+        weight /= data.total_cross_section;
 
-  // compute the contribution for all calculation points in this neighborhood
-  std::vector<moab::EntityHandle>::iterator i;
-  moab::EntityHandle point;
-  double contribution = 0;
-  double coords[3];
+        // add collision to running variance for computing optimal bandwidth
+        update_variance(data.collision_point);
+    }
 
-  for (i = calculation_points.begin(); i != calculation_points.end(); ++i)
-  {
+    // iterate through the calculation points
+    std::vector<moab::EntityHandle>::iterator i;
+    double coords[3];
 
-    point = *i;
-    rval = mb->get_coords( &point, 1, coords );
-    assert( moab::MB_SUCCESS == rval );  
+    for (i = tally_points.begin(); i != tally_points.end(); ++i)
+    {
+        // get coordinates of this point
+        moab::EntityHandle point = *i;
+        rval = mb->get_coords(&point, 1, coords);
+        assert(moab::MB_SUCCESS == rval);
 
-    contribution = weight * collision.compute_contribution( coords );
-    
-    // add results to the mesh tally for the current history
-    add_score_to_tally( point, contribution, ebin );
+        // compute the final contribution to the tally for this point
+        double score = weight * get_score(event, moab::CartVect(coords));
 
-  }
-    
-  // add collision to the running variance used in computing optimal bandwidth
-  update_bandwidth_variance(data.collision_point);
-
+        // add score to KDE mesh tally for the current history
+        add_score_to_tally(point, score, ebin);
+    }
 }
 //-----------------------------------------------------------------------------
 void KDEMeshTally::tally_track(const TallyEvent& event, int ebin)
@@ -295,7 +286,7 @@ void KDEMeshTally::tally_track(const TallyEvent& event, int ebin)
   // set the number of subtracks to be tallied only for SUBTRACK tallies
   unsigned int tally_subtracks = 0;
 
-  if ( kde_tally == SUBTRACK )
+  if ( kde_tally == SUB_TRACK )
     tally_subtracks = subtracks;
 
   // make a KDETrack object to represent a single track segment
@@ -324,7 +315,7 @@ void KDEMeshTally::tally_track(const TallyEvent& event, int ebin)
   double weight = event.get_tally_multiplier() * particle_weight;
 
   // if SUBTRACK mesh tally, multiply weight by the total track length
-  if (kde_tally == SUBTRACK)
+  if (kde_tally == SUB_TRACK)
     weight *= data.track_length;
 
   // compute the contribution for all calculation points in this neighborhood
@@ -346,14 +337,6 @@ void KDEMeshTally::tally_track(const TallyEvent& event, int ebin)
     add_score_to_tally( point, contribution, ebin );
     
   }
-    
-  // TODO need to determine how to compute an optimal bandwidth with a track
-  // This could be done using the subtracks/choose_points feature for both
-  // SUBTRACK and TRACKLENGTH tallies.  For SUBTRACK tallies, simply would
-  // need access to the subtrack_points vector in KDETrack.  For TRACKLENGTH
-  // tallies, would need to use the choose_points function to get the points.
-  // update_bandwidth_variance( collision_loc );
-
 }
 //-----------------------------------------------------------------------------
 void KDEMeshTally::end_history()
@@ -497,7 +480,7 @@ void KDEMeshTally::build_tree( moab::EntityHandle meshset )
 
 }
 //-----------------------------------------------------------------------------
-void KDEMeshTally::update_bandwidth_variance( const moab::CartVect & collision_loc )
+void KDEMeshTally::update_variance(const moab::CartVect& collision_point)
 {
  
   if ( numCollisions != LLONG_MAX ) {
@@ -509,13 +492,13 @@ void KDEMeshTally::update_bandwidth_variance( const moab::CartVect & collision_l
   
     // compute new values for the mean and variance
     if ( numCollisions == 1 )
-      Mn = collision_loc;
+      Mn = collision_point;
     else {
 
-      Mn += ( collision_loc - Mn_prev ) / numCollisions;
+      Mn += (collision_point - Mn_prev) / numCollisions;
     
       for ( int i = 0 ; i < 3 ; ++i )
-        Sn[i] += ( collision_loc[i] - Mn_prev[i] ) * ( collision_loc[i] - Mn[i] );
+        Sn[i] += (collision_point[i] - Mn_prev[i]) * (collision_point[i] - Mn[i]);
     
     }
 
@@ -547,6 +530,38 @@ moab::CartVect KDEMeshTally::get_optimal_bandwidth()
 
   return optimal_bandwidth;
 
+}
+//-----------------------------------------------------------------------------
+double KDEMeshTally::get_score(const TallyEvent& event,
+                               const moab::CartVect& tally_point)
+{
+    double score = 1;
+
+    // compute unique score for tally point based on KDE mesh tally type
+    if (kde_tally == INTEGRAL_TRACK)
+    {
+        // TODO add function to get score for integral-track tally
+    }
+    else if (kde_tally == SUB_TRACK)
+    {
+        // TODO add function to get score for sub-track tally
+    }
+    else
+    {
+        // compute score for a KDE COLLISION mesh tally
+        CollisionData data;
+        event.get_collision_data(data);
+
+        // compute the 3D kernel contribution using product of 1D kernels
+        for (int i = 0; i < 3; ++i)
+        {
+            double u = tally_point[i] - data.collision_point[i];
+            u /= bandwidth[i];
+            score *= kernel->evaluate(u) / bandwidth[i];
+        }
+    }
+
+    return score;
 }
 //-----------------------------------------------------------------------------
 void KDEMeshTally::add_score_to_tally( moab::EntityHandle mesh_point,

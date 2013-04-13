@@ -28,14 +28,13 @@ class KDEMeshTally : public MeshTally {
      static moab::CartVect default_bandwidth;  // bandwidth choice for KDE tallies
 
     /**
-     * An enumerative type that specifies the type of tally being used by this
-     * KDEMeshTally object.
+     * \brief Defines type of estimator used in computing KDE mesh tally scores
      *
-     *  - COLLISION tallies are based on the KDE collision estimator
-     *  - TRACKLENGTH tallies are based on the KDE integral track estimator
-     *  - SUBTRACK tallies are based on the KDE subtrack estimator
+     *     1) COLLISION tallies use the KDE collision estimator
+     *     2) INTEGRAL_TRACK tallies use the KDE integral-track estimator
+     *     3) SUB_TRACK tallies use the KDE sub-track estimator
      */
-    enum TallyType { COLLISION = 0, TRACKLENGTH = 1, SUBTRACK = 2 };
+    enum TallyType { COLLISION = 1, INTEGRAL_TRACK = 2, SUB_TRACK = 3 };
 
     /**
      * Allocate and return the specified tally object
@@ -53,8 +52,8 @@ class KDEMeshTally : public MeshTally {
      * approach.  The tally type cannot be changed once a KDEMeshTally object
      * has been created.
      *
-     * NOTE: the parameter "numSubtracks" is required for SUBTRACK tallies,
-     * but it is optional for TRACKLENGTH tallies for computing an optimal
+     * NOTE: the parameter "numSubtracks" is required for SUB_TRACK tallies,
+     * but it is optional for INTEGRAL_TRACK tallies for computing an optimal
      * bandwidth.  It has no meaning for COLLISION tallies.
      *
      * @param settings the FC card parameters 
@@ -82,23 +81,15 @@ class KDEMeshTally : public MeshTally {
      * \brief Computes mesh tally scores for the given tally event
      * \param event the parameters needed to compute the mesh tally scores
      * \param ebin index representing energy bin
+     * TODO remove ebin as a parameter
      */
     void compute_score(const TallyEvent& event, int ebin);
 
-    // TODO combine tally_collision and tally_track into one function
-    /**
-     * \brief Computes mesh tally scores for the given collision event
-     * \param event the parameters needed to compute the mesh tally scores
-     * \param ebin the energy bin to tally this collision into (calculated by fortran)
-     * TODO remove ebin as a parameter
-     */
-    void tally_collision(const TallyEvent& event, int ebin);
-
+    // TODO merge tally_track into compute_score
     /**
      * \brief Computes mesh tally scores for the given track-based event
      * \param event the parameters needed to compute the mesh tally scores
      * \param ebin the energy bin to tally this track into (calculated by fortran)
-     * TODO remove ebin as a parameter
      */
     void tally_track(const TallyEvent& event, int ebin);
 
@@ -157,7 +148,7 @@ class KDEMeshTally : public MeshTally {
      * Adds the given collision coordinates to the running variance formula
      * used to compute the optimal bandwidth.
      */
-    void update_bandwidth_variance( const moab::CartVect & collision_loc );
+    void update_variance(const moab::CartVect& collision_point);
 
     /**
      * Computes and returns the optimal bandwidth to achieve the best results
@@ -165,6 +156,18 @@ class KDEMeshTally : public MeshTally {
      */
     moab::CartVect get_optimal_bandwidth();
 
+    /**
+     * \brief Computes a single tally score for the given calculation point
+     * \param event the parameters needed to compute the tally score
+     * \param tally_point the (x, y, z) coordinates of the calculation point
+     * \return the tally score for the calculation point
+     *
+     * Note that the method used for computing the tally score for the given
+     * calculation point is determined according to the type of KDE mesh tally
+     * that was created.
+     */
+    double get_score(const TallyEvent& event,
+                     const moab::CartVect& tally_point);
     /**
      * Adds a tally contribution to one calculation point on the mesh.
      *
