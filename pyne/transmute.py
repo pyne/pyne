@@ -310,10 +310,10 @@ def _tree_log(depth, nuc, N, tree):
     None
         This method only writes to the File "tree".
     """
-    spacing = depth * '----'
+    spacing = depth * '   |'
     name = nucname.name(nuc)
     Nstr = str(N)
-    entry = spacing + '> ' + name + ' (' + Nstr + ')\n'
+    entry = spacing + '--> ' + name + ' (' + Nstr + ')\n'
     tree.write(entry)
     return None
 
