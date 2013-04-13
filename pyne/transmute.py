@@ -12,7 +12,7 @@ from pyne.xs.data_source import EAF_RX
 from scipy import linalg
 
 
-def transmute(inp, t_sim, tol, tree, phi = None, filename = None):
+def transmute(inp, t_sim, phi, tree = None, tol = 1e-7):
     """Transmutes a material into its daughters.
 
     Parameters
@@ -23,19 +23,17 @@ def transmute(inp, t_sim, tol, tree, phi = None, filename = None):
         Values are corresponding number densities represented by floats.
     t_sim : float
         Time to decay for.
-    tol : float
-        Tolerance level for chain truncation.
-    tree : Boolean
-        True if a tree output file is desired.
-        False if a tree output file is not desired.
     phi : NumPy 1-dimensional array of floats
         Neutron flux vector.
         If phi is None, the flux vector is set to zero.
         If phi is less than 175 entries in length, zeros will be added
         until it contains 175 entries.
-    filename : String
-        Name of file to write tree log to.
-        Must be provided if 'tree' is True.
+    tree : File
+        The file where the tree log should be written.
+        tree should be None if a tree log is not desired.
+    tol : float
+        Tolerance level for chain truncation.
+        Default tolerance level is 1e-7 for a root of unit density.
 
     Returns
     -------
@@ -45,11 +43,8 @@ def transmute(inp, t_sim, tol, tree, phi = None, filename = None):
         (zzaaam) form. Values are number densities for the coupled
         nuclide in float format.
     """
-    # Check length of phi
-    if phi is None:
-        phi = np.zeros((175, 1))
-    else:
-        phi = _format_phi(phi)
+    # Properly format phi
+    phi = _format_phi(phi)
     out = {}
     for nuc in inp.keys():
         A = np.zeros((1,1))
@@ -74,6 +69,9 @@ def _format_phi(phi):
     phi : NumPy 1-dimensional array
         Phi will be returned with a shape of (175,1).
     """
+    if phi is None:
+        phi = np.zeros((175,1))
+        return phi
     n = phi.shape[0]
     if phi.ndim == 1:
         phi = phi.reshape((n,1))
@@ -287,7 +285,7 @@ def _check_tol(N, tol):
     return fail
 
 
-def _tree_log(depth, nuc, N, filename, new = None):
+def _tree_log(depth, nuc, N, tree):
     """Logging method to track path of _traversal.
 
     Parameters
@@ -298,8 +296,8 @@ def _tree_log(depth, nuc, N, filename, new = None):
         Current nuclide in traversal.
     N : float
         Current density of nuc.
-    filename : String
-        Name of file to write tree log to.
+    tree : File
+        File to write tree log to.
     new : boolean
         True if a new file should be created or existing file should be
             overwritten.
@@ -308,22 +306,18 @@ def _tree_log(depth, nuc, N, filename, new = None):
     Returns
     -------
     None
+        This method only writes to the File "tree".
     """
     spacing = depth * '----'
     name = nucname.name(nuc)
     Nstr = str(N)
     entry = spacing + '> ' + name + ' (' + Nstr + ')\n'
-    if new:
-        with open(filename, 'w') as f:
-            f.write(entry)
-    else:
-        with open(filename, 'a') as f:
-            f.write(entry)
+    tree.write(entry)
     return None
 
 
 def _traversal(nuc, A, phi, t, N_ini, out, tol, tree, filename = None, \
-                first = None, depth = None):
+                depth = None):
     """Nuclide transmutation traversal method.
 
     This method will traverse the reaction tree recursively, using a DFS
@@ -355,10 +349,6 @@ def _traversal(nuc, A, phi, t, N_ini, out, tol, tree, filename = None, \
     filename : String
         Name of file to write tree log to.
         Must be provided if 'tree' is True.
-    first : boolean
-        True if this is the first traversal for the problem,
-            False or None otherwise.
-        This argument is only required if a tree log is desired.
     depth : integer
         Current depth of traversal (root at 0).
         Should never be provided by user.
@@ -371,15 +361,9 @@ def _traversal(nuc, A, phi, t, N_ini, out, tol, tree, filename = None, \
         number densities for the coupled nuclide in float format.
     """
     # Log initial nuclide
-    if depth is None and tree:
-        if filename is None:
-            # Filename not provided, throw exception
-            pass
+    if depth is None and tree is not None:
         depth = 0
-        if first:
-            _tree_log(depth, nuc, N_ini, filename, True)
-        else:
-            _tree_log(depth, nuc, N_ini, filename)
+        _tree_log(depth, nuc, N_ini, tree)
     # Lookup decay constant of current nuclide
     lam = data.decay_const(nuc)
     # Lookup decay products and reaction daughters
@@ -413,7 +397,7 @@ def _traversal(nuc, A, phi, t, N_ini, out, tol, tree, filename = None, \
         N_final = np.dot(eB, N0)
         # Log child
         if tree:
-            _tree_log(depth+1, child, N_final[-1], filename)
+            _tree_log(depth+1, child, N_final[-1], tree)
         # Check against tolerance
         if _check_tol(N_final[-1], tol):
             # Continue traversal
