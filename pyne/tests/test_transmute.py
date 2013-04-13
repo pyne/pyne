@@ -107,7 +107,8 @@ def test_grow_matrix():
 def test_check_tol():
     current = 1848.3
     tol = 1337.5
-    assert_true(transmute._check_tol(current, tol))
+    N_ini = 1
+    assert_true(transmute._check_tol(current, tol, N_ini))
 
 """Tests corret implementation of the _tree_log() function"""
 def test_tree_log():
