@@ -130,11 +130,11 @@ def test_tree_log():
     N2 = 1.23456
     N11 = 1111.
     N20 = 12.
-    temp = ['> O16 (123.456)\n']
-    temp.append('----> O17 (12.3456)\n')
-    temp.append('--------> O18 (1.23456)\n')
-    temp.append('----> HE4 (1111.0)\n')
-    temp.append('> C12 (12.0)\n')
+    temp = ['--> O16 (123.456)\n']
+    temp.append('   |--> O17 (12.3456)\n')
+    temp.append('   |   |--> O18 (1.23456)\n')
+    temp.append('   |--> HE4 (1111.0)\n')
+    temp.append('--> C12 (12.0)\n')
     with open(filename, 'w') as tree:
         transmute._tree_log(d0, nuc0, N0, tree)
         transmute._tree_log(d1, nuc1, N1, tree)
