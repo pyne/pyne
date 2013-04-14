@@ -60,6 +60,56 @@ def transmute(inp, t_sim, phi, tree = None, tol = 1e-7):
     return out
 
 
+def transmute_spatial(space, t_sim, tree = None, tol = 1e-7):
+    """Transmutes a material into its daughters.
+
+    Parameters
+    ----------
+    space : dictionary
+        Input dictionary for the transmutation simulation.
+        Keys are float triples corresponding to the xyz location in space.
+        Values are tuples.
+            The first entry in the tuple is a NumPy 1-dimensional array
+                of floats representing the flux at the specified point.
+            The second entry in the tuple is a the standard input
+                dictionary used by the 'transmute' routine.
+                (i.e. keys are zzaaam nuclides, values are initial
+                    densities)
+    t_sim : float
+        Time to decay for.
+    phi : NumPy 1-dimensional array of floats
+        Neutron flux vector.
+        If phi is None, the flux vector is set to zero.
+        If phi is less than 175 entries in length, zeros will be added
+        until it contains 175 entries.
+    tree : File
+        The file where the tree log should be written.
+        tree should be None if a tree log is not desired.
+    tol : float
+        Tolerance level for chain truncation.
+        Default tolerance level is 1e-7 for a root of unit density.
+
+    Returns
+    -------
+    space_out : dictionary
+        A dictionary containing the output from a multi-point simulation.
+        Keys are float triples corresponding to the xyz location in space.
+        Values are 'out' dictionaries (described below).
+            out : dictionary
+                A dictionary containing number densities for each
+                nuclide after the simulation is carried out. Keys are
+                nuclide names in integer (zzaaam) form. Values are
+                number densities for the coupled nuclide in float format.
+    """
+    space_out = {}
+    for point in space.keys():
+        phi = space[point][0]
+        inp = space[point][1]
+        out = transmute(inp, t_sim, phi, tree, tol)
+        space_out[point] = out
+    return space_out
+
+
 def transmute_core(nuc, t_sim, phi, tree = None, tol = 1e-7):
     """Core method to transmute a material into its daughters.
 
