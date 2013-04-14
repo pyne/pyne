@@ -52,6 +52,10 @@ def transmute(inp, t_sim, phi, tree = None, tol = 1e-7):
         dest = _get_destruction(nuc,phi)
         A[0,0] = -dest
         N_ini = inp[nuc]
+        if nuc in out.keys():
+            out[nuc] += N_ini
+        else:
+            out[nuc] = N_ini
         out = _traversal(nuc, A, phi, t_sim, N_ini, out, tol, tree)
     return out
 
