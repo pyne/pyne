@@ -8,6 +8,7 @@ from numpy.testing import assert_array_equal, assert_allclose
 from pyne.endf import Library
 from pyne.utils import endftod
 from pyne.rxdata import DoubleSpinDict
+from pyne.xs.data_source import ENDFDataSource
 
 import nose
 from nose.tools import assert_equal
@@ -791,7 +792,7 @@ def test_u235():
     It is very big (51 MB), so it is not included.
     """
     if not os.path.isfile('U235.txt'):
-        return 
+        return
     u235 = Library('U235.txt')
     u235._read_res(922350)
     u235._read_xs(922350, 37)
@@ -810,6 +811,14 @@ def test_u235():
     for key in obs:
         assert_array_equal(obs[key], exp[key])
 
+def test_data_source():
+    ds = ENDFDataSource(str_library)
+    ds._load_group_structure(40000, 600, 40040)
+    exp = ds.src_group_struct
+    obs = [-3.72423800e+02, 3.36357200e+08, 6.34538200e+04, 3.96078400e+09,
+           -1.74017900e+09, -1.32751300e+02]
+    assert_allclose(obs, exp, rtol = 1e-8)
+    print ds.src_group_struct
 
 if __name__ == "__main__":
     nose.runmodule()

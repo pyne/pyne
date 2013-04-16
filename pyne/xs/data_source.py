@@ -1,11 +1,14 @@
 """Cross section library data source interfaces.
 """
+import os
+import StringIO
+
 import numpy as np
 import tables as tb
 
-from pyne import nuc_data
-from pyne import nucname
+from pyne import nuc_data, nucname, rxname
 from pyne.xs.models import partial_energy_matrix, group_collapse
+from pyne.endf import Library
 
 RX_TYPES = set(["", 'np *', 'a  *', 'h  *', '2p *', '3n *', 'd  *', 'np/d',
                 'na', '*', 'nd', 'g  *', '3n', 'np', 'nt', 't', 'nt *',
@@ -94,8 +97,8 @@ class DataSource(object):
     src_phi_g : array-like, optional
         Group fluxes which must match the group structure for this data source.
     dst_group_struct : array-like, optional
-        The energy group structure [MeV] of the destination cross sections.  Used when 
-        discretizing cross sections from this source.
+        The energy group structure [MeV] of the destination cross sections.
+        Used when discretizing cross sections from this source.
 
     """
 
@@ -224,7 +227,7 @@ class NullDataSource(DataSource):
         Keyword arguments to be sent to base class.
 
     """
-    
+
     def __init__(self, **kwargs):
         super(NullDataSource, self).__init__(**kwargs)
 
@@ -378,7 +381,7 @@ class CinderDataSource(DataSource):
         Keyword arguments to be sent to base class.
 
     """
-    
+
     def __init__(self, **kwargs):
         super(CinderDataSource, self).__init__(**kwargs)
 
@@ -573,3 +576,148 @@ class EAFDataSource(DataSource):
         return rxdata
 
 
+class ENDFDataSource(DataSource):
+    """Evaluated Nuclear Data File cross section data source.  The ENDF file
+    must exist for this data source to exist.
+
+    Parameters
+    ----------
+    f : string, file handle
+        Path to ENDF file, or ENDF file itself.
+    kwargs : optional
+        Keyword arguments to be sent to base class.
+
+    Notes
+    -----
+    """
+
+    def __init__(self, fh, src_phi_g=None, dst_group_struct=None, **kwargs):
+        self.fh = fh
+        self._exists = None
+        if not self.exists:
+            raise ValueError
+        else:
+            self.library = Library(fh)
+        self.rxcache = {}
+        self.dst_group_struct = dst_group_struct
+        # self.src_phi_g = np.ones(self._src_ngroups, dtype='f8') if src_phi_g is None \
+        #                     else np.asarray(src_phi_g)
+    # def __init__(self, fh, **kwargs):
+    #     self.fh = fh
+    #     super(ENDFDataSource, self).__init__(**kwargs)
+    #     if self.exists:
+    #         self.library = Library(fh)
+
+    def _load_group_structure(self, nuc, rx, nuc_i=None):
+        """Loads the group structure from ENDF file."""
+        self.library._read_res(nuc)
+        mt = rxname.mt(rx)
+        xsdata = self.library.get_xs(nuc, rx, nuc_i)
+        intpoints = xsdata[0]['intpoints'][::-1]
+        Eint = xsdata[0]['Eint']
+        numpts = self.library.structure[nuc]['data'][nuc_i]['xs'][mt][1]['NR']
+        E_g = np.zeros(numpts)
+        for i in range(int(numpts)):
+            E_g[i] = Eint[intpoints[i]-1]
+        self.src_group_struct = E_g
+
+    @property
+    def exists(self):
+        if self._exists is None:
+            if isinstance(self.fh, basestring):
+                self._exists = os.path.isfile(fh)
+            else:
+                self._exists = isinstance(self.fh, file) or isinstance(self.fh, StringIO.StringIO)
+        return self._exists
+
+    def _load_reaction(self, nuc, rx, temp=300.0):
+        """Note: EAF data does not use temperature information (temp)
+
+        Parameters
+        ----------
+        nuc : int
+            Nuclide in zzaaam form.
+        rx : int or str
+            Reaction MT # in nnnm form.
+            OR:
+            Reaction key: 'gamma', 'alpha', 'p', etc.
+
+        Returns
+        -------
+        rxdata: dict
+            Dictionary of xs data. Includes intpoints, intschemes, Eint, and xs.
+        """
+        nuc = nucname.zzaaam(nuc)
+        # Munging the rx to an MT#
+        try:
+            rx = int(rx)
+        except ValueError:
+            rx = rxname.mt(rx)
+        # Check if usable rx #
+        if rx is None:
+            return None
+        # Grab data
+        _load_group_structure(nuc, rx)
+        rxdata = library.get_xs(nuc, rx)
+        return rxdata
+    # def discretize(self, nuc, rx, temp=300.0, src_phi_g=None, dst_phi_g=None):
+    #     """Discretizes the reaction channel from simple group structure to that 
+    #     of the destination weighted by the group fluxes.  Since the simple data 
+    #     source consists of only thermal (2.53E-8 MeV), fission (1 MeV), and 14 MeV
+    #     data points, the following piecewise functional form is assumed:
+
+    #     .. math::  
+
+    #         \\sigma(E) = \\sigma(2.53E-8) \\sqrt{\\frac{2.53E-8}{E}} 
+    #         \\sigma(E) = \\frac{\sigma(14) - \\sigma(1)}{14 - 1} (E - 1) + \\sigma(1) 
+
+    #     Parameters
+    #     ----------
+    #     nuc : int or str
+    #         A nuclide.
+    #     rx : int or str
+    #         Reaction key ('gamma', 'alpha', 'p', etc.) or MT number.
+    #     temp : float, optional
+    #         Temperature [K] of material, defaults to 300.0.
+    #     src_phi_g : array-like, optional
+    #         IGNORED!!!  Included for API compatability
+    #     dst_phi_g : array-like, optional
+    #         Group fluxes for the destiniation structure, length dst_ngroups.
+
+    #     Returns
+    #     -------
+    #     dst_sigma : ndarry
+    #         Destination cross section data, length dst_ngroups.
+
+    #     """
+    #     src_phi_g = self.src_phi_g if src_phi_g is None else np.asarray(src_phi_g) 
+    #     src_sigma = self.reaction(nuc, rx, temp)
+    #     if src_sigma is None:
+    #         return None
+    #     # not the most efficient, but data sizes should be smallish
+    #     center_g = self._dst_centers
+    #     dst_sigma = (src_sigma[2] * np.sqrt(2.53E-8)) / np.sqrt(center_g)
+    #     dst_fissn = ((src_sigma[0] - src_sigma[1])/13.0) * (center_g - 1.0) + \
+    #                                                                     src_sigma[1]
+    #     mask = (dst_sigma < dst_fissn)
+    #     dst_sigma[mask] = dst_fissn[mask]
+    #     if dst_phi_g is not None:
+    #         dst_sigma = (dst_sigma * dst_phi_g) / dst_phi_g.sum()
+    #     return dst_sigma
+
+    # @property
+    # def dst_group_struct(self):
+    #     return self._dst_group_struct
+
+    # @dst_group_struct.setter
+    # def dst_group_struct(self, dst_group_struct):
+    #     if dst_group_struct is None:
+    #         self._dst_group_struct = None
+    #         self._dst_centers = None
+    #         self._dst_ngroups = 0
+    #     else:
+    #         self._dst_group_struct = np.asarray(dst_group_struct)
+    #         self._dst_centers = (self._dst_group_struct[1:] + 
+    #                              self._dst_group_struct[:-1])/2.0
+    #         self._dst_ngroups = len(dst_group_struct) - 1
+    #     self._src_to_dst_matrix = None

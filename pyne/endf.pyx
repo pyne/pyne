@@ -46,7 +46,7 @@ SPACE66_R = re.compile(' {66}')
 
 class Library(rx.RxLib):
     "A class for a file which contains multiple ENDF evaluations."
-    def __init__(self, fh, resonances=True):
+    def __init__(self, fh):
         self.mts = {}
         self.structure = {}
         self.mat_dict = {}
