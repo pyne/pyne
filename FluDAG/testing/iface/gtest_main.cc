@@ -31,9 +31,33 @@
 
 #include "gtest/gtest.h"
 
+char ** gtest_argv;
+int gtest_argc;
+
 GTEST_API_ int main(int argc, char **argv) {
   std::cout << "Running main() from gtest_main.cc\n";
 
-  testing::InitGoogleTest(&argc, argv);
+  // jcz -- Provide the capability of passing arguments
+  // ref -- groups.google.com/forum
+  const char * data_path = NULL;
+  gtest_argv = (char **)malloc( sizeof(char *) * argc);
+  gtest_argv[0] = argv[0]; // copying the first argument
+  gtest_argc = 1;
+  for (int i=1; i<argc; i++)
+  {
+      if (strcmp(argv[i],"data_path") != 0)
+      {
+	 gtest_argv[gtest_argc++] = argv[i];
+      }
+      else
+      {
+         data_path = argv[i];
+      }
+  }
+  ///////////////// end of additional code
+
+  // testing::InitGoogleTest(&argc, argv);
+  testing::InitGoogleTest(&gtest_argc, gtest_argv);
+  free(gtest_argv);
   return RUN_ALL_TESTS();
 }

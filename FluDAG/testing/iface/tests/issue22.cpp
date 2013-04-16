@@ -1,6 +1,6 @@
 //----------------------------------*-C++-*----------------------------------//
 /*!
- * \file   /testing/issue.cpp
+ * \file   /tests/issue.cpp
  * \author Julie C. Zachman
  * \date   Wed Apr 3 
  * \brief  Unit Tests for Issue
