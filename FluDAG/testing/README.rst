@@ -16,8 +16,10 @@ _______________
 issuetest
 nrml
 
-To create and run the interface tests you need the google test library,
-do the steps listed below.
+To create and run the interface tests you need the google test library installed
+in your system.  The cmake configuration will find it.
+
+To create the tests follow the instructions below.
 
 a.  In the current (testing) directory make a build subdirectory and move to it:
 
@@ -36,7 +38,7 @@ Note 2: The variables defined with -D switches can also be defined in a file
         in the iface directory named 'local.cmake'
 
 d.  Several files and subdirectories will be created in the build directory.
-Build the tests by typing the following command where 'testname' is one of the 
+You can then build the tests by typing the following command where 'testname' is one of the 
 names in the List of Tests above
 
 build> make 'testname'

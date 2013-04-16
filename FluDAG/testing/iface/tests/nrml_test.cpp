@@ -18,6 +18,7 @@
 
 using moab::DagMC;
 
+double pSx_orig;
 double pSx;
 double pSy;
 double pSz;
@@ -31,7 +32,9 @@ char *getfileptr(std::string name);
 
 TEST(nrml_Test, RayFire)
 {
-   pSx = 0;
+   double delta = 0.1;
+   pSx_orig = 1.5;
+   pSx = pSx_orig;
    pSy = 0;
    pSz = 0;
    double xyz[] = {pSx, pSy, pSz};
@@ -43,20 +46,16 @@ TEST(nrml_Test, RayFire)
    
    int oldReg = 2;
    double retStep;
-   int newReg = 0;
+   int newReg;
 
    char *fileptr;
-   // fileptr = getfileptr("../iface/cases/test.h5m");
-   fileptr = getfileptr("../iface/cases/test.h5m");
-
-   std::string fname = "../iface/cases/test.h5m";
+   fileptr = getfileptr("../cases/test.h5m");
 
    // Load the file and create the dag structure
-   // cpp_dagmcinit(fileptr,0,1);
    cpp_dagmcinit(fileptr,0,1);
+   
    // Fire a ray from the given point in the given direction
    // calls ray_fire, sets retStep and global next_surf
-   
    g1_fire(oldReg, xyz, dir, retStep, newReg); 
    if (true)
    {
@@ -72,18 +71,40 @@ TEST(nrml_Test, RayFire)
    //            In this case I should reset pSx, pSy, pSz to the next_surf
    double* norml = new double(3); 
    int flagErr;
-   nrmlwr(pSx, pSy, pSz, pVx, pVy, pVz, norml, 0,0, flagErr);
+   nrmlwr(pSx, pSy, pSz, pVx, pVy, pVz, norml, oldReg, newReg, flagErr);
+      std::cout << "Oldreg = " << oldReg << std::endl;
+      std::cout << "retStep = " << retStep << std::endl;
+      std::cout << "Newreg = " << newReg << std::endl;
+      std::cout << std::endl;
 
-   std::cout<<"============= Norml after g1_fire =============="<<std::endl;
-   std::cout << "Normal: " << norml[0] << ", " << norml[1] << ", " << norml[2]  << std::endl;
-   std::cout << "retStep = " << retStep << std::endl;
+   std::cout<<"============= update position to before surface =============="<<std::endl;
+   pSx = pSx_orig + (retStep - delta);
+   std::cout << "Position " << pSx << " " << pSy << " " << pSz << std::endl;
+   nrmlwr(pSx, pSy, pSz, pVx, pVy, pVz, norml, oldReg, newReg, flagErr);
+      std::cout << "Oldreg = " << oldReg << std::endl;
+      std::cout << "retStep = " << retStep << std::endl;
+      std::cout << "Newreg = " << newReg << std::endl;
+      std::cout << std::endl;
 
-   pSx += retStep + .001;
-   nrmlwr(pSx, pSy, pSz, pVx, pVy, pVz, norml, 0,0, flagErr);
+   std::cout<<"============= update position at surface =============="<<std::endl;
+   pSx = pSx_orig + retStep;
+   std::cout << "Position " << pSx << " " << pSy << " " << pSz << std::endl;
+   nrmlwr(pSx, pSy, pSz, pVx, pVy, pVz, norml, oldReg, newReg, flagErr);
+      std::cout << "Oldreg = " << oldReg << std::endl;
+      std::cout << "retStep = " << retStep << std::endl;
+      std::cout << "Newreg = " << newReg << std::endl;
+      std::cout << std::endl;
 
-   std::cout<<"============= Norml after g1_fire =============="<<std::endl;
-   std::cout << "Normal: " << norml[0] << ", " << norml[1] << ", " << norml[2]  << std::endl;
-   std::cout << "retStep = " << retStep << std::endl;
+   std::cout<<"============= update position to beyond surface =============="<<std::endl;
+   pSx = pSx_orig + (retStep + delta);
+   std::cout << "Position " << pSx << " " << pSy << " " << pSz << std::endl;
+   // If we've gone beyond the surface update the region
+   oldReg = newReg;
+   nrmlwr(pSx, pSy, pSz, pVx, pVy, pVz, norml, oldReg, newReg, flagErr);
+      std::cout << "Oldreg = " << oldReg << std::endl;
+      std::cout << "retStep = " << retStep << std::endl;
+      std::cout << "Newreg = " << newReg << std::endl;
+      std::cout << std::endl;
 
    EXPECT_TRUE(true);
 }
