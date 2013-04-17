@@ -614,8 +614,7 @@ class ENDFDataSource(DataSource):
         xsdata = self.library.get_xs(nuc, rx, nuc_i)
         intpoints = xsdata[0]['intpoints'][::-1]
         Eint = xsdata[0]['Eint']
-        numpts = self.library.structure[nuc]['data'][nuc_i]['xs'][mt][1]['NR']
-        E_g = [Eint[intpoints[i]-1] for i in range(int(numpts))]
+        E_g = np.array([Eint[np.asarray(intpoints, dtype=int)-1]]).flat
         self.src_group_struct = E_g
         self.src_phi_g = np.ones(self._src_ngroups, dtype='f8') \
             if self._src_phi_g is None \
@@ -661,8 +660,19 @@ class ENDFDataSource(DataSource):
             return None
         # Grab data
         self._load_group_structure(nuc, rx, nuc_i)
-        rxdata = self.library.get_xs(nuc, rx, nuc_i)[0]
+        if (nuc, rx, nuc_i) in self.rxcache:
+            pass
+        else:
+            rxdata = self.library.get_xs(nuc, rx, nuc_i)[0]
+            self.rxcache[nuc, rx, nuc_i] = rxdata
         return rxdata
+
+    def discretize(self, nuc, rx, nuc_i, temp=300.0, src_phi_g=None,
+                   dst_phi_g=None):
+        """Discretizes the reaction channel.
+        """
+        self._load_group_structure(nuc, rx, nuc_i)
+        rxdata = self._load_reaction(nuc, rx, nuc_i)
 
     # def discretize(self, nuc, rx, temp=300.0, src_phi_g=None, dst_phi_g=None):
     #     """Discretizes the reaction channel from simple group structure to that 
@@ -670,9 +680,9 @@ class ENDFDataSource(DataSource):
     #     source consists of only thermal (2.53E-8 MeV), fission (1 MeV), and 14 MeV
     #     data points, the following piecewise functional form is assumed:
 
-    #     .. math::  
+    #     .. math::
 
-    #         \\sigma(E) = \\sigma(2.53E-8) \\sqrt{\\frac{2.53E-8}{E}} 
+    #         \\sigma(E) = \\sigma(2.53E-8) \\sqrt{\\frac{2.53E-8}{E}}
     #         \\sigma(E) = \\frac{\sigma(14) - \\sigma(1)}{14 - 1} (E - 1) + \\sigma(1) 
 
     #     Parameters
