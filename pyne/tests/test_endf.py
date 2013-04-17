@@ -828,7 +828,6 @@ def test_load_reaction():
     exp = {'Eint': exp['Eint'],
            'xs': exp['xs']}
     obs = ds._load_reaction(40000, 600, 40040)
-    print obs
     for key in exp:
         assert_allclose(exp[key], obs[key])
 if __name__ == "__main__":
