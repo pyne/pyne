@@ -31,15 +31,6 @@ double dirz;
 int oldReg;
 
 char *getfileptr(std::string name);
-/*
-MBEntityHandle next_srf;
-void nrml(double& pSx, double& pSy, double& pSz,
-            double& dirx, double& diry, double& dirz,
-            double* norml, const int& oldReg,
-            const int& newReg, int& flagErr);
-
-void g1_rayfire(int& oldRegion, double point[], double dir[], double& retStep,  int& newRegion);
-*/
 void delta_to_surface(double posx, double posy, double posz,
                       double dirx, double diry, double dirz,
                       double delta, int& oldReg, double retStep, int newReg,
@@ -74,9 +65,7 @@ TEST(nrml_Test, RayFire)
    
    // Fire a ray from the given point in the given direction
    // calls ray_fire, sets retStep and global next_surf
-   // std::cout << next_surf << std::endl;
    g1_fire(oldReg, xyz, dir, retStep, newReg); 
-   // std::cout << next_surf << std::endl;
 
    if (true)
    {
@@ -254,118 +243,3 @@ void delta_to_surface(double posx, double posy, double posz,
    std::cout << std::endl;
 }
 
-/*
-void nrml(double& pSx, double& pSy, double& pSz,
-            double& dirx, double& diry, double& dirz,
-            double* norml, const int& oldReg,
-            const int& newReg, int& flagErr)
-{
-  if(true)
-    {
-      std::cout << "============ NRMLWR-DBG =============" << std::endl;
-    }
-
-  //dummy variables
-  flagErr=0;
-  double xyz[3]; //tmp storage of position
-  //MBEntityHandle surf = 0;
-  xyz[0]=pSx,xyz[1]=pSy,xyz[2]=pSz;
-  MBErrorCode ErrorCode = DAG->get_angle(next_srf,xyz,norml); // get the angle
-  if(ErrorCode != MB_SUCCESS)
-    {
-      std::cout << "Could not determine normal" << std::endl;
-      flagErr = 2;
-      return;
-    }
-
-  //return normal:
-  //norml[0]=dirx;
-  //norml[1]=diry;
-  //norml[2]=dirz;
-
-  // to test:  create a simple model:  dag-> ray_fire in order to get next_sruf.  
-// then call normlwr with next_surf and it should return an opposite-pointing vector
-// ON the surface, normlwr should components of rnorml should be 0 or near
-// PAST the surface, norml components should point AWAY from current position
-
-  if(true)
-    {
-      std::cout << "Normal: " << norml[0] << ", " << norml[1] << ", " << norml[2]  << std::endl;
-      std::cout << "out of nrmlwr " << std::endl;
-    }
-
-  return;
-}
-///////                 End nrmlwr
-/////////////////////////////////////////////////////////////////////
-
-//---------------------------------------------------------------------------//
-// g1(int& old Region, int& newRegion)
-//---------------------------------------------------------------------------//
-void g1_rayfire(int& oldRegion, double point[], double dir[], double& retStep,  int& newRegion)
-{
-  MBEntityHandle vol = DAG->entity_by_index(3,oldRegion);
-
-  double next_surf_dist;
-  MBEntityHandle newvol = 0;
-
-  MBErrorCode result = DAG->ray_fire(vol, point, dir, next_srf, next_surf_dist );
-  retStep = next_surf_dist;
-
-  MBErrorCode rval = DAG->next_vol(next_srf,vol,newvol);
-
-  newRegion = DAG->index_by_handle(newvol);
-  return;
-}
-///////                 End g1wr and g1
-/////////////////////////////////////////////////////////////////////
-*/
-
-/*
-//---------------------------------------------------------------------------//
-// nrmlwr(..)
-//---------------------------------------------------------------------------//
-/// From Flugg Wrappers WrapNorml.cc
-void nrmlwr(double& posx, double& posy, double& posz,
-            double& dirx, double& diry, double& dirz,
-	    double* norml, const int& oldReg, 
-	    const int& newReg, int& flagErr)
-{
-  if(debug)
-    {
-      std::cout << "============ NRMLWR-DBG =============" << std::endl;
-    }
-
-  //dummy variables
-  flagErr=0;
-  double abc[] = {posx, posy, posz};
-  double xyz[3]; //tmp storage of position
-  //MBEntityHandle surf = 0;
-  xyz[0]=posx,xyz[1]=posy,xyz[2]=posz;
-  MBErrorCode ErrorCode = DAG->get_angle(next_surf,xyz,norml); // get the angle
-  if(ErrorCode != MB_SUCCESS)
-    {
-      std::cout << "Could not determine normal" << std::endl;
-      flagErr = 2;
-      return;
-    }
-
-  //return normal:
-  //norml[0]=dirx;
-  //norml[1]=diry;
-  //norml[2]=dirz;
-
-  // to test:  create a simple model:  dag-> ray_fire in order to get next_sruf.  
-// then call normlwr with next_surf and it should return an opposite-pointing vector
-// ON the surface, normlwr should components of rnorml should be 0 or near
-// PAST the surface, norml components should point AWAY from current position
-  
-  if(debug)
-    {
-      std::cout << "Normal: " << norml[0] << ", " << norml[1] << ", " << norml[2]  << std::endl;
-      std::cout << "out of nrmlwr " << std::endl;
-    }
-  
-  return;
-}
-*/
