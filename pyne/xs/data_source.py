@@ -600,8 +600,7 @@ class ENDFDataSource(DataSource):
             self.library = Library(fh)
         self.rxcache = {}
         self.dst_group_struct = dst_group_struct
-        # self.src_phi_g = np.ones(self._src_ngroups, dtype='f8') if src_phi_g is None \
-        #                     else np.asarray(src_phi_g)
+        self._src_phi_g = src_phi_g
     # def __init__(self, fh, **kwargs):
     #     self.fh = fh
     #     super(ENDFDataSource, self).__init__(**kwargs)
@@ -616,10 +615,11 @@ class ENDFDataSource(DataSource):
         intpoints = xsdata[0]['intpoints'][::-1]
         Eint = xsdata[0]['Eint']
         numpts = self.library.structure[nuc]['data'][nuc_i]['xs'][mt][1]['NR']
-        E_g = np.zeros(numpts)
-        for i in range(int(numpts)):
-            E_g[i] = Eint[intpoints[i]-1]
+        E_g = [Eint[intpoints[i]-1] for i in range(int(numpts))]
         self.src_group_struct = E_g
+        self.src_phi_g = np.ones(self._src_ngroups, dtype='f8') \
+            if self._src_phi_g is None \
+            else np.asarray(self._src_phi_g)
 
     @property
     def exists(self):
@@ -627,10 +627,11 @@ class ENDFDataSource(DataSource):
             if isinstance(self.fh, basestring):
                 self._exists = os.path.isfile(fh)
             else:
-                self._exists = isinstance(self.fh, file) or isinstance(self.fh, StringIO.StringIO)
+                self._exists = (isinstance(self.fh, file) or \
+                                isinstance(self.fh, StringIO.StringIO))
         return self._exists
 
-    def _load_reaction(self, nuc, rx, temp=300.0):
+    def _load_reaction(self, nuc, rx, nuc_i, temp=300.0):
         """Note: EAF data does not use temperature information (temp)
 
         Parameters
@@ -641,11 +642,13 @@ class ENDFDataSource(DataSource):
             Reaction MT # in nnnm form.
             OR:
             Reaction key: 'gamma', 'alpha', 'p', etc.
+        nuc_i: : int
+            Isotope in zzaaam form (optional). Default is None.
 
         Returns
         -------
         rxdata: dict
-            Dictionary of xs data. Includes intpoints, intschemes, Eint, and xs.
+            Dictionary of xs data. Includes Eint and xs.
         """
         nuc = nucname.zzaaam(nuc)
         # Munging the rx to an MT#
@@ -657,9 +660,10 @@ class ENDFDataSource(DataSource):
         if rx is None:
             return None
         # Grab data
-        _load_group_structure(nuc, rx)
-        rxdata = library.get_xs(nuc, rx)
+        self._load_group_structure(nuc, rx, nuc_i)
+        rxdata = self.library.get_xs(nuc, rx, nuc_i)[0]
         return rxdata
+
     # def discretize(self, nuc, rx, temp=300.0, src_phi_g=None, dst_phi_g=None):
     #     """Discretizes the reaction channel from simple group structure to that 
     #     of the destination weighted by the group fluxes.  Since the simple data 

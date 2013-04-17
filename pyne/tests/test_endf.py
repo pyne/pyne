@@ -811,14 +811,25 @@ def test_u235():
     for key in obs:
         assert_array_equal(obs[key], exp[key])
 
-def test_data_source():
-    ds = ENDFDataSource(str_library)
+
+# Test ENDF Data Source
+ds = ENDFDataSource(str_library)
+def test_load_group_struct():
     ds._load_group_structure(40000, 600, 40040)
     exp = ds.src_group_struct
     obs = [-3.72423800e+02, 3.36357200e+08, 6.34538200e+04, 3.96078400e+09,
            -1.74017900e+09, -1.32751300e+02]
     assert_allclose(obs, exp, rtol = 1e-8)
-    print ds.src_group_struct
 
+
+def test_load_reaction():
+    ds._load_group_structure(40000, 600, 40040)
+    exp = library.structure[40000]['data'][40040]['xs'][600][0]
+    exp = {'Eint': exp['Eint'],
+           'xs': exp['xs']}
+    obs = ds._load_reaction(40000, 600, 40040)
+    print obs
+    for key in exp:
+        assert_allclose(exp[key], obs[key])
 if __name__ == "__main__":
     nose.runmodule()
