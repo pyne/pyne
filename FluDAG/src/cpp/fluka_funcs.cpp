@@ -248,11 +248,11 @@ void g1_fire(int& oldRegion, double point[], double dir[], double& retStep,  int
   MBEntityHandle vol = DAG->entity_by_index(3,oldRegion);
 
   double next_surf_dist;
-  //  MBEntityHandle next_surf = 0;
   MBEntityHandle newvol = 0;
 
-  // next_surf is a global
+  std::cout << "g1_fire: next_surf before ray_fire: " << next_surf << std::endl;
   MBErrorCode result = DAG->ray_fire(vol, point, dir, next_surf, next_surf_dist );
+  std::cout << "g1_fire:      AFTER ray_fire: " << next_surf << std::endl;
   retStep = next_surf_dist;
 
   MBErrorCode rval = DAG->next_vol(next_surf,vol,newvol);
@@ -272,7 +272,8 @@ void nrmlwr(double& pSx, double& pSy, double& pSz,
 	    double* norml, const int& oldRegion, 
 	    const int& newReg, int& flagErr)
 {
-  if(debug)
+  bool print_all = false;
+  if(print_all)
     {
       std::cout << "============ NRMLWR-DBG =============" << std::endl;
     }
@@ -303,7 +304,7 @@ void nrmlwr(double& pSx, double& pSy, double& pSz,
   if(debug)
     {
       std::cout << "Normal: " << norml[0] << ", " << norml[1] << ", " << norml[2]  << std::endl;
-      std::cout << "out of nrmlwr " << std::endl;
+      // std::cout << "out of nrmlwr " << std::endl;
     }
   
   return;
