@@ -6,6 +6,7 @@
 #include <iosfwd>
 #include <set>
 #include <string>
+#include <utility>
 
 #include "moab/CartVect.hpp"
 #include "moab/Interface.hpp"
@@ -85,14 +86,6 @@ class KDEMeshTally : public MeshTally {
      */
     void compute_score(const TallyEvent& event, int ebin);
 
-    // TODO merge tally_track into compute_score
-    /**
-     * \brief Computes mesh tally scores for the given track-based event
-     * \param event the parameters needed to compute the mesh tally scores
-     * \param ebin the energy bin to tally this track into (calculated by fortran)
-     */
-    void tally_track(const TallyEvent& event, int ebin);
-
     /** 
      * Implement MeshTally end_history interface 
      */ 
@@ -118,7 +111,7 @@ class KDEMeshTally : public MeshTally {
     moab::CartVect bandwidth;      // the set of bandwidth values (hx, hy, hz)
     TallyType kde_tally;           // specifies type of KDE tally 
     KDEKernel* kernel;             // kernel function tally is based on
-    unsigned int subtracks;        // number of subtracks used in tally       
+    unsigned int num_subtracks;    // number of subtracks used in tally       
     
     std::string output_filename;
     moab::EntityHandle tally_set;  // the MOAB set of entities used in tally
@@ -136,8 +129,12 @@ class KDEMeshTally : public MeshTally {
     bool max_collisions;
     long long int numCollisions;       
     moab::CartVect Mn;  // mean
-    moab::CartVect Sn;  // variance       
-    
+    moab::CartVect Sn;  // variance
+
+    // subtrack estimator parameters
+    static bool seed_is_set;
+    std::vector<moab::CartVect> subtrack_points;  // random points along track
+        
     /**
      * Builds a KD-Tree from all the mesh node entities in the specified meshset,
      * or if the set is 0, from all mesh nodes in MOAB.
@@ -159,15 +156,16 @@ class KDEMeshTally : public MeshTally {
     /**
      * \brief Computes a single tally score for the given calculation point
      * \param event the parameters needed to compute the tally score
-     * \param tally_point the (x, y, z) coordinates of the calculation point
+     * \param X the (x, y, z) coordinates of the calculation point
      * \return the tally score for the calculation point
      *
      * Note that the method used for computing the tally score for the given
-     * calculation point is determined according to the type of KDE mesh tally
-     * that was created.
+     * calculation point X is determined according to the type of KDE mesh
+     * tally that was created.
      */
     double get_score(const TallyEvent& event,
-                     const moab::CartVect& tally_point);
+                     const moab::CartVect& X);
+
     /**
      * Adds a tally contribution to one calculation point on the mesh.
      *
@@ -184,6 +182,79 @@ class KDEMeshTally : public MeshTally {
     /// unimplemented
     KDEMeshTally & operator=( const KDEMeshTally & obj );
 
+    // >>> KDE ESTIMATOR FUNCTIONS
+
+    /**
+     * \brief Computes tally score based on the integral-track estimator
+     * \param data the physics data for the track segment being tallied
+     * \param X the (x, y, z) coordinates of the calculation point
+     * \return the tally score for the calculation point
+     *
+     * The integral_track_estimator() function computes the integral of the
+     * 3D path-length dependent kernel function K(X, s) with respect to path-
+     * length s for the given calculation point X, using the limits of
+     * integration as determined by the set_integral_limits function.
+     */
+    double integral_track_estimator(const TrackData& data,
+                                    const moab::CartVect& X);
+
+    /**
+     * \brief Determines integration limits for the integral-track estimator
+     * \param data the physics data for the track segment being tallied
+     * \param X the (x, y, z) coordinates of the calculation point
+     * \param limits stores integration limits in form of pair<lower, upper>
+     * \return true if valid limits exist, false otherwise
+     *
+     * The set_integral_limits() function determines the integration limits
+     * for the integral of the 3D path-length dependent kernel function K(X, s)
+     * with respect to path-length s for the given calculation point X.
+     *
+     * NOTE: if this function returns false, that means there are no valid
+     * integration limits within the range from 0 to the total track length.
+     * This essentially means that the resulting integrand over this range
+     * would have been zero and the calculation point can be ignored.
+     */
+    bool set_integral_limits(const TrackData& data,
+                             const moab::CartVect& X,
+                             std::pair<double, double>& limits);
+
+    /**
+     * \brief Computes tally score based on the sub-track estimator
+     * \param data the physics data for the track segment being tallied
+     * \param X the (x, y, z) coordinates of the calculation point
+     * \return the tally score for the calculation point
+     *
+     * The sub_track_estimator() function computes the average 3D kernel
+     * contribution for the number of subtracks requested for the given
+     * calculation point X, using the randomly chosen points along the
+     * track that were computed by the choose_points function.
+     */
+    double sub_track_estimator(const TrackData& data,
+                               const moab::CartVect& X);
+
+    /**
+     * \brief Chooses p random points along a track segment
+     * \param data the physics data for the track segment being tallied
+     * \param p the number of random points requested
+     * \return the vector of p random points
+     *
+     * The choose_points() function sub-divides the track segment into p
+     * sub-tracks of equal length and randomly chooses the coordinates of
+     * one point from each sub-track.
+     */
+    std::vector<moab::CartVect> choose_points(const TrackData& data, int p);
+
+    /**
+     * \brief Computes tally score based on the collision estimator
+     * \param data the physics data for the collision being tallied
+     * \param X the (x, y, z) coordinates of the calculation point
+     * \return the tally score for the calculation point
+     *
+     * The collision_estimator() function computes the 3D kernel contribution
+     * for the given calculation point X.
+     */
+    double collision_estimator(const CollisionData& data,
+                               const moab::CartVect& X);
 };
 
 #endif

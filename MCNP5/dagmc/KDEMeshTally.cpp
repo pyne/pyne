@@ -7,6 +7,7 @@
 #include <sstream>
 #include <fstream>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "moab/AdaptiveKDTree.hpp"
@@ -15,16 +16,21 @@
 #include "moab/Range.hpp"
 #include "moab/Types.hpp"
 
-#include "KDECollision.hpp"
 #include "KDEKernel.hpp"
-#include "KDENeighborhood.hpp"
-#include "KDETrack.hpp"
 #include "KDEMeshTally.hpp"
+#include "KDENeighborhood.hpp"
 #include "TallyEvent.hpp"
-#include "meshtal_funcs.h"
 
+// initialize static variables
 moab::CartVect KDEMeshTally::default_bandwidth( 1, 1, 1 );
+bool KDEMeshTally::seed_is_set = false;
 
+// quadrature points and weights for the integrate_path_kernel function
+const double quad_points[4] = {0.339981043585, -0.339981043585,
+                               0.861136311594, -0.861136311594};
+
+const double quad_weights[4] = {0.652145154863, 0.652145154863,
+                                0.347854845137, 0.347854845137};
 
 //-----------------------------------------------------------------------------
 static double parse_bandwidth_param( const std::string& key,
@@ -167,7 +173,7 @@ KDEMeshTally::KDEMeshTally( const MeshTallyInput& settings,
                             moab::CartVect bandwidth,
                             KDEMeshTally::TallyType type,
                             KDEKernel::KernelType k,
-                            unsigned int numSubtracks )
+                            unsigned int subtracks )
 : MeshTally(settings), mb( moabMesh ), bandwidth( bandwidth ),
   kde_tally( type ), kernel( new KDEKernel(k) )
 {
@@ -181,15 +187,16 @@ KDEMeshTally::KDEMeshTally( const MeshTallyInput& settings,
   Sn = moab::CartVect( 0, 0, 0 );
 
   // check numSubtracks is a valid parameter for SUBTRACK tallies
-  if ( numSubtracks == 0 && kde_tally == SUB_TRACK ) {
+  if (subtracks == 0 && kde_tally == SUB_TRACK)
+  {
 
     std::cerr << "\nWarning: number of subtracks must be non-zero for KDE subtrack tallies" << std::endl;
     std::cerr << "      Using default value subtracks = 3\n" << std::endl;
-    subtracks = 3;
+    num_subtracks = 3;
 
   }
   else
-    subtracks = numSubtracks;
+    num_subtracks = subtracks;
   
 }
 //-----------------------------------------------------------------------------
@@ -224,13 +231,6 @@ void KDEMeshTally::compute_score(const TallyEvent& event, int ebin)
         exit(EXIT_FAILURE);
     }
 
-    // TODO temporary until I remove tally_track function
-    if (kde_tally == INTEGRAL_TRACK || kde_tally == SUB_TRACK)
-    {
-        tally_track(event, ebin);
-        return;
-    }
-
     // create the neighborhood region for the tally event
     KDENeighborhood region(event, bandwidth, *tree, tree_root);
 
@@ -254,6 +254,16 @@ void KDEMeshTally::compute_score(const TallyEvent& event, int ebin)
         // add collision to running variance for computing optimal bandwidth
         update_variance(data.collision_point);
     }
+    else if (kde_tally == SUB_TRACK)
+    {
+        // multiply weight by track length
+        TrackData data;
+        event.get_track_data(data);
+        weight *= data.track_length;
+
+        // choose and store random points along the track
+        subtrack_points = choose_points(data, num_subtracks);
+    }
 
     // iterate through the calculation points
     std::vector<moab::EntityHandle>::iterator i;
@@ -272,71 +282,6 @@ void KDEMeshTally::compute_score(const TallyEvent& event, int ebin)
         // add score to KDE mesh tally for the current history
         add_score_to_tally(point, score, ebin);
     }
-}
-//-----------------------------------------------------------------------------
-void KDEMeshTally::tally_track(const TallyEvent& event, int ebin)
-{
-  // make sure tally event is a track-based event
-  if (event.get_event_type() != TallyEvent::TRACK)
-  {
-    std::cerr << "\nError: Tally event is not a track-based event" << std::endl;
-    exit(EXIT_FAILURE);
-  } 
-
-  // set the number of subtracks to be tallied only for SUBTRACK tallies
-  unsigned int tally_subtracks = 0;
-
-  if ( kde_tally == SUB_TRACK )
-    tally_subtracks = subtracks;
-
-  // make a KDETrack object to represent a single track segment
-  TrackData data;
-  bool set_data = event.get_track_data(data);
-
-  if (!set_data)
-  {
-    std::cerr << "\nError: Invalid track-based event data" << std::endl;
-    exit(EXIT_FAILURE);
-  }
-
-  KDETrack track(data.start_point, data.direction, bandwidth, data.track_length,
-                 kernel, tally_subtracks);
-
-  // create the neighborhood region for this tally event
-  KDENeighborhood region(event, bandwidth, *tree, tree_root);
-
-  // find all the calculation points that exist in this neighborhood region
-  std::vector<moab::EntityHandle> calculation_points;
-  moab::ErrorCode rval = region.get_points(calculation_points);
-  assert(moab::MB_SUCCESS == rval);
-
-  // get the tally weighting factor for this track
-  double particle_weight = event.get_particle_data().second;
-  double weight = event.get_tally_multiplier() * particle_weight;
-
-  // if SUBTRACK mesh tally, multiply weight by the total track length
-  if (kde_tally == SUB_TRACK)
-    weight *= data.track_length;
-
-  // compute the contribution for all calculation points in this neighborhood
-  std::vector<moab::EntityHandle>::iterator i;
-  moab::EntityHandle point;
-  double contribution = 0;
-  double coords[3];
-
-  for (i = calculation_points.begin(); i != calculation_points.end(); ++i)
-  {
-
-    point = *i;
-    rval = mb->get_coords( &point, 1, coords );
-    assert( moab::MB_SUCCESS == rval );  
-
-    contribution = weight * track.compute_contribution( coords );
-
-    // add results to the mesh tally for the current history
-    add_score_to_tally( point, contribution, ebin );
-    
-  }
 }
 //-----------------------------------------------------------------------------
 void KDEMeshTally::end_history()
@@ -533,35 +478,30 @@ moab::CartVect KDEMeshTally::get_optimal_bandwidth()
 }
 //-----------------------------------------------------------------------------
 double KDEMeshTally::get_score(const TallyEvent& event,
-                               const moab::CartVect& tally_point)
+                               const moab::CartVect& X)
 {
-    double score = 1;
-
-    // compute unique score for tally point based on KDE mesh tally type
+    // compute score for calculation point X based on KDE mesh tally type
     if (kde_tally == INTEGRAL_TRACK)
     {
-        // TODO add function to get score for integral-track tally
+        // use the integral-track estimator to compute score        
+        TrackData data;
+        event.get_track_data(data);
+        return integral_track_estimator(data, X);
     }
     else if (kde_tally == SUB_TRACK)
     {
-        // TODO add function to get score for sub-track tally
+        // use the sub-track estimator to compute score
+        TrackData data;
+        event.get_track_data(data);
+        return sub_track_estimator(data, X);
     }
     else
     {
-        // compute score for a KDE COLLISION mesh tally
+        // use the collision estimator to compute score
         CollisionData data;
         event.get_collision_data(data);
-
-        // compute the 3D kernel contribution using product of 1D kernels
-        for (int i = 0; i < 3; ++i)
-        {
-            double u = tally_point[i] - data.collision_point[i];
-            u /= bandwidth[i];
-            score *= kernel->evaluate(u) / bandwidth[i];
-        }
+        return collision_estimator(data, X);
     }
-
-    return score;
 }
 //-----------------------------------------------------------------------------
 void KDEMeshTally::add_score_to_tally( moab::EntityHandle mesh_point,
@@ -577,5 +517,192 @@ void KDEMeshTally::add_score_to_tally( moab::EntityHandle mesh_point,
 
   visited_this_history.insert( mesh_point );
 
+}
+//-----------------------------------------------------------------------------
+// NOTE: integral_track_estimator uses the 4-point gaussian quadrature method
+double KDEMeshTally::integral_track_estimator(const TrackData& data,
+                                              const moab::CartVect& X)
+{
+    // determine the limits of integration
+    std::pair<double, double> limits;
+    
+    bool valid_limits = set_integral_limits(data, X, limits);
+
+    // compute value of the integral only if valid limits exist
+    if (valid_limits)
+    {
+        // define scaling constants
+        double c1 = 0.5 * (limits.second - limits.first);
+        double c2 = 0.5 * (limits.second + limits.first);
+
+        // sum contributions for all quadrature points
+        double sum = 0;
+
+        for (int i = 0; i < 4; ++i)
+        {
+            // define scaled quadrature point
+            double s = c1 * quad_points[i] + c2;
+
+            // compute the value of the kernel function K(X, s)
+            double kernel_value = 1;
+
+            for (int j = 0; j < 3; ++j)
+            {
+                double u = X[j] - data.start_point[j] - s * data.direction[j];
+                u /= bandwidth[j];
+                kernel_value *= kernel->evaluate(u) / bandwidth[j];
+            }
+        
+            // multiply by quadrature weight and add to sum
+            sum += quad_weights[i] * kernel_value;
+        }
+
+        // return value of the integral
+        return c1 * sum;
+    }
+    else
+    {
+        // integration limits are not valid so no score is computed
+        return 0;
+    }
+}
+//-----------------------------------------------------------------------------
+bool KDEMeshTally::set_integral_limits(const TrackData& data,
+                                       const moab::CartVect& X,
+                                       std::pair<double, double>& limits)
+{
+    bool valid_limits = false;
+
+    // set initial integral limits to the full track length (default values)
+    limits = std::make_pair(0, data.track_length);
+
+    // check limits against the valid path length interval for each dimension
+    for (int i = 0; i < 3; ++i)
+    {
+        double path_min = limits.first;
+        double path_max = limits.second;
+
+        // compute valid path length interval Si = [path_min, path_max]
+        if (data.direction[i] > 0)
+        {
+            path_min = X[i] - data.start_point[i] - bandwidth[i];
+            path_min /= data.direction[i];
+
+            path_max = X[i] - data.start_point[i] + bandwidth[i];
+            path_max /= data.direction[i];
+        }
+        else if (data.direction[i] < 0)
+        {
+            path_min = X[i] - data.start_point[i] + bandwidth[i];
+            path_min /= data.direction[i];
+
+            path_max = X[i] - data.start_point[i] - bandwidth[i];
+            path_max /= data.direction[i];
+        }
+
+        // set lower limit to highest minimum
+        if (path_min > limits.first)
+        {
+            limits.first = path_min;
+        }
+
+        // set upper limit to lowest maximum
+        if (path_max < limits.second)
+        {
+            limits.second = path_max;
+        }
+    }
+  
+    // limits are only valid if upper limit is greater than lower limit
+    if (limits.first < limits.second)
+    {
+        valid_limits = true;
+    }
+
+    return valid_limits;
+}
+//-----------------------------------------------------------------------------
+double KDEMeshTally::sub_track_estimator(const TrackData& data,
+                                         const moab::CartVect& X)
+{
+    // iterate through the sub-track points
+    std::vector<moab::CartVect>::iterator i;
+    double score = 0;
+
+    for (i = subtrack_points.begin(); i !=subtrack_points.end(); ++i)
+    {
+        // Compute the value of the kernel function K(X)
+        double kernel_value = 1;
+
+        for (int j = 0; j < 3; ++j)
+        {
+            double u = (X[j] - (*i)[j]) / bandwidth[j];
+            kernel_value *= kernel->evaluate(u) / bandwidth[j];
+        }
+
+        // add kernel contribution for sub-track point to sum
+        score += kernel_value;
+    }
+
+    // normalize by the total number of sub-track points
+    score /= subtrack_points.size();
+
+    return score;
+}
+//-----------------------------------------------------------------------------
+std::vector<moab::CartVect> KDEMeshTally::choose_points(const TrackData& data,
+                                                        int p)
+{
+    // check number of points to choose is valid
+    if (p <= 0)
+    {
+        p = 3;
+        std::cerr << "\nError: Number of sub-track points is invalid:\n";
+        std::cerr << "  using p = 3. \n\n";
+    }
+
+    // set random number generator seed if it has not yet been set
+    if (!seed_is_set)
+    {
+        srand(11699913);
+        seed_is_set = true;
+    }
+
+    // compute sub-track length, assumed to be equal for all sub-tracks
+    double sub_track_length = data.track_length / p;
+
+    // set the starting point to the beginning of the track segment
+    moab::CartVect start_point = data.start_point;
+
+    // choose a random position along each sub-track
+    std::vector<moab::CartVect> random_points;
+
+    for (int i = 0; i < p; ++i)
+    {
+        double path_length = rand() * sub_track_length / RAND_MAX;
+        
+        // add the coordinates of the corresponding point
+        random_points.push_back(start_point + path_length * data.direction);
+
+        // shift starting point to the next sub-track
+        start_point += sub_track_length * data.direction;
+    }
+ 
+    return random_points;
+}
+//-----------------------------------------------------------------------------
+double KDEMeshTally::collision_estimator(const CollisionData& data,
+                                         const moab::CartVect& X)
+{
+    // compute the value of the kernel function K(X)
+    double score = 1;
+
+    for (int i = 0; i < 3; ++i)
+    {
+        double u = (X[i] - data.collision_point[i]) / bandwidth[i];
+        score *= kernel->evaluate(u) / bandwidth[i];
+    }
+
+    return score;
 }
 //-----------------------------------------------------------------------------
