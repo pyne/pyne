@@ -250,14 +250,17 @@ void g1_fire(int& oldRegion, double point[], double dir[], double& retStep,  int
   double next_surf_dist;
   MBEntityHandle newvol = 0;
 
-  std::cout << "g1_fire: next_surf before ray_fire: " << next_surf << std::endl;
+  // next_surf is a global
   MBErrorCode result = DAG->ray_fire(vol, point, dir, next_surf, next_surf_dist );
-  std::cout << "g1_fire:      AFTER ray_fire: " << next_surf << std::endl;
   retStep = next_surf_dist;
 
   MBErrorCode rval = DAG->next_vol(next_surf,vol,newvol);
   newRegion = DAG->index_by_handle(newvol);
-  // std::cerr << "newRegion = " << newRegion << " Distance = " << retStep << std::endl;
+  if(false)
+  {
+     std::cerr << "Region on other side of surface is  = " << newRegion << \
+                  ", Distance to next surf is " << retStep << std::endl;
+  }
   return;
 }
 ///////			End g1wr and g1
@@ -267,46 +270,35 @@ void g1_fire(int& oldRegion, double point[], double dir[], double& retStep,  int
 // nrmlwr(..)
 //---------------------------------------------------------------------------//
 /// From Flugg Wrappers WrapNorml.cc
+//  Note:  The normal is calculated at the point on the surface nearest the 
+//         given point
+//  Does NOT set newReg.
 void nrmlwr(double& pSx, double& pSy, double& pSz,
             double& pVx, double& pVy, double& pVz,
 	    double* norml, const int& oldRegion, 
 	    const int& newReg, int& flagErr)
 {
-  bool print_all = false;
-  if(print_all)
-    {
-      std::cout << "============ NRMLWR-DBG =============" << std::endl;
-    }
+  if(debug)
+  {
+      std::cout << "============ NRMLWR =============" << std::endl;
+  }
 
-  //dummy variables
   flagErr=0;
   double xyz[3]; //tmp storage of position
-  //MBEntityHandle surf = 0;
   xyz[0]=pSx,xyz[1]=pSy,xyz[2]=pSz;
-  MBErrorCode ErrorCode = DAG->get_angle(next_surf,xyz,norml); // get the angle
+  MBErrorCode ErrorCode = DAG->get_angle(next_surf,xyz,norml); 
   if(ErrorCode != MB_SUCCESS)
-    {
+  {
       std::cout << "Could not determine normal" << std::endl;
       flagErr = 2;
       return;
-    }
-
-  //return normal:
-  //norml[0]=pVx;
-  //norml[1]=pVy;
-  //norml[2]=pVz;
-
-  // to test:  create a simple model:  dag-> ray_fire in order to get next_sruf.  
-// then call normlwr with next_surf and it should return an opposite-pointing vector
-// ON the surface, normlwr should components of rnorml should be 0 or near
-// PAST the surface, norml components should point AWAY from current position
-  
+  }
+  // sense of next_surf with respect to oldRegion (volume)
+  int sense = getSense(oldRegion);
   if(debug)
-    {
+  {
       std::cout << "Normal: " << norml[0] << ", " << norml[1] << ", " << norml[2]  << std::endl;
-      // std::cout << "out of nrmlwr " << std::endl;
-    }
-  
+  }
   return;
 }
 ///////			End nrmlwr
@@ -314,6 +306,28 @@ void nrmlwr(double& pSx, double& pSy, double& pSz,
 
 //---------------------------------------------------------------------------//
 // getSense(..)
+//---------------------------------------------------------------------------//
+// Helper function
+int getSense(int region)
+{
+
+  int sense;  // sense of next_surf with respect to oldRegion (volume)
+
+  MBEntityHandle vol = DAG->entity_by_index(3, region);
+ 
+  MBErrorCode ErrorCode = DAG->surface_sense(vol, next_surf, sense); 
+  if(false)
+  {
+      std::cout << "Sense of next_surf with respect to the point is " << sense << std::endl;
+  }
+  return sense; 
+} 
+
+///////			End nrmlwr
+/////////////////////////////////////////////////////////////////////
+
+//---------------------------------------------------------------------------//
+// lkwr(..)
 //---------------------------------------------------------------------------//
 // Was in 
 // Wrapper for localisation of starting point of particle.
@@ -332,7 +346,6 @@ void lkwr(double& pSx, double& pSy, double& pSz,
   if(debug)
   {
       std::cout << "======= LKWR =======" << std::endl;
-      std::cout << "oldReg is " << oldReg << std::endl;
       std::cout << "position is " << pSx << " " << pSy << " " << pSz << std::endl; 
   }
 
@@ -372,15 +385,11 @@ void lkwr(double& pSx, double& pSy, double& pSz,
 	  flagErr = i;
           if(debug)
           {
-              std::cout << "newReg is " << newReg << std::endl;
+              std::cout << "point is in region = " << region << std::endl;
           }
-          //BIZARRELY - WHEN WE ARE INSIDE A VOLUME, BOTH, newReg has to equal flagErr
-	  //std::cerr << "newReg is " << newReg << std::endl;
-	  return;
+          return;
 	}
-    }
-    return;
-}
+    }  // end loop over all volumes
 
   std::cout << "point is not in any volume" << std::endl;
   return;
