@@ -18,133 +18,167 @@
 
 using moab::DagMC;
 
-// #define DAG DagMC::instance()
-
-double posx_orig;
 double posx;
 double posy;
 double posz;
+double xyz[] = {posx, posy, posz};
 
 double dirx;
 double diry;
 double dirz;
-int oldReg;
+
+double lastRetStep;
+int lastKnownRegion = -1;
+int curReg, newReg, nextReg, originReg;;
 
 char *getfileptr(std::string name);
-void delta_to_surface(double posx, double posy, double posz,
-                      double dirx, double diry, double dirz,
-                      double delta, int& oldReg, double retStep, int newReg,
-                      int& flagErr, bool print_all);
 
-TEST(nrml_Test, RayFire)
+int look( double& posx, double& posy, double& posz, double* dir, int& region);
+
+TEST(nrml_Test, sense)
 {
-   // double delta = 0.00;
-   posx_orig = 0.0;
-   posx = posx_orig;
+   double retStep;
+   posx = 0.0;
    posy = 0.0;
    posz = 0.0;
-   double xyz[] = {posx, posy, posz};
    
    dirx = 1.0;
    diry = 0.0;
    dirz = 0.0;
    double dir[] = {dirx, diry, dirz};
    
-   int oldReg = 2;
-   double retStep;
-   int newReg;
-   int flagErr;
-   int lattice_dummy;
-
-   char *fileptr;
-   fileptr = getfileptr("../cases/test.h5m");
+   // Concentric bricks: faces at 5, 7.5, and 10
+   char *fileptr = getfileptr("../cases/test.h5m");
 
    // Load the file and create the dag structure
    cpp_dagmcinit(fileptr,0,1);
-   lkwr(posx, posy, posz, dir, oldReg, lattice_dummy, newReg, flagErr, lattice_dummy);
    
-   // Fire a ray from the given point in the given direction
-   // calls ray_fire, sets retStep and global next_surf
-   g1_fire(oldReg, xyz, dir, retStep, newReg); 
+   // Find out what volume we are in: lastKnownRegion doesn't matter unless we are on a boundary
+   // curRegion should be 1 for nested cubes, 2 for nested spheres
+   curReg = look(posx, posy, posz, dir, lastKnownRegion );
+   originReg = curReg;
 
+   // Fire a ray from the given point in the given direction
+   // calls ray_fire, sets retStep, newReg and global next_surf
+   g1_fire(curReg, xyz, dir, retStep, nextReg); 
+   // set global for later use
+   lastRetStep = retStep;
    if (true)
    {
       std::cout<<"============= Result of g1_fire =============="<<std::endl;
       std::cout << "Position " << posx << " " << posy << " " << posz << std::endl;
       std::cout << "Direction vector " << dirx << " " << diry << " " << dirz << std::endl;
-      std::cout << "Oldreg = " << oldReg << std::endl;
+      std::cout << "Point is in region = " << curReg<< std::endl;
       std::cout << "retStep = " << retStep << std::endl;
-      std::cout << "Newreg = " << newReg << std::endl;
+      std::cout << "Point heading to region = " << nextReg << std::endl;
    }
    std::cout << std::endl;
 
-   double delta = 1.0e-16;
-   delta_to_surface(posx, posy, posz, dirx, diry, dirz, delta, \
-                    oldReg, retStep, newReg, flagErr, false);
+   // Reset the position to just a little off the origin, within the normaliztion amount
+   double* norml = new double(3); 
+   posx += 1.0e-2;
+   std::cout << "Position close to origin " << posx << " " << posy << " " << posz << std::endl;
 
-   delta = 1.0e-15;
-   delta_to_surface(posx, posy, posz, dirx, diry, dirz, delta, \
-                    oldReg, retStep, newReg, flagErr, false);
+   // Testing calls (not otherwise necessary: confirm we are still in the volume of the origin 
+   lastKnownRegion = curReg;  // Copy position of previous region
+   curReg = look(posx, posy, posz, dir, lastKnownRegion);
+   EXPECT_EQ(originReg, curReg);
 
-   delta = 1.0e-14;
-   delta_to_surface(posx, posy, posz, dirx, diry, dirz, delta, \
-                    oldReg, retStep, newReg, flagErr, false);
+   // Position is near the origin.  Nothing should change
+   int flagErr;
+   nrmlwr(posx, posy, posz, dirx, diry, dirz, norml, curReg, newReg, flagErr);
+   // Get the sense of the normal with respect to the current region
+   int sense = getSense(curReg);
+      std::cout << "Sense of next_surf with respect to the point is " << sense << std::endl;
+   EXPECT_EQ(1, sense);
 
-   delta = 1.0e-13;
-   delta_to_surface(posx, posy, posz, dirx, diry, dirz, delta, \
-                    oldReg, retStep, newReg, flagErr, false);
-
-   delta = 1.0e-12;
-   delta_to_surface(posx, posy, posz, dirx, diry, dirz, delta, \
-                    oldReg, retStep, newReg, flagErr, false);
-
-   delta = 1.0e-11;
-   delta_to_surface(posx, posy, posz, dirx, diry, dirz, delta, \
-                    oldReg, retStep, newReg, flagErr, false);
-
-   delta = 1.0e-10;
-   delta_to_surface(posx, posy, posz, dirx, diry, dirz, delta, \
-                    oldReg, retStep, newReg, flagErr, false);
-
-   delta = 1.0e-9;
-   delta_to_surface(posx, posy, posz, dirx, diry, dirz, delta, \
-                    oldReg, retStep, newReg, flagErr, false);
-
-   delta = 1.0e-8;
-   delta_to_surface(posx, posy, posz, dirx, diry, dirz, delta, \
-                    oldReg, retStep, newReg, flagErr, false);
-
-   delta = 1.0e-7;
-   delta_to_surface(posx, posy, posz, dirx, diry, dirz, delta, \
-                    oldReg, retStep, newReg, flagErr, false);
-
-   delta = 1.0e-6;
-   delta_to_surface(posx, posy, posz, dirx, diry, dirz, delta, \
-                    oldReg, retStep, newReg, flagErr, false);
-
-   delta = 1.0e-5;
-   delta_to_surface(posx, posy, posz, dirx, diry, dirz, delta, \
-                    oldReg, retStep, newReg, flagErr, false);
-
-   delta = 1.0e-4;
-   delta_to_surface(posx, posy, posz, dirx, diry, dirz, delta, \
-                    oldReg, retStep, newReg, flagErr, false);
-
-   delta = 1.0e-3;
-   delta_to_surface(posx, posy, posz, dirx, diry, dirz, delta, \
-                    oldReg, retStep, newReg, flagErr, false);
-
-   EXPECT_TRUE(true);
+   dir[0] *= -1.0;
+   g1_fire(curReg, xyz, dir, retStep, nextReg);
+   nrmlwr(posx, posy, posz, dirx, diry, dirz, norml, curReg, newReg, flagErr);
+   sense = getSense(curReg);
+      std::cout << "Sense of next_surf with respect to the point is " << sense << std::endl;
 }
 
+TEST(nrml_test, test2)
+{ 
+   double* norml = new double(3); 
+   double retStep;
+   int flagErr;
+   double dir[] = {-dirx, diry, dirz};
+   // Add distance to surface to current (already offset) point should put us into the next region
+   std::cout << std::endl;
+   posx = lastRetStep + .1;
+   lastKnownRegion = curReg;  // Copy position of previous region
+   curReg = look(posx, posy, posz, dir, lastKnownRegion);
+   // Expect curReg to = previous nextReg from knowledge of last g1_fire, but maybe not because we are such
+   // a short distance beyond the boundary.
+   // calls ray_fire, sets retStep, nextReg and global next_surf
+   // double original_retStep = retStep;  // save retstep
+   g1_fire(curReg, xyz, dir, retStep, nextReg); 
+   if (true)
+   {
+      std::cout<<"============= Result of g1_fire =============="<<std::endl;
+      std::cout << "Position " << posx << " " << posy << " " << posz << std::endl;
+      std::cout << "Direction vector " << dirx << " " << diry << " " << dirz << std::endl;
+      std::cout << "Point is in region = " << curReg<< std::endl;
+      std::cout << "retStep = " << retStep << std::endl;
+      std::cout << "Point heading to region = " << nextReg << std::endl;
+   }
+   nrmlwr(posx, posy, posz, dirx, diry, dirz, norml, curReg, newReg, flagErr);
+   int sense = getSense(curReg);
+   std::cout << "Sense of next_surf with respect to the point is " << sense << std::endl;
+   std::cout << std::endl;
+
+   /////////////////////////////////////////////////////////////////////////////   
+   // Move this to another test
+   /*
+   std::cout << std::endl;
+   posx += retStep;
+   lastKnownRegion = curReg;  // Copy position of previous region
+   curReg = look(posx, posy, posz, dir, lastKnownRegion);
+   // Expect curReg to = previous nextReg from knowledge of last g1_fire, but maybe not because we are such
+   // a short distance beyond the boundary.
+   // calls ray_fire, sets retStep, nextReg and global next_surf
+   g1_fire(curReg, xyz, dir, retStep, nextReg); 
+   if (true)
+   {
+      std::cout<<"============= Result of g1_fire =============="<<std::endl;
+      std::cout << "Position " << posx << " " << posy << " " << posz << std::endl;
+      std::cout << "Direction vector " << dirx << " " << diry << " " << dirz << std::endl;
+      std::cout << "Point is in region = " << curReg<< std::endl;
+      std::cout << "retStep = " << retStep << std::endl;
+      std::cout << "Point heading to region = " << nextReg << std::endl;
+   }
+   nrmlwr(posx, posy, posz, dirx, diry, dirz, norml, curReg, newReg, flagErr);
+   */
+}
+
+//---------------------------------------------------------------------------//
+// getfileptr
+//---------------------------------------------------------------------------//
+// helper function
 char *getfileptr(std::string name)
 {
    char* fileptr = new char(name.length()+1);
    std:strcpy(fileptr, name.c_str());
-   return fileptr;
 }
 
-
+//---------------------------------------------------------------------------//
+// look
+//---------------------------------------------------------------------------//
+// Local wrapper for fortran-called, fluka-set lkwr
+int look( double& posx, double& posy, double& posz, double* dir, int& region)
+{
+   int flagErr;
+   int lattice_dummy;  // not used
+   int nextRegion;     // looked if on boundry, but not set.
+   lkwr(posx, posy, posz, dir, region, lattice_dummy, nextRegion, flagErr, lattice_dummy);
+   return nextRegion;
+}
+//---------------------------------------------------------------------------//
+// delta_to_surface
+//---------------------------------------------------------------------------//
+/*
 void delta_to_surface(double posx, double posy, double posz,
                       double dirx, double diry, double dirz,
                       double delta, int& oldReg, double retStep, int newReg,
@@ -154,7 +188,7 @@ void delta_to_surface(double posx, double posy, double posz,
    // Question:  do I need to pretend fluka updated the particle to the boundary?
    //            In this case I should reset posx, posy, posz to the next_surf
    double* norml = new double(3); 
-   std::cout << "For delta = " << delta << ": Position still at origin " << posx << " " << posy << " " << posz << std::endl;
+   std::cout << "Position still at origin " << posx << " " << posy << " " << posz << std::endl;
    // Position is still at the origin
    nrmlwr(posx, posy, posz, dirx, diry, dirz, norml, oldReg, newReg, flagErr);
    
@@ -242,4 +276,4 @@ void delta_to_surface(double posx, double posy, double posz,
                 sense2 << " direction." << std::endl;
    std::cout << std::endl;
 }
-
+*/
