@@ -239,20 +239,29 @@ void g1wr(double& pSx,
 //---------------------------------------------------------------------------//
 void g1_fire(int& oldRegion, double point[], double dir[], double& retStep,  int& newRegion)
 {
+  if(false)
+  {
+      std::cout<<"============= g1_fire =============="<<std::endl;    
+      std::cout << "Point " << point[0] << " " << point[1] << " " << point[2] << std::endl;
+      std::cout << "Direction vector " << dir[0] << " " << dir[1] << " " << dir[2] << std::endl;
+  }
   MBEntityHandle vol = DAG->entity_by_index(3,oldRegion);
 
   double next_surf_dist;
   MBEntityHandle newvol = 0;
 
-  std::cout << "g1_fire: next_surf before ray_fire: " << next_surf << std::endl;
+  // next_surf is a global
   MBErrorCode result = DAG->ray_fire(vol, point, dir, next_surf, next_surf_dist );
-  std::cout << "g1_fire:      AFTER ray_fire: " << next_surf << std::endl;
   retStep = next_surf_dist;
 
   MBErrorCode rval = DAG->next_vol(next_surf,vol,newvol);
 
   newRegion = DAG->index_by_handle(newvol);
-  // std::cerr << "newRegion = " << newRegion << " Distance = " << retStep << std::endl;
+  if(false)
+  {
+     std::cerr << "Region on other side of surface is  = " << newRegion << \
+                  ", Distance to next surf is " << retStep << std::endl;
+  }
   return;
 }
 ///////			End g1wr and g1
@@ -262,48 +271,59 @@ void g1_fire(int& oldRegion, double point[], double dir[], double& retStep,  int
 // nrmlwr(..)
 //---------------------------------------------------------------------------//
 /// From Flugg Wrappers WrapNorml.cc
+//  Note:  The normal is calculated at the point on the surface nearest the 
+//         given point
+//  Does NOT set newReg.
 void nrmlwr(double& pSx, double& pSy, double& pSz,
             double& pVx, double& pVy, double& pVz,
-	    double* norml, const int& oldReg, 
+	    double* norml, const int& oldRegion, 
 	    const int& newReg, int& flagErr)
 {
-  bool print_all = false;
-  if(print_all)
-    {
-      std::cout << "============ NRMLWR-DBG =============" << std::endl;
-    }
+  if(debug)
+  {
+      std::cout << "============ NRMLWR =============" << std::endl;
+  }
 
-  //dummy variables
   flagErr=0;
   double xyz[3]; //tmp storage of position
-  //MBEntityHandle surf = 0;
   xyz[0]=pSx,xyz[1]=pSy,xyz[2]=pSz;
-  MBErrorCode ErrorCode = DAG->get_angle(next_surf,xyz,norml); // get the angle
+  MBErrorCode ErrorCode = DAG->get_angle(next_surf,xyz,norml); 
   if(ErrorCode != MB_SUCCESS)
-    {
+  {
       std::cout << "Could not determine normal" << std::endl;
       flagErr = 2;
       return;
-    }
-
-  //return normal:
-  //norml[0]=pVx;
-  //norml[1]=pVy;
-  //norml[2]=pVz;
-
-  // to test:  create a simple model:  dag-> ray_fire in order to get next_sruf.  
-// then call normlwr with next_surf and it should return an opposite-pointing vector
-// ON the surface, normlwr should components of rnorml should be 0 or near
-// PAST the surface, norml components should point AWAY from current position
-  
+  }
+  // sense of next_surf with respect to oldRegion (volume)
+  int sense = getSense(oldRegion);
   if(debug)
-    {
+  {
       std::cout << "Normal: " << norml[0] << ", " << norml[1] << ", " << norml[2]  << std::endl;
-      // std::cout << "out of nrmlwr " << std::endl;
-    }
-  
+  }
   return;
 }
+///////			End nrmlwr
+/////////////////////////////////////////////////////////////////////
+
+//---------------------------------------------------------------------------//
+// getSense(..)
+//---------------------------------------------------------------------------//
+// Helper function
+int getSense(int region)
+{
+
+  int sense;  // sense of next_surf with respect to oldRegion (volume)
+
+  MBEntityHandle vol = DAG->entity_by_index(3, region);
+ 
+  MBErrorCode ErrorCode = DAG->surface_sense(vol, next_surf, sense); 
+  if(false)
+  {
+      std::cout << "Sense of next_surf with respect to the point is " << sense << std::endl;
+  }
+  return sense; 
+} 
+
 ///////			End nrmlwr
 /////////////////////////////////////////////////////////////////////
 
@@ -313,19 +333,20 @@ void nrmlwr(double& pSx, double& pSy, double& pSz,
 // Was in 
 // Wrapper for localisation of starting point of particle.
 //
-// modified 20/III/00: history initialization moved to ISVHWR
+// Question:  Should pV, the direction vector, be used?  The Flugg wrapper
+//            code passes it to a geant call 
+//           "ptrNavig->LocateGlobalPointAndUpdateTouchable()"
 //////////////////////////////////////////////////////////////////
-
-using namespace moab;
-
+// What volume is the point in?  
+// Set newReg to volume of point.
+// Ignore oldReg UNLESS volume is on the boundary, then set newReg=oldReg
 void lkwr(double& pSx, double& pSy, double& pSz,
           double* pV, const int& oldReg, const int& oldLttc,
-          int& newReg, int& flagErr, int& newLttc)
+          int& region, int& flagErr, int& newLttc)
 {
   if(debug)
   {
       std::cout << "======= LKWR =======" << std::endl;
-      std::cout << "oldReg is " << oldReg << std::endl;
       std::cout << "position is " << pSx << " " << pSy << " " << pSz << std::endl; 
   }
 
@@ -335,9 +356,9 @@ void lkwr(double& pSx, double& pSy, double& pSz,
 
   for (int i = 1 ; i <= num_vols ; i++) // loop over all volumes
     {
-      EntityHandle volume = DAG->entity_by_index(3, i); // get the volume by index
+      MBEntityHandle volume = DAG->entity_by_index(3, i); // get the volume by index
       // No ray history or ray direction.
-      ErrorCode code = DAG->point_in_volume(volume, xyz, is_inside);
+      MBErrorCode code = DAG->point_in_volume(volume, xyz, is_inside);
 
       // check for non error
       if(MB_SUCCESS != code) 
@@ -347,19 +368,29 @@ void lkwr(double& pSx, double& pSy, double& pSz,
 	  return;
 	}
       
-      if (is_inside == 1 )  // we are inside the cell tested
+      if (is_inside == -1)  // we are on a boundary
+      {
+          region = oldReg;
+          flagErr = oldReg;
+          if(debug)
+          {
+             std::cout << "oldReg = " << oldReg << std::endl;
+             std::cout << "point is on a boundary, setting region = oldReg" << std::endl;
+          }
+          return;
+      }
+      else if ( is_inside == 1 ) // we are inside the cell tested
 	{
-	  newReg = i;
+	  region = i;
+          //BIZARRELY - WHEN WE ARE INSIDE A VOLUME, BOTH, region has to equal flagErr
 	  flagErr = i;
           if(debug)
           {
-              std::cout << "newReg is " << newReg << std::endl;
+              std::cout << "point is in region = " << region << std::endl;
           }
-          //BIZARRELY - WHEN WE ARE INSIDE A VOLUME, BOTH, newReg has to equal flagErr
-	  //std::cerr << "newReg is " << newReg << std::endl;
-	  return;
+          return;
 	}
-    }
+    }  // end loop over all volumes
 
   std::cout << "point is not in any volume" << std::endl;
   return;
