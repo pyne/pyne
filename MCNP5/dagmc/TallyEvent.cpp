@@ -112,6 +112,11 @@ double TallyEvent::get_tally_multiplier() const
     return tally_multiplier;
 }
 //---------------------------------------------------------------------------//
+double TallyEvent::get_weighting_factor() const
+{
+    return tally_multiplier * particle_weight;
+}
+//---------------------------------------------------------------------------//
 TallyEvent::EventType TallyEvent::get_event_type() const
 {
     return event_type;

@@ -51,11 +51,10 @@ struct MeshTallyInput
  * transport codes.  Some basic functionality is already included but the
  * following functions must be implemented in all Derived classes
  * 
- *     1) get_score_weight
- *     2) compute_score
- *     3) add_score_to_tally
- *     4) end_history
- *     5) write_results
+ *     1) compute_score
+ *     2) add_score_to_tally
+ *     3) end_history
+ *     4) write_results
  *
  * Note that three arrays are available for storing mesh tally data
  *
@@ -86,11 +85,6 @@ class MeshTally
     virtual ~MeshTally(){}
 
     // >>> PUBLIC INTERFACE
-
-    /**
-     * \brief Computes weighting factor for individual tally scores
-     */
-    //virtual void get_score_weight() = 0;
 
     /**
      * \brief Computes mesh tally scores for the given tally event

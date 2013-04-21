@@ -224,8 +224,7 @@ KDEMeshTally::~KDEMeshTally()
 void KDEMeshTally::compute_score(const TallyEvent& event, int ebin)
 {
     // initialize common weighting factor for this tally event
-    double particle_weight = event.get_particle_data().second;
-    double weight = event.get_tally_multiplier() * particle_weight;
+    double weight = event.get_weighting_factor();
 
     // set up tally event based on KDE mesh tally type
     TrackData track;

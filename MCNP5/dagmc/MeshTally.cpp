@@ -17,7 +17,9 @@ MeshTally::MeshTally(const MeshTallyInput& input)
     num_energy_bins = input_data.energy_bin_bounds.size();
 
     if(!input_data.total_energy_bin)
+    {
         --num_energy_bins;
+    }
 
     assert(num_energy_bins > 0);
 }

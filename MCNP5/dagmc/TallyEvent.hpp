@@ -116,6 +116,12 @@ class TallyEvent
     double get_tally_multiplier() const;
 
     /**
+     * \brief Gets the total weighting factor for this event
+     * \return product of tally multiplier and particle weight
+     */
+    double get_weighting_factor() const;
+
+    /**
      * \brief get_event_type()
      * \return type of tally event this event represents
      */
