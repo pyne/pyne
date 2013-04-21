@@ -93,6 +93,13 @@ KDEMeshTally* KDEMeshTally::setup( const MeshTallyInput& fmesh,
     else if( key == "hy" ) bandwidth[1] = parse_bandwidth_param( key, val );
     else if( key == "hz" ) bandwidth[2] = parse_bandwidth_param( key, val );
     else if( key == "kernel" ) kernel = set_kernel_type( key, val );
+    else if ( key == "seed" && type == SUB_TRACK)
+    {
+        // override random number seed if requested by user
+        int seed = atoi(val.c_str());
+        srand(seed);
+        seed_is_set = true;
+    }
     else if( key == "subtracks" && type != COLLISION ) { 
       subtracks = atoi( val.c_str() );
       if( subtracks == 0 ) {
@@ -104,6 +111,13 @@ KDEMeshTally* KDEMeshTally::setup( const MeshTallyInput& fmesh,
     else{
       std::cerr << "Warning: KDE tally's FC" << id << " card has unknown key '" << key << "'" << std::endl;
     }
+  }
+
+  // set random number seed if it has not already been set by another instance
+  if (type == SUB_TRACK && !seed_is_set)
+  {
+    srand(time(NULL));
+    seed_is_set = true;
   }
   
   std::stringstream strbuf;
@@ -197,7 +211,6 @@ KDEMeshTally::KDEMeshTally( const MeshTallyInput& settings,
   }
   else
     num_subtracks = subtracks;
-  
 }
 //-----------------------------------------------------------------------------
 KDEMeshTally::~KDEMeshTally()
@@ -634,20 +647,8 @@ double KDEMeshTally::subtrack_score(const std::vector<moab::CartVect>& points,
 std::vector<moab::CartVect> KDEMeshTally::choose_points(const TrackData& data,
                                                         int p)
 {
-    // check number of points to choose is valid
-    if (p <= 0)
-    {
-        p = 3;
-        std::cerr << "\nError: Number of sub-track points is invalid:\n";
-        std::cerr << "  using p = 3. \n\n";
-    }
-
-    // set random number generator seed if it has not yet been set
-    if (!seed_is_set)
-    {
-        srand(11699913);
-        seed_is_set = true;
-    }
+    // make sure the number of sub-tracks is valid
+    assert(p > 0);
 
     // compute sub-track length, assumed to be equal for all sub-tracks
     double sub_track_length = data.track_length / p;
