@@ -133,7 +133,6 @@ class KDEMeshTally : public MeshTally {
 
     // subtrack estimator parameters
     static bool seed_is_set;
-    std::vector<moab::CartVect> subtrack_points;  // random points along track
         
     /**
      * Builds a KD-Tree from all the mesh node entities in the specified meshset,
@@ -152,20 +151,7 @@ class KDEMeshTally : public MeshTally {
      * in the kernel density approximation.
      */
     moab::CartVect get_optimal_bandwidth();
-
-    /**
-     * \brief Computes a single tally score for the given calculation point
-     * \param event the parameters needed to compute the tally score
-     * \param X the (x, y, z) coordinates of the calculation point
-     * \return the tally score for the calculation point
-     *
-     * Note that the method used for computing the tally score for the given
-     * calculation point X is determined according to the type of KDE mesh
-     * tally that was created.
-     */
-    double get_score(const TallyEvent& event,
-                     const moab::CartVect& X);
-
+   
     /**
      * Adds a tally contribution to one calculation point on the mesh.
      *
@@ -190,13 +176,13 @@ class KDEMeshTally : public MeshTally {
      * \param X the (x, y, z) coordinates of the calculation point
      * \return the tally score for the calculation point
      *
-     * The integral_track_estimator() function computes the integral of the
+     * The integral_track_score() function computes the integral of the
      * 3D path-length dependent kernel function K(X, s) with respect to path-
      * length s for the given calculation point X, using the limits of
-     * integration as determined by the set_integral_limits function.
+     * integration as determined by the set_integral_limits() function.
      */
-    double integral_track_estimator(const TrackData& data,
-                                    const moab::CartVect& X);
+    double integral_track_score(const TrackData& data,
+                                const moab::CartVect& X);
 
     /**
      * \brief Determines integration limits for the integral-track estimator
@@ -220,17 +206,17 @@ class KDEMeshTally : public MeshTally {
 
     /**
      * \brief Computes tally score based on the sub-track estimator
-     * \param data the physics data for the track segment being tallied
+     * \param points the set of sub-track points needed for computing score
      * \param X the (x, y, z) coordinates of the calculation point
      * \return the tally score for the calculation point
      *
-     * The sub_track_estimator() function computes the average 3D kernel
-     * contribution for the number of subtracks requested for the given
+     * The subtrack_score() function computes the average 3D kernel
+     * contribution for the number of sub-tracks requested for the given
      * calculation point X, using the randomly chosen points along the
      * track that were computed by the choose_points function.
      */
-    double sub_track_estimator(const TrackData& data,
-                               const moab::CartVect& X);
+    double subtrack_score(const std::vector<moab::CartVect>& points,
+                          const moab::CartVect& X);
 
     /**
      * \brief Chooses p random points along a track segment
@@ -250,11 +236,10 @@ class KDEMeshTally : public MeshTally {
      * \param X the (x, y, z) coordinates of the calculation point
      * \return the tally score for the calculation point
      *
-     * The collision_estimator() function computes the 3D kernel contribution
+     * The collision_score() function computes the 3D kernel contribution
      * for the given calculation point X.
      */
-    double collision_estimator(const CollisionData& data,
-                               const moab::CartVect& X);
+    double collision_score(const CollisionData& data, const moab::CartVect& X);
 };
 
 #endif
