@@ -237,6 +237,9 @@ void g1wr(double& pSx,
 //---------------------------------------------------------------------------//
 // g1(int& old Region, int& newRegion)
 //---------------------------------------------------------------------------//
+// oldRegion should be the region the point is in
+// retStep is set to next_surf_dist
+// newRegion is gotten from the volue returned by DAG->next_vol
 void g1_fire(int& oldRegion, double point[], double dir[], double& retStep,  int& newRegion)
 {
   if(false)
@@ -255,7 +258,6 @@ void g1_fire(int& oldRegion, double point[], double dir[], double& retStep,  int
   retStep = next_surf_dist;
 
   MBErrorCode rval = DAG->next_vol(next_surf,vol,newvol);
-
   newRegion = DAG->index_by_handle(newvol);
   if(false)
   {
@@ -319,7 +321,7 @@ int getSense(int region)
   MBErrorCode ErrorCode = DAG->surface_sense(vol, next_surf, sense); 
   if(false)
   {
-      std::cout << "Sense of next_surf with respect to the point is " << sense << std::endl;
+      std::cout << "Sense of next_surf with respect to the region is " << sense << std::endl;
   }
   return sense; 
 } 
