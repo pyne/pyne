@@ -676,7 +676,7 @@ def genpxd(template, header=None):
     return pxd
 
 
-_testheader = '''"""Tests the part of stlconverters that is accessible from Python."""
+_testheader = '''"""Tests the part of stlcontainers that is accessible from Python."""
 ###################
 ###  WARNING!!! ###
 ###################
@@ -694,7 +694,7 @@ import os
 import numpy  as np
 import tables as tb
 
-import pyne.stlconverters as conv
+import pyne.stlcontainers as conv
 
 
 '''

@@ -22,8 +22,8 @@ ELSE:
     from pyne._includes.libcpp.string cimport string as std_string
     from pyne._includes.libcpp.map cimport map as cpp_map
 cimport cpp_material
-cimport pyne.stlconverters as conv
-import pyne.stlconverters as conv
+cimport pyne.stlcontainers as conv
+import pyne.stlcontainers as conv
 
 cimport cpp_jsoncpp
 cimport jsoncpp
