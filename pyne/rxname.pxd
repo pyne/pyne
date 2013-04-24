@@ -18,4 +18,4 @@ cimport pyne.pyne_config
 
 cimport cpp_nucname
 cimport cpp_rxname
-cimport pyne.stlconverters as conv
+cimport pyne.stlcontainers as conv

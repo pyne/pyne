@@ -21,7 +21,7 @@ ELSE:
 from pyne cimport nucname
 from pyne import nucname
 
-from pyne cimport stlconverters as conv
+from pyne cimport stlcontainers as conv
 
 cimport pyne.cpp_material
 cimport pyne.material

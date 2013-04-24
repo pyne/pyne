@@ -41,8 +41,8 @@ def main():
                     ('map', 'str', 'vector[double]'),
                     ]
         stlwrap.genfiles(template, 
-                         fname='pyne/stlconverters', 
-                         testname="pyne/tests/test_stlconverters")
+                         fname='pyne/stlcontainers', 
+                         testname="pyne/tests/test_stlcontainers")
 
 if __name__ == '__main__':
     main()
