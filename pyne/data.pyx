@@ -32,8 +32,8 @@ cimport pyne.nucname
 import pyne.nucname
 
 cimport cpp_data
-cimport pyne.stlconverters as conv
-import pyne.stlconverters as conv
+cimport pyne.stlcontainers as conv
+import pyne.stlcontainers as conv
 
 
 #
