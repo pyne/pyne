@@ -180,7 +180,8 @@ void dagmc_fmesh_setup_mesh_( int* /*ipt*/, int* id, int* fmesh_index,
   for( int i = 0; i < *n_energy_mesh; ++i ){
     emesh_boundaries.push_back(energy_mesh[i]);
   }
-  
+
+  // Parse FC card and create input data for MeshTally
   MeshTallyInput fmesh_settings;
   fmesh_settings.tally_id = *id;
   fmesh_settings.energy_bin_bounds = emesh_boundaries;
@@ -191,6 +192,21 @@ void dagmc_fmesh_setup_mesh_( int* /*ipt*/, int* id, int* fmesh_index,
   bool success = parse_fc_card( comment_str, fc_settings, *id );
   if( !success ){
     exit(EXIT_FAILURE);
+  }
+
+  // Set the filename for the input mesh to be tallied
+  MeshTallyInput::TallyOptions::iterator it = fc_settings.find("inp");
+
+  if (it != fc_settings.end())
+  {
+      fmesh_settings.input_filename = it->second;
+      fc_settings.erase(it);
+  }
+  else // use default input file name
+  {
+      std::stringstream str;
+      str << "fmesh" << *id << ".h5m";
+      str >> fmesh_settings.input_filename;
   }
 
   // pad all tally lists with nulls up to a max of (*fmesh_index)

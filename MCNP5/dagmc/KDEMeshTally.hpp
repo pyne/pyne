@@ -113,7 +113,6 @@ class KDEMeshTally : public MeshTally {
     KDEKernel* kernel;             // kernel function tally is based on
     unsigned int num_subtracks;    // number of subtracks used in tally       
     
-    std::string output_filename;
     moab::EntityHandle tally_set;  // the MOAB set of entities used in tally
 
     moab::AdaptiveKDTree* tree;    

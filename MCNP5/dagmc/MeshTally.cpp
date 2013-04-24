@@ -22,6 +22,21 @@ MeshTally::MeshTally(const MeshTallyInput& input)
     }
 
     assert(num_energy_bins > 0);
+
+    // Determine name of the output file
+    MeshTallyInput::TallyOptions::iterator it = input_data.options.find("out");
+
+    if (it != input_data.options.end())
+    {
+        output_filename = it->second;
+        input_data.options.erase(it);
+    }
+    else // use default output file name
+    {
+        std::stringstream str;
+        str << "meshtal" << input_data.tally_id << ".h5m";
+        str >> output_filename;
+    }
 }
 //---------------------------------------------------------------------------//
 // TALLY DATA ACCESS FUNCTIONS

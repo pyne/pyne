@@ -74,8 +74,7 @@ KDEMeshTally* KDEMeshTally::setup( const MeshTallyInput& fmesh,
                                    moab::Interface* mbi, TallyType type )
 {
 
-  bool use_dagmc_mesh = true; // true if mesh data should be pulled from DagMC object
-  std::string input_filename, output_filename;
+  bool use_dagmc_mesh = false; // true if mesh data should be pulled from DagMC object
   moab::CartVect bandwidth = default_bandwidth;
   KDEKernel::KernelType kernel = KDEKernel::EPANECHNIKOV;
   unsigned int subtracks = 0;
@@ -86,9 +85,7 @@ KDEMeshTally* KDEMeshTally::setup( const MeshTallyInput& fmesh,
   for( MeshTallyInput::TallyOptions::const_iterator i = params.begin(); i != params.end(); ++i )
   {
     std::string key = (*i).first, val = (*i).second;
-
-    if( key == "inp" ){ input_filename = val; use_dagmc_mesh = false; }
-    else if( key == "out" ) output_filename = val;
+    if( key == "out" ) continue;  // processed in MeshTally
     else if( key == "hx" ) bandwidth[0] = parse_bandwidth_param( key, val );
     else if( key == "hy" ) bandwidth[1] = parse_bandwidth_param( key, val );
     else if( key == "hz" ) bandwidth[2] = parse_bandwidth_param( key, val );
@@ -119,31 +116,6 @@ KDEMeshTally* KDEMeshTally::setup( const MeshTallyInput& fmesh,
     srand(time(NULL));
     seed_is_set = true;
   }
-  
-  std::stringstream strbuf;
-  if( output_filename.length() == 0 ){
-    strbuf << "meshtal" << id << ".h5m";
-    strbuf >> output_filename;
-    strbuf.clear();
-  }
-
-  std::cout << "Creating KDE ";
-
-  if ( type == COLLISION ) std::cout << "collision ";
-  else if ( type == INTEGRAL_TRACK ) std::cout << "track ";
-  else std::cout << "subtrack ";
- 
-  std::cout << "fmesh" << id 
-            << ", input: " << (use_dagmc_mesh ? "(pre-loaded DagMC data)" : input_filename.c_str())  
-            << ", output: " << output_filename << std::endl;
-  
-  std::cout << "   using the " << KDEKernel::kernel_names[kernel] << " kernel";
-  std::cout << " with bandwidth = " << bandwidth;
-
-  if ( subtracks != 0 )
-    std::cout << "\n   and splitting tracks into " << subtracks << " subtracks" << std::endl;
-  else
-    std::cout << std::endl;
 
   moab::EntityHandle moab_set = NULL ; // TODO: this should be queried from DagMC
   if( !use_dagmc_mesh ){
@@ -152,10 +124,10 @@ KDEMeshTally* KDEMeshTally::setup( const MeshTallyInput& fmesh,
     rval = mbi->create_meshset( moab::MESHSET_SET, moab_set );
     assert( rval == moab::MB_SUCCESS );
 
-    rval = mbi->load_file( input_filename.c_str(), &moab_set );
+    rval = mbi->load_file( fmesh.input_filename.c_str(), &moab_set );
 
     if( rval != moab::MB_SUCCESS ){
-      std::cerr << "Error: could not load KDE tally mesh file " << input_filename << std::endl;
+      std::cerr << "Error: could not load KDE tally mesh file " << fmesh.input_filename << std::endl;
       exit( EXIT_FAILURE );
     }
 
@@ -163,7 +135,24 @@ KDEMeshTally* KDEMeshTally::setup( const MeshTallyInput& fmesh,
 
   KDEMeshTally *kde = new KDEMeshTally( fmesh, mbi, moab_set, bandwidth,
                                         type, kernel, subtracks );
-  kde->output_filename = output_filename;
+
+  std::cout << "Creating KDE ";
+
+  if ( type == COLLISION ) std::cout << "collision ";
+  else if ( type == INTEGRAL_TRACK ) std::cout << "track ";
+  else std::cout << "subtrack ";
+ 
+  std::cout << "fmesh" << id 
+            << ", input: " << (use_dagmc_mesh ? "(pre-loaded DagMC data)" : fmesh.input_filename.c_str())  
+            << ", output: " << kde->output_filename << std::endl;
+  
+  std::cout << "   using the " << KDEKernel::kernel_names[kernel] << " kernel";
+  std::cout << " with bandwidth = " << bandwidth;
+
+  if ( subtracks != 0 )
+    std::cout << "\n   and splitting tracks into " << subtracks << " subtracks" << std::endl;
+  else
+    std::cout << std::endl;
 
   // create a tally set that contains only the 3D mesh cells (i.e. hexes/tets)
   moab::ErrorCode rval;

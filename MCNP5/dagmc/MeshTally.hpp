@@ -29,13 +29,16 @@ struct MeshTallyInput
     typedef std::multimap<std::string, std::string> TallyOptions;
 
     /// User-specified ID for this mesh tally
-    int tally_id;
+    unsigned int tally_id;
 
     /// Energy bin boundaries defined for all mesh tally points
     std::vector<double> energy_bin_bounds;
 
     /// If true, add an extra energy bin to tally all energy levels
     bool total_energy_bin;
+
+    /// Name of input file containing mesh data
+    std::string input_filename;
 
     /// Optional input parameters requested by user
     TallyOptions options;
@@ -137,11 +140,19 @@ class MeshTally
     /// Input data defined by user for this mesh tally
     MeshTallyInput input_data;
 
+    /// Number of energy bins implemented in the data arrays
+    unsigned int num_energy_bins; 
+
+    /// Name of file to which the final tally results will be written
+    std::string output_filename;
+
     /// Set of tally points (cells, nodes, etc) for this mesh tally
     moab::Range tally_points;
 
     /// Tag arrays for storing energy bin labels
     std::vector<moab::Tag> tally_tags, error_tags;
+
+    // >>> TALLY DATA ARRAYS
 
     /// Data array for storing sum of scores for all particle histories
     std::vector<double> tally_data;
@@ -151,9 +162,6 @@ class MeshTally
 
     /// Data array for storing sum of scores for a single history
     std::vector<double> temp_tally_data;
-
-    /// Number of energy bins implemented in the data arrays
-    unsigned int num_energy_bins; 
 
     // >>> PROTECTED FUNCTIONS
 

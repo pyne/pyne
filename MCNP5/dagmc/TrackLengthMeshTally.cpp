@@ -134,7 +134,7 @@ TrackLengthMeshTally* TrackLengthMeshTally::setup( const MeshTallyInput& fmesh_p
 
   const MeshTallyInput::TallyOptions& fc_params = fmesh_params.options;
 
-  std::string input_filename, output_filename, tag_name;
+  std::string tag_name;
   std::vector<std::string> tag_values;
 
   bool convex_flag = false, conformal_flag = false;
@@ -147,8 +147,7 @@ TrackLengthMeshTally* TrackLengthMeshTally::setup( const MeshTallyInput& fmesh_p
        i != fc_params.end(); ++i )
   {
     std::string key = (*i).first, val = (*i).second;
-    if( key == "inp" ) input_filename = val;
-    else if( key == "out" ) output_filename = val;
+    if(key == "out" ) continue; // processed in MeshTally
     else if( key == "tag" ) tag_name = val;
     else if( key == "tagval" ) tag_values.push_back(val);
     else if( key == "convex" && (val == "t" || val == "true" ) ) convex_flag = true; 
@@ -170,22 +169,12 @@ TrackLengthMeshTally* TrackLengthMeshTally::setup( const MeshTallyInput& fmesh_p
       std::cerr << "Warning: FC" << id << " card has unknown key '" << key << "'" << std::endl;
     }
   }
-  
-  std::stringstream strbuf;
-  if( input_filename.length() == 0 ){
-    strbuf << "fmesh" << id << ".h5m";
-    strbuf >> input_filename;
-    strbuf.clear();
-  }
-  if( output_filename.length() == 0 ){
-    strbuf << "meshtal" << id << ".h5m";
-    strbuf >> output_filename;
-    strbuf.clear();
-  }
+
+  moab::TrackLengthMeshTally *mt = new moab::TrackLengthMeshTally( fmesh_params, mbi );
 
   std::cout << "Creating dagmc fmesh" << id 
-            << ", input: " << input_filename 
-            << ", output: " << output_filename << std::endl;
+            << ", input: " << fmesh_params.input_filename 
+            << ", output: " << mt->output_filename << std::endl;
 
   if( tag_name != "" ){
     std::cout << "  using tag name='" << tag_name << "'";
@@ -211,8 +200,6 @@ TrackLengthMeshTally* TrackLengthMeshTally::setup( const MeshTallyInput& fmesh_p
     std::cout << std::endl; 
     *conformality = conf_tmp;
   }
-
-  moab::TrackLengthMeshTally *mt = new moab::TrackLengthMeshTally( fmesh_params, mbi, output_filename );
   
   if( convex_flag && conformal_flag ){
     std::cerr << "Warning: FC" << id << " specifies both conformal and convex logic; using conformal logic." << std::endl;
@@ -225,7 +212,7 @@ TrackLengthMeshTally* TrackLengthMeshTally::setup( const MeshTallyInput& fmesh_p
   else mt->set_convex_flag( convex_flag );
 
   moab::ErrorCode rval;
-  rval = mt->load_mesh( input_filename, tag_name, tag_values );
+  rval = mt->load_mesh( fmesh_params.input_filename, tag_name, tag_values );
   if( rval != moab::MB_SUCCESS ){
     std::cerr << "** DAGMC TrackLengthMeshTally creation failed!" << std::endl;
     std::cerr << "** Tally " << id << " failed to initialize." << std::endl;
@@ -238,10 +225,9 @@ TrackLengthMeshTally* TrackLengthMeshTally::setup( const MeshTallyInput& fmesh_p
 }
 
   
-TrackLengthMeshTally::TrackLengthMeshTally( const MeshTallyInput& fmesh, Interface* mb_p, 
-                                            const std::string& output_filename_p ) :
+TrackLengthMeshTally::TrackLengthMeshTally( const MeshTallyInput& fmesh, Interface* mb_p ) :
   MeshTally( fmesh ),
-  mb( mb_p ), output_filename(output_filename_p),  
+  mb( mb_p ),  
   obb_tool( new OrientedBoxTreeTool(mb_p) ),
   last_visited_tet( 0 ), 
   convex( false ), conformality( NULL ), conformal_surface_source( false ),

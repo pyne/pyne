@@ -74,8 +74,6 @@ protected:
 
   Interface* mb;
 
-  std::string output_filename;
-
   EntityHandle tally_set;
 
   AdaptiveKDTree* kdtree;
@@ -99,7 +97,7 @@ protected:
   int last_cell;
   std::set<EntityHandle> visited_this_history; 
     
-  TrackLengthMeshTally( const MeshTallyInput& fmesh_params, Interface* mb_p, const std::string& output_filename );
+  TrackLengthMeshTally( const MeshTallyInput& fmesh_params, Interface* mb_p );
 
 private:
   TrackLengthMeshTally& operator=( const TrackLengthMeshTally& mt ); // unimplemented
