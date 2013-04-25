@@ -3,6 +3,9 @@
 #ifndef KDEKERNEL_H
 #define KDEKERNEL_H
 
+// forward declarations
+class string;
+
 /**  
  * A class that represents a one-dimensional kernel function k(u), which is a
  * function whose integral over the entire domain is equal to one.
@@ -35,13 +38,19 @@ class KDEKernel {
      */
     KernelType get_type();
 
-    /**
-     * Changes the type of kernel function being used by this Kernel object to
-     * the type specified by the parameter k.
+    /** 
+     * \brief Changes the type of this kernel function
+     * \param new_type name of the new kernel type in lower case
      *
-     * @param k the kernel type
+     * Available options include "epanechnikov" and "uniform".
      */
-    void change_type( KernelType k );
+    void change_type(const std::string& new_type);
+
+    /**
+     * \brief Changes the type of this kernel function
+     * \param new_type enum value representing new kernel type
+     */
+    void change_type(KernelType new_type);
 
    /**
      * Evaluates the kernel function at the parameter u.

@@ -1,6 +1,8 @@
 // KDEKernel.cpp
 
 #include <cmath>
+#include <iostream>
+#include <string>
 
 #include "KDEKernel.hpp"
 
@@ -15,11 +17,26 @@ KDEKernel::KernelType KDEKernel::get_type()
 
 }
 //-----------------------------------------------------------------------------
-void KDEKernel::change_type( KernelType k )
+void KDEKernel::change_type(const std::string& new_type)
 {
-
-  type = k;
-
+    if (new_type == kernel_names[0])
+    {
+        type = EPANECHNIKOV;
+    }
+    else if (new_type == kernel_names[1])
+    {
+        type = UNIFORM;
+    }
+    else
+    {
+        std::cerr << "Warning: " << new_type
+                  << " is not a valid kernel type" << std::endl;
+    }
+}
+//-----------------------------------------------------------------------------
+void KDEKernel::change_type(KernelType new_type)
+{
+    type = new_type;
 }
 //-----------------------------------------------------------------------------
 double KDEKernel::evaluate( double u )

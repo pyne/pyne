@@ -22,10 +22,12 @@
 #include "TallyEvent.hpp"
 
 // initialize static variables
-moab::CartVect KDEMeshTally::default_bandwidth( 1, 1, 1 );
 bool KDEMeshTally::seed_is_set = false;
+const char* const KDEMeshTally::kde_tally_names[] = {"collision",
+                                                     "integral-track",
+                                                     "sub-track"};
 
-// quadrature points and weights for the integrate_path_kernel function
+// quadrature points and weights for the integral_track_score function
 const double quad_points[4] = {0.339981043585, -0.339981043585,
                                0.861136311594, -0.861136311594};
 
@@ -33,82 +35,29 @@ const double quad_weights[4] = {0.652145154863, 0.652145154863,
                                 0.347854845137, 0.347854845137};
 
 //-----------------------------------------------------------------------------
-static double parse_bandwidth_param( const std::string& key,
-                                     const std::string& val, 
-                                     double default_value = 1 )
+static double parse_bandwidth_value(const std::string& key,
+                                    const std::string& value,
+                                    double default_value = 0.01)
 {
-  char* end;
-  double ret = strtod( val.c_str(), &end );
-  if( val.c_str() == end || ret <= 0 ){
-    // parsing failed or value is invalid
-    std::cerr << "Error parsing bandwidth param " << key << ": '" << val << "' is invalid" << std::endl;
-    std::cerr << "      Using default value " << key << " = " << default_value << std::endl;
-    ret = default_value;
-  }
-  return ret;
+    char* end;
+    double bandwidth_value = strtod(value.c_str(), &end);
+
+    if( value.c_str() == end || bandwidth_value <= 0 )
+    {
+        std::cerr << "Warning: invalid bandwidth value for " << key
+                  << " = " << value << std::endl;
+        std::cerr << "    using default value " << key << " = "
+                  << default_value << std::endl;
+        bandwidth_value = default_value;
+    }
+
+    return bandwidth_value;
 }
 //-----------------------------------------------------------------------------
-static KDEKernel::KernelType set_kernel_type( const std::string& key,
-                                              const std::string& val )
-{
-
-  KDEKernel::KernelType k;
-
-  if ( val == "epanechnikov" || val == "e" )
-    k = KDEKernel::EPANECHNIKOV;
-  else if ( val == "uniform" || val == "u" )
-    k = KDEKernel::UNIFORM;
-  else {
-
-    k = KDEKernel::EPANECHNIKOV;
-    std::cerr << "\nWarning: " << val << " is not a valid kernel function" << std::endl;
-        std::cerr << "      Using default " << key << " = epanechnikov\n" << std::endl;
-
-  }
-
-  return k;
-
-}
-//-----------------------------------------------------------------------------
-KDEMeshTally* KDEMeshTally::setup( const MeshTallyInput& fmesh, 
+KDEMeshTally* KDEMeshTally::setup( const MeshTallyInput& settings, 
                                    moab::Interface* mbi, TallyType type )
 {
-
-  bool use_dagmc_mesh = false; // true if mesh data should be pulled from DagMC object
-  moab::CartVect bandwidth = default_bandwidth;
-  KDEKernel::KernelType kernel = KDEKernel::EPANECHNIKOV;
-  unsigned int subtracks = 0;
-
-  const MeshTallyInput::TallyOptions& params = fmesh.options;
-  int id = fmesh.tally_id;
-
-  for( MeshTallyInput::TallyOptions::const_iterator i = params.begin(); i != params.end(); ++i )
-  {
-    std::string key = (*i).first, val = (*i).second;
-    if( key == "out" ) continue;  // processed in MeshTally
-    else if( key == "hx" ) bandwidth[0] = parse_bandwidth_param( key, val );
-    else if( key == "hy" ) bandwidth[1] = parse_bandwidth_param( key, val );
-    else if( key == "hz" ) bandwidth[2] = parse_bandwidth_param( key, val );
-    else if( key == "kernel" ) kernel = set_kernel_type( key, val );
-    else if ( key == "seed" && type == SUB_TRACK)
-    {
-        // override random number seed if requested by user
-        int seed = atoi(val.c_str());
-        srand(seed);
-        seed_is_set = true;
-    }
-    else if( key == "subtracks" && type != COLLISION ) { 
-      subtracks = atoi( val.c_str() );
-      if( subtracks == 0 ) {
-        std::cerr << "\nWarning: number of subtracks requested is invalid" << std::endl;
-        std::cerr << "      Using default value " << key << " = 3\n" << std::endl;
-        subtracks = 3;
-      }
-    }
-    else{
-      std::cerr << "Warning: KDE tally's FC" << id << " card has unknown key '" << key << "'" << std::endl;
-    }
-  }
+  bool use_dagmc_mesh = false;
 
   // set random number seed if it has not already been set by another instance
   if (type == SUB_TRACK && !seed_is_set)
@@ -124,35 +73,16 @@ KDEMeshTally* KDEMeshTally::setup( const MeshTallyInput& fmesh,
     rval = mbi->create_meshset( moab::MESHSET_SET, moab_set );
     assert( rval == moab::MB_SUCCESS );
 
-    rval = mbi->load_file( fmesh.input_filename.c_str(), &moab_set );
+    rval = mbi->load_file( settings.input_filename.c_str(), &moab_set );
 
     if( rval != moab::MB_SUCCESS ){
-      std::cerr << "Error: could not load KDE tally mesh file " << fmesh.input_filename << std::endl;
+      std::cerr << "Error: could not load KDE tally mesh file " << settings.input_filename << std::endl;
       exit( EXIT_FAILURE );
     }
 
   }
 
-  KDEMeshTally *kde = new KDEMeshTally( fmesh, mbi, moab_set, bandwidth,
-                                        type, kernel, subtracks );
-
-  std::cout << "Creating KDE ";
-
-  if ( type == COLLISION ) std::cout << "collision ";
-  else if ( type == INTEGRAL_TRACK ) std::cout << "track ";
-  else std::cout << "subtrack ";
- 
-  std::cout << "fmesh" << id 
-            << ", input: " << (use_dagmc_mesh ? "(pre-loaded DagMC data)" : fmesh.input_filename.c_str())  
-            << ", output: " << kde->output_filename << std::endl;
-  
-  std::cout << "   using the " << KDEKernel::kernel_names[kernel] << " kernel";
-  std::cout << " with bandwidth = " << bandwidth;
-
-  if ( subtracks != 0 )
-    std::cout << "\n   and splitting tracks into " << subtracks << " subtracks" << std::endl;
-  else
-    std::cout << std::endl;
+  KDEMeshTally *kde = new KDEMeshTally( settings, mbi, moab_set, type );
 
   // create a tally set that contains only the 3D mesh cells (i.e. hexes/tets)
   moab::ErrorCode rval;
@@ -170,36 +100,42 @@ KDEMeshTally* KDEMeshTally::setup( const MeshTallyInput& fmesh,
 
 }
 //-----------------------------------------------------------------------------
-KDEMeshTally::KDEMeshTally( const MeshTallyInput& settings,
-                            moab::Interface* moabMesh,
-                            moab::EntityHandle moabSet,
-                            moab::CartVect bandwidth,
-                            KDEMeshTally::TallyType type,
-                            KDEKernel::KernelType k,
-                            unsigned int subtracks )
-: MeshTally(settings), mb( moabMesh ), bandwidth( bandwidth ),
-  kde_tally( type ), kernel( new KDEKernel(k) )
+KDEMeshTally::KDEMeshTally(const MeshTallyInput& input,
+                           moab::Interface* moabMesh,
+                           moab::EntityHandle moabSet,
+                           KDEMeshTally::TallyType type)
+    : MeshTally(input),
+      mb(moabMesh),
+      bandwidth(moab::CartVect(0.01, 0.01, 0.01)),
+      kde_tally(type),
+      kernel(new KDEKernel()),
+      num_subtracks(3)
 {
+    std::cout << "Creating KDE " << kde_tally_names[kde_tally]
+              << " mesh tally " << input.tally_id << std::endl;
 
-  build_tree(moabSet); 
+    std::cout << "    for input mesh: " << input.input_filename
+              << ", output file: " << output_filename << std::endl;
 
-  // initialize running variance variables
-  max_collisions = false;
-  numCollisions = 0;
-  Mn = moab::CartVect( 0, 0, 0 );
-  Sn = moab::CartVect( 0, 0, 0 );
+    // set up member variables from MeshTallyInput
+    parse_tally_options();
 
-  // check numSubtracks is a valid parameter for SUBTRACK tallies
-  if (subtracks == 0 && kde_tally == SUB_TRACK)
-  {
+    std::cout << "    using " << KDEKernel::kernel_names[kernel->get_type()]
+              << " kernel and bandwidth " << bandwidth << std::endl;
 
-    std::cerr << "\nWarning: number of subtracks must be non-zero for KDE subtrack tallies" << std::endl;
-    std::cerr << "      Using default value subtracks = 3\n" << std::endl;
-    num_subtracks = 3;
+    if (kde_tally == SUB_TRACK)
+    {
+        std::cout << "    splitting full tracks into "
+                  << num_subtracks << " sub-tracks" << std::endl;
+    }
+    
+    build_tree(moabSet);
 
-  }
-  else
-    num_subtracks = subtracks;
+    // initialize running variance variables
+    max_collisions = false;
+    numCollisions = 0;
+    Mn = moab::CartVect(0, 0, 0);
+    Sn = moab::CartVect(0, 0, 0);
 }
 //-----------------------------------------------------------------------------
 KDEMeshTally::~KDEMeshTally()
@@ -247,7 +183,7 @@ void KDEMeshTally::compute_score(const TallyEvent& event, int ebin)
     // check that a valid tally event has been set for this KDE mesh tally
     if (!event_is_set)
     {
-        std::cerr << "\nError: Tally event is not valid for KDE mesh tally ";
+        std::cerr << "Error: Tally event is not valid for KDE mesh tally ";
         std::cerr << input_data.tally_id << std::endl;
         exit(EXIT_FAILURE);
     }
@@ -401,6 +337,57 @@ void KDEMeshTally::write_results( double sp_norm, double fmesh_fact )
   
 }
 //-----------------------------------------------------------------------------
+void KDEMeshTally::parse_tally_options()
+{
+    const MeshTallyInput::TallyOptions& options = input_data.options;  
+    MeshTallyInput::TallyOptions::const_iterator it;
+
+    for (it = options.begin(); it != options.end(); ++it)
+    {
+        std::string key = it->first;
+        std::string value = it->second;
+
+        // process tally option according to key
+        if      (key == "hx") bandwidth[0] = parse_bandwidth_value(key, value);
+        else if (key == "hy") bandwidth[1] = parse_bandwidth_value(key, value);
+        else if (key == "hz") bandwidth[2] = parse_bandwidth_value(key, value);
+        else if (key == "kernel")
+        {
+            kernel->change_type(value);
+        }
+        else if (key == "seed" && kde_tally == SUB_TRACK)
+        {
+            // override random number seed if requested by user
+            unsigned long int seed = strtol(value.c_str(), NULL, 10);
+            srand(seed);
+            seed_is_set = true;
+            std::cout << "    setting random seed to " << seed
+                      << " for choosing sub-track points" << std::endl;
+        }
+        else if (key == "subtracks" && kde_tally == SUB_TRACK)
+        {
+            char* end;
+            int subtracks = strtol(value.c_str(), &end, 10);
+
+            if (value.c_str() == end || subtracks <= 0)
+            {
+                std::cerr << "Warning: '" << value << "' is an invalid value"
+                          << " for the number of subtracks" << std::endl;
+                std::cerr << "    using default value " << key << " = 3\n";
+                subtracks = 3;
+            }
+            
+            num_subtracks = subtracks;
+        }
+        else // invalid tally option
+        {
+            std::cerr << "Warning: input data for KDE mesh tally "
+                      << input_data.tally_id
+                      << " has unknown key '" << key << "'" << std::endl;
+        }
+    }
+}
+//-----------------------------------------------------------------------------
 void KDEMeshTally::build_tree( moab::EntityHandle meshset )
 {
 
@@ -416,7 +403,7 @@ void KDEMeshTally::build_tree( moab::EntityHandle meshset )
   // If there are many divisions (for some rather arbitrary definition of "many"), print
   // a warning about performance compromise
   int psize = tally_points.psize();
-  std::cout << "   Tally range has psize: " << psize << std::endl;
+  std::cout << "    Tally range has psize: " << psize << std::endl;
   if( psize > 4 ){
     std::cerr << "Warning: large tally range psize " << psize 
               << ", may reduce performance." << std::endl;
@@ -459,9 +446,9 @@ void KDEMeshTally::update_variance(const moab::CartVect& collision_point)
   }
   else if ( !max_collisions ) {
   
-    std::cerr << "/nWarning: number of collisions exceeds maximum/n"
-              << "  optimal bandwidth will be based on " << numCollisions
-              << " collisions./n/n";
+    std::cerr << "Warning: number of collisions exceeds maximum\n"
+              << "    optimal bandwidth will be based on " << numCollisions
+              << " collisions.\n";
 
     max_collisions = true;
 

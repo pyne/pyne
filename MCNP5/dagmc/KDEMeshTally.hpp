@@ -25,17 +25,15 @@ class AdaptiveKDTree;
 class KDEMeshTally : public MeshTally {
 
   public:
-
-     static moab::CartVect default_bandwidth;  // bandwidth choice for KDE tallies
-
     /**
      * \brief Defines type of estimator used in computing KDE mesh tally scores
      *
-     *     1) COLLISION tallies use the KDE collision estimator
-     *     2) INTEGRAL_TRACK tallies use the KDE integral-track estimator
-     *     3) SUB_TRACK tallies use the KDE sub-track estimator
+     *     0) COLLISION tallies use the KDE collision estimator
+     *     1) INTEGRAL_TRACK tallies use the KDE integral-track estimator
+     *     2) SUB_TRACK tallies use the KDE sub-track estimator
      */
-    enum TallyType { COLLISION = 1, INTEGRAL_TRACK = 2, SUB_TRACK = 3 };
+    enum TallyType {COLLISION = 0, INTEGRAL_TRACK = 1, SUB_TRACK = 2};
+    static const char* const kde_tally_names[];
 
     /**
      * Allocate and return the specified tally object
@@ -53,25 +51,15 @@ class KDEMeshTally : public MeshTally {
      * approach.  The tally type cannot be changed once a KDEMeshTally object
      * has been created.
      *
-     * NOTE: the parameter "numSubtracks" is required for SUB_TRACK tallies,
-     * but it is optional for INTEGRAL_TRACK tallies for computing an optimal
-     * bandwidth.  It has no meaning for COLLISION tallies.
-     *
      * @param settings the FC card parameters 
      * @param moabMesh the MOAB instance containing the mesh information
      * @param moabSet the MOAB set of entities used in the tally
-     * @param bandwidth the set of bandwidth values (hx, hy, hz)
      * @param type (optional) the type of tally to be used
-     * @param k (optional) the KernelType function to be used in the computation
-     * @param numSubtracks (optional) the number of subtracks to be used
      */
-    KDEMeshTally( const MeshTallyInput& settings,
-                  moab::Interface* moabMesh,
-                  moab::EntityHandle moabSet,
-                  moab::CartVect bandwidth,
-                  TallyType type = COLLISION,
-                  KDEKernel::KernelType k = KDEKernel::EPANECHNIKOV,
-                  unsigned int numSubtracks = 0 );
+    KDEMeshTally(const MeshTallyInput& input,
+                 moab::Interface* moabMesh,
+                 moab::EntityHandle moabSet,
+                 TallyType type = COLLISION);
 
     /**
      * Destructor.
@@ -132,6 +120,11 @@ class KDEMeshTally : public MeshTally {
 
     // subtrack estimator parameters
     static bool seed_is_set;
+
+    /**
+     * \brief parse the MeshTallyInput options for this KDE mesh tally
+     */
+    void parse_tally_options();
         
     /**
      * Builds a KD-Tree from all the mesh node entities in the specified meshset,
