@@ -153,8 +153,8 @@ import pyne.pyne_config
 
 cimport cpp_nucname
 cimport cpp_rxname
-cimport pyne.stlconverters as conv
-import pyne.stlconverters as conv
+cimport pyne.stlcontainers as conv
+import pyne.stlcontainers as conv
 
 # names
 cdef conv._SetStr names_proxy = conv.SetStr(False)
