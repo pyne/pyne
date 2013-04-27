@@ -20,8 +20,8 @@ cimport pyne.pyne_config
 import pyne.pyne_config
 
 cimport cpp_nucname
-cimport pyne.stlconverters as conv
-import pyne.stlconverters as conv
+cimport pyne.stlcontainers as conv
+import pyne.stlcontainers as conv
 
 #
 # Conversion dictionaries

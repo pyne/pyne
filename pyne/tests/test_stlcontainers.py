@@ -1,4 +1,4 @@
-"""Tests the part of stlconverters that is accessible from Python."""
+"""Tests the part of stlcontainers that is accessible from Python."""
 ###################
 ###  WARNING!!! ###
 ###################
