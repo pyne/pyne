@@ -247,7 +247,7 @@ TrackLengthMeshTally::~TrackLengthMeshTally(){
 ErrorCode TrackLengthMeshTally::load_mesh( const std::string& input_filename, 
                                            std::string tag_name, std::vector<std::string>& tag_values ){
 
-  // load the MOAB mesh data from the input file for this KDE mesh tally
+  // load the MOAB mesh data from the input file for this mesh tally
   moab::EntityHandle loaded_file_set;
   moab::ErrorCode rval = load_moab_mesh(mb, loaded_file_set);
 
