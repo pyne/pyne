@@ -232,11 +232,11 @@ void dagmc_fmesh_setup_mesh_( int* /*ipt*/, int* id, int* fmesh_index,
     fc_settings.erase("type"); 
   }
   
-  moab::Interface* mbi = new moab::Core();
-
   MeshTally *new_tally;
 
   if( type == "tracklen" ){
+
+    moab::Interface* mbi = new moab::Core();
 
     TrackLengthMeshTally* t = TrackLengthMeshTally::setup( fmesh_settings, mbi, current_mcnp_cell );
     new_tally = track_tallies[*fmesh_index] = t;
@@ -249,7 +249,7 @@ void dagmc_fmesh_setup_mesh_( int* /*ipt*/, int* id, int* fmesh_index,
     if ( type == "kde_subtrack" )
       kde_type = KDEMeshTally::SUB_TRACK;
 
-    KDEMeshTally* kde = KDEMeshTally::setup( fmesh_settings, mbi, kde_type );
+    KDEMeshTally* kde = new KDEMeshTally( fmesh_settings, kde_type );
     new_tally = track_tallies[*fmesh_index] = kde;
 
   }
@@ -257,7 +257,7 @@ void dagmc_fmesh_setup_mesh_( int* /*ipt*/, int* id, int* fmesh_index,
   
     *is_collision_tally = 1; 
 
-    KDEMeshTally* kde = KDEMeshTally::setup( fmesh_settings, mbi );
+    KDEMeshTally* kde = new KDEMeshTally( fmesh_settings );
     new_tally = kde_coll_tallies[*fmesh_index] = kde;
 
   }

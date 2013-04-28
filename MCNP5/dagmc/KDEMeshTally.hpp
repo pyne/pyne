@@ -35,31 +35,15 @@ class KDEMeshTally : public MeshTally {
     enum TallyType {COLLISION = 0, INTEGRAL_TRACK = 1, SUB_TRACK = 2};
     static const char* const kde_tally_names[];
 
-    /**
-     * Allocate and return the specified tally object
-     * @param settings The FC card parameters
-     * @param mbi The associated MOAB interface
-     * @param type The tally type
-     * @return A newly allocated object, ready to receive collisions or tracks 
-     */
-    static KDEMeshTally* setup( const MeshTallyInput& settings, 
-                                moab::Interface* mbi,
-                                TallyType type = COLLISION );
-
-    /**
+    /** TODO fix this definition to reflect the new constructor
      * Constructs a mesh tally object based on a kernel density estimator
      * approach.  The tally type cannot be changed once a KDEMeshTally object
      * has been created.
      *
      * @param settings the FC card parameters 
-     * @param moabMesh the MOAB instance containing the mesh information
-     * @param moabSet the MOAB set of entities used in the tally
      * @param type (optional) the type of tally to be used
      */
-    KDEMeshTally(const MeshTallyInput& input,
-                 moab::Interface* moabMesh,
-                 moab::EntityHandle moabSet,
-                 TallyType type = COLLISION);
+    KDEMeshTally(const MeshTallyInput& input, TallyType type = COLLISION);
 
     /**
      * Destructor.
@@ -94,17 +78,15 @@ class KDEMeshTally : public MeshTally {
 
   private:
 
-    moab::Interface* mb;           // the MOAB instance
+    moab::Interface* mbi;           // the MOAB instance
     
     moab::CartVect bandwidth;      // the set of bandwidth values (hx, hy, hz)
     TallyType kde_tally;           // specifies type of KDE tally 
     KDEKernel* kernel;             // kernel function tally is based on
     unsigned int num_subtracks;    // number of subtracks used in tally       
-    
-    moab::EntityHandle tally_set;  // the MOAB set of entities used in tally
 
-    moab::AdaptiveKDTree* tree;    
-    moab::EntityHandle tree_root;
+    moab::AdaptiveKDTree* kd_tree;  
+    moab::EntityHandle kd_tree_root;
     
     // The entityhandles updated in the current particle history; cleared by end_history()
     std::set<moab::EntityHandle> visited_this_history;
@@ -125,13 +107,19 @@ class KDEMeshTally : public MeshTally {
      * \brief parse the MeshTallyInput options for this KDE mesh tally
      */
     void parse_tally_options();
-        
-    /**
-     * Builds a KD-Tree from all the mesh node entities in the specified meshset,
-     * or if the set is 0, from all mesh nodes in MOAB.
-     */
-    void build_tree( moab::EntityHandle meshset );
 
+    /**
+     * \brief initializes MeshTally member variables representing the mesh data
+     * \return the MOAB ErrorCode value
+     *
+     * MeshTally variables set by this function include tally_points and
+     * tally_mesh_set.  The tally_points will be defined as the set of mesh
+     * nodes, whereas tally_mesh_set stores the set of all 3D mesh elements.
+     * This function also calls MeshTally::setup_tags() to set the tag names
+     * for the energy bins.
+     */
+    moab::ErrorCode initialize_mesh_data();
+  
     /**
      * Adds the given collision coordinates to the running variance formula
      * used to compute the optimal bandwidth.

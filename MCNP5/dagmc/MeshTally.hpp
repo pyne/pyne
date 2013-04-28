@@ -3,7 +3,6 @@
 #ifndef DAGMC_MESHTALLY_H
 #define DAGMC_MESHTALLY_H
 
-#include <cassert>
 #include <map>
 #include <string>
 #include <vector>
@@ -146,6 +145,9 @@ class MeshTally
     /// Name of file to which the final tally results will be written
     std::string output_filename;
 
+    /// Entity handle for the MOAB mesh data used for this mesh tally
+    moab::EntityHandle tally_mesh_set;
+
     /// Set of tally points (cells, nodes, etc) for this mesh tally
     moab::Range tally_points;
 
@@ -194,6 +196,37 @@ class MeshTally
     double& get_data(std::vector<double>& data,
                      moab::EntityHandle tally_point,
                      unsigned energy_bin = 0);
+
+    /**
+     * \brief loads the MOAB mesh data from the input file for this mesh tally
+     * \param mbi the MOAB interface for this mesh tally
+     * \param mesh_set entity handle for the mesh set that will be created
+     * \return the MOAB ErrorCode value
+     */
+    moab::ErrorCode load_moab_mesh(moab::Interface* mbi,
+                                   moab::EntityHandle& mesh_set);
+
+    /**
+     * \brief defines the set of tally points to use for this mesh tally
+     * \param mesh_elements the set of mesh elements to use as tally points
+     *
+     * Note that this function calls resize_data_arrays() to set the tally
+     * data arrays for the given number of tally points.
+     */
+    void set_tally_points(const moab::Range& mesh_elements);
+
+    /**
+     * \brief reduces a MOAB mesh set to include only its 3D elements
+     * \param mbi the MOAB interface for this mesh tally
+     * \param mesh_set entity handle for the mesh set that will be reduced
+     * \param mesh_elements stores 3D elements that were added to the mesh set
+     * \return the MOAB ErrorCode value
+     *
+     * NOTE: this function will overwrite the mesh set
+     */
+    moab::ErrorCode reduce_meshset_to_3D(moab::Interface* mbi,
+                                         moab::EntityHandle& mesh_set,
+                                         moab::Range& mesh_elements);
 
     /**
      * \brief Sets up tally value and error labels for all energy bins

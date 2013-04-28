@@ -240,7 +240,7 @@ TrackLengthMeshTally::~TrackLengthMeshTally(){
 
 /**
  * Load the given file as an input mesh
- * Member variable tally_set will contain the mesh contents
+ * MeshTally member variable tally_mesh_set will contain the mesh contents
  */
 ErrorCode TrackLengthMeshTally::load_mesh( const std::string& input_filename, 
                                            std::string tag_name, std::vector<std::string>& tag_values ){
@@ -257,7 +257,7 @@ ErrorCode TrackLengthMeshTally::load_mesh( const std::string& input_filename,
   }
 
 
-  rval = mb->create_meshset( MESHSET_SET, tally_set );
+  rval = mb->create_meshset( MESHSET_SET, tally_mesh_set );
   assert( rval == MB_SUCCESS );
   
  
@@ -298,7 +298,7 @@ ErrorCode TrackLengthMeshTally::load_mesh( const std::string& input_filename,
       
       if( std::find( tag_values.begin(), tag_values.end(),std::string(name) ) != tag_values.end() ){
         std::cout << "  Successfully found a set with tag value " << name << std::endl;
-        rval = mb->unite_meshset( tally_set, s );
+        rval = mb->unite_meshset( tally_mesh_set, s );
         assert( rval == MB_SUCCESS );
       }
       delete[] name;
@@ -307,7 +307,7 @@ ErrorCode TrackLengthMeshTally::load_mesh( const std::string& input_filename,
   }
   else{ // no user-specified tag filter
 
-    rval = mb->unite_meshset( tally_set, loaded_file_set );
+    rval = mb->unite_meshset( tally_mesh_set, loaded_file_set );
     assert( rval == MB_SUCCESS );
   }
 
@@ -315,7 +315,7 @@ ErrorCode TrackLengthMeshTally::load_mesh( const std::string& input_filename,
   assert( rval == MB_SUCCESS );
 
   int num_tets;
-  rval = mb->get_number_entities_by_dimension( tally_set, 3, num_tets );
+  rval = mb->get_number_entities_by_dimension( tally_mesh_set, 3, num_tets );
   assert( rval == MB_SUCCESS );
   std::cerr << "  There are " << num_tets << " tetrahedrons in this tally mesh." << std::endl;
 
@@ -324,14 +324,14 @@ ErrorCode TrackLengthMeshTally::load_mesh( const std::string& input_filename,
   resize_data_arrays( num_tets );
 
   Range all_tets;
-  rval = mb->get_entities_by_dimension( tally_set, 3, all_tets );
+  rval = mb->get_entities_by_dimension( tally_mesh_set, 3, all_tets );
   assert( rval == MB_SUCCESS );
   assert( all_tets.size() == (unsigned)num_tets );
 
-  // restruct tally_set to contain only 3-dimensional elements
-  rval = mb->clear_meshset( &tally_set, 1  );
+  // restruct tally_mesh_set to contain only 3-dimensional elements
+  rval = mb->clear_meshset( &tally_mesh_set, 1  );
   assert( rval == MB_SUCCESS );
-  rval = mb->add_entities( tally_set, all_tets );
+  rval = mb->add_entities( tally_mesh_set, all_tets );
   assert( rval == MB_SUCCESS );
 
   tally_points = all_tets;
@@ -425,7 +425,7 @@ ErrorCode TrackLengthMeshTally::write_results( double sp_norm, double mult_fact,
   ErrorCode rval;
 
   Range all_tets;
-  rval = mb->get_entities_by_dimension( tally_set, 3, all_tets );
+  rval = mb->get_entities_by_dimension( tally_mesh_set, 3, all_tets );
   assert( rval == MB_SUCCESS );
 
 
@@ -471,7 +471,7 @@ ErrorCode TrackLengthMeshTally::write_results( double sp_norm, double mult_fact,
   std::vector<Tag> output_tags = tally_tags;
   output_tags.insert( output_tags.end(), error_tags.begin(), error_tags.end() );
 
-  rval = mb->write_file( filename.c_str(), NULL, NULL, &tally_set, 1, &(output_tags[0]), output_tags.size() );
+  rval = mb->write_file( filename.c_str(), NULL, NULL, &tally_mesh_set, 1, &(output_tags[0]), output_tags.size() );
   assert (rval == MB_SUCCESS );
  
   if ( num_negative_tracks != 0 )

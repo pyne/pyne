@@ -74,8 +74,6 @@ protected:
 
   Interface* mb;
 
-  EntityHandle tally_set;
-
   AdaptiveKDTree* kdtree;
   EntityHandle kdtree_root;
 

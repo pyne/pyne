@@ -12,6 +12,7 @@
 
 #include "moab/AdaptiveKDTree.hpp"
 #include "moab/CartVect.hpp"
+#include "moab/Core.hpp"
 #include "moab/Interface.hpp"
 #include "moab/Range.hpp"
 #include "moab/Types.hpp"
@@ -54,58 +55,10 @@ static double parse_bandwidth_value(const std::string& key,
     return bandwidth_value;
 }
 //-----------------------------------------------------------------------------
-KDEMeshTally* KDEMeshTally::setup( const MeshTallyInput& settings, 
-                                   moab::Interface* mbi, TallyType type )
-{
-  bool use_dagmc_mesh = false;
-
-  // set random number seed if it has not already been set by another instance
-  if (type == SUB_TRACK && !seed_is_set)
-  {
-    srand(time(NULL));
-    seed_is_set = true;
-  }
-
-  moab::EntityHandle moab_set = NULL ; // TODO: this should be queried from DagMC
-  if( !use_dagmc_mesh ){
-   
-    moab::ErrorCode rval;
-    rval = mbi->create_meshset( moab::MESHSET_SET, moab_set );
-    assert( rval == moab::MB_SUCCESS );
-
-    rval = mbi->load_file( settings.input_filename.c_str(), &moab_set );
-
-    if( rval != moab::MB_SUCCESS ){
-      std::cerr << "Error: could not load KDE tally mesh file " << settings.input_filename << std::endl;
-      exit( EXIT_FAILURE );
-    }
-
-  }
-
-  KDEMeshTally *kde = new KDEMeshTally( settings, mbi, moab_set, type );
-
-  // create a tally set that contains only the 3D mesh cells (i.e. hexes/tets)
-  moab::ErrorCode rval;
-  rval = mbi->create_meshset( moab::MESHSET_SET, kde->tally_set );
-  assert( rval == moab::MB_SUCCESS );
-
-  moab::Range mesh_cells;
-  rval = mbi->get_entities_by_dimension( moab_set, 3, mesh_cells );
-  assert( rval == moab::MB_SUCCESS );
-   
-  rval = mbi->add_entities( kde->tally_set, mesh_cells );
-  assert( rval == moab::MB_SUCCESS );
-
-  return kde;
-
-}
-//-----------------------------------------------------------------------------
 KDEMeshTally::KDEMeshTally(const MeshTallyInput& input,
-                           moab::Interface* moabMesh,
-                           moab::EntityHandle moabSet,
                            KDEMeshTally::TallyType type)
     : MeshTally(input),
-      mb(moabMesh),
+      mbi(new moab::Core()),
       bandwidth(moab::CartVect(0.01, 0.01, 0.01)),
       kde_tally(type),
       kernel(new KDEKernel()),
@@ -117,9 +70,9 @@ KDEMeshTally::KDEMeshTally(const MeshTallyInput& input,
     std::cout << "    for input mesh: " << input.input_filename
               << ", output file: " << output_filename << std::endl;
 
-    // set up member variables from MeshTallyInput
+    // set up KDEMeshTally member variables from MeshTallyInput
     parse_tally_options();
-
+ 
     std::cout << "    using " << KDEKernel::kernel_names[kernel->get_type()]
               << " kernel and bandwidth " << bandwidth << std::endl;
 
@@ -127,9 +80,25 @@ KDEMeshTally::KDEMeshTally(const MeshTallyInput& input,
     {
         std::cout << "    splitting full tracks into "
                   << num_subtracks << " sub-tracks" << std::endl;
+
+        // set seed value if not already set by another instance
+        if (!seed_is_set)
+        {
+            srand(time(NULL));
+            seed_is_set = true;
+        }
     }
-    
-    build_tree(moabSet);
+
+    // initialize MeshTally member variables representing the mesh data
+    moab::ErrorCode rval = initialize_mesh_data();
+
+    if (rval != moab::MB_SUCCESS)
+    {
+        std::cout << "Error: Could not load mesh data for KDE mesh tally "
+                  << input_data.tally_id << " from input file "
+                  << input_data.input_filename << std::endl;
+        exit(EXIT_FAILURE);
+    }
 
     // initialize running variance variables
     max_collisions = false;
@@ -140,10 +109,9 @@ KDEMeshTally::KDEMeshTally(const MeshTallyInput& input,
 //-----------------------------------------------------------------------------
 KDEMeshTally::~KDEMeshTally()
 {
-
-  delete tree;
-  delete kernel;
-  
+    delete kd_tree;
+    delete kernel;
+    delete mbi;  
 }
 //-----------------------------------------------------------------------------
 void KDEMeshTally::compute_score(const TallyEvent& event, int ebin)
@@ -189,7 +157,7 @@ void KDEMeshTally::compute_score(const TallyEvent& event, int ebin)
     }
 
     // create the neighborhood region and find all of the calculations points
-    KDENeighborhood region(event, bandwidth, *tree, tree_root);
+    KDENeighborhood region(event, bandwidth, *kd_tree, kd_tree_root);
 
     std::vector<moab::EntityHandle> calculation_points;
     moab::ErrorCode rval = region.get_points(calculation_points);
@@ -204,7 +172,7 @@ void KDEMeshTally::compute_score(const TallyEvent& event, int ebin)
     {
         // get coordinates of this point
         moab::EntityHandle point = *i;
-        rval = mb->get_coords(&point, 1, coords);
+        rval = mbi->get_coords(&point, 1, coords);
 
         assert(moab::MB_SUCCESS == rval);
 
@@ -305,10 +273,10 @@ void KDEMeshTally::write_results( double sp_norm, double fmesh_fact )
       tally *= fmesh_fact;
       
       // set tally and error tag values for this entity
-      rval = mb->tag_set_data( tally_tags[j], &point, 1, &tally );
+      rval = mbi->tag_set_data( tally_tags[j], &point, 1, &tally );
       assert( moab::MB_SUCCESS == rval );
       
-      rval = mb->tag_set_data( error_tags[j], &point, 1, &rel_err );
+      rval = mbi->tag_set_data( error_tags[j], &point, 1, &rel_err );
       assert( moab::MB_SUCCESS == rval ); 
       
     } 
@@ -317,13 +285,13 @@ void KDEMeshTally::write_results( double sp_norm, double fmesh_fact )
 
   // create a global tag to store the bandwidth value
   moab::Tag bandwidth_tag;
-  rval = mb->tag_get_handle( "BANDWIDTH_TAG", 3, moab::MB_TYPE_DOUBLE, bandwidth_tag,
+  rval = mbi->tag_get_handle( "BANDWIDTH_TAG", 3, moab::MB_TYPE_DOUBLE, bandwidth_tag,
                              moab::MB_TAG_MESH|moab::MB_TAG_CREAT );
   assert( moab::MB_SUCCESS == rval );
 
   // add bandwidth tag to the root set
-  moab::EntityHandle bandwidth_set = mb->get_root_set();
-  rval = mb->tag_set_data( bandwidth_tag, &bandwidth_set, 1, &bandwidth );
+  moab::EntityHandle bandwidth_set = mbi->get_root_set();
+  rval = mbi->tag_set_data( bandwidth_tag, &bandwidth_set, 1, &bandwidth );
   assert( moab::MB_SUCCESS == rval );
 
   // define list of tags to include and write mesh to output file
@@ -331,8 +299,8 @@ void KDEMeshTally::write_results( double sp_norm, double fmesh_fact )
   output_tags.insert( output_tags.end(), error_tags.begin(), error_tags.end() );
   output_tags.push_back( bandwidth_tag );  
 
-  rval = mb->write_file( output_filename.c_str(),
-                         NULL, NULL, &tally_set, 1, &(output_tags[0]), output_tags.size() );
+  rval = mbi->write_file( output_filename.c_str(),
+                         NULL, NULL, &tally_mesh_set, 1, &(output_tags[0]), output_tags.size() );
   assert( moab::MB_SUCCESS == rval );
   
 }
@@ -388,37 +356,42 @@ void KDEMeshTally::parse_tally_options()
     }
 }
 //-----------------------------------------------------------------------------
-void KDEMeshTally::build_tree( moab::EntityHandle meshset )
+moab::ErrorCode KDEMeshTally::initialize_mesh_data()
 {
+    // load the MOAB mesh data from the input file for this KDE mesh tally
+    moab::EntityHandle moab_mesh_set;
+    moab::ErrorCode rval = load_moab_mesh(mbi, moab_mesh_set);
 
-  // Obtain all of the calculation points in the mesh and store into tally_points
-  moab::EntityType type = moab::MBVERTEX;
-  
-  moab::ErrorCode rval = mb->get_entities_by_type( meshset, type, tally_points );
-  assert( moab::MB_SUCCESS == rval );  
+    if (rval != moab::MB_SUCCESS) return rval;
 
-  resize_data_arrays( tally_points.size() );
-    
-  // Measure the number of divisions in the moab::Range used to represent the tally points
-  // If there are many divisions (for some rather arbitrary definition of "many"), print
-  // a warning about performance compromise
-  int psize = tally_points.psize();
-  std::cout << "    Tally range has psize: " << psize << std::endl;
-  if( psize > 4 ){
-    std::cerr << "Warning: large tally range psize " << psize 
-              << ", may reduce performance." << std::endl;
-  }
-  // Build a KD-tree using all of the calculation points in the mesh
-  moab::AdaptiveKDTree::Settings settings;
-  settings.maxEntPerLeaf = 10;
-  settings.maxTreeDepth = 30;
+    // get all of the mesh nodes from the MOAB mesh set
+    moab::Range mesh_nodes;
+    rval = mbi->get_entities_by_type(moab_mesh_set, moab::MBVERTEX, mesh_nodes);
 
-  tree = new moab::AdaptiveKDTree( mb );
-  rval = tree->build_tree( tally_points, tree_root, &settings );
-  assert( moab::MB_SUCCESS == rval );  
+    if (rval != moab::MB_SUCCESS) return rval;
 
-  rval = setup_tags( mb, "KDE_" );
+    // initialize MeshTally::tally_points to include all mesh nodes
+    set_tally_points(mesh_nodes);
 
+    // build a kd-tree from all of the mesh nodes
+    kd_tree = new moab::AdaptiveKDTree(mbi);
+    rval = kd_tree->build_tree(mesh_nodes, kd_tree_root);
+
+    if (rval != moab::MB_SUCCESS) return rval;
+
+    // reduce the loaded MOAB mesh set to include only 3D elements
+    moab::Range mesh_cells;
+    rval = reduce_meshset_to_3D(mbi, moab_mesh_set, mesh_cells);  
+
+    if (rval != moab::MB_SUCCESS) return rval;
+
+    // initialize MeshTally::tally_mesh_set and set up tags for energy bins
+    tally_mesh_set = moab_mesh_set;
+    rval = setup_tags(mbi, "KDE_");
+
+    if (rval != moab::MB_SUCCESS) return rval;
+
+    return moab::MB_SUCCESS; 
 }
 //-----------------------------------------------------------------------------
 void KDEMeshTally::update_variance(const moab::CartVect& collision_point)

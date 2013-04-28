@@ -1,5 +1,6 @@
 // MCNP5/dagmc/MeshTally.cpp
 
+#include <cassert>
 #include <iostream>
 #include <sstream>
 
@@ -93,8 +94,66 @@ double& MeshTally::get_data(std::vector<double>& data,
     return data[index];
 }
 //---------------------------------------------------------------------------//
-moab::ErrorCode MeshTally::setup_tags(moab::Interface* mbi,
-                                      const char* prefix)
+moab::ErrorCode MeshTally::load_moab_mesh(moab::Interface* mbi,
+                                          moab::EntityHandle& mesh_set)
+{
+    // create a mesh set to store the MOAB mesh data
+    moab::ErrorCode rval = mbi->create_meshset(moab::MESHSET_SET, mesh_set);
+    
+    if (rval != moab::MB_SUCCESS) return rval;
+
+    // load the MOAB mesh data from the input file into the mesh set
+    rval = mbi->load_file(input_data.input_filename.c_str(), &mesh_set);
+
+    if (rval != moab::MB_SUCCESS) return rval;
+
+    return moab::MB_SUCCESS;
+}
+//---------------------------------------------------------------------------//
+void MeshTally::set_tally_points(const moab::Range& mesh_elements)
+{
+    tally_points = mesh_elements;
+
+    // resize data arrays for storing the tally data for these tally points
+    resize_data_arrays(tally_points.size());
+
+    // measure number of divisions in moab::Range representing tally points
+    int psize = tally_points.psize();
+
+    std::cout << "    Tally range has psize: " << psize << std::endl;
+
+    // print warning about performance compromise if there are many divisions
+    // (for some rather arbitrary definition of "many")
+    if (psize > 4)
+    {
+        std::cerr << "Warning: large tally range psize " << psize
+                  << ", may reduce performance" << std::endl;
+    }
+}
+//---------------------------------------------------------------------------//
+moab::ErrorCode MeshTally::reduce_meshset_to_3D(moab::Interface* mbi,
+                                                moab::EntityHandle& mesh_set,
+                                                moab::Range& mesh_elements)
+{
+    // get all 3D elements from the mesh set
+    moab::ErrorCode rval;
+    rval = mbi->get_entities_by_dimension(mesh_set, 3, mesh_elements);
+
+    if (rval != moab::MB_SUCCESS) return rval;
+
+    // clear the mesh set and add 3D elements
+    rval = mbi->clear_meshset(&mesh_set, 1);
+
+    if (rval != moab::MB_SUCCESS) return rval;
+
+    rval = mbi->add_entities(mesh_set, mesh_elements);
+
+    if (rval != moab::MB_SUCCESS) return rval;
+
+    return moab::MB_SUCCESS;
+}
+//---------------------------------------------------------------------------//
+moab::ErrorCode MeshTally::setup_tags(moab::Interface* mbi, const char* prefix)
 { 
     moab::ErrorCode rval;
     std::string pfx = prefix;
