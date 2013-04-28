@@ -27,7 +27,7 @@ public:
   /**
    * Public constructor interface- actual constructor is protected.
    */
-  static TrackLengthMeshTally* setup( const MeshTallyInput& params, Interface* mbi, const int* cur_mcnp_cell );
+  static TrackLengthMeshTally* setup(const MeshTallyInput& params, const int* cur_mcnp_cell);
 
   /**
    * \brief Computes mesh tally scores for the given tally event
@@ -95,7 +95,7 @@ protected:
   int last_cell;
   std::set<EntityHandle> visited_this_history; 
     
-  TrackLengthMeshTally( const MeshTallyInput& fmesh_params, Interface* mb_p );
+  TrackLengthMeshTally( const MeshTallyInput& fmesh_params );
 
 private:
   TrackLengthMeshTally& operator=( const TrackLengthMeshTally& mt ); // unimplemented

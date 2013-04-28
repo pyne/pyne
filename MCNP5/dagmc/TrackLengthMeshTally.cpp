@@ -3,6 +3,7 @@
 #include <cmath>
 #include <set>
 
+#include "moab/Core.hpp"
 #include "moab/Range.hpp"
 #include "moab/GeomUtil.hpp"
 #include "moab/AdaptiveKDTree.hpp"
@@ -129,7 +130,7 @@ namespace moab {
 
 
 TrackLengthMeshTally* TrackLengthMeshTally::setup( const MeshTallyInput& fmesh_params, 
-                                                   Interface* mbi, const int* current_mcnp_cell )
+                                                   const int* current_mcnp_cell )
 {
 
   const MeshTallyInput::TallyOptions& fc_params = fmesh_params.options;
@@ -170,7 +171,7 @@ TrackLengthMeshTally* TrackLengthMeshTally::setup( const MeshTallyInput& fmesh_p
     }
   }
 
-  moab::TrackLengthMeshTally *mt = new moab::TrackLengthMeshTally( fmesh_params, mbi );
+  moab::TrackLengthMeshTally *mt = new moab::TrackLengthMeshTally( fmesh_params );
 
   std::cout << "Creating dagmc fmesh" << id 
             << ", input: " << fmesh_params.input_filename 
@@ -225,16 +226,17 @@ TrackLengthMeshTally* TrackLengthMeshTally::setup( const MeshTallyInput& fmesh_p
 }
 
   
-TrackLengthMeshTally::TrackLengthMeshTally( const MeshTallyInput& fmesh, Interface* mb_p ) :
+TrackLengthMeshTally::TrackLengthMeshTally( const MeshTallyInput& fmesh ) :
   MeshTally( fmesh ),
-  mb( mb_p ),  
-  obb_tool( new OrientedBoxTreeTool(mb_p) ),
+  mb( new moab::Core() ),  
+  obb_tool( new OrientedBoxTreeTool(mb) ),
   last_visited_tet( 0 ), 
   convex( false ), conformality( NULL ), conformal_surface_source( false ),
   mcnp_current_cell( NULL ), last_cell( -1 ), num_negative_tracks(0)
 {}
   
 TrackLengthMeshTally::~TrackLengthMeshTally(){
+  delete mb;
   delete obb_tool;
 }
 
@@ -244,23 +246,15 @@ TrackLengthMeshTally::~TrackLengthMeshTally(){
  */
 ErrorCode TrackLengthMeshTally::load_mesh( const std::string& input_filename, 
                                            std::string tag_name, std::vector<std::string>& tag_values ){
-  
-  ErrorCode rval;
 
-  EntityHandle loaded_file_set;
-  rval = mb->create_meshset( MESHSET_SET, loaded_file_set );
-  assert( rval == MB_SUCCESS );
-  rval = mb->load_file( input_filename.c_str(), &loaded_file_set );
-  if( rval != MB_SUCCESS ){
-    std::cerr << "Warning: could not load tally mesh " << input_filename << std::endl;
-    return rval;
-  }
+  // load the MOAB mesh data from the input file for this KDE mesh tally
+  moab::EntityHandle loaded_file_set;
+  moab::ErrorCode rval = load_moab_mesh(mb, loaded_file_set);
 
+  if (rval != moab::MB_SUCCESS) return rval;
 
   rval = mb->create_meshset( MESHSET_SET, tally_mesh_set );
-  assert( rval == MB_SUCCESS );
-  
- 
+  assert( rval == MB_SUCCESS ); 
 
   if( tag_name.length() > 0 ){
 
@@ -319,31 +313,17 @@ ErrorCode TrackLengthMeshTally::load_mesh( const std::string& input_filename,
   assert( rval == MB_SUCCESS );
   std::cerr << "  There are " << num_tets << " tetrahedrons in this tally mesh." << std::endl;
 
-
   tet_baryc_data.resize( num_tets );  
-  resize_data_arrays( num_tets );
 
+  // reduce the loaded MOAB mesh set to include only 3D elements
   Range all_tets;
-  rval = mb->get_entities_by_dimension( tally_mesh_set, 3, all_tets );
-  assert( rval == MB_SUCCESS );
+  rval = reduce_meshset_to_3D(mb, tally_mesh_set, all_tets);  
+
+  if (rval != moab::MB_SUCCESS) return rval;
   assert( all_tets.size() == (unsigned)num_tets );
 
-  // restruct tally_mesh_set to contain only 3-dimensional elements
-  rval = mb->clear_meshset( &tally_mesh_set, 1  );
-  assert( rval == MB_SUCCESS );
-  rval = mb->add_entities( tally_mesh_set, all_tets );
-  assert( rval == MB_SUCCESS );
-
-  tally_points = all_tets;
-
-  // Measure the number of divisions in the moab::Range used to represent the tally tets
-  // If there are many divisions (for some rather arbitrary definition of "many"), print
-  // a warning about performance compromise
-  int psize = tally_points.psize();
-  std::cout << "  Tally range has psize: " << psize << std::endl;
-  if( psize > 4 ){
-    std::cerr << "Warning: large tally range psize " << psize << ", may reduce performance." << std::endl;
-  }
+  // initialize MeshTally::tally_points to include all mesh cells
+  set_tally_points(all_tets);
 
   /**
    * Iterate over all tets and compute barycentric matrices 
@@ -396,9 +376,7 @@ ErrorCode TrackLengthMeshTally::load_mesh( const std::string& input_filename,
   // build KD tree of all tetrahedra
   std::cout << "  Building KD tree of size " << all_tets.size() << "... " << std::flush;
   kdtree = new AdaptiveKDTree( mb );
-  AdaptiveKDTree::Settings kdtree_settings;
-  //kdtree_settings.candidatePlaneSet = MBAdaptiveKDTree::VERTEX_SAMPLE;
-  kdtree->build_tree( all_tets, kdtree_root, &kdtree_settings );
+  kdtree->build_tree( all_tets, kdtree_root );
   std::cout << "done." << std::endl << std::endl;;
 
   return MB_SUCCESS;

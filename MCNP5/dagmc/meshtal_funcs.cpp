@@ -236,9 +236,7 @@ void dagmc_fmesh_setup_mesh_( int* /*ipt*/, int* id, int* fmesh_index,
 
   if( type == "tracklen" ){
 
-    moab::Interface* mbi = new moab::Core();
-
-    TrackLengthMeshTally* t = TrackLengthMeshTally::setup( fmesh_settings, mbi, current_mcnp_cell );
+    TrackLengthMeshTally* t = TrackLengthMeshTally::setup( fmesh_settings, current_mcnp_cell );
     new_tally = track_tallies[*fmesh_index] = t;
 
   }
