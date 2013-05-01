@@ -36,11 +36,23 @@ set (issuefiles ${FLUDAG_SRC}/cpp/Input.cpp ${FLUDAG_SRC}/cpp/fluka_funcs.cpp)
 add_executable(issuetest ${gmain} ${ifacefiles} ${issuefiles} ${gmain})
 target_link_libraries(issuetest ${PROJECT_NAME_STR} ${moablibs} ${GTEST_BOTH_LIBRARIES} pthread)
 
-set (srcfiles ${FLUDAG_SRC}/cpp/fluka_funcs.cpp ${gmain})
-set (wrappers ${FLUDAG_TST}/iface/tests/nrml_test.cpp)
-add_executable(nrml ${srcfiles} ${wrappers})
-target_link_libraries(nrml ${PROJECT_NAME_STR} ${moablibs} ${GTEST_BOTH_LIBRARIES} pthread)
+# Test call to nrml with concentric spheres geometry
+set (wrappers ${FLUDAG_SRC}/cpp/fluka_funcs.cpp ${gmain})
+set (nrml_spheres_src ${FLUDAG_TST}/iface/tests/nrml_spheres_test.cpp)
+add_executable(nrml_spheres ${nrml_spheres_src} ${wrappers})
+target_link_libraries(nrml_spheres ${PROJECT_NAME_STR} ${moablibs} ${GTEST_BOTH_LIBRARIES} pthread)
+
+# Test call to nrml with nested bricks geometry
+set (nrml_bricks_src ${FLUDAG_TST}/iface/tests/nrml_bricks_test.cpp)
+add_executable(nrml_bricks ${nrml_bricks_src} ${wrappers})
+target_link_libraries(nrml_bricks ${PROJECT_NAME_STR} ${moablibs} ${GTEST_BOTH_LIBRARIES} pthread)
+
+set (all_test_src ${nrml_bricks_src} ${nrml_spheres_src})
+add_executable(all_tests ${all_test_src} ${wrappers})
+target_link_libraries(all_tests ${PROJECT_NAME_STR} ${moablibs} ${GTEST_BOTH_LIBRARIES} pthread)
 
 ENABLE_TESTING()
+
+
 #add_test(${PROJECT_TEST_NAME} ${PROJECT_TEST_NAME})
 
