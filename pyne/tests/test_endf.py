@@ -821,8 +821,20 @@ def test_group_struct():
            -1.74017900e+09, -1.32751300e+02]
     assert_allclose(obs, exp, rtol = 1e-8)
 
-def test_rxdata():
-    print ds.rxcache
-    assert(False)
+def test_int_hist():
+    exp_Eint = np.array([1,4,10, 20])
+    exp_xs = np.array([15, 12, -7, 10])
+    obs = library.integrate_tab_range(1, exp_Eint, exp_xs)
+    exp = 3*15 + 6*12+10*-7
+    assert_equal(exp, obs)
+
+def test_int_linlin():
+    exp_Eint = np.array([1,4,10, 20])
+    exp_xs = np.array([15, 12, -7, 10])
+    obs = library.integrate_tab_range(2, exp_Eint, exp_xs)
+    exp = 3*13.5 + 6*2.5 + 10 * 1.5
+    assert_equal(exp, obs)
+
+
 if __name__ == "__main__":
     nose.runmodule()
