@@ -330,16 +330,19 @@ class Library(rx.RxLib):
         sigma_g : float
             The group xs.
         """
-        def histogram(Eint, xs, i):
-            return (Eint[i+1]-Eint[i]) * xs[i]
+        def histogram(Eint, xs):
+            return sum((Eint[1:]-Eint[:-1]) * xs[:-1])
 
         def linlin(Eint, xs):
-            return (Eint[i+1]-Eint[i]) * (xs[i] + xs[i+1])/2
+            return sum((Eint[1:]-Eint[:-1]) * (xs[1:] + xs[:-1])/2)
 
-        total = 0
-        for i in range(len(Eint)-1):
-            total += histogram(Eint, xs, i)
-        return total
+        def linlog(Eint, xs):
+            return 1
+
+        intdict = {1: histogram, 2: linlin}
+        # Do we need this sortedness check? Or sordidness check?
+        # if np.sort(Eint) == Eint:
+        return intdict[intscheme](Eint, xs)
 
 
     def _cont_and_update(self, flags, keys, data, total_lines):
