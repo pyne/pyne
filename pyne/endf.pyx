@@ -313,6 +313,35 @@ class Library(rx.RxLib):
         total_lines = 1 + meta_len + data_len
         return head, intdata, total_lines
 
+    def integrate_tab_range(intscheme, Eint, xs):
+        """Integrates across one tabulation range.
+
+        Parameters
+        ----------
+        intscheme : int or float
+            The interpolation scheme used in this range.
+        Eint : array
+            The energies at which we have xs data.
+        xs : array
+            The xs data corresponding to Eint.
+
+        Returns
+        -------
+        sigma_g : float
+            The group xs.
+        """
+        def histogram(Eint, xs, i):
+            return (Eint[i+1]-Eint[i]) * xs[i]
+
+        def linlin(Eint, xs):
+            return (Eint[i+1]-Eint[i]) * (xs[i] + xs[i+1])/2
+
+        total = 0
+        for i in range(len(Eint)-1):
+            total += histogram(Eint, xs, i)
+        return total
+
+
     def _cont_and_update(self, flags, keys, data, total_lines):
         flags.update(self._get_cont(keys, data[total_lines]))
         return flags, total_lines+1

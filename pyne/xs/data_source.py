@@ -165,7 +165,7 @@ class DataSource(object):
 
         Returns
         -------
-        rxdata : ndarry
+        rxdata : ndarray
             Source cross section data, length src_ngroups.
 
         """
@@ -601,24 +601,6 @@ class ENDFDataSource(DataSource):
         self.rxcache = {}
         self.dst_group_struct = dst_group_struct
         self._src_phi_g = src_phi_g
-    # def __init__(self, fh, **kwargs):
-    #     self.fh = fh
-    #     super(ENDFDataSource, self).__init__(**kwargs)
-    #     if self.exists:
-    #         self.library = Library(fh)
-
-    def _load_group_structure(self, nuc, rx, nuc_i=None):
-        """Loads the group structure from ENDF file."""
-        self.library._read_res(nuc)
-        mt = rxname.mt(rx)
-        xsdata = self.library.get_xs(nuc, rx, nuc_i)
-        intpoints = xsdata[0]['intpoints'][::-1]
-        Eint = xsdata[0]['Eint']
-        E_g = np.array([Eint[np.asarray(intpoints, dtype=int)-1]]).flat
-        self.src_group_struct = E_g
-        self.src_phi_g = np.ones(self._src_ngroups, dtype='f8') \
-            if self._src_phi_g is None \
-            else np.asarray(self._src_phi_g)
 
     @property
     def exists(self):
@@ -630,7 +612,21 @@ class ENDFDataSource(DataSource):
                                 isinstance(self.fh, StringIO.StringIO))
         return self._exists
 
-    def _load_reaction(self, nuc, rx, nuc_i, temp=300.0):
+    def _load_group_structure(self, nuc, rx, nuc_i=None):
+        """Loads the group structure from ENDF file."""
+        self.library._read_res(nuc)
+        mt = rxname.mt(rx)
+        rx_data = self.rxcache[nuc, rx, nuc_i]
+        xsdata = self.library.get_xs(nuc, rx, nuc_i)
+        intpoints = xsdata[0]['intpoints'][::-1]
+        Eint = xsdata[0]['Eint']
+        E_g = np.array([Eint[np.asarray(intpoints, dtype=int)-1]]).flat
+        rx_data['src_group_struct'] = E_g
+        rx_data['src_phi_g'] = np.ones(len(E_g), dtype='f8') \
+            if rx_data['_src_phi_g'] is None \
+            else np.asarray(rx_data['src_phi_g'])
+
+    def _load_reaction(self, nuc, rx, nuc_i, src_phi_g=None, temp=300.0):
         """Note: EAF data does not use temperature information (temp)
 
         Parameters
@@ -646,8 +642,7 @@ class ENDFDataSource(DataSource):
 
         Returns
         -------
-        rxdata: dict
-            Dictionary of xs data. Includes Eint and xs.
+        rxdata: ndarray of floats, len ngroups
         """
         nuc = nucname.zzaaam(nuc)
         # Munging the rx to an MT#
@@ -659,12 +654,16 @@ class ENDFDataSource(DataSource):
         if rx is None:
             return None
         # Grab data
-        self._load_group_structure(nuc, rx, nuc_i)
         if (nuc, rx, nuc_i) in self.rxcache:
-            pass
+            rxdict = self.rxcache[nuc, rx, nuc_i]
         else:
-            rxdata = self.library.get_xs(nuc, rx, nuc_i)[0]
-            self.rxcache[nuc, rx, nuc_i] = rxdata
+            if nuc_i not in self.library.structure[nuc]['data']:
+                self.library._read_res(nuc)
+            rxdict = self.library.get_xs(nuc, rx, nuc_i)[0]
+            rxdict['_src_phi_g'] = src_phi_g
+            self.rxcache[nuc, rx, nuc_i] = rxdict
+        self._load_group_structure(nuc, rx, nuc_i)
+        rxdata = rxdict['Eint']
         return rxdata
 
     def discretize(self, nuc, rx, nuc_i, temp=300.0, src_phi_g=None,
