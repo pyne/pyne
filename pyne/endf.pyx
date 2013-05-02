@@ -51,7 +51,8 @@ class Library(rx.RxLib):
         self.structure = {}
         self.mat_dict = {}
         self.more_files = True
-        # This counts the calculated position in the file.
+        self.intdict = {1: self._histogram, 2: self._linlin, 3: self._linlog,
+                   4: self._loglin, 5: self._loglog}
         self.chars_til_now = 0
         self.offset = 0
         self.fh = fh
@@ -313,6 +314,28 @@ class Library(rx.RxLib):
         total_lines = 1 + meta_len + data_len
         return head, intdata, total_lines
 
+    def _histogram(self, Eint, xs):
+        dEint = float(Eint[-1]-Eint[0])
+        return sum((Eint[1:]-Eint[:-1]) * xs[:-1])/dEint
+
+    def _linlin(self, Eint, xs):
+        dEint = float(Eint[-1]-Eint[0])
+        return sum((Eint[1:]-Eint[:-1]) * (xs[1:] + xs[:-1])/2.)/dEint
+
+    def _linlog(self, Eint, xs):
+        Eint = np.log(Eint)
+        return self._linlin(Eint, xs)
+
+    def _loglin(self, Eint, xs):
+        xs = np.log(xs)
+        return self._linlin(Eint, xs)
+
+    def _loglog(self, Eint, xs):
+        Eint = np.log(Eint)
+        xs = np.log(xs)
+        return self._linlin(Eint, xs)
+
+
     def integrate_tab_range(self, intscheme, Eint, xs):
         """Integrates across one tabulation range.
 
@@ -330,29 +353,7 @@ class Library(rx.RxLib):
         sigma_g : float
             The group xs.
         """
-        def histogram(Eint, xs):
-            return sum((Eint[1:]-Eint[:-1]) * xs[:-1])
-
-        def linlin(Eint, xs):
-            return sum((Eint[1:]-Eint[:-1]) * (xs[1:] + xs[:-1])/2.)
-
-        def linlog(Eint, xs):
-            Eint = np.log(Eint)
-            return linlin(Eint, xs)
-
-        def loglin(Eint, xs):
-            xs = np.log(xs)
-            return linlin(Eint, xs)
-
-        def loglog(Eint, xs):
-            Eint = np.log(Eint)
-            xs = np.log(xs)
-            return linlin(Eint, xs)
-
-        intdict = {1: histogram, 2: linlin, 3: linlog, 4: loglin, 5: loglog}
-        # Do we need this sortedness check? Or sordidness check?
-        # if np.sort(Eint) == Eint:
-        return intdict[intscheme](Eint, xs)
+        return self.intdict[intscheme](Eint, xs)
 
 
     def _cont_and_update(self, flags, keys, data, total_lines):
