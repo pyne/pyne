@@ -58,7 +58,7 @@ static std::ostream* raystat_dump = NULL;
 
 #define DEBUG 1
 
-bool debug = true;
+bool debug = false ;//true ;
 
 /* Static values used by dagmctrack_ */
 
@@ -74,7 +74,8 @@ static double dist_limit; // needs to be thread-local
 
 MBEntityHandle next_surf;
 
-std::string ExePath() {
+std::string ExePath() 
+{
     int MAX_PATH = 256;
     char buffer[MAX_PATH];
     getcwd(  buffer, MAX_PATH );
@@ -83,41 +84,16 @@ std::string ExePath() {
     return std::string( buffer );
 }
 
-/**	
-  dagmcinit_ is meant to be called from a fortran caller.  Strings have to be 
-  accompanied by their length, and will need to be null-appended.
-  Precondition:  cfile exists and is readable
-*/
-void dagmcinit_(char *cfile, int *clen,  // geom
-                char *ftol,  int *ftlen, // faceting tolerance
-                int *parallel_file_mode, // parallel read mode
-                double* dagmc_version, int* moab_version, int* max_pbl )
-{
-        // Presumably this serves as output to a calling fortran program
-        *dagmc_version= DAG->version();
-        *moab_version = DAG->interface_revision();
-        // terminate all filenames with null char
-        cfile[*clen] = ftol[*ftlen] = '\0';
-        // Call as if running with fluka (final param=true)
-	cpp_dagmcinit(cfile, *parallel_file_mode, *max_pbl);
-}
-
-
 /** 
    cpp_dagmcinit is called directly from c++ or from a fortran-called wrapper.
   Precondition:  myfile exists and is readable
 */
-void cpp_dagmcinit(const char *myfile,        // geom
+void cpp_dagmcinit(std::string infile,         // geom
                 int parallel_file_mode, // parallel read mode
                 int max_pbl)
 {
  
   MBErrorCode rval;
-
-#ifdef ENABLE_RAYSTAT_DUMPS
-  // the file to which ray statistics dumps will be written
-  raystat_dump = new std::ofstream("dagmc_raystat_dump.csv");
-#endif 
 
   // initialize this as -1 so that DAGMC internal defaults are preserved
   // user doesn't set this
@@ -127,34 +103,21 @@ void cpp_dagmcinit(const char *myfile,        // geom
   // if ( *ftlen > 0 ) arg_facet_tolerance = atof(ftol);
 
   // read geometry
-  std::cerr << "Loading " << myfile << std::endl;
-  rval = DAG->load_file(myfile, arg_facet_tolerance );
-  if (MB_SUCCESS != rval) {
-    std::cerr << "DAGMC failed to read input file: " << myfile << std::endl;
-    exit(EXIT_FAILURE);
-  }
-
-#ifdef CUBIT_LIBS_PRESENT
-  // The Cubit 10.2 libraries enable floating point exceptions.  
-  // This is bad because MOAB may divide by zero and expect to continue executing.
-  // See MOAB mailing list discussion on April 28 2010.
-  // As a workaround, put a hold exceptions when Cubit is present.
-
-  fenv_t old_fenv;
-  if ( feholdexcept( &old_fenv ) ){
-    std::cerr << "Warning: could not hold floating-point exceptions!" << std::endl;
-  }
-#endif
-
+  std::cerr << "Loading " << infile << std::endl;
+  rval = DAG->load_file(infile.c_str(), arg_facet_tolerance );
+  if (MB_SUCCESS != rval) 
+    {
+      std::cerr << "DAGMC failed to read input file: " << infile << std::endl;
+      exit(EXIT_FAILURE);
+    }
  
   // initialize geometry
   rval = DAG->init_OBBTree();
-  if (MB_SUCCESS != rval) {
-    std::cerr << "DAGMC failed to initialize geometry and create OBB tree" <<  std::endl;
-    exit(EXIT_FAILURE);
-  }
-
-  pblcm_history_stack.resize( max_pbl+1 ); // fortran will index from 1
+  if (MB_SUCCESS != rval) 
+    {
+      std::cerr << "DAGMC failed to initialize geometry and create OBB tree" <<  std::endl;
+      exit(EXIT_FAILURE);
+    }
 }
 
 /**************************************************************************************************/
@@ -211,6 +174,8 @@ void g1wr(double& pSx,
           double* sLt,         // .
           int* jrLt)           // .
 {
+  double safety; // safety parameter
+
   if(debug)
     {
       std::cout<<"============= G1WR =============="<<std::endl;    
@@ -225,9 +190,17 @@ void g1wr(double& pSx,
 
   // Separate the body of this function to a testable call
   g1_fire(oldReg, point, dir, retStep, newReg);
+
+
+  //  retStep = retStep+3.0e-9;
+  
+  // if ( retStep > propStep ) 
+  //  saf = retStep - propStep;
   
   if(debug)
     {
+      std::cout << "saf = " << saf << std::endl;
+      std::cout << std::setw(20) << std::scientific;
       std::cout << "newReg = " << newReg << " retStep = " << retStep << std::endl;
     }
 
@@ -239,7 +212,7 @@ void g1wr(double& pSx,
 //---------------------------------------------------------------------------//
 void g1_fire(int& oldRegion, double point[], double dir[], double& retStep,  int& newRegion)
 {
-  if(false)
+  if(debug)
   {
       std::cout<<"============= g1_fire =============="<<std::endl;    
       std::cout << "Point " << point[0] << " " << point[1] << " " << point[2] << std::endl;
@@ -247,17 +220,40 @@ void g1_fire(int& oldRegion, double point[], double dir[], double& retStep,  int
   }
   MBEntityHandle vol = DAG->entity_by_index(3,oldRegion);
 
+  std::cout << point[0] << " " << point[1] << " " << point[2] << std::endl;
+
   double next_surf_dist;
   MBEntityHandle newvol = 0;
 
   // next_surf is a global
   MBErrorCode result = DAG->ray_fire(vol, point, dir, next_surf, next_surf_dist );
-  retStep = next_surf_dist;
+
+  if ( next_surf == 0 )
+    {
+      std::cerr << "Lost particle" << std::endl;
+      exit(0);
+    }
+
+  /*
+  do  // we cant find next intersection
+    {
+      // peturb dir slightly
+      dir[0] = dir[0]-1.0e-9;
+      dir[1] = dir[1]-1.0e-9;
+      dir[2] = dir[2]-1.0e-9;
+
+      MBErrorCode result = DAG->ray_fire(vol, point, dir, next_surf, next_surf_dist );
+
+    }
+  while ( next_surf == 0 );
+
+  */
 
   MBErrorCode rval = DAG->next_vol(next_surf,vol,newvol);
+  retStep = next_surf_dist;
 
   newRegion = DAG->index_by_handle(newvol);
-  if(false)
+  if(debug)
   {
      std::cerr << "Region on other side of surface is  = " << newRegion << \
                   ", Distance to next surf is " << retStep << std::endl;
@@ -296,6 +292,14 @@ void nrmlwr(double& pSx, double& pSy, double& pSz,
   }
   // sense of next_surf with respect to oldRegion (volume)
   int sense = getSense(oldRegion);
+  if (sense == -1 )
+    {
+      norml[0]=norml[0]*-1.0;
+      norml[0]=norml[0]*-1.0;
+      norml[0]=norml[0]*-1.0;
+    }
+  // otheriwse out of old region and should point away 
+    
   if(debug)
   {
       std::cout << "Normal: " << norml[0] << ", " << norml[1] << ", " << norml[2]  << std::endl;
@@ -450,6 +454,7 @@ void g1rtwr(void)
 /*
  * WrapIniHist
  */
+/*
 void inihwr(int& intHist)
 {
   if(debug)
@@ -459,11 +464,11 @@ void inihwr(int& intHist)
     }
   return;
 }
-
+*/
 /*
  * WrapSavHist
  */
-int isvhwr(const int& fCheck, const int& intHist)
+/*int isvhwr(const int& fCheck, const int& intHist)
 {
   if(debug)
     {
@@ -477,6 +482,7 @@ int isvhwr(const int& fCheck, const int& intHist)
     }
   return 1;
 }
+*/
 
 /**************************************************************************************************/
 /******                                End of FLUKA stubs                                  ********/
