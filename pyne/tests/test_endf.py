@@ -825,14 +825,14 @@ def test_int_hist():
     exp_Eint = np.array([1,4,10, 20])
     exp_xs = np.array([15, 12, -7, 10])
     obs = library.integrate_tab_range(1, exp_Eint, exp_xs)
-    exp = 3*15 + 6*12+10*-7
+    exp = (3*15 + 6*12+10*-7)/19.
     assert_equal(exp, obs)
 
 def test_int_linlin():
     exp_Eint = np.array([1,4,10, 20])
     exp_xs = np.array([15, 12, -7, 10])
     obs = library.integrate_tab_range(2, exp_Eint, exp_xs)
-    exp = 3*13.5 + 6*2.5 + 10 * 1.5
+    exp = (3*13.5 + 6*2.5 + 10 * 1.5)/19.
     assert_equal(exp, obs)
 
 
