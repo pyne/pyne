@@ -253,12 +253,9 @@ void g1_fire(int& oldRegion, double point[], double dir[], double& retStep,  int
   */
 
   MBErrorCode rval = DAG->next_vol(next_surf,vol,newvol);
-<<<<<<< HEAD
-  retStep = next_surf_dist;
 
-=======
->>>>>>> ce5d6138bc9ff477c8859ac5ae9e80d7e8f85f16
   newRegion = DAG->index_by_handle(newvol);
+
   if(debug)
   {
      std::cerr << "Region on other side of surface is  = " << newRegion << \
@@ -654,7 +651,7 @@ void fludagwrite_assignma(std::string lfname)  // file with cell/surface cards
   std::cout << "\tnum_vols is " << num_vols << std::endl;
   std::cout << "Graveyard list: " << std::endl;
   MBErrorCode ret;
-  MBEntityHandle entity = NULL;
+  MBEntityHandle entity = 0;
 
   std::vector< std::string > keywords;
   ret = DAG->detect_available_props( keywords );
@@ -669,7 +666,7 @@ void fludagwrite_assignma(std::string lfname)  // file with cell/surface cards
   // Open an outputstring
   std::ostringstream ostr;
   // Loop through 3d entities.  In model_complete.h5m there are 90 vols
-  for (unsigned i = 1; i<=num_vols; i++)
+  for (unsigned i = 1 ; i <= num_vols ; i++)
   {
       entity = DAG->entity_by_index(3, i);
       // std::string props = make_property_string(*DAG, entity, keywords);
@@ -678,13 +675,13 @@ void fludagwrite_assignma(std::string lfname)  // file with cell/surface cards
       {
 	 ostr << std::setw(10) << std::left  << "ASSIGNMAT";
 	 ostr << std::setw(10) << std::right << "BLCKHOLE";
-	 ostr << std::setw(10) << std::right << i + 1 << std::endl;
+	 ostr << std::setw(10) << std::right << i << std::endl;
       }
       else
       {
 	 ostr << std::setw(10) << std::left  << "ASSIGNMAT";
 	 ostr << std::setw(10) << std::right << "VACUUM";
-	 ostr << std::setw(10) << std::right << i + 1 << std::endl;
+	 ostr << std::setw(10) << std::right << i << std::endl;
       }
   }
   // Show the output string just created
