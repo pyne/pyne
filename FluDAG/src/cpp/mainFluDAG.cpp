@@ -10,111 +10,98 @@
 #include "fludag_utils.h"
 #include "fluka_funcs.h"
 
-#include "moab/Interface.hpp"
 #include "DagMC.hpp"
+#include "MBInterface.hpp"
+#include "MBCartVect.hpp"
+#include "MBTypes.h"
+
 #include <iostream>
 #include <stdlib.h>
 #include <cstring>
 #include <string.h>
-
+#include <fstream>
 
 using namespace moab;
 
 #define flukam flukam_
 #define DAG DagMC::instance()
 
-extern "C" {
- void flukam(const int &GeoFlag);
+extern "C" 
+{ 
+  void flukam(const int &GeoFlag);
 }
 
 int main(int argc, char* argv[]) 
 {
   bool flukarun = false;
+  MBErrorCode error;
   
   // Default h5m filename is for fluka runs
-  std::string infile = "test.h5m";
-  checkArgs(infile, argc, argv, flukarun);
+  std::string infile = "dagmc.h5m"; // used to be test.h5m should be dagmc.h5m
+ 
+  if ( argc == 1 ) // then its a fluka run
+    {
+      infile = "../"+infile; // fluka create a run directory one higher than where we launch
+      flukarun = true;
+    }
+  else if ( argc > 2 )
+    {
+      std::cout << "run as main_fludag <facet_file>  to produce"
+	        << " material assignments" << std::endl;
+      std::cout << "too many arguments provided" << std::endl;
+      exit(1);
+    }
+  else // its a pre process run
+    {
+      infile = argv[1]; // must be the 2nd argument
+    }
 
-  std::string locatedFile = prefixFilename(infile, flukarun);
 
-  bool success  = checkFile(locatedFile);
-  if (!success)
-  {
-     exit(EXIT_FAILURE);
-  }
-  char *ptr = new char[locatedFile.length()+1];
-  std::strcpy(ptr, locatedFile.c_str());
+  std::ifstream h5mfile (infile.c_str()); // filestream for mesh geom
+  if ( h5mfile.good() )
+    {
+      // ok
+    }
+  else // file not ok
+    {
+      std::cout << "h5m file does not exist" << std::endl;
+      exit(1);
+    }
 
-  // Load the h5m file, init the obb tree;  flukarun changes the expected
-  // relative location of the file
   int max_pbl = 1;
-  cpp_dagmcinit(ptr, 0, max_pbl); 
-  if (!flukarun)
-  {
-    std::string lcad = "mat.inp";
-    fludagwrite_assignma(lcad);
-  //  fludagwrite_mat("mat1.inp");
-  }
-  else // call flukarun
-  {
-//flag for geometry:
-// 1 for GEANT4
-// 0 for FLUKA
-// 2 for Rubia
-// 3 for Dagmc ?
 
+  // load the dag file
+  std::cout << "Loading the faceted geometry file " << infile << "..." << std::endl;
+  error = DAG->load_file(infile.c_str(), 0.0 ); // load the dag file takeing the faceting from h5m
+  if ( error != MB_SUCCESS ) 
+    {
+      std::cerr << "DAGMC failed to read input file: " << infile << std::endl;
+      exit(EXIT_FAILURE);
+    }
+ 
+  // initialize geometry
+  error = DAG->init_OBBTree();
+  if ( error != MB_SUCCESS ) 
+    {
+      std::cerr << "DAGMC failed to initialize geometry and create OBB tree" <<  std::endl;
+      exit(EXIT_FAILURE);
+    }
+
+  // if fluka preprocess run then create mat file to paste into input deck
+  if (!flukarun)
+    {
+      std::string lcad = "mat.inp";
+      fludagwrite_assignma(lcad);
+      std::cout << "Producing material snippets" << std::endl;
+      std::cout << "please paste these into your input deck" << std::endl;
+    }
+  else // call fluka run
+    {
+      // flugg mode is flag = 1
        const int flag = 1;
        flukam(flag);
     }
 
   return 0;
 }
-
-//---------------------------------------------------------------------------//
-// checkArgs(..)
-//---------------------------------------------------------------------------//
-// Perform argument and argument-dependent checks
-void checkArgs(std::string infile, int numargs, char* argv[], bool& flukarun)
-{
-  std::cerr << __FILE__ << ", " << __func__ << ":" << __LINE__ << "_______________" << std::endl;
-  // No filename => do a fluka run using test.h5m in higher directory
-  if (numargs < 2) 
-  {
-     // Tell the user how to run the program
-     std::cerr << "Using " << infile << std::endl;
-     std::cerr << "   or call: " << argv[0] << " h5mfile" << std::endl;
-     // "Usage messages" are a conventional way of telling the user
-     // how to run a program if they enter the command incorrectly.
-     flukarun = true;
-  }
-  else  // Given a file name, write out the material file and stop
-  {
-      std::cerr << "Writing materials to " << infile << std::endl;
-      flukarun = false;
-  }
-} 
-
-//---------------------------------------------------------------------------//
-// prefixFilename(..)
-//---------------------------------------------------------------------------//
-// When passing a filename to be used as fluka input, it must be prefixed
-// with "../" because it will be referenced from a subdirectory.
-std::string prefixFilename(std::string infile, bool running_with_fluka)
-{
-  char *fileptr;
-  fileptr = &infile[0];
-
-  std::string prefixedFilename; 
-  // Prefix
-  if (running_with_fluka)  // h5m file is one level up
-  {
-     prefixedFilename="../";
-  }
-  else // file is in same directory as executable
-  {
-     prefixedFilename="";
-  }
-  prefixedFilename.append(fileptr);
-  return prefixedFilename;
-}  
 
