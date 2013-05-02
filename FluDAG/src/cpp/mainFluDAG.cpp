@@ -20,6 +20,7 @@
 #include <cstring>
 #include <string.h>
 #include <fstream>
+#include <time.h>       // for timing the routine
 
 using namespace moab;
 
@@ -35,7 +36,8 @@ int main(int argc, char* argv[])
 {
   bool flukarun = false;
   MBErrorCode error;
-  
+  time_t time_before,time_after;
+
   // Default h5m filename is for fluka runs
   std::string infile = "dagmc.h5m"; // used to be test.h5m should be dagmc.h5m
  
@@ -70,6 +72,10 @@ int main(int argc, char* argv[])
 
   int max_pbl = 1;
 
+  // get the current time
+  time(&time_before);  /* get current time; same as: timer = time(NULL)  */
+
+
   // load the dag file
   std::cout << "Loading the faceted geometry file " << infile << "..." << std::endl;
   error = DAG->load_file(infile.c_str(), 0.0 ); // load the dag file takeing the faceting from h5m
@@ -78,7 +84,13 @@ int main(int argc, char* argv[])
       std::cerr << "DAGMC failed to read input file: " << infile << std::endl;
       exit(EXIT_FAILURE);
     }
- 
+  
+  time(&time_after); 
+
+  double seconds = difftime(time_after,time_before); //get the time in seconds to load file
+
+  std::cout << "Time to load the h5m file = " << seconds << " seconds" << std::endl;
+
   // initialize geometry
   error = DAG->init_OBBTree();
   if ( error != MB_SUCCESS ) 
