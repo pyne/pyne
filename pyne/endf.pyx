@@ -313,7 +313,7 @@ class Library(rx.RxLib):
         total_lines = 1 + meta_len + data_len
         return head, intdata, total_lines
 
-    def integrate_tab_range(intscheme, Eint, xs):
+    def integrate_tab_range(self, intscheme, Eint, xs):
         """Integrates across one tabulation range.
 
         Parameters
@@ -334,12 +334,22 @@ class Library(rx.RxLib):
             return sum((Eint[1:]-Eint[:-1]) * xs[:-1])
 
         def linlin(Eint, xs):
-            return sum((Eint[1:]-Eint[:-1]) * (xs[1:] + xs[:-1])/2)
+            return sum((Eint[1:]-Eint[:-1]) * (xs[1:] + xs[:-1])/2.)
 
         def linlog(Eint, xs):
-            return 1
+            Eint = np.log(Eint)
+            return linlin(Eint, xs)
 
-        intdict = {1: histogram, 2: linlin}
+        def loglin(Eint, xs):
+            xs = np.log(xs)
+            return linlin(Eint, xs)
+
+        def loglog(Eint, xs):
+            Eint = np.log(Eint)
+            xs = np.log(xs)
+            return linlin(Eint, xs)
+
+        intdict = {1: histogram, 2: linlin, 3: linlog, 4: loglin, 5: loglog}
         # Do we need this sortedness check? Or sordidness check?
         # if np.sort(Eint) == Eint:
         return intdict[intscheme](Eint, xs)
