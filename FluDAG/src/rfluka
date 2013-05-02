@@ -1,0 +1,366 @@
+#!/bin/sh
+#
+# Create a directory which is a subdirectory of the current one
+# and is unique
+#
+ if [ $? -ne 0 ] ; then
+    cat <<!
+
+Usage: rfluka -e <fluka executable> -N <run N> -M <final run N>
+       -t <max_cputime> -p <pemf> <input file>
+
+!
+    exit 2
+ fi
+#
+
+# Default values
+ ECHOE="echo"
+ FORT="fort"
+ FORTD="."
+ FORT0=""
+
+ TARGET_MACHINE=`uname`
+ echo \$TARGET_MACHINE = $TARGET_MACHINE
+ case $TARGET_MACHINE in
+    Linux)
+       #ECHOE="echo -e"
+       ECHOE="printf"
+       ;;
+
+    Darwin|OSF1|AIX)
+       # default values
+    ;;
+
+    HP-UX)
+       FORT="ftn"
+       FORTD=""
+       FORT0="0"
+       ;;
+
+    *)
+       echo "	!!! undefined !!!!"
+       ;;
+ esac
+
+ if [ -z "$FLUPRO" ] ; then
+    echo \$FLUPRO not defined
+    exit 1
+ fi
+ echo \$FLUPRO = $FLUPRO
+ FTOP="$FLUPRO"
+ EXE="$FTOP/flukahp"
+ INPF=""
+ NUM=0
+ MAX=5
+ PEMF="$FTOP/libec_thihecufealw_10t"
+
+ # loop until all arguments are processed
+ while [ $# -gt 0 ]; do
+    while getopts "d:e:hN:M:p:t" opt; do
+       case $opt in
+          h)
+            cat <<!
+
+       rfluka [-e <fluka executable> -N <number of previous run>
+              -M <number of final run> -p <name of the pemf file>
+              -t <max cpu time (s)> -h (print this help)] <input file>
+
+       rfluka runs fluka. A unique name subdirectory is created and
+       the program is run from there. Links are created to the files
+       in the parent directory. After a successful run of fluka all
+       the temporary links are removed and the newly created files
+       are copied to the parent directory with the prefix
+       <input_name><cycle number>.
+       This operation is repeated from the cycle after the one indicated
+       on the -N option (default 0) to the one indicated on the -M
+       option (default 5).
+
+       -e<file>  name of the fluka executable to be run
+
+       -N<run N> number of the previous run
+
+       -M<final run N>  final run number
+
+       -p<pemf>  Obsolete: name of the pemf file. The suffix .pemf will
+                 be added automatically. The default is
+                 /user2/fluka/libec_thihecufealw_10t.
+
+       -t<max cpu time> maximum CPU time (s) allowed for each run
+
+       -h        print this help file
+
+       <input file> input file for fluka, without .inp
+
+
+!
+             exit
+             ;;
+          e)
+             EXE="${OPTARG}"
+             ;;
+          N)
+             NUM=${OPTARG}
+             ;;
+          M)
+             MAX=${OPTARG}
+             ;;
+          p)
+             PEMF="${OPTARG}"
+             ;;
+          t)
+             CPULIMIT=${OPTARG}
+             export CPULIMIT
+             ;;
+	  d)
+	     DAGMCFILE=${OPTARG}
+             cp ${DAGMCFILE} dagmc.h5m
+	     ;;
+          \?)
+             ${ECHOE} "\nInvalid option -$OPTARG\n"
+             exit 2
+             ;;
+          :)
+             ${ECHOE} "\nOption -$OPTARG requires an argument!\n"
+             ;;
+       esac
+    done
+
+    # shift the remaining arguments
+    shift `expr $OPTIND - 1`
+
+    # check if any arguments left?
+    if [ $# -gt 0 ] ; then
+       if [ .$INPF = . ]; then
+           # For safety remove the extension .inp if any
+           ARG="`echo ${1} | sed -es/\.inp\$//`"
+           INPF="${ARG}.inp"
+           shift
+       else
+           ${ECHOE} "\nToo many input files specified!\n"
+           exit 2
+       fi
+       OPTIND=1
+    fi
+ done
+
+ if [ .$INPF = . ]; then
+    ${ECHOE} "\nAn input file should be specified!\n"
+    exit 2
+ fi
+
+ CURDIR=`pwd`
+ INPD=`dirname "$INPF"`
+ if [ "$INPD" = "." ] ; then
+    INPF="${CURDIR}/${INPF}"
+ fi
+ INPN=`basename "${INPF}"`
+ ROOF=`basename "${ARG}"`
+
+#
+ if [ ! -r "$INPF" ] ; then
+    ${ECHOE} "\nInput $INPF not found !\n"
+    exit 2
+ fi
+
+# check NUM and MAX
+ if [ $NUM -ge $MAX ]; then
+    ${ECHOE} "\nERROR: Final cycle -M $MAX is smaller or equal than previous cycle -N $NUM !\n"
+    exit 2
+ fi
+
+#
+ EXED=`dirname "${EXE}"`
+ if [ "$EXED" = "." ] ; then
+    EXE="${CURDIR}/$EXE"
+ fi
+#
+ PEM=`dirname "${PEMF}"`
+ if [ "$PEM" = "." ] ; then
+    PEMF="${CURDIR}/$PEMF"
+ fi
+ PEMF="${PEMF}.pemf"
+ echo \$PEMF = $PEMF
+#
+ CURSUB=fluka_${$}
+ if [ -d $CURSUB ] ; then
+    ${ECHOE} "\n$CURSUB exists, making a new unique one"
+    i=0
+    while [ 1 ] ; do
+       if [ $i -lt 10 ] ; then
+          BAS=00
+       elif [ $i -lt 100 ] ; then
+          BAS=0
+       else
+          ${ECHOE} "\nCannot find free directory name in first 100"
+          exit 2
+       fi
+       TRY=${CURSUB}_00${i}
+       if [ ! -d ${CURSUB}_00${i} ] ; then
+          CURSUB=$TRY
+          break
+       fi
+       i=`expr $i + 1`
+    done
+ fi
+#
+ if [ $NUM -eq 0 ] ; then
+    RAN1="${CURDIR}/ran${ROOF}001"
+    if [ ! -r "$RAN1" ] ; then
+       ${ECHOE} "\nInitial seed copied from $FTOP"
+       cp "$FTOP/random.dat" "$RAN1"
+    else
+       ${ECHOE} "\nInitial seed already existing"
+    fi
+ fi
+
+# create running sub-directory
+ mkdir $CURSUB ; cd $CURSUB
+ ${ECHOE} "\nRunning fluka in `pwd`"
+
+# copy input file to directory
+ cp "${INPF}" "${INPN}"
+
+#
+ while [ $NUM -lt $MAX ] ; do
+
+    NUM=`expr $NUM + 1`
+
+#  Export a variable with the NUM value
+    FLUKA_CUR_RUN="$NUM"
+    export FLUKA_CUR_RUN
+
+    if [ $NUM -lt 10 ] ; then
+       PST=00${NUM}
+    elif [ $NUM -lt 100 ] ; then
+       PST=0${NUM}
+    elif [ $NUM -lt 1000 ] ; then
+       PST=$NUM
+    else
+       ${ECHOE} "\n-N #: number should be less than 998"
+    fi
+
+    NUP=`expr $NUM + 1`
+    if [ $NUP -lt 10 ] ; then
+       PSP=00${NUP}
+    elif [ $NUP -lt 100 ] ; then
+       PSP=0${NUP}
+    elif [ $NUP -lt 1000 ] ; then
+       PSP=$NUP
+    else
+       ${ECHOE} "\n-N #: number should be less than 998"
+    fi
+
+# Start run
+    RAN1="$CURDIR/ran${ROOF}${PST}"
+    if [ ! -f "$RAN1" ]; then
+        ${ECHOE} "\nERROR: Random seed '$RAN1' do not exist!\n"
+        exit 3
+    fi
+    ln -s -f "$RAN1" ${FORT}${FORTD}${FORT0}1
+#
+    RAN2="ran${ROOF}${PSP}"
+    ln -s -f "$RAN2" ${FORT}${FORTD}${FORT0}2
+#
+    ln -s -f "$PEMF" ${FORT}${FORTD}12
+#
+DATAFILES="sigmapi.bin elasct.bin nuclear.bin fluodt.dat"
+XNLOANFIL="e6r1nds3.fyi jef2.fyi  jendl3.fyi"
+#
+    for i in $DATAFILES ; do
+       if [ -r "${CURDIR}/${i}" ] ; then
+          ${ECHOE} "\nFile ${CURDIR}/${i} exists and it is not a link!"
+          ln -s -f "${CURDIR}/${i}" ${i}
+       else
+          ln -s -f "${FTOP}/${i}" ${i}
+       fi
+    done
+    if [ -r "${CURDIR}/neuxsc-ind_260.bin" ] ; then
+       ${ECHOE} "\nFile ${CURDIR}/neuxsc-ind_260.bin exists and it is not a link!"
+       ln -s -f "${CURDIR}/neuxsc-ind_260.bin" neuxsc.bin
+    else
+       ln -s -f "${FTOP}/neuxsc-ind_260.bin" neuxsc.bin
+    fi
+    if [ -r "${CURDIR}/xnloan.dat" ] ; then
+       ${ECHOE} "\nFile ${CURDIR}/xnloan.dat  exists and it is not a link!"
+       ln -s -f "${CURDIR}/xnloan.dat" xnloan.dat
+    elif [ -r "${FTOP}/xnloan.dat" ] ; then
+       ln -s -f "${FTOP}/xnloan.dat" xnloan.dat
+    else
+#
+       for i in $XNLOANFIL ; do
+         ln -s -f "${CURDIR}/${i}" ${i}
+       done
+       ln -s -f "${FTOP}/xnloan.dat" xnloan.dat
+    fi
+#
+    ERRF="${ROOF}${PST}.err"
+    ln -s "${ERRF}" ${FORT}${FORTD}15
+    OUTF="${ROOF}${PST}.out"
+    ln -s "${OUTF}" ${FORT}${FORTD}11
+    LOGF="${ROOF}${PST}.log"
+    ${ECHOE} "\n\n======================= Running FLUKA for cycle # $NUM =======================\n"
+    "${EXE}" <"$INPN" 2>"$LOGF" 1>"$LOGF"
+    RC=$?
+    if [ ! $RC -eq 0 ] ; then exit $RC ; fi
+# remove the links we know we can remove
+    ${ECHOE} "\nRemoving links"
+    for i in \
+    ${FORT}${FORTD}${FORT0}1 ${FORT}${FORTD}${FORT0}2 ${FORT}${FORTD}11 \
+    ${FORT}${FORTD}12 ${FORT}${FORTD}15 \
+    $DATAFILES neuxsc.bin $XNLOANFIL xnloan.dat
+    do
+       if [ -h $i ] ; then
+          rm $i
+       elif [ -r $i ] ; then
+          ${ECHOE} "\nSomething wrong, $i a file and not a link!"
+          exit 2
+       fi
+    done
+# remove the temporary files we know we can remove
+    ${ECHOE} "\nRemoving temporary files"
+    for i in \
+    ${FORT}${FORTD}${FORT0}8 ${FORT}${FORTD}16 geom.scr emf.scr .timer.out
+    do
+       if [ -f $i ] ; then
+          rm $i
+       elif [ -h $i ] ; then
+          ${ECHOE} "\nSomething wrong, $i a link and not a file!"
+          exit 2
+       fi
+    done
+# move 'up' the files we know we have to save
+    ${ECHOE} "\nSaving output and random number seed"
+    for i in \
+    "$OUTF" "$RAN2" "$LOGF" "$ERRF"
+    do
+       if [ -r "$i" ] ; then
+          mv "$i" "$CURDIR"
+       else
+          ${ECHOE} "\n     No $i generated!"
+       fi
+    done
+# move up all the other files with a name
+    ${ECHOE} "\nSaving additional files generated"
+    FILES=`ls -d * 2>/dev/null`
+    found=0
+    for i in *; do
+# check for a possible user request to stop the run
+       if [ "$i" = "rfluka.stop" ]; then
+          NUM=$MAX
+          rm "$i"
+# move all but the copy of the input file
+       elif [ "$i" != "$INPN" ]; then
+          ${ECHOE} "\n     Moving $i to $CURDIR/${ROOF}${PST}_${i}"
+          mv "$i" "$CURDIR/${ROOF}${PST}_${i}"
+          found=1
+       fi
+    done
+    if [ $found -eq 0 ]; then
+       ${ECHOE} "\n     No additional files to move"
+    fi
+ done
+# cleanup files and directory
+ rm "$INPN"
+ cd "${CURDIR}" ; rmdir ${CURSUB}
+ ${ECHOE} "\nEnd of FLUKA run\n"
