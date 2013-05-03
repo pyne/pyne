@@ -35,7 +35,7 @@ extern "C" {
    * retStep   set to distance to next surface
    * newRegion region ofter step
   */
-  void g1_fire(int& oldRegion, double point[], double dir[],  double& retStep, int& newRegion);
+  void g1_fire(int& oldRegion, double point[], double dir[],  double &propStep, double& retStep, int& newRegion);
 
   /* get the sense of a region with respect to the global next_surf,
    * which is set by a call to rayfire
