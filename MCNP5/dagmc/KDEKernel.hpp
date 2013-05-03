@@ -3,7 +3,7 @@
 #ifndef DAGMC_KDE_KERNEL_H
 #define DAGMC_KDE_KERNEL_H
 
-#include "string"
+#include <string>
 
 /**
  * \class KDEKernel
