@@ -2,6 +2,8 @@
 #
 
 GH_PAGES_SOURCES = doc-src/source
+CURRENT_BRANCH = $(shell git branch 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/\1/')
+
 
 # You can set these variables from the command line.
 SPHINXOPTS    =
@@ -44,7 +46,7 @@ help:
 
 gh-pages:
 	git checkout gh-pages
-	git checkout master $(GH_PAGES_SOURCES)
+	git checkout $(CURRENT_BRANCH) $(GH_PAGES_SOURCES)
 	git reset HEAD
 	rm -rf _static _sources doc doctrees build
 	make  html
@@ -56,7 +58,7 @@ gh-pages:
 
 gh-preview:
 	git checkout gh-pages
-	git checkout master $(GH_PAGES_SOURCES)
+	git checkout $(CURRENT_BRANCH) $(GH_PAGES_SOURCES)
 	git reset HEAD
 	rm -rf _static _sources doc doctrees build
 	make  html

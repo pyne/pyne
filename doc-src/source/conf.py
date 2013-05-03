@@ -41,7 +41,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'Direct Acclerated Geometry Monte Carlo Toolkit'
-copyright = u'2012, The UW CNERG Team'
+copyright = u'2012-2013, The UW CNERG Team'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the

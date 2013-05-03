@@ -45,6 +45,12 @@ ASSIGNMA      VACUUM       6.0
 *ASSIGNMA     OSALLOY    OSLAYR
 USRBIN           10.   NEUTRON      -21.       5.0       5.0       5.0asdf
 USRBIN          -5.0      -5.0      -5.0       11.       11.       11.&
+USRTRACK         -1.   NEUTRON      -22.       2.0       1.0        1.NFLUX1
+USRTRACK        0.02   1.0E-14                                        &
+USRTRACK         -1.   NEUTRON      -22.       3.0       1.0        1.NFLUX2
+USRTRACK        0.02   1.0E-14                                        &
+USRTRACK         -1.   NEUTRON      -22.       4.0       1.0        1.NFLUX3
+USRTRACK        0.02   1.0E-14                                        &
 * Set the number of primary histories to be simulated in the run
-START          1000.                            1.
+START        100000.                            1.
 STOP
