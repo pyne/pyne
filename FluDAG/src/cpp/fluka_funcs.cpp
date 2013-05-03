@@ -193,6 +193,7 @@ void g1wr(double& pSx,
 
 
   retStep = retStep + 3.0e-9;
+  //  retStep = retStep+3.0e-9;
   
   // if ( retStep > propStep ) 
   //  saf = retStep - propStep;
@@ -252,10 +253,11 @@ void g1_fire(int& oldRegion, double point[], double dir[], double &propStep, dou
   else
     {
       newRegion = oldRegion;
-      // next_surf = next_surf;
     }
 
   //  newRegion = DAG->index_by_handle(newvol);
+
+  //  while ( next_surf == 0 );
 
   if(debug)
   {
