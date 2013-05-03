@@ -209,15 +209,11 @@ void g1wr(double& pSx,
   double dir[3]   = {pV[0],pV[1],pV[2]};  
 
   // Separate the body of this function to a testable call
-<<<<<<< HEAD
   g1_fire(oldReg, point, dir, propStep, retStep, newReg);
 
 
   retStep = retStep + 3.0e-9;
-=======
-  g1_fire(oldReg, point, dir, retStep, newReg);
   //  retStep = retStep+3.0e-9;
->>>>>>> 076c2f1d145c283dce089354496214defd25b5cf
   
   // if ( retStep > propStep ) 
   //  saf = retStep - propStep;
@@ -253,7 +249,6 @@ void g1_fire(int& oldRegion, double point[], double dir[], double &propStep, dou
 
   // next_surf is a global
   MBErrorCode result = DAG->ray_fire(vol, point, dir, next_surf, next_surf_dist );
-  retStep = next_surf_dist;
 
   retStep = next_surf_dist;
 
@@ -276,19 +271,11 @@ void g1_fire(int& oldRegion, double point[], double dir[], double &propStep, dou
   else
     {
       newRegion = oldRegion;
-      // next_surf = next_surf;
     }
-<<<<<<< HEAD
 
   //  newRegion = DAG->index_by_handle(newvol);
-=======
-  while ( next_surf == 0 );
 
-  */
-
-  MBErrorCode rval = DAG->next_vol(next_surf,vol,newvol);
-  newRegion = DAG->index_by_handle(newvol);
->>>>>>> 076c2f1d145c283dce089354496214defd25b5cf
+  //  while ( next_surf == 0 );
 
   if(debug)
   {
