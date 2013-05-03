@@ -61,7 +61,7 @@ KDEMeshTally::KDEMeshTally(const MeshTallyInput& input,
       mbi(new moab::Core()),
       bandwidth(moab::CartVect(0.01, 0.01, 0.01)),
       kde_tally(type),
-      kernel(new KDEKernel()),
+      kernel(NULL),
       num_subtracks(3)
 {
     std::cout << "Creating KDE " << kde_tally_names[kde_tally]
@@ -72,8 +72,14 @@ KDEMeshTally::KDEMeshTally(const MeshTallyInput& input,
 
     // set up KDEMeshTally member variables from MeshTallyInput
     parse_tally_options();
+
+    // create second-order epanechnikov kernel if user did not specify type
+    if (kernel == NULL)
+    {
+        kernel = KDEKernel::createKernel("epanechnikov");
+    }
  
-    std::cout << "    using " << KDEKernel::kernel_names[kernel->get_type()]
+    std::cout << "    using " << kernel->get_kernel_name()
               << " kernel and bandwidth " << bandwidth << std::endl;
 
     if (kde_tally == SUB_TRACK)
@@ -321,7 +327,7 @@ void KDEMeshTally::parse_tally_options()
         else if (key == "hz") bandwidth[2] = parse_bandwidth_value(key, value);
         else if (key == "kernel")
         {
-            kernel->change_type(value);
+            kernel = KDEKernel::createKernel(value);
         }
         else if (key == "seed" && kde_tally == SUB_TRACK)
         {

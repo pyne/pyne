@@ -1,87 +1,88 @@
-// KDEKernel.hpp
+// MCNP5/dagmc/KDEKernel.hpp
 
-#ifndef KDEKERNEL_H
-#define KDEKERNEL_H
+#ifndef DAGMC_KDE_KERNEL_H
+#define DAGMC_KDE_KERNEL_H
 
-// forward declarations
-class string;
+#include "string"
 
-/**  
- * A class that represents a one-dimensional kernel function k(u), which is a
- * function whose integral over the entire domain is equal to one.
+/**
+ * \class KDEKernel
+ * \brief Defines a general kernel function interface
+ *
+ * KDEKernel is a Base class that defines the variables and methods that are
+ * typically needed to implement a kernel function for use with a Kernel
+ * Density Estimator.
+ *
+ * KDEKernel objects can be created via the createKernel() factory method.
+ * This method assigns memory for storing the object, so it will need to be
+ * deleted once it is no longer needed to prevent memory leaks.
+ *
+ * Currently, no kernel functions are supported.
+ *
+ * The following functions must be implemented in all Derived classes
+ *
+ *     1) evaluate(double)
+ *     2) evaluate(double, KDEKernel::Boundary)
+ *     3) get_kernel_name()
  */
-class KDEKernel {
+class KDEKernel
+{
+  protected:
+    /**
+     * \brief Constructor
+     * \param order the order of the kernel
+     */
+    explicit KDEKernel(unsigned int order) : kernel_order(order) {}
 
   public:
+    /**
+     * \brief Defines the location of the boundary for 1D geometries
+     */
+    enum Boundary {LEFT = 0, RIGHT = 1};
 
     /**
-     * An enumerative type that specifies the kernel function being used by a
-     * Kernel object.
+     * \brief Virtual destructor
      */
-    enum KernelType { EPANECHNIKOV = 0, UNIFORM = 1 };
-    static const char* const kernel_names[];
-    
-     /**
-      * Constructs a default kernel based on the Epanechnikov kernel function.
-      */
-    KDEKernel() : type( EPANECHNIKOV ) {}
-    
-     /**
-      * Constructs a kernel based on the kernel function k.
-      */
-    KDEKernel( KernelType k ) : type( k ) {}
+    virtual ~KDEKernel(){}
+
+    // >>> FACTORY METHOD
 
     /**
-     * Returns the type of kernel being used by this Kernel object.
-     *
-     * @return the kernel type
+     * \brief creates a KDEKernel of the specified type and order
+     * \param type the name of the kernel type
+     * \param order the order of the kernel
+     * \return pointer to the new KDEKernel that was created
      */
-    KernelType get_type();
+    static KDEKernel* createKernel(std::string type, unsigned int order = 2);
 
-    /** 
-     * \brief Changes the type of this kernel function
-     * \param new_type name of the new kernel type in lower case
-     *
-     * Available options include "epanechnikov" and "uniform".
-     */
-    void change_type(const std::string& new_type);
+    // >>> PUBLIC INTERFACE
 
     /**
-     * \brief Changes the type of this kernel function
-     * \param new_type enum value representing new kernel type
+     * \brief evaluate the kernel function K(u)
+     * \param u the value at which the kernel will be evaluated
+     * \return the kernel function evaluation K(u)
      */
-    void change_type(KernelType new_type);
+    virtual double evaluate(double u) = 0;
 
-   /**
-     * Evaluates the kernel function at the parameter u.
-     *
-     * @param u the value at which the kernel is evaluated
-     * @return the kernel function evaluation k(u)
+    /**
+     * \brief evaluate the boundary kernel function Kb(u)
+     * \param u the value at which the boundary kernel will be evaluated
+     * \param side the location of the boundary
+     * \return the boundary kernel function evaluation Kb(u)
      */
-    double evaluate( double u );
+    virtual double evaluate(double u, KDEKernel::Boundary side) = 0;
+
+    /**
+     * \brief get_kernel_name()
+     * \return string representing kernel name
+     */
+    virtual std::string get_kernel_name() = 0;
   
-  private:
-
-    KernelType type;  // the kernel function being used
-
-    /**
-     * Evaluates the kernel function at the parameter u using the Epanechnikov
-     * kernel. 
-     *
-     * @param u the value at which the kernel is evaluated
-     * @return the epanechnikov kernel function evaluation k(u)
-     */
-    double epanechnikov( double u );
-
-    /**
-     * Evaluates the kernel function at the parameter u using the Uniform
-     * kernel. 
-     *
-     * @param u the value at which the kernel is evaluated
-     * @return the uniform kernel function evaluation k(u)
-     */
-    double uniform( double u );
-
+  protected:
+    /// order of this kernel
+    unsigned int kernel_order;
 };
 
-#endif
+#endif // DAGMC_KDE_KERNEL_H
+
+// end of MCNP5/dagmc/KDEKernel.hpp
