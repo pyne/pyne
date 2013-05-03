@@ -89,6 +89,8 @@ int main(int argc, char* argv[])
 
   double seconds = difftime(time_after,time_before); //get the time in seconds to load file
 
+  time_before = time_after; // reset time to now for the next call
+  
   std::cout << "Time to load the h5m file = " << seconds << " seconds" << std::endl;
 
   // initialize geometry
@@ -98,6 +100,11 @@ int main(int argc, char* argv[])
       std::cerr << "DAGMC failed to initialize geometry and create OBB tree" <<  std::endl;
       exit(EXIT_FAILURE);
     }
+
+  time(&time_after);
+
+  seconds = difftime(time_after,time_before);
+  std::cout << "Time to initialise the geometry" << seconds << std::endl;
 
   // if fluka preprocess run then create mat file to paste into input deck
   if (!flukarun)
