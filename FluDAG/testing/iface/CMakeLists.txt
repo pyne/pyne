@@ -27,7 +27,8 @@ set(MOAB_LIB_DIR ${MOAB_HOME}/lib)
 set (moablibs ${MOAB_LIB_DIR}/libMOAB.so ${MOAB_LIB_DIR}/libdagmc.so)
 
 include_directories(${GTEST_INCLUDE_DIRS})
-include_directories(${FLUDAG}/src/include)
+# include_directories(${FLUDAG}/src/include)
+include_directories(${FLUDAG}/src/cpp)
 include_directories(${MOAB_INCLUDE})
 
 set (gmain      ${FLUDAG_TST}/iface/gtest_main.cc)
