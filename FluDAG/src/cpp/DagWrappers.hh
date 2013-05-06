@@ -46,10 +46,14 @@ extern "C" void  g1wr(double& pSx, double& pSy, double& pSz, double* pV,
    * oldRegion region of start point
    * point     start point
    * dir       direction vector
+   * propStep
    * retStep   set to distance to next surface
    * newRegion region ofter step
   */
-  void g1_fire(int& oldRegion, double point[], double dir[],  double& retStep, int& newRegion);
+ //  void g1_fire(int& oldRegion, double point[], double dir[],  double& retStep, int& newRegion);
+  void g1_fire(int& oldRegion, double point[], double dir[], 
+               double &propStep, double& retStep,  int& newRegion);
+
 
 // WrapG1RT.cc has been deleted.  The function is now 
 // defined in fluka_funcs.cpp, as a stub.
