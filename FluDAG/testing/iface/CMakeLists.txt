@@ -43,12 +43,12 @@ set (nrml_spheres_src ${FLUDAG_TST}/iface/tests/nrml_spheres_test.cpp)
 add_executable(nrml_spheres ${nrml_spheres_src} ${wrappers})
 target_link_libraries(nrml_spheres ${PROJECT_NAME_STR} ${moablibs} ${GTEST_BOTH_LIBRARIES} pthread)
 
-# Test call to nrml with nested bricks geometry
-set (nrml_bricks_src ${FLUDAG_TST}/iface/tests/nrml_bricks_test.cpp)
-add_executable(nrml_bricks ${nrml_bricks_src} ${wrappers})
-target_link_libraries(nrml_bricks ${PROJECT_NAME_STR} ${moablibs} ${GTEST_BOTH_LIBRARIES} pthread)
+# Test call to nrml with nested cube geometry
+set (nrml_cubes_src ${FLUDAG_TST}/iface/tests/nrml_cubes_test.cpp)
+add_executable(nrml_cubes ${nrml_cubes_src} ${wrappers})
+target_link_libraries(nrml_cubes ${PROJECT_NAME_STR} ${moablibs} ${GTEST_BOTH_LIBRARIES} pthread)
 
-set (all_test_src ${nrml_bricks_src} ${nrml_spheres_src})
+set (all_test_src ${nrml_cubes_src} ${nrml_spheres_src})
 add_executable(all_tests ${all_test_src} ${wrappers})
 target_link_libraries(all_tests ${PROJECT_NAME_STR} ${moablibs} ${GTEST_BOTH_LIBRARIES} pthread)
 
