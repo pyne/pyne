@@ -208,7 +208,6 @@ void g1wr(double& pSx,
   double dir[3]   = {pV[0],pV[1],pV[2]};  
 
   // Separate the body of this function to a testable call
-  // g1_fire(oldReg, point, dir, retStep, newReg);
   g1_fire(oldReg, point, dir, propStep, retStep, newReg);
 
   retStep = retStep + 3.0e-9;
@@ -228,7 +227,8 @@ void g1wr(double& pSx,
 }
 
 //---------------------------------------------------------------------------//
-// g1_fire(int& old Region, int& newRegion)
+// void g1_fire(int& oldRegion, double point[], double dir[], 
+//              double &propStep, double& retStep,  int& newRegion)
 //---------------------------------------------------------------------------//
 // oldRegion - the region of the particle's current coordinates
 // point     - the particle's coordinate location vector
@@ -236,7 +236,6 @@ void g1wr(double& pSx,
 // propStep  - ??
 // retStep   - returned as the distance from the particle's current location, along its ray, to the next boundary
 // newRegion - gotten from the value returned by DAG->next_vol
-// void g1_fire(int& oldRegion, double point[], double dir[], double& retStep, int& newRegion)
 // newRegion is gotten from the volue returned by DAG->next_vol
 void g1_fire(int& oldRegion, double point[], double dir[], double &propStep, double& retStep,  int& newRegion)
 {
@@ -265,9 +264,6 @@ void g1_fire(int& oldRegion, double point[], double dir[], double &propStep, dou
       exit(0);
     }
 
-
-  //      MBErrorCode result = DAG->ray_fire(vol, point, dir, next_surf, next_surf_dist );
-
   
   if ( propStep > retStep ) // will cross into next volume next step
     {
@@ -278,10 +274,6 @@ void g1_fire(int& oldRegion, double point[], double dir[], double &propStep, dou
     {
       newRegion = oldRegion;
     }
-
-  //  newRegion = DAG->index_by_handle(newvol);
-
-  //  while ( next_surf == 0 );
 
   if(debug)
   {
