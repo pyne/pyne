@@ -14,7 +14,6 @@
 #include "fludag_utils.h"
 
 #include "DagWrappers.hh"
-// #include "DagWrapUtils.hh"
 
 #include "MBInterface.hpp"
 #include "MBCartVect.hpp"
@@ -189,11 +188,7 @@ void g1wr(double& pSx,
   double dir[3]   = {pV[0],pV[1],pV[2]};  
 
   // Separate the body of this function to a testable call
-  g1_fire(oldReg, point, dir, propStep, retStep, newReg);
-
-
-  retStep = retStep + 3.0e-9;
-  //  retStep = retStep+3.0e-9;
+  g1_fire(oldReg, point, dir, retStep, newReg);
   
   // if ( retStep > propStep ) 
   //  saf = retStep - propStep;
@@ -209,12 +204,14 @@ void g1wr(double& pSx,
 }
 
 //---------------------------------------------------------------------------//
-// g1(int& old Region, int& newRegion)
+// g1_fire(int& old Region, int& newRegion)
 //---------------------------------------------------------------------------//
-// oldRegion should be the region the point is in
-// retStep is set to next_surf_dist
-// newRegion is gotten from the volue returned by DAG->next_vol
-void g1_fire(int& oldRegion, double point[], double dir[], double &propStep, double& retStep,  int& newRegion)
+// oldRegion - the region of the particle's current coordinates
+// point     - the particle's coordinate location vector
+// dir       - the direction vector of the particle's current path (ray)
+// retStep   - returned as the distance from the particle's current location, along its ray, to the next boundary
+// newRegion - gotten from the value returned by DAG->next_vol
+void g1_fire(int& oldRegion, double point[], double dir[], double& retStep, int& newRegion)
 {
   if(debug)
   {
@@ -270,12 +267,38 @@ void g1_fire(int& oldRegion, double point[], double dir[], double &propStep, dou
 /////////////////////////////////////////////////////////////////////
 
 //---------------------------------------------------------------------------//
+// normal
+//---------------------------------------------------------------------------//
+// Local wrapper for fortran-called, nrmlwr.  This function is supplied for testing
+// purposes.  Its signature shows what parameters are being used in our wrapper 
+// implementation.  
+// Any FluDAG calls to nrmlwr should use this call instead.
+// ASSUMES:  no ray history
+// Notes
+// - direction is not taken into account 
+// - curRegion is not currently used.  It is expected to be implemented as a check
+//   on what the sign of the normal should be.  It is used in a call to DAG->surface_sense
+int  normal (double& posx, double& posy, double& posz, double *norml, int& curRegion)
+{
+   int flagErr; 
+   int dummyReg;
+   double dummyDirx, dummyDiry, dummyDirz;
+   nrmlwr(posx, posy, posz, dummyDirx, dummyDiry, dummyDirz, norml, curRegion, dummyReg, flagErr);
+   return flagErr;
+}
+//---------------------------------------------------------------------------//
 // nrmlwr(..)
 //---------------------------------------------------------------------------//
 /// From Flugg Wrappers WrapNorml.cc
 //  Note:  The normal is calculated at the point on the surface nearest the 
 //         given point
-//  Does NOT set newReg.
+// ASSUMES:  Point is on the boundary
+// Parameters Set:
+//     norml vector
+//     flagErr = 0 if ok, !=0 otherwise
+// Does NOT set any region, point or direction vector.
+// Globals used:
+//     next_surf, set by ray_fire 
 void nrmlwr(double& pSx, double& pSy, double& pSz,
             double& pVx, double& pVy, double& pVz,
 	    double* norml, const int& oldRegion, 
@@ -287,8 +310,8 @@ void nrmlwr(double& pSx, double& pSy, double& pSz,
   }
 
   flagErr=0;
-  double xyz[3]; //tmp storage of position
-  xyz[0]=pSx,xyz[1]=pSy,xyz[2]=pSz;
+  double xyz[3] = {pSx, pSy, pSz}; 
+  // xyz[0]=pSx,xyz[1]=pSy,xyz[2]=pSz;
   MBErrorCode ErrorCode = DAG->get_angle(next_surf,xyz,norml); 
   if(ErrorCode != MB_SUCCESS)
   {
@@ -304,7 +327,7 @@ void nrmlwr(double& pSx, double& pSy, double& pSz,
       norml[0]=norml[0]*-1.0;
       norml[0]=norml[0]*-1.0;
     }
-  // otheriwse out of old region and should point away 
+  // otherwise out of old region and should point away 
     
   if(debug)
   {
@@ -312,9 +335,6 @@ void nrmlwr(double& pSx, double& pSy, double& pSz,
   }
   return;
 }
-///////			End nrmlwr
-/////////////////////////////////////////////////////////////////////
-
 //---------------------------------------------------------------------------//
 // getSense(..)
 //---------------------------------------------------------------------------//
@@ -333,10 +353,25 @@ int getSense(int region)
   }
   return sense; 
 } 
-
-///////			End nrmlwr
+///////			End nrmlwr, normal, and getSense(..)
 /////////////////////////////////////////////////////////////////////
 
+//---------------------------------------------------------------------------//
+// look(..)
+//---------------------------------------------------------------------------//
+// Testable local wrapper for fortran-called, lkwr
+// This function signature shows what parameters are being used in our wrapper implementation
+// oldRegion is looked at if we are no a boundary, but it is not set.
+// ASSUMES:  position is not on a boundary
+// RETURNS: nextRegion, the region the given point is in 
+int look( double& posx, double& posy, double& posz, double* dir, int& oldRegion)
+{
+   int flagErr;
+   int lattice_dummy;  // not used
+   int nextRegion;     
+   lkwr(posx, posy, posz, dir, oldRegion, lattice_dummy, nextRegion, flagErr, lattice_dummy);
+   return nextRegion;
+}
 //---------------------------------------------------------------------------//
 // lkwr(..)
 //---------------------------------------------------------------------------//
@@ -347,12 +382,14 @@ int getSense(int region)
 //            code passes it to a geant call 
 //           "ptrNavig->LocateGlobalPointAndUpdateTouchable()"
 //////////////////////////////////////////////////////////////////
-// What volume is the point in?  
-// Set newReg to volume of point.
-// Ignore oldReg UNLESS volume is on the boundary, then set newReg=oldReg
+// This function answers the question What volume is the point in?  
+// oldReg - not looked at UNLESS the volume is on the boundary, then newReg=oldReg
+// nextRegion - set to the volume index the point is in.
+// ToDo:  Is there an error condition for the flagErr that is guaranteed not to be equal to the next region?
+//        Find a way to make use of the error return from point_in_volume
 void lkwr(double& pSx, double& pSy, double& pSz,
           double* pV, const int& oldReg, const int& oldLttc,
-          int& region, int& flagErr, int& newLttc)
+          int& nextRegion, int& flagErr, int& newLttc)
 {
   if(debug)
   {
@@ -361,8 +398,8 @@ void lkwr(double& pSx, double& pSy, double& pSz,
   }
 
   const double xyz[] = {pSx, pSy, pSz}; // location of the particle (xyz)
-  int is_inside = 0; // logical inside or outside of volume
-  int num_vols = DAG->num_entities(3); // number of volumes
+  int is_inside = 0;                    // logical inside or outside of volume
+  int num_vols = DAG->num_entities(3);  // number of volumes
 
   for (int i = 1 ; i <= num_vols ; i++) // loop over all volumes
     {
@@ -372,34 +409,34 @@ void lkwr(double& pSx, double& pSy, double& pSz,
 
       // check for non error
       if(MB_SUCCESS != code) 
-	{
+      {
 	  std::cout << "Error return from point_in_volume!" << std::endl;
 	  flagErr = 1;
 	  return;
-	}
+      }
       
       if (is_inside == -1)  // we are on a boundary
       {
-          region = oldReg;
-          flagErr = oldReg;
+          nextRegion = oldReg;
+          flagErr = nextRegion;
           if(debug)
           {
              std::cout << "oldReg = " << oldReg << std::endl;
-             std::cout << "point is on a boundary, setting region = oldReg" << std::endl;
+             std::cout << "point is on a boundary, setting nextRegion = oldReg" << std::endl;
           }
           return;
       }
       else if ( is_inside == 1 ) // we are inside the cell tested
-	{
-	  region = i;
-          //BIZARRELY - WHEN WE ARE INSIDE A VOLUME, BOTH, region has to equal flagErr
-	  flagErr = i;
+      {
+	  nextRegion = i;
+          //BIZARRELY - WHEN WE ARE INSIDE A VOLUME, BOTH, nextRegion has to equal flagErr
+	  flagErr = nextRegion;
           if(debug)
           {
-              std::cout << "point is in region = " << region << std::endl;
+              std::cout << "point is in nextRegion = " << nextRegion << std::endl;
           }
           return;
-	}
+      }
     }  // end loop over all volumes
 
   std::cout << "point is not in any volume" << std::endl;
@@ -459,6 +496,7 @@ void g1rtwr(void)
 
 /*
  * WrapIniHist
+ * Removed from header
  */
 /*
 void inihwr(int& intHist)
@@ -638,14 +676,16 @@ static char* get_tallyspec( std::string spec, int& dim ){
 
 }
 
-//////////////////////////////////////////////////////////////////////////
-/////////////
-/////////////		fludagwrite_assignma
-/////////////
-//////////////////////////////////////////////////////////////////////////
-/**
-   After mcnp_funcs:dagmcwritemcnp_
-*/
+//---------------------------------------------------------------------------//
+// fludagwrite_assignma
+//---------------------------------------------------------------------------//
+/// Called from mainFludag if only one argument is given.
+//  This function writes out a simple numerical material assignment to the named argument file
+//  Example usage:  mainFludag dagmc.html
+//  Note that a preprocessing step to this call sets up the the DAG object that contains 
+//  all the geometry information contained in dagmc.html.  
+//  the name of the (currently hardcoded) output file is "mat.inp"
+//  The graveyard is assumed to be the last region.
 void fludagwrite_assignma(std::string lfname)  // file with cell/surface cards
 {
 
