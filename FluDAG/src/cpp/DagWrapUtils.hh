@@ -31,7 +31,5 @@ void PrintEntityRegionNames(std::ostream& os);
 void writeRegionLine(std::ostream& os, int iRegion, std::string name);
 void createFlukaMatFile();
 
-// Defined in fluka_funcs, perhaps should be in fluka_funcs.h
-void region2name(int volindex, char * vname );
 
 #endif
