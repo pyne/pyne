@@ -57,7 +57,7 @@ static std::ostream* raystat_dump = NULL;
 
 #define DEBUG 1
 
-bool debug = false ;//true ;
+bool debug = false; //true ;
 
 /* Static values used by dagmctrack_ */
 
@@ -208,7 +208,11 @@ void g1wr(double& pSx,
   double dir[3]   = {pV[0],pV[1],pV[2]};  
 
   // Separate the body of this function to a testable call
-  g1_fire(oldReg, point, dir, retStep, newReg);
+  // g1_fire(oldReg, point, dir, retStep, newReg);
+  g1_fire(oldReg, point, dir, propStep, retStep, newReg);
+
+  retStep = retStep + 3.0e-9;
+  //  retStep = retStep+3.0e-9;
   
   // if ( retStep > propStep ) 
   //  saf = retStep - propStep;
@@ -229,9 +233,12 @@ void g1wr(double& pSx,
 // oldRegion - the region of the particle's current coordinates
 // point     - the particle's coordinate location vector
 // dir       - the direction vector of the particle's current path (ray)
+// propStep  - ??
 // retStep   - returned as the distance from the particle's current location, along its ray, to the next boundary
 // newRegion - gotten from the value returned by DAG->next_vol
-void g1_fire(int& oldRegion, double point[], double dir[], double& retStep, int& newRegion)
+// void g1_fire(int& oldRegion, double point[], double dir[], double& retStep, int& newRegion)
+// newRegion is gotten from the volue returned by DAG->next_vol
+void g1_fire(int& oldRegion, double point[], double dir[], double &propStep, double& retStep,  int& newRegion)
 {
   if(debug)
   {
@@ -241,42 +248,44 @@ void g1_fire(int& oldRegion, double point[], double dir[], double& retStep, int&
   }
   MBEntityHandle vol = DAG->entity_by_index(3,oldRegion);
 
-  std::cout << point[0] << " " << point[1] << " " << point[2] << std::endl;
+  //  std::cout << point[0] << " " << point[1] << " " << point[2] << std::endl;
 
   double next_surf_dist;
   MBEntityHandle newvol = 0;
 
   // next_surf is a global
   MBErrorCode result = DAG->ray_fire(vol, point, dir, next_surf, next_surf_dist );
+
   retStep = next_surf_dist;
 
   if ( next_surf == 0 )
     {
-      std::cerr << "Lost particle" << std::endl;
+      std::cout << point[0] << " " << point[1] << " " << point[2] << std::endl;
+      std::cout << "Lost particle" << std::endl;
       exit(0);
     }
 
-  /*
-  do  // we cant find next intersection
+
+  //      MBErrorCode result = DAG->ray_fire(vol, point, dir, next_surf, next_surf_dist );
+
+  
+  if ( propStep > retStep ) // will cross into next volume next step
     {
-      // peturb dir slightly
-      dir[0] = dir[0]-1.0e-9;
-      dir[1] = dir[1]-1.0e-9;
-      dir[2] = dir[2]-1.0e-9;
-
-      MBErrorCode result = DAG->ray_fire(vol, point, dir, next_surf, next_surf_dist );
-
+      MBErrorCode rval = DAG->next_vol(next_surf,vol,newvol);
+      newRegion = DAG->index_by_handle(newvol);
     }
-  while ( next_surf == 0 );
+  else
+    {
+      newRegion = oldRegion;
+    }
 
-  */
+  //  newRegion = DAG->index_by_handle(newvol);
 
-  MBErrorCode rval = DAG->next_vol(next_surf,vol,newvol);
-  newRegion = DAG->index_by_handle(newvol);
+  //  while ( next_surf == 0 );
 
   if(debug)
   {
-     std::cerr << "Region on other side of surface is  = " << newRegion << \
+     std::cout << "Region on other side of surface is  = " << newRegion << \
                   ", Distance to next surf is " << retStep << std::endl;
   }
   return;

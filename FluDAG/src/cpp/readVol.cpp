@@ -468,7 +468,7 @@ std::string makeRegionName(int l)
 
   std::string VVname;
   std::string Vname;
-  EntityHandle entity = NULL;
+  EntityHandle entity = 0;
   entity = DAG->entity_by_id(3, l);
   // Don't add 1
   int iRegion = l;
