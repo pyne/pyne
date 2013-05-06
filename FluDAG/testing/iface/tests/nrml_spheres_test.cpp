@@ -1,10 +1,10 @@
 //----------------------------------*-C++-*----------------------------------//
 /*!
- * \file   /testing/iface/test/nrml_test.cpp
+ * \file   /testing/iface/test/nrml_spheres_test.cpp
  * \author Julie C. Zachman
  * \date   Wed Apr 3 
- * \brief  Unit Tests for Issue
- * \note   Test
+ * \brief  Unit Tests for concentric sphere geometry
+ * \note   
  */
 //---------------------------------------------------------------------------//
 // $Id:
@@ -18,47 +18,37 @@
 
 using moab::DagMC;
 
-double posx;
-double posy;
-double posz;
-double xyz[] = {posx, posy, posz};
+double spheres_lastRetStep;
 
-double dirx;
-double diry;
-double dirz;
-
-double lastRetStep;
-int lastKnownRegion = -1;
-int curReg, newReg, nextReg, originReg;;
-
-char *getfileptr(std::string name);
-
-int look( double& posx, double& posy, double& posz, double* dir, int& region);
-void normal (double& posx, double& posy, double& posz, double *norml, int& regionForSense);
-
-TEST(nrml_Test, spheres_sense)
+TEST(nrml_spheres_Test, sense)
 {
+   int lastKnownRegion = -1;
+   int curReg, newReg, nextReg, originReg;;
+
    double retStep;
-   posx = 0.0;
-   posy = 0.0;
-   posz = 0.0;
+   // Position at zero
+   double posx = 0.0;
+   double posy = 0.0;
+   double posz = 0.0;
+   double xyz[] = {posx, posy, posz};
    
-   dirx = 1.0;
-   diry = 0.0;
-   dirz = 0.0;
+   // Direction along x
+   double dirx = 1.0;
+   double diry = 0.0;
+   double dirz = 0.0;
    double dir[] = {dirx, diry, dirz};
    double* norml = new double(3); 
    int flagErr;
    
-   // Nested bricks: faces at 5, 7.5, and 10
    // Concentric spheres at 12, 15, 20
-   char *fileptr = getfileptr("../cases/spheres.h5m");
+   std::string name = "../cases/spheres.h5m";
+   char* fileptr = new char(name.length()+1);
+   std:strcpy(fileptr, name.c_str());
    std::cout << "********* Testing Concentric Spheres ************" << std::endl;
 
    // Load the file and create the dag structure
    cpp_dagmcinit(fileptr,0,1);
    
-   xyz = {posx, posy, posz}; 
    // Find out what volume we are in: lastKnownRegion doesn't matter unless we are on a boundary
    // curRegion should be 1 for nested cubes, 2 for nested spheres
    curReg = look(posx, posy, posz, dir, lastKnownRegion );
@@ -67,8 +57,9 @@ TEST(nrml_Test, spheres_sense)
    // Fire a ray from the given point in the given direction
    // calls ray_fire; sets retStep, nextReg and global next_surf
    g1_fire(curReg, xyz, dir, retStep, nextReg); 
-   // nrmlwr(posx, posy, posz, dirx, diry, dirz, norml, curReg, newReg, flagErr);
-   normal(posx, posy, posz, norml, curReg);
+   spheres_lastRetStep = retStep;  // save for later testing
+   int error = normal(posx, posy, posz, norml, curReg);
+   EXPECT_EQ(0,error);
    // Potential Tests: 
    //   o verify retStep = {12,5} at origin for spheres and bricks
    //   o verify curReg = {2,1} at origin for spheres and bricks. 
@@ -93,6 +84,7 @@ TEST(nrml_Test, spheres_sense)
    // Test:  confirm near origin we are still in the volume of the origin 
    std::cout << "Testing position close to origin " << std::endl;
    posx += 1.0e-2;
+   xyz[0] = posx;             // Update position vector
    lastKnownRegion = curReg;  // Copy position of previous region
    curReg = look(posx, posy, posz, dir, lastKnownRegion);
    EXPECT_EQ(originReg, curReg);
@@ -109,7 +101,6 @@ TEST(nrml_Test, spheres_sense)
 
    std::cout << "Fire the ray in the opposite direction.  " << std::endl;
    dir[0] *= -1.0;
-   xyz = {posx, posy, posz}; 
    g1_fire(curReg, xyz, dir, retStep, nextReg);
    if (true)
    {
@@ -126,15 +117,29 @@ TEST(nrml_Test, spheres_sense)
    std::cout << "Sense of next_surf with respect to the point is " << sense << std::endl;
 }
 
-TEST(nrml_test, test2)
+TEST(nrml_spheres_Test, test2)
 { 
-   double* norml = new double(3); 
+   int lastKnownRegion = -1;
+   int curReg, newReg, nextReg, originReg;;
    double retStep;
-   int flagErr;
+
+   // Position at zero
+   double posx = 0.0;
+   double posy = 0.0;
+   double posz = 0.0;
+   double xyz[] = {posx, posy, posz};
+   
+   // Direction along -x
+   double dirx = 1.0;
+   double diry = 0.0;
+   double dirz = 0.0;
    double dir[] = {-dirx, diry, dirz};
+   double* norml = new double(3); 
+   int flagErr;
+   
    // Add distance to surface to current (already offset) point should put us into the next region
    std::cout << std::endl;
-   posx = lastRetStep + .1;
+   posx = spheres_lastRetStep + .1;
    lastKnownRegion = curReg;  // Copy position of previous region
    curReg = look(posx, posy, posz, dir, lastKnownRegion);
    // Expect curReg to = previous nextReg from knowledge of last g1_fire, but maybe not because we are such
@@ -180,44 +185,3 @@ TEST(nrml_test, test2)
    */
 }
 
-//---------------------------------------------------------------------------//
-// getfileptr
-//---------------------------------------------------------------------------//
-// helper function
-char *getfileptr(std::string name)
-{
-   char* fileptr = new char(name.length()+1);
-   std:strcpy(fileptr, name.c_str());
-}
-
-//---------------------------------------------------------------------------//
-// look
-//---------------------------------------------------------------------------//
-// Local wrapper for fortran-called, fluka-set lkwr
-// This function signature shows what parameters are being used in our wrapper implementation
-// ASSUMES:  position is not on a boundary
-int look( double& posx, double& posy, double& posz, double* dir, int& region)
-{
-   int flagErr;
-   int lattice_dummy;  // not used
-   int nextRegion;     // looked at iff on boundry, but not set.
-   lkwr(posx, posy, posz, dir, region, lattice_dummy, nextRegion, flagErr, lattice_dummy);
-   return nextRegion;
-}
-
-//---------------------------------------------------------------------------//
-// normal
-//---------------------------------------------------------------------------//
-// Local wrapper for fortran-called, fluka-set nrmlwr
-// This function signature shows what parameters are being used in our wrapper implementation
-// ASSUMES:  no ray history
-// Notes
-// - direction is not taken into account 
-// - curRegion is not currently used.  It is expected to be implemented as a check
-//   on what the sign of the normal should be.  It is used in a call to DAG->surface_sense
-void normal (double& posx, double& posy, double& posz, double *norml, int& curRegion)
-{
-   int dummyFlagErr, dummyReg;
-   double dummyDirx, dummyDiry, dummyDirz;
-   nrmlwr(posx, posy, posz, dummyDirx, dummyDiry, dummyDirz, norml, curRegion, dummyReg, dummyFlagErr);
-}
