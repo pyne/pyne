@@ -678,7 +678,7 @@ class PtracEvent(tables.IsDescription):
     tme     = tables.Float32Col()
 
 
-class PtracReader:
+class PtracReader(object):
     def __init__(self, filename):
         """Construct a new Prac reader for a given filename, determine the
         number format and read the file's headers.
@@ -707,7 +707,7 @@ class PtracReader:
             28: "tme"
         }
     
-        self.f = open(sys.argv[1], 'rb')
+        self.f = open(filename, 'rb')
         self.determine_endianness()
         self.read_headers()
         self.read_variable_ids()
