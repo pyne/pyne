@@ -225,8 +225,20 @@ void g1wr(double& pSx,
   double point[3] = {pSx,pSy,pSz};
   double dir[3]   = {pV[0],pV[1],pV[2]};  
 
-  g1_fire(oldReg, point, dir, propStep, retStep, newReg); // fire a ray 
 
+  //std::cerr << pSx << " " << pSy << " " << pSz << std::endl;
+  //std::cerr << pV[0] << " " << pV[1] << " " << pV[2] << std::endl;
+  // Separate the body of this function to a testable call
+  g1_fire(oldReg, point, dir, propStep, retStep, newReg);
+
+  //std::cerr << retStep << std::endl;
+
+  //retStep = retStep + 3.0e-9;
+  //  retStep = retStep+3.0e-9;
+  
+  // if ( retStep > propStep ) 
+  //  saf = retStep - propStep;
+  
   if(debug)
     {
       std::cout << "saf = " << saf << std::endl;
@@ -250,14 +262,14 @@ void g1wr(double& pSx,
 void g1_fire(int& oldRegion, double point[], double dir[], double &propStep, double& retStep,  int& newRegion)
 {
 
-  /*
   if (PrevRegion != oldRegion) // if the particle is not in the correct volume since could be a banked history
     {
       int dummy;
       int errFlg;
-      lkwr(point[0],point[1],point[2],dir,0,dummy,oldRegion,errFlg,dummy); // where is particle
+      // must be a banked particle
+      lkwr(point[0],point[1],point[2],dir,0,oldRegion,dummy,errFlg,dummy);
     }
-  */
+    
 
   if(debug)
   {
@@ -299,12 +311,12 @@ void g1_fire(int& oldRegion, double point[], double dir[], double &propStep, dou
     {
       MBErrorCode rval = DAG->next_vol(next_surf,vol,newvol);
       newRegion = DAG->index_by_handle(newvol);
-      retStep = retStep ; // path limited by geometry
+      propStep -= ( retStep + 3.0e-9) ;
     }
   else
     {
       newRegion = oldRegion;
-      retStep = propStep; //physics limits step
+      retStep = propStep - 3.0e-9; 
     }
 
   PrevRegion = newRegion; // particle will be moving to PrevRegion upon next entry.
