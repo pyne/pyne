@@ -385,7 +385,7 @@ def _get_decay(nuc):
     return decay_dict
 
 
-def _get_destruction(nuc, phi):
+def _get_destruction(nuc, phi, addDecay = True):
     """Returns the destruction rate of the nuclide.
 
     Parameters
@@ -395,6 +395,10 @@ def _get_destruction(nuc, phi):
     phi : NumPy 1-dimensional array
         Flux vector for use in simulation. The vector should be 175 entries
         in length for proper usage with EAF data.
+    addDecay : boolean
+        True if the decay constant should be added to the returned value.
+        False if only destruction from neutron reactions should be
+            considered.
 
     Returns
     -------
@@ -406,7 +410,10 @@ def _get_destruction(nuc, phi):
     xs_total = np.zeros((175,1))
     for key in rxn_dict.keys():
         xs_total += rxn_dict[key]
-    d = data.decay_const(nuc) + np.sum(xs_total*phi)
+    if addDecay:
+        d = data.decay_const(nuc) + np.sum(xs_total*phi)
+    else:
+        d = np.sum(xs_total*phi)
     return d
 
 
