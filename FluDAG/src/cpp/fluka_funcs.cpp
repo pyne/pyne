@@ -462,11 +462,9 @@ void lkwr(double& pSx, double& pSy, double& pSz,
       std::cout << "position is " << pSx << " " << pSy << " " << pSz << std::endl; 
   }
 
-  double xyz[] = {pSx, pSy, pSz};       // location of the particle (xyz)
+  double xyz[] = {pSx, pSy, pSz}; // location of the particle (xyz)
   const double dir[] = {pV[0],pV[1],pV[2]};
-  // Initialize to outside boundary.  This value can be 0 or +/-1 for ouside, inside, or on boundary.
-  // ToDo:  Should this be initialized at all?  Or should it be initialized to an invalide number?
-  int is_inside = 0;                    
+  int is_inside = 0;                    // logical inside or outside of volume
   int num_vols = DAG->num_entities(3);  // number of volumes
 
   for (int i = 1 ; i <= num_vols ; i++) // loop over all volumes
@@ -479,17 +477,34 @@ void lkwr(double& pSx, double& pSy, double& pSz,
       if(MB_SUCCESS != code) 
 	{
 	  std::cout << "Error return from point_in_volume!" << std::endl;
+	  exit(0);
 	  flagErr = -33;
 	  return;
-	}
-
+      }
+      /*      
+      if (is_inside == 0)  // is outside
+      {
+          nextRegion = oldReg;
+          flagErr = nextRegion;
+          if(debug)
+          {
+             std::cout << "oldReg = " << oldReg << std::endl;
+             std::cout << "point is on a boundary, setting nextRegion = oldReg" << std::endl;
+          }
+          return;
+      }
+      else */
       if ( is_inside == 1 ) // we are inside the cell tested
-	{
+      {
 	  nextRegion = i;
           //BIZARRELY - WHEN WE ARE INSIDE A VOLUME, BOTH, nextRegion has to equal flagErr
 	  flagErr = nextRegion;
-	  return;	  
-	}
+          if(debug)
+          {
+              std::cout << "point is in nextRegion = " << nextRegion << std::endl;
+          }
+          return;
+      }
       else if ( is_inside == -1 )
 	{
 	  std::cout << "We cannot be here" << std::endl;
@@ -497,88 +512,16 @@ void lkwr(double& pSx, double& pSy, double& pSz,
 	}
     }  // end loop over all volumes
 
-  //special_check(xyz,dir,nextRegion);
+  std::cout << "point is not in any volume" << std::endl;
+  special_check(xyz,dir,nextRegion);
   // if we return update xyz
-  //pSx=xyz[0];
-  //pSy=xyz[1];
-  //pSz=xyz[2];
-  // if we are here do slow check
-  slow_check(xyz,dir,nextRegion);
-  flagErr = nextRegion; // return nextRegion
+  pSx=xyz[0];
+  pSy=xyz[1];
+  pSz=xyz[2];
+  flagErr = nextRegion;
   return;
 }
 
-//---------------------------------------------------------------------------//
-// slow_check(..)
-//---------------------------------------------------------------------------//
-// Helper function
-void slow_check(double pos[3], const double dir[3], int &oldReg)
-{
-  std::cout << pos[0] << " " << pos[1] << " " << pos[2] << std::endl;
-  std::cout << dir[0] << " " << dir[1] << " " << dir[2] << std::endl;
-  int num_vols = DAG->num_entities(3);  // number of volumes
-  int is_inside = 0;
-  for (int i = 1 ; i <= num_vols ; i++) // loop over all volumes
-    {
-      MBEntityHandle volume = DAG->entity_by_index(3, i); // get the volume by index
-      MBErrorCode code = DAG->point_in_volume(volume, pos, is_inside,dir); 
-      if ( code != MB_SUCCESS)
-	{
-	 std::cout << "Failure from point in volume" << std::endl;
-	 exit(0);
-	}
-
-      if ( is_inside == 1) // if in volume
-	{
-	  oldReg = DAG->index_by_handle(volume); //set oldReg
-	  std::cout << pos[0] << " " << pos[1] << " " << pos[2] << " " << oldReg << std::endl;
-	  return;
-	}
-    }
-
-  std::cout << "FAILED SLOW CHECK" << std::endl;
-  exit(0);
-}
-
-//---------------------------------------------------------------------------//
-// check_reg(..)
-//---------------------------------------------------------------------------//
-// NOT CALLED - Helper function
-// check we are where we say we are
-MBEntityHandle check_reg(MBEntityHandle volume, double point[3], double dir[3]) 
-{
-  int is_inside;
-  MBErrorCode code = DAG->point_in_volume(volume, point, is_inside,dir); 
-  if (is_inside == 1 )
-    {
-      // we are where we say we are
-      return volume;
-    }
-  else
-    {
-      int num_vols = DAG->num_entities(3);  // number of volumes
-      for (int i = 1 ; i <= num_vols ; i++) // loop over all volumes
-	{
-	  MBEntityHandle volume = DAG->entity_by_index(3, i); // get the volume by index
-	  MBErrorCode code = DAG->point_in_volume(volume, point, is_inside,dir); 
-	  if ( is_inside == 1) // if in volume
-	    {
-	      return volume;
-	    }
-	}
-      std::cout.precision(25);
-      std::cout << std::scientific ; 
-      std::cout << "position of particle " << point[0] << " " << point[1] << " " << point[2] << std::endl;
-      std::cout << " traveling in direction " << dir[0] << " " << dir[1] << " " << dir[2] << std::endl;
-      std::cout << "particle not nowhere" << std::endl;
-      exit(0);
-    }
-}
-
-//---------------------------------------------------------------------------//
-// special_check(..)
-//---------------------------------------------------------------------------//
-// NOT CALLED - Helper function
 void special_check(double pos[3],const double dir[3], int& oldReg)
 {
   int num_vols = DAG->num_entities(3);  // number of volumes
@@ -586,19 +529,19 @@ void special_check(double pos[3],const double dir[3], int& oldReg)
   int is_inside = 0;
   do 
     {
-      // bump particle position along dir
-      pos[0]=pos[0]+(dir[0]*1.0e-9);
-      pos[1]=pos[1]+(dir[1]*1.0e-9);
-      pos[2]=pos[2]+(dir[2]*1.0e-9);
+      // bump particle position outwards
+      pos[0]=pos[0]-(dir[0]*1.0e-9);
+      pos[1]=pos[1]-(dir[1]*1.0e-9);
+      pos[2]=pos[2]-(dir[2]*1.0e-9);
 
       for (int i = 1 ; i <= num_vols ; i++) // loop over all volumes
 	{
 	  MBEntityHandle volume = DAG->entity_by_index(3, i); // get the volume by index
-	  MBErrorCode code = DAG->point_in_volume(volume, pos, is_inside,dir); 
-	  if ( is_inside == 1) // if in volume
+	  MBErrorCode code = DAG->point_in_volume(volume, pos, is_inside);
+	  if ( is_inside == 1)
 	    {
 	      std::cout << "had to bump " << counter << " times" << std::endl;
-	      oldReg = DAG->index_by_handle(volume); //set oldReg
+	      oldReg = DAG->get_entity_id(volume);
 	      return;
 	    }
 	}
