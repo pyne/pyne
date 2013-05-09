@@ -31,6 +31,8 @@ extern "C" {
                 int max_pbl);
 
 
+  void special_check(double pos[3],const double dir[3], int& oldReg);
+
   /* get the sense of a region with respect to the global next_surf,
    * which is set by a call to rayfire
   */
