@@ -141,6 +141,9 @@ def check_sample_feed(solver):
     orig_casc.mat_feed = feed
     casc = enr.multicomponent(orig_casc, solver=solver, tolerance=1E-11, max_iter=100)
 
+    #print "casc.mat_prod = " + repr(casc.mat_prod)
+    #print "casc.mat_prod = " + repr(casc.mat_tail)
+    #assert False
     assert_almost_equal(casc.mat_prod.comp[922350], 0.06,   5) 
     assert_almost_equal(casc.mat_tail.comp[922350], 0.0025, 5)
 
@@ -274,5 +277,5 @@ def test_tungsten():
 
 
 if __name__ == "__main__":
-    nose.main()
+    nose.runmodule()
 
