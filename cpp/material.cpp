@@ -102,7 +102,10 @@ void pyne::Material::_load_comp_protocol1(hid_t db, std::string datapath, int ro
 
   // Grab the nucpath
   hid_t nuc_attr = H5Aopen(data_set, "nucpath", H5P_DEFAULT);
-  hsize_t nuc_attr_len = H5Aget_storage_size(nuc_attr) / sizeof(char);
+  //hsize_t nuc_attr_len = H5Aget_storage_size(nuc_attr) / sizeof(char);
+  H5A_info_t nuc_info;
+  H5Aget_info(nuc_attr, &nuc_info);
+  hsize_t nuc_attr_len = nuc_info.data_size / sizeof(char);
   hid_t str_attr = H5Tcopy(H5T_C_S1);
   H5Tset_size(str_attr, nuc_attr_len);
   char * nucpathbuf = new char [nuc_attr_len];
