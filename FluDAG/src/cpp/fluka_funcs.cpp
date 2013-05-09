@@ -453,7 +453,8 @@ void lkwr(double& pSx, double& pSy, double& pSz,
       std::cout << "position is " << pSx << " " << pSy << " " << pSz << std::endl; 
   }
 
-  const double xyz[] = {pSx, pSy, pSz}; // location of the particle (xyz)
+  double xyz[] = {pSx, pSy, pSz}; // location of the particle (xyz)
+  const double dir[] = {pV[0],pV[1],pV[2]};
   int is_inside = 0;                    // logical inside or outside of volume
   int num_vols = DAG->num_entities(3);  // number of volumes
 
@@ -467,11 +468,12 @@ void lkwr(double& pSx, double& pSy, double& pSz,
       if(MB_SUCCESS != code) 
       {
 	  std::cout << "Error return from point_in_volume!" << std::endl;
-	  flagErr = 1;
+	  exit(0);
+	  flagErr = -33;
 	  return;
       }
-      
-      if (is_inside == -1)  // we are on a boundary
+      /*      
+      if (is_inside == 0)  // is outside
       {
           nextRegion = oldReg;
           flagErr = nextRegion;
@@ -482,7 +484,8 @@ void lkwr(double& pSx, double& pSy, double& pSz,
           }
           return;
       }
-      else if ( is_inside == 1 ) // we are inside the cell tested
+      else */
+      if ( is_inside == 1 ) // we are inside the cell tested
       {
 	  nextRegion = i;
           //BIZARRELY - WHEN WE ARE INSIDE A VOLUME, BOTH, nextRegion has to equal flagErr
@@ -493,10 +496,49 @@ void lkwr(double& pSx, double& pSy, double& pSz,
           }
           return;
       }
+      else if ( is_inside == -1 )
+	{
+	  std::cout << "We cannot be here" << std::endl;
+	  exit(0);
+	}
     }  // end loop over all volumes
 
   std::cout << "point is not in any volume" << std::endl;
+  special_check(xyz,dir,nextRegion);
+  // if we return update xyz
+  pSx=xyz[0];
+  pSy=xyz[1];
+  pSz=xyz[2];
+  flagErr = nextRegion;
   return;
+}
+
+void special_check(double pos[3],const double dir[3], int& oldReg)
+{
+  int num_vols = DAG->num_entities(3);  // number of volumes
+  int counter = 0; //
+  int is_inside = 0;
+  do 
+    {
+      // bump particle position outwards
+      pos[0]=pos[0]-(dir[0]*1.0e-9);
+      pos[1]=pos[1]-(dir[1]*1.0e-9);
+      pos[2]=pos[2]-(dir[2]*1.0e-9);
+
+      for (int i = 1 ; i <= num_vols ; i++) // loop over all volumes
+	{
+	  MBEntityHandle volume = DAG->entity_by_index(3, i); // get the volume by index
+	  MBErrorCode code = DAG->point_in_volume(volume, pos, is_inside);
+	  if ( is_inside == 1)
+	    {
+	      std::cout << "had to bump " << counter << " times" << std::endl;
+	      oldReg = DAG->get_entity_id(volume);
+	      return;
+	    }
+	}
+      counter++;
+    }
+  while ( is_inside != 0 );
 }
 
 // Defined in WrapIncrHist.cc
