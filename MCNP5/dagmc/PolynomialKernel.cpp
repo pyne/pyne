@@ -64,33 +64,69 @@ std::string PolynomialKernel::get_kernel_name()
         kernel_name << "epanechnikov";
         break;
 
+      case 2:
+        kernel_name << "biweight";
+        break;
+
+      case 3:
+        kernel_name << "triweight";
+        break;
+
       default:
-        return "Not a valid polynomial kernel";
+        kernel_name << "polynomial (s = " << s << ")";
     }
 
     return kernel_name.str();
 }
 //---------------------------------------------------------------------------//
-// PROTECTED FUNCTIONS
+// PRIVATE FUNCTIONS
 //---------------------------------------------------------------------------//
 double PolynomialKernel::set_multiplier()
 {
-    double value = 1.0;
+    // set multiplier for 2nd-order kernel function
+    double value = pochhammer(0.5, s + 1) / factorial(s);
 
-    if (s == 0) value = 0.5;
-    if (s == 1) value = 0.75;
+    // TODO add extra multiplier for kernels of higher order
 
     return value;
 }
 //---------------------------------------------------------------------------//
 double PolynomialKernel::pochhammer(double x, unsigned int n)
 {
-    return 0.0;
+    // set default result for (x)0 = 1
+    double value = 1.0;
+
+    // compute (x)n
+    if (n > 0)
+    {
+        while (n != 1)
+        {
+            --n;
+            value *= (x + n);
+        }
+
+        value *= x;
+    }
+
+    return value;
 }
 //---------------------------------------------------------------------------//
 long double PolynomialKernel::factorial(unsigned int n)
 {
-    return 0.0;
+    // set default result for 0! = 1! = 1
+    long double value = 1.0;
+
+    // compute n!
+    if (n > 1)
+    {
+        while (n != 1)
+        {
+            value *= n;
+            --n;
+        }
+    }
+
+    return value;
 }
 //---------------------------------------------------------------------------//
 

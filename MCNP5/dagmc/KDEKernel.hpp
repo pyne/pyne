@@ -50,8 +50,13 @@ class KDEKernel
      * \param order the order of the kernel
      * \return pointer to the new KDEKernel that was created
      *
-     * Currently, the only kernel functions that are supported are the
-     * 2nd-order "uniform" and "epanechnikov" cases.
+     * Valid kernel types include
+     *     "uniform": Uniform kernel (s = 0)
+     *     "epanechnikov": Epanechnikov kernel (s = 1)
+     *     "biweight": Biweight kernel (s = 2)
+     *     "triweight": Triweight kernel (s = 3)
+     *
+     * Currently, only 2nd-order kernel functions of these types are supported.
      *
      * NOTE: if an invalid type is requested, then a NULL pointer is returned.
      */

@@ -60,7 +60,7 @@ class PolynomialKernel : public KDEKernel
     /// Coefficients of the polynomial generated for kernels of order > 2
     std::vector<double> coefficients;
 
-    // >>> PROTECTED FUNCTIONS
+    // >>> PRIVATE FUNCTIONS
 
     /**
      * \brief sets the common multiplier term for the kernel function

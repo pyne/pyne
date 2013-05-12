@@ -21,6 +21,16 @@ KDEKernel* KDEKernel::createKernel(std::string type, unsigned int order)
         s = 1;
         kernel = new PolynomialKernel(s, r);
     }
+    else if (type == "biweight" && r == 1)
+    {
+        s = 2;
+        kernel = new PolynomialKernel(s, r);
+    }
+    else if (type == "triweight" && r == 1)
+    {
+        s = 3;
+        kernel = new PolynomialKernel(s, r);
+    }
 
     return kernel;
 }
