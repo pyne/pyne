@@ -39,7 +39,7 @@ class PolynomialKernel : public KDEKernel
      * \param side the location of the boundary
      * \return the boundary kernel function evaluation Kb(u)
      */
-    virtual double evaluate_boundary(double u, KDEKernel::Boundary side);
+    virtual double evaluate(double u, KDEKernel::Boundary side);
 
     /**
      * \brief get_kernel_name()
@@ -61,6 +61,11 @@ class PolynomialKernel : public KDEKernel
     std::vector<double> coefficients;
 
     // >>> PROTECTED FUNCTIONS
+
+    /**
+     * \brief sets the common multiplier term for the kernel function
+     */
+    double set_multiplier();
 
     /**
      * \brief evaluates the pochhammer symbol (x)n

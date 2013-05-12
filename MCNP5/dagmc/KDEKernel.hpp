@@ -7,17 +7,15 @@
 
 /**
  * \class KDEKernel
- * \brief Defines a general kernel function interface
+ * \brief Defines a general 1D kernel function interface
  *
- * KDEKernel is a Base class that defines the variables and methods that are
- * typically needed to implement a kernel function for use with a Kernel
+ * KDEKernel is an abstract Base class that defines the methods that are
+ * typically needed to implement a 1D kernel function for use with a Kernel
  * Density Estimator.
  *
- * KDEKernel objects can be created via the createKernel() factory method.
+ * KDEKernel objects should be created via the createKernel() factory method.
  * This method assigns memory for storing the object, so it will need to be
  * deleted once it is no longer needed to prevent memory leaks.
- *
- * Currently, no kernel functions are supported.
  *
  * The following functions must be implemented in all Derived classes
  *
@@ -30,9 +28,8 @@ class KDEKernel
   protected:
     /**
      * \brief Constructor
-     * \param order the order of the kernel
      */
-    explicit KDEKernel(unsigned int order) : kernel_order(order) {}
+    KDEKernel(){}
 
   public:
     /**
@@ -52,6 +49,11 @@ class KDEKernel
      * \param type the name of the kernel type
      * \param order the order of the kernel
      * \return pointer to the new KDEKernel that was created
+     *
+     * Currently, the only kernel functions that are supported are the
+     * 2nd-order "uniform" and "epanechnikov" cases.
+     *
+     * NOTE: if an invalid type is requested, then a NULL pointer is returned.
      */
     static KDEKernel* createKernel(std::string type, unsigned int order = 2);
 
@@ -77,10 +79,6 @@ class KDEKernel
      * \return string representing kernel name
      */
     virtual std::string get_kernel_name() = 0;
-  
-  protected:
-    /// order of this kernel
-    unsigned int kernel_order;
 };
 
 #endif // DAGMC_KDE_KERNEL_H
