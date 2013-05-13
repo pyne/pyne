@@ -56,9 +56,10 @@ class KDEKernel
      *     "biweight": Biweight kernel (s = 2)
      *     "triweight": Triweight kernel (s = 3)
      *
-     * Currently, only 2nd-order kernel functions of these types are supported.
+     * Only symmetric kernel functions of these types are supported, which
+     * means that the order must be a multiple of 2.
      *
-     * NOTE: if an invalid type is requested, then a NULL pointer is returned.
+     * NOTE: if an invalid kernel is requested, a NULL pointer is returned.
      */
     static KDEKernel* createKernel(std::string type, unsigned int order = 2);
 

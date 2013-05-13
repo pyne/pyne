@@ -9,28 +9,29 @@
 KDEKernel* KDEKernel::createKernel(std::string type, unsigned int order)
 {
     KDEKernel* kernel = NULL;
-    int s = 0;
-    int r = order / 2;
 
-    if (type == "uniform" && r == 1)
+    // order must be a multiple of 2 as only symmetric kernels are supported
+    if (order % 2 == 0 && order > 0)
     {
-        kernel = new PolynomialKernel(s, r);
-    }
-    else if (type == "epanechnikov" && r == 1)
-    {
-        s = 1;
-        kernel = new PolynomialKernel(s, r);
-    }
-    else if (type == "biweight" && r == 1)
-    {
-        s = 2;
-        kernel = new PolynomialKernel(s, r);
-    }
-    else if (type == "triweight" && r == 1)
-    {
-        s = 3;
-        kernel = new PolynomialKernel(s, r);
-    }
+        int r = order / 2;
+
+        if (type == "uniform")
+        {
+            kernel = new PolynomialKernel(0, r);
+        }
+        else if (type == "epanechnikov")
+        {
+            kernel = new PolynomialKernel(1, r);
+        }
+        else if (type == "biweight")
+        {
+            kernel = new PolynomialKernel(2, r);
+        }
+        else if (type == "triweight")
+        {
+            kernel = new PolynomialKernel(3, r);
+        }
+    }     
 
     return kernel;
 }

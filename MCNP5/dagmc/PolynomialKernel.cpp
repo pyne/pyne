@@ -1,8 +1,8 @@
 // MCNP5/dagmc/PolynomialKernel.cpp
 
+#include <cassert>
 #include <cmath>
 #include <sstream>
-
 #include "PolynomialKernel.hpp"
 
 //---------------------------------------------------------------------------//
@@ -11,7 +11,20 @@
 PolynomialKernel::PolynomialKernel(unsigned int s, unsigned int r)
     : s(s), r(r), multiplier(set_multiplier())
 {
-    // TODO populate coefficients vector for higher order kernel functions
+    assert(r > 0);
+
+    // populate coefficients vector for higher order kernel functions
+    if (r > 1)
+    {
+        for (unsigned int k = 0; k < r; ++k)
+        {
+            double value = pow(-1, k) * pochhammer(0.5 + s + r, k);
+            value /= factorial(k) * factorial(r - 1 - k) * pochhammer(1.5, k);
+            coefficients.push_back(value);
+        }
+
+        assert(coefficients.size() == r);
+    }
 }
 //---------------------------------------------------------------------------//
 // DERIVED PUBLIC INTERFACE from KDEKernel.hpp
@@ -24,7 +37,7 @@ double PolynomialKernel::evaluate(double u)
         return 0.0;
     }
 
-    // evaluate kernel function
+    // evaluate a 2nd-order kernel function
     double value = multiplier;
 
     if (s == 1) // epanechnikov kernel
@@ -36,11 +49,25 @@ double PolynomialKernel::evaluate(double u)
         value *= pow(1 - u * u, s);
     }
 
+    // multiply value by second polynomial for kernels of higher order
+    if (r > 1)
+    {
+        double sum = 0.0;
+
+        for (unsigned int k = 0; k < r; ++k)
+        {
+            sum += coefficients[k] * pow(u, 2 * k);
+        }
+
+        value *= sum;
+    }
+
     return value;
 }
 //---------------------------------------------------------------------------//
 double PolynomialKernel::evaluate(double u, KDEKernel::Boundary side)
 {
+    // TODO implement this method for the boundary kernel
     return 0.0;
 }
 //---------------------------------------------------------------------------//
@@ -86,7 +113,13 @@ double PolynomialKernel::set_multiplier()
     // set multiplier for 2nd-order kernel function
     double value = pochhammer(0.5, s + 1) / factorial(s);
 
-    // TODO add extra multiplier for kernels of higher order
+    // add extra factor to multiplier for kernels of higher order
+    if (r > 1)
+    {
+        unsigned int n = r - 1;
+        value *= pochhammer(1.5, n) * pochhammer(1.5 + s, n);
+        value /= pochhammer(s + 1, n);
+    }
 
     return value;
 }
