@@ -25,7 +25,7 @@ TEST(nrml_spheres_Test, sense)
    int lastKnownRegion = -1;
    int curReg, newReg, nextReg, originReg;;
 
-   double retStep;
+   double propStep, retStep;
    // Position at zero
    double posx = 0.0;
    double posy = 0.0;
@@ -56,7 +56,7 @@ TEST(nrml_spheres_Test, sense)
 
    // Fire a ray from the given point in the given direction
    // calls ray_fire; sets retStep, nextReg and global next_surf
-   g1_fire(curReg, xyz, dir, retStep, nextReg); 
+   g1_fire(curReg, xyz, dir, propStep, retStep, nextReg); 
    spheres_lastRetStep = retStep;  // save for later testing
    int error = normal(posx, posy, posz, norml, curReg);
    EXPECT_EQ(0,error);
@@ -74,6 +74,7 @@ TEST(nrml_spheres_Test, sense)
       std::cout << "Position " << posx << " " << posy << " " << posz << std::endl;
       std::cout << "Point is in region = " << curReg<< std::endl;
       std::cout << "Direction vector " << dirx << " " << diry << " " << dirz << std::endl;
+      std::cout << "propStep = " << propStep << std::endl;
       std::cout << "retStep = " << retStep << std::endl;
       std::cout << "Point heading to region = " << nextReg << std::endl;
    }
@@ -101,13 +102,14 @@ TEST(nrml_spheres_Test, sense)
 
    std::cout << "Fire the ray in the opposite direction.  " << std::endl;
    dir[0] *= -1.0;
-   g1_fire(curReg, xyz, dir, retStep, nextReg);
+   g1_fire(curReg, xyz, dir, propStep, retStep, nextReg);
    if (true)
    {
       std::cout<<"============= Result of g1_fire =============="<<std::endl;
       std::cout << "Position " << posx << " " << posy << " " << posz << std::endl;
       std::cout << "Point is in region = " << curReg<< std::endl;
       std::cout << "Direction vector " << dir[0] << " " << dir[1] << " " << dir[2] << std::endl;
+      std::cout << "propStep = " << propStep << std::endl;
       std::cout << "retStep = " << retStep << std::endl;
       std::cout << "Point heading to region = " << nextReg << std::endl;
    }
@@ -121,7 +123,7 @@ TEST(nrml_spheres_Test, test2)
 { 
    int lastKnownRegion = -1;
    int curReg, newReg, nextReg, originReg;;
-   double retStep;
+   double propStep, retStep;
 
    // Position at zero
    double posx = 0.0;
@@ -146,13 +148,14 @@ TEST(nrml_spheres_Test, test2)
    // a short distance beyond the boundary.
    // calls ray_fire, sets retStep, nextReg and global next_surf
    // double original_retStep = retStep;  // save retstep
-   g1_fire(curReg, xyz, dir, retStep, nextReg); 
+   g1_fire(curReg, xyz, dir, propStep, retStep, nextReg); 
    if (true)
    {
       std::cout<<"============= Result of g1_fire =============="<<std::endl;
       std::cout << "Position " << posx << " " << posy << " " << posz << std::endl;
       std::cout << "Direction vector " << dirx << " " << diry << " " << dirz << std::endl;
       std::cout << "Point is in region = " << curReg<< std::endl;
+      std::cout << "propStep = " << propStep << std::endl;
       std::cout << "retStep = " << retStep << std::endl;
       std::cout << "Point heading to region = " << nextReg << std::endl;
    }
