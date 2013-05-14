@@ -32,13 +32,13 @@ include_directories(${FLUDAG}/src/cpp)
 include_directories(${MOAB_INCLUDE})
 
 set (gmain      ${FLUDAG_TST}/iface/gtest_main.cc)
-set (ifacefiles ${FLUDAG_TST}/iface/tests/issue22.cpp)
-set (issuefiles ${FLUDAG_SRC}/cpp/Input.cpp ${FLUDAG_SRC}/cpp/fluka_funcs.cpp)
-add_executable(issuetest ${gmain} ${ifacefiles} ${issuefiles} ${gmain})
+set (testfile ${FLUDAG_TST}/iface/tests/issue22.cpp)
+set (issue22_src ${FLUDAG_SRC}/cpp/Input.cpp ${FLUDAG_SRC}/cpp/fluka_funcs.cpp ${FLUDAG_SRC}/cpp/dagmc_utils.cpp)
+add_executable(issuetest ${gmain} ${testfile} ${issue22_src} ${gmain})
 target_link_libraries(issuetest ${PROJECT_NAME_STR} ${moablibs} ${GTEST_BOTH_LIBRARIES} pthread)
 
 # Test call to nrml with concentric spheres geometry
-set (wrappers ${FLUDAG_SRC}/cpp/fluka_funcs.cpp ${gmain})
+set (wrappers ${FLUDAG_SRC}/cpp/fluka_funcs.cpp ${FLUDAG_SRC}/cpp/dagmc_utils.cpp ${gmain})
 set (nrml_spheres_src ${FLUDAG_TST}/iface/tests/nrml_spheres_test.cpp)
 add_executable(nrml_spheres ${nrml_spheres_src} ${wrappers})
 target_link_libraries(nrml_spheres ${PROJECT_NAME_STR} ${moablibs} ${GTEST_BOTH_LIBRARIES} pthread)
@@ -47,6 +47,12 @@ target_link_libraries(nrml_spheres ${PROJECT_NAME_STR} ${moablibs} ${GTEST_BOTH_
 set (nrml_cubes_src ${FLUDAG_TST}/iface/tests/nrml_cubes_test.cpp)
 add_executable(nrml_cubes ${nrml_cubes_src} ${wrappers})
 target_link_libraries(nrml_cubes ${PROJECT_NAME_STR} ${moablibs} ${GTEST_BOTH_LIBRARIES} pthread)
+
+# Test looking for material strings in a list of material strings
+set(findMat_src ${FLUDAG_TST}/iface/tests/findMat.cpp)
+# add_executable(findMat ${findMat_src} ${wrappers} ${gmain})
+add_executable(findMat ${findMat_src} ${gmain})
+target_link_libraries(findMat ${PROJECT_NAME_STR} ${GTEST_BOTH_LIBRARIES} pthread)
 
 set (all_test_src ${nrml_cubes_src} ${nrml_spheres_src})
 add_executable(all_tests ${all_test_src} ${wrappers})
