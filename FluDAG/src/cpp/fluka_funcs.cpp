@@ -14,6 +14,7 @@
 #include "fludag_utils.h"
 
 #include "DagWrappers.hh"
+#include "dagmc_utils.hpp"
 
 #include "MBInterface.hpp"
 #include "MBCartVect.hpp"
@@ -33,6 +34,8 @@ using moab::DagMC;
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <set>
+#include <cstring>
 
 #ifdef CUBIT_LIBS_PRESENT
 #include <fenv.h>
@@ -54,8 +57,24 @@ using moab::DagMC;
 static std::ostream* raystat_dump = NULL;
 
 #endif 
-
 #define DEBUG 1
+/* These 37 strings are predefined FLUKA materials. Any ASSIGNMAt of unique 
+ * materials not on this list requires a MATERIAL card. */
+std::string flukaMatStrings[] = {"BLCKHOLE", "VACUUM", "HYDROGEN",
+"HELIUM", "BERYLLIU", "CARBON", "NITROGEN", "OXYGEN", "MAGNESIU",      
+"ALUMINUM", "IRON", "COPPER", "SILVER", "SILICON", "GOLD", "MERCURY",  
+"LEAD", "TANTALUM", "SODIUM", "ARGON", "CALCIUM", "TIN", "TUNGSTEN",   
+"TITANIUM", "NICKEL", "WATER", "POLYSTYR", "PLASCINT", "PMMA",         
+"BONECOMP", "BONECORT", "MUSCLESK", "MUSCLEST", "ADTISSUE", "KAPTON",  
+"POLYETHY", "AIR"};
+
+int NUM_FLUKA_MATS = 37;
+
+/* Create a set out of the hardcoded string array. */
+std::set<std::string> FLUKA_mat_set(flukaMatStrings, flukaMatStrings+NUM_FLUKA_MATS); 
+
+/* Maximum character-length of a cubit-named material property */
+int MAX_MATERIAL_NAME_SIZE = 32;
 
 bool debug = false; //true ;
 
@@ -82,7 +101,6 @@ std::string ExePath()
     // return std::string( buffer ).substr( 0, pos);
     return std::string( buffer );
 }
-
 /**	
   dagmcinit_ is meant to be called from a fortran caller.  Strings have to be 
   accompanied by their length, and will need to be null-appended.
@@ -698,66 +716,171 @@ static char* get_tallyspec( std::string spec, int& dim ){
 //---------------------------------------------------------------------------//
 // fludagwrite_assignma
 //---------------------------------------------------------------------------//
-/// Called from mainFludag if only one argument is given.
+/// Called from mainFludag when only one argument is given to the program.
 //  This function writes out a simple numerical material assignment to the named argument file
 //  Example usage:  mainFludag dagmc.html
+//  Outputs
+//           mat.inp  contains MATERIAL and ASSIGNMAt records for the input geometry.
+//                    The MATERIAL is gotten by parsing the Cubit volume name on underscores.  
+//                    The string after "M_" is considered to be t he material for that volume.
+//                    There are no MATERIAL cards for the materials in the FLUKA_mat_set list
+//                    For the remaining materials, there is one MATERIAL card apiece (no dups)
+//                    User-named (not predefined) materials are TRUNCATED to 8 chars.
+//                    User-named material id's start at 25 and increment by 1 for each MATERIAL card
+//           index-id.txt  Map of FluDAG volume index vs Cubit volume ids, for info only.
 //  Note that a preprocessing step to this call sets up the the DAG object that contains 
 //  all the geometry information contained in dagmc.html.  
 //  the name of the (currently hardcoded) output file is "mat.inp"
 //  The graveyard is assumed to be the last region.
 void fludagwrite_assignma(std::string lfname)  // file with cell/surface cards
 {
-
   int num_vols = DAG->num_entities(3);
   std::cout << __FILE__ << ", " << __func__ << ":" << __LINE__ << "_______________" << std::endl;
   std::cout << "\tnum_vols is " << num_vols << std::endl;
   std::cout << "Graveyard list: " << std::endl;
   MBErrorCode ret;
   MBEntityHandle entity = 0;
+  int id;
 
   std::vector< std::string > keywords;
   ret = DAG->detect_available_props( keywords );
   // parse data from geometry so that property can be found
   ret = DAG->parse_properties( keywords );
 
-// if (MB_SUCCESS != ret) {
-//    std::cerr << "DAGMC failed to parse metadata properties" <<  std::endl;
-//    exit(EXIT_FAILURE);
-//    }
-
-  // Open an outputstring
-  std::ostringstream ostr;
-  // Loop through 3d entities.  In model_complete.h5m there are 90 vols
-  for (unsigned i = 1 ; i <= num_vols ; i++)
+  if (MB_SUCCESS != ret) 
   {
-      entity = DAG->entity_by_index(3, i);
-      // std::string props = make_property_string(*DAG, entity, keywords);
-      // if (props.length()) std::cout << "Parsed props: " << props << std::endl; 
-      if (DAG->has_prop(entity, "graveyard"))
+    std::cerr << "DAGMC failed to parse metadata properties" <<  std::endl;
+    exit(EXIT_FAILURE);
+  }
+  // Preprocessing loop:  make a string, "props",  for each vol entity
+  // This loop could be removed if the user doesn't care to see terminal output
+  for (unsigned i=1; i<=num_vols; i++)
+  {
+     
+      std::string props = mat_property_string(i, keywords);
+      id = DAG->id_by_index(3, i);
+      if (props.length()) 
       {
-	 ostr << std::setw(10) << std::left  << "ASSIGNMAT";
-	 ostr << std::setw(10) << std::right << "BLCKHOLE";
-	 ostr << std::setw(10) << std::right << i << std::endl;
+         std::cout << "Vol " << i << ", id=" << id << ": parsed props: " << props << std::endl; 
       }
       else
       {
-	 ostr << std::setw(10) << std::left  << "ASSIGNMAT";
-	 ostr << std::setw(10) << std::right << "VACUUM";
+         std::cout << "Vol " << i << ", id=" << id << " has no props: " <<  std::endl; 
+      }
+  }
+
+  // Open an outputstring for mat.inp
+  std::ostringstream ostr;
+  // Open an outputstring for index-id table and put a header in it
+  std::ostringstream idstr;
+  idstr << std::setw(5) <<  "Index" ;
+  idstr << std::setw(5) <<  "   Id" << std::endl;
+
+  // Prepare a list to contain unique materials not in Flulka's list
+  std::list<std::string> uniqueMatList;
+
+  // Loop through 3d entities.  In model_complete.h5m there are 90 vols
+  std::vector<std::string> vals;
+  std::string material;
+  char buffer[MAX_MATERIAL_NAME_SIZE];
+  for (unsigned i = 1 ; i <= num_vols ; i++)
+  {
+      vals.clear();
+      entity = DAG->entity_by_index(3, i);
+      id = DAG->id_by_index(3, i);
+      // Create the id-index string for this vol
+      idstr << std::setw(5) << std::right << i;
+      idstr << std::setw(5) << std::right << id << std::endl;
+      // Create the mat.inp string for this vol
+      if (DAG->has_prop(entity, "graveyard"))
+      {
+	 ostr << std::setw(10) << std::left  << "ASSIGNMAt";
+	 ostr << std::setw(10) << std::right << "BLCKHOLE";
+	 ostr << std::setw(10) << std::right << i << std::endl;
+      }
+      else if (DAG->has_prop(entity, "M"))
+      {
+         ret = DAG->prop_values(entity, "M", vals);
+         if (vals.size() >= 1)
+         {
+            // Make a copy of string in vals[0]; full string needs to be compared to
+            // FLUKA materials list; copy is for potential truncation
+            std::strcpy(buffer, vals[0].c_str());
+            material = std::string(buffer);
+            
+            if (vals[0].size() > 8)
+            {
+               material.resize(8);
+            }
+            if (FLUKA_mat_set.find(vals[0]) == FLUKA_mat_set.end())
+            {
+                // current material is not in the pre-existing FLUKA material list
+                uniqueMatList.push_back(material); 
+                std::cerr << "Adding material " << material << " to the MATERIAL card list" << std::endl;
+            }
+         }
+         else
+         {
+            material = "moreThanOne";
+         }
+	 ostr << std::setw(10) << std::left  << "ASSIGNMAt";
+	 ostr << std::setw(10) << std::right << material;
 	 ostr << std::setw(10) << std::right << i << std::endl;
       }
   }
-  // Show the output string just created
-  // std::cout << ostr.str();
+  // Finish the ostr with the implicit complement card
+  std::string implicit_comp_comment = "* The next volume is the implicit complement";
+  ostr << implicit_comp_comment << std::endl;
+  ostr << std::setw(10) << std::left  << "ASSIGNMAt";
+  ostr << std::setw(10) << std::right << "VACUUM";
+  ostr << std::setw(10) << std::right << num_vols+1 << std::endl;
+
+  // Process the uniqueMatList list so that it truly is unique
+  uniqueMatList.sort();
+  uniqueMatList.unique();
+  // Print the final list
+  if (debug)
+  {
+     std::list<std::string>::iterator it; 
+     for (it=uniqueMatList.begin(); it!=uniqueMatList.end(); ++it)
+     {
+        std::cerr << *it << std::endl;
+     }
+  
+     // Show the output string just created
+     std::cout << ostr.str();
+  }
 
   // Prepare an output file of the given name; put a header and the output string in it
-  std::cerr << "Going to write an lcad file = " << lfname << std::endl;
   std::ofstream lcadfile( lfname.c_str());
   std::string header = "*...+....1....+....2....+....3....+....4....+....5....+....6....+....7...";
+  if (uniqueMatList.size() != 0)
+  {
+     int matID = 25;
+     lcadfile << header << std::endl;
+     std::list<std::string>::iterator it; 
+     for (it=uniqueMatList.begin(); it!=uniqueMatList.end(); ++it)
+     {
+        lcadfile << std::setw(10) << std::left << "MATERIAL";
+        lcadfile << std::setw(10) << std::right << "at. no.";
+        lcadfile << std::setw(10) << std::right << "g/mole";
+        lcadfile << std::setw(10) << std::right << ++matID;
+        lcadfile << std::setw(10) << std::right << "alt. no.";
+        lcadfile << std::setw(10) << std::right << "mass no.";
+        lcadfile << std::setw(10) << std::right << *it << std::endl;
+     }
+  }
   lcadfile << header << std::endl;
   lcadfile << ostr.str();
+  lcadfile.close();
 
-  std::cerr << "Writing lcad file = " << lfname << std::endl;
-  // Before opening file for writing, check for an existing file
+  // Prepare an output file named "index_id.txt" for idstr
+  std::string index_id_filename = "index_id.txt";
+  std::ofstream index_id(index_id_filename.c_str());
+  index_id << idstr.str();
+  index_id.close(); 
+  std::cerr << "Writing lcad file = " << lfname << std::endl; 
+// Before opening file for writing, check for an existing file
 /*
   if( lfname != "lcad" ){
     // Do not overwrite a lcad file if it already exists, except if it has the default name "lcad"
@@ -767,8 +890,101 @@ void fludagwrite_assignma(std::string lfname)  // file with cell/surface cards
     }
   }
 */
+
 }
 
+//---------------------------------------------------------------------------//
+// mat_property_string
+//---------------------------------------------------------------------------//
+// For a given volume, find the values of all properties named "MAT".   
+// Create a string with these properites
+// Modified from make_property_string
+// This function helps with debugging, but is not germane to writing cards.
+std::string mat_property_string (int index, std::vector<std::string> &properties)
+{
+  ErrorCode ret;
+  std::string propstring;
+  EntityHandle entity = DAG->entity_by_index(3,index);
+  int id = DAG->id_by_index(3, index);
+  for (std::vector<std::string>::iterator p = properties.begin(); p != properties.end(); ++p)
+  {
+     if ( DAG->has_prop(entity, *p) )
+     {
+        std::vector<std::string> vals;
+        ret = DAG->prop_values(entity, *p, vals);
+        CHECKERR(*DAG, ret);
+        propstring += *p;
+        if (vals.size() == 1)
+        {
+ 	   propstring += "=";
+           propstring += vals[0];
+        }
+        else if (vals.size() > 1)
+        {
+ 	   // this property has multiple values; list within brackets
+           propstring += "=[";
+	   for (std::vector<std::string>::iterator i = vals.begin(); i != vals.end(); ++i)
+           {
+	       propstring += *i;
+               propstring += ",";
+           }
+           // replace the last trailing comma with a close bracket
+           propstring[ propstring.length() -1 ] = ']';
+        }
+        propstring += ", ";
+     }
+  }
+  if (propstring.length())
+  {
+     propstring.resize( propstring.length() - 2); // drop trailing comma
+  }
+  return propstring;
+}
+
+//---------------------------------------------------------------------------//
+// make_property_string
+//---------------------------------------------------------------------------//
+// For a given volume, find all properties associated with it, and any and all 
+//     values associated with each property
+// Copied and modified from obb_analysis.cpp
+static std::string make_property_string (EntityHandle eh, std::vector<std::string> &properties)
+{
+  ErrorCode ret;
+  std::string propstring;
+  for (std::vector<std::string>::iterator p = properties.begin(); p != properties.end(); ++p)
+  {
+     if ( DAG->has_prop(eh, *p) )
+     {
+        std::vector<std::string> vals;
+        ret = DAG->prop_values(eh, *p, vals);
+        CHECKERR(*DAG, ret);
+        propstring += *p;
+        if (vals.size() == 1)
+        {
+ 	   propstring += "=";
+           propstring += vals[0];
+        }
+        else if (vals.size() > 1)
+        {
+ 	   // this property has multiple values; list within brackets
+           propstring += "=[";
+	   for (std::vector<std::string>::iterator i = vals.begin(); i != vals.end(); ++i)
+           {
+	       propstring += *i;
+               propstring += ",";
+           }
+           // replace the last trailing comma with a close bracket
+           propstring[ propstring.length() -1 ] = ']';
+        }
+        propstring += ", ";
+     }
+  }
+  if (propstring.length())
+  {
+     propstring.resize( propstring.length() - 2); // drop trailing comma
+  }
+  return propstring;
+}
 
 //////////////////////////////////////////////////////////////////////////
 /////////////

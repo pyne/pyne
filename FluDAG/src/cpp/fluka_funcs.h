@@ -2,10 +2,12 @@
 #define DAGMC_MCNP_IFACE_H
 
 #include <string>
+#include <vector>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
 
 /* initialize DAGMC from FORTRAN main 
  * @param max_pbl - The maximum index of the pblcm (temporary particle state) array
@@ -34,12 +36,14 @@ extern "C" {
   */
   int getSense(int region);
 /*
+ * Prepare a descriptive string that creates the properties of the volume whose index is index
+ */
+  std::string mat_property_string (int index, std::vector<std::string> &properties);
+/*
  * Write the material assignment for each volume to a file named matfile
  */
   void fludagwrite_assignma(std::string matfile);  
- // void fludagwrite(std::string fname );  // file with cell/surface cards
   void fludagwrite_mat(std::string fname);
- //  void region2name(int volindex, char * vname );
 
 /* Add the current particle state to the bank */
   void dagmc_bank_push_( int* nbnk );
