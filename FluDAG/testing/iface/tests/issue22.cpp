@@ -12,6 +12,7 @@
 #include "gtest/gtest.h"
 #include "fludag_utils.h"
 #include "fluka_funcs.h"
+#include "dagmc_utils.hpp"
 
 std::string goodfile = "../iface/cases/test.h5m";
 char *goodfileptr = &goodfile[0];
