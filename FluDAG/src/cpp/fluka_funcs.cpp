@@ -302,12 +302,12 @@ void g1_fire(int& oldRegion, double point[], double dir[], double &propStep, dou
     {
       MBErrorCode rval = DAG->next_vol(next_surf,vol,newvol);
       newRegion = DAG->index_by_handle(newvol);
-      propStep -= ( retStep + 3.0e-9) ;
+      retStep = retStep ; // path limited by geometry
     }
   else
     {
       newRegion = oldRegion;
-      retStep = propStep - 3.0e-9; 
+      retStep = propStep; //physics limits step
     }
 
   PrevRegion = newRegion; // particle will be moving to PrevRegion upon next entry.
