@@ -226,20 +226,8 @@ void g1wr(double& pSx,
   double point[3] = {pSx,pSy,pSz};
   double dir[3]   = {pV[0],pV[1],pV[2]};  
 
+  g1_fire(oldReg, point, dir, propStep, retStep, newReg); // fire a ray 
 
-  //std::cerr << pSx << " " << pSy << " " << pSz << std::endl;
-  //std::cerr << pV[0] << " " << pV[1] << " " << pV[2] << std::endl;
-  // Separate the body of this function to a testable call
-  g1_fire(oldReg, point, dir, propStep, retStep, newReg);
-
-  //std::cerr << retStep << std::endl;
-
-  //retStep = retStep + 3.0e-9;
-  //  retStep = retStep+3.0e-9;
-  
-  // if ( retStep > propStep ) 
-  //  saf = retStep - propStep;
-  
   if(debug)
     {
       std::cout << "saf = " << saf << std::endl;
@@ -273,7 +261,6 @@ void g1_fire(int& oldRegion, double point[], double dir[], double &propStep, dou
     }
     
 
-
   if(debug)
   {
       std::cout<<"============= g1_fire =============="<<std::endl;    
@@ -282,23 +269,20 @@ void g1_fire(int& oldRegion, double point[], double dir[], double &propStep, dou
   }
   MBEntityHandle vol = DAG->entity_by_index(3,oldRegion);
 
-  //  std::cout << point[0] << " " << point[1] << " " << point[2] << std::endl;
-
   double next_surf_dist;
   MBEntityHandle newvol = 0;
 
   // next_surf is a global
   MBErrorCode result = DAG->ray_fire(vol, point, dir, next_surf, next_surf_dist );
 
-  retStep = next_surf_dist;
+  retStep = next_surf_dist; // the returned step length is the distance to next surf
 
-  if ( next_surf == 0 )
+  if ( next_surf == 0 ) // if next_surface is 0 then we are lost
     {
       std::cout << point[0] << " " << point[1] << " " << point[2] << std::endl;
       std::cout << "Lost particle" << std::endl;
       exit(0);
     }
-
   
   if ( propStep > retStep ) // will cross into next volume next step
     {
@@ -470,23 +454,10 @@ void lkwr(double& pSx, double& pSy, double& pSz,
       if(MB_SUCCESS != code) 
       {
 	  std::cout << "Error return from point_in_volume!" << std::endl;
-	  exit(0);
 	  flagErr = -33;
+	  exit(0);
 	  return;
       }
-      /*      
-      if (is_inside == 0)  // is outside
-      {
-          nextRegion = oldReg;
-          flagErr = nextRegion;
-          if(debug)
-          {
-             std::cout << "oldReg = " << oldReg << std::endl;
-             std::cout << "point is on a boundary, setting nextRegion = oldReg" << std::endl;
-          }
-          return;
-      }
-      else */
       if ( is_inside == 1 ) // we are inside the cell tested
       {
 	  nextRegion = i;
@@ -500,18 +471,16 @@ void lkwr(double& pSx, double& pSy, double& pSz,
       }
       else if ( is_inside == -1 )
 	{
-	  std::cout << "We cannot be here" << std::endl;
 	  exit(0);
 	}
     }  // end loop over all volumes
 
-  std::cout << "point is not in any volume" << std::endl;
   special_check(xyz,dir,nextRegion);
   // if we return update xyz
   pSx=xyz[0];
   pSy=xyz[1];
   pSz=xyz[2];
-  flagErr = nextRegion;
+  flagErr = nextRegion; // return nextRegion
   return;
 }
 
@@ -522,19 +491,19 @@ void special_check(double pos[3],const double dir[3], int& oldReg)
   int is_inside = 0;
   do 
     {
-      // bump particle position outwards
-      pos[0]=pos[0]-(dir[0]*1.0e-9);
-      pos[1]=pos[1]-(dir[1]*1.0e-9);
-      pos[2]=pos[2]-(dir[2]*1.0e-9);
+      // bump particle position along dir
+      pos[0]=pos[0]+(dir[0]*1.0e-9);
+      pos[1]=pos[1]+(dir[1]*1.0e-9);
+      pos[2]=pos[2]+(dir[2]*1.0e-9);
 
       for (int i = 1 ; i <= num_vols ; i++) // loop over all volumes
 	{
 	  MBEntityHandle volume = DAG->entity_by_index(3, i); // get the volume by index
-	  MBErrorCode code = DAG->point_in_volume(volume, pos, is_inside);
-	  if ( is_inside == 1)
+	  MBErrorCode code = DAG->point_in_volume(volume, pos, is_inside); 
+	  if ( is_inside == 1) // if in volume
 	    {
 	      std::cout << "had to bump " << counter << " times" << std::endl;
-	      oldReg = DAG->get_entity_id(volume);
+	      oldReg = DAG->index_by_handle(volume); //set oldReg
 	      return;
 	    }
 	}
