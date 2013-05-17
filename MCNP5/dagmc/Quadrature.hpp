@@ -36,7 +36,11 @@ class Function
  * n quadrature points.  This scheme can be used to compute definite integrals
  * for functions that implement the Function interface.
  *
- * NOTE: Polynomials of order 2n - 1 are integrated exactly.
+ * NOTE: Polynomials of order 2n - 1 or less are integrated exactly by an
+ * n-point Quadrature.  However, the quadrature points and weights are only
+ * exact to 12 significant figures.  This may limit the final accuracy of
+ * the results due to floating point arithmetic.  Use a higher order
+ * Quadrature if you need more accuracy.
  */
 class Quadrature
 {
@@ -50,6 +54,12 @@ class Quadrature
     // >>> PUBLIC INTERFACE
 
     /**
+     * \brief changes the set of quadrature points for this Quadrature
+     * \param new_n the new number of quadrature points
+     */
+    void change_quadrature_set(unsigned int new_n);
+
+    /**
      * \brief computes the definite integral of the function f(x) from a to b
      * \param a the lower integration limit
      * \param b the upper integration limit
@@ -57,6 +67,12 @@ class Quadrature
      * \return the value of the definite integral of f(x) from a to b
      */
     double integrate(double a, double b, const Function& f) const;
+
+    /**
+     * \brief get_num_quad_points()
+     * \return the number of quadrature points used by this Quadrature
+     */
+    unsigned int get_num_quad_points() const;
 
   private:
     unsigned int num_quad_points;
