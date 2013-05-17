@@ -21,6 +21,7 @@ from libc.stdlib cimport malloc, free
 import numpy as np
 cimport numpy as np
 import matplotlib.pyplot as plt
+from math import e
 
 import pyne.rxdata as rx
 from pyne.rxname import label
@@ -316,29 +317,40 @@ class Library(rx.RxLib):
 
     def _histogram(self, Eint, xs):
         dEint = float(Eint[-1]-Eint[0])
-        return sum((Eint[1:]-Eint[:-1]) * xs[:-1])/dEint
+        return sum((Eint[1:]-Eint[:-1]) * xs[:-1]/dEint)
+        # return sum(np.ma.masked_invalid((Eint[1:]-Eint[:-1]) * xs[:-1]/dEint))
 
     def _linlin(self, Eint, xs):
         dEint = float(Eint[-1]-Eint[0])
-        return sum((Eint[1:]-Eint[:-1]) * (xs[1:] + xs[:-1])/2.)/dEint
+        return sum(np.ma.masked_invalid((Eint[1:]-Eint[:-1]) *
+                                        (xs[1:] + xs[:-1])/2./dEint))
 
     def _linlog(self, Eint, xs):
+        dEint = float(Eint[-1]-Eint[0])
         x1 = Eint[:-1]
         x2 = Eint[1:]
         y1 = xs[:-1]
         y2 = xs[1:]
         A = (y1-y2)/(np.log(x1/x2))
         B = y1-A*np.log(x1)
-        return A*(x2*np.log(x2) - x1*np.log(x1) - x2 + x1) + B*(x2-x1)
+        print sum(np.ma.masked_invalid(A*(x2*np.log(x2) - x1*np.log(x1)-x2+x1) +
+                                   B*(x2-x1)))
+        return sum(np.ma.masked_invalid(A*(x2*np.log(x2) - x1*np.log(x1)-x2+x1) +
+                                        B*(x2-x1)))
 
     def _loglin(self, Eint, xs):
-        xs = np.log(xs)
-        return self._linlin(Eint, xs)
+        return self._linlog(xs, Eint)
 
     def _loglog(self, Eint, xs):
-        Eint = np.log(Eint)
-        xs = np.log(xs)
-        return self._linlin(Eint, xs)
+        dEint = float(Eint[-1]-Eint[0])
+        x1 = Eint[:-1]
+        x2 = Eint[1:]
+        y1 = xs[:-1]
+        y2 = xs[1:]
+        A = - np.log(y2/y1)/np.log(x1/x2)
+        B = - (np.log(y1)*np.log(x2) - np.log(y2)*np.log(y1))/np.log(x1/x2)
+        return sum(np.ma.masked_invalid(e**B / (A+1) * (x2**(A+1) - x1**(A+1))/
+                                        dEint))
 
     def integrate_tab_range(self, intscheme, Eint, xs):
         """Integrates across one tabulation range.
