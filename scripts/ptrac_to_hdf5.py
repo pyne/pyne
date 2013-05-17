@@ -18,12 +18,12 @@ tablename = sys.argv[3]
 ptrac = mcnp.PtracReader(ptrac_filename)
 
 # open HDF5 file and create table if it doesn't exist yet
-h5file = tables.openFile(hdf5_filename, mode="a", title=problem_title)
+h5file = tables.openFile(hdf5_filename, mode="a", title=ptrac.problem_title)
 tablepath = "/" + tablename
 if tablepath in h5file:
     table = h5file.getNode(tablepath)
 else:
-    table = h5file.createTable(group, tablename, mcnp.PtracEvent, "Ptrac data")
+    table = h5file.createTable("/", tablename, mcnp.PtracEvent, "Ptrac data")
 
 ptrac.write_to_hdf5_table(table, print_progress=1000000)
 

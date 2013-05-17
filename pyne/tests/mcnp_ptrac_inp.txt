@@ -1,0 +1,19 @@
+Generate a well-defined PTRAC file for PyNE test cases
+c -- cell cards
+1   0   -1:2:-3:4:-5:6    imp:n=0     $ out of world
+2   0    1 -2 3 -4 5 -6   imp:n=1     $ vacuum cube
+
+c -- surface cards
+1   px      -5.0
+2   px       5.0
+3   py      -5.0
+4   py       5.0
+5   pz      -5.0
+6   pz       5.0
+
+c -- data cards
+mode n
+nps 5
+sdef
+dbcn 1 $ fixed seed
+ptrac file=bin
