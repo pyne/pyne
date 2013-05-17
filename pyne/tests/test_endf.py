@@ -826,22 +826,27 @@ def test_int_hist():
     exp_xs = np.array([15, 12, -7, 10])
     obs = library.integrate_tab_range(1, exp_Eint, exp_xs)
     exp = (3*15 + 6*12+10*-7)/19.
-    assert_equal(exp, obs)
+    assert_allclose(exp, obs, rtol = 1e-12)
 
 def test_int_linlin():
     exp_Eint = np.array([1,4,10, 20])
     exp_xs = np.array([15, 12, -7, 10])
     obs = library.integrate_tab_range(2, exp_Eint, exp_xs)
     exp = (3*13.5 + 6*2.5 + 10 * 1.5)/19.
-    assert_equal(exp, obs)
+    assert_allclose(exp, obs, rtol = 1e-12)
 
 def test_int_linlog():
     from math import e
-    exp_Eint = np.array([1, e])
-    exp_xs = np.array([1, 3])
+    exp_Eint = np.array([1, e, e, e**2])
+    exp_xs = np.array([1, 3, 3, 0])
     obs = library.integrate_tab_range(3, exp_Eint, exp_xs)
-    exp = e+1
+    exp = e+1+3*e**2-6*e
     assert_equal(exp, obs)
 
+def test_int_loglin():
+    pass
+
+def test_int_loglog():
+    pass
 if __name__ == "__main__":
     nose.runmodule()
