@@ -155,3 +155,64 @@ Unfortunately, we cannot avoid loops in the integer conversion because it is not
 fixed-width. Here we have opted to count up in place value because ENDF numbers
 are right-justified. Instead of iterating through a bunch of whitespace we can
 usually hit the end of the number in a few tries.
+
+Integration of Energy Groups
+----------------------------
+
+The data for each energy group consists of an array of (energy, cross-section)
+pairs. The data between the points can be interpolated using the schemes given
+in the data. Each group only uses one interpolation scheme, which is given by an
+integer flag in the data.
+
+The available interpolation schemes include histogram, linear, y linear in
+ln(x), x linear in ln(y), ln(y) linear in ln(x), and a special interpolation law
+described in the ENDF Manual, pp. 23-24.
+
+Histogram and linear are trivial to implement. However, the various log cases
+are slightly more complicated.
+
+In the case where y is a linear function of ln(x), we integrate over the region
+like this:
+
+.. math::
+   y=A\ln{x}+B \\
+   y_1=A\ln{x_1}+B \\
+   y_2=A\ln{x_2}+B
+
+With some algebra, we get:
+
+.. math::
+   A(\ln{x_1}-\ln{x_2})=y_1-y_2 \\
+   A=\frac{y_1-y_2}{\ln{(x_1/x_2)}} \\
+   B=y_1-A\ln{x_1}=y_1-\frac{y_1-y_2}{\ln{(x_1/x_2)}}\ln{x_1}
+
+Then we can take the integral and plug in A and B:
+
+.. math::
+   \int_{x_1}^{x_2}A\ln{x}+B\mathrm{d}x = A(x\ln{x}-x)|_{x_1}^{x_2}+Bx|_{x_1}^{x_2} = A(x_2\ln{x_2}-x_1\ln{x_1}-x_2+x_1)+B(x_2-x_1)\\
+   \int_{x_1}^{x_2}y(x)\mathrm{d}x = \frac{y_1-y_2}{\ln{(x_1/x_2)}}(x_2\ln{x_2}-x_1\ln{x_1}-x_2+x_1) + (y_1-\frac{y_1-y_2}{\ln{(x_1/x_2)}} \ln{x_1})(x_2-x_1) \\
+
+When x is linear in ln(y), we can switch out :math:`x_i` with :math:`y_i`.
+
+When ln(y) is linear in ln(x) we have:
+
+.. math::
+   \ln{y} = A\ln{x}+B
+
+Taking e to the power of both sides gives us:
+
+.. math::
+   y = e^Bx^A \\
+   y_1 = e^Bx_1^A \\
+   y_2 = e^Bx_2^A
+
+With some algebra we get:
+
+.. math::
+   A = - \frac{\ln{y_2}-\ln{y_1}}{\ln{x_1}-\ln{x_2}} \\
+   B = - \frac{\ln{y_1}\ln{x_2} - \ln{y_2}\ln{x_1}}{\ln{x_1}-\ln{x_2}}
+
+And finally we can plug A and B into the integral:
+
+.. math::
+   \int_{x_1}^{x_2}e^Bx^A\mathrm{d}x = e^B (\frac{x^{A+1}}{A+1})|_{x_1}^{x_2}

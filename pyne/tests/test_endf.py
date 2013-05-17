@@ -835,6 +835,13 @@ def test_int_linlin():
     exp = (3*13.5 + 6*2.5 + 10 * 1.5)/19.
     assert_equal(exp, obs)
 
+def test_int_linlog():
+    from math import e
+    exp_Eint = np.array([1, e])
+    exp_xs = np.array([1, 3])
+    obs = library.integrate_tab_range(3, exp_Eint, exp_xs)
+    exp = e+1
+    assert_equal(exp, obs)
 
 if __name__ == "__main__":
     nose.runmodule()
