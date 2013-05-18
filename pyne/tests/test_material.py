@@ -1022,4 +1022,4 @@ def test_natural_elements():
 # Run as script
 #
 if __name__ == "__main__":
-    nose.main()
+    nose.runmodule()

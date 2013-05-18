@@ -54,6 +54,9 @@ cdef class Cascade:
             Any keyword argument which is supplied is applied as an attribute
             to this instance.
         """
+        self._mat_feed = None
+        self._mat_prod = None
+        self._mat_tail = None
         for key, val in kwargs.items():
             setattr(self, key, val)
 
@@ -168,49 +171,52 @@ cdef class Cascade:
         """Feed material to be enriched.  Often set at initialization.
         """
         def __get__(self):
-            cdef pyne.material._Material pymat = pyne.material.Material()
-            pymat.mat_pointer[0] = self._inst.mat_feed
-            return pymat
-
-        def __set__(self, mat):
-            cdef pyne.material._Material pymat
-            if isinstance(mat, pyne.material._Material):
-                pymat = mat
-            else:
-                pymat = pyne.material.Material(mat)
-            self._inst.mat_feed = <pyne.cpp_material.Material> pymat.mat_pointer[0]
+            cdef pyne.material._Material mat_feed_proxy
+            if self._mat_feed is None:
+                mat_feed_proxy = pyne.material.Material(free_mat=False)
+                mat_feed_proxy.mat_pointer = &(<cpp_enrichment.Cascade *> self._inst).mat_feed
+                self._mat_feed = mat_feed_proxy
+            return self._mat_feed
+    
+        def __set__(self, value):
+            cdef pyne.material._Material value_proxy
+            value_proxy = pyne.material.Material(value, free_mat=not isinstance(value, pyne.material._Material))
+            (<cpp_enrichment.Cascade *> self._inst).mat_feed = value_proxy.mat_pointer[0]
+            self._mat_feed = None
 
     property mat_prod:
         """Product (enriched) material.
         """
         def __get__(self):
-            cdef pyne.material._Material pymat = pyne.material.Material()
-            pymat.mat_pointer[0] = self._inst.mat_prod
-            return pymat
-
-        def __set__(self, mat):
-            cdef pyne.material._Material pymat
-            if isinstance(mat, pyne.material._Material):
-                pymat = mat
-            else:
-                pymat = pyne.material.Material(mat)
-            self._inst.mat_prod = <pyne.cpp_material.Material> pymat.mat_pointer[0]
+            cdef pyne.material._Material mat_prod_proxy
+            if self._mat_prod is None:
+                mat_prod_proxy = pyne.material.Material(free_mat=False)
+                mat_prod_proxy.mat_pointer = &(<cpp_enrichment.Cascade *> self._inst).mat_prod
+                self._mat_prod = mat_prod_proxy
+            return self._mat_prod
+    
+        def __set__(self, value):
+            cdef pyne.material._Material value_proxy
+            value_proxy = pyne.material.Material(value, free_mat=not isinstance(value, pyne.material._Material))
+            (<cpp_enrichment.Cascade *> self._inst).mat_prod = value_proxy.mat_pointer[0]
+            self._mat_prod = None
 
     property mat_tail:
         """Tails (de-enriched) material.
         """
         def __get__(self):
-            cdef pyne.material._Material pymat = pyne.material.Material()
-            pymat.mat_pointer[0] = self._inst.mat_tail
-            return pymat
-
-        def __set__(self, mat):
-            cdef pyne.material._Material pymat
-            if isinstance(mat, pyne.material._Material):
-                pymat = mat
-            else:
-                pymat = pyne.material.Material(mat)
-            self._inst.mat_tail = <pyne.cpp_material.Material> pymat.mat_pointer[0]
+            cdef pyne.material._Material mat_tail_proxy
+            if self._mat_tail is None:
+                mat_tail_proxy = pyne.material.Material(free_mat=False)
+                mat_tail_proxy.mat_pointer = &(<cpp_enrichment.Cascade *> self._inst).mat_tail
+                self._mat_tail = mat_tail_proxy
+            return self._mat_tail
+    
+        def __set__(self, value):
+            cdef pyne.material._Material value_proxy
+            value_proxy = pyne.material.Material(value, free_mat=not isinstance(value, pyne.material._Material))
+            (<cpp_enrichment.Cascade *> self._inst).mat_tail = value_proxy.mat_pointer[0]
+            self._mat_tail = None
 
     property l_t_per_feed:
         """Total flow rate (:math:`L_t`) per feed flow rate.  This is a 
