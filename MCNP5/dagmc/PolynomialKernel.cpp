@@ -3,6 +3,7 @@
 #include <cassert>
 #include <cmath>
 #include <sstream>
+
 #include "PolynomialKernel.hpp"
 
 //---------------------------------------------------------------------------//
@@ -29,7 +30,7 @@ PolynomialKernel::PolynomialKernel(unsigned int s, unsigned int r)
 //---------------------------------------------------------------------------//
 // DERIVED PUBLIC INTERFACE from KDEKernel.hpp
 //---------------------------------------------------------------------------//
-double PolynomialKernel::evaluate(double u)
+double PolynomialKernel::evaluate(double u) const
 {
     // test if outside kernel function domain [-1.0, 1.0]
     if (u < -1.0 || u > 1.0)
@@ -65,13 +66,7 @@ double PolynomialKernel::evaluate(double u)
     return value;
 }
 //---------------------------------------------------------------------------//
-double PolynomialKernel::evaluate(double u, KDEKernel::Boundary side)
-{
-    // TODO implement this method for the boundary kernel
-    return 0.0;
-}
-//---------------------------------------------------------------------------//
-std::string PolynomialKernel::get_kernel_name()
+std::string PolynomialKernel::get_kernel_name() const
 {
     // determine the order of this kernel and add to kernel name
     std::stringstream kernel_name;
@@ -126,10 +121,10 @@ double PolynomialKernel::set_multiplier()
 //---------------------------------------------------------------------------//
 double PolynomialKernel::pochhammer(double x, unsigned int n)
 {
-    // set default result for (x)0 = 1
+    // set default result for (x)_0 = 1
     double value = 1.0;
 
-    // compute (x)n
+    // compute (x)_n
     if (n > 0)
     {
         while (n != 1)

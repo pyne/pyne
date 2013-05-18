@@ -4,15 +4,39 @@
 #define DAGMC_POLYNOMIAL_KERNEL_H
 
 #include <vector>
-#include <string>
 
 #include "KDEKernel.hpp"
 
 /**
  * \class PolynomialKernel
- * \brief Defines a polynomial-based kernel function
+ * \brief Defines a polynomial kernel function
  * 
- * TODO add detailed description of class
+ * PolynomialKernel is a Derived class that can create any polynomial kernel
+ * function that is defined by a smoothness factor s and kernel order 2r.
+ *
+ * Common polynomial kernels include uniform (s = 0), epanechnikov (s = 1),
+ * biweight (s = 2), and triweight (s = 3).  All of these cases and more can be
+ * constructed using the following general formula
+ *
+ *               (1/2)_s+1
+ *      K_s(u) = --------- (1 - u^2)^s
+ *                   s!
+ *
+ * where (1/2)_s+1 is known as the Pochhammer symbol
+ *
+ *      (x)_n = x(x + 1)(x + 2)...(x + n - 1)
+ *
+ * Any kernel function based on K_s(u) is said to be of 2nd-order.  Higher-
+ * order cases (r > 1) can be derived from these 2nd-order kernels by simply
+ * multiplying them with a second polynomial
+ *
+ *      K_2r,s(u) = B_r,s(u) * K_s(u)
+ *
+ * For more information on how to construct higher-order kernel functions,
+ * please refer to the following reference
+ * 
+ *     B. E. Hansen, "Exact Mean Integrated Squared Error of Higher Order
+ *     "Kernel Estimators", Econometric Theory, 21, pp. 1031-1057 (2005)
  */
 class PolynomialKernel : public KDEKernel
 {
@@ -27,25 +51,17 @@ class PolynomialKernel : public KDEKernel
     // >>> DERIVED PUBLIC INTERFACE from KDEKernel.hpp
 
     /**
-     * \brief evaluate the kernel function K(u)
+     * \brief evaluate the kernel function
      * \param u the value at which the kernel will be evaluated
-     * \return the kernel function evaluation K(u)
+     * \return K_2r,s(u)
      */
-    virtual double evaluate(double u);
-
-    /**
-     * \brief evaluate the boundary kernel function Kb(u)
-     * \param u the value at which the boundary kernel will be evaluated
-     * \param side the location of the boundary
-     * \return the boundary kernel function evaluation Kb(u)
-     */
-    virtual double evaluate(double u, KDEKernel::Boundary side);
+    virtual double evaluate(double u) const;
 
     /**
      * \brief get_kernel_name()
      * \return string representing kernel name
      */
-    virtual std::string get_kernel_name();
+    virtual std::string get_kernel_name() const;
   
   private:
     /// Smoothness factor for this kernel
@@ -68,19 +84,19 @@ class PolynomialKernel : public KDEKernel
     double set_multiplier();
 
     /**
-     * \brief evaluates the pochhammer symbol (x)n
-     * \param x the value for which to evaluate the pochhammer symbol
+     * \brief evaluates the Pochhammer symbol
+     * \param x the value for which to evaluate the Pochhammer symbol
      * \param n any non-negative integer (n >= 0)
-     * \return the pochhammer symbol evaluation (x)n
+     * \return (x)_n
      *
-     * Computes (x)n = x(x + 1)(x + 2)...(x + n - 1) where (x)0 = 1.
+     * Computes (x)_n = x(x + 1)(x + 2)...(x + n - 1) where (x)_0 = 1.
      */
     double pochhammer(double x, unsigned int n);
 
     /**
-     * \brief evaluates n!
+     * \brief evaluates the factorial function
      * \param n any non-negative integer (n >=0)
-     * \return the n! evaluation
+     * \return n!
      *
      * Computes n! = n(n-1)(n-2)...(2)(1) where 0! = 1.
      */

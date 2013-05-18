@@ -1,5 +1,7 @@
 // MCNP5/dagmc/KDEKernel.cpp
 
+#include <cmath>
+
 #include "KDEKernel.hpp"
 #include "PolynomialKernel.hpp"
 
@@ -34,6 +36,20 @@ KDEKernel* KDEKernel::createKernel(std::string type, unsigned int order)
     }     
 
     return kernel;
+}
+//---------------------------------------------------------------------------//
+// PROTECTED FUNCTIONS
+//---------------------------------------------------------------------------//
+double KDEKernel::MomentFunction::evaluate(double x) const
+{
+    if (moment_index == 0)
+    {
+        return kernel.evaluate(x);
+    }
+    else
+    { 
+        return pow(x, moment_index) * kernel.evaluate(x);
+    }
 }
 //---------------------------------------------------------------------------//
 

@@ -5,23 +5,29 @@
 
 #include <string>
 
+#include "Quadrature.hpp"
+
 /**
  * \class KDEKernel
  * \brief Defines a general 1D kernel function interface
  *
  * KDEKernel is an abstract Base class that defines the methods that are
- * typically needed to implement a 1D kernel function for use with a Kernel
- * Density Estimator.
+ * typically needed to implement a 1D kernel function K(u) for use with a
+ * Kernel Density Estimator.
  *
- * KDEKernel objects should be created via the createKernel() factory method.
- * This method assigns memory for storing the object, so it will need to be
- * deleted once it is no longer needed to prevent memory leaks.
+ * Some of the most commonly used KDEKernel objects can be created via the
+ * createKernel() factory method.  This method allocates memory for storing
+ * the object, so it will need to be deleted once it is no longer needed to
+ * prevent memory leaks.
  *
- * The following functions must be implemented in all Derived classes
+ * =========================
+ * Derived Class Information
+ * =========================
+ *
+ * The following methods must be implemented by all Derived classes
  *
  *     1) evaluate(double)
- *     2) evaluate(double, KDEKernel::Boundary)
- *     3) get_kernel_name()
+ *     2) get_kernel_name()
  */
 class KDEKernel
 {
@@ -32,11 +38,6 @@ class KDEKernel
     KDEKernel(){}
 
   public:
-    /**
-     * \brief Defines the location of the boundary for 1D geometries
-     */
-    enum Boundary {LEFT = 0, RIGHT = 1};
-
     /**
      * \brief Virtual destructor
      */
@@ -66,25 +67,45 @@ class KDEKernel
     // >>> PUBLIC INTERFACE
 
     /**
-     * \brief evaluate the kernel function K(u)
+     * \brief evaluate the kernel function
      * \param u the value at which the kernel will be evaluated
-     * \return the kernel function evaluation K(u)
+     * \return K(u)
      */
-    virtual double evaluate(double u) = 0;
-
-    /**
-     * \brief evaluate the boundary kernel function Kb(u)
-     * \param u the value at which the boundary kernel will be evaluated
-     * \param side the location of the boundary
-     * \return the boundary kernel function evaluation Kb(u)
-     */
-    virtual double evaluate(double u, KDEKernel::Boundary side) = 0;
+    virtual double evaluate(double u) const = 0;
 
     /**
      * \brief get_kernel_name()
      * \return string representing kernel name
      */
-    virtual std::string get_kernel_name() = 0;
+    virtual std::string get_kernel_name() const = 0;
+
+  protected:
+    /**
+     * \class MomentFunction
+     * \brief Defines the ith moment function for a general kernel object
+     */
+    class MomentFunction : public Function
+    {
+      public:
+        /**
+         * \brief Constructor
+         * \param i the index representing the ith moment function
+         * \param kernel the kernel for which the moment function is desired
+         */
+        MomentFunction(unsigned int i, const KDEKernel& kernel)
+            : moment_index(i), kernel(kernel) {}
+
+        /**
+         * \brief evaluates the ith moment function
+         * \param x the value at which this moment function will be evaluated
+         * \return x^i * K(x) where K(x) is the kernel function
+         */
+        double evaluate(double x) const;
+
+      private:
+        unsigned int moment_index;
+        const KDEKernel& kernel;
+    };
 };
 
 #endif // DAGMC_KDE_KERNEL_H
