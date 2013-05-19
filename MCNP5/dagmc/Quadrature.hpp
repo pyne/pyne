@@ -21,9 +21,9 @@ class Function
     virtual ~Function(){}
 
     /**
-     * \brief evaluate the function f(x)
-     * \param x the value at which this function will be evaluated
-     * \return the function evaluation f(x)
+     * \brief evaluate this Function f
+     * \param x the value at which f will be evaluated
+     * \return f(x)
      */
     virtual double evaluate(double x) const = 0;
 };
@@ -60,11 +60,10 @@ class Quadrature
     void change_quadrature_set(unsigned int new_n);
 
     /**
-     * \brief computes the definite integral of the function f(x) from a to b
-     * \param a the lower integration limit
-     * \param b the upper integration limit
-     * \param f the function to be integrated
-     * \return the value of the definite integral of f(x) from a to b
+     * \brief computes the definite integral of a Function f
+     * \param a, b the lower and upper integration limits
+     * \param f the Function to be integrated
+     * \return definite integral of f(x) for [a, b]
      */
     double integrate(double a, double b, const Function& f) const;
 

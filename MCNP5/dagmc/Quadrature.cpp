@@ -29,6 +29,8 @@ void Quadrature::change_quadrature_set(unsigned int new_n)
 //---------------------------------------------------------------------------//
 double Quadrature::integrate(double a, double b, const Function& f) const
 {
+    assert(b > a);
+
     // define scaling constants
     double c1 = 0.5 * (b - a);
     double c2 = 0.5 * (b + a);

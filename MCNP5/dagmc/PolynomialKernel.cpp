@@ -26,6 +26,16 @@ PolynomialKernel::PolynomialKernel(unsigned int s, unsigned int r)
 
         assert(coefficients.size() == r);
     }
+
+    // set quadrature for integrating the 0th moment function
+    quadrature = new Quadrature(s + r);
+}
+//---------------------------------------------------------------------------//
+// DESTRUCTOR
+//---------------------------------------------------------------------------//
+PolynomialKernel::~PolynomialKernel()
+{
+    delete quadrature;
 }
 //---------------------------------------------------------------------------//
 // DERIVED PUBLIC INTERFACE from KDEKernel.hpp
@@ -99,6 +109,34 @@ std::string PolynomialKernel::get_kernel_name() const
     }
 
     return kernel_name.str();
+}
+//---------------------------------------------------------------------------//
+double PolynomialKernel::integrate_moment(double a,
+                                          double b,
+                                          unsigned int i) const
+{
+    assert(quadrature != NULL);
+
+    // check if integral is defined in the domain u = [-1, 1]
+    if (a > 1.0 || b < -1.0) return 0.0;
+
+    // create the ith moment function
+    MomentFunction moment(i, *this);
+
+    // define the quadrature set for integrating the ith moment function
+    unsigned int n = s + r + (i/2);
+
+    if (quadrature->get_num_quad_points() != n)
+    {
+        quadrature->change_quadrature_set(n);
+    }
+
+    // modify integration limits if needed
+    if (a < -1.0) a = -1.0;
+    if (b > 1.0) b = 1.0;
+
+    // evaluate the integral
+    return quadrature->integrate(a, b, moment);
 }
 //---------------------------------------------------------------------------//
 // PRIVATE FUNCTIONS

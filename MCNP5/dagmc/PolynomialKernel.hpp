@@ -12,7 +12,8 @@
  * \brief Defines a polynomial kernel function
  * 
  * PolynomialKernel is a Derived class that can create any polynomial kernel
- * function that is defined by a smoothness factor s and kernel order 2r.
+ * function that is defined by a smoothness factor s and kernel order 2r.  The
+ * domain of these kernel functions is limited to u = [-1, 1].
  *
  * Common polynomial kernels include uniform (s = 0), epanechnikov (s = 1),
  * biweight (s = 2), and triweight (s = 3).  All of these cases and more can be
@@ -48,6 +49,11 @@ class PolynomialKernel : public KDEKernel
      */
     PolynomialKernel(unsigned int s, unsigned int r);
 
+    /**
+     * \brief Destructor
+     */
+    ~PolynomialKernel();
+
     // >>> DERIVED PUBLIC INTERFACE from KDEKernel.hpp
 
     /**
@@ -62,6 +68,14 @@ class PolynomialKernel : public KDEKernel
      * \return string representing kernel name
      */
     virtual std::string get_kernel_name() const;
+
+    /**
+     * \brief integrates the ith moment function for this polynomial kernel
+     * \param a, b the lower and upper integration limits
+     * \param i the index representing the ith moment function
+     * \return integral of the ith moment function evaluated from a to b
+     */
+    virtual double integrate_moment(double a, double b, unsigned int i) const;
   
   private:
     /// Smoothness factor for this kernel
@@ -75,6 +89,9 @@ class PolynomialKernel : public KDEKernel
 
     /// Coefficients of the polynomial generated for kernels of order > 2
     std::vector<double> coefficients;
+
+    /// Quadrature set for integrating moment functions
+    Quadrature* quadrature;
 
     // >>> PRIVATE FUNCTIONS
 

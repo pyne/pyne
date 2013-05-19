@@ -38,6 +38,50 @@ KDEKernel* KDEKernel::createKernel(std::string type, unsigned int order)
     return kernel;
 }
 //---------------------------------------------------------------------------//
+// PUBLIC INTERFACE
+//---------------------------------------------------------------------------//
+double KDEKernel::evaluate(double u,
+                           double distance,
+                           double bandwidth,
+                           Boundary side) const
+{
+    // compute the scaled distance from the boundary
+    double p = distance / bandwidth;
+
+    // test if outside domain p = [0, 1]
+    if (p < 0.0 || p > 1.0) return 0.0;
+
+    // determine the integration limits
+    double lower_limit = -1.0;
+    double upper_limit = 1.0;
+
+    if (p < 1.0)
+    {
+        if (side == LOWER)
+        {
+            upper_limit = p;
+        }
+        else // side == UPPER
+        {
+            lower_limit = -1.0 * p;
+        }
+    }
+
+    // test if outside domain u = [lower_limit, upper_limit]
+    if (u < lower_limit || u > upper_limit) return 0.0;
+
+    // evaluate the moment functions ai(p)
+    double a0 = this->integrate_moment(lower_limit, upper_limit, 0);
+    double a1 = this->integrate_moment(lower_limit, upper_limit, 1);
+    double a2 = this->integrate_moment(lower_limit, upper_limit, 2);
+
+    // compute the value of the boundary kernel
+    double value = (a2 - a1 * u) * this->evaluate(u);
+    value /= a0 * a2 - a1 * a1;
+
+    return value;
+}
+//---------------------------------------------------------------------------//
 // PROTECTED FUNCTIONS
 //---------------------------------------------------------------------------//
 double KDEKernel::MomentFunction::evaluate(double x) const
