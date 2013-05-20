@@ -1,5 +1,5 @@
-cmake_minimum_required(VERSION 2.8)
-project (MyFluDAG)
+CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
+PROJECT (MyFluDAG)
 
 IF (NOT DEFINED HOME) 
 	set (HOME "$ENV{HOME}")
