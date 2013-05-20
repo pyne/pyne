@@ -117,26 +117,31 @@ double PolynomialKernel::integrate_moment(double a,
 {
     assert(quadrature != NULL);
 
-    // check if integral is defined in the domain u = [-1, 1]
-    if (a > 1.0 || b < -1.0) return 0.0;
+    double value = 0.0;
 
-    // create the ith moment function
-    MomentFunction moment(i, *this);
-
-    // define the quadrature set for integrating the ith moment function
-    unsigned int n = s + r + (i/2);
-
-    if (quadrature->get_num_quad_points() != n)
+    // check if integral limits are within the domain u = [-1, 1]
+    if (a < 1.0 && b > -1.0)
     {
-        quadrature->change_quadrature_set(n);
+        // create the ith moment function
+        MomentFunction moment(i, *this);
+
+        // define the quadrature set for integrating the ith moment function
+        unsigned int n = s + r + (i/2);
+
+        if (quadrature->get_num_quad_points() != n)
+        {
+            quadrature->change_quadrature_set(n);
+        }
+
+        // modify integration limits if needed
+        if (a < -1.0) a = -1.0;
+        if (b > 1.0) b = 1.0;
+
+        // evaluate the integral
+        value = quadrature->integrate(a, b, moment);
     }
 
-    // modify integration limits if needed
-    if (a < -1.0) a = -1.0;
-    if (b > 1.0) b = 1.0;
-
-    // evaluate the integral
-    return quadrature->integrate(a, b, moment);
+    return value;
 }
 //---------------------------------------------------------------------------//
 // PRIVATE FUNCTIONS

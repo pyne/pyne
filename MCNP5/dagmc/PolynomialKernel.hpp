@@ -73,7 +73,7 @@ class PolynomialKernel : public KDEKernel
      * \brief integrates the ith moment function for this polynomial kernel
      * \param a, b the lower and upper integration limits
      * \param i the index representing the ith moment function
-     * \return integral of the ith moment function evaluated from a to b
+     * \return definite integral of the ith moment function for [a, b]
      */
     virtual double integrate_moment(double a, double b, unsigned int i) const;
   
