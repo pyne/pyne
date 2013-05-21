@@ -52,8 +52,12 @@ class Library(rx.RxLib):
         self.structure = {}
         self.mat_dict = {}
         self.more_files = True
-        self.intdict = {1: self._histogram, 2: self._linlin, 3: self._linlog,
-                   4: self._loglin, 5: self._loglog}
+        self.intdict = {1: self._histogram, 2: self._linlin, 3: self._linlog, 4:
+                        self._loglin, 5: self._loglog, 6:self._chargedparticles,
+                        11: self._histogram, 12: self._linlin, 13: self._linlog,
+                        14: self._loglin, 15: self._loglog, 21: self._histogram,
+                        22: self._linlin, 23: self._linlog, 24: self._loglin,
+                        25: self._loglog}
         self.chars_til_now = 0
         self.offset = 0
         self.fh = fh
@@ -317,13 +321,12 @@ class Library(rx.RxLib):
 
     def _histogram(self, Eint, xs):
         dEint = float(Eint[-1]-Eint[0])
-        return sum((Eint[1:]-Eint[:-1]) * xs[:-1]/dEint)
-        # return sum(np.ma.masked_invalid((Eint[1:]-Eint[:-1]) * xs[:-1]/dEint))
+        return np.ma.masked_invalid((Eint[1:]-Eint[:-1]) * xs[:-1]/dEint).sum()
 
     def _linlin(self, Eint, xs):
         dEint = float(Eint[-1]-Eint[0])
-        return sum(np.ma.masked_invalid((Eint[1:]-Eint[:-1]) *
-                                        (xs[1:] + xs[:-1])/2./dEint))
+        return np.ma.masked_invalid((Eint[1:]-Eint[:-1])*
+                                    (xs[1:]+xs[:-1])/2./dEint).sum()
 
     def _linlog(self, Eint, xs):
         dEint = float(Eint[-1]-Eint[0])
@@ -333,13 +336,19 @@ class Library(rx.RxLib):
         y2 = xs[1:]
         A = (y1-y2)/(np.log(x1/x2))
         B = y1-A*np.log(x1)
-        print sum(np.ma.masked_invalid(A*(x2*np.log(x2) - x1*np.log(x1)-x2+x1) +
-                                   B*(x2-x1)))
-        return sum(np.ma.masked_invalid(A*(x2*np.log(x2) - x1*np.log(x1)-x2+x1) +
-                                        B*(x2-x1)))
+        return np.ma.masked_invalid(A*(x2*np.log(x2) - x1*np.log(x1)-x2+x1) +
+                                    B*(x2-x1)).sum()
 
     def _loglin(self, Eint, xs):
-        return self._linlog(xs, Eint)
+        dEint = float(Eint[-1]-Eint[0])
+        x1 = Eint[:-1]
+        x2 = Eint[1:]
+        y1 = xs[:-1]
+        y2 = xs[1:]
+        A = np.log(y1/y2)/(x1-x2)
+        B = np.log(y1) - A*x1
+        return np.ma.masked_invalid(e**B / (A*dEint) * (e**(A*x2) -
+                                                        e**(A*x1))).sum()
 
     def _loglog(self, Eint, xs):
         dEint = float(Eint[-1]-Eint[0])
@@ -349,8 +358,16 @@ class Library(rx.RxLib):
         y2 = xs[1:]
         A = - np.log(y2/y1)/np.log(x1/x2)
         B = - (np.log(y1)*np.log(x2) - np.log(y2)*np.log(y1))/np.log(x1/x2)
-        return sum(np.ma.masked_invalid(e**B / (A+1) * (x2**(A+1) - x1**(A+1))/
-                                        dEint))
+        return np.ma.masked_invalid(e**B / (A+1) * (x2**(A+1) - x1**(A+1))/
+                                    dEint).sum()
+
+    def _chargedparticles(self, Eint, xs):
+        dEint = float(Eint[-1]-Eint[0])
+        x1 = Eint[:-1]
+        x2 = Eint[1:]
+        y1 = xs[:-1]
+        y2 = xs[1:]
+        raise NotImplementedError('I haven\'t done the math for this one yet!')
 
     def integrate_tab_range(self, intscheme, Eint, xs):
         """Integrates across one tabulation range.

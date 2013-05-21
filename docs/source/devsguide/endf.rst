@@ -192,7 +192,37 @@ Then we can take the integral and plug in A and B:
    \int_{x_1}^{x_2}A\ln{x}+B\mathrm{d}x = A(x\ln{x}-x)|_{x_1}^{x_2}+Bx|_{x_1}^{x_2} = A(x_2\ln{x_2}-x_1\ln{x_1}-x_2+x_1)+B(x_2-x_1)\\
    \int_{x_1}^{x_2}y(x)\mathrm{d}x = \frac{y_1-y_2}{\ln{(x_1/x_2)}}(x_2\ln{x_2}-x_1\ln{x_1}-x_2+x_1) + (y_1-\frac{y_1-y_2}{\ln{(x_1/x_2)}} \ln{x_1})(x_2-x_1) \\
 
-When x is linear in ln(y), we can switch out :math:`x_i` with :math:`y_i`.
+When x is linear in ln(y), we have:
+
+.. math::
+   x=A\ln{y}+B
+
+Since A and B are arbitrary constants, we can express this relation as:
+
+.. math::
+   \ln{y}=Ax+B\\
+   y = e^{Ax+B}\\
+   y_1 = e^{Ax_1+B}\\
+   y_2 = e^{Ax_2+B}
+
+So now we can solve for A:
+
+.. math::
+   \frac{y_1}{y_2} = e^{Ax_1+B-Ax_2-B} = e^{A(x_1-x_2)}\\
+   ln{\frac{y_1}{y_2}} = A(x_1-x_2)\\
+   A = \frac{\ln{(y_1/y_2)}}{x_1-x_2}
+
+Plug this in to the original relation to solve for B:
+
+.. math::
+   \ln{y_1} = Ax_1+B\\
+   B = \ln{y_1}-Ax_1\\
+   B = \ln{y_1}-\frac{\ln{(y_1/y_2)}}{x_1-x_2}x_1
+
+Now we integrate :math:`e^{Ax+B}`. We all know this one!
+
+.. math::
+   \int_{x_1}^{x_2} e^{Ax+B} \mathrm{d}x = \frac{1}{A}e^{Ax+B}|_{x_1}^{x_2} = \frac{e^B}{A}(e^{Ax_2}-e^{Ax_1})
 
 When ln(y) is linear in ln(x) we have:
 
