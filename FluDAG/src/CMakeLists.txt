@@ -18,22 +18,31 @@ IF (NOT DEFINED MOAB_HOME)
 	INCLUDE(local.cmake)
 ENDIF (NOT DEFINED MOAB_HOME)
 
-set(MOAB_INCLUDE ${MOAB_HOME}/include)
-set(MOAB_LIB_DIR ${MOAB_HOME}/lib)
-set (moablibs ${MOAB_LIB_DIR}/libMOAB.so ${MOAB_LIB_DIR}/libdagmc.so)
+SET(MOAB_INCLUDE ${MOAB_HOME}/include)
+SET(MOAB_LIB_DIR ${MOAB_HOME}/lib)
+SET (moablibs ${MOAB_LIB_DIR}/libMOAB.so ${MOAB_LIB_DIR}/libdagmc.so)
 
 
 # Where to look for includes
-include_directories(include ${MOAB_INCLUDE})
+INCLUDE_DIRECTORIES(${MOAB_INCLUDE})
+ENABLE_LANGUAGE(Fortran)
 
-set (commonfiles cpp/fluka_funcs.cpp cpp/dagmc_utils.cpp cpp/Input.cpp)
-set (wrapperfiles cpp/WrapReg2Name.cc cpp/WrapLookMG.cc cpp/WrapMag.cc 
-		  cpp/WrapLookFX.cc cpp/WrapReg.cc  
-		  cpp/WrapFlgfwr.cc 
-		  )
+SET (fluka_file ${FLUPRO}/usermvax/mgdraw.f)
+SET (fluka_includes ${FLUPRO}/flukapro)
+SET (fluka_libdir ${FLUPRO})
+ADD_CUSTOM_COMMAND(OUTPUT mgdraw.o
+       COMMAND gfortran -c ${fluka_file} -I${fluka_includes} 
+       DEPENDS ${FLUPRO}/usermvax/mgdraw.f
+       COMMENT "Custom command to compile mgdraw object with parenthetically named includes"
+       )
+ADD_CUSTOM_TARGET (mgdraw
+	        DEPENDS mgdraw.o)
+
+SET (commonfiles cpp/fluka_funcs.cpp cpp/dagmc_utils.cpp cpp/Input.cpp)
+SET (wrapperfiles cpp/WrapReg2Name.cc cpp/WrapLookMG.cc cpp/WrapMag.cc 
+		  cpp/WrapLookFX.cc cpp/WrapReg.cc cpp/WrapFlgfwr.cc)
 
 # Create the executable that can call flukam_
-add_executable(mainfludag cpp/mainFluDAG.cpp ${commonfiles} ${wrapperfiles})
-set (CMAKE_Fortran_Compiler gfortran)
-ENABLE_LANGUAGE(Fortran)
-target_link_libraries(mainfludag ${moablibs} ${FLUPRO}/libflukahp.a gfortran)
+ADD_EXECUTABLE(mainfludag cpp/mainFluDAG.cpp mgdraw.o ${commonfiles} ${wrapperfiles})
+ADD_DEPENDENCIES(mainfludag mgdraw)
+TARGET_LINK_LIBRARIES(mainfludag ${moablibs} ${FLUPRO}/libflukahp.a gfortran)
