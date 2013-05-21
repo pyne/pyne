@@ -139,6 +139,7 @@ else()
     # information the python interpreter itself gave us were more complete.
     find_library(PYTHON_LIBRARY
         NAMES "python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}"
+              "python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}mu"
         PATHS ${_PYTHON_LIBS_SEARCH}
         NO_SYSTEM_ENVIRONMENT_PATH)
 endif()
@@ -167,6 +168,10 @@ SET(PYTHON_DEBUG_LIBRARIES "${PYTHON_DEBUG_LIBRARY}")
 find_package_message(PYTHON
     "Found PythonLibs: ${PYTHON_LIBRARY}"
     "${PYTHON_EXECUTABLE}${PYTHON_VERSION}")
+#find_package_message(PYTHON "PYTHON_PREFIX: ${PYTHON_PREFIX}" "${PYTHON_PREFIX}")
+#find_package_message(PYTHON "PYTHON_LIBRARY: ${PYTHON_LIBRARY}" "${PYTHON_LIBRARY}")
+#find_package_message(PYTHON "PYTHON_VERSION: ${PYTHON_VERSION}" "${PYTHON_VERSION}")
+#find_package_message(PYTHON "PYTHON_EXECUTABLE: ${PYTHON_EXECUTABLE}" "${PYTHON_EXECUTABLE}")
 
 
 # PYTHON_ADD_MODULE(<name> src1 src2 ... srcN) is used to build modules for python.
