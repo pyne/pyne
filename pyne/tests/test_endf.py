@@ -841,7 +841,7 @@ def test_int_linlog():
     exp_xs = np.array([1, 3, 3, 0])
     obs = library.integrate_tab_range(3, exp_Eint, exp_xs)
     exp = e+1+3*e**2-6*e
-    assert_equal(exp, obs)
+    assert_allclose(exp, obs, rtol=1e-12)
 
 def test_int_loglin():
     pass
