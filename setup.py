@@ -62,6 +62,7 @@ def main_body():
     makefile = os.path.join('build', 'Makefile')
     if not os.path.exists(makefile):
         cmake_cmd = ['cmake', '..'] + cmake_args
+        cmake_cmd += ['-DPYTHON_EXECUTABLE=' + sys.executable, ]
         if os.name == 'nt':
             files_on_path = set()
             for p in os.environ['PATH'].split(';')[::-1]:
