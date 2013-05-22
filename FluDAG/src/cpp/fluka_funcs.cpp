@@ -448,7 +448,7 @@ void lkwr(double& pSx, double& pSy, double& pSz,
     {
       MBEntityHandle volume = DAG->entity_by_index(3, i); // get the volume by index
       // No ray history or ray direction.
-      MBErrorCode code = DAG->point_in_volume(volume, xyz, is_inside);
+      MBErrorCode code = DAG->point_in_volume(volume, xyz, is_inside,dir);
 
       // check for non error
       if(MB_SUCCESS != code) 
@@ -499,7 +499,7 @@ void special_check(double pos[3],const double dir[3], int& oldReg)
       for (int i = 1 ; i <= num_vols ; i++) // loop over all volumes
 	{
 	  MBEntityHandle volume = DAG->entity_by_index(3, i); // get the volume by index
-	  MBErrorCode code = DAG->point_in_volume(volume, pos, is_inside); 
+	  MBErrorCode code = DAG->point_in_volume(volume, pos, is_inside,dir); 
 	  if ( is_inside == 1) // if in volume
 	    {
 	      std::cout << "had to bump " << counter << " times" << std::endl;
