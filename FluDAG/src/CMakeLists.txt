@@ -8,6 +8,7 @@ IF (NOT DEFINED FLUPRO)
 	set (FLUPRO "$ENV{FLUPRO}")
 ENDIF (NOT DEFINED FLUPRO)
 
+<<<<<<< HEAD
 IF (NOT DEFINED HOME OR NOT DEFINED FLUPRO)
 	message ("Including local.cmake")
 	INCLUDE(local.cmake)
@@ -20,8 +21,7 @@ ENDIF (NOT DEFINED MOAB_HOME)
 
 SET(MOAB_INCLUDE ${MOAB_HOME}/include)
 SET(MOAB_LIB_DIR ${MOAB_HOME}/lib)
-SET (moablibs ${MOAB_LIB_DIR}/libMOAB.so ${MOAB_LIB_DIR}/libdagmc.so)
-
+set (moablibs ${MOAB_LIB_DIR}/libdagmc.so ${MOAB_LIB_DIR}/libMOAB.so)
 
 # Where to look for includes
 INCLUDE_DIRECTORIES(${MOAB_INCLUDE})
