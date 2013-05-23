@@ -4,6 +4,13 @@
 #include <string>
 #include <vector>
 
+#include "moab/Types.hpp"
+
+#include "MBInterface.hpp"
+#include "MBCartVect.hpp"
+
+#include "DagMC.hpp"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -30,7 +37,8 @@ extern "C" {
                 int parallel_file_mode, // parallel read mode
                 int max_pbl);
 
-
+  void slow_check(double pos[3], const double dir[3], int &oldReg);
+  MBEntityHandle check_reg(MBEntityHandle volume, double point[3], double dir[3]); // check we are where we say we are
   void special_check(double pos[3],const double dir[3], int& oldReg);
 
   /* get the sense of a region with respect to the global next_surf,
