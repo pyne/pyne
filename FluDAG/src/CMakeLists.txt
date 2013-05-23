@@ -8,19 +8,9 @@ IF (NOT DEFINED FLUPRO)
 	set (FLUPRO "$ENV{FLUPRO}")
 ENDIF (NOT DEFINED FLUPRO)
 
-IF (NOT DEFINED HOME OR NOT DEFINED FLUPRO)
-	message ("Including local.cmake")
-	INCLUDE(local.cmake)
-ENDIF (NOT DEFINED HOME OR NOT DEFINED FLUPRO)
-
-IF (NOT DEFINED MOAB_HOME)
-	message ("Including local.cmake")
-	INCLUDE(local.cmake)
-ENDIF (NOT DEFINED MOAB_HOME)
-
 set(MOAB_INCLUDE ${MOAB_HOME}/include)
 set(MOAB_LIB_DIR ${MOAB_HOME}/lib)
-set (moablibs ${MOAB_LIB_DIR}/libMOAB.so ${MOAB_LIB_DIR}/libdagmc.so)
+set (moablibs ${MOAB_LIB_DIR}/libdagmc.so ${MOAB_LIB_DIR}/libMOAB.so)
 
 
 # Where to look for includes
@@ -29,7 +19,7 @@ include_directories(include ${MOAB_INCLUDE})
 set (commonfiles cpp/fluka_funcs.cpp cpp/dagmc_utils.cpp cpp/Input.cpp)
 set (wrapperfiles cpp/WrapReg2Name.cc cpp/WrapLookMG.cc cpp/WrapMag.cc 
 		  cpp/WrapLookFX.cc cpp/WrapReg.cc  
-		  cpp/WrapFlgfwr.cc 
+		  cpp/WrapFlgfwr.cc cpp/WrapDN.cc
 		  )
 
 # Create the executable that can call flukam_
