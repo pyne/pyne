@@ -80,7 +80,7 @@ def parse_atomic_abund(build_dir=""):
     return atomic_abund
 
 
-def grab_atmoic_mass_adjustment(build_dir=""):
+def grab_atomic_mass_adjustment(build_dir=""):
     """Grabs the current atomic mass adjustment from the Atomic
     Mass Data Center.  These are courtesy of Georges Audi and 
     Wang Meng via a private communication, November 2012."""
@@ -96,7 +96,7 @@ def grab_atmoic_mass_adjustment(build_dir=""):
 #amdc_regex = re.compile('[ \d-]*? (\d{1,3})[ ]{1,4}(\d{1,3}) [A-Z][a-z]? .*? (\d{1,3}) ([ #.\d]{10,11}) ([ #.\d]{1,10})[ ]*?$')
 amdc_regex = re.compile('[ \d-]*? (\d{1,3})[ ]{1,4}(\d{1,3}) [A-Z][a-z]? .*? (\d{1,3}) ([ #.\d]{5,12}) ([ #.\d]+)[ ]*?$')
 
-def parse_atmoic_mass_adjustment(build_dir=""):
+def parse_atomic_mass_adjustment(build_dir=""):
     """Parses the atomic mass adjustment data into a list of tuples of 
     the nuclide, atomic mass, and error."""
     f = open(os.path.join(build_dir, MASS_FILE), 'r')
@@ -147,7 +147,7 @@ def make_atomic_weight_table(nuc_data, build_dir=""):
     """
     # Grab raw data
     atomic_abund  = parse_atomic_abund(build_dir)
-    atomic_masses = parse_atmoic_mass_adjustment(build_dir)
+    atomic_masses = parse_atomic_mass_adjustment(build_dir)
 
     A = {}
 
@@ -210,7 +210,7 @@ def make_atomic_weight(args):
 
     # Then grab mass data
     print "Grabbing atomic mass data from AMDC"
-    grab_atmoic_mass_adjustment(build_dir)
+    grab_atomic_mass_adjustment(build_dir)
 
     # Make atomic weight table once we have the array
     print "Making atomic weight data table."
