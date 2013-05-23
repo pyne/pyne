@@ -256,8 +256,7 @@ void g1_fire(int& oldRegion, double point[], double dir[], double &propStep, dou
     {
       int dummy;
       int errFlg;
-      // must be a banked particle
-      lkwr(point[0],point[1],point[2],dir,0,oldRegion,dummy,errFlg,dummy);
+      lkwr(point[0],point[1],point[2],dir,0,dummy,oldRegion,errFlg,dummy); // where is particle
     }
     
 
@@ -272,15 +271,28 @@ void g1_fire(int& oldRegion, double point[], double dir[], double &propStep, dou
   double next_surf_dist;
   MBEntityHandle newvol = 0;
 
+  vol = check_reg(vol,point,dir); // check we are where we say we are
+  oldRegion = DAG->index_by_handle(vol);
   // next_surf is a global
   MBErrorCode result = DAG->ray_fire(vol, point, dir, next_surf, next_surf_dist );
+  if ( result != MB_SUCCESS )
+    {
+      std::cout << "DAG ray fire error" << std::endl;
+      exit(0);
+    }
 
   retStep = next_surf_dist; // the returned step length is the distance to next surf
 
   if ( next_surf == 0 ) // if next_surface is 0 then we are lost
     {
-      std::cout << point[0] << " " << point[1] << " " << point[2] << std::endl;
-      std::cout << "Lost particle" << std::endl;
+      std::cout << "!!! Lost Particle !!! " << std::endl;
+      std::cout << "in region, " << oldRegion << " aka " << DAG->entity_by_index(3,oldRegion) << std::endl;  
+
+      std::cout.precision(25);
+      std::cout << std::scientific ; 
+      std::cout << "position of particle " << point[0] << " " << point[1] << " " << point[2] << std::endl;
+      std::cout << " traveling in direction " << dir[0] << " " << dir[1] << " " << dir[2] << std::endl;
+      std::cout << "!!! Lost Particle !!!" << std::endl;
       exit(0);
     }
   
@@ -452,36 +464,93 @@ void lkwr(double& pSx, double& pSy, double& pSz,
 
       // check for non error
       if(MB_SUCCESS != code) 
-      {
+	{
 	  std::cout << "Error return from point_in_volume!" << std::endl;
 	  flagErr = -33;
-	  exit(0);
 	  return;
-      }
+	}
+
       if ( is_inside == 1 ) // we are inside the cell tested
-      {
+	{
 	  nextRegion = i;
           //BIZARRELY - WHEN WE ARE INSIDE A VOLUME, BOTH, nextRegion has to equal flagErr
 	  flagErr = nextRegion;
-          if(debug)
-          {
-              std::cout << "point is in nextRegion = " << nextRegion << std::endl;
-          }
-          return;
-      }
+	  return;	  
+	}
       else if ( is_inside == -1 )
 	{
+	  std::cout << "We cannot be here" << std::endl;
 	  exit(0);
 	}
     }  // end loop over all volumes
 
-  special_check(xyz,dir,nextRegion);
+  //special_check(xyz,dir,nextRegion);
   // if we return update xyz
-  pSx=xyz[0];
-  pSy=xyz[1];
-  pSz=xyz[2];
+  //pSx=xyz[0];
+  //pSy=xyz[1];
+  //pSz=xyz[2];
+  // if we are here do slow check
+  slow_check(xyz,dir,nextRegion);
   flagErr = nextRegion; // return nextRegion
   return;
+}
+
+void slow_check(double pos[3], const double dir[3], int &oldReg)
+{
+  std::cout << pos[0] << " " << pos[1] << " " << pos[2] << std::endl;
+  std::cout << dir[0] << " " << dir[1] << " " << dir[2] << std::endl;
+  int num_vols = DAG->num_entities(3);  // number of volumes
+  int is_inside;
+  for (int i = 1 ; i <= num_vols ; i++) // loop over all volumes
+    {
+      MBEntityHandle volume = DAG->entity_by_index(3, i); // get the volume by index
+      MBErrorCode code = DAG->point_in_volume(volume, pos, is_inside,dir); 
+      if ( code != MB_SUCCESS)
+	{
+	 std::cout << "Failure from point in volume" << std::endl;
+	 exit(0);
+	}
+
+      if ( is_inside == 1) // if in volume
+	{
+	  oldReg = DAG->index_by_handle(volume); //set oldReg
+	  std::cout << pos[0] << " " << pos[1] << " " << pos[2] << " " << oldReg << std::endl;
+	  return;
+	}
+    }
+
+  std::cout << "FAILED SLOW CHECK" << std::endl;
+  exit(0);
+}
+
+MBEntityHandle check_reg(MBEntityHandle volume, double point[3], double dir[3]) // check we are where we say we are
+{
+  int is_inside;
+  MBErrorCode code = DAG->point_in_volume(volume, point, is_inside,dir); 
+  if (is_inside == 1 )
+    {
+      // we are where we say we are
+      return volume;
+    }
+  else
+    {
+      int num_vols = DAG->num_entities(3);  // number of volumes
+      for (int i = 1 ; i <= num_vols ; i++) // loop over all volumes
+	{
+	  MBEntityHandle volume = DAG->entity_by_index(3, i); // get the volume by index
+	  MBErrorCode code = DAG->point_in_volume(volume, point, is_inside,dir); 
+	  if ( is_inside == 1) // if in volume
+	    {
+	      return volume;
+	    }
+	}
+      std::cout.precision(25);
+      std::cout << std::scientific ; 
+      std::cout << "position of particle " << point[0] << " " << point[1] << " " << point[2] << std::endl;
+      std::cout << " traveling in direction " << dir[0] << " " << dir[1] << " " << dir[2] << std::endl;
+      std::cout << "particle not nowhere" << std::endl;
+      exit(0);
+    }
 }
 
 void special_check(double pos[3],const double dir[3], int& oldReg)
