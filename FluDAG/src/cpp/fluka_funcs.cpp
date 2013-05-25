@@ -250,13 +250,14 @@ void g1wr(double& pSx,
 void g1_fire(int& oldRegion, double point[], double dir[], double &propStep, double& retStep,  int& newRegion)
 {
 
+  /*
   if (PrevRegion != oldRegion) // if the particle is not in the correct volume since could be a banked history
     {
       int dummy;
       int errFlg;
       lkwr(point[0],point[1],point[2],dir,0,dummy,oldRegion,errFlg,dummy); // where is particle
     }
-    
+  */
 
   if(debug)
   {
@@ -269,7 +270,7 @@ void g1_fire(int& oldRegion, double point[], double dir[], double &propStep, dou
   double next_surf_dist;
   MBEntityHandle newvol = 0;
 
-  vol = check_reg(vol,point,dir); // check we are where we say we are
+  // vol = check_reg(vol,point,dir); // check we are where we say we are
   oldRegion = DAG->index_by_handle(vol);
   // next_surf is a global
   MBErrorCode result = DAG->ray_fire(vol, point, dir, next_surf, next_surf_dist );
