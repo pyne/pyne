@@ -249,9 +249,20 @@ class TestPtrac(unittest.TestCase):
                 "Generate a well-defined PTRAC file for PyNE test cases")
         del p
 
+        # 8-byte ints, little endian
+        p = mcnp.PtracReader("mcnp_ptrac_i8_little.ptrac")
+        assert_equal(p.problem_title,
+                "Generate a well-defined PTRAC file for PyNE test cases")
+        del p
+
     def test_determine_format(self):
         # 4-byte ints, little endian
         p = mcnp.PtracReader("mcnp_ptrac_i4_little.ptrac")
+        assert_equal(p.endianness, "<")
+        del p
+
+        # 8-byte ints, little endian
+        p = mcnp.PtracReader("mcnp_ptrac_i8_little.ptrac")
         assert_equal(p.endianness, "<")
         del p
 
@@ -271,28 +282,33 @@ class TestPtrac(unittest.TestCase):
         del evt
 
     def test_write_to_hdf5(self):
-        p = mcnp.PtracReader("mcnp_ptrac_i4_little.ptrac")
-        h5file = tables.openFile("mcnp_ptrac_hdf5_file.h5", "w")
-        tab = h5file.createTable("/", "t", mcnp.PtracEvent, "test")
-        p.write_to_hdf5_table(tab)
-        tab.flush()
-        h5file.close()
-        del h5file
-        del tab
-        del p
+        test_files = ["mcnp_ptrac_i4_little.ptrac",
+                "mcnp_ptrac_i8_little.ptrac"]
 
-        # now check if the data was correctly written. there should be 5 events
-        # of type 1000 (src)
-        h5file = tables.openFile("mcnp_ptrac_hdf5_file.h5")
-        tab = h5file.getNode("/t")
-        selected = [1 for x in tab.iterrows() if x["event_type"] == 1000]
-        assert_equal(len(selected), 5)
-        del tab
-        del h5file
+        for test_file in test_files:
+            p = mcnp.PtracReader(test_file)
+            h5file = tables.openFile("mcnp_ptrac_hdf5_file.h5", "w")
+            tab = h5file.createTable("/", "t", mcnp.PtracEvent, "test")
+            p.write_to_hdf5_table(tab)
+            tab.flush()
+            h5file.close()
+            del h5file
+            del tab
+            del p
 
-        # clean up
-        if os.path.exists("mcnp_ptrac_hdf5_file.h5"):
-            os.unlink("mcnp_ptrac_hdf5_file.h5")
+            # now check if the data was correctly written.
+            # there should be 5 events of type 1000 (src)
+            h5file = tables.openFile("mcnp_ptrac_hdf5_file.h5")
+            tab = h5file.getNode("/t")
+            selected = [1 for x in tab.iterrows() if x["event_type"] == 1000]
+            assert_equal(len(selected), 5)
+            h5file.close()
+            del tab
+            del h5file
+
+            # clean up
+            if os.path.exists("mcnp_ptrac_hdf5_file.h5"):
+                os.unlink("mcnp_ptrac_hdf5_file.h5")
 
 
 
