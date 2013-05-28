@@ -709,6 +709,8 @@ class PtracReader(object):
             27: "wgt", # weight
             28: "tme"
         }
+
+        self.eightbytes = False
     
         self.f = open(filename, 'rb')
         self.determine_endianness()
@@ -737,8 +739,8 @@ class PtracReader(object):
         
         # discard the next 8 bytes (the value -1 und another 4)
         self.f.read(8)
-    
-    def read_next(self, format, number=1, auto=False):
+
+    def read_next(self, format, number=1, auto=False, raw_format=False):
         """Helper method for reading records from the Ptrac file.
         All binary records consist of the record content's length in bytes,
         the content itself and then the length again.
@@ -747,18 +749,25 @@ class PtracReader(object):
         The length of the record can either be hard-coded by setting the
         number parameter (e.g. to read 10 floats) or determined automatically
         by setting auto=True.
+        Setting the parameter raw_format to True means that the format string
+        will not be expanded by number, but will be used directly.
         """
+
+        if self.eightbytes and (not raw_format) and format == 'f':
+            format = 'd'
+        if self.eightbytes and (not raw_format) and format == 'i':
+            format = 'q'
     
         # how long is one field of the read values
         format_length = 1
-        if format in ['h', 'H']:
+        if format in ['h', 'H'] and not raw_format:
             format_length = 2
-        elif format in ['i', 'I', 'l', 'L', 'f']:
+        elif format in ['i', 'I', 'l', 'L', 'f'] and not raw_format:
             format_length = 4
-        elif format in ['d', 'q', 'Q']:
+        elif format in ['d', 'q', 'Q'] and not raw_format:
             format_length = 8
     
-        if auto:
+        if auto and not raw_format:
             b = self.f.read(4)
             
             if b == '':
@@ -776,8 +785,14 @@ class PtracReader(object):
             b = self.f.read(bytes_to_read)
             if b == '':
                 raise EOFError
+
+            fmt_string = self.endianness + "i"
+            if raw_format:
+                fmt_string += format + "i"
+            else:
+                fmt_string += format * number + "i"
             
-            tmp = struct.unpack(self.endianness + 'i' + format * number + 'i', b)
+            tmp = struct.unpack(fmt_string, b)
             length = tmp[0]
             length2 = tmp[-1]
             tmp = tmp[1:-1]
@@ -805,8 +820,18 @@ class PtracReader(object):
 
 
         # ptrac input data. can be omitted for now,
-        # but has to be parsed, because it has variable length
-        line = self.read_next('f', 10)
+        # but has to be parsed, because it has variable length.
+        # Also, this is the first difference between a file generated
+        # with 4-byte and 8-byte numbers.
+        line = self.read_next('f', auto=True)
+        # if this line doesn't consist of 10 floats, then we've read them with
+        # the wrong byte length and re have to re-read them (and every
+        # following float) with 8 bytes length.
+        if len(line) != 10:
+            self.eightbytes = True
+            tmp = struct.pack(self.endianness + "f"*20, *line)
+            line = list(struct.unpack(self.endianness + "d"*10, tmp))
+
         # the first item is always 13. afterwards, there is 13 times the
         # following scheme:
         # N x_0 ... x_N,
@@ -832,7 +857,11 @@ class PtracReader(object):
         variable_nums = dict()
         variable_ids = dict()
         
-        variable_info = self.read_next('i', 20)
+        if self.eightbytes:
+            variable_info = self.read_next("qqqqqqqqqqqiiiiiiiii", 124, raw_format=True)
+        else:
+            variable_info = self.read_next('i', 20)
+        
         variable_nums["nps"] = variable_info[0]
         variable_nums["src"] = variable_info[1] + variable_info[2]
         variable_nums["bnk"] = variable_info[3] + variable_info[4]
@@ -841,7 +870,14 @@ class PtracReader(object):
         variable_nums["ter"] = variable_info[9] + variable_info[10]
         
         num_vars_total = sum(variable_info[:11])
-        all_var_ids = self.read_next('i', num_vars_total)
+        
+        if self.eightbytes:
+            # only the NPS vars are in 8 byte, the other ones are still 4
+            fmt_string = "q" * variable_info[0] + "i" * sum(variable_info[1:11])
+            fmt_length = 8 * variable_info[0] + 4 * sum(variable_info[1:11])
+            all_var_ids = self.read_next(fmt_string, fmt_length, raw_format=True)
+        else:
+            all_var_ids = self.read_next('i', num_vars_total)
         
         for l in ["nps", "src", "bnk", "sur", "col", "ter"]:
             variable_ids[l] = all_var_ids[:variable_nums[l]]
