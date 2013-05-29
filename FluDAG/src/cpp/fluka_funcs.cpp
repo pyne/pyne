@@ -450,15 +450,17 @@ void lkwr(double& pSx, double& pSy, double& pSz,
       std::cout << "position is " << pSx << " " << pSy << " " << pSz << std::endl; 
   }
 
-  double xyz[] = {pSx, pSy, pSz}; // location of the particle (xyz)
+  double xyz[] = {pSx, pSy, pSz};       // location of the particle (xyz)
   const double dir[] = {pV[0],pV[1],pV[2]};
-  int is_inside = 0;                    // logical inside or outside of volume
+  // Initialize to outside boundary.  This value can be 0 or +/-1 for ouside, inside, or on boundary.
+  // ToDo:  Should this be initialized at all?  Or should it be initialized to an invalide number?
+  int is_inside = 0;                    
   int num_vols = DAG->num_entities(3);  // number of volumes
 
   for (int i = 1 ; i <= num_vols ; i++) // loop over all volumes
     {
       MBEntityHandle volume = DAG->entity_by_index(3, i); // get the volume by index
-      // No ray history or ray direction.
+      // No ray history 
       MBErrorCode code = DAG->point_in_volume(volume, xyz, is_inside,dir);
 
       // check for non error
@@ -494,12 +496,16 @@ void lkwr(double& pSx, double& pSy, double& pSz,
   return;
 }
 
+//---------------------------------------------------------------------------//
+// slow_check(..)
+//---------------------------------------------------------------------------//
+// Helper function
 void slow_check(double pos[3], const double dir[3], int &oldReg)
 {
   std::cout << pos[0] << " " << pos[1] << " " << pos[2] << std::endl;
   std::cout << dir[0] << " " << dir[1] << " " << dir[2] << std::endl;
   int num_vols = DAG->num_entities(3);  // number of volumes
-  int is_inside;
+  int is_inside = 0;
   for (int i = 1 ; i <= num_vols ; i++) // loop over all volumes
     {
       MBEntityHandle volume = DAG->entity_by_index(3, i); // get the volume by index
@@ -522,7 +528,12 @@ void slow_check(double pos[3], const double dir[3], int &oldReg)
   exit(0);
 }
 
-MBEntityHandle check_reg(MBEntityHandle volume, double point[3], double dir[3]) // check we are where we say we are
+//---------------------------------------------------------------------------//
+// check_reg(..)
+//---------------------------------------------------------------------------//
+// NOT CALLED - Helper function
+// check we are where we say we are
+MBEntityHandle check_reg(MBEntityHandle volume, double point[3], double dir[3]) 
 {
   int is_inside;
   MBErrorCode code = DAG->point_in_volume(volume, point, is_inside,dir); 
@@ -552,6 +563,10 @@ MBEntityHandle check_reg(MBEntityHandle volume, double point[3], double dir[3]) 
     }
 }
 
+//---------------------------------------------------------------------------//
+// special_check(..)
+//---------------------------------------------------------------------------//
+// NOT CALLED - Helper function
 void special_check(double pos[3],const double dir[3], int& oldReg)
 {
   int num_vols = DAG->num_entities(3);  // number of volumes
