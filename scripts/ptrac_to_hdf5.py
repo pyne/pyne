@@ -1,31 +1,45 @@
 #!/usr/bin/env python
 """Read a MCNP Ptrac file and save it in HDF5 format."""
-import sys
+
 import tables
 from pyne import mcnp
+try:
+    import argparse
+except ImportError:
+    import pyne._argparse as argparse
 
-if len(sys.argv) <= 3:
-    sys.stderr.write("Not enough command line arguments.\n")
-    sys.stderr.write("\n")
-    sys.stderr.write("Usage:\n")
-    sys.stderr.write("{0} ptrac_file hdf5_file tablename\n".format(sys.argv[0]))
-    exit(-1)
+def main():
+    argparser = argparse.ArgumentParser(description="write the contents of a MCNP PTRAC file to a HDF5 table")
+    argparser.add_argument("ptrac_file", help="MCNP PTRAC file to read from")
+    argparser.add_argument("hdf5_file", help="HDF5 file to write to (will be created if it does not exist)")
+    argparser.add_argument("-n", "--table-name", default="ptrac",
+            help="name of the HDF5 table (default is \"ptrac\")")
+    argparser.add_argument("-t", "--table-title", default="Ptrac data",
+            help="title of the HDF5 table (default is \"Ptrac data\")")
+    argparser.add_argument("-s", "--show-progress", action="store_true",
+            help="show progress indicator")
+    args = argparser.parse_args()
 
-ptrac_filename = sys.argv[1]
-hdf5_filename = sys.argv[2]
-tablename = sys.argv[3]
+    ptrac_filename = args.ptrac_file
+    hdf5_filename = args.hdf5_file
+    table_name = args.table_name
+    table_title = args.table_title
+    print_progress = 1000000 if args.show_progress else 0
 
-ptrac = mcnp.PtracReader(ptrac_filename)
+    ptrac = mcnp.PtracReader(ptrac_filename)
 
-# open HDF5 file and create table if it doesn't exist yet
-h5file = tables.openFile(hdf5_filename, mode="a", title=ptrac.problem_title)
-tablepath = "/" + tablename
-if tablepath in h5file:
-    table = h5file.getNode(tablepath)
-else:
-    table = h5file.createTable("/", tablename, mcnp.PtracEvent, "Ptrac data")
+    # open HDF5 file and create table if it doesn't exist yet
+    h5file = tables.openFile(hdf5_filename, mode="a", title=ptrac.problem_title)
+    table_path = "/" + table_name
+    if table_path in h5file:
+        table = h5file.getNode(table_path)
+    else:
+        table = h5file.createTable("/", table_name, mcnp.PtracEvent, table_title)
 
-ptrac.write_to_hdf5_table(table, print_progress=1000000)
+    ptrac.write_to_hdf5_table(table, print_progress=print_progress)
 
-table.flush()
-h5file.close()
+    table.flush()
+    h5file.close()
+
+if __name__ == '__main__':
+    main()
