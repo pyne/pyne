@@ -1,7 +1,7 @@
 // MCNP5/dagmc/Quadrature.hpp
 
-#ifndef DAGMC_QUADRATURE_H
-#define DAGMC_QUADRATURE_H
+#ifndef DAGMC_QUADRATURE_HPP
+#define DAGMC_QUADRATURE_HPP
 
 #include <vector>
 
@@ -21,7 +21,7 @@ class Function
     virtual ~Function(){}
 
     /**
-     * \brief evaluate this Function f
+     * \brief Evaluate this Function f
      * \param x the value at which f will be evaluated
      * \return f(x)
      */
@@ -34,7 +34,7 @@ class Function
  *
  * Quadrature is a class that represents a Gaussian Quadrature scheme based on
  * n quadrature points.  This scheme can be used to compute definite integrals
- * for functions that implement the Function interface.
+ * for classes that implement the Function interface.
  *
  * NOTE: Polynomials of order 2n - 1 or less are integrated exactly by an
  * n-point Quadrature.  However, the quadrature points and weights are only
@@ -54,13 +54,13 @@ class Quadrature
     // >>> PUBLIC INTERFACE
 
     /**
-     * \brief changes the set of quadrature points for this Quadrature
+     * \brief Changes the set of quadrature points for this Quadrature
      * \param new_n the new number of quadrature points
      */
     void change_quadrature_set(unsigned int new_n);
 
     /**
-     * \brief computes the definite integral of a Function f
+     * \brief Computes the definite integral of a Function f
      * \param a, b the lower and upper integration limits
      * \param f the Function to be integrated
      * \return definite integral of f(x) for [a, b]
@@ -78,12 +78,14 @@ class Quadrature
     std::vector<double> quad_points;
     std::vector<double> quad_weights;
 
+    // >>> PRIVATE METHODS
+
     /**
-     * \brief set up the quadrature points and weights for this Quadrature
+     * \brief Set up the quadrature points and weights for this Quadrature
      */
     void set_up_quadrature();
 };
 
-#endif // DAGMC_QUADRATURE_H
+#endif // DAGMC_QUADRATURE_HPP
 
 // end of MCNP5/dagmc/Quadrature.hpp

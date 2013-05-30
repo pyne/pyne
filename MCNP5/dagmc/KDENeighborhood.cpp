@@ -2,14 +2,12 @@
 
 #include <cstdlib>
 #include <iostream>
-#include <vector>
 
 #include "moab/AdaptiveKDTree.hpp"
 #include "moab/CartVect.hpp"
 #include "moab/Interface.hpp"
 
 #include "KDENeighborhood.hpp"
-#include "TallyEvent.hpp"
 
 //---------------------------------------------------------------------------//
 // CONSTRUCTOR
@@ -19,7 +17,7 @@ KDENeighborhood::KDENeighborhood(const TallyEvent& event,
                                  moab::AdaptiveKDTree& tree,
                                  moab::EntityHandle& tree_root)
 {
-    // Copy KD-Tree to this neighborhood for the given tally event
+    // copy KD-Tree to this neighborhood for the given tally event
     this->tree = &tree;
     this->tree_root = tree_root;
 
@@ -45,7 +43,7 @@ KDENeighborhood::KDENeighborhood(const TallyEvent& event,
     }
     else
     {
-        // Neighborhood region does not exist
+        // neighborhood region does not exist
         std::cerr << "\nError: Could not define neighborhood for tally event";
         std::cerr << std::endl;
         exit(EXIT_FAILURE);
@@ -55,15 +53,15 @@ KDENeighborhood::KDENeighborhood(const TallyEvent& event,
 // PUBLIC INTERFACE
 //---------------------------------------------------------------------------//
 moab::ErrorCode
-    KDENeighborhood::get_points(std::vector<moab::EntityHandle>& points)
+    KDENeighborhood::get_points(std_vector_EntityHandle& points) const
 {
     // find all the points that exist within a rectangular neighborhood region
     moab::ErrorCode rval = points_in_box(points);
     return rval;
 }
-//-----------------------------------------------------------------------------
+//---------------------------------------------------------------------------//
 bool KDENeighborhood::point_within_max_radius(const TallyEvent& event,
-                                              const moab::CartVect& point)
+                                              const moab::CartVect& point) const
 {
     // process track-based tally event only
     if (event.get_event_type() == TallyEvent::TRACK)
@@ -85,17 +83,14 @@ bool KDENeighborhood::point_within_max_radius(const TallyEvent& event,
         double distance_to_track = (data.direction * temp).length();
 
         // return true if distance is less than radius of cylindrical region
-        if (distance_to_track < radius)
-        {
-            return true;
-        }
+        if (distance_to_track < radius) return true;
     }
 
     // otherwise return false
     return false;
 }
 //---------------------------------------------------------------------------//
-// PRIVATE FUNCTIONS
+// PRIVATE METHODS
 //---------------------------------------------------------------------------//
 void KDENeighborhood::set_neighborhood(const moab::CartVect& collision_point,
                                        const moab::CartVect& bandwidth)
@@ -137,7 +132,7 @@ void KDENeighborhood::set_neighborhood(double track_length,
 }                              
 //---------------------------------------------------------------------------//
 moab::ErrorCode
-    KDENeighborhood::points_in_box(std::vector<moab::EntityHandle>& points)
+    KDENeighborhood::points_in_box(std_vector_EntityHandle& points) const
 {
     // determine the center point of the box
     double box_center[3];
@@ -154,7 +149,7 @@ moab::ErrorCode
     double radius = center_to_max_corner.length();
 
     // find all leaves of the tree within the given radius
-    std::vector<moab::EntityHandle> leaves;
+    std_vector_EntityHandle leaves;
     moab::ErrorCode rval = moab::MB_SUCCESS;
 
     (*tree).leaves_within_distance(tree_root, box_center, radius, leaves);
@@ -162,7 +157,7 @@ moab::ErrorCode
     if (moab::MB_SUCCESS != rval) return rval;
 
     // obtain the set of unique points in the box 
-    std::vector<moab::EntityHandle>::iterator i; 
+    std_vector_EntityHandle::iterator i; 
     moab::Interface* mb = tree->moab();
     moab::Range leaf_points;
     moab::Range::iterator j;

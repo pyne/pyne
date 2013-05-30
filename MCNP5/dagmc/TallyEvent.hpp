@@ -1,7 +1,7 @@
 // MCNP5/dagmc/TallyEvent.hpp
 
-#ifndef DAGMC_TALLYEVENT_H
-#define DAGMC_TALLYEVENT_H
+#ifndef DAGMC_TALLY_EVENT_HPP
+#define DAGMC_TALLY_EVENT_HPP
 
 #include <utility>
 
@@ -51,7 +51,7 @@ struct CollisionData
  * been set it cannot be changed.
  *
  * In addition to setting the required variables for each type of tally event,
- * there is also an optional function available to set the tally multiplier.
+ * there is also an optional method available to set the tally multiplier.
  * If the tally multiplier is not set, then it will default to 1.
  */
 //===========================================================================//
@@ -93,7 +93,7 @@ class TallyEvent
      */
     void set_tally_multiplier(double value);
 
-    // >>> TALLY EVENT DATA ACCESS FUNCTIONS
+    // >>> TALLY EVENT DATA ACCESS METHODS
 
     /**
      * \brief Gets particle energy and weight for this tally event
@@ -147,6 +147,6 @@ class TallyEvent
     EventType event_type;
 };
 
-#endif // DAGMC_TALLYEVENT_H
+#endif // DAGMC_TALLY_EVENT_HPP
 
 // end of MCNP5/dagmc/TallyEvent.hpp

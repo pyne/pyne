@@ -8,7 +8,7 @@
 //---------------------------------------------------------------------------//
 // FACTORY METHOD
 //---------------------------------------------------------------------------//
-KDEKernel* KDEKernel::createKernel(std::string type, unsigned int order)
+KDEKernel* KDEKernel::createKernel(const std::string& type, unsigned int order)
 {
     KDEKernel* kernel = NULL;
 
@@ -82,7 +82,7 @@ double KDEKernel::evaluate(double u,
     return value;
 }
 //---------------------------------------------------------------------------//
-// PROTECTED FUNCTIONS
+// PROTECTED METHODS
 //---------------------------------------------------------------------------//
 double KDEKernel::MomentFunction::evaluate(double x) const
 {

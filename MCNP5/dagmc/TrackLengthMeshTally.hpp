@@ -34,11 +34,11 @@ public:
    * \param event the parameters needed to compute the mesh tally scores
    * \param ebin index representing energy bin
    */
-  void compute_score(const TallyEvent& event, int ebin);
+  virtual void compute_score(const TallyEvent& event, int ebin);
   
   virtual void end_history ();
     
-  virtual void print(  double sp_norm, double mult_fact );
+  virtual void print(double num_particles, double multiplier = 1.0);
 
   ~TrackLengthMeshTally();
 

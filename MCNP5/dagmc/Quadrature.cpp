@@ -56,7 +56,7 @@ unsigned int Quadrature::get_num_quad_points() const
     return num_quad_points;
 }
 //---------------------------------------------------------------------------//
-// PRIVATE FUNCTIONS
+// PRIVATE METHODS
 //---------------------------------------------------------------------------//
 void Quadrature::set_up_quadrature()
 {

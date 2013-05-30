@@ -40,7 +40,7 @@ MeshTally::MeshTally(const MeshTallyInput& input)
     }
 }
 //---------------------------------------------------------------------------//
-// TALLY DATA ACCESS FUNCTIONS
+// TALLY DATA ACCESS METHODS
 //---------------------------------------------------------------------------//
 double* MeshTally::get_tally_data(int& length)
 {
@@ -67,7 +67,7 @@ void MeshTally::zero_tally_data()
     std::fill(temp_tally_data.begin(), temp_tally_data.end(), 0);
 }
 //---------------------------------------------------------------------------//
-// PROTECTED FUNCTIONS
+// PROTECTED METHODS
 //---------------------------------------------------------------------------//
 void MeshTally::resize_data_arrays(unsigned int num_tally_points)
 {

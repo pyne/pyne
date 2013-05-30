@@ -65,7 +65,7 @@ void TallyEvent::set_tally_multiplier(double value)
     return;
 }
 //---------------------------------------------------------------------------//
-// TALLY EVENT ACCESS FUNCTIONS
+// TALLY EVENT ACCESS METHODS
 //---------------------------------------------------------------------------//
 std::pair<double, double> TallyEvent::get_particle_data() const
 {

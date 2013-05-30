@@ -1,7 +1,7 @@
 // MCNP5/dagmc/MeshTally.hpp
 
-#ifndef DAGMC_MESHTALLY_H
-#define DAGMC_MESHTALLY_H
+#ifndef DAGMC_MESH_TALLY_HPP
+#define DAGMC_MESH_TALLY_HPP
 
 #include <map>
 #include <string>
@@ -51,12 +51,11 @@ struct MeshTallyInput
  * MeshTally is a Base class that defines the variables and methods that are
  * typically needed to implement a mesh tally for use in Monte Carlo particle
  * transport codes.  Some basic functionality is already included but the
- * following functions must be implemented in all Derived classes
+ * following methods must be implemented in all Derived classes
  * 
  *     1) compute_score
- *     2) add_score_to_tally
- *     3) end_history
- *     4) write_results
+ *     2) end_history
+ *     3) print
  *
  * Note that three arrays are available for storing mesh tally data
  *
@@ -67,7 +66,7 @@ struct MeshTallyInput
  * Each element in these three data arrays represents one tally point and
  * one energy bin.  They are ordered first by tally point, and then by energy
  * bin.  Derived classes can easily access/modify individual elements using
- * the get_data function.
+ * the get_data() method.
  */
 //===========================================================================//
 class MeshTally
@@ -97,34 +96,26 @@ class MeshTally
     virtual void compute_score(const TallyEvent& event, int ebin) = 0;
 
     /**
-     * \brief Adds score to the mesh tally
-     */ 
-    //virtual void add_score_to_tally() = 0;
-
-    /**
-     * \brief Updates tally information when the history of a particle ends
+     * \brief Updates tally information when a particle history ends
      */
     virtual void end_history() = 0;
 
     /**
      * \brief Write tally and error results to the mesh tally's output file
-     */ 
-    //virtual void write_results() = 0;
-
-    // TODO remove print function once we change the Derived class implementations
-    /**
-     * Print / write results to the AMeshTally's output file.
-     * @param sp_norm The number of source particles, as reported from within mcnp's fortran code.
-     * @param fmesh_fact Multiplication factor from fmesh card.  
+     * \param num_particles the number of source particles tracked
+     * \param multiplier an optional constant multiplication factor
      */
-    virtual void print(double sp_norm, double fmesh_fact) = 0;
+    virtual void print(double num_particles, double multiplier = 1.0) = 0;
 
-    // >>> TALLY DATA ACCESS FUNCTIONS
+    // >>> TALLY DATA ACCESS METHODS
 
     /**
      * \brief get_tally_data(), get_error_data(), get_scratch_data()
      * \param length output parameter containing size of data array
      * \return pointer to the data array
+     *
+     * These three methods can be useful for implementing MeshTally
+     * functionality in parallel.
      */
     virtual double* get_tally_data(int& length);
     virtual double* get_error_data(int& length);
@@ -165,7 +156,7 @@ class MeshTally
     /// Data array for storing sum of scores for a single history
     std::vector<double> temp_tally_data;
 
-    // >>> PROTECTED FUNCTIONS
+    // >>> PROTECTED METHODS
 
     /**
      * \brief Resize data arrays to hold all of the mesh tally data
@@ -198,7 +189,7 @@ class MeshTally
                      unsigned energy_bin = 0);
 
     /**
-     * \brief loads the MOAB mesh data from the input file for this mesh tally
+     * \brief Loads the MOAB mesh data from the input file for this mesh tally
      * \param mbi the MOAB interface for this mesh tally
      * \param mesh_set entity handle for the mesh set that will be created
      * \return the MOAB ErrorCode value
@@ -207,22 +198,22 @@ class MeshTally
                                    moab::EntityHandle& mesh_set);
 
     /**
-     * \brief defines the set of tally points to use for this mesh tally
+     * \brief Defines the set of tally points to use for this mesh tally
      * \param mesh_elements the set of mesh elements to use as tally points
      *
-     * Note that this function calls resize_data_arrays() to set the tally
+     * Note that this method calls resize_data_arrays() to set the tally
      * data arrays for the given number of tally points.
      */
     void set_tally_points(const moab::Range& mesh_elements);
 
     /**
-     * \brief reduces a MOAB mesh set to include only its 3D elements
+     * \brief Reduces a MOAB mesh set to include only its 3D elements
      * \param mbi the MOAB interface for this mesh tally
      * \param mesh_set entity handle for the mesh set that will be reduced
      * \param mesh_elements stores 3D elements that were added to the mesh set
      * \return the MOAB ErrorCode value
      *
-     * NOTE: this function will overwrite the mesh set
+     * NOTE: this method will overwrite the mesh set
      */
     moab::ErrorCode reduce_meshset_to_3D(moab::Interface* mbi,
                                          moab::EntityHandle& mesh_set,
@@ -240,6 +231,6 @@ class MeshTally
     moab::ErrorCode setup_tags(moab::Interface* mbi, const char* prefix="");
 };
 
-#endif // DAGMC_MESHTALLY_H
+#endif // DAGMC_MESHTALLY_HPP
 
 // end of MCNP5/dagmc/MeshTally.hpp

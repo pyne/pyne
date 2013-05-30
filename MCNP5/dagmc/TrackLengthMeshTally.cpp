@@ -383,8 +383,8 @@ ErrorCode TrackLengthMeshTally::load_mesh( const std::string& input_filename,
 
 }
 
-  void TrackLengthMeshTally::print( double sp_norm, double mult_fact ){
-    write_results( sp_norm, mult_fact );
+  void TrackLengthMeshTally::print( double num_particles, double multiplier ){
+    write_results( num_particles, multiplier );
   }
 
 /**

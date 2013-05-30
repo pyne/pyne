@@ -242,12 +242,12 @@ void dagmc_fmesh_setup_mesh_( int* /*ipt*/, int* id, int* fmesh_index,
   }
   else if( type == "kde_track" || type == "kde_subtrack" ){
 
-    KDEMeshTally::TallyType kde_type = KDEMeshTally::INTEGRAL_TRACK;
+    KDEMeshTally::Estimator estimator = KDEMeshTally::INTEGRAL_TRACK;
 
     if ( type == "kde_subtrack" )
-      kde_type = KDEMeshTally::SUB_TRACK;
+      estimator = KDEMeshTally::SUB_TRACK;
 
-    KDEMeshTally* kde = new KDEMeshTally( fmesh_settings, kde_type );
+    KDEMeshTally* kde = new KDEMeshTally( fmesh_settings, estimator );
     new_tally = track_tallies[*fmesh_index] = kde;
 
   }

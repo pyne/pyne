@@ -1,13 +1,18 @@
 // MCNP5/dagmc/KDENeighborhood.hpp
 
-#ifndef DAGMC_KDE_NEIGHBORHOOD_H
-#define DAGMC_KDE_NEIGHBORHOOD_H
+#ifndef DAGMC_KDE_NEIGHBORHOOD_HPP
+#define DAGMC_KDE_NEIGHBORHOOD_HPP
 
-#include "moab/AdaptiveKDTree.hpp"
-#include "moab/CartVect.hpp"
-#include "moab/Interface.hpp"
+#include <vector>
 
 #include "TallyEvent.hpp"
+
+// forward declarations
+namespace moab {
+  class AdaptiveKDTree;
+  class CartVect;
+  class Interface;
+}
 
 /**
  * \class KDENeighborhood
@@ -22,15 +27,19 @@
  * KDE mesh tally.
  *
  * Once a KDENeighborhood has been created, the calculation points for the
- * corresponding tally event can be obtained using the get_points() function.
- * For collision events this function will return a set of unique mesh nodes
+ * corresponding tally event can be obtained using the get_points() method.
+ * For collision events this method will return a set of unique mesh nodes
  * that are all guaranteed to produce non-trivial tally contributions.  For
  * track-based events KDENeighborhood is only an approximation to the true
- * neighborhood region.  Therefore, for these events the get_points() function
+ * neighborhood region.  Therefore, for these events the get_points() method
  * may return some mesh nodes that produce trivial tally contributions.
  */
 class KDENeighborhood
 {
+  public:
+    // Typedefs
+    typedef std::vector<moab::EntityHandle> std_vector_EntityHandle;
+
   public:
     /**
      * \brief Constructor
@@ -52,10 +61,10 @@ class KDENeighborhood
      * \return the MOAB ErrorCode value
      *
      * The neighborhood region is currently assumed to be rectangular.  This
-     * function will therefore return all of the calculation points that exist
+     * method will therefore return all of the calculation points that exist
      * within the boxed region defined by min_corner and max_corner.
      */
-    moab::ErrorCode get_points(std::vector<moab::EntityHandle>& points);
+    moab::ErrorCode get_points(std_vector_EntityHandle& points) const;
 
     /**
      * \brief Determines if point lies within radius of cylindrical region
@@ -63,11 +72,11 @@ class KDENeighborhood
      * \param point the calculation point to be tested
      * \return true if point is inside the region, false otherwise
      *
-     * Note that this function is only valid for track-based events.  If the
+     * Note that this method is only valid for track-based events.  If the
      * event is not a track-based event, then it will always return false.
      */
     bool point_within_max_radius(const TallyEvent& event,
-                                 const moab::CartVect& point);
+                                 const moab::CartVect& point) const;
 
   private:
     /// Minimum and maximum corner of a rectangular neighborhood region
@@ -81,7 +90,7 @@ class KDENeighborhood
     moab::AdaptiveKDTree* tree;
     moab::EntityHandle tree_root;
 
-    // >>> PRIVATE FUNCTIONS
+    // >>> PRIVATE METHODS
 
     /**
      * \brief Sets the neighborhood region for a collision event
@@ -108,9 +117,9 @@ class KDENeighborhood
      * \param points stores unique set of vertices that exist inside box
      * \return the MOAB ErrorCode value
      */
-    moab::ErrorCode points_in_box(std::vector<moab::EntityHandle>& points);
+    moab::ErrorCode points_in_box(std_vector_EntityHandle& points) const;
 };
 
-#endif // DAGMC_KDE_NEIGHBORHOOD_H
+#endif // DAGMC_KDE_NEIGHBORHOOD_HPP
 
 // end of MCNP5/dagmc/KDENeighborhood.hpp

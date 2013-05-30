@@ -1,70 +1,45 @@
-// KDEMeshTally.cpp
+// MCNP5/dagmc/KDEMeshTally.cpp
 
 #include <cassert>
 #include <climits>
 #include <cmath>
 #include <iostream>
 #include <sstream>
-#include <fstream>
 #include <string>
-#include <utility>
-#include <vector>
 
 #include "moab/AdaptiveKDTree.hpp"
-#include "moab/CartVect.hpp"
 #include "moab/Core.hpp"
-#include "moab/Interface.hpp"
 #include "moab/Range.hpp"
-#include "moab/Types.hpp"
 
-#include "KDEKernel.hpp"
 #include "KDEMeshTally.hpp"
 #include "KDENeighborhood.hpp"
-#include "TallyEvent.hpp"
 
 // initialize static variables
 bool KDEMeshTally::seed_is_set = false;
-const char* const KDEMeshTally::kde_tally_names[] = {"collision",
-                                                     "integral-track",
-                                                     "sub-track"};
+const char* const KDEMeshTally::kde_estimator_names[] = {"collision",
+                                                         "integral-track",
+                                                         "sub-track"};
 
-// quadrature points and weights for the integral_track_score function
+// quadrature points and weights for the integral_track_score method
 const double quad_points[4] = {0.339981043585, -0.339981043585,
                                0.861136311594, -0.861136311594};
 
 const double quad_weights[4] = {0.652145154863, 0.652145154863,
                                 0.347854845137, 0.347854845137};
 
-//-----------------------------------------------------------------------------
-static double parse_bandwidth_value(const std::string& key,
-                                    const std::string& value,
-                                    double default_value = 0.01)
-{
-    char* end;
-    double bandwidth_value = strtod(value.c_str(), &end);
-
-    if( value.c_str() == end || bandwidth_value <= 0 )
-    {
-        std::cerr << "Warning: invalid bandwidth value for " << key
-                  << " = " << value << std::endl;
-        std::cerr << "    using default value " << key << " = "
-                  << default_value << std::endl;
-        bandwidth_value = default_value;
-    }
-
-    return bandwidth_value;
-}
-//-----------------------------------------------------------------------------
+//---------------------------------------------------------------------------//
+// CONSTRUCTOR
+//---------------------------------------------------------------------------//
 KDEMeshTally::KDEMeshTally(const MeshTallyInput& input,
-                           KDEMeshTally::TallyType type)
+                           KDEMeshTally::Estimator type)
     : MeshTally(input),
-      mbi(new moab::Core()),
+      estimator(type),
       bandwidth(moab::CartVect(0.01, 0.01, 0.01)),
-      kde_tally(type),
       kernel(NULL),
-      num_subtracks(3)
+      num_subtracks(3),
+      mbi(new moab::Core())
 {
-    std::cout << "Creating KDE " << kde_tally_names[kde_tally]
+    std::cout << "Creating KDE " << kde_estimator_names[estimator]
               << " mesh tally " << input.tally_id << std::endl;
 
     std::cout << "    for input mesh: " << input.input_filename
@@ -82,7 +57,7 @@ KDEMeshTally::KDEMeshTally(const MeshTallyInput& input,
     std::cout << "    using " << kernel->get_kernel_name()
               << " kernel and bandwidth " << bandwidth << std::endl;
 
-    if (kde_tally == SUB_TRACK)
+    if (estimator == SUB_TRACK)
     {
         std::cout << "    splitting full tracks into "
                   << num_subtracks << " sub-tracks" << std::endl;
@@ -108,18 +83,22 @@ KDEMeshTally::KDEMeshTally(const MeshTallyInput& input,
 
     // initialize running variance variables
     max_collisions = false;
-    numCollisions = 0;
-    Mn = moab::CartVect(0, 0, 0);
-    Sn = moab::CartVect(0, 0, 0);
+    num_collisions = 0;
+    mean = moab::CartVect(0, 0, 0);
+    variance = moab::CartVect(0, 0, 0);
 }
-//-----------------------------------------------------------------------------
+//---------------------------------------------------------------------------//
+// DESTRUCTOR
+//---------------------------------------------------------------------------//
 KDEMeshTally::~KDEMeshTally()
 {
     delete kd_tree;
     delete kernel;
     delete mbi;  
 }
-//-----------------------------------------------------------------------------
+//---------------------------------------------------------------------------//
+// DERIVED PUBLIC INTERFACE from MeshTally.hpp
+//---------------------------------------------------------------------------//
 void KDEMeshTally::compute_score(const TallyEvent& event, int ebin)
 {
     // initialize common weighting factor for this tally event
@@ -131,18 +110,18 @@ void KDEMeshTally::compute_score(const TallyEvent& event, int ebin)
     std::vector<moab::CartVect> subtrack_points;
     bool event_is_set = false;
 
-    if (kde_tally == INTEGRAL_TRACK || kde_tally == SUB_TRACK)
+    if (estimator == INTEGRAL_TRACK || estimator == SUB_TRACK)
     {
         event_is_set = event.get_track_data(track);
 
-        if (kde_tally == SUB_TRACK && event_is_set == true)
+        if (estimator == SUB_TRACK && event_is_set == true)
         {
             // multiply weight by track length and set up sub-track points
             weight *= track.track_length;
-            subtrack_points = choose_points(track, num_subtracks);
+            subtrack_points = choose_points(num_subtracks, track);
         }
     }
-    else // kde_tally == COLLISION
+    else // estimator == COLLISION
     {
         event_is_set = event.get_collision_data(collision);
 
@@ -185,15 +164,15 @@ void KDEMeshTally::compute_score(const TallyEvent& event, int ebin)
         // compute the final contribution to the tally for this point
         double score = weight;
 
-        if (kde_tally == INTEGRAL_TRACK)
+        if (estimator == INTEGRAL_TRACK)
         {
             score *= integral_track_score(track, moab::CartVect(coords));
         }
-        else if (kde_tally == SUB_TRACK)
+        else if (estimator == SUB_TRACK)
         {
             score *= subtrack_score(subtrack_points, moab::CartVect(coords));
         }
-        else // kde_tally == COLLISION
+        else // estimator == COLLISION
         {
             score *= collision_score(collision, moab::CartVect(coords));
         }
@@ -202,115 +181,132 @@ void KDEMeshTally::compute_score(const TallyEvent& event, int ebin)
         add_score_to_tally(point, score, ebin);
     }
 }
-//-----------------------------------------------------------------------------
+//---------------------------------------------------------------------------//
 void KDEMeshTally::end_history()
 {
-  
-  std::set<moab::EntityHandle>::iterator i;
- 
-  // add results from current history to the tally for each calculation point
-  for ( i = visited_this_history.begin() ; i != visited_this_history.end() ; ++i ) {
-    
-    for( unsigned int j = 0; j < num_energy_bins; ++j ){
-      double& history = get_data( temp_tally_data, *i, j );
-      double& tally =   get_data( tally_data, *i, j );
-      double& error =   get_data( error_data, *i, j );
+    std::set<moab::EntityHandle>::iterator i;
+
+    // add sum of scores for this history to mesh tally for each tally point
+    for (i = visited_this_history.begin(); i != visited_this_history.end(); ++i)
+    {
+        for (unsigned int j = 0; j < num_energy_bins; ++j)
+        {
+            double& history_score = get_data(temp_tally_data, *i, j);
+            double& tally = get_data(tally_data, *i, j);
+            double& error = get_data(error_data, *i, j);
+
+            tally += history_score;
+            error += history_score * history_score;
       
-      tally += history;
-      error += ( history * history );
-      
-      // reset temp_tally for the next particle history
-      history = 0;
-      
+            // reset temp_tally_data array for the next particle history
+            history_score = 0;
+        }
     }
-  }
-  visited_this_history.clear();
 
+    // reset set of tally points for next particle history
+    visited_this_history.clear();
 }
-//-----------------------------------------------------------------------------
-void KDEMeshTally::print( double sp_norm, double fmesh_fact )
+//---------------------------------------------------------------------------//
+void KDEMeshTally::print(double num_particles, double multiplier)
 {
+    // print the optimal bandwidth if it was computed
+    if (estimator == COLLISION)
+    {
+        std::cout << std::endl << "optimal bandwidth for " << num_collisions
+                  << " collisions is: " << get_optimal_bandwidth() << std::endl;
+    }
 
-  // tags tally/error results to the nodes and writes mesh to output file
-  write_results( sp_norm, fmesh_fact );
+    // tag tally and relative error results to the mesh for each tally point
+    moab::ErrorCode rval = moab::MB_SUCCESS;
+    moab::Range::iterator i;
 
+    for (i = tally_points.begin(); i != tally_points.end(); ++i)
+    {
+        moab::EntityHandle point = *i;
+
+        for (unsigned int j = 0; j < num_energy_bins; ++ j)
+        {
+            double tally = get_data(tally_data, point, j);
+            double error = get_data(error_data, point, j);
+
+            // compute relative error for the tally result
+            double rel_error = 0.0;
+
+            if (error != 0.0)
+            {
+                rel_error = sqrt(error / (tally * tally) - 1.0 / num_particles);
+            }
+
+            // normalize mesh tally result by the number of source particles
+            tally /= num_particles;
+
+            // apply multiplier to the total tally result
+            tally *= multiplier;
+
+            // set tally and error tag values for this entity
+            rval = mbi->tag_set_data(tally_tags[j], &point, 1, &tally);
+
+            assert(moab::MB_SUCCESS == rval);
+      
+            rval = mbi->tag_set_data(error_tags[j], &point, 1, &rel_error);
+
+            assert(moab::MB_SUCCESS == rval);
+        }
+    }
+
+    // create a global tag to store the bandwidth value
+    moab::Tag bandwidth_tag;
+    rval = mbi->tag_get_handle("BANDWIDTH_TAG", 3,
+                               moab::MB_TYPE_DOUBLE,
+                               bandwidth_tag,
+                               moab::MB_TAG_MESH|moab::MB_TAG_CREAT);
+
+    assert(moab::MB_SUCCESS == rval);
+
+    // add bandwidth tag to the root set
+    moab::EntityHandle bandwidth_set = mbi->get_root_set();
+    rval = mbi->tag_set_data(bandwidth_tag, &bandwidth_set, 1, &bandwidth);
+
+    assert(moab::MB_SUCCESS == rval);
+
+    // define list of tags to include and write mesh to output file
+    std::vector<moab::Tag> output_tags = tally_tags;
+    output_tags.insert(output_tags.end(), error_tags.begin(), error_tags.end());
+    output_tags.push_back(bandwidth_tag);
+
+    rval = mbi->write_file(output_filename.c_str(),
+                           NULL, NULL,
+                           &tally_mesh_set, 1,
+                           &(output_tags[0]),
+                           output_tags.size());
+
+    assert(moab::MB_SUCCESS == rval);
 }
-//-----------------------------------------------------------------------------
-void KDEMeshTally::write_results( double sp_norm, double fmesh_fact )
+//---------------------------------------------------------------------------//
+// PRIVATE METHODS
+//---------------------------------------------------------------------------//
+void KDEMeshTally::set_bandwidth_value(const std::string& key,
+                                       const std::string& value,
+                                       unsigned int i)
 {
+    // extract the bandwidth value for the given key
+    char* end;
+    double bandwidth_value = strtod(value.c_str(), &end);
 
-  double tally = 0;
-  double error = 0, rel_err = 0;
-  
-  moab::ErrorCode rval = moab::MB_SUCCESS;
-
-  // print the optimal bandwidth if it was computed
-  if ( kde_tally == COLLISION ) {
-  
-    std::cout << std::endl << "optimal bandwidth for " << numCollisions;
-    std::cout  << " collisions is: " << get_optimal_bandwidth() << std::endl;
-
-  }
-
-  // tag tally and relative error results to the mesh for each entity
-  moab::Range::iterator i;
-  
-  for ( i = tally_points.begin() ; i != tally_points.end() ; ++i ) {
-
-    moab::EntityHandle point = *i;
-
-    for ( unsigned int j = 0; j < num_energy_bins; ++ j){
-
-      tally = get_data( tally_data, point, j);
-      error = get_data( error_data, point, j );
-      
-      // compute relative error for the tally
-      // Use 0 as the rel_err value if nothing has been computed for this tally point;
-      // this reflects MCNP's approach to avoiding a divide-by-zero situation.
-      rel_err = 0; 
-      if( error != 0 ){
-        rel_err = sqrt( error / ( tally * tally ) - 1.0 / sp_norm );
-      }
-      
-      // normalizing mesh tally results by the number of source particles
-      tally /= sp_norm;
-      
-      // applying the fmesh multiplication FACTOR to the mesh tally results
-      tally *= fmesh_fact;
-      
-      // set tally and error tag values for this entity
-      rval = mbi->tag_set_data( tally_tags[j], &point, 1, &tally );
-      assert( moab::MB_SUCCESS == rval );
-      
-      rval = mbi->tag_set_data( error_tags[j], &point, 1, &rel_err );
-      assert( moab::MB_SUCCESS == rval ); 
-      
-    } 
-    
-  }
-
-  // create a global tag to store the bandwidth value
-  moab::Tag bandwidth_tag;
-  rval = mbi->tag_get_handle( "BANDWIDTH_TAG", 3, moab::MB_TYPE_DOUBLE, bandwidth_tag,
-                             moab::MB_TAG_MESH|moab::MB_TAG_CREAT );
-  assert( moab::MB_SUCCESS == rval );
-
-  // add bandwidth tag to the root set
-  moab::EntityHandle bandwidth_set = mbi->get_root_set();
-  rval = mbi->tag_set_data( bandwidth_tag, &bandwidth_set, 1, &bandwidth );
-  assert( moab::MB_SUCCESS == rval );
-
-  // define list of tags to include and write mesh to output file
-  std::vector<moab::Tag> output_tags = tally_tags;
-  output_tags.insert( output_tags.end(), error_tags.begin(), error_tags.end() );
-  output_tags.push_back( bandwidth_tag );  
-
-  rval = mbi->write_file( output_filename.c_str(),
-                         NULL, NULL, &tally_mesh_set, 1, &(output_tags[0]), output_tags.size() );
-  assert( moab::MB_SUCCESS == rval );
-  
+    // set the bandwidth value for the given index
+    if (value.c_str() != end && bandwidth_value > 0.0)
+    {
+        bandwidth[i] = bandwidth_value;
+    }
+    else
+    {
+        std::cerr << "Warning: invalid bandwidth value for " << key
+                  << " = " << value << std::endl;
+        std::cerr << "    using default value " << key << " = "
+                  << bandwidth[i] << std::endl;
+    }
 }
-//-----------------------------------------------------------------------------
+//---------------------------------------------------------------------------//
 void KDEMeshTally::parse_tally_options()
 {
     const MeshTallyInput::TallyOptions& options = input_data.options;  
@@ -322,14 +318,14 @@ void KDEMeshTally::parse_tally_options()
         std::string value = it->second;
 
         // process tally option according to key
-        if      (key == "hx") bandwidth[0] = parse_bandwidth_value(key, value);
-        else if (key == "hy") bandwidth[1] = parse_bandwidth_value(key, value);
-        else if (key == "hz") bandwidth[2] = parse_bandwidth_value(key, value);
+        if      (key == "hx") set_bandwidth_value(key, value, 0);
+        else if (key == "hy") set_bandwidth_value(key, value, 1);
+        else if (key == "hz") set_bandwidth_value(key, value, 2);
         else if (key == "kernel")
         {
             kernel = KDEKernel::createKernel(value);
         }
-        else if (key == "seed" && kde_tally == SUB_TRACK)
+        else if (key == "seed" && estimator == SUB_TRACK)
         {
             // override random number seed if requested by user
             unsigned long int seed = strtol(value.c_str(), NULL, 10);
@@ -338,7 +334,7 @@ void KDEMeshTally::parse_tally_options()
             std::cout << "    setting random seed to " << seed
                       << " for choosing sub-track points" << std::endl;
         }
-        else if (key == "subtracks" && kde_tally == SUB_TRACK)
+        else if (key == "subtracks" && estimator == SUB_TRACK)
         {
             char* end;
             int subtracks = strtol(value.c_str(), &end, 10);
@@ -361,7 +357,7 @@ void KDEMeshTally::parse_tally_options()
         }
     }
 }
-//-----------------------------------------------------------------------------
+//---------------------------------------------------------------------------//
 moab::ErrorCode KDEMeshTally::initialize_mesh_data()
 {
     // load the MOAB mesh data from the input file for this KDE mesh tally
@@ -399,77 +395,76 @@ moab::ErrorCode KDEMeshTally::initialize_mesh_data()
 
     return moab::MB_SUCCESS; 
 }
-//-----------------------------------------------------------------------------
+//---------------------------------------------------------------------------//
 void KDEMeshTally::update_variance(const moab::CartVect& collision_point)
 {
- 
-  if ( numCollisions != LLONG_MAX ) {
+    if (num_collisions != LLONG_MAX)
+    {
+        ++num_collisions;
 
-    ++numCollisions;
-    
-    // obtain previous value for the mean
-    moab::CartVect Mn_prev = Mn;
-  
-    // compute new values for the mean and variance
-    if ( numCollisions == 1 )
-      Mn = collision_point;
-    else {
+        // compute new values for the mean and variance
+        if (num_collisions == 1)
+        {
+            mean = collision_point;
+        }
+        else
+        {
+            for (int i = 0; i < 3; ++i)
+            {
+                // get difference between point and previous mean
+                double value = collision_point[i] - mean[i];
 
-      Mn += (collision_point - Mn_prev) / numCollisions;
-    
-      for ( int i = 0 ; i < 3 ; ++i )
-        Sn[i] += (collision_point[i] - Mn_prev[i]) * (collision_point[i] - Mn[i]);
-    
+                // update mean and variance variables
+                mean[i] += value / num_collisions;
+                variance[i] += value * (collision_point[i] - mean[i]);
+            }
+        }
+    }
+    else if (!max_collisions)
+    {
+        std::cerr << "Warning: number of collisions exceeds maximum\n"
+                  << "    optimal bandwidth will be based on "
+                  << num_collisions << " collisions" << std::endl;
+
+        max_collisions = true;
+    }
+}
+//---------------------------------------------------------------------------//
+moab::CartVect KDEMeshTally::get_optimal_bandwidth() const
+{
+    double stdev = 0.0;
+    moab::CartVect optimal_bandwidth;
+
+    for (int i = 0; i < 3; ++i)
+    {
+        stdev = sqrt(variance[i] / (num_collisions - 1));
+        optimal_bandwidth[i] = 0.968625 * stdev * pow(num_collisions, -1.0/7.0);
     }
 
-  }
-  else if ( !max_collisions ) {
-  
-    std::cerr << "Warning: number of collisions exceeds maximum\n"
-              << "    optimal bandwidth will be based on " << numCollisions
-              << " collisions.\n";
-
-    max_collisions = true;
-
-  }
-
+    return optimal_bandwidth;
 }
-//-----------------------------------------------------------------------------
-moab::CartVect KDEMeshTally::get_optimal_bandwidth()
+//---------------------------------------------------------------------------//
+void KDEMeshTally::add_score_to_tally(moab::EntityHandle tally_point,
+                                      double score,
+                                      int ebin)
 {
-  
-  double stdev = 0;
-  moab::CartVect optimal_bandwidth;
-  
-  for ( int i = 0 ; i < 3 ; ++i ) {
+    // update tally for this history with new score
+    get_data(temp_tally_data, tally_point, ebin) += score;
 
-    stdev = sqrt( Sn[i] / ( numCollisions - 1 ) );
-    optimal_bandwidth[i] = 0.968625 * stdev * pow( numCollisions, -1.0/7.0 );
+    // also update total energy bin tally for this history if one exists
+    if (input_data.total_energy_bin)
+    {
+        get_data(temp_tally_data, tally_point, (num_energy_bins-1)) += score;
+    }
 
-  }
-
-  return optimal_bandwidth;
-
+    visited_this_history.insert(tally_point);
 }
-//-----------------------------------------------------------------------------
-void KDEMeshTally::add_score_to_tally( moab::EntityHandle mesh_point,
-                                       double score,
-                                       int ebin )
-{
-
-  get_data( temp_tally_data, mesh_point, ebin ) += score;
-
-  // tally the total energy bin if requested
-  if ( input_data.total_energy_bin )
-    get_data( temp_tally_data, mesh_point, (num_energy_bins-1) ) += score;
-
-  visited_this_history.insert( mesh_point );
-
-}
-//-----------------------------------------------------------------------------
+//---------------------------------------------------------------------------//
+// KDE ESTIMATOR METHODS
+//---------------------------------------------------------------------------//
 // NOTE: integral_track_estimator uses the 4-point gaussian quadrature method
 double KDEMeshTally::integral_track_score(const TrackData& data,
-                                          const moab::CartVect& X)
+                                          const moab::CartVect& X) const
 {
     // determine the limits of integration
     std::pair<double, double> limits;
@@ -514,10 +509,10 @@ double KDEMeshTally::integral_track_score(const TrackData& data,
         return 0;
     }
 }
-//-----------------------------------------------------------------------------
+//---------------------------------------------------------------------------//
 bool KDEMeshTally::set_integral_limits(const TrackData& data,
                                        const moab::CartVect& X,
-                                       std::pair<double, double>& limits)
+                                       std::pair<double, double>& limits) const
 {
     bool valid_limits = false;
 
@@ -569,9 +564,9 @@ bool KDEMeshTally::set_integral_limits(const TrackData& data,
 
     return valid_limits;
 }
-//-----------------------------------------------------------------------------
+//---------------------------------------------------------------------------//
 double KDEMeshTally::subtrack_score(const std::vector<moab::CartVect>& points,
-                                    const moab::CartVect& X)
+                                    const moab::CartVect& X) const
 {
     // iterate through the sub-track points
     std::vector<moab::CartVect>::const_iterator i;
@@ -597,9 +592,9 @@ double KDEMeshTally::subtrack_score(const std::vector<moab::CartVect>& points,
 
     return score;
 }
-//-----------------------------------------------------------------------------
-std::vector<moab::CartVect> KDEMeshTally::choose_points(const TrackData& data,
-                                                        int p)
+//---------------------------------------------------------------------------//
+std_vector_CartVect KDEMeshTally::choose_points(unsigned int p,
+                                                const TrackData& data) const
 {
     // make sure the number of sub-tracks is valid
     assert(p > 0);
@@ -613,7 +608,7 @@ std::vector<moab::CartVect> KDEMeshTally::choose_points(const TrackData& data,
     // choose a random position along each sub-track
     std::vector<moab::CartVect> random_points;
 
-    for (int i = 0; i < p; ++i)
+    for (unsigned int i = 0; i < p; ++i)
     {
         double path_length = rand() * sub_track_length / RAND_MAX;
         
@@ -626,9 +621,9 @@ std::vector<moab::CartVect> KDEMeshTally::choose_points(const TrackData& data,
  
     return random_points;
 }
-//-----------------------------------------------------------------------------
+//---------------------------------------------------------------------------//
 double KDEMeshTally::collision_score(const CollisionData& data,
-                                     const moab::CartVect& X)
+                                     const moab::CartVect& X) const
 {
     // compute the value of the kernel function K(X)
     double score = 1;
@@ -641,4 +636,6 @@ double KDEMeshTally::collision_score(const CollisionData& data,
 
     return score;
 }
-//-----------------------------------------------------------------------------
+//---------------------------------------------------------------------------//
+
+// end of MCNP5/dagmc/KDEMeshTally.cpp

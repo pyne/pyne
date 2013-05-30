@@ -10,7 +10,7 @@
 // CONSTRUCTOR
 //---------------------------------------------------------------------------//
 PolynomialKernel::PolynomialKernel(unsigned int s, unsigned int r)
-    : s(s), r(r), multiplier(set_multiplier())
+    : s(s), r(r), multiplier(compute_multiplier())
 {
     assert(r > 0);
 
@@ -43,10 +43,7 @@ PolynomialKernel::~PolynomialKernel()
 double PolynomialKernel::evaluate(double u) const
 {
     // test if outside kernel function domain [-1.0, 1.0]
-    if (u < -1.0 || u > 1.0)
-    {
-        return 0.0;
-    }
+    if (u < -1.0 || u > 1.0) return 0.0;
 
     // evaluate a 2nd-order kernel function
     double value = multiplier;
@@ -144,11 +141,11 @@ double PolynomialKernel::integrate_moment(double a,
     return value;
 }
 //---------------------------------------------------------------------------//
-// PRIVATE FUNCTIONS
+// PRIVATE METHODS
 //---------------------------------------------------------------------------//
-double PolynomialKernel::set_multiplier()
+double PolynomialKernel::compute_multiplier()
 {
-    // set multiplier for 2nd-order kernel function
+    // compute common multiplier term for 2nd-order polynomial kernel
     double value = pochhammer(0.5, s + 1) / factorial(s);
 
     // add extra factor to multiplier for kernels of higher order
@@ -162,7 +159,7 @@ double PolynomialKernel::set_multiplier()
     return value;
 }
 //---------------------------------------------------------------------------//
-double PolynomialKernel::pochhammer(double x, unsigned int n)
+double PolynomialKernel::pochhammer(double x, unsigned int n) const
 {
     // set default result for (x)_0 = 1
     double value = 1.0;
@@ -182,7 +179,7 @@ double PolynomialKernel::pochhammer(double x, unsigned int n)
     return value;
 }
 //---------------------------------------------------------------------------//
-long double PolynomialKernel::factorial(unsigned int n)
+long double PolynomialKernel::factorial(unsigned int n) const
 {
     // set default result for 0! = 1! = 1
     long double value = 1.0;
