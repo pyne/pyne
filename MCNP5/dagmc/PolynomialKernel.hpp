@@ -11,9 +11,10 @@
  * \class PolynomialKernel
  * \brief Defines a polynomial kernel function
  * 
- * PolynomialKernel is a Derived class that can create any polynomial kernel
- * function that is defined by a smoothness factor s and kernel order 2r.  The
- * domain of these kernel functions is limited to u = [-1, 1].
+ * PolynomialKernel is a Derived class that implements the KDEKernel interface
+ * to create any polynomial kernel function that is defined by a smoothness
+ * factor s and kernel order 2r.  The domain of these kernel functions is
+ * limited to u = [-1, 1].
  *
  * Common polynomial kernels include uniform (s = 0), epanechnikov (s = 1),
  * biweight (s = 2), and triweight (s = 3).  All of these cases and more can be

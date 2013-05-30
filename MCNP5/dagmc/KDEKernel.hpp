@@ -160,7 +160,7 @@ class KDEKernel
         /**
          * \brief Evaluates the ith moment function
          * \param x the value at which this moment function will be evaluated
-         * \return x^i * K(x) where K(x) is the kernel function
+         * \return x^i * K(x) where K is the kernel function
          */
         double evaluate(double x) const;
 
