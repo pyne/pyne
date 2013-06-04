@@ -844,9 +844,20 @@ def test_int_linlog():
     assert_allclose(exp, obs, rtol=1e-12)
 
 def test_int_loglin():
-    pass
+    from math import e
+    exp_Eint = np.array([1., 2., 2., 3.])
+    exp_xs = np.array([1, e, e**2, e])
+    obs = library.integrate_tab_range(4, exp_Eint, exp_xs)
+    exp = e**2-1
+    assert_allclose(exp, obs, rtol=1e-12)
 
 def test_int_loglog():
-    pass
+    from math import e
+    exp_Eint = np.array([1., 2., 2., 3.])
+    exp_xs = np.array([1/e, 4/e, (e**2)/4, (e**2)/9])
+    obs = library.integrate_tab_range(5, exp_Eint, exp_xs)
+    exp = 7/(3*e) - (e**2)/6
+    assert_allclose(exp, obs, rtol=1e-12)
+
 if __name__ == "__main__":
     nose.runmodule()

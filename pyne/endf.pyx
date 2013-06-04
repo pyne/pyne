@@ -343,9 +343,9 @@ class Library(rx.RxLib):
         x2 = Eint[1:]
         y1 = xs[:-1]
         y2 = xs[1:]
-        A = np.log(y1/y2)/(x1-x2)
+        A = (np.log(y1)-np.log(y2))/(x1-x2)
         B = np.log(y1) - A*x1
-        return np.nansum(e**B / (A*dEint) * (e**(A*x2) - e**(A*x1)))
+        return np.nansum((y2-y1)/A)
 
     def _loglog(self, Eint, xs):
         dEint = float(Eint[-1]-Eint[0])
@@ -354,7 +354,7 @@ class Library(rx.RxLib):
         y1 = xs[:-1]
         y2 = xs[1:]
         A = - np.log(y2/y1)/np.log(x1/x2)
-        B = - (np.log(y1)*np.log(x2) - np.log(y2)*np.log(y1))/np.log(x1/x2)
+        B = - (np.log(y1)*np.log(x2) - np.log(y2)*np.log(x1))/np.log(x1/x2)
         return np.nansum(e**B / (A+1) * (x2**(A+1) - x1**(A+1))/ dEint)
 
     def _chargedparticles(self, Eint, xs, flags=None):

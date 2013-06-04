@@ -224,6 +224,12 @@ Now we integrate :math:`e^{Ax+B}`. We all know this one!
 .. math::
    \int_{x_1}^{x_2} e^{Ax+B} \mathrm{d}x = \frac{1}{A}e^{Ax+B}|_{x_1}^{x_2} = \frac{e^B}{A}(e^{Ax_2}-e^{Ax_1})
 
+Factor stuff out and you get:
+
+.. math::
+   \int_{x_1}^{x_2} e^{Ax+B} \mathrm{d}x = \frac{1}{A}(y_2-y_1)
+
+
 When ln(y) is linear in ln(x) we have:
 
 .. math::
