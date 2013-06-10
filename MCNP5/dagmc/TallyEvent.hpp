@@ -3,9 +3,9 @@
 #ifndef DAGMC_TALLY_EVENT_HPP
 #define DAGMC_TALLY_EVENT_HPP
 
-// ToDo:  Clean up;  This file is being modified for Issue #90
-#include <map>
-#include "Tally.hpp"
+#include <utility>
+// for Observer list
+#include <vector>
 
 #include "moab/CartVect.hpp"
 
@@ -58,6 +58,16 @@ class TallyEvent
      *     3) TRACK indicates a track-based event has been set
      */
     enum EventType {NONE = 1, COLLISION = 2, TRACK = 3};
+    
+    // Keep a record of the Observers
+    // 3.  Coupled only to the base Observer class
+    vector <class Observer * > views;    
+
+// Have to have a way to add Observers
+        void attach(Observer *obs)
+        {
+                views.push_back(obs);   
+        }
 
     /**
      * \brief Constructor
