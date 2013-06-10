@@ -4,6 +4,8 @@
 #define DAGMC_TALLY_EVENT_HPP
 
 #include <utility>
+// for Observer list
+#include <vector>
 
 #include "moab/CartVect.hpp"
 
@@ -53,6 +55,9 @@ struct CollisionData
  * In addition to setting the required variables for each type of tally event,
  * there is also an optional method available to set the tally multiplier.
  * If the tally multiplier is not set, then it will default to 1.
+ * 
+ * This class is a Subject (Observable) class that keeps a list of Observers
+ * to be Notified.  The Observers are added via the method attach(..)
  */
 //===========================================================================//
 class TallyEvent
@@ -66,6 +71,16 @@ class TallyEvent
      *     3) TRACK indicates a track-based event has been set
      */
     enum EventType {NONE = 1, COLLISION = 2, TRACK = 3};
+    
+    // Keep a record of the Observers
+    // 3.  Coupled only to the base Observer class
+    vector <class Observer * > views;    
+
+// Have to have a way to add Observers
+        void attach(Observer *obs)
+        {
+                views.push_back(obs);   
+        }
 
     /**
      * \brief Constructor
@@ -147,6 +162,32 @@ class TallyEvent
     EventType event_type;
 };
 
-#endif // DAGMC_TALLY_EVENT_HPP
+// 2.  "dependent" functionality
+class Observer
+{
+        TallyEvent *event_model;
+        int event_index;
+    public:
+        Observer(TallyEvent *mod, int index)
+        {
+		event_model = mod;
+		event_index = index;
+                // 4.  Observers register themselves with the Subject
+//                event_model->attach(this);
+        }
+        virtual void update() = 0;
+    protected:
+        // Give the classes that inherit Observer access to the Subject (Observable)
+        TallyEvent *getTallyEvent()
+        {
+                return event_model;
+        }
+        int getIndex()
+        {
+                return event_index;
+        }
+};
+
+#endif // DAGMC_TALLYEVENT_H
 
 // end of MCNP5/dagmc/TallyEvent.hpp
