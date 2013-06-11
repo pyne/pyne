@@ -8,7 +8,6 @@ IF (NOT DEFINED FLUPRO)
 	set (FLUPRO "$ENV{FLUPRO}")
 ENDIF (NOT DEFINED FLUPRO)
 
-<<<<<<< HEAD
 IF (NOT DEFINED HOME OR NOT DEFINED FLUPRO)
 	message ("Including local.cmake")
 	INCLUDE(local.cmake)
