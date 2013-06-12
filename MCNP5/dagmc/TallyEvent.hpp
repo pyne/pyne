@@ -3,43 +3,30 @@
 #ifndef DAGMC_TALLY_EVENT_HPP
 #define DAGMC_TALLY_EVENT_HPP
 
-#include <utility>
-// for Observer list
-#include <vector>
+// ToDo:  Clean up;  This file is being modified for Issue #90
+#include <map>
+#include "Tally.hpp"
 
 #include "moab/CartVect.hpp"
 
-//===========================================================================//
-/**
- * \struct TrackData
- * \brief Stores physics data needed to construct a track-based tally event
- */
-//===========================================================================//
-struct TrackData
+struct ParticleState
 {
     /// Total length of track segment
     double track_length;
 
-    /// Starting location of track segment (xo, yo, zo)
-    moab::CartVect start_point;
+    /// Position of particle (x, y, z)
+    moab::CartVect position;
 
-    /// Direction in which particle is traveling (uo, vo, wo)
+    /// Direction in which particle is traveling (u, v, w)
     moab::CartVect direction;
-};
 
-//===========================================================================//
-/**
- * \struct CollisionData
- * \brief Stores physics data needed to construct a collision tally event
- */
-//===========================================================================//
-struct CollisionData
-{
-    /// Total macroscopic cross section for cell in which collision occurred
+    /// Collision: Total macroscopic cross section for cell in 
+    /// which collision occurred
     double total_cross_section;
 
-    /// Location of the collision (x, y, z)
-    moab::CartVect collision_point;
+    /// Energy and weight of particle when event occurred
+    double energy;
+    double weight;
 };
 
 //===========================================================================//
@@ -74,33 +61,33 @@ class TallyEvent
     
     // Keep a record of the Observers
     // 3.  Coupled only to the base Observer class
-    vector <class Observer * > views;    
-
-// Have to have a way to add Observers
-        void attach(Observer *obs)
-        {
-                views.push_back(obs);   
-        }
-
-    /**
-     * \brief Constructor
-     * \param energy, weight properties of particle triggering event
-     */
-    TallyEvent(double energy, double weight);
+    std::map <int, Tally *> observers; 
 
     // >>> PUBLIC INTERFACE
 
-    /**
-     * \brief Defines this tally event as a track-based event
-     * \param data the physics data needed to set a track-based event
-     */
-    void set_track_event(const TrackData& data);
+    // Add a new Tally
+    void addTally(int map_index, Tally *obs)
+    {
+        observers.insert(map_index, obs);   
+    }
 
-    /**
-     * \brief Defines this tally event as a collision event
-     * \brief data the physics data needed to set a collision event
-     */
-    void set_collision_event(const CollisionData& data);
+    // Remove a Tally
+    void removeTally(int map_index, Tally *obs)
+    {
+        std::map<int, Tally *>::iterator it;	
+ 	it = observers.find(map_index);
+	observers.erase(it);
+    }
+
+    void update_tallies()
+    {
+       std::map<int, Tally*>::iterator map_it;
+       for (map_it = observers.begin(); map_it != observers.end(); ++map_it)
+       {
+           Tally *tally = map_it->second;
+	   tally->update();
+       }
+    }
 
     /**
      * \brief Sets tally multiplier for the event
@@ -109,20 +96,6 @@ class TallyEvent
     void set_tally_multiplier(double value);
 
     // >>> TALLY EVENT DATA ACCESS METHODS
-
-    /**
-     * \brief Gets particle energy and weight for this tally event
-     * \return the particle data in form of pair<energy, weight>
-     */
-    std::pair<double, double> get_particle_data() const;
-
-    /**
-     * \brief get_track_data(), get_collision_data()
-     * \param data the struct to which the tally event data will be copied
-     * \return true if data was copied successfully, false otherwise
-     */
-    bool get_track_data(TrackData& data) const;
-    bool get_collision_data(CollisionData& data) const;
 
     /**
      * \brief get_tally_multiplier()
@@ -144,49 +117,16 @@ class TallyEvent
 
   private:
 
-    /// Physical quantity needed to compute the score for this event
-    double event_value;
-
-    /// Energy and weight of particle when event occurred
-    double particle_energy;
-    double particle_weight;
-
     /// Energy-dependent multiplier for this event
     double tally_multiplier;
 
-    /// Position and direction of particle when event occurred
-    moab::CartVect position;
-    moab::CartVect direction;
-
     /// Type of tally event this event represents
     EventType event_type;
+
+    // Store particle state for the event
+    ParticleState particle;
 };
 
-// 2.  "dependent" functionality
-class Observer
-{
-        TallyEvent *event_model;
-        int event_index;
-    public:
-        Observer(TallyEvent *mod, int index)
-        {
-		event_model = mod;
-		event_index = index;
-                // 4.  Observers register themselves with the Subject
-//                event_model->attach(this);
-        }
-        virtual void update() = 0;
-    protected:
-        // Give the classes that inherit Observer access to the Subject (Observable)
-        TallyEvent *getTallyEvent()
-        {
-                return event_model;
-        }
-        int getIndex()
-        {
-                return event_index;
-        }
-};
 
 #endif // DAGMC_TALLYEVENT_H
 
