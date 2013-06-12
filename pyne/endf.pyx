@@ -18,8 +18,11 @@ import re
 import os
 from libc.stdlib cimport malloc, free
 
-import numpy as np
 cimport numpy as np
+import numpy as np
+
+np.import_array()
+
 import matplotlib.pyplot as plt
 from math import e
 
@@ -371,7 +374,7 @@ class Library(rx.RxLib):
         B = np.log(y2*x2/(x1*y1)) / (1/(x1-T)**0.5 - 1/(x2-T)**0.5)
         A = e**(B/(x1-T)**0.5)*y1*x1
         # FIXME
-        raise NotImplementedError('I haven\'t done the math for this one yet!')
+        raise NotImplementedError("see docs for more details.")
 
     def integrate_tab_range(self, intscheme, Eint, xs):
         """Integrates across one tabulation range.
