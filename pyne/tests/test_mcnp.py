@@ -233,3 +233,83 @@ def test_read_mcnp():
                                 read_materials[1]._mats.keys()[1].atoms_per_mol)
     assert_equal(expected_multimaterial._mats.keys()[1].attrs,
                                       read_materials[1]._mats.keys()[1].attrs)
+
+
+# test PtracReader class
+class TestPtrac(unittest.TestCase):
+    def setUp(self):
+        pass
+
+    def tearDown(self):
+        pass
+
+    def test_read_headers(self):
+        p = mcnp.PtracReader("mcnp_ptrac_i4_little.ptrac")
+        assert_equal(p.problem_title,
+                "Generate a well-defined PTRAC file for PyNE test cases")
+        del p
+
+        # 8-byte ints, little endian
+        p = mcnp.PtracReader("mcnp_ptrac_i8_little.ptrac")
+        assert_equal(p.problem_title,
+                "Generate a well-defined PTRAC file for PyNE test cases")
+        del p
+
+    def test_determine_format(self):
+        # 4-byte ints, little endian
+        p = mcnp.PtracReader("mcnp_ptrac_i4_little.ptrac")
+        assert_equal(p.endianness, "<")
+        del p
+
+        # 8-byte ints, little endian
+        p = mcnp.PtracReader("mcnp_ptrac_i8_little.ptrac")
+        assert_equal(p.endianness, "<")
+        del p
+
+    def test_read_events(self):
+        p = mcnp.PtracReader("mcnp_ptrac_i4_little.ptrac")
+
+        evt = {}
+
+        p.read_nps_line()
+        assert_equal(p.next_event, 1000)
+
+        p.read_event_line(evt)
+        assert_equal(evt["xxx"], 0.0)
+        assert_equal(evt["yyy"], 0.0)
+        assert_equal(evt["zzz"], 0.0)
+        del p
+        del evt
+
+    def test_write_to_hdf5(self):
+        test_files = ["mcnp_ptrac_i4_little.ptrac",
+                "mcnp_ptrac_i8_little.ptrac"]
+
+        for test_file in test_files:
+            p = mcnp.PtracReader(test_file)
+            h5file = tables.openFile("mcnp_ptrac_hdf5_file.h5", "w")
+            tab = h5file.createTable("/", "t", mcnp.PtracEvent, "test")
+            p.write_to_hdf5_table(tab)
+            tab.flush()
+            h5file.close()
+            del h5file
+            del tab
+            del p
+
+            # now check if the data was correctly written.
+            # there should be 5 events of type 1000 (src)
+            h5file = tables.openFile("mcnp_ptrac_hdf5_file.h5")
+            tab = h5file.getNode("/t")
+            selected = [1 for x in tab.iterrows() if x["event_type"] == 1000]
+            assert_equal(len(selected), 5)
+            h5file.close()
+            del tab
+            del h5file
+
+            # clean up
+            if os.path.exists("mcnp_ptrac_hdf5_file.h5"):
+                os.unlink("mcnp_ptrac_hdf5_file.h5")
+
+
+
+
