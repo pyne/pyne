@@ -3,9 +3,9 @@
 #ifndef DAGMC_TALLY_EVENT_HPP
 #define DAGMC_TALLY_EVENT_HPP
 
-#include <utility>
-// for Observer list
-#include <vector>
+// ToDo:  Clean up;  This file is being modified for Issue #90
+#include <map>
+#include "Tally.hpp"
 
 #include "moab/CartVect.hpp"
 
@@ -61,34 +61,33 @@ class TallyEvent
     
     // Keep a record of the Observers
     // 3.  Coupled only to the base Observer class
-    vector <class Observer * > views;    
-
-// Have to have a way to add Observers
-        void attach(Observer *obs)
-        {
-                views.push_back(obs);   
-        }
-
-    /**
-     * \brief Constructor
-     * Does not compile without this, due to event_type setting
-     * in implementation, maybe
-     */
-    TallyEvent();
-    
-    // Keep a record of the Observers
     std::map <int, Tally *> observers; 
 
     // >>> PUBLIC INTERFACE
 
     // Add a new Tally
-    void addTally(int, Tally *);
+    void addTally(int map_index, Tally *obs)
+    {
+        observers.insert(map_index, obs);   
+    }
 
     // Remove a Tally
-    void removeTally(int map_index, Tally *obs);
+    void removeTally(int map_index, Tally *obs)
+    {
+        std::map<int, Tally *>::iterator it;	
+ 	it = observers.find(map_index);
+	observers.erase(it);
+    }
 
-    // Call action on every tally
-    void update_tallies();
+    void update_tallies()
+    {
+       std::map<int, Tally*>::iterator map_it;
+       for (map_it = observers.begin(); map_it != observers.end(); ++map_it)
+       {
+           Tally *tally = map_it->second;
+	   tally->update();
+       }
+    }
 
     /**
      * \brief Sets tally multiplier for the event
@@ -116,16 +115,6 @@ class TallyEvent
      */
     TallyEvent::EventType get_event_type() const;
 
-    /**
-     * \brief fill the ParticleState
-     * \param position interpreted differently for TrackLength and Collision 
-     */
-    void set_event(const moab::CartVect& position, 
-                           const moab::CartVect& direction,
-                           double track_length, double total_cross_section, 
-                           double particle_energy, double particle_weight, 
-                           EventType type);
-
   private:
 
     /// Energy-dependent multiplier for this event
@@ -133,11 +122,6 @@ class TallyEvent
 
     /// Type of tally event this event represents
     EventType event_type;
-
-    // Store particle state for the event
-    ParticleState particle;
-};
-
 
 #endif // DAGMC_TALLYEVENT_H
 

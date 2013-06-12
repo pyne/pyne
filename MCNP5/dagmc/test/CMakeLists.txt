@@ -4,28 +4,20 @@ PROJECT(MeshTallyUnitTests)
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 
 FIND_PACKAGE(GTest REQUIRED)
-# Locally defined vars
-# set(HOME /filespace/people/z/zachman)
-IF (NOT DEFINED HOME) 
-	SET (HOME "$ENV{HOME}")
-	message("Home is ${HOME}")
-ENDIF (NOT DEFINED HOME)
-
 SET(MOAB_HOME ${HOME}/dagmc_bld/MOAB)
 
-# Where to look for includes
-INCLUDE_DIRECTORIES("${HOME}/dagmc_bld/MOAB/include")
+SET(MOAB_INCLUDE ${MOAB_HOME}/include)
+SET(MOAB_LIBS ${MOAB_HOME}/lib)
 
-ADD_LIBRARY(tally 
-	${DAGMC_MESHTALLY_SOURCE}/TallyEvent.cpp
-)
+# Where to look for includes
+INCLUDE_DIRECTORIES(${MOAB_INCLUDE})
 
 # make mesh tally source files into a library
 ADD_LIBRARY(meshtally SHARED
     ${DAGMC_MESHTALLY_SOURCE}/KDEKernel.cpp
     ${DAGMC_MESHTALLY_SOURCE}/PolynomialKernel.cpp
     ${DAGMC_MESHTALLY_SOURCE}/Quadrature.cpp
-
+    ${DAGMC_MESHTALLY_SOURCE}/TallyEvent.cpp
 )
 
 # set libraries
