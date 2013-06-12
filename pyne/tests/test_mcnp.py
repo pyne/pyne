@@ -6,6 +6,8 @@ import nose
 import nose.tools
 from nose.tools import assert_equal
 
+import tables
+
 from pyne import mcnp
 from pyne.mcnp import read_mcnp_inp
 from pyne.material import Material
