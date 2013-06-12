@@ -252,3 +252,19 @@ And finally we can plug A and B into the integral:
 
 .. math::
    \int_{x_1}^{x_2}e^Bx^A\mathrm{d}x = e^B (\frac{x^{A+1}}{A+1})|_{x_1}^{x_2}
+
+The ENDF Manual also mentions a sixth one-dimensional interpolation
+law, described in detail on pp. 23-24. From this, I quote:
+
+.. math::
+   \sigma = \frac{A}{E} e^{-\frac{B}{\sqrt{E-T}}}
+
+Where T = 0 for exothermic reactions with Q greater than 0 and equal
+to kinematic threshold energy for endothermic reactions with Q less
+than or equal to 0.
+
+The ENDF Manual also states that this is "for charged-particle cross
+sections and is based on the limiting forms of the Coulomb
+penetrabilities for exothermic reactions." Because of this, and the
+difficulty of analytically solving this integral, we have opted to
+not implement this (yet).

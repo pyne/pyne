@@ -335,7 +335,7 @@ class Library(rx.RxLib):
         y2 = xs[1:]
         A = (y1-y2)/(np.log(x1/x2))
         B = y1-A*np.log(x1)
-        return np.nansum(A*(x2*np.log(x2) - x1*np.log(x1)-x2+x1) + B*(x2-x1))
+        return np.nansum(A*(x2*np.log(x2) - x1*np.log(x1)-x2+x1) + B*(x2-x1))/dEint
 
     def _loglin(self, Eint, xs):
         dEint = float(Eint[-1]-Eint[0])
@@ -345,7 +345,7 @@ class Library(rx.RxLib):
         y2 = xs[1:]
         A = (np.log(y1)-np.log(y2))/(x1-x2)
         B = np.log(y1) - A*x1
-        return np.nansum((y2-y1)/A)
+        return np.nansum((y2-y1)/A)/dEint
 
     def _loglog(self, Eint, xs):
         dEint = float(Eint[-1]-Eint[0])
@@ -355,7 +355,7 @@ class Library(rx.RxLib):
         y2 = xs[1:]
         A = - np.log(y2/y1)/np.log(x1/x2)
         B = - (np.log(y1)*np.log(x2) - np.log(y2)*np.log(x1))/np.log(x1/x2)
-        return np.nansum(e**B / (A+1) * (x2**(A+1) - x1**(A+1))/ dEint)
+        return np.nansum(e**B / (A+1) * (x2**(A+1) - x1**(A+1))/dEint)
 
     def _chargedparticles(self, Eint, xs, flags=None):
         q = flags['Q']
@@ -370,6 +370,7 @@ class Library(rx.RxLib):
         y2 = xs[1:]
         B = np.log(y2*x2/(x1*y1)) / (1/(x1-T)**0.5 - 1/(x2-T)**0.5)
         A = e**(B/(x1-T)**0.5)*y1*x1
+        # FIXME
         raise NotImplementedError('I haven\'t done the math for this one yet!')
 
     def integrate_tab_range(self, intscheme, Eint, xs):
