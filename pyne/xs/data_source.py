@@ -696,7 +696,7 @@ class ENDFDataSource(DataSource):
 
         Returns
         -------
-        xs_gs : array
+        dst_sigma : array
             An array with the group cross-sections in order of decreasing energy.
         """
         # Munging the rx to an MT#
@@ -716,7 +716,7 @@ class ENDFDataSource(DataSource):
         E_g = rxdata['src_group_struct']
         xs = rxdata['xs']
         xs_all = []
-        xs_gs = []
+        dst_sigma = []
         for i in range(len(intpoints)):
             if not i:
                 low_xs = 0
@@ -728,6 +728,6 @@ class ENDFDataSource(DataSource):
             intscheme = intschemes[i]
             Eints = E_g[i]
             xs = xs_all[i]
-            xs_gs.append(self.library.integrate_tab_range(intscheme, Eints, xs))
-        self.xs_gs = np.asarray(xs_gs)[::-1]
-        return self.xs_gs
+            dst_sigma.append(self.library.integrate_tab_range(intscheme, Eints, xs))
+        rxdata['dst_sigma'] = np.asarray(dst_sigma)[::-1]
+        return rxdata['dst_sigma']
