@@ -21,6 +21,7 @@ from libc.stdlib cimport malloc, free
 import numpy as np
 cimport numpy as np
 import matplotlib.pyplot as plt
+from math import e
 
 import pyne.rxdata as rx
 from pyne.rxname import label
@@ -46,12 +47,17 @@ SPACE66_R = re.compile(' {66}')
 
 class Library(rx.RxLib):
     "A class for a file which contains multiple ENDF evaluations."
-    def __init__(self, fh, resonances=True):
+    def __init__(self, fh):
         self.mts = {}
         self.structure = {}
         self.mat_dict = {}
         self.more_files = True
-        # This counts the calculated position in the file.
+        self.intdict = {1: self._histogram, 2: self._linlin, 3: self._linlog, 4:
+                        self._loglin, 5: self._loglog, 6:self._chargedparticles,
+                        11: self._histogram, 12: self._linlin, 13: self._linlog,
+                        14: self._loglin, 15: self._loglog, 21: self._histogram,
+                        22: self._linlin, 23: self._linlog, 24: self._loglin,
+                        25: self._loglog}
         self.chars_til_now = 0
         self.offset = 0
         self.fh = fh
@@ -312,6 +318,80 @@ class Library(rx.RxLib):
         intdata.update(intmeta)
         total_lines = 1 + meta_len + data_len
         return head, intdata, total_lines
+
+    def _histogram(self, Eint, xs):
+        dEint = float(Eint[-1]-Eint[0])
+        return np.nansum((Eint[1:]-Eint[:-1]) * xs[:-1]/dEint)
+
+    def _linlin(self, Eint, xs):
+        dEint = float(Eint[-1]-Eint[0])
+        return np.nansum((Eint[1:]-Eint[:-1])* (xs[1:]+xs[:-1])/2./dEint)
+
+    def _linlog(self, Eint, xs):
+        dEint = float(Eint[-1]-Eint[0])
+        x1 = Eint[:-1]
+        x2 = Eint[1:]
+        y1 = xs[:-1]
+        y2 = xs[1:]
+        A = (y1-y2)/(np.log(x1/x2))
+        B = y1-A*np.log(x1)
+        return np.nansum(A*(x2*np.log(x2) - x1*np.log(x1)-x2+x1) + B*(x2-x1))/dEint
+
+    def _loglin(self, Eint, xs):
+        dEint = float(Eint[-1]-Eint[0])
+        x1 = Eint[:-1]
+        x2 = Eint[1:]
+        y1 = xs[:-1]
+        y2 = xs[1:]
+        A = (np.log(y1)-np.log(y2))/(x1-x2)
+        B = np.log(y1) - A*x1
+        return np.nansum((y2-y1)/A)/dEint
+
+    def _loglog(self, Eint, xs):
+        dEint = float(Eint[-1]-Eint[0])
+        x1 = Eint[:-1]
+        x2 = Eint[1:]
+        y1 = xs[:-1]
+        y2 = xs[1:]
+        A = - np.log(y2/y1)/np.log(x1/x2)
+        B = - (np.log(y1)*np.log(x2) - np.log(y2)*np.log(x1))/np.log(x1/x2)
+        return np.nansum(e**B / (A+1) * (x2**(A+1) - x1**(A+1))/dEint)
+
+    def _chargedparticles(self, Eint, xs, flags=None):
+        q = flags['Q']
+        if q > 0:
+            T = 0
+        else:
+            T = q
+        dEint = float(Eint[-1]-Eint[0])
+        x1 = Eint[:-1]
+        x2 = Eint[1:]
+        y1 = xs[:-1]
+        y2 = xs[1:]
+        B = np.log(y2*x2/(x1*y1)) / (1/(x1-T)**0.5 - 1/(x2-T)**0.5)
+        A = e**(B/(x1-T)**0.5)*y1*x1
+        # FIXME
+        raise NotImplementedError('I haven\'t done the math for this one yet!')
+
+    def integrate_tab_range(self, intscheme, Eint, xs):
+        """Integrates across one tabulation range.
+
+        Parameters
+        ----------
+        intscheme : int or float
+            The interpolation scheme used in this range.
+        Eint : array
+            The energies at which we have xs data.
+        xs : array
+            The xs data corresponding to Eint.
+
+        Returns
+        -------
+        sigma_g : float
+            The group xs.
+        """
+        return self.intdict[intscheme](Eint, xs)
+
 
     def _cont_and_update(self, flags, keys, data, total_lines):
         flags.update(self._get_cont(keys, data[total_lines]))

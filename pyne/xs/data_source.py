@@ -1,11 +1,14 @@
 """Cross section library data source interfaces.
 """
+import os
+import StringIO
+
 import numpy as np
 import tables as tb
 
-from pyne import nuc_data
-from pyne import nucname
+from pyne import nuc_data, nucname, rxname
 from pyne.xs.models import partial_energy_matrix, group_collapse
+from pyne.endf import Library
 
 RX_TYPES = set(["", 'np *', 'a  *', 'h  *', '2p *', '3n *', 'd  *', 'np/d',
                 'na', '*', 'nd', 'g  *', '3n', 'np', 'nt', 't', 'nt *',
@@ -94,8 +97,8 @@ class DataSource(object):
     src_phi_g : array-like, optional
         Group fluxes which must match the group structure for this data source.
     dst_group_struct : array-like, optional
-        The energy group structure [MeV] of the destination cross sections.  Used when 
-        discretizing cross sections from this source.
+        The energy group structure [MeV] of the destination cross sections.
+        Used when discretizing cross sections from this source.
 
     """
 
@@ -162,7 +165,7 @@ class DataSource(object):
 
         Returns
         -------
-        rxdata : ndarry
+        rxdata : ndarray
             Source cross section data, length src_ngroups.
 
         """
@@ -224,7 +227,7 @@ class NullDataSource(DataSource):
         Keyword arguments to be sent to base class.
 
     """
-    
+
     def __init__(self, **kwargs):
         super(NullDataSource, self).__init__(**kwargs)
 
@@ -378,7 +381,7 @@ class CinderDataSource(DataSource):
         Keyword arguments to be sent to base class.
 
     """
-    
+
     def __init__(self, **kwargs):
         super(CinderDataSource, self).__init__(**kwargs)
 
@@ -573,3 +576,158 @@ class EAFDataSource(DataSource):
         return rxdata
 
 
+class ENDFDataSource(DataSource):
+    """Evaluated Nuclear Data File cross section data source.  The ENDF file
+    must exist for this data source to exist.
+
+    Parameters
+    ----------
+    f : string, file handle
+        Path to ENDF file, or ENDF file itself.
+    kwargs : optional
+        Keyword arguments to be sent to base class.
+
+    Notes
+    -----
+    """
+
+    def __init__(self, fh, src_phi_g=None, dst_group_struct=None, **kwargs):
+        self.fh = fh
+        self._exists = None
+        if not self.exists:
+            raise ValueError
+        else:
+            self.library = Library(fh)
+        self.rxcache = {}
+        self.dst_group_struct = dst_group_struct
+        self._src_phi_g = src_phi_g
+
+    @property
+    def exists(self):
+        if self._exists is None:
+            if isinstance(self.fh, basestring):
+                self._exists = os.path.isfile(fh)
+            else:
+                self._exists = (isinstance(self.fh, file) or \
+                                isinstance(self.fh, StringIO.StringIO))
+        return self._exists
+
+    def _load_group_structure(self, nuc, rx, nuc_i=None):
+        """Loads the group structure from ENDF file."""
+        self.library._read_res(nuc)
+        mt = rxname.mt(rx)
+        rx_data = self.rxcache[nuc, rx, nuc_i]
+        xsdata = self.library.get_xs(nuc, rx, nuc_i)[0]
+        intpoints = xsdata['intpoints']#[::-1]
+        Eint = xsdata['Eint']
+        E_g = []
+        for i in range(len(intpoints)):
+            if not i:
+                low_Eint = 0
+            else:
+                low_Eint = intpoints[i-1]
+            high_Eint = intpoints[i]
+            E_g.append(Eint[low_Eint:high_Eint])
+        rx_data['src_group_struct'] = E_g
+        rx_data['src_phi_g'] = np.ones(len(E_g), dtype='f8') \
+            if rx_data['_src_phi_g'] is None \
+            else np.asarray(rx_data['src_phi_g'])
+
+    def _load_reaction(self, nuc, rx, nuc_i, src_phi_g=None, temp=300.0):
+        """Note: EAF data does not use temperature information (temp)
+
+        Parameters
+        ----------
+        nuc : int
+            Nuclide in zzaaam form.
+        rx : int or str
+            Reaction MT # in nnnm form.
+            OR:
+            Reaction key: 'gamma', 'alpha', 'p', etc.
+        nuc_i: : int
+            Isotope in zzaaam form (optional). Default is None.
+
+        Returns
+        -------
+        rxdata: ndarray of floats, len ngroups
+        """
+        nuc = nucname.zzaaam(nuc)
+        # Munging the rx to an MT#
+        try:
+            rx = int(rx)
+        except ValueError:
+            rx = rxname.mt(rx)
+        # Check if usable rx #
+        if rx is None:
+            return None
+        # Grab data
+        if (nuc, rx, nuc_i) in self.rxcache:
+            rxdict = self.rxcache[nuc, rx, nuc_i]
+        else:
+            if nuc_i not in self.library.structure[nuc]['data']:
+                self.library._read_res(nuc)
+            rxdict = self.library.get_xs(nuc, rx, nuc_i)[0]
+            rxdict['_src_phi_g'] = src_phi_g
+            self.rxcache[nuc, rx, nuc_i] = rxdict
+        self._load_group_structure(nuc, rx, nuc_i)
+        rxdata = rxdict['Eint']
+        return rxdata
+
+    def discretize(self, nuc, rx, nuc_i, temp=300.0, src_phi_g=None,
+                   dst_phi_g=None):
+        """Discretizes the reaction channel.
+
+        Parameters
+        ----------
+        nuc : int
+            Nuclide to discretize.
+        rx : int or str
+            Reaction to discretize.
+        nuc_i : int
+            Isotope to discretize.
+        temp : float
+            Temperature - not used in this, but preserved for API compatibility
+        src_phi_g : array-like
+            Source group flux - not used in this, but preserved for API
+            compatibility
+        dst_phi_g : array-like
+            Destination group flux - not used in this, but preserved for API
+            compatibility
+
+        Returns
+        -------
+        dst_sigma : array
+            An array with the group cross-sections in order of decreasing energy.
+        """
+        # Munging the rx to an MT#
+        try:
+            rx = int(rx)
+        except ValueError:
+            rx = rxname.mt(rx)
+        # Check if usable rx #
+        if rx is None:
+            return None
+        self._load_group_structure(nuc, rx, nuc_i)
+        self._load_reaction(nuc, rx, nuc_i)
+        rxdata = self.rxcache[nuc, rx, nuc_i]
+        intpoints = rxdata['intpoints']
+        intschemes = rxdata['intschemes']
+        Eints = rxdata['Eint']
+        E_g = rxdata['src_group_struct']
+        xs = rxdata['xs']
+        xs_all = []
+        dst_sigma = []
+        for i in range(len(intpoints)):
+            if not i:
+                low_xs = 0
+            else:
+                low_xs = intpoints[i-1]
+            high_xs = intpoints[i]
+            xs_all.append(xs[low_xs:high_xs])
+        for i in range(len(E_g)):
+            intscheme = intschemes[i]
+            Eints = E_g[i]
+            xs = xs_all[i]
+            dst_sigma.append(self.library.integrate_tab_range(intscheme, Eints, xs))
+        rxdata['dst_sigma'] = np.asarray(dst_sigma)[::-1]
+        return rxdata['dst_sigma']

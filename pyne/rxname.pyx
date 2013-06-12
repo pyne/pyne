@@ -227,7 +227,7 @@ def name(x, y=None, char * z="n"):
     n : str
         a unique reaction name.
     """
-    cdef std_string cn 
+    cdef std_string cn
     cdef int from_nuc, to_nuc
     if y is None:
         if isinstance(x, basestring):

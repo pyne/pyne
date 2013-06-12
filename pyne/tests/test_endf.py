@@ -8,6 +8,7 @@ from numpy.testing import assert_array_equal, assert_allclose
 from pyne.endf import Library
 from pyne.utils import endftod
 from pyne.rxdata import DoubleSpinDict
+from pyne.xs.data_source import ENDFDataSource
 
 import nose
 from nose.tools import assert_equal
@@ -250,7 +251,7 @@ convallis tristique sem.                                           419 1451   14
                                 1        451         22          1 419 1451   16
                                 2        151         57          1 419 1451   17
                                 3          2         12          1 419 1451   18
-                                3        600         13          1 419 1451   19
+                                3        600         11          1 419 1451   19
                                 3        650          1          1 419 1451   20
                                 3        800          1          1 419 1451   21
                                 4          2          2          1 419 1451   22
@@ -329,18 +330,16 @@ convallis tristique sem.                                           419 1451   14
  2.140116+7 3.120507-6-1.741408+8 1.783210-6                       419 3  2   12
  0.000000+0 0.000000+0          0          0          0          0 419 3  099999
  4.004000+3 6.287192+0          0          0          0          0 419 3600    1
- 3.863437-5-7.373532-7          0 8.675483-1          6         27 419 3600    2
-          2          6          8          5          9          4 419 3600    3
-         11          3         13          2         27          1 419 3600    4
- 3.466435+9-4.071020-5-1.327513+2-4.380357-8-1.945657+6 4.860245+3 419 3600    5
- 2.996919+4 1.566880+8 3.852136+6 1.795499+9 7.957804-9 2.355285+0 419 3600    6
--2.548492-5 1.407193-4-1.740179+9 1.188455+8 3.960784+9-4.360968-6 419 3600    7
- 2.932958-2-2.204113-1 6.345382+4-4.462245-2 4.439669-2-1.072753-4 419 3600    8
- 3.363572+8 3.905778+9-2.345998+6 4.424309-7 1.664749+2-8.409107-8 419 3600    9
- 1.402644-8-3.924514+6-2.083729+1-3.933751-6 6.874812+7 2.533323+3 419 3600   10
- 3.629253+8-3.332270+5-3.405330+3 2.177075-7 3.802944+1 1.070481-1 419 3600   11
- 3.910696-2-4.361393+4 4.703875+6-2.637394+3 3.567077+7-2.700338+2 419 3600   12
--3.285596-2-3.522920-6 4.022546-1 4.339912+3-3.724238+2 2.712721+0 419 3600   13
+ 3.863437-5-7.373532-7          0 8.675483-1          5         20 419 3600    2
+          4          1          8          2         12          3 419 3600    3
+         16          4         20          5                       419 3600    4
+          1         15          4         12         10         -7 419 3600    5
+         20         10          1         15          4         12 419 3600    6
+         10         -7         20         10          1          1 419 3600    7
+ 2.718282+0          3 2.718282+0          3 7.389056+0          0 419 3600    8
+          1          1          2 2.718282+0          2 7.389056+0 419 3600    9
+          3 2.718281+0          1 3.678794-1          2 1.471517+0 419 3600   10
+          2 1.847264+0          3 8.210062-1                       419 3600   11
  0.000000+0 0.000000+0          0          0          0          0 419 3  099999
  4.192847+3 6.874398+0          0          0          0          0 419 3650    1
  0.000000+0 0.000000+0          0          0          0          0 419 3  099999
@@ -764,12 +763,12 @@ def test_xs():
 
     exp_600_a = array_from_ENDF(StringIO.StringIO(
         """ 4.193742+3 6.287192+0          0          0          0          0
- 3.863437-5-7.373532-7          0 8.675483-1          6         27
-          2          6          8          5          9          4
-         11          3         13          2         27          1"""))
+ 3.863437-5-7.373532-7          0 8.675483-1          5         20
+          4          1          8          2         12          3
+         16          4         20          5                     """))
 
     exp_600 = dict(zip(('intpoints', 'intschemes'),
-                     (exp_600_a[2:].flat[::2], exp_600_a[2:].flat[1::2])))
+                       (exp_600_a[2:].flat[:-2:2], exp_600_a[2:].flat[1:-1:2])))
     obs_600 = library.mat40000['data'][40040]['xs'][600][0]
 
     for key in exp_2:
@@ -791,7 +790,7 @@ def test_u235():
     It is very big (51 MB), so it is not included.
     """
     if not os.path.isfile('U235.txt'):
-        return 
+        return
     u235 = Library('U235.txt')
     u235._read_res(922350)
     u235._read_xs(922350, 37)
@@ -810,6 +809,73 @@ def test_u235():
     for key in obs:
         assert_array_equal(obs[key], exp[key])
 
+
+# Test ENDF Data Source
+ds = ENDFDataSource(str_library)
+
+def test_group_struct():
+    from math import e
+    ds._load_reaction(40000, 600, 40040)
+    obs = ds.rxcache[40000, 600, 40040]['src_group_struct']
+    exp = [np.array([1., 4., 10., 20.]),
+           np.array([1., 4., 10., 20.]),
+           np.array([1, round(e, 6), round(e,6), round(e**2, 6)]),
+           np.array([1., 2., 2., 3.]),
+           np.array([1., 2., 2., 3.])]
+    for i in range(len(exp)):
+        assert_allclose(obs[i], exp[i])
+
+def test_int_hist():
+    exp_Eint = np.array([1,4,10, 20])
+    exp_xs = np.array([15, 12, -7, 10])
+    obs = library.integrate_tab_range(1, exp_Eint, exp_xs)
+    exp = (3*15 + 6*12+10*-7)/19.
+    assert_allclose(exp, obs, rtol = 1e-12)
+    return exp
+
+def test_int_linlin():
+    exp_Eint = np.array([1,4,10, 20])
+    exp_xs = np.array([15, 12, -7, 10])
+    obs = library.integrate_tab_range(2, exp_Eint, exp_xs)
+    exp = (3*13.5 + 6*2.5 + 10 * 1.5)/19.
+    assert_allclose(exp, obs, rtol = 1e-12)
+    return exp
+
+def test_int_linlog():
+    from math import e
+    exp_Eint = np.array([1, e, e, e**2])
+    exp_xs = np.array([1, 3, 3, 0])
+    obs = library.integrate_tab_range(3, exp_Eint, exp_xs)
+    exp = (e+1+3*e**2-6*e)/(e**2-1)
+    assert_allclose(exp, obs, rtol=1e-12)
+    return exp
+
+def test_int_loglin():
+    from math import e
+    exp_Eint = np.array([1., 2., 2., 3.])
+    exp_xs = np.array([1, e, e**2, e])
+    obs = library.integrate_tab_range(4, exp_Eint, exp_xs)
+    exp = (e**2-1)/2
+    assert_allclose(exp, obs, rtol=1e-12)
+    return exp
+
+def test_int_loglog():
+    from math import e
+    exp_Eint = np.array([1., 2., 2., 3.])
+    exp_xs = np.array([1/e, 4/e, (e**2)/4, (e**2)/9])
+    obs = library.integrate_tab_range(5, exp_Eint, exp_xs)
+    exp = (7/(3*e) + (e**2)/6)/2.
+    assert_allclose(exp, obs, rtol=1e-12)
+    return exp
+
+def test_discretize():
+    obs = ds.discretize(40000, 600, 40040)
+    exp = [test_int_hist(),
+           test_int_linlin(),
+           test_int_linlog(),
+           test_int_loglin(),
+           test_int_loglog()]
+    assert_allclose(np.asarray(exp)[::-1], obs, rtol=1e-6)
 
 if __name__ == "__main__":
     nose.runmodule()
