@@ -1,0 +1,7 @@
+#!/usr/bin/env python
+"""Read a MCNP Ptrac file and save it in HDF5 format."""
+
+from pyne.ptrac_to_hdf5 import main
+
+main()
+
