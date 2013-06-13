@@ -139,7 +139,9 @@ else()
     # information the python interpreter itself gave us were more complete.
     find_library(PYTHON_LIBRARY
         NAMES "python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}"
+              "python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}m"
               "python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}mu"
+              "python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}dm"
         PATHS ${_PYTHON_LIBS_SEARCH}
         NO_SYSTEM_ENVIRONMENT_PATH)
 endif()
