@@ -5,7 +5,12 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 
 FIND_PACKAGE(GTest REQUIRED)
 # Locally defined vars
-set(HOME /filespace/people/z/zachman)
+# set(HOME /filespace/people/z/zachman)
+IF (NOT DEFINED HOME) 
+	SET (HOME "$ENV{HOME}")
+	message("Home is ${HOME}")
+ENDIF (NOT DEFINED HOME)
+
 SET(MOAB_HOME ${HOME}/dagmc_bld/MOAB)
 
 # Where to look for includes
