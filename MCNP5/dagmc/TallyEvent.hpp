@@ -58,36 +58,27 @@ class TallyEvent
      *     3) TRACK indicates a track-based event has been set
      */
     enum EventType {NONE = 1, COLLISION = 2, TRACK = 3};
+
+    /**
+     * \brief Constructor
+     * Does not compile without this, due to event_type setting
+     * in implementation, maybe
+     */
+    TallyEvent();
     
     // Keep a record of the Observers
-    // 3.  Coupled only to the base Observer class
     std::map <int, Tally *> observers; 
 
     // >>> PUBLIC INTERFACE
 
     // Add a new Tally
-    void addTally(int map_index, Tally *obs)
-    {
-        observers.insert(map_index, obs);   
-    }
+    void addTally(int, Tally *);
 
     // Remove a Tally
-    void removeTally(int map_index, Tally *obs)
-    {
-        std::map<int, Tally *>::iterator it;	
- 	it = observers.find(map_index);
-	observers.erase(it);
-    }
+    void removeTally(int map_index, Tally *obs);
 
-    void update_tallies()
-    {
-       std::map<int, Tally*>::iterator map_it;
-       for (map_it = observers.begin(); map_it != observers.end(); ++map_it)
-       {
-           Tally *tally = map_it->second;
-	   tally->update();
-       }
-    }
+    // Call action on every tally
+    void update_tallies();
 
     /**
      * \brief Sets tally multiplier for the event
@@ -114,6 +105,16 @@ class TallyEvent
      * \return type of tally event this event represents
      */
     TallyEvent::EventType get_event_type() const;
+
+    /**
+     * \brief fill the ParticleState
+     * \param position interpreted differently for TrackLength and Collision 
+     */
+    void set_event(const moab::CartVect& position, 
+                           const moab::CartVect& direction,
+                           double track_length, double total_cross_section, 
+                           double particle_energy, double particle_weight, 
+                           EventType type);
 
   private:
 
