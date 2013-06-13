@@ -1,7 +1,5 @@
 // MCNP5/dagmc/TallyEvent.cpp
 
-// #include <cstdlib>
-
 #include "moab/CartVect.hpp"
 
 #include "TallyEvent.hpp"
@@ -17,10 +15,10 @@ TallyEvent::TallyEvent(): event_type(NONE){}
 // Add a new Tally
 void TallyEvent::addTally(int map_index, Tally *obs)
 {
-        observers.insert(map_index, obs);   
+        observers.insert(std::pair<int, Tally *>(map_index, obs));   
 }
 
-// Remove a Tally
+// Remove a Tally - Observer pattern best practise
 void TallyEvent::removeTally(int map_index, Tally *obs)
 {
         std::map<int, Tally *>::iterator it;	
