@@ -569,6 +569,7 @@ MBEntityHandle check_reg(MBEntityHandle volume, double point[3], double dir[3])
 // special_check(..)
 //---------------------------------------------------------------------------//
 // NOT CALLED - Helper function
+/*
 void special_check(double pos[3],const double dir[3], int& oldReg)
 {
   int num_vols = DAG->num_entities(3);  // number of volumes
@@ -596,36 +597,14 @@ void special_check(double pos[3],const double dir[3], int& oldReg)
     }
   while ( is_inside != 0 );
 }
-
-// Defined in WrapIncrHist.cc
-// Called by WrapG1, WrapIniHist, WrapLookFX, and WrapLookZ
-// intHist is an array that stores secondary particle information
-// Using standard FLUKA version in libflukahp.a
-/*
-void conhwr(int& intHist, int* incrCount)
-{
-  if(debug)
-    {
-      std::cout << "============= CONHWR ==============" << std::endl;    
-      std::cout << "Ptr History = " << intHist << std::endl;
-    }
-  incrCount++;
-  if(debug)
-    {
-      std::cout << "Counter = " << incrCount << std::endl;
-      std::cout << "============= Out of CONHWR ==============" << std::endl;    
-    }
-  return;
-}
 */
-
-void lkdbwr(double& pSx, double& pSy, double& pSz,
+void f_lookdb(double& pSx, double& pSy, double& pSz,
 	    double* pV, const int& oldReg, const int& oldLttc,
 	    int& newReg, int& flagErr, int& newLttc)
 {
   if(debug)
     {
-      std::cout<<"============= LKDBWR =============="<< std::endl;
+      std::cout<<"============= F_LooKDB =============="<< std::endl;
     }
   //return region number and dummy variables
   newReg=0;   
@@ -637,51 +616,16 @@ void lkdbwr(double& pSx, double& pSy, double& pSz,
 
 
 /*
- * G1RT
+ * f_g1rt
  */
-void g1rtwr(void)
+void f_g1rt(void)
 {
   if(debug)
     {
-      std::cout<<"============ G1RTWR ============="<<std::endl;
+      std::cout<<"============ F_G1RT ============="<<std::endl;
     }
     return;
 }
-
-/*
- * WrapIniHist
- * Removed from header
- */
-/*
-void inihwr(int& intHist)
-{
-  if(debug)
-    {
-      std::cout << "============= INIHWR ==============" << std::endl;    
-      std::cout << "Ptr History=" <<intHist<< std::endl;
-    }
-  return;
-}
-*/
-/*
- * WrapSavHist
- */
-/*int isvhwr(const int& fCheck, const int& intHist)
-{
-  if(debug)
-    {
-      std::cout << "============= ISVHWR ==============" << std::endl;    
-      std::cout << "fCheck=" << fCheck << std::endl;
-      if(fCheck==-1) 
-	{
-	  std::cout << "intHist=" << intHist  << std::endl;
-	}
-
-    }
-  return 1;
-}
-*/
-
 /**************************************************************************************************/
 /******                                End of FLUKA stubs                                  ********/
 /**************************************************************************************************/
