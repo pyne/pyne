@@ -84,7 +84,7 @@ extern "C" void f_look(double& pSx, double& pSy, double& pSz,
                      double* pV, const int& oldReg, const int& oldLttc,
 	             int& newReg, int& flagErr, int& newLttc);
 
-// Wrapper for f_look clarifying which arguments are used.
+// Wrapper for f_look clarifying which areguments are used.
 int look( double& posx, double& posy, double& posz, double* dir, int& region);
 
 // WrapMag.cc stubs this function and is linked in
