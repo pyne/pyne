@@ -191,12 +191,11 @@ void jomiwr(int & nge, const int& lin, const int& lou, int& flukaReg)
 }
 
 //---------------------------------------------------------------------------//
-// g1wr(..)
+// g_step(..)
 //---------------------------------------------------------------------------//
-/// From Flugg Wrappers
-//  returns approved step of particle and all variables that fluka G1 computes.
+//  returns approved step of particle and all variables 
 //
-void g1wr(double& pSx, 
+void g_step(double& pSx, 
           double& pSy, 
           double& pSz, 
           double* pV,
@@ -216,7 +215,7 @@ void g1wr(double& pSx,
 
   if(debug)
     {
-      std::cout<<"============= G1WR =============="<<std::endl;    
+      std::cout<<"============= G_STEP	 =============="<<std::endl;    
       std::cout << "Position " << pSx << " " << pSy << " " << pSz << std::endl;
       std::cout << "Direction vector " << pV[0] << " " << pV[1] << " " << pV[2] << std::endl;
       std::cout << "Oldreg = " << oldReg << std::endl;
@@ -226,7 +225,7 @@ void g1wr(double& pSx,
   double point[3] = {pSx,pSy,pSz};
   double dir[3]   = {pV[0],pV[1],pV[2]};  
 
-  g1_fire(oldReg, point, dir, propStep, retStep, newReg); // fire a ray 
+  g_fire(oldReg, point, dir, propStep, retStep, newReg); // fire a ray 
 
   if(debug)
     {
@@ -239,7 +238,7 @@ void g1wr(double& pSx,
 }
 
 //---------------------------------------------------------------------------//
-// void g1_fire(int& oldRegion, double point[], double dir[], 
+// void g_fire(int& oldRegion, double point[], double dir[], 
 //              double &propStep, double& retStep,  int& newRegion)
 //---------------------------------------------------------------------------//
 // oldRegion - the region of the particle's current coordinates
@@ -248,7 +247,7 @@ void g1wr(double& pSx,
 // retStep   - returned as the distance from the particle's current location, along its ray, to the next boundary
 // newRegion - gotten from the value returned by DAG->next_vol
 // newRegion is gotten from the volue returned by DAG->next_vol
-void g1_fire(int& oldRegion, double point[], double dir[], double &propStep, double& retStep,  int& newRegion)
+void g_fire(int& oldRegion, double point[], double dir[], double &propStep, double& retStep,  int& newRegion)
 {
 
   /*
@@ -262,7 +261,7 @@ void g1_fire(int& oldRegion, double point[], double dir[], double &propStep, dou
 
   if(debug)
   {
-      std::cout<<"============= g1_fire =============="<<std::endl;    
+      std::cout<<"============= g_fire =============="<<std::endl;    
       std::cout << "Point " << point[0] << " " << point[1] << " " << point[2] << std::endl;
       std::cout << "Direction vector " << dir[0] << " " << dir[1] << " " << dir[2] << std::endl;
   }
@@ -322,7 +321,7 @@ void g1_fire(int& oldRegion, double point[], double dir[], double &propStep, dou
 
   return;
 }
-///////			End g1wr and g1
+///////			End g_step and g_fire
 /////////////////////////////////////////////////////////////////////
 
 //---------------------------------------------------------------------------//
