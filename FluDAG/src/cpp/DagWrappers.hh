@@ -22,7 +22,7 @@
 #define lkwr lkwr_
 #define fldwr fldwr_
 #define flgfwr flgfwr_
-#define nrmlwr nrmlwr_
+#define f_normal nrmlwr_
 #define rgrpwr rgrpwr_
 #define isvhwr isvhwr_
 #define rg2nwr rg2nwr_
@@ -104,12 +104,12 @@ extern "C" void fldwr(const double& pX, const double& pY, const double& pZ,
 	    
 // WrapNorml.cc has been removed.  This function is defined in fluka_funcs.
 //  It is called by normal(..).
-extern "C" void nrmlwr(double& pSx, double& pSy, double& pSz,
+extern "C" void f_normal(double& pSx, double& pSy, double& pSz,
                        double& pVx, double& pVy, double& pVz,
 	               double* norml, const int& oldReg, 
 	               const int& newReg, int& flagErr);
 
-// Wrapper for nrmlwr clarifying which arguments are used
+// Wrapper for f_normal clarifying which arguments are used
 int  normal (double& posx, double& posy, double& posz, double *norml, int& regionForSense);
 
 // WrapReg
