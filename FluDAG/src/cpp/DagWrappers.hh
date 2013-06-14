@@ -10,10 +10,9 @@
 #define DAGWRAPPERS_HH
 
 
-#define idnrwr idnrwr_
+#define f_idnr idnrwr_
 #define g_step g1wr_
 #define f_g1rt g1rtwr_
-// #define conhwr conhwr_
 #define inihwr inihwr_
 #define jomiwr jomiwr_
 #define f_lookdb lkdbwr_
@@ -31,7 +30,7 @@
 extern "C" void flgfwr(int& flkflg);
 
 // The FLUKA internal function is used.
-extern "C" int idnrwr(const int & nreg, const int & mlat);
+extern "C" int f_idnr(const int & nreg, const int & mlat);
 
 // The function is defined in fluka_funcs.cpp.  It calls g_fire.
 extern "C" void  g_step(double& pSx, double& pSy, double& pSz, double* pV,
