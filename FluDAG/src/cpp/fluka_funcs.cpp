@@ -367,16 +367,18 @@ void f_normal(double& pSx, double& pSy, double& pSz,
       std::cout << "============ NRMLWR =============" << std::endl;
   }
 
-
-  MBEntityHandle OldReg = DAG -> entity_by_index(3,oldRegion); // entity handle
-  double xyz[3] = {pSx,pSy,pSz}; //position vector
-  double uvw[3] = {pVx,pVy,pVz}; //particl directoin
-  int result; // particle is entering or leaving
-
-  MBErrorCode ErrorCode = DAG->test_volume_boundary( OldReg, next_surf,xyz,uvw, result);  // see if we are on boundary
-  ErrorCode = DAG->get_angle(next_surf,xyz,norml); 
-  // result = 1 entering, 0 leaving
-  if ( result == 0 ) // vector should point towards OldReg
+  flagErr=0;
+  double xyz[3] = {pSx, pSy, pSz}; 
+  MBErrorCode ErrorCode = DAG->get_angle(next_surf,xyz,norml); 
+  if(ErrorCode != MB_SUCCESS)
+  {
+      std::cout << "Could not determine normal" << std::endl;
+      flagErr = 2;
+      return;
+  }
+  // sense of next_surf with respect to oldRegion (volume)
+  int sense = getSense(oldRegion);
+  if (sense == -1 )
     {
       norml[0] = norml[0]*-1.0;
       norml[1] = norml[1]*-1.0;
@@ -567,6 +569,7 @@ MBEntityHandle check_reg(MBEntityHandle volume, double point[3], double dir[3])
 // special_check(..)
 //---------------------------------------------------------------------------//
 // NOT CALLED - Helper function
+/*
 void special_check(double pos[3],const double dir[3], int& oldReg)
 {
   int num_vols = DAG->num_entities(3);  // number of volumes
@@ -594,36 +597,14 @@ void special_check(double pos[3],const double dir[3], int& oldReg)
     }
   while ( is_inside != 0 );
 }
-
-// Defined in WrapIncrHist.cc
-// Called by WrapG1, WrapIniHist, WrapLookFX, and WrapLookZ
-// intHist is an array that stores secondary particle information
-// Using standard FLUKA version in libflukahp.a
-/*
-void conhwr(int& intHist, int* incrCount)
-{
-  if(debug)
-    {
-      std::cout << "============= CONHWR ==============" << std::endl;    
-      std::cout << "Ptr History = " << intHist << std::endl;
-    }
-  incrCount++;
-  if(debug)
-    {
-      std::cout << "Counter = " << incrCount << std::endl;
-      std::cout << "============= Out of CONHWR ==============" << std::endl;    
-    }
-  return;
-}
 */
-
-void lkdbwr(double& pSx, double& pSy, double& pSz,
+void f_lookdb(double& pSx, double& pSy, double& pSz,
 	    double* pV, const int& oldReg, const int& oldLttc,
 	    int& newReg, int& flagErr, int& newLttc)
 {
   if(debug)
     {
-      std::cout<<"============= LKDBWR =============="<< std::endl;
+      std::cout<<"============= F_LooKDB =============="<< std::endl;
     }
   //return region number and dummy variables
   newReg=0;   
@@ -635,51 +616,16 @@ void lkdbwr(double& pSx, double& pSy, double& pSz,
 
 
 /*
- * G1RT
+ * f_g1rt
  */
-void g1rtwr(void)
+void f_g1rt(void)
 {
   if(debug)
     {
-      std::cout<<"============ G1RTWR ============="<<std::endl;
+      std::cout<<"============ F_G1RT ============="<<std::endl;
     }
     return;
 }
-
-/*
- * WrapIniHist
- * Removed from header
- */
-/*
-void inihwr(int& intHist)
-{
-  if(debug)
-    {
-      std::cout << "============= INIHWR ==============" << std::endl;    
-      std::cout << "Ptr History=" <<intHist<< std::endl;
-    }
-  return;
-}
-*/
-/*
- * WrapSavHist
- */
-/*int isvhwr(const int& fCheck, const int& intHist)
-{
-  if(debug)
-    {
-      std::cout << "============= ISVHWR ==============" << std::endl;    
-      std::cout << "fCheck=" << fCheck << std::endl;
-      if(fCheck==-1) 
-	{
-	  std::cout << "intHist=" << intHist  << std::endl;
-	}
-
-    }
-  return 1;
-}
-*/
-
 /**************************************************************************************************/
 /******                                End of FLUKA stubs                                  ********/
 /**************************************************************************************************/

@@ -12,11 +12,11 @@
 
 #define idnrwr idnrwr_
 #define g_step g1wr_
-#define g1rtwr g1rtwr_
-#define conhwr conhwr_
+#define f_g1rt g1rtwr_
+// #define conhwr conhwr_
 #define inihwr inihwr_
 #define jomiwr jomiwr_
-#define lkdbwr lkdbwr_
+#define f_lookdb lkdbwr_
 #define lkfxwr lkfxwr_
 #define lkmgwr lkmgwr_
 #define f_look lkwr_
@@ -30,11 +30,10 @@
 // WrapFlgfwr.cc stubs this
 extern "C" void flgfwr(int& flkflg);
 
-// WrapDN.cc has been deleted.  The FLUKA internal function is used.
+// The FLUKA internal function is used.
 extern "C" int idnrwr(const int & nreg, const int & mlat);
 
-// WrapG1.cpp has been deleted.  The function is now
-// defined in fluka_funcs.cpp.  It calls g_fire.
+// The function is defined in fluka_funcs.cpp.  It calls g_fire.
 extern "C" void  g_step(double& pSx, double& pSy, double& pSz, double* pV,
                       int& oldReg, const int& oldLttc, double& propStep,
                       int& nascFlag, double& retStep, int& newReg,
@@ -53,18 +52,8 @@ extern "C" void  g_step(double& pSx, double& pSy, double& pSz, double* pV,
   void g_fire(int& oldRegion, double point[], double dir[], 
                double &propStep, double& retStep,  int& newRegion);
 
-
-// WrapG1RT.cc has been deleted.  The function is now 
-// defined in fluka_funcs.cpp, as a stub.
-extern "C" void g1rtwr(void);
-
-// WrapIncrHist.cc has been deleted.  The internal 
-// FLUKA form of this function is called.
-// extern "C" void conhwr(int& intHist, int* incrCount); 
-
-// WrapIniHist.cc has been deleted.  The function is now
-// commented out in fluka_funcs.cpp
-// extern "C" void inihwr(int& intHist);                   
+// Stub function
+extern "C" void f_g1rt(void);
 
 // WrapInit.cc - has been deleted, the function is now
 // defined in fluka_funcs.cpp
@@ -73,7 +62,7 @@ extern "C" void jomiwr(int & nge, const int& lin, const int& lou,
 
 // WrapLookDB.cc has been deleted, the function is now
 // defined in fluka_funcs.cpp.  It sets some of its return values
-extern "C" void lkdbwr(double& pSx, double& pSy, double& pSz,
+extern "C" void f_lookdb(double& pSx, double& pSy, double& pSz,
                        double* pV, const int& oldReg, const int& oldLttc,
                	       int& newReg, int& flagErr, int& newLttc);
 
@@ -94,7 +83,7 @@ extern "C" void f_look(double& pSx, double& pSy, double& pSz,
                      double* pV, const int& oldReg, const int& oldLttc,
 	             int& newReg, int& flagErr, int& newLttc);
 
-// Wrapper for f_look clarifying which areguments are used.
+// Wrapper for f_look clarifying which arguments are used.
 int look( double& posx, double& posy, double& posz, double* dir, int& region);
 
 // WrapMag.cc stubs this function and is linked in
