@@ -11,7 +11,7 @@
 
 
 #define idnrwr idnrwr_
-#define g1wr g1wr_
+#define g_step g1wr_
 #define g1rtwr g1rtwr_
 #define conhwr conhwr_
 #define inihwr inihwr_
@@ -34,15 +34,15 @@ extern "C" void flgfwr(int& flkflg);
 extern "C" int idnrwr(const int & nreg, const int & mlat);
 
 // WrapG1.cpp has been deleted.  The function is now
-// defined in fluka_funcs.cpp.  It calls g1_fire.
-extern "C" void  g1wr(double& pSx, double& pSy, double& pSz, double* pV,
+// defined in fluka_funcs.cpp.  It calls g_fire.
+extern "C" void  g_step(double& pSx, double& pSy, double& pSz, double* pV,
                       int& oldReg, const int& oldLttc, double& propStep,
                       int& nascFlag, double& retStep, int& newReg,
 	              double& saf, int& newLttc, int& LttcFlag,
                       double* sLt, int* jrLt);
 
   /**
-   * g1_fire is called by fludag's implementation of g1wr.  It calls DAG->ray_fire(...).
+   * g_fire is called by fludag's implementation of g_step.  It calls DAG->ray_fire(...).
    * oldRegion region of start point
    * point     start point
    * dir       direction vector
@@ -50,8 +50,7 @@ extern "C" void  g1wr(double& pSx, double& pSy, double& pSz, double* pV,
    * retStep   set to distance to next surface
    * newRegion region ofter step
   */
- //  void g1_fire(int& oldRegion, double point[], double dir[],  double& retStep, int& newRegion);
-  void g1_fire(int& oldRegion, double point[], double dir[], 
+  void g_fire(int& oldRegion, double point[], double dir[], 
                double &propStep, double& retStep,  int& newRegion);
 
 
