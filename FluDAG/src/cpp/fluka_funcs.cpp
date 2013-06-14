@@ -327,10 +327,10 @@ void g_fire(int& oldRegion, double point[], double dir[], double &propStep, doub
 //---------------------------------------------------------------------------//
 // normal
 //---------------------------------------------------------------------------//
-// Local wrapper for fortran-called, nrmlwr.  This function is supplied for testing
+// Local wrapper for fortran-called, f_normal.  This function is supplied for testing
 // purposes.  Its signature shows what parameters are being used in our wrapper 
 // implementation.  
-// Any FluDAG calls to nrmlwr should use this call instead.
+// Any FluDAG calls to f_normal should use this call instead.
 // ASSUMES:  no ray history
 // Notes
 // - direction is not taken into account 
@@ -341,11 +341,11 @@ int  normal (double& posx, double& posy, double& posz, double *norml, int& curRe
    int flagErr; 
    int dummyReg;
    double dummyDirx, dummyDiry, dummyDirz;
-   nrmlwr(posx, posy, posz, dummyDirx, dummyDiry, dummyDirz, norml, curRegion, dummyReg, flagErr);
+   f_normal(posx, posy, posz, dummyDirx, dummyDiry, dummyDirz, norml, curRegion, dummyReg, flagErr);
    return flagErr;
 }
 //---------------------------------------------------------------------------//
-// nrmlwr(..)
+// f_normal(..)
 //---------------------------------------------------------------------------//
 /// From Flugg Wrappers WrapNorml.cc
 //  Note:  The normal is calculated at the point on the surface nearest the 
@@ -357,7 +357,7 @@ int  normal (double& posx, double& posy, double& posz, double *norml, int& curRe
 // Does NOT set any region, point or direction vector.
 // Globals used:
 //     next_surf, set by ray_fire 
-void nrmlwr(double& pSx, double& pSy, double& pSz,
+void f_normal(double& pSx, double& pSy, double& pSz,
             double& pVx, double& pVy, double& pVz,
 	    double* norml, const int& oldRegion, 
 	    const int& newReg, int& flagErr)
@@ -407,7 +407,7 @@ int getSense(int region)
   }
   return sense; 
 } 
-///////			End nrmlwr, normal, and getSense(..)
+///////			End f_normal, normal, and getSense(..)
 /////////////////////////////////////////////////////////////////////
 
 //---------------------------------------------------------------------------//
