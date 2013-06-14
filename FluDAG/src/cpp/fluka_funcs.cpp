@@ -628,19 +628,6 @@ void f_g1rt(void)
     }
     return;
 }
-
-// Set DNEAR option if needed
-int f_idnr(const int & nreg, const int & mlat) 
-
-{
-	std::cerr<<"================== F_IDNR ================="<<std::endl;
-
-// returns 0 if user doesn't want Fluka to use DNEAR to compute the 
-// step (the same effect is obtained with the GLOBAL (WHAT(3)=-1)
-// card in fluka input), returns 1 if user wants Fluka always to use DNEAR.
-
-	return 0;
-}
 /**************************************************************************************************/
 /******                                End of FLUKA stubs                                  ********/
 /**************************************************************************************************/

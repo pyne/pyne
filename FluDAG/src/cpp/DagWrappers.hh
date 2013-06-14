@@ -12,8 +12,8 @@
 
 #define idnrwr idnrwr_
 #define g_step g1wr_
-#define g1rtwr g1rtwr_
-#define conhwr conhwr_
+#define f_g1rt g1rtwr_
+// #define conhwr conhwr_
 #define inihwr inihwr_
 #define jomiwr jomiwr_
 #define f_lookdb lkdbwr_
@@ -31,10 +31,9 @@
 extern "C" void flgfwr(int& flkflg);
 
 // The FLUKA internal function is used.
-extern "C" int f_idnr(const int & nreg, const int & mlat);
+extern "C" int idnrwr(const int & nreg, const int & mlat);
 
-// WrapG1.cpp has been deleted.  The function is now
-// defined in fluka_funcs.cpp.  It calls g_fire.
+// The function is defined in fluka_funcs.cpp.  It calls g_fire.
 extern "C" void  g_step(double& pSx, double& pSy, double& pSz, double* pV,
                       int& oldReg, const int& oldLttc, double& propStep,
                       int& nascFlag, double& retStep, int& newReg,
@@ -84,7 +83,7 @@ extern "C" void f_look(double& pSx, double& pSy, double& pSz,
                      double* pV, const int& oldReg, const int& oldLttc,
 	             int& newReg, int& flagErr, int& newLttc);
 
-// Wrapper for f_look clarifying which areguments are used.
+// Wrapper for f_look clarifying which arguments are used.
 int look( double& posx, double& posy, double& posz, double* dir, int& region);
 
 // WrapMag.cc stubs this function and is linked in
