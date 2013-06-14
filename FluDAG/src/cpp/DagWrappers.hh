@@ -19,7 +19,7 @@
 #define lkdbwr lkdbwr_
 #define lkfxwr lkfxwr_
 #define lkmgwr lkmgwr_
-#define lkwr lkwr_
+#define f_look lkwr_
 #define fldwr fldwr_
 #define flgfwr flgfwr_
 #define f_normal nrmlwr_
@@ -90,11 +90,11 @@ extern "C" void lkmgwr(double& pSx, double& pSy, double& pSz,
 	    
 // WrapLookZ has been deleted.  This function is defined in
 // fluka_funcs.cc.  It is called by look(..).
-extern "C" void lkwr(double& pSx, double& pSy, double& pSz,
+extern "C" void f_look(double& pSx, double& pSy, double& pSz,
                      double* pV, const int& oldReg, const int& oldLttc,
 	             int& newReg, int& flagErr, int& newLttc);
 
-// Wrapper for lkwr clarifying which areguments are used.
+// Wrapper for f_look clarifying which areguments are used.
 int look( double& posx, double& posy, double& posz, double* dir, int& region);
 
 // WrapMag.cc stubs this function and is linked in
