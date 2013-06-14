@@ -256,7 +256,7 @@ void g_fire(int& oldRegion, double point[], double dir[], double &propStep, doub
     {
       int dummy;
       int errFlg;
-      lkwr(point[0],point[1],point[2],dir,0,dummy,oldRegion,errFlg,dummy); // where is particle
+      f_look(point[0],point[1],point[2],dir,0,dummy,oldRegion,errFlg,dummy); // where is particle
     }
   */
 
@@ -413,7 +413,7 @@ int getSense(int region)
 //---------------------------------------------------------------------------//
 // look(..)
 //---------------------------------------------------------------------------//
-// Testable local wrapper for fortran-called, lkwr
+// Testable local wrapper for fortran-called, f_look
 // This function signature shows what parameters are being used in our wrapper implementation
 // oldRegion is looked at if we are no a boundary, but it is not set.
 // ASSUMES:  position is not on a boundary
@@ -423,13 +423,12 @@ int look( double& posx, double& posy, double& posz, double* dir, int& oldRegion)
    int flagErr;
    int lattice_dummy;  // not used
    int nextRegion;     
-   lkwr(posx, posy, posz, dir, oldRegion, lattice_dummy, nextRegion, flagErr, lattice_dummy);
+   f_look(posx, posy, posz, dir, oldRegion, lattice_dummy, nextRegion, flagErr, lattice_dummy);
    return nextRegion;
 }
 //---------------------------------------------------------------------------//
-// lkwr(..)
+// f_look(..)
 //---------------------------------------------------------------------------//
-// Was in 
 // Wrapper for localisation of starting point of particle.
 //
 // Question:  Should pV, the direction vector, be used?  The Flugg wrapper
@@ -441,7 +440,7 @@ int look( double& posx, double& posy, double& posz, double* dir, int& oldRegion)
 // nextRegion - set to the volume index the point is in.
 // ToDo:  Is there an error condition for the flagErr that is guaranteed not to be equal to the next region?
 //        Find a way to make use of the error return from point_in_volume
-void lkwr(double& pSx, double& pSy, double& pSz,
+void f_look(double& pSx, double& pSy, double& pSz,
           double* pV, const int& oldReg, const int& oldLttc,
           int& nextRegion, int& flagErr, int& newLttc)
 {
