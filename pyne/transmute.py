@@ -1,6 +1,7 @@
 import numpy as np
 import scipy as sp
 import tables as tb
+import math
 import sys
 import os
 
@@ -42,13 +43,13 @@ def transmute_core(nuc, t_sim, phi, tree = None, tol = 1e-7):
         nuclide in float format.
     """
     out = {}
+    phi = _check_phi(phi)
     dest = _get_destruction(nuc, phi)
     A = np.zeros((1,1))
     A[0,0] = -dest
-    rootVal = exp(-dest * t_sim)
+    rootVal = math.exp(-dest * t_sim)
     out = {nuc : rootVal}
-    _traversal(nuc, A, phi, t, out, tol, tree, depth = None)
-    out = transmute(inp, t_sim, phi, tree, tol)
+    _traversal(nuc, A, phi, t_sim, out, tol, tree, depth = None)
     return out
 
 
