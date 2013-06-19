@@ -13,6 +13,45 @@ from scipy import linalg
 from tables import *
 
 
+def transmute_core(nuc, t_sim, phi, tree = None, tol = 1e-7):
+    """Core method to transmute a material into its daughters.
+    This method assumes that the initial nuclide has unit density.
+
+    Parameters
+    ----------
+    nuc : nucname
+        Integer representation of nuclide to be transmuted.
+    t_sim : float
+        Time to decay for.
+    phi : NumPy 1-dimensional array of floats
+        Neutron flux vector.
+        If phi is None, the flux vector is set to zero.
+    tree : File
+        The file where the tree log should be written.
+        tree should be None if a tree log is not desired.
+    tol : float
+        Tolerance level for chain truncation.
+        Default tolerance level is 1e-7 for a root of unit density.
+
+    Returns
+    -------
+    out : dictionary
+        A dictionary containing number densities for each nuclide after
+        the simulation is carried out. Keys are nuclide names in integer
+        (zzaaam) form. Values are number densities for the coupled
+        nuclide in float format.
+    """
+    out = {}
+    dest = _get_destruction(nuc, phi)
+    A = np.zeros((1,1))
+    A[0,0] = -dest
+    rootVal = exp(-dest * t_sim)
+    out = {nuc : rootVal}
+    _traversal(nuc, A, phi, t, out, tol, tree, depth = None)
+    out = transmute(inp, t_sim, phi, tree, tol)
+    return out
+
+
 def transmute(inp, t_sim, phi, tree = None, tol = 1e-7):
     """Transmutes a material into its daughters.
 
@@ -46,15 +85,11 @@ def transmute(inp, t_sim, phi, tree = None, tol = 1e-7):
     phi = _check_phi(phi)
     out = {}
     for nuc in inp.keys():
-        A = np.zeros((1,1))
-        dest = _get_destruction(nuc,phi)
-        A[0,0] = -dest
-        N_ini = inp[nuc]
-        if nuc in out.keys():
-            out[nuc] += N_ini
-        else:
-            out[nuc] = N_ini
-        out = _traversal(nuc, A, phi, t_sim, N_ini, out, tol, tree)
+        # Find output for root of unit density
+        out_partial = transmute_core(nuc, t_sim, phi, tree, tol)
+        # Scale all output by actual nuclide density
+        for part in out_partial.keys():
+            out_partial[part] = out_partial[part] * inp[nuc]
     return out
 
 
@@ -104,38 +139,6 @@ def transmute_spatial(space, t_sim, tree = None, tol = 1e-7):
         out = transmute(inp, t_sim, phi, tree, tol)
         space_out[point] = out
     return space_out
-
-
-def transmute_core(nuc, t_sim, phi, tree = None, tol = 1e-7):
-    """Core method to transmute a material into its daughters.
-
-    Parameters
-    ----------
-    nuc : nucname
-        Integer representation of nuclide to be transmuted.
-    t_sim : float
-        Time to decay for.
-    phi : NumPy 1-dimensional array of floats
-        Neutron flux vector.
-        If phi is None, the flux vector is set to zero.
-    tree : File
-        The file where the tree log should be written.
-        tree should be None if a tree log is not desired.
-    tol : float
-        Tolerance level for chain truncation.
-        Default tolerance level is 1e-7 for a root of unit density.
-
-    Returns
-    -------
-    out : dictionary
-        A dictionary containing number densities for each nuclide after
-        the simulation is carried out. Keys are nuclide names in integer
-        (zzaaam) form. Values are number densities for the coupled
-        nuclide in float format.
-    """
-    inp = {nuc : 1.0}
-    out = transmute(inp, t_sim, phi, tree, tol)
-    return out
 
 
 class Nuclide(IsDescription):
@@ -441,7 +444,7 @@ def _grow_matrix(A, prod, dest):
     return B
 
 
-def _check_tol(N, tol, N_ini):
+def _check_tol(N, tol):
     """Method to check if the current nuclide concentration exceeds the
     specified tolerance.
 
@@ -451,8 +454,6 @@ def _check_tol(N, tol, N_ini):
         The calculated final nuclide number density.
     tol : float
         The specified tolerance for the simulation.
-    N_ini : float
-        The number density of the root nuclide.
 
     Returns
     -------
@@ -460,8 +461,6 @@ def _check_tol(N, tol, N_ini):
         False if the final nuclide density is less than the tolerance.
         True if the final nuclide density is not less than the tolerance.
     """
-    # First, scale the tolerance by the root density
-    tol = tol * N_ini
     fail = N > tol
     return fail
 
@@ -493,7 +492,7 @@ def _tree_log(depth, nuc, N, tree):
     return None
 
 
-def _traversal(nuc, A, phi, t, N_ini, out, tol, tree, depth = None):
+def _traversal(nuc, A, phi, t, out, tol, tree, depth = None):
     """Nuclide transmutation traversal method.
 
     This method will traverse the reaction tree recursively, using a DFS
@@ -511,8 +510,6 @@ def _traversal(nuc, A, phi, t, N_ini, out, tol, tree, depth = None):
         in length for proper usage with EAF data.
     t : float
         Time at which to evaluate transmutation events.
-    N_ini : float
-        Number density of initial nuclide at root of transmutation tree.
     out : dictionary
         A dictionary containing the final recorded number densities for each
         nuclide. Keys are nuclide names in integer (zzaaam) form. Values are
@@ -536,7 +533,7 @@ def _traversal(nuc, A, phi, t, N_ini, out, tol, tree, depth = None):
     # Log initial nuclide
     if depth is None and tree is not None:
         depth = 0
-        _tree_log(depth, nuc, N_ini, tree)
+        _tree_log(depth, nuc, 1, tree)
     # Lookup decay constant of current nuclide
     lam = data.decay_const(nuc)
     # Lookup decay products and reaction daughters
@@ -564,7 +561,7 @@ def _traversal(nuc, A, phi, t, N_ini, out, tol, tree, depth = None):
         # Create initial density vector
         n = B.shape[0]
         N0 = np.zeros((n,1))
-        N0[0] = N_ini
+        N0[0] = 1
         # Compute matrix exponential and dot with density vector
         eB = _matrix_exp(B, t)
         N_final = np.dot(eB, N0)
@@ -572,9 +569,9 @@ def _traversal(nuc, A, phi, t, N_ini, out, tol, tree, depth = None):
         if tree:
             _tree_log(depth+1, child, N_final[-1], tree)
         # Check against tolerance
-        if _check_tol(N_final[-1], tol, N_ini):
+        if _check_tol(N_final[-1], tol):
             # Continue traversal
-            out = _traversal(child, B, phi, t, N_ini, out, tol, tree, depth+1)
+            out = _traversal(child, B, phi, t, out, tol, tree, depth+1)
         # On recursion exit or truncation, write data from this nuclide
         if child in out.keys():
             out[child] += N_final[-1]
