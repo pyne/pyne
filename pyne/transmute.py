@@ -49,7 +49,7 @@ def transmute_core(nuc, t_sim, phi, tree = None, tol = 1e-7):
     A[0,0] = -dest
     rootVal = math.exp(-dest * t_sim)
     out = {nuc : rootVal}
-    _traversal(nuc, A, phi, t_sim, out, tol, tree, depth = None)
+    out = _traversal(nuc, A, phi, t_sim, out, tol, tree, depth = None)
     return out
 
 
