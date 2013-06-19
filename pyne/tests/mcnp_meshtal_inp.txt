@@ -32,7 +32,6 @@ fmesh24:p origin -200 -200 -200 tr=2
          jmesh = 200
          jints = 4
          emesh = 1E-1 2E-1 1E0
-         emesh = 1E-3 1E-2 1E-1
          eints = 3   2 1
 fmesh34:p origin -200 -200 -200
          imesh = 100 200
