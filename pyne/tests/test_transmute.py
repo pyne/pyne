@@ -158,6 +158,18 @@ def test_zero_flux():
     out = transmute.transmute_core(nuc, t_sim, phi, tree, tol)
     assert_equal(out[nuc], 1)
 
+"""Tests that the root isotope is not being skipped"""
+def test_root_decrease():
+    nuc = nucname.zzaaam('FE56')
+    t_sim = 100.
+    phi = np.zeros((175,1))
+    for i in np.arange(phi.shape[0]):
+        phi[i] = 1e12
+    tree = None
+    tol = 1e-7
+    out = transmute.transmute_core(nuc, t_sim, phi, tree, tol)
+    assert_true(out[nuc] < 1)
+
 #
 # Run as script
 #
