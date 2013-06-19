@@ -27,8 +27,6 @@ def transmute(inp, t_sim, phi, tree = None, tol = 1e-7):
     phi : NumPy 1-dimensional array of floats
         Neutron flux vector.
         If phi is None, the flux vector is set to zero.
-        If phi is less than 175 entries in length, zeros will be added
-        until it contains 175 entries.
     tree : File
         The file where the tree log should be written.
         tree should be None if a tree log is not desired.
@@ -45,7 +43,7 @@ def transmute(inp, t_sim, phi, tree = None, tol = 1e-7):
         nuclide in float format.
     """
     # Properly format phi
-    phi = _format_phi(phi)
+    phi = _check_phi(phi)
     out = {}
     for nuc in inp.keys():
         A = np.zeros((1,1))
@@ -80,8 +78,6 @@ def transmute_spatial(space, t_sim, tree = None, tol = 1e-7):
     phi : NumPy 1-dimensional array of floats
         Neutron flux vector.
         If phi is None, the flux vector is set to zero.
-        If phi is less than 175 entries in length, zeros will be added
-        until it contains 175 entries.
     tree : File
         The file where the tree log should be written.
         tree should be None if a tree log is not desired.
@@ -122,8 +118,6 @@ def transmute_core(nuc, t_sim, phi, tree = None, tol = 1e-7):
     phi : NumPy 1-dimensional array of floats
         Neutron flux vector.
         If phi is None, the flux vector is set to zero.
-        If phi is less than 175 entries in length, zeros will be added
-        until it contains 175 entries.
     tree : File
         The file where the tree log should be written.
         tree should be None if a tree log is not desired.
@@ -228,13 +222,14 @@ def write_space_hdf5(h5file, parentGroup, space_out):
     return None
             
 
-def _format_phi(phi):
+def _check_phi(phi):
     """Ensures that the flux vector phi is correctly formatted.
 
     Parameters
     ----------
     phi : NumPy 1-dimensional array
-        Phi may be of various acceptable formats.
+        Phi may be either correctly formatted or None.
+        When the value of phi is None, a vector of zero flux is used.
 
     Returns
     -------
@@ -245,12 +240,12 @@ def _format_phi(phi):
         phi = np.zeros((175,1))
         return phi
     n = phi.shape[0]
-    if phi.ndim == 1:
-        phi = phi.reshape((n,1))
-    if n < 175:
-        rem = 175 - n
-        app = np.zeros((rem,1))
-        phi = np.append(phi, app, 0)
+    if phi.ndim != 2:
+        # Throw exception for incorrect shape
+        pass
+    if n != 175:
+        # Throw exception for incorrect number of entries
+        pass
     return phi
 
 

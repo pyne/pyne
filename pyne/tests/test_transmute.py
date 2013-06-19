@@ -34,6 +34,7 @@ def test_expm():
 
 
 """Ensures the flux vector format is completing"""
+"""
 def test_phi_size_check():
     phiPass = np.arange(175)
     phiPass = phiPass.reshape((175,1))
@@ -42,6 +43,7 @@ def test_phi_size_check():
     phi2 = phi.reshape((100,1))
     out = np.append(phi2, np.zeros((75,1)), 0)
     assert_true(np.array_equal(out, transmute._format_phi(phi)))
+"""
 
 
 """Tests correct application of the _get_daughters function"""
