@@ -3,7 +3,6 @@ import scipy as sp
 import tables as tb
 import math
 import sys
-import os
 
 from pyne import data
 from pyne import nucname
