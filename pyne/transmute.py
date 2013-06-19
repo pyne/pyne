@@ -143,8 +143,9 @@ def transmute_spatial(space, t_sim, tree = None, tol = 1e-7):
 
 class Nuclide(IsDescription):
     """Class to describe columns of hdf5 output table"""
-    name = StringCol(16)
-    zzaaam = StringCol(16)
+    size = 16
+    name = StringCol(size)
+    zzaaam = StringCol(size)
     density = FloatCol()
 
 
@@ -237,16 +238,17 @@ def _check_phi(phi):
     Returns
     -------
     phi : NumPy 1-dimensional array
-        Phi will be returned with a shape of (175,1).
+        Phi will be returned with a shape of (numEntries,1).
     """
+    numEntries = 175
     if phi is None:
-        phi = np.zeros((175,1))
+        phi = np.zeros((numEntries,1))
         return phi
     n = phi.shape[0]
     if phi.ndim != 2:
         # Throw exception for incorrect shape
         pass
-    if n != 175:
+    if n != numEntries:
         # Throw exception for incorrect number of entries
         pass
     return phi
@@ -311,10 +313,13 @@ def _get_daughters(nuc):
             Cross sections have been converted from units of b to units
             of cm^2.
     """
+    numEntries = 175
+    barn_cm2 = 1e-24
+    fissionMT = 180
     daugh_dict = {}
     # Remove fission MT# (cannot handle)
-    if '180' in EAF_RX:
-        EAF_RX.remove('180')
+    if fissionMT in EAF_RX:
+        EAF_RX.remove(fissionMT)
     # Open nuc_data.h5
     with tb.openFile(nuc_data, 'r') as f:
         # Set working node that contains EAF cross sections
@@ -327,8 +332,9 @@ def _get_daughters(nuc):
         if all_rx[i] not in EAF_RX:
             continue
         daugh = _convert_eaf(daughters[i])
-        xs = all_xs[i] * 1e-24
-        daugh_dict[daugh] = xs.reshape((175,1))
+        # Convert from barns to cm^2
+        xs = all_xs[i] * barn_cm2
+        daugh_dict[daugh] = xs.reshape((numEntries,1))
     return daugh_dict
 
 
@@ -403,9 +409,10 @@ def _get_destruction(nuc, phi, addDecay = True):
     d : float
         Destruction rate of the nuclide.
     """
+    numEntries = 175
     nuc = nucname.zzaaam(nuc)
     rxn_dict = _get_daughters(nuc)
-    xs_total = np.zeros((175,1))
+    xs_total = np.zeros((numEntries,1))
     for key in rxn_dict.keys():
         xs_total += rxn_dict[key]
     if addDecay:
