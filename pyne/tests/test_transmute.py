@@ -147,6 +147,17 @@ def test_tree_log():
         assert_equal(lines[i], temp[i])
     os.remove(filename)
 
+"""Tests correct implementation of a transmutation with zero flux on an
+isotope with a zero decay-constant."""
+def test_zero_flux():
+    nuc = nucname.zzaaam('FE56')
+    t_sim = 100.
+    phi = None
+    tree = None
+    tol = 1e-7
+    out = transmute.transmute_core(nuc, t_sim, phi, tree, tol)
+    assert_equal(out[nuc], 1)
+
 #
 # Run as script
 #
