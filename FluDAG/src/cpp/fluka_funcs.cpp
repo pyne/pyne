@@ -90,7 +90,8 @@ static bool visited_surface = false;
 static bool use_dist_limit = false;
 static double dist_limit; // needs to be thread-local
 
-MBEntityHandle next_surf;
+MBEntityHandle next_surf; // the next suface the ray will hit
+MBEntityHandle prev_surf; // the last value of next surface
 MBEntityHandle PrevRegion; // the integer region that the particle was in previously
 
 std::string ExePath() 
@@ -268,9 +269,10 @@ void g1_fire(int& oldRegion, double point[], double dir[], double &propStep, dou
       std::cout << "Direction vector " << dir[0] << " " << dir[1] << " " << dir[2] << std::endl;
   }
   MBEntityHandle vol = DAG->entity_by_index(3,oldRegion);
-
   double next_surf_dist;
   MBEntityHandle newvol = 0;
+
+  next_surf = prev_surf;
 
   // vol = check_reg(vol,point,dir); // check we are where we say we are
   oldRegion = DAG->index_by_handle(vol);
@@ -307,6 +309,7 @@ void g1_fire(int& oldRegion, double point[], double dir[], double &propStep, dou
     {
       newRegion = oldRegion;
       retStep = propStep; //physics limits step
+      next_surf = prev_surf;
     }
 
   PrevRegion = newRegion; // particle will be moving to PrevRegion upon next entry.
@@ -316,6 +319,9 @@ void g1_fire(int& oldRegion, double point[], double dir[], double &propStep, dou
      std::cout << "Region on other side of surface is  = " << newRegion << \
                   ", Distance to next surf is " << retStep << std::endl;
   }
+
+  prev_surf = next_surf;
+
   return;
 }
 ///////			End g1wr and g1
@@ -376,7 +382,7 @@ void nrmlwr(double& pSx, double& pSy, double& pSz,
   }
   // sense of next_surf with respect to oldRegion (volume)
   int sense = getSense(oldRegion);
-  if (sense == -1 )
+  if (sense == 1 )
     {
       norml[0]=norml[0]*-1.0;
       norml[0]=norml[0]*-1.0;
