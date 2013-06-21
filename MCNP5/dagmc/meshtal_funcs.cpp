@@ -78,7 +78,7 @@ void dagmc_fmesh_initialize_( const int* mcnp_icl ){
 /**
  * Convert the contents of an FC card to an fmesh_params_t (i.e. a multimap<string,string>)
  * @param fc_content The FC card's comment content as a string
- * @param results The output data
+ * @param results The output data, as a multimap
  * @param fcid The tally ID of the FC card
  * @return true on success, or false if the input has serious enough formatting problems
  *         to make parameter parsing impossible.
