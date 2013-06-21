@@ -8,40 +8,15 @@
 #include <vector>
 
 #include "moab/Range.hpp"
-
+#include "Tally.hpp"
+// Note:  It may be possible to remove this include.
+// TallyEvent.hpp includes Tally.hpp
 #include "TallyEvent.hpp"
 
 // forward declaration
 namespace moab {
   class Interface;
 }
-
-//===========================================================================//
-/**
- * \struct MeshTallyInput
- * \brief Input data needed to set up a mesh tally
- */
-//===========================================================================//
-struct MeshTallyInput
-{
-    /// Typedef for map that stores optional mesh tally input parameters
-    typedef std::multimap<std::string, std::string> TallyOptions;
-
-    /// User-specified ID for this mesh tally
-    unsigned int tally_id;
-
-    /// Energy bin boundaries defined for all mesh tally points
-    std::vector<double> energy_bin_bounds;
-
-    /// If true, add an extra energy bin to tally all energy levels
-    bool total_energy_bin;
-
-    /// Name of input file containing mesh data
-    std::string input_filename;
-
-    /// Optional input parameters requested by user
-    TallyOptions options;
-};
 
 //===========================================================================//
 /**
@@ -77,7 +52,7 @@ class MeshTally
      * \brief Constructor
      * \param input user-defined input parameters for this mesh tally
      */
-    explicit MeshTally(const MeshTallyInput& input);
+    explicit MeshTally(const TallyInput& input);
 
   public:
     /**
@@ -128,7 +103,7 @@ class MeshTally
 
   protected:
     /// Input data defined by user for this mesh tally
-    MeshTallyInput input_data;
+    TallyInput input_data;
 
     /// Number of energy bins implemented in the data arrays
     unsigned int num_energy_bins; 
