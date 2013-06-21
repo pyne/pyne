@@ -3,8 +3,6 @@
 #ifndef DAGMC_TALLY_EVENT_HPP
 #define DAGMC_TALLY_EVENT_HPP
 
-// ToDo:  Clean up;  This file is being modified for Issue #90
-#include <map>
 #include "Tally.hpp"
 
 #include "moab/CartVect.hpp"
@@ -66,20 +64,34 @@ class TallyEvent
      */
     TallyEvent();
     
-    // Keep a record of the Observers
-    std::map <int, Tally *> observers; 
 
     // >>> PUBLIC INTERFACE
+    // Create and a new Tally
+    // ToDo: turn into doc
+    /// Typedef for map that stores optional tally input parameters
+    /// User-specified ID for this tally
+    /// Energy bin boundaries defined for all tally points
+    /// If true, add an extra energy bin to tally all energy levels
+    Tally *createTally(std::multimap<std::string, std::string>& options, 
+                       unsigned int tally_id,
+                       const std::vector<double>& energy_bin_bounds,
+                       bool total_energy_bin);
+                       
 
     // Add a new Tally
-    void addTally(int, Tally *);
+    void addTally(int tally_index, Tally *obs);
 
     // Remove a Tally
-    void removeTally(int map_index, Tally *obs);
+    void removeTally(int tally_index, Tally *obs);
 
     // Call action on every tally
     void update_tallies();
 
+    // Call end_history() on every tally
+    void end_history();
+
+    // Call write_data() on every tally
+    void write_data();
     /**
      * \brief Sets tally multiplier for the event
      * \param value energy-dependent value for the tally multiplier
@@ -117,6 +129,9 @@ class TallyEvent
                            EventType type);
 
   private:
+
+    // Keep a record of the Observers
+    std::map <int, Tally*> observers; 
 
     /// Energy-dependent multiplier for this event
     double tally_multiplier;

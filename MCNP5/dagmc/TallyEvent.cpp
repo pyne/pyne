@@ -12,17 +12,36 @@ TallyEvent::TallyEvent(): event_type(NONE){}
 //---------------------------------------------------------------------------//
 // PUBLIC INTERFACE
 //---------------------------------------------------------------------------//
-// Add a new Tally
-void TallyEvent::addTally(int map_index, Tally *obs)
+// Create a new Tally with the implementation that calls this method
+Tally *createTally(std::multimap<std::string, std::string>& options, 
+                   unsigned int tally_id,
+                   const std::vector<double>& energy_bin_bounds,
+                   bool total_energy_bin)
 {
-        observers.insert(std::pair<int, Tally *>(map_index, obs));   
+	Tally *ret;
+        TallyInput input; 
+
+        input.options  = options;
+	input.tally_id = tally_id;
+        input.energy_bin_bounds = energy_bin_bounds;
+        input.total_energy_bin  = total_energy_bin; 
+        
+        // Tally::create_tally is not static:  this does not compile
+        ret = Tally::create_tally(input);
+        return ret;
+}
+
+// Add a Tally  
+void TallyEvent::addTally(int tally_index, Tally *obs)
+{
+        observers.insert(std::pair<int, Tally *>(tally_index, obs));   
 }
 
 // Remove a Tally - Observer pattern best practise
-void TallyEvent::removeTally(int map_index, Tally *obs)
+void TallyEvent::removeTally(int tally_index, Tally *obs)
 {
         std::map<int, Tally *>::iterator it;	
- 	it = observers.find(map_index);
+ 	it = observers.find(tally_index);
 	observers.erase(it);
 }
 
@@ -33,6 +52,26 @@ void TallyEvent::update_tallies()
        {
            Tally *tally = map_it->second;
 	   tally->update();
+       }
+}
+
+void TallyEvent::end_history()
+{
+       std::map<int, Tally*>::iterator map_it;
+       for (map_it = observers.begin(); map_it != observers.end(); ++map_it)
+       {
+           Tally *tally = map_it->second;
+	   tally->end_history();
+       }
+}
+
+void TallyEvent::write_data()
+{
+       std::map<int, Tally*>::iterator map_it;
+       for (map_it = observers.begin(); map_it != observers.end(); ++map_it)
+       {
+           Tally *tally = map_it->second;
+	   tally->write_data();
        }
 }
 
