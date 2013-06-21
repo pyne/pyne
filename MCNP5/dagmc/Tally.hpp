@@ -3,6 +3,7 @@
 #ifndef DAGMC_TALLY_HPP
 #define DAGMC_TALLY_HPP
 
+#include <string>
 #include <map>
 #include <vector>
 
