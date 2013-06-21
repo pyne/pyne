@@ -3,6 +3,34 @@
 #ifndef DAGMC_TALLY_HPP
 #define DAGMC_TALLY_HPP
 
+#include <map>
+#include <vector>
+
+//===========================================================================//
+/**
+ * \struct TallyInput
+ * \brief Input data needed to set up a tally (could be mesh or other)
+ *  May add time bins, angle bins etc.
+ */
+//===========================================================================//
+struct TallyInput
+{
+    /// Typedef for map that stores optional tally input parameters
+    typedef std::multimap<std::string, std::string> TallyOptions;
+
+    /// User-specified ID for this tally
+    unsigned int tally_id;
+
+    /// Energy bin boundaries defined for all tally points
+    std::vector<double> energy_bin_bounds;
+
+    /// If true, add an extra energy bin to tally all energy levels
+    bool total_energy_bin;
+
+    /// Optional input parameters requested by user
+    TallyOptions options;
+};
+
 
 //===========================================================================//
 /**
@@ -21,13 +49,20 @@ class Tally
     /**
      * \brief Defines update
      *
-     *     1) blah blah blah
+     * Pass Particle state data
      */
     virtual void update() = 0;
  
     virtual void end_history() = 0;
 
     virtual void write_data() = 0;
+
+    /**
+     *  \brief Factory method for creation of Tally Observers
+     * 
+     *
+    */
+    static Tally *create_tally(const TallyInput& input);
 };
 
 #endif // DAGMC_TALLY_HPP
