@@ -15,19 +15,19 @@ cdef extern from "rxname.h" namespace "pyne::rxname":
     set[std_string] names
 
     # Conversion dictionaries
-    map[std_string, extra_types.uint] altnames
-    map[extra_types.uint, std_string] id_name
-    map[std_string, extra_types.uint] name_id
-    map[extra_types.uint, extra_types.uint] id_mt
-    map[extra_types.uint, extra_types.uint] mt_id
-    map[extra_types.uint, std_string] labels
-    map[extra_types.uint, std_string] docs
+    map[std_string, extra_types.uint32] altnames
+    map[extra_types.uint32, std_string] id_name
+    map[std_string, extra_types.uint32] name_id
+    map[extra_types.uint32, extra_types.uint32] id_mt
+    map[extra_types.uint32, extra_types.uint32] mt_id
+    map[extra_types.uint32, std_string] labels
+    map[extra_types.uint32, std_string] docs
 
-    extra_types.uint hash(std_string) except +
-    extra_types.uint hash(const_char *) except +
+    extra_types.uint32 hash(std_string) except +
+    extra_types.uint32 hash(const_char *) except +
 
     std_string name(int) except +
-    std_string name(extra_types.uint) except +
+    std_string name(extra_types.uint32) except +
     std_string name(char *) except +
     std_string name(std_string) except +
     std_string name(int, int) except +
@@ -39,34 +39,34 @@ cdef extern from "rxname.h" namespace "pyne::rxname":
     std_string name(std_string, int, std_string) except +
     std_string name(std_string, std_string, std_string) except + 
 
-    extra_types.uint id(int) except +
-    extra_types.uint id(extra_types.uint) except +
-    extra_types.uint id(char *) except +
-    extra_types.uint id(std_string) except +
-    extra_types.uint id(int, int) except +
-    extra_types.uint id(int, std_string) except +
-    extra_types.uint id(std_string, int) except +
-    extra_types.uint id(std_string, std_string) except + 
-    extra_types.uint id(int, int, std_string) except +
-    extra_types.uint id(int, std_string, std_string) except +
-    extra_types.uint id(std_string, int, std_string) except +
-    extra_types.uint id(std_string, std_string, std_string) except + 
+    extra_types.uint32 id(int) except +
+    extra_types.uint32 id(extra_types.uint) except +
+    extra_types.uint32 id(char *) except +
+    extra_types.uint32 id(std_string) except +
+    extra_types.uint32 id(int, int) except +
+    extra_types.uint32 id(int, std_string) except +
+    extra_types.uint32 id(std_string, int) except +
+    extra_types.uint32 id(std_string, std_string) except + 
+    extra_types.uint32 id(int, int, std_string) except +
+    extra_types.uint32 id(int, std_string, std_string) except +
+    extra_types.uint32 id(std_string, int, std_string) except +
+    extra_types.uint32 id(std_string, std_string, std_string) except + 
 
-    extra_types.uint mt(int) except +
-    extra_types.uint mt(extra_types.uint) except +
-    extra_types.uint mt(char *) except +
-    extra_types.uint mt(std_string) except +
-    extra_types.uint mt(int, int) except +
-    extra_types.uint mt(int, std_string) except +
-    extra_types.uint mt(std_string, int) except +
-    extra_types.uint mt(std_string, std_string) except + 
-    extra_types.uint mt(int, int, std_string) except +
-    extra_types.uint mt(int, std_string, std_string) except +
-    extra_types.uint mt(std_string, int, std_string) except +
-    extra_types.uint mt(std_string, std_string, std_string) except + 
+    extra_types.uint32 mt(int) except +
+    extra_types.uint32 mt(extra_types.uint) except +
+    extra_types.uint32 mt(char *) except +
+    extra_types.uint32 mt(std_string) except +
+    extra_types.uint32 mt(int, int) except +
+    extra_types.uint32 mt(int, std_string) except +
+    extra_types.uint32 mt(std_string, int) except +
+    extra_types.uint32 mt(std_string, std_string) except + 
+    extra_types.uint32 mt(int, int, std_string) except +
+    extra_types.uint32 mt(int, std_string, std_string) except +
+    extra_types.uint32 mt(std_string, int, std_string) except +
+    extra_types.uint32 mt(std_string, std_string, std_string) except + 
 
     std_string label(int) except +
-    std_string label(extra_types.uint) except +
+    std_string label(extra_types.uint32) except +
     std_string label(char *) except +
     std_string label(std_string) except +
     std_string label(int, int) except +
@@ -79,7 +79,7 @@ cdef extern from "rxname.h" namespace "pyne::rxname":
     std_string label(std_string, std_string, std_string) except + 
 
     std_string doc(int) except +
-    std_string doc(extra_types.uint) except +
+    std_string doc(extra_types.uint32) except +
     std_string doc(char *) except +
     std_string doc(std_string) except +
     std_string doc(int, int) except +
