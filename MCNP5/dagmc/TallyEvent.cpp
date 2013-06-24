@@ -11,6 +11,7 @@ TallyEvent::TallyEvent(): event_type(NONE){}
 // PUBLIC INTERFACE
 //---------------------------------------------------------------------------//
 // Create a new Tally with the implementation that calls this method
+// ToDo:  Create a signature with an input file instead of the multimap arg
 Tally *createTally(std::multimap<std::string, std::string>& options, 
                    unsigned int tally_id,
                    const std::vector<double>& energy_bin_bounds,
@@ -20,25 +21,35 @@ Tally *createTally(std::multimap<std::string, std::string>& options,
         TallyInput input; 
 
         input.options  = options;
-	input.tally_id = tally_id;
         input.energy_bin_bounds = energy_bin_bounds;
         input.total_energy_bin  = total_energy_bin; 
         
-        ret = Tally::create_tally(input);
+        ret = Tally::create_tally(tally_id, input);
         return ret;
 }
 
 // Add a Tally  
-void TallyEvent::addTally(int tally_index, Tally *obs)
+void TallyEvent::addTally(int tally_id, Tally *obs)
 {
-        observers.insert(std::pair<int, Tally *>(tally_index, obs));   
+        observers.insert(std::pair<int, Tally *>(tally_id, obs));   
+}
+
+// Add a newly created Tally
+void TallyEvent::addNewTally(std::multimap<std::string, std::string>& options, 
+                   unsigned int tally_id,
+                   const std::vector<double>& energy_bin_bounds,
+                   bool total_energy_bin)
+
+{
+	Tally *newTally = createTally(options, tally_id, energy_bin_bounds, total_energy_bin);
+        addTally(tally_id, newTally);
 }
 
 // Remove a Tally - Observer pattern best practise
-void TallyEvent::removeTally(int tally_index, Tally *obs)
+void TallyEvent::removeTally(int tally_id)
 {
         std::map<int, Tally *>::iterator it;	
- 	it = observers.find(tally_index);
+ 	it = observers.find(tally_id);
 	observers.erase(it);
 }
 

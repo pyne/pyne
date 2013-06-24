@@ -18,6 +18,7 @@ INCLUDE_DIRECTORIES("${HOME}/dagmc_bld/MOAB/include")
 
 ADD_LIBRARY(tally 
 	${DAGMC_MESHTALLY_SOURCE}/TallyEvent.cpp
+	${DAGMC_MESHTALLY_SOURCE}/Tally.cpp
 )
 
 # make mesh tally source files into a library

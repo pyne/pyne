@@ -80,10 +80,15 @@ class TallyEvent
                        
 
     // Add a new Tally
-    void addTally(int tally_index, Tally *obs);
+    void addTally(int tally_id, Tally *obs);
+
+    void addNewTally(std::multimap<std::string, std::string>& options, 
+                   unsigned int tally_id,
+                   const std::vector<double>& energy_bin_bounds,
+                   bool total_energy_bin);
 
     // Remove a Tally
-    void removeTally(int tally_index, Tally *obs);
+    void removeTally(int tally_id);
 
     // Call action on every tally
     void update_tallies();
