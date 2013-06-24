@@ -20,7 +20,7 @@ struct TallyInput
     typedef std::multimap<std::string, std::string> TallyOptions;
 
     /// User-specified ID for this tally
-    unsigned int tally_id;
+//    unsigned int tally_id;
 
     /// Energy bin boundaries defined for all tally points
     std::vector<double> energy_bin_bounds;
@@ -46,7 +46,7 @@ struct TallyInput
 class Tally
 {
   public:
-
+    
     /**
      * \brief Defines update
      *
@@ -63,8 +63,21 @@ class Tally
      * 
      *
     */
-    static Tally *create_tally(const TallyInput& input);
+    static Tally *create_tally(int id, const TallyInput& input);
+
+    unsigned int tally_id;
+
+  protected:
+
+    TallyInput input_data;
+
+    Tally(int id, TallyInput input)
+    {
+       tally_id   = id; 
+       input_data = input;
+    }
 };
+
 
 #endif // DAGMC_TALLY_HPP
 
