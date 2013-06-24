@@ -1158,6 +1158,11 @@ class Wwinp(object):
             ni = 1, the e will look like [[]]. If ni = 2, e will look like
             [[], []].
         bounds : list of lists of spacial bounds in the i, j, k dimensions.
+	mesh : scdmesh containing all the neutron and/or photon weight 
+	       window lower bounds. These tags have the form "ww_X_group_YYY"
+	       where X is n or p and YYY is the energy group number
+	       (e.g. 001, 002, etc.). The mesh has rootSet tags in the form
+	       X_e_upper_bounds.
     """
     def __init__(self):
         pass
