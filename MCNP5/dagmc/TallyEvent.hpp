@@ -131,6 +131,13 @@ class TallyEvent
                    double track_length = 0.0, double total_cross_section = 0.0); 
                            
 
+    /**
+     *  \brief Reset TallyEvent data
+     *
+     *  Set eventType to NONE and clear the particle data
+     */
+    void clear_last_event();
+
   private:
 
     // Keep a record of the Observers
