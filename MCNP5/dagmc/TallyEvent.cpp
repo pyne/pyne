@@ -1,7 +1,5 @@
 // MCNP5/dagmc/TallyEvent.cpp
 
-#include "moab/CartVect.hpp"
-
 #include "TallyEvent.hpp"
 
 //---------------------------------------------------------------------------//
@@ -75,21 +73,27 @@ void TallyEvent::write_data()
        }
 }
 
-void TallyEvent::set_event(const moab::CartVect& position, 
-                           const moab::CartVect& direction,
-                           double track_length, double total_cross_section, 
+void TallyEvent::set_event(double x, double y, double z, 
+                           double u, double v, double w,                           
                            double particle_energy, double particle_weight, 
-                           EventType type)
+                           double track_length, double total_cross_section) 
 {
+    if (track_length == 0.0 && total_cross_section == 0.0)
+    {
+       std::cerr << "Error:  No event type has been defined." << std::endl;
+       return;
+    }
+
     /// Set the particle state object
-    particle.position            = position;
-    particle.direction           = direction;
+    particle.position            = moab::CartVect(x, y, z);
+    particle.direction           = moab::CartVect(u, v, w);
     particle.track_length        = track_length;
     particle.total_cross_section = total_cross_section;
     particle.energy              = particle_energy;
     particle.weight              = particle_weight;
  
-    event_type = type;
+    // If more event types are needed this should become a nested if statement
+    event_type = track_length > 0.0 ? TRACK : (total_cross_section > 0.0 ? COLLISION : NONE);
 }
 
 //---------------------------------------------------------------------------//
@@ -110,8 +114,7 @@ double TallyEvent::get_tally_multiplier() const
 double TallyEvent::get_weighting_factor() const
 {
     return tally_multiplier * particle.weight;
-}
-//---------------------------------------------------------------------------//
+} //---------------------------------------------------------------------------//
 TallyEvent::EventType TallyEvent::get_event_type() const
 {
     return event_type;

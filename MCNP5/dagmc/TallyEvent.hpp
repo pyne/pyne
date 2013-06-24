@@ -3,6 +3,7 @@
 #ifndef DAGMC_TALLY_EVENT_HPP
 #define DAGMC_TALLY_EVENT_HPP
 
+#include <iostream>
 #include "Tally.hpp"
 
 #include "moab/CartVect.hpp"
@@ -121,12 +122,14 @@ class TallyEvent
     /**
      * \brief fill the ParticleState
      * \param position interpreted differently for TrackLength and Collision 
+     * Requires one of track_length and total_cross_section to be nonzero
+     * ToDo:  may not need u, v, w in signature 
      */
-    void set_event(const moab::CartVect& position, 
-                           const moab::CartVect& direction,
-                           double track_length, double total_cross_section, 
-                           double particle_energy, double particle_weight, 
-                           EventType type);
+    void set_event(double x, double y, double z,
+                   double u, double v, double w,                           
+                   double particle_energy, double particle_weight,
+                   double track_length = 0.0, double total_cross_section = 0.0); 
+                           
 
   private:
 
