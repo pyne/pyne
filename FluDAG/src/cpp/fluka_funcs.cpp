@@ -983,10 +983,11 @@ void fludagwrite_assignma(std::string lfname)  // file with cell/surface cards
         lcadfile << std::setw(10) << std::left << "MATERIAL";
         lcadfile << std::setw(10) << std::right << "at. no.";
         lcadfile << std::setw(10) << std::right << "g/mole";
+        lcadfile << std::setw(10) << std::right << "g/cm^3";
         lcadfile << std::setw(10) << std::right << ++matID;
         lcadfile << std::setw(10) << std::right << "alt. no.";
         lcadfile << std::setw(10) << std::right << "mass no.";
-        lcadfile << std::setw(10) << std::right << *it << std::endl;
+        lcadfile << std::setw(10) << std::left << *it << std::endl;
      }
   }
   lcadfile << header << std::endl;
