@@ -369,7 +369,6 @@ void f_normal(double& pSx, double& pSy, double& pSz,
       std::cout << "============ NRMLWR =============" << std::endl;
   }
 
-
   MBEntityHandle OldReg = DAG -> entity_by_index(3,oldRegion); // entity handle
   double xyz[3] = {pSx,pSy,pSz}; //position vector
   double uvw[3] = {pVx,pVy,pVz}; //particl directoin
