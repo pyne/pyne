@@ -1,9 +1,11 @@
 # Makefile for Sphinx documentation
 #
 
-GH_PAGES_SOURCES = doc-src/source
-CURRENT_BRANCH = $(shell git branch 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/\1/')
+GH_SOURCE_DIRS = doc-src/source
 
+GH_CURRENT_BRANCH = $(shell git branch 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/\1/')
+GH_SOURCE_BRANCH = master
+GH_BUILD_BRANCH = gh-pages
 
 # You can set these variables from the command line.
 SPHINXOPTS    =
@@ -45,24 +47,19 @@ help:
 	@echo "  doctest    to run all doctests embedded in the documentation (if enabled)"
 
 gh-pages:
-	git checkout gh-pages
-	git checkout $(CURRENT_BRANCH) $(GH_PAGES_SOURCES)
+	git checkout $(GH_BUILD_BRANCH)
+	git checkout $(GH_SOURCE_BRANCH) $(GH_SOURCE_DIRS)
 	git reset HEAD
-	rm -rf _static _sources doc doctrees build
-	make  html
-	mv -fv build/* .
-	rm -rf $(GH_PAGES_SOURCES) build
-	git add -A
-	git commit -m "Generated gh-pages for `git log master -1 --pretty=short --abbrev-commit`" && git push origin gh-pages
-	git checkout master
+	make html
+	make gh-install
+	make gh-push
 
 gh-preview:
-	git checkout gh-pages
-	git checkout $(CURRENT_BRANCH) $(GH_PAGES_SOURCES)
+	git checkout $(GH_BUILD_BRANCH)
+	git checkout $(GH_CURRENT_BRANCH) $(GH_SOURCE_DIRS)
 	git reset HEAD
-	rm -rf _static _sources doc doctrees build
-	make  html
-	mv -fv build/* .
+	make html
+	make gh-install
 
 
 clean:
