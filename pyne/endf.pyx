@@ -777,7 +777,7 @@ class Library(rx.RxLib):
             range_flags, ('SPI','AP',0,0,'NLS',0), subsection, total_lines)
         return total_lines
 
-    def _read_xs(self, mat_id, mt, nuc_i = None):
+    def _read_xs(self, mat_id, mt, nuc_i=None):
         """Read in cross-section data. Read resonances with Library._read_res
         first.
 
@@ -825,11 +825,10 @@ class Library(rx.RxLib):
         """
         if not nuc_i:
             nuc_i = nuc
-        try:
-            return self.structure[nuc]['data'][nuc_i]['xs'][mt]
-        except KeyError:
+        if nuc not in self.structure or nuc_i not in self.structure[nuc]['data']:
+            self._read_res(nuc)
             self._read_xs(nuc, mt, nuc_i)
-            return self.structure[nuc]['data'][nuc_i]['xs'][mt]
+        return self.structure[nuc]['data'][nuc_i]['xs'][mt]
 
     def get_rx(self, nuc, mf, mt, lines=0):
         """Grab the data from one reaction type.
