@@ -240,15 +240,15 @@ def _check_phi(phi):
     phi : NumPy 1-dimensional array
         Phi will be returned with a shape of (numEntries,1).
     """
-    numEntries = 175
+    eaf_numEntries = 175
     if phi is None:
-        phi = np.zeros((numEntries,1))
+        phi = np.zeros((eaf_numEntries,1))
         return phi
     n = phi.shape[0]
     if phi.ndim != 2:
         # Throw exception for incorrect shape
         pass
-    if n != numEntries:
+    if n != eaf_numEntries:
         # Throw exception for incorrect number of entries
         pass
     return phi
@@ -313,7 +313,7 @@ def _get_daughters(nuc):
             Cross sections have been converted from units of b to units
             of cm^2.
     """
-    numEntries = 175
+    eaf_numEntries = 175
     barn_cm2 = 1e-24
     fissionMT = 180
     daugh_dict = {}
@@ -334,7 +334,7 @@ def _get_daughters(nuc):
         daugh = _convert_eaf(daughters[i])
         # Convert from barns to cm^2
         xs = all_xs[i] * barn_cm2
-        daugh_dict[daugh] = xs.reshape((numEntries,1))
+        daugh_dict[daugh] = xs.reshape((eaf_numEntries, 1))
     return daugh_dict
 
 
@@ -351,14 +351,20 @@ def _convert_eaf(daugh):
     daugh_conv : nucname
         Name of daugh in zzaaam format appropriate for PyNE.
     """
+    singleSpace = ' '
+    noSpace = ''
+    letterG = 'G'
+    meta1 = 'M1'
+    meta2 = 'M2'
+    letterM = 'M'
     # Remove possible space from string
-    daugh = daugh.replace(' ', '')
+    daugh = daugh.replace(singleSpace, noSpace)
     # Check for 'G' suffix
-    daugh = daugh.replace('G', '')
+    daugh = daugh.replace(letterG, noSpace)
     # Check for metastable suffix
-    if daugh.endswith('M1') or daugh.endswith('M2'):
+    if daugh.endswith(meta1) or daugh.endswith(meta2):
         # Convert appropriately
-        parts = daugh.rsplit('M',1)
+        parts = daugh.rsplit(letterM ,1)
         daugh_conv = nucname.zzaaam(parts[0]) + int(parts[1])
     else:
         daugh_conv = nucname.zzaaam(daugh)
@@ -409,10 +415,10 @@ def _get_destruction(nuc, phi, addDecay = True):
     d : float
         Destruction rate of the nuclide.
     """
-    numEntries = 175
+    eaf_numEntries = 175
     nuc = nucname.zzaaam(nuc)
     rxn_dict = _get_daughters(nuc)
-    xs_total = np.zeros((numEntries,1))
+    xs_total = np.zeros((eaf_numEntries, 1))
     for key in rxn_dict.keys():
         xs_total += rxn_dict[key]
     if addDecay:
@@ -491,10 +497,14 @@ def _tree_log(depth, nuc, N, tree):
     None
         This method only writes to the File "tree".
     """
-    spacing = depth * '   |'
+    space = '   |'
+    arrow = '--> '
+    openPar  = ' ('
+    closePar = ')\n'
+    spacing = depth * space
     name = nucname.name(nuc)
     Nstr = str(N)
-    entry = spacing + '--> ' + name + ' (' + Nstr + ')\n'
+    entry = spacing + arrow + name + openPar + Nstr + closePar
     tree.write(entry)
     return None
 
