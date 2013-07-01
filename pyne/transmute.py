@@ -100,7 +100,7 @@ def transmute_spatial(space, t_sim, tree = None, tol = 1e-7):
     ----------
     space : dictionary
         Input dictionary for the transmutation simulation.
-        Keys are float triples corresponding to the xyz location in space.
+        Keys are integers representing the volume ID.
         Values are tuples.
             The first entry in the tuple is a NumPy 1-dimensional array
                 of floats representing the flux at the specified point.
@@ -124,7 +124,7 @@ def transmute_spatial(space, t_sim, tree = None, tol = 1e-7):
     -------
     space_out : dictionary
         A dictionary containing the output from a multi-point simulation.
-        Keys are float triples corresponding to the xyz location in space.
+        Keys are integers representing the volume ID.
         Values are 'out' dictionaries (described below).
             out : dictionary
                 A dictionary containing number densities for each
@@ -133,11 +133,11 @@ def transmute_spatial(space, t_sim, tree = None, tol = 1e-7):
                 number densities for the coupled nuclide in float format.
     """
     space_out = {}
-    for point in space.keys():
-        phi = space[point][0]
-        inp = space[point][1]
+    for volume in space.keys():
+        phi = space[volume][0]
+        inp = space[volume][1]
         out = transmute(inp, t_sim, phi, tree, tol)
-        space_out[point] = out
+        space_out[volume] = out
     return space_out
 
 
@@ -203,7 +203,7 @@ def write_space_hdf5(h5file, parentGroup, space_out):
         should be written under.
     space_out : dictionary
         A dictionary containing the output from a multi-point simulation.
-        Keys are float triples corresponding to the xyz location in space.
+        Keys are integers representing the volume ID.
         Values are 'out' dictionaries (described below).
             out : dictionary
                 A dictionary containing number densities for each
@@ -219,9 +219,9 @@ def write_space_hdf5(h5file, parentGroup, space_out):
     """
     node = h5file.createGroup(parentGroup,'transmutation', \
                                 'Multi-point transmutation')
-    for point in space_out.keys():
-        out = space_out[point]
-        write_hdf5(h5file, node, out, 'Point: ' + str(point))
+    for volume in space_out.keys():
+        out = space_out[volume]
+        write_hdf5(h5file, node, out, 'Volume: ' + str(volume))
     h5file.flush()
     return None
             
