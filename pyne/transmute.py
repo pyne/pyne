@@ -180,7 +180,7 @@ def write_hdf5(h5file, parentGroup, out, title = None):
     else:
         table = h5file.createTable(parentGroup, title, Nuclide)
     nuc = table.row
-    for key in out.keys():
+    for key in out.keys().sort():
         nuc['name'] = nucname.name(key)
         nuc['zzaaam'] = key
         nuc['density'] = out[key]
