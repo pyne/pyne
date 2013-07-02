@@ -87,9 +87,13 @@ def transmute(inp, t_sim, phi, tree = None, tol = 1e-7):
     for nuc in inp.keys():
         # Find output for root of unit density
         out_partial = transmute_core(nuc, t_sim, phi, tree, tol)
-        # Scale all output by actual nuclide density
+        # Scale all output by actual nuclide density and add to final output
         for part in out_partial.keys():
             out_partial[part] = out_partial[part] * inp[nuc]
+            if part in out.keys():
+                out[part] += out_partial[part]
+            else:
+                out[part] =  out_partial[part]
     return out
 
 
