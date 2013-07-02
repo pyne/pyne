@@ -825,8 +825,10 @@ class Library(rx.RxLib):
         """
         if not nuc_i:
             nuc_i = nuc
-        if nuc not in self.structure or nuc_i not in self.structure[nuc]['data']:
+        if nuc not in self.structure:
             self._read_res(nuc)
+        if nuc_i not in self.structure[nuc]['data'] or \
+           mt not in self.structure[nuc]['data'][nuc_i]['xs']:
             self._read_xs(nuc, mt, nuc_i)
         return self.structure[nuc]['data'][nuc_i]['xs'][mt]
 
