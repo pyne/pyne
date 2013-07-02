@@ -39,11 +39,16 @@ list = [0.00000E+00, 0.00000E+00, 0.00000E+00, 0.00000E+00, 0.00000E+00, 0.00000
 phi = np.zeros((175,1))
 for i in np.arange(len(list)):
     phi[i] = list[i]
+print('Flux initialized.')
 filename = 'test.tree'
 tol = 1e-7
+print('Begin transmutation.')
 with open(filename,'w') as tree:
     out = tm.transmute(inp,t_sim,phi,tree,tol)
 h5file = tb.openFile('h5test.h5','w')
 group = h5file.createGroup('/','transmute','Transmute Output')
+print('Writing to hdf5.')
 tm.write_hdf5(h5file, group, out)
 h5file.close()
+print('Closed hdf5.')
+print('Total density: ' + str(sum(out.values())) + '.')
