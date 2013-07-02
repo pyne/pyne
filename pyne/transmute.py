@@ -143,9 +143,8 @@ def transmute_spatial(space, t_sim, tree = None, tol = 1e-7):
 
 class Nuclide(IsDescription):
     """Class to describe columns of hdf5 output table"""
-    size = 16
-    name = StringCol(size)
-    zzaaam = StringCol(size)
+    name = StringCol(16)
+    zzaaam = StringCol(16)
     density = FloatCol()
 
 
@@ -180,7 +179,7 @@ def write_hdf5(h5file, parentGroup, out, title = None):
     else:
         table = h5file.createTable(parentGroup, title, Nuclide)
     nuc = table.row
-    for key in out.keys().sort():
+    for key in sorted(out.keys()):
         nuc['name'] = nucname.name(key)
         nuc['zzaaam'] = key
         nuc['density'] = out[key]
