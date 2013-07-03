@@ -23,5 +23,10 @@ pyne/*/*.cpp
 
 # Ignore specific files
 examples/BASE_TAPE9.INP
+examples/*.txt
+examples/*.eps
+examples/*.svg
+examples/*.png
 pyne/tests/test.file
 pyne/tests/test.txt
+

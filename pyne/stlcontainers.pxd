@@ -13,6 +13,7 @@ from libcpp.utility cimport pair
 from libcpp.map cimport map as cpp_map
 from libcpp.vector cimport vector as cpp_vector
 from libc cimport stdio
+from cpython.version cimport PY_MAJOR_VERSION
 from cpython.ref cimport PyTypeObject, Py_INCREF, Py_XDECREF
 from cpython.type cimport PyType_Ready
 from cpython.object cimport PyObject
@@ -32,6 +33,13 @@ cdef extern from "Python.h":
     cdef long Py_TPFLAGS_DEFAULT 
     cdef long Py_TPFLAGS_BASETYPE 
     cdef long Py_TPFLAGS_CHECKTYPES
+    cdef long Py_TPFLAGS_HEAPTYPE
+
+    ctypedef struct PyMemberDef:
+        char * name
+
+    ctypedef struct PyGetSetDef:
+        char * name
 
     ctypedef struct PyTypeObject:
         char * tp_name
@@ -39,7 +47,6 @@ cdef extern from "Python.h":
         int tp_itemsize
         object tp_alloc(PyTypeObject *, Py_ssize_t)
         void tp_dealloc(object)
-        int tp_compare(object, object)
         object tp_richcompare(object, object, int)
         object tp_new(PyTypeObject *, object, object)
         object tp_str(object)
@@ -51,12 +58,9 @@ cdef extern from "Python.h":
         PyGetSetDef * tp_getset
         PyTypeObject * tp_base
         void tp_free(void *)
-
-    ctypedef struct PyMemberDef:
-        char * name
-
-    ctypedef struct PyGetSetDef:
-        char * name
+        # This is a dirty hack by declaring to Cython both the Python 2 & 3 APIs
+        int (*tp_compare)(object, object)      # Python 2
+        void * (*tp_reserved)(object, object)  # Python 3
 
 cdef extern from "numpy/arrayobject.h":
 
@@ -105,6 +109,8 @@ cdef extern from "numpy/arrayobject.h":
         PyObject  *shape
 
     cdef void ** PyArray_API
+
+    cdef PyTypeObject * PyArrayDescr_Type
     
     ctypedef struct PyArray_Descr:
         Py_ssize_t ob_refcnt
@@ -199,12 +205,12 @@ cdef class _MapIntStr:
 
 # MapStrUInt
 cdef class _MapIterStrUInt(object):
-    cdef cpp_map[std_string, extra_types.uint].iterator * iter_now
-    cdef cpp_map[std_string, extra_types.uint].iterator * iter_end
-    cdef void init(_MapIterStrUInt, cpp_map[std_string, extra_types.uint] *)
+    cdef cpp_map[std_string, extra_types.uint32].iterator * iter_now
+    cdef cpp_map[std_string, extra_types.uint32].iterator * iter_end
+    cdef void init(_MapIterStrUInt, cpp_map[std_string, extra_types.uint32] *)
 
 cdef class _MapStrUInt:
-    cdef cpp_map[std_string, extra_types.uint] * map_ptr
+    cdef cpp_map[std_string, extra_types.uint32] * map_ptr
     cdef public bint _free_map
 
 
@@ -212,12 +218,12 @@ cdef class _MapStrUInt:
 
 # MapUIntStr
 cdef class _MapIterUIntStr(object):
-    cdef cpp_map[extra_types.uint, std_string].iterator * iter_now
-    cdef cpp_map[extra_types.uint, std_string].iterator * iter_end
-    cdef void init(_MapIterUIntStr, cpp_map[extra_types.uint, std_string] *)
+    cdef cpp_map[extra_types.uint32, std_string].iterator * iter_now
+    cdef cpp_map[extra_types.uint32, std_string].iterator * iter_end
+    cdef void init(_MapIterUIntStr, cpp_map[extra_types.uint32, std_string] *)
 
 cdef class _MapUIntStr:
-    cdef cpp_map[extra_types.uint, std_string] * map_ptr
+    cdef cpp_map[extra_types.uint32, std_string] * map_ptr
     cdef public bint _free_map
 
 
@@ -238,12 +244,12 @@ cdef class _MapStrDouble:
 
 # MapUIntUInt
 cdef class _MapIterUIntUInt(object):
-    cdef cpp_map[extra_types.uint, extra_types.uint].iterator * iter_now
-    cdef cpp_map[extra_types.uint, extra_types.uint].iterator * iter_end
-    cdef void init(_MapIterUIntUInt, cpp_map[extra_types.uint, extra_types.uint] *)
+    cdef cpp_map[extra_types.uint32, extra_types.uint32].iterator * iter_now
+    cdef cpp_map[extra_types.uint32, extra_types.uint32].iterator * iter_end
+    cdef void init(_MapIterUIntUInt, cpp_map[extra_types.uint32, extra_types.uint32] *)
 
 cdef class _MapUIntUInt:
-    cdef cpp_map[extra_types.uint, extra_types.uint] * map_ptr
+    cdef cpp_map[extra_types.uint32, extra_types.uint32] * map_ptr
     cdef public bint _free_map
 
 
@@ -290,12 +296,12 @@ cdef class _MapIntComplex:
 
 # MapUIntDouble
 cdef class _MapIterUIntDouble(object):
-    cdef cpp_map[extra_types.uint, double].iterator * iter_now
-    cdef cpp_map[extra_types.uint, double].iterator * iter_end
-    cdef void init(_MapIterUIntDouble, cpp_map[extra_types.uint, double] *)
+    cdef cpp_map[extra_types.uint32, double].iterator * iter_now
+    cdef cpp_map[extra_types.uint32, double].iterator * iter_end
+    cdef void init(_MapIterUIntDouble, cpp_map[extra_types.uint32, double] *)
 
 cdef class _MapUIntDouble:
-    cdef cpp_map[extra_types.uint, double] * map_ptr
+    cdef cpp_map[extra_types.uint32, double] * map_ptr
     cdef public bint _free_map
 
 

@@ -18,6 +18,7 @@ import math
 import os
 import linecache
 import tables
+import datetime
 
 import numpy as np
 
@@ -25,6 +26,13 @@ from pyne.material import Material
 from pyne.material import MultiMaterial
 from pyne import nucname
 from binaryreader import _BinaryReader, _FortranRecord
+
+# mesh specific imports
+try:
+    from itaps import iMesh
+    from pyne.scdmesh import ScdMesh
+except ImportError:
+    pass
 
 
 class Mctal(object):
@@ -1122,3 +1130,381 @@ def mat_from_mcnp(filename, mat_line, densities='None'):
         finished_mat = mat
 
     return finished_mat
+
+
+class Wwinp(object):
+    """ A Wwinp object stores all of the information from a single MCNP WWINP
+    file. Weight window lower bounds are stored on a structured mesh. Only
+    Cartesian mesh WWINP files are supported. Neutron, photon, and
+    simotaneous neutron and photon WWINP files are supported.
+
+    Atrributes
+    ----------
+    Attribute names are identical to names speficied in WWINP file
+    description in the MCNP5 User's Guide Volume 3 Appendix J.
+
+    ni : number of integers on card 2. ni = 1 for neutron WWINPs, ni = 2 for 
+         photon WWINPs or neutron + photon WWINPs.
+    nr : 10 for rectangular, 16 for cylindrical.
+    ne : list of number of energy groups for neutrons and photons. If ni = 1
+         the list is only 1 value long, to represent the number of neutron
+         energy groups
+    nf : list of number of fine mesh points in the i, j, k dimensions
+    origin : list of i, j, k, minimums.
+    nc : list of number of coarse mesh points in the i, j, k dimensions
+    nwg : 1 for rectangular, 2 for cylindrical.
+    cm : list of lists of coarse mesh points in the i, j, k dimensions. Note
+         the origin is not considered a coarse mesh point (as in MCNP).
+    fm : list of lists of number of fine mesh points between the coarses 
+    mesh points in the i, j, k dimensions.
+    e : list of lists of energy upper bounds for neutrons, photons. If
+        ni = 1, the e will look like [[]]. If ni = 2, e will look like
+        [[], []].
+    bounds : list of lists of spacial bounds in the i, j, k dimensions.
+    mesh : scdmesh containing all the neutron and/or photon weight 
+	   window lower bounds. These tags have the form "ww_X_group_YYY"
+	   where X is n or p and YYY is the energy group number
+	   (e.g. 001, 002, etc.). The mesh has rootSet tags in the form
+	   X_e_upper_bounds.
+    """
+
+    def __init__(self):
+        pass
+
+    def read_wwinp(self, filename):
+        """ This method creates a Wwinp object from the WWINP file <filename>.
+        """
+        with open(filename, 'r') as f: 
+             self._read_block1(f)
+             self._read_block2(f)
+             self._read_block3(f)
+
+    def _read_block1(self, f):
+        # Retrieves all of the information from block 1 of a wwinp file.
+
+        line_1 = f.readline()
+        self.ni = int(line_1.split()[2])
+        self.nr = int(line_1.split()[3])
+
+        line_2 = f.readline()
+        self.ne = [float(x) for x in line_2.split()]
+
+        if self.nr == 10: # Cartesian
+            line_3 = f.readline()
+            self.nf = [int(float(x)) for x in line_3.split()[0:3]]        
+            self.origin = [float(x) for x in line_3.split()[3:6]]
+        
+            line_4 = f.readline()
+            self.nc = [int(float(x)) for x in line_4.split()[0:3]]
+            self.nwg = int(float(line_4.split()[3]))
+                 
+        if self.nr == 16: # Cylindrical
+            raise ValueError('Cylindrical WWINP not currently supported')
+
+        
+    def _read_block2(self, f):
+        # Retrieves all of the information from block 2 of a wwinp file. 
+
+        self.bounds = [[], [], []]
+        self.cm = [[], [], []]
+        self.fm = [[], [], []]
+
+        for i in [0, 1, 2] :
+            # Create a list of raw block 2 values.
+            raw = []
+            while len(raw) < 3*self.nc[i] + 1:
+                raw += [float(x) for x in f.readline().split()]
+
+            # Remove all the rx(i), ry(i), rz(i) values that 
+            # contaminated the raw list.
+            removed_values = [raw[0]]
+            for j in range(1, len(raw)):
+                if j % 3 != 0:
+                    removed_values.append(raw[j])
+
+            # Expaned out nfx/nfy/nfx values to get structured mesh bounds.
+            for j in range(0, len(removed_values)):
+                if j % 2 == 0:
+                    self.bounds[i].append(removed_values[j])
+                    if j != 0:
+                        self.cm[i].append(removed_values[j])
+                    
+                else:
+                    self.fm[i].append(removed_values[j])
+                    for k in range(1, int(removed_values[j])):
+                        self.bounds[i].append(
+                            (removed_values[j+1] - removed_values[j-1])\
+                             *k/removed_values[j] + removed_values[j-1])
+   
+
+    def _read_block3(self, f):
+        #Retrives all the information of the block 3 of a wwinp file.
+
+        self.e = [[]]
+        if self.ne[0] != 0:
+            while len(self.e[0]) < self.ne[0]:
+                self.e[0] += [float(x) for x in f.readline().split()]
+
+            self._read_wwlb('n', f)
+
+        if len(self.ne) == 2:
+            self.e.append([])
+            while len(self.e[-1]) < self.ne[1]:
+                self.e[-1] += [float(x) for x in f.readline().split()]
+
+            self._read_wwlb('p', f)
+
+    def _read_wwlb(self, particle, f):
+        # Reads the weight window lower bounds from block 3 and returns a 
+        # mesh.
+
+        # If this is the first time this method is called then created a mesh,
+        # otherwise (in the case of n and p in the same WWINP) add to the 
+        # preexisting mesh.
+        if not hasattr(self, 'mesh'):
+            self.mesh = ScdMesh(self.bounds[0], self.bounds[1], self.bounds[2])
+
+        voxels = list(self.mesh.iterateHex('zyx'))
+
+        if particle == 'n':
+           particle_index = 0
+
+        elif particle == 'p':
+           particle_index = 1
+
+        for i in range(1, len(self.e[particle_index]) + 1):
+            # Create tags for each e_group
+            tag_name = 'ww_{0}_group_{1:03d}'.format(particle, i)
+            tag_ww = self.mesh.imesh.createTag(tag_name, 1, float)
+        
+            # Get all data for energy group i
+            ww_data = []
+            while len(ww_data) < self.nf[0]*self.nf[1]*self.nf[2]:
+                ww_data += [float(x) for x in f.readline().split()]
+
+            # tag data to voxels
+            tag_ww[voxels] = ww_data 
+
+        # Save energy upper bounds to rootset.
+        tag_e_bounds = \
+            self.mesh.imesh.createTag('{0}_e_upper_bounds'.format(particle),\
+                                      len(self.e[particle_index]), float)
+        tag_e_bounds[self.mesh.imesh.rootSet] = self.e[particle_index]
+
+
+
+
+    def write_wwinp(self, filename):
+        """ This method writes a complete WWINP file to <filename>.
+        """
+        with open(filename, 'w') as f: 
+            self._write_block1(f)
+            self._write_block2(f)
+            self._write_block3(f)
+
+    def _write_block1(self, f):
+        #Writes the all block 1 data to WWINP file
+
+        block1 = ''
+
+        # Create a MCNP formated time string.
+        now = datetime.datetime.now()
+        time ='{0:02d}/{1}/{2} {3}:{4}:{5}'.format(now.month, now.day, \
+                   str(now.year)[2:], now.hour, now.minute, now.second)
+
+        # Append line 1.
+        block1 += \
+        '         1         1         {0}        {1}                     {2}\n'\
+        .format(self.ni, self.nr, time)
+
+        # Append line 2.
+        for i in self.ne:
+            block1 += '         {0}'.format(int(i))
+
+        block1 += '\n'
+
+        # Append line 3.
+        block1 += \
+            ' {0: 1.5E} {1: 1.5E} {2: 1.5E} {3: 1.5E} {4: 1.5E} {5: 1.5E}\n'\
+            .format(self.nf[0], self.nf[1], self.nf[2],
+                    self.origin[0], self.origin[1], self.origin[2])
+
+        # Append line 4.
+        block1 += ' {0: 1.5E} {1: 1.5E} {2: 1.5E} {3: 1.5E}\n'\
+            .format(self.nc[0], self.nc[1], self.nc[2], self.nwg)
+
+        f.write(block1)
+
+    def _write_block2(self, f):
+        #Writes the all block 2 data to WWINP file
+
+        # Create an array of values to be print in block 2.
+        block2_array = [[],[],[]]
+        for i in [0, 1, 2]:
+            block2_array[i].append(self.origin[i])
+            for j in range(0, len(self.cm[i])):
+               block2_array[i] += [self.fm[i][j], self.cm[i][j], 1.0000]
+
+        # Translate block2 vector into a string with appropriate text wrapping.
+        block2 = ""
+        for i in range(0,3):
+            line_count = 0 # number of entries printed to current line, max = 6
+            for j in range(0, len(block2_array[i])):           
+                block2 += ' {0: 1.5E}'.format(block2_array[i][j])
+                line_count += 1
+                if line_count == 6:
+                    block2 += '\n'
+                    line_count = 0
+
+            if line_count != 0:
+                block2 += '\n'
+
+        f.write(block2)
+
+    def _write_block3(self, f):
+        #Writes the all block 3 data to WWINP file
+
+        if self.ne[0] != 0:
+            self._write_block3_single('n', f)
+
+        if len(self.ne) == 2:
+            self._write_block3_single('p', f)
+
+    def _write_block3_single(self, particle, f):
+        # Write all of block 3 a single time (e.g. for WWINP with only n or 
+        #   p). This function is called twice in the case of the WWINP having 
+        #   both n and p.
+
+
+        if particle == 'n':
+           particle_index = 0
+
+        elif particle == 'p':
+           particle_index = 1
+
+        # Append energy line.
+        block3 = ''
+        line_count = 0
+
+        for e_upper_bound in self.e[particle_index]:
+            block3 += '  {0:1.5E}'.format(e_upper_bound)
+            line_count += 1
+            if line_count == 6:
+               block3 += '\n'
+
+        if line_count != 0:
+            block3 += '\n'
+
+        # Get ww_data.
+        count = 0
+        for e_group in range(1, len(self.e[particle_index]) + 1):
+            voxels = list(self.mesh.iterateHex('zyx'))
+            ww_data = []
+            count += 1
+            for voxel in voxels:
+                ww_data.append(
+                    self.mesh.imesh.getTagHandle('ww_{0}_group_{1:03d}'\
+                        .format(particle, e_group))[voxel])
+          
+            # Append ww_data to block3 string.
+            line_count = 0
+            for ww in ww_data:
+                
+                block3 += ' {0: 1.5E}'.format(ww)
+                line_count += 1
+    
+                if line_count == 6:
+                    block3 += '\n'
+                    line_count = 0
+
+            if line_count != 0:
+                block3 += '\n'
+
+        f.write(block3)
+
+
+
+    def read_mesh(self, mesh):
+        """This method creates a Wwinp object from a structured mesh object. 
+        The mesh must have tags in the form "ww_X_group_YYY" where X is n 
+        or p, and  YYY is the energy group. For every particle there must 
+        be a rootSet tag in the form X_e_upper_bounds containing a list of
+        energy upper bounds.
+        """
+
+        self.mesh = mesh
+ 
+        # Set geometry related attributes.
+        self.nr = 10
+        self.nwg = 1
+    
+        # Set energy related attributes.  
+        self.e = []
+        self.ne = []
+        all_tags = [x.name for x in self.mesh.imesh\
+                                   .getAllTags(self.mesh.imesh.rootSet)]
+
+        if 'n_e_upper_bounds' in all_tags:
+            n_e_upper_bounds = self.mesh.imesh.getTagHandle('n_e_upper_bounds')\
+                              [self.mesh.imesh.rootSet]
+            # In the single energy group case, the "E_upper_bounds" tag 
+            # returns a non-iterable float. If this is the case, put this 
+            # float into an array so that it can be iterated over
+            if isinstance(n_e_upper_bounds, float):
+                n_e_upper_bounds = [n_e_upper_bounds]
+
+            self.e.append(n_e_upper_bounds)
+            self.ne.append(int(len(n_e_upper_bounds)))
+
+        else:
+            self.e.append([])
+            self.ne.append(0)
+ 
+
+        if 'p_e_upper_bounds' in all_tags:
+            p_e_upper_bounds = self.mesh.imesh.getTagHandle('p_e_upper_bounds')\
+                              [self.mesh.imesh.rootSet]
+            if isinstance(p_e_upper_bounds, float):
+                p_e_upper_bounds = [p_e_upper_bounds]
+
+            self.e.append(p_e_upper_bounds)
+            self.ne.append(int(len(p_e_upper_bounds)))
+
+   
+        self.ni = int(len(self.ne))
+    
+        # Set space related attributes.
+        self.bounds = [self.mesh.getDivisions('x'),\
+                       self.mesh.getDivisions('y'),\
+                       self.mesh.getDivisions('z')]
+    
+        self.origin = [self.bounds[0][0], self.bounds[1][0], self.bounds[2][0]]
+    
+        # Cycle through the rest of bounds to get the fine/coarse information.
+        self.cm = [[],[],[]]
+        self.fm = [[],[],[]]
+        for i, points in enumerate(self.bounds):
+            # There exists at least 1 fine mesh point.
+            self.fm[i].append(1)
+            # Loop through remaining points to determine which are coarse, 
+            # and the number of fine meshes between them.
+            j = 1
+            while j < len(points) - 1 :
+                 # Floating point comparison characterizes coarse vs. fine. 
+                 # The value 1.01E-2 is used because MCNP prints
+                 # to the nearest 0.01.
+                if abs((points[j] - points[j-1]) - (points[j+1] - points[j]))\
+                       <= 1.01E-2: 
+                    self.fm[i][len(self.cm[i])] += 1
+                else:
+                    self.cm[i].append(points[j])
+                    self.fm[i].append(1)
+    
+                j += 1
+    
+            # Append last point as coarse point, as this is always the case.
+            self.cm[i].append(points[-1])
+    
+        self.nc = [len(self.cm[0]), len(self.cm[1]), len(self.cm[2])]
+        self.nf = [sum(self.fm[0]), sum(self.fm[1]), sum(self.fm[2])]
+

@@ -233,9 +233,9 @@ def name(x, y=None, char * z="n"):
         if isinstance(x, basestring):
             cn = cpp_rxname.name(std_string(<char *> x))
         elif isinstance(x, int):
-            cn = cpp_rxname.name(<extra_types.uint> long(x))
+            cn = cpp_rxname.name(<extra_types.uint32> long(x))
         elif isinstance(x, long):
-            cn = cpp_rxname.name(<extra_types.uint> x)
+            cn = cpp_rxname.name(<extra_types.uint32> x)
     else:
         if isinstance(x, basestring):
             from_nuc = cpp_nucname.zzaaam(std_string(<char *> x))
@@ -276,9 +276,9 @@ def id(x, y=None, char * z="n"):
         if isinstance(x, basestring):
             rxid = cpp_rxname.id(std_string(<char *> x))
         elif isinstance(x, int):
-            rxid = cpp_rxname.id(<extra_types.uint> long(x))
+            rxid = cpp_rxname.id(<extra_types.uint32> long(x))
         elif isinstance(x, long):
-            rxid = cpp_rxname.id(<extra_types.uint> x)
+            rxid = cpp_rxname.id(<extra_types.uint32> x)
     else:
         if isinstance(x, basestring):
             from_nuc = cpp_nucname.zzaaam(std_string(<char *> x))
@@ -316,9 +316,9 @@ def mt(x, y=None, char * z="n"):
         if isinstance(x, basestring):
             mtnum = cpp_rxname.mt(std_string(<char *> x))
         elif isinstance(x, int):
-            mtnum = cpp_rxname.mt(<extra_types.uint> long(x))
+            mtnum = cpp_rxname.mt(<extra_types.uint32> long(x))
         elif isinstance(x, long):
-            mtnum = cpp_rxname.mt(<extra_types.uint> x)
+            mtnum = cpp_rxname.mt(<extra_types.uint32> x)
     else:
         if isinstance(x, basestring):
             from_nuc = cpp_nucname.zzaaam(std_string(<char *> x))
@@ -357,9 +357,9 @@ def label(x, y=None, char * z="n"):
         if isinstance(x, basestring):
             clab = cpp_rxname.label(std_string(<char *> x))
         elif isinstance(x, int):
-            clab = cpp_rxname.label(<extra_types.uint> long(x))
+            clab = cpp_rxname.label(<extra_types.uint32> long(x))
         elif isinstance(x, long):
-            clab = cpp_rxname.label(<extra_types.uint> x)
+            clab = cpp_rxname.label(<extra_types.uint32> x)
     else:
         if isinstance(x, basestring):
             from_nuc = cpp_nucname.zzaaam(std_string(<char *> x))
@@ -399,9 +399,9 @@ def doc(x, y=None, char * z="n"):
         if isinstance(x, basestring):
             cd = cpp_rxname.doc(std_string(<char *> x))
         elif isinstance(x, int):
-            cd = cpp_rxname.doc(<extra_types.uint> long(x))
+            cd = cpp_rxname.doc(<extra_types.uint32> long(x))
         elif isinstance(x, long):
-            cd = cpp_rxname.doc(<extra_types.uint> x)
+            cd = cpp_rxname.doc(<extra_types.uint32> x)
     else:
         if isinstance(x, basestring):
             from_nuc = cpp_nucname.zzaaam(std_string(<char *> x))

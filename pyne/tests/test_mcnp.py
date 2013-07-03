@@ -18,6 +18,15 @@ ssrname = os.path.join(thisdir,"mcnp_surfsrc.w")
 sswname = os.path.join(thisdir,"copy_mcnp_surfsrc.w")
 ssrname_onetrack = os.path.join(thisdir,"mcnp_surfsrc_onetrack.w")
 
+# mesh specific imports
+try:
+    from itaps import iMesh
+    from pyne.scdmesh import ScdMesh
+except ImportError:
+    pass
+
+from numpy.testing import assert_array_equal
+
 # Test methods for the SurfSrc class
 class TestSurfSrc(unittest.TestCase):
 
@@ -313,5 +322,337 @@ class TestPtrac(unittest.TestCase):
                 os.unlink("mcnp_ptrac_hdf5_file.h5")
 
 
+# Test Wwinp class. All three function are tested at once because there inputs 
+# and ouputs are easily strung together.
+def test_wwinp_n():
 
+    thisdir = os.path.dirname(__file__)
+    wwinp_file = os.path.join(thisdir, 'mcnp_wwinp_wwinp_n.txt')
+    expected_h5m = os.path.join(thisdir, 'mcnp_wwinp_mesh_n.h5m')
+    expected_sm = ScdMesh.fromFile(expected_h5m)
+    output = os.path.join(os.getcwd(), 'test_wwinp')
+
+    
+    # Read in the wwinp file to an object and check resulting attributes.
+    ww1 = mcnp.Wwinp()
+    ww1.read_wwinp(wwinp_file)
+    assert_equal(ww1.ni, 1)
+    assert_equal(ww1.nr, 10)
+    assert_equal(ww1.ne,  [7])
+    assert_equal(ww1.nf, [15, 8, 6])
+    assert_equal(ww1.origin, [-100, -100, -100])
+    assert_equal(ww1.nc, [5, 3, 1])
+    assert_equal(ww1.nwg , 1)
+    assert_equal(ww1.cm , [[-99, -97,  97, 99, 100],  [-50, 60, 100], [100]])
+    assert_equal(ww1.fm, [[1, 1, 11, 1, 1], [1, 3, 4], [6]])
+    assert_array_equal(ww1.e, [[0.1, 0.14678, 0.21544, 0.31623, 0.46416, 0.68129, 1.0000]])
+    assert_equal(ww1.bounds, [[-100.0, -99.0, -97.0, -79.36363636363636, 
+                             -61.727272727272727, -44.090909090909093, 
+                             -26.454545454545453, -8.818181818181813, 
+                               8.818181818181813, 26.454545454545453, 
+                              44.090909090909093, 61.72727272727272, 
+                              79.363636363636374, 97.0, 99.0, 100.0],
+                             [-100.0, -50.0, -13.333333333333336, 
+                              23.333333333333329, 60.0, 70.0, 80.0, 90.0, 100.0], 
+                             [-100.0, -66.666666666666657, -33.333333333333329, 
+                              0.0, 33.333333333333343, 66.666666666666657, 100.0]])    
+    for x in range(0,15):
+        for y in range(0,8):
+            for z in range(0,6):
+                for e_group in range(1, 8):
+                    expected_voxel = expected_sm.getHex(x,y,z)
+                    expected = expected_sm.imesh\
+                               .getTagHandle('ww_n_group_00{0}'\
+                               .format(e_group))[expected_voxel]
+                    written_voxel = ww1.mesh.getHex(x,y,z)
+                    written = ww1.mesh.imesh\
+                                 .getTagHandle('ww_n_group_00{0}'\
+                                 .format(e_group))[written_voxel]
+                    assert_equal(written, expected)
+
+
+    # Create an new object based off of only the mesh attribute of the first 
+    # object and check resutling attributes.
+    ww2 = mcnp.Wwinp()
+    ww2.read_mesh(ww1.mesh)
+    assert_equal(ww2.ni, 1)
+    assert_equal(ww2.nr, 10)
+    assert_equal(ww2.ne,  [7])
+    assert_equal(ww2.nf, [15, 8, 6])
+    assert_equal(ww2.origin, [-100, -100, -100])
+    assert_equal(ww2.nc, [5, 3, 1])
+    assert_equal(ww2.nwg , 1)
+    assert_equal(ww2.cm , [[-99, -97,  97, 99, 100],  [-50, 60, 100], [100]])
+    assert_equal(ww2.fm, [[1, 1, 11, 1, 1], [1, 3, 4], [6]])
+    assert_array_equal(ww2.e, [[0.1, 0.14678, 0.21544, 0.31623, 0.46416, 0.68129, 1.0000]])
+    assert_equal(ww2.bounds, [[-100.0, -99.0, -97.0, -79.36363636363636, 
+                             -61.727272727272727, -44.090909090909093, 
+                             -26.454545454545453, -8.818181818181813, 
+                               8.818181818181813, 26.454545454545453, 
+                              44.090909090909093, 61.72727272727272, 
+                              79.363636363636374, 97.0, 99.0, 100.0],
+                             [-100.0, -50.0, -13.333333333333336, 
+                              23.333333333333329, 60.0, 70.0, 80.0, 90.0, 100.0], 
+                             [-100.0, -66.666666666666657, -33.333333333333329, 
+                              0.0, 33.333333333333343, 66.666666666666657, 100.0]])
+    for x in range(0,15):
+        for y in range(0,8):
+            for z in range(0,6):
+                for e_group in range(1, 8):
+                    expected_voxel = expected_sm.getHex(x,y,z)
+                    expected = expected_sm.imesh\
+                               .getTagHandle('ww_n_group_00{0}'\
+                               .format(e_group))[expected_voxel]
+                    written_voxel = ww2.mesh.getHex(x,y,z)
+                    written = ww2.mesh.imesh\
+                              .getTagHandle('ww_n_group_00{0}'\
+                              .format(e_group))[written_voxel]
+                    assert_equal(written, expected)
+
+    # write a new wwinp file and verify that is same wwinp file used as an 
+    # input to this test
+    ww2.write_wwinp(output)
+    expected_output = wwinp_file
+    
+    with open(output) as f:
+        written = f.readlines()
+
+    with open(expected_output) as f:
+        expected = f.readlines()
+
+    # check to make sure file are the same except for the data/time info
+    # on line 1
+    assert_equal(written[0].split()[:-2], expected[0].split()[:-2])
+    assert_equal(len(written), len(expected))
+    for i in range(1, len(expected)):
+        for j in range(0, len(expected[i].split())):
+            assert_equal(float(written[i].split()[j]), float(expected[i].split()[j]))
+
+    os.remove(output)
+
+
+def test_wwinp_p():
+
+    thisdir = os.path.dirname(__file__)
+    wwinp_file = os.path.join(thisdir, 'mcnp_wwinp_wwinp_p.txt')
+    expected_h5m = os.path.join(thisdir, 'mcnp_wwinp_mesh_p.h5m')
+    expected_sm = ScdMesh.fromFile(expected_h5m)
+    output = os.path.join(os.getcwd(), 'test_wwinp')
+
+    
+    # Read in the wwinp file to an object and check resulting attributes.
+    ww1 = mcnp.Wwinp()
+    ww1.read_wwinp(wwinp_file)
+    assert_equal(ww1.ni, 2)
+    assert_equal(ww1.nr, 10)
+    assert_equal(ww1.ne,  [0,7])
+    assert_equal(ww1.nf, [1, 8, 6])
+    assert_equal(ww1.origin, [-100, -100, -100])
+    assert_equal(ww1.nc, [1, 3, 1])
+    assert_equal(ww1.nwg , 1)
+    assert_equal(ww1.cm , [[100],  [-50, 60, 100], [100]])
+    assert_equal(ww1.fm, [[1], [1, 3, 4], [6]])
+    assert_equal(ww1.e[0], [])
+    assert_array_equal(ww1.e[1], [0.1, 0.14678, 0.21544, 0.31623, 0.46416, 0.68129, 1.0000])
+    assert_equal(ww1.bounds, [[-100.0, 100],
+                             [-100.0, -50.0, -13.333333333333336, 
+                              23.333333333333329, 60.0, 70.0, 80.0, 90.0, 100.0], 
+                             [-100.0, -66.666666666666657, -33.333333333333329, 
+                              0.0, 33.333333333333343, 66.666666666666657, 100.0]]) 
+    for x in range(0,1):
+        for y in range(0,8):
+            for z in range(0,6):
+                for e_group in range(1, 8):
+                    expected_voxel = expected_sm.getHex(x,y,z)
+                    expected = expected_sm.imesh\
+                               .getTagHandle('ww_p_group_00{0}'\
+                               .format(e_group))[expected_voxel]
+                    written_voxel = ww1.mesh.getHex(x,y,z)
+                    written = ww1.mesh.imesh\
+                                 .getTagHandle('ww_p_group_00{0}'\
+                                 .format(e_group))[written_voxel]
+                    assert_equal(written, expected)
+
+
+    # Create an new object based off of only the mesh attribute of the first 
+    # object and check resutling attributes.
+    ww2 = mcnp.Wwinp()
+    ww2.read_mesh(ww1.mesh)
+    assert_equal(ww2.ni, 2)
+    assert_equal(ww2.nr, 10)
+    assert_equal(ww2.ne,  [0,7])
+    assert_equal(ww2.nf, [1, 8, 6])
+    assert_equal(ww2.origin, [-100, -100, -100])
+    assert_equal(ww2.nc, [1, 3, 1])
+    assert_equal(ww2.nwg , 1)
+    assert_equal(ww2.cm , [[100],  [-50, 60, 100], [100]])
+    assert_equal(ww2.fm, [[1], [1, 3, 4], [6]])
+    assert_equal(ww2.e[0], [])
+    assert_array_equal(ww2.e[1], [0.1, 0.14678, 0.21544, 0.31623, 0.46416, 0.68129, 1.0000])
+    assert_equal(ww2.bounds, [[-100.0, 100],
+                             [-100.0, -50.0, -13.333333333333336, 
+                              23.333333333333329, 60.0, 70.0, 80.0, 90.0, 100.0], 
+                             [-100.0, -66.666666666666657, -33.333333333333329, 
+                              0.0, 33.333333333333343, 66.666666666666657, 100.0]])
+    for x in range(0,1):
+        for y in range(0,8):
+            for z in range(0,6):
+                for e_group in range(1, 8):
+                    expected_voxel = expected_sm.getHex(x,y,z)
+                    expected = expected_sm.imesh\
+                               .getTagHandle('ww_p_group_00{0}'\
+                               .format(e_group))[expected_voxel]
+                    written_voxel = ww2.mesh.getHex(x,y,z)
+                    written = ww2.mesh.imesh\
+                              .getTagHandle('ww_p_group_00{0}'\
+                              .format(e_group))[written_voxel]
+                    assert_equal(written, expected)
+
+    # write a new wwinp file and verify that is same wwinp file used as an 
+    # input to this test
+    ww2.write_wwinp(output)
+    expected_output = wwinp_file
+    
+    with open(output) as f:
+        written = f.readlines()
+
+    with open(expected_output) as f:
+        expected = f.readlines()
+
+    # check to make sure file are the same except for the data/time info
+    # on line 1
+    assert_equal(written[0].split()[:-2], expected[0].split()[:-2])
+    assert_equal(len(written), len(expected))
+    for i in range(1, len(expected)):
+        for j in range(0, len(expected[i].split())):
+            assert_equal(float(written[i].split()[j]), float(expected[i].split()[j]))
+
+    os.remove(output)
+
+
+def test_wwinp_np():
+
+    thisdir = os.path.dirname(__file__)
+    wwinp_file = os.path.join(thisdir, 'mcnp_wwinp_wwinp_np.txt')
+    expected_h5m = os.path.join(thisdir, 'mcnp_wwinp_mesh_np.h5m')
+    expected_sm = ScdMesh.fromFile(expected_h5m)
+    output = os.path.join(os.getcwd(), 'test_wwinp')
+
+    
+    # Read in the wwinp file to an object and check resulting attributes.
+    ww1 = mcnp.Wwinp()
+    ww1.read_wwinp(wwinp_file)
+    assert_equal(ww1.ni, 2)
+    assert_equal(ww1.nr, 10)
+    assert_equal(ww1.ne,  [7,1])
+    assert_equal(ww1.nf, [1, 8, 6])
+    assert_equal(ww1.origin, [-100, -100, -100])
+    assert_equal(ww1.nc, [1, 3, 1])
+    assert_equal(ww1.nwg , 1)
+    assert_equal(ww1.cm , [[100],  [-50, 60, 100], [100]])
+    assert_equal(ww1.fm, [[1], [1, 3, 4], [6]])
+    assert_equal(ww1.e[0], [0.1, 0.14678, 0.21544, 0.31623, 0.46416, 0.68129, 1.0000])
+    assert_array_equal(ww1.e[1], [100])
+    assert_equal(ww1.bounds, [[-100.0, 100],
+                             [-100.0, -50.0, -13.333333333333336, 
+                              23.333333333333329, 60.0, 70.0, 80.0, 90.0, 100.0], 
+                             [-100.0, -66.666666666666657, -33.333333333333329, 
+                              0.0, 33.333333333333343, 66.666666666666657, 100.0]]) 
+    for x in range(0,1):
+        for y in range(0,8):
+            for z in range(0,6):
+                for e_group in range(1, 8):
+                    expected_voxel = expected_sm.getHex(x,y,z)
+                    expected = expected_sm.imesh\
+                               .getTagHandle('ww_n_group_00{0}'\
+                               .format(e_group))[expected_voxel]
+                    written_voxel = ww1.mesh.getHex(x,y,z)
+                    written = ww1.mesh.imesh\
+                                 .getTagHandle('ww_n_group_00{0}'\
+                                 .format(e_group))[written_voxel]
+                    assert_equal(written, expected)
+
+    for x in range(0,1):
+        for y in range(0,8):
+            for z in range(0,6):
+                for e_group in range(1, 2):
+                    expected_voxel = expected_sm.getHex(x,y,z)
+                    expected = expected_sm.imesh\
+                               .getTagHandle('ww_p_group_00{0}'\
+                               .format(e_group))[expected_voxel]
+                    written_voxel = ww1.mesh.getHex(x,y,z)
+                    written = ww1.mesh.imesh\
+                                 .getTagHandle('ww_p_group_00{0}'\
+                                 .format(e_group))[written_voxel]
+                    assert_equal(written, expected)
+
+
+    # Create an new object based off of only the mesh attribute of the first 
+    # object and check resutling attributes.
+    ww2 = mcnp.Wwinp()
+    ww2.read_mesh(ww1.mesh)
+    assert_equal(ww2.ni, 2)
+    assert_equal(ww2.nr, 10)
+    assert_equal(ww2.ne,  [7,1])
+    assert_equal(ww2.nf, [1, 8, 6])
+    assert_equal(ww2.origin, [-100, -100, -100])
+    assert_equal(ww2.nc, [1, 3, 1])
+    assert_equal(ww2.nwg , 1)
+    assert_equal(ww2.cm , [[100],  [-50, 60, 100], [100]])
+    assert_equal(ww2.fm, [[1], [1, 3, 4], [6]])
+    assert_array_equal(ww2.e[0], [0.1, 0.14678, 0.21544, 0.31623, 0.46416, 0.68129, 1.0000])
+    assert_array_equal(ww2.e[1], [100])
+    assert_equal(ww2.bounds, [[-100.0, 100],
+                             [-100.0, -50.0, -13.333333333333336, 
+                              23.333333333333329, 60.0, 70.0, 80.0, 90.0, 100.0], 
+                             [-100.0, -66.666666666666657, -33.333333333333329, 
+                              0.0, 33.333333333333343, 66.666666666666657, 100.0]])
+    for x in range(0,1):
+        for y in range(0,8):
+            for z in range(0,6):
+                for e_group in range(1, 8):
+                    expected_voxel = expected_sm.getHex(x,y,z)
+                    expected = expected_sm.imesh\
+                               .getTagHandle('ww_n_group_00{0}'\
+                               .format(e_group))[expected_voxel]
+                    written_voxel = ww2.mesh.getHex(x,y,z)
+                    written = ww2.mesh.imesh\
+                              .getTagHandle('ww_n_group_00{0}'\
+                              .format(e_group))[written_voxel]
+                    assert_equal(written, expected)
+
+    for x in range(0,1):
+        for y in range(0,8):
+            for z in range(0,6):
+                for e_group in range(1, 2):
+                    expected_voxel = expected_sm.getHex(x,y,z)
+                    expected = expected_sm.imesh\
+                               .getTagHandle('ww_p_group_00{0}'\
+                               .format(e_group))[expected_voxel]
+                    written_voxel = ww2.mesh.getHex(x,y,z)
+                    written = ww2.mesh.imesh\
+                              .getTagHandle('ww_p_group_00{0}'\
+                              .format(e_group))[written_voxel]
+                    assert_equal(written, expected)
+
+    # write a new wwinp file and verify that is same wwinp file used as an 
+    # input to this test
+    ww2.write_wwinp(output)
+    expected_output = wwinp_file
+    
+    with open(output) as f:
+        written = f.readlines()
+
+    with open(expected_output) as f:
+        expected = f.readlines()
+
+    # check to make sure file are the same except for the data/time info
+    # on line 1
+    assert_equal(written[0].split()[:-2], expected[0].split()[:-2])
+    assert_equal(len(written), len(expected))
+    for i in range(1, len(expected)):
+        for j in range(0, len(expected[i].split())):
+            assert_equal(float(written[i].split()[j]), float(expected[i].split()[j]))
+
+    os.remove(output)
 
