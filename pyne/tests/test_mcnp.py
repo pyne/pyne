@@ -324,7 +324,7 @@ class TestPtrac(unittest.TestCase):
 
 # Test Wwinp class. All three function are tested at once because there inputs 
 # and ouputs are easily strung together.
-def test_Wwinp_n():
+def test_wwinp_n():
 
     thisdir = os.path.dirname(__file__)
     wwinp_file = os.path.join(thisdir, 'mcnp_wwinp_wwinp_n.txt')
@@ -530,7 +530,7 @@ def test_wwinp_p():
     os.remove(output)
 
 
-def test_Wwinp_np():
+def test_wwinp_np():
 
     thisdir = os.path.dirname(__file__)
     wwinp_file = os.path.join(thisdir, 'mcnp_wwinp_wwinp_np.txt')
