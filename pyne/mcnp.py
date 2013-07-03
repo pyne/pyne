@@ -1281,7 +1281,6 @@ class Wwinp(object):
             ww_data = []
             while len(ww_data) < self.nf[0]*self.nf[1]*self.nf[2]:
                 ww_data += [float(x) for x in f.readline().split()]
-                ww_data += [float(x) for x in self.f.readline().split()]
 
             # tag data to voxels
             tag_ww[voxels] = ww_data 
