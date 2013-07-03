@@ -18,8 +18,12 @@ ssrname = os.path.join(thisdir,"mcnp_surfsrc.w")
 sswname = os.path.join(thisdir,"copy_mcnp_surfsrc.w")
 ssrname_onetrack = os.path.join(thisdir,"mcnp_surfsrc_onetrack.w")
 
-from itaps import iMesh
-from r2s.scdmesh import ScdMesh
+# mesh specific imports
+try:
+    from itaps import iMesh
+    from pyne.scdmesh import ScdMesh
+except ImportError:
+    pass
 
 from numpy.testing import assert_array_equal
 
@@ -427,7 +431,7 @@ def test_Wwinp_n():
     os.remove(output)
 
 
-def test_Wwinp_p():
+def test_wwinp_p():
 
     thisdir = os.path.dirname(__file__)
     wwinp_file = os.path.join(thisdir, 'mcnp_wwinp_wwinp_p.txt')

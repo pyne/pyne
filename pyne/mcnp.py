@@ -28,8 +28,11 @@ from pyne import nucname
 from binaryreader import _BinaryReader, _FortranRecord
 
 # mesh specific imports
-from itaps import iMesh
-from r2s.scdmesh import ScdMesh
+try:
+    from itaps import iMesh
+    from pyne.scdmesh import ScdMesh
+except ImportError:
+    pass
 
 
 class Mctal(object):
@@ -1131,76 +1134,75 @@ def mat_from_mcnp(filename, mat_line, densities='None'):
 
 class Wwinp(object):
     """ A Wwinp object stores all of the information from a single MCNP WWINP
-        file. Weight window lower bounds are stored on a structured mesh. Only
-        Cartesian mesh WWINP files are supported. Neutron, photon, and
-        simotaneous neutron and photon WWINP files are supported.
+    file. Weight window lower bounds are stored on a structured mesh. Only
+    Cartesian mesh WWINP files are supported. Neutron, photon, and
+    simotaneous neutron and photon WWINP files are supported.
 
-        Parameters:
-        ----------
-        Attribute names are identical to names speficied in WWINP file
-        description in the MCNP5 User's Guide Volume 3 Appendix J.
+    Atrributes
+    ----------
+    Attribute names are identical to names speficied in WWINP file
+    description in the MCNP5 User's Guide Volume 3 Appendix J.
 
-        ni : number of integers on card 2. ni = 1 for neutron WWINPs, ni = 2 for 
-             photon WWINPs or neutron + photon WWINPs.
-        nr : 10 for rectangular, 16 for cylindrical.
-        ne : list of number of energy groups for neutrons and photons. If ni = 1
-             the list is only 1 value long, to represent the number of neutron
-             energy groups
-        nf : list of number of fine mesh points in the i, j, k dimensions
-        origin : list of i, j, k, minimums.
-        nc : list of number of coarse mesh points in the i, j, k dimensions
-        nwg : 1 for rectangular, 2 for cylindrical.
-        cm : list of lists of coarse mesh points in the i, j, k dimensions. Note
-             the origin is not considered a coarse mesh point (as in MCNP).
-        fm : list of lists of number of fine mesh points between the coarses 
-              mesh points in the i, j, k dimensions.
-        e : list of lists of energy upper bounds for neutrons, photons. If
-            ni = 1, the e will look like [[]]. If ni = 2, e will look like
-            [[], []].
-        bounds : list of lists of spacial bounds in the i, j, k dimensions.
-	mesh : scdmesh containing all the neutron and/or photon weight 
-	       window lower bounds. These tags have the form "ww_X_group_YYY"
-	       where X is n or p and YYY is the energy group number
-	       (e.g. 001, 002, etc.). The mesh has rootSet tags in the form
-	       X_e_upper_bounds.
+    ni : number of integers on card 2. ni = 1 for neutron WWINPs, ni = 2 for 
+         photon WWINPs or neutron + photon WWINPs.
+    nr : 10 for rectangular, 16 for cylindrical.
+    ne : list of number of energy groups for neutrons and photons. If ni = 1
+         the list is only 1 value long, to represent the number of neutron
+         energy groups
+    nf : list of number of fine mesh points in the i, j, k dimensions
+    origin : list of i, j, k, minimums.
+    nc : list of number of coarse mesh points in the i, j, k dimensions
+    nwg : 1 for rectangular, 2 for cylindrical.
+    cm : list of lists of coarse mesh points in the i, j, k dimensions. Note
+         the origin is not considered a coarse mesh point (as in MCNP).
+    fm : list of lists of number of fine mesh points between the coarses 
+    mesh points in the i, j, k dimensions.
+    e : list of lists of energy upper bounds for neutrons, photons. If
+        ni = 1, the e will look like [[]]. If ni = 2, e will look like
+        [[], []].
+    bounds : list of lists of spacial bounds in the i, j, k dimensions.
+    mesh : scdmesh containing all the neutron and/or photon weight 
+	   window lower bounds. These tags have the form "ww_X_group_YYY"
+	   where X is n or p and YYY is the energy group number
+	   (e.g. 001, 002, etc.). The mesh has rootSet tags in the form
+	   X_e_upper_bounds.
     """
+
     def __init__(self):
         pass
 
     def read_wwinp(self, filename):
         """ This method creates a Wwinp object from the WWINP file <filename>.
         """
-        self.f = open(filename, 'r')
-        self._read_block1()
-        self._read_block2()
-        self._read_block3()
-	self.f.close()
+        with open(filename, 'r') as f: 
+             self._read_block1(f)
+             self._read_block2(f)
+             self._read_block3(f)
 
-    def _read_block1(self):
+    def _read_block1(self, f):
         # Retrieves all of the information from block 1 of a wwinp file.
 
-        line_1 = self.f.readline()
+        line_1 = f.readline()
         self.ni = int(line_1.split()[2])
         self.nr = int(line_1.split()[3])
 
-        line_2 = self.f.readline()
+        line_2 = f.readline()
         self.ne = [float(x) for x in line_2.split()]
 
         if self.nr == 10: # Cartesian
-            line_3 = self.f.readline()
+            line_3 = f.readline()
             self.nf = [int(float(x)) for x in line_3.split()[0:3]]        
             self.origin = [float(x) for x in line_3.split()[3:6]]
         
-            line_4 = self.f.readline()
+            line_4 = f.readline()
             self.nc = [int(float(x)) for x in line_4.split()[0:3]]
             self.nwg = int(float(line_4.split()[3]))
                  
         if self.nr == 16: # Cylindrical
-            print >>sys.stderr, 'Cylindrical WWINP not currently supported'
-            sys.exit(1)
-            pass
+            raise ValueError('Cylindrical WWINP not currently supported')
+
         
-    def _read_block2(self):
+    def _read_block2(self, f):
         # Retrieves all of the information from block 2 of a wwinp file. 
 
         self.bounds = [[], [], []]
@@ -1211,7 +1213,7 @@ class Wwinp(object):
             # Create a list of raw block 2 values.
             raw = []
             while len(raw) < 3*self.nc[i] + 1:
-                raw += [float(x) for x in self.f.readline().split()]
+                raw += [float(x) for x in f.readline().split()]
 
             # Remove all the rx(i), ry(i), rz(i) values that 
             # contaminated the raw list.
@@ -1235,24 +1237,24 @@ class Wwinp(object):
                              *k/removed_values[j] + removed_values[j-1])
    
 
-    def _read_block3(self):
+    def _read_block3(self, f):
         #Retrives all the information of the block 3 of a wwinp file.
 
         self.e = [[]]
         if self.ne[0] != 0:
             while len(self.e[0]) < self.ne[0]:
-                self.e[0] += [float(x) for x in self.f.readline().split()]
+                self.e[0] += [float(x) for x in f.readline().split()]
 
-            self._read_wwlb('n')
+            self._read_wwlb('n', f)
 
         if len(self.ne) == 2:
             self.e.append([])
             while len(self.e[-1]) < self.ne[1]:
-                self.e[-1] += [float(x) for x in self.f.readline().split()]
+                self.e[-1] += [float(x) for x in f.readline().split()]
 
-            self._read_wwlb('p')
+            self._read_wwlb('p', f)
 
-    def _read_wwlb(self, particle):
+    def _read_wwlb(self, particle, f):
         # Reads the weight window lower bounds from block 3 and returns a 
         # mesh.
 
@@ -1278,7 +1280,7 @@ class Wwinp(object):
             # Get all data for energy group i
             ww_data = []
             while len(ww_data) < self.nf[0]*self.nf[1]*self.nf[2]:
-                ww_data += [float(x) for x in self.f.readline().split()]
+                ww_data += [float(x) for x in f.readline().split()]
 
             # tag data to voxels
             tag_ww[voxels] = ww_data 
@@ -1295,13 +1297,12 @@ class Wwinp(object):
     def write_wwinp(self, filename):
         """ This method writes a complete WWINP file to <filename>.
         """
-        self.f = open(filename, 'w')
-        self._write_block1()
-        self._write_block2()
-        self._write_block3()
-        self.f.close()
+        with open(filename, 'w') as f: 
+            self._write_block1(f)
+            self._write_block2(f)
+            self._write_block3(f)
 
-    def _write_block1(self):
+    def _write_block1(self, f):
         #Writes the all block 1 data to WWINP file
 
         block1 = ''
@@ -1332,9 +1333,9 @@ class Wwinp(object):
         block1 += ' {0: 1.5E} {1: 1.5E} {2: 1.5E} {3: 1.5E}\n'\
             .format(self.nc[0], self.nc[1], self.nc[2], self.nwg)
 
-        self.f.write(block1)
+        f.write(block1)
 
-    def _write_block2(self):
+    def _write_block2(self, f):
         #Writes the all block 2 data to WWINP file
 
         # Create an array of values to be print in block 2.
@@ -1358,18 +1359,18 @@ class Wwinp(object):
             if line_count != 0:
                 block2 += '\n'
 
-        self.f.write(block2)
+        f.write(block2)
 
-    def _write_block3(self):
+    def _write_block3(self, f):
         #Writes the all block 3 data to WWINP file
 
         if self.ne[0] != 0:
-            self._write_block3_single('n')
+            self._write_block3_single('n', f)
 
         if len(self.ne) == 2:
-            self._write_block3_single('p')
+            self._write_block3_single('p', f)
 
-    def _write_block3_single(self, particle):
+    def _write_block3_single(self, particle, f):
         # Write all of block 3 a single time (e.g. for WWINP with only n or 
         #   p). This function is called twice in the case of the WWINP having 
         #   both n and p.
@@ -1401,7 +1402,7 @@ class Wwinp(object):
             ww_data = []
             count += 1
             for voxel in voxels:
-                ww_data.append(\
+                ww_data.append(
                     self.mesh.imesh.getTagHandle('ww_{0}_group_{1:03d}'\
                         .format(particle, e_group))[voxel])
           
@@ -1419,16 +1420,16 @@ class Wwinp(object):
             if line_count != 0:
                 block3 += '\n'
 
-        self.f.write(block3)
+        f.write(block3)
 
 
 
     def read_mesh(self, mesh):
-        """ This method creates a Wwinp object from a structured mesh object. 
-            The mesh must have tags in the form "ww_X_group_YYY" where X is n 
-            or p, and  YYY is the energy group. For every particle there must 
-            be a rootSet tag in the form X_e_upper_bounds containing a list of
-            energy upper bounds.
+        """This method creates a Wwinp object from a structured mesh object. 
+        The mesh must have tags in the form "ww_X_group_YYY" where X is n 
+        or p, and  YYY is the energy group. For every particle there must 
+        be a rootSet tag in the form X_e_upper_bounds containing a list of
+        energy upper bounds.
         """
 
         self.mesh = mesh
