@@ -44,7 +44,7 @@ namespace moab {
  * the get_data() method.
  */
 //===========================================================================//
-class MeshTally
+class MeshTally : public Tally
 {
 
   protected:
@@ -52,7 +52,7 @@ class MeshTally
      * \brief Constructor
      * \param input user-defined input parameters for this mesh tally
      */
-    explicit MeshTally(const TallyInput& input);
+    explicit MeshTally(int id, const TallyInput& input);
 
   public:
     /**
@@ -102,14 +102,10 @@ class MeshTally
     virtual void zero_tally_data();
 
   protected:
-    /// Input data defined by user for this mesh tally
-    TallyInput input_data;
-
-    /// Number of energy bins implemented in the data arrays
-    unsigned int num_energy_bins; 
-
     /// Name of file to which the final tally results will be written
     std::string output_filename;
+    /// Name of the file that contains the mesh description separate from the geometry
+    std::string input_filename;
 
     /// Entity handle for the MOAB mesh data used for this mesh tally
     moab::EntityHandle tally_mesh_set;

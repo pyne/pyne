@@ -6,6 +6,7 @@
 #include <string>
 #include <map>
 #include <vector>
+#include <cassert>
 
 //===========================================================================//
 /**
@@ -18,9 +19,6 @@ struct TallyInput
 {
     /// Typedef for map that stores optional tally input parameters
     typedef std::multimap<std::string, std::string> TallyOptions;
-
-    /// User-specified ID for this tally
-//    unsigned int tally_id;
 
     /// Energy bin boundaries defined for all tally points
     std::vector<double> energy_bin_bounds;
@@ -69,12 +67,26 @@ class Tally
 
   protected:
 
+    /// Input data defined by user for this tally
     TallyInput input_data;
 
-    Tally(int id, TallyInput input)
+    /// Number of energy bins implemented in the data arrays
+    unsigned int num_energy_bins;
+
+    Tally(int id, const TallyInput input)
     {
        tally_id   = id; 
        input_data = input;
+
+       // Determine the total number of energy bins requested
+       num_energy_bins = input_data.energy_bin_bounds.size();
+
+       if(!input_data.total_energy_bin)
+       {
+          --num_energy_bins;
+       }
+
+       assert(num_energy_bins > 0);
     }
 };
 

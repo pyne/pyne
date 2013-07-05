@@ -3,6 +3,7 @@
 #include <cassert>
 #include <iostream>
 #include <sstream>
+#include <cstdlib>
 
 #include "moab/Interface.hpp"
 
@@ -11,21 +12,11 @@
 //---------------------------------------------------------------------------//
 // CONSTRUCTOR
 //---------------------------------------------------------------------------//
-MeshTally::MeshTally(const MeshTallyInput& input)
-    : input_data(input)
+MeshTally::MeshTally(int id, const TallyInput& input)
+	: Tally(id, input)    
 {
-    // Determine the total number of energy bins requested
-    num_energy_bins = input_data.energy_bin_bounds.size();
-
-    if(!input_data.total_energy_bin)
-    {
-        --num_energy_bins;
-    }
-
-    assert(num_energy_bins > 0);
-
     // Determine name of the output file
-    MeshTallyInput::TallyOptions::iterator it = input_data.options.find("out");
+    TallyInput::TallyOptions::iterator it = input_data.options.find("out");
 
     if (it != input_data.options.end())
     {
@@ -35,9 +26,25 @@ MeshTally::MeshTally(const MeshTallyInput& input)
     else // use default output file name
     {
         std::stringstream str;
-        str << "meshtal" << input_data.tally_id << ".h5m";
+        str << "meshtal" << tally_id << ".h5m";
         str >> output_filename;
     }
+
+    // Reset the iterator and find the name of the input mesh file
+    it = input_data.options.begin();
+    it = input_data.options.find("inp");
+    if (it != input_data.options.end())
+    {
+ 	input_filename = it->second;
+        input_data.options.erase(it);
+    }
+    else
+    {
+       std::cerr << "Exit: No input mesh file was given." << std::endl;
+       exit(EXIT_FAILURE); 
+    }
+
+
 }
 //---------------------------------------------------------------------------//
 // TALLY DATA ACCESS METHODS
@@ -103,7 +110,7 @@ moab::ErrorCode MeshTally::load_moab_mesh(moab::Interface* mbi,
     if (rval != moab::MB_SUCCESS) return rval;
 
     // load the MOAB mesh data from the input file into the mesh set
-    rval = mbi->load_file(input_data.input_filename.c_str(), &mesh_set);
+    rval = mbi->load_file(input_filename.c_str(), &mesh_set);
 
     if (rval != moab::MB_SUCCESS) return rval;
 
