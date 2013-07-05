@@ -182,31 +182,6 @@ void KDEMeshTally::compute_score(const TallyEvent& event, int ebin)
     }
 }
 //---------------------------------------------------------------------------//
-void KDEMeshTally::end_history()
-{
-    std::set<moab::EntityHandle>::iterator i;
-
-    // add sum of scores for this history to mesh tally for each tally point
-    for (i = visited_this_history.begin(); i != visited_this_history.end(); ++i)
-    {
-        for (unsigned int j = 0; j < num_energy_bins; ++j)
-        {
-            double& history_score = get_data(temp_tally_data, *i, j);
-            double& tally = get_data(tally_data, *i, j);
-            double& error = get_data(error_data, *i, j);
-
-            tally += history_score;
-            error += history_score * history_score;
-      
-            // reset temp_tally_data array for the next particle history
-            history_score = 0;
-        }
-    }
-
-    // reset set of tally points for next particle history
-    visited_this_history.clear();
-}
-//---------------------------------------------------------------------------//
 void KDEMeshTally::print(double num_particles, double multiplier)
 {
     // print the optimal bandwidth if it was computed
