@@ -44,8 +44,6 @@ MeshTally::MeshTally(int id, const TallyInput& input)
        std::cerr << "Exit: No input mesh file was given." << std::endl;
        exit(EXIT_FAILURE); 
     }
-
-
 }
 //---------------------------------------------------------------------------//
 // TALLY DATA ACCESS METHODS
@@ -230,7 +228,6 @@ void MeshTally::end_history()
     // reset set of tally points for next particle history
     visited_this_history.clear();
 }
-//---------------------------------------------------------------------------//
 //---------------------------------------------------------------------------//
 
 // end of MCNP5/dagmc/MeshTally.cpp

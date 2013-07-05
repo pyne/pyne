@@ -76,7 +76,7 @@ class MeshTally : public Tally
     /**
      * \brief Updates tally information when a particle history ends
      */
-    virtual void end_history() = 0;
+    virtual void end_history();
 
     /**
      * \brief Write tally and error results to the mesh tally's output file
