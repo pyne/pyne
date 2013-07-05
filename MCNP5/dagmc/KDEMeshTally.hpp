@@ -205,9 +205,6 @@ class KDEMeshTally : public MeshTally
     /// If true, another instance already set the random number generator seed
     static bool seed_is_set;
 
-    /// Entity handles updated in current history; cleared by end_history()
-    std::set<moab::EntityHandle> visited_this_history;
-
     // >>> PRIVATE METHODS
 
     /**

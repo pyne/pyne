@@ -62,13 +62,16 @@ class MeshTally : public Tally
 
     // >>> PUBLIC INTERFACE
 
+    // ToDo:  These comments, perhaps in modified form, will go with 
+    //        the implementation of these methods in derived classes.
     /**
      * \brief Computes mesh tally scores for the given tally event
      * \param event the parameters needed to compute the mesh tally scores
      * \param ebin index representing energy bin
      * TODO remove ebin as parameter since this can be computed from energy?
      */
-    virtual void compute_score(const TallyEvent& event, int ebin) = 0;
+    // jcz note: compare to update() in base class
+    // virtual void compute_score(const TallyEvent& event, int ebin) = 0;
 
     /**
      * \brief Updates tally information when a particle history ends
@@ -80,7 +83,7 @@ class MeshTally : public Tally
      * \param num_particles the number of source particles tracked
      * \param multiplier an optional constant multiplication factor
      */
-    virtual void print(double num_particles, double multiplier = 1.0) = 0;
+    // virtual void print(double num_particles, double multiplier = 1.0) = 0;
 
     // >>> TALLY DATA ACCESS METHODS
 
@@ -126,6 +129,9 @@ class MeshTally : public Tally
 
     /// Data array for storing sum of scores for a single history
     std::vector<double> temp_tally_data;
+
+    /// Entity handles updated in current history; cleared by end_history()
+    std::set<moab::EntityHandle> visited_this_history;
 
     // >>> PROTECTED METHODS
 

@@ -45,6 +45,8 @@ class Tally
 {
   public:
     
+    virtual ~Tally(){}
+
     /**
      * \brief Defines update
      *

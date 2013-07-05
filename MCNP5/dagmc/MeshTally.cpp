@@ -4,6 +4,7 @@
 #include <iostream>
 #include <sstream>
 #include <cstdlib>
+#include <set>
 
 #include "moab/Interface.hpp"
 
@@ -203,6 +204,33 @@ moab::ErrorCode MeshTally::setup_tags(moab::Interface* mbi, const char* prefix)
 
     return moab::MB_SUCCESS;
 }
+//---------------------------------------------------------------------------//
+// Modified from KDEMeshTally
+void MeshTally::end_history()
+{
+    std::set<moab::EntityHandle>::iterator i;
+
+    // add sum of scores for this history to mesh tally for each tally point
+    for (i = visited_this_history.begin(); i != visited_this_history.end(); ++i)
+    {
+        for (unsigned int j = 0; j < num_energy_bins; ++j)
+        {
+            double& history_score = get_data(temp_tally_data, *i, j);
+            double& tally = get_data(tally_data, *i, j);
+            double& error = get_data(error_data, *i, j);
+
+            tally += history_score;
+            error += history_score * history_score;
+      
+            // reset temp_tally_data array for the next particle history
+            history_score = 0;
+        }
+    }
+
+    // reset set of tally points for next particle history
+    visited_this_history.clear();
+}
+//---------------------------------------------------------------------------//
 //---------------------------------------------------------------------------//
 
 // end of MCNP5/dagmc/MeshTally.cpp
