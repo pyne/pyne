@@ -6,6 +6,7 @@
 #include <iostream>
 #include <sstream>
 #include <string>
+#include <set>
 
 #include "moab/AdaptiveKDTree.hpp"
 #include "moab/Core.hpp"
@@ -30,9 +31,9 @@ const double quad_weights[4] = {0.652145154863, 0.652145154863,
 //---------------------------------------------------------------------------//
 // CONSTRUCTOR
 //---------------------------------------------------------------------------//
-KDEMeshTally::KDEMeshTally(const MeshTallyInput& input,
+KDEMeshTally::KDEMeshTally(int id, const TallyInput& input,
                            KDEMeshTally::Estimator type)
-    : MeshTally(input),
+    : MeshTally(id, input),
       estimator(type),
       bandwidth(moab::CartVect(0.01, 0.01, 0.01)),
       kernel(NULL),
@@ -40,12 +41,12 @@ KDEMeshTally::KDEMeshTally(const MeshTallyInput& input,
       mbi(new moab::Core())
 {
     std::cout << "Creating KDE " << kde_estimator_names[estimator]
-              << " mesh tally " << input.tally_id << std::endl;
+              << " mesh tally " << tally_id << std::endl;
 
-    std::cout << "    for input mesh: " << input.input_filename
+    std::cout << "    for input mesh: " << input_filename
               << ", output file: " << output_filename << std::endl;
 
-    // set up KDEMeshTally member variables from MeshTallyInput
+    // set up KDEMeshTally member variables from TallyInput
     parse_tally_options();
 
     // create second-order epanechnikov kernel if user did not specify type
@@ -75,9 +76,9 @@ KDEMeshTally::KDEMeshTally(const MeshTallyInput& input,
 
     if (rval != moab::MB_SUCCESS)
     {
-        std::cout << "Error: Could not load mesh data for KDE mesh tally "
-                  << input_data.tally_id << " from input file "
-                  << input_data.input_filename << std::endl;
+        std::cerr << "Error: Could not load mesh data for KDE mesh tally "
+                  << tally_id << " from input file "
+                  << input_filename << std::endl;
         exit(EXIT_FAILURE);
     }
 
@@ -137,7 +138,7 @@ void KDEMeshTally::compute_score(const TallyEvent& event, int ebin)
     if (!event_is_set)
     {
         std::cerr << "Error: Tally event is not valid for KDE mesh tally ";
-        std::cerr << input_data.tally_id << std::endl;
+        std::cerr << tally_id << std::endl;
         exit(EXIT_FAILURE);
     }
 
@@ -284,8 +285,8 @@ void KDEMeshTally::set_bandwidth_value(const std::string& key,
 //---------------------------------------------------------------------------//
 void KDEMeshTally::parse_tally_options()
 {
-    const MeshTallyInput::TallyOptions& options = input_data.options;  
-    MeshTallyInput::TallyOptions::const_iterator it;
+    const TallyInput::TallyOptions& options = input_data.options;  
+    TallyInput::TallyOptions::const_iterator it;
 
     for (it = options.begin(); it != options.end(); ++it)
     {
@@ -327,7 +328,7 @@ void KDEMeshTally::parse_tally_options()
         else // invalid tally option
         {
             std::cerr << "Warning: input data for KDE mesh tally "
-                      << input_data.tally_id
+                      << tally_id
                       << " has unknown key '" << key << "'" << std::endl;
         }
     }
@@ -417,22 +418,6 @@ moab::CartVect KDEMeshTally::get_optimal_bandwidth() const
     }
 
     return optimal_bandwidth;
-}
-//---------------------------------------------------------------------------//
-void KDEMeshTally::add_score_to_tally(moab::EntityHandle tally_point,
-                                      double score,
-                                      int ebin)
-{
-    // update tally for this history with new score
-    get_data(temp_tally_data, tally_point, ebin) += score;
-
-    // also update total energy bin tally for this history if one exists
-    if (input_data.total_energy_bin)
-    {
-        get_data(temp_tally_data, tally_point, (num_energy_bins-1)) += score;
-    }
-
-    visited_this_history.insert(tally_point);
 }
 //---------------------------------------------------------------------------//
 // KDE ESTIMATOR METHODS

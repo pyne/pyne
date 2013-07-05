@@ -75,6 +75,22 @@ void MeshTally::zero_tally_data()
 //---------------------------------------------------------------------------//
 // PROTECTED METHODS
 //---------------------------------------------------------------------------//
+void MeshTally::add_score_to_tally(moab::EntityHandle tally_point,
+                                      double score,
+                                      int ebin)
+{
+    // update tally for this history with new score
+    get_data(temp_tally_data, tally_point, ebin) += score;
+
+    // also update total energy bin tally for this history if one exists
+    if (input_data.total_energy_bin)
+    {
+        get_data(temp_tally_data, tally_point, (num_energy_bins-1)) += score;
+    }
+
+    visited_this_history.insert(tally_point);
+}
+//---------------------------------------------------------------------------//
 void MeshTally::resize_data_arrays(unsigned int num_tally_points)
 {
     int new_size = num_tally_points * num_energy_bins;

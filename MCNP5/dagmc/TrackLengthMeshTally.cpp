@@ -129,11 +129,11 @@ namespace moab {
 
 
 
-TrackLengthMeshTally* TrackLengthMeshTally::setup( const MeshTallyInput& fmesh_params, 
+TrackLengthMeshTally* TrackLengthMeshTally::setup( const TallyInput& fmesh_params, 
                                                    const int* current_mcnp_cell )
 {
 
-  const MeshTallyInput::TallyOptions& fc_params = fmesh_params.options;
+  const TallyInput::TallyOptions& fc_params = fmesh_params.options;
 
   std::string tag_name;
   std::vector<std::string> tag_values;
@@ -144,7 +144,7 @@ TrackLengthMeshTally* TrackLengthMeshTally::setup( const MeshTallyInput& fmesh_p
 
   int id = fmesh_params.tally_id;
 
-  for( MeshTallyInput::TallyOptions::const_iterator i = fc_params.begin();
+  for( TallyInput::TallyOptions::const_iterator i = fc_params.begin();
        i != fc_params.end(); ++i )
   {
     std::string key = (*i).first, val = (*i).second;
@@ -226,7 +226,7 @@ TrackLengthMeshTally* TrackLengthMeshTally::setup( const MeshTallyInput& fmesh_p
 }
 
   
-TrackLengthMeshTally::TrackLengthMeshTally( const MeshTallyInput& fmesh ) :
+TrackLengthMeshTally::TrackLengthMeshTally(int id,  const TallyInput& fmesh ) :
   MeshTally( fmesh ),
   mb( new moab::Core() ),  
   obb_tool( new OrientedBoxTreeTool(mb) ),
@@ -383,9 +383,11 @@ ErrorCode TrackLengthMeshTally::load_mesh( const std::string& input_filename,
 
 }
 
+/*
   void TrackLengthMeshTally::print( double num_particles, double multiplier ){
     write_results( num_particles, multiplier );
   }
+*/
 
 /**
  * Write out the mesh with tally and error tags attached
@@ -394,11 +396,13 @@ ErrorCode TrackLengthMeshTally::load_mesh( const std::string& input_filename,
  * @param override_output_filename If non-NULL, use this filename for output instead
  *                                 of this->output_filename
  */
-ErrorCode TrackLengthMeshTally::write_results( double sp_norm, double mult_fact, 
-                                    const std::string* override_output_filename )
+
+// ErrorCode TrackLengthMeshTally::write_results( double sp_norm, double mult_fact, 
+//                                     const std::string* override_output_filename )
+ErrorCode TrackLengthMeshTally::write_data( double sp_norm, double mult_fact) 
 {
 
-  std::string filename = override_output_filename ? *override_output_filename : output_filename;
+//   std::string filename = override_output_filename ? *override_output_filename : output_filename;
 
   ErrorCode rval;
 
@@ -462,7 +466,6 @@ ErrorCode TrackLengthMeshTally::write_results( double sp_norm, double mult_fact,
   return MB_SUCCESS;
 }
 
-
 /**
  * Return true if the point falls inside tet.  Assumes tet is part of this TrackLengthMeshTally.
  */
@@ -493,6 +496,7 @@ bool TrackLengthMeshTally::point_in_tet( const CartVect& point, const EntityHand
 /**
  * Add a score to a given mesh cell
  */
+/*
 void TrackLengthMeshTally::add_score_to_mesh_cell( EntityHandle mesh_cell, double score, int ebin ){
   
   visited_this_history.insert( mesh_cell );
@@ -503,12 +507,17 @@ void TrackLengthMeshTally::add_score_to_mesh_cell( EntityHandle mesh_cell, doubl
     get_data( temp_tally_data, mesh_cell, (num_energy_bins-1) ) += score;
   }
 }
+*/
 
 /**
  * Finish adding a set of scores for a particular monte carlo particle track
+ * ToDo:  This may not need to be overridden, depending on whethere conformality 
+ *        needs to be distinguished.
  */
-void TrackLengthMeshTally::end_history () {
-
+void TrackLengthMeshTally::end_history () 
+{
+  MeshTally::end_history();
+/*
   for( std::set< EntityHandle >::iterator i=visited_this_history.begin(); i!=visited_this_history.end(); ++i){
 
     for( unsigned j = 0; j < num_energy_bins; ++j ){
@@ -524,7 +533,7 @@ void TrackLengthMeshTally::end_history () {
   }
 
   visited_this_history.clear();
-
+*/
   if( conformality ){ last_cell = -1; } 
 }
 
@@ -915,7 +924,8 @@ void TrackLengthMeshTally::compute_score(const TallyEvent& event, int ebin)
         double weight = event.get_weighting_factor();
         double score = weight * track_length;
 
-        add_score_to_mesh_cell( tet, score, ebin );
+ 	add_score_to_tally(tet, score, ebin);
+        // add_score_to_mesh_cell( tet, score, ebin );
         found_crossing = true;
       }
 

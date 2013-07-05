@@ -3,7 +3,6 @@
 #ifndef DAGMC_KDE_MESH_TALLY_HPP
 #define DAGMC_KDE_MESH_TALLY_HPP
 
-#include <set>
 #include <utility>
 #include <vector>
 
@@ -11,7 +10,6 @@
 
 #include "KDEKernel.hpp"
 #include "MeshTally.hpp"
-#include "TallyEvent.hpp"
 
 // forward declarations
 namespace moab {
@@ -53,11 +51,11 @@ typedef std::vector<moab::CartVect> std_vector_CartVect;
  *        Computational Methods (M&C 2013), Sun Valley, Idaho, May 5-9 (2013)
  *
  * ==============
- * MeshTallyInput
+ * TallyInput
  * ==============
  *
  * In addition to choosing the type of estimator, the user must also prepare a
- * MeshTallyInput object that will be used to set all of the other required and
+ * TallyInput object that will be used to set all of the other required and
  * optional input parameters.  This is a struct defined in MeshTally.hpp that
  * must include the tally ID number, the energy bin boundaries, whether or not
  * a total energy bin is required, the name of the mesh input file, and a
@@ -133,7 +131,7 @@ class KDEMeshTally : public MeshTally
      * \param input user-defined input parameters for this KDE mesh tally
      * \param type the type of estimator to use with this KDE mesh tally
      */
-    KDEMeshTally(const MeshTallyInput& input, Estimator type = COLLISION);
+    KDEMeshTally(int id, const TallyInput& input, Estimator type = COLLISION);
 
     /**
      * \brief Virtual destructor
@@ -149,11 +147,6 @@ class KDEMeshTally : public MeshTally
      */
     virtual void compute_score(const TallyEvent& event, int ebin);
  
-    /**
-     * \brief Updates tally information when a particle history ends
-     */
-    virtual void end_history();
-
     /**
      * \brief Write tally and error results to the mesh tally's output file
      * \param num_particles the number of source particles tracked
@@ -218,7 +211,7 @@ class KDEMeshTally : public MeshTally
                              unsigned int i);
 
     /**
-     * \brief Parse the MeshTallyInput options for this KDE mesh tally
+     * \brief Parse the TallyInput options for this KDE mesh tally
      */
     void parse_tally_options();
 
@@ -263,16 +256,6 @@ class KDEMeshTally : public MeshTally
      */
     moab::CartVect get_optimal_bandwidth() const;
   
-    /** 
-     * \brief Add score to the tally for the given tally point
-     * \param tally_point entity handle representing tally point
-     * \param score the contribution to add to the tally
-     * \param ebin the energy bin to which the score will be added
-     */
-    virtual void add_score_to_tally(moab::EntityHandle tally_point,
-                                    double score,
-                                    int ebin);
-
     // >>> KDE ESTIMATOR METHODS
 
     /**

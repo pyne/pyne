@@ -135,6 +135,16 @@ class MeshTally : public Tally
 
     // >>> PROTECTED METHODS
 
+    /** 
+     * \brief Add score to the tally for the given tally point
+     * \param tally_point entity handle representing tally point
+     * \param score the contribution to add to the tally
+     * \param ebin the energy bin to which the score will be added
+     */
+    virtual void add_score_to_tally(moab::EntityHandle tally_point,
+                                    double score,
+                                    int ebin);
+
     /**
      * \brief Resize data arrays to hold all of the mesh tally data
      * \param num_tally_points number of tally points included in mesh tally

@@ -27,7 +27,7 @@ public:
   /**
    * Public constructor interface- actual constructor is protected.
    */
-  static TrackLengthMeshTally* setup(const MeshTallyInput& params, const int* cur_mcnp_cell);
+  static TrackLengthMeshTally* setup(const TallyInput& params, const int* cur_mcnp_cell);
 
   /**
    * \brief Computes mesh tally scores for the given tally event
@@ -38,7 +38,7 @@ public:
   
   virtual void end_history ();
     
-  virtual void print(double num_particles, double multiplier = 1.0);
+  // virtual void print(double num_particles, double multiplier = 1.0);
 
   ~TrackLengthMeshTally();
 
@@ -53,7 +53,7 @@ protected:
 
   bool point_in_tet( const CartVect& point, const EntityHandle* tet );
 
-  void add_score_to_mesh_cell( EntityHandle mesh_cell, double score, int ebin );
+  // void add_score_to_mesh_cell( EntityHandle mesh_cell, double score, int ebin );
  
   void get_skin_triangle_adjacencies( EntityHandle triangle, 
                                       EntityHandle& tetrahedron, EntityHandle vertices[3] );
@@ -93,9 +93,9 @@ protected:
 
   const int* mcnp_current_cell; // non-null if user has asserted conformal geometry
   int last_cell;
-  std::set<EntityHandle> visited_this_history; 
+  // std::set<EntityHandle> visited_this_history; 
     
-  TrackLengthMeshTally( const MeshTallyInput& fmesh_params );
+  TrackLengthMeshTally( int id, const TallyInput& fmesh_params );
 
 private:
   TrackLengthMeshTally& operator=( const TrackLengthMeshTally& mt ); // unimplemented
