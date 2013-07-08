@@ -228,6 +228,15 @@ void g_step(double& pSx,
 
   g_fire(oldReg, point, dir, propStep, retStep, newReg); // fire a ray 
 
+  /*
+  std::cout << oldReg << " " << newReg << " " << std::endl;
+  std::cout.precision(25);
+  std::cout << std::scientific ;
+  std::cout << point[0] << " " << point[1] << " " << point[2] << std::endl;
+  std::cout << dir[0] << " " << dir[1] << " " << dir[2] << std::endl;
+  std::cout << retStep << " " << propStep << std::endl;
+  */
+
   if(debug)
     {
       std::cout << "saf = " << saf << std::endl;
@@ -303,6 +312,8 @@ void g_fire(int& oldRegion, double point[], double dir[], double &propStep, doub
       MBErrorCode rval = DAG->next_vol(next_surf,vol,newvol);
       newRegion = DAG->index_by_handle(newvol);
       retStep = retStep ; // path limited by geometry
+      if ( retStep < 1.0e-9 )
+	retStep = 1.0e-9;
     }
   else
     {
@@ -632,7 +643,7 @@ void f_g1rt(void)
 int f_idnr(const int & nreg, const int & mlat) 
 
 {
-	std::cerr<<"================== F_IDNR ================="<<std::endl;
+	
 
 // returns 0 if user doesn't want Fluka to use DNEAR to compute the 
 // step (the same effect is obtained with the GLOBAL (WHAT(3)=-1)
