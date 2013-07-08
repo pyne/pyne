@@ -114,7 +114,8 @@ Usage: rfluka -e <fluka executable> -N <run N> -M <final run N>
              ;;
 	  d)
 	     DAGMCFILE=${OPTARG}
-             cp ${DAGMCFILE} dagmc.h5m
+	     ln -s ${DAGMCFILE} dagmc.h5m
+             #cp ${DAGMCFILE} dagmc.h5m
 	     ;;
           \?)
              ${ECHOE} "\nInvalid option -$OPTARG\n"
