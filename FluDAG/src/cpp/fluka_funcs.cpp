@@ -347,8 +347,7 @@ void g_fire(int& oldRegion, double point[], double dir[], double &propStep, doub
 // ASSUMES:  no ray history
 // Notes
 // - direction is not taken into account 
-// - curRegion is not currently used.  It is expected to be implemented as a check
-//   on what the sign of the normal should be.  It is used in a call to DAG->surface_sense
+// - curRegion is not currently used.  
 int  normal (double& posx, double& posy, double& posz, double *norml, int& curRegion)
 {
    int flagErr; 
@@ -401,27 +400,8 @@ void f_normal(double& pSx, double& pSy, double& pSz,
   }
   return;
 }
-//---------------------------------------------------------------------------//
-// getSense(..)
-//---------------------------------------------------------------------------//
-// Helper function
-int getSense(int region)
-{
-
-  int sense;  // sense of next_surf with respect to oldRegion (volume)
-
-  MBEntityHandle vol = DAG->entity_by_index(3, region);
- 
-  MBErrorCode ErrorCode = DAG->surface_sense(vol, next_surf, sense); 
-  if(false)
-  {
-      std::cout << "Sense of next_surf with respect to the region is " << sense << std::endl;
-  }
-  return sense; 
-} 
-///////			End f_normal, normal, and getSense(..)
+///////			End normal() and f_normal()
 /////////////////////////////////////////////////////////////////////
-
 //---------------------------------------------------------------------------//
 // look(..)
 //---------------------------------------------------------------------------//
