@@ -21,24 +21,16 @@ KDENeighborhood::KDENeighborhood(const TallyEvent& event,
     this->tree = &tree;
     this->tree_root = tree_root;
 
-    // define the neighborhood region for this tally event
-    TallyEvent::EventType type = event.get_event_type();
-
-    if (type == TallyEvent::COLLISION)
+    // define and set the neighborhood region for this tally event
+    if (event.type == TallyEvent::COLLISION)
     {
-        // set neighborhood region for collision event
-        CollisionData data;
-        event.get_collision_data(data);
-        set_neighborhood(data.collision_point, bandwidth);
+        set_neighborhood(event.position, bandwidth);
     }
-    else if (type == TallyEvent::TRACK)
+    else if (event.type == TallyEvent::TRACK)
     {
-        // set neighborhood region for the track-based event
-        TrackData data;
-        event.get_track_data(data);
-        set_neighborhood(data.track_length,
-                         data.start_point,
-                         data.direction,
+        set_neighborhood(event.track_length,
+                         event.position,
+                         event.direction,
                          bandwidth);
     }
     else
@@ -64,23 +56,19 @@ bool KDENeighborhood::point_within_max_radius(const TallyEvent& event,
                                               const moab::CartVect& point) const
 {
     // process track-based tally event only
-    if (event.get_event_type() == TallyEvent::TRACK)
+    if (event.type == TallyEvent::TRACK)
     {
-        // get track segment data
-        TrackData data;
-        event.get_track_data(data);
-
-        // create a temporary vector from start_point to point being tested
+        // create a vector from starting position to point being tested
         moab::CartVect temp;
 
         for (int i = 0; i < 3; ++i)
         {
-            temp[i] = point[i] - data.start_point[i];
+            temp[i] = point[i] - event.position[i];
         }
 
         // compute perpendicular distance from point being tested to line
         // defined by track segment using the cross-product method
-        double distance_to_track = (data.direction * temp).length();
+        double distance_to_track = (event.direction * temp).length();
 
         // return true if distance is less than radius of cylindrical region
         if (distance_to_track < radius) return true;
