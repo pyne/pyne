@@ -553,6 +553,9 @@ TrackLengthMeshTally::get_skin_triangle_adjacencies( EntityHandle triangle,
                                                      EntityHandle& tetrahedron, EntityHandle vertices[3] ){
 
   ErrorCode rval;
+  // This part of the code could be replace by a modified get_tet_verts(..)
+  // say 
+  // vertices = get_triangle_vertices(triangle)
   const EntityHandle* tri_conn;
   int num_verts; 
   rval = mb->get_connectivity( triangle, tri_conn, num_verts );
@@ -560,6 +563,10 @@ TrackLengthMeshTally::get_skin_triangle_adjacencies( EntityHandle triangle,
   assert( num_verts == 3 );
   memcpy( vertices, tri_conn, sizeof(EntityHandle)*3 );
   
+   
+  // This part of the code could be replaced by, say
+  // 
+  // tetrahedron = get_adjacent_tetrahedron(triangle)
   Range tri_sides; 
   rval = mb->get_adjacencies( &triangle, 1, 3, false, tri_sides );
   assert( rval == MB_SUCCESS );
@@ -822,20 +829,31 @@ void TrackLengthMeshTally::compute_score(const TallyEvent& event, int ebin)
     EntityHandle tet = next_tet; // the tetrahedron being currently handled
     tet_count++;
 
+    // The next 5 lines could be replaced with a single function 
+    // pseudo: // Get a list of EntityHandles at each vertex of  the 
+    // pseudo: // current tetrahedron entity
+    // pseudo: tet_verts = get_tetrahedron_vertices(tet)
     const EntityHandle* tet_verts; 
     int num_tet_verts; 
     rval = mb->get_connectivity( tet, tet_verts, num_tet_verts );
     assert( rval == MB_SUCCESS );
     assert( num_tet_verts == 4 );
-
+    
     bool found_crossing = false;
 
-
-    for( int i = 0; i < 4 && !found_crossing; ++i ){
-
+    for( int i = 0; i < 4 && !found_crossing; ++i )
+    {
+      // return the vertices of the sub-entity at the ith vertex in the given 
+      // set vertices from a single parent entity, 
+      // where MBTET is the Entity type of tet_verts (the parent),
+      // tri is the list of EntityHandles of the subentity at the ith vertex,
+      // based on tet_verts and canonical ordering for parent_type, and
+      // the expected number of vertices of the sub_entity is 3
+      // This could be replaced by a function call
+      // pseudo: tri = get_triangle_vertices_at(tet_verts, i)
       EntityHandle tri[3]; 
       int three;
-
+      // constructor or static class
       CN::SubEntityConn( tet_verts, MBTET, 2, i, tri, three );
       assert( three == 3 );
 
@@ -940,6 +958,22 @@ void TrackLengthMeshTally::compute_score(const TallyEvent& event, int ebin)
 
   return;
 
+}
+
+EntityHandle *get_tet_vertices(EntityHandle tet)
+{
+    const EntityHandle* tet_verts; 
+    int num_tet_verts; 
+    ErrorCode rval;
+    rval = mb->get_connectivity( tet, tet_verts, num_tet_verts );
+    assert( rval == MB_SUCCESS );
+    assert( num_tet_verts == 4);
+    if( num_verts != 4 ){
+      std::cerr << "Error: DAGMC TrackLengthMeshTally cannot handle non-tetrahedral meshes yet," << std::endl;
+      std::cerr << "       but your mesh has at least one cell with " << num_verts << " vertices." << std::endl;
+      // return MB_NOT_IMPLEMENTED;
+    }
+    return tet_verts
 }
 
 } // namespace moab

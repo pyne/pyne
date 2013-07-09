@@ -183,9 +183,9 @@ void KDEMeshTally::compute_score(const TallyEvent& event, int ebin)
     }
 }
 //---------------------------------------------------------------------------//
-void KDEMeshTally::print(double num_particles, double multiplier)
+void KDEMeshTally::write_data(double num_particles, double multiplier)
 {
-    // print the optimal bandwidth if it was computed
+    // display the optimal bandwidth if it was computed
     if (estimator == COLLISION)
     {
         std::cout << std::endl << "optimal bandwidth for " << num_collisions

@@ -53,6 +53,8 @@ void TallyEvent::removeTally(int tally_id)
 	observers.erase(it);
 }
 
+////////////////////////////////////////////////////////////////////
+// UPDATE
 void TallyEvent::update_tallies()
 {
        std::map<int, Tally*>::iterator map_it;
@@ -62,7 +64,27 @@ void TallyEvent::update_tallies()
 	   tally->update();
        }
 }
-
+/*
+void TallyEvent::update_track_tallies()
+{
+       std::map<int, Tally*>::iterator map_it;
+       for (map_it = observers.begin(); map_it != observers.end(); ++map_it)
+       {
+           Tally *tally = map_it->second;
+	   tally->update_track();
+       }
+}
+void TallyEvent::update_collision_tallies()
+{
+       std::map<int, Tally*>::iterator map_it;
+       for (map_it = observers.begin(); map_it != observers.end(); ++map_it)
+       {
+           Tally *tally = map_it->second;
+	   tally->update_collision_tallies();
+       }
+}
+*/
+////////////////////////////////////////////////////////////////////
 void TallyEvent::end_history()
 {
        std::map<int, Tally*>::iterator map_it;

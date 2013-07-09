@@ -52,11 +52,14 @@ class Tally
      *
      * Pass Particle state data
      */
-    virtual void update() = 0;
- 
+    virtual void update(const ParticleState& state) = 0;
+/*
+    virtual void update_track(const ParticleState& state) = 0;
+    virtual void update_collision(const ParticleState& state) = 0;
+*/ 
     virtual void end_history() = 0;
 
-    virtual void write_data(double num_particlesl, double multiplier = 1.0) = 0;
+    virtual void write_data(double num_particles, double multiplier = 1.0) = 0;
 
     /**
      *  \brief Factory method for creation of Tally Observers

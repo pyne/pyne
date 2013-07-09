@@ -105,7 +105,7 @@ typedef std::vector<moab::CartVect> std_vector_CartVect;
  * MeshTally::tally_data array.  It is also important for calculating the
  * relative standard error of the final tally results.
  *
- * The third and final step is to use the print() method to write all of the
+ * The third and final step is to use the write_data() method to write all of the
  * tally results and their corresponding relative standard errors to the output
  * file.  If the "out" key is not included as a tally option, then the default
  * case is a H5M file format named meshtal<tally_id>.h5m.  To write to another
@@ -152,7 +152,7 @@ class KDEMeshTally : public MeshTally
      * \param num_particles the number of source particles tracked
      * \param multiplier an optional constant multiplication factor
      *
-     * The print() method writes the current tally and relative standard error
+     * The write_data() method writes the current tally and relative standard error
      * results to the output file defined for this mesh tally, normalized by
      * the number of source particles that were tracked during the Monte Carlo
      * simulation.
@@ -162,7 +162,7 @@ class KDEMeshTally : public MeshTally
      * same as the standard tally multiplier, which is typically applied to
      * individual scores instead.
      */
-    virtual void print(double num_particles, double multiplier = 1.0);
+    virtual void write_data(double num_particles, double multiplier = 1.0);
 
   private:
     /// Copy constructor and operator= methods are not implemented
