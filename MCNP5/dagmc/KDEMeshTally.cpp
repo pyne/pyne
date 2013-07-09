@@ -111,7 +111,7 @@ void KDEMeshTally::compute_score(const TallyEvent& event)
     // set up tally event based on KDE mesh tally type
     std::vector<moab::CartVect> subtrack_points;
 
-    if (event == TallyEvent::TRACK)
+    if (event.type == TallyEvent::TRACK)
     {
         if (estimator == SUB_TRACK)
         {
@@ -121,7 +121,7 @@ void KDEMeshTally::compute_score(const TallyEvent& event)
             subtrack_points = choose_points(num_subtracks, event);
         }
     }
-    else if (event == TallyEvent::COLLISION)
+    else if (event.type == TallyEvent::COLLISION)
     {
         if (estimator == COLLISION)
         {
@@ -175,7 +175,7 @@ void KDEMeshTally::compute_score(const TallyEvent& event)
           }
           else // estimator == COLLISION
           {
-            score *= collision_score(event, moab::CartVect(coords));
+            score *= collision_score(event.position, moab::CartVect(coords));
           }
 
         // add score to KDE mesh tally for the current history
@@ -423,13 +423,14 @@ moab::CartVect KDEMeshTally::get_optimal_bandwidth() const
 // KDE ESTIMATOR METHODS
 //---------------------------------------------------------------------------//
 // NOTE: integral_track_estimator uses the 4-point gaussian quadrature method
-double KDEMeshTally::integral_track_score(const TrackData& data,
+// double KDEMeshTally::integral_track_score(const TrackData& data,
+double KDEMeshTally::integral_track_score(const TallyEvent& event,
                                           const moab::CartVect& X) const
 {
     // determine the limits of integration
     std::pair<double, double> limits;
     
-    bool valid_limits = set_integral_limits(data, X, limits);
+    bool valid_limits = set_integral_limits(event, X, limits);
 
     // compute value of the integral only if valid limits exist
     if (valid_limits)
@@ -451,7 +452,7 @@ double KDEMeshTally::integral_track_score(const TrackData& data,
 
             for (int j = 0; j < 3; ++j)
             {
-                double u = X[j] - data.start_point[j] - s * data.direction[j];
+                double u = X[j] - event.position[j] - s * event.direction[j];
                 u /= bandwidth[j];
                 kernel_value *= kernel->evaluate(u) / bandwidth[j];
             }
@@ -470,14 +471,14 @@ double KDEMeshTally::integral_track_score(const TrackData& data,
     }
 }
 //---------------------------------------------------------------------------//
-bool KDEMeshTally::set_integral_limits(const TrackData& data,
+bool KDEMeshTally::set_integral_limits(const TallyEvent& event,
                                        const moab::CartVect& X,
                                        std::pair<double, double>& limits) const
 {
     bool valid_limits = false;
 
     // set initial integral limits to the full track length (default values)
-    limits = std::make_pair(0, data.track_length);
+    limits = std::make_pair(0, event.track_length);
 
     // check limits against the valid path length interval for each dimension
     for (int i = 0; i < 3; ++i)
@@ -486,21 +487,21 @@ bool KDEMeshTally::set_integral_limits(const TrackData& data,
         double path_max = limits.second;
 
         // compute valid path length interval Si = [path_min, path_max]
-        if (data.direction[i] > 0)
+        if (event.direction[i] > 0)
         {
-            path_min = X[i] - data.start_point[i] - bandwidth[i];
-            path_min /= data.direction[i];
+            path_min = X[i] - event.position[i] - bandwidth[i];
+            path_min /= event.direction[i];
 
-            path_max = X[i] - data.start_point[i] + bandwidth[i];
-            path_max /= data.direction[i];
+            path_max = X[i] - event.position[i] + bandwidth[i];
+            path_max /= event.direction[i];
         }
-        else if (data.direction[i] < 0)
+        else if (event.direction[i] < 0)
         {
-            path_min = X[i] - data.start_point[i] + bandwidth[i];
-            path_min /= data.direction[i];
+            path_min = X[i] - event.position[i] + bandwidth[i];
+            path_min /= event.direction[i];
 
-            path_max = X[i] - data.start_point[i] - bandwidth[i];
-            path_max /= data.direction[i];
+            path_max = X[i] - event.position[i] - bandwidth[i];
+            path_max /= event.direction[i];
         }
 
         // set lower limit to highest minimum
@@ -554,16 +555,16 @@ double KDEMeshTally::subtrack_score(const std::vector<moab::CartVect>& points,
 }
 //---------------------------------------------------------------------------//
 std_vector_CartVect KDEMeshTally::choose_points(unsigned int p,
-                                                const TrackData& data) const
+						const TallyEvent& event) const
 {
     // make sure the number of sub-tracks is valid
     assert(p > 0);
 
     // compute sub-track length, assumed to be equal for all sub-tracks
-    double sub_track_length = data.track_length / p;
+    double sub_track_length = event.track_length / p;
 
     // set the starting point to the beginning of the track segment
-    moab::CartVect start_point = data.start_point;
+    moab::CartVect start_point = event.position;
 
     // choose a random position along each sub-track
     std::vector<moab::CartVect> random_points;
@@ -573,16 +574,16 @@ std_vector_CartVect KDEMeshTally::choose_points(unsigned int p,
         double path_length = rand() * sub_track_length / RAND_MAX;
         
         // add the coordinates of the corresponding point
-        random_points.push_back(start_point + path_length * data.direction);
+        random_points.push_back(start_point + path_length * event.direction);
 
         // shift starting point to the next sub-track
-        start_point += sub_track_length * data.direction;
+        start_point += sub_track_length * event.direction;
     }
  
     return random_points;
 }
 //---------------------------------------------------------------------------//
-double KDEMeshTally::collision_score(const CollisionData& data,
+double KDEMeshTally::collision_score(const moab::CartVect& collision_point,
                                      const moab::CartVect& X) const
 {
     // compute the value of the kernel function K(X)
@@ -590,7 +591,7 @@ double KDEMeshTally::collision_score(const CollisionData& data,
 
     for (int i = 0; i < 3; ++i)
     {
-        double u = (X[i] - data.collision_point[i]) / bandwidth[i];
+        double u = (X[i] - collision_point[i]) / bandwidth[i];
         score *= kernel->evaluate(u) / bandwidth[i];
     }
 

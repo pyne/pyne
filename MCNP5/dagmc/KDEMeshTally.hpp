@@ -143,9 +143,8 @@ class KDEMeshTally : public MeshTally
     /**
      * \brief Computes mesh tally scores for the given tally event
      * \param event the parameters needed to compute the mesh tally scores
-     * \param ebin index representing energy bin
      */
-    virtual void compute_score(const TallyEvent& event, int ebin);
+    virtual void compute_score(const TallyEvent& event );
  
     /**
      * \brief Write tally and error results to the mesh tally's output file
@@ -269,7 +268,7 @@ class KDEMeshTally : public MeshTally
      * length s for the given calculation point X, using the limits of
      * integration as determined by the set_integral_limits() method.
      */
-    double integral_track_score(const TrackData& data,
+    double integral_track_score(const TallyEvent& event,
                                 const moab::CartVect& X) const;
 
     /**
@@ -288,7 +287,7 @@ class KDEMeshTally : public MeshTally
      * This essentially means that the resulting integrand over this range
      * would have been zero and the calculation point can be ignored.
      */
-    bool set_integral_limits(const TrackData& data,
+    bool set_integral_limits(const TallyEvent& event,
                              const moab::CartVect& X,
                              std::pair<double, double>& limits) const;
 
@@ -317,7 +316,7 @@ class KDEMeshTally : public MeshTally
      * one point from each sub-track.
      */
     std_vector_CartVect choose_points(unsigned int p,
-                                      const TrackData& data) const;
+                                      const TallyEvent& event) const;
 
     /**
      * \brief Computes tally score based on the collision estimator
@@ -328,7 +327,7 @@ class KDEMeshTally : public MeshTally
      * The collision_score() method computes the 3D kernel contribution
      * for the given calculation point X.
      */
-    double collision_score(const CollisionData& data,
+    double collision_score(const moab::CartVect& collision_point,
                            const moab::CartVect& X) const;
 };
 
