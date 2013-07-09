@@ -5,28 +5,7 @@
 
 #include <iostream>
 #include "Tally.hpp"
-
-#include "moab/CartVect.hpp"
-
-struct ParticleState
-{
-    /// Total length of track segment
-    double track_length;
-
-    /// Position of particle (x, y, z)
-    moab::CartVect position;
-
-    /// Direction in which particle is traveling (u, v, w)
-    moab::CartVect direction;
-
-    /// Collision: Total macroscopic cross section for cell in 
-    /// which collision occurred
-    double total_cross_section;
-
-    /// Energy and weight of particle when event occurred
-    double energy;
-    double weight;
-};
+#include "ParticleState.hpp"
 
 //===========================================================================//
 /**
@@ -97,7 +76,8 @@ class TallyEvent
     void end_history();
 
     // Call write_data() on every tally
-    void write_data();
+    void write_data(double num_particles, double multiplier);
+
     /**
      * \brief Sets tally multiplier for the event
      * \param value energy-dependent value for the tally multiplier

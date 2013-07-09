@@ -61,7 +61,7 @@ void TallyEvent::update_tallies()
        for (map_it = observers.begin(); map_it != observers.end(); ++map_it)
        {
            Tally *tally = map_it->second;
-	   tally->update();
+	   tally->update(particle);
        }
 }
 /*
@@ -95,13 +95,13 @@ void TallyEvent::end_history()
        }
 }
 
-void TallyEvent::write_data()
+void TallyEvent::write_data(double num_particles, double multiplier)
 {
        std::map<int, Tally*>::iterator map_it;
        for (map_it = observers.begin(); map_it != observers.end(); ++map_it)
        {
            Tally *tally = map_it->second;
-	   tally->write_data();
+	   tally->write_data(num_particles, multiplier);
        }
 }
 

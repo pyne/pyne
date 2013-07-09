@@ -8,6 +8,9 @@
 #include <vector>
 #include <cassert>
 
+// Forward declare because it's only referenced here
+struct ParticleState;
+
 //===========================================================================//
 /**
  * \struct TallyInput
