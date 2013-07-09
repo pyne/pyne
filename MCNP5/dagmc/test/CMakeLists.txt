@@ -21,6 +21,7 @@ ADD_LIBRARY(tally
 	${DAGMC_MESHTALLY_SOURCE}/TallyManager.cpp
 	${DAGMC_MESHTALLY_SOURCE}/MeshTally.cpp
 	${DAGMC_MESHTALLY_SOURCE}/KDEMeshTally.cpp
+	${DAGMC_MESHTALLY_SOURCE}/TrackLengthMeshTally.cpp
 )
 
 # make mesh tally source files into a library

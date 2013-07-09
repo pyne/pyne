@@ -1,6 +1,5 @@
-#ifndef DAGMC_TRACK_LENGTH_MESH_TALLY_H
-#define DAGMC_TRACK_LENGTH_MESH_TALLY_H
-
+#ifndef DAGMC_TRACK_LENGTH_MESH_TALLY_HPP
+#define DAGMC_TRACK_LENGTH_MESH_TALLY_HPP
 
 #include <string>
 #include <cassert>
@@ -21,35 +20,36 @@ class AdaptiveKDTree;
 class OrientedBoxTreeTool;
 
 
-class TrackLengthMeshTally : public MeshTally{ 
+class TrackLengthMeshTally : public MeshTally
+{ 
 
 public:
   /**
    * Public constructor interface- actual constructor is protected.
    */
-  static TrackLengthMeshTally* setup(const TallyInput& params, const int* cur_mcnp_cell);
+  // static TrackLengthMeshTally* setup(int id, const TallyInput& params, const int* cur_mcnp_cell);
 
   /**
    * \brief Computes mesh tally scores for the given tally event
    * \param event the parameters needed to compute the mesh tally scores
    * \param ebin index representing energy bin
    */
-  virtual void compute_score(const TallyEvent& event, int ebin);
+  virtual void compute_score(const TallyEvent& event);
   
   virtual void end_history ();
+ 
+  virtual void write_data( double num_particles, double multiplier = 1.0); 
     
-  // virtual void print(double num_particles, double multiplier = 1.0);
-
   ~TrackLengthMeshTally();
 
  
 
 protected:
 
-  ErrorCode load_mesh( const std::string& input_filename, 
-                       std::string tag_name, std::vector<std::string>& tag_values );  
-  ErrorCode write_results( double sp_norm, double mult_fact, 
-                           const std::string* override_output_filename = NULL );
+  ErrorCode load_mesh();
+                       
+  // ErrorCode write_results( double sp_norm, double mult_fact, 
+  //                          const std::string* override_output_filename = NULL );
 
   bool point_in_tet( const CartVect& point, const EntityHandle* tet );
 
@@ -70,7 +70,7 @@ protected:
   EntityHandle get_starting_tet_conformal(const CartVect& start, EntityHandle first_tri[3]);
 
 
-  void set_convex_flag( bool c ){ convex = c; } 
+  // void set_convex_flag( bool c ){ convex = c; } 
 
   Interface* mb;
 
@@ -95,9 +95,11 @@ protected:
   int last_cell;
   // std::set<EntityHandle> visited_this_history; 
     
-  TrackLengthMeshTally( int id, const TallyInput& fmesh_params );
+  TrackLengthMeshTally( int id, const TallyInput& input );
 
 private:
+  void parse_tally_options();
+  void set_tally_meshset();
   TrackLengthMeshTally& operator=( const TrackLengthMeshTally& mt ); // unimplemented
   TrackLengthMeshTally( const TrackLengthMeshTally& mt ); // unimplemented
 
@@ -107,4 +109,4 @@ private:
 } // end namespace moab
 
 
-#endif /* DAGMC_TRACK_LENGTH_MESH_TALLY_H */
+#endif /* DAGMC_TRACK_LENGTH_MESH_TALLY_HPP */

@@ -11,8 +11,6 @@
 // Forward declare because it's only referenced here
 struct TallyEvent;
 
-// enum EventType {NONE = 1, COLLISION = 2, TRACK = 3};
-
 //===========================================================================//
 /**
  * \struct TallyInput

@@ -135,7 +135,6 @@ void KDEMeshTally::compute_score(const TallyEvent& event)
     {
         std::cerr << "Error: Tally event is not valid for KDE mesh tally ";
         std::cerr << tally_id << std::endl;
-        // ToDo:  consider whether or not to exit
         exit(EXIT_FAILURE);
     }
 
