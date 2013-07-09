@@ -9,9 +9,9 @@
 #include <cassert>
 
 // Forward declare because it's only referenced here
-struct ParticleState;
+struct TallyEvent;
 
-enum EventType {NONE = 1, COLLISION = 2, TRACK = 3};
+// enum EventType {NONE = 1, COLLISION = 2, TRACK = 3};
 
 //===========================================================================//
 /**
@@ -57,7 +57,7 @@ class Tally
      *
      * Pass Particle state data
      */
-    virtual void compute_score(const ParticleState& state, EventType event) = 0;
+    virtual void compute_score(const TallyEvent& event) = 0;
 
     virtual void end_history() = 0;
 
@@ -66,7 +66,6 @@ class Tally
     /**
      *  \brief Factory method for creation of Tally Observers
      * 
-     *
     */
     static Tally *create_tally(int id, const TallyInput& input);
 

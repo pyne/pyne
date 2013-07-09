@@ -1,11 +1,15 @@
-// MCNP5/dagmc/TallyEvent.cpp
+// MCNP5/dagmc/TallyManager.cpp
 
+#include "TallyManager.hpp"
 #include "TallyEvent.hpp"
 
 //---------------------------------------------------------------------------//
 // CONSTRUCTOR
 //---------------------------------------------------------------------------//
-TallyEvent::TallyEvent(): event(NONE){}
+TallyManager::TallyManager() 
+{
+    event.type = TallyEvent::NONE;
+}
 
 //---------------------------------------------------------------------------//
 // PUBLIC INTERFACE
@@ -29,13 +33,13 @@ Tally *createTally(std::multimap<std::string, std::string>& options,
 }
 
 // Add a Tally  
-void TallyEvent::addTally(int tally_id, Tally *obs)
+void TallyManager::addTally(int tally_id, Tally *obs)
 {
         observers.insert(std::pair<int, Tally *>(tally_id, obs));   
 }
 
 // Add a newly created Tally
-void TallyEvent::addNewTally(std::multimap<std::string, std::string>& options, 
+void TallyManager::addNewTally(std::multimap<std::string, std::string>& options, 
                    unsigned int tally_id,
                    const std::vector<double>& energy_bin_bounds,
                    bool total_energy_bin)
@@ -46,7 +50,7 @@ void TallyEvent::addNewTally(std::multimap<std::string, std::string>& options,
 }
 
 // Remove a Tally - Observer pattern best practise
-void TallyEvent::removeTally(int tally_id)
+void TallyManager::removeTally(int tally_id)
 {
         std::map<int, Tally *>::iterator it;	
  	it = observers.find(tally_id);
@@ -55,17 +59,17 @@ void TallyEvent::removeTally(int tally_id)
 
 ////////////////////////////////////////////////////////////////////
 // UPDATE
-void TallyEvent::update_tallies()
+void TallyManager::update_tallies()
 {
        std::map<int, Tally*>::iterator map_it;
        for (map_it = observers.begin(); map_it != observers.end(); ++map_it)
        {
            Tally *tally = map_it->second;
-	   tally->compute_score(particle, event);
+	   tally->compute_score(event);
        }
 }
 ////////////////////////////////////////////////////////////////////
-void TallyEvent::end_history()
+void TallyManager::end_history()
 {
        std::map<int, Tally*>::iterator map_it;
        for (map_it = observers.begin(); map_it != observers.end(); ++map_it)
@@ -75,7 +79,7 @@ void TallyEvent::end_history()
        }
 }
 
-void TallyEvent::write_data(double num_particles, double multiplier)
+void TallyManager::write_data(double num_particles, double multiplier)
 {
        std::map<int, Tally*>::iterator map_it;
        for (map_it = observers.begin(); map_it != observers.end(); ++map_it)
@@ -85,7 +89,7 @@ void TallyEvent::write_data(double num_particles, double multiplier)
        }
 }
 
-void TallyEvent::set_event(double x, double y, double z, 
+void TallyManager::set_event(double x, double y, double z, 
                            double u, double v, double w,                           
                            double particle_energy, double particle_weight, 
                            double track_length, double total_cross_section) 
@@ -97,32 +101,34 @@ void TallyEvent::set_event(double x, double y, double z,
     }
 
     /// Set the particle state object
-    particle.position            = moab::CartVect(x, y, z);
+    event.position            = moab::CartVect(x, y, z);
     // ToDo:  Direction is set for all event_types, but not used for collision. 
-    particle.direction           = moab::CartVect(u, v, w);
-    particle.energy              = particle_energy;
-    particle.weight              = particle_weight;
-    particle.track_length        = track_length;
-    particle.total_cross_section = total_cross_section;
+    event.direction           = moab::CartVect(u, v, w);
+    event.particle_energy     = particle_energy;
+    event.particle_weight     = particle_weight;
+    event.track_length        = track_length;
+    event.total_cross_section = total_cross_section;
  
     // If more event types are needed this should become a nested if statement
-    event = track_length > 0.0 ? TRACK : (total_cross_section > 0.0 ? COLLISION : NONE);
+    event.type = track_length > 0.0 ? TallyEvent::TRACK : (total_cross_section > 0.0 ? 
+                                      TallyEvent::COLLISION : 
+                                      TallyEvent::NONE);
 }
 
 //---------------------------------------------------------------------------//
-void TallyEvent::clear_last_event()
+void TallyManager::clear_last_event()
 {
-    event = NONE;
-    particle.position  = moab::CartVect(0.0, 0.0, 0.0);
-    particle.direction = moab::CartVect(0.0, 0.0, 0.0);
-    particle.energy              = 0.0;
-    particle.weight              = 0.0;
-    particle.track_length        = 0.0;
-    particle.total_cross_section = 0.0;
+    event.type = TallyEvent::NONE;
+    event.position  = moab::CartVect(0.0, 0.0, 0.0);
+    event.direction = moab::CartVect(0.0, 0.0, 0.0);
+    event.particle_energy     = 0.0;
+    event.particle_weight     = 0.0;
+    event.track_length        = 0.0;
+    event.total_cross_section = 0.0;
      
 }
 //---------------------------------------------------------------------------//
-void TallyEvent::set_tally_multiplier(double value)
+void TallyManager::set_tally_multiplier(double value)
 {
     tally_multiplier = value;
     return;
@@ -131,22 +137,15 @@ void TallyEvent::set_tally_multiplier(double value)
 // TALLY EVENT ACCESS METHODS
 //---------------------------------------------------------------------------//
 //---------------------------------------------------------------------------//
-double TallyEvent::get_tally_multiplier() const
+double TallyManager::get_tally_multiplier() const
 {
     return tally_multiplier;
 }
 //---------------------------------------------------------------------------//
-double TallyEvent::get_weighting_factor() const
+double TallyManager::get_weighting_factor() const
 {
-    return tally_multiplier * particle.weight;
+    return tally_multiplier * event.particle_weight;
 } 
-//---------------------------------------------------------------------------//
-/*
-TallyEvent::EventType TallyEvent::get_event_type() const
-{
-    return event_type;
-}
-*/
 //---------------------------------------------------------------------------//
 
 // end of MCNP5/dagmc/TallyEvent.cpp

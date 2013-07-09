@@ -97,158 +97,16 @@ KDEMeshTally::~KDEMeshTally()
     delete kernel;
     delete mbi;  
 }
+
 //---------------------------------------------------------------------------//
 // DERIVED PUBLIC INTERFACE from MeshTally.hpp
 //---------------------------------------------------------------------------//
-// void KDEMeshTally::compute_score(const TallyEvent& event, int ebin)
-void KDEMeshTally::update_track(const ParticleState& particle)
-{
-    // initialize common weighting factor for this tally event
-    // double weight = event.get_weighting_factor();
-    // ToDo:  weighting factor is the particle weight x tally_multiplier
-    double weight = particle.weight;
-
-    // set up tally event based on KDE mesh tally type
-    std::vector<moab::CartVect> subtrack_points;
-    bool event_is_set = false;
-
-    //if (estimator == INTEGRAL_TRACK || estimator == SUB_TRACK)
-    //{
-        // event_is_set = event.get_track_data(track);
-
-        if (estimator == SUB_TRACK && event_is_set == true)
-        {
-            // multiply weight by track length and set up sub-track points
-            weight *= track.track_length;
-            subtrack_points = choose_points(num_subtracks, track);
-        }
-    //}
-
-    // check that a valid tally event has been set for this KDE mesh tally
-    if (!event_is_set)
-    {
-        std::cerr << "Error: Tally event is not valid for KDE mesh tally ";
-        std::cerr << tally_id << std::endl;
-        exit(EXIT_FAILURE);
-    }
-
-    // create the neighborhood region and find all of the calculations points
-    KDENeighborhood region(event, bandwidth, *kd_tree, kd_tree_root);
-
-    std::vector<moab::EntityHandle> calculation_points;
-    moab::ErrorCode rval = region.get_points(calculation_points);
-
-    assert(moab::MB_SUCCESS == rval);
-
-    // iterate through the calculation points
-    std::vector<moab::EntityHandle>::iterator i;
-    double coords[3];
-
-    for (i = calculation_points.begin(); i != calculation_points.end(); ++i)
-    {
-        // get coordinates of this point
-        moab::EntityHandle point = *i;
-        rval = mbi->get_coords(&point, 1, coords);
-
-        assert(moab::MB_SUCCESS == rval);
-
-        // compute the final contribution to the tally for this point
-        double score = weight;
-
-        if (estimator == INTEGRAL_TRACK)
-        {
-            score *= integral_track_score(track, moab::CartVect(coords));
-        }
-        else if (estimator == SUB_TRACK)
-        {
-            score *= subtrack_score(subtrack_points, moab::CartVect(coords));
-        }
-//        else // estimator == COLLISION
-//        {
-//            score *= collision_score(collision, moab::CartVect(coords));
-//        }
-
-        // add score to KDE mesh tally for the current history
-        add_score_to_tally(point, score, ebin);
-    }
-}
-void KDEMeshTally::update_collision(const ParticleState& particle)
-{
-    // initialize common weighting factor for this tally event
-    // double weight = event.get_weighting_factor();
-    // ToDo:  weighting factor is the particle weight x tally_multiplier
-    double weight = particle.weight;
-
-    // set up tally event based on KDE mesh tally type
-    std::vector<moab::CartVect> subtrack_points;
-    bool event_is_set = false;
-
-    // it's a collision event
-        event_is_set = event.get_collision_data(collision);
-
-        if (event_is_set)
-        {
-            // divide weight by cross section and update optimal bandwidth
-            weight /= collision.total_cross_section;
-            update_variance(collision.collision_point);
-        }
-
-
-    // check that a valid tally event has been set for this KDE mesh tally
-    if (!event_is_set)
-    {
-        std::cerr << "Error: Tally event is not valid for KDE mesh tally ";
-        std::cerr << tally_id << std::endl;
-        exit(EXIT_FAILURE);
-    }
-
-    // create the neighborhood region and find all of the calculations points
-    KDENeighborhood region(event, bandwidth, *kd_tree, kd_tree_root);
-
-    std::vector<moab::EntityHandle> calculation_points;
-    moab::ErrorCode rval = region.get_points(calculation_points);
-
-    assert(moab::MB_SUCCESS == rval);
-
-    // iterate through the calculation points
-    std::vector<moab::EntityHandle>::iterator i;
-    double coords[3];
-
-    for (i = calculation_points.begin(); i != calculation_points.end(); ++i)
-    {
-        // get coordinates of this point
-        moab::EntityHandle point = *i;
-        rval = mbi->get_coords(&point, 1, coords);
-
-        assert(moab::MB_SUCCESS == rval);
-
-        // compute the final contribution to the tally for this point
-        double score = weight;
-
-//      if (estimator == INTEGRAL_TRACK)
-//      {
-//          score *= integral_track_score(track, moab::CartVect(coords));
-//      }
-//      else if (estimator == SUB_TRACK)
-//      {
-//          score *= subtrack_score(subtrack_points, moab::CartVect(coords));
-//      }
-//      else // estimator == COLLISION
-//      {
-            score *= collision_score(collision, moab::CartVect(coords));
-//        }
-
-        // add score to KDE mesh tally for the current history
-        add_score_to_tally(point, score, ebin);
-    }
-}
-
-void KDEMeshTally::update(const ParticleState& particle, EventType event)
+void KDEMeshTally::compute_score(const TallyEvent& event)
 {
     // initialize common weighting factor for this tally event
     //  double weight = event.get_weighting_factor();
-    // ToDo:  weighting factor is the particle weight x tally_multiplier
-    double weight = particle.weight;
+    // ToDo:  weighting factor is the  particle_weight x tally_multiplier
+    double weight = event.particle_weight;
 
     // set up tally event based on KDE mesh tally type
     std::vector<moab::CartVect> subtrack_points;
@@ -258,9 +116,9 @@ void KDEMeshTally::update(const ParticleState& particle, EventType event)
         if (estimator == SUB_TRACK)
         {
             // multiply weight by track length and set up sub-track points
-            weight *= particle.track_length;
+            weight *= event.track_length;
             // subtrack_points = choose_points(num_subtracks, track);
-            subtrack_points = choose_points(num_subtracks, particle);
+            subtrack_points = choose_points(num_subtracks, event);
         }
     }
     else if (event == TallyEvent::COLLISION)
@@ -268,9 +126,9 @@ void KDEMeshTally::update(const ParticleState& particle, EventType event)
         if (estimator == COLLISION)
         {
             // divide weight by cross section and update optimal bandwidth
-            weight /= particle.total_cross_section;
+            weight /= event.total_cross_section;
             // update_variance(collision.collision_point);
-            update_variance(particle.position);
+            update_variance(event.position);
         }
     }
     else // NONE, warn and exit (?)
@@ -309,7 +167,7 @@ void KDEMeshTally::update(const ParticleState& particle, EventType event)
 
           if (estimator == INTEGRAL_TRACK)
           {
-              score *= integral_track_score(particle, moab::CartVect(coords));
+              score *= integral_track_score(event, moab::CartVect(coords));
           }
           else if (estimator == SUB_TRACK)
           {
@@ -317,7 +175,7 @@ void KDEMeshTally::update(const ParticleState& particle, EventType event)
           }
           else // estimator == COLLISION
           {
-            score *= collision_score(particle, moab::CartVect(coords));
+            score *= collision_score(event, moab::CartVect(coords));
           }
 
         // add score to KDE mesh tally for the current history

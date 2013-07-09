@@ -9,9 +9,6 @@
 
 #include "moab/Range.hpp"
 #include "Tally.hpp"
-// Note:  It may be possible to remove this include.
-// TallyEvent.hpp includes Tally.hpp
-#include "TallyEvent.hpp"
 
 // forward declaration
 namespace moab {

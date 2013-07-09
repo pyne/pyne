@@ -18,7 +18,7 @@ INCLUDE_DIRECTORIES("${HOME}/dagmc_bld/MOAB/include")
 
 ADD_LIBRARY(tally 
 	${DAGMC_MESHTALLY_SOURCE}/Tally.cpp
-	${DAGMC_MESHTALLY_SOURCE}/TallyEvent.cpp
+	${DAGMC_MESHTALLY_SOURCE}/TallyManager.cpp
 	${DAGMC_MESHTALLY_SOURCE}/MeshTally.cpp
 	${DAGMC_MESHTALLY_SOURCE}/KDEMeshTally.cpp
 )
