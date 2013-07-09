@@ -3,9 +3,14 @@
 #ifndef DAGMC_PARTICLE_STATE_HPP
 #define DAGMC_PARTICLE_STATE_HPP
 #include "moab/CartVect.hpp"
+ 
+enum EventType {NONE = 1, COLLISION = 2, TRACK = 3};
 
-struct ParticleState
+// struct ParticleState
+struct ParticleEvent
 {
+    EventType event;
+
     /// Total length of track segment
     double track_length;
 

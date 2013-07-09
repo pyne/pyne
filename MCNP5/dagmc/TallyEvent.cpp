@@ -5,7 +5,7 @@
 //---------------------------------------------------------------------------//
 // CONSTRUCTOR
 //---------------------------------------------------------------------------//
-TallyEvent::TallyEvent(): event_type(NONE){}
+TallyEvent::TallyEvent(): event(NONE){}
 
 //---------------------------------------------------------------------------//
 // PUBLIC INTERFACE
@@ -61,29 +61,9 @@ void TallyEvent::update_tallies()
        for (map_it = observers.begin(); map_it != observers.end(); ++map_it)
        {
            Tally *tally = map_it->second;
-	   tally->update(particle);
+	   tally->compute_score(particle, event);
        }
 }
-/*
-void TallyEvent::update_track_tallies()
-{
-       std::map<int, Tally*>::iterator map_it;
-       for (map_it = observers.begin(); map_it != observers.end(); ++map_it)
-       {
-           Tally *tally = map_it->second;
-	   tally->update_track();
-       }
-}
-void TallyEvent::update_collision_tallies()
-{
-       std::map<int, Tally*>::iterator map_it;
-       for (map_it = observers.begin(); map_it != observers.end(); ++map_it)
-       {
-           Tally *tally = map_it->second;
-	   tally->update_collision_tallies();
-       }
-}
-*/
 ////////////////////////////////////////////////////////////////////
 void TallyEvent::end_history()
 {
@@ -126,13 +106,13 @@ void TallyEvent::set_event(double x, double y, double z,
     particle.total_cross_section = total_cross_section;
  
     // If more event types are needed this should become a nested if statement
-    event_type = track_length > 0.0 ? TRACK : (total_cross_section > 0.0 ? COLLISION : NONE);
+    event = track_length > 0.0 ? TRACK : (total_cross_section > 0.0 ? COLLISION : NONE);
 }
 
 //---------------------------------------------------------------------------//
 void TallyEvent::clear_last_event()
 {
-    event_type = NONE;
+    event = NONE;
     particle.position  = moab::CartVect(0.0, 0.0, 0.0);
     particle.direction = moab::CartVect(0.0, 0.0, 0.0);
     particle.energy              = 0.0;
@@ -161,10 +141,12 @@ double TallyEvent::get_weighting_factor() const
     return tally_multiplier * particle.weight;
 } 
 //---------------------------------------------------------------------------//
+/*
 TallyEvent::EventType TallyEvent::get_event_type() const
 {
     return event_type;
 }
+*/
 //---------------------------------------------------------------------------//
 
 // end of MCNP5/dagmc/TallyEvent.cpp

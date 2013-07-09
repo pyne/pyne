@@ -132,7 +132,7 @@ class TallyEvent
     double tally_multiplier;
 
     /// Type of tally event this event represents
-    EventType event_type;
+    EventType event;
 
 #endif // DAGMC_TALLYEVENT_H
 

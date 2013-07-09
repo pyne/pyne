@@ -11,6 +11,8 @@
 // Forward declare because it's only referenced here
 struct ParticleState;
 
+enum EventType {NONE = 1, COLLISION = 2, TRACK = 3};
+
 //===========================================================================//
 /**
  * \struct TallyInput
@@ -55,11 +57,8 @@ class Tally
      *
      * Pass Particle state data
      */
-    virtual void update(const ParticleState& state) = 0;
-/*
-    virtual void update_track(const ParticleState& state) = 0;
-    virtual void update_collision(const ParticleState& state) = 0;
-*/ 
+    virtual void compute_score(const ParticleState& state, EventType event) = 0;
+
     virtual void end_history() = 0;
 
     virtual void write_data(double num_particles, double multiplier = 1.0) = 0;
