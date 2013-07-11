@@ -6,8 +6,9 @@
 #MCNP #
 #place to put stuff
 
-cubit_path=$CNERG_ROOT/opt/cubit12.2/
-cubit_bin_path=$cubit_path/bin
+path_to_cubit=""
+path_to_dagmc=""
+cubit_bin_path=$path_to_cubit/bin
 prefix=$HOME/dagmc_bld
 
 echoErr() { echo "$@" 1>&2; }
@@ -81,7 +82,7 @@ if ! options=$(getopt -u -o  abhp: -l "
     verbose,   
     enable_static,
     clean
-
+    path_to_cubit:,
     cgm_revision:,
     cgm_branch:,    
     moab_revision:,
@@ -102,6 +103,7 @@ if ! options=$(getopt -u -o  abhp: -l "
     moab_tgz:,
   
     no_mcnp,  
+    path_to_dagmc:,
     mcnp_source:,
     mcnp_is_patched,
     mcnp_patch:"  -- "$@")
@@ -131,6 +133,8 @@ do
     --cgm_tag)          cgm_code="tag";cgm_special=$2; shift;;
     --moab_tag)         moab_code="tag";moab_special=$2; shift;;
 
+    --path_to_cubit)       path_to_cubit=$2;cubit_bin_path=$path_to_cubit/bin;shift;;
+
     --cgm_installed) cgm_installed="yes";;
     --hdf5_installed) hdf5_installed="yes";;
     --moab_installed) moab_installed="yes";;
@@ -145,7 +149,8 @@ do
     --hdf5_tgz)		hdf5_tgz=$2; shift;;
     --moab_tgz)		moab_tgz=$2; shift;;
 
-    --no_mcnp)		no_mcnp="yes";;		
+    --no_mcnp)		no_mcnp="yes";;	
+    --path_to_dagmc)    path_to_dagmc=$2;shift;;
     --mcnp_is_patched) 	mcnp_is_patched="yes";;
     --mcnp_source)	mcnp_source=$2 ; shift;;
     --mcnp_patch)   	mcnp_patch=$2; shift;;
@@ -182,12 +187,13 @@ OPTIONS:
     --verbose                   get all svn and make info
     --clean                     Delete PREFIX before installing anything
     --enable_static             Static build of MOAB [no] 
+    --path_to_cubit             Path to Cubit
     --cgm_revision=REV          revision to pull from repo
     --cgm_branch=BRANCH         branch to pull from repo
     --moab_revision=REV         revision to pull from repo
     --moab_branch=BRANCH        branch to pull from repo
-    --cgm_tag=TAG                tag to pull from repo
-    --moab_tag=TAG               tag to pull from repo
+    --cgm_tag=TAG               tag to pull from repo
+    --moab_tag=TAG              tag to pull from repo
     --cgm_installed             CGM already installed
     --hdf5_installed            HDF5 already installed
     --moab_installed            MOAB already installed
@@ -198,6 +204,7 @@ OPTIONS:
     --hdf5_tgz=HDF5             path to tgz file HDF5		
     --moab_tgz=MOAB             path to tgz file MOAB
     --no_mcnp			Do not build MCNP
+    --path_to_dagmc             Path to dagmc sourc code directory
     --mcnp_source=SRC           MCNP Source Code located in SRC ["'$HOME'"/LANL/MCNP5/Source]      
     --mcnp_is_patched           MCNP Source already been patched
     --mcnp_patch=PATCH          path to patch file PATCH
@@ -245,7 +252,7 @@ then
 
 	cd bld		
 	../src/configure --enable-optimize --disable-debug \
-	  --with-cubit=$cubit_path/  \
+	  --with-cubit=$path_to_cubit/  \
 	  --prefix=$cgm_prefix  
 
 	checkErr "CGM configure failed"
@@ -353,7 +360,7 @@ then
 fi
 
  make build CONFIG="seq plot gfortran dagmc" FC=gfortran MARCH=M64 \
-             MOAB_DIR=$moab_prefix CUBIT_DIR=$cubit_bin_path 
+             MOAB_DIR=$moab_prefix CUBIT_DIR=$cubit_bin_path DAGMC_DIR=$path_to_dagmc
 
 
 
