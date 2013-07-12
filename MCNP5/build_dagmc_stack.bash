@@ -32,7 +32,7 @@ function unTar(){   #param is file name
         ln -s $tgz_dir src
 }
 
-function checkOut(){   #param 1 is repo #param2 is code $3 is special
+function svnCO(){   #param 1 is repo #param2 is code $3 is special
      if [ $2 == "revision" ]
         then              
             svn_dir=trunk 
@@ -60,6 +60,24 @@ function checkOut(){   #param 1 is repo #param2 is code $3 is special
 		ln -fs $svn_dir src
 }
 
+
+
+
+function gitCO(){   #param 1 is repo url #param2 is code $3 is branch/name,4 is repo name
+        git_cmd=""
+        if [ $2 == "branch" ] || [ $2 == "tag" ]
+        then
+            git_cmd="-b $3"
+        fi
+        git clone $git_cmd $1
+        cd $4
+        autoreconf -fi
+        cd ..
+        ln -fs $4 src
+}
+
+
+
 cgm_prefix=$prefix/cgm/
 hdf5_prefix=$prefix/HDF5
 moab_prefix=$prefix/MOAB/
@@ -85,7 +103,6 @@ if ! options=$(getopt -u -o  abhp: -l "
     path_to_cubit:,
     cgm_revision:,
     cgm_branch:,    
-    moab_revision:,
     moab_branch:,
     cgm_tag:,
     moab_tag:,
@@ -115,8 +132,8 @@ fi
 set -- $options
 cgm_code="none"
 moab_code="none"
-cgm_special=""
-moab_special=""
+cgm_special="none"
+moab_special="none"
 while [ $# -gt 0 ]
 do
     case $1 in
@@ -128,7 +145,6 @@ do
 
     --cgm_revision)		cgm_code="revision";cgm_special=$2; shift;;
     --cgm_branch)       cgm_code="branch";cgm_special=$2; shift;;
-    --moab_revision)	moab_code="revision";moab_special=$2; shift;;
     --moab_branch)      moab_code="branch";moab_special=$2; shift;;
     --cgm_tag)          cgm_code="tag";cgm_special=$2; shift;;
     --moab_tag)         moab_code="tag";moab_special=$2; shift;;
@@ -179,7 +195,7 @@ Defaults for options are specified in brackets
 
 cgm  repo : https://svn.mcs.anl.gov/repos/ITAPS/cgm/
 hdf5 repo : None
-moab repo : https://svn.mcs.anl.gov/repos/ITAPS/MOAB/
+moab repo : https://bitbucket.org/fathomteam/moab.git
 
 OPTIONS:
     -h, --help                  display this help and exit 
@@ -190,7 +206,6 @@ OPTIONS:
     --path_to_cubit             Path to Cubit
     --cgm_revision=REV          revision to pull from repo
     --cgm_branch=BRANCH         branch to pull from repo
-    --moab_revision=REV         revision to pull from repo
     --moab_branch=BRANCH        branch to pull from repo
     --cgm_tag=TAG               tag to pull from repo
     --moab_tag=TAG              tag to pull from repo
@@ -215,6 +230,7 @@ fi
 #set up verbose
 if (($_V)); then
   echo "verbose"
+  set -x
 else
   exec 1>/dev/null
 fi
@@ -241,11 +257,9 @@ then
 
 	if [ -z $cgm_tgz ]
 	then
-        checkOut $cgm_repo $cgm_code $cgm_special
+            svnCO $cgm_repo $cgm_code $cgm_special
 	else
-
-    unTar $cgm_tgz
-	
+            unTar $cgm_tgz
 	fi
 
     checkErr "CGM setup failed"
@@ -301,7 +315,7 @@ fi
 
 
 #install MOAB
-moab_repo=https://svn.mcs.anl.gov/repos/ITAPS/MOAB/
+moab_repo=https://bitbucket.org/fathomteam/moab.git
 if [ -z $moab_installed ] && [ "$moab_installed_dir" == "" ]
 then 
 
@@ -309,8 +323,8 @@ then
 	cd $moab_prefix
 
 	if [ -z $moab_tgz ]	
-    then 
-     checkOut $moab_repo $moab_code $moab_special
+        then 
+             gitCO $moab_repo $moab_code $moab_special moab
 	else
 	    unTar $moab_tgz
 	fi
