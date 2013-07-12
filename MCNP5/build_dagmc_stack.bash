@@ -25,7 +25,7 @@ function unTar(){   #param is file name
         tgz=$(echo $1 | awk '{n = split($0,a,"/");  print a[n];}');
         echoErr "unzipping $tgz"
 		tar -xzf $tgz
-        checkErr "untarring tgz failed"https://svn.mcs.anl.gov/repos/ITAPS/cgm
+        checkErr "untarring tgz failed"
 		tgz_dir=$(echo $tgz | awk '{split($0,a,".tar.gz");  print a[1];}');
 		tgz_dir=$(echo $tgz_dir | awk '{split($0,a,".tgz");  print a[1];}');
         echoErr $tgz_dir
@@ -345,8 +345,9 @@ else
 fi
 
 
-if [ $no_mcnp != "" ]
+if [ "$no_mcnp" != "" ]
 then
+    echo "Quitting without building mcnp"
 	exit
 fi
 
