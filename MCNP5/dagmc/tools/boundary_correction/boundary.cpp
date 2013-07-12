@@ -113,7 +113,7 @@ double distance_to_boundary(double max_distance,
     assert(max_distance > 0.0);
 
     // return if starting volume_ID is the graveyard
-     if (dagmc->has_prop(volume_ID, "graveyard")) return -1.0;
+    if (dagmc->has_prop(volume_ID, "graveyard")) return -1.0;
 
     // create RayHistory to store surface crossing history
     moab::DagMC::RayHistory surface_history;
@@ -229,10 +229,35 @@ bool node_near_boundary(const moab::EntityHandle& mesh_node,
     return boundary_point;
 }
 
+// converts a C-string value into a valid bandwidth value
+double parse_bandwidth_value(char* value)
+{
+    char* end;
+    double bandwidth_value = strtod(value, &end);
+
+    if (value != end && bandwidth_value > 0.0)
+    {
+        return bandwidth_value;
+    }
+    else
+    {
+        std::cerr << "Warning: bandwidth = " << value << " is invalid\n";
+        std::cerr << "    using default value of 0.1" << std::endl;
+        return 0.1;
+    }
+}
+
 // >>> MAIN METHOD
 
 int main(int argc, char* argv[])
 {
+    if (argc != 6)
+    {
+        std::cerr << "usage: " << argv[0] << " <input mesh> <input geometry> "
+                  << "<hx hy hz>" << std::endl;
+        exit( EXIT_FAILURE );
+    }
+
     // load the mesh data into the MOAB instance
     load_moab_instance(argv[1]);
 
@@ -240,9 +265,16 @@ int main(int argc, char* argv[])
     load_dagmc_instance(argv[2]);
 
     // read bandwidth vector from command line
-    // TODO
-    moab::CartVect bandwidth(0.1);
+    moab::CartVect bandwidth;
+    
+    for (int i = 0; i < 3; ++i)
+    {
+        bandwidth[i] = parse_bandwidth_value(argv[i+3]);
+    }
 
+    std::cout << "Using a bandwidth value of " << bandwidth
+              << " to determine boundary points" << std::endl;
+    
     // create new BOUNDARY and DISTANCE_TO_BOUNDARY tags
     int tag_size = 3;
     const std::vector<int> default_boundary(3, -1);
