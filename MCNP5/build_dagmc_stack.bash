@@ -345,8 +345,9 @@ else
 fi
 
 
-if [ $no_mcnp != "" ]
+if [ "$no_mcnp" != "" ]
 then
+    echo "Quitting without building mcnp"
 	exit
 fi
 
