@@ -1,8 +1,12 @@
 #!/usr/bin/env python
 
 def get_isotopic_abundances():
-    """Creates a dictionary of isotopic abundances based off of the IUPAC
-    Technical Report entitled "Isotopic Compositions of the Elements 1997".
+    """Creates a dictionary of isotopic abundances based off of [1].
+    
+    [1] M. Berglund, M. Wieser: Isotopic compositions of the elements 2009
+        (IUPAC Technical Report).
+        Pure Appl. Chem., 2011, Vol. 83, No. 2, pp. 397-410
+        http://dx.doi.org/10.1351/PAC-REP-10-06-02
 
     Returns
     -------
