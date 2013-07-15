@@ -5,6 +5,7 @@
 extern "C" {
 #endif
 
+
 /***********************************************************
  * This file declares the functions forming the C/Fortran bridge for the
  * advanced MOAB-based mesh tally features, including tetrahedral mesh tallies
@@ -62,6 +63,7 @@ extern void FMESH_FUNC(dagmc_make_fortran_pointer)( void* fort_ref, double* arra
 /* Choose the energy bin for the i'th tally, given the current particle energy
  * This is only used by collision tallies for which dagmc_fmesh_score is not called directly*/
 extern void FMESH_FUNC(dagmc_mesh_choose_ebin)( int* i, double* erg, int* ien );
+extern int FMESH_FUNC(namchg)( int*, int* );
 
 /**
  * The dagmc_fmesh_*_ functions are called from fortran to drive our advanced mesh tallies,

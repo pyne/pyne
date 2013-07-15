@@ -103,10 +103,6 @@ bool parse_int_list( const char* string, std::set<int>& results )
   return okay;    
 }
 
-extern "C"{
-extern int namchg_( int*, int* );
-}
-
 namespace moab { 
 
 /**
