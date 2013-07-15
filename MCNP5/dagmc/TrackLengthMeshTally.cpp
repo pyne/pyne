@@ -59,7 +59,6 @@ inline static double tet_volume( const moab::CartVect& v0,
 
 // Adapted from MOAB's convert.cpp
 // Parse list of integer ranges, e.g. "1,2,5-10,12"
-static
 bool parse_int_list( const char* string, std::set<int>& results )
 {
   bool okay = true;
@@ -108,35 +107,16 @@ extern "C"{
 extern int namchg_( int*, int* );
 }
 
-/*
-ToDo:  Move this to meshtal_funcs:  it is mcnp-related
-static 
-bool map_conformal_names( std::set<int>& input, std::set<int>& output ){
-  
-  for( std::set<int>::iterator i = input.begin(); i!=input.end(); ++i){
-    int x, y, one = 1;
-    x = *i;
-    y = namchg_( &one, &x );
-#ifdef MESHTAL_DEBUG
-    std::cerr << "namchg mapped cell " << *i << " to name " << y << std::endl;
-#endif
-    if( y == 0 ){
-        std::cerr << " conformality cell " << *i << " does not exist." << std::endl;
-        return false;
-    }
-    output.insert( y );
-  }
-  return true;
-}
-*/
 namespace moab { 
 
 /**
  * Convenience function
+ * ToDo:  Consider whether the TallyOptions need to be a multimap:  Are there
+ *        times when the user needs to enter the same key with different values?
+ * ToDo:  Find the sjackson doc on MeshTally keys (PHHW)
  */
 void TrackLengthMeshTally::parse_tally_options()
 {
-  // std::set<int> conf_tmp;
   const TallyInput::TallyOptions& options = input_data.options;
   TallyInput::TallyOptions::const_iterator it;
 
@@ -149,19 +129,15 @@ void TrackLengthMeshTally::parse_tally_options()
     else if( key == "conf_surf_src" && (val == "t" || val == "true" ) ) conformal_surface_source = true;
     else if( key == "conformal" ) 
     { 
-      if( !conformality ) conformality = new std::set<int>();
-      if( !parse_int_list( val.c_str(), *conformality ) )
+      // Since the options are a multimap, the conformal tag could (illogically) occur more than once
+      if (conformality.empty())
       {
-        std::cerr << "Error: FC" << tally_id << " card has bad conformality value '" << val << "'" << std::endl;
-        exit(EXIT_FAILURE);
+         if( !parse_int_list( val.c_str(), conformality ) )
+         {
+           std::cerr << "Error: FC" << tally_id << " card has bad conformality value '" << val << "'" << std::endl;
+           exit(EXIT_FAILURE);
+         }
       }
-      /* ToDo:  move to meshtal_funcs
-      if( !map_conformal_names( *conformality, conf_tmp ) )
-      {
-        std::cerr << "Error: a conformal cell does not exist in the problem!" << std::endl;
-        exit(EXIT_FAILURE);
-      }
-      */
     }
     else
     {
@@ -184,6 +160,8 @@ void TrackLengthMeshTally::parse_tally_options()
  
 /*
  *  Using the tagnames and values, if given, reduce the meshset need to load and tally
+ *  Created as part of the meshtally refactor, pulled from the setup function. 
+ *  Now called by the constructor.
  */
 void TrackLengthMeshTally::set_tally_meshset()
 {
@@ -191,7 +169,6 @@ void TrackLengthMeshTally::set_tally_meshset()
   moab::EntityHandle loaded_file_set;
   moab::ErrorCode rval = load_moab_mesh(mb, loaded_file_set);
 
-  // if (rval != moab::MB_SUCCESS) return rval;
   assert( rval == MB_SUCCESS ); 
 
   rval = mb->create_meshset( MESHSET_SET, tally_mesh_set );
@@ -247,7 +224,6 @@ void TrackLengthMeshTally::set_tally_meshset()
     rval = mb->unite_meshset( tally_mesh_set, loaded_file_set );
     assert( rval == MB_SUCCESS );
   }
-  // return rval;
 } 
 
 /**
@@ -258,14 +234,9 @@ TrackLengthMeshTally::TrackLengthMeshTally(int id,  const TallyInput& input ) :
   mb( new moab::Core() ),  
   obb_tool( new OrientedBoxTreeTool(mb) ),
   last_visited_tet( 0 ), 
-  convex( false ), conformality( NULL ), conformal_surface_source( false ),
+  convex( false ),  conformal_surface_source( false ),
   mcnp_current_cell( NULL ), last_cell( -1 ), num_negative_tracks(0)
 {
-  bool conformal_flag = false;
-  // std::set<int> conf_tmp, *conformality = NULL;
-  std::set<int> *conformality = NULL;
-  bool conformal_surface_source = false;
-
    std::cout << "Creating dagmc fmesh" << id 
             << ", input: " << input_filename 
             << ", output: " << output_filename << std::endl;
@@ -280,30 +251,20 @@ TrackLengthMeshTally::TrackLengthMeshTally(int id,  const TallyInput& input ) :
     std::cout << "  user asserts that this tally mesh has convex geometry." << std::endl;
   }
   
-  if( conformality )
+  if( !conformality.empty() )
   {
     std::cout << "  conformal to cells " << std::flush;
-    for( std::set<int>::iterator i = conformality->begin(); i!=conformality->end(); )
+    for( std::set<int>::iterator i = conformality.begin(); i!=conformality.end(); )
     {
       std::cout << *i; 
-      if( ++i != conformality->end() ) std::cout << ", ";
+      if( ++i != conformality.end() ) std::cout << ", ";
     }
     std::cout << std::endl; 
-    // *conformality = conf_tmp;
   }
   
-  if( convex && conformal_flag )
+  if( convex && !conformality.empty())
   {
     std::cerr << "Warning: FC" << id << " specifies both conformal and convex logic; using conformal logic." << std::endl;
-  }
-
-  if( conformality )
-  {
-  // ToDo:  current_mcnp_cell  was passed in by the original static setup, 
-  //        and needs to be changed to something mcnp-transparent.
-  //   mcnp_current_cell = current_mcnp_cell;
-    conformality = conformality;
-    conformal_surface_source = conformal_surface_source;
   }
 
   moab::ErrorCode rval;
@@ -316,7 +277,8 @@ TrackLengthMeshTally::TrackLengthMeshTally(int id,  const TallyInput& input ) :
   }
 }
   
-TrackLengthMeshTally::~TrackLengthMeshTally(){
+TrackLengthMeshTally::~TrackLengthMeshTally()
+{
   delete mb;
   delete obb_tool;
 }
@@ -543,7 +505,7 @@ void TrackLengthMeshTally::end_history ()
 
   visited_this_history.clear();
 */
-  if( conformality ){ last_cell = -1; } 
+  if( !conformality.empty() ){ last_cell = -1; } 
 }
 
 /**
@@ -695,8 +657,6 @@ TrackLengthMeshTally::get_starting_tet_conformal(const CartVect& start, EntityHa
  * @param first_tri If return value is non-zero, and a ray fire was performed, 
  *                  will contain the skin triangle that ray intersects.
  * @param first_t Value of t along the ray where first_tri is intersected.
- * @param conformal_begin_track If true, track is known to enter mesh at a conformal 
- *                              MCNP cell at t=0.  Use simplified logic in this case.
  * @return The first tetrahedron along the ray, or zero if none found.
  */
 
@@ -777,47 +737,48 @@ void TrackLengthMeshTally::compute_score(const TallyEvent& event)
 
   ErrorCode rval;
 
-  bool conformal_begin_track = false;
-
-  if( conformality ){
-
-    bool cell_change = (last_cell != *mcnp_current_cell);
-    bool newparticle = (last_cell == -1);
-    
-    conformal_begin_track = cell_change;
-    // new particles should only use conformal crossing logic if a conformal surface source was declared
-    if( newparticle )
-        conformal_begin_track = conformal_surface_source; 
-
-#ifdef MESHTAL_DEBUG
-    if( newparticle ){ std::cout << "Started new particle in cell " << *mcnp_current_cell << std::endl; } 
-    else if( cell_change ){ 
-        std::cout << "Crossed surface from " << last_cell 
-                  << " into " << *mcnp_current_cell<< std::endl; }
-#endif
-
-    last_cell = *mcnp_current_cell;
-
-    // if the new cell is not part of this tally, return immediately
-    if( conformality->find( *mcnp_current_cell ) == conformality->end() ) {
-      return;
-    }
-  }
-
   EntityHandle last_crossed_tri[3] = {0,0,0};
   double last_t = 0;
   EntityHandle first_tet;
 
-  if( conformal_begin_track )
+  if (conformality.empty())  // it's not conformal
   {
-    first_tet = get_starting_tet_conformal(event.position, last_crossed_tri);
+      first_tet = get_starting_tet(event.position, event.direction, event.track_length, last_crossed_tri, last_t);
   }
-  else
+  else 
   {
-    first_tet = get_starting_tet(event.position, event.direction, event.track_length, last_crossed_tri, last_t);
+     bool cell_change = (last_cell != *mcnp_current_cell);
+    
+#ifdef MESHTAL_DEBUG
+     if( last_cell == -1 ){ std::cout << "Started new particle in cell " << *mcnp_current_cell << std::endl; } 
+     else if( cell_change )
+     { 
+        std::cout << "Crossed surface from " << last_cell << " into " << *mcnp_current_cell<< std::endl; 
+     }
+#endif
+
+     // if the new cell is not part of this tally, return immediately
+     if (conformality.find( *mcnp_current_cell ) == conformality.end() ) 
+     {
+        return;
+     }
+     // alternate to above if-else
+     if ( (last_cell == -1 && conformal_surface_source) ||
+           cell_change)
+     {
+       first_tet = get_starting_tet_conformal(event.position, last_crossed_tri);
+     }
+     else
+     {
+       first_tet = get_starting_tet(event.position, event.direction, event.track_length, last_crossed_tri, last_t);
+     }
+
+     // set last_cell and do some checking
+     last_cell = *mcnp_current_cell;
   }
 
-  if( first_tet == 0 ){
+  if( first_tet == 0 )
+  {
     // this ray never touches the tally mesh
     return;
   }
@@ -902,7 +863,7 @@ void TrackLengthMeshTally::compute_score(const TallyEvent& event)
 #endif
       
 
-            if( convex || conformality ) {
+            if( convex || !conformality.empty() ) {
               // input file made assertion that this mesh tally is convex, 
               // or conformality assures that no single track will reenter tally mesh
             next_tet = 0;

@@ -51,6 +51,30 @@ void mcnp_weight_calculation( int* index, double* erg, double* wgt,
     FMESH_FUNC(dagmc_mesh_score)( index, erg, wgt, dist, score_result );
 }
 
+/*
+ToDo:  This has been moved from TrackLengthMeshTally to here:  it is mcnp-related
+ToDo:  Get this working in meshtal_funcs
+       Probably:  Converts the name read in from the input file 
+                  to the MCNP index
+static 
+bool map_conformal_names( std::set<int>& input, std::set<int>& output ){
+  
+  for( std::set<int>::iterator i = input.begin(); i!=input.end(); ++i){
+    int x, y, one = 1;
+    x = *i;
+    y = namchg_( &one, &x );
+#ifdef MESHTAL_DEBUG
+    std::cerr << "namchg mapped cell " << *i << " to name " << y << std::endl;
+#endif
+    if( y == 0 ){
+        std::cerr << " conformality cell " << *i << " does not exist." << std::endl;
+        return false;
+    }
+    output.insert( y );
+  }
+  return true;
+}
+*/
 
 
 /********************************************************************

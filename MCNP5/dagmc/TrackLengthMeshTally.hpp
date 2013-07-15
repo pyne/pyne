@@ -86,9 +86,9 @@ protected:
 
   bool convex; // true if user asserts this mesh tally has convex geometry
 
-  // if non-null, user has asserted mesh tally geometry
+  // if not empty, user has asserted mesh tally geometry
   // conforms to the cells identified in this set
-  std::set<int>* conformality; 
+  std::set<int> conformality; 
   bool conformal_surface_source;
 
   const int* mcnp_current_cell; // non-null if user has asserted conformal geometry
