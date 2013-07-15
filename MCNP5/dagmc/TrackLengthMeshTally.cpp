@@ -216,61 +216,70 @@ void TrackLengthMeshTally::set_tally_meshset()
   }
   else
   { // no user-specified tag filter
-
     rval = mb->unite_meshset( tally_mesh_set, loaded_file_set );
-    assert( rval == MB_SUCCESS );
+    assert (rval == MB_SUCCESS);
   }
 } 
 
 /**
   * Constructor
+  * ToDo:  Get a current correct value of current_cell;  currently it isn't set
   */
 TrackLengthMeshTally::TrackLengthMeshTally(int id,  const TallyInput& input ) :
   MeshTally( id, input ),
-  mb( new moab::Core() ),  
+  mb (new moab::Core() ),  
   obb_tool( new OrientedBoxTreeTool(mb) ),
   last_visited_tet( 0 ), 
   convex( false ),  conformal_surface_source( false ),
-  mcnp_current_cell( NULL ), last_cell( -1 ), num_negative_tracks(0)
+  current_cell (-1), last_cell (-1), num_negative_tracks(0)
 {
    std::cout << "Creating dagmc fmesh" << id 
             << ", input: " << input_filename 
             << ", output: " << output_filename << std::endl;
 
-
    parse_tally_options();
    set_tally_meshset();
 
-  // Manage conformality situation
-  if( convex)
-  { 
-    std::cout << "  user asserts that this tally mesh has convex geometry." << std::endl;
-  }
-  
-  if( !conformality.empty() )
-  {
-    std::cout << "  conformal to cells " << std::flush;
-    for( std::set<int>::iterator i = conformality.begin(); i!=conformality.end(); )
-    {
-      std::cout << *i; 
-      if( ++i != conformality.end() ) std::cout << ", ";
-    }
-    std::cout << std::endl; 
-  }
-  
-  if( convex && !conformality.empty())
-  {
-    std::cerr << "Warning: FC" << id << " specifies both conformal and convex logic; using conformal logic." << std::endl;
-  }
+   // reduce the loaded MOAB mesh set to include only 3D elements
+   Range all_tets;
+   ErrorCode rval = reduce_meshset_to_3D(mb, tally_mesh_set, all_tets);  
+   assert (rval == MB_SUCCESS);
 
-  moab::ErrorCode rval;
-  rval = load_mesh();
-  if( rval != moab::MB_SUCCESS )
-  {
-    std::cerr << "** DAGMC TrackLengthMeshTally creation failed!" << std::endl;
-    std::cerr << "** Tally " << id << " failed to initialize." << std::endl;
-    exit( EXIT_FAILURE );
-  }
+   // initialize MeshTally::tally_points to include all mesh cells
+   set_tally_points(all_tets);
+
+   // Does not change all_tets
+   rval = compute_barycentric_data(all_tets);
+   assert (rval == MB_SUCCESS);
+  
+   // Add skin triangles to all_tets, build obb if requested, and kde tree
+   build_trees(all_tets);
+
+   // Manage conformality situation
+   if (convex)
+   { 
+      std::cout << "  user asserts that this tally mesh has convex geometry." << std::endl;
+   }
+  
+   if (!conformality.empty() )
+   {
+     std::cout << "  conformal to cells " << std::flush;
+     for( std::set<int>::iterator i = conformality.begin(); i!=conformality.end(); )
+     {
+        std::cout << *i; 
+        if( ++i != conformality.end() ) std::cout << ", ";
+     }
+     std::cout << std::endl; 
+   }
+  
+   if (convex && !conformality.empty())
+   {
+     std::cerr << "Warning: FC" << id << " specifies both conformal and convex logic; using conformal logic." << std::endl;
+   }
+
+   // Perform tasks
+   rval = setup_tags( mb );
+   assert (rval == MB_SUCCESS);
 }
   
 TrackLengthMeshTally::~TrackLengthMeshTally()
@@ -283,63 +292,54 @@ TrackLengthMeshTally::~TrackLengthMeshTally()
  * Load the given file as an input mesh
  * MeshTally member variable tally_mesh_set will contain the mesh contents
  */
-ErrorCode TrackLengthMeshTally::load_mesh( )
+ErrorCode TrackLengthMeshTally::compute_barycentric_data(const Range& all_tets )
 {
-  moab::ErrorCode rval;
-  rval = setup_tags( mb );
-  assert( rval == MB_SUCCESS );
+  ErrorCode rval;
 
-  int num_tets;
-  rval = mb->get_number_entities_by_dimension( tally_mesh_set, 3, num_tets );
-  assert( rval == MB_SUCCESS );
+  // Iterate over all tets and compute barycentric matrices 
+  int num_tets = all_tets.size();
   std::cerr << "  There are " << num_tets << " tetrahedrons in this tally mesh." << std::endl;
 
-  tet_baryc_data.resize( num_tets );  
+  if (num_tets != 0)
+  {
+     tet_baryc_data.resize (num_tets);  
+  }
 
-  // reduce the loaded MOAB mesh set to include only 3D elements
-  Range all_tets;
-  rval = reduce_meshset_to_3D(mb, tally_mesh_set, all_tets);  
-
-  if (rval != moab::MB_SUCCESS) return rval;
-  assert( all_tets.size() == (unsigned)num_tets );
-
-  // initialize MeshTally::tally_points to include all mesh cells
-  set_tally_points(all_tets);
-
-  /**
-   * Iterate over all tets and compute barycentric matrices 
-   */
   for( Range::const_iterator i=all_tets.begin(); i!=all_tets.end(); ++i)
   {
     EntityHandle tet = *i;
 
     const EntityHandle* verts;
     int num_verts;
-    rval = mb->get_connectivity( tet, verts, num_verts );
+    rval = mb->get_connectivity (tet, verts, num_verts);
     assert( rval == MB_SUCCESS );
     
-    if( num_verts != 4 ){
+    if( num_verts != 4 )
+    {
       std::cerr << "Error: DAGMC TrackLengthMeshTally cannot handle non-tetrahedral meshes yet," << std::endl;
       std::cerr << "       but your mesh has at least one cell with " << num_verts << " vertices." << std::endl;
       return MB_NOT_IMPLEMENTED;
     }
     
     CartVect p[4];
-    rval = mb->get_coords( verts, 4, p[0].array() );
+    rval = mb->get_coords (verts, 4, p[0].array());
     assert( rval == MB_SUCCESS );
 
     Matrix3 a( p[1]-p[0], p[2]-p[0], p[3]-p[0] );
     a = a.transpose().inverse();
     tet_baryc_data.at( get_entity_index(tet) ) = a;
-
   }
+  return MB_SUCCESS;
+}
 
+void TrackLengthMeshTally::build_trees (Range& all_tets)
+{
+  moab::ErrorCode rval;
   // prepare to build KD tree and OBB tree
   Range all_tris;
   Skinner skinner(mb);
   skinner.find_skin( all_tets, 2, all_tris );
   std::cout << "  Tally mesh skin has " << all_tris.size() << " triangles." << std::endl;
-
 
 #ifdef USE_OBB_TREE_RAY_TRACING
   std::cout << " Building OBB tree of size " << all_tris.size() << "... " << std::flush;
@@ -360,8 +360,6 @@ ErrorCode TrackLengthMeshTally::load_mesh( )
   kdtree = new AdaptiveKDTree( mb );
   kdtree->build_tree( all_tets, kdtree_root );
   std::cout << "done." << std::endl << std::endl;;
-
-  return MB_SUCCESS;
 }
 
 /**
@@ -743,18 +741,18 @@ void TrackLengthMeshTally::compute_score(const TallyEvent& event)
   }
   else 
   {
-     bool cell_change = (last_cell != *mcnp_current_cell);
+     bool cell_change = (last_cell != current_cell);
     
 #ifdef MESHTAL_DEBUG
-     if( last_cell == -1 ){ std::cout << "Started new particle in cell " << *mcnp_current_cell << std::endl; } 
+     if( last_cell == -1 ){ std::cout << "Started new particle in cell " << current_cell << std::endl; } 
      else if( cell_change )
      { 
-        std::cout << "Crossed surface from " << last_cell << " into " << *mcnp_current_cell<< std::endl; 
+        std::cout << "Crossed surface from " << last_cell << " into " << current_cell<< std::endl; 
      }
 #endif
 
      // if the new cell is not part of this tally, return immediately
-     if (conformality.find( *mcnp_current_cell ) == conformality.end() ) 
+     if (conformality.find (current_cell) == conformality.end() ) 
      {
         return;
      }
@@ -770,7 +768,7 @@ void TrackLengthMeshTally::compute_score(const TallyEvent& event)
      }
 
      // set last_cell and do some checking
-     last_cell = *mcnp_current_cell;
+     last_cell = current_cell;
   }
 
   if( first_tet == 0 )
@@ -915,11 +913,9 @@ void TrackLengthMeshTally::compute_score(const TallyEvent& event)
       return;
     }
     assert( found_crossing );
-
   }
 
   return;
-
 }
 
 /*&

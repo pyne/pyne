@@ -24,10 +24,7 @@ class TrackLengthMeshTally : public MeshTally
 { 
 
 public:
-  /**
-   * Public constructor interface- actual constructor is protected.
-   */
-  // static TrackLengthMeshTally* setup(int id, const TallyInput& params, const int* cur_mcnp_cell);
+  TrackLengthMeshTally( int id, const TallyInput& input );
 
   /**
    * \brief Computes mesh tally scores for the given tally event
@@ -42,18 +39,14 @@ public:
     
   ~TrackLengthMeshTally();
 
- 
 
 protected:
 
-  ErrorCode load_mesh();
+  ErrorCode compute_barycentric_data (const Range& all_tets);
+  void build_trees (Range& all_tets);
                        
-  // ErrorCode write_results( double sp_norm, double mult_fact, 
-  //                          const std::string* override_output_filename = NULL );
-
   bool point_in_tet( const CartVect& point, const EntityHandle* tet );
 
-  // void add_score_to_mesh_cell( EntityHandle mesh_cell, double score, int ebin );
  
   void get_skin_triangle_adjacencies( EntityHandle triangle, 
                                       EntityHandle& tetrahedron, EntityHandle vertices[3] );
@@ -69,8 +62,6 @@ protected:
 
   EntityHandle get_starting_tet_conformal(const CartVect& start, EntityHandle first_tri[3]);
 
-
-  // void set_convex_flag( bool c ){ convex = c; } 
 
   Interface* mb;
 
@@ -91,11 +82,9 @@ protected:
   std::set<int> conformality; 
   bool conformal_surface_source;
 
-  const int* mcnp_current_cell; // non-null if user has asserted conformal geometry
+  int current_cell; // non-null if user has asserted conformal geometry
   int last_cell;
-  // std::set<EntityHandle> visited_this_history; 
     
-  TrackLengthMeshTally( int id, const TallyInput& input );
 
 private:
   void parse_tally_options();
