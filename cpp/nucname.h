@@ -315,7 +315,7 @@ namespace nucname
   int cinder(std::string nuc);
   /// \}
 
-  /// \alara ALARA Form Functions
+  /// \name ALARA Form Functions
   /// \{
   /// This is the format used in the ALARA activation code elements library.
   /// For elements, the form is "ll" where ll is the atomic symbol. For isotopes
