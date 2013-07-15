@@ -10,6 +10,9 @@ struct TallyEvent
     enum EventType {NONE = 1, COLLISION = 2, TRACK = 3};
 
     EventType type;
+    
+    /// Cell at the point of the event
+    int current_cell;
 
     /// Total length of track segment
     double track_length;

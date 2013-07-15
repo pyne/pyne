@@ -82,7 +82,6 @@ protected:
   std::set<int> conformality; 
   bool conformal_surface_source;
 
-  int current_cell; // non-null if user has asserted conformal geometry
   int last_cell;
     
 

@@ -223,7 +223,6 @@ void TrackLengthMeshTally::set_tally_meshset()
 
 /**
   * Constructor
-  * ToDo:  Get a current correct value of current_cell;  currently it isn't set
   */
 TrackLengthMeshTally::TrackLengthMeshTally(int id,  const TallyInput& input ) :
   MeshTally( id, input ),
@@ -231,7 +230,7 @@ TrackLengthMeshTally::TrackLengthMeshTally(int id,  const TallyInput& input ) :
   obb_tool( new OrientedBoxTreeTool(mb) ),
   last_visited_tet( 0 ), 
   convex( false ),  conformal_surface_source( false ),
-  current_cell (-1), last_cell (-1), num_negative_tracks(0)
+  last_cell (-1), num_negative_tracks(0)
 {
    std::cout << "Creating dagmc fmesh" << id 
             << ", input: " << input_filename 
@@ -739,20 +738,20 @@ void TrackLengthMeshTally::compute_score(const TallyEvent& event)
   {
       first_tet = get_starting_tet(event.position, event.direction, event.track_length, last_crossed_tri, last_t);
   }
-  else 
+  else  // The conformal branch
   {
-     bool cell_change = (last_cell != current_cell);
+     bool cell_change = (last_cell != event.current_cell);
     
 #ifdef MESHTAL_DEBUG
-     if( last_cell == -1 ){ std::cout << "Started new particle in cell " << current_cell << std::endl; } 
+     if( last_cell == -1 ){ std::cout << "Started new particle in cell " << event.current_cell << std::endl; } 
      else if( cell_change )
      { 
-        std::cout << "Crossed surface from " << last_cell << " into " << current_cell<< std::endl; 
+        std::cout << "Crossed surface from " << last_cell << " into " << event.current_cell<< std::endl; 
      }
 #endif
 
      // if the new cell is not part of this tally, return immediately
-     if (conformality.find (current_cell) == conformality.end() ) 
+     if (conformality.find (event.current_cell) == conformality.end() ) 
      {
         return;
      }
@@ -768,7 +767,7 @@ void TrackLengthMeshTally::compute_score(const TallyEvent& event)
      }
 
      // set last_cell and do some checking
-     last_cell = current_cell;
+     last_cell = event.current_cell;
   }
 
   if( first_tet == 0 )
