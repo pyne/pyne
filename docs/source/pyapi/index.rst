@@ -23,7 +23,7 @@ The following modules and sub-packages are discussed:
     serpent
     enrichment
     utils
-    stlconverters
+    stlcontainers
     dbgen/index
     mcnp
     simplesim/index

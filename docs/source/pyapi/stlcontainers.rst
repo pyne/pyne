@@ -1,17 +1,17 @@
-.. _pyne_stlconverters:
+.. _pyne_stlcontainers:
 
 ============================================================
-C++ Standard Library Converters -- :mod:`pyne.stlconverters`
+C++ Standard Library Converters -- :mod:`pyne.stlcontainers`
 ============================================================
 This module contains wrapper classes for commonly used constructs 
 in the C++ standard library.  Becasue Cython does not yet do templating,
 these classes must be declared and defined for every type.
 
-.. currentmodule:: pyne.stlconverters
+.. currentmodule:: pyne.stlcontainers
 
-All functionality may be found in the ``stlconverters`` module::
+All functionality may be found in the ``stlcontainers`` module::
 
- from pyne import stlconverters
+ from pyne import stlcontainers
 
 This module is largely used by PyNE under the convers, in Cython and elsewhere.
 However, these classes are of more general interest so feel free to use them in
