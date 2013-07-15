@@ -130,14 +130,14 @@ void TrackLengthMeshTally::parse_tally_options()
       {
          if( !parse_int_list( val.c_str(), conformality ) )
          {
-           std::cerr << "Error: FC" << tally_id << " card has bad conformality value '" << val << "'" << std::endl;
+           std::cerr << "Error: Tally " << tally_id << " card has bad conformality value '" << val << "'" << std::endl;
            exit(EXIT_FAILURE);
          }
       }
     }
     else
     {
-      std::cerr << "Warning: FC" << tally_id << " card has unknown key '" << key << "'" << std::endl;
+      std::cerr << "Warning: Tally " << tally_id << " card has unknown key '" << key << "'" << std::endl;
     }
   }
   if( tag_name != "" )
@@ -232,7 +232,7 @@ TrackLengthMeshTally::TrackLengthMeshTally(int id,  const TallyInput& input ) :
   convex( false ),  conformal_surface_source( false ),
   last_cell (-1), num_negative_tracks(0)
 {
-   std::cout << "Creating dagmc fmesh" << id 
+   std::cout << "Creating dagmc mesh tally" << id 
             << ", input: " << input_filename 
             << ", output: " << output_filename << std::endl;
 
@@ -273,7 +273,7 @@ TrackLengthMeshTally::TrackLengthMeshTally(int id,  const TallyInput& input ) :
   
    if (convex && !conformality.empty())
    {
-     std::cerr << "Warning: FC" << id << " specifies both conformal and convex logic; using conformal logic." << std::endl;
+     std::cerr << "Warning:  Tally " << id << " specifies both conformal and convex logic; using conformal logic." << std::endl;
    }
 
    // Perform tasks
