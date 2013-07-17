@@ -46,7 +46,7 @@ print('Begin transmutation.')
 with open(filename,'w') as tree:
     out = tm.transmute(inp,t_sim,phi,tree,tol)
 h5file = tb.openFile('h5test.h5','w')
-group = h5file.createGroup('/','transmute','Transmute Output')
+group = h5file.createGroup('/','transmute_parentGroup','Transmute Output')
 print('Writing to hdf5.')
 tm.write_hdf5(h5file, group, out, 'test_volume')
 h5file.close()
