@@ -45,10 +45,14 @@ tol = 1e-7
 print('Begin transmutation.')
 with open(filename,'w') as tree:
     out = tm.transmute(inp,t_sim,phi,tree,tol)
+total_dens = str(sum(out.values()))
+alara_scale = (7.86/55.847) * 8.4726485E+22
+for key in out.keys():
+    out[key] = out[key] * alara_scale
 h5file = tb.openFile('h5test.h5','w')
 group = h5file.createGroup('/','transmute_parentGroup','Transmute Output')
 print('Writing to hdf5.')
 tm.write_hdf5(h5file, group, out, 'test_volume')
 h5file.close()
 print('Closed hdf5.')
-print('Total density: ' + str(sum(out.values())) + '.')
+print('Total density: ' + total_dens + '.')
