@@ -184,6 +184,24 @@ def test_trans_v_transCore():
         assert_true(key in out_core.keys())
         assert_equal(out[key], out_core[key])
 
+"""Tests that transmute and transmute_spatial agree"""
+def test_trans_v_transSpat():
+    nuc = nucname.zzaaam('FE56')
+    t_sim = 100.
+    phi = np.zeros((175,1))
+    for i in np.arange(phi.shape[0]):
+        phi[i] = 1.0E+12
+    inp = {nuc: 1.0}
+    inp2 = {nuc: 2.0}
+    space = {1: (phi, inp), 2: (phi, inp2)}
+    out = transmute.transmute(inp, t_sim, phi)
+    space_out = transmute.transmute_spatial(space, t_sim)
+    for key in out.keys():
+        assert_true(key in space_out[1].keys())
+        assert_true(key in space_out[2].keys())
+        assert_equal(out[key], space_out[1][key])
+        assert_almost_equal(2*out[key], space_out[2][key])
+
 
 #
 # Run as script
