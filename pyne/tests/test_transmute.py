@@ -170,6 +170,21 @@ def test_root_decrease():
     out = transmute.transmute_core(nuc, t_sim, phi, tree, tol)
     assert_true(out[nuc] < 1)
 
+"""Tests that transmute_core and transmute agree"""
+def test_trans_v_transCore():
+    nuc = nucname.zzaaam('FE56')
+    t_sim = 100.
+    phi = np.zeros((175,1))
+    for i in np.arange(phi.shape[0]):
+        phi[i] = 1.0E+12
+    out_core = transmute.transmute_core(nuc, t_sim, phi)
+    inp = {nuc: 1.0}
+    out = transmute.transmute(inp, t_sim, phi)
+    for key in out.keys():
+        assert_true(key in out_core.keys())
+        assert_equal(out[key], out_core[key])
+
+
 #
 # Run as script
 #
