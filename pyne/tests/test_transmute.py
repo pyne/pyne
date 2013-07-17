@@ -207,7 +207,7 @@ def test_trans_v_transSpat():
         assert_true(key in space_out[1].keys())
         assert_true(key in space_out[2].keys())
         assert_equal(out[key], space_out[1][key])
-        assert_almost_equal(2*out[key], space_out[2][key])
+        assert_equal(2*out[key], space_out[2][key])
 
 """Tests if decay is properly implemented"""
 def test_tm171_decay():
