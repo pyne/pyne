@@ -247,11 +247,13 @@ def _check_phi(phi):
         return phi
     n = phi.shape[0]
     if phi.ndim != 2:
-        # Throw exception for incorrect shape
-        pass
+        raise ValueError, ("The flux vector must be two dimensional " +
+                            "(i.e. N by 1).")
     if n != eaf_numEntries:
-        # Throw exception for incorrect number of entries
-        pass
+        raise ValueError, "Incorrect number of entries in flux vector."
+    for entry in phi:
+        if entry < 0:
+            raise ValueError, "Flux entries must be nonnegative."
     return phi
 
 
