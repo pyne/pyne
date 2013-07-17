@@ -220,11 +220,12 @@ def write_space_hdf5(h5file, parentGroup, space_out):
         This method writes to a file and does not return any
         information.
     """
-    node = h5file.createGroup(parentGroup,'transmutation', \
-                                'Multi-point transmutation')
+    # Precursor string for table names
+    volume_prefix = 'volume_'
     for volume in space_out.keys():
         out = space_out[volume]
-        write_hdf5(h5file, node, out, 'Volume: ' + str(volume))
+        write_hdf5(h5file, parentGroup, out, volume_prefix + str(volume))
+        h5file.flush()
     h5file.flush()
     return None
             
