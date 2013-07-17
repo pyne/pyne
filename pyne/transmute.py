@@ -97,7 +97,7 @@ def transmute(inp, t_sim, phi, tree = None, tol = 1e-7):
     return out
 
 
-def transmute_spatial(space, t_sim, tree = None, tol = 1e-7):
+def transmute_spatial(space, t_sim, phi, tree = None, tol = 1e-7):
     """Transmutes a material into its daughters.
 
     Parameters
