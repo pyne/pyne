@@ -220,7 +220,7 @@ def write_space_hdf5(h5file, parentGroup, space_out):
     # Precursor string for table names
     volume_prefix = 'volume_'
     for volume in space_out.keys():
-        out = space_out[volume][1]
+        out = space_out[volume]
         write_hdf5(h5file, parentGroup, out, volume_prefix + str(volume))
         h5file.flush()
     h5file.flush()
