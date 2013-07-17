@@ -7,7 +7,7 @@ and testing of DAGMC is `MCNP5 <http://mcnp-green.lanl.gov/>`_,
 developed by `Los Alamos National Laboratory <http://www.lanl.gov>`_
 and distributed by the `Radiation Safety Information Computing Center
 <http://rsicc.ornl.gov>`_.  There has also been experience with MCNPX
-(LANL) and Tripoli4 (CEA/Saclay).
+(LANL), Tripoli4 (CEA/Saclay), and `FLUKA <http://www.fluka.org/>`_ (CERN/INFN).
 
 These instructions describe the basic steps for downloading and
 installing the software libraries that provide the DAGMC toolkit for
@@ -21,7 +21,7 @@ It is useful to consider how users will use the DAGMC workflow prior
 to making some installation decisions.  There are three main stages
 for the workflow:
  * manual preparation of geometric models
- qqqutomated pre-processing of models
+ * automated pre-processing of models
  * use of the models in analysis
 
 While the second and third stages can be combined, these instructions
@@ -80,7 +80,7 @@ the automated processing stage will be available.
 Here are some assumptions/conventions that are used in these instructions:
 
 * all operations are carried out in the a subdirectory ``dagmc_bld`` of a user's home directory
-* path to CUBIT files is known, e.g. ``/path/to/cubit``
+* path to CUBIT files is known, e.g. ``/path/to/cubit``.  This is the directory that contains the Python script file ``cubit`` and a ``bin`` subdirectory.  
 * all tarballs reside in user's home directory
 
 If these do not apply to you, please modify your steps accordingly.
