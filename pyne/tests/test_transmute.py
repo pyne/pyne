@@ -81,6 +81,9 @@ def test_convert_eaf():
     nuc4 = nn.zzaaam('AU196') + 2
     test4 = tm._convert_eaf('AU196M2')
     assert_equal(nuc4, test4)
+    nuc5 = nn.zzaaam('MG28')
+    test5 = tm._convert_eaf('MG28')
+    assert_equal(nuc5, test5)
 
 """Tests correct implementation of the _get_decay function"""
 def test_get_decay():

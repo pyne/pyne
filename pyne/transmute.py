@@ -363,9 +363,11 @@ def _convert_eaf(daugh):
     # Remove possible space from string
     daugh = daugh.replace(singleSpace, noSpace)
     # Check for 'G' suffix
-    daugh = daugh.replace(letterG, noSpace)
+    if daugh.endswith(letterG):
+        daugh_noG  = daugh.rsplit(letterG, 1)[0]
+        daugh_conv = nucname.zzaaam(daugh_noG)
     # Check for metastable suffix
-    if daugh.endswith(meta1) or daugh.endswith(meta2):
+    elif daugh.endswith(meta1) or daugh.endswith(meta2):
         # Convert appropriately
         parts = daugh.rsplit(letterM ,1)
         daugh_conv = nucname.zzaaam(parts[0]) + int(parts[1])
