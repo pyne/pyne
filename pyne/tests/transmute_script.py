@@ -3,7 +3,7 @@ import numpy as np
 import tables as tb
 nuc = nn.zzaaam('FE56')
 inp = {nuc : 1.}
-t_sim = 3153600
+t_sim = 31536000
 tree = True
 # fluxin1 from ALARA
 list = [0.00000E+00, 0.00000E+00, 0.00000E+00, 0.00000E+00, 0.00000E+00, 0.00000E+00,\
@@ -41,12 +41,15 @@ for i in np.arange(len(list)):
     phi[i] = list[i]
 print('Flux initialized.')
 filename = 'test.tree'
-tol = 1e-7
+tol = 1e-5
 print('Begin transmutation.')
 with open(filename,'w') as tree:
     out = tm.transmute(inp,t_sim,phi,tree,tol)
 total_dens = str(sum(out.values()))
-alara_scale = (7.86/55.847) * 8.4726485E+22
+iron_dens = 7.86
+iron_mass = 55.847
+avogadro = 6.02e23
+alara_scale = iron_dens/iron_mass * avogadro
 for key in out.keys():
     out[key] = out[key] * alara_scale
 h5file = tb.openFile('h5test.h5','w')
