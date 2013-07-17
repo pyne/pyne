@@ -32,19 +32,27 @@ def test_expm():
     # Check the equivalence of _solve_decay_matrix
     assert_true(np.array_equal(eA, transA))
 
-
-"""Ensures the flux vector format is completing"""
-"""
-def test_phi_size_check():
-    phiPass = np.arange(175)
-    phiPass = phiPass.reshape((175,1))
-    assert_true(np.array_equal(phiPass, transmute._format_phi(phiPass)))
-    phi = np.arange(100)
-    phi2 = phi.reshape((100,1))
-    out = np.append(phi2, np.zeros((75,1)), 0)
-    assert_true(np.array_equal(out, transmute._format_phi(phi)))
-"""
-
+"""Tests the _check_phi function"""
+def test_check_phi():
+    eaf_numEntries = 175
+    # First check that None is properly converted
+    nothing = None
+    phi = transmute._check_phi(None)
+    assert_equal(phi.ndim, 2)
+    assert_equal(phi.shape[0], eaf_numEntries)
+    assert_equal(phi.shape[1], 1)
+    for entry in phi:
+        assert_equal(entry, 0)
+    # Check that incorrect shape raises an exception
+    phi = np.ones((175))
+    assert_raises(ValueError, transmute._check_phi, phi)
+    # Check that incorrect number of entries raises an exception
+    phi = np.ones((50,1))
+    assert_raises(ValueError, transmute._check_phi, phi)
+    # Check that a negative entry raises an exception
+    phi = np.ones((175,1))
+    phi[123] = -1
+    assert_raises(ValueError, transmute._check_phi, phi)
 
 """Tests correct application of the _get_daughters function"""
 def test_get_daughters():
@@ -58,7 +66,6 @@ def test_get_daughters():
     daughter_dict = transmute._get_daughters(nuc)
     for daugh in daughter_dict.keys():
         assert(daugh in daughtersTest)
-
 
 """Tests conversion of EAF formatted nuc strings to zzaaam format"""
 def test_convert_eaf():
