@@ -97,7 +97,7 @@ def transmute(inp, t_sim, phi, tree = None, tol = 1e-7):
     return out
 
 
-def transmute_spatial(space, t_sim, phi, tree = None, tol = 1e-7):
+def transmute_spatial(space, t_sim, tree = None, tol = 1e-7):
     """Transmutes a material into its daughters.
 
     Parameters
@@ -114,9 +114,6 @@ def transmute_spatial(space, t_sim, phi, tree = None, tol = 1e-7):
                     densities)
     t_sim : float
         Time to decay for.
-    phi : NumPy 1-dimensional array of floats
-        Neutron flux vector.
-        If phi is None, the flux vector is set to zero.
     tree : File
         The file where the tree log should be written.
         tree should be None if a tree log is not desired.
@@ -223,7 +220,7 @@ def write_space_hdf5(h5file, parentGroup, space_out):
     # Precursor string for table names
     volume_prefix = 'volume_'
     for volume in space_out.keys():
-        out = space_out[volume]
+        out = space_out[volume][1]
         write_hdf5(h5file, parentGroup, out, volume_prefix + str(volume))
         h5file.flush()
     h5file.flush()
