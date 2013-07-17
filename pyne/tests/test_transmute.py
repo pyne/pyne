@@ -202,6 +202,17 @@ def test_trans_v_transSpat():
         assert_equal(out[key], space_out[1][key])
         assert_almost_equal(2*out[key], space_out[2][key])
 
+"""Tests if decay is properly implemented"""
+def test_tm171_decay():
+    nuc = nucname.zzaaam('TM171')
+    t_sim = 1.2119E+8 # Run for 3.843 years (approx 2 half lives)
+    out = transmute.transmute_core(nuc, t_sim, None)
+    # With no flux, the result should be pure decay
+    assert_true(nuc in out.keys())
+    tm_res = out[nuc]
+    lamb = data.decay_const(nuc)
+    analytical = np.exp(-1*lamb*t_sim)
+    assert_equal(tm_res, analytical)
 
 #
 # Run as script
