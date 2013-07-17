@@ -592,7 +592,10 @@ def _traversal(nuc, A, phi, t, out, tol, tree, depth = None):
         # Check against tolerance
         if _check_tol(N_final[-1], tol):
             # Continue traversal
-            out = _traversal(child, B, phi, t, out, tol, tree, depth+1)
+            if tree is not None:
+                out = _traversal(child, B, phi, t, out, tol, tree, depth+1)
+            else:
+                out = _traversal(child, B, phi, t, out, tol, tree, None)
         # On recursion exit or truncation, write data from this nuclide
         if child in out.keys():
             out[child] += N_final[-1]
