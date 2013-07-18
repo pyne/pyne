@@ -8,76 +8,12 @@ import tables as tb
 
 from pyne import nucname
 from pyne.dbgen.api import BASIC_FILTERS
-from pyne.dbgen.kaeri import grab_kaeri_nuclide, parse_for_natural_isotopes
+from pyne.dbgen.isotopic_abundance import get_isotopic_abundances
 
 # Note that since ground state and meta-stable isotopes are of the same atomic weight, 
 # the meta-stables have been discluded from the following data sets.
 
 MASS_FILE = 'mass.mas12'
-
-
-def grab_kaeri_atomic_abund(build_dir=""):
-    """Grabs the KAERI files needed for the atomic abundance calculation, 
-    if not already present.
-
-    Parameters
-    ----------
-    build_dir : str
-        Major directory to place html files in. 'KAERI/' will be appended.
-    """
-    # Add kaeri to build_dir
-    build_dir = os.path.join(build_dir, 'KAERI')
-    try:
-        os.makedirs(build_dir)
-    except OSError:
-        pass
-    already_grabbed = set(os.listdir(build_dir))
-
-    # Grab and parse elemental summary files.
-    natural_nuclides = set()
-    for element in nucname.name_zz.keys():
-        htmlfile = element + '.html'
-        if htmlfile not in already_grabbed:
-            grab_kaeri_nuclide(element, build_dir)
-
-        natural_nuclides = natural_nuclides | parse_for_natural_isotopes(os.path.join(build_dir, htmlfile))
-
-    # Grab natural nuclide files
-    for nuc in natural_nuclides:
-        nuc = nucname.name(nuc)
-        htmlfile = nuc + '.html'
-        if htmlfile not in already_grabbed:
-            grab_kaeri_nuclide(nuc, build_dir)
-
-
-
-atomic_abund_regex = re.compile('<li>Atomic Percent Abundance: (\d+[.]?\d*?)%')
-
-def parse_atomic_abund(build_dir=""):
-    """Builds and returns a dictionary from nuclides to atomic abundence fractions."""
-    build_dir = os.path.join(build_dir, 'KAERI')
-
-    # Grab and parse elemental summary files.
-    natural_nuclides = set()
-    for element in nucname.name_zz.keys():
-        htmlfile = element + '.html'
-        natural_nuclides = natural_nuclides | parse_for_natural_isotopes(os.path.join(build_dir, htmlfile))
-
-    atomic_abund = {}    
-
-    for nuc in natural_nuclides:
-        nuc_name = nucname.name(nuc)
-        htmlfile = os.path.join(build_dir, nuc_name + '.html')
-
-        with open(htmlfile, 'r') as f:
-            for line in f:
-                m = atomic_abund_regex.search(line)
-                if m is not None:
-                    val = float(m.group(1)) * 0.01
-                    atomic_abund[nuc] = val
-                    break
-
-    return atomic_abund
 
 
 def grab_atomic_mass_adjustment(build_dir=""):
@@ -146,7 +82,7 @@ def make_atomic_weight_table(nuc_data, build_dir=""):
         Directory to place html files in.
     """
     # Grab raw data
-    atomic_abund  = parse_atomic_abund(build_dir)
+    atomic_abund  = get_isotopic_abundances()
     atomic_masses = parse_atomic_mass_adjustment(build_dir)
 
     A = {}
@@ -203,10 +139,6 @@ def make_atomic_weight(args):
             if hasattr(f.root, 'atomic_weight'):
                 print "skipping atomic weights data table creation; already exists."
                 return 
-
-    # First grab the atomic abundance data
-    print "Grabbing the atomic abundance from KAERI"
-    grab_kaeri_atomic_abund(build_dir)
 
     # Then grab mass data
     print "Grabbing atomic mass data from AMDC"
