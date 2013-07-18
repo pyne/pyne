@@ -1,4 +1,5 @@
 Getting & Installing the DAGMC Toolkit
+The DAGMC Toolkit
 ----------------------------------------
 
 DAGMC is a toolkit that provides direct geometry support to any Monte
@@ -15,6 +16,7 @@ integration with Monte Carlo codes.  After this, code-specific
 instructions will be give for each code. 
 
 DAGMC Dependencies and User Workflows
+Dependencies and Workflows
 +++++++++++++++++++++++++++++++++++++++
 
 It is useful to consider how users will use the DAGMC workflow prior
@@ -28,31 +30,27 @@ While the second and third stages can be combined, these instructions
 will be based on treating them as separate stages with comments about
 how they would be combined where appropriate.
 
-Manual Geometry Preparation
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+*Manual Geometry Preparation*
 
 Because this stage is highly interactive, most users prefer to perform
 this stage on their desktop or laptop computer.  The only software
 required for this stage is the interactive Cubit software.
 
-Automated Model Pre-processing
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+*Automated Model Pre-processing*
 
 The primary purpose of this stage is to "translate" from the solid
 model representation to the faceted representation.  As such, it
 requires Cubit, CGM and MOAB, and typically results in dependencies on
 shared libraries.
 
-Model Analysis
-~~~~~~~~~~~~~~
+*Model Analysis*
 
 During analysis, only the faceted model is necessary, requiring only
 MOAB and the physics code.  It is also possible to combine this stage
 with the previous one, requiring Cubit, CGM, MOAB and the physics
 code, and will also result in dependencies on shared libraries.
 
-Summary of Dependencies
-~~~~~~~~~~~~~~~~~~~~~~~
+*Summary of Dependencies* 
 
 * Some physics package, e.g. MCNP5
    * `MOAB/DAGMC <http://trac.mcs.anl.gov/projects/ITAPS/wiki/MOAB>`_
@@ -65,16 +63,19 @@ Summary of Dependencies
 Installing the DAGMC Toolkit
 ++++++++++++++++++++++++++++
 
-Installing the MOAB library can be accomplished in two ways:
+Installing the MOAB library can be accomplished in either of two ways:
+
 * Run the build_dagmc_stack script
 * Compile each component individually in a 4-step process.
 
-Build and Install MOAB using a Build Script
+*Build and Install MOAB using a Build Script*
+
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 build_dagmc_stack.bash
 best way to get?
 
-Compile each component individually
+__Compile each component individually__
+
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 The following 4 steps are required to install the MOAB library,
 including the DAGMC toolkit, for use in Monte Carlo radiation
