@@ -56,7 +56,7 @@ def get_isotopic_abundances():
         for name, val in abundance_by_Z[Z]:
             total += val
 
-        # Check if sum is 100.0 (within floating point error)
+        # Check if sum is 1.0 (within floating point error)
         try:
             assert approx_equal(total, 1.0)
         except AssertionError:
