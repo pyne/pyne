@@ -211,8 +211,8 @@ def test_expand_elements2():
     natmat = Material({'C': 1.0})
     expmat = natmat.expand_elements()
     afrac = expmat.to_atom_frac()
-    assert_equal(data.natural_abund(60120), afrac[60120])
-    assert_equal(data.natural_abund(60130), afrac[60130])
+    assert_almost_equal(data.natural_abund(60120), afrac[60120])
+    assert_almost_equal(data.natural_abund(60130), afrac[60130])
 
 
 def test_mass_density():
@@ -1016,8 +1016,9 @@ def test_write_alara():
 def test_natural_elements():
     water = Material()
     water.from_atom_frac({10000: 2.0, 80000: 1.0})
-    expected_comp = {10000: 0.11190248274452597, 80000: 0.888097517255474}
-    assert_equal(water.comp, expected_comp)
+    expected_comp = {10000: 0.11189838783149784, 80000: 0.8881016121685023}
+    for key in expected_comp.keys():
+        assert_almost_equal(water.comp[key], expected_comp[key])
 
 # Run as script
 #
