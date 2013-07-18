@@ -75,26 +75,6 @@ class TallyManager
     void write_data(double num_particles);
 
     /**
-     * \brief Sets tally multiplier for the event
-     * \param value energy-dependent value for the tally multiplier
-     */
-    void set_tally_multiplier(double value);
-
-    // >>> TALLY MANAGER DATA ACCESS METHODS
-
-    /**
-     * \brief get_tally_multiplier()
-     * \return current value of the tally multiplier for this event
-     */
-    double get_tally_multiplier() const;
-
-    /**
-     * \brief Gets the total weighting factor for this event
-     * \return product of tally multiplier and particle weight
-     */
-    double get_weighting_factor() const;
-
-    /**
      * \brief fill the ParticleState
      * \param position interpreted differently for TrackLength and Collision 
      * Requires one of track_length and total_cross_section to be nonzero

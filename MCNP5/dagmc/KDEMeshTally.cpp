@@ -103,9 +103,6 @@ KDEMeshTally::~KDEMeshTally()
 //---------------------------------------------------------------------------//
 void KDEMeshTally::compute_score(const TallyEvent& event)
 {
-    // initialize common weighting factor for this tally event
-    //  double weight = event.get_weighting_factor();
-    // ToDo:  weighting factor is the  particle_weight x tally_multiplier
     double weight = event.particle_weight;
 
     // set up tally event based on KDE mesh tally type

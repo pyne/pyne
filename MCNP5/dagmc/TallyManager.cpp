@@ -130,24 +130,5 @@ void TallyManager::clear_last_event()
      
 }
 //---------------------------------------------------------------------------//
-void TallyManager::set_tally_multiplier(double value)
-{
-    tally_multiplier = value;
-    return;
-}
-//---------------------------------------------------------------------------//
-// TALLY EVENT ACCESS METHODS
-//---------------------------------------------------------------------------//
-//---------------------------------------------------------------------------//
-double TallyManager::get_tally_multiplier() const
-{
-    return tally_multiplier;
-}
-//---------------------------------------------------------------------------//
-double TallyManager::get_weighting_factor() const
-{
-    return tally_multiplier * event.particle_weight;
-} 
-//---------------------------------------------------------------------------//
 
 // end of MCNP5/dagmc/TallyEvent.cpp
