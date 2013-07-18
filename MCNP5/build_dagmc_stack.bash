@@ -7,7 +7,6 @@
 #place to put stuff
 
 path_to_cubit=""
-path_to_dagmc=""
 cubit_bin_path=$path_to_cubit/bin
 prefix=$HOME/dagmc_bld
 
@@ -82,9 +81,10 @@ cgm_prefix=$prefix/cgm/
 hdf5_prefix=$prefix/HDF5
 moab_prefix=$prefix/MOAB/
 with_moab_tgz=
+dagmc_prefix=$prefix/DAGMC
+mcnp_patch=""
 mcnp_source=$HOME/LANL/MCNP5/Source
-mcnp_is_patched=
-mcnp_patch=$HOME/dagmc.patch.5.1.60
+mcnp_is_patched=""
 cgm_revision=""
 cgm_branch=""
 cgm_tag=""
@@ -104,23 +104,27 @@ if ! options=$(getopt -u -o  abhp: -l "
     cgm_revision:,
     cgm_branch:,    
     moab_branch:,
+    dagmc_branch:,
     cgm_tag:,
     moab_tag:,
+    dagmc_tag:,
 
     cgm_installed,
     hdf5_installed,
     moab_installed,
+    dagmc_installed,
     
     cgm_installed_dir:,
     hdf5_installed_dir:,
     moab_installed_dir:,
-    
+    dagmc_installed_dir:,
+
     cgm_tgz:,
     hdf5_tgz:,
     moab_tgz:,
+    dagmc_tgz:,
   
     no_mcnp,  
-    path_to_dagmc:,
     mcnp_source:,
     mcnp_is_patched,
     mcnp_patch:"  -- "$@")
@@ -132,8 +136,11 @@ fi
 set -- $options
 cgm_code="none"
 moab_code="none"
+dagmc_code="none"
 cgm_special="none"
 moab_special="none"
+dagmc_special="none"
+
 while [ $# -gt 0 ]
 do
     case $1 in
@@ -146,27 +153,31 @@ do
     --cgm_revision)		cgm_code="revision";cgm_special=$2; shift;;
     --cgm_branch)       cgm_code="branch";cgm_special=$2; shift;;
     --moab_branch)      moab_code="branch";moab_special=$2; shift;;
+    --dagmc_branch)     dagmc_code="branch";dagmc_special=$2; shift;;
     --cgm_tag)          cgm_code="tag";cgm_special=$2; shift;;
     --moab_tag)         moab_code="tag";moab_special=$2; shift;;
+    --dagmc_tag)        dagmc_code="tag";dagmc_special=$2; shift;;
 
     --path_to_cubit)       path_to_cubit=$2;cubit_bin_path=$path_to_cubit/bin;shift;;
 
     --cgm_installed) cgm_installed="yes";;
     --hdf5_installed) hdf5_installed="yes";;
     --moab_installed) moab_installed="yes";;
+    --dagmc_installed) dagmc_installed="yes";;
   
     # for options with required arguments, an additional shift is required
     
     --cgm_installed_dir) cgm_installed_dir=$2;shift;;
     --hdf5_installed_dir) hdf5_installed_dir=$2;shift;;
     --moab_installed_dir) moab_installed_dir=$2;shift;;
+    --dagmc_installed_dir) dagmc_installed_dir=$2;shift;;
     
     --cgm_tgz)		cgm_tgz=$2; shift;;
     --hdf5_tgz)		hdf5_tgz=$2; shift;;
     --moab_tgz)		moab_tgz=$2; shift;;
+    --dagmc_tgz)		dagmc_tgz=$2; shift;;
 
     --no_mcnp)		no_mcnp="yes";;	
-    --path_to_dagmc)    path_to_dagmc=$2;shift;;
     --mcnp_is_patched) 	mcnp_is_patched="yes";;
     --mcnp_source)	mcnp_source=$2 ; shift;;
     --mcnp_patch)   	mcnp_patch=$2; shift;;
@@ -181,6 +192,7 @@ done
 cgm_prefix=$prefix/cgm/
 hdf5_prefix=$prefix/HDF5
 moab_prefix=$prefix/MOAB/
+dagmc_prefix=$prefix/DAGMC
 
 if [ "$help_flag" == "yes" ]
 then
@@ -207,22 +219,25 @@ OPTIONS:
     --cgm_revision=REV          revision to pull from repo
     --cgm_branch=BRANCH         branch to pull from repo
     --moab_branch=BRANCH        branch to pull from repo
+    --dagmc_branch=BRANCH       branch to pull from repo
     --cgm_tag=TAG               tag to pull from repo
     --moab_tag=TAG              tag to pull from repo
+    --dagmc_tag=TAG             tag to pull from repo
     --cgm_installed             CGM already installed
     --hdf5_installed            HDF5 already installed
     --moab_installed            MOAB already installed
+    --dagmc_installed           MOAB already installed
     --cgm_installed_dir=CGM     cgm already installed in dir CGM
     --hdf5_installed_dir=HDF5   HDF5 already installed in dir HDF5  
     --moab_installed_dir=MOAB   MOAB already installed in dir MOAB   
+    --dagmc_installed_dir=DAGMC MOAB already installed in dir MOAB   
     --cgm_tgz=CGM               path to tgz file CGM		
     --hdf5_tgz=HDF5             path to tgz file HDF5		
     --moab_tgz=MOAB             path to tgz file MOAB
+    --dagmc_tgz=DAGMC           path to tgz file MOAB
     --no_mcnp			Do not build MCNP
-    --path_to_dagmc             Path to dagmc sourc code directory
     --mcnp_source=SRC           MCNP Source Code located in SRC ["'$HOME'"/LANL/MCNP5/Source]      
     --mcnp_is_patched           MCNP Source already been patched
-    --mcnp_patch=PATCH          path to patch file PATCH
 "     
     exit
 fi
@@ -319,7 +334,7 @@ moab_repo=https://bitbucket.org/fathomteam/moab.git
 if [ -z $moab_installed ] && [ "$moab_installed_dir" == "" ]
 then 
 
-	mkdir -p $moab_prefix/bld
+        mkdir -p $moab_prefix/bld
 	cd $moab_prefix
 
 	if [ -z $moab_tgz ]	
@@ -367,15 +382,46 @@ fi
 
 
 
+#get DAGMC
+dagmc_repo=https://github.com/svalinn/DAGMC.git
+if [ -z $dagmc_installed ] && [ "$dagmc_installed_dir" == "" ]
+then 
+
+	cd $prefix
+
+	if [ -z $dagmc_tgz ]	
+        then 
+             gitCO $dagmc_repo $dagmc_code $dagmc_special DAGMC
+	else
+	    unTar $dagmc_tgz
+	fi
+   
+    echoErr "DAGMC Successfully Installed"
+else
+
+	if [ "$dagmc_installed_dir" != "" ]
+	then
+		dagmc_prefix=$dagmc_installed_dir
+	fi
+fi
+
+if [ -z $mcnp_patch ]
+then
+    mcnp_patch=$dagmc_prefix/MCNP5/patch/dagmc.patch.5.1.60
+    echoErr "Set patch to "$mcnp_patch
+fi
+
 #patch mcnp5
+
 cd $mcnp_source
 if [ -z $mcnp_is_patched ]
 then
-	patch -p 0 < $mcnp_patch
+    echoErr "applying MCNP5 patch"
+	patch -p 1 < $mcnp_patch
 fi
 
  make build CONFIG="seq plot gfortran dagmc" FC=gfortran MARCH=M64 \
-             MOAB_DIR=$moab_prefix CUBIT_DIR=$cubit_bin_path DAGMC_DIR=$path_to_dagmc
+             MOAB_DIR=$moab_prefix CUBIT_DIR=$cubit_bin_path \
+             DAGMC_DIR=$dagmc_prefix/MCNP5/dagmc
 
-
-
+cp $mcnp_source/../bin/mcnp5 ./dag-mcnp5
