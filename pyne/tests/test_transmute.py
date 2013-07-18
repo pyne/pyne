@@ -57,13 +57,12 @@ def test_check_phi():
 """Tests correct application of the _get_daughters function"""
 def test_get_daughters():
     nuc = nn.zzaaam("O16")
-    data_table = tb.openFile(nuc_data)
-    daughtersTest = [row['daughter'] for row in \
-        data_table.root.neutron.eaf_xs.eaf_xs.where('nuc_zz == nuc')]
-    data_table.close()
-    for i in range(len(daughtersTest)):
-        daughtersTest[i] = tm._convert_eaf(daughtersTest[i])
-    daughter_dict = tm._get_daughters(nuc)
+    with tb.openFile(nuc_data) as data_table:
+        daughtersTest = [row['daughter'] for row in \
+            data_table.root.neutron.eaf_xs.eaf_xs.where('nuc_zz == nuc')]
+        for i in range(len(daughtersTest)):
+            daughtersTest[i] = tm._convert_eaf(daughtersTest[i])
+        daughter_dict = tm._get_daughters(nuc, data_table)
     for daugh in daughter_dict.keys():
         assert(daugh in daughtersTest)
 

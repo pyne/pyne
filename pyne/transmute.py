@@ -43,12 +43,14 @@ def transmute_core(nuc, t_sim, phi, tree = None, tol = 1e-7):
     """
     out = {}
     phi = _check_phi(phi)
-    dest = _get_destruction(nuc, phi)
-    A = np.zeros((1,1))
-    A[0,0] = -dest
-    rootVal = math.exp(-dest * t_sim)
-    out = {nuc : rootVal}
-    out = _traversal(nuc, A, phi, t_sim, out, tol, tree, depth = None)
+    # Open nuc_data.h5
+    with tb.openFile(nuc_data, 'r') as table:
+        dest = _get_destruction(nuc, phi, table)
+        A = np.zeros((1,1))
+        A[0,0] = -dest
+        rootVal = math.exp(-dest * t_sim)
+        out = {nuc : rootVal}
+        out = _traversal(nuc, A, phi, t_sim, table, out, tol, tree, depth = None)
     return out
 
 
@@ -296,7 +298,7 @@ def _matrix_exp(A, t):
     return eA
 
 
-def _get_daughters(nuc):
+def _get_daughters(nuc, table):
     """Returns a dictionary that contains the neutron-reaction daughters of
     nuc as keys to the 175-group neutron cross sections for that daughter's
     reaction.
@@ -305,6 +307,8 @@ def _get_daughters(nuc):
     ----------
     nuc : nucname
         Name of parent nuclide to get daughters of.
+    table : hdf5 file handle
+        The nuc_data hdf5 table handle.
 
     Returns
     -------
@@ -323,14 +327,12 @@ def _get_daughters(nuc):
     # Remove fission MT# (cannot handle)
     if fissionMT in EAF_RX:
         EAF_RX.remove(fissionMT)
-    # Open nuc_data.h5
-    with tb.openFile(nuc_data, 'r') as f:
-        # Set working node that contains EAF cross sections
-        node = f.root.neutron.eaf_xs.eaf_xs
-        cond = "(nuc_zz == {0})".format(nuc)
-        daughters = [row['daughter'] for row in node.where(cond)]
-        all_xs = [np.array(row['xs']) for row in node.where(cond)]
-        all_rx = [row['rxnum'] for row in node.where(cond)]
+    # Set working node that contains EAF cross sections
+    node = table.root.neutron.eaf_xs.eaf_xs
+    cond = "(nuc_zz == {0})".format(nuc)
+    daughters = [row['daughter'] for row in node.where(cond)]
+    all_xs = [np.array(row['xs']) for row in node.where(cond)]
+    all_rx = [row['rxnum'] for row in node.where(cond)]
     for i in range(len(daughters)):
         if all_rx[i] not in EAF_RX:
             continue
@@ -400,7 +402,7 @@ def _get_decay(nuc):
     return decay_dict
 
 
-def _get_destruction(nuc, phi, addDecay = True):
+def _get_destruction(nuc, phi, table, addDecay = True):
     """Returns the destruction rate of the nuclide.
 
     Parameters
@@ -410,6 +412,8 @@ def _get_destruction(nuc, phi, addDecay = True):
     phi : NumPy 1-dimensional array
         Flux vector for use in simulation. The vector should be 175 entries
         in length for proper usage with EAF data.
+    table : hdf5 file handle
+        The nuc_data hdf5 table handle.
     addDecay : boolean
         True if the decay constant should be added to the returned value.
         False if only destruction from neutron reactions should be
@@ -422,7 +426,7 @@ def _get_destruction(nuc, phi, addDecay = True):
     """
     eaf_numEntries = 175
     nuc = nucname.zzaaam(nuc)
-    rxn_dict = _get_daughters(nuc)
+    rxn_dict = _get_daughters(nuc, table)
     xs_total = np.zeros((eaf_numEntries, 1))
     for key in rxn_dict.keys():
         xs_total += rxn_dict[key]
@@ -514,7 +518,7 @@ def _tree_log(depth, nuc, N, tree):
     return None
 
 
-def _traversal(nuc, A, phi, t, out, tol, tree, depth = None):
+def _traversal(nuc, A, phi, t, table, out, tol, tree, depth = None):
     """Nuclide transmutation traversal method.
 
     This method will traverse the reaction tree recursively, using a DFS
@@ -532,6 +536,8 @@ def _traversal(nuc, A, phi, t, out, tol, tree, depth = None):
         in length for proper usage with EAF data.
     t : float
         Time at which to evaluate transmutation events.
+    table : hdf5 file handle
+        The nuc_data hdf5 table handle.
     out : dictionary
         A dictionary containing the final recorded number densities for each
         nuclide. Keys are nuclide names in integer (zzaaam) form. Values are
@@ -563,7 +569,7 @@ def _traversal(nuc, A, phi, t, out, tol, tree, depth = None):
         decay_dict = {}
     else:
         decay_dict = _get_decay(nuc)
-    daugh_dict = _get_daughters(nuc)
+    daugh_dict = _get_daughters(nuc, table)
     # Initialize production rate dictionary
     prod_dict = {}
     # Cycle decay children
@@ -579,7 +585,7 @@ def _traversal(nuc, A, phi, t, out, tol, tree, depth = None):
     # Cycle production dictionary
     for child in prod_dict.keys():
         # Grow matrix
-        B = _grow_matrix(A, prod_dict[child], _get_destruction(child, phi))
+        B = _grow_matrix(A, prod_dict[child], _get_destruction(child, phi, table))
         # Create initial density vector
         n = B.shape[0]
         N0 = np.zeros((n,1))
@@ -594,9 +600,9 @@ def _traversal(nuc, A, phi, t, out, tol, tree, depth = None):
         if _check_tol(N_final[-1], tol):
             # Continue traversal
             if tree is not None:
-                out = _traversal(child, B, phi, t, out, tol, tree, depth+1)
+                out = _traversal(child,B,phi,t,table,out,tol,tree,depth+1)
             else:
-                out = _traversal(child, B, phi, t, out, tol, tree, None)
+                out = _traversal(child,B,phi,t,table,out,tol,tree,None)
         # On recursion exit or truncation, write data from this nuclide
         if child in out.keys():
             out[child] += N_final[-1]
