@@ -29,15 +29,6 @@ class TallyManager
 {
   public:
     /**
-     * \brief Defines type of tally event
-     *
-     *     1) NONE indicates no event has been set yet
-     *     2) COLLISION indicates a collision event has been set
-     *     3) TRACK indicates a track-based event has been set
-     */
-//     enum EventType {NONE = 1, COLLISION = 2, TRACK = 3};
-
-    /**
      * \brief Constructor
      * Does not compile without this, due to event_type setting
      * in implementation, maybe
@@ -81,7 +72,7 @@ class TallyManager
     void end_history();
 
     // Call write_data() on every tally
-    void write_data(double num_particles, double multiplier);
+    void write_data(double num_particles);
 
     /**
      * \brief Sets tally multiplier for the event

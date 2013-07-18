@@ -35,7 +35,7 @@ public:
   
   virtual void end_history ();
  
-  virtual void write_data( double num_particles, double multiplier = 1.0); 
+  virtual void write_data( double num_particles);
     
   ~TrackLengthMeshTally();
 

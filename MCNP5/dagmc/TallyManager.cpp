@@ -81,13 +81,13 @@ void TallyManager::end_history()
        }
 }
 
-void TallyManager::write_data(double num_particles, double multiplier)
+void TallyManager::write_data(double num_particles)
 {
        std::map<int, Tally*>::iterator map_it;
        for (map_it = observers.begin(); map_it != observers.end(); ++map_it)
        {
            Tally *tally = map_it->second;
-	   tally->write_data(num_particles, multiplier);
+	   tally->write_data(num_particles);
        }
 }
 

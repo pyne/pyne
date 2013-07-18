@@ -364,9 +364,8 @@ void TrackLengthMeshTally::build_trees (Range& all_tets)
 /**
  * Write out the mesh with tally and error tags attached
  * @param sp_norm Tally for each tetrahedron will be divided by sp_norm*volume of tet.
- * @param mult_fact Tally for each tetrahedron will be multiplied by this parameter.
  */
-void TrackLengthMeshTally::write_data( double sp_norm, double mult_fact) 
+void TrackLengthMeshTally::write_data( double sp_norm)
 {
 
   ErrorCode rval;
@@ -397,7 +396,7 @@ void TrackLengthMeshTally::write_data( double sp_norm, double mult_fact)
 
       double tally = get_data( tally_data, t, j );
       double error = get_data( error_data, t, j );
-      double score = (tally / (volume*sp_norm)) * mult_fact;
+      double score = (tally / (volume*sp_norm));
       
       rval = mb->tag_set_data( tally_tags[j], &t, 1, &score );
       assert( rval == MB_SUCCESS );

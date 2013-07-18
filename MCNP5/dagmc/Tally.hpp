@@ -70,7 +70,7 @@ class Tally
 
     virtual void end_history() = 0;
 
-    virtual void write_data(double num_particles, double multiplier = 1.0) = 0;
+    virtual void write_data(double num_particles);
 
     /**
      *  \brief Factory method for creation of Tally Observers

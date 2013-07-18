@@ -182,7 +182,7 @@ void KDEMeshTally::compute_score(const TallyEvent& event)
     }
 }
 //---------------------------------------------------------------------------//
-void KDEMeshTally::write_data(double num_particles, double multiplier)
+void KDEMeshTally::write_data(double num_particles)
 {
     // display the optimal bandwidth if it was computed
     if (estimator == COLLISION)
@@ -214,9 +214,6 @@ void KDEMeshTally::write_data(double num_particles, double multiplier)
 
             // normalize mesh tally result by the number of source particles
             tally /= num_particles;
-
-            // apply multiplier to the total tally result
-            tally *= multiplier;
 
             // set tally and error tag values for this entity
             rval = mbi->tag_set_data(tally_tags[j], &point, 1, &tally);

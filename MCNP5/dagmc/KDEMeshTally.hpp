@@ -161,7 +161,7 @@ class KDEMeshTally : public MeshTally
      * same as the standard tally multiplier, which is typically applied to
      * individual scores instead.
      */
-    virtual void write_data(double num_particles, double multiplier = 1.0);
+    virtual void write_data(double num_particles);
 
   private:
     /// Copy constructor and operator= methods are not implemented

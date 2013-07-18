@@ -7,6 +7,13 @@
 
 struct TallyEvent
 {
+    /**
+     * \brief Defines type of tally event
+     *
+     *     1) NONE indicates no event has been set yet
+     *     2) COLLISION indicates a collision event has been set
+     *     3) TRACK indicates a track-based event has been set
+     */
     enum EventType {NONE = 1, COLLISION = 2, TRACK = 3};
 
     EventType type;
