@@ -1,4 +1,3 @@
-Getting & Installing the DAGMC Toolkit
 The DAGMC Toolkit
 ----------------------------------------
 
@@ -15,7 +14,6 @@ installing the software libraries that provide the DAGMC toolkit for
 integration with Monte Carlo codes.  After this, code-specific
 instructions will be give for each code. 
 
-DAGMC Dependencies and User Workflows
 Dependencies and Workflows
 +++++++++++++++++++++++++++++++++++++++
 
@@ -74,7 +72,7 @@ Installing the MOAB library can be accomplished in either of two ways:
 build_dagmc_stack.bash
 best way to get?
 
-__Compile each component individually__
+**Compile each component individually**
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 The following 4 steps are required to install the MOAB library,
