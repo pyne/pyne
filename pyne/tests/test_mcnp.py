@@ -198,16 +198,16 @@ def test_read_mcnp():
     expected_material.mass = -1.0  # to avoid reassignment to +1.0
 
     expected_multimaterial = MultiMaterial({
-        Material({10000: 0.11190248274452597, 80000: 0.888097517255474}, 
+        Material({10000: 0.11189838783149784, 80000: 0.8881016121685023}, 
                     -1.0, 0.9, 3, {"comments": (" Here are comments the comments "
                                                 "continue here are more even more"),
                                    "mat_number": "2", 
                                    "name":" water",
                                    "source":" internet",
                                    "table_ids":{'10000':"05c"}}): 1,
-        Material({10000: 0.11190248274452597, 80000: 0.888097517255474}, -1.0, 
-                 1.002153632715214, 3, {"comments": (" Here are comments the comments "
-                                            "continue here are more even more"),
+        Material({10000: 0.11189838783149784, 80000: 0.8881016121685023}, -1.0, 
+                 1.0021552889223864, 3, {"comments": (" Here are comments the comments "
+                                        "continue here are more even more"),
                                         "mat_number": "2", 
                                         "name": " water",
                                         "source": " internet",
