@@ -48,21 +48,26 @@ class TallyManager
     // >>> PUBLIC INTERFACE
     // Create and a new Tally
     // ToDo: turn into doc
-    /// Typedef for map that stores optional tally input parameters
+    // ToDo:  Do we need this to be multimap?
     /// User-specified ID for this tally
+    /// Type of tally to create
+    /// Options  map that stores optional tally input parameters
     /// Energy bin boundaries defined for all tally points
     /// If true, add an extra energy bin to tally all energy levels
-    Tally *createTally(std::multimap<std::string, std::string>& options, 
-                       unsigned int tally_id,
-                       const std::vector<double>& energy_bin_bounds,
-                       bool total_energy_bin);
-                       
+    Tally *createTally(unsigned int tally_id,
+                   std::string  tally_type,
+                   std::multimap<std::string, std::string>& options, 
+                   const std::vector<double>& energy_bin_bounds,
+                   bool total_energy_bin);
 
-    // Add a new Tally
+    // Add a Tally to the observer list
     void addTally(int tally_id, Tally *obs);
 
-    void addNewTally(std::multimap<std::string, std::string>& options, 
-                   unsigned int tally_id,
+
+    // Create a Tally and add it to the observer list    
+    void addNewTally(unsigned int tally_id,
+                   std::string tally_type,
+                   std::multimap<std::string, std::string>& options, 
                    const std::vector<double>& energy_bin_bounds,
                    bool total_energy_bin);
 

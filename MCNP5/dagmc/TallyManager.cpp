@@ -15,18 +15,20 @@ TallyManager::TallyManager()
 // PUBLIC INTERFACE
 //---------------------------------------------------------------------------//
 // Create a new Tally with the implementation that calls this method
-// ToDo:  Create a signature with an input file instead of the multimap arg
-Tally *createTally(std::multimap<std::string, std::string>& options, 
-                   unsigned int tally_id,
+Tally *createTally(unsigned int tally_id,
+                   std::string  tally_type,
+                   std::multimap<std::string, std::string>& options, 
                    const std::vector<double>& energy_bin_bounds,
                    bool total_energy_bin)
 {
 	Tally *ret;
         TallyInput input; 
 
+        // Set up the input structure from the passed parameters
         input.options  = options;
         input.energy_bin_bounds = energy_bin_bounds;
         input.total_energy_bin  = total_energy_bin; 
+        input.tally_type        = tally_type;
         
         ret = Tally::create_tally(tally_id, input);
         return ret;
@@ -39,13 +41,13 @@ void TallyManager::addTally(int tally_id, Tally *obs)
 }
 
 // Add a newly created Tally
-void TallyManager::addNewTally(std::multimap<std::string, std::string>& options, 
-                   unsigned int tally_id,
+void TallyManager::addNewTally(unsigned int tally_id,
+                   std::string tally_type,
+                   std::multimap<std::string, std::string>& options, 
                    const std::vector<double>& energy_bin_bounds,
                    bool total_energy_bin)
-
 {
-	Tally *newTally = createTally(options, tally_id, energy_bin_bounds, total_energy_bin);
+	Tally *newTally = createTally(tally_id, tally_type, options,  energy_bin_bounds, total_energy_bin);
         addTally(tally_id, newTally);
 }
 

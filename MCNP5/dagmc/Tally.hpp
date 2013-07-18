@@ -31,6 +31,9 @@ struct TallyInput
 
     /// Optional input parameters requested by user
     TallyOptions options;
+
+    /// Type of tally to create as a concrete class
+    std::string tally_type;
 };
 
 
@@ -46,6 +49,14 @@ struct TallyInput
 //===========================================================================//
 class Tally
 {
+  protected:
+   /**
+     * \brief Constructor
+     * \param id    mesh 
+     * \param input user-defined input parameters for this tally
+     */
+    Tally(int id, const TallyInput& input);
+
   public:
     
     virtual ~Tally(){}
@@ -70,8 +81,6 @@ class Tally
     unsigned int tally_id;
 
   protected:
-
-    Tally(int id, const TallyInput& input);
 
     /// Input data defined by user for this tally
     TallyInput input_data;
