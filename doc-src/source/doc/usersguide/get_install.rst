@@ -68,6 +68,7 @@ Summary
 
 Toolkit Installation
 ++++++++++++++++++++++++++++
+*Installing the Toolkit*
 
 Installing the MOAB library can be accomplished in either of two ways:
 
