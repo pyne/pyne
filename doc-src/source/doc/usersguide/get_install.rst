@@ -270,8 +270,21 @@ Within the ``install`` program you will need to set the DAGMC build options:
 Your executable should be available as ``$HOME/dagmc_bld/MCNP5/Source/src/mcnp5``.
 
 Access to DAG-Tripoli4
-_______________________
++++++++++++++++++++++++
 
 Tripoli4 is distributed by CEA/Saclay as a binary executable.  For
 access to DAG-Tripoli4, please contact `Jean-Christophe Trama
 <mailto:jean-christophe.trama@cea.fr>`_.
+
+Building FluDAG
++++++++++++++++++++++++
+FluDAG uses `FLUKA <http://www.fluka.org>`_ from CERN/INFN with the DAGMC Toolkit.
+To build and install FluDAG follow these additional steps after building DAGMC:
+
+*Download and Build FLUKA*
+These instructions follow the FLUKA README:
+
+1. Download the FLUKA tarball and follow the README instructions  
+2. Per the FLUKA install instructions add the FLUKA environment variables to your login script:
+   a.  export $FLUPRO=path/toFLUKA 
+   b.  export $FLUFOR=gfortran 
