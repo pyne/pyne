@@ -14,7 +14,7 @@ installing the software libraries that provide the DAGMC toolkit for
 integration with Monte Carlo codes.  After this, code-specific
 instructions will be give for each code. 
 
-Dependencies and Workflows
+Toolkit Dependencies and Workflows
 +++++++++++++++++++++++++++++++++++++++
 
 It is useful to consider how users will use the DAGMC workflow prior
@@ -28,12 +28,16 @@ While the second and third stages can be combined, these instructions
 will be based on treating them as separate stages with comments about
 how they would be combined where appropriate.
 
+Geometry
+~~~~~~~~~~
 *Manual Geometry Preparation*
 
 Because this stage is highly interactive, most users prefer to perform
 this stage on their desktop or laptop computer.  The only software
 required for this stage is the interactive Cubit software.
 
+Pre-Processing
+~~~~~~~~~~~~~~~
 *Automated Model Pre-processing*
 
 The primary purpose of this stage is to "translate" from the solid
@@ -41,6 +45,8 @@ model representation to the faceted representation.  As such, it
 requires Cubit, CGM and MOAB, and typically results in dependencies on
 shared libraries.
 
+Analysis
+~~~~~~~~~
 *Model Analysis*
 
 During analysis, only the faceted model is necessary, requiring only
@@ -48,6 +54,8 @@ MOAB and the physics code.  It is also possible to combine this stage
 with the previous one, requiring Cubit, CGM, MOAB and the physics
 code, and will also result in dependencies on shared libraries.
 
+Summary
+~~~~~~~
 *Summary of Dependencies* 
 
 * Some physics package, e.g. MCNP5
@@ -58,29 +66,28 @@ code, and will also result in dependencies on shared libraries.
 
 
 
-Installing the DAGMC Toolkit
+Toolkit Installation
 ++++++++++++++++++++++++++++
+*Installing the Toolkit*
 
 Installing the MOAB library can be accomplished in either of two ways:
 
 * Run the build_dagmc_stack script
 * Compile each component individually in a 4-step process.
 
-*Build and Install MOAB using a Build Script*
+**Build and Install MOAB using a Build Script**
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 build_dagmc_stack.bash
 best way to get?
 
 **Compile each component individually**
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 The following 4 steps are required to install the MOAB library,
 including the DAGMC toolkit, for use in Monte Carlo radiation
 transport tools.  Following these steps, all the pre-requisites for
 the automated processing stage will be available.
 
-1. Install `CUBIT <http://cubit.sandia.gov>`_ v12.2
+1. Install `CUBIT <http://cubit.sandia.gov>`_ v12.2 or v13.1
 2. Install `CGM <http://trac.mcs.anl.gov/projects/ITAPS/wiki/CGM>`_, using the --with-cubit options
 3. Install `HDF5 <http://www.hdfgroup.org/HDF5/>`_
 4. Install `MOAB <http://trac.mcs.anl.gov/projects/ITAPS/wiki/MOAB>`_,
@@ -97,7 +104,7 @@ If these do not apply to you, please modify your steps accordingly.
 
      *(For a shortcut to installing DAG-MCNP5.1.51 you may be able to use the DagmcBuildPackage .)*
 
-Installing CGM
+CGM
 ______________
 
 Create a directory to build CGM:
@@ -128,7 +135,7 @@ In all cases:
     prompt%> make
     prompt%> make install
 
-Installing HDF5
+HDF5
 _________________
 
 Follow these steps
@@ -143,7 +150,7 @@ Follow these steps
     prompt%> make install
 
 
-Installing MOAB
+MOAB
 _________________
 
 Create a directory to install MOAB:
@@ -221,8 +228,9 @@ Some assumptions/conventions:
 * MCNP5 source code is available in location ``$HOME/dagmc_bld/MCNP5``
 * A cloned DAGMC git repo can be found at ``/path/to/DAGMC``
 
-Apply DAGMC Patch to MCNP5 v1.60
+Apply Patch
 _________________________________
+*Apply DAGMC Patch to MCNP5 v1.60*
 
 Perform the following steps:
 ::
@@ -230,8 +238,9 @@ Perform the following steps:
     prompt%> patch -p1 < /path/to/DAGMC/MCNP5/patch/dagmc.patch.5.1.60
 
 
-Build DAG-MCNP5 from modified code
+Build DAG-MCNP5
 ____________________________________
+*Build DAG-MCNP5 from modified code*
 
 One of the easiest ways to build DAG-MCNP5 is directly using the
 ``makefile`` from the command-line.  To do this, you must know the
