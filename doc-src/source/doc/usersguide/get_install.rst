@@ -20,9 +20,9 @@ DAGMC Dependencies and User Workflows
 It is useful to consider how users will use the DAGMC workflow prior
 to making some installation decisions.  There are three main stages
 for the workflow:
- * manual preparation of geometric models
- * automated pre-processing of models
- * use of the models in analysis
+* manual preparation of geometric models
+* automated pre-processing of models
+* use of the models in analysis
 
 While the second and third stages can be combined, these instructions
 will be based on treating them as separate stages with comments about
@@ -88,8 +88,6 @@ the automated processing stage will be available.
    using the --with-cgm and --with-hdf5 options (--with-netcdf may
    also be useful but not necessary)
 
-NOTE:  The --enable-shared otpion must be used for CGM, HDF5, and MOAB.
-
 Here are some assumptions/conventions that are used in these instructions:
 
 * all operations are carried out in the a subdirectory ``dagmc_bld`` of a user's home directory
@@ -108,7 +106,7 @@ Create a directory to build CGM:
     prompt%> mkdir -p $HOME/dagmc_bld/CGM/bld
     prompt%> cd $HOME/dagmc_bld/CGM
 
-If installing from SVN repository (you must_ use this method if you are using Cubit v13.1):
+If installing from SVN repository (you *must* use this method if you are using Cubit v13.1):
 ::
     prompt%> svn co https://svn.mcs.anl.gov/repos/ITAPS/cgm/trunk
     prompt%> cd trunk
@@ -132,7 +130,7 @@ In all cases:
     prompt%> make install
 
 Installing HDF5
-""""""""""""""""
+_________________
 
 Follow these steps
 ::
@@ -147,7 +145,7 @@ Follow these steps
 
 
 Installing MOAB
-""""""""""""""""
+_________________
 
 Create a directory to install MOAB:
 ::
@@ -182,7 +180,6 @@ In all cases:
     prompt%> make install
 
 
-
 Applying DAGMC to Specific Monte Carlo Codes
 --------------------------------------------
 
@@ -195,7 +192,7 @@ If you would like to use DAGMC with MCNP5, known as DAG-MCNP5, you will also nee
 * a local copy of UW-Madison's `DAGMC git repo <https://github.com/svalinn/DAGMC>`_ 
 
 Automatic Installation
-'''''''''''''''''''''''
+~~~~~~~~~~~~~~~~~~~~~~~~~
 
 A package has been prepared that includes many of the requires
 software libraries and an automated build script.  Because the DAGMC
@@ -208,7 +205,7 @@ Once you have both of those things, you should be able to use the
 DagmcBuildPackage to create a working install of DAG-MCNP5.1.51.
 
 Manual Installation
-'''''''''''''''''
+~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The following steps are required to install DAG-MCNP5.  Most of these steps are described in more detail below.
 
@@ -226,7 +223,7 @@ Some assumptions/conventions:
 * A cloned DAGMC git repo can be found at ``/path/to/DAGMC``
 
 Apply DAGMC Patch to MCNP5 v1.60
-................................
+_________________________________
 
 Perform the following steps:
 ::
@@ -235,7 +232,7 @@ Perform the following steps:
 
 
 Build DAG-MCNP5 from modified code
-....................................
+____________________________________
 
 One of the easiest ways to build DAG-MCNP5 is directly using the
 ``makefile`` from the command-line.  To do this, you must know the
@@ -262,13 +259,11 @@ Within the ``install`` program you will need to set the DAGMC build options:
 * turn on DAGMC mode
 * provide the path to MOAB: ``$HOME/dagmc_bld/MOAB``
 * provide the path to CUBIT: ``/path/to/cubit``
-src/Makefile gh-preview
 Your executable should be available as ``$HOME/dagmc_bld/MCNP5/Source/src/mcnp5``.
 
 Access to DAG-Tripoli4
-"""""""""""""""""""""""
+_______________________
 
 Tripoli4 is distributed by CEA/Saclay as a binary executable.  For
 access to DAG-Tripoli4, please contact `Jean-Christophe Trama
 <mailto:jean-christophe.trama@cea.fr>`_.
-make -f doc-src/Makefile gh-preview
