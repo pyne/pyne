@@ -58,7 +58,7 @@ Summary of Dependencies
    * `MOAB/DAGMC <http://trac.mcs.anl.gov/projects/ITAPS/wiki/MOAB>`_
        * `HDF5 <http://www.hdfgroup.org/HDF5/release/obtain5.html>`_
        * `CGM <http://trac.mcs.anl.gov/projects/ITAPS/wiki/CGM>`_ 
-            * ACIS v19, or `CUBIT <http://cubit.sandia.gov>`_ v12.2
+            * ACIS v19, or `CUBIT <http://cubit.sandia.gov>`_ v12.2 or v13.1 (with CGM `trunk <http://ftp.mcs.anl.gov/pub/fathom/cgm-nightly-trunk.tar.gz>` only)
 
 
 
