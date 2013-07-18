@@ -135,7 +135,7 @@ def setup():
         'pyne.xs': ['*.pxd'] + extpttn,
         'pyne.lib': extpttn,
         'pyne.gui': ['*.pyw'],
-        'pyne.dbgen': ['*.html', '*.csv'],
+        'pyne.dbgen': ['*.html', '*.csv', 'abundances.txt'],
         }
     setup_kwargs = {
         "name": "pyne",
