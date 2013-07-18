@@ -75,13 +75,6 @@ class MeshTally : public Tally
      */
     virtual void end_history();
 
-    /**
-     * \brief Write tally and error results to the mesh tally's output file
-     * \param num_particles the number of source particles tracked
-     * \param multiplier an optional constant multiplication factor
-     */
-    // virtual void print(double num_particles, double multiplier = 1.0) = 0;
-
     // >>> TALLY DATA ACCESS METHODS
 
     /**

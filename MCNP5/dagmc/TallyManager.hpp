@@ -12,15 +12,12 @@
  * \class TallyManager
  * \brief Defines a single tally event
  *
+ * ToDo:  Update this doc
  * TallyManager is a class that represents a tally event that can be triggered
  * as part of a Monte Carlo particle transport simulation.  Both collision
  * and track-based events can be created.  Note that once an event type has
  * been set it cannot be changed.
  *
- * In addition to setting the required variables for each type of tally event,
- * there is also an optional method available to set the tally multiplier.
- * If the tally multiplier is not set, then it will default to 1.
- * 
  * This class is a Subject (Observable) class that keeps a list of Observers
  * to be Notified.  The Observers are added via the method attach(..)
  */
@@ -97,9 +94,6 @@ class TallyManager
 
     // Keep a record of the Observers
     std::map <int, Tally*> observers; 
-
-    /// Energy-dependent multiplier for this event
-    double tally_multiplier;
 
     // Store particle state for the event
     TallyEvent event;
