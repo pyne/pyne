@@ -65,6 +65,17 @@ Summary of Dependencies
 Installing the DAGMC Toolkit
 ++++++++++++++++++++++++++++
 
+Installing the MOAB library can be accomplished in two ways:
+* Run the build_dagmc_stack script
+* Compile each component individually in a 4-step process.
+
+Build and Install MOAB using a Build Script
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+build_dagmc_stack.bash
+best way to get?
+
+Compile each component individually
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 The following 4 steps are required to install the MOAB library,
 including the DAGMC toolkit, for use in Monte Carlo radiation
 transport tools.  Following these steps, all the pre-requisites for
@@ -77,6 +88,8 @@ the automated processing stage will be available.
    using the --with-cgm and --with-hdf5 options (--with-netcdf may
    also be useful but not necessary)
 
+NOTE:  The --enable-shared otpion must be used for CGM, HDF5, and MOAB.
+
 Here are some assumptions/conventions that are used in these instructions:
 
 * all operations are carried out in the a subdirectory ``dagmc_bld`` of a user's home directory
@@ -88,14 +101,14 @@ If these do not apply to you, please modify your steps accordingly.
      *(For a shortcut to installing DAG-MCNP5.1.51 you may be able to use the DagmcBuildPackage .)*
 
 Installing CGM
-""""""""""""""
+______________
 
 Create a directory to build CGM:
 ::
     prompt%> mkdir -p $HOME/dagmc_bld/CGM/bld
     prompt%> cd $HOME/dagmc_bld/CGM
 
-If installing from SVN repository:
+If installing from SVN repository (you must_ use this method if you are using Cubit v13.1):
 ::
     prompt%> svn co https://svn.mcs.anl.gov/repos/ITAPS/cgm/trunk
     prompt%> cd trunk
@@ -103,7 +116,7 @@ If installing from SVN repository:
     prompt%> cd ..
     prompt%> ln -s trunk src
 
-If installing from a tarball, ``CGM-12.2.0.tar.gz``:
+If installing CGM version 12.2 from a tarball, ``CGM-12.2.0.tar.gz``:
 ::
     prompt%> tar xzf ~/CGM-12.2.0.tar.gz
     prompt%> ln -s CGM-12.2.0 src
@@ -111,7 +124,8 @@ If installing from a tarball, ``CGM-12.2.0.tar.gz``:
 In all cases:
 ::
     prompt%> cd bld
-    prompt%> ../src/configure --enable-optimize --disable-debug \
+    prompt%> ../src/configure --enable-optimize \
+              --enable-shared --disable-debug \
               --with-cubit=/path/to/cubit  \
               --prefix=$HOME/dagmc_bld/CGM
     prompt%> make
@@ -124,10 +138,10 @@ Follow these steps
 ::
     prompt%> mkdir $HOME/dagmc_bld/HDF5/bld
     prompt%> cd $HOME/dagmc_bld/HDF5
-    prompt%> tar xzf ~/hdf5-1.8.3.tar.gz
-    prompt%> ln -s hdf5-1.8.3 src
+    prompt%> tar xzf ~/hdf5-1.8.7.tar.gz
+    prompt%> ln -s hdf5-1.8.7 src
     prompt%> cd bld
-    prompt%> ../src/configure --prefix=$HOME/dagmc_bld/HDF5
+    prompt%> ../src/configure --enable-shared --prefix=$HOME/dagmc_bld/HDF5
     prompt%> make
     prompt%> make install
 
@@ -150,16 +164,17 @@ If installing from SVN repository:
     prompt%> ln -s trunk src
 
 
-If installing from a tarball, ``MOAB-3.99.tar.gz``:
+If installing from a tarball, ``MOAB-4.60.tar.gz``:
 ::
-    prompt%> tar xzf ~/MOAB-3.99.tar.gz
-    prompt%> ln -s MOAB-3.99 src
+    prompt%> tar xzf ~/MOAB-4.60.tar.gz
+    prompt%> ln -s MOAB-4.60 src
 
 
 In all cases:
 ::
     prompt%> cd bld
-    prompt%> ../src/configure --enable-optimize --disable-debug \
+    prompt%> ../src/configure --enable-optimize \
+              --enable-shared --disable-debug \
               --with-cgm=$HOME/dagmc_bld/CGM  \
               --with-hdf5=$HOME/dagmc_bld/HDF5 \
               --prefix=$HOME/dagmc_bld/MOAB
@@ -169,10 +184,10 @@ In all cases:
 
 
 Applying DAGMC to Specific Monte Carlo Codes
-++++++++++++++++++++++++++++++++++++++++++++
+--------------------------------------------
 
 Installing DAG-MCNP5
-""""""""""""""""""""
+++++++++++++++++++++
 
 If you would like to use DAGMC with MCNP5, known as DAG-MCNP5, you will also need:
 
