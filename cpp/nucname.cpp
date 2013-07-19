@@ -278,103 +278,98 @@ bool pyne::nucname::isnuclide(int nuc)
 
 
 
-/************************/
-/*** zzaaam functions ***/
-/************************/
-int pyne::nucname::zzaaam(int nuc)
+/********************/
+/*** id functions ***/
+/********************/
+int pyne::nucname::id(int nuc)
 {
   int newnuc;
-
-  int mod_10000 = nuc % 10000;
-  int div_10000 = nuc / 10000;
-  int mod_10000_div_10 = mod_10000 / 10;
-
-  // Nuclide must already be in zzaaam form
-  if (div_10000 <= mod_10000_div_10 && mod_10000_div_10 <= div_10000 * 7)
+  int zzz = nuc / 10000000;     // ZZZ ?
+  int aaassss = nuc % 10000000; // AAA-SSSS ?
+  int aaa = aaassss / 10000;    // AAA ?
+  //int ssss = aaassss % 10000;   // SSSS ?
+  // Nuclide must already be in id form
+  if (zzz <= aaa && aaa <= zzz * 7)
   {
     // Normal nuclide
-    newnuc = nuc;
-    return newnuc;
+    return nuc;
   }
-  else if (mod_10000 == 0 && 0 < zz_name.count(div_10000))
+  else if (aaassss == 0 && 0 < zz_name.count(zzz))
   {
-    // Natural elemental nuclide:  ie for Urnaium = 920000
-    newnuc = nuc;
-    return newnuc;
+    // Natural elemental nuclide:  ie for Urnaium = 920000000
+    return nuc;
   }
-  else if (mod_10000_div_10 < div_10000 && 0 < zz_name.count(mod_10000_div_10))
+
+  // Not in id form, try  ZZZAAAM form.
+  zzz = nuc / 10000;     // ZZZ ?
+  aaassss = nuc % 10000; // AAA-SSSS ?
+  aaa = aaassss / 10;    // AAA ?
+  if (zzz <= aaa && aaa <= zzz * 7)
+  {
+    // ZZZAAAM nuclide
+    return (zzz*10000000) + (aaa*10000) + (nuc%10);
+  }
+  else if (aaa < zzz && 0 < zz_name.count(aaa))
   {
     // Cinder-form (aaazzzm), ie 2350920
-    newnuc = (mod_10000_div_10*10000) + (div_10000*10) + (nuc%10);
-    return newnuc;
+    return (aaa*10000000) + (zzz*10000000) + (nuc%10);
   }
+  //else if (aaassss == 0 && 0 == zz_name.count(nuc/1000) && 0 < zz_name.count(zzz))
+  else if (aaassss == 0 && 0 < zz_name.count(zzz))
+  {
+    // zzaaam form natural nuclide
+    return zzz * 10000000;
+  }
+
+  if (nuc >= 1000000){
+    // From now we assume no metastable info has been given.
+    throw IndeterminateNuclideForm(nuc, "");
+  };
 
   // Nuclide is not in zzaaam form, 
   // Try MCNP form, ie zzaaa
-  int mod_1000 = nuc % 1000; 
-  int div_1000 = nuc / 1000;
-
-  if (div_1000 <= mod_1000)
+  zzz = nuc / 1000;
+  aaa = nuc % 1000; 
+  if (zzz <= aaa)
   {
-    if (mod_1000 - 400 < 0)
+    if (aaa - 400 < 0)
     {
-      // Nuclide in normal MCNP form
-      newnuc = nuc * 10;
-
-      // special case MCNP Am-242m
-      if (newnuc == 952420)
-        newnuc += 1;
+      if (nuc == 95242)
+        return nuc * 10000 + 1;  // special case MCNP Am-242m
+      else
+        return nuc * 10000;  // Nuclide in normal MCNP form
     }
     else
     {
       // Nuclide in MCNP metastable form
-      newnuc = ((nuc - 400) * 10) + 1;
-      while (3.0 < (float ((newnuc/10)%1000) / float (newnuc/10000)))
-      {
-        newnuc -= 999;
-      };
-
-      // special case MCNP Am-242
-      if (newnuc == 952421)
-        newnuc -= 1;
+      if (nuc == 95642)
+        return (95642 - 400)*10000;  // special case MCNP Am-242
+      nuc = ((nuc - 400) * 10000) + 1;
+      while (3.0 < (float ((nuc/10000)%1000) / float (nuc/10000000)))
+        nuc -= 999999;
+      return nuc;
     }
-    return newnuc;
   }
-
+  else if (aaa == 0 && 0 < zz_name.count(zzz))
+    // MCNP form natural nuclide
+    return zzz * 10000000;
 
   // Not a normal nuclide, might be a 
   // Natural elemental nuclide.  
-  // ie for Urnaium = 920000
-  if (mod_10000 == 0 && 0 == zz_name.count(div_1000) && 0 < zz_name.count(div_10000))
-  {
-    // zzaaam form natural nuclide
-    newnuc = nuc;
-  }
-  else if (mod_1000 == 0 && mod_10000 != 0 && 0 < zz_name.count(div_1000))
-  {
-    // MCNP form natural nuclide
-    newnuc = nuc * 10;
-  }
-  else
-  {
-    newnuc = -1;
-    throw IndeterminateNuclideForm(nuc, "");
-  };
-
-  return newnuc;
+  // ie 92 for Urnaium = 920000
+  if (0 < zz_name.count(nuc))
+    return nuc * 10000000;
+  throw IndeterminateNuclideForm(nuc, "");
 };
 
-
-
-int pyne::nucname::zzaaam(char * nuc)
+int pyne::nucname::id(char * nuc)
 {
   std::string newnuc (nuc);
   return zzaaam(newnuc);
 };
 
 
-
-int pyne::nucname::zzaaam(std::string nuc)
+int pyne::nucname::id(std::string nuc)
 {
   if (nuc.empty())
     throw NotANuclide(nuc, "<empty>");
@@ -501,6 +496,26 @@ std::string pyne::nucname::name(std::string nuc)
 }
 
 
+/************************/
+/*** zzaaam functions ***/
+/************************/
+int pyne::nucname::zzaaam(int nuc)
+{
+  return -1;
+};
+
+
+int pyne::nucname::zzaaam(char * nuc)
+{
+  std::string newnuc (nuc);
+  return zzaaam(newnuc);
+};
+
+
+int pyne::nucname::zzaaam(std::string nuc)
+{
+  return -1;
+};
 
 
 /**********************/
