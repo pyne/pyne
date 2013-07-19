@@ -98,35 +98,6 @@ class NucTypeError(Exception):
             msg += ": " + repr(self.nuc) 
         return msg
 
-#
-# Current Form Function
-#
-
-def current_form(nuc):
-    """Find the current form of a nuclide.
-
-    Parameters
-    ----------
-    nuc : int or str 
-        Input nuclide(s).
-
-    Returns
-    -------
-    form_flag : str
-        The form identifier string from ["zzaaam", "name", "MCNP"].
-
-    """
-    cdef std_string cpp_curr_form 
-
-    if isinstance(nuc, basestring):
-        cpp_curr_form = cpp_nucname.current_form(<char *> nuc)
-    elif isinstance(nuc, int) or isinstance(nuc, long):
-        cpp_curr_form = cpp_nucname.current_form(<int> nuc)
-    else:
-        raise NucTypeError(nuc)
-
-    return <char *> cpp_curr_form.c_str()
-
 
 #
 # Is Nuclide Function
@@ -155,12 +126,9 @@ def isnuclide(nuc):
     return flag
 
 
-#
-# zzaaam Functions
-#
 
-def zzaaam(nuc):
-    """Converts a nuclide to its zzaaam form (952420). 
+def id(nuc):
+    """Converts a nuclide to its identifier form (952420000).
 
     Parameters
     ----------
@@ -169,18 +137,16 @@ def zzaaam(nuc):
 
     Returns
     -------
-    newnuc : int 
-        Output nuclide in zzaaam form.
+    newnuc : int
+        Output nuclide id.
 
     """
-
     if isinstance(nuc, basestring):
-        newnuc = cpp_nucname.zzaaam(<char *> nuc)
+        newnuc = cpp_nucname.id(<char *> nuc)
     elif isinstance(nuc, int) or isinstance(nuc, long):
-        newnuc = cpp_nucname.zzaaam(<int> nuc)
+        newnuc = cpp_nucname.id(<int> nuc)
     else:
         raise NucTypeError(nuc)
-
     return newnuc
 
 
@@ -199,15 +165,36 @@ def name(nuc):
 
     """
     cdef std_string newnuc
-
     if isinstance(nuc, basestring):
         newnuc = cpp_nucname.name(<char *> nuc)
     elif isinstance(nuc, int):
         newnuc = cpp_nucname.name(<int> nuc)
     else:
         raise NucTypeError(nuc)
-
     return <char *> newnuc.c_str()
+
+
+def zzaaam(nuc):
+    """Converts a nuclide to its zzaaam form (952420). 
+
+    Parameters
+    ----------
+    nuc : int or str 
+        Input nuclide.
+
+    Returns
+    -------
+    newnuc : int 
+        Output nuclide in zzaaam form.
+
+    """
+    if isinstance(nuc, basestring):
+        newnuc = cpp_nucname.zzaaam(<char *> nuc)
+    elif isinstance(nuc, int) or isinstance(nuc, long):
+        newnuc = cpp_nucname.zzaaam(<int> nuc)
+    else:
+        raise NucTypeError(nuc)
+    return newnuc
 
 
 def mcnp(nuc):
