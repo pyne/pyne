@@ -2,6 +2,7 @@
 import os
 import re
 import urllib2
+import pkgutil
 
 import numpy as np
 import tables as tb
@@ -16,16 +17,17 @@ from pyne.dbgen.isotopic_abundance import get_isotopic_abundances
 MASS_FILE = 'mass.mas12'
 
 
-def grab_atomic_mass_adjustment(build_dir=""):
-    """Grabs the current atomic mass adjustment from the Atomic
-    Mass Data Center.  These are courtesy of Georges Audi and 
-    Wang Meng via a private communication, November 2012."""
+def copy_atomic_mass_adjustment(build_dir=""):
+    """Copies the atomic mass evaluation originally from the Atomic Mass Data
+    Center.  These are courtesy of Georges Audi and Wang Meng via a private
+    communication, November 2012."""
+
     if os.path.exists(os.path.join(build_dir, MASS_FILE)):
         return 
 
-    mass = urllib2.urlopen('http://amdc.in2p3.fr/masstables/Ame2012/mass.mas12')
+    mass = pkgutil.get_data('pyne.dbgen', MASS_FILE)
     with open(os.path.join(build_dir, MASS_FILE), 'w') as f:
-        f.write(mass.read())
+        f.write(mass)
 
 
 # Note, this regex specifically leaves our free neutrons
@@ -141,8 +143,8 @@ def make_atomic_weight(args):
                 return 
 
     # Then grab mass data
-    print "Grabbing atomic mass data from AMDC"
-    grab_atomic_mass_adjustment(build_dir)
+    print "Copying AME 2012 atomic mass data."
+    copy_atomic_mass_adjustment(build_dir)
 
     # Make atomic weight table once we have the array
     print "Making atomic weight data table."
