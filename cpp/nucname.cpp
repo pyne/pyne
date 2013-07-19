@@ -10,120 +10,120 @@ pyne::nucname::name_zz_t pyne::nucname::get_name_zz()
 {
   pyne::nucname::name_zz_t lzd;
 
-  lzd["BE"] = 04;
-  lzd["BA"] = 56;
-  lzd["BH"] = 107;
-  lzd["BI"] = 83;
-  lzd["BK"] = 97;
-  lzd["BR"] = 35;
-  lzd["RU"] = 44;
-  lzd["RE"] = 75;
-  lzd["RF"] = 104;
-  lzd["RG"] = 111;
-  lzd["RA"] = 88;
-  lzd["RB"] = 37;
-  lzd["RN"] = 86;
-  lzd["RH"] = 45;
-  lzd["TM"] = 69;
+  lzd["Be"] = 04;
+  lzd["Ba"] = 56;
+  lzd["Bh"] = 107;
+  lzd["Bi"] = 83;
+  lzd["Bk"] = 97;
+  lzd["Br"] = 35;
+  lzd["Ru"] = 44;
+  lzd["Re"] = 75;
+  lzd["Rf"] = 104;
+  lzd["Rg"] = 111;
+  lzd["Ra"] = 88;
+  lzd["Rb"] = 37;
+  lzd["Rn"] = 86;
+  lzd["Rh"] = 45;
+  lzd["Tm"] = 69;
   lzd["H"] = 01;
   lzd["P"] = 15;	
-  lzd["GE"] = 32;
-  lzd["GD"] = 64;
-  lzd["GA"] = 31;
-  lzd["OS"] = 76;
-  lzd["HS"] = 108;
-  lzd["ZN"] = 30;
-  lzd["HO"] = 67;
-  lzd["HF"] = 72;
-  lzd["HG"] = 80;
-  lzd["HE"] = 02;
-  lzd["PR"] = 59;
-  lzd["PT"] = 78;
-  lzd["PU"] = 94;
-  lzd["PB"] = 82;
-  lzd["PA"] = 91;
-  lzd["PD"] = 46;
-  lzd["PO"] = 84;
-  lzd["PM"] = 61;
+  lzd["Ge"] = 32;
+  lzd["Gd"] = 64;
+  lzd["Ga"] = 31;
+  lzd["Os"] = 76;
+  lzd["Hs"] = 108;
+  lzd["Zn"] = 30;
+  lzd["Ho"] = 67;
+  lzd["Hf"] = 72;
+  lzd["Hg"] = 80;
+  lzd["He"] = 02;
+  lzd["Pr"] = 59;
+  lzd["Pt"] = 78;
+  lzd["Pu"] = 94;
+  lzd["Pb"] = 82;
+  lzd["Pa"] = 91;
+  lzd["Pd"] = 46;
+  lzd["Po"] = 84;
+  lzd["Pm"] = 61;
   lzd["C"] = 6;
   lzd["K"] = 19;
   lzd["O"] = 8;
   lzd["S"] = 16;
   lzd["W"] = 74;
-  lzd["EU"] = 63;
-  lzd["ES"] = 99;
-  lzd["ER"] = 68;
-  lzd["MD"] = 101;
-  lzd["MG"] = 12;
-  lzd["MO"] = 42;
-  lzd["MN"] = 25;
-  lzd["MT"] = 109;
+  lzd["Eu"] = 63;
+  lzd["Es"] = 99;
+  lzd["Er"] = 68;
+  lzd["Md"] = 101;
+  lzd["Mg"] = 12;
+  lzd["Mo"] = 42;
+  lzd["Mn"] = 25;
+  lzd["Mt"] = 109;
   lzd["U"] = 92;
-  lzd["FR"] = 87;
-  lzd["FE"] = 26;
-  lzd["FM"] = 100;
-  lzd["NI"] = 28;
-  lzd["NO"] = 102;
-  lzd["NA"] = 11;
-  lzd["NB"] = 41;
-  lzd["ND"] = 60;
-  lzd["NE"] = 10;
-  lzd["ZR"] = 40;
-  lzd["NP"] = 93;
+  lzd["Fr"] = 87;
+  lzd["Fe"] = 26;
+  lzd["Fm"] = 100;
+  lzd["Ni"] = 28;
+  lzd["No"] = 102;
+  lzd["Na"] = 11;
+  lzd["Nb"] = 41;
+  lzd["Nd"] = 60;
+  lzd["Ne"] = 10;
+  lzd["Zr"] = 40;
+  lzd["Np"] = 93;
   lzd["B"] = 05;
-  lzd["CO"] = 27;
-  lzd["CM"] = 96;
+  lzd["Co"] = 27;
+  lzd["Cm"] = 96;
   lzd["F"] = 9;
-  lzd["CA"] = 20;
-  lzd["CF"] = 98;
-  lzd["CE"] = 58;
-  lzd["CD"] = 48;
+  lzd["Ca"] = 20;
+  lzd["Cf"] = 98;
+  lzd["Ce"] = 58;
+  lzd["Cd"] = 48;
   lzd["V"] = 23;
-  lzd["CS"] = 55;
-  lzd["CR"] = 24;
-  lzd["CU"] = 29;
-  lzd["SR"] = 38;
-  lzd["KR"] = 36;
-  lzd["SI"] = 14;
-  lzd["SN"] = 50;
-  lzd["SM"] = 62;
-  lzd["SC"] = 21;
-  lzd["SB"] = 51;
-  lzd["SG"] = 106;
-  lzd["SE"] = 34;
-  lzd["YB"] = 70;
-  lzd["DB"] = 105;
-  lzd["DY"] = 66;
-  lzd["DS"] = 110;
-  lzd["LA"] = 57;
-  lzd["CL"] = 17;
-  lzd["LI"] = 03;
-  lzd["TL"] = 81;
-  lzd["LU"] = 71;
-  lzd["LR"] = 103;
-  lzd["TH"] = 90;
-  lzd["TI"] = 22;
-  lzd["TE"] = 52;
-  lzd["TB"] = 65;
-  lzd["TC"] = 43;
-  lzd["TA"] = 73;
-  lzd["AC"] = 89;
-  lzd["AG"] = 47;
+  lzd["Cs"] = 55;
+  lzd["Cr"] = 24;
+  lzd["Cu"] = 29;
+  lzd["Sr"] = 38;
+  lzd["Kr"] = 36;
+  lzd["Si"] = 14;
+  lzd["Sn"] = 50;
+  lzd["Sm"] = 62;
+  lzd["Sc"] = 21;
+  lzd["Sb"] = 51;
+  lzd["Sg"] = 106;
+  lzd["Se"] = 34;
+  lzd["Yb"] = 70;
+  lzd["Db"] = 105;
+  lzd["Dy"] = 66;
+  lzd["Ds"] = 110;
+  lzd["La"] = 57;
+  lzd["Cl"] = 17;
+  lzd["Li"] = 03;
+  lzd["Tl"] = 81;
+  lzd["Lu"] = 71;
+  lzd["Lr"] = 103;
+  lzd["Th"] = 90;
+  lzd["Ti"] = 22;
+  lzd["Te"] = 52;
+  lzd["Tb"] = 65;
+  lzd["Tc"] = 43;
+  lzd["Ta"] = 73;
+  lzd["Ac"] = 89;
+  lzd["Ag"] = 47;
   lzd["I"] = 53;
-  lzd["IR"] = 77;
-  lzd["AM"] = 95;
-  lzd["AL"] = 13;
-  lzd["AS"] = 33;
-  lzd["AR"] = 18;
-  lzd["AU"] = 79;
-  lzd["AT"] = 85;
-  lzd["IN"] = 49;
+  lzd["Ir"] = 77;
+  lzd["Am"] = 95;
+  lzd["Al"] = 13;
+  lzd["As"] = 33;
+  lzd["Ar"] = 18;
+  lzd["Au"] = 79;
+  lzd["At"] = 85;
+  lzd["In"] = 49;
   lzd["Y"] = 39;
   lzd["N"] = 07;
-  lzd["XE"] = 54;
-  lzd["CN"] = 112;
-  lzd["FL"] = 114;
-  lzd["LV"] = 116;
+  lzd["Xe"] = 54;
+  lzd["Cn"] = 112;
+  lzd["Fl"] = 114;
+  lzd["Lv"] = 116;
 
   return lzd;
 };
@@ -152,51 +152,54 @@ pyne::nucname::zz_group pyne::nucname::name_to_zz_group(pyne::nucname::name_grou
 {
   zz_group zg;
   for (name_group_iter i = eg.begin(); i != eg.end(); i++)
-  {
     zg.insert(name_zz[*i]);
-  }
   return zg;
 };
 
 // Lanthanides
-pyne::nucname::name_t pyne::nucname::LAN_array[15] = {"LA", "CE", "PR", "ND", "PM", "SM", "EU", \
-                                        "GD", "TB", "DY", "HO", "ER", "TM", "YB", "LU"};
-pyne::nucname::name_group pyne::nucname::LAN (pyne::nucname::LAN_array, pyne::nucname::LAN_array+15);
-pyne::nucname::zz_group pyne::nucname::lan = pyne::nucname::name_to_zz_group(pyne::nucname::LAN);
+pyne::nucname::name_t pyne::nucname::LAN_array[15] = {"La", "Ce", "Pr", "Nd", 
+  "Pm", "Sm", "Eu", "Gd", "Tb", "Dy", "Ho", "Er", "Tm", "Yb", "Lu"};
+pyne::nucname::name_group pyne::nucname::LAN (pyne::nucname::LAN_array, 
+                                              pyne::nucname::LAN_array+15);
+pyne::nucname::zz_group pyne::nucname::lan = \
+  pyne::nucname::name_to_zz_group(pyne::nucname::LAN);
 
 // Actinides
-pyne::nucname::name_t pyne::nucname::ACT_array[15] = {"AC", "TH", "PA", "U",  "NP", "PU", "AM", "CM", \
-                                        "BK", "CF", "ES", "FM", "MD", "NO", "LR"};
+pyne::nucname::name_t pyne::nucname::ACT_array[15] = {"Ac", "Th", "Pa", "U", 
+  "Np", "Pu", "Am", "Cm", "Bk", "Cf", "Es", "Fm", "Md", "No", "Lr"};
 pyne::nucname::name_group pyne::nucname::ACT (pyne::nucname::ACT_array, pyne::nucname::ACT_array+15);
 pyne::nucname::zz_group pyne::nucname::act = pyne::nucname::name_to_zz_group(pyne::nucname::ACT);
 
 // Transuarnics
-pyne::nucname::name_t pyne::nucname::TRU_array[22] = {"NP", "PU", "AM", "CM", "BK", "CF", "ES", "FM", \
-                                        "MD", "NO", "LR", "RF", "DB", "SG", "BH", "HS", \
-                                        "MT", "DS", "RG", "CN", "FL", "LV"};
-pyne::nucname::name_group pyne::nucname::TRU (pyne::nucname::TRU_array, pyne::nucname::TRU_array+22);
-pyne::nucname::zz_group pyne::nucname::tru = pyne::nucname::name_to_zz_group(pyne::nucname::TRU);
+pyne::nucname::name_t pyne::nucname::TRU_array[22] = {"Np", "Pu", "Am", "Cm", 
+  "Bk", "Cf", "Es", "Fm", "Md", "No", "Lr", "Rf", "Db", "Sg", "Bh", "Hs", "Mt", 
+  "Ds", "Rg", "Cn", "Fl", "Lv"};
+pyne::nucname::name_group pyne::nucname::TRU (pyne::nucname::TRU_array, 
+                                              pyne::nucname::TRU_array+22);
+pyne::nucname::zz_group pyne::nucname::tru = \
+  pyne::nucname::name_to_zz_group(pyne::nucname::TRU);
 
 //Minor Actinides
-pyne::nucname::name_t pyne::nucname::MA_array[10] = {"NP", "AM", "CM", "BK", "CF", "ES", "FM", "MD", \
-                                       "NO", "LR"};
-pyne::nucname::name_group pyne::nucname::MA (pyne::nucname::MA_array, pyne::nucname::MA_array+10);
-pyne::nucname::zz_group pyne::nucname::ma = pyne::nucname::name_to_zz_group(pyne::nucname::MA);
+pyne::nucname::name_t pyne::nucname::MA_array[10] = {"Np", "Am", "Cm", "Bk", 
+  "Cf", "Es", "Fm", "Md", "No", "Lr"};
+pyne::nucname::name_group pyne::nucname::MA (pyne::nucname::MA_array, 
+                                             pyne::nucname::MA_array+10);
+pyne::nucname::zz_group pyne::nucname::ma = \
+  pyne::nucname::name_to_zz_group(pyne::nucname::MA);
 
 //Fission Products
-pyne::nucname::name_t pyne::nucname::FP_array[88] = {"AG", "AL", "AR", "AS", "AT", "AU", "B",  "BA", \
-                                       "BE", "BI", "BR", "C",  "CA", "CD", "CE", "CL", \
-                                       "CO", "CR", "CS", "CU", "DY", "ER", "EU", "F",  \
-                                       "FE", "FR", "GA", "GD", "GE", "H",  "HE", "HF", \
-                                       "HG", "HO", "I",  "IN", "IR", "K",  "KR", "LA", \
-                                       "LI", "LU", "MG", "MN", "MO", "N",  "NA", "NB", \
-                                       "ND", "NE", "NI", "O",  "OS", "P",  "PB", "PD", \
-                                       "PM", "PO", "PR", "PT", "RA", "RB", "RE", "RH", \
-                                       "RN", "RU", "S",  "SB", "SC", "SE", "SI", "SM", \
-                                       "SN", "SR", "TA", "TB", "TC", "TE", "TI", "TL", \
-                                       "TM", "V",  "W",  "XE", "Y",  "YB", "ZN", "ZR"};
-pyne::nucname::name_group pyne::nucname::FP (pyne::nucname::FP_array, pyne::nucname::FP_array+88);
-pyne::nucname::zz_group pyne::nucname::fp = pyne::nucname::name_to_zz_group(pyne::nucname::FP);
+pyne::nucname::name_t pyne::nucname::FP_array[88] = {"Ag", "Al", "Ar", "As", 
+  "At", "Au", "B",  "Ba", "Be", "Bi", "Br", "C",  "Ca", "Cd", "Ce", "Cl", "Co",
+  "Cr", "Cs", "Cu", "Dy", "Er", "Eu", "F",  "Fe", "Fr", "Ga", "Gd", "Ge", "H",  
+  "He", "Hf", "Hg", "Ho", "I",  "In", "Ir", "K",  "Kr", "La", "Li", "Lu", "Mg", 
+  "Mn", "Mo", "N",  "Na", "Nb", "Nd", "Ne", "Ni", "O",  "Os", "P",  "Pb", "Pd", 
+  "Pm", "Po", "Pr", "Pt", "Ra", "Rb", "Re", "Rh", "Rn", "Ru", "S",  "Sb", "Sc", 
+  "Se", "Si", "Sm", "Sn", "Sr", "Ta", "Tb", "Tc", "Te", "Ti", "Tl", "Tm", "V",  
+  "W",  "Xe", "Y",  "Yb", "Zn", "Zr"};
+pyne::nucname::name_group pyne::nucname::FP (pyne::nucname::FP_array, 
+                                             pyne::nucname::FP_array+88);
+pyne::nucname::zz_group pyne::nucname::fp = \
+  pyne::nucname::name_to_zz_group(pyne::nucname::FP);
 
 
 /***************************/
@@ -336,7 +339,7 @@ int pyne::nucname::id(std::string nuc)
 
   // Get the string into a regular form
   std::string nucstr = pyne::to_upper(nuc);
-  nucstr = pyne::remove_substring(nucstr, "-");
+  nucstr nucstr = pyne::remove_substring(nucstr, "-");
   int nuclen = nucstr.length();
 
   if (pyne::contains_substring(pyne::digits, nucstr.substr(0, 1)))
@@ -390,6 +393,7 @@ int pyne::nucname::id(std::string nuc)
     // Add the Z-number
     std::string elem_name = pyne::remove_characters(nucstr.substr(0, nuclen-1), 
                                                     pyne::digits);
+    elem_name = pyne::capitalize(elem_name);
     if (0 < name_zz.count(elem_name))
       newnuc = (10000000 * name_zz[elem_name]) + newnuc;
     else
