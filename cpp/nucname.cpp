@@ -199,43 +199,6 @@ pyne::nucname::name_group pyne::nucname::FP (pyne::nucname::FP_array, pyne::nucn
 pyne::nucname::zz_group pyne::nucname::fp = pyne::nucname::name_to_zz_group(pyne::nucname::FP);
 
 
-
-/********************/
-/*** Current Form ***/
-/********************/
-std::string pyne::nucname::current_form(std::string nuc)
-{
-  // returns current form of a nuclide.
-  using namespace pyne;
-
-  nuc = to_upper(nuc);
-  nuc = remove_substring(nuc, "-");
-
-  if ( contains_substring(alphabet, nuc.substr(0,1)) )
-    return "name";
-  else
-  {
-    if (nuc.length() == 7)
-      return "zzaaam";
-    else if ( contains_substring("23456789", last_char(nuc)) )
-      return "MCNP";
-
-    if ( ternary_ge( to_int(nuc.substr(0,nuc.length()-4)), to_int(slice_from_end(nuc,-4,3)), to_int(nuc.substr(0,nuc.length()-4)) * 5) )
-      return "zzaaam";
-    else if ( ternary_ge( to_int(nuc.substr(0,nuc.length()-3)), to_int(slice_from_end(nuc,-3,3)), to_int(nuc.substr(0,nuc.length()-3)) * 5) )
-      return "MCNP";
-    else
-      throw IndeterminateNuclideForm(nuc, "");
-  };
-};
-
-std::string pyne::nucname::current_form(int nuc)
-{
-   return pyne::nucname::current_form(pyne::to_str(nuc));
-};
-
-
-
 /***************************/
 /*** isnuclide functions ***/
 /***************************/
@@ -244,7 +207,7 @@ bool pyne::nucname::isnuclide(std::string nuc)
 {
   int n;
   try {
-    n = zzaaam(nuc);
+    n = id(nuc);
   }
   catch(NotANuclide) {
     return false;
@@ -261,17 +224,14 @@ bool pyne::nucname::isnuclide(int nuc)
 {
   int n;
   try {
-    n = zzaaam(nuc);
+    n = id(nuc);
   }
   catch(NotANuclide) {
     return false;
   };
-  int znum = n / 10000;
-  int anum = (n % 10000) / 10;
-  //std::cout << n << " = n \n";
-  //std::cout << znum << " = znum \n";
-  //std::cout << anum << " = anum \n";
-  if (anum < znum)
+  int zzz = n / 10000000;
+  int aaa = (n % 10000000) / 10000;
+  if (aaa < zzz)
     return false;
   return true;
 };
@@ -523,23 +483,17 @@ int pyne::nucname::zzaaam(std::string nuc)
 /**********************/
 int pyne::nucname::mcnp(int nuc)
 {
-  int newnuc = zzaaam(nuc);
-  int mod_10 = newnuc%10;
-
-  newnuc = newnuc/10;
+  nuc = id(nuc);
+  int ssss = nuc % 10000;
+  int newnuc = nuc / 10000;
 
   // special case Am242(m)
-  if (newnuc == 95242 && mod_10 < 2)
-  {
-    mod_10 = (mod_10 + 1) % 2;
-  }
+  if (newnuc == 95242 && ssss < 2)
+    ssss = (ssss + 1) % 2;
 
   // Handle the crazy MCNP meta-stable format
-  if (0 != mod_10) 
-  {
-    newnuc += 300;
-    newnuc += (mod_10 * 100);
-  }
+  if (0 != ssss && ssss < 10) 
+    newnuc += 300 + (ssss * 100);
 
   return newnuc;
 };
@@ -556,8 +510,7 @@ int pyne::nucname::mcnp(char * nuc)
 
 int pyne::nucname::mcnp(std::string nuc)
 {
-  int newnuc = zzaaam(nuc);
-  return mcnp(newnuc);
+  return mcnp(id(nuc));
 };
 
 
@@ -569,36 +522,36 @@ int pyne::nucname::mcnp(std::string nuc)
 /*************************/
 std::string pyne::nucname::serpent(int nuc)
 {
-  int nucint = zzaaam(nuc);
+  int nucid = id(nuc);
   std::string newnuc = "";
 
-  int mod_10 = nucint%10;
-  int mod_10000 = nucint % 10000;
-  int div_10000 = nucint / 10000;
-  int mod_10000_div_10 = mod_10000 / 10;
+  int ssss = nucid % 10000;
+  int aaassss = nucid % 10000000;
+  int zzz = nucid / 10000000;
+  int aaa = aaassss / 10000;
 
   // Make sure the LL value is correct
-  if (0 == zz_name.count(div_10000))
-    throw NotANuclide(nuc, nucint);
+  if (0 == zz_name.count(zzz))
+    throw NotANuclide(nuc, nucid);
 
   // Add LL
-  std::string LLupper = pyne::to_upper(zz_name[div_10000]);
-  std::string LLlower = pyne::to_lower(zz_name[div_10000]);
-  newnuc += LLupper[0];
-  for (int l = 1; l < LLlower.size(); l++)
-    newnuc += LLlower[l];  
+  std::string llupper = pyne::to_upper(zz_name[zzz]);
+  std::string lllower = pyne::to_lower(zz_name[zzz]);
+  newnuc += llupper[0];
+  for (int l = 1; l < lllower.size(); l++)
+    newnuc += lllower[l];  
 
   // Add required dash
   newnuc += "-";
 
   // Add A-number
-  if (0 < mod_10000)
-    newnuc += pyne::to_str(mod_10000_div_10);
-  else if (0 == mod_10000)
+  if (0 < aaassss)
+    newnuc += pyne::to_str(aaa);
+  else if (0 == aaassss)
     newnuc += "nat";
 
   // Add meta-stable flag
-  if (0 < mod_10)
+  if (0 < ssss)
     newnuc += "m";
 
   return newnuc;
@@ -614,8 +567,7 @@ std::string pyne::nucname::serpent(char * nuc)
 
 std::string pyne::nucname::serpent(std::string nuc)
 {
-  int newnuc = zzaaam(nuc);
-  return serpent(newnuc);
+  return serpent(id(newnuc));
 };
 
 
@@ -626,25 +578,25 @@ std::string pyne::nucname::serpent(std::string nuc)
 /**********************/
 std::string pyne::nucname::nist(int nuc)
 {
-  int nucint = zzaaam(nuc);
+  int nucid = id(nuc);
   std::string newnuc = "";
 
-  int mod_10 = nucint%10;
-  int mod_10000 = nucint % 10000;
-  int div_10000 = nucint / 10000;
-  int mod_10000_div_10 = mod_10000 / 10;
+  int zzz = nucid / 10000000;
+  int ssss = nucid % 10000;
+  int aaassss = nucid % 10000000;
+  int aaa = aaassss / 10000;
 
   // Make sure the LL value is correct
-  if (0 == zz_name.count(div_10000))
-    throw NotANuclide(nuc, nucint);
+  if (0 == zz_name.count(zzz))
+    throw NotANuclide(nuc, nucid);
 
   // Add A-number
-  if (0 < mod_10000)
-    newnuc += pyne::to_str(mod_10000_div_10);
+  if (0 < aaassss)
+    newnuc += pyne::to_str(aaa);
 
   // Add name
-  std::string name_upper = pyne::to_upper(zz_name[div_10000]);
-  std::string name_lower = pyne::to_lower(zz_name[div_10000]);
+  std::string name_upper = pyne::to_upper(zz_name[zzz]);
+  std::string name_lower = pyne::to_lower(zz_name[zzz]);
   newnuc += name_upper[0];
   for (int l = 1; l < name_lower.size(); l++)
     newnuc += name_lower[l];  
@@ -668,8 +620,7 @@ std::string pyne::nucname::nist(char * nuc)
 
 std::string pyne::nucname::nist(std::string nuc)
 {
-  int newnuc = zzaaam(nuc);
-  return nist(newnuc);
+  return nist(id(nuc));
 };
 
 
@@ -681,15 +632,14 @@ std::string pyne::nucname::nist(std::string nuc)
 int pyne::nucname::cinder(int nuc)
 {
   // cinder nuclides of form aaazzzm
-
-  int newnuc = zzaaam(nuc);
-  int mod_10000 = newnuc % 10000;
-  int div_10000 = newnuc / 10000;
-  int mod_10000_div_10 = mod_10000 / 10;
-  int mod_10 = newnuc%10;
-
-  newnuc = (mod_10000_div_10*10000) + (div_10000*10) + mod_10;
-  return newnuc;
+  int nucid = id(nuc);
+  int zzz = nucid / 10000000;
+  int ssss = nucid % 10000;
+  int aaassss = nucid % 10000000;
+  int aaa = aaassss / 10000;
+  if (10 <= ssss)
+    ssss = 9;
+  return (aaa*10000) + (zzz*10) + ssss;
 };
 
 
@@ -704,11 +654,8 @@ int pyne::nucname::cinder(char * nuc)
 
 int pyne::nucname::cinder(std::string nuc)
 {
-  int newnuc = zzaaam(nuc);
-  return cinder(newnuc);
+  return cinder(id(nuc));
 };
-
-
 
 
 /**********************/
@@ -716,35 +663,33 @@ int pyne::nucname::cinder(std::string nuc)
 /**********************/
 std::string pyne::nucname::alara(int nuc)
 {
-  int nucint = zzaaam(nuc);
+  int nucid = id(nuc);
   std::string newnuc = "";
   std::string ll = "";
 
-  int mod_10 = nucint%10;
-  int mod_10000 = nucint % 10000;
-  int div_10000 = nucint / 10000;
-  int mod_10000_div_10 = mod_10000 / 10;
+  int zzz = nucid / 10000000;
+  int ssss = nucid % 10000;
+  int aaassss = nucid % 10000000;
+  int aaa = aaassss / 10000;
 
   // Make sure the LL value is correct
-  if (0 == zz_name.count(div_10000))
+  if (0 == zz_name.count(zzz))
     throw NotANuclide(nuc, nucint);
 
   // Add LL, in lower case
-  ll += zz_name[div_10000];
+  ll += zz_name[zzz];
 
-  for(int i = 0; ll[i] != '\0'; i++){
+  for(int i = 0; ll[i] != '\0'; i++)
     ll[i] = tolower(ll[i]);
-    }
-   newnuc += ll;
+  newnuc += ll;
 
   // Add A-number
   if (0 < mod_10000){
     newnuc += ":";
-    newnuc += pyne::to_str(mod_10000_div_10);
-    }
+    newnuc += pyne::to_str(aaa);
+  }
 
   // Note, ALARA input format does not use metastable flag
-
   return newnuc;
 };
 
@@ -758,6 +703,5 @@ std::string pyne::nucname::alara(char * nuc)
 
 std::string pyne::nucname::alara(std::string nuc)
 {
-  int newnuc = zzaaam(nuc);
-  return alara(newnuc);
+  return alara(id(nuc));
 }
