@@ -1,4 +1,4 @@
-// TODO Implementation of the boundary correction method (in progress)
+// MCNP5/dagmc/tools/boundary_correction/boundary.cpp
 
 #include <cassert>
 #include <cstdlib>
@@ -20,7 +20,6 @@ moab::DagMC* dagmc = moab::DagMC::instance();
 // loads mesh data from mesh_input_file into MOAB instance
 void load_moab_instance(char* mesh_input_file)
 {
-    // load mesh data into MOAB instance
     moab::ErrorCode mb_error = mbi->load_file(mesh_input_file);
 
     if (mb_error != moab::MB_SUCCESS)
@@ -34,7 +33,6 @@ void load_moab_instance(char* mesh_input_file)
 // loads geometry data from geometry_input_file into DAGMC instance
 void load_dagmc_instance(char* geometry_input_file)
 {
-    // load geometry data into DAGMC instance
     moab::ErrorCode dagmc_error = dagmc->load_file(geometry_input_file);
 
     if (dagmc_error != moab::MB_SUCCESS)
@@ -57,7 +55,6 @@ void load_dagmc_instance(char* geometry_input_file)
     std::vector<std::string> dagmc_keywords;
     dagmc_keywords.push_back("spec.reflect");
     dagmc_keywords.push_back("graveyard");
-
     dagmc_error = dagmc->parse_properties(dagmc_keywords);
 
     if (dagmc_error != moab::MB_SUCCESS)
@@ -67,16 +64,15 @@ void load_dagmc_instance(char* geometry_input_file)
     }
 }
 
-// TODO write description for this method
-// returns volume_ID of 0 if no valid volume is found and prints warning
-moab::EntityHandle find_volume_ID(const moab::CartVect& coords)
+// returns volume in which coords are located, based on direction
+moab::EntityHandle find_volume_ID(const moab::CartVect& coords,
+                                  const moab::CartVect& direction)
 {
     // get number of 3D volumes from DAGMC instance
     int num_volumes = dagmc->num_entities(3);
 
     // iterate through volumes to find the one in which coords is located
     moab::EntityHandle volume_ID = 0;
-    moab::CartVect direction(1.0, 0.0, 0.0);
     int inside_volume = 0;
     int volume_index = 1;
     
@@ -103,17 +99,14 @@ moab::EntityHandle find_volume_ID(const moab::CartVect& coords)
     return volume_ID;
 }
 
-// TODO write description for this method
-// returns -1.0 if distance to boundary is > max_distance or volume_ID is not valid
+// returns distance to boundary from coords for given direction and volume_ID
+// will return -1.0 if distance is > max_distance or no intersection exists
 double distance_to_boundary(double max_distance,
                             const moab::CartVect& coords,
                             const moab::CartVect& direction,
                             const moab::EntityHandle& volume_ID)
 {
     assert(max_distance > 0.0);
-
-    // return if starting volume_ID is the graveyard
-    if (dagmc->has_prop(volume_ID, "graveyard")) return -1.0;
 
     // create RayHistory to store surface crossing history
     moab::DagMC::RayHistory surface_history;
@@ -164,9 +157,13 @@ double distance_to_boundary(double max_distance,
     return distance;
 }
 
-// TODO write description for this method
-// assumes node can only ever be near one boundary in each direction (lower OR upper)
-// if false is returned, then boundary and distance may have meaningless results
+/**
+ * Determines if node is less than or equal to one bandwidth from any external
+ * boundary in the DAGMC geometry.  If true, the boundary array will be set to
+ * 0 for a lower boundary OR 1 for an upper boundary.  The distance array will
+ * reflect how far that boundary is from the node.  If false, then the boundary
+ * and distance arrays may return meaningless results.
+ */
 bool node_near_boundary(const moab::EntityHandle& mesh_node,
                         const moab::CartVect& bandwidth,
                         int boundary[3],
@@ -178,13 +175,26 @@ bool node_near_boundary(const moab::EntityHandle& mesh_node,
     assert(mb_error == moab::MB_SUCCESS);
 
     // determine volume in DAGMC geometry in which mesh node is located
-    moab::EntityHandle volume_ID = find_volume_ID(coords);
+    moab::CartVect direction(1.0, 0.0, 0.0);
+    moab::EntityHandle volume_ID = find_volume_ID(coords, direction);
+
+    if (dagmc->has_prop(volume_ID, "graveyard"))
+    {
+        // flip the direction and see if node was on an inner boundary
+        direction[0] = -1.0;
+        volume_ID = find_volume_ID(coords, direction);
+
+        if (dagmc->has_prop(volume_ID, "graveyard"))
+        {
+            std::cerr << "Warning: node was found inside graveyard" << std::endl;
+            return false;
+        }
+    }
 
     if (volume_ID == 0) return false;
 
     // iterate through all directions x = 0, y = 1, and z = 2
     bool boundary_point = false;
-    moab::CartVect direction(0.0);
 
     for (int i = 0; i < 3; ++i)
     {
@@ -342,3 +352,5 @@ int main(int argc, char* argv[])
 
     return 0;
 }
+
+// end of MCNP5/dagmc/tools/boundary_correction/boundary.cpp
