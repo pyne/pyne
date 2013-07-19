@@ -368,19 +368,16 @@ int pyne::nucname::id(char * nuc)
   return zzaaam(newnuc);
 };
 
-
 int pyne::nucname::id(std::string nuc)
 {
   if (nuc.empty())
     throw NotANuclide(nuc, "<empty>");
-
-  int newnuc, nuclen;
-  std::string nucstr;
+  int newnuc;
 
   // Get the string into a regular form
-  nucstr = pyne::to_upper(nuc);
+  std::string nucstr = pyne::to_upper(nuc);
   nucstr = pyne::remove_substring(nucstr, "-");
-  nuclen = nucstr.length();
+  int nuclen = nucstr.length();
 
   if (pyne::contains_substring(pyne::digits, nucstr.substr(0, 1)))
   {
@@ -389,19 +386,19 @@ int pyne::nucname::id(std::string nuc)
       // Nuclide must actually be an integer that 
       // just happens to be living in string form.
       newnuc = pyne::to_int(nucstr);
-      newnuc = zzaaam(newnuc);
+      newnuc = id(newnuc);
     }
     else
     {
       // probably in NIST-like form (242Am)
       // Here we know we have both digits and letters
       std::string anum_str = pyne::remove_characters(nucstr, pyne::alphabet);
-      newnuc = pyne::to_int(anum_str) * 10;
+      newnuc = pyne::to_int(anum_str) * 10000;
 
       // Add the Z-number
       std::string elem_name = pyne::remove_characters(nucstr, pyne::digits);
       if (0 < name_zz.count(elem_name))
-        newnuc = (10000 * name_zz[elem_name]) + newnuc;
+        newnuc = (10000000 * name_zz[elem_name]) + newnuc;
       else
         throw NotANuclide(nucstr, newnuc);
     };
@@ -411,9 +408,9 @@ int pyne::nucname::id(std::string nuc)
     // Nuclide is probably in name form, or some variation therein
     std::string anum_str = pyne::remove_characters(nucstr, pyne::alphabet);
 
-    // natural element form, a la 'U' -> 920000
+    // natural element form, a la 'U' -> 920000000
     if (anum_str.empty() && (0 < name_zz.count(nucstr)))
-      return 10000 * name_zz[nucstr]; 
+      return 10000000 * name_zz[nucstr]; 
 
     int anum = pyne::to_int(anum_str);
 
@@ -424,16 +421,17 @@ int pyne::nucname::id(std::string nuc)
     // Figure out if we are meta-stable or not
     std::string end_char = pyne::last_char(nucstr);
     if (end_char == "M")
-      newnuc = (10 * anum) + 1;
+      newnuc = (10000 * anum) + 1;
     else if (pyne::contains_substring(pyne::digits, end_char))
-      newnuc = (10 * anum);
+      newnuc = (10000 * anum);
     else
       throw NotANuclide(nucstr, newnuc);
 
     // Add the Z-number
-    std::string elem_name = pyne::remove_characters(nucstr.substr(0, nuclen-1), pyne::digits);
+    std::string elem_name = pyne::remove_characters(nucstr.substr(0, nuclen-1), 
+                                                    pyne::digits);
     if (0 < name_zz.count(elem_name))
-      newnuc = (10000 * name_zz[elem_name]) + newnuc;
+      newnuc = (10000000 * name_zz[elem_name]) + newnuc;
     else
       throw NotANuclide(nucstr, newnuc);
   }
@@ -442,10 +440,8 @@ int pyne::nucname::id(std::string nuc)
     // Clearly not a nuclide
     throw NotANuclide(nuc, nucstr);
   }
-
   return newnuc;  
 };
-
 
 
 
@@ -454,27 +450,27 @@ int pyne::nucname::id(std::string nuc)
 /**********************/
 std::string pyne::nucname::name(int nuc)
 {
-  int nucint = zzaaam(nuc);
+  int nucid = id(nuc);
   std::string newnuc = "";
 
-  int mod_10 = nucint%10;
-  int mod_10000 = nucint % 10000;
-  int div_10000 = nucint / 10000;
-  int mod_10000_div_10 = mod_10000 / 10;
+  int zzz = nucid / 10000000;
+  int ssss = nucid % 10000;
+  int aaassss = nucid % 10000000;
+  int aaa = aaassss / 10000;
 
   // Make sure the LL value is correct
-  if (0 == zz_name.count(div_10000))
-    throw NotANuclide(nuc, nucint);
+  if (0 == zz_name.count(zzz))
+    throw NotANuclide(nuc, nucid);
 
   // Add LL
-  newnuc += zz_name[div_10000];
+  newnuc += zz_name[zzz];
 
   // Add A-number
-  if (0 < mod_10000)
-    newnuc += pyne::to_str(mod_10000_div_10);
+  if (0 < aaa)
+    newnuc += pyne::to_str(aaa);
 
   // Add meta-stable flag
-  if (0 < mod_10)
+  if (0 < ssss)
     newnuc += "M";
 
   return newnuc;
@@ -491,8 +487,7 @@ std::string pyne::nucname::name(char * nuc)
 
 std::string pyne::nucname::name(std::string nuc)
 {
-  int newnuc = zzaaam(nuc);
-  return name(newnuc);
+  return name(id(nuc));
 }
 
 
@@ -501,7 +496,12 @@ std::string pyne::nucname::name(std::string nuc)
 /************************/
 int pyne::nucname::zzaaam(int nuc)
 {
-  return -1;
+  int nucid = id(nuc);
+  int zzzaaa = nucid / 10000;
+  int ssss = nucid % 10000;
+  if (10 <= ssss)
+    ssss = 9;
+  return zzzaaa*10 + ssss;
 };
 
 
@@ -514,7 +514,7 @@ int pyne::nucname::zzaaam(char * nuc)
 
 int pyne::nucname::zzaaam(std::string nuc)
 {
-  return -1;
+  return zzaaam(id(nuc));
 };
 
 
