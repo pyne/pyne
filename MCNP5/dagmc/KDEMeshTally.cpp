@@ -37,6 +37,7 @@ KDEMeshTally::KDEMeshTally(int id, const TallyInput& input,
       estimator(type),
       bandwidth(moab::CartVect(0.01, 0.01, 0.01)),
       kernel(NULL),
+      use_boundary_correction(false),
       num_subtracks(3),
       mbi(new moab::Core())
 {
@@ -294,6 +295,10 @@ void KDEMeshTally::parse_tally_options()
         {
             kernel = KDEKernel::createKernel(value);
         }
+        else if (key == "boundary" && value == "default")
+        {
+            use_boundary_correction = true;
+        }
         else if (key == "seed" && estimator == SUB_TRACK)
         {
             // override random number seed if requested by user
@@ -361,6 +366,29 @@ moab::ErrorCode KDEMeshTally::initialize_mesh_data()
     rval = setup_tags(mbi, "KDE_");
 
     if (rval != moab::MB_SUCCESS) return rval;
+
+    // if requested, set up tags for boundary correction method
+    if (use_boundary_correction)
+    {
+        moab::ErrorCode tag1 = mbi->tag_get_handle("BOUNDARY", 3,
+                                                   moab::MB_TYPE_INTEGER,
+                                                   boundary_tag);
+
+        moab::ErrorCode tag2 = mbi->tag_get_handle("DISTANCE_TO_BOUNDARY", 3,
+                                                   moab::MB_TYPE_DOUBLE,
+                                                   distance_tag);
+
+        if (tag1 == moab::MB_TAG_NOT_FOUND || tag2 == moab::MB_TAG_NOT_FOUND)
+        {
+            std::cerr << "Warning: no valid boundary tags were found\n"
+                      << "    ignoring request for boundary correction\n";
+            use_boundary_correction = false;
+        }
+        else if (tag1 != moab::MB_SUCCESS || tag2 != moab::MB_SUCCESS)
+        {
+            return moab::MB_FAILURE;
+        }
+    }
 
     return moab::MB_SUCCESS; 
 }

@@ -178,6 +178,11 @@ class KDEMeshTally : public MeshTally
     /// Kernel function used to compute KDE mesh tally scores
     KDEKernel* kernel;
 
+    /// Variables used if boundary correction method is requested by user
+    bool use_boundary_correction;
+    moab::Tag boundary_tag;
+    moab::Tag distance_tag;
+
     /// Number of sub-tracks used to compute KDE sub-track mesh tally scores
     unsigned int num_subtracks;
 
@@ -221,8 +226,8 @@ class KDEMeshTally : public MeshTally
      * MeshTally variables set by this method include tally_points and
      * tally_mesh_set.  The tally_points will be defined as the set of mesh
      * nodes, whereas tally_mesh_set stores the set of all 3D mesh elements.
-     * This method also calls MeshTally::setup_tags() to set the tag names
-     * for the energy bins.
+     * This method also calls MeshTally::setup_tags() to set the tag names for
+     * the energy bins, and initializes tag handles for boundary correction.
      */
     moab::ErrorCode initialize_mesh_data();
 
