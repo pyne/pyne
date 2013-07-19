@@ -339,7 +339,7 @@ int pyne::nucname::id(std::string nuc)
 
   // Get the string into a regular form
   std::string nucstr = pyne::to_upper(nuc);
-  nucstr nucstr = pyne::remove_substring(nucstr, "-");
+  nucstr = pyne::remove_substring(nucstr, "-");
   int nuclen = nucstr.length();
 
   if (pyne::contains_substring(pyne::digits, nucstr.substr(0, 1)))
@@ -571,7 +571,7 @@ std::string pyne::nucname::serpent(char * nuc)
 
 std::string pyne::nucname::serpent(std::string nuc)
 {
-  return serpent(id(newnuc));
+  return serpent(id(nuc));
 };
 
 
@@ -678,7 +678,7 @@ std::string pyne::nucname::alara(int nuc)
 
   // Make sure the LL value is correct
   if (0 == zz_name.count(zzz))
-    throw NotANuclide(nuc, nucint);
+    throw NotANuclide(nuc, nucid);
 
   // Add LL, in lower case
   ll += zz_name[zzz];
@@ -688,7 +688,7 @@ std::string pyne::nucname::alara(int nuc)
   newnuc += ll;
 
   // Add A-number
-  if (0 < mod_10000){
+  if (0 < aaassss){
     newnuc += ":";
     newnuc += pyne::to_str(aaa);
   }
