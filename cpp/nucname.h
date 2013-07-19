@@ -142,8 +142,6 @@ namespace nucname
     std::string nucnow; ///< current nuclide state  
   };
 
-
-
   /// Custom expection for declaring that a value represents one or more nuclides 
   /// in one or more namig conventions
   class IndeterminateNuclideForm : public std::exception
@@ -231,19 +229,17 @@ namespace nucname
   bool isnuclide(int nuc);
   /// \}
 
-
-  /// \name ZZAAAM Form Functions
+  /// \name Identifier Form Functions
   /// \{
-  /// The ZZAAAM nuclide naming convention is the canonical form for representing
-  /// nuclides in PyNE. This places the charge of the nucleus out front, then has 
-  /// three digits for the atomic mass number, and ends with a metastable flag 
-  /// (0 = ground, 1 = first excited state, 2 = second excited state, etc). 
-  /// Uranium-235 here would be expressed as ‘922350’.
+  /// The 'id' nuclide naming convention is the canonical form for representing
+  /// nuclides in PyNE. This is termed a ZAS, or ZZZAAASSSS, representation because 
+  /// It stores 3 Z-number digits, 3 A-number digits, followed by 4 S-number digits
+  /// which the nucleus excitation state. 
   /// \param nuc a nuclide
-  /// \return an integer nuclide identifier.
-  int zzaaam(int nuc);
-  int zzaaam(char * nuc);
-  int zzaaam(std::string nuc);
+  /// \return nucid 32-bit integer identifier
+  int id(int nuc);
+  int id(char * nuc);
+  int id(std::string nuc);
   /// \}
 
   /// \name Name Form Functions
@@ -259,6 +255,20 @@ namespace nucname
   std::string name(int nuc);
   std::string name(char * nuc);
   std::string name(std::string nuc);
+  /// \}
+
+  /// \name ZZAAAM Form Functions
+  /// \{
+  /// The ZZAAAM nuclide naming convention is the former canonical form for 
+  /// nuclides in PyNE. This places the charge of the nucleus out front, then has 
+  /// three digits for the atomic mass number, and ends with a metastable flag 
+  /// (0 = ground, 1 = first excited state, 2 = second excited state, etc). 
+  /// Uranium-235 here would be expressed as ‘922350’.
+  /// \param nuc a nuclide
+  /// \return an integer nuclide identifier.
+  int zzaaam(int nuc);
+  int zzaaam(char * nuc);
+  int zzaaam(std::string nuc);
   /// \}
 
   /// \name MCNP Form Functions
