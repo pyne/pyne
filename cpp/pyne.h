@@ -83,6 +83,9 @@ namespace pyne {
   /// Returns an all lower case copy of the string.
   std::string to_lower(std::string s);
 
+  /// Returns a capitalized copy of the string.
+  std::string capitalize(std::string s);
+
   /// Finds and returns the first white-space delimited token of a line.
   /// \param line a character array to take the first token from.
   /// \param max_l an upper bound to the length of the token.  Must be 11 or less.
