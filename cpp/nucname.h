@@ -210,15 +210,6 @@ namespace nucname
     std::string nucnow; ///< current nuclide state
   };
 
-  /// \name Current Form Functions
-  /// \{
-  /// These functions compute the current form of the nuclide.
-  /// \param nuc a nuclide
-  /// \return a (string) flag of the nuclides current form.
-  std::string current_form(std::string nuc);
-  std::string current_form(int nuc);
-  /// \}
-
   /// \name isnuclide functions
   /// \{
   /// These functions test if an input \a nuc is a valid nuclide.
