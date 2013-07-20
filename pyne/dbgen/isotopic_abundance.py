@@ -34,7 +34,7 @@ def get_isotopic_abundances():
         # Read atomic number and mass number
         Z = int(words[0])
         A = int(words[2])
-        nuc = (Z*1000 + A)*10
+        nuc = (Z*1000 + A)*10000
         name = '-'.join(words[1:3])
         
         # Read value and add to dictionary

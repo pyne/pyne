@@ -1220,11 +1220,12 @@ class Material(_Material, collections.MutableMapping):
         fracs = self.to_atom_frac() if frac_type == 'atom' else self.comp
         frac_sign = "" if  frac_type == 'atom' else '-'
         for nuc, frac in fracs.items():
+            nucmcnp = str(nucname.mcnp(nuc))
             if 'table_ids' in self.attrs:
-                s += '     {0}.{1} '.format(str(nuc)[:-1],
-                                            self.attrs['table_ids'][str(nuc)])
+                s += '     {0}.{1} '.format(nucmcnp,
+                                            self.attrs['table_ids'][nucmcnp])
             else:
-                s += '     {0} '.format(nuc)
+                s += '     {0} '.format(nucmcnp)
             s += '{0}{1:.4E}\n'.format(frac_sign, frac)
 
         # write s to output file
@@ -1272,7 +1273,7 @@ class Material(_Material, collections.MutableMapping):
 
         for iso, frac in self.comp.items():
             s += '     {0} {1:.4E} {2}\n'.format(nucname.alara(iso),
-                                                 frac, str(iso)[:-4])
+                                                 frac, str(nucname.znum(iso)))
 
         with open(filename, 'a') as f:
             f.write(s)
