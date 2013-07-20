@@ -74,7 +74,7 @@ def check_cases(f, x, exp):
 
 cases = [20040, "he4", "Cm-244", "PU239", "AM242M", 2004, 95642, 95242, 92636, 
     95942, "Am-242m", "he", "U", "Np", "4he", "244CM", "239Pu", "242AM", 40020,
-    2440961, 2390940, 2420950]
+    2440961, 2390940, 2420950, 92]
 
 def test_id():
     assert_equal(nucname.id(20040), 20040000)
@@ -105,6 +105,7 @@ def test_id():
     assert_equal(nucname.id(2440961), 962440001)
     assert_equal(nucname.id(2390940), 942390000)
     assert_equal(nucname.id(2420950), 952420000)
+    assert_equal(nucname.id(92), 920000000)
 
 
 def test_name():
@@ -127,18 +128,18 @@ def test_name():
 
 def test_znum():
     exps = [2, 2, 96, 94, 95, 2, 95, 95, 92, 95, 95, 2, 92, 93, 2, 96, 94, 95, 2,
-            96, 94, 95]
+            96, 94, 95, 92]
     for case, exp in zip(cases, exps):
         yield check_cases, nucname.znum, case, exp
 
 def test_anum():
     exps = [4, 4, 244, 239, 242, 4, 242, 242, 236, 242, 242, 0, 0, 0, 4, 244, 239, 
-        242, 4, 244, 239, 242]
+        242, 4, 244, 239, 242, 0]
     for case, exp in zip(cases, exps):
         yield check_cases, nucname.anum, case, exp
 
 def test_snum():
-    exps = [0, 0, 0, 0, 1, 0, 0, 1, 1, 4, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0]
+    exps = [0, 0, 0, 0, 1, 0, 0, 1, 1, 4, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0]
     for case, exp in zip(cases, exps):
         yield check_cases, nucname.snum, case, exp
 
