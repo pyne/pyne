@@ -252,7 +252,7 @@ int pyne::nucname::id(int nuc)
   int aaa = aaassss / 10000;    // AAA ?
   //int ssss = aaassss % 10000;   // SSSS ?
   // Nuclide must already be in id form
-  if (zzz <= aaa && aaa <= zzz * 7)
+  if (0 < zzz && zzz <= aaa && aaa <= zzz * 7)
   {
     // Normal nuclide
     return nuc;
@@ -272,10 +272,10 @@ int pyne::nucname::id(int nuc)
     // ZZZAAAM nuclide
     return (zzz*10000000) + (aaa*10000) + (nuc%10);
   }
-  else if (aaa < zzz && 0 < zz_name.count(aaa))
+  else if (aaa <= zzz && zzz <= aaa * 7 && 0 < zz_name.count(aaa))
   {
     // Cinder-form (aaazzzm), ie 2350920
-    return (aaa*10000000) + (zzz*10000000) + (nuc%10);
+    return (aaa*10000000) + (zzz*10000) + (nuc%10);
   }
   //else if (aaassss == 0 && 0 == zz_name.count(nuc/1000) && 0 < zz_name.count(zzz))
   else if (aaassss == 0 && 0 < zz_name.count(zzz))
@@ -328,7 +328,7 @@ int pyne::nucname::id(int nuc)
 int pyne::nucname::id(char * nuc)
 {
   std::string newnuc (nuc);
-  return zzaaam(newnuc);
+  return id(newnuc);
 };
 
 int pyne::nucname::id(std::string nuc)
@@ -336,6 +336,7 @@ int pyne::nucname::id(std::string nuc)
   if (nuc.empty())
     throw NotANuclide(nuc, "<empty>");
   int newnuc;
+  std::string elem_name;
 
   // Get the string into a regular form
   std::string nucstr = pyne::to_upper(nuc);
@@ -359,7 +360,8 @@ int pyne::nucname::id(std::string nuc)
       newnuc = pyne::to_int(anum_str) * 10000;
 
       // Add the Z-number
-      std::string elem_name = pyne::remove_characters(nucstr, pyne::digits);
+      elem_name = pyne::remove_characters(nucstr, pyne::digits);
+      elem_name = pyne::capitalize(elem_name);
       if (0 < name_zz.count(elem_name))
         newnuc = (10000000 * name_zz[elem_name]) + newnuc;
       else
@@ -372,8 +374,11 @@ int pyne::nucname::id(std::string nuc)
     std::string anum_str = pyne::remove_characters(nucstr, pyne::alphabet);
 
     // natural element form, a la 'U' -> 920000000
-    if (anum_str.empty() && (0 < name_zz.count(nucstr)))
-      return 10000000 * name_zz[nucstr]; 
+    if (anum_str.empty()) {
+      elem_name = pyne::capitalize(nucstr);    
+      if (0 < name_zz.count(elem_name))
+        return 10000000 * name_zz[elem_name]; 
+    }
 
     int anum = pyne::to_int(anum_str);
 
@@ -391,8 +396,7 @@ int pyne::nucname::id(std::string nuc)
       throw NotANuclide(nucstr, newnuc);
 
     // Add the Z-number
-    std::string elem_name = pyne::remove_characters(nucstr.substr(0, nuclen-1), 
-                                                    pyne::digits);
+    elem_name = pyne::remove_characters(nucstr.substr(0, nuclen-1), pyne::digits);
     elem_name = pyne::capitalize(elem_name);
     if (0 < name_zz.count(elem_name))
       newnuc = (10000000 * name_zz[elem_name]) + newnuc;
