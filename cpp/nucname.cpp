@@ -250,7 +250,6 @@ int pyne::nucname::id(int nuc)
   int zzz = nuc / 10000000;     // ZZZ ?
   int aaassss = nuc % 10000000; // AAA-SSSS ?
   int aaa = aaassss / 10000;    // AAA ?
-  //int ssss = aaassss % 10000;   // SSSS ?
   // Nuclide must already be in id form
   if (0 < zzz && zzz <= aaa && aaa <= zzz * 7)
   {
@@ -262,6 +261,9 @@ int pyne::nucname::id(int nuc)
     // Natural elemental nuclide:  ie for Urnaium = 920000000
     return nuc;
   }
+  else if (nuc < 1000 && 0 < zz_name.count(nuc))
+    //  Gave Z-number
+    return nuc * 10000000;
 
   // Not in id form, try  ZZZAAAM form.
   zzz = nuc / 10000;     // ZZZ ?
