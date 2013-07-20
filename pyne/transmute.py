@@ -48,7 +48,7 @@ def transmute_core(nuc, t_sim, phi, tree = None, tol = 1e-7):
         dest = _get_destruction(nuc, phi, table)
         A = np.zeros((1,1))
         A[0,0] = -dest
-        rootVal = math.exp(-dest * t_sim)
+        rootVal = np.exp(-dest * t_sim)
         out = {nuc : rootVal}
         out = _traversal(nuc, A, phi, t_sim, table, out, tol, tree, depth = None)
     return out
@@ -294,7 +294,7 @@ def _matrix_exp(A, t):
     eA : NumPy 2-dimensional array
         Result after calculating the matrix exponential of At
     """
-    eA = linalg.expm2(A * t)
+    eA = linalg.expm(A * t)
     return eA
 
 
@@ -515,6 +515,7 @@ def _tree_log(depth, nuc, N, tree):
     Nstr = str(N)
     entry = spacing + arrow + name + openPar + Nstr + closePar
     tree.write(entry)
+    tree.flush()
     return None
 
 
