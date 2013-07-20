@@ -459,6 +459,51 @@ std::string pyne::nucname::name(std::string nuc)
 }
 
 
+/**********************/
+/*** znum functions ***/
+/**********************/
+int pyne::nucname::znum(int nuc){
+  return id(nuc) / 10000000;
+};
+
+int pyne::nucname::znum(char * nuc){
+  return id(nuc) / 10000000;
+};
+
+int pyne::nucname::znum(std::string nuc){
+  return id(nuc) / 10000000;
+};
+
+/**********************/
+/*** anum functions ***/
+/**********************/
+int pyne::nucname::anum(int nuc){
+  return (id(nuc) / 10000) % 1000;
+};
+
+int pyne::nucname::anum(char * nuc){
+  return (id(nuc) / 10000) % 1000;
+};
+
+int pyne::nucname::anum(std::string nuc){
+  return (id(nuc) / 10000) % 1000;
+};
+
+/**********************/
+/*** snum functions ***/
+/**********************/
+int pyne::nucname::snum(int nuc){
+  return id(nuc) % 10000;
+};
+
+int pyne::nucname::snum(char * nuc){
+  return id(nuc) % 10000;
+};
+
+int pyne::nucname::snum(std::string nuc){
+  return id(nuc) % 10000;
+};
+
 /************************/
 /*** zzaaam functions ***/
 /************************/
