@@ -76,7 +76,7 @@ namespace enrichment {
   /// To link to this article: DOI: 10.1081/SS-100100654
   /// URL: http://dx.doi.org/10.1081/SS-100100654
   /// \param casc Input cascade.  
-  /// \param i nuclide in zzaaam form.
+  /// \param i nuclide in id form.
   double _deltaU_i_OverG(Cascade & casc, int i);
   /// \}
 

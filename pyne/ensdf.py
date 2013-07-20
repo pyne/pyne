@@ -10,16 +10,16 @@ _level_regex = re.compile('([ \d]{3}[ A-Za-z]{2})  L (.{10}).{20}(.{10}).{28}([ 
 
 _level_cont_regex = re.compile('([ \d]{3}[ A-Za-z]{2})[0-9A-Za-z] L (.*)')
 
-def _to_zzaaam(nuc, m, s):
-    nuc_zz = nucname.zzaaam(nuc.strip())
+def _to_id(nuc, m, s):
+    nucid = nucname.id(nuc.strip())
     if m == 'M':
         state = s.strip()
         if 0 < len(state):
             state = int(state)
         else:
             state = 1
-        nuc_zz += state
-    return nuc_zz
+        nucid += state
+    return nucid
 
 
 def _to_float(x):
@@ -61,9 +61,9 @@ def half_life(ensdf):
     data : list of 5-tuples
         List of tuples where the indices match
 
-        1. from_nuclide, int (zzaaam)
+        1. from_nuclide, int (id)
         2. level, float (MeV) - from_nuc's energy level
-        3. to_nuclide, int (zzaaam)
+        3. to_nuclide, int (id)
         4. half_life, float (seconds)
         5. branch_ratio, float (frac)
 
@@ -89,7 +89,7 @@ def half_life(ensdf):
 
             # grab the from nuclide
             try:
-                from_nuc = _to_zzaaam(g[0], g[-2], g[-1])
+                from_nuc = _to_id(g[0], g[-2], g[-1])
                 valid_from_nuc = True
             except:
                 valid_from_nuc = False
@@ -130,7 +130,7 @@ def half_life(ensdf):
     # Hack to calculate metastable state number, make sure it doesn't go over 10,
     # and then change the from_nuc value, and remove all other states
     # FIXME: while the renaming bases on level should still happen, the limit
-    # of the 10 lowest levels should be removed when zzaaam is removed.
+    # of the 10 lowest levels should be removed when id is removed.
     nuclvl = {}
     for row in data:
         from_nuc, level, to_nuc, half_life, br = row

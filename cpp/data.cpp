@@ -77,7 +77,7 @@ double pyne::atomic_mass(int nuc)
   };
 
   double aw;
-  int nuc_zz = nucname::zzaaam(nuc);
+  int nuc_zz = nucname::id(nuc);
 
   // If in an excited state, return the ground
   // state weight...not strictly true, but good guess.
@@ -99,14 +99,14 @@ double pyne::atomic_mass(int nuc)
 
 double pyne::atomic_mass(char * nuc)
 {
-  int nuc_zz = nucname::zzaaam(nuc);
+  int nuc_zz = nucname::id(nuc);
   return atomic_mass(nuc_zz);
 };
 
 
 double pyne::atomic_mass(std::string nuc)
 {
-  int nuc_zz = nucname::zzaaam(nuc);
+  int nuc_zz = nucname::id(nuc);
   return atomic_mass(nuc_zz);
 };
 
@@ -143,7 +143,7 @@ double pyne::natural_abund(int nuc)
   };
 
   double na;
-  int nuc_zz = nucname::zzaaam(nuc);
+  int nuc_zz = nucname::id(nuc);
 
   // If in an excited state, return the ground
   // state abundance...not strictly true, but good guess.
@@ -165,14 +165,14 @@ double pyne::natural_abund(int nuc)
 
 double pyne::natural_abund(char * nuc)
 {
-  int nuc_zz = nucname::zzaaam(nuc);
+  int nuc_zz = nucname::id(nuc);
   return natural_abund(nuc_zz);
 };
 
 
 double pyne::natural_abund(std::string nuc)
 {
-  int nuc_zz = nucname::zzaaam(nuc);
+  int nuc_zz = nucname::id(nuc);
   return natural_abund(nuc_zz);
 };
 
@@ -265,7 +265,7 @@ extra_types::complex_t pyne::b_coherent(int nuc)
   };
 
   extra_types::complex_t bc;
-  int nuc_zz = nucname::zzaaam(nuc);
+  int nuc_zz = nucname::id(nuc);
   int znum = nuc_zz/10000;
   int anum = (nuc_zz/10)%1000;
 
@@ -306,14 +306,14 @@ extra_types::complex_t pyne::b_coherent(int nuc)
 
 extra_types::complex_t pyne::b_coherent(char * nuc)
 {
-  int nuc_zz = nucname::zzaaam(nuc);
+  int nuc_zz = nucname::id(nuc);
   return b_coherent(nuc_zz);
 };
 
 
 extra_types::complex_t pyne::b_coherent(std::string nuc)
 {
-  int nuc_zz = nucname::zzaaam(nuc);
+  int nuc_zz = nucname::id(nuc);
   return b_coherent(nuc_zz);
 };
 
@@ -345,7 +345,7 @@ extra_types::complex_t pyne::b_incoherent(int nuc)
   };
 
   extra_types::complex_t bi;
-  int nuc_zz = nucname::zzaaam(nuc);
+  int nuc_zz = nucname::id(nuc);
   int znum = nuc_zz/10000;
   int anum = (nuc_zz/10)%1000;
 
@@ -386,14 +386,14 @@ extra_types::complex_t pyne::b_incoherent(int nuc)
 
 extra_types::complex_t pyne::b_incoherent(char * nuc)
 {
-  int nuc_zz = nucname::zzaaam(nuc);
+  int nuc_zz = nucname::id(nuc);
   return b_incoherent(nuc_zz);
 };
 
 
 extra_types::complex_t pyne::b_incoherent(std::string nuc)
 {
-  int nuc_zz = nucname::zzaaam(nuc);
+  int nuc_zz = nucname::id(nuc);
   return b_incoherent(nuc_zz);
 };
 
@@ -427,14 +427,14 @@ double pyne::b(int nuc)
 
 double pyne::b(char * nuc)
 {
-  int nuc_zz = nucname::zzaaam(nuc);
+  int nuc_zz = nucname::id(nuc);
   return b(nuc_zz);
 };
 
 
 double pyne::b(std::string nuc)
 {
-  int nuc_zz = nucname::zzaaam(nuc);
+  int nuc_zz = nucname::id(nuc);
   return b(nuc_zz);
 };
 
@@ -563,14 +563,14 @@ double pyne::half_life(int nuc)
 
 double pyne::half_life(char * nuc)
 {
-  int nuc_zz = nucname::zzaaam(nuc);
+  int nuc_zz = nucname::id(nuc);
   return half_life(nuc_zz);
 };
 
 
 double pyne::half_life(std::string nuc)
 {
-  int nuc_zz = nucname::zzaaam(nuc);
+  int nuc_zz = nucname::id(nuc);
   return half_life(nuc_zz);
 };
 
@@ -610,14 +610,14 @@ double pyne::decay_const(int nuc)
 
 double pyne::decay_const(char * nuc)
 {
-  int nuc_zz = nucname::zzaaam(nuc);
+  int nuc_zz = nucname::id(nuc);
   return decay_const(nuc_zz);
 };
 
 
 double pyne::decay_const(std::string nuc)
 {
-  int nuc_zz = nucname::zzaaam(nuc);
+  int nuc_zz = nucname::id(nuc);
   return decay_const(nuc_zz);
 };
 
@@ -658,20 +658,20 @@ double pyne::branch_ratio(std::pair<int, int> from_to)
 
 double pyne::branch_ratio(int from_nuc, int to_nuc)
 {
-  return branch_ratio(std::pair<int, int>(nucname::zzaaam(from_nuc), 
-                                          nucname::zzaaam(to_nuc)));
+  return branch_ratio(std::pair<int, int>(nucname::id(from_nuc), 
+                                          nucname::id(to_nuc)));
 };
 
 double pyne::branch_ratio(char * from_nuc, char * to_nuc)
 {
-  return branch_ratio(std::pair<int, int>(nucname::zzaaam(from_nuc), 
-                                          nucname::zzaaam(to_nuc)));
+  return branch_ratio(std::pair<int, int>(nucname::id(from_nuc), 
+                                          nucname::id(to_nuc)));
 };
 
 double pyne::branch_ratio(std::string from_nuc, std::string to_nuc)
 {
-  return branch_ratio(std::pair<int, int>(nucname::zzaaam(from_nuc), 
-                                          nucname::zzaaam(to_nuc)));
+  return branch_ratio(std::pair<int, int>(nucname::id(from_nuc), 
+                                          nucname::id(to_nuc)));
 };
 
 
@@ -710,13 +710,13 @@ double pyne::state_energy(int nuc)
 
 double pyne::state_energy(char * nuc)
 {
-  return state_energy(nucname::zzaaam(nuc));
+  return state_energy(nucname::id(nuc));
 };
  
 
 double pyne::state_energy(std::string nuc)
 {
-  return state_energy(nucname::zzaaam(nuc));
+  return state_energy(nucname::id(nuc));
 };
 
 
@@ -756,11 +756,11 @@ std::set<int> pyne::decay_children(int nuc)
 
 std::set<int> pyne::decay_children(char * nuc)
 {
-  return decay_children(nucname::zzaaam(nuc));
+  return decay_children(nucname::id(nuc));
 };
 
 
 std::set<int> pyne::decay_children(std::string nuc)
 {
-  return decay_children(nucname::zzaaam(nuc));
+  return decay_children(nucname::id(nuc));
 };
