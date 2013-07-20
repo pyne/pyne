@@ -86,7 +86,7 @@ def parse_scattering_lengths(build_dir):
     for m in re.finditer(scat_len_pattern, raw_data):
         md = m.groupdict()
 
-        slrow = (nucname.zzaaam(md['iso']),
+        slrow = (nucname.id(md['iso']),
                  nist_num(md['b_coherent']) * (1E-13),
                  nist_num(md['b_incoherent']) * (1E-13),
                  nist_num(md['xs_coherent']),

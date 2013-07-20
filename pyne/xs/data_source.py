@@ -290,7 +290,7 @@ class SimpleDataSource(DataSource):
         self.src_group_struct = np.array([14.0, 1.0, 2.53E-8, 0.0], dtype='float64')
 
     def _load_reaction(self, nuc, rx, temp=300.0):
-        nuc = nucname.zzaaam(nuc)
+        nuc = nucname.id(nuc)
         if rx not in self._rx_avail:
             return None
         cond = "nuc == {0}".format(nuc)
@@ -399,7 +399,7 @@ class CinderDataSource(DataSource):
         return self._exists
 
     def _load_reaction(self, nuc, rx, temp=300.0):
-        nuc = nucname.zzaaam(nuc)
+        nuc = nucname.id(nuc)
         rx = _munge_rx(rx)
 
         # Set query condition
@@ -527,7 +527,7 @@ class EAFDataSource(DataSource):
         Parameters
         ----------
         nuc : int
-            Nuclide in zzaaam form.
+            Nuclide in id form.
         rx : int or str 
             Reaction MT # in nnnm form.
             OR:
@@ -541,7 +541,7 @@ class EAFDataSource(DataSource):
             Dictionary for converting string reaction identifiers to MT #s.
 
         """
-        nuc = nucname.zzaaam(nuc)
+        nuc = nucname.id(nuc)
 
         # Munging the rx to an MT#
         try:
@@ -639,19 +639,19 @@ class ENDFDataSource(DataSource):
         Parameters
         ----------
         nuc : int
-            Nuclide in zzaaam form.
+            Nuclide in id form.
         rx : int or str
             Reaction MT # in nnnm form.
             OR:
             Reaction key: 'gamma', 'alpha', 'p', etc.
         nuc_i: : int
-            Isotope in zzaaam form (optional). Default is None.
+            Isotope in id form (optional). Default is None.
 
         Returns
         -------
         rxdata: ndarray of floats, len ngroups
         """
-        nuc = nucname.zzaaam(nuc)
+        nuc = nucname.id(nuc)
         # Munging the rx to an MT#
         try:
             rx = int(rx)

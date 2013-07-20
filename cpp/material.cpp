@@ -73,7 +73,7 @@ void pyne::Material::_load_comp_protocol0(hid_t db, std::string datapath, int ro
     if (nuckey == "Mass" || nuckey == "MASS" || nuckey == "mass")
       mass = nucvalue;
     else
-      comp[pyne::nucname::zzaaam(nuckey)] = nucvalue;
+      comp[pyne::nucname::id(nuckey)] = nucvalue;
 
     H5Dclose(nucset);
     delete[] nkey;
@@ -547,7 +547,7 @@ void pyne::Material::from_text(std::string filename)
     else if (keystr == "APerM")
       atoms_per_mol = pyne::to_dbl(valstr);
     else
-      comp[pyne::nucname::zzaaam(keystr)] = pyne::to_dbl(valstr);
+      comp[pyne::nucname::id(keystr)] = pyne::to_dbl(valstr);
   };
 
   f.close();
@@ -812,7 +812,7 @@ double pyne::Material::number_density(double mass_dens, double apm)
 pyne::Material pyne::Material::sub_mat(std::set<int> nucset)
 {
   // Grabs a sub-material from this mat based on a set of integers.
-  // Integers can either be of zzaaam form -OR- they can be a z-numer (is 8 for O, 93 for Np, etc).
+  // Integers can either be of id form -OR- they can be a z-numer (is 8 for O, 93 for Np, etc).
 
   pyne::comp_map cm;
   for (pyne::comp_iter i = comp.begin(); i != comp.end(); i++)
@@ -833,7 +833,7 @@ pyne::Material pyne::Material::sub_mat(std::set<std::string> nucset)
   std::set<int> iset;
   for (std::set<std::string>::iterator i = nucset.begin(); i != nucset.end(); i++)
   {
-    iset.insert(pyne::nucname::zzaaam(*i));
+    iset.insert(pyne::nucname::id(*i));
   };
 
   return sub_mat(iset);
@@ -844,7 +844,7 @@ pyne::Material pyne::Material::sub_mat(std::set<std::string> nucset)
 pyne::Material pyne::Material::set_mat (std::set<int> nucset, double value)
 {
   // Sets a sub-material from this mat based on a set of integers.
-  // Integers can either be of zzaaam form -OR- they can be a z-numer (is 8 for O, 93 for Np, etc).
+  // Integers can either be of id form -OR- they can be a z-numer (is 8 for O, 93 for Np, etc).
   // n is the name of the new material.
 
   pyne::comp_map cm;
@@ -872,7 +872,7 @@ pyne::Material pyne::Material::set_mat(std::set<std::string> nucset, double valu
   std::set<int> iset;
   for (std::set<std::string>::iterator i = nucset.begin(); i != nucset.end(); i++)
   {
-    iset.insert(pyne::nucname::zzaaam(*i));
+    iset.insert(pyne::nucname::id(*i));
   };
 
   return set_mat(iset, value);
@@ -884,7 +884,7 @@ pyne::Material pyne::Material::set_mat(std::set<std::string> nucset, double valu
 pyne::Material pyne::Material::del_mat(std::set<int> nucset)
 {
   // Removes a sub-material from this mat based on a set of integers.
-  // Integers can either be of zzaaam form -OR- they can be a z-numer (is 8 for O, 93 for Np, etc).
+  // Integers can either be of id form -OR- they can be a z-numer (is 8 for O, 93 for Np, etc).
   // n is the name of the new material.
 
   pyne::comp_map cm;
@@ -907,7 +907,7 @@ pyne::Material pyne::Material::del_mat (std::set<std::string> nucset)
   std::set<int> iset;
   for (std::set<std::string>::iterator i = nucset.begin(); i != nucset.end(); i++)
   {
-    iset.insert(pyne::nucname::zzaaam(*i));
+    iset.insert(pyne::nucname::id(*i));
   };
 
   return del_mat(iset);

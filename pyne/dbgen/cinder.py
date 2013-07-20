@@ -196,7 +196,7 @@ def make_mg_absorption(nuc_data, build_dir=""):
 
     # Iterate through all from nuctopes.
     for m_from in re.finditer(from_nuc_pattern, raw_data, re.DOTALL):
-        from_nuc = nucname.zzaaam(m_from.group(1))
+        from_nuc = nucname.id(m_from.group(1))
 
         # Check matestable state
         if 1 < from_nuc%10:
@@ -208,7 +208,7 @@ def make_mg_absorption(nuc_data, build_dir=""):
 
         # Iterate over all to_nucs
         for m_to in re.finditer(to_nuc_pattern, from_nuc_part):
-            to_nuc = nucname.zzaaam(m_to.group(1))
+            to_nuc = nucname.id(m_to.group(1))
 
             # Check matestable state
             if 1 < to_nuc%10:
@@ -284,7 +284,7 @@ def make_mg_fission(nuc_data, build_dir=""):
 
     # Iterate through all from nuctopes.
     for m_from in re.finditer(from_nuc_pattern, raw_data, re.DOTALL):
-        from_nuc = nucname.zzaaam(m_from.group(1))
+        from_nuc = nucname.id(m_from.group(1))
 
         # Check matestable state
         if 1 < from_nuc%10:
@@ -371,7 +371,7 @@ def make_mg_gamma_decay(nuc_data, build_dir=""):
 
     # Iterate through all from nuctopes.
     for m_from in re.finditer(from_nuc_pattern, raw_data, re.DOTALL):
-        from_nuc = nucname.zzaaam(m_from.group(1))
+        from_nuc = nucname.id(m_from.group(1))
 
         # Check matestable state
         if 1 < from_nuc%10:
@@ -494,7 +494,7 @@ def parse_neutron_fp_info(raw_data):
         iit = iits[m]
         index = int(iit[0])
 
-        nuc = nucname.zzaaam(iit[1])
+        nuc = nucname.id(iit[1])
         # Correct for metastable flag
         if 0 != nuc%10:
             nuc = nuc + 2000
@@ -584,7 +584,7 @@ def grab_photon_fp_info(raw_data):
         iit = iits[m]
         index = int(iit[0])
 
-        nuc = nucname.zzaaam(iit[1])
+        nuc = nucname.id(iit[1])
         # Correct for metastable flag
         if 0 != nuc%10:
             nuc = nuc + 2000
@@ -686,7 +686,7 @@ def make_neutron_fp_yields(nuc_data, build_dir=""):
     # Iterate over all to-nucs
     fp_to_nuc_pattern = fp_to_nuc_base + N_n*fp_to_nuc_insert + ")"
     for m_to in re.finditer(fp_to_nuc_pattern, nfp_yields_raw):
-        to_nuc = nucname.zzaaam(m_to.group(2).strip())
+        to_nuc = nucname.id(m_to.group(2).strip())
 
         # Check matestable state
         if 1 < to_nuc%10:
@@ -755,7 +755,7 @@ def make_photon_fp_yields(nuc_data, build_dir):
     # Iterate over all to-nucs
     fp_to_nuc_pattern = fp_to_nuc_base + N_g*fp_to_nuc_insert + ")"
     for m_to in re.finditer(fp_to_nuc_pattern, gfp_yields_raw):
-        to_nuc = nucname.zzaaam(m_to.group(2).strip())
+        to_nuc = nucname.id(m_to.group(2).strip())
 
         # Check matestable state
         if 1 < to_nuc%10:

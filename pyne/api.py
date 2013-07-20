@@ -2,7 +2,7 @@
 from pyne.pyne_config import nuc_data, pyne_start, pyne_conf
 
 # Important naming functions
-from pyne.nucname import zzaaam, name
+from pyne.nucname import id, name
 
 # Get common data functions
 from pyne.data import atomic_mass

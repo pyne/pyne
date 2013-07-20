@@ -63,9 +63,9 @@ namespace rxname
   /// \param n Integer input of possible reaction, nominally an id or MT number.
   /// \param s String input of possible reaction, often a reaction or alternate name.
   /// \param from_nuc Initial target nuclide prior to reaction.  When \a from_nuc is
-  ///                 an integer it must be in zzaaam form.
+  ///                 an integer it must be in id form.
   /// \param to_nuc Target nuclide after reaction occurs.  When \a to_nuc is
-  ///               an integer it must be in zzaaam form.
+  ///               an integer it must be in id form.
   /// \param z Flag for incident particle type.
   ///          Particle flags are 'n', 'p', 'd', 't', 'He3', 'a', 'gamma', and 'decay'.
   std::string name(int n);
@@ -85,9 +85,9 @@ namespace rxname
   /// \param x Input reaction specification, may be a reaction name, alternate name,
   ///          an id, or an MT number.
   /// \param from_nuc Initial target nuclide prior to reaction.  When \a from_nuc is
-  ///                 an integer it must be in zzaaam form.
+  ///                 an integer it must be in id form.
   /// \param to_nuc Target nuclide after reaction occurs.  When \a to_nuc is
-  ///               an integer it must be in zzaaam form.
+  ///               an integer it must be in id form.
   /// \param z Flag for incident particle type.
   ///          Particle flags are 'n', 'p', 'd', 't', 'He3', 'a', 'gamma', and 'decay'.
   unsigned int id(int x);
@@ -106,9 +106,9 @@ namespace rxname
   /// \param x Input reaction specification, may be a reaction name, alternate name,
   ///          an id, or an MT number.
   /// \param from_nuc Initial target nuclide prior to reaction.  When \a from_nuc is
-  ///                 an integer it must be in zzaaam form.
+  ///                 an integer it must be in id form.
   /// \param to_nuc Target nuclide after reaction occurs.  When \a to_nuc is
-  ///               an integer it must be in zzaaam form.
+  ///               an integer it must be in id form.
   /// \param z Flag for incident particle type.
   ///          Particle flags are 'n', 'p', 'd', 't', 'He3', 'a', 'gamma', and 'decay'.
   unsigned int mt(int x);
@@ -127,9 +127,9 @@ namespace rxname
   /// \param x Input reaction specification, may be a reaction name, alternate name,
   ///          an id, or an MT number.
   /// \param from_nuc Initial target nuclide prior to reaction.  When \a from_nuc is
-  ///                 an integer it must be in zzaaam form.
+  ///                 an integer it must be in id form.
   /// \param to_nuc Target nuclide after reaction occurs.  When \a to_nuc is
-  ///               an integer it must be in zzaaam form.
+  ///               an integer it must be in id form.
   /// \param z Flag for incident particle type.
   ///          Particle flags are 'n', 'p', 'd', 't', 'He3', 'a', 'gamma', and 'decay'.
   std::string label(int x);
@@ -148,9 +148,9 @@ namespace rxname
   /// \param x Input reaction specification, may be a reaction name, alternate name,
   ///          an id, or an MT number.
   /// \param from_nuc Initial target nuclide prior to reaction.  When \a from_nuc is
-  ///                 an integer it must be in zzaaam form.
+  ///                 an integer it must be in id form.
   /// \param to_nuc Target nuclide after reaction occurs.  When \a to_nuc is
-  ///               an integer it must be in zzaaam form.
+  ///               an integer it must be in id form.
   /// \param z Flag for incident particle type.
   ///          Particle flags are 'n', 'p', 'd', 't', 'He3', 'a', 'gamma', and 'decay'.
   std::string doc(int x);

@@ -60,7 +60,7 @@ def parse_for_natural_isotopes(htmlfile):
         for line in f:
             m = nat_iso_regex.search(line)
             if m is not None:
-                nat_isos.add(nucname.zzaaam(m.group(1)))
+                nat_isos.add(nucname.id(m.group(1)))
     return nat_isos
 
 
@@ -73,6 +73,6 @@ def parse_for_all_isotopes(htmlfile):
         for line in f:
             m = all_iso_regex.search(line)
             if m is not None:
-                isos.add(nucname.zzaaam(m.group(1)))
+                isos.add(nucname.id(m.group(1)))
     return isos
 
