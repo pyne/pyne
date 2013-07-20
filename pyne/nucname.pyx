@@ -174,6 +174,75 @@ def name(nuc):
     return <char *> newnuc.c_str()
 
 
+def znum(nuc):
+    """Retrieves a nuclide's charge number (95).
+
+    Parameters
+    ----------
+    nuc : int or str 
+        Input nuclide.
+
+    Returns
+    -------
+    z : int
+        The number of protons in the nucleus.
+
+    """
+    if isinstance(nuc, basestring):
+        z = cpp_nucname.znum(<char *> nuc)
+    elif isinstance(nuc, int) or isinstance(nuc, long):
+        z = cpp_nucname.znum(<int> nuc)
+    else:
+        raise NucTypeError(nuc)
+    return z
+
+
+def anum(nuc):
+    """Retrieves a nuclide's nucleon number (95).
+
+    Parameters
+    ----------
+    nuc : int or str 
+        Input nuclide.
+
+    Returns
+    -------
+    a : int
+        The number of protons and neutrons in the nucleus.
+
+    """
+    if isinstance(nuc, basestring):
+        a = cpp_nucname.anum(<char *> nuc)
+    elif isinstance(nuc, int) or isinstance(nuc, long):
+        a = cpp_nucname.anum(<int> nuc)
+    else:
+        raise NucTypeError(nuc)
+    return a
+
+
+def snum(nuc):
+    """Retrieves a nuclide's excitation number (95).
+
+    Parameters
+    ----------
+    nuc : int or str 
+        Input nuclide.
+
+    Returns
+    -------
+    s : int
+        The excitation level the nucleus.
+
+    """
+    if isinstance(nuc, basestring):
+        s = cpp_nucname.snum(<char *> nuc)
+    elif isinstance(nuc, int) or isinstance(nuc, long):
+        s = cpp_nucname.snum(<int> nuc)
+    else:
+        raise NucTypeError(nuc)
+    return s
+
+
 def zzaaam(nuc):
     """Converts a nuclide to its zzaaam form (952420). 
 
@@ -340,11 +409,11 @@ def alara(nuc):
 #
 
 cdef cpp_set[int] id_set(object nuc_sequence):
-    cdef int nuc_zz
+    cdef int nucid
     cdef cpp_set[int] nuc_set = cpp_set[int]()
     for nuc in nuc_sequence:
-        nuc_zz = id(nuc)
-        nuc_set.insert(nuc_zz)
+        nucid = id(nuc)
+        nuc_set.insert(nucid)
     return nuc_set
 
 cdef cpp_set[int] zzaaam_set(object nuc_sequence):
