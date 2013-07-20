@@ -72,13 +72,12 @@ Toolkit Installation
 
 Installing the MOAB library can be accomplished in either of two ways:
 
-* Run the build_dagmc_stack script
+* Run the build_dagmc_stack script, when it becomes available.
 * Compile each component individually in a 4-step process.
 
 **Build and Install MOAB using a Build Script**
 
-build_dagmc_stack.bash
-best way to get?
+The script build_dagmc_stack.bash is currently under development.
 
 **Compile each component individually**
 
@@ -189,8 +188,8 @@ In all cases:
 Applying DAGMC to Specific Monte Carlo Codes
 --------------------------------------------
 
-Installing DAG-MCNP5
-++++++++++++++++++++
+DAG-MCNP5 Biuild/Install
++++++++++++++++++++++++++
 
 If you would like to use DAGMC with MCNP5, known as DAG-MCNP5, you will also need:
 
@@ -269,14 +268,14 @@ Within the ``install`` program you will need to set the DAGMC build options:
 * provide the path to CUBIT: ``/path/to/cubit``
 Your executable should be available as ``$HOME/dagmc_bld/MCNP5/Source/src/mcnp5``.
 
-Access to DAG-Tripoli4
+DAG-Tripoli4 Access
 +++++++++++++++++++++++
 
 Tripoli4 is distributed by CEA/Saclay as a binary executable.  For
 access to DAG-Tripoli4, please contact `Jean-Christophe Trama
 <mailto:jean-christophe.trama@cea.fr>`_.
 
-Building FluDAG
+FluDAG Build
 +++++++++++++++++++++++
 FluDAG uses `FLUKA <http://www.fluka.org>`_ from CERN/INFN with the DAGMC Toolkit.
 To build and install FluDAG follow these additional steps after building DAGMC:
@@ -286,5 +285,6 @@ These instructions follow the FLUKA README:
 
 1. Download the FLUKA tarball and follow the README instructions  
 2. Per the FLUKA install instructions add the FLUKA environment variables to your login script:
+
    a.  export $FLUPRO=path/toFLUKA 
    b.  export $FLUFOR=gfortran 
