@@ -21,7 +21,6 @@ def _to_id(nuc, m, s):
         nucid += state
     return nucid
 
-
 def _to_float(x):
     x = x.strip()
     x = x.replace('$', '')
@@ -33,20 +32,17 @@ def _to_float(x):
         x = float(x)
 
     return x
-    
-
 
 _decay_to = {
-    '%EC': lambda x: (x-10000)/10*10,
-    '%B+': lambda x: (x-10000)/10*10,
-    '%EC+%B+': lambda x: (x-10000)/10*10,
-    '%B-': lambda x: (x+10000)/10*10,
-    '%IT': lambda x: x/10*10,
-    '%A': lambda x: (x-20040)/10*10,
-    '%P': lambda x: (x-10010)/10*10,
-    '%N': lambda x: (x-10)/10*10,
+    '%EC': lambda x: (x-10000000)/10000*10000,
+    '%B+': lambda x: (x-10000000)/10000*10000,
+    '%EC+%B+': lambda x: (x-10000000)/10000*10000,
+    '%B-': lambda x: (x+10000000)/10000*10000,
+    '%IT': lambda x: x/10000*10000,
+    '%A': lambda x: (x-20040000)/10000*10000,
+    '%P': lambda x: (x-10010000)/10000*10000,
+    '%N': lambda x: (x-10000)/10000*10000,
     }
-
 
 def half_life(ensdf):
     """Grabs the half-lives from an ENSDF file.
