@@ -30,12 +30,12 @@ namespace pyne
   /// \name Atomic Mass Data
   /// \{
 
-  /// Mapping from nuclides in zzaaam form to their atomic masses.
+  /// Mapping from nuclides in id form to their atomic masses.
   extern std::map<int, double> atomic_mass_map;
 
   /// a struct matching the atomic_weight table in nuc_data.h5.
   typedef struct atomic_weight_struct {
-    int nuc;      ///< nuclide in zzaaam form
+    int nuc;      ///< nuclide in id form
     double mass;  ///< nuclide atomic mass [amu]
     double error; ///< error in atomic mass [amu]
     double abund; ///< natural abundance of nuclide [atom fraction]
@@ -61,7 +61,7 @@ namespace pyne
   /// \name Natural Abundance Data
   /// \{
 
-  /// Mapping from nuclides in zzaaam form to their natural abundances.
+  /// Mapping from nuclides in id form to their natural abundances.
   extern std::map<int, double> natural_abund_map;
 
   /// \brief Returns the natural abundance of a nuclide \a nuc.  
@@ -79,16 +79,16 @@ namespace pyne
   /// \name Scattering Length Data
   /// \{
 
-  /// Mapping from nuclides in zzaaam form to their coherent scattering length.
+  /// Mapping from nuclides in id form to their coherent scattering length.
   extern std::map<int, extra_types::complex_t> b_coherent_map;
-  /// Mapping from nuclides in zzaaam form to their incoherent scattering length.
+  /// Mapping from nuclides in id form to their incoherent scattering length.
   extern std::map<int, extra_types::complex_t> b_incoherent_map;
-  /// Mapping from nuclides in zzaaam form to their scattering length.
+  /// Mapping from nuclides in id form to their scattering length.
   extern std::map<int, double> b_map;
 
   /// a struct matching the '/neutron/scattering_lengths' table in nuc_data.h5.
   typedef struct scattering_lengths_struct {
-    int nuc;  ///< nuclide in zzaaam form
+    int nuc;  ///< nuclide in id form
     extra_types::complex_t b_coherent;  ///< coherent scattering length [cm]
     extra_types::complex_t b_incoherent;  ///< incoherent scattering length [cm]
     double xs_coherent;   ///< coherent scattering cross section
@@ -132,23 +132,23 @@ namespace pyne
   /// \name Decay Data
   /// \{
 
-  /// Mapping from nuclides in zzaaam form to their half lives [s].
+  /// Mapping from nuclides in id form to their half lives [s].
   extern std::map<int, double> half_life_map;
-  /// Mapping from nuclides in zzaaam form to their decay constants [1/s].
+  /// Mapping from nuclides in id form to their decay constants [1/s].
   extern std::map<int, double> decay_const_map;
-  /// Mapping from parent/child nuclide pairs in zzaaam form to their 
+  /// Mapping from parent/child nuclide pairs in id form to their 
   /// branch ratio [fraction].
   extern std::map<std::pair<int, int>, double> branch_ratio_map;
-  /// Mapping from nuclides in zzaaam form to their excitation energy [MeV].
+  /// Mapping from nuclides in id form to their excitation energy [MeV].
   extern std::map<int, double> state_energy_map;
-  /// Mapping from nuclides in zzaaam form to its decay children, if any.
+  /// Mapping from nuclides in id form to its decay children, if any.
   extern std::map<int, std::set<int> > decay_children_map;
 
   /// a struct matching the '/atomic_decay' table in nuc_data.h5.
   typedef struct atomic_decay_struct {
-    int from_nuc; ///< parent species in zzaaam form
+    int from_nuc; ///< parent species in id form
     double level; ///< decay level [MeV]
-    int to_nuc;   ///< child species in zzaaam form
+    int to_nuc;   ///< child species in id form
     double half_life;     ///< species half life [s]
     double decay_const;   ///< decay constant [1/s]
     double branch_ratio;  ///< decay branch ratio [fraction]

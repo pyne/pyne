@@ -88,7 +88,7 @@ def sigma_f(nuc, temp=300.0, group_struct=None, phi_g=None, xs_cache=None):
     _prep_cache(xs_cache, group_struct, phi_g)
     if isinstance(nuc, collections.Iterable) and not isinstance(nuc, basestring):
         return _atom_weight_channel(sigma_f, nuc, temp=temp, xs_cache=xs_cache)
-    nuc = nucname.zzaaam(nuc)
+    nuc = nucname.id(nuc)
     key = (nuc, 'f', temp)
     return xs_cache[key]
 
@@ -134,7 +134,7 @@ def sigma_s_gh(nuc, temp=300.0, group_struct=None, phi_g=None, xs_cache=None):
     _prep_cache(xs_cache, group_struct, phi_g)
     if isinstance(nuc, collections.Iterable) and not isinstance(nuc, basestring):
         return _atom_weight_channel(sigma_s_gh, nuc, temp=temp, xs_cache=xs_cache)
-    nuc = nucname.zzaaam(nuc)
+    nuc = nucname.id(nuc)
     key = (nuc, 's_gh', temp)
 
     # Don't recalculate anything if you don't have to
@@ -209,7 +209,7 @@ def sigma_s(nuc, temp=300.0, group_struct=None, phi_g=None, xs_cache=None):
     _prep_cache(xs_cache, group_struct, phi_g)
     if isinstance(nuc, collections.Iterable) and not isinstance(nuc, basestring):
         return _atom_weight_channel(sigma_s, nuc, temp=temp, xs_cache=xs_cache)
-    nuc = nucname.zzaaam(nuc)
+    nuc = nucname.id(nuc)
     key_g  = (nuc, 's_g', temp)
     key_gh = (nuc, 's_gh', temp)
 
@@ -269,7 +269,7 @@ def sigma_a_reaction(nuc, rx, temp=300.0, group_struct=None, phi_g=None, xs_cach
     if isinstance(nuc, collections.Iterable) and not isinstance(nuc, basestring):
         return _atom_weight_channel(sigma_a_reaction, nuc, rx=rx, temp=temp, 
                                     xs_cache=xs_cache)
-    nuc = nucname.zzaaam(nuc)
+    nuc = nucname.id(nuc)
     key= (nuc, rx, temp)
     return xs_cache[key]
 
@@ -316,7 +316,7 @@ def metastable_ratio(nuc, rx, temp=300.0, group_struct=None, phi_g=None, xs_cach
     if isinstance(nuc, int) or isinstance(nuc, basestring):
         xs_cache = cache.xs_cache if xs_cache is None else xs_cache
         _prep_cache(xs_cache, group_struct, phi_g)
-        nuc = nucname.zzaaam(nuc)
+        nuc = nucname.id(nuc)
         key = (nuc, rx + '_x_ratio', temp)
         if key in xs_cache:
             return xs_cache[key]
@@ -368,7 +368,7 @@ def sigma_a(nuc, temp=300.0, group_struct=None, phi_g=None, xs_cache=None):
     _prep_cache(xs_cache, group_struct, phi_g)
     if isinstance(nuc, collections.Iterable) and not isinstance(nuc, basestring):
         return _atom_weight_channel(sigma_a, nuc, temp=temp, xs_cache=xs_cache)
-    nuc = nucname.zzaaam(nuc)
+    nuc = nucname.id(nuc)
     key = (nuc, 'a', temp)
     return xs_cache[key]
 
@@ -407,7 +407,7 @@ def chi(nuc, temp=300.0, group_struct=None, phi_g=None, xs_cache=None, eres=101)
     _prep_cache(xs_cache, group_struct, phi_g)
     if isinstance(nuc, collections.Iterable) and not isinstance(nuc, basestring):
         return _atom_weight_channel(chi, nuc, temp=temp, xs_cache=xs_cache, eres=eres)
-    nuc = nucname.zzaaam(nuc)
+    nuc = nucname.id(nuc)
     key = (nuc, 'chi', temp)
 
     # Don't recalculate anything if you don't have to
@@ -475,7 +475,7 @@ def sigma_t(nuc, temp=300.0, group_struct=None, phi_g=None, xs_cache=None):
     _prep_cache(xs_cache, group_struct, phi_g)
     if isinstance(nuc, collections.Iterable) and not isinstance(nuc, basestring):
         return _atom_weight_channel(sigma_t, nuc, temp=temp, xs_cache=xs_cache)
-    nuc = nucname.zzaaam(nuc)
+    nuc = nucname.id(nuc)
     key_a = (nuc, 'a', temp)
     key_s = (nuc, 's', temp)
     key_t = (nuc, 't', temp)

@@ -2299,9 +2299,9 @@ std::string pyne::rxname::name(unsigned int n)
 
 std::string pyne::rxname::name(int from_nuc, int to_nuc, std::string z)
 {
-  // This assumes nuclides are in zzaaam form
-  int dz = (to_nuc/10000) - (from_nuc/10000);
-  int da = ((to_nuc/10)%1000) - ((from_nuc/10)%1000);
+  // This assumes nuclides are in id form
+  int dz = (to_nuc/10000000) - (from_nuc/10000000);
+  int da = ((to_nuc/10000)%1000) - ((from_nuc/10000)%1000);
   if (0 == zadelta.count(z))
     throw IndeterminateReactionForm("z=" + z, "???");
   if (0 == zadelta[z].count(dz))
@@ -2317,20 +2317,20 @@ std::string pyne::rxname::name(int from_nuc, int to_nuc, std::string z)
 
 std::string pyne::rxname::name(std::string from_nuc, int to_nuc, std::string z)
 {
-  return pyne::rxname::name(pyne::nucname::zzaaam(from_nuc), 
-                            pyne::nucname::zzaaam(to_nuc), z);
+  return pyne::rxname::name(pyne::nucname::id(from_nuc), 
+                            pyne::nucname::id(to_nuc), z);
 };
 
 std::string pyne::rxname::name(int from_nuc, std::string to_nuc, std::string z)
 {
-  return pyne::rxname::name(pyne::nucname::zzaaam(from_nuc), 
-                            pyne::nucname::zzaaam(to_nuc), z);
+  return pyne::rxname::name(pyne::nucname::id(from_nuc), 
+                            pyne::nucname::id(to_nuc), z);
 };
 
 std::string pyne::rxname::name(std::string from_nuc, std::string to_nuc, std::string z)
 {
-  return pyne::rxname::name(pyne::nucname::zzaaam(from_nuc), 
-                            pyne::nucname::zzaaam(to_nuc), z);
+  return pyne::rxname::name(pyne::nucname::id(from_nuc), 
+                            pyne::nucname::id(to_nuc), z);
 };
 
 
@@ -2368,9 +2368,9 @@ unsigned int pyne::rxname::id(std::string x)
   
 unsigned int pyne::rxname::id(int from_nuc, int to_nuc, std::string z)
 {
-  // This assumes nuclides are in zzaaam form
-  int dz = (to_nuc/10000) - (from_nuc/10000);
-  int da = ((to_nuc/10)%1000) - ((from_nuc/10)%1000);
+  // This assumes nuclides are in id form
+  int dz = (to_nuc/10000000) - (from_nuc/10000000);
+  int da = ((to_nuc/10000)%1000) - ((from_nuc/10000)%1000);
   if (0 == zadelta.count(z))
     throw IndeterminateReactionForm("z=" + z, "???");
   if (0 == zadelta[z].count(dz))
@@ -2386,20 +2386,20 @@ unsigned int pyne::rxname::id(int from_nuc, int to_nuc, std::string z)
   
 unsigned int pyne::rxname::id(int from_nuc, std::string to_nuc, std::string z)
 {
-  return pyne::rxname::id(pyne::nucname::zzaaam(from_nuc), 
-                          pyne::nucname::zzaaam(to_nuc), z);
+  return pyne::rxname::id(pyne::nucname::id(from_nuc), 
+                          pyne::nucname::id(to_nuc), z);
 };
   
 unsigned int pyne::rxname::id(std::string from_nuc, int to_nuc, std::string z)
 {
-  return pyne::rxname::id(pyne::nucname::zzaaam(from_nuc), 
-                          pyne::nucname::zzaaam(to_nuc), z);
+  return pyne::rxname::id(pyne::nucname::id(from_nuc), 
+                          pyne::nucname::id(to_nuc), z);
 };
   
 unsigned int pyne::rxname::id(std::string from_nuc, std::string to_nuc, std::string z)
 {
-  return pyne::rxname::id(pyne::nucname::zzaaam(from_nuc), 
-                          pyne::nucname::zzaaam(to_nuc), z);
+  return pyne::rxname::id(pyne::nucname::id(from_nuc), 
+                          pyne::nucname::id(to_nuc), z);
 };
 
 

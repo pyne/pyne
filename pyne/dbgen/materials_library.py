@@ -54,7 +54,7 @@ def grab_materials_compendium(location = 'materials_compendium.csv'):
     # grabs elemental data, splits into isotopes if need be        
     def elemental_row(row):
         if re.match('[A-Z][a-z]?-?(\d{1,3})?$', row[0]):
-            element = nucname.zzaaam(row[0])
+            element = nucname.id(row[0])
             weight_frac = row[3]
             if nucname.name(element) in elemental_mats:
                 composition.update(elemental_mats[row[0].upper()])
