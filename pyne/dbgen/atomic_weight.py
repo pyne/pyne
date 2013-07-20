@@ -100,8 +100,8 @@ def make_atomic_weight_table(nuc_data, build_dir=""):
         A[nuc] = nuc, 0.0, 0.0, 0.0
         
     for nuc, abund in atomic_abund.items():
-        zz = nuc / 10000
-        element_zz = zz * 10000
+        zz = nucname.znum(nuc)
+        element_zz = nucname.id(zz)
         element = nucname.zz_name[zz]
 
         _nuc, nuc_mass, _error, _abund = A[nuc]
