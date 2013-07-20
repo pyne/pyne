@@ -248,6 +248,40 @@ namespace nucname
   std::string name(std::string nuc);
   /// \}
 
+  /// \name Z-Number Functions
+  /// \{
+  /// The Z-number, or charge number, represents the number of protons in a
+  /// nuclide.  This function returns that number.
+  /// \param nuc a nuclide
+  /// \return an integer Z-number.
+  int znum(int nuc);
+  int znum(char * nuc);
+  int znum(std::string nuc);
+  /// \}
+
+  /// \name A-Number Functions
+  /// \{
+  /// The A-number, or nucleon number, represents the number of protons and 
+  /// neutrons in a nuclide.  This function returns that number.
+  /// \param nuc a nuclide
+  /// \return an integer A-number.
+  int anum(int nuc);
+  int anum(char * nuc);
+  int anum(std::string nuc);
+  /// \}
+
+  /// \name S-Number Functions
+  /// \{
+  /// The S-number, or excitation state number, represents the excitation
+  /// level of a nuclide.  Normally, this is zero.  This function returns 
+  /// that number.
+  /// \param nuc a nuclide
+  /// \return an integer A-number.
+  int snum(int nuc);
+  int snum(char * nuc);
+  int snum(std::string nuc);
+  /// \}
+
   /// \name ZZAAAM Form Functions
   /// \{
   /// The ZZAAAM nuclide naming convention is the former canonical form for 
