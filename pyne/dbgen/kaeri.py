@@ -20,7 +20,7 @@ def grab_kaeri_nuclide(nuc, build_dir="", n=None):
         2 = cross section summary, 3 = cross section graphs.
     """
     if not isinstance(nuc, basestring):
-        nuc = nucname.name(nuc)
+        nuc = nucname.name(nuc).upper()
 
     if n is None:
         filename = os.path.join(build_dir, nuc + '.html')
