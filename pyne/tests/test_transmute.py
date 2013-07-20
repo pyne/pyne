@@ -27,7 +27,7 @@ def test_expm():
     t = 1.
     np.fill_diagonal(A,[-1,-2,-3])
     transA = tm._matrix_exp(A, t)
-    eA = linalg.expm2(A)
+    eA = linalg.expm(A)
     tayA = linalg.expm3(A,q=20)
     # Check the equivalence of _solve_decay_matrix
     assert_true(np.array_equal(eA, transA))
