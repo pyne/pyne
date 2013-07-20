@@ -53,13 +53,13 @@ def test_Mstar():
 
 def test_j():
     casc = enr.Cascade()
-    casc.j = 922350
-    assert_equal(casc.j, 922350)
+    casc.j = 922350000
+    assert_equal(casc.j, 922350000)
 
 def test_k():
     casc = enr.Cascade()
-    casc.k = 922380
-    assert_equal(casc.k, 922380)
+    casc.k = 922380000
+    assert_equal(casc.k, 922380000)
 
 def test_N():
     casc = enr.Cascade()
@@ -89,15 +89,15 @@ def test_default_uranium_cascade():
     casc = enr.default_uranium_cascade()
     assert_equal(casc.alpha, 1.05)
     assert_equal(casc.Mstar, 236.5)
-    assert_equal(casc.j, 922350)
-    assert_equal(casc.k, 922380)
+    assert_equal(casc.j, 922350000)
+    assert_equal(casc.k, 922380000)
     assert_equal(casc.N, 30.0)
     assert_equal(casc.M, 10.0)
     assert_equal(casc.x_feed_j, 0.0072)
     assert_equal(casc.x_prod_j, 0.05)
     assert_equal(casc.x_tail_j, 0.0025)
-    assert_equal(casc.mat_feed, Material({922340: 5.5e-05, 922350: 0.0072, 
-                                922380: 0.992745}, 1.0, 1.0))
+    assert_equal(casc.mat_feed, Material({922340000: 5.5e-05, 922350000: 0.0072, 
+                                922380000: 0.992745}, 1.0, 1.0))
 
 def test_prod_per_feed():
     xf, xp, xt = 0.0072, 0.05, 0.0025
@@ -132,11 +132,11 @@ def check_sample_feed(solver):
     orig_casc = enr.default_uranium_cascade()
     orig_casc.x_prod_j = 0.06
     feed = Material({
-            922320: 1.1 * (10.0**-9),
-            922340: 0.00021,
-            922350: 0.0092,
-            922360: 0.0042,
-            922380: 0.9863899989,
+            922320000: 1.1 * (10.0**-9),
+            922340000: 0.00021,
+            922350000: 0.0092,
+            922360000: 0.0042,
+            922380000: 0.9863899989,
             })
     orig_casc.mat_feed = feed
     casc = enr.multicomponent(orig_casc, solver=solver, tolerance=1E-11, max_iter=100)
@@ -144,19 +144,19 @@ def check_sample_feed(solver):
     #print "casc.mat_prod = " + repr(casc.mat_prod)
     #print "casc.mat_prod = " + repr(casc.mat_tail)
     #assert False
-    assert_almost_equal(casc.mat_prod.comp[922350], 0.06,   5) 
-    assert_almost_equal(casc.mat_tail.comp[922350], 0.0025, 5)
+    assert_almost_equal(casc.mat_prod.comp[922350000], 0.06,   5) 
+    assert_almost_equal(casc.mat_tail.comp[922350000], 0.0025, 5)
 
     assert_almost_equal(casc.mat_feed.mass / 1.0,                 1.0)
     assert_almost_equal(casc.mat_prod.mass / 0.11652173913043479, 1.0)
     assert_almost_equal(casc.mat_tail.mass / 0.88347826086956527, 1.0)
 
-    assert_almost_equal(casc.N / 26.8646352802, 1.0, 5)
-    assert_almost_equal(casc.M / 16.6379009423, 1.0, 5)
+    assert_almost_equal(casc.N / 26.9259708184, 1.0, 5)
+    assert_almost_equal(casc.M / 16.6782040763, 1.0, 5)
 
-    assert_almost_equal(casc.Mstar / 236.577085, 1.0, 5)
+    assert_almost_equal(casc.Mstar / 236.529657, 1.0, 5)
 
-    assert_almost_equal(casc.l_t_per_feed / 357.388791749,  1.0, 5)
+    assert_almost_equal(casc.l_t_per_feed / 359.023092539,  1.0, 5)
     assert_almost_equal(casc.swu_per_feed / 0.932280175218, 1.0, 5)
     assert_almost_equal(casc.swu_per_prod / 8.0009119515,   1.0, 5)
 
@@ -169,27 +169,27 @@ def check_NU(solver):
     orig_casc = enr.default_uranium_cascade()
     orig_casc.x_prod_j = 0.05
     feed = Material({
-            922340: 0.000055,
-            922350: 0.00720,
-            922380: 0.992745,
+            922340000: 0.000055,
+            922350000: 0.00720,
+            922380000: 0.992745,
             })
     orig_casc.mat_feed = feed
     casc = enr.multicomponent(orig_casc, solver=solver, tolerance=1E-11)
 
-    print "casc.mat_prod = " + repr(casc.mat_prod)
-    assert_almost_equal(casc.mat_prod.comp[922350], 0.05,   5) 
-    assert_almost_equal(casc.mat_tail.comp[922350], 0.0025, 5)
+    #print "casc.mat_prod = " + repr(casc.mat_prod)
+    assert_almost_equal(casc.mat_prod.comp[922350000], 0.05,   5) 
+    assert_almost_equal(casc.mat_tail.comp[922350000], 0.0025, 5)
 
     assert_almost_equal(casc.mat_feed.mass / 1.0,             1.0)
     assert_almost_equal(casc.mat_prod.mass / 0.0989473684211, 1.0)
     assert_almost_equal(casc.mat_tail.mass / 0.901052631579,  1.0)
 
-    assert_almost_equal(casc.N / 27.1835088212, 1.0, 4)
-    assert_almost_equal(casc.M / 13.3875092512, 1.0, 4)
+    assert_almost_equal(casc.N / 27.245704947553573, 1.0, 4)
+    assert_almost_equal(casc.M / 13.420369681399823, 1.0, 4)
 
-    assert_almost_equal(casc.Mstar / 236.562179, 1.0, 5)
+    assert_almost_equal(casc.Mstar / 236.5147909, 1.0, 5)
 
-    assert_almost_equal(casc.l_t_per_feed / 288.627270162,  1.0, 5)
+    assert_almost_equal(casc.l_t_per_feed / 289.9479025553294,  1.0, 5)
     assert_almost_equal(casc.swu_per_feed / 0.761263453429, 1.0, 5)
     assert_almost_equal(casc.swu_per_prod / 7.69362000806,  1.0, 5)
 
@@ -202,16 +202,16 @@ def check_vision(solver):
     orig_casc = enr.default_uranium_cascade()
     orig_casc.x_prod_j = 0.055
     feed = Material({
-            922340: 0.000183963025893197,
-            922350: 0.00818576605617839,
-            922360: 0.00610641667100979,
-            922380: 0.985523854246919,
+            922340000: 0.000183963025893197,
+            922350000: 0.00818576605617839,
+            922360000: 0.00610641667100979,
+            922380000: 0.985523854246919,
             })
     orig_casc.mat_feed = feed
     casc = enr.multicomponent(orig_casc, solver=solver, tolerance=1E-11)
 
-    assert_almost_equal(casc.mat_prod.comp[922350], 0.055,  5) 
-    assert_almost_equal(casc.mat_tail.comp[922350], 0.0025, 5)
+    assert_almost_equal(casc.mat_prod.comp[922350000], 0.055,  5) 
+    assert_almost_equal(casc.mat_tail.comp[922350000], 0.0025, 5)
 
     assert_almost_equal(casc.mat_feed.mass / 1.0,                 1.0)
     assert_almost_equal(casc.mat_prod.mass / 0.10830030583196934, 1.0)
@@ -220,9 +220,9 @@ def check_vision(solver):
     assert_almost_equal(casc.N / 27.38162850698868, 1.0, 2)
     assert_almost_equal(casc.M / 15.09646512546496, 1.0, 2)
 
-    assert_almost_equal(casc.Mstar / 236.581784, 1.0, 4)
+    assert_almost_equal(casc.Mstar / 236.534377, 1.0, 4)
 
-    assert_almost_equal(casc.l_t_per_feed / 326.895568684,  1.0, 4)
+    assert_almost_equal(casc.l_t_per_feed / 328.38993705092776,  1.0, 4)
     assert_almost_equal(casc.swu_per_feed / 0.85102089049,  1.0, 4)
     assert_almost_equal(casc.swu_per_prod / 7.85797310499,  1.0, 4)
 
@@ -246,17 +246,17 @@ def check_tungsten(solver):
     orig_casc.x_tail_j = 0.00014
 
     feed = Material({
-            741800: 0.0014, 
-            741820: 0.26416, 
-            741830: 0.14409, 
-            741840: 0.30618, 
-            741860: 0.28417,
+            741800000: 0.0014, 
+            741820000: 0.26416, 
+            741830000: 0.14409, 
+            741840000: 0.30618, 
+            741860000: 0.28417,
             })
     orig_casc.mat_feed = feed
     casc = enr.multicomponent(orig_casc, solver=solver, tolerance=1E-7)
 
-    assert_almost_equal(casc.mat_prod.comp[741800], 0.5109,  5) 
-    assert_almost_equal(casc.mat_tail.comp[741800], 0.00014, 5)
+    assert_almost_equal(casc.mat_prod.comp[741800000], 0.5109,  5) 
+    assert_almost_equal(casc.mat_tail.comp[741800000], 0.00014, 5)
 
     assert_almost_equal(casc.mat_feed.mass / 1.0,                   1.0)
     assert_almost_equal(casc.mat_prod.mass / 0.0024669120526274574, 1.0)
@@ -265,9 +265,9 @@ def check_tungsten(solver):
     assert_almost_equal(casc.N / 43.557515688533513, 1.0, 2)
     assert_almost_equal(casc.M / 11.49556481009056,  1.0, 2)
 
-    assert_almost_equal(casc.Mstar / 181.164592, 1.0, 4)
+    assert_almost_equal(casc.Mstar / 181.217112, 1.0, 4)
 
-    assert_almost_equal(casc.l_t_per_feed / 96.8179316719, 1.0, 3)
+    assert_almost_equal(casc.l_t_per_feed / 96.98557731803484, 1.0, 3)
     assert_almost_equal(casc.swu_per_feed / 2.22221945305, 1.0, 3)
     assert_almost_equal(casc.swu_per_prod / 900.810164953, 1.0, 3)
 
