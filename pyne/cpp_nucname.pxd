@@ -42,6 +42,21 @@ cdef extern from "nucname.h" namespace "pyne::nucname":
     std_string name(char *) except +
     std_string name(std_string) except +
 
+    # znum functions
+    int znum(int) except +
+    int znum(char *) except +
+    int znum(std_string) except +
+
+    # anum functions
+    int anum(int) except +
+    int anum(char *) except +
+    int anum(std_string) except +
+
+    # znum functions
+    int snum(int) except +
+    int snum(char *) except +
+    int snum(std_string) except +
+
     # zzaaam Functions
     int zzaaam(int) except +
     int zzaaam(char *) except +
