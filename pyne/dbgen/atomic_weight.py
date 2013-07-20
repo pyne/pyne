@@ -44,7 +44,7 @@ def parse_atomic_mass_adjustment(build_dir=""):
         if m is None:
             continue
 
-        nuc = (10000 * int(m.group(1))) + (10 * int(m.group(2)))
+        nuc = (10000000 * int(m.group(1))) + (10000 * int(m.group(2)))
         mass = float(m.group(3)) + 1E-6 * float(m.group(4).strip().replace('#', ''))
         error = 1E-6 * float(m.group(5).strip().replace('#', ''))
 
