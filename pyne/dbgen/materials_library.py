@@ -57,7 +57,7 @@ def grab_materials_compendium(location = 'materials_compendium.csv'):
             element = nucname.id(row[0])
             weight_frac = row[3]
             if nucname.name(element) in elemental_mats:
-                composition.update(elemental_mats[row[0].upper()])
+                composition.update(elemental_mats[row[0]])
             else:
                 composition[element] = float(weight_frac)
             nuc_zz.add(element)
