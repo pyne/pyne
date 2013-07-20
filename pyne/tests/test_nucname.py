@@ -7,41 +7,41 @@ from nose.tools import assert_equal, assert_not_equal, assert_raises, raises, as
 from pyne import nucname
 
 def test_name_zz():
-    assert_equal(nucname.name_zz["HE"], 2)
+    assert_equal(nucname.name_zz["He"], 2)
     assert_equal(nucname.name_zz["U"], 92)
 
 def test_zz_name():
     assert_equal(nucname.zz_name[1],  "H")
-    assert_equal(nucname.zz_name[94], "PU")
+    assert_equal(nucname.zz_name[94], "Pu")
 
 
 def test_LAN():
-    assert_equal(nucname.LAN, set(['CE', 'DY', 'ER', 'EU', 'GD', 'HO', 'LA', 
-                                   'LU', 'ND', 'PM', 'PR', 'SM', 'TB', 'TM', 'YB']))
+    assert_equal(nucname.LAN, set(['Ce', 'Dy', 'Er', 'Eu', 'Gd', 'Ho', 'La', 
+                                   'Lu', 'Nd', 'Pm', 'Pr', 'Sm', 'Tb', 'Tm', 'Yb']))
 
 def test_ACT():
-    assert_equal(nucname.ACT, set(["AC", "TH", "PA", "U",  "NP", "PU", "AM", "CM", \
-                                   "BK", "CF", "ES", "FM", "MD", "NO", "LR"]))
+    assert_equal(nucname.ACT, set(["Ac", "Th", "Pa", "U",  "Np", "Pu", "Am", "Cm", 
+                                   "Bk", "Cf", "Es", "Fm", "Md", "No", "Lr"]))
             
 def test_TRU():
-    assert_equal(nucname.TRU, set(['AM', 'BH', 'BK', 'CF', 'CM', 'DB', 'DS', 
-     'ES', 'FM', 'HS', 'LR', 'MD', 'MT', 'NO', 'NP', 'PU', 'RF', 'RG', 'SG', 
-     'FL', 'LV', 'CN']))
+    assert_equal(nucname.TRU, set(['Am', 'Bh', 'Bk', 'Cf', 'Cm', 'Db', 'Ds', 
+     'Es', 'Fm', 'Hs', 'Lr', 'Md', 'Mt', 'No', 'Np', 'Pu', 'Rf', 'Rg', 'Sg', 
+     'Fl', 'Lv', 'Cn']))
 
 def test_MA():
-    assert_equal(nucname.MA, set(["NP", "AM", "CM", "BK", "CF", "ES", "FM", "MD", \
-                                  "NO", "LR"]))
+    assert_equal(nucname.MA, set(["Np", "Am", "Cm", "Bk", "Cf", "Es", "Fm", "Md", 
+                                  "No", "Lr"]))
 
 def test_FP():
-    assert_equal(nucname.FP, set(['AG', 'AL', 'AR', 'AS', 'AT', 'AU', 'B',  
-          'BA', 'BE', 'BI', 'BR', 'C',  'CA', 'CD', 'CE', 'CL', 'CO', 'CR', 
-          'CS', 'CU', 'DY', 'ER', 'EU', 'F',  'FE', 'FR', 'GA', 'GD', 'GE',
-          'H',  'HE', 'HF', 'HG', 'HO', 'I',  'IN', 'IR', 'K',  'KR', 'LA', 
-          'LI', 'LU', 'MG', 'MN', 'MO', 'N',  'NA', 'NB', 'ND', 'NE', 'NI', 
-          'O',  'OS', 'P',  'PB', 'PD', 'PM', 'PO', 'PR', 'PT', 'RA', 'RB', 
-          'RE', 'RH', 'RN', 'RU', 'S',  'SB', 'SC', 'SE', 'SI', 'SM', 'SN', 
-          'SR', 'TA', 'TB', 'TC', 'TE', 'TI', 'TL', 'TM', 'V',  'W',  'XE',  
-          'Y',  'YB', 'ZN', 'ZR']))
+    assert_equal(nucname.FP, set(['Ag', 'Al', 'Ar', 'As', 'At', 'Au', 'B',  
+          'Ba', 'Be', 'Bi', 'Br', 'C',  'Ca', 'Cd', 'Ce', 'Cl', 'Co', 'Cr', 
+          'Cs', 'Cu', 'Dy', 'Er', 'Eu', 'F',  'Fe', 'Fr', 'Ga', 'Gd', 'Ge',
+          'H',  'He', 'Hf', 'Hg', 'Ho', 'I',  'In', 'Ir', 'K',  'Kr', 'La', 
+          'Li', 'Lu', 'Mg', 'Mn', 'Mo', 'N',  'Na', 'Nb', 'Nd', 'Ne', 'Ni', 
+          'O',  'Os', 'P',  'Pb', 'Pd', 'Pm', 'Po', 'Pr', 'Pt', 'Ra', 'Rb', 
+          'Re', 'Rh', 'Rn', 'Ru', 'S',  'Sb', 'Sc', 'Se', 'Si', 'Sm', 'Sn', 
+          'Sr', 'Ta', 'Tb', 'Tc', 'Te', 'Ti', 'Tl', 'Tm', 'V',  'W',  'Xe',  
+          'Y',  'Yb', 'Zn', 'Zr']))
 
 
 def test_lan():
@@ -68,16 +68,55 @@ def test_fp():
             82, 83, 84, 85, 86, 87, 88]))
 
 
-def test_current_form():
-    assert_equal(nucname.current_form(922380),   "zzaaam")
-    assert_equal(nucname.current_form("922350"), "zzaaam")
 
-    assert_equal(nucname.current_form("U235"),  "name")
-    assert_equal(nucname.current_form("h-004"), "name")
+def test_id():
+    assert_equal(nucname.id(20040), 20040000)
 
-    assert_equal(nucname.current_form(92238),   "MCNP")
-    assert_equal(nucname.current_form("92235"), "MCNP")
+    assert_equal(nucname.id("he4"),    20040000)
+    assert_equal(nucname.id("Cm-244"), 962440000)
+    assert_equal(nucname.id("PU239"),  942390000)
+    assert_equal(nucname.id("AM242M"), 952420001)
 
+    assert_equal(nucname.id(2004),  20040000)
+    assert_equal(nucname.id(95642), 952420000)
+    assert_equal(nucname.id(95242), 952420001)
+    assert_equal(nucname.id(92636), 922360001)
+    assert_equal(nucname.id(95942), 952420004)
+
+    assert_equal(nucname.id("Am-242m"), 952420001)
+
+    assert_equal(nucname.id("he"), 20000000)
+    assert_equal(nucname.id("U"), 920000000)
+    assert_equal(nucname.id("Np"), 930000000)
+
+    assert_equal(nucname.id("4he"),   20040000)
+    assert_equal(nucname.id("244CM"), 962440000)
+    assert_equal(nucname.id("239Pu"), 942390000)
+    assert_equal(nucname.id("242AM"), 952420000)
+
+    assert_equal(nucname.id(40020),   20040000)
+    assert_equal(nucname.id(2440961), 962440001)
+    assert_equal(nucname.id(2390940), 942390000)
+    assert_equal(nucname.id(2420950), 952420000)
+
+
+def test_name():
+    assert_equal(nucname.name(942390), "Pu239")
+    assert_equal(nucname.name(952421), "Am242M")
+
+    assert_equal(nucname.name("PU239"), "Pu239")
+
+    assert_equal(nucname.name(94239), "Pu239")
+    assert_equal(nucname.name(95242), "Am242M")
+    assert_equal(nucname.name(95642), "Am242")
+    assert_equal(nucname.name(92636), "U236M")
+
+    assert_equal(nucname.name("Am-242m"), "Am242M")
+
+    assert_equal(nucname.name(40020),   "He4")
+    assert_equal(nucname.name(2440961), "Cm244M")
+    assert_equal(nucname.name(2390940), "Pu239")
+    assert_equal(nucname.name(2420950), "Am242")
 
 
 def test_zzaaam():
@@ -109,25 +148,6 @@ def test_zzaaam():
     assert_equal(nucname.zzaaam(2440961), 962441)
     assert_equal(nucname.zzaaam(2390940), 942390)
     assert_equal(nucname.zzaaam(2420950), 952420)
-
-
-def test_name():
-    assert_equal(nucname.name(942390), "PU239")
-    assert_equal(nucname.name(952421), "AM242M")
-
-    assert_equal(nucname.name("PU239"), "PU239")
-
-    assert_equal(nucname.name(94239), "PU239")
-    assert_equal(nucname.name(95242), "AM242M")
-    assert_equal(nucname.name(95642), "AM242")
-    assert_equal(nucname.name(92636), "U236M")
-
-    assert_equal(nucname.name("Am-242m"), "AM242M")
-
-    assert_equal(nucname.name(40020),   "HE4")
-    assert_equal(nucname.name(2440961), "CM244M")
-    assert_equal(nucname.name(2390940), "PU239")
-    assert_equal(nucname.name(2420950), "AM242")
 
 
 def test_mcnp():
