@@ -19,7 +19,7 @@ cimport pyne.cpp_pyne
 cimport pyne.pyne_config
 import pyne.pyne_config
 
-cimport cpp_nucname
+from pyne cimport cpp_nucname
 cimport pyne.stlcontainers as conv
 import pyne.stlcontainers as conv
 
@@ -339,12 +339,18 @@ def alara(nuc):
 # C++ Helper Functions
 #
 
+cdef cpp_set[int] id_set(object nuc_sequence):
+    cdef int nuc_zz
+    cdef cpp_set[int] nuc_set = cpp_set[int]()
+    for nuc in nuc_sequence:
+        nuc_zz = id(nuc)
+        nuc_set.insert(nuc_zz)
+    return nuc_set
+
 cdef cpp_set[int] zzaaam_set(object nuc_sequence):
     cdef int nuc_zz
     cdef cpp_set[int] nuc_set = cpp_set[int]()
-
     for nuc in nuc_sequence:
         nuc_zz = zzaaam(nuc)
         nuc_set.insert(nuc_zz)
-
     return nuc_set

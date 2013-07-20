@@ -148,7 +148,7 @@ def parse_simple_xs(build_dir=""):
         htmlfile = element + '.html'
         all_nuclides = all_nuclides | parse_for_all_isotopes(os.path.join(build_dir, htmlfile))
 
-    all_nuclides = sorted([nucname.zzaaam(nuc) for nuc in all_nuclides])
+    all_nuclides = sorted([nucname.id(nuc) for nuc in all_nuclides])
 
     energy_tables = dict([(eng, np.zeros(len(all_nuclides), dtype=simple_xs_dtype)) \
                           for eng in simple_xs_energy.keys()])

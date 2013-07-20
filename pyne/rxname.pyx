@@ -238,13 +238,13 @@ def name(x, y=None, char * z="n"):
             cn = cpp_rxname.name(<extra_types.uint32> x)
     else:
         if isinstance(x, basestring):
-            from_nuc = cpp_nucname.zzaaam(std_string(<char *> x))
+            from_nuc = cpp_nucname.id(std_string(<char *> x))
         elif isinstance(x, int):
-            from_nuc = cpp_nucname.zzaaam(<int> x)
+            from_nuc = cpp_nucname.id(<int> x)
         if isinstance(y, basestring):
-            to_nuc = cpp_nucname.zzaaam(std_string(<char *> y))
+            to_nuc = cpp_nucname.id(std_string(<char *> y))
         elif isinstance(y, int):
-            to_nuc = cpp_nucname.zzaaam(<int> y)
+            to_nuc = cpp_nucname.id(<int> y)
         cn = cpp_rxname.name(from_nuc, to_nuc, std_string(z))
     n = <char *> cn.c_str()
     return n
@@ -281,13 +281,13 @@ def id(x, y=None, char * z="n"):
             rxid = cpp_rxname.id(<extra_types.uint32> x)
     else:
         if isinstance(x, basestring):
-            from_nuc = cpp_nucname.zzaaam(std_string(<char *> x))
+            from_nuc = cpp_nucname.id(std_string(<char *> x))
         elif isinstance(x, int):
-            from_nuc = cpp_nucname.zzaaam(<int> x)
+            from_nuc = cpp_nucname.id(<int> x)
         if isinstance(y, basestring):
-            to_nuc = cpp_nucname.zzaaam(std_string(<char *> y))
+            to_nuc = cpp_nucname.id(std_string(<char *> y))
         elif isinstance(y, int):
-            to_nuc = cpp_nucname.zzaaam(<int> y)
+            to_nuc = cpp_nucname.id(<int> y)
         rxid = cpp_rxname.id(from_nuc, to_nuc, std_string(z))
     return int(rxid)
 
@@ -321,13 +321,13 @@ def mt(x, y=None, char * z="n"):
             mtnum = cpp_rxname.mt(<extra_types.uint32> x)
     else:
         if isinstance(x, basestring):
-            from_nuc = cpp_nucname.zzaaam(std_string(<char *> x))
+            from_nuc = cpp_nucname.id(std_string(<char *> x))
         elif isinstance(x, int):
-            from_nuc = cpp_nucname.zzaaam(<int> x)
+            from_nuc = cpp_nucname.id(<int> x)
         if isinstance(y, basestring):
-            to_nuc = cpp_nucname.zzaaam(std_string(<char *> y))
+            to_nuc = cpp_nucname.id(std_string(<char *> y))
         elif isinstance(y, int):
-            to_nuc = cpp_nucname.zzaaam(<int> y)
+            to_nuc = cpp_nucname.id(<int> y)
         mtnum = cpp_rxname.mt(from_nuc, to_nuc, std_string(z))
     return int(mtnum)
 
@@ -362,13 +362,13 @@ def label(x, y=None, char * z="n"):
             clab = cpp_rxname.label(<extra_types.uint32> x)
     else:
         if isinstance(x, basestring):
-            from_nuc = cpp_nucname.zzaaam(std_string(<char *> x))
+            from_nuc = cpp_nucname.id(std_string(<char *> x))
         elif isinstance(x, int):
-            from_nuc = cpp_nucname.zzaaam(<int> x)
+            from_nuc = cpp_nucname.id(<int> x)
         if isinstance(y, basestring):
-            to_nuc = cpp_nucname.zzaaam(std_string(<char *> y))
+            to_nuc = cpp_nucname.id(std_string(<char *> y))
         elif isinstance(y, int):
-            to_nuc = cpp_nucname.zzaaam(<int> y)
+            to_nuc = cpp_nucname.id(<int> y)
         clab = cpp_rxname.label(from_nuc, to_nuc, std_string(z))
     lab = <char *> clab.c_str()
     return lab
@@ -404,13 +404,13 @@ def doc(x, y=None, char * z="n"):
             cd = cpp_rxname.doc(<extra_types.uint32> x)
     else:
         if isinstance(x, basestring):
-            from_nuc = cpp_nucname.zzaaam(std_string(<char *> x))
+            from_nuc = cpp_nucname.id(std_string(<char *> x))
         elif isinstance(x, int):
-            from_nuc = cpp_nucname.zzaaam(<int> x)
+            from_nuc = cpp_nucname.id(<int> x)
         if isinstance(y, basestring):
-            to_nuc = cpp_nucname.zzaaam(std_string(<char *> y))
+            to_nuc = cpp_nucname.id(std_string(<char *> y))
         elif isinstance(y, int):
-            to_nuc = cpp_nucname.zzaaam(<int> y)
+            to_nuc = cpp_nucname.id(<int> y)
         cd = cpp_rxname.doc(from_nuc, to_nuc, std_string(z))
     d = <char *> cd.c_str()
     return d

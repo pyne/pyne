@@ -96,7 +96,7 @@ def make_atomic_weight_table(nuc_data, build_dir=""):
 
     # Add naturally occuring elements
     for element in nucname.name_zz:
-        nuc = nucname.zzaaam(element)
+        nuc = nucname.id(element)
         A[nuc] = nuc, 0.0, 0.0, 0.0
         
     for nuc, abund in atomic_abund.items():
