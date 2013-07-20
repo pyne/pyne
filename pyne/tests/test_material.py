@@ -800,29 +800,29 @@ def test_iter():
 #
 
 def test_from_atom_frac_func():
-    h2o = {10010: 2.0, 80160: 1.0}
+    h2o = {10010000: 2.0, 80160000: 1.0}
     mat = from_atom_frac(h2o)
     assert_equal(mat.atoms_per_mol, 3.0)
-    assert_equal(mat.comp[10010], 0.11191487328808077)
-    assert_equal(mat.comp[80160], 0.8880851267119192)
+    assert_equal(mat.comp[10010000], 0.11191487328808077)
+    assert_equal(mat.comp[80160000], 0.8880851267119192)
     assert_equal(mat.mass, 18.01056468403)    
     assert_equal(mat.molecular_weight(), 18.01056468403)    
 
-    h2 = Material({10010: 1.0}, atoms_per_mol=2.0)
+    h2 = Material({10010000: 1.0}, atoms_per_mol=2.0)
     h2o = {'O16': 1.0, h2: 1.0}
     mat = from_atom_frac(h2o)
     assert_equal(mat.atoms_per_mol, 3.0)
-    assert_equal(mat.comp[10010], 0.11191487328808077)
-    assert_equal(mat.comp[80160], 0.8880851267119192)
+    assert_equal(mat.comp[10010000], 0.11191487328808077)
+    assert_equal(mat.comp[80160000], 0.8880851267119192)
     assert_equal(mat.molecular_weight(), 18.01056468403)    
 
-    ihm = from_atom_frac({922350: 0.5, 922380: 0.5})
+    ihm = from_atom_frac({922350000: 0.5, 922380000: 0.5})
     uox = {ihm: 1.0, 'O16': 2.0}
     mat = from_atom_frac(uox)
     assert_equal(mat.atoms_per_mol, 3.0)
-    assert_almost_equal(mat.comp[80160], 0.11912625367051276, 16)
-    assert_almost_equal(mat.comp[922350], 0.43763757904405304, 15)
-    assert_almost_equal(mat.comp[922380], 0.44323616728543414, 15)
+    assert_almost_equal(mat.comp[80160000], 0.11912625367051276, 16)
+    assert_almost_equal(mat.comp[922350000], 0.43763757904405304, 15)
+    assert_almost_equal(mat.comp[922380000], 0.44323616728543414, 15)
     assert_almost_equal(mat.molecular_weight()/268.53718851614, 1.0, 15)
 
 
@@ -830,36 +830,36 @@ def test_from_atom_frac_func():
 def test_from_hdf5_func_protocol_0():
     mat = from_hdf5("mat.h5", "/mat", protocol=0)
     assert_equal(mat.mass, 0.0)
-    assert_equal(mat.comp, {922350: 0.0, 942390: 0.0})
+    assert_equal(mat.comp, {922350000: 0.0, 942390000: 0.0})
 
     mat = from_hdf5("mat.h5", "/mat", 0, 0)
     assert_equal(mat.mass, 1.0)
-    assert_equal(mat.comp, {922350: 1.0, 942390: 0.0})
+    assert_equal(mat.comp, {922350000: 1.0, 942390000: 0.0})
 
     mat = from_hdf5("mat.h5", "/mat", 1, 0)
     assert_equal(mat.mass, 0.5)
-    assert_equal(mat.comp, {922350: 0.75, 942390: 0.25})
+    assert_equal(mat.comp, {922350000: 0.75, 942390000: 0.25})
 
     mat = from_hdf5("mat.h5", "/mat", 2, 0)
     assert_equal(mat.mass, 0.0)
-    assert_equal(mat.comp, {922350: 0.0, 942390: 0.0})
+    assert_equal(mat.comp, {922350000: 0.0, 942390000: 0.0})
 
     mat = from_hdf5("mat.h5", "/mat", -1, 0)
     assert_equal(mat.mass, 0.0)
-    assert_equal(mat.comp, {922350: 0.0, 942390: 0.0})
+    assert_equal(mat.comp, {922350000: 0.0, 942390000: 0.0})
 
     mat = from_hdf5("mat.h5", "/mat", -2, 0)
     assert_equal(mat.mass, 0.5)
-    assert_equal(mat.comp, {922350: 0.75, 942390: 0.25})
+    assert_equal(mat.comp, {922350000: 0.75, 942390000: 0.25})
 
     mat = from_hdf5("mat.h5", "/mat", -3, 0)
     assert_equal(mat.mass, 1.0)
-    assert_equal(mat.comp, {922350: 1.0, 942390: 0.0})
+    assert_equal(mat.comp, {922350000: 1.0, 942390000: 0.0})
 
 
 def test_from_text_func():
     mat= from_text("mat.txt")
-    assert_equal(mat.comp, {922350: 0.05, 922380: 0.95})
+    assert_equal(mat.comp, {922350000: 0.05, 922380000: 0.95})
 
 
 
@@ -942,8 +942,8 @@ def test_write_mcnp():
         os.remove('mcnp_mass_fracs.txt')
 
     leu = Material(nucvec={'U235': 0.04, 'U238': 0.96}, 
-                   attrs={'mat_number':2, 
-                          'table_ids': {'922350':'15c', '922380':'25c'},
+                   attrs={'mat_number': 2, 
+                          'table_ids': {'92235':'15c', '92238':'25c'},
                           'mat_name':'LEU', 
                           'source':'Some URL',
                           'comments': ('this is a long comment that will definitly '
@@ -1015,8 +1015,8 @@ def test_write_alara():
 
 def test_natural_elements():
     water = Material()
-    water.from_atom_frac({10000: 2.0, 80000: 1.0})
-    expected_comp = {10000: 0.11189838783149784, 80000: 0.8881016121685023}
+    water.from_atom_frac({10000000: 2.0, 80000000: 1.0})
+    expected_comp = {10000000: 0.11189838783149784, 80000000: 0.8881016121685023}
     for key in expected_comp.keys():
         assert_almost_equal(water.comp[key], expected_comp[key])
 
