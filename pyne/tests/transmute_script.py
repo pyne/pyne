@@ -41,7 +41,7 @@ for i in np.arange(len(list)):
     phi[i] = list[i]
 print('Flux initialized.')
 filename = 'test.tree'
-tol = 1e-5
+tol = 1e-7
 print('Begin transmutation.')
 with open(filename,'w') as tree:
     out = tm.transmute(inp,t_sim,phi,tree,tol)
