@@ -143,7 +143,6 @@ def check_sample_feed(solver):
 
     #print "casc.mat_prod = " + repr(casc.mat_prod)
     #print "casc.mat_prod = " + repr(casc.mat_tail)
-    #assert False
     assert_almost_equal(casc.mat_prod.comp[922350000], 0.06,   5) 
     assert_almost_equal(casc.mat_tail.comp[922350000], 0.0025, 5)
 
@@ -151,14 +150,14 @@ def check_sample_feed(solver):
     assert_almost_equal(casc.mat_prod.mass / 0.11652173913043479, 1.0)
     assert_almost_equal(casc.mat_tail.mass / 0.88347826086956527, 1.0)
 
-    assert_almost_equal(casc.N / 26.9259708184, 1.0, 5)
-    assert_almost_equal(casc.M / 16.6782040763, 1.0, 5)
+    assert_almost_equal(casc.N / 26.864660071132583, 1.0, 5)
+    assert_almost_equal(casc.M / 16.637884564470365, 1.0, 5)
 
-    assert_almost_equal(casc.Mstar / 236.529657, 1.0, 5)
+    assert_almost_equal(casc.Mstar / 236.57708506549994, 1.0, 5)
 
-    assert_almost_equal(casc.l_t_per_feed / 359.023092539,  1.0, 5)
-    assert_almost_equal(casc.swu_per_feed / 0.932280175218, 1.0, 5)
-    assert_almost_equal(casc.swu_per_prod / 8.0009119515,   1.0, 5)
+    assert_almost_equal(casc.l_t_per_feed / 357.3888391866117,  1.0, 5)
+    assert_almost_equal(casc.swu_per_feed / 0.9322804173594426, 1.0, 5)
+    assert_almost_equal(casc.swu_per_prod / 8.000914029577306,   1.0, 5)
 
 def test_sample_feed():
     for solver in SOLVERS:
@@ -184,12 +183,12 @@ def check_NU(solver):
     assert_almost_equal(casc.mat_prod.mass / 0.0989473684211, 1.0)
     assert_almost_equal(casc.mat_tail.mass / 0.901052631579,  1.0)
 
-    assert_almost_equal(casc.N / 27.245704947553573, 1.0, 4)
-    assert_almost_equal(casc.M / 13.420369681399823, 1.0, 4)
+    assert_almost_equal(casc.N / 27.183583424704818, 1.0, 4)
+    assert_almost_equal(casc.M / 13.387464890476533, 1.0, 4)
 
-    assert_almost_equal(casc.Mstar / 236.5147909, 1.0, 5)
+    assert_almost_equal(casc.Mstar / 236.5621860655, 1.0, 5)
 
-    assert_almost_equal(casc.l_t_per_feed / 289.9479025553294,  1.0, 5)
+    assert_almost_equal(casc.l_t_per_feed / 288.62731727645644,  1.0, 5)
     assert_almost_equal(casc.swu_per_feed / 0.761263453429, 1.0, 5)
     assert_almost_equal(casc.swu_per_prod / 7.69362000806,  1.0, 5)
 
@@ -220,9 +219,9 @@ def check_vision(solver):
     assert_almost_equal(casc.N / 27.38162850698868, 1.0, 2)
     assert_almost_equal(casc.M / 15.09646512546496, 1.0, 2)
 
-    assert_almost_equal(casc.Mstar / 236.534377, 1.0, 4)
+    assert_almost_equal(casc.Mstar / 236.58177606549995, 1.0, 4)
 
-    assert_almost_equal(casc.l_t_per_feed / 328.38993705092776,  1.0, 4)
+    assert_almost_equal(casc.l_t_per_feed / 326.8956175003255,  1.0, 4)
     assert_almost_equal(casc.swu_per_feed / 0.85102089049,  1.0, 4)
     assert_almost_equal(casc.swu_per_prod / 7.85797310499,  1.0, 4)
 
@@ -265,9 +264,9 @@ def check_tungsten(solver):
     assert_almost_equal(casc.N / 43.557515688533513, 1.0, 2)
     assert_almost_equal(casc.M / 11.49556481009056,  1.0, 2)
 
-    assert_almost_equal(casc.Mstar / 181.217112, 1.0, 4)
+    assert_almost_equal(casc.Mstar / 181.16425540249995, 1.0, 4)
 
-    assert_almost_equal(casc.l_t_per_feed / 96.98557731803484, 1.0, 3)
+    assert_almost_equal(casc.l_t_per_feed / 96.81774564292206, 1.0, 3)
     assert_almost_equal(casc.swu_per_feed / 2.22221945305, 1.0, 3)
     assert_almost_equal(casc.swu_per_prod / 900.810164953, 1.0, 3)
 

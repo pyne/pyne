@@ -14,18 +14,18 @@ import numpy  as np
 import tables as tb
 
 
-nucvec = {10010:  1.0,   
-          80160:  1.0,   
-          691690: 1.0,
-          922350: 1.0,
-          922380: 1.0,
-          942390: 1.0,
-          942410: 1.0,
-          952420: 1.0,
-          962440: 1.0,
+nucvec = {10010000:  1.0,   
+          80160000:  1.0,   
+          691690000: 1.0,
+          922350000: 1.0,
+          922380000: 1.0,
+          942390000: 1.0,
+          942410000: 1.0,
+          952420000: 1.0,
+          962440000: 1.0,
           }
 
-leu = {922380: 0.96, 922350: 0.04}
+leu = {922380000: 0.96, 922350000: 0.04}
 
 
 def make_mat_txt():
@@ -48,29 +48,29 @@ def make_mat_h5():
 
 def test_mat1():
     mat = Material("mat.txt")
-    assert_equal(mat.comp, {922350: 0.05, 922380: 0.95})
+    assert_equal(mat.comp, {922350000: 0.05, 922380000: 0.95})
     assert_equal(mat.mass, 1.0)
 
 def test_mat2():
     mat = Material("mat.txt", 42)
-    assert_equal(mat.comp, {922350: 0.05, 922380: 0.95})
+    assert_equal(mat.comp, {922350000: 0.05, 922380000: 0.95})
     assert_equal(mat.mass, 42.0)
 
 def test_mat3():
     mat = Material("mat.txt", -42)
-    assert_equal(mat.comp, {922350: 0.05, 922380: 0.95})
+    assert_equal(mat.comp, {922350000: 0.05, 922380000: 0.95})
     assert_equal(mat.mass, 1.0)
 
 def test_mat4():
-    mat = Material({922350: 0.05, 922380: 0.95}, 15, attrs={'units': 'kg'})
-    assert_equal(mat.comp, {922350: 0.05, 922380: 0.95})
+    mat = Material({922350000: 0.05, 922380000: 0.95}, 15, attrs={'units': 'kg'})
+    assert_equal(mat.comp, {922350000: 0.05, 922380000: 0.95})
     assert_equal(mat.mass, 15.0)
     assert_equal(mat.attrs['units'], 'kg')
 
 def test_from_text():
     mat = Material(attrs={'units': 'kg'})
     mat.from_text("mat.txt")
-    assert_equal(mat.comp, {922350: 0.05, 922380: 0.95})
+    assert_equal(mat.comp, {922350000: 0.05, 922380000: 0.95})
     assert_equal(mat.attrs['units'], 'kg')
 
 
@@ -103,31 +103,31 @@ def test_from_hdf5_protocol_0():
     mat = Material()
     mat.from_hdf5("mat.h5", "/mat", protocol=0)
     assert_equal(mat.mass, 0.0)
-    assert_equal(mat.comp, {922350: 0.0, 942390: 0.0})
+    assert_equal(mat.comp, {922350000: 0.0, 942390000: 0.0})
 
     mat.from_hdf5("mat.h5", "/mat", 0, 0)
     assert_equal(mat.mass, 1.0)
-    assert_equal(mat.comp, {922350: 1.0, 942390: 0.0})
+    assert_equal(mat.comp, {922350000: 1.0, 942390000: 0.0})
 
     mat.from_hdf5("mat.h5", "/mat", 1, 0)
     assert_equal(mat.mass, 0.5)
-    assert_equal(mat.comp, {922350: 0.75, 942390: 0.25})
+    assert_equal(mat.comp, {922350000: 0.75, 942390000: 0.25})
 
     mat.from_hdf5("mat.h5", "/mat", 2, 0)
     assert_equal(mat.mass, 0.0)
-    assert_equal(mat.comp, {922350: 0.0, 942390: 0.0})
+    assert_equal(mat.comp, {922350000: 0.0, 942390000: 0.0})
 
     mat.from_hdf5("mat.h5", "/mat", -1, 0)
     assert_equal(mat.mass, 0.0)
-    assert_equal(mat.comp, {922350: 0.0, 942390: 0.0})
+    assert_equal(mat.comp, {922350000: 0.0, 942390000: 0.0})
 
     mat.from_hdf5("mat.h5", "/mat", -2, 0)
     assert_equal(mat.mass, 0.5)
-    assert_equal(mat.comp, {922350: 0.75, 942390: 0.25})
+    assert_equal(mat.comp, {922350000: 0.75, 942390000: 0.25})
 
     mat.from_hdf5("mat.h5", "/mat", -3, 0)
     assert_equal(mat.mass, 1.0)
-    assert_equal(mat.comp, {922350: 1.0, 942390: 0.0})
+    assert_equal(mat.comp, {922350000: 1.0, 942390000: 0.0})
 
 
 def test_hdf5_protocol_1():
@@ -150,14 +150,14 @@ def test_hdf5_protocol_1():
     assert_equal(m.density, 2.72)
     assert_equal(m.atoms_per_mol, 8.0)
     assert_equal(m.mass, 33.6)
-    assert_equal(m.comp, {922350: 0.04, 922380: 0.96})
+    assert_equal(m.comp, {922350000: 0.04, 922380000: 0.96})
     assert_equal(m.attrs['comment'], 'fire in the disco - 8')
 
     m = from_hdf5('proto1.h5', '/material', 3, 1)
     assert_equal(m.density, 2.72)
     assert_equal(m.atoms_per_mol, 4.0)
     assert_equal(m.mass, 16.8)
-    assert_equal(m.comp, {922350: 0.04, 922380: 0.96})
+    assert_equal(m.comp, {922350000: 0.04, 922380000: 0.96})
     assert_equal(m.attrs['comment'], 'fire in the disco - 4')
 
     os.remove('proto1.h5')
@@ -167,29 +167,29 @@ class TestMaterialMethods(TestCase):
     "Tests that the Material member functions work."
 
     def test_normalize(self):
-        mat = Material({922350: 0.05, 922380: 0.95}, 15)
+        mat = Material({922350000: 0.05, 922380000: 0.95}, 15)
         mat.normalize()
         assert_equal(mat.mass, 1.0)
 
 
     def test_mult_by_mass(self):
-        mat = Material({922350: 0.05, 922380: 0.95}, 15)
+        mat = Material({922350000: 0.05, 922380000: 0.95}, 15)
         nucvec = mat.mult_by_mass()
-        assert_equal(nucvec, {922350: 0.75, 922380: 14.25})
+        assert_equal(nucvec, {922350000: 0.75, 922380000: 14.25})
 
 
     def test_molecular_weight(self):
         mat_empty = Material({})
         assert_equal(mat_empty.molecular_weight(), 0.0)
 
-        mat_u238 = Material({922380: 1.0})
+        mat_u238 = Material({922380000: 1.0})
         mw_u238 = mat_u238.molecular_weight()
         try:
             assert_almost_equal(mw_u238, 238.050788423)
         except AssertionError:
             assert_almost_equal(mw_u238, 238.0)            
 
-        mat_mixed = Material({922350: 0.5, 922380: 0.5})
+        mat_mixed = Material({922350000: 0.5, 922380000: 0.5})
         mw_mixed = mat_mixed.molecular_weight()
         try:
             assert_almost_equal(mw_mixed/236.547360417, 1.0, 4)            
@@ -198,10 +198,11 @@ class TestMaterialMethods(TestCase):
 
 
 def test_expand_elements1():
-    natmat = Material({'C': 1.0, 902320: 0.5, 'PU': 4.0, 'U': 3.0}, attrs={'y': 1.0})
+    natmat = Material({'C': 1.0, 902320000: 0.5, 'PU': 4.0, 'U': 3.0}, 
+                       attrs={'y': 1.0})
     expmat = natmat.expand_elements()
-    assert_true(60120 in expmat.comp)
-    assert_false(60000 in expmat.comp)
+    assert_true(60120000 in expmat.comp)
+    assert_false(60000000 in expmat.comp)
     assert_true(natmat.attrs == expmat.attrs)
     assert_false(natmat.attrs is expmat.attrs)
 
@@ -211,8 +212,8 @@ def test_expand_elements2():
     natmat = Material({'C': 1.0})
     expmat = natmat.expand_elements()
     afrac = expmat.to_atom_frac()
-    assert_almost_equal(data.natural_abund(60120), afrac[60120])
-    assert_almost_equal(data.natural_abund(60130), afrac[60130])
+    assert_almost_equal(data.natural_abund(60120000), afrac[60120000])
+    assert_almost_equal(data.natural_abund(60130000), afrac[60130000])
 
 
 def test_mass_density():
@@ -236,162 +237,162 @@ class TestMassSubMaterialMethods(TestCase):
 
     def test_sub_mat_int_1(self):
         mat = Material(nucvec, -1)
-        mat1 = mat.sub_mat([922350, 922380, 80160])
-        assert_almost_equal(mat1.comp[80160],  0.3333333333333)
-        assert_almost_equal(mat1.comp[922350], 0.3333333333333)
-        assert_almost_equal(mat1.comp[922380], 0.3333333333333)
+        mat1 = mat.sub_mat([922350000, 922380000, 80160000])
+        assert_almost_equal(mat1.comp[80160000],  0.3333333333333)
+        assert_almost_equal(mat1.comp[922350000], 0.3333333333333)
+        assert_almost_equal(mat1.comp[922380000], 0.3333333333333)
         assert_equal(mat1.mass, 3.0)
 
     def test_sub_mat_int_2(self):
         mat = Material(nucvec)
-        mat1 = mat.sub_mat([922350, 922380, 80160])
-        assert_almost_equal(mat1.comp[80160],  0.3333333333333)
-        assert_almost_equal(mat1.comp[922350], 0.3333333333333)
-        assert_almost_equal(mat1.comp[922380], 0.3333333333333)
+        mat1 = mat.sub_mat([922350000, 922380000, 80160000])
+        assert_almost_equal(mat1.comp[80160000],  0.3333333333333)
+        assert_almost_equal(mat1.comp[922350000], 0.3333333333333)
+        assert_almost_equal(mat1.comp[922380000], 0.3333333333333)
         assert_equal(mat1.mass, 3.0)
 
     def test_sub_mat_attr_1(self):
         mat = Material(nucvec, -1)
         mat1 = mat.sub_mat(["U235", "U238", "80160", "H1"])
-        assert_almost_equal(mat1.comp[10010],  0.25)
-        assert_almost_equal(mat1.comp[80160],  0.25)
-        assert_almost_equal(mat1.comp[922350], 0.25)
-        assert_almost_equal(mat1.comp[922380], 0.25)
+        assert_almost_equal(mat1.comp[10010000],  0.25)
+        assert_almost_equal(mat1.comp[80160000],  0.25)
+        assert_almost_equal(mat1.comp[922350000], 0.25)
+        assert_almost_equal(mat1.comp[922380000], 0.25)
         assert_equal(mat1.mass, 4.0)
 
     def test_sub_mat_attr_2(self):
         mat = Material(nucvec)
         mat1 = mat.sub_mat(["U235", "U238", "80160", "H1"])
-        assert_almost_equal(mat1.comp[10010],  0.25)
-        assert_almost_equal(mat1.comp[80160],  0.25)
-        assert_almost_equal(mat1.comp[922350], 0.25)
-        assert_almost_equal(mat1.comp[922380], 0.25)
+        assert_almost_equal(mat1.comp[10010000],  0.25)
+        assert_almost_equal(mat1.comp[80160000],  0.25)
+        assert_almost_equal(mat1.comp[922350000], 0.25)
+        assert_almost_equal(mat1.comp[922380000], 0.25)
         assert_equal(mat1.mass, 4.0)
 
     def test_sub_u_1(self):
         mat = Material(nucvec)
         mat1 = mat.sub_u()
-        assert_equal(mat1.comp, {922350: 0.5, 922380: 0.5})
+        assert_equal(mat1.comp, {922350000: 0.5, 922380000: 0.5})
         assert_equal(mat1.mass, 2.0)
 
     def test_sub_u_2(self):
         mat = Material(nucvec)
         mat1 = mat.sub_u()
-        assert_equal(mat1.comp, {922350: 0.5, 922380: 0.5})
+        assert_equal(mat1.comp, {922350000: 0.5, 922380000: 0.5})
         assert_equal(mat1.mass, 2.0)
 
     def test_pu_1(self):
         mat = Material(nucvec)
         mat1 = mat.sub_pu()
-        assert_equal(mat1.comp, {942390: 0.5, 942410: 0.5})
+        assert_equal(mat1.comp, {942390000: 0.5, 942410000: 0.5})
         assert_equal(mat1.mass, 2.0)
 
     def test_pu_2(self):
         mat = Material(nucvec)
         mat1 = mat.sub_pu()
-        assert_equal(mat1.comp, {942390: 0.5, 942410: 0.5})
+        assert_equal(mat1.comp, {942390000: 0.5, 942410000: 0.5})
         assert_equal(mat1.mass, 2.0)
 
     def test_lan_1(self):
         mat = Material(nucvec)
         mat1 = mat.sub_lan()
-        assert_equal(mat1.comp, {691690: 1.0})
+        assert_equal(mat1.comp, {691690000: 1.0})
         assert_equal(mat1.mass, 1.0)
 
     def test_lan_2(self):
         mat = Material(nucvec)
         mat1 = mat.sub_lan()
-        assert_equal(mat1.comp, {691690: 1.0})
+        assert_equal(mat1.comp, {691690000: 1.0})
         assert_equal(mat1.mass, 1.0)
 
     def test_act_1(self):
         mat = Material(nucvec)
         mat1 = mat.sub_act()
-        assert_equal(mat1.comp[922350], 1.0/6.0)
-        assert_equal(mat1.comp[922380], 1.0/6.0)
-        assert_equal(mat1.comp[942390], 1.0/6.0)
-        assert_equal(mat1.comp[942410], 1.0/6.0)
-        assert_equal(mat1.comp[952420], 1.0/6.0)
-        assert_equal(mat1.comp[962440], 1.0/6.0)
+        assert_equal(mat1.comp[922350000], 1.0/6.0)
+        assert_equal(mat1.comp[922380000], 1.0/6.0)
+        assert_equal(mat1.comp[942390000], 1.0/6.0)
+        assert_equal(mat1.comp[942410000], 1.0/6.0)
+        assert_equal(mat1.comp[952420000], 1.0/6.0)
+        assert_equal(mat1.comp[962440000], 1.0/6.0)
         assert_equal(mat1.mass, 6.0)
 
     def test_act_2(self):
         mat = Material(nucvec)
         mat1 = mat.sub_act()
-        assert_equal(mat1.comp[922350], 1.0/6.0)
-        assert_equal(mat1.comp[922380], 1.0/6.0)
-        assert_equal(mat1.comp[942390], 1.0/6.0)
-        assert_equal(mat1.comp[942410], 1.0/6.0)
-        assert_equal(mat1.comp[952420], 1.0/6.0)
-        assert_equal(mat1.comp[962440], 1.0/6.0)
+        assert_equal(mat1.comp[922350000], 1.0/6.0)
+        assert_equal(mat1.comp[922380000], 1.0/6.0)
+        assert_equal(mat1.comp[942390000], 1.0/6.0)
+        assert_equal(mat1.comp[942410000], 1.0/6.0)
+        assert_equal(mat1.comp[952420000], 1.0/6.0)
+        assert_equal(mat1.comp[962440000], 1.0/6.0)
         assert_equal(mat1.mass, 6.0)
 
     def test_tru_1(self):
         mat = Material(nucvec)
         mat1 = mat.sub_tru()
-        assert_equal(mat1.comp[942390], 1.0/4.0)
-        assert_equal(mat1.comp[942410], 1.0/4.0)
-        assert_equal(mat1.comp[952420], 1.0/4.0)
-        assert_equal(mat1.comp[962440], 1.0/4.0)
+        assert_equal(mat1.comp[942390000], 1.0/4.0)
+        assert_equal(mat1.comp[942410000], 1.0/4.0)
+        assert_equal(mat1.comp[952420000], 1.0/4.0)
+        assert_equal(mat1.comp[962440000], 1.0/4.0)
         assert_equal(mat1.mass, 4.0)
 
     def test_tru_2(self):
         mat = Material(nucvec)
         mat1 = mat.sub_tru()
-        assert_equal(mat1.comp[942390], 1.0/4.0)
-        assert_equal(mat1.comp[942410], 1.0/4.0)
-        assert_equal(mat1.comp[952420], 1.0/4.0)
-        assert_equal(mat1.comp[962440], 1.0/4.0)
+        assert_equal(mat1.comp[942390000], 1.0/4.0)
+        assert_equal(mat1.comp[942410000], 1.0/4.0)
+        assert_equal(mat1.comp[952420000], 1.0/4.0)
+        assert_equal(mat1.comp[962440000], 1.0/4.0)
         assert_equal(mat1.mass, 4.0)
 
     def test_ma_1(self):
         mat = Material(nucvec)
         mat1 = mat.sub_ma()
-        assert_equal(mat1.comp[952420], 1.0/2.0)
-        assert_equal(mat1.comp[962440], 1.0/2.0)
+        assert_equal(mat1.comp[952420000], 1.0/2.0)
+        assert_equal(mat1.comp[962440000], 1.0/2.0)
         assert_equal(mat1.mass, 2.0)
 
     def test_ma_2(self):
         mat = Material(nucvec)
         mat1 = mat.sub_ma()
-        assert_equal(mat1.comp[952420], 1.0/2.0)
-        assert_equal(mat1.comp[962440], 1.0/2.0)
+        assert_equal(mat1.comp[952420000], 1.0/2.0)
+        assert_equal(mat1.comp[962440000], 1.0/2.0)
         assert_equal(mat1.mass, 2.0)
 
     def test_fp_1(self):
         mat = Material(nucvec)
         mat1 = mat.sub_fp()
-        assert_equal(mat1.comp[10010],  1.0/3.0)
-        assert_equal(mat1.comp[80160],  1.0/3.0)
-        assert_equal(mat1.comp[691690], 1.0/3.0)
+        assert_equal(mat1.comp[10010000],  1.0/3.0)
+        assert_equal(mat1.comp[80160000],  1.0/3.0)
+        assert_equal(mat1.comp[691690000], 1.0/3.0)
         assert_equal(mat1.mass, 3.0)
 
     def test_fp_2(self):
         mat = Material(nucvec)
         mat1 = mat.sub_fp()
-        assert_equal(mat1.comp[10010],  1.0/3.0)
-        assert_equal(mat1.comp[80160],  1.0/3.0)
-        assert_equal(mat1.comp[691690], 1.0/3.0)
+        assert_equal(mat1.comp[10010000],  1.0/3.0)
+        assert_equal(mat1.comp[80160000],  1.0/3.0)
+        assert_equal(mat1.comp[691690000], 1.0/3.0)
         assert_equal(mat1.mass, 3.0)
 
 
     def test_sub_range(self):
         mat = Material(nucvec)
-        mat1 = mat.sub_range(920000, 930000)
+        mat1 = mat.sub_range(920000000, 930000000)
         assert_equal(mat1.mass, 2.0)
         for nuc in mat1:
-            assert_true(920000 <= nuc < 930000)
+            assert_true(920000000 <= nuc < 930000000)
 
         mat1 = mat.sub_range(upper="U238")
         assert_equal(mat1.mass, 4.0)
         for nuc in mat1:
-            assert_true(nuc < 922380)
+            assert_true(nuc < 922380000)
 
         
 class TestMaterialOperatorOverloading(TestCase):
     "Tests that the Material operator overloads work."
-    u235 = Material({922350: 1.0})
-    u238 = Material({922380: 1.0})
+    u235 = Material({922350000: 1.0})
+    u238 = Material({922380000: 1.0})
 
     def test_add_num(self):
         mat = self.u235 + 30.0
@@ -403,7 +404,7 @@ class TestMaterialOperatorOverloading(TestCase):
 
     def test_add_mat(self):
         mat = self.u235 + self.u238
-        assert_equal(mat.comp, {922350: 0.5, 922380: 0.5})
+        assert_equal(mat.comp, {922350000: 0.5, 922380000: 0.5})
         assert_equal(mat.mass, 2.0)
 
     def test_mul_num(self):
@@ -423,43 +424,43 @@ class TestMaterialOperatorOverloading(TestCase):
 # Test atom fraction functions
 #
 def test_to_atom_frac():
-    h2o = {10010: 0.11191487328808077, 80160: 0.8880851267119192}
+    h2o = {10010000: 0.11191487328808077, 80160000: 0.8880851267119192}
     mat = Material(h2o, atoms_per_mol=3.0)
     af = mat.to_atom_frac()
     assert_equal(mat.atoms_per_mol, 3.0)
-    assert_equal(af[10010], 2.0)
-    assert_equal(af[80160], 1.0)
+    assert_equal(af[10010000], 2.0)
+    assert_equal(af[80160000], 1.0)
     assert_equal(mat.molecular_weight(), 18.01056468403)    
 
 
 def test_from_atom_frac_meth():
-    h2o = {10010: 2.0, 80160: 1.0}
+    h2o = {10010000: 2.0, 80160000: 1.0}
     mat = Material()
     mat.from_atom_frac(h2o)
     assert_equal(mat.atoms_per_mol, 3.0)
-    assert_equal(mat.comp[10010], 0.11191487328808077)
-    assert_equal(mat.comp[80160], 0.8880851267119192)
+    assert_equal(mat.comp[10010000], 0.11191487328808077)
+    assert_equal(mat.comp[80160000], 0.8880851267119192)
     assert_equal(mat.mass, 18.01056468403)    
     assert_equal(mat.molecular_weight(), 18.01056468403)    
 
-    h2 = Material({10010: 1.0}, atoms_per_mol=2.0)
+    h2 = Material({10010000: 1.0}, atoms_per_mol=2.0)
     h2o = {'O16': 1.0, h2: 1.0}
     mat = Material()
     mat.from_atom_frac(h2o)
     assert_equal(mat.atoms_per_mol, 3.0)
-    assert_equal(mat.comp[10010], 0.11191487328808077)
-    assert_equal(mat.comp[80160], 0.8880851267119192)
+    assert_equal(mat.comp[10010000], 0.11191487328808077)
+    assert_equal(mat.comp[80160000], 0.8880851267119192)
     assert_equal(mat.molecular_weight(), 18.01056468403)    
 
     ihm = Material()
-    ihm.from_atom_frac({922350: 0.5, 922380: 0.5})
+    ihm.from_atom_frac({922350000: 0.5, 922380000: 0.5})
     uox = {ihm: 1.0, 'O16': 2.0}
     mat = Material()
     mat.from_atom_frac(uox)
     assert_equal(mat.atoms_per_mol, 3.0)
-    assert_almost_equal(mat.comp[80160], 0.11912625367051276, 16)
-    assert_almost_equal(mat.comp[922350], 0.43763757904405304, 15)
-    assert_almost_equal(mat.comp[922380], 0.44323616728543414, 15)
+    assert_almost_equal(mat.comp[80160000], 0.11912625367051276, 16)
+    assert_almost_equal(mat.comp[922350000], 0.43763757904405304, 15)
+    assert_almost_equal(mat.comp[922380000], 0.44323616728543414, 15)
     assert_almost_equal(mat.molecular_weight()/268.53718851614, 1.0, 15)
 
 
@@ -474,21 +475,21 @@ def test_len():
 
 def test_contains():
     mat = Material(nucvec)
-    assert_true(10010 in mat)
-    assert_true(922350 in mat)
-    assert_false(92000 in mat)
+    assert_true(10010000 in mat)
+    assert_true(922350000 in mat)
+    assert_false(92000000 in mat)
     assert_raises(TypeError, lambda: 'word' in mat)
 
 
 def test_getitem_int():
     mat = Material(nucvec)
-    assert_equal(mat[922350], 1.0) 
+    assert_equal(mat[922350000], 1.0) 
     assert_raises(KeyError, lambda: mat[42]) 
 
     mat = Material(leu)
-    assert_equal(mat[922350], 0.04) 
-    assert_equal(mat[922380], 0.96) 
-    assert_raises(KeyError, lambda: mat[922340]) 
+    assert_equal(mat[922350000], 0.04) 
+    assert_equal(mat[922380000], 0.96) 
+    assert_raises(KeyError, lambda: mat[922340000]) 
 
 
 def test_getitem_str():
@@ -504,20 +505,20 @@ def test_getitem_str():
 
 def test_getitem_slice_int():
     mat = Material(nucvec)
-    mat1 = mat[920000:930000] 
+    mat1 = mat[920000000:930000000] 
     assert_equal(mat1.mass, 2.0)
     for nuc in mat1:
-        assert_true(920000 <= nuc < 930000)
+        assert_true(920000000 <= nuc < 930000000)
 
-    mat1 = mat[:922380]
+    mat1 = mat[:922380000]
     assert_equal(mat1.mass, 4.0)
     for nuc in mat1:
-        assert_true(nuc < 922380)
+        assert_true(nuc < 922380000)
 
-    mat1 = mat[922350:]
+    mat1 = mat[922350000:]
     assert_equal(mat1.mass, 6.0)
     for nuc in mat1:
-        assert_true(922350 <= nuc)
+        assert_true(922350000 <= nuc)
 
 
 def test_getitem_slice_str():
@@ -525,96 +526,96 @@ def test_getitem_slice_str():
     mat1 = mat['U':'NP'] 
     assert_equal(mat1.mass, 2.0)
     for nuc in mat1:
-        assert_true(920000 <= nuc < 930000)
+        assert_true(920000000 <= nuc < 930000000)
 
     mat1 = mat[:'U238']
     assert_equal(mat1.mass, 4.0)
     for nuc in mat1:
-        assert_true(nuc < 922380)
+        assert_true(nuc < 922380000)
 
     mat1 = mat['U235':]
     assert_equal(mat1.mass, 6.0)
     for nuc in mat1:
-        assert_true(922350 <= nuc)
+        assert_true(922350000 <= nuc)
 
 
 def test_getitem_sequence():
     mat = Material(nucvec)
-    mat1 = mat[922380, 922350] 
+    mat1 = mat[922380000, 922350000] 
     assert_equal(mat1.mass, 2.0)
-    assert_equal(set(mat1.keys()), set([922380, 922350]))
+    assert_equal(set(mat1.keys()), set([922380000, 922350000]))
 
     mat1 = mat[922380, 'H2', 'h1']
     assert_equal(mat1.mass, 2.0)
-    assert_equal(set(mat1.keys()), set([922380, 10010]))
+    assert_equal(set(mat1.keys()), set([922380000, 10010000]))
 
 
 def test_setitem_int():
     mat = Material(nucvec)
     assert_equal(mat.mass, 9.0)
-    assert_equal(mat[922350], 1.0) 
-    mat[922350] = 2.0
+    assert_equal(mat[922350000], 1.0) 
+    mat[922350000] = 2.0
     assert_equal(mat.mass, 10.0)
-    assert_equal(mat[922350], 2.0) 
+    assert_equal(mat[922350000], 2.0) 
 
     mat = Material(leu)
     assert_equal(mat.mass, 1.0)
-    assert_equal(mat[922350], 0.04) 
-    assert_equal(mat[922380], 0.96) 
-    assert_raises(KeyError, lambda: mat[922340]) 
-    mat[922340] = 17.0
+    assert_equal(mat[922350000], 0.04) 
+    assert_equal(mat[922380000], 0.96) 
+    assert_raises(KeyError, lambda: mat[922340000]) 
+    mat[922340000] = 17.0
     assert_equal(mat.mass, 18.0)
-    assert_equal(mat[922340], 17.0) 
-    assert_equal(mat[922350], 0.04) 
-    assert_equal(mat[922380], 0.96) 
+    assert_equal(mat[922340000], 17.0) 
+    assert_equal(mat[922350000], 0.04) 
+    assert_equal(mat[922380000], 0.96) 
 
 
 
 def test_setitem_str():
     mat = Material(nucvec)
     assert_equal(mat.mass, 9.0)
-    assert_equal(mat[922350], 1.0) 
+    assert_equal(mat[922350000], 1.0) 
     mat['U235'] = 2.0
     assert_equal(mat.mass, 10.0)
-    assert_equal(mat[922350], 2.0) 
+    assert_equal(mat[922350000], 2.0) 
 
     mat = Material(leu)
     assert_equal(mat.mass, 1.0)
-    assert_equal(mat[922350], 0.04) 
-    assert_equal(mat[922380], 0.96) 
-    assert_raises(KeyError, lambda: mat[922340]) 
+    assert_equal(mat[922350000], 0.04) 
+    assert_equal(mat[922380000], 0.96) 
+    assert_raises(KeyError, lambda: mat[922340000]) 
     mat['U234'] = 17.0
     assert_equal(mat.mass, 18.0)
-    assert_equal(mat[922340], 17.0) 
-    assert_equal(mat[922350], 0.04) 
-    assert_equal(mat[922380], 0.96) 
+    assert_equal(mat[922340000], 17.0) 
+    assert_equal(mat[922350000], 0.04) 
+    assert_equal(mat[922380000], 0.96) 
 
 
 
 def test_setitem_slice_int():
     mat = Material(nucvec)
     mat_id = id(mat)
-    mat[920000:930000] = 42
+    mat[920000000:930000000] = 42
     assert_equal(mat_id, id(mat))
     assert_equal(mat.mass, 91.0)
-    assert_equal(mat[10010], 1.0)
-    assert_equal(mat[922350], 42.0)
-    assert_equal(mat[922380], 42.0)
+    assert_equal(mat[10010000], 1.0)
+    assert_equal(mat[922350000], 42.0)
+    assert_equal(mat[922380000], 42.0)
 
     mat = Material(nucvec)
-    mat[:922380] = 0.0
+    mat[:922380000] = 0.0
     assert_equal(mat.mass, 5.0)
     for nuc in mat:
-        if (nuc < 922380):
+        if (nuc < 922380000):
             assert_equal(mat[nuc], 0.0)
         else:
             assert_equal(mat[nuc], 1.0)
 
     mat = Material(nucvec)
-    mat[922350:] = 2
+    mat[922350000:] = 2
     assert_equal(mat.mass, 15.0)
     for nuc in mat:
-        if (922350 <= nuc):
+        if (922350000 <= nuc):
             assert_equal(mat[nuc], 2.0)
         else:
             assert_equal(mat[nuc], 1.0)
@@ -625,15 +626,15 @@ def test_setitem_slice_str():
     mat = Material(nucvec)
     mat['U':'Np'] = 42
     assert_equal(mat.mass, 91.0)
-    assert_equal(mat[10010], 1.0)
-    assert_equal(mat[922350], 42.0)
-    assert_equal(mat[922380], 42.0)
+    assert_equal(mat[10010000], 1.0)
+    assert_equal(mat[922350000], 42.0)
+    assert_equal(mat[922380000], 42.0)
 
     mat = Material(nucvec)
     mat[:'U238'] = 0.0
     assert_equal(mat.mass, 5.0)
     for nuc in mat:
-        if (nuc < 922380):
+        if (nuc < 922380000):
             assert_equal(mat[nuc], 0.0)
         else:
             assert_equal(mat[nuc], 1.0)
@@ -642,7 +643,7 @@ def test_setitem_slice_str():
     mat['U235':] = 2
     assert_equal(mat.mass, 15.0)
     for nuc in mat:
-        if (922350 <= nuc):
+        if (922350000 <= nuc):
             assert_equal(mat[nuc], 2.0)
         else:
             assert_equal(mat[nuc], 1.0)
@@ -651,19 +652,19 @@ def test_setitem_slice_str():
 def test_setitem_sequence():
     mat = Material(nucvec)
     mat_id = id(mat)
-    mat[922380, 922350] = 42
+    mat[922380000, 922350000] = 42
     assert_equal(mat_id, id(mat))
     assert_equal(mat.mass, 91.0)
-    assert_equal(mat[10010], 1.0)
-    assert_equal(mat[922350], 42.0)
-    assert_equal(mat[922380], 42.0)
+    assert_equal(mat[10010000], 1.0)
+    assert_equal(mat[922350000], 42.0)
+    assert_equal(mat[922380000], 42.0)
 
     mat = Material(nucvec)
-    mat[922380, 'H2', 'h1'] = 0.0
+    mat[922380000, 'H2', 'h1'] = 0.0
     assert_equal(mat.mass, 7.0)
     assert_equal(len(mat), 10)
     for nuc in mat:
-        if (nuc in [10010, 10020, 922380]):
+        if (nuc in [10010000, 10020000, 922380000]):
             assert_equal(mat[nuc], 0.0)
         else:
             assert_equal(mat[nuc], 1.0)
@@ -673,7 +674,7 @@ def test_setitem_sequence():
     assert_equal(mat.mass, 13.0)
     assert_equal(len(mat), 10)
     for nuc in mat:
-        if (nuc in [10010, 10020, 922350]):
+        if (nuc in [10010000, 10020000, 922350000]):
             assert_equal(mat[nuc], 2.0)
         else:
             assert_equal(mat[nuc], 1.0)
@@ -682,54 +683,54 @@ def test_setitem_sequence():
 
 def test_delitem_int():
     mat = Material(nucvec)
-    assert_equal(mat[922350], 1.0)
-    del mat[922350]
-    assert_raises(KeyError, lambda: mat[922350]) 
+    assert_equal(mat[922350000], 1.0)
+    del mat[922350000]
+    assert_raises(KeyError, lambda: mat[922350000]) 
 
     mat = Material(leu)
-    assert_equal(mat[922350], 0.04)
-    del mat[922350]
+    assert_equal(mat[922350000], 0.04)
+    del mat[922350000]
     assert_equal(mat.mass, 0.96) 
-    assert_equal(mat.comp[922380], 1.0) 
-    assert_raises(KeyError, lambda: mat[922350]) 
+    assert_equal(mat.comp[922380000], 1.0) 
+    assert_raises(KeyError, lambda: mat[922350000]) 
 
 
 def test_delitem_str():
     mat = Material(nucvec)
-    assert_equal(mat[922350], 1.0)
+    assert_equal(mat[922350000], 1.0)
     del mat['U235']
-    assert_raises(KeyError, lambda: mat[922350]) 
+    assert_raises(KeyError, lambda: mat[922350000]) 
 
     mat = Material(leu)
-    assert_equal(mat[922350], 0.04)
+    assert_equal(mat[922350000], 0.04)
     del mat['U235']
     assert_equal(mat.mass, 0.96) 
-    assert_equal(mat.comp[922380], 1.0) 
-    assert_raises(KeyError, lambda: mat[922350]) 
+    assert_equal(mat.comp[922380000], 1.0) 
+    assert_raises(KeyError, lambda: mat[922350000]) 
 
 
 def test_delitem_slice_int():
     mat = Material(nucvec)
-    del mat[920000:930000]
+    del mat[920000000:930000000]
     assert_equal(mat.mass, 7.0)
-    assert_equal(mat[10010], 1.0)
-    assert_raises(KeyError, lambda: mat[922350]) 
-    assert_raises(KeyError, lambda: mat[922380]) 
+    assert_equal(mat[10010000], 1.0)
+    assert_raises(KeyError, lambda: mat[922350000]) 
+    assert_raises(KeyError, lambda: mat[922380000]) 
 
     mat = Material(nucvec)
-    del mat[:922380]
+    del mat[:922380000]
     assert_equal(mat.mass, 5.0)
     for nuc in mat:
-        if (nuc < 922380):
+        if (nuc < 922380000):
             assert_raises(KeyError, lambda: mat[nuc]) 
         else:
             assert_equal(mat[nuc], 1.0)
 
     mat = Material(nucvec)
-    del mat[922350:]
+    del mat[922350000:]
     assert_equal(mat.mass, 3.0)
     for nuc in mat:
-        if (922350 <= nuc):
+        if (922350000 <= nuc):
             assert_raises(KeyError, lambda: mat[nuc]) 
         else:
             assert_equal(mat[nuc], 1.0)
@@ -739,15 +740,15 @@ def test_delitem_slice_str():
     mat = Material(nucvec)
     del mat['U':'Np']
     assert_equal(mat.mass, 7.0)
-    assert_equal(mat[10010], 1.0)
-    assert_raises(KeyError, lambda: mat[922350]) 
-    assert_raises(KeyError, lambda: mat[922380]) 
+    assert_equal(mat[10010000], 1.0)
+    assert_raises(KeyError, lambda: mat[922350000]) 
+    assert_raises(KeyError, lambda: mat[922380000]) 
 
     mat = Material(nucvec)
     del mat[:'U238']
     assert_equal(mat.mass, 5.0)
     for nuc in mat:
-        if (nuc < 922380):
+        if (nuc < 922380000):
             assert_raises(KeyError, lambda: mat[nuc]) 
         else:
             assert_equal(mat[nuc], 1.0)
@@ -756,7 +757,7 @@ def test_delitem_slice_str():
     del mat['U235':]
     assert_equal(mat.mass, 3.0)
     for nuc in mat:
-        if (922350 <= nuc):
+        if (922350000 <= nuc):
             assert_raises(KeyError, lambda: mat[nuc]) 
         else:
             assert_equal(mat[nuc], 1.0)
@@ -764,18 +765,18 @@ def test_delitem_slice_str():
 
 def test_delitem_sequence():
     mat = Material(nucvec)
-    del mat[922380, 922350]
+    del mat[922380000, 922350000]
     assert_equal(mat.mass, 7.0)
-    assert_equal(mat[10010], 1.0)
-    assert_raises(KeyError, lambda: mat[922350]) 
-    assert_raises(KeyError, lambda: mat[922380]) 
+    assert_equal(mat[10010000], 1.0)
+    assert_raises(KeyError, lambda: mat[922350000]) 
+    assert_raises(KeyError, lambda: mat[922380000]) 
 
     mat = Material(nucvec)
-    del mat[922380, 'H2', 'h1']
+    del mat[922380000, 'H2', 'h1']
     assert_equal(mat.mass, 7.0)
-    assert_raises(KeyError, lambda: mat[10010]) 
-    assert_raises(KeyError, lambda: mat[10020]) 
-    assert_raises(KeyError, lambda: mat[922380]) 
+    assert_raises(KeyError, lambda: mat[10010000]) 
+    assert_raises(KeyError, lambda: mat[10020000]) 
+    assert_raises(KeyError, lambda: mat[922380000]) 
 
 
 
@@ -785,9 +786,9 @@ def test_iter():
         assert_equal(mat[nuc], 1.0)
 
     mat = Material(leu)
-    keys = set([922350, 922380])
+    keys = set([922350000, 922380000])
     values = set([0.04, 0.96])
-    items = set([(922350, 0.04), (922380, 0.96)])
+    items = set([(922350000, 0.04), (922380000, 0.96)])
 
     assert_equal(set(mat.keys()), keys)
     assert_equal(set(mat.values()), values)
@@ -917,25 +918,25 @@ def test_attrs():
 # Test MultiMaterial
 #
 def test_multimaterial():
-    mat1 = Material(nucvec={120240:0.3, 300000:0.2, 10010:0.1}, density=2.71)
-    mat2 = Material(nucvec={60120:0.2, 280640:0.5, 10010:0.12}, density=8.0)
+    mat1 = Material(nucvec={120240000:0.3, 300000000:0.2, 10010000:0.1}, density=2.71)
+    mat2 = Material(nucvec={60120000:0.2, 280640000:0.5, 10010000:0.12}, density=8.0)
     mix = MultiMaterial({mat1:0.5, mat2:0.21})
     mat3 = mix.mix_by_mass()
     mat4 = mix.mix_by_volume()
 
     assert_equal(mat3.density, -1.0)
-    assert_equal(mat3.comp[10010], 0.16065498683155846)
-    assert_equal(mat3.comp[60120], 0.0721401580212985)
-    assert_equal(mat3.comp[120240], 0.352112676056338)
-    assert_equal(mat3.comp[280640], 0.18035039505324627)
-    assert_equal(mat3.comp[300000], 0.2347417840375587)
+    assert_equal(mat3.comp[10010000], 0.16065498683155846)
+    assert_equal(mat3.comp[60120000], 0.0721401580212985)
+    assert_equal(mat3.comp[120240000], 0.352112676056338)
+    assert_equal(mat3.comp[280640000], 0.18035039505324627)
+    assert_equal(mat3.comp[300000000], 0.2347417840375587)
 
     assert_equal(mat4.density, -1.0)
-    assert_equal(mat4.comp[10010], 0.15541581280722197)
-    assert_equal(mat4.comp[60120], 0.13501024631333625)
-    assert_equal(mat4.comp[120240], 0.2232289950576606)
-    assert_equal(mat4.comp[280640], 0.33752561578334067)
-    assert_equal(mat4.comp[300000], 0.14881933003844042)
+    assert_equal(mat4.comp[10010000], 0.15541581280722197)
+    assert_equal(mat4.comp[60120000], 0.13501024631333625)
+    assert_equal(mat4.comp[120240000], 0.2232289950576606)
+    assert_equal(mat4.comp[280640000], 0.33752561578334067)
+    assert_equal(mat4.comp[300000000], 0.14881933003844042)
 
 def test_write_mcnp():
     if 'mcnp_mass_fracs.txt' in os.listdir('.'):
