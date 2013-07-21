@@ -24,16 +24,14 @@ def test_sec_to_time_unit():
 
 
 def test_write_tape4():
-    mat = Material({"U235": 0.95, 80160: 0.05})
+    mat = Material({"U235": 0.95, 80160000: 0.05})
     tape4 = StringIO()
     origen22.write_tape4(mat, tape4)
-
     tape4.seek(0)
     observed = tape4.read()
     expected = ("1 80160 5.0000000000E-02   0 0   0 0   0 0\n"
                 "2 922350 9.5000000000E-01   0 0   0 0   0 0\n"
                 "0 0 0 0\n")
-
     assert_equal(observed, expected)
 
 
