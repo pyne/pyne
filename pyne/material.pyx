@@ -36,6 +36,8 @@ import os
 cimport pyne.data as data
 import pyne.data as data
 
+# Maximum 32-bit signed int
+DEF INT_MAX = 2147483647
 
 cdef cpp_map[int, double] dict_to_comp(dict nucvec):
     """Converts a dictionary with arbitraily-typed keys to component map."""
@@ -584,8 +586,8 @@ cdef class _Material:
         return pymat
 
 
-    def sub_range(self, lower=0, upper=10000000):
-        """sub_range(lower=0, upper=10000000)
+    def sub_range(self, lower=0, upper=INT_MAX):
+        """sub_range(lower=0, upper=INT_MAX)
         Grabs a sub-material from this mat based on a range [lower, upper)
         of values.
 
@@ -619,8 +621,8 @@ cdef class _Material:
         return pymat
 
 
-    def set_range(self, lower=0, upper=10000000, value=0.0):
-        """set_range(lower=0, upper=10000000, value=0.0)
+    def set_range(self, lower=0, upper=INT_MAX, value=0.0):
+        """set_range(lower=0, upper=INT_MAX, value=0.0)
         Sets a sub-material from this mat based on a range [lower, upper) to
         a new mass weight value.
 
@@ -656,8 +658,8 @@ cdef class _Material:
         return pymat
 
 
-    def del_range(self, lower=0, upper=10000000):
-        """del_range(lower=0, upper=10000000)
+    def del_range(self, lower=0, upper=INT_MAX):
+        """del_range(lower=0, upper=INT_MAX)
         Remove a range [lower, upper) of nuclides from this material and
         returns a submaterial.
 
@@ -1005,7 +1007,7 @@ cdef class _Material:
 
             upper = key.stop
             if upper is None:
-                upper = 10000000
+                upper = INT_MAX
 
             return self.sub_range(lower, upper)
 
@@ -1047,7 +1049,7 @@ cdef class _Material:
 
             upper = key.stop
             if upper is None:
-                upper = 10000000
+                upper = INT_MAX
 
             # set values back on instance
             new_mat = self.set_range(lower, upper, value)
@@ -1097,7 +1099,7 @@ cdef class _Material:
 
             upper = key.stop
             if upper is None:
-                upper = 10000000
+                upper = INT_MAX
 
             # set values back on instance
             new_mat = self.del_range(lower, upper)
