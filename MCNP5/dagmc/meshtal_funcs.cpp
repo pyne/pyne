@@ -425,13 +425,8 @@ void dagmc_fmesh_score_( int *fmesh_index, double *x, double *y, double *z,
     score_count += 1;
 
     // create a track-based tally event
-    TrackData data;
-    data.track_length = *d;
-    data.start_point = moab::CartVect(*x, *y, *z);
-    data.direction = moab::CartVect(*u, *v, *w);
-
-    TallyEvent event(*erg, *wgt);
-    event.set_track_event(data);
+    TallyEvent event;
+    event.set_track_event(*d, *x, *y, *z, *u, *v, *w, *erg, *wgt);
 
 #ifdef MESHTAL_DEBUG
     std::cout << "meshtal particle: " << start_point << " " << direction;
@@ -491,12 +486,8 @@ void dagmc_kde_tally_( double* x, double* y, double* z, double* wgt,
       ien -= 1; // convert fortran array index to C index
 
       // create a collision event
-      CollisionData data;
-      data.total_cross_section = *ple;
-      data.collision_point = moab::CartVect(*x, *y, *z);
-
-      TallyEvent event(*erg, *wgt);
-      event.set_collision_event(data);
+      TallyEvent event;
+      event.set_collision_event(*ple, *x, *y, *z, *erg, *wgt);
 
       // TODO temporary until dagmc_mesh_score has been modified
       // determine energy-dependent tally multiplier from MCNP

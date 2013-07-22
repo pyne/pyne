@@ -720,12 +720,11 @@ static inline bool tris_eq( const EntityHandle *t1, const EntityHandle *t2 ){
 void TrackLengthMeshTally::compute_score(const TallyEvent& event)
 {
   // make sure tally event is a track-based event
-  // if (event.get_event_type() != TallyEvent::TRACK)
   if (event.type != TallyEvent::TRACK)
   {
     std::cerr << "\nError: Tally event is not a track-based event" << std::endl;
     exit(EXIT_FAILURE);
-  } 
+  }
 
   ErrorCode rval;
 
@@ -769,8 +768,18 @@ void TrackLengthMeshTally::compute_score(const TallyEvent& event)
      last_cell = event.current_cell;
   }
 
-  if( first_tet == 0 )
-  {
+  EntityHandle last_crossed_tri[3] = {0,0,0};
+  double last_t = 0;
+  EntityHandle first_tet;
+
+  if( conformal_begin_track ){
+    first_tet = get_starting_tet_conformal(event.position, last_crossed_tri);
+  }
+  else{
+    first_tet = get_starting_tet(event.position, event.direction, event.track_length, last_crossed_tri, last_t);
+  }
+
+  if( first_tet == 0 ){
     // this ray never touches the tally mesh
     return;
   }
@@ -819,12 +828,11 @@ void TrackLengthMeshTally::compute_score(const TallyEvent& event)
       assert( rval == MB_SUCCESS );
 
       double t;
-      if( GeomUtil::ray_tri_intersect( tri_pts, event.position, event.direction, TRIANGLE_INTERSECTION_TOL, t ) )
-      {
+      if( GeomUtil::ray_tri_intersect( tri_pts, event.position, event.direction, TRIANGLE_INTERSECTION_TOL, t ) ){
+
         double track_length;
 
-        if( t >= event.track_length )
-        {
+        if( t >= event.track_length ){
           // track ends in this tetrahedron
           track_length = event.track_length - last_t;
           next_tet = 0;
