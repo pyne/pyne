@@ -1,5 +1,6 @@
 // MCNP5/dagmc/KDENeighborhood.cpp
 
+#include <cassert>
 #include <cstdlib>
 #include <iostream>
 
@@ -44,12 +45,16 @@ KDENeighborhood::KDENeighborhood(const TallyEvent& event,
 //---------------------------------------------------------------------------//
 // PUBLIC INTERFACE
 //---------------------------------------------------------------------------//
-moab::ErrorCode
-    KDENeighborhood::get_points(std_vector_EntityHandle& points) const
+std::vector<moab::EntityHandle> KDENeighborhood::get_points() const
 {
     // find all the points that exist within a rectangular neighborhood region
-    moab::ErrorCode rval = points_in_box(points);
-    return rval;
+    std::vector<moab::EntityHandle> points;
+    moab::ErrorCode rval = moab::MB_SUCCESS;
+
+    rval = points_in_box(points);
+    assert(rval == moab::MB_SUCCESS);
+
+    return points;
 }
 //---------------------------------------------------------------------------//
 bool KDENeighborhood::point_within_max_radius(const TallyEvent& event,
@@ -120,7 +125,7 @@ void KDENeighborhood::set_neighborhood(double track_length,
 }                              
 //---------------------------------------------------------------------------//
 moab::ErrorCode
-    KDENeighborhood::points_in_box(std_vector_EntityHandle& points) const
+    KDENeighborhood::points_in_box(std::vector<moab::EntityHandle>& points) const
 {
     // determine the center point of the box
     double box_center[3];
@@ -137,7 +142,7 @@ moab::ErrorCode
     double radius = center_to_max_corner.length();
 
     // find all leaves of the tree within the given radius
-    std_vector_EntityHandle leaves;
+    std::vector<moab::EntityHandle> leaves;
     moab::ErrorCode rval = moab::MB_SUCCESS;
 
     (*tree).leaves_within_distance(tree_root, box_center, radius, leaves);
@@ -145,7 +150,7 @@ moab::ErrorCode
     if (moab::MB_SUCCESS != rval) return rval;
 
     // obtain the set of unique points in the box 
-    std_vector_EntityHandle::iterator i; 
+    std::vector<moab::EntityHandle>::iterator i; 
     moab::Interface* mb = tree->moab();
     moab::Range leaf_points;
     moab::Range::iterator j;

@@ -37,10 +37,6 @@ namespace moab {
 class KDENeighborhood
 {
   public:
-    // Typedefs
-    typedef std::vector<moab::EntityHandle> std_vector_EntityHandle;
-
-  public:
     /**
      * \brief Constructor
      * \param event the tally event for which the neighborhood is desired
@@ -57,14 +53,13 @@ class KDENeighborhood
 
     /**
      * \brief Gets the calculation points for this neighborhood region
-     * \param points the vector to which the calculation points are copied
-     * \return the MOAB ErrorCode value
+     * \return vector of all calculation points in this neighborhood region
      *
      * The neighborhood region is currently assumed to be rectangular.  This
      * method will therefore return all of the calculation points that exist
      * within the boxed region defined by min_corner and max_corner.
      */
-    moab::ErrorCode get_points(std_vector_EntityHandle& points) const;
+    std::vector<moab::EntityHandle> get_points() const;
 
     /**
      * \brief Determines if point lies within radius of cylindrical region
@@ -117,7 +112,7 @@ class KDENeighborhood
      * \param points stores unique set of vertices that exist inside box
      * \return the MOAB ErrorCode value
      */
-    moab::ErrorCode points_in_box(std_vector_EntityHandle& points) const;
+    moab::ErrorCode points_in_box(std::vector<moab::EntityHandle>& points) const;
 };
 
 #endif // DAGMC_KDE_NEIGHBORHOOD_HPP

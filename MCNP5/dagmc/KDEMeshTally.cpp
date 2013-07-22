@@ -133,45 +133,34 @@ void KDEMeshTally::compute_score(const TallyEvent& event)
 
     // create the neighborhood region and find all of the calculations points
     KDENeighborhood region(event, bandwidth, *kd_tree, kd_tree_root);
+    std::vector<moab::EntityHandle> calculation_points = region.get_points();
 
-    std::vector<moab::EntityHandle> calculation_points;
-    moab::ErrorCode rval = region.get_points(calculation_points);
-
-    assert(moab::MB_SUCCESS == rval);
-
-    // iterate through the calculation points
+    // iterate through calculation points and compute their final scores
     std::vector<moab::EntityHandle>::iterator i;
-    double coords[3];
 
     // ToDo:  do a correct ebin based on the particle energy; this is temporary
     int ebin = 0;
 
     for (i = calculation_points.begin(); i != calculation_points.end(); ++i)
     {
-        // get coordinates of this point
-        moab::EntityHandle point = *i;
-        rval = mbi->get_coords(&point, 1, coords);
-
-        assert(moab::MB_SUCCESS == rval);
-
-        // compute the final contribution to the tally for this point
-        double score = weight;
+         double score = weight;
+         moab::EntityHandle node = *i;
 
         if (estimator == INTEGRAL_TRACK)
         {
-            score *= integral_track_score(event, moab::CartVect(coords));
+            score *= integral_track_score(node, event);
         }
         else if (estimator == SUB_TRACK)
         {
-            score *= subtrack_score(subtrack_points, moab::CartVect(coords));
+            score *= subtrack_score(node, subtrack_points);
         }
         else // estimator == COLLISION
         {
-            score *= collision_score(event.position, moab::CartVect(coords));
+            score *= evaluate_kernel(node, event.position);
         }
 
         // add score to KDE mesh tally for the current history
-        add_score_to_tally(point, score, ebin);
+        add_score_to_tally(node, score, ebin);
     }
 }
 //---------------------------------------------------------------------------//
@@ -438,14 +427,44 @@ moab::CartVect KDEMeshTally::get_optimal_bandwidth() const
 //---------------------------------------------------------------------------//
 // KDE ESTIMATOR METHODS
 //---------------------------------------------------------------------------//
-// NOTE: integral_track_estimator uses the 4-point gaussian quadrature method
-double KDEMeshTally::integral_track_score(const TallyEvent& event,
-                                          const moab::CartVect& X) const
+// TODO: need to account for boundary kernel if node is a boundary point and
+// correction requested by user (just using normal evaluate for now)
+double KDEMeshTally::evaluate_kernel(const moab::EntityHandle& node,
+                                     const moab::CartVect& observation) const
 {
+    // get coordinates of calculation point from mesh node
+    moab::ErrorCode rval = moab::MB_SUCCESS;
+    moab::CartVect coords(0.0, 0.0, 0.0);
+
+    rval = mbi->get_coords(&node, 1, coords.array());
+    assert(rval == moab::MB_SUCCESS);
+
+    // evaluate the 3D kernel function
+    double kernel_value = 1.0;
+
+    for (int i = 0; i < 3; ++i)
+    {
+        double u = (coords[i] - observation[i]) / bandwidth[i];
+        kernel_value *= kernel->evaluate(u) / bandwidth[i];
+    }
+
+    return kernel_value;
+}                    
+//---------------------------------------------------------------------------//
+// NOTE: integral_track_estimator uses the 4-point gaussian quadrature method
+double KDEMeshTally::integral_track_score(const moab::EntityHandle& node,
+                                          const TallyEvent& event) const
+{
+    // get coordinates of calculation point from mesh node
+    moab::ErrorCode rval = moab::MB_SUCCESS;
+    moab::CartVect coords(0.0, 0.0, 0.0);
+
+    rval = mbi->get_coords(&node, 1, coords.array());
+    assert(rval == moab::MB_SUCCESS);
+
     // determine the limits of integration
-    std::pair<double, double> limits;
-    
-    bool valid_limits = set_integral_limits(event, X, limits);
+    std::pair<double, double> limits;  
+    bool valid_limits = set_integral_limits(event, coords, limits);
 
     // compute value of the integral only if valid limits exist
     if (valid_limits)
@@ -455,25 +474,16 @@ double KDEMeshTally::integral_track_score(const TallyEvent& event,
         double c2 = 0.5 * (limits.second + limits.first);
 
         // sum contributions for all quadrature points
-        double sum = 0;
+        double sum = 0.0;
 
         for (int i = 0; i < 4; ++i)
         {
             // define scaled quadrature point
             double s = c1 * quad_points[i] + c2;
 
-            // compute the value of the kernel function K(X, s)
-            double kernel_value = 1;
-
-            for (int j = 0; j < 3; ++j)
-            {
-                double u = X[j] - event.position[j] - s * event.direction[j];
-                u /= bandwidth[j];
-                kernel_value *= kernel->evaluate(u) / bandwidth[j];
-            }
-        
-            // multiply by quadrature weight and add to sum
-            sum += quad_weights[i] * kernel_value;
+            // determine observation point and add next contribution to sum
+            moab::CartVect observation = event.position + s * event.direction;
+            sum += quad_weights[i] * evaluate_kernel(node, observation);
         }
 
         // return value of the integral
@@ -482,7 +492,7 @@ double KDEMeshTally::integral_track_score(const TallyEvent& event,
     else
     {
         // integration limits are not valid so no score is computed
-        return 0;
+        return 0.0;
     }
 }
 //---------------------------------------------------------------------------//
@@ -541,26 +551,17 @@ bool KDEMeshTally::set_integral_limits(const TallyEvent& event,
     return valid_limits;
 }
 //---------------------------------------------------------------------------//
-double KDEMeshTally::subtrack_score(const std::vector<moab::CartVect>& points,
-                                    const moab::CartVect& X) const
+double KDEMeshTally::subtrack_score(const moab::EntityHandle& node,
+                                    const std::vector<moab::CartVect>& points) const
 {
     // iterate through the sub-track points
     std::vector<moab::CartVect>::const_iterator i;
-    double score = 0;
+    double score = 0.0;
 
     for (i = points.begin(); i != points.end(); ++i)
     {
-        // Compute the value of the kernel function K(X)
-        double kernel_value = 1;
-
-        for (int j = 0; j < 3; ++j)
-        {
-            double u = (X[j] - (*i)[j]) / bandwidth[j];
-            kernel_value *= kernel->evaluate(u) / bandwidth[j];
-        }
-
         // add kernel contribution for sub-track point to sum
-        score += kernel_value;
+        score += evaluate_kernel(node, *i);
     }
 
     // normalize by the total number of sub-track points
@@ -569,8 +570,8 @@ double KDEMeshTally::subtrack_score(const std::vector<moab::CartVect>& points,
     return score;
 }
 //---------------------------------------------------------------------------//
-std_vector_CartVect KDEMeshTally::choose_points(unsigned int p,
-                                                const TallyEvent& event) const
+std::vector<moab::CartVect> KDEMeshTally::choose_points(unsigned int p,
+                                                        const TallyEvent& event) const
 {
     // make sure the number of sub-tracks is valid
     assert(p > 0);
@@ -596,21 +597,6 @@ std_vector_CartVect KDEMeshTally::choose_points(unsigned int p,
     }
  
     return random_points;
-}
-//---------------------------------------------------------------------------//
-double KDEMeshTally::collision_score(const moab::CartVect& collision_point,
-                                     const moab::CartVect& X) const
-{
-    // compute the value of the kernel function K(X)
-    double score = 1;
-
-    for (int i = 0; i < 3; ++i)
-    {
-        double u = (X[i] - collision_point[i]) / bandwidth[i];
-        score *= kernel->evaluate(u) / bandwidth[i];
-    }
-
-    return score;
 }
 //---------------------------------------------------------------------------//
 
