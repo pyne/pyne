@@ -1,6 +1,7 @@
 from pyne import transmute as tm, nucname as nn
 import numpy as np
 import tables as tb
+import time
 nuc = nn.zzaaam('FE56')
 inp = {nuc : 1.}
 t_sim = 31536000
@@ -43,8 +44,10 @@ print('Flux initialized.')
 filename = 'test.tree'
 tol = 1e-7
 print('Begin transmutation.')
+x = time.time()
 with open(filename,'w') as tree:
     out = tm.transmute(inp,t_sim,phi,tree,tol)
+elapsed = time.time() - x
 total_dens = str(sum(out.values()))
 iron_dens = 7.86
 iron_mass = 55.847
@@ -59,3 +62,4 @@ tm.write_hdf5(h5file, group, out, 'test_volume')
 h5file.close()
 print('Closed hdf5.')
 print('Total density: ' + total_dens + '.')
+print('Transmutation time: ' + str(elapsed) + '.')
