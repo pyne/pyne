@@ -576,6 +576,50 @@ MBEntityHandle check_reg(MBEntityHandle volume, double point[3], double dir[3])
     }
 }
 
+void lkmgwr(double& pSx, double& pSy, double& pSz,
+            double* pV, const int& oldReg, const int& oldLttc,
+	    int& flagErr, int& newReg, int& newLttc)
+{
+    std::cerr<<"============= LKMGWR =============="<<std::endl;
+    const double xyz[] = {pSx, pSy, pSz}; // location of the particle (xyz)
+    int is_inside = 0; // logical inside or outside of volume
+    int num_vols = DAG->num_entities(3); // number of volumes
+
+    for (int i = 1 ; i <= num_vols ; i++) // loop over all volumes
+      {
+	MBEntityHandle volume = DAG->entity_by_index(3, i); // get the volume by index
+	// No ray history or ray direction.
+	MBErrorCode code = DAG->point_in_volume(volume, xyz, is_inside);
+
+	// check for non error
+	if(MB_SUCCESS != code) 
+	  {
+	    std::cout << "Error return from point_in_volume!" << std::endl;
+	    flagErr = 1;
+	    return;
+	  }
+
+	if ( is_inside == 1 ) // we are inside the cell tested
+	  {
+	    newReg = i;
+	    flagErr = i+1;
+	    if(debug)
+	      {
+		std::cout << "point is in region = " << newReg << std::endl;
+	      }
+	    return;
+	  }
+      }  // end loop over all volumes
+
+    std::cout << "particle is nowhere!" << std::endl;
+    newReg = -100;
+    std::cout << "point is not in any volume" << std::endl;
+    return;
+
+
+}
+
+
 // ToDo:  remove? jcz
 //---------------------------------------------------------------------------//
 // special_check(..)
