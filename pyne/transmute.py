@@ -506,14 +506,17 @@ def _tree_log(depth, nuc, N, tree):
     None
         This method only writes to the File "tree".
     """
+    # Don't print a zero density.
+    if N == 0:
+        return None
     space = '   |'
     arrow = '--> '
-    openPar  = ' ('
-    closePar = ')\n'
+    blank = ' '
+    newline = '\n'
     spacing = depth * space
     name = nucname.name(nuc)
     Nstr = str(N)
-    entry = spacing + arrow + name + openPar + Nstr + closePar
+    entry = spacing + arrow + name + blank + Nstr + newline
     tree.write(entry)
     tree.flush()
     return None
