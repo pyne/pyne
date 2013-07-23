@@ -21,13 +21,6 @@ const char* const KDEMeshTally::kde_estimator_names[] = {"collision",
                                                          "integral-track",
                                                          "sub-track"};
 
-// quadrature points and weights for the integral_track_score method
-const double quad_points[4] = {0.339981043585, -0.339981043585,
-                               0.861136311594, -0.861136311594};
-
-const double quad_weights[4] = {0.652145154863, 0.652145154863,
-                                0.347854845137, 0.347854845137};
-
 //---------------------------------------------------------------------------//
 // CONSTRUCTOR
 //---------------------------------------------------------------------------//
@@ -39,6 +32,7 @@ KDEMeshTally::KDEMeshTally(int id, const TallyInput& input,
       kernel(NULL),
       use_boundary_correction(false),
       num_subtracks(3),
+      quadrature(NULL),
       mbi(new moab::Core())
 {
     std::cout << "Creating KDE " << kde_estimator_names[estimator]
@@ -59,7 +53,12 @@ KDEMeshTally::KDEMeshTally(int id, const TallyInput& input,
     std::cout << "    using " << kernel->get_kernel_name()
               << " kernel and bandwidth " << bandwidth << std::endl;
 
-    if (estimator == SUB_TRACK)
+    if (estimator == INTEGRAL_TRACK)
+    {
+        // set up quadrature rule for the integral_track estimator
+        quadrature = new Quadrature(4);
+    }
+    else if (estimator == SUB_TRACK)
     {
         std::cout << "    splitting full tracks into "
                   << num_subtracks << " sub-tracks" << std::endl;
@@ -96,7 +95,8 @@ KDEMeshTally::~KDEMeshTally()
 {
     delete kd_tree;
     delete kernel;
-    delete mbi;  
+    delete mbi;
+    delete quadrature;  
 }
 
 //---------------------------------------------------------------------------//
@@ -427,6 +427,12 @@ moab::CartVect KDEMeshTally::get_optimal_bandwidth() const
 //---------------------------------------------------------------------------//
 // KDE ESTIMATOR METHODS
 //---------------------------------------------------------------------------//
+double KDEMeshTally::PathKernel::evaluate(double s) const
+{
+    moab::CartVect observation = event.position + s * event.direction;  
+    return kde_tally.evaluate_kernel(node, observation);
+}
+//---------------------------------------------------------------------------//
 // TODO: need to account for boundary kernel if node is a boundary point and
 // correction requested by user (just using normal evaluate for now)
 double KDEMeshTally::evaluate_kernel(const moab::EntityHandle& node,
@@ -451,7 +457,6 @@ double KDEMeshTally::evaluate_kernel(const moab::EntityHandle& node,
     return kernel_value;
 }                    
 //---------------------------------------------------------------------------//
-// NOTE: integral_track_estimator uses the 4-point gaussian quadrature method
 double KDEMeshTally::integral_track_score(const moab::EntityHandle& node,
                                           const TallyEvent& event) const
 {
@@ -469,29 +474,12 @@ double KDEMeshTally::integral_track_score(const moab::EntityHandle& node,
     // compute value of the integral only if valid limits exist
     if (valid_limits)
     {
-        // define scaling constants
-        double c1 = 0.5 * (limits.second - limits.first);
-        double c2 = 0.5 * (limits.second + limits.first);
-
-        // sum contributions for all quadrature points
-        double sum = 0.0;
-
-        for (int i = 0; i < 4; ++i)
-        {
-            // define scaled quadrature point
-            double s = c1 * quad_points[i] + c2;
-
-            // determine observation point and add next contribution to sum
-            moab::CartVect observation = event.position + s * event.direction;
-            sum += quad_weights[i] * evaluate_kernel(node, observation);
-        }
-
-        // return value of the integral
-        return c1 * sum;
+        // construct a PathKernel and return value of its integral
+        PathKernel path_kernel(*this, node, event);
+        return quadrature->integrate(limits.first, limits.second, path_kernel);
     }
-    else
+    else // integration limits are not valid so no score is computed
     {
-        // integration limits are not valid so no score is computed
         return 0.0;
     }
 }

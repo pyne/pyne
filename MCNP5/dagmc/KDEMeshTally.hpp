@@ -10,6 +10,8 @@
 
 #include "KDEKernel.hpp"
 #include "MeshTally.hpp"
+#include "TallyEvent.hpp"
+#include "Quadrature.hpp"
 
 // forward declarations
 namespace moab {
@@ -183,6 +185,9 @@ class KDEMeshTally : public MeshTally
     /// Number of sub-tracks used to compute KDE sub-track mesh tally scores
     unsigned int num_subtracks;
 
+    /// Quadrature used to compute KDE integral-track mesh tally scores
+    Quadrature* quadrature;
+
     /// MOAB instance that stores all of the mesh data
     moab::Interface* mbi;
 
@@ -258,6 +263,37 @@ class KDEMeshTally : public MeshTally
     moab::CartVect get_optimal_bandwidth() const;
   
     // >>> KDE ESTIMATOR METHODS
+
+    /**
+     * \class PathKernel
+     * \brief Defines the path length kernel function K(X, s)
+     */
+    class PathKernel : public Function
+    {
+      public:
+        /**
+         * \brief Constructor
+         * \param kde_tally the KDEMeshTally object using this path kernel
+         * \param node the mesh node representing the calculation point (x, y, z)
+         * \param event the tally event containing the track segment data
+         */
+        PathKernel(const KDEMeshTally& kde_tally,
+                   const moab::EntityHandle& node,
+                   const TallyEvent& event)
+            : kde_tally(kde_tally), node(node), event(event) {}
+
+        /**
+         * \brief Evaluates the path length kernel function
+         * \param s the path length for which to evaluate this function
+         * \return K(X, s)
+         */
+        double evaluate(double s) const;
+
+      private:
+        const KDEMeshTally& kde_tally;
+        const moab::EntityHandle& node;
+        const TallyEvent& event;
+    };
 
     /**
      * \brief Computes value of the 3D kernel function
