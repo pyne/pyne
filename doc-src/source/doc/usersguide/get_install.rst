@@ -104,7 +104,7 @@ If these do not apply to you, please modify your steps accordingly.
      *(For a shortcut to installing DAG-MCNP5.1.51 you may be able to use the DagmcBuildPackage .)*
 
 CGM
-______________
+_____
 
 Create a directory to build CGM:
 ::
@@ -124,7 +124,7 @@ If installing CGM version 12.2 from a tarball, ``CGM-12.2.0.tar.gz``:
     prompt%> tar xzf ~/CGM-12.2.0.tar.gz
     prompt%> ln -s CGM-12.2.0 src
 
-In all cases:
+In all CGM cases:
 ::
     prompt%> cd bld
     prompt%> ../src/configure --enable-optimize \
@@ -135,7 +135,7 @@ In all cases:
     prompt%> make install
 
 HDF5
-_________________
+=========
 
 Follow these steps
 ::
