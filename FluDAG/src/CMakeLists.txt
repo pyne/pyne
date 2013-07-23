@@ -29,7 +29,7 @@ SET (fluka_libdir ${FLUPRO})
 #	        DEPENDS mgdraw.o)
 
 SET (commonfiles cpp/fluka_funcs.cpp cpp/dagmc_utils.cpp cpp/Input.cpp)
-SET (wrapperfiles cpp/WrapReg2Name.cc cpp/WrapLookMG.cc cpp/WrapMag.cc 
+SET (wrapperfiles cpp/WrapReg2Name.cc cpp/WrapMag.cc 
 		  cpp/WrapLookFX.cc cpp/WrapReg.cc cpp/WrapFlgfwr.cc)
 
 # Create the executable that can call flukam_
