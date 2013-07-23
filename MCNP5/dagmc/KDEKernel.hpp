@@ -24,7 +24,7 @@
  * different methods
  *
  *     1) evaluate(double u)
- *     2) evaluate(double u, double distance, double bandwidth, Boundary side)
+ *     2) evaluate(double u, double distance, double bandwidth, int side)
  *
  * The first method evaluates the standard kernel function K(u), whereas the
  * second evaluates K_b(u) based on a boundary correction method.  This boundary
@@ -57,11 +57,6 @@ class KDEKernel
     KDEKernel(){}
 
   public:
-    /**
-     * \brief Defines the location of the boundary for 1D geometries
-     */
-    enum Boundary {LOWER = 0, UPPER = 1};
-
     /**
      * \brief Virtual destructor
      */
@@ -117,7 +112,7 @@ class KDEKernel
      * \param u the value at which K_b will be evaluated
      * \param distance the distance from the calculation point to the boundary
      * \param bandwidth the maximum distance for which correction is needed
-     * \param side the location of the boundary
+     * \param side the location of the boundary (0 = LOWER, 1 = UPPER)
      * \return K_b(u)
      *
      * The default boundary correction method uses a boundary kernel to evaluate
@@ -139,7 +134,7 @@ class KDEKernel
     virtual double evaluate(double u,
                             double distance,
                             double bandwidth,
-                            Boundary side) const;
+                            unsigned int side) const;
 
   protected:
     /**

@@ -1,5 +1,6 @@
 // MCNP5/dagmc/KDEKernel.cpp
 
+#include <cassert>
 #include <cmath>
 
 #include "KDEKernel.hpp"
@@ -43,8 +44,10 @@ KDEKernel* KDEKernel::createKernel(const std::string& type, unsigned int order)
 double KDEKernel::evaluate(double u,
                            double distance,
                            double bandwidth,
-                           Boundary side) const
+                           unsigned int side) const
 {
+    assert(side <= 1);
+
     // compute the scaled distance from the boundary
     double p = distance / bandwidth;
 
@@ -57,7 +60,7 @@ double KDEKernel::evaluate(double u,
 
     if (p < 1.0)
     {
-        if (side == LOWER)
+        if (side == 0) // side == LOWER
         {
             upper_limit = p;
         }

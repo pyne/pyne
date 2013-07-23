@@ -433,8 +433,6 @@ double KDEMeshTally::PathKernel::evaluate(double s) const
     return kde_tally.evaluate_kernel(node, observation);
 }
 //---------------------------------------------------------------------------//
-// TODO: need to account for boundary kernel if node is a boundary point and
-// correction requested by user (just using normal evaluate for now)
 double KDEMeshTally::evaluate_kernel(const moab::EntityHandle& node,
                                      const moab::CartVect& observation) const
 {
@@ -445,14 +443,45 @@ double KDEMeshTally::evaluate_kernel(const moab::EntityHandle& node,
     rval = mbi->get_coords(&node, 1, coords.array());
     assert(rval == moab::MB_SUCCESS);
 
+    // get pointers to tag data if user requested boundary correction
+    int* boundary_data = NULL;
+    double* distance_data = NULL;
+
+    if (use_boundary_correction)
+    {
+        boundary_data = new int[3];
+        rval = mbi->tag_get_data(boundary_tag, &node, 1, boundary_data);
+        assert(rval == moab::MB_SUCCESS);
+
+        distance_data = new double[3];
+        rval = mbi->tag_get_data(distance_tag, &node, 1, distance_data);
+        assert(rval == moab::MB_SUCCESS);
+    }
+
     // evaluate the 3D kernel function
     double kernel_value = 1.0;
 
     for (int i = 0; i < 3; ++i)
     {
         double u = (coords[i] - observation[i]) / bandwidth[i];
-        kernel_value *= kernel->evaluate(u) / bandwidth[i];
+
+        if (use_boundary_correction && boundary_data[i] != -1)
+        {
+            // use boundary kernel for this direction
+            kernel_value *= kernel->evaluate(u,
+                                             distance_data[i],
+                                             bandwidth[i],
+                                             boundary_data[i]);
+        }
+        else // use standard kernel for this direction
+        {
+            kernel_value *= kernel->evaluate(u) / bandwidth[i];
+        }
     }
+
+    // memory management
+    delete[] boundary_data;
+    delete[] distance_data;
 
     return kernel_value;
 }                    
