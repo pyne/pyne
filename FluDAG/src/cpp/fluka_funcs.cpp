@@ -557,7 +557,6 @@ MBEntityHandle check_reg(MBEntityHandle volume, double point[3], double dir[3])
       exit(0);
     }
 }
-*/
 
 void f_lookdb(double& pSx, double& pSy, double& pSz,
 	    double* pV, const int& oldReg, const int& oldLttc,
