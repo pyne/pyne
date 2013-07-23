@@ -283,19 +283,28 @@ access to DAG-Tripoli4, please contact `Jean-Christophe Trama
 FluDAG Build
 +++++++++++++++++++++++
 FluDAG uses `FLUKA <http://www.fluka.org>`_ from CERN/INFN with the DAGMC Toolkit.
-To build and install FluDAG follow these additional steps after building DAGMC:
+The steps To build and install FluDAG follow.
 
-*Download and Build FLUKA*
+*Download FLUKA*
 
 In order to download FLUKA you need to become a registered user, which you can do at 
-the `FLUKA website <https://www.fluka.org/fluka.php?id=secured_intro>`_.
-Save the user id and password for future FLUKA updates.  For a 64 bit linux installation the download filename is of the form fluka20xx.xx-linux-gfor64bitAA.tar.gz
+the `FLUKA register page <https://www.fluka.org/fluka.php?id=secured_intro>`_.
+Save the user id and password for future FLUKA updates.  For a 64 bit linux installation the download filename is of the form *fluka20xx.xx-linux-gfor64bitAA.tar.gz*.  The build steps below assume the tarfile 
+has been placed in the $HOME/Downloads directory.
 
-FLUKA provides libraries, which must be linked together to produce the desired set of utilities.  
-While there are some source files for utilites or as stubs for user-defined functionality, FLUKA is provided mostly as object code.  Building and installing FLUKA is a matter of linking object code and adding some environment variables.  
-To build the FLUKA library and utilities the following steps assume you have the FLUKA tar.gz file in your Downloads directory and that you are in the $HOME directory:
+*Setup Environment and Extract FLUKA tarfile*
 
+Add the following two export statements to your login script (probably a file named .bashrc):
+export $FLUPRO=path/toFLUKA 
+export $FLUFOR=gfortran 
+
+To activate these environment variables 
+While there are some source files for utilites and stubs FLUKA is provided mostly as object code.  
+Building and installing FLUKA is a matter of linking the object code and setting two environment 
+variables.  
 ::
+
+    prompt%> cd $HOME
     prompt%> mkdir FLUKA
     prompt%> cd FLUKA
     prompt%> tar zxvf $HOME/Downloads/FLUKAXX.X.tar.gz
@@ -303,7 +312,7 @@ To build the FLUKA library and utilities the following steps assume you have the
 After you have untarred the FLUKA download file you can read the README file in the top level directory for additional help.
 The instructions for installing FLUKA are in their online `manual <http://www.fluka.org/fluka.php?id=man_onl&sub=5`_.  The instructions for installing on a 64 bit machine are outlined below.
 
+*Link FLUKA Object Files*
+
 Per the FLUKA install instructions add the FLUKA environment variables to your login script:
 
-export $FLUPRO=path/toFLUKA 
-export $FLUFOR=gfortran 
