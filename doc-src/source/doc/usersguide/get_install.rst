@@ -68,16 +68,11 @@ Summary
 
 Toolkit Installation
 ++++++++++++++++++++++++++++
-*Installing the Toolkit*
 
 Installing the MOAB library can be accomplished in either of two ways:
 
-* Run the build_dagmc_stack script, when it becomes available.
 * Compile each component individually in a 4-step process.
-
-**Build and Install MOAB using a Build Script**
-
-The script build_dagmc_stack.bash is currently under development.
+* Run the *build_dagmc_stack.bash* script.
 
 **Compile each component individually**
 
@@ -104,9 +99,9 @@ If these do not apply to you, please modify your steps accordingly.
      *(For a shortcut to installing DAG-MCNP5.1.51 you may be able to use the DagmcBuildPackage .)*
 
 CGM
-_____
+````
 
-Create a directory to build CGM:
+CGM:  Create a directory to build in:
 ::
     prompt%> mkdir -p $HOME/dagmc_bld/CGM/bld
     prompt%> cd $HOME/dagmc_bld/CGM
@@ -135,9 +130,9 @@ In all CGM cases:
     prompt%> make install
 
 HDF5
-=========
+====
 
-Follow these steps
+HDF5:  Follow these steps
 ::
     prompt%> mkdir $HOME/dagmc_bld/HDF5/bld
     prompt%> cd $HOME/dagmc_bld/HDF5
@@ -150,15 +145,15 @@ Follow these steps
 
 
 MOAB
-_________________
+````
 
-Create a directory to install MOAB:
+MOAB: Create a directory to install in
 ::
     prompt%> mkdir -p $HOME/dagmc_bld/MOAB/bld
     prompt%> cd $HOME/dagmc_bld/MOAB
 
 
-If installing from SVN repository:
+If installing MOAB from SVN repository:
 ::
     prompt%> svn co https://svn.mcs.anl.gov/repos/ITAPS/MOAB/trunk
     prompt%> cd trunk
@@ -167,13 +162,13 @@ If installing from SVN repository:
     prompt%> ln -s trunk src
 
 
-If installing from a tarball, ``MOAB-4.60.tar.gz``:
+If installing MOAB from a tarball, ``MOAB-4.60.tar.gz``:
 ::
     prompt%> tar xzf ~/MOAB-4.60.tar.gz
     prompt%> ln -s MOAB-4.60 src
 
 
-In all cases:
+In all MOAB cases:
 ::
     prompt%> cd bld
     prompt%> ../src/configure --enable-optimize \
@@ -184,11 +179,21 @@ In all cases:
     prompt%> make
     prompt%> make install
 
+**Build and Install MOAB using a Build Script**
+
+The script *build_dagmc_stack.bash* is in UW-Madison's svalinn/DAGMC repository,
+`DAGMC git repo <https://github.com/svalinn/DAGMC>`_ under DAGMC/MCNP5/
+To see the available options, in the directory containing *build_dagmc_stack.bash* type 
+:: 
+    prompt%> ./build_dagmc_stack.bash --help
+
+This script is under development.  It is recommended that the components be compiled individually 
+at this time.
 
 Applying DAGMC to Specific Monte Carlo Codes
 --------------------------------------------
 
-DAG-MCNP5 Biuild/Install
+DAG-MCNP5 Build/Install
 +++++++++++++++++++++++++
 
 If you would like to use DAGMC with MCNP5, known as DAG-MCNP5, you will also need:
@@ -281,10 +286,24 @@ FluDAG uses `FLUKA <http://www.fluka.org>`_ from CERN/INFN with the DAGMC Toolki
 To build and install FluDAG follow these additional steps after building DAGMC:
 
 *Download and Build FLUKA*
-These instructions follow the FLUKA README:
 
-1. Download the FLUKA tarball and follow the README instructions  
-2. Per the FLUKA install instructions add the FLUKA environment variables to your login script:
+In order to download FLUKA you need to become a registered user, which you can do at 
+the `FLUKA website <https://www.fluka.org/fluka.php?id=secured_intro>`_.
+Save the user id and password for future FLUKA updates.  For a 64 bit linux installation the download filename is of the form fluka20xx.xx-linux-gfor64bitAA.tar.gz
 
-   a.  export $FLUPRO=path/toFLUKA 
-   b.  export $FLUFOR=gfortran 
+FLUKA provides libraries, which must be linked together to produce the desired set of utilities.  
+While there are some source files for utilites or as stubs for user-defined functionality, FLUKA is provided mostly as object code.  Building and installing FLUKA is a matter of linking object code and adding some environment variables.  
+To build the FLUKA library and utilities the following steps assume you have the FLUKA tar.gz file in your Downloads directory and that you are in the $HOME directory:
+
+::
+    prompt%> mkdir FLUKA
+    prompt%> cd FLUKA
+    prompt%> tar zxvf $HOME/Downloads/FLUKAXX.X.tar.gz
+
+After you have untarred the FLUKA download file you can read the README file in the top level directory for additional help.
+The instructions for installing FLUKA are in their online `manual <http://www.fluka.org/fluka.php?id=man_onl&sub=5`_.  The instructions for installing on a 64 bit machine are outlined below.
+
+Per the FLUKA install instructions add the FLUKA environment variables to your login script:
+
+export $FLUPRO=path/toFLUKA 
+export $FLUFOR=gfortran 
