@@ -526,6 +526,7 @@ void slow_check(double pos[3], const double dir[3], int &oldReg)
 //---------------------------------------------------------------------------//
 // NOT CALLED - Helper function
 // check we are where we say we are
+/*
 MBEntityHandle check_reg(MBEntityHandle volume, double point[3], double dir[3]) 
 {
   int is_inside;
@@ -555,41 +556,8 @@ MBEntityHandle check_reg(MBEntityHandle volume, double point[3], double dir[3])
       exit(0);
     }
 }
-
-// ToDo:  remove? jcz
-//---------------------------------------------------------------------------//
-// special_check(..)
-//---------------------------------------------------------------------------//
-// NOT CALLED - Helper function
-/*
-void special_check(double pos[3],const double dir[3], int& oldReg)
-{
-  int num_vols = DAG->num_entities(3);  // number of volumes
-  int counter = 0; //
-  int is_inside = 0;
-  do 
-    {
-      // bump particle position along dir
-      pos[0]=pos[0]+(dir[0]*1.0e-9);
-      pos[1]=pos[1]+(dir[1]*1.0e-9);
-      pos[2]=pos[2]+(dir[2]*1.0e-9);
-
-      for (int i = 1 ; i <= num_vols ; i++) // loop over all volumes
-	{
-	  MBEntityHandle volume = DAG->entity_by_index(3, i); // get the volume by index
-	  MBErrorCode code = DAG->point_in_volume(volume, pos, is_inside,dir); 
-	  if ( is_inside == 1) // if in volume
-	    {
-	      std::cout << "had to bump " << counter << " times" << std::endl;
-	      oldReg = DAG->index_by_handle(volume); //set oldReg
-	      return;
-	    }
-	}
-      counter++;
-    }
-  while ( is_inside != 0 );
-}
 */
+
 void f_lookdb(double& pSx, double& pSy, double& pSz,
 	    double* pV, const int& oldReg, const int& oldLttc,
 	    int& newReg, int& flagErr, int& newLttc)
