@@ -118,7 +118,7 @@ def parse_eaf_xs(build_file):
 
         # Store information in new row of array.
         eafrow = (
-                  nucname.zzaaam(md['iso']),
+                  nucname.id(md['iso']),
                   md['rxnum'],
                   md['rxstr'],
                   md['daugh'],

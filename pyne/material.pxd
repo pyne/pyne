@@ -13,7 +13,6 @@ ELSE:
 cimport cpp_material
 cimport pyne.stlcontainers as conv
 
-
 cdef cpp_map[int, double] dict_to_comp(dict)
 
 cdef class _Material:

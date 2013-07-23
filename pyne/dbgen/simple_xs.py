@@ -32,18 +32,18 @@ def grab_kaeri_simple_xs(build_dir=""):
     # Grab and parse elemental summary files.
     all_nuclides = set()
     for element in nucname.name_zz.keys():
-        htmlfile = element + '.html'
+        htmlfile = element.upper() + '.html'
         if htmlfile not in already_grabbed:
-            grab_kaeri_nuclide(element, build_dir)
-
-        all_nuclides = all_nuclides | parse_for_all_isotopes(os.path.join(build_dir, htmlfile))
+            grab_kaeri_nuclide(element.upper(), build_dir)
+        all_nuclides = all_nuclides | parse_for_all_isotopes(os.path.join(build_dir, 
+                                                                          htmlfile))
 
     # Grab nuclide XS summary files
     for nuc in sorted(all_nuclides):
         nuc = nucname.name(nuc)
-        htmlfile = nuc + '_2.html'
+        htmlfile = nuc.upper() + '_2.html'
         if htmlfile not in already_grabbed:
-            grab_kaeri_nuclide(nuc, build_dir, 2)
+            grab_kaeri_nuclide(nuc.upper(), build_dir, 2)
 
 
 
@@ -145,17 +145,16 @@ def parse_simple_xs(build_dir=""):
     # Grab and parse elemental summary files.
     all_nuclides = set()
     for element in nucname.name_zz.keys():
-        htmlfile = element + '.html'
-        all_nuclides = all_nuclides | parse_for_all_isotopes(os.path.join(build_dir, htmlfile))
-
-    all_nuclides = sorted([nucname.zzaaam(nuc) for nuc in all_nuclides])
-
+        htmlfile = element.upper() + '.html'
+        all_nuclides = all_nuclides | parse_for_all_isotopes(os.path.join(build_dir, 
+                                                                          htmlfile))
+    all_nuclides = sorted([nucname.id(nuc) for nuc in all_nuclides])
     energy_tables = dict([(eng, np.zeros(len(all_nuclides), dtype=simple_xs_dtype)) \
                           for eng in simple_xs_energy.keys()])
 
     # Loop through species
     for i, nuc in enumerate(all_nuclides):
-        nuc_name = nucname.name(nuc)
+        nuc_name = nucname.name(nuc).upper()
         filename = os.path.join(build_dir, nuc_name + '_2.html')
 
         # Loop through all energy types

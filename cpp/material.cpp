@@ -73,7 +73,7 @@ void pyne::Material::_load_comp_protocol0(hid_t db, std::string datapath, int ro
     if (nuckey == "Mass" || nuckey == "MASS" || nuckey == "mass")
       mass = nucvalue;
     else
-      comp[pyne::nucname::zzaaam(nuckey)] = nucvalue;
+      comp[pyne::nucname::id(nuckey)] = nucvalue;
 
     H5Dclose(nucset);
     delete[] nkey;
@@ -547,7 +547,7 @@ void pyne::Material::from_text(std::string filename)
     else if (keystr == "APerM")
       atoms_per_mol = pyne::to_dbl(valstr);
     else
-      comp[pyne::nucname::zzaaam(keystr)] = pyne::to_dbl(valstr);
+      comp[pyne::nucname::id(keystr)] = pyne::to_dbl(valstr);
   };
 
   f.close();
@@ -748,15 +748,15 @@ pyne::Material pyne::Material::expand_elements()
     pyne::_load_atomic_mass_map();
   abund_itr = pyne::natural_abund_map.begin();
   abund_end = pyne::natural_abund_map.end();
-  zabund = (*abund_itr).first/10000;
+  zabund = nucname::znum((*abund_itr).first);
   for (comp_iter nuc = comp.begin(); nuc != comp.end(); nuc++)
   {
     if(abund_itr == abund_end)
       newcomp.insert(*nuc);
-    else if(0 == (*nuc).first%10000)
+    else if(0 == nucname::anum((*nuc).first))
     {
       n = (*nuc).first;
-      znuc = n/10000;
+      znuc = nucname::znum(n);
       if (znuc < zabund)
       {
         newcomp.insert(*nuc);
@@ -765,7 +765,7 @@ pyne::Material pyne::Material::expand_elements()
       while(zabund <= znuc)
       {
         nabund = (*abund_itr).first;
-        if (zabund == znuc && 0 != nabund%10000 && 0.0 != (*abund_itr).second)
+        if (zabund == znuc && 0 != nucname::anum(nabund) && 0.0 != (*abund_itr).second)
           newcomp[nabund] = (*abund_itr).second * (*nuc).second * \
                             atomic_mass_map[nabund] / atomic_mass_map[n];
         else if (n == nabund && 0.0 == (*abund_itr).second)
@@ -773,10 +773,10 @@ pyne::Material pyne::Material::expand_elements()
         abund_itr++;
         if (abund_itr == abund_end)
         {
-          zabund = 9999999;
+          zabund = 9999999999;
           break;
         }
-        zabund = nabund/10000;
+        zabund = nucname::znum(nabund);
       };
     }
     else
@@ -812,7 +812,7 @@ double pyne::Material::number_density(double mass_dens, double apm)
 pyne::Material pyne::Material::sub_mat(std::set<int> nucset)
 {
   // Grabs a sub-material from this mat based on a set of integers.
-  // Integers can either be of zzaaam form -OR- they can be a z-numer (is 8 for O, 93 for Np, etc).
+  // Integers can either be of id form -OR- they can be a z-numer (is 8 for O, 93 for Np, etc).
 
   pyne::comp_map cm;
   for (pyne::comp_iter i = comp.begin(); i != comp.end(); i++)
@@ -833,7 +833,7 @@ pyne::Material pyne::Material::sub_mat(std::set<std::string> nucset)
   std::set<int> iset;
   for (std::set<std::string>::iterator i = nucset.begin(); i != nucset.end(); i++)
   {
-    iset.insert(pyne::nucname::zzaaam(*i));
+    iset.insert(pyne::nucname::id(*i));
   };
 
   return sub_mat(iset);
@@ -844,7 +844,7 @@ pyne::Material pyne::Material::sub_mat(std::set<std::string> nucset)
 pyne::Material pyne::Material::set_mat (std::set<int> nucset, double value)
 {
   // Sets a sub-material from this mat based on a set of integers.
-  // Integers can either be of zzaaam form -OR- they can be a z-numer (is 8 for O, 93 for Np, etc).
+  // Integers can either be of id form -OR- they can be a z-numer (is 8 for O, 93 for Np, etc).
   // n is the name of the new material.
 
   pyne::comp_map cm;
@@ -872,7 +872,7 @@ pyne::Material pyne::Material::set_mat(std::set<std::string> nucset, double valu
   std::set<int> iset;
   for (std::set<std::string>::iterator i = nucset.begin(); i != nucset.end(); i++)
   {
-    iset.insert(pyne::nucname::zzaaam(*i));
+    iset.insert(pyne::nucname::id(*i));
   };
 
   return set_mat(iset, value);
@@ -884,7 +884,7 @@ pyne::Material pyne::Material::set_mat(std::set<std::string> nucset, double valu
 pyne::Material pyne::Material::del_mat(std::set<int> nucset)
 {
   // Removes a sub-material from this mat based on a set of integers.
-  // Integers can either be of zzaaam form -OR- they can be a z-numer (is 8 for O, 93 for Np, etc).
+  // Integers can either be of id form -OR- they can be a z-numer (is 8 for O, 93 for Np, etc).
   // n is the name of the new material.
 
   pyne::comp_map cm;
@@ -907,7 +907,7 @@ pyne::Material pyne::Material::del_mat (std::set<std::string> nucset)
   std::set<int> iset;
   for (std::set<std::string>::iterator i = nucset.begin(); i != nucset.end(); i++)
   {
-    iset.insert(pyne::nucname::zzaaam(*i));
+    iset.insert(pyne::nucname::id(*i));
   };
 
   return del_mat(iset);
@@ -996,7 +996,7 @@ pyne::Material pyne::Material::del_range(int lower, int upper)
 pyne::Material pyne::Material::sub_u()
 {
   // Returns a material of Uranium that is a submaterial of this one.
-  return sub_range(920000, 930000);
+  return sub_range(920000000, 930000000);
 };
 
 
@@ -1004,7 +1004,7 @@ pyne::Material pyne::Material::sub_u()
 pyne::Material pyne::Material::sub_pu()
 {
   // Returns a material of Plutonium that is a sub-material of this one.
-  return sub_range(940000, 950000);
+  return sub_range(940000000, 950000000);
 };
 
 
@@ -1012,7 +1012,7 @@ pyne::Material pyne::Material::sub_pu()
 pyne::Material pyne::Material::sub_lan()
 {
   // Returns a material of Lanthanides that is a sub-material of this one.
-  return sub_range(570000, 720000);
+  return sub_range(570000000, 720000000);
 };
 
 
@@ -1020,14 +1020,14 @@ pyne::Material pyne::Material::sub_lan()
 pyne::Material pyne::Material::sub_act()
 {
   //Returns a material of Actindes that is a sub-material of this one.
-  return sub_range(890000, 1040000);
+  return sub_range(890000000, 1040000000);
 };
 
 
 pyne::Material pyne::Material::sub_tru()
 {
   // Returns a material of Transuranics that is a sub-material of this one.
-  return sub_range(930000, 10000000);
+  return sub_range(930000000, 10000000000);
 };
 
 
@@ -1035,7 +1035,7 @@ pyne::Material pyne::Material::sub_tru()
 pyne::Material pyne::Material::sub_ma()
 {
   // Returns a material of Minor Actinides that is a sub-material of this one.
-  return sub_range(930000, 1040000).del_range(940000, 950000);
+  return sub_range(930000000, 1040000000).del_range(940000000, 950000000);
 };
 
 
@@ -1043,7 +1043,7 @@ pyne::Material pyne::Material::sub_ma()
 pyne::Material pyne::Material::sub_fp()
 {
   // Returns a material of Fission Products that is a sub-material of this one.
-  return sub_range(0, 890000);
+  return sub_range(0, 890000000);
 };
 
 
