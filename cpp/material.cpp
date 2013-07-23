@@ -738,9 +738,9 @@ double pyne::Material::molecular_weight(double apm)
 
 pyne::Material pyne::Material::expand_elements()
 {
-  // Expands the natural elements of a material and returns a new material
-  // note that this implementation relies on the fact that maps of ints are sored
-  // in a sorted manner in C++.
+  // Expands the natural elements of a material and returns a new material note
+  // that this implementation relies on the fact that maps of ints are stored in
+  // a sorted manner in C++.
   int n, nabund, znuc, zabund;
   comp_map newcomp;
   std::map<int, double>::iterator abund_itr, abund_end;
