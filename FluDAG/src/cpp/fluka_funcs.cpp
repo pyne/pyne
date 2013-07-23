@@ -562,7 +562,6 @@ void lkmgwr(double& pSx, double& pSy, double& pSz,
     return;
 }
 
-
 void f_lookdb(double& pSx, double& pSy, double& pSz,
 	    double* pV, const int& oldReg, const int& oldLttc,
 	    int& newReg, int& flagErr, int& newLttc)
