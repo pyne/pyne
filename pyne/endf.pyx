@@ -23,9 +23,12 @@ import numpy as np
 
 np.import_array()
 
+from pyne cimport cpp_nucname
+
 import matplotlib.pyplot as plt
 from math import e
 
+from pyne import nucname
 import pyne.rxdata as rx
 from pyne.rxname import label
 from pyne.utils import fromendf_tok, endftod
@@ -106,6 +109,9 @@ class Library(rx.RxLib):
         return data
 
     def _read_headers(self):
+        cdef int nuc
+        cdef int mat_id
+        cdef double nucd
         opened_here = False
         if isinstance(self.fh, basestring):
             fh = open(self.fh, 'r')
@@ -117,13 +123,14 @@ class Library(rx.RxLib):
         len_headline = len(fh.readline())
         self.offset += 81 - len_headline
         line = fh.readline()
-        mat_id = int(line[66:70])
-        nuc = int(endftod(line[:11])*10)
+        mat_id = int(line[66:70].strip() or -1)
+        # originally in a float version of ZZAAA.M, ie 94242.1
+        nuc = cpp_nucname.id(<int> (endftod(line[:11])*10))
         # Make a new dict in self.structure to contain the material data.
         if nuc not in self.structure:
             self.structure.update(
-                {nuc:{'styles':'', 'docs':[], 'particles':[], 'data':{},
-                         'matflags':{}}})
+                {nuc:{'styles': "", 'docs': [], 'particles': [], 'data': {},
+                         'matflags': {}}})
             self.mat_dict.update({nuc:{'end_line':[],
                                           'mfs':{}}})
         # Parse header (all lines with 1451)
@@ -160,7 +167,7 @@ class Library(rx.RxLib):
         nextline = fh.readline()
         self.more_files = (nextline != '' and nextline[68:70] != "-1")
         # Update materials dict
-        if mat_id != '':
+        if mat_id != -1:
             self.mat_dict[nuc]['end_line'] = (self.chars_til_now+self.offset)/81
             setattr(self, "mat{0}".format(nuc), self.structure[nuc])
         self._read_mat_flags(nuc)
@@ -430,7 +437,7 @@ class Library(rx.RxLib):
         Parameters
         -----------
         mat_id: int
-            Material ZZAAAM.
+            Material id .
         """
         lrp = self.structure[mat_id]['matflags']['LRP']
         if (lrp == -1 or mat_id in (-1,0)):

@@ -84,8 +84,10 @@ def write_tape4(mat, outfile="TAPE4.INP"):
     lower_z = mat[:'AC']
     upper_z = mat['AC':]
 
-    lower_lines = ["1 {0} {1:.10E}   0 0   0 0   0 0".format(nuc, mass) for nuc, mass in lower_z.mult_by_mass().items()]
-    upper_lines = ["2 {0} {1:.10E}   0 0   0 0   0 0".format(nuc, mass) for nuc, mass in upper_z.mult_by_mass().items()]
+    lower_lines = ["1 {0} {1:.10E}   0 0   0 0   0 0".format(nucname.zzaaam(nuc), mass) \
+                   for nuc, mass in lower_z.mult_by_mass().items()]
+    upper_lines = ["2 {0} {1:.10E}   0 0   0 0   0 0".format(nucname.zzaaam(nuc), mass) \
+                   for nuc, mass in upper_z.mult_by_mass().items()]
     lines = lower_lines + upper_lines + ["0 0 0 0\n"]
 
     tape4 = "\n".join(lines)

@@ -141,9 +141,7 @@ std::string pyne::to_upper(std::string s)
 {
   // change each element of the string to upper case.
   for(unsigned int i = 0; i < s.length(); i++)
-  {
     s[i] = toupper(s[i]);
-  }
   return s;
 }
 
@@ -151,9 +149,21 @@ std::string pyne::to_lower(std::string s)
 {
   // change each element of the string to lower case
   for(unsigned int i = 0; i < s.length(); i++)
-  {
     s[i] = tolower(s[i]);
-  }
+  return s;
+}
+
+
+std::string pyne::capitalize(std::string s)
+{
+  unsigned int slen = s.length();
+  if (slen == 0)
+    return s;
+  // uppercase the first character
+  s[0] = toupper(s[0]);
+  // change each subsequent element of the string to lower case
+  for(unsigned int i = 1; i < slen; i++)
+    s[i] = tolower(s[i]);
   return s;
 }
 
