@@ -63,15 +63,13 @@ class KDENeighborhood
 
     /**
      * \brief Determines if point lies within radius of cylindrical region
-     * \param event the tally event containing the track segment data
      * \param point the calculation point to be tested
      * \return true if point is inside the region, false otherwise
      *
      * Note that this method is only valid for track-based events.  If the
      * event is not a track-based event, then it will always return false.
      */
-    bool point_within_max_radius(const TallyEvent& event,
-                                 const moab::CartVect& point) const;
+    bool point_within_max_radius(const moab::CartVect& point) const;
 
   private:
     /// Minimum and maximum corner of a rectangular neighborhood region
@@ -84,6 +82,9 @@ class KDENeighborhood
     /// KD-Tree containing all mesh nodes in the input mesh
     moab::AdaptiveKDTree* tree;
     moab::EntityHandle tree_root;
+
+    /// Tally event this KDENeighborhood was constructed from
+    const TallyEvent& event;
 
     // >>> PRIVATE METHODS
 

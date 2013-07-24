@@ -71,7 +71,7 @@ class BoundaryKernelTest : public ::testing::Test
     virtual void SetUp()
     {
         kernel = new MockEpanechnikovKernel();
-        side = KDEKernel::LOWER;
+        side = 0;
         distance = 0.5;
         max_distance = 0.5;
     }
@@ -85,7 +85,7 @@ class BoundaryKernelTest : public ::testing::Test
   protected:
     // data needed for each test
     KDEKernel* kernel;
-    KDEKernel::Boundary side;
+    unsigned int side;
     double distance;
     double max_distance;
 };
@@ -148,7 +148,7 @@ TEST_F(KDEKernelTest, CreateHigherOrderKernel)
 // FIXTURE-BASED TESTS: BoundaryKernelTest
 //---------------------------------------------------------------------------//
 // Tests point located at the max distance from the LOWER boundary
-// i.e. distance = max_distance, side = LOWER
+// i.e. distance = max_distance, side = 0 (LOWER)
 TEST_F(BoundaryKernelTest, EvaluatePointAtLowerMax)
 {
     // test evaluation over the domain u = [-1, 1]
@@ -194,10 +194,10 @@ TEST_F(BoundaryKernelTest, EvaluatePointAtLowerMax)
 }
 //---------------------------------------------------------------------------//
 // Tests point located at the max distance from the UPPER boundary
-// i.e. distance = max_distance, side = UPPER
+// i.e. distance = max_distance, side = 1 (UPPER)
 TEST_F(BoundaryKernelTest, EvaluatePointAtUpperMax)
 {
-    side = KDEKernel::UPPER;
+    side = 1;
 
     // test evaluation over the domain u = [-1, 1]
     double value = kernel->evaluate(-1.0, distance, max_distance, side);
@@ -242,7 +242,7 @@ TEST_F(BoundaryKernelTest, EvaluatePointAtUpperMax)
 }
 //---------------------------------------------------------------------------//
 // Tests point located at half the max distance from the LOWER boundary
-// i.e. distance = 0.5 * max_distance, side = LOWER
+// i.e. distance = 0.5 * max_distance, side = 0 (LOWER)
 TEST_F(BoundaryKernelTest, EvaluatePointAtHalfLowerMax)
 {
     distance = 0.25;
@@ -287,11 +287,11 @@ TEST_F(BoundaryKernelTest, EvaluatePointAtHalfLowerMax)
 }
 //---------------------------------------------------------------------------//
 // Tests point located at half the max distance from the UPPER boundary
-// i.e. distance = 0.5 * max_distance, side = UPPER
+// i.e. distance = 0.5 * max_distance, side = 1 (UPPER)
 TEST_F(BoundaryKernelTest, EvaluatePointAtHalfUpperMax)
 {
     distance = 0.25;
-    side = KDEKernel::UPPER;
+    side = 1;
 
     // test evaluation over the domain u = [-0.5, 1]
     double value = kernel->evaluate(-0.5, distance, max_distance, side);
@@ -333,7 +333,7 @@ TEST_F(BoundaryKernelTest, EvaluatePointAtHalfUpperMax)
 }
 //---------------------------------------------------------------------------//
 // Tests point located on the LOWER boundary
-// i.e. distance = 0, side = LOWER
+// i.e. distance = 0, side = 0 (LOWER)
 TEST_F(BoundaryKernelTest, EvaluatePointOnLowerBoundary)
 {
     distance = 0.0;
@@ -372,11 +372,11 @@ TEST_F(BoundaryKernelTest, EvaluatePointOnLowerBoundary)
 }
 //---------------------------------------------------------------------------//
 // Tests point located on the UPPER boundary
-// i.e. distance = 0, side = UPPER
+// i.e. distance = 0, side = 1 (UPPER)
 TEST_F(BoundaryKernelTest, EvaluatePointOnUpperBoundary)
 {
     distance = 0.0;
-    side = KDEKernel::UPPER;
+    side = 1;
 
     // test evaluation over the domain u = [0, 1]
     double value = kernel->evaluate(0.0, distance, max_distance, side);

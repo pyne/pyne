@@ -17,11 +17,8 @@ KDENeighborhood::KDENeighborhood(const TallyEvent& event,
                                  const moab::CartVect& bandwidth,
                                  moab::AdaptiveKDTree& tree,
                                  moab::EntityHandle& tree_root)
+    : event(event), tree(&tree), tree_root(tree_root)
 {
-    // copy KD-Tree to this neighborhood for the given tally event
-    this->tree = &tree;
-    this->tree_root = tree_root;
-
     // define and set the neighborhood region for this tally event
     if (event.type == TallyEvent::COLLISION)
     {
@@ -57,8 +54,7 @@ std::vector<moab::EntityHandle> KDENeighborhood::get_points() const
     return points;
 }
 //---------------------------------------------------------------------------//
-bool KDENeighborhood::point_within_max_radius(const TallyEvent& event,
-                                              const moab::CartVect& point) const
+bool KDENeighborhood::point_within_max_radius(const moab::CartVect& point) const
 {
     // process track-based tally event only
     if (event.type == TallyEvent::TRACK)
@@ -120,7 +116,7 @@ void KDENeighborhood::set_neighborhood(double track_length,
         }
     }
 
-    // set maximum radius around the track to hx^2 + hy^2 + hz^2
+    // set maximum radius around the track to sqrt(hx^2 + hy^2 + hz^2)
     radius = bandwidth.length();
 }                              
 //---------------------------------------------------------------------------//
