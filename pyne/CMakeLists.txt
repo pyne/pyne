@@ -39,6 +39,7 @@ target_link_libraries(_utils pyne)
 set_source_files_properties(${PROJECT_SOURCE_DIR}/pyne/endf.pyx 
                             PROPERTIES CYTHON_IS_CXX TRUE)
 cython_add_module(endf endf.pyx)
+target_link_libraries(endf pyne_nucname)
 
 # nucname
 set_source_files_properties(${PROJECT_SOURCE_DIR}/pyne/nucname.pyx 

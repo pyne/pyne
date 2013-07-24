@@ -19,7 +19,7 @@ cimport pyne.cpp_pyne
 cimport pyne.pyne_config
 import pyne.pyne_config
 
-cimport cpp_nucname
+from pyne cimport cpp_nucname
 cimport pyne.stlcontainers as conv
 import pyne.stlcontainers as conv
 
@@ -98,35 +98,6 @@ class NucTypeError(Exception):
             msg += ": " + repr(self.nuc) 
         return msg
 
-#
-# Current Form Function
-#
-
-def current_form(nuc):
-    """Find the current form of a nuclide.
-
-    Parameters
-    ----------
-    nuc : int or str 
-        Input nuclide(s).
-
-    Returns
-    -------
-    form_flag : str
-        The form identifier string from ["zzaaam", "name", "MCNP"].
-
-    """
-    cdef std_string cpp_curr_form 
-
-    if isinstance(nuc, basestring):
-        cpp_curr_form = cpp_nucname.current_form(<char *> nuc)
-    elif isinstance(nuc, int) or isinstance(nuc, long):
-        cpp_curr_form = cpp_nucname.current_form(<int> nuc)
-    else:
-        raise NucTypeError(nuc)
-
-    return <char *> cpp_curr_form.c_str()
-
 
 #
 # Is Nuclide Function
@@ -155,12 +126,9 @@ def isnuclide(nuc):
     return flag
 
 
-#
-# zzaaam Functions
-#
 
-def zzaaam(nuc):
-    """Converts a nuclide to its zzaaam form (952420). 
+def id(nuc):
+    """Converts a nuclide to its identifier form (952420000).
 
     Parameters
     ----------
@@ -169,18 +137,16 @@ def zzaaam(nuc):
 
     Returns
     -------
-    newnuc : int 
-        Output nuclide in zzaaam form.
+    newnuc : int
+        Output nuclide id.
 
     """
-
     if isinstance(nuc, basestring):
-        newnuc = cpp_nucname.zzaaam(<char *> nuc)
+        newnuc = cpp_nucname.id(<char *> nuc)
     elif isinstance(nuc, int) or isinstance(nuc, long):
-        newnuc = cpp_nucname.zzaaam(<int> nuc)
+        newnuc = cpp_nucname.id(<int> nuc)
     else:
         raise NucTypeError(nuc)
-
     return newnuc
 
 
@@ -199,15 +165,105 @@ def name(nuc):
 
     """
     cdef std_string newnuc
-
     if isinstance(nuc, basestring):
         newnuc = cpp_nucname.name(<char *> nuc)
     elif isinstance(nuc, int):
         newnuc = cpp_nucname.name(<int> nuc)
     else:
         raise NucTypeError(nuc)
-
     return <char *> newnuc.c_str()
+
+
+def znum(nuc):
+    """Retrieves a nuclide's charge number (95).
+
+    Parameters
+    ----------
+    nuc : int or str 
+        Input nuclide.
+
+    Returns
+    -------
+    z : int
+        The number of protons in the nucleus.
+
+    """
+    if isinstance(nuc, basestring):
+        z = cpp_nucname.znum(<char *> nuc)
+    elif isinstance(nuc, int) or isinstance(nuc, long):
+        z = cpp_nucname.znum(<int> nuc)
+    else:
+        raise NucTypeError(nuc)
+    return z
+
+
+def anum(nuc):
+    """Retrieves a nuclide's nucleon number (95).
+
+    Parameters
+    ----------
+    nuc : int or str 
+        Input nuclide.
+
+    Returns
+    -------
+    a : int
+        The number of protons and neutrons in the nucleus.
+
+    """
+    if isinstance(nuc, basestring):
+        a = cpp_nucname.anum(<char *> nuc)
+    elif isinstance(nuc, int) or isinstance(nuc, long):
+        a = cpp_nucname.anum(<int> nuc)
+    else:
+        raise NucTypeError(nuc)
+    return a
+
+
+def snum(nuc):
+    """Retrieves a nuclide's excitation number (95).
+
+    Parameters
+    ----------
+    nuc : int or str 
+        Input nuclide.
+
+    Returns
+    -------
+    s : int
+        The excitation level the nucleus.
+
+    """
+    if isinstance(nuc, basestring):
+        s = cpp_nucname.snum(<char *> nuc)
+    elif isinstance(nuc, int) or isinstance(nuc, long):
+        s = cpp_nucname.snum(<int> nuc)
+    else:
+        raise NucTypeError(nuc)
+    return s
+
+
+def zzaaam(nuc):
+    """Converts a nuclide to its zzaaam form (952420). 
+
+    Parameters
+    ----------
+    nuc : int or str 
+        Input nuclide.
+
+    Returns
+    -------
+    newnuc : int 
+        Output nuclide in zzaaam form.
+
+    """
+    if isinstance(nuc, basestring):
+        newnuc = cpp_nucname.zzaaam(<char *> nuc)
+    elif isinstance(nuc, int) or isinstance(nuc, long):
+        newnuc = cpp_nucname.zzaaam(<int> nuc)
+    else:
+        raise NucTypeError(nuc)
+    return newnuc
 
 
 def mcnp(nuc):
@@ -352,12 +408,18 @@ def alara(nuc):
 # C++ Helper Functions
 #
 
+cdef cpp_set[int] id_set(object nuc_sequence):
+    cdef int nucid
+    cdef cpp_set[int] nuc_set = cpp_set[int]()
+    for nuc in nuc_sequence:
+        nucid = id(nuc)
+        nuc_set.insert(nucid)
+    return nuc_set
+
 cdef cpp_set[int] zzaaam_set(object nuc_sequence):
     cdef int nuc_zz
     cdef cpp_set[int] nuc_set = cpp_set[int]()
-
     for nuc in nuc_sequence:
         nuc_zz = zzaaam(nuc)
         nuc_set.insert(nuc_zz)
-
     return nuc_set

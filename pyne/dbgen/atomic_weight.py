@@ -46,7 +46,7 @@ def parse_atomic_mass_adjustment(build_dir=""):
         if m is None:
             continue
 
-        nuc = (10000 * int(m.group(1))) + (10 * int(m.group(2)))
+        nuc = (10000000 * int(m.group(1))) + (10000 * int(m.group(2)))
         mass = float(m.group(3)) + 1E-6 * float(m.group(4).strip().replace('#', ''))
         error = 1E-6 * float(m.group(5).strip().replace('#', ''))
 
@@ -98,12 +98,12 @@ def make_atomic_weight_table(nuc_data, build_dir=""):
 
     # Add naturally occuring elements
     for element in nucname.name_zz:
-        nuc = nucname.zzaaam(element)
+        nuc = nucname.id(element)
         A[nuc] = nuc, 0.0, 0.0, 0.0
         
     for nuc, abund in atomic_abund.items():
-        zz = nuc / 10000
-        element_zz = zz * 10000
+        zz = nucname.znum(nuc)
+        element_zz = nucname.id(zz)
         element = nucname.zz_name[zz]
 
         _nuc, nuc_mass, _error, _abund = A[nuc]

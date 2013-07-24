@@ -36,6 +36,8 @@ import os
 cimport pyne.data as data
 import pyne.data as data
 
+# Maximum 32-bit signed int
+DEF INT_MAX = 2147483647
 
 cdef cpp_map[int, double] dict_to_comp(dict nucvec):
     """Converts a dictionary with arbitraily-typed keys to component map."""
@@ -46,7 +48,7 @@ cdef cpp_map[int, double] dict_to_comp(dict nucvec):
         if isinstance(key, int):
             comp[key] = value
         else:
-            key_zz = nucname.zzaaam(key)
+            key_zz = nucname.id(key)
             comp[key_zz] = value
 
     return comp
@@ -226,7 +228,7 @@ cdef class _Material:
 
         Protocol 1 is the newer, more efficient protocol for storing many
         materials.  It consists of a table which stores the material
-        information and an array that stores the nuclides (zzaaam) which index
+        information and an array that stores the nuclides (id) which index
         the comp array::
 
             file.h5 (file)
@@ -269,7 +271,7 @@ cdef class _Material:
             Path to HDF5 table that represents the data.  If the table does not
             exist, it will be created.
         nucpath : str, optional
-            Path to zzaaam array of nuclides to write out.  If this array does
+            Path to id array of nuclides to write out.  If this array does
             not exist, it is created with the nuclides present in this
             material. Nuclides present in this material but not in nucpath will
             not be written out.
@@ -511,7 +513,7 @@ cdef class _Material:
 
         """
         # Make an nuctopic set
-        cdef cpp_set[int] nuc_set = nucname.zzaaam_set(nuc_sequence)
+        cdef cpp_set[int] nuc_set = nucname.id_set(nuc_sequence)
 
         # Make new python version of this material
         cdef _Material pymat = Material()
@@ -543,7 +545,7 @@ cdef class _Material:
 
         """
         # Make an nuctopic set
-        cdef cpp_set[int] nuc_set = nucname.zzaaam_set(nuc_sequence)
+        cdef cpp_set[int] nuc_set = nucname.id_set(nuc_sequence)
 
         # Make new python version of this material
         cdef _Material pymat = Material()
@@ -576,7 +578,7 @@ cdef class _Material:
 
         """
         # Make an nuctopic set
-        cdef cpp_set[int] nuc_set = nucname.zzaaam_set(nuc_sequence)
+        cdef cpp_set[int] nuc_set = nucname.id_set(nuc_sequence)
 
         # Make new python version of this material
         cdef _Material pymat = Material()
@@ -584,8 +586,8 @@ cdef class _Material:
         return pymat
 
 
-    def sub_range(self, lower=0, upper=10000000):
-        """sub_range(lower=0, upper=10000000)
+    def sub_range(self, lower=0, upper=INT_MAX):
+        """sub_range(lower=0, upper=INT_MAX)
         Grabs a sub-material from this mat based on a range [lower, upper)
         of values.
 
@@ -607,20 +609,20 @@ cdef class _Material:
         if isinstance(lower, int):
             clower = lower
         else:
-            clower = nucname.zzaaam(lower)
+            clower = nucname.id(lower)
 
         if isinstance(upper, int):
             cupper = upper
         else:
-            cupper = nucname.zzaaam(upper)
+            cupper = nucname.id(upper)
 
         cdef _Material pymat = Material()
         pymat.mat_pointer[0] = self.mat_pointer.sub_range(clower, cupper)
         return pymat
 
 
-    def set_range(self, lower=0, upper=10000000, value=0.0):
-        """set_range(lower=0, upper=10000000, value=0.0)
+    def set_range(self, lower=0, upper=INT_MAX, value=0.0):
+        """set_range(lower=0, upper=INT_MAX, value=0.0)
         Sets a sub-material from this mat based on a range [lower, upper) to
         a new mass weight value.
 
@@ -644,20 +646,20 @@ cdef class _Material:
         if isinstance(lower, int):
             clower = lower
         else:
-            clower = nucname.zzaaam(lower)
+            clower = nucname.id(lower)
 
         if isinstance(upper, int):
             cupper = upper
         else:
-            cupper = nucname.zzaaam(upper)
+            cupper = nucname.id(upper)
 
         cdef _Material pymat = Material()
         pymat.mat_pointer[0] = self.mat_pointer.set_range(clower, cupper, <double> value)
         return pymat
 
 
-    def del_range(self, lower=0, upper=10000000):
-        """del_range(lower=0, upper=10000000)
+    def del_range(self, lower=0, upper=INT_MAX):
+        """del_range(lower=0, upper=INT_MAX)
         Remove a range [lower, upper) of nuclides from this material and
         returns a submaterial.
 
@@ -680,12 +682,12 @@ cdef class _Material:
         if isinstance(lower, int):
             clower = lower
         else:
-            clower = nucname.zzaaam(lower)
+            clower = nucname.id(lower)
 
         if isinstance(upper, int):
             cupper = upper
         else:
-            cupper = nucname.zzaaam(upper)
+            cupper = nucname.id(upper)
 
         cdef _Material pymat = Material()
         pymat.mat_pointer[0] = self.mat_pointer.del_range(clower, cupper)
@@ -867,7 +869,7 @@ cdef class _Material:
                     af[key_zz] = 0.0
                 af[key_zz] = af[key_zz] + val
             elif isinstance(key, basestring):
-                key_zz = nucname.zzaaam(key)
+                key_zz = nucname.id(key)
                 if 0 == af.count(key_zz):
                     af[key_zz] = 0.0
                 af[key_zz] = af[key_zz] + val
@@ -994,7 +996,7 @@ cdef class _Material:
 
         # Get single string-key
         elif isinstance(key, basestring):
-            key_zz = nucname.zzaaam(key)
+            key_zz = nucname.id(key)
             return self[key_zz]
 
         # Get slice-based sub-material
@@ -1005,7 +1007,7 @@ cdef class _Material:
 
             upper = key.stop
             if upper is None:
-                upper = 10000000
+                upper = INT_MAX
 
             return self.sub_range(lower, upper)
 
@@ -1036,7 +1038,7 @@ cdef class _Material:
 
         # Set single string-key
         elif isinstance(key, basestring):
-            key_zz = nucname.zzaaam(key)
+            key_zz = nucname.id(key)
             self[key_zz] = value
 
         # Set slice-based sub-material
@@ -1047,7 +1049,7 @@ cdef class _Material:
 
             upper = key.stop
             if upper is None:
-                upper = 10000000
+                upper = INT_MAX
 
             # set values back on instance
             new_mat = self.set_range(lower, upper, value)
@@ -1086,7 +1088,7 @@ cdef class _Material:
 
         # Remove single string-key
         elif isinstance(key, basestring):
-            key_zz = nucname.zzaaam(key)
+            key_zz = nucname.id(key)
             del self[key_zz]
 
         # Remove slice-based sub-material
@@ -1097,7 +1099,7 @@ cdef class _Material:
 
             upper = key.stop
             if upper is None:
-                upper = 10000000
+                upper = INT_MAX
 
             # set values back on instance
             new_mat = self.del_range(lower, upper)
@@ -1142,7 +1144,7 @@ class Material(_Material, collections.MutableMapping):
         not be normalized; Material initialization will automatically
         renormalize the stream.  Thus the comp simply is a dictionary of
         relative weights.  The keys of comp must be integers representing
-        nuclides in zzaaam-form.  The values are floats for each nuclide's
+        nuclides in id-form.  The values are floats for each nuclide's
         weight fraction. If a string is provided instead of a dictionary, then
         Material will read in the comp vector from a file at the string's
         location.  This either plaintext or hdf5 files. If no comp is provided,
@@ -1220,11 +1222,12 @@ class Material(_Material, collections.MutableMapping):
         fracs = self.to_atom_frac() if frac_type == 'atom' else self.comp
         frac_sign = "" if  frac_type == 'atom' else '-'
         for nuc, frac in fracs.items():
+            nucmcnp = str(nucname.mcnp(nuc))
             if 'table_ids' in self.attrs:
-                s += '     {0}.{1} '.format(str(nuc)[:-1],
-                                            self.attrs['table_ids'][str(nuc)])
+                s += '     {0}.{1} '.format(nucmcnp,
+                                            self.attrs['table_ids'][nucmcnp])
             else:
-                s += '     {0} '.format(nuc)
+                s += '     {0} '.format(nucmcnp)
             s += '{0}{1:.4E}\n'.format(frac_sign, frac)
 
         # write s to output file
@@ -1272,7 +1275,7 @@ class Material(_Material, collections.MutableMapping):
 
         for iso, frac in self.comp.items():
             s += '     {0} {1:.4E} {2}\n'.format(nucname.alara(iso),
-                                                 frac, str(iso)[:-4])
+                                                 frac, str(nucname.znum(iso)))
 
         with open(filename, 'a') as f:
             f.write(s)

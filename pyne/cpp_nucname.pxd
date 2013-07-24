@@ -27,25 +27,40 @@ cdef extern from "nucname.h" namespace "pyne::nucname":
     set[int] ma
     set[int] fp
 
-    # Current Form
-    std_string current_form(int) except +
-    std_string current_form(char *) except +
-    std_string current_form(std_string) except +
-
     # isnuclide
     bint isnuclide(int) except +
     bint isnuclide(char *) except +
     bint isnuclide(std_string) except +
 
-    # zzaaam Functions
-    int zzaaam(int) except +
-    int zzaaam(char *) except +
-    int zzaaam(std_string) except +
+    # id functions
+    int id(int) except +
+    int id(char *) except +
+    int id(std_string) except +
 
     # name Functions
     std_string name(int) except +
     std_string name(char *) except +
     std_string name(std_string) except +
+
+    # znum functions
+    int znum(int) except +
+    int znum(char *) except +
+    int znum(std_string) except +
+
+    # anum functions
+    int anum(int) except +
+    int anum(char *) except +
+    int anum(std_string) except +
+
+    # znum functions
+    int snum(int) except +
+    int snum(char *) except +
+    int snum(std_string) except +
+
+    # zzaaam Functions
+    int zzaaam(int) except +
+    int zzaaam(char *) except +
+    int zzaaam(std_string) except +
 
     # MCNP Functions 
     int mcnp(int) except + 
