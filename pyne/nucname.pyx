@@ -266,6 +266,30 @@ def zzaaam(nuc):
     return newnuc
 
 
+def zzaaam_to_id(nuc):
+    """Converts a nuclide directly from ZZAAAM form (952420) to
+    the canonical identifier form. 
+
+    Parameters
+    ----------
+    nuc : int or str 
+        Input nuclide in ZZAAAM form.
+
+    Returns
+    -------
+    newnuc : int 
+        Output nuclide in identifier form.
+
+    """
+    if isinstance(nuc, basestring):
+        newnuc = cpp_nucname.zzaaam_to_id(<char *> nuc)
+    elif isinstance(nuc, int) or isinstance(nuc, long):
+        newnuc = cpp_nucname.zzaaam_to_id(<int> nuc)
+    else:
+        raise NucTypeError(nuc)
+    return newnuc
+
+
 def mcnp(nuc):
     """Converts a nuclide to its MCNP form (92636). 
 
@@ -298,6 +322,30 @@ def mcnp(nuc):
     return newnuc
 
 
+def mcnp_to_id(nuc):
+    """Converts a nuclide directly from MCNP form (92636) to
+    the canonical identifier form. 
+
+    Parameters
+    ----------
+    nuc : int or str 
+        Input nuclide in MCNP form.
+
+    Returns
+    -------
+    newnuc : int 
+        Output nuclide in identifier form.
+
+    """
+    if isinstance(nuc, basestring):
+        newnuc = cpp_nucname.mcnp_to_id(<char *> nuc)
+    elif isinstance(nuc, int) or isinstance(nuc, long):
+        newnuc = cpp_nucname.mcnp_to_id(<int> nuc)
+    else:
+        raise NucTypeError(nuc)
+    return newnuc
+
+
 def serpent(nuc):
     """Converts a nuclide to its Serepnt form ('Am-242m'). 
 
@@ -323,6 +371,29 @@ def serpent(nuc):
 
     return <char *> newnuc.c_str()
 
+
+def serpent_to_id(nuc):
+    """Converts a nuclide directly from Serpent form ('Am-242m') to
+    the canonical identifier form. 
+
+    Parameters
+    ----------
+    nuc : int or str 
+        Input nuclide in Serpent form.
+
+    Returns
+    -------
+    newnuc : int 
+        Output nuclide in identifier form.
+
+    """
+    if isinstance(nuc, basestring):
+        newnuc = cpp_nucname.serpent_to_id(<char *> nuc)
+    #elif isinstance(nuc, int) or isinstance(nuc, long):
+    #    newnuc = cpp_nucname.serpent_to_id(<int> nuc)
+    else:
+        raise NucTypeError(nuc)
+    return newnuc
 
 
 def nist(nuc):
@@ -351,6 +422,30 @@ def nist(nuc):
     return <char *> newnuc.c_str()
 
 
+def nist_to_id(nuc):
+    """Converts a nuclide directly from NIST form ('242Am') to
+    the canonical identifier form. 
+
+    Parameters
+    ----------
+    nuc : int or str 
+        Input nuclide in NIST form.
+
+    Returns
+    -------
+    newnuc : int 
+        Output nuclide in identifier form.
+
+    """
+    if isinstance(nuc, basestring):
+        newnuc = cpp_nucname.nist_to_id(<char *> nuc)
+    #elif isinstance(nuc, int) or isinstance(nuc, long):
+    #    newnuc = cpp_nucname.nist_to_id(<int> nuc)
+    else:
+        raise NucTypeError(nuc)
+    return newnuc
+
+
 def cinder(nuc):
     """Converts a nuclide to its CINDER (aaazzzm) form (2420951). 
 
@@ -373,6 +468,30 @@ def cinder(nuc):
     else:
         raise NucTypeError(nuc)
 
+    return newnuc
+
+
+def cinder_to_id(nuc):
+    """Converts a nuclide directly from Cinder form (2420951) to
+    the canonical identifier form. 
+
+    Parameters
+    ----------
+    nuc : int or str 
+        Input nuclide in Cinder form.
+
+    Returns
+    -------
+    newnuc : int 
+        Output nuclide in identifier form.
+
+    """
+    if isinstance(nuc, basestring):
+        newnuc = cpp_nucname.cinder_to_id(<char *> nuc)
+    elif isinstance(nuc, int) or isinstance(nuc, long):
+        newnuc = cpp_nucname.cinder_to_id(<int> nuc)
+    else:
+        raise NucTypeError(nuc)
     return newnuc
 
 
@@ -402,6 +521,28 @@ def alara(nuc):
     return <char *> newnuc.c_str()
 
 
+def alara_to_id(nuc):
+    """Converts a nuclide directly from ALARA form ('am:242') to
+    the canonical identifier form. 
+
+    Parameters
+    ----------
+    nuc : int or str 
+        Input nuclide in ALARA form.
+
+    Returns
+    -------
+    newnuc : int 
+        Output nuclide in identifier form.
+
+    """
+    if isinstance(nuc, basestring):
+        newnuc = cpp_nucname.alara_to_id(<char *> nuc)
+    #elif isinstance(nuc, int) or isinstance(nuc, long):
+    #    newnuc = cpp_nucname.alara_to_id(<int> nuc)
+    else:
+        raise NucTypeError(nuc)
+    return newnuc
 
 
 #
