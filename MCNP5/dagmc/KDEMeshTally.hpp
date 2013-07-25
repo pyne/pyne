@@ -264,6 +264,14 @@ class KDEMeshTally : public MeshTally
   
     // >>> KDE ESTIMATOR METHODS
 
+    // Defines common data needed for computing score for a calculation point
+    struct CalculationPoint
+    {
+        double coords[3];
+        int boundary_data[3];
+        double distance_data[3];
+    };
+
     /**
      * \class PathKernel
      * \brief Defines the path length kernel function K(X, s)
@@ -273,14 +281,14 @@ class KDEMeshTally : public MeshTally
       public:
         /**
          * \brief Constructor
-         * \param kde_tally the KDEMeshTally object using this path kernel
-         * \param node the mesh node representing the calculation point (x, y, z)
+         * \param tally the KDEMeshTally object using this path kernel
          * \param event the tally event containing the track segment data
+         * \param X the calculation point
          */
-        PathKernel(const KDEMeshTally& kde_tally,
-                   const moab::EntityHandle& node,
-                   const TallyEvent& event)
-            : kde_tally(kde_tally), node(node), event(event) {}
+        PathKernel(const KDEMeshTally& tally,
+                   const TallyEvent& event,
+                   const CalculationPoint& X)
+            : tally(tally), event(event), X(X) {}
 
         /**
          * \brief Evaluates the path length kernel function
@@ -290,27 +298,27 @@ class KDEMeshTally : public MeshTally
         double evaluate(double s) const;
 
       private:
-        const KDEMeshTally& kde_tally;
-        const moab::EntityHandle& node;
+        const KDEMeshTally& tally;
         const TallyEvent& event;
+        const CalculationPoint& X;
     };
 
     /**
-     * \brief Computes value of the 3D kernel function
-     * \param node the mesh node representing the calculation point (x, y, z)
+     * \brief Computes value of the 3D kernel function K(x, y, z)
+     * \param X the calculation point
      * \param observation the random observation point (Xi, Yi, Zi)
+     * \return K(x, y, z)
      *
-     * Evaluates the general 3D kernel function for the given mesh node and
-     * observation point.  Uses the bandwidth vector stored in this KDEMeshTally
-     * and adjusts for the boundary correction if it has been requested during
-     * setup by the user.
+     * Evaluates the general 3D kernel function for the given calculation and
+     * observation points.  Uses the bandwidth vector stored in this KDEMeshTally
+     * and adjusts for the boundary correction as needed.
      */
-    double evaluate_kernel(const moab::EntityHandle& node,
+    double evaluate_kernel(const CalculationPoint& X,
                            const moab::CartVect& observation) const;                    
 
     /**
      * \brief Computes tally score based on the integral-track estimator
-     * \param node the mesh node representing the calculation point (x, y, z)
+     * \param X the calculation point
      * \param event the tally event containing the track segment data
      * \return the tally score for the calculation point
      *
@@ -319,13 +327,13 @@ class KDEMeshTally : public MeshTally
      * length s for the given calculation point X, using the limits of
      * integration as determined by the set_integral_limits() method.
      */
-    double integral_track_score(const moab::EntityHandle& node,
+    double integral_track_score(const CalculationPoint& X,
                                 const TallyEvent& event) const;
 
     /**
      * \brief Determines integration limits for the integral-track estimator
      * \param event the tally event containing the track segment data
-     * \param X the (x, y, z) coordinates of the calculation point
+     * \param coords the (x, y, z) coordinates of the calculation point X
      * \param limits stores integration limits in form of pair<lower, upper>
      * \return true if valid limits exist, false otherwise
      *
@@ -339,12 +347,12 @@ class KDEMeshTally : public MeshTally
      * would have been zero and the calculation point can be ignored.
      */
     bool set_integral_limits(const TallyEvent& event,
-                             const moab::CartVect& X,
+                             const moab::CartVect& coords,
                              std::pair<double, double>& limits) const;
 
     /**
      * \brief Computes tally score based on the sub-track estimator
-     * \param node the mesh node representing the calculation point (x, y, z)
+     * \param X the calculation point
      * \param points the set of sub-track points needed for computing score
      * \return the tally score for the calculation point
      *
@@ -353,7 +361,7 @@ class KDEMeshTally : public MeshTally
      * using the randomly chosen points along the track that were computed by
      * the choose_points() method.
      */
-    double subtrack_score(const moab::EntityHandle& node,
+    double subtrack_score(const CalculationPoint& X,
                           const std::vector<moab::CartVect>& points) const;
 
     /**

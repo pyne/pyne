@@ -79,12 +79,12 @@ class KDENeighborhood
     /// Radius of a cylindrical neighborhood region
     double radius;
 
+    /// Tally event this KDENeighborhood was constructed from
+    const TallyEvent& event;
+
     /// KD-Tree containing all mesh nodes in the input mesh
     moab::AdaptiveKDTree* tree;
     moab::EntityHandle tree_root;
-
-    /// Tally event this KDENeighborhood was constructed from
-    const TallyEvent& event;
 
     // >>> PRIVATE METHODS
 

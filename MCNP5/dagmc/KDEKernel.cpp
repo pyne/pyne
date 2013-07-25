@@ -42,8 +42,8 @@ KDEKernel* KDEKernel::createKernel(const std::string& type, unsigned int order)
 // PUBLIC INTERFACE
 //---------------------------------------------------------------------------//
 double KDEKernel::evaluate(double u,
-                           double distance,
                            double bandwidth,
+                           double distance,
                            unsigned int side) const
 {
     assert(side <= 1);

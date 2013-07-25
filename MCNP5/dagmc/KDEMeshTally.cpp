@@ -137,30 +137,43 @@ void KDEMeshTally::compute_score(const TallyEvent& event)
 
     // iterate through calculation points and compute their final scores
     std::vector<moab::EntityHandle>::iterator i;
-
-    // ToDo:  do a correct ebin based on the particle energy; this is temporary
-    int ebin = 0;
-
+    CalculationPoint X;
+    
     for (i = calculation_points.begin(); i != calculation_points.end(); ++i)
     {
-         double score = weight;
-         moab::EntityHandle node = *i;
+        // get coordinates of this point
+        moab::EntityHandle point = *i;
+        moab::ErrorCode rval = mbi->get_coords(&point, 1, X.coords);
+        assert(rval == moab::MB_SUCCESS);
+
+        // get tag data for this point if user requested boundary correction
+        if (use_boundary_correction)
+        {
+            rval = mbi->tag_get_data(boundary_tag, &point, 1, X.boundary_data);
+            assert(rval == moab::MB_SUCCESS);
+
+            rval = mbi->tag_get_data(distance_tag, &point, 1, X.distance_data);
+            assert(rval == moab::MB_SUCCESS);
+        }
+
+        // compute the final contribution to the tally for this point
+        double score = weight;
 
         if (estimator == INTEGRAL_TRACK)
         {
-            score *= integral_track_score(node, event);
+            score *= integral_track_score(X, event);
         }
         else if (estimator == SUB_TRACK)
         {
-            score *= subtrack_score(node, subtrack_points);
+            score *= subtrack_score(X, subtrack_points);
         }
         else // estimator == COLLISION
         {
-            score *= evaluate_kernel(node, event.position);
+            score *= evaluate_kernel(X, event.position);
         }
 
         // add score to KDE mesh tally for the current history
-        add_score_to_tally(node, score, ebin);
+        add_score_to_tally(point, score, ebin);
     }
 }
 //---------------------------------------------------------------------------//
@@ -430,48 +443,26 @@ moab::CartVect KDEMeshTally::get_optimal_bandwidth() const
 double KDEMeshTally::PathKernel::evaluate(double s) const
 {
     moab::CartVect observation = event.position + s * event.direction;  
-    return kde_tally.evaluate_kernel(node, observation);
+    return tally.evaluate_kernel(X, observation);
 }
 //---------------------------------------------------------------------------//
-double KDEMeshTally::evaluate_kernel(const moab::EntityHandle& node,
+double KDEMeshTally::evaluate_kernel(const CalculationPoint& X,
                                      const moab::CartVect& observation) const
 {
-    // get coordinates of calculation point from mesh node
-    moab::ErrorCode rval = moab::MB_SUCCESS;
-    moab::CartVect coords(0.0, 0.0, 0.0);
-
-    rval = mbi->get_coords(&node, 1, coords.array());
-    assert(rval == moab::MB_SUCCESS);
-
-    // get pointers to tag data if user requested boundary correction
-    int* boundary_data = NULL;
-    double* distance_data = NULL;
-
-    if (use_boundary_correction)
-    {
-        boundary_data = new int[3];
-        rval = mbi->tag_get_data(boundary_tag, &node, 1, boundary_data);
-        assert(rval == moab::MB_SUCCESS);
-
-        distance_data = new double[3];
-        rval = mbi->tag_get_data(distance_tag, &node, 1, distance_data);
-        assert(rval == moab::MB_SUCCESS);
-    }
-
     // evaluate the 3D kernel function
     double kernel_value = 1.0;
 
     for (int i = 0; i < 3; ++i)
     {
-        double u = (coords[i] - observation[i]) / bandwidth[i];
+        double u = (X.coords[i] - observation[i]) / bandwidth[i];
 
-        if (use_boundary_correction && boundary_data[i] != -1)
+        if (use_boundary_correction && X.boundary_data[i] != -1)
         {
             // use boundary kernel for this direction
-            kernel_value *= kernel->evaluate(u,
-                                             distance_data[i],
-                                             bandwidth[i],
-                                             boundary_data[i]);
+            kernel_value *= kernel->evaluate(u, bandwidth[i],
+                                             X.distance_data[i],
+                                             X.boundary_data[i]) / bandwidth[i];
+
         }
         else // use standard kernel for this direction
         {
@@ -479,32 +470,23 @@ double KDEMeshTally::evaluate_kernel(const moab::EntityHandle& node,
         }
     }
 
-    // memory management
-    delete[] boundary_data;
-    delete[] distance_data;
-
     return kernel_value;
 }                    
 //---------------------------------------------------------------------------//
-double KDEMeshTally::integral_track_score(const moab::EntityHandle& node,
+double KDEMeshTally::integral_track_score(const CalculationPoint& X,
                                           const TallyEvent& event) const
 {
-    // get coordinates of calculation point from mesh node
-    moab::ErrorCode rval = moab::MB_SUCCESS;
-    moab::CartVect coords(0.0, 0.0, 0.0);
-
-    rval = mbi->get_coords(&node, 1, coords.array());
-    assert(rval == moab::MB_SUCCESS);
-
     // determine the limits of integration
     std::pair<double, double> limits;  
-    bool valid_limits = set_integral_limits(event, coords, limits);
+    bool valid_limits = set_integral_limits(event,
+                                            moab::CartVect(X.coords),
+                                            limits);
 
     // compute value of the integral only if valid limits exist
     if (valid_limits)
     {
         // construct a PathKernel and return value of its integral
-        PathKernel path_kernel(*this, node, event);
+        PathKernel path_kernel(*this, event, X);
         return quadrature->integrate(limits.first, limits.second, path_kernel);
     }
     else // integration limits are not valid so no score is computed
@@ -514,7 +496,7 @@ double KDEMeshTally::integral_track_score(const moab::EntityHandle& node,
 }
 //---------------------------------------------------------------------------//
 bool KDEMeshTally::set_integral_limits(const TallyEvent& event,
-                                       const moab::CartVect& X,
+                                       const moab::CartVect& coords,
                                        std::pair<double, double>& limits) const
 {
     bool valid_limits = false;
@@ -531,18 +513,18 @@ bool KDEMeshTally::set_integral_limits(const TallyEvent& event,
         // compute valid path length interval Si = [path_min, path_max]
         if (event.direction[i] > 0)
         {
-            path_min = X[i] - event.position[i] - bandwidth[i];
+            path_min = coords[i] - event.position[i] - bandwidth[i];
             path_min /= event.direction[i];
 
-            path_max = X[i] - event.position[i] + bandwidth[i];
+            path_max = coords[i] - event.position[i] + bandwidth[i];
             path_max /= event.direction[i];
         }
         else if (event.direction[i] < 0)
         {
-            path_min = X[i] - event.position[i] + bandwidth[i];
+            path_min = coords[i] - event.position[i] + bandwidth[i];
             path_min /= event.direction[i];
 
-            path_max = X[i] - event.position[i] - bandwidth[i];
+            path_max = coords[i] - event.position[i] - bandwidth[i];
             path_max /= event.direction[i];
         }
 
@@ -568,7 +550,7 @@ bool KDEMeshTally::set_integral_limits(const TallyEvent& event,
     return valid_limits;
 }
 //---------------------------------------------------------------------------//
-double KDEMeshTally::subtrack_score(const moab::EntityHandle& node,
+double KDEMeshTally::subtrack_score(const CalculationPoint& X,
                                     const std::vector<moab::CartVect>& points) const
 {
     // iterate through the sub-track points
@@ -578,7 +560,7 @@ double KDEMeshTally::subtrack_score(const moab::EntityHandle& node,
     for (i = points.begin(); i != points.end(); ++i)
     {
         // add kernel contribution for sub-track point to sum
-        score += evaluate_kernel(node, *i);
+        score += evaluate_kernel(X, *i);
     }
 
     // normalize by the total number of sub-track points

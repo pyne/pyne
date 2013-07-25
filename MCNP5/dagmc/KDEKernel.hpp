@@ -24,7 +24,7 @@
  * different methods
  *
  *     1) evaluate(double u)
- *     2) evaluate(double u, double distance, double bandwidth, int side)
+ *     2) evaluate(double u, double bandwidth, double distance, int side)
  *
  * The first method evaluates the standard kernel function K(u), whereas the
  * second evaluates K_b(u) based on a boundary correction method.  This boundary
@@ -110,8 +110,8 @@ class KDEKernel
     /**
      * \brief Evaluate this kernel using a boundary correction method K_b
      * \param u the value at which K_b will be evaluated
-     * \param distance the distance from the calculation point to the boundary
      * \param bandwidth the maximum distance for which correction is needed
+     * \param distance the distance from the calculation point to the boundary
      * \param side the location of the boundary (0 = LOWER, 1 = UPPER)
      * \return K_b(u)
      *
@@ -132,8 +132,8 @@ class KDEKernel
      * [-1, p].  If UPPER, then the integration is performed on [-p, 1].
      */
     virtual double evaluate(double u,
-                            double distance,
                             double bandwidth,
+                            double distance,
                             unsigned int side) const;
 
   protected:
