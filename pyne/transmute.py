@@ -259,26 +259,6 @@ def _check_phi(phi):
     return phi
 
 
-def _create_decay_matrix(nucs):
-    """Creates a NumPy matrix representing the nuclide list nucs.
-
-    Parameters
-    ----------
-    nucs : NumPy array of nucnames
-        Names of nuclides to build decay matrix around.
-
-    Returns
-    -------
-    A : NumPy matrix of floats
-        The decay matrix.
-    """
-    nnucs = len(nucs)
-    nucsrange = np.arange(nnucs)
-    A = np.zeros((nnucs, nnucs), dtype=float)
-    A[nucsrange, nucsrange] = [-data.decay_const(nuc) for nuc in nucs]
-    return A
-
-
 def _matrix_exp(A, t):
     """Takes the matrix exponential of the product At.
 
