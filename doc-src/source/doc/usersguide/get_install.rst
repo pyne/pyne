@@ -288,7 +288,7 @@ The steps to build and install FluDAG follow.
 *Download FLUKA*
 
 In order to download FLUKA you need to become a registered user, which you can do at 
-the `FLUKA register page <https://www.fluka.org/fluka.php?id=secured_intro>`_.
+the FLUKA register page from a link on the main FLUKA page.
 Save the user id and password for future FLUKA updates.  For a 64 bit linux installation the download filename is of the form *fluka20xx.xx-linux-gfor64bitAA.tar.gz*.  The build steps below assume the tarfile 
 has been placed in the $HOME/Downloads directory.
 
@@ -297,7 +297,7 @@ has been placed in the $HOME/Downloads directory.
 Add the following two export statements to your login script (probably a file named .bashrc):
 ::
 
-    export FLUPRO=path/toFLUKA 
+    export FLUPRO=path/to/FLUKA 
     export FLUFOR=gfortran 
 
 To activate these environment variables either open a new terminal or type
@@ -305,9 +305,8 @@ To activate these environment variables either open a new terminal or type
     prompt%> source $HOME/.bashrc
 
 While some of the FLUKA files are source files for utilites and stubs, most of the  FLUKA files
-in the download is object code.  
-Building and installing FLUKA is a matter of linking the object code into a library and creating 
-utilities.
+in the download are in the form of object code.  
+Building and installing FLUKA is a matter of linking the object code into an executable:
 ::
 
     prompt%> cd $HOME
@@ -315,8 +314,9 @@ utilities.
     prompt%> cd FLUKA
     prompt%> tar zxvf $HOME/Downloads/flukaxx.xx-linux-gfor64bitAA.tar.gz
 
-After you have untarred the FLUKA download file you can read the README file in the top level directory for additional help.
-The instructions for installing FLUKA are in their online `manual <http://www.fluka.org/fluka.php?id=man_onl`_.  The instructions for installing on a 64 bit machine are outlined below.
+After you have untarred the FLUKA download file you can read the README file in the top level directory for additional help.  There is also the FLUKA manual *FM.pdf*, and a text version of the online manual, *fluka2011.manual*.
+
+The instructions for installing on a 64 bit machine are in the various manuals and outlined below.
 
 *Link FLUKA Object Files*
 
@@ -325,7 +325,15 @@ In the top-level FLUKA directory, with the environment variables set, type
     prompt%> make
 
 This will create the 64-bit executable named **flukahp**.
-At this point you are ready to get the alpha_release_fludage rpository.
+At this point you are ready to get the alpha_release_fludag repository.
 
 *FluDAG, Alpha Release*
+ 
+Get the FluDAG Alpha Release repository by cloning the UW-Madison DAGMC repository and checking out the alpha_release branch:
+::
+
+    prompt%> git clone https://github.com/svalinn/DAGMC.git
+    prompt%> get checkout alpha_release.
+
+
 
