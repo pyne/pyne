@@ -964,7 +964,7 @@ int pyne::nucname::alara_to_id(std::string nuc)
   if (nuc.empty())
     throw NotANuclide(nuc, "<empty>");
   int nucid;
-  nuc = pyne::remove_characters(nuc, ":");
+  nuc = pyne::to_upper(pyne::remove_characters(nuc, ":"));
   std::string elem_name;
   int nuclen = nuc.length();
 
@@ -980,7 +980,7 @@ int pyne::nucname::alara_to_id(std::string nuc)
   nucid = pyne::to_int(anum_str) * 10000;
 
   // Add the Z-number
-  elem_name = pyne::remove_characters(nuc.substr(0, nuclen-1), pyne::digits);
+  elem_name = pyne::remove_characters(nuc, pyne::digits);
   elem_name = pyne::capitalize(elem_name);
   if (0 < name_zz.count(elem_name))
     nucid = (10000000 * name_zz[elem_name]) + nucid;
