@@ -283,7 +283,7 @@ access to DAG-Tripoli4, please contact `Jean-Christophe Trama
 FluDAG Build
 +++++++++++++++++++++++
 FluDAG uses `FLUKA <http://www.fluka.org>`_ from CERN/INFN with the DAGMC Toolkit.
-The steps To build and install FluDAG follow.
+The steps to build and install FluDAG follow.
 
 *Download FLUKA*
 
@@ -295,24 +295,37 @@ has been placed in the $HOME/Downloads directory.
 *Setup Environment and Extract FLUKA tarfile*
 
 Add the following two export statements to your login script (probably a file named .bashrc):
-export $FLUPRO=path/toFLUKA 
-export $FLUFOR=gfortran 
+::
 
-To activate these environment variables 
-While there are some source files for utilites and stubs FLUKA is provided mostly as object code.  
-Building and installing FLUKA is a matter of linking the object code and setting two environment 
-variables.  
+    export FLUPRO=path/toFLUKA 
+    export FLUFOR=gfortran 
+
+To activate these environment variables either open a new terminal or type
+::
+    prompt%> source $HOME/.bashrc
+
+While some of the FLUKA files are source files for utilites and stubs, most of the  FLUKA files
+in the download is object code.  
+Building and installing FLUKA is a matter of linking the object code into a library and creating 
+utilities.
 ::
 
     prompt%> cd $HOME
     prompt%> mkdir FLUKA
     prompt%> cd FLUKA
-    prompt%> tar zxvf $HOME/Downloads/FLUKAXX.X.tar.gz
+    prompt%> tar zxvf $HOME/Downloads/flukaxx.xx-linux-gfor64bitAA.tar.gz
 
 After you have untarred the FLUKA download file you can read the README file in the top level directory for additional help.
-The instructions for installing FLUKA are in their online `manual <http://www.fluka.org/fluka.php?id=man_onl&sub=5`_.  The instructions for installing on a 64 bit machine are outlined below.
+The instructions for installing FLUKA are in their online `manual <http://www.fluka.org/fluka.php?id=man_onl`_.  The instructions for installing on a 64 bit machine are outlined below.
 
 *Link FLUKA Object Files*
 
-Per the FLUKA install instructions add the FLUKA environment variables to your login script:
+In the top-level FLUKA directory, with the environment variables set, type
+::
+    prompt%> make
+
+This will create the 64-bit executable named **flukahp**.
+At this point you are ready to get the alpha_release_fludage rpository.
+
+*FluDAG, Alpha Release*
 
