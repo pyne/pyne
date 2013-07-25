@@ -61,28 +61,46 @@ cdef extern from "nucname.h" namespace "pyne::nucname":
     int zzaaam(int) except +
     int zzaaam(char *) except +
     int zzaaam(std_string) except +
+    int zzaaam_to_id(int) except +
+    int zzaaam_to_id(char *) except +
+    int zzaaam_to_id(std_string) except +
 
     # MCNP Functions 
     int mcnp(int) except + 
     int mcnp(char *) except + 
     int mcnp(std_string) except + 
+    int mcnp_to_id(int) except +
+    int mcnp_to_id(char *) except +
+    int mcnp_to_id(std_string) except +
 
     # Serpent Functions
     std_string serpent(int) except +
     std_string serpent(char *) except +
     std_string serpent(std_string) except +
+    #int serpent_to_id(int) except +
+    int serpent_to_id(char *) except +
+    int serpent_to_id(std_string) except +
 
     # NIST Functions
     std_string nist(int) except +
     std_string nist(char *) except +
     std_string nist(std_string) except +
+    #int nist_to_id(int) except +
+    int nist_to_id(char *) except +
+    int nist_to_id(std_string) except +
 
     # Cinder Functions 
     int cinder(int) except + 
     int cinder(char *) except + 
     int cinder(std_string) except + 
+    int cinder_to_id(int) except +
+    int cinder_to_id(char *) except +
+    int cinder_to_id(std_string) except +
 
     # ALARA Functions
     std_string alara(int) except +
     std_string alara(char *) except +
     std_string alara(std_string) except +
+    #int alara_to_id(int) except +
+    int alara_to_id(char *) except +
+    int alara_to_id(std_string) except +
