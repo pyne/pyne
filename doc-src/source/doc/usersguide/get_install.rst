@@ -325,11 +325,11 @@ In the top-level FLUKA directory, with the environment variables set, type
     prompt%> make
 
 This will create the 64-bit executable named **flukahp**.
-At this point you are ready to get the alpha_release_fludag repository.
+At this point you are ready to get the FluDAG alpha_release repository.
 
 *FluDAG, Alpha Release*
  
-Get the FluDAG Alpha Release repository by cloning the UW-Madison DAGMC repository and checking out the alpha_release branch:
+Get the FluDAG Alpha Release repository by cloning the UW-Madison DAGMC repository from github.com and checking out the alpha_release branch:
 ::
 
     prompt%> git clone https://github.com/svalinn/DAGMC.git
