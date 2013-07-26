@@ -13,8 +13,8 @@
 //---------------------------------------------------------------------------//
 // CONSTRUCTOR
 //---------------------------------------------------------------------------//
-MeshTally::MeshTally(int id, const TallyInput& input)
-	: Tally(id, input)    
+MeshTally::MeshTally(const TallyInput& input)
+	: Tally(input)    
 {
     // Determine name of the output file
     TallyInput::TallyOptions::iterator it = input_data.options.find("out");
@@ -27,7 +27,7 @@ MeshTally::MeshTally(int id, const TallyInput& input)
     else // use default output file name
     {
         std::stringstream str;
-        str << "meshtal" << tally_id << ".h5m";
+        str << "meshtal" << input.tally_id << ".h5m";
         str >> output_filename;
     }
 

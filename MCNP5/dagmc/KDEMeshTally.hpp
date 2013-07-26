@@ -130,7 +130,7 @@ class KDEMeshTally : public MeshTally
      * \param input user-defined input parameters for this KDE mesh tally
      * \param type the type of estimator to use with this KDE mesh tally
      */
-    KDEMeshTally(int id, const TallyInput& input, Estimator type = COLLISION);
+    KDEMeshTally(const TallyInput& input, Estimator type = COLLISION);
 
     /**
      * \brief Virtual destructor

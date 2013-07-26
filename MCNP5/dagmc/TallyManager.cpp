@@ -15,8 +15,7 @@ TallyManager::TallyManager()
 // PUBLIC INTERFACE
 //---------------------------------------------------------------------------//
 // Create a new Tally with the implementation that calls this method
-Tally *createTally(unsigned int tally_id,
-                   std::string  tally_type,
+Tally *createTally(std::string  tally_type,
                    std::multimap<std::string, std::string>& options, 
                    const std::vector<double>& energy_bin_bounds)
 {
@@ -28,7 +27,7 @@ Tally *createTally(unsigned int tally_id,
         input.energy_bin_bounds = energy_bin_bounds;
         input.tally_type        = tally_type;
         
-        ret = Tally::create_tally(tally_id, input);
+        ret = Tally::create_tally(input);
         return ret;
 }
 

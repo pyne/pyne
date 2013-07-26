@@ -7,8 +7,8 @@
 //---------------------------------------------------------------------------//
 // CONSTRUCTOR
 //---------------------------------------------------------------------------//
-Tally::Tally(int id, const TallyInput& input) 
-     : input_data(input), total_energy_bin(true), tally_id(id)
+Tally::Tally(const TallyInput& input) 
+     : input_data(input), total_energy_bin(true)
 {    
        // Determine the total number of energy bins requested
        num_energy_bins = input_data.energy_bin_bounds.size();
@@ -36,29 +36,29 @@ Tally::Tally(int id, const TallyInput& input)
      *               | Track Length   | Cell         || track_cell    testing, not implemented 
      *
     */
-Tally *Tally::create_tally(int id, const TallyInput& input)
+Tally *Tally::create_tally(const TallyInput& input)
 {
       Tally *newTally = NULL;
           
       if (input.tally_type == "unstr_track")
       {
-         newTally = new moab::TrackLengthMeshTally(id, input);
+         newTally = new moab::TrackLengthMeshTally(input);
       }
       else if (input.tally_type == "kde_track")
       {
          KDEMeshTally::Estimator estimator = KDEMeshTally::INTEGRAL_TRACK;
-         newTally = new KDEMeshTally(id, input, estimator); 
+         newTally = new KDEMeshTally(input, estimator); 
       }
       else if (input.tally_type == "kde_subtrack")
       {
          KDEMeshTally::Estimator estimator = KDEMeshTally::SUB_TRACK;
-         newTally = new KDEMeshTally(id, input, estimator); 
+         newTally = new KDEMeshTally(input, estimator); 
       }
       else if (input.tally_type == "kde_coll")
       {
          // This line is not necessary because COLLISION is the default estimator.
          KDEMeshTally::Estimator estimator = KDEMeshTally::COLLISION;
-         newTally = new KDEMeshTally(id, input, estimator); 
+         newTally = new KDEMeshTally(input, estimator); 
       }
       else if (input.tally_type == "coll_cell")
       {

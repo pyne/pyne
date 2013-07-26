@@ -20,17 +20,19 @@ struct TallyEvent;
 //===========================================================================//
 struct TallyInput
 {
-    /// Typedef for map that stores optional tally input parameters
-    typedef std::multimap<std::string, std::string> TallyOptions;
+    unsigned int tally_id;
+
+    /// Type of tally to create as a concrete class
+    std::string tally_type;
 
     /// Energy bin boundaries defined for all tally points
     std::vector<double> energy_bin_bounds;
 
+    /// Typedef for map that stores optional tally input parameters
+    typedef std::multimap<std::string, std::string> TallyOptions;
+
     /// Optional input parameters requested by user
     TallyOptions options;
-
-    /// Type of tally to create as a concrete class
-    std::string tally_type;
 };
 
 
@@ -49,10 +51,9 @@ class Tally
   protected:
    /**
      * \brief Constructor
-     * \param id    mesh 
      * \param input user-defined input parameters for this tally
      */
-    Tally(int id, const TallyInput& input);
+    Tally(const TallyInput& input);
 
   public:
     
@@ -73,7 +74,7 @@ class Tally
      *  \brief Factory method for creation of Tally Observers
      * 
     */
-    static Tally *create_tally(int id, const TallyInput& input);
+    static Tally *create_tally(const TallyInput& input);
 
 
   protected:
@@ -86,7 +87,6 @@ class Tally
 
     bool total_energy_bin;
 
-    unsigned int tally_id;
 };
 
 

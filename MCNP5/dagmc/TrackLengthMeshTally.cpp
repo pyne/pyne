@@ -130,14 +130,14 @@ void TrackLengthMeshTally::parse_tally_options()
       {
          if( !parse_int_list( val.c_str(), conformality ) )
          {
-           std::cerr << "Error: Tally " << tally_id << " input has bad conformality value '" << val << "'" << std::endl;
+           std::cerr << "Error: Tally " << input_data.tally_id << " input has bad conformality value '" << val << "'" << std::endl;
            exit(EXIT_FAILURE);
          }
       }
     }
     else
     {
-      std::cerr << "Warning: Tally " << tally_id << " input has unknown key '" << key << "'" << std::endl;
+      std::cerr << "Warning: Tally " << input_data.tally_id << " input has unknown key '" << key << "'" << std::endl;
     }
   }
   if( tag_name != "" )
@@ -224,15 +224,15 @@ void TrackLengthMeshTally::set_tally_meshset()
 /**
   * Constructor
   */
-TrackLengthMeshTally::TrackLengthMeshTally(int id,  const TallyInput& input ) :
-  MeshTally( id, input ),
+TrackLengthMeshTally::TrackLengthMeshTally( const TallyInput& input ) :
+  MeshTally( input ),
   mb (new moab::Core() ),  
   obb_tool( new OrientedBoxTreeTool(mb) ),
   last_visited_tet( 0 ), 
   convex( false ),  conformal_surface_source( false ),
   last_cell (-1), num_negative_tracks(0)
 {
-   std::cout << "Creating dagmc mesh tally" << id 
+   std::cout << "Creating dagmc mesh tally" << input.tally_id 
             << ", input: " << input_filename 
             << ", output: " << output_filename << std::endl;
 
@@ -273,7 +273,7 @@ TrackLengthMeshTally::TrackLengthMeshTally(int id,  const TallyInput& input ) :
   
    if (convex && !conformality.empty())
    {
-     std::cerr << "Warning:  Tally " << id << " specifies both conformal and convex logic; using conformal logic." << std::endl;
+     std::cerr << "Warning:  Tally " << input.tally_id << " specifies both conformal and convex logic; using conformal logic." << std::endl;
    }
 
    // Perform tasks

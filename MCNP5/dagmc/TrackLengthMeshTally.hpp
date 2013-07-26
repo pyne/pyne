@@ -24,7 +24,7 @@ class TrackLengthMeshTally : public MeshTally
 { 
 
 public:
-  TrackLengthMeshTally( int id, const TallyInput& input );
+  TrackLengthMeshTally( const TallyInput& input );
 
   /**
    * \brief Computes mesh tally scores for the given tally event

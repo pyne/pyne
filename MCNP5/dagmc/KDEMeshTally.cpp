@@ -24,9 +24,9 @@ const char* const KDEMeshTally::kde_estimator_names[] = {"collision",
 //---------------------------------------------------------------------------//
 // CONSTRUCTOR
 //---------------------------------------------------------------------------//
-KDEMeshTally::KDEMeshTally(int id, const TallyInput& input,
+KDEMeshTally::KDEMeshTally(const TallyInput& input,
                            KDEMeshTally::Estimator type)
-    : MeshTally(id, input),
+    : MeshTally(input),
       estimator(type),
       bandwidth(moab::CartVect(0.01, 0.01, 0.01)),
       kernel(NULL),
@@ -36,7 +36,7 @@ KDEMeshTally::KDEMeshTally(int id, const TallyInput& input,
       mbi(new moab::Core())
 {
     std::cout << "Creating KDE " << kde_estimator_names[estimator]
-              << " mesh tally " << tally_id << std::endl;
+              << " mesh tally " << input.tally_id << std::endl;
 
     std::cout << "    for input mesh: " << input_filename
               << ", output file: " << output_filename << std::endl;
@@ -77,7 +77,7 @@ KDEMeshTally::KDEMeshTally(int id, const TallyInput& input,
     if (rval != moab::MB_SUCCESS)
     {
         std::cerr << "Error: Could not load mesh data for KDE mesh tally "
-                  << tally_id << " from input file "
+                  << input.tally_id << " from input file "
                   << input_filename << std::endl;
         exit(EXIT_FAILURE);
     }
@@ -322,7 +322,7 @@ void KDEMeshTally::parse_tally_options()
         else // invalid tally option
         {
             std::cerr << "Warning: input data for KDE mesh tally "
-                      << tally_id
+                      << input_data.tally_id
                       << " has unknown key '" << key << "'" << std::endl;
         }
     }
