@@ -130,14 +130,14 @@ void TrackLengthMeshTally::parse_tally_options()
       {
          if( !parse_int_list( val.c_str(), conformality ) )
          {
-           std::cerr << "Error: Tally " << tally_id << " card has bad conformality value '" << val << "'" << std::endl;
+           std::cerr << "Error: Tally " << tally_id << " input has bad conformality value '" << val << "'" << std::endl;
            exit(EXIT_FAILURE);
          }
       }
     }
     else
     {
-      std::cerr << "Warning: Tally " << tally_id << " card has unknown key '" << key << "'" << std::endl;
+      std::cerr << "Warning: Tally " << tally_id << " input has unknown key '" << key << "'" << std::endl;
     }
   }
   if( tag_name != "" )
@@ -363,9 +363,9 @@ void TrackLengthMeshTally::build_trees (Range& all_tets)
 
 /**
  * Write out the mesh with tally and error tags attached
- * @param sp_norm Tally for each tetrahedron will be divided by sp_norm*volume of tet.
+ * @param num_histories Tally for each tetrahedron will be divided by num_histories*volume of tet.
  */
-void TrackLengthMeshTally::write_data( double sp_norm)
+void TrackLengthMeshTally::write_data( double num_histories)
 {
 
   ErrorCode rval;
@@ -396,7 +396,7 @@ void TrackLengthMeshTally::write_data( double sp_norm)
 
       double tally = get_data( tally_data, t, j );
       double error = get_data( error_data, t, j );
-      double score = (tally / (volume*sp_norm));
+      double score = (tally / (volume*num_histories));
       
       rval = mb->tag_set_data( tally_tags[j], &t, 1, &score );
       assert( rval == MB_SUCCESS );
@@ -405,7 +405,7 @@ void TrackLengthMeshTally::write_data( double sp_norm)
       // this reflects MCNP's approach to avoiding a divide-by-zero situation.
       double rel_err = 0;
       if( error != 0 ){
-        rel_err = sqrt( (error / (tally*tally)) - (1./sp_norm) );
+        rel_err = sqrt( (error / (tally*tally)) - (1./num_histories) );
       }        
 
       rval = mb->tag_set_data( error_tags[j], &t, 1, &rel_err );
@@ -455,23 +455,6 @@ bool TrackLengthMeshTally::point_in_tet( const CartVect& point, const EntityHand
   return in_tet;
 }
 
-
-/**
- * Add a score to a given mesh cell
- */
-/*
-void TrackLengthMeshTally::add_score_to_mesh_cell( EntityHandle mesh_cell, double score, int ebin ){
-  
-  visited_this_history.insert( mesh_cell );
-
-  get_data( temp_tally_data, mesh_cell, ebin ) += score;
-
-  if( input_data.total_energy_bin ){
-    get_data( temp_tally_data, mesh_cell, (num_energy_bins-1) ) += score;
-  }
-}
-*/
-
 /**
  * Finish adding a set of scores for a particular monte carlo particle track
  * ToDo:  This may not need to be overridden, depending on whethere conformality 
@@ -480,23 +463,6 @@ void TrackLengthMeshTally::add_score_to_mesh_cell( EntityHandle mesh_cell, doubl
 void TrackLengthMeshTally::end_history () 
 {
   MeshTally::end_history();
-/*
-  for( std::set< EntityHandle >::iterator i=visited_this_history.begin(); i!=visited_this_history.end(); ++i){
-
-    for( unsigned j = 0; j < num_energy_bins; ++j ){
-      double& d =     get_data(temp_tally_data, *i, j );
-      double& tally = get_data(tally_data, *i, j );
-      double& error = get_data(error_data, *i, j );
-      
-      tally += d;
-      error += (d * d);
-      d = 0.0;
-    }
-
-  }
-
-  visited_this_history.clear();
-*/
   if( !conformality.empty() ){ last_cell = -1; } 
 }
 
@@ -719,12 +685,8 @@ static inline bool tris_eq( const EntityHandle *t1, const EntityHandle *t2 ){
 
 void TrackLengthMeshTally::compute_score(const TallyEvent& event)
 {
-  // make sure tally event is a track-based event
-  if (event.type != TallyEvent::TRACK)
-  {
-    std::cerr << "\nError: Tally event is not a track-based event" << std::endl;
-    exit(EXIT_FAILURE);
-  }
+  // If it's not the type we want leave immediately
+  if (event.type != TallyEvent::TRACK) return;
 
   ErrorCode rval;
 

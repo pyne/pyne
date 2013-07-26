@@ -26,9 +26,6 @@ struct TallyInput
     /// Energy bin boundaries defined for all tally points
     std::vector<double> energy_bin_bounds;
 
-    /// If true, add an extra energy bin to tally all energy levels
-    bool total_energy_bin;
-
     /// Optional input parameters requested by user
     TallyOptions options;
 
@@ -70,7 +67,7 @@ class Tally
 
     virtual void end_history() = 0;
 
-    virtual void write_data(double num_particles);
+    virtual void write_data(double num_histories);
 
     /**
      *  \brief Factory method for creation of Tally Observers
@@ -78,7 +75,6 @@ class Tally
     */
     static Tally *create_tally(int id, const TallyInput& input);
 
-    unsigned int tally_id;
 
   protected:
 
@@ -88,6 +84,9 @@ class Tally
     /// Number of energy bins implemented in the data arrays
     unsigned int num_energy_bins;
 
+    bool total_energy_bin;
+
+    unsigned int tally_id;
 };
 
 

@@ -118,17 +118,16 @@ void KDEMeshTally::compute_score(const TallyEvent& event)
             subtrack_points = choose_points(num_subtracks, event);
         }
     }
-    else if (event.type == TallyEvent::COLLISION && estimator == COLLISION)
+    else if (event.type == TallyEvent::COLLISION  &&  estimator == COLLISION)
     {
-        // divide weight by cross section and update optimal bandwidth
-        weight /= event.total_cross_section;
-        update_variance(event.position);
+            // divide weight by cross section and update optimal bandwidth
+            weight /= event.total_cross_section;
+            // update_variance(collision.collision_point);
+            update_variance(event.position);
     }
-    else // NONE, warn and exit
+    else // NONE, return from this method
     {
-        std::cerr << "Error: Tally event is not valid for KDE mesh tally ";
-        std::cerr << tally_id << std::endl;
-        exit(EXIT_FAILURE);
+ 	return;
     }
 
     // create the neighborhood region and find all of the calculations points
@@ -177,7 +176,7 @@ void KDEMeshTally::compute_score(const TallyEvent& event)
     }
 }
 //---------------------------------------------------------------------------//
-void KDEMeshTally::write_data(double num_particles)
+void KDEMeshTally::write_data(double num_histories)
 {
     // display the optimal bandwidth if it was computed
     if (estimator == COLLISION)
@@ -204,11 +203,11 @@ void KDEMeshTally::write_data(double num_particles)
 
             if (error != 0.0)
             {
-                rel_error = sqrt(error / (tally * tally) - 1.0 / num_particles);
+                rel_error = sqrt(error / (tally * tally) - 1.0 / num_histories);
             }
 
             // normalize mesh tally result by the number of source particles
-            tally /= num_particles;
+            tally /= num_histories;
 
             // set tally and error tag values for this entity
             rval = mbi->tag_set_data(tally_tags[j], &point, 1, &tally);

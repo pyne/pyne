@@ -18,8 +18,7 @@ TallyManager::TallyManager()
 Tally *createTally(unsigned int tally_id,
                    std::string  tally_type,
                    std::multimap<std::string, std::string>& options, 
-                   const std::vector<double>& energy_bin_bounds,
-                   bool total_energy_bin)
+                   const std::vector<double>& energy_bin_bounds)
 {
 	Tally *ret;
         TallyInput input; 
@@ -27,7 +26,6 @@ Tally *createTally(unsigned int tally_id,
         // Set up the input structure from the passed parameters
         input.options  = options;
         input.energy_bin_bounds = energy_bin_bounds;
-        input.total_energy_bin  = total_energy_bin; 
         input.tally_type        = tally_type;
         
         ret = Tally::create_tally(tally_id, input);
@@ -44,10 +42,9 @@ void TallyManager::addTally(int tally_id, Tally *obs)
 void TallyManager::addNewTally(unsigned int tally_id,
                    std::string tally_type,
                    std::multimap<std::string, std::string>& options, 
-                   const std::vector<double>& energy_bin_bounds,
-                   bool total_energy_bin)
+                   const std::vector<double>& energy_bin_bounds)
 {
-	Tally *newTally = createTally(tally_id, tally_type, options,  energy_bin_bounds, total_energy_bin);
+	Tally *newTally = createTally(tally_id, tally_type, options,  energy_bin_bounds);
         addTally(tally_id, newTally);
 }
 
@@ -81,13 +78,13 @@ void TallyManager::end_history()
        }
 }
 
-void TallyManager::write_data(double num_particles)
+void TallyManager::write_data(double num_histories)
 {
        std::map<int, Tally*>::iterator map_it;
        for (map_it = observers.begin(); map_it != observers.end(); ++map_it)
        {
            Tally *tally = map_it->second;
-	   tally->write_data(num_particles);
+	   tally->write_data(num_histories);
        }
 }
 

@@ -83,7 +83,7 @@ void MeshTally::add_score_to_tally(moab::EntityHandle tally_point,
     get_data(temp_tally_data, tally_point, ebin) += score;
 
     // also update total energy bin tally for this history if one exists
-    if (input_data.total_energy_bin)
+    if (total_energy_bin)
     {
         get_data(temp_tally_data, tally_point, (num_energy_bins-1)) += score;
     }

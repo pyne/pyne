@@ -45,8 +45,7 @@ class TallyManager
     Tally *createTally(unsigned int tally_id,
                    std::string  tally_type,
                    std::multimap<std::string, std::string>& options, 
-                   const std::vector<double>& energy_bin_bounds,
-                   bool total_energy_bin);
+                   const std::vector<double>& energy_bin_bounds);
 
     // Add a Tally to the observer list
     void addTally(int tally_id, Tally *obs);
@@ -56,8 +55,7 @@ class TallyManager
     void addNewTally(unsigned int tally_id,
                    std::string tally_type,
                    std::multimap<std::string, std::string>& options, 
-                   const std::vector<double>& energy_bin_bounds,
-                   bool total_energy_bin);
+                   const std::vector<double>& energy_bin_bounds);
 
     // Remove a Tally
     void removeTally(int tally_id);
@@ -69,7 +67,7 @@ class TallyManager
     void end_history();
 
     // Call write_data() on every tally
-    void write_data(double num_particles);
+    void write_data(double num_histories);
 
     /**
      * \brief fill the ParticleState
