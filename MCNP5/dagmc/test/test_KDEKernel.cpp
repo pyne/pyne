@@ -152,44 +152,44 @@ TEST_F(KDEKernelTest, CreateHigherOrderKernel)
 TEST_F(BoundaryKernelTest, EvaluatePointAtLowerMax)
 {
     // test evaluation over the domain u = [-1, 1]
-    double value = kernel->evaluate(-1.0, distance, max_distance, side);
+    double value = kernel->evaluate(-1.0, max_distance, distance, side);
     EXPECT_NEAR(0.0, value, 1e-6);
 
-    value = kernel->evaluate(-0.8, distance, max_distance, side);
+    value = kernel->evaluate(-0.8, max_distance, distance, side);
     EXPECT_NEAR(0.27, value, 1e-6);
 
-    value = kernel->evaluate(-0.6, distance, max_distance, side);
+    value = kernel->evaluate(-0.6, max_distance, distance, side);
     EXPECT_NEAR(0.48, value, 1e-6);
 
-    value = kernel->evaluate(-0.4, distance, max_distance, side);
+    value = kernel->evaluate(-0.4, max_distance, distance, side);
     EXPECT_NEAR(0.63, value, 1e-6);
 
-    value = kernel->evaluate(-0.2, distance, max_distance, side);
+    value = kernel->evaluate(-0.2, max_distance, distance, side);
     EXPECT_NEAR(0.72, value, 1e-6);
 
-    value = kernel->evaluate(0.0, distance, max_distance, side);
+    value = kernel->evaluate(0.0, max_distance, distance, side);
     EXPECT_NEAR(0.75, value, 1e-6);
 
-    value = kernel->evaluate(0.2, distance, max_distance, side);
+    value = kernel->evaluate(0.2, max_distance, distance, side);
     EXPECT_NEAR(0.72, value, 1e-6);
 
-    value = kernel->evaluate(0.4, distance, max_distance, side);
+    value = kernel->evaluate(0.4, max_distance, distance, side);
     EXPECT_NEAR(0.63, value, 1e-6);
 
-    value = kernel->evaluate(0.6, distance, max_distance, side);
+    value = kernel->evaluate(0.6, max_distance, distance, side);
     EXPECT_NEAR(0.48, value, 1e-6);
 
-    value = kernel->evaluate(0.8, distance, max_distance, side);
+    value = kernel->evaluate(0.8, max_distance, distance, side);
     EXPECT_NEAR(0.27, value, 1e-6);
 
-    value = kernel->evaluate(1.0, distance, max_distance, side);
+    value = kernel->evaluate(1.0, max_distance, distance, side);
     EXPECT_NEAR(0.0, value, 1e-6);
 
     // test evaluation outside the domain u = [-1, 1]
-    value = kernel->evaluate(-2.0, distance, max_distance, side);
+    value = kernel->evaluate(-2.0, max_distance, distance, side);
     EXPECT_DOUBLE_EQ(0.0, value);
 
-    value = kernel->evaluate(2.0, distance, max_distance, side);
+    value = kernel->evaluate(2.0, max_distance, distance, side);
     EXPECT_DOUBLE_EQ(0.0, value);
 }
 //---------------------------------------------------------------------------//
@@ -200,44 +200,44 @@ TEST_F(BoundaryKernelTest, EvaluatePointAtUpperMax)
     side = 1;
 
     // test evaluation over the domain u = [-1, 1]
-    double value = kernel->evaluate(-1.0, distance, max_distance, side);
+    double value = kernel->evaluate(-1.0, max_distance, distance, side);
     EXPECT_NEAR(0.0, value, 1e-6);
 
-    value = kernel->evaluate(-0.8, distance, max_distance, side);
+    value = kernel->evaluate(-0.8, max_distance, distance, side);
     EXPECT_NEAR(0.27, value, 1e-6);
 
-    value = kernel->evaluate(-0.6, distance, max_distance, side);
+    value = kernel->evaluate(-0.6, max_distance, distance, side);
     EXPECT_NEAR(0.48, value, 1e-6);
 
-    value = kernel->evaluate(-0.4, distance, max_distance, side);
+    value = kernel->evaluate(-0.4, max_distance, distance, side);
     EXPECT_NEAR(0.63, value, 1e-6);
 
-    value = kernel->evaluate(-0.2, distance, max_distance, side);
+    value = kernel->evaluate(-0.2, max_distance, distance, side);
     EXPECT_NEAR(0.72, value, 1e-6);
 
-    value = kernel->evaluate(0.0, distance, max_distance, side);
+    value = kernel->evaluate(0.0, max_distance, distance, side);
     EXPECT_NEAR(0.75, value, 1e-6);
 
-    value = kernel->evaluate(0.2, distance, max_distance, side);
+    value = kernel->evaluate(0.2, max_distance, distance, side);
     EXPECT_NEAR(0.72, value, 1e-6);
 
-    value = kernel->evaluate(0.4, distance, max_distance, side);
+    value = kernel->evaluate(0.4, max_distance, distance, side);
     EXPECT_NEAR(0.63, value, 1e-6);
 
-    value = kernel->evaluate(0.6, distance, max_distance, side);
+    value = kernel->evaluate(0.6, max_distance, distance, side);
     EXPECT_NEAR(0.48, value, 1e-6);
 
-    value = kernel->evaluate(0.8, distance, max_distance, side);
+    value = kernel->evaluate(0.8, max_distance, distance, side);
     EXPECT_NEAR(0.27, value, 1e-6);
 
-    value = kernel->evaluate(1.0, distance, max_distance, side);
+    value = kernel->evaluate(1.0, max_distance, distance, side);
     EXPECT_NEAR(0.0, value, 1e-6);
 
     // test evaluation outside the domain u = [-1, 1]
-    value = kernel->evaluate(-2.0, distance, max_distance, side);
+    value = kernel->evaluate(-2.0, max_distance, distance, side);
     EXPECT_DOUBLE_EQ(0.0, value);
 
-    value = kernel->evaluate(2.0, distance, max_distance, side);
+    value = kernel->evaluate(2.0, max_distance, distance, side);
     EXPECT_DOUBLE_EQ(0.0, value);
 }
 //---------------------------------------------------------------------------//
@@ -248,41 +248,41 @@ TEST_F(BoundaryKernelTest, EvaluatePointAtHalfLowerMax)
     distance = 0.25;
 
     // test evaluation over the domain u = [-1, 0.5]
-    double value = kernel->evaluate(-1.0, distance, max_distance, side);
+    double value = kernel->evaluate(-1.0, max_distance, distance, side);
     EXPECT_NEAR(0.0, value, 1e-6);
 
-    value = kernel->evaluate(-0.8, distance, max_distance, side);
+    value = kernel->evaluate(-0.8, max_distance, distance, side);
     EXPECT_NEAR(0.119070, value, 1e-6);
 
-    value = kernel->evaluate(-0.6, distance, max_distance, side);
+    value = kernel->evaluate(-0.6, max_distance, distance, side);
     EXPECT_NEAR(0.317519, value, 1e-6);
 
-    value = kernel->evaluate(-0.4, distance, max_distance, side);
+    value = kernel->evaluate(-0.4, max_distance, distance, side);
     EXPECT_NEAR(0.555659, value, 1e-6);
 
-    value = kernel->evaluate(-0.2, distance, max_distance, side);
+    value = kernel->evaluate(-0.2, max_distance, distance, side);
     EXPECT_NEAR(0.793798, value, 1e-6);
 
-    value = kernel->evaluate(0.0, distance, max_distance, side);
+    value = kernel->evaluate(0.0, max_distance, distance, side);
     EXPECT_NEAR(0.992248, value, 1e-6);
 
-    value = kernel->evaluate(0.2, distance, max_distance, side);
+    value = kernel->evaluate(0.2, max_distance, distance, side);
     EXPECT_NEAR(1.111318, value, 1e-6);
 
-    value = kernel->evaluate(0.5, distance, max_distance, side);
+    value = kernel->evaluate(0.5, max_distance, distance, side);
     EXPECT_NEAR(1.054264, value, 1e-6);
 
     // test evaluation outside the domain u = [-1, 0.5]
-    value = kernel->evaluate(-2.0, distance, max_distance, side);
+    value = kernel->evaluate(-2.0, max_distance, distance, side);
     EXPECT_DOUBLE_EQ(0.0, value);
 
-    value = kernel->evaluate(0.8, distance, max_distance, side);
+    value = kernel->evaluate(0.8, max_distance, distance, side);
     EXPECT_DOUBLE_EQ(0.0, value);
 
-    value = kernel->evaluate(1.0, distance, max_distance, side);
+    value = kernel->evaluate(1.0, max_distance, distance, side);
     EXPECT_DOUBLE_EQ(0.0, value);
 
-    value = kernel->evaluate(2.0, distance, max_distance, side);
+    value = kernel->evaluate(2.0, max_distance, distance, side);
     EXPECT_DOUBLE_EQ(0.0, value);
 }
 //---------------------------------------------------------------------------//
@@ -294,41 +294,41 @@ TEST_F(BoundaryKernelTest, EvaluatePointAtHalfUpperMax)
     side = 1;
 
     // test evaluation over the domain u = [-0.5, 1]
-    double value = kernel->evaluate(-0.5, distance, max_distance, side);
+    double value = kernel->evaluate(-0.5, max_distance, distance, side);
     EXPECT_NEAR(1.054264, value, 1e-6);
 
-    value = kernel->evaluate(-0.2, distance, max_distance, side);
+    value = kernel->evaluate(-0.2, max_distance, distance, side);
     EXPECT_NEAR(1.111318, value, 1e-6);
 
-    value = kernel->evaluate(0.0, distance, max_distance, side);
+    value = kernel->evaluate(0.0, max_distance, distance, side);
     EXPECT_NEAR(0.992248, value, 1e-6);
 
-    value = kernel->evaluate(0.2, distance, max_distance, side);
+    value = kernel->evaluate(0.2, max_distance, distance, side);
     EXPECT_NEAR(0.793798, value, 1e-6);
 
-    value = kernel->evaluate(0.4, distance, max_distance, side);
+    value = kernel->evaluate(0.4, max_distance, distance, side);
     EXPECT_NEAR(0.555659, value, 1e-6);
 
-    value = kernel->evaluate(0.6, distance, max_distance, side);
+    value = kernel->evaluate(0.6, max_distance, distance, side);
     EXPECT_NEAR(0.317519, value, 1e-6);
 
-    value = kernel->evaluate(0.8, distance, max_distance, side);
+    value = kernel->evaluate(0.8, max_distance, distance, side);
     EXPECT_NEAR(0.119070, value, 1e-6);
 
-    value = kernel->evaluate(1.0, distance, max_distance, side);
+    value = kernel->evaluate(1.0, max_distance, distance, side);
     EXPECT_NEAR(0.0, value, 1e-6);
 
     // test evaluation outside the domain u = [-0.5, 1]
-    value = kernel->evaluate(-2.0, distance, max_distance, side);
+    value = kernel->evaluate(-2.0, max_distance, distance, side);
     EXPECT_DOUBLE_EQ(0.0, value);
 
-    value = kernel->evaluate(-1.0, distance, max_distance, side);
+    value = kernel->evaluate(-1.0, max_distance, distance, side);
     EXPECT_DOUBLE_EQ(0.0, value);
 
-    value = kernel->evaluate(-0.8, distance, max_distance, side);
+    value = kernel->evaluate(-0.8, max_distance, distance, side);
     EXPECT_DOUBLE_EQ(0.0, value);
 
-    value = kernel->evaluate(2.0, distance, max_distance, side);
+    value = kernel->evaluate(2.0, max_distance, distance, side);
     EXPECT_DOUBLE_EQ(0.0, value);
 }
 //---------------------------------------------------------------------------//
@@ -339,35 +339,35 @@ TEST_F(BoundaryKernelTest, EvaluatePointOnLowerBoundary)
     distance = 0.0;
 
     // test evaluation over the domain u = [-1, 0]
-    double value = kernel->evaluate(-1.0, distance, max_distance, side);
+    double value = kernel->evaluate(-1.0, max_distance, distance, side);
     EXPECT_NEAR(0.0, value, 1e-6);
 
-    value = kernel->evaluate(-0.8, distance, max_distance, side);
+    value = kernel->evaluate(-0.8, max_distance, distance, side);
     EXPECT_NEAR(-0.909474, value, 1e-6);
 
-    value = kernel->evaluate(-0.6, distance, max_distance, side);
+    value = kernel->evaluate(-0.6, max_distance, distance, side);
     EXPECT_NEAR(-0.404211, value, 1e-6);
 
-    value = kernel->evaluate(-0.4, distance, max_distance, side);
+    value = kernel->evaluate(-0.4, max_distance, distance, side);
     EXPECT_NEAR(1.061053, value, 1e-6);
 
-    value = kernel->evaluate(-0.2, distance, max_distance, side);
+    value = kernel->evaluate(-0.2, max_distance, distance, side);
     EXPECT_NEAR(3.031579, value, 1e-6);
 
-    value = kernel->evaluate(0.0, distance, max_distance, side);
+    value = kernel->evaluate(0.0, max_distance, distance, side);
     EXPECT_NEAR(5.052632, value, 1e-6);
 
     // test evaluation outside the domain u = [-1, 0]
-    value = kernel->evaluate(-2.0, distance, max_distance, side);
+    value = kernel->evaluate(-2.0, max_distance, distance, side);
     EXPECT_DOUBLE_EQ(0.0, value);
 
-    value = kernel->evaluate(0.5, distance, max_distance, side);
+    value = kernel->evaluate(0.5, max_distance, distance, side);
     EXPECT_DOUBLE_EQ(0.0, value);
 
-    value = kernel->evaluate(1.0, distance, max_distance, side);
+    value = kernel->evaluate(1.0, max_distance, distance, side);
     EXPECT_DOUBLE_EQ(0.0, value);
 
-    value = kernel->evaluate(2.0, distance, max_distance, side);
+    value = kernel->evaluate(2.0, max_distance, distance, side);
     EXPECT_DOUBLE_EQ(0.0, value);
 }
 //---------------------------------------------------------------------------//
@@ -379,35 +379,35 @@ TEST_F(BoundaryKernelTest, EvaluatePointOnUpperBoundary)
     side = 1;
 
     // test evaluation over the domain u = [0, 1]
-    double value = kernel->evaluate(0.0, distance, max_distance, side);
+    double value = kernel->evaluate(0.0, max_distance, distance, side);
     EXPECT_NEAR(5.052632, value, 1e-6);
 
-    value = kernel->evaluate(0.2, distance, max_distance, side);
+    value = kernel->evaluate(0.2, max_distance, distance, side);
     EXPECT_NEAR(3.031579, value, 1e-6);
 
-    value = kernel->evaluate(0.4, distance, max_distance, side);
+    value = kernel->evaluate(0.4, max_distance, distance, side);
     EXPECT_NEAR(1.061053, value, 1e-6);
 
-    value = kernel->evaluate(0.6, distance, max_distance, side);
+    value = kernel->evaluate(0.6, max_distance, distance, side);
     EXPECT_NEAR(-0.404211, value, 1e-6);
 
-    value = kernel->evaluate(0.8, distance, max_distance, side);
+    value = kernel->evaluate(0.8, max_distance, distance, side);
     EXPECT_NEAR(-0.909474, value, 1e-6);
 
-    value = kernel->evaluate(1.0, distance, max_distance, side);
+    value = kernel->evaluate(1.0, max_distance, distance, side);
     EXPECT_NEAR(0.0, value, 1e-6);
 
     // test evaluation outside the domain u = [0, 1]
-    value = kernel->evaluate(-2.0, distance, max_distance, side);
+    value = kernel->evaluate(-2.0, max_distance, distance, side);
     EXPECT_DOUBLE_EQ(0.0, value);
 
-    value = kernel->evaluate(-0.5, distance, max_distance, side);
+    value = kernel->evaluate(-0.5, max_distance, distance, side);
     EXPECT_DOUBLE_EQ(0.0, value);
 
-    value = kernel->evaluate(-1.0, distance, max_distance, side);
+    value = kernel->evaluate(-1.0, max_distance, distance, side);
     EXPECT_DOUBLE_EQ(0.0, value);
 
-    value = kernel->evaluate(2.0, distance, max_distance, side);
+    value = kernel->evaluate(2.0, max_distance, distance, side);
     EXPECT_DOUBLE_EQ(0.0, value);
 }
 //---------------------------------------------------------------------------//
@@ -417,25 +417,25 @@ TEST_F(BoundaryKernelTest, EvaluatePointOutsideMaxDistance)
     distance = 1.5;
 
     // test evaluation over various values to verify always outside domain
-    double value = kernel->evaluate(-2.0, distance, max_distance, side);
+    double value = kernel->evaluate(-2.0, max_distance, distance, side);
     EXPECT_DOUBLE_EQ(0.0, value);
 
-    value = kernel->evaluate(-1.0, distance, max_distance, side);
+    value = kernel->evaluate(-1.0, max_distance, distance, side);
     EXPECT_DOUBLE_EQ(0.0, value);
 
-    value = kernel->evaluate(-0.5, distance, max_distance, side);
+    value = kernel->evaluate(-0.5, max_distance, distance, side);
     EXPECT_DOUBLE_EQ(0.0, value);
 
-    value = kernel->evaluate(0.0, distance, max_distance, side);
+    value = kernel->evaluate(0.0, max_distance, distance, side);
     EXPECT_DOUBLE_EQ(0.0, value);
 
-    value = kernel->evaluate(0.5, distance, max_distance, side);
+    value = kernel->evaluate(0.5, max_distance, distance, side);
     EXPECT_DOUBLE_EQ(0.0, value);
 
-    value = kernel->evaluate(1.0, distance, max_distance, side);
+    value = kernel->evaluate(1.0, max_distance, distance, side);
     EXPECT_DOUBLE_EQ(0.0, value);
 
-    value = kernel->evaluate(2.0, distance, max_distance, side);
+    value = kernel->evaluate(2.0, max_distance, distance, side);
     EXPECT_DOUBLE_EQ(0.0, value);
 }
 //---------------------------------------------------------------------------//
@@ -445,25 +445,25 @@ TEST_F(BoundaryKernelTest, EvaluateNegativeDistanceRatio)
     distance = -1.5;
 
     // test evaluation over various values to verify always outside domain
-    double value = kernel->evaluate(-2.0, distance, max_distance, side);
+    double value = kernel->evaluate(-2.0, max_distance, distance, side);
     EXPECT_DOUBLE_EQ(0.0, value);
 
-    value = kernel->evaluate(-1.0, distance, max_distance, side);
+    value = kernel->evaluate(-1.0, max_distance, distance, side);
     EXPECT_DOUBLE_EQ(0.0, value);
 
-    value = kernel->evaluate(-0.5, distance, max_distance, side);
+    value = kernel->evaluate(-0.5, max_distance, distance, side);
     EXPECT_DOUBLE_EQ(0.0, value);
 
-    value = kernel->evaluate(0.0, distance, max_distance, side);
+    value = kernel->evaluate(0.0, max_distance, distance, side);
     EXPECT_DOUBLE_EQ(0.0, value);
 
-    value = kernel->evaluate(0.5, distance, max_distance, side);
+    value = kernel->evaluate(0.5, max_distance, distance, side);
     EXPECT_DOUBLE_EQ(0.0, value);
 
-    value = kernel->evaluate(1.0, distance, max_distance, side);
+    value = kernel->evaluate(1.0, max_distance, distance, side);
     EXPECT_DOUBLE_EQ(0.0, value);
 
-    value = kernel->evaluate(2.0, distance, max_distance, side);
+    value = kernel->evaluate(2.0, max_distance, distance, side);
     EXPECT_DOUBLE_EQ(0.0, value);
 }
 //---------------------------------------------------------------------------//
