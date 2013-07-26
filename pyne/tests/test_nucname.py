@@ -76,6 +76,11 @@ cases = [20040, "he4", "Cm-244", "PU239", "AM242M", 2004, 95642, 95242, 92636,
     95942, "Am-242m", "he", "U", "Np", "4he", "244CM", "239Pu", "242AM", 40020,
     2440961, 2390940, 2420950, 92]
 
+caseids = [20040000, 20040000, 962440000, 942390000, 952420001, 20040000, 952420000, 
+    952420001, 922360001, 952420004, 952420001, 20000000, 920000000, 930000000, 
+    20040000, 962440000, 942390000, 952420000, 20040000, 962440001, 942390000, 
+    952420000, 920000000]
+
 def test_id():
     assert_equal(nucname.id(20040), 20040000)
 
@@ -173,6 +178,14 @@ def test_zzaaam():
     assert_equal(nucname.zzaaam(2390940), 942390)
     assert_equal(nucname.zzaaam(2420950), 952420)
 
+def test_zzaaam_to_id():
+    vals = [20040, 20040, 962440, 942390, 952421, 20040, 952420, 952421, 922361, 
+            952424, 952421, 20000, 920000, 930000, 20040, 962440, 942390, 952420, 
+            20040, 962441, 942390, 952420, 920000]
+    for val, id in set(zip(vals, caseids)):
+        if val is None:
+            continue
+        yield check_cases, nucname.zzaaam_to_id, val, id
 
 def test_mcnp():
     assert_equal(nucname.mcnp(10010),  1001)
@@ -197,6 +210,14 @@ def test_mcnp():
     assert_equal(nucname.mcnp(2420950), 95642)
     assert_equal(nucname.mcnp(2360921), 92636)
 
+def test_mcnp_to_id():
+    vals = [2004, 2004, 96244, 94239, 95242, 2004, 95642, 95242, 92636, 
+            95942, 95242, 2000, 92000, 93000, 2004, 96244, 94239, 95642, 
+            2004, 96644, 94239, 95642, 92000]
+    for val, id in set(zip(vals, caseids)):
+        if val is None:
+            continue
+        yield check_cases, nucname.mcnp_to_id, val, id
 
 def test_serpent():
     assert_equal(nucname.serpent(942390), "Pu-239")
@@ -212,7 +233,16 @@ def test_serpent():
     assert_equal(nucname.serpent(2390940), "Pu-239")
     assert_equal(nucname.serpent(2420951), "Am-242m")
 
-
+def test_serpent_to_id():
+    # use None for impossible forms
+    vals = ["He-4", "He-4", "Cm-244", "Pu-239", "Am-242m", "He-4", "Am-242", 
+            "Am-242m", "U-236m", None, "Am-242m", "He-nat", "U-nat", 
+            "Np-nat", "He-4", "Cm-244", "Pu-239", "Am-242", "He-4", "Cm-244m", 
+            "Pu-239", "Am-242", "U-nat"]
+    for val, id in set(zip(vals, caseids)):
+        if val is None:
+            continue
+        yield check_cases, nucname.serpent_to_id, val, id
 
 def test_nist():
     assert_equal(nucname.nist(942390), "239Pu")
@@ -230,6 +260,15 @@ def test_nist():
     assert_equal(nucname.nist(2390940), "239Pu")
     assert_equal(nucname.nist(2420951), "242Am")
 
+def test_nist_to_id():
+    # use None for impossible forms
+    vals = ["4He", "4He", "244Cm", "239Pu", None, "4He", "242Am", None, None, 
+            None, None, "He", "U", "Np", "4He", "244Cm", "239Pu", "242Am", "4He", 
+            None, "239Pu", "242Am", "U"]
+    for val, id in set(zip(vals, caseids)):
+        if val is None:
+            continue
+        yield check_cases, nucname.nist_to_id, val, id
 
 def test_cinder():
     assert_equal(nucname.cinder(10020),  20010)
@@ -248,6 +287,14 @@ def test_cinder():
     assert_equal(nucname.cinder(20010),  20010)
     assert_equal(nucname.cinder(2420951), 2420951)
 
+def test_cinder_to_id():
+    vals = [40020, 40020, 2440960, 2390940, 2420951, 40020, 2420950, 2420951, 2360921, 
+            2420954, 2420951, 20, 920, 930, 40020, 2440960, 2390940, 2420950, 
+            40020, 2440961, 2390940, 2420950, 920]
+    for val, id in set(zip(vals, caseids)):
+        if val is None:
+            continue
+        yield check_cases, nucname.cinder_to_id, val, id
 
 def test_alara():
     assert_equal(nucname.alara(942390), "pu:239")
@@ -269,6 +316,15 @@ def test_alara():
     assert_equal(nucname.alara(2390940), "pu:239")
     assert_equal(nucname.alara(2420950), "am:242")
 
+def test_alara_to_id():
+    # use None for impossible forms
+    vals = ["he:4", "he:4", "cm:244", "pu:239", None, "he:4", "am:242", None, None, 
+            None, None, "he", "u", "np", "he:4", "cm:244", "pu:239", "am:242", "he:4", 
+            None, "pu:239", "am:242", "u"]
+    for val, id in set(zip(vals, caseids)):
+        if val is None:
+            continue
+        yield check_cases, nucname.alara_to_id, val, id
 
 
 if __name__ == "__main__":

@@ -296,6 +296,17 @@ namespace nucname
   int zzaaam(std::string nuc);
   /// \}
 
+  /// \name ZZAAAM Form to Identifier Form Functions
+  /// \{
+  /// This converts from the ZZAAAM nuclide naming convention 
+  /// to the id canonical form  for nuclides in PyNE. 
+  /// \param nuc a nuclide in ZZAAAM form.
+  /// \return an integer id nuclide identifier.
+  int zzaaam_to_id(int nuc);
+  int zzaaam_to_id(char * nuc);
+  int zzaaam_to_id(std::string nuc);
+  /// \}
+
   /// \name MCNP Form Functions
   /// \{
   /// This is the naming convention used by the MCNP suite of codes.
@@ -308,6 +319,17 @@ namespace nucname
   int mcnp(int nuc);
   int mcnp(char * nuc);
   int mcnp(std::string nuc);
+  /// \}
+
+  /// \name MCNP Form to Identifier Form Functions
+  /// \{
+  /// This converts from the MCNP nuclide naming convention 
+  /// to the id canonical form  for nuclides in PyNE. 
+  /// \param nuc a nuclide in MCNP form.
+  /// \return an integer id nuclide identifier.
+  int mcnp_to_id(int nuc);
+  int mcnp_to_id(char * nuc);
+  int mcnp_to_id(std::string nuc);
   /// \}
 
   /// \name Serpent Form Functions
@@ -324,6 +346,17 @@ namespace nucname
   std::string serpent(std::string nuc);
   /// \}
 
+  /// \name Serpent Form to Identifier Form Functions
+  /// \{
+  /// This converts from the Serpent nuclide naming convention 
+  /// to the id canonical form  for nuclides in PyNE. 
+  /// \param nuc a nuclide in Serpent form.
+  /// \return an integer id nuclide identifier.
+  //int serpent_to_id(int nuc);  Should be ZAID
+  int serpent_to_id(char * nuc);
+  int serpent_to_id(std::string nuc);
+  /// \}
+
   /// \name NIST Form Functions
   /// \{
   /// This is the string-based naming convention used by NIST.
@@ -335,6 +368,17 @@ namespace nucname
   std::string nist(int nuc);
   std::string nist(char * nuc);
   std::string nist(std::string nuc);
+  /// \}
+
+  /// \name NIST Form to Identifier Form Functions
+  /// \{
+  /// This converts from the NIST nuclide naming convention 
+  /// to the id canonical form  for nuclides in PyNE. 
+  /// \param nuc a nuclide in NIST form.
+  /// \return an integer id nuclide identifier.
+  //int serpent_to_id(int nuc);  NON-EXISTANT
+  int nist_to_id(char * nuc);
+  int nist_to_id(std::string nuc);
   /// \}
 
   /// \name CINDER Form Functions
@@ -350,6 +394,17 @@ namespace nucname
   int cinder(std::string nuc);
   /// \}
 
+  /// \name Cinder Form to Identifier Form Functions
+  /// \{
+  /// This converts from the Cinder nuclide naming convention 
+  /// to the id canonical form  for nuclides in PyNE. 
+  /// \param nuc a nuclide in Cinder form.
+  /// \return an integer id nuclide identifier.
+  int cinder_to_id(int nuc);
+  int cinder_to_id(char * nuc);
+  int cinder_to_id(std::string nuc);
+  /// \}
+
   /// \name ALARA Form Functions
   /// \{
   /// This is the format used in the ALARA activation code elements library.
@@ -360,6 +415,17 @@ namespace nucname
   std::string alara(int nuc);
   std::string alara(char * nuc);
   std::string alara(std::string nuc);
+  /// \}
+
+  /// \name ALARA Form to Identifier Form Functions
+  /// \{
+  /// This converts from the ALARA nuclide naming convention 
+  /// to the id canonical form  for nuclides in PyNE. 
+  /// \param nuc a nuclide in ALARA form.
+  /// \return an integer id nuclide identifier.
+  //int alara_to_id(int nuc); NOT POSSIBLE
+  int alara_to_id(char * nuc);
+  int alara_to_id(std::string nuc);
   /// \}
 
 };
