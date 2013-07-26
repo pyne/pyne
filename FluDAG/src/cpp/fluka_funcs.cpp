@@ -347,8 +347,7 @@ void g_fire(int& oldRegion, double point[], double dir[], double &propStep, doub
 // ASSUMES:  no ray history
 // Notes
 // - direction is not taken into account 
-// - curRegion is not currently used.  It is expected to be implemented as a check
-//   on what the sign of the normal should be.  It is used in a call to DAG->surface_sense
+// - curRegion is not currently used.  
 int  normal (double& posx, double& posy, double& posz, double *norml, int& curRegion)
 {
    int flagErr; 
@@ -401,27 +400,8 @@ void f_normal(double& pSx, double& pSy, double& pSz,
   }
   return;
 }
-//---------------------------------------------------------------------------//
-// getSense(..)
-//---------------------------------------------------------------------------//
-// Helper function
-int getSense(int region)
-{
-
-  int sense;  // sense of next_surf with respect to oldRegion (volume)
-
-  MBEntityHandle vol = DAG->entity_by_index(3, region);
- 
-  MBErrorCode ErrorCode = DAG->surface_sense(vol, next_surf, sense); 
-  if(false)
-  {
-      std::cout << "Sense of next_surf with respect to the region is " << sense << std::endl;
-  }
-  return sense; 
-} 
-///////			End f_normal, normal, and getSense(..)
+///////			End normal() and f_normal()
 /////////////////////////////////////////////////////////////////////
-
 //---------------------------------------------------------------------------//
 // look(..)
 //---------------------------------------------------------------------------//
@@ -541,75 +521,47 @@ void slow_check(double pos[3], const double dir[3], int &oldReg)
   exit(0);
 }
 
-//---------------------------------------------------------------------------//
-// check_reg(..)
-//---------------------------------------------------------------------------//
-// NOT CALLED - Helper function
-// check we are where we say we are
-MBEntityHandle check_reg(MBEntityHandle volume, double point[3], double dir[3]) 
+void lkmgwr(double& pSx, double& pSy, double& pSz,
+            double* pV, const int& oldReg, const int& oldLttc,
+	    int& flagErr, int& newReg, int& newLttc)
 {
-  int is_inside;
-  MBErrorCode code = DAG->point_in_volume(volume, point, is_inside,dir); 
-  if (is_inside == 1 )
-    {
-      // we are where we say we are
-      return volume;
-    }
-  else
-    {
-      int num_vols = DAG->num_entities(3);  // number of volumes
-      for (int i = 1 ; i <= num_vols ; i++) // loop over all volumes
-	{
-	  MBEntityHandle volume = DAG->entity_by_index(3, i); // get the volume by index
-	  MBErrorCode code = DAG->point_in_volume(volume, point, is_inside,dir); 
-	  if ( is_inside == 1) // if in volume
-	    {
-	      return volume;
-	    }
-	}
-      std::cout.precision(25);
-      std::cout << std::scientific ; 
-      std::cout << "position of particle " << point[0] << " " << point[1] << " " << point[2] << std::endl;
-      std::cout << " traveling in direction " << dir[0] << " " << dir[1] << " " << dir[2] << std::endl;
-      std::cout << "particle not nowhere" << std::endl;
-      exit(0);
-    }
+    std::cerr<<"============= LKMGWR =============="<<std::endl;
+    const double xyz[] = {pSx, pSy, pSz}; // location of the particle (xyz)
+    int is_inside = 0; // logical inside or outside of volume
+    int num_vols = DAG->num_entities(3); // number of volumes
+
+    for (int i = 1 ; i <= num_vols ; i++) // loop over all volumes
+      {
+	MBEntityHandle volume = DAG->entity_by_index(3, i); // get the volume by index
+	// No ray history or ray direction.
+	MBErrorCode code = DAG->point_in_volume(volume, xyz, is_inside);
+
+	// check for non error
+	if(MB_SUCCESS != code) 
+	  {
+	    std::cout << "Error return from point_in_volume!" << std::endl;
+	    flagErr = 1;
+	    return;
+	  }
+
+	if ( is_inside == 1 ) // we are inside the cell tested
+	  {
+	    newReg = i;
+	    flagErr = i+1;
+	    if(debug)
+	      {
+		std::cout << "point is in region = " << newReg << std::endl;
+	      }
+	    return;
+	  }
+      }  // end loop over all volumes
+
+    std::cout << "particle is nowhere!" << std::endl;
+    newReg = -100;
+    std::cout << "point is not in any volume" << std::endl;
+    return;
 }
 
-// ToDo:  remove? jcz
-//---------------------------------------------------------------------------//
-// special_check(..)
-//---------------------------------------------------------------------------//
-// NOT CALLED - Helper function
-/*
-void special_check(double pos[3],const double dir[3], int& oldReg)
-{
-  int num_vols = DAG->num_entities(3);  // number of volumes
-  int counter = 0; //
-  int is_inside = 0;
-  do 
-    {
-      // bump particle position along dir
-      pos[0]=pos[0]+(dir[0]*1.0e-9);
-      pos[1]=pos[1]+(dir[1]*1.0e-9);
-      pos[2]=pos[2]+(dir[2]*1.0e-9);
-
-      for (int i = 1 ; i <= num_vols ; i++) // loop over all volumes
-	{
-	  MBEntityHandle volume = DAG->entity_by_index(3, i); // get the volume by index
-	  MBErrorCode code = DAG->point_in_volume(volume, pos, is_inside,dir); 
-	  if ( is_inside == 1) // if in volume
-	    {
-	      std::cout << "had to bump " << counter << " times" << std::endl;
-	      oldReg = DAG->index_by_handle(volume); //set oldReg
-	      return;
-	    }
-	}
-      counter++;
-    }
-  while ( is_inside != 0 );
-}
-*/
 void f_lookdb(double& pSx, double& pSy, double& pSz,
 	    double* pV, const int& oldReg, const int& oldLttc,
 	    int& newReg, int& flagErr, int& newLttc)
