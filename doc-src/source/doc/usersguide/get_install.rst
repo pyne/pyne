@@ -290,7 +290,7 @@ In order to download FLUKA you need to become a registered user, which you can d
 the FLUKA register page from a link on the main FLUKA page.
 Save the user id and password for future FLUKA updates.  
 For a 64 bit linux installation the download filename is of the form *fluka20xx.xx-linux-gfor64bitAA.tar.gz*.  
-See the `FLUKA Installation Instructions <http://www.fluka.org/fluka.php\?id=ins_run&mm2=3>`_
+See the `FLUKA Installation Instructions <http://www.fluka.org/fluka.php\?id=ins_run\&mm2=3>`_.
 Once the environment variables have been set proceed to the FluDAG installation.
 *FluDAG, Alpha Release*
  
@@ -301,7 +301,7 @@ Get the FluDAG Alpha Release repository by cloning the UW-Madison DAGMC reposito
     prompt%> git clone https://github.com/svalinn/DAGMC.git
     prompt%> get checkout alpha_release.
 
- run-script provided by FLUKA has been modified to allow it to have input filenames
+A run-script provided by FLUKA has been modified to allow it to have input filenames
 longer than 8 characters.  The following steps assume you have the FLUKA environment
 variables defined:
 ::
@@ -324,5 +324,37 @@ These instructions assume they are in $HOME/dagmc_bld/MOAB/lib:
     prompt%> cd $HOME/DAGMC/FluDAG
     prompt%> mkdir bld
     prompt%> cmake ../src/. -DMOAB_HOME=$HOME/dagmc_bld/MOAB
+    prompt%> make
 
-    prompt%>
+Upon successful compile the directory *bld*  should have the *mainfludag* executable in it.
+In order to test FluDAG an environment variable with the path to the *bld* directory must be set.
+Add this statement to your login script:
+::
+
+    export FLUDAG=${HOME}/DAGMC/FluDAG
+
+The FluDAG tests are in a separate repository, which can be cloned from the UW-Madison website:
+::
+
+    prompt%> git clone https://github.com/svalinn/fludag_testing.git
+
+To run all the tests type:
+::
+
+    prompt%> cd $HOME/fludag_testing
+    prompt%> ./run_test test_input
+
+Some of the tests are slow, so the above command will take some time.  
+If you want to run just the fast tests, or just the magnetic tests
+:: 
+
+    prompt%> ./run_test test_fast
+    prompt%> ./run_test test_magnetic
+
+The slow tests can be run separately:
+::
+
+    prompt%> ./run_test test_slow
+
+At this time, not all tests will pass.
+
