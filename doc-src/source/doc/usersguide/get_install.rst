@@ -290,8 +290,9 @@ In order to download FLUKA you need to become a registered user, which you can d
 the FLUKA register page from a link on the main FLUKA page.
 Save the user id and password for future FLUKA updates.  
 For a 64 bit linux installation the download filename is of the form *fluka20xx.xx-linux-gfor64bitAA.tar.gz*.  
-See the `FLUKA <http://www.fluka.org>`_ website in the **Install and Run** item of the *Documentation* menu. 
-.. <http://www.fluka.org/fluka.php\?id\=ins_run\&mm2\=3>`_.
+See the `FLUKA <http://www.fluka.org>`_ website in the **Install and Run** item of the *Documentation* menu
+at <http://www.fluka.org/fluka.php\?id\=ins_run\&mm2\=3>.
+
 Once the environment variables have been set proceed to the FluDAG installation.
 *FluDAG, Alpha Release*
  
