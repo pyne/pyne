@@ -1,5 +1,6 @@
 // MCNP5/dagmc/TallyManager.cpp
 
+#include <cstdlib>
 #include "TallyManager.hpp"
 #include "TallyEvent.hpp"
 
@@ -59,12 +60,17 @@ void TallyManager::removeTally(int tally_id)
 // UPDATE
 void TallyManager::update_tallies()
 {
-       std::map<int, Tally*>::iterator map_it;
-       for (map_it = observers.begin(); map_it != observers.end(); ++map_it)
-       {
-           Tally *tally = map_it->second;
-	   tally->compute_score(event);
-       }
+    if (event.type == TallyEvent::NONE)
+    {
+        std::cerr << "Error:  No event type has been defined." << std::endl;
+        exit(EXIT_FAILURE);
+    }
+    std::map<int, Tally*>::iterator map_it;
+    for (map_it = observers.begin(); map_it != observers.end(); ++map_it)
+    {
+        Tally *tally = map_it->second;
+        tally->compute_score(event);
+    }
 }
 ////////////////////////////////////////////////////////////////////
 void TallyManager::end_history()
@@ -90,27 +96,22 @@ void TallyManager::write_data(double num_histories)
 void TallyManager::set_event(double x, double y, double z, 
                            double u, double v, double w,                           
                            double particle_energy, double particle_weight, 
-                           double track_length, double total_cross_section) 
+                           double track_length, double total_cross_section,
+                           int cell_id) 
 {
-    if (track_length == 0.0 && total_cross_section == 0.0)
-    {
-       std::cerr << "Error:  No event type has been defined." << std::endl;
-       return;
-    }
-
     /// Set the particle state object
     event.position            = moab::CartVect(x, y, z);
-    // ToDo:  Direction is set for all event_types, but not used for collision. 
     event.direction           = moab::CartVect(u, v, w);
     event.particle_energy     = particle_energy;
     event.particle_weight     = particle_weight;
     event.track_length        = track_length;
     event.total_cross_section = total_cross_section;
+    event.current_cell        = cell_id;
  
     // If more event types are needed this should become a nested if statement
-    event.type = track_length > 0.0 ? TallyEvent::TRACK : (total_cross_section > 0.0 ? 
-                                      TallyEvent::COLLISION : 
-                                      TallyEvent::NONE);
+    // event.type = track_length > 0.0 ? TallyEvent::TRACK : (total_cross_section > 0.0 ? 
+    //                                   TallyEvent::COLLISION : 
+    //                                   TallyEvent::NONE);
 }
 
 //---------------------------------------------------------------------------//

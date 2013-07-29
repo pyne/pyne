@@ -70,23 +70,26 @@ class TallyManager
     void write_data(double num_histories);
 
     /**
-     * \brief fill the ParticleState
-     * \param position interpreted differently for TrackLength and Collision 
-     * Requires one of track_length and total_cross_section to be nonzero
-     * ToDo:  may not need u, v, w in signature 
-     */
-    void set_event(double x, double y, double z,
-                   double u, double v, double w,                           
-                   double particle_energy, double particle_weight,
-                   double track_length = 0.0, double total_cross_section = 0.0); 
-                           
-
-    /**
      *  \brief Reset TallyEvent data
      *
      *  Set eventType to NONE and clear the particle data
      */
     void clear_last_event();
+
+    /**
+     * \brief fill the TallyEvent for a collision event
+     */
+    void set_collision_event(double x, double y, double z,
+                   double particle_energy, double particle_weight,
+                   double total_cross_section, int cell_id); 
+
+    /**
+     * \brief fill the TallyEvent for a track event
+     */
+    void set_track_event(double x, double y, double z,
+                   double u, double v, double w,                           
+                   double particle_energy, double particle_weight,
+                   double track_length, int cell_id); 
 
   private:
 
@@ -95,6 +98,19 @@ class TallyManager
 
     // Store particle state for the event
     TallyEvent event;
+
+    /**
+     * \brief fill the TallyEvent
+     * \param position interpreted differently for TrackLength and Collision 
+     * Requires one of track_length and total_cross_section to be nonzero
+     */
+    void set_event(double x, double y, double z,
+                   double u, double v, double w,                           
+                   double particle_energy, double particle_weight,
+                   double track_length = 0.0, 
+                   double total_cross_section = 0.0,
+                   int cell_id = 0); 
+                           
 };
 
 #endif // DAGMC_TALLY_MANAGER_HPP
