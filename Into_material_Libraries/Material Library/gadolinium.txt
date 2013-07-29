@@ -1,0 +1,4 @@
+Name    gadolinium
+Mass    7.9004
+APerM   1
+GD      1

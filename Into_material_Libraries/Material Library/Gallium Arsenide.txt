@@ -1,5 +1,0 @@
-Name    Gallium Arsenide
-Mass    1
-APerM   1
-GA      0.499998
-AS75    0.500002

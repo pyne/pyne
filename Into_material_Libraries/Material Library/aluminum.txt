@@ -1,0 +1,4 @@
+Name    aluminum
+Mass    2.6989
+APerM   1
+AL27    1

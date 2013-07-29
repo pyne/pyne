@@ -1,0 +1,4 @@
+Name    nickel
+Mass    8.902
+APerM   1
+NI      1

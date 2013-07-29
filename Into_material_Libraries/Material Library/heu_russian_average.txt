@@ -1,0 +1,7 @@
+Name    heu_russian_average
+Mass    18.95
+APerM   1
+U234    0.009722
+U235    0.898982
+U236    0.003798
+U238    0.087498

@@ -1,0 +1,7 @@
+Name    nylon_type_11_rilsan
+Mass    1.425
+APerM   1
+H1      0.617634
+C12     0.323542
+N14     0.029412
+O16     0.029412

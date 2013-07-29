@@ -1,0 +1,5 @@
+Name    plastic_scintillator_vinyltoluene
+Mass    1.032
+APerM   1
+H1      0.525382
+C12     0.474618

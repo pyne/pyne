@@ -1,0 +1,6 @@
+Name    polyvinyl_chloride
+Mass    1.406
+APerM   1
+H1      0.499995
+C12     0.33334
+CL      0.166665

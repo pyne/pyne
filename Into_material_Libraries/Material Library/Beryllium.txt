@@ -1,4 +1,0 @@
-Name    Beryllium
-Mass    1
-APerM   1
-BE9     1

@@ -1,4 +1,0 @@
-Name    Tantalum
-Mass    1
-APerM   1
-TA181   1

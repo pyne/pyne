@@ -1,4 +1,0 @@
-Name    Zirconium
-Mass    1
-APerM   1
-BE      1

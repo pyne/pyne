@@ -1,6 +1,0 @@
-Name    Incoloy-800
-Mass    1
-APerM   1
-CR      0.225565
-FE      0.470023
-NI      0.304412

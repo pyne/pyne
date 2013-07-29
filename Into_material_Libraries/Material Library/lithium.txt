@@ -1,0 +1,4 @@
+Name    lithium
+Mass    0.534
+APerM   1
+LI7     1

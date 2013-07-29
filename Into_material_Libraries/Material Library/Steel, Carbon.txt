@@ -1,5 +1,0 @@
-Name    Steel, Carbon
-Mass    1
-APerM   1
-C12     0.022831
-FE      0.977169

@@ -1,7 +1,0 @@
-Name    Plate Glass
-Mass    1
-APerM   1
-HE      0.0562051
-O16     0.603859
-NA23    0.0881451
-SI      0.251791

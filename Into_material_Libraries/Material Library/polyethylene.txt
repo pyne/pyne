@@ -1,0 +1,5 @@
+Name    polyethylene
+Mass    0.93
+APerM   1
+H1      0.666662
+C12     0.333338

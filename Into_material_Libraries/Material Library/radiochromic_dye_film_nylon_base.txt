@@ -1,0 +1,7 @@
+Name    radiochromic_dye_film_nylon_base
+Mass    1.08
+APerM   1
+H1      0.589073
+C12     0.317171
+N14     0.04111
+O16     0.052646

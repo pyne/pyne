@@ -1,0 +1,4 @@
+Name    molybdenum
+Mass    10.22
+APerM   1
+MO      1

@@ -1,4 +1,0 @@
-Name    Titanium
-Mass    1
-APerM   1
-TI      1

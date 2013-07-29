@@ -1,4 +1,0 @@
-Name    Thorium
-Mass    1
-APerM   1
-F23M    1

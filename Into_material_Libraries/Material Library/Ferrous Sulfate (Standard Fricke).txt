@@ -1,9 +1,0 @@
-Name    Ferrous Sulfate (Standard Fricke)
-Mass    1
-APerM   1
-H1      0.660239
-O16     0.337339
-NA23    6.00001e-06
-S       0.002404
-CL      6.00001e-06
-FE      6.00001e-06

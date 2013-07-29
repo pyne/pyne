@@ -1,0 +1,4 @@
+Name    bismuth
+Mass    9.747
+APerM   1
+BI209   1

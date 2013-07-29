@@ -1,9 +1,0 @@
-Name    Steel, Stainless 316
-Mass    1
-APerM   1
-SI      0.019755
-CR      0.1814
-MN55    0.020198
-FE      0.650753
-NI      0.113436
-MO      0.014458

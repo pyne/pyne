@@ -1,0 +1,8 @@
+Name    plutonium_fuel_grade
+Mass    19.84
+APerM   1
+PU238   0.001005
+PU239   0.861562
+PU240   0.119577
+PU241   0.01588
+PU242   0.00197601

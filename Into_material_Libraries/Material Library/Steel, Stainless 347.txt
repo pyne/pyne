@@ -1,8 +1,0 @@
-Name    Steel, Stainless 347
-Mass    1
-APerM   1
-SI      0.019524
-CR      0.189823
-MN55    0.019962
-FE      0.672595
-NI      0.0980952

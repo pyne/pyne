@@ -1,6 +1,0 @@
-Name    Commercial Enriched Uranium
-Mass    1
-APerM   1
-U234    0.000305
-U235    0.029967
-U238    0.969728

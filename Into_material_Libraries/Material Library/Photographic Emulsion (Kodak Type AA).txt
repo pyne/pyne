@@ -1,9 +1,0 @@
-Name    Photographic Emulsion (Kodak Type AA)
-Mass    1
-APerM   1
-H1      0.440293
-C12     0.255254
-N14     0.074899
-O16     0.14842
-BR79    0.040572
-AG      0.040562

@@ -1,0 +1,4 @@
+Name    magnesium
+Mass    1.74
+APerM   1
+MG      1

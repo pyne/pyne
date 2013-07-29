@@ -1,5 +1,0 @@
-Name    Plastic Scintillator, Vinyltoluene
-Mass    1
-APerM   1
-H1      0.525382
-C12     0.474618

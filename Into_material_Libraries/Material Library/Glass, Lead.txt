@@ -1,8 +1,0 @@
-Name    Glass, Lead
-Mass    1
-APerM   1
-O16     0.592954
-SI      0.174593
-TI      0.010251
-AS75    0.002146
-PB      0.220057

@@ -1,5 +1,0 @@
-Name    Natural Rubber
-Mass    1
-APerM   1
-H1      0.61537
-C12     0.38463

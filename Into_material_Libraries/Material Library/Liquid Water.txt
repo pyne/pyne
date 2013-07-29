@@ -1,5 +1,0 @@
-Name    Liquid Water
-Mass    1
-APerM   1
-H1      0.666657
-O16     0.333343

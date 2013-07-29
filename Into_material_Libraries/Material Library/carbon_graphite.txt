@@ -1,0 +1,4 @@
+Name    carbon_graphite
+Mass    1.7
+APerM   1
+C12     1

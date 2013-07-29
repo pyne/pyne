@@ -1,0 +1,4 @@
+Name    cadmium
+Mass    8.65
+APerM   1
+CD      1

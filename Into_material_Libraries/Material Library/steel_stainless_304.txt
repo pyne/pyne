@@ -1,0 +1,7 @@
+Name    steel_stainless_304
+Mass    7.92
+APerM   1
+CR      0.202087
+MN55    0.020133
+FE      0.688267
+NI      0.0895138

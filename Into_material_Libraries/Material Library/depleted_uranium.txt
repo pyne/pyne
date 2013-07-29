@@ -1,0 +1,6 @@
+Name    depleted_uranium
+Mass    18.9
+APerM   1
+U234    5e-06
+U235    0.002532
+U238    0.997463

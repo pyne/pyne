@@ -1,0 +1,11 @@
+Name    concrete_ferro_phosphorus
+Mass    4.8
+APerM   1
+H1      0.158643
+HE      0.033514
+O16     0.207881
+MG      0.002632
+AL27    0.004741
+SI      0.038715
+P31     0.203403
+FE      0.350472

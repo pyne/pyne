@@ -1,0 +1,5 @@
+Name    gallium_arsenide
+Mass    5.31
+APerM   1
+GA      0.499998
+AS75    0.500002

@@ -1,7 +1,0 @@
-Name    Air, Dry (near sea level)
-Mass    1
-APerM   1
-C       0.000150999
-N14     0.78443
-O16     0.210748
-AR      0.00467096

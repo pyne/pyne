@@ -1,5 +1,0 @@
-Name    Boron Carbide
-Mass    1
-APerM   1
-B11     0.799982
-C12     0.200018

@@ -1,0 +1,4 @@
+Name    thorium
+Mass    11.72
+APerM   1
+F23M    1

@@ -1,0 +1,5 @@
+Name    butyl_rubber
+Mass    0.92
+APerM   1
+H1      0.666653
+C12     0.333347

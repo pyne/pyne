@@ -1,4 +1,0 @@
-Name    Molybdenum
-Mass    1
-APerM   1
-MO      1

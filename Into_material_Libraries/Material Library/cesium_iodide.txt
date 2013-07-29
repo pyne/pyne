@@ -1,0 +1,5 @@
+Name    cesium_iodide
+Mass    4.51
+APerM   1
+I127    0.499994
+CS133   0.500006

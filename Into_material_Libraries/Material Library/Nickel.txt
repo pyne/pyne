@@ -1,4 +1,0 @@
-Name    Nickel
-Mass    1
-APerM   1
-NI      1

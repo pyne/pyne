@@ -1,5 +1,0 @@
-Name    Rock Salt
-Mass    1
-APerM   1
-NA23    0.5
-CL      0.5

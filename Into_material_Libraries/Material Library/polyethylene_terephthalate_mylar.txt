@@ -1,0 +1,6 @@
+Name    polyethylene_terephthalate_mylar
+Mass    1.38
+APerM   1
+H1      0.363632
+C12     0.454552
+O16     0.181816

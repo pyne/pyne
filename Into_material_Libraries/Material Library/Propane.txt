@@ -1,5 +1,0 @@
-Name    Propane
-Mass    1
-APerM   1
-H1      0.72726
-C12     0.27274
