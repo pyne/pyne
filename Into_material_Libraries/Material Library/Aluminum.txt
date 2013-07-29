@@ -1,0 +1,4 @@
+Name    Aluminum
+Mass    1
+APerM   1
+AL27    1

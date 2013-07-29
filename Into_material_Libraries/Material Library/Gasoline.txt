@@ -1,0 +1,5 @@
+Name    Gasoline
+Mass    1
+APerM   1
+H1      0.694164
+C12     0.305836

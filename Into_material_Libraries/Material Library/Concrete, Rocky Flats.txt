@@ -1,0 +1,10 @@
+Name    Concrete, Rocky Flats
+Mass    1
+APerM   1
+H1      0.136471
+HE      0.10502
+C12     0.0847481
+O16     0.565028
+S       0.102527
+K       0.003516
+FE      0.00269

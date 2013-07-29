@@ -1,0 +1,7 @@
+Name    Polyurethane (Foam)
+Mass    1
+APerM   1
+H1      0.360023
+C12     0.400878
+N14     0.0764591
+O16     0.162639

@@ -1,0 +1,8 @@
+Name    Plutonium, Power Grade 
+Mass    1
+APerM   1
+PU238   0.00996501
+PU239   0.625154
+PU240   0.217396
+PU241   0.118086
+PU242   0.029399

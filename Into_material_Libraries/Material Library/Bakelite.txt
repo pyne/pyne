@@ -1,0 +1,6 @@
+Name    Bakelite
+Mass    1
+APerM   1
+H1      0.431814
+C       0.488641
+O16     0.079545

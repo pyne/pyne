@@ -1,0 +1,6 @@
+Name    Lucite
+Mass    1
+APerM   1
+H1      0.53332
+C12     0.333345
+O16     0.133335

@@ -1,0 +1,4 @@
+Name    Gadolinium
+Mass    1
+APerM   1
+GD      1

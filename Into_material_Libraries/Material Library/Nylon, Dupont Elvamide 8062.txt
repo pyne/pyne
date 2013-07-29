@@ -1,0 +1,7 @@
+Name    Nylon, Dupont Elvamide 8062
+Mass    1
+APerM   1
+H1      0.593364
+C12     0.311933
+N14     0.04106
+O16     0.0536431

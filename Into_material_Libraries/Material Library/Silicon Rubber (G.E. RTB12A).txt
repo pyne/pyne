@@ -1,0 +1,7 @@
+Name    Silicon Rubber (G.E. RTB12A)
+Mass    1
+APerM   1
+H1      0.597038
+C12     0.19936
+O16     0.104169
+SI      0.0994338

@@ -1,0 +1,4 @@
+Name    Magnesium
+Mass    1
+APerM   1
+MG      1

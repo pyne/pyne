@@ -1,0 +1,4 @@
+Name    Cadmium
+Mass    1
+APerM   1
+CD      1

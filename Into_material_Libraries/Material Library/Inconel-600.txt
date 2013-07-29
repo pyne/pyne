@@ -1,0 +1,6 @@
+Name    Inconel-600
+Mass    1
+APerM   1
+CR      0.197637
+FE      0.102231
+NI      0.700132

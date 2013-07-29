@@ -1,0 +1,7 @@
+Name    Steel, Stainless 304
+Mass    1
+APerM   1
+CR      0.202087
+MN55    0.020133
+FE      0.688267
+NI      0.0895138

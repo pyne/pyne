@@ -1,0 +1,7 @@
+Name    Polyiso(cyanurate)
+Mass    1
+APerM   1
+H1      0.345
+C12     0.517
+N14     0.069
+O16     0.069
