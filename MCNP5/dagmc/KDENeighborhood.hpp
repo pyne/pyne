@@ -68,7 +68,7 @@ class KDENeighborhood
      *
      * Currently only works for a rectangular neighborhood region.
      */
-    bool check_point_in_region(const moab::CartVect& coords) const;
+    bool point_in_region(const moab::CartVect& coords) const;
 
     /**
      * \brief Determines if point lies within radius of cylindrical region

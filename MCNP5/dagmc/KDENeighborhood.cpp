@@ -49,9 +49,9 @@ std::set<moab::EntityHandle> KDENeighborhood::get_points() const
     return points_in_box();
 }
 //---------------------------------------------------------------------------//
-bool KDENeighborhood::check_point_in_region(const moab::CartVect& coords) const
+bool KDENeighborhood::point_in_region(const moab::CartVect& coords) const
 {
-    bool in_region = false;
+    bool in_region = true;
 
     // check point is in the rectangular neighborhood region
     for (int i = 0; i < 3; ++i)
@@ -61,9 +61,9 @@ bool KDENeighborhood::check_point_in_region(const moab::CartVect& coords) const
         double max_diff = fabs(coords[i] - max_corner[i]);
 
         if (min_diff < 1e-12 || max_diff < 1e-12 ||
-            coords[i] > min_corner[i] && coords[i] < max_corner[i])
+            (coords[i] > min_corner[i] && coords[i] < max_corner[i]))
         {
-            in_region = true;
+            // point may still be in the region, so do nothing
         }
         else // point is not in the region
         {
@@ -189,7 +189,7 @@ std::set<moab::EntityHandle> KDENeighborhood::points_in_box() const
             assert(rval == moab::MB_SUCCESS);
 
             // add the point to the set if it is in the box
-            if (check_point_in_region(coords))
+            if (point_in_region(coords))
             {
                 points.insert(point);
             }
