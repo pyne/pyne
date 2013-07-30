@@ -3,7 +3,7 @@
 #ifndef DAGMC_KDE_NEIGHBORHOOD_HPP
 #define DAGMC_KDE_NEIGHBORHOOD_HPP
 
-#include <vector>
+#include <set>
 
 #include "TallyEvent.hpp"
 
@@ -41,13 +41,13 @@ class KDENeighborhood
      * \brief Constructor
      * \param event the tally event for which the neighborhood is desired
      * \param bandwidth the bandwidth vector (hx, hy, hz)
-     * \param tree the KD-Tree containing all mesh nodes in the input mesh
-     * \param tree_root the root of the KD-Tree
+     * \param kd_tree the kd-tree containing all mesh nodes in the input mesh
+     * \param kd_tree_root the root of the kd-tree
      */
     KDENeighborhood(const TallyEvent& event,
                     const moab::CartVect& bandwidth,
-                    moab::AdaptiveKDTree& tree,
-                    moab::EntityHandle& tree_root);
+                    moab::AdaptiveKDTree& kd_tree,
+                    moab::EntityHandle& kd_tree_root);
 
     // >>> PUBLIC INTERFACE
 
@@ -59,7 +59,16 @@ class KDENeighborhood
      * method will therefore return all of the calculation points that exist
      * within the boxed region defined by min_corner and max_corner.
      */
-    std::vector<moab::EntityHandle> get_points() const;
+    std::set<moab::EntityHandle> get_points() const;
+
+    /**
+     * \brief checks if a point exists within this neighborhood region
+     * \param coords the coordinates of the point to check
+     * \return true if point does exist within this neighborhood region
+     *
+     * Currently only works for a rectangular neighborhood region.
+     */
+    bool check_point_in_region(const moab::CartVect& coords) const;
 
     /**
      * \brief Determines if point lies within radius of cylindrical region
@@ -83,8 +92,8 @@ class KDENeighborhood
     const TallyEvent& event;
 
     /// KD-Tree containing all mesh nodes in the input mesh
-    moab::AdaptiveKDTree* tree;
-    moab::EntityHandle tree_root;
+    moab::AdaptiveKDTree* kd_tree;
+    moab::EntityHandle kd_tree_root;
 
     // >>> PRIVATE METHODS
 
@@ -110,10 +119,11 @@ class KDENeighborhood
 
     /**
      * \brief Finds the vertices that exist inside a rectangular region
-     * \param points stores unique set of vertices that exist inside box
-     * \return the MOAB ErrorCode value
+     * \return the set of unique vertices
+     *
+     * Includes vertices that are within +/- 1e-12 of a box boundary.
      */
-    moab::ErrorCode points_in_box(std::vector<moab::EntityHandle>& points) const;
+    std::set<moab::EntityHandle> points_in_box() const;
 };
 
 #endif // DAGMC_KDE_NEIGHBORHOOD_HPP

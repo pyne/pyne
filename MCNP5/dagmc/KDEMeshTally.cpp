@@ -132,10 +132,10 @@ void KDEMeshTally::compute_score(const TallyEvent& event)
 
     // create the neighborhood region and find all of the calculations points
     KDENeighborhood region(event, bandwidth, *kd_tree, kd_tree_root);
-    std::vector<moab::EntityHandle> calculation_points = region.get_points();
+    std::set<moab::EntityHandle> calculation_points = region.get_points();
 
     // iterate through calculation points and compute their final scores
-    std::vector<moab::EntityHandle>::iterator i;
+    std::set<moab::EntityHandle>::iterator i;
     CalculationPoint X;
     
     for (i = calculation_points.begin(); i != calculation_points.end(); ++i)

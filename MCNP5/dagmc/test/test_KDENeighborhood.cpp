@@ -1,11 +1,14 @@
 // MCNP5/dagmc/test/test_KDENeighborhood.cpp
 
+#include <cassert>
 #include <cmath>
+#include <set>
 
 #include "gtest/gtest.h"
 
 #include "moab/AdaptiveKDTree.hpp"
 #include "moab/CartVect.hpp"
+#include "moab/Core.hpp"
 #include "moab/Types.hpp"
 
 #include "../KDENeighborhood.hpp"
@@ -15,6 +18,44 @@ const double PI = 3.14159265359;
 
 //---------------------------------------------------------------------------//
 // TEST FIXTURES
+//---------------------------------------------------------------------------//
+class GetPointsTest : public ::testing::Test
+{
+  protected:
+    // initialize variables for each test
+    virtual void SetUp()
+    {
+        mbi = new moab::Core();
+
+        // load the mesh data
+        moab::ErrorCode rval = mbi->load_mesh("../structured_mesh.h5m");
+        assert(rval == moab::MB_SUCCESS);
+
+        // get all of the mesh nodes from the MOAB root set
+        moab::EntityHandle root_set = 0;
+        moab::Range mesh_nodes;
+        rval = mbi->get_entities_by_type(root_set, moab::MBVERTEX, mesh_nodes);
+        assert(rval == moab::MB_SUCCESS);
+
+        // build a kd-tree from all of the mesh nodes
+        kd_tree = new moab::AdaptiveKDTree(mbi);
+        rval = kd_tree->build_tree(mesh_nodes, kd_tree_root);
+        assert(rval == moab::MB_SUCCESS);
+    }
+
+    // deallocate memory resources
+    virtual void TearDown()
+    {
+        delete kd_tree;
+        delete mbi;
+    }
+
+  protected:
+    // data needed for each test
+    moab::Interface* mbi;
+    moab::AdaptiveKDTree* kd_tree;
+    moab::EntityHandle kd_tree_root;
+};
 //---------------------------------------------------------------------------//
 class PointWithinMaxRadiusTest : public ::testing::Test
 {
@@ -69,6 +110,104 @@ class PointWithinMaxRadiusTest : public ::testing::Test
     KDENeighborhood* region2;
     KDENeighborhood* region3;
 };
+//---------------------------------------------------------------------------//
+// SIMPLE TESTS
+//---------------------------------------------------------------------------//
+TEST(KDENeighborhoodDeathTest, InvalidTallyEvent)
+{
+    ::testing::FLAGS_gtest_death_test_style = "threadsafe";
+
+    // define a null tally event and fake kd-tree
+    TallyEvent event;
+    event.type = TallyEvent::NONE;
+    moab::CartVect bandwidth(0.1, 0.1, 0.1);
+    moab::AdaptiveKDTree* kd_tree = NULL;
+    moab::EntityHandle kd_tree_root = 0;
+
+    // make sure KDENeighborhood returns error for NULL tally event
+    EXPECT_EXIT(KDENeighborhood(event, bandwidth, *kd_tree, kd_tree_root),
+                ::testing::ExitedWithCode(EXIT_FAILURE),
+                "\nError: Could not define neighborhood for tally event");
+}
+//---------------------------------------------------------------------------//
+// FIXTURE-BASED TESTS: GetPointsTest
+//---------------------------------------------------------------------------//
+// Tests all points are returned if neighborhood is conformal to mesh
+TEST_F(GetPointsTest, GetAllPointsInBox)
+{
+    // define neighborhood conformal to mesh based on collision event
+    TallyEvent event;
+    event.type = TallyEvent::COLLISION;
+    event.position = moab::CartVect(2.5, 0.0, 0.0);
+    moab::CartVect bandwidth(2.5, 0.5, 0.5);
+    KDENeighborhood region1(event, bandwidth, *kd_tree, kd_tree_root);
+
+    // test if all points are returned
+    std::set<moab::EntityHandle> points1 = region1.get_points();
+    EXPECT_EQ(2025, points1.size());
+
+    // change to a conformal neighborhood based on track event
+    event.type = TallyEvent::TRACK;
+    event.position[0] = 2.0;
+    event.direction = moab::CartVect(1.0, 0.0, 0.0);
+    event.track_length = 1.0;
+    bandwidth[0] = 2.0;
+    KDENeighborhood region2(event, bandwidth, *kd_tree, kd_tree_root);
+
+    // test if all points are returned
+    std::set<moab::EntityHandle> points2 = region2.get_points();
+    EXPECT_EQ(2025, points2.size());
+}
+//---------------------------------------------------------------------------//
+// Tests no points are returned if neighborhood exists outside mesh
+TEST_F(GetPointsTest, GetNoPointsOutsideBox)
+{
+    // define neighborhood outside the mesh based on collision event
+    TallyEvent event;
+    event.type = TallyEvent::COLLISION;
+    event.position = moab::CartVect(-5.0, 0.0, 0.0);
+    moab::CartVect bandwidth(1.0, 0.5, 0.5);
+    KDENeighborhood region1(event, bandwidth, *kd_tree, kd_tree_root);
+
+    // test if no points are returned
+    std::set<moab::EntityHandle> points1 = region1.get_points();
+    EXPECT_EQ(0, points1.size());
+
+    // change to neighborhood based on track event
+    event.type = TallyEvent::TRACK;
+    event.direction = moab::CartVect(1.0, 0.0, 0.0);
+    event.track_length = 1.0;
+    KDENeighborhood region2(event, bandwidth, *kd_tree, kd_tree_root);
+
+    // test if no points are returned
+    std::set<moab::EntityHandle> points2 = region2.get_points();
+    EXPECT_EQ(0, points2.size());
+}
+//---------------------------------------------------------------------------//
+// Tests no points are returned if mesh cell is bigger than neighborhood
+TEST_F(GetPointsTest, GetNoPointsInBox)
+{
+    // define neighborhood within mesh cell based on collision event
+    TallyEvent event;
+    event.type = TallyEvent::COLLISION;
+    event.position = moab::CartVect(2.6, -0.06, 0.06);
+    moab::CartVect bandwidth(0.05, 0.05, 0.05);
+    KDENeighborhood region1(event, bandwidth, *kd_tree, kd_tree_root);
+
+    // test if no points are returned
+    std::set<moab::EntityHandle> points1 = region1.get_points();
+    EXPECT_EQ(0, points1.size());
+
+    // change to neighborhood based on track event
+    event.type = TallyEvent::TRACK;
+    event.direction = moab::CartVect(1.0, 0.0, 0.0);
+    event.track_length = 0.1;
+    KDENeighborhood region2(event, bandwidth, *kd_tree, kd_tree_root);
+
+    // test if no points are returned
+    std::set<moab::EntityHandle> points2 = region2.get_points();
+    EXPECT_EQ(0, points2.size());
+}
 //---------------------------------------------------------------------------//
 // FIXTURE-BASED TESTS: PointWithinMaxRadiusTest
 //---------------------------------------------------------------------------//
