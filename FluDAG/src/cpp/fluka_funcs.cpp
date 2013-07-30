@@ -253,6 +253,7 @@ void g_step(double& pSx,
 // oldRegion - the region of the particle's current coordinates
 // point     - the particle's coordinate location vector
 // dir       - the direction vector of the particle's current path (ray)
+// propStep  - ??
 // retStep   - returned as the distance from the particle's current location, along its ray, to the next boundary
 // newRegion - gotten from the value returned by DAG->next_vol
 // newRegion is gotten from the volue returned by DAG->next_vol
@@ -377,18 +378,15 @@ void f_normal(double& pSx, double& pSy, double& pSz,
       std::cout << "============ NRMLWR =============" << std::endl;
   }
 
-  flagErr=0;
-  double xyz[3] = {pSx, pSy, pSz}; 
-  MBErrorCode ErrorCode = DAG->get_angle(next_surf,xyz,norml); 
-  if(ErrorCode != MB_SUCCESS)
-  {
-      std::cout << "Could not determine normal" << std::endl;
-      flagErr = 2;
-      return;
-  }
-  // sense of next_surf with respect to oldRegion (volume)
-  int sense = getSense(oldRegion);
-  if (sense == -1 )
+  MBEntityHandle OldReg = DAG -> entity_by_index(3,oldRegion); // entity handle
+  double xyz[3] = {pSx,pSy,pSz}; //position vector
+  double uvw[3] = {pVx,pVy,pVz}; //particl directoin
+  int result; // particle is entering or leaving
+
+  MBErrorCode ErrorCode = DAG->test_volume_boundary( OldReg, next_surf,xyz,uvw, result);  // see if we are on boundary
+  ErrorCode = DAG->get_angle(next_surf,xyz,norml); 
+  // result = 1 entering, 0 leaving
+  if ( result == 0 ) // vector should point towards OldReg
     {
       norml[0] = norml[0]*-1.0;
       norml[1] = norml[1]*-1.0;
@@ -522,40 +520,45 @@ void slow_check(double pos[3], const double dir[3], int &oldReg)
   exit(0);
 }
 
-//---------------------------------------------------------------------------//
-// check_reg(..)
-//---------------------------------------------------------------------------//
-// NOT CALLED - Helper function
-// check we are where we say we are
-/*
-MBEntityHandle check_reg(MBEntityHandle volume, double point[3], double dir[3]) 
+void lkmgwr(double& pSx, double& pSy, double& pSz,
+            double* pV, const int& oldReg, const int& oldLttc,
+	    int& flagErr, int& newReg, int& newLttc)
 {
-  int is_inside;
-  MBErrorCode code = DAG->point_in_volume(volume, point, is_inside,dir); 
-  if (is_inside == 1 )
-    {
-      // we are where we say we are
-      return volume;
-    }
-  else
-    {
-      int num_vols = DAG->num_entities(3);  // number of volumes
-      for (int i = 1 ; i <= num_vols ; i++) // loop over all volumes
-	{
-	  MBEntityHandle volume = DAG->entity_by_index(3, i); // get the volume by index
-	  MBErrorCode code = DAG->point_in_volume(volume, point, is_inside,dir); 
-	  if ( is_inside == 1) // if in volume
-	    {
-	      return volume;
-	    }
-	}
-      std::cout.precision(25);
-      std::cout << std::scientific ; 
-      std::cout << "position of particle " << point[0] << " " << point[1] << " " << point[2] << std::endl;
-      std::cout << " traveling in direction " << dir[0] << " " << dir[1] << " " << dir[2] << std::endl;
-      std::cout << "particle not nowhere" << std::endl;
-      exit(0);
-    }
+    std::cerr<<"============= LKMGWR =============="<<std::endl;
+    const double xyz[] = {pSx, pSy, pSz}; // location of the particle (xyz)
+    int is_inside = 0; // logical inside or outside of volume
+    int num_vols = DAG->num_entities(3); // number of volumes
+
+    for (int i = 1 ; i <= num_vols ; i++) // loop over all volumes
+      {
+	MBEntityHandle volume = DAG->entity_by_index(3, i); // get the volume by index
+	// No ray history or ray direction.
+	MBErrorCode code = DAG->point_in_volume(volume, xyz, is_inside);
+
+	// check for non error
+	if(MB_SUCCESS != code) 
+	  {
+	    std::cout << "Error return from point_in_volume!" << std::endl;
+	    flagErr = 1;
+	    return;
+	  }
+
+	if ( is_inside == 1 ) // we are inside the cell tested
+	  {
+	    newReg = i;
+	    flagErr = i+1;
+	    if(debug)
+	      {
+		std::cout << "point is in region = " << newReg << std::endl;
+	      }
+	    return;
+	  }
+      }  // end loop over all volumes
+
+    std::cout << "particle is nowhere!" << std::endl;
+    newReg = -100;
+    std::cout << "point is not in any volume" << std::endl;
+    return;
 }
 
 void f_lookdb(double& pSx, double& pSy, double& pSz,

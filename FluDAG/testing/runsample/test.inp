@@ -31,13 +31,10 @@ COMPOUND     -.67145      IRON    -0.185  CHROMIUM   -0.1125    NICKELSS316LN
 COMPOUND       -0.02  MANGANES     -0.01   SILICON   -4.5E-4   PHOSPHOSS316LN
 COMPOUND      -3.E-4    SULFUR    -3.E-4    CARBON                    SS316LN
 *...+....1....+....2....+....3....+....4....+....5....+....6....+....7...
-*...+....1....+....2....+....3....+....4....+....5....+....6....+....7...
-ASSIGNMAT   BLCKHOLE       1.0
-ASSIGNMAT     VACUUM       2.0
-ASSIGNMAT     VACUUM       3.0
-ASSIGNMAT     VACUUM       4.0
-ASSIGNMAT     VACUUM       5.0
-ASSIGNMAT     VACUUM       6.0
+ASSIGNMAT     VACUUM         1
+ASSIGNMAT     VACUUM         2
+ASSIGNMAT   BLCKHOLE         3
+ASSIGNMAT     VACUUM         4
 * ASSIGNMA    BLCKHOLE       BHL
 * ASSIGNMA     SS316LN    TARGET
 * ASSIGNMA         H2O    WATERL

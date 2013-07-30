@@ -1,4 +1,7 @@
 *...+....1....+....2....+....3....+....4....+....5....+....6....+....7...
-ASSIGNMAT     VACUUM         1
+ASSIGNMAT   BLCKHOLE         1
 ASSIGNMAT     VACUUM         2
-ASSIGNMAT   BLCKHOLE         3
+ASSIGNMAT     VACUUM         3
+ASSIGNMAT     VACUUM         4
+ASSIGNMAT     VACUUM         5
+ASSIGNMAT     VACUUM         6
