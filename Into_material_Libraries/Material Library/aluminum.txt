@@ -1,4 +1,4 @@
-Name    aluminum
-Mass    2.6989
-APerM   1
-AL27    1
+Mass    1
+Density 2.6989
+APerm   1
+Al27    1

@@ -1,9 +1,9 @@
-Name    photographic_emulsion_kodak_type_aa
-Mass    2.2
-APerM   1
+Mass    1
+Density 2.2
+APerm   1
 H1      0.440293
 C12     0.255254
 N14     0.074899
 O16     0.14842
-BR79    0.040572
-AG      0.040562
+Br79    0.040572
+Ag      0.040562

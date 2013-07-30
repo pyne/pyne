@@ -1,7 +1,7 @@
-Name    borax
-Mass    1.73
-APerM   1
+Mass    1
+Density 1.73
+APerm   1
 H1      0.465119
 B11     0.0930232
 O16     0.395347
-NA23    0.0465111
+Na23    0.0465111

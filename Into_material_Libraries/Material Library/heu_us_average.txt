@@ -1,6 +1,6 @@
-Name    heu_us_average
-Mass    18.95
-APerM   1
+Mass    1
+Density 18.95
+APerm   1
 U234    0.009849
 U235    0.932166
 U236    0.004484

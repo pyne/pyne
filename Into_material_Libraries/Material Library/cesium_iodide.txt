@@ -1,5 +1,5 @@
-Name    cesium_iodide
-Mass    4.51
-APerM   1
+Mass    1
+Density 4.51
+APerm   1
 I127    0.499994
-CS133   0.500006
+Cs133   0.500006

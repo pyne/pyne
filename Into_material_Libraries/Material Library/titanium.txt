@@ -1,4 +1,4 @@
-Name    titanium
-Mass    4.54
-APerM   1
-TI      1
+Mass    1
+Density 4.54
+APerm   1
+Ti      1

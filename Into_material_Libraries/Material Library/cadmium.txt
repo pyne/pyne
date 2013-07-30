@@ -1,4 +1,4 @@
-Name    cadmium
-Mass    8.65
-APerM   1
-CD      1
+Mass    1
+Density 8.65
+APerm   1
+Cd      1

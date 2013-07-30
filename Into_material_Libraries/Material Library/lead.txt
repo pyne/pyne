@@ -1,4 +1,4 @@
-Name    lead
-Mass    11.35
-APerM   1
-PB      1
+Mass    1
+Density 11.35
+APerm   1
+Pb      1

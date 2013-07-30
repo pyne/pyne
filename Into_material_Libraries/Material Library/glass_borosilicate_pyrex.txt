@@ -1,9 +1,9 @@
-Name    glass_borosilicate_pyrex
-Mass    2.23
-APerM   1
+Mass    1
+Density 2.23
+APerm   1
 B11     0.0704517
 O16     0.641091
-NA23    0.0233109
-AL27    0.00820397
-SI      0.255327
+Na23    0.0233109
+Al27    0.00820397
+Si      0.255327
 K       0.00161499

@@ -1,8 +1,8 @@
-Name    plutonium_power_grade
-Mass    19.84
-APerM   1
-PU238   0.00996501
-PU239   0.625154
-PU240   0.217396
-PU241   0.118086
-PU242   0.029399
+Mass    1
+Density 19.84
+APerm   1
+Pu238   0.00996501
+Pu239   0.625154
+Pu240   0.217396
+Pu241   0.118086
+Pu242   0.029399

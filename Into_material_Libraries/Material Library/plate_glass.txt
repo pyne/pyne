@@ -1,7 +1,7 @@
-Name    plate_glass
-Mass    2.4
-APerM   1
-HE      0.0562051
+Mass    1
+Density 2.4
+APerm   1
+He      0.0562051
 O16     0.603859
-NA23    0.0881451
-SI      0.251791
+Na23    0.0881451
+Si      0.251791

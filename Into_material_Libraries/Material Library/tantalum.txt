@@ -1,4 +1,4 @@
-Name    tantalum
-Mass    16.654
-APerM   1
-TA181   1
+Mass    1
+Density 16.654
+APerm   1
+Ta181   1

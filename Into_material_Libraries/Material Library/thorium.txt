@@ -1,4 +1,4 @@
-Name    thorium
-Mass    11.72
-APerM   1
+Mass    1
+Density 11.72
+APerm   1
 F23M    1

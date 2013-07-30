@@ -1,8 +1,8 @@
-Name    bricks_common_silica
-Mass    1.8
-APerM   1
-HE      0.007272
+Mass    1
+Density 1.8
+APerm   1
+He      0.007272
 O16     0.663062
-AL27    0.003916
-SI      0.32314
-FE      0.00261
+Al27    0.003916
+Si      0.32314
+Fe      0.00261

@@ -1,4 +1,4 @@
-Name    lithium
-Mass    0.534
-APerM   1
-LI7     1
+Mass    1
+Density 0.534
+APerm   1
+Li7     1

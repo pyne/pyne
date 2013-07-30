@@ -31,6 +31,6 @@ for line in searchfile:
 	        print "Isotopes: ", line
 		data= line.split()
 		dictionary.update({str(data[0]): float(data[1])})
-	mat = Material(dictionary, float(density), mat_name, 1.0)
+	mat = Material(dictionary,1, float(density), 1.0)
 	filename= "Material Library/" +mat_name + ".txt"
     	mat.write_text(filename)

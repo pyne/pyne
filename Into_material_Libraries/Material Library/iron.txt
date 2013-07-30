@@ -1,4 +1,4 @@
-Name    iron
-Mass    7.874
-APerM   1
-FE      1
+Mass    1
+Density 7.874
+APerm   1
+Fe      1

@@ -1,6 +1,6 @@
-Name    heu_hps
-Mass    18.95
-APerM   1
+Mass    1
+Density 18.95
+APerm   1
 U234    0.010582
 U235    0.932361
 U236    0.002053

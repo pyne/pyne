@@ -1,6 +1,6 @@
-Name    incoloy_800
-Mass    8.01
-APerM   1
-CR      0.225565
-FE      0.470023
-NI      0.304412
+Mass    1
+Density 8.01
+APerm   1
+Cr      0.225565
+Fe      0.470023
+Ni      0.304412

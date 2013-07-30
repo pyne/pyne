@@ -1,4 +1,4 @@
-Name    carbon_amorphous
-Mass    2
-APerM   1
+Mass    1
+Density 2
+APerm   1
 C12     1

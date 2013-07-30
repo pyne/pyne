@@ -1,4 +1,4 @@
-Name    zirconium
-Mass    6.506
-APerM   1
-BE      1
+Mass    1
+Density 6.506
+APerm   1
+Be      1

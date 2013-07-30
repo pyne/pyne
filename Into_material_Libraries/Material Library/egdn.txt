@@ -1,6 +1,6 @@
-Name    egdn
-Mass    1.49
-APerM   1
+Mass    1
+Density 1.49
+APerm   1
 H1      0.285716
 C12     0.142857
 N14     0.142856

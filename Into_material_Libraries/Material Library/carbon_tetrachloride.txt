@@ -1,5 +1,5 @@
-Name    carbon_tetrachloride
-Mass    1.594
-APerM   1
+Mass    1
+Density 1.594
+APerm   1
 C12     0.200005
-CL      0.799995
+Cl      0.799995

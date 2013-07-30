@@ -1,6 +1,6 @@
-Name    tnt
-Mass    1.654
-APerM   1
+Mass    1
+Density 1.654
+APerm   1
 H1      0.238099
 C12     0.333331
 N14     0.142857

@@ -1,8 +1,8 @@
-Name    steel_stainless_347
-Mass    7.92
-APerM   1
-SI      0.019524
-CR      0.189823
-MN55    0.019962
-FE      0.672595
-NI      0.0980952
+Mass    1
+Density 7.92
+APerm   1
+Si      0.019524
+Cr      0.189823
+Mn55    0.019962
+Fe      0.672595
+Ni      0.0980952

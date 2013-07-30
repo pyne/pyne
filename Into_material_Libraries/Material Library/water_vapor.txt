@@ -1,5 +1,5 @@
-Name    water_vapor
-Mass    0.000756182
-APerM   1
+Mass    1
+Density 0.000756182
+APerm   1
 H1      0.666656
 O16     0.333344
