@@ -11,23 +11,19 @@ There are three varieties of code-specific steps:
 Geometry Metadata
 ''''''''''''''''''
 
-In FluDAG, the geometry file can be used to define material and
-density assignments, boundary conditions, and tally locations.
-
+In FluDAG, the geometry file can be used to define material 
+assignments, boundary conditions and tally locations.
+ 
 Assigning Materials & Densities
 ..................................
 
 The generic workflow description includes details on
 :ref:`grouping-basics` , but a specific naming convention is required
-for FluDAG. To define materials, the FLUKA material ID must be 
+for FluDAG. To define materials, the FLUKA material name must be 
 provided in the group name. The format for the group
-name is as follows: :: m_[matid]
+name is as follows: :: M_[mat_name]
 
-``[matid]`` is replaced by the material ID that will be specified in
-the FLUKA input file.  
-
-For example, suppose UO2 is iron in the problem and volumes 4 
-through 18 consist of this material.
+For example, suppose volumes 4 through 18 in UO2 is iron.
 To assign materials to these volumes, the following command would be
 used:
 ::
@@ -38,7 +34,7 @@ FluDAG it will be treated as a void; the material for that cell will
 be zero. This can actually become a fairly useful debugging tool to
 identify volumes that were not assigned to their appropriate group.*
 
-The implicit complement is automatically assigned the 1 + the id of the 
+The implicit complement is automatically assigned the value 1 + the id of the 
 highest numberd volume.
 
 Defining the Graveyard
