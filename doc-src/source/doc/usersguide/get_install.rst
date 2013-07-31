@@ -284,16 +284,17 @@ FluDAG Build
 +++++++++++++++++++++++
 FluDAG uses `FLUKA <http://www.fluka.org>`_ from CERN/INFN with the DAGMC Toolkit.
 The steps to build and install FluDAG follow.
+
 *Install  FLUKA*
 
 In order to download FLUKA you need to become a registered user, which you can do at 
 the FLUKA register page from a link on the main FLUKA page.
 Save the user id and password for future FLUKA updates.  
 For a 64 bit linux installation the download filename is of the form *fluka20xx.xx-linux-gfor64bitAA.tar.gz*.  
-See the `FLUKA <http://www.fluka.org>`_ website in the **Install and Run** item of the *Documentation* menu
-at <http://www.fluka.org/fluka.php\?id\=ins_run\&mm2\=3>.
+See the `FLUKA <http://www.fluka.org>`_ website in the **Install and Run** item of the *Documentation* menu.
 
 Once the environment variables have been set proceed to the FluDAG installation.
+
 *FluDAG, Alpha Release*
  
 Get the FluDAG Alpha Release repository by cloning the UW-Madison DAGMC repository from github.com and checking out the alpha_release branch:
@@ -320,7 +321,7 @@ line to your login script:
     prompt%> export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/path/to/Cubit/bin
 
 You also need to know where the MOAB libraries are.
-These instructions assume they are in $HOME/dagmc_bld/MOAB/lib:
+These instructions illustrate passing a known MOAB library path to cmake via the -D switch:
 ::
 
     prompt%> cd $HOME/DAGMC/FluDAG
@@ -328,8 +329,8 @@ These instructions assume they are in $HOME/dagmc_bld/MOAB/lib:
     prompt%> cmake ../src/. -DMOAB_HOME=$HOME/dagmc_bld/MOAB
     prompt%> make
 
-Upon successful compile the directory *bld*  should have the *mainfludag* executable in it.
-In order to test FluDAG an environment variable with the path to the *bld* directory must be set.
+Upon successful compilation the directory *bld* will have the *mainfludag* executable in it.
+In order to test FluDAG, an environment variable, named 'FLUDAG', with the path to the *bld* directory must be set:
 Add this statement to your login script:
 ::
 
