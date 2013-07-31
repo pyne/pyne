@@ -12,7 +12,8 @@ Geometry Metadata
 ''''''''''''''''''
 
 In FluDAG, the geometry file can be used to define material 
-assignments, boundary conditions and tally locations.
+assignments, and eventually we would like to add the capability to 
+define boundary conditions and tally locations.
  
 Assigning Materials & Densities
 ..................................
