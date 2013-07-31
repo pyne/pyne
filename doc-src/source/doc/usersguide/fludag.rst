@@ -98,42 +98,35 @@ For example
      group "usrbdx_proton" add volume 1 2 4 9
 
 
-Preparing the DAG-MCNP5 Input File
+Preparing the FluDAG Input File
 ''''''''''''''''''''''''''''''''''''
+The FluDAG (Fluka) input file will look almost identical to the originating
+Fluka input file. The exception will be the removal of all data between
+the cards GEOBEGIN and GEOEND, i.e. all native Fluka input data. The last entry 
+on the line of GEOBEGIN should be FLUGG. 
 
-The DAG-MCNP5 input file contains only the data cards section of a
-standard MCNP5 input file.  There are no cell or surface cards
-included in the input file.
-
-In addition to many other MCNP5 data cards, it is important to define
-the materials that have been assigned in step 2.D.i.a above and any
-tally modifiers, as desired, for the tallies defined in step 2.D.i.a
-above.
-
-A new data card has been added to DAG-MCNP5 to define parameters for
-the DAGMC geometry capability.  These parameters are described in
-:ref:`additional_parameters`.
+For example the most simple valid Fluka geometry is as follows, 
 ::
-    Form: dagmc  keyword1=value   keyword2=value
-           check_src_cell: behavior of CEL variable in SDEF card
-                           on  [default] standard interpretation for 
-                                         CEL variable: source rejection
-                           off           no cell rejection - assume that 
-                                         sampled position is in cell CEL
-        overlap_thickness: allows particle tracking through small overlaps
-                           {real} [default=0.0]
-                   usecad: toggle usage of solid model geometry
-                           off [default] ray-tracing limited to facets
-                           on            ray-tracing performed on solid model 
-                                         geometry surfaces
-                distlimit: toggle usage of flight distance sampled from 
-                           physics to accelerate ray-tracing search
-                           off [default] do not use physics flight distance
-                           on            do use physics flight distance
+     GEOBEGIN                                                              COMBNAME
+         0    0          
+     SPH S1         0.0 0.0 0.0 50.0
+     CELL1        5 +S1
+     CELL2        5 +S1
+     GEOEND
+
+To run this geometry with FluDAG, remove all data between GEOBEGIN and GEOEND, and 
+switch the last entry to FLUGG, 
+::
+     GEOBEGIN                                                              FLUGG
+     GEOEND
 
 
-Running DAG-MCNP5
+Running FluDAG
 '''''''''''''''''''
+Running FluDAG bears some similarity to running FLUGG, first create the CAD geometry of
+the problem you wish to run. In order to produce the material assignment data from the 
+CAD geometry we mus t
+
 
 Running DAG-MCNP5 is identical to running the standard MCNP5, but a
 few new keywords have been added to the command-line to specify the
