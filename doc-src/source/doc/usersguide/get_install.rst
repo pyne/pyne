@@ -284,56 +284,79 @@ FluDAG Build
 +++++++++++++++++++++++
 FluDAG uses `FLUKA <http://www.fluka.org>`_ from CERN/INFN with the DAGMC Toolkit.
 The steps to build and install FluDAG follow.
-
-*Download FLUKA*
+*Install  FLUKA*
 
 In order to download FLUKA you need to become a registered user, which you can do at 
 the FLUKA register page from a link on the main FLUKA page.
-Save the user id and password for future FLUKA updates.  For a 64 bit linux installation the download filename is of the form *fluka20xx.xx-linux-gfor64bitAA.tar.gz*.  The build steps below assume the tarfile 
-has been placed in the $HOME/Downloads directory.
+Save the user id and password for future FLUKA updates.  
+For a 64 bit linux installation the download filename is of the form *fluka20xx.xx-linux-gfor64bitAA.tar.gz*.  
+See the `FLUKA <http://www.fluka.org>`_ website in the **Install and Run** item of the *Documentation* menu
+at <http://www.fluka.org/fluka.php\?id\=ins_run\&mm2\=3>.
 
-*Setup Environment and Extract FLUKA tarfile*
-
-Add the following two export statements to your login script (probably a file named .bashrc):
-::
-
-    export FLUPRO=path/to/FLUKA 
-    export FLUFOR=gfortran 
-
-To activate these environment variables either open a new terminal or type
-::
-    prompt%> source $HOME/.bashrc
-
-While some of the FLUKA files are source files for utilites and stubs, most of the  FLUKA files
-in the download are in the form of object code.  
-Building and installing FLUKA is a matter of linking the object code into an executable:
-::
-
-    prompt%> cd $HOME
-    prompt%> mkdir FLUKA
-    prompt%> cd FLUKA
-    prompt%> tar zxvf $HOME/Downloads/flukaxx.xx-linux-gfor64bitAA.tar.gz
-
-After you have untarred the FLUKA download file you can read the README file in the top level directory for additional help.  There is also the FLUKA manual *FM.pdf*, and a text version of the online manual, *fluka2011.manual*.
-
-The instructions for installing on a 64 bit machine are in the various manuals and outlined below.
-
-*Link FLUKA Object Files*
-
-In the top-level FLUKA directory, with the environment variables set, type
-::
-    prompt%> make
-
-This will create the 64-bit executable named **flukahp**.
-At this point you are ready to get the FluDAG alpha_release repository.
-
+Once the environment variables have been set proceed to the FluDAG installation.
 *FluDAG, Alpha Release*
  
 Get the FluDAG Alpha Release repository by cloning the UW-Madison DAGMC repository from github.com and checking out the alpha_release branch:
 ::
 
+    prompt%> cd $HOME
     prompt%> git clone https://github.com/svalinn/DAGMC.git
     prompt%> get checkout alpha_release.
 
+A run-script provided by FLUKA has been modified to allow it to have input filenames
+longer than 8 characters.  The following steps assume you have the FLUKA environment
+variables defined:
+::
+ 
+    prompt%> cd $FLUPRO/flutil
+    prompt%> cp rfluka rfluka.orig
+    prompt%> cd DAGMC/FluDAG/src
+    prompt%> cp rfluka $FLUPRO/flutil
 
+To compile FluDAG you must have the Cubit bin directory in your LD_LIBRARY_PATH.  Add the following
+line to your login script:
+::
+
+    prompt%> export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/path/to/Cubit/bin
+
+You also need to know where the MOAB libraries are.
+These instructions assume they are in $HOME/dagmc_bld/MOAB/lib:
+::
+
+    prompt%> cd $HOME/DAGMC/FluDAG
+    prompt%> mkdir bld
+    prompt%> cmake ../src/. -DMOAB_HOME=$HOME/dagmc_bld/MOAB
+    prompt%> make
+
+Upon successful compile the directory *bld*  should have the *mainfludag* executable in it.
+In order to test FluDAG an environment variable with the path to the *bld* directory must be set.
+Add this statement to your login script:
+::
+
+    export FLUDAG=${HOME}/DAGMC/FluDAG
+
+The FluDAG tests are in a separate repository, which can be cloned from the UW-Madison website:
+::
+
+    prompt%> git clone https://github.com/svalinn/fludag_testing.git
+
+To run all the tests type:
+::
+
+    prompt%> cd $HOME/fludag_testing
+    prompt%> ./run_test test_input
+
+Some of the tests are slow, so the above command will take some time.  
+If you want to run just the fast tests, or just the magnetic tests
+:: 
+
+    prompt%> ./run_test test_fast
+    prompt%> ./run_test test_magnetic
+
+The slow tests can be run separately:
+::
+
+    prompt%> ./run_test test_slow
+
+At this time, not all tests will pass.
 
