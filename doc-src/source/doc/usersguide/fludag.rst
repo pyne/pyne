@@ -123,63 +123,24 @@ switch the last entry to FLUGG,
 
 Running FluDAG
 '''''''''''''''''''
-Running FluDAG bears some similarity to running FLUGG, first create the CAD geometry of
-the problem you wish to run. In order to produce the material assignment data from the 
-CAD geometry we mus t
+Running FluDAG bears some similarity to running FLUGG, first create the CAD 
+geometry of the problem you wish to run. In order to produce the material assignment 
+data from the CAD geometry we must first facet the file,
+::
+     dagmc_preproc -f <facet_tol> <cad_file.sat> -o <name.h5m>
+     
+Will facet the geometry file to a tolerance of <facet_tol> and produce a faceted file
+called <name.h5m>. From that facet file we can produce the material "snippet" file
+::
+     /path/to/fludag/executable/mainfludag <name.h5m>
+     
+Will load the h5m file pointed to and produce the material assignments information. 
+This information should then be pasted into the Fluka input file and any adjustments
+that need to be made should be made, for example adding the density of non standard 
+materials, adding your scoring information
 
+The FluDAG calculation is now ok to run, 
+::
+     $FLUPRO/flutil/rfluka -e <path/to/fludag/executable/mainfludag> -d <path/to/h5m/file/name.h5m> 
+     ++{standard fluka options}++ <fludag_input_file>
 
-Running DAG-MCNP5 is identical to running the standard MCNP5, but a
-few new keywords have been added to the command-line to specify the
-necessary files.
-
-:``gcad=<geom_file>``: (required) The ``geom_file`` is the geometry
-                       file that contains your geometric model, either
-                       in the ACIS (\*.sat) format or the MOAB (\*.h5m)
-                       format.  If this entry is not present,
-                       DAG-MCNP5 will assume that it is running in
-                       standard MCNP5 mode.  This runtime parameter is
-                       described in more detail above.
-
-:``ftol=<faceting_tolerance>``: (optional) [default: 1e-3] This is a
-                               real number that provides guidance to
-                               the faceting engine regarding the
-                               maximum distance between a facet and
-                               the surface it is representing.  It is
-                               only used when reading an ACIS (\*.sat)
-                               ``geom_file``.  When reading a MOAB
-                               (\*.h5m) file, the facets have already
-                               been generated and this setting is
-                               ignored.  This runtime parameter is
-                               described in more detail above.
-
-:``fcad=<facet_file>: (optional) The ``facet_file`` is written by
-                           DAG-MCNP5 in the MOAB (\*.h5m) format.  When
-                           an ACIS file is read by DAG-MCNP5, a number
-                           of pre-processing and initialization steps
-                           are necessary.  Since these can be time
-                           consuming, the user has the option to
-                           create a ``facet_file`` the first time that
-                           they use a geometry and then use that
-                           ``facet_file`` with the ``gcad`` keyword in
-                           subsequent uses.  This runtime parameter is
-                           described in more detail above.
-
-
-:``lcad=<log_file>``: (optional) The ``log_file`` is a skeleton of an
-                           MCNP file for the cells and surfaces in
-                           your geometry.  This file is created by
-                           DAG-MCNP5 to communicate the material
-                           assignments, boundary conditions, and
-                           tallies that you defined in your geometry.
-                           If you give a name other than the default
-                           (``lcad``) for this file on the command-line,
-                           that file will be used instead of the one
-                           generated automatically by DAG-MCNP5.  This
-                           is useful to make small changes to your
-                           material assignments and/or importances,
-                           but **can not** be used to change the
-                           geometry.  It is up to the user to ensure
-                           that the ``log_file`` being used
-                           corresponds to the geometry file in
-                           question.  This runtime parameter is unique
-                           to the DAG-MCNP5 implementation of DAGMC.
