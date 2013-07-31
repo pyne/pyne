@@ -128,7 +128,7 @@ For example the most simple valid Fluka geometry is as follows,
          0    0          
      SPH S1         0.0 0.0 0.0 50.0
      CELL1        5 +S1
-     CELL2        5 +S1
+     CELL2        5 -S1
      GEOEND
 
 To run this geometry with FluDAG, remove all data between GEOBEGIN and GEOEND, and 
