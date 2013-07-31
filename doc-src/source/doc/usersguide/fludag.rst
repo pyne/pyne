@@ -5,9 +5,9 @@ There are several varieties of code-specific steps:
 
 1. defining attributes of the geometry using groups in CUBIT
 2. exporting CUBIT files tothe appropriate ACIS version
-3. converting the ACIS *.sat file to H5M, possibly setting a 
+3. converting the ACIS .sat file to H5M, possibly setting a 
 faceting tolerance
-4. producing material assignments in FLUKA input format from the *.h5m file, with the help of fludag
+4. producing material assignments in FLUKA input format from the .h5m file, with the help of fludag
 5. preparing the FLUKA input file for running with DAGMC
 6. inserting the material assignments into the FLUKA input deck
 
@@ -16,7 +16,7 @@ Geometry Metadata
 ''''''''''''''''''
 
 In FluDAG, the geometry file can be used to define material 
-assignments, boundary conditions and tally locations.
+assignments and tally locations.
  
 Assigning Materials & Densities
 ..................................
@@ -26,13 +26,14 @@ materials, the FLUKA material name must be
 provided in the group name. The format for the group
 name is as follows: 
 :: 
-M_[mat_name]
+    M_[mat_name]
 
 For example, suppose volumes 4 through 18 in UO2 is iron.
 To assign materials to these volumes, the following command would be
 used:
 ::
-     group "M_IRON" add vol 4 to 18
+
+    group "M_IRON" add vol 4 to 18
 
 *Note: If a volume is not assigned to a specific group, when run in
 FluDAG it will be treated as a void; the material for that cell will
@@ -72,51 +73,6 @@ previous section. The graveyard is defined by assigning it a specific
 group name the following keyword:
 ::
     BLACKHOL
-    outside.world
-    rest.of.world
-
-Consider a geometry with 99 volumes that all fit within a cube
-centered at the origin with side-length 99 cm.  To create a graveyard
-for this problem in CUBIT, you could issue the following commands:
-::
-    cubit_prompt> create brick x 100
-    cubit_prompt> create brick x 105
-    cubit_prompt> subtract vol 100 from vol 101
-    cubit_prompt> group "graveyard" add vol 102
-
-
-When DAG-MCNP5 is run, the importance of volume 102 (or any other
-volumes included in the group) will be set to zero. (_Note: this
-assumes that the two ``create brick`` commands generate volumes
-numbered 100 and 101, respectively, and that the Boolean subtraction
-results in a new volume number 102.
-
-If you have boundary conditions (reflecting, white, or periodic) it is
-not required that you surround them with the bounding volume, but is
-not incorrect to do so.  Only areas where particles should escape need
-to be enclosed.  However, it is often easiest to simply create a
-single graveyard that covers all directions and volumes of the system.
-
-* **Surface boundary conditions: reflection**
-
-Surface boundary conditions are similarly enforced by specifying a
-group name. This type of attribute (surface boundary condition) is
-only required if reflective or white boundary conditions are used in
-the problem.  If not, this section may be skipped.  *Note that
-periodic boundary conditions are not yet supported.*
-
-Specifying reflecting and white boundary conditions are fairly
-straightforward.  The group names for reflecting and white are
-respectively:
-::
-     spec.reflect
-     white.reflect
-
-Suppose surfaces 10 and 11 are reflecting boundary conditions.  To
-specify these as reflecting surfaces, the following group would be
-created:
-::
-     group "spec.reflect" add surf 10 11
 
 Tally Assignments
 ..................
