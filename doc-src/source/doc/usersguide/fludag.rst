@@ -30,10 +30,27 @@ would be used.
 ::
     group "M_IRON" add volume 1 to 5
     
+Will produce in the input file
+::
+    ASSIGNMA        IRON         1
+    ASSIGNMA        IRON         2
+    ASSIGNMA        IRON         3
+    ASSIGNMA        IRON         4
+    ASSIGNMA        IRON         5
+    
 Compounds are also supported by FluDAG, for example, if we wish to have volume 6 
 belong to a group whose material name is STAINLESS then we can can use 
 ::
     group "M_STAINLESS" add volume 6
+
+Will produce in the input file
+::
+    MATERIAL                                        26                    STAINLES  
+    *...+....1....+....2....+....3....+....4....+....5....+....6....+....7...
+    ASSIGNMA    STAINLES         6
+
+*Note: Material names longer than 8 characters are truncated to the first 8 
+characters. 
 
 Be aware that there are several predefined material names in Fluka, and they
 are appropriately treated by FluDAG. 
@@ -137,7 +154,10 @@ called <name.h5m>. From that facet file we can produce the material "snippet" fi
 Will load the h5m file pointed to and produce the material assignments information. 
 This information should then be pasted into the Fluka input file and any adjustments
 that need to be made should be made, for example adding the density of non standard 
-materials, adding your scoring information
+materials, adding your scoring information. Please note that the user must always 
+include the additional material and compound information themselves and take
+responsibility to ensure that the Fluka material index number does not overlap with one
+produced by FluDAG.
 
 The FluDAG calculation is now ok to run, 
 ::
