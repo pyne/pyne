@@ -24,40 +24,39 @@ for FluDAG. To define materials, the FLUKA material name must be
 provided in the group name. The format for the group
 name is as follows: :: M_[mat_name]
 
-For example, suppose volumes 4 through 18 in UO2 is iron.
-To assign materials to these volumes, the following command would be
-used:
+For example, suppose we wish to add volumes 1 through 5 to a group
+that defineds the material to be iron, then the following command 
+would be used.
 ::
-     group "M_iron" add vol 4 to 18
+    group "M_IRON" add volume 1 to 5
+    
+Compounds are also supported by FluDAG, for example, if we wish to have volume 6 
+belong to a group whose material name is STAINLESS then we can can use 
+::
+    group "M_STAINLESS" add volume 6
 
-*Note: If a volume is not assigned to a specific group, when run in
-FluDAG it will be treated as a void; the material for that cell will
-be zero. This can actually become a fairly useful debugging tool to
-identify volumes that were not assigned to their appropriate group.*
+Be aware that there are several predefined material names in Fluka, and they
+are appropriately treated by FluDAG. 
+    
+*Note: All volumes must belong to a group, if they do not have any information
+FluDAG will not assign material information.
 
 The implicit complement is automatically assigned the value 1 + the id of the 
 highest numberd volume.
 
 Defining the Graveyard
 ..............................
-
-There are two general classes of boundary condition supported by
-DAG-MCNP5. a vacuum boundary and reflecting surfaces, and they are
-implemented in different ways.
-The 
-
 * **Defining the "graveyard": vacuum boundaries**
 
-A typical usage of Monte Carlo codes  include a volume that extends to infinity
-with an importance of 0 that bounds the active volumes of interest.
+A typical usage of Monte Carlo codes  include a volume that extends 
+to infinity with an importance of 0 that bounds the active volumes of interest.
 Since solid models cannot include any infinite volumes, it is
 necessary to place a finite volume of importance 0 to define the
 problem boundary. You will need to surround the entire geometry with a
 shell of finite thickness, known as the "graveyard".  Any geometric
 shape can be used for this; however, a cubic shell is usually preferred.  This
 shell volume will represent the outside world and will be the volume
-where all of the particles are terminated (thus it will have an
-importance of zero).
+where all of the particles are terminated.
 
 To create this volume create two volumes in CUBIT with the same shape,
 same center, and one slightly larger than the other.  Subtract the
@@ -67,10 +66,8 @@ Like the material definitions and boundary conditions discussed in the
 previous section. The graveyard is defined by assigning it a specific
 group name the following keyword:
 ::
-    BLACKHOL
-    outside.world
-    rest.of.world
-
+    group "M_BLCKHOLE" add volume X
+   
 Consider a geometry with 99 volumes that all fit within a cube
 centered at the origin with side-length 99 cm.  To create a graveyard
 for this problem in CUBIT, you could issue the following commands:
@@ -78,115 +75,28 @@ for this problem in CUBIT, you could issue the following commands:
     cubit_prompt> create brick x 100
     cubit_prompt> create brick x 105
     cubit_prompt> subtract vol 100 from vol 101
-    cubit_prompt> group "graveyard" add vol 102
+    cubit_prompt> group "M_BLCKHOLE" add vol 102
 
 
-When DAG-MCNP5 is run, the importance of volume 102 (or any other
-volumes included in the group) will be set to zero. (_Note: this
-assumes that the two ``create brick`` commands generate volumes
-numbered 100 and 101, respectively, and that the Boolean subtraction
-results in a new volume number 102.
+When FLuDAG is run the all particles that enter volumes in group "M_BLCKHOLE" 
+will be killed, this is effectively the same as the concept of importance 
+in MCNP.
 
-If you have boundary conditions (reflecting, white, or periodic) it is
-not required that you surround them with the bounding volume, but is
-not incorrect to do so.  Only areas where particles should escape need
-to be enclosed.  However, it is often easiest to simply create a
-single graveyard that covers all directions and volumes of the system.
 
-* **Surface boundary conditions: reflection**
-
-Surface boundary conditions are similarly enforced by specifying a
-group name. This type of attribute (surface boundary condition) is
-only required if reflective or white boundary conditions are used in
-the problem.  If not, this section may be skipped.  *Note that
-periodic boundary conditions are not yet supported.*
-
-Specifying reflecting and white boundary conditions are fairly
-straightforward.  The group names for reflecting and white are
-respectively:
-::
-     spec.reflect
-     white.reflect
-
-Suppose surfaces 10 and 11 are reflecting boundary conditions.  To
-specify these as reflecting surfaces, the following group would be
-created:
-::
-     group "spec.reflect" add surf 10 11
-
-Tally Assignments
+Scoring Assignments
 ..................
+We do not currently support scoring assignments through group names. The user must manually
+add these to the Fluka input deck.
 
-It is also possible, although not required, to specify tallies in the
-geometry.  The general form for adding this meta-data is to create a
-group of volumes or surfaces and encode the meta-data in the names of
-those groups.
-
-The user has the option of specifying tallies in the geometry
-directly.  It is still possible to specify tallies in the MCNP input
-file, however, the user has to make sure that the tally indices are
-not duplicated lest a fatal error will occur.  Tallies are specified
-as group names in the following format:
+The proposed naming scheme would be the following, 
 ::
-      tally_[CUBIT tally ID].[tally type keyword].[particles]
-
-The ``[CUBIT tally ID]`` field is an integer from 0 to 99.  Different
-tally types may have the same CUBIT ID and are still consistent.  The
-tally number in MCNP is 10 times the CUBIT ID plus the tally type
-index (e.g. 4 for cell flux tallies).
-
-The ``[tally type keyword]`` is one of the following for each type of
-tally:
-
-+----------+------------------+
-|Tally Type|tally type keyword|
-+----------+------------------+
-|f1        |surf.current      |
-+----------+------------------+
-|f2        |surf.flux         |
-+----------+------------------+
-|f4        |cell.flux         |
-+----------+------------------+
-|f6        |cell.heating      |
-+----------+------------------+
-|f7        |cell.fission      |
-+----------+------------------+
-|f8        |pulse.height      |
-+----------+------------------+
-
-Also \*tallies (the tally result times the incident particle energy)
-are possible by placing an "e" before the tally type.  So to make a
-\*f2 tally, the keyword would be ``esurf_flux``.  Pulse height (f8) tallies
-have the option to include charge as well.  This is done by placing a
-"q" before the keyword as in ``qpulse_height``.
-
-The ``[particles]`` tag is a string stating which particles will be
-tallied.  To tally both photons and neutrons, set the tag to "np".
-The default is neutrons only.  Should this be tag be omitted, only
-neutrons will be tallied.
-
-Some CUBIT commands to do tallies:
+     group "[tally_type]_[particle_name]" add volume <list>
+     
+For example
 ::
-    group "tally_0.surf.current" add surf 1 to 4
-    group "tally_0.cell.flux.p" add vol 7
-    group "tally_1.ecell.heating.np" add vol 2 6
-    group "tally_6.cell.heating.n" add vol 2 6
-    group "tally_7.cell.flux.p" add vol 1 to 3
-    group "tally_12.pulse.height.p" add vol 10 to 14
-    group "tally_14.qpulse.height.p" add vol 10 to 14
+     group "usrtrack_neutron" add volume 1 2 5 6
+     group "usrbdx_proton" add volume 1 2 4 9
 
-The above are equivalent to following MCNP definitions:
-::
-    f1:n 1 2 3 4 T
-    f4:p 7 T
-    *f16:n,p 2 6 T
-    f66:n 2 6 T
-    f74:p 1 2 3 T
-    f128:p 10 11 12 13 14 T
-    +f148:p 10 11 12 13 14 T
-
-*(Note: the current convention is to always add a tally bin for the
-total across all cells/volumes.)*
 
 Preparing the DAG-MCNP5 Input File
 ''''''''''''''''''''''''''''''''''''
