@@ -1,11 +1,15 @@
 Monte Carlo Code-Specific Steps for FluDAG
 +++++++++++++++++++++++++++++++++++++++++++++
 
-There are three varieties of code-specific steps:
+There are several varieties of code-specific steps:
 
 1. defining attributes of the geometry using groups in CUBIT
-2. defining DAGMC runtime parameters using input file syntax
-3. changes to the command-line
+2. exporting CUBIT files tothe appropriate ACIS version
+3. converting the ACIS *.sat file to H5M, possibly setting a 
+faceting tolerance
+4. producing material assignments in FLUKA input format from the *.h5m file, with the help of fludag
+5. preparing the FLUKA input file for running with DAGMC
+6. inserting the material assignments into the FLUKA input deck
 
 
 Geometry Metadata
@@ -17,17 +21,18 @@ assignments, boundary conditions and tally locations.
 Assigning Materials & Densities
 ..................................
 
-The generic workflow description includes details on
-:ref:`grouping-basics` , but a specific naming convention is required
-for FluDAG. To define materials, the FLUKA material name must be 
+A specific naming convention is required for FluDAG. To define 
+materials, the FLUKA material name must be 
 provided in the group name. The format for the group
-name is as follows: :: M_[mat_name]
+name is as follows: 
+:: 
+M_[mat_name]
 
 For example, suppose volumes 4 through 18 in UO2 is iron.
 To assign materials to these volumes, the following command would be
 used:
 ::
-     group "M_iron" add vol 4 to 18
+     group "M_IRON" add vol 4 to 18
 
 *Note: If a volume is not assigned to a specific group, when run in
 FluDAG it will be treated as a void; the material for that cell will
