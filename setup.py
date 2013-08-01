@@ -61,6 +61,10 @@ def main_body():
     sys.argv, cmake_args, make_args = parse_args()
     makefile = os.path.join('build', 'Makefile')
     if not os.path.exists(makefile):
+        if os.name != 'nt':
+            rtn = subprocess.call(['which', 'cmake'])
+            if rtn != 0:
+                sys.exit('CMake is not installed, aborting PyNE build.')
         cmake_cmd = ['cmake', '..'] + cmake_args
         cmake_cmd += ['-DPYTHON_EXECUTABLE=' + sys.executable, ]
         if os.name == 'nt':

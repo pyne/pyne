@@ -100,6 +100,7 @@ def test_id():
     assert_equal(nucname.id("he"), 20000000)
     assert_equal(nucname.id("U"), 920000000)
     assert_equal(nucname.id("Np"), 930000000)
+    assert_equal(nucname.id("Cl"), 170000000)
 
     assert_equal(nucname.id("4he"),   20040000)
     assert_equal(nucname.id("244CM"), 962440000)
