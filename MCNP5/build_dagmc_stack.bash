@@ -64,12 +64,16 @@ function svnCO(){   #param 1 is repo #param2 is code $3 is special
 
 function gitCO(){   #param 1 is repo url #param2 is code $3 is branch/name,4 is repo name
         git_cmd=""
-        if [ $2 == "branch" ] || [ $2 == "tag" ]
+        if [ $2 == "branch" ] 
         then
             git_cmd="-b $3"
         fi
         git clone $git_cmd $1
         cd $4
+	if [ $2 == "tag" ] 
+	then
+	    git checkout tags/$3
+	fi
         autoreconf -fi
         cd ..
         ln -fs $4 src
