@@ -34,7 +34,7 @@ would be used.
 ::
     group "M_IRON" add volume 1 to 5
     
-This will produce in the inpput file,
+This will produce in the input file,
 ::
     ASSIGNMA        IRON         1
     ASSIGNMA        IRON         2
@@ -47,7 +47,7 @@ belong to a group whose material name is STAINLESS then we can can use
 ::
     group "M_STAINLESS" add volume 6
 
-This produce in the input file:
+This will produce in the input file:
 ::
     MATERIAL                                        26                    STAINLES  
     *...+....1....+....2....+....3....+....4....+....5....+....6....+....7...
