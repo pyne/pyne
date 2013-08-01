@@ -1,62 +1,83 @@
 Monte Carlo Code-Specific Steps for FluDAG
 +++++++++++++++++++++++++++++++++++++++++++++
 
-There are three varieties of code-specific steps:
+There are several varieties of code-specific steps:
 
 1. defining attributes of the geometry using groups in CUBIT
-2. defining DAGMC runtime parameters using input file syntax
-3. changes to the command-line
+2. exporting CUBIT files to the appropriate ACIS version
+3. converting the ACIS file to H5M, possibly setting a faceting tolerance
+4. producing material assignments in FLUKA input format from the h5m file, with the help of fludag
+5. preparing the FLUKA input file for running with DAGMC
+6. inserting the material assignments into the FLUKA input deck
 
 
 Geometry Metadata
 ''''''''''''''''''
 
 In FluDAG, the geometry file can be used to define material 
-assignments, boundary conditions and tally locations.
+assignments, and eventually we would like to add the capability to 
+define boundary conditions and tally locations.
  
 Assigning Materials & Densities
 ..................................
 
-The generic workflow description includes details on
-:ref:`grouping-basics` , but a specific naming convention is required
-for FluDAG. To define materials, the FLUKA material name must be 
+A specific naming convention is required for FluDAG. To define 
+materials, the FLUKA material name must be 
 provided in the group name. The format for the group
-name is as follows: :: M_[mat_name]
+name is as follows: 
+:: 
+    M_[mat_name]
 
-For example, suppose volumes 4 through 18 in UO2 is iron.
-To assign materials to these volumes, the following command would be
-used:
+For example, suppose we wish to add volumes 1 through 5 to a group
+that defineds the material to be iron, then the following command 
+would be used.
 ::
-     group "M_iron" add vol 4 to 18
+    group "M_IRON" add volume 1 to 5
+    
+Will produce in the input file
+::
+    ASSIGNMA        IRON         1
+    ASSIGNMA        IRON         2
+    ASSIGNMA        IRON         3
+    ASSIGNMA        IRON         4
+    ASSIGNMA        IRON         5
+    
+Compounds are also supported by FluDAG, for example, if we wish to have volume 6 
+belong to a group whose material name is STAINLESS then we can can use 
+::
+    group "M_STAINLESS" add volume 6
 
-*Note: If a volume is not assigned to a specific group, when run in
-FluDAG it will be treated as a void; the material for that cell will
-be zero. This can actually become a fairly useful debugging tool to
-identify volumes that were not assigned to their appropriate group.*
+Will produce in the input file
+::
+    MATERIAL                                        26                    STAINLES  
+    *...+....1....+....2....+....3....+....4....+....5....+....6....+....7...
+    ASSIGNMA    STAINLES         6
+
+*Note: Material names longer than 8 characters are truncated to the first 8 
+characters. 
+
+Be aware that there are several predefined material names in Fluka, and they
+are appropriately treated by FluDAG. 
+    
+*Note: All volumes must belong to a group, if they do not have any information
+FluDAG will not assign material information.
 
 The implicit complement is automatically assigned the value 1 + the id of the 
 highest numberd volume.
 
 Defining the Graveyard
 ..............................
-
-There are two general classes of boundary condition supported by
-DAG-MCNP5. a vacuum boundary and reflecting surfaces, and they are
-implemented in different ways.
-The 
-
 * **Defining the "graveyard": vacuum boundaries**
 
-A typical usage of Monte Carlo codes  include a volume that extends to infinity
-with an importance of 0 that bounds the active volumes of interest.
+A typical usage of Monte Carlo codes  include a volume that extends 
+to infinity with an importance of 0 that bounds the active volumes of interest.
 Since solid models cannot include any infinite volumes, it is
 necessary to place a finite volume of importance 0 to define the
 problem boundary. You will need to surround the entire geometry with a
 shell of finite thickness, known as the "graveyard".  Any geometric
 shape can be used for this; however, a cubic shell is usually preferred.  This
 shell volume will represent the outside world and will be the volume
-where all of the particles are terminated (thus it will have an
-importance of zero).
+where all of the particles are terminated.
 
 To create this volume create two volumes in CUBIT with the same shape,
 same center, and one slightly larger than the other.  Subtract the
@@ -66,10 +87,8 @@ Like the material definitions and boundary conditions discussed in the
 previous section. The graveyard is defined by assigning it a specific
 group name the following keyword:
 ::
-    BLACKHOL
-    outside.world
-    rest.of.world
-
+    group "M_BLCKHOLE" add volume X
+   
 Consider a geometry with 99 volumes that all fit within a cube
 centered at the origin with side-length 99 cm.  To create a graveyard
 for this problem in CUBIT, you could issue the following commands:
@@ -77,205 +96,75 @@ for this problem in CUBIT, you could issue the following commands:
     cubit_prompt> create brick x 100
     cubit_prompt> create brick x 105
     cubit_prompt> subtract vol 100 from vol 101
-    cubit_prompt> group "graveyard" add vol 102
+    cubit_prompt> group "M_BLCKHOLE" add vol 102
 
 
-When DAG-MCNP5 is run, the importance of volume 102 (or any other
-volumes included in the group) will be set to zero. (_Note: this
-assumes that the two ``create brick`` commands generate volumes
-numbered 100 and 101, respectively, and that the Boolean subtraction
-results in a new volume number 102.
+When FLuDAG is run the all particles that enter volumes in group "M_BLCKHOLE" 
+will be killed, this is effectively the same as the concept of importance 
+in MCNP.
 
-If you have boundary conditions (reflecting, white, or periodic) it is
-not required that you surround them with the bounding volume, but is
-not incorrect to do so.  Only areas where particles should escape need
-to be enclosed.  However, it is often easiest to simply create a
-single graveyard that covers all directions and volumes of the system.
 
-* **Surface boundary conditions: reflection**
-
-Surface boundary conditions are similarly enforced by specifying a
-group name. This type of attribute (surface boundary condition) is
-only required if reflective or white boundary conditions are used in
-the problem.  If not, this section may be skipped.  *Note that
-periodic boundary conditions are not yet supported.*
-
-Specifying reflecting and white boundary conditions are fairly
-straightforward.  The group names for reflecting and white are
-respectively:
-::
-     spec.reflect
-     white.reflect
-
-Suppose surfaces 10 and 11 are reflecting boundary conditions.  To
-specify these as reflecting surfaces, the following group would be
-created:
-::
-     group "spec.reflect" add surf 10 11
-
-Tally Assignments
+Scoring Assignments
 ..................
+We do not currently support scoring assignments through group names. The user must manually
+add these to the Fluka input deck.
 
-It is also possible, although not required, to specify tallies in the
-geometry.  The general form for adding this meta-data is to create a
-group of volumes or surfaces and encode the meta-data in the names of
-those groups.
-
-The user has the option of specifying tallies in the geometry
-directly.  It is still possible to specify tallies in the MCNP input
-file, however, the user has to make sure that the tally indices are
-not duplicated lest a fatal error will occur.  Tallies are specified
-as group names in the following format:
+The proposed naming scheme would be the following, 
 ::
-      tally_[CUBIT tally ID].[tally type keyword].[particles]
-
-The ``[CUBIT tally ID]`` field is an integer from 0 to 99.  Different
-tally types may have the same CUBIT ID and are still consistent.  The
-tally number in MCNP is 10 times the CUBIT ID plus the tally type
-index (e.g. 4 for cell flux tallies).
-
-The ``[tally type keyword]`` is one of the following for each type of
-tally:
-
-+----------+------------------+
-|Tally Type|tally type keyword|
-+----------+------------------+
-|f1        |surf.current      |
-+----------+------------------+
-|f2        |surf.flux         |
-+----------+------------------+
-|f4        |cell.flux         |
-+----------+------------------+
-|f6        |cell.heating      |
-+----------+------------------+
-|f7        |cell.fission      |
-+----------+------------------+
-|f8        |pulse.height      |
-+----------+------------------+
-
-Also \*tallies (the tally result times the incident particle energy)
-are possible by placing an "e" before the tally type.  So to make a
-\*f2 tally, the keyword would be ``esurf_flux``.  Pulse height (f8) tallies
-have the option to include charge as well.  This is done by placing a
-"q" before the keyword as in ``qpulse_height``.
-
-The ``[particles]`` tag is a string stating which particles will be
-tallied.  To tally both photons and neutrons, set the tag to "np".
-The default is neutrons only.  Should this be tag be omitted, only
-neutrons will be tallied.
-
-Some CUBIT commands to do tallies:
+     group "[tally_type]_[particle_name]" add volume <list>
+     
+For example
 ::
-    group "tally_0.surf.current" add surf 1 to 4
-    group "tally_0.cell.flux.p" add vol 7
-    group "tally_1.ecell.heating.np" add vol 2 6
-    group "tally_6.cell.heating.n" add vol 2 6
-    group "tally_7.cell.flux.p" add vol 1 to 3
-    group "tally_12.pulse.height.p" add vol 10 to 14
-    group "tally_14.qpulse.height.p" add vol 10 to 14
+     group "usrtrack_neutron" add volume 1 2 5 6
+     group "usrbdx_proton" add volume 1 2 4 9
 
-The above are equivalent to following MCNP definitions:
-::
-    f1:n 1 2 3 4 T
-    f4:p 7 T
-    *f16:n,p 2 6 T
-    f66:n 2 6 T
-    f74:p 1 2 3 T
-    f128:p 10 11 12 13 14 T
-    +f148:p 10 11 12 13 14 T
 
-*(Note: the current convention is to always add a tally bin for the
-total across all cells/volumes.)*
-
-Preparing the DAG-MCNP5 Input File
+Preparing the FluDAG Input File
 ''''''''''''''''''''''''''''''''''''
+The FluDAG (Fluka) input file will look almost identical to the originating
+Fluka input file. The exception will be the removal of all data between
+the cards GEOBEGIN and GEOEND, i.e. all native Fluka input data. The last entry 
+on the line of GEOBEGIN should be FLUGG. 
 
-The DAG-MCNP5 input file contains only the data cards section of a
-standard MCNP5 input file.  There are no cell or surface cards
-included in the input file.
-
-In addition to many other MCNP5 data cards, it is important to define
-the materials that have been assigned in step 2.D.i.a above and any
-tally modifiers, as desired, for the tallies defined in step 2.D.i.a
-above.
-
-A new data card has been added to DAG-MCNP5 to define parameters for
-the DAGMC geometry capability.  These parameters are described in
-:ref:`additional_parameters`.
+For example the most simple valid Fluka geometry is as follows, 
 ::
-    Form: dagmc  keyword1=value   keyword2=value
-           check_src_cell: behavior of CEL variable in SDEF card
-                           on  [default] standard interpretation for 
-                                         CEL variable: source rejection
-                           off           no cell rejection - assume that 
-                                         sampled position is in cell CEL
-        overlap_thickness: allows particle tracking through small overlaps
-                           {real} [default=0.0]
-                   usecad: toggle usage of solid model geometry
-                           off [default] ray-tracing limited to facets
-                           on            ray-tracing performed on solid model 
-                                         geometry surfaces
-                distlimit: toggle usage of flight distance sampled from 
-                           physics to accelerate ray-tracing search
-                           off [default] do not use physics flight distance
-                           on            do use physics flight distance
+     GEOBEGIN                                                              COMBNAME
+         0    0          
+     SPH S1         0.0 0.0 0.0 50.0
+     CELL1        5 +S1
+     CELL2        5 -S1
+     GEOEND
+
+To run this geometry with FluDAG, remove all data between GEOBEGIN and GEOEND, and 
+switch the last entry to FLUGG, 
+::
+     GEOBEGIN                                                              FLUGG
+     GEOEND
 
 
-Running DAG-MCNP5
+Running FluDAG
 '''''''''''''''''''
+Running FluDAG bears some similarity to running FLUGG, first create the CAD 
+geometry of the problem you wish to run. In order to produce the material assignment 
+data from the CAD geometry we must first facet the file,
+::
+     dagmc_preproc -f <facet_tol> <cad_file.sat> -o <name.h5m>
+     
+Will facet the geometry file to a tolerance of <facet_tol> and produce a faceted file
+called <name.h5m>. From that facet file we can produce the material "snippet" file
+::
+     /path/to/fludag/executable/mainfludag <name.h5m>
+     
+Will load the h5m file pointed to and produce the material assignments information. 
+This information should then be pasted into the Fluka input file and any adjustments
+that need to be made should be made, for example adding the density of non standard 
+materials, adding your scoring information. Please note that the user must always 
+include the additional material and compound information themselves and take
+responsibility to ensure that the Fluka material index number does not overlap with one
+produced by FluDAG.
 
-Running DAG-MCNP5 is identical to running the standard MCNP5, but a
-few new keywords have been added to the command-line to specify the
-necessary files.
+The FluDAG calculation is now ok to run, 
+::
+     $FLUPRO/flutil/rfluka -e <path/to/fludag/executable/mainfludag> -d <path/to/h5m/file/name.h5m> 
+     ++{standard fluka options}++ <fludag_input_file>
 
-:``gcad=<geom_file>``: (required) The ``geom_file`` is the geometry
-                       file that contains your geometric model, either
-                       in the ACIS (\*.sat) format or the MOAB (\*.h5m)
-                       format.  If this entry is not present,
-                       DAG-MCNP5 will assume that it is running in
-                       standard MCNP5 mode.  This runtime parameter is
-                       described in more detail above.
-
-:``ftol=<faceting_tolerance>``: (optional) [default: 1e-3] This is a
-                               real number that provides guidance to
-                               the faceting engine regarding the
-                               maximum distance between a facet and
-                               the surface it is representing.  It is
-                               only used when reading an ACIS (\*.sat)
-                               ``geom_file``.  When reading a MOAB
-                               (\*.h5m) file, the facets have already
-                               been generated and this setting is
-                               ignored.  This runtime parameter is
-                               described in more detail above.
-
-:``fcad=<facet_file>: (optional) The ``facet_file`` is written by
-                           DAG-MCNP5 in the MOAB (\*.h5m) format.  When
-                           an ACIS file is read by DAG-MCNP5, a number
-                           of pre-processing and initialization steps
-                           are necessary.  Since these can be time
-                           consuming, the user has the option to
-                           create a ``facet_file`` the first time that
-                           they use a geometry and then use that
-                           ``facet_file`` with the ``gcad`` keyword in
-                           subsequent uses.  This runtime parameter is
-                           described in more detail above.
-
-
-:``lcad=<log_file>``: (optional) The ``log_file`` is a skeleton of an
-                           MCNP file for the cells and surfaces in
-                           your geometry.  This file is created by
-                           DAG-MCNP5 to communicate the material
-                           assignments, boundary conditions, and
-                           tallies that you defined in your geometry.
-                           If you give a name other than the default
-                           (``lcad``) for this file on the command-line,
-                           that file will be used instead of the one
-                           generated automatically by DAG-MCNP5.  This
-                           is useful to make small changes to your
-                           material assignments and/or importances,
-                           but **can not** be used to change the
-                           geometry.  It is up to the user to ensure
-                           that the ``log_file`` being used
-                           corresponds to the geometry file in
-                           question.  This runtime parameter is unique
-                           to the DAG-MCNP5 implementation of DAGMC.
