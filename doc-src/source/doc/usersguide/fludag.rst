@@ -24,7 +24,7 @@ Assigning Materials & Densities
 A specific naming convention is required for FluDAG. To define 
 materials, the FLUKA material name must be 
 provided in the group name. The format for the group
-name is as follows: 
+name is as follows
 :: 
     M_[mat_name]
 
@@ -67,7 +67,6 @@ highest numberd volume.
 
 Defining the Graveyard
 ..............................
-* **Defining the "graveyard": vacuum boundaries**
 
 A typical usage of Monte Carlo codes include a volume that extends 
 to infinity with an importance of 0 that bounds the active volumes of interest.
@@ -83,9 +82,9 @@ To create this volume create two volumes in CUBIT with the same shape,
 same center, and one slightly larger than the other.  Subtract the
 smaller from the larger.  The remaining volume is the graveyard.
 
-As with the material definitions [jcz] and boundary conditions [???] discussed in the
-previous section the graveyard is defined by assigning the volume a keyword
-group name:
+As with the material definitions discussed in the previous section the 
+graveyard is defined by assigning the volume a keyword
+group name,
 ::
     group "M_BLCKHOLE" add volume X
    
