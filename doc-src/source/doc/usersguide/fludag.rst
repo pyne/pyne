@@ -28,6 +28,7 @@ name is as follows;
 ::
     $> M_[material_name]
     M_[material_name]
+    M&#95;[material_name]
 
 For example, suppose we wish to add volumes 1 through 5 to a group
 that defines the material to be iron.  The following command 
