@@ -917,7 +917,7 @@ void fludagwrite_assignma(std::string lfname)  // file with cell/surface cards
   std::ofstream index_id(index_id_filename.c_str());
   index_id << idstr.str();
   index_id.close(); 
-  std::corr << "Writing lcad file = " << lfname << std::endl; 
+  std::cout << "Writing lcad file = " << lfname << std::endl; 
 // Before opening file for writing, check for an existing file
 /*
   if( lfname != "lcad" ){
