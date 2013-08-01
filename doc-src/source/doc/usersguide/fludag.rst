@@ -26,11 +26,13 @@ materials, the FLUKA material name must be
 provided in the group name. The format for the group
 name is as follows,
 :: 
-    M\\_[mat_name] 
+    prompt> M_[mat_name] 
 
+try this
 :: 
     "M_[mat_name]"
 
+and also this
 :: 
     " M_[mat_name]"
 
