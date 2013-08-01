@@ -26,13 +26,13 @@ materials, the FLUKA material name must be
 provided in the group name. The format for the group
 name is as follows,
 :: 
-    M_[mat_name]
+    group "M_IRON" add volume 1 to 5
 
 For example, suppose we wish to add volumes 1 through 5 to a group
 that defines the material to be iron.  The following command 
 would be used.
 ::
-    group "M_IRON" add volume 1 to 5
+    M_[mat_name]
     
 This will produce in the input file,
 ::
