@@ -234,7 +234,9 @@ bool pyne::nucname::isnuclide(int nuc)
   };
   int zzz = n / 10000000;
   int aaa = (n % 10000000) / 10000;
-  if (aaa < zzz)
+  if (aaa == 0)
+    return true;
+  else if (aaa < zzz)
     return false;
   return true;
 };
