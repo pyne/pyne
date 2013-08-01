@@ -27,8 +27,10 @@ provided in the group name. The format for the group
 name is as follows,
 :: 
     M_[mat_name]
-::    
+    
     M_[mat_name]  
+    
+    'M_[mat_name]'
 
 For example, suppose we wish to add volumes 1 through 5 to a group
 that defines the material to be iron.  The following command 
