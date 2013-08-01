@@ -26,6 +26,7 @@ materials, the FLUKA material name must be
 provided in the group name. The format for the group
 name is as follows;
 ::
+    $> M_[material_name]
     M_[material_name]
 
 For example, suppose we wish to add volumes 1 through 5 to a group
