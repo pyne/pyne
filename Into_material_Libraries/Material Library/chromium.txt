@@ -1,4 +1,0 @@
-Mass    1
-Density 7.18
-APerm   1
-Cr      1

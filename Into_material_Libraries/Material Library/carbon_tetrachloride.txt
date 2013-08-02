@@ -1,5 +1,0 @@
-Mass    1
-Density 1.594
-APerm   1
-C12     0.200005
-Cl      0.799995

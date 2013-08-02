@@ -1,4 +1,0 @@
-Mass    1
-Density 1.848
-APerm   1
-Be9     1

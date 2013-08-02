@@ -1,5 +1,0 @@
-Mass    1
-Density 1
-APerm   1
-H1      0.666657
-O16     0.333343

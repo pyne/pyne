@@ -1,5 +1,0 @@
-Mass    1
-Density 5.31
-APerm   1
-Ga      0.499998
-As75    0.500002

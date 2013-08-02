@@ -1,4 +1,0 @@
-Mass    1
-Density 8.65
-APerm   1
-Cd      1

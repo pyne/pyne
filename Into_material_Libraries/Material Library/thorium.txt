@@ -1,4 +1,0 @@
-Mass    1
-Density 11.72
-APerm   1
-F23M    1

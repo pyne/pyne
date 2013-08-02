@@ -1,4 +1,0 @@
-Mass    1
-Density 7.874
-APerm   1
-Fe      1

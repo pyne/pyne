@@ -1,4 +1,0 @@
-Mass    1
-Density 7.9004
-APerm   1
-Gd      1

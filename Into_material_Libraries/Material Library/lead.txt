@@ -1,4 +1,0 @@
-Mass    1
-Density 11.35
-APerm   1
-Pb      1

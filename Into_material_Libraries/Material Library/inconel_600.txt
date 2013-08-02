@@ -1,6 +1,0 @@
-Mass    1
-Density 8.43
-APerm   1
-Cr      0.197637
-Fe      0.102231
-Ni      0.700132

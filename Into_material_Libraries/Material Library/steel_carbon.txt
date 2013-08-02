@@ -1,5 +1,0 @@
-Mass    1
-Density 7.82
-APerm   1
-C12     0.022831
-Fe      0.977169

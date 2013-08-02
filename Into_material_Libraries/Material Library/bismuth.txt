@@ -1,4 +1,0 @@
-Mass    1
-Density 9.747
-APerm   1
-Bi209   1

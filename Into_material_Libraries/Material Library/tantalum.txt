@@ -1,4 +1,0 @@
-Mass    1
-Density 16.654
-APerm   1
-Ta181   1

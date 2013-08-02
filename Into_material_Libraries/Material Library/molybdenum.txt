@@ -1,4 +1,0 @@
-Mass    1
-Density 10.22
-APerm   1
-Mo      1

@@ -1,4 +1,0 @@
-Mass    1
-Density 2.6989
-APerm   1
-Al27    1

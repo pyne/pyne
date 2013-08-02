@@ -1,4 +1,0 @@
-Mass    1
-Density 1.74
-APerm   1
-Mg      1

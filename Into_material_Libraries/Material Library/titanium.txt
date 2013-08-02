@@ -1,4 +1,0 @@
-Mass    1
-Density 4.54
-APerm   1
-Ti      1

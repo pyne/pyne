@@ -1,4 +1,0 @@
-Mass    1
-Density 0.534
-APerm   1
-Li7     1

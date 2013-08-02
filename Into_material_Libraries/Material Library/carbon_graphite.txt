@@ -1,4 +1,0 @@
-Mass    1
-Density 1.7
-APerm   1
-C12     1

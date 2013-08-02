@@ -1,5 +1,0 @@
-Mass    1
-Density 2.18
-APerm   1
-Na23    0.5
-Cl      0.5
