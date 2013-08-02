@@ -759,7 +759,7 @@ static char* get_tallyspec( std::string spec, int& dim ){
 //  Outputs
 //           mat.inp  contains MATERIAL and ASSIGNMAt records for the input geometry.
 //                    The MATERIAL is gotten by parsing the Cubit volume name on underscores.  
-//                    The string after "M_" is considered to be t he material for that volume.
+//                    The string after "M_" is considered to be the material for that volume.
 //                    There are no MATERIAL cards for the materials in the FLUKA_mat_set list
 //                    For the remaining materials, there is one MATERIAL card apiece (no dups)
 //                    User-named (not predefined) materials are TRUNCATED to 8 chars.
@@ -853,7 +853,7 @@ void fludagwrite_assignma(std::string lfname)  // file with cell/surface cards
             {
                 // current material is not in the pre-existing FLUKA material list
                 uniqueMatList.push_back(material); 
-                std::cerr << "Adding material " << material << " to the MATERIAL card list" << std::endl;
+                std::cout << "Adding material " << material << " to the MATERIAL card list" << std::endl;
             }
          }
          else
@@ -870,7 +870,7 @@ void fludagwrite_assignma(std::string lfname)  // file with cell/surface cards
   ostr << implicit_comp_comment << std::endl;
   ostr << std::setw(10) << std::left  << "ASSIGNMAt";
   ostr << std::setw(10) << std::right << "VACUUM";
-  ostr << std::setw(10) << std::right << num_vols+1 << std::endl;
+  ostr << std::setw(10) << std::right << num_vols << std::endl;
 
   // Process the uniqueMatList list so that it truly is unique
   uniqueMatList.sort();
@@ -881,7 +881,7 @@ void fludagwrite_assignma(std::string lfname)  // file with cell/surface cards
      std::list<std::string>::iterator it; 
      for (it=uniqueMatList.begin(); it!=uniqueMatList.end(); ++it)
      {
-        std::cerr << *it << std::endl;
+        std::cout << *it << std::endl;
      }
   
      // Show the output string just created
@@ -917,7 +917,7 @@ void fludagwrite_assignma(std::string lfname)  // file with cell/surface cards
   std::ofstream index_id(index_id_filename.c_str());
   index_id << idstr.str();
   index_id.close(); 
-  std::cerr << "Writing lcad file = " << lfname << std::endl; 
+  std::cout << "Writing lcad file = " << lfname << std::endl; 
 // Before opening file for writing, check for an existing file
 /*
   if( lfname != "lcad" ){
@@ -1118,7 +1118,7 @@ void fludagwrite_mat(std::string fname )  // file with cell/surface cards
     exit(EXIT_FAILURE);
   }
 
-  std::cerr << "Going to write file = " << fname << std::endl;
+  std::cout << "Going to write file = " << fname << std::endl;
   // Before opening file for writing, check for an existing file
   if( fname != "lcad" ){
     // Do not overwrite a lcad file if it already exists, except if it has the default name "lcad"
@@ -1190,7 +1190,7 @@ void fludagwrite_mat(std::string fname )  // file with cell/surface cards
   lcadfile << header << std::endl;
   lcadfile << ostr.str();
 
-  std::cerr << "Writing lcad file = " << fname << std::endl;
+  std::cout << "Writing lcad file = " << fname << std::endl;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -1229,7 +1229,7 @@ void fludagwrite(std::string fname )  // file with cell/surface cards
     exit(EXIT_FAILURE);
   }
 
-  std::cerr << "Going to write an lcad file = " << fname << std::endl;
+  std::cout << "Going to write an lcad file = " << fname << std::endl;
   // Before opening file for writing, check for an existing file
   if( fname != "lcad" ){
     // Do not overwrite a lcad file if it already exists, except if it has the default name "lcad"
