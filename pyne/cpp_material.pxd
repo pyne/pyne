@@ -51,6 +51,10 @@ cdef extern from "material.h" namespace "pyne":
 
         void write_text(char *) except +
 
+        cpp_jsoncpp.Value dump_json() except +
+        void from_json(char *) except +
+        void write_json(char *) except +
+
         void normalize() except +
         map[int, double] mult_by_mass() except +
         double molecular_weight() except +

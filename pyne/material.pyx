@@ -371,7 +371,51 @@ cdef class _Material:
         self.mat_pointer.write_text(filename)
 
 
+    def dump_json(self):
+        """dump_json()
+        Dumps the material to a JSON object.
 
+        Returns
+        ----------
+        val : jsoncpp.Value
+            An object-type JSON value.
+
+        """
+        cdef jsoncpp.Value val = jsoncpp.Value(view=False)
+        val._inst[0] = self.mat_pointer.dump_json()
+        return val
+
+    def from_json(self, char * filename):
+        """from_json(char * filename)
+        Initialize a Material object from a JSON file.
+
+        Parameters
+        ----------
+        filename : str
+            Path to text file that contains the data to read in.
+
+        """
+        self.mat_pointer.from_json(filename)
+
+    def write_json(self, filename):
+        """write_json(filename)
+        Writes the material to a JSON file.
+
+        Parameters
+        ----------
+        filename : str
+            Path to text file to write the data to.  If the file already
+            exists, it will be overwritten.
+
+        Examples
+        --------
+        The following writes out a low-enriched uranium material to a new file::
+
+            leu = Material({'U235': 0.04, 'U238': 0.96}, 42.0, "LEU", 1.0)
+            leu.write_json('leu.json')
+
+        """
+        self.mat_pointer.write_json(filename)
 
     def normalize(self):
         """This convenience method normalizes the mass stream by setting its

@@ -154,6 +154,17 @@ namespace pyne
     /// Writes the Material out to a simple plaintext file readable by from_text().
     void write_text(std::string filename);
 
+    /// Dumps the Material out to a JSON instance tree.
+    Json::Value dump_json();
+    /// Reads data from a JSON file at \a filename into this Material instance.
+    void from_json(char * filename);
+    /// Reads data from a JSON file at \a filename into this Material instance.
+    void from_json(std::string filname);
+    /// Writes the Material out to a JSON file
+    void write_json(char * filename);
+    /// Writes the Material out to a JSON file
+    void write_json(std::string filename);
+
     // Fundemental mass stream data
     /// composition, maps nuclides in id form to normalized mass weights.
     comp_map comp;  

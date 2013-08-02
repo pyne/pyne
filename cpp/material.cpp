@@ -590,6 +590,67 @@ void pyne::Material::write_text (std::string filename)
 };
 
 
+Json::Value pyne::Material::dump_json() {
+  Json::Value json = Json::Value(Json::objectValue);
+  Json::Value jcomp = Json::Value(Json::objectValue);
+  json["mass"] = mass;
+  json["density"] = density;
+  json["atoms_per_mol"] = atoms_per_mol;
+  json["attrs"] = attrs;
+  for(comp_iter i = comp.begin(); i != comp.end(); i++)
+    jcomp[nucname::name(i->first)] = (i->second);
+  json["comp"] = jcomp;
+  return json;
+};
+
+
+void pyne::Material::from_json(char * filename) {
+  std::string fname (filename);
+  from_json(fname);
+};
+
+void pyne::Material::from_json(std::string filename) {
+  if (!pyne::file_exists(filename))
+    throw pyne::FileNotFound(filename);  
+  std::string s;
+  std::ifstream f (filename.c_str(), std::ios::in | std::ios::binary);
+  f.seekg(0, std::ios::end);
+  s.resize(f.tellg());
+  f.seekg(0, std::ios::beg);
+  f.read(&s[0], s.size());
+  f.close();
+  Json::Reader reader;
+  Json::Value json;
+  reader.parse(s, json);
+  comp.clear();
+  Json::Value::Members keys = json["comp"].getMemberNames();
+  Json::Value::Members::const_iterator ikey = keys.begin();
+  Json::Value::Members::const_iterator ikey_end = keys.end();
+  for (; ikey != ikey_end; ++ikey)
+    comp[nucname::id(*ikey)] = json["comp"][*ikey].asDouble();
+  norm_comp(); 
+  mass = json["mass"].asDouble();
+  density = json["density"].asDouble();
+  atoms_per_mol = json["atoms_per_mol"].asDouble();
+  attrs = json["attrs"];
+};
+
+
+void pyne::Material::write_json(char * filename) {
+  std::string fname (filename);
+  write_json(fname);
+};
+
+void pyne::Material::write_json(std::string filename) {
+  Json::Value json = dump_json();
+  Json::StyledWriter writer;
+  std::string s = writer.write(json);
+  std::ofstream f;
+  f.open(filename.c_str(), std::ios_base::trunc);
+  f << s << "\n";
+  f.close();
+};
+
 
 /************************/
 /*** Public Functions ***/
