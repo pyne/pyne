@@ -582,7 +582,7 @@ class Xsdir(object):
             if table.serpent_type == 1:
                 xsdata.write(table.to_serpent() + '\n')
         xsdata.close()
-    def get_lib_ids(self,searchIsotope,preferredLibsStr): #get_table_ids: xsdir method
+    def get_lib_ids(self,searchIsotope,preferredLibsStr):
     
         # get preferred libraries from input string
         preferredLibs=preferredLibsStr.split()

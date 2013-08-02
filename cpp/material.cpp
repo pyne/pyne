@@ -6,7 +6,7 @@
 #include "nucname.h"
 #include "jsoncpp.cpp"
 #include <string>
-
+#include <sstream>
 
 // h5wrap template
 template double h5wrap::get_array_index(hid_t, int, hid_t);
@@ -588,19 +588,8 @@ void pyne::Material::write_text (std::string filename)
   f.open(filename.c_str(), std::ios_base::trunc);
   std::string keystr;
   std::string valstr;
-  //Json::Value Values;
-  //Json::StyledWriter writer;
-  //std::string outstring;// = writer.write(attrs);
-  //Json::Reader Reader;
-  //Reader.parse(outstring, attrs);
-  //std::string outstring = writer.write(attrs);
 
-    //std::string key;
-    //std::string OO =attrs.get(key, 0-10);//.isInt() ? root.get(key, 0-1).asUInt() : 0-1;
-	//std::vector<std::string> 
-  //std::cout << "Printing...: "<<(attrs.getMemberNames()).typedef();
 
-  
   if (0 <= mass)
     f << "Mass    " << mass << "\n";
 

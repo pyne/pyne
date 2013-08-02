@@ -9,7 +9,7 @@ from nose.tools import assert_equal
 import tables
 
 from pyne import mcnp
-from pyne.mcnp import read_mcnp_inp
+from pyne.mcnp import read_mcnp_inp, Xsdir
 from pyne.material import Material
 from pyne.material import MultiMaterial
 
@@ -311,6 +311,17 @@ class TestPtrac(unittest.TestCase):
             # clean up
             if os.path.exists("mcnp_ptrac_hdf5_file.h5"):
                 os.unlink("mcnp_ptrac_hdf5_file.h5")
+
+    def test_get_lib_ids(self):
+        xsFile= Xsdir("sample_xsdir")
+        assert_equal(xsFile.get_lib_ids('922350',"None" ), {'922350': '67y'})
+        assert_equal(xsFile.get_lib_ids('922380',"None" ), {'922380': '22c'})
+        assert_equal(xsFile.get_lib_ids('2003',"None" ), {'2003': '21c'})
+        assert_equal(xsFile.get_lib_ids('922350',"21c 22c 67y" ), {'922350': '21c'})
+        assert_equal(xsFile.get_lib_ids('922380',"21c 22c 67y" ), {'922380': '21c'})
+        assert_equal(xsFile.get_lib_ids('2003',"24y 22c 67y" ), {'2003': '24y'})
+        assert_equal(xsFile.get_lib_ids('922350',"" ), 0)
+        assert_equal(xsFile.get_lib_ids('992233',"None" ), 0)
 
 
 
