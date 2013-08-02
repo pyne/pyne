@@ -534,7 +534,6 @@ void pyne::Material::from_text(std::string filename)
   // Read in
   comp.clear();
   std::string keystr, valstr;
-  unsigned pos2;
 
   while ( !f.eof() )
   {
@@ -542,8 +541,6 @@ void pyne::Material::from_text(std::string filename)
 
     if (0 == keystr.length())
       continue;
-    else
-      int X=1;
 
     if (keystr == "Mass"){
       f >> valstr;
