@@ -24,17 +24,9 @@ Assigning Materials & Densities
 A specific naming convention is required for FluDAG. To define 
 materials, the FLUKA material name must be 
 provided in the group name. The format for the group
-name is as follows,
-:: 
-    prompt> M_[mat_name] 
-
-try this
-:: 
-    "M_[mat_name]"
-
-and also this
-:: 
-    " M_[mat_name]"
+name is as follows:
+::
+    M_[material_name]
 
 For example, suppose we wish to add volumes 1 through 5 to a group
 that defines the material to be iron.  The following command 
