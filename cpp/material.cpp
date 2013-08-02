@@ -7,7 +7,9 @@
 #include "jsoncpp.cpp"
 #include <string>
 #include <sstream>
-
+#include <vector>
+using std::vector;
+using namespace std;
 // h5wrap template
 template double h5wrap::get_array_index(hid_t, int, hid_t);
 
@@ -563,7 +565,7 @@ void pyne::Material::from_text(std::string filename)
 	}
     else{
       getline(f, valstr);
-      valstr= valstr.substr(4, valstr.length()-5);
+      valstr= valstr.substr(0, valstr.length()-1);
       attrs[keystr]= valstr;
       continue;
 	}
@@ -586,10 +588,8 @@ void pyne::Material::write_text (std::string filename)
 {
   std::ofstream f;
   f.open(filename.c_str(), std::ios_base::trunc);
-  std::string keystr;
-  std::string valstr;
-
-
+  Json::Reader reader;
+  vector<string> obj = attrs.getMemberNames();
   if (0 <= mass)
     f << "Mass    " << mass << "\n";
 
@@ -599,14 +599,11 @@ void pyne::Material::write_text (std::string filename)
   if (0 <= atoms_per_mol)
     f << "APerM   " << atoms_per_mol << "\n";
 
+   for (int i = 0; i < attrs.size(); i= i+2)
+    {
+	f << attrs.get(obj.at(i), "") << attrs.get(obj.at(i+1), "");
+	}
 
-    f << "name   " << attrs["name"];
-
-    f << "comments   " << attrs["comments"];
-
-    f << "mat_number   " << attrs["mat_number"];
-
-    f << "source   " << attrs["source"];
 
   std::string nuc_name;
   for(pyne::comp_iter i = comp.begin(); i != comp.end(); i++)
