@@ -6,7 +6,6 @@
 #include "nucname.h"
 #include "jsoncpp.cpp"
 #include <string>
-#include <sstream>
 #include <vector>
 using std::vector;
 using namespace std;
