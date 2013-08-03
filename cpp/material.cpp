@@ -255,8 +255,8 @@ void pyne::Material::write_hdf5(char * filename, char * datapath, char * nucpath
 
 
 
-void pyne::Material::write_hdf5(std::string filename, std::string datapath, std::string nucpath, 
-                                float row, int chunksize)
+void pyne::Material::write_hdf5(std::string filename, std::string datapath, 
+                                std::string nucpath, float row, int chunksize)
 {
   int row_num = (int) row;
 
