@@ -1085,9 +1085,8 @@ def test_matlib_json():
 
 def test_matlib_hdf5_nuc_data():
     matlib = MaterialLibrary()
-    matlib.from_hdf5(nuc_data, "/materials_library/materials")
-    print matlib
-    raise
+    matlib.from_hdf5(nuc_data, datapath="/material_library/materials", 
+                     nucpath="/material_library/nucid")
 
 # Run as script
 #

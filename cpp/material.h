@@ -142,7 +142,7 @@ namespace pyne
     ///            appended to the end of the dataset.
     /// \param chunksize The chunksize for all material data on disk.
     void write_hdf5(std::string filename, std::string datapath="/material", 
-                    std::string nucpath="/nuc_zz", float row=-0.0, int chunksize=100);
+                    std::string nucpath="/nucid", float row=-0.0, int chunksize=100);
 
     /// Reads data from a plaintext file at \a filename into this Material instance.
     void from_text(char * filename);

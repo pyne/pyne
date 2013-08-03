@@ -261,9 +261,9 @@ cdef class _Material:
         self.mat_pointer.from_hdf5(filename, datapath, row, protocol)
 
 
-    def write_hdf5(self, filename, datapath="/material", nucpath="/nuc_zz",
+    def write_hdf5(self, filename, datapath="/material", nucpath="/nucid",
                    row=-0.0, chunksize=100):
-        """write_hdf5(filename, datapath="/material", nucpath="/nuc_zz", row=-0.0, chunksize=100)
+        """write_hdf5(filename, datapath="/material", nucpath="/nucid", row=-0.0, chunksize=100)
         Writes the material to an HDF5 file, using Protocol 1 (see the
         from_hdf5() method).
 
@@ -1790,7 +1790,7 @@ def mats_latex_table(mats, labels=None, align=None, format=".5g"):
 
 cdef class _MaterialLibrary(object):
 
-    def __init__(self, lib=None, datapath="/materials"):
+    def __init__(self, lib=None, datapath="/materials", nucpath="/nucid"):
         cdef dict _lib = {}
         if lib is None:
             self._lib = _lib
@@ -1807,7 +1807,7 @@ cdef class _MaterialLibrary(object):
             if lib.endswith('.json') or lib.endswith('.js'):
                 self.load_json(lib)
             if lib.endswith('.h5') or lib.endswith('.hdf5'):
-                self.load_hdf5(lib, datapath)
+                self.load_hdf5(lib, datapath=datapath, nucpath=nucpath)
         else:
             msg = "Could not initialize library with lib type {0!r}"
             raise TypeError(msg.format(type(lib)))
@@ -1872,24 +1872,34 @@ cdef class _MaterialLibrary(object):
         if opened_here:
             file.close()
 
-    def from_hdf5(self, file, datapath="/materials"):
+    def from_hdf5(self, file, datapath="/materials", nucpath="/nucid"):
         cdef std_string s
         cdef cpp_jsoncpp.Reader reader = cpp_jsoncpp.Reader()
+        cdef cpp_jsoncpp.Value attribs
         cdef int i
         cdef _Material mat
         cdef dict _lib = (<_MaterialLibrary> self)._lib
         cdef np.ndarray mattable
         #cdef np.ndarray[int] nucs
-        grp = os.path.dirname(datapath)
         with tb.openFile(file, 'r') as f:
             matstable = f.getNode(datapath)[:]
-            nucs = f.getNode(grp + '/nuc_zz')[:]
+            nucs = f.getNode(nucpath)[:]
             matsattrs = f.getNode(datapath + '_attrs').read()
         for i in range(len(matstable)):
             row = matstable[i]
-            comp = dict(zip(nucs, row[3]))
-            _lib[str(i)] = Material(comp, mass=row[0], density=row[1], 
+            comp = dict((<int> k, v) for k, v in zip(nucs, row[3]) if v != 0.0)
+            mat = Material(comp, mass=row[0], density=row[1], 
                                     atoms_per_mol=row[2])
+            strattrs = "".join(map(chr, matsattrs[i]))
+            s = std_string(<char *> strattrs)
+            attribs = cpp_jsoncpp.Value()
+            reader.parse(s, attribs)
+            (<_Material> mat).mat_pointer.attrs = attribs
+            if "name" in mat.attrs:
+                name = mat.attrs["name"]
+            else:
+                name = "_" + str(i)
+            _lib[name] = mat
 
 class MaterialLibrary(_MaterialLibrary, collections.MutableMapping):
     """The material library is a collection of unique keys mapped to 
