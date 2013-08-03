@@ -590,6 +590,21 @@ void pyne::Material::write_text (std::string filename)
 };
 
 
+void pyne::Material::load_json(Json::Value json) {
+  Json::Value::Members keys = json["comp"].getMemberNames();
+  Json::Value::Members::const_iterator ikey = keys.begin();
+  Json::Value::Members::const_iterator ikey_end = keys.end();
+  comp.clear();
+  for (; ikey != ikey_end; ++ikey)
+    comp[nucname::id(*ikey)] = json["comp"][*ikey].asDouble();
+  norm_comp(); 
+  mass = json["mass"].asDouble();
+  density = json["density"].asDouble();
+  atoms_per_mol = json["atoms_per_mol"].asDouble();
+  attrs = json["attrs"];
+};
+
+
 Json::Value pyne::Material::dump_json() {
   Json::Value json = Json::Value(Json::objectValue);
   Json::Value jcomp = Json::Value(Json::objectValue);
@@ -622,17 +637,7 @@ void pyne::Material::from_json(std::string filename) {
   Json::Reader reader;
   Json::Value json;
   reader.parse(s, json);
-  comp.clear();
-  Json::Value::Members keys = json["comp"].getMemberNames();
-  Json::Value::Members::const_iterator ikey = keys.begin();
-  Json::Value::Members::const_iterator ikey_end = keys.end();
-  for (; ikey != ikey_end; ++ikey)
-    comp[nucname::id(*ikey)] = json["comp"][*ikey].asDouble();
-  norm_comp(); 
-  mass = json["mass"].asDouble();
-  density = json["density"].asDouble();
-  atoms_per_mol = json["atoms_per_mol"].asDouble();
-  attrs = json["attrs"];
+  load_json(json);
 };
 
 
