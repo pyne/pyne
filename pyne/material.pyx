@@ -1826,20 +1826,29 @@ cdef class _MaterialLibrary(object):
         del self._lib[key]
 
     def from_json(self, file):
-        cdef char * s
+        cdef std_string s
         cdef bint opened_here = False
         cdef cpp_jsoncpp.Value jsonlib 
         cdef cpp_jsoncpp.Reader reader = cpp_jsoncpp.Reader()
+        cdef int i
+        cdef std_string key
         cdef cpp_vector[std_string] keys
+        cdef _Material mat
+        cdef dict _lib = (<_MaterialLibrary> self)._lib
         if isinstance(file, basestring):
             file = open(file, 'r')
             opened_here = True
-        s = file.read()
+        fstr = file.read()
+        s = std_string(<char *> fstr)
         if opened_here:
             file.close()
-        jsonlib = reader.parse(s)
+        reader.parse(s, jsonlib)
         keys = jsonlib.getMemberNames()
-        # now iterate
+        for i in range(len(keys)):
+            mat = Material()
+            key = keys[i]
+            (<_Material> mat).mat_pointer.load_json(jsonlib[key])
+            _lib[key.c_str()] = mat
 
     def write_json(self, file):
         cdef std_string s
