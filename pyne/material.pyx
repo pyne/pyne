@@ -1791,6 +1791,17 @@ def mats_latex_table(mats, labels=None, align=None, format=".5g"):
 cdef class _MaterialLibrary(object):
 
     def __init__(self, lib=None, datapath="/materials", nucpath="/nucid"):
+        """Parameters
+        ----------
+        lib : dict-like, str, or None, optional
+            The data to intialize the material library with.  If this is a 
+            string, it is interpreted as a path to a file.
+        datapath : str, optional
+            The path in the heirarchy to the data table in an HDF5 file.
+        nucpath : str, optional
+            The path in the heirarchy to the nuclide array in an HDF5 file.
+
+        """
         cdef dict _lib = {}
         if lib is None:
             self._lib = _lib
@@ -1831,6 +1842,14 @@ cdef class _MaterialLibrary(object):
         del self._lib[key]
 
     def from_json(self, file):
+        """Loads data from a JSON file into this material library.
+
+        Parameters
+        ----------
+        file : str
+            A path to a JSON file.
+
+        """
         cdef std_string s
         cdef bint opened_here = False
         cdef cpp_jsoncpp.Value jsonlib 
@@ -1856,6 +1875,14 @@ cdef class _MaterialLibrary(object):
             _lib[key.c_str()] = mat
 
     def write_json(self, file):
+        """Writes this material library to a JSON file.
+
+        Parameters
+        ----------
+        file : str
+            A path to a JSON file.
+
+        """
         cdef std_string s
         cdef std_string skey
         cdef bint opened_here = False
@@ -1873,6 +1900,18 @@ cdef class _MaterialLibrary(object):
             file.close()
 
     def from_hdf5(self, file, datapath="/materials", nucpath="/nucid"):
+        """Loads data from an HDF5 file into this material library.
+
+        Parameters
+        ----------
+        file : str
+            A path to an HDF5 file.
+        datapath : str, optional
+            The path in the heirarchy to the data table in an HDF5 file.
+        nucpath : str, optional
+            The path in the heirarchy to the nuclide array in an HDF5 file.
+
+        """
         cdef std_string s
         cdef cpp_jsoncpp.Reader reader = cpp_jsoncpp.Reader()
         cdef cpp_jsoncpp.Value attribs
@@ -1901,6 +1940,18 @@ cdef class _MaterialLibrary(object):
             _lib[name] = mat
 
     def write_hdf5(self, file, datapath="/materials", nucpath="/nucid"):
+        """Writes this material library to an HDF5 file.
+
+        Parameters
+        ----------
+        file : str
+            A path to an HDF5 file.
+        datapath : str, optional
+            The path in the heirarchy to the data table in an HDF5 file.
+        nucpath : str, optional
+            The path in the heirarchy to the nuclide array in an HDF5 file.
+
+        """
         cdef _Material mat
         cdef dict _lib = (<_MaterialLibrary> self)._lib
         cdef set nucids = set()
