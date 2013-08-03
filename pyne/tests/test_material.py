@@ -7,7 +7,8 @@ from nose.tools import assert_equal, assert_not_equal, assert_raises, raises, \
     assert_almost_equal, assert_true, assert_false, assert_in
 
 import os
-from pyne.material import Material, from_atom_frac, from_hdf5, from_text, MapStrMaterial, MultiMaterial
+from pyne.material import Material, from_atom_frac, from_hdf5, from_text, \
+    MapStrMaterial, MultiMaterial, MaterialLibrary
 from pyne import jsoncpp 
 from pyne import data
 import numpy  as np
@@ -26,6 +27,17 @@ nucvec = {10010000:  1.0,
           }
 
 leu = {922380000: 0.96, 922350000: 0.04}
+
+
+def assert_mat_almost_equal(first, second, places=7):
+    assert_almost_equal(first.mass, second.mass, places=places)
+    assert_almost_equal(first.density, second.density, places=places)
+    assert_almost_equal(first.atoms_per_mol, second.atoms_per_mol, places=places)
+    assert_equal(first.attrs, second.attrs)
+    nucs = set(second.comp.keys())
+    assert_equal(set(first.comp.keys()), nucs)
+    for nuc in nucs:
+        assert_almost_equal(first.comp[nuc], second.comp[nuc], places=places)
 
 
 def make_mat_txt():
@@ -1045,6 +1057,28 @@ def test_rw_json():
     rmat = Material()
     rmat.from_json(filename)
     assert_equal(wmat, rmat)
+    os.remove(filename)
+
+
+
+#
+#  Material Library
+#
+
+
+def test_matlib_json():
+    filename = "matlib.json"
+    water = Material()
+    water.from_atom_frac({10000000: 2.0, 80000000: 1.0})
+    water.attrs["name"] = "Aqua sera."
+    lib = {"leu": Material(leu), "nucvec": nucvec, "aqua": water}
+    wmatlib = MaterialLibrary(lib)
+    wmatlib.write_json(filename)
+    rmatlib = MaterialLibrary()
+    rmatlib.from_json(filename)
+    assert_equal(set(wmatlib.keys()), set(rmatlib.keys()))
+    for key in rmatlib.keys():
+        assert_mat_almost_equal(wmatlib[key], rmatlib[key])
     os.remove(filename)
 
 # Run as script
