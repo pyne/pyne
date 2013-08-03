@@ -154,6 +154,8 @@ namespace pyne
     /// Writes the Material out to a simple plaintext file readable by from_text().
     void write_text(std::string filename);
 
+    /// Loads a JSON instance tree into this Material.
+    void load_json(Json::Value);
     /// Dumps the Material out to a JSON instance tree.
     Json::Value dump_json();
     /// Reads data from a JSON file at \a filename into this Material instance.

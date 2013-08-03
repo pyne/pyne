@@ -1022,13 +1022,21 @@ def test_natural_elements():
         assert_almost_equal(water.comp[key], expected_comp[key])
 
 
+def test_load_json():
+    leu = {"U238": 0.96, "U235": 0.04}
+    exp = Material(leu)
+    obs = Material()
+    json = jsoncpp.Value({"mass": 1.0, "comp": leu, "density": -1.0, "attrs": {}, 
+                         "atoms_per_mol": -1.0})
+    obs.load_json(json)
+    assert_equal(exp, obs)
+
 def test_dump_json():
     leu = {"U238": 0.96, "U235": 0.04}
     exp = jsoncpp.Value({"mass": 1.0, "comp": leu, "density": -1.0, "attrs": {}, 
                          "atoms_per_mol": -1.0})
     obs = Material(leu).dump_json()
     assert_equal(exp, obs)
-
 
 def test_rw_json():
     filename = "leu.json"

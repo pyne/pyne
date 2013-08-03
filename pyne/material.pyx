@@ -18,9 +18,11 @@ include "include/cython_version.pxi"
 IF CYTHON_VERSION_MAJOR == 0 and CYTHON_VERSION_MINOR >= 17:
     from libcpp.string cimport string as std_string
     from libcpp.map cimport map as cpp_map
+    from libcpp.vector cimport vector as cpp_vector
 ELSE:
     from pyne._includes.libcpp.string cimport string as std_string
     from pyne._includes.libcpp.map cimport map as cpp_map
+    from pyne._includes.libcpp.vector cimport vector as cpp_vector
 cimport cpp_material
 cimport pyne.stlcontainers as conv
 import pyne.stlcontainers as conv
@@ -370,13 +372,24 @@ cdef class _Material:
         """
         self.mat_pointer.write_text(filename)
 
+    def load_json(self, json):
+        """load_json(json)
+        Loads a JSON instance into this Material.
+
+        Parameters
+        ----------
+        json : jsoncpp.Value
+            An object-type JSON value.
+
+        """
+        self.mat_pointer.load_json(deref((<jsoncpp.Value> json)._inst))
 
     def dump_json(self):
         """dump_json()
         Dumps the material to a JSON object.
 
         Returns
-        ----------
+        -------
         val : jsoncpp.Value
             An object-type JSON value.
 
@@ -1766,3 +1779,90 @@ def mats_latex_table(mats, labels=None, align=None, format=".5g"):
         tab += r" \\ " + "\n\\hline\n"
     tab += "\\end{tabular}\n"
     return tab
+
+
+#
+#  Material Library
+#
+
+cdef class _MaterialLibrary(object):
+
+    def __init__(self, lib=None):
+        cdef dict _lib = {}
+        if lib is None:
+            self._lib = _lib
+        elif isinstance(lib, collections.Mapping):
+            for key, mat in lib.items():
+                _lib[key] = ensure_material(mat)
+            self._lib = _lib
+        elif isinstance(lib, collections.Sequence):
+            for key, mat in lib:
+                _lib[key] = ensure_material(mat)
+            self._lib = _lib
+        elif isinstance(lib, basestring):
+            self._lib = _lib
+            if lib.endswith('.json') or lib.endswith('.js'):
+                self.load_json(lib)
+        else:
+            msg = "Could not initialize library with lib type {0!r}"
+            raise TypeError(msg.format(type(lib)))
+
+    def __contains__(self, key):
+        return key in self._lib
+
+    def __len__(self):
+        return len(self._lib)
+
+    def __iter__(self):
+        return iter(self._lib)
+
+    def __getitem__(self, key):
+        return self._lib[key]
+
+    def __setitem__(self, key, value):
+        self._lib[key] = ensure_material(value)
+
+    def __delitem__(self, key):
+        del self._lib[key]
+
+    def from_json(self, file):
+        cdef char * s
+        cdef bint opened_here = False
+        cdef cpp_jsoncpp.Value jsonlib 
+        cdef cpp_jsoncpp.Reader reader = cpp_jsoncpp.Reader()
+        cdef cpp_vector[std_string] keys
+        if isinstance(file, basestring):
+            file = open(file, 'r')
+            opened_here = True
+        s = file.read()
+        if opened_here:
+            file.close()
+        jsonlib = reader.parse(s)
+        keys = jsonlib.getMemberNames()
+        # now iterate
+
+    def write_json(self, file):
+        cdef std_string s
+        cdef std_string skey
+        cdef bint opened_here = False
+        cdef cpp_jsoncpp.Value jsonlib = cpp_jsoncpp.Value(cpp_jsoncpp.objectValue)
+        cdef cpp_jsoncpp.StyledWriter writer = cpp_jsoncpp.StyledWriter()
+        for key, mat in self._lib.items():
+            skey = std_string(<char *> key)
+            jsonlib[skey] = (<_Material> mat).mat_pointer.dump_json()
+        s = writer.write(jsonlib)
+        if isinstance(file, basestring):
+            file = open(file, 'w')
+            opened_here = True
+        file.write(s)
+        if opened_here:
+            file.close()
+
+class MaterialLibrary(_MaterialLibrary, collections.MutableMapping):
+    """The material library is a collection of unique keys mapped to 
+    Material objects.  This is useful for organization and declaring
+    prefernces between several sources (multiple libraries).
+    """
+    pass
+
+ensure_material = lambda m: m if isinstance(m, Material) else Material(m)
