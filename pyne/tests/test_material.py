@@ -1082,11 +1082,29 @@ def test_matlib_json():
         assert_mat_almost_equal(wmatlib[key], rmatlib[key])
     os.remove(filename)
 
-
 def test_matlib_hdf5_nuc_data():
     matlib = MaterialLibrary()
     matlib.from_hdf5(nuc_data, datapath="/material_library/materials", 
                      nucpath="/material_library/nucid")
+
+def test_matlib_hdf5():
+    filename = "matlib.h5"
+    water = Material()
+    water.from_atom_frac({10000000: 2.0, 80000000: 1.0})
+    water.attrs["name"] = "Aqua sera."
+    lib = {"leu": Material(leu), "nucvec": nucvec, "aqua": water}
+    wmatlib = MaterialLibrary(lib)
+    wmatlib.write_hdf5(filename)
+    rmatlib = MaterialLibrary()
+    rmatlib.from_hdf5(filename)
+    os.remove(filename)
+    # Round trip!
+    rmatlib.write_hdf5(filename)
+    wmatlib = MaterialLibrary(filename)
+    assert_equal(set(wmatlib.keys()), set(rmatlib.keys()))
+    for key in rmatlib.keys():
+        assert_mat_almost_equal(wmatlib[key], rmatlib[key])
+    os.remove(filename)
 
 # Run as script
 #

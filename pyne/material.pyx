@@ -1798,16 +1798,16 @@ cdef class _MaterialLibrary(object):
             for key, mat in lib.items():
                 _lib[key] = ensure_material(mat)
             self._lib = _lib
+        elif isinstance(lib, basestring):
+            self._lib = _lib
+            if lib.endswith('.json') or lib.endswith('.js'):
+                self.from_json(lib)
+            if lib.endswith('.h5') or lib.endswith('.hdf5'):
+                self.from_hdf5(lib, datapath=datapath, nucpath=nucpath)
         elif isinstance(lib, collections.Sequence):
             for key, mat in lib:
                 _lib[key] = ensure_material(mat)
             self._lib = _lib
-        elif isinstance(lib, basestring):
-            self._lib = _lib
-            if lib.endswith('.json') or lib.endswith('.js'):
-                self.load_json(lib)
-            if lib.endswith('.h5') or lib.endswith('.hdf5'):
-                self.load_hdf5(lib, datapath=datapath, nucpath=nucpath)
         else:
             msg = "Could not initialize library with lib type {0!r}"
             raise TypeError(msg.format(type(lib)))
@@ -1880,7 +1880,6 @@ cdef class _MaterialLibrary(object):
         cdef _Material mat
         cdef dict _lib = (<_MaterialLibrary> self)._lib
         cdef np.ndarray mattable
-        #cdef np.ndarray[int] nucs
         with tb.openFile(file, 'r') as f:
             matstable = f.getNode(datapath)[:]
             nucs = f.getNode(nucpath)[:]
@@ -1900,6 +1899,21 @@ cdef class _MaterialLibrary(object):
             else:
                 name = "_" + str(i)
             _lib[name] = mat
+
+    def write_hdf5(self, file, datapath="/materials", nucpath="/nucid"):
+        cdef _Material mat
+        cdef dict _lib = (<_MaterialLibrary> self)._lib
+        cdef set nucids = set()
+        for mat in _lib.values():
+            nucids.update(mat.comp.keys())
+        with tb.openFile(file, 'a') as f:
+            nucgrp, nucdsname = os.path.split(nucpath)
+            f.createArray(nucgrp, nucdsname, np.array(sorted(nucids)), 
+                          createparents=True)
+        for key, mat in _lib.items():
+            if "name" not in mat.attrs:
+                mat.attrs["name"] = key
+            mat.write_hdf5(file, datapath=datapath, nucpath=nucpath)
 
 class MaterialLibrary(_MaterialLibrary, collections.MutableMapping):
     """The material library is a collection of unique keys mapped to 
