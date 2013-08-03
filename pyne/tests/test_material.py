@@ -7,6 +7,7 @@ from nose.tools import assert_equal, assert_not_equal, assert_raises, raises, \
     assert_almost_equal, assert_true, assert_false, assert_in
 
 import os
+from pyne import nuc_data
 from pyne.material import Material, from_atom_frac, from_hdf5, from_text, \
     MapStrMaterial, MultiMaterial, MaterialLibrary
 from pyne import jsoncpp 
@@ -1080,6 +1081,13 @@ def test_matlib_json():
     for key in rmatlib.keys():
         assert_mat_almost_equal(wmatlib[key], rmatlib[key])
     os.remove(filename)
+
+
+def test_matlib_hdf5_nuc_data():
+    matlib = MaterialLibrary()
+    matlib.from_hdf5(nuc_data, "/materials_library/materials")
+    print matlib
+    raise
 
 # Run as script
 #

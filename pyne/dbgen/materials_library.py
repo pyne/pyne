@@ -27,9 +27,9 @@ def make_elements():
     for name, zz in nucname.name_zz.items():
         elemental_mats[name] = {}
     for nuc, abund in natural_abund_map.items():
-        if 0 == nuc%10000 or abund == 0.0:
+        if 0 == nuc%10000000 or abund == 0.0:
             continue
-        zz = nuc/10000
+        zz = nuc/10000000
         if zz not in nucname.zz_name:
             continue
         name = nucname.zz_name[zz]
@@ -102,6 +102,7 @@ def make_materials_compendium(nuc_data):
         mats[i].density = float(densities[i])
         mats[i].attrs = {'name': names[i]}
         mats[i].write_hdf5(nuc_data, datapath="/materials_library/materials", nucpath="/materials_library/nuc_zz", chunksize=70)
+        print mats[i]
     
 def make_materials_library(args):
     """Controller function for adding materials library."""

@@ -38,6 +38,8 @@ import os
 cimport pyne.data as data
 import pyne.data as data
 
+import tables as tb
+
 # Maximum 32-bit signed int
 DEF INT_MAX = 2147483647
 
@@ -235,11 +237,12 @@ cdef class _Material:
 
             file.h5 (file)
                 |-- material (table)
-                    |-- name (string col, len 20)
                     |-- mass (double col)
+                    |-- density (double col)
                     |-- atoms_per_mol (double col)
                     |-- comp (double array col, len of nuc_zz)
                 |-- nuc_zz (int array)
+                |-- material_attr (variable length char array)
 
         The material table has a string attribute called 'nucpath' which holds
         the path to the nuclide array inside this HDF5 file.  The same nucpath
@@ -1787,7 +1790,7 @@ def mats_latex_table(mats, labels=None, align=None, format=".5g"):
 
 cdef class _MaterialLibrary(object):
 
-    def __init__(self, lib=None):
+    def __init__(self, lib=None, datapath="/materials"):
         cdef dict _lib = {}
         if lib is None:
             self._lib = _lib
@@ -1803,6 +1806,8 @@ cdef class _MaterialLibrary(object):
             self._lib = _lib
             if lib.endswith('.json') or lib.endswith('.js'):
                 self.load_json(lib)
+            if lib.endswith('.h5') or lib.endswith('.hdf5'):
+                self.load_hdf5(lib, datapath)
         else:
             msg = "Could not initialize library with lib type {0!r}"
             raise TypeError(msg.format(type(lib)))
@@ -1867,11 +1872,33 @@ cdef class _MaterialLibrary(object):
         if opened_here:
             file.close()
 
+    def from_hdf5(self, file, datapath="/materials"):
+        cdef std_string s
+        cdef cpp_jsoncpp.Reader reader = cpp_jsoncpp.Reader()
+        cdef int i
+        cdef _Material mat
+        cdef dict _lib = (<_MaterialLibrary> self)._lib
+        cdef np.ndarray mattable
+        #cdef np.ndarray[int] nucs
+        grp = os.path.dirname(datapath)
+        with tb.openFile(file, 'r') as f:
+            matstable = f.getNode(datapath)[:]
+            nucs = f.getNode(grp + '/nuc_zz')[:]
+            matsattrs = f.getNode(datapath + '_attrs').read()
+        for i in range(len(matstable)):
+            row = matstable[i]
+            comp = dict(zip(nucs, row[3]))
+            _lib[str(i)] = Material(comp, mass=row[0], density=row[1], 
+                                    atoms_per_mol=row[2])
+
 class MaterialLibrary(_MaterialLibrary, collections.MutableMapping):
     """The material library is a collection of unique keys mapped to 
     Material objects.  This is useful for organization and declaring
     prefernces between several sources (multiple libraries).
     """
-    pass
+    def __repr__(self):
+        libs = ["{0!r}={1!r}".format(k, m) for k, m in self.items()]
+        libs = "{" + ", ".join(libs) + "}"
+        return "pyne.material.MaterialLibrary({0})".format(libs)
 
 ensure_material = lambda m: m if isinstance(m, Material) else Material(m)
