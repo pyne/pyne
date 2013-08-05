@@ -60,7 +60,7 @@ class TallyManager
      * \brief fill the TallyEvent for a collision event
      * Result:  Will update all tallies if no errors occur.
      */
-    void set_collision_event(double x, double y, double z,
+    bool set_collision_event(double x, double y, double z,
                    double particle_energy, double particle_weight,
                    double total_cross_section, int cell_id); 
 
@@ -68,10 +68,13 @@ class TallyManager
      * \brief fill the TallyEvent for a track event
      * Result:  Will update all tallies if no errors occur.
      */
-    void set_track_event(double x, double y, double z,
+    bool set_track_event(double x, double y, double z,
                    double u, double v, double w,                           
                    double particle_energy, double particle_weight,
                    double track_length, int cell_id); 
+
+    // Call action on every tally, calls clear_last_event() at the end
+    void update_tallies();
 
   private:
 
@@ -101,7 +104,7 @@ class TallyManager
      * Requires one of track_length and total_cross_section to be nonzero
      * Result:  If the event has no errors update_tallies() is called.
      */
-    void set_event(TallyEvent::EventType type,
+    bool set_event(TallyEvent::EventType type,
                    double x, double y, double z,
                    double u, double v, double w,                           
                    double particle_energy, double particle_weight,
@@ -109,8 +112,6 @@ class TallyManager
                    double total_cross_section,
                    int cell_id); 
                            
-    // Call action on every tally
-    void update_tallies();
 };
 
 #endif // DAGMC_TALLY_MANAGER_HPP

@@ -77,16 +77,16 @@ void TallyManager::clear_last_event()
     /**
      * \brief fill the TallyEvent for a collision event
      */
-    void TallyManager::set_collision_event(double x, double y, double z,
+    bool TallyManager::set_collision_event(double x, double y, double z,
                    double particle_energy, double particle_weight,
                    double total_cross_section, int cell_id)
     { 
        if (total_cross_section < 0.0)
        {
           std::cerr << "Warning: total_cross_section, " << total_cross_section << ", cannot be less than zero." << std::endl;
-          return;
+          return false;;
        }
-       set_event(TallyEvent::COLLISION, 
+       return set_event(TallyEvent::COLLISION, 
                  x, y, z, 0.0, 0.0, 0.0,
                  particle_energy, particle_weight, 
                  0.0, total_cross_section, 
@@ -96,7 +96,7 @@ void TallyManager::clear_last_event()
     /**
      * \brief fill the TallyEvent for a track event
      */
-    void TallyManager::set_track_event(double x, double y, double z,
+    bool TallyManager::set_track_event(double x, double y, double z,
                    double u, double v, double w,                           
                    double particle_energy, double particle_weight,
                    double track_length, int cell_id)
@@ -104,15 +104,26 @@ void TallyManager::clear_last_event()
        if (track_length < 0.0)
        {
           std::cerr << "Warning: track_length, " << track_length << ", cannot be less than zero." << std::endl;
-          return;
+          return false;
        }
-       set_event(TallyEvent::TRACK, 
+       return set_event(TallyEvent::TRACK, 
                  x, y, z, u, v, w,
                  particle_energy, particle_weight,
                  track_length, 0.0,
                  cell_id);
     } 
 
+////////////////////////////////////////////////////////////////////
+void TallyManager::update_tallies()
+{
+    std::map<int, Tally*>::iterator map_it;
+    for (map_it = observers.begin(); map_it != observers.end(); ++map_it)
+    {
+        Tally *tally = map_it->second;
+        tally->compute_score(event);
+    }
+    clear_last_event();
+}
 //---------------------------------------------------------------------------//
 
 //---------------------------------------------------------------------------//
@@ -137,7 +148,7 @@ Tally *TallyManager::createTally(unsigned int tally_id,
 }
 
 ////////////////////////////////////////////////////////////////////
-void TallyManager::set_event(TallyEvent::EventType type,  
+bool TallyManager::set_event(TallyEvent::EventType type,  
                            double x, double y, double z, 
                            double u, double v, double w,                           
                            double particle_energy, double particle_weight, 
@@ -145,7 +156,7 @@ void TallyManager::set_event(TallyEvent::EventType type,
                            int cell_id) 
 {
     // Test whether an error condition has occurred for this event
-    bool flag = false;
+    bool errflag = false;
 
     /// Set the particle state object
     event.position  = moab::CartVect(x, y, z);
@@ -156,21 +167,23 @@ void TallyManager::set_event(TallyEvent::EventType type,
     if (particle_energy < 0.0)
     {
         std::cerr << "Warning: particle_energy, " << particle_energy << ", cannot be less than zero." << std::endl;
-        flag = true;
+        errflag = true; 
     }
     else
     {
         event.particle_energy = particle_energy;
     }
+
     if (particle_energy < 0.0)
     {
         std::cerr << "Warning: particle_weight, " << particle_weight << ", cannot be less than zero." << std::endl;
-        flag = true;
+        errflag = true; 
     }
     else
     {
         event.particle_weight = particle_weight;
     }
+
     event.track_length        = track_length;
     event.total_cross_section = total_cross_section;
     event.current_cell        = cell_id;
@@ -178,29 +191,21 @@ void TallyManager::set_event(TallyEvent::EventType type,
     if (type != TallyEvent::NONE)
     {
  	event.type = type;
+        errflag = true; 
     }
     else
     {
         std::cerr << "Warning: Cannot set a tally event of type NONE." << std::endl;
-        flag = true;
     }
-    if (flag)
+    if (errflag)
     {
         clear_last_event();
-        return;
     }    
+    bool event_is_set = !errflag;
+    return event_is_set;
+
     // Only update (that is, notify observers) if all is good
-    update_tallies();
+    // update_tallies();
 }
 
-////////////////////////////////////////////////////////////////////
-void TallyManager::update_tallies()
-{
-    std::map<int, Tally*>::iterator map_it;
-    for (map_it = observers.begin(); map_it != observers.end(); ++map_it)
-    {
-        Tally *tally = map_it->second;
-        tally->compute_score(event);
-    }
-}
 // end of MCNP5/dagmc/TallyEvent.cpp
