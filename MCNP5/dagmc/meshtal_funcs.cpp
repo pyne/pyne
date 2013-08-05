@@ -147,7 +147,7 @@ std::string copyComments(char* fort_comment, int* n_comment_lines)
  }
 
 
-void dagmc_fmesh_setup_mesh_( int* /*ipt*/, int* id, int* fmesh_index, 
+void dagmc_fmesh_setup_mesh_( int* /*ipt*/, int* id, 
                               double* energy_mesh, int* n_energy_mesh, int* tot_energy_bin, 
                               char* fort_comment, int* n_comment_lines )
 {

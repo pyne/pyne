@@ -70,24 +70,30 @@ extern int FMESH_FUNC(namchg)( int*, int* );
  * mostly from fmesh_mod.F90.  They should probably not be called from C++ code.
  * Per-function documentation is found in meshtal_funcs.cpp
  */
-void dagmc_fmesh_initialize_( const int* mcnp_icl );
-void dagmc_fmesh_setup_mesh_( int* ipt, int* id, int* fmesh_index, 
+// void dagmc_fmesh_initialize_( const int* mcnp_icl );
+void dagmc_fmesh_setup_mesh_( int* ipt, int* id, 
                             double* energy_mesh, int* n_energy_mesh, int* tot_energy_bin, 
-                            char* comment, int* n_comment_lines, int *is_collision_tally );
+                            char* comment, int* n_comment_lines);
 void dagmc_fmesh_end_history_();
-void dagmc_fmesh_score_(int *fmesh_index, double *x, double *y, double *z,
-                      double *u, double *v, double *w, double *erg,double *wgt,double *d, int* ien );
-void dagmc_fmesh_print_( int* fmesh_index, double* sp_norm, double* fmesh_fact );
+void dagmc_fmesh_score_(double *x, double *y, double *z,
+                        double *u, double *v, double *w, 
+                        double *erg,double *wgt,
+                        double *d, int* icl );
 
+void dagmc_fmesh_print_(double* sp_norm);
+
+/*
 void dagmc_fmesh_get_tally_data_( int* fmesh_index, void* fortran_data_pointer );
 void dagmc_fmesh_get_error_data_( int* fmesh_index, void* fortran_data_pointer );
 void dagmc_fmesh_get_scratch_data_( int* fmesh_index, void* fortran_data_pointer );
 void dagmc_fmesh_clear_data_( int* fmesh_index );
 void dagmc_fmesh_add_scratch_to_tally_( int* fmesh_index );
 void dagmc_fmesh_add_scratch_to_error_( int* fmesh_index );
+*/
 
-void dagmc_kde_tally_( double* x, double* y, double* z, double* wgt,
-                     double* ple, double* erg );
+void dagmc_collision_score_( double* x,   double* y, double* z, 
+                             double* erg, double* wgt,
+                             double* ple, int* icl );
 
 #ifdef __cplusplus
 } /* extern "C" */
