@@ -33,24 +33,6 @@ class TallyManager
     TallyManager();
     
 
-    // >>> PUBLIC INTERFACE
-    // Create and a new Tally
-    // ToDo: turn into doc
-    // ToDo:  Do we need this to be multimap?
-    /// User-specified ID for this tally
-    /// Type of tally to create
-    /// Options  map that stores optional tally input parameters
-    /// Energy bin boundaries defined for all tally points
-    /// If true, add an extra energy bin to tally all energy levels
-    Tally *createTally(unsigned int tally_id,
-                   std::string  tally_type,
-                   std::multimap<std::string, std::string>& options, 
-                   const std::vector<double>& energy_bin_bounds);
-
-    // Add a Tally to the observer list
-    void addTally(int tally_id, Tally *obs);
-
-
     // Create a Tally and add it to the observer list    
     void addNewTally(unsigned int tally_id,
                    std::string tally_type,
@@ -60,8 +42,6 @@ class TallyManager
     // Remove a Tally
     void removeTally(int tally_id);
 
-    // Call action on every tally
-    void update_tallies();
 
     // Call end_history() on every tally
     void end_history();
@@ -78,6 +58,7 @@ class TallyManager
 
     /**
      * \brief fill the TallyEvent for a collision event
+     * Result:  Will update all tallies if no errors occur.
      */
     void set_collision_event(double x, double y, double z,
                    double particle_energy, double particle_weight,
@@ -85,6 +66,7 @@ class TallyManager
 
     /**
      * \brief fill the TallyEvent for a track event
+     * Result:  Will update all tallies if no errors occur.
      */
     void set_track_event(double x, double y, double z,
                    double u, double v, double w,                           
@@ -92,6 +74,20 @@ class TallyManager
                    double track_length, int cell_id); 
 
   private:
+
+    // >>> PUBLIC INTERFACE
+    // Create and a new Tally
+    // ToDo: turn into doc
+    /// User-specified ID for this tally
+    /// Type of tally to create
+    /// Options  map that stores optional tally input parameters
+    /// Energy bin boundaries defined for all tally points
+    /// If true, add an extra energy bin to tally all energy levels
+    Tally *createTally(unsigned int tally_id,
+                   std::string  tally_type,
+                   std::multimap<std::string, 
+                   std::string>& options, 
+                   const std::vector<double>& energy_bin_bounds);
 
     // Keep a record of the Observers
     std::map <int, Tally*> observers; 
@@ -103,14 +99,18 @@ class TallyManager
      * \brief fill the TallyEvent
      * \param position interpreted differently for TrackLength and Collision 
      * Requires one of track_length and total_cross_section to be nonzero
+     * Result:  If the event has no errors update_tallies() is called.
      */
-    void set_event(double x, double y, double z,
+    void set_event(TallyEvent::EventType type,
+                   double x, double y, double z,
                    double u, double v, double w,                           
                    double particle_energy, double particle_weight,
-                   double track_length = 0.0, 
-                   double total_cross_section = 0.0,
-                   int cell_id = 0); 
+                   double track_length, 
+                   double total_cross_section,
+                   int cell_id); 
                            
+    // Call action on every tally
+    void update_tallies();
 };
 
 #endif // DAGMC_TALLY_MANAGER_HPP

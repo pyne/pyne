@@ -109,6 +109,9 @@ namespace moab {
  * Convenience function
  * ToDo:  Consider whether the TallyOptions need to be a multimap:  Are there
  *        times when the user needs to enter the same key with different values?
+ * ToDo:  Do we need this to be multimap?  It allows tags to have multiple tags (vector).  
+ *        In TrackLengthMeshTally you can have one tag name with many tag values, but it
+ *        isn't tested, i.e. there is not a test with multiple tag values.
  * ToDo:  Find the sjackson doc on MeshTally keys (PHHW)
  */
 void TrackLengthMeshTally::parse_tally_options()
