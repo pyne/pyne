@@ -22,6 +22,7 @@ ADD_LIBRARY(tally
 	${DAGMC_MESHTALLY_SOURCE}/MeshTally.cpp
 	${DAGMC_MESHTALLY_SOURCE}/KDEMeshTally.cpp
 	${DAGMC_MESHTALLY_SOURCE}/TrackLengthMeshTally.cpp
+	${DAGMC_MESHTALLY_SOURCE}/meshtal_funcs.cpp
 )
 
 # Locally defined vars

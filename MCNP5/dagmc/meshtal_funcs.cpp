@@ -4,15 +4,9 @@
 #include <sstream>
 #include <cstdlib>
 #include <fstream>
+#include <map>
 
-#include "moab/Core.hpp"
-#include "MeshTally.hpp"
-#include "TallyEvent.hpp"
-#include "TrackLengthMeshTally.hpp"
-
-using moab::TrackLengthMeshTally;
-
-#include "KDEMeshTally.hpp"
+#include "TallyManager.hpp"
 
 /********************************************************************
  * File statics defining global meshtal data
@@ -25,26 +19,11 @@ static int history_count = 0;
 /// number of calls to dagmc_fmesh_score - used for debugging only
 static int score_count = 0;
 
-/// The following three lists are indexed by the fmesh_index values
-/// used to index fmesh tallies in the fortran code.  Entries in 
-/// these lists may be NULL.
-
-/// List of all track length tallies that have been created.
-/// These tallies respond to fmesh mesh_score calls
-static std::vector<MeshTally*> track_tallies;
-
-/// List of all KDE collision tallies that have been created.
-/// These tallies respond to dagmc_kde_tally calls
-static std::vector< KDEMeshTally* > kde_coll_tallies;
-
-/// List of all dagmc-typed fmesh tallies: the entries are duplicates
-/// of the above lists with the same indexing.
-/// All our tallies are stored here, and respond to fmesh_print commands.
-static std::vector< MeshTally* > all_tallies;
 
 /// pointer to MCNP5's current cell ID variable (icl) 
-static const int* current_mcnp_cell;
+// static const int* current_mcnp_cell;
 
+// For tally multipliers
 void mcnp_weight_calculation( int* index, double* erg, double* wgt, 
                               double* dist, double* score_result )
 {
@@ -81,13 +60,15 @@ bool map_conformal_names( std::set<int>& input, std::set<int>& output ){
  * Initialization and setup functions
  ********************************************************************/ 
 
+TallyManager tallyManager = TallyManager();
 
-static bool initialized = false;
+// static bool initialized = false;
 
 /** 
  * Called at least once from fmesh_mod on program initialization;
  * in runtpe or MPI modes may be called multiple times.  
  */
+/*
 void dagmc_fmesh_initialize_( const int* mcnp_icl ){
 
   if( initialized ) return;
@@ -98,17 +79,18 @@ void dagmc_fmesh_initialize_( const int* mcnp_icl ){
 
   initialized = true;
 }
+*/
 
 /**
- * Convert the contents of an FC card to an fmesh_params_t (i.e. a multimap<string,string>)
+ * Convert the contents of an FC card to an fmesh_params multimap<string,string>
  * @param fc_content The FC card's comment content as a string
- * @param results The output data, as a multimap
+ * @param fmesh_params The output data and comments, as a multimap
  * @param fcid The tally ID of the FC card
  * @return true on success, or false if the input has serious enough formatting problems
  *         to make parameter parsing impossible.
  */
-static bool parse_fc_card( std::string& fc_content, MeshTallyInput::TallyOptions& results, int fcid ){
-
+static void parse_fc_card( std::string& fc_content, multimap<std::string, std::string> fmesh_params, int fcid )
+{
   // convert '=' chars to spaces 
   size_t found;
    
@@ -132,9 +114,10 @@ static bool parse_fc_card( std::string& fc_content, MeshTallyInput::TallyOptions
     }
   }
 
-  if( !found_dagmc ){
+  if( !found_dagmc )
+  {
     std::cerr << "Error: FC" << fcid << " card is incorrectly formatted" << std::endl;
-    return false;
+    exit(EXIT_FAILURE);
   }
 
   std::string last_key;
@@ -147,47 +130,26 @@ static bool parse_fc_card( std::string& fc_content, MeshTallyInput::TallyOptions
 
     if( last_key == "" ){ last_key = token; }
     else{ 
-      results.insert(std::make_pair(last_key,token));
+      fmesh_params.insert(std::make_pair(last_key,token));
       last_key = "";
     }
-
   }
 
   if( last_key != "" ){
     std::cerr << "Warning: FC" << fcid << " card has unused key '" << last_key << "'" << std::endl;
   }
-
-  return true;
-
 }
 
-
-
-void dagmc_fmesh_setup_mesh_( int* /*ipt*/, int* id, int* fmesh_index, 
-                              double* energy_mesh, int* n_energy_mesh, int* tot_energy_bin, 
-                              char* fort_comment, int* n_comment_lines, int* is_collision_tally  )
+// Convenience methods
+// Copy comment string out of fortran's data structure, and get it into comment_str
+std::string copyComments(char* fort_comment, int* n_comment_lines)
 {
-
-  std::cerr << "Mesh tally " << *id << " has these " << *n_energy_mesh << " energy bins: " << std::endl;
-  for( int i = 0; i < *n_energy_mesh; ++i ){
-    std::cerr << "     " << energy_mesh[i] << std::endl;
-  }
-  std::cerr << "tot bin: " << (*tot_energy_bin ? "yes" : "no") << std::endl;
-  
-  if( *n_comment_lines <= 0 ){
-    std::cerr << "FMESH" << *id << " has geom=dag without matching FC card" << std::endl;
-    exit(EXIT_FAILURE);
-  }
-
-  std::string comment_str; 
-
-  
-  {
-    // Copy comment string out of fortran's data structure, and get it into comment_str
-    // Need to turn it into a c-style string first
+    std::string comment_str; 
 
     const unsigned int fort_line_len = 75;
     unsigned int comment_len = fort_line_len * *n_comment_lines;
+
+    // Need to turn it into a c-style string first
     char* c_comment = new char[(comment_len+1)];
     
     memcpy(c_comment,fort_comment,comment_len);
@@ -195,8 +157,27 @@ void dagmc_fmesh_setup_mesh_( int* /*ipt*/, int* id, int* fmesh_index,
     
     comment_str = c_comment;
     delete[] c_comment;
+    return comment_str
+ }
 
+
+void dagmc_fmesh_setup_mesh_( int* /*ipt*/, int* id, int* fmesh_index, 
+                              double* energy_mesh, int* n_energy_mesh, int* tot_energy_bin, 
+                              char* fort_comment, int* n_comment_lines, is_collision_tally  )
+{
+
+  std::cout << "Mesh tally " << *id << " has these " << *n_energy_mesh << " energy bins: " << std::endl;
+  for( int i = 0; i < *n_energy_mesh; ++i ){
+    std::cout << "     " << energy_mesh[i] << std::endl;
   }
+  std::cout << "tot bin: " << (*tot_energy_bin ? "yes" : "no") << std::endl;
+  
+  if( *n_comment_lines <= 0 ){
+    std::cerr << "FMESH" << *id << " has geom=dag without matching FC card" << std::endl;
+    exit(EXIT_FAILURE);
+  }
+  
+  std::string comment_str = copyComments(fort_comment, n_comment_lines);; 
 
   // Copy emesh bin boundaries from MCNP (includes 0 MeV)
   std::vector<double> emesh_boundaries;
@@ -206,49 +187,17 @@ void dagmc_fmesh_setup_mesh_( int* /*ipt*/, int* id, int* fmesh_index,
   }
 
   // Parse FC card and create input data for MeshTally
-  MeshTallyInput fmesh_settings;
-  fmesh_settings.tally_id = *id;
-  fmesh_settings.energy_bin_bounds = emesh_boundaries;
-  fmesh_settings.total_energy_bin = (*tot_energy_bin == 1);
-
-  MeshTallyInput::TallyOptions& fc_settings = fmesh_settings.options;
-
-  bool success = parse_fc_card( comment_str, fc_settings, *id );
-  if( !success ){
-    exit(EXIT_FAILURE);
-  }
-
-  // Set the filename for the input mesh to be tallied
-  MeshTallyInput::TallyOptions::iterator it = fc_settings.find("inp");
-
-  if (it != fc_settings.end())
-  {
-      fmesh_settings.input_filename = it->second;
-      fc_settings.erase(it);
-  }
-  else // use default input file name
-  {
-      std::stringstream str;
-      str << "fmesh" << *id << ".h5m";
-      str >> fmesh_settings.input_filename;
-  }
-
-  // pad all tally lists with nulls up to a max of (*fmesh_index)
-  while( all_tallies.size() <= (unsigned)(*fmesh_index) ){
-    track_tallies.push_back(NULL);
-    kde_coll_tallies.push_back(NULL);
-    all_tallies.push_back(NULL);
-    
-  }
+  multimap<std::string, std::string> fc_settings;
+  parse_fc_card( comment_str, fc_settings, *id );
 
   // determine the user-specified tally type
-  std::string type = "tracklen";
-  *is_collision_tally = 0;
+  std::string type;
 
-  if( fc_settings.find("type") != fc_settings.end() ){
-
+  if( fc_settings.find("type") != fc_settings.end() )
+  {
     type = (*fc_settings.find("type")).second;
-    if( fc_settings.count("type") > 1 ){
+    if( fc_settings.count("type") > 1 )
+    {
       std::cerr << "Warning: FC" << *id << " has multiple 'type' keywords, using " << type << std::endl;
     }
     
@@ -256,40 +205,7 @@ void dagmc_fmesh_setup_mesh_( int* /*ipt*/, int* id, int* fmesh_index,
     fc_settings.erase("type"); 
   }
   
-  MeshTally *new_tally;
-
-  if( type == "tracklen" ){
-
-    TrackLengthMeshTally* t = TrackLengthMeshTally::setup( fmesh_settings, current_mcnp_cell );
-    new_tally = track_tallies[*fmesh_index] = t;
-
-  }
-  else if( type == "kde_track" || type == "kde_subtrack" ){
-
-    KDEMeshTally::Estimator estimator = KDEMeshTally::INTEGRAL_TRACK;
-
-    if ( type == "kde_subtrack" )
-      estimator = KDEMeshTally::SUB_TRACK;
-
-    KDEMeshTally* kde = new KDEMeshTally( fmesh_settings, estimator );
-    new_tally = track_tallies[*fmesh_index] = kde;
-
-  }
-  else if( type == "kde_coll" ){
-  
-    *is_collision_tally = 1; 
-
-    KDEMeshTally* kde = new KDEMeshTally( fmesh_settings );
-    new_tally = kde_coll_tallies[*fmesh_index] = kde;
-
-  }
-  else{
-    std::cerr << "FC" << *id << " error: cannot make mesh tally of type " << type << std::endl;
-    exit( EXIT_FAILURE );
-  }
-
-  all_tallies[*fmesh_index] = new_tally;
-  
+  tallyManager.addNewTally(*id, type, fc_settings, emesh_boundaries);
 }
 
 /********************************************************************
