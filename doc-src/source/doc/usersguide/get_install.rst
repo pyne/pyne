@@ -334,7 +334,7 @@ In order to test FluDAG, an environment variable, named 'FLUDAG', with the path 
 Add this statement to your login script:
 ::
 
-    export FLUDAG=${HOME}/DAGMC/FluDAG
+    export FLUDAG=${HOME}/DAGMC/FluDAG/bld/
 
 The FluDAG tests are in a separate repository, which can be cloned from the UW-Madison website:
 ::
