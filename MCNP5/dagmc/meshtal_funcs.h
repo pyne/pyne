@@ -73,7 +73,7 @@ extern int FMESH_FUNC(namchg)( int*, int* );
 // void dagmc_fmesh_initialize_( const int* mcnp_icl );
 void dagmc_fmesh_setup_mesh_( int* ipt, int* id, 
                             double* energy_mesh, int* n_energy_mesh, int* tot_energy_bin, 
-                            char* comment, int* n_comment_lines);
+                            char* comment, int* n_comment_lines, int* is_collision_tally);
 void dagmc_fmesh_end_history_();
 void dagmc_fmesh_score_(double *x, double *y, double *z,
                         double *u, double *v, double *w, 

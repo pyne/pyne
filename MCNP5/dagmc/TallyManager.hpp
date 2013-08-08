@@ -111,7 +111,6 @@ class TallyManager
                    double track_length, 
                    double total_cross_section,
                    int cell_id); 
-                           
 };
 
 #endif // DAGMC_TALLY_MANAGER_HPP

@@ -30,9 +30,7 @@
 #include <cassert>
 
 // the header file has at least one assert, so keep this include below the macro checks
-#include "TallyEvent.hpp"
 #include "TrackLengthMeshTally.hpp"
-#include "meshtal_funcs.h"
 
 
 // tolerance for ray-triangle intersection tests

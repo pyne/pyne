@@ -35,12 +35,12 @@ class TallyEvent
 
     /**
      * \brief Defines type of tally event
-     * 
-     * 1) NONE indicates no event has been set yet
-     * 2) COLLISION indicates a collision event has been set
-     * 3) TRACK indicates a track-based event has been set
+     *
+     *     0) NONE indicates no event has been set yet
+     *     1) COLLISION indicates a collision event has been set
+     *     2) TRACK indicates a track-based event has been set
      */
-    enum EventType {NONE = 1, COLLISION = 2, TRACK = 3};
+    enum EventType {NONE = 0, COLLISION = 1, TRACK = 2};
 
     EventType type;
 

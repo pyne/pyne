@@ -174,7 +174,7 @@ bool TallyManager::set_event(TallyEvent::EventType type,
         event.particle_energy = particle_energy;
     }
 
-    if (particle_energy < 0.0)
+    if (particle_weight < 0.0)
     {
         std::cerr << "Warning: particle_weight, " << particle_weight << ", cannot be less than zero." << std::endl;
         errflag = true; 
@@ -191,10 +191,10 @@ bool TallyManager::set_event(TallyEvent::EventType type,
     if (type != TallyEvent::NONE)
     {
  	event.type = type;
-        errflag = true; 
     }
     else
     {
+        errflag = true; 
         std::cerr << "Warning: Cannot set a tally event of type NONE." << std::endl;
     }
     if (errflag)
@@ -203,9 +203,5 @@ bool TallyManager::set_event(TallyEvent::EventType type,
     }    
     bool event_is_set = !errflag;
     return event_is_set;
-
-    // Only update (that is, notify observers) if all is good
-    // update_tallies();
 }
-
-// end of MCNP5/dagmc/TallyEvent.cpp
+// end of MCNP5/dagmc/TallyManager.cpp

@@ -75,7 +75,7 @@ void dagmc_fmesh_initialize_( const int* mcnp_icl ){
  * @return true on success, or false if the input has serious enough formatting problems
  *         to make parameter parsing impossible.
  */
-static void parse_fc_card( std::string& fc_content, std::multimap<std::string, std::string> fmesh_params, int fcid )
+static void parse_fc_card( std::string& fc_content, std::multimap<std::string, std::string>& fmesh_params, int fcid )
 {
   // convert '=' chars to spaces 
   size_t found;
@@ -149,7 +149,7 @@ std::string copyComments(char* fort_comment, int* n_comment_lines)
 
 void dagmc_fmesh_setup_mesh_( int* /*ipt*/, int* id, 
                               double* energy_mesh, int* n_energy_mesh, int* tot_energy_bin, 
-                              char* fort_comment, int* n_comment_lines )
+                              char* fort_comment, int* n_comment_lines, int* is_collision_tally )
 {
 
   std::cout << "Mesh tally " << *id << " has these " << *n_energy_mesh << " energy bins: " << std::endl;
@@ -191,9 +191,20 @@ void dagmc_fmesh_setup_mesh_( int* /*ipt*/, int* id,
     // remove the type keywords
     fc_settings.erase("type"); 
   }
-  
+     
+  // Set whether the tally type is a collision tally 
+  if (type.find("coll") != std::string::npos)
+  {
+       *is_collision_tally = true;
+  }
+  else
+  {
+       *is_collision_tally = false;
+  } 
+
   tallyManager.addNewTally(*id, type, fc_settings, emesh_boundaries);
 }
+
 
 /********************************************************************
  * Runtape and MPI calls
