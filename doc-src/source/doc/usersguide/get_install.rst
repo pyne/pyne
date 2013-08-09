@@ -351,7 +351,7 @@ To run all the tests type:
     prompt%> ./run_test test_input
 
 Some of the tests are slow, so the above command will take some time.  
-If you want to run just the fast tests, or just the magnetic tests
+If you want to run just the fast tests, or just the magnetic tests:
 :: 
 
     prompt%> ./run_test test_fast
@@ -362,5 +362,11 @@ The slow tests can be run separately:
 
     prompt%> ./run_test test_slow
 
-At this time, not all tests will pass.
+Some of the tests check the installation and can be run separately:
+::
+
+    prompt%> ./run_test test_install
+
+
+At this time, some tests may not pass.
 

@@ -4,9 +4,9 @@ Monte Carlo Code-Specific Steps for FluDAG
 There are several varieties of code-specific steps:
 
 1. defining attributes of the geometry using groups in CUBIT
-4. producing material assignments in FLUKA input format from the h5m file, with the help of FluDAG
-5. preparing the FLUKA input file for running with DAGMC
-6. inserting the material assignments into the FLUKA input deck
+2. producing material assignments in FLUKA input format from the h5m file, with the help of FluDAG
+3. preparing the FLUKA input file for running with DAGMC
+4. inserting the material assignments into the FLUKA input deck
 
 
 Geometry Metadata
@@ -19,7 +19,10 @@ define boundary conditions and tally locations.
 Assigning Materials & Densities
 ..................................
 
-A specific naming convention is required for FluDAG. To define 
+The generic workflow description includes details on
+:ref:`grouping-basics`, but a specific naming convention is required
+for FluDAG. 
+To define 
 materials, the FLUKA material name must be 
 provided in the group name. The format for the group
 name is as follows:
