@@ -4,8 +4,6 @@ Monte Carlo Code-Specific Steps for FluDAG
 There are several varieties of code-specific steps:
 
 1. defining attributes of the geometry using groups in CUBIT
-2. exporting CUBIT files to the appropriate ACIS version
-3. converting the ACIS file to H5M, possibly setting a faceting tolerance
 4. producing material assignments in FLUKA input format from the h5m file, with the help of FluDAG
 5. preparing the FLUKA input file for running with DAGMC
 6. inserting the material assignments into the FLUKA input deck

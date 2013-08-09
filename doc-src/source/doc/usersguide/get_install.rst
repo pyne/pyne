@@ -1,4 +1,4 @@
-The DAGMC Toolkit
+Getting and Installing the DAGMC Toolkit
 ----------------------------------------
 
 DAGMC is a toolkit that provides direct geometry support to any Monte
