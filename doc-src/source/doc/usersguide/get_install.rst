@@ -1,4 +1,4 @@
-The DAGMC Toolkit
+Getting and Installing the DAGMC Toolkit
 ----------------------------------------
 
 DAGMC is a toolkit that provides direct geometry support to any Monte
@@ -191,10 +191,10 @@ This script is under development.  It is recommended that the components be comp
 at this time.
 
 Applying DAGMC to Specific Monte Carlo Codes
---------------------------------------------
++++++++++++++++++++++++++++++++++++++++++++++
 
 DAG-MCNP5 Build/Install
-+++++++++++++++++++++++++
+~~~~~~~~~~~~~~~~~~~~~~~~
 
 If you would like to use DAGMC with MCNP5, known as DAG-MCNP5, you will also need:
 
@@ -202,7 +202,7 @@ If you would like to use DAGMC with MCNP5, known as DAG-MCNP5, you will also nee
 * a local copy of UW-Madison's `DAGMC git repo <https://github.com/svalinn/DAGMC>`_ 
 
 Automatic Installation
-~~~~~~~~~~~~~~~~~~~~~~~~~
+=======================
 
 A package has been prepared that includes many of the requires
 software libraries and an automated build script.  Because the DAGMC
@@ -215,7 +215,7 @@ Once you have both of those things, you should be able to use the
 DagmcBuildPackage to create a working install of DAG-MCNP5.1.51.
 
 Manual Installation
-~~~~~~~~~~~~~~~~~~~~~~~~~
+=====================
 
 The following steps are required to install DAG-MCNP5.  Most of these steps are described in more detail below.
 
@@ -233,7 +233,8 @@ Some assumptions/conventions:
 * A cloned DAGMC git repo can be found at ``/path/to/DAGMC``
 
 Apply Patch
-_________________________________
+############
+
 *Apply DAGMC Patch to MCNP5 v1.60*
 
 Perform the following steps:
@@ -243,7 +244,8 @@ Perform the following steps:
 
 
 Build DAG-MCNP5
-____________________________________
+################
+
 *Build DAG-MCNP5 from modified code*
 
 One of the easiest ways to build DAG-MCNP5 is directly using the
@@ -274,14 +276,15 @@ Within the ``install`` program you will need to set the DAGMC build options:
 Your executable should be available as ``$HOME/dagmc_bld/MCNP5/Source/src/mcnp5``.
 
 DAG-Tripoli4 Access
-+++++++++++++++++++++++
+~~~~~~~~~~~~~~~~~~~
 
 Tripoli4 is distributed by CEA/Saclay as a binary executable.  For
 access to DAG-Tripoli4, please contact `Jean-Christophe Trama
 <mailto:jean-christophe.trama@cea.fr>`_.
 
 FluDAG Build
-+++++++++++++++++++++++
+~~~~~~~~~~~~
+
 FluDAG uses `FLUKA <http://www.fluka.org>`_ from CERN/INFN with the DAGMC Toolkit.
 The steps to build and install FluDAG follow.
 
