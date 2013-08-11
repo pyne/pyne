@@ -42,7 +42,7 @@ available for manipulating workflows like this.
 .. toctree::
    :maxdepth: 1
 
-   doc/usersguide/index
+   usersguide/index
    CNERG Support for DAGMC
    DagmcDevelopersGuide
    DagmcPublications
