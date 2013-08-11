@@ -58,8 +58,9 @@ gh-preview html:
 
 gh-publish:
 	git checkout $(GH_PUBLISH_BRANCH)
-	git checkout $(GH_SOURCE_BRANCH) -- $(GH_SOURCE_DIR)
-	git reset HEAD 
+	git rm -rf .
+	git checkout $(GH_SOURCE_BRANCH) -- $(GH_SOURCE_DIR) Makefile gh-project.mk README.rst
+	touch .nojekyll
 	make html
 	rsync -a $(BUILDDIR)/* .
 	rm -rf $(GH_SOURCE_DIR) $(BUILDDIR)
