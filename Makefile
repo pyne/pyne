@@ -56,18 +56,6 @@ gh-preview html:
 	@echo
 	@echo "Build finished. The HTML pages are in $(BUILDDIR)."
 
-gh-publish:
-	git checkout $(GH_PUBLISH_BRANCH)
-	git rm -rf .
-	git checkout $(GH_SOURCE_BRANCH) -- $(GH_SOURCE_DIR) Makefile gh-project.mk README.rst
-	touch .nojekyll
-	make html
-	rsync -a $(BUILDDIR)/* .
-	rm -rf $(GH_SOURCE_DIR) $(BUILDDIR)
-	git add -A 
-	git commit -m "Generated $(GH_PUBLISH_BRANCH) for `git log $(GH_SOURCE_BRANCH) -1 --pretty=short --abbrev-commit`" && git push $(GH_UPSTREAM_REPO) $(GH_PUBLISH_BRANCH)
-	git checkout $(GH_SOURCE_BRANCH)
-
 htmlclean cleanhtml: clean html
 
 dirhtml:
