@@ -76,14 +76,14 @@ void MeshTally::zero_tally_data()
 // PROTECTED METHODS
 //---------------------------------------------------------------------------//
 void MeshTally::add_score_to_tally(moab::EntityHandle tally_point,
-                                      double score,
-                                      int ebin)
+                                   double score,
+                                   int ebin)
 {
     // update tally for this history with new score
     get_data(temp_tally_data, tally_point, ebin) += score;
 
     // also update total energy bin tally for this history if one exists
-    if (total_energy_bin)
+    if (input_data.total_energy_bin)
     {
         get_data(temp_tally_data, tally_point, (num_energy_bins-1)) += score;
     }
@@ -219,7 +219,6 @@ moab::ErrorCode MeshTally::setup_tags(moab::Interface* mbi, const char* prefix)
     return moab::MB_SUCCESS;
 }
 //---------------------------------------------------------------------------//
-// Modified from KDEMeshTally
 void MeshTally::end_history()
 {
     std::set<moab::EntityHandle>::iterator i;

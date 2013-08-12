@@ -143,8 +143,8 @@ class KDEMeshTally : public MeshTally
      * \brief Computes mesh tally scores for the given tally event
      * \param event the parameters needed to compute the mesh tally scores
      */
-    virtual void compute_score(const TallyEvent& event );
- 
+    virtual void compute_score(const TallyEvent& event, int ebin);
+
     /**
      * \brief Write tally and error results to the mesh tally's output file
      * \param num_histories the number of source particles tracked

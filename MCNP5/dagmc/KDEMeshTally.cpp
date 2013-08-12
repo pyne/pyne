@@ -176,7 +176,7 @@ void KDEMeshTally::compute_score(const TallyEvent& event)
     }
 }
 //---------------------------------------------------------------------------//
-void KDEMeshTally::write_data(double num_histories)
+void KDEMeshTally::print(double num_particles, double multiplier)
 {
     // display the optimal bandwidth if it was computed
     if (estimator == COLLISION)
