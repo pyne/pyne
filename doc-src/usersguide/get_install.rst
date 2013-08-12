@@ -20,6 +20,7 @@ Toolkit Dependencies and Workflows
 It is useful to consider how users will use the DAGMC workflow prior
 to making some installation decisions.  There are three main stages
 for the workflow:
+
 * manual preparation of geometric models
 * automated pre-processing of models
 * use of the models in analysis
