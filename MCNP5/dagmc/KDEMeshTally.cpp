@@ -556,14 +556,17 @@ double KDEMeshTally::subtrack_score(const CalculationPoint& X,
     std::vector<moab::CartVect>::const_iterator i;
     double score = 0.0;
 
-    for (i = points.begin(); i != points.end(); ++i)
+    if (!points.empty())
     {
-        // add kernel contribution for sub-track point to sum
-        score += evaluate_kernel(X, *i);
-    }
+        for (i = points.begin(); i != points.end(); ++i)
+        {
+            // add kernel contribution for sub-track point to sum
+            score += evaluate_kernel(X, *i);
+        }
 
-    // normalize by the total number of sub-track points
-    score /= points.size();
+        // normalie by the total number of sub-track points
+        score /= points.size();
+    }
 
     return score;
 }

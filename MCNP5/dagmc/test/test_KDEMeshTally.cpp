@@ -10,35 +10,32 @@
 //---------------------------------------------------------------------------//
 // TEST FIXTURES
 //---------------------------------------------------------------------------//
-class KDEIntegralTrackTest : public ::testing::Test
+// Base test fixture that defines common input parameters
+class KDEMeshTallyTest : public ::testing::Test
 {
   protected:
     // initialize variables for each test
     virtual void SetUp()
     {
-        // define tally options
+        // define general tally options
         std::multimap<std::string, std::string> options;
         options.insert(std::make_pair("hx", "0.1"));
         options.insert(std::make_pair("hy", "0.1"));
-        options.insert(std::make_pair("hz", "0.1"));  
+        options.insert(std::make_pair("hz", "0.1"));
 
-        // define input data
-        MeshTallyInput input;
+        // add general input data
         input.tally_id = 1;
         input.input_filename = "../structured_mesh.h5m";
         input.energy_bin_bounds.push_back(0.0);
         input.energy_bin_bounds.push_back(10.0);
         input.total_energy_bin = false;
         input.options = options;
-        
-        kde_tally = new KDEMeshTally(input, KDEMeshTally::INTEGRAL_TRACK);
     }
 
-    // deallocate memory resources
-    virtual void TearDown()
-    {
-        delete kde_tally;
-    }
+  protected:
+    // data needed for each test
+    MeshTallyInput input;
+    KDEMeshTally* kde_tally;
 
     // wrapper for the KDEMeshTally::integral_track_score method
     double test_integral_track_score(const moab::CartVect& coords,
@@ -51,15 +48,68 @@ class KDEIntegralTrackTest : public ::testing::Test
         return kde_tally->integral_track_score(X, event);
     }
 
+    // wrapper for the KDEMeshTally::subtrack_score method
+    double test_subtrack_score(const moab::CartVect& coords,
+                               const std::vector<moab::CartVect>& points)
+    {
+        KDEMeshTally::CalculationPoint X;
+        X.coords[0] = coords[0];
+        X.coords[1] = coords[1];
+        X.coords[2] = coords[2];
+        return kde_tally->subtrack_score(X, points);
+    }
+
     // accessor method to change the bandwidth value
     void change_bandwidth(const moab::CartVect& new_bandwidth)
     {
         kde_tally->bandwidth = new_bandwidth;
     }
+};
+//---------------------------------------------------------------------------//
+// Tests the private integral_track_score method in KDEMeshTally
+class KDEIntegralTrackTest : public KDEMeshTallyTest
+{
+  protected:
+    // initialize variables for each test
+    virtual void SetUp()
+    {
+        // set up default input parameters for kde mesh tally
+        KDEMeshTallyTest::SetUp();
+
+        // create kde mesh tally
+        kde_tally = new KDEMeshTally(input, KDEMeshTally::INTEGRAL_TRACK);
+    }
+
+    // deallocate memory resources
+    virtual void TearDown()
+    {
+        delete kde_tally;
+    }
+};
+//---------------------------------------------------------------------------//
+// Tests the private subtrack_score method in KDEMeshTally
+class KDESubtrackTest : public KDEMeshTallyTest
+{
+  protected:
+    // initialize variables for each test
+    virtual void SetUp()
+    {
+        // set up default input parameters for kde mesh tally
+        KDEMeshTallyTest::SetUp();
+
+        // create kde mesh tally
+        kde_tally = new KDEMeshTally(input, KDEMeshTally::SUB_TRACK);
+    }
+
+    // deallocate memory resources
+    virtual void TearDown()
+    {
+        delete kde_tally;
+    }
 
   protected:
     // data needed for each test
-    KDEMeshTally* kde_tally;
+    std::vector<moab::CartVect> points;
 };
 //---------------------------------------------------------------------------//
 // FIXTURE-BASED TESTS: KDEIntegralTrackTest
@@ -192,6 +242,75 @@ TEST_F(KDEIntegralTrackTest, InvalidLimits)
     // Case 18: Sx, Sy, Sz only overlap at boundaries
     moab::CartVect coords5(0.0, 0.241421356237, -0.2);
     EXPECT_DOUBLE_EQ(0.0, test_integral_track_score(coords5, event));
+}
+//---------------------------------------------------------------------------//
+// FIXTURE-BASED TESTS: KDESubtrackTest
+//---------------------------------------------------------------------------//
+TEST_F(KDESubtrackTest, NoSubtracks)
+{
+    // verify no score is returned for a few calculation points
+    moab::CartVect coords1(0.0, 0.0, 0.0);
+    EXPECT_DOUBLE_EQ(0.0, test_subtrack_score(coords1, points));
+
+    moab::CartVect coords2(-1.5, -0.7, -0.18);
+    EXPECT_DOUBLE_EQ(0.0, test_subtrack_score(coords2, points));
+
+    moab::CartVect coords3(5.13, -9.27, 0.0);
+    EXPECT_DOUBLE_EQ(0.0, test_subtrack_score(coords3, points));
+}
+//---------------------------------------------------------------------------//
+TEST_F(KDESubtrackTest, OneSubtrack)
+{
+    // add only one subtrack point
+    points.push_back(moab::CartVect(-1.0, 0.0, 2.0));
+
+    // verify no score is returned for calculation points outside neighborhood
+    moab::CartVect coords1(-2.0, 5.7, -4.2);
+    EXPECT_DOUBLE_EQ(0.0, test_subtrack_score(coords1, points));
+
+    moab::CartVect coords2(-2.0, 0.0, -4.2);
+    EXPECT_DOUBLE_EQ(0.0, test_subtrack_score(coords2, points));
+
+    moab::CartVect coords3(-0.9, 0.0, 3.0);
+    EXPECT_DOUBLE_EQ(0.0, test_subtrack_score(coords3, points));
+
+    // verify score returned for calculation points inside neighborhood
+    moab::CartVect coords4(-1.0, 0.0, 2.0);
+    EXPECT_DOUBLE_EQ(421.875, test_subtrack_score(coords4, points));
+
+    moab::CartVect coords5(-0.9, 0.1, 1.9);
+    EXPECT_DOUBLE_EQ(0.0, test_subtrack_score(coords5, points));
+
+    moab::CartVect coords6(-1.033, -0.01, 1.99);
+    EXPECT_NEAR(368.451750, test_subtrack_score(coords6, points), 1e-6);
+}
+//---------------------------------------------------------------------------//
+TEST_F(KDESubtrackTest, MultipleSubtracks)
+{
+    // add multiple subtrack points
+    points.push_back(moab::CartVect(-0.05, -0.05, -0.05));
+    points.push_back(moab::CartVect(0.0, 0.0, 0.0));
+    points.push_back(moab::CartVect(0.1, 0.1, 0.1));
+
+    // verify no score is returned for calculation points outside neighborhood
+    moab::CartVect coords1(-1.0, 2.0, 3.0);
+    EXPECT_DOUBLE_EQ(0.0, test_subtrack_score(coords1, points));
+
+    moab::CartVect coords2(0.8, 0.0, 4.9);
+    EXPECT_DOUBLE_EQ(0.0, test_subtrack_score(coords2, points));
+
+    moab::CartVect coords3(0.0, -5.2, 0.1);
+    EXPECT_DOUBLE_EQ(0.0, test_subtrack_score(coords3, points));
+
+    // verify score returned for calculation points inside neighborhood
+    moab::CartVect coords4(0.0, 0.0, 0.0);
+    EXPECT_NEAR(199.951172, test_subtrack_score(coords4, points), 1e-6);
+
+    moab::CartVect coords5(-0.02, 0.01, 0.03);
+    EXPECT_NEAR(151.105500, test_subtrack_score(coords5, points), 1e-6);
+
+    moab::CartVect coords6(0.01, 0.02, 0.03);
+    EXPECT_NEAR(143.051063, test_subtrack_score(coords6, points), 1e-6);
 }
 //---------------------------------------------------------------------------//
 

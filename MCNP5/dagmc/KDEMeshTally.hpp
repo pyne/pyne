@@ -265,9 +265,7 @@ class KDEMeshTally : public MeshTally
     // >>> KDE ESTIMATOR METHODS
 
     // Declare test fixtures as friends for testing KDE estimator methods
-    friend class KDEIntegralTrackTest;
-    friend class KDESubtrackTest;
-    friend class KDECollisionTest;
+    friend class KDEMeshTallyTest;
 
     // Defines common data needed for computing score for a calculation point
     struct CalculationPoint
