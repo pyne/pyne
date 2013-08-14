@@ -264,7 +264,7 @@ class KDEMeshTally : public MeshTally
   
     // >>> KDE ESTIMATOR METHODS
 
-    // Declare test fixtures as friends for testing KDE estimator methods
+    // Declare test fixture as friend for testing KDE estimator methods
     friend class KDEMeshTallyTest;
 
     // Defines common data needed for computing score for a calculation point
