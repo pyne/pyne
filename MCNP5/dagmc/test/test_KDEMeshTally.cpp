@@ -30,6 +30,14 @@ class KDEMeshTallyTest : public ::testing::Test
         input.energy_bin_bounds.push_back(10.0);
         input.total_energy_bin = false;
         input.options = options;
+
+        kde_tally = NULL;
+    }
+
+    // deallocate memory resources
+    virtual void TearDown()
+    {
+        delete kde_tally;
     }
 
   protected:
@@ -106,12 +114,6 @@ class KDEIntegralTrackTest : public KDEMeshTallyTest
         // create kde mesh tally
         kde_tally = new KDEMeshTally(input, KDEMeshTally::INTEGRAL_TRACK);
     }
-
-    // deallocate memory resources
-    virtual void TearDown()
-    {
-        delete kde_tally;
-    }
 };
 //---------------------------------------------------------------------------//
 // Tests the private subtrack_score method in KDEMeshTally
@@ -126,12 +128,6 @@ class KDESubtrackTest : public KDEMeshTallyTest
 
         // create kde mesh tally
         kde_tally = new KDEMeshTally(input, KDEMeshTally::SUB_TRACK);
-    }
-
-    // deallocate memory resources
-    virtual void TearDown()
-    {
-        delete kde_tally;
     }
 
   protected:
@@ -159,17 +155,70 @@ class KDECollisionTest : public KDEMeshTallyTest
         calculation_point = moab::CartVect(-0.05, -1.7, 1.39);
     }
 
-    // deallocate memory resources
-    virtual void TearDown()
-    {
-        delete kde_tally;
-    }
-
   protected:
     // data needed for each test
     moab::CartVect collision;
     moab::CartVect calculation_point;
 };
+//---------------------------------------------------------------------------//
+// SIMPLE TESTS
+//---------------------------------------------------------------------------//
+TEST(KDEMeshTallyDeathTest, MissingInputMesh)
+{
+    ::testing::FLAGS_gtest_death_test_style = "threadsafe";
+
+    // define empty tally options
+    std::multimap<std::string, std::string> options;
+
+    // add input data
+    MeshTallyInput input;
+    input.tally_id = 1;
+    input.input_filename = "missing_file.h5m";
+    input.energy_bin_bounds.push_back(0.0);
+    input.energy_bin_bounds.push_back(10.0);
+    input.total_energy_bin = false;
+    input.options = options;
+
+    // make sure KDEMeshTally returns error for missing input file
+    EXPECT_EXIT(KDEMeshTally(input, KDEMeshTally::INTEGRAL_TRACK),
+                ::testing::ExitedWithCode(EXIT_FAILURE),
+                "Error: Could not load mesh data for KDE mesh tally");
+}
+//---------------------------------------------------------------------------//
+// FIXTURE-BASED TESTS: KDEMeshTallyTest
+//---------------------------------------------------------------------------//
+TEST_F(KDEMeshTallyTest, MissingBoundaryTags)
+{
+    // add boundary correction to input options
+    input.options.insert(std::make_pair("boundary", "default"));
+
+    // make sure KDEMeshTally does not return an error
+    KDEMeshTally::Estimator type = KDEMeshTally::INTEGRAL_TRACK;
+    EXPECT_NO_THROW(kde_tally = new KDEMeshTally(input, type));
+
+    // verify boundary tags are not accessed for scoring on a tally event
+    TallyEvent event;
+    event.type = TallyEvent::TRACK;
+    event.position = moab::CartVect(0.0, 0.0, 0.0);
+    event.direction = moab::CartVect(1.0, 0.0, 0.0);
+    event.track_length = 1.0;
+    EXPECT_NO_THROW(kde_tally->compute_score(event, 0));
+}
+//---------------------------------------------------------------------------//
+TEST_F(KDEMeshTallyTest, InvalidBandwidth)
+{
+    // change bandwidth values in input options to be invalid
+    input.options.erase("hx");
+    input.options.erase("hy");
+    input.options.erase("hz");
+    input.options.insert(std::make_pair("hx", "0.0"));
+    input.options.insert(std::make_pair("hy", "-1.0"));
+    input.options.insert(std::make_pair("hz", "na"));
+
+    // make sure KDEMeshTally does not return an error
+    KDEMeshTally::Estimator type = KDEMeshTally::INTEGRAL_TRACK;
+    EXPECT_NO_THROW(kde_tally = new KDEMeshTally(input, type));
+}
 //---------------------------------------------------------------------------//
 // FIXTURE-BASED TESTS: KDEIntegralTrackTest
 //---------------------------------------------------------------------------//
