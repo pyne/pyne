@@ -22,7 +22,14 @@ void TallyManager::addNewTally(unsigned int tally_id,
                    const std::vector<double>& energy_bin_bounds)
 {
 	Tally *newTally = createTally(tally_id, tally_type, options,  energy_bin_bounds);
-        observers.insert(std::pair<int, Tally *>(tally_id, newTally));   
+        if (newTally != NULL)
+        {
+           observers.insert(std::pair<int, Tally *>(tally_id, newTally));   
+        }
+	else
+        {
+           std::cerr << "Warning: Tally will be ignored." << std::endl;
+        }
 }
 
 // Remove a Tally - Observer pattern best practise

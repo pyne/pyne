@@ -14,6 +14,11 @@ Tally::Tally(const TallyInput& input)
        num_energy_bins = input_data.energy_bin_bounds.size();
 
        assert(num_energy_bins >= 2);
+       if (num_energy_bins == 2)
+       {
+          --num_energy_bins;
+          total_energy_bin = false;
+       }
 }
 
 //---------------------------------------------------------------------------//
@@ -72,7 +77,7 @@ Tally *Tally::create_tally(const TallyInput& input)
       }
       else 
       {
-         std::cout << "Warning: " << input.tally_type << " is not recognized." << std::endl;
+         std::cout << "Warning: " << input.tally_type << " is not a valid tally type." << std::endl;
       }
          
      return newTally;

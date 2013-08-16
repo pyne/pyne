@@ -180,7 +180,7 @@ void dagmc_fmesh_setup_mesh_( int* /*ipt*/, int* id,
   parse_fc_card( comment_str, fc_settings, *id );
 
   // determine the user-specified tally type
-  std::string type;
+  std::string type = "unstr_track";
   if( fc_settings.find("type") != fc_settings.end() )
   {
     type = (*fc_settings.find("type")).second;
