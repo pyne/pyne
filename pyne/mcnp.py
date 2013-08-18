@@ -26,6 +26,7 @@ from pyne.material import Material
 from pyne.material import MultiMaterial
 from pyne import nucname
 from binaryreader import _BinaryReader, _FortranRecord
+import meshtally
 
 # mesh specific imports
 try:
@@ -1131,7 +1132,6 @@ def mat_from_mcnp(filename, mat_line, densities='None'):
 
     return finished_mat
 
-
 class Wwinp(object):
     """ A Wwinp object stores all of the information from a single MCNP WWINP
     file. Weight window lower bounds are stored on a structured mesh. Only
@@ -1508,3 +1508,73 @@ class Wwinp(object):
         self.nc = [len(self.cm[0]), len(self.cm[1]), len(self.cm[2])]
         self.nf = [sum(self.fm[0]), sum(self.fm[1]), sum(self.fm[2])]
 
+class meshtal:
+
+    def __init__(self, FileName = None, LineCount = 1):
+        self.Version = -1
+        self.NHistories = -1
+        self.SM = []
+        self.linecount = LineCount
+        if FileName == None:
+            pass  
+        else:
+            self.read_meshtal_head(FileName, LineCount)
+            self.read_tallies(FileName)
+            
+    def read_meshtal_head(self, FileName, LineCount = -1):
+        if LineCount == -1:
+            LineCount = self.linecount
+        flag = 2
+        while flag:
+            Line = linecache.getline( FileName, LineCount )
+            LineCount = LineCount+1
+        
+            # empty line
+            if (Line.split() == []):
+                continue
+            # ignore comments
+            x = Line.strip().find('#')
+            if ( x == 0 ):
+                continue
+            elif (x > 0):
+                Line = str(Line.split('#')[:1]).lower().split()    
+            else:
+                Line = Line.lower().split()
+        
+            # get mcnp version
+            if (self.Version == -1) & ('mcnp' in Line) & ('version' in Line):
+                for i in range(Line.index('version')+1, len(Line)):            
+                    if Line[i].replace('.', '').isdigit():
+                        self.Version = Line[i]
+                        flag = flag-1
+                        break
+            # get number of histories
+            elif (self.NHistories == -1) & ('number' in Line) \
+                                         & ('histories' in Line):
+                for i in Line:
+                    if i.replace('.','').isdigit():
+                        self.NHistories = i
+                        flag = flag -1
+                        break
+            # break if not found
+            elif (LineCount - self.linecount) > 50:
+                return False
+
+        self.linecount = LineCount
+        return True
+                
+    def read_tallies( self, FileName, LineCount = -1 ):
+        if LineCount == -1:
+            LineCount = self.linecount
+        while True:
+            Meshtally = meshtally(FileName, LineCount)
+            LineCount = Meshtally.linecount
+            self.SM.append(Meshtally)
+            Line = linecache.getline(FileName, LineCount)
+            if Line.split() == []:
+                Line = linecache.getline(FileName, LineCount+1)
+            if Line.lower().find('mesh') < 0:
+                break
+            
+        self.linecount = LineCount
+        return True
