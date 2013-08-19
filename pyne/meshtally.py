@@ -16,39 +16,39 @@ from r2s.scdmesh import ScdMesh, ScdMeshError
 
 class meshtally:   
 
-    def __init__(self, FileName = None, LineCount = 1):
-        self.linecount = LineCount
+    def __init__(self, filename = None, line_count = 1):
+        self.line_count = line_count
         self.Number = -1
         self.Type = 'NA'
         self.x_bounds = []
         self.y_bounds = []
         self.z_bounds = []
         self.e_bounds = []
-        self.colinds = {}
+        self.col_idx = {}
         self.Flux = []
         self.RelE = []
         self.e_bins = -1
         self.spatialPoints = -1
         self.sm = -1
 
-        if FileName == None:
+        if filename == None:
             return    
         else:
-            self.read_meshtally_head(FileName, self.linecount)
-            self.read_boundaries(FileName, self.linecount)
-            self.read_column_order(FileName, self.linecount)
-            self.read_values(FileName, self.linecount)
+            self.read_meshtally_head(filename, self.line_count)
+            self.read_boundaries(filename, self.line_count)
+            self.read_column_order(filename, self.line_count)
+            self.read_values(filename, self.line_count)
             self.create_mesh()
             self.tag_fluxes()
    
-    def read_meshtally_head(self, FileName, LineCount = -1):
-        if LineCount == -1:
-            LineCount = self.linecount
+    def read_meshtally_head(self, filename, line_count = -1):
+        if line_count == -1:
+            line_count = self.line_count
 
         flag = 2
         while flag:
-            Line = linecache.getline(FileName, LineCount)
-            LineCount = LineCount+1
+            Line = linecache.getline(filename, line_count)
+            line_count = line_count+1
 
             # empty line
             if (Line.split() == []):
@@ -82,20 +82,20 @@ class meshtally:
                 elif ('photon' in Line):
                     self.Type = 'p'
                     flag = flag-1
-            elif (LineCount-self.linecount) > 50:
+            elif (line_count-self.line_count) > 50:
                 return False
 
-        self.linecount =  LineCount
+        self.line_count =  line_count
         return True
 
-    def read_boundaries(self, FileName, LineCount = -1):
-        if LineCount == -1:
-            LineCount = self.linecount
+    def read_boundaries(self, filename, line_count = -1):
+        if line_count == -1:
+            line_count = self.line_count
      
         flag = 4              
         while flag:
-            Line = linecache.getline( FileName , LineCount )
-            LineCount = LineCount + 1      
+            Line = linecache.getline( filename , line_count )
+            line_count = line_count + 1      
             # empty line
             if ( Line.split() == []):
                 continue
@@ -133,20 +133,20 @@ class meshtally:
                         self.e_bounds.append(i.replace('e','E')) 
                 flag = flag-1
 
-            elif (LineCount-self.linecount) > 50:
+            elif (line_count-self.line_count) > 50:
                 return False
  
-        self.linecount = LineCount
+        self.line_count = line_count
         return True
     
 
-    def read_column_order( self, FileName, LineCount = -1 ):
-        if LineCount == -1:
-            LineCount = self.linecount
+    def read_column_order( self, filename, line_count = -1 ):
+        if line_count == -1:
+            line_count = self.line_count
         flag = 1
         while flag:
-            Line = temp = linecache.getline( FileName, LineCount )
-            LineCount = LineCount+1            
+            Line = temp = linecache.getline( filename, line_count )
+            line_count = line_count+1            
             # empty line
             if ( Line.split() == []):
                 continue        
@@ -161,44 +161,44 @@ class meshtally:
 
             if ('x' in Line) & ('y' in Line) & ('z' in Line) & ('result' in Line):
                 colnames = temp.lower().replace('rel ','rel').replace('rslt * ','rslt').strip().split()
-                self.colinds = dict(zip(colnames,range(0,len(colnames))))
+                self.col_idx = dict(zip(colnames,range(0,len(colnames))))
                 flag = flag-1
 
-            if (LineCount - self.linecount) > 50:
+            if (line_count - self.line_count) > 50:
                 return False
 
-        self.linecount = LineCount
+        self.line_count = line_count
         return True
     
-    def read_values(self, FileName, LineCount = -1):  
-        if LineCount == -1:
-            LineCount = self.linecount
+    def read_values(self, filename, line_count = -1):  
+        if line_count == -1:
+            line_count = self.line_count
         while True:
-            Line = linecache.getline(FileName, LineCount)
-            LineCount = LineCount + 1	    
+            Line = linecache.getline(filename, line_count)
+            line_count = line_count + 1	    
             if (Line.split() == []):
                 break
             else:
                 Line = Line.split() 	        
                 try:
-                    self.Flux.append(Line[self.colinds['result']])
+                    self.Flux.append(Line[self.col_idx['result']])
                 except IndexError:
                     print 'flux not found'
                 try:
-                    self.RelE.append(Line[self.colinds['relerror']])
+                    self.RelE.append(Line[self.col_idx['relerror']])
                 except IndexError:
                     print 'RelE not found'
-        self.linecount = LineCount-1
+        self.line_count = line_count-1
         return True
 
-    def get_values_line(self, FileName, LineCount = -1):
-        if LineCount == -1:
-            LineCount = self.linecount-1
+    def get_values_line(self, filename, line_count = -1):
+        if line_count == -1:
+            line_count = self.line_count-1
         i = 50
-        Line = linecache.getline(FileName, LineCount).lower().split()
+        Line = linecache.getline(filename, line_count).lower().split()
         while i:
             if ('x' in Line) & ('y' in Line) & ('z' in Line) & ('result' in Line):
-                return LineCount+1
+                return line_count+1
             i = i-1
 
     def create_mesh(self):

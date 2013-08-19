@@ -1509,3 +1509,76 @@ class Wwinp(object):
         self.nc = [len(self.cm[0]), len(self.cm[1]), len(self.cm[2])]
         self.nf = [sum(self.fm[0]), sum(self.fm[1]), sum(self.fm[2])]
 
+class meshtal:
+
+    def __init__(self, filename = None, line_count = 1):
+        self.version = -1
+        self.num_hist = -1
+        self.tally = {}
+        self.line_count = line_count
+
+        if filename == None:
+            pass  
+        else:
+            self.read_meshtal_head(filename, line_count)
+            self.read_tallies(filename)
+            
+
+    def read_meshtal_head(self, filename, line_count = -1):
+        if line_count == -1:
+            line_count = self.line_count
+
+        flag = 2
+        while flag:
+            line = linecache.getline(filename, line_count)
+            line_count = line_count+1
+        
+            # empty line
+#           if (line.split() == []):
+#                continue
+#            # ignore comments
+#            x = line.strip().find('#')
+#            if x == 0:
+#                continue
+#            elif x > 0:
+#                line = str(line.split('#')[:1]).lower().split()    
+#            else:
+#               line = line.lower().split()
+        
+            # get mcnp version
+            if (self.version == -1) & ('mcnp' in line) & ('version' in line):
+                for i in range(line.index('version')+1, len(line)):            
+                    if line[i].replace('.', '').isdigit():
+                        self.version = line[i]
+                        flag -= 1
+                        break
+            # get number of histories
+            elif (self.num_hist == -1) & ('number' in line) \
+                                         & ('histories' in line):
+                for i in line:
+                    if i.replace('.','').isdigit():
+                        self.num_hist = i
+                        flag -= 1
+#                       break
+            # break if not found
+            elif (line_count - self.line_count) > 50:
+                return False
+
+        self.line_count = line_count
+        return True
+                
+    def read_tallies(self, filename, line_count = -1):
+        if line_count == -1:
+            line_count = self.line_count
+        while True:
+            Meshtally = meshtally(filename, line_count)
+            line_count = Meshtally.line_count
+            self.tally.append(Meshtally)
+            line = linecache.getline(filename, line_count)
+            if line.split() == []:
+                line = linecache.getline(filename, line_count+1)
+            if line.lower().find('mesh') < 0:
+                break
+            
+        self.line_count = line_count
+        return True
