@@ -336,14 +336,14 @@ void dagmc_fmesh_score_( double *x, double *y, double *z,
                          double *erg,double *wgt, 
                          double *d, int *icl )
 {
-  tallyManager.set_track_event(*x, *y, *z, *u, *v, *w, *erg, *wgt, *d, *icl);
-  tallyManager.update_tallies();
-
 #ifdef MESHTAL_DEBUG
     std::cout << "meshtal particle loc: " << *x << ", " << *y << ", " << *z << std::endl;
     std::cout << "meshtal particle dir: " << *u << ", " << *v << ", " << *w << std::endl;
     std::cout << "meshtal track length: " << *d << std::endl;
 #endif
+
+  tallyManager.set_track_event(*x, *y, *z, *u, *v, *w, *erg, *wgt, *d, *icl);
+  tallyManager.update_tallies();
 }
 
 /**

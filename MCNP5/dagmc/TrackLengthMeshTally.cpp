@@ -702,22 +702,27 @@ void TrackLengthMeshTally::compute_score(const TallyEvent& event)
   else  // The conformal branch
   {
      bool cell_change = (last_cell != event.current_cell);
+     bool new_particle = (last_cell == -1);
     
 #ifdef MESHTAL_DEBUG
-     if( last_cell == -1 ){ std::cout << "Started new particle in cell " << event.current_cell << std::endl; } 
-     else if( cell_change )
+     if(new_particle){ std::cout << "Started new particle in cell " << event.current_cell << std::endl; } 
+     else if(cell_change)
      { 
         std::cout << "Crossed surface from " << last_cell << " into " << event.current_cell<< std::endl; 
      }
 #endif
 
+     // update last cell information
+     last_cell = event.current_cell;
+
      // if the new cell is not part of this tally, return immediately
-     if (conformality.find (event.current_cell) == conformality.end() ) 
+     if (conformality.find(event.current_cell) == conformality.end()) 
      {
         return;
      }
-     // alternate to above if-else
-     if ( (last_cell == -1 && conformal_surface_source) ||
+
+     // new particles only use conformal crossing logic if a conformal surface source was declared
+     if ((new_particle && conformal_surface_source) ||
            cell_change)
      {
        first_tet = get_starting_tet_conformal(event.position, last_crossed_tri);
@@ -726,9 +731,6 @@ void TrackLengthMeshTally::compute_score(const TallyEvent& event)
      {
        first_tet = get_starting_tet(event.position, event.direction, event.track_length, last_crossed_tri, last_t);
      }
-
-     // set last_cell and do some checking
-     last_cell = event.current_cell;
   }
 
   EntityHandle last_crossed_tri[3] = {0,0,0};
