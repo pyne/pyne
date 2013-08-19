@@ -26,7 +26,6 @@ from pyne.material import Material
 from pyne.material import MultiMaterial
 from pyne import nucname
 from binaryreader import _BinaryReader, _FortranRecord
-import meshtally
 
 # mesh specific imports
 try:
@@ -1510,327 +1509,143 @@ class Wwinp(object):
         self.nf = [sum(self.fm[0]), sum(self.fm[1]), sum(self.fm[2])]
 
 
-class meshtal:
+class Meshtal(object):
     """This class 
 
-    Parameters
+    Attributes
     ==========
     filename : string
-        Path to the file
+        Path to an MCNP meshtal file
     tally : dict
         A dictionary with MCNP fmesh4 tally numbers (e.g. 4, 14, 24) as keys and
         MOAB meshes as values.
     """
+
     def __init__(self, filename):
 
         self.tally = {}
-        self.line_count = 1
 
-        if filename == None:
-            pass  
-        else:
-            self.read_meshtal_head(filename, line_count)
-            self.read_tallies(filename)
+        with open(filename, 'r') as f: 
+           self._read_meshtal_head(f)
+           self._read_tallies(f)
             
 
-    def read_meshtal_head(self, filename, line_count = -1):
-        if line_count == -1:
-            line_count = self.line_count
+    def _read_meshtal_head(self, f):
 
-        flag = 2
-        while flag:
-            line = linecache.getline(filename, line_count)
-            line_count = line_count+1
-      
-            # get mcnp version
-            if (self.version == -1) & ('mcnp' in line) & ('version' in line):
-                for i in range(line.index('version')+1, len(line)):            
-                    if line[i].replace('.', '').isdigit():
-                        self.version = line[i]
-                        flag -= 1
-                        break
-            # get number of histories
-            elif (self.num_hist == -1) & ('number' in line) \
-                                         & ('histories' in line):
-                for i in line:
-                    if i.replace('.','').isdigit():
-                        self.num_hist = i
-                        flag -= 1
-#                       break
-            # break if not found
-            elif (line_count - self.line_count) > 50:
-                return False
+        line_1 = f.readline()
+        #set mcnp version
+        self.version = int(line_1.split()[2])
+        #get version date ("ld" in MCNP User's Manual)
+        self.ld = line_1.split()[3][2:0]
 
-        self.line_count = line_count
-        return True
+        line_2 = f.readline()
+        #store title card
+        self.title = line_2
+
+        line_3 = f.readline()
+        # get number of histories
+        self.histories = int(float(line_3.split()[-1]))
 
 
+    def _read_tallies(self, f):
 
-    def read_tallies(self, filename, line_count = -1):
-        if line_count == -1:
-            line_count = self.line_count
-        while True:
-            Meshtally = meshtally(filename, line_count)
-            line_count = Meshtally.line_count
-            self.tally.append(Meshtally)
-            line = linecache.getline(filename, line_count)
-            if line.split() == []:
-                line = linecache.getline(filename, line_count+1)
-            if line.lower().find('mesh') < 0:
-                break
-            
-        self.line_count = line_count
-        return True
+        line = f.readline()
+
+        while line != "":        
+            if line.split()[0:3] == ['Mesh', 'Tally', 'Number']:
+                tally_number = int(line.split()[3])
+                self.tally[tally_number] = MeshTally(f, tally_number)
+
+            line = f.readline()
 
 
+class MeshTally(object):
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-class meshtally(stat_mesh):   
-
-    def __init__(self, filename = None, line_count = 1):
-        self.line_count = line_count
-        self.Number = -1
-        self.Type = 'NA'
-        self.x_bounds = []
-        self.y_bounds = []
-        self.z_bounds = []
-        self.e_bounds = []
-        self.col_idx = {}
-        self.Flux = []
-        self.RelE = []
-        self.e_bins = -1
-        self.spatialPoints = -1
-        self.sm = -1
-
-        if filename == None:
-            return    
-        else:
-            self.read_meshtally_head(filename, self.line_count)
-            self.read_boundaries(filename, self.line_count)
-            self.read_column_order(filename, self.line_count)
-            self.read_values(filename, self.line_count)
-            self.create_mesh()
-            self.tag_fluxes()
+    def __init__(self, f, tally_number):
+        self.tally_number = tally_number
+        self._read_meshtally_head(f)
+        self._read_column_order(f)
+        self._create_mesh(f)
    
-    def read_meshtally_head(self, filename, line_count = -1):
-        if line_count == -1:
-            line_count = self.line_count
+    def _read_meshtally_head(self, f):
+        #get particle type
+        line = f.readline()
+        if ('neutron' in line):
+            self.particle = 'n'
+        elif ('photon' in line):
+            self.particle = 'p'
 
-        flag = 2
-        while flag:
-            Line = linecache.getline(filename, line_count)
-            line_count = line_count+1
+        #determine if meshtally flux-to-dose conversion factors are being used.
+        line = f.readline()
+        dr_str = 'This mesh tally is modified by a dose response function.'
+        if line.strip == dr_str:
+            self.dose_response = True
+        else:
+            self.dose_response = False
 
-            # empty line
-            if (Line.split() == []):
-                continue
-            # ignore comments
-            x = Line.strip().find('#')
-            if ( x == 0 ):
-                continue
-            elif (x > 0):
-                Line = str(Line.split('#')[:1]).lower().split()
-            else:
-                Line = Line.lower().split()
+        #advance the file to the line where x, y, z, bounds start
+        while line.strip() != 'Tally bin boundaries:':
+            line = f.readline()
+        
+        self.x_bounds = [float(x) for x in f.readline().split()[2:]]
+        self.y_bounds = [float(x) for x in f.readline().split()[2:]]
+        self.z_bounds = [float(x) for x in f.readline().split()[2:]]
+        # "Energy bin boundaries" contain one more word than "X boundaries"
+        self.e_bounds = [float(x) for x in f.readline().split()[3:]]
 
-            # get meshtally number
-            if (self.Number == -1) & ('mesh' in Line) & \
-                                     ('tally' in Line) & ('number' in Line):
-                for i in Line:
-                    if i.replace('.','',1).isdigit():
-                        self.Number = i
-                        flag = flag-1
-                        break
-            # get meshtally type
-            elif (self.Type == 'NA') & ('this' in Line) & \
-                                       ('is' in Line) & ('mesh' in Line):
-                if ('and' in Line) & ('neutron' in Line) & ('photon' in Line):
-                    self.Type = 'np'
-                    flag = flag-1
-                elif ('neutron' in Line):
-                    self.Type = 'n'
-                    flag = flag-1
-                elif ('photon' in Line):
-                    self.Type = 'p'
-                    flag = flag-1
-            elif (line_count-self.line_count) > 50:
-                return False
+        #skip blank line between enery bin boundaries and table headings
+        f.readline() 
 
-        self.line_count =  line_count
-        return True
+    def _read_column_order(self, f):
+            line = f.readline()
+            column_names = line.replace('Rel ','Rel_').replace('Rslt * ','Rslt_*_').strip().split()
+            self.column_idx = dict(zip(column_names, range(0,len(column_names))))
 
-    def read_boundaries(self, filename, line_count = -1):
-        if line_count == -1:
-            line_count = self.line_count
-     
-        flag = 4              
-        while flag:
-            Line = linecache.getline( filename , line_count )
-            line_count = line_count + 1      
-            # empty line
-            if ( Line.split() == []):
-                continue
-            # ignore comments
-            x = Line.strip().find('#')
-            if ( x == 0 ):
-                continue
-            elif (x > 0):
-                Line = str(Line.split('#')[:1]).lower().replace(':','').split()
-            else:
-                Line = Line.lower().replace(':','').split()
+    def _create_mesh(self, f):
 
-            # get x bounds
-            if (self.x_bounds == []) & ('x' in Line) & ('direction' in Line):
-                for i in Line:
-                    if i.replace('-','').replace('.','').isdigit():
-                        self.x_bounds.append(i)
-                flag = flag-1
-            # get y bounds
-            elif (self.y_bounds == []) & ('y' in Line) & ('direction' in Line):
-                for i in Line:
-                    if i.replace('-','').replace('.','').isdigit():
-                        self.y_bounds.append(i)
-                flag = flag-1
-            # get z bounds
-            elif (self.z_bounds == []) & ('z' in Line) & ('direction' in Line):
-                for i in Line:
-                    if i.replace('-','').replace('.','').isdigit():
-                        self.z_bounds.append(i)
-                flag = flag-1
-            # get energy bounds
-            elif (self.e_bounds == []) & ('energy' in Line) & ('bin' in Line):
-                for i in Line:
-                    if i.replace('+','').replace('-','').replace('.','').replace('e','').isdigit():
-                        self.e_bounds.append(i.replace('e','E')) 
-                flag = flag-1
-
-            elif (line_count-self.line_count) > 50:
-                return False
- 
-        self.line_count = line_count
-        return True
-    
-
-    def read_column_order( self, filename, line_count = -1 ):
-        if line_count == -1:
-            line_count = self.line_count
-        flag = 1
-        while flag:
-            Line = temp = linecache.getline( filename, line_count )
-            line_count = line_count+1            
-            # empty line
-            if ( Line.split() == []):
-                continue        
-            # ignore comments
-            x = Line.strip().find('#')
-            if ( x == 0 ):
-                continue
-            elif (x > 0):
-                Line = str(Line.split('#')[:1]).lower().replace(':','').split()
-            else:
-                Line = Line.lower().replace(':','').split()
-
-            if ('x' in Line) & ('y' in Line) & ('z' in Line) & ('result' in Line):
-                colnames = temp.lower().replace('rel ','rel').replace('rslt * ','rslt').strip().split()
-                self.col_idx = dict(zip(colnames,range(0,len(colnames))))
-                flag = flag-1
-
-            if (line_count - self.line_count) > 50:
-                return False
-
-        self.line_count = line_count
-        return True
-    
-    def read_values(self, filename, line_count = -1):  
-        if line_count == -1:
-            line_count = self.line_count
-        while True:
-            Line = linecache.getline(filename, line_count)
-            line_count = line_count + 1	    
-            if (Line.split() == []):
-                break
-            else:
-                Line = Line.split() 	        
-                try:
-                    self.Flux.append(Line[self.col_idx['result']])
-                except IndexError:
-                    print 'flux not found'
-                try:
-                    self.RelE.append(Line[self.col_idx['relerror']])
-                except IndexError:
-                    print 'RelE not found'
-        self.line_count = line_count-1
-        return True
-
-    def get_values_line(self, filename, line_count = -1):
-        if line_count == -1:
-            line_count = self.line_count-1
-        i = 50
-        Line = linecache.getline(filename, line_count).lower().split()
-        while i:
-            if ('x' in Line) & ('y' in Line) & ('z' in Line) & ('result' in Line):
-                return line_count+1
-            i = i-1
-
-    def create_mesh(self):
-        #Calculating pertinent information from meshtal header and input
-        self.spatialPoints = (len(self.x_bounds)-1) * \
-                             (len(self.y_bounds)-1) * (len(self.z_bounds)-1)        
+        self.mesh = ScdMesh(self.x_bounds, self.y_bounds, self.z_bounds)
+           
         if len(self.e_bounds) > 2 :
             self.e_bins = len(self.e_bounds) 
             #don't substract 1; cancels with totals bin
         elif len(self.e_bounds) == 2: 
-            #for 1 energy bin, meshtal doesn't have TOTALS group
-            self.e_bins = 1 
-        self.sm = ScdMesh(self.x_bounds, self.y_bounds, self.z_bounds)
-        return True
+            #for 1 energy bin, meshtal does not have "total group
+            self.e_bins = 1
 
-    def tag_fluxes(self, Norm = 1.0):
-        voxels = list(self.sm.iterateHex('xyz'))
-        for e_group in range(1, self.e_bins + 1): 
-            # Create tags if they do not already exist
-            if self.e_bins == 1 or e_group != self.e_bins: 
-                # tag name for each E_Bin
-                flux_str = '{0}_group_{1:03d}'.format( self.Type, e_group)
-                error_str = '{0}_group_{1:03d}_error'.format( self.Type, e_group)
-            elif e_group == self.e_bins : 
-                # tag name for totals group
-                flux_str = self.Type + '_group_total'
-                error_str = self.Type + '_group_total_error'
-            try:
-                tag_flux = self.sm.imesh.createTag( flux_str, 1, float)
-            except iBase.TagAlreadyExistsError:
-                tag_flux = self.sm.imesh.getTagHandle( flux_str)
-            try:
-                tag_error = self.sm.imesh.createTag( error_str , 1, float)
-            except iBase.TagAlreadyExistsError:
-                tag_error = self.sm.imesh.getTagHandle( error_str)
-            #Create lists of data from meshtal file for energy group 'e_group'
-            flux_data = []
-            error_data = []
-            for point in range( 0, self.spatialPoints) :
-                flux_data.append( float( self.Flux[ 
-                    point + (e_group-1)* self.spatialPoints ]) * Norm)
-                error_data.append( float( self.RelE[ 
-                    point + (e_group-1)* self.spatialPoints ]))
-            #Tag data for energy group 'e_group' onto all voxels
-            tag_flux[voxels] = flux_data
-            tag_error[voxels] = error_data
+        for e_group in range(1, len(self.e_bounds)):
+            result_tag_name = '{0}_group_{1:03d}'.format( self.particle, e_group)
+            rel_error_tag_name = '{0}_group_{1:03d}_error'.format( self.particle, e_group)
+            self._tag_mesh(f, result_tag_name, rel_error_tag_name)
+
+        # Tag "total" data if it exists (i.e. if there is more than 1 energy group)
+        if len(self.e_bounds) > 2:
+            result_tag_name = '{0}_group_total'.format(self.particle)
+            rel_error_tag_name = '{0}_group_total_error'.format(self.particle)
+            self._tag_mesh(f, result_tag_name, rel_error_tag_name)
+
+
+    def _tag_mesh(self, f, result_tag_name, rel_error_tag_name):
+
+        tag_result = self.mesh.imesh.createTag(result_tag_name, 1, float)
+        tag_rel_error = self.mesh.imesh.createTag(rel_error_tag_name, 1, float)
+        result = []
+        rel_error = []
+
+        num_vol_elements = (len(self.x_bounds)-1) * (len(self.y_bounds)-1)\
+            * (len(self.z_bounds)-1) 
+
+        while len(result) < num_vol_elements:
+            line = f.readline()
+            result.append(float(line.split()[self.column_idx["Result"]]))
+            rel_error.append(float(line.split()[self.column_idx["Rel_Error"]]))
+
+        #Tag data for energy group 'e_group' onto all voxels
+        vol_elements = list(self.mesh.iterateHex("xyz"))
+        tag_result[vol_elements] = result
+        tag_rel_error[vol_elements] = rel_error
+
+
+
+
+
+
