@@ -18,9 +18,11 @@ include "include/cython_version.pxi"
 IF CYTHON_VERSION_MAJOR == 0 and CYTHON_VERSION_MINOR >= 17:
     from libcpp.string cimport string as std_string
     from libcpp.map cimport map as cpp_map
+    from libcpp.vector cimport vector as cpp_vector
 ELSE:
     from pyne._includes.libcpp.string cimport string as std_string
     from pyne._includes.libcpp.map cimport map as cpp_map
+    from pyne._includes.libcpp.vector cimport vector as cpp_vector
 cimport cpp_material
 cimport pyne.stlcontainers as conv
 import pyne.stlcontainers as conv
@@ -35,6 +37,8 @@ import os
 
 cimport pyne.data as data
 import pyne.data as data
+
+import tables as tb
 
 # Maximum 32-bit signed int
 DEF INT_MAX = 2147483647
@@ -233,11 +237,12 @@ cdef class _Material:
 
             file.h5 (file)
                 |-- material (table)
-                    |-- name (string col, len 20)
                     |-- mass (double col)
+                    |-- density (double col)
                     |-- atoms_per_mol (double col)
                     |-- comp (double array col, len of nuc_zz)
                 |-- nuc_zz (int array)
+                |-- material_attr (variable length char array)
 
         The material table has a string attribute called 'nucpath' which holds
         the path to the nuclide array inside this HDF5 file.  The same nucpath
@@ -256,9 +261,9 @@ cdef class _Material:
         self.mat_pointer.from_hdf5(filename, datapath, row, protocol)
 
 
-    def write_hdf5(self, filename, datapath="/material", nucpath="/nuc_zz",
+    def write_hdf5(self, filename, datapath="/material", nucpath="/nucid",
                    row=-0.0, chunksize=100):
-        """write_hdf5(filename, datapath="/material", nucpath="/nuc_zz", row=-0.0, chunksize=100)
+        """write_hdf5(filename, datapath="/material", nucpath="/nucid", row=-0.0, chunksize=100)
         Writes the material to an HDF5 file, using Protocol 1 (see the
         from_hdf5() method).
 
@@ -370,8 +375,63 @@ cdef class _Material:
         """
         self.mat_pointer.write_text(filename)
 
+    def load_json(self, json):
+        """load_json(json)
+        Loads a JSON instance into this Material.
 
+        Parameters
+        ----------
+        json : jsoncpp.Value
+            An object-type JSON value.
 
+        """
+        self.mat_pointer.load_json(deref((<jsoncpp.Value> json)._inst))
+
+    def dump_json(self):
+        """dump_json()
+        Dumps the material to a JSON object.
+
+        Returns
+        -------
+        val : jsoncpp.Value
+            An object-type JSON value.
+
+        """
+        cdef jsoncpp.Value val = jsoncpp.Value(view=False)
+        val._inst[0] = self.mat_pointer.dump_json()
+        return val
+
+    def from_json(self, char * filename):
+        """from_json(char * filename)
+        Initialize a Material object from a JSON file.
+
+        Parameters
+        ----------
+        filename : str
+            Path to text file that contains the data to read in.
+
+        """
+        self.mat_pointer.from_json(filename)
+
+    def write_json(self, filename):
+        """write_json(filename)
+        Writes the material to a JSON file.
+
+        Parameters
+        ----------
+        filename : str
+            Path to text file to write the data to.  If the file already
+            exists, it will be overwritten.
+
+        Examples
+        --------
+        The following writes out a low-enriched uranium material to a new file::
+
+            leu = Material({'U235': 0.04, 'U238': 0.96}, 42.0, "LEU", 1.0)
+            leu.write_json('leu.json')
+
+        """
+        self.mat_pointer.write_json(filename)
 
     def normalize(self):
         """This convenience method normalizes the mass stream by setting its
@@ -1722,3 +1782,198 @@ def mats_latex_table(mats, labels=None, align=None, format=".5g"):
         tab += r" \\ " + "\n\\hline\n"
     tab += "\\end{tabular}\n"
     return tab
+
+
+#
+#  Material Library
+#
+
+cdef class _MaterialLibrary(object):
+
+    def __init__(self, lib=None, datapath="/materials", nucpath="/nucid"):
+        """Parameters
+        ----------
+        lib : dict-like, str, or None, optional
+            The data to intialize the material library with.  If this is a 
+            string, it is interpreted as a path to a file.
+        datapath : str, optional
+            The path in the heirarchy to the data table in an HDF5 file.
+        nucpath : str, optional
+            The path in the heirarchy to the nuclide array in an HDF5 file.
+
+        """
+        cdef dict _lib = {}
+        if lib is None:
+            self._lib = _lib
+        elif isinstance(lib, collections.Mapping):
+            for key, mat in lib.items():
+                _lib[key] = ensure_material(mat)
+            self._lib = _lib
+        elif isinstance(lib, basestring):
+            self._lib = _lib
+            if lib.endswith('.json') or lib.endswith('.js'):
+                self.from_json(lib)
+            if lib.endswith('.h5') or lib.endswith('.hdf5'):
+                self.from_hdf5(lib, datapath=datapath, nucpath=nucpath)
+        elif isinstance(lib, collections.Sequence):
+            for key, mat in lib:
+                _lib[key] = ensure_material(mat)
+            self._lib = _lib
+        else:
+            msg = "Could not initialize library with lib type {0!r}"
+            raise TypeError(msg.format(type(lib)))
+
+    def __contains__(self, key):
+        return key in self._lib
+
+    def __len__(self):
+        return len(self._lib)
+
+    def __iter__(self):
+        return iter(self._lib)
+
+    def __getitem__(self, key):
+        return self._lib[key]
+
+    def __setitem__(self, key, value):
+        self._lib[key] = ensure_material(value)
+
+    def __delitem__(self, key):
+        del self._lib[key]
+
+    def from_json(self, file):
+        """Loads data from a JSON file into this material library.
+
+        Parameters
+        ----------
+        file : str
+            A path to a JSON file.
+
+        """
+        cdef std_string s
+        cdef bint opened_here = False
+        cdef cpp_jsoncpp.Value jsonlib 
+        cdef cpp_jsoncpp.Reader reader = cpp_jsoncpp.Reader()
+        cdef int i
+        cdef std_string key
+        cdef cpp_vector[std_string] keys
+        cdef _Material mat
+        cdef dict _lib = (<_MaterialLibrary> self)._lib
+        if isinstance(file, basestring):
+            file = open(file, 'r')
+            opened_here = True
+        fstr = file.read()
+        s = std_string(<char *> fstr)
+        if opened_here:
+            file.close()
+        reader.parse(s, jsonlib)
+        keys = jsonlib.getMemberNames()
+        for i in range(len(keys)):
+            mat = Material()
+            key = keys[i]
+            (<_Material> mat).mat_pointer.load_json(jsonlib[key])
+            _lib[key.c_str()] = mat
+
+    def write_json(self, file):
+        """Writes this material library to a JSON file.
+
+        Parameters
+        ----------
+        file : str
+            A path to a JSON file.
+
+        """
+        cdef std_string s
+        cdef std_string skey
+        cdef bint opened_here = False
+        cdef cpp_jsoncpp.Value jsonlib = cpp_jsoncpp.Value(cpp_jsoncpp.objectValue)
+        cdef cpp_jsoncpp.StyledWriter writer = cpp_jsoncpp.StyledWriter()
+        for key, mat in self._lib.items():
+            skey = std_string(<char *> key)
+            jsonlib[skey] = (<_Material> mat).mat_pointer.dump_json()
+        s = writer.write(jsonlib)
+        if isinstance(file, basestring):
+            file = open(file, 'w')
+            opened_here = True
+        file.write(s)
+        if opened_here:
+            file.close()
+
+    def from_hdf5(self, file, datapath="/materials", nucpath="/nucid"):
+        """Loads data from an HDF5 file into this material library.
+
+        Parameters
+        ----------
+        file : str
+            A path to an HDF5 file.
+        datapath : str, optional
+            The path in the heirarchy to the data table in an HDF5 file.
+        nucpath : str, optional
+            The path in the heirarchy to the nuclide array in an HDF5 file.
+
+        """
+        cdef std_string s
+        cdef cpp_jsoncpp.Reader reader = cpp_jsoncpp.Reader()
+        cdef cpp_jsoncpp.Value attribs
+        cdef int i
+        cdef _Material mat
+        cdef dict _lib = (<_MaterialLibrary> self)._lib
+        cdef np.ndarray mattable
+        with tb.openFile(file, 'r') as f:
+            matstable = f.getNode(datapath)[:]
+            nucs = f.getNode(nucpath)[:]
+            matsattrs = f.getNode(datapath + '_attrs').read()
+        for i in range(len(matstable)):
+            row = matstable[i]
+            comp = dict((<int> k, v) for k, v in zip(nucs, row[3]) if v != 0.0)
+            mat = Material(comp, mass=row[0], density=row[1], 
+                                    atoms_per_mol=row[2])
+            strattrs = "".join(map(chr, matsattrs[i]))
+            s = std_string(<char *> strattrs)
+            attribs = cpp_jsoncpp.Value()
+            reader.parse(s, attribs)
+            (<_Material> mat).mat_pointer.attrs = attribs
+            if "name" in mat.attrs:
+                name = mat.attrs["name"]
+            else:
+                name = "_" + str(i)
+            _lib[name] = mat
+
+    def write_hdf5(self, file, datapath="/materials", nucpath="/nucid"):
+        """Writes this material library to an HDF5 file.
+
+        Parameters
+        ----------
+        file : str
+            A path to an HDF5 file.
+        datapath : str, optional
+            The path in the heirarchy to the data table in an HDF5 file.
+        nucpath : str, optional
+            The path in the heirarchy to the nuclide array in an HDF5 file.
+
+        """
+        cdef _Material mat
+        cdef dict _lib = (<_MaterialLibrary> self)._lib
+        cdef set nucids = set()
+        for mat in _lib.values():
+            nucids.update(mat.comp.keys())
+        with tb.openFile(file, 'a') as f:
+            nucgrp, nucdsname = os.path.split(nucpath)
+            f.createArray(nucgrp, nucdsname, np.array(sorted(nucids)), 
+                          createparents=True)
+        for key, mat in _lib.items():
+            if "name" not in mat.attrs:
+                mat.attrs["name"] = key
+            mat.write_hdf5(file, datapath=datapath, nucpath=nucpath)
+
+class MaterialLibrary(_MaterialLibrary, collections.MutableMapping):
+    """The material library is a collection of unique keys mapped to 
+    Material objects.  This is useful for organization and declaring
+    prefernces between several sources (multiple libraries).
+    """
+    def __repr__(self):
+        libs = ["{0!r}={1!r}".format(k, m) for k, m in self.items()]
+        libs = "{" + ", ".join(libs) + "}"
+        return "pyne.material.MaterialLibrary({0})".format(libs)
+
+ensure_material = lambda m: m if isinstance(m, Material) else Material(m)

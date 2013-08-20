@@ -7,7 +7,9 @@ from nose.tools import assert_equal, assert_not_equal, assert_raises, raises, \
     assert_almost_equal, assert_true, assert_false, assert_in
 
 import os
-from pyne.material import Material, from_atom_frac, from_hdf5, from_text, MapStrMaterial, MultiMaterial
+from pyne import nuc_data
+from pyne.material import Material, from_atom_frac, from_hdf5, from_text, \
+    MapStrMaterial, MultiMaterial, MaterialLibrary
 from pyne import jsoncpp 
 from pyne import data
 import numpy  as np
@@ -26,6 +28,17 @@ nucvec = {10010000:  1.0,
           }
 
 leu = {922380000: 0.96, 922350000: 0.04}
+
+
+def assert_mat_almost_equal(first, second, places=7):
+    assert_almost_equal(first.mass, second.mass, places=places)
+    assert_almost_equal(first.density, second.density, places=places)
+    assert_almost_equal(first.atoms_per_mol, second.atoms_per_mol, places=places)
+    assert_equal(first.attrs, second.attrs)
+    nucs = set(second.comp.keys())
+    assert_equal(set(first.comp.keys()), nucs)
+    for nuc in nucs:
+        assert_almost_equal(first.comp[nuc], second.comp[nuc], places=places)
 
 
 def make_mat_txt():
@@ -1020,6 +1033,78 @@ def test_natural_elements():
     expected_comp = {10000000: 0.11189838783149784, 80000000: 0.8881016121685023}
     for key in expected_comp.keys():
         assert_almost_equal(water.comp[key], expected_comp[key])
+
+
+def test_load_json():
+    leu = {"U238": 0.96, "U235": 0.04}
+    exp = Material(leu)
+    obs = Material()
+    json = jsoncpp.Value({"mass": 1.0, "comp": leu, "density": -1.0, "attrs": {}, 
+                         "atoms_per_mol": -1.0})
+    obs.load_json(json)
+    assert_equal(exp, obs)
+
+def test_dump_json():
+    leu = {"U238": 0.96, "U235": 0.04}
+    exp = jsoncpp.Value({"mass": 1.0, "comp": leu, "density": -1.0, "attrs": {}, 
+                         "atoms_per_mol": -1.0})
+    obs = Material(leu).dump_json()
+    assert_equal(exp, obs)
+
+def test_rw_json():
+    filename = "leu.json"
+    wmat = Material(leu)
+    wmat.write_json(filename)
+    rmat = Material()
+    rmat.from_json(filename)
+    assert_equal(wmat, rmat)
+    os.remove(filename)
+
+
+
+#
+#  Material Library
+#
+
+
+def test_matlib_json():
+    filename = "matlib.json"
+    water = Material()
+    water.from_atom_frac({10000000: 2.0, 80000000: 1.0})
+    water.attrs["name"] = "Aqua sera."
+    lib = {"leu": Material(leu), "nucvec": nucvec, "aqua": water}
+    wmatlib = MaterialLibrary(lib)
+    wmatlib.write_json(filename)
+    rmatlib = MaterialLibrary()
+    rmatlib.from_json(filename)
+    assert_equal(set(wmatlib.keys()), set(rmatlib.keys()))
+    for key in rmatlib.keys():
+        assert_mat_almost_equal(wmatlib[key], rmatlib[key])
+    os.remove(filename)
+
+def test_matlib_hdf5_nuc_data():
+    matlib = MaterialLibrary()
+    matlib.from_hdf5(nuc_data, datapath="/material_library/materials", 
+                     nucpath="/material_library/nucid")
+
+def test_matlib_hdf5():
+    filename = "matlib.h5"
+    water = Material()
+    water.from_atom_frac({10000000: 2.0, 80000000: 1.0})
+    water.attrs["name"] = "Aqua sera."
+    lib = {"leu": Material(leu), "nucvec": nucvec, "aqua": water}
+    wmatlib = MaterialLibrary(lib)
+    wmatlib.write_hdf5(filename)
+    rmatlib = MaterialLibrary()
+    rmatlib.from_hdf5(filename)
+    os.remove(filename)
+    # Round trip!
+    rmatlib.write_hdf5(filename)
+    wmatlib = MaterialLibrary(filename)
+    assert_equal(set(wmatlib.keys()), set(rmatlib.keys()))
+    for key in rmatlib.keys():
+        assert_mat_almost_equal(wmatlib[key], rmatlib[key])
+    os.remove(filename)
 
 # Run as script
 #

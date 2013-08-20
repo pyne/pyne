@@ -2,6 +2,8 @@
 from libcpp.utility cimport pair as cpp_pair
 from cython import pointer
 
+import collections
+
 # Local imports
 include "include/cython_version.pxi"
 IF CYTHON_VERSION_MAJOR == 0 and CYTHON_VERSION_MINOR >= 17:
@@ -38,3 +40,6 @@ cdef class _MapStrMaterial:
     cdef cpp_map[std_string, matp] * map_ptr
     cdef public bint _free_map
     cdef dict _cache
+
+cdef class _MaterialLibrary(object):
+    cdef dict _lib
