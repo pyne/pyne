@@ -25,6 +25,7 @@ import numpy as np
 from pyne.material import Material
 from pyne.material import MultiMaterial
 from pyne import nucname
+from pyne.stat_mesh import StatMesh
 from binaryreader import _BinaryReader, _FortranRecord
 
 # mesh specific imports
@@ -1510,18 +1511,30 @@ class Wwinp(object):
 
 
 class Meshtal(object):
-    """This class 
+    """This class stores all the information from an MCNP meshtal file with
+    single or multiple fmesh4 neutron or photon tallies. The "tally" attribute
+    provides key/value access to invidial MeshTally objects.
 
     Attributes
     ==========
     filename : string
         Path to an MCNP meshtal file
+    version: float
+        The MCNP verison number
+    ld : string
+        The MCNP verison date
+    title : string
+        Title card from the MCNP input
+    histories : int
+        Number of histories from the MCNP simulation
     tally : dict
         A dictionary with MCNP fmesh4 tally numbers (e.g. 4, 14, 24) as keys and
-        MOAB meshes as values.
+        MeshTally objects as values.
     """
 
     def __init__(self, filename):
+        """Instantiate a Meshtal object from a meshtal file.
+        """
 
         self.tally = {}
 
@@ -1531,16 +1544,18 @@ class Meshtal(object):
             
 
     def _read_meshtal_head(self, f):
+        """Get the version, ld, title card and number of histories.
+        """
 
         line_1 = f.readline()
         #set mcnp version
-        self.version = int(line_1.split()[2])
+        self.version = float(line_1.split()[2])
         #get version date ("ld" in MCNP User's Manual)
-        self.ld = line_1.split()[3][2:0]
+        self.ld = line_1.split()[3][3:]
 
         line_2 = f.readline()
         #store title card
-        self.title = line_2
+        self.title = line_2.strip()
 
         line_3 = f.readline()
         # get number of histories
@@ -1548,6 +1563,8 @@ class Meshtal(object):
 
 
     def _read_tallies(self, f):
+        """Read in all of the mesh tallies from the meshtal file.
+        """
 
         line = f.readline()
 
@@ -1560,15 +1577,46 @@ class Meshtal(object):
 
 
 class MeshTally(StatMesh, object):
+    """This class stores all information from all single MCNP mesh tally that 
+    exists within some meshtal file. Header information is stored as attributes
+    and the "mesh" attribute is a MOAB mesh with all result and relative error
+    data tagged. This class inherits from StatMesh, exposing all statistical
+    mesh manipulation methods.
+
+    Atrributes
+    ----------
+    tally number : int
+        The MCNP tally number. Must end in 4 (e.g. 4, 14, 214).
+    particle : string
+        Either "n" for a neutron mesh tally or "p" for a photon mesh tally.
+    dose response : bool
+        True is the tally is modified by a dose response function.
+    x_bounds : list of floats
+        The locations of mesh vertices in the x direction.
+    y_bounds : list of floats
+        The locations of mesh vertices in the y direction.
+    z_bounds : list of floats
+        The locations of mesh vertices in the z direction.
+    e_bounds : list of floats
+        The minimum and maximum bounds for energy bins
+    mesh : MOAB mesh
+        A mesh tagged with all results and relative errors
+    """
 
     def __init__(self, f, tally_number):
+        """Create MeshTally object from a filestream open to the second line of
+        a mesh tally header. MeshTally objects should be instantiated only
+        through the Meshtal class.
+        """
         self.tally_number = tally_number
         self._read_meshtally_head(f)
         self._read_column_order(f)
         self._create_mesh(f)
    
     def _read_meshtally_head(self, f):
-        #get particle type
+        """ Get the particle type, spacial and energy bounds, and whether or 
+        not flux-to-dose conversion factors are being used.
+        """
         line = f.readline()
         if ('neutron' in line):
             self.particle = 'n'
@@ -1578,7 +1626,7 @@ class MeshTally(StatMesh, object):
         #determine if meshtally flux-to-dose conversion factors are being used.
         line = f.readline()
         dr_str = 'This mesh tally is modified by a dose response function.'
-        if line.strip == dr_str:
+        if line.strip() == dr_str:
             self.dose_response = True
         else:
             self.dose_response = False
@@ -1597,21 +1645,19 @@ class MeshTally(StatMesh, object):
         f.readline() 
 
     def _read_column_order(self, f):
-            line = f.readline()
-            column_names = line.replace('Rel ','Rel_').replace('Rslt * ','Rslt_*_').strip().split()
-            self.column_idx = dict(zip(column_names, range(0,len(column_names))))
+        """Create dictionary with table headings as keys and their column
+        location as values. Dictionary is the private attribute _column_idx.
+        """
+        line = f.readline()
+        column_names = line.replace('Rel ','Rel_').replace('Rslt * ','Rslt_*_').strip().split()
+        self._column_idx = dict(zip(column_names, range(0,len(column_names))))
 
     def _create_mesh(self, f):
+        """Instantiate a MOAB mesh and tag it will results and relative errors.
+        """
 
         self.mesh = ScdMesh(self.x_bounds, self.y_bounds, self.z_bounds)
            
-        if len(self.e_bounds) > 2 :
-            self.e_bins = len(self.e_bounds) 
-            #don't substract 1; cancels with totals bin
-        elif len(self.e_bounds) == 2: 
-            #for 1 energy bin, meshtal does not have "total group
-            self.e_bins = 1
-
         for e_group in range(1, len(self.e_bounds)):
             result_tag_name = '{0}_group_{1:03d}'.format( self.particle, e_group)
             rel_error_tag_name = '{0}_group_{1:03d}_error'.format( self.particle, e_group)
@@ -1625,6 +1671,9 @@ class MeshTally(StatMesh, object):
 
 
     def _tag_mesh(self, f, result_tag_name, rel_error_tag_name):
+        """Tag the MOAB mesh with data from an open filestream and supplied
+        tag names.
+        """
 
         tag_result = self.mesh.imesh.createTag(result_tag_name, 1, float)
         tag_rel_error = self.mesh.imesh.createTag(rel_error_tag_name, 1, float)
@@ -1636,8 +1685,8 @@ class MeshTally(StatMesh, object):
 
         while len(result) < num_vol_elements:
             line = f.readline()
-            result.append(float(line.split()[self.column_idx["Result"]]))
-            rel_error.append(float(line.split()[self.column_idx["Rel_Error"]]))
+            result.append(float(line.split()[self._column_idx["Result"]]))
+            rel_error.append(float(line.split()[self._column_idx["Rel_Error"]]))
 
         #Tag data for energy group 'e_group' onto all voxels
         vol_elements = list(self.mesh.iterateHex("xyz"))
