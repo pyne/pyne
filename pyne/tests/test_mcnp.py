@@ -673,7 +673,8 @@ def test_single_meshtally_meshtal():
 
     assert_equal(meshtal_object.ld, "09282010")
 
-    assert_equal(meshtal_object.title, "Input file to general test meshtal file")
+    assert_equal(meshtal_object.title, 
+                 "Input file to general test meshtal file")
 
     assert_equal(meshtal_object.histories, 100000)  
 
@@ -681,19 +682,24 @@ def test_single_meshtally_meshtal():
     assert_equal(meshtal_object.tally[4].tally_number, 4)
     assert_equal(meshtal_object.tally[4].particle, "n")
     assert_equal(meshtal_object.tally[4].dose_response, True)
-    assert_equal(meshtal_object.tally[4].x_bounds, [-200.00, -66.67, 66.67, 200.00])
-    assert_equal(meshtal_object.tally[4].y_bounds, [-200.00, -120.00, -40.00, 40.00, 120.00, 200.00])
-    assert_equal(meshtal_object.tally[4].z_bounds, [-200.00, -50.00, 100.00, 200.00])
-    assert_equal(meshtal_object.tally[4].e_bounds, [0.00E+00, 1.00E-01, 2.00E-01, 1.00E+00])
+    assert_equal(meshtal_object.tally[4].x_bounds, \
+                                               [-200.00, -66.67, 66.67, 200.00])
+    assert_equal(meshtal_object.tally[4].y_bounds, \
+                              [-200.00, -120.00, -40.00, 40.00, 120.00, 200.00])
+    assert_equal(meshtal_object.tally[4].z_bounds, \
+                                              [-200.00, -50.00, 100.00, 200.00])
+    assert_equal(meshtal_object.tally[4].e_bounds, \
+                                       [0.00E+00, 1.00E-01, 2.00E-01, 1.00E+00])
 
     # test mesh attributes
     for e_group in range(1, 4):
-        for v_e, expected_v_e in zip(meshtal_object.tally[4].mesh.iterateHex("xyz"),\
-                                             expected_sm.iterateHex("xyz")):
+        for v_e, expected_v_e in zip(
+                meshtal_object.tally[4].mesh.iterateHex("xyz"), 
+                                 expected_sm.iterateHex("xyz")):
             written = meshtal_object.tally[4].mesh.imesh\
-                          .getTagHandle("n_group_00{0}".format(e_group))[v_e]
+                     .getTagHandle("n_group_00{0}".format(e_group))[v_e]
             expected = expected_sm.imesh\
-                          .getTagHandle("n_group_00{0}".format(e_group))[expected_v_e]
+                    .getTagHandle("n_group_00{0}".format(e_group))[expected_v_e]
             assert_equal(written, expected)
 
 
@@ -720,37 +726,41 @@ def test_multiple_meshtally_meshtal():
     meshtal_object = mcnp.Meshtal(meshtal_file)
 
     for e_group in range(1, 7):
-        for v_e, expected_v_e in zip(meshtal_object.tally[4].mesh.iterateHex("xyz"),\
-                                             expected_sm_4.iterateHex("xyz")):
+        for v_e, expected_v_e in zip(
+                meshtal_object.tally[4].mesh.iterateHex("xyz"), 
+                expected_sm_4.iterateHex("xyz")):
             written = meshtal_object.tally[4].mesh.imesh\
-                          .getTagHandle("n_group_00{0}".format(e_group))[v_e]
+                    .getTagHandle("n_group_00{0}".format(e_group))[v_e]
             expected = expected_sm_4.imesh\
-                          .getTagHandle("n_group_00{0}".format(e_group))[expected_v_e]
+                    .getTagHandle("n_group_00{0}".format(e_group))[expected_v_e]
             assert_equal(written, expected)
 
     for e_group in range(1, 2):
-        for v_e, expected_v_e in zip(meshtal_object.tally[14].mesh.iterateHex("xyz"),\
-                                             expected_sm_14.iterateHex("xyz")):
+        for v_e, expected_v_e in zip( 
+                meshtal_object.tally[14].mesh.iterateHex("xyz"),
+                expected_sm_14.iterateHex("xyz")):
             written = meshtal_object.tally[14].mesh.imesh\
-                          .getTagHandle("n_group_00{0}".format(e_group))[v_e]
+                    .getTagHandle("n_group_00{0}".format(e_group))[v_e]
             expected = expected_sm_14.imesh\
-                          .getTagHandle("n_group_00{0}".format(e_group))[expected_v_e]
+                    .getTagHandle("n_group_00{0}".format(e_group))[expected_v_e]
             assert_equal(written, expected)
 
     for e_group in range(1, 7):
-        for v_e, expected_v_e in zip(meshtal_object.tally[24].mesh.iterateHex("xyz"),\
-                                             expected_sm_24.iterateHex("xyz")):
+        for v_e, expected_v_e in zip(
+                meshtal_object.tally[24].mesh.iterateHex("xyz"), 
+                expected_sm_24.iterateHex("xyz")):
             written = meshtal_object.tally[24].mesh.imesh\
-                          .getTagHandle("p_group_00{0}".format(e_group))[v_e]
+                    .getTagHandle("p_group_00{0}".format(e_group))[v_e]
             expected = expected_sm_24.imesh\
-                          .getTagHandle("p_group_00{0}".format(e_group))[expected_v_e]
+                    .getTagHandle("p_group_00{0}".format(e_group))[expected_v_e]
             assert_equal(written, expected)
 
     for e_group in range(1, 2):
-        for v_e, expected_v_e in zip(meshtal_object.tally[34].mesh.iterateHex("xyz"),\
-                                             expected_sm_34.iterateHex("xyz")):
+        for v_e, expected_v_e in zip(
+                meshtal_object.tally[34].mesh.iterateHex("xyz"),
+                expected_sm_34.iterateHex("xyz")):
             written = meshtal_object.tally[34].mesh.imesh\
-                          .getTagHandle("p_group_00{0}".format(e_group))[v_e]
+                    .getTagHandle("p_group_00{0}".format(e_group))[v_e]
             expected = expected_sm_34.imesh\
-                          .getTagHandle("p_group_00{0}".format(e_group))[expected_v_e]
+                    .getTagHandle("p_group_00{0}".format(e_group))[expected_v_e]
             assert_equal(written, expected)
