@@ -2,31 +2,23 @@
 
 #ifndef DAGMC_TALLY_EVENT_HPP
 #define DAGMC_TALLY_EVENT_HPP
+
 #include "moab/CartVect.hpp"
- 
 
 //===========================================================================//
 /**
- * \class TallyEvent
- * \brief Defines a single tally event
+ * \struct TallyEvent
+ * \brief Data structure for storing event data to be tallied
  *
- * TallyEvent is a class that represents a tally event that can be triggered
- * as part of a Monte Carlo particle transport simulation.  Both collision
- * and track-based events can be created.  Note that once an event type has
- * been set it cannot be changed.
- *
- * In addition to setting the required variables for each type of tally event,
- * there is also an optional method available to set the tally multiplier.
- * If the tally multiplier is not set, then it will default to 1.
- *
- * TODO: This is a temporary class structure that will be changed once we
- * merge with the observer pattern implementation in meshtally_reftest branch.
- * Taking this first step will make it easier to merge with KDEMeshTally since
- * I am making some substantial changes to it as a part of the boundary
- * correction method.
+ * Data stored in this struct is set by TallyManager and read by the different
+ * Tally implementations.  The variables that will be used by each Tally depend
+ * on the type of event that is defined.  All events set type, particle_energy
+ * and particle_weight. Collision events add the current_cell, position
+ * (i.e. collision point) and total_cross_section.  Track events add the
+ * current_cell, position (i.e. start of track), direction and track_length.
  */
 //===========================================================================//
-class TallyEvent
+struct TallyEvent
 {
     /**
      * \brief Constructor
@@ -43,6 +35,9 @@ class TallyEvent
     enum EventType {NONE = 0, COLLISION = 1, TRACK = 2};
 
     EventType type;
+    
+    /// Geometric cell in which the event occurred
+    int current_cell;
 
     /// Total length of track segment
     double track_length;
@@ -53,8 +48,7 @@ class TallyEvent
     /// Direction in which particle is traveling (u, v, w)
     moab::CartVect direction;
 
-    /// Collision: Total macroscopic cross section for cell in
-    /// which collision occurred
+    /// Total macroscopic cross section for cell in which collision occurred
     double total_cross_section;
 
     /// Energy and weight of particle when event occurred

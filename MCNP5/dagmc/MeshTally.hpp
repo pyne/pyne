@@ -9,6 +9,7 @@
 #include <vector>
 
 #include "moab/Range.hpp"
+
 #include "Tally.hpp"
 
 // forward declaration
@@ -19,18 +20,21 @@ namespace moab {
 //===========================================================================//
 /**
  * \class MeshTally
- * \brief Defines a basic mesh tally interface
+ * \brief Defines an abstract MeshTally interface
  *
- * MeshTally is a Base class that defines the variables and methods that are
- * typically needed to implement a mesh tally for use in Monte Carlo particle
- * transport codes.  Some basic functionality is already included but the
- * following methods must be implemented in all Derived classes
- * 
- *     1) compute_score
- *     2) end_history
- *     3) print
+ * MeshTally is an abstract class derived from Tally that defines all the
+ * variables and methods needed to implement a generic MeshTally for use in
+ * Monte Carlo particle transport codes.  All Derived classes must implement
+ * the following methods from Tally
  *
- * Note that three arrays are available for storing mesh tally data
+ *     1) compute_score(const TallyEvent& event)
+ *     2) write_data(double num_histories)
+ *
+ * A simple version of the end_history() method is already included, so this
+ * does not need to be implemented unless additional or alternative actions
+ * are required by a Derived class.
+ *
+ * Note that three arrays are available for storing the mesh tally data
  *
  *    1) tally_data: stores sum of scores for all particle histories
  *    2) error_data: stores data needed to determine error in tally results
@@ -39,12 +43,11 @@ namespace moab {
  * Each element in these three data arrays represents one tally point and
  * one energy bin.  They are ordered first by tally point, and then by energy
  * bin.  Derived classes can easily access/modify individual elements using
- * the get_data() method.
+ * the protected get_data() method.
  */
 //===========================================================================//
 class MeshTally : public Tally
 {
-
   protected:
     /**
      * \brief Constructor
@@ -60,19 +63,8 @@ class MeshTally : public Tally
 
     // >>> PUBLIC INTERFACE
 
-    // ToDo:  These comments, perhaps in modified form, will go with 
-    //        the implementation of these methods in derived classes.
     /**
-     * \brief Computes mesh tally scores for the given tally event
-     * \param event the parameters needed to compute the mesh tally scores
-     * \param ebin index representing energy bin
-     * TODO remove ebin as parameter since this can be computed from energy?
-     */
-    // jcz note: compare to update() in base class
-    // virtual void compute_score(const TallyEvent& event, int ebin) = 0;
-
-    /**
-     * \brief Updates tally information when a particle history ends
+     * \brief Updates MeshTally when a particle history ends
      */
     virtual void end_history();
 
@@ -105,7 +97,8 @@ class MeshTally : public Tally
   protected:
     /// Name of file to which the final tally results will be written
     std::string output_filename;
-    /// Name of the file that contains the mesh description separate from the geometry
+
+    /// Name of file that contains the mesh description (separate from geometry)
     std::string input_filename;
 
     /// Entity handle for the MOAB mesh data used for this mesh tally
