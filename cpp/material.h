@@ -142,7 +142,7 @@ namespace pyne
     ///            appended to the end of the dataset.
     /// \param chunksize The chunksize for all material data on disk.
     void write_hdf5(std::string filename, std::string datapath="/material", 
-                    std::string nucpath="/nuc_zz", float row=-0.0, int chunksize=100);
+                    std::string nucpath="/nucid", float row=-0.0, int chunksize=100);
 
     /// Reads data from a plaintext file at \a filename into this Material instance.
     void from_text(char * filename);
@@ -153,6 +153,19 @@ namespace pyne
     void write_text(char * filename);
     /// Writes the Material out to a simple plaintext file readable by from_text().
     void write_text(std::string filename);
+
+    /// Loads a JSON instance tree into this Material.
+    void load_json(Json::Value);
+    /// Dumps the Material out to a JSON instance tree.
+    Json::Value dump_json();
+    /// Reads data from a JSON file at \a filename into this Material instance.
+    void from_json(char * filename);
+    /// Reads data from a JSON file at \a filename into this Material instance.
+    void from_json(std::string filname);
+    /// Writes the Material out to a JSON file
+    void write_json(char * filename);
+    /// Writes the Material out to a JSON file
+    void write_json(std::string filename);
 
     // Fundemental mass stream data
     /// composition, maps nuclides in id form to normalized mass weights.
