@@ -1558,7 +1558,7 @@ class Meshtal(object):
             line = f.readline()
 
 
-class MeshTally(object):
+class MeshTally(StatMesh, object):
 
     def __init__(self, f, tally_number):
         self.tally_number = tally_number
