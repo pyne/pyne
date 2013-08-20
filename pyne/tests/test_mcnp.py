@@ -656,3 +656,29 @@ def test_wwinp_np():
 
     os.remove(output)
 
+
+
+# Test Meshtal and Meshtally classes
+def test_single_meshtally_meshtal():
+
+    thisdir = os.path.dirname(__file__)
+    meshtal_file = os.path.join(thisdir, 'mcnp_meshtal_single_meshtal.txt')
+    expected_h5m = os.path.join(thisdir, 'mcnp_meshtal_single_meshtal.txt')
+    expected_sm = ScdMesh.fromFile(expected_h5m)
+
+    meshtal_object = Meshtal()
+
+    for e_group in range(1, 7):
+        for v_e, expected_v_e in zip(meshtal_object.mesh.mesh.iterateHex("xyz"),\
+                                         expected_sm.mesh.iterateHex("xyz"))
+            written = meshtal_object.imesh\
+                          .getTagHandle('n_group_00{0}'.format(e_group))[v_e]
+            expected = expected_sm.imesh\
+                          .getTagHandle('n_group_00{0}').format(e_group)[expected_v_e]
+            assert_equal(written, expected)
+
+
+def test_multiple_meshtally_meshtal():
+    pass
+
+
