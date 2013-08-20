@@ -1541,7 +1541,6 @@ class Meshtal(object):
         with open(filename, 'r') as f: 
            self._read_meshtal_head(f)
            self._read_tallies(f)
-            
 
     def _read_meshtal_head(self, f):
         """Get the version, ld, title card and number of histories.
@@ -1561,11 +1560,9 @@ class Meshtal(object):
         # get number of histories
         self.histories = int(float(line_3.split()[-1]))
 
-
     def _read_tallies(self, f):
         """Read in all of the mesh tallies from the meshtal file.
         """
-
         line = f.readline()
 
         while line != "":        
@@ -1574,6 +1571,7 @@ class Meshtal(object):
                 self.tally[tally_number] = MeshTally(f, tally_number)
 
             line = f.readline()
+
 
 
 class MeshTally(StatMesh, object):
@@ -1649,7 +1647,8 @@ class MeshTally(StatMesh, object):
         location as values. Dictionary is the private attribute _column_idx.
         """
         line = f.readline()
-        column_names = line.replace('Rel ','Rel_').replace('Rslt * ','Rslt_*_').strip().split()
+        column_names = line.replace('Rel ','Rel_').replace('Rslt * ','Rslt_*_')\
+                                                                .strip().split()
         self._column_idx = dict(zip(column_names, range(0,len(column_names))))
 
     def _create_mesh(self, f):
@@ -1659,16 +1658,18 @@ class MeshTally(StatMesh, object):
         self.mesh = ScdMesh(self.x_bounds, self.y_bounds, self.z_bounds)
            
         for e_group in range(1, len(self.e_bounds)):
-            result_tag_name = '{0}_group_{1:03d}'.format( self.particle, e_group)
-            rel_error_tag_name = '{0}_group_{1:03d}_error'.format( self.particle, e_group)
+            result_tag_name = '{0}_group_{1:03d}'.format(self.particle, 
+                                                          e_group)
+            rel_error_tag_name = '{0}_group_{1:03d}_error'.format(self.particle,
+                                                                  e_group)
             self._tag_mesh(f, result_tag_name, rel_error_tag_name)
 
-        # Tag "total" data if it exists (i.e. if there is more than 1 energy group)
+        #Tag "total" data if it exists (i.e. if there is more than
+        #1 energy group)
         if len(self.e_bounds) > 2:
             result_tag_name = '{0}_group_total'.format(self.particle)
             rel_error_tag_name = '{0}_group_total_error'.format(self.particle)
             self._tag_mesh(f, result_tag_name, rel_error_tag_name)
-
 
     def _tag_mesh(self, f, result_tag_name, rel_error_tag_name):
         """Tag the MOAB mesh with data from an open filestream and supplied
@@ -1681,7 +1682,7 @@ class MeshTally(StatMesh, object):
         rel_error = []
 
         num_vol_elements = (len(self.x_bounds)-1) * (len(self.y_bounds)-1)\
-            * (len(self.z_bounds)-1) 
+                * (len(self.z_bounds)-1) 
 
         while len(result) < num_vol_elements:
             line = f.readline()
@@ -1692,9 +1693,4 @@ class MeshTally(StatMesh, object):
         vol_elements = list(self.mesh.iterateHex("xyz"))
         tag_result[vol_elements] = result
         tag_rel_error[vol_elements] = rel_error
-
-
-
-
-
 
