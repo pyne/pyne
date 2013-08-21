@@ -25,7 +25,7 @@ import numpy as np
 from pyne.material import Material
 from pyne.material import MultiMaterial
 from pyne import nucname
-from pyne.stat_mesh import StatMesh
+from pyne.statmesh import StatMesh
 from binaryreader import _BinaryReader, _FortranRecord
 
 # mesh specific imports
@@ -1574,7 +1574,7 @@ class Meshtal(object):
 
 
 
-class MeshTally(StatMesh, object):
+class MeshTally(StatMesh):
     """This class stores all information from all single MCNP mesh tally that 
     exists within some meshtal file. Header information is stored as attributes
     and the "mesh" attribute is a MOAB mesh with all result and relative error
@@ -1602,9 +1602,10 @@ class MeshTally(StatMesh, object):
     """
 
     def __init__(self, f, tally_number):
-        """Create MeshTally object from a filestream open to the second line of
-        a mesh tally header. MeshTally objects should be instantiated only
-        through the Meshtal class.
+        """Create MeshTally object from a filestream (f) open to the second line
+        of a mesh tally header (the neutron/photon line). The "tally_number" is
+        the MCNP fmesh4 tally number (e.g. 4, 14, 24). MeshTally objects should 
+        be instantiated only through the Meshtal class.
         """
         self.tally_number = tally_number
         self._read_meshtally_head(f)
