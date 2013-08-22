@@ -7,6 +7,7 @@
 
 #include "Quadrature.hpp"
 
+//===========================================================================//
 /**
  * \class KDEKernel
  * \brief Defines a general 1D kernel function interface
@@ -48,6 +49,7 @@
  * can be integrated using the integrate method in the Quadrature class.  See
  * the PolynomialKernel implementation for an example.
  */
+//===========================================================================//
 class KDEKernel
 {
   protected:

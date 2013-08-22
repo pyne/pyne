@@ -19,23 +19,25 @@ namespace moab {
   class Interface;
 }
 
+//===========================================================================//
 /**
  * \class KDEMeshTally
- * \brief Represents a mesh tally based on a kernel density estimator approach
+ * \brief Represents a mesh tally based on a kernel density estimator
  *
- * KDEMeshTally is a Derived class that implements the MeshTally interface to
- * enable the use of the kernel density estimator as a mesh tally option in a
- * Monte Carlo particle transport simulation.  Three different types of KDE
- * mesh tallies can be created
+ * KDEMeshTally is a concrete class derived from MeshTally that implements
+ * the Tally interface to enable the use of the kernel density estimator as a
+ * mesh tally option in a Monte Carlo particle transport simulation.  Three
+ * different types of KDE mesh tallies can be created
  *
  *     1) KDE COLLISION mesh tally, based only on particle collisions
  *     2) KDE INTEGRAL_TRACK mesh tally, based on full particle tracks
  *     3) KDE SUB_TRACK mesh tally, based on approximated particle tracks
  *
  * The primary difference between these three options is what estimator is used
- * to compute the tally scores for the collisions or particle tracks that are
- * received from the Monte Carlo particle transport code.  Note that this cannot
- * be changed once a KDEMeshTally object has been created.
+ * to compute the tally scores for the TallyEvent::COLLISION or TallyEvent::TRACK
+ * events that are set through the TallyManager.  If a KDEMeshTally object
+ * receives an invalid TallyEvent type for its estimator type, then no scores
+ * are computed.
  *
  * For more information on using kernel density estimator methods for mesh tally
  * purposes, please refer to the following two references
@@ -49,69 +51,50 @@ namespace moab {
  *        Proceedings of the International Conference on Mathematics and
  *        Computational Methods (M&C 2013), Sun Valley, Idaho, May 5-9 (2013)
  *
- * ==============
+ * ==========
  * TallyInput
- * ==============
+ * ==========
  *
- * In addition to choosing the type of estimator, the user must also prepare a
- * TallyInput object that will be used to set all of the other required and
- * optional input parameters.  This is a struct defined in MeshTally.hpp that
- * must include the tally ID number, the energy bin boundaries, whether or not
- * a total energy bin is required, the name of the mesh input file, and a
- * std::map with all other tally options as key-value pairs.  Tally options
- * that are currently available include the following
+ * The TallyInput struct needed to construct a KDEMeshTally object is defined
+ * in Tally.hpp and is set through the TallyManager when a Tally is created.
+ * Options that are currently available for KDEMeshTally objects include
  *
- *     1) "out": defines the name of the KDE mesh tally output file
- *     2) "hx", "hy", "hz": sets the value of the bandwidth vector components
- *     3) "kernel": defines the kernel function to be used
- *     4) "seed": overrides random number seed for determining sub-track points
- *     5) "subtracks": sets number of sub-tracks to use
+ * 1) "inp"="input_filename", "out"="output_filename"
+ * --------------------------------------------------
+ * These two options are processed through the MeshTally constructor.  The
+ * "inp" key is REQUIRED for KDEMeshTally objects, whereas the "out" key is
+ * optional.  See MeshTally.hpp for more information.
  *
- * The last two options are only valid for KDE sub-track mesh tallies.  Note
- * also that if an invalid "kernel" is requested, or this key is not included
- * in the MeshTallyInput options, then the default 2nd-order "epanechnikov"
- * kernel function is used.  Other options include "uniform", "biweight",
- * or "triweight".
+ * 2) "hx"="value", "hy"="value", "hz"="value"
+ * -------------------------------------------
+ * Sets the value of the bandwidth vector components.  Note that these values
+ * must all be positive and non-zero.  The default value is (0.01, 0.01, 0.01).
  *
- * TODO need to add higher-order kernels/boundary kernel as available keys in
- * tally options as well
+ * 3) "kernel"="type", "order"="value"
+ * -----------------------------------
+ * Defines the type and order of the kernel function to be used.  Valid types
+ * include "epanechnikov", "uniform", "biweight", or "triweight". Only symmetric
+ * kernel functions of these types are supported, which means that the order
+ * must be a multiple of 2.  If no "kernel" is requested, the default is a 2nd
+ * order "epanechnikov" kernel.
  *
- * ===============
- * Mesh Input File
- * ===============
+ * TODO implement the "order" as an available option
  *
- * The mesh input file that is added to MeshTallyInput must be created in a file
- * format that is supported by the Mesh-Oriented Database (MOAB), which includes
- * both H5M and VTK options.  Source code and more information on MOAB can be
- * found at https://trac.mcs.anl.gov/projects/ITAPS/wiki/MOAB
+ * 4) "boundary"="default"
+ * -----------------------
+ * Indicates that boundary correction is needed for tally points within one
+ * bandwidth of an external boundary.  The "default" method uses the boundary
+ * kernel approach, and is currently the only option available.  Note that
+ * this feature will only work properly for 2nd-order kernels.
  *
- * ============================
- * KDE Mesh Tally Functionality
- * ============================
- *
- * After a KDEMeshTally object has been created, there are a few simple steps
- * that are needed to ensure that the tally will work correctly.  The first step
- * is to use the compute_score() method for every tally event that is reported
- * by the Monte Carlo particle transport code being used.  These tally events
- * can be either collision or track-based, as the compute_score() method will
- * use the type of estimator that has been associated with the KDEMeshTally
- * object for computing the corresponding tally scores.  These scores are
- * accumulated in the MeshTally::temp_tally_data array.
- *
- * The second step is to use the end_history() method once all tally scores for
- * a single particle history has been completed.  This step takes the current
- * sum of scores that is in MeshTally::temp_tally_data and adds it to the
- * MeshTally::tally_data array.  It is also important for calculating the
- * relative standard error of the final tally results.
- *
- * The third and final step is to use the write_data() method to write all of the
- * tally results and their corresponding relative standard errors to the output
- * file.  If the "out" key is not included as a tally option, then the default
- * case is a H5M file format named meshtal<tally_id>.h5m.  To write to another
- * file format that is supported by MOAB, simply add the "out" key and use a
- * name with the desired extension.  For example, to write to a VTK file format,
- * add "out" = "file_name.vtk" to the MeshTallyInput options.
+ * 5) "seed"="value", "subtracks"="value"
+ * --------------------------------------
+ * These two options are only available for KDE sub-track mesh tallies.  The
+ * "seed" option overrides the random number seed value that is used for
+ * determining sub-track points.  The "subtracks" option sets the number
+ * of sub-tracks to use for computing scores.
  */
+//===========================================================================//
 class KDEMeshTally : public MeshTally
 {
   public:
@@ -127,8 +110,8 @@ class KDEMeshTally : public MeshTally
 
     /**
      * \brief Constructor
-     * \param input user-defined input parameters for this KDE mesh tally
-     * \param type the type of estimator to use with this KDE mesh tally
+     * \param input user-defined input parameters for this KDEMeshTally
+     * \param type the type of estimator to use with this KDEMeshTally
      */
     KDEMeshTally(const TallyInput& input, Estimator type = COLLISION);
 
@@ -140,68 +123,62 @@ class KDEMeshTally : public MeshTally
     // >>> DERIVED PUBLIC INTERFACE from MeshTally.hpp
 
     /**
-     * \brief Computes mesh tally scores for the given tally event
-     * \param event the parameters needed to compute the mesh tally scores
+     * \brief Computes scores for this KDEMeshTally based on the given TallyEvent
+     * \param event the parameters needed to compute the scores
      */
     virtual void compute_score(const TallyEvent& event, int ebin);
 
     /**
-     * \brief Write tally and error results to the mesh tally's output file
-     * \param num_histories the number of source particles tracked
-     * \param multiplier an optional constant multiplication factor
+     * \brief Write results to the output file for this KDEMeshTally
+     * \param num_histories the number of particle histories tracked
      *
-     * The write_data() method writes the current tally and relative standard error
-     * results to the output file defined for this mesh tally, normalized by
-     * the number of source particles that were tracked during the Monte Carlo
-     * simulation.
-     *
-     * If the multiplier parameter is provided, then all final tally results
-     * will be multiplied by this value.  Note that this multiplier is not the
-     * same as the standard tally multiplier, which is typically applied to
-     * individual scores instead.
+     * The write_data() method writes the current tally and relative standard
+     * error results for all of the mesh nodes to the output_filename set for
+     * this KDEMeshTally.  These values are normalized only by the number of
+     * particle histories that were tracked.
      */
     virtual void write_data(double num_histories);
 
   private:
-    /// Copy constructor and operator= methods are not implemented
+    // Copy constructor and operator= methods are not implemented
     KDEMeshTally(const KDEMeshTally& obj);
     KDEMeshTally& operator=(const KDEMeshTally& obj);
 
   private:
-    /// Type of estimator used by this KDE mesh tally
+    // Type of estimator used by this KDE mesh tally
     Estimator estimator;
 
-    /// Bandwidth vector (hx, hy, hz) used to compute KDE mesh tally scores
+    // Bandwidth vector (hx, hy, hz) used to compute KDE mesh tally scores
     moab::CartVect bandwidth;
 
-    /// Kernel function used to compute KDE mesh tally scores
+    // Kernel function used to compute KDE mesh tally scores
     KDEKernel* kernel;
 
-    /// Variables used if boundary correction method is requested by user
+    // Variables used if boundary correction method is requested by user
     bool use_boundary_correction;
     moab::Tag boundary_tag;
     moab::Tag distance_tag;
 
-    /// Number of sub-tracks used to compute KDE sub-track mesh tally scores
+    // Number of sub-tracks used to compute KDE sub-track mesh tally scores
     unsigned int num_subtracks;
 
-    /// Quadrature used to compute KDE integral-track mesh tally scores
+    // Quadrature used to compute KDE integral-track mesh tally scores
     Quadrature* quadrature;
 
-    /// MOAB instance that stores all of the mesh data
+    // MOAB instance that stores all of the mesh data
     moab::Interface* mbi;
 
-    /// KD-Tree used with unstructured meshes to locate calculation points
+    // KD-Tree used with unstructured meshes to locate calculation points
     moab::AdaptiveKDTree* kd_tree;  
     moab::EntityHandle kd_tree_root;
 
-    /// Running variance variables for computing optimal bandwidth at runtime
+    // Running variance variables for computing optimal bandwidth at runtime
     bool max_collisions;
     long long int num_collisions;       
     moab::CartVect mean;
     moab::CartVect variance;
 
-    /// If true, another instance already set the random number generator seed
+    // If true, another instance already set the random number generator seed
     static bool seed_is_set;
 
     // >>> PRIVATE METHODS
@@ -217,7 +194,7 @@ class KDEMeshTally : public MeshTally
                              unsigned int i);
 
     /**
-     * \brief Parse the TallyInput options for this KDE mesh tally
+     * \brief Parse the TallyInput options for this KDEMeshTally
      */
     void parse_tally_options();
 

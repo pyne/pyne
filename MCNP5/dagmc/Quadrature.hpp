@@ -5,6 +5,7 @@
 
 #include <vector>
 
+//===========================================================================//
 /**
  * \class Function
  * \brief Defines an abstract function interface
@@ -12,6 +13,7 @@
  * Function defines an abstract interface for creating functions f(x) that can
  * be integrated by the integrate() method in the Quadrature class.
  */
+//===========================================================================//
 class Function
 {
   public:
@@ -28,6 +30,7 @@ class Function
     virtual double evaluate(double x) const = 0;
 };
 
+//===========================================================================//
 /**
  * \class Quadrature
  * \brief Defines a Quadrature scheme for computing definite integrals of f(x)
@@ -42,6 +45,7 @@ class Function
  * the results due to floating point arithmetic.  Use a higher order
  * Quadrature if you need more accuracy.
  */
+//===========================================================================//
 class Quadrature
 {
   public:

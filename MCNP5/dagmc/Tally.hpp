@@ -98,13 +98,13 @@ class Tally
     virtual void end_history() = 0;
 
     /**
-     * \brief Write results to an output file for this Tally
+     * \brief Write results for this Tally
      * \param num_histories the number of particle histories tracked
      *
      * The write_data() method writes the current tally and relative standard
-     * error results to an output file for this Tally, typically normalized by
-     * the number of particle histories that were tracked during the Monte
-     * Carlo simulation.
+     * error results to std::out or an output file for this Tally, typically
+     * normalized by the number of particle histories that were tracked during
+     * the Monte Carlo simulation.
      */
     virtual void write_data(double num_histories) = 0;
 

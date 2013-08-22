@@ -14,6 +14,7 @@ namespace moab {
   class Interface;
 }
 
+//===========================================================================//
 /**
  * \class KDENeighborhood
  * \brief Defines a neighborhood region for a KDE mesh tally event
@@ -34,6 +35,7 @@ namespace moab {
  * neighborhood region.  Therefore, for these events the get_points() method
  * may return some mesh nodes that produce trivial tally contributions.
  */
+//===========================================================================//
 class KDENeighborhood
 {
   public:

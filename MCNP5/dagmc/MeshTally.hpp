@@ -44,6 +44,25 @@ namespace moab {
  * one energy bin.  They are ordered first by tally point, and then by energy
  * bin.  Derived classes can easily access/modify individual elements using
  * the protected get_data() method.
+ *
+ * ==================
+ * Input/Output Files
+ * ==================
+ *
+ * All MeshTally objects are REQUIRED to include "inp"="input_filename" as
+ * a TallyOption in the TallyInput struct defined in Tally.hpp and set through
+ * the TallyManager.  This input file contains all of the mesh data that is
+ * needed to compute the mesh tally scores.  It must be created in a file format
+ * that is supported by the Mesh-Oriented Database (MOAB), which includes both
+ * H5M and VTK options.  Source code and more information on MOAB can be found
+ * at https://trac.mcs.anl.gov/projects/ITAPS/wiki/MOAB
+ *
+ * In addition to the "inp" key, all MeshTally objects can also include an
+ * optional "out"="output_filename" key-value pair.  If the "out" key is not
+ * included as a TallyOption, then the default is a H5M file format named
+ * meshtal<tally_id>.h5m.  To write to a different file format that is
+ * supported by MOAB, simply add the desired extension to the output filename
+ * (i.e. "out"="filename.vtk" will write results to the VTK format).
  */
 //===========================================================================//
 class MeshTally : public Tally

@@ -7,6 +7,7 @@
 
 #include "KDEKernel.hpp"
 
+//===========================================================================//
 /**
  * \class PolynomialKernel
  * \brief Defines a polynomial kernel function
@@ -40,6 +41,7 @@
  *     B. E. Hansen, "Exact Mean Integrated Squared Error of Higher Order
  *     "Kernel Estimators," Econometric Theory, 21, pp. 1031-1057 (2005)
  */
+//===========================================================================//
 class PolynomialKernel : public KDEKernel
 {
   public:

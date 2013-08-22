@@ -40,6 +40,8 @@ void TallyManager::removeTally(int tally_id)
 
     if (it != observers.end())
     {
+        // release memory allocated to Tally and remove it from the map
+        delete it->second;
         observers.erase(it);
     }
     else
@@ -138,11 +140,19 @@ Tally *TallyManager::createTally(unsigned int tally_id,
 {
     TallyInput input; 
 
+    // Check that there are at least 2 energy bin boundaries
+    if (energy_bin_bounds.size() < 2)
+    {
+        std::cerr << "Warning: energy bin boundaries for Tally " << tally_id
+                  << " are invalid." << std::endl;
+        return NULL;
+    }
+ 
     // Set up the input structure from the passed parameters
-    input.tally_id = tally_id;
-    input.options  = options;
-    input.energy_bin_bounds = energy_bin_bounds;
+    input.tally_id          = tally_id;
     input.tally_type        = tally_type;
+    input.energy_bin_bounds = energy_bin_bounds;
+    input.options           = options;
         
     return Tally::create_tally(input);
 }
