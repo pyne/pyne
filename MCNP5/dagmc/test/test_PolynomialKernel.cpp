@@ -67,6 +67,7 @@ TEST_F(PolynomialKernelTest, EvaluateUniformKernel)
 {
     kernel = new PolynomialKernel(0, 1);
     EXPECT_EQ("2nd-order uniform", kernel->get_kernel_name());
+    EXPECT_EQ(2, kernel->get_order());
 
     // test evaluation over the domain
     EXPECT_DOUBLE_EQ(0.5, kernel->evaluate(-1.0));
@@ -91,6 +92,7 @@ TEST_F(PolynomialKernelTest, EvaluateEpanechnikovKernel)
 {
     kernel = new PolynomialKernel(1, 1);
     EXPECT_EQ("2nd-order epanechnikov", kernel->get_kernel_name());
+    EXPECT_EQ(2, kernel->get_order());
 
     // test evaluation over the domain
     EXPECT_DOUBLE_EQ(0.0, kernel->evaluate(-1.0));
@@ -115,6 +117,7 @@ TEST_F(PolynomialKernelTest, EvaluateBiweightKernel)
 {
     kernel = new PolynomialKernel(2, 1);
     EXPECT_EQ("2nd-order biweight", kernel->get_kernel_name());
+    EXPECT_EQ(2, kernel->get_order());
 
     // test evaluation over the domain
     EXPECT_NEAR(0.0000, kernel->evaluate(-1.0), 1e-6);
@@ -139,6 +142,7 @@ TEST_F(PolynomialKernelTest, EvaluateTriweightKernel)
 {
     kernel = new PolynomialKernel(3, 1);
     EXPECT_EQ("2nd-order triweight", kernel->get_kernel_name());
+    EXPECT_EQ(2, kernel->get_order());
 
     // test evaluation over the domain
     EXPECT_NEAR(0.00000, kernel->evaluate(-1.0), 1e-6);
@@ -163,6 +167,7 @@ TEST_F(PolynomialKernelTest, EvaluateGeneralPolynomialKernel)
 {
     kernel = new PolynomialKernel(4, 1);
     EXPECT_EQ("2nd-order polynomial (s = 4)", kernel->get_kernel_name());
+    EXPECT_EQ(2, kernel->get_order());
 
     // test evaluation over the domain
     EXPECT_NEAR(0.000000, kernel->evaluate(-1.0), 1e-6);
@@ -187,6 +192,7 @@ TEST_F(PolynomialKernelTest, Evaluate4thOrderEpanechnikov)
 {
     kernel = new PolynomialKernel(1, 2);
     EXPECT_EQ("4th-order epanechnikov", kernel->get_kernel_name());
+    EXPECT_EQ(4, kernel->get_order());
 
     // test evaluation over the domain
     EXPECT_NEAR(0.00000, kernel->evaluate(-1.0), 1e-6);
@@ -211,6 +217,7 @@ TEST_F(PolynomialKernelTest, Evaluate6thOrderEpanechnikov)
 {
     kernel = new PolynomialKernel(1, 3);
     EXPECT_EQ("6th-order epanechnikov", kernel->get_kernel_name());
+    EXPECT_EQ(6, kernel->get_order());
 
     // test evaluation over the domain
     EXPECT_NEAR(0.000000, kernel->evaluate(-1.0), 1e-6);
@@ -235,6 +242,7 @@ TEST_F(PolynomialKernelTest, Evaluate4thOrderBiweight)
 {
     kernel = new PolynomialKernel(2, 2);
     EXPECT_EQ("4th-order biweight", kernel->get_kernel_name());
+    EXPECT_EQ(4, kernel->get_order());
 
     // test evaluation over the domain
     EXPECT_NEAR(0.000000, kernel->evaluate(-1.0), 1e-6);
@@ -259,6 +267,7 @@ TEST_F(PolynomialKernelTest, Evaluate6thOrderBiweight)
 {
     kernel = new PolynomialKernel(2, 3);
     EXPECT_EQ("6th-order biweight", kernel->get_kernel_name());
+    EXPECT_EQ(6, kernel->get_order());
 
     // test evaluation over the domain
     EXPECT_NEAR(0.000000, kernel->evaluate(-1.0), 1e-6);
@@ -283,6 +292,7 @@ TEST_F(PolynomialKernelTest, Evaluate4thOrderTriweight)
 {
     kernel = new PolynomialKernel(3, 2);
     EXPECT_EQ("4th-order triweight", kernel->get_kernel_name());
+    EXPECT_EQ(4, kernel->get_order());
 
     // test evaluation over the domain
     EXPECT_NEAR(0.000000, kernel->evaluate(-1.0), 1e-6);
@@ -307,6 +317,7 @@ TEST_F(PolynomialKernelTest, Evaluate6thOrderTriweight)
 {
     kernel = new PolynomialKernel(3, 3);
     EXPECT_EQ("6th-order triweight", kernel->get_kernel_name());
+    EXPECT_EQ(6, kernel->get_order());
 
     // test evaluation over the domain
     EXPECT_NEAR(0.000000, kernel->evaluate(-1.0), 1e-6);

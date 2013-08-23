@@ -205,6 +205,25 @@ TEST_F(KDEMeshTallyTest, MissingBoundaryTags)
     EXPECT_NO_THROW(kde_tally->compute_score(event, 0));
 }
 //---------------------------------------------------------------------------//
+TEST_F(KDEMeshTallyTest, TurnOffBoundaryForHigherOrderKernels)
+{
+    // add boundary correction and kernel order to input options
+    input.options.insert(std::make_pair("boundary", "default"));
+    input.options.insert(std::make_pair("order", "6"));
+
+    // make sure KDEMeshTally does not return an error
+    KDEMeshTally::Estimator type = KDEMeshTally::INTEGRAL_TRACK;
+    EXPECT_NO_THROW(kde_tally = new KDEMeshTally(input, type));
+
+    // verify boundary tags are not accessed for scoring on a tally event
+    TallyEvent event;
+    event.type = TallyEvent::TRACK;
+    event.position = moab::CartVect(0.0, 0.0, 0.0);
+    event.direction = moab::CartVect(1.0, 0.0, 0.0);
+    event.track_length = 1.0;
+    EXPECT_NO_THROW(kde_tally->compute_score(event));
+}
+//---------------------------------------------------------------------------//
 TEST_F(KDEMeshTallyTest, InvalidBandwidth)
 {
     // change bandwidth values in input options to be invalid
@@ -215,7 +234,7 @@ TEST_F(KDEMeshTallyTest, InvalidBandwidth)
     input.options.insert(std::make_pair("hy", "-1.0"));
     input.options.insert(std::make_pair("hz", "na"));
 
-    // make sure KDEMeshTally does not return an error
+    // make sure KDEMeshTally does not return an error for invalid bandwidth
     KDEMeshTally::Estimator type = KDEMeshTally::INTEGRAL_TRACK;
     EXPECT_NO_THROW(kde_tally = new KDEMeshTally(input, type));
 }

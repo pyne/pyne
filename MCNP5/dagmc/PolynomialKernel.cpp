@@ -108,6 +108,11 @@ std::string PolynomialKernel::get_kernel_name() const
     return kernel_name.str();
 }
 //---------------------------------------------------------------------------//
+int PolynomialKernel::get_order() const
+{
+    return 2 * r;
+}
+//---------------------------------------------------------------------------//
 double PolynomialKernel::integrate_moment(double a,
                                           double b,
                                           unsigned int i) const

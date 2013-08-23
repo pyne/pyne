@@ -41,9 +41,10 @@
  *
  *     1) evaluate(double u)
  *     2) get_kernel_name()
- *     3) integrate_moment(double a, double b, unsigned int i)
+ *     3) get_order()
+ *     4) integrate_moment(double a, double b, unsigned int i)
  *
- * To assist Derived classes in implementing method 3, there is a protected
+ * To assist Derived classes in implementing method 4, there is a protected
  * MomentFunction class defined within KDEKernel that implements the Function
  * interface.  This class can be used to create general moment functions that
  * can be integrated using the integrate method in the Quadrature class.  See
@@ -100,6 +101,12 @@ class KDEKernel
      * \return string representing kernel name
      */
     virtual std::string get_kernel_name() const = 0;
+
+    /**
+     * \brief get_order()
+     * \return the order of the kernel
+     */
+    virtual int get_order() const = 0;
 
     /**
      * \brief Integrates the ith moment function for this kernel

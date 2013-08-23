@@ -73,12 +73,11 @@ namespace moab {
  * 3) "kernel"="type", "order"="value"
  * -----------------------------------
  * Defines the type and order of the kernel function to be used.  Valid types
- * include "epanechnikov", "uniform", "biweight", or "triweight". Only symmetric
- * kernel functions of these types are supported, which means that the order
- * must be a multiple of 2.  If no "kernel" is requested, the default is a 2nd
- * order "epanechnikov" kernel.
- *
- * TODO implement the "order" as an available option
+ * include "epanechnikov", "uniform", "biweight", or "triweight".  Note that
+ * only symmetric versions of these kernels are supported, which means that
+ * "order" must be a multiple of 2.  If "kernel" is omitted or invalid, then
+ * the default is "epanechnikov".  Similarly, if "order" is omitted or invalid,
+ * then the default is 2nd-order.
  *
  * 4) "boundary"="default"
  * -----------------------

@@ -73,6 +73,12 @@ class PolynomialKernel : public KDEKernel
     virtual std::string get_kernel_name() const;
 
     /**
+     * \brief get_order()
+     * \return the order of the kernel
+     */
+    virtual int get_order() const;
+
+    /**
      * \brief Integrates the ith moment function for this polynomial kernel
      * \param a, b the lower and upper integration limits
      * \param i the index representing the ith moment function

@@ -43,15 +43,17 @@ KDEMeshTally::KDEMeshTally(const TallyInput& input,
 
     // set up KDEMeshTally member variables from TallyInput
     parse_tally_options();
-
-    // create second-order epanechnikov kernel if user did not specify type
-    if (kernel == NULL)
-    {
-        kernel = KDEKernel::createKernel("epanechnikov");
-    }
  
     std::cout << "    using " << kernel->get_kernel_name()
               << " kernel and bandwidth " << bandwidth << std::endl;
+
+    // turn off boundary correction for higher-order kernels
+    if (use_boundary_correction == true && kernel->get_order() > 2)
+    {
+        std::cerr << "Warning: boundary correction is not yet supported "
+                  << "for higher-order kernels" << std::endl;
+        use_boundary_correction = false;
+    }
 
     if (estimator == INTEGRAL_TRACK)
     {
@@ -277,6 +279,8 @@ void KDEMeshTally::parse_tally_options()
 {
     const TallyInput::TallyOptions& options = input_data.options;  
     TallyInput::TallyOptions::const_iterator it;
+    std::string kernel_type = "epanechnikov";
+    int kernel_order = 2;
 
     for (it = options.begin(); it != options.end(); ++it)
     {
@@ -289,7 +293,20 @@ void KDEMeshTally::parse_tally_options()
         else if (key == "hz") set_bandwidth_value(key, value, 2);
         else if (key == "kernel")
         {
-            kernel = KDEKernel::createKernel(value);
+            kernel_type = value;
+        }
+        else if (key == "order")
+        {
+            char* end;
+            kernel_order = strtol(value.c_str(), &end, 10);
+
+            if (value.c_str() == end || kernel_order % 2 != 0)
+            {
+                std::cerr << "Warning: '" << value << "' is an invalid value"
+                          << " for the kernel order" << std::endl;
+                std::cerr << "    using default value " << key << " = 2\n";
+                kernel_order = 2;
+            }
         }
         else if (key == "boundary" && value == "default")
         {
@@ -325,6 +342,15 @@ void KDEMeshTally::parse_tally_options()
                       << input_data.tally_id
                       << " has unknown key '" << key << "'" << std::endl;
         }
+    }
+
+    // create a kernel function to use for this KDEMeshTally
+    kernel = KDEKernel::createKernel(kernel_type, kernel_order);
+
+    if (kernel == NULL)
+    {
+        std::cerr << "Warning: invalid kernel type '" << kernel_type << "'\n";
+        kernel = KDEKernel::createKernel("epanechnikov", kernel_order);
     }
 }
 //---------------------------------------------------------------------------//

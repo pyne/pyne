@@ -26,6 +26,7 @@ class MockEpanechnikovKernel : public KDEKernel
 
     // not implemented
     std::string get_kernel_name() const {}
+    int get_order() const {}
 
     // integrates the ith moment function
     double integrate_moment(double a, double b, unsigned int i) const
@@ -110,11 +111,18 @@ TEST_F(KDEKernelTest, CreateInvalidZeroOrderKernel)
     EXPECT_TRUE(kernel == NULL);
 }
 //---------------------------------------------------------------------------//
+TEST_F(KDEKernelTest, CreateInvalidTypeAndOrderKernel)
+{
+    kernel = KDEKernel::createKernel("invalid_kernel", 5);
+    EXPECT_TRUE(kernel == NULL);
+}
+//---------------------------------------------------------------------------//
 TEST_F(KDEKernelTest, CreateUniformKernel)
 {
     kernel = KDEKernel::createKernel("uniform");
     EXPECT_TRUE(kernel != NULL);
     EXPECT_EQ("2nd-order uniform", kernel->get_kernel_name());
+    EXPECT_EQ(2, kernel->get_order());
 }
 //---------------------------------------------------------------------------//
 TEST_F(KDEKernelTest, CreateEpanechnikovKernel)
@@ -122,6 +130,7 @@ TEST_F(KDEKernelTest, CreateEpanechnikovKernel)
     kernel = KDEKernel::createKernel("epanechnikov");
     EXPECT_TRUE(kernel != NULL);
     EXPECT_EQ("2nd-order epanechnikov", kernel->get_kernel_name());
+    EXPECT_EQ(2, kernel->get_order());
 }
 //---------------------------------------------------------------------------//
 TEST_F(KDEKernelTest, CreateBiweightKernel)
@@ -129,6 +138,7 @@ TEST_F(KDEKernelTest, CreateBiweightKernel)
     kernel = KDEKernel::createKernel("biweight");
     EXPECT_TRUE(kernel != NULL);
     EXPECT_EQ("2nd-order biweight", kernel->get_kernel_name());
+    EXPECT_EQ(2, kernel->get_order());
 }
 //---------------------------------------------------------------------------//
 TEST_F(KDEKernelTest, CreateTriweightKernel)
@@ -136,6 +146,7 @@ TEST_F(KDEKernelTest, CreateTriweightKernel)
     kernel = KDEKernel::createKernel("triweight");
     EXPECT_TRUE(kernel != NULL);
     EXPECT_EQ("2nd-order triweight", kernel->get_kernel_name());
+    EXPECT_EQ(2, kernel->get_order());
 }
 //---------------------------------------------------------------------------//
 TEST_F(KDEKernelTest, CreateHigherOrderKernel)
@@ -143,6 +154,7 @@ TEST_F(KDEKernelTest, CreateHigherOrderKernel)
     kernel = KDEKernel::createKernel("epanechnikov", 6);
     EXPECT_TRUE(kernel != NULL);
     EXPECT_EQ("6th-order epanechnikov", kernel->get_kernel_name());
+    EXPECT_EQ(6, kernel->get_order());
 }
 //---------------------------------------------------------------------------//
 // FIXTURE-BASED TESTS: BoundaryKernelTest
