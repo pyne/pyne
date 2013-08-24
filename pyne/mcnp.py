@@ -25,8 +25,8 @@ import numpy as np
 from pyne.material import Material
 from pyne.material import MultiMaterial
 from pyne import nucname
+from pyne.statmesh import StatMesh
 from binaryreader import _BinaryReader, _FortranRecord
-import meshtally
 
 # mesh specific imports
 try:
@@ -1508,73 +1508,189 @@ class Wwinp(object):
         self.nc = [len(self.cm[0]), len(self.cm[1]), len(self.cm[2])]
         self.nf = [sum(self.fm[0]), sum(self.fm[1]), sum(self.fm[2])]
 
-class meshtal:
 
-    def __init__(self, FileName = None, LineCount = 1):
-        self.Version = -1
-        self.NHistories = -1
-        self.SM = []
-        self.linecount = LineCount
-        if FileName == None:
-            pass  
+class Meshtal(object):
+    """This class stores all the information from an MCNP meshtal file with
+    single or multiple fmesh4 neutron or photon tallies. The "tally" attribute
+    provides key/value access to invidial MeshTally objects.
+
+    Attributes
+    ==========
+    filename : string
+        Path to an MCNP meshtal file
+    version: float
+        The MCNP verison number
+    ld : string
+        The MCNP verison date
+    title : string
+        Title card from the MCNP input
+    histories : int
+        Number of histories from the MCNP simulation
+    tally : dict
+        A dictionary with MCNP fmesh4 tally numbers (e.g. 4, 14, 24) as keys and
+        MeshTally objects as values.
+    """
+
+    def __init__(self, filename):
+        """Instantiate a Meshtal object from a meshtal file.
+        """
+
+        self.tally = {}
+
+        with open(filename, 'r') as f: 
+           self._read_meshtal_head(f)
+           self._read_tallies(f)
+
+    def _read_meshtal_head(self, f):
+        """Get the version, ld, title card and number of histories.
+        """
+
+        line_1 = f.readline()
+        #set mcnp version
+        self.version = float(line_1.split()[2])
+        #get version date ("ld" in MCNP User's Manual)
+        self.ld = line_1.split()[3][3:]
+
+        line_2 = f.readline()
+        #store title card
+        self.title = line_2.strip()
+
+        line_3 = f.readline()
+        # get number of histories
+        self.histories = int(float(line_3.split()[-1]))
+
+    def _read_tallies(self, f):
+        """Read in all of the mesh tallies from the meshtal file.
+        """
+        line = f.readline()
+
+        while line != "":        
+            if line.split()[0:3] == ['Mesh', 'Tally', 'Number']:
+                tally_number = int(line.split()[3])
+                self.tally[tally_number] = MeshTally(f, tally_number)
+
+            line = f.readline()
+
+
+
+class MeshTally(StatMesh):
+    """This class stores all information from all single MCNP mesh tally that 
+    exists within some meshtal file. Header information is stored as attributes
+    and the "mesh" attribute is a MOAB mesh with all result and relative error
+    data tagged. This class inherits from StatMesh, exposing all statistical
+    mesh manipulation methods.
+
+    Atrributes
+    ----------
+    tally number : int
+        The MCNP tally number. Must end in 4 (e.g. 4, 14, 214).
+    particle : string
+        Either "n" for a neutron mesh tally or "p" for a photon mesh tally.
+    dose response : bool
+        True is the tally is modified by a dose response function.
+    x_bounds : list of floats
+        The locations of mesh vertices in the x direction.
+    y_bounds : list of floats
+        The locations of mesh vertices in the y direction.
+    z_bounds : list of floats
+        The locations of mesh vertices in the z direction.
+    e_bounds : list of floats
+        The minimum and maximum bounds for energy bins
+    mesh : MOAB mesh
+        A mesh tagged with all results and relative errors
+    """
+
+    def __init__(self, f, tally_number):
+        """Create MeshTally object from a filestream (f) open to the second line
+        of a mesh tally header (the neutron/photon line). The "tally_number" is
+        the MCNP fmesh4 tally number (e.g. 4, 14, 24). MeshTally objects should 
+        be instantiated only through the Meshtal class.
+        """
+        self.tally_number = tally_number
+        self._read_meshtally_head(f)
+        self._read_column_order(f)
+        self._create_mesh(f)
+   
+    def _read_meshtally_head(self, f):
+        """ Get the particle type, spacial and energy bounds, and whether or 
+        not flux-to-dose conversion factors are being used.
+        """
+        line = f.readline()
+        if ('neutron' in line):
+            self.particle = 'n'
+        elif ('photon' in line):
+            self.particle = 'p'
+
+        #determine if meshtally flux-to-dose conversion factors are being used.
+        line = f.readline()
+        dr_str = 'This mesh tally is modified by a dose response function.'
+        if line.strip() == dr_str:
+            self.dose_response = True
         else:
-            self.read_meshtal_head(FileName, LineCount)
-            self.read_tallies(FileName)
-            
-    def read_meshtal_head(self, FileName, LineCount = -1):
-        if LineCount == -1:
-            LineCount = self.linecount
-        flag = 2
-        while flag:
-            Line = linecache.getline( FileName, LineCount )
-            LineCount = LineCount+1
-        
-            # empty line
-            if (Line.split() == []):
-                continue
-            # ignore comments
-            x = Line.strip().find('#')
-            if ( x == 0 ):
-                continue
-            elif (x > 0):
-                Line = str(Line.split('#')[:1]).lower().split()    
-            else:
-                Line = Line.lower().split()
-        
-            # get mcnp version
-            if (self.Version == -1) & ('mcnp' in Line) & ('version' in Line):
-                for i in range(Line.index('version')+1, len(Line)):            
-                    if Line[i].replace('.', '').isdigit():
-                        self.Version = Line[i]
-                        flag = flag-1
-                        break
-            # get number of histories
-            elif (self.NHistories == -1) & ('number' in Line) \
-                                         & ('histories' in Line):
-                for i in Line:
-                    if i.replace('.','').isdigit():
-                        self.NHistories = i
-                        flag = flag -1
-                        break
-            # break if not found
-            elif (LineCount - self.linecount) > 50:
-                return False
+            self.dose_response = False
 
-        self.linecount = LineCount
-        return True
-                
-    def read_tallies( self, FileName, LineCount = -1 ):
-        if LineCount == -1:
-            LineCount = self.linecount
-        while True:
-            Meshtally = meshtally(FileName, LineCount)
-            LineCount = Meshtally.linecount
-            self.SM.append(Meshtally)
-            Line = linecache.getline(FileName, LineCount)
-            if Line.split() == []:
-                Line = linecache.getline(FileName, LineCount+1)
-            if Line.lower().find('mesh') < 0:
-                break
-            
-        self.linecount = LineCount
-        return True
+        #advance the file to the line where x, y, z, bounds start
+        while line.strip() != 'Tally bin boundaries:':
+            line = f.readline()
+        
+        self.x_bounds = [float(x) for x in f.readline().split()[2:]]
+        self.y_bounds = [float(x) for x in f.readline().split()[2:]]
+        self.z_bounds = [float(x) for x in f.readline().split()[2:]]
+        # "Energy bin boundaries" contain one more word than "X boundaries"
+        self.e_bounds = [float(x) for x in f.readline().split()[3:]]
+
+        #skip blank line between enery bin boundaries and table headings
+        f.readline() 
+
+    def _read_column_order(self, f):
+        """Create dictionary with table headings as keys and their column
+        location as values. Dictionary is the private attribute _column_idx.
+        """
+        line = f.readline()
+        column_names = line.replace('Rel ','Rel_').replace('Rslt * ','Rslt_*_')\
+                                                                .strip().split()
+        self._column_idx = dict(zip(column_names, range(0,len(column_names))))
+
+    def _create_mesh(self, f):
+        """Instantiate a MOAB mesh and tag it will results and relative errors.
+        """
+
+        self.mesh = ScdMesh(self.x_bounds, self.y_bounds, self.z_bounds)
+           
+        for e_group in range(1, len(self.e_bounds)):
+            result_tag_name = '{0}_group_{1:03d}'.format(self.particle, 
+                                                          e_group)
+            rel_error_tag_name = '{0}_group_{1:03d}_error'.format(self.particle,
+                                                                  e_group)
+            self._tag_mesh(f, result_tag_name, rel_error_tag_name)
+
+        #Tag "total" data if it exists (i.e. if there is more than
+        #1 energy group)
+        if len(self.e_bounds) > 2:
+            result_tag_name = '{0}_group_total'.format(self.particle)
+            rel_error_tag_name = '{0}_group_total_error'.format(self.particle)
+            self._tag_mesh(f, result_tag_name, rel_error_tag_name)
+
+    def _tag_mesh(self, f, result_tag_name, rel_error_tag_name):
+        """Tag the MOAB mesh with data from an open filestream and supplied
+        tag names.
+        """
+
+        tag_result = self.mesh.imesh.createTag(result_tag_name, 1, float)
+        tag_rel_error = self.mesh.imesh.createTag(rel_error_tag_name, 1, float)
+        result = []
+        rel_error = []
+
+        num_vol_elements = (len(self.x_bounds)-1) * (len(self.y_bounds)-1)\
+                * (len(self.z_bounds)-1) 
+
+        while len(result) < num_vol_elements:
+            line = f.readline()
+            result.append(float(line.split()[self._column_idx["Result"]]))
+            rel_error.append(float(line.split()[self._column_idx["Rel_Error"]]))
+
+        #Tag data for energy group 'e_group' onto all voxels
+        vol_elements = list(self.mesh.iterateHex("xyz"))
+        tag_result[vol_elements] = result
+        tag_rel_error[vol_elements] = rel_error
+
