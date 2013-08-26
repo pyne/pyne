@@ -4,6 +4,7 @@ mcnp   version 5     ld=09282010  probid =  06/19/13 11:00:46
 
  Mesh Tally Number         4
  This is a neutron mesh tally.
+ This mesh tally is modified by a dose response function.
 
  Tally bin boundaries:
     X direction:   -200.00    -66.67     66.67    200.00
