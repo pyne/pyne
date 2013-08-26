@@ -157,6 +157,36 @@ double distance_to_boundary(double max_distance,
     return distance;
 }
 
+// updates volume ID if on a boundary to the next volume ID
+bool get_adjacent_volume(const moab::CartVect& coords,
+                         const moab::CartVect& direction,
+                         moab::EntityHandle& volume_ID)
+{
+    moab::ErrorCode dagmc_error = moab::MB_SUCCESS;
+    moab::EntityHandle next_surface = 0;
+    double next_surface_distance = 0.0;    
+
+    // check distance to next surface in current direction    
+    dagmc_error = dagmc->ray_fire(volume_ID,
+                                  coords.array(),
+                                  direction.array(),
+                                  next_surface,
+                                  next_surface_distance);
+
+    assert(dagmc_error == moab::MB_SUCCESS);
+
+    if (next_surface != 0 && next_surface_distance < 1e-10)
+    {
+        dagmc_error = dagmc->next_vol(next_surface, volume_ID, volume_ID);
+        assert(dagmc_error == moab::MB_SUCCESS);
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
 /**
  * Determines if node is less than or equal to one bandwidth from any external
  * boundary in the DAGMC geometry.  If true, the boundary array will be set to
@@ -180,13 +210,30 @@ bool node_near_boundary(const moab::EntityHandle& mesh_node,
 
     if (dagmc->has_prop(volume_ID, "graveyard"))
     {
-        // flip the direction and see if node was on an inner boundary
-        direction[0] = -1.0;
-        volume_ID = find_volume_ID(coords, direction);
+        bool volume_change = false;
 
-        if (dagmc->has_prop(volume_ID, "graveyard"))
+        // check if coords are on inner graveyard boundary and update volume_ID
+        for (int i = 0; i < 3; ++i)
         {
-            std::cerr << "Warning: node was found inside graveyard" << std::endl;
+            if (!volume_change)
+            {
+                direction[i] = 1.0;
+                volume_change = get_adjacent_volume(coords, direction, volume_ID);
+            }
+            
+            if (!volume_change)
+            {
+                direction[i] = -1.0;
+                volume_change = get_adjacent_volume(coords, direction, volume_ID);
+            }
+
+            direction[i] = 0.0;
+        }
+
+        if (!volume_change)
+        {
+            std::cerr << "Warning: node " << coords
+                      << " was found inside graveyard" << std::endl;
             return false;
         }
     }
