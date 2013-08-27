@@ -365,6 +365,7 @@ int main(int argc, char* argv[])
 
     // iterate through all mesh nodes
     std::vector<moab::EntityHandle>::iterator it;
+    int node_count = 0;
 
     for(it = mesh_nodes.begin(); it != mesh_nodes.end(); ++it)
     {
@@ -383,8 +384,12 @@ int main(int argc, char* argv[])
 
             mb_error = mbi->tag_set_data(distance_tag, &node, 1, distance);
             assert(mb_error == moab::MB_SUCCESS);
+            ++node_count;
         }
     }
+
+    std::cout << node_count << " of " << mesh_nodes.size()
+              << " were tagged as boundary points" << std::endl;
 
     // write mesh to output file with new tag data
     moab::Tag output_tags[2] = {boundary_tag, distance_tag};

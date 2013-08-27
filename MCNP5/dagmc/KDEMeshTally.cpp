@@ -310,6 +310,7 @@ void KDEMeshTally::parse_tally_options()
         }
         else if (key == "boundary" && value == "default")
         {
+            std::cout << "    using boundary correction: " << value << std::endl;
             use_boundary_correction = true;
         }
         else if (key == "seed" && estimator == SUB_TRACK)
