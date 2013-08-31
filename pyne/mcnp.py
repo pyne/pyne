@@ -1375,7 +1375,6 @@ class Wwinp(object):
         # Write all of block 3 a single time (e.g. for WWINP with only n or 
         #   p). This function is called twice in the case of the WWINP having 
         #   both n and p.
-trier
 
         if particle == 'n':
            particle_index = 0
