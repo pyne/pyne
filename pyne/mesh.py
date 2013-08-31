@@ -1,18 +1,16 @@
-import math
+import numpy as np
 import itertools
-from collections import namedtuple
-from collections import Iterable
+from collections import namedtuple, Iterable
 
 try:
-    from itaps import iMesh
-    from itaps import iBase
-    from itaps import iMeshExtensions
-except:
-    print("The mesh module requires imports of iMesh, iBase, and"
+    from itaps import iMesh, iBase, iMeshExtensions
+except ImportError:
+    raise ImportError("The mesh module requires imports of iMesh, iBase, and"
           " iMeshExtensions from PyTAPS")
-    raise ImportError
 
 class MeshError(Exception):
+    """Errors related to instantiating mesh objects and utilizing their methods.
+    """
     pass
 
 class Mesh(object):        
@@ -27,10 +25,10 @@ class Mesh(object):
         File name of file containing iMesh instance.
     structured : bool
         True for structured mesh.
-    str_coords : list of lists
+    structured_coords : list of lists
         A list containing lists of x_points, y_points and z_points that make up
         a structured mesh. 
-    str_set : iMesh entity set handle
+    structured_set : iMesh entity set handle
         A preexisting structured entity set on an iMesh instance with a
         "BOX_DIMS" tag.
 
@@ -44,8 +42,8 @@ class Mesh(object):
             - From mesh file with exactly 1 entity set (with BOX_DIMS tag) by
               specifying <mesh_file> and structured = True.
             - From an imesh instance with multiple entity sets by specifying 
-              <mesh>, <str_set>, structured=True.
-            - From coordinates by specifying <str_coords>, structured=True, and 
+              <mesh>, <structured_set>, structured=True.
+            - From coordinates by specifying <structured_coords>, structured=True, and 
               optional preexisting iMesh instance <mesh>
 
         The "BOX_DIMS" tag on iMesh instances containing structured mesh is
@@ -58,7 +56,7 @@ class Mesh(object):
         """
 
     def __init__(self, mesh=None, mesh_file=None, structured=False, \
-                 str_coords=None, str_set=None):
+                 structured_coords=None, structured_set=None):
 
         if mesh:
             self.mesh = mesh
@@ -70,7 +68,7 @@ class Mesh(object):
         #Unstructured mesh cases
         if not self.structured:
             #Error if structured arguments are passed
-            if str_coords or str_set:
+            if structured_coords or structured_set:
                 MeshError("Structured mesh arguments should not be present for\
                             unstructured Mesh instantiation.")
 
@@ -81,14 +79,14 @@ class Mesh(object):
             elif mesh_file and not mesh:
                 self.mesh.load(mesh_file)
             else:
-                raise MeshError("To instantiate unstructured mesh object, " \
-                                 "must supply exactly 1 of the following: "\
+                raise MeshError("To instantiate unstructured mesh object, "
+                                 "must supply exactly 1 of the following: "
                                  "<mesh>, <mesh_file>.")
 
         #structured mesh cases
         elif self.structured:
             #From mesh or mesh_file
-            if (mesh or mesh_file) and not str_coords and not str_set:
+            if (mesh or mesh_file) and not structured_coords and not structured_set:
                 if mesh_file:
                     self.mesh.load(mesh_file)
                 try:
@@ -104,7 +102,7 @@ class Mesh(object):
                     except iBase.TagNotFoundError:
                         pass
                     else:
-                        self.str_set = ent_set
+                        self.structured_set = ent_set
                         count += 1
 
                 if count == 0:
@@ -115,22 +113,22 @@ class Mesh(object):
                                    " Instantiate individually using"\
                                    " from_ent_set()".format(count))
             # from coordinates                       
-            elif not mesh and not mesh_file and str_coords and not str_set:
-                extents = [0, 0, 0] + [len(x) - 1 for x in str_coords]
-                self.str_set = self.mesh.createStructuredMesh(
-                     extents, i=str_coords[0], j=str_coords[1], k=str_coords[2],
+            elif not mesh and not mesh_file and structured_coords and not structured_set:
+                extents = [0, 0, 0] + [len(x) - 1 for x in structured_coords]
+                self.structured_set = self.mesh.createStructuredMesh(
+                     extents, i=structured_coords[0], j=structured_coords[1], k=structured_coords[2],
                      create_set=True)
 
-            #From mesh and str_set:
-            elif mesh and not mesh_file and not str_coords and str_set:
+            #From mesh and structured_set:
+            elif mesh and not mesh_file and not structured_coords and structured_set:
                 try:
-                    self.mesh.getTagHandle("BOX_DIMS")[str_set]
+                    self.mesh.getTagHandle("BOX_DIMS")[structured_set]
                 except iBase.TagNotFoundError as e:
                     print("Supplied entity set does not contain"
                                      "BOX_DIMS tag")
                     raise e
 
-                self.str_set = str_set
+                self.structured_set = structured_set
             else:
                 raise MeshError("For structured mesh instantiation, need to"
                                 "supply exactly one of the following:\n"
@@ -139,31 +137,31 @@ class Mesh(object):
                                 "C. Mesh coordinates\n"
                                 "D. Structured entity set AND iMesh instance")
 
-            self.dims = self.mesh.getTagHandle("BOX_DIMS")[self.str_set]
+            self.dims = self.mesh.getTagHandle("BOX_DIMS")[self.structured_set]
             self.vertex_dims = list(self.dims[0:3]) \
                                + [x + 1 for x in self.dims[3:6]]                           
 
-    def str_get_vertex(self, i, j, k):
+    def structured_get_vertex(self, i, j, k):
         """Return the handle for (i,j,k)'th vertex in the mesh"""
-        self._str_check()
-        n = _str_find_idx(self.vertex_dims, (i, j, k))
-        return _str_stepIter(
-            self.str_set.iterate(iBase.Type.vertex, iMesh.Topology.point), n)
+        self._structured_check()
+        n = _structured_find_idx(self.vertex_dims, (i, j, k))
+        return _structured_step_iter(
+            self.structured_set.iterate(iBase.Type.vertex, iMesh.Topology.point), n)
 
 
-    def str_get_hex(self, i, j, k):
+    def structured_get_hex(self, i, j, k):
         """Return the handle for the (i,j,k)'th hexahedron in the mesh"""
-        self._str_check()
-        n = _str_find_idx(self.dims, (i, j, k))
-        return _str_stepIter(
-            self.str_set.iterate(iBase.Type.region, 
+        self._structured_check()
+        n = _structured_find_idx(self.dims, (i, j, k))
+        return _structured_step_iter(
+            self.structured_set.iterate(iBase.Type.region, 
                                  iMesh.Topology.hexahedron), n)
 
 
-    def str_get_hex_volume(self, i, j, k):
-        self._str_check()
+    def structured_get_hex_volume(self, i, j, k):
+        self._structured_check()
         """Return the volume of the (i,j,k)'th hexahedron in the mesh"""
-        v = list(self.str_iterate_vertex(x=[i, i + 1],
+        v = list(self.structured_iterate_vertex(x=[i, i + 1],
                                  y=[j, j + 1],
                                  z=[k, k + 1]))
         coord = self.mesh.getVtxCoords(v)
@@ -173,7 +171,7 @@ class Mesh(object):
         return dx * dy * dz
 
 
-    def str_iterate_hex(self, order="zyx", **kw):
+    def structured_iterate_hex(self, order="zyx", **kw):
         """Get an iterator over the hexahedra of the mesh
 
         The order argument specifies the iteration order.  It must be a string
@@ -181,7 +179,7 @@ class Mesh(object):
         along which the iteration will advance the most quickly.  Thus "zyx" --
         x coordinates changing fastest, z coordinates changing least fast-- is
         the default, and is identical to the order that would be given by the
-        str_set.iterate() function.
+        structured_set.iterate() function.
 
         When a dimension is absent from the order, iteration will proceed over
         only the column in the mesh that has the lowest corresonding (i/j/k)
@@ -198,83 +196,83 @@ class Mesh(object):
 
         Examples::
 
-          str_iterate_hex(): equivalent to iMesh iterator over hexes in mesh
-          str_iterate_hex("xyz"): iterate over entire mesh, with k-coordinates
+          structured_iterate_hex(): equivalent to iMesh iterator over hexes in mesh
+          structured_iterate_hex("xyz"): iterate over entire mesh, with k-coordinates
                                changing fastest, i-coordinates least fast.
-          str_iterate_hex("yz", x=3): Iterate over the j-k plane of the mesh
+          structured_iterate_hex("yz", x=3): Iterate over the j-k plane of the mesh
                                    whose i-coordinate is 3, with k values
                                    changing fastest.
-          str_iterate_hex("z"): Iterate over k-coordinates, with i=dims.imin
+          structured_iterate_hex("z"): Iterate over k-coordinates, with i=dims.imin
                              and j=dims.jmin
-          str_iterate_hex("yxz", y=(3,4)): Iterate over all hexes with
+          structured_iterate_hex("yxz", y=(3,4)): Iterate over all hexes with
                                         j-coordinate = 3 or 4.  k-coordinate
                                         values change fastest, j-values least
                                         fast.
         """
-        self._str_check()
+        self._structured_check()
 
         # special case: zyx order is the standard pytaps iteration order,
         # so we can save time by simply returning a pytaps iterator
         # if no kwargs were specified
         if order == "zyx" and not kw:
-            return self.str_set.iterate(iBase.Type.region,
+            return self.structured_set.iterate(iBase.Type.region,
                                        iMesh.Topology.hexahedron)
 
-        indices, ordmap = _str_IterSetup(self.dims, order, **kw)
-        return _str_Iter(indices, ordmap, self.dims, 
-            self.str_set.iterate(iBase.Type.region, iMesh.Topology.hexahedron))
+        indices, ordmap = _structured_iter_setup(self.dims, order, **kw)
+        return _structured_iter(indices, ordmap, self.dims, 
+            self.structured_set.iterate(iBase.Type.region, iMesh.Topology.hexahedron))
 
 
-    def str_iterate_vertex(self, order="zyx", **kw):
+    def structured_iterate_vertex(self, order="zyx", **kw):
         """Get an iterator over the vertices of the mesh
 
-        See str_iterate_hex() for an explanation of the order argument and the
+        See structured_iterate_hex() for an explanation of the order argument and the
         available keyword arguments.
         """
-        self._str_check()
+        self._structured_check()
         #special case: zyx order without kw is equivalent to pytaps iterator
         if order == "zyx" and not kw:
-            return self.str_set.iterate(iBase.Type.vertex, iMesh.Topology.point)
+            return self.structured_set.iterate(iBase.Type.vertex, iMesh.Topology.point)
 
-        indices, ordmap = _str_IterSetup(self.vertex_dims, order, **kw)
-        return _str_Iter(indices, ordmap, self.vertex_dims, 
-                self.str_set.iterate(iBase.Type.vertex, iMesh.Topology.point))
+        indices, ordmap = _structured_iter_setup(self.vertex_dims, order, **kw)
+        return _structured_iter(indices, ordmap, self.vertex_dims, 
+                self.structured_set.iterate(iBase.Type.vertex, iMesh.Topology.point))
 
 
-    def str_iterate_hex_volumes(self, order="zyx", **kw):
+    def structured_iterate_hex_volumes(self, order="zyx", **kw):
         """Get an iterator over the volumes of the mesh hexahedra
 
-        See str_iterate_hex() for an explanation of the order argument and the
+        See structured_iterate_hex() for an explanation of the order argument and the
         available keyword arguments.
         """
-        self._str_check()
-        indices, _ = _str_IterSetup(self.dims, order, **kw)
-        # Use an inefficient but simple approach: call str_get_hex_volume()
+        self._structured_check()
+        indices, _ = _structured_iter_setup(self.dims, order, **kw)
+        # Use an inefficient but simple approach: call structured_get_hex_volume()
         # on each required i,j,k pair.  
         # A better implementation would only make one call to getVtxCoords.
         for A in itertools.product(*indices):
-            # the ordmap returned from _str_IterSetup maps to kji/zyx ordering,
+            # the ordmap returned from _structured_iter_setup maps to kji/zyx ordering,
             # but we want ijk/xyz ordering, so create the ordmap differently.
             ordmap = [order.find(L) for L in "xyz"]
             ijk = [A[ordmap[x]] for x in range(3)]
-            yield self.str_get_hex_volume(*ijk)
+            yield self.structured_get_hex_volume(*ijk)
 
 
-    def str_get_divisions(self, dim):
+    def structured_get_divisions(self, dim):
         """Get the mesh divisions on a given dimension
 
         Given a dimension "x", "y", or "z", return a list of the mesh vertices
         along that dimension.
         """
-        self._str_check()
+        self._structured_check()
         if len(dim) == 1 and dim in "xyz":
             idx = "xyz".find(dim)
             return [self.mesh.getVtxCoords(i)[idx]
-                    for i in self.str_iterate_vertex(dim)]
+                    for i in self.structured_iterate_vertex(dim)]
         else:
             raise MeshError("Invalid dimension: {0}".format(str(dim)))
 
-    def _str_check(self):
+    def _structured_check(self):
         if not self.structured:
             raise MeshError("Structured mesh methods cannot be called from "\
                             "unstructured mesh instances.")
@@ -283,8 +281,8 @@ class Mesh(object):
 # private helper functions for structured mesh methods
 ######################################################
 
-def _str_find_idx(dims, ijk):
-    """Helper method fo str_get_vertex and str_get_hex.
+def _structured_find_idx(dims, ijk):
+    """Helper method fo structured_get_vertex and structured_get_hex.
 
     For tuple (i,j,k), return the number N in the appropriate iterator.
     """
@@ -300,8 +298,8 @@ def _str_find_idx(dims, ijk):
     return n
 
 
-def _str_stepIter(it, n):
-    """Helper method for str_get_vertex and str_get_hex
+def _structured_step_iter(it, n):
+    """Helper method for structured_get_vertex and structured_get_hex
 
     Return the nth item in the iterator."""
     it.step(n)
@@ -310,13 +308,13 @@ def _str_stepIter(it, n):
     return r
 
 
-def _str_IterSetup(dims, order, **kw):
+def _structured_iter_setup(dims, order, **kw):
     """Setup helper function for StrMesh iterator functions
 
     Given dims and the arguments to the iterator function, return
     a list of three lists, each being a set of desired coordinates,
     with fastest-changing coordinate in the last column),
-    and the ordmap used by _str_Iter to reorder each coodinate to (i,j,k).
+    and the ordmap used by _structured_iter to reorder each coodinate to (i,j,k).
     """
     # a valid order has the letters "x", "y", and "z"
     # in any order without duplicates
@@ -353,8 +351,8 @@ def _str_IterSetup(dims, order, **kw):
     return indices, ordmap
 
 
-def _str_Iter(indices, ordmap, dims, it):
-    """Iterate over the indices lists, yielding _str_stepIter(it) for each.
+def _structured_iter(indices, ordmap, dims, it):
+    """Iterate over the indices lists, yielding _structured_step_iter(it) for each.
     """
     d = [0, 0, 1]
     d[1] = (dims[3] - dims[0])
@@ -364,4 +362,4 @@ def _str_Iter(indices, ordmap, dims, it):
                 for a in indices[x]]
                 for x in range(3))
     for ioff, joff, koff in itertools.product(*offsets):
-        yield _str_stepIter(it, (ioff + joff + koff))
+        yield _structured_step_iter(it, (ioff + joff + koff))
