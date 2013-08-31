@@ -15,8 +15,21 @@ class MeshTest(unittest.TestCase):
     def setUp(self):
         self.mesh = iMesh.Mesh()
 
+    def test_unstr_mesh_from_file(self):
+        filename = os.path.join(os.path.dirname(__file__), 
+                                "files_mesh_test/unstr.h5m")
+        sm = Mesh(mesh_file=filename)
+
+    def test_unstr_mesh_from_instance(self):
+        filename = os.path.join(os.path.dirname(__file__), 
+                                "files_mesh_test/unstr.h5m")
+        hello = iMesh.Mesh()
+        self.mesh.load(filename)
+        sm = Mesh(mesh = self.mesh)
+
     def test_str_mesh_from_coords(self):
-        sm = Mesh(str_coords = [range(1,5), range(1,4), range(1,3)], structured=True)
+        sm = Mesh(str_coords = [range(1,5), range(1,4), range(1,3)], \
+                  structured=True)
         self.assertTrue(all(sm.dims == [0, 0, 0, 3, 2, 1]))
 
     def test_create_by_set(self):
@@ -27,24 +40,29 @@ class MeshTest(unittest.TestCase):
         self.assertTrue(all(sm.dims == [0, 0, 0, 1, 1, 1]))
 
     def test_create_by_file(self):
-        filename = os.path.join(os.path.dirname(__file__), 'files_mesh_test/grid543.h5m')
+        filename = os.path.join(os.path.dirname(__file__), 
+                                "files_mesh_test/grid543.h5m")
         sm = Mesh(mesh_file = filename, structured=True)
         self.assertTrue(all(sm.dims == [1, 11, -5, 5, 14, -3]))
 
-        # This mesh is interesting because the i/j/k space is not numbered from zero
-        # Check that divisions are correct
+        # This mesh is interesting because the i/j/k space is not numbered from
+        # zero. Check that divisions are correct
 
-        self.assertEqual(sm.str_get_divisions('x'), range(1,6) )
-        self.assertEqual(sm.str_get_divisions('y'), [1.0, 5.0, 10.0, 15.0] )
-        self.assertEqual(sm.str_get_divisions('z'), [-10.0, 2.0, 12.0] )
+        self.assertEqual(sm.str_get_divisions("x"), range(1,6) )
+        self.assertEqual(sm.str_get_divisions("y"), [1.0, 5.0, 10.0, 15.0] )
+        self.assertEqual(sm.str_get_divisions("z"), [-10.0, 2.0, 12.0] )
 
-        # loading a test file without structured mesh metadata should raise an error
-        filename2 = os.path.join(os.path.dirname(__file__), 'files_mesh_test/no_str_mesh.h5m')
-        self.assertRaises(iBase.TagNotFoundError, Mesh, mesh_file = filename2, structured=True)
+        # loading a test file without structured mesh metadata should raise an 
+        # error
+        filename2 = os.path.join(os.path.dirname(__file__), 
+                                 "files_mesh_test/no_str_mesh.h5m")
+        self.assertRaises(iBase.TagNotFoundError, Mesh, mesh_file = filename2, 
+                           structured=True)
 
     def test_str_get_hex(self):
         # mesh with valid i values 0-4, j values 0-3, k values 0-2
-        sm = Mesh(str_coords = [range(11,16), range(21,25), range(31,34)], structured=True)
+        sm = Mesh(str_coords = [range(11,16), range(21,25), range(31,34)], 
+                  structured=True)
         def check(e):
             self.assertTrue(isinstance(e, iBase.Entity))
         check(sm.str_get_hex(0, 0, 0))
@@ -52,14 +70,15 @@ class MeshTest(unittest.TestCase):
         check(sm.str_get_hex(3, 0, 0))
         check(sm.str_get_hex(3, 2, 1))
 
-        self.assertRaises(StrMeshError, sm.str_get_hex,-1,-1,-1)
-        self.assertRaises(StrMeshError, sm.str_get_hex, 4, 0, 0)
-        self.assertRaises(StrMeshError, sm.str_get_hex, 0, 3, 0)
-        self.assertRaises(StrMeshError, sm.str_get_hex, 0, 0, 2)
+        self.assertRaises(MeshError, sm.str_get_hex,-1,-1,-1)
+        self.assertRaises(MeshError, sm.str_get_hex, 4, 0, 0)
+        self.assertRaises(MeshError, sm.str_get_hex, 0, 3, 0)
+        self.assertRaises(MeshError, sm.str_get_hex, 0, 0, 2)
 
     def test_hex_volume(self):
 
-        sm = Mesh(str_coords = [[0,1,3], [-3,-2,0], [12,13,15]], structured=True)
+        sm = Mesh(str_coords = [[0,1,3], [-3,-2,0], [12,13,15]], 
+                  structured=True)
         self.assertEqual(sm.str_get_hex_volume(0,0,0), 1)
         self.assertEqual(sm.str_get_hex_volume(1,0,0), 2)
         self.assertEqual(sm.str_get_hex_volume(0,1,0), 2)
@@ -68,7 +87,8 @@ class MeshTest(unittest.TestCase):
 
         ijk_all = itertools.product(*([[0,1]]*3))
 
-        for V, ijk in itertools.izip_longest(sm.str_iterate_hex_volumes(), ijk_all):
+        for V, ijk in itertools.izip_longest(sm.str_iterate_hex_volumes(), 
+                                             ijk_all):
             self.assertEqual(V, sm.str_get_hex_volume(*ijk))
 
 
@@ -95,9 +115,9 @@ class MeshTest(unittest.TestCase):
 
         sm = Mesh(str_coords=[x, y, z], structured=True)
 
-        self.assertEqual(sm.str_get_divisions('x'), x)
-        self.assertEqual(sm.str_get_divisions('y'), y)
-        self.assertEqual(sm.str_get_divisions('z'), z)
+        self.assertEqual(sm.str_get_divisions("x"), x)
+        self.assertEqual(sm.str_get_divisions("y"), y)
+        self.assertEqual(sm.str_get_divisions("z"), z)
 
 class StrMeshIterateTest(unittest.TestCase):
 
@@ -112,11 +132,11 @@ class StrMeshIterateTest(unittest.TestCase):
 
     def test_bad_iterates(self):
 
-        self.assertRaises(StrMeshError, self.sm.str_iterate_hex, 'abc')
+        self.assertRaises(MeshError, self.sm.str_iterate_hex, "abc")
         self.assertRaises(TypeError, self.sm.str_iterate_hex, 12)
-        self.assertRaises(StrMeshError, self.sm.str_iterate_hex, 'xxyz')
-        self.assertRaises(StrMeshError, self.sm.str_iterate_hex, 'yyx')
-        self.assertRaises(StrMeshError, self.sm.str_iterate_hex, 'xyz', z=[0,1,2])
+        self.assertRaises(MeshError, self.sm.str_iterate_hex, "xxyz")
+        self.assertRaises(MeshError, self.sm.str_iterate_hex, "yyx")
+        self.assertRaises(MeshError, self.sm.str_iterate_hex, "xyz", z=[0,1,2])
 
     def test_iterate_3d(self):        
         # use izip_longest in the lockstep iterations below; this will catch any
@@ -138,49 +158,54 @@ class StrMeshIterateTest(unittest.TestCase):
         all_indices_zyx = itertools.product( self.I, self.J, self.K )
         # Test the xyz order, the default from original mmGridGen
         for ijk_index, sm_x in izip( all_indices_zyx, 
-                                     self.sm.str_iterate_hex('xyz') ):
+                                     self.sm.str_iterate_hex("xyz") ):
             self.assertEqual( self.sm.str_get_hex(*ijk_index), sm_x )
 
         def tuple_sort( collection, indices ):
             # sorting function for order test
             def t( tup ):
-                # sort this 3-tuple according to the order of x, y, and z in indices
-                return ( tup['xyz'.find(indices[0])]*100 +
-                         tup['xyz'.find(indices[1])]*10 +
-                         tup['xyz'.find(indices[2])] )
+                # sort this 3-tuple according to the order of x, y, and z in 
+                #indices
+                return ( tup["xyz".find(indices[0])]*100 +
+                         tup["xyz".find(indices[1])]*10 +
+                         tup["xyz".find(indices[2])] )
             return sorted( collection, key = t )
 
         def test_order( order, *args,  **kw ):
-            print 'testing',order
+            print "testing",order
             all_indices = itertools.product(*args)
             for ijk_index, sm_x in izip( tuple_sort(all_indices, order),
                                          self.sm.str_iterate_hex(order,**kw) ):
                 self.assertEqual(self.sm.str_get_hex(*ijk_index), sm_x)
 
-        test_order( 'yxz', self.I, self.J, self.K )
-        test_order( 'yzx', self.I, self.J, self.K )
-        test_order( 'xzy', self.I, self.J, self.K )
-        test_order( 'zxy', self.I, self.J, self.K )
+        test_order( "yxz", self.I, self.J, self.K )
+        test_order( "yzx", self.I, self.J, self.K )
+        test_order( "xzy", self.I, self.J, self.K )
+        test_order( "zxy", self.I, self.J, self.K )
 
         # Specify z=[1] to iterator
-        test_order( 'xyz', self.I, self.J, [1], z=[1] )
+        test_order("xyz", self.I, self.J, [1], z=[1])
         # Specify y=2 to iterator
-        test_order( 'zyx', self.I, [2], self.K, y=2 )
+        test_order("zyx", self.I, [2], self.K, y=2)
         # specify x and y both to iterator
-        test_order( 'yzx', [1,2,3],self.J[:-1], self.K, y=self.J[:-1], x=[1,2,3] )
+        test_order("yzx", [1,2,3],self.J[:-1], self.K, y=self.J[:-1], x=[1,2,3])
 
     def test_iterate_2d(self):
-        def test_order( iter1, iter2 ):
-            for i1, i2 in itertools.izip_longest( iter1, iter2 ):
+        def test_order(iter1, iter2):
+            for i1, i2 in itertools.izip_longest(iter1, iter2):
                 self.assertEqual( i1, i2 )
 
-        test_order( self.sm.str_iterate_hex('yx'), self.sm.str_iterate_hex('zyx', z=[0] ) )
-        test_order( self.sm.str_iterate_hex('yx',z=1), self.sm.str_iterate_hex('zyx',z=[1]) )
-        test_order( self.sm.str_iterate_hex('yx',z=1), self.sm.str_iterate_hex('yzx',z=[1]) )
-        test_order( self.sm.str_iterate_hex('zy',x=[3]), self.sm.str_iterate_hex('zxy',x=3) )
+        test_order(self.sm.str_iterate_hex("yx"), 
+                   self.sm.str_iterate_hex("zyx", z=[0]))
+        test_order(self.sm.str_iterate_hex("yx",z=1), 
+                   self.sm.str_iterate_hex("zyx",z=[1]))
+        test_order(self.sm.str_iterate_hex("yx",z=1), 
+                   self.sm.str_iterate_hex("yzx",z=[1]))
+        test_order(self.sm.str_iterate_hex("zy",x=[3]), 
+                   self.sm.str_iterate_hex("zxy",x=3))
 
         # Cannot iterate over multiple z's without specifing z order
-        self.assertRaises(StrMeshError, self.sm.str_iterate_hex, 'yx', z=[0,1])
+        self.assertRaises(MeshError, self.sm.str_iterate_hex, "yx", z=[0,1])
 
     def test_iterate_1d(self):
         
@@ -189,39 +214,42 @@ class StrMeshIterateTest(unittest.TestCase):
                 self.assertEqual( self.sm.str_get_hex(*ijk), i )
 
         test_equal( [[0,0,0],[0,0,1]], 
-                    self.sm.str_iterate_hex('z') )
+                    self.sm.str_iterate_hex("z") )
 
         test_equal( [[0,1,1],[0,2,1]],
-                    self.sm.str_iterate_hex('y', y=[1,2], z=1) )
+                    self.sm.str_iterate_hex("y", y=[1,2], z=1) )
 
         test_equal( [[2,0,0],[2,1,0],[2,2,0]],
-                    self.sm.str_iterate_hex('y', x=2) ) 
+                    self.sm.str_iterate_hex("y", x=2) ) 
         test_equal( [[0,0,0],[1,0,0],[2,0,0]], 
-            self.sm.str_iterate_hex('x', x=[0,1,2]) )
+            self.sm.str_iterate_hex("x", x=[0,1,2]) )
 
     def test_vtx_iterator(self):
         
-        #use vanilla izip as we'll test using non-equal-length iterators
+        #use vanilla izip as we"ll test using non-equal-length iterators
         izip = itertools.izip
 
         sm = self.sm
         it = sm.str_set.iterate(iBase.Type.vertex, iMesh.Topology.point)
 
         # test the default order
-        for (it_x, sm_x) in itertools.izip_longest( it, sm.str_iterate_vertex('zyx') ):
+        for (it_x, sm_x) in itertools.izip_longest(it, 
+                                                  sm.str_iterate_vertex("zyx")):
             self.assertEqual(it_x,sm_x)
 
-        # Do the same again, but use an arbitrary kwarg to str_iterate_vertex to prevent optimization from kicking in
+        # Do the same again, but use an arbitrary kwarg to str_iterate_vertex to
+        # prevent optimization from kicking in
         it.reset()
-        for (it_x, sm_x) in itertools.izip_longest( it, sm.str_iterate_vertex('zyx', no_opt=True) ):
+        for (it_x, sm_x) in itertools.izip_longest(it,
+                                    sm.str_iterate_vertex("zyx", no_opt=True) ):
             self.assertEqual(it_x,sm_x)
 
         it.reset()
-        for (it_x, sm_x) in izip( it, sm.str_iterate_vertex('yx',z=sm.dims[2])):
+        for (it_x, sm_x) in izip(it, sm.str_iterate_vertex("yx",z=sm.dims[2])):
             self.assertEqual(it_x,sm_x)
 
         it.reset()
-        for (it_x, sm_x) in izip( it, sm.str_iterate_vertex('x')):
+        for (it_x, sm_x) in izip( it, sm.str_iterate_vertex("x")):
             self.assertEqual(it_x,sm_x)
 
     
@@ -240,6 +268,6 @@ class StrPerfTest(unittest.TestCase):
         for i in big.str_iterate_hex():
             pass
         print "iterating (2)"
-        for i in big.str_iterate_hex( 'yzx' ):
+        for i in big.str_iterate_hex( "yzx" ):
             pass
 
