@@ -139,16 +139,11 @@ class Mesh(object):
 
             self.dims = self.mesh.getTagHandle("BOX_DIMS")[self.structured_set]
             self.vertex_dims = list(self.dims[0:3]) \
-<<<<<<< HEAD
                                + [x + 1 for x in self.dims[3:6]]
 
 
                            
     #Structured methods:
-=======
-                               + [x + 1 for x in self.dims[3:6]]                           
-
->>>>>>> 8492cf01f4134d23d09c10ce2a3109ded64adf66
     def structured_get_vertex(self, i, j, k):
         """Return the handle for (i,j,k)'th vertex in the mesh"""
         self._structured_check()
@@ -371,12 +366,9 @@ def _structured_iter(indices, ordmap, dims, it):
                 for x in range(3))
     for ioff, joff, koff in itertools.product(*offsets):
         yield _structured_step_iter(it, (ioff + joff + koff))
-<<<<<<< HEAD
 
 
 
 class StatMesh(Mesh):
     __init__():
         pass
-=======
->>>>>>> 8492cf01f4134d23d09c10ce2a3109ded64adf66
