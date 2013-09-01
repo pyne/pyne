@@ -25,7 +25,6 @@ import numpy as np
 from pyne.material import Material
 from pyne.material import MultiMaterial
 from pyne import nucname
-from pyne.statmesh import StatMesh
 from binaryreader import _BinaryReader, _FortranRecord
 
 # Mesh specific imports
