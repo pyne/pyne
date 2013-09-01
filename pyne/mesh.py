@@ -370,5 +370,5 @@ def _structured_iter(indices, ordmap, dims, it):
 
 
 class StatMesh(Mesh):
-    __init__():
-        pass
+   def __init__(mesh):
+        self.mesh = mesh
