@@ -1593,8 +1593,9 @@ class MeshTally(StatMesh):
     e_bounds : list of floats
         The minimum and maximum bounds for energy bins
     mesh : 
-        A Mesh object with an iMesh instance tagged with all results and 
+        An iMesh instance tagged with all results and 
         relative errors
+
     Note: All Mesh attributes are also present via a super() call to 
     Mesh.__init__().
     """
