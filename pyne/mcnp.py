@@ -30,7 +30,7 @@ from binaryreader import _BinaryReader, _FortranRecord
 # Mesh specific imports
 try:
     from itaps import iMesh
-    from pyne.mesh import StatMesh, MeshError
+    from pyne.mesh import Mesh, StatMesh, MeshError
 except ImportError:
     pass
 
@@ -1132,7 +1132,7 @@ def mat_from_mcnp(filename, mat_line, densities='None'):
     return finished_mat
 
 
-class Wwinp(object):
+class Wwinp(Mesh):
     """ A Wwinp object stores all of the information from a single MCNP WWINP
     file. Weight window lower bounds are stored on a structured mesh. Only
     Cartesian mesh WWINP files are supported. Neutron, photon, and
@@ -1161,9 +1161,9 @@ class Wwinp(object):
         ni = 1, the e will look like [[]]. If ni = 2, e will look like
         [[], []].
     bounds : list of lists of spacial bounds in the i, j, k dimensions.
-    mesh : scdmesh containing all the neutron and/or photon weight 
-	   window lower bounds. These tags have the form "ww_X_group_YYY"
-	   where X is n or p and YYY is the energy group number
+    mesh : Mesh object with a structured mesh containing all the neutron and/or 
+       photon weight window lower bounds. These tags have the form 
+       "ww_X_group_YYY"  where X is n or p and YYY is the energy group number
 	   (e.g. 001, 002, etc.). The mesh has rootSet tags in the form
 	   X_e_upper_bounds.
     """
@@ -1201,7 +1201,7 @@ class Wwinp(object):
         if self.nr == 16: # Cylindrical
             raise ValueError('Cylindrical WWINP not currently supported')
 
-        
+       
     def _read_block2(self, f):
         # Retrieves all of the information from block 2 of a wwinp file. 
 
@@ -1262,9 +1262,11 @@ class Wwinp(object):
         # otherwise (in the case of n and p in the same WWINP) add to the 
         # preexisting mesh.
         if not hasattr(self, 'mesh'):
-            self.mesh = ScdMesh(self.bounds[0], self.bounds[1], self.bounds[2])
+            super(Wwinp, self).__init__(structured_coords=[self.bounds[0], 
+                                        self.bounds[1], self.bounds[2]],
+                                        structured=True)
 
-        voxels = list(self.mesh.iterateHex('zyx'))
+        voxels = list(self.structured_iterate_hex('zyx'))
 
         if particle == 'n':
            particle_index = 0
@@ -1275,7 +1277,7 @@ class Wwinp(object):
         for i in range(1, len(self.e[particle_index]) + 1):
             # Create tags for each e_group
             tag_name = 'ww_{0}_group_{1:03d}'.format(particle, i)
-            tag_ww = self.mesh.imesh.createTag(tag_name, 1, float)
+            tag_ww = self.mesh.createTag(tag_name, 1, float)
         
             # Get all data for energy group i
             ww_data = []
@@ -1287,11 +1289,9 @@ class Wwinp(object):
 
         # Save energy upper bounds to rootset.
         tag_e_bounds = \
-            self.mesh.imesh.createTag('{0}_e_upper_bounds'.format(particle),\
+            self.mesh.createTag('{0}_e_upper_bounds'.format(particle),\
                                       len(self.e[particle_index]), float)
-        tag_e_bounds[self.mesh.imesh.rootSet] = self.e[particle_index]
-
-
+        tag_e_bounds[self.mesh.rootSet] = self.e[particle_index]
 
 
     def write_wwinp(self, filename):
@@ -1397,12 +1397,12 @@ class Wwinp(object):
         # Get ww_data.
         count = 0
         for e_group in range(1, len(self.e[particle_index]) + 1):
-            voxels = list(self.mesh.iterateHex('zyx'))
+            voxels = list(self.structured_iterate_hex('zyx'))
             ww_data = []
             count += 1
             for voxel in voxels:
                 ww_data.append(
-                    self.mesh.imesh.getTagHandle('ww_{0}_group_{1:03d}'\
+                    self.mesh.getTagHandle('ww_{0}_group_{1:03d}'\
                         .format(particle, e_group))[voxel])
           
             # Append ww_data to block3 string.
@@ -1421,8 +1421,6 @@ class Wwinp(object):
 
         f.write(block3)
 
-
-
     def read_mesh(self, mesh):
         """This method creates a Wwinp object from a structured mesh object. 
         The mesh must have tags in the form "ww_X_group_YYY" where X is n 
@@ -1431,7 +1429,7 @@ class Wwinp(object):
         energy upper bounds.
         """
 
-        self.mesh = mesh
+        super(Wwinp, self).__init__(mesh=mesh, structured=True)
  
         # Set geometry related attributes.
         self.nr = 10
@@ -1440,12 +1438,11 @@ class Wwinp(object):
         # Set energy related attributes.  
         self.e = []
         self.ne = []
-        all_tags = [x.name for x in self.mesh.imesh\
-                                   .getAllTags(self.mesh.imesh.rootSet)]
+        all_tags = [x.name for x in self.mesh.getAllTags(self.mesh.rootSet)]
 
         if 'n_e_upper_bounds' in all_tags:
-            n_e_upper_bounds = self.mesh.imesh.getTagHandle('n_e_upper_bounds')\
-                              [self.mesh.imesh.rootSet]
+            n_e_upper_bounds = self.mesh.getTagHandle('n_e_upper_bounds')\
+                              [self.mesh.rootSet]
             # In the single energy group case, the "E_upper_bounds" tag 
             # returns a non-iterable float. If this is the case, put this 
             # float into an array so that it can be iterated over
@@ -1461,8 +1458,8 @@ class Wwinp(object):
  
 
         if 'p_e_upper_bounds' in all_tags:
-            p_e_upper_bounds = self.mesh.imesh.getTagHandle('p_e_upper_bounds')\
-                              [self.mesh.imesh.rootSet]
+            p_e_upper_bounds = self.mesh.getTagHandle('p_e_upper_bounds')\
+                              [self.mesh.rootSet]
             if isinstance(p_e_upper_bounds, float):
                 p_e_upper_bounds = [p_e_upper_bounds]
 
@@ -1473,9 +1470,9 @@ class Wwinp(object):
         self.ni = int(len(self.ne))
     
         # Set space related attributes.
-        self.bounds = [self.mesh.getDivisions('x'),\
-                       self.mesh.getDivisions('y'),\
-                       self.mesh.getDivisions('z')]
+        self.bounds = [self.structured_get_divisions('x'),\
+                       self.structured_get_divisions('y'),\
+                       self.structured_get_divisions('z')]
     
         self.origin = [self.bounds[0][0], self.bounds[1][0], self.bounds[2][0]]
     
@@ -1595,8 +1592,11 @@ class MeshTally(StatMesh):
         The locations of mesh vertices in the z direction.
     e_bounds : list of floats
         The minimum and maximum bounds for energy bins
-    mesh : MOAB mesh
-        A mesh tagged with all results and relative errors
+    mesh : 
+        A Mesh object with an iMesh instance tagged with all results and 
+        relative errors
+    Note: All Mesh attributes are also present via a super() call to 
+    Mesh.__init__().
     """
 
     def __init__(self, f, tally_number):
@@ -1638,6 +1638,9 @@ class MeshTally(StatMesh):
         # "Energy bin boundaries" contain one more word than "X boundaries"
         self.e_bounds = [float(x) for x in f.readline().split()[3:]]
 
+        self.dims = [0, 0, 0] + [len(self.x_bounds) - 1, len(self.y_bounds) - 1, 
+                                 len(self.z_bounds) - 1]
+
         #skip blank line between enery bin boundaries and table headings
         f.readline() 
 
@@ -1651,10 +1654,13 @@ class MeshTally(StatMesh):
         self._column_idx = dict(zip(column_names, range(0,len(column_names))))
 
     def _create_mesh(self, f):
-        """Instantiate a MOAB mesh and tag it will results and relative errors.
+        """Instantiate a Mesh object and tag the iMesh instance 
+           with results and relative errors.
         """
 
-        self.mesh = ScdMesh(self.x_bounds, self.y_bounds, self.z_bounds)
+        super(MeshTally, self).__init__(structured_coords=[self.x_bounds, 
+                                        self.y_bounds, self.z_bounds], 
+                                        structured=True)
            
         for e_group in range(1, len(self.e_bounds)):
             result_tag_name = '{0}_group_{1:03d}'.format(self.particle, 
@@ -1675,8 +1681,8 @@ class MeshTally(StatMesh):
         tag names.
         """
 
-        tag_result = self.mesh.imesh.createTag(result_tag_name, 1, float)
-        tag_rel_error = self.mesh.imesh.createTag(rel_error_tag_name, 1, float)
+        tag_result = self.mesh.createTag(result_tag_name, 1, float)
+        tag_rel_error = self.mesh.createTag(rel_error_tag_name, 1, float)
         result = []
         rel_error = []
 
@@ -1689,7 +1695,7 @@ class MeshTally(StatMesh):
             rel_error.append(float(line.split()[self._column_idx["Rel_Error"]]))
 
         #Tag data for energy group 'e_group' onto all voxels
-        vol_elements = list(self.mesh.iterateHex("xyz"))
+        vol_elements = list(self.structured_iterate_hex("xyz"))
         tag_result[vol_elements] = result
         tag_rel_error[vol_elements] = rel_error
 
