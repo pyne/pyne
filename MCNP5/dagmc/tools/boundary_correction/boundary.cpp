@@ -10,10 +10,15 @@
 #include <moab/CartVect.hpp>
 #include <moab/Core.hpp>
 #include <moab/Interface.hpp>
+#include <moab/Range.hpp>
+#include <moab/Skinner.hpp>
 
 // set up MOAB and DAGMC instances
 moab::Interface* mbi = new moab::Core();
 moab::DagMC* dagmc = moab::DagMC::instance();
+
+// sets the tolerance value for cases on a graveyard boundary
+const double TOLERANCE = 1e-3;
 
 // >>> HELPER METHODS
 
@@ -175,7 +180,7 @@ bool get_adjacent_volume(const moab::CartVect& coords,
 
     assert(dagmc_error == moab::MB_SUCCESS);
 
-    if (next_surface != 0 && next_surface_distance < 1e-10)
+    if (next_surface != 0 && next_surface_distance < TOLERANCE)
     {
         dagmc_error = dagmc->next_vol(next_surface, volume_ID, volume_ID);
         assert(dagmc_error == moab::MB_SUCCESS);
@@ -329,8 +334,8 @@ int main(int argc, char* argv[])
         bandwidth[i] = parse_bandwidth_value(argv[i+3]);
     }
 
-    std::cout << "Using a bandwidth value of " << bandwidth
-              << " to determine boundary points" << std::endl;
+    std::cout << "Using bandwidth vector " << bandwidth
+              << " to determine boundary nodes" << std::endl;
     
     // create new BOUNDARY and DISTANCE_TO_BOUNDARY tags
     int tag_size = 3;
@@ -355,16 +360,30 @@ int main(int argc, char* argv[])
                                    
     assert(mb_error == moab::MB_SUCCESS);
 
-    // obtain all mesh nodes loaded into the MOAB instance
-    // TODO consider using Skinner to reduce set of mesh nodes to check
+    // obtain all mesh nodes and mesh cells loaded into the MOAB instance
     moab::EntityHandle mesh_set = 0;
-    std::vector<moab::EntityHandle> mesh_nodes;
+    moab::Range mesh_nodes;
+    moab::Range mesh_cells;
 
     mb_error = mbi->get_entities_by_type(mesh_set, moab::MBVERTEX, mesh_nodes);
     assert(mb_error == moab::MB_SUCCESS);
 
+    mb_error = mbi->get_entities_by_dimension(mesh_set, 3, mesh_cells);
+    assert(mb_error == moab::MB_SUCCESS);
+
+    std::cout << "Mesh has " << mesh_nodes.size() << " nodes and "
+              << mesh_cells.size() << " cells" << std::endl;
+
+    // print number of nodes on skin of mesh
+    moab::Range skin_nodes;
+    moab::Skinner skinner(mbi);
+    skinner.find_skin(mesh_cells, 0, skin_nodes);
+    std::cout << "Mesh skin has " << skin_nodes.size() << " nodes" << std::endl;
+
+    // TODO consider using Skinner to reduce set of mesh nodes to check
+
     // iterate through all mesh nodes
-    std::vector<moab::EntityHandle>::iterator it;
+    moab::Range::iterator it;
     int node_count = 0;
 
     for(it = mesh_nodes.begin(); it != mesh_nodes.end(); ++it)
@@ -388,8 +407,7 @@ int main(int argc, char* argv[])
         }
     }
 
-    std::cout << node_count << " of " << mesh_nodes.size()
-              << " were tagged as boundary points" << std::endl;
+    std::cout << "Boundary nodes tagged: " << node_count << std::endl;
 
     // write mesh to output file with new tag data
     moab::Tag output_tags[2] = {boundary_tag, distance_tag};
