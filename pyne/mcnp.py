@@ -1037,7 +1037,7 @@ def mat_from_mcnp(filename, mat_line, densities='None'):
     table_ids = {}
     for i in range(1, len(data_string.split())):
         if i & 1 == 1:
-            zzzaaam = str(nucname.zzaaam(int(data_string.split()[i].split('.')[0])))
+            zzzaaam = str(nucname.zzaaam(nucname.mcnp_to_id(data_string.split()[i].split('.')[0])))
             nucvec[zzzaaam] = float(data_string.split()[i+1])
             if len(data_string.split()[i].split('.')) > 1:
                 table_ids[str(zzzaaam)] = data_string.split()[i].split('.')[1]
