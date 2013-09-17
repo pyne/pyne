@@ -664,21 +664,23 @@ void fludagwrite_assignma(std::string lfname)  // file with cell/surface cards
   idstr << std::setw(5) <<  "Index" ;
   idstr << std::setw(5) <<  "   Id" << std::endl;
 
-  // Prepare a list to contain unique materials not in Flulka's list
+  // Prepare a list to contain unique materials not in Fluka's list
   std::list<std::string> uniqueMatList;
 
   // Loop through 3d entities.  In model_complete.h5m there are 90 vols
   std::vector<std::string> vals;
-  std::string material;
+  std::string material_trunc;
   char buffer[MAX_MATERIAL_NAME_SIZE];
   for (unsigned i = 1 ; i <= num_vols ; i++)
   {
       vals.clear();
       entity = DAG->entity_by_index(3, i);
-      id = DAG->id_by_index(3, i);
+
       // Create the id-index string for this vol
+      id = DAG->id_by_index(3, i);
       idstr << std::setw(5) << std::right << i;
       idstr << std::setw(5) << std::right << id << std::endl;
+
       // Create the mat.inp string for this vol
       if (DAG->has_prop(entity, "graveyard"))
       {
@@ -698,23 +700,24 @@ void fludagwrite_assignma(std::string lfname)  // file with cell/surface cards
             
             if (vals[0].size() > 8)
             {
-               material.resize(8);
+               material_trunc.resize(8);
             }
             if (FLUKA_mat_set.find(vals[0]) == FLUKA_mat_set.end())
             {
                 // current material is not in the pre-existing FLUKA material list
-                uniqueMatList.push_back(material); 
-                std::cout << "Adding material " << material << " to the MATERIAL card list" << std::endl;
+                uniqueMatList.push_back(material_trunc); 
+                std::cout << "Adding material " << material_trunc 
+                                                << " to the MATERIAL card list" << std::endl;
             }
          }
          else
          {
-            material = "moreThanOne";
+            material_trunc = "moreThanOne";
          }
 	 ostr << std::setw(10) << std::left  << "ASSIGNMAt";
-	 ostr << std::setw(10) << std::right << material;
+	 ostr << std::setw(10) << std::right << material_trunc;
 	 ostr << std::setw(10) << std::right << i << std::endl;
-      }
+      } // end processing of "M_" property
   }
   // Finish the ostr with the implicit complement card
   std::string implicit_comp_comment = "* The next volume is the implicit complement";
