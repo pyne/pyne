@@ -909,6 +909,25 @@ void writeToFileNamed(std::ostringstream& file_contents, std::string filename)
 }
 
 //---------------------------------------------------------------------------//
+// addToIDIndexMap(int i, 
+//---------------------------------------------------------------------------//
+// Convenience method to write a prepared stream to a file
+void addToIDIndexMap(i, std::ostringstream idstr&)
+{
+      idstr << std::setw(5) << std::right << i;
+      idstr << std::setw(5) << std::right << DAG->id_by_index(3,i) << std::endl;
+}
+//---------------------------------------------------------------------------//
+// writeStringToFile
+//---------------------------------------------------------------------------//
+// Convenience method to write a prepared stream to a file
+void writeToFileNamed(std::ostringstream oss, std::string index_id_filename)
+{
+  std::ofstream index_id(index_id_filename.c_str());
+  index_id << oss.str();
+  index_id.close(); 
+}
+//---------------------------------------------------------------------------//
 // mat_property_string
 //---------------------------------------------------------------------------//
 // For a given volume, find the values of all properties named "MAT".   
