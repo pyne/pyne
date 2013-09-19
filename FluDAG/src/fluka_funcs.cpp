@@ -601,6 +601,7 @@ static bool get_real_prop( MBEntityHandle vol, int cell_id, const std::string& p
 
 }
 
+void writeToFileNamed(std::ostringstream oss, std::string index_id_filename);
 //---------------------------------------------------------------------------//
 // fludagwrite_assignma
 //---------------------------------------------------------------------------//
@@ -667,7 +668,7 @@ void fludagwrite_assignma(std::string lfname)  // file with cell/surface cards
   // Prepare a list to contain unique materials not in Fluka's list
   std::list<std::string> uniqueMatList;
 
-  // Loop through 3d entities.  In model_complete.h5m there are 90 vols
+  // Loop through 3d entities (vols).  
   std::vector<std::string> vals;
   std::string material_trunc;
   char buffer[MAX_MATERIAL_NAME_SIZE];
@@ -677,6 +678,7 @@ void fludagwrite_assignma(std::string lfname)  // file with cell/surface cards
       entity = DAG->entity_by_index(3, i);
 
       // Create the id-index string for this vol
+      addToIDIndexMap(i, idstr);
       id = DAG->id_by_index(3, i);
       idstr << std::setw(5) << std::right << i;
       idstr << std::setw(5) << std::right << id << std::endl;
@@ -767,10 +769,8 @@ void fludagwrite_assignma(std::string lfname)  // file with cell/surface cards
   lcadfile.close();
 
   // Prepare an output file named "index_id.txt" for idstr
-  std::string index_id_filename = "index_id.txt";
-  std::ofstream index_id(index_id_filename.c_str());
-  index_id << idstr.str();
-  index_id.close(); 
+  writeToFileNamed(idstr, "index_id.txt");
+
   std::cout << "Writing lcad file = " << lfname << std::endl; 
 // Before opening file for writing, check for an existing file
 /*
@@ -785,6 +785,25 @@ void fludagwrite_assignma(std::string lfname)  // file with cell/surface cards
 
 }
 
+//---------------------------------------------------------------------------//
+// addToIDIndexMap(int i, 
+//---------------------------------------------------------------------------//
+// Convenience method to write a prepared stream to a file
+void addToIDIndexMap(i, std::ostringstream idstr&)
+{
+      idstr << std::setw(5) << std::right << i;
+      idstr << std::setw(5) << std::right << DAG->id_by_index(3,i) << std::endl;
+}
+//---------------------------------------------------------------------------//
+// writeStringToFile
+//---------------------------------------------------------------------------//
+// Convenience method to write a prepared stream to a file
+void writeToFileNamed(std::ostringstream oss, std::string index_id_filename)
+{
+  std::ofstream index_id(index_id_filename.c_str());
+  index_id << oss.str();
+  index_id.close(); 
+}
 //---------------------------------------------------------------------------//
 // mat_property_string
 //---------------------------------------------------------------------------//
