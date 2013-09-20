@@ -67,6 +67,14 @@ std::set<std::string> FLUKA_mat_set(flukaMatStrings, flukaMatStrings+NUM_FLUKA_M
 /* Maximum character-length of a cubit-named material property */
 int MAX_MATERIAL_NAME_SIZE = 32;
 
+/* Start and end logical (Fortran-style) unit numbers for S_card wrting */
+int START_UNIT = -21;
+int END_UNIT   = -99;
+/* The number of types of cards to be written. Card 'types' are distinguished by
+ * the combination of particle and tally type 
+ */
+int num_units_in_use;
+
 bool debug = false; //true ;
 
 /* Static values used by dagmctrack_ */
@@ -601,7 +609,11 @@ static bool get_real_prop( MBEntityHandle vol, int cell_id, const std::string& p
 
 }
 
-void writeToFileNamed(std::ostringstream oss, std::string index_id_filename);
+void writeToFileNamed(std::ostringstream& oss, std::string index_id_filename);
+void addToIDIndexMap(int i, std::ostringstream& idstr);
+int getNextUnitNumber();
+void process_Mi(std::ostringstream& ostr, MBEntityHandle entity, std::list<std::string> &matList, unsigned i);
+void process_Si(std::ostringstream& ostr, MBEntityHandle entity, unsigned i);
 //---------------------------------------------------------------------------//
 // fludagwrite_assignma
 //---------------------------------------------------------------------------//
@@ -634,7 +646,6 @@ void fludagwrite_assignma(std::string lfname)  // file with cell/surface cards
   ret = DAG->detect_available_props( keywords );
   // parse data from geometry so that property can be found
   ret = DAG->parse_properties( keywords );
-
   if (MB_SUCCESS != ret) 
   {
     std::cerr << "DAGMC failed to parse metadata properties" <<  std::endl;
@@ -660,6 +671,9 @@ void fludagwrite_assignma(std::string lfname)  // file with cell/surface cards
 
   // Open an outputstring for mat.inp
   std::ostringstream ostr;
+  // open an outputstring for the M_  and S_ portions
+  std::ostringstream Mstr;
+  std::ostringstream Sstr;
   // Open an outputstring for index-id table and put a header in it
   std::ostringstream idstr;
   idstr << std::setw(5) <<  "Index" ;
@@ -679,9 +693,6 @@ void fludagwrite_assignma(std::string lfname)  // file with cell/surface cards
 
       // Create the id-index string for this vol
       addToIDIndexMap(i, idstr);
-      id = DAG->id_by_index(3, i);
-      idstr << std::setw(5) << std::right << i;
-      idstr << std::setw(5) << std::right << id << std::endl;
 
       // Create the mat.inp string for this vol
       if (DAG->has_prop(entity, "graveyard"))
@@ -692,35 +703,16 @@ void fludagwrite_assignma(std::string lfname)  // file with cell/surface cards
       }
       else if (DAG->has_prop(entity, "M"))
       {
-         ret = DAG->prop_values(entity, "M", vals);
-         if (vals.size() >= 1)
-         {
-            // Make a copy of string in vals[0]; full string needs to be compared to
-            // FLUKA materials list; copy is for potential truncation
-            std::strcpy(buffer, vals[0].c_str());
-            material = std::string(buffer);
-            
-            if (vals[0].size() > 8)
-            {
-               material_trunc.resize(8);
-            }
-            if (FLUKA_mat_set.find(vals[0]) == FLUKA_mat_set.end())
-            {
-                // current material is not in the pre-existing FLUKA material list
-                uniqueMatList.push_back(material_trunc); 
-                std::cout << "Adding material " << material_trunc 
-                                                << " to the MATERIAL card list" << std::endl;
-            }
-         }
-         else
-         {
-            material_trunc = "moreThanOne";
-         }
-	 ostr << std::setw(10) << std::left  << "ASSIGNMAt";
-	 ostr << std::setw(10) << std::right << material_trunc;
-	 ostr << std::setw(10) << std::right << i << std::endl;
+         process_Mi(Mstr, entity, uniqueMatList, i);
       } // end processing of "M_" property
+      else if (DAG->has_prop(entity, "S"))
+      {
+         process_Si(Sstr, entity, i);
+      } // end processing of "S_" property
   }
+  // Add the processed strings to the output string
+  ostr << ostr.str() + Mstr.str() + Sstr.str();
+
   // Finish the ostr with the implicit complement card
   std::string implicit_comp_comment = "* The next volume is the implicit complement";
   ostr << implicit_comp_comment << std::endl;
@@ -767,11 +759,11 @@ void fludagwrite_assignma(std::string lfname)  // file with cell/surface cards
   lcadfile << header << std::endl;
   lcadfile << ostr.str();
   lcadfile.close();
+  std::cout << "Writing input file = " << lfname << std::endl; 
 
   // Prepare an output file named "index_id.txt" for idstr
-  writeToFileNamed(idstr, "index_id.txt");
+   writeToFileNamed(idstr, "index_id.txt");
 
-  std::cout << "Writing lcad file = " << lfname << std::endl; 
 // Before opening file for writing, check for an existing file
 /*
   if( lfname != "lcad" ){
@@ -782,14 +774,70 @@ void fludagwrite_assignma(std::string lfname)  // file with cell/surface cards
     }
   }
 */
-
 }
 
+void process_Si(std::ostringstream& ostr, MBEntityHandle entity, unsigned i)
+{
+   return;
+} 
+
+void process_Mi(std::ostringstream& mstr, MBEntityHandle entity, std::list<std::string> &matList, unsigned i)
+{
+    MBErrorCode ret;
+    std::vector<std::string> vals;
+    char buffer[MAX_MATERIAL_NAME_SIZE];
+    std::string material_trunc;
+
+    ret = DAG->prop_values(entity, "M", vals);
+    if (MB_SUCCESS != ret) 
+    {
+       std::cerr << "DAGMC failed to get M_ properties" <<  std::endl;
+       return;
+    }
+
+    if (vals.size() >= 1)
+    {
+       // Make a copy of string in vals[0]; full string needs to be compared to
+       // FLUKA materials list; copy is for potential truncation
+       std::strcpy(buffer, vals[0].c_str());
+       material_trunc = std::string(buffer);
+            
+       if (vals[0].size() > 8)
+       {
+           material_trunc.resize(8);
+       }
+
+       if (FLUKA_mat_set.find(vals[0]) == FLUKA_mat_set.end())
+       {
+          // current material is not in the pre-existing FLUKA material list
+          matList.push_back(material_trunc); 
+          std::cout << "Adding material " << material_trunc << " to the MATERIAL card list" << std::endl;
+       }
+     }
+     else
+     {
+         material_trunc = "moreThanOne";
+     }
+     mstr << std::setw(10) << std::left  << "ASSIGNMAt";
+     mstr << std::setw(10) << std::right << material_trunc;
+     mstr << std::setw(10) << std::right << i << std::endl;
+}
+//---------------------------------------------------------------------------//
+// getNextUnitNumber()
+//---------------------------------------------------------------------------//
+// Convenience method to get the next logical unit number for the writing-out 
+// field of a FLUKA card.  The key is when to call.  
+int getNextUnitNumber()
+{
+    int retval =  START_UNIT - num_units_in_use;
+    ++num_units_in_use;
+    return retval;
+}
 //---------------------------------------------------------------------------//
 // addToIDIndexMap(int i, 
 //---------------------------------------------------------------------------//
-// Convenience method to write a prepared stream to a file
-void addToIDIndexMap(i, std::ostringstream idstr&)
+// Convenience method to connect the geometry id to the ith volume 
+void addToIDIndexMap(int i, std::ostringstream &idstr)
 {
       idstr << std::setw(5) << std::right << i;
       idstr << std::setw(5) << std::right << DAG->id_by_index(3,i) << std::endl;
@@ -798,12 +846,13 @@ void addToIDIndexMap(i, std::ostringstream idstr&)
 // writeStringToFile
 //---------------------------------------------------------------------------//
 // Convenience method to write a prepared stream to a file
-void writeToFileNamed(std::ostringstream oss, std::string index_id_filename)
+void writeToFileNamed(std::ostringstream& file_contents, std::string filename)
 {
-  std::ofstream index_id(index_id_filename.c_str());
-  index_id << oss.str();
-  index_id.close(); 
+     std::ofstream file_stream(filename.c_str());
+     file_stream << file_contents.str();
+     file_stream.close(); 
 }
+
 //---------------------------------------------------------------------------//
 // mat_property_string
 //---------------------------------------------------------------------------//
