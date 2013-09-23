@@ -614,6 +614,7 @@ void addToIDIndexMap(int i, std::ostringstream& idstr);
 int getNextUnitNumber();
 void process_Mi(std::ostringstream& ostr, MBEntityHandle entity, std::list<std::string> &matList, unsigned i);
 void process_Si(std::ostringstream& ostr, MBEntityHandle entity, unsigned i);
+void processUniqueMaterials(std::ostringstream& ostr, std::list<std::string> uniqueList,std::string header);
 //---------------------------------------------------------------------------//
 // fludagwrite_assignma
 //---------------------------------------------------------------------------//
@@ -633,7 +634,7 @@ void process_Si(std::ostringstream& ostr, MBEntityHandle entity, unsigned i);
 //  all the geometry information contained in dagmc.html.  
 //  the name of the (currently hardcoded) output file is "mat.inp"
 //  The graveyard is assumed to be the last region.
-void fludagwrite_assignma(std::string lfname)  // file with cell/surface cards
+void fludagwrite_assignma(std::string filename_to_write)  // file with cell/surface cards
 {
   int num_vols = DAG->num_entities(3);
   std::cout << __FILE__ << ", " << __func__ << ":" << __LINE__ << "_______________" << std::endl;
@@ -669,11 +670,17 @@ void fludagwrite_assignma(std::string lfname)  // file with cell/surface cards
       }
   }
 
+  std::string header = "*...+....1....+....2....+....3....+....4....+....5....+....6....+....7...";
+
   // Open an outputstring for mat.inp
   std::ostringstream ostr;
+  std::ostringstream graveyard_str;
+  std::ostringstream impl_compl_str;
+
   // open an outputstring for the M_  and S_ portions
-  std::ostringstream Mstr;
-  std::ostringstream Sstr;
+  std::ostringstream A_filestr;
+  std::ostringstream S_filestr;
+
   // Open an outputstring for index-id table and put a header in it
   std::ostringstream idstr;
   idstr << std::setw(5) <<  "Index" ;
@@ -697,32 +704,35 @@ void fludagwrite_assignma(std::string lfname)  // file with cell/surface cards
       // Create the mat.inp string for this vol
       if (DAG->has_prop(entity, "graveyard"))
       {
-	 ostr << std::setw(10) << std::left  << "ASSIGNMAt";
-	 ostr << std::setw(10) << std::right << "BLCKHOLE";
-	 ostr << std::setw(10) << std::right << i << std::endl;
+	 graveyard_str << std::setw(10) << std::left  << "ASSIGNMAt";
+	 graveyard_str << std::setw(10) << std::right << "BLCKHOLE";
+	 graveyard_str << std::setw(10) << std::right << i << std::endl;
       }
       else if (DAG->has_prop(entity, "M"))
       {
-         process_Mi(Mstr, entity, uniqueMatList, i);
+         process_Mi(A_filestr, entity, uniqueMatList, i);
       } // end processing of "M_" property
       else if (DAG->has_prop(entity, "S"))
       {
-         process_Si(Sstr, entity, i);
+         process_Si(S_filestr, entity, i);
       } // end processing of "S_" property
   }
   // Add the processed strings to the output string
-  ostr << ostr.str() + Mstr.str() + Sstr.str();
+  // ostr << graveyard_str.str() + A_filestr.str() + S_filestr.str();
 
   // Finish the ostr with the implicit complement card
   std::string implicit_comp_comment = "* The next volume is the implicit complement";
-  ostr << implicit_comp_comment << std::endl;
-  ostr << std::setw(10) << std::left  << "ASSIGNMAt";
-  ostr << std::setw(10) << std::right << "VACUUM";
-  ostr << std::setw(10) << std::right << num_vols << std::endl;
+  impl_compl_str << implicit_comp_comment << std::endl;
+  impl_compl_str << std::setw(10) << std::left  << "ASSIGNMAt";
+  impl_compl_str << std::setw(10) << std::right << "VACUUM";
+  impl_compl_str << std::setw(10) << std::right << num_vols << std::endl;
 
-  // Process the uniqueMatList list so that it truly is unique
+  // Prepare the MATERIAL cards as a string stream using a list
+  // of materials that has no duplicates
   uniqueMatList.sort();
   uniqueMatList.unique();
+  std::ostringstream MAT_filestr;
+  processUniqueMaterials(MAT_filestr, uniqueMatList, header);
   // Print the final list
   if (debug)
   {
@@ -736,51 +746,71 @@ void fludagwrite_assignma(std::string lfname)  // file with cell/surface cards
      std::cout << ostr.str();
   }
 
-  // Prepare an output file of the given name; put a header and the output string in it
-  std::ofstream lcadfile( lfname.c_str());
-  std::string header = "*...+....1....+....2....+....3....+....4....+....5....+....6....+....7...";
-  if (uniqueMatList.size() != 0)
-  {
-     int matID = 25;
-     lcadfile << header << std::endl;
-     std::list<std::string>::iterator it; 
-     for (it=uniqueMatList.begin(); it!=uniqueMatList.end(); ++it)
-     {
-        lcadfile << std::setw(10) << std::left << "MATERIAL";
-        lcadfile << std::setw(10) << std::right << "";
-        lcadfile << std::setw(10) << std::right << "";
-        lcadfile << std::setw(10) << std::right << "";
-        lcadfile << std::setw(10) << std::right << ++matID;
-        lcadfile << std::setw(10) << std::right << "";
-        lcadfile << std::setw(10) << std::right << "";
-        lcadfile << std::setw(10) << std::left << *it << std::endl;
-     }
-  }
-  lcadfile << header << std::endl;
-  lcadfile << ostr.str();
-  lcadfile.close();
-  std::cout << "Writing input file = " << lfname << std::endl; 
+  // Prepare a file of the given name; put a header in it;  This file contains the FLUKA input cards 
+  // (records) the user has requested via geometry tags.
+  std::ofstream records_filestr( filename_to_write.c_str());
+  records_filestr << header << std::endl;
+
+
+  // Put all the filestr parts together
+  records_filestr << MAT_filestr.str();    // The material list is created separately
+  records_filestr << graveyard_str.str();  // the graveyard
+  records_filestr << A_filestr.str();      // ASIGNMAt statements
+  records_filestr << impl_compl_str.str(); // implicit complement
+  records_filestr << S_filestr.str();      // Detector tallies
+  records_filestr.close();
+
+  std::cout << "Writing input file = " << filename_to_write << std::endl; 
 
   // Prepare an output file named "index_id.txt" for idstr
    writeToFileNamed(idstr, "index_id.txt");
-
-// Before opening file for writing, check for an existing file
-/*
-  if( lfname != "lcad" ){
-    // Do not overwrite a lcad file if it already exists, except if it has the default name "lcad"
-    if( access( lfname.c_str(), R_OK ) == 0 ){
-      std::cout << "DagMC: reading from existing lcad file " << lfname << std::endl;
-      return; 
-    }
-  }
-*/
 }
 
+//---------------------------------------------------------------------------//
+// processUniqueMaterials
+//---------------------------------------------------------------------------//
+// Convenience method to create MATERIAL cards
+void processUniqueMaterials(std::ostringstream& ostr, std::list<std::string> uniqueList, std::string header)
+{
+  // Prepare the MATERIAL cards as a string stream
+  if (uniqueList.size() != 0)
+  {
+     int matID = 25;
+     std::list<std::string>::iterator it; 
+     for (it=uniqueList.begin(); it!=uniqueList.end(); ++it)
+     {
+        ostr << std::setw(10) << std::left << "MATERIAL";
+        ostr << std::setw(10) << std::right << "";
+        ostr << std::setw(10) << std::right << "";
+        ostr << std::setw(10) << std::right << "";
+        ostr << std::setw(10) << std::right << ++matID;
+        ostr << std::setw(10) << std::right << "";
+        ostr << std::setw(10) << std::right << "";
+        ostr << std::setw(10) << std::left << *it << std::endl;
+     }
+  }
+  if (uniqueList.size() !=0)
+  {
+     ostr << header << std::endl;
+  }
+  return;
+}
+
+//---------------------------------------------------------------------------//
+// process_SI
+//---------------------------------------------------------------------------//
+// 
 void process_Si(std::ostringstream& ostr, MBEntityHandle entity, unsigned i)
 {
+   MBErrorCode ret;
+   std::vector<std::string> vals;
    return;
 } 
 
+//---------------------------------------------------------------------------//
+// process_MI
+//---------------------------------------------------------------------------//
+// 
 void process_Mi(std::ostringstream& mstr, MBEntityHandle entity, std::list<std::string> &matList, unsigned i)
 {
     MBErrorCode ret;
