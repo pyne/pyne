@@ -908,11 +908,21 @@ void writeToFileNamed(std::ostringstream& file_contents, std::string filename)
      file_stream.close(); 
 }
 
+//---------------------------------------------------------------------------//
+// process_SI
+//---------------------------------------------------------------------------//
+// 
 void process_Si(std::ostringstream& ostr, MBEntityHandle entity, unsigned i)
 {
+   MBErrorCode ret;
+   std::vector<std::string> vals;
    return;
 } 
 
+//---------------------------------------------------------------------------//
+// process_MI
+//---------------------------------------------------------------------------//
+// 
 void process_Mi(std::ostringstream& mstr, MBEntityHandle entity, std::list<std::string> &matList, unsigned i)
 {
     MBErrorCode ret;
