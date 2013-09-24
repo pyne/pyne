@@ -43,6 +43,7 @@ KDEMeshTally::KDEMeshTally(const TallyInput& input,
 
     // set up KDEMeshTally member variables from TallyInput
     parse_tally_options();
+    assert(kernel != NULL);
  
     std::cout << "    using " << kernel->get_kernel_name()
               << " kernel and bandwidth " << bandwidth << std::endl;
@@ -58,7 +59,10 @@ KDEMeshTally::KDEMeshTally(const TallyInput& input,
     if (estimator == INTEGRAL_TRACK)
     {
         // set up quadrature rule for the integral_track estimator
-        quadrature = new Quadrature(4);
+        // NOTE: this will only work correctly for polynomial kernel functions
+        int num_points = 3 * kernel->get_min_quadrature(0) - 2;
+        std::cout << "    using " << num_points << "-pt quadrature scheme\n";
+        quadrature = new Quadrature(num_points);
     }
     else if (estimator == SUB_TRACK)
     {

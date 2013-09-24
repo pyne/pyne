@@ -41,7 +41,7 @@ class Function
  *
  * NOTE: Polynomials of order 2n - 1 or less are integrated exactly by an
  * n-point Quadrature.  However, the quadrature points and weights are only
- * exact to 12 significant figures.  This may limit the final accuracy of
+ * exact to 16 significant figures.  This may limit the final accuracy of
  * the results due to floating point arithmetic.  Use a higher order
  * Quadrature if you need more accuracy.
  */

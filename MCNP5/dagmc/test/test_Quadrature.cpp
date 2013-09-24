@@ -88,7 +88,7 @@ class QuadratureTest : public ::testing::Test
 TEST(InvalidQuadratureTest, InvalidQuadPoints)
 {
     Quadrature quadrature(50);
-    EXPECT_EQ(5, quadrature.get_num_quad_points());
+    EXPECT_EQ(10, quadrature.get_num_quad_points());
 }
 //---------------------------------------------------------------------------//
 // FIXTURE-BASED TESTS: QuadratureTest

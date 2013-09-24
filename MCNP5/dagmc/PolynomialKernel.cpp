@@ -28,7 +28,7 @@ PolynomialKernel::PolynomialKernel(unsigned int s, unsigned int r)
     }
 
     // set quadrature for integrating the 0th moment function
-    quadrature = new Quadrature(s + r);
+    quadrature = new Quadrature(get_min_quadrature(0));
 }
 //---------------------------------------------------------------------------//
 // DESTRUCTOR
@@ -113,6 +113,11 @@ int PolynomialKernel::get_order() const
     return 2 * r;
 }
 //---------------------------------------------------------------------------//
+int PolynomialKernel::get_min_quadrature(unsigned int i) const
+{
+    return s + r + (i/2);
+}
+//---------------------------------------------------------------------------//
 double PolynomialKernel::integrate_moment(double a,
                                           double b,
                                           unsigned int i) const
@@ -128,7 +133,7 @@ double PolynomialKernel::integrate_moment(double a,
         MomentFunction moment(i, *this);
 
         // define the quadrature set for integrating the ith moment function
-        unsigned int n = s + r + (i/2);
+        unsigned int n = get_min_quadrature(i);
 
         if (quadrature->get_num_quad_points() != n)
         {

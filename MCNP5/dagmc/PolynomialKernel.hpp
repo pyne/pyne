@@ -79,6 +79,13 @@ class PolynomialKernel : public KDEKernel
     virtual int get_order() const;
 
     /**
+     * \brief Gets minimum number of quadrature points based on the ith moment
+     * \param i the index representing the ith moment function
+     * \return number of quadrature points needed to integrate the ith moment
+     */
+    virtual int get_min_quadrature(unsigned int i) const;
+
+    /**
      * \brief Integrates the ith moment function for this polynomial kernel
      * \param a, b the lower and upper integration limits
      * \param i the index representing the ith moment function

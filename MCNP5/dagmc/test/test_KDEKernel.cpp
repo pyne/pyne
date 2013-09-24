@@ -27,6 +27,7 @@ class MockEpanechnikovKernel : public KDEKernel
     // not implemented
     std::string get_kernel_name() const {}
     int get_order() const {}
+    int get_min_quadrature(unsigned int i) const {}
 
     // integrates the ith moment function
     double integrate_moment(double a, double b, unsigned int i) const
@@ -123,6 +124,10 @@ TEST_F(KDEKernelTest, CreateUniformKernel)
     EXPECT_TRUE(kernel != NULL);
     EXPECT_EQ("2nd-order uniform", kernel->get_kernel_name());
     EXPECT_EQ(2, kernel->get_order());
+    EXPECT_EQ(1, kernel->get_min_quadrature(0));
+    EXPECT_EQ(1, kernel->get_min_quadrature(1));
+    EXPECT_EQ(2, kernel->get_min_quadrature(2));
+    EXPECT_EQ(2, kernel->get_min_quadrature(3));
 }
 //---------------------------------------------------------------------------//
 TEST_F(KDEKernelTest, CreateEpanechnikovKernel)
@@ -131,6 +136,10 @@ TEST_F(KDEKernelTest, CreateEpanechnikovKernel)
     EXPECT_TRUE(kernel != NULL);
     EXPECT_EQ("2nd-order epanechnikov", kernel->get_kernel_name());
     EXPECT_EQ(2, kernel->get_order());
+    EXPECT_EQ(2, kernel->get_min_quadrature(0));
+    EXPECT_EQ(2, kernel->get_min_quadrature(1));
+    EXPECT_EQ(3, kernel->get_min_quadrature(2));
+    EXPECT_EQ(3, kernel->get_min_quadrature(3));
 }
 //---------------------------------------------------------------------------//
 TEST_F(KDEKernelTest, CreateBiweightKernel)
@@ -139,6 +148,10 @@ TEST_F(KDEKernelTest, CreateBiweightKernel)
     EXPECT_TRUE(kernel != NULL);
     EXPECT_EQ("2nd-order biweight", kernel->get_kernel_name());
     EXPECT_EQ(2, kernel->get_order());
+    EXPECT_EQ(3, kernel->get_min_quadrature(0));
+    EXPECT_EQ(3, kernel->get_min_quadrature(1));
+    EXPECT_EQ(4, kernel->get_min_quadrature(2));
+    EXPECT_EQ(4, kernel->get_min_quadrature(3));
 }
 //---------------------------------------------------------------------------//
 TEST_F(KDEKernelTest, CreateTriweightKernel)
@@ -147,6 +160,10 @@ TEST_F(KDEKernelTest, CreateTriweightKernel)
     EXPECT_TRUE(kernel != NULL);
     EXPECT_EQ("2nd-order triweight", kernel->get_kernel_name());
     EXPECT_EQ(2, kernel->get_order());
+    EXPECT_EQ(4, kernel->get_min_quadrature(0));
+    EXPECT_EQ(4, kernel->get_min_quadrature(1));
+    EXPECT_EQ(5, kernel->get_min_quadrature(2));
+    EXPECT_EQ(5, kernel->get_min_quadrature(3));
 }
 //---------------------------------------------------------------------------//
 TEST_F(KDEKernelTest, CreateHigherOrderKernel)
@@ -155,6 +172,10 @@ TEST_F(KDEKernelTest, CreateHigherOrderKernel)
     EXPECT_TRUE(kernel != NULL);
     EXPECT_EQ("6th-order epanechnikov", kernel->get_kernel_name());
     EXPECT_EQ(6, kernel->get_order());
+    EXPECT_EQ(4, kernel->get_min_quadrature(0));
+    EXPECT_EQ(4, kernel->get_min_quadrature(1));
+    EXPECT_EQ(5, kernel->get_min_quadrature(2));
+    EXPECT_EQ(5, kernel->get_min_quadrature(3));
 }
 //---------------------------------------------------------------------------//
 // FIXTURE-BASED TESTS: BoundaryKernelTest
