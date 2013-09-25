@@ -173,7 +173,13 @@ class Mesh(object):
         ops = {"+": lambda val_1, val_2: (val_1 + val_2), 
                "-": lambda val_1, val_2: (val_1 - val_2),
                "*": lambda val_1, val_2: (val_1 * val_2),
-               "/": lambda val_1, val_2: (val_1 / val_2),}
+               "/": lambda val_1, val_2: (val_1 / val_2)}
+  
+        # Exclude error tags in a case a StatMesh is mistakenly initialized as a
+        # Mesh object.
+        for tag in tags:
+            if tag[-6:] == "_error":
+                tags.remove(tag)
 
         for tag in tags:
             for ve_1, ve_2 in \
@@ -191,7 +197,7 @@ class Mesh(object):
         common_tags = []
 
         for tag in mesh_1_tags:
-             if (tag[-6:] != "_error") and (tag in mesh_2_tags):
+             if tag in mesh_2_tags:
                  common_tags.append(tag)
 
         return common_tags
@@ -423,10 +429,46 @@ def _structured_iter(indices, ordmap, dims, it):
         yield _structured_step_iter(it, (ioff + joff + koff))
 
 
-
 class StatMesh(Mesh):
    def __init__(self, mesh=None, mesh_file=None, structured=False,
                  structured_coords=None, structured_set=None):
 
         super(StatMesh, self).__init__(mesh=mesh, mesh_file=mesh_file, structured=structured,
                  structured_coords=structured_coords, structured_set=structured_set)
+
+    def _do_op_(self, mesh_obj_2, tags, op):
+        """Duck typed private method to do mesh +, -, *, /, with proper error
+           treatments.
+        """
+        ops = {"+": lambda val_1, val_2: (val_1 + val_2), 
+               "-": lambda val_1, val_2: (val_1 - val_2),
+               "*": lambda val_1, val_2: (val_1 * val_2),
+               "/": lambda val_1, val_2: (val_1 / val_2)}
+
+        err_ops = {"+": lambda val_1, val_2, val_1_err, val_2_err: (1/(val_1 + val_2)*sqrt((val_1*val_1_err)**2 + (val_2*val_2_err)**2))), 
+                   "-": lambda val_1, val_2: val_1_err, val_2_err: (1/(val_1 - val_2)*sqrt((val_1*val_1_err)**2 + (val_2*val_2_err)**2))),
+                   "*": lambda val_1, val_2: (np.sqrt(val_1_err**2 + val_2_err**2)),
+                   "/": lambda val_1, val_2: (np.sqrt(val_1_err**2 + val_2_err**2))}
+  
+        # Exclude error tags in a case a StatMesh is mistakenly initialized as a
+        # Mesh object.
+        for tag in tags:
+            if tag[-6:] == "_error":
+                tags.remove(tag)
+
+        for tag in tags:
+            for ve_1, ve_2 in \
+                zip(list(self.mesh.iterate(iBase.Type.region, iMesh.Topology.all)),
+                    list(mesh_obj_2.mesh.iterate(iBase.Type.region, iMesh.Topology.all))):
+                self.mesh.getTagHandle(tag)[ve_1] = ops[op](
+                    self.mesh.getTagHandle(tag)[ve_1], 
+                    mesh_obj_2.mesh.getTagHandle(tag)[ve_2])
+
+                self.mesh.getTagHandle(tag + "_error")[ve_1] = error_ops[op](
+                    self.mesh.getTagHandle(tag)[ve_1], 
+                    mesh_obj_2.mesh.getTagHandle(tag)[ve_2], 
+                    self.mesh.getTagHandle(tag + "_error")[ve_1], 
+                    mesh_obj_2.mesh.getTagHandle(tag + "_error")[ve_2])
+
+
+
