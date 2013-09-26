@@ -68,12 +68,14 @@ std::set<std::string> FLUKA_mat_set(flukaMatStrings, flukaMatStrings+NUM_FLUKA_M
 int MAX_MATERIAL_NAME_SIZE = 32;
 
 /* Start and end logical (Fortran-style) unit numbers for S_card wrting */
-int START_UNIT = -21;
-int END_UNIT   = -99;
+//int START_UNIT = -21;
+//int END_UNIT   = -99;
 /* The number of types of cards to be written. Card 'types' are distinguished by
  * the combination of particle and tally type 
  */
-int num_units_in_use;
+// static int num_units_in_use = 0;
+// 
+//static int RESNUCLEI_Unit = -1;
 
 bool debug = false; //true ;
 
@@ -610,7 +612,7 @@ static bool get_real_prop( MBEntityHandle vol, int cell_id, const std::string& p
 }
 
 void writeToFileNamed(std::ostringstream& oss, std::string index_id_filename);
-void addToIDIndexMap(int i, std::ostringstream& idstr);
+void addToIDIndexFile(int i, std::ostringstream& idstr);
 int getNextUnitNumber();
 void process_Mi(std::ostringstream& ostr, MBEntityHandle entity, std::list<std::string> &matList, unsigned i);
 void process_Si(std::ostringstream& ostr, MBEntityHandle entity, unsigned i);
@@ -699,7 +701,7 @@ void fludagwrite_assignma(std::string filename_to_write)  // file with cell/surf
       entity = DAG->entity_by_index(3, i);
 
       // Create the id-index string for this vol
-      addToIDIndexMap(i, idstr);
+      addToIDIndexFile(i, idstr);
 
       // Create the mat.inp string for this vol
       if (DAG->has_prop(entity, "graveyard"))
@@ -751,7 +753,6 @@ void fludagwrite_assignma(std::string filename_to_write)  // file with cell/surf
   std::ofstream records_filestr( filename_to_write.c_str());
   records_filestr << header << std::endl;
 
-
   // Put all the filestr parts together
   records_filestr << MAT_filestr.str();    // The material list is created separately
   records_filestr << graveyard_str.str();  // the graveyard
@@ -797,21 +798,35 @@ void processUniqueMaterials(std::ostringstream& ostr, std::list<std::string> uni
 }
 
 //---------------------------------------------------------------------------//
-// process_SI
+// process_S_RESNUCLEI
 //---------------------------------------------------------------------------//
-// 
-void process_Si(std::ostringstream& ostr, MBEntityHandle entity, unsigned i)
+// Process the request for a RESNUCLEI tally
+/*
+void process_S_RESNUCLEI(std::ostringstream& ostr, MBEntityHandle entity, unsigned i)
 {
    MBErrorCode ret;
    std::vector<std::string> vals;
+
+   int unitNum = getRESNUCLEIUnitNumber()
    return;
 } 
-
+*/
+/*
+int getRESNUCLEIUnitNumber()
+{
+    if (RESNUCLEI_Unit = -1)
+    {
+       RESNUCLEI_Unit = getNextUnitNumber();
+       ++num_units_in_use;
+    }
+    return RESNUCLEI_Unit;
+}
+*/
 //---------------------------------------------------------------------------//
 // process_MI
 //---------------------------------------------------------------------------//
 // 
-void process_Mi(std::ostringstream& mstr, MBEntityHandle entity, std::list<std::string> &matList, unsigned i)
+void process_Mi(std::ostringstream& ostr, MBEntityHandle entity, std::list<std::string> &matList, unsigned i)
 {
     MBErrorCode ret;
     std::vector<std::string> vals;
@@ -848,26 +863,28 @@ void process_Mi(std::ostringstream& mstr, MBEntityHandle entity, std::list<std::
      {
          material_trunc = "moreThanOne";
      }
-     mstr << std::setw(10) << std::left  << "ASSIGNMAt";
-     mstr << std::setw(10) << std::right << material_trunc;
-     mstr << std::setw(10) << std::right << i << std::endl;
+     ostr << std::setw(10) << std::left  << "ASSIGNMAt";
+     ostr << std::setw(10) << std::right << material_trunc;
+     ostr << std::setw(10) << std::right << i << std::endl;
 }
 //---------------------------------------------------------------------------//
 // getNextUnitNumber()
 //---------------------------------------------------------------------------//
 // Convenience method to get the next logical unit number for the writing-out 
 // field of a FLUKA card.  The key is when to call.  
+/*
 int getNextUnitNumber()
 {
     int retval =  START_UNIT - num_units_in_use;
     ++num_units_in_use;
     return retval;
 }
+*/
 //---------------------------------------------------------------------------//
 // addToIDIndexMap(int i, 
 //---------------------------------------------------------------------------//
 // Convenience method to connect the geometry id to the ith volume 
-void addToIDIndexMap(int i, std::ostringstream &idstr)
+void addToIDIndexFile(int i, std::ostringstream &idstr)
 {
       idstr << std::setw(5) << std::right << i;
       idstr << std::setw(5) << std::right << DAG->id_by_index(3,i) << std::endl;
