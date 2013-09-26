@@ -911,19 +911,33 @@ void writeToFileNamed(std::ostringstream& file_contents, std::string filename)
 //---------------------------------------------------------------------------//
 // process_SI
 //---------------------------------------------------------------------------//
-// 
-void process_Si(std::ostringstream& ostr, MBEntityHandle entity, unsigned i)
+// Process the request for a RESNUCLEI tally
+/*
+void process_S_RESNUCLEI(std::ostringstream& ostr, MBEntityHandle entity, unsigned i)
 {
    MBErrorCode ret;
    std::vector<std::string> vals;
+
+   int unitNum = getRESNUCLEIUnitNumber()
    return;
 } 
-
+*/
+/*
+int getRESNUCLEIUnitNumber()
+{
+    if (RESNUCLEI_Unit = -1)
+    {
+       RESNUCLEI_Unit = getNextUnitNumber();
+       ++num_units_in_use;
+    }
+    return RESNUCLEI_Unit;
+}
+*/
 //---------------------------------------------------------------------------//
 // process_MI
 //---------------------------------------------------------------------------//
 // 
-void process_Mi(std::ostringstream& mstr, MBEntityHandle entity, std::list<std::string> &matList, unsigned i)
+void process_Mi(std::ostringstream& ostr, MBEntityHandle entity, std::list<std::string> &matList, unsigned i)
 {
     MBErrorCode ret;
     std::vector<std::string> vals;
@@ -960,26 +974,28 @@ void process_Mi(std::ostringstream& mstr, MBEntityHandle entity, std::list<std::
      {
          material_trunc = "moreThanOne";
      }
-     mstr << std::setw(10) << std::left  << "ASSIGNMAt";
-     mstr << std::setw(10) << std::right << material_trunc;
-     mstr << std::setw(10) << std::right << i << std::endl;
+     ostr << std::setw(10) << std::left  << "ASSIGNMAt";
+     ostr << std::setw(10) << std::right << material_trunc;
+     ostr << std::setw(10) << std::right << i << std::endl;
 }
 //---------------------------------------------------------------------------//
 // getNextUnitNumber()
 //---------------------------------------------------------------------------//
 // Convenience method to get the next logical unit number for the writing-out 
 // field of a FLUKA card.  The key is when to call.  
+/*
 int getNextUnitNumber()
 {
     int retval =  START_UNIT - num_units_in_use;
     ++num_units_in_use;
     return retval;
 }
+*/
 //---------------------------------------------------------------------------//
 // addToIDIndexMap(int i, 
 //---------------------------------------------------------------------------//
 // Convenience method to connect the geometry id to the ith volume 
-void addToIDIndexMap(int i, std::ostringstream &idstr)
+void addToIDIndexFile(int i, std::ostringstream &idstr)
 {
       idstr << std::setw(5) << std::right << i;
       idstr << std::setw(5) << std::right << DAG->id_by_index(3,i) << std::endl;
