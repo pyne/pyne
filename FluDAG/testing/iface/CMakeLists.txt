@@ -1,5 +1,8 @@
+# CMake build script for FluDAG testing
+
+project (FluDAGUnitTests)
 cmake_minimum_required(VERSION 2.8)
-project (TestFluDAG)
+
 find_package(GTest REQUIRED)
 
 # If FLUKA is installed, $FLUPRO is probably an environment varaiable
@@ -7,14 +10,15 @@ IF (NOT DEFINED FLUPRO)
 	set (FLUPRO "$ENV{FLUPRO}")
 ENDIF (NOT DEFINED FLUPRO)
 
-IF (NOT DEFINED MOAB_HOME OR NOT DEFINED TOPDIR)
-	INCLUDE(local.cmake)
-ENDIF (NOT DEFINED MOAB_HOME OR NOT DEFINED TOPDIR)
+# IF (NOT DEFINED MOAB_HOME OR NOT DEFINED TOPDIR)
+#	INCLUDE(local.cmake)
+#ENDIF (NOT DEFINED MOAB_HOME OR NOT DEFINED TOPDIR)
 
-IF (NOT DEFINED TOPDIR)
-	message("Please define the directory containing DAGMC/FluDAG.")
-	message("Definition can be done with the -D switch or in local.cmake.")
-ENDIF (NOT DEFINED TOPDIR)
+# IF (NOT DEFINED TOPDIR)
+#	message("Please define the directory containing DAGMC/FluDAG.")
+#	message("Definition can be done with the -D switch or in local.cmake.")
+# ENDIF (NOT DEFINED TOPDIR)
+
 
 IF (NOT DEFINED FLUDAG)
 	set (FLUDAG  ${TOPDIR}/DAGMC/FluDAG)
@@ -27,7 +31,6 @@ set(MOAB_LIB_DIR ${MOAB_HOME}/lib)
 set (moablibs ${MOAB_LIB_DIR}/libMOAB.so ${MOAB_LIB_DIR}/libdagmc.so)
 
 include_directories(${GTEST_INCLUDE_DIRS})
-# include_directories(${FLUDAG}/src/include)
 include_directories(${FLUDAG}/src/cpp)
 include_directories(${MOAB_INCLUDE})
 
