@@ -305,7 +305,8 @@ Get the FluDAG Alpha Release repository by cloning the UW-Madison DAGMC reposito
 
     prompt%> cd $HOME
     prompt%> git clone https://github.com/svalinn/DAGMC.git
-    prompt%> get checkout alpha_release.
+    prompt%> cd DAGMC
+    prompt%> git checkout alpha_release
 
 A run-script provided by FLUKA has been modified to allow it to have input filenames
 longer than 8 characters.  The following steps assume you have the FLUKA environment
