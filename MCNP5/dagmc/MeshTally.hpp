@@ -104,14 +104,14 @@ class MeshTally : public Tally
      * These three methods can be useful for implementing MeshTally
      * functionality in parallel.
      */
-    virtual double* get_tally_data(int& length);
-    virtual double* get_error_data(int& length);
-    virtual double* get_scratch_data(int& length);
+    // virtual double* get_tally_data(int& length);
+    // virtual double* get_error_data(int& length);
+    // virtual double* get_scratch_data(int& length);
 
     /**
      * \brief Resets all of the mesh tally data arrays to zero
      */
-    virtual void zero_tally_data();
+    // virtual void zero_tally_data();
 
   protected:
     /// Name of file to which the final tally results will be written
@@ -132,13 +132,13 @@ class MeshTally : public Tally
     // >>> TALLY DATA ARRAYS
 
     /// Data array for storing sum of scores for all particle histories
-    std::vector<double> tally_data;
+    // std::vector<double> tally_data;
 
     /// Data array for determining error in tally results
-    std::vector<double> error_data;
+    // std::vector<double> error_data;
 
     /// Data array for storing sum of scores for a single history
-    std::vector<double> temp_tally_data;
+    // std::vector<double> temp_tally_data;
 
     /// Entity handles updated in current history; cleared by end_history()
     std::set<moab::EntityHandle> visited_this_history;
@@ -162,7 +162,7 @@ class MeshTally : public Tally
      * Arrays will be resized to the given number of tally points multiplied
      * by the number of energy bins.
      */
-    void resize_data_arrays(unsigned int num_tally_points);
+ //   void resize_data_arrays(unsigned int num_tally_points);
 
     /**
      * \brief Determines entity index corresponding to tally point
@@ -181,12 +181,13 @@ class MeshTally : public Tally
      * Enables direct access to the mesh tally data for the given tally point
      * and energy bin.
      */
-    double& get_data(std::vector<double>& data,
-                     moab::EntityHandle tally_point,
-                     unsigned energy_bin = 0);
+  //  double& get_data(std::vector<double>& data,
+   //                  moab::EntityHandle tally_point,
+    //                 unsigned energy_bin = 0);
 
     /**
-     * \brief Loads the MOAB mesh data from the input file for this mesh tally
+    
+* \brief Loads the MOAB mesh data from the input file for this mesh tally
      * \param mbi the MOAB interface for this mesh tally
      * \param mesh_set entity handle for the mesh set that will be created
      * \return the MOAB ErrorCode value

@@ -195,51 +195,49 @@ void dagmc_fmesh_setup_mesh_(int* /*ipt*/, int* id,
 //---------------------------------------------------------------------------//
 // RUNTAPE AND MPI METHODS
 //---------------------------------------------------------------------------//
-// TODO modify/remove these methods when Runtape/MPI functionality is implemented 
 /**
  * Get a fortran pointer to the tally array for the specified mesh tally.
  * Called when this data needs to be written or read from a runtpe file or 
  * an MPI stream.
  */
-/*
-void dagmc_fmesh_get_tally_data_( int* fmesh_index, void* fortran_data_pointer ){
+void dagmc_fmesh_get_tally_data_( int* tally_id, void* fortran_data_pointer )
+{
   double* data; 
   int length;
  
-  data = all_tallies[*fmesh_index]->get_tally_data( length );
+  // data = all_tallies[*tally_id]->get_tally_data( length );
+ //  tallyManager.get_data(id, data, length);
   FMESH_FUNC( dagmc_make_fortran_pointer )( fortran_data_pointer, data, &length );
 }
-*/
 
 /**
  * Get a fortran pointer to the error array for the specified mesh tally.
  * Called when this data needs to be written or read from a runtpe file or 
  * an MPI stream.
  */
-
-/*
-void dagmc_fmesh_get_error_data_( int* fmesh_index, void* fortran_data_pointer ){
+void dagmc_fmesh_get_error_data_( int* tally_id, void* fortran_data_pointer )
+{
   double* data; 
   int length;
  
-  data = all_tallies[*fmesh_index]->get_error_data( length );
+  // data = all_tallies[*fmesh_index]->get_error_data( length );
   FMESH_FUNC( dagmc_make_fortran_pointer )( fortran_data_pointer, data, &length );
 }
-*/
+
 /**
  * Get a fortran pointer to the scratch array for the specified mesh tally.
  * Called when this data needs to be written or read from a runtpe file or 
  * an MPI stream.
  */
-/*
-void dagmc_fmesh_get_scratch_data_( int* fmesh_index, void* fortran_data_pointer ){
+void dagmc_fmesh_get_scratch_data_( int* tally_id, void* fortran_data_pointer )
+{
   double* data; 
   int length;
   
-  data = all_tallies[*fmesh_index]->get_scratch_data( length );
+//  data = all_tallies[*fmesh_index]->get_scratch_data( length );
   FMESH_FUNC( dagmc_make_fortran_pointer )( fortran_data_pointer, data, &length );
 }
-*/
+
 /**
  * Set the tally and error arrays of the specified mesh tally to all zeros.
  * Called when an MPI subtask has just sent all its tally and error values
@@ -256,40 +254,40 @@ void dagmc_fmesh_clear_data_( int* fmesh_index ){
  * Add the values in this mesh's scratch array to its tally array.
  * Called when merging together values from MPI subtasks at the master task.
  */
-/*
-void dagmc_fmesh_add_scratch_to_tally_( int* fmesh_index ){
+void dagmc_fmesh_add_scratch_to_tally_( int* tally_id )
+{
   double* data, *scratch;
   int length, scratchlength;
 
-  data = all_tallies[*fmesh_index]->get_tally_data( length );
-  scratch = all_tallies[*fmesh_index]->get_scratch_data( scratchlength );
+//  data = all_tallies[*fmesh_index]->get_tally_data( length );
+//  scratch = all_tallies[*fmesh_index]->get_scratch_data( scratchlength );
   
   assert( scratchlength >= length );
 
-  for( int i = 0; i < length; ++i ){
-    data[i] += scratch[i];
+  for( int i = 0; i < length; ++i )
+  {
+ //   data[i] += scratch[i];
   }
 }
-*/
 /**
  * Add the values in this mesh's scratch array to its error array.
  * Called when merging together values from MPI subtasks at the master task.
  */
-/*
-void dagmc_fmesh_add_scratch_to_error_( int* fmesh_index ){
+void dagmc_fmesh_add_scratch_to_error_( int* tally_id )
+{
   double* data, *scratch;
   int length, scratchlength;
 
-  data = all_tallies[*fmesh_index]->get_error_data( length );
-  scratch = all_tallies[*fmesh_index]->get_scratch_data( scratchlength );
+  // data = all_tallies[*fmesh_index]->get_error_data( length );
+  // scratch = all_tallies[*fmesh_index]->get_scratch_data( scratchlength );
   
   assert( scratchlength >= length );
 
-  for( int i = 0; i < length; ++i ){
-    data[i] += scratch[i];
+  for( int i = 0; i < length; ++i )
+  {
+ //   data[i] += scratch[i];
   }
 }
-*/
 //---------------------------------------------------------------------------//
 // ROUTINE FMESH METHODS
 //---------------------------------------------------------------------------//

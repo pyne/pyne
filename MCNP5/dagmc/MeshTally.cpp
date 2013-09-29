@@ -135,6 +135,7 @@ unsigned int MeshTally::get_entity_index(moab::EntityHandle tally_point)
     return ret;
 }
 //---------------------------------------------------------------------------//
+/*
 double& MeshTally::get_data(std::vector<double>& data,
                             moab::EntityHandle tally_point,
                             unsigned energy_bin)
@@ -143,6 +144,7 @@ double& MeshTally::get_data(std::vector<double>& data,
     int index = get_entity_index(tally_point) * num_energy_bins + energy_bin;
     return data[index];
 }
+*/
 //---------------------------------------------------------------------------//
 moab::ErrorCode MeshTally::load_moab_mesh(moab::Interface* mbi,
                                           moab::EntityHandle& mesh_set)
