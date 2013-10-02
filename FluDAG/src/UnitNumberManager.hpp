@@ -1,3 +1,13 @@
+// FluDAG/src/UnitNumberManager.hpp
+
+#ifndef FLUDAG_SRC_UNIT_NUMBER_MANAGER_HPP
+#define FLUDAG_SRC_UNIT_NUMBER_MANAGER_HPP
+
+#include <iostream>   // std::cerr
+#include <string>     // std::string
+#include <map>        // std::map
+
+// NOTE:  the logical unit numbers in the Fluka cards are floats
 class UnitNumberManager
 {
   public:
@@ -6,19 +16,20 @@ class UnitNumberManager
      */
     UnitNumberManager();
 
-    static int BAD_UNIT_NUMBER = 0;
 
     int getUnitNumber(std::string name);
-
-  private:
-    /* Start and end logical (Fortran-style) unit numbers for record writing */
-    static int START_UNIT = -21;
-    static int END_UNIT   = -99;
-    /* The number of types of cards to be written. Card 'types' are distinguished by
+    /* 
+     * The number of types of cards to be written. Card 'types' are distinguished by
      * the combination of particle and tally type 
      */
-    static int num_units_in_use = 0;
+    static int num_units_in_use;
+
+  private:
 
     std::map<std::string, int> nameNumberMap;
     int getNextUnitNumber();
-}
+};
+
+#endif // FLUDAG_SRC_UNIT_NUMBER_MANAGER_HPP
+
+// end of FluDAG/src/UnitNumberManager.hpp
