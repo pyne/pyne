@@ -1,3 +1,15 @@
+// FluDAG/src/UnitNumberManager.cpp
+
+#include "UnitNumberManager.hpp"
+
+/* Start and end logical (Fortran-style) unit numbers for record writing */
+const int BAD_UNIT_NUMBER = 0;
+const int START_UNIT      = -21;
+const int END_UNIT        = -99;
+
+// Initialize the static variables
+int UnitNumberManager::num_units_in_use = 0;
+
 //---------------------------------------------------------------------------//
 // getUnitNumber()
 //---------------------------------------------------------------------------//
@@ -9,9 +21,9 @@ int UnitNumberManager::getUnitNumber(std::string name)
     {
        return nameNumberMap.find(name)->second;
     }
-    else // get the next unit number
+    else // otherwise get the next unit number
     {
-       int unitNumber = getNextAvailableUnitNumber();
+       int unitNumber = getNextUnitNumber();
        nameNumberMap.insert(std::make_pair(name,unitNumber)); 
        if (unitNumber == BAD_UNIT_NUMBER)
        {
@@ -26,10 +38,11 @@ int UnitNumberManager::getUnitNumber(std::string name)
 // getNextUnitNumber()
 //---------------------------------------------------------------------------//
 // Convenience method to get the next logical unit number for the writing-out 
-// field of a FLUKA card.  The key is when to call.  
+// field of a FLUKA card.  The key to this function is when to call it.  
 int UnitNumberManager::getNextUnitNumber()
 {
-    // Note that the unit number id increasingly negative, counting down from the (negative) START_UNIT
+    // Note that the unit number is increasingly negative, 
+    // counting down from the (negative) START_UNIT
     int retval =  START_UNIT - num_units_in_use;
   
     if (retval < END_UNIT)
@@ -43,3 +56,4 @@ int UnitNumberManager::getNextUnitNumber()
    
     return retval;
 }
+// end of FluDAG/src/UnitNumberManager.cpp

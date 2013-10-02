@@ -766,7 +766,15 @@ void fludagwrite_assignma(std::string filename_to_write)  // file with cell/surf
   // Prepare an output file named "index_id.txt" for idstr
    writeToFileNamed(idstr, "index_id.txt");
 }
+// End fludagwrite_assignma
 
+//---------------------------------------------------------------------------//
+// process_Si
+//---------------------------------------------------------------------------//
+// Function template to allow compilation
+void process_Si(std::ostringstream& ostr, MBEntityHandle entity, unsigned i)
+{
+}
 //---------------------------------------------------------------------------//
 // processUniqueMaterials
 //---------------------------------------------------------------------------//
