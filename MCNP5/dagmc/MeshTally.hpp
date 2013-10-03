@@ -141,7 +141,7 @@ class MeshTally : public Tally
     // std::vector<double> temp_tally_data;
 
     /// Entity handles updated in current history; cleared by end_history()
-    std::set<moab::EntityHandle> visited_this_history;
+    // std::set<moab::EntityHandle> visited_this_history;
 
     // >>> PROTECTED METHODS
 
@@ -151,9 +151,10 @@ class MeshTally : public Tally
      * \param score the contribution to add to the tally
      * \param ebin the energy bin to which the score will be added
      */
-    virtual void add_score_to_tally(moab::EntityHandle tally_point,
+    /* virtual void add_score_to_tally(moab::EntityHandle tally_point,
                                     double score,
                                     int ebin);
+     */
 
     /**
      * \brief Resize data arrays to hold all of the mesh tally data

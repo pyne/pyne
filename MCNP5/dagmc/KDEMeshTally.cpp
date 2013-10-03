@@ -199,7 +199,7 @@ void KDEMeshTally::print(double num_particles, double multiplier)
     {
         moab::EntityHandle point = *i;
 
-        for (unsigned int j = 0; j < num_energy_bins; ++ j)
+        for (unsigned int j = 0; j < data->get_num_energy_bins(); ++ j)
         {
             double tally = get_data(tally_data, point, j);
             double error = get_data(error_data, point, j);

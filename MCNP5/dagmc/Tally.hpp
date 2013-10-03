@@ -7,6 +7,7 @@
 #include <map>
 #include <string>
 #include <vector>
+#include "TallyData.hpp"
 
 // Forward declare because it's only referenced here
 struct TallyEvent;
@@ -95,7 +96,7 @@ class Tally
     /**
      * \brief Updates Tally when a particle history ends
      */
-    virtual void end_history() = 0;
+    virtual void end_history();
 
     /**
      * \brief Write results for this Tally
@@ -108,15 +109,24 @@ class Tally
      */
     virtual void write_data(double num_histories) = 0;
 
+
   protected:
     /// Input data defined by user for this tally
     TallyInput input_data;
 
-    /// Number of energy bins implemented in the data arrays
-    unsigned int num_energy_bins;
+    /// All of the tally data for this tally
+    TallyData *data;
 
-    /// Set to true by default; determines if total energy bin is included
-    bool total_energy_bin;
+
+    /** 
+     * \brief Add score to the tally for the given tally point
+     * \param tally_point index representing tally point
+     * \param score the contribution to add to the tally
+     * \param ebin the energy bin to which the score will be added
+     */
+    virtual void add_score_to_tally(unsigned int tally_point, double score, unsigned int ebin);
+
+
 };
 
 #endif // DAGMC_TALLY_HPP

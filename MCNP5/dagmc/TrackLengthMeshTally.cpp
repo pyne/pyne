@@ -428,7 +428,7 @@ void TrackLengthMeshTally::write_data(double num_histories)
 
     double volume = tet_volume( v[0], v[1], v[2], v[3] );
 
-    for( unsigned j = 0; j < num_energy_bins; ++j )
+    for( unsigned j = 0; j < data->get_num_energy_bins(); ++j )
     {
       double tally = get_data( tally_data, t, j );
       double error = get_data( error_data, t, j );

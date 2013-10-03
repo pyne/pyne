@@ -49,6 +49,7 @@ MeshTally::MeshTally(const TallyInput& input)
 //---------------------------------------------------------------------------//
 // PUBLIC INTERFACE
 //---------------------------------------------------------------------------//
+/*
 void MeshTally::end_history()
 {
     std::set<moab::EntityHandle>::iterator i;
@@ -56,7 +57,7 @@ void MeshTally::end_history()
     // add sum of scores for this history to mesh tally for each tally point
     for (i = visited_this_history.begin(); i != visited_this_history.end(); ++i)
     {
-        for (unsigned int j = 0; j < num_energy_bins; ++j)
+        for (unsigned int j = 0; j < data->get_num_energy_bins(); ++j)
         {
             double& history_score = get_data(temp_tally_data, *i, j);
             double& tally = get_data(tally_data, *i, j);
@@ -73,36 +74,11 @@ void MeshTally::end_history()
     // reset set of tally points for next particle history
     visited_this_history.clear();
 }
-//---------------------------------------------------------------------------//
-// TALLY DATA ACCESS METHODS
-//---------------------------------------------------------------------------//
-double* MeshTally::get_tally_data(int& length)
-{
-    length = tally_data.size();
-    return &(tally_data[0]);
-}
-//---------------------------------------------------------------------------//
-double* MeshTally::get_error_data(int& length)
-{
-    length = error_data.size();
-    return &(error_data[0]);
-}
-//---------------------------------------------------------------------------//
-double* MeshTally::get_scratch_data(int& length)
-{
-    length = temp_tally_data.size();
-    return &(temp_tally_data[0]);
-}
-//---------------------------------------------------------------------------//
-void MeshTally::zero_tally_data()
-{
-    std::fill(tally_data.begin(), tally_data.end(), 0);
-    std::fill(error_data.begin(), error_data.end(), 0);
-    std::fill(temp_tally_data.begin(), temp_tally_data.end(), 0);
-}
+*/
 //---------------------------------------------------------------------------//
 // PROTECTED METHODS
 //---------------------------------------------------------------------------//
+/*
 void MeshTally::add_score_to_tally(moab::EntityHandle tally_point,
                                    double score,
                                    int ebin)
@@ -111,22 +87,14 @@ void MeshTally::add_score_to_tally(moab::EntityHandle tally_point,
     get_data(temp_tally_data, tally_point, ebin) += score;
 
     // also update total energy bin tally for this history if one exists
-    if (input_data.total_energy_bin)
+    if (data->has_total_energy_bin())
     {
-        get_data(temp_tally_data, tally_point, (num_energy_bins-1)) += score;
+        get_data(temp_tally_data, tally_point, (data->get_num_energy_bins()-1)) += score;
     }
 
     visited_this_history.insert(tally_point);
 }
-//---------------------------------------------------------------------------//
-void MeshTally::resize_data_arrays(unsigned int num_tally_points)
-{
-    int new_size = num_tally_points * num_energy_bins;
-
-    tally_data.resize(new_size, 0);
-    error_data.resize(new_size, 0);
-    temp_tally_data.resize(new_size, 0);
-}
+*/
 //---------------------------------------------------------------------------//
 unsigned int MeshTally::get_entity_index(moab::EntityHandle tally_point)
 {
@@ -134,17 +102,6 @@ unsigned int MeshTally::get_entity_index(moab::EntityHandle tally_point)
     assert(ret < tally_points.size());
     return ret;
 }
-//---------------------------------------------------------------------------//
-/*
-double& MeshTally::get_data(std::vector<double>& data,
-                            moab::EntityHandle tally_point,
-                            unsigned energy_bin)
-{
-    assert(energy_bin < num_energy_bins);
-    int index = get_entity_index(tally_point) * num_energy_bins + energy_bin;
-    return data[index];
-}
-*/
 //---------------------------------------------------------------------------//
 moab::ErrorCode MeshTally::load_moab_mesh(moab::Interface* mbi,
                                           moab::EntityHandle& mesh_set)
@@ -167,7 +124,7 @@ void MeshTally::set_tally_points(const moab::Range& mesh_elements)
     tally_points = mesh_elements;
 
     // resize data arrays for storing the tally data for these tally points
-    resize_data_arrays(tally_points.size());
+    data->resize_data_arrays(tally_points.size());
 
     // measure number of divisions in moab::Range representing tally points
     int psize = tally_points.psize();
@@ -210,17 +167,18 @@ moab::ErrorCode MeshTally::setup_tags(moab::Interface* mbi, const char* prefix)
     moab::ErrorCode rval;
     std::string pfx = prefix;
     int tag_size = 1;
-
-    tally_tags.resize(num_energy_bins);
-    error_tags.resize(num_energy_bins);
+    
+    unsigned int num_bins = data->get_num_energy_bins();
+    tally_tags.resize(num_bins);
+    error_tags.resize(num_bins);
 
     // Create separate MOAB tag handles for every energy bin
-    for(unsigned i = 0; i < num_energy_bins; ++i)
+    for(unsigned i = 0; i < num_bins; ++i)
     {
         std::string t_name = pfx + "TALLY_TAG", e_name = pfx + "ERROR_TAG";
         std::stringstream str;  
 
-        if(i + 1 != num_energy_bins)
+        if(i + 1 != num_bins)
         {
             str << "_" << input_data.energy_bin_bounds[i] 
                 << '-' << input_data.energy_bin_bounds[i+1];

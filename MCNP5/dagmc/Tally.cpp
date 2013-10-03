@@ -10,18 +10,22 @@
 // CONSTRUCTOR
 //---------------------------------------------------------------------------//
 Tally::Tally(const TallyInput& input) 
-     : input_data(input), total_energy_bin(true)
+    : input_data(input), data(NULL)
 {
+    bool total_energy_bin = true;
     // determine total number of energy bins requested
-    num_energy_bins = input_data.energy_bin_bounds.size();
+    int num_energy_bins = input_data.energy_bin_bounds.size();
     assert(num_energy_bins >= 2);
 
     // turn off total energy bin if only one bin exists
     if (num_energy_bins == 2)
     {
         --num_energy_bins;
-        total_energy_bin = false;
+       total_energy_bin = false;
     }
+
+    data = new TallyData(num_energy_bins, total_energy_bin); 
+
 }
 //---------------------------------------------------------------------------//
 // FACTORY METHOD
@@ -82,5 +86,16 @@ Tally *Tally::create_tally(const TallyInput& input)
     return newTally;
 }
 //---------------------------------------------------------------------------//
+// PROTECTED METHODS
+//---------------------------------------------------------------------------//
+void Tally::end_history()
+{
+    data->my_end_history();
+}
+//---------------------------------------------------------------------------//
+void Tally::add_score_to_tally(unsigned int tally_point, double score, unsigned int ebin)
+{
+    data->my_add_score_to_tally(tally_point, score, ebin);
+}
 
 // end of MCNP5/dagmc/Tally.cpp
