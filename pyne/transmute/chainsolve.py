@@ -8,7 +8,9 @@ from pyne import data
 from pyne import nucname
 from pyne import nuc_data
 from pyne.material import Material, from_atom_frac
-from pyne.xs.data_source import EAF_RX
+from pyne.xs.data_source import EAF_RX, NullDataSource, EAFDataSource
+from pyne.xs.cache import XSCache
+from pyne.xs.channels import sigma_a
 
 class Transmuter(object):
     """A class for transmuting materials using an ALARA-like chain solver."""
@@ -32,6 +34,11 @@ class Transmuter(object):
         self.phi = phi
         self.log = log
         self.tol = tol
+        
+        eafgs = EAFDataSource().src_group_stuct
+        gs = np.array([eafgs[0], eafgs[-1]])
+        self.xs_cache = XSCache(group_struct=gs, 
+                                data_source_classes=(EAFDataSource, NullDataSource))
 
     @property
     def phi(self):
@@ -115,14 +122,12 @@ class Transmuter(object):
 
         """
         partial = {}
-        # Open nuc_data.h5
-        with tb.openFile(nuc_data, 'r') as table:
-            dest = self._get_destruction(nuc)
-            A = np.zeros((1,1))
-            A[0,0] = -dest
-            rootval = np.exp(-dest * self.t)
-            partial = {nuc: rootval}
-            partial = _traversal(nuc, A, phi, t_sim, table, out, tol, tree, depth = None)
+        dest = self._get_destruction(nuc)
+        A = np.zeros((1,1))
+        A[0,0] = -dest
+        rootval = np.exp(-dest * self.t)
+        partial = {nuc: rootval}
+        partial = _traversal(nuc, A, phi, t_sim, table, out, tol, tree, depth = None)
         return partial
 
     def _get_destruction(nuc, decay=True):
@@ -142,7 +147,7 @@ class Transmuter(object):
             Destruction rate of the nuclide.
 
         """
-        rxn_dict = _get_daughters(nuc, table)
+        rxn_dict = _get_daughters(nuc)
         xs_total = np.zeros((eaf_numEntries, 1))
         for key in rxn_dict.keys():
             xs_total += rxn_dict[key]
@@ -150,6 +155,48 @@ class Transmuter(object):
         if decay:
             d += data.decay_const(nuc) 
         return d
+
+    def _get_daughters(self, nuc):
+        """Returns a dictionary that contains the neutron-reaction daughters of
+        nuc as keys to the 175-group neutron cross sections for that daughter's
+        reaction.
+
+        Parameters
+        ----------
+        nuc : int
+            ID of mother nuclide to of which to find daughters.
+
+        Returns
+        -------
+        daugh_dict : dictionary
+            Keys are the neutron-reaction daughters of nuc in zzaaam format.
+            Values are a NumPy array containing the EAF cross section data.
+            (all Values should have size 175)
+            NOTE
+                Cross sections have been converted from units of b to units
+                of cm^2.
+        """
+        eaf_numEntries = 175
+        barn_cm2 = 1e-24
+        fissionMT = 180
+        daugh_dict = {}
+        # Remove fission MT# (cannot handle)
+        if fissionMT in EAF_RX:
+            EAF_RX.remove(fissionMT)
+        # Set working node that contains EAF cross sections
+        node = table.root.neutron.eaf_xs.eaf_xs
+        cond = "(nuc_zz == {0})".format(nuc)
+        daughters = [row['daughter'] for row in node.where(cond)]
+        all_xs = [np.array(row['xs']) for row in node.where(cond)]
+        all_rx = [row['rxnum'] for row in node.where(cond)]
+        for i in range(len(daughters)):
+            if all_rx[i] not in EAF_RX:
+                continue
+            daugh = _convert_eaf(daughters[i])
+            # Convert from barns to cm^2
+            xs = all_xs[i] * barn_cm2
+            daugh_dict[daugh] = xs.reshape((eaf_numEntries, 1))
+        return daugh_dict
 
 
 
@@ -219,50 +266,6 @@ def _matrix_exp(A, t):
     eA = linalg.expm(A * t)
     return eA
 
-
-def _get_daughters(nuc, table):
-    """Returns a dictionary that contains the neutron-reaction daughters of
-    nuc as keys to the 175-group neutron cross sections for that daughter's
-    reaction.
-
-    Parameters
-    ----------
-    nuc : nucname
-        Name of parent nuclide to get daughters of.
-    table : hdf5 file handle
-        The nuc_data hdf5 table handle.
-
-    Returns
-    -------
-    daugh_dict : dictionary
-        Keys are the neutron-reaction daughters of nuc in zzaaam format.
-        Values are a NumPy array containing the EAF cross section data.
-            (all Values should have size 175)
-        NOTE
-            Cross sections have been converted from units of b to units
-            of cm^2.
-    """
-    eaf_numEntries = 175
-    barn_cm2 = 1e-24
-    fissionMT = 180
-    daugh_dict = {}
-    # Remove fission MT# (cannot handle)
-    if fissionMT in EAF_RX:
-        EAF_RX.remove(fissionMT)
-    # Set working node that contains EAF cross sections
-    node = table.root.neutron.eaf_xs.eaf_xs
-    cond = "(nuc_zz == {0})".format(nuc)
-    daughters = [row['daughter'] for row in node.where(cond)]
-    all_xs = [np.array(row['xs']) for row in node.where(cond)]
-    all_rx = [row['rxnum'] for row in node.where(cond)]
-    for i in range(len(daughters)):
-        if all_rx[i] not in EAF_RX:
-            continue
-        daugh = _convert_eaf(daughters[i])
-        # Convert from barns to cm^2
-        xs = all_xs[i] * barn_cm2
-        daugh_dict[daugh] = xs.reshape((eaf_numEntries, 1))
-    return daugh_dict
 
 
 def _convert_eaf(daugh):
