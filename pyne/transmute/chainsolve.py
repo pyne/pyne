@@ -2,13 +2,12 @@
 """
 
 import numpy as np
-import tables as tb
 from scipy import linalg
 
 from pyne import data
 from pyne import nucname
 from pyne import nuc_data
-from pyne.material import Material
+from pyne.material import Material, from_atom_frac
 from pyne.xs.data_source import EAF_RX
 
 class Transmuter(object):
@@ -74,6 +73,8 @@ class Transmuter(object):
             The output material post-transmutation.
 
         """
+        if not isinstance(x, Material):
+            x = Material(x)
         if t is not None:
             self.t = t
         if phi is not None:
@@ -83,59 +84,73 @@ class Transmuter(object):
         if tol is not None:
             self.tol = tol
 
-        out = {}
-        for nuc in inp.keys():
-            # Find output for root of unit density
-            out_partial = transmute_core(nuc, t_sim, phi, tree, tol)
-            # Scale all output by actual nuclide density and add to final output
-            for part in out_partial.keys():
-                out_partial[part] = out_partial[part] * inp[nuc]
-                if part in out.keys():
-                    out[part] += out_partial[part]
-                else:
-                    out[part] =  out_partial[part]
-        return out
+        x_atoms = x.to_atom_frac()
+        y_atoms = {}
+        for nuc, adens in x_atoms.items():
+            # Find output for root of unit density and scale all output by 
+            # actual nuclide density and add to final output.
+            partial = self._transmute_partial(nuc)
+            for part_nuc, part_adens in partial.items():
+                if part_nuc not in y_atoms:
+                    y_atoms[part_nuc] = 0.0
+                y_atoms[part_nuc] += part_adens * adens
+        y = from_atom_frac(y_atoms)
+        return y
 
+    def _transmute_partial(self, nuc):
+        """Core method to transmute a material into its daughters.
+        This method assumes that the initial nuclide has unit density.
 
-def transmute_core(nuc, t_sim, phi, tree = None, tol = 1e-7):
-    """Core method to transmute a material into its daughters.
-    This method assumes that the initial nuclide has unit density.
+        Parameters
+        ----------
+        nuc : int 
+            Nuclide id to be transmuted.
 
-    Parameters
-    ----------
-    nuc : nucname
-        Integer representation of nuclide to be transmuted.
-    t_sim : float
-        Time to decay for.
-    phi : NumPy 1-dimensional array of floats
-        Neutron flux vector.
-        If phi is None, the flux vector is set to zero.
-    tree : File
-        The file where the tree log should be written.
-        tree should be None if a tree log is not desired.
-    tol : float
-        Tolerance level for chain truncation.
-        Default tolerance level is 1e-7 for a root of unit density.
+        Returns
+        -------
+        partial : dict
+            A dictionary containing number densities for each nuclide after
+            the transmutation is carried out for the input nuclide. Keys are 
+            nuclide ids and values are float number densities for the coupled.
 
-    Returns
-    -------
-    out : dictionary
-        A dictionary containing number densities for each nuclide after
-        the simulation is carried out. Keys are nuclide names in integer
-        (zzaaam) form. Values are number densities for the coupled
-        nuclide in float format.
-    """
-    out = {}
-    phi = _check_phi(phi)
-    # Open nuc_data.h5
-    with tb.openFile(nuc_data, 'r') as table:
-        dest = _get_destruction(nuc, phi, table)
-        A = np.zeros((1,1))
-        A[0,0] = -dest
-        rootVal = np.exp(-dest * t_sim)
-        out = {nuc : rootVal}
-        out = _traversal(nuc, A, phi, t_sim, table, out, tol, tree, depth = None)
-    return out
+        """
+        partial = {}
+        # Open nuc_data.h5
+        with tb.openFile(nuc_data, 'r') as table:
+            dest = self._get_destruction(nuc)
+            A = np.zeros((1,1))
+            A[0,0] = -dest
+            rootval = np.exp(-dest * self.t)
+            partial = {nuc: rootval}
+            partial = _traversal(nuc, A, phi, t_sim, table, out, tol, tree, depth = None)
+        return partial
+
+    def _get_destruction(nuc, decay=True):
+        """Computes the destruction rate of the nuclide.
+
+        Parameters
+        ----------
+        nuc : int
+            Name of the nuclide in question
+        decay : bool
+            True if the decay constant should be added to the returned value.
+            False if only destruction from neutron reactions should be considered.
+
+        Returns
+        -------
+        d : float
+            Destruction rate of the nuclide.
+
+        """
+        rxn_dict = _get_daughters(nuc, table)
+        xs_total = np.zeros((eaf_numEntries, 1))
+        for key in rxn_dict.keys():
+            xs_total += rxn_dict[key]
+        d = np.sum(xs_total * phi)
+        if decay:
+            d += data.decay_const(nuc) 
+        return d
+
 
 
 
@@ -184,90 +199,6 @@ def transmute_spatial(space, t_sim, tree = None, tol = 1e-7):
     return space_out
 
 
-class Nuclide(IsDescription):
-    """Class to describe columns of hdf5 output table"""
-    name = StringCol(16)
-    zzaaam = StringCol(16)
-    density = FloatCol()
-
-
-def write_hdf5(h5file, parentGroup, out, title = None):
-    """Method to write contents of an output dictionary generated by
-    transmute() to a specified group of an hdf5 file.
-
-    Parameters
-    ----------
-    h5file : PyTables file handle
-        The PyTables file representation of the hdf5 file that should
-        be written to.
-    parentGroup : String
-        The String representation of the parent group that the output
-        should be written under.
-    out : dictionary
-        A dictionary containing number densities for each nuclide after
-        the simulation is carried out. Keys are nuclide names in integer
-        (zzaaam) form. Values are number densities for the coupled
-        nuclide in float format.
-    title : String
-        Optionally, a title to assign to the table being written
-
-    Returns
-    -------
-    None
-        This method writes to a file and does not return any
-        information.
-    """
-    if title is None:
-        table = h5file.createTable(parentGroup,'transmutation',Nuclide)
-    else:
-        table = h5file.createTable(parentGroup, title, Nuclide)
-    nuc = table.row
-    for key in sorted(out.keys()):
-        nuc['name'] = nucname.name(key)
-        nuc['zzaaam'] = key
-        nuc['density'] = out[key]
-        nuc.append()
-    h5file.flush()
-    return None
-
-
-def write_space_hdf5(h5file, parentGroup, space_out):
-    """Method to write contents of an output dictionary generated by
-    transmute() to a specified group of an hdf5 file.
-
-    Parameters
-    ----------
-    h5file : PyTables file handle
-        The PyTables file representation of the hdf5 file that should
-        be written to.
-    parentGroup : String
-        The String representation of the parent group that the output
-        should be written under.
-    space_out : dictionary
-        A dictionary containing the output from a multi-point simulation.
-        Keys are integers representing the volume ID.
-        Values are 'out' dictionaries (described below).
-            out : dictionary
-                A dictionary containing number densities for each
-                nuclide after the simulation is carried out. Keys are
-                nuclide names in integer (zzaaam) form. Values are
-                number densities for the coupled nuclide in float format.
-
-    Returns
-    -------
-    None
-        This method writes to a file and does not return any
-        information.
-    """
-    # Precursor string for table names
-    volume_prefix = 'volume_'
-    for volume in space_out.keys():
-        out = space_out[volume]
-        write_hdf5(h5file, parentGroup, out, volume_prefix + str(volume))
-        h5file.flush()
-    h5file.flush()
-    return None
-            
 
 
 def _matrix_exp(A, t):
@@ -392,40 +323,6 @@ def _get_decay(nuc):
         decay_dict[child] = branch
     return decay_dict
 
-
-def _get_destruction(nuc, phi, table, addDecay = True):
-    """Returns the destruction rate of the nuclide.
-
-    Parameters
-    ----------
-    nuc : nucname
-        Name of the nuclide in question
-    phi : NumPy 1-dimensional array
-        Flux vector for use in simulation. The vector should be 175 entries
-        in length for proper usage with EAF data.
-    table : hdf5 file handle
-        The nuc_data hdf5 table handle.
-    addDecay : boolean
-        True if the decay constant should be added to the returned value.
-        False if only destruction from neutron reactions should be
-            considered.
-
-    Returns
-    -------
-    d : float
-        Destruction rate of the nuclide.
-    """
-    eaf_numEntries = 175
-    nuc = nucname.zzaaam(nuc)
-    rxn_dict = _get_daughters(nuc, table)
-    xs_total = np.zeros((eaf_numEntries, 1))
-    for key in rxn_dict.keys():
-        xs_total += rxn_dict[key]
-    if addDecay:
-        d = data.decay_const(nuc) + np.sum(xs_total*phi)
-    else:
-        d = np.sum(xs_total*phi)
-    return d
 
 
 def _grow_matrix(A, prod, dest):
