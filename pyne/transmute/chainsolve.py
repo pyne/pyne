@@ -1,3 +1,6 @@
+"""This module implements an ALARA-like chain-based transmutation solver.
+"""
+
 import numpy as np
 import tables as tb
 from scipy import linalg
@@ -7,6 +10,91 @@ from pyne import nucname
 from pyne import nuc_data
 from pyne.material import Material
 from pyne.xs.data_source import EAF_RX
+
+class Transmuter(object):
+    """A class for transmuting materials using an ALARA-like chain solver."""
+
+    def __init__(self, t=0.0, phi=0.0, tol=1e-7, log=None):
+        """Parameters
+        ----------
+        t : float
+            Transmutations time [sec].
+        phi : float or array of floats
+            Neutron flux vector [n/cm^2/sec].  Currently this must either be 
+            a scalar or match the group structure of EAF.
+        tol : float
+            Tolerance level for chain truncation.
+        log : file-like or None
+            The log file object should be written. A None imples the log is 
+            not desired.
+        """
+        self.t = t
+        self._phi = None
+        self.phi = phi
+        self.log = log
+        self.tol = tol
+
+    @property
+    def phi(self):
+        return self._phi
+
+    @phi.setter
+    def phi(self, flux):
+        """Ensures that the flux is correctly formatted."""
+        flux = np.asarray(flux)
+        if flux.ndim > 1:
+            raise ValueError("The flux vector must be 0- or 1-dimensional.")
+        if flux.ndim == 1 and flux.shape[0] != 175:
+            raise ValueError("Group structure must match EAF.")
+        if not np.all(flux >= 0.0):
+            raise ValueError("Flux entries must be non-negative.")
+        self._phi = flux
+
+    def transmute(self, x, t=None, phi=None, log=None, tol=None):
+        """Transmutes a material into its daughters.
+
+        Parameters
+        ----------
+        x : Marterial or similar
+            Input material for transmutation.
+        t : float
+            Transmutations time [sec].
+        phi : float or array of floats
+            Neutron flux vector [n/cm^2/sec].  Currently this must either be 
+            a scalar or match the group structure of EAF.
+        tol : float
+            Tolerance level for chain truncation.
+        log : file-like or None
+            The log file object should be written. A None imples the log is 
+            not desired.
+
+        Returns
+        -------
+        y : Material
+            The output material post-transmutation.
+
+        """
+        if t is not None:
+            self.t = t
+        if phi is not None:
+            self.phi = phi
+        if log is not None:
+            self.log = log
+        if tol is not None:
+            self.tol = tol
+
+        out = {}
+        for nuc in inp.keys():
+            # Find output for root of unit density
+            out_partial = transmute_core(nuc, t_sim, phi, tree, tol)
+            # Scale all output by actual nuclide density and add to final output
+            for part in out_partial.keys():
+                out_partial[part] = out_partial[part] * inp[nuc]
+                if part in out.keys():
+                    out[part] += out_partial[part]
+                else:
+                    out[part] =  out_partial[part]
+        return out
 
 
 def transmute_core(nuc, t_sim, phi, tree = None, tol = 1e-7):
@@ -49,50 +137,6 @@ def transmute_core(nuc, t_sim, phi, tree = None, tol = 1e-7):
         out = _traversal(nuc, A, phi, t_sim, table, out, tol, tree, depth = None)
     return out
 
-
-def transmute(inp, t_sim, phi, tree = None, tol = 1e-7):
-    """Transmutes a material into its daughters.
-
-    Parameters
-    ----------
-    inp : dictionary
-        Input dictionary for the transmutation simulation.
-        Keys are nuclides in integer (zzaaam) format.
-        Values are corresponding number densities represented by floats.
-    t_sim : float
-        Time to decay for.
-    phi : NumPy 1-dimensional array of floats
-        Neutron flux vector.
-        If phi is None, the flux vector is set to zero.
-    tree : File
-        The file where the tree log should be written.
-        tree should be None if a tree log is not desired.
-    tol : float
-        Tolerance level for chain truncation.
-        Default tolerance level is 1e-7 for a root of unit density.
-
-    Returns
-    -------
-    out : dictionary
-        A dictionary containing number densities for each nuclide after
-        the simulation is carried out. Keys are nuclide names in integer
-        (zzaaam) form. Values are number densities for the coupled
-        nuclide in float format.
-    """
-    # Properly format phi
-    phi = _check_phi(phi)
-    out = {}
-    for nuc in inp.keys():
-        # Find output for root of unit density
-        out_partial = transmute_core(nuc, t_sim, phi, tree, tol)
-        # Scale all output by actual nuclide density and add to final output
-        for part in out_partial.keys():
-            out_partial[part] = out_partial[part] * inp[nuc]
-            if part in out.keys():
-                out[part] += out_partial[part]
-            else:
-                out[part] =  out_partial[part]
-    return out
 
 
 def transmute_spatial(space, t_sim, tree = None, tol = 1e-7):
@@ -224,35 +268,6 @@ def write_space_hdf5(h5file, parentGroup, space_out):
     h5file.flush()
     return None
             
-
-def _check_phi(phi):
-    """Ensures that the flux vector phi is correctly formatted.
-
-    Parameters
-    ----------
-    phi : NumPy 1-dimensional array
-        Phi may be either correctly formatted or None.
-        When the value of phi is None, a vector of zero flux is used.
-
-    Returns
-    -------
-    phi : NumPy 1-dimensional array
-        Phi will be returned with a shape of (numEntries,1).
-    """
-    eaf_numEntries = 175
-    if phi is None:
-        phi = np.zeros((eaf_numEntries,1))
-        return phi
-    n = phi.shape[0]
-    if phi.ndim != 2:
-        raise ValueError, ("The flux vector must be two dimensional " +
-                            "(i.e. N by 1).")
-    if n != eaf_numEntries:
-        raise ValueError, "Incorrect number of entries in flux vector."
-    for entry in phi:
-        if entry < 0:
-            raise ValueError, "Flux entries must be nonnegative."
-    return phi
 
 
 def _matrix_exp(A, t):
