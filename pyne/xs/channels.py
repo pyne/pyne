@@ -276,7 +276,8 @@ def sigma_a_reaction(nuc, rx, temp=300.0, group_struct=None, phi_g=None, xs_cach
     return xs_cache[key]
 
 
-def metastable_ratio(nuc, rx, temp=300.0, group_struct=None, phi_g=None, xs_cache=None):
+def metastable_ratio(nuc, rx, temp=300.0, group_struct=None, phi_g=None, 
+                     xs_cache=None):
     """Calculates the ratio between a reaction that leaves the nuclide in a 
     metastable state and the equivalent reaction that leaves the nuclide in 
     the ground state.  This allows the calculation of metastable cross sections 
@@ -325,7 +326,7 @@ def metastable_ratio(nuc, rx, temp=300.0, group_struct=None, phi_g=None, xs_cach
 
     # Get the cross-sections
     sigma_rx = sigma_a_reaction(nuc, rx, temp, group_struct, phi_g, xs_cache)
-    sigma_rx_x = sigma_a_reaction(nuc, rx + '_x', temp, group_struct, phi_g, xs_cache)
+    sigma_rx_x = sigma_a_reaction(nuc, rx + '_1', temp, group_struct, phi_g, xs_cache)
 
     # Get the ratio
     ratio_rx_g = sigma_rx_x / sigma_rx
@@ -425,7 +426,7 @@ def chi(nuc, temp=300.0, group_struct=None, phi_g=None, xs_cache=None, eres=101)
                 fn = set()
         xs_cache['fissionable_nucs'] = fn
     fissionable_nucs = xs_cache['fissionable_nucs']
-    if (nuc not in fissionable_nucs) and (86 <= nuc/10000):
+    if (nuc not in fissionable_nucs) and (86 <= nucname.znum(nuc)):
         fissionable_nucs.add(nuc)
 
     # Perform the group collapse on a continuous chi
