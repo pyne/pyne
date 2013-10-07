@@ -266,4 +266,3 @@ def test_large_iterator():
     print "iterating (2)"
     for i in big.structured_iterate_hex("yzx"):
         pass
-
