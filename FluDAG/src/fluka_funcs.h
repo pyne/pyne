@@ -31,6 +31,10 @@ extern "C" {
   void slow_check(double pos[3], const double dir[3], int &oldReg);
   MBEntityHandle check_reg(MBEntityHandle volume, double point[3], double dir[3]); // check we are where we say we are
 
+  /** Store the name of a group in a string */
+  // Taken from private section of DagMC.hpp
+  ErrorCode get_group_name( EntityHandle group_set, std::string& name );
+
   /* get the sense of a region with respect to the global next_surf,
    * which is set by a call to rayfire
   */

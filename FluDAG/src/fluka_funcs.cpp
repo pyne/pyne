@@ -607,6 +607,16 @@ static bool get_real_prop( MBEntityHandle vol, int cell_id, const std::string& p
   else return false;
 
 }
+ErrorCode DagMC::get_group_name( EntityHandle group_set, std::string& name )
+{
+  ErrorCode rval;
+  const void* v = NULL;
+  int ignored;
+  rval = MBI->tag_get_by_ptr(name_tag(), &group_set, 1, &v, &ignored);
+  if( MB_SUCCESS != rval ) return rval;
+  name = static_cast<const char*>(v);
+  return MB_SUCCESS;
+}
 
 void writeToFileNamed(std::ostringstream& oss, std::string index_id_filename);
 void addToIDIndexFile(int i, std::ostringstream& idstr);
@@ -674,6 +684,9 @@ void fludagwrite_assignma(std::string filename_to_write)  // file with cell/surf
       {
          std::cout << "Vol " << i << ", id=" << id << " has no props: " <<  std::endl; 
       }
+      std::string group_name;
+      entity = DAG->entity_by_index(3, i);
+      DAG->get_group_name(entity, group_name);
   }
   std::string header = "*...+....1....+....2....+....3....+....4....+....5....+....6....+....7...";
 
