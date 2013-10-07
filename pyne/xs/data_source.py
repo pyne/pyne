@@ -497,15 +497,6 @@ EAF_RX_MAP = {         'x': '50',      'c': '1010',    'f': '180',
         'helion_x': None,
         }
 
-# list/set of the MT#s included in the EAF data
-EAF_RX = set(['1020', '1021', '1022', '1030', '1031', '1032', '1040', 
-                     '1041', '1042', '1050', '1051', '1052', '1060', '1061',
-                     '1062', '1070', '1071', '1072', '1080', '1110', '1111',
-                     '1112', '160', '161', '162', '170', '171', '172', '180',
-                     '220', '221', '222', '240', '280', '281', '282', '290',
-                     '320', '321', '322', '330', '331', '332', '340', '341',
-                     '342', '370', '371', '40', '41', '42', '420'])
-
 class EAFDataSource(DataSource):
     """European Activation File cross section data source.  The relevant EAF
     cross section data must be present in the nuc-data for this data source
@@ -520,6 +511,62 @@ class EAFDataSource(DataSource):
     -----
     EAF data does not use temperature information.
     """
+
+    # MT#s included in the EAF data
+    _rx_avail = {rxname.id('gamma'): '1020', 
+                 rxname.id('gamma_1'): '1021', 
+                 rxname.id('gamma_2'): '1022', 
+                 rxname.id('p'): '1030', 
+                 rxname.id('p_1'): '1031',
+                 rxname.id('p_2'): '1032',
+                 rxname.id('d'): '1040', 
+                 rxname.id('d_1'): '1041', 
+                 rxname.id('d_2'): '1042',
+                 rxname.id('t'): '1050',
+                 rxname.id('t_1'): '1051',
+                 rxname.id('t_2'): '1052',
+                 rxname.id('He3'): '1060',
+                 rxname.id('He3_1'): '1061',
+                 rxname.id('He3_2'): '1062',
+                 rxname.id('a'): '1070',
+                 rxname.id('a_1'): '1071',
+                 rxname.id('a_2'): '1072',
+                 rxname.id('z_2a'): '1080',
+                 rxname.id('z_2p'): '1110',
+                 rxname.id('z_2p_1'): '1111',
+                 rxname.id('z_2p_2'): '1112',
+                 rxname.id('z_2n'): '160',
+                 rxname.id('z_2n_1'): '161',
+                 rxname.id('z_2n_2'): '162',
+                 rxname.id('z_3n'): '170',
+                 rxname.id('z_3n_1'): '171',
+                 rxname.id('z_3n_2'): '172',
+                 rxname.id(''): '180',
+                 rxname.id(''): '220',
+                 rxname.id(''): '221',
+                 rxname.id(''): '222',
+                 rxname.id(''): '240',
+                 rxname.id(''): '280',
+                 rxname.id(''): '281',
+                 rxname.id(''): '282',
+                 rxname.id(''): '290',
+                 rxname.id(''): '320',
+                 rxname.id(''): '321',
+                 rxname.id(''): '322',
+                 rxname.id(''): '330',
+                 rxname.id(''): '331',
+                 rxname.id(''): '332',
+                 rxname.id(''): '340',
+                 rxname.id(''): '341',
+                 rxname.id(''): '342',
+                 rxname.id(''): '370',
+                 rxname.id(''): '371',
+                 rxname.id(''): '40',
+                 rxname.id(''): '41',
+                 rxname.id(''): '42',
+                 rxname.id(''): '420',
+                 }
+
 
     def __init__(self, **kwargs):
         super(EAFDataSource, self).__init__(**kwargs)
