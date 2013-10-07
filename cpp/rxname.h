@@ -17,7 +17,7 @@
 #include "nucname.h"
 
 /// Number of reactions supported by default.
-#define NUM_RX_NAMES 544
+#define NUM_RX_NAMES 549
 
 namespace pyne
 {
