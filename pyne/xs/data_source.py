@@ -6,7 +6,9 @@ import StringIO
 import numpy as np
 import tables as tb
 
-from pyne import nuc_data, nucname, rxname
+from pyne import nuc_data
+from pyne import nucname
+from pyne import rxname
 from pyne.xs.models import partial_energy_matrix, group_collapse
 from pyne.endf import Library
 
@@ -195,7 +197,7 @@ class DataSource(object):
 
         Returns
         -------
-        dst_sigma : ndarry
+        dst_sigma : ndarray
             Destination cross section data, length dst_ngroups.
 
         """
@@ -334,7 +336,7 @@ class SimpleDataSource(DataSource):
 
         Returns
         -------
-        dst_sigma : ndarry
+        dst_sigma : ndarray
             Destination cross section data, length dst_ngroups.
 
         """

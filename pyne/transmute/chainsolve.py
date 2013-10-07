@@ -4,6 +4,7 @@
 import numpy as np
 from scipy import linalg
 
+from pyne import utils
 from pyne import data
 from pyne import nucname
 from pyne import nuc_data
@@ -29,16 +30,17 @@ class Transmuter(object):
             The log file object should be written. A None imples the log is 
             not desired.
         """
+        eafds = EAFDataSource()
+        gs = np.array([eafds.src_group_struct[0], eafds.src_group_struct[-1]])
+        eafds.dst_group_struct = gs
+        self.xs_cache = XSCache(group_struct=gs, data_source_classes=(NullDataSource))
+        self.xs_cache.data_sources.insert(0, eafds)
+
         self.t = t
         self._phi = None
         self.phi = phi
         self.log = log
         self.tol = tol
-        
-        eafgs = EAFDataSource().src_group_stuct
-        gs = np.array([eafgs[0], eafgs[-1]])
-        self.xs_cache = XSCache(group_struct=gs, 
-                                data_source_classes=(EAFDataSource, NullDataSource))
 
     @property
     def phi(self):
@@ -48,12 +50,22 @@ class Transmuter(object):
     def phi(self, flux):
         """Ensures that the flux is correctly formatted."""
         flux = np.asarray(flux)
-        if flux.ndim > 1:
-            raise ValueError("The flux vector must be 0- or 1-dimensional.")
-        if flux.ndim == 1 and flux.shape[0] != 175:
+        if flux.ndim == 0:
+            _ = np.empty(175, float)
+            if flux == 0.0
+                _.fill(0.0)
+            else:
+                _.fill(1.0 / flux)
+            flux = _
+        elif flux.ndim == 1 and flux.shape[0] != 175:
             raise ValueError("Group structure must match EAF.")
+        elif flux.ndim > 1:
+            raise ValueError("The flux vector must be 0- or 1-dimensional.")
         if not np.all(flux >= 0.0):
             raise ValueError("Flux entries must be non-negative.")
+        for ds in self.xs_cache.data_sources:
+            ds.src_phi_g = flux
+        self.xs_cache['phi_g'] = flux.sum()
         self._phi = flux
 
     def transmute(self, x, t=None, phi=None, log=None, tol=None):
@@ -123,11 +135,11 @@ class Transmuter(object):
         """
         partial = {}
         dest = self._get_destruction(nuc)
-        A = np.zeros((1,1))
+        A = np.zeros((1,1), float)
         A[0,0] = -dest
         rootval = np.exp(-dest * self.t)
         partial = {nuc: rootval}
-        partial = _traversal(nuc, A, phi, t_sim, table, out, tol, tree, depth = None)
+        self._traversal(nuc, A, partial)
         return partial
 
     def _get_destruction(nuc, decay=True):
@@ -147,11 +159,8 @@ class Transmuter(object):
             Destruction rate of the nuclide.
 
         """
-        rxn_dict = _get_daughters(nuc)
-        xs_total = np.zeros((eaf_numEntries, 1))
-        for key in rxn_dict.keys():
-            xs_total += rxn_dict[key]
-        d = np.sum(xs_total * phi)
+        sig_a = sigma_a(nuc, xs_cache=self.xs_cache)
+        d = utils.from_barns(sig_a[0], 'cm2') * self.xs_cache['phi_g'][0]
         if decay:
             d += data.decay_const(nuc) 
         return d
@@ -198,8 +207,118 @@ class Transmuter(object):
             daugh_dict[daugh] = xs.reshape((eaf_numEntries, 1))
         return daugh_dict
 
+    def _traversal(self, nuc, A, out, _depth=0):
+        """Nuclide transmutation traversal method.
 
+        This method will traverse the reaction tree recursively, using a DFS
+        algorithm. On termination, the method will return all number densities
+        after a given time that are a result of the starting nuclide.
 
+        Parameters
+        ----------
+        nuc : int
+            ID of the active nuclide for the traversal.
+        A : NumPy 2-dimensional array
+            Current state of the coupled equation matrix.
+        out : dict
+            A dictionary containing the final recorded number densities for each
+            nuclide. Keys are nuclide names in integer (zzaaam) form. Values are
+            number densities for the coupled nuclide in float format.  This is 
+            modified in place.
+        _depth : int
+            Current depth of traversal (root at 0). Should never be provided by user.
+
+        """
+        if self.log is not None:
+            self._log_tree(_depth, nuc, 1.0)
+        prod_dict = {}
+        # decay info
+        lam = data.decay_const(nuc)
+        decay_branches = {} if lam == 0 else self._decay_branches(nuc)
+        for decay_child, branch_ratio in decay_branches.items():
+            prod_dict[decay_child] = lam * branch_ratio
+        # reaction daughters
+        daugh_dict = self._get_daughters(nuc, table)
+        for decay_daugh in daugh_dict.keys():
+            # Increment current production rate if already in dictionary
+            if decay_daugh in prod_dict.keys():
+                prod_dict[decay_daugh] += np.sum(phi * daugh_dict[decay_daugh])
+            else:
+                prod_dict[decay_daugh] = np.sum(phi * daugh_dict[decay_daugh])
+        # Cycle production dictionary
+        for child in prod_dict.keys():
+            # Grow matrix
+            B = _grow_matrix(A, prod_dict[child], _get_destruction(child, phi, table))
+            # Create initial density vector
+            n = B.shape[0]
+            N0 = np.zeros((n,1))
+            N0[0] = 1
+            # Compute matrix exponential and dot with density vector
+            eB = _matrix_exp(B, t)
+            N_final = np.dot(eB, N0)
+            # Log child
+            if tree:
+                _tree_log(_depth+1, child, N_final[-1], tree)
+            # Check against tolerance
+            if _check_tol(N_final[-1], tol):
+                # Continue traversal
+                if tree is not None:
+                    out = _traversal(child,B,phi,t,table,out,tol,tree,_depth+1)
+                else:
+                    out = _traversal(child,B,phi,t,table,out,tol,tree,None)
+            # On recursion exit or truncation, write data from this nuclide
+            if child in out.keys():
+                out[child] += N_final[-1]
+            else:
+                out[child] = N_final[-1]
+
+    def _log_tree(self, depth, nuc, N):
+        """Logging method to track path of _traversal.
+
+        Parameters
+        ----------
+        depth : integer
+            Current depth of traversal (root at 0).
+        nuc : nucname
+            Current nuclide in traversal.
+        N : float
+            Current density of nuc.
+        tree : File
+            File to write tree log to.
+
+        """
+        # Don't print a zero density.
+        if N == 0.0:
+            return
+        space = '   |'
+        entry = "{spacing}--> {name} {N}\n".format(spacing=depth * space, N=N,
+                                                   name=nucname.name(nuc))
+        self.log.write(entry)
+        self.log.flush()
+
+    def _decay_branches(self, nuc):
+        """Returns a dictionary that contains the decay children of nuc as keys
+        to the branch ratio of that child's decay process.
+
+        Parameters
+        ----------
+        nuc : int
+            Name of parent nuclide to get decay children of.
+
+        Returns
+        -------
+        decay_branches : dictionary
+            Keys are decay children of nuc in zzaaam format.
+            Values are the branch ratio of the decay child.
+
+        """
+        decay_branches = {}
+        children = data.decay_children(nuc)
+        for child in children:
+            decay_branches[child] = data.branch_ratio(nuc, child)
+        return decay_branches
+
+#####################
 
 def transmute_spatial(space, t_sim, tree = None, tol = 1e-7):
     """Transmutes a material into its daughters.
@@ -303,31 +422,6 @@ def _convert_eaf(daugh):
     return daugh_conv
 
 
-def _get_decay(nuc):
-    """Returns a dictionary that contains the decay children of nuc as keys
-    to the branch ratio of that child's decay process.
-
-    Parameters
-    ----------
-    nuc : nucname
-        Name of parent nuclide to get decay children of.
-
-    Returns
-    -------
-    decay_dict : dictionary
-        Keys are decay children of nuc in zzaaam format.
-        Values are the branch ratio of the decay child.
-    """
-    decay_dict = {}
-    nuc = nucname.zzaaam(nuc)
-    children = data.decay_children(nuc)
-    for child in children:
-        branch = data.branch_ratio(nuc,child)
-        decay_dict[child] = branch
-    return decay_dict
-
-
-
 def _grow_matrix(A, prod, dest):
     """Grows the given matrix by one row and one column, adding necessary
     production and destruction rates.
@@ -378,131 +472,4 @@ def _check_tol(N, tol):
     return fail
 
 
-def _tree_log(depth, nuc, N, tree):
-    """Logging method to track path of _traversal.
-
-    Parameters
-    ----------
-    depth : integer
-        Current depth of traversal (root at 0).
-    nuc : nucname
-        Current nuclide in traversal.
-    N : float
-        Current density of nuc.
-    tree : File
-        File to write tree log to.
-
-    Returns
-    -------
-    None
-        This method only writes to the File "tree".
-    """
-    # Don't print a zero density.
-    if N == 0:
-        return None
-    space = '   |'
-    arrow = '--> '
-    blank = ' '
-    newline = '\n'
-    spacing = depth * space
-    name = nucname.name(nuc)
-    Nstr = str(N)
-    entry = spacing + arrow + name + blank + Nstr + newline
-    tree.write(entry)
-    tree.flush()
-    return None
-
-
-def _traversal(nuc, A, phi, t, table, out, tol, tree, depth = None):
-    """Nuclide transmutation traversal method.
-
-    This method will traverse the reaction tree recursively, using a DFS
-    algorithm. On termination, the method will return all number densities
-    after a given time that are a result of the starting nuclide.
-
-    Parameters
-    ----------
-    nuc : nucname
-        Name of the active nuclide for the traversal.
-    A : NumPy 2-dimensional array
-        Current state of the coupled equation matrix.
-    phi : NumPy 1-dimensional array
-        Flux vector for use in simulation. The vector should be 175 entries
-        in length for proper usage with EAF data.
-    t : float
-        Time at which to evaluate transmutation events.
-    table : hdf5 file handle
-        The nuc_data hdf5 table handle.
-    out : dictionary
-        A dictionary containing the final recorded number densities for each
-        nuclide. Keys are nuclide names in integer (zzaaam) form. Values are
-        number densities for the coupled nuclide in float format.
-    tol : float
-        Tolerance level to reference for tree truncation.
-    tree : Boolean
-        True if a tree output file is desired.
-        False if a tree output file is not desired.
-    depth : integer
-        Current depth of traversal (root at 0).
-        Should never be provided by user.
-
-    Returns
-    -------
-    out : dictionary
-        A dictionary containing the final recorded number densities for each
-        nuclide. Keys are nuclide names in integer (zzaaam) form. Values are
-        number densities for the coupled nuclide in float format.
-    """
-    # Log initial nuclide
-    if depth is None and tree is not None:
-        depth = 0
-        _tree_log(depth, nuc, 1, tree)
-    # Lookup decay constant of current nuclide
-    lam = data.decay_const(nuc)
-    # Lookup decay products and reaction daughters
-    if lam == 0:
-        decay_dict = {}
-    else:
-        decay_dict = _get_decay(nuc)
-    daugh_dict = _get_daughters(nuc, table)
-    # Initialize production rate dictionary
-    prod_dict = {}
-    # Cycle decay children
-    for decay_child in decay_dict.keys():
-        prod_dict[decay_child] = lam * decay_dict[decay_child]
-    # Cycle reaction daughters
-    for decay_daugh in daugh_dict.keys():
-        # Increment current production rate if already in dictionary
-        if decay_daugh in prod_dict.keys():
-            prod_dict[decay_daugh] += np.sum(phi * daugh_dict[decay_daugh])
-        else:
-            prod_dict[decay_daugh] = np.sum(phi * daugh_dict[decay_daugh])
-    # Cycle production dictionary
-    for child in prod_dict.keys():
-        # Grow matrix
-        B = _grow_matrix(A, prod_dict[child], _get_destruction(child, phi, table))
-        # Create initial density vector
-        n = B.shape[0]
-        N0 = np.zeros((n,1))
-        N0[0] = 1
-        # Compute matrix exponential and dot with density vector
-        eB = _matrix_exp(B, t)
-        N_final = np.dot(eB, N0)
-        # Log child
-        if tree:
-            _tree_log(depth+1, child, N_final[-1], tree)
-        # Check against tolerance
-        if _check_tol(N_final[-1], tol):
-            # Continue traversal
-            if tree is not None:
-                out = _traversal(child,B,phi,t,table,out,tol,tree,depth+1)
-            else:
-                out = _traversal(child,B,phi,t,table,out,tol,tree,None)
-        # On recursion exit or truncation, write data from this nuclide
-        if child in out.keys():
-            out[child] += N_final[-1]
-        else:
-            out[child] = N_final[-1]
-    # Return final output dictionary
-    return out
 

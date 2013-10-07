@@ -3,8 +3,8 @@ import os
 
 import nose 
 
-from nose.tools import assert_equal, assert_not_equal, assert_raises, raises, assert_in, \
-                       assert_true
+from nose.tools import assert_equal, assert_not_equal, assert_raises, raises, \
+                       assert_in, assert_true
 
 from numpy.testing import assert_array_equal, assert_array_almost_equal
 
@@ -18,6 +18,10 @@ def test_to_sec():
 
 def test_to_barns():
     assert_equal(3E3, utils.to_barns(3, 'KB'))
+
+
+def test_from_barns():
+    assert_equal(3E-3, utils.to_barns(3, 'KB'))
 
 
 def test_message():
