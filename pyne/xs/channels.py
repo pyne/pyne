@@ -16,6 +16,7 @@ import pyne
 import pyne.data
 import pyne.xs.models
 from pyne import nucname
+from pyne import rxname
 from pyne.xs import cache
 from pyne.xs.models import group_collapse
 from pyne.material import Material
@@ -89,7 +90,7 @@ def sigma_f(nuc, temp=300.0, group_struct=None, phi_g=None, xs_cache=None):
     if isinstance(nuc, collections.Iterable) and not isinstance(nuc, basestring):
         return _atom_weight_channel(sigma_f, nuc, temp=temp, xs_cache=xs_cache)
     nuc = nucname.id(nuc)
-    key = (nuc, 'f', temp)
+    key = (nuc, rxname.id('fission'), temp)
     return xs_cache[key]
 
 
@@ -264,6 +265,7 @@ def sigma_a_reaction(nuc, rx, temp=300.0, group_struct=None, phi_g=None, xs_cach
     pyne.xs.data_source.RX_TYPES_MAP 
 
     """
+    rx = rxname.id(rx)
     xs_cache = cache.xs_cache if xs_cache is None else xs_cache
     _prep_cache(xs_cache, group_struct, phi_g)
     if isinstance(nuc, collections.Iterable) and not isinstance(nuc, basestring):
@@ -369,7 +371,7 @@ def sigma_a(nuc, temp=300.0, group_struct=None, phi_g=None, xs_cache=None):
     if isinstance(nuc, collections.Iterable) and not isinstance(nuc, basestring):
         return _atom_weight_channel(sigma_a, nuc, temp=temp, xs_cache=xs_cache)
     nuc = nucname.id(nuc)
-    key = (nuc, 'a', temp)
+    key = (nuc, rxname.id('absorption'), temp)
     return xs_cache[key]
 
 
@@ -476,9 +478,9 @@ def sigma_t(nuc, temp=300.0, group_struct=None, phi_g=None, xs_cache=None):
     if isinstance(nuc, collections.Iterable) and not isinstance(nuc, basestring):
         return _atom_weight_channel(sigma_t, nuc, temp=temp, xs_cache=xs_cache)
     nuc = nucname.id(nuc)
-    key_a = (nuc, 'a', temp)
-    key_s = (nuc, 's', temp)
-    key_t = (nuc, 't', temp)
+    key_a = (nuc, rxname.id('absorption'), temp)
+    key_s = (nuc, rxname.id('scattering'), temp)
+    key_t = (nuc, rxname.id('total'), temp)
 
     # Don't recalculate anything if you don't have to
     if key_t in xs_cache:
