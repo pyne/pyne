@@ -26,11 +26,11 @@ def test_xs_cache_sigma_f_n():
 
     with tb.openFile(nuc_data, 'r') as f:
         sigma_f_n_U235 = np.array(f.root.neutron.cinder_xs.fission[28]['xs'])
-    from_cache = xs_cache[922350,'f']
+    from_cache = xs_cache[922350, 'fiss']
 
     assert_not_equal(id(sigma_f_n_U235), id(from_cache))
-    assert_equal(id(from_cache), id(xs_cache[922350,'f']))
-    assert_array_equal(sigma_f_n_U235, xs_cache[922350,'f'])
+    assert_equal(id(from_cache), id(xs_cache[922350, 'fiss']))
+    assert_array_equal(sigma_f_n_U235, xs_cache[922350,'fiss'])
 
 
 def test_xs_cache_sigma_a_n():
@@ -40,11 +40,11 @@ def test_xs_cache_sigma_a_n():
 
     with tb.openFile(nuc_data, 'r') as f:
         sigma_a_n_H1 = np.array(f.root.neutron.cinder_xs.absorption[0]['xs'])
-    from_cache = xs_cache[10010,'a']
+    from_cache = xs_cache[10010, 'abs']
 
     assert_not_equal(id(sigma_a_n_H1), id(from_cache))
-    assert_equal(id(from_cache), id(xs_cache[10010, 'a']))
-    assert_array_equal(sigma_a_n_H1, xs_cache[10010, 'a'])
+    assert_equal(id(from_cache), id(xs_cache[10010, 'abs']))
+    assert_array_equal(sigma_a_n_H1, xs_cache[10010, 'abs'])
 
 
 def test_xs_cache_set_E_g():
@@ -65,11 +65,11 @@ def test_xs_cache_set_E_g():
     assert_equal(len(xs_cache['E_g']), 3)
 
     # Test auto-clearing
-    xs_cache[10010,'f']
-    assert_true((10010,'f') in xs_cache)
+    xs_cache[10010, 'fiss']
+    assert_true((10010, 'fiss') in xs_cache)
     xs_cache['E_g'] = [10.0, 8.0, 2.0, 1.0]
     assert_true(xs_cache['phi_g'] is None)
-    assert_false((10010,'f') in xs_cache)
+    assert_false((10010, 'fiss') in xs_cache)
     
 
 def test_xs_cache_get_phi_g():
