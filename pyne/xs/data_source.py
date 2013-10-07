@@ -454,49 +454,6 @@ class CinderDataSource(DataSource):
                 rxdata = fdata if rxdata is None else rxdata + fdata
         return rxdata
 
-
-# Dictionary matching products with MT#'s
-EAF_RX_MAP = {         'x': '50',      'c': '1010',    'f': '180',
-        'n': '40',      '2n': '160',    '3n': '170',    '4n': '370',
-        'na': '220',    '2na': '240',   'np': '280',    'n2a': '290',
-        'nd': '320',    'nt': '330',    'nh': '340',    'nhe3': '340',
-        'pd': '1150',   'np/d':None,
-        'g': '1020',
-        'p': '1030',    '2p': '1110',
-        'd': '1040',    't': '1050',    'h': '1060',    'he3': '1060',          
-        'a': '1070',    '2a': '1080',   
-        # metastable not supported yet
-        '3n *':None,   'd  *':None,   'n  *':None,   'g  *':None,
-        'np *':None,   'a  *':None,   'h  *':None,   '2p *':None,
-        'x  *':None,   '4n *':None,   'na *':None,   'nd *':None,
-        'nh *':None,   'p  *':None,   'nt *':None,   't  *':None,  
-        '2n *':None,   '*': None,
-        '3n_x':None,   'd_x':None,    'n_x':None,    'g_x':None,
-        'np_x':None,   'a_x':None,    'h_x':None,    '2p_x':None,
-        'x_x':None,    '4n_x':None,   'na_x':None,   'nd_x':None,
-        'nh_x':None,   'p_x':None,    'nt_x':None,   't_x':None,  
-        '2n_x':None,
-        # handling words
-        'neutron': '40',
-        'gamma': '1020', 
-        'alpha': '1070',
-        'proton': '1030',
-        'trit': '1050',
-        'triton': '1050',
-        'deut': '1040',
-        'deuteron': '1040',
-        'helion': '1060',
-        'neutron_x': None,
-        'gamma_x': None, 
-        'alpha_x': None,
-        'proton_x':None,
-        'trit_x': None,
-        'triton_x': None,
-        'deut_x': None,
-        'deuteron_x': None,
-        'helion_x': None,
-        }
-
 class EAFDataSource(DataSource):
     """European Activation File cross section data source.  The relevant EAF
     cross section data must be present in the nuc-data for this data source
@@ -567,7 +524,6 @@ class EAFDataSource(DataSource):
                  rxname.id('z_3np'): '420',
                  }
 
-
     def __init__(self, **kwargs):
         super(EAFDataSource, self).__init__(**kwargs)
 
@@ -585,47 +541,31 @@ class EAFDataSource(DataSource):
         return self._exists
 
     def _load_reaction(self, nuc, rx, temp=300.0):
-        """ 
-        Note: EAF data does not use temperature information (temp)
+        """Loads reaction specific data for EAF.
 
         Parameters
         ----------
         nuc : int
-            Nuclide in id form.
-        rx : int or str 
-            Reaction MT # in nnnm form.
-            OR:
-            Reaction key: 'gamma', 'alpha', 'p', etc.
-
-        See Also
-        --------
-        EAF_RX : list
-            List of valid MT #s in the EAF data.
-        EAF_RX_MAP : dict
-            Dictionary for converting string reaction identifiers to MT #s.
+            Nuclide id.
+        rx : int 
+            Reaction id.
+        
+        Note
+        ----
+        EAF data does not use temperature information (temp).
 
         """
-        nuc = nucname.id(nuc)
+        absrx = rxname.id('absorption')
 
-        # Munging the rx to an MT#
-        try:
-            int(rx)
-        except ValueError:
-            try:
-                rx = EAF_RX_MAP[rx]
-            except KeyError:
-                pass
-
-        # Check if usable rx #
-        if rx is None:
+        if rx in self._rx_avail:
+            cond = "(nuc_zz == {0}) & (rxnum == '{1}')".format(nuc, self._rx_avail[rx])
+        elif rx == absrx:
+            cond = "(nuc_zz == {0})".format(nuc)            
+        else:
             return None
-        if str(rx) not in EAF_RX:
-            msg = "the reaction '{rx}' is not valid.".format(rx=rx)
-            raise IndexError(msg)
 
         # Grab data
         with tb.openFile(nuc_data, 'r') as f:
-            cond = "(nuc_zz == {0}) & (rxnum == '{1}')".format(nuc, rx)
             node = f.root.neutron.eaf_xs.eaf_xs
             rows = [np.array(row['xs']) for row in node.where(cond)]
 
