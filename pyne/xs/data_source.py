@@ -402,38 +402,6 @@ class CinderDataSource(DataSource):
                  #rxname.id('fission'): 'f',
                  }
 
-RX_TYPES_MAP = {
-    'neutron': 'n',
-    'gamma': 'g',
-    'alpha': 'a',
-    'proton': 'p',
-    'trit': 't',
-    'triton': 't',
-    'deut': 'd',
-    'deuteron': 'd',
-    'helion': 'h',
-    }
-
-def _munge_rx(rx):
-    """Munge the reaction rate name."""
-    if rx not in RX_TYPES:
-        while any([(key in rx) for key in RX_TYPES_MAP]):
-            for key, value in RX_TYPES_MAP.items():
-                rx = rx.replace(key, value)
-
-    if '_x' in rx:
-        if len(rx) == 3:
-            rx = rx.replace('_x', '  *')
-        else:
-            rx = rx.replace('_x', ' *')
-
-    if rx not in RX_TYPES:
-        msg = "the reaction '{rx}' is not valid.".format(rx=rx)
-        raise IndexError(msg)
-    return rx
-
-
-
     def __init__(self, **kwargs):
         super(CinderDataSource, self).__init__(**kwargs)
 
@@ -451,19 +419,23 @@ def _munge_rx(rx):
         return self._exists
 
     def _load_reaction(self, nuc, rx, temp=300.0):
-        nuc = nucname.id(nuc)
-        rx = _munge_rx(rx)
+        fissrx = rxname.id('fission')
+        absrx = rxname.id('absorption')
 
         # Set query condition
-        if rx == 'f':
+        if rx in self._rx_avail:
+            cond = "(from_nuc == {0}) & (reaction_type == '{1}')"
+            cond = cond.format(nuc, self._rx_avail[rx])
+        elif rx == fissrx:
             cond = 'nuc == {0}'.format(nuc)
-        elif rx in RX_TYPES:
-            cond = "(from_nuc == {0}) & (reaction_type == '{1}')".format(nuc, rx)
+        elif rx == absrx:
+            cond = "(from_nuc == {0}) & (reaction_type != 'c')".format(nuc)
         else:
             return None
 
+        # read & collapse data
         with tb.openFile(nuc_data, 'r') as f:
-            node = f.root.neutron.cinder_xs.fission if rx == 'f' else \
+            node = f.root.neutron.cinder_xs.fission if rx == fissrx else \
                    f.root.neutron.cinder_xs.absorption
             rows = [np.array(row['xs']) for row in node.where(cond)]
 
@@ -472,21 +444,14 @@ def _munge_rx(rx):
         elif 1 < len(rows):
             rows = np.array(rows)
             rxdata = rows.sum(axis=0)
-        elif 0 == len(rows) and (rx == 'a'):
-            # in case absorption doesn't exist, we compute it
-            fdata = self._load_reaction(nuc, 'f')
-            cond = "(from_nuc == {0}) & (reaction_type != 'c')".format(nuc)
-            with tb.openFile(nuc_data, 'r') as f:
-                node = f.root.neutron.cinder_xs.absorption
-                rows = np.array([row['xs'] for row in node.where(cond)])
-            if 0 == len(rows) and fdata is None:
-                rxdata = None
-            else:
-                rxdata = rows.sum(axis=0)
-                if fdata is not None:
-                    rxdata += fdata
         else:
             rxdata = None
+
+        # add fission data to absorption
+        if rx == absrx:
+            fdata = self._load_reaction(nuc, fissrx)
+            if fdata is not None:
+                rxdata = fdata if rxdata is None else rxdata + fdata
         return rxdata
 
 
