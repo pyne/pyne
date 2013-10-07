@@ -145,7 +145,7 @@ class Mesh(object):
         """Adds the common tags of mesh_obj_2 and returns a new mesh object.
         """
         tags = self.common_ve_tags(mesh_obj_2)
-        return = _do_op_(self, mesh_obj_2, tags, "+", isinstance(self, StatMesh))
+        return _do_op_(self, mesh_obj_2, tags, "+", isinstance(self, StatMesh))
 
     def __sub__(self, mesh_obj_2):
         """Subtracts the common tags of mesh_obj_2 and returns a new mesh object.
