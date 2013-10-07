@@ -6,6 +6,7 @@
 #include <vector>
 #include <cassert>
 #include <set>
+#include <utility>
 
 class TallyData
 {
@@ -35,24 +36,19 @@ class TallyData
     void zero_tally_data();
     /**
      * \brief Determines location of element in data array
-     * \param data array containing element to be accessed
-     * \param tally_point entity handle representing tally point
+     * \param tally_point index representing tally point
      * \param energy_bin index representing energy bin
      * \return reference to element in data array
      *
      * Enables direct access to the mesh tally data for the given tally point
      * and energy bin.
      */
-    /*
-    double& get_data(std::vector<double>& data,
-                     unsigned int index,
-                     unsigned int energy_bin);
-*/
-  
+     std::pair <double,double> get_data(unsigned int tally_point_index, unsigned int energy_bin);
+
      unsigned int get_num_energy_bins();
      bool has_total_energy_bin();
-     void my_end_history();
-     void my_add_score_to_tally(unsigned int tally_point_index, double score, unsigned int ebin);
+     void end_history();
+     void add_score_to_tally(unsigned int tally_point_index, double score, unsigned int ebin);
 
     /**
      * \brief Resize data arrays to hold all of the mesh tally data

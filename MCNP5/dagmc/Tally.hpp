@@ -72,7 +72,8 @@ class Tally
     /**
      * \brief Virtual destructor
      */
-    virtual ~Tally(){}
+    virtual ~Tally();
+
 
     // >>> FACTORY METHOD
 
@@ -116,17 +117,6 @@ class Tally
 
     /// All of the tally data for this tally
     TallyData *data;
-
-
-    /** 
-     * \brief Add score to the tally for the given tally point
-     * \param tally_point index representing tally point
-     * \param score the contribution to add to the tally
-     * \param ebin the energy bin to which the score will be added
-     */
-    virtual void add_score_to_tally(unsigned int tally_point, double score, unsigned int ebin);
-
-
 };
 
 #endif // DAGMC_TALLY_HPP

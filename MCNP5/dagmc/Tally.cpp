@@ -25,8 +25,16 @@ Tally::Tally(const TallyInput& input)
     }
 
     data = new TallyData(num_energy_bins, total_energy_bin); 
-
 }
+
+//---------------------------------------------------------------------------//
+// DESTRUCTOR
+//---------------------------------------------------------------------------//
+Tally::~Tally()
+{
+   delete data;
+}
+
 //---------------------------------------------------------------------------//
 // FACTORY METHOD
 //
@@ -88,14 +96,10 @@ Tally *Tally::create_tally(const TallyInput& input)
 //---------------------------------------------------------------------------//
 // PROTECTED METHODS
 //---------------------------------------------------------------------------//
+
 void Tally::end_history()
 {
-    data->my_end_history();
+    data->end_history();
 }
 //---------------------------------------------------------------------------//
-void Tally::add_score_to_tally(unsigned int tally_point, double score, unsigned int ebin)
-{
-    data->my_add_score_to_tally(tally_point, score, ebin);
-}
-
 // end of MCNP5/dagmc/Tally.cpp

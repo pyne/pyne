@@ -49,52 +49,8 @@ MeshTally::MeshTally(const TallyInput& input)
 //---------------------------------------------------------------------------//
 // PUBLIC INTERFACE
 //---------------------------------------------------------------------------//
-/*
-void MeshTally::end_history()
-{
-    std::set<moab::EntityHandle>::iterator i;
-
-    // add sum of scores for this history to mesh tally for each tally point
-    for (i = visited_this_history.begin(); i != visited_this_history.end(); ++i)
-    {
-        for (unsigned int j = 0; j < data->get_num_energy_bins(); ++j)
-        {
-            double& history_score = get_data(temp_tally_data, *i, j);
-            double& tally = get_data(tally_data, *i, j);
-            double& error = get_data(error_data, *i, j);
-
-            tally += history_score;
-            error += history_score * history_score;
-      
-            // reset temp_tally_data array for the next particle history
-            history_score = 0;
-        }
-    }
-
-    // reset set of tally points for next particle history
-    visited_this_history.clear();
-}
-*/
 //---------------------------------------------------------------------------//
 // PROTECTED METHODS
-//---------------------------------------------------------------------------//
-/*
-void MeshTally::add_score_to_tally(moab::EntityHandle tally_point,
-                                   double score,
-                                   int ebin)
-{
-    // update tally for this history with new score
-    get_data(temp_tally_data, tally_point, ebin) += score;
-
-    // also update total energy bin tally for this history if one exists
-    if (data->has_total_energy_bin())
-    {
-        get_data(temp_tally_data, tally_point, (data->get_num_energy_bins()-1)) += score;
-    }
-
-    visited_this_history.insert(tally_point);
-}
-*/
 //---------------------------------------------------------------------------//
 unsigned int MeshTally::get_entity_index(moab::EntityHandle tally_point)
 {

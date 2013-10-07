@@ -376,9 +376,11 @@ void TrackLengthMeshTally::compute_score(const TallyEvent& event)
         double weight = event.particle_weight;
         double score = weight * track_length;
 
-        // ToDo:  fix fake ebin
+        // ToDo jcz:  Call a function defined in Tally to calculate the correct ebin
+        // get_energy_bin(event.energy)  // define in Tally class
         int ebin = 0;
- 	add_score_to_tally(tet, score, ebin);
+        unsigned int tet_index = get_entity_index(tet);
+ 	data->add_score_to_tally(tet_index, score, ebin);
         found_crossing = true;
       }
 
@@ -427,11 +429,15 @@ void TrackLengthMeshTally::write_data(double num_histories)
     }
 
     double volume = tet_volume( v[0], v[1], v[2], v[3] );
+    unsigned int tet_index = get_entity_index(t);
 
     for( unsigned j = 0; j < data->get_num_energy_bins(); ++j )
     {
-      double tally = get_data( tally_data, t, j );
-      double error = get_data( error_data, t, j );
+      std::pair <double,double> tally_data = data->get_data(tet_index,j);
+      double tally = tally_data.first;
+      double error = tally_data.second;
+      // double tally = get_data( tally_data, t, j );
+      // double error = get_data( error_data, t, j );
       double score = (tally / (volume*num_histories));
       
       rval = mb->tag_set_data( tally_tags[j], &t, 1, &score );

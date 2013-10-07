@@ -3,8 +3,6 @@
 #ifndef DAGMC_MESH_TALLY_HPP
 #define DAGMC_MESH_TALLY_HPP
 
-#include <map>
-#include <set>
 #include <string>
 #include <vector>
 
@@ -80,39 +78,6 @@ class MeshTally : public Tally
      */
     virtual ~MeshTally(){}
 
-    // >>> PUBLIC INTERFACE
-
-    /**
-     * \brief Updates MeshTally when a particle history ends
-     */
-    virtual void end_history();
-
-    /**
-     * \brief Write tally and error results to the mesh tally's output file
-     * \param num_particles the number of source particles tracked
-     * \param multiplier an optional constant multiplication factor
-     */
-    virtual void print(double num_particles, double multiplier = 1.0) = 0;
-
-    // >>> TALLY DATA ACCESS METHODS
-
-    /**
-     * \brief get_tally_data(), get_error_data(), get_scratch_data()
-     * \param length output parameter containing size of data array
-     * \return pointer to the data array
-     *
-     * These three methods can be useful for implementing MeshTally
-     * functionality in parallel.
-     */
-    // virtual double* get_tally_data(int& length);
-    // virtual double* get_error_data(int& length);
-    // virtual double* get_scratch_data(int& length);
-
-    /**
-     * \brief Resets all of the mesh tally data arrays to zero
-     */
-    // virtual void zero_tally_data();
-
   protected:
     /// Name of file to which the final tally results will be written
     std::string output_filename;
@@ -129,41 +94,8 @@ class MeshTally : public Tally
     /// Tag arrays for storing energy bin labels
     std::vector<moab::Tag> tally_tags, error_tags;
 
-    // >>> TALLY DATA ARRAYS
-
-    /// Data array for storing sum of scores for all particle histories
-    // std::vector<double> tally_data;
-
-    /// Data array for determining error in tally results
-    // std::vector<double> error_data;
-
-    /// Data array for storing sum of scores for a single history
-    // std::vector<double> temp_tally_data;
-
-    /// Entity handles updated in current history; cleared by end_history()
-    // std::set<moab::EntityHandle> visited_this_history;
-
     // >>> PROTECTED METHODS
 
-    /** 
-     * \brief Add score to the tally for the given tally point
-     * \param tally_point entity handle representing tally point
-     * \param score the contribution to add to the tally
-     * \param ebin the energy bin to which the score will be added
-     */
-    /* virtual void add_score_to_tally(moab::EntityHandle tally_point,
-                                    double score,
-                                    int ebin);
-     */
-
-    /**
-     * \brief Resize data arrays to hold all of the mesh tally data
-     * \param num_tally_points number of tally points included in mesh tally
-     *
-     * Arrays will be resized to the given number of tally points multiplied
-     * by the number of energy bins.
-     */
- //   void resize_data_arrays(unsigned int num_tally_points);
 
     /**
      * \brief Determines entity index corresponding to tally point
@@ -172,23 +104,9 @@ class MeshTally : public Tally
      */
     unsigned int get_entity_index(moab::EntityHandle tally_point);
 
-    /**
-     * \brief Determines location of element in data array
-     * \param data array containing element to be accessed
-     * \param tally_point entity handle representing tally point
-     * \param energy_bin index representing energy bin
-     * \return reference to element in data array
-     *
-     * Enables direct access to the mesh tally data for the given tally point
-     * and energy bin.
-     */
-  //  double& get_data(std::vector<double>& data,
-   //                  moab::EntityHandle tally_point,
-    //                 unsigned energy_bin = 0);
 
     /**
-    
-* \brief Loads the MOAB mesh data from the input file for this mesh tally
+     * \brief Loads the MOAB mesh data from the input file for this mesh tally
      * \param mbi the MOAB interface for this mesh tally
      * \param mesh_set entity handle for the mesh set that will be created
      * \return the MOAB ErrorCode value

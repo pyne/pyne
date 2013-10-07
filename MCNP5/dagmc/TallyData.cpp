@@ -28,16 +28,15 @@ void TallyData::resize_data_arrays(unsigned int num_tally_points)
 //---------------------------------------------------------------------------//
 // TALLY DATA ACCESS METHODS
 //---------------------------------------------------------------------------//
-/*
-double& TallyData::get_data(std::vector<double>& data,
-                            unsigned int tally_point,
-                            unsigned int energy_bin)
+std::pair <double,double> TallyData::get_data(unsigned int tally_point_index, unsigned int energy_bin)
 {
-    assert(energy_bin < num_energy_bins);
-    int index = tally_point * num_energy_bins + energy_bin;
-    return data[index];
+   assert(energy_bin < num_energy_bins);
+   int index = tally_point_index * num_energy_bins + energy_bin;
+   double tally = tally_data.at(index);
+   double error = error_data.at(index);
+ 
+   return std::make_pair(tally, error);
 }
-*/
 //---------------------------------------------------------------------------//
 double* TallyData::get_tally_data(int& length)
 {
@@ -70,7 +69,7 @@ void TallyData::zero_tally_data()
     std::fill(temp_tally_data.begin(), temp_tally_data.end(), 0);
 }
 //---------------------------------------------------------------------------//
-void TallyData::my_end_history()
+void TallyData::end_history()
 {
     std::set<unsigned int>::iterator it;
 
@@ -98,12 +97,12 @@ void TallyData::my_end_history()
 //---------------------------------------------------------------------------//
 // PROTECTED METHODS
 //---------------------------------------------------------------------------//
-void TallyData::my_add_score_to_tally(unsigned int tally_point_index,
+void TallyData::add_score_to_tally(unsigned int tally_point_index,
                                    double score,
-                                   unsigned int ebin)
+                                   unsigned int energy_bin)
 {
     // update tally for this history with new score
-    int index = tally_point_index * num_energy_bins + ebin;;
+    int index = tally_point_index * num_energy_bins + energy_bin;;
     temp_tally_data.at(index) += score; 
 
 
