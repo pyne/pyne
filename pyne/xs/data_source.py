@@ -6,46 +6,11 @@ import StringIO
 import numpy as np
 import tables as tb
 
-from pyne import nuc_data, nucname, rxname
+from pyne import nuc_data
+from pyne import nucname
+from pyne import rxname
 from pyne.xs.models import partial_energy_matrix, group_collapse
 from pyne.endf import Library
-
-RX_TYPES = set(["", 'np *', 'a  *', 'h  *', '2p *', '3n *', 'd  *', 'np/d',
-                'na', '*', 'nd', 'g  *', '3n', 'np', 'nt', 't', 'nt *',
-                'x  *', '4n *', 'na *', 'nd *', 't  *', 'a', 'c', '2p', 'd',
-                'g', 'h', 'n', '4n', 'p', 'n  *', '2a', '2n *', 'x', '2n',
-                'nh *', 'p  *', 'f'])
-
-RX_TYPES_MAP = {
-    'neutron': 'n',
-    'gamma': 'g',
-    'alpha': 'a',
-    'proton': 'p',
-    'trit': 't',
-    'triton': 't',
-    'deut': 'd',
-    'deuteron': 'd',
-    'helion': 'h',
-    }
-
-def _munge_rx(rx):
-    """Munge the reaction rate name."""
-    if rx not in RX_TYPES:
-        while any([(key in rx) for key in RX_TYPES_MAP]):
-            for key, value in RX_TYPES_MAP.items():
-                rx = rx.replace(key, value)
-
-    if '_x' in rx:
-        if len(rx) == 3:
-            rx = rx.replace('_x', '  *')
-        else:
-            rx = rx.replace('_x', ' *')
-
-    if rx not in RX_TYPES:
-        msg = "the reaction '{rx}' is not valid.".format(rx=rx)
-        raise IndexError(msg)
-    return rx
-
 
 class DataSource(object):
     """Base cross section data source.
@@ -159,7 +124,7 @@ class DataSource(object):
         nuc : int or str
             A nuclide.
         rx : int or str
-            Reaction key ('gamma', 'alpha', 'p', etc.) or MT number.
+            Reaction id or name.
         temp : float, optional
             Temperature [K] of material, defaults to 300.0.
 
@@ -169,6 +134,8 @@ class DataSource(object):
             Source cross section data, length src_ngroups.
 
         """
+        nuc = nucname.id(nuc)
+        rx = rxname.id(rx)
         rxkey = (nuc, rx, temp)
         if rxkey not in self.rxcache:
             self.rxcache[rxkey] = self._load_reaction(nuc, rx, temp)
@@ -185,7 +152,7 @@ class DataSource(object):
         nuc : int or str
             A nuclide.
         rx : int or str
-            Reaction key ('gamma', 'alpha', 'p', etc.) or MT number.
+            Reaction id or name.
         temp : float, optional
             Temperature [K] of material, defaults to 300.0.
         src_phi_g : array-like, optional
@@ -272,8 +239,20 @@ class SimpleDataSource(DataSource):
         Keyword arguments to be sent to base class.
 
     """
-    _rx_avail = set(['t', 's', 'e', 'i', 'a', 'gamma', 'f', 'alpha', 'proton', 
-                     'deut', 'trit', '2n', '3n', '4n'])
+    _rx_avail = {rxname.id('total'): 't', 
+                 rxname.id('scattering'): 's', 
+                 rxname.id('elastic'): 'e', 
+                 rxname.id('inelastic'): 'i', 
+                 rxname.id('absorption'): 'a', 
+                 rxname.id('gamma'): 'gamma', 
+                 rxname.id('fission'): 'f', 
+                 rxname.id('alpha'): 'alpha', 
+                 rxname.id('proton'): 'proton', 
+                 rxname.id('deut'): 'deut', 
+                 rxname.id('trit'): 'trit', 
+                 rxname.id('z_2n'): '2n', 
+                 rxname.id('z_3n'): '3n', 
+                 rxname.id('z_4n'): '4n'}
 
     def __init__(self, **kwargs):
         super(SimpleDataSource, self).__init__(**kwargs)
@@ -290,11 +269,10 @@ class SimpleDataSource(DataSource):
         self.src_group_struct = np.array([14.0, 1.0, 2.53E-8, 0.0], dtype='float64')
 
     def _load_reaction(self, nuc, rx, temp=300.0):
-        nuc = nucname.id(nuc)
         if rx not in self._rx_avail:
             return None
         cond = "nuc == {0}".format(nuc)
-        sig = 'sigma_' + rx
+        sig = 'sigma_' + self._rx_avail[rx]
         with tb.openFile(nuc_data, 'r') as f:
             simple_xs = f.root.neutron.simple_xs
             fteen = [row[sig] for row in simple_xs.fourteen_MeV.where(cond)]
@@ -381,6 +359,78 @@ class CinderDataSource(DataSource):
         Keyword arguments to be sent to base class.
 
     """
+    # 'h' stands for helion or 'He3'
+    _rx_avail = {rxname.id('absorption'): "", 
+                 rxname.id('np_1'): 'np *', 
+                 rxname.id('a_1'): 'a  *', 
+                 rxname.id('He3_1'): 'h  *', 
+                 rxname.id('z_2p_1'): '2p *', 
+                 rxname.id('z_3n_1'): '3n *', 
+                 rxname.id('d_1'): 'd  *',
+                 rxname.id('npd'): 'np/d',
+                 rxname.id('na'): 'na', 
+                 rxname.id(''): '*', 
+                 rxname.id(''): 'nd', 
+                 rxname.id(''): 'g  *', 
+                 rxname.id(''): '3n', 
+                 rxname.id(''): 'np', 
+                 rxname.id(''): 'nt', 
+                 rxname.id(''): 't', 
+                 rxname.id(''): 'nt *',
+                 rxname.id(''): 'x  *', 
+                 rxname.id(''): '4n *', 
+                 rxname.id(''): 'na *', 
+                 rxname.id(''): 'nd *', 
+                 rxname.id(''): 't  *', 
+                 rxname.id(''): 'a', 
+                 rxname.id(''): 'c', 
+                 rxname.id(''): '2p', 
+                 rxname.id(''): 'd',
+                 rxname.id(''): 'g', 
+                 rxname.id(''): 'h', 
+                 rxname.id(''): 'n', 
+                 rxname.id(''): '4n', 
+                 rxname.id(''): 'p', 
+                 rxname.id(''): 'n  *', 
+                 rxname.id(''): '2a', 
+                 rxname.id(''): '2n *', 
+                 rxname.id(''): 'x', 
+                 rxname.id(''): '2n',
+                 rxname.id(''): 'nh *', 
+                 rxname.id(''): 'p  *', 
+                 rxname.id('fission'): 'f'}
+
+RX_TYPES_MAP = {
+    'neutron': 'n',
+    'gamma': 'g',
+    'alpha': 'a',
+    'proton': 'p',
+    'trit': 't',
+    'triton': 't',
+    'deut': 'd',
+    'deuteron': 'd',
+    'helion': 'h',
+    }
+
+def _munge_rx(rx):
+    """Munge the reaction rate name."""
+    if rx not in RX_TYPES:
+        while any([(key in rx) for key in RX_TYPES_MAP]):
+            for key, value in RX_TYPES_MAP.items():
+                rx = rx.replace(key, value)
+
+    if '_x' in rx:
+        if len(rx) == 3:
+            rx = rx.replace('_x', '  *')
+        else:
+            rx = rx.replace('_x', ' *')
+
+    if rx not in RX_TYPES:
+        msg = "the reaction '{rx}' is not valid.".format(rx=rx)
+        raise IndexError(msg)
+    return rx
+
+
 
     def __init__(self, **kwargs):
         super(CinderDataSource, self).__init__(**kwargs)
