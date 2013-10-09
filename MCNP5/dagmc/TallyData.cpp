@@ -4,6 +4,7 @@ TallyData::TallyData(unsigned int num_energy_bins, bool total_energy_bin)
 {
     this->num_energy_bins = num_energy_bins;
     this->total_energy_bin = total_energy_bin;
+    this->num_tally_points = 0;
 }
 
 //---------------------------------------------------------------------------//
@@ -17,8 +18,10 @@ bool TallyData::has_total_energy_bin()
     return total_energy_bin;
 }
 //---------------------------------------------------------------------------//
-void TallyData::resize_data_arrays(unsigned int num_tally_points)
+void TallyData::resize_data_arrays(unsigned int tally_points)
 {
+    assert(tally_points > 0);
+    num_tally_points = tally_points;
     unsigned int new_size = num_tally_points * num_energy_bins;
 
     tally_data.resize(new_size, 0);
@@ -31,6 +34,8 @@ void TallyData::resize_data_arrays(unsigned int num_tally_points)
 std::pair <double,double> TallyData::get_data(unsigned int tally_point_index, unsigned int energy_bin)
 {
    assert(energy_bin < num_energy_bins);
+   assert(tally_point_index < num_tally_points);
+
    int index = tally_point_index * num_energy_bins + energy_bin;
    double tally = tally_data.at(index);
    double error = error_data.at(index);
@@ -101,6 +106,9 @@ void TallyData::add_score_to_tally(unsigned int tally_point_index,
                                    double score,
                                    unsigned int energy_bin)
 {
+    assert(tally_point_index < num_tally_points);
+    assert(energy_bin < num_energy_bins);
+
     // update tally for this history with new score
     int index = tally_point_index * num_energy_bins + energy_bin;;
     temp_tally_data.at(index) += score; 

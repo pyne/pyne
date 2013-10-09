@@ -79,6 +79,9 @@ class TallyData
     /// Set to true by default; determines if total energy bin is included
     bool total_energy_bin;
 
+    /// Number of tally points = tally_data.size()/num_energy_bins
+    unsigned int num_tally_points;
+
 };
 
 #endif // DAGMC_TALLY_DATA_HPP
