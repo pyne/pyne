@@ -93,7 +93,7 @@ void dagmc_collision_score_(double* x,   double* y, double* z,
 void dagmc_fmesh_get_tally_data_( int* tally_id, void* fortran_data_pointer );
 void dagmc_fmesh_get_error_data_( int* tally_id, void* fortran_data_pointer );
 void dagmc_fmesh_get_scratch_data_( int* tally_id, void* fortran_data_pointer );
-// void dagmc_fmesh_clear_data_( int* fmesh_index );
+void dagmc_fmesh_clear_data_();
 void dagmc_fmesh_add_scratch_to_tally_( int* tally_id );
 void dagmc_fmesh_add_scratch_to_error_( int* tally_id );
 

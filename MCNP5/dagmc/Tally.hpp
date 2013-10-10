@@ -117,6 +117,9 @@ class Tally
 
     /// All of the tally data for this tally
     TallyData *data;
+
+  /// The purpose of this is to allow TallyManager to use the data
+  friend class TallyManager;
 };
 
 #endif // DAGMC_TALLY_HPP

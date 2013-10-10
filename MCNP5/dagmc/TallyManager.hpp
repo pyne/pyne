@@ -94,7 +94,7 @@ class TallyManager
      * \brief Remove a DAGMC Tally from the Observer list
      * \param tally_id the unique ID for the Tally to be removed
      */
-    void removeTally(int tally_id);
+    void removeTally(unsigned int tally_id);
 
     /**
      * \brief Set a collision event
@@ -147,6 +147,15 @@ class TallyManager
      * \param num_histories the number of particle histories tracked
      */
     void write_data(double num_histories);
+
+    double* get_tally_data(int tally_id, int& length);
+    double* get_error_data(int tally_id, int& length);
+    double* get_scratch_data(int tally_id, int& length);
+    /**
+     * \brief Resets all of the mesh tally data arrays to zero
+     */
+    void zero_all_tally_data();
+
 
   private:
     // Keep a record of the currently active Tally Observers

@@ -33,7 +33,7 @@ void TallyManager::addNewTally(unsigned int tally_id,
     }
 }
 //---------------------------------------------------------------------------//
-void TallyManager::removeTally(int tally_id)
+void TallyManager::removeTally(unsigned int tally_id)
 {
     std::map<int, Tally *>::iterator it;	
     it = observers.find(tally_id);
@@ -111,6 +111,17 @@ void TallyManager::update_tallies()
     clear_last_event();
 }
 //---------------------------------------------------------------------------//
+void TallyManager::zero_all_tally_data()
+{
+    std::map<int, Tally*>::iterator map_it;
+    for (map_it = observers.begin(); map_it != observers.end(); ++map_it)
+    {
+        Tally *tally = map_it->second;
+        tally->data->zero_tally_data();
+    }
+    clear_last_event();
+}
+//---------------------------------------------------------------------------//
 void TallyManager::end_history()
 {
     std::map<int, Tally*>::iterator map_it;
@@ -128,6 +139,60 @@ void TallyManager::write_data(double num_histories)
     {
         Tally *tally = map_it->second;
 	tally->write_data(num_histories);
+    }
+}
+//---------------------------------------------------------------------------//
+double* TallyManager::get_tally_data(int tally_id, int& length)
+{
+    std::map<int, Tally *>::iterator it;	
+    it = observers.find(tally_id);
+
+    if (it != observers.end())
+    {
+        Tally *tally = it->second;
+        return tally->data->get_tally_data(length);;
+    }
+    else
+    {
+        std::cerr << "Warning: Tally " << tally_id
+                  << " does not exist and cannot be accessed for tally data. " << std::endl;
+        return NULL;
+    }
+}
+//---------------------------------------------------------------------------//
+double* TallyManager::get_error_data(int tally_id, int& length)
+{
+    std::map<int, Tally *>::iterator it;	
+    it = observers.find(tally_id);
+
+    if (it != observers.end())
+    {
+        Tally *tally = it->second;
+        return tally->data->get_error_data(length);;
+    }
+    else
+    {
+        std::cerr << "Warning: Tally " << tally_id
+                  << " does not exist and cannot be accessed for error data. " << std::endl;
+        return NULL;
+    }
+}
+//---------------------------------------------------------------------------//
+double* TallyManager::get_scratch_data(int tally_id, int& length)
+{
+    std::map<int, Tally *>::iterator it;	
+    it = observers.find(tally_id);
+
+    if (it != observers.end())
+    {
+        Tally *tally = it->second;
+        return tally->data->get_scratch_data(length);;
+    }
+    else
+    {
+        std::cerr << "Warning: Tally " << tally_id
+                  << " does not exist and cannot be accessed for scratch data. " << std::endl;
+        return NULL;
     }
 }
 //---------------------------------------------------------------------------//

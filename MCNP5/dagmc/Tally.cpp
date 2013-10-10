@@ -20,7 +20,7 @@ Tally::Tally(const TallyInput& input)
     // turn off total energy bin if only one bin exists
     if (num_energy_bins == 2)
     {
-        --num_energy_bins;
+       --num_energy_bins;
        total_energy_bin = false;
     }
 

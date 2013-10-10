@@ -205,8 +205,7 @@ void dagmc_fmesh_get_tally_data_( int* tally_id, void* fortran_data_pointer )
   double* data; 
   int length;
  
-  // data = all_tallies[*tally_id]->get_tally_data( length );
- //  tallyManager.get_data(id, data, length);
+  data = tallyManager.get_tally_data(*tally_id, length);
   FMESH_FUNC( dagmc_make_fortran_pointer )( fortran_data_pointer, data, &length );
 }
 
@@ -220,7 +219,7 @@ void dagmc_fmesh_get_error_data_( int* tally_id, void* fortran_data_pointer )
   double* data; 
   int length;
  
-  // data = all_tallies[*fmesh_index]->get_error_data( length );
+  data = tallyManager.get_error_data(*tally_id, length);
   FMESH_FUNC( dagmc_make_fortran_pointer )( fortran_data_pointer, data, &length );
 }
 
@@ -234,7 +233,7 @@ void dagmc_fmesh_get_scratch_data_( int* tally_id, void* fortran_data_pointer )
   double* data; 
   int length;
   
-//  data = all_tallies[*fmesh_index]->get_scratch_data( length );
+  data = tallyManager.get_scratch_data(*tally_id, length);
   FMESH_FUNC( dagmc_make_fortran_pointer )( fortran_data_pointer, data, &length );
 }
 
@@ -243,12 +242,10 @@ void dagmc_fmesh_get_scratch_data_( int* tally_id, void* fortran_data_pointer )
  * Called when an MPI subtask has just sent all its tally and error values
  * back to the master task.
  */
-/*
-void dagmc_fmesh_clear_data_( int* fmesh_index ){
-
-  all_tallies[*fmesh_index]->zero_tally_data( );
+void dagmc_fmesh_clear_data_()
+{
+   tallyManager.zero_all_tally_data();
 }
-*/
 
 /**
  * Add the values in this mesh's scratch array to its tally array.
@@ -256,17 +253,18 @@ void dagmc_fmesh_clear_data_( int* fmesh_index ){
  */
 void dagmc_fmesh_add_scratch_to_tally_( int* tally_id )
 {
-  double* data, *scratch;
+  double* data; 
+  double* scratch;
   int length, scratchlength;
 
-//  data = all_tallies[*fmesh_index]->get_tally_data( length );
-//  scratch = all_tallies[*fmesh_index]->get_scratch_data( scratchlength );
+  data = tallyManager.get_tally_data(*tally_id, length);
+  scratch = tallyManager.get_scratch_data(*tally_id, scratchlength);
   
   assert( scratchlength >= length );
 
   for( int i = 0; i < length; ++i )
   {
- //   data[i] += scratch[i];
+      data[i] += scratch[i];
   }
 }
 /**
@@ -275,17 +273,18 @@ void dagmc_fmesh_add_scratch_to_tally_( int* tally_id )
  */
 void dagmc_fmesh_add_scratch_to_error_( int* tally_id )
 {
-  double* data, *scratch;
+  double* error_data; 
+  double* scratch;
   int length, scratchlength;
 
-  // data = all_tallies[*fmesh_index]->get_error_data( length );
-  // scratch = all_tallies[*fmesh_index]->get_scratch_data( scratchlength );
+  error_data = tallyManager.get_error_data(*tally_id, length);
+  scratch = tallyManager.get_scratch_data(*tally_id, scratchlength);
   
   assert( scratchlength >= length );
 
   for( int i = 0; i < length; ++i )
   {
- //   data[i] += scratch[i];
+     error_data[i] += scratch[i];
   }
 }
 //---------------------------------------------------------------------------//
@@ -302,6 +301,7 @@ void dagmc_fmesh_end_history_()
     std::cout << "* History ends *" << std::endl;
 #endif
 }
+
 //---------------------------------------------------------------------------//
 /**
  * \brief Called from fortran to score a track event
