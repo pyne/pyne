@@ -4,7 +4,6 @@
 #define DAGMC_TRACK_LENGTH_MESH_TALLY_HPP
 
 #include <string>
-#include <cassert>
 #include <set>
 
 #include "moab/Interface.hpp"
@@ -86,7 +85,7 @@ class TrackLengthMeshTally : public MeshTally
   public:
     /**
      * \brief Constructor
-     * \param input user-defined input parameters for this KDEMeshTally
+     * \param[in] input user-defined input parameters for this KDEMeshTally
      */
     explicit TrackLengthMeshTally(const TallyInput& input);
 
@@ -99,7 +98,7 @@ class TrackLengthMeshTally : public MeshTally
 
     /**
      * \brief Computes scores for this TrackLengthMeshTally based on the given TallyEvent
-     * \param event the parameters needed to compute the scores
+     * \param[in] event the parameters needed to compute the scores
      */
     virtual void compute_score(const TallyEvent& event);
 
@@ -113,7 +112,7 @@ class TrackLengthMeshTally : public MeshTally
 
     /**
      * \brief Write results to the output file for this TrackLengthMeshTally
-     * \param num_histories the number of particle histories tracked
+     * \param[in] num_histories the number of particle histories tracked
      *
      * The write_data() method writes the current tally and relative standard
      * error results for all of the mesh cells defined as tally points to the
@@ -178,14 +177,14 @@ class TrackLengthMeshTally : public MeshTally
 
     /**
      * \brief Computes the barycentric matrices for all tetrahedrons
-     * \param all_tets the set of tets extracted from the input mesh
+     * \param[in] all_tets the set of tets extracted from the input mesh
      * \return the MOAB ErrorCode value
      */
     ErrorCode compute_barycentric_data (const Range& all_tets);
 
     /**
      * \brief Constructs the KD and OBB trees from the mesh data
-     * \param all_tets the set of tets extracted from the input mesh
+     * \param[in, out] all_tets the set of tets extracted from the input mesh
      *
      * Also adds the set of skin triangles to all_tets.
      */
@@ -193,8 +192,8 @@ class TrackLengthMeshTally : public MeshTally
 
     /**
      * \brief Checks if the given point is inside the given tet
-     * \param point the coordinates of the point to test
-     * \param tet the EntityHandle of the tet
+     * \param[in] point the coordinates of the point to test
+     * \param[in] tet the EntityHandle of the tet
      * \return true if the point falls inside tet; false otherwise
      *
      * Assumes that tet is part of this TrackLengthMeshTally.
@@ -203,9 +202,9 @@ class TrackLengthMeshTally : public MeshTally
 
     /**
      * \brief Get parent tetrahedron and vertices from given triangle
-     * \param triangle the input triangle
-     * \param tetrahedron (output) the parent tetrahedron of triangle
-     * \param vertices (output) the verticles of triangle
+     * \param[in] triangle the input triangle
+     * \param[out] tetrahedron the parent tetrahedron of triangle
+     * \param[out] vertices the verticles of triangle
      *
      * Given an EntityHandle representing a mesh skin triangle, return the
      * tetrahedron it belongs to as well as the handles of its vertices.
@@ -219,13 +218,13 @@ class TrackLengthMeshTally : public MeshTally
 
     /**
      * \brief Finds the next tetrahedron (if any) intersected by a ray
-     * \param start the beginning of ray
-     * \param vec the unit vector of ray
-     * \param length the length of ray
-     * \param first_tri if return value is non-zero, will contain the skin
+     * \param[in] start the beginning of ray
+     * \param[in] vec the unit vector of ray
+     * \param[in] length the length of ray
+     * \param[out] first_tri if return value is non-zero, will contain the skin
      *                  triangle that ray intersects
-     * \param first_t value of t along the ray where first_tri is intersected
-     * \param last_crossing a skin triangle to ignore for this ray fire (Used
+     * \param[out] first_t value of t along the ray where first_tri is intersected
+     * \param[in] last_crossing a skin triangle to ignore for this ray fire (Used
      *                      if a ray is being fired away from surface of mesh)
      * \return tetrahedron intersected by this ray fire, or zero if none
      *
@@ -239,8 +238,8 @@ class TrackLengthMeshTally : public MeshTally
 
     /**
      * \brief Find first tet intersected by a track, using conformal logic
-     * \param start the beginning of track
-     * \param first_tri (output) vertices of skin triangle at which track begins
+     * \param[in] start the beginning of track
+     * \param[out] first_tri vertices of skin triangle at which track begins
      * \return first tetrahedron intersected
      *
      * Find the first tetrahedron intersected by a track segment, using
@@ -258,12 +257,12 @@ class TrackLengthMeshTally : public MeshTally
 
     /**
      * \brief Find first tet intersected by the given track segment
-     * \param start the beginning of track
-     * \param vec the unit vector of track
-     * \param length the track length
-     * \param first_tri if return value is non-zero, and ray fire was performed,
+     * \param[in] start the beginning of track
+     * \param[in] vec the unit vector of track
+     * \param[in] length the track length
+     * \param[out] first_tri if return value is non-zero, and ray fire was performed,
      *                  will contain the skin triangle that ray intersects
-     * \param first_t value of t along the ray where first_tri intersects
+     * \param[out] first_t value of t along the ray where first_tri intersects
      * \return the first tetrahedron along the ray, or zero if none found
      */ 
     EntityHandle get_starting_tet(const CartVect& start,

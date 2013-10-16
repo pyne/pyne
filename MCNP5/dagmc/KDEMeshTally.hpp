@@ -109,8 +109,8 @@ class KDEMeshTally : public MeshTally
 
     /**
      * \brief Constructor
-     * \param input user-defined input parameters for this KDEMeshTally
-     * \param type the type of estimator to use with this KDEMeshTally
+     * \param[in] input user-defined input parameters for this KDEMeshTally
+     * \param[in] type the type of estimator to use with this KDEMeshTally
      */
     KDEMeshTally(const TallyInput& input, Estimator type = COLLISION);
 
@@ -123,13 +123,13 @@ class KDEMeshTally : public MeshTally
 
     /**
      * \brief Computes scores for this KDEMeshTally based on the given TallyEvent
-     * \param event the parameters needed to compute the scores
+     * \param[in] event the parameters needed to compute the scores
      */
     virtual void compute_score(const TallyEvent& event, int ebin);
 
     /**
      * \brief Write results to the output file for this KDEMeshTally
-     * \param num_histories the number of particle histories tracked
+     * \param[in] num_histories the number of particle histories tracked
      *
      * The write_data() method writes the current tally and relative standard
      * error results for all of the mesh nodes to the output_filename set for
@@ -184,9 +184,9 @@ class KDEMeshTally : public MeshTally
 
     /**
      * \brief Sets bandwidth[i] = value for the given key
-     * \param key the name of the bandwidth vector component
-     * \param value the value of the bandwidth vector component
-     * \param i the index in the bandwidth vector associated with the key
+     * \param[in] key the name of the bandwidth vector component
+     * \param[in] value the value of the bandwidth vector component
+     * \param[in] i the index in the bandwidth vector associated with the key
      */
     void set_bandwidth_value(const std::string& key,
                              const std::string& value,
@@ -211,7 +211,7 @@ class KDEMeshTally : public MeshTally
 
     /**
      * \brief Adds the collision point to the running variance formula
-     * \param collision_point the coordinates of the collision point
+     * \param[in] collision_point the coordinates of the collision point
      *
      * The update_variance() method updates mean and variance variables with
      * the coordinates of the new collision point, which can then be used by
@@ -260,9 +260,9 @@ class KDEMeshTally : public MeshTally
       public:
         /**
          * \brief Constructor
-         * \param tally the KDEMeshTally object using this path kernel
-         * \param event the tally event containing the track segment data
-         * \param X the calculation point
+         * \param[in] tally the KDEMeshTally object using this path kernel
+         * \param[in] event the tally event containing the track segment data
+         * \param[in] X the calculation point
          */
         PathKernel(const KDEMeshTally& tally,
                    const TallyEvent& event,
@@ -271,7 +271,7 @@ class KDEMeshTally : public MeshTally
 
         /**
          * \brief Evaluates the path length kernel function
-         * \param s the path length for which to evaluate this function
+         * \param[in] s the path length for which to evaluate this function
          * \return K(X, s)
          */
         double evaluate(double s) const;
@@ -284,8 +284,8 @@ class KDEMeshTally : public MeshTally
 
     /**
      * \brief Computes value of the 3D kernel function K(x, y, z)
-     * \param X the calculation point
-     * \param observation the random observation point (Xi, Yi, Zi)
+     * \param[in] X the calculation point
+     * \param[in] observation the random observation point (Xi, Yi, Zi)
      * \return K(x, y, z)
      *
      * Evaluates the general 3D kernel function for the given calculation and
@@ -297,8 +297,8 @@ class KDEMeshTally : public MeshTally
 
     /**
      * \brief Computes tally score based on the integral-track estimator
-     * \param X the calculation point
-     * \param event the tally event containing the track segment data
+     * \param[in] X the calculation point
+     * \param[in] event the tally event containing the track segment data
      * \return the tally score for the calculation point
      *
      * The integral_track_score() method computes the integral of the 3D
@@ -311,9 +311,9 @@ class KDEMeshTally : public MeshTally
 
     /**
      * \brief Determines integration limits for the integral-track estimator
-     * \param event the tally event containing the track segment data
-     * \param coords the (x, y, z) coordinates of the calculation point X
-     * \param limits stores integration limits in form of pair<lower, upper>
+     * \param[in] event the tally event containing the track segment data
+     * \param[in] coords the (x, y, z) coordinates of the calculation point X
+     * \param[out] limits stores integration limits in form of pair<lower, upper>
      * \return true if valid limits exist, false otherwise
      *
      * The set_integral_limits() method determines the integration limits for
@@ -331,8 +331,8 @@ class KDEMeshTally : public MeshTally
 
     /**
      * \brief Computes tally score based on the sub-track estimator
-     * \param X the calculation point
-     * \param points the set of sub-track points needed for computing score
+     * \param[in] X the calculation point
+     * \param[in] points the set of sub-track points needed for computing score
      * \return the tally score for the calculation point
      *
      * The subtrack_score() method computes the average 3D kernel contribution
@@ -345,8 +345,8 @@ class KDEMeshTally : public MeshTally
 
     /**
      * \brief Chooses p random points along a track segment
-     * \param p the number of random points requested
-     * \param event the tally event containing the track segment data
+     * \param[in] p the number of random points requested
+     * \param[in] event the tally event containing the track segment data
      * \return the vector of p random points
      *
      * The choose_points() method sub-divides the track segment into p

@@ -104,7 +104,6 @@ KDEMeshTally::~KDEMeshTally()
     delete mbi;
     delete quadrature;  
 }
-
 //---------------------------------------------------------------------------//
 // DERIVED PUBLIC INTERFACE from MeshTally.hpp
 //---------------------------------------------------------------------------//
@@ -204,7 +203,6 @@ void KDEMeshTally::print(double num_particles, double multiplier)
     {
         moab::EntityHandle point = *i;
         unsigned int point_index = get_entity_index(point);
-        
 
         for (unsigned int j = 0; j < data->get_num_energy_bins(); ++ j)
         {

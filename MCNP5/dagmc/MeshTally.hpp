@@ -28,20 +28,10 @@ namespace moab {
  *     1) compute_score(const TallyEvent& event)
  *     2) write_data(double num_histories)
  *
- * A simple version of the end_history() method is already included, so this
- * does not need to be implemented unless additional or alternative actions
- * are required by a Derived class.
- *
- * Note that three arrays are available for storing the mesh tally data
- *
- *    1) tally_data: stores sum of scores for all particle histories
- *    2) error_data: stores data needed to determine error in tally results
- *    3) temp_tally_data: stores sum of scores for a single history
- *
- * Each element in these three data arrays represents one tally point and
- * one energy bin.  They are ordered first by tally point, and then by energy
- * bin.  Derived classes can easily access/modify individual elements using
- * the protected get_data() method.
+ * In general, the default end_history() method that is implemented in Tally
+ * will also be sufficient for most MeshTally objects that use the TallyData
+ * structure for storing their data.  However, it can be extended or overridden
+ * as needed by Derived classes.
  *
  * ==================
  * Input/Output Files
@@ -68,7 +58,7 @@ class MeshTally : public Tally
   protected:
     /**
      * \brief Constructor
-     * \param input user-defined input parameters for this mesh tally
+     * \param[in] input user-defined input parameters for this mesh tally
      */
     MeshTally(const TallyInput& input);
 
@@ -96,19 +86,17 @@ class MeshTally : public Tally
 
     // >>> PROTECTED METHODS
 
-
     /**
      * \brief Determines entity index corresponding to tally point
-     * \param tally_point entity handle representing tally point
-     * \return entity index for given tally point 
+     * \param[in] tally_point entity handle representing tally point
+     * \return entity index for given tally point
      */
     unsigned int get_entity_index(moab::EntityHandle tally_point);
 
-
     /**
      * \brief Loads the MOAB mesh data from the input file for this mesh tally
-     * \param mbi the MOAB interface for this mesh tally
-     * \param mesh_set entity handle for the mesh set that will be created
+     * \param[in] mbi the MOAB interface for this mesh tally
+     * \param[out] mesh_set entity handle for the mesh set that will be created
      * \return the MOAB ErrorCode value
      */
     moab::ErrorCode load_moab_mesh(moab::Interface* mbi,
@@ -116,7 +104,7 @@ class MeshTally : public Tally
 
     /**
      * \brief Defines the set of tally points to use for this mesh tally
-     * \param mesh_elements the set of mesh elements to use as tally points
+     * \param[in] mesh_elements the set of mesh elements to use as tally points
      *
      * Note that this method calls resize_data_arrays() to set the tally
      * data arrays for the given number of tally points.
@@ -125,9 +113,9 @@ class MeshTally : public Tally
 
     /**
      * \brief Reduces a MOAB mesh set to include only its 3D elements
-     * \param mbi the MOAB interface for this mesh tally
-     * \param mesh_set entity handle for the mesh set that will be reduced
-     * \param mesh_elements stores 3D elements that were added to the mesh set
+     * \param[in] mbi the MOAB interface for this mesh tally
+     * \param[in, out] mesh_set entity handle for the mesh set that will be reduced
+     * \param[out] mesh_elements stores 3D elements that were added to the mesh set
      * \return the MOAB ErrorCode value
      *
      * NOTE: this method will overwrite the mesh set
@@ -138,8 +126,8 @@ class MeshTally : public Tally
 
     /**
      * \brief Sets up tally value and error labels for all energy bins
-     * \param mbi the MOAB interface for this mesh tally
-     * \param prefix additional string to be added before each label
+     * \param[in] mbi the MOAB interface for this mesh tally
+     * \param[in] prefix additional string to be added before each label
      * \return the MOAB ErrorCode value
      *
      * Note that labels are stored as MOAB tag handles in the tally_tags

@@ -24,7 +24,7 @@ class Function
 
     /**
      * \brief Evaluate this Function f
-     * \param x the value at which f will be evaluated
+     * \param[in] x the value at which f will be evaluated
      * \return f(x)
      */
     virtual double evaluate(double x) const = 0;
@@ -51,7 +51,7 @@ class Quadrature
   public:
     /**
      * \brief Constructor
-     * \param n the number of points to use with this Quadrature
+     * \param[in] n the number of points to use with this Quadrature
      */
     Quadrature(unsigned int n);
 
@@ -59,14 +59,14 @@ class Quadrature
 
     /**
      * \brief Changes the set of quadrature points for this Quadrature
-     * \param new_n the new number of quadrature points
+     * \param[in] new_n the new number of quadrature points
      */
     void change_quadrature_set(unsigned int new_n);
 
     /**
      * \brief Computes the definite integral of a Function f
-     * \param a, b the lower and upper integration limits
-     * \param f the Function to be integrated
+     * \param[in] a, b the lower and upper integration limits
+     * \param[in] f the Function to be integrated
      * \return definite integral of f(x) for [a, b]
      */
     double integrate(double a, double b, const Function& f) const;

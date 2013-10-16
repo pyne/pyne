@@ -111,17 +111,6 @@ void TallyManager::update_tallies()
     clear_last_event();
 }
 //---------------------------------------------------------------------------//
-void TallyManager::zero_all_tally_data()
-{
-    std::map<int, Tally*>::iterator map_it;
-    for (map_it = observers.begin(); map_it != observers.end(); ++map_it)
-    {
-        Tally *tally = map_it->second;
-        tally->data->zero_tally_data();
-    }
-    clear_last_event();
-}
-//---------------------------------------------------------------------------//
 void TallyManager::end_history()
 {
     std::map<int, Tally*>::iterator map_it;
@@ -142,6 +131,11 @@ void TallyManager::write_data(double num_histories)
     }
 }
 //---------------------------------------------------------------------------//
+// TALLY DATA ACCESS METHODS
+//---------------------------------------------------------------------------//
+// TODO: These will only work if TallyData is used to store all data.
+// Future addition could add similar functions to the Tally interface so that
+// each implementation can choose how to store its data.
 double* TallyManager::get_tally_data(int tally_id, int& length)
 {
     std::map<int, Tally *>::iterator it;	
@@ -194,6 +188,17 @@ double* TallyManager::get_scratch_data(int tally_id, int& length)
                   << " does not exist and cannot be accessed for scratch data. " << std::endl;
         return NULL;
     }
+}
+//---------------------------------------------------------------------------//
+void TallyManager::zero_all_tally_data()
+{
+    std::map<int, Tally*>::iterator map_it;
+    for (map_it = observers.begin(); map_it != observers.end(); ++map_it)
+    {
+        Tally *tally = map_it->second;
+        tally->data->zero_tally_data();
+    }
+    clear_last_event();
 }
 //---------------------------------------------------------------------------//
 // PRIVATE METHODS

@@ -70,8 +70,8 @@ class KDEKernel
 
     /**
      * \brief Creates a KDEKernel of the specified type and order
-     * \param type the name of the kernel type
-     * \param order the order of the kernel
+     * \param[in] type the name of the kernel type
+     * \param[in] order the order of the kernel
      * \return pointer to the new KDEKernel that was created
      *
      * Valid kernel types include
@@ -92,7 +92,7 @@ class KDEKernel
 
     /**
      * \brief Evaluate this kernel function K
-     * \param u the value at which K will be evaluated
+     * \param[in] u the value at which K will be evaluated
      * \return K(u)
      */
     virtual double evaluate(double u) const = 0;
@@ -111,25 +111,25 @@ class KDEKernel
 
     /**
      * \brief Gets minimum number of quadrature points based on the ith moment
-     * \param i the index representing the ith moment function
+     * \param[in] i the index representing the ith moment function
      * \return number of quadrature points needed to integrate the ith moment
      */
     virtual int get_min_quadrature(unsigned int i) const = 0;
 
     /**
      * \brief Integrates the ith moment function for this kernel
-     * \param a, b the lower and upper integration limits
-     * \param i the index representing the ith moment function
+     * \param[in] a, b the lower and upper integration limits
+     * \param[in] i the index representing the ith moment function
      * \return definite integral of the ith moment function for [a, b]
      */
     virtual double integrate_moment(double a, double b, unsigned int i) const = 0;
 
     /**
      * \brief Evaluate this kernel using a boundary correction method K_b
-     * \param u the value at which K_b will be evaluated
-     * \param bandwidth the maximum distance for which correction is needed
-     * \param distance the distance from the calculation point to the boundary
-     * \param side the location of the boundary (0 = LOWER, 1 = UPPER)
+     * \param[in] u the value at which K_b will be evaluated
+     * \param[in] bandwidth the maximum distance for which correction is needed
+     * \param[in] distance the distance from the calculation point to the boundary
+     * \param[in] side the location of the boundary (0 = LOWER, 1 = UPPER)
      * \return K_b(u)
      *
      * The default boundary correction method uses a boundary kernel to evaluate
@@ -163,15 +163,15 @@ class KDEKernel
       public:
         /**
          * \brief Constructor
-         * \param i the index representing the ith moment function
-         * \param kernel the kernel for which the moment function is desired
+         * \param[in] i the index representing the ith moment function
+         * \param[in] kernel the kernel for which the moment function is desired
          */
         MomentFunction(unsigned int i, const KDEKernel& kernel)
             : moment_index(i), kernel(kernel) {}
 
         /**
          * \brief Evaluates the ith moment function
-         * \param x the value at which this moment function will be evaluated
+         * \param[in] x the value at which this moment function will be evaluated
          * \return x^i * K(x) where K is the kernel function
          */
         double evaluate(double x) const;

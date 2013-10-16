@@ -76,10 +76,10 @@ class TallyManager
 
     /**
      * \brief Create a new DAGMC Tally and add it to the Observer list
-     * \param tally_id the unique ID for this Tally
-     * \param tally_type the type of Tally to create
-     * \param energy_bin_bounds the boundaries of the energy bins
-     * \param options the set of options requested for this Tally
+     * \param[in] tally_id the unique ID for this Tally
+     * \param[in] tally_type the type of Tally to create
+     * \param[in] energy_bin_bounds the boundaries of the energy bins
+     * \param[in] options the set of options requested for this Tally
      *
      * If an invalid tally_type is requested, then it will be ignored.
      * Note that energy_bin_bounds must have at least two entries, so
@@ -92,17 +92,17 @@ class TallyManager
 
     /**
      * \brief Remove a DAGMC Tally from the Observer list
-     * \param tally_id the unique ID for the Tally to be removed
+     * \param[in] tally_id the unique ID for the Tally to be removed
      */
     void removeTally(unsigned int tally_id);
 
     /**
      * \brief Set a collision event
-     * \param x, y, z coordinates of the collision point
-     * \param particle_energy the energy of the particle prior to collision
-     * \param particle_weight the weight of the particle prior to collision
-     * \param total_cross_section the macroscopic cross section for current cell
-     * \param cell_id the unique ID for the current cell
+     * \param[in] x, y, z coordinates of the collision point
+     * \param[in] particle_energy the energy of the particle prior to collision
+     * \param[in] particle_weight the weight of the particle prior to collision
+     * \param[in] total_cross_section the macroscopic cross section for current cell
+     * \param[in] cell_id the unique ID for the current cell
      * \return true if a collision event was set; false otherwise
      */
     bool set_collision_event(double x, double y, double z,
@@ -111,11 +111,11 @@ class TallyManager
 
     /**
      * \brief Set a track event
-     * \param x, y, z coordinates of the start of the track
-     * \param u, v, w current direction of the particle
-     * \param particle_energy the energy of the particle prior to event
-     * \param particle_weight the weight of the particle prior to event
-     * \param track_length the length of the track
+     * \param[in] x, y, z coordinates of the start of the track
+     * \param[in] u, v, w current direction of the particle
+     * \param[in] particle_energy the energy of the particle prior to event
+     * \param[in] particle_weight the weight of the particle prior to event
+     * \param[in] track_length the length of the track
      * \return true if a track event was set; false otherwise
      */
     bool set_track_event(double x, double y, double z,
@@ -144,18 +144,31 @@ class TallyManager
 
     /**
      * \brief Call write_data() for all active DAGMC tallies
-     * \param num_histories the number of particle histories tracked
+     * \param[in] num_histories the number of particle histories tracked
      */
     void write_data(double num_histories);
 
+    // >>> TALLY DATA ACCESS METHODS
+
+    /**
+     * \brief get_tally_data(), get_error_data(), get_scratch_data()
+     * \param[in] tally_id the unique ID of the Tally for which data is needed
+     * \param[out] length the size of the data array
+     * \return pointer to the data array
+     *
+     * In general, the data arrays stored in each Tally should not be accessed
+     * directly.  However, if direct access to these data arrays are needed for
+     * parallel or other implementations, then these methods can be used to get
+     * a pointer to the underlying data stored within each Tally.
+     */
     double* get_tally_data(int tally_id, int& length);
     double* get_error_data(int tally_id, int& length);
     double* get_scratch_data(int tally_id, int& length);
+
     /**
-     * \brief Resets all of the mesh tally data arrays to zero
+     * \brief Resets all data arrays for all active Tally Observers
      */
     void zero_all_tally_data();
-
 
   private:
     // Keep a record of the currently active Tally Observers
@@ -168,10 +181,10 @@ class TallyManager
 
     /**
      * \brief Create a new DAGMC Tally
-     * \param tally_id the unique ID for this Tally
-     * \param tally_type the type of Tally to create
-     * \param energy_bin_bounds the boundaries of the energy bins
-     * \param options the set of options requested for this Tally
+     * \param[in] tally_id the unique ID for this Tally
+     * \param[in] tally_type the type of Tally to create
+     * \param[in] energy_bin_bounds the boundaries of the energy bins
+     * \param[in] options the set of options requested for this Tally
      *
      * Sets up TallyInput and calls the Tally factory method.
      */
@@ -182,13 +195,13 @@ class TallyManager
 
     /**
      * \brief Sets up TallyEvent
-     * \param x, y, z the position of the particle
-     * \param u, v, w current direction of the particle
-     * \param particle_energy the energy of the particle prior to event
-     * \param particle_weight the weight of the particle prior to event
-     * \param track_length the length of the track
-     * \param total_cross_section the macroscopic cross section for current cell
-     * \param cell_id the unique ID for the current geometric cell
+     * \param[in] x, y, z the position of the particle
+     * \param[in] u, v, w current direction of the particle
+     * \param[in] particle_energy the energy of the particle prior to event
+     * \param[in] particle_weight the weight of the particle prior to event
+     * \param[in] track_length the length of the track
+     * \param[in] total_cross_section the macroscopic cross section for current cell
+     * \param[in] cell_id the unique ID for the current geometric cell
      * \return true if an event was set; false otherwise
      */
     bool set_event(TallyEvent::EventType type,

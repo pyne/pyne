@@ -41,10 +41,10 @@ class KDENeighborhood
   public:
     /**
      * \brief Constructor
-     * \param event the tally event for which the neighborhood is desired
-     * \param bandwidth the bandwidth vector (hx, hy, hz)
-     * \param kd_tree the kd-tree containing all mesh nodes in the input mesh
-     * \param kd_tree_root the root of the kd-tree
+     * \param[in] event the tally event for which the neighborhood is desired
+     * \param[in] bandwidth the bandwidth vector (hx, hy, hz)
+     * \param[in] kd_tree the kd-tree containing all mesh nodes in the input mesh
+     * \param[in] kd_tree_root the root of the kd-tree
      */
     KDENeighborhood(const TallyEvent& event,
                     const moab::CartVect& bandwidth,
@@ -65,7 +65,7 @@ class KDENeighborhood
 
     /**
      * \brief checks if a point exists within this neighborhood region
-     * \param coords the coordinates of the point to check
+     * \param[in] coords the coordinates of the point to check
      * \return true if point does exist within this neighborhood region
      *
      * Currently only works for a rectangular neighborhood region.
@@ -74,7 +74,7 @@ class KDENeighborhood
 
     /**
      * \brief Determines if point lies within radius of cylindrical region
-     * \param point the calculation point to be tested
+     * \param[in] point the calculation point to be tested
      * \return true if point is inside the region, false otherwise
      *
      * Note that this method is only valid for track-based events.  If the
@@ -101,18 +101,18 @@ class KDENeighborhood
 
     /**
      * \brief Sets the neighborhood region for a collision event
-     * \param collision_point the location of the collision (x, y, z)
-     * \param bandwidth the bandwidth vector (hx, hy, hz)
+     * \param[in] collision_point the location of the collision (x, y, z)
+     * \param[in] bandwidth the bandwidth vector (hx, hy, hz)
      */
     void set_neighborhood(const moab::CartVect& collision_point,
                           const moab::CartVect& bandwidth);
 
     /**
      * \brief Sets the neighborhood region for a track-based event
-     * \param track_length the total length of the track segment
-     * \param start_point the starting location of the particle (xo, yo, zo)
-     * \param direction the direction the particle is traveling (uo, vo, wo)
-     * \param bandwidth the bandwidth vector (hx, hy, hz)
+     * \param[in] track_length the total length of the track segment
+     * \param[in] start_point the starting location of the particle (xo, yo, zo)
+     * \param[in] direction the direction the particle is traveling (uo, vo, wo)
+     * \param[in] bandwidth the bandwidth vector (hx, hy, hz)
      */
     void set_neighborhood(double track_length,
                           const moab::CartVect& start_point,

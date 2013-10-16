@@ -1,5 +1,6 @@
 // MCNP5/dagmc/TrackLengthMeshTally.cpp
 
+#include <cassert>
 #include <iostream>
 #include <sstream>
 #include <cmath> 
@@ -400,7 +401,7 @@ void TrackLengthMeshTally::compute_score(const TallyEvent& event)
 // needs to be distinguished
 void TrackLengthMeshTally::end_history () 
 {
-  MeshTally::end_history();
+  Tally::end_history();
   if( !conformality.empty() ){ last_cell = -1; } 
 }
 //---------------------------------------------------------------------------//

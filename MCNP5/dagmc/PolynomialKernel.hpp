@@ -47,8 +47,8 @@ class PolynomialKernel : public KDEKernel
   public:
     /**
      * \brief Constructor
-     * \param s the level of smoothness of the polynomial kernel
-     * \param r defines a polynomial kernel of 2rth-order
+     * \param[in] s the level of smoothness of the polynomial kernel
+     * \param[in] r defines a polynomial kernel of 2rth-order
      */
     PolynomialKernel(unsigned int s, unsigned int r);
 
@@ -61,7 +61,7 @@ class PolynomialKernel : public KDEKernel
 
     /**
      * \brief Evaluate this polynomial kernel function K_2r,s
-     * \param u the value at which K_2r,s will be evaluated
+     * \param[in] u the value at which K_2r,s will be evaluated
      * \return K_2r,s(u)
      */
     virtual double evaluate(double u) const;
@@ -80,15 +80,15 @@ class PolynomialKernel : public KDEKernel
 
     /**
      * \brief Gets minimum number of quadrature points based on the ith moment
-     * \param i the index representing the ith moment function
+     * \param[in] i the index representing the ith moment function
      * \return number of quadrature points needed to integrate the ith moment
      */
     virtual int get_min_quadrature(unsigned int i) const;
 
     /**
      * \brief Integrates the ith moment function for this polynomial kernel
-     * \param a, b the lower and upper integration limits
-     * \param i the index representing the ith moment function
+     * \param[in] a, b the lower and upper integration limits
+     * \param[in] i the index representing the ith moment function
      * \return definite integral of the ith moment function for [a, b]
      */
     virtual double integrate_moment(double a, double b, unsigned int i) const;
@@ -119,8 +119,8 @@ class PolynomialKernel : public KDEKernel
 
     /**
      * \brief Evaluates the Pochhammer symbol
-     * \param x the value for which to evaluate the Pochhammer symbol
-     * \param n any non-negative integer (n >= 0)
+     * \param[in] x the value for which to evaluate the Pochhammer symbol
+     * \param[in] n any non-negative integer (n >= 0)
      * \return (x)_n
      *
      * Computes (x)_n = x(x + 1)(x + 2)...(x + n - 1) where (x)_0 = 1.
@@ -129,7 +129,7 @@ class PolynomialKernel : public KDEKernel
 
     /**
      * \brief Evaluates the factorial function
-     * \param n any non-negative integer (n >=0)
+     * \param[in] n any non-negative integer (n >=0)
      * \return n!
      *
      * Computes n! = n(n-1)(n-2)...(2)(1) where 0! = 1.

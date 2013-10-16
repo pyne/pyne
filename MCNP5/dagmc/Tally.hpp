@@ -3,10 +3,10 @@
 #ifndef DAGMC_TALLY_HPP
 #define DAGMC_TALLY_HPP
 
-#include <cassert>
 #include <map>
 #include <string>
 #include <vector>
+
 #include "TallyData.hpp"
 
 // Forward declare because it's only referenced here
@@ -49,7 +49,7 @@ struct TallyInput
  *
  * Tally is an abstract Base class that defines the variables and methods
  * needed to implement a generic Tally for use in Monte Carlo particle
- * codes.  All Derived classes must implement the following
+ * codes.  All Derived classes must implement the following methods
  *
  *     1) compute_score(const TallyEvent& event)
  *     2) end_history()
@@ -57,6 +57,11 @@ struct TallyInput
  *
  * These three update methods are called by TallyManager (Observable) for all
  * Tally objects (Observers) that have been added.
+ *
+ * Note that Tally provides a default end_history() method that should be
+ * sufficient for most Tally objects that use the TallyData structure for
+ * storing their data.  If a different data structure is used, or alternative
+ * behavior is desired, then Derived classes can override this method.
  */
 //===========================================================================//
 class Tally
@@ -64,7 +69,7 @@ class Tally
   protected:
     /**
      * \brief Constructor
-     * \param input user-defined input parameters for this Tally
+     * \param[in] input user-defined input parameters for this Tally
      */
     Tally(const TallyInput& input);
 
@@ -74,12 +79,11 @@ class Tally
      */
     virtual ~Tally();
 
-
     // >>> FACTORY METHOD
 
     /**
      * \brief Creates a Tally based on the given TallyInput
-     * \param input user-defined input parameters for this Tally
+     * \param[in] input user-defined input parameters for this Tally
      * \return pointer to the new Tally that was created
      *
      * NOTE: if an invalid tally_type is requested, a NULL pointer is returned
@@ -90,7 +94,7 @@ class Tally
 
     /**
      * \brief Computes scores for this Tally based on the given TallyEvent
-     * \param event the parameters needed to compute the scores
+     * \param[in] event the parameters needed to compute the scores
      */
     virtual void compute_score(const TallyEvent& event) = 0;
 
@@ -101,7 +105,7 @@ class Tally
 
     /**
      * \brief Write results for this Tally
-     * \param num_histories the number of particle histories tracked
+     * \param[in] num_histories the number of particle histories tracked
      *
      * The write_data() method writes the current tally and relative standard
      * error results to std::out or an output file for this Tally, typically
@@ -110,7 +114,6 @@ class Tally
      */
     virtual void write_data(double num_histories) = 0;
 
-
   protected:
     /// Input data defined by user for this tally
     TallyInput input_data;
@@ -118,8 +121,8 @@ class Tally
     /// All of the tally data for this tally
     TallyData *data;
 
-  /// The purpose of this is to allow TallyManager to use the data
-  friend class TallyManager;
+    /// The purpose of this is to allow TallyManager to use the data
+    friend class TallyManager;
 };
 
 #endif // DAGMC_TALLY_HPP

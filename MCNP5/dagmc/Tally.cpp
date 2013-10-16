@@ -1,5 +1,6 @@
 // MCNP5/dagmc/Tally.cpp
 
+#include <cassert>
 #include <iostream>
 
 #include "Tally.hpp"
@@ -13,6 +14,7 @@ Tally::Tally(const TallyInput& input)
     : input_data(input), data(NULL)
 {
     bool total_energy_bin = true;
+
     // determine total number of energy bins requested
     int num_energy_bins = input_data.energy_bin_bounds.size();
     assert(num_energy_bins >= 2);
@@ -26,7 +28,6 @@ Tally::Tally(const TallyInput& input)
 
     data = new TallyData(num_energy_bins, total_energy_bin); 
 }
-
 //---------------------------------------------------------------------------//
 // DESTRUCTOR
 //---------------------------------------------------------------------------//
@@ -34,7 +35,6 @@ Tally::~Tally()
 {
    delete data;
 }
-
 //---------------------------------------------------------------------------//
 // FACTORY METHOD
 //
@@ -94,12 +94,12 @@ Tally *Tally::create_tally(const TallyInput& input)
     return newTally;
 }
 //---------------------------------------------------------------------------//
-// PROTECTED METHODS
+// PUBLIC INTERFACE
 //---------------------------------------------------------------------------//
-
 void Tally::end_history()
 {
     data->end_history();
 }
 //---------------------------------------------------------------------------//
+
 // end of MCNP5/dagmc/Tally.cpp

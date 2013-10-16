@@ -1,10 +1,9 @@
 # CMAKE build script for MeshTally testing
 
 PROJECT(MeshTallyUnitTests)
-CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
+CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
 
 # FIND_PACKAGE(GTest REQUIRED PATHS ${GTEST_DIR})
-
 ADD_SUBDIRECTORY(gtest/gtest-1.7.0)
 
 # Where to look for includes
@@ -41,9 +40,9 @@ ADD_LIBRARY(meshtally
 
 # set libraries
 SET(LIBRARIES
-	    gtest
-	gtest_main
-	 pthread
+    gtest
+    gtest_main
+    pthread
     meshtally
     ${MOAB_HOME}/lib/libMOAB.so
 )
