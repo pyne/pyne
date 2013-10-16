@@ -122,15 +122,34 @@ def test_get_divs():
 #############################################
 #Test mesh arithematic for Mesh and StatMesh
 #############################################
+
+
+def arithematic_setup():
+    mesh_1 = Mesh(structured_coords=[[-1,0,1],[-1,0,1],[0,1]], structured=True)
+    volumes1 = list(mesh_1.structured_iterate_hex("xyz"))
+    volumes2 = list(mesh_1.structured_iterate_hex("xyz"))
+    flux_tag = mesh_1.mesh.createTag("flux", 1, float)
+    error_tag = mesh_1.mesh.createTag("flux_error", 1, float)
+    flux_data = [1.0, 2.0, 3.0, 4.0]
+    error_data = [0.1, 0.2, 0.3, 0.4]
+    flux_tag[volumes1] = flux_data
+    error_tag[volumes2] = error_data
+
+    mesh_2 = Mesh(structured_coords=[[-1,0,1],[-1,0,1],[0,1]], structured=True)
+    volumes1 = list(mesh_2.structured_iterate_hex("xyz"))
+    volumes2 = list(mesh_2.structured_iterate_hex("xyz"))
+    flux_tag = mesh_2.mesh.createTag("flux", 1, float)
+    error_tag = mesh_2.mesh.createTag("flux_error", 1, float)
+    flux_data = [1.1, 2.2, 3.3, 4.4]
+    error_data = [0.1, 0.2, 0.3, 0.4]
+    flux_tag[volumes1] = flux_data
+    error_tag[volumes2] = error_data
+
+
+@with_setup(arithematic_setup)
 def test_add_mesh():
-    mesh1 = Mesh(mesh_file="files_mesh_test/test_mesh_2x2x1_1.h5m", 
-                         structured=True)
-    mesh2 = Mesh(mesh_file="files_mesh_test/test_mesh_2x2x1_2.h5m", 
-                         structured=True)
     mesh1.add(mesh2)
-
     exp_res = [2.1, 4.2, 6.3, 8.4]
-
     for i, vol in enumerate(list(mesh1.structured_iterate_hex("xyz"))):
         assert abs(mesh1.mesh.getTagHandle("flux")[vol] - exp_res[i]) < 1E-8
 
