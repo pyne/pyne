@@ -6,6 +6,7 @@
 #include <map>
 #include <fstream>
 #include <sstream>
+#include <cassert>
 
 #include "meshtal_funcs.h"
 #include "TallyManager.hpp"
