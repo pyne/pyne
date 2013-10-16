@@ -6,46 +6,11 @@ import StringIO
 import numpy as np
 import tables as tb
 
-from pyne import nuc_data, nucname, rxname
+from pyne import nuc_data
+from pyne import nucname
+from pyne import rxname
 from pyne.xs.models import partial_energy_matrix, group_collapse
 from pyne.endf import Library
-
-RX_TYPES = set(["", 'np *', 'a  *', 'h  *', '2p *', '3n *', 'd  *', 'np/d',
-                'na', '*', 'nd', 'g  *', '3n', 'np', 'nt', 't', 'nt *',
-                'x  *', '4n *', 'na *', 'nd *', 't  *', 'a', 'c', '2p', 'd',
-                'g', 'h', 'n', '4n', 'p', 'n  *', '2a', '2n *', 'x', '2n',
-                'nh *', 'p  *', 'f'])
-
-RX_TYPES_MAP = {
-    'neutron': 'n',
-    'gamma': 'g',
-    'alpha': 'a',
-    'proton': 'p',
-    'trit': 't',
-    'triton': 't',
-    'deut': 'd',
-    'deuteron': 'd',
-    'helion': 'h',
-    }
-
-def _munge_rx(rx):
-    """Munge the reaction rate name."""
-    if rx not in RX_TYPES:
-        while any([(key in rx) for key in RX_TYPES_MAP]):
-            for key, value in RX_TYPES_MAP.items():
-                rx = rx.replace(key, value)
-
-    if '_x' in rx:
-        if len(rx) == 3:
-            rx = rx.replace('_x', '  *')
-        else:
-            rx = rx.replace('_x', ' *')
-
-    if rx not in RX_TYPES:
-        msg = "the reaction '{rx}' is not valid.".format(rx=rx)
-        raise IndexError(msg)
-    return rx
-
 
 class DataSource(object):
     """Base cross section data source.
@@ -159,7 +124,7 @@ class DataSource(object):
         nuc : int or str
             A nuclide.
         rx : int or str
-            Reaction key ('gamma', 'alpha', 'p', etc.) or MT number.
+            Reaction id or name.
         temp : float, optional
             Temperature [K] of material, defaults to 300.0.
 
@@ -169,6 +134,8 @@ class DataSource(object):
             Source cross section data, length src_ngroups.
 
         """
+        nuc = nucname.id(nuc)
+        rx = rxname.id(rx)
         rxkey = (nuc, rx, temp)
         if rxkey not in self.rxcache:
             self.rxcache[rxkey] = self._load_reaction(nuc, rx, temp)
@@ -185,7 +152,7 @@ class DataSource(object):
         nuc : int or str
             A nuclide.
         rx : int or str
-            Reaction key ('gamma', 'alpha', 'p', etc.) or MT number.
+            Reaction id or name.
         temp : float, optional
             Temperature [K] of material, defaults to 300.0.
         src_phi_g : array-like, optional
@@ -272,8 +239,20 @@ class SimpleDataSource(DataSource):
         Keyword arguments to be sent to base class.
 
     """
-    _rx_avail = set(['t', 's', 'e', 'i', 'a', 'gamma', 'f', 'alpha', 'proton', 
-                     'deut', 'trit', '2n', '3n', '4n'])
+    _rx_avail = {rxname.id('total'): 't', 
+                 rxname.id('scattering'): 's', 
+                 rxname.id('elastic'): 'e', 
+                 rxname.id('inelastic'): 'i', 
+                 rxname.id('absorption'): 'a', 
+                 rxname.id('gamma'): 'gamma', 
+                 rxname.id('fission'): 'f', 
+                 rxname.id('alpha'): 'alpha', 
+                 rxname.id('proton'): 'proton', 
+                 rxname.id('deut'): 'deut', 
+                 rxname.id('trit'): 'trit', 
+                 rxname.id('z_2n'): '2n', 
+                 rxname.id('z_3n'): '3n', 
+                 rxname.id('z_4n'): '4n'}
 
     def __init__(self, **kwargs):
         super(SimpleDataSource, self).__init__(**kwargs)
@@ -290,11 +269,10 @@ class SimpleDataSource(DataSource):
         self.src_group_struct = np.array([14.0, 1.0, 2.53E-8, 0.0], dtype='float64')
 
     def _load_reaction(self, nuc, rx, temp=300.0):
-        nuc = nucname.id(nuc)
         if rx not in self._rx_avail:
             return None
         cond = "nuc == {0}".format(nuc)
-        sig = 'sigma_' + rx
+        sig = 'sigma_' + self._rx_avail[rx]
         with tb.openFile(nuc_data, 'r') as f:
             simple_xs = f.root.neutron.simple_xs
             fteen = [row[sig] for row in simple_xs.fourteen_MeV.where(cond)]
@@ -381,6 +359,48 @@ class CinderDataSource(DataSource):
         Keyword arguments to be sent to base class.
 
     """
+    # 'h' stands for helion or 'He3'
+    _rx_avail = {rxname.id('np_1'): 'np *',
+                 rxname.id('a_1'): 'a  *', 
+                 rxname.id('He3_1'): 'h  *', 
+                 rxname.id('z_2p_1'): '2p *', 
+                 rxname.id('z_3n_1'): '3n *', 
+                 rxname.id('d_1'): 'd  *',
+                 rxname.id('npd'): 'np/d',
+                 rxname.id('na'): 'na', 
+                 rxname.id('excited'): '*', 
+                 rxname.id('nd'): 'nd', 
+                 rxname.id('gamma_1'): 'g  *', 
+                 rxname.id('z_3n'): '3n', 
+                 rxname.id('np'): 'np', 
+                 rxname.id('nt'): 'nt', 
+                 rxname.id('t'): 't', 
+                 rxname.id('nt_1'): 'nt *',
+                 rxname.id('z_4n_1'): '4n *', 
+                 rxname.id('na_1'): 'na *', 
+                 rxname.id('nd_1'): 'nd *', 
+                 rxname.id('t_1'): 't  *', 
+                 rxname.id('a'): 'a', 
+                 rxname.id('z_2p'): '2p', 
+                 rxname.id('d'): 'd',
+                 rxname.id('gamma'): 'g', 
+                 rxname.id('He3'): 'h', 
+                 rxname.id('n'): 'n', 
+                 rxname.id('z_4n'): '4n', 
+                 rxname.id('p'): 'p', 
+                 rxname.id('n_1'): 'n  *', 
+                 rxname.id('z_2a'): '2a', 
+                 rxname.id('z_2n_1'): '2n *', 
+                 rxname.id('z_2n'): '2n',
+                 rxname.id('nHe3_1'): 'nh *', 
+                 rxname.id('p_1'): 'p  *', 
+                 # not real or unique absorption reactions
+                 #rxname.id(''): "", 
+                 #rxname.id(''): 'x', 
+                 #rxname.id(''): 'x  *',
+                 #rxname.id(''): 'c', 
+                 #rxname.id('fission'): 'f',
+                 }
 
     def __init__(self, **kwargs):
         super(CinderDataSource, self).__init__(**kwargs)
@@ -399,19 +419,23 @@ class CinderDataSource(DataSource):
         return self._exists
 
     def _load_reaction(self, nuc, rx, temp=300.0):
-        nuc = nucname.id(nuc)
-        rx = _munge_rx(rx)
+        fissrx = rxname.id('fission')
+        absrx = rxname.id('absorption')
 
         # Set query condition
-        if rx == 'f':
+        if rx in self._rx_avail:
+            cond = "(from_nuc == {0}) & (reaction_type == '{1}')"
+            cond = cond.format(nuc, self._rx_avail[rx])
+        elif rx == fissrx:
             cond = 'nuc == {0}'.format(nuc)
-        elif rx in RX_TYPES:
-            cond = "(from_nuc == {0}) & (reaction_type == '{1}')".format(nuc, rx)
+        elif rx == absrx:
+            cond = "(from_nuc == {0}) & (reaction_type != 'c')".format(nuc)
         else:
             return None
 
+        # read & collapse data
         with tb.openFile(nuc_data, 'r') as f:
-            node = f.root.neutron.cinder_xs.fission if rx == 'f' else \
+            node = f.root.neutron.cinder_xs.fission if rx == fissrx else \
                    f.root.neutron.cinder_xs.absorption
             rows = [np.array(row['xs']) for row in node.where(cond)]
 
@@ -420,74 +444,15 @@ class CinderDataSource(DataSource):
         elif 1 < len(rows):
             rows = np.array(rows)
             rxdata = rows.sum(axis=0)
-        elif 0 == len(rows) and (rx == 'a'):
-            # in case absorption doesn't exist, we compute it
-            fdata = self._load_reaction(nuc, 'f')
-            cond = "(from_nuc == {0}) & (reaction_type != 'c')".format(nuc)
-            with tb.openFile(nuc_data, 'r') as f:
-                node = f.root.neutron.cinder_xs.absorption
-                rows = np.array([row['xs'] for row in node.where(cond)])
-            if 0 == len(rows) and fdata is None:
-                rxdata = None
-            else:
-                rxdata = rows.sum(axis=0)
-                if fdata is not None:
-                    rxdata += fdata
         else:
             rxdata = None
+
+        # add fission data to absorption
+        if rx == absrx:
+            fdata = self._load_reaction(nuc, fissrx)
+            if fdata is not None:
+                rxdata = fdata if rxdata is None else rxdata + fdata
         return rxdata
-
-
-# Dictionary matching products with MT#'s
-EAF_RX_MAP = {         'x': '50',      'c': '1010',    'f': '180',
-        'n': '40',      '2n': '160',    '3n': '170',    '4n': '370',
-        'na': '220',    '2na': '240',   'np': '280',    'n2a': '290',
-        'nd': '320',    'nt': '330',    'nh': '340',    'nhe3': '340',
-        'pd': '1150',   'np/d':None,
-        'g': '1020',
-        'p': '1030',    '2p': '1110',
-        'd': '1040',    't': '1050',    'h': '1060',    'he3': '1060',          
-        'a': '1070',    '2a': '1080',   
-        # metastable not supported yet
-        '3n *':None,   'd  *':None,   'n  *':None,   'g  *':None,
-        'np *':None,   'a  *':None,   'h  *':None,   '2p *':None,
-        'x  *':None,   '4n *':None,   'na *':None,   'nd *':None,
-        'nh *':None,   'p  *':None,   'nt *':None,   't  *':None,  
-        '2n *':None,   '*': None,
-        '3n_x':None,   'd_x':None,    'n_x':None,    'g_x':None,
-        'np_x':None,   'a_x':None,    'h_x':None,    '2p_x':None,
-        'x_x':None,    '4n_x':None,   'na_x':None,   'nd_x':None,
-        'nh_x':None,   'p_x':None,    'nt_x':None,   't_x':None,  
-        '2n_x':None,
-        # handling words
-        'neutron': '40',
-        'gamma': '1020', 
-        'alpha': '1070',
-        'proton': '1030',
-        'trit': '1050',
-        'triton': '1050',
-        'deut': '1040',
-        'deuteron': '1040',
-        'helion': '1060',
-        'neutron_x': None,
-        'gamma_x': None, 
-        'alpha_x': None,
-        'proton_x':None,
-        'trit_x': None,
-        'triton_x': None,
-        'deut_x': None,
-        'deuteron_x': None,
-        'helion_x': None,
-        }
-
-# list/set of the MT#s included in the EAF data
-EAF_RX = set(['1020', '1021', '1022', '1030', '1031', '1032', '1040', 
-                     '1041', '1042', '1050', '1051', '1052', '1060', '1061',
-                     '1062', '1070', '1071', '1072', '1080', '1110', '1111',
-                     '1112', '160', '161', '162', '170', '171', '172', '180',
-                     '220', '221', '222', '240', '280', '281', '282', '290',
-                     '320', '321', '322', '330', '331', '332', '340', '341',
-                     '342', '370', '371', '40', '41', '42', '420'])
 
 class EAFDataSource(DataSource):
     """European Activation File cross section data source.  The relevant EAF
@@ -503,6 +468,61 @@ class EAFDataSource(DataSource):
     -----
     EAF data does not use temperature information.
     """
+
+    # MT#s included in the EAF data
+    _rx_avail = {rxname.id('gamma'): '1020', 
+                 rxname.id('gamma_1'): '1021', 
+                 rxname.id('gamma_2'): '1022', 
+                 rxname.id('p'): '1030', 
+                 rxname.id('p_1'): '1031',
+                 rxname.id('p_2'): '1032',
+                 rxname.id('d'): '1040', 
+                 rxname.id('d_1'): '1041', 
+                 rxname.id('d_2'): '1042',
+                 rxname.id('t'): '1050',
+                 rxname.id('t_1'): '1051',
+                 rxname.id('t_2'): '1052',
+                 rxname.id('He3'): '1060',
+                 rxname.id('He3_1'): '1061',
+                 rxname.id('He3_2'): '1062',
+                 rxname.id('a'): '1070',
+                 rxname.id('a_1'): '1071',
+                 rxname.id('a_2'): '1072',
+                 rxname.id('z_2a'): '1080',
+                 rxname.id('z_2p'): '1110',
+                 rxname.id('z_2p_1'): '1111',
+                 rxname.id('z_2p_2'): '1112',
+                 rxname.id('z_2n'): '160',
+                 rxname.id('z_2n_1'): '161',
+                 rxname.id('z_2n_2'): '162',
+                 rxname.id('z_3n'): '170',
+                 rxname.id('z_3n_1'): '171',
+                 rxname.id('z_3n_2'): '172',
+                 rxname.id('fission'): '180',
+                 rxname.id('na'): '220',
+                 rxname.id('na_1'): '221',
+                 rxname.id('na_2'): '222',
+                 rxname.id('z_2na'): '240',
+                 rxname.id('np'): '280',
+                 rxname.id('np_1'): '281',
+                 rxname.id('np_2'): '282',
+                 rxname.id('n2a'): '290',
+                 rxname.id('nd'): '320',
+                 rxname.id('nd_1'): '321',
+                 rxname.id('nd_2'): '322',
+                 rxname.id('nt'): '330',
+                 rxname.id('nt_1'): '331',
+                 rxname.id('nt_2'): '332',
+                 rxname.id('nHe3'): '340',
+                 rxname.id('nHe3_1'): '341',
+                 rxname.id('nHe3_2'): '342',
+                 rxname.id('z_4n'): '370',
+                 rxname.id('z_4n_1'): '371',
+                 rxname.id('n'): '40',
+                 rxname.id('n_1'): '41',
+                 rxname.id('n_2'): '42',
+                 rxname.id('z_3np'): '420',
+                 }
 
     def __init__(self, **kwargs):
         super(EAFDataSource, self).__init__(**kwargs)
@@ -521,47 +541,31 @@ class EAFDataSource(DataSource):
         return self._exists
 
     def _load_reaction(self, nuc, rx, temp=300.0):
-        """ 
-        Note: EAF data does not use temperature information (temp)
+        """Loads reaction specific data for EAF.
 
         Parameters
         ----------
         nuc : int
-            Nuclide in id form.
-        rx : int or str 
-            Reaction MT # in nnnm form.
-            OR:
-            Reaction key: 'gamma', 'alpha', 'p', etc.
-
-        See Also
-        --------
-        EAF_RX : list
-            List of valid MT #s in the EAF data.
-        EAF_RX_MAP : dict
-            Dictionary for converting string reaction identifiers to MT #s.
+            Nuclide id.
+        rx : int 
+            Reaction id.
+        
+        Note
+        ----
+        EAF data does not use temperature information (temp).
 
         """
-        nuc = nucname.id(nuc)
+        absrx = rxname.id('absorption')
 
-        # Munging the rx to an MT#
-        try:
-            int(rx)
-        except ValueError:
-            try:
-                rx = EAF_RX_MAP[rx]
-            except KeyError:
-                pass
-
-        # Check if usable rx #
-        if rx is None:
+        if rx in self._rx_avail:
+            cond = "(nuc_zz == {0}) & (rxnum == '{1}')".format(nuc, self._rx_avail[rx])
+        elif rx == absrx:
+            cond = "(nuc_zz == {0})".format(nuc)            
+        else:
             return None
-        if str(rx) not in EAF_RX:
-            msg = "the reaction '{rx}' is not valid.".format(rx=rx)
-            raise IndexError(msg)
 
         # Grab data
         with tb.openFile(nuc_data, 'r') as f:
-            cond = "(nuc_zz == {0}) & (rxnum == '{1}')".format(nuc, rx)
             node = f.root.neutron.eaf_xs.eaf_xs
             rows = [np.array(row['xs']) for row in node.where(cond)]
 
