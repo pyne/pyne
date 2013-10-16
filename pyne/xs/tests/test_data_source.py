@@ -34,10 +34,10 @@ def test_cinder_sigma_f():
         return
     with tb.openFile(nuc_data, 'r') as f:
         sigma_f_n_U235 = np.array(f.root.neutron.cinder_xs.fission[28]['xs'])
-    obs = cinderds.reaction('U235', 'f')
+    obs = cinderds.reaction('U235', 'fission')
     assert_array_equal(sigma_f_n_U235, obs)
-    assert_equal(id(obs), id(cinderds.reaction('U235', 'f')))
-    assert_not_equal(id(obs), id(cinderds.reaction(922350, 'f')))
+    assert_equal(id(obs), id(cinderds.reaction('U235', 'fission')))
+    assert_equal(id(obs), id(cinderds.reaction(922350, 'fission')))
 
 
 def test_cinder_sigma_a():
@@ -45,16 +45,16 @@ def test_cinder_sigma_a():
         return
     with tb.openFile(nuc_data, 'r') as f:
         sigma_a_n_H1 = np.array(f.root.neutron.cinder_xs.absorption[0]['xs'])
-    obs = cinderds.reaction(10010, 'a')
+    obs = cinderds.reaction(10010, 'absorption')
     assert_array_equal(sigma_a_n_H1, obs)
-    assert_equal(id(obs), id(cinderds.reaction(10010, 'a')))
-    assert_not_equal(id(obs), id(cinderds.reaction('H1', 'a')))
+    assert_equal(id(obs), id(cinderds.reaction(10010, 'absorption')))
+    assert_equal(id(obs), id(cinderds.reaction('H1', 'absorption')))
 
 
 def test_cinder_sigma_f_n1():
     if not cinderds.exists:
         return
-    observed = cinderds.reaction(922350, 'f')
+    observed = cinderds.reaction(922350, 'fission')
     expected = np.array([1.74780000e+03,   1.09570000e+03,   8.54720000e+02,
                          8.21910000e+02,   5.96110000e+02,   6.55820000e+02,
                          4.85430000e+02,   5.24960000e+02,   4.01070000e+02,
@@ -82,7 +82,7 @@ def test_cinder_sigma_f_n1():
 def test_cinder_sigma_f_n2():
     if not cinderds.exists:
         return
-    observed = cinderds.reaction(10010, 'f')
+    observed = cinderds.reaction(10010, 'fission')
     expected = None
     assert_array_equal(observed, expected)
 
@@ -91,7 +91,7 @@ def test_get_sigma_a_n1():
     # Test example with one entry
     if not cinderds.exists:
         return
-    observed = cinderds.reaction(10010, 'a')
+    observed = cinderds.reaction(10010, 'absorption')
     expected = np.array([
          9.96360000e-01,   6.07160000e-01,   4.72250000e-01,
          3.99360000e-01,   3.52130000e-01,   3.18550000e-01,
@@ -121,7 +121,7 @@ def test_get_sigma_a_n2():
     # Test example with multiple entries but not that have reaction_type = 'c'
     if not cinderds.exists:
         return
-    observed = cinderds.reaction(10020, 'a')
+    observed = cinderds.reaction(10020, 'absorption')
     expected = np.array([
         0.       ,  0.       ,  0.       ,  0.       ,  0.       ,
         0.       ,  0.       ,  0.       ,  0.       ,  0.       ,
@@ -165,7 +165,7 @@ def test_get_sigma_a_n3():
     # Test example with multiple entries including one that has reaction_type = 'c'
     if not cinderds.exists:
         return
-    observed = cinderds.reaction(20030, 'a')
+    observed = cinderds.reaction(20030, 'absorption')
     expected = np.array([
         0.       ,  0.       ,  0.       ,  0.       ,  0.       ,
         0.       ,  0.       ,  0.       ,  0.       ,  0.       ,
@@ -231,7 +231,7 @@ def test_get_sigma_a_n4():
     if not cinderds.exists:
         return
     # Test that a zeros array is returned for an entry that is not in the table
-    observed = cinderds.reaction(10420, 'a')
+    observed = cinderds.reaction(10420, 'absorption')
     expected = None
     assert_array_equal(observed, expected)
 
@@ -247,27 +247,27 @@ def test_simple_sigma_f():
     if not simpleds.exists:
         return
     sigma_f_n_U235 = np.array([2.056, 1.235, 584.4])
-    obs = simpleds.reaction('U235', 'f')
+    obs = simpleds.reaction('U235', 'fission')
     assert_array_equal(sigma_f_n_U235, obs)
-    assert_equal(id(obs), id(simpleds.reaction('U235', 'f')))
-    assert_not_equal(id(obs), id(simpleds.reaction(922350, 'f')))
+    assert_equal(id(obs), id(simpleds.reaction('U235', 'fission')))
+    assert_equal(id(obs), id(simpleds.reaction(922350, 'fission')))
 
 
 def test_simple_sigma_a():
     if not simpleds.exists:
         return
     sigma_a_n_H1 = np.array([2.983E-5, 3.927E-5, 0.332])
-    obs = simpleds.reaction(10010, 'a')
+    obs = simpleds.reaction(10010, 'absorption')
     assert_array_almost_equal(sigma_a_n_H1, obs)
-    assert_equal(id(obs), id(simpleds.reaction(10010, 'a')))
-    assert_not_equal(id(obs), id(simpleds.reaction('H1', 'a')))
+    assert_equal(id(obs), id(simpleds.reaction(10010, 'absorption')))
+    assert_equal(id(obs), id(simpleds.reaction('H1', 'absorption')))
 
 
 def test_simple_not_in_table():
     if not simpleds.exists:
         return
     exp = None
-    obs = simpleds.reaction(10030, '4n')
+    obs = simpleds.reaction(10030, 'z_4n')
     assert_equal(obs, exp)
 
 
@@ -284,7 +284,7 @@ def test_simple_discretize_no_weights1():
         return
     dst_g = cinderds.src_group_struct
     simpleds.dst_group_struct = dst_g
-    obs = simpleds.discretize('U235', 'f')
+    obs = simpleds.discretize('U235', 'fission')
     mask = obs[:-1] <= obs[1:]
     assert_true((obs[mask][:-1] <= obs[mask][1:]).all())
     assert_true((obs[~mask][:-1] >= obs[~mask][1:]).all())
@@ -308,7 +308,7 @@ def test_simple_discretize_weights1():
     phi_g = np.ones(cinderds.src_ngroups, dtype=float)
     phi_g[:25] = 0.0
     simpleds.dst_group_struct = dst_g
-    obs = simpleds.discretize('U235', 'f', dst_phi_g=phi_g)
+    obs = simpleds.discretize('U235', 'fission', dst_phi_g=phi_g)
     assert_true((obs[:-1] <= obs[1:]).all())
     simpleds.dst_group_struct = None
 
@@ -324,7 +324,7 @@ def test_eaf_E_g():
 def test_eaf_valid_mtnum_RX():
     if not eafds.exists:
         return
-    observed = eafds.reaction(250550, '220')
+    observed = eafds.reaction(250550, '22')
     expected = [4.48860E-02, 2.89454E-02, 2.36589E-02, 1.61601E-02,
                 6.04350E-03, 3.65975E-03, 2.11363E-03, 1.14410E-03,
                 7.26727E-04, 4.03486E-04, 6.35067E-05, 3.15836E-05,
@@ -339,7 +339,7 @@ def test_eaf_valid_mtnum_RX():
 def test_eaf_invalid_mtnum_RX():
     if not eafds.exists:
         return
-    observed = eafds.reaction(250550, '240')
+    observed = eafds.reaction(250550, 24)
     expected = None
     assert_array_equal(observed, expected)
 
@@ -362,7 +362,7 @@ def test_eaf_valid_str_RX():
 def test_eaf_invalid_str_RX():
     if not eafds.exists:
         return
-    observed = eafds.reaction(10010, 'f')
+    observed = eafds.reaction(10010, 'fission')
     expected = None
     assert_array_equal(observed, expected)
 
