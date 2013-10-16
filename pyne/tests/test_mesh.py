@@ -227,7 +227,8 @@ def test_add_statmesh():
     statmesh1.add(statmesh2)
 
     exp_res = [2.1, 4.2, 6.3, 8.4]
-    exp_err = [0.070790803558659549, 0.1415816071173191, 0.21237241067597862, 0.28316321423463819]
+    exp_err = [0.070790803558659549, 0.1415816071173191, 
+               0.21237241067597862, 0.28316321423463819]
 
     for i, vol in enumerate(list(statmesh1.structured_iterate_hex("xyz"))):
         assert abs(statmesh1.mesh.getTagHandle("flux")[vol] - exp_res[i]) < 1E-8
@@ -241,7 +242,8 @@ def test_op_add_statmesh():
     statmesh3 = statmesh1 + statmesh2
 
     exp_res = [2.1, 4.2, 6.3, 8.4]
-    exp_err = [0.070790803558659549, 0.1415816071173191, 0.21237241067597862, 0.28316321423463819]
+    exp_err = [0.070790803558659549, 0.1415816071173191, 
+               0.21237241067597862, 0.28316321423463819]
 
     for i, vol in enumerate(list(statmesh3.structured_iterate_hex("xyz"))):
         assert abs(statmesh1.mesh.getTagHandle("flux")[vol] - exp_res[i]) < 1E-8
