@@ -1,7 +1,7 @@
 import os.path
 import itertools
 from operator import itemgetter
-from nose.tools import assert_true, assert_equal, assert_raises
+from nose.tools import assert_true, assert_equal, assert_raises, with_setup
 
 import numpy as np
 from itaps import iBase, iMesh, iMeshExtensions
@@ -120,11 +120,11 @@ def test_get_divs():
     assert_equal(sm.structured_get_divisions("z"), z)
 
 #############################################
-#Test mesh arithematic for Mesh and StatMesh
+#Test mesh arithmetic for Mesh and StatMesh
 #############################################
 
 
-def arithematic_setup():
+def arithmetic_setup():
     mesh_1 = Mesh(structured_coords=[[-1,0,1],[-1,0,1],[0,1]], structured=True)
     volumes1 = list(mesh_1.structured_iterate_hex("xyz"))
     volumes2 = list(mesh_1.structured_iterate_hex("xyz"))
@@ -134,6 +134,7 @@ def arithematic_setup():
     error_data = [0.1, 0.2, 0.3, 0.4]
     flux_tag[volumes1] = flux_data
     error_tag[volumes2] = error_data
+    mesh_1.mesh.save("mesh_1.h5m")
 
     mesh_2 = Mesh(structured_coords=[[-1,0,1],[-1,0,1],[0,1]], structured=True)
     volumes1 = list(mesh_2.structured_iterate_hex("xyz"))
@@ -144,20 +145,27 @@ def arithematic_setup():
     error_data = [0.1, 0.2, 0.3, 0.4]
     flux_tag[volumes1] = flux_data
     error_tag[volumes2] = error_data
+    mesh_2.mesh.save("mesh_2.h5m")
 
+def arithmetic_teardown():
+    os.system("rm -rf mesh_1.h5m mesh_2.h5m")
 
-@with_setup(arithematic_setup)
+@with_setup(arithmetic_setup, arithmetic_teardown)
 def test_add_mesh():
+    mesh1 = Mesh(mesh_file="mesh_1.h5m", 
+                         structured=True)
+    mesh2 = Mesh(mesh_file="mesh_2.h5m", 
+                         structured=True)
     mesh1.add(mesh2)
     exp_res = [2.1, 4.2, 6.3, 8.4]
     for i, vol in enumerate(list(mesh1.structured_iterate_hex("xyz"))):
         assert abs(mesh1.mesh.getTagHandle("flux")[vol] - exp_res[i]) < 1E-8
 
-
+@with_setup(arithmetic_setup, arithmetic_teardown)
 def test_op_add_mesh():
-    mesh1 = Mesh(mesh_file="files_mesh_test/test_mesh_2x2x1_1.h5m", 
+    mesh1 = Mesh(mesh_file="mesh_1.h5m", 
                          structured=True)
-    mesh2 = Mesh(mesh_file="files_mesh_test/test_mesh_2x2x1_2.h5m", 
+    mesh2 = Mesh(mesh_file="mesh_2.h5m", 
                          structured=True)
     mesh3 = mesh1 + mesh2
 
@@ -166,10 +174,11 @@ def test_op_add_mesh():
     for i, vol in enumerate(list(mesh3.structured_iterate_hex("xyz"))):
         assert abs(mesh1.mesh.getTagHandle("flux")[vol] - exp_res[i]) < 1E-8
 
+@with_setup(arithmetic_setup, arithmetic_teardown)
 def test_subtract_mesh():
-    mesh1 = Mesh(mesh_file="files_mesh_test/test_mesh_2x2x1_1.h5m", 
+    mesh1 = Mesh(mesh_file="mesh_1.h5m", 
                          structured=True)
-    mesh2 = Mesh(mesh_file="files_mesh_test/test_mesh_2x2x1_2.h5m", 
+    mesh2 = Mesh(mesh_file="mesh_2.h5m", 
                          structured=True)
     mesh1.sub(mesh2)
 
@@ -178,10 +187,11 @@ def test_subtract_mesh():
     for i, vol in enumerate(list(mesh1.structured_iterate_hex("xyz"))):
         assert abs(mesh1.mesh.getTagHandle("flux")[vol] - exp_res[i]) < 1E-8
 
+@with_setup(arithmetic_setup, arithmetic_teardown)
 def test_op_subtract_mesh():
-    mesh1 = Mesh(mesh_file="files_mesh_test/test_mesh_2x2x1_1.h5m", 
+    mesh1 = Mesh(mesh_file="mesh_1.h5m", 
                          structured=True)
-    mesh2 = Mesh(mesh_file="files_mesh_test/test_mesh_2x2x1_2.h5m", 
+    mesh2 = Mesh(mesh_file="mesh_2.h5m", 
                          structured=True)
     mesh3 = mesh1 - mesh2
 
@@ -190,10 +200,11 @@ def test_op_subtract_mesh():
     for i, vol in enumerate(list(mesh3.structured_iterate_hex("xyz"))):
         assert abs(mesh1.mesh.getTagHandle("flux")[vol] - exp_res[i]) < 1E-8
 
+@with_setup(arithmetic_setup, arithmetic_teardown)
 def test_multiply_mesh():
-    mesh1 = Mesh(mesh_file="files_mesh_test/test_mesh_2x2x1_1.h5m", 
+    mesh1 = Mesh(mesh_file="mesh_1.h5m", 
                          structured=True)
-    mesh2 = Mesh(mesh_file="files_mesh_test/test_mesh_2x2x1_2.h5m", 
+    mesh2 = Mesh(mesh_file="mesh_2.h5m", 
                          structured=True)
     mesh1.mul(mesh2)
 
@@ -202,10 +213,11 @@ def test_multiply_mesh():
     for i, vol in enumerate(list(mesh1.structured_iterate_hex("xyz"))):
         assert abs(mesh1.mesh.getTagHandle("flux")[vol] - exp_res[i]) < 1E-8
 
+@with_setup(arithmetic_setup, arithmetic_teardown)
 def test_op_multiply_mesh():
-    mesh1 = Mesh(mesh_file="files_mesh_test/test_mesh_2x2x1_1.h5m", 
+    mesh1 = Mesh(mesh_file="mesh_1.h5m", 
                          structured=True)
-    mesh2 = Mesh(mesh_file="files_mesh_test/test_mesh_2x2x1_2.h5m", 
+    mesh2 = Mesh(mesh_file="mesh_2.h5m", 
                          structured=True)
     mesh3 = mesh1 * mesh2
 
@@ -214,10 +226,11 @@ def test_op_multiply_mesh():
     for i, vol in enumerate(list(mesh3.structured_iterate_hex("xyz"))):
         assert abs(mesh1.mesh.getTagHandle("flux")[vol] - exp_res[i]) < 1E-8
 
+@with_setup(arithmetic_setup, arithmetic_teardown)
 def test_divide_mesh():
-    mesh1 = Mesh(mesh_file="files_mesh_test/test_mesh_2x2x1_1.h5m", 
+    mesh1 = Mesh(mesh_file="mesh_1.h5m", 
                          structured=True)
-    mesh2 = Mesh(mesh_file="files_mesh_test/test_mesh_2x2x1_2.h5m", 
+    mesh2 = Mesh(mesh_file="mesh_2.h5m", 
                          structured=True)
     mesh1.div(mesh2)
 
@@ -226,10 +239,11 @@ def test_divide_mesh():
     for i, vol in enumerate(list(mesh1.structured_iterate_hex("xyz"))):
         assert abs(mesh1.mesh.getTagHandle("flux")[vol] - exp_res[i]) < 1E-8
 
+@with_setup(arithmetic_setup, arithmetic_teardown)
 def test_op_divide_mesh():
-    mesh1 = Mesh(mesh_file="files_mesh_test/test_mesh_2x2x1_1.h5m", 
+    mesh1 = Mesh(mesh_file="mesh_1.h5m", 
                          structured=True)
-    mesh2 = Mesh(mesh_file="files_mesh_test/test_mesh_2x2x1_2.h5m", 
+    mesh2 = Mesh(mesh_file="mesh_2.h5m", 
                          structured=True)
     mesh3 = mesh1/mesh2
 
@@ -238,10 +252,11 @@ def test_op_divide_mesh():
     for i, vol in enumerate(list(mesh3.structured_iterate_hex("xyz"))):
         assert abs(mesh1.mesh.getTagHandle("flux")[vol] - exp_res[i]) < 1E-8
 
+@with_setup(arithmetic_setup, arithmetic_teardown)
 def test_add_statmesh():
-    statmesh1 = StatMesh(mesh_file="files_mesh_test/test_mesh_2x2x1_1.h5m", 
+    statmesh1 = StatMesh(mesh_file="mesh_1.h5m", 
                          structured=True)
-    statmesh2 = StatMesh(mesh_file="files_mesh_test/test_mesh_2x2x1_2.h5m", 
+    statmesh2 = StatMesh(mesh_file="mesh_2.h5m", 
                          structured=True)
     statmesh1.add(statmesh2)
 
@@ -253,10 +268,11 @@ def test_add_statmesh():
         assert abs(statmesh1.mesh.getTagHandle("flux")[vol] - exp_res[i]) < 1E-8
         assert abs(statmesh1.mesh.getTagHandle("flux_error")[vol] - exp_err[i]) < 1E-8
 
+@with_setup(arithmetic_setup, arithmetic_teardown)
 def test_op_add_statmesh():
-    statmesh1 = StatMesh(mesh_file="files_mesh_test/test_mesh_2x2x1_1.h5m", 
+    statmesh1 = StatMesh(mesh_file="mesh_1.h5m", 
                          structured=True)
-    statmesh2 = StatMesh(mesh_file="files_mesh_test/test_mesh_2x2x1_2.h5m", 
+    statmesh2 = StatMesh(mesh_file="mesh_2.h5m", 
                          structured=True)
     statmesh3 = statmesh1 + statmesh2
 
@@ -268,10 +284,11 @@ def test_op_add_statmesh():
         assert abs(statmesh1.mesh.getTagHandle("flux")[vol] - exp_res[i]) < 1E-8
         assert abs(statmesh1.mesh.getTagHandle("flux_error")[vol] - exp_err[i]) <1E-8
 
+@with_setup(arithmetic_setup, arithmetic_teardown)
 def test_subtract_statmesh():
-    statmesh1 = StatMesh(mesh_file="files_mesh_test/test_mesh_2x2x1_1.h5m", 
+    statmesh1 = StatMesh(mesh_file="mesh_1.h5m", 
                          structured=True)
-    statmesh2 = StatMesh(mesh_file="files_mesh_test/test_mesh_2x2x1_2.h5m", 
+    statmesh2 = StatMesh(mesh_file="mesh_2.h5m", 
                          structured=True)
     statmesh1.sub(statmesh2)
 
@@ -282,10 +299,11 @@ def test_subtract_statmesh():
         assert abs(statmesh1.mesh.getTagHandle("flux")[vol] - exp_res[i]) < 1E-8
         assert abs(statmesh1.mesh.getTagHandle("flux_error")[vol]- exp_err[i]) < 1E-8
 
+@with_setup(arithmetic_setup, arithmetic_teardown)
 def test_op_subtract_statmesh():
-    statmesh1 = StatMesh(mesh_file="files_mesh_test/test_mesh_2x2x1_1.h5m", 
+    statmesh1 = StatMesh(mesh_file="mesh_1.h5m", 
                          structured=True)
-    statmesh2 = StatMesh(mesh_file="files_mesh_test/test_mesh_2x2x1_2.h5m", 
+    statmesh2 = StatMesh(mesh_file="mesh_2.h5m", 
                          structured=True)
     statmesh3 = statmesh1 - statmesh2
 
@@ -296,10 +314,11 @@ def test_op_subtract_statmesh():
         assert abs(statmesh1.mesh.getTagHandle("flux")[vol] - exp_res[i]) < 1E-8
         assert abs(statmesh1.mesh.getTagHandle("flux_error")[vol] - exp_err[i]) < 1E-8
 
+@with_setup(arithmetic_setup, arithmetic_teardown)
 def test_multiply_statmesh():
-    statmesh1 = StatMesh(mesh_file="files_mesh_test/test_mesh_2x2x1_1.h5m", 
+    statmesh1 = StatMesh(mesh_file="mesh_1.h5m", 
                          structured=True)
-    statmesh2 = StatMesh(mesh_file="files_mesh_test/test_mesh_2x2x1_2.h5m", 
+    statmesh2 = StatMesh(mesh_file="mesh_2.h5m", 
                          structured=True)
     statmesh1.mul(statmesh2)
 
@@ -310,10 +329,11 @@ def test_multiply_statmesh():
         assert abs(statmesh1.mesh.getTagHandle("flux")[vol] - exp_res[i]) < 1E-8
         assert abs(statmesh1.mesh.getTagHandle("flux_error")[vol]- exp_err[i]) < 1E-8
 
+@with_setup(arithmetic_setup, arithmetic_teardown)
 def test_op_multiply_statmesh():
-    statmesh1 = StatMesh(mesh_file="files_mesh_test/test_mesh_2x2x1_1.h5m", 
+    statmesh1 = StatMesh(mesh_file="mesh_1.h5m", 
                          structured=True)
-    statmesh2 = StatMesh(mesh_file="files_mesh_test/test_mesh_2x2x1_2.h5m", 
+    statmesh2 = StatMesh(mesh_file="mesh_2.h5m", 
                          structured=True)
     statmesh3 = statmesh1 * statmesh2
 
@@ -324,10 +344,11 @@ def test_op_multiply_statmesh():
         assert abs(statmesh1.mesh.getTagHandle("flux")[vol] - exp_res[i]) < 1E-8
         assert abs(statmesh1.mesh.getTagHandle("flux_error")[vol] - exp_err[i]) < 1E-8
 
+@with_setup(arithmetic_setup, arithmetic_teardown)
 def test_divide_statmesh():
-    statmesh1 = StatMesh(mesh_file="files_mesh_test/test_mesh_2x2x1_1.h5m", 
+    statmesh1 = StatMesh(mesh_file="mesh_1.h5m", 
                          structured=True)
-    statmesh2 = StatMesh(mesh_file="files_mesh_test/test_mesh_2x2x1_2.h5m", 
+    statmesh2 = StatMesh(mesh_file="mesh_2.h5m", 
                          structured=True)
     statmesh1.div(statmesh2)
 
@@ -338,10 +359,11 @@ def test_divide_statmesh():
         assert abs(statmesh1.mesh.getTagHandle("flux")[vol] - exp_res[i]) < 1E-8
         assert abs(statmesh1.mesh.getTagHandle("flux_error")[vol]- exp_err[i]) < 1E-8
 
+@with_setup(arithmetic_setup, arithmetic_teardown)
 def test_op_divide_statmesh():
-    statmesh1 = StatMesh(mesh_file="files_mesh_test/test_mesh_2x2x1_1.h5m", 
+    statmesh1 = StatMesh(mesh_file="mesh_1.h5m", 
                          structured=True)
-    statmesh2 = StatMesh(mesh_file="files_mesh_test/test_mesh_2x2x1_2.h5m", 
+    statmesh2 = StatMesh(mesh_file="mesh_2.h5m", 
                          structured=True)
     statmesh3 = statmesh1/statmesh2
 
