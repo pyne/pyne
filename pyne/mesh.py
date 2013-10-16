@@ -173,25 +173,25 @@ class Mesh(object):
         """Adds the common tags of mesh_obj_2 to the mesh object.
         """
         tags = self.common_ve_tags(mesh_obj_2)
-        self = self._do_op_(mesh_obj_2, tags, "+")
+        self._do_op_(mesh_obj_2, tags, "+")
 
     def sub(self, mesh_obj_2):
         """Substracts the common tags of mesh_obj_2 to the mesh object.
         """
         tags = self.common_ve_tags(mesh_obj_2)
-        self = self._do_op_(mesh_obj_2, tags, "-")
+        self._do_op_(mesh_obj_2, tags, "-")
 
     def mul(self, mesh_obj_2):
         """Multiplies the common tags of mesh_obj_2 to the mesh object.
         """
         tags = self.common_ve_tags(mesh_obj_2)
-        self = self._do_op_(mesh_obj_2, tags, "*")
+        self._do_op_(mesh_obj_2, tags, "*")
 
     def div(self, mesh_obj_2):
         """Divides the common tags of mesh_obj_2 to the mesh object.
         """
         tags = self.common_ve_tags(mesh_obj_2)
-        self = self._do_op_(mesh_obj_2, tags, "/")
+        self._do_op_(mesh_obj_2, tags, "/")
 
     def _do_op_(self, mesh_obj_2, tags, op):
         """Private function to do mesh +, -, *, /.
@@ -514,5 +514,4 @@ class StatMesh(Mesh):
                             mesh_obj_2.mesh.getTagHandle(tag)[ve_2])
 
         return self
-
 
