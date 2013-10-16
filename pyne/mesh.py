@@ -170,25 +170,25 @@ class Mesh(object):
         """Adds the common tags of mesh_obj_2 to the mesh object.
         """
         tags = self.common_ve_tags(mesh_obj_2)
-        self.mesh = _do_op_(self, mesh_obj_2, tags, "+", isinstance(self, StatMesh))
+        self = _do_op_(self, mesh_obj_2, tags, "+", isinstance(self, StatMesh))
 
     def sub(self, mesh_obj_2):
         """Substracts the common tags of mesh_obj_2 to the mesh object.
         """
         tags = self.common_ve_tags(mesh_obj_2)
-        self.mesh = _do_op_(self, mesh_obj_2, tags, "-", isinstance(self, StatMesh))
+        self = _do_op_(self, mesh_obj_2, tags, "-", isinstance(self, StatMesh))
 
     def mul(self, mesh_obj_2):
         """Multiplies the common tags of mesh_obj_2 to the mesh object.
         """
         tags = self.common_ve_tags(mesh_obj_2)
-        self.mesh = _do_op_(self, mesh_obj_2, tags, "*", isinstance(self, StatMesh))
+        self = _do_op_(self, mesh_obj_2, tags, "*", isinstance(self, StatMesh))
 
     def div(self, mesh_obj_2):
         """Divides the common tags of mesh_obj_2 to the mesh object.
         """
         tags = self.common_ve_tags(mesh_obj_2)
-        self.mesh = _do_op_(self, mesh_obj_2, tags, "/", isinstance(self, StatMesh))
+        self = _do_op_(self, mesh_obj_2, tags, "/", isinstance(self, StatMesh))
 
 
     def common_ve_tags(self, mesh_obj_2):
@@ -449,10 +449,10 @@ def _do_op_(mesh_obj_1, mesh_obj_2, tags, op, stat = False):
            "*": lambda val_1, val_2: (val_1 * val_2),
            "/": lambda val_1, val_2: (val_1 / val_2)}
     if stat:
-        err_ops = {"+": lambda val_1, val_2, val_1_err, val_2_err: (1/(val_1 + val_2)*sqrt((val_1*val_1_err)**2 + (val_2*val_2_err)**2)), 
-                   "-": lambda val_1, val_2: val_1_err, val_2_err: (1/(val_1 - val_2)*sqrt((val_1*val_1_err)**2 + (val_2*val_2_err)**2)),
-                   "*": lambda val_1, val_2: (np.sqrt(val_1_err**2 + val_2_err**2)),
-                   "/": lambda val_1, val_2: (np.sqrt(val_1_err**2 + val_2_err**2))}
+        err_ops = {"+": lambda val_1, val_2, val_1_err, val_2_err: (1/(val_1 + val_2)*np.sqrt((val_1*val_1_err)**2 + (val_2*val_2_err)**2)), 
+                   "-": lambda val_1, val_2, val_1_err, val_2_err: (1/(val_1 - val_2)*np.sqrt((val_1*val_1_err)**2 + (val_2*val_2_err)**2)),
+                   "*": lambda val_1, val_2, val_1_err, val_2_err: (np.sqrt(val_1_err**2 + val_2_err**2)),
+                   "/": lambda val_1, val_2, val_1_err, val_2_err: (np.sqrt(val_1_err**2 + val_2_err**2))}
   
     # Exclude error tags in a case a StatMesh is mistakenly initialized as a
     # Mesh object.
@@ -464,12 +464,14 @@ def _do_op_(mesh_obj_1, mesh_obj_2, tags, op, stat = False):
         for ve_1, ve_2 in \
             zip(list(mesh_obj_1.mesh.iterate(iBase.Type.region, iMesh.Topology.all)),
                 list(mesh_obj_2.mesh.iterate(iBase.Type.region, iMesh.Topology.all))):
-            mesh_obj_1.mesh.getTagHandle(tag)[ve_1] = ops[op](mesh_obj_1.mesh.getTagHandle(tag)[ve_1], mesh_obj_2.mesh.getTagHandle(tag)[ve_2])
             if stat:
-                self.mesh.getTagHandle(tag + "_error")[ve_1] = error_ops[op](
-                    self.mesh.getTagHandle(tag)[ve_1], 
+                mesh_obj_1.mesh.getTagHandle(tag + "_error")[ve_1] = err_ops[op](
+                    mesh_obj_1.mesh.getTagHandle(tag)[ve_1], 
                     mesh_obj_2.mesh.getTagHandle(tag)[ve_2], 
-                    self.mesh.getTagHandle(tag + "_error")[ve_1], 
+                    mesh_obj_1.mesh.getTagHandle(tag + "_error")[ve_1], 
                     mesh_obj_2.mesh.getTagHandle(tag + "_error")[ve_2])
+
+            mesh_obj_1.mesh.getTagHandle(tag)[ve_1] = ops[op](mesh_obj_1.mesh.getTagHandle(tag)[ve_1], mesh_obj_2.mesh.getTagHandle(tag)[ve_2])
+
 
     return mesh_obj_1
