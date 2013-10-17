@@ -221,8 +221,8 @@ class Mesh(object):
 
         for tag in tags:
             for ve_1, ve_2 in \
-                zip(list(self.mesh.iterate(iBase.Type.region, iMesh.Topology.all)),
-                    list(other.mesh.iterate(iBase.Type.region, iMesh.Topology.all))):
+                zip(zip(iter(self.mesh.iterate(iBase.Type.region, iMesh.Topology.all))),
+                    zip(iter(other.mesh.iterate(iBase.Type.region, iMesh.Topology.all)))):
                 self.mesh.getTagHandle(tag)[ve_1] = \
                     _ops[op](self.mesh.getTagHandle(tag)[ve_1], 
                             other.mesh.getTagHandle(tag)[ve_2])
@@ -490,8 +490,8 @@ class StatMesh(Mesh):
 
         for tag in tags:
             for ve_1, ve_2 in \
-                zip(list(self.mesh.iterate(iBase.Type.region, iMesh.Topology.all)),
-                    list(other.mesh.iterate(iBase.Type.region, iMesh.Topology.all))):
+                zip(zip(iter(self.mesh.iterate(iBase.Type.region, iMesh.Topology.all))),
+                    zip(iter(other.mesh.iterate(iBase.Type.region, iMesh.Topology.all)))):
 
                 self.mesh.getTagHandle(tag + "_error")[ve_1] = err__ops[op](
                     self.mesh.getTagHandle(tag)[ve_1], 
