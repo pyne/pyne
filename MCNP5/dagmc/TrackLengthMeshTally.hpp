@@ -322,10 +322,9 @@ class TrackLengthMeshTally : public MeshTally
    * \param vector<EntityHandle> intersections list of the triangle entity handles that correspond to the intersections
    * \return void
    */
-  void compute_tracklengths(const TallyEvent& event,
+  void compute_tracklengths(const TallyEvent event,
 			    const std::vector<double> intersections,
 			    const std::vector<EntityHandle> triangles);
-
 
 };
 
