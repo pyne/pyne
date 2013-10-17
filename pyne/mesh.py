@@ -144,56 +144,56 @@ class Mesh(object):
             self.vertex_dims = list(self.dims[0:3]) \
                                + [x + 1 for x in self.dims[3:6]]
 
-    def __add__(self, mesh_obj_2):
-        """Adds the common tags of mesh_obj_2 and returns a new mesh object.
+    def __add__(self, other):
+        """Adds the common tags of other and returns a new mesh object.
         """
-        tags = self.common_ve_tags(mesh_obj_2)
-        return self._do_op_(mesh_obj_2, tags, "+")
+        tags = self.common_ve_tags(other)
+        return self._do_op(other, tags, "+")
 
-    def __sub__(self, mesh_obj_2):
-        """Subtracts the common tags of mesh_obj_2 and returns a new mesh object.
+    def __sub__(self, other):
+        """Subtracts the common tags of other and returns a new mesh object.
         """
-        tags = self.common_ve_tags(mesh_obj_2)
-        return self._do_op_(mesh_obj_2, tags, "-")
+        tags = self.common_ve_tags(other)
+        return self._do_op(other, tags, "-")
 
-    def __mul__(self, mesh_obj_2):
-        """Multiplies the common tags of mesh_obj_2 and returns a new mesh object.
+    def __mul__(self, other):
+        """Multiplies the common tags of other and returns a new mesh object.
         """
-        tags = self.common_ve_tags(mesh_obj_2)
-        return  self._do_op_(mesh_obj_2, tags, "*")
+        tags = self.common_ve_tags(other)
+        return  self._do_op(other, tags, "*")
 
-    def __div__(self, mesh_obj_2):
-        """Adds the common tags of mesh_obj_2 and returns a new mesh object.
+    def __div__(self, other):
+        """Adds the common tags of other and returns a new mesh object.
         """
-        tags = self.common_ve_tags(mesh_obj_2)
-        return self._do_op_(mesh_obj_2, tags, "/")
+        tags = self.common_ve_tags(other)
+        return self._do_op(other, tags, "/")
 
 
-    def add(self, mesh_obj_2):
-        """Adds the common tags of mesh_obj_2 to the mesh object.
+    def add(self, other):
+        """Adds the common tags of other to the mesh object.
         """
-        tags = self.common_ve_tags(mesh_obj_2)
-        self._do_op_(mesh_obj_2, tags, "+")
+        tags = self.common_ve_tags(other)
+        self._do_op(other, tags, "+")
 
-    def sub(self, mesh_obj_2):
-        """Substracts the common tags of mesh_obj_2 to the mesh object.
+    def sub(self, other):
+        """Substracts the common tags of other to the mesh object.
         """
-        tags = self.common_ve_tags(mesh_obj_2)
-        self._do_op_(mesh_obj_2, tags, "-")
+        tags = self.common_ve_tags(other)
+        self._do_op(other, tags, "-")
 
-    def mul(self, mesh_obj_2):
-        """Multiplies the common tags of mesh_obj_2 to the mesh object.
+    def mul(self, other):
+        """Multiplies the common tags of other to the mesh object.
         """
-        tags = self.common_ve_tags(mesh_obj_2)
-        self._do_op_(mesh_obj_2, tags, "*")
+        tags = self.common_ve_tags(other)
+        self._do_op(other, tags, "*")
 
-    def div(self, mesh_obj_2):
-        """Divides the common tags of mesh_obj_2 to the mesh object.
+    def div(self, other):
+        """Divides the common tags of other to the mesh object.
         """
-        tags = self.common_ve_tags(mesh_obj_2)
-        self._do_op_(mesh_obj_2, tags, "/")
+        tags = self.common_ve_tags(other)
+        self._do_op(other, tags, "/")
 
-    def _do_op_(self, mesh_obj_2, tags, op):
+    def _do_op(self, other, tags, op):
         """Private function to do mesh +, -, *, /.
         """
         ops = {"+": lambda val_1, val_2: (val_1 + val_2), 
@@ -210,20 +210,20 @@ class Mesh(object):
         for tag in tags:
             for ve_1, ve_2 in \
                 zip(list(self.mesh.iterate(iBase.Type.region, iMesh.Topology.all)),
-                    list(mesh_obj_2.mesh.iterate(iBase.Type.region, iMesh.Topology.all))):
+                    list(other.mesh.iterate(iBase.Type.region, iMesh.Topology.all))):
                 self.mesh.getTagHandle(tag)[ve_1] = \
                     ops[op](self.mesh.getTagHandle(tag)[ve_1], 
-                            mesh_obj_2.mesh.getTagHandle(tag)[ve_2])
+                            other.mesh.getTagHandle(tag)[ve_2])
 
         return self
 
 
-    def common_ve_tags(self, mesh_obj_2):
+    def common_ve_tags(self, other):
         """Returns the volume element tags in common between mesh_1 and mesh_2.
         """
         mesh_1_tags = self.mesh.getAllTags(list(self.mesh.iterate(
                                      iBase.Type.region, iMesh.Topology.all))[0])
-        mesh_2_tags = mesh_obj_2.mesh.getAllTags(list(mesh_obj_2.mesh.iterate(iBase.Type.region, iMesh.Topology.all))[0])
+        mesh_2_tags = other.mesh.getAllTags(list(other.mesh.iterate(iBase.Type.region, iMesh.Topology.all))[0])
         mesh_1_tags = [x.name for x in mesh_1_tags]
         mesh_2_tags = [x.name for x in mesh_2_tags]
         common_tags = []
@@ -471,7 +471,7 @@ class StatMesh(Mesh):
               structured=structured, structured_coords=structured_coords, 
               structured_set=structured_set)
 
-    def _do_op_(self, mesh_obj_2, tags, op):
+    def _do_op(self, other, tags, op):
         """Private function to do mesh +, -, *, /. Called by operater overloading
         functions.
         """
@@ -501,17 +501,17 @@ class StatMesh(Mesh):
         for tag in tags:
             for ve_1, ve_2 in \
                 zip(list(self.mesh.iterate(iBase.Type.region, iMesh.Topology.all)),
-                    list(mesh_obj_2.mesh.iterate(iBase.Type.region, iMesh.Topology.all))):
+                    list(other.mesh.iterate(iBase.Type.region, iMesh.Topology.all))):
 
                 self.mesh.getTagHandle(tag + "_error")[ve_1] = err_ops[op](
                     self.mesh.getTagHandle(tag)[ve_1], 
-                    mesh_obj_2.mesh.getTagHandle(tag)[ve_2], 
+                    other.mesh.getTagHandle(tag)[ve_2], 
                     self.mesh.getTagHandle(tag + "_error")[ve_1], 
-                    mesh_obj_2.mesh.getTagHandle(tag + "_error")[ve_2])
+                    other.mesh.getTagHandle(tag + "_error")[ve_2])
 
                 self.mesh.getTagHandle(tag)[ve_1] = \
                     ops[op](self.mesh.getTagHandle(tag)[ve_1], 
-                            mesh_obj_2.mesh.getTagHandle(tag)[ve_2])
+                            other.mesh.getTagHandle(tag)[ve_2])
 
         return self
 
