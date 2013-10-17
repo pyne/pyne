@@ -8,6 +8,23 @@ except ImportError:
     raise ImportError("The mesh module requires imports of iMesh, iBase, and"
           " iMeshExtensions from PyTAPS")
 
+# dictionary of lamba functions for mesh arithmetic
+_ops = {"+": lambda val_1, val_2: (val_1 + val_2), 
+        "-": lambda val_1, val_2: (val_1 - val_2),
+        "*": lambda val_1, val_2: (val_1 * val_2),
+        "/": lambda val_1, val_2: (val_1 / val_2)}
+
+err__ops = {"+": lambda val_1, val_2, val_1_err, val_2_err: \
+                 (1/(val_1 + val_2)*np.sqrt((val_1*val_1_err)**2 \
+                  + (val_2*val_2_err)**2)), 
+            "-": lambda val_1, val_2, val_1_err, val_2_err: \
+                 (1/(val_1 - val_2)*np.sqrt((val_1*val_1_err)**2 \
+                 + (val_2*val_2_err)**2)),
+            "*": lambda val_1, val_2, val_1_err, val_2_err: \
+                 (np.sqrt(val_1_err**2 + val_2_err**2)),
+                  "/": lambda val_1, val_2, val_1_err, val_2_err: \
+                 (np.sqrt(val_1_err**2 + val_2_err**2))}
+
 class MeshError(Exception):
     """Errors related to instantiating mesh objects and utilizing their methods.
     """
@@ -196,11 +213,6 @@ class Mesh(object):
     def _do_op(self, other, tags, op):
         """Private function to do mesh +, -, *, /.
         """
-        ops = {"+": lambda val_1, val_2: (val_1 + val_2), 
-               "-": lambda val_1, val_2: (val_1 - val_2),
-               "*": lambda val_1, val_2: (val_1 * val_2),
-               "/": lambda val_1, val_2: (val_1 / val_2)}
-
         # Exclude error tags in a case a StatMesh is mistakenly initialized as a
         # Mesh object.
         for tag in tags:
@@ -212,27 +224,22 @@ class Mesh(object):
                 zip(list(self.mesh.iterate(iBase.Type.region, iMesh.Topology.all)),
                     list(other.mesh.iterate(iBase.Type.region, iMesh.Topology.all))):
                 self.mesh.getTagHandle(tag)[ve_1] = \
-                    ops[op](self.mesh.getTagHandle(tag)[ve_1], 
+                    _ops[op](self.mesh.getTagHandle(tag)[ve_1], 
                             other.mesh.getTagHandle(tag)[ve_2])
 
         return self
 
 
     def common_ve_tags(self, other):
-        """Returns the volume element tags in common between mesh_1 and mesh_2.
+        """Returns the volume element tags in common between self and other.
         """
-        mesh_1_tags = self.mesh.getAllTags(list(self.mesh.iterate(
+        self_tags = self.mesh.getAllTags(list(self.mesh.iterate(
                                      iBase.Type.region, iMesh.Topology.all))[0])
-        mesh_2_tags = other.mesh.getAllTags(list(other.mesh.iterate(iBase.Type.region, iMesh.Topology.all))[0])
-        mesh_1_tags = [x.name for x in mesh_1_tags]
-        mesh_2_tags = [x.name for x in mesh_2_tags]
-        common_tags = []
+        other_tags = other.mesh.getAllTags(list(other.mesh.iterate(iBase.Type.region, iMesh.Topology.all))[0])
+        self_tags = set(x.name for x in self_tags)
+        other_tags = set(x.name for x in other_tags)
 
-        for tag in mesh_1_tags:
-             if tag in mesh_2_tags:
-                 common_tags.append(tag)
-
-        return common_tags
+        return list(self_tags.intersection(other_tags))
                            
     #Structured methods:
     def structured_get_vertex(self, i, j, k):
@@ -475,23 +482,6 @@ class StatMesh(Mesh):
         """Private function to do mesh +, -, *, /. Called by operater overloading
         functions.
         """
-
-        ops = {"+": lambda val_1, val_2: (val_1 + val_2), 
-               "-": lambda val_1, val_2: (val_1 - val_2),
-               "*": lambda val_1, val_2: (val_1 * val_2),
-               "/": lambda val_1, val_2: (val_1 / val_2)}
-
-        err_ops = {"+": lambda val_1, val_2, val_1_err, val_2_err: \
-                       (1/(val_1 + val_2)*np.sqrt((val_1*val_1_err)**2 \
-                       + (val_2*val_2_err)**2)), 
-                   "-": lambda val_1, val_2, val_1_err, val_2_err: \
-                       (1/(val_1 - val_2)*np.sqrt((val_1*val_1_err)**2 \
-                       + (val_2*val_2_err)**2)),
-                   "*": lambda val_1, val_2, val_1_err, val_2_err: \
-                       (np.sqrt(val_1_err**2 + val_2_err**2)),
-                   "/": lambda val_1, val_2, val_1_err, val_2_err: \
-                       (np.sqrt(val_1_err**2 + val_2_err**2))}
-  
         # Exclude error tags because result and error tags are treated simotaneously
         # so there is not need to include both in the tag list to iterate through.
         for tag in tags:
@@ -503,14 +493,14 @@ class StatMesh(Mesh):
                 zip(list(self.mesh.iterate(iBase.Type.region, iMesh.Topology.all)),
                     list(other.mesh.iterate(iBase.Type.region, iMesh.Topology.all))):
 
-                self.mesh.getTagHandle(tag + "_error")[ve_1] = err_ops[op](
+                self.mesh.getTagHandle(tag + "_error")[ve_1] = err__ops[op](
                     self.mesh.getTagHandle(tag)[ve_1], 
                     other.mesh.getTagHandle(tag)[ve_2], 
                     self.mesh.getTagHandle(tag + "_error")[ve_1], 
                     other.mesh.getTagHandle(tag + "_error")[ve_2])
 
                 self.mesh.getTagHandle(tag)[ve_1] = \
-                    ops[op](self.mesh.getTagHandle(tag)[ve_1], 
+                    _ops[op](self.mesh.getTagHandle(tag)[ve_1], 
                             other.mesh.getTagHandle(tag)[ve_2])
 
         return self
