@@ -148,6 +148,11 @@ TrackLengthMeshTally::TrackLengthMeshTally(const TallyInput& input)
    // reduce the loaded MOAB mesh set to include only 3D elements
    Range all_tets;
    ErrorCode rval = reduce_meshset_to_3D(mb, tally_mesh_set, all_tets);  
+   if(rval != MB_SUCCESS)
+     {
+       std::cout << "Failed to reduce meshset to 3d" << std::endl;
+       exit(1);
+     }
    assert (rval == MB_SUCCESS);
 
    // initialize MeshTally::tally_points to include all mesh cells
@@ -212,7 +217,8 @@ void TrackLengthMeshTally::compute_score(const TallyEvent& event)
 	  
 	  // ToDo:  fix fake ebin
 	  int ebin = 0;
-	  data->add_score_to_tally(tet, score, ebin);
+	  unsigned int tet_index = get_entity_index(tet);
+	  data->add_score_to_tally(tet_index, score, ebin);
 	  //	  found_crossing = true;
 	  return;
 	}
@@ -341,6 +347,11 @@ void TrackLengthMeshTally::write_data(double num_histories)
 
   Range all_tets;
   rval = mb->get_entities_by_dimension( tally_mesh_set, 3, all_tets );
+  if(rval != MB_SUCCESS )
+    {
+      std::cout << "Failed to get 3d entities" << std::endl;
+      exit(1);
+    }
   assert( rval == MB_SUCCESS );
 
   for( Range::const_iterator i=all_tets.begin(); i!=all_tets.end(); ++i){
@@ -446,7 +457,11 @@ void TrackLengthMeshTally::set_tally_meshset()
   // load the MOAB mesh data from the input file for this mesh tally
   moab::EntityHandle loaded_file_set;
   moab::ErrorCode rval = load_moab_mesh(mb, loaded_file_set);
-
+  if(rval != MB_SUCCESS)
+    {
+      std::cout << "Failed to load moab mesh" << std::endl;
+      exit(1);
+    }
   assert( rval == MB_SUCCESS ); 
 
   rval = mb->create_meshset( MESHSET_SET, tally_mesh_set );
@@ -500,6 +515,11 @@ void TrackLengthMeshTally::set_tally_meshset()
   else
   { // no user-specified tag filter
     rval = mb->unite_meshset( tally_mesh_set, loaded_file_set );
+    if(rval != MB_SUCCESS)
+      {
+	std::cout << "Failed to unite meshset" << std::endl;
+	exit(1);
+      }
     assert (rval == MB_SUCCESS);
   }
 } 
@@ -524,6 +544,11 @@ ErrorCode TrackLengthMeshTally::compute_barycentric_data(const Range& all_tets)
     const EntityHandle* verts;
     int num_verts;
     rval = mb->get_connectivity (tet, verts, num_verts);
+    if(rval != MB_SUCCESS)
+      {
+	std::cout << "Failed to get connectivity information" << std::endl;
+	exit(1);
+      }
     assert( rval == MB_SUCCESS );
     
     if( num_verts != 4 )
@@ -535,6 +560,11 @@ ErrorCode TrackLengthMeshTally::compute_barycentric_data(const Range& all_tets)
     
     CartVect p[4];
     rval = mb->get_coords (verts, 4, p[0].array());
+    if(rval != MB_SUCCESS)
+      {
+	std::cout << "Failed to get coordinate data" << std::endl;
+	exit(1);
+      }
     assert( rval == MB_SUCCESS );
 
     Matrix3 a( p[1]-p[0], p[2]-p[0], p[3]-p[0] );
@@ -546,7 +576,6 @@ ErrorCode TrackLengthMeshTally::compute_barycentric_data(const Range& all_tets)
 //---------------------------------------------------------------------------//
 void TrackLengthMeshTally::build_trees (Range& all_tets)
 {
-  moab::ErrorCode rval;
   // prepare to build KD tree and OBB tree
   Range all_tris;
   // get the triangles that belong to the mesh
@@ -572,10 +601,20 @@ bool TrackLengthMeshTally::point_in_tet(const CartVect& point,
   const EntityHandle* verts;
   int num_verts;
   rval = mb->get_connectivity( *tet, verts, num_verts );
+  if(rval != MB_SUCCESS)
+    {
+      std::cout << "Failed to get connectivity information" << std::endl;
+      exit(1);
+    }
   assert( rval == MB_SUCCESS );
   
   CartVect p0;
   rval = mb->get_coords( verts, 1, p0.array() );
+  if(rval != MB_SUCCESS)
+    {
+      std::cout << "Failed to get coordinate information" << std::endl;
+      exit(1);
+    }
   assert( rval == MB_SUCCESS );
 
   Matrix3& Ainverse = tet_baryc_data[ get_entity_index(*tet) ];
@@ -691,7 +730,7 @@ void TrackLengthMeshTally::sort_intersection_data(std::vector<double> &intersect
 }
 
 // function to compute the track lengths
-void TrackLengthMeshTally::compute_tracklengths(const TallyEvent& event, 
+void TrackLengthMeshTally::compute_tracklengths(const TallyEvent event, 
 						const std::vector<double> intersections,
 						const std::vector<EntityHandle> triangles)
 {
@@ -703,6 +742,7 @@ void TrackLengthMeshTally::compute_tracklengths(const TallyEvent& event,
   hit_point.push_back(event.position); // add the origin of the ray to the point to the list
 
   EntityHandle next_tet = 0;
+  // loop over all intersections
   for (unsigned int i = 0 ; i < intersections.size() ; i++) 
     {
       // hit point
@@ -732,7 +772,8 @@ void TrackLengthMeshTally::compute_tracklengths(const TallyEvent& event,
 	  
 	  // ToDo:  fix fake ebin
 	  int ebin = 0;
-	  data->add_score_to_tally(tet, score, ebin);
+	  unsigned int tet_index = get_entity_index(tet);
+	  data->add_score_to_tally(tet_index, score, ebin);
 
 	}
     }
@@ -759,7 +800,8 @@ void TrackLengthMeshTally::compute_tracklengths(const TallyEvent& event,
 	  
 	  // ToDo:  fix fake ebin
 	  int ebin = 0;
-	  data->add_score_to_tally(tet, score, ebin);
+	  unsigned int tet_index = get_entity_index(tet);
+	  data->add_score_to_tally(tet_index, score, ebin);
 
 	}
     }
