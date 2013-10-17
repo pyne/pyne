@@ -163,6 +163,11 @@ std::set<moab::EntityHandle> KDENeighborhood::points_in_box() const
     // find all leaves of the kd-tree within the given radius
     std::vector<moab::EntityHandle> leaves;
     moab::ErrorCode rval = moab::MB_SUCCESS;
+    if(rval != moab::MB_SUCCESS)
+      {
+	std::cout << "this can't fail" << std::endl;
+	exit(1);
+      }
 
     rval = kd_tree->leaves_within_distance(kd_tree_root, box_center, radius, leaves);
     assert(rval == moab::MB_SUCCESS);
