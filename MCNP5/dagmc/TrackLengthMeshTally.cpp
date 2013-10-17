@@ -158,8 +158,6 @@ TrackLengthMeshTally::TrackLengthMeshTally(const TallyInput& input)
    // initialize MeshTally::tally_points to include all mesh cells
    set_tally_points(all_tets);
    // build the kdtree
-   build_trees(all_tets);
-
    // Does not change all_tets
    rval = compute_barycentric_data(all_tets);
    assert (rval == MB_SUCCESS);
@@ -167,6 +165,9 @@ TrackLengthMeshTally::TrackLengthMeshTally(const TallyInput& input)
    // Perform tasks
    rval = setup_tags( mb );
    assert (rval == MB_SUCCESS);
+
+   build_trees(all_tets);
+
 }
 //---------------------------------------------------------------------------//
 // DESTRUCTOR
@@ -176,6 +177,8 @@ TrackLengthMeshTally::~TrackLengthMeshTally()
   delete mb;
   delete obb_tool;
 }
+
+
 
 //---------------------------------------------------------------------------//
 // DERIVED PUBLIC INTERFACE from Tally.hpp
@@ -223,110 +226,12 @@ void TrackLengthMeshTally::compute_score(const TallyEvent& event)
 	  return;
 	}
     }
-  
-  /*
-  double track_length; // track_length to add to the tet
-  CartVect hit_p; //position on the triangular face of the hit
-  std::vector<CartVect> hit_point; // array of all hit points
-  CartVect tet_centroid; // centroid position between intersect point
-  */
-
-  // copy the data from intersections and triangles to temporary array of structs for the
-  // purpose of sorting the intersection data
 
   // sort the intersection data
   sort_intersection_data(intersections,triangles);
   // compute the tracklengths
   compute_tracklengths(event,intersections,triangles);
 
-
-  /*
-  for ( int i = 0 ; i < intersections.size() ; i++ ) 
-    {
-      ray_data data;
-      data.intersect=intersections[i];
-      data.triangle=triangles[i];
-      hit_information.push_back(data);
-    }
-
-  // at some point the sort will be done by moab rather than by us
-  std::sort(hit_information.begin(), hit_information.end(), compare); // sort the intersections
-
-  // copy the sorted data back into array
-  for ( int i = 0 ; i < intersections.size() ; i++) 
-    {
-      intersections[i]=hit_information[i].intersect;
-      triangles[i]=hit_information[i].triangle;
-    }
-  */
-
-  /*
-  hit_point.push_back(event.position); // add the origin of the ray to the point to the list
-
-  EntityHandle next_tet = 0;
-  for (unsigned int i = 0 ; i < intersections.size() ; i++) 
-    {
-      // hit point
-      hit_p = (event.direction*intersections[i]) + event.position;
-      hit_point.push_back(hit_p); // add to list of hit points
-      tet_centroid = ((hit_point[i+1]-hit_point[i])/2.0)+hit_point[i]; // centre of the tet
-
-      // determine the tet that the point belongs to
-      EntityHandle tet = TrackLengthMeshTally::point_in_which_tet(tet_centroid);
-
-      if ( tet > 0 )
-	{
-	  if ( i != 0 ) // detrmine the track_length
-	    track_length = intersections[i]-intersections[i-1];
-	  else
-	    track_length = intersections[i];
-
-	  if (track_length < 0.0 )
-	    {
-	      std::cout << "!!! Negative Track Length !!!" << std::endl;
-	      std::cout << track_length << " " << intersections[i] << " " << intersections[i-1] << std::endl;
-	      std::cout << tet << " " << next_tet << std::endl;
-	    }
-
-	  double weight = event.particle_weight;
-	  double score = weight * track_length;
-	  
-	  // ToDo:  fix fake ebin
-	  int ebin = 0;
-	  data->add_score_to_tally(tet, score, ebin);
-	  found_crossing = true;
-
-	}
-    }
-
-  // it is possible that there is some tracklength left to allocate at the end, where the ray ends in the middle of a tet
-  // or the ray could end in free space
-  if ( intersections[intersections.size()-1] < event.track_length )
-    {
-      track_length = event.track_length-intersections[intersections.size()-1];
-      tet = TrackLengthMeshTally::remainder(event.position,event.direction,
-					   intersections[intersections.size()-1],
-					   track_length);
-      if (track_length < 0.0 )
-	{
-	  std::cout << "Negative Track Length!!" << std::endl;
-	  std::cout << track_length << " " << intersections[intersections.size()-1] << " " <<  event.track_length << std::endl;
-	  std::cout << tet << " " << next_tet << std::endl;
-	}
-      
-      if ( tet > 0 ) 
-	{
-	  double weight = event.particle_weight;
-	  double score = weight * track_length;
-	  
-	  // ToDo:  fix fake ebin
-	  int ebin = 0;
-	  data->add_score_to_tally(tet, score, ebin);
-	  found_crossing = true;
-	}
-    }
-
-  */
 
   return;
 }
@@ -746,19 +651,22 @@ void TrackLengthMeshTally::compute_tracklengths(const TallyEvent event,
   for (unsigned int i = 0 ; i < intersections.size() ; i++) 
     {
       // hit point
+      //      std::cout << "pos " << event.position << std::endl;
       hit_p = (event.direction*intersections[i]) + event.position;
       hit_point.push_back(hit_p); // add to list of hit points
       tet_centroid = ((hit_point[i+1]-hit_point[i])/2.0)+hit_point[i]; // centre of the tet
-
+      //      std::cout << "centroid " << tet_centroid << std::endl;
       // determine the tet that the point belongs to
       tet = TrackLengthMeshTally::point_in_which_tet(tet_centroid);
-
+      //      std::cout << tet << std::endl;
       if ( tet > 0 )
 	{
 	  if ( i != 0 ) // detrmine the track_length
 	    track_length = intersections[i]-intersections[i-1];
 	  else
 	    track_length = intersections[i];
+
+	  //  std::cout << tet << " " << track_length << " " << intersections[i] << std::endl;
 
 	  if (track_length < 0.0 )
 	    {
