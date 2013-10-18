@@ -326,6 +326,14 @@ class TrackLengthMeshTally : public MeshTally
 			    const std::vector<double> intersections,
 			    const std::vector<EntityHandle> triangles);
 
+  /** 
+   * \brief determine the score to add to the results
+   * \param tally event the tally event, direction, position etc
+   * \param double tracklength, the physical tracklength of the current history
+   * \return void
+   */
+  void determine_score(const TallyEvent event, double tracklength)
+
 };
 
 } // end namespace moab
