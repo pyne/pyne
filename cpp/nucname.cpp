@@ -214,6 +214,9 @@ bool pyne::nucname::isnuclide(std::string nuc)
   }
   catch(NotANuclide) {
     return false;
+  }
+  catch(IndeterminateNuclideForm) {
+    return false;
   };
   return isnuclide(n);
 };
@@ -230,6 +233,9 @@ bool pyne::nucname::isnuclide(int nuc)
     n = id(nuc);
   }
   catch(NotANuclide) {
+    return false;
+  }
+  catch(IndeterminateNuclideForm) {
     return false;
   };
   int zzz = n / 10000000;
