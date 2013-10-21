@@ -2,7 +2,8 @@
 from unittest import TestCase
 import nose 
 
-from nose.tools import assert_equal, assert_not_equal, assert_raises, raises, assert_in
+from nose.tools import assert_equal, assert_not_equal, assert_raises, raises, assert_in, \
+    assert_true, assert_false
 
 from pyne import nucname
 
@@ -326,6 +327,15 @@ def test_alara_to_id():
         if val is None:
             continue
         yield check_cases, nucname.alara_to_id, val, id
+
+
+def test_isnuclide():
+    are = [922350, 'U235']
+    arent = ['U3']
+    for nuc in are:
+        yield assert_true, nucname.isnuclide(nuc)
+    for nuc in arent:
+        yield assert_false, nucname.isnuclide(nuc)
 
 
 if __name__ == "__main__":
