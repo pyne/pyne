@@ -86,22 +86,6 @@ class Library(rx.RxLib):
             fh.close()
         return data
 
-    def _load_part(self, s):
-        """Read a section of the ENDF file into a NumPy array.
-
-        Parameters
-        -----------
-        s : string
-            The ENDF data to read in.
-
-        Returns
-        --------
-        data : np.array, 1d, float64
-            Returns a 1d float64 NumPy array.
-        """
-        data = fromendf_tok(s)
-        return data
-
     def _read_headers(self):
         opened_here = False
         if isinstance(self.fh, basestring):
@@ -885,7 +869,7 @@ class Library(rx.RxLib):
             s = fh.read(lines*81)
         if opened_here:
             fh.close
-        return self._load_part(s)
+        return fromendf_tok(s)
 
 class Evaluation(object):
     """

@@ -51,7 +51,7 @@ class DataSource(object):
     """Base cross section data source.
 
     This is an abstract class which provides default functionality when subclassed
-    and certain methods are overridden.  A data source should know how to find cross 
+    and certain methods are overridden.  A data source should know how to find cross
     section information for a given nuclide, reaction type, and temperature, if
     available.  If such data is not present for this source, then the source should
     return None.
@@ -60,7 +60,7 @@ class DataSource(object):
     on the users system.
 
     Finally, data sources distinguish between group structure information coming
-    from or for the source itself (src) and optional user-defined destination (dst) 
+    from or for the source itself (src) and optional user-defined destination (dst)
     group structure information.  This allows the data source to define how it wishes
     to discretize its data to the custom destination form.
 
@@ -175,7 +175,7 @@ class DataSource(object):
         return self.rxcache[rxkey]
 
     def discretize(self, nuc, rx, temp=300.0, src_phi_g=None, dst_phi_g=None):
-        """Discretizes the reaction channel from the source group structure to that 
+        """Discretizes the reaction channel from the source group structure to that
         of the destination weighted by the group fluxes.  This implemenation is only
         valid for multi-group data sources.  Non-multigroup data source should also
         override this method.
@@ -199,10 +199,10 @@ class DataSource(object):
             Destination cross section data, length dst_ngroups.
 
         """
-        src_phi_g = self.src_phi_g if src_phi_g is None else np.asarray(src_phi_g) 
+        src_phi_g = self.src_phi_g if src_phi_g is None else np.asarray(src_phi_g)
         src_sigma = self.reaction(nuc, rx, temp)
-        dst_sigma = None if src_sigma is None else group_collapse(src_sigma, 
-                                                        src_phi_g, dst_phi_g, 
+        dst_sigma = None if src_sigma is None else group_collapse(src_sigma,
+                                                        src_phi_g, dst_phi_g,
                                                         self._src_to_dst_matrix)
         return dst_sigma
 
@@ -272,7 +272,7 @@ class SimpleDataSource(DataSource):
         Keyword arguments to be sent to base class.
 
     """
-    _rx_avail = set(['t', 's', 'e', 'i', 'a', 'gamma', 'f', 'alpha', 'proton', 
+    _rx_avail = set(['t', 's', 'e', 'i', 'a', 'gamma', 'f', 'alpha', 'proton',
                      'deut', 'trit', '2n', '3n', '4n'])
 
     def __init__(self, **kwargs):
@@ -309,15 +309,15 @@ class SimpleDataSource(DataSource):
         return rxdata
 
     def discretize(self, nuc, rx, temp=300.0, src_phi_g=None, dst_phi_g=None):
-        """Discretizes the reaction channel from simple group structure to that 
-        of the destination weighted by the group fluxes.  Since the simple data 
+        """Discretizes the reaction channel from simple group structure to that
+        of the destination weighted by the group fluxes.  Since the simple data
         source consists of only thermal (2.53E-8 MeV), fission (1 MeV), and 14 MeV
         data points, the following piecewise functional form is assumed:
 
-        .. math::  
+        .. math::
 
-            \\sigma(E) = \\sigma(2.53E-8) \\sqrt{\\frac{2.53E-8}{E}} 
-            \\sigma(E) = \\frac{\sigma(14) - \\sigma(1)}{14 - 1} (E - 1) + \\sigma(1) 
+            \\sigma(E) = \\sigma(2.53E-8) \\sqrt{\\frac{2.53E-8}{E}}
+            \\sigma(E) = \\frac{\sigma(14) - \\sigma(1)}{14 - 1} (E - 1) + \\sigma(1)
 
         Parameters
         ----------
@@ -338,7 +338,7 @@ class SimpleDataSource(DataSource):
             Destination cross section data, length dst_ngroups.
 
         """
-        src_phi_g = self.src_phi_g if src_phi_g is None else np.asarray(src_phi_g) 
+        src_phi_g = self.src_phi_g if src_phi_g is None else np.asarray(src_phi_g)
         src_sigma = self.reaction(nuc, rx, temp)
         if src_sigma is None:
             return None
@@ -365,7 +365,7 @@ class SimpleDataSource(DataSource):
             self._dst_ngroups = 0
         else:
             self._dst_group_struct = np.asarray(dst_group_struct)
-            self._dst_centers = (self._dst_group_struct[1:] + 
+            self._dst_centers = (self._dst_group_struct[1:] +
                                  self._dst_group_struct[:-1])/2.0
             self._dst_ngroups = len(dst_group_struct) - 1
         self._src_to_dst_matrix = None
@@ -446,22 +446,22 @@ EAF_RX_MAP = {         'x': '50',      'c': '1010',    'f': '180',
         'pd': '1150',   'np/d':None,
         'g': '1020',
         'p': '1030',    '2p': '1110',
-        'd': '1040',    't': '1050',    'h': '1060',    'he3': '1060',          
-        'a': '1070',    '2a': '1080',   
+        'd': '1040',    't': '1050',    'h': '1060',    'he3': '1060',
+        'a': '1070',    '2a': '1080',
         # metastable not supported yet
         '3n *':None,   'd  *':None,   'n  *':None,   'g  *':None,
         'np *':None,   'a  *':None,   'h  *':None,   '2p *':None,
         'x  *':None,   '4n *':None,   'na *':None,   'nd *':None,
-        'nh *':None,   'p  *':None,   'nt *':None,   't  *':None,  
+        'nh *':None,   'p  *':None,   'nt *':None,   't  *':None,
         '2n *':None,   '*': None,
         '3n_x':None,   'd_x':None,    'n_x':None,    'g_x':None,
         'np_x':None,   'a_x':None,    'h_x':None,    '2p_x':None,
         'x_x':None,    '4n_x':None,   'na_x':None,   'nd_x':None,
-        'nh_x':None,   'p_x':None,    'nt_x':None,   't_x':None,  
+        'nh_x':None,   'p_x':None,    'nt_x':None,   't_x':None,
         '2n_x':None,
         # handling words
         'neutron': '40',
-        'gamma': '1020', 
+        'gamma': '1020',
         'alpha': '1070',
         'proton': '1030',
         'trit': '1050',
@@ -470,7 +470,7 @@ EAF_RX_MAP = {         'x': '50',      'c': '1010',    'f': '180',
         'deuteron': '1040',
         'helion': '1060',
         'neutron_x': None,
-        'gamma_x': None, 
+        'gamma_x': None,
         'alpha_x': None,
         'proton_x':None,
         'trit_x': None,
@@ -481,7 +481,7 @@ EAF_RX_MAP = {         'x': '50',      'c': '1010',    'f': '180',
         }
 
 # list/set of the MT#s included in the EAF data
-EAF_RX = set(['1020', '1021', '1022', '1030', '1031', '1032', '1040', 
+EAF_RX = set(['1020', '1021', '1022', '1030', '1031', '1032', '1040',
                      '1041', '1042', '1050', '1051', '1052', '1060', '1061',
                      '1062', '1070', '1071', '1072', '1080', '1110', '1111',
                      '1112', '160', '161', '162', '170', '171', '172', '180',
@@ -521,14 +521,14 @@ class EAFDataSource(DataSource):
         return self._exists
 
     def _load_reaction(self, nuc, rx, temp=300.0):
-        """ 
+        """
         Note: EAF data does not use temperature information (temp)
 
         Parameters
         ----------
         nuc : int
             Nuclide in zzaaam form.
-        rx : int or str 
+        rx : int or str
             Reaction MT # in nnnm form.
             OR:
             Reaction key: 'gamma', 'alpha', 'p', etc.
