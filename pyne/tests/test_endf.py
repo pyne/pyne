@@ -870,12 +870,12 @@ def test_int_loglog():
 
 def test_discretize():
     obs = ds.discretize(40000, 600, 40040)
-    exp = [test_int_hist(),
-           test_int_linlin(),
-           test_int_linlog(),
+    exp = [test_int_loglog(),
            test_int_loglin(),
-           test_int_loglog()]
-    assert_allclose(np.asarray(exp)[::-1], obs, rtol=1e-6)
+           test_int_linlog(),
+           test_int_linlin(),
+           test_int_hist()]
+    assert_allclose(np.asarray(exp), obs, rtol=1e-6)
 
 if __name__ == "__main__":
     nose.runmodule()
