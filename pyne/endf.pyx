@@ -25,7 +25,6 @@ np.import_array()
 
 from pyne cimport cpp_nucname
 
-import matplotlib.pyplot as plt
 from math import e
 
 from pyne import nucname
@@ -1973,9 +1972,6 @@ class ENDFTab2Record(object):
                 self.INT.append(INT)
                 line = line[22:]
             m = m + toRead
-
-    def plot(self):
-        plt.plot(self.x, self.y)
 
 class ENDFRecord(object):
     def __init__(self, fh):
