@@ -173,6 +173,21 @@ namespace rxname
   /// \name Child Functions
   /// \{
   /// Returns the child nuclide comming from a parent for a reaction channel.
+  /// \param nuc Nuclide after reaction occurs.  When \a nuc is
+  ///               an integer it must be in id form.
+  /// \param rx Input reaction specification, may be a reaction name, alternate name,
+  ///           an id, or an MT number.
+  /// \param z Flag for incident particle type.
+  ///          Particle flags are 'n', 'p', 'd', 't', 'He3', 'a', 'gamma', and 'decay'.
+  int parent(int nuc, unsigned int rx, std::string z="n");
+  int parent(int nuc, std::string rx, std::string z="n");
+  int parent(std::string nuc, unsigned int rx, std::string z="n");
+  int parent(std::string nuc, std::string rx, std::string z="n");
+  /// \}
+
+  /// \name Parent Functions
+  /// \{
+  /// Returns the parent nuclide comming for a child and a given reaction channel.
   /// \param nuc Initial target nuclide prior to reaction.  When \a nuc is
   ///            an integer it must be in id form.
   /// \param rx Input reaction specification, may be a reaction name, alternate name,
@@ -180,9 +195,9 @@ namespace rxname
   /// \param z Flag for incident particle type.
   ///          Particle flags are 'n', 'p', 'd', 't', 'He3', 'a', 'gamma', and 'decay'.
   int child(int nuc, unsigned int rx, std::string z="n");
-  //unsigned int id(int from_nuc, std::string to_nuc, std::string z="n");
-  //unsigned int id(std::string from_nuc, int to_nuc, std::string z="n");
-  //unsigned int id(std::string from_nuc, std::string to_nuc, std::string z="n");
+  int child(int nuc, std::string rx, std::string z="n");
+  int child(std::string nuc, unsigned int rx, std::string z="n");
+  int child(std::string nuc, std::string rx, std::string z="n");
   /// \}
 
   /// Custom exception for declaring a value not to be a valid reaction.  
