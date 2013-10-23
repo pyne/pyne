@@ -567,7 +567,8 @@ class EAFDataSource(DataSource):
         # Grab data
         with tb.openFile(nuc_data, 'r') as f:
             node = f.root.neutron.eaf_xs.eaf_xs
-            rows = [np.array(row['xs']) for row in node.where(cond)]
+            rows = [row['xs'] for row in node.where(cond)]
+            #rows = [np.array(row['xs']) for row in node.where(cond)]
 
         if len(rows) == 0:
             rxdata = None

@@ -9,7 +9,7 @@ from pyne import data
 from pyne import nucname
 from pyne import nuc_data
 from pyne.material import Material, from_atom_frac
-from pyne.xs.data_source import EAF_RX, NullDataSource, EAFDataSource
+from pyne.xs.data_source import NullDataSource, EAFDataSource
 from pyne.xs.cache import XSCache
 from pyne.xs.channels import sigma_a
 
@@ -133,10 +133,9 @@ class Transmuter(object):
             nuclide ids and values are float number densities for the coupled.
 
         """
-        partial = {}
         dest = self._get_destruction(nuc)
         A = np.zeros((1,1), float)
-        A[0,0] = -dest
+        A[0, 0] = -dest
         rootval = np.exp(-dest * self.t)
         partial = {nuc: rootval}
         self._traversal(nuc, A, partial)
@@ -159,8 +158,9 @@ class Transmuter(object):
             Destruction rate of the nuclide.
 
         """
-        sig_a = sigma_a(nuc, xs_cache=self.xs_cache)
-        d = utils.from_barns(sig_a[0], 'cm2') * self.xs_cache['phi_g'][0]
+        xs_chache = self.xs_cache
+        sig_a = sigma_a(nuc, xs_cache=xs_cache)
+        d = utils.from_barns(sig_a[0], 'cm2') * xs_cache['phi_g'][0]
         if decay:
             d += data.decay_const(nuc) 
         return d
@@ -181,17 +181,14 @@ class Transmuter(object):
             Keys are the neutron-reaction daughters of nuc in zzaaam format.
             Values are a NumPy array containing the EAF cross section data.
             (all Values should have size 175)
-            NOTE
-                Cross sections have been converted from units of b to units
-                of cm^2.
+            
+        Notes
+        -----
+        Cross sections have been converted from units of [barns] to [cm^2].
         """
-        eaf_numEntries = 175
-        barn_cm2 = 1e-24
-        fissionMT = 180
+        eaf_ngoups = 175
+        #barn_cm2 = 1e-24
         daugh_dict = {}
-        # Remove fission MT# (cannot handle)
-        if fissionMT in EAF_RX:
-            EAF_RX.remove(fissionMT)
         # Set working node that contains EAF cross sections
         node = table.root.neutron.eaf_xs.eaf_xs
         cond = "(nuc_zz == {0})".format(nuc)
@@ -204,10 +201,10 @@ class Transmuter(object):
             daugh = _convert_eaf(daughters[i])
             # Convert from barns to cm^2
             xs = all_xs[i] * barn_cm2
-            daugh_dict[daugh] = xs.reshape((eaf_numEntries, 1))
+            daugh_dict[daugh] = xs.reshape((eaf_ngroups, 1))
         return daugh_dict
 
-    def _traversal(self, nuc, A, out, _depth=0):
+    def _traversal(self, nuc, A, out, depth=0):
         """Nuclide transmutation traversal method.
 
         This method will traverse the reaction tree recursively, using a DFS
@@ -225,12 +222,12 @@ class Transmuter(object):
             nuclide. Keys are nuclide names in integer (zzaaam) form. Values are
             number densities for the coupled nuclide in float format.  This is 
             modified in place.
-        _depth : int
+        depth : int
             Current depth of traversal (root at 0). Should never be provided by user.
 
         """
         if self.log is not None:
-            self._log_tree(_depth, nuc, 1.0)
+            self._log_tree(depth, nuc, 1.0)
         prod_dict = {}
         # decay info
         lam = data.decay_const(nuc)
@@ -238,7 +235,7 @@ class Transmuter(object):
         for decay_child, branch_ratio in decay_branches.items():
             prod_dict[decay_child] = lam * branch_ratio
         # reaction daughters
-        daugh_dict = self._get_daughters(nuc, table)
+        daugh_dict = self._get_daughters(nuc)
         for decay_daugh in daugh_dict.keys():
             # Increment current production rate if already in dictionary
             if decay_daugh in prod_dict.keys():
@@ -258,12 +255,12 @@ class Transmuter(object):
             N_final = np.dot(eB, N0)
             # Log child
             if tree:
-                _tree_log(_depth+1, child, N_final[-1], tree)
+                _tree_log(depth+1, child, N_final[-1], tree)
             # Check against tolerance
             if _check_tol(N_final[-1], tol):
                 # Continue traversal
                 if tree is not None:
-                    out = _traversal(child,B,phi,t,table,out,tol,tree,_depth+1)
+                    out = _traversal(child,B,phi,t,table,out,tol,tree,depth+1)
                 else:
                     out = _traversal(child,B,phi,t,table,out,tol,tree,None)
             # On recursion exit or truncation, write data from this nuclide
@@ -272,7 +269,7 @@ class Transmuter(object):
             else:
                 out[child] = N_final[-1]
 
-    def _log_tree(self, depth, nuc, N):
+    def _log_tree(self, depth, nuc, numdens):
         """Logging method to track path of _traversal.
 
         Parameters
@@ -281,17 +278,18 @@ class Transmuter(object):
             Current depth of traversal (root at 0).
         nuc : nucname
             Current nuclide in traversal.
-        N : float
-            Current density of nuc.
+        numdens : float
+            Current number density of nuc.
         tree : File
             File to write tree log to.
 
         """
         # Don't print a zero density.
-        if N == 0.0:
+        if numdens == 0.0:
             return
         space = '   |'
-        entry = "{spacing}--> {name} {N}\n".format(spacing=depth * space, N=N,
+        entry = "{spacing}--> {name} {N}\n".format(spacing=depth*space, 
+                                                   numdens=numdens,
                                                    name=nucname.name(nuc))
         self.log.write(entry)
         self.log.flush()
