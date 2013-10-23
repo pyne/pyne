@@ -562,10 +562,12 @@ std::map<unsigned int, unsigned int> pyne::rxname::id_mt;
 std::map<unsigned int, unsigned int> pyne::rxname::mt_id;
 std::map<unsigned int, std::string> pyne::rxname::labels;
 std::map<unsigned int, std::string> pyne::rxname::docs;
-std::map<std::string, std::map<int, std::map<int, unsigned int> > > pyne::rxname::zadelta;
+std::map<std::string, std::map<int, std::map<int, unsigned int> > > pyne::rxname::offset_id;
+std::map<std::pair<std::string, unsigned int>, std::pair<int, int> > pyne::rxname::id_offset;
 
 void * pyne::rxname::_fill_maps()
 {
+  using std::make_pair;
   std::string rx;
   unsigned int rxid;
   unsigned int _mts [NUM_RX_NAMES] = {
@@ -2267,102 +2269,108 @@ void * pyne::rxname::_fill_maps()
   altnames["HE-3"] = name_id["He3"];
   altnames["*"] = name_id["excited"];
 
-  // set the nulcide difference mappings, zadelta
-  // zadelta[incident particle type "n", "p", ...][delta Z num][delta A num][rxid]
+  // set the nulcide difference mappings, offset_id
+  // offset_id[incident particle type "n", "p", ...][delta Z num][delta A num][rxid]
   // neutrons:
-  zadelta["n"][0][0] = name_id["scattering"];
-  zadelta["n"][0][1] = name_id["absorption"];
-  zadelta["n"][0][-1] = name_id["z_2n"];
-  zadelta["n"][0][-2] = name_id["z_3n"];
-  zadelta["n"][0][-3] = name_id["z_4n"];
-  zadelta["n"][-1][0] = name_id["p"];
-  zadelta["n"][-2][-1] = name_id["z_2p"];
-  zadelta["n"][-1][-1] = name_id["d"];
-  zadelta["n"][-1][-2] = name_id["t"];
-  zadelta["n"][-2][-2] = name_id["He3"];
-  zadelta["n"][-2][-3] = name_id["a"];
+  offset_id[make_pair("n", offset(0, 0))] = name_id["scattering"];
+  offset_id[make_pair("n", offset(0, 1))] = name_id["absorption"];
+  offset_id[make_pair("n", offset(0, -1))] = name_id["z_2n"];
+  offset_id[make_pair("n", offset(0, -2))] = name_id["z_3n"];
+  offset_id[make_pair("n", offset(0, -3))] = name_id["z_4n"];
+  offset_id[make_pair("n", offset(-1, 0))] = name_id["p"];
+  offset_id[make_pair("n", offset(-2, -1))] = name_id["z_2p"];
+  offset_id[make_pair("n", offset(-1, -1))] = name_id["d"];
+  offset_id[make_pair("n", offset(-1, -2))] = name_id["t"];
+  offset_id[make_pair("n", offset(-2, -2))] = name_id["He3"];
+  offset_id[make_pair("n", offset(-2, -3))] = name_id["a"];
   // proton:
-  zadelta["p"][0][0] = name_id["scattering"];
-  zadelta["p"][1][1] = name_id["absorption"];
-  zadelta["p"][1][0] = name_id["n"];
-  zadelta["p"][1][-1] = name_id["z_2n"];
-  zadelta["p"][1][-2] = name_id["z_3n"];
-  zadelta["p"][1][-3] = name_id["z_4n"];
-  zadelta["p"][-1][-1] = name_id["z_2p"];
-  zadelta["p"][0][-1] = name_id["d"];
-  zadelta["p"][0][-2] = name_id["t"];
-  zadelta["p"][-1][-2] = name_id["He3"];
-  zadelta["p"][-1][-3] = name_id["a"];
+  offset_id[make_pair("p", offset(0, 0))] = name_id["scattering"];
+  offset_id[make_pair("p", offset(1, 1))] = name_id["absorption"];
+  offset_id[make_pair("p", offset(1, 0))] = name_id["n"];
+  offset_id[make_pair("p", offset(1, -1))] = name_id["z_2n"];
+  offset_id[make_pair("p", offset(1, -2))] = name_id["z_3n"];
+  offset_id[make_pair("p", offset(1, -3))] = name_id["z_4n"];
+  offset_id[make_pair("p", offset(-1, -1))] = name_id["z_2p"];
+  offset_id[make_pair("p", offset(0, -1))] = name_id["d"];
+  offset_id[make_pair("p", offset(0, -2))] = name_id["t"];
+  offset_id[make_pair("p", offset(-1, -2))] = name_id["He3"];
+  offset_id[make_pair("p", offset(-1, -3))] = name_id["a"];
   // deuterium:
-  zadelta["d"][0][0] = name_id["scattering"];
-  zadelta["d"][1][2] = name_id["absorption"];
-  zadelta["d"][1][1] = name_id["n"];
-  zadelta["d"][1][0] = name_id["z_2n"];
-  zadelta["d"][1][-1] = name_id["z_3n"];
-  zadelta["d"][1][-2] = name_id["z_4n"];
-  zadelta["d"][0][1] = name_id["p"];
-  zadelta["d"][-1][0] = name_id["z_2p"];
-  zadelta["d"][0][-1] = name_id["t"];
-  zadelta["d"][-1][-1] = name_id["He3"];
-  zadelta["d"][-1][-2] = name_id["a"];
+  offset_id[make_pair("d", offset(0, 0))] = name_id["scattering"];
+  offset_id[make_pair("d", offset(1, 2))] = name_id["absorption"];
+  offset_id[make_pair("d", offset(1, 1))] = name_id["n"];
+  offset_id[make_pair("d", offset(1, 0))] = name_id["z_2n"];
+  offset_id[make_pair("d", offset(1, -1))] = name_id["z_3n"];
+  offset_id[make_pair("d", offset(1, -2))] = name_id["z_4n"];
+  offset_id[make_pair("d", offset(0, 1))] = name_id["p"];
+  offset_id[make_pair("d", offset(-1, 0))] = name_id["z_2p"];
+  offset_id[make_pair("d", offset(0, -1))] = name_id["t"];
+  offset_id[make_pair("d", offset(-1, -1))] = name_id["He3"];
+  offset_id[make_pair("d", offset(-1, -2))] = name_id["a"];
   // tritium:
-  zadelta["t"][0][0] = name_id["scattering"];
-  zadelta["t"][1][3] = name_id["absorption"];
-  zadelta["t"][1][2] = name_id["n"];
-  zadelta["t"][1][1] = name_id["z_2n"];
-  zadelta["t"][1][0] = name_id["z_3n"];
-  zadelta["t"][1][-1] = name_id["z_4n"];
-  zadelta["t"][0][2] = name_id["p"];
-  zadelta["t"][-1][1] = name_id["z_2p"];
-  zadelta["t"][0][1] = name_id["d"];
-  zadelta["t"][-1][0] = name_id["He3"];
-  zadelta["t"][-1][-1] = name_id["a"];
+  offset_id[make_pair("t", offset(0, 0))] = name_id["scattering"];
+  offset_id[make_pair("t", offset(1, 3))] = name_id["absorption"];
+  offset_id[make_pair("t", offset(1, 2))] = name_id["n"];
+  offset_id[make_pair("t", offset(1, 1))] = name_id["z_2n"];
+  offset_id[make_pair("t", offset(1, 0))] = name_id["z_3n"];
+  offset_id[make_pair("t", offset(1, -1))] = name_id["z_4n"];
+  offset_id[make_pair("t", offset(0, 2))] = name_id["p"];
+  offset_id[make_pair("t", offset(-1, 1))] = name_id["z_2p"];
+  offset_id[make_pair("t", offset(0, 1))] = name_id["d"];
+  offset_id[make_pair("t", offset(-1, 0))] = name_id["He3"];
+  offset_id[make_pair("t", offset(-1, -1))] = name_id["a"];
   // He3:
-  zadelta["He3"][0][0] = name_id["scattering"];
-  zadelta["He3"][2][3] = name_id["absorption"];
-  zadelta["He3"][2][2] = name_id["n"];
-  zadelta["He3"][2][1] = name_id["z_2n"];
-  zadelta["He3"][2][0] = name_id["z_3n"];
-  zadelta["He3"][2][-1] = name_id["z_4n"];
-  zadelta["He3"][1][2] = name_id["p"];
-  zadelta["He3"][0][1] = name_id["z_2p"];
-  zadelta["He3"][1][1] = name_id["d"];
-  zadelta["He3"][1][0] = name_id["t"];
-  zadelta["He3"][0][-1] = name_id["a"];
+  offset_id[make_pair("He3", offset(0, 0))] = name_id["scattering"];
+  offset_id[make_pair("He3", offset(2, 3))] = name_id["absorption"];
+  offset_id[make_pair("He3", offset(2, 2))] = name_id["n"];
+  offset_id[make_pair("He3", offset(2, 1))] = name_id["z_2n"];
+  offset_id[make_pair("He3", offset(2, 0))] = name_id["z_3n"];
+  offset_id[make_pair("He3", offset(2, -1))] = name_id["z_4n"];
+  offset_id[make_pair("He3", offset(1, 2))] = name_id["p"];
+  offset_id[make_pair("He3", offset(0, 1))] = name_id["z_2p"];
+  offset_id[make_pair("He3", offset(1, 1))] = name_id["d"];
+  offset_id[make_pair("He3", offset(1, 0))] = name_id["t"];
+  offset_id[make_pair("He3", offset(0, -1))] = name_id["a"];
   // alpha:
-  zadelta["a"][0][0] = name_id["scattering"];
-  zadelta["a"][2][4] = name_id["absorption"];
-  zadelta["a"][2][3] = name_id["n"];
-  zadelta["a"][2][2] = name_id["z_2n"];
-  zadelta["a"][2][1] = name_id["z_3n"];
-  zadelta["a"][2][0] = name_id["z_4n"];
-  zadelta["a"][1][3] = name_id["p"];
-  zadelta["a"][0][2] = name_id["z_2p"];
-  zadelta["a"][1][2] = name_id["d"];
-  zadelta["a"][1][1] = name_id["t"];
-  zadelta["a"][0][1] = name_id["He3"];
+  offset_id[make_pair("a", offset(0, 0))] = name_id["scattering"];
+  offset_id[make_pair("a", offset(2, 4))] = name_id["absorption"];
+  offset_id[make_pair("a", offset(2, 3))] = name_id["n"];
+  offset_id[make_pair("a", offset(2, 2))] = name_id["z_2n"];
+  offset_id[make_pair("a", offset(2, 1))] = name_id["z_3n"];
+  offset_id[make_pair("a", offset(2, 0))] = name_id["z_4n"];
+  offset_id[make_pair("a", offset(1, 3))] = name_id["p"];
+  offset_id[make_pair("a", offset(0, 2))] = name_id["z_2p"];
+  offset_id[make_pair("a", offset(1, 2))] = name_id["d"];
+  offset_id[make_pair("a", offset(1, 1))] = name_id["t"];
+  offset_id[make_pair("a", offset(0, 1))] = name_id["He3"];
   // gamma:
-  zadelta["gamma"][0][-1] = name_id["n"];
-  zadelta["gamma"][0][-2] = name_id["z_2n"];
-  zadelta["gamma"][0][-3] = name_id["z_3n"];
-  zadelta["gamma"][0][-4] = name_id["z_4n"];
-  zadelta["gamma"][-1][-1] = name_id["p"];
-  zadelta["gamma"][-2][-2] = name_id["z_2p"];
-  zadelta["gamma"][-1][-2] = name_id["d"];
-  zadelta["gamma"][-1][-3] = name_id["t"];
-  zadelta["gamma"][-2][-3] = name_id["He3"];
-  zadelta["gamma"][-2][-4] = name_id["a"];
+  offset_id[make_pair("gamma", offset(0, -1))] = name_id["n"];
+  offset_id[make_pair("gamma", offset(0, -2))] = name_id["z_2n"];
+  offset_id[make_pair("gamma", offset(0, -3))] = name_id["z_3n"];
+  offset_id[make_pair("gamma", offset(0, -4))] = name_id["z_4n"];
+  offset_id[make_pair("gamma", offset(-1, -1))] = name_id["p"];
+  offset_id[make_pair("gamma", offset(-2, -2))] = name_id["z_2p"];
+  offset_id[make_pair("gamma", offset(-1, -2))] = name_id["d"];
+  offset_id[make_pair("gamma", offset(-1, -3))] = name_id["t"];
+  offset_id[make_pair("gamma", offset(-2, -3))] = name_id["He3"];
+  offset_id[make_pair("gamma", offset(-2, -4))] = name_id["a"];
   // decay:
-  zadelta["decay"][0][-1] = name_id["n"];
-  zadelta["decay"][0][-2] = name_id["z_2n"];
-  zadelta["decay"][0][-3] = name_id["z_3n"];
-  zadelta["decay"][0][-4] = name_id["z_4n"];
-  zadelta["decay"][-1][-1] = name_id["p"];
-  zadelta["decay"][-2][-2] = name_id["z_2p"];
-  zadelta["decay"][-1][-2] = name_id["d"];
-  zadelta["decay"][-1][-3] = name_id["t"];
-  zadelta["decay"][-2][-3] = name_id["He3"];
-  zadelta["decay"][-2][-4] = name_id["a"];
+  offset_id[make_pair("decay", offset(0, -1))] = name_id["n"];
+  offset_id[make_pair("decay", offset(0, -2))] = name_id["z_2n"];
+  offset_id[make_pair("decay", offset(0, -3))] = name_id["z_3n"];
+  offset_id[make_pair("decay", offset(0, -4))] = name_id["z_4n"];
+  offset_id[make_pair("decay", offset(-1, -1))] = name_id["p"];
+  offset_id[make_pair("decay", offset(-2, -2))] = name_id["z_2p"];
+  offset_id[make_pair("decay", offset(-1, -2))] = name_id["d"];
+  offset_id[make_pair("decay", offset(-1, -3))] = name_id["t"];
+  offset_id[make_pair("decay", offset(-2, -3))] = name_id["He3"];
+  offset_id[make_pair("decay", offset(-2, -4))] = name_id["a"];
+
+  // child offsets
+  std::map<std::pair<std::string, int>, unsigned int>::iterator ioffid;
+  for (ioffid = offset_id.begin(); ioffid != offset_id.end(); ioffid++) {
+    id_offset[make_pair(ioffid->first.first, ioffid->second)] = ioffid->first.second;
+  };
 
 };
 void * pyne::rxname::_ = pyne::rxname::_fill_maps();
@@ -2427,17 +2435,17 @@ std::string pyne::rxname::name(int from_nuc, int to_nuc, std::string z)
   // This assumes nuclides are in id form
   int dz = (to_nuc/10000000) - (from_nuc/10000000);
   int da = ((to_nuc/10000)%1000) - ((from_nuc/10000)%1000);
-  if (0 == zadelta.count(z))
+  if (0 == offset_id.count(z))
     throw IndeterminateReactionForm("z=" + z, "???");
-  if (0 == zadelta[z].count(dz))
+  if (0 == offset_id[z].count(dz))
     throw IndeterminateReactionForm(pyne::to_str(from_nuc) + ", " + \
                                     pyne::to_str(to_nuc), "delta Z = " + \
                                     pyne::to_str(dz));
-  if (0 == zadelta[z][dz].count(da))
+  if (0 == offset_id[z][dz].count(da))
     throw IndeterminateReactionForm(pyne::to_str(from_nuc) + ", " + \
                                     pyne::to_str(to_nuc), "delta A = " + \
                                     pyne::to_str(da));
-  return id_name[zadelta[z][dz][da]];
+  return id_name[offset_id[make_pair(z, to_nuc - from_nuc)];
 };
 
 std::string pyne::rxname::name(std::string from_nuc, int to_nuc, std::string z)
@@ -2496,17 +2504,17 @@ unsigned int pyne::rxname::id(int from_nuc, int to_nuc, std::string z)
   // This assumes nuclides are in id form
   int dz = (to_nuc/10000000) - (from_nuc/10000000);
   int da = ((to_nuc/10000)%1000) - ((from_nuc/10000)%1000);
-  if (0 == zadelta.count(z))
+  if (0 == offset_id.count(z))
     throw IndeterminateReactionForm("z=" + z, "???");
-  if (0 == zadelta[z].count(dz))
+  if (0 == offset_id[z].count(dz))
     throw IndeterminateReactionForm(pyne::to_str(from_nuc) + ", " + \
                                     pyne::to_str(to_nuc), "delta Z = " + \
                                     pyne::to_str(dz));
-  if (0 == zadelta[z][dz].count(da))
+  if (0 == offset_id[z][dz].count(da))
     throw IndeterminateReactionForm(pyne::to_str(from_nuc) + ", " + \
                                     pyne::to_str(to_nuc), "delta A = " + \
                                     pyne::to_str(da));
-  return zadelta[z][dz][da];
+  return offset_id[z][dz][da];
 };
   
 unsigned int pyne::rxname::id(int from_nuc, std::string to_nuc, std::string z)
@@ -2682,3 +2690,32 @@ std::string pyne::rxname::doc(std::string from_nuc, std::string to_nuc, std::str
 {
   return docs[pyne::rxname::id(from_nuc, to_nuc, z)];
 };
+
+
+// ***********************
+// *** child functions ***
+// ***********************
+
+int pyne::rxname::child(int nuc, unsigned int rx, std::string z)
+{
+  // This assumes nuclides are in id form
+  std::pair<int, int> dza = child_offsets[std::make_pair(z, rx)];
+  int z = pyne::nucname::znum(nuc);
+  int a = pyne::nucname::anum(nuc);
+
+  int dz = (to_nuc/10000000) - (from_nuc/10000000);
+  int da = ((to_nuc/10000)%1000) - ((from_nuc/10000)%1000);
+  if (0 == offset_id.count(z))
+    throw IndeterminateReactionForm("z=" + z, "???");
+  if (0 == offset_id[z].count(dz))
+    throw IndeterminateReactionForm(pyne::to_str(from_nuc) + ", " + \
+                                    pyne::to_str(to_nuc), "delta Z = " + \
+                                    pyne::to_str(dz));
+  if (0 == offset_id[z][dz].count(da))
+    throw IndeterminateReactionForm(pyne::to_str(from_nuc) + ", " + \
+                                    pyne::to_str(to_nuc), "delta A = " + \
+                                    pyne::to_str(da));
+  return offset_id[z][dz][da];
+};
+  
+
