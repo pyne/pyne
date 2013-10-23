@@ -2269,7 +2269,7 @@ void * pyne::rxname::_fill_maps()
   altnames["HE-3"] = name_id["He3"];
   altnames["*"] = name_id["excited"];
 
-  // set the nulcide difference mappings, offset_id
+  // set the nuclide difference mappings, offset_id
   // offset_id[incident particle type "n", "p", ...][delta Z num][delta A num][rxid]
   // neutrons:
   offset_id[make_pair("n", offset(0, 0))] = name_id["scattering"];
