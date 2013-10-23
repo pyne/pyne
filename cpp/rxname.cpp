@@ -2433,19 +2433,11 @@ std::string pyne::rxname::name(unsigned int n)
 std::string pyne::rxname::name(int from_nuc, int to_nuc, std::string z)
 {
   // This assumes nuclides are in id form
-  int dz = (to_nuc/10000000) - (from_nuc/10000000);
-  int da = ((to_nuc/10000)%1000) - ((from_nuc/10000)%1000);
-  if (0 == offset_id.count(z))
-    throw IndeterminateReactionForm("z=" + z, "???");
-  if (0 == offset_id[z].count(dz))
-    throw IndeterminateReactionForm(pyne::to_str(from_nuc) + ", " + \
-                                    pyne::to_str(to_nuc), "delta Z = " + \
-                                    pyne::to_str(dz));
-  if (0 == offset_id[z][dz].count(da))
-    throw IndeterminateReactionForm(pyne::to_str(from_nuc) + ", " + \
-                                    pyne::to_str(to_nuc), "delta A = " + \
-                                    pyne::to_str(da));
-  return id_name[offset_id[make_pair(z, to_nuc - from_nuc)];
+  std::pair<std::string, int> key = std::make_pair(z, to_nuc - from_nuc);
+  if (0 == offset_id.count(key))
+    throw IndeterminateReactionForm("z=" + z + ", " + pyne::to_str(from_nuc) + \
+                                    ", " + pyne::to_str(to_nuc), "???");
+  return id_name[offset_id[key]];
 };
 
 std::string pyne::rxname::name(std::string from_nuc, int to_nuc, std::string z)
@@ -2502,19 +2494,11 @@ unsigned int pyne::rxname::id(std::string x)
 unsigned int pyne::rxname::id(int from_nuc, int to_nuc, std::string z)
 {
   // This assumes nuclides are in id form
-  int dz = (to_nuc/10000000) - (from_nuc/10000000);
-  int da = ((to_nuc/10000)%1000) - ((from_nuc/10000)%1000);
-  if (0 == offset_id.count(z))
-    throw IndeterminateReactionForm("z=" + z, "???");
-  if (0 == offset_id[z].count(dz))
-    throw IndeterminateReactionForm(pyne::to_str(from_nuc) + ", " + \
-                                    pyne::to_str(to_nuc), "delta Z = " + \
-                                    pyne::to_str(dz));
-  if (0 == offset_id[z][dz].count(da))
-    throw IndeterminateReactionForm(pyne::to_str(from_nuc) + ", " + \
-                                    pyne::to_str(to_nuc), "delta A = " + \
-                                    pyne::to_str(da));
-  return offset_id[z][dz][da];
+  std::pair<std::string, int> key = std::make_pair(z, to_nuc - from_nuc);
+  if (0 == offset_id.count(key))
+    throw IndeterminateReactionForm("z=" + z + ", " + pyne::to_str(from_nuc) + \
+                                    ", " + pyne::to_str(to_nuc), "???");
+  return offset_id[key];
 };
   
 unsigned int pyne::rxname::id(int from_nuc, std::string to_nuc, std::string z)
@@ -2696,26 +2680,54 @@ std::string pyne::rxname::doc(std::string from_nuc, std::string to_nuc, std::str
 // *** child functions ***
 // ***********************
 
-int pyne::rxname::child(int nuc, unsigned int rx, std::string z)
-{
+int pyne::rxname::child(int nuc, unsigned int rx, std::string z) {
   // This assumes nuclides are in id form
-  std::pair<int, int> dza = child_offsets[std::make_pair(z, rx)];
-  int z = pyne::nucname::znum(nuc);
-  int a = pyne::nucname::anum(nuc);
-
-  int dz = (to_nuc/10000000) - (from_nuc/10000000);
-  int da = ((to_nuc/10000)%1000) - ((from_nuc/10000)%1000);
-  if (0 == offset_id.count(z))
-    throw IndeterminateReactionForm("z=" + z, "???");
-  if (0 == offset_id[z].count(dz))
-    throw IndeterminateReactionForm(pyne::to_str(from_nuc) + ", " + \
-                                    pyne::to_str(to_nuc), "delta Z = " + \
-                                    pyne::to_str(dz));
-  if (0 == offset_id[z][dz].count(da))
-    throw IndeterminateReactionForm(pyne::to_str(from_nuc) + ", " + \
-                                    pyne::to_str(to_nuc), "delta A = " + \
-                                    pyne::to_str(da));
-  return offset_id[z][dz][da];
+  std::pair<std::string, unsigned int> key = std::make_pair(z, rx);
+  if (0 == id_offset.count(key))
+    throw IndeterminateReactionForm("z=" + z + ", rx=" + pyne::to_str(rx), "???");
+  int to_nuc = nuc + id_offset[key];
+  if (!pyne::nucname::isnuclide(to_nuc))
+    throw pyne::nucname::NotANuclide(nuc, to_nuc);
+  return to_nuc;
 };
-  
+
+int pyne::rxname::child(int nuc, std::string rx, std::string z) {
+  return child(nuc, id(rx), z);
+};
+
+int pyne::rxname::child(std::string nuc, unsigned int rx, std::string z) {
+  return child(pyne::nucname::id(nuc), rx, z);
+};
+
+int pyne::rxname::child(std::string nuc, std::string rx, std::string z) {
+  return child(pyne::nucname::id(nuc), id(rx), z);
+};
+
+
+// ************************
+// *** parent functions ***
+// ************************
+
+int pyne::rxname::parent(int nuc, unsigned int rx, std::string z) {
+  // This assumes nuclides are in id form
+  std::pair<std::string, unsigned int> key = std::make_pair(z, rx);
+  if (0 == id_offset.count(key))
+    throw IndeterminateReactionForm("z=" + z + ", rx=" + pyne::to_str(rx), "???");
+  int from_nuc = nuc - id_offset[key];
+  if (!pyne::nucname::isnuclide(from_nuc))
+    throw pyne::nucname::NotANuclide(from_nuc, nuc);
+  return from_nuc;
+};
+
+int pyne::rxname::parent(int nuc, std::string rx, std::string z) {
+  return parent(nuc, id(rx), z);
+};
+
+int pyne::rxname::parent(std::string nuc, unsigned int rx, std::string z) {
+  return parent(pyne::nucname::id(nuc), rx, z);
+};
+
+int pyne::rxname::parent(std::string nuc, std::string rx, std::string z) {
+  return parent(pyne::nucname::id(nuc), id(rx), z);
+};
 
