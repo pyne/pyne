@@ -5,6 +5,7 @@
 
 #ifndef _PYNE_RXNAME_
 #define _PYNE_RXNAME_
+#include <utility>
 #include <iostream>
 #include <string>
 #include <map>
@@ -40,13 +41,19 @@ namespace rxname
   extern std::map<unsigned int, std::string> labels;
   /// Mapping from reaction ids to documentation strings (long descriptions).
   extern std::map<unsigned int, std::string> docs;
-  /// Mapping from particle type, changes in Z number, and changes in A numbers 
-  /// to reaction ids.  
+  /// Mapping from particle type and offset pairs to reaction ids.  
   /// Particle flags are 'n', 'p', 'd', 't', 'He3', 'a', 'gamma', and 'decay'.
-  extern std::map<std::string, std::map<int, std::map<int, unsigned int> > > zadelta;
+  extern std::map<std::pair<std::string, int>, unsigned int> offset_id;
+  /// Mapping from particle type and reaction ids to offsets.
+  /// Particle flags are 'n', 'p', 'd', 't', 'He3', 'a', 'gamma', and 'decay'.
+  extern std::map<std::pair<std::string, unsigned int>, int> id_offset;
+
   /// A helper function to set the contents of the variables in this library.
   void * _fill_maps();  
   extern void * _;  ///< A dummy variable used when calling #_fill_maps().
+
+  /// A helper function to compute nuclide id offsets from z-, a-, and s- deltas
+  inline int offset(int dz, int da, int ds=0) {return dz*10000000 + da*10000 + ds;};
 
   /// \name Hash Functions
   /// \{
@@ -163,6 +170,35 @@ namespace rxname
   std::string doc(std::string from_nuc, std::string to_nuc, std::string z="n");
   /// \}
 
+  /// \name Child Functions
+  /// \{
+  /// Returns the child nuclide comming from a parent for a reaction channel.
+  /// \param nuc Nuclide after reaction occurs.  When \a nuc is
+  ///               an integer it must be in id form.
+  /// \param rx Input reaction specification, may be a reaction name, alternate name,
+  ///           an id, or an MT number.
+  /// \param z Flag for incident particle type.
+  ///          Particle flags are 'n', 'p', 'd', 't', 'He3', 'a', 'gamma', and 'decay'.
+  int parent(int nuc, unsigned int rx, std::string z="n");
+  int parent(int nuc, std::string rx, std::string z="n");
+  int parent(std::string nuc, unsigned int rx, std::string z="n");
+  int parent(std::string nuc, std::string rx, std::string z="n");
+  /// \}
+
+  /// \name Parent Functions
+  /// \{
+  /// Returns the parent nuclide comming for a child and a given reaction channel.
+  /// \param nuc Initial target nuclide prior to reaction.  When \a nuc is
+  ///            an integer it must be in id form.
+  /// \param rx Input reaction specification, may be a reaction name, alternate name,
+  ///           an id, or an MT number.
+  /// \param z Flag for incident particle type.
+  ///          Particle flags are 'n', 'p', 'd', 't', 'He3', 'a', 'gamma', and 'decay'.
+  int child(int nuc, unsigned int rx, std::string z="n");
+  int child(int nuc, std::string rx, std::string z="n");
+  int child(std::string nuc, unsigned int rx, std::string z="n");
+  int child(std::string nuc, std::string rx, std::string z="n");
+  /// \}
 
   /// Custom exception for declaring a value not to be a valid reaction.  
   class NotAReaction : public std::exception

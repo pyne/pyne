@@ -90,3 +90,13 @@ cdef extern from "rxname.h" namespace "pyne::rxname":
     std_string doc(int, std_string, std_string) except +
     std_string doc(std_string, int, std_string) except +
     std_string doc(std_string, std_string, std_string) except + 
+
+    int child(int, int, std_string) except +
+    int child(int, std_string, std_string) except +
+    int child(std_string, int, std_string) except +
+    int child(std_string, std_string, std_string) except + 
+
+    int parent(int, int, std_string) except +
+    int parent(int, std_string, std_string) except +
+    int parent(std_string, int, std_string) except +
+    int parent(std_string, std_string, std_string) except + 
