@@ -414,3 +414,78 @@ def doc(x, y=None, char * z="n"):
         cd = cpp_rxname.doc(from_nuc, to_nuc, std_string(z))
     d = <char *> cd.c_str()
     return d
+
+
+def child(nuc, rx, char * z="n"):
+    """child(nuc, rx, char * z="n")
+
+    Gives the child nuclide that comes from a parent and a reaction.
+
+    Parameters
+    ----------
+    nuc : str or int
+        parent nuclide name or id.
+    rx : str or int
+        reaction name or id.
+    z : str, optional
+        incident particle type ("n", "p", ...).
+
+    Returns
+    -------
+    to_nuc : int
+        a nuclide identifier.
+    """
+    cdef std_string ptype #= std_string(<char *> z);
+    cdef int to_nuc
+    ptype = std_string(<char *> z);
+    nuc_is_str = isinstance(rx, basestring)
+    rx_is_str = isinstance(rx, basestring)
+    if nuc_is_str and rx_is_str:
+        to_nuc = cpp_rxname.child(std_string(<char *> nuc), 
+                                  std_string(<char *> rx), ptype)
+    elif not nuc_is_str and rx_is_str:
+        to_nuc = cpp_rxname.child(<int> nuc, std_string(<char *> rx), ptype)
+    elif nuc_is_str and not rx_is_str:
+        to_nuc = cpp_rxname.child(std_string(<char *> nuc), 
+                                  <extra_types.uint32> long(rx), ptype)
+    elif not nuc_is_str and not rx_is_str:
+        to_nuc = cpp_rxname.child(<int> nuc, <extra_types.uint32> long(rx), ptype)
+    return int(to_nuc)
+
+
+def parent(nuc, rx, char * z="n"):
+    """parent(nuc, rx, char * z="n")
+
+    Gives the parent nuclide that produces a child from a reaction.
+
+    Parameters
+    ----------
+    nuc : str or int
+        child nuclide name or id.
+    rx : str or int
+        reaction name or id.
+    z : str, optional
+        incident particle type ("n", "p", ...).
+
+    Returns
+    -------
+    from_nuc : int
+        a nuclide identifier.
+    """
+    cdef std_string ptype #= std_string(<char *> z);
+    cdef int from_nuc
+    ptype = std_string(<char *> z);
+    nuc_is_str = isinstance(rx, basestring)
+    rx_is_str = isinstance(rx, basestring)
+    if nuc_is_str and rx_is_str:
+        from_nuc = cpp_rxname.parent(std_string(<char *> nuc), 
+                                    std_string(<char *> rx), ptype)
+    elif not nuc_is_str and rx_is_str:
+        from_nuc = cpp_rxname.parent(<int> nuc, std_string(<char *> rx), ptype)
+    elif nuc_is_str and not rx_is_str:
+        from_nuc = cpp_rxname.parent(std_string(<char *> nuc), 
+                                    <extra_types.uint32> long(rx), ptype)
+    elif not nuc_is_str and not rx_is_str:
+        from_nuc = cpp_rxname.parent(<int> nuc, <extra_types.uint32> long(rx), ptype)
+    return int(from_nuc)
+
