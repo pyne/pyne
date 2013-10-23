@@ -16,6 +16,7 @@ import pyne
 import pyne.data
 import pyne.xs.models
 from pyne import nucname
+from pyne import rxname
 from pyne.xs import cache
 from pyne.xs.models import group_collapse
 from pyne.material import Material
@@ -89,7 +90,7 @@ def sigma_f(nuc, temp=300.0, group_struct=None, phi_g=None, xs_cache=None):
     if isinstance(nuc, collections.Iterable) and not isinstance(nuc, basestring):
         return _atom_weight_channel(sigma_f, nuc, temp=temp, xs_cache=xs_cache)
     nuc = nucname.id(nuc)
-    key = (nuc, 'f', temp)
+    key = (nuc, rxname.id('fission'), temp)
     return xs_cache[key]
 
 
@@ -264,6 +265,7 @@ def sigma_a_reaction(nuc, rx, temp=300.0, group_struct=None, phi_g=None, xs_cach
     pyne.xs.data_source.RX_TYPES_MAP 
 
     """
+    rx = rxname.id(rx)
     xs_cache = cache.xs_cache if xs_cache is None else xs_cache
     _prep_cache(xs_cache, group_struct, phi_g)
     if isinstance(nuc, collections.Iterable) and not isinstance(nuc, basestring):
@@ -274,7 +276,8 @@ def sigma_a_reaction(nuc, rx, temp=300.0, group_struct=None, phi_g=None, xs_cach
     return xs_cache[key]
 
 
-def metastable_ratio(nuc, rx, temp=300.0, group_struct=None, phi_g=None, xs_cache=None):
+def metastable_ratio(nuc, rx, temp=300.0, group_struct=None, phi_g=None, 
+                     xs_cache=None):
     """Calculates the ratio between a reaction that leaves the nuclide in a 
     metastable state and the equivalent reaction that leaves the nuclide in 
     the ground state.  This allows the calculation of metastable cross sections 
@@ -323,7 +326,7 @@ def metastable_ratio(nuc, rx, temp=300.0, group_struct=None, phi_g=None, xs_cach
 
     # Get the cross-sections
     sigma_rx = sigma_a_reaction(nuc, rx, temp, group_struct, phi_g, xs_cache)
-    sigma_rx_x = sigma_a_reaction(nuc, rx + '_x', temp, group_struct, phi_g, xs_cache)
+    sigma_rx_x = sigma_a_reaction(nuc, rx + '_1', temp, group_struct, phi_g, xs_cache)
 
     # Get the ratio
     ratio_rx_g = sigma_rx_x / sigma_rx
@@ -369,7 +372,7 @@ def sigma_a(nuc, temp=300.0, group_struct=None, phi_g=None, xs_cache=None):
     if isinstance(nuc, collections.Iterable) and not isinstance(nuc, basestring):
         return _atom_weight_channel(sigma_a, nuc, temp=temp, xs_cache=xs_cache)
     nuc = nucname.id(nuc)
-    key = (nuc, 'a', temp)
+    key = (nuc, rxname.id('absorption'), temp)
     return xs_cache[key]
 
 
@@ -423,7 +426,7 @@ def chi(nuc, temp=300.0, group_struct=None, phi_g=None, xs_cache=None, eres=101)
                 fn = set()
         xs_cache['fissionable_nucs'] = fn
     fissionable_nucs = xs_cache['fissionable_nucs']
-    if (nuc not in fissionable_nucs) and (86 <= nuc/10000):
+    if (nuc not in fissionable_nucs) and (86 <= nucname.znum(nuc)):
         fissionable_nucs.add(nuc)
 
     # Perform the group collapse on a continuous chi
@@ -476,9 +479,9 @@ def sigma_t(nuc, temp=300.0, group_struct=None, phi_g=None, xs_cache=None):
     if isinstance(nuc, collections.Iterable) and not isinstance(nuc, basestring):
         return _atom_weight_channel(sigma_t, nuc, temp=temp, xs_cache=xs_cache)
     nuc = nucname.id(nuc)
-    key_a = (nuc, 'a', temp)
-    key_s = (nuc, 's', temp)
-    key_t = (nuc, 't', temp)
+    key_a = (nuc, rxname.id('absorption'), temp)
+    key_s = (nuc, rxname.id('scattering'), temp)
+    key_t = (nuc, rxname.id('total'), temp)
 
     # Don't recalculate anything if you don't have to
     if key_t in xs_cache:
