@@ -135,9 +135,11 @@ def test_mt_not():
     assert_raises(RuntimeError, rxname.mt, "Waka waka")
     assert_raises(RuntimeError, rxname.mt, 0)
 
-
 def test_child():
-    assert_equal(rxname.child("U235", "absorption"), "U236")
+    assert_equal(rxname.child("U235", "absorption"), 922360000)
+
+def test_parent():
+    assert_equal(rxname.parent("U235", "absorption"), 922340000)
 
 
 
