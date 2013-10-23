@@ -562,8 +562,8 @@ std::map<unsigned int, unsigned int> pyne::rxname::id_mt;
 std::map<unsigned int, unsigned int> pyne::rxname::mt_id;
 std::map<unsigned int, std::string> pyne::rxname::labels;
 std::map<unsigned int, std::string> pyne::rxname::docs;
-std::map<std::string, std::map<int, std::map<int, unsigned int> > > pyne::rxname::offset_id;
-std::map<std::pair<std::string, unsigned int>, std::pair<int, int> > pyne::rxname::id_offset;
+std::map<std::pair<std::string, int>, unsigned int> pyne::rxname::offset_id;
+std::map<std::pair<std::string, unsigned int>, int> pyne::rxname::id_offset;
 
 void * pyne::rxname::_fill_maps()
 {
