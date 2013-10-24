@@ -5,13 +5,14 @@
 
 #include <set>
 
+#include "moab/Interface.hpp"
+
 #include "TallyEvent.hpp"
 
 // forward declarations
 namespace moab {
   class AdaptiveKDTree;
   class CartVect;
-  class Interface;
 }
 
 //===========================================================================//
@@ -19,21 +20,29 @@ namespace moab {
  * \class KDENeighborhood
  * \brief Defines a neighborhood region for a KDE mesh tally event
  *
- * KDENeighborhood is a class that defines the neighborhood region for either
- * a collision or track-based event that is to be tallied as part of a Monte
- * Carlo particle transport simulation.  This neighborhood region is formally
- * defined as the region in space for which the kernel function produces a
- * non-trivial result for any mesh node that exists inside that region.  This
- * set of mesh nodes is also known as the set of calculation points for the
- * KDE mesh tally.
+ * KDENeighborhood is a class that defines the neighborhood region for a
+ * KDEMeshTally as part of a Monte Carlo particle transport simulation.  The
+ * neighborhood region is formally defined as the region in space for which
+ * the kernel function produces a non-trivial result for any mesh node that
+ * exists inside that region.  This set of mesh nodes is also known as the
+ * set of calculation points for the KDEMeshTally.
  *
- * Once a KDENeighborhood has been created, the calculation points for the
- * corresponding tally event can be obtained using the get_points() method.
- * For collision events this method will return a set of unique mesh nodes
- * that are all guaranteed to produce non-trivial tally contributions.  For
- * track-based events KDENeighborhood is only an approximation to the true
- * neighborhood region.  Therefore, for these events the get_points() method
- * may return some mesh nodes that produce trivial tally contributions.
+ * In general, it is not always easy to define the exact neighborhood region.
+ * Therefore, the default behavior of KDENeighborhood is to use a kd-tree
+ * search method to locate all possible calculation points for each TallyEvent.
+ * This kd-tree approach produces an exact neighborhood region for collision
+ * events, but only an approximation for track-based events.
+ *
+ * =============================
+ * KDENeighborhood Functionality
+ * =============================
+ *
+ * Once a KDENeighborhood has been created, there are two steps that are
+ * needed to get its calculation points.  Since the dimensions of the exact
+ * neighborhood region usually changes with each TallyEvent, it is first
+ * necessary to call update_neighborhood().  Once the neighborhood has been
+ * updated, then the set of calculation points associated with that event can
+ * be obtained by get_points().
  */
 //===========================================================================//
 class KDENeighborhood
@@ -41,34 +50,42 @@ class KDENeighborhood
   public:
     /**
      * \brief Constructor
-     * \param[in] event the tally event for which the neighborhood is desired
-     * \param[in] bandwidth the bandwidth vector (hx, hy, hz)
-     * \param[in] kd_tree the kd-tree containing all mesh nodes in the input mesh
-     * \param[in] kd_tree_root the root of the kd-tree
+     * \param[in] mbi pointer to a pre-loaded MOAB instance
+     * \param[in] mesh_set the MOAB mesh set containing all of the mesh data
+     * \param[in] build_kd_tree if true, creates kd-tree based on mesh nodes
+     *
+     * Note that setting build_kd_tree to false forces the KDENeighborhood to
+     * always use all calculation points with every TallyEvent that occurs.
      */
-    KDENeighborhood(const TallyEvent& event,
-                    const moab::CartVect& bandwidth,
-                    moab::AdaptiveKDTree& kd_tree,
-                    moab::EntityHandle& kd_tree_root);
+    KDENeighborhood(moab::Interface* mbi,
+                    const moab::EntityHandle& mesh_set,
+                    bool build_kd_tree = true);
+
+    /**
+     * \brief Destructor
+     */
+    ~KDENeighborhood();
 
     // >>> PUBLIC INTERFACE
 
     /**
      * \brief Gets the calculation points for this neighborhood region
-     * \return vector of all calculation points in this neighborhood region
-     *
-     * The neighborhood region is currently assumed to be rectangular.  This
-     * method will therefore return all of the calculation points that exist
-     * within the boxed region defined by min_corner and max_corner.
+     * \return set of calculation points currently in the neighborhood region
      */
     std::set<moab::EntityHandle> get_points() const;
+
+    /**
+     * \brief Updates the neighborhood region based on the given tally event
+     * \param[in] event the tally event for which the neighborhood is desired
+     * \param[in] bandwidth the bandwidth vector (hx, hy, hz)
+     */
+    void update_neighborhood(const TallyEvent& event,
+                             const moab::CartVect& bandwidth);
 
     /**
      * \brief checks if a point exists within this neighborhood region
      * \param[in] coords the coordinates of the point to check
      * \return true if point does exist within this neighborhood region
-     *
-     * Currently only works for a rectangular neighborhood region.
      */
     bool point_in_region(const moab::CartVect& coords) const;
 
@@ -79,23 +96,26 @@ class KDENeighborhood
      *
      * Note that this method is only valid for track-based events.  If the
      * event is not a track-based event, then it will always return false.
+     * It will also return false if no radius was set due to the neighborhood
+     * containing all calculation points.
      */
-    bool point_within_max_radius(const moab::CartVect& point) const;
+    bool point_within_max_radius(const TallyEvent& event,
+                                 const moab::CartVect& point) const;
 
   private:
-    /// Minimum and maximum corner of a rectangular neighborhood region
+    // Set of calculation points currently in this neighborhood region
+    std::set<moab::EntityHandle> points;
+
+    // KD-Tree containing all mesh nodes in the input mesh
+    moab::AdaptiveKDTree* kd_tree;
+    moab::EntityHandle kd_tree_root;
+
+    // Minimum and maximum corner of a rectangular neighborhood region
     double min_corner[3];
     double max_corner[3];
 
-    /// Radius of a cylindrical neighborhood region
+    // Radius of a cylindrical neighborhood region
     double radius;
-
-    /// Tally event this KDENeighborhood was constructed from
-    const TallyEvent& event;
-
-    /// KD-Tree containing all mesh nodes in the input mesh
-    moab::AdaptiveKDTree* kd_tree;
-    moab::EntityHandle kd_tree_root;
 
     // >>> PRIVATE METHODS
 
@@ -121,11 +141,12 @@ class KDENeighborhood
 
     /**
      * \brief Finds the vertices that exist inside a rectangular region
-     * \return the set of unique vertices
      *
-     * Includes vertices that are within +/- 1e-12 of a box boundary.
+     * Includes vertices that are within +/- 1e-12 of a box boundary.  This
+     * method updates the set of calculation points with all vertices that
+     * were located within the current neighborhood region.
      */
-    std::set<moab::EntityHandle> points_in_box() const;
+    void points_in_box();
 };
 
 #endif // DAGMC_KDE_NEIGHBORHOOD_HPP

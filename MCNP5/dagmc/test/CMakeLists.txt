@@ -1,6 +1,6 @@
-# CMAKE build script for MeshTally testing
+# CMAKE build script for DAGMCTally testing
 
-PROJECT(MeshTallyUnitTests)
+PROJECT(DAGMCTallyUnitTests)
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
 
 # FIND_PACKAGE(GTest REQUIRED PATHS ${GTEST_DIR})
@@ -9,35 +9,19 @@ ADD_SUBDIRECTORY(gtest/gtest-1.7.0)
 # Where to look for includes
 INCLUDE_DIRECTORIES("${MOAB_HOME}/include" gtest/gtest-1.7.0/include)
 
-# Locally defined vars
-# set(HOME /filespace/people/z/zachman)
-IF (NOT DEFINED HOME) 
-	SET (HOME "$ENV{HOME}")
-	message("Home is ${HOME}")
-ENDIF (NOT DEFINED HOME)
-
-SET(MOAB_HOME ${HOME}/opt/moab)
-
-# Where to look for includes
-INCLUDE_DIRECTORIES("${HOME}/opt/moab/include")
-
-# make mesh tally source files into a library
-ADD_LIBRARY(meshtally
-    ${DAGMC_MESHTALLY_SOURCE}/meshtal_funcs.cpp
-    ${DAGMC_MESHTALLY_SOURCE}/Tally.cpp
-    ${DAGMC_MESHTALLY_SOURCE}/TallyData.cpp
-    ${DAGMC_MESHTALLY_SOURCE}/TallyManager.cpp
-    ${DAGMC_MESHTALLY_SOURCE}/MeshTally.cpp
-    ${DAGMC_MESHTALLY_SOURCE}/TrackLengthMeshTally.cpp
-    ${DAGMC_MESHTALLY_SOURCE}/KDEMeshTally.cpp
-    ${DAGMC_MESHTALLY_SOURCE}/CellTally.cpp
-    ${DAGMC_MESHTALLY_SOURCE}/KDEKernel.cpp
-    ${DAGMC_MESHTALLY_SOURCE}/KDEMeshTally.cpp
-    ${DAGMC_MESHTALLY_SOURCE}/KDENeighborhood.cpp
-    ${DAGMC_MESHTALLY_SOURCE}/MeshTally.cpp
-    ${DAGMC_MESHTALLY_SOURCE}/PolynomialKernel.cpp
-    ${DAGMC_MESHTALLY_SOURCE}/Quadrature.cpp
-    ${DAGMC_MESHTALLY_SOURCE}/TallyEvent.cpp
+# make DAGMC Tally source files into a library
+ADD_LIBRARY(dagtally SHARED
+    ${DAGMC_TALLY_SOURCE}/Tally.cpp
+    ${DAGMC_TALLY_SOURCE}/TallyData.cpp
+    ${DAGMC_TALLY_SOURCE}/TallyManager.cpp
+    ${DAGMC_TALLY_SOURCE}/MeshTally.cpp
+    ${DAGMC_TALLY_SOURCE}/TrackLengthMeshTally.cpp
+    ${DAGMC_TALLY_SOURCE}/KDEMeshTally.cpp
+    ${DAGMC_TALLY_SOURCE}/CellTally.cpp
+    ${DAGMC_TALLY_SOURCE}/KDEKernel.cpp
+    ${DAGMC_TALLY_SOURCE}/KDENeighborhood.cpp
+    ${DAGMC_TALLY_SOURCE}/PolynomialKernel.cpp
+    ${DAGMC_TALLY_SOURCE}/Quadrature.cpp
 )
 
 # set libraries
@@ -45,11 +29,11 @@ SET(LIBRARIES
     gtest
     gtest_main
     pthread
-    meshtally
+    dagtally
     ${MOAB_HOME}/lib/libMOAB.so
 )
 
-# set up MeshTally test cases
+# set up DAGMC Tally test cases
 ADD_EXECUTABLE(test_KDEKernel test_KDEKernel.cpp)
 TARGET_LINK_LIBRARIES(test_KDEKernel ${LIBRARIES})
 
@@ -65,10 +49,10 @@ TARGET_LINK_LIBRARIES(test_PolynomialKernel ${LIBRARIES})
 ADD_EXECUTABLE(test_Quadrature test_Quadrature.cpp)
 TARGET_LINK_LIBRARIES(test_Quadrature ${LIBRARIES})
 
-# enable MeshTally test cases
+# enable DAGMC Tally test cases
 ENABLE_TESTING()
 
-# list MeshTally test cases
+# list DAGMC Tally test cases
 ADD_TEST(test_KDEKernel test_KDEKernel)
 ADD_TEST(test_KDEMeshTally test_KDEMeshTally)
 ADD_TEST(test_KDENeighborhood test_KDENeighborhood)

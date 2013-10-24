@@ -140,7 +140,7 @@ class MeshTally : public Tally
      * \param[in] tally_point entity handle representing tally point
      * \param[in] weight the multiplier value for the score to be tallied
      * \param[in] score the score that is to be tallied
-     * \param[out] ebin the energy bin index corresponding to the energy
+     * \param[in] ebin the energy bin index corresponding to the energy
      *
      * The weight and ebin can be obtained using Tally::get_score_multiplier
      * and Tally::get_energy_bin respectively.

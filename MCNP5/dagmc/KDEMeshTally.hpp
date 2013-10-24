@@ -9,13 +9,13 @@
 #include "moab/CartVect.hpp"
 
 #include "KDEKernel.hpp"
+#include "KDENeighborhood.hpp"
 #include "MeshTally.hpp"
 #include "TallyEvent.hpp"
 #include "Quadrature.hpp"
 
 // forward declarations
 namespace moab {
-  class AdaptiveKDTree;
   class Interface;
 }
 
@@ -79,14 +79,20 @@ namespace moab {
  * the default is "epanechnikov".  Similarly, if "order" is omitted or invalid,
  * then the default is 2nd-order.
  *
- * 4) "boundary"="default"
+ * 4) "neighborhood"="off"
+ * -----------------------
+ * Turns off the neighborhood-search and computes scores for all calculation
+ * points.  This key will also be used to request different neighborhood-search
+ * methods in the future.  The default is the kd-tree method.
+ *
+ * 5) "boundary"="default"
  * -----------------------
  * Indicates that boundary correction is needed for tally points within one
  * bandwidth of an external boundary.  The "default" method uses the boundary
  * kernel approach, and is currently the only option available.  Note that
  * this feature will only work properly for 2nd-order kernels.
  *
- * 5) "seed"="value", "subtracks"="value"
+ * 6) "seed"="value", "subtracks"="value"
  * --------------------------------------
  * These two options are only available for KDE sub-track mesh tallies.  The
  * "seed" option overrides the random number seed value that is used for
@@ -153,6 +159,10 @@ class KDEMeshTally : public MeshTally
     // Kernel function used to compute KDE mesh tally scores
     KDEKernel* kernel;
 
+    // Defines neighborhood region for computing scores
+    bool use_kd_tree;
+    KDENeighborhood* region;
+
     // Variables used if boundary correction method is requested by user
     bool use_boundary_correction;
     moab::Tag boundary_tag;
@@ -166,10 +176,6 @@ class KDEMeshTally : public MeshTally
 
     // MOAB instance that stores all of the mesh data
     moab::Interface* mbi;
-
-    // KD-Tree used with unstructured meshes to locate calculation points
-    moab::AdaptiveKDTree* kd_tree;  
-    moab::EntityHandle kd_tree_root;
 
     // Running variance variables for computing optimal bandwidth at runtime
     bool max_collisions;

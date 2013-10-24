@@ -8,12 +8,10 @@
 #include <string>
 #include <set>
 
-#include "moab/AdaptiveKDTree.hpp"
 #include "moab/Core.hpp"
 #include "moab/Range.hpp"
 
 #include "KDEMeshTally.hpp"
-#include "KDENeighborhood.hpp"
 
 // initialize static variables
 bool KDEMeshTally::seed_is_set = false;
@@ -30,6 +28,8 @@ KDEMeshTally::KDEMeshTally(const TallyInput& input,
       estimator(type),
       bandwidth(moab::CartVect(0.01, 0.01, 0.01)),
       kernel(NULL),
+      use_kd_tree(true),
+      region(NULL),
       use_boundary_correction(false),
       num_subtracks(3),
       quadrature(NULL),
@@ -99,10 +99,10 @@ KDEMeshTally::KDEMeshTally(const TallyInput& input,
 //---------------------------------------------------------------------------//
 KDEMeshTally::~KDEMeshTally()
 {
-    delete kd_tree;
     delete kernel;
+    delete region;
+    delete quadrature;
     delete mbi;
-    delete quadrature;  
 }
 //---------------------------------------------------------------------------//
 // DERIVED PUBLIC INTERFACE from MeshTally.hpp
@@ -141,9 +141,9 @@ void KDEMeshTally::compute_score(const TallyEvent& event)
         return;
     }
 
-    // create the neighborhood region and find all of the calculations points
-    KDENeighborhood region(event, bandwidth, *kd_tree, kd_tree_root);
-    std::set<moab::EntityHandle> calculation_points = region.get_points();
+    // update the neighborhood region and find all of the calculations points
+    region->update_neighborhood(event, bandwidth);
+    std::set<moab::EntityHandle> calculation_points = region->get_points();
 
     // iterate through calculation points and compute their final scores
     std::set<moab::EntityHandle>::iterator i;
@@ -328,6 +328,11 @@ void KDEMeshTally::parse_tally_options()
                 kernel_order = 2;
             }
         }
+        else if (key == "neighborhood" && value == "off")
+        {
+            std::cout << "    using neighborhood-search: " << value << std::endl;
+            use_kd_tree = false;
+        }
         else if (key == "boundary" && value == "default")
         {
             std::cout << "    using boundary correction: " << value << std::endl;
@@ -392,11 +397,8 @@ moab::ErrorCode KDEMeshTally::initialize_mesh_data()
     // initialize MeshTally::tally_points to include all mesh nodes
     set_tally_points(mesh_nodes);
 
-    // build a kd-tree from all of the mesh nodes
-    kd_tree = new moab::AdaptiveKDTree(mbi);
-    rval = kd_tree->build_tree(mesh_nodes, kd_tree_root);
-
-    if (rval != moab::MB_SUCCESS) return rval;
+    // set up the KDE neighborhood region
+    region = new KDENeighborhood(mbi, moab_mesh_set, use_kd_tree);
 
     // reduce the loaded MOAB mesh set to include only 3D elements
     moab::Range mesh_cells;
