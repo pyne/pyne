@@ -2271,18 +2271,50 @@ void * pyne::rxname::_fill_maps()
 
   // set the nuclide difference mappings, offset_id
   // offset_id[incident particle type "n", "p", ...][delta Z num][delta A num][rxid]
+  // offset_id mapping may be ambiquious so they must come before the id_offsets!
+  // the following should be sorted by (dz, da, ds)
   // neutrons:
-  offset_id[make_pair("n", offset(0, 0))] = name_id["scattering"];
-  offset_id[make_pair("n", offset(0, 1))] = name_id["absorption"];
-  offset_id[make_pair("n", offset(0, -1))] = name_id["z_2n"];
-  offset_id[make_pair("n", offset(0, -2))] = name_id["z_3n"];
-  offset_id[make_pair("n", offset(0, -3))] = name_id["z_4n"];
-  offset_id[make_pair("n", offset(-1, 0))] = name_id["p"];
-  offset_id[make_pair("n", offset(-2, -1))] = name_id["z_2p"];
-  offset_id[make_pair("n", offset(-1, -1))] = name_id["d"];
-  offset_id[make_pair("n", offset(-1, -2))] = name_id["t"];
-  offset_id[make_pair("n", offset(-2, -2))] = name_id["He3"];
+  offset_id[make_pair("n", offset(-4, -8))] = name_id["n2a"];
+  offset_id[make_pair("n", offset(-4, -7))] = name_id["z_2a"];
+  offset_id[make_pair("n", offset(-2, -5))] = name_id["z_2na"];
+  offset_id[make_pair("n", offset(-2, -4))] = name_id["na"];
+  offset_id[make_pair("n", offset(-2, -4, 1))] = name_id["na_1"];
+  offset_id[make_pair("n", offset(-2, -4, 2))] = name_id["na_2"];
   offset_id[make_pair("n", offset(-2, -3))] = name_id["a"];
+  offset_id[make_pair("n", offset(-2, -3, 1))] = name_id["a_1"];
+  offset_id[make_pair("n", offset(-2, -3, 2))] = name_id["a_2"];
+  offset_id[make_pair("n", offset(-2, -2))] = name_id["He3"];
+  offset_id[make_pair("n", offset(-2, -2, 1))] = name_id["He3_1"];
+  offset_id[make_pair("n", offset(-2, -2, 2))] = name_id["He3_2"];
+  offset_id[make_pair("n", offset(-2, -1))] = name_id["z_2p"];
+  offset_id[make_pair("n", offset(-2, -1, 1))] = name_id["z_2p_1"];
+  offset_id[make_pair("n", offset(-2, -1, 2))] = name_id["z_2p_2"];
+  offset_id[make_pair("n", offset(-1, -3))] = name_id["nt"];
+  offset_id[make_pair("n", offset(-1, -3, 1))] = name_id["nt_1"];
+  offset_id[make_pair("n", offset(-1, -3, 2))] = name_id["nt_2"];
+  offset_id[make_pair("n", offset(-1, -2))] = name_id["t"];
+  offset_id[make_pair("n", offset(-1, -2, 1))] = name_id["t_1"];
+  offset_id[make_pair("n", offset(-1, -2, 2))] = name_id["t_2"];
+  offset_id[make_pair("n", offset(-1, -1))] = name_id["d"];
+  offset_id[make_pair("n", offset(-1, -1, 1))] = name_id["d_1"];
+  offset_id[make_pair("n", offset(-1, -1, 2))] = name_id["d_2"];
+  offset_id[make_pair("n", offset(-1, 0))] = name_id["p"];
+  offset_id[make_pair("n", offset(-1, 0, 1))] = name_id["p_1"];
+  offset_id[make_pair("n", offset(-1, 0, 2))] = name_id["p_2"];
+  offset_id[make_pair("n", offset(0, -3))] = name_id["z_4n"];
+  offset_id[make_pair("n", offset(0, -3, 1))] = name_id["z_4n_1"];
+  offset_id[make_pair("n", offset(0, -2))] = name_id["z_3n"];
+  offset_id[make_pair("n", offset(0, -2, 1))] = name_id["z_3n_1"];
+  offset_id[make_pair("n", offset(0, -2, 2))] = name_id["z_3n_2"];
+  offset_id[make_pair("n", offset(0, -1))] = name_id["z_2n"];
+  offset_id[make_pair("n", offset(0, -1, 1))] = name_id["z_2n_1"];
+  offset_id[make_pair("n", offset(0, -1, 2))] = name_id["z_2n_2"];
+  offset_id[make_pair("n", offset(0, 0))] = name_id["scattering"];
+  offset_id[make_pair("n", offset(0, 0, 1))] = name_id["n_1"];
+  offset_id[make_pair("n", offset(0, 0, 2))] = name_id["n_2"];
+  offset_id[make_pair("n", offset(0, 1))] = name_id["absorption"];
+  offset_id[make_pair("n", offset(0, 1, 1))] = name_id["gamma_1"];
+  offset_id[make_pair("n", offset(0, 1, 2))] = name_id["gamma_2"];
   // proton:
   offset_id[make_pair("p", offset(0, 0))] = name_id["scattering"];
   offset_id[make_pair("p", offset(1, 1))] = name_id["absorption"];
@@ -2366,11 +2398,24 @@ void * pyne::rxname::_fill_maps()
   offset_id[make_pair("decay", offset(-2, -3))] = name_id["He3"];
   offset_id[make_pair("decay", offset(-2, -4))] = name_id["a"];
 
-  // child offsets
+  // pre-loaded child offsets
   std::map<std::pair<std::string, int>, unsigned int>::iterator ioffid;
   for (ioffid = offset_id.begin(); ioffid != offset_id.end(); ioffid++) {
     id_offset[make_pair(ioffid->first.first, ioffid->second)] = ioffid->first.second;
   };
+  // neutrons:
+  offset_id[make_pair("n", name_id["nHe3"])] = offset(-2, -3);
+  offset_id[make_pair("n", name_id["nHe3_1"])] = offset(-2, -3, 2);
+  offset_id[make_pair("n", name_id["nHe3_2"])] = offset(-2, -3, 2);
+  offset_id[make_pair("n", name_id["z_3np"])] = offset(-1, -3);
+  offset_id[make_pair("n", name_id["nd"])] = offset(-1, -2);
+  offset_id[make_pair("n", name_id["nd_1"])] = offset(-1, -2, 1);
+  offset_id[make_pair("n", name_id["nd_2"])] = offset(-1, -2, 2);
+  offset_id[make_pair("n", name_id["np"])] = offset(-1, -1);
+  offset_id[make_pair("n", name_id["np_1"])] = offset(-1, -1, 1);
+  offset_id[make_pair("n", name_id["np_2"])] = offset(-1, -1, 2);
+  offset_id[make_pair("n", name_id["n"])] = offset(0, 0);
+  offset_id[make_pair("n", name_id["gamma"])] = offset(0, 1);
 
 };
 void * pyne::rxname::_ = pyne::rxname::_fill_maps();
