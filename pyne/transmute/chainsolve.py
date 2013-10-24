@@ -71,7 +71,7 @@ class Transmuter(object):
         flux = np.asarray(flux)
         if flux.ndim == 0:
             _ = np.empty(175, float)
-            if flux == 0.0
+            if flux == 0.0:
                 _.fill(0.0)
             else:
                 _.fill(1.0 / flux)
