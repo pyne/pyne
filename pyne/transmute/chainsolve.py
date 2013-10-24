@@ -184,6 +184,38 @@ class Transmuter(object):
             d += data.decay_const(nuc) 
         return d
 
+    def _grow_matrix(self, A, prod, dest):
+        """Grows the given matrix by one row and one column, adding necessary
+        production and destruction rates.
+
+        Parameters
+        ----------
+        A : NumPy 2-dimensional array
+            The original matrix that must be grown.
+        prod : float
+            The production rate of the next nuclide in the chain.
+        dest : float
+            The destruction rate of the next nuclide in the chain.
+
+        Returns
+        -------
+        B : NumPy 2-dimensional array
+            The grown matrix
+        """
+        shape = A.shape
+        n = shape[0]
+        # Add row and column to current matrix
+        #B = np.append(A, np.zeros((1,n)), 0)
+        #B = np.append(B, np.zeros((n+1,1)), 1)
+        B = np.empty((n+1, n+1), dtype=float)
+        B[:n,:n] = A
+        B[n,:n-1] = 0
+        B[:n,n] = 0
+        # Update new matrix with provided data
+        B[n,n-1] = prod
+        B[n,n] = -dest
+        return B
+
     def _traversal(self, nuc, A, out, depth=0):
         """Nuclide transmutation traversal method.
 
@@ -206,7 +238,9 @@ class Transmuter(object):
             Current depth of traversal (root at 0). Should never be provided by user.
 
         """
-        phi = self.phi
+        t = self.t
+        tol = self.tol
+        phi = self.xs_cache['phi_g'][0]
         temp = self.temp
         xs_cache = self.xs_cache
         if self.log is not None:
@@ -218,7 +252,6 @@ class Transmuter(object):
         for decay_child, branch_ratio in decay_branches.items():
             prod[decay_child] = lam * branch_ratio
         # reaction daughters
-        daugh_dict = self._get_daughters(nuc)
         for rx in self.rxs:
             try:
                 child = rxname.child(nuc, rx)
@@ -226,33 +259,28 @@ class Transmuter(object):
                 continue
             child_xs = xs_cache[nuc, rx, temp][0]
             rr = utils.from_barns(child_xs, 'cm2') * phi  # reaction rate
-            prod[child] = prod[child] + rr if child in prod else rr
+            prod[child] = rr + prod.get(child, 0.0)
         # Cycle production dictionary
         for child in prod_dict.keys():
             # Grow matrix
-            B = _grow_matrix(A, prod_dict[child], _get_destruction(child, phi, table))
+            d = self._get_destruction(child)
+            B = self._grow_matrix(A, prod[child], d)
             # Create initial density vector
             n = B.shape[0]
-            N0 = np.zeros((n,1))
-            N0[0] = 1
+            N0 = np.zeros((n, 1), dtype=float)
+            N0[0] = 1.0
             # Compute matrix exponential and dot with density vector
-            eB = _matrix_exp(B, t)
+            eB = linalg.expm(B * t)
             N_final = np.dot(eB, N0)
             # Log child
-            if tree:
-                _tree_log(depth+1, child, N_final[-1], tree)
+            if self.log is not None:
+                self._log_tree(depth+1, child, N_final[-1])
             # Check against tolerance
-            if _check_tol(N_final[-1], tol):
+            if N_final[-1] > tol:
                 # Continue traversal
-                if tree is not None:
-                    out = _traversal(child,B,phi,t,table,out,tol,tree,depth+1)
-                else:
-                    out = _traversal(child,B,phi,t,table,out,tol,tree,None)
+                self._traversal(child, B, out, depth=depth+1)
             # On recursion exit or truncation, write data from this nuclide
-            if child in out.keys():
-                out[child] += N_final[-1]
-            else:
-                out[child] = N_final[-1]
+            out[child] = N_final[-1] + out.get(child, 0.0)
 
     def _log_tree(self, depth, nuc, numdens):
         """Logging method to track path of _traversal.
@@ -348,55 +376,6 @@ def transmute_spatial(space, t_sim, tree = None, tol = 1e-7):
     return space_out
 
 
-
-
-def _matrix_exp(A, t):
-    """Takes the matrix exponential of the product At.
-
-    Parameters
-    ----------
-    A : NumPy 2-dimensional array
-        Coupled equation matrix.
-    t : float
-        Time required for transmutation simulation.
-
-    Returns
-    -------
-    eA : NumPy 2-dimensional array
-        Result after calculating the matrix exponential of At
-    """
-    eA = linalg.expm(A * t)
-    return eA
-
-
-
-def _grow_matrix(A, prod, dest):
-    """Grows the given matrix by one row and one column, adding necessary
-    production and destruction rates.
-
-    Parameters
-    ----------
-    A : NumPy 2-dimensional array
-        The original matrix that must be grown.
-    prod : float
-        The production rate of the next nuclide in the chain.
-    dest : float
-        The destruction rate of the next nuclide in the chain.
-
-    Returns
-    -------
-    B : NumPy 2-dimensional array
-        The grown matrix
-    """
-    shape = A.shape
-    n = shape[0]
-    # Add row and column to current matrix
-    B = np.append(A, np.zeros((1,n)), 0)
-    B = np.append(B, np.zeros((n+1,1)), 1)
-    # Update new matrix with provided data
-    B[n,n-1] = prod
-    B[n,n] = -dest
-    return B
 
 
 def _check_tol(N, tol):
