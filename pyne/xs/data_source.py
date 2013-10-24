@@ -524,6 +524,8 @@ class EAFDataSource(DataSource):
                  rxname.id('z_3np'): '420',
                  }
 
+    _avail_rx = dict([_[::-1] for _ in _rx_avail.items()])
+
     def __init__(self, **kwargs):
         super(EAFDataSource, self).__init__(**kwargs)
 
@@ -567,16 +569,19 @@ class EAFDataSource(DataSource):
         # Grab data
         with tb.openFile(nuc_data, 'r') as f:
             node = f.root.neutron.eaf_xs.eaf_xs
-            rows = [row['xs'] for row in node.where(cond)]
+            rows = node.readWhere(cond)
             #rows = [np.array(row['xs']) for row in node.where(cond)]
 
         if len(rows) == 0:
             rxdata = None
         elif 1 < len(rows):
-            rows = np.array(rows)
-            rxdata = rows.sum(axis=0)
+            xss = rows['xs']
+            rxnums = rows['rxnum']
+            for rxnum, xs in zip(rxnums, xss):
+                self.rxcache[nuc, self._avail_rx[rxnum], temp] = xs
+            rxdata = xss.sum(axis=0)
         else:
-            rxdata = rows[0]
+            rxdata = rows[0]['xs']
 
         return rxdata
 

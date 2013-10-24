@@ -6,6 +6,7 @@ from scipy import linalg
 
 from pyne import utils
 from pyne import data
+from pyne import rxname
 from pyne import nucname
 from pyne import nuc_data
 from pyne.material import Material, from_atom_frac
@@ -16,7 +17,7 @@ from pyne.xs.channels import sigma_a
 class Transmuter(object):
     """A class for transmuting materials using an ALARA-like chain solver."""
 
-    def __init__(self, t=0.0, phi=0.0, tol=1e-7, log=None):
+    def __init__(self, t=0.0, phi=0.0, temp=300.0, tol=1e-7, rxs=None, log=None):
         """Parameters
         ----------
         t : float
@@ -24,8 +25,14 @@ class Transmuter(object):
         phi : float or array of floats
             Neutron flux vector [n/cm^2/sec].  Currently this must either be 
             a scalar or match the group structure of EAF.
+        temp : float, optional
+            Temperature [K] of material, defaults to 300.0.
         tol : float
             Tolerance level for chain truncation.
+        rxs : set of ints or strs
+            Reaction ids or names to use in transmutation which produce well-defined 
+            children.  This set should thus not include fission.  If None, then the 
+            reactions from EAF are used.
         log : file-like or None
             The log file object should be written. A None imples the log is 
             not desired.
@@ -39,8 +46,20 @@ class Transmuter(object):
         self.t = t
         self._phi = None
         self.phi = phi
+        self.temp = temp
         self.log = log
         self.tol = tol
+        if rxs is None:
+            rxs = ['gamma', 'gamma_1', 'gamma_2', 'p', 'p_1', 'p_2', 'd', 'd_1', 
+                   'd_2', 't', 't_1', 't_2', 'He3', 'He3_1', 'He3_2', 'a', 'a_1', 
+                   'a_2', 'z_2a', 'z_2p', 'z_2p_1', 'z_2p_2', 'z_2n', 'z_2n_1', 
+                   'z_2n_2', 'z_3n', 'z_3n_1', 'z_3n_2', 'na', 'na_1', 'na_2', 
+                   'z_2na', 'np', 'np_1', 'np_2', 'n2a', 'nd', 'nd_1', 'nd_2', 
+                   'nt', 'nt_1', 'nt_2', 'nHe3', 'nHe3_1', 'nHe3_2','z_4n', 
+                   'z_4n_1', 'n', 'n_1', 'n_2', 'z_3np']
+        rxs = set([rxname.id(rx) for rx in rxs])
+        rxs.discard(rxname.id('fission'))
+        self.rxs = rxs
 
     @property
     def phi(self):
@@ -165,45 +184,6 @@ class Transmuter(object):
             d += data.decay_const(nuc) 
         return d
 
-    def _get_daughters(self, nuc):
-        """Returns a dictionary that contains the neutron-reaction daughters of
-        nuc as keys to the 175-group neutron cross sections for that daughter's
-        reaction.
-
-        Parameters
-        ----------
-        nuc : int
-            ID of mother nuclide to of which to find daughters.
-
-        Returns
-        -------
-        daugh_dict : dictionary
-            Keys are the neutron-reaction daughters of nuc in zzaaam format.
-            Values are a NumPy array containing the EAF cross section data.
-            (all Values should have size 175)
-            
-        Notes
-        -----
-        Cross sections have been converted from units of [barns] to [cm^2].
-        """
-        eaf_ngoups = 175
-        #barn_cm2 = 1e-24
-        daugh_dict = {}
-        # Set working node that contains EAF cross sections
-        node = table.root.neutron.eaf_xs.eaf_xs
-        cond = "(nuc_zz == {0})".format(nuc)
-        daughters = [row['daughter'] for row in node.where(cond)]
-        all_xs = [np.array(row['xs']) for row in node.where(cond)]
-        all_rx = [row['rxnum'] for row in node.where(cond)]
-        for i in range(len(daughters)):
-            if all_rx[i] not in EAF_RX:
-                continue
-            daugh = _convert_eaf(daughters[i])
-            # Convert from barns to cm^2
-            xs = all_xs[i] * barn_cm2
-            daugh_dict[daugh] = xs.reshape((eaf_ngroups, 1))
-        return daugh_dict
-
     def _traversal(self, nuc, A, out, depth=0):
         """Nuclide transmutation traversal method.
 
@@ -226,22 +206,27 @@ class Transmuter(object):
             Current depth of traversal (root at 0). Should never be provided by user.
 
         """
+        phi = self.phi
+        temp = self.temp
+        xs_cache = self.xs_cache
         if self.log is not None:
             self._log_tree(depth, nuc, 1.0)
-        prod_dict = {}
+        prod = {}
         # decay info
         lam = data.decay_const(nuc)
         decay_branches = {} if lam == 0 else self._decay_branches(nuc)
         for decay_child, branch_ratio in decay_branches.items():
-            prod_dict[decay_child] = lam * branch_ratio
+            prod[decay_child] = lam * branch_ratio
         # reaction daughters
         daugh_dict = self._get_daughters(nuc)
-        for decay_daugh in daugh_dict.keys():
-            # Increment current production rate if already in dictionary
-            if decay_daugh in prod_dict.keys():
-                prod_dict[decay_daugh] += np.sum(phi * daugh_dict[decay_daugh])
-            else:
-                prod_dict[decay_daugh] = np.sum(phi * daugh_dict[decay_daugh])
+        for rx in self.rxs:
+            try:
+                child = rxname.child(nuc, rx)
+            except RuntimeError:
+                continue
+            child_xs = xs_cache[nuc, rx, temp][0]
+            rr = utils.from_barns(child_xs, 'cm2') * phi  # reaction rate
+            prod[child] = prod[child] + rr if child in prod else rr
         # Cycle production dictionary
         for child in prod_dict.keys():
             # Grow matrix
@@ -383,41 +368,6 @@ def _matrix_exp(A, t):
     eA = linalg.expm(A * t)
     return eA
 
-
-
-def _convert_eaf(daugh):
-    """Returns the zzaaam format of a daugh string in parsed EAF format.
-
-    Parameters
-    ----------
-    daugh : String
-        String representation of a daughter in EAF format.
-
-    Returns
-    -------
-    daugh_conv : nucname
-        Name of daugh in zzaaam format appropriate for PyNE.
-    """
-    singleSpace = ' '
-    noSpace = ''
-    letterG = 'G'
-    meta1 = 'M1'
-    meta2 = 'M2'
-    letterM = 'M'
-    # Remove possible space from string
-    daugh = daugh.replace(singleSpace, noSpace)
-    # Check for 'G' suffix
-    if daugh.endswith(letterG):
-        daugh_noG  = daugh.rsplit(letterG, 1)[0]
-        daugh_conv = nucname.zzaaam(daugh_noG)
-    # Check for metastable suffix
-    elif daugh.endswith(meta1) or daugh.endswith(meta2):
-        # Convert appropriately
-        parts = daugh.rsplit(letterM ,1)
-        daugh_conv = nucname.zzaaam(parts[0]) + int(parts[1])
-    else:
-        daugh_conv = nucname.zzaaam(daugh)
-    return daugh_conv
 
 
 def _grow_matrix(A, prod, dest):
