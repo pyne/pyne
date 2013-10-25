@@ -256,6 +256,9 @@ bool pyne::nucname::isnuclide(int nuc)
 /********************/
 int pyne::nucname::id(int nuc)
 {
+  if (nuc < 0)
+    throw NotANuclide(nuc, "");
+
   int newnuc;
   int zzz = nuc / 10000000;     // ZZZ ?
   int aaassss = nuc % 10000000; // AAA-SSSS ?

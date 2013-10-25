@@ -256,10 +256,7 @@ class Transmuter(object):
             try:
                 child = rxname.child(nuc, rx)
             except RuntimeError:
-                child = (nuc, rxname.name(rx))
                 continue
-            finally:
-                print child
             child_xs = xs_cache[nuc, rx, temp][0]
             rr = utils.from_barns(child_xs, 'cm2') * phi  # reaction rate
             prod[child] = rr + prod.get(child, 0.0)

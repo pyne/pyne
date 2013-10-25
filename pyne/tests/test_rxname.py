@@ -137,9 +137,11 @@ def test_mt_not():
 
 def test_child():
     assert_equal(rxname.child("U235", "absorption"), 922360000)
+    assert_equal(rxname.child(922350000, "absorption"), 922360000)
 
 def test_parent():
     assert_equal(rxname.parent("U235", "absorption"), 922340000)
+    assert_equal(rxname.parent(922350000, "absorption"), 922340000)
 
 
 
