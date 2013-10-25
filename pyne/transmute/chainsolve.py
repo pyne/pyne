@@ -14,6 +14,8 @@ from pyne.xs.data_source import NullDataSource, EAFDataSource
 from pyne.xs.cache import XSCache
 from pyne.xs.channels import sigma_a
 
+import pdb
+
 class Transmuter(object):
     """A class for transmuting materials using an ALARA-like chain solver."""
 
@@ -40,7 +42,7 @@ class Transmuter(object):
         eafds = EAFDataSource()
         gs = np.array([eafds.src_group_struct[0], eafds.src_group_struct[-1]])
         eafds.dst_group_struct = gs
-        self.xs_cache = XSCache(group_struct=gs, data_source_classes=(NullDataSource))
+        self.xs_cache = XSCache(group_struct=gs, data_source_classes=(NullDataSource,))
         self.xs_cache.data_sources.insert(0, eafds)
 
         self.t = t
@@ -84,7 +86,7 @@ class Transmuter(object):
             raise ValueError("Flux entries must be non-negative.")
         for ds in self.xs_cache.data_sources:
             ds.src_phi_g = flux
-        self.xs_cache['phi_g'] = flux.sum()
+        self.xs_cache['phi_g'] = np.array([flux.sum()])
         self._phi = flux
 
     def transmute(self, x, t=None, phi=None, log=None, tol=None):
@@ -153,14 +155,15 @@ class Transmuter(object):
 
         """
         dest = self._get_destruction(nuc)
-        A = np.zeros((1,1), float)
+        A = np.empty((1,1), float)
         A[0, 0] = -dest
         rootval = np.exp(-dest * self.t)
         partial = {nuc: rootval}
+        #pdb.set_trace()
         self._traversal(nuc, A, partial)
         return partial
 
-    def _get_destruction(nuc, decay=True):
+    def _get_destruction(self, nuc, decay=True):
         """Computes the destruction rate of the nuclide.
 
         Parameters
@@ -177,11 +180,12 @@ class Transmuter(object):
             Destruction rate of the nuclide.
 
         """
-        xs_chache = self.xs_cache
+        xs_cache = self.xs_cache
         sig_a = sigma_a(nuc, xs_cache=xs_cache)
         d = utils.from_barns(sig_a[0], 'cm2') * xs_cache['phi_g'][0]
         if decay:
             d += data.decay_const(nuc) 
+        #pdb.set_trace()
         return d
 
     def _grow_matrix(self, A, prod, dest):
@@ -261,7 +265,7 @@ class Transmuter(object):
             rr = utils.from_barns(child_xs, 'cm2') * phi  # reaction rate
             prod[child] = rr + prod.get(child, 0.0)
         # Cycle production dictionary
-        for child in prod_dict.keys():
+        for child in prod:
             # Grow matrix
             d = self._get_destruction(child)
             B = self._grow_matrix(A, prod[child], d)
@@ -270,7 +274,10 @@ class Transmuter(object):
             N0 = np.zeros((n, 1), dtype=float)
             N0[0] = 1.0
             # Compute matrix exponential and dot with density vector
-            eB = linalg.expm(B * t)
+            try:
+                eB = linalg.expm(B * t)
+            except ValueError:
+                pdb#.set_trace()
             N_final = np.dot(eB, N0)
             # Log child
             if self.log is not None:
