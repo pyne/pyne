@@ -91,22 +91,6 @@ class Library(rx.RxLib):
             fh.close()
         return data
 
-    def _load_part(self, s):
-        """Read a section of the ENDF file into a NumPy array.
-
-        Parameters
-        -----------
-        s : string
-            The ENDF data to read in.
-
-        Returns
-        --------
-        data : np.array, 1d, float64
-            Returns a 1d float64 NumPy array.
-        """
-        data = fromendf_tok(s)
-        return data
-
     def _read_headers(self):
         cdef int nuc
         cdef int mat_id
@@ -399,7 +383,8 @@ class Library(rx.RxLib):
         sigma_g : float
             The group xs.
         """
-        return self.intdict[intscheme](Eint, xs)
+        with np.errstate(divide="ignore", invalid="ignore"):
+           return self.intdict[intscheme](Eint, xs)
 
 
     def _cont_and_update(self, flags, keys, data, total_lines):
@@ -895,7 +880,7 @@ class Library(rx.RxLib):
             s = fh.read(lines*81)
         if opened_here:
             fh.close
-        return self._load_part(s)
+        return fromendf_tok(s)
 
 class Evaluation(object):
     """
