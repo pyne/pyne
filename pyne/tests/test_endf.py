@@ -869,7 +869,7 @@ def test_int_loglog():
     return exp
 
 def test_discretize():
-    obs = ds.discretize(40000, 600, 40040)
+    obs = ds.discretize(40000000, 600, 40040)
     exp = [test_int_loglog(),
            test_int_loglin(),
            test_int_linlog(),
