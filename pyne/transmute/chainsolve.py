@@ -256,7 +256,10 @@ class Transmuter(object):
             try:
                 child = rxname.child(nuc, rx)
             except RuntimeError:
+                child = (nuc, rxname.name(rx))
                 continue
+            finally:
+                print child
             child_xs = xs_cache[nuc, rx, temp][0]
             rr = utils.from_barns(child_xs, 'cm2') * phi  # reaction rate
             prod[child] = rr + prod.get(child, 0.0)
@@ -272,12 +275,10 @@ class Transmuter(object):
             # Compute matrix exponential and dot with density vector
             eB = linalg.expm(B * t)
             N_final = np.dot(eB, N0)
-            # Log child
             if self.log is not None:
                 self._log_tree(depth+1, child, N_final[-1])
-            # Check against tolerance
+            # Check against tolerance and continue traversal
             if N_final[-1] > tol:
-                # Continue traversal
                 self._traversal(child, B, out, depth=depth+1)
             # On recursion exit or truncation, write data from this nuclide
             outval = N_final[-1] + out.get(child, 0.0)
