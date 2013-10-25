@@ -374,7 +374,8 @@ class Library(rx.RxLib):
         sigma_g : float
             The group xs.
         """
-        return self.intdict[intscheme](Eint, xs)
+        with np.errstate(divide="ignore", invalid="ignore"):
+           return self.intdict[intscheme](Eint, xs)
 
 
     def _cont_and_update(self, flags, keys, data, total_lines):
