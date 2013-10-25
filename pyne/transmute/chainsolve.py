@@ -298,9 +298,9 @@ class Transmuter(object):
         if numdens == 0.0:
             return
         space = '   |'
-        entry = "{spacing}--> {name} {N}\n".format(spacing=depth*space, 
-                                                   numdens=numdens,
-                                                   name=nucname.name(nuc))
+        entry = "{spacing}--> {name} {numdens}\n".format(spacing=depth*space, 
+                                                         numdens=numdens,
+                                                         name=nucname.name(nuc))
         self.log.write(entry)
         self.log.flush()
 
