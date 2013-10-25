@@ -331,7 +331,7 @@ def test_alara_to_id():
 
 def test_isnuclide():
     are = [922350, 'U235']
-    arent = ['U3']
+    arent = ['U3', -30060000]
     for nuc in are:
         yield assert_true, nucname.isnuclide(nuc)
     for nuc in arent:
