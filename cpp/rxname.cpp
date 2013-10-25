@@ -2404,18 +2404,18 @@ void * pyne::rxname::_fill_maps()
     id_offset[make_pair(ioffid->first.first, ioffid->second)] = ioffid->first.second;
   };
   // neutrons:
-  offset_id[make_pair("n", name_id["nHe3"])] = offset(-2, -3);
-  offset_id[make_pair("n", name_id["nHe3_1"])] = offset(-2, -3, 2);
-  offset_id[make_pair("n", name_id["nHe3_2"])] = offset(-2, -3, 2);
-  offset_id[make_pair("n", name_id["z_3np"])] = offset(-1, -3);
-  offset_id[make_pair("n", name_id["nd"])] = offset(-1, -2);
-  offset_id[make_pair("n", name_id["nd_1"])] = offset(-1, -2, 1);
-  offset_id[make_pair("n", name_id["nd_2"])] = offset(-1, -2, 2);
-  offset_id[make_pair("n", name_id["np"])] = offset(-1, -1);
-  offset_id[make_pair("n", name_id["np_1"])] = offset(-1, -1, 1);
-  offset_id[make_pair("n", name_id["np_2"])] = offset(-1, -1, 2);
-  offset_id[make_pair("n", name_id["n"])] = offset(0, 0);
-  offset_id[make_pair("n", name_id["gamma"])] = offset(0, 1);
+  id_offset[make_pair("n", name_id["nHe3"])] = offset(-2, -3);
+  id_offset[make_pair("n", name_id["nHe3_1"])] = offset(-2, -3, 2);
+  id_offset[make_pair("n", name_id["nHe3_2"])] = offset(-2, -3, 2);
+  id_offset[make_pair("n", name_id["z_3np"])] = offset(-1, -3);
+  id_offset[make_pair("n", name_id["nd"])] = offset(-1, -2);
+  id_offset[make_pair("n", name_id["nd_1"])] = offset(-1, -2, 1);
+  id_offset[make_pair("n", name_id["nd_2"])] = offset(-1, -2, 2);
+  id_offset[make_pair("n", name_id["np"])] = offset(-1, -1);
+  id_offset[make_pair("n", name_id["np_1"])] = offset(-1, -1, 1);
+  id_offset[make_pair("n", name_id["np_2"])] = offset(-1, -1, 2);
+  id_offset[make_pair("n", name_id["n"])] = offset(0, 0);
+  id_offset[make_pair("n", name_id["gamma"])] = offset(0, 1);
 
 };
 void * pyne::rxname::_ = pyne::rxname::_fill_maps();
