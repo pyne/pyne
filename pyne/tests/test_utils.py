@@ -21,7 +21,7 @@ def test_to_barns():
 
 
 def test_from_barns():
-    assert_equal(3E-3, utils.to_barns(3, 'KB'))
+    assert_equal(3E-3, utils.from_barns(3, 'KB'))
 
 
 def test_message():
