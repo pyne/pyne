@@ -428,6 +428,32 @@ namespace nucname
   int alara_to_id(std::string nuc);
   /// \}
 
+  /// \name SZA Form Functions
+  /// \{
+  /// This is the new format for ACE data tables in the form SSSZZZAAA.
+  /// The first three digits represent the excited state (000 = ground,
+  /// 001 = first excited state, 002 = second excited state, etc).
+  /// The second three digits are the atomic number and the last three
+  /// digits are the atomic mass. Prepending zeros can be omitted, making
+  /// the SZA form equal to the MCNP form for non-excited nuclides.
+  /// \param nuc a nuclide
+  /// \return a string nuclide identifier.
+  int sza(int nuc);
+  int sza(char * nuc);
+  int sza(std::string nuc);
+  /// \}
+
+  /// \name SZA Form to Identifier Form Functions
+  /// \{
+  /// This converts from the SZA nuclide naming convention 
+  /// to the id canonical form  for nuclides in PyNE. 
+  /// \param nuc a nuclide in SZA form.
+  /// \return an integer id nuclide identifier.
+  int sza_to_id(int nuc);
+  int sza_to_id(char * nuc);
+  int sza_to_id(std::string nuc);
+  /// \}
+
 };
 };
 
