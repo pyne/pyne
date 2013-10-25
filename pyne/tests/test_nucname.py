@@ -328,6 +328,45 @@ def test_alara_to_id():
             continue
         yield check_cases, nucname.alara_to_id, val, id
 
+def test_sza():
+    assert_equal(nucname.sza(20040), 2004)
+
+    assert_equal(nucname.sza("he4"),    2004)
+    assert_equal(nucname.sza("Cm-244"), 96244)
+    assert_equal(nucname.sza("PU239"),  94239)
+    assert_equal(nucname.sza("AM242M"), 1095242)
+
+    assert_equal(nucname.sza(2004),  2004)
+    assert_equal(nucname.sza(95642), 95242)
+    assert_equal(nucname.sza(95242), 1095242)
+    assert_equal(nucname.sza(92636), 1092236)
+    assert_equal(nucname.sza(95942), 4095242)
+
+    assert_equal(nucname.sza("Am-242m"), 1095242)
+
+    assert_equal(nucname.sza("he"), 2000)
+    assert_equal(nucname.sza("U"), 92000)
+    assert_equal(nucname.sza("Np"), 93000)
+
+    assert_equal(nucname.sza("4he"),   2004)
+    assert_equal(nucname.sza("244CM"), 96244)
+    assert_equal(nucname.sza("239Pu"), 94239)
+    assert_equal(nucname.sza("242AM"), 95242)
+
+    assert_equal(nucname.sza(40020),   2004)
+    assert_equal(nucname.sza(2440961), 1096244)
+    assert_equal(nucname.sza(2390940), 94239)
+    assert_equal(nucname.sza(2420950), 95242)
+
+def test_sza_to_id():
+    vals = [2004, 2004, 96244, 94239, 1095242, 2004, 95242, 1095242, 1092236, 
+            4095242, 1095242, 2000, 92000, 93000, 2004, 96244, 94239, 95242, 
+            2004, 1096244, 94239, 95242, 92000]
+    for val, id in set(zip(vals, caseids)):
+        if val is None:
+            continue
+        yield check_cases, nucname.sza_to_id, val, id
+
 
 def test_isnuclide():
     are = [922350, 'U235']
