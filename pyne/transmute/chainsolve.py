@@ -71,10 +71,7 @@ class Transmuter(object):
         flux = np.asarray(flux)
         if flux.ndim == 0:
             _ = np.empty(175, float)
-            if flux == 0.0:
-                _.fill(0.0)
-            else:
-                _.fill(1.0 / flux)
+            _.fill(flux / 175.0)
             flux = _
         elif flux.ndim == 1 and flux.shape[0] != 175:
             raise ValueError("Group structure must match EAF.")
