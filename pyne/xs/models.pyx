@@ -205,7 +205,7 @@ def group_collapse(sigma_n, phi_n, phi_g=None, partial_energies=None, E_g=None, 
 
     # Calulate partial group collapse
     sigma_g = np.dot(pem, sigma_n * phi_n) / phi_g
-    sigma_g[phi_g == 0.0] = 0.0  # handle zero flux to prevent NaNs later on.
+    sigma_g[np.isnan(sigma_g)] = 0.0  # handle zero flux that causes NaNs later.
     return sigma_g
 
 
