@@ -14,8 +14,6 @@ from pyne.xs.data_source import NullDataSource, EAFDataSource
 from pyne.xs.cache import XSCache
 from pyne.xs.channels import sigma_a
 
-import pdb
-
 class Transmuter(object):
     """A class for transmuting materials using an ALARA-like chain solver."""
 
@@ -159,7 +157,6 @@ class Transmuter(object):
         A[0, 0] = -dest
         rootval = np.exp(-dest * self.t)
         partial = {nuc: rootval}
-        #pdb.set_trace()
         self._traversal(nuc, A, partial)
         return partial
 
@@ -185,7 +182,6 @@ class Transmuter(object):
         d = utils.from_barns(sig_a[0], 'cm2') * xs_cache['phi_g'][0]
         if decay:
             d += data.decay_const(nuc) 
-        #pdb.set_trace()
         return d
 
     def _grow_matrix(self, A, prod, dest):
@@ -274,10 +270,7 @@ class Transmuter(object):
             N0 = np.zeros((n, 1), dtype=float)
             N0[0] = 1.0
             # Compute matrix exponential and dot with density vector
-            try:
-                eB = linalg.expm(B * t)
-            except ValueError:
-                pdb#.set_trace()
+            eB = linalg.expm(B * t)
             N_final = np.dot(eB, N0)
             # Log child
             if self.log is not None:
@@ -287,7 +280,9 @@ class Transmuter(object):
                 # Continue traversal
                 self._traversal(child, B, out, depth=depth+1)
             # On recursion exit or truncation, write data from this nuclide
-            out[child] = N_final[-1] + out.get(child, 0.0)
+            outval = N_final[-1] + out.get(child, 0.0)
+            if 0.0 < outval:
+                out[child] = outval
 
     def _log_tree(self, depth, nuc, numdens):
         """Logging method to track path of _traversal.
