@@ -1016,46 +1016,44 @@ int pyne::nucname::alara_to_id(std::string nuc)
 /***********************/
 int pyne::nucname::sza(int nuc)
 {
-    int nucid = id(nuc);
-    int zzzaaa = nucid / 10000;
-    int sss = nucid % 10000;
-    
-    return sss * 1000000 + zzzaaa;
+  int nucid = id(nuc);
+  int zzzaaa = nucid / 10000;
+  int sss = nucid % 10000;
+  return sss * 1000000 + zzzaaa;
 }
 
 
 int pyne::nucname::sza(char * nuc)
 {
-    std::string newnuc (nuc);
-    return sza(newnuc);
+  std::string newnuc (nuc);
+  return sza(newnuc);
 }
 
 
 int pyne::nucname::sza(std::string nuc)
 {
-    return sza(id(nuc));
+  return sza(id(nuc));
 }
 
 
 int pyne::nucname::sza_to_id(int nuc)
 {
-    int sss = nuc / 1000000;
-    int zzzaaa = nuc % 1000000;
-    
-    return zzzaaa * 10000 + sss;
+  int sss = nuc / 1000000;
+  int zzzaaa = nuc % 1000000;
+  return zzzaaa * 10000 + sss;
 }
 
 
 int pyne::nucname::sza_to_id(char * nuc)
 {
-    std::string newnuc (nuc);
-    return sza_to_id(newnuc);
+  std::string newnuc (nuc);
+  return sza_to_id(newnuc);
 }
 
 
 int pyne::nucname::sza_to_id(std::string nuc)
 {
-    return sza_to_id(pyne::to_int(nuc));
+  return sza_to_id(pyne::to_int(nuc));
 }
 
 
