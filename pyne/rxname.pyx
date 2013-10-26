@@ -437,9 +437,9 @@ def child(nuc, rx, char * z="n"):
     """
     cdef std_string ptype #= std_string(<char *> z);
     cdef int to_nuc
+    cdef bint nuc_is_str = isinstance(nuc, basestring)
+    cdef bint rx_is_str = isinstance(rx, basestring)
     ptype = std_string(<char *> z);
-    nuc_is_str = isinstance(rx, basestring)
-    rx_is_str = isinstance(rx, basestring)
     if nuc_is_str and rx_is_str:
         to_nuc = cpp_rxname.child(std_string(<char *> nuc), 
                                   std_string(<char *> rx), ptype)
@@ -474,9 +474,9 @@ def parent(nuc, rx, char * z="n"):
     """
     cdef std_string ptype #= std_string(<char *> z);
     cdef int from_nuc
+    cdef bint nuc_is_str = isinstance(nuc, basestring)
+    cdef bint rx_is_str = isinstance(rx, basestring)
     ptype = std_string(<char *> z);
-    nuc_is_str = isinstance(rx, basestring)
-    rx_is_str = isinstance(rx, basestring)
     if nuc_is_str and rx_is_str:
         from_nuc = cpp_rxname.parent(std_string(<char *> nuc), 
                                     std_string(<char *> rx), ptype)

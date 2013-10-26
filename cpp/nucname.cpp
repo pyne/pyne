@@ -238,10 +238,12 @@ bool pyne::nucname::isnuclide(int nuc)
   catch(IndeterminateNuclideForm) {
     return false;
   };
+  if (n <= 10000000)
+    return false;
   int zzz = n / 10000000;
   int aaa = (n % 10000000) / 10000;
   if (aaa == 0)
-    return true;
+    return false;  // is element
   else if (aaa < zzz)
     return false;
   return true;
@@ -254,6 +256,9 @@ bool pyne::nucname::isnuclide(int nuc)
 /********************/
 int pyne::nucname::id(int nuc)
 {
+  if (nuc < 0)
+    throw NotANuclide(nuc, "");
+
   int newnuc;
   int zzz = nuc / 10000000;     // ZZZ ?
   int aaassss = nuc % 10000000; // AAA-SSSS ?

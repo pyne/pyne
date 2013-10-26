@@ -117,7 +117,7 @@ def setup():
     scripts = [s for s in scripts if (os.name == 'nt' and s.endswith('.bat')) or 
                                      (os.name != 'nt' and not s.endswith('.bat'))]
     packages = ['pyne', 'pyne.lib', 'pyne.dbgen', 'pyne.apigen', 'pyne.xs', 
-                'pyne.simplesim', 'pyne.gui']
+                'pyne.simplesim', 'pyne.transmute', 'pyne.gui']
     pack_dir = {
         'pyne': 'pyne',
         'pyne.xs': 'pyne/xs',
@@ -126,6 +126,7 @@ def setup():
         'pyne.dbgen': 'pyne/dbgen',
         'pyne.apigen': 'pyne/apigen',
         'pyne.simplesim': 'pyne/simplesim',
+        'pyne.transmute': 'pyne/transmute',
         }
     extpttn = ['*.dll', '*.so', '*.dylib', '*.pyd', '*.pyo']
     pack_data = {
@@ -140,7 +141,7 @@ def setup():
     setup_kwargs = {
         "name": "pyne",
         "version": INFO['version'],
-        "description": 'Python for Nuclear Engineering',
+        "description": 'The Nuclear Engineering Toolkit',
         "author": 'PyNE Development Team',
         "author_email": 'scopatz@gmail.com',
         "url": 'http://pyne.github.com/',
