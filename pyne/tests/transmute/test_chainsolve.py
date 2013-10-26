@@ -114,10 +114,10 @@ def test_zero_flux():
     an isotope with a zero decay-constant."""
     inp = Material({'FE56': 1.0}, mass=1.0)
     obs = tm.transmute(inp, t=100.0, tol=1e-7)
-    print inp
-    print
-    print obs
-    assert_equal(obs['FE56'], 1.0)
+    #print inp
+    #print
+    #print obs
+    assert_almost_equal(obs['FE56'], 1.0)
 
 """\
 
