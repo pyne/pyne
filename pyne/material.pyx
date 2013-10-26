@@ -49,11 +49,8 @@ cdef cpp_map[int, double] dict_to_comp(dict nucvec):
     cdef cpp_map[int, double] comp = cpp_map[int, double]()
 
     for key, value in nucvec.items():
-        if isinstance(key, int):
-            comp[key] = value
-        else:
-            key_zz = nucname.id(key)
-            comp[key_zz] = value
+        key_zz = nucname.id(key)
+        comp[key_zz] = value
 
     return comp
 
@@ -78,7 +75,8 @@ cdef class _Material:
         elif isinstance(nucvec, basestring):
             # Material from file
             self.mat_pointer = new cpp_material.Material(
-                    <char *> nucvec, mass, density, atoms_per_mol, deref(cattrs._inst))
+                    <char *> nucvec, mass, density, atoms_per_mol, 
+                    deref(cattrs._inst))
         elif (nucvec is None):
             if free_mat:
                 # Make empty mass stream
@@ -553,9 +551,9 @@ cdef class _Material:
         Parameters
         ----------
         nuc_sequence : sequence
-            Elements and nuctopes to be taken from current stream.
-            Members of this list must be integers.  For example, [92, 942390]
-            would take all uranium atoms and Pu-239.
+            Nuctopes --OR-- elements to be taken from current stream.
+            Members of this list must be integers.  For example, [922350, 942390]
+            would take U-235 and Pu-239.
 
         Returns
         -------
@@ -589,9 +587,9 @@ cdef class _Material:
         Parameters
         ----------
         nuc_sequence : sequence
-            Elements and nuctopes to be taken from current stream.
-            Members of this list must be integers.  For example, [92, 942390]
-            would take all uranium atoms and Pu-239.
+            Nuctopes --OR-- elements to be taken from current stream.
+            Members of this list must be integers.  For example, [922350, 942390]
+            would take U-235 and Pu-239.
         value : float
             Mass value to set all nuclides in sequence to on the material.
 
@@ -754,6 +752,22 @@ cdef class _Material:
         return pymat
 
 
+    def sub_elem(self, element):
+        """sub_elem(element)
+        Grabs a subset of the material and returns a new material comprised of 
+        only the nuclides of the specified element.
+
+        Returns
+        -------
+        submaterial : Material
+            A new mass stream object that only has members of the given element.
+
+        """
+        cdef _Material pymat = Material()
+        pymat.mat_pointer[0] = self.mat_pointer.sub_elem(nucname.id(element))
+        return pymat
+
+
     def sub_u(self):
         """sub_u()
         Convenience method that gets the Uranium portion of a mass stream.
@@ -765,7 +779,7 @@ cdef class _Material:
 
         """
         cdef _Material pymat = Material()
-        pymat.mat_pointer[0] = self.mat_pointer.sub_u()
+        pymat.mat_pointer[0] = self.mat_pointer.sub_elem(nucname.id('U'))
         return pymat
 
 
@@ -780,7 +794,7 @@ cdef class _Material:
 
         """
         cdef _Material pymat = Material()
-        pymat.mat_pointer[0] = self.mat_pointer.sub_pu()
+        pymat.mat_pointer[0] = self.mat_pointer.sub_elem(nucname.id('Pu'))
         return pymat
 
 

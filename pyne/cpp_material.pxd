@@ -77,8 +77,7 @@ cdef extern from "material.h" namespace "pyne":
         Material set_range(int, int, double) except +
         Material del_range(int, int) except +
 
-        Material sub_u() except +
-        Material sub_pu() except +
+        Material sub_elem(int) except +
         Material sub_lan() except +
         Material sub_act() except +
         Material sub_tru() except +
