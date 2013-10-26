@@ -4,7 +4,8 @@ import os
 import nose
 
 from nose.tools import assert_equal, assert_not_equal, assert_raises, raises, \
-    assert_almost_equal, assert_true, assert_false, assert_is, with_setup
+    assert_almost_equal, assert_true, assert_false, assert_is, with_setup, \
+    assert_less
 
 from numpy.testing import dec, assert_array_equal
 
@@ -114,70 +115,23 @@ def test_zero_flux():
     an isotope with a zero decay-constant."""
     inp = Material({'FE56': 1.0}, mass=1.0)
     obs = tm.transmute(inp, t=100.0, tol=1e-7)
-    #print inp
-    #print
-    #print obs
     assert_almost_equal(obs['FE56'], 1.0)
-
-"""\
-
 
 def test_root_decrease():
     "Tests that the root isotope is not being skipped"
-    nuc = nn.zzaaam('FE56')
-    t_sim = 100.
-    phi = np.zeros((175,1))
-    for i in np.arange(phi.shape[0]):
-        phi[i] = 1e12
-    tree = None
-    tol = 1e-7
-    out = tm.transmute_core(nuc, t_sim, phi, tree, tol)
-    assert_true(out[nuc] < 1)
-
-def test_trans_v_transCore():
-    "Tests that transmute_core and transmute agree"
-    nuc = nn.zzaaam('FE56')
-    t_sim = 100.
-    phi = np.zeros((175,1))
-    for i in np.arange(phi.shape[0]):
-        phi[i] = 1.0E+12
-    out_core = tm.transmute_core(nuc, t_sim, phi)
-    inp = {nuc: 1.0}
-    out = tm.transmute(inp, t_sim, phi)
-    for key in out.keys():
-        assert_true(key in out_core.keys())
-        assert_equal(out[key], out_core[key])
-
-def test_trans_v_transSpat():
-    "Tests that transmute and transmute_spatial agree"
-    nuc = nn.zzaaam('FE56')
-    t_sim = 100.
-    phi = np.zeros((175,1))
-    for i in np.arange(phi.shape[0]):
-        phi[i] = 1.0E+12
-    inp = {nuc: 1.0}
-    inp2 = {nuc: 2.0}
-    space = {1: (phi, inp), 2: (phi, inp2)}
-    out = tm.transmute(inp, t_sim, phi)
-    space_out = tm.transmute_spatial(space, t_sim)
-    for key in out.keys():
-        assert_true(key in space_out[1].keys())
-        assert_true(key in space_out[2].keys())
-        assert_equal(out[key], space_out[1][key])
-        assert_equal(2*out[key], space_out[2][key])
+    phi = 1e12 * np.ones(175)
+    inp = Material({'FE56': 1.0}, mass=1.0)
+    obs = tm.transmute(inp, t=100.0, phi=phi, tol=1e-7)
+    assert_less(obs['FE56'], 1.0)
 
 def test_tm171_decay():
     "Tests if decay is properly implemented"
-    nuc = nn.zzaaam('TM171')
-    t_sim = 1.2119E+8 # Run for 3.843 years (approx 2 half lives)
-    out = tm.transmute_core(nuc, t_sim, None)
-    # With no flux, the result should be pure decay
-    assert_true(nuc in out.keys())
-    tm_res = out[nuc]
-    lamb = data.decay_const(nuc)
-    analytical = np.exp(-1*lamb*t_sim)
-    assert_equal(tm_res, analytical)
-"""
+    t_sim = 1.2119E+8  # Run for 3.843 years (approx 2 half lives)
+    lamb = data.decay_const('TM171')
+    exp = np.exp(-1*lamb*t_sim)
+    inp = Material({'TM171': 1.0}, mass=1.0)
+    obs = tm.transmute(inp, t=t_sim, phi=0.0, tol=1e-7)
+    assert_equal(exp, obs['TM171'])
 
 #
 # Run as script
