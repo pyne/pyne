@@ -233,18 +233,18 @@ def name(x, y=None, char * z="n"):
         if isinstance(x, basestring):
             cn = cpp_rxname.name(std_string(<char *> x))
         elif isinstance(x, int):
-            cn = cpp_rxname.name(<extra_types.uint> long(x))
+            cn = cpp_rxname.name(<extra_types.uint32> long(x))
         elif isinstance(x, long):
-            cn = cpp_rxname.name(<extra_types.uint> x)
+            cn = cpp_rxname.name(<extra_types.uint32> x)
     else:
         if isinstance(x, basestring):
-            from_nuc = cpp_nucname.zzaaam(std_string(<char *> x))
+            from_nuc = cpp_nucname.id(std_string(<char *> x))
         elif isinstance(x, int):
-            from_nuc = cpp_nucname.zzaaam(<int> x)
+            from_nuc = cpp_nucname.id(<int> x)
         if isinstance(y, basestring):
-            to_nuc = cpp_nucname.zzaaam(std_string(<char *> y))
+            to_nuc = cpp_nucname.id(std_string(<char *> y))
         elif isinstance(y, int):
-            to_nuc = cpp_nucname.zzaaam(<int> y)
+            to_nuc = cpp_nucname.id(<int> y)
         cn = cpp_rxname.name(from_nuc, to_nuc, std_string(z))
     n = <char *> cn.c_str()
     return n
@@ -276,18 +276,18 @@ def id(x, y=None, char * z="n"):
         if isinstance(x, basestring):
             rxid = cpp_rxname.id(std_string(<char *> x))
         elif isinstance(x, int):
-            rxid = cpp_rxname.id(<extra_types.uint> long(x))
+            rxid = cpp_rxname.id(<extra_types.uint32> long(x))
         elif isinstance(x, long):
-            rxid = cpp_rxname.id(<extra_types.uint> x)
+            rxid = cpp_rxname.id(<extra_types.uint32> x)
     else:
         if isinstance(x, basestring):
-            from_nuc = cpp_nucname.zzaaam(std_string(<char *> x))
+            from_nuc = cpp_nucname.id(std_string(<char *> x))
         elif isinstance(x, int):
-            from_nuc = cpp_nucname.zzaaam(<int> x)
+            from_nuc = cpp_nucname.id(<int> x)
         if isinstance(y, basestring):
-            to_nuc = cpp_nucname.zzaaam(std_string(<char *> y))
+            to_nuc = cpp_nucname.id(std_string(<char *> y))
         elif isinstance(y, int):
-            to_nuc = cpp_nucname.zzaaam(<int> y)
+            to_nuc = cpp_nucname.id(<int> y)
         rxid = cpp_rxname.id(from_nuc, to_nuc, std_string(z))
     return int(rxid)
 
@@ -316,18 +316,18 @@ def mt(x, y=None, char * z="n"):
         if isinstance(x, basestring):
             mtnum = cpp_rxname.mt(std_string(<char *> x))
         elif isinstance(x, int):
-            mtnum = cpp_rxname.mt(<extra_types.uint> long(x))
+            mtnum = cpp_rxname.mt(<extra_types.uint32> long(x))
         elif isinstance(x, long):
-            mtnum = cpp_rxname.mt(<extra_types.uint> x)
+            mtnum = cpp_rxname.mt(<extra_types.uint32> x)
     else:
         if isinstance(x, basestring):
-            from_nuc = cpp_nucname.zzaaam(std_string(<char *> x))
+            from_nuc = cpp_nucname.id(std_string(<char *> x))
         elif isinstance(x, int):
-            from_nuc = cpp_nucname.zzaaam(<int> x)
+            from_nuc = cpp_nucname.id(<int> x)
         if isinstance(y, basestring):
-            to_nuc = cpp_nucname.zzaaam(std_string(<char *> y))
+            to_nuc = cpp_nucname.id(std_string(<char *> y))
         elif isinstance(y, int):
-            to_nuc = cpp_nucname.zzaaam(<int> y)
+            to_nuc = cpp_nucname.id(<int> y)
         mtnum = cpp_rxname.mt(from_nuc, to_nuc, std_string(z))
     return int(mtnum)
 
@@ -357,18 +357,18 @@ def label(x, y=None, char * z="n"):
         if isinstance(x, basestring):
             clab = cpp_rxname.label(std_string(<char *> x))
         elif isinstance(x, int):
-            clab = cpp_rxname.label(<extra_types.uint> long(x))
+            clab = cpp_rxname.label(<extra_types.uint32> long(x))
         elif isinstance(x, long):
-            clab = cpp_rxname.label(<extra_types.uint> x)
+            clab = cpp_rxname.label(<extra_types.uint32> x)
     else:
         if isinstance(x, basestring):
-            from_nuc = cpp_nucname.zzaaam(std_string(<char *> x))
+            from_nuc = cpp_nucname.id(std_string(<char *> x))
         elif isinstance(x, int):
-            from_nuc = cpp_nucname.zzaaam(<int> x)
+            from_nuc = cpp_nucname.id(<int> x)
         if isinstance(y, basestring):
-            to_nuc = cpp_nucname.zzaaam(std_string(<char *> y))
+            to_nuc = cpp_nucname.id(std_string(<char *> y))
         elif isinstance(y, int):
-            to_nuc = cpp_nucname.zzaaam(<int> y)
+            to_nuc = cpp_nucname.id(<int> y)
         clab = cpp_rxname.label(from_nuc, to_nuc, std_string(z))
     lab = <char *> clab.c_str()
     return lab
@@ -399,18 +399,93 @@ def doc(x, y=None, char * z="n"):
         if isinstance(x, basestring):
             cd = cpp_rxname.doc(std_string(<char *> x))
         elif isinstance(x, int):
-            cd = cpp_rxname.doc(<extra_types.uint> long(x))
+            cd = cpp_rxname.doc(<extra_types.uint32> long(x))
         elif isinstance(x, long):
-            cd = cpp_rxname.doc(<extra_types.uint> x)
+            cd = cpp_rxname.doc(<extra_types.uint32> x)
     else:
         if isinstance(x, basestring):
-            from_nuc = cpp_nucname.zzaaam(std_string(<char *> x))
+            from_nuc = cpp_nucname.id(std_string(<char *> x))
         elif isinstance(x, int):
-            from_nuc = cpp_nucname.zzaaam(<int> x)
+            from_nuc = cpp_nucname.id(<int> x)
         if isinstance(y, basestring):
-            to_nuc = cpp_nucname.zzaaam(std_string(<char *> y))
+            to_nuc = cpp_nucname.id(std_string(<char *> y))
         elif isinstance(y, int):
-            to_nuc = cpp_nucname.zzaaam(<int> y)
+            to_nuc = cpp_nucname.id(<int> y)
         cd = cpp_rxname.doc(from_nuc, to_nuc, std_string(z))
     d = <char *> cd.c_str()
     return d
+
+
+def child(nuc, rx, char * z="n"):
+    """child(nuc, rx, char * z="n")
+
+    Gives the child nuclide that comes from a parent and a reaction.
+
+    Parameters
+    ----------
+    nuc : str or int
+        parent nuclide name or id.
+    rx : str or int
+        reaction name or id.
+    z : str, optional
+        incident particle type ("n", "p", ...).
+
+    Returns
+    -------
+    to_nuc : int
+        a nuclide identifier.
+    """
+    cdef std_string ptype #= std_string(<char *> z);
+    cdef int to_nuc
+    ptype = std_string(<char *> z);
+    nuc_is_str = isinstance(rx, basestring)
+    rx_is_str = isinstance(rx, basestring)
+    if nuc_is_str and rx_is_str:
+        to_nuc = cpp_rxname.child(std_string(<char *> nuc), 
+                                  std_string(<char *> rx), ptype)
+    elif not nuc_is_str and rx_is_str:
+        to_nuc = cpp_rxname.child(<int> nuc, std_string(<char *> rx), ptype)
+    elif nuc_is_str and not rx_is_str:
+        to_nuc = cpp_rxname.child(std_string(<char *> nuc), 
+                                  <extra_types.uint32> long(rx), ptype)
+    elif not nuc_is_str and not rx_is_str:
+        to_nuc = cpp_rxname.child(<int> nuc, <extra_types.uint32> long(rx), ptype)
+    return int(to_nuc)
+
+
+def parent(nuc, rx, char * z="n"):
+    """parent(nuc, rx, char * z="n")
+
+    Gives the parent nuclide that produces a child from a reaction.
+
+    Parameters
+    ----------
+    nuc : str or int
+        child nuclide name or id.
+    rx : str or int
+        reaction name or id.
+    z : str, optional
+        incident particle type ("n", "p", ...).
+
+    Returns
+    -------
+    from_nuc : int
+        a nuclide identifier.
+    """
+    cdef std_string ptype #= std_string(<char *> z);
+    cdef int from_nuc
+    ptype = std_string(<char *> z);
+    nuc_is_str = isinstance(rx, basestring)
+    rx_is_str = isinstance(rx, basestring)
+    if nuc_is_str and rx_is_str:
+        from_nuc = cpp_rxname.parent(std_string(<char *> nuc), 
+                                    std_string(<char *> rx), ptype)
+    elif not nuc_is_str and rx_is_str:
+        from_nuc = cpp_rxname.parent(<int> nuc, std_string(<char *> rx), ptype)
+    elif nuc_is_str and not rx_is_str:
+        from_nuc = cpp_rxname.parent(std_string(<char *> nuc), 
+                                    <extra_types.uint32> long(rx), ptype)
+    elif not nuc_is_str and not rx_is_str:
+        from_nuc = cpp_rxname.parent(<int> nuc, <extra_types.uint32> long(rx), ptype)
+    return int(from_nuc)
+

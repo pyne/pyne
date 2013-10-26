@@ -18,9 +18,11 @@ include "include/cython_version.pxi"
 IF CYTHON_VERSION_MAJOR == 0 and CYTHON_VERSION_MINOR >= 17:
     from libcpp.string cimport string as std_string
     from libcpp.map cimport map as cpp_map
+    from libcpp.vector cimport vector as cpp_vector
 ELSE:
     from pyne._includes.libcpp.string cimport string as std_string
     from pyne._includes.libcpp.map cimport map as cpp_map
+    from pyne._includes.libcpp.vector cimport vector as cpp_vector
 cimport cpp_material
 cimport pyne.stlcontainers as conv
 import pyne.stlcontainers as conv
@@ -36,6 +38,10 @@ import os
 cimport pyne.data as data
 import pyne.data as data
 
+import tables as tb
+
+# Maximum 32-bit signed int
+DEF INT_MAX = 2147483647
 
 cdef cpp_map[int, double] dict_to_comp(dict nucvec):
     """Converts a dictionary with arbitraily-typed keys to component map."""
@@ -46,7 +52,7 @@ cdef cpp_map[int, double] dict_to_comp(dict nucvec):
         if isinstance(key, int):
             comp[key] = value
         else:
-            key_zz = nucname.zzaaam(key)
+            key_zz = nucname.id(key)
             comp[key_zz] = value
 
     return comp
@@ -226,16 +232,17 @@ cdef class _Material:
 
         Protocol 1 is the newer, more efficient protocol for storing many
         materials.  It consists of a table which stores the material
-        information and an array that stores the nuclides (zzaaam) which index
+        information and an array that stores the nuclides (id) which index
         the comp array::
 
             file.h5 (file)
                 |-- material (table)
-                    |-- name (string col, len 20)
                     |-- mass (double col)
+                    |-- density (double col)
                     |-- atoms_per_mol (double col)
                     |-- comp (double array col, len of nuc_zz)
                 |-- nuc_zz (int array)
+                |-- material_attr (variable length char array)
 
         The material table has a string attribute called 'nucpath' which holds
         the path to the nuclide array inside this HDF5 file.  The same nucpath
@@ -254,9 +261,9 @@ cdef class _Material:
         self.mat_pointer.from_hdf5(filename, datapath, row, protocol)
 
 
-    def write_hdf5(self, filename, datapath="/material", nucpath="/nuc_zz",
+    def write_hdf5(self, filename, datapath="/material", nucpath="/nucid",
                    row=-0.0, chunksize=100):
-        """write_hdf5(filename, datapath="/material", nucpath="/nuc_zz", row=-0.0, chunksize=100)
+        """write_hdf5(filename, datapath="/material", nucpath="/nucid", row=-0.0, chunksize=100)
         Writes the material to an HDF5 file, using Protocol 1 (see the
         from_hdf5() method).
 
@@ -269,7 +276,7 @@ cdef class _Material:
             Path to HDF5 table that represents the data.  If the table does not
             exist, it will be created.
         nucpath : str, optional
-            Path to zzaaam array of nuclides to write out.  If this array does
+            Path to id array of nuclides to write out.  If this array does
             not exist, it is created with the nuclides present in this
             material. Nuclides present in this material but not in nucpath will
             not be written out.
@@ -368,8 +375,63 @@ cdef class _Material:
         """
         self.mat_pointer.write_text(filename)
 
+    def load_json(self, json):
+        """load_json(json)
+        Loads a JSON instance into this Material.
 
+        Parameters
+        ----------
+        json : jsoncpp.Value
+            An object-type JSON value.
 
+        """
+        self.mat_pointer.load_json(deref((<jsoncpp.Value> json)._inst))
+
+    def dump_json(self):
+        """dump_json()
+        Dumps the material to a JSON object.
+
+        Returns
+        -------
+        val : jsoncpp.Value
+            An object-type JSON value.
+
+        """
+        cdef jsoncpp.Value val = jsoncpp.Value(view=False)
+        val._inst[0] = self.mat_pointer.dump_json()
+        return val
+
+    def from_json(self, char * filename):
+        """from_json(char * filename)
+        Initialize a Material object from a JSON file.
+
+        Parameters
+        ----------
+        filename : str
+            Path to text file that contains the data to read in.
+
+        """
+        self.mat_pointer.from_json(filename)
+
+    def write_json(self, filename):
+        """write_json(filename)
+        Writes the material to a JSON file.
+
+        Parameters
+        ----------
+        filename : str
+            Path to text file to write the data to.  If the file already
+            exists, it will be overwritten.
+
+        Examples
+        --------
+        The following writes out a low-enriched uranium material to a new file::
+
+            leu = Material({'U235': 0.04, 'U238': 0.96}, 42.0, "LEU", 1.0)
+            leu.write_json('leu.json')
+
+        """
+        self.mat_pointer.write_json(filename)
 
     def normalize(self):
         """This convenience method normalizes the mass stream by setting its
@@ -511,7 +573,7 @@ cdef class _Material:
 
         """
         # Make an nuctopic set
-        cdef cpp_set[int] nuc_set = nucname.zzaaam_set(nuc_sequence)
+        cdef cpp_set[int] nuc_set = nucname.id_set(nuc_sequence)
 
         # Make new python version of this material
         cdef _Material pymat = Material()
@@ -543,7 +605,7 @@ cdef class _Material:
 
         """
         # Make an nuctopic set
-        cdef cpp_set[int] nuc_set = nucname.zzaaam_set(nuc_sequence)
+        cdef cpp_set[int] nuc_set = nucname.id_set(nuc_sequence)
 
         # Make new python version of this material
         cdef _Material pymat = Material()
@@ -576,7 +638,7 @@ cdef class _Material:
 
         """
         # Make an nuctopic set
-        cdef cpp_set[int] nuc_set = nucname.zzaaam_set(nuc_sequence)
+        cdef cpp_set[int] nuc_set = nucname.id_set(nuc_sequence)
 
         # Make new python version of this material
         cdef _Material pymat = Material()
@@ -584,8 +646,8 @@ cdef class _Material:
         return pymat
 
 
-    def sub_range(self, lower=0, upper=10000000):
-        """sub_range(lower=0, upper=10000000)
+    def sub_range(self, lower=0, upper=INT_MAX):
+        """sub_range(lower=0, upper=INT_MAX)
         Grabs a sub-material from this mat based on a range [lower, upper)
         of values.
 
@@ -607,20 +669,20 @@ cdef class _Material:
         if isinstance(lower, int):
             clower = lower
         else:
-            clower = nucname.zzaaam(lower)
+            clower = nucname.id(lower)
 
         if isinstance(upper, int):
             cupper = upper
         else:
-            cupper = nucname.zzaaam(upper)
+            cupper = nucname.id(upper)
 
         cdef _Material pymat = Material()
         pymat.mat_pointer[0] = self.mat_pointer.sub_range(clower, cupper)
         return pymat
 
 
-    def set_range(self, lower=0, upper=10000000, value=0.0):
-        """set_range(lower=0, upper=10000000, value=0.0)
+    def set_range(self, lower=0, upper=INT_MAX, value=0.0):
+        """set_range(lower=0, upper=INT_MAX, value=0.0)
         Sets a sub-material from this mat based on a range [lower, upper) to
         a new mass weight value.
 
@@ -644,20 +706,20 @@ cdef class _Material:
         if isinstance(lower, int):
             clower = lower
         else:
-            clower = nucname.zzaaam(lower)
+            clower = nucname.id(lower)
 
         if isinstance(upper, int):
             cupper = upper
         else:
-            cupper = nucname.zzaaam(upper)
+            cupper = nucname.id(upper)
 
         cdef _Material pymat = Material()
         pymat.mat_pointer[0] = self.mat_pointer.set_range(clower, cupper, <double> value)
         return pymat
 
 
-    def del_range(self, lower=0, upper=10000000):
-        """del_range(lower=0, upper=10000000)
+    def del_range(self, lower=0, upper=INT_MAX):
+        """del_range(lower=0, upper=INT_MAX)
         Remove a range [lower, upper) of nuclides from this material and
         returns a submaterial.
 
@@ -680,12 +742,12 @@ cdef class _Material:
         if isinstance(lower, int):
             clower = lower
         else:
-            clower = nucname.zzaaam(lower)
+            clower = nucname.id(lower)
 
         if isinstance(upper, int):
             cupper = upper
         else:
-            cupper = nucname.zzaaam(upper)
+            cupper = nucname.id(upper)
 
         cdef _Material pymat = Material()
         pymat.mat_pointer[0] = self.mat_pointer.del_range(clower, cupper)
@@ -867,7 +929,7 @@ cdef class _Material:
                     af[key_zz] = 0.0
                 af[key_zz] = af[key_zz] + val
             elif isinstance(key, basestring):
-                key_zz = nucname.zzaaam(key)
+                key_zz = nucname.id(key)
                 if 0 == af.count(key_zz):
                     af[key_zz] = 0.0
                 af[key_zz] = af[key_zz] + val
@@ -994,7 +1056,7 @@ cdef class _Material:
 
         # Get single string-key
         elif isinstance(key, basestring):
-            key_zz = nucname.zzaaam(key)
+            key_zz = nucname.id(key)
             return self[key_zz]
 
         # Get slice-based sub-material
@@ -1005,7 +1067,7 @@ cdef class _Material:
 
             upper = key.stop
             if upper is None:
-                upper = 10000000
+                upper = INT_MAX
 
             return self.sub_range(lower, upper)
 
@@ -1036,7 +1098,7 @@ cdef class _Material:
 
         # Set single string-key
         elif isinstance(key, basestring):
-            key_zz = nucname.zzaaam(key)
+            key_zz = nucname.id(key)
             self[key_zz] = value
 
         # Set slice-based sub-material
@@ -1047,7 +1109,7 @@ cdef class _Material:
 
             upper = key.stop
             if upper is None:
-                upper = 10000000
+                upper = INT_MAX
 
             # set values back on instance
             new_mat = self.set_range(lower, upper, value)
@@ -1086,7 +1148,7 @@ cdef class _Material:
 
         # Remove single string-key
         elif isinstance(key, basestring):
-            key_zz = nucname.zzaaam(key)
+            key_zz = nucname.id(key)
             del self[key_zz]
 
         # Remove slice-based sub-material
@@ -1097,7 +1159,7 @@ cdef class _Material:
 
             upper = key.stop
             if upper is None:
-                upper = 10000000
+                upper = INT_MAX
 
             # set values back on instance
             new_mat = self.del_range(lower, upper)
@@ -1142,7 +1204,7 @@ class Material(_Material, collections.MutableMapping):
         not be normalized; Material initialization will automatically
         renormalize the stream.  Thus the comp simply is a dictionary of
         relative weights.  The keys of comp must be integers representing
-        nuclides in zzaaam-form.  The values are floats for each nuclide's
+        nuclides in id-form.  The values are floats for each nuclide's
         weight fraction. If a string is provided instead of a dictionary, then
         Material will read in the comp vector from a file at the string's
         location.  This either plaintext or hdf5 files. If no comp is provided,
@@ -1220,11 +1282,12 @@ class Material(_Material, collections.MutableMapping):
         fracs = self.to_atom_frac() if frac_type == 'atom' else self.comp
         frac_sign = "" if  frac_type == 'atom' else '-'
         for nuc, frac in fracs.items():
+            nucmcnp = str(nucname.mcnp(nuc))
             if 'table_ids' in self.attrs:
-                s += '     {0}.{1} '.format(str(nuc)[:-1],
-                                            self.attrs['table_ids'][str(nuc)])
+                s += '     {0}.{1} '.format(nucmcnp,
+                                            self.attrs['table_ids'][nucmcnp])
             else:
-                s += '     {0} '.format(nuc)
+                s += '     {0} '.format(nucmcnp)
             s += '{0}{1:.4E}\n'.format(frac_sign, frac)
 
         # write s to output file
@@ -1272,7 +1335,7 @@ class Material(_Material, collections.MutableMapping):
 
         for iso, frac in self.comp.items():
             s += '     {0} {1:.4E} {2}\n'.format(nucname.alara(iso),
-                                                 frac, str(iso)[:-4])
+                                                 frac, str(nucname.znum(iso)))
 
         with open(filename, 'a') as f:
             f.write(s)
@@ -1719,3 +1782,198 @@ def mats_latex_table(mats, labels=None, align=None, format=".5g"):
         tab += r" \\ " + "\n\\hline\n"
     tab += "\\end{tabular}\n"
     return tab
+
+
+#
+#  Material Library
+#
+
+cdef class _MaterialLibrary(object):
+
+    def __init__(self, lib=None, datapath="/materials", nucpath="/nucid"):
+        """Parameters
+        ----------
+        lib : dict-like, str, or None, optional
+            The data to intialize the material library with.  If this is a 
+            string, it is interpreted as a path to a file.
+        datapath : str, optional
+            The path in the heirarchy to the data table in an HDF5 file.
+        nucpath : str, optional
+            The path in the heirarchy to the nuclide array in an HDF5 file.
+
+        """
+        cdef dict _lib = {}
+        if lib is None:
+            self._lib = _lib
+        elif isinstance(lib, collections.Mapping):
+            for key, mat in lib.items():
+                _lib[key] = ensure_material(mat)
+            self._lib = _lib
+        elif isinstance(lib, basestring):
+            self._lib = _lib
+            if lib.endswith('.json') or lib.endswith('.js'):
+                self.from_json(lib)
+            if lib.endswith('.h5') or lib.endswith('.hdf5'):
+                self.from_hdf5(lib, datapath=datapath, nucpath=nucpath)
+        elif isinstance(lib, collections.Sequence):
+            for key, mat in lib:
+                _lib[key] = ensure_material(mat)
+            self._lib = _lib
+        else:
+            msg = "Could not initialize library with lib type {0!r}"
+            raise TypeError(msg.format(type(lib)))
+
+    def __contains__(self, key):
+        return key in self._lib
+
+    def __len__(self):
+        return len(self._lib)
+
+    def __iter__(self):
+        return iter(self._lib)
+
+    def __getitem__(self, key):
+        return self._lib[key]
+
+    def __setitem__(self, key, value):
+        self._lib[key] = ensure_material(value)
+
+    def __delitem__(self, key):
+        del self._lib[key]
+
+    def from_json(self, file):
+        """Loads data from a JSON file into this material library.
+
+        Parameters
+        ----------
+        file : str
+            A path to a JSON file.
+
+        """
+        cdef std_string s
+        cdef bint opened_here = False
+        cdef cpp_jsoncpp.Value jsonlib 
+        cdef cpp_jsoncpp.Reader reader = cpp_jsoncpp.Reader()
+        cdef int i
+        cdef std_string key
+        cdef cpp_vector[std_string] keys
+        cdef _Material mat
+        cdef dict _lib = (<_MaterialLibrary> self)._lib
+        if isinstance(file, basestring):
+            file = open(file, 'r')
+            opened_here = True
+        fstr = file.read()
+        s = std_string(<char *> fstr)
+        if opened_here:
+            file.close()
+        reader.parse(s, jsonlib)
+        keys = jsonlib.getMemberNames()
+        for i in range(len(keys)):
+            mat = Material()
+            key = keys[i]
+            (<_Material> mat).mat_pointer.load_json(jsonlib[key])
+            _lib[key.c_str()] = mat
+
+    def write_json(self, file):
+        """Writes this material library to a JSON file.
+
+        Parameters
+        ----------
+        file : str
+            A path to a JSON file.
+
+        """
+        cdef std_string s
+        cdef std_string skey
+        cdef bint opened_here = False
+        cdef cpp_jsoncpp.Value jsonlib = cpp_jsoncpp.Value(cpp_jsoncpp.objectValue)
+        cdef cpp_jsoncpp.StyledWriter writer = cpp_jsoncpp.StyledWriter()
+        for key, mat in self._lib.items():
+            skey = std_string(<char *> key)
+            jsonlib[skey] = (<_Material> mat).mat_pointer.dump_json()
+        s = writer.write(jsonlib)
+        if isinstance(file, basestring):
+            file = open(file, 'w')
+            opened_here = True
+        file.write(s)
+        if opened_here:
+            file.close()
+
+    def from_hdf5(self, file, datapath="/materials", nucpath="/nucid"):
+        """Loads data from an HDF5 file into this material library.
+
+        Parameters
+        ----------
+        file : str
+            A path to an HDF5 file.
+        datapath : str, optional
+            The path in the heirarchy to the data table in an HDF5 file.
+        nucpath : str, optional
+            The path in the heirarchy to the nuclide array in an HDF5 file.
+
+        """
+        cdef std_string s
+        cdef cpp_jsoncpp.Reader reader = cpp_jsoncpp.Reader()
+        cdef cpp_jsoncpp.Value attribs
+        cdef int i
+        cdef _Material mat
+        cdef dict _lib = (<_MaterialLibrary> self)._lib
+        cdef np.ndarray mattable
+        with tb.openFile(file, 'r') as f:
+            matstable = f.getNode(datapath)[:]
+            nucs = f.getNode(nucpath)[:]
+            matsattrs = f.getNode(datapath + '_attrs').read()
+        for i in range(len(matstable)):
+            row = matstable[i]
+            comp = dict((<int> k, v) for k, v in zip(nucs, row[3]) if v != 0.0)
+            mat = Material(comp, mass=row[0], density=row[1], 
+                                    atoms_per_mol=row[2])
+            strattrs = "".join(map(chr, matsattrs[i]))
+            s = std_string(<char *> strattrs)
+            attribs = cpp_jsoncpp.Value()
+            reader.parse(s, attribs)
+            (<_Material> mat).mat_pointer.attrs = attribs
+            if "name" in mat.attrs:
+                name = mat.attrs["name"]
+            else:
+                name = "_" + str(i)
+            _lib[name] = mat
+
+    def write_hdf5(self, file, datapath="/materials", nucpath="/nucid"):
+        """Writes this material library to an HDF5 file.
+
+        Parameters
+        ----------
+        file : str
+            A path to an HDF5 file.
+        datapath : str, optional
+            The path in the heirarchy to the data table in an HDF5 file.
+        nucpath : str, optional
+            The path in the heirarchy to the nuclide array in an HDF5 file.
+
+        """
+        cdef _Material mat
+        cdef dict _lib = (<_MaterialLibrary> self)._lib
+        cdef set nucids = set()
+        for mat in _lib.values():
+            nucids.update(mat.comp.keys())
+        with tb.openFile(file, 'a') as f:
+            nucgrp, nucdsname = os.path.split(nucpath)
+            f.createArray(nucgrp, nucdsname, np.array(sorted(nucids)), 
+                          createparents=True)
+        for key, mat in _lib.items():
+            if "name" not in mat.attrs:
+                mat.attrs["name"] = key
+            mat.write_hdf5(file, datapath=datapath, nucpath=nucpath)
+
+class MaterialLibrary(_MaterialLibrary, collections.MutableMapping):
+    """The material library is a collection of unique keys mapped to 
+    Material objects.  This is useful for organization and declaring
+    prefernces between several sources (multiple libraries).
+    """
+    def __repr__(self):
+        libs = ["{0!r}={1!r}".format(k, m) for k, m in self.items()]
+        libs = "{" + ", ".join(libs) + "}"
+        return "pyne.material.MaterialLibrary({0})".format(libs)
+
+ensure_material = lambda m: m if isinstance(m, Material) else Material(m)

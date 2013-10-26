@@ -1,6 +1,6 @@
-.. currentmodule:: pyne.stlconverters
+.. currentmodule:: pyne.stlcontainers
 
-.. _usersguide_stlconverters:
+.. _usersguide_stlcontainers:
 
 =============================
 C++ Standard Library Wrappers
@@ -26,7 +26,7 @@ Example of Use
 --------------
 From Python, the following represent common use cases::
 
-    import pyne.stlconverters as conv
+    import pyne.stlcontainers as conv
 
     # New integer set
     s = conv.SetInt()
@@ -59,8 +59,8 @@ and expose the python bindings.
 
 .. code-block:: cython
 
-    cimport pyne.stlconverters as conv
-    import pyne.stlconverters as conv
+    cimport pyne.stlcontainers as conv
+    import pyne.stlcontainers as conv
 
     # Existing map
     def conv._MapIntDouble i_exist_proxy = conv.MapIntDouble(False)
@@ -72,4 +72,4 @@ and expose the python bindings.
     owned_elsewhere_proxy.map_ptr = &owner.map_in_c
     owned_elsewhere_as_seen_in_python = owned_elsewhere_proxy
 
-Further information on this wrapper module, please refer to the library reference :ref:`pyne_stlconverters`.
+Further information on this wrapper module, please refer to the library reference :ref:`pyne_stlcontainers`.

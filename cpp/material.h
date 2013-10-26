@@ -142,7 +142,7 @@ namespace pyne
     ///            appended to the end of the dataset.
     /// \param chunksize The chunksize for all material data on disk.
     void write_hdf5(std::string filename, std::string datapath="/material", 
-                    std::string nucpath="/nuc_zz", float row=-0.0, int chunksize=100);
+                    std::string nucpath="/nucid", float row=-0.0, int chunksize=100);
 
     /// Reads data from a plaintext file at \a filename into this Material instance.
     void from_text(char * filename);
@@ -154,8 +154,21 @@ namespace pyne
     /// Writes the Material out to a simple plaintext file readable by from_text().
     void write_text(std::string filename);
 
+    /// Loads a JSON instance tree into this Material.
+    void load_json(Json::Value);
+    /// Dumps the Material out to a JSON instance tree.
+    Json::Value dump_json();
+    /// Reads data from a JSON file at \a filename into this Material instance.
+    void from_json(char * filename);
+    /// Reads data from a JSON file at \a filename into this Material instance.
+    void from_json(std::string filname);
+    /// Writes the Material out to a JSON file
+    void write_json(char * filename);
+    /// Writes the Material out to a JSON file
+    void write_json(std::string filename);
+
     // Fundemental mass stream data
-    /// composition, maps nuclides in zzaaam form to normalized mass weights.
+    /// composition, maps nuclides in id form to normalized mass weights.
     comp_map comp;  
     double mass;  ///< mass (in arbitrary units) of the Material.
     double density; ///< density (in arbitrary units) of the Material.
@@ -191,7 +204,7 @@ namespace pyne
 
     // Sub-Stream Computation
     /// Creates a sub-Material with only the nuclides present in \a nucset.
-    /// Elements of this set may be either in zzaaam form or simple Z numbers.
+    /// Elements of this set may be either in id form or simple Z numbers.
     Material sub_mat(std::set<int> nucset);
     /// Creates a sub-Material with only the nuclides present in \a nucset.
     /// Elements of this set may be in any form.
@@ -199,25 +212,25 @@ namespace pyne
 
     /// Creates a new Material with the mass weights for all nuclides in \a nucset 
     /// set to \a value.
-    /// Elements of \a nucset may be either in zzaaam form or simple Z numbers.
+    /// Elements of \a nucset may be either in id form or simple Z numbers.
     Material set_mat(std::set<int> nucset, double value);
     /// Creates a new Material with the mass weights for all nuclides in \a nucset 
     /// set to \a value.  Elements of \a nucset may be in any form.
     Material set_mat(std::set<std::string> nucset, double value);
 
     /// Creates a new Material with the all nuclides in \a nucset removed.
-    /// Elements of \a nucset may be either in zzaaam form or simple Z numbers.
+    /// Elements of \a nucset may be either in id form or simple Z numbers.
     Material del_mat(std::set<int> nucset);
     /// Creates a new Material with the all nuclides in \a nucset removed.
     /// Elements of \a nucset may be in any form.
     Material del_mat(std::set<std::string> nucset);
 
-    /// Creates a sub-Material based on a range of zzaaam-form integers.
+    /// Creates a sub-Material based on a range of id-form integers.
     Material sub_range(int lower=0, int upper=10000000);
-    /// Creates a new Material with the mass weights for all nuclides in the zzaaam
+    /// Creates a new Material with the mass weights for all nuclides in the id
     /// range set to \a value.
     Material set_range(int lower=0, int upper=10000000, double value=0.0);
-    /// Creates a new Material with the all nuclides in the zzaaam range removed.
+    /// Creates a new Material with the all nuclides in the id range removed.
     Material del_range(int lower=0, int upper=10000000);
 
     /// Creates a sub-Material of only uranium.

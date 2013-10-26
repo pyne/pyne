@@ -25,7 +25,6 @@ def setup():
     np.seterr(all='ignore')
     xs_cache.clear()
 
-
 #
 # Test helper functions
 #
@@ -46,9 +45,9 @@ def test_atom_weight_channel1():
     assert_array_equal(obs, exp)
 
     # test material
-    h2o = Material({10010: 0.11191487328808077, 80160: 0.8880851267119192})
+    h2o = Material({10010000: 0.11191487328808077, 80160000: 0.8880851267119192})
     obs = _atom_weight_channel(chanfunc, h2o)
-    exp = np.array([1.0, 33393.333333333336])
+    exp = np.array([1.0, 33393333.333333336])
     assert_array_almost_equal(obs, exp)
 
 
@@ -67,7 +66,7 @@ def test_atom_weight_channel2():
     assert_array_equal(obs, exp)
 
     # test material
-    h2o = Material({10010: 0.11191487328808077, 80160: 0.8880851267119192})
+    h2o = Material({10010000: 0.11191487328808077, 80160000: 0.8880851267119192})
     obs = _atom_weight_channel(sigma_t, h2o)
     assert_array_almost_equal(obs, exp)
 
@@ -112,7 +111,7 @@ def test_sigma_s():
 
 def test_sigma_a_reaction():
     E_g = np.array([10.0, 7.5, 5.0, 2.5, 0.1])
-    sig_rx = sigma_a_reaction('U238', '2n', group_struct=E_g)
+    sig_rx = sigma_a_reaction('U238', 'z_2n', group_struct=E_g)
     observed = (0.0 <= sig_rx).all()
     assert_true(observed)
 
@@ -120,14 +119,14 @@ def test_sigma_a_reaction():
     observed = (0.0 <= sig_rx).all()
     assert_true(observed)
 
-    sig_rx = sigma_a_reaction('H1', 'g')
+    sig_rx = sigma_a_reaction('H1', 'gamma')
     observed = (0.0 <= sig_rx).all()
     assert_true(observed)
 
 
 def test_metastable_ratio():
     E_g = np.array([10.0, 7.5, 5.0, 2.5, 0.1])
-    ms_rx = metastable_ratio('U238', '2n', group_struct=E_g)
+    ms_rx = metastable_ratio('U238', 'z_2n', group_struct=E_g)
     observed = (0.0 <= ms_rx).all()
     assert_true(observed)
 
@@ -135,7 +134,7 @@ def test_metastable_ratio():
     observed = (0.0 <= ms_rx).all()
     assert_true(observed)
 
-    ms_rx = metastable_ratio('H1', 'g')
+    ms_rx = metastable_ratio('H1', 'gamma')
     observed = (0.0 <= ms_rx).all()
     assert_true(observed)
 

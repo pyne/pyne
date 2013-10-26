@@ -47,32 +47,32 @@ def test_b():
 
 def test_half_life():
     assert_equal(data.half_life('H1'), np.inf)
-    assert_equal(data.half_life(922351), 1560.0)    
+    assert_equal(data.half_life(922350001), 1560.0)    
 
 
 def test_decay_const():
     assert_equal(data.decay_const('H1'), 0.0)
-    assert_equal(data.decay_const(922351), np.log(2.0)/1560.0)    
+    assert_equal(data.decay_const(922350001), np.log(2.0)/1560.0)    
 
 
 def test_branch_ratio():
     assert_equal(data.branch_ratio('H1', 'H1'), 1.0)
-    assert_equal(data.branch_ratio(922351, 922350), 1.0)
-    assert_equal(data.branch_ratio(922351, 922360), 0.0)
-    assert_equal(data.branch_ratio(611460, 621460), 0.34)
+    assert_equal(data.branch_ratio(922350001, 922350000), 1.0)
+    assert_equal(data.branch_ratio(922350001, 922360000), 0.0)
+    assert_equal(data.branch_ratio(611460000, 621460000), 0.34)
 
 
 def test_state_energy():
     assert_equal(data.state_energy('H1'), 0.0)
-    assert_equal(data.state_energy(922351), 7.65e-5)
+    assert_equal(data.state_energy(922350001), 7.65e-5)
 
 
 def test_decay_children():
     assert_equal(data.decay_children('H1'), set())
-    assert_equal(data.decay_children(922351), set([922350]))
-    assert_equal(data.decay_children(611460), set([601460, 621460]))
+    assert_equal(data.decay_children(922350001), set([922350000]))
+    assert_equal(data.decay_children(611460000), set([601460000, 621460000]))
     assert_equal(data.decay_children('O16'), set())
-    assert_equal(data.decay_children('80161'), set([60120, 80160]))
+    assert_equal(data.decay_children('80161'), set([60120000, 80160000]))
 
 if __name__ == "__main__":
     nose.runmodule()

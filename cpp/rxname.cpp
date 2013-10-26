@@ -10,25 +10,49 @@ std::string pyne::rxname::_names[NUM_RX_NAMES] = {
   "continuum",
   "z_2nd",
   "z_2n",
+  "z_2n_0",
+  "z_2n_1",
+  "z_2n_2",
   "z_3n",
+  "z_3n_0",
+  "z_3n_1",
+  "z_3n_2",
   "fission",
   "fission_first",
   "fission_second",
   "fission_third",
   "na",
+  "na_0",
+  "na_1",
+  "na_2",
   "n3a",
   "z_2na",
   "z_3na",
   "absorption",
   "np",
+  "np_0",
+  "np_1",
+  "np_2",
+  "npd",
   "n2a",
   "z_2n2a",
   "nd",
+  "nd_0",
+  "nd_1",
+  "nd_2",
   "nt",
+  "nt_0",
+  "nt_1",
+  "nt_2",
   "nHe3",
+  "nHe3_0",
+  "nHe3_1",
+  "nHe3_2",
   "nd3a",
   "nt2a",
   "z_4n",
+  "z_4n_0",
+  "z_4n_1",
   "fission_fourth",
   "z_2np",
   "z_3np",
@@ -78,6 +102,9 @@ std::string pyne::rxname::_names[NUM_RX_NAMES] = {
   "n_continuum",
   "disappeareance",
   "gamma",
+  "gamma_0",
+  "gamma_1",
+  "gamma_2",
   "p",
   "d",
   "t",
@@ -86,6 +113,9 @@ std::string pyne::rxname::_names[NUM_RX_NAMES] = {
   "z_2a",
   "z_3a",
   "z_2p",
+  "z_2p_0",
+  "z_2p_1",
+  "z_2p_2",
   "pa",
   "t2a",
   "d2a",
@@ -519,6 +549,7 @@ std::string pyne::rxname::_names[NUM_RX_NAMES] = {
   "a_48",
   "a_continuum",
   "lumped_covar",
+  "excited",
   };
 std::set<std::string> pyne::rxname::names(pyne::rxname::_names, 
                                           pyne::rxname::_names+NUM_RX_NAMES);
@@ -531,10 +562,12 @@ std::map<unsigned int, unsigned int> pyne::rxname::id_mt;
 std::map<unsigned int, unsigned int> pyne::rxname::mt_id;
 std::map<unsigned int, std::string> pyne::rxname::labels;
 std::map<unsigned int, std::string> pyne::rxname::docs;
-std::map<std::string, std::map<int, std::map<int, unsigned int> > > pyne::rxname::zadelta;
+std::map<std::pair<std::string, int>, unsigned int> pyne::rxname::offset_id;
+std::map<std::pair<std::string, unsigned int>, int> pyne::rxname::id_offset;
 
 void * pyne::rxname::_fill_maps()
 {
+  using std::make_pair;
   std::string rx;
   unsigned int rxid;
   unsigned int _mts [NUM_RX_NAMES] = {
@@ -547,25 +580,49 @@ void * pyne::rxname::_fill_maps()
     10,
     11,
     16,
+    0,
+    0,
+    0,
     17,
+    0,
+    0,
+    0,
     18,
     19,
     20,
     21,
     22,
+    0,
+    0,
+    0,
     23,
     24,
     25,
     27,
     28,
+    0,
+    0,
+    0,
+    0,
     29,
     30,
     32,
+    0,
+    0,
+    0,
     33,
+    0,
+    0,
+    0,
     34,
+    0,
+    0,
+    0,
     35,
     36,
     37,
+    0,
+    0,
     38,
     41,
     42,
@@ -615,6 +672,9 @@ void * pyne::rxname::_fill_maps()
     91,
     101,
     102,
+    0,
+    0,
+    0,
     103,
     104,
     105,
@@ -623,6 +683,9 @@ void * pyne::rxname::_fill_maps()
     108,
     109,
     111,
+    0,
+    0,
+    0,
     112,
     113,
     114,
@@ -1056,6 +1119,7 @@ void * pyne::rxname::_fill_maps()
     848,
     849,
     851,
+    0,
   };
   std::string _labels[NUM_RX_NAMES] = {
     "(z,total)",
@@ -1065,27 +1129,51 @@ void * pyne::rxname::_fill_maps()
     "(z,n)",
     "(misc)",
     "(z,continuum)",
-    "(z,2nd )",
+    "(z,2nd)",
     "(z,2n)",
+    "(z,2n0)",
+    "(z,2n1)",
+    "(z,2n2)",
     "(z,3n)",
+    "(z,3n0)",
+    "(z,3n1)",
+    "(z,3n2)",
     "(z,fission)",
     "(z,f)",
     "(z,nf)",
     "(z,2nf)",
     "(z,n+a)",
+    "(z,n+a0)",
+    "(z,n+a1)",
+    "(z,n+a2)",
     "(z,n+3a)",
     "(z,2n+a)",
     "(z,3n+a)",
     "(z,abs) Absorption",
     "(z,n+p)",
+    "(z,n+p0)",
+    "(z,n+p1)",
+    "(z,n+p2)",
+    "(z,n+p+d)",
     "(z,n+2a)",
     "(z,2n+2a)",
     "(z,nd)",
+    "(z,nd0)",
+    "(z,nd1)",
+    "(z,nd2)",
     "(z,nt)",
+    "(z,nt0)",
+    "(z,nt1)",
+    "(z,nt2)",
     "(z,n+He3)",
+    "(z,n+He3-0)",
+    "(z,n+He3-1)",
+    "(z,n+He3-2)",
     "(z,n+d+3a)",
     "(z,n+t+2a)",
     "(z,4n)",
+    "(z,4n0)",
+    "(z,4n1)",
     "(z,3nf)",
     "(z,2n+p)",
     "(z,3n+p)",
@@ -1135,6 +1223,9 @@ void * pyne::rxname::_fill_maps()
     "(z,nc)",
     "(z,disap) Neutron disappeareance",
     "(z,gamma)",
+    "(z,gamma0)",
+    "(z,gamma1)",
+    "(z,gamma2)",
     "(z,p)",
     "(z,d)",
     "(z,t)",
@@ -1143,6 +1234,9 @@ void * pyne::rxname::_fill_maps()
     "(z,2a)",
     "(z,3a)",
     "(z,2p)",
+    "(z,2p0)",
+    "(z,2p1)",
+    "(z,2p2)",
     "(z,pa)",
     "(z,t2a)",
     "(z,d2a)",
@@ -1177,7 +1271,7 @@ void * pyne::rxname::_fill_maps()
     "Energy Release from (z,inelastic)",
     "Energy Release from (misc)",
     "Energy Release from (z,continuum)",
-    "Energy Release from (z,2nd )",
+    "Energy Release from (z,2nd)",
     "Energy Release from (z,2n)",
     "Energy Release from (z,3n)",
     "Energy Release from (z,fission)",
@@ -1576,6 +1670,7 @@ void * pyne::rxname::_fill_maps()
     "(z,a48)",
     "(z,ac)",
     "Lumped Covariances",
+    "Any Excited State",
   };
   std::string _docs[NUM_RX_NAMES] = {
     "(n,total) Neutron total",
@@ -1587,25 +1682,49 @@ void * pyne::rxname::_fill_maps()
     "(z,contin) Total continuum reaction",
     "(z,2nd) Production of 2n and d",
     "(z,2n) Production of 2n",
+    "(z,2n0) Production of 2n, ground state",
+    "(z,2n1) Production of 2n, 1st excited state",
+    "(z,2n2) Production of 2n, 2nd excited state",
     "(z,3n) Production of 3n",
+    "(z,3n0) Production of 3n, ground state",
+    "(z,3n1) Production of 3n, 1st excited state",
+    "(z,3n2) Production of 3n, 2nd excited state",
     "(z,fiss) Particle-induced fission",
     "(z,f) First-chance fission",
     "(z,nf) Second chance fission",
     "(z,2nf) Third-chance fission",
     "(z,na) Production of n and alpha",
+    "(z,na0) Production of n and alpha, ground state",
+    "(z,na1) Production of n and alpha, 1st excited state",
+    "(z,na2) Production of n and alpha, 2nd excited state",
     "(z,n3a) Production of n and 3 alphas",
     "(z,2na) Production of 2n and alpha",
     "(z,3na) Production of 3n and alpha",
     "(n,abs) Absorption",
     "(z,np) Production of n and p",
+    "(z,np0) Production of n and p, ground state",
+    "(z,np1) Production of n and p, 1st excited state",
+    "(z,np2) Production of n and p, 2nd excited state",
+    "(z,npd) Production of n, p, and d",
     "(z,n2a) Production of n and 2 alphas",
     "(z,2n2a) Production of 2n and 2 alphas",
     "(z,nd) Production of n and d",
+    "(z,nd0) Production of n and d, ground state",
+    "(z,nd1) Production of n and d, 1st excited state",
+    "(z,nd2) Production of n and d, 2nd excited state",
     "(z,nt) Production of n and t",
+    "(z,nt0) Production of n and t, ground state",
+    "(z,nt1) Production of n and t, 1st excited state",
+    "(z,nt2) Production of n and t, 2nd excited state",
     "(z,n3He) Production of n and He-3",
+    "(z,n3He-0) Production of n and He-3, ground state",
+    "(z,n3He-1) Production of n and He-3, 1st excited state",
+    "(z,n3He-2) Production of n and He-3, 2nd excited state",
     "(z,nd2a) Production of n, d, and alpha",
     "(z,nt2a) Production of n, t, and 2 alphas",
     "(z,4n) Production of 4n",
+    "(z,4n0) Production of 4n, ground state",
+    "(z,4n1) Production of 4n, 1st excited state",
     "(z,3nf) Fourth-chance fission",
     "(z,2np) Production of 2n and p",
     "(z,3np) Production of 3n and p",
@@ -1655,6 +1774,9 @@ void * pyne::rxname::_fill_maps()
     "(z,nc) Production of n in continuum",
     "(n,disap) Neutron disappeareance",
     "(z,gamma) Radiative capture",
+    "(z,gamma0) Radiative capture, ground state",
+    "(z,gamma1) Radiative capture, 1st excited state",
+    "(z,gamma2) Radiative capture, 2st excited state",
     "(z,p) Production of p",
     "(z,d) Production of d",
     "(z,t) Production of t",
@@ -1663,6 +1785,9 @@ void * pyne::rxname::_fill_maps()
     "(z,2a) Production of 2 alphas",
     "(z,3a) Production of 3 alphas",
     "(z,2p) Production of 2p",
+    "(z,2p0) Production of 2p, ground state",
+    "(z,2p1) Production of 2p, 1st excited state",
+    "(z,2p2) Production of 2p, 2nd excited state",
     "(z,pa) Production of p and alpha",
     "(z,t2a) Production of t and 2 alphas",
     "(z,d2a) Production of d and 2 alphas",
@@ -2096,6 +2221,7 @@ void * pyne::rxname::_fill_maps()
     "(z,a48)",
     "(n,ac)",
     "Lumped-Reaction Covariances",
+    "production of any excited state nucleus",
   };
 
   // fill the maps
@@ -2141,103 +2267,110 @@ void * pyne::rxname::_fill_maps()
   altnames["3he"] = name_id["He3"];
   altnames["he-3"] = name_id["He3"];
   altnames["HE-3"] = name_id["He3"];
+  altnames["*"] = name_id["excited"];
 
-  // set the nulcide difference mappings, zadelta
-  // zadelta[incident particle type "n", "p", ...][delta Z num][delta A num][rxid]
+  // set the nuclide difference mappings, offset_id
+  // offset_id[incident particle type "n", "p", ...][delta Z num][delta A num][rxid]
   // neutrons:
-  zadelta["n"][0][0] = name_id["scattering"];
-  zadelta["n"][0][1] = name_id["absorption"];
-  zadelta["n"][0][-1] = name_id["z_2n"];
-  zadelta["n"][0][-2] = name_id["z_3n"];
-  zadelta["n"][0][-3] = name_id["z_4n"];
-  zadelta["n"][-1][0] = name_id["p"];
-  zadelta["n"][-2][-1] = name_id["z_2p"];
-  zadelta["n"][-1][-1] = name_id["d"];
-  zadelta["n"][-1][-2] = name_id["t"];
-  zadelta["n"][-2][-2] = name_id["He3"];
-  zadelta["n"][-2][-3] = name_id["a"];
+  offset_id[make_pair("n", offset(0, 0))] = name_id["scattering"];
+  offset_id[make_pair("n", offset(0, 1))] = name_id["absorption"];
+  offset_id[make_pair("n", offset(0, -1))] = name_id["z_2n"];
+  offset_id[make_pair("n", offset(0, -2))] = name_id["z_3n"];
+  offset_id[make_pair("n", offset(0, -3))] = name_id["z_4n"];
+  offset_id[make_pair("n", offset(-1, 0))] = name_id["p"];
+  offset_id[make_pair("n", offset(-2, -1))] = name_id["z_2p"];
+  offset_id[make_pair("n", offset(-1, -1))] = name_id["d"];
+  offset_id[make_pair("n", offset(-1, -2))] = name_id["t"];
+  offset_id[make_pair("n", offset(-2, -2))] = name_id["He3"];
+  offset_id[make_pair("n", offset(-2, -3))] = name_id["a"];
   // proton:
-  zadelta["p"][0][0] = name_id["scattering"];
-  zadelta["p"][1][1] = name_id["absorption"];
-  zadelta["p"][1][0] = name_id["n"];
-  zadelta["p"][1][-1] = name_id["z_2n"];
-  zadelta["p"][1][-2] = name_id["z_3n"];
-  zadelta["p"][1][-3] = name_id["z_4n"];
-  zadelta["p"][-1][-1] = name_id["z_2p"];
-  zadelta["p"][0][-1] = name_id["d"];
-  zadelta["p"][0][-2] = name_id["t"];
-  zadelta["p"][-1][-2] = name_id["He3"];
-  zadelta["p"][-1][-3] = name_id["a"];
+  offset_id[make_pair("p", offset(0, 0))] = name_id["scattering"];
+  offset_id[make_pair("p", offset(1, 1))] = name_id["absorption"];
+  offset_id[make_pair("p", offset(1, 0))] = name_id["n"];
+  offset_id[make_pair("p", offset(1, -1))] = name_id["z_2n"];
+  offset_id[make_pair("p", offset(1, -2))] = name_id["z_3n"];
+  offset_id[make_pair("p", offset(1, -3))] = name_id["z_4n"];
+  offset_id[make_pair("p", offset(-1, -1))] = name_id["z_2p"];
+  offset_id[make_pair("p", offset(0, -1))] = name_id["d"];
+  offset_id[make_pair("p", offset(0, -2))] = name_id["t"];
+  offset_id[make_pair("p", offset(-1, -2))] = name_id["He3"];
+  offset_id[make_pair("p", offset(-1, -3))] = name_id["a"];
   // deuterium:
-  zadelta["d"][0][0] = name_id["scattering"];
-  zadelta["d"][1][2] = name_id["absorption"];
-  zadelta["d"][1][1] = name_id["n"];
-  zadelta["d"][1][0] = name_id["z_2n"];
-  zadelta["d"][1][-1] = name_id["z_3n"];
-  zadelta["d"][1][-2] = name_id["z_4n"];
-  zadelta["d"][0][1] = name_id["p"];
-  zadelta["d"][-1][0] = name_id["z_2p"];
-  zadelta["d"][0][-1] = name_id["t"];
-  zadelta["d"][-1][-1] = name_id["He3"];
-  zadelta["d"][-1][-2] = name_id["a"];
+  offset_id[make_pair("d", offset(0, 0))] = name_id["scattering"];
+  offset_id[make_pair("d", offset(1, 2))] = name_id["absorption"];
+  offset_id[make_pair("d", offset(1, 1))] = name_id["n"];
+  offset_id[make_pair("d", offset(1, 0))] = name_id["z_2n"];
+  offset_id[make_pair("d", offset(1, -1))] = name_id["z_3n"];
+  offset_id[make_pair("d", offset(1, -2))] = name_id["z_4n"];
+  offset_id[make_pair("d", offset(0, 1))] = name_id["p"];
+  offset_id[make_pair("d", offset(-1, 0))] = name_id["z_2p"];
+  offset_id[make_pair("d", offset(0, -1))] = name_id["t"];
+  offset_id[make_pair("d", offset(-1, -1))] = name_id["He3"];
+  offset_id[make_pair("d", offset(-1, -2))] = name_id["a"];
   // tritium:
-  zadelta["t"][0][0] = name_id["scattering"];
-  zadelta["t"][1][3] = name_id["absorption"];
-  zadelta["t"][1][2] = name_id["n"];
-  zadelta["t"][1][1] = name_id["z_2n"];
-  zadelta["t"][1][0] = name_id["z_3n"];
-  zadelta["t"][1][-1] = name_id["z_4n"];
-  zadelta["t"][0][2] = name_id["p"];
-  zadelta["t"][-1][1] = name_id["z_2p"];
-  zadelta["t"][0][1] = name_id["d"];
-  zadelta["t"][-1][0] = name_id["He3"];
-  zadelta["t"][-1][-1] = name_id["a"];
+  offset_id[make_pair("t", offset(0, 0))] = name_id["scattering"];
+  offset_id[make_pair("t", offset(1, 3))] = name_id["absorption"];
+  offset_id[make_pair("t", offset(1, 2))] = name_id["n"];
+  offset_id[make_pair("t", offset(1, 1))] = name_id["z_2n"];
+  offset_id[make_pair("t", offset(1, 0))] = name_id["z_3n"];
+  offset_id[make_pair("t", offset(1, -1))] = name_id["z_4n"];
+  offset_id[make_pair("t", offset(0, 2))] = name_id["p"];
+  offset_id[make_pair("t", offset(-1, 1))] = name_id["z_2p"];
+  offset_id[make_pair("t", offset(0, 1))] = name_id["d"];
+  offset_id[make_pair("t", offset(-1, 0))] = name_id["He3"];
+  offset_id[make_pair("t", offset(-1, -1))] = name_id["a"];
   // He3:
-  zadelta["He3"][0][0] = name_id["scattering"];
-  zadelta["He3"][2][3] = name_id["absorption"];
-  zadelta["He3"][2][2] = name_id["n"];
-  zadelta["He3"][2][1] = name_id["z_2n"];
-  zadelta["He3"][2][0] = name_id["z_3n"];
-  zadelta["He3"][2][-1] = name_id["z_4n"];
-  zadelta["He3"][1][2] = name_id["p"];
-  zadelta["He3"][0][1] = name_id["z_2p"];
-  zadelta["He3"][1][1] = name_id["d"];
-  zadelta["He3"][1][0] = name_id["t"];
-  zadelta["He3"][0][-1] = name_id["a"];
+  offset_id[make_pair("He3", offset(0, 0))] = name_id["scattering"];
+  offset_id[make_pair("He3", offset(2, 3))] = name_id["absorption"];
+  offset_id[make_pair("He3", offset(2, 2))] = name_id["n"];
+  offset_id[make_pair("He3", offset(2, 1))] = name_id["z_2n"];
+  offset_id[make_pair("He3", offset(2, 0))] = name_id["z_3n"];
+  offset_id[make_pair("He3", offset(2, -1))] = name_id["z_4n"];
+  offset_id[make_pair("He3", offset(1, 2))] = name_id["p"];
+  offset_id[make_pair("He3", offset(0, 1))] = name_id["z_2p"];
+  offset_id[make_pair("He3", offset(1, 1))] = name_id["d"];
+  offset_id[make_pair("He3", offset(1, 0))] = name_id["t"];
+  offset_id[make_pair("He3", offset(0, -1))] = name_id["a"];
   // alpha:
-  zadelta["a"][0][0] = name_id["scattering"];
-  zadelta["a"][2][4] = name_id["absorption"];
-  zadelta["a"][2][3] = name_id["n"];
-  zadelta["a"][2][2] = name_id["z_2n"];
-  zadelta["a"][2][1] = name_id["z_3n"];
-  zadelta["a"][2][0] = name_id["z_4n"];
-  zadelta["a"][1][3] = name_id["p"];
-  zadelta["a"][0][2] = name_id["z_2p"];
-  zadelta["a"][1][2] = name_id["d"];
-  zadelta["a"][1][1] = name_id["t"];
-  zadelta["a"][0][1] = name_id["He3"];
+  offset_id[make_pair("a", offset(0, 0))] = name_id["scattering"];
+  offset_id[make_pair("a", offset(2, 4))] = name_id["absorption"];
+  offset_id[make_pair("a", offset(2, 3))] = name_id["n"];
+  offset_id[make_pair("a", offset(2, 2))] = name_id["z_2n"];
+  offset_id[make_pair("a", offset(2, 1))] = name_id["z_3n"];
+  offset_id[make_pair("a", offset(2, 0))] = name_id["z_4n"];
+  offset_id[make_pair("a", offset(1, 3))] = name_id["p"];
+  offset_id[make_pair("a", offset(0, 2))] = name_id["z_2p"];
+  offset_id[make_pair("a", offset(1, 2))] = name_id["d"];
+  offset_id[make_pair("a", offset(1, 1))] = name_id["t"];
+  offset_id[make_pair("a", offset(0, 1))] = name_id["He3"];
   // gamma:
-  zadelta["gamma"][0][-1] = name_id["n"];
-  zadelta["gamma"][0][-2] = name_id["z_2n"];
-  zadelta["gamma"][0][-3] = name_id["z_3n"];
-  zadelta["gamma"][0][-4] = name_id["z_4n"];
-  zadelta["gamma"][-1][-1] = name_id["p"];
-  zadelta["gamma"][-2][-2] = name_id["z_2p"];
-  zadelta["gamma"][-1][-2] = name_id["d"];
-  zadelta["gamma"][-1][-3] = name_id["t"];
-  zadelta["gamma"][-2][-3] = name_id["He3"];
-  zadelta["gamma"][-2][-4] = name_id["a"];
+  offset_id[make_pair("gamma", offset(0, -1))] = name_id["n"];
+  offset_id[make_pair("gamma", offset(0, -2))] = name_id["z_2n"];
+  offset_id[make_pair("gamma", offset(0, -3))] = name_id["z_3n"];
+  offset_id[make_pair("gamma", offset(0, -4))] = name_id["z_4n"];
+  offset_id[make_pair("gamma", offset(-1, -1))] = name_id["p"];
+  offset_id[make_pair("gamma", offset(-2, -2))] = name_id["z_2p"];
+  offset_id[make_pair("gamma", offset(-1, -2))] = name_id["d"];
+  offset_id[make_pair("gamma", offset(-1, -3))] = name_id["t"];
+  offset_id[make_pair("gamma", offset(-2, -3))] = name_id["He3"];
+  offset_id[make_pair("gamma", offset(-2, -4))] = name_id["a"];
   // decay:
-  zadelta["decay"][0][-1] = name_id["n"];
-  zadelta["decay"][0][-2] = name_id["z_2n"];
-  zadelta["decay"][0][-3] = name_id["z_3n"];
-  zadelta["decay"][0][-4] = name_id["z_4n"];
-  zadelta["decay"][-1][-1] = name_id["p"];
-  zadelta["decay"][-2][-2] = name_id["z_2p"];
-  zadelta["decay"][-1][-2] = name_id["d"];
-  zadelta["decay"][-1][-3] = name_id["t"];
-  zadelta["decay"][-2][-3] = name_id["He3"];
-  zadelta["decay"][-2][-4] = name_id["a"];
+  offset_id[make_pair("decay", offset(0, -1))] = name_id["n"];
+  offset_id[make_pair("decay", offset(0, -2))] = name_id["z_2n"];
+  offset_id[make_pair("decay", offset(0, -3))] = name_id["z_3n"];
+  offset_id[make_pair("decay", offset(0, -4))] = name_id["z_4n"];
+  offset_id[make_pair("decay", offset(-1, -1))] = name_id["p"];
+  offset_id[make_pair("decay", offset(-2, -2))] = name_id["z_2p"];
+  offset_id[make_pair("decay", offset(-1, -2))] = name_id["d"];
+  offset_id[make_pair("decay", offset(-1, -3))] = name_id["t"];
+  offset_id[make_pair("decay", offset(-2, -3))] = name_id["He3"];
+  offset_id[make_pair("decay", offset(-2, -4))] = name_id["a"];
+
+  // child offsets
+  std::map<std::pair<std::string, int>, unsigned int>::iterator ioffid;
+  for (ioffid = offset_id.begin(); ioffid != offset_id.end(); ioffid++) {
+    id_offset[make_pair(ioffid->first.first, ioffid->second)] = ioffid->first.second;
+  };
 
 };
 void * pyne::rxname::_ = pyne::rxname::_fill_maps();
@@ -2299,38 +2432,30 @@ std::string pyne::rxname::name(unsigned int n)
 
 std::string pyne::rxname::name(int from_nuc, int to_nuc, std::string z)
 {
-  // This assumes nuclides are in zzaaam form
-  int dz = (to_nuc/10000) - (from_nuc/10000);
-  int da = ((to_nuc/10)%1000) - ((from_nuc/10)%1000);
-  if (0 == zadelta.count(z))
-    throw IndeterminateReactionForm("z=" + z, "???");
-  if (0 == zadelta[z].count(dz))
-    throw IndeterminateReactionForm(pyne::to_str(from_nuc) + ", " + \
-                                    pyne::to_str(to_nuc), "delta Z = " + \
-                                    pyne::to_str(dz));
-  if (0 == zadelta[z][dz].count(da))
-    throw IndeterminateReactionForm(pyne::to_str(from_nuc) + ", " + \
-                                    pyne::to_str(to_nuc), "delta A = " + \
-                                    pyne::to_str(da));
-  return id_name[zadelta[z][dz][da]];
+  // This assumes nuclides are in id form
+  std::pair<std::string, int> key = std::make_pair(z, to_nuc - from_nuc);
+  if (0 == offset_id.count(key))
+    throw IndeterminateReactionForm("z=" + z + ", " + pyne::to_str(from_nuc) + \
+                                    ", " + pyne::to_str(to_nuc), "???");
+  return id_name[offset_id[key]];
 };
 
 std::string pyne::rxname::name(std::string from_nuc, int to_nuc, std::string z)
 {
-  return pyne::rxname::name(pyne::nucname::zzaaam(from_nuc), 
-                            pyne::nucname::zzaaam(to_nuc), z);
+  return pyne::rxname::name(pyne::nucname::id(from_nuc), 
+                            pyne::nucname::id(to_nuc), z);
 };
 
 std::string pyne::rxname::name(int from_nuc, std::string to_nuc, std::string z)
 {
-  return pyne::rxname::name(pyne::nucname::zzaaam(from_nuc), 
-                            pyne::nucname::zzaaam(to_nuc), z);
+  return pyne::rxname::name(pyne::nucname::id(from_nuc), 
+                            pyne::nucname::id(to_nuc), z);
 };
 
 std::string pyne::rxname::name(std::string from_nuc, std::string to_nuc, std::string z)
 {
-  return pyne::rxname::name(pyne::nucname::zzaaam(from_nuc), 
-                            pyne::nucname::zzaaam(to_nuc), z);
+  return pyne::rxname::name(pyne::nucname::id(from_nuc), 
+                            pyne::nucname::id(to_nuc), z);
 };
 
 
@@ -2368,38 +2493,30 @@ unsigned int pyne::rxname::id(std::string x)
   
 unsigned int pyne::rxname::id(int from_nuc, int to_nuc, std::string z)
 {
-  // This assumes nuclides are in zzaaam form
-  int dz = (to_nuc/10000) - (from_nuc/10000);
-  int da = ((to_nuc/10)%1000) - ((from_nuc/10)%1000);
-  if (0 == zadelta.count(z))
-    throw IndeterminateReactionForm("z=" + z, "???");
-  if (0 == zadelta[z].count(dz))
-    throw IndeterminateReactionForm(pyne::to_str(from_nuc) + ", " + \
-                                    pyne::to_str(to_nuc), "delta Z = " + \
-                                    pyne::to_str(dz));
-  if (0 == zadelta[z][dz].count(da))
-    throw IndeterminateReactionForm(pyne::to_str(from_nuc) + ", " + \
-                                    pyne::to_str(to_nuc), "delta A = " + \
-                                    pyne::to_str(da));
-  return zadelta[z][dz][da];
+  // This assumes nuclides are in id form
+  std::pair<std::string, int> key = std::make_pair(z, to_nuc - from_nuc);
+  if (0 == offset_id.count(key))
+    throw IndeterminateReactionForm("z=" + z + ", " + pyne::to_str(from_nuc) + \
+                                    ", " + pyne::to_str(to_nuc), "???");
+  return offset_id[key];
 };
   
 unsigned int pyne::rxname::id(int from_nuc, std::string to_nuc, std::string z)
 {
-  return pyne::rxname::id(pyne::nucname::zzaaam(from_nuc), 
-                          pyne::nucname::zzaaam(to_nuc), z);
+  return pyne::rxname::id(pyne::nucname::id(from_nuc), 
+                          pyne::nucname::id(to_nuc), z);
 };
   
 unsigned int pyne::rxname::id(std::string from_nuc, int to_nuc, std::string z)
 {
-  return pyne::rxname::id(pyne::nucname::zzaaam(from_nuc), 
-                          pyne::nucname::zzaaam(to_nuc), z);
+  return pyne::rxname::id(pyne::nucname::id(from_nuc), 
+                          pyne::nucname::id(to_nuc), z);
 };
   
 unsigned int pyne::rxname::id(std::string from_nuc, std::string to_nuc, std::string z)
 {
-  return pyne::rxname::id(pyne::nucname::zzaaam(from_nuc), 
-                          pyne::nucname::zzaaam(to_nuc), z);
+  return pyne::rxname::id(pyne::nucname::id(from_nuc), 
+                          pyne::nucname::id(to_nuc), z);
 };
 
 
@@ -2557,3 +2674,60 @@ std::string pyne::rxname::doc(std::string from_nuc, std::string to_nuc, std::str
 {
   return docs[pyne::rxname::id(from_nuc, to_nuc, z)];
 };
+
+
+// ***********************
+// *** child functions ***
+// ***********************
+
+int pyne::rxname::child(int nuc, unsigned int rx, std::string z) {
+  // This assumes nuclides are in id form
+  std::pair<std::string, unsigned int> key = std::make_pair(z, rx);
+  if (0 == id_offset.count(key))
+    throw IndeterminateReactionForm("z=" + z + ", rx=" + pyne::to_str(rx), "???");
+  int to_nuc = nuc + id_offset[key];
+  if (!pyne::nucname::isnuclide(to_nuc))
+    throw pyne::nucname::NotANuclide(nuc, to_nuc);
+  return to_nuc;
+};
+
+int pyne::rxname::child(int nuc, std::string rx, std::string z) {
+  return child(nuc, id(rx), z);
+};
+
+int pyne::rxname::child(std::string nuc, unsigned int rx, std::string z) {
+  return child(pyne::nucname::id(nuc), rx, z);
+};
+
+int pyne::rxname::child(std::string nuc, std::string rx, std::string z) {
+  return child(pyne::nucname::id(nuc), id(rx), z);
+};
+
+
+// ************************
+// *** parent functions ***
+// ************************
+
+int pyne::rxname::parent(int nuc, unsigned int rx, std::string z) {
+  // This assumes nuclides are in id form
+  std::pair<std::string, unsigned int> key = std::make_pair(z, rx);
+  if (0 == id_offset.count(key))
+    throw IndeterminateReactionForm("z=" + z + ", rx=" + pyne::to_str(rx), "???");
+  int from_nuc = nuc - id_offset[key];
+  if (!pyne::nucname::isnuclide(from_nuc))
+    throw pyne::nucname::NotANuclide(from_nuc, nuc);
+  return from_nuc;
+};
+
+int pyne::rxname::parent(int nuc, std::string rx, std::string z) {
+  return parent(nuc, id(rx), z);
+};
+
+int pyne::rxname::parent(std::string nuc, unsigned int rx, std::string z) {
+  return parent(pyne::nucname::id(nuc), rx, z);
+};
+
+int pyne::rxname::parent(std::string nuc, std::string rx, std::string z) {
+  return parent(pyne::nucname::id(nuc), id(rx), z);
+};
+

@@ -2,46 +2,47 @@
 from unittest import TestCase
 import nose 
 
-from nose.tools import assert_equal, assert_not_equal, assert_raises, raises, assert_in
+from nose.tools import assert_equal, assert_not_equal, assert_raises, raises, assert_in, \
+    assert_true, assert_false
 
 from pyne import nucname
 
 def test_name_zz():
-    assert_equal(nucname.name_zz["HE"], 2)
+    assert_equal(nucname.name_zz["He"], 2)
     assert_equal(nucname.name_zz["U"], 92)
 
 def test_zz_name():
     assert_equal(nucname.zz_name[1],  "H")
-    assert_equal(nucname.zz_name[94], "PU")
+    assert_equal(nucname.zz_name[94], "Pu")
 
 
 def test_LAN():
-    assert_equal(nucname.LAN, set(['CE', 'DY', 'ER', 'EU', 'GD', 'HO', 'LA', 
-                                   'LU', 'ND', 'PM', 'PR', 'SM', 'TB', 'TM', 'YB']))
+    assert_equal(nucname.LAN, set(['Ce', 'Dy', 'Er', 'Eu', 'Gd', 'Ho', 'La', 
+                                   'Lu', 'Nd', 'Pm', 'Pr', 'Sm', 'Tb', 'Tm', 'Yb']))
 
 def test_ACT():
-    assert_equal(nucname.ACT, set(["AC", "TH", "PA", "U",  "NP", "PU", "AM", "CM", \
-                                   "BK", "CF", "ES", "FM", "MD", "NO", "LR"]))
+    assert_equal(nucname.ACT, set(["Ac", "Th", "Pa", "U",  "Np", "Pu", "Am", "Cm", 
+                                   "Bk", "Cf", "Es", "Fm", "Md", "No", "Lr"]))
             
 def test_TRU():
-    assert_equal(nucname.TRU, set(['AM', 'BH', 'BK', 'CF', 'CM', 'DB', 'DS', 
-     'ES', 'FM', 'HS', 'LR', 'MD', 'MT', 'NO', 'NP', 'PU', 'RF', 'RG', 'SG', 
-     'FL', 'LV', 'CN']))
+    assert_equal(nucname.TRU, set(['Am', 'Bh', 'Bk', 'Cf', 'Cm', 'Db', 'Ds', 
+     'Es', 'Fm', 'Hs', 'Lr', 'Md', 'Mt', 'No', 'Np', 'Pu', 'Rf', 'Rg', 'Sg', 
+     'Fl', 'Lv', 'Cn']))
 
 def test_MA():
-    assert_equal(nucname.MA, set(["NP", "AM", "CM", "BK", "CF", "ES", "FM", "MD", \
-                                  "NO", "LR"]))
+    assert_equal(nucname.MA, set(["Np", "Am", "Cm", "Bk", "Cf", "Es", "Fm", "Md", 
+                                  "No", "Lr"]))
 
 def test_FP():
-    assert_equal(nucname.FP, set(['AG', 'AL', 'AR', 'AS', 'AT', 'AU', 'B',  
-          'BA', 'BE', 'BI', 'BR', 'C',  'CA', 'CD', 'CE', 'CL', 'CO', 'CR', 
-          'CS', 'CU', 'DY', 'ER', 'EU', 'F',  'FE', 'FR', 'GA', 'GD', 'GE',
-          'H',  'HE', 'HF', 'HG', 'HO', 'I',  'IN', 'IR', 'K',  'KR', 'LA', 
-          'LI', 'LU', 'MG', 'MN', 'MO', 'N',  'NA', 'NB', 'ND', 'NE', 'NI', 
-          'O',  'OS', 'P',  'PB', 'PD', 'PM', 'PO', 'PR', 'PT', 'RA', 'RB', 
-          'RE', 'RH', 'RN', 'RU', 'S',  'SB', 'SC', 'SE', 'SI', 'SM', 'SN', 
-          'SR', 'TA', 'TB', 'TC', 'TE', 'TI', 'TL', 'TM', 'V',  'W',  'XE',  
-          'Y',  'YB', 'ZN', 'ZR']))
+    assert_equal(nucname.FP, set(['Ag', 'Al', 'Ar', 'As', 'At', 'Au', 'B',  
+          'Ba', 'Be', 'Bi', 'Br', 'C',  'Ca', 'Cd', 'Ce', 'Cl', 'Co', 'Cr', 
+          'Cs', 'Cu', 'Dy', 'Er', 'Eu', 'F',  'Fe', 'Fr', 'Ga', 'Gd', 'Ge',
+          'H',  'He', 'Hf', 'Hg', 'Ho', 'I',  'In', 'Ir', 'K',  'Kr', 'La', 
+          'Li', 'Lu', 'Mg', 'Mn', 'Mo', 'N',  'Na', 'Nb', 'Nd', 'Ne', 'Ni', 
+          'O',  'Os', 'P',  'Pb', 'Pd', 'Pm', 'Po', 'Pr', 'Pt', 'Ra', 'Rb', 
+          'Re', 'Rh', 'Rn', 'Ru', 'S',  'Sb', 'Sc', 'Se', 'Si', 'Sm', 'Sn', 
+          'Sr', 'Ta', 'Tb', 'Tc', 'Te', 'Ti', 'Tl', 'Tm', 'V',  'W',  'Xe',  
+          'Y',  'Yb', 'Zn', 'Zr']))
 
 
 def test_lan():
@@ -68,17 +69,86 @@ def test_fp():
             82, 83, 84, 85, 86, 87, 88]))
 
 
-def test_current_form():
-    assert_equal(nucname.current_form(922380),   "zzaaam")
-    assert_equal(nucname.current_form("922350"), "zzaaam")
+def check_cases(f, x, exp):
+    obs = f(x)
+    assert_equal(exp, obs)
 
-    assert_equal(nucname.current_form("U235"),  "name")
-    assert_equal(nucname.current_form("h-004"), "name")
+cases = [20040, "he4", "Cm-244", "PU239", "AM242M", 2004, 95642, 95242, 92636, 
+    95942, "Am-242m", "he", "U", "Np", "4he", "244CM", "239Pu", "242AM", 40020,
+    2440961, 2390940, 2420950, 92]
 
-    assert_equal(nucname.current_form(92238),   "MCNP")
-    assert_equal(nucname.current_form("92235"), "MCNP")
+caseids = [20040000, 20040000, 962440000, 942390000, 952420001, 20040000, 952420000, 
+    952420001, 922360001, 952420004, 952420001, 20000000, 920000000, 930000000, 
+    20040000, 962440000, 942390000, 952420000, 20040000, 962440001, 942390000, 
+    952420000, 920000000]
+
+def test_id():
+    assert_equal(nucname.id(20040), 20040000)
+
+    assert_equal(nucname.id("he4"),    20040000)
+    assert_equal(nucname.id("Cm-244"), 962440000)
+    assert_equal(nucname.id("PU239"),  942390000)
+    assert_equal(nucname.id("AM242M"), 952420001)
+
+    assert_equal(nucname.id(2004),  20040000)
+    assert_equal(nucname.id(95642), 952420000)
+    assert_equal(nucname.id(95242), 952420001)
+    assert_equal(nucname.id(92636), 922360001)
+    assert_equal(nucname.id(95942), 952420004)
+
+    assert_equal(nucname.id("Am-242m"), 952420001)
+
+    assert_equal(nucname.id("he"), 20000000)
+    assert_equal(nucname.id("U"), 920000000)
+    assert_equal(nucname.id("Np"), 930000000)
+    assert_equal(nucname.id("Cl"), 170000000)
+
+    assert_equal(nucname.id("4he"),   20040000)
+    assert_equal(nucname.id("244CM"), 962440000)
+    assert_equal(nucname.id("239Pu"), 942390000)
+    assert_equal(nucname.id("242AM"), 952420000)
+
+    assert_equal(nucname.id(40020),   20040000)
+    assert_equal(nucname.id(2440961), 962440001)
+    assert_equal(nucname.id(2390940), 942390000)
+    assert_equal(nucname.id(2420950), 952420000)
+    assert_equal(nucname.id(92), 920000000)
 
 
+def test_name():
+    assert_equal(nucname.name(942390), "Pu239")
+    assert_equal(nucname.name(952421), "Am242M")
+
+    assert_equal(nucname.name("PU239"), "Pu239")
+
+    assert_equal(nucname.name(94239), "Pu239")
+    assert_equal(nucname.name(95242), "Am242M")
+    assert_equal(nucname.name(95642), "Am242")
+    assert_equal(nucname.name(92636), "U236M")
+
+    assert_equal(nucname.name("Am-242m"), "Am242M")
+
+    assert_equal(nucname.name(40020),   "He4")
+    assert_equal(nucname.name(2440961), "Cm244M")
+    assert_equal(nucname.name(2390940), "Pu239")
+    assert_equal(nucname.name(2420950), "Am242")
+
+def test_znum():
+    exps = [2, 2, 96, 94, 95, 2, 95, 95, 92, 95, 95, 2, 92, 93, 2, 96, 94, 95, 2,
+            96, 94, 95, 92]
+    for case, exp in zip(cases, exps):
+        yield check_cases, nucname.znum, case, exp
+
+def test_anum():
+    exps = [4, 4, 244, 239, 242, 4, 242, 242, 236, 242, 242, 0, 0, 0, 4, 244, 239, 
+        242, 4, 244, 239, 242, 0]
+    for case, exp in zip(cases, exps):
+        yield check_cases, nucname.anum, case, exp
+
+def test_snum():
+    exps = [0, 0, 0, 0, 1, 0, 0, 1, 1, 4, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0]
+    for case, exp in zip(cases, exps):
+        yield check_cases, nucname.snum, case, exp
 
 def test_zzaaam():
     assert_equal(nucname.zzaaam(20040), 20040)
@@ -110,25 +180,14 @@ def test_zzaaam():
     assert_equal(nucname.zzaaam(2390940), 942390)
     assert_equal(nucname.zzaaam(2420950), 952420)
 
-
-def test_name():
-    assert_equal(nucname.name(942390), "PU239")
-    assert_equal(nucname.name(952421), "AM242M")
-
-    assert_equal(nucname.name("PU239"), "PU239")
-
-    assert_equal(nucname.name(94239), "PU239")
-    assert_equal(nucname.name(95242), "AM242M")
-    assert_equal(nucname.name(95642), "AM242")
-    assert_equal(nucname.name(92636), "U236M")
-
-    assert_equal(nucname.name("Am-242m"), "AM242M")
-
-    assert_equal(nucname.name(40020),   "HE4")
-    assert_equal(nucname.name(2440961), "CM244M")
-    assert_equal(nucname.name(2390940), "PU239")
-    assert_equal(nucname.name(2420950), "AM242")
-
+def test_zzaaam_to_id():
+    vals = [20040, 20040, 962440, 942390, 952421, 20040, 952420, 952421, 922361, 
+            952424, 952421, 20000, 920000, 930000, 20040, 962440, 942390, 952420, 
+            20040, 962441, 942390, 952420, 920000]
+    for val, id in set(zip(vals, caseids)):
+        if val is None:
+            continue
+        yield check_cases, nucname.zzaaam_to_id, val, id
 
 def test_mcnp():
     assert_equal(nucname.mcnp(10010),  1001)
@@ -153,6 +212,14 @@ def test_mcnp():
     assert_equal(nucname.mcnp(2420950), 95642)
     assert_equal(nucname.mcnp(2360921), 92636)
 
+def test_mcnp_to_id():
+    vals = [2004, 2004, 96244, 94239, 95242, 2004, 95642, 95242, 92636, 
+            95942, 95242, 2000, 92000, 93000, 2004, 96244, 94239, 95642, 
+            2004, 96644, 94239, 95642, 92000]
+    for val, id in set(zip(vals, caseids)):
+        if val is None:
+            continue
+        yield check_cases, nucname.mcnp_to_id, val, id
 
 def test_serpent():
     assert_equal(nucname.serpent(942390), "Pu-239")
@@ -168,7 +235,16 @@ def test_serpent():
     assert_equal(nucname.serpent(2390940), "Pu-239")
     assert_equal(nucname.serpent(2420951), "Am-242m")
 
-
+def test_serpent_to_id():
+    # use None for impossible forms
+    vals = ["He-4", "He-4", "Cm-244", "Pu-239", "Am-242m", "He-4", "Am-242", 
+            "Am-242m", "U-236m", None, "Am-242m", "He-nat", "U-nat", 
+            "Np-nat", "He-4", "Cm-244", "Pu-239", "Am-242", "He-4", "Cm-244m", 
+            "Pu-239", "Am-242", "U-nat"]
+    for val, id in set(zip(vals, caseids)):
+        if val is None:
+            continue
+        yield check_cases, nucname.serpent_to_id, val, id
 
 def test_nist():
     assert_equal(nucname.nist(942390), "239Pu")
@@ -186,6 +262,15 @@ def test_nist():
     assert_equal(nucname.nist(2390940), "239Pu")
     assert_equal(nucname.nist(2420951), "242Am")
 
+def test_nist_to_id():
+    # use None for impossible forms
+    vals = ["4He", "4He", "244Cm", "239Pu", None, "4He", "242Am", None, None, 
+            None, None, "He", "U", "Np", "4He", "244Cm", "239Pu", "242Am", "4He", 
+            None, "239Pu", "242Am", "U"]
+    for val, id in set(zip(vals, caseids)):
+        if val is None:
+            continue
+        yield check_cases, nucname.nist_to_id, val, id
 
 def test_cinder():
     assert_equal(nucname.cinder(10020),  20010)
@@ -204,6 +289,14 @@ def test_cinder():
     assert_equal(nucname.cinder(20010),  20010)
     assert_equal(nucname.cinder(2420951), 2420951)
 
+def test_cinder_to_id():
+    vals = [40020, 40020, 2440960, 2390940, 2420951, 40020, 2420950, 2420951, 2360921, 
+            2420954, 2420951, 20, 920, 930, 40020, 2440960, 2390940, 2420950, 
+            40020, 2440961, 2390940, 2420950, 920]
+    for val, id in set(zip(vals, caseids)):
+        if val is None:
+            continue
+        yield check_cases, nucname.cinder_to_id, val, id
 
 def test_alara():
     assert_equal(nucname.alara(942390), "pu:239")
@@ -225,6 +318,63 @@ def test_alara():
     assert_equal(nucname.alara(2390940), "pu:239")
     assert_equal(nucname.alara(2420950), "am:242")
 
+def test_alara_to_id():
+    # use None for impossible forms
+    vals = ["he:4", "he:4", "cm:244", "pu:239", None, "he:4", "am:242", None, None, 
+            None, None, "he", "u", "np", "he:4", "cm:244", "pu:239", "am:242", "he:4", 
+            None, "pu:239", "am:242", "u"]
+    for val, id in set(zip(vals, caseids)):
+        if val is None:
+            continue
+        yield check_cases, nucname.alara_to_id, val, id
+
+def test_sza():
+    assert_equal(nucname.sza(20040), 2004)
+
+    assert_equal(nucname.sza("he4"),    2004)
+    assert_equal(nucname.sza("Cm-244"), 96244)
+    assert_equal(nucname.sza("PU239"),  94239)
+    assert_equal(nucname.sza("AM242M"), 1095242)
+
+    assert_equal(nucname.sza(2004),  2004)
+    assert_equal(nucname.sza(95642), 95242)
+    assert_equal(nucname.sza(95242), 1095242)
+    assert_equal(nucname.sza(92636), 1092236)
+    assert_equal(nucname.sza(95942), 4095242)
+
+    assert_equal(nucname.sza("Am-242m"), 1095242)
+
+    assert_equal(nucname.sza("he"), 2000)
+    assert_equal(nucname.sza("U"), 92000)
+    assert_equal(nucname.sza("Np"), 93000)
+
+    assert_equal(nucname.sza("4he"),   2004)
+    assert_equal(nucname.sza("244CM"), 96244)
+    assert_equal(nucname.sza("239Pu"), 94239)
+    assert_equal(nucname.sza("242AM"), 95242)
+
+    assert_equal(nucname.sza(40020),   2004)
+    assert_equal(nucname.sza(2440961), 1096244)
+    assert_equal(nucname.sza(2390940), 94239)
+    assert_equal(nucname.sza(2420950), 95242)
+
+def test_sza_to_id():
+    vals = [2004, 2004, 96244, 94239, 1095242, 2004, 95242, 1095242, 1092236, 
+            4095242, 1095242, 2000, 92000, 93000, 2004, 96244, 94239, 95242, 
+            2004, 1096244, 94239, 95242, 92000]
+    for val, id in set(zip(vals, caseids)):
+        if val is None:
+            continue
+        yield check_cases, nucname.sza_to_id, val, id
+
+
+def test_isnuclide():
+    are = [922350, 'U235']
+    arent = ['U3']
+    for nuc in are:
+        yield assert_true, nucname.isnuclide(nuc)
+    for nuc in arent:
+        yield assert_false, nucname.isnuclide(nuc)
 
 
 if __name__ == "__main__":
