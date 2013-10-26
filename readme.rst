@@ -66,3 +66,13 @@ do its best to find relevant nuclear data elsewhere on your machine
 or from public sources on the internet.  
 
 .. install-end
+
+
+============
+Contributing
+============
+We highly encourage contributions to PyNE! If you would like to contribute, 
+it is as easy as forking the repository on GitHub, making your changes, and 
+issuing a pull request. If you have any questions about this process don't 
+hesitate to ask the mailing list (pyne-dev@googlegroups.com).
+

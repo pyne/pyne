@@ -11,7 +11,6 @@ The Python for Nuclear Engineering Team includes:
 * Paul Wilson
 * Nick Touran
 * Katy Huff
-* Josh Peterson
 * `Chris Dembia`_
 * `Eric Relson`_
 
@@ -26,3 +25,10 @@ The Python for Nuclear Engineering Team includes:
 .. _Eric Relson: mailto:erelson@umich.edu
 
 Contact us via pyne-dev@googlegroups.com
+
+Contributing
+------------
+We highly encourage contributions to PyNE! If you would like to contribute, 
+it is as easy as forking the repository on GitHub, making your changes, and 
+issuing a pull request. If you have any questions about this process don't 
+hesitate to ask the mailing list (pyne-dev@googlegroups.com).
