@@ -219,7 +219,6 @@ def test_expand_elements1():
     assert_true(natmat.attrs == expmat.attrs)
     assert_false(natmat.attrs is expmat.attrs)
 
-
 def test_expand_elements2():
     """Inspired by #86"""
     natmat = Material({'C': 1.0})

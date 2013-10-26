@@ -49,11 +49,8 @@ cdef cpp_map[int, double] dict_to_comp(dict nucvec):
     cdef cpp_map[int, double] comp = cpp_map[int, double]()
 
     for key, value in nucvec.items():
-        if isinstance(key, int):
-            comp[key] = value
-        else:
-            key_zz = nucname.id(key)
-            comp[key_zz] = value
+        key_zz = nucname.id(key)
+        comp[key_zz] = value
 
     return comp
 
