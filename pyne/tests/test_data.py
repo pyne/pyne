@@ -71,11 +71,9 @@ def test_decay_children():
 
 
 def test_abundance_by_z_for_soundness():
-    for z in data.abundance_by_z:
-        abunds = data.abundance_by_z[z]
-        if abunds:
-            assert(abs(1-sum([abund[1] for abund in abunds]))<1e-12)
-
+    for vs in data.abundance_by_z.values():
+        if vs:
+            assert(abs(1-sum([v[1] for v in vs]))<1e-12)
 
 if __name__ == "__main__":
     nose.runmodule()
