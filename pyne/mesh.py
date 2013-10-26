@@ -1,5 +1,6 @@
 import numpy as np
 import itertools
+import copy
 from collections import namedtuple, Iterable
 
 try:
@@ -161,29 +162,29 @@ class Mesh(object):
             self.vertex_dims = list(self.dims[0:3]) \
                                + [x + 1 for x in self.dims[3:6]]
 
-    def __add__(self, other):
-        """Adds the common tags of other and returns a new mesh object.
-        """
-        tags = self.common_ve_tags(other)
-        return self._do_op(other, tags, "+")
-
-    def __sub__(self, other):
-        """Subtracts the common tags of other and returns a new mesh object.
-        """
-        tags = self.common_ve_tags(other)
-        return self._do_op(other, tags, "-")
-
-    def __mul__(self, other):
-        """Multiplies the common tags of other and returns a new mesh object.
-        """
-        tags = self.common_ve_tags(other)
-        return  self._do_op(other, tags, "*")
-
-    def __div__(self, other):
-        """Adds the common tags of other and returns a new mesh object.
-        """
-        tags = self.common_ve_tags(other)
-        return self._do_op(other, tags, "/")
+#    def __add__(self, other):
+#        """Adds the common tags of other and returns a new mesh object.
+#        """
+#        tags = self.common_ve_tags(other)
+#        return self._do_op(other, tags, "+", in_place=False)
+#
+#    def __sub__(self, other):
+#        """Subtracts the common tags of other and returns a new mesh object.
+#        """
+#        tags = self.common_ve_tags(other)
+#        return self._do_op(other, tags, "-", in_place=False)
+#
+#    def __mul__(self, other):
+#        """Multiplies the common tags of other and returns a new mesh object.
+#        """
+#        tags = self.common_ve_tags(other)
+#        return  self._do_op(other, tags, "*", in_place=False)
+#
+#    def __div__(self, other):
+#        """Adds the common tags of other and returns a new mesh object.
+#        """
+#        tags = self.common_ve_tags(other)
+#        return self._do_op(other, tags, "/", in_place=False)
 
 
     def add(self, other):
@@ -210,7 +211,7 @@ class Mesh(object):
         tags = self.common_ve_tags(other)
         self._do_op(other, tags, "/")
 
-    def _do_op(self, other, tags, op):
+    def _do_op(self, other, tags, op, in_place=True):
         """Private function to do mesh +, -, *, /.
         """
         # Exclude error tags in a case a StatMesh is mistakenly initialized as a
@@ -219,15 +220,20 @@ class Mesh(object):
             if tag[-6:] == "_error":
                 tags.remove(tag)
 
+        if in_place:
+            mesh_1 = self
+        else:
+            mesh_1 = copy.copy(self)
+
         for tag in tags:
             for ve_1, ve_2 in \
-                zip(zip(iter(self.mesh.iterate(iBase.Type.region, iMesh.Topology.all))),
+                zip(zip(iter(mesh_1.mesh.iterate(iBase.Type.region, iMesh.Topology.all))),
                     zip(iter(other.mesh.iterate(iBase.Type.region, iMesh.Topology.all)))):
                 self.mesh.getTagHandle(tag)[ve_1] = \
-                    _ops[op](self.mesh.getTagHandle(tag)[ve_1], 
+                    _ops[op](mesh_1.mesh.getTagHandle(tag)[ve_1], 
                             other.mesh.getTagHandle(tag)[ve_2])
 
-        return self
+        return mesh_1
 
 
     def common_ve_tags(self, other):
@@ -241,6 +247,14 @@ class Mesh(object):
 
         return list(self_tags.intersection(other_tags))
                            
+    def __copy__(self):
+        #first copy full imesh instance
+        imesh_copy = iMesh.Mesh()
+
+        #now create Mesh objected from copied iMesh instance
+        mesh_copy = Mesh(mesh=imesh_copy, structured=copy.copy(self.structured))
+        return mesh_copy
+
     #Structured methods:
     def structured_get_vertex(self, i, j, k):
         """Return the handle for (i,j,k)'th vertex in the mesh"""
@@ -478,7 +492,7 @@ class StatMesh(Mesh):
               structured=structured, structured_coords=structured_coords, 
               structured_set=structured_set)
 
-    def _do_op(self, other, tags, op):
+    def _do_op(self, other, tags, op, in_place=True):
         """Private function to do mesh +, -, *, /. Called by operater overloading
         functions.
         """
@@ -488,20 +502,25 @@ class StatMesh(Mesh):
             if tag[-6:] == "_error":
                 tags.remove(tag)
 
+        if in_place:
+            mesh_1 = self
+        else:
+            mesh_1 = copy.copy(self)
+
         for tag in tags:
             for ve_1, ve_2 in \
-                zip(zip(iter(self.mesh.iterate(iBase.Type.region, iMesh.Topology.all))),
+                zip(zip(iter(mesh_1.mesh.iterate(iBase.Type.region, iMesh.Topology.all))),
                     zip(iter(other.mesh.iterate(iBase.Type.region, iMesh.Topology.all)))):
 
-                self.mesh.getTagHandle(tag + "_error")[ve_1] = err__ops[op](
-                    self.mesh.getTagHandle(tag)[ve_1], 
+                mesh_1.mesh.getTagHandle(tag + "_error")[ve_1] = err__ops[op](
+                    mesh_1.mesh.getTagHandle(tag)[ve_1], 
                     other.mesh.getTagHandle(tag)[ve_2], 
-                    self.mesh.getTagHandle(tag + "_error")[ve_1], 
+                    mesh_1.mesh.getTagHandle(tag + "_error")[ve_1], 
                     other.mesh.getTagHandle(tag + "_error")[ve_2])
 
-                self.mesh.getTagHandle(tag)[ve_1] = \
-                    _ops[op](self.mesh.getTagHandle(tag)[ve_1], 
+                mesh_1.mesh.getTagHandle(tag)[ve_1] = \
+                    _ops[op](mesh_1.mesh.getTagHandle(tag)[ve_1], 
                             other.mesh.getTagHandle(tag)[ve_2])
 
-        return self
+        return mesh_1
 

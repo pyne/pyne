@@ -169,14 +169,28 @@ class TestArithmetic():
         obs_res = [self.mesh_1.mesh.getTagHandle("flux")[vol] 
                    for vol in self.mesh_1.structured_iterate_hex("xyz")]
         assert_array_almost_equal(exp_res, obs_res)
+
     
-    def test_op_add_mesh(self):
-        self.arithmetic_mesh_setup()
-        mesh_3 = self.mesh_1 + self.mesh_2
-        exp_res = [2.1, 4.2, 6.3, 8.4]
-        obs_res = [mesh_3.mesh.getTagHandle("flux")[vol] 
-                   for vol in mesh_3.structured_iterate_hex("xyz")]
-        assert_array_almost_equal(exp_res, obs_res)
+#    def test_op_add_mesh(self):
+#        self.arithmetic_mesh_setup()
+#        mesh_3 = self.mesh_1 + self.mesh_2
+#        exp_res = [2.1, 4.2, 6.3, 8.4]
+#        obs_res = [mesh_3.mesh.getTagHandle("flux")[vol] 
+#                   for vol in mesh_3.structured_iterate_hex("xyz")]
+#        assert_array_almost_equal(exp_res, obs_res)
+#
+#        #test to make sure not modification is being done in place
+#        obs_orig_1 = [self.mesh_1.mesh.getTagHandle("flux")[vol] 
+#                   for vol in self.mesh_1.structured_iterate_hex("xyz")]
+#        exp_orig_1 = [1.0, 2.0, 3.0, 4.0]
+#        assert_array_almost_equal(exp_orig_1, obs_orig_1)
+#
+#        obs_orig_2 = [self.mesh_2.mesh.getTagHandle("flux")[vol] 
+#                   for vol in self.mesh_2.structured_iterate_hex("xyz")]
+#        exp_orig_1 = [1.1, 2.2, 3.3, 4.4]
+#        assert_array_almost_equal(exp_res, obs_res)
+#        assert_array_almost_equal(exp_orig_2, obs_orig_2)
+
     
     def test_subtract_mesh(self):
         self.arithmetic_mesh_setup()
@@ -186,13 +200,13 @@ class TestArithmetic():
                    for vol in self.mesh_1.structured_iterate_hex("xyz")]
         assert_array_almost_equal(exp_res, obs_res)
     
-    def test_op_subtract_mesh(self):
-        self.arithmetic_mesh_setup()
-        mesh_3 = self.mesh_1 - self.mesh_2
-        exp_res = [-0.1, -0.2, -0.3, -0.4]
-        obs_res = [mesh_3.mesh.getTagHandle("flux")[vol] 
-                   for vol in mesh_3.structured_iterate_hex("xyz")]
-        assert_array_almost_equal(exp_res, obs_res)
+#    def test_op_subtract_mesh(self):
+#        self.arithmetic_mesh_setup()
+#        mesh_3 = self.mesh_1 - self.mesh_2
+#        exp_res = [-0.1, -0.2, -0.3, -0.4]
+#        obs_res = [mesh_3.mesh.getTagHandle("flux")[vol] 
+#                   for vol in mesh_3.structured_iterate_hex("xyz")]
+#        assert_array_almost_equal(exp_res, obs_res)
     
     def test_multiply_mesh(self):
         self.arithmetic_mesh_setup()
@@ -202,13 +216,13 @@ class TestArithmetic():
                    for vol in self.mesh_1.structured_iterate_hex("xyz")]
         assert_array_almost_equal(exp_res, obs_res)
     
-    def test_op_multiply_mesh(self):
-        self.arithmetic_mesh_setup()
-        mesh_3 = self.mesh_1 * self.mesh_2
-        exp_res = [1.1, 4.4, 9.9, 17.6]
-        obs_res = [mesh_3.mesh.getTagHandle("flux")[vol] 
-                   for vol in mesh_3.structured_iterate_hex("xyz")]
-        assert_array_almost_equal(exp_res, obs_res)
+#    def test_op_multiply_mesh(self):
+#        self.arithmetic_mesh_setup()
+#        mesh_3 = self.mesh_1 * self.mesh_2
+#        exp_res = [1.1, 4.4, 9.9, 17.6]
+#        obs_res = [mesh_3.mesh.getTagHandle("flux")[vol] 
+#                   for vol in mesh_3.structured_iterate_hex("xyz")]
+#        assert_array_almost_equal(exp_res, obs_res)
     
     def test_divide_mesh(self):
         self.arithmetic_mesh_setup()
@@ -218,13 +232,13 @@ class TestArithmetic():
                    for vol in self.mesh_1.structured_iterate_hex("xyz")]
         assert_array_almost_equal(exp_res, obs_res)
     
-    def test_op_divide_mesh(self):
-        self.arithmetic_mesh_setup()
-        mesh_3 = self.mesh_1/self.mesh_2
-        exp_res = [0.9090909091, 0.9090909091, 0.9090909091, 0.9090909091]
-        obs_res = [mesh_3.mesh.getTagHandle("flux")[vol] 
-                   for vol in mesh_3.structured_iterate_hex("xyz")]
-        assert_array_almost_equal(exp_res, obs_res)
+#    def test_op_divide_mesh(self):
+#        self.arithmetic_mesh_setup()
+#        mesh_3 = self.mesh_1/self.mesh_2
+#        exp_res = [0.9090909091, 0.9090909091, 0.9090909091, 0.9090909091]
+#        obs_res = [mesh_3.mesh.getTagHandle("flux")[vol] 
+#                   for vol in mesh_3.structured_iterate_hex("xyz")]
+#        assert_array_almost_equal(exp_res, obs_res)
     
     def test_add_statmesh(self):
         self.arithmetic_statmesh_setup()
@@ -239,18 +253,18 @@ class TestArithmetic():
         assert_array_almost_equal(exp_res, obs_res)
         assert_array_almost_equal(exp_err, obs_err)
     
-    def test_op_add_statmesh(self):
-        self.arithmetic_statmesh_setup()
-        statmesh_3 = self.statmesh_1 + self.statmesh_2
-        exp_res = [2.1, 4.2, 6.3, 8.4]
-        exp_err = [0.070790803558659549, 0.1415816071173191, 
-                   0.21237241067597862, 0.28316321423463819]
-        obs_res = [statmesh_3.mesh.getTagHandle("flux")[vol] 
-                   for vol in statmesh_3.structured_iterate_hex("xyz")]
-        obs_err = [statmesh_3.mesh.getTagHandle("flux_error")[vol] 
-                   for vol in statmesh_3.structured_iterate_hex("xyz")]
-        assert_array_almost_equal(exp_res, obs_res)
-        assert_array_almost_equal(exp_err, obs_err)
+#    def test_op_add_statmesh(self):
+#        self.arithmetic_statmesh_setup()
+#        statmesh_3 = self.statmesh_1 + self.statmesh_2
+#        exp_res = [2.1, 4.2, 6.3, 8.4]
+#        exp_err = [0.070790803558659549, 0.1415816071173191, 
+#                   0.21237241067597862, 0.28316321423463819]
+#        obs_res = [statmesh_3.mesh.getTagHandle("flux")[vol] 
+#                   for vol in statmesh_3.structured_iterate_hex("xyz")]
+#        obs_err = [statmesh_3.mesh.getTagHandle("flux_error")[vol] 
+#                   for vol in statmesh_3.structured_iterate_hex("xyz")]
+#        assert_array_almost_equal(exp_res, obs_res)
+#        assert_array_almost_equal(exp_err, obs_err)
 
   
     def test_subtract_statmesh(self):
@@ -265,17 +279,17 @@ class TestArithmetic():
         assert_array_almost_equal(exp_res, obs_res)
         assert_array_almost_equal(exp_err, obs_err)
     
-    def test_op_subtract_statmesh(self):
-        self.arithmetic_statmesh_setup()
-        statmesh_3 = self.statmesh_1 - self.statmesh_2
-        exp_res = [-0.1, -0.2, -0.3, -0.4]
-        exp_err = [-1.4866068747, -2.9732137495, -4.4598206242, -5.9464274989]
-        obs_res = [statmesh_3.mesh.getTagHandle("flux")[vol] 
-                   for vol in statmesh_3.structured_iterate_hex("xyz")]
-        obs_err = [statmesh_3.mesh.getTagHandle("flux_error")[vol] 
-                   for vol in statmesh_3.structured_iterate_hex("xyz")]
-        assert_array_almost_equal(exp_res, obs_res)
-        assert_array_almost_equal(exp_err, obs_err)
+#    def test_op_subtract_statmesh(self):
+#        self.arithmetic_statmesh_setup()
+#        statmesh_3 = self.statmesh_1 - self.statmesh_2
+#        exp_res = [-0.1, -0.2, -0.3, -0.4]
+#        exp_err = [-1.4866068747, -2.9732137495, -4.4598206242, -5.9464274989]
+#        obs_res = [statmesh_3.mesh.getTagHandle("flux")[vol] 
+#                   for vol in statmesh_3.structured_iterate_hex("xyz")]
+#        obs_err = [statmesh_3.mesh.getTagHandle("flux_error")[vol] 
+#                   for vol in statmesh_3.structured_iterate_hex("xyz")]
+#        assert_array_almost_equal(exp_res, obs_res)
+#        assert_array_almost_equal(exp_err, obs_err)
     
     def test_multiply_statmesh(self):
         self.arithmetic_statmesh_setup()
@@ -289,17 +303,17 @@ class TestArithmetic():
         assert_array_almost_equal(exp_res, obs_res)
         assert_array_almost_equal(exp_err, obs_err)
     
-    def test_op_multiply_statmesh(self):
-        self.arithmetic_statmesh_setup()
-        statmesh_3 = self.statmesh_1 * self.statmesh_2
-        exp_res = [1.1, 4.4, 9.9, 17.6]
-        exp_err = [0.1414213562, 0.2828427125, 0.4242640687, 0.5656854249,]
-        obs_res = [statmesh_3.mesh.getTagHandle("flux")[vol] 
-                   for vol in statmesh_3.structured_iterate_hex("xyz")]
-        obs_err = [statmesh_3.mesh.getTagHandle("flux_error")[vol] 
-                   for vol in statmesh_3.structured_iterate_hex("xyz")]
-        assert_array_almost_equal(exp_res, obs_res)
-        assert_array_almost_equal(exp_err, obs_err)
+#    def test_op_multiply_statmesh(self):
+#        self.arithmetic_statmesh_setup()
+#        statmesh_3 = self.statmesh_1 * self.statmesh_2
+#        exp_res = [1.1, 4.4, 9.9, 17.6]
+#        exp_err = [0.1414213562, 0.2828427125, 0.4242640687, 0.5656854249,]
+#        obs_res = [statmesh_3.mesh.getTagHandle("flux")[vol] 
+#                   for vol in statmesh_3.structured_iterate_hex("xyz")]
+#        obs_err = [statmesh_3.mesh.getTagHandle("flux_error")[vol] 
+#                   for vol in statmesh_3.structured_iterate_hex("xyz")]
+#        assert_array_almost_equal(exp_res, obs_res)
+#        assert_array_almost_equal(exp_err, obs_err)
     
     def test_divide_statmesh(self):
         self.arithmetic_statmesh_setup()
@@ -313,17 +327,17 @@ class TestArithmetic():
         assert_array_almost_equal(exp_res, obs_res)
         assert_array_almost_equal(exp_err, obs_err)
     
-    def test_op_divide_statmesh(self):
-        self.arithmetic_statmesh_setup()
-        statmesh_3 = self.statmesh_1/self.statmesh_2
-        exp_res = [0.9090909091, 0.9090909091, 0.9090909091, 0.9090909091]
-        exp_err = [0.1414213562, 0.2828427125, 0.4242640687, 0.5656854249]
-        obs_res = [statmesh_3.mesh.getTagHandle("flux")[vol] 
-                   for vol in statmesh_3.structured_iterate_hex("xyz")]
-        obs_err = [statmesh_3.mesh.getTagHandle("flux_error")[vol] 
-                   for vol in statmesh_3.structured_iterate_hex("xyz")]
-        assert_array_almost_equal(exp_res, obs_res)
-        assert_array_almost_equal(exp_err, obs_err)
+#    def test_op_divide_statmesh(self):
+#        self.arithmetic_statmesh_setup()
+#        statmesh_3 = self.statmesh_1/self.statmesh_2
+#        exp_res = [0.9090909091, 0.9090909091, 0.9090909091, 0.9090909091]
+#        exp_err = [0.1414213562, 0.2828427125, 0.4242640687, 0.5656854249]
+#        obs_res = [statmesh_3.mesh.getTagHandle("flux")[vol] 
+#                   for vol in statmesh_3.structured_iterate_hex("xyz")]
+#        obs_err = [statmesh_3.mesh.getTagHandle("flux_error")[vol] 
+#                   for vol in statmesh_3.structured_iterate_hex("xyz")]
+#        assert_array_almost_equal(exp_res, obs_res)
+#        assert_array_almost_equal(exp_err, obs_err)
     
 #############################################
 #Test Structured mesh iteration functionality
