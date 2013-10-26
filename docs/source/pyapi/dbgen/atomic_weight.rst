@@ -19,13 +19,6 @@ All functionality may be found in the ``atomic_weight`` module::
 
 ------------
 
-.. autofunction:: grab_atmoic_mass_adjustment(build_dir="")
-
-------------
-
-.. autofunction:: parse_atmoic_mass_adjustment(build_dir="")
-
-------------
 
 .. autofunction:: make_atomic_weight_table(nuc_data, build_dir="")
 

@@ -6,7 +6,7 @@
 #if !defined(_XDRESS_EXTRA_TYPES_)
 #define _XDRESS_EXTRA_TYPES_
 
-
+#if defined(__cplusplus)
 namespace extra_types
 {
   /// complex type struct, matching PyTables definition
@@ -44,5 +44,16 @@ namespace extra_types
 
 // End namespace extra_types
 };
+
+#elif defined(__STDC__)
+
+/// complex type struct, matching PyTables definition
+typedef struct {
+  double re;  ///< real part
+  double im;  ///< imaginary part
+} complex_t;
+
+#endif
+
 #endif
 

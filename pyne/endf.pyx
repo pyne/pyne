@@ -18,11 +18,16 @@ import re
 import os
 from libc.stdlib cimport malloc, free
 
-import numpy as np
 cimport numpy as np
-import matplotlib.pyplot as plt
+import numpy as np
+
+np.import_array()
+
+from pyne cimport cpp_nucname
+
 from math import e
 
+from pyne import nucname
 import pyne.rxdata as rx
 from pyne.rxname import label
 from pyne.utils import fromendf_tok, endftod
@@ -87,6 +92,9 @@ class Library(rx.RxLib):
         return data
 
     def _read_headers(self):
+        cdef int nuc
+        cdef int mat_id
+        cdef double nucd
         opened_here = False
         if isinstance(self.fh, basestring):
             fh = open(self.fh, 'r')
@@ -98,13 +106,14 @@ class Library(rx.RxLib):
         len_headline = len(fh.readline())
         self.offset += 81 - len_headline
         line = fh.readline()
-        mat_id = int(line[66:70])
-        nuc = int(endftod(line[:11])*10)
+        mat_id = int(line[66:70].strip() or -1)
+        # originally in a float version of ZZAAA.M, ie 94242.1
+        nuc = cpp_nucname.id(<int> (endftod(line[:11])*10))
         # Make a new dict in self.structure to contain the material data.
         if nuc not in self.structure:
             self.structure.update(
-                {nuc:{'styles':'', 'docs':[], 'particles':[], 'data':{},
-                         'matflags':{}}})
+                {nuc:{'styles': "", 'docs': [], 'particles': [], 'data': {},
+                         'matflags': {}}})
             self.mat_dict.update({nuc:{'end_line':[],
                                           'mfs':{}}})
         # Parse header (all lines with 1451)
@@ -141,7 +150,7 @@ class Library(rx.RxLib):
         nextline = fh.readline()
         self.more_files = (nextline != '' and nextline[68:70] != "-1")
         # Update materials dict
-        if mat_id != '':
+        if mat_id != -1:
             self.mat_dict[nuc]['end_line'] = (self.chars_til_now+self.offset)/81
             setattr(self, "mat{0}".format(nuc), self.structure[nuc])
         self._read_mat_flags(nuc)
@@ -355,7 +364,7 @@ class Library(rx.RxLib):
         B = np.log(y2*x2/(x1*y1)) / (1/(x1-T)**0.5 - 1/(x2-T)**0.5)
         A = e**(B/(x1-T)**0.5)*y1*x1
         # FIXME
-        raise NotImplementedError('I haven\'t done the math for this one yet!')
+        raise NotImplementedError("see docs for more details.")
 
     def integrate_tab_range(self, intscheme, Eint, xs):
         """Integrates across one tabulation range.
@@ -411,7 +420,7 @@ class Library(rx.RxLib):
         Parameters
         -----------
         mat_id: int
-            Material ZZAAAM.
+            Material id .
         """
         lrp = self.structure[mat_id]['matflags']['LRP']
         if (lrp == -1 or mat_id in (-1,0)):
@@ -758,7 +767,7 @@ class Library(rx.RxLib):
             range_flags, ('SPI','AP',0,0,'NLS',0), subsection, total_lines)
         return total_lines
 
-    def _read_xs(self, mat_id, mt, nuc_i = None):
+    def _read_xs(self, mat_id, mt, nuc_i=None):
         """Read in cross-section data. Read resonances with Library._read_res
         first.
 
@@ -806,11 +815,12 @@ class Library(rx.RxLib):
         """
         if not nuc_i:
             nuc_i = nuc
-        try:
-            return self.structure[nuc]['data'][nuc_i]['xs'][mt]
-        except KeyError:
+        if nuc not in self.structure:
+            self._read_res(nuc)
+        if nuc_i not in self.structure[nuc]['data'] or \
+           mt not in self.structure[nuc]['data'][nuc_i]['xs']:
             self._read_xs(nuc, mt, nuc_i)
-            return self.structure[nuc]['data'][nuc_i]['xs'][mt]
+        return self.structure[nuc]['data'][nuc_i]['xs'][mt]
 
     def get_rx(self, nuc, mf, mt, lines=0):
         """Grab the data from one reaction type.
@@ -1946,9 +1956,6 @@ class ENDFTab2Record(object):
                 self.INT.append(INT)
                 line = line[22:]
             m = m + toRead
-
-    def plot(self):
-        plt.plot(self.x, self.y)
 
 class ENDFRecord(object):
     def __init__(self, fh):

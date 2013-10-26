@@ -81,64 +81,59 @@ double pyne::to_dbl (std::string s)
   return strtod( s.c_str(), NULL );
 }
 
-double pyne::endftod (char * s)
-{
+double pyne::endftod (char * s) {
   // Converts string from ENDF to float64.
   int pos, mant, exp;
   double v, dbl_exp;
 
   mant = exp = 0;
-  if (s[2] == '.')
-  // Convert an ENDF float
+  if (s[2] == '.') {
+    // Convert an ENDF float
+    if (s[9] == '+' or s[9] == '-')
     {
-      if (s[9] == '+' or s[9] == '-')
-        {
-          // All these factors of ten are from place values.
-          mant = s[8] + 10 * s[7] + 100 * s[6] + 1000 * s[5] + 10000 * s[4] + \
-            100000 * s[3] + 1000000 * s[1] - 1111111 * '0';
-          exp = s[10] - '0';
-          // Make the right power of 10.
-          dbl_exp = (exp & 01? 10.: 1) * \
-                    ((exp >>= 1) & 01? 100.: 1) * \
-                    ((exp >>= 1) & 01? 1.0e4: 1) * \
-                    ((exp >>= 1) & 01? 1.0e8: 1);
-          // Adjust for powers of ten from treating mantissa as an integer.
-          dbl_exp = (s[9] == '-'? 1/dbl_exp: dbl_exp) * 1.0e-6;
-          // Get mantissa sign, apply exponent.
-          v = mant * (s[0] == '-'? -1: 1) * dbl_exp;
-        }
-      else
-        {
-          mant = s[7] + 10 * s[6] + 100 * s[5] + 1000 * s[4] + 10000 * s[3] + \
-            100000 * s[1] - 111111 * '0';
-          exp = s[10] + 10 * s[9] - 11 * '0';
-          dbl_exp = (exp & 01? 10.: 1) * \
-                    ((exp >>= 1) & 01? 100.: 1) * \
-                    ((exp >>= 1) & 01? 1.0e4: 1) * \
-                    ((exp >>= 1) & 01? 1.0e8: 1) * \
-                    ((exp >>= 1) & 01? 1.0e16: 1) * \
-                    ((exp >>= 1) & 01? 1.0e32: 1) * \
-                    ((exp >>= 1) & 01? 1.0e64: 1);
-          dbl_exp = (s[8] == '-'? 1/dbl_exp: dbl_exp) * 1.0e-5;
-          v = mant * (s[0] == '-'? -1: 1) * dbl_exp;
-        }
+      // All these factors of ten are from place values.
+      mant = s[8] + 10 * s[7] + 100 * s[6] + 1000 * s[5] + 10000 * s[4] + \
+             100000 * s[3] + 1000000 * s[1] - 1111111 * '0';
+      exp = s[10] - '0';
+      // Make the right power of 10.
+      dbl_exp = (exp & 01? 10.: 1) * \
+                ((exp >>= 1) & 01? 100.: 1) * \
+                ((exp >>= 1) & 01? 1.0e4: 1) * \
+                ((exp >>= 1) & 01? 1.0e8: 1);
+      // Adjust for powers of ten from treating mantissa as an integer.
+      dbl_exp = (s[9] == '-'? 1/dbl_exp: dbl_exp) * 1.0e-6;
+      // Get mantissa sign, apply exponent.
+      v = mant * (s[0] == '-'? -1: 1) * dbl_exp;
     }
+    else {
+      mant = s[7] + 10 * s[6] + 100 * s[5] + 1000 * s[4] + 10000 * s[3] + \
+             100000 * s[1] - 111111 * '0';
+      exp = s[10] + 10 * s[9] - 11 * '0';
+      dbl_exp = (exp & 01? 10.: 1) * \
+                ((exp >>= 1) & 01? 100.: 1) * \
+                ((exp >>= 1) & 01? 1.0e4: 1) * \
+                ((exp >>= 1) & 01? 1.0e8: 1) * \
+                ((exp >>= 1) & 01? 1.0e16: 1) * \
+                ((exp >>= 1) & 01? 1.0e32: 1) * \
+                ((exp >>= 1) & 01? 1.0e64: 1);
+      dbl_exp = (s[8] == '-'? 1/dbl_exp: dbl_exp) * 1.0e-5;
+      v = mant * (s[0] == '-'? -1: 1) * dbl_exp;
+    }
+  }
 
   // Convert an ENDF int to float; we start from the last char in the field and
   // move forward until we hit a non-digit.
-  else
-    {
-      v = 0;
-      mant = 1; // Here we use mant for the place value about to be read in.
-      pos = 10;
-      while (s[pos] != '-' and s[pos] != '+' and s[pos] != ' ' and pos > 0)
-        {
-          v += mant * (s[pos] - '0');
-          mant *= 10;
-          pos--;
-        }
-     v *= (s[pos] == '-'? -1: 1);
+  else {
+    v = 0;
+    mant = 1; // Here we use mant for the place value about to be read in.
+    pos = 10;
+    while (s[pos] != '-' and s[pos] != '+' and s[pos] != ' ' and pos > 0) {
+      v += mant * (s[pos] - '0');
+      mant *= 10;
+      pos--;
     }
+    v *= (s[pos] == '-'? -1: 1);
+  }
   return v;
 }
 
@@ -146,9 +141,7 @@ std::string pyne::to_upper(std::string s)
 {
   // change each element of the string to upper case.
   for(unsigned int i = 0; i < s.length(); i++)
-  {
     s[i] = toupper(s[i]);
-  }
   return s;
 }
 
@@ -156,9 +149,21 @@ std::string pyne::to_lower(std::string s)
 {
   // change each element of the string to lower case
   for(unsigned int i = 0; i < s.length(); i++)
-  {
     s[i] = tolower(s[i]);
-  }
+  return s;
+}
+
+
+std::string pyne::capitalize(std::string s)
+{
+  unsigned int slen = s.length();
+  if (slen == 0)
+    return s;
+  // uppercase the first character
+  s[0] = toupper(s[0]);
+  // change each subsequent element of the string to lower case
+  for(unsigned int i = 1; i < slen; i++)
+    s[i] = tolower(s[i]);
   return s;
 }
 

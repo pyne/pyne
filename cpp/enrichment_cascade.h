@@ -34,8 +34,8 @@ namespace enrichment {
     double alpha; ///< stage separation factor
     double Mstar; ///< mass separation factor
 
-    int j; ///< Component to enrich (U-235), zzaaam form
-    int k; ///< Component to de-enrich, or strip (U-238), zzaaam form
+    int j; ///< Component to enrich (U-235), id form
+    int k; ///< Component to de-enrich, or strip (U-238), id form
 
     double N; ///< number of enriching stages
     double M; ///< number of stripping stages

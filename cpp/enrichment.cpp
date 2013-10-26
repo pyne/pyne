@@ -12,8 +12,8 @@ pyne_enr::Cascade pyne_enr::_fill_default_uranium_cascade()
   duc.alpha = 1.05;
   duc.Mstar = 236.5;
 
-  duc.j = 922350;
-  duc.k = 922380;
+  duc.j = 922350000;
+  duc.k = 922380000;
 
   duc.N = 30.0;
   duc.M = 10.0;
@@ -23,9 +23,9 @@ pyne_enr::Cascade pyne_enr::_fill_default_uranium_cascade()
   duc.x_tail_j = 0.0025;
 
   pyne::comp_map cm;
-  cm[922340] = 0.000055;
-  cm[922350] = 0.00720;
-  cm[922380] = 0.992745;
+  cm[922340000] = 0.000055;
+  cm[922350000] = 0.00720;
+  cm[922380000] = 0.992745;
   duc.mat_feed = pyne::Material(cm, 1.0, 1.0);
 
   return duc;

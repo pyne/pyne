@@ -2,13 +2,14 @@
 import os
 import re
 import urllib2
+import pkgutil
 
 import numpy as np
 import tables as tb
 
 from pyne import nucname
 from pyne.dbgen.api import BASIC_FILTERS
-from pyne.dbgen.kaeri import grab_kaeri_nuclide, parse_for_natural_isotopes
+from pyne.dbgen.isotopic_abundance import get_isotopic_abundances
 
 # Note that since ground state and meta-stable isotopes are of the same atomic weight, 
 # the meta-stables have been discluded from the following data sets.
@@ -16,80 +17,17 @@ from pyne.dbgen.kaeri import grab_kaeri_nuclide, parse_for_natural_isotopes
 MASS_FILE = 'mass.mas12'
 
 
-def grab_kaeri_atomic_abund(build_dir=""):
-    """Grabs the KAERI files needed for the atomic abundance calculation, 
-    if not already present.
+def copy_atomic_mass_adjustment(build_dir=""):
+    """Copies the atomic mass evaluation originally from the Atomic Mass Data
+    Center.  These are courtesy of Georges Audi and Wang Meng via a private
+    communication, November 2012."""
 
-    Parameters
-    ----------
-    build_dir : str
-        Major directory to place html files in. 'KAERI/' will be appended.
-    """
-    # Add kaeri to build_dir
-    build_dir = os.path.join(build_dir, 'KAERI')
-    try:
-        os.makedirs(build_dir)
-    except OSError:
-        pass
-    already_grabbed = set(os.listdir(build_dir))
-
-    # Grab and parse elemental summary files.
-    natural_nuclides = set()
-    for element in nucname.name_zz.keys():
-        htmlfile = element + '.html'
-        if htmlfile not in already_grabbed:
-            grab_kaeri_nuclide(element, build_dir)
-
-        natural_nuclides = natural_nuclides | parse_for_natural_isotopes(os.path.join(build_dir, htmlfile))
-
-    # Grab natural nuclide files
-    for nuc in natural_nuclides:
-        nuc = nucname.name(nuc)
-        htmlfile = nuc + '.html'
-        if htmlfile not in already_grabbed:
-            grab_kaeri_nuclide(nuc, build_dir)
-
-
-
-atomic_abund_regex = re.compile('<li>Atomic Percent Abundance: (\d+[.]?\d*?)%')
-
-def parse_atomic_abund(build_dir=""):
-    """Builds and returns a dictionary from nuclides to atomic abundence fractions."""
-    build_dir = os.path.join(build_dir, 'KAERI')
-
-    # Grab and parse elemental summary files.
-    natural_nuclides = set()
-    for element in nucname.name_zz.keys():
-        htmlfile = element + '.html'
-        natural_nuclides = natural_nuclides | parse_for_natural_isotopes(os.path.join(build_dir, htmlfile))
-
-    atomic_abund = {}    
-
-    for nuc in natural_nuclides:
-        nuc_name = nucname.name(nuc)
-        htmlfile = os.path.join(build_dir, nuc_name + '.html')
-
-        with open(htmlfile, 'r') as f:
-            for line in f:
-                m = atomic_abund_regex.search(line)
-                if m is not None:
-                    val = float(m.group(1)) * 0.01
-                    atomic_abund[nuc] = val
-                    break
-
-    return atomic_abund
-
-
-def grab_atomic_mass_adjustment(build_dir=""):
-    """Grabs the current atomic mass adjustment from the Atomic
-    Mass Data Center.  These are courtesy of Georges Audi and 
-    Wang Meng via a private communication, November 2012."""
     if os.path.exists(os.path.join(build_dir, MASS_FILE)):
         return 
 
-    mass = urllib2.urlopen('http://amdc.in2p3.fr/masstables/Ame2012/mass.mas12')
+    mass = pkgutil.get_data('pyne.dbgen', MASS_FILE)
     with open(os.path.join(build_dir, MASS_FILE), 'w') as f:
-        f.write(mass.read())
+        f.write(mass)
 
 
 # Note, this regex specifically leaves our free neutrons
@@ -108,7 +46,7 @@ def parse_atomic_mass_adjustment(build_dir=""):
         if m is None:
             continue
 
-        nuc = (10000 * int(m.group(1))) + (10 * int(m.group(2)))
+        nuc = (10000000 * int(m.group(1))) + (10000 * int(m.group(2)))
         mass = float(m.group(3)) + 1E-6 * float(m.group(4).strip().replace('#', ''))
         error = 1E-6 * float(m.group(5).strip().replace('#', ''))
 
@@ -146,7 +84,7 @@ def make_atomic_weight_table(nuc_data, build_dir=""):
         Directory to place html files in.
     """
     # Grab raw data
-    atomic_abund  = parse_atomic_abund(build_dir)
+    atomic_abund  = get_isotopic_abundances()
     atomic_masses = parse_atomic_mass_adjustment(build_dir)
 
     A = {}
@@ -160,12 +98,12 @@ def make_atomic_weight_table(nuc_data, build_dir=""):
 
     # Add naturally occuring elements
     for element in nucname.name_zz:
-        nuc = nucname.zzaaam(element)
+        nuc = nucname.id(element)
         A[nuc] = nuc, 0.0, 0.0, 0.0
         
     for nuc, abund in atomic_abund.items():
-        zz = nuc / 10000
-        element_zz = zz * 10000
+        zz = nucname.znum(nuc)
+        element_zz = nucname.id(zz)
         element = nucname.zz_name[zz]
 
         _nuc, nuc_mass, _error, _abund = A[nuc]
@@ -204,13 +142,9 @@ def make_atomic_weight(args):
                 print "skipping atomic weights data table creation; already exists."
                 return 
 
-    # First grab the atomic abundance data
-    print "Grabbing the atomic abundance from KAERI"
-    grab_kaeri_atomic_abund(build_dir)
-
     # Then grab mass data
-    print "Grabbing atomic mass data from AMDC"
-    grab_atomic_mass_adjustment(build_dir)
+    print "Copying AME 2012 atomic mass data."
+    copy_atomic_mass_adjustment(build_dir)
 
     # Make atomic weight table once we have the array
     print "Making atomic weight data table."

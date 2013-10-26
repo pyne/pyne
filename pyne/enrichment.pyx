@@ -94,7 +94,7 @@ cdef class Cascade:
             self._inst.Mstar = <double> value
 
     property j:
-        """This is an integer in zzaaam-form that represents the jth key component.
+        """This is an integer in id-form that represents the jth key component.
         This nuclide is preferentially enriched in the product stream. For standard 
         uranium cascades j is 922350 (ie U-235).
         """
@@ -102,10 +102,10 @@ cdef class Cascade:
             return self._inst.j
 
         def __set__(self, value):
-            self._inst.j = nucname.zzaaam(value)
+            self._inst.j = nucname.id(value)
 
     property k:
-        """This is an integer in zzaaam-form that represents the kth key component.
+        """This is an integer in id-form that represents the kth key component.
         This nuclide is preferentially enriched in the tails stream. For standard 
         uranium cascades k is 922380 (ie U-238).
         """
@@ -113,7 +113,7 @@ cdef class Cascade:
             return self._inst.k
 
         def __set__(self, value):
-            self._inst.k = nucname.zzaaam(value)
+            self._inst.k = nucname.id(value)
 
     property N:
         """The number of enriching stages."""
