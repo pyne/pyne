@@ -27,12 +27,15 @@ from pyne.material import MultiMaterial
 from pyne import nucname
 from binaryreader import _BinaryReader, _FortranRecord
 
-# Mesh specific imports
-try:
-    from itaps import iMesh
-    from pyne.mesh import Mesh, StatMesh, MeshError
-except ImportError:
-    pass
+from itaps import iMesh
+from pyne.mesh import Mesh, StatMesh, MeshError
+
+# # Mesh specific imports
+# try:
+#     from itaps import iMesh
+#     from pyne.mesh import Mesh, StatMesh, MeshError
+# except ImportError:
+#     pass
 
 
 class Mctal(object):
