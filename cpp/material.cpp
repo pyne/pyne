@@ -3,7 +3,11 @@
 // -- Anthony Scopatz
 
 #include "material.h"
-
+#include "nucname.h"
+#include <string>
+#include <vector>
+using std::vector;
+using namespace std;
 
 // h5wrap template
 template double h5wrap::get_array_index(hid_t, int, hid_t);
@@ -537,21 +541,33 @@ void pyne::Material::from_text(std::string filename)
 
     if (0 == keystr.length())
       continue;
-    else 
+
+    if (keystr == "Mass"){
       f >> valstr;
-
-    if (keystr == "Mass")
       mass = pyne::to_dbl(valstr);
-    else if (keystr == "Density")
+    }
+    else if (keystr == "Density"){
+      f >> valstr; 
       density = pyne::to_dbl(valstr);
-    else if (keystr == "APerM")
+    }
+    else if (keystr == "APerM"){
+      f >> valstr;
       atoms_per_mol = pyne::to_dbl(valstr);
-    else
-      comp[pyne::nucname::id(keystr)] = pyne::to_dbl(valstr);
-  };
-
-  f.close();
-  norm_comp();
+    }
+    else if (pyne::nucname::isnuclide(keystr)){
+      f >> valstr;
+       comp[pyne::nucname::id(keystr)] = pyne::to_dbl(valstr);
+    } 
+    else{
+      getline(f, valstr);
+      valstr= valstr.substr(0, valstr.length()-1);
+      attrs[keystr]= valstr;
+      continue;
+   }
+   };
+ 
+   f.close();
+   norm_comp();
 };
 
 
@@ -563,10 +579,13 @@ void pyne::Material::write_text(char * filename)
 };
 
 
-void pyne::Material::write_text (std::string filename)
+void pyne::Material::write_text(std::string filename)
 {
   std::ofstream f;
   f.open(filename.c_str(), std::ios_base::trunc);
+
+  Json::Reader reader;
+  vector<string> obj = attrs.getMemberNames();
 
   if (0 <= mass)
     f << "Mass    " << mass << "\n";
@@ -577,7 +596,11 @@ void pyne::Material::write_text (std::string filename)
   if (0 <= atoms_per_mol)
     f << "APerM   " << atoms_per_mol << "\n";
 
-  std::string nuc_name;
+  for (int i=0; i < attrs.size(); i=i+2){
+    f <<attrs.get(obj.at(i), "") << attrs.get(obj.at(i+1), "");
+  }
+
+  std :string nuc_name;
   for(pyne::comp_iter i = comp.begin(); i != comp.end(); i++)
   {
     nuc_name = pyne::nucname::name( i->first ) + "  ";
