@@ -5,7 +5,11 @@ from nose.tools import assert_true, assert_equal, assert_raises, with_setup
 
 import numpy as np
 from numpy.testing import assert_array_almost_equal
-from itaps import iBase, iMesh, iMeshExtensions
+try:
+    from itaps import iBase, iMesh, iMeshExtensions
+except ImportError:
+    from nose.plugins.skip import SkipTest
+    raise SkipTest
 from pyne.mesh import Mesh, StatMesh, MeshError
 
 #############################################
