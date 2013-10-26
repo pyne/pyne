@@ -46,17 +46,21 @@ class Notebook(Directive):
         # convert notebook to html
         exporter = html.HTMLExporter(template_file='full')
         output, resources = exporter.from_filename(nb_path)
-        import pdb; pdb.set_trace()
-        print output
+        header = output.split('<head>', 1)[1].split('</head>',1)[0]
+        body = output.split('<body>', 1)[1].split('</body>',1)[0]
 
         # add HTML5 scoped attribute to header style tags
-        header = map(lambda s: s.replace('<style', '<style scoped="scoped"'),
-                     converter.header_body())
+        header = header.replace('<style', '<style scoped="scoped"')
+        header = header.replace('body{background-color:#ffffff;}\n', '')
+        header = header.replace('body{background-color:white;position:absolute;'
+                                'left:0px;right:0px;top:0px;bottom:0px;'
+                                'overflow:visible;}\n', '')
+        header = header.replace('background-color:#ffffff;', '', 1)
 
         # concatenate raw html lines
         lines = ['<div class="ipynotebook">']
-        lines.extend(header)
-        lines.extend(converter.main_body())
+        lines.append(header)
+        lines.append(body)
         lines.append('</div>')
         text = '\n'.join(lines)
 
