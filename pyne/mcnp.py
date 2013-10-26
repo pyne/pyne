@@ -504,7 +504,9 @@ class Xsdir(object):
         self.directory = os.path.dirname(filename)
         self.awr = {}
         self.tables = []
-
+	self.searchIsotope=""
+	self.preferredLibsStr=""
+	self.xsdirFile=""
         self.read()
 
     def read(self):
@@ -588,6 +590,43 @@ class Xsdir(object):
             if table.serpent_type == 1:
                 xsdata.write(table.to_serpent() + '\n')
         xsdata.close()
+    def get_lib_ids(self,searchIsotope,preferredLibsStr):
+    
+        # get preferred libraries from input string
+        preferredLibs=preferredLibsStr.split()
+
+    
+        lib=[]
+        # initialize Xsdir object with iput xsdirFile
+        xsFile= Xsdir(self.filename)
+        # get table of libraries corresponding to search Isotope
+        tables=xsFile.find_table(searchIsotope);
+        for isoLibValues in tables:
+            # extract library from "<XsDirTable: isotope.library>"
+	    lib.append(isoLibValues.name.split( '.' )[1])
+
+
+        print "Libraries for Isotope: ", searchIsotope, " found are: ", lib
+
+        iso_lib=[]
+        if not lib:
+            print " Isotope: ", searchIsotope, " has no Libraries found."
+	    return 0
+        elif preferredLibsStr== "None":
+	    iso_lib=[ searchIsotope, lib[0]]
+	    print "No preferred Libary, first to find was chosen: ", iso_lib
+	    return {iso_lib[0]: iso_lib[1]}
+        else:
+            for pLib in preferredLibs:
+	        if pLib in lib:
+	            iso_lib=[ searchIsotope, pLib]
+	            break
+	    if not iso_lib:
+	        print "None of your preferred libraries was found for isotope: ", searchIsotope
+	        return 0
+	    else:
+   	        print "To MCNP: ", iso_lib
+	        return {iso_lib[0]: iso_lib[1]}
 
     def __iter__(self):
         for table in self.tables:
