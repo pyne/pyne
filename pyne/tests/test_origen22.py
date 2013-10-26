@@ -96,6 +96,35 @@ def test_write_tape5_irradiation():
 
     assert_equal(observed, expected)
 
+def test_write_tape5_decay():
+    tape5 = StringIO()
+    origen22.write_tape5_decay(100, xsfpy_nlb=[204, 205, 206], 
+                               outfile=tape5,
+                               out_table_nes=(False, False, True), 
+                               out_table_laf=(True,  False,  True),  
+                               out_table_num=[5, 10])
+    
+    tape5.seek(0)
+    observed = tape5.read()
+
+    expected = ("  -1\n"
+                "  -1\n"  
+                "  -1\n"
+                "  CUT     5 1.000E-10 -1\n"
+                "  RDA     Make sure thet the library identifier numbers match those in the TAPE9.INP file\n"
+                "  LIB     0 1 2 3 204 205 206 9 3 0 4 0\n"
+                "  OPTL    8 8 8 8 7 8 8 8 8 7 8 8 8 8 8 8 8 8 8 8 8 8 8 8\n"
+                "  OPTA    8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8\n"
+                "  OPTF    8 8 8 8 7 8 8 8 8 7 8 8 8 8 8 8 8 8 8 8 8 8 8 8\n"
+                "  INP     1 -1  0  -1  4  4\n"
+                "  RDA     All irradiation (IRF and IRP) cards must be between burnup (BUP) cards.\n"
+                "  BUP\n"
+                "  DEC     1.0000000000E+02  1   2   4  2\n"
+                "  BUP\n"
+                "  OUT     2  1 1 0\n"
+                "  END\n")
+    assert_equal(observed, expected)
+
 
 
 def test_parse_tape6():

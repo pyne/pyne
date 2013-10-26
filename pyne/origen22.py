@@ -124,6 +124,25 @@ _tape5_irradiation_template = """\
   END
 """
 
+_tape5_decay_template = """\
+  -1
+  -1
+  -1
+  CUT     5 {CUT_OFF} -1
+  RDA     Make sure thet the library identifier numbers match those in the TAPE9.INP file
+  LIB     0 {DECAY_NLB1} {DECAY_NLB2} {DECAY_NLB3} {XSFPY_NLB1} {XSFPY_NLB2} {XSFPY_NLB3} 9 3 0 4 0
+  OPTL    {optl}
+  OPTA    {opta}
+  OPTF    {optf}
+  INP     1 -1  0  -1  4  4
+  RDA     All irradiation (IRF and IRP) cards must be between burnup (BUP) cards.
+  BUP
+  DEC     {dec_time}  1   2   4  2
+  BUP
+  OUT     2  1 1 0
+  END
+"""
+
 _nes_table = np.zeros((2, 2, 2), dtype=int)
 _nes_table[True, True, True]    = 1
 _nes_table[True, True, False]   = 2
@@ -150,7 +169,6 @@ def _out_table_string(out_table_nes, out_table_num):
     s = np.array2string(arr)[1:-1]
 
     return s
-
 
 def write_tape5_irradiation(irr_type, irr_time, irr_value, 
                             outfile="TAPE5.INP",
@@ -245,8 +263,87 @@ def write_tape5_irradiation(irr_type, irr_time, irr_value,
     if opened_here:
         outfile.close()
 
+def write_tape5_decay(dec_time, 
+                      outfile="TAPE5.INP",
+                      decay_nlb=(1, 2, 3), 
+                      xsfpy_nlb=(204, 205, 206), 
+                      cut_off=1E-10, 
+                      out_table_nes=(False, False, True),
+                      out_table_laf=(True,  True,  True),
+                      out_table_num=None):
+    """Writes an irradiation TAPE5 file.
+
+    Parameters
+    ----------
+    dec_time : float 
+        Decay time durration in days.
+    outfile : str or file-like object
+        Path or file to write the tape5 to.
+    decay_nlb : length 3 sequence
+        Three tuple of library numbers from the tape9 file decay data, eg (1, 2, 3).
+    xsfpy_nlb : length 3 sequence
+        Three tuple of library numbers from the tape9 file for cross section and fission
+        product yields, eg (204, 205, 206).
+    cut_off : float, optional
+        Cut-off concentration, below which reults are not recorded.
+    out_table_nes :  length 3 sequence of bools, optional
+        Specifies which type of output tables should be printed by ORIGEN.  The fields 
+        represent (Nuclide, Element, Summary).  The default value of (False, False, True) 
+        only prints the summary tables. 
+    out_table_laf :  length 3 sequence of bools, optional 
+        Specifies whether to print the activation products (l), actinides (a), and 
+        fission products (f).  By default all three are printed.
+    out_table_num : sequence of ints or None
+        Specifies which tables, by number, to print according to the rules given by 
+        out_table_nes and out_table_laf.  For example the list [10, 5] would print 
+        tables 5 and 10.  There are 24 tables available. If None, then all tables 
+        are printed.   
+    """
+    # Make template fill-value dictionary
+    tape5_kw = {
+        'CUT_OFF': "{0:.3E}".format(cut_off),
+        'DECAY_NLB1': decay_nlb[0],
+        'DECAY_NLB2': decay_nlb[1],
+        'DECAY_NLB3': decay_nlb[2],
+        'XSFPY_NLB1': xsfpy_nlb[0],
+        'XSFPY_NLB2': xsfpy_nlb[1],
+        'XSFPY_NLB3': xsfpy_nlb[2],
+        'dec_time': '{0:.10E}'.format(dec_time),
+        }
+
+    no_print_string = np.array2string(8 * np.ones(24, dtype=int))[1:-1]
+
+    # Activation Product Print String
+    if out_table_laf[0]:
+        tape5_kw['optl'] = _out_table_string(out_table_nes, out_table_num)
+    else:
+        tape5_kw['optl'] = no_print_string
+
+    # Actinide Print String
+    if out_table_laf[1]:
+        tape5_kw['opta'] = _out_table_string(out_table_nes, out_table_num)
+    else:
+        tape5_kw['opta'] = no_print_string
+
+    # Fission Product Print String
+    if out_table_laf[2]:
+        tape5_kw['optf'] = _out_table_string(out_table_nes, out_table_num)
+    else:
+        tape5_kw['optf'] = no_print_string
 
 
+    # Fill the template and write it to a file
+    tape5 = _tape5_decay_template.format(**tape5_kw)
+
+    opened_here = False
+    if isinstance(outfile, basestring):
+        outfile = open(outfile, 'w')
+        opened_here = True
+
+    outfile.write(tape5)
+
+    if opened_here:
+        outfile.close()
 
 #
 # Tape6 functions
