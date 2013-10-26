@@ -69,6 +69,12 @@ def test_decay_children():
     assert_equal(data.decay_children('O16'), set())
     assert_equal(data.decay_children('80161'), set([60120000, 80160000]))
 
+
+def test_abundance_by_z_for_soundness():
+    for vs in data.abundance_by_z.values():
+        if vs:
+            assert(abs(1-sum([v[1] for v in vs]))<1e-12)
+
 if __name__ == "__main__":
     nose.runmodule()
 
