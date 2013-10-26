@@ -23,6 +23,11 @@ def test_atomic_mass():
     assert_in(data.atomic_mass(922350), u235)
     assert_in(data.atomic_mass(952421), am242m)
 
+def test_natural_abund_200():
+    obs = data.natural_abund("Ne-200")
+    print obs
+    assert(False)
+
 
 def test_b_coherent():
     assert_equal(data.b_coherent('H1'), -3.7406E-13 + 0j)
