@@ -84,7 +84,7 @@ class Transmuter(object):
         self.xs_cache['phi_g'] = np.array([flux.sum()])
         self._phi = flux
 
-    def transmute(self, x, t=None, phi=None, log=None, tol=None):
+    def transmute(self, x, t=None, phi=None, tol=None, log=None):
         """Transmutes a material into its daughters.
 
         Parameters
@@ -126,9 +126,7 @@ class Transmuter(object):
             # actual nuclide density and add to final output.
             partial = self._transmute_partial(nuc)
             for part_nuc, part_adens in partial.items():
-                if part_nuc not in y_atoms:
-                    y_atoms[part_nuc] = 0.0
-                y_atoms[part_nuc] += part_adens * adens
+                y_atoms[part_nuc] = part_adens * adens + y_atoms.get(part_nuc, 0.0)
         y = from_atom_frac(y_atoms)
         return y
 

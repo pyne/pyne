@@ -4,7 +4,7 @@ import os
 import nose
 
 from nose.tools import assert_equal, assert_not_equal, assert_raises, raises, \
-    assert_almost_equal, assert_true, assert_false, assert_is
+    assert_almost_equal, assert_true, assert_false, assert_is, with_setup
 
 from numpy.testing import dec, assert_array_equal
 
@@ -68,52 +68,59 @@ def test_grow_matrix2():
     obs = tm._grow_matrix(orig, prod, dest)
     assert_array_equal(exp, obs)
 
-"""\
-
+@with_setup(None, lambda: os.remove('log.txt') if os.path.exists('log.txt') else None)
 def test_tree_log():
-    "Tests corret implementation of the _tree_log() function"
-    filename = 'testTreeFile'
+    "Tests corret implementation of the _log_tree() function"
+    filename = 'log.txt'
+    tm.log = open(filename, 'w')
     d0 = 0
     d1 = 1
     d2 = 2
     d11 = 1
     d20 = 0
-    nuc0 = nn.zzaaam('O16')
-    nuc1 = nn.zzaaam('O17')
-    nuc2 = nn.zzaaam('O18')
-    nuc11 = nn.zzaaam('He4')
-    nuc20 = nn.zzaaam('C12')
+    nuc0 = nn.id('O16')
+    nuc1 = nn.id('O17')
+    nuc2 = nn.id('O18')
+    nuc11 = nn.id('He4')
+    nuc20 = nn.id('C12')
     N0 = 123.456
     N1 = 12.3456
     N2 = 1.23456
     N11 = 1111.
     N20 = 12.
-    temp = ['--> O16 123.456\n']
-    temp.append('   |--> O17 12.3456\n')
-    temp.append('   |   |--> O18 1.23456\n')
-    temp.append('   |--> HE4 1111.0\n')
-    temp.append('--> C12 12.0\n')
+    exp = ('--> O16 123.456\n'
+           '   |--> O17 12.3456\n'
+           '   |   |--> O18 1.23456\n'
+           '   |--> He4 1111.0\n'
+           '--> C12 12.0\n')
     with open(filename, 'w') as tree:
-        tm._tree_log(d0, nuc0, N0, tree)
-        tm._tree_log(d1, nuc1, N1, tree)
-        tm._tree_log(d2, nuc2, N2, tree)
-        tm._tree_log(d11, nuc11, N11, tree)
-        tm._tree_log(d20, nuc20, N20, tree)
+        tm._log_tree(d0, nuc0, N0)
+        tm._log_tree(d1, nuc1, N1)
+        tm._log_tree(d2, nuc2, N2)
+        tm._log_tree(d11, nuc11, N11)
+        tm._log_tree(d20, nuc20, N20)
+    tm.log.close()
+    tm.log = None
     with open(filename, 'r') as f:
-        lines = f.readlines()
-    for i in range(len(lines)):
-        assert_equal(lines[i], temp[i])
-    os.remove(filename)
+        obs = f.read()
+    #print repr(exp)
+    #print repr(obs)
+    #print obs == exp
+    assert_equal(exp, obs)
+
 
 def test_zero_flux():
-    "Tests correct implementation of a transmutation with zero flux on an isotope with a zero decay-constant."
-    nuc = nn.zzaaam('FE56')
-    t_sim = 100.
-    phi = None
-    tree = None
-    tol = 1e-7
-    out = tm.transmute_core(nuc, t_sim, phi, tree, tol)
-    assert_equal(out[nuc], 1)
+    """Tests correct implementation of a transmutation with zero flux on 
+    an isotope with a zero decay-constant."""
+    inp = Material({'FE56': 1.0}, mass=1.0)
+    obs = tm.transmute(inp, t=100.0, tol=1e-7)
+    print inp
+    print
+    print obs
+    assert_equal(obs['FE56'], 1.0)
+
+"""\
+
 
 def test_root_decrease():
     "Tests that the root isotope is not being skipped"
