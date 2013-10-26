@@ -78,7 +78,8 @@ cdef class _Material:
         elif isinstance(nucvec, basestring):
             # Material from file
             self.mat_pointer = new cpp_material.Material(
-                    <char *> nucvec, mass, density, atoms_per_mol, deref(cattrs._inst))
+                    <char *> nucvec, mass, density, atoms_per_mol, 
+                    deref(cattrs._inst))
         elif (nucvec is None):
             if free_mat:
                 # Make empty mass stream
@@ -553,9 +554,9 @@ cdef class _Material:
         Parameters
         ----------
         nuc_sequence : sequence
-            Elements and nuctopes to be taken from current stream.
-            Members of this list must be integers.  For example, [92, 942390]
-            would take all uranium atoms and Pu-239.
+            Nuctopes --OR-- elements to be taken from current stream.
+            Members of this list must be integers.  For example, [922350, 942390]
+            would take U-235 and Pu-239.
 
         Returns
         -------
@@ -589,9 +590,9 @@ cdef class _Material:
         Parameters
         ----------
         nuc_sequence : sequence
-            Elements and nuctopes to be taken from current stream.
-            Members of this list must be integers.  For example, [92, 942390]
-            would take all uranium atoms and Pu-239.
+            Nuctopes --OR-- elements to be taken from current stream.
+            Members of this list must be integers.  For example, [922350, 942390]
+            would take U-235 and Pu-239.
         value : float
             Mass value to set all nuclides in sequence to on the material.
 
@@ -757,7 +758,7 @@ cdef class _Material:
     def sub_elem(self, element):
         """sub_elem(element)
         Grabs a subset of the material and returns a new material comprised of 
-	only the nuclides of the specified element.
+        only the nuclides of the specified element.
 
         Returns
         -------
