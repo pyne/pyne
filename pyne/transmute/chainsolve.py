@@ -3,6 +3,7 @@
 
 import numpy as np
 from scipy import linalg
+#from scipy import sparse  # <-- SPARSE
 
 from pyne import utils
 from pyne import data
@@ -152,8 +153,10 @@ class Transmuter(object):
 
         """
         dest = self._get_destruction(nuc)
+        # DENSE
         A = np.empty((1,1), float)
         A[0, 0] = -dest
+        #A = sparse.csr_matrix([[-dest]])  # <-- SPARSE
         rootval = np.exp(-dest * self.t)
         partial = {nuc: rootval}
         self._traversal(nuc, A, partial)
@@ -203,9 +206,8 @@ class Transmuter(object):
         """
         shape = A.shape
         n = shape[0]
+        # DENSE
         # Add row and column to current matrix
-        #B = np.append(A, np.zeros((1,n)), 0)
-        #B = np.append(B, np.zeros((n+1,1)), 1)
         B = np.empty((n+1, n+1), dtype=float)
         B[:n,:n] = A
         B[n,:n-1] = 0
@@ -213,6 +215,9 @@ class Transmuter(object):
         # Update new matrix with provided data
         B[n,n-1] = prod
         B[n,n] = -dest
+        # SPARSE
+        #B = sparse.bmat([[A, None], [None, [[-dest]]]]).tocsr()
+        #B[n,n-1] = prod        
         return B
 
     def _traversal(self, nuc, A, out, depth=0):
@@ -270,7 +275,8 @@ class Transmuter(object):
             N0[0] = 1.0
             # Compute matrix exponential and dot with density vector
             eB = linalg.expm(B * t)
-            N_final = np.dot(eB, N0)
+            N_final = np.dot(eB, N0)  # <-- DENSE
+            #N_final = eB.dot(N0)  # <-- SPARSE
             if self.log is not None:
                 self._log_tree(depth+1, child, N_final[-1])
             # Check against tolerance and continue traversal
