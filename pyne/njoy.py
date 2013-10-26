@@ -1,20 +1,26 @@
 """Purpose:
+
   Automatic generation of Njoy input data, including dragr data.
-  Generation of DRAGLIB and ACELIB.
+  Generation of DRAGLIB and ACELIB.  Please see the tutorial at 
+  http://www.polymtl.ca/merlin/downloads/IGE305.pdf for more information.
 
 Copyright:
+
   This code was originally distirbuted under the LGPL license (below).
   However, we have been given written permission from the author Alain
   Herbert to redistribute it under PyNE's BSD license.
   
 Original Copyright:
+
   Copyright (C) 2003 Ecole Polytechnique de Montreal
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
   version 2.1 of the License, or (at your option) any later version
 
+
 .. moduleauthor:: A. Hebert, R. Karthikeyan
+
 """
 
 import os
