@@ -78,6 +78,15 @@ cdef conv._MapIntDouble natural_abund_map_proxy = conv.MapIntDouble(False)
 natural_abund_map_proxy.map_ptr = &cpp_data.natural_abund_map
 natural_abund_map = natural_abund_map_proxy
 
+# initialize natural_abund_map
+cpp_data.natural_abund(<int>10000000)
+
+abundance_by_z = dict([(i, []) for i in range(1,119)])
+for zas, abundance in natural_abund_map.items():
+    if 0.0 < abundance < 1.0:
+        abundance_by_z[zas/10000000].append((zas, abundance))
+
+
 def natural_abund(nuc):
     """Finds the natural abundance of a nuclide.
 

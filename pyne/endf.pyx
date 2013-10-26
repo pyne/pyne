@@ -386,7 +386,6 @@ class Library(rx.RxLib):
         with np.errstate(divide="ignore", invalid="ignore"):
            return self.intdict[intscheme](Eint, xs)
 
-
     def _cont_and_update(self, flags, keys, data, total_lines):
         flags.update(self._get_cont(keys, data[total_lines]))
         return flags, total_lines+1
