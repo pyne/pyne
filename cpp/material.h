@@ -233,10 +233,9 @@ namespace pyne
     /// Creates a new Material with the all nuclides in the id range removed.
     Material del_range(int lower=0, int upper=10000000);
 
-    /// Creates a sub-Material of only uranium.
-    Material sub_u();
-    /// Creates a sub-Material of only plutonium.
-    Material sub_pu();
+    /// Creates a sub-Material of only the given element. Assumes element is
+    /// id form.
+    Material sub_elem(int element);
     /// Creates a sub-Material of only lanthanides.
     Material sub_lan();
     /// Creates a sub-Material of only actinides.

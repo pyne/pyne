@@ -1059,18 +1059,10 @@ pyne::Material pyne::Material::del_range(int lower, int upper)
 
 
 
-pyne::Material pyne::Material::sub_u()
+pyne::Material pyne::Material::sub_elem(int elem)
 {
-  // Returns a material of Uranium that is a submaterial of this one.
-  return sub_range(920000000, 930000000);
-};
-
-
-
-pyne::Material pyne::Material::sub_pu()
-{
-  // Returns a material of Plutonium that is a sub-material of this one.
-  return sub_range(940000000, 950000000);
+  // Returns a material of the element that is a submaterial of this one.
+  return sub_range(elem, elem + 10000000);
 };
 
 
