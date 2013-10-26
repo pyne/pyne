@@ -15,6 +15,8 @@ import sys, os
 
 # -- General configuration -----------------------------------------------------
 
+sys.path.insert(0, '.')
+
 extensions = ['sphinx.ext.autodoc', 
               'sphinx.ext.doctest', 
               'sphinx.ext.pngmath', 
@@ -24,7 +26,7 @@ extensions = ['sphinx.ext.autodoc',
               'scisphinx.numpydoc', 
               'scisphinx.ipython_console_highlighting', 
               'breathe',
-              'nbconvert.notebook_sphinxext', 
+              'sphinxext.notebook_sphinxext', 
               'scisphinx.bibtex',
               ]
 
