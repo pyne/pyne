@@ -214,6 +214,9 @@ bool pyne::nucname::isnuclide(std::string nuc)
   }
   catch(NotANuclide) {
     return false;
+  }
+  catch(IndeterminateNuclideForm) {
+    return false;
   };
   return isnuclide(n);
 };
@@ -230,6 +233,9 @@ bool pyne::nucname::isnuclide(int nuc)
     n = id(nuc);
   }
   catch(NotANuclide) {
+    return false;
+  }
+  catch(IndeterminateNuclideForm) {
     return false;
   };
   int zzz = n / 10000000;
@@ -295,6 +301,7 @@ int pyne::nucname::id(int nuc)
 
   // Nuclide is not in zzaaam form, 
   // Try MCNP form, ie zzaaa
+  // This is the same form as SZA for the 0th state.
   zzz = nuc / 1000;
   aaa = nuc % 1000; 
   if (zzz <= aaa)
@@ -318,8 +325,18 @@ int pyne::nucname::id(int nuc)
     }
   }
   else if (aaa == 0 && 0 < zz_name.count(zzz))
+  {
     // MCNP form natural nuclide
     return zzz * 10000000;
+  }
+  else if (zzz > 1000)
+  {
+    // SZA form with a metastable state (sss != 0)
+    int sss = zzz / 1000;
+    int newzzz = zzz % 1000;
+    
+    return newzzz * 10000000 + aaa * 10000 + sss;
+  }
 
   // Not a normal nuclide, might be a 
   // Natural elemental nuclide.  
@@ -990,5 +1007,53 @@ int pyne::nucname::alara_to_id(std::string nuc)
     throw NotANuclide(nuc, nucid);
   return nucid;
 };
+
+
+
+
+/***********************/
+/***  SZA functions  ***/
+/***********************/
+int pyne::nucname::sza(int nuc)
+{
+  int nucid = id(nuc);
+  int zzzaaa = nucid / 10000;
+  int sss = nucid % 10000;
+  return sss * 1000000 + zzzaaa;
+}
+
+
+int pyne::nucname::sza(char * nuc)
+{
+  std::string newnuc (nuc);
+  return sza(newnuc);
+}
+
+
+int pyne::nucname::sza(std::string nuc)
+{
+  return sza(id(nuc));
+}
+
+
+int pyne::nucname::sza_to_id(int nuc)
+{
+  int sss = nuc / 1000000;
+  int zzzaaa = nuc % 1000000;
+  return zzzaaa * 10000 + sss;
+}
+
+
+int pyne::nucname::sza_to_id(char * nuc)
+{
+  std::string newnuc (nuc);
+  return sza_to_id(newnuc);
+}
+
+
+int pyne::nucname::sza_to_id(std::string nuc)
+{
+  return sza_to_id(pyne::to_int(nuc));
+}
 
 

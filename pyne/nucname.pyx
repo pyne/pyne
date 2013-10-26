@@ -545,6 +545,53 @@ def alara_to_id(nuc):
     return newnuc
 
 
+def sza(nuc):
+    """Converts a nuclide to its SZA form (SSSZZZAAA). 
+
+    Parameters
+    ----------
+    nuc : int or str 
+        Input nuclide.
+
+    Returns
+    -------
+    newnuc : int 
+        Output nuclide in SZA form.
+
+    """
+    if isinstance(nuc, basestring):
+        newnuc = cpp_nucname.sza(<char *> nuc)
+    elif isinstance(nuc, int) or isinstance(nuc, long):
+        newnuc = cpp_nucname.sza(<int> nuc)
+    else:
+        raise NucTypeError(nuc)
+    return newnuc
+
+
+def sza_to_id(nuc):
+    """Converts a nuclide directly from SZA form (SSSZZZAAA) to
+    the canonical identifier form. 
+
+    Parameters
+    ----------
+    nuc : int or str 
+        Input nuclide in SZA form.
+
+    Returns
+    -------
+    newnuc : int 
+        Output nuclide in identifier form.
+
+    """
+    if isinstance(nuc, basestring):
+        newnuc = cpp_nucname.sza_to_id(<char *> nuc)
+    elif isinstance(nuc, int) or isinstance(nuc, long):
+        newnuc = cpp_nucname.sza_to_id(<int> nuc)
+    else:
+        raise NucTypeError(nuc)
+    return newnuc
+
+
 #
 # C++ Helper Functions
 #

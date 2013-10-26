@@ -16,7 +16,7 @@ class DataSource(object):
     """Base cross section data source.
 
     This is an abstract class which provides default functionality when subclassed
-    and certain methods are overridden.  A data source should know how to find cross 
+    and certain methods are overridden.  A data source should know how to find cross
     section information for a given nuclide, reaction type, and temperature, if
     available.  If such data is not present for this source, then the source should
     return None.
@@ -25,7 +25,7 @@ class DataSource(object):
     on the users system.
 
     Finally, data sources distinguish between group structure information coming
-    from or for the source itself (src) and optional user-defined destination (dst) 
+    from or for the source itself (src) and optional user-defined destination (dst)
     group structure information.  This allows the data source to define how it wishes
     to discretize its data to the custom destination form.
 
@@ -142,7 +142,7 @@ class DataSource(object):
         return self.rxcache[rxkey]
 
     def discretize(self, nuc, rx, temp=300.0, src_phi_g=None, dst_phi_g=None):
-        """Discretizes the reaction channel from the source group structure to that 
+        """Discretizes the reaction channel from the source group structure to that
         of the destination weighted by the group fluxes.  This implemenation is only
         valid for multi-group data sources.  Non-multigroup data source should also
         override this method.
@@ -166,10 +166,10 @@ class DataSource(object):
             Destination cross section data, length dst_ngroups.
 
         """
-        src_phi_g = self.src_phi_g if src_phi_g is None else np.asarray(src_phi_g) 
+        src_phi_g = self.src_phi_g if src_phi_g is None else np.asarray(src_phi_g)
         src_sigma = self.reaction(nuc, rx, temp)
-        dst_sigma = None if src_sigma is None else group_collapse(src_sigma, 
-                                                        src_phi_g, dst_phi_g, 
+        dst_sigma = None if src_sigma is None else group_collapse(src_sigma,
+                                                        src_phi_g, dst_phi_g,
                                                         self._src_to_dst_matrix)
         return dst_sigma
 
@@ -287,15 +287,15 @@ class SimpleDataSource(DataSource):
         return rxdata
 
     def discretize(self, nuc, rx, temp=300.0, src_phi_g=None, dst_phi_g=None):
-        """Discretizes the reaction channel from simple group structure to that 
-        of the destination weighted by the group fluxes.  Since the simple data 
+        """Discretizes the reaction channel from simple group structure to that
+        of the destination weighted by the group fluxes.  Since the simple data
         source consists of only thermal (2.53E-8 MeV), fission (1 MeV), and 14 MeV
         data points, the following piecewise functional form is assumed:
 
-        .. math::  
+        .. math::
 
-            \\sigma(E) = \\sigma(2.53E-8) \\sqrt{\\frac{2.53E-8}{E}} 
-            \\sigma(E) = \\frac{\sigma(14) - \\sigma(1)}{14 - 1} (E - 1) + \\sigma(1) 
+            \\sigma(E) = \\sigma(2.53E-8) \\sqrt{\\frac{2.53E-8}{E}}
+            \\sigma(E) = \\frac{\sigma(14) - \\sigma(1)}{14 - 1} (E - 1) + \\sigma(1)
 
         Parameters
         ----------
@@ -316,7 +316,7 @@ class SimpleDataSource(DataSource):
             Destination cross section data, length dst_ngroups.
 
         """
-        src_phi_g = self.src_phi_g if src_phi_g is None else np.asarray(src_phi_g) 
+        src_phi_g = self.src_phi_g if src_phi_g is None else np.asarray(src_phi_g)
         src_sigma = self.reaction(nuc, rx, temp)
         if src_sigma is None:
             return None
@@ -343,7 +343,7 @@ class SimpleDataSource(DataSource):
             self._dst_ngroups = 0
         else:
             self._dst_group_struct = np.asarray(dst_group_struct)
-            self._dst_centers = (self._dst_group_struct[1:] + 
+            self._dst_centers = (self._dst_group_struct[1:] +
                                  self._dst_group_struct[:-1])/2.0
             self._dst_ngroups = len(dst_group_struct) - 1
         self._src_to_dst_matrix = None
