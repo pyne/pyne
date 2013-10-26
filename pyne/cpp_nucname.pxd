@@ -104,3 +104,11 @@ cdef extern from "nucname.h" namespace "pyne::nucname":
     #int alara_to_id(int) except +
     int alara_to_id(char *) except +
     int alara_to_id(std_string) except +
+
+    # SZA Functions
+    int sza(int) except +
+    int sza(char *) except +
+    int sza(std_string) except +
+    int sza_to_id(int) except +
+    int sza_to_id(char *) except +
+    int sza_to_id(std_string) except +
