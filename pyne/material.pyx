@@ -754,6 +754,22 @@ cdef class _Material:
         return pymat
 
 
+    def sub_elem(self, element):
+        """sub_elem(element)
+        Grabs a subset of the material and returns a new material comprised of 
+	only the nuclides of the specified element.
+
+        Returns
+        -------
+        submaterial : Material
+            A new mass stream object that only has members of the given element.
+
+        """
+        cdef _Material pymat = Material()
+        pymat.mat_pointer[0] = self.mat_pointer.sub_elem(nucname.id(element))
+        return pymat
+
+
     def sub_u(self):
         """sub_u()
         Convenience method that gets the Uranium portion of a mass stream.
@@ -765,7 +781,7 @@ cdef class _Material:
 
         """
         cdef _Material pymat = Material()
-        pymat.mat_pointer[0] = self.mat_pointer.sub_u()
+        pymat.mat_pointer[0] = self.mat_pointer.sub_elem(nucname.id('U'))
         return pymat
 
 
@@ -780,7 +796,7 @@ cdef class _Material:
 
         """
         cdef _Material pymat = Material()
-        pymat.mat_pointer[0] = self.mat_pointer.sub_pu()
+        pymat.mat_pointer[0] = self.mat_pointer.sub_elem(nucname.id('Pu'))
         return pymat
 
 
