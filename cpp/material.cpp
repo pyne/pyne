@@ -6,8 +6,6 @@
 #include "nucname.h"
 #include <string>
 #include <vector>
-using std::vector;
-using namespace std;
 
 // h5wrap template
 template double h5wrap::get_array_index(hid_t, int, hid_t);
@@ -585,7 +583,7 @@ void pyne::Material::write_text(std::string filename)
   f.open(filename.c_str(), std::ios_base::trunc);
 
   Json::Reader reader;
-  vector<string> obj = attrs.getMemberNames();
+  std::vector<std::string> obj = attrs.getMemberNames();
 
   if (0 <= mass)
     f << "Mass    " << mass << "\n";
@@ -600,7 +598,7 @@ void pyne::Material::write_text(std::string filename)
     f <<attrs.get(obj.at(i), "") << attrs.get(obj.at(i+1), "");
   }
 
-  std :string nuc_name;
+  std::string nuc_name;
   for(pyne::comp_iter i = comp.begin(); i != comp.end(); i++)
   {
     nuc_name = pyne::nucname::name( i->first ) + "  ";
