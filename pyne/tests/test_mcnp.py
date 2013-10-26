@@ -8,8 +8,13 @@ from nose.tools import assert_equal
 
 import tables
 
-from pyne import mcnp
-from pyne.mcnp import read_mcnp_inp
+try:
+    from pyne import mcnp
+    from pyne.mcnp import read_mcnp_inp
+except ImportError:
+    from nose.plugins.skip import SkipTest
+    raise SkipTest
+
 from pyne.material import Material
 from pyne.material import MultiMaterial
 
