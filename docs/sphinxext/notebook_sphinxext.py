@@ -12,7 +12,7 @@ from docutils.parsers.rst import directives, roles, states
 from docutils.parsers.rst.roles import set_classes
 from docutils.transforms import misc
 
-from nbconvert import ConverterHTML
+from IPython.nbconvert import html
 
 
 class Notebook(Directive):
@@ -44,8 +44,10 @@ class Notebook(Directive):
         nb_path = utils.relative_path(None, nb_path)
 
         # convert notebook to html
-        converter = ConverterHTML(nb_path)
-        converter.read()
+        exporter = html.HTMLExporter(template_file='full')
+        output, resources = exporter.from_filename(nb_path)
+        import pdb; pdb.set_trace()
+        print output
 
         # add HTML5 scoped attribute to header style tags
         header = map(lambda s: s.replace('<style', '<style scoped="scoped"'),
