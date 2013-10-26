@@ -15,7 +15,7 @@ from pyne import data
 import numpy  as np
 import tables as tb
 
-
+nclides = 9
 nucvec = {10010000:  1.0,   
           80160000:  1.0,   
           691690000: 1.0,
@@ -244,6 +244,25 @@ def test_number_density():
     assert_almost_equal(obs / exp, 1.0, 4)
 
 
+def test_set_mat_int_1():
+    mat = Material(nucvec, -1)
+    mat1 = mat.set_mat([922350000, 922380000, 80160000], 2)
+    comp = 2 / (nclides + 3.)
+    assert_almost_equal(mat1.comp[80160000],  comp)
+    assert_almost_equal(mat1.comp[922350000], comp)
+    assert_almost_equal(mat1.comp[922380000], comp)
+    assert_equal(mat1.mass, nclides + 3)
+
+
+def test_set_mat_int_2():
+    mat = Material(nucvec)
+    mat1 = mat.set_mat([922350000, 922380000, 80160000], 2)
+    comp = 2. / (nclides + 3.)
+    assert_almost_equal(mat1.comp[80160000],  comp)
+    assert_almost_equal(mat1.comp[922350000], comp)
+    assert_almost_equal(mat1.comp[922380000], comp)
+    assert_equal(mat1.mass, nclides + 3)
+
 
 class TestMassSubMaterialMethods(TestCase):
     "Tests that the Material sub-Material ter member functions work."
@@ -281,6 +300,18 @@ class TestMassSubMaterialMethods(TestCase):
         assert_almost_equal(mat1.comp[922350000], 0.25)
         assert_almost_equal(mat1.comp[922380000], 0.25)
         assert_equal(mat1.mass, 4.0)
+
+    def test_sub_elem_1(self):
+        mat = Material(nucvec)
+        mat1 = mat.sub_elem(8)
+        assert_equal(mat1.comp, {80160000: 1.0})
+        assert_equal(mat1.mass, 1.0)
+
+    def test_sub_elem_2(self):
+        mat = Material(nucvec, -1)
+        mat1 = mat.sub_elem(8)
+        assert_equal(mat1.comp, {80160000: 1.0})
+        assert_equal(mat1.mass, 1.0)
 
     def test_sub_u_1(self):
         mat = Material(nucvec)
@@ -387,7 +418,6 @@ class TestMassSubMaterialMethods(TestCase):
         assert_equal(mat1.comp[80160000],  1.0/3.0)
         assert_equal(mat1.comp[691690000], 1.0/3.0)
         assert_equal(mat1.mass, 3.0)
-
 
     def test_sub_range(self):
         mat = Material(nucvec)
