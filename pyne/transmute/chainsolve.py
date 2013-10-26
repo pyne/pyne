@@ -127,7 +127,11 @@ class Transmuter(object):
             partial = self._transmute_partial(nuc)
             for part_nuc, part_adens in partial.items():
                 y_atoms[part_nuc] = part_adens * adens + y_atoms.get(part_nuc, 0.0)
-        y = from_atom_frac(y_atoms)
+        mw_x = x.molecular_weight()
+        y = from_atom_frac(y_atoms, atoms_per_mol=x.atoms_per_mol)
+        # even though it doesn't look likt it, the following line is actually
+        #   mass_y = MW_y * mass_x / MW_x
+        y.mass *= x.mass / mw_x 
         return y
 
     def _transmute_partial(self, nuc):
