@@ -25,6 +25,11 @@ Original Copyright:
 
 import os
 import time
+import warnings
+
+warnings.warn("the NJOY module is untested and considered experimental", 
+              RuntimeWarning)
+
 
 class PyNjoyError(Exception):
     """Exception indicating an error in PyNjoy."""
