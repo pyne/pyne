@@ -6,6 +6,7 @@ from nose.tools import assert_equal, assert_true
 from numpy.testing import assert_array_equal
 
 from pyne import serpent
+from pyne import nucname
 from pyne.material import Material
 
 
@@ -24,7 +25,7 @@ def test_parse_res1():
 
 def test_parse_dep1():
     dep = serpent.parse_dep('sample_dep.m')
-    nuc_set = set(dep['ZAI'][:-2])
+    nuc_set = set([nucname.id(int(nuc)) for nuc in dep['ZAI'][:-2]])
     shape = (len(dep['ZAI']), len(dep['DAYS'])) 
     for key in dep:
         if key.endswith('_VOLUME'):
