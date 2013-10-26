@@ -14,6 +14,7 @@ The Python for Nuclear Engineering Team includes:
 * `Chris Dembia`_
 * `Eric Relson`_
 * `Elliott Biondo`_
+* `Matthew Gidden`_
 
 .. _Anthony Scopatz: http://www.scopatz.com/
 
@@ -26,6 +27,8 @@ The Python for Nuclear Engineering Team includes:
 .. _Eric Relson: mailto:erelson@umich.edu
 
 .. _Elliott Biondo: mailto:biondo@wisc.edu
+
+.. _Matthew Gidden: http://github.com/gidden
 
 Contact us via pyne-dev@googlegroups.com
 
