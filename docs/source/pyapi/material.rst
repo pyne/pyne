@@ -44,3 +44,10 @@ The following top-level module functions are used to generate materials from var
 
 .. autofunction:: from_text
 
+****************
+Material Library
+****************
+.. autoclass:: MaterialLibrary(lib=None, datapath="/materials", nucpath="/nucid")
+   :members:
+   :inherited-members:
+
