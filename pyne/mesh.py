@@ -47,6 +47,7 @@ class Tag(object):
         """
         self.mesh = mesh
         self.name = name
+        mesh.tags[name] = self
         if doc is None:
             doc = "the {0!r} tag".format(name)
         self.__doc__ = doc
@@ -68,6 +69,13 @@ class Tag(object):
 
 class MaterialPropertyTag(Tag):
     """A mesh tag which looks itself up as a material property (attribute).
+    This makes the following expressions equivalent for a given material property
+    name::
+
+        mesh.name[i] == mesh.mats[i].name
+
+    It also adds slicing, fancy indexing, boolean masking, and broadcasting
+    features to this process.
     """
 
     def __getitem__(self, key):
@@ -123,6 +131,49 @@ class MaterialPropertyTag(Tag):
             raise TypeError("{0} is not an int, slice, mask, "
                             "or fancy index.".format(key))        
 
+    def __delitem__(self, key):
+        msg = "the material property tag {0!r} may not be deleted".format(self.name)
+        raise AttributeError(msg)
+
+
+class MaterialMethodTag(Tag):
+    """A mesh tag which looks itself up by calling a material method which takes 
+    no arguments.  This makes the following expressions equivalent for a given 
+    material method name::
+
+        mesh.name[i] == mesh.mats[i].name()
+
+    It also adds slicing, fancy indexing, boolean masking, and broadcasting
+    features to this process.
+    """
+
+    def __getitem__(self, key):
+        name = self.name
+        mats = self.mesh.mats
+        size = len(self.mesh)
+        if isinstance(key, int):
+            return getattr(mats[key], name)()
+        elif isinstance(key, slice):
+            return np.array([getattr(mats[i], name)() for i in \
+                                                          range(*key.indices(size))])
+        elif isinstance(key, np.ndarray) and key.dtype == np.bool:
+            if len(key) != size:
+                raise KeyError("boolean mask must match the length of the mesh.")
+            return np.array([getattr(mats[i], name)() for i, b in enumerate(key) if b])
+        elif isinstance(key, Iterable):
+            return np.array([getattr(mats[i], name)() for i in key])
+        else:
+            raise TypeError("{0} is not an int, slice, mask, "
+                            "or fancy index.".format(key))        
+
+    def __setitem__(self, key, value):
+        msg = "the material method tag {0!r} may not be set".format(self.name)
+        raise AttributeError(msg)
+
+    def __delitem__(self, key):
+        msg = "the material method tag {0!r} may not be deleted".format(self.name)
+        raise AttributeError(msg)
+
 class MeshError(Exception):
     """Errors related to instantiating mesh objects and utilizing their methods.
     """
@@ -170,6 +221,8 @@ class Mesh(object):
         This is a mapping of volume element handles to Material objects.
 
     """
+
+    
 
     def __init__(self, mesh=None, mesh_file=None, structured=False, \
                  structured_coords=None, structured_set=None, mats=None):
@@ -280,8 +333,25 @@ class Mesh(object):
             if i not in mats:
                 mats[i] = Material()
 
-        self.density = MaterialPropertyTag(self, 'density', 'the density [g/cc]')
-
+        # Default tags
+        self.tags = {}
+        # Material property tags
+        self.atoms_per_mol = MaterialPropertyTag(self, 'atoms_per_mol', 
+                                                 doc='Number of atoms per molecule')
+        self.attrs = MaterialPropertyTag(self, 'attrs', 
+                        doc='metadata attributes, stored on the material')
+        self.comp = MaterialPropertyTag(self, 'comp', doc="normalized composition "
+                                        "mapping from nuclides to mass fractions")
+        self.mass = MaterialPropertyTag(self, 'mass', doc='the mass of the material')
+        self.density = MaterialPropertyTag(self, 'density', doc='the density [g/cc]')
+        # Material method tags
+        methtagnames = ('expand_elements', 'mass_density', 'molecular_weight', 
+                        'mult_by_mass', 'number_density', 'sub_act', 'sub_fp', 
+                        'sub_lan', 'sub_ma', 'sub_tru', 'to_atom_frac')
+        for name in methtagnames:
+            doc = "see Material.{0}() for more information".format(name)
+            setattr(self, name, MaterialMethodTag(self, name, doc=doc)) 
+        
     def __len__(self):
         return len(self.mats)
 
