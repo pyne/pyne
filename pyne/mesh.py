@@ -1,6 +1,6 @@
 import copy
 import itertools
-from collections import namedtuple, Iterable
+from collections import namedtuple, Iterable, Sequence
 
 import numpy as np
 
@@ -84,6 +84,41 @@ class MaterialPropertyTag(Tag):
             return np.array([getattr(mats[i], name) for i, b in enumerate(key) if b])
         elif isinstance(key, Iterable):
             return np.array([getattr(mats[i], name) for i in key])
+        else:
+            raise TypeError("{0} is not an int, slice, mask, "
+                            "or fancy index.".format(key))        
+
+    def __setitem__(self, key, value):
+        name = self.name
+        mats = self.mesh.mats
+        size = len(self.mesh)
+        if isinstance(key, int):
+            setattr(mats[key], name, value)
+        elif isinstance(key, slice):
+            idx = range(*key.indices(size))
+            if isinstance(value, Sequence) and len(value) == len(idx):
+                for i, v in zip(idx, value):
+                    setattr(mats[i], name, v)
+            else:
+                for i in idx:
+                    setattr(mats[i], name, value) 
+        elif isinstance(key, np.ndarray) and key.dtype == np.bool:
+            if len(key) != size:
+                raise KeyError("boolean mask must match the length of the mesh.")
+            idx = np.where(key)[0]
+            if isinstance(value, Sequence) and len(value) == key.sum():
+                for i, v in zip(idx, value):
+                    setattr(mats[i], name, v)
+            else:
+                for i in idx:
+                    setattr(mats[i], name, value) 
+        elif isinstance(key, Iterable):
+            if isinstance(value, Sequence) and len(value) == len(key):
+                for i, v in zip(key, value):
+                    setattr(mats[i], name, v)
+            else:
+                for i in key:
+                    setattr(mats[i], name, value) 
         else:
             raise TypeError("{0} is not an int, slice, mask, "
                             "or fancy index.".format(key))        
