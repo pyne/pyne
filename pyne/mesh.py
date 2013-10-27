@@ -52,6 +52,13 @@ class Tag(object):
             doc = "the {0!r} tag".format(name)
         self.__doc__ = doc
 
+    def __str__(self):
+        return "{0}: {1}".format(self.__class__.__name__, self.name)
+
+    def __repr__(self):
+        return "{0}(name={1!r}, doc={2!r})".format(self.__class__.__name__, self.name,
+                                                   self.doc)
+
     def __get__(self, mesh, objtype=None):
         return self
 
@@ -173,6 +180,95 @@ class MaterialMethodTag(Tag):
     def __delitem__(self, key):
         msg = "the material method tag {0!r} may not be deleted".format(self.name)
         raise AttributeError(msg)
+
+
+class MetadataTag(Tag):
+    """A mesh tag which looks itself up as a material metadata attribute.
+    Tags of this are untyped and may have any size.  Use this for catch-all tags.
+    This makes the following expressions equivalent for a given material property
+    name::
+
+        mesh.name[i] == mesh.mats[i].attrs['name']
+
+    It also adds slicing, fancy indexing, boolean masking, and broadcasting
+    features to this process.  
+    """
+
+    def __getitem__(self, key):
+        name = self.name
+        mats = self.mesh.mats
+        size = len(self.mesh)
+        if isinstance(key, int):
+            return mats[key].attrs[name]
+        elif isinstance(key, slice):
+            return [mats[i].attrs[name] for i in range(*key.indices(size))]
+        elif isinstance(key, np.ndarray) and key.dtype == np.bool:
+            if len(key) != size:
+                raise KeyError("boolean mask must match the length of the mesh.")
+            return [mats[i].attrs[name] for i, b in enumerate(key) if b]
+        elif isinstance(key, Iterable):
+            return [mats[i].attrs[name] for i in key]
+        else:
+            raise TypeError("{0} is not an int, slice, mask, "
+                            "or fancy index.".format(key))        
+
+    def __setitem__(self, key, value):
+        name = self.name
+        mats = self.mesh.mats
+        size = len(self.mesh)
+        if isinstance(key, int):
+            mats[key].attrs[name] = value
+        elif isinstance(key, slice):
+            idx = range(*key.indices(size))
+            if isinstance(value, Sequence) and len(value) == len(idx):
+                for i, v in zip(idx, value):
+                    mats[i].attrs[name] = v
+            else:
+                for i in idx:
+                    mats[i].attrs[name] = value
+        elif isinstance(key, np.ndarray) and key.dtype == np.bool:
+            if len(key) != size:
+                raise KeyError("boolean mask must match the length of the mesh.")
+            idx = np.where(key)[0]
+            if isinstance(value, Sequence) and len(value) == key.sum():
+                for i, v in zip(idx, value):
+                    mats[i].attrs[name] = v
+            else:
+                for i in idx:
+                    mats[i].attrs[name] = value
+        elif isinstance(key, Iterable):
+            if isinstance(value, Sequence) and len(value) == len(key):
+                for i, v in zip(key, value):
+                    mats[i].attrs[name] = v
+            else:
+                for i in key:
+                    mats[i].attrs[name] = value
+        else:
+            raise TypeError("{0} is not an int, slice, mask, "
+                            "or fancy index.".format(key))        
+
+    def __delitem__(self, key):
+        name = self.name
+        mats = self.mesh.mats
+        size = len(self.mesh)
+        if isinstance(key, int):
+            del mats[key].attrs[name]
+        elif isinstance(key, slice):
+            for i in range(*key.indices(size)):
+                del mats[i].attrs[name]
+        elif isinstance(key, np.ndarray) and key.dtype == np.bool:
+            if len(key) != size:
+                raise KeyError("boolean mask must match the length of the mesh.")
+            for i, b in enumerate(key): 
+                if b:
+                    del mats[i].attrs[name] 
+        elif isinstance(key, Iterable):
+            for i in key:
+                del mats[i].attrs[name]
+        else:
+            raise TypeError("{0} is not an int, slice, mask, "
+                            "or fancy index.".format(key))        
+
 
 class MeshError(Exception):
     """Errors related to instantiating mesh objects and utilizing their methods.
@@ -335,6 +431,13 @@ class Mesh(object):
 
         # Default tags
         self.tags = {}
+        # metadata tags, these should come first so they don't accidentally 
+        # overwite hard coded tag names.
+        metatagnames = set()
+        for mat in mats.values():
+            metatagnames.update(mat.attrs.keys())
+        for name in metatagnames:
+            setattr(self, name, MetadataTag(self, name))
         # Material property tags
         self.atoms_per_mol = MaterialPropertyTag(self, 'atoms_per_mol', 
                                                  doc='Number of atoms per molecule')
@@ -350,7 +453,8 @@ class Mesh(object):
                         'sub_lan', 'sub_ma', 'sub_tru', 'to_atom_frac')
         for name in methtagnames:
             doc = "see Material.{0}() for more information".format(name)
-            setattr(self, name, MaterialMethodTag(self, name, doc=doc)) 
+            setattr(self, name, MaterialMethodTag(self, name, doc=doc))
+        
         
     def __len__(self):
         return len(self.mats)
