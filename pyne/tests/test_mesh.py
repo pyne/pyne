@@ -562,3 +562,21 @@ def test_matproptag():
     m.density[[2]] = 28.0
     m.density[3, 1] = 6.0, 4128.0
     assert_array_equal(m.density[1:], np.array([4128.0, 28.0, 6.0]))
+
+def test_matmethtag():
+    mats = {
+        0: Material({'H1': 1.0, 'K39': 1.0}, density=42.0), 
+        1: Material({'H1': 0.1, 'O16': 1.0}, density=43.0), 
+        2: Material({'He4': 42.0}, density=44.0), 
+        3: Material({'Tm171': 171.0}, density=45.0), 
+        }
+    m = gen_mesh(mats=mats)
+
+    mws = np.array([mat.molecular_weight() for i, mat in mats.items()])
+
+    # Getting tags
+    assert_equal(m.molecular_weight[0], mws[0])
+    assert_array_equal(m.molecular_weight[::2], mws[::2])
+    mask = np.array([True, False, True, True], dtype=bool)
+    assert_array_equal(m.molecular_weight[mask], mws[mask])
+    assert_array_equal(m.molecular_weight[1, 0, 1, 3], mws[[1, 0, 1, 3]])
