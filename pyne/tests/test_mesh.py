@@ -537,10 +537,28 @@ def test_matproptag():
         3: Material({'Tm171': 171.0}, density=45.0), 
         }
     m = gen_mesh(mats=mats)
+
+    # Getting tags
     assert_equal(m.density[0], 42.0)
     assert_array_equal(m.density[::2], np.array([42.0, 44.0]))
-
     mask = np.array([True, False, True, True], dtype=bool)
     assert_array_equal(m.density[mask], np.array([42.0, 44.0, 45.0]))
-
     assert_array_equal(m.density[1, 0, 1, 3], np.array([43.0, 42.0, 43.0, 45.0]))
+
+    # setting tags
+    m.density[0] = 65.0
+    assert_equal(m.density[0], 65.0)
+
+    m.density[::2] = 18.0
+    m.density[1::2] = [36.0, 54.0]
+    assert_array_equal(m.density[:], np.array([18.0, 36.0, 18.0, 54.0]))
+
+    mask = np.array([True, False, True, True], dtype=bool)
+    m.density[mask] = 9.0
+    mask = np.array([True, True, False, False], dtype=bool)
+    m.density[mask] = (19.0, 29.0)
+    assert_array_equal(m.density[:], np.array([19.0, 29.0, 9.0, 9.0]))
+
+    m.density[[2]] = 28.0
+    m.density[3, 1] = 6.0, 4128.0
+    assert_array_equal(m.density[1:], np.array([4128.0, 28.0, 6.0]))
