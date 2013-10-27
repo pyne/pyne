@@ -42,6 +42,8 @@ class Tag(object):
             The PyNE mesh to tag.
         name : str
             The name of the tag.
+        doc : str, optional
+            Documentation string for the tag.
         """
         self.mesh = mesh
         self.name = name
@@ -64,7 +66,7 @@ class Tag(object):
     def __delete__(self, mesh):
         del self[:]
 
-class MaterialPropertyTag(object):
+class MaterialPropertyTag(Tag):
     """A mesh tag which looks itself up as a material property (attribute).
     """
 
@@ -75,7 +77,7 @@ class MaterialPropertyTag(object):
         if isinstance(key, int):
             return getattr(mats[key], name)
         elif isinstance(key, slice):
-            return np.array([getattr(mats[i], name) for i in key.indices(size)])
+            return np.array([getattr(mats[i],name) for i in range(*key.indices(size))])
         elif isinstance(key, np.ndarray) and key.dtype == np.bool:
             if len(key) != size:
                 raise KeyError("boolean mask must match the length of the mesh.")
@@ -84,9 +86,7 @@ class MaterialPropertyTag(object):
             return np.array([getattr(mats[i], name) for i in key])
         else:
             raise TypeError("{0} is not an int, slice, mask, "
-                            "or fancy index.".format(key))
-        
-        
+                            "or fancy index.".format(key))        
 
 class MeshError(Exception):
     """Errors related to instantiating mesh objects and utilizing their methods.
@@ -244,6 +244,8 @@ class Mesh(object):
             tag_ve_idx[ve] = i
             if i not in mats:
                 mats[i] = Material()
+
+        self.density = MaterialPropertyTag(self, 'density', 'the density [g/cc]')
 
     def __len__(self):
         return len(self.mats)

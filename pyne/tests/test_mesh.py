@@ -7,7 +7,7 @@ from nose.tools import assert_true, assert_equal, assert_raises, with_setup, \
     assert_is
 
 import numpy as np
-from numpy.testing import assert_array_almost_equal
+from numpy.testing import assert_array_equal, assert_array_almost_equal
 try:
     from itaps import iBase, iMesh, iMeshExtensions
 except ImportError:
@@ -495,7 +495,7 @@ def test_vtx_iterator():
     for (it_x, sm_x) in izip(it, sm.structured_iterate_vertex("x")):
         assert_equal(it_x,sm_x)
 
-
+"""\
 def test_large_iterator():
     #Test performance with large mesh
     print "building large mesh"
@@ -507,6 +507,7 @@ def test_large_iterator():
     print "iterating (2)"
     for i in big.structured_iterate_hex("yzx"):
         pass
+"""
 
 
 @with_setup(None, try_rm_file('test_matlib.h5m'))
@@ -528,3 +529,18 @@ def test_matlib():
     m2 = Mesh(mesh_file='test_matlib2.h5m')  # MOAB fails to flush
 
     
+def test_matproptag():
+    mats = {
+        0: Material({'H1': 1.0, 'K39': 1.0}, density=42.0), 
+        1: Material({'H1': 0.1, 'O16': 1.0}, density=43.0), 
+        2: Material({'He4': 42.0}, density=44.0), 
+        3: Material({'Tm171': 171.0}, density=45.0), 
+        }
+    m = gen_mesh(mats=mats)
+    assert_equal(m.density[0], 42.0)
+    assert_array_equal(m.density[::2], np.array([42.0, 44.0]))
+
+    mask = np.array([True, False, True, True], dtype=bool)
+    assert_array_equal(m.density[mask], np.array([42.0, 44.0, 45.0]))
+
+    assert_array_equal(m.density[1, 0, 1, 3], np.array([43.0, 42.0, 43.0, 45.0]))
