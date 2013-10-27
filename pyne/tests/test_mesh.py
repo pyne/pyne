@@ -1,7 +1,10 @@
-import os.path
+import os
+import time
+import shutil
 import itertools
 from operator import itemgetter
-from nose.tools import assert_true, assert_equal, assert_raises, with_setup
+from nose.tools import assert_true, assert_equal, assert_raises, with_setup, \
+    assert_is
 
 import numpy as np
 from numpy.testing import assert_array_almost_equal
@@ -11,6 +14,20 @@ except ImportError:
     from nose.plugins.skip import SkipTest
     raise SkipTest
 from pyne.mesh import Mesh, StatMesh, MeshError
+from pyne.material import Material, MaterialLibrary
+
+def try_rm_file(filename):
+    return lambda: os.remove(filename) if os.path.exists(filename) else None
+
+def gen_mesh(mats=None):
+    mesh_1 = Mesh(structured_coords=[[-1,0,1],[-1,0,1],[0,1]], structured=True, 
+                  mats=mats)
+    volumes1 = list(mesh_1.structured_iterate_hex("xyz"))
+    flux_tag = mesh_1.mesh.createTag("flux", 1, float)
+    flux_data = [1.0, 2.0, 3.0, 4.0]
+    flux_tag[volumes1] = flux_data
+    return mesh_1
+
 
 #############################################
 #Test unstructured mesh functionality
@@ -490,3 +507,24 @@ def test_large_iterator():
     print "iterating (2)"
     for i in big.structured_iterate_hex("yzx"):
         pass
+
+
+@with_setup(None, try_rm_file('test_matlib.h5m'))
+@with_setup(None, try_rm_file('test_matlib2.h5m'))
+def test_matlib():
+    mats = {
+        0: Material({'H1': 1.0, 'K39': 1.0}), 
+        1: Material({'H1': 0.1, 'O16': 1.0}), 
+        2: Material({'He4': 42.0}), 
+        3: Material({'Tm171': 171.0}), 
+        }
+    m = gen_mesh(mats=mats)
+    for i, ve in enumerate(m.mesh.iterate(iBase.Type.region, iMesh.Topology.all)):
+        assert_is(m.mats[i], mats[i])
+        assert_equal(m.mesh.getTagHandle('ve_idx')[ve], i)
+
+    m.write_hdf5('test_matlib.h5m')
+    shutil.copy('test_matlib.h5m', 'test_matlib2.h5m')
+    m2 = Mesh(mesh_file='test_matlib2.h5m')  # MOAB fails to flush
+
+    

@@ -98,6 +98,7 @@ class Mesh(object):
             #From file
             elif mesh_file and not mesh:
                 self.mesh.load(mesh_file)
+                self.mats = MaterialLibrary(mesh_file)
             else:
                 raise MeshError("To instantiate unstructured mesh object, "
                                  "must supply exactly 1 of the following: "
@@ -110,6 +111,7 @@ class Mesh(object):
                                    and not structured_set:
                 if mesh_file:
                     self.mesh.load(mesh_file)
+                    self.mats = MaterialLibrary(mesh_file)
                 try:
                     self.mesh.getTagHandle("BOX_DIMS")
                 except iBase.TagNotFoundError as e:
@@ -170,7 +172,13 @@ class Mesh(object):
         self.mats = mats
 
         # tag with volume id and ensure mats exist.
-        tag_ve_idx = self.mesh.createTag('ve_idx', 1, int)
+        tags = self.mesh.getAllTags(list(self.mesh.iterate(iBase.Type.region, 
+                                                           iMesh.Topology.all))[0])
+        tags = set(tag.name for tag in tags)
+        if 've_idx' in tags:
+            tag_ve_idx = self.mesh.getTagHandle('ve_idx')
+        else:
+            tag_ve_idx = self.mesh.createTag('ve_idx', 1, int)
         for i, ve in enumerate(self.mesh.iterate(iBase.Type.region, 
                                                  iMesh.Topology.all)):
             tag_ve_idx[ve] = i
@@ -231,9 +239,7 @@ class Mesh(object):
         """
         # Exclude error tags in a case a StatMesh is mistakenly initialized as a
         # Mesh object.
-        for tag in tags:
-            if tag[-6:] == "_error":
-                tags.remove(tag)
+        tags = set(tag for tag in tags if not tag.endswith('_error'))
 
         if in_place:
             mesh_1 = self
@@ -256,11 +262,13 @@ class Mesh(object):
         """
         self_tags = self.mesh.getAllTags(list(self.mesh.iterate(
                                      iBase.Type.region, iMesh.Topology.all))[0])
-        other_tags = other.mesh.getAllTags(list(other.mesh.iterate(iBase.Type.region, iMesh.Topology.all))[0])
+        other_tags = other.mesh.getAllTags(list(other.mesh.iterate(iBase.Type.region, 
+                                           iMesh.Topology.all))[0])
         self_tags = set(x.name for x in self_tags)
         other_tags = set(x.name for x in other_tags)
-
-        return list(self_tags.intersection(other_tags))
+        intersect = self_tags & other_tags
+        intersect.discard('ve_idx')
+        return intersect
                            
     def __copy__(self):
         #first copy full imesh instance
@@ -415,7 +423,6 @@ class Mesh(object):
         """Writes the mesh to an hdf5 file."""
         self.mesh.save(filename)
         self.mats.write_hdf5(filename)
-        
 
 ######################################################
 # private helper functions for structured mesh methods
@@ -519,9 +526,7 @@ class StatMesh(Mesh):
         """
         # Exclude error tags because result and error tags are treated simotaneously
         # so there is not need to include both in the tag list to iterate through.
-        for tag in tags:
-            if tag[-6:] == "_error":
-                tags.remove(tag)
+        tags = set(tag for tag in tags if not tag.endswith('_error'))
 
         if in_place:
             mesh_1 = self
