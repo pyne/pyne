@@ -1,7 +1,8 @@
-import numpy as np
-import itertools
 import copy
+import itertools
 from collections import namedtuple, Iterable
+
+import numpy as np
 
 try:
     from itaps import iMesh, iBase, iMeshExtensions
@@ -27,6 +28,65 @@ err__ops = {"+": lambda val_1, val_2, val_1_err, val_2_err: \
                  (np.sqrt(val_1_err**2 + val_2_err**2)),
                   "/": lambda val_1, val_2, val_1_err, val_2_err: \
                  (np.sqrt(val_1_err**2 + val_2_err**2))}
+
+class Tag(object):
+    """A mesh tag, which acts as a descriptor on the mesh.  This dispatches
+    access to intrinsic material properties, the iMesh.Mesh tags, and material
+    metadata attributes.
+    """
+
+    def __init__(self, mesh, name, doc=None):
+        """Parameters
+        ----------
+        mesh : Mesh
+            The PyNE mesh to tag.
+        name : str
+            The name of the tag.
+        """
+        self.mesh = mesh
+        self.name = name
+        if doc is None:
+            doc = "the {0!r} tag".format(name)
+        self.__doc__ = doc
+
+    def __get__(self, mesh, objtype=None):
+        return self
+
+    def __set__(self, mesh, value):
+        if not isinstance(value, Tag):
+            raise AttributeError("can't set tag from non-tag objects, "
+                                 "got {0}".format(type(value)))
+        if self.name != value.name:
+            raise AttributeError("tags names must match, found "
+                                 "{0} and {1}".format(self.name, value.name))
+        self[:] = value[:]
+
+    def __delete__(self, mesh):
+        del self[:]
+
+class MaterialPropertyTag(object):
+    """A mesh tag which looks itself up as a material property (attribute).
+    """
+
+    def __getitem__(self, key):
+        name = self.name
+        mats = self.mesh.mats
+        size = len(self.mesh)
+        if isinstance(key, int):
+            return getattr(mats[key], name)
+        elif isinstance(key, slice):
+            return np.array([getattr(mats[i], name) for i in key.indices(size)])
+        elif isinstance(key, np.ndarray) and key.dtype == np.bool:
+            if len(key) != size:
+                raise KeyError("boolean mask must match the length of the mesh.")
+            return np.array([getattr(mats[i], name) for i, b in enumerate(key) if b])
+        elif isinstance(key, Iterable):
+            return np.array([getattr(mats[i], name) for i in key])
+        else:
+            raise TypeError("{0} is not an int, slice, mask, "
+                            "or fancy index.".format(key))
+        
+        
 
 class MeshError(Exception):
     """Errors related to instantiating mesh objects and utilizing their methods.
@@ -184,6 +244,10 @@ class Mesh(object):
             tag_ve_idx[ve] = i
             if i not in mats:
                 mats[i] = Material()
+
+    def __len__(self):
+        return len(self.mats)
+
 
 #    def __add__(self, other):
 #        """Adds the common tags of other and returns a new mesh object.
