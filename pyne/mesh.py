@@ -44,6 +44,7 @@ class Tag(object):
             The name of the tag.
         doc : str, optional
             Documentation string for the tag.
+
         """
         self.mesh = mesh
         self.name = name
@@ -282,6 +283,21 @@ class IMeshTag(Tag):
     """
 
     def __init__(self, mesh, name, doc=None, size=1, dtype='f8'):
+        """Parameters
+        ----------
+        mesh : Mesh
+            The PyNE mesh to tag.
+        name : str
+            The name of the tag.
+        doc : str, optional
+            Documentation string for the tag.
+        size : int, optional
+            The number of elements of type dtype that this tag stores.
+        dtype : np.dtype or similar, optional
+            The data type of this tag from int, float, and byte. See PyTAPS
+            tags for more details.
+
+        """
         super(IMeshTag, self).__init__(mesh=mesh, name=name, doc=doc)
         try:
             self.tag = self.mesh.mesh.getTagHandle(self.name)
@@ -374,6 +390,80 @@ class IMeshTag(Tag):
         else:
             raise TypeError("{0} is not an int, slice, mask, "
                             "or fancy index.".format(key))        
+
+class ComputedTag(Tag):
+    '''A mesh tag which looks itself up by calling a function (or other callable)
+    with the following signature::
+
+        def f(mesh, i):
+            """mesh is a pyne.mesh.Mesh() object and i is the volume element index
+            to compute.
+            """
+            # ... do some work ...
+            return anything_you_want
+
+    This makes the following expressions equivalent for a given computed tag
+    name::
+
+        mesh.name[i] == f(mesh, i)
+
+    It also adds slicing, fancy indexing, boolean masking, and broadcasting
+    features to this process.
+
+    Notes
+    -----
+    The results of computed tags are not stored and the function object itself 
+    is also not persisted.  Therefore, you must manually re-tag the mesh with
+    the desired functions each session.
+
+    '''
+
+    def __init__(self, mesh, name, f, doc=None):
+        """Parameters
+        ----------
+        mesh : Mesh
+            The PyNE mesh to tag.
+        name : str
+            The name of the tag.
+        f : callable object
+            The function that performs the computation.
+        doc : str, optional
+            Documentation string for the tag.
+
+        """
+        doc = doc or f.__doc__
+        super(ComputedTag, self).__init__(mesh=mesh, name=name, doc=doc)
+        self.f = f
+
+    def __getitem__(self, key):
+        m = self.mesh
+        f = self.f
+        size = len(m)
+        if isinstance(key, int):
+            if key >= size:
+                raise IndexError("key index {0} greater than the size of the "
+                                 "mesh {1}".format(key, size))
+            return f(m, key)
+        elif isinstance(key, slice):
+            return [f(m, i) for i in range(*key.indices(size))]
+        elif isinstance(key, np.ndarray) and key.dtype == np.bool:
+            if len(key) != size:
+                raise KeyError("boolean mask must match the length of the mesh.")
+            return [f(m, i) for i, b in enumerate(key) if b]
+        elif isinstance(key, Iterable):
+            return [f(m, i) for i in key]
+        else:
+            raise TypeError("{0} is not an int, slice, mask, "
+                            "or fancy index.".format(key))        
+
+    def __setitem__(self, key, value):
+        msg = "the computed tag {0!r} may not be set".format(self.name)
+        raise AttributeError(msg)
+
+    def __delitem__(self, key):
+        msg = "the computed tag {0!r} may not be deleted".format(self.name)
+        raise AttributeError(msg)
+
 
 
 class MeshError(Exception):
@@ -582,7 +672,8 @@ class Mesh(object):
             The value to initialize the tag with, skipped if None.
         tagtype : Tag or str, optional
             The type of tag this should be any of the following classes or 
-            strings are accepted: IMeshTag, MetadataTag, 'imesh', or 'metadata'.
+            strings are accepted: IMeshTag, MetadataTag, ComputedTag, 'imesh', 
+            'metadata', or 'computed'.
         doc : str, optional
             The tag documentation string.
         size : int, optional
@@ -595,7 +686,9 @@ class Mesh(object):
         if name in self.tags:
             raise KeyError('{0} tag already exists on the mesh'.format(name))
         if tagtype is None:
-            if size is None and dtype is not None:
+            if callable(value):
+                tagtype = ComputedTag
+            elif size is None and dtype is not None:
                 size = 1
                 tagtype = IMeshTag
             elif size is not None and dtype is None:
@@ -625,9 +718,11 @@ class Mesh(object):
             t = IMeshTag(self, name, doc=doc, size=size, dtype=dtype)
         elif tagtype is MetadataTag or tagtype.lower() == 'metadata':
             t = MetadataTag(self, name, doc=doc)
+        elif tagtype is ComputedTag or tagtype.lower() == 'computed':
+            t = ComputedTag(self, name, f=value, doc=doc)
         else:
             raise ValueError('tagtype {0} not valid'.format(tagtype))
-        if value is not None:
+        if value is not None and tagtype is not ComputedTag:
             t[:] = value
         setattr(self, name, t)
 

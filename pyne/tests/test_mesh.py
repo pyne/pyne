@@ -13,7 +13,8 @@ try:
 except ImportError:
     from nose.plugins.skip import SkipTest
     raise SkipTest
-from pyne.mesh import Mesh, StatMesh, MeshError, Tag, MetadataTag, IMeshTag
+from pyne.mesh import Mesh, StatMesh, MeshError, Tag, MetadataTag, IMeshTag, \
+    ComputedTag
 from pyne.material import Material, MaterialLibrary
 
 def try_rm_file(filename):
@@ -660,6 +661,27 @@ def test_imeshtag():
 
     # deleting tag
     del m.f[:]
+
+
+def test_comptag():
+    mats = {
+        0: Material({'H1': 1.0, 'K39': 1.0}, density=42.0), 
+        1: Material({'H1': 0.1, 'O16': 1.0}, density=43.0), 
+        2: Material({'He4': 42.0}, density=44.0), 
+        3: Material({'Tm171': 171.0}, density=45.0), 
+        }
+    m = gen_mesh(mats=mats)
+    def d2(mesh, i):
+        """I square the density."""
+        return mesh.density[i]**2
+    m.density2 = ComputedTag(m, 'density2', d2)
+
+    # Getting tags
+    assert_equal(m.density2[0], 42.0**2)
+    assert_array_equal(m.density2[::2], np.array([42.0, 44.0])**2)
+    mask = np.array([True, False, True, True], dtype=bool)
+    assert_array_equal(m.density2[mask], np.array([42.0, 44.0, 45.0])**2)
+    assert_array_equal(m.density2[1, 0, 1, 3], np.array([43.0, 42.0, 43.0, 45.0])**2)
 
 
 def test_addtag():
