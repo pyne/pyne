@@ -522,15 +522,14 @@ class Mesh(object):
         self.mats = mats
 
         # tag with volume id and ensure mats exist.
-        tags = self.mesh.getAllTags(list(self.mesh.iterate(iBase.Type.region, 
-                                                           iMesh.Topology.all))[0])
+        ves = list(self.mesh.iterate(iBase.Type.region, iMesh.Topology.all))
+        tags = self.mesh.getAllTags(ves[0])
         tags = set(tag.name for tag in tags)
         if 've_idx' in tags:
             tag_ve_idx = self.mesh.getTagHandle('ve_idx')
         else:
             tag_ve_idx = self.mesh.createTag('ve_idx', 1, int)
-        for i, ve in enumerate(self.mesh.iterate(iBase.Type.region, 
-                                                 iMesh.Topology.all)):
+        for i, ve in enumerate(ves):
             tag_ve_idx[ve] = i
             if i not in mats:
                 mats[i] = Material()
@@ -544,6 +543,12 @@ class Mesh(object):
             metatagnames.update(mat.attrs.keys())
         for name in metatagnames:
             setattr(self, name, MetadataTag(self, name))
+        # iMesh.Mesh() tags
+        tagnames = set()
+        for ve in ves:
+            tagnames.update(t.name for t in self.mesh.getAllTags(ve))
+        for name in tagnames:
+            setattr(self, name, IMeshTag(self, name))        
         # Material property tags
         self.atoms_per_mol = MaterialPropertyTag(self, 'atoms_per_mol', 
                                                  doc='Number of atoms per molecule')
