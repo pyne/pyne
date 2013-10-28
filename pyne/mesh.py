@@ -570,6 +570,67 @@ class Mesh(object):
     def __len__(self):
         return len(self.mats)
 
+    def tag(self, name, value=None, tagtype=None, doc=None, size=None, dtype=None):
+        """Adds a new tag to the mesh, guessing the approriate place to store the
+        data.
+
+        Parameters
+        ----------
+        name : str
+            The tag name
+        value : optional
+            The value to initialize the tag with, skipped if None.
+        tagtype : Tag or str, optional
+            The type of tag this should be any of the following classes or 
+            strings are accepted: IMeshTag, MetadataTag, 'imesh', or 'metadata'.
+        doc : str, optional
+            The tag documentation string.
+        size : int, optional
+            The size of the tag. This only applies to IMeshTags.
+        dtype : numpy dtype, optional
+            The data type of the tag. This only applies to IMeshTags. See PyTAPS
+            for more details.
+
+        """
+        if name in self.tags:
+            raise KeyError('{0} tag already exists on the mesh'.format(name))
+        if tagtype is None:
+            if size is None and dtype is not None:
+                size = 1
+                tagtype = IMeshTag
+            elif size is not None and dtype is None:
+                dtype = 'f8'
+                tagtype = IMeshTag
+            elif value is None:
+                size = 1
+                value = 0.0
+                dtype = 'f8'
+                tagtype = IMeshTag
+            elif isinstance(value, float):
+                size = 1
+                dtype = 'f8'
+                tagtype = IMeshTag
+            elif isinstance(value, int):
+                size = 1
+                dtype = 'i'
+                tagtype = IMeshTag
+            elif isinstance(value, str):
+                tagtype = MetadataTag                
+            elif isinstance(value, Sequence):
+                raise ValueError('ambiguous tag {0!r} creation when value is a '
+                        'sequence, please set tagtype, size, or dtype'.format(name))
+            else:
+                tagtype = MetadataTag
+        if tagtype is IMeshTag or tagtype.lower() == 'imesh':
+            t = IMeshTag(self, name, doc=doc, size=size, dtype=dtype)
+        elif tagtype is MetadataTag or tagtype.lower() == 'metadata':
+            t = MetadataTag(self, name, doc=doc)
+        else:
+            raise ValueError('tagtype {0} not valid'.format(tagtype))
+        if value is not None:
+            t[:] = value
+        setattr(self, name, t)
+
 
 #    def __add__(self, other):
 #        """Adds the common tags of other and returns a new mesh object.

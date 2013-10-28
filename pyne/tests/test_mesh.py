@@ -4,7 +4,7 @@ import shutil
 import itertools
 from operator import itemgetter
 from nose.tools import assert_true, assert_equal, assert_raises, with_setup, \
-    assert_is
+    assert_is, assert_is_instance
 
 import numpy as np
 from numpy.testing import assert_array_equal, assert_array_almost_equal
@@ -660,3 +660,16 @@ def test_imeshtag():
 
     # deleting tag
     del m.f[:]
+
+
+def test_addtag():
+    mats = {
+        0: Material({'H1': 1.0, 'K39': 1.0}, density=42.0), 
+        1: Material({'H1': 0.1, 'O16': 1.0}, density=43.0), 
+        2: Material({'He4': 42.0}, density=44.0), 
+        3: Material({'Tm171': 171.0}, density=45.0), 
+        }
+    m = gen_mesh(mats=mats)
+    m.tag('meaning', value=42.0)
+    assert_is_instance(m.meaning, IMeshTag)
+    assert_array_equal(m.meaning[:], np.array([42.0]*len(m)))
