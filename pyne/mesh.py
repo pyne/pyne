@@ -269,6 +269,112 @@ class MetadataTag(Tag):
             raise TypeError("{0} is not an int, slice, mask, "
                             "or fancy index.".format(key))        
 
+class IMeshTag(Tag):
+    """A mesh tag which looks itself up as a tag on the iMesh.Mesh instance.
+    This makes the following expressions equivalent for a given iMesh.Mesh tag
+    name::
+
+        mesh.name[i] == mesh.mesh.getTagHandle(name)[list(mesh.mesh.iterate(
+                                iBase.Type.region, iMesh.Topology.all))[i]]
+
+    It also adds slicing, fancy indexing, boolean masking, and broadcasting
+    features to this process.
+    """
+
+    def __init__(self, mesh, name, doc=None, size=1, dtype='f8'):
+        super(IMeshTag, self).__init__(mesh=mesh, name=name, doc=doc)
+        try:
+            self.tag = self.mesh.mesh.getTagHandle(self.name)
+        except iBase.TagNotFoundError: 
+            self.tag = self.mesh.mesh.createTag(self.name, size, dtype)
+
+    def __delete__(self, mesh):
+        super(IMeshTag, self).__delete__(mesh)
+        self.mesh.mesh.destroyTag(self.name, force=True)
+
+    def __getitem__(self, key):
+        m = self.mesh.mesh
+        size = len(self.mesh)
+        mtag = self.tag
+        miter = m.iterate(iBase.Type.region, iMesh.Topology.all)
+        if isinstance(key, int):
+            if key >= size:
+                raise IndexError("key index {0} greater than the size of the "
+                                 "mesh {1}".format(key, size))
+            for i_ve in zip(range(key+1), miter):
+                pass
+            return mtag[i_ve[1]]
+        elif isinstance(key, slice):
+            return mtag[list(miter)[key]]
+        elif isinstance(key, np.ndarray) and key.dtype == np.bool:
+            if len(key) != size:
+                raise KeyError("boolean mask must match the length of the mesh.")
+            return mtag[[ve for b, ve in zip(key, miter) if b]]
+        elif isinstance(key, Iterable):
+            ves = list(miter)
+            return mtag[[ves[i] for i in key]]
+        else:
+            raise TypeError("{0} is not an int, slice, mask, "
+                            "or fancy index.".format(key))        
+
+    def __setitem__(self, key, value):
+        m = self.mesh.mesh
+        size = len(self.mesh)
+        mtag = self.tag
+        miter = m.iterate(iBase.Type.region, iMesh.Topology.all)
+        if isinstance(key, int):
+            if key >= size:
+                raise IndexError("key index {0} greater than the size of the "
+                                 "mesh {1}".format(key, size))
+            for i_ve in zip(range(key+1), miter):
+                pass
+            mtag[i_ve[1]] = value
+        elif isinstance(key, slice):
+            idx = range(*key.indices(size))
+            if not (isinstance(value, Sequence) and len(value) == len(idx)):
+                value = [value] * len(idx)
+            mtag[list(miter)[key]] = value
+        elif isinstance(key, np.ndarray) and key.dtype == np.bool:
+            if len(key) != size:
+                raise KeyError("boolean mask must match the length of the mesh.")
+            ntrues = key.sum()
+            if not (isinstance(value, Sequence) and len(value) == ntrues):
+                value = [value] * ntrues                
+            mtag[[ve for b, ve in zip(key, miter) if b]] = value
+        elif isinstance(key, Iterable):
+            if not (isinstance(value, Sequence) and len(value) == len(key)):
+                value = [value] * len(key)
+            ves = list(miter)
+            mtag[[ves[i] for i in key]] = value
+        else:
+            raise TypeError("{0} is not an int, slice, mask, "
+                            "or fancy index.".format(key))        
+
+    def __delitem__(self, key):
+        m = self.mesh.mesh
+        size = len(self.mesh)
+        mtag = self.tag
+        miter = m.iterate(iBase.Type.region, iMesh.Topology.all)
+        if isinstance(key, int):
+            if key >= size:
+                raise IndexError("key index {0} greater than the size of the "
+                                 "mesh {1}".format(key, size))
+            for i_ve in zip(range(key+1), miter):
+                pass
+            del mtag[i_ve[1]]
+        elif isinstance(key, slice):
+            del mtag[list(miter)[key]]
+        elif isinstance(key, np.ndarray) and key.dtype == np.bool:
+            if len(key) != size:
+                raise KeyError("boolean mask must match the length of the mesh.")
+            del mtag[[ve for b, ve in zip(key, miter) if b]]
+        elif isinstance(key, Iterable):
+            ves = list(miter)
+            del mtag[[ves[i] for i in key]]
+        else:
+            raise TypeError("{0} is not an int, slice, mask, "
+                            "or fancy index.".format(key))        
+
 
 class MeshError(Exception):
     """Errors related to instantiating mesh objects and utilizing their methods.

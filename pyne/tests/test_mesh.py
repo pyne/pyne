@@ -13,7 +13,7 @@ try:
 except ImportError:
     from nose.plugins.skip import SkipTest
     raise SkipTest
-from pyne.mesh import Mesh, StatMesh, MeshError, Tag, MetadataTag
+from pyne.mesh import Mesh, StatMesh, MeshError, Tag, MetadataTag, IMeshTag
 from pyne.material import Material, MaterialLibrary
 
 def try_rm_file(filename):
@@ -619,3 +619,44 @@ def test_metadatatag():
 
     # deleting tag
     del m.doc[:]
+
+def test_imeshtag():
+    mats = {
+        0: Material({'H1': 1.0, 'K39': 1.0}, density=42.0), 
+        1: Material({'H1': 0.1, 'O16': 1.0}, density=43.0), 
+        2: Material({'He4': 42.0}, density=44.0), 
+        3: Material({'Tm171': 171.0}, density=45.0), 
+        }
+    m = gen_mesh(mats=mats)
+    m.f = IMeshTag(m, 'f')
+    ftag = m.mesh.getTagHandle('f')
+    ftag[list(m.mesh.iterate(iBase.Type.region, iMesh.Topology.all))] = \
+                                                                [1.0, 2.0, 3.0, 4.0]
+
+    # Getting tags
+    assert_equal(m.f[0], 1.0)
+    assert_array_equal(m.f[::2], [1.0, 3.0])
+    mask = np.array([True, False, True, True], dtype=bool)
+    assert_array_equal(m.f[mask], [1.0, 3.0, 4.0])
+    assert_array_equal(m.f[1, 0, 1, 3], [2.0, 1.0, 2.0, 4.0])
+
+    # setting tags
+    m.f[0] = 65.0
+    assert_equal(m.f[0], 65.0)
+
+    m.f[::2] = 18.0
+    m.f[1::2] = [36.0, 54.0]
+    assert_array_equal(m.f[:], np.array([18.0, 36.0, 18.0, 54.0]))
+
+    mask = np.array([True, False, True, True], dtype=bool)
+    m.f[mask] = 9.0
+    mask = np.array([True, True, False, False], dtype=bool)
+    m.f[mask] = (19.0, 29.0)
+    assert_array_equal(m.f[:], np.array([19.0, 29.0, 9.0, 9.0]))
+
+    m.f[[2]] = 28.0
+    m.f[3, 1] = 6.0, 4128.0
+    assert_array_equal(m.f[1:], np.array([4128.0, 28.0, 6.0]))
+
+    # deleting tag
+    del m.f[:]
