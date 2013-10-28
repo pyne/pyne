@@ -4,7 +4,7 @@ import shutil
 import itertools
 from operator import itemgetter
 from nose.tools import assert_true, assert_equal, assert_raises, with_setup, \
-    assert_is, assert_is_instance
+    assert_is, assert_is_instance, assert_in
 
 import numpy as np
 from numpy.testing import assert_array_equal, assert_array_almost_equal
@@ -629,7 +629,7 @@ def test_imeshtag():
         3: Material({'Tm171': 171.0}, density=45.0), 
         }
     m = gen_mesh(mats=mats)
-    m.f = IMeshTag(m, 'f')
+    m.f = IMeshTag(mesh=m, name='f')
     ftag = m.mesh.getTagHandle('f')
     ftag[list(m.mesh.iterate(iBase.Type.region, iMesh.Topology.all))] = \
                                                                 [1.0, 2.0, 3.0, 4.0]
@@ -674,7 +674,7 @@ def test_comptag():
     def d2(mesh, i):
         """I square the density."""
         return mesh.density[i]**2
-    m.density2 = ComputedTag(m, 'density2', d2)
+    m.density2 = ComputedTag(d2, m, 'density2')
 
     # Getting tags
     assert_equal(m.density2[0], 42.0**2)
@@ -695,3 +695,10 @@ def test_addtag():
     m.tag('meaning', value=42.0)
     assert_is_instance(m.meaning, IMeshTag)
     assert_array_equal(m.meaning[:], np.array([42.0]*len(m)))
+
+
+def test_lazytaginit():
+    m = gen_mesh()
+    m.cactus = IMeshTag(3, 'i')
+    assert_in('cactus', m.tags)
+
