@@ -35,23 +35,28 @@ class Tag(object):
     metadata attributes.
     """
 
-    def __init__(self, mesh, name, doc=None):
+    def __init__(self, mesh=None, name=None, doc=None):
         """Parameters
         ----------
-        mesh : Mesh
+        mesh : Mesh, optional
             The PyNE mesh to tag.
-        name : str
+        name : str, optional
             The name of the tag.
         doc : str, optional
             Documentation string for the tag.
 
         """
+        if mesh is None or name is None:
+            self._lazy_args = {'mesh': mesh, 'name': name, 'doc': doc}
+            return 
         self.mesh = mesh
         self.name = name
         mesh.tags[name] = self
         if doc is None:
             doc = "the {0!r} tag".format(name)
         self.__doc__ = doc
+        if hasattr(self, '_lazy_args'):
+            del self._lazy_args
 
     def __str__(self):
         return "{0}: {1}".format(self.__class__.__name__, self.name)
@@ -282,23 +287,27 @@ class IMeshTag(Tag):
     features to this process.
     """
 
-    def __init__(self, mesh, name, doc=None, size=1, dtype='f8'):
+    def __init__(self, size=1, dtype='f8', mesh=None, name=None, doc=None):
         """Parameters
         ----------
-        mesh : Mesh
-            The PyNE mesh to tag.
-        name : str
-            The name of the tag.
-        doc : str, optional
-            Documentation string for the tag.
         size : int, optional
             The number of elements of type dtype that this tag stores.
         dtype : np.dtype or similar, optional
             The data type of this tag from int, float, and byte. See PyTAPS
             tags for more details.
+        mesh : Mesh, optional
+            The PyNE mesh to tag.
+        name : str, optional
+            The name of the tag.
+        doc : str, optional
+            Documentation string for the tag.
 
         """
         super(IMeshTag, self).__init__(mesh=mesh, name=name, doc=doc)
+        if mesh is None or name is None:
+            self._lazy_args['size'] = size
+            self._lazy_args['dtype'] = dtype
+            return 
         try:
             self.tag = self.mesh.mesh.getTagHandle(self.name)
         except iBase.TagNotFoundError: 
@@ -418,21 +427,24 @@ class ComputedTag(Tag):
 
     '''
 
-    def __init__(self, mesh, name, f, doc=None):
+    def __init__(self, f, mesh=None, name=None, doc=None):
         """Parameters
         ----------
-        mesh : Mesh
-            The PyNE mesh to tag.
-        name : str
-            The name of the tag.
         f : callable object
             The function that performs the computation.
+        mesh : Mesh, optional
+            The PyNE mesh to tag.
+        name : str, optional
+            The name of the tag.
         doc : str, optional
             Documentation string for the tag.
 
         """
         doc = doc or f.__doc__
         super(ComputedTag, self).__init__(mesh=mesh, name=name, doc=doc)
+        if mesh is None or name is None:
+            self._lazy_args['f'] = f
+            return 
         self.f = f
 
     def __getitem__(self, key):
@@ -632,33 +644,44 @@ class Mesh(object):
         for mat in mats.values():
             metatagnames.update(mat.attrs.keys())
         for name in metatagnames:
-            setattr(self, name, MetadataTag(self, name))
+            setattr(self, name, MetadataTag(mesh=self, name=name))
         # iMesh.Mesh() tags
         tagnames = set()
         for ve in ves:
             tagnames.update(t.name for t in self.mesh.getAllTags(ve))
         for name in tagnames:
-            setattr(self, name, IMeshTag(self, name))        
+            setattr(self, name, IMeshTag(mesh=self, name=name)) 
         # Material property tags
-        self.atoms_per_mol = MaterialPropertyTag(self, 'atoms_per_mol', 
+        self.atoms_per_mol = MaterialPropertyTag(mesh=self, name='atoms_per_mol', 
                                                  doc='Number of atoms per molecule')
-        self.attrs = MaterialPropertyTag(self, 'attrs', 
+        self.attrs = MaterialPropertyTag(mesh=self, name='attrs', 
                         doc='metadata attributes, stored on the material')
-        self.comp = MaterialPropertyTag(self, 'comp', doc="normalized composition "
-                                        "mapping from nuclides to mass fractions")
-        self.mass = MaterialPropertyTag(self, 'mass', doc='the mass of the material')
-        self.density = MaterialPropertyTag(self, 'density', doc='the density [g/cc]')
+        self.comp = MaterialPropertyTag(mesh=self, name='comp', 
+                doc="normalized composition mapping from nuclides to mass fractions")
+        self.mass = MaterialPropertyTag(mesh=self, name='mass', 
+                                        doc='the mass of the material')
+        self.density = MaterialPropertyTag(mesh=self, name='density', 
+                                           doc='the density [g/cc]')
         # Material method tags
         methtagnames = ('expand_elements', 'mass_density', 'molecular_weight', 
                         'mult_by_mass', 'number_density', 'sub_act', 'sub_fp', 
                         'sub_lan', 'sub_ma', 'sub_tru', 'to_atom_frac')
         for name in methtagnames:
             doc = "see Material.{0}() for more information".format(name)
-            setattr(self, name, MaterialMethodTag(self, name, doc=doc))
+            setattr(self, name, MaterialMethodTag(mesh=self, name=name, doc=doc))
         
         
     def __len__(self):
         return len(self.mats)
+
+    def __setattr__(self, name, value):
+        if isinstance(value, Tag) and hasattr(value, '_lazy_args'):
+            # some 1337 1Azy 3\/a1
+            kwargs = value._lazy_args
+            kwargs['mesh'] = self if kwargs['mesh'] is None else kwargs['mesh']
+            kwargs['name'] = name if kwargs['name'] is None else kwargs['name']
+            value = type(value)(**kwargs)
+        super(Mesh, self).__setattr__(name, value)
 
     def tag(self, name, value=None, tagtype=None, doc=None, size=None, dtype=None):
         """Adds a new tag to the mesh, guessing the approriate place to store the
@@ -715,11 +738,11 @@ class Mesh(object):
             else:
                 tagtype = MetadataTag
         if tagtype is IMeshTag or tagtype.lower() == 'imesh':
-            t = IMeshTag(self, name, doc=doc, size=size, dtype=dtype)
+            t = IMeshTag(size=size, dtype=dtype, mesh=self, name=name, doc=doc)
         elif tagtype is MetadataTag or tagtype.lower() == 'metadata':
-            t = MetadataTag(self, name, doc=doc)
+            t = MetadataTag(mesh=self, name=name, doc=doc)
         elif tagtype is ComputedTag or tagtype.lower() == 'computed':
-            t = ComputedTag(self, name, f=value, doc=doc)
+            t = ComputedTag(f=value, mesh=self, name=name, doc=doc)
         else:
             raise ValueError('tagtype {0} not valid'.format(tagtype))
         if value is not None and tagtype is not ComputedTag:
