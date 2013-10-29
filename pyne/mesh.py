@@ -637,6 +637,7 @@ class Mesh(object):
             tag_ve_idx[ve] = i
             if i not in mats:
                 mats[i] = Material()
+        self._len = i + 1
 
         # Default tags
         self.tags = {}
@@ -674,7 +675,7 @@ class Mesh(object):
         
         
     def __len__(self):
-        return len(self.mats)
+        return self._len
 
     def __iter__(self):
         """Iterates through the mesh and at each step yield the volume element 
