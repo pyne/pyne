@@ -4,16 +4,17 @@ import shutil
 import itertools
 from operator import itemgetter
 from nose.tools import assert_true, assert_equal, assert_raises, with_setup, \
-    assert_is
+    assert_is, assert_is_instance, assert_in, assert_not_in
 
 import numpy as np
-from numpy.testing import assert_array_almost_equal
+from numpy.testing import assert_array_equal, assert_array_almost_equal
 try:
     from itaps import iBase, iMesh, iMeshExtensions
 except ImportError:
     from nose.plugins.skip import SkipTest
     raise SkipTest
-from pyne.mesh import Mesh, StatMesh, MeshError
+from pyne.mesh import Mesh, StatMesh, MeshError, Tag, MetadataTag, IMeshTag, \
+    ComputedTag
 from pyne.material import Material, MaterialLibrary
 
 def try_rm_file(filename):
@@ -495,7 +496,7 @@ def test_vtx_iterator():
     for (it_x, sm_x) in izip(it, sm.structured_iterate_vertex("x")):
         assert_equal(it_x,sm_x)
 
-
+"""\
 def test_large_iterator():
     #Test performance with large mesh
     print "building large mesh"
@@ -507,6 +508,7 @@ def test_large_iterator():
     print "iterating (2)"
     for i in big.structured_iterate_hex("yzx"):
         pass
+"""
 
 
 @with_setup(None, try_rm_file('test_matlib.h5m'))
@@ -528,3 +530,194 @@ def test_matlib():
     m2 = Mesh(mesh_file='test_matlib2.h5m')  # MOAB fails to flush
 
     
+def test_matproptag():
+    mats = {
+        0: Material({'H1': 1.0, 'K39': 1.0}, density=42.0), 
+        1: Material({'H1': 0.1, 'O16': 1.0}, density=43.0), 
+        2: Material({'He4': 42.0}, density=44.0), 
+        3: Material({'Tm171': 171.0}, density=45.0), 
+        }
+    m = gen_mesh(mats=mats)
+
+    # Getting tags
+    assert_equal(m.density[0], 42.0)
+    assert_array_equal(m.density[::2], np.array([42.0, 44.0]))
+    mask = np.array([True, False, True, True], dtype=bool)
+    assert_array_equal(m.density[mask], np.array([42.0, 44.0, 45.0]))
+    assert_array_equal(m.density[1, 0, 1, 3], np.array([43.0, 42.0, 43.0, 45.0]))
+
+    # setting tags
+    m.density[0] = 65.0
+    assert_equal(m.density[0], 65.0)
+
+    m.density[::2] = 18.0
+    m.density[1::2] = [36.0, 54.0]
+    assert_array_equal(m.density[:], np.array([18.0, 36.0, 18.0, 54.0]))
+
+    mask = np.array([True, False, True, True], dtype=bool)
+    m.density[mask] = 9.0
+    mask = np.array([True, True, False, False], dtype=bool)
+    m.density[mask] = (19.0, 29.0)
+    assert_array_equal(m.density[:], np.array([19.0, 29.0, 9.0, 9.0]))
+
+    m.density[[2]] = 28.0
+    m.density[3, 1] = 6.0, 4128.0
+    assert_array_equal(m.density[1:], np.array([4128.0, 28.0, 6.0]))
+
+def test_matmethtag():
+    mats = {
+        0: Material({'H1': 1.0, 'K39': 1.0}, density=42.0), 
+        1: Material({'H1': 0.1, 'O16': 1.0}, density=43.0), 
+        2: Material({'He4': 42.0}, density=44.0), 
+        3: Material({'Tm171': 171.0}, density=45.0), 
+        }
+    m = gen_mesh(mats=mats)
+
+    mws = np.array([mat.molecular_weight() for i, mat in mats.items()])
+
+    # Getting tags
+    assert_equal(m.molecular_weight[0], mws[0])
+    assert_array_equal(m.molecular_weight[::2], mws[::2])
+    mask = np.array([True, False, True, True], dtype=bool)
+    assert_array_equal(m.molecular_weight[mask], mws[mask])
+    assert_array_equal(m.molecular_weight[1, 0, 1, 3], mws[[1, 0, 1, 3]])
+
+def test_metadatatag():
+    mats = {
+        0: Material({'H1': 1.0, 'K39': 1.0}, density=42.0), 
+        1: Material({'H1': 0.1, 'O16': 1.0}, density=43.0), 
+        2: Material({'He4': 42.0}, density=44.0), 
+        3: Material({'Tm171': 171.0}, density=45.0), 
+        }
+    m = gen_mesh(mats=mats)
+    m.doc = MetadataTag(m, 'doc', doc="extra documentaion")
+    m.doc[:] = ['write', 'awesome', 'code', 'now']
+
+    # Getting tags
+    assert_equal(m.doc[0], 'write')
+    assert_equal(m.doc[::2], ['write', 'code'])
+    mask = np.array([True, False, True, True], dtype=bool)
+    assert_equal(m.doc[mask], ['write', 'code', 'now'])
+    assert_equal(m.doc[1, 0, 1, 3], ['awesome', 'write', 'awesome', 'now'])
+
+    # setting tags
+    m.doc[0] = 65.0
+    assert_equal(m.doc[0], 65.0)
+
+    m.doc[::2] = 18.0
+    m.doc[1::2] = [36.0, 54.0]
+    assert_array_equal(m.doc[:], np.array([18.0, 36.0, 18.0, 54.0]))
+
+    mask = np.array([True, False, True, True], dtype=bool)
+    m.doc[mask] = 9.0
+    mask = np.array([True, True, False, False], dtype=bool)
+    m.doc[mask] = (19.0, 29.0)
+    assert_array_equal(m.doc[:], np.array([19.0, 29.0, 9.0, 9.0]))
+
+    m.doc[[2]] = 28.0
+    m.doc[3, 1] = 6.0, 4128.0
+    assert_array_equal(m.doc[1:], np.array([4128.0, 28.0, 6.0]))
+
+    # deleting tag
+    del m.doc[:]
+
+def test_imeshtag():
+    mats = {
+        0: Material({'H1': 1.0, 'K39': 1.0}, density=42.0), 
+        1: Material({'H1': 0.1, 'O16': 1.0}, density=43.0), 
+        2: Material({'He4': 42.0}, density=44.0), 
+        3: Material({'Tm171': 171.0}, density=45.0), 
+        }
+    m = gen_mesh(mats=mats)
+    m.f = IMeshTag(mesh=m, name='f')
+    ftag = m.mesh.getTagHandle('f')
+    ftag[list(m.mesh.iterate(iBase.Type.region, iMesh.Topology.all))] = \
+                                                                [1.0, 2.0, 3.0, 4.0]
+
+    # Getting tags
+    assert_equal(m.f[0], 1.0)
+    assert_array_equal(m.f[::2], [1.0, 3.0])
+    mask = np.array([True, False, True, True], dtype=bool)
+    assert_array_equal(m.f[mask], [1.0, 3.0, 4.0])
+    assert_array_equal(m.f[1, 0, 1, 3], [2.0, 1.0, 2.0, 4.0])
+
+    # setting tags
+    m.f[0] = 65.0
+    assert_equal(m.f[0], 65.0)
+
+    m.f[::2] = 18.0
+    m.f[1::2] = [36.0, 54.0]
+    assert_array_equal(m.f[:], np.array([18.0, 36.0, 18.0, 54.0]))
+
+    mask = np.array([True, False, True, True], dtype=bool)
+    m.f[mask] = 9.0
+    mask = np.array([True, True, False, False], dtype=bool)
+    m.f[mask] = (19.0, 29.0)
+    assert_array_equal(m.f[:], np.array([19.0, 29.0, 9.0, 9.0]))
+
+    m.f[[2]] = 28.0
+    m.f[3, 1] = 6.0, 4128.0
+    assert_array_equal(m.f[1:], np.array([4128.0, 28.0, 6.0]))
+
+    # deleting tag
+    del m.f[:]
+
+
+def test_comptag():
+    mats = {
+        0: Material({'H1': 1.0, 'K39': 1.0}, density=42.0), 
+        1: Material({'H1': 0.1, 'O16': 1.0}, density=43.0), 
+        2: Material({'He4': 42.0}, density=44.0), 
+        3: Material({'Tm171': 171.0}, density=45.0), 
+        }
+    m = gen_mesh(mats=mats)
+    def d2(mesh, i):
+        """I square the density."""
+        return mesh.density[i]**2
+    m.density2 = ComputedTag(d2, m, 'density2')
+
+    # Getting tags
+    assert_equal(m.density2[0], 42.0**2)
+    assert_array_equal(m.density2[::2], np.array([42.0, 44.0])**2)
+    mask = np.array([True, False, True, True], dtype=bool)
+    assert_array_equal(m.density2[mask], np.array([42.0, 44.0, 45.0])**2)
+    assert_array_equal(m.density2[1, 0, 1, 3], np.array([43.0, 42.0, 43.0, 45.0])**2)
+
+def test_addtag():
+    mats = {
+        0: Material({'H1': 1.0, 'K39': 1.0}, density=42.0), 
+        1: Material({'H1': 0.1, 'O16': 1.0}, density=43.0), 
+        2: Material({'He4': 42.0}, density=44.0), 
+        3: Material({'Tm171': 171.0}, density=45.0), 
+        }
+    m = gen_mesh(mats=mats)
+    m.tag('meaning', value=42.0)
+    assert_is_instance(m.meaning, IMeshTag)
+    assert_array_equal(m.meaning[:], np.array([42.0]*len(m)))
+
+def test_lazytaginit():
+    m = gen_mesh()
+    m.cactus = IMeshTag(3, 'i')
+    assert_in('cactus', m.tags)
+
+def test_iter():
+    mats = {
+        0: Material({'H1': 1.0, 'K39': 1.0}, density=42.0), 
+        1: Material({'H1': 0.1, 'O16': 1.0}, density=43.0), 
+        2: Material({'He4': 42.0}, density=44.0), 
+        3: Material({'Tm171': 171.0}, density=45.0), 
+        }
+    m = gen_mesh(mats=mats)
+    j = 0
+    ve_idx_tag = m.mesh.getTagHandle('ve_idx')
+    for i, mat, ve in m:
+        assert_equal(j, i)
+        assert_is(mats[i], mat)
+        assert_equal(j, ve_idx_tag[ve])
+        j += 1
+        
+
+def test_contains():
+    m = gen_mesh()
+    assert_in(1, m)
+    assert_not_in(42, m)
