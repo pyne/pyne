@@ -65,7 +65,7 @@ class Tag(object):
 
     def __repr__(self):
         return "{0}(name={1!r}, doc={2!r})".format(self.__class__.__name__, self.name,
-                                                   self.doc)
+                                                   self.__doc__)
 
     def __get__(self, mesh, objtype=None):
         return self
