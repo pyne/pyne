@@ -29,6 +29,8 @@ err__ops = {"+": lambda val_1, val_2, val_1_err, val_2_err: \
                   "/": lambda val_1, val_2, val_1_err, val_2_err: \
                  (np.sqrt(val_1_err**2 + val_2_err**2))}
 
+_INTEGRAL_TYPES = (int, np.integer, np.bool_)
+
 class Tag(object):
     """A mesh tag, which acts as a descriptor on the mesh.  This dispatches
     access to intrinsic material properties, the iMesh.Mesh tags, and material
@@ -95,7 +97,7 @@ class MaterialPropertyTag(Tag):
         name = self.name
         mats = self.mesh.mats
         size = len(self.mesh)
-        if isinstance(key, int):
+        if isinstance(key, _INTEGRAL_TYPES):
             return getattr(mats[key], name)
         elif isinstance(key, slice):
             return np.array([getattr(mats[i],name) for i in range(*key.indices(size))])
@@ -113,7 +115,7 @@ class MaterialPropertyTag(Tag):
         name = self.name
         mats = self.mesh.mats
         size = len(self.mesh)
-        if isinstance(key, int):
+        if isinstance(key, _INTEGRAL_TYPES):
             setattr(mats[key], name, value)
         elif isinstance(key, slice):
             idx = range(*key.indices(size))
@@ -164,7 +166,7 @@ class MaterialMethodTag(Tag):
         name = self.name
         mats = self.mesh.mats
         size = len(self.mesh)
-        if isinstance(key, int):
+        if isinstance(key, _INTEGRAL_TYPES):
             return getattr(mats[key], name)()
         elif isinstance(key, slice):
             return np.array([getattr(mats[i], name)() for i in \
@@ -204,7 +206,7 @@ class MetadataTag(Tag):
         name = self.name
         mats = self.mesh.mats
         size = len(self.mesh)
-        if isinstance(key, int):
+        if isinstance(key, _INTEGRAL_TYPES):
             return mats[key].attrs[name]
         elif isinstance(key, slice):
             return [mats[i].attrs[name] for i in range(*key.indices(size))]
@@ -222,7 +224,7 @@ class MetadataTag(Tag):
         name = self.name
         mats = self.mesh.mats
         size = len(self.mesh)
-        if isinstance(key, int):
+        if isinstance(key, _INTEGRAL_TYPES):
             mats[key].attrs[name] = value
         elif isinstance(key, slice):
             idx = range(*key.indices(size))
@@ -257,7 +259,7 @@ class MetadataTag(Tag):
         name = self.name
         mats = self.mesh.mats
         size = len(self.mesh)
-        if isinstance(key, int):
+        if isinstance(key, _INTEGRAL_TYPES):
             del mats[key].attrs[name]
         elif isinstance(key, slice):
             for i in range(*key.indices(size)):
@@ -322,7 +324,7 @@ class IMeshTag(Tag):
         size = len(self.mesh)
         mtag = self.tag
         miter = m.iterate(iBase.Type.region, iMesh.Topology.all)
-        if isinstance(key, int):
+        if isinstance(key, _INTEGRAL_TYPES):
             if key >= size:
                 raise IndexError("key index {0} greater than the size of the "
                                  "mesh {1}".format(key, size))
@@ -347,7 +349,7 @@ class IMeshTag(Tag):
         size = len(self.mesh)
         mtag = self.tag
         miter = m.iterate(iBase.Type.region, iMesh.Topology.all)
-        if isinstance(key, int):
+        if isinstance(key, _INTEGRAL_TYPES):
             if key >= size:
                 raise IndexError("key index {0} greater than the size of the "
                                  "mesh {1}".format(key, size))
@@ -380,7 +382,7 @@ class IMeshTag(Tag):
         size = len(self.mesh)
         mtag = self.tag
         miter = m.iterate(iBase.Type.region, iMesh.Topology.all)
-        if isinstance(key, int):
+        if isinstance(key, _INTEGRAL_TYPES):
             if key >= size:
                 raise IndexError("key index {0} greater than the size of the "
                                  "mesh {1}".format(key, size))
@@ -451,7 +453,7 @@ class ComputedTag(Tag):
         m = self.mesh
         f = self.f
         size = len(m)
-        if isinstance(key, int):
+        if isinstance(key, _INTEGRAL_TYPES):
             if key >= size:
                 raise IndexError("key index {0} greater than the size of the "
                                  "mesh {1}".format(key, size))
