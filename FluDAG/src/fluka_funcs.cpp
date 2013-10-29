@@ -690,6 +690,8 @@ void fludagwrite_assignma(std::string filename_to_write)  // file with cell/surf
   }
   std::string header = "*...+....1....+....2....+....3....+....4....+....5....+....6....+....7...";
 
+  std::string header = "*...+....1....+....2....+....3....+....4....+....5....+....6....+....7...";
+
   // Open an outputstring for mat.inp
   std::ostringstream ostr;
   std::ostringstream graveyard_str;
