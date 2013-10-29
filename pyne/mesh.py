@@ -1,7 +1,8 @@
-import numpy as np
-import itertools
 import copy
-from collections import namedtuple, Iterable
+import itertools
+from collections import namedtuple, Iterable, Sequence
+
+import numpy as np
 
 try:
     from itaps import iMesh, iBase, iMeshExtensions
@@ -27,6 +28,457 @@ err__ops = {"+": lambda val_1, val_2, val_1_err, val_2_err: \
                  (np.sqrt(val_1_err**2 + val_2_err**2)),
                   "/": lambda val_1, val_2, val_1_err, val_2_err: \
                  (np.sqrt(val_1_err**2 + val_2_err**2))}
+
+_INTEGRAL_TYPES = (int, np.integer, np.bool_)
+
+class Tag(object):
+    """A mesh tag, which acts as a descriptor on the mesh.  This dispatches
+    access to intrinsic material properties, the iMesh.Mesh tags, and material
+    metadata attributes.
+    """
+
+    def __init__(self, mesh=None, name=None, doc=None):
+        """Parameters
+        ----------
+        mesh : Mesh, optional
+            The PyNE mesh to tag.
+        name : str, optional
+            The name of the tag.
+        doc : str, optional
+            Documentation string for the tag.
+
+        """
+        if mesh is None or name is None:
+            self._lazy_args = {'mesh': mesh, 'name': name, 'doc': doc}
+            return 
+        self.mesh = mesh
+        self.name = name
+        mesh.tags[name] = self
+        if doc is None:
+            doc = "the {0!r} tag".format(name)
+        self.__doc__ = doc
+        if hasattr(self, '_lazy_args'):
+            del self._lazy_args
+
+    def __str__(self):
+        return "{0}: {1}".format(self.__class__.__name__, self.name)
+
+    def __repr__(self):
+        return "{0}(name={1!r}, doc={2!r})".format(self.__class__.__name__, self.name,
+                                                   self.doc)
+
+    def __get__(self, mesh, objtype=None):
+        return self
+
+    def __set__(self, mesh, value):
+        if not isinstance(value, Tag):
+            raise AttributeError("can't set tag from non-tag objects, "
+                                 "got {0}".format(type(value)))
+        if self.name != value.name:
+            raise AttributeError("tags names must match, found "
+                                 "{0} and {1}".format(self.name, value.name))
+        self[:] = value[:]
+
+    def __delete__(self, mesh):
+        del self[:]
+
+class MaterialPropertyTag(Tag):
+    """A mesh tag which looks itself up as a material property (attribute).
+    This makes the following expressions equivalent for a given material property
+    name::
+
+        mesh.name[i] == mesh.mats[i].name
+
+    It also adds slicing, fancy indexing, boolean masking, and broadcasting
+    features to this process.
+    """
+
+    def __getitem__(self, key):
+        name = self.name
+        mats = self.mesh.mats
+        size = len(self.mesh)
+        if isinstance(key, _INTEGRAL_TYPES):
+            return getattr(mats[key], name)
+        elif isinstance(key, slice):
+            return np.array([getattr(mats[i],name) for i in range(*key.indices(size))])
+        elif isinstance(key, np.ndarray) and key.dtype == np.bool:
+            if len(key) != size:
+                raise KeyError("boolean mask must match the length of the mesh.")
+            return np.array([getattr(mats[i], name) for i, b in enumerate(key) if b])
+        elif isinstance(key, Iterable):
+            return np.array([getattr(mats[i], name) for i in key])
+        else:
+            raise TypeError("{0} is not an int, slice, mask, "
+                            "or fancy index.".format(key))        
+
+    def __setitem__(self, key, value):
+        name = self.name
+        mats = self.mesh.mats
+        size = len(self.mesh)
+        if isinstance(key, _INTEGRAL_TYPES):
+            setattr(mats[key], name, value)
+        elif isinstance(key, slice):
+            idx = range(*key.indices(size))
+            if isinstance(value, Sequence) and len(value) == len(idx):
+                for i, v in zip(idx, value):
+                    setattr(mats[i], name, v)
+            else:
+                for i in idx:
+                    setattr(mats[i], name, value) 
+        elif isinstance(key, np.ndarray) and key.dtype == np.bool:
+            if len(key) != size:
+                raise KeyError("boolean mask must match the length of the mesh.")
+            idx = np.where(key)[0]
+            if isinstance(value, Sequence) and len(value) == key.sum():
+                for i, v in zip(idx, value):
+                    setattr(mats[i], name, v)
+            else:
+                for i in idx:
+                    setattr(mats[i], name, value) 
+        elif isinstance(key, Iterable):
+            if isinstance(value, Sequence) and len(value) == len(key):
+                for i, v in zip(key, value):
+                    setattr(mats[i], name, v)
+            else:
+                for i in key:
+                    setattr(mats[i], name, value) 
+        else:
+            raise TypeError("{0} is not an int, slice, mask, "
+                            "or fancy index.".format(key))        
+
+    def __delitem__(self, key):
+        msg = "the material property tag {0!r} may not be deleted".format(self.name)
+        raise AttributeError(msg)
+
+
+class MaterialMethodTag(Tag):
+    """A mesh tag which looks itself up by calling a material method which takes 
+    no arguments.  This makes the following expressions equivalent for a given 
+    material method name::
+
+        mesh.name[i] == mesh.mats[i].name()
+
+    It also adds slicing, fancy indexing, boolean masking, and broadcasting
+    features to this process.
+    """
+
+    def __getitem__(self, key):
+        name = self.name
+        mats = self.mesh.mats
+        size = len(self.mesh)
+        if isinstance(key, _INTEGRAL_TYPES):
+            return getattr(mats[key], name)()
+        elif isinstance(key, slice):
+            return np.array([getattr(mats[i], name)() for i in \
+                                                          range(*key.indices(size))])
+        elif isinstance(key, np.ndarray) and key.dtype == np.bool:
+            if len(key) != size:
+                raise KeyError("boolean mask must match the length of the mesh.")
+            return np.array([getattr(mats[i], name)() for i, b in enumerate(key) if b])
+        elif isinstance(key, Iterable):
+            return np.array([getattr(mats[i], name)() for i in key])
+        else:
+            raise TypeError("{0} is not an int, slice, mask, "
+                            "or fancy index.".format(key))        
+
+    def __setitem__(self, key, value):
+        msg = "the material method tag {0!r} may not be set".format(self.name)
+        raise AttributeError(msg)
+
+    def __delitem__(self, key):
+        msg = "the material method tag {0!r} may not be deleted".format(self.name)
+        raise AttributeError(msg)
+
+
+class MetadataTag(Tag):
+    """A mesh tag which looks itself up as a material metadata attribute.
+    Tags of this are untyped and may have any size.  Use this for catch-all tags.
+    This makes the following expressions equivalent for a given material property
+    name::
+
+        mesh.name[i] == mesh.mats[i].attrs['name']
+
+    It also adds slicing, fancy indexing, boolean masking, and broadcasting
+    features to this process.  
+    """
+
+    def __getitem__(self, key):
+        name = self.name
+        mats = self.mesh.mats
+        size = len(self.mesh)
+        if isinstance(key, _INTEGRAL_TYPES):
+            return mats[key].attrs[name]
+        elif isinstance(key, slice):
+            return [mats[i].attrs[name] for i in range(*key.indices(size))]
+        elif isinstance(key, np.ndarray) and key.dtype == np.bool:
+            if len(key) != size:
+                raise KeyError("boolean mask must match the length of the mesh.")
+            return [mats[i].attrs[name] for i, b in enumerate(key) if b]
+        elif isinstance(key, Iterable):
+            return [mats[i].attrs[name] for i in key]
+        else:
+            raise TypeError("{0} is not an int, slice, mask, "
+                            "or fancy index.".format(key))        
+
+    def __setitem__(self, key, value):
+        name = self.name
+        mats = self.mesh.mats
+        size = len(self.mesh)
+        if isinstance(key, _INTEGRAL_TYPES):
+            mats[key].attrs[name] = value
+        elif isinstance(key, slice):
+            idx = range(*key.indices(size))
+            if isinstance(value, Sequence) and len(value) == len(idx):
+                for i, v in zip(idx, value):
+                    mats[i].attrs[name] = v
+            else:
+                for i in idx:
+                    mats[i].attrs[name] = value
+        elif isinstance(key, np.ndarray) and key.dtype == np.bool:
+            if len(key) != size:
+                raise KeyError("boolean mask must match the length of the mesh.")
+            idx = np.where(key)[0]
+            if isinstance(value, Sequence) and len(value) == key.sum():
+                for i, v in zip(idx, value):
+                    mats[i].attrs[name] = v
+            else:
+                for i in idx:
+                    mats[i].attrs[name] = value
+        elif isinstance(key, Iterable):
+            if isinstance(value, Sequence) and len(value) == len(key):
+                for i, v in zip(key, value):
+                    mats[i].attrs[name] = v
+            else:
+                for i in key:
+                    mats[i].attrs[name] = value
+        else:
+            raise TypeError("{0} is not an int, slice, mask, "
+                            "or fancy index.".format(key))        
+
+    def __delitem__(self, key):
+        name = self.name
+        mats = self.mesh.mats
+        size = len(self.mesh)
+        if isinstance(key, _INTEGRAL_TYPES):
+            del mats[key].attrs[name]
+        elif isinstance(key, slice):
+            for i in range(*key.indices(size)):
+                del mats[i].attrs[name]
+        elif isinstance(key, np.ndarray) and key.dtype == np.bool:
+            if len(key) != size:
+                raise KeyError("boolean mask must match the length of the mesh.")
+            for i, b in enumerate(key): 
+                if b:
+                    del mats[i].attrs[name] 
+        elif isinstance(key, Iterable):
+            for i in key:
+                del mats[i].attrs[name]
+        else:
+            raise TypeError("{0} is not an int, slice, mask, "
+                            "or fancy index.".format(key))        
+
+class IMeshTag(Tag):
+    """A mesh tag which looks itself up as a tag on the iMesh.Mesh instance.
+    This makes the following expressions equivalent for a given iMesh.Mesh tag
+    name::
+
+        mesh.name[i] == mesh.mesh.getTagHandle(name)[list(mesh.mesh.iterate(
+                                iBase.Type.region, iMesh.Topology.all))[i]]
+
+    It also adds slicing, fancy indexing, boolean masking, and broadcasting
+    features to this process.
+    """
+
+    def __init__(self, size=1, dtype='f8', mesh=None, name=None, doc=None):
+        """Parameters
+        ----------
+        size : int, optional
+            The number of elements of type dtype that this tag stores.
+        dtype : np.dtype or similar, optional
+            The data type of this tag from int, float, and byte. See PyTAPS
+            tags for more details.
+        mesh : Mesh, optional
+            The PyNE mesh to tag.
+        name : str, optional
+            The name of the tag.
+        doc : str, optional
+            Documentation string for the tag.
+
+        """
+        super(IMeshTag, self).__init__(mesh=mesh, name=name, doc=doc)
+        if mesh is None or name is None:
+            self._lazy_args['size'] = size
+            self._lazy_args['dtype'] = dtype
+            return 
+        try:
+            self.tag = self.mesh.mesh.getTagHandle(self.name)
+        except iBase.TagNotFoundError: 
+            self.tag = self.mesh.mesh.createTag(self.name, size, dtype)
+
+    def __delete__(self, mesh):
+        super(IMeshTag, self).__delete__(mesh)
+        self.mesh.mesh.destroyTag(self.name, force=True)
+
+    def __getitem__(self, key):
+        m = self.mesh.mesh
+        size = len(self.mesh)
+        mtag = self.tag
+        miter = m.iterate(iBase.Type.region, iMesh.Topology.all)
+        if isinstance(key, _INTEGRAL_TYPES):
+            if key >= size:
+                raise IndexError("key index {0} greater than the size of the "
+                                 "mesh {1}".format(key, size))
+            for i_ve in zip(range(key+1), miter):
+                pass
+            return mtag[i_ve[1]]
+        elif isinstance(key, slice):
+            return mtag[list(miter)[key]]
+        elif isinstance(key, np.ndarray) and key.dtype == np.bool:
+            if len(key) != size:
+                raise KeyError("boolean mask must match the length of the mesh.")
+            return mtag[[ve for b, ve in zip(key, miter) if b]]
+        elif isinstance(key, Iterable):
+            ves = list(miter)
+            return mtag[[ves[i] for i in key]]
+        else:
+            raise TypeError("{0} is not an int, slice, mask, "
+                            "or fancy index.".format(key))        
+
+    def __setitem__(self, key, value):
+        m = self.mesh.mesh
+        size = len(self.mesh)
+        mtag = self.tag
+        miter = m.iterate(iBase.Type.region, iMesh.Topology.all)
+        if isinstance(key, _INTEGRAL_TYPES):
+            if key >= size:
+                raise IndexError("key index {0} greater than the size of the "
+                                 "mesh {1}".format(key, size))
+            for i_ve in zip(range(key+1), miter):
+                pass
+            mtag[i_ve[1]] = value
+        elif isinstance(key, slice):
+            idx = range(*key.indices(size))
+            if not (isinstance(value, Sequence) and len(value) == len(idx)):
+                value = [value] * len(idx)
+            mtag[list(miter)[key]] = value
+        elif isinstance(key, np.ndarray) and key.dtype == np.bool:
+            if len(key) != size:
+                raise KeyError("boolean mask must match the length of the mesh.")
+            ntrues = key.sum()
+            if not (isinstance(value, Sequence) and len(value) == ntrues):
+                value = [value] * ntrues                
+            mtag[[ve for b, ve in zip(key, miter) if b]] = value
+        elif isinstance(key, Iterable):
+            if not (isinstance(value, Sequence) and len(value) == len(key)):
+                value = [value] * len(key)
+            ves = list(miter)
+            mtag[[ves[i] for i in key]] = value
+        else:
+            raise TypeError("{0} is not an int, slice, mask, "
+                            "or fancy index.".format(key))        
+
+    def __delitem__(self, key):
+        m = self.mesh.mesh
+        size = len(self.mesh)
+        mtag = self.tag
+        miter = m.iterate(iBase.Type.region, iMesh.Topology.all)
+        if isinstance(key, _INTEGRAL_TYPES):
+            if key >= size:
+                raise IndexError("key index {0} greater than the size of the "
+                                 "mesh {1}".format(key, size))
+            for i_ve in zip(range(key+1), miter):
+                pass
+            del mtag[i_ve[1]]
+        elif isinstance(key, slice):
+            del mtag[list(miter)[key]]
+        elif isinstance(key, np.ndarray) and key.dtype == np.bool:
+            if len(key) != size:
+                raise KeyError("boolean mask must match the length of the mesh.")
+            del mtag[[ve for b, ve in zip(key, miter) if b]]
+        elif isinstance(key, Iterable):
+            ves = list(miter)
+            del mtag[[ves[i] for i in key]]
+        else:
+            raise TypeError("{0} is not an int, slice, mask, "
+                            "or fancy index.".format(key))        
+
+class ComputedTag(Tag):
+    '''A mesh tag which looks itself up by calling a function (or other callable)
+    with the following signature::
+
+        def f(mesh, i):
+            """mesh is a pyne.mesh.Mesh() object and i is the volume element index
+            to compute.
+            """
+            # ... do some work ...
+            return anything_you_want
+
+    This makes the following expressions equivalent for a given computed tag
+    name::
+
+        mesh.name[i] == f(mesh, i)
+
+    It also adds slicing, fancy indexing, boolean masking, and broadcasting
+    features to this process.
+
+    Notes
+    -----
+    The results of computed tags are not stored and the function object itself 
+    is also not persisted.  Therefore, you must manually re-tag the mesh with
+    the desired functions each session.
+
+    '''
+
+    def __init__(self, f, mesh=None, name=None, doc=None):
+        """Parameters
+        ----------
+        f : callable object
+            The function that performs the computation.
+        mesh : Mesh, optional
+            The PyNE mesh to tag.
+        name : str, optional
+            The name of the tag.
+        doc : str, optional
+            Documentation string for the tag.
+
+        """
+        doc = doc or f.__doc__
+        super(ComputedTag, self).__init__(mesh=mesh, name=name, doc=doc)
+        if mesh is None or name is None:
+            self._lazy_args['f'] = f
+            return 
+        self.f = f
+
+    def __getitem__(self, key):
+        m = self.mesh
+        f = self.f
+        size = len(m)
+        if isinstance(key, _INTEGRAL_TYPES):
+            if key >= size:
+                raise IndexError("key index {0} greater than the size of the "
+                                 "mesh {1}".format(key, size))
+            return f(m, key)
+        elif isinstance(key, slice):
+            return [f(m, i) for i in range(*key.indices(size))]
+        elif isinstance(key, np.ndarray) and key.dtype == np.bool:
+            if len(key) != size:
+                raise KeyError("boolean mask must match the length of the mesh.")
+            return [f(m, i) for i, b in enumerate(key) if b]
+        elif isinstance(key, Iterable):
+            return [f(m, i) for i in key]
+        else:
+            raise TypeError("{0} is not an int, slice, mask, "
+                            "or fancy index.".format(key))        
+
+    def __setitem__(self, key, value):
+        msg = "the computed tag {0!r} may not be set".format(self.name)
+        raise AttributeError(msg)
+
+    def __delitem__(self, key):
+        msg = "the computed tag {0!r} may not be deleted".format(self.name)
+        raise AttributeError(msg)
+
+
 
 class MeshError(Exception):
     """Errors related to instantiating mesh objects and utilizing their methods.
@@ -75,6 +527,8 @@ class Mesh(object):
         This is a mapping of volume element handles to Material objects.
 
     """
+
+    
 
     def __init__(self, mesh=None, mesh_file=None, structured=False, \
                  structured_coords=None, structured_set=None, mats=None):
@@ -172,18 +626,144 @@ class Mesh(object):
         self.mats = mats
 
         # tag with volume id and ensure mats exist.
-        tags = self.mesh.getAllTags(list(self.mesh.iterate(iBase.Type.region, 
-                                                           iMesh.Topology.all))[0])
+        ves = list(self.mesh.iterate(iBase.Type.region, iMesh.Topology.all))
+        tags = self.mesh.getAllTags(ves[0])
         tags = set(tag.name for tag in tags)
         if 've_idx' in tags:
             tag_ve_idx = self.mesh.getTagHandle('ve_idx')
         else:
             tag_ve_idx = self.mesh.createTag('ve_idx', 1, int)
-        for i, ve in enumerate(self.mesh.iterate(iBase.Type.region, 
-                                                 iMesh.Topology.all)):
+        for i, ve in enumerate(ves):
             tag_ve_idx[ve] = i
             if i not in mats:
                 mats[i] = Material()
+        self._len = i + 1
+
+        # Default tags
+        self.tags = {}
+        # metadata tags, these should come first so they don't accidentally 
+        # overwite hard coded tag names.
+        metatagnames = set()
+        for mat in mats.values():
+            metatagnames.update(mat.attrs.keys())
+        for name in metatagnames:
+            setattr(self, name, MetadataTag(mesh=self, name=name))
+        # iMesh.Mesh() tags
+        tagnames = set()
+        for ve in ves:
+            tagnames.update(t.name for t in self.mesh.getAllTags(ve))
+        for name in tagnames:
+            setattr(self, name, IMeshTag(mesh=self, name=name)) 
+        # Material property tags
+        self.atoms_per_mol = MaterialPropertyTag(mesh=self, name='atoms_per_mol', 
+                                                 doc='Number of atoms per molecule')
+        self.attrs = MaterialPropertyTag(mesh=self, name='attrs', 
+                        doc='metadata attributes, stored on the material')
+        self.comp = MaterialPropertyTag(mesh=self, name='comp', 
+                doc="normalized composition mapping from nuclides to mass fractions")
+        self.mass = MaterialPropertyTag(mesh=self, name='mass', 
+                                        doc='the mass of the material')
+        self.density = MaterialPropertyTag(mesh=self, name='density', 
+                                           doc='the density [g/cc]')
+        # Material method tags
+        methtagnames = ('expand_elements', 'mass_density', 'molecular_weight', 
+                        'mult_by_mass', 'number_density', 'sub_act', 'sub_fp', 
+                        'sub_lan', 'sub_ma', 'sub_tru', 'to_atom_frac')
+        for name in methtagnames:
+            doc = "see Material.{0}() for more information".format(name)
+            setattr(self, name, MaterialMethodTag(mesh=self, name=name, doc=doc))
+        
+        
+    def __len__(self):
+        return self._len
+
+    def __iter__(self):
+        """Iterates through the mesh and at each step yield the volume element 
+        index i, the material mat, and the volume element itself ve.
+        """
+        mats = self.mats
+        for i, ve in enumerate(self.mesh.iterate(iBase.Type.region, 
+                                                 iMesh.Topology.all)):
+            yield i, mats[i], ve
+
+    def __contains__(self, i):
+        return i < len(self)
+
+    def __setattr__(self, name, value):
+        if isinstance(value, Tag) and hasattr(value, '_lazy_args'):
+            # some 1337 1Azy 3\/a1
+            kwargs = value._lazy_args
+            kwargs['mesh'] = self if kwargs['mesh'] is None else kwargs['mesh']
+            kwargs['name'] = name if kwargs['name'] is None else kwargs['name']
+            value = type(value)(**kwargs)
+        super(Mesh, self).__setattr__(name, value)
+
+    def tag(self, name, value=None, tagtype=None, doc=None, size=None, dtype=None):
+        """Adds a new tag to the mesh, guessing the approriate place to store the
+        data.
+
+        Parameters
+        ----------
+        name : str
+            The tag name
+        value : optional
+            The value to initialize the tag with, skipped if None.
+        tagtype : Tag or str, optional
+            The type of tag this should be any of the following classes or 
+            strings are accepted: IMeshTag, MetadataTag, ComputedTag, 'imesh', 
+            'metadata', or 'computed'.
+        doc : str, optional
+            The tag documentation string.
+        size : int, optional
+            The size of the tag. This only applies to IMeshTags.
+        dtype : numpy dtype, optional
+            The data type of the tag. This only applies to IMeshTags. See PyTAPS
+            for more details.
+
+        """
+        if name in self.tags:
+            raise KeyError('{0} tag already exists on the mesh'.format(name))
+        if tagtype is None:
+            if callable(value):
+                tagtype = ComputedTag
+            elif size is None and dtype is not None:
+                size = 1
+                tagtype = IMeshTag
+            elif size is not None and dtype is None:
+                dtype = 'f8'
+                tagtype = IMeshTag
+            elif value is None:
+                size = 1
+                value = 0.0
+                dtype = 'f8'
+                tagtype = IMeshTag
+            elif isinstance(value, float):
+                size = 1
+                dtype = 'f8'
+                tagtype = IMeshTag
+            elif isinstance(value, int):
+                size = 1
+                dtype = 'i'
+                tagtype = IMeshTag
+            elif isinstance(value, str):
+                tagtype = MetadataTag                
+            elif isinstance(value, Sequence):
+                raise ValueError('ambiguous tag {0!r} creation when value is a '
+                        'sequence, please set tagtype, size, or dtype'.format(name))
+            else:
+                tagtype = MetadataTag
+        if tagtype is IMeshTag or tagtype.lower() == 'imesh':
+            t = IMeshTag(size=size, dtype=dtype, mesh=self, name=name, doc=doc)
+        elif tagtype is MetadataTag or tagtype.lower() == 'metadata':
+            t = MetadataTag(mesh=self, name=name, doc=doc)
+        elif tagtype is ComputedTag or tagtype.lower() == 'computed':
+            t = ComputedTag(f=value, mesh=self, name=name, doc=doc)
+        else:
+            raise ValueError('tagtype {0} not valid'.format(tagtype))
+        if value is not None and tagtype is not ComputedTag:
+            t[:] = value
+        setattr(self, name, t)
+
 
 #    def __add__(self, other):
 #        """Adds the common tags of other and returns a new mesh object.
