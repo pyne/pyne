@@ -676,6 +676,18 @@ class Mesh(object):
     def __len__(self):
         return len(self.mats)
 
+    def __iter__(self):
+        """Iterates through the mesh and at each step yield the volume element 
+        index i, the material mat, and the volume element itself ve.
+        """
+        mats = self.mats
+        for i, ve in enumerate(self.mesh.iterate(iBase.Type.region, 
+                                                 iMesh.Topology.all)):
+            yield i, mats[i], ve
+
+    def __contains__(self, i):
+        return i < len(self)
+
     def __setattr__(self, name, value):
         if isinstance(value, Tag) and hasattr(value, '_lazy_args'):
             # some 1337 1Azy 3\/a1

@@ -4,7 +4,7 @@ import shutil
 import itertools
 from operator import itemgetter
 from nose.tools import assert_true, assert_equal, assert_raises, with_setup, \
-    assert_is, assert_is_instance, assert_in
+    assert_is, assert_is_instance, assert_in, assert_not_in
 
 import numpy as np
 from numpy.testing import assert_array_equal, assert_array_almost_equal
@@ -683,7 +683,6 @@ def test_comptag():
     assert_array_equal(m.density2[mask], np.array([42.0, 44.0, 45.0])**2)
     assert_array_equal(m.density2[1, 0, 1, 3], np.array([43.0, 42.0, 43.0, 45.0])**2)
 
-
 def test_addtag():
     mats = {
         0: Material({'H1': 1.0, 'K39': 1.0}, density=42.0), 
@@ -696,9 +695,29 @@ def test_addtag():
     assert_is_instance(m.meaning, IMeshTag)
     assert_array_equal(m.meaning[:], np.array([42.0]*len(m)))
 
-
 def test_lazytaginit():
     m = gen_mesh()
     m.cactus = IMeshTag(3, 'i')
     assert_in('cactus', m.tags)
 
+def test_iter():
+    mats = {
+        0: Material({'H1': 1.0, 'K39': 1.0}, density=42.0), 
+        1: Material({'H1': 0.1, 'O16': 1.0}, density=43.0), 
+        2: Material({'He4': 42.0}, density=44.0), 
+        3: Material({'Tm171': 171.0}, density=45.0), 
+        }
+    m = gen_mesh(mats=mats)
+    j = 0
+    ve_idx_tag = m.mesh.getTagHandle('ve_idx')
+    for i, mat, ve in m:
+        assert_equal(j, i)
+        assert_is(mats[i], mat)
+        assert_equal(j, ve_idx_tag[ve])
+        j += 1
+        
+
+def test_contains():
+    m = gen_mesh()
+    assert_in(1, m)
+    assert_not_in(42, m)
