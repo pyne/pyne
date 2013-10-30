@@ -10,12 +10,13 @@
 #
 # All configuration values have a default; values that are commented out
 # serve to show the default.
-
-import sys, os
+import os
+import sys
 
 # -- General configuration -----------------------------------------------------
 
-sys.path.insert(0, '.')
+#sys.path.insert(0, '.')
+sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
 extensions = ['sphinx.ext.autodoc', 
               'sphinx.ext.doctest', 
@@ -247,7 +248,8 @@ autosummary_generate = []
 # C++ Autodocumentation Flags
 breathe_projects = {"pyne": None,}
 breathe_default_project = 'pyne'
-breathe_domain_by_extension = {"h" : "cpp",}
+breathe_domain_by_extension = {"h": "cpp",}
+breathe_projects_source = {"pyne": '../cpp',}
 
 # Prevent numpy from making silly tables 
 numpydoc_show_class_members = False
