@@ -367,5 +367,6 @@ class Transmuter(object):
             childs_dcbr = self._decay_const_branches(child)
             for kidskid, kidskid_fact in childs_dcbr.items():
                 nuc_dcbr[kidskid] = fact * kidskid_fact + nuc_dcbr.get(kidskid, 0.0)
+                #nuc_dcbr[kidskid] = kidskid_fact/fact + nuc_dcbr.get(kidskid, 0.0)
         dcbr[nuc] = nuc_dcbr
         return nuc_dcbr
