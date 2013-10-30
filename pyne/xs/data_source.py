@@ -239,6 +239,8 @@ class NullDataSource(DataSource):
         """Returns zeros."""
         return np.zeros(self.dst_ngroups, dtype='f8')
 
+    _USES_TEMP = False
+
     @property
     def dst_group_struct(self):
         return self._dst_group_struct
