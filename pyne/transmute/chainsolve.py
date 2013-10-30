@@ -39,6 +39,7 @@ class Transmuter(object):
             not desired.
         """
         eafds = EAFDataSource()
+        eafds.load(temp=temp)
         gs = np.array([eafds.src_group_struct[0], eafds.src_group_struct[-1]])
         eafds.dst_group_struct = gs
         self.xs_cache = XSCache(group_struct=gs, data_source_classes=(NullDataSource,))
