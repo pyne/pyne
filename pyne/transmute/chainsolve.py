@@ -252,11 +252,11 @@ class Transmuter(object):
             self._log_tree(depth, nuc, 1.0)
         prod = {}
         # decay info
-        #lam = data.decay_const(nuc)
-        #decay_branches = {} if lam == 0 else self._decay_branches(nuc)
-        #for decay_child, branch_ratio in decay_branches.items():
-        #    prod[decay_child] = lam * branch_ratio
-        prod.update(self._decay_const_branches(nuc))
+        lam = data.decay_const(nuc)
+        decay_branches = {} if lam == 0 else self._decay_branches(nuc)
+        for decay_child, branch_ratio in decay_branches.items():
+            prod[decay_child] = lam * branch_ratio
+        #prod.update(self._decay_const_branches(nuc))
         print prod
         # reaction daughters
         for rx in self.rxs:
@@ -364,9 +364,12 @@ class Transmuter(object):
         for child in children:
             fact = dconst * data.branch_ratio(nuc, child)
             nuc_dcbr[child] = fact
+            child_dconst = data.decay_const(child)
             childs_dcbr = self._decay_const_branches(child)
             for kidskid, kidskid_fact in childs_dcbr.items():
                 nuc_dcbr[kidskid] = fact * kidskid_fact + nuc_dcbr.get(kidskid, 0.0)
-                #nuc_dcbr[kidskid] = kidskid_fact/fact + nuc_dcbr.get(kidskid, 0.0)
+                #nuc_dcbr[kidskid] = child_dconst - kidskid_fact + nuc_dcbr.get(kidskid, 0.0)
+                #nuc_dcbr[kidskid] = child_dconst*fact - kidskid_fact - nuc_dcbr.get(kidskid, 0.0)
+                #nuc_dcbr[kidskid] = kidskid_fact + nuc_dcbr.get(kidskid, 0.0)
         dcbr[nuc] = nuc_dcbr
         return nuc_dcbr
