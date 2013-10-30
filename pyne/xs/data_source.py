@@ -60,6 +60,13 @@ class DataSource(object):
             # excessive queries to disk.  This does not return anything.
             pass
 
+        # a class attribute that specificies whether the data source uses 
+        # temperature information.  If the data source does not use such 
+        # info, the keys in the rxcache dictionary are shortend to just the 
+        # (nuc, rx) pair.  Accessing (nuc, rx, temp) data will defer to the 
+        # (nuc, rx) pair.
+        _USES_TEMP = True
+
     Note that non-multigroup data sources should also override the discretize()
     method.  Other methods and properties may also need to be overriden depending
     on the data source at hand.
@@ -147,7 +154,7 @@ class DataSource(object):
         """
         nuc = nucname.id(nuc)
         rx = rxname.id(rx)
-        rxkey = (nuc, rx, temp)
+        rxkey = (nuc, rx, temp) if self._USES_TEMP else (nuc, rx)
         if rxkey not in self.rxcache:
             self.rxcache[rxkey] = None if self.fullyloaded \
                                        else self._load_reaction(nuc, rx, temp)
@@ -200,6 +207,7 @@ class DataSource(object):
     def load(self, temp=300.0):
         pass
 
+    _USES_TEMP = True
 
 class NullDataSource(DataSource):
     """Cross section data source that always exists and always returns zeros.
@@ -542,6 +550,8 @@ class EAFDataSource(DataSource):
 
     _avail_rx = dict([_[::-1] for _ in _rx_avail.items()])
 
+    _USES_TEMP = False
+
     def __init__(self, **kwargs):
         super(EAFDataSource, self).__init__(**kwargs)
 
@@ -596,7 +606,7 @@ class EAFDataSource(DataSource):
             xss = rows['xs']
             rxnums = rows['rxnum']
             for rxnum, xs in zip(rxnums, xss):
-                self.rxcache[nuc, self._avail_rx[rxnum], temp] = xs
+                self.rxcache[nuc, self._avail_rx[rxnum]] = xs
             rxdata = xss.sum(axis=0)
         else:
             rxdata = rows[0]['xs']
@@ -625,8 +635,8 @@ class EAFDataSource(DataSource):
                 nuc = row['nuc_zz']
                 rx = avail_rx[row['rxnum']]
                 xs = row['xs']
-                rxcache[nuc, rx, temp] = xs
-                abskey = (nuc, absrx, temp)
+                rxcache[nuc, rx] = xs
+                abskey = (nuc, absrx)
                 rxcache[abskey] = xs + rxcache.get(abskey, 0.0)            
         self.fullyloaded = True
 
