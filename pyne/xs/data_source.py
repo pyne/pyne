@@ -50,6 +50,16 @@ class DataSource(object):
             ...
             return rxdata (ndarray of floats, length self.src_ngroups, or None)
 
+    The following methods may be overridden in DataSource subclasses as a potential
+    optimization:
+
+    .. code-block:: python
+
+        def load(self, temp=300.0):
+            # loads the entire data source into memory.  This prevents 
+            # excessive queries to disk.  This does not return anything.
+            pass
+
     Note that non-multigroup data sources should also override the discretize()
     method.  Other methods and properties may also need to be overriden depending
     on the data source at hand.
@@ -72,6 +82,7 @@ class DataSource(object):
         if not self.exists:
             return
         self.rxcache = {}
+        self.fullyloaded = False
         self._load_group_structure()
         self.dst_group_struct = dst_group_struct
         self.src_phi_g = np.ones(self._src_ngroups, dtype='f8') if src_phi_g is None \
@@ -138,7 +149,8 @@ class DataSource(object):
         rx = rxname.id(rx)
         rxkey = (nuc, rx, temp)
         if rxkey not in self.rxcache:
-            self.rxcache[rxkey] = self._load_reaction(nuc, rx, temp)
+            self.rxcache[rxkey] = None if self.fullyloaded \
+                                       else self._load_reaction(nuc, rx, temp)
         return self.rxcache[rxkey]
 
     def discretize(self, nuc, rx, temp=300.0, src_phi_g=None, dst_phi_g=None):
@@ -183,6 +195,10 @@ class DataSource(object):
 
     def _load_reaction(self, nuc, rx, temp=300.0):
         raise NotImplementedError
+
+    # Optional mix-in methods to implement
+    def load(self, temp=300.0):
+        pass
 
 
 class NullDataSource(DataSource):
@@ -551,6 +567,8 @@ class EAFDataSource(DataSource):
             Nuclide id.
         rx : int 
             Reaction id.
+        temp : float, optional
+            The material temperature
         
         Note
         ----
@@ -584,6 +602,33 @@ class EAFDataSource(DataSource):
             rxdata = rows[0]['xs']
 
         return rxdata
+
+    def load(self, temp=300.0):
+        """Loads all EAF into memory.
+
+        Parameters
+        ----------
+        temp : float, optional
+            The material temperature
+        
+        Note
+        ----
+        EAF data does not use temperature information (temp).
+
+        """
+        rxcache = self.rxcache
+        avail_rx = self._avail_rx
+        absrx = rxname.id('absorption')
+        with tb.openFile(nuc_data, 'r') as f:
+            node = f.root.neutron.eaf_xs.eaf_xs
+            for row in node:
+                nuc = row['nuc_zz']
+                rx = avail_rx[row['rxnum']]
+                xs = row['xs']
+                rxcache[nuc, rx, temp] = xs
+                abskey = (nuc, absrx, temp)
+                rxcache[abskey] = xs + rxcache.get(abskey, 0.0)            
+        self.fullyloaded = True
 
 
 class ENDFDataSource(DataSource):
