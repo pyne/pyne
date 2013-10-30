@@ -257,7 +257,8 @@ class NullDataSource(DataSource):
 
 
 class SimpleDataSource(DataSource):
-    """Simple cross section data source based off of KAERI data.
+    """Simple cross section data source based off of KAERI data.  This data source
+    does not use material temperature information.
 
     Parameters
     ----------
@@ -289,6 +290,8 @@ class SimpleDataSource(DataSource):
             with tb.openFile(nuc_data, 'r') as f:
                 self._exists = ('/neutron/simple_xs' in f)
         return self._exists
+
+    _USES_TEMP = False
 
     def _load_group_structure(self):
         """Sets the simple energy bounds array, E_g."""
@@ -377,7 +380,8 @@ class SimpleDataSource(DataSource):
 
 class CinderDataSource(DataSource):
     """Cinder cross section data source. The relevant cinder cross section data must
-    be present in the nuc_data for this data source to exist.
+    be present in the nuc_data for this data source to exist.  This data source does
+    not use material temperature information.
 
     Parameters
     ----------
@@ -427,6 +431,8 @@ class CinderDataSource(DataSource):
                  #rxname.id(''): 'c', 
                  #rxname.id('fission'): 'f',
                  }
+
+    _USES_TEMP = False
 
     def __init__(self, **kwargs):
         super(CinderDataSource, self).__init__(**kwargs)
