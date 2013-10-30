@@ -137,7 +137,12 @@ class XSCache(MutableMapping):
         E_g, phi_g = self._cache['E_g'], self._cache['phi_g'] 
         self._cache.clear()
         self._cache['E_g'], self._cache['phi_g'] = E_g, phi_g
-        
+
+
+    def load(self, temp=300.0):
+        """Loads the cross sections from all data sources."""
+        for ds in self.data_sources:
+            ds.load(temp=temp)
 
 # Make a singleton of the cross-section cache
 xs_cache = XSCache()
