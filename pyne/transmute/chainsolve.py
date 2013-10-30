@@ -252,10 +252,12 @@ class Transmuter(object):
             self._log_tree(depth, nuc, 1.0)
         prod = {}
         # decay info
-        lam = data.decay_const(nuc)
-        decay_branches = {} if lam == 0 else self._decay_branches(nuc)
-        for decay_child, branch_ratio in decay_branches.items():
-            prod[decay_child] = lam * branch_ratio
+        #lam = data.decay_const(nuc)
+        #decay_branches = {} if lam == 0 else self._decay_branches(nuc)
+        #for decay_child, branch_ratio in decay_branches.items():
+        #    prod[decay_child] = lam * branch_ratio
+        prod.update(self._decay_const_branches(nuc))
+        print prod
         # reaction daughters
         for rx in self.rxs:
             try:
@@ -334,3 +336,36 @@ class Transmuter(object):
         for child in children:
             decay_branches[child] = data.branch_ratio(nuc, child)
         return decay_branches
+
+    _dcbr = {}
+
+    def _decay_const_branches(self, nuc):
+        """Returns a dictionary that contains the decay children of nuc as keys
+        and the decay constant times the branch ratio as branches.
+
+        Parameters
+        ----------
+        nuc : int
+            Name of parent nuclide to get decay children of.
+
+        Returns
+        -------
+        decay_branches : dictionary
+            Keys are decay children of nuc in zzaaam format.
+            Values are the branch ratio of the decay child.
+
+        """
+        dcbr = self._dcbr
+        if nuc in dcbr:
+            return dcbr[nuc]
+        nuc_dcbr = {}
+        dconst = data.decay_const(nuc)
+        children = data.decay_children(nuc)
+        for child in children:
+            fact = dconst * data.branch_ratio(nuc, child)
+            nuc_dcbr[child] = fact
+            childs_dcbr = self._decay_const_branches(child)
+            for kidskid, kidskid_fact in childs_dcbr.items():
+                nuc_dcbr[kidskid] = fact * kidskid_fact + nuc_dcbr.get(kidskid, 0.0)
+        dcbr[nuc] = nuc_dcbr
+        return nuc_dcbr
