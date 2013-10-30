@@ -4,7 +4,7 @@
 Module for parsing MCNP output data. MCNP is a general-purpose Monte Carlo
 N-Particle code developed at Los Alamos National Laboratory that can be used for
 neutron, photon, electron, or coupled neutron/photon/electron transport. Further
-information on MCNP can be obtained from http://mcnp-green.lanl.gov/
+information on MCNP can be obtained from http://mcnp.lanl.gov/
 
 Mctal and Runtpe classes still need work. Also should add Meshtal and Outp
 classes.
