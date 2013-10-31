@@ -194,12 +194,197 @@ void TrackLengthMeshTally::compute_score(const TallyEvent& event)
   std::vector< EntityHandle > triangles; // vector of entityhandles that belong to the triangles hit
   //  std::vector<ray_data> hit_information; // vector of reformated ray triangle intersections
 
-  // get all ray-triangle intersections along the ray 
-  ErrorCode rval = get_all_intersections(event.position,event.direction,event.track_length,triangles,intersections);
-  if (rval != MB_SUCCESS )
+  ErrorCode rval;
+
+  EntityHandle last_crossed_tri[3] = {0,0,0};
+  double last_t = 0;
+  EntityHandle first_tet;
+
+  if (conformality.empty())  // it's not conformal
+  {
+      first_tet = get_starting_tet(event.position, event.direction, event.track_length, last_crossed_tri, last_t);
+  }
+  else  // The conformal branch
+  {
+     bool cell_change = (last_cell != event.current_cell);
+     bool new_particle = (last_cell == -1);
+    
+#ifdef MESHTAL_DEBUG
+     if(new_particle){ std::cout << "Started new particle in cell " << event.current_cell << std::endl; } 
+     else if(cell_change)
+     { 
+        std::cout << "Crossed surface from " << last_cell << " into " << event.current_cell<< std::endl; 
+     }
+#endif
+
+     // update last cell information
+     last_cell = event.current_cell;
+
+     // if the new cell is not part of this tally, return immediately
+     if (conformality.find(event.current_cell) == conformality.end()) 
+     {
+        return;
+     }
+
+     // new particles only use conformal crossing logic if a conformal surface source was declared
+     if ((new_particle && conformal_surface_source) ||
+           cell_change)
+     {
+       first_tet = get_starting_tet_conformal(event.position, last_crossed_tri);
+     }
+     else
+     {
+       first_tet = get_starting_tet(event.position, event.direction, event.track_length, last_crossed_tri, last_t);
+     }
+  }
+
+  if( first_tet == 0 )
+  {
+    // this ray never touches the tally mesh
+    return;
+  }
+
+  EntityHandle next_tet = first_tet;
+  //double first_t = last_t; //useful as a debugging var
+  int tet_count = 0;
+
+  double weight = event.get_score_multiplier(input_data.multiplier_id);
+  while( next_tet != 0 )
+  {
+
+    EntityHandle tet = next_tet; // the tetrahedron being currently handled
+    tet_count++;
+
+    // The next 5 lines could be replaced with a single function 
+    // pseudo: // Get a list of EntityHandles at each vertex of  the 
+    // pseudo: // current tetrahedron entity
+    // pseudo: tet_verts = get_tetrahedron_vertices(tet)
+    const EntityHandle* tet_verts; 
+    int num_tet_verts; 
+    rval = mb->get_connectivity( tet, tet_verts, num_tet_verts );
+    assert( rval == MB_SUCCESS );
+    assert( num_tet_verts == 4 );
+    
+    bool found_crossing = false;
+
+    for( int i = 0; i < 4 && !found_crossing; ++i )
     {
-      std::cout << "we have a problem finding intersections" << std::endl;
-      exit(1);
+      // return the vertices of the sub-entity at the ith vertex in the given 
+      // set vertices from a single parent entity, 
+      // where MBTET is the Entity type of tet_verts (the parent),
+      // tri is the list of EntityHandles of the subentity at the ith vertex,
+      // based on tet_verts and canonical ordering for parent_type, and
+      // the expected number of vertices of the sub_entity is 3
+      // This could be replaced by a function call
+      // pseudo: tri = get_triangle_vertices_at(tet_verts, i)
+      EntityHandle tri[3]; 
+      int three;
+      // constructor or static class
+      CN::SubEntityConn( tet_verts, MBTET, 2, i, tri, three );
+      assert( three == 3 );
+
+      if( tris_eq( tri, last_crossed_tri ) ) continue;
+
+      CartVect tri_pts[3];
+      rval = mb->get_coords( tri, 3, tri_pts[0].array() );
+      assert( rval == MB_SUCCESS );
+
+      double t;
+      if( GeomUtil::ray_tri_intersect( tri_pts, event.position, event.direction, TRIANGLE_INTERSECTION_TOL, t ) )
+      {
+        double track_length;
+
+        if( t >= event.track_length )
+        {
+          // track ends in this tetrahedron
+          track_length = event.track_length - last_t;
+          next_tet = 0;
+          this->last_visited_tet = tet;
+
+#ifdef MESHTAL_DEBUG
+          std::cout << " track ends in mesh" << std::endl;
+#endif
+        }
+        else
+        { 
+          // t < length, track proceeds to next tetrahedron
+          track_length = t - last_t;
+          last_t = t;
+          
+          Range tri_sides; 
+          rval = mb->get_adjacencies( tri, 3, 3, false, tri_sides );
+          assert( rval == MB_SUCCESS );
+          assert( tri_sides.size() <= 2 );
+          assert( tri_sides[0] == tet || tri_sides[1] == tet );
+          assert( tri_sides.size() == 1 || (tri_sides[0] != tet || tri_sides[1] != tet) );
+
+          if( tri_sides.size() == 1 )
+          {
+            // the mesh ends here
+            CartVect crossing = event.position + (event.direction*t);
+#ifdef MESHTAL_DEBUG
+            std::cout << "  Ray departs from mesh at t = " << t << ", "  << crossing  << std::endl;
+#endif
+
+            if( convex || !conformality.empty() ) 
+            {
+              // input file made assertion that this mesh tally is convex, 
+              // or conformality assures that no single track will reenter tally mesh
+            next_tet = 0;
+            }
+            else
+            {
+              Range last_tri_eh;
+              rval = mb->get_adjacencies( tri, 3, 2, false, last_tri_eh );
+              assert( rval == MB_SUCCESS );
+              assert( last_tri_eh.size() == 1 );
+              next_tet = find_next_tet_by_ray_fire( crossing, event.direction, event.track_length - t, last_crossed_tri, last_t, last_tri_eh[0] );
+            }
+
+#ifdef MESHTAL_DEBUG
+            if( next_tet )
+            {
+              std::cout << "  Ray enters mesh again at t = " << last_t << std::endl;
+            }
+            else
+            {
+              std::cout << " track ends." << std::endl;
+            }
+#endif
+
+            last_t += t;
+            this->last_visited_tet = 0;
+          }
+          else
+          { 
+#ifdef MESHTAL_DEBUG
+            std::cout << "  track proceeds, t = " << last_t << std::endl;
+#endif
+
+            next_tet = (tri_sides[0]==tet) ? tri_sides[1] : tri_sides[0];
+            memcpy( last_crossed_tri, tri, sizeof(last_crossed_tri) );
+          }
+
+        }
+
+        // If track length is negative do not add score to the tally and end track early
+        if( track_length < 0 )
+        {
+          std::cerr << "Warning-- negative track length.   Dubious continuation.." << std::endl;
+          ++num_negative_tracks;
+          return;
+        }
+
+        double score = weight * track_length;
+
+        // ToDo jcz:  Call a function defined in Tally to calculate the correct ebin
+        // get_energy_bin(event.energy)  // define in Tally class
+        int ebin = 0;
+        unsigned int tet_index = get_entity_index(tet);
+ 	data->add_score_to_tally(tet_index, score, ebin);
+        found_crossing = true;
+      }
+
     }
 
   if( intersections.size() == 0 )

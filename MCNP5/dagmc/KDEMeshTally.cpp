@@ -109,7 +109,7 @@ KDEMeshTally::~KDEMeshTally()
 //---------------------------------------------------------------------------//
 void KDEMeshTally::compute_score(const TallyEvent& event)
 {
-    double weight = event.particle_weight;
+    double weight = event.get_score_multiplier(input_data.multiplier_id);
 
     // set up tally event based on KDE mesh tally type
     std::vector<moab::CartVect> subtrack_points;

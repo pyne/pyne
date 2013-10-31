@@ -40,6 +40,10 @@ struct TallyInput
 
     /// Optional input parameters requested by user
     TallyOptions options;
+ 
+    /// Support a single multiplier for each tally; index is the id while the 
+    /// multipliers are stored in a vector
+    int multiplier_id;
 };
 
 //===========================================================================//

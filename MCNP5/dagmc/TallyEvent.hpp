@@ -4,6 +4,7 @@
 #define DAGMC_TALLY_EVENT_HPP
 
 #include "moab/CartVect.hpp"
+#include <vector>
 
 //===========================================================================//
 /**
@@ -55,47 +56,18 @@ struct TallyEvent
     double particle_energy;
     double particle_weight;
 
-    // >>> PUBLIC INTERFACE
-
-    /**
-     * \brief Defines this tally event as a track-based event
-     */
-    void set_track_event(double track_length,
-                         double x, double y, double z,
-                         double u, double v, double w,
-                         double particle_energy,
-                         double particle_weight);
-
-    /**
-     * \brief Defines this tally event as a collision event
-     */
-    void set_collision_event(double total_cross_section,
-                             double x, double y, double z,
-                             double particle_energy,
-                             double particle_weight);
-
-    /**
-     * \brief Sets tally multiplier for the event
-     * \param value energy-dependent value for the tally multiplier
-     */
-    void set_tally_multiplier(double value);
-
-    /**
-     * \brief get_tally_multiplier()
-     * \return current value of the tally multiplier for this event
-     */
-    double get_tally_multiplier() const;
-
-    /**
-     * \brief Gets the total weighting factor for this event
-     * \return product of tally multiplier and particle weight
-     */
-    double get_weighting_factor() const;
-
-  private:
-
-    /// Energy-dependent multiplier for this event
-    double tally_multiplier;
+    /// Energy-dependent tally multipliers: variable with each event
+    std::vector<double> multipliers; 
+ 
+    double get_score_multiplier(int multiplier_index) const
+    {
+       if (multiplier_index == -1 || multiplier_index >= multipliers.size())
+       {
+          return particle_weight;
+       }
+      
+       return multipliers.at(multiplier_index) * particle_weight; 
+    }
 };
 
 #endif // DAGMC_TALLY_EVENT_HPP

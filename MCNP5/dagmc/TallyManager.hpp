@@ -91,6 +91,26 @@ class TallyManager
                      std::multimap<std::string, std::string>& options);
 
     /**
+     * \brief add a new multiplier
+     * \param[in] unused for the present, can be used if vector becomes unordered_map
+     *
+     * Currently push_back() is used to add a default, but later the 
+     * param can be used as a map key
+     *
+     * A default of 1.0 is used for the value
+     */
+    void addNewMultiplier(int multiplier_id);
+
+    void addMultiplierToTally(int multiplier_id, unsigned int tally_id);
+
+    /**
+     * \brief Update the value associated with the multiplier id 
+     * \param[in] multiplier_id the unique ID for the multiplier
+     * \param[in] value of the multiplier
+     */
+    void updateMultiplier(int multiplier_id, double value);
+
+    /**
      * \brief Remove a DAGMC Tally from the Observer list
      * \param[in] tally_id the unique ID for the Tally to be removed
      */
@@ -105,9 +125,9 @@ class TallyManager
      * \param[in] cell_id the unique ID for the current cell
      * \return true if a collision event was set; false otherwise
      */
-    bool set_collision_event(double x, double y, double z,
-                             double particle_energy, double particle_weight,
-                             double total_cross_section, int cell_id); 
+    bool setCollisionEvent(double x, double y, double z,
+                           double particle_energy, double particle_weight,
+                           double total_cross_section, int cell_id); 
 
     /**
      * \brief Set a track event
@@ -118,35 +138,35 @@ class TallyManager
      * \param[in] track_length the length of the track
      * \return true if a track event was set; false otherwise
      */
-    bool set_track_event(double x, double y, double z,
-                   double u, double v, double w,                           
-                   double particle_energy, double particle_weight,
-                   double track_length, int cell_id); 
+    bool setTrackEvent(double x, double y, double z,
+                       double u, double v, double w,                           
+                       double particle_energy, double particle_weight,
+                       double track_length, int cell_id); 
 
     /**
      *  \brief Reset a tally event
      *
      *  Sets event type to NONE and clears all event data.
      */
-    void clear_last_event();
+    void clearLastEvent();
 
     /**
      * \brief Call compute_score() for all active DAGMC tallies
      *
      * Resets the tally event once all scores are computed.
      */
-    void update_tallies();
+    void updateTallies();
 
     /**
      * \brief Call end_history() for all active DAGMC tallies
      */
-    void end_history();
+    void endHistory();
 
     /**
      * \brief Call write_data() for all active DAGMC tallies
      * \param[in] num_histories the number of particle histories tracked
      */
-    void write_data(double num_histories);
+    void writeData(double num_histories);
 
     // >>> TALLY DATA ACCESS METHODS
 
@@ -161,14 +181,14 @@ class TallyManager
      * parallel or other implementations, then these methods can be used to get
      * a pointer to the underlying data stored within each Tally.
      */
-    double* get_tally_data(int tally_id, int& length);
-    double* get_error_data(int tally_id, int& length);
-    double* get_scratch_data(int tally_id, int& length);
+    double* getTallyData(int tally_id, int& length);
+    double* getErrorData(int tally_id, int& length);
+    double* getScratchData(int tally_id, int& length);
 
     /**
      * \brief Resets all data arrays for all active Tally Observers
      */
-    void zero_all_tally_data();
+    void zeroAllTallyData();
 
   private:
     // Keep a record of the currently active Tally Observers
@@ -204,7 +224,7 @@ class TallyManager
      * \param[in] cell_id the unique ID for the current geometric cell
      * \return true if an event was set; false otherwise
      */
-    bool set_event(TallyEvent::EventType type,
+    bool setEvent(TallyEvent::EventType type,
                    double x, double y, double z,
                    double u, double v, double w,                           
                    double particle_energy, double particle_weight,

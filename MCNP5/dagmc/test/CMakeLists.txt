@@ -23,6 +23,7 @@ INCLUDE_DIRECTORIES("${HOME}/opt/moab/include")
 
 # make mesh tally source files into a library
 ADD_LIBRARY(meshtally
+    ${DAGMC_MESHTALLY_SOURCE}/meshtal_funcs.cpp
     ${DAGMC_MESHTALLY_SOURCE}/Tally.cpp
     ${DAGMC_MESHTALLY_SOURCE}/TallyData.cpp
     ${DAGMC_MESHTALLY_SOURCE}/TallyManager.cpp

@@ -33,6 +33,40 @@ void TallyManager::addNewTally(unsigned int tally_id,
     }
 }
 //---------------------------------------------------------------------------//
+void TallyManager::addNewMultiplier(int multiplier_id)
+{
+     event.multipliers.push_back(1.0);
+}
+//---------------------------------------------------------------------------//
+
+void TallyManager::updateMultiplier(int multiplier_id, double value)
+{
+    if (event.multipliers.size() > multiplier_id)
+    {
+       event.multipliers.at(multiplier_id) = value; 
+    }
+}
+
+//---------------------------------------------------------------------------//
+void TallyManager::addMultiplierToTally(int multiplier_id, unsigned int tally_id)
+{
+        
+    std::map<int, Tally *>::iterator it;	
+    it = observers.find(tally_id);
+   
+    if (multiplier_id < event.multipliers.size() && it != observers.end())
+    {
+        Tally *tally = it->second;
+        
+        tally->input_data.multiplier_id = multiplier_id;
+    }
+    else
+    {
+        std::cerr << "Warning: Cannot set multiplier id for Tally " << tally_id
+                  << ".  Tally and/or multiplier are/is invalid." << std::endl;
+    }
+}
+//---------------------------------------------------------------------------//
 void TallyManager::removeTally(unsigned int tally_id)
 {
     std::map<int, Tally *>::iterator it;	
@@ -51,9 +85,9 @@ void TallyManager::removeTally(unsigned int tally_id)
     }
 }
 //---------------------------------------------------------------------------//
-bool TallyManager::set_collision_event(double x, double y, double z,
-                                       double particle_energy, double particle_weight,
-                                       double total_cross_section, int cell_id)
+bool TallyManager::setCollisionEvent(double x, double y, double z,
+                                     double particle_energy, double particle_weight,
+                                     double total_cross_section, int cell_id)
 { 
     if (total_cross_section < 0.0)
     {
@@ -62,17 +96,17 @@ bool TallyManager::set_collision_event(double x, double y, double z,
         return false;;
     }
 
-    return set_event(TallyEvent::COLLISION, 
+    return setEvent(TallyEvent::COLLISION, 
                      x, y, z, 0.0, 0.0, 0.0,
                      particle_energy, particle_weight, 
                      0.0, total_cross_section, 
                      cell_id);
 } 
 //---------------------------------------------------------------------------//
-bool TallyManager::set_track_event(double x, double y, double z,
-                                   double u, double v, double w,                           
-                                   double particle_energy, double particle_weight,
-                                   double track_length, int cell_id)
+bool TallyManager::setTrackEvent(double x, double y, double z,
+                                 double u, double v, double w,                           
+                                 double particle_energy, double particle_weight,
+                                 double track_length, int cell_id)
 { 
     if (track_length < 0.0)
     {
@@ -81,14 +115,14 @@ bool TallyManager::set_track_event(double x, double y, double z,
         return false;
     }
 
-    return set_event(TallyEvent::TRACK, 
+    return setEvent(TallyEvent::TRACK, 
                      x, y, z, u, v, w,
                      particle_energy, particle_weight,
                      track_length, 0.0,
                      cell_id);
 }
 //---------------------------------------------------------------------------//
-void TallyManager::clear_last_event()
+void TallyManager::clearLastEvent()
 {
     event.type = TallyEvent::NONE;
     event.position  = moab::CartVect(0.0, 0.0, 0.0);
@@ -100,7 +134,7 @@ void TallyManager::clear_last_event()
     event.current_cell        = 0;
 }
 //---------------------------------------------------------------------------//
-void TallyManager::update_tallies()
+void TallyManager::updateTallies()
 {
     std::map<int, Tally*>::iterator map_it;
     for (map_it = observers.begin(); map_it != observers.end(); ++map_it)
@@ -108,10 +142,10 @@ void TallyManager::update_tallies()
         Tally *tally = map_it->second;
         tally->compute_score(event);
     }
-    clear_last_event();
+    clearLastEvent();
 }
 //---------------------------------------------------------------------------//
-void TallyManager::end_history()
+void TallyManager::endHistory()
 {
     std::map<int, Tally*>::iterator map_it;
     for (map_it = observers.begin(); map_it != observers.end(); ++map_it)
@@ -121,7 +155,7 @@ void TallyManager::end_history()
     }
 }
 //---------------------------------------------------------------------------//
-void TallyManager::write_data(double num_histories)
+void TallyManager::writeData(double num_histories)
 {
     std::map<int, Tally*>::iterator map_it;
     for (map_it = observers.begin(); map_it != observers.end(); ++map_it)
@@ -136,7 +170,7 @@ void TallyManager::write_data(double num_histories)
 // TODO: These will only work if TallyData is used to store all data.
 // Future addition could add similar functions to the Tally interface so that
 // each implementation can choose how to store its data.
-double* TallyManager::get_tally_data(int tally_id, int& length)
+double* TallyManager::getTallyData(int tally_id, int& length)
 {
     std::map<int, Tally *>::iterator it;	
     it = observers.find(tally_id);
@@ -154,7 +188,7 @@ double* TallyManager::get_tally_data(int tally_id, int& length)
     }
 }
 //---------------------------------------------------------------------------//
-double* TallyManager::get_error_data(int tally_id, int& length)
+double* TallyManager::getErrorData(int tally_id, int& length)
 {
     std::map<int, Tally *>::iterator it;	
     it = observers.find(tally_id);
@@ -172,7 +206,7 @@ double* TallyManager::get_error_data(int tally_id, int& length)
     }
 }
 //---------------------------------------------------------------------------//
-double* TallyManager::get_scratch_data(int tally_id, int& length)
+double* TallyManager::getScratchData(int tally_id, int& length)
 {
     std::map<int, Tally *>::iterator it;	
     it = observers.find(tally_id);
@@ -190,7 +224,7 @@ double* TallyManager::get_scratch_data(int tally_id, int& length)
     }
 }
 //---------------------------------------------------------------------------//
-void TallyManager::zero_all_tally_data()
+void TallyManager::zeroAllTallyData()
 {
     std::map<int, Tally*>::iterator map_it;
     for (map_it = observers.begin(); map_it != observers.end(); ++map_it)
@@ -198,7 +232,7 @@ void TallyManager::zero_all_tally_data()
         Tally *tally = map_it->second;
         tally->data->zero_tally_data();
     }
-    clear_last_event();
+    clearLastEvent();
 }
 //---------------------------------------------------------------------------//
 // PRIVATE METHODS
@@ -207,6 +241,7 @@ Tally *TallyManager::createTally(unsigned int tally_id,
                                  std::string  tally_type,
                                  const std::vector<double>& energy_bin_bounds,
                                  std::multimap<std::string, std::string>& options)
+                                 
 {
     TallyInput input; 
 
@@ -223,11 +258,12 @@ Tally *TallyManager::createTally(unsigned int tally_id,
     input.tally_type        = tally_type;
     input.energy_bin_bounds = energy_bin_bounds;
     input.options           = options;
-        
+    input.multiplier_id     = -1;      // Turn off multipliers by default
+   
     return Tally::create_tally(input);
 }
 //---------------------------------------------------------------------------//
-bool TallyManager::set_event(TallyEvent::EventType type,  
+bool TallyManager::setEvent(TallyEvent::EventType type,  
                            double x, double y, double z, 
                            double u, double v, double w,                           
                            double particle_energy, double particle_weight, 
@@ -280,7 +316,7 @@ bool TallyManager::set_event(TallyEvent::EventType type,
     }
     if (errflag)
     {
-        clear_last_event();
+        clearLastEvent();
     }    
     bool event_is_set = !errflag;
     return event_is_set;
