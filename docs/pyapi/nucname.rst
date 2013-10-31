@@ -90,6 +90,47 @@ Naming Convention Casting Functions
 .. autofunction:: alara(nuc)
 
 
+-----------------------------------
+Id Conversion Functions
+-----------------------------------
+
+.. autofunction:: zzaaam_to_id(nuc)
+
+-----
+
+.. autofunction:: mcnp_to_id(nuc)
+
+-----
+
+.. autofunction:: serpent_to_id(nuc)
+
+-----
+
+.. autofunction:: nist_to_id(nuc)
+
+-----
+
+.. autofunction:: cinder_to_id(nuc)
+
+-----
+
+.. autofunction:: alara_to_id(nuc)
+
+
+-----------------------------------
+Number Functions
+-----------------------------------
+
+.. autofunction:: znum(nuc)
+
+-----
+
+.. autofunction:: anum(nuc)
+
+-----
+
+.. autofunction:: snum(nuc)
+
 -----------------------
 Conversion Dictionaries
 -----------------------
