@@ -1,5 +1,5 @@
-PyNE: Python for Nuclear Engineering
-====================================
+PyNE: The Nuclear Engineering Toolkit
+=====================================
 The pyne project aims to provide a common set of tools for nuclear 
 science and engineering needs.
 
@@ -33,8 +33,7 @@ Additionally, building the documentation requires the following:
 
    #. `Sphinx <http://sphinx-doc.org/>`_
    #. `SciSphinx <https://github.com/numfocus/scisphinx>`_
-   #. `Anthony's fork of breathe <https://github.com/scopatz/breathe>`_ 
-      (must be installed after SciSphinx)
+   #. `breathe <http://michaeljones.github.io/breathe/>`_ 
 
 ------
 Binary
