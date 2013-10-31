@@ -236,7 +236,7 @@ class Transmuter(object):
             Current state of the coupled equation matrix.
         out : dict
             A dictionary containing the final recorded number densities for each
-            nuclide. Keys are nuclide names in integer (zzaaam) form. Values are
+            nuclide. Keys are nuclide names in integer id form. Values are
             number densities for the coupled nuclide in float format.  This is 
             modified in place.
         depth : int
@@ -256,8 +256,6 @@ class Transmuter(object):
         decay_branches = {} if lam == 0 else self._decay_branches(nuc)
         for decay_child, branch_ratio in decay_branches.items():
             prod[decay_child] = lam * branch_ratio
-        #prod.update(self._decay_const_branches(nuc))
-        print prod
         # reaction daughters
         for rx in self.rxs:
             try:
@@ -286,7 +284,7 @@ class Transmuter(object):
             if N_final[-1] > tol:
                 self._traversal(child, B, out, depth=depth+1)
             # On recursion exit or truncation, write data from this nuclide
-            outval = N_final[-1] + out.get(child, 0.0)
+            outval = N_final[-1,0] + out.get(child, 0.0)
             if 0.0 < outval:
                 out[child] = outval
 
@@ -336,40 +334,3 @@ class Transmuter(object):
         for child in children:
             decay_branches[child] = data.branch_ratio(nuc, child)
         return decay_branches
-
-    _dcbr = {}
-
-    def _decay_const_branches(self, nuc):
-        """Returns a dictionary that contains the decay children of nuc as keys
-        and the decay constant times the branch ratio as branches.
-
-        Parameters
-        ----------
-        nuc : int
-            Name of parent nuclide to get decay children of.
-
-        Returns
-        -------
-        decay_branches : dictionary
-            Keys are decay children of nuc in zzaaam format.
-            Values are the branch ratio of the decay child.
-
-        """
-        dcbr = self._dcbr
-        if nuc in dcbr:
-            return dcbr[nuc]
-        nuc_dcbr = {}
-        dconst = data.decay_const(nuc)
-        children = data.decay_children(nuc)
-        for child in children:
-            fact = dconst * data.branch_ratio(nuc, child)
-            nuc_dcbr[child] = fact
-            child_dconst = data.decay_const(child)
-            childs_dcbr = self._decay_const_branches(child)
-            for kidskid, kidskid_fact in childs_dcbr.items():
-                nuc_dcbr[kidskid] = fact * kidskid_fact + nuc_dcbr.get(kidskid, 0.0)
-                #nuc_dcbr[kidskid] = child_dconst - kidskid_fact + nuc_dcbr.get(kidskid, 0.0)
-                #nuc_dcbr[kidskid] = child_dconst*fact - kidskid_fact - nuc_dcbr.get(kidskid, 0.0)
-                #nuc_dcbr[kidskid] = kidskid_fact + nuc_dcbr.get(kidskid, 0.0)
-        dcbr[nuc] = nuc_dcbr
-        return nuc_dcbr
