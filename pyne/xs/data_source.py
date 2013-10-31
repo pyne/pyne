@@ -50,6 +50,23 @@ class DataSource(object):
             ...
             return rxdata (ndarray of floats, length self.src_ngroups, or None)
 
+    The following methods may be overridden in DataSource subclasses as a potential
+    optimization:
+
+    .. code-block:: python
+
+        def load(self, temp=300.0):
+            # loads the entire data source into memory.  This prevents 
+            # excessive queries to disk.  This does not return anything.
+            pass
+
+        # a class attribute that specificies whether the data source uses 
+        # temperature information.  If the data source does not use such 
+        # info, the keys in the rxcache dictionary are shortend to just the 
+        # (nuc, rx) pair.  Accessing (nuc, rx, temp) data will defer to the 
+        # (nuc, rx) pair.
+        _USES_TEMP = True
+
     Note that non-multigroup data sources should also override the discretize()
     method.  Other methods and properties may also need to be overriden depending
     on the data source at hand.
@@ -72,6 +89,7 @@ class DataSource(object):
         if not self.exists:
             return
         self.rxcache = {}
+        self.fullyloaded = False
         self._load_group_structure()
         self.dst_group_struct = dst_group_struct
         self.src_phi_g = np.ones(self._src_ngroups, dtype='f8') if src_phi_g is None \
@@ -136,9 +154,10 @@ class DataSource(object):
         """
         nuc = nucname.id(nuc)
         rx = rxname.id(rx)
-        rxkey = (nuc, rx, temp)
+        rxkey = (nuc, rx, temp) if self._USES_TEMP else (nuc, rx)
         if rxkey not in self.rxcache:
-            self.rxcache[rxkey] = self._load_reaction(nuc, rx, temp)
+            self.rxcache[rxkey] = None if self.fullyloaded \
+                                       else self._load_reaction(nuc, rx, temp)
         return self.rxcache[rxkey]
 
     def discretize(self, nuc, rx, temp=300.0, src_phi_g=None, dst_phi_g=None):
@@ -184,6 +203,11 @@ class DataSource(object):
     def _load_reaction(self, nuc, rx, temp=300.0):
         raise NotImplementedError
 
+    # Optional mix-in methods to implement
+    def load(self, temp=300.0):
+        pass
+
+    _USES_TEMP = True
 
 class NullDataSource(DataSource):
     """Cross section data source that always exists and always returns zeros.
@@ -215,6 +239,8 @@ class NullDataSource(DataSource):
         """Returns zeros."""
         return np.zeros(self.dst_ngroups, dtype='f8')
 
+    _USES_TEMP = False
+
     @property
     def dst_group_struct(self):
         return self._dst_group_struct
@@ -231,7 +257,8 @@ class NullDataSource(DataSource):
 
 
 class SimpleDataSource(DataSource):
-    """Simple cross section data source based off of KAERI data.
+    """Simple cross section data source based off of KAERI data.  This data source
+    does not use material temperature information.
 
     Parameters
     ----------
@@ -263,6 +290,8 @@ class SimpleDataSource(DataSource):
             with tb.openFile(nuc_data, 'r') as f:
                 self._exists = ('/neutron/simple_xs' in f)
         return self._exists
+
+    _USES_TEMP = False
 
     def _load_group_structure(self):
         """Sets the simple energy bounds array, E_g."""
@@ -351,7 +380,8 @@ class SimpleDataSource(DataSource):
 
 class CinderDataSource(DataSource):
     """Cinder cross section data source. The relevant cinder cross section data must
-    be present in the nuc_data for this data source to exist.
+    be present in the nuc_data for this data source to exist.  This data source does
+    not use material temperature information.
 
     Parameters
     ----------
@@ -401,6 +431,8 @@ class CinderDataSource(DataSource):
                  #rxname.id(''): 'c', 
                  #rxname.id('fission'): 'f',
                  }
+
+    _USES_TEMP = False
 
     def __init__(self, **kwargs):
         super(CinderDataSource, self).__init__(**kwargs)
@@ -526,6 +558,8 @@ class EAFDataSource(DataSource):
 
     _avail_rx = dict([_[::-1] for _ in _rx_avail.items()])
 
+    _USES_TEMP = False
+
     def __init__(self, **kwargs):
         super(EAFDataSource, self).__init__(**kwargs)
 
@@ -551,6 +585,8 @@ class EAFDataSource(DataSource):
             Nuclide id.
         rx : int 
             Reaction id.
+        temp : float, optional
+            The material temperature
         
         Note
         ----
@@ -578,12 +614,39 @@ class EAFDataSource(DataSource):
             xss = rows['xs']
             rxnums = rows['rxnum']
             for rxnum, xs in zip(rxnums, xss):
-                self.rxcache[nuc, self._avail_rx[rxnum], temp] = xs
+                self.rxcache[nuc, self._avail_rx[rxnum]] = xs
             rxdata = xss.sum(axis=0)
         else:
             rxdata = rows[0]['xs']
 
         return rxdata
+
+    def load(self, temp=300.0):
+        """Loads all EAF into memory.
+
+        Parameters
+        ----------
+        temp : float, optional
+            The material temperature
+        
+        Note
+        ----
+        EAF data does not use temperature information (temp).
+
+        """
+        rxcache = self.rxcache
+        avail_rx = self._avail_rx
+        absrx = rxname.id('absorption')
+        with tb.openFile(nuc_data, 'r') as f:
+            node = f.root.neutron.eaf_xs.eaf_xs
+            for row in node:
+                nuc = row['nuc_zz']
+                rx = avail_rx[row['rxnum']]
+                xs = row['xs']
+                rxcache[nuc, rx] = xs
+                abskey = (nuc, absrx)
+                rxcache[abskey] = xs + rxcache.get(abskey, 0.0)            
+        self.fullyloaded = True
 
 
 class ENDFDataSource(DataSource):
