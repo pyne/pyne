@@ -588,8 +588,8 @@ class EAFDataSource(DataSource):
         temp : float, optional
             The material temperature
         
-        Note
-        ----
+        Notes
+        -----
         EAF data does not use temperature information (temp).
 
         """
@@ -629,8 +629,8 @@ class EAFDataSource(DataSource):
         temp : float, optional
             The material temperature
         
-        Note
-        ----
+        Notes
+        -----
         EAF data does not use temperature information (temp).
 
         """
