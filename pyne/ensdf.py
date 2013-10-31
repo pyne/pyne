@@ -114,10 +114,19 @@ def half_life(ensdf):
         m = _level_cont_regex.match(line)
         if m is not None and valid_from_nuc:
             g = m.groups()
-            dat = dict([d.split('=')[:2] for d in g[-1].replace('$', ' ').split() if '=' in d])
+            dat = {}
+            raw_children = g[-1].replace(' AP ', '=')
+            raw_children = raw_children.replace('$', ' ').split()
+            for raw_child in raw_children:
+                if '=' in raw_child:
+                    rx, br = raw_child.split('=')[:2]
+                else:
+                    continue
+                dat[rx] = br
             dat = dict([(_decay_to[key](from_nuc), _to_float(val)*0.01) 
                         for key, val in dat.items() if key in _decay_to.keys()])
-            data += [(from_nuc, level, to_nuc, half_life, br) for to_nuc, br in dat.items() if 0.0 < br]
+            data += [(from_nuc, level, to_nuc, half_life, br) for to_nuc, br in \
+                                                              dat.items() if 0.0 < br]
             continue
 
     if opened_here:
