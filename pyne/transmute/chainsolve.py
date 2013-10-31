@@ -236,7 +236,7 @@ class Transmuter(object):
             Current state of the coupled equation matrix.
         out : dict
             A dictionary containing the final recorded number densities for each
-            nuclide. Keys are nuclide names in integer (zzaaam) form. Values are
+            nuclide. Keys are nuclide names in integer id form. Values are
             number densities for the coupled nuclide in float format.  This is 
             modified in place.
         depth : int
@@ -284,7 +284,7 @@ class Transmuter(object):
             if N_final[-1] > tol:
                 self._traversal(child, B, out, depth=depth+1)
             # On recursion exit or truncation, write data from this nuclide
-            outval = N_final[-1] + out.get(child, 0.0)
+            outval = N_final[-1,0] + out.get(child, 0.0)
             if 0.0 < outval:
                 out[child] = outval
 
