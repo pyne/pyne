@@ -65,6 +65,20 @@ prevents the developers from distributing it with PyNE.  However, the
 do its best to find relevant nuclear data elsewhere on your machine
 or from public sources on the internet.  
 
+On MacOSX, it may be necessary to add the pyne library path to the 
+``DYLD_FALLBACK_LIBRARY_PATH`` environment variable *before* running 
+``nuc_data_make``. To do this, add the following lines to your 
+``~/.bashrc`` file where ``/path/to/pyne/lib`` is the absolute path to the 
+directory containing libpyne.dylib :: 
+
+    DYLD_FALLBACK_LIBRARY_PATH="${DYLD_FALLBACK_LIBRARY_PATH}:/path/to/pyne/lib"
+    export DYLD_FALLBACK_LIBRARY_PATH
+
+Once those lines have been added, run the following command before running 
+``nuc_data_make`` ::
+
+    source ~/.bashrc
+
 .. install-end
 
 
