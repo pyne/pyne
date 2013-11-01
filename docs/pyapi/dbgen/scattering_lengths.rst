@@ -14,20 +14,8 @@ All functionality may be found in the ``scattering_lengths`` module::
 
     from pyne.dbgen import scattering_lengths
 
-.. autofunction:: grab_scattering_lengths(build_dir="", file_out='scattering_lengths.html')
+Scattering Length API
+----------------------
 
-------------
-
-.. autofunction:: nist_num(nist_data)
-
-------------
-
-.. autofunction:: parse_scattering_lengths(build_dir)
-
-------------
-
-.. autofunction:: make_scattering_lengths_table(nuc_data, build_dir="")
-
-------------
-
-.. autofunction:: make_scattering_lengths(nuc_data, build_dir)
+.. automodule:: pyne.dbgen.scattering_lengths
+    :members:

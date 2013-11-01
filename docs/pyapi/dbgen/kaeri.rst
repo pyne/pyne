@@ -12,12 +12,8 @@ All functionality may be found in the ``kaeri`` module::
 
     from pyne.dbgen import kaeri
 
-.. autofunction:: grab_kaeri_nuclide(nuc, build_dir="", n=None)
+KAERI API
+---------
 
-------------
-
-.. autofunction:: parse_for_natural_isotopes(htmlfile)
-
-------------
-
-.. autofunction:: parse_for_all_isotopes(htmlfile)
+.. automodule:: pyne.dbgen.kaeri
+    :members:

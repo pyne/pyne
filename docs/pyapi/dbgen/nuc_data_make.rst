@@ -11,5 +11,9 @@ All functionality may be found in the ``nuc_data_make`` module::
 
     from pyne.dbgen import nuc_data_make
 
-.. autofunction:: main()
+Nuclear Data API
+----------------
+
+.. automodule:: pyne.dbgen.nuc_data_make
+    :members:
 

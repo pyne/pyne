@@ -11,21 +11,8 @@ All functionality may be found in the ``simple_xs`` module::
 
     from pyne.dbgen import simple_xs
 
-.. autofunction:: grab_kaeri_simple_xs(build_dir="")
+Simple Cross Section API
+------------------------
 
-------------
-
-.. autofunction:: get_xs_from_file(filename, eng, chan)
-
-------------
-
-.. autofunction:: parse_simple_xs(build_dir="")
-
-------------
-
-.. autofunction:: make_simple_xs_tables(nuc_data, build_dir="")
-
-------------
-
-.. autofunction:: make_simple_xs(nuc_data, build_dir)
-
+.. automodule:: pyne.dbgen.simple_xs
+    :members:
