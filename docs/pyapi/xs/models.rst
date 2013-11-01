@@ -30,83 +30,8 @@ The following terminology applies for this module:
 * **M_A**: The atomic mass [amu] of the target material.
 * **T**: The temperature [kelvin] of the target material.
 
+Models API
+-----------
 
-******************
-Physical Constants
-******************
-.. data:: k
-
-    Boltzmann's constant in [MeV/K].
-
-.. data:: m_n
-
-    Neutron mass in [amu].
-
-*********************
-Partial Energy Matrix
-*********************
-When collapsing a flux spectrum or multigroup cross-section from one more finely 
-resolved group structure (**E_n**) to another coarser structure (**E_g**) it is 
-useful to define a partial energy operator.  This describes the linear contribution
-of each nth group to each gth group.  Calling this matrix **P_E**, it thereby solves
-the equation:
-
-.. math::
-
-    \phi_g = P_E \cdot \phi_n
-
-Note that for this transform to be valid both group structures must be monotonic in the 
-same direction.  All elements of **P_E** live on the range [0,1].
-
-.. autofunction:: partial_energy_matrix(E_g, E_n)
-
----------
-
-.. autofunction:: partial_energy_matrix_mono(E_g, E_n, slope=-1)
-
-************************
-Group Collapse Functions
-************************
-.. autofunction:: phi_g(E_g, E_n, phi_n)
-
----------
-
-.. autofunction:: group_collapse(sigma_n, phi_n, phi_g=None, partial_energies=None, E_g=None, E_n=None)
-
-
-***************
-Physical models
-***************
-.. autofunction:: chi(E)
-
----------
-
-.. autofunction:: alpha(E_prime, E, theta, M_A=1.0, T=300.0)
-
----------
-
-.. autofunction:: beta(E_prime, E, T=300.0)
-
----------
-
-.. autofunction:: alpha_at_theta_0(E_prime, E, M_A=1.0, T=300.0)
-
----------
-
-.. autofunction:: alpha_at_theta_pi(E_prime, E, M_A=1.0, T=300.0)
-
----------
-
-.. autofunction:: one_over_gamma_squared(E)
-
----------
-
-.. autofunction:: E_prime_min(E, M_A=1.0)
-
----------
-
-.. autofunction:: sigma_s_const(b)
-
----------
-
-.. autofunction:: sigma_s(E, b=1.0, M_A=1.0, T=300.0)
+.. automodule:: pyne.xs.models
+    :members:
