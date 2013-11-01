@@ -6,6 +6,7 @@ PyNE: The Nuclear Engineering Toolkit
 
     .. image:: gallery/half_life_thumb.png
     .. image:: gallery/data_sources_thumb.png
+    .. image:: gallery/mesh_tags_thumb.png
     .. image:: gallery/enrichment_mstar_vs_flowrate_thumb.png
     .. image:: gallery/origen22_h1_xs_thumb.png
 
