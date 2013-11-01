@@ -89,3 +89,7 @@ it is as easy as forking the repository on GitHub, making your changes, and
 issuing a pull request. If you have any questions about this process don't 
 hesitate to ask the mailing list (pyne-dev@googlegroups.com).
 
+
+.. _zip: https://github.com/pyne/pyne/zipball/0.3
+.. _tar: https://github.com/pyne/pyne/tarball/0.3
+
