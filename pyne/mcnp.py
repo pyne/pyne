@@ -171,7 +171,7 @@ class SurfSrc(_BinaryReader):
         return trackData
 
     def compare(self,other):
-        """ """
+        """"""
 
         if other.kod != self.kod:
             print "kod does not match"
@@ -1129,29 +1129,39 @@ class Wwinp(Mesh):
 
     Attributes
     ----------
-    ni : number of integers on card 2. ni = 1 for neutron WWINPs, ni = 2 for 
-        photon WWINPs or neutron + photon WWINPs.
-    nr : 10 for rectangular, 16 for cylindrical.
-    ne : list of number of energy groups for neutrons and photons. If ni = 1
-        the list is only 1 value long, to represent the number of neutron
+    ni : number of integers on card 2. 
+        ni = 1 for neutron WWINPs, ni = 2 for photon WWINPs or neutron + photon WWINPs.
+    nr : int 
+        10 for rectangular, 16 for cylindrical.
+    ne : list of number of energy groups for neutrons and photons. 
+        If ni = 1 the list is only 1 value long, to represent the number of neutron
         energy groups
-    nf : list of number of fine mesh points in the i, j, k dimensions
-    origin : list of i, j, k, minimums.
-    nc : list of number of coarse mesh points in the i, j, k dimensions
-    nwg : 1 for rectangular, 2 for cylindrical.
-    cm : list of lists of coarse mesh points in the i, j, k dimensions. Note
+    nf : list of number 
+        of fine mesh points in the i, j, k dimensions
+    origin : list of i, j, k
+        minimums.
+    nc : list 
+        number of coarse mesh points in the i, j, k dimensions
+    nwg : int
+        1 for rectangular, 2 for cylindrical.
+    cm : list of lists 
+        of coarse mesh points in the i, j, k dimensions. Note
         the origin is not considered a coarse mesh point (as in MCNP).
-    fm : list of lists of number of fine mesh points between the coarses 
-    mesh points in the i, j, k dimensions.
-    e : list of lists of energy upper bounds for neutrons, photons. If
+    fm : list of lists 
+        of number of fine mesh points between the coarses 
+        mesh points in the i, j, k dimensions.
+    e : list of lists 
+        of energy upper bounds for neutrons, photons. If
         ni = 1, the e will look like [[]]. If ni = 2, e will look like
         [[], []].
-    bounds : list of lists of spacial bounds in the i, j, k dimensions.
-    mesh : Mesh object with a structured mesh containing all the neutron and/or 
+    bounds : list of lists 
+        of spacial bounds in the i, j, k dimensions.
+    mesh : Mesh object 
+        with a structured mesh containing all the neutron and/or 
         photon weight window lower bounds. These tags have the form 
-        "ww_X_group_YYY"  where X is n or p and YYY is the energy group number
-	    (e.g. 001, 002, etc.). The mesh has rootSet tags in the form
-	    X_e_upper_bounds.
+        "ww_X_group_YYY" where X is n or p and YYY is the energy group number
+        (e.g. 001, 002, etc.). The mesh has rootSet tags in the form
+        X_e_upper_bounds.
 
     Notes
     -----
@@ -1164,7 +1174,7 @@ class Wwinp(Mesh):
         pass
 
     def read_wwinp(self, filename):
-        """ This method creates a Wwinp object from the WWINP file <filename>.
+        """This method creates a Wwinp object from the WWINP file <filename>.
         """
         with open(filename, 'r') as f: 
              self._read_block1(f)
@@ -1287,7 +1297,7 @@ class Wwinp(Mesh):
 
 
     def write_wwinp(self, filename):
-        """ This method writes a complete WWINP file to <filename>.
+        """This method writes a complete WWINP file to <filename>.
         """
         with open(filename, 'w') as f: 
             self._write_block1(f)
@@ -1604,7 +1614,7 @@ class MeshTally(StatMesh):
         self._create_mesh(f)
    
     def _read_meshtally_head(self, f):
-        """ Get the particle type, spacial and energy bounds, and whether or 
+        """Get the particle type, spacial and energy bounds, and whether or 
         not flux-to-dose conversion factors are being used.
         """
         line = f.readline()
