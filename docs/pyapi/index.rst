@@ -13,6 +13,7 @@ The following modules and sub-packages are discussed:
     rxname
     data
     material
+    mesh
     bins
     njoy
     cccc
@@ -26,5 +27,8 @@ The following modules and sub-packages are discussed:
     stlcontainers
     dbgen/index
     mcnp
+    ptrac_to_hdf5
+    binaryreader
+    rxdata
     simplesim/index
     jsoncpp

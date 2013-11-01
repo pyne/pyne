@@ -11,15 +11,12 @@ You may find them useful as well!
 
 All functionality may be found in the ``bins`` module::
 
- from pyne import bins
+    from pyne import bins
 
 -------------------------
 Special Binning Functions
 -------------------------
 
-.. autofunction:: ninespace(start, stop, num=50, endpoint=True)
-
-------
-
-.. autofunction:: stair_step(x, y)
+.. automodule:: pyne.bins
+    :members:
 

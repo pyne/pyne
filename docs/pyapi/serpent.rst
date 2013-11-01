@@ -14,18 +14,10 @@ All functionality may be found in the ``serpent`` package::
 
  from pyne import serpent
 
--------
-Parsers
--------
-
-.. autofunction:: parse_res(resfile, write_py=False)
-
+Serpent API
 -----------
 
-.. autofunction:: parse_dep(depfile, write_py=False, make_mats=True)
-
------------
-
-.. autofunction:: parse_det(detfile, write_py=False)
+.. automodule:: pyne.serpent
+    :members:
 
 .. _Serpent: http://montecarlo.vtt.fi/
