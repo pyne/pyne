@@ -11,12 +11,11 @@ only parsing out half-life data is supported.
 
 All functionality may be found in the ``ensdf`` module::
 
- from pyne import ensdf
+    from pyne import ensdf
 
-
-----------
-Half Lives
+ENSDF API
 ----------
 
-.. autofunction:: half_life(ensdf)
+.. automodule:: pyne.ensdf
+    :members:
 

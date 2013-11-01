@@ -489,7 +489,7 @@ class Mesh(object):
     """This class houses any iMesh instance and contains methods for various mesh
     operations. Special methods exploit the properties of structured mesh.
 
-    Atrributes
+    Attributes
     ----------
     mesh : iMesh instance
     mesh_file : string
