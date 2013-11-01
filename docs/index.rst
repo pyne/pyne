@@ -69,3 +69,7 @@ Search Links
 .. _GitHub project site: https://github.com/pyne
 
 .. _github: https://github.com/pyne/pyne
+
+.. _zip: https://github.com/pyne/pyne/zipball/0.3
+.. _tar: https://github.com/pyne/pyne/tarball/0.3
+
