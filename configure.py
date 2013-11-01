@@ -13,7 +13,7 @@ from Cython.Compiler.Version import version as CYTHON_VERSION
 
 
 INFO = {
-    'version': '0.3',
+    'version': '0.4-dev',
     }
 
 
