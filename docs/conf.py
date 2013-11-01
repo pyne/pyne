@@ -15,8 +15,7 @@ import sys
 
 # -- General configuration -----------------------------------------------------
 
-#sys.path.insert(0, '.')
-sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
+sys.path.insert(0, os.path.dirname(__file__))
 
 extensions = ['sphinx.ext.autodoc', 
               'sphinx.ext.doctest', 
@@ -45,14 +44,14 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'PyNE'
-copyright = u'2011-2012, The PyNE Development Team'
+copyright = u'2011-2013, The PyNE Development Team'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
 # built documents.
 #
 # The short X.Y version.
-sys.path.insert(0, '../../')
+sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 from configure import INFO
 
 version = INFO['version']
@@ -155,12 +154,12 @@ html_short_title = "{project}".format(project=project)
 
 # The name of an image file (relative to this directory) to place at the top
 # of the sidebar.
-html_logo = '../../img/pyne_icon_small.png'
+html_logo = '../img/pyne_icon_small.png'
 
 # The name of an image file (within the static path) to use as favicon of the
 # docs.  This file should be a Windows icon file (.ico) being 16x16 or 32x32
 # pixels large.
-html_favicon = '../../img/pyne_icon.ico'
+html_favicon = '../img/pyne_icon.ico'
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,

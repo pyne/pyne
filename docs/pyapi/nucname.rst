@@ -8,15 +8,22 @@ Currently the following naming conventions are supported:
 
 .. _name_forms:
 
- #. **zzaaam**: This type places the charge of the nucleus out front, then has three
-    digits for the atomic mass number, and ends with a metastable flag (0 = ground,
+ #. **id (zas)**: This type places the charge of the nucleus out front, then has three
+    digits for the atomic mass number, and ends with four state digits (0 = ground,
     1 = first excited state, 2 = second excited state, etc).  Uranium-235 here would
-    be expressed as '922350'.
+    be expressed as '922350000'.  This is th canonical form for nuclides.
  #. **name**: This is the more common, human readable notation.  The chemical symbol
     (one or two characters long) is first, followed by the atomic weight.  Lastly if
     the nuclide is metastable, the letter *M* is concatenated to the end.  For
     example, 'H-1' and 'Am242M' are both valid.  Note that nucname will always
     return name form with the dash removed and all letters uppercase.
+ #. **zzaaam**: This type places the charge of the nucleus out front, then has three
+    digits for the atomic mass number, and ends with a metastable flag (0 = ground,
+    1 = first excited state, 2 = second excited state, etc).  Uranium-235 here would
+    be expressed as '922350'.
+ #. **SZA**: This type places three state digits out front, the charge of the nucleus in 
+    the middle, and then has three digits for the atomic mass number. Uranium-235M here 
+    would be expressed as '1092235'.  
  #. **MCNP**: The MCNP format for entering nuclides is unfortunately
     non-standard.  In most ways it is similar to zzaaam form, except that it
     lacks the metastable flag.  For information on how metastable isotopes are
@@ -52,11 +59,15 @@ well as other helpful module attributes.
 Naming Convention Casting Functions
 -----------------------------------
 
-.. autofunction:: zzaaam(nuc)
+.. autofunction:: id(nuc)
 
 -----
 
 .. autofunction:: name(nuc)
+
+-----
+
+.. autofunction:: zzaaam(nuc)
 
 -----
 
@@ -78,6 +89,47 @@ Naming Convention Casting Functions
 
 .. autofunction:: alara(nuc)
 
+
+-----------------------------------
+Id Conversion Functions
+-----------------------------------
+
+.. autofunction:: zzaaam_to_id(nuc)
+
+-----
+
+.. autofunction:: mcnp_to_id(nuc)
+
+-----
+
+.. autofunction:: serpent_to_id(nuc)
+
+-----
+
+.. autofunction:: nist_to_id(nuc)
+
+-----
+
+.. autofunction:: cinder_to_id(nuc)
+
+-----
+
+.. autofunction:: alara_to_id(nuc)
+
+
+-----------------------------------
+Number Functions
+-----------------------------------
+
+.. autofunction:: znum(nuc)
+
+-----
+
+.. autofunction:: anum(nuc)
+
+-----
+
+.. autofunction:: snum(nuc)
 
 -----------------------
 Conversion Dictionaries
@@ -169,12 +221,4 @@ The groups are defined as follows::
                      29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53,
                      54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78,
                      79, 80, 81, 82, 83, 84, 85, 86, 87, 88])
-
-
-
------------------------
-Other nucname functions
------------------------
-
-.. autofunction:: current_form(nuc)
 

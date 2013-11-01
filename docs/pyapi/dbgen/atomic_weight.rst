@@ -11,17 +11,8 @@ All functionality may be found in the ``atomic_weight`` module::
 
     from pyne.dbgen import atomic_weight
 
-.. autofunction:: grab_kaeri_atomic_abund(build_dir="")
+Atomic Weights API
+==================
 
-------------
-
-.. autofunction:: parse_atomic_abund(build_dir="")
-
-------------
-
-
-.. autofunction:: make_atomic_weight_table(nuc_data, build_dir="")
-
-------------
-
-.. autofunction:: make_atomic_weight(nuc_data, build_dir)
+.. automodule:: pyne.dbgen.atomic_weight
+    :members:
