@@ -71,8 +71,7 @@ def test_decay_children():
 
 
 def test_abundance_by_z_for_soundness():
-    for z in data.abundance_by_z:
-        abunds = data.abundance_by_z[z]
+    for z, abunds in data.abundance_by_z.items():
         if abunds:
             assert(abs(1-sum([abund[1] for abund in abunds]))<1e-12)
 
