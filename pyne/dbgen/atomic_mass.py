@@ -12,7 +12,7 @@ def get_atomic_masses():
     atomic_mass : dict
         A dictionary where each key is an integer equal to the ZAID identifier
         for the nuclide and the value is the atomic mass in units of amu
-        (1.660538921e−27 kg). For example, to get the atomic mass of U-235 which
+        (1.660538921e-27 kg). For example, to get the atomic mass of U-235 which
         has Z=92, you would enter atomic_mass[92235].
     """
 
