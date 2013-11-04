@@ -1,0 +1,48 @@
+======================
+PyNE 0.3 Release Notes
+======================
+
+PyNE 0.3 is the latest, greatest release of PyNE: The Nuclear Engineering Toolkit 
+project after an additional year of effort.  PyNE is a free and open source 
+(BSD licensed) project whose goal is to become a necessary package in the computational 
+nuclear engineer's toolkit.  It is meant to play nicely with existing, industry standard
+nuclear engineering tools.  PyNE is meant to be both fast and useful.  
+
+Release highlights:
+
+  - Mesh interface
+  - ENDF reader
+  - Transmutation chain solver
+  - PTRAC Reader and HDF5 conversion utility
+  - Material library
+  - Reaction name handling
+  - New and improved nuclide naming convention
+
+This release represnts over 850 commits, 418 files changed, 113361 insertions(+), 
+84414 deletions(-) since the version v0.2-rc release.  Additionally 63 issues were 
+closed on behalf of this release.
+
+Please visit our website for more information: http://pynesim.org/
+Please email us at pyne-users@googlegroups.com if you have any questions
+on how to use or install PyNE.
+
+Authors
+=======
+This release contains code written by the following people (in alphabetical 
+order).  An (*) indicates a first-time contributor to PyNE.
+
+* Elliott Biondo
+* Carsten Brachem*
+* Christopher Dembia
+* Robert Flanagan
+* Matthew Gidden*
+* Katy Huff
+* Matthew Klebenow*
+* Matt McCormick
+* Mohamad Rabbani*
+* Eric Relson
+* Paul Romano
+* Anthony Scopatz
+* Paul Wilson
+* John Xia
+

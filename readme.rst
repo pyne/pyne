@@ -1,5 +1,5 @@
-PyNE: Python for Nuclear Engineering
-====================================
+PyNE: The Nuclear Engineering Toolkit
+=====================================
 The pyne project aims to provide a common set of tools for nuclear 
 science and engineering needs.
 
@@ -33,8 +33,7 @@ Additionally, building the documentation requires the following:
 
    #. `Sphinx <http://sphinx-doc.org/>`_
    #. `SciSphinx <https://github.com/numfocus/scisphinx>`_
-   #. `Anthony's fork of breathe <https://github.com/scopatz/breathe>`_ 
-      (must be installed after SciSphinx)
+   #. `breathe <http://michaeljones.github.io/breathe/>`_ 
 
 ------
 Binary
@@ -65,6 +64,20 @@ prevents the developers from distributing it with PyNE.  However, the
 do its best to find relevant nuclear data elsewhere on your machine
 or from public sources on the internet.  
 
+On MacOSX, it may be necessary to add the pyne library path to the 
+``DYLD_FALLBACK_LIBRARY_PATH`` environment variable *before* running 
+``nuc_data_make``. To do this, add the following lines to your 
+``~/.bashrc`` file where ``/path/to/pyne/lib`` is the absolute path to the 
+directory containing libpyne.dylib :: 
+
+    DYLD_FALLBACK_LIBRARY_PATH="${DYLD_FALLBACK_LIBRARY_PATH}:/path/to/pyne/lib"
+    export DYLD_FALLBACK_LIBRARY_PATH
+
+Once those lines have been added, run the following command before running 
+``nuc_data_make`` ::
+
+    source ~/.bashrc
+
 .. install-end
 
 
@@ -75,4 +88,8 @@ We highly encourage contributions to PyNE! If you would like to contribute,
 it is as easy as forking the repository on GitHub, making your changes, and 
 issuing a pull request. If you have any questions about this process don't 
 hesitate to ask the mailing list (pyne-dev@googlegroups.com).
+
+
+.. _zip: https://github.com/pyne/pyne/zipball/0.3
+.. _tar: https://github.com/pyne/pyne/tarball/0.3
 

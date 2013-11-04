@@ -1,10 +1,8 @@
 #!/usr/bin/env python
-
-"""
-Module for parsing MCNP output data. MCNP is a general-purpose Monte Carlo
+"""Module for parsing MCNP output data. MCNP is a general-purpose Monte Carlo
 N-Particle code developed at Los Alamos National Laboratory that can be used for
 neutron, photon, electron, or coupled neutron/photon/electron transport. Further
-information on MCNP can be obtained from http://mcnp-green.lanl.gov/
+information on MCNP can be obtained from http://mcnp.lanl.gov/
 
 Mctal and Runtpe classes still need work. Also should add Meshtal and Outp
 classes.
@@ -28,12 +26,8 @@ from pyne import nucname
 from binaryreader import _BinaryReader, _FortranRecord
 
 # Mesh specific imports
-try:
-    from itaps import iMesh
-    from pyne.mesh import Mesh, StatMesh, MeshError
-except ImportError:
-    pass
-
+from itaps import iMesh
+from pyne.mesh import Mesh, StatMesh, MeshError
 
 class Mctal(object):
     def __init__(self):
@@ -177,7 +171,7 @@ class SurfSrc(_BinaryReader):
         return trackData
 
     def compare(self,other):
-        """ """
+        """"""
 
         if other.kod != self.kod:
             print "kod does not match"
@@ -226,10 +220,8 @@ class SurfSrc(_BinaryReader):
         return True
 
     def read_header(self):
-        """Read in the header block data
-
-        This block comprises 4 fortran records which we refer to as:
-        header, table1, table2, summary
+        """Read in the header block data. This block comprises 4 fortran records which we refer to as:
+        header, table1, table2, summary.
         """
         # read header record
         header = self.get_fortran_record()
@@ -335,8 +327,7 @@ class SurfSrc(_BinaryReader):
 
 
     def put_header(self):
-        """
-        Write the header part of the header
+        """Write the header part of the header
         to the surface source file
         """
         rec = [self.kod, self.ver, self.loddat, self.idtm, self.probid, self.aid]
@@ -347,8 +338,7 @@ class SurfSrc(_BinaryReader):
     
     
     def put_table_1(self):
-        """
-        Write the table1 part of the header
+        """Write the table1 part of the header
         to the surface source file
         """
         newrecord = _FortranRecord("", 0)
@@ -362,8 +352,7 @@ class SurfSrc(_BinaryReader):
     
     
     def put_table_2(self):
-        """
-        Write the table2 part of the header
+        """Write the table2 part of the header
         to the surface source file
         """
         newrecord = _FortranRecord("", 0)
@@ -376,8 +365,7 @@ class SurfSrc(_BinaryReader):
 
 
     def put_surface_info(self):
-        """
-        Write the record for each surface
+        """Write the record for each surface
         to the surface source file
         """
 
@@ -735,7 +723,8 @@ class PtracReader(object):
     def determine_endianness(self):
         """Determine the number format (endianness) used in the Ptrac file.
         For this, the file's first entry is used. It is always minus one
-        and has a length of 4 bytes."""
+        and has a length of 4 bytes.
+        """
         
         # read and unpack first 4 bytes
         b = self.f.read(4)
@@ -1133,46 +1122,59 @@ def mat_from_mcnp(filename, mat_line, densities='None'):
 
 
 class Wwinp(Mesh):
-    """ A Wwinp object stores all of the information from a single MCNP WWINP
+    """A Wwinp object stores all of the information from a single MCNP WWINP
     file. Weight window lower bounds are stored on a structured mesh. Only
     Cartesian mesh WWINP files are supported. Neutron, photon, and
     simotaneous neutron and photon WWINP files are supported.
 
-    Atrributes
+    Attributes
     ----------
+    ni : number of integers on card 2. 
+        ni = 1 for neutron WWINPs, ni = 2 for photon WWINPs or neutron + photon WWINPs.
+    nr : int 
+        10 for rectangular, 16 for cylindrical.
+    ne : list of number of energy groups for neutrons and photons. 
+        If ni = 1 the list is only 1 value long, to represent the number of neutron
+        energy groups
+    nf : list of number 
+        of fine mesh points in the i, j, k dimensions
+    origin : list of i, j, k
+        minimums.
+    nc : list 
+        number of coarse mesh points in the i, j, k dimensions
+    nwg : int
+        1 for rectangular, 2 for cylindrical.
+    cm : list of lists 
+        of coarse mesh points in the i, j, k dimensions. Note
+        the origin is not considered a coarse mesh point (as in MCNP).
+    fm : list of lists 
+        of number of fine mesh points between the coarses 
+        mesh points in the i, j, k dimensions.
+    e : list of lists 
+        of energy upper bounds for neutrons, photons. If
+        ni = 1, the e will look like [[]]. If ni = 2, e will look like
+        [[], []].
+    bounds : list of lists 
+        of spacial bounds in the i, j, k dimensions.
+    mesh : Mesh object 
+        with a structured mesh containing all the neutron and/or 
+        photon weight window lower bounds. These tags have the form 
+        "ww_X_group_YYY" where X is n or p and YYY is the energy group number
+        (e.g. 001, 002, etc.). The mesh has rootSet tags in the form
+        X_e_upper_bounds.
+
+    Notes
+    -----
     Attribute names are identical to names speficied in WWINP file
     description in the MCNP5 User's Guide Volume 3 Appendix J.
 
-    ni : number of integers on card 2. ni = 1 for neutron WWINPs, ni = 2 for 
-         photon WWINPs or neutron + photon WWINPs.
-    nr : 10 for rectangular, 16 for cylindrical.
-    ne : list of number of energy groups for neutrons and photons. If ni = 1
-         the list is only 1 value long, to represent the number of neutron
-         energy groups
-    nf : list of number of fine mesh points in the i, j, k dimensions
-    origin : list of i, j, k, minimums.
-    nc : list of number of coarse mesh points in the i, j, k dimensions
-    nwg : 1 for rectangular, 2 for cylindrical.
-    cm : list of lists of coarse mesh points in the i, j, k dimensions. Note
-         the origin is not considered a coarse mesh point (as in MCNP).
-    fm : list of lists of number of fine mesh points between the coarses 
-    mesh points in the i, j, k dimensions.
-    e : list of lists of energy upper bounds for neutrons, photons. If
-        ni = 1, the e will look like [[]]. If ni = 2, e will look like
-        [[], []].
-    bounds : list of lists of spacial bounds in the i, j, k dimensions.
-    mesh : Mesh object with a structured mesh containing all the neutron and/or 
-       photon weight window lower bounds. These tags have the form 
-       "ww_X_group_YYY"  where X is n or p and YYY is the energy group number
-	   (e.g. 001, 002, etc.). The mesh has rootSet tags in the form
-	   X_e_upper_bounds.
     """
 
     def __init__(self):
         pass
 
     def read_wwinp(self, filename):
-        """ This method creates a Wwinp object from the WWINP file <filename>.
+        """This method creates a Wwinp object from the WWINP file <filename>.
         """
         with open(filename, 'r') as f: 
              self._read_block1(f)
@@ -1295,7 +1297,7 @@ class Wwinp(Mesh):
 
 
     def write_wwinp(self, filename):
-        """ This method writes a complete WWINP file to <filename>.
+        """This method writes a complete WWINP file to <filename>.
         """
         with open(filename, 'w') as f: 
             self._write_block1(f)
@@ -1576,7 +1578,7 @@ class MeshTally(StatMesh):
     data tagged. This class inherits from StatMesh, exposing all statistical
     mesh manipulation methods.
 
-    Atrributes
+    Attributes
     ----------
     tally number : int
         The MCNP tally number. Must end in 4 (e.g. 4, 14, 214).
@@ -1612,7 +1614,7 @@ class MeshTally(StatMesh):
         self._create_mesh(f)
    
     def _read_meshtally_head(self, f):
-        """ Get the particle type, spacial and energy bounds, and whether or 
+        """Get the particle type, spacial and energy bounds, and whether or 
         not flux-to-dose conversion factors are being used.
         """
         line = f.readline()

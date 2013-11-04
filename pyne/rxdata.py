@@ -17,8 +17,8 @@ class RxLib(object):
 class DoubleSpinDict(collections.MutableMapping):
     """Sanitizes input, avoiding errors arising from half-integer values of spin.
 
-    Parameters:
-    -----------
+    Parameters
+    ----------
     spin_dict: a dictionary where the keys are (spi, [L], [j]) tuples.
     """
     def __init__(self, spin_dict):
