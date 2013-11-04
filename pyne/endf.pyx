@@ -462,7 +462,7 @@ class Library(rx.RxLib):
         """
         isotope_flags = self._get_cont(['ZAI','ABN',0,'LFW','NER',0],
                                        isotope_data[0])
-        nuc_i = int(isotope_flags['ZAI']*10)
+        nuc_i = nucname.id(int(isotope_flags['ZAI']*10))
         self.structure[mat_id]['data'].update(
             {nuc_i:{'resolved':[],
                        'unresolved':[],
@@ -767,22 +767,23 @@ class Library(rx.RxLib):
             range_flags, ('SPI','AP',0,0,'NLS',0), subsection, total_lines)
         return total_lines
 
-    def _read_xs(self, mat_id, mt, nuc_i=None):
+    def _read_xs(self, nuc, mt, nuc_i=None):
         """Read in cross-section data. Read resonances with Library._read_res
         first.
 
         Parameters
         -----------
-        mat_id: int
-            ZZAAAM of material.
+        nuc: int
+            id of material.
         mt: int
             Reaction number to find cross-section data of.
         nuc_i: int
             Isotope to find; if None, defaults to mat_id.
         """
+        nuc = nucname.id(nuc)
         if nuc_i == None:
-            nuc_i = mat_id
-        xsdata = self.get_rx(mat_id, 3, mt).reshape(-1,6)
+            nuc_i = nuc
+        xsdata = self.get_rx(nuc, 3, mt).reshape(-1,6)
         total_lines = 0
         head_flags = self._get_head(('ZA','AWR',0,0,0,0),
                                     xsdata[total_lines])
@@ -792,7 +793,7 @@ class Library(rx.RxLib):
             ('Eint','xs'),
             xsdata[total_lines:])
         int_flags.update(head_flags)
-        isotope_dict = self.structure[mat_id]['data'][nuc_i]
+        isotope_dict = self.structure[nuc]['data'][nuc_i]
         isotope_dict['xs'].update({mt: (int_data, int_flags)})
         total_lines += int_size
 
@@ -802,19 +803,22 @@ class Library(rx.RxLib):
         Parameters
         -----------
         nuc: int
-            ZZAAAM of nuclide to read.
+            id of nuclide to read.
         mt: int
             ENDF reaction number to read.
         nuc_i: int
-            ZZAAAM of isotope to read. Defaults to nuc.
+            id of isotope to read. Defaults to nuc.
 
         Returns
         --------
         tuple
             Returns a tuple with xs data in tuple[0] and flags in tuple[1].
         """
+        # nuc = nucname.id(nuc)
         if not nuc_i:
             nuc_i = nuc
+        # else:
+            # nuc_i = nucname.id(nuc_i)
         if nuc not in self.structure:
             self._read_res(nuc)
         if nuc_i not in self.structure[nuc]['data'] or \
@@ -828,7 +832,7 @@ class Library(rx.RxLib):
         Parameters
         -----------
         nuc: int
-            ZZAAAM form of material to read from.
+            id form of material to read from.
         mf: int
             ENDF file number (MF).
         mt: int
@@ -842,6 +846,7 @@ class Library(rx.RxLib):
         data: NumPy array
             Contains the reaction data in an Nx6 array.
         """
+        nuc = nucname.id(nuc)
         if nuc in self.structure:
             return self._read_nucmfmt(nuc, mf, mt, lines)
         else:
@@ -853,7 +858,7 @@ class Library(rx.RxLib):
         Parameters
         -----------
         nuc : int
-            ZZAAAM of nuclide.
+            id of nuclide.
         mf : int
             ENDF file number (MF).
         mt : int
