@@ -787,7 +787,8 @@ def test_u235():
     try:
         assert(os.path.isfile('U235.txt'))
     except AssertionError as e:
-        msg = """U235.txt not found. You do not appear to have the U235 ENDF-VII.1 neutron data.
+        msg = """
+U235.txt not found. You do not appear to have the U235 ENDF-VII.1 neutron data.
 
 If you wish to test this library on real ENDF data, download it at
 http://t2.lanl.gov/data/data/ENDFB-VII.1-neutron/U/235 and save it to U235.txt.
