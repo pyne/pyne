@@ -9,7 +9,7 @@ from pyne.endf import Library
 from pyne.utils import endftod
 from pyne.rxdata import DoubleSpinDict
 from pyne.xs.data_source import ENDFDataSource
-import pyne.nucname as nucname
+from pyne import nucname
 
 import nose
 from nose.tools import assert_equal
