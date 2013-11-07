@@ -34,6 +34,12 @@ message("-- PYTHON_EXECUTABLE: ${PYTHON_EXECUTABLE}")
 # Instruction for use can be found at the top of cmake/UseCython.cmake.
 include( UseCython )
 
+execute_process(COMMAND "${CYTHON_EXECUTABLE}" "-V" 
+    ERROR_VARIABLE CYTHON_VERSION
+    ERROR_STRIP_TRAILING_WHITESPACE)
+message( STATUS "Cython Version: " ${CYTHON_VERSION} )
+
+
 # Also, there are some custom pyne macros to make for less verbosity
 include( PyneMacros )
 
