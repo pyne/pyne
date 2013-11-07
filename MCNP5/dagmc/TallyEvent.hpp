@@ -61,7 +61,8 @@ struct TallyEvent
  
     double get_score_multiplier(int multiplier_index) const
     {
-       if (multiplier_index == -1 || multiplier_index >= multipliers.size())
+       int size = multipliers.size();
+       if (multiplier_index == -1 || multiplier_index >= size)
        {
           return particle_weight;
        }

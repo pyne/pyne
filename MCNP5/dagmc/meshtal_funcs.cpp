@@ -7,19 +7,22 @@
 #include <fstream>
 #include <sstream>
 #include <cassert>
+#include <vector>
 
 #include "meshtal_funcs.h"
 #include "TallyManager.hpp"
 
 // TODO modify/remove this method when tally multipliers are implemented
-void mcnp_weight_calculation(int* index, double* erg, double* wgt, 
-                              double* dist, double* score_result)
+void mcnp_weight_calculation(int* index, double* erg, double* value) 
 {
-    FMESH_FUNC(dagmc_mesh_score)(index, erg, wgt, dist, score_result);
+    FMESH_FUNC(dagmc_mesh_score)(index, erg, value);
 }
 
 // create a tally manager to handle all DAGMC tally actions
 TallyManager tallyManager = TallyManager();
+
+// Store fmesh_index of tallys that have multipliers (which will be updated)
+std::vector<int> fmesh_idxs;
 
 //---------------------------------------------------------------------------//
 // INITIALIZATION AND SETUP METHODS
@@ -128,7 +131,7 @@ std::string copyComments(char* fort_comment, int* n_comment_lines)
  * \param[in] n_comment_lines the number of comment lines
  * \param[out] is_collision_tally indicates that tally uses collision estimator
  */
-void dagmc_fmesh_setup_mesh_(int* /*ipt*/, int* id, int* multiplier_id,
+void dagmc_fmesh_setup_mesh_(int* /*ipt*/, int* id, int* fmesh_idx,
                              double* energy_mesh, int* n_energy_mesh,
                              int* tot_energy_bin, 
                              char* fort_comment, int* n_comment_lines,
@@ -192,10 +195,16 @@ void dagmc_fmesh_setup_mesh_(int* /*ipt*/, int* id, int* multiplier_id,
     } 
 
     tallyManager.addNewTally(*id, type, emesh_boundaries, fc_settings);
-    if (*multiplier_id != -1)
+    // Create a zero-based version of fmesh_idx to use as multiplier_id
+    int multiplier_id = *fmesh_idx - 1;
+    // Always do this so the list is as long as the list of the tallies
+    tallyManager.addNewMultiplier(multiplier_id);
+    // Do things that only need to be done for existing tally requests 
+    if (*fmesh_idx != -1)
     {
-       tallyManager.addNewMultiplier(*multiplier_id);
-       tallyManager.addMultiplierToTally(*multiplier_id, *id);
+       tallyManager.addMultiplierToTally(multiplier_id, *id);
+       // Add current index to the speed-up vector
+       fmesh_idxs.push_back(*fmesh_idx);   
     }
 }
 //---------------------------------------------------------------------------//
@@ -331,6 +340,8 @@ void dagmc_fmesh_end_history_()
  * \param[in] wgt the weight of the particle
  * \param[in] d the track length
  * \param[in] icl the current cell ID (MCNP global variable)
+ * 
+ * This function is called once per tally event
  */
 void dagmc_fmesh_score_(double *x, double *y, double *z,
                         double *u, double *v, double *w, 
@@ -345,12 +356,6 @@ void dagmc_fmesh_score_(double *x, double *y, double *z,
 
     tallyManager.setTrackEvent(*x, *y, *z, *u, *v, *w, *erg, *wgt, *d, *icl);
     tallyManager.updateTallies();
-    int numMultipliers = tallyManager.getNumMultipliers();
-    for (int i=0; i<numMultipliers; i++)
-    {
-        double value = 1.0;
-        tallyManager.updateMultiplier(i,value);
-    }
 }
 //---------------------------------------------------------------------------//
 /**
@@ -369,6 +374,8 @@ void dagmc_fmesh_print_(double* sp_norm)
  * \param[in] wgt the weight of the particle
  * \param[in] ple the total macroscopic cross section of the current cell
  * \param[in] icl the current cell ID (MCNP global variable)
+ * 
+ * This function is called once per collision tally event
  */
 void dagmc_collision_score_(double* x,   double* y, double* z, 
                             double* erg, double* wgt,
@@ -377,6 +384,19 @@ void dagmc_collision_score_(double* x,   double* y, double* z,
     tallyManager.setCollisionEvent(*x, *y, *z, *erg, *wgt, *ple, *icl);
     tallyManager.updateTallies();
 }
+
+//---------------------------------------------------------------------------//
+void dagmc_update_multipliers_(double *erg)
+{
+   std::vector<int>::iterator it;
+   double value = 1.0;
+   for (it=fmesh_idxs.begin(); it!=fmesh_idxs.end(); ++it)
+   {
+       mcnp_weight_calculation(&(*it), erg, &value);
+       tallyManager.updateMultiplier(*it-1, value);
+   }
+}
+
 //---------------------------------------------------------------------------//
 
 // end of MCNP5/dagmc/meshtal_funcs.cpp

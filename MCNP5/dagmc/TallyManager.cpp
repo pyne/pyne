@@ -53,7 +53,6 @@ void TallyManager::addMultiplierToTally(int multiplier_id, unsigned int tally_id
         
     std::map<int, Tally *>::iterator it;	
     it = observers.find(tally_id);
-   
     if (multiplier_id < event.multipliers.size() && it != observers.end())
     {
         Tally *tally = it->second;
