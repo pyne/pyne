@@ -789,16 +789,10 @@ def test_xs():
 def test_u235():
     try:
         assert(os.path.isfile('U235.txt'))
-    except AssertionError as e:
-        msg = """
-U235.txt not found. You do not appear to have the U235 ENDF-VII.1 neutron data.
-
-If you wish to test this library on real ENDF data, download it at
-http://t2.lanl.gov/data/data/ENDFB-VII.1-neutron/U/235 and save it to U235.txt.
-It is 51 MB, so we did not include it."""
-        e.args += (msg,)
-        raise
-
+    except AssertionError:
+        from urllib import urlretrieve
+        urlretrieve("http://t2.lanl.gov/nis/data/data/ENDFB-VII.1-neutron/U/235",
+                    "U235.txt")
     u235 = Library('U235.txt')
     nuc = 922350000
     u235._read_res(nuc)
