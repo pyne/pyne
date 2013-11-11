@@ -9,6 +9,7 @@ from pyne.endf import Library
 from pyne.utils import endftod
 from pyne.rxdata import DoubleSpinDict
 from pyne.xs.data_source import ENDFDataSource
+from pyne import nucname
 
 import nose
 from nose.tools import assert_equal
@@ -356,10 +357,11 @@ convallis tristique sem.                                           419 1451   14
 
 
 library = Library(str_library)
-library._read_res(10020000)
-library._read_res(10030001)
-library._read_res(40000000)
-
+nuc1002, nuc10031, nuc40000 = nucname.id(1002), nucname.id(10031), nucname.id(40000)
+library._read_res(nuc1002)
+library._read_res(nuc10031)
+library._read_res(nuc40000)
+nuc40040 = nucname.id(40040)
 
 def array_from_ENDF(fh):
     "Convert a chunk of ENDF, stripped of metadata, into a numpy array."
@@ -398,7 +400,7 @@ def test_endftod():
 
 
 def test_get():
-    obs = library.get_rx(40000000, 4, 2)
+    obs = library.get_rx(nuc40000, 4, 2)
     exp = [4.898421e+3,6.768123e+0,0,1,0,0,2.123124e+6,8.123142e-6,2.123212e+6,
            8.231231e-6,-2.231211e+6,8.123421e-6]
     try:
@@ -411,7 +413,7 @@ def test_get():
 
 def test_unresolved_resonances_a():
     # Case A (ENDF Manual p.70)
-    obs = library.mat10030001['data'][10031]['unresolved']
+    obs = library.structure[nuc10031]['data'][nuc10031]['unresolved']
     obs_LIST = obs[1][2][2,2]
 
     exp = array_from_ENDF(StringIO.StringIO(
@@ -425,7 +427,7 @@ def test_unresolved_resonances_a():
 
 def test_unresolved_resonances_b():
     # Case B (ENDF Manual p. 70)
-    obs = library.mat40000000['data'][40040]['unresolved']
+    obs = library.structure[nuc40000]['data'][nuc40040]['unresolved']
     # For the spin=4.5, L=3, J=4 section in the first isotope
     obs_1 = obs[0][2][4.5,3,4]
     exp_1_a = array_from_ENDF(StringIO.StringIO(
@@ -465,7 +467,7 @@ def test_unresolved_resonances_b():
 
 def test_unresolved_resonances_c():
     # Case C (ENDF Manual p. 70)
-    obs = library.mat40000000['data'][40040]['unresolved'][2][2][0.5,6,9]
+    obs = library.structure[nuc40000]['data'][nuc40040]['unresolved'][2][2][0.5,6,9]
 
     exp_a = array_from_ENDF(StringIO.StringIO(
         """ 9.000000+0 0.000000+0          2          0         18          2
@@ -504,7 +506,7 @@ def test_resolved_breitwigner():
          ER         AJ         GT         GN         GG         GF 419 2151    8
 """
 
-    data = library.mat10020000['data'][10020]['resolved']
+    data = library.structure[nuc1002]['data'][nuc1002]['resolved']
     # Check to see if NRO is reading from the right place.
     # NRO = 0 case
     range_nro_0 = data[2]
@@ -531,7 +533,7 @@ def test_resolved_reichmoore():
         ER         AJ         GN         GG        GFA        GFB 419 2151    7
 """
 
-    subsection = library.mat10020000['data'][10020]['resolved'][1]
+    subsection = library.structure[nuc1002]['data'][nuc1002]['resolved'][1]
     assert_array_equal(subsection[2]['int']['intpoints'], [3,7])
     assert_array_equal(subsection[2]['int']['intschemes'], [4,1])
 
@@ -558,7 +560,7 @@ def test_resolved_adleradler():
              ------------------------------------
              ------------------------, GICN LJ ] LIST
 """
-    subsection = library.mat10020000['data'][10020]['resolved'][0]
+    subsection = library.structure[nuc1002]['data'][nuc1002]['resolved'][0]
 
     obs_LIST = subsection[2][3.5,5,3]
     obs_bg = subsection[2]['bg']
@@ -585,8 +587,8 @@ def test_resolved_adleradler():
 
 def test_resolved_r_matrix_kbk_kps():
 
-    obs_3 = library.mat10020000['data'][10020]['resolved'][-1][2][3.0]
-    obs_4 = library.mat10020000['data'][10020]['resolved'][-1][2][-4.0]
+    obs_3 = library.structure[nuc1002]['data'][nuc1002]['resolved'][-1][2][3.0]
+    obs_4 = library.structure[nuc1002]['data'][nuc1002]['resolved'][-1][2][-4.0]
 
     exp_3 = array_from_ENDF(StringIO.StringIO(
         """ 1.960831+3-1.053619+4          0          0          3          1
@@ -683,7 +685,6 @@ def test_resolved_r_matrix_kbk_kps():
     assert_equal(lbk2_exp, lbk2_obs)
 
 
-
 def test_resolved_r_matrix():
     pp_exp_a = array_from_ENDF(StringIO.StringIO(
         """1.685738+5 1.659888-5          1          7          0          0
@@ -693,7 +694,7 @@ def test_resolved_r_matrix():
  5.307428-7          0          1          7          1         -1
  2.807643-8-4.478596+0 3.274758+3-2.760395+9 1.356440+3 3.447654+4
  4.790839-8          1         -1        800          1         -1"""))
-    pp_obs = library.mat10020000['data'][10020]['resolved'][-1][3]
+    pp_obs = library.structure[nuc1002]['data'][nuc1002]['resolved'][-1][3]
     pp_exp = dict(zip(('MA','MB','ZA','ZB','IA','IB','Q','PNT','SHF','MT',
                        'PA','PB'),
                        pp_exp_a[3:7].reshape(2,12).transpose()))
@@ -713,7 +714,7 @@ def test_resolved_r_matrix():
                          ch_exp_a[4:6].transpose()))
     ch_exp[-4.0] = dict(zip(('IPP','L','SCH','BND','APE','APT'),
                           ch_exp_a[1:3].transpose()))
-    ch_obs = library.mat10020000['data'][10020]['resolved'][-1][2]
+    ch_obs = library.structure[nuc1002]['data'][nuc1002]['resolved'][-1][2]
 
     gam_4_a = array_from_ENDF(StringIO.StringIO(
         """ 2.949030-1 1.156625+7 7.255199-6          0          0          0
@@ -745,8 +746,9 @@ def test_resolved_r_matrix():
 
 def test_xs():
     # Read in the data
-    library._read_xs(40000000, 2, 40192)
-    library._read_xs(40000000, 600, 40040)
+    nuc_i = nucname.id(40192)
+    library._read_xs(nuc40000, 2, nuc_i)
+    library._read_xs(nuc40000, 600, nuc40040)
 
     # Manually find where the data should be reading from and check if it is
     # consistent with what the program is doing.
@@ -759,7 +761,7 @@ def test_xs():
     exp_2_a = array_from_ENDF(exp_2_str)
     exp_2 = dict(zip(('intpoints', 'intschemes'),
                      (exp_2_a[2:].flat[:14:2], exp_2_a[2:].flat[1:14:2])))
-    obs_2 = library.mat40000000['data'][40192]['xs'][2][0]
+    obs_2 = library.structure[nuc40000]['data'][nuc_i]['xs'][2][0]
 
     exp_600_a = array_from_ENDF(StringIO.StringIO(
         """ 4.193742+3 6.287192+0          0          0          0          0
@@ -769,14 +771,14 @@ def test_xs():
 
     exp_600 = dict(zip(('intpoints', 'intschemes'),
                        (exp_600_a[2:].flat[:-2:2], exp_600_a[2:].flat[1:-1:2])))
-    obs_600 = library.mat40000000['data'][40040]['xs'][600][0]
+    obs_600 = library.structure[nuc40000]['data'][nuc40040]['xs'][600][0]
 
     for key in exp_2:
         assert_array_equal(obs_2[key], exp_2[key])
         assert_array_equal(obs_600[key], exp_600[key])
 
     # Heck, why not check the flags too?
-    obs_600_flags = library.mat40000000['data'][40040]['xs'][600][1]
+    obs_600_flags = library.structure[nuc40000]['data'][nuc40040]['xs'][600][1]
     exp_600_flags = dict(zip(('QM','QI',0,'LM','NR','NP'),
         exp_600_a[1]))#
     exp_600_flags.update({'ZA': 4.004e+3, 'AWR': 6.287192})
@@ -785,15 +787,16 @@ def test_xs():
 
 
 def test_u235():
-    """This test file can be found here:
-    http://t2.lanl.gov/data/data/ENDFB-VII.1-neutron/U/235
-    It is very big (51 MB), so it is not included.
-    """
-    if not os.path.isfile('U235.txt'):
-        return
+    try:
+        assert(os.path.isfile('U235.txt'))
+    except AssertionError:
+        from urllib import urlretrieve
+        urlretrieve("http://t2.lanl.gov/nis/data/data/ENDFB-VII.1-neutron/U/235",
+                    "U235.txt")
     u235 = Library('U235.txt')
-    u235._read_res(922350)
-    u235._read_xs(922350, 37)
+    nuc = 922350000
+    u235._read_res(nuc)
+    u235._read_xs(nuc, 37)
     exp_a = array_from_ENDF(StringIO.StringIO
          (""" 9.223500+4 2.330248+2          0          0          0          0
 -1.788560+7-1.788560+7          0          0          1          6
@@ -801,7 +804,7 @@ def test_u235():
  1.796240+7 5.05980-10 1.800000+7 3.810030-7 1.850000+7 8.441785-5
  1.900000+7 2.387410-4 1.950000+7 1.348763-3 2.000000+7 4.785594-3
 """))
-    obs =  u235.mat922350['data'][922350]['xs'][37][0]
+    obs =  u235.structure[nuc]['data'][nuc]['xs'][37][0]
     exp = {'intpoints': 6, 'intschemes': 2,
            'Eint': exp_a[3:5].flat[::2],
            'xs': exp_a[3:5].flat[1::2]}
@@ -815,8 +818,8 @@ ds = ENDFDataSource(str_library)
 
 def test_group_struct():
     from math import e
-    ds._load_reaction(40000000, 600, 40040)
-    obs = ds.rxcache[40000000, 600, 40040]['src_group_struct']
+    ds._load_reaction(nuc40000, 600, nuc40040)
+    obs = ds.rxcache[nuc40000, 600, nuc40040]['src_group_struct']
     exp = [np.array([1., 4., 10., 20.]),
            np.array([1., 4., 10., 20.]),
            np.array([1, round(e, 6), round(e,6), round(e**2, 6)]),
@@ -869,7 +872,7 @@ def test_int_loglog():
     return exp
 
 def test_discretize():
-    obs = ds.discretize(40000000, 600, 40040)
+    obs = ds.discretize(nuc40000, 600, nuc40040)
     exp = [test_int_loglog(),
            test_int_loglin(),
            test_int_linlog(),
