@@ -188,6 +188,7 @@ void pyne::Material::_load_comp_protocol1(hid_t db, std::string datapath, int ro
 
   // Close out the HDF5 file
   H5Fclose(db);
+  H5close();
 };
 
 
@@ -496,7 +497,7 @@ void pyne::Material::write_hdf5(std::string filename, std::string datapath,
 
   // Close out the HDF5 file
   H5Fclose(db);
-
+  H5close();
   // Remember the milk!  
   // ...by which I mean to deallocate
   delete[] mat_data;
