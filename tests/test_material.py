@@ -1118,6 +1118,8 @@ def test_matlib_hdf5_nuc_data():
 
 def test_matlib_hdf5():
     filename = "matlib.h5"
+    if filename in os.listdir('.'):
+        os.remove(filename)
     water = Material()
     water.from_atom_frac({10000000: 2.0, 80000000: 1.0})
     water.attrs["name"] = "Aqua sera."
