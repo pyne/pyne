@@ -29,5 +29,6 @@ examples/*.svg
 examples/*.png
 tests/test.file
 tests/test.txt
+tests/U235.txt
 
 .ipynb_checkpoints
