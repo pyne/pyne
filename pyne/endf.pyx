@@ -814,12 +814,12 @@ class Library(rx.RxLib):
         tuple
             Returns a tuple with xs data in tuple[0] and flags in tuple[1].
         """
-        # nuc = nucname.id(nuc)
+        nuc = nucname.id(nuc)
         if not nuc_i:
             nuc_i = nuc
-        # else:
-            # nuc_i = nucname.id(nuc_i)
-        if nuc not in self.structure:
+        else:
+            nuc_i = nucname.id(nuc_i)
+        if (nuc not in self.structure) or (not self.structure[nuc]['data']):
             self._read_res(nuc)
         if nuc_i not in self.structure[nuc]['data'] or \
            mt not in self.structure[nuc]['data'][nuc_i]['xs']:
