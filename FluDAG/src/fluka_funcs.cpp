@@ -68,11 +68,10 @@ std::set<std::string> FLUKA_mat_set(flukaMatStrings, flukaMatStrings+NUM_FLUKA_M
 /* Maximum character-length of a cubit-named material property */
 int MAX_MATERIAL_NAME_SIZE = 32;
 
-/* The number of types of cards to be written. Card 'types' are distinguished by
- * the combination of particle and tally type 
- */
-// static int num_units_in_use = 0;
-// UnitNumberManager unit_number = UnitNumberManager();
+std::multimap<std::string, unsigned int> scoring_vol_map;
+std::map<std::string, int> scoring_unit_map;
+
+UnitNumberManager unit_no_mgr = UnitNumberManager();
 
 bool debug = false; //true ;
 
@@ -607,17 +606,6 @@ static bool get_real_prop( MBEntityHandle vol, int cell_id, const std::string& p
   else return false;
 
 }
-ErrorCode DagMC::get_group_name( EntityHandle group_set, std::string& name )
-{
-  ErrorCode rval;
-  const void* v = NULL;
-  int ignored;
-  rval = MBI->tag_get_by_ptr(name_tag(), &group_set, 1, &v, &ignored);
-  if( MB_SUCCESS != rval ) return rval;
-  name = static_cast<const char*>(v);
-  return MB_SUCCESS;
-}
-
 void writeToFileNamed(std::ostringstream& oss, std::string index_id_filename);
 void addToIDIndexFile(int i, std::ostringstream& idstr);
 int getNextUnitNumber();
@@ -662,6 +650,8 @@ void fludagwrite_assignma(std::string filename_to_write)  // file with cell/surf
     exit(EXIT_FAILURE);
   }
 
+
+  unit_no_mgr = UnitNumberManager();
   // jcz debug: lists DEN, M, NEUTRON, S, USRTRACK
   std::vector< std::string >::iterator vit;
   for (vit=keywords.begin(); vit!=keywords.end(); ++vit)
@@ -684,11 +674,7 @@ void fludagwrite_assignma(std::string filename_to_write)  // file with cell/surf
       {
          std::cout << "Vol " << i << ", id=" << id << " has no props: " <<  std::endl; 
       }
-      std::string group_name;
-      entity = DAG->entity_by_index(3, i);
-      DAG->get_group_name(entity, group_name);
   }
-  std::string header = "*...+....1....+....2....+....3....+....4....+....5....+....6....+....7...";
 
   // Open an outputstring for mat.inp
   std::ostringstream ostr;
@@ -711,7 +697,7 @@ void fludagwrite_assignma(std::string filename_to_write)  // file with cell/surf
   std::vector<std::string> vals;
   std::string material_trunc;
   char buffer[MAX_MATERIAL_NAME_SIZE];
-  for (unsigned int i=1; i <= num_vols ; i++)
+  for (unsigned int i=1; i<=num_vols ; i++)
   {  
       // Get the properties for the current volume
   //    std::string props = mat_property_string(i, keywords);
@@ -729,18 +715,35 @@ void fludagwrite_assignma(std::string filename_to_write)  // file with cell/surf
 	 graveyard_str << std::setw(10) << std::right << "BLCKHOLE";
 	 graveyard_str << std::setw(10) << std::right << i << std::endl;
       }
-      else if (DAG->has_prop(entity, "M"))
+      if (DAG->has_prop(entity, "M"))
       {
-         std::cout << "Volume " << i << " material found.  Processing... " << std::endl;
+         // std::cout << "Volume " << i << " material found.  Processing... " << std::endl;
          DAG->prop_values(entity, "M", vals);
 
          process_Mi(A_filestr, entity, uniqueMatList, i);
       } // end processing of "M_" property
-      else if (DAG->has_prop(entity, "S"))
+      if (DAG->has_prop(entity, "S"))
       {
-         std::cout << "Volume " << i << " is tagged for scoring.  Processing... " << std::endl;
          process_Si(S_filestr, entity, i);
       } // end processing of "S_" property
+  }
+
+  // Print out the scoring by volume map
+  std::cout << "All scoring.particle and volumes" << std::endl;
+  unsigned int counter = 0;
+  std::map<std::string, unsigned int>::iterator uit;
+  for (uit = scoring_vol_map.begin(); uit != scoring_vol_map.end(); ++uit)
+  {
+     std::cout << counter << ". " << uit->first << " => " << uit->second << std::endl;
+     counter++;
+  }
+  std::cout << "Unique scoring.particle and unit numbers" << std::endl;
+  std::map<std::string, int>::iterator it;
+  counter = 0;
+  for (it = scoring_unit_map.begin(); it != scoring_unit_map.end(); ++it)
+  {
+     std::cout << counter << ". " << it->first << " => " << it->second << std::endl;
+     counter++;
   }
   // Add the processed strings to the output string
   // ostr << graveyard_str.str() + A_filestr.str() + S_filestr.str();
@@ -794,8 +797,10 @@ void fludagwrite_assignma(std::string filename_to_write)  // file with cell/surf
 //---------------------------------------------------------------------------//
 // process_Si
 //---------------------------------------------------------------------------//
-// Function template to allow compilation
-void process_Si(std::ostringstream& ostr, MBEntityHandle entity, unsigned i)
+// Process group names that have S as the key and track.[p'le] as the value
+// Examples:  USRTRACK.PROTON, RESNUCLEI, USRCOLL.NEUTRON
+// ToDo jcz: process the value side of the key_value pair
+void process_Si(std::ostringstream& ostr, MBEntityHandle entity, unsigned int vol_id)
 {
     MBErrorCode ret;
     std::vector<std::string> vals;
@@ -804,19 +809,18 @@ void process_Si(std::ostringstream& ostr, MBEntityHandle entity, unsigned i)
     ret = DAG->prop_values(entity, "S", vals);
     if (MB_SUCCESS != ret) 
     {
-       std::cerr << "DAGMC failed to get M_ properties" <<  std::endl;
+       std::cerr << "DAGMC failed to get S_ properties" <<  std::endl;
        return;
     }
-    std::cout << "\nProcessing scoring tags in ";
-    std::cout << __FILE__ << ", " << __func__ << ":" << __LINE__ << "_______________" << std::endl;
-    std::cout << "vals.size() = " << vals.size() << std::endl;
-    for (i=0; i<vals.size(); i++)
+    int unit_no = 0; 
+  //   std::cout << "Volume " << vol_id << " scoring requested: = " << std::endl;
+    for (int i=0; i<vals.size(); i++)
     {
-        std::cout << std::setw(5) << std::right << i << "    " << std::left << vals[i];
-    }
-    std::cout << std::endl;
-    if (vals.size() >= 1)
-    {
+    //    std::cout << std::setw(5) << std::right << i << "    " << std::left << vals[i] << std::endl;
+	scoring_vol_map.insert(std::pair<std::string, unsigned int>(vals[i], vol_id));
+	unit_no = unit_no_mgr.getUnitNumber(vals[i]);  
+	scoring_unit_map.insert(std::pair<std::string, int>(vals[i], unit_no));
+	
     }
 }
 //---------------------------------------------------------------------------//
@@ -850,32 +854,6 @@ void processUniqueMaterials(std::ostringstream& ostr,
   }
   return;
 }
-
-//---------------------------------------------------------------------------//
-// process_S_RESNUCLEI
-//---------------------------------------------------------------------------//
-// Process the request for a RESNUCLEI tally
-/*
-void process_S_RESNUCLEI(std::ostringstream& ostr, MBEntityHandle entity, unsigned i)
-{
-   MBErrorCode ret;
-   std::vector<std::string> vals;
-
-   int unitNum = getRESNUCLEIUnitNumber()
-   return;
-} 
-*/
-/*
-int getRESNUCLEIUnitNumber()
-{
-    if (RESNUCLEI_Unit = -1)
-    {
-       RESNUCLEI_Unit = getNextUnitNumber();
-       ++num_units_in_use;
-    }
-    return RESNUCLEI_Unit;
-}
-*/
 //---------------------------------------------------------------------------//
 // process_MI
 //---------------------------------------------------------------------------//

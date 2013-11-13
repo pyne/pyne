@@ -18,16 +18,16 @@ class UnitNumberManager
 
 
     int getUnitNumber(std::string name);
-    /* 
-     * The number of types of cards to be written. Card 'types' are distinguished by
-     * the combination of particle and tally type 
-     */
-    static int num_units_in_use;
 
   private:
 
     std::map<std::string, int> nameNumberMap;
     int getNextUnitNumber();
+    /* 
+     * The number of types of cards to be written. Card 'types' are distinguished by
+     * the combination of particle and tally type 
+     */
+    int num_units_in_use;
 };
 
 #endif // FLUDAG_SRC_UNIT_NUMBER_MANAGER_HPP

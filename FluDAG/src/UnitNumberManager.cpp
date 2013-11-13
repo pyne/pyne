@@ -7,8 +7,13 @@ const int BAD_UNIT_NUMBER = 0;
 const int START_UNIT      = -21;
 const int END_UNIT        = -99;
 
-// Initialize the static variables
-int UnitNumberManager::num_units_in_use = 0;
+//---------------------------------------------------------------------------//
+// CONSTRUCTOR
+//---------------------------------------------------------------------------//
+UnitNumberManager::UnitNumberManager() 
+{
+    num_units_in_use = 0;
+}
 
 //---------------------------------------------------------------------------//
 // getUnitNumber()
@@ -16,6 +21,11 @@ int UnitNumberManager::num_units_in_use = 0;
 // Find the unit number in a map, or calculate it and add a new map entry
 int UnitNumberManager::getUnitNumber(std::string name)
 {
+    if (true)
+    { 
+       std::cout << "Number of units assigned = " << num_units_in_use << std::endl;
+       std::cout << "For name " << name << ", count is " << nameNumberMap.count(name) << std::endl; 
+    }
     // If name is already in the map, grab the int associated with it
     if ( UnitNumberManager::nameNumberMap.count(name)>0 )
     {

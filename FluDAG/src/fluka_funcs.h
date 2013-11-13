@@ -31,9 +31,35 @@ extern "C" {
   void slow_check(double pos[3], const double dir[3], int &oldReg);
   MBEntityHandle check_reg(MBEntityHandle volume, double point[3], double dir[3]); // check we are where we say we are
 
+  /* Convenience function for tokenizing.  
+   * Ref: http://stackoverflow.com/questions/10051679/c-tokenize-string 
+   */
+  std::vector<std::string> inline StringSplit(const std::string &source, 
+                                              const char *delimiter = " ", 
+					      bool keepEmpty = false)
+  {
+        std::vector<std::string> results;
+        size_t prev = 0;
+	size_t next = 0;		
+
+        // Reminder: string::npos ==> what 'next' will be if nothing found
+	while ( (next = source.find_first_of(delimiter, prev)) != std::string::npos)
+	{
+ 	    if (keepEmpty || (next - prev != 0))
+	    {
+		results.push_back(source.substr(prev, next-prev));
+	    }		
+	    prev = next + 1;
+	}
+	
+	if (prev < source.size())
+	{
+ 	    results.push_back(source.substr(prev));
+	}
+	
+	return results;
+  }
   /** Store the name of a group in a string */
-  // Taken from private section of DagMC.hpp
-  ErrorCode get_group_name( EntityHandle group_set, std::string& name );
 
   /* get the sense of a region with respect to the global next_surf,
    * which is set by a call to rayfire
