@@ -28,6 +28,7 @@ using moab::DagMC;
 #include <sstream>
 #include <set>
 #include <cstring>
+#include <string>
 
 #ifdef CUBIT_LIBS_PRESENT
 #include <fenv.h>
@@ -684,6 +685,9 @@ void fludagwrite_assignma(std::string filename_to_write)  // file with cell/surf
   // open an outputstring for the M_  and S_ portions
   std::ostringstream A_filestr;
   std::ostringstream S_filestr;
+  std::ostringstream r_filestr;
+  std::ostringstream ut_filestr;
+  std::ostringstream uc_filestr;
 
   // Open an outputstring for index-id table and put a header in it
   std::ostringstream idstr;
@@ -732,19 +736,48 @@ void fludagwrite_assignma(std::string filename_to_write)  // file with cell/surf
   std::cout << "All scoring.particle and volumes" << std::endl;
   unsigned int counter = 0;
   std::map<std::string, unsigned int>::iterator uit;
+  r_filestr << "* RESNUCLEI scoring requests." << std::endl;
+  r_filestr << header << std::endl;
+  
   for (uit = scoring_vol_map.begin(); uit != scoring_vol_map.end(); ++uit)
   {
-     std::cout << counter << ". " << uit->first << " => " << uit->second << std::endl;
      counter++;
+     std::cout << counter << ". " << uit->first << " => " << uit->second << std::endl;
+    
+     int   iVol = uit->second;
+     float fVol = (float) iVol;
+
+     char strVolID[10];
+     char strDetName[10];
+     sprintf (strVolID, "%c%d",'V', iVol);
+     sprintf (strDetName, "%s%d","RES_", iVol);
+
+     if (uit->first.compare("RESNUCLEI") == 0)
+     {
+        float fortran_unit = scoring_unit_map["RESNUCLEI"];
+
+        r_filestr << std::setw(10) << std::left << "RESNUCLEI";
+        r_filestr << std::setw(20) << std::right << std::fixed << std::setprecision(1) << fortran_unit;
+	r_filestr << std::setw(30) << std::right << std::fixed << std::setprecision(1) << fVol;
+        r_filestr << std::setw(9) << std::right << strVolID << " ";
+        r_filestr << std::setw(10) << std::left <<  strDetName;
+
+        r_filestr << std::endl;
+     }
+     if (uit->first.star
+     
   }
   std::cout << "Unique scoring.particle and unit numbers" << std::endl;
   std::map<std::string, int>::iterator it;
   counter = 0;
   for (it = scoring_unit_map.begin(); it != scoring_unit_map.end(); ++it)
   {
-     std::cout << counter << ". " << it->first << " => " << it->second << std::endl;
      counter++;
+     std::cout << counter << ". " << it->first << " => " << it->second << std::endl;
   }
+  S_filestr << r_filestr.str();
+  std::cout << S_filestr.str();
+
   // Add the processed strings to the output string
   // ostr << graveyard_str.str() + A_filestr.str() + S_filestr.str();
 
