@@ -740,11 +740,16 @@ void fludagwrite_assignma(std::string filename_to_write)  // file with cell/surf
   std::map<std::string, unsigned int>::iterator uit;
   r_filestr << "* RESNUCLEI scoring requests." << std::endl;
   r_filestr << header << std::endl;
+  ut_filestr << "* USRTRACK scoring requests." << std::endl;
+  ut_filestr << header << std::endl;
   
   for (uit = scoring_vol_map.begin(); uit != scoring_vol_map.end(); ++uit)
   {
      counter++;
      std::cout << counter << ". " << uit->first << " => " << uit->second << std::endl;
+     // Use the current scoring request to figure out what the unit no. should be.
+     float fortran_unit = scoring_unit_map[uit->first];
+
      // Get the volume id of the current volume, whose scoring info we are pulling out
      int   iVol = uit->second;
 
@@ -759,14 +764,15 @@ void fludagwrite_assignma(std::string filename_to_write)  // file with cell/surf
      }
      float fVol = (float) iVol;
      std::vector<std::string> dot_delimited = StringSplit(uit->first,".");
+ 
      
-     // The RESNUCLEI section:  use to_string when c11 comes
      char strDetName[10];
-     sprintf (strDetName, "%s%d","RES_", iVol);
+     // The RESNUCLEI section:  use to_string when c11 comes
 
-     if (uit->first.compare("RESNUCLEI") == 0)
+     // if (uit->first.compare("RESNUCLEI") == 0)
+     if (dot_delimited[0].compare("RESNUCLEI") == 0)
      {
-        float fortran_unit = scoring_unit_map["RESNUCLEI"];
+        sprintf (strDetName, "%s%d","RES_", iVol);
 
         r_filestr << std::setw(10) << std::left << "RESNUCLEI";
         r_filestr << std::setw(20) << std::right << std::fixed << std::setprecision(1) << fortran_unit;
@@ -776,7 +782,34 @@ void fludagwrite_assignma(std::string filename_to_write)  // file with cell/surf
 
         r_filestr << std::endl;
      }
-  //   if (uit->first.find_first_of("USRTRACK"
+     
+     // The USRTRACK section
+     else if (dot_delimited[0].compare("USRTRACK") == 0)
+     {
+        if (dot_delimited.size() >= 2)  // all is good
+        {
+           sprintf (strDetName, "%s%d","TRAC_", iVol);
+           ut_filestr << std::setw(10) << std::left << "USRTRACK";           
+           ut_filestr << std::setw(20) << std::right << dot_delimited[1];           
+           ut_filestr << std::setw(10) << std::right << std::fixed << std::setprecision(1) << fortran_unit;
+	   ut_filestr << std::setw(10) << std::right << std::fixed << std::setprecision(1) << fVol;
+           ut_filestr << std::setw(9)  << std::right << measurement << " ";
+           ut_filestr << std::setw(10) << std::left <<  strDetName;
+           ut_filestr << std::endl;
+           ut_filestr << std::setw(10) << std::left << "USRTRACK";           
+           ut_filestr << std::setw(60) << std::right << "&";
+           ut_filestr << std::endl;
+        }
+        else if (dot_delimited.size() < 2)  // no particle was entered into the group name
+        {
+           std::cerr << "Error:  the USRTRACK score does not reference a particle.  Please label the USRTRACK group with S_USRTRAC.particle" << std::endl;
+        }
+        if (dot_delimited.size() > 2)  // hmm, there is a send piece, but also more
+        {
+           std::cerr << "Error:  the USRTRACK score has more than one particle reference.  Only the first particle, " <<
+                        dot_delimited[1] << ", is used." << std::endl;  
+        }
+     }
      
   }
   std::cout << "Unique scoring.particle and unit numbers" << std::endl;
@@ -787,8 +820,9 @@ void fludagwrite_assignma(std::string filename_to_write)  // file with cell/surf
      counter++;
      std::cout << counter << ". " << it->first << " => " << it->second << std::endl;
   }
-  S_filestr << r_filestr.str();
-  std::cout << S_filestr.str();
+  S_filestr <<  r_filestr.str();
+  S_filestr << ut_filestr.str();
+  std::cout <<  S_filestr.str();
 
   // Add the processed strings to the output string
   // ostr << graveyard_str.str() + A_filestr.str() + S_filestr.str();
