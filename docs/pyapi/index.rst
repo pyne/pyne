@@ -18,6 +18,7 @@ The following modules and sub-packages are discussed:
     njoy
     cccc
     ace
+    endf
     ensdf
     xs/index
     transmute/index
