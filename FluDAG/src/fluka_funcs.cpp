@@ -801,7 +801,9 @@ void fludagwrite_assignma(std::string filename_to_write)  // file with cell/surf
 //---------------------------------------------------------------------------//
 // Process group names that have S as the key and track.[p'le] as the value
 // Examples:  USRTRACK.PROTON, RESNUCLEI, USRCOLL.NEUTRON
-// ToDo jcz: process the value side of the key_value pair
+// Two maps are used:  a multimap to store every score request for every volume,
+//                     and a map to store every unique score request with a 
+//                     Fortran-style unit number
 void process_Si(std::ostringstream& ostr, MBEntityHandle entity, unsigned int vol_id)
 {
     MBErrorCode ret;
@@ -815,14 +817,12 @@ void process_Si(std::ostringstream& ostr, MBEntityHandle entity, unsigned int vo
        return;
     }
     int unit_no = 0; 
-  //   std::cout << "Volume " << vol_id << " scoring requested: = " << std::endl;
     for (int i=0; i<vals.size(); i++)
     {
-    //    std::cout << std::setw(5) << std::right << i << "    " << std::left << vals[i] << std::endl;
 	scoring_vol_map.insert(std::pair<std::string, unsigned int>(vals[i], vol_id));
+        // Get and store the unit number for the unique scoring/particle combo
 	unit_no = unit_no_mgr.getUnitNumber(vals[i]);  
 	scoring_unit_map.insert(std::pair<std::string, int>(vals[i], unit_no));
-	
     }
 }
 //---------------------------------------------------------------------------//
@@ -903,19 +903,6 @@ void process_Mi(std::ostringstream& ostr,
      ostr << std::setw(10) << std::right << material_trunc;
      ostr << std::setw(10) << std::right << i << std::endl;
 }
-//---------------------------------------------------------------------------//
-// getNextUnitNumber()
-//---------------------------------------------------------------------------//
-// Convenience method to get the next logical unit number for the writing-out 
-// field of a FLUKA card.  The key is when to call.  
-/*
-int getNextUnitNumber()
-{
-    int retval =  START_UNIT - num_units_in_use;
-    ++num_units_in_use;
-    return retval;
-}
-*/
 //---------------------------------------------------------------------------//
 // addToIDIndexMap(int i, 
 //---------------------------------------------------------------------------//
