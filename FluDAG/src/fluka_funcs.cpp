@@ -743,13 +743,23 @@ void fludagwrite_assignma(std::string filename_to_write)  // file with cell/surf
   {
      counter++;
      std::cout << counter << ". " << uit->first << " => " << uit->second << std::endl;
-    
+     // Get the volume id of the current volume, whose scoring info we are pulling out
      int   iVol = uit->second;
-     float fVol = (float) iVol;
 
-     char strVolID[10];
+     // Calculate some things we'll need that are based on the volume id 
+     EntityHandle handle = DAG->entity_by_id(3, iVol);
+     double measurement;
+     ret = DAG->measure_volume(handle, measurement);
+     if (MB_SUCCESS != ret) 
+     {
+       std::cerr << "DAGMC failed to get the measured volume of region " <<  iVol <<  std::endl;
+       return;
+     }
+     float fVol = (float) iVol;
+     std::vector<std::string> dot_delimited = StringSplit(uit->first,".");
+     
+     // The RESNUCLEI section:  use to_string when c11 comes
      char strDetName[10];
-     sprintf (strVolID, "%c%d",'V', iVol);
      sprintf (strDetName, "%s%d","RES_", iVol);
 
      if (uit->first.compare("RESNUCLEI") == 0)
@@ -759,12 +769,12 @@ void fludagwrite_assignma(std::string filename_to_write)  // file with cell/surf
         r_filestr << std::setw(10) << std::left << "RESNUCLEI";
         r_filestr << std::setw(20) << std::right << std::fixed << std::setprecision(1) << fortran_unit;
 	r_filestr << std::setw(30) << std::right << std::fixed << std::setprecision(1) << fVol;
-        r_filestr << std::setw(9) << std::right << strVolID << " ";
+        r_filestr << std::setw(9) << std::right << measurement << " ";
         r_filestr << std::setw(10) << std::left <<  strDetName;
 
         r_filestr << std::endl;
      }
-     if (uit->first.star
+  //   if (uit->first.find_first_of("USRTRACK"
      
   }
   std::cout << "Unique scoring.particle and unit numbers" << std::endl;
