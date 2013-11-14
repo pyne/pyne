@@ -607,12 +607,6 @@ static bool get_real_prop( MBEntityHandle vol, int cell_id, const std::string& p
   else return false;
 
 }
-void writeToFileNamed(std::ostringstream& oss, std::string index_id_filename);
-void addToIDIndexFile(int i, std::ostringstream& idstr);
-int getNextUnitNumber();
-void process_Mi(std::ostringstream& ostr, MBEntityHandle entity, std::list<std::string> &matList, unsigned i);
-void process_Si(std::ostringstream& ostr, MBEntityHandle entity, unsigned i);
-void processUniqueMaterials(std::ostringstream& ostr, std::list<std::string> uniqueList,std::string header);
 //---------------------------------------------------------------------------//
 // fludagwrite_assignma
 //---------------------------------------------------------------------------//
@@ -651,8 +645,6 @@ void fludagwrite_assignma(std::string filename_to_write)  // file with cell/surf
     exit(EXIT_FAILURE);
   }
 
-
-  unit_no_mgr = UnitNumberManager();
   // jcz debug: lists DEN, M, NEUTRON, S, USRTRACK
   std::vector< std::string >::iterator vit;
   for (vit=keywords.begin(); vit!=keywords.end(); ++vit)
@@ -684,12 +676,8 @@ void fludagwrite_assignma(std::string filename_to_write)  // file with cell/surf
   std::ostringstream graveyard_str;
   std::ostringstream impl_compl_str;
 
-  // open an outputstring for the M_  and S_ portions
+  // open an outputstring for the M_  (ASSIGNMAt) portions
   std::ostringstream A_filestr;
-  std::ostringstream S_filestr;
-  std::ostringstream r_filestr;
-  std::ostringstream ut_filestr;
-  std::ostringstream uc_filestr;
 
   // Open an outputstring for index-id table and put a header in it
   std::ostringstream idstr;
@@ -705,9 +693,6 @@ void fludagwrite_assignma(std::string filename_to_write)  // file with cell/surf
   char buffer[MAX_MATERIAL_NAME_SIZE];
   for (unsigned int i=1; i<=num_vols ; i++)
   {  
-      // Get the properties for the current volume
-  //    std::string props = mat_property_string(i, keywords);
-
       vals.clear();
       entity = DAG->entity_by_index(3, i);
 
@@ -723,16 +708,20 @@ void fludagwrite_assignma(std::string filename_to_write)  // file with cell/surf
       }
       if (DAG->has_prop(entity, "M"))
       {
-         // std::cout << "Volume " << i << " material found.  Processing... " << std::endl;
          DAG->prop_values(entity, "M", vals);
 
          process_Mi(A_filestr, entity, uniqueMatList, i);
       } // end processing of "M_" property
       if (DAG->has_prop(entity, "S"))
       {
-         process_Si(S_filestr, entity, i);
+         process_Si(entity, i);
       } // end processing of "S_" property
   }
+
+  std::ostringstream S_filestr;
+  std::ostringstream r_filestr;
+  std::ostringstream ut_filestr;
+  std::ostringstream uc_filestr;
 
   // Print out the scoring by volume map
   std::cout << "All scoring.particle and volumes" << std::endl;
@@ -747,7 +736,7 @@ void fludagwrite_assignma(std::string filename_to_write)  // file with cell/surf
   {
      counter++;
      std::cout << counter << ". " << uit->first << " => " << uit->second << std::endl;
-     // Use the current scoring request to figure out what the unit no. should be.
+     // Use the current scoring request to retrieve the value of the unit no.
      float fortran_unit = scoring_unit_map[uit->first];
 
      // Get the volume id of the current volume, whose scoring info we are pulling out
@@ -763,13 +752,14 @@ void fludagwrite_assignma(std::string filename_to_write)  // file with cell/surf
        return;
      }
      float fVol = (float) iVol;
+     // Create a vector of '.'-delimited strings from the original "key" part of the 
+     // group name (now the "value" part of the map).  The vector may be of size 1 for some score
+     // requests.  If not size 1 it should be size 2, e.g. USRCOLL, MUON
      std::vector<std::string> dot_delimited = StringSplit(uit->first,".");
- 
      
      char strDetName[10];
-     // The RESNUCLEI section:  use to_string when c11 comes
 
-     // if (uit->first.compare("RESNUCLEI") == 0)
+     // The RESNUCLEI section:  use to_string when c11 comes
      if (dot_delimited[0].compare("RESNUCLEI") == 0)
      {
         sprintf (strDetName, "%s%d","RES_", iVol);
@@ -786,32 +776,17 @@ void fludagwrite_assignma(std::string filename_to_write)  // file with cell/surf
      // The USRTRACK section
      else if (dot_delimited[0].compare("USRTRACK") == 0)
      {
-        if (dot_delimited.size() >= 2)  // all is good
-        {
-           sprintf (strDetName, "%s%d","TRAC_", iVol);
-           ut_filestr << std::setw(10) << std::left << "USRTRACK";           
-           ut_filestr << std::setw(20) << std::right << dot_delimited[1];           
-           ut_filestr << std::setw(10) << std::right << std::fixed << std::setprecision(1) << fortran_unit;
-	   ut_filestr << std::setw(10) << std::right << std::fixed << std::setprecision(1) << fVol;
-           ut_filestr << std::setw(9)  << std::right << measurement << " ";
-           ut_filestr << std::setw(10) << std::left <<  strDetName;
-           ut_filestr << std::endl;
-           ut_filestr << std::setw(10) << std::left << "USRTRACK";           
-           ut_filestr << std::setw(60) << std::right << "&";
-           ut_filestr << std::endl;
-        }
-        else if (dot_delimited.size() < 2)  // no particle was entered into the group name
-        {
-           std::cerr << "Error:  the USRTRACK score does not reference a particle.  Please label the USRTRACK group with S_USRTRAC.particle" << std::endl;
-        }
-        if (dot_delimited.size() > 2)  // hmm, there is a send piece, but also more
-        {
-           std::cerr << "Error:  the USRTRACK score has more than one particle reference.  Only the first particle, " <<
-                        dot_delimited[1] << ", is used." << std::endl;  
-        }
-     }
-     
+        sprintf (strDetName, "%s%d","TRAC_", iVol);
+        basic_score(ut_filestr, dot_delimited, fVol, fortran_unit, measurement, strDetName);
+     } 
+     // The USRCOLL section
+     else if (dot_delimited[0].compare("USRCOLL") == 0)
+     {
+        sprintf (strDetName, "%s%d","COLL_", iVol);
+        basic_score(uc_filestr, dot_delimited, fVol, fortran_unit, measurement, strDetName);
+     } 
   }
+  /* Optional:  Show the unit numbers on the screen */
   std::cout << "Unique scoring.particle and unit numbers" << std::endl;
   std::map<std::string, int>::iterator it;
   counter = 0;
@@ -820,8 +795,12 @@ void fludagwrite_assignma(std::string filename_to_write)  // file with cell/surf
      counter++;
      std::cout << counter << ". " << it->first << " => " << it->second << std::endl;
   }
+
+  // Collect all the scoring records into one stream
   S_filestr <<  r_filestr.str();
   S_filestr << ut_filestr.str();
+  S_filestr << uc_filestr.str();
+  // Optional: send all the scores to the screen
   std::cout <<  S_filestr.str();
 
   // Add the processed strings to the output string
@@ -874,6 +853,50 @@ void fludagwrite_assignma(std::string filename_to_write)  // file with cell/surf
 // End fludagwrite_assignma
 
 //---------------------------------------------------------------------------//
+// basic_score
+//---------------------------------------------------------------------------//
+// Some records are very similar, differing only in name
+void basic_score(std::ostringstream& ostr, 
+                 std::vector<std::string> score_words, 
+                 float fVol, float fortran_unit, double measurement,
+                 std::string name)
+{
+     char buf10[10];
+
+     if (score_words.size() >= 2)  // all is good
+     {
+           ostr << std::setw(10) << std::left << score_words[0];           
+           ostr << std::setw(20) << std::right << score_words[1];           
+           ostr << std::setw(10) << std::right << std::fixed << std::setprecision(1) << fortran_unit;
+	   ostr << std::setw(10) << std::right << std::fixed << std::setprecision(1) << fVol;
+           ostr << std::setw(9)  << std::right << measurement << " ";
+
+           ostr << std::setw(10) << std::left <<  name << std::endl;;
+	   sdum_endline(ostr, score_words[0]);
+     }
+     else if (score_words.size() < 2)  // no particle was entered into the group name
+     {
+           std::cerr << "Error: the " << score_words[0] << " score does not include a particle. " 
+                     << "Please label the group with particle" << std::endl;
+     }
+     if (score_words.size() > 2)  // hmm, there is a particle piece, but also more
+     {
+           std::cerr << "Error:  the " << score_words[0] << " score has more than one particle reference.  " 
+                     << "Only the first particle, " << score_words[1] << ", is used." << std::endl;  
+     }
+}
+//---------------------------------------------------------------------------//
+// sdum_endline
+//---------------------------------------------------------------------------//
+// Create a standard continuation line, putting the '&' on the 71st space
+// The line is tacked on to the output stream
+void sdum_endline(std::ostringstream& ostr, std::string score)
+{
+     ostr << std::setw(10) << std::left << score;           
+     ostr << std::setw(61) << std::right << "&";
+     ostr << std::endl;
+}
+//---------------------------------------------------------------------------//
 // process_Si
 //---------------------------------------------------------------------------//
 // Process group names that have S as the key and track.[p'le] as the value
@@ -881,7 +904,7 @@ void fludagwrite_assignma(std::string filename_to_write)  // file with cell/surf
 // Two maps are used:  a multimap to store every score request for every volume,
 //                     and a map to store every unique score request with a 
 //                     Fortran-style unit number
-void process_Si(std::ostringstream& ostr, MBEntityHandle entity, unsigned int vol_id)
+void process_Si(MBEntityHandle entity, unsigned int vol_id)
 {
     MBErrorCode ret;
     std::vector<std::string> vals;

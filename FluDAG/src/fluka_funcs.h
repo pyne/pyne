@@ -29,7 +29,35 @@ extern "C" {
                 int max_pbl);
 
   void slow_check(double pos[3], const double dir[3], int &oldReg);
-  MBEntityHandle check_reg(MBEntityHandle volume, double point[3], double dir[3]); // check we are where we say we are
+  // check we are where we say we are
+  MBEntityHandle check_reg(MBEntityHandle volume, double point[3], double dir[3]); 
+  /*
+   * Convenience function to open a file for writing
+   */
+  void writeToFileNamed(std::ostringstream& oss, std::string index_id_filename);
+  void addToIDIndexFile(int i, std::ostringstream& idstr);
+  /*
+   * Process a material assignment for the ith volume
+   */
+  void process_Mi(std::ostringstream& ostr, MBEntityHandle entity, std::list<std::string> &matList, unsigned i);
+  /*
+   * Process all scoring requests for the ith volume.
+   * 	- create a scoring-request vs volume-id multimap (numerous keys per value)
+   *    - create a unique-scoring-request vs fortran-unit-number map.  
+   *      Note 1: the unit number will be negative so that unformatted data will be produced 
+   *      Note 2: the unit number is translated from an int to a floating point in the card
+   */
+  void process_Si(MBEntityHandle entity, unsigned i);
+  void processUniqueMaterials(std::ostringstream& ostr, std::list<std::string> uniqueList,std::string header);
+  void sdum_endline(std::ostringstream& ostr, std::string score);
+  //---------------------------------------------------------------------------//
+  // basic_score
+  //---------------------------------------------------------------------------//
+  /// This function encapsulates very similar records for USRTRACK and USRCOLL
+  void basic_score(std::ostringstream& ostr, 
+                 std::vector<std::string> score_words, 
+                 float fVol, float fortran_unit, double measurement,
+                 std::string name);
 
   /* Convenience function for tokenizing.  
    * Ref: http://stackoverflow.com/questions/10051679/c-tokenize-string 
@@ -59,19 +87,18 @@ extern "C" {
 	
 	return results;
   }
-  /** Store the name of a group in a string */
 
   /* get the sense of a region with respect to the global next_surf,
    * which is set by a call to rayfire
   */
   int getSense(int region);
-/*
- * Prepare a descriptive string that creates the properties of the volume whose index is index
- */
+  /*
+   * Prepare a descriptive string that creates the properties of the volume whose index is index
+   */
   std::string mat_property_string (int index, std::vector<std::string> &properties);
-/*
- * Write the material assignment for each volume to a file named matfile
- */
+  /*
+   * Write records to a *.inp file for each volume tagged with material info and scoring requests.
+   */
   void fludagwrite_assignma(std::string matfile);  
 
   void dagmc_version_(double* dagmcVersion);
