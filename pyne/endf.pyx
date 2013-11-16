@@ -21,8 +21,6 @@ from libc.stdlib cimport malloc, free
 cimport numpy as np
 import numpy as np
 
-np.import_array()
-
 from pyne cimport cpp_nucname
 
 from math import e
@@ -875,7 +873,12 @@ class Library(rx.RxLib):
             opened_here = True
         else:
             fh = self.fh
-        start, stop = self.mat_dict[nuc]['mfs'][mf,mt]
+        try:
+            start, stop = self.mat_dict[nuc]['mfs'][mf,mt]
+        except KeyError as e:
+            msg = "MT {1} not found in File {0}.".format(mf, mt)
+            e.args = (msg,)
+            raise e
         fh.readline()
         fh.seek(start)
         if lines == 0:

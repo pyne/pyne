@@ -679,7 +679,7 @@ class ENDFDataSource(DataSource):
     def exists(self):
         if self._exists is None:
             if isinstance(self.fh, basestring):
-                self._exists = os.path.isfile(fh)
+                self._exists = os.path.isfile(self.fh)
             else:
                 self._exists = (isinstance(self.fh, file) or \
                                 isinstance(self.fh, StringIO.StringIO))
@@ -701,13 +701,15 @@ class ENDFDataSource(DataSource):
                 low_Eint = intpoints[i-1]
             high_Eint = intpoints[i]
             E_g.append(Eint[low_Eint:high_Eint])
+        self._src_group_struct = E_g
         rx_data['src_group_struct'] = E_g
+        self.ngroups = len(E_g)
         rx_data['src_phi_g'] = np.ones(len(E_g), dtype='f8') \
             if rx_data['_src_phi_g'] is None \
             else np.asarray(rx_data['src_phi_g'])
 
     def _load_reaction(self, nuc, rx, nuc_i, src_phi_g=None, temp=300.0):
-        """Note: EAF data does not use temperature information (temp)
+        """Note: ENDF data does not use temperature information (temp)
 
         Parameters
         ----------
@@ -726,25 +728,30 @@ class ENDFDataSource(DataSource):
         """
         nuc = nucname.id(nuc)
         # Munging the rx to an MT#
-        try:
-            rx = int(rx)
-        except ValueError:
-            rx = rxname.mt(rx)
+        # try:
+            # rx = int(rx)
+        # except ValueError:
+        rx = rxname.mt(rx)
         # Check if usable rx #
         if rx is None:
             return None
         # Grab data
-        if (nuc, rx, nuc_i) in self.rxcache:
-            rxdict = self.rxcache[nuc, rx, nuc_i]
-        else:
-            if nuc_i not in self.library.structure[nuc]['data']:
-                self.library._read_res(nuc)
-            rxdict = self.library.get_xs(nuc, rx, nuc_i)[0]
-            rxdict['_src_phi_g'] = src_phi_g
-            self.rxcache[nuc, rx, nuc_i] = rxdict
+        # if (nuc, rx, nuc_i) in self.rxcache:
+            # rxdict = self.rxcache[nuc, rx, nuc_i]
+        # else:
+        if nuc_i not in self.library.structure[nuc]['data']:
+            self.library._read_res(nuc)
+        rxdict = self.library.get_xs(nuc, rx, nuc_i)[0]
+        rxdict['_src_phi_g'] = src_phi_g
+        self.rxcache[nuc, rx, nuc_i] = rxdict
         self._load_group_structure(nuc, rx, nuc_i)
-        rxdata = rxdict['Eint']
-        return rxdata
+        return rxdict
+
+    def reaction(self, nuc, rx, nuc_i):
+        rx = rxname.mt(rx)
+        if (nuc, rx, nuc_i) not in self.rxcache:
+            self._load_reaction(nuc, rx, nuc_i)
+        return self.rxcache[nuc, rx, nuc_i]['xs']
 
     def discretize(self, nuc, rx, nuc_i, temp=300.0, src_phi_g=None,
                    dst_phi_g=None):
@@ -780,16 +787,15 @@ class ENDFDataSource(DataSource):
         # Check if usable rx #
         if rx is None:
             return None
-        self._load_group_structure(nuc, rx, nuc_i)
-        self._load_reaction(nuc, rx, nuc_i)
-        rxdata = self.rxcache[nuc, rx, nuc_i]
+        rxdata = self._load_reaction(nuc, rx, nuc_i)
         intpoints = rxdata['intpoints']
         intschemes = rxdata['intschemes']
         Eints = rxdata['Eint']
-        E_g = rxdata['src_group_struct']
+        E_g = self.src_group_struct
         xs = rxdata['xs']
         xs_all = []
         dst_sigma = []
+        dst_group_struct = self.dst_group_struct
         for i in range(len(intpoints)):
             if not i:
                 low_xs = 0
