@@ -70,7 +70,6 @@ std::set<std::string> FLUKA_mat_set(flukaMatStrings, flukaMatStrings+NUM_FLUKA_M
 int MAX_MATERIAL_NAME_SIZE = 32;
 
 std::multimap<std::string, unsigned int> scoring_vol_map;
-std::map<std::string, int> scoring_unit_map;
 
 UnitNumberManager unit_no_mgr = UnitNumberManager();
 
@@ -714,12 +713,14 @@ void fludagwrite_assignma(std::string filename_to_write)  // file with cell/surf
       {
          process_Si(entity, i);
       } // end processing of "S_" property
-  }
+  }  // end of volume processing loop
 
   std::ostringstream S_filestr;
   std::ostringstream r_filestr;
   std::ostringstream ut_filestr;
   std::ostringstream uc_filestr;
+  std::ostringstream ub_filestr;
+  std::ostringstream uy_filestr;
 
   // Print out the scoring by volume map
   std::cout << "All scoring.particle and volumes" << std::endl;
@@ -729,13 +730,18 @@ void fludagwrite_assignma(std::string filename_to_write)  // file with cell/surf
   r_filestr << header << std::endl;
   ut_filestr << "* USRTRACK scoring requests." << std::endl;
   ut_filestr << header << std::endl;
+  uc_filestr << "* USRCOLL scoring requests." << std::endl;
+  uc_filestr << header << std::endl;
+  ub_filestr << "* USRBDX scoring requests." << std::endl;
+  ub_filestr << header << std::endl;
+  uy_filestr << "* USRYIELD scoring requests." << std::endl;
+  uy_filestr << header << std::endl;
   
+  // Go through the map created whilst going through the volumes
   for (uit = scoring_vol_map.begin(); uit != scoring_vol_map.end(); ++uit)
   {
      counter++;
      std::cout << counter << ". " << uit->first << " => " << uit->second << std::endl;
-     // Use the current scoring request to retrieve the value of the unit no.
-     float fortran_unit = scoring_unit_map[uit->first];
 
      // Get the volume id of the current volume, whose scoring info we are pulling out
      int   iVol = uit->second;
@@ -751,15 +757,28 @@ void fludagwrite_assignma(std::string filename_to_write)  // file with cell/surf
      }
      float fVol = (float) iVol;
      // Create a vector of '.'-delimited strings from the original "key" part of the 
-     // group name (now the "value" part of the map).  The vector may be of size 1 for some score
-     // requests.  If not size 1 it should be size 2, e.g. USRCOLL, MUON
+     // group name (now the "value" part of the map).  
+     // The vector may be of size 1, 2, or 3, depending on the score type;
+     // No more than the first two values are used in the unit map.
      std::vector<std::string> dot_delimited = StringSplit(uit->first,".");
-     
+     std::string score_name;
+     if (dot_delimited.size() > 0)
+     {
+        score_name = dot_delimited[0];
+     }
+     else
+     {
+        std::cout << "The score group for volume " << iVol << " is empty." << std::endl;
+        continue;
+     }
+    
      char strDetName[10];
+     float fortran_unit;
 
      // The RESNUCLEI section:  use to_string when c11 comes
-     if (dot_delimited[0].compare("RESNUCLEI") == 0)
+     if (score_name.compare("RESNUCLEI") == 0)
      {
+        fortran_unit = get_score_particle_unit(dot_delimited);
         sprintf (strDetName, "%s%d","RES_", iVol);
 
         r_filestr << std::setw(10) << std::left << "RESNUCLEI";
@@ -770,39 +789,42 @@ void fludagwrite_assignma(std::string filename_to_write)  // file with cell/surf
 
         r_filestr << std::endl;
      }
-     
-     // The USRTRACK section
-     else if (dot_delimited[0].compare("USRTRACK") == 0)
+     // The USRTRACK section 
+     else if (score_name.compare("USRTRACK") == 0 && dot_delimited.size() == 2)
      {
+        fortran_unit = get_score_particle_unit(dot_delimited);
         sprintf (strDetName, "%s%d","TRAC_", iVol);
         basic_score(ut_filestr, dot_delimited, fVol, fortran_unit, measurement, strDetName);
      } 
      // The USRCOLL section
-     else if (dot_delimited[0].compare("USRCOLL") == 0)
+     else if (score_name.compare("USRCOLL") == 0 && dot_delimited.size() == 2)
      {
+        fortran_unit = get_score_particle_unit(dot_delimited);
         sprintf (strDetName, "%s%d","COLL_", iVol);
         basic_score(uc_filestr, dot_delimited, fVol, fortran_unit, measurement, strDetName);
      } 
-  }
-  /* Optional:  Show the unit numbers on the screen */
-  std::cout << "Unique scoring.particle and unit numbers" << std::endl;
-  std::map<std::string, int>::iterator it;
-  counter = 0;
-  for (it = scoring_unit_map.begin(); it != scoring_unit_map.end(); ++it)
-  {
-     counter++;
-     std::cout << counter << ". " << it->first << " => " << it->second << std::endl;
+     // The USRBDX section
+     else if (score_name.compare("USRBDX") == 0 && dot_delimited.size() >= 3)
+     {
+        fortran_unit = get_score_particle_unit(dot_delimited);
+        two_vol_score(ub_filestr, dot_delimited, iVol, fortran_unit, "BDX");
+     } 
+     // The USRYIELD section
+     else if (score_name.compare("USRYIELD") == 0 && dot_delimited.size() >= 3)
+     {
+        fortran_unit = get_score_particle_unit(dot_delimited);
+        two_vol_score(uy_filestr, dot_delimited, iVol, fortran_unit, "YIELD");
+     } 
   }
 
   // Collect all the scoring records into one stream
   S_filestr <<  r_filestr.str();
   S_filestr << ut_filestr.str();
   S_filestr << uc_filestr.str();
+  S_filestr << ub_filestr.str();
+  S_filestr << uy_filestr.str();
   // Optional: send all the scores to the screen
   std::cout <<  S_filestr.str();
-
-  // Add the processed strings to the output string
-  // ostr << graveyard_str.str() + A_filestr.str() + S_filestr.str();
 
   // Finish the ostr with the implicit complement card
   std::string implicit_comp_comment = "* The next volume is the implicit complement";
@@ -851,6 +873,38 @@ void fludagwrite_assignma(std::string filename_to_write)  // file with cell/surf
 // End fludagwrite_assignma
 
 //---------------------------------------------------------------------------//
+// two_vol_score
+//---------------------------------------------------------------------------//
+// Some records are very similar, differing only in name
+void two_vol_score(std::ostringstream& ostr, 
+                 std::vector<std::string> score_words, 
+                 int iVol, float fortran_unit, std::string score_prefix)
+{
+     // Prepare the detector name to go at the end of the line
+     char strDetName[10];
+     std::string subname (score_prefix + "_" + score_words[2] + "_");
+     char *cstr = new char [subname.length() + 1];
+     std::strcpy (cstr, subname.c_str());
+     sprintf (strDetName, "%s%d", cstr, iVol);
+
+     // We are guaranteed there are three values in score_words
+     ostr << std::setw(10) << std::left << score_words[0];           
+     ostr << std::setw(20) << std::right << score_words[1];           
+     ostr << std::setw(10) << std::right << std::fixed << std::setprecision(1) << fortran_unit;
+     ostr << std::setw(10) << std::right << std::fixed << std::setprecision(1) << score_words[2];
+     ostr << std::setw(10) << std::right << std::fixed << std::setprecision(1) << (float)iVol;
+
+     ostr << std::setw(10) << std::right << " ";
+     ostr << std::setw(10) << std::left <<  strDetName << std::endl;
+
+     sdum_endline(ostr, score_words[0]);
+     if (score_words.size() > 3)  // hmm, there is a particle piece, but also more
+     {
+           std::cerr << "Error:  the " << score_words[0] << " score has more than one particle reference.  " 
+                     << "Only the first particle, " << score_words[1] << ", is used." << std::endl;  
+     }
+}
+//---------------------------------------------------------------------------//
 // basic_score
 //---------------------------------------------------------------------------//
 // Some records are very similar, differing only in name
@@ -859,8 +913,6 @@ void basic_score(std::ostringstream& ostr,
                  float fVol, float fortran_unit, double measurement,
                  std::string name)
 {
-     char buf10[10];
-
      if (score_words.size() >= 2)  // all is good
      {
            ostr << std::setw(10) << std::left << score_words[0];           
@@ -894,14 +946,13 @@ void sdum_endline(std::ostringstream& ostr, std::string score)
      ostr << std::setw(61) << std::right << "&";
      ostr << std::endl;
 }
+
 //---------------------------------------------------------------------------//
 // process_Si
 //---------------------------------------------------------------------------//
 // Process group names that have S as the key and track.[p'le] as the value
 // Examples:  USRTRACK.PROTON, RESNUCLEI, USRCOLL.NEUTRON
-// Two maps are used:  a multimap to store every score request for every volume,
-//                     and a map to store every unique score request with a 
-//                     Fortran-style unit number
+// A multimap is used to store every score request for every volume,
 void process_Si(MBEntityHandle entity, unsigned int vol_id)
 {
     MBErrorCode ret;
@@ -914,14 +965,46 @@ void process_Si(MBEntityHandle entity, unsigned int vol_id)
        std::cerr << "DAGMC failed to get S_ properties" <<  std::endl;
        return;
     }
-    int unit_no = 0; 
     for (int i=0; i<vals.size(); i++)
     {
 	scoring_vol_map.insert(std::pair<std::string, unsigned int>(vals[i], vol_id));
-        // Get and store the unit number for the unique scoring/particle combo
-	unit_no = unit_no_mgr.getUnitNumber(vals[i]);  
-	scoring_unit_map.insert(std::pair<std::string, int>(vals[i], unit_no));
     }
+}
+
+//---------------------------------------------------------------------------//
+// get_score_particle_mapname
+//---------------------------------------------------------------------------//
+/// Convert the first two values of the group name (in the case there are two) to a 
+//  standard name for the fortran unit number getter
+std::string get_score_particle_mapname(std::string score_name, std::string particle_name)
+{
+    std::string keyword ( score_name + "." + particle_name);
+    char *cstr = new char [keyword.length() + 1];
+    std::strcpy (cstr, keyword.c_str());
+    return cstr;
+}
+
+//---------------------------------------------------------------------------//
+// get_score_particle_unit
+//---------------------------------------------------------------------------//
+/// Parse the vector of strings from the scoring group name values and determine
+//  the correct fortran unit number for them.  
+// This function relies on the UnitNumberManager class, whose key method returns
+// an int, however we always need a float unit number for the fluka cards, so
+// a float is returned. 
+//  If the vector is empty, this function returns -1
+float get_score_particle_unit(std::vector<std::string> score_words)
+{
+    std::string mapname;
+    if (score_words.size() == 1)
+    {
+        mapname = score_words[0];
+    }
+    else if (score_words.size() > 1)
+    {
+        mapname = get_score_particle_mapname(score_words[0], score_words[1]);
+    }
+    return (float)unit_no_mgr.getUnitNumber(mapname);
 }
 //---------------------------------------------------------------------------//
 // processUniqueMaterials

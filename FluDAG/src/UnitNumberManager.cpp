@@ -21,6 +21,13 @@ UnitNumberManager::UnitNumberManager()
 // Find the unit number in a map, or calculate it and add a new map entry
 int UnitNumberManager::getUnitNumber(std::string name)
 {
+    // During preprocessing of the string it may be determined to be invalid and not set
+    if ( name.empty())
+    {
+       std::cout << "empty............................................" << std::endl;
+       return -1;
+    }
+
     // If name is already in the map, return the int associated with it
     if ( UnitNumberManager::nameNumberMap.count(name)>0 )
     {
@@ -29,12 +36,16 @@ int UnitNumberManager::getUnitNumber(std::string name)
     else // otherwise get the next unit number
     {
        int unitNumber = getNextUnitNumber();
-       nameNumberMap.insert(std::make_pair(name,unitNumber)); 
        if (unitNumber == BAD_UNIT_NUMBER)
        {
           std::cerr << "Warning:  There are no more available unit numbers.  A unit number of 0 is being assigned." 
                     << std::endl;
        }
+       else  // If the unit number is bad, no insertion is done
+       {
+          nameNumberMap.insert(std::make_pair(name,unitNumber)); 
+       }
+
        return unitNumber;
     }
 }
