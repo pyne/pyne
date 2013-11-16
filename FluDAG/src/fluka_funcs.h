@@ -50,6 +50,8 @@ extern "C" {
   void process_Si(MBEntityHandle entity, unsigned i);
   void processUniqueMaterials(std::ostringstream& ostr, std::list<std::string> uniqueList,std::string header);
   void sdum_endline(std::ostringstream& ostr, std::string score);
+  std::string get_score_particle_mapname(std::string score_name, std::string particle_name);
+  float get_score_particle_unit(std::vector<std::string> score_words);
   //---------------------------------------------------------------------------//
   // basic_score
   //---------------------------------------------------------------------------//
@@ -58,6 +60,13 @@ extern "C" {
                  std::vector<std::string> score_words, 
                  float fVol, float fortran_unit, double measurement,
                  std::string name);
+
+  //---------------------------------------------------------------------------//
+  // two_vol_score
+  //---------------------------------------------------------------------------//
+  /// This function encapsulates very similar records for USRBDX and USRYIELD
+  void two_vol_score(std::ostringstream& ostr, std::vector<std::string> score_words, 
+                 int iVol, float fortran_unit, std::string name);
 
   /* Convenience function for tokenizing.  
    * Ref: http://stackoverflow.com/questions/10051679/c-tokenize-string 
