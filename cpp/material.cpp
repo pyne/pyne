@@ -218,8 +218,12 @@ void pyne::Material::from_hdf5(std::string filename, std::string datapath, int r
   if (!ish5)
     throw h5wrap::FileNotHDF5(filename);
 
+  //Set file access properties so it closes cleanly
+  hid_t fapl;
+  fapl = H5Pcreate(H5P_FILE_ACCESS);
+  H5Pset_fclose_degree(fapl,H5F_CLOSE_STRONG);
   // Open the database
-  hid_t db = H5Fopen(filename.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT);
+  hid_t db = H5Fopen(filename.c_str(), H5F_ACC_RDONLY, fapl);
 
   bool datapath_exists = h5wrap::path_exists(db, datapath);
   if (!datapath_exists)
@@ -265,6 +269,10 @@ void pyne::Material::write_hdf5(std::string filename, std::string datapath,
   // Turn off annoying HDF5 errors
   H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
 
+  //Set file access properties so it closes cleanly
+  hid_t fapl;
+  fapl = H5Pcreate(H5P_FILE_ACCESS);
+  H5Pset_fclose_degree(fapl,H5F_CLOSE_STRONG);
   // Create new/open datafile.
   hid_t db;
   if (pyne::file_exists(filename))
@@ -272,10 +280,10 @@ void pyne::Material::write_hdf5(std::string filename, std::string datapath,
     bool ish5 = H5Fis_hdf5(filename.c_str());
     if (!ish5)
       throw h5wrap::FileNotHDF5(filename);
-    db = H5Fopen(filename.c_str(), H5F_ACC_RDWR, H5P_DEFAULT);
+    db = H5Fopen(filename.c_str(), H5F_ACC_RDWR, fapl);
   }
   else
-    db = H5Fcreate(filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    db = H5Fcreate(filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
 
   //
   // Read in nuclist if available, write it out if not
@@ -496,7 +504,6 @@ void pyne::Material::write_hdf5(std::string filename, std::string datapath,
 
   // Close out the HDF5 file
   H5Fclose(db);
-
   // Remember the milk!  
   // ...by which I mean to deallocate
   delete[] mat_data;
