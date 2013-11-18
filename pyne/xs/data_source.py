@@ -727,18 +727,7 @@ class ENDFDataSource(DataSource):
         rxdata: ndarray of floats, len ngroups
         """
         nuc = nucname.id(nuc)
-        # Munging the rx to an MT#
-        # try:
-            # rx = int(rx)
-        # except ValueError:
         rx = rxname.mt(rx)
-        # Check if usable rx #
-        if rx is None:
-            return None
-        # Grab data
-        # if (nuc, rx, nuc_i) in self.rxcache:
-            # rxdict = self.rxcache[nuc, rx, nuc_i]
-        # else:
         if nuc_i not in self.library.structure[nuc]['data']:
             self.library._read_res(nuc)
         rxdict = self.library.get_xs(nuc, rx, nuc_i)[0]
@@ -747,11 +736,63 @@ class ENDFDataSource(DataSource):
         self._load_group_structure(nuc, rx, nuc_i)
         return rxdict
 
-    def reaction(self, nuc, rx, nuc_i):
+    def reaction(self, nuc, rx, nuc_i = None):
+        """Get reaction data.
+
+        Parameters
+        ----------
+        nuc : int or str
+            Nuclide containing the reaction.
+        rx : int or str
+            Desired reaction
+        nuc_i : int or str
+            Isotope containing the reaction. Defaults to nuc.
+        group_bounds : tuple
+            Low and high energy bounds of the new group.
+
+        Returns
+        ----------
+        rxdict : dict
+            Dictionary containing source group structure, energy values, cross-
+            section data, and interpolation data."""
+        if nuc_i is None:
+            nuc_i = nuc
+        nuc = nucname.id(nuc)
         rx = rxname.mt(rx)
+        nuc_i = nucname.id(nuc_i)
         if (nuc, rx, nuc_i) not in self.rxcache:
             self._load_reaction(nuc, rx, nuc_i)
-        return self.rxcache[nuc, rx, nuc_i]['xs']
+        return self.rxcache[nuc, rx, nuc_i]
+
+    def _integrate_group(self, group_bounds, nuc, rx, nuc_i = None):
+        """Integrate the reaction cross-section over one group.
+
+        Parameters
+        ----------
+        nuc : int or str
+            Nuclide containing the reaction.
+        rx : int or str
+            Desired reaction
+        nuc_i : int or str
+            Isotope containing the reaction. Defaults to nuc.
+        group_bounds : tuple
+            Low and high energy bounds of the new group.
+
+        Returns
+        -------
+        group_xs : float
+            The cross-section of the group."""
+        if nuc_i is None:
+            nuc_i = nuc
+        nuc = nucname.id(nuc)
+        rx = rxname.mt(rx)
+        nuc_i = nucname.id(nuc_i)
+        rxdata = self.reaction(nuc, rx, nuc_i = nuc_i)
+        src_group_struct = rxdata['src_group_struct']
+        src_bounds = [group[-1] for group in src_group_struct]
+        # figure out what to do at the boundaries between dst groups
+        # integrate tab groups
+        return src_bounds
 
     def discretize(self, nuc, rx, nuc_i, temp=300.0, src_phi_g=None,
                    dst_phi_g=None):
@@ -779,23 +820,17 @@ class ENDFDataSource(DataSource):
         dst_sigma : array
             An array with the group cross-sections in order of decreasing energy.
         """
-        # Munging the rx to an MT#
-        try:
-            rx = int(rx)
-        except ValueError:
-            rx = rxname.mt(rx)
-        # Check if usable rx #
-        if rx is None:
-            return None
+        nuc = nucname.id(nuc)
+        rx = rxname.mt(rx)
         rxdata = self._load_reaction(nuc, rx, nuc_i)
         intpoints = rxdata['intpoints']
         intschemes = rxdata['intschemes']
         Eints = rxdata['Eint']
-        E_g = self.src_group_struct
+        # dst_group_struct = rxdata['dst_group_struct']
+        E_g = rxdata['src_group_struct']
         xs = rxdata['xs']
         xs_all = []
         dst_sigma = []
-        dst_group_struct = self.dst_group_struct
         for i in range(len(intpoints)):
             if not i:
                 low_xs = 0
