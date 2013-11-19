@@ -240,24 +240,58 @@ class SurfSrc(_BinaryReader):
 
         # interpret header 
         self.kod    = header.get_string(8)[0]  # code identifier
-        self.ver    = header.get_string(5)[0]  # code version identifier
-        self.loddat = header.get_string(8)[0]  # code version date
-        self.idtm   = header.get_string(19)[0] # current date and time
-        self.probid = header.get_string(19)[0] # problem identification string
-        self.aid    = header.get_string(80)[0] # title card of initial run
-        self.knod   = header.get_int()[0]      # dump number
 
-        # read table 1 record; various counts and sizes
-        tablelengths = self.get_fortran_record()
+        if 'SF_00001' not in self.kod:
+            self.ver    = header.get_string(5)[0]  # code version identifier
 
-        # interpret table lengths
-        self.np1  = tablelengths.get_long()[0]  # number of histories used to generate source
-        self.nrss = tablelengths.get_long()[0]  # number of tracks written to surface source
-        self.ncrd = tablelengths.get_int()[0]  # number of values in surface source record
-                                               # 6 for a spherical source
-                                               # 11 otherwise
-        self.njsw = tablelengths.get_int()[0]   # number of surfaces
-        self.niss = tablelengths.get_long()[0]  # number of histories written to surface source
+            if '2.6.0' in self.ver:
+                self.loddat = header.get_string(28)[0]  # code version date
+            else:
+                self.loddat = header.get_string(8)[0]  # code version date
+
+            self.idtm   = header.get_string(19)[0] # current date and time
+            self.probid = header.get_string(19)[0] # problem identification string
+            self.aid    = header.get_string(80)[0] # title card of initial run
+            self.knod   = header.get_int()[0]      # dump number
+            
+            # read table 1 record; various counts and sizes
+            tablelengths = self.get_fortran_record()
+
+            # interpret table lengths
+            if '2.6.0' in self.ver:
+                self.np1  = tablelengths.get_int()[0]  # number of histories used to generate source
+                self.nrss = tablelengths.get_int()[0]  # number of tracks written to surface source
+            else:
+                self.np1  = tablelengths.get_long()[0]  # number of histories used to generate source
+                self.nrss = tablelengths.get_long()[0]  # number of tracks written to surface source
+
+            self.ncrd = tablelengths.get_int()[0]  # number of values in surface source record
+                                   # 6 for a spherical source
+                                   # 11 otherwise
+            self.njsw = tablelengths.get_int()[0]   # number of surfaces
+            self.niss = tablelengths.get_int()[0]  # number of histories written to surface source
+                
+        elif 'SF_00001' in self.kod:
+            header = self.get_fortran_record()
+            self.ver    = header.get_string(12)[0]  # code version identifier
+            self.loddat = header.get_string( 9)[0]  # code version date       
+            self.idtm   = header.get_string(19)[0]  # current date and time
+            self.probid = header.get_string(19)[0] # problem identification string
+            self.aid    = header.get_string(80)[0] # title card of initial run    
+            self.knod   = header.get_int()[0]      # dump number
+
+            # read table 1 record; various counts and sizes
+            tablelengths = self.get_fortran_record()
+
+            # interpret table lengths
+            self.np1  = tablelengths.get_int()[0]  # number of histories used to generate source
+            self.notsure0 = tablelengths.get_int()[0]  # number of values in surface source record
+            self.nrss = tablelengths.get_int()[0]  # number of tracks written to surface source
+            self.notsure1 = tablelengths.get_int()[0]   # number of surfaces
+            self.ncrd = tablelengths.get_int()[0]  # number of histories written to surface source
+            self.njsw = tablelengths.get_int()[0]   # number of surfaces
+            self.niss=tablelengths.get_int()[0]  # number of histories written to surface source
+            self.notsure2 = tablelengths.get_int()[0]   # number of surfaces
 
         if self.np1 < 0:
             # read table 2 record; more size info
@@ -269,9 +303,8 @@ class SurfSrc(_BinaryReader):
             self.table2extra=[]
             while tablelengths.numBytes > tablelengths.pos:
                 self.table2extra += tablelengths.get_int()
-            # print "np1 is ", self.np1
+
         else:
-            # print "np1 is ", self.np1
             pass
         
         self.orignp1 = self.np1
@@ -319,7 +352,7 @@ class SurfSrc(_BinaryReader):
         for j in range(self.nrss):
             trackInfo = self.get_fortran_record()
             trackData = TrackData()
-            trackData.record   = trackInfo.get_double(self.ncrd)
+            trackData.record   = trackInfo.get_double(abs(self.ncrd))
             trackData.nps      = trackData.record[0]
             trackData.bitarray = trackData.record[1]
             trackData.wgt      = trackData.record[2]
@@ -342,10 +375,21 @@ class SurfSrc(_BinaryReader):
         """Write the header part of the header
         to the surface source file
         """
-        rec = [self.kod, self.ver, self.loddat, self.idtm, self.probid, self.aid]
-        newrecord = _FortranRecord("".join(rec), len("".join(rec)))
-        newrecord.put_int([self.knod])
-        self.put_fortran_record(newrecord)
+        if 'SF_00001' in self.kod:
+            rec = [self.kod]
+            newrecord = _FortranRecord("".join(rec), len("".join(rec)))
+            newrecord.put_int([self.knod])
+            self.put_fortran_record(newrecord)
+
+            rec = [self.ver, self.loddat, self.idtm, self.probid, self.aid]
+            newrecord = _FortranRecord("".join(rec), len("".join(rec)))
+            newrecord.put_int([self.knod])
+            self.put_fortran_record(newrecord)
+        else:
+            rec = [self.kod, self.ver, self.loddat, self.idtm, self.probid, self.aid]
+            newrecord = _FortranRecord("".join(rec), len("".join(rec)))
+            newrecord.put_int([self.knod])
+            self.put_fortran_record(newrecord)
         return
     
     
@@ -354,8 +398,12 @@ class SurfSrc(_BinaryReader):
         to the surface source file
         """
         newrecord = _FortranRecord("", 0)
-        newrecord.put_long( [self.np1])
-        newrecord.put_long( [self.nrss])
+        if '2.6.0' in self.ver:
+            newrecord.put_int( [self.np1])
+            newrecord.put_int( [self.nrss])
+        else:
+            newrecord.put_long( [self.np1])
+            newrecord.put_long( [self.nrss])
         newrecord.put_int(  [self.ncrd])
         newrecord.put_int(  [self.njsw])
         newrecord.put_long( [self.niss])
