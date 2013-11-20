@@ -628,7 +628,7 @@ static bool get_real_prop( MBEntityHandle vol, int cell_id, const std::string& p
 void fludagwrite_assignma(std::string filename_to_write)  // file with cell/surface cards
 {
   int num_vols = DAG->num_entities(3);
-  std::cout << __FILE__ << ", " << __func__ << ":" << __LINE__ << "_______________" << std::endl;
+  // std::cout << __FILE__ << ", " << __func__ << ":" << __LINE__ << "_______________" << std::endl;
   std::cout << "\tnum_vols is " << num_vols << std::endl;
   MBErrorCode ret;
   MBEntityHandle entity = 0;
@@ -728,8 +728,6 @@ void fludagwrite_assignma(std::string filename_to_write)  // file with cell/surf
   std::cout << "All scoring.particle and volumes" << std::endl;
   unsigned int counter = 0;
   std::map<std::string, unsigned int>::iterator uit;
-  r_filestr << "* RESNUCLEI scoring requests." << std::endl;
-  r_filestr << header << std::endl;
   ut_filestr << "* USRTRACK scoring requests." << std::endl;
   ut_filestr << header << std::endl;
   uc_filestr << "* USRCOLL scoring requests." << std::endl;
@@ -739,83 +737,100 @@ void fludagwrite_assignma(std::string filename_to_write)  // file with cell/surf
   uy_filestr << "* USRYIELD scoring requests." << std::endl;
   uy_filestr << header << std::endl;
   
-  // Go through the map created whilst going through the volumes
+  // Go through the map that was created while going through the volumes
   for (uit = scoring_vol_map.begin(); uit != scoring_vol_map.end(); ++uit)
   {
      counter++;
+     // std::cout << __FILE__ << ", " << __func__ << ":" << __LINE__ << "_______________" << std::endl;
      std::cout << counter << ". " << uit->first << " => " << uit->second << std::endl;
 
      // Get the volume id of the current volume, whose scoring info we are pulling out
-     int   iVol = uit->second;
+     int iVol = uit->second;
 
-     // Calculate some things we'll need that are based on the volume id 
-     EntityHandle handle = DAG->entity_by_id(3, iVol);
-     double measurement;
-     ret = DAG->measure_volume(handle, measurement);
-     if (MB_SUCCESS != ret) 
-     {
-       std::cerr << "DAGMC failed to get the measured volume of region " <<  iVol <<  std::endl;
-       return;
-     }
-     float fVol = (float) iVol;
      // Create a vector of '.'-delimited strings from the original "key" part of the 
      // group name (now the "value" part of the map).  
      // The vector may be of size 1, 2, or 3, depending on the score type;
      // No more than the first two values are used in the unit map.
-     std::vector<std::string> dot_delimited = StringSplit(uit->first,".");
+     std::vector<std::string> score_words = StringSplit(uit->first,".");
      std::string score_name;
-     if (dot_delimited.size() > 0)
-     {
-        score_name = dot_delimited[0];
-     }
-     else
+     char particle[3];
+     
+     if (score_words.size() == 0)
      {
         std::cout << "The score group for volume " << iVol << " is empty." << std::endl;
         continue;
      }
+     if (score_words.size() > 0)
+     {
+        score_name = score_words[0];
+     }
+     if (score_words.size() > 1)
+     {
+
+        std::size_t len = score_words[1].copy(particle,2);
+        particle[len] = '\0';
+     }
     
      char strDetName[10];
      float fortran_unit;
+     double measurement;
 
      // The RESNUCLEI section:  use to_string when c11 comes
      if (score_name.compare("RESNUCLEI") == 0)
      {
-        fortran_unit = get_score_particle_unit(dot_delimited);
+        // if (r_filestr.tellp() == 0)
+        // {
+           r_filestr << "* RESNUCLEI scoring requests." << std::endl;
+           r_filestr << header << std::endl;
+        // }
+        // jcz ToDo;  Error return.  How serious an error is this?  Is returning warranted?
+        measurement = measurementOfVol(iVol);
+        fortran_unit = get_score_particle_unit(score_words);
         sprintf (strDetName, "%s%d","RES_", iVol);
 
         r_filestr << std::setw(10) << std::left << "RESNUCLEI";
         r_filestr << std::setw(20) << std::right << std::fixed << std::setprecision(1) << fortran_unit;
-	r_filestr << std::setw(30) << std::right << std::fixed << std::setprecision(1) << fVol;
-        r_filestr << std::setw(9) << std::right << measurement << " ";
+	r_filestr << std::setw(30) << std::right << std::fixed  << std::setprecision(1) << (float)iVol;
+        r_filestr << std::setw(9)  << std::right << measurement << " ";
         r_filestr << std::setw(10) << std::left <<  strDetName;
 
         r_filestr << std::endl;
      }
-     // The USRTRACK section 
-     else if (score_name.compare("USRTRACK") == 0 && dot_delimited.size() == 2)
+     // The USRTRACK and USRCOLL section 
+     else if (score_name.compare("USRTRACK") == 0 || score_name.compare("USRCOLL") == 0)
      {
-        fortran_unit = get_score_particle_unit(dot_delimited);
-        sprintf (strDetName, "%s%d","TRAC_", iVol);
-        basic_score(ut_filestr, dot_delimited, fVol, fortran_unit, measurement, strDetName);
-     } 
-     // The USRCOLL section
-     else if (score_name.compare("USRCOLL") == 0 && dot_delimited.size() == 2)
-     {
-        fortran_unit = get_score_particle_unit(dot_delimited);
-        sprintf (strDetName, "%s%d","COLL_", iVol);
-        basic_score(uc_filestr, dot_delimited, fVol, fortran_unit, measurement, strDetName);
+        // These tallies need both a score and a particle name
+	if (score_words.size() >= 2)
+        {
+           fortran_unit = get_score_particle_unit(score_words);
+           if (score_name.compare("USRTRACK") == 0)
+           {
+              sprintf (strDetName, "%s_%s_%d","TR",  particle, iVol);
+              basic_score(ut_filestr, score_words, iVol, fortran_unit, measurement, strDetName);
+           }
+ 	   else  // USRCOLL case
+           {
+              sprintf (strDetName, "%s_%s_%d","CO",  particle, iVol);
+              basic_score(uc_filestr, score_words, iVol, fortran_unit, measurement, strDetName);
+           }
+        }
+        else   // Error:  no particle was added to the group name
+        {
+           std::cerr << "Error: the " << score_name << " score does not include a particle. " 
+                     << "Please label the group with particle" << std::endl;
+        }
      } 
      // The USRBDX section
-     else if (score_name.compare("USRBDX") == 0 && dot_delimited.size() >= 3)
+     else if (score_name.compare("USRBDX") == 0 && score_words.size() >= 3)
      {
-        fortran_unit = get_score_particle_unit(dot_delimited);
-        two_vol_score(ub_filestr, dot_delimited, iVol, fortran_unit, "BDX");
+        fortran_unit = get_score_particle_unit(score_words);
+        two_vol_score(ub_filestr, score_words, iVol, fortran_unit, "BDX");
      } 
      // The USRYIELD section
-     else if (score_name.compare("USRYIELD") == 0 && dot_delimited.size() >= 3)
+     else if (score_name.compare("USRYIELD") == 0 && score_words.size() >= 3)
      {
-        fortran_unit = get_score_particle_unit(dot_delimited);
-        two_vol_score(uy_filestr, dot_delimited, iVol, fortran_unit, "YIELD");
+        fortran_unit = get_score_particle_unit(score_words);
+        two_vol_score(uy_filestr, score_words, iVol, fortran_unit, "YIELD");
      } 
   }
 
@@ -875,6 +890,26 @@ void fludagwrite_assignma(std::string filename_to_write)  // file with cell/surf
 // End fludagwrite_assignma
 
 //---------------------------------------------------------------------------//
+// measurementOfVol
+//---------------------------------------------------------------------------//
+// Convenience function to call dag measure_volume(..)
+double measurementOfVol(int iVol)
+{
+   MBErrorCode ret;
+
+   // Calculate some things we'll need that are based on the volume id 
+   EntityHandle handle = DAG->entity_by_id(3, iVol);
+
+   double measurement;
+   ret = DAG->measure_volume(handle, measurement);
+   if (MB_SUCCESS != ret) 
+   {
+      std::cerr << "DAGMC failed to get the measured volume of region " <<  iVol <<  std::endl;
+      measurement = -1.0;
+   }
+   return measurement; 
+}
+//---------------------------------------------------------------------------//
 // two_vol_score
 //---------------------------------------------------------------------------//
 // Some records are very similar, differing only in name
@@ -911,29 +946,26 @@ void two_vol_score(std::ostringstream& ostr,
 //---------------------------------------------------------------------------//
 // Some records are very similar, differing only in name
 void basic_score(std::ostringstream& ostr, 
-                 std::vector<std::string> score_words, 
-                 float fVol, float fortran_unit, double measurement,
+                 std::vector <std::string> score_words, 
+                 int iVol, float fortran_unit, double measurement,
                  std::string name)
 {
+     measurement = measurementOfVol(iVol);
      if (score_words.size() >= 2)  // all is good
      {
            ostr << std::setw(10) << std::left << score_words[0];           
+           // ostr << std::setw(10) << std::right << "-1.0";
            ostr << std::setw(20) << std::right << score_words[1];           
            ostr << std::setw(10) << std::right << std::fixed << std::setprecision(1) << fortran_unit;
-	   ostr << std::setw(10) << std::right << std::fixed << std::setprecision(1) << fVol;
+	   ostr << std::setw(10) << std::right << std::fixed << std::setprecision(1) << (float)iVol;
            ostr << std::setw(9)  << std::right << measurement << " ";
 
            ostr << std::setw(10) << std::left <<  name << std::endl;;
 	   sdum_endline(ostr, score_words[0]);
      }
-     else if (score_words.size() < 2)  // no particle was entered into the group name
+     if (score_words.size() > 2)  // hmm, there is a particle word, but also more
      {
-           std::cerr << "Error: the " << score_words[0] << " score does not include a particle. " 
-                     << "Please label the group with particle" << std::endl;
-     }
-     if (score_words.size() > 2)  // hmm, there is a particle piece, but also more
-     {
-           std::cerr << "Error:  the " << score_words[0] << " score has more than one particle reference.  " 
+           std::cerr << "Warning:  the " << score_words[0] << " score has more than one particle reference.  " 
                      << "Only the first particle, " << score_words[1] << ", is used." << std::endl;  
      }
 }
@@ -980,7 +1012,7 @@ void process_Si(MBEntityHandle entity, unsigned int vol_id)
 //  standard name for the fortran unit number getter
 std::string get_score_particle_mapname(std::string score_name, std::string particle_name)
 {
-    std::string keyword ( score_name + "." + particle_name);
+    std::string keyword (score_name + "." + particle_name);
     char *cstr = new char [keyword.length() + 1];
     std::strcpy (cstr, keyword.c_str());
     return cstr;
@@ -991,6 +1023,8 @@ std::string get_score_particle_mapname(std::string score_name, std::string parti
 //---------------------------------------------------------------------------//
 /// Parse the vector of strings from the scoring group name values and determine
 //  the correct fortran unit number for them.  
+//  There can be 1, 2, or more words in teh score_words vectore. 
+//  If 1, it is used.  If 2, both are used.  If more than 2, only the first two are used.
 // This function relies on the UnitNumberManager class, whose key method returns
 // an int, however we always need a float unit number for the fluka cards, so
 // a float is returned. 
