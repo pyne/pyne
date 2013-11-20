@@ -823,7 +823,7 @@ void fludagwrite_assignma(std::string filename_to_write)  // file with cell/surf
         }
      } 
      // The USRBDX section
-     else if (score_name.compare("USRBDX") == 0 && score_name.compare("USRYIELD") == 0)
+     else if (score_name.compare("USRBDX") == 0 || score_name.compare("USRYIELD") == 0)
      {
         // These tallies need a score, particle name, and a FROM volume
         if (score_words.size() >= 3)
@@ -932,6 +932,41 @@ double measurementOfVol(int iVol)
    return measurement; 
 }
 //---------------------------------------------------------------------------//
+// usrtrackRecord
+//---------------------------------------------------------------------------//
+// Specialized record-preparer for USRTRACK defaults
+/*
+void usrtrackRecord(std::ostringstream& ostr, 
+                 std::vector<std::string> score_words, 
+                 int iVol, float fortran_unit, std::string score_prefix)
+{
+     // Prepare the detector name to go at the end of the line
+     char strDetName[10];
+     std::string subname (score_prefix + "_" + score_words[2] + "_");
+     char *cstr = new char [subname.length() + 1];
+     std::strcpy (cstr, subname.c_str());
+     sprintf (strDetName, "%s%d", cstr, iVol);
+
+     // We are guaranteed there are three values in score_words
+     ostr << std::setw(10) << std::left << score_words[0];           
+     ostr << std::setw(10) << std::right << "-1.0";
+     ostr << std::setw(10) << std::right << score_words[1];           
+     ostr << std::setw(10) << std::right << std::fixed << std::setprecision(1) << fortran_unit;
+     ostr << std::setw(10) << std::right << std::fixed << std::setprecision(1) << score_words[2];
+     ostr << std::setw(10) << std::right << std::fixed << std::setprecision(1) << (float)iVol;
+
+     ostr << std::setw(10) << std::right << " ";
+     ostr << std::setw(10) << std::left <<  strDetName << std::endl;
+
+     sdum_endline(ostr, score_words[0]);
+     if (score_words.size() > 3)  // hmm, there is a particle piece, but also more
+     {
+           std::cerr << "Error:  the " << score_words[0] << " score has more than one particle reference.  " 
+                     << "Only the first particle, " << score_words[1] << ", is used." << std::endl;  
+     }
+}
+*/
+//---------------------------------------------------------------------------//
 // two_vol_score
 //---------------------------------------------------------------------------//
 // Some records are very similar, differing only in name
@@ -948,7 +983,8 @@ void two_vol_score(std::ostringstream& ostr,
 
      // We are guaranteed there are three values in score_words
      ostr << std::setw(10) << std::left << score_words[0];           
-     ostr << std::setw(20) << std::right << score_words[1];           
+     ostr << std::setw(10) << std::right << "-1.0";
+     ostr << std::setw(10) << std::right << score_words[1];           
      ostr << std::setw(10) << std::right << std::fixed << std::setprecision(1) << fortran_unit;
      ostr << std::setw(10) << std::right << std::fixed << std::setprecision(1) << score_words[2];
      ostr << std::setw(10) << std::right << std::fixed << std::setprecision(1) << (float)iVol;
@@ -967,6 +1003,7 @@ void two_vol_score(std::ostringstream& ostr,
 // basic_score
 //---------------------------------------------------------------------------//
 // Some records are very similar, differing only in name
+// This handls USRCOLL and USRTRACK score requests
 void basic_score(std::ostringstream& ostr, 
                  std::vector <std::string> score_words, 
                  int iVol, float fortran_unit, double measurement,
@@ -980,10 +1017,13 @@ void basic_score(std::ostringstream& ostr,
            ostr << std::setw(10) << std::right << score_words[1];           
            ostr << std::setw(10) << std::right << std::fixed << std::setprecision(1) << fortran_unit;
 	   ostr << std::setw(10) << std::right << std::fixed << std::setprecision(1) << (float)iVol;
-           ostr << std::setw(9)  << std::right << measurement << " ";
+           ostr << std::setw(10) << std::right << measurement << " ";
+           // Default number of energy bins
+           ostr << std::setw(8)  << std::right << "1.";
 
-           ostr << std::setw(10) << std::left <<  name << std::endl;;
-	   sdum_endline(ostr, score_words[0]);
+           // ostr << std::setw(10) << std::left <<  name << std::endl;;
+           ostr << " " << name << std::endl;;
+	   sdum_endline(ostr, score_words[0], true);
      }
      if (score_words.size() > 2)  // hmm, there is a particle word, but also more
      {
@@ -996,10 +1036,21 @@ void basic_score(std::ostringstream& ostr,
 //---------------------------------------------------------------------------//
 // Create a standard continuation line, putting the '&' on the 71st space
 // The line is tacked on to the output stream
-void sdum_endline(std::ostringstream& ostr, std::string score)
+void sdum_endline(std::ostringstream& ostr, std::string score, bool isBasic)
 {
      ostr << std::setw(10) << std::left << score;           
-     ostr << std::setw(61) << std::right << "&";
+     if (isBasic)  // This path is for using the defaults common to USRTRACK and USRYIELD
+     {
+        // Default maximum energy
+        ostr << std::setw(10) << std::right << "1E20";           
+        // Default minimum energy
+        ostr << std::setw(10) << std::right << "1.0";           
+        ostr << std::setw(41) << std::right << "&";
+     }
+     else
+     {
+        ostr << std::setw(61) << std::right << "&";
+     }
      ostr << std::endl;
 }
 
@@ -1021,9 +1072,9 @@ void process_Si(MBEntityHandle entity, unsigned int vol_id)
        std::cerr << "DAGMC failed to get S_ properties" <<  std::endl;
        return;
     }
-    for (int i=0; i<vals.size(); i++)
-    {
-	scoring_vol_map.insert(std::pair<std::string, unsigned int>(vals[i], vol_id));
+    for (int i=0; i<vals.size(); i++) 
+    { 
+        scoring_vol_map.insert(std::pair<std::string, unsigned int>(vals[i], vol_id)); 
     }
 }
 

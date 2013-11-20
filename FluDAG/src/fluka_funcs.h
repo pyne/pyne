@@ -49,7 +49,7 @@ extern "C" {
    */
   void process_Si(MBEntityHandle entity, unsigned i);
   void processUniqueMaterials(std::ostringstream& ostr, std::list<std::string> uniqueList,std::string header);
-  void sdum_endline(std::ostringstream& ostr, std::string score);
+  void sdum_endline(std::ostringstream& ostr, std::string score, bool isBasic=false);
   std::string get_score_particle_mapname(std::string score_name, std::string particle_name);
   float get_score_particle_unit(std::vector<std::string> score_words);
   double measurementOfVol(int iVol);
