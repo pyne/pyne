@@ -15,6 +15,7 @@ from pyne.dbgen.scattering_lengths import make_scattering_lengths
 from pyne.dbgen.simple_xs import make_simple_xs
 from pyne.dbgen.cinder import make_cinder
 from pyne.dbgen.eaf import make_eaf
+from pyne.dbgen.hash_tools import write_hash_config, check_hashes
 
 # Thanks to http://patorjk.com/software/taag/
 # and http://www.chris.com/ascii/index.php?art=creatures/dragons (Jeff Ferris)
@@ -94,6 +95,10 @@ def main():
     parser.add_argument('-m', dest='make', action='store', default='all',
                         help='comma-separated parts of nuc_data to make: ' + \
                         ", ".join([mf[0] for mf in make_funcs]) + ', all, and none.')
+    parser.add_argument('--g', dest='hash_gen',action='store_true',
+                        help='generate nuc_hash.cfg')
+    parser.add_argument('--check', dest='hash_check',action='store_true',
+                        help='check hashes against nuc_hash.cfg')
     parser.add_argument('--clean', dest='clean', type=int, default=0,
                         help="""level to clean up existing files.
                                 0: no cleaning (default).
@@ -134,7 +139,21 @@ def main():
     print "Making nuc_data at {0}".format(args.nuc_data)
     for mo in make_order:
         make_map[mo](args)
-
+        
+    #Generate and/or check the dataset hashes
+    if args.hash_gen:
+        print "Generating hashes"
+        write_hash_config(args.nuc_data)
+        
+    if args.hash_check:
+        print "Checking hashes"
+        result = check_hashes(args.nuc_data)
+        print "Results:"
+        for name,value in result:
+            if value:
+                print "    database "+name+"'s hash matches"
+            else:
+                print "    database "+name+"'s hash doesn't match!!"
 
 if __name__ == '__main__':
     main()
