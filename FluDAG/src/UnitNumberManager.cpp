@@ -15,6 +15,11 @@ UnitNumberManager::UnitNumberManager()
     num_units_in_use = 0;
 }
 
+// For testing.  Make friendly, etc.
+int UnitNumberManager::getNumUnitsInUse()
+{
+    return num_units_in_use;
+}
 //---------------------------------------------------------------------------//
 // getUnitNumber()
 //---------------------------------------------------------------------------//
