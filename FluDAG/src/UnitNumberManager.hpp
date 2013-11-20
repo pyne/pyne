@@ -17,6 +17,7 @@ class UnitNumberManager
     UnitNumberManager();
 
 
+    int getNumUnitsInUse();
     int getUnitNumber(std::string name);
 
   private:

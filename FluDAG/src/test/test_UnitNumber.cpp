@@ -32,16 +32,18 @@ class UnitNumberManagerTest : public ::testing::Test
 TEST_F(UnitNumberManagerTest, EvaluateUniformKernel)
 {
     manager = new UnitNumberManager();
-
+    EXPECT_EQ(0, manager->getNumUnitsInUse());
 //    kernel = new PolynomialKernel(0, 1);
+/*
     EXPECT_EQ("2nd-order uniform", kernel->get_kernel_name());
     EXPECT_EQ(2, kernel->get_order());
     EXPECT_EQ(1, kernel->get_min_quadrature(0));
     EXPECT_EQ(1, kernel->get_min_quadrature(1));
     EXPECT_EQ(2, kernel->get_min_quadrature(2));
     EXPECT_EQ(2, kernel->get_min_quadrature(3));
-
+*/
     // test evaluation over the domain
+/*
     EXPECT_DOUBLE_EQ(0.5, kernel->evaluate(-1.0));
     EXPECT_DOUBLE_EQ(0.5, kernel->evaluate(-0.8));
     EXPECT_DOUBLE_EQ(0.5, kernel->evaluate(-0.6));
@@ -57,7 +59,9 @@ TEST_F(UnitNumberManagerTest, EvaluateUniformKernel)
     // test evaluation outside the domain
     EXPECT_DOUBLE_EQ(0.0, kernel->evaluate(-2.0));
     EXPECT_DOUBLE_EQ(0.0, kernel->evaluate(2.0));
+*/
 }
+/*
 //---------------------------------------------------------------------------//
 // Tests the basic evaluate method of a 2nd-order epanechnikov kernel
 TEST_F(PolynomialKernelTest, EvaluateEpanechnikovKernel)
@@ -467,5 +471,5 @@ TEST_F(IntegrateMomentTest, IntegrateWithValidLimits)
     EXPECT_NEAR(-0.047619, kernel4->integrate_moment(a, b, i), 1e-6);
 }
 //---------------------------------------------------------------------------//
-
+*/
 // end of MCNP5/dagmc/test/test_PolynomialKernel.cpp
