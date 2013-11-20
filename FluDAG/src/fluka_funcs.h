@@ -52,15 +52,21 @@ extern "C" {
   void sdum_endline(std::ostringstream& ostr, std::string score);
   std::string get_score_particle_mapname(std::string score_name, std::string particle_name);
   float get_score_particle_unit(std::vector<std::string> score_words);
+  double measurementOfVol(int iVol);
   //---------------------------------------------------------------------------//
   // basic_score
   //---------------------------------------------------------------------------//
   /// This function encapsulates very similar records for USRTRACK and USRCOLL
+/*
   void basic_score(std::ostringstream& ostr, 
-                 std::vector<std::string> score_words, 
+                 std::string score_words, std::string particle_words, 
                  float fVol, float fortran_unit, double measurement,
                  std::string name);
-
+*/
+  void basic_score(std::ostringstream& ostr, 
+                 std::vector<std::string> score_words, 
+                 int iVol, float fortran_unit, double measurement,
+                 std::string name);
   //---------------------------------------------------------------------------//
   // two_vol_score
   //---------------------------------------------------------------------------//
