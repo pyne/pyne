@@ -726,14 +726,6 @@ void fludagwrite_assignma(std::string filename_to_write)  // file with cell/surf
   std::cout << "All scoring.particle and volumes" << std::endl;
   unsigned int counter = 0;
   std::map<std::string, unsigned int>::iterator uit;
-  ut_filestr << "* USRTRACK scoring requests." << std::endl;
-  ut_filestr << header << std::endl;
-  uc_filestr << "* USRCOLL scoring requests." << std::endl;
-  uc_filestr << header << std::endl;
-  ub_filestr << "* USRBDX scoring requests." << std::endl;
-  ub_filestr << header << std::endl;
-  uy_filestr << "* USRYIELD scoring requests." << std::endl;
-  uy_filestr << header << std::endl;
   
   // Go through the map that was created while going through the volumes
   for (uit = scoring_vol_map.begin(); uit != scoring_vol_map.end(); ++uit)
@@ -776,12 +768,12 @@ void fludagwrite_assignma(std::string filename_to_write)  // file with cell/surf
      // The RESNUCLEI section:  use to_string when c11 comes
      if (score_name.compare("RESNUCLEI") == 0)
      {
-        // if (r_filestr.tellp() == 0)
-        // {
+        if (r_filestr.tellp() == 0)
+        {
            r_filestr << "* RESNUCLEI scoring requests." << std::endl;
            r_filestr << header << std::endl;
-        // }
-        // jcz ToDo;  Error return.  How serious an error is this?  Is returning warranted?
+        }
+        // jcz ToDo;  Error return.  How serious an error is -1?  Is returning warranted?
         measurement = measurementOfVol(iVol);
         fortran_unit = get_score_particle_unit(score_words);
         sprintf (strDetName, "%s%d","RES_", iVol);
@@ -803,11 +795,21 @@ void fludagwrite_assignma(std::string filename_to_write)  // file with cell/surf
            fortran_unit = get_score_particle_unit(score_words);
            if (score_name.compare("USRTRACK") == 0)
            {
+              if (ut_filestr.tellp() == 0)
+              {
+                 ut_filestr << "* USRTRACK scoring requests." << std::endl;
+                 ut_filestr << header << std::endl;
+              }
               sprintf (strDetName, "%s_%s_%d","TR",  particle, iVol);
               basic_score(ut_filestr, score_words, iVol, fortran_unit, measurement, strDetName);
            }
  	   else  // USRCOLL case
            {
+              if (uc_filestr.tellp() == 0)
+              {
+                 uc_filestr << "* USRCOLL scoring requests." << std::endl;
+                 uc_filestr << header << std::endl;
+              }
               sprintf (strDetName, "%s_%s_%d","CO",  particle, iVol);
               basic_score(uc_filestr, score_words, iVol, fortran_unit, measurement, strDetName);
            }
@@ -819,16 +821,36 @@ void fludagwrite_assignma(std::string filename_to_write)  // file with cell/surf
         }
      } 
      // The USRBDX section
-     else if (score_name.compare("USRBDX") == 0 && score_words.size() >= 3)
+     else if (score_name.compare("USRBDX") == 0 && score_name.compare("USRYIELD") == 0)
      {
-        fortran_unit = get_score_particle_unit(score_words);
-        two_vol_score(ub_filestr, score_words, iVol, fortran_unit, "BDX");
-     } 
-     // The USRYIELD section
-     else if (score_name.compare("USRYIELD") == 0 && score_words.size() >= 3)
-     {
-        fortran_unit = get_score_particle_unit(score_words);
-        two_vol_score(uy_filestr, score_words, iVol, fortran_unit, "YIELD");
+        // These tallies need a score, particle name, and a FROM volume
+        if (score_words.size() >= 3)
+        {
+           fortran_unit = get_score_particle_unit(score_words);
+           if (score_name.compare("USRBDX") == 0)     // USRBDX case 
+           {
+              if (ub_filestr.tellp() == 0)
+              {
+                 ub_filestr << "* USRBDX scoring requests." << std::endl;
+                 ub_filestr << header << std::endl;
+              }
+              two_vol_score(ub_filestr, score_words, iVol, fortran_unit, "BDX");
+           }
+           else   // USRYIELD case
+           {
+              if (uy_filestr.tellp() == 0)
+              {
+                 uy_filestr << "* USRYIELD scoring requests." << std::endl;
+                 uy_filestr << header << std::endl;
+              }
+              two_vol_score(uy_filestr, score_words, iVol, fortran_unit, "YIELD");
+           }
+        }
+        else   // Error:  missing particle or volume
+        {
+           std::cerr << "Error: the " << score_name << " score is missing a particle or a volume. " 
+                     << "Please label the group with both particle and FROM volume" << std::endl;
+        }
      } 
   }
 
@@ -952,8 +974,8 @@ void basic_score(std::ostringstream& ostr,
      if (score_words.size() >= 2)  // all is good
      {
            ostr << std::setw(10) << std::left << score_words[0];           
-           // ostr << std::setw(10) << std::right << "-1.0";
-           ostr << std::setw(20) << std::right << score_words[1];           
+           ostr << std::setw(10) << std::right << "-1.0";
+           ostr << std::setw(10) << std::right << score_words[1];           
            ostr << std::setw(10) << std::right << std::fixed << std::setprecision(1) << fortran_unit;
 	   ostr << std::setw(10) << std::right << std::fixed << std::setprecision(1) << (float)iVol;
            ostr << std::setw(9)  << std::right << measurement << " ";
