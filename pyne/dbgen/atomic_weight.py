@@ -1,7 +1,6 @@
 """This module provides a way to grab and store raw data for atomic weights."""
 import os
 import re
-import urllib2
 import pkgutil
 
 import numpy as np

@@ -6,7 +6,6 @@ the IAEA.
 import re
 import os
 import urllib
-import urllib2
 from gzip import GzipFile
 
 import numpy as np

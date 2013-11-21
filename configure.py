@@ -2,11 +2,7 @@
  
 import os
 import sys
-import glob
 import json
-from distutils.file_util import copy_file, move_file
-from distutils.dir_util import mkpath, remove_tree
-from copy import deepcopy
 
 from Cython.Compiler.Version import version as CYTHON_VERSION
 

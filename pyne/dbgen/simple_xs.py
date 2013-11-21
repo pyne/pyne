@@ -1,7 +1,5 @@
 """This module provides a way to grab and store simple cross sections from KAERI."""
 import os
-import re
-import urllib2
 
 import numpy as np
 import tables as tb

@@ -27,8 +27,6 @@ Report LA-5324-MS_.
 
 """
 
-import struct
-import math
 
 from binaryreader import _BinaryReader, _FortranRecord
 
