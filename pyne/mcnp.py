@@ -1250,7 +1250,7 @@ class Wwinp(Mesh):
                         self.bounds[i].append(
                             (removed_values[j+1] - removed_values[j-1])\
                              *k/removed_values[j] + removed_values[j-1])
-   
+    
 
     def _read_block3(self, f):
         #Retrives all the information of the block 3 of a wwinp file.
@@ -1445,7 +1445,7 @@ class Wwinp(Mesh):
         """
 
         super(Wwinp, self).__init__(mesh=mesh, structured=True)
- 
+    
         # Set geometry related attributes.
         self.nr = 10
         self.nwg = 1
@@ -1470,7 +1470,7 @@ class Wwinp(Mesh):
         else:
             self.e.append([])
             self.ne.append(0)
- 
+    
 
         if 'p_e_upper_bounds' in all_tags:
             p_e_upper_bounds = self.mesh.getTagHandle('p_e_upper_bounds')\
@@ -1481,7 +1481,7 @@ class Wwinp(Mesh):
             self.e.append(p_e_upper_bounds)
             self.ne.append(int(len(p_e_upper_bounds)))
 
-   
+    
         self.ni = int(len(self.ne))
     
         # Set space related attributes.
