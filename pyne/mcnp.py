@@ -27,7 +27,7 @@ from binaryreader import _BinaryReader, _FortranRecord
 
 # Mesh specific imports
 from itaps import iMesh
-from pyne.mesh import Mesh, StatMesh, MeshError
+from pyne.mesh import Mesh, StatMesh
 
 class Mctal(object):
     def __init__(self):

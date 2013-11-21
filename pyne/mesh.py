@@ -1,6 +1,6 @@
 import copy
 import itertools
-from collections import namedtuple, Iterable, Sequence
+from collections import Iterable, Sequence
 
 import numpy as np
 

@@ -2,7 +2,6 @@ import os
 import argparse
 import urllib2
 import shutil
-from distutils.file_util import copy_file, move_file
 from distutils.dir_util import mkpath, remove_tree
 
 from pyne.api import nuc_data

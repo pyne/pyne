@@ -8,7 +8,7 @@ import numpy as np
 import tables as tb
 
 from pyne import nucname
-from pyne.utils import to_barns, failure
+from pyne.utils import failure
 from pyne.dbgen.api import BASIC_FILTERS
 
 def grab_cinder_dat(build_dir="", datapath=''):
