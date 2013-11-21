@@ -1,9 +1,7 @@
 """This module provides a way to grab and store raw data for radioactive decay."""
 import os
-import re
 import glob
 import urllib
-import urllib2
 from zipfile import ZipFile
 
 import numpy as np
