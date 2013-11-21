@@ -27,10 +27,10 @@ from pyne import nucname
 from binaryreader import _BinaryReader, _FortranRecord
 
 # Mesh specific imports
-HAVE_PYTAPS=True
 try:
     from itaps import iMesh
     from pyne.mesh import Mesh, StatMesh, MeshError
+    HAVE_PYTAPS=True
 except ImportError:
     warnings.warn("the PyTAPS optional dependency could not be imported. "
                   "Some aspects of the mcnp module may be incomplete.", ImportWarning)
