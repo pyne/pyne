@@ -2,7 +2,6 @@
 import os
 import unittest
 import nose
-import sys
 
 import nose.tools
 from nose.tools import assert_equal
