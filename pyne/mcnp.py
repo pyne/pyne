@@ -36,6 +36,10 @@ except ImportError:
                   "Some aspects of the mcnp module may be incomplete.", ImportWarning)
     HAVE_PYTAPS=False
 
+def nopytapsmsg(classname):
+    warnings.warn("the "+classname+" class in the mcnp module was not loaded. "
+        ,ImportWarning)
+
 class Mctal(object):
     def __init__(self):
         pass
@@ -1513,8 +1517,7 @@ if (HAVE_PYTAPS):
             self.nc = [len(self.cm[0]), len(self.cm[1]), len(self.cm[2])]
             self.nf = [sum(self.fm[0]), sum(self.fm[1]), sum(self.fm[2])]
 else:
-    warnings.warn("the Wwinp class in the mcnp module was not loaded. ")
-
+    nopytapsmsg("Wwinp")
 
 class Meshtal(object):
     """This class stores all the information from an MCNP meshtal file with
@@ -1710,5 +1713,5 @@ if(HAVE_PYTAPS):
             tag_result[vol_elements] = result
             tag_rel_error[vol_elements] = rel_error
 else:
-    warnings.warn("the Meshtally class in the mcnp module was not loaded. ")
+    nopytapsmsg("Meshtally")
 
