@@ -433,4 +433,5 @@ fi
              MOAB_DIR=$moab_prefix CUBIT_DIR=$cubit_bin_path \
              DAGMC_DIR=$dagmc_prefix/MCNP5/dagmc
 
-cp $mcnp_source/../bin/mcnp5 ./dag-mcnp5
+mkdir -p $prefix/bin
+cp $mcnp_source/../bin/mcnp5 $prefix/bin/dag-mcnp5
