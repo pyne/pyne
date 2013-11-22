@@ -7,5 +7,4 @@ file( COPY setup.py configure.py pyne DESTINATION "${CMAKE_ARGV3}"
                    PATTERN "*.txt" 
                    PATTERN "*.html" 
                    PATTERN "*.pxi"
-                   PATTERN "*.mas12"
-                   PATTERN "*.cfg")
+                   PATTERN "*.mas12")

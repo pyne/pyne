@@ -37,6 +37,16 @@ import pyne.stlcontainers as conv
 
 
 #
+# hash map and initialization
+#
+cdef conv._MapStrStr hash_map_proxy = conv.MapStrStr(False)
+hash_map_proxy.map_ptr = &cpp_data.hash_map
+hash_map = hash_map_proxy
+
+cpp_data.hashes()
+
+
+#
 # atomic_mass functions
 #
 cdef conv._MapIntDouble atomic_mass_map_proxy = conv.MapIntDouble(False)
