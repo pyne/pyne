@@ -1,63 +1,132 @@
 """
-Tools to generate, set and check the hashes of datasets in pyne. Specifically,
-these are the high level tools to iterate over all lower level functions in
-hasher
-
-Author: crbates
+Tools to generate, set and check the hashes of datasets in pyne.
 """
 
-import ConfigParser
-import os
 import hashlib
 
-import pyne.dbgen.hasher as hasher
+import numpy
+import tables
 
+from pyne import data
 
-def write_hash_config(nuc_data):
-    config = ConfigParser.ConfigParser()
-    config.add_section('Hashes')
-    mhash = hashlib.md5()
-    for item in dir(hasher):
-        if "calc" in item:
-            fn = getattr(hasher, item)
-            hashv = fn(nuc_data)
-            config.set('Hashes', item[5:-5], hashv)
-            mhash.update(hashv)
-    config.set('Hashes', 'global', mhash.hexdigest())
-    local_filename = os.path.join(os.path.split(__file__)[0], 'nuc_hash.cfg')
-    with open(local_filename, 'wb') as configfile:
-        config.write(configfile)
+#list of nodes from distinct data sets
+nodelist = ['/atomic_decay', '/atomic_weight', '/material_library',
+            '/neutron/eaf_xs', '/neutron/scattering_lengths',
+            '/neutron/simple_xs']
 
 
 def check_hashes(nuc_data):
+    """
+    This function checks the hash of all the nodes in nodelist against the
+    built-in ones
+
+    Parameters
+    ----------
+    nuc_data : str
+        path to the nuc_data.h5 file
+
+    """
     check_list = []
-    config = ConfigParser.ConfigParser()
-    local_filename = os.path.join(os.path.split(__file__)[0], 'nuc_hash.cfg')
-    config.read(local_filename)
-    mhash = hashlib.md5()
-    for hashopt in config.options('Hashes'):
-        for item in dir(hasher):
-            if "calc_" + hashopt in item:
-                fn = getattr(hasher, item)
-                hashv = fn(nuc_data)
-                val = (config.get('Hashes', hashopt) == hashv)
-                check_list.append((hashopt, val))
-                mhash.update(hashv)
-    val = (config.get('Hashes', 'global') == mhash.hexdigest())
-    check_list.append(("all", val))
+    for item in data.hash_map:
+        res = (calc_hash(item, nuc_data) == data.hash_map[item])
+        check_list.append([item, res])
     return check_list
 
 
 def set_internal_hashes(nuc_data):
-    for item in dir(hasher):
-        if "set" in item:
-            fn = getattr(hasher, item)
-            fn(nuc_data)
+    """
+    This function sets internal hashes for all the nodes in nodelist.
+
+    Parameters
+    ----------
+    nuc_data : str
+        path to the nuc_data.h5 file
+
+    """
+    for item in nodelist:
+        set_hash(item, nuc_data)
 
 
 def check_internal_hashes(nuc_data):
-    for item in dir(hasher):
-        if "check" in item:
-            fn = getattr(hasher, item)
-            hashv = fn(nuc_data)
-            check_list.append((item[5:-5], hashv))
+    """
+    This function checks the hashes of the nodes in nodelist against internally
+    saved ones.
+
+    Parameters
+    ----------
+    nuc_data : str
+        path to the nuc_data.h5 file
+    """
+    check_list = []
+    for item in nodelist:
+        res = check_hash(item, nuc_data)
+        check_list.append([item, res])
+    return check_list
+
+
+def calc_hash(node, nuc_data):
+    """
+    This function calculates the hash of a dataset or group of datasets in a
+    hdf5 file.
+
+    Parameters
+    ----------
+    node : str
+        String with the hdf5 node name
+    nuc_data : str
+        path to the nuc_data.h5 file
+
+    """
+    with tables.openFile(nuc_data) as f:
+        node = f.getNode(node)
+        if type(node) == tables.group.Group:
+            mhash = hashlib.md5()
+            for item in node:
+                if type(item[:]) == numpy.ndarray:
+                    mhash.update(item[:].data)
+                else:
+                    if type(item[0]) == numpy.ndarray:
+                        for tiny_item in item:
+                            mhash.update(tiny_item.data)
+                    else:
+                        for tiny_item in item:
+                            mhash.update(str(tiny_item))
+            return mhash.hexdigest()
+        else:
+            return hashlib.md5(node[:].data).hexdigest()
+
+
+def set_hash(node, nuc_data):
+    """
+    This function sets the hash of a dataset or group of datasets in an hdf5
+    file as an attribute of that node.
+
+    Parameters
+    ----------
+    node : str
+        String with the hdf5 node name
+    nuc_data : str
+        path to the nuc_data.h5 file
+
+    """
+    the_hash = calc_hash(node, nuc_data)
+    with tables.openFile(nuc_data, mode='a') as f:
+        f.setNodeAttr(node, 'hash', the_hash)
+
+
+def check_hash(node, nuc_data):
+    """
+    This function checks the hash of a dataset or group of datasets and checks
+    it against the stored hash attribute.
+
+    Parameters
+    ----------
+    node : str
+        String with the hdf5 node name
+    nuc_data : str
+        path to the nuc_data.h5 file
+
+    """
+    with tables.openFile(nuc_data) as f:
+        hash_val = f.getNodeAttr(node, 'hash')
+        return calc_hash(node, nuc_data) == hash_val
