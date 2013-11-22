@@ -48,6 +48,7 @@ pyne_logo = """\
                                      `  
 """
 
+
 def _fetch_prebuilt(args):
     nuc_data, build_dir = args.nuc_data, args.build_dir
     prebuilt_nuc_data = os.path.join(build_dir, 'prebuilt_nuc_data.h5')
@@ -69,10 +70,10 @@ def main():
 
     make_funcs = [('atomic_weight', make_atomic_weight),
                   ('scattering_lengths', make_scattering_lengths),
-                  ('decay', make_decay), 
-                  ('simple_xs', make_simple_xs), 
-                  ('cinder', make_cinder), 
-				  ('materials', make_materials_library),
+                  ('decay', make_decay),
+                  ('simple_xs', make_simple_xs),
+                  ('cinder', make_cinder),
+                  ('materials', make_materials_library),
                   ('eaf', make_eaf),
                   ]
     make_map = dict(make_funcs)
@@ -86,19 +87,17 @@ def main():
                         help='path to the build directory.')
     parser.add_argument('--datapath', dest='datapath', action='store', default="",
                         help='MCNP DATAPATH.')
-    parser.add_argument('--fetch-prebuilt', dest='fetch_prebuilt', action='store', 
-                        type=lambda s: 't' in s.lower() or 'y' in s.lower(), 
+    parser.add_argument('--fetch-prebuilt', dest='fetch_prebuilt', action='store',
+                        type=lambda s: 't' in s.lower() or 'y' in s.lower(),
                         default=True, help='grab partially assembled file [y/n].')
-    parser.add_argument('--make-open-only', dest='make_open_only', action='store', 
-                        type=lambda s: 't' in s.lower() or 'y' in s.lower(), 
+    parser.add_argument('--make-open-only', dest='make_open_only', action='store',
+                        type=lambda s: 't' in s.lower() or 'y' in s.lower(),
                         default=False, help='only add open data to file [y/n].')
     parser.add_argument('-m', dest='make', action='store', default='all',
-                        help='comma-separated parts of nuc_data to make: ' + \
+                        help='comma-separated parts of nuc_data to make: ' +
                         ", ".join([mf[0] for mf in make_funcs]) + ', all, and none.')
-    parser.add_argument('--g', dest='hash_gen',action='store_true',
-                        help='generate nuc_hash.cfg')
-    parser.add_argument('--check', dest='hash_check',action='store_true',
-                        help='check hashes against nuc_hash.cfg')
+    parser.add_argument('--check', dest='hash_check', action='store_true',
+                        help='check hashes against built-in ones')
     parser.add_argument('--clean', dest='clean', type=int, default=0,
                         help="""level to clean up existing files.
                                 0: no cleaning (default).
@@ -125,7 +124,7 @@ def main():
         make_order = []
     elif args.make == 'all':
         make_order = [mf[0] for mf in make_funcs]
-    else:   
+    else:
         make_order = args.make.replace(' ', "").split(',')
 
     if args.make_open_only:
@@ -146,9 +145,10 @@ def main():
         print "Results:"
         for name, value in result:
             if value:
-                print "    node "+name+" hash matches"
+                print "    node " + name + " hash matches"
             else:
-                print "    node "+name+" hash doesn't match!!"
+                print "    node " + name + " hash doesn't match!!"
+
 
 if __name__ == '__main__':
     main()
