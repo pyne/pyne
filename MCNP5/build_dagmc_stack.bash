@@ -95,15 +95,18 @@ cgm_tag=""
 _V=0
 enable_static="no"
 clean="no"
+make_parallel=""
 no_mcnp=""
 
 # options may be followed by one colon to indicate they have a required argument
-if ! options=$(getopt -u -o  abhp: -l "
+if ! options=$(getopt -u -o  abhp:j: -l "
     help,
     prefix:,
     verbose,   
     enable_static,
-    clean
+    clean,
+    j:,
+
     path_to_cubit:,
     cgm_revision:,
     cgm_branch:,    
@@ -153,6 +156,7 @@ do
     --verbose) _V=1;;
     --enable_static) enable_static="yes";;
     --clean) clean="yes";;
+    -j|--j)     make_parallel="-j $2"; shift;;
 
     --cgm_revision)		cgm_code="revision";cgm_special=$2; shift;;
     --cgm_branch)       cgm_code="branch";cgm_special=$2; shift;;
@@ -218,6 +222,7 @@ OPTIONS:
     --prefix=PREFIX             install files in directory PREFIX ["'$HOME'"/dagmc_bld]
     --verbose                   get all svn and make info
     --clean                     Delete PREFIX before installing anything
+    -j NUM, --j NUM                      Use NUM processes for make
     --enable_static             Static build of MOAB [no] 
     --path_to_cubit             Path to Cubit
     --cgm_revision=REV          revision to pull from repo
@@ -289,7 +294,7 @@ then
 	  --prefix=$cgm_prefix  
 
 	checkErr "CGM configure failed"
-    make  
+    make $make_parallel
     checkErr "CGM make failed"
 
 	make install 
@@ -320,7 +325,7 @@ then
     
     checkErr "HDF5 configure failed"
 
-	make
+	make $make_parallel
     checkErr "HDF5 make failed"
 	make install
     checkErr "HDF5 install failed"
@@ -362,7 +367,7 @@ then
 
     checkErr "MOAB Configure failed"
 
-	make
+	make $make_parallel
     checkErr "MOAB make failed"
 	make install
     checkErr "MOAB install failed"
