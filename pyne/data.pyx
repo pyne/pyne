@@ -39,11 +39,9 @@ import pyne.stlcontainers as conv
 #
 # hash map and initialization
 #
-cdef conv._MapStrStr hash_map_proxy = conv.MapStrStr(False)
-hash_map_proxy.map_ptr = &cpp_data.hash_map
-hash_map = hash_map_proxy
-
-cpp_data.hashes()
+cdef conv._MapStrStr data_checksums_proxy = conv.MapStrStr(False)
+data_checksums_proxy.map_ptr = &cpp_data.data_checksums
+data_checksums = data_checksums_proxy
 
 
 #

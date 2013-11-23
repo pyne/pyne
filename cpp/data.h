@@ -28,7 +28,7 @@ namespace pyne
   extern std::string NUC_DATA_PATH; ///< Path to the nuc_data.h5 file.
 
   // Mapping from nodes in nuc_data.h5 to hashes of nodes
-  extern std::map<std::string, std::string> hash_map; 
+  extern std::map<std::string, std::string> data_checksums; 
   
   /// \name Atomic Mass Data
   /// \{
@@ -45,7 +45,7 @@ namespace pyne
   } atomic_weight_struct; 
 
   // Loads preset dataset hashes into memory.
-  void hashes();
+  std::map<std::string, std::string> get_data_checksums();
   
   /// Loads the atomic mass and natural abundance data from the nuc_data.h5 file
   /// into memory.

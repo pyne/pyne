@@ -15,8 +15,7 @@ cimport extra_types
 
 cdef extern from "data.h" namespace "pyne":
     # hash map and initialization function
-    map[std_string, std_string] hash_map
-    void hashes() except +
+    map[std_string, std_string] data_checksums
     
     # atomic_mass functions
     map[int, double] atomic_mass_map
