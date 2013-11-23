@@ -1481,7 +1481,7 @@ class Wwinp(Mesh):
             self.e.append(p_e_upper_bounds)
             self.ne.append(int(len(p_e_upper_bounds)))
 
-    
+   
         self.ni = int(len(self.ne))
     
         # Set space related attributes.
@@ -1584,72 +1584,6 @@ class Meshtal(object):
                 self.tally[tally_number] = MeshTally(f, tally_number)
 
             line = f.readline()
-=======
-if(HAVE_PYTAPS):
-  class Meshtal(object):
-      """This class stores all the information from an MCNP meshtal file with
-      single or multiple fmesh4 neutron or photon tallies. The "tally" attribute
-      provides key/value access to invidial MeshTally objects.
-
-      Attributes
-      ==========
-      filename : string
-          Path to an MCNP meshtal file
-      version: float
-          The MCNP verison number
-      ld : string
-          The MCNP verison date
-      title : string
-          Title card from the MCNP input
-      histories : int
-          Number of histories from the MCNP simulation
-      tally : dict
-          A dictionary with MCNP fmesh4 tally numbers (e.g. 4, 14, 24) as keys and
-          MeshTally objects as values.
-      """
-
-      def __init__(self, filename):
-          """Instantiate a Meshtal object from a meshtal file.
-          """
-
-          self.tally = {}
-
-          with open(filename, 'r') as f: 
-             self._read_meshtal_head(f)
-             self._read_tallies(f)
-
-      def _read_meshtal_head(self, f):
-          """Get the version, ld, title card and number of histories.
-          """
-
-          line_1 = f.readline()
-          #set mcnp version
-          self.version = float(line_1.split()[2])
-          #get version date ("ld" in MCNP User's Manual)
-          self.ld = line_1.split()[3][3:]
-
-          line_2 = f.readline()
-          #store title card
-          self.title = line_2.strip()
-
-          line_3 = f.readline()
-          # get number of histories
-          self.histories = int(float(line_3.split()[-1]))
-
-      def _read_tallies(self, f):
-          """Read in all of the mesh tallies from the meshtal file.
-          """
-          line = f.readline()
-
-          while line != "":        
-              if line.split()[0:3] == ['Mesh', 'Tally', 'Number']:
-                  tally_number = int(line.split()[3])
-                  self.tally[tally_number] = MeshTally(f, tally_number)
-
-              line = f.readline()
-else:
-    nopytapsmsg("Meshtal")
->>>>>>> HAVE_PYTAPS guard around Meshtal in mcnp.py
 
 
 class MeshTally(StatMesh):
