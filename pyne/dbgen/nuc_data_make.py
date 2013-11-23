@@ -15,7 +15,7 @@ from pyne.dbgen.scattering_lengths import make_scattering_lengths
 from pyne.dbgen.simple_xs import make_simple_xs
 from pyne.dbgen.cinder import make_cinder
 from pyne.dbgen.eaf import make_eaf
-from pyne.dbgen.hash_tools import check_hashes
+from pyne.dbgen.hashtools import check_hashes
 
 # Thanks to http://patorjk.com/software/taag/
 # and http://www.chris.com/ascii/index.php?art=creatures/dragons (Jeff Ferris)
@@ -145,9 +145,9 @@ def main():
         print "Results:"
         for name, value in result:
             if value:
-                print "    node " + name + " hash matches"
+                print "    node " + name + " checksum matches"
             else:
-                print "    node " + name + " hash doesn't match!!"
+                print "    node " + name + " checksum doesn't match!!"
 
 
 if __name__ == '__main__':
