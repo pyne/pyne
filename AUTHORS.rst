@@ -1,7 +1,7 @@
 Authors
 ========
 
-The DAGMC project began as the CAD-MCNPX project in 20??, and since then has
+The DAGMC project began as the CAD-MCNPX project in 2003, and since then has
 included contributions from the following:
 
 * Meng-Kuo Wang
