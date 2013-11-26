@@ -754,54 +754,64 @@ class ENDFDataSource(DataSource):
         if (nuc, rx, nuc_i) not in self.rxcache:
             self._load_reaction(nuc, rx, nuc_i)
         return self.rxcache[nuc, rx, nuc_i]
+        # return ENDFReaction(nuc, rx, self)
 
-    # def discretize(self, nuc, rx, temp=300.0, src_phi_g=None, dst_phi_g=None):
-    #     """Discretizes the reaction channel from the source group structure to that
-    #     of the destination weighted by the group fluxes.  This implemenation is only
-    #     valid for multi-group data sources.  Non-multigroup data source should also
-    #     override this method.
+    def discretize(self, nuc, rx, temp=300.0, src_phi_g=None, dst_phi_g=None):
+        """Discretizes the reaction channel from the source group structure to that
+        of the destination weighted by the group fluxes. 
 
-    #     Parameters
-    #     ----------
-    #     nuc : int or str
-    #         A nuclide.
-    #     rx : int or str
-    #         Reaction id or name.
-    #     temp : float, optional
-    #         Temperature [K] of material, defaults to 300.0.
-    #     src_phi_g : array-like, optional
-    #         Group fluxes for this data source, length src_ngroups.
-    #     dst_phi_g : array-like, optional
-    #         Group fluxes for the destiniation structure, length dst_ngroups.
+        Parameters
+        ----------
+        nuc : int or str
+            A nuclide.
+        rx : int or str
+            Reaction id or name.
+        temp : float, optional
+            Temperature [K] of material, defaults to 300.0.
+        src_phi_g : array-like, optional
+            Group fluxes for this data source, length src_ngroups.
+        dst_phi_g : array-like, optional
+            Group fluxes for the destiniation structure, length dst_ngroups.
 
-    #     Returns
-    #     -------
-    #     dst_sigma : ndarray
-    #         Destination cross section data, length dst_ngroups.
+        Returns
+        -------
+        dst_sigma : ndarray
+            Destination cross section data, length dst_ngroups.
 
-    #     """
-    #     nuc = nucname.id(nuc)
-    #     nuc_i = nucname.id(nuc)
-    #     rx = rxname.mt(rx)
-    #     rxdata = self.reaction(nuc, rx, nuc_i = nuc_i)
-    #     src_phi_g = rxdata['src_phi_g'] if src_phi_g is None else np.asarray(src_phi_g)
-    #     src_sigma = rxdata['xs']
-    #     dst_group_struct = rxdata['dst_group_struct']
-    #     rxdata['src_to_dst_matrix'] = partial_energy_matrix(dst_group_struct,
-    #                                                         rxdata['src_group_struct'])
-    #     dst_sigma = None if src_sigma is None else group_collapse(src_sigma,
-    #                                                     src_phi_g, dst_phi_g,
-    #                                                     rxdata['_src_to_dst_matrix'])
-    #     return dst_sigma
+        """
+        nuc = nucname.id(nuc)
+        nuc_i = nucname.id(nuc)
+        rx = rxname.mt(rx)
+        rxdata = self.reaction(nuc, rx, nuc_i = nuc_i)
+        # src_phi_g = rxdata['src_phi_g'] if src_phi_g is None else np.asarray(src_phi_g)
+        src_sigma = rxdata['xs']
+        dst_group_struct = rxdata['dst_group_struct']
+        intpoints = [intpt for intpt in rxdata['intpoints'][::-1]]
+        intschemes = rxdata['intschemes'][::-1]
+        if intpoints[-1] != 1:
+            intpoints.append(1)
+        Eint = rxdata['Eint']
+        src_boundaries = [Eint[intpoint-1] for intpoint in intpoints]
+        src_bins = zip(src_boundaries[1:], src_boundaries[:-1], )
+        dst_bins = zip(dst_group_struct[1:], dst_group_struct[:-1])
+        print [self.intgp(dst_bin, src_bins, intschemes) for dst_bin in dst_bins]
+
+    def intgp(self, dst_bin, src_bins, src_intschemes):
+        dst_low = dst_bin[0]
+        dst_high = dst_bin[1]
+
+        pass
+
 
 class ENDFReaction(DataSource):
     def __init__(self, nuc, rx, ds, src_phi_g=None, dst_group_struct=None, **kwargs):
         self.ds = ds
+        self.ds.reaction(nuc, rx)
         self.nuc = nucname.id(nuc)
         self.rx = rxname.mt(rx)
         self._load_group_structure()
         self.dst_group_struct = dst_group_struct
-        self.src_phi_g = np.ones(self._src_ngroups, dtype='f8') if src_phi_g is None \
+        self.src_phi_g = np.ones(self._src_ngroups - 1, dtype='f8') if src_phi_g is None \
                             else np.asarray(src_phi_g)
         self.rxcache = self.ds.rxcache
 
@@ -814,7 +824,7 @@ class ENDFReaction(DataSource):
     def src_group_struct(self, src_group_struct):
         self._src_group_struct = np.asarray(src_group_struct, dtype='f8')
         self._src_group_struct = self._src_group_struct
-        self._src_ngroups = len(src_group_struct)
+        self._src_ngroups = len(self.src_group_struct) - 1
 
     @property
     def src_ngroups(self):
