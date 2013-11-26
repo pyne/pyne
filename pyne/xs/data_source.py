@@ -648,7 +648,6 @@ class EAFDataSource(DataSource):
                 rxcache[abskey] = xs + rxcache.get(abskey, 0.0)            
         self.fullyloaded = True
 
-
 class ENDFDataSource(DataSource):
     """Evaluated Nuclear Data File cross section data source.  The ENDF file
     must exist for this data source to exist.
@@ -689,24 +688,16 @@ class ENDFDataSource(DataSource):
         """Loads the group structure from ENDF file."""
         self.library._read_res(nuc)
         mt = rxname.mt(rx)
-        rx_data = self.rxcache[nuc, rx, nuc_i]
+        rxdata = self.rxcache[nuc, rx, nuc_i]
         xsdata = self.library.get_xs(nuc, rx, nuc_i)[0]
         intpoints = xsdata['intpoints']#[::-1]
         Eint = xsdata['Eint']
-        E_g = []
-        for i in range(len(intpoints)):
-            if not i:
-                low_Eint = 0
-            else:
-                low_Eint = intpoints[i-1]
-            high_Eint = intpoints[i]
-            E_g.append(Eint[low_Eint:high_Eint])
-        self._src_group_struct = E_g
-        rx_data['src_group_struct'] = E_g
-        self.ngroups = len(E_g)
-        rx_data['src_phi_g'] = np.ones(len(E_g), dtype='f8') \
-            if rx_data['_src_phi_g'] is None \
-            else np.asarray(rx_data['src_phi_g'])
+        src_group_struct = [Eint[intpoint-1] for intpoint in intpoints[::-1]]
+        rxdata['src_group_struct'] = src_group_struct
+        rxdata['src_ngroups'] = len(intpoints)
+        rxdata['src_phi_g'] = np.ones(len(intpoints), dtype='f8') \
+            if rxdata['_src_phi_g'] is None \
+            else np.asarray(rxdata['src_phi_g'])
 
     def _load_reaction(self, nuc, rx, nuc_i, src_phi_g=None, temp=300.0):
         """Note: ENDF data does not use temperature information (temp)
@@ -764,84 +755,134 @@ class ENDFDataSource(DataSource):
             self._load_reaction(nuc, rx, nuc_i)
         return self.rxcache[nuc, rx, nuc_i]
 
-    def _integrate_group(self, group_bounds, nuc, rx, nuc_i = None):
-        """Integrate the reaction cross-section over one group.
+    # def discretize(self, nuc, rx, temp=300.0, src_phi_g=None, dst_phi_g=None):
+    #     """Discretizes the reaction channel from the source group structure to that
+    #     of the destination weighted by the group fluxes.  This implemenation is only
+    #     valid for multi-group data sources.  Non-multigroup data source should also
+    #     override this method.
+
+    #     Parameters
+    #     ----------
+    #     nuc : int or str
+    #         A nuclide.
+    #     rx : int or str
+    #         Reaction id or name.
+    #     temp : float, optional
+    #         Temperature [K] of material, defaults to 300.0.
+    #     src_phi_g : array-like, optional
+    #         Group fluxes for this data source, length src_ngroups.
+    #     dst_phi_g : array-like, optional
+    #         Group fluxes for the destiniation structure, length dst_ngroups.
+
+    #     Returns
+    #     -------
+    #     dst_sigma : ndarray
+    #         Destination cross section data, length dst_ngroups.
+
+    #     """
+    #     nuc = nucname.id(nuc)
+    #     nuc_i = nucname.id(nuc)
+    #     rx = rxname.mt(rx)
+    #     rxdata = self.reaction(nuc, rx, nuc_i = nuc_i)
+    #     src_phi_g = rxdata['src_phi_g'] if src_phi_g is None else np.asarray(src_phi_g)
+    #     src_sigma = rxdata['xs']
+    #     dst_group_struct = rxdata['dst_group_struct']
+    #     rxdata['src_to_dst_matrix'] = partial_energy_matrix(dst_group_struct,
+    #                                                         rxdata['src_group_struct'])
+    #     dst_sigma = None if src_sigma is None else group_collapse(src_sigma,
+    #                                                     src_phi_g, dst_phi_g,
+    #                                                     rxdata['_src_to_dst_matrix'])
+    #     return dst_sigma
+
+class ENDFReaction(DataSource):
+    def __init__(self, nuc, rx, ds, src_phi_g=None, dst_group_struct=None, **kwargs):
+        self.ds = ds
+        self.nuc = nucname.id(nuc)
+        self.rx = rxname.mt(rx)
+        self._load_group_structure()
+        self.dst_group_struct = dst_group_struct
+        self.src_phi_g = np.ones(self._src_ngroups, dtype='f8') if src_phi_g is None \
+                            else np.asarray(src_phi_g)
+        self.rxcache = self.ds.rxcache
+
+
+    @property
+    def src_group_struct(self):
+        return self._src_group_struct
+
+    @src_group_struct.setter
+    def src_group_struct(self, src_group_struct):
+        self._src_group_struct = np.asarray(src_group_struct, dtype='f8')
+        self._src_group_struct = self._src_group_struct
+        self._src_ngroups = len(src_group_struct)
+
+    @property
+    def src_ngroups(self):
+        return self._src_ngroups
+
+    @property
+    def dst_group_struct(self):
+        return self._dst_group_struct
+
+    @dst_group_struct.setter
+    def dst_group_struct(self, dst_group_struct):
+        if dst_group_struct is None:
+            self._dst_group_struct = None
+            self._dst_ngroups = 0
+            self._src_to_dst_matrix = None
+        else:
+            self._dst_group_struct = np.asarray(dst_group_struct)
+            self._dst_ngroups = len(dst_group_struct) - 1
+            self._src_to_dst_matrix = partial_energy_matrix(dst_group_struct,
+                                                            self._src_group_struct)
+
+    @property
+    def dst_ngroups(self):
+        return self._dst_ngroups
+
+    @property
+    def src_to_dst_matrix(self):
+        return self._src_to_dst_matrix
+
+    def _load_group_structure(self):
+        """Loads the group structure from ENDF file."""
+        rxdata = self.ds.rxcache[self.nuc, self.rx, self.nuc]
+        intpoints = rxdata['intpoints'][::-1]
+        E_g = [rxdata['Eint'][intpoint-1] for intpoint in intpoints]
+        # self._src_group_struct = E_g
+        self.src_group_struct = rxdata['Eint'][::-1]
+        self.src_sigma = rxdata['xs']
+        self.intpoints = intpoints
+
+    def discretize(self, temp=300.0, src_phi_g=None, dst_phi_g=None):
+        """Discretizes the reaction channel from the source group structure to that
+        of the destination weighted by the group fluxes.  This implemenation is only
+        valid for multi-group data sources.  Non-multigroup data source should also
+        override this method.
 
         Parameters
         ----------
         nuc : int or str
-            Nuclide containing the reaction.
+            A nuclide.
         rx : int or str
-            Desired reaction
-        nuc_i : int or str
-            Isotope containing the reaction. Defaults to nuc.
-        group_bounds : tuple
-            Low and high energy bounds of the new group.
+            Reaction id or name.
+        temp : float, optional
+            Temperature [K] of material, defaults to 300.0.
+        src_phi_g : array-like, optional
+            Group fluxes for this data source, length src_ngroups.
+        dst_phi_g : array-like, optional
+            Group fluxes for the destiniation structure, length dst_ngroups.
 
         Returns
         -------
-        group_xs : float
-            The cross-section of the group."""
-        if nuc_i is None:
-            nuc_i = nuc
-        nuc = nucname.id(nuc)
-        rx = rxname.mt(rx)
-        nuc_i = nucname.id(nuc_i)
-        rxdata = self.reaction(nuc, rx, nuc_i = nuc_i)
-        src_group_struct = rxdata['src_group_struct']
-        src_bounds = [group[-1] for group in src_group_struct]
-        # figure out what to do at the boundaries between dst groups
-        # integrate tab groups
-        return src_bounds
+        dst_sigma : ndarray
+            Destination cross section data, length dst_ngroups.
 
-    def discretize(self, nuc, rx, nuc_i, temp=300.0, src_phi_g=None,
-                   dst_phi_g=None):
-        """Discretizes the reaction channel.
-
-        Parameters
-        ----------
-        nuc : int
-            Nuclide to discretize.
-        rx : int or str
-            Reaction to discretize.
-        nuc_i : int
-            Isotope to discretize.
-        temp : float
-            Temperature - not used in this, but preserved for API compatibility
-        src_phi_g : array-like
-            Source group flux - not used in this, but preserved for API
-            compatibility
-        dst_phi_g : array-like
-            Destination group flux - not used in this, but preserved for API
-            compatibility
-
-        Returns
-        -------
-        dst_sigma : array
-            An array with the group cross-sections in order of decreasing energy.
         """
-        nuc = nucname.id(nuc)
-        rx = rxname.mt(rx)
-        rxdata = self._load_reaction(nuc, rx, nuc_i)
-        intpoints = rxdata['intpoints']
-        intschemes = rxdata['intschemes']
-        Eints = rxdata['Eint']
-        # dst_group_struct = rxdata['dst_group_struct']
-        E_g = rxdata['src_group_struct']
-        xs = rxdata['xs']
-        xs_all = []
-        dst_sigma = []
-        for i in range(len(intpoints)):
-            if not i:
-                low_xs = 0
-            else:
-                low_xs = intpoints[i-1]
-            high_xs = intpoints[i]
-            xs_all.append(xs[low_xs:high_xs])
-        for i in range(len(E_g)):
-            intscheme = intschemes[i]
-            Eints = E_g[i]
-            xs = xs_all[i]
-            dst_sigma.append(self.library.integrate_tab_range(intscheme, Eints, xs))
-        rxdata['dst_sigma'] = np.asarray(dst_sigma)[::-1]
-        return rxdata['dst_sigma']
+        src_phi_g = self.src_phi_g if src_phi_g is None else np.asarray(src_phi_g)
+        src_sigma = self.src_sigma
+        dst_sigma = None if src_sigma is None else group_collapse(src_sigma,
+                                                        src_phi_g, dst_phi_g,
+                                                        self._src_to_dst_matrix)
+        return dst_sigma
+
