@@ -12,17 +12,8 @@
 #include "meshtal_funcs.h"
 #include "TallyManager.hpp"
 
-// TODO modify/remove this method when tally multipliers are implemented
-void mcnp_weight_calculation(int* index, double* erg, double* value) 
-{
-    FMESH_FUNC(dagmc_mesh_score)(index, erg, value);
-}
-
 // create a tally manager to handle all DAGMC tally actions
-TallyManager tallyManager = TallyManager();
-
-// Store fmesh_index of tallys that have multipliers (which will be updated)
-std::vector<int> fmesh_idxs;
+TallyManager tallyManager;
 
 //---------------------------------------------------------------------------//
 // INITIALIZATION AND SETUP METHODS
@@ -203,8 +194,6 @@ void dagmc_fmesh_setup_mesh_(int* /*ipt*/, int* id, int* fmesh_idx,
     if (*fmesh_idx != -1)
     {
        tallyManager.addMultiplierToTally(multiplier_id, *id);
-       // Add current index to the speed-up vector
-       fmesh_idxs.push_back(*fmesh_idx);   
     }
 }
 //---------------------------------------------------------------------------//
@@ -386,15 +375,9 @@ void dagmc_collision_score_(double* x,   double* y, double* z,
 }
 
 //---------------------------------------------------------------------------//
-void dagmc_update_multipliers_(double *erg)
+void dagmc_update_multiplier_(int* fmesh_idx, double* value)
 {
-   std::vector<int>::iterator it;
-   double value = 1.0;
-   for (it=fmesh_idxs.begin(); it!=fmesh_idxs.end(); ++it)
-   {
-       mcnp_weight_calculation(&(*it), erg, &value);
-       tallyManager.updateMultiplier(*it-1, value);
-   }
+   tallyManager.updateMultiplier(*fmesh_idx-1, *value);
 }
 
 //---------------------------------------------------------------------------//
