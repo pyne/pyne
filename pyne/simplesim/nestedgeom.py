@@ -89,7 +89,6 @@ tally.
 
 """
 
-import numpy as np
 
 class IUnit(object):
     """Abstract base class for tally units. The user does not use this class

@@ -17,6 +17,7 @@ import os
 import linecache
 import tables
 import datetime
+import warnings
 
 import numpy as np
 
@@ -26,8 +27,12 @@ from pyne import nucname
 from binaryreader import _BinaryReader, _FortranRecord
 
 # Mesh specific imports
-from itaps import iMesh
-from pyne.mesh import Mesh, StatMesh, MeshError
+try:
+    from itaps import iMesh
+    from pyne.mesh import Mesh, StatMesh, MeshError
+except ImportError:
+    warnings.warn("the PyTAPS optional dependency could not be imported. "
+                  "Some aspects of the mcnp module may be incomplete.", ImportWarning)
 
 class Mctal(object):
     def __init__(self):
