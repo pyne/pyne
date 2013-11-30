@@ -1,7 +1,7 @@
 """Module for tools to generate and handle various binning structures."""
 
 import numpy as np
-from numpy import linspace, logspace
+from numpy import logspace
 
 
 def ninespace(start, stop, num=50, endpoint=True):

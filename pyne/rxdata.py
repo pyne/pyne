@@ -1,5 +1,3 @@
-import re
-import numpy as np
 import collections
 # import pyne.endf as endf
 
