@@ -99,16 +99,17 @@ class TallyManager
      *
      * A default of 1.0 is used for the value
      */
-    void addNewMultiplier(int multiplier_id);
+    void addNewMultiplier(unsigned int multiplier_id);
 
-    void addMultiplierToTally(int multiplier_id, unsigned int tally_id);
+    // will only update if valid multiplier
+    void addMultiplierToTally(unsigned int multiplier_id, unsigned int tally_id);
 
     /**
      * \brief Update the value associated with the multiplier id 
      * \param[in] multiplier_id the unique ID for the multiplier
      * \param[in] value of the multiplier
      */
-    void updateMultiplier(int multiplier_id, double value);
+    void updateMultiplier(unsigned int multiplier_id, double value);
 
     /**
      * \brief Remove a DAGMC Tally from the Observer list

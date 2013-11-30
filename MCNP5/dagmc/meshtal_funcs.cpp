@@ -186,13 +186,14 @@ void dagmc_fmesh_setup_mesh_(int* /*ipt*/, int* id, int* fmesh_idx,
     } 
 
     tallyManager.addNewTally(*id, type, emesh_boundaries, fc_settings);
-    // Create a zero-based version of fmesh_idx to use as multiplier_id
-    int multiplier_id = *fmesh_idx - 1;
-    // Always do this so the list is as long as the list of the tallies
-    tallyManager.addNewMultiplier(multiplier_id);
-    // Do things that only need to be done for existing tally requests 
+
+    // Add tally multiplier, if it exists  
     if (*fmesh_idx != -1)
     {
+       // Create a zero-based version of fmesh_idx to use as multiplier_id
+       int multiplier_id = *fmesh_idx - 1;
+
+       tallyManager.addNewMultiplier(multiplier_id);
        tallyManager.addMultiplierToTally(multiplier_id, *id);
     }
 }

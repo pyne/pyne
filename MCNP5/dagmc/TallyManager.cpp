@@ -33,13 +33,17 @@ void TallyManager::addNewTally(unsigned int tally_id,
     }
 }
 //---------------------------------------------------------------------------//
-void TallyManager::addNewMultiplier(int multiplier_id)
+void TallyManager::addNewMultiplier(unsigned int multiplier_id)
 {
-     event.multipliers.push_back(1.0);
+     // pad multipliers vector up to a size one greater than the multiplier_id
+     while (event.multipliers.size() <= multiplier_id)
+     {
+         event.multipliers.push_back(1.0);
+     }
 }
 //---------------------------------------------------------------------------//
 
-void TallyManager::updateMultiplier(int multiplier_id, double value)
+void TallyManager::updateMultiplier(unsigned int multiplier_id, double value)
 {
     if (event.multipliers.size() > multiplier_id)
     {
@@ -48,15 +52,16 @@ void TallyManager::updateMultiplier(int multiplier_id, double value)
 }
 
 //---------------------------------------------------------------------------//
-void TallyManager::addMultiplierToTally(int multiplier_id, unsigned int tally_id)
+void TallyManager::addMultiplierToTally(unsigned int multiplier_id,
+                                        unsigned int tally_id)
 {
         
     std::map<int, Tally *>::iterator it;	
     it = observers.find(tally_id);
-    if (multiplier_id < event.multipliers.size() && it != observers.end())
+
+    if (event.multipliers.size() > multiplier_id && it != observers.end())
     {
-        Tally *tally = it->second;
-        
+        Tally *tally = it->second;  
         tally->input_data.multiplier_id = multiplier_id;
     }
     else
