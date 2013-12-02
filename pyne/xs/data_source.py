@@ -691,8 +691,8 @@ class ENDFDataSource(DataSource):
         rxdata = self.rxcache[nuc, rx, nuc_i]
         xsdata = self.library.get_xs(nuc, rx, nuc_i)[0]
         intpoints = xsdata['intpoints']#[::-1]
-        Eint = xsdata['Eint']
-        src_group_struct = [Eint[intpoint-1] for intpoint in intpoints[::-1]]
+        e_int = xsdata["e_int"]
+        src_group_struct = [e_int[intpoint-1] for intpoint in intpoints[::-1]]
         rxdata['src_group_struct'] = src_group_struct
         rxdata['src_ngroups'] = len(intpoints)
         rxdata['src_phi_g'] = np.ones(len(intpoints), dtype='f8') \
@@ -777,7 +777,6 @@ class ENDFDataSource(DataSource):
         -------
         dst_sigma : ndarray
             Destination cross section data, length dst_ngroups.
-
         """
         nuc = nucname.id(nuc)
         nuc_i = nucname.id(nuc)
@@ -787,31 +786,55 @@ class ENDFDataSource(DataSource):
         dst_group_struct = rxdata['dst_group_struct']
         intpoints = [intpt for intpt in rxdata['intpoints'][::-1]]
         intschemes = rxdata['intschemes'][::-1]
-        if intpoints[-1] != 1:
-            intpoints.append(1)
-        Eint = rxdata['Eint']
-        src_bounds = [Eint[intpoint-1] for intpoint in intpoints]
+        e_int = rxdata["e_int"]
+
+        src_bounds = [e_int[intpoint-1] for intpoint in intpoints]
         src_dict = dict(zip(src_bounds, intschemes))
         dst_bounds = zip(dst_group_struct[1:], dst_group_struct[:-1])
-        dst_sigma = [self.integrate_dst_group(dst_bound, src_bounds, src_dict, Eint, xs)
+        dst_sigma = [self.integrate_dst_group(dst_bound, src_bounds, src_dict, e_int, xs)
                      for dst_bound in dst_bounds]
         return dst_sigma
 
-    def integrate_dst_group(self, dst_bounds, src_bounds, src_dict, Eint, xs):
+    def integrate_dst_group(self, dst_bounds, src_bounds, src_dict, e_int, xs):
         dst_low, dst_high = dst_bounds
         src_bounds = np.array(src_bounds)
+
+        # We're going to have to integrate over each zone bounded by the edges
+        # of a destination bin or by the edges of a source bin
         internal_src_bounds = [bd for bd in src_bounds if dst_low < bd < dst_high]
         integration_bounds = [dst_low, dst_high]
         integration_bounds[1:1] = internal_src_bounds
         integration_bounds = zip(integration_bounds[:-1],
                                  integration_bounds[1:])
+
         schemes = [src_dict[src_bounds[src_bounds >= high][0]] for low,
                    high in integration_bounds]
-        integration_args = [(scheme, Eint, xs, bds[0], bds[1]) for scheme, bds in zip(schemes, integration_bounds)]
-        return sum([self.integrate_range_nonnormal(*args) for
+
+        integration_args = [(scheme, e_int, xs, bds[0], bds[1]) for
+                            scheme, bds in zip(schemes, integration_bounds)]
+        return sum([self._integrate_range_nonnormal(*args) for
                     args in integration_args])/(dst_high-dst_low)
 
-    def integrate_range_nonnormal(self, scheme, Eint, xs, low, high):
+    def _integrate_range_nonnormal(self, scheme, e_int, xs, low, high):
+        """De-normalizes the integral over a certain range. Useful when the
+        range is integrated piecewise over several chunks - you don't want
+        each chunk to be individually normalized.
+
+        Parameters
+        ----------
+        scheme : int
+            ENDF-coded interpolation scheme to be used between the data points.
+        e_int : NDArray
+            Array of energy values to integrate over.
+        xs : NDArray
+            Array of cross-sections corresponding to e_int.
+        low, high : float
+            Lower and upper bounds of integration.
+
+        Returns
+        -------
+        sigma * dE : float
+            Non-normalized integral. """
         dE = high - low
-        sigma = self.library.integrate_tab_range(scheme,Eint, xs, low, high)
+        sigma = self.library.integrate_tab_range(scheme,e_int, xs, low, high)
         return sigma * dE

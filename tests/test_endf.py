@@ -630,11 +630,11 @@ def test_resolved_r_matrix_kbk_kps():
 
     ch1_exp = {'PSI':{'intpoints': [3.,6.,10.],
                       'intschemes': [1.,2.,3.],
-                      'Eint': exp_3[13:17].flat[:-4:2],
+                      'e_int': exp_3[13:17].flat[:-4:2],
                       'PSI': exp_3[13:17].flat[1:-4:2]},
                'PSR':{'intpoints': 3.,
                       'intschemes': 2.,
-                      'Eint': exp_3[10].flat[::2],
+                      'e_int': exp_3[10].flat[::2],
                       'PSR': exp_3[10].flat[1::2]},
                'LBK': 0.,
                'LPS': 1.}
@@ -807,7 +807,7 @@ def test_u235():
 """))
     obs =  u235.structure[nuc]['data'][nuc]['xs'][37][0]
     exp = {'intpoints': 6, 'intschemes': 2,
-           'Eint': exp_a[3:5].flat[::2],
+           'e_int': exp_a[3:5].flat[::2],
            'xs': exp_a[3:5].flat[1::2]}
 
     for key in obs:
