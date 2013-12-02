@@ -17,11 +17,12 @@ John Xia <john.danger.xia@gmail.com>.
 import re
 import os
 from libc.stdlib cimport malloc, free
-from math import e
 
 cimport numpy as np
 import numpy as np
 from scipy.interpolate import interp1d
+
+np.import_array()
 
 from pyne cimport cpp_nucname
 from pyne import nucname
@@ -385,14 +386,14 @@ class Library(rx.RxLib):
                 xs = xs[e_int >= low]
                 e_int = e_int[e_int >= low]
             elif low is not None and low > e_int[0]:
-                low_xs = e ** interp(low)
+                low_xs = np.e ** interp(low)
                 xs = np.insert(xs[e_int > low], 0, low_xs)
                 e_int = np.insert(e_int[e_int > low], 0, low)
             if high in e_int:
                 xs = xs[e_int <= high]
                 e_int = e_int[e_int <= high]
             elif high is not None:
-                high_xs = e ** interp(high)
+                high_xs = np.e ** interp(high)
                 xs = np.append(xs[e_int < high], high_xs)
                 e_int = np.append(e_int[e_int < high], high)
 
@@ -412,14 +413,14 @@ class Library(rx.RxLib):
                 xs = xs[e_int >= low]
                 e_int = e_int[e_int >= low]
             elif low is not None and low > e_int[0]:
-                low_xs = e ** interp(np.log(low))
+                low_xs = np.e ** interp(np.log(low))
                 xs = np.insert(xs[e_int > low], 0, low_xs)
                 e_int = np.insert(e_int[e_int > low], 0, low)
             if high in e_int:
                 xs = xs[e_int <= high]
                 e_int = e_int[e_int <= high]
             elif high is not None:
-                high_xs = e ** interp(np.log(high))
+                high_xs = np.e ** interp(np.log(high))
                 xs = np.append(xs[e_int < high], high_xs)
                 e_int = np.append(e_int[e_int < high], high)
 
@@ -448,7 +449,7 @@ class Library(rx.RxLib):
         # FIXME
         raise NotImplementedError("see docs for more details.")
 
-    def integrate_tab_range(self, intscheme, e_int, xs, low = None, high = None):
+    def integrate_tab_range(self, intscheme, e_int, xs, low=None, high=None):
         """Integrates across one tabulation range.
 
         Parameters
