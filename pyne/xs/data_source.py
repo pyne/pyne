@@ -56,14 +56,14 @@ class DataSource(object):
     .. code-block:: python
 
         def load(self, temp=300.0):
-            # loads the entire data source into memory.  This prevents 
+            # loads the entire data source into memory.  This prevents
             # excessive queries to disk.  This does not return anything.
             pass
 
-        # a class attribute that specificies whether the data source uses 
-        # temperature information.  If the data source does not use such 
-        # info, the keys in the rxcache dictionary are shortend to just the 
-        # (nuc, rx) pair.  Accessing (nuc, rx, temp) data will defer to the 
+        # a class attribute that specificies whether the data source uses
+        # temperature information.  If the data source does not use such
+        # info, the keys in the rxcache dictionary are shortend to just the
+        # (nuc, rx) pair.  Accessing (nuc, rx, temp) data will defer to the
         # (nuc, rx) pair.
         _USES_TEMP = True
 
@@ -266,19 +266,19 @@ class SimpleDataSource(DataSource):
         Keyword arguments to be sent to base class.
 
     """
-    _rx_avail = {rxname.id('total'): 't', 
-                 rxname.id('scattering'): 's', 
-                 rxname.id('elastic'): 'e', 
-                 rxname.id('inelastic'): 'i', 
-                 rxname.id('absorption'): 'a', 
-                 rxname.id('gamma'): 'gamma', 
-                 rxname.id('fission'): 'f', 
-                 rxname.id('alpha'): 'alpha', 
-                 rxname.id('proton'): 'proton', 
-                 rxname.id('deut'): 'deut', 
-                 rxname.id('trit'): 'trit', 
-                 rxname.id('z_2n'): '2n', 
-                 rxname.id('z_3n'): '3n', 
+    _rx_avail = {rxname.id('total'): 't',
+                 rxname.id('scattering'): 's',
+                 rxname.id('elastic'): 'e',
+                 rxname.id('inelastic'): 'i',
+                 rxname.id('absorption'): 'a',
+                 rxname.id('gamma'): 'gamma',
+                 rxname.id('fission'): 'f',
+                 rxname.id('alpha'): 'alpha',
+                 rxname.id('proton'): 'proton',
+                 rxname.id('deut'): 'deut',
+                 rxname.id('trit'): 'trit',
+                 rxname.id('z_2n'): '2n',
+                 rxname.id('z_3n'): '3n',
                  rxname.id('z_4n'): '4n'}
 
     def __init__(self, **kwargs):
@@ -391,44 +391,44 @@ class CinderDataSource(DataSource):
     """
     # 'h' stands for helion or 'He3'
     _rx_avail = {rxname.id('np_1'): 'np *',
-                 rxname.id('a_1'): 'a  *', 
-                 rxname.id('He3_1'): 'h  *', 
-                 rxname.id('z_2p_1'): '2p *', 
-                 rxname.id('z_3n_1'): '3n *', 
+                 rxname.id('a_1'): 'a  *',
+                 rxname.id('He3_1'): 'h  *',
+                 rxname.id('z_2p_1'): '2p *',
+                 rxname.id('z_3n_1'): '3n *',
                  rxname.id('d_1'): 'd  *',
                  rxname.id('npd'): 'np/d',
-                 rxname.id('na'): 'na', 
-                 rxname.id('excited'): '*', 
-                 rxname.id('nd'): 'nd', 
-                 rxname.id('gamma_1'): 'g  *', 
-                 rxname.id('z_3n'): '3n', 
-                 rxname.id('np'): 'np', 
-                 rxname.id('nt'): 'nt', 
-                 rxname.id('t'): 't', 
+                 rxname.id('na'): 'na',
+                 rxname.id('excited'): '*',
+                 rxname.id('nd'): 'nd',
+                 rxname.id('gamma_1'): 'g  *',
+                 rxname.id('z_3n'): '3n',
+                 rxname.id('np'): 'np',
+                 rxname.id('nt'): 'nt',
+                 rxname.id('t'): 't',
                  rxname.id('nt_1'): 'nt *',
-                 rxname.id('z_4n_1'): '4n *', 
-                 rxname.id('na_1'): 'na *', 
-                 rxname.id('nd_1'): 'nd *', 
-                 rxname.id('t_1'): 't  *', 
-                 rxname.id('a'): 'a', 
-                 rxname.id('z_2p'): '2p', 
+                 rxname.id('z_4n_1'): '4n *',
+                 rxname.id('na_1'): 'na *',
+                 rxname.id('nd_1'): 'nd *',
+                 rxname.id('t_1'): 't  *',
+                 rxname.id('a'): 'a',
+                 rxname.id('z_2p'): '2p',
                  rxname.id('d'): 'd',
-                 rxname.id('gamma'): 'g', 
-                 rxname.id('He3'): 'h', 
-                 rxname.id('n'): 'n', 
-                 rxname.id('z_4n'): '4n', 
-                 rxname.id('p'): 'p', 
-                 rxname.id('n_1'): 'n  *', 
-                 rxname.id('z_2a'): '2a', 
-                 rxname.id('z_2n_1'): '2n *', 
+                 rxname.id('gamma'): 'g',
+                 rxname.id('He3'): 'h',
+                 rxname.id('n'): 'n',
+                 rxname.id('z_4n'): '4n',
+                 rxname.id('p'): 'p',
+                 rxname.id('n_1'): 'n  *',
+                 rxname.id('z_2a'): '2a',
+                 rxname.id('z_2n_1'): '2n *',
                  rxname.id('z_2n'): '2n',
-                 rxname.id('nHe3_1'): 'nh *', 
-                 rxname.id('p_1'): 'p  *', 
+                 rxname.id('nHe3_1'): 'nh *',
+                 rxname.id('p_1'): 'p  *',
                  # not real or unique absorption reactions
-                 #rxname.id(''): "", 
-                 #rxname.id(''): 'x', 
+                 #rxname.id(''): "",
+                 #rxname.id(''): 'x',
                  #rxname.id(''): 'x  *',
-                 #rxname.id(''): 'c', 
+                 #rxname.id(''): 'c',
                  #rxname.id('fission'): 'f',
                  }
 
@@ -502,14 +502,14 @@ class EAFDataSource(DataSource):
     """
 
     # MT#s included in the EAF data
-    _rx_avail = {rxname.id('gamma'): '1020', 
-                 rxname.id('gamma_1'): '1021', 
-                 rxname.id('gamma_2'): '1022', 
-                 rxname.id('p'): '1030', 
+    _rx_avail = {rxname.id('gamma'): '1020',
+                 rxname.id('gamma_1'): '1021',
+                 rxname.id('gamma_2'): '1022',
+                 rxname.id('p'): '1030',
                  rxname.id('p_1'): '1031',
                  rxname.id('p_2'): '1032',
-                 rxname.id('d'): '1040', 
-                 rxname.id('d_1'): '1041', 
+                 rxname.id('d'): '1040',
+                 rxname.id('d_1'): '1041',
                  rxname.id('d_2'): '1042',
                  rxname.id('t'): '1050',
                  rxname.id('t_1'): '1051',
@@ -583,11 +583,11 @@ class EAFDataSource(DataSource):
         ----------
         nuc : int
             Nuclide id.
-        rx : int 
+        rx : int
             Reaction id.
         temp : float, optional
             The material temperature
-        
+
         Notes
         -----
         EAF data does not use temperature information (temp).
@@ -598,7 +598,7 @@ class EAFDataSource(DataSource):
         if rx in self._rx_avail:
             cond = "(nuc_zz == {0}) & (rxnum == '{1}')".format(nuc, self._rx_avail[rx])
         elif rx == absrx:
-            cond = "(nuc_zz == {0})".format(nuc)            
+            cond = "(nuc_zz == {0})".format(nuc)
         else:
             return None
 
@@ -628,7 +628,7 @@ class EAFDataSource(DataSource):
         ----------
         temp : float, optional
             The material temperature
-        
+
         Notes
         -----
         EAF data does not use temperature information (temp).
@@ -645,7 +645,7 @@ class EAFDataSource(DataSource):
                 xs = row['xs']
                 rxcache[nuc, rx] = xs
                 abskey = (nuc, absrx)
-                rxcache[abskey] = xs + rxcache.get(abskey, 0.0)            
+                rxcache[abskey] = xs + rxcache.get(abskey, 0.0)
         self.fullyloaded = True
 
 class ENDFDataSource(DataSource):
@@ -758,7 +758,7 @@ class ENDFDataSource(DataSource):
 
     def discretize(self, nuc, rx, temp=300.0, src_phi_g=None, dst_phi_g=None):
         """Discretizes the reaction channel from the source group structure to that
-        of the destination weighted by the group fluxes. 
+        of the destination weighted by the group fluxes.
 
         Parameters
         ----------
@@ -783,116 +783,35 @@ class ENDFDataSource(DataSource):
         nuc_i = nucname.id(nuc)
         rx = rxname.mt(rx)
         rxdata = self.reaction(nuc, rx, nuc_i = nuc_i)
-        # src_phi_g = rxdata['src_phi_g'] if src_phi_g is None else np.asarray(src_phi_g)
-        src_sigma = rxdata['xs']
+        xs = rxdata['xs']
         dst_group_struct = rxdata['dst_group_struct']
         intpoints = [intpt for intpt in rxdata['intpoints'][::-1]]
         intschemes = rxdata['intschemes'][::-1]
         if intpoints[-1] != 1:
             intpoints.append(1)
         Eint = rxdata['Eint']
-        src_boundaries = [Eint[intpoint-1] for intpoint in intpoints]
-        src_bins = zip(src_boundaries[1:], src_boundaries[:-1], )
-        dst_bins = zip(dst_group_struct[1:], dst_group_struct[:-1])
-        print [self.intgp(dst_bin, src_bins, intschemes) for dst_bin in dst_bins]
-
-    def intgp(self, dst_bin, src_bins, src_intschemes):
-        dst_low = dst_bin[0]
-        dst_high = dst_bin[1]
-
-        pass
-
-
-class ENDFReaction(DataSource):
-    def __init__(self, nuc, rx, ds, src_phi_g=None, dst_group_struct=None, **kwargs):
-        self.ds = ds
-        self.ds.reaction(nuc, rx)
-        self.nuc = nucname.id(nuc)
-        self.rx = rxname.mt(rx)
-        self._load_group_structure()
-        self.dst_group_struct = dst_group_struct
-        self.src_phi_g = np.ones(self._src_ngroups - 1, dtype='f8') if src_phi_g is None \
-                            else np.asarray(src_phi_g)
-        self.rxcache = self.ds.rxcache
-
-
-    @property
-    def src_group_struct(self):
-        return self._src_group_struct
-
-    @src_group_struct.setter
-    def src_group_struct(self, src_group_struct):
-        self._src_group_struct = np.asarray(src_group_struct, dtype='f8')
-        self._src_group_struct = self._src_group_struct
-        self._src_ngroups = len(self.src_group_struct) - 1
-
-    @property
-    def src_ngroups(self):
-        return self._src_ngroups
-
-    @property
-    def dst_group_struct(self):
-        return self._dst_group_struct
-
-    @dst_group_struct.setter
-    def dst_group_struct(self, dst_group_struct):
-        if dst_group_struct is None:
-            self._dst_group_struct = None
-            self._dst_ngroups = 0
-            self._src_to_dst_matrix = None
-        else:
-            self._dst_group_struct = np.asarray(dst_group_struct)
-            self._dst_ngroups = len(dst_group_struct) - 1
-            self._src_to_dst_matrix = partial_energy_matrix(dst_group_struct,
-                                                            self._src_group_struct)
-
-    @property
-    def dst_ngroups(self):
-        return self._dst_ngroups
-
-    @property
-    def src_to_dst_matrix(self):
-        return self._src_to_dst_matrix
-
-    def _load_group_structure(self):
-        """Loads the group structure from ENDF file."""
-        rxdata = self.ds.rxcache[self.nuc, self.rx, self.nuc]
-        intpoints = rxdata['intpoints'][::-1]
-        E_g = [rxdata['Eint'][intpoint-1] for intpoint in intpoints]
-        # self._src_group_struct = E_g
-        self.src_group_struct = rxdata['Eint'][::-1]
-        self.src_sigma = rxdata['xs']
-        self.intpoints = intpoints
-
-    def discretize(self, temp=300.0, src_phi_g=None, dst_phi_g=None):
-        """Discretizes the reaction channel from the source group structure to that
-        of the destination weighted by the group fluxes.  This implemenation is only
-        valid for multi-group data sources.  Non-multigroup data source should also
-        override this method.
-
-        Parameters
-        ----------
-        nuc : int or str
-            A nuclide.
-        rx : int or str
-            Reaction id or name.
-        temp : float, optional
-            Temperature [K] of material, defaults to 300.0.
-        src_phi_g : array-like, optional
-            Group fluxes for this data source, length src_ngroups.
-        dst_phi_g : array-like, optional
-            Group fluxes for the destiniation structure, length dst_ngroups.
-
-        Returns
-        -------
-        dst_sigma : ndarray
-            Destination cross section data, length dst_ngroups.
-
-        """
-        src_phi_g = self.src_phi_g if src_phi_g is None else np.asarray(src_phi_g)
-        src_sigma = self.src_sigma
-        dst_sigma = None if src_sigma is None else group_collapse(src_sigma,
-                                                        src_phi_g, dst_phi_g,
-                                                        self._src_to_dst_matrix)
+        src_bounds = [Eint[intpoint-1] for intpoint in intpoints]
+        src_dict = dict(zip(src_bounds, intschemes))
+        dst_bounds = zip(dst_group_struct[1:], dst_group_struct[:-1])
+        dst_sigma = [self.integrate_dst_group(dst_bound, src_bounds, src_dict, Eint, xs)
+                     for dst_bound in dst_bounds]
         return dst_sigma
 
+    def integrate_dst_group(self, dst_bounds, src_bounds, src_dict, Eint, xs):
+        dst_low, dst_high = dst_bounds
+        src_bounds = np.array(src_bounds)
+        internal_src_bounds = [bd for bd in src_bounds if dst_low < bd < dst_high]
+        integration_bounds = [dst_low, dst_high]
+        integration_bounds[1:1] = internal_src_bounds
+        integration_bounds = zip(integration_bounds[:-1],
+                                 integration_bounds[1:])
+        schemes = [src_dict[src_bounds[src_bounds >= high][0]] for low,
+                   high in integration_bounds]
+        integration_args = [(scheme, Eint, xs, bds[0], bds[1]) for scheme, bds in zip(schemes, integration_bounds)]
+        return sum([self.integrate_range_nonnormal(*args) for
+                    args in integration_args])/(dst_high-dst_low)
+
+    def integrate_range_nonnormal(self, scheme, Eint, xs, low, high):
+        dE = high - low
+        sigma = self.library.integrate_tab_range(scheme,Eint, xs, low, high)
+        return sigma * dE

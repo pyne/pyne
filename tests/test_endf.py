@@ -1,6 +1,7 @@
 import os
 import warnings
 import StringIO
+from math import e
 
 import numpy as np
 from numpy.testing import assert_array_equal, assert_allclose
@@ -814,19 +815,6 @@ def test_u235():
 
 
 # Test ENDF Data Source
-ds = ENDFDataSource(str_library)
-
-# def test_group_struct():
-    # from math import e
-    # ds._load_reaction(nuc40000, 600, nuc40040)
-    # obs = ds.rxcache[nuc40000, 600, nuc40040]['src_group_struct']
-    # exp = [np.array([1., 4., 10., 20.]),
-           # np.array([1., 4., 10., 20.]),
-           # np.array([1, round(e, 6), round(e,6), round(e**2, 6)]),
-           # np.array([1., 2., 2., 3.]),
-           # np.array([1., 2., 2., 3.])]
-    # for i in range(len(exp)):
-        # assert_allclose(obs[i], exp[i])
 
 def test_int_hist():
     exp_Eint = np.array([1,4,10, 20])
@@ -834,7 +822,22 @@ def test_int_hist():
     obs = library.integrate_tab_range(1, exp_Eint, exp_xs)
     exp = (3*15 + 6*12+10*-7)/19.
     assert_allclose(exp, obs, rtol = 1e-12)
-    return exp
+
+def test_int_hist_interpolation():
+    exp_Eint = np.array([1,4,10, 20])
+    exp_xs = np.array([15, 12, -7, 10])
+    obs = library.integrate_tab_range(1, exp_Eint, exp_xs, low = 2, high = 15)
+    exp = (2*15 + 6*12 + 5*-7)/13.
+    assert_allclose(exp, obs, rtol = 1e-12)
+
+def test_int_hist_only_interpolate_one_endpoint():
+    endfds = ENDFDataSource(str_library)
+    obs = endfds.integrate_dst_group((1, 5), np.array([2, 5, 8]),
+                                     {2: 1, 5: 1, 8:1},
+                                     np.array([0., 2, 4, 6, 8]),
+                                     np.array([0., 1, 0, 0, 0]))
+    exp = 0.5
+    assert_equal(exp, obs)
 
 def test_int_linlin():
     exp_Eint = np.array([1,4,10, 20])
@@ -844,41 +847,122 @@ def test_int_linlin():
     assert_allclose(exp, obs, rtol = 1e-12)
     return exp
 
+def test_int_linlin_interpolation():
+    exp_Eint = np.array([1, 4, 10, 20.])
+    exp_xs = np.array([15, 12, -7, 10.])
+    obs = library.integrate_tab_range(2, exp_Eint, exp_xs, low = 2, high = 15)
+    exp = (2*13 + 6*2.5 + 5*(-7+1.5)/2)/13.
+    assert_allclose(exp, obs, rtol = 1e-12)
+
+def test_int_linlin_interpolation_2():
+    endfds = ENDFDataSource(str_library)
+    obs = endfds.integrate_dst_group((1, 5), np.array([3, 5, 8]),
+                                     {3: 2, 5: 2, 8:1},
+                                     np.array([0., 2, 4, 6, 8]),
+                                     np.array([0., 1, 0, 0, 0]))
+    exp = (0.75 + 1) / 4
+    assert_equal(exp, obs)
+
+def test_int_linlin_only_interpolate_one_endpoint():
+    exp_Eint = np.array([1, 4, 10, 20.])
+    exp_xs = np.array([15, 12, -7, 10.])
+    obs = library.integrate_tab_range(2, exp_Eint, exp_xs, low = 1, high = 15)
+    exp = (3*13.5 + 6*2.5 + 5*(-7+1.5)/2)/14.
+    assert_allclose(exp, obs, rtol = 1e-12)
+
 def test_int_linlog():
-    from math import e
     exp_Eint = np.array([1, e, e, e**2])
     exp_xs = np.array([1, 3, 3, 0])
     obs = library.integrate_tab_range(3, exp_Eint, exp_xs)
     exp = (e+1+3*e**2-6*e)/(e**2-1)
     assert_allclose(exp, obs, rtol=1e-12)
-    return exp
+
+def test_int_linlog_interpolation():
+    exp_Eint = np.array([1, e**2, e**4, e**6])
+    exp_xs = np.array([0, 2, 4, 6.])
+    obs = library.integrate_tab_range(3, exp_Eint, exp_xs, low=e, high=e**5)
+    exp = 4*e**5/(e**5-e)
+    assert_allclose(exp, obs, rtol=1e-12)
+
+def test_int_linlog_only_interpolate_one_endpoint():
+    exp_Eint = np.array([1, e**2, e**4, e**6])
+    exp_xs = np.array([0, 2, 4, 6.])
+    obs = library.integrate_tab_range(3, exp_Eint, exp_xs, low=1, high=e**5)
+    exp = (1+4*e**5)/(e**5-1)
+    assert_allclose(exp, obs, rtol=1e-12)
 
 def test_int_loglin():
-    from math import e
     exp_Eint = np.array([1., 2., 2., 3.])
     exp_xs = np.array([1, e, e**2, e])
     obs = library.integrate_tab_range(4, exp_Eint, exp_xs)
     exp = (e**2-1)/2
     assert_allclose(exp, obs, rtol=1e-12)
-    return exp
+
+def test_int_loglin_interpolation():
+    exp_Eint = np.array([0, 2, 4, 6])
+    exp_xs = np.array([1, e**2, e**4, e**6])
+    obs = library.integrate_tab_range(4, exp_Eint, exp_xs, low=1, high=5)
+    exp = (e**5 - e)/(5-1)
+    assert_allclose(exp, obs, rtol=1e-12)
+
+def test_int_loglin_only_interpolate_one_endpoint():
+    exp_Eint = np.array([0, 2, 4, 6], dtype="float64")
+    exp_xs = np.array([1, e**2, e**4, e**6])
+    obs = library.integrate_tab_range(4, exp_Eint, exp_xs, low=2, high=5)
+    exp = (e**5 - e**2)/(5-2)
+    assert_allclose(exp, obs, rtol=1e-12)
 
 def test_int_loglog():
-    from math import e
     exp_Eint = np.array([1., 2., 2., 3.])
     exp_xs = np.array([1/e, 4/e, (e**2)/4, (e**2)/9])
     obs = library.integrate_tab_range(5, exp_Eint, exp_xs)
     exp = (7/(3*e) + (e**2)/6)/2.
     assert_allclose(exp, obs, rtol=1e-12)
-    return exp
 
-# def test_discretize():
-    # obs = ds.discretize(nuc40000, 600, nuc40040)
-    # exp = [test_int_loglog(),
-           # test_int_loglin(),
-           # test_int_linlog(),
-           # test_int_linlin(),
-           # test_int_hist()]
-    # assert_allclose(np.asarray(exp), obs, rtol=1e-6)
+def test_int_loglog_interpolation():
+    # ln y = 2 ln x + 1
+    # y = e * x ** 2
+    # integral of y = e/3 * x**3
+    exp_Eint = np.array([1, 3, 5, 7], dtype="float64")
+    exp_xs = np.array([e, 9*e, 25*e, 49*e])
+    obs = library.integrate_tab_range(5, exp_Eint, exp_xs, low = 2, high = 6)
+    exp = e/3 * (6**3 - 2 **3) / (6-2)
+    assert_allclose(exp, obs, rtol=1e-12)
+
+def test_int_loglog_only_interpolate_one_endpoint():
+    # ln y = 2 ln x + 1
+    # y = e * x ** 2
+    # integral of y = e/3 * x**3
+    exp_Eint = np.array([1, 3, 5, 7], dtype="float64")
+    exp_xs = np.array([e, 9*e, 25*e, 49*e])
+    obs = library.integrate_tab_range(5, exp_Eint, exp_xs, low = 2, high = 5)
+    exp = e/3 * (5**3 - 2 **3) / (5-2)
+    assert_allclose(exp, obs, rtol=1e-12)
+
+def test_discretize():
+    from os.path import isfile
+    from urllib import urlretrieve
+
+    if not isfile("Ni59.txt"):
+        urlretrieve("http://t2.lanl.gov/nis/data/data/ENDFB-VII.1-neutron/Ni/59",
+                    "Ni59.txt")
+
+    endfds = ENDFDataSource("Ni59.txt")
+    nonelastic_rx = endfds.reaction("Ni59", "nonelastic")
+    nonelastic_rx['dst_group_struct'] = np.logspace(7, -5, 33)
+    nonelastic_c = endfds.discretize("Ni59", "nonelastic")
+    exp = [0.54334609294912528, 0.21206255570566626,
+           0.079089998725708668, 0.039061531003500925, 0.056193960028285306,
+           0.062581135526972767, 0.086088778452663009, 0.1519375415918513,
+           0.015156525895127398, 0.18503957567677801, 0.0039443417078627837,
+           0.082573739674287688, 17.523219940338304, 0.97176481236488554,
+           0.60307330340022303, 0.71684581122716162, 0.99386518962022252,
+           1.4726882603418707, 2.2391970686479672, 3.405589441800994,
+           5.2453926977834398, 8.0731410528834182, 12.384026334168054,
+           19.175694435799141, 29.334824378652982, 45.254982026071197,
+           74.217617672501689, 162.26091389706099, 218.90153743636509,
+           312.62178192130619, 590.40136068709603, 724.64216445611373]
+    assert_equal(nonelastic_c, exp)
 
 if __name__ == "__main__":
     nose.runmodule()
