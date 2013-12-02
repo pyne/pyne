@@ -331,7 +331,7 @@ void dagmc_fmesh_end_history_()
  * \param[in] d the track length
  * \param[in] icl the current cell ID (MCNP global variable)
  * 
- * This function is called once per tally event
+ * This function is called once per track event.
  */
 void dagmc_fmesh_score_(double *x, double *y, double *z,
                         double *u, double *v, double *w, 
@@ -365,7 +365,7 @@ void dagmc_fmesh_print_(double* sp_norm)
  * \param[in] ple the total macroscopic cross section of the current cell
  * \param[in] icl the current cell ID (MCNP global variable)
  * 
- * This function is called once per collision tally event
+ * This function is called once per collision event.
  */
 void dagmc_collision_score_(double* x,   double* y, double* z, 
                             double* erg, double* wgt,
@@ -374,8 +374,12 @@ void dagmc_collision_score_(double* x,   double* y, double* z,
     tallyManager.setCollisionEvent(*x, *y, *z, *erg, *wgt, *ple, *icl);
     tallyManager.updateTallies();
 }
-
 //---------------------------------------------------------------------------//
+/**
+ * \brief Called from fmesh_mod.F90 to update tally multipliers
+ * \param[in] fmesh_idx the fmesh index for multiplier to be updated
+ * \param[in] value the value of the multiplier
+ */
 void dagmc_update_multiplier_(int* fmesh_idx, double* value)
 {
    tallyManager.updateMultiplier(*fmesh_idx-1, *value);

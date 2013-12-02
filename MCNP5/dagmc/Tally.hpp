@@ -21,7 +21,9 @@ struct TallyEvent;
  * Tally implementations.  Required variables for all tallies are tally_id,
  * tally_type and energy_bin_bounds.  The TallyOptions multimap is optional
  * and can be used to store all key-value pairs that define options that are
- * specific to each Tally implementation.
+ * specific to each Tally implementation.  The multiplier_id is also optional
+ * and is used to indicate what energy-dependent multiplier is to be used
+ * with the Tally.
  */
 //===========================================================================//
 struct TallyInput
@@ -41,8 +43,8 @@ struct TallyInput
     /// Optional input parameters requested by user
     TallyOptions options;
  
-    /// Support a single multiplier for each tally; index is the id while the 
-    /// multipliers are stored in a vector
+    /// Support a single multiplier for each tally; this id refers to an
+    /// index in the TallyEvent::multipliers vector
     int multiplier_id;
 };
 

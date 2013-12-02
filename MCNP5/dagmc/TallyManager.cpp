@@ -35,27 +35,17 @@ void TallyManager::addNewTally(unsigned int tally_id,
 //---------------------------------------------------------------------------//
 void TallyManager::addNewMultiplier(unsigned int multiplier_id)
 {
-     // pad multipliers vector up to a size one greater than the multiplier_id
-     while (event.multipliers.size() <= multiplier_id)
-     {
-         event.multipliers.push_back(1.0);
-     }
-}
-//---------------------------------------------------------------------------//
-
-void TallyManager::updateMultiplier(unsigned int multiplier_id, double value)
-{
-    if (event.multipliers.size() > multiplier_id)
+    // pad multipliers vector up to a size one greater than the multiplier_id
+    // NOTE: this would not be needed if we use an unordered map over a vector
+    while (event.multipliers.size() <= multiplier_id)
     {
-       event.multipliers.at(multiplier_id) = value; 
+        event.multipliers.push_back(1.0);
     }
 }
-
 //---------------------------------------------------------------------------//
 void TallyManager::addMultiplierToTally(unsigned int multiplier_id,
                                         unsigned int tally_id)
 {
-        
     std::map<int, Tally *>::iterator it;	
     it = observers.find(tally_id);
 
@@ -68,6 +58,14 @@ void TallyManager::addMultiplierToTally(unsigned int multiplier_id,
     {
         std::cerr << "Warning: Cannot set multiplier id for Tally " << tally_id
                   << ".  Tally and/or multiplier are/is invalid." << std::endl;
+    }
+}
+//---------------------------------------------------------------------------//
+void TallyManager::updateMultiplier(unsigned int multiplier_id, double value)
+{
+    if (event.multipliers.size() > multiplier_id)
+    {
+        event.multipliers.at(multiplier_id) = value; 
     }
 }
 //---------------------------------------------------------------------------//

@@ -13,9 +13,6 @@ extern "C" {
  * are available include unstructured track length and KDE options.
  *************************************************************************/
 
-// Updated to update the multiplier for a given fmesh index
-void dagmc_update_multiplier_(int* fmesh_idx, double* value);
-
 /**
  * Functions from fmesh_mod are implemented in src/fmesh_mod.F90 
  * and should only be called from within meshtal_funcs.cpp
@@ -44,7 +41,6 @@ void dagmc_update_multiplier_(int* fmesh_idx, double* value);
 #endif /* FORT_FUNC */
 
 #define FMESH_FUNC( func ) FORT_FUNC( fmesh_mod, func )
-
 
 /* Make a valid Fortran pointer to a C array */
 extern void FMESH_FUNC(dagmc_make_fortran_pointer)(void* fort_ref, double* array, int* size);
@@ -75,6 +71,8 @@ void dagmc_fmesh_print_(double* sp_norm);
 void dagmc_collision_score_(double* x,   double* y, double* z, 
                             double* erg, double* wgt,
                             double* ple, int* icl);
+
+void dagmc_update_multiplier_(int* fmesh_idx, double* value);
 
 void dagmc_fmesh_get_tally_data_(int* tally_id, void* fortran_data_pointer);
 void dagmc_fmesh_get_error_data_(int* tally_id, void* fortran_data_pointer);
