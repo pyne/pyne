@@ -311,17 +311,20 @@ class Library(rx.RxLib):
 
     def _histogram(self, e_int, xs, low, high):
         if low in e_int:
+            # truncate at lower bound
             xs = xs[e_int >= low]
             e_int = e_int[e_int >= low]
         elif low is not None and low > e_int[0]:
-            # truncate at lower bound and prepend
+            # truncate at lower bound and prepend interpolated endpoint
             low_xs = xs[e_int < low][-1]
             xs = np.insert(xs[e_int > low], 0, low_xs)
             e_int = np.insert(e_int[e_int > low], 0, low)
         if high in e_int:
+            # truncate at higher bound
             xs = xs[e_int <= high]
             e_int = e_int[e_int <= high]
         elif high is not None:
+            # truncate at higher bound and prepend interpolated endpoint
             high_xs = xs[e_int < high][-1]
             xs = np.append(xs[e_int < high], high_xs)
             e_int = np.append(e_int[e_int < high], high)
@@ -335,7 +338,6 @@ class Library(rx.RxLib):
                 xs = xs[e_int >= low]
                 e_int = e_int[e_int >= low]
             elif low is not None and low > e_int[0]:
-                # truncate at lower bound and prepend
                 low_xs = interp(low)
                 xs = np.insert(xs[e_int > low], 0, low_xs)
                 e_int = np.insert(e_int[e_int > low], 0, low)
