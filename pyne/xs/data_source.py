@@ -737,7 +737,7 @@ class ENDFDataSource(DataSource):
         rx : int or str
             Desired reaction
         nuc_i : int or str
-            Isotope containing the reaction. Defaults to nuc.
+            Nuclide containing the reaction. Defaults to nuc.
         group_bounds : tuple
             Low and high energy bounds of the new group.
 
@@ -754,7 +754,6 @@ class ENDFDataSource(DataSource):
         if (nuc, rx, nuc_i) not in self.rxcache:
             self._load_reaction(nuc, rx, nuc_i)
         return self.rxcache[nuc, rx, nuc_i]
-        # return ENDFReaction(nuc, rx, self)
 
     def discretize(self, nuc, rx, temp=300.0, src_phi_g=None, dst_phi_g=None):
         """Discretizes the reaction channel from the source group structure to that
