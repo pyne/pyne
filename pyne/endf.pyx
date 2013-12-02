@@ -17,14 +17,13 @@ John Xia <john.danger.xia@gmail.com>.
 import re
 import os
 from libc.stdlib cimport malloc, free
+from math import e
 
 cimport numpy as np
 import numpy as np
+from scipy.interpolate import interp1d
 
 from pyne cimport cpp_nucname
-
-from math import e
-
 from pyne import nucname
 import pyne.rxdata as rx
 from pyne.rxname import label
@@ -310,15 +309,68 @@ class Library(rx.RxLib):
         total_lines = 1 + meta_len + data_len
         return head, intdata, total_lines
 
-    def _histogram(self, Eint, xs):
+    def _histogram(self, Eint, xs, low, high):
+        if low in Eint:
+            xs = xs[Eint >= low]
+            Eint = Eint[Eint >= low]
+        elif low is not None and low > Eint[0]:
+            # truncate at lower bound and prepend
+            low_xs = xs[Eint < low][-1]
+            xs = np.insert(xs[Eint > low], 0, low_xs)
+            Eint = np.insert(Eint[Eint > low], 0, low)
+        if high in Eint:
+            xs = xs[Eint <= high]
+            Eint = Eint[Eint <= high]
+        elif high is not None:
+            high_xs = xs[Eint < high][-1]
+            xs = np.append(xs[Eint < high], high_xs)
+            Eint = np.append(Eint[Eint < high], high)
         dEint = float(Eint[-1]-Eint[0])
         return np.nansum((Eint[1:]-Eint[:-1]) * xs[:-1]/dEint)
 
-    def _linlin(self, Eint, xs):
+    def _linlin(self, Eint, xs, low, high):
+        if low is not None or high is not None:
+            interp = interp1d(Eint, xs)
+            # print "linlin0: ", Eint, xs
+            if low in Eint:
+                xs = xs[Eint >= low]
+                Eint = Eint[Eint >= low]
+            elif low is not None and low > Eint[0]:
+                # truncate at lower bound and prepend
+                low_xs = interp(low)
+                xs = np.insert(xs[Eint > low], 0, low_xs)
+                Eint = np.insert(Eint[Eint > low], 0, low)
+                # print "linlin1: ", Eint, xs
+            if high in Eint:
+                xs = xs[Eint <= high]
+                Eint = Eint[Eint <= high]
+            elif high is not None:
+                high_xs = interp(high)
+                xs = np.append(xs[Eint < high], high_xs)
+                Eint = np.append(Eint[Eint < high], high)
+                # print "linlin2: ", Eint, xs
         dEint = float(Eint[-1]-Eint[0])
+        # print "linlin: ", Eint, xs, dEint
         return np.nansum((Eint[1:]-Eint[:-1])* (xs[1:]+xs[:-1])/2./dEint)
 
-    def _linlog(self, Eint, xs):
+    def _linlog(self, Eint, xs, low, high):
+        if low is not None or high is not None:
+            interp = interp1d(np.log(Eint), xs)
+            if low in Eint:
+                xs = xs[Eint >= low]
+                Eint = Eint[Eint >= low]
+            elif low is not None and low > Eint[0]:
+                low_xs = interp(np.log(low))
+                xs = np.insert(xs[Eint > low], 0, low_xs)
+                Eint = np.insert(Eint[Eint > low], 0, low)
+            if high in Eint:
+                xs = xs[Eint <= high]
+                Eint = Eint[Eint <= high]
+            elif high is not None:
+                high_xs = interp(np.log(high))
+                xs = np.append(xs[Eint < high], high_xs)
+                Eint = np.append(Eint[Eint < high], high)
+
         dEint = float(Eint[-1]-Eint[0])
         x1 = Eint[:-1]
         x2 = Eint[1:]
@@ -328,7 +380,24 @@ class Library(rx.RxLib):
         B = y1-A*np.log(x1)
         return np.nansum(A*(x2*np.log(x2) - x1*np.log(x1)-x2+x1) + B*(x2-x1))/dEint
 
-    def _loglin(self, Eint, xs):
+    def _loglin(self, Eint, xs, low, high):
+        if low is not None or high is not None:
+            interp = interp1d(Eint, np.log(xs))
+            if low in Eint:
+                xs = xs[Eint >= low]
+                Eint = Eint[Eint >= low]
+            elif low is not None and low > Eint[0]:
+                low_xs = e ** interp(low)
+                xs = np.insert(xs[Eint > low], 0, low_xs)
+                Eint = np.insert(Eint[Eint > low], 0, low)
+            if high in Eint:
+                xs = xs[Eint <= high]
+                Eint = Eint[Eint <= high]
+            elif high is not None:
+                high_xs = e ** interp(high)
+                xs = np.append(xs[Eint < high], high_xs)
+                Eint = np.append(Eint[Eint < high], high)
+
         dEint = float(Eint[-1]-Eint[0])
         x1 = Eint[:-1]
         x2 = Eint[1:]
@@ -338,7 +407,24 @@ class Library(rx.RxLib):
         B = np.log(y1) - A*x1
         return np.nansum((y2-y1)/A)/dEint
 
-    def _loglog(self, Eint, xs):
+    def _loglog(self, Eint, xs, low, high):
+        if low is not None or high is not None:
+            interp = interp1d(np.log(Eint), np.log(xs))
+            if low in Eint:
+                xs = xs[Eint >= low]
+                Eint = Eint[Eint >= low]
+            elif low is not None and low > Eint[0]:
+                low_xs = e ** interp(np.log(low))
+                xs = np.insert(xs[Eint > low], 0, low_xs)
+                Eint = np.insert(Eint[Eint > low], 0, low)
+            if high in Eint:
+                xs = xs[Eint <= high]
+                Eint = Eint[Eint <= high]
+            elif high is not None:
+                high_xs = e ** interp(np.log(high))
+                xs = np.append(xs[Eint < high], high_xs)
+                Eint = np.append(Eint[Eint < high], high)
+
         dEint = float(Eint[-1]-Eint[0])
         x1 = Eint[:-1]
         x2 = Eint[1:]
@@ -364,7 +450,7 @@ class Library(rx.RxLib):
         # FIXME
         raise NotImplementedError("see docs for more details.")
 
-    def integrate_tab_range(self, intscheme, Eint, xs):
+    def integrate_tab_range(self, intscheme, Eint, xs, low = None, high = None):
         """Integrates across one tabulation range.
 
         Parameters
@@ -375,6 +461,8 @@ class Library(rx.RxLib):
             The energies at which we have xs data.
         xs : array
             The xs data corresponding to Eint.
+        low, high : float
+            Lower and upper bounds within the tabulation range to start/stop at.
 
         Returns
         -------
@@ -382,7 +470,7 @@ class Library(rx.RxLib):
             The group xs.
         """
         with np.errstate(divide="ignore", invalid="ignore"):
-           return self.intdict[intscheme](Eint, xs)
+           return self.intdict[intscheme](Eint, xs, low, high)
 
     def _cont_and_update(self, flags, keys, data, total_lines):
         flags.update(self._get_cont(keys, data[total_lines]))
