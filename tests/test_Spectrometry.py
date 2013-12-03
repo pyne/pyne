@@ -2,15 +2,10 @@
 import nose 
 from nose.tools import assert_equal
 
-import gammaSpec
-import spectAnalysis
+from pyne import gammaspec
+from pyne import spectanalysis
 
-gspec1=gammaSpec.readspefile("test.spe")
-
-# gspec1.print_parameters()
-# spectAnalysis.plot_spectra(gspec1)
-# spectAnalysis.plot_peak(gspec1, 843)
-
+gspec1 = gammaspec.read_spe_file("test.spe")
 
 def test_read_times():
     assert_equal(gspec1.real_time, 300.0)
