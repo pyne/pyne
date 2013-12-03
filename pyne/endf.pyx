@@ -431,7 +431,7 @@ class Library(rx.RxLib):
         y2 = xs[1:]
         A = - np.log(y2/y1)/np.log(x1/x2)
         B = - (np.log(y1)*np.log(x2) - np.log(y2)*np.log(x1))/np.log(x1/x2)
-        return np.nansum(e**B / (A+1) * (x2**(A+1) - x1**(A+1))/de_int)
+        return np.nansum(np.e**B / (A+1) * (x2**(A+1) - x1**(A+1))/de_int)
 
     def _chargedparticles(self, e_int, xs, flags=None):
         q = flags['Q']
@@ -445,7 +445,7 @@ class Library(rx.RxLib):
         y1 = xs[:-1]
         y2 = xs[1:]
         B = np.log(y2*x2/(x1*y1)) / (1/(x1-T)**0.5 - 1/(x2-T)**0.5)
-        A = e**(B/(x1-T)**0.5)*y1*x1
+        A = np.e**(B/(x1-T)**0.5)*y1*x1
         # FIXME
         raise NotImplementedError("see docs for more details.")
 
