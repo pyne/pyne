@@ -4,16 +4,16 @@ import urllib2
 import shutil
 from distutils.dir_util import mkpath, remove_tree
 
-from pyne.api import nuc_data
-from pyne.utils import message
-from pyne.dbgen.api import build_dir
-from pyne.dbgen.decay import make_decay
-from pyne.dbgen.atomic_weight import make_atomic_weight
-from pyne.dbgen.materials_library import make_materials_library
-from pyne.dbgen.scattering_lengths import make_scattering_lengths
-from pyne.dbgen.simple_xs import make_simple_xs
-from pyne.dbgen.cinder import make_cinder
-from pyne.dbgen.eaf import make_eaf
+from ..api import nuc_data
+from ..utils import message
+from .api import build_dir
+from .decay import make_decay
+from .atomic_weight import make_atomic_weight
+from .materials_library import make_materials_library
+from .scattering_lengths import make_scattering_lengths
+from .simple_xs import make_simple_xs
+from .cinder import make_cinder
+from .eaf import make_eaf
 
 # Thanks to http://patorjk.com/software/taag/
 # and http://www.chris.com/ascii/index.php?art=creatures/dragons (Jeff Ferris)
