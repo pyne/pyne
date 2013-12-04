@@ -1,4 +1,4 @@
-CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
+CMAKE_MINIMUM_REQUIRED(VERSION 2.6.4)
 PROJECT (MyFluDAG)
 
 IF (NOT DEFINED HOME) 
@@ -29,8 +29,7 @@ SET (fluka_libdir ${FLUPRO})
 #	        DEPENDS mgdraw.o)
 
 SET (commonfiles fluka_funcs.cpp dagmc_utils.cpp Input.cpp UnitNumberManager.cpp)
-SET (wrapperfiles WrapReg2Name.cc WrapMag.cc 
-		  WrapLookFX.cc WrapReg.cc WrapFlgfwr.cc)
+SET (wrapperfiles WrapMag.cc WrapLookFX.cc WrapReg.cc WrapFlgfwr.cc)
 
 # Create the executable that can call flukam_
 ADD_EXECUTABLE(mainfludag mainFluDAG.cpp ${commonfiles} ${wrapperfiles})
