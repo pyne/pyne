@@ -500,6 +500,10 @@ void lkmgwr(double& pSx, double& pSy, double& pSz,
     return;
 }
 
+
+//--------------------------------------------------------------------------//
+// f_lookdb(..)
+//---------------------------------------------------------------------------//
 void f_lookdb(double& pSx, double& pSy, double& pSz,
 	    double* pV, const int& oldReg, const int& oldLttc,
 	    int& newReg, int& flagErr, int& newLttc)
@@ -516,10 +520,9 @@ void f_lookdb(double& pSx, double& pSy, double& pSz,
   return;
 }
 
-
-/*
- * f_g1rt
- */
+//--------------------------------------------------------------------------//
+// f_g1rt()
+//---------------------------------------------------------------------------//
 void f_g1rt(void)
 {
   if(debug)
@@ -529,18 +532,34 @@ void f_g1rt(void)
     return;
 }
 
+//---------------------------------------------------------------------------//
+// f_idnr(..)
+//---------------------------------------------------------------------------//
 // Set DNEAR option if needed
 int f_idnr(const int & nreg, const int & mlat) 
-
 {
-	
+   // returns 0 if user doesn't want Fluka to use DNEAR to compute the 
+   // step (the same effect is obtained with the GLOBAL (WHAT(3)=-1)
+   // card in fluka input), returns 1 if user wants Fluka always to use DNEAR.
 
-// returns 0 if user doesn't want Fluka to use DNEAR to compute the 
-// step (the same effect is obtained with the GLOBAL (WHAT(3)=-1)
-// card in fluka input), returns 1 if user wants Fluka always to use DNEAR.
-
-	return 0;
+   return 0;
 }
+
+//---------------------------------------------------------------------------//
+// rg2nwr(..)
+//---------------------------------------------------------------------------//
+// Wrapper for getting region name corresponding to given region number
+void rg2nwr(const int& mreg, const char* Vname)
+{
+  std::cerr << "============= RG2NWR ==============" << std::endl;    
+  std::cerr << "mreg=" << mreg << std::endl;
+  char * vvname;
+  region2name(mreg, vvname);
+  Vname = vvname;
+  std::cerr << "reg2nmwr: Vname " << Vname<< std::endl;  
+  return;
+}
+
 /**************************************************************************************************/
 /******                                End of FLUKA stubs                                  ********/
 /**************************************************************************************************/
