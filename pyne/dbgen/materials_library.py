@@ -7,12 +7,13 @@ This currently consists to natural element materials and those coming from PNNL'
 
 import csv    
 import re
-from pyne.material import Material
 import tables as tb
 import numpy as np
-from pyne import nucname
 import os
-from pyne.data import natural_abund, natural_abund_map
+
+from .. import nucname
+from ..data import natural_abund, natural_abund_map
+from ..material import Material
 
 elemental_mats = {}
 names = []

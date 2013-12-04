@@ -6,11 +6,11 @@ import StringIO
 import numpy as np
 import tables as tb
 
-from pyne import nuc_data
-from pyne import nucname
-from pyne import rxname
-from pyne.xs.models import partial_energy_matrix, group_collapse
-from pyne.endf import Library
+from .. import nuc_data
+from .. import nucname
+from .. import rxname
+from ..endf import Library
+from .models import partial_energy_matrix, group_collapse
 
 class DataSource(object):
     """Base cross section data source.

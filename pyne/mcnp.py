@@ -21,15 +21,15 @@ import warnings
 
 import numpy as np
 
-from pyne.material import Material
-from pyne.material import MultiMaterial
+from .material import Material
+from .material import MultiMaterial
 from pyne import nucname
 from binaryreader import _BinaryReader, _FortranRecord
 
 # Mesh specific imports
 try:
     from itaps import iMesh
-    from pyne.mesh import Mesh, StatMesh, MeshError
+    from .mesh import Mesh, StatMesh, MeshError
 except ImportError:
     warnings.warn("the PyTAPS optional dependency could not be imported. "
                   "Some aspects of the mcnp module may be incomplete.", ImportWarning)

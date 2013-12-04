@@ -1,5 +1,5 @@
-from pyne.xs.cache import xs_cache
+from .xs.cache import xs_cache
 
-from pyne.xs import models
-from pyne.xs.models import partial_energy_matrix, phi_g
-from pyne.xs.channels import sigma_f
+from .xs import models
+from .xs.models import partial_energy_matrix, phi_g
+from .xs.channels import sigma_f

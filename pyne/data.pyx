@@ -79,7 +79,7 @@ natural_abund_map_proxy.map_ptr = &cpp_data.natural_abund_map
 natural_abund_map = natural_abund_map_proxy
 
 # initialize natural_abund_map
-cpp_data.natural_abund(<int>10000000)
+cpp_data.natural_abund(<int> 10000000)
 
 abundance_by_z = dict([(i, []) for i in range(1,119)])
 for zas, abundance in natural_abund_map.items():
