@@ -579,10 +579,10 @@ IF CYTHON_VERSION_MAJOR == 0 and CYTHON_VERSION_MINOR >= 17:
     from libcpp.map cimport map as cpp_map
     from libcpp.vector cimport vector as cpp_vector
 ELSE:
-    from pyne._includes.libcpp.string cimport string as std_string
-    from pyne._includes.libcpp.utility cimport pair
-    from pyne._includes.libcpp.map cimport map as cpp_map
-    from pyne._includes.libcpp.vector cimport vector as cpp_vector
+    from ._includes.libcpp.string cimport string as std_string
+    from ._includes.libcpp.utility cimport pair
+    from ._includes.libcpp.map cimport map as cpp_map
+    from ._includes.libcpp.vector cimport vector as cpp_vector
 cimport extra_types
 
 cdef extra_types.complex_t py2c_complex(object pyv):
@@ -651,10 +651,10 @@ IF CYTHON_VERSION_MAJOR == 0 and CYTHON_VERSION_MINOR >= 17:
     from libcpp.map cimport map as cpp_map
     from libcpp.vector cimport vector as cpp_vector
 ELSE:
-    from pyne._includes.libcpp.string cimport string as std_string
-    from pyne._includes.libcpp.utility cimport pair
-    from pyne._includes.libcpp.map cimport map as cpp_map
-    from pyne._includes.libcpp.vector cimport vector as cpp_vector
+    from ._includes.libcpp.string cimport string as std_string
+    from ._includes.libcpp.utility cimport pair
+    from ._includes.libcpp.map cimport map as cpp_map
+    from ._includes.libcpp.vector cimport vector as cpp_vector
 cimport extra_types
 
 cimport numpy as np
@@ -694,7 +694,7 @@ import os
 import numpy  as np
 import tables as tb
 
-import pyne.stlcontainers as conv
+import .stlcontainers as conv
 
 
 '''
