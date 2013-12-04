@@ -7,9 +7,9 @@ from zipfile import ZipFile
 import numpy as np
 import tables as tb
 
-from pyne import nucname
-from pyne import ensdf
-from pyne.dbgen.api import BASIC_FILTERS
+from .. import nucname
+from .. import ensdf
+from .api import BASIC_FILTERS
 
 def grab_ensdf_decay(build_dir=""):
     """Grabs the ENSDF decay data files

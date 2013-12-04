@@ -3,7 +3,7 @@ import re
 import numpy as np
 
 from pyne import nucname
-from pyne.utils import to_sec
+from .utils import to_sec
 
 
 _level_regex = re.compile('([ \d]{3}[ A-Za-z]{2})  L (.{10}).{20}(.{10}).{28}([ M])([ 1-9])')
