@@ -105,7 +105,7 @@ def half_life(ensdf):
                 half_life = np.inf
                 data += [(from_nuc, 0.0, from_nuc, half_life, 1.0)]
             else:
-                time_unit = [s.strip() for s in time_info.split()]
+                time_unit = [s.strip(' ()') for s in time_info.split()]
                 if 2 == len(time_unit):
                     hl, unit = time_unit
                     half_life = to_sec(float(hl), unit)
