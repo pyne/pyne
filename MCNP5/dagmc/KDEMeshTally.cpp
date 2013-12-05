@@ -181,14 +181,14 @@ void KDEMeshTally::compute_score(const TallyEvent& event)
             score *= evaluate_kernel(X, event.position);
         }
 
-        // TODO:  do a correct ebin based on the particle energy; this is temporary
-        // jcz:  Consider wrapping up the eh, ebin, and call to add_score_to_tally and put it in MeshTally.
-        //       Same call here and in TrackLengthMeshTally, which see
-        int ebin = 0;
+        // jcz:  Consider wrapping up the eh (point), ebin, and call to add_score_to_tally and put it in MeshTally.
+        //       Same call here and in TrackLengthMeshTally 
+        // add_score_to_energy_tally(point, score, event.energy)  // event.energy?  Meshtally may have it
+        unsigned int ebin = get_energy_bin(event.energy);
         unsigned int point_index = get_entity_index(point);
         // add score to KDE mesh tally for the current history
         data->add_score_to_tally(point_index, score, ebin);
-    }
+    }// end calculation_points iteration
 }
 //---------------------------------------------------------------------------//
 void KDEMeshTally::print(double num_particles, double multiplier)

@@ -403,8 +403,7 @@ void TrackLengthMeshTally::compute_score(const TallyEvent& event)
 	  double weight = event.particle_weight;
 	  double score = weight * event.track_length;
 	  
-	  // ToDo:  fix fake ebin
-	  int ebin = 0;
+          unsigned int ebin = get_energy_bin(event.energy);  
 	  unsigned int tet_index = get_entity_index(tet);
 	  data->add_score_to_tally(tet_index, score, ebin);
 	  //	  found_crossing = true;
@@ -825,8 +824,7 @@ void TrackLengthMeshTally::determine_score(const TallyEvent event, double trackl
     double weight = event.particle_weight;
     double score = weight * tracklength;
     
-    // ToDo:  fix fake ebin
-    int ebin = 0;
+    unsigned int ebin = get_energy_bin(event.energy);  
     unsigned int tet_index = get_entity_index(tet);
     data->add_score_to_tally(tet_index, score, ebin);
     return;
@@ -859,7 +857,7 @@ void TrackLengthMeshTally::compute_tracklengths(const TallyEvent event,
       //      std::cout << tet << std::endl;
       if ( tet > 0 )
 	{
-	  if ( i != 0 ) // detrmine the track_length
+	  if ( i != 0 ) // determine the track_length
 	    track_length = intersections[i]-intersections[i-1];
 	  else
 	    track_length = intersections[i];
@@ -874,15 +872,6 @@ void TrackLengthMeshTally::compute_tracklengths(const TallyEvent event,
 	    }
 
 	  TrackLengthMeshTally::determine_score(event,track_length,tet);
-	  /*
-	  double weight = event.particle_weight;
-	  double score = weight * track_length;
-	  
-	  // ToDo:  fix fake ebin
-	  int ebin = 0;
-	  unsigned int tet_index = get_entity_index(tet);
-	  data->add_score_to_tally(tet_index, score, ebin);
-	  */
 	}
     }
 
@@ -904,15 +893,6 @@ void TrackLengthMeshTally::compute_tracklengths(const TallyEvent event,
       if ( tet > 0 ) 
 	{
 	  TrackLengthMeshTally::determine_score(event,track_length,tet);
-	  /*
-	  double weight = event.particle_weight;
-	  double score = weight * track_length;
-	  
-	  // ToDo:  fix fake ebin
-	  int ebin = 0;
-	  unsigned int tet_index = get_entity_index(tet);
-	  data->add_score_to_tally(tet_index, score, ebin);
-	  */
 	}
     }
 

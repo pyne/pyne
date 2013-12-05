@@ -101,5 +101,34 @@ void Tally::end_history()
     data->end_history();
 }
 //---------------------------------------------------------------------------//
+// PROTECTED INTERFACE
+//---------------------------------------------------------------------------//
+unsigned int get_energy_bin(double energy)
+{
+    int bin_no = -1;
+    std::vector<double> bounds = input_data.energy_bin_bounds;
 
+    // Test:  print out the energy and all the boundaries
+    std::cout << energy << std::endl;
+    for (std::vector<double>::iterator bdry = bounds.begin(); bdry != bounds.end(); ++bdry)
+    {
+        std::cout << *bdry << ' ';
+    }
+    std::cout << '\n';
+
+    std::vector<double>::iterator curIt = bounds.begin();
+    unsigned int bin = -1;
+    double prev = *curIt;
+    // Should be at second boundry now
+    for ( ; curIt != bounds.end(); ++curIt, ++bin)
+    {
+       if (prev <= energy && energy < *curIt)
+       {
+          bin_no = bin;
+       }
+       prev = *curIt;
+    }
+
+    return bin_no;
+}
 // end of MCNP5/dagmc/Tally.cpp

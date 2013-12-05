@@ -127,6 +127,9 @@ class Tally
     /// All of the tally data for this tally
     TallyData *data;
 
+    /// Get the bin index for the current energy
+    unsigned int get_energy_bin(double energy);
+
     /// The purpose of this is to allow TallyManager to use the data
     friend class TallyManager;
 };
