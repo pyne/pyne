@@ -7,7 +7,7 @@ import hashlib
 import numpy
 import tables
 
-from pyne import data
+from .. import data
 
 #list of nodes from distinct data sets
 nodelist = ['/atomic_decay', '/atomic_weight', '/material_library',
@@ -27,8 +27,8 @@ def check_hashes(nuc_data):
 
     """
     check_list = []
-    for item in data.hash_map:
-        res = (calc_hash(item, nuc_data) == data.hash_map[item])
+    for item in data.data_checksums:
+        res = (calc_hash(item, nuc_data) == data.data_checksums[item])
         check_list.append([item, res])
     return check_list
 
