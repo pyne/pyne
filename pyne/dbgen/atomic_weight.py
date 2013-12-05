@@ -1,15 +1,14 @@
 """This module provides a way to grab and store raw data for atomic weights."""
 import os
 import re
-import urllib2
 import pkgutil
 
 import numpy as np
 import tables as tb
 
-from pyne import nucname
-from pyne.dbgen.api import BASIC_FILTERS
-from pyne.dbgen.isotopic_abundance import get_isotopic_abundances
+from .. import nucname
+from .api import BASIC_FILTERS
+from .isotopic_abundance import get_isotopic_abundances
 
 # Note that since ground state and meta-stable isotopes are of the same atomic weight, 
 # the meta-stables have been discluded from the following data sets.

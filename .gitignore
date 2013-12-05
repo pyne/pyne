@@ -30,5 +30,6 @@ examples/*.png
 tests/test.file
 tests/test.txt
 tests/U235.txt
+tests/Ni59.txt
 
 .ipynb_checkpoints

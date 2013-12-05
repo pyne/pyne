@@ -2,7 +2,7 @@
 
 """The ``inputfile`` module can be imported as such::
 
-    from pyne.simplesim import inputfile
+    from .simplesim import inputfile
 
 
 ********
@@ -40,8 +40,8 @@ import warnings
 
 import numpy as np
 
-from pyne.simplesim import definition
-from pyne.simplesim import cards
+from . import definition
+from . import cards
 
 class IInputFile(object):
     """This class is not used directly by the user. Abstract base class for

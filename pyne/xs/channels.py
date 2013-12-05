@@ -12,14 +12,14 @@ np.seterr(all='ignore')
 import scipy.integrate
 import tables as tb
 
-import pyne
-import pyne.data
-import pyne.xs.models
-from pyne import nucname
-from pyne import rxname
-from pyne.xs import cache
-from pyne.xs.models import group_collapse
-from pyne.material import Material
+from .. import nuc_data
+from .. import data
+from .. import nucname
+from .. import rxname
+from ..material import Material
+from . import models
+from . import cache
+from .models import group_collapse
 
 
 def _prep_cache(xs_cache, E_g=None, phi_g=None):
@@ -145,8 +145,8 @@ def sigma_s_gh(nuc, temp=300.0, group_struct=None, phi_g=None, xs_cache=None):
     # Get some needed data
     E_g = xs_cache['E_g']
     G = len(E_g) - 1
-    b = pyne.data.b(nuc)
-    aw = pyne.data.atomic_mass(nuc)
+    b = data.b(nuc)
+    aw = data.atomic_mass(nuc)
 
     # OMG FIXME So hard!
     ## Initialize the scattering kernel
@@ -172,7 +172,7 @@ def sigma_s_gh(nuc, temp=300.0, group_struct=None, phi_g=None, xs_cache=None):
 
     # Temporary stub
     E_g_centers = (E_g[1:] + E_g[:-1]) / 2.0
-    sig_s = pyne.xs.models.sigma_s(E_g_centers, b, aw, temp)
+    sig_s = models.sigma_s(E_g_centers, b, aw, temp)
     sig_s_gh = np.diag(sig_s)
 
     xs_cache[key] = sig_s_gh
@@ -419,7 +419,7 @@ def chi(nuc, temp=300.0, group_struct=None, phi_g=None, xs_cache=None, eres=101)
 
     # Get the the set of nuclides we know we need chi for.  
     if 'fissionable_nucs' not in xs_cache:
-        with tb.openFile(pyne.nuc_data, 'r') as f:
+        with tb.openFile(nuc_data, 'r') as f:
             if '/neutron/cinder_xs/fission' in f:
                 fn = set(f.root.neutron.cinder_xs.fission.cols.nuc)
             else:
@@ -436,7 +436,7 @@ def chi(nuc, temp=300.0, group_struct=None, phi_g=None, xs_cache=None, eres=101)
     if (nuc in fissionable_nucs):
         for g in range(G):
             E_space = np.logspace(np.log10(E_g[g]), np.log10(E_g[g+1]), eres)
-            dnumer = pyne.xs.models.chi(E_space)
+            dnumer = models.chi(E_space)
             numer = scipy.integrate.trapz(dnumer, E_space)
             denom = (E_g[g+1] - E_g[g])
             chi_g[g] = (numer / denom)

@@ -6,14 +6,13 @@ the IAEA.
 import re
 import os
 import urllib
-import urllib2
 from gzip import GzipFile
 
 import numpy as np
 import tables as tb
 
-from pyne import nucname
-from pyne.dbgen.api import BASIC_FILTERS
+from .. import nucname
+from .api import BASIC_FILTERS
 
 
 def grab_eaf_data(build_dir=""):

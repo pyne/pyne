@@ -1,15 +1,13 @@
 """This module provides a way to grab and store simple cross sections from KAERI."""
 import os
-import re
-import urllib2
 
 import numpy as np
 import tables as tb
 
-from pyne import nucname
-from pyne.utils import to_barns
-from pyne.dbgen.api import BASIC_FILTERS
-from pyne.dbgen.kaeri import grab_kaeri_nuclide, parse_for_all_isotopes
+from .. import nucname
+from ..utils import to_barns
+from .api import BASIC_FILTERS
+from .kaeri import grab_kaeri_nuclide, parse_for_all_isotopes
 
 
 def grab_kaeri_simple_xs(build_dir=""):

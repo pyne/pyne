@@ -1,6 +1,6 @@
 import copy
 import itertools
-from collections import namedtuple, Iterable, Sequence
+from collections import Iterable, Sequence
 
 import numpy as np
 
@@ -10,7 +10,7 @@ except ImportError:
     raise ImportError("The mesh module requires imports of iMesh, iBase, and"
           " iMeshExtensions from PyTAPS")
 
-from pyne.material import Material, MaterialLibrary
+from .material import Material, MaterialLibrary
 
 # dictionary of lamba functions for mesh arithmetic
 _ops = {"+": lambda val_1, val_2: (val_1 + val_2), 

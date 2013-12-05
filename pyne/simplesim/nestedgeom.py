@@ -10,7 +10,7 @@ comments and mcnp strings.
 The names of classes here are fairly short, so the user may not want to import
 the entire namespace. A suggested way to import the module is::
 
-    import pyne.simplesim.nestedgeom as ng
+    import .simplesim.nestedgeom as ng
 
 
 An inheritance diagram of all the classes in this module can be found at
@@ -89,7 +89,6 @@ tally.
 
 """
 
-import numpy as np
 
 class IUnit(object):
     """Abstract base class for tally units. The user does not use this class
