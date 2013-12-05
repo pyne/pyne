@@ -15,7 +15,7 @@ from pyne.dbgen.scattering_lengths import make_scattering_lengths
 from pyne.dbgen.simple_xs import make_simple_xs
 from pyne.dbgen.cinder import make_cinder
 from pyne.dbgen.eaf import make_eaf
-from pyne.dbgen.hashtools import check_hashes
+from .hashtools import check_hashes
 
 # Thanks to http://patorjk.com/software/taag/
 # and http://www.chris.com/ascii/index.php?art=creatures/dragons (Jeff Ferris)
