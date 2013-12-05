@@ -2,7 +2,7 @@
 
 """The ``definition`` module can be imported as such::
 
-    from pyne.simplesim import definition
+    from .simplesim import definition
 
 ********
 Overview
@@ -62,8 +62,8 @@ except ImportError:
 
 import numpy as np
 
-from pyne import material
-from pyne.simplesim import cards
+from .. import material
+from . import cards
 
 class IDefinition(object):
     """This class is not used by the user. Abstract base class for

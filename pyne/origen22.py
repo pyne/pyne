@@ -5,7 +5,7 @@ from itertools import chain, imap, izip
 import numpy as np
 
 from pyne import nucname
-from pyne.material import Material, from_atom_frac
+from .material import Material, from_atom_frac
 
 # Table 4.2 in ORIGEN 2.2 manual
 ORIGEN_TIME_UNITS = [None,              # No zero unit

@@ -20,13 +20,11 @@ from libc.stdlib cimport malloc, free
 
 cimport numpy as np
 import numpy as np
+from scipy.interpolate import interp1d
 
 np.import_array()
 
 from pyne cimport cpp_nucname
-
-from math import e
-
 from pyne import nucname
 import pyne.rxdata as rx
 from pyne.rxname import label
@@ -312,71 +310,158 @@ class Library(rx.RxLib):
         total_lines = 1 + meta_len + data_len
         return head, intdata, total_lines
 
-    def _histogram(self, Eint, xs):
-        dEint = float(Eint[-1]-Eint[0])
-        return np.nansum((Eint[1:]-Eint[:-1]) * xs[:-1]/dEint)
+    def _histogram(self, e_int, xs, low, high):
+        if low in e_int:
+            # truncate at lower bound
+            xs = xs[e_int >= low]
+            e_int = e_int[e_int >= low]
+        elif low is not None and low > e_int[0]:
+            # truncate at lower bound and prepend interpolated endpoint
+            low_xs = xs[e_int < low][-1]
+            xs = np.insert(xs[e_int > low], 0, low_xs)
+            e_int = np.insert(e_int[e_int > low], 0, low)
+        if high in e_int:
+            # truncate at higher bound
+            xs = xs[e_int <= high]
+            e_int = e_int[e_int <= high]
+        elif high is not None:
+            # truncate at higher bound and prepend interpolated endpoint
+            high_xs = xs[e_int < high][-1]
+            xs = np.append(xs[e_int < high], high_xs)
+            e_int = np.append(e_int[e_int < high], high)
+        de_int = float(e_int[-1]-e_int[0])
+        return np.nansum((e_int[1:]-e_int[:-1]) * xs[:-1]/de_int)
 
-    def _linlin(self, Eint, xs):
-        dEint = float(Eint[-1]-Eint[0])
-        return np.nansum((Eint[1:]-Eint[:-1])* (xs[1:]+xs[:-1])/2./dEint)
+    def _linlin(self, e_int, xs, low, high):
+        if low is not None or high is not None:
+            interp = interp1d(e_int, xs)
+            if low in e_int:
+                xs = xs[e_int >= low]
+                e_int = e_int[e_int >= low]
+            elif low is not None and low > e_int[0]:
+                low_xs = interp(low)
+                xs = np.insert(xs[e_int > low], 0, low_xs)
+                e_int = np.insert(e_int[e_int > low], 0, low)
+            if high in e_int:
+                xs = xs[e_int <= high]
+                e_int = e_int[e_int <= high]
+            elif high is not None:
+                high_xs = interp(high)
+                xs = np.append(xs[e_int < high], high_xs)
+                e_int = np.append(e_int[e_int < high], high)
+        de_int = float(e_int[-1]-e_int[0])
+        return np.nansum((e_int[1:]-e_int[:-1])* (xs[1:]+xs[:-1])/2./de_int)
 
-    def _linlog(self, Eint, xs):
-        dEint = float(Eint[-1]-Eint[0])
-        x1 = Eint[:-1]
-        x2 = Eint[1:]
+    def _linlog(self, e_int, xs, low, high):
+        if low is not None or high is not None:
+            interp = interp1d(np.log(e_int), xs)
+            if low in e_int:
+                xs = xs[e_int >= low]
+                e_int = e_int[e_int >= low]
+            elif low is not None and low > e_int[0]:
+                low_xs = interp(np.log(low))
+                xs = np.insert(xs[e_int > low], 0, low_xs)
+                e_int = np.insert(e_int[e_int > low], 0, low)
+            if high in e_int:
+                xs = xs[e_int <= high]
+                e_int = e_int[e_int <= high]
+            elif high is not None:
+                high_xs = interp(np.log(high))
+                xs = np.append(xs[e_int < high], high_xs)
+                e_int = np.append(e_int[e_int < high], high)
+
+        de_int = float(e_int[-1]-e_int[0])
+        x1 = e_int[:-1]
+        x2 = e_int[1:]
         y1 = xs[:-1]
         y2 = xs[1:]
         A = (y1-y2)/(np.log(x1/x2))
         B = y1-A*np.log(x1)
-        return np.nansum(A*(x2*np.log(x2) - x1*np.log(x1)-x2+x1) + B*(x2-x1))/dEint
+        return np.nansum(A*(x2*np.log(x2) - x1*np.log(x1)-x2+x1) + B*(x2-x1))/de_int
 
-    def _loglin(self, Eint, xs):
-        dEint = float(Eint[-1]-Eint[0])
-        x1 = Eint[:-1]
-        x2 = Eint[1:]
+    def _loglin(self, e_int, xs, low, high):
+        if low is not None or high is not None:
+            interp = interp1d(e_int, np.log(xs))
+            if low in e_int:
+                xs = xs[e_int >= low]
+                e_int = e_int[e_int >= low]
+            elif low is not None and low > e_int[0]:
+                low_xs = np.e ** interp(low)
+                xs = np.insert(xs[e_int > low], 0, low_xs)
+                e_int = np.insert(e_int[e_int > low], 0, low)
+            if high in e_int:
+                xs = xs[e_int <= high]
+                e_int = e_int[e_int <= high]
+            elif high is not None:
+                high_xs = np.e ** interp(high)
+                xs = np.append(xs[e_int < high], high_xs)
+                e_int = np.append(e_int[e_int < high], high)
+
+        de_int = float(e_int[-1]-e_int[0])
+        x1 = e_int[:-1]
+        x2 = e_int[1:]
         y1 = xs[:-1]
         y2 = xs[1:]
         A = (np.log(y1)-np.log(y2))/(x1-x2)
         B = np.log(y1) - A*x1
-        return np.nansum((y2-y1)/A)/dEint
+        return np.nansum((y2-y1)/A)/de_int
 
-    def _loglog(self, Eint, xs):
-        dEint = float(Eint[-1]-Eint[0])
-        x1 = Eint[:-1]
-        x2 = Eint[1:]
+    def _loglog(self, e_int, xs, low, high):
+        if low is not None or high is not None:
+            interp = interp1d(np.log(e_int), np.log(xs))
+            if low in e_int:
+                xs = xs[e_int >= low]
+                e_int = e_int[e_int >= low]
+            elif low is not None and low > e_int[0]:
+                low_xs = np.e ** interp(np.log(low))
+                xs = np.insert(xs[e_int > low], 0, low_xs)
+                e_int = np.insert(e_int[e_int > low], 0, low)
+            if high in e_int:
+                xs = xs[e_int <= high]
+                e_int = e_int[e_int <= high]
+            elif high is not None:
+                high_xs = np.e ** interp(np.log(high))
+                xs = np.append(xs[e_int < high], high_xs)
+                e_int = np.append(e_int[e_int < high], high)
+
+        de_int = float(e_int[-1]-e_int[0])
+        x1 = e_int[:-1]
+        x2 = e_int[1:]
         y1 = xs[:-1]
         y2 = xs[1:]
         A = - np.log(y2/y1)/np.log(x1/x2)
         B = - (np.log(y1)*np.log(x2) - np.log(y2)*np.log(x1))/np.log(x1/x2)
-        return np.nansum(e**B / (A+1) * (x2**(A+1) - x1**(A+1))/dEint)
+        return np.nansum(np.e**B / (A+1) * (x2**(A+1) - x1**(A+1))/de_int)
 
-    def _chargedparticles(self, Eint, xs, flags=None):
+    def _chargedparticles(self, e_int, xs, flags=None):
         q = flags['Q']
         if q > 0:
             T = 0
         else:
             T = q
-        dEint = float(Eint[-1]-Eint[0])
-        x1 = Eint[:-1]
-        x2 = Eint[1:]
+        de_int = float(e_int[-1]-e_int[0])
+        x1 = e_int[:-1]
+        x2 = e_int[1:]
         y1 = xs[:-1]
         y2 = xs[1:]
         B = np.log(y2*x2/(x1*y1)) / (1/(x1-T)**0.5 - 1/(x2-T)**0.5)
-        A = e**(B/(x1-T)**0.5)*y1*x1
+        A = np.e**(B/(x1-T)**0.5)*y1*x1
         # FIXME
         raise NotImplementedError("see docs for more details.")
 
-    def integrate_tab_range(self, intscheme, Eint, xs):
+    def integrate_tab_range(self, intscheme, e_int, xs, low=None, high=None):
         """Integrates across one tabulation range.
 
         Parameters
         ----------
         intscheme : int or float
             The interpolation scheme used in this range.
-        Eint : array
+        e_int : array
             The energies at which we have xs data.
         xs : array
-            The xs data corresponding to Eint.
+            The xs data corresponding to e_int.
+        low, high : float
+            Lower and upper bounds within the tabulation range to start/stop at.
 
         Returns
         -------
@@ -384,7 +469,9 @@ class Library(rx.RxLib):
             The group xs.
         """
         with np.errstate(divide="ignore", invalid="ignore"):
-           return self.intdict[intscheme](Eint, xs)
+            # each of these functions returns a normalized integration
+            # over the range
+            return self.intdict[intscheme](e_int, xs, low, high)
 
     def _cont_and_update(self, flags, keys, data, total_lines):
         flags.update(self._get_cont(keys, data[total_lines]))
@@ -550,12 +637,12 @@ class Library(rx.RxLib):
                 elif lbk == 1:
                     total_lines += 2
                     rbr, rbr_size = self._get_tab1(
-                        (0,0,0,0,'NR','NP'), ('Eint','RBR'),
+                        (0,0,0,0,'NR','NP'), ('e_int','RBR'),
                         subsection[total_lines:])[1:3]
                     total_lines += rbr_size
                     ch_data['RBR'] = rbr
                     rbi, rbi_size = self._get_tab1(
-                        (0,0,0,0,'NR','NP'), ('Eint','RBI'),
+                        (0,0,0,0,'NR','NP'), ('e_int','RBI'),
                         (subsection[total_lines:]))[1:3]
                     total_lines += rbi_size
                     ch_data['RBI'] = rbi
@@ -576,12 +663,12 @@ class Library(rx.RxLib):
                 total_lines += 2
                 if lps == 1:
                     psr, psr_size = self._get_tab1(
-                        (0,0,0,0,'NR','NP'), ('Eint','PSR'),
+                        (0,0,0,0,'NR','NP'), ('e_int','PSR'),
                         subsection[total_lines:])[1:3]
                     total_lines += psr_size
                     ch_data['PSR'] = psr
                     psi, psi_size = self._get_tab1(
-                        (0,0,0,0,'NR','NP'), ('Eint','PSI'),
+                        (0,0,0,0,'NR','NP'), ('e_int','PSI'),
                         (subsection[total_lines:]))[1:3]
                     total_lines += psi_size
                     ch_data['PSI'] = psi
@@ -790,7 +877,7 @@ class Library(rx.RxLib):
         total_lines += 1
         int_flags, int_data, int_size = self._get_tab1(
             ('QM','QI',0,'LM','NR','NP'),
-            ('Eint','xs'),
+            ('e_int','xs'),
             xsdata[total_lines:])
         int_flags.update(head_flags)
         isotope_dict = self.structure[nuc]['data'][nuc_i]
@@ -875,7 +962,12 @@ class Library(rx.RxLib):
             opened_here = True
         else:
             fh = self.fh
-        start, stop = self.mat_dict[nuc]['mfs'][mf,mt]
+        try:
+            start, stop = self.mat_dict[nuc]['mfs'][mf,mt]
+        except KeyError as e:
+            msg = "MT {1} not found in File {0}.".format(mf, mt)
+            e.args = (msg,)
+            raise e
         fh.readline()
         fh.seek(start)
         if lines == 0:

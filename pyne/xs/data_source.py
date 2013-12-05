@@ -6,11 +6,11 @@ import StringIO
 import numpy as np
 import tables as tb
 
-from pyne import nuc_data
-from pyne import nucname
-from pyne import rxname
-from pyne.xs.models import partial_energy_matrix, group_collapse
-from pyne.endf import Library
+from .. import nuc_data
+from .. import nucname
+from .. import rxname
+from ..endf import Library
+from .models import partial_energy_matrix, group_collapse
 
 class DataSource(object):
     """Base cross section data source.
@@ -56,14 +56,14 @@ class DataSource(object):
     .. code-block:: python
 
         def load(self, temp=300.0):
-            # loads the entire data source into memory.  This prevents 
+            # loads the entire data source into memory.  This prevents
             # excessive queries to disk.  This does not return anything.
             pass
 
-        # a class attribute that specificies whether the data source uses 
-        # temperature information.  If the data source does not use such 
-        # info, the keys in the rxcache dictionary are shortend to just the 
-        # (nuc, rx) pair.  Accessing (nuc, rx, temp) data will defer to the 
+        # a class attribute that specificies whether the data source uses
+        # temperature information.  If the data source does not use such
+        # info, the keys in the rxcache dictionary are shortend to just the
+        # (nuc, rx) pair.  Accessing (nuc, rx, temp) data will defer to the
         # (nuc, rx) pair.
         _USES_TEMP = True
 
@@ -266,19 +266,19 @@ class SimpleDataSource(DataSource):
         Keyword arguments to be sent to base class.
 
     """
-    _rx_avail = {rxname.id('total'): 't', 
-                 rxname.id('scattering'): 's', 
-                 rxname.id('elastic'): 'e', 
-                 rxname.id('inelastic'): 'i', 
-                 rxname.id('absorption'): 'a', 
-                 rxname.id('gamma'): 'gamma', 
-                 rxname.id('fission'): 'f', 
-                 rxname.id('alpha'): 'alpha', 
-                 rxname.id('proton'): 'proton', 
-                 rxname.id('deut'): 'deut', 
-                 rxname.id('trit'): 'trit', 
-                 rxname.id('z_2n'): '2n', 
-                 rxname.id('z_3n'): '3n', 
+    _rx_avail = {rxname.id('total'): 't',
+                 rxname.id('scattering'): 's',
+                 rxname.id('elastic'): 'e',
+                 rxname.id('inelastic'): 'i',
+                 rxname.id('absorption'): 'a',
+                 rxname.id('gamma'): 'gamma',
+                 rxname.id('fission'): 'f',
+                 rxname.id('alpha'): 'alpha',
+                 rxname.id('proton'): 'proton',
+                 rxname.id('deut'): 'deut',
+                 rxname.id('trit'): 'trit',
+                 rxname.id('z_2n'): '2n',
+                 rxname.id('z_3n'): '3n',
                  rxname.id('z_4n'): '4n'}
 
     def __init__(self, **kwargs):
@@ -391,44 +391,44 @@ class CinderDataSource(DataSource):
     """
     # 'h' stands for helion or 'He3'
     _rx_avail = {rxname.id('np_1'): 'np *',
-                 rxname.id('a_1'): 'a  *', 
-                 rxname.id('He3_1'): 'h  *', 
-                 rxname.id('z_2p_1'): '2p *', 
-                 rxname.id('z_3n_1'): '3n *', 
+                 rxname.id('a_1'): 'a  *',
+                 rxname.id('He3_1'): 'h  *',
+                 rxname.id('z_2p_1'): '2p *',
+                 rxname.id('z_3n_1'): '3n *',
                  rxname.id('d_1'): 'd  *',
                  rxname.id('npd'): 'np/d',
-                 rxname.id('na'): 'na', 
-                 rxname.id('excited'): '*', 
-                 rxname.id('nd'): 'nd', 
-                 rxname.id('gamma_1'): 'g  *', 
-                 rxname.id('z_3n'): '3n', 
-                 rxname.id('np'): 'np', 
-                 rxname.id('nt'): 'nt', 
-                 rxname.id('t'): 't', 
+                 rxname.id('na'): 'na',
+                 rxname.id('excited'): '*',
+                 rxname.id('nd'): 'nd',
+                 rxname.id('gamma_1'): 'g  *',
+                 rxname.id('z_3n'): '3n',
+                 rxname.id('np'): 'np',
+                 rxname.id('nt'): 'nt',
+                 rxname.id('t'): 't',
                  rxname.id('nt_1'): 'nt *',
-                 rxname.id('z_4n_1'): '4n *', 
-                 rxname.id('na_1'): 'na *', 
-                 rxname.id('nd_1'): 'nd *', 
-                 rxname.id('t_1'): 't  *', 
-                 rxname.id('a'): 'a', 
-                 rxname.id('z_2p'): '2p', 
+                 rxname.id('z_4n_1'): '4n *',
+                 rxname.id('na_1'): 'na *',
+                 rxname.id('nd_1'): 'nd *',
+                 rxname.id('t_1'): 't  *',
+                 rxname.id('a'): 'a',
+                 rxname.id('z_2p'): '2p',
                  rxname.id('d'): 'd',
-                 rxname.id('gamma'): 'g', 
-                 rxname.id('He3'): 'h', 
-                 rxname.id('n'): 'n', 
-                 rxname.id('z_4n'): '4n', 
-                 rxname.id('p'): 'p', 
-                 rxname.id('n_1'): 'n  *', 
-                 rxname.id('z_2a'): '2a', 
-                 rxname.id('z_2n_1'): '2n *', 
+                 rxname.id('gamma'): 'g',
+                 rxname.id('He3'): 'h',
+                 rxname.id('n'): 'n',
+                 rxname.id('z_4n'): '4n',
+                 rxname.id('p'): 'p',
+                 rxname.id('n_1'): 'n  *',
+                 rxname.id('z_2a'): '2a',
+                 rxname.id('z_2n_1'): '2n *',
                  rxname.id('z_2n'): '2n',
-                 rxname.id('nHe3_1'): 'nh *', 
-                 rxname.id('p_1'): 'p  *', 
+                 rxname.id('nHe3_1'): 'nh *',
+                 rxname.id('p_1'): 'p  *',
                  # not real or unique absorption reactions
-                 #rxname.id(''): "", 
-                 #rxname.id(''): 'x', 
+                 #rxname.id(''): "",
+                 #rxname.id(''): 'x',
                  #rxname.id(''): 'x  *',
-                 #rxname.id(''): 'c', 
+                 #rxname.id(''): 'c',
                  #rxname.id('fission'): 'f',
                  }
 
@@ -502,14 +502,14 @@ class EAFDataSource(DataSource):
     """
 
     # MT#s included in the EAF data
-    _rx_avail = {rxname.id('gamma'): '1020', 
-                 rxname.id('gamma_1'): '1021', 
-                 rxname.id('gamma_2'): '1022', 
-                 rxname.id('p'): '1030', 
+    _rx_avail = {rxname.id('gamma'): '1020',
+                 rxname.id('gamma_1'): '1021',
+                 rxname.id('gamma_2'): '1022',
+                 rxname.id('p'): '1030',
                  rxname.id('p_1'): '1031',
                  rxname.id('p_2'): '1032',
-                 rxname.id('d'): '1040', 
-                 rxname.id('d_1'): '1041', 
+                 rxname.id('d'): '1040',
+                 rxname.id('d_1'): '1041',
                  rxname.id('d_2'): '1042',
                  rxname.id('t'): '1050',
                  rxname.id('t_1'): '1051',
@@ -583,11 +583,11 @@ class EAFDataSource(DataSource):
         ----------
         nuc : int
             Nuclide id.
-        rx : int 
+        rx : int
             Reaction id.
         temp : float, optional
             The material temperature
-        
+
         Notes
         -----
         EAF data does not use temperature information (temp).
@@ -598,7 +598,7 @@ class EAFDataSource(DataSource):
         if rx in self._rx_avail:
             cond = "(nuc_zz == {0}) & (rxnum == '{1}')".format(nuc, self._rx_avail[rx])
         elif rx == absrx:
-            cond = "(nuc_zz == {0})".format(nuc)            
+            cond = "(nuc_zz == {0})".format(nuc)
         else:
             return None
 
@@ -628,7 +628,7 @@ class EAFDataSource(DataSource):
         ----------
         temp : float, optional
             The material temperature
-        
+
         Notes
         -----
         EAF data does not use temperature information (temp).
@@ -645,9 +645,8 @@ class EAFDataSource(DataSource):
                 xs = row['xs']
                 rxcache[nuc, rx] = xs
                 abskey = (nuc, absrx)
-                rxcache[abskey] = xs + rxcache.get(abskey, 0.0)            
+                rxcache[abskey] = xs + rxcache.get(abskey, 0.0)
         self.fullyloaded = True
-
 
 class ENDFDataSource(DataSource):
     """Evaluated Nuclear Data File cross section data source.  The ENDF file
@@ -679,7 +678,7 @@ class ENDFDataSource(DataSource):
     def exists(self):
         if self._exists is None:
             if isinstance(self.fh, basestring):
-                self._exists = os.path.isfile(fh)
+                self._exists = os.path.isfile(self.fh)
             else:
                 self._exists = (isinstance(self.fh, file) or \
                                 isinstance(self.fh, StringIO.StringIO))
@@ -689,25 +688,19 @@ class ENDFDataSource(DataSource):
         """Loads the group structure from ENDF file."""
         self.library._read_res(nuc)
         mt = rxname.mt(rx)
-        rx_data = self.rxcache[nuc, rx, nuc_i]
+        rxdata = self.rxcache[nuc, rx, nuc_i]
         xsdata = self.library.get_xs(nuc, rx, nuc_i)[0]
         intpoints = xsdata['intpoints']#[::-1]
-        Eint = xsdata['Eint']
-        E_g = []
-        for i in range(len(intpoints)):
-            if not i:
-                low_Eint = 0
-            else:
-                low_Eint = intpoints[i-1]
-            high_Eint = intpoints[i]
-            E_g.append(Eint[low_Eint:high_Eint])
-        rx_data['src_group_struct'] = E_g
-        rx_data['src_phi_g'] = np.ones(len(E_g), dtype='f8') \
-            if rx_data['_src_phi_g'] is None \
-            else np.asarray(rx_data['src_phi_g'])
+        e_int = xsdata["e_int"]
+        src_group_struct = [e_int[intpoint-1] for intpoint in intpoints[::-1]]
+        rxdata['src_group_struct'] = src_group_struct
+        rxdata['src_ngroups'] = len(intpoints)
+        rxdata['src_phi_g'] = np.ones(len(intpoints), dtype='f8') \
+            if rxdata['_src_phi_g'] is None \
+            else np.asarray(rxdata['src_phi_g'])
 
     def _load_reaction(self, nuc, rx, nuc_i, src_phi_g=None, temp=300.0):
-        """Note: EAF data does not use temperature information (temp)
+        """Note: ENDF data does not use temperature information (temp)
 
         Parameters
         ----------
@@ -725,82 +718,122 @@ class ENDFDataSource(DataSource):
         rxdata: ndarray of floats, len ngroups
         """
         nuc = nucname.id(nuc)
-        # Munging the rx to an MT#
-        try:
-            rx = int(rx)
-        except ValueError:
-            rx = rxname.mt(rx)
-        # Check if usable rx #
-        if rx is None:
-            return None
-        # Grab data
-        if (nuc, rx, nuc_i) in self.rxcache:
-            rxdict = self.rxcache[nuc, rx, nuc_i]
-        else:
-            if nuc_i not in self.library.structure[nuc]['data']:
-                self.library._read_res(nuc)
-            rxdict = self.library.get_xs(nuc, rx, nuc_i)[0]
-            rxdict['_src_phi_g'] = src_phi_g
-            self.rxcache[nuc, rx, nuc_i] = rxdict
+        rx = rxname.mt(rx)
+        if nuc_i not in self.library.structure[nuc]['data']:
+            self.library._read_res(nuc)
+        rxdict = self.library.get_xs(nuc, rx, nuc_i)[0]
+        rxdict['_src_phi_g'] = src_phi_g
+        self.rxcache[nuc, rx, nuc_i] = rxdict
         self._load_group_structure(nuc, rx, nuc_i)
-        rxdata = rxdict['Eint']
-        return rxdata
+        return rxdict
 
-    def discretize(self, nuc, rx, nuc_i, temp=300.0, src_phi_g=None,
-                   dst_phi_g=None):
-        """Discretizes the reaction channel.
+    def reaction(self, nuc, rx, nuc_i = None):
+        """Get reaction data.
 
         Parameters
         ----------
-        nuc : int
-            Nuclide to discretize.
+        nuc : int or str
+            Nuclide containing the reaction.
         rx : int or str
-            Reaction to discretize.
-        nuc_i : int
-            Isotope to discretize.
-        temp : float
-            Temperature - not used in this, but preserved for API compatibility
-        src_phi_g : array-like
-            Source group flux - not used in this, but preserved for API
-            compatibility
-        dst_phi_g : array-like
-            Destination group flux - not used in this, but preserved for API
-            compatibility
+            Desired reaction
+        nuc_i : int or str
+            Nuclide containing the reaction. Defaults to nuc.
+        group_bounds : tuple
+            Low and high energy bounds of the new group.
+
+        Returns
+        ----------
+        rxdict : dict
+            Dictionary containing source group structure, energy values, cross-
+            section data, and interpolation data."""
+        if nuc_i is None:
+            nuc_i = nuc
+        nuc = nucname.id(nuc)
+        rx = rxname.mt(rx)
+        nuc_i = nucname.id(nuc_i)
+        if (nuc, rx, nuc_i) not in self.rxcache:
+            self._load_reaction(nuc, rx, nuc_i)
+        return self.rxcache[nuc, rx, nuc_i]
+
+    def discretize(self, nuc, rx, temp=300.0, src_phi_g=None, dst_phi_g=None):
+        """Discretizes the reaction channel from the source group structure to that
+        of the destination weighted by the group fluxes.
+
+        Parameters
+        ----------
+        nuc : int or str
+            A nuclide.
+        rx : int or str
+            Reaction id or name.
+        temp : float, optional
+            Temperature [K] of material, defaults to 300.0.
+        src_phi_g : array-like, optional
+            Group fluxes for this data source, length src_ngroups.
+        dst_phi_g : array-like, optional
+            Group fluxes for the destiniation structure, length dst_ngroups.
 
         Returns
         -------
-        dst_sigma : array
-            An array with the group cross-sections in order of decreasing energy.
+        dst_sigma : ndarray
+            Destination cross section data, length dst_ngroups.
         """
-        # Munging the rx to an MT#
-        try:
-            rx = int(rx)
-        except ValueError:
-            rx = rxname.mt(rx)
-        # Check if usable rx #
-        if rx is None:
-            return None
-        self._load_group_structure(nuc, rx, nuc_i)
-        self._load_reaction(nuc, rx, nuc_i)
-        rxdata = self.rxcache[nuc, rx, nuc_i]
-        intpoints = rxdata['intpoints']
-        intschemes = rxdata['intschemes']
-        Eints = rxdata['Eint']
-        E_g = rxdata['src_group_struct']
+        nuc = nucname.id(nuc)
+        nuc_i = nucname.id(nuc)
+        rx = rxname.mt(rx)
+        rxdata = self.reaction(nuc, rx, nuc_i = nuc_i)
         xs = rxdata['xs']
-        xs_all = []
-        dst_sigma = []
-        for i in range(len(intpoints)):
-            if not i:
-                low_xs = 0
-            else:
-                low_xs = intpoints[i-1]
-            high_xs = intpoints[i]
-            xs_all.append(xs[low_xs:high_xs])
-        for i in range(len(E_g)):
-            intscheme = intschemes[i]
-            Eints = E_g[i]
-            xs = xs_all[i]
-            dst_sigma.append(self.library.integrate_tab_range(intscheme, Eints, xs))
-        rxdata['dst_sigma'] = np.asarray(dst_sigma)[::-1]
-        return rxdata['dst_sigma']
+        dst_group_struct = rxdata['dst_group_struct']
+        intpoints = [intpt for intpt in rxdata['intpoints'][::-1]]
+        intschemes = rxdata['intschemes'][::-1]
+        e_int = rxdata["e_int"]
+
+        src_bounds = [e_int[intpoint-1] for intpoint in intpoints]
+        src_dict = dict(zip(src_bounds, intschemes))
+        dst_bounds = zip(dst_group_struct[1:], dst_group_struct[:-1])
+        dst_sigma = [self.integrate_dst_group(dst_bound, src_bounds, src_dict, e_int, xs)
+                     for dst_bound in dst_bounds]
+        return dst_sigma
+
+    def integrate_dst_group(self, dst_bounds, src_bounds, src_dict, e_int, xs):
+        dst_low, dst_high = dst_bounds
+        src_bounds = np.array(src_bounds)
+
+        # We're going to have to integrate over each zone bounded by the edges
+        # of a destination bin or by the edges of a source bin
+        internal_src_bounds = [bd for bd in src_bounds if dst_low < bd < dst_high]
+        integration_bounds = [dst_low, dst_high]
+        integration_bounds[1:1] = internal_src_bounds
+        integration_bounds = zip(integration_bounds[:-1],
+                                 integration_bounds[1:])
+
+        schemes = [src_dict[src_bounds[src_bounds >= high][0]] for low,
+                   high in integration_bounds]
+
+        integration_args = [(scheme, e_int, xs, bds[0], bds[1]) for
+                            scheme, bds in zip(schemes, integration_bounds)]
+        return sum([self._integrate_range_nonnormal(*args) for
+                    args in integration_args])/(dst_high-dst_low)
+
+    def _integrate_range_nonnormal(self, scheme, e_int, xs, low, high):
+        """De-normalizes the integral over a certain range. Useful when the
+        range is integrated piecewise over several chunks - you don't want
+        each chunk to be individually normalized.
+
+        Parameters
+        ----------
+        scheme : int
+            ENDF-coded interpolation scheme to be used between the data points.
+        e_int : NDArray
+            Array of energy values to integrate over.
+        xs : NDArray
+            Array of cross-sections corresponding to e_int.
+        low, high : float
+            Lower and upper bounds of integration.
+
+        Returns
+        -------
+        sigma * dE : float
+            Non-normalized integral. """
+        dE = high - low
+        sigma = self.library.integrate_tab_range(scheme,e_int, xs, low, high)
+        return sigma * dE

@@ -7,9 +7,9 @@ from glob import glob
 import numpy as np
 import tables as tb
 
-from pyne import nucname
-from pyne.utils import to_barns, failure
-from pyne.dbgen.api import BASIC_FILTERS
+from .. import nucname
+from ..utils import failure
+from .api import BASIC_FILTERS
 
 def grab_cinder_dat(build_dir="", datapath=''):
     """Grabs the cinder.dat file from the DATAPATH directory if not already present."""

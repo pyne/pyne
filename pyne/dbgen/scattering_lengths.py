@@ -11,8 +11,8 @@ import urllib2
 import numpy as np
 import tables as tb
 
-from pyne import nucname
-from pyne.dbgen.api import BASIC_FILTERS
+from .. import nucname
+from .api import BASIC_FILTERS
 
 
 def grab_scattering_lengths(build_dir="", file_out='scattering_lengths.html'):

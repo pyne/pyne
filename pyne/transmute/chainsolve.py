@@ -5,15 +5,15 @@ import numpy as np
 from scipy import linalg
 #from scipy import sparse  # <-- SPARSE
 
-from pyne import utils
-from pyne import data
-from pyne import rxname
-from pyne import nucname
-from pyne import nuc_data
-from pyne.material import Material, from_atom_frac
-from pyne.xs.data_source import NullDataSource, EAFDataSource
-from pyne.xs.cache import XSCache
-from pyne.xs.channels import sigma_a
+from .. import utils
+from .. import data
+from .. import rxname
+from .. import nucname
+from .. import nuc_data
+from ..material import Material, from_atom_frac
+from ..xs.data_source import NullDataSource, EAFDataSource
+from ..xs.cache import XSCache
+from ..xs.channels import sigma_a
 
 class Transmuter(object):
     """A class for transmuting materials using an ALARA-like chain solver."""

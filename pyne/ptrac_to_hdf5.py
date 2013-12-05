@@ -2,11 +2,11 @@
 """Read a MCNP Ptrac file and save it in HDF5 format."""
 
 import tables
-from pyne import mcnp
+from . import mcnp
 try:
     import argparse
 except ImportError:
-    import pyne._argparse as argparse
+    from . import _argparse as argparse
 
 def main():
     argparser = argparse.ArgumentParser(description="write the contents of a MCNP PTRAC file to a HDF5 table")

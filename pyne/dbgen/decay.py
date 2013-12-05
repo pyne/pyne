@@ -1,17 +1,15 @@
 """This module provides a way to grab and store raw data for radioactive decay."""
 import os
-import re
 import glob
 import urllib
-import urllib2
 from zipfile import ZipFile
 
 import numpy as np
 import tables as tb
 
-from pyne import nucname
-from pyne import ensdf
-from pyne.dbgen.api import BASIC_FILTERS
+from .. import nucname
+from .. import ensdf
+from .api import BASIC_FILTERS
 
 def grab_ensdf_decay(build_dir=""):
     """Grabs the ENSDF decay data files
@@ -30,9 +28,9 @@ def grab_ensdf_decay(build_dir=""):
         pass
 
     # Grab ENSDF files and unzip them.
-    iaea_base_url = 'http://www-nds.iaea.org/ensdf_base_files/2010-November/'
+    iaea_base_url = 'http://www-nds.iaea.org/ensdf_base_files/2013-October/'
     s3_base_url = 'http://s3.amazonaws.com/pyne/'
-    ensdf_zip = ['ensdf_1010_099.zip', 'ensdf_1010_199.zip', 'ensdf_1010_294.zip',]
+    ensdf_zip = ['ensdf_131009_099.zip', 'ensdf_131009_199.zip', 'ensdf_131009_294.zip',]
 
     for f in ensdf_zip:
         fpath = os.path.join(build_dir, f)
