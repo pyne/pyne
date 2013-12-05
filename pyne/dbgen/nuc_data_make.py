@@ -14,7 +14,6 @@ from .scattering_lengths import make_scattering_lengths
 from .simple_xs import make_simple_xs
 from .cinder import make_cinder
 from .eaf import make_eaf
-
 from .hashtools import check_hashes
 
 # Thanks to http://patorjk.com/software/taag/
