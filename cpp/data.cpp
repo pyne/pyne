@@ -3,6 +3,26 @@
 #include "data.h"
 
 
+/********************************/
+/*** data_checksums Functions ***/
+/********************************/
+
+std::map<std::string, std::string> pyne::get_data_checksums()
+{
+    std::map<std::string, std::string> temp_map;
+    // Initialization of dataset hashes
+    temp_map["/atomic_decay"]="09bf73252629077785e20b3532fde8b3";
+    temp_map["/atomic_weight"]="10edfdc662e35bdfab91beb89285efff";
+    temp_map["/material_library"]="8b10864378fbd88538434679acf908cc";
+    temp_map["/neutron/eaf_xs"]="29622c636c4a3a46802207b934f9516c";
+    temp_map["/neutron/scattering_lengths"]="a24d391cc9dc0fc146392740bb97ead4";
+    temp_map["/neutron/simple_xs"]="3d6e086977783dcdf07e5c6b0c2416be";
+    
+    return temp_map;
+};
+
+std::map<std::string, std::string> pyne::data_checksums = pyne::get_data_checksums();
+
 /*****************************/
 /*** atomic_mass Functions ***/
 /*****************************/

@@ -37,6 +37,14 @@ import pyne.stlcontainers as conv
 
 
 #
+# hash map and initialization
+#
+cdef conv._MapStrStr data_checksums_proxy = conv.MapStrStr(False)
+data_checksums_proxy.map_ptr = &cpp_data.data_checksums
+data_checksums = data_checksums_proxy
+
+
+#
 # atomic_mass functions
 #
 cdef conv._MapIntDouble atomic_mass_map_proxy = conv.MapIntDouble(False)
