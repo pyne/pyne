@@ -83,6 +83,13 @@ def main_body():
     rtn = subprocess.check_call(['make'] + make_args, cwd='build')
     cwd = os.getcwd()
     os.chdir('build')
+    if '--egg-base' in sys.argv:
+        # Change pip-egg-info entry to absolute path, so pip can find it
+        # after changing directory.
+        local_path = os.path.dirname(os.path.dirname(os.path.abspath(sys.argv[0])))
+        idx = sys.argv.index('--egg-base')
+        if sys.argv[idx + 1] == 'pip-egg-info':
+            sys.argv[idx + 1] = os.path.join(local_path, 'pip-egg-info')
     configure.setup()
     os.chdir(cwd)
 
