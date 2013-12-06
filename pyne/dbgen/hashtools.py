@@ -91,9 +91,10 @@ def calc_hash(node, nuc_data):
                     else:
                         for tiny_item in item:
                             mhash.update(str(tiny_item))
-            return mhash.hexdigest()
+            ret = mhash.hexdigest()
         else:
-            return hashlib.md5(node[:].data).hexdigest()
+            ret = hashlib.md5(node[:].data).hexdigest()
+    return ret
 
 
 def set_hash(node, nuc_data):
@@ -129,4 +130,4 @@ def check_hash(node, nuc_data):
     """
     with tables.openFile(nuc_data) as f:
         hash_val = f.getNodeAttr(node, 'hash')
-        return calc_hash(node, nuc_data) == hash_val
+    return calc_hash(node, nuc_data) == hash_val
