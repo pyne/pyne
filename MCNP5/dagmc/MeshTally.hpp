@@ -134,6 +134,8 @@ class MeshTally : public Tally
      * and error_tags arrays.
      */
     moab::ErrorCode setup_tags(moab::Interface* mbi, const char* prefix="");
+
+    void add_score_to_energy_tally(double energy, moab::EntityHandle point, double score);
 };
 
 #endif // DAGMC_MESHTALLY_HPP

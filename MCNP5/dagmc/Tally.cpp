@@ -103,28 +103,28 @@ void Tally::end_history()
 //---------------------------------------------------------------------------//
 // PROTECTED INTERFACE
 //---------------------------------------------------------------------------//
-unsigned int get_energy_bin(double energy)
+unsigned int Tally::get_energy_bin(double energy)
 {
-    int bin_no = -1;
-    std::vector<double> bounds = input_data.energy_bin_bounds;
+    unsigned int bin_no = 0;
 
     // Test:  print out the energy and all the boundaries
     std::cout << energy << std::endl;
-    for (std::vector<double>::iterator bdry = bounds.begin(); bdry != bounds.end(); ++bdry)
+    for (std::vector<double>::iterator bdry = input_data.energy_bin_bounds.begin(); bdry != input_data.energy_bin_bounds.end(); ++bdry)
     {
         std::cout << *bdry << ' ';
     }
     std::cout << '\n';
 
-    std::vector<double>::iterator curIt = bounds.begin();
-    unsigned int bin = -1;
+    std::vector<double>::iterator curIt = input_data.energy_bin_bounds.begin();
     double prev = *curIt;
-    // Should be at second boundry now
-    for ( ; curIt != bounds.end(); ++curIt, ++bin)
+    // Move the iterator to point to the second boundary
+    ++curIt;
+    for (unsigned int bin = 0; curIt != input_data.energy_bin_bounds.end(); ++curIt, ++bin)
     {
        if (prev <= energy && energy < *curIt)
        {
           bin_no = bin;
+          break;
        }
        prev = *curIt;
     }

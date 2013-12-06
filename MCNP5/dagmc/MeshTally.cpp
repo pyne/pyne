@@ -160,5 +160,13 @@ moab::ErrorCode MeshTally::setup_tags(moab::Interface* mbi, const char* prefix)
     return moab::MB_SUCCESS;
 }
 //---------------------------------------------------------------------------//
+void MeshTally::add_score_to_energy_tally(double energy, moab::EntityHandle point, double score)
+{
+    unsigned int ebin = get_energy_bin(energy);
+    unsigned int point_index = get_entity_index(point);
+    // add score to tally data for the current history
+    data->add_score_to_tally(point_index, score, ebin);
+}
+//---------------------------------------------------------------------------//
 
 // end of MCNP5/dagmc/MeshTally.cpp

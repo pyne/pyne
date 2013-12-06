@@ -328,12 +328,11 @@ class TrackLengthMeshTally : public MeshTally
 
   /** 
    * \brief determine the score to add to the results
-   * \param tally event the tally event, direction, position etc
-   * \param double tracklength, the physical tracklength of the current history
+   * \param tally event the tally event, direction, position, track_length, etc
    * \param EntityHandle tet, the MOAB entityhandle of the current tet
    * \return void
    */
-  void determine_score(const TallyEvent event, double tracklength, EntityHandle tet);
+  void determine_score(const TallyEvent event, EntityHandle tet);
 
 };
 

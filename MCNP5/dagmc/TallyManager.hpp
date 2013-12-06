@@ -45,11 +45,11 @@
  * if the complete particle history data is available.
  *
  * After an event type has been set, the TallyManager can then be used to
- * update_tallies().  This will compute the scores for all currently active
+ * updateTallies().  This will compute the scores for all currently active
  * tallies, based on the tally event data that was set.  If a particular event
  * type is not compatible with a specific DAGMC tally type, then nothing will
  * happen and the code will move on to the next tally in the list.  Note that
- * when update_tallies() has updated all of the tallies it will then reset the
+ * when updateTallies() has updated all of the tallies it will then reset the
  * event data using clear_last_event().
  *
  * As each particle history is completed, the end_history() method should be
