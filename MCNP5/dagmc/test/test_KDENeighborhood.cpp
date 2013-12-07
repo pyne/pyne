@@ -6,7 +6,6 @@
 
 #include "gtest/gtest.h"
 
-#include "moab/AdaptiveKDTree.hpp"
 #include "moab/CartVect.hpp"
 #include "moab/Core.hpp"
 #include "moab/Types.hpp"
@@ -16,6 +15,34 @@
 
 const double PI = 3.14159265359;
 
+//---------------------------------------------------------------------------//
+// HELPER METHODS
+//---------------------------------------------------------------------------//
+// loads default mesh into the mbi instance and gets all mesh nodes
+void load_default_mesh(moab::Interface* mbi, moab::Range& mesh_nodes)
+{
+    moab::ErrorCode rval = mbi->load_mesh("../structured_mesh.h5m");
+    assert(rval == moab::MB_SUCCESS);
+
+    // copy all mesh nodes into Range
+    moab::EntityHandle root_set = 0;
+    rval = mbi->get_entities_by_type(root_set, moab::MBVERTEX, mesh_nodes);
+    assert(rval == moab::MB_SUCCESS);
+}
+//---------------------------------------------------------------------------//
+// check all points are valid for given neighborhood region
+bool check_all_points(const KDENeighborhood& region,
+                      const std::set<moab::EntityHandle>& points)
+{
+    std::set<moab::EntityHandle>::iterator it;
+
+    for (it = points.begin(); it != points.end(); ++it)
+    {
+        if (!region.is_calculation_point(*it)) return false;
+    }
+
+    return true;
+}
 //---------------------------------------------------------------------------//
 // TEST FIXTURES
 //---------------------------------------------------------------------------//
@@ -27,198 +54,140 @@ class GetPointsTest : public ::testing::Test
     {
         mbi = new moab::Core();
 
-        // load the mesh data
-        moab::ErrorCode rval = mbi->load_mesh("../structured_mesh.h5m");
-        assert(rval == moab::MB_SUCCESS);
-
-        // get all of the mesh nodes from the MOAB root set
-        moab::EntityHandle root_set = 0;
+        // load the default mesh and get all mesh nodes
         moab::Range mesh_nodes;
-        rval = mbi->get_entities_by_type(root_set, moab::MBVERTEX, mesh_nodes);
-        assert(rval == moab::MB_SUCCESS);
+        load_default_mesh(mbi, mesh_nodes);
 
-        // build a kd-tree from all of the mesh nodes
-        kd_tree = new moab::AdaptiveKDTree(mbi);
-        rval = kd_tree->build_tree(mesh_nodes, kd_tree_root);
-        assert(rval == moab::MB_SUCCESS);
+        // create neighborhood regions with and without kd-trees
+        region1 = new KDENeighborhood(mbi, mesh_nodes, false);
+        region2 = new KDENeighborhood(mbi, mesh_nodes, true);
     }
 
     // deallocate memory resources
     virtual void TearDown()
     {
-        delete kd_tree;
+        delete mbi;
+        delete region1;
+        delete region2;
+    }
+
+  protected:
+    // data needed for each test
+    moab::Interface* mbi;
+    KDENeighborhood* region1;
+    KDENeighborhood* region2;
+};
+//---------------------------------------------------------------------------//
+class IsCalculationPointTest : public ::testing::Test
+{
+  protected:
+    // initialize variables for each test
+    virtual void SetUp()
+    {
+        mbi = new moab::Core();
+
+        // load the default mesh
+        rval = mbi->load_mesh("../structured_mesh.h5m");
+        assert(rval == moab::MB_SUCCESS);
+
+        // set up the TallyEvent and bandwidth
+        event.type = TallyEvent::COLLISION;
+        event.position = moab::CartVect(0.0, 0.0, 0.0);
+        bandwidth = moab::CartVect(0.1, 0.2, 0.3);
+    }
+
+    // deallocate memory resources
+    virtual void TearDown()
+    {
         delete mbi;
     }
 
   protected:
     // data needed for each test
     moab::Interface* mbi;
-    moab::AdaptiveKDTree* kd_tree;
-    moab::EntityHandle kd_tree_root;
-
-    // helper function to check all points are valid
-    bool check_all_points(const std::set<moab::EntityHandle>& points,
-                          const KDENeighborhood& region)
-    {
-        std::set<moab::EntityHandle>::iterator it;
-
-        for (it = points.begin(); it != points.end(); ++it)
-        {
-            moab::CartVect coords(0.0, 0.0, 0.0);
-            moab::EntityHandle point = *it;
-            moab::ErrorCode rval = mbi->get_coords(&point, 1, coords.array());
-            assert(rval == moab::MB_SUCCESS);
-
-            if (!region.point_in_region(coords)) return false;
-        }
-
-        return true;
-    }
-};
-//---------------------------------------------------------------------------//
-class PointWithinMaxRadiusTest : public ::testing::Test
-{
-  protected:
-    // initialize variables for each test
-    virtual void SetUp()
-    {
-        // define bandwidth and maximum radius
-        moab::CartVect bandwidth(0.1, 0.1, 0.1);
-        max_radius = bandwidth.length();
-
-        // define fake kd-tree variables for constructor
-        moab::AdaptiveKDTree* tree = NULL;
-        moab::EntityHandle tree_root = 0;
-
-        // create first neighborhood region
-        event1.type = TallyEvent::TRACK;
-        event1.position = moab::CartVect(0.0, 0.0, 0.0);
-        event1.direction = moab::CartVect(1.0, 0.0, 0.0);
-        event1.track_length = 1.0;
-        region1 = new KDENeighborhood(event1, bandwidth, *tree, tree_root);
-
-        // create second neighborhood region
-        event2.type = TallyEvent::TRACK;
-        event2.position = moab::CartVect(-0.1, 0.1, -0.3);
-        event2.direction = moab::CartVect(-0.5, -0.3, sqrt(0.66));
-        event2.track_length = 2.5;
-        region2 = new KDENeighborhood(event2, bandwidth, *tree, tree_root);
-
-        // create third neighborhood region
-        event3.type = TallyEvent::COLLISION;
-        event3.position = moab::CartVect(0.0, 0.0, 0.0);
-        event3.total_cross_section = 0.1;
-        region3 = new KDENeighborhood(event3, bandwidth, *tree, tree_root);
-    }
-
-    // deallocate memory resources
-    virtual void TearDown()
-    {
-        delete region1;
-        delete region2;
-        delete region3;
-    }
-
-  protected:
-    // data needed for each test
-    double max_radius;
-    TallyEvent event1;
-    TallyEvent event2;
-    TallyEvent event3;
-    KDENeighborhood* region1;
-    KDENeighborhood* region2;
-    KDENeighborhood* region3;
+    moab::CartVect bandwidth;
+    moab::ErrorCode rval;
+    TallyEvent event;
 };
 //---------------------------------------------------------------------------//
 // SIMPLE TESTS
 //---------------------------------------------------------------------------//
+// Tests construction with no MOAB instance
+TEST(KDENeighborhoodDeathTest, NullMOABInstance)
+{
+    ::testing::FLAGS_gtest_death_test_style = "threadsafe";
+
+    // define a NULL MOAB instance
+    moab::Interface* mbi = NULL;
+    moab::Range mesh_nodes;
+
+    // check no errors occur if the kd-tree is set to off
+    EXPECT_NO_THROW(KDENeighborhood(mbi, mesh_nodes, false));
+
+    // check program exits if kd-tree is set on with NULL MOAB instance
+    EXPECT_EXIT(KDENeighborhood(mbi, mesh_nodes, true),
+                ::testing::ExitedWithCode(EXIT_FAILURE),
+                "\nError: invalid moab::Interface for building KD-tree");
+}
+//---------------------------------------------------------------------------//
+// Tests NULL tally event passed to the update_neighborhood method
 TEST(KDENeighborhoodDeathTest, InvalidTallyEvent)
 {
     ::testing::FLAGS_gtest_death_test_style = "threadsafe";
 
-    // define a null tally event and fake kd-tree
+    moab::Core mb_core;
+    moab::Interface* mbi = &mb_core;
+
+    // load the default mesh and get all mesh nodes
+    moab::Range mesh_nodes;
+    load_default_mesh(mbi, mesh_nodes);
+
+    // set up a NULL tally event
+    moab::CartVect bandwidth(0.1, 0.1, 0.1);
     TallyEvent event;
     event.type = TallyEvent::NONE;
-    moab::CartVect bandwidth(0.1, 0.1, 0.1);
-    moab::AdaptiveKDTree* kd_tree = NULL;
-    moab::EntityHandle kd_tree_root = 0;
-
-    // make sure KDENeighborhood returns error for NULL tally event
-    EXPECT_EXIT(KDENeighborhood(event, bandwidth, *kd_tree, kd_tree_root),
-                ::testing::ExitedWithCode(EXIT_FAILURE),
-                "\nError: Could not define neighborhood for tally event");
-}
-//---------------------------------------------------------------------------//
-TEST(KDENeighborhoodTest, ValidPointsForCollision)
-{
-    // define fake kd-tree variables
-    moab::AdaptiveKDTree* kd_tree = NULL;
-    moab::EntityHandle kd_tree_root = 0;
-
-    // define a neighborhood region using a collision event
-    TallyEvent event;
-    event.type = TallyEvent::COLLISION;
-    event.position = moab::CartVect(0.0, 0.0, 0.0);
-    moab::CartVect bandwidth(0.1, 0.2, 0.3);
-    KDENeighborhood region1(event, bandwidth, *kd_tree, kd_tree_root);
-
-    // check all corner points are valid
-    EXPECT_TRUE(region1.point_in_region(moab::CartVect(-0.1, -0.2, -0.3)));
-    EXPECT_TRUE(region1.point_in_region(moab::CartVect(0.1, 0.2, 0.3)));
-    EXPECT_TRUE(region1.point_in_region(moab::CartVect(-0.1, -0.2, 0.3)));
-    EXPECT_TRUE(region1.point_in_region(moab::CartVect(-0.1, 0.2, -0.3)));
-    EXPECT_TRUE(region1.point_in_region(moab::CartVect(0.1, -0.2, -0.3)));
-    EXPECT_TRUE(region1.point_in_region(moab::CartVect(-0.1, 0.2, 0.3)));
-    EXPECT_TRUE(region1.point_in_region(moab::CartVect(0.1, -0.2, 0.3)));
-    EXPECT_TRUE(region1.point_in_region(moab::CartVect(0.1, 0.2, -0.3)));
     
-    // check some edge points are valid
-    EXPECT_TRUE(region1.point_in_region(moab::CartVect(-0.1, -0.2, 0.1667)));
-    EXPECT_TRUE(region1.point_in_region(moab::CartVect(-0.1, -0.05, -0.3)));
-    EXPECT_TRUE(region1.point_in_region(moab::CartVect(0.0, -0.2, -0.3)));
-    EXPECT_TRUE(region1.point_in_region(moab::CartVect(0.1, 0.2, -0.01)));
-    EXPECT_TRUE(region1.point_in_region(moab::CartVect(0.1, 0.13, 0.3)));
-    EXPECT_TRUE(region1.point_in_region(moab::CartVect(-0.09, 0.2, 0.3)));
-    EXPECT_TRUE(region1.point_in_region(moab::CartVect(0.07, -0.2, 0.3)));
-    EXPECT_TRUE(region1.point_in_region(moab::CartVect(0.1, 0.0, -0.3)));
+    // create neighborhood regions with and without kd-trees
+    KDENeighborhood region1(mbi, mesh_nodes, false);
+    KDENeighborhood region2(mbi, mesh_nodes, true);
 
-    // check some interior points are valid
-    EXPECT_TRUE(region1.point_in_region(moab::CartVect(0.0, 0.0, 0.0)));
-    EXPECT_TRUE(region1.point_in_region(moab::CartVect(0.001, 0.19, 0.2)));
-    EXPECT_TRUE(region1.point_in_region(moab::CartVect(-0.06, -0.1, -0.1)));
-    EXPECT_TRUE(region1.point_in_region(moab::CartVect(-0.0, 0.05, -0.23)));
+    // check default number of points
+    EXPECT_EQ(2025, region1.get_points().size());
+    EXPECT_EQ(0, region2.get_points().size());
+
+    // check NULL tally event behavior
+    EXPECT_NO_THROW(region1.update_neighborhood(event, bandwidth));
+    EXPECT_EXIT(region2.update_neighborhood(event, bandwidth),
+                ::testing::ExitedWithCode(EXIT_FAILURE),
+                 "\nError: Could not define neighborhood for tally event");
 }
 //---------------------------------------------------------------------------//
-TEST(KDENeighborhoodTest, InvalidPointsForCollision)
+// Tests construction with an empty moab::Range containing no mesh nodes
+TEST(KDENeighborhoodTest, NoMeshNodes)
 {
-    // define fake kd-tree variables
-    moab::AdaptiveKDTree* kd_tree = NULL;
-    moab::EntityHandle kd_tree_root = 0;
+    moab::Core mb_core;
+    moab::Interface* mbi = &mb_core;
 
-    // define a neighborhood region using a collision event
-    TallyEvent event;
-    event.type = TallyEvent::COLLISION;
-    event.position = moab::CartVect(0.0, 0.0, 0.0);
-    moab::CartVect bandwidth(0.1, 0.2, 0.3);
-    KDENeighborhood region1(event, bandwidth, *kd_tree, kd_tree_root);
+    // load default mesh
+    moab::ErrorCode rval = mbi->load_mesh("../structured_mesh.h5m");
+    assert(rval == moab::MB_SUCCESS);
 
-    // check some points with two valid coordinates
-    EXPECT_FALSE(region1.point_in_region(moab::CartVect(-0.1, -0.2, 0.5)));
-    EXPECT_FALSE(region1.point_in_region(moab::CartVect(-0.1, -0.3, -0.3)));
-    EXPECT_FALSE(region1.point_in_region(moab::CartVect(0.2, -0.2, -0.3)));
-    EXPECT_FALSE(region1.point_in_region(moab::CartVect(0.1, 0.2, -0.7)));
-    EXPECT_FALSE(region1.point_in_region(moab::CartVect(0.1, -1.8, 0.3)));
-    EXPECT_FALSE(region1.point_in_region(moab::CartVect(-0.1, 0.9, 0.3)));
+    // define a Range containing no mesh nodes
+    moab::Range mesh_nodes;
 
-    // check some points with one valid coordinate
-    EXPECT_FALSE(region1.point_in_region(moab::CartVect(-0.1, 5.1, -2.9)));
-    EXPECT_FALSE(region1.point_in_region(moab::CartVect(1.7, 0.0, 10.4)));
-    EXPECT_FALSE(region1.point_in_region(moab::CartVect(-0.5, -0.8, 0.3)));
+    // make sure no errors occur on construction with or without kd-tree
+    EXPECT_NO_THROW(KDENeighborhood(mbi, mesh_nodes, false));
+    EXPECT_NO_THROW(KDENeighborhood(mbi, mesh_nodes, true));
 
-    // check some points with no valid coordinates
-    EXPECT_FALSE(region1.point_in_region(moab::CartVect(0.6, -0.9, 1.5)));
-    EXPECT_FALSE(region1.point_in_region(moab::CartVect(-0.7, 0.4, -0.5)));
-    EXPECT_FALSE(region1.point_in_region(moab::CartVect(-0.1, -0.3, -0.3)));
+    // check default number of points in region1
+    KDENeighborhood region1(mbi, mesh_nodes, false);
+    std::set<moab::EntityHandle> points1 = region1.get_points();
+    EXPECT_EQ(0, points1.size());
+
+    // check default number of points in region2
+    KDENeighborhood region2(mbi, mesh_nodes, true);
+    std::set<moab::EntityHandle> points2 = region2.get_points();
+    EXPECT_EQ(0, points2.size());
 }
 //---------------------------------------------------------------------------//
 // FIXTURE-BASED TESTS: GetPointsTest
@@ -231,25 +200,25 @@ TEST_F(GetPointsTest, GetAllPointsInBox)
     event.type = TallyEvent::COLLISION;
     event.position = moab::CartVect(2.5, 0.0, 0.0);
     moab::CartVect bandwidth(2.5, 0.5, 0.5);
-    KDENeighborhood region1(event, bandwidth, *kd_tree, kd_tree_root);
+    region1->update_neighborhood(event, bandwidth);
+    region2->update_neighborhood(event, bandwidth);
 
-    // test if all points are returned and check all are valid
-    std::set<moab::EntityHandle> points1 = region1.get_points();
-    EXPECT_EQ(2025, points1.size());
-    EXPECT_TRUE(check_all_points(points1, region1));
-
+    // test region1 and region2 return all points
+    EXPECT_EQ(2025, region1->get_points().size());
+    EXPECT_EQ(2025, region2->get_points().size());
+    
     // change to a conformal neighborhood based on track event
     event.type = TallyEvent::TRACK;
     event.position[0] = 2.0;
     event.direction = moab::CartVect(1.0, 0.0, 0.0);
     event.track_length = 1.0;
     bandwidth[0] = 2.0;
-    KDENeighborhood region2(event, bandwidth, *kd_tree, kd_tree_root);
+    region1->update_neighborhood(event, bandwidth);
+    region2->update_neighborhood(event, bandwidth);
 
-    // test if all points are returned and check all are valid
-    std::set<moab::EntityHandle> points2 = region2.get_points();
-    EXPECT_EQ(2025, points2.size());
-    EXPECT_TRUE(check_all_points(points2, region2));
+    // test region1 and region2 return all points
+    EXPECT_EQ(2025, region1->get_points().size());
+    EXPECT_EQ(2025, region2->get_points().size());
 }
 //---------------------------------------------------------------------------//
 // Tests no points are returned if neighborhood exists outside mesh
@@ -260,21 +229,23 @@ TEST_F(GetPointsTest, GetNoPointsOutsideBox)
     event.type = TallyEvent::COLLISION;
     event.position = moab::CartVect(-5.0, 0.0, 0.0);
     moab::CartVect bandwidth(1.0, 0.5, 0.5);
-    KDENeighborhood region1(event, bandwidth, *kd_tree, kd_tree_root);
+    region1->update_neighborhood(event, bandwidth);
+    region2->update_neighborhood(event, bandwidth);
 
-    // test if no points are returned
-    std::set<moab::EntityHandle> points1 = region1.get_points();
-    EXPECT_EQ(0, points1.size());
+    // test region1 still returns all points and region2 returns no points
+    EXPECT_EQ(2025, region1->get_points().size());
+    EXPECT_EQ(0, region2->get_points().size());
 
     // change to neighborhood based on track event
     event.type = TallyEvent::TRACK;
     event.direction = moab::CartVect(1.0, 0.0, 0.0);
     event.track_length = 1.0;
-    KDENeighborhood region2(event, bandwidth, *kd_tree, kd_tree_root);
+    region1->update_neighborhood(event, bandwidth);
+    region2->update_neighborhood(event, bandwidth);
 
-    // test if no points are returned
-    std::set<moab::EntityHandle> points2 = region2.get_points();
-    EXPECT_EQ(0, points2.size());
+    // test region1 still returns all points and region2 returns no points
+    EXPECT_EQ(2025, region1->get_points().size());
+    EXPECT_EQ(0, region2->get_points().size());
 }
 //---------------------------------------------------------------------------//
 // Tests no points are returned if mesh cell is bigger than neighborhood
@@ -285,108 +256,260 @@ TEST_F(GetPointsTest, GetNoPointsInBox)
     event.type = TallyEvent::COLLISION;
     event.position = moab::CartVect(2.6, -0.06, 0.06);
     moab::CartVect bandwidth(0.05, 0.05, 0.05);
-    KDENeighborhood region1(event, bandwidth, *kd_tree, kd_tree_root);
+    region1->update_neighborhood(event, bandwidth);
+    region2->update_neighborhood(event, bandwidth);
 
-    // test if no points are returned
-    std::set<moab::EntityHandle> points1 = region1.get_points();
-    EXPECT_EQ(0, points1.size());
+    // test region1 still returns all points and region2 returns no points
+    EXPECT_EQ(2025, region1->get_points().size());
+    EXPECT_EQ(0, region2->get_points().size());
 
     // change to neighborhood based on track event
     event.type = TallyEvent::TRACK;
     event.direction = moab::CartVect(1.0, 0.0, 0.0);
     event.track_length = 0.1;
-    KDENeighborhood region2(event, bandwidth, *kd_tree, kd_tree_root);
+    region1->update_neighborhood(event, bandwidth);
+    region2->update_neighborhood(event, bandwidth);
 
-    // test if no points are returned
-    std::set<moab::EntityHandle> points2 = region2.get_points();
-    EXPECT_EQ(0, points2.size());
+    // test region1 still returns all points and region2 returns no points
+    EXPECT_EQ(2025, region1->get_points().size());
+    EXPECT_EQ(0, region2->get_points().size());
 }
 //---------------------------------------------------------------------------//
+// Tests correct points are returned for normal cases
 TEST_F(GetPointsTest, GetPointsInBox)
 {
-    // define neighborhood using a collision event (region inside mesh)
+    // define neighborhood using a track event (region overlaps z-mesh)
     TallyEvent event;
-    event.type = TallyEvent::COLLISION;
-    event.position = moab::CartVect(0.2, -0.2, 0.2);
-    moab::CartVect bandwidth(0.2, 0.2, 0.2);
-    KDENeighborhood region1(event, bandwidth, *kd_tree, kd_tree_root);
-
-    // test number of points returned and check all are valid
-    std::set<moab::EntityHandle> points1 = region1.get_points();
-    EXPECT_EQ(32, points1.size());
-    EXPECT_TRUE(check_all_points(points1, region1));
-
-    // change to neighborhood based on track event (region overlaps z-mesh)
     double uvw_val = 1.0/sqrt(2.0);
     event.type = TallyEvent::TRACK;
+    event.position = moab::CartVect(0.2, -0.2, 0.2);
     event.direction = moab::CartVect(uvw_val, 0.0, -1.0 * uvw_val);
     event.track_length = 2.3;
-    KDENeighborhood region2(event, bandwidth, *kd_tree, kd_tree_root);
+    moab::CartVect bandwidth(0.2, 0.2, 0.2);
+    region1->update_neighborhood(event, bandwidth);
+    region2->update_neighborhood(event, bandwidth);
 
-    // test number of points returned and check all are valid
-    std::set<moab::EntityHandle> points2 = region2.get_points();
-    EXPECT_EQ(320, points2.size());
-    EXPECT_TRUE(check_all_points(points2, region2));
+    // test region1 still returns all points
+    EXPECT_EQ(2025, region1->get_points().size());
+
+    // test number of points returned by region2 and check all are valid
+    std::set<moab::EntityHandle> points1 = region2->get_points();
+    EXPECT_EQ(320, points1.size());
+    EXPECT_TRUE(check_all_points(*region2, points1));
+
+    // change to neighborhood based on collision event (region inside mesh)
+    event.type = TallyEvent::COLLISION;
+    region1->update_neighborhood(event, bandwidth);
+    region2->update_neighborhood(event, bandwidth);
+
+    // test region1 still returns all points
+    EXPECT_EQ(2025, region1->get_points().size());
+
+    // test number of points returned by region2 and check all are valid
+    std::set<moab::EntityHandle> points2 = region2->get_points();
+    EXPECT_EQ(32, points2.size());
+    EXPECT_TRUE(check_all_points(*region2, points2));
 }
 //---------------------------------------------------------------------------//
-// FIXTURE-BASED TESTS: PointWithinMaxRadiusTest
+// FIXTURE-BASED TESTS: IsCalculationPointTest
 //---------------------------------------------------------------------------//
-TEST_F(PointWithinMaxRadiusTest, PointOutsideMaxRadius)
+// Tests all points are calculation points when no kd-tree is used
+TEST_F(IsCalculationPointTest, NoKDTree)
 {
-    // test point outside max radius in region1
-    moab::CartVect point1(0.7, -0.02, 2 * max_radius);
-    EXPECT_FALSE(region1->point_within_max_radius(point1));
+    // copy all mesh nodes into Range and convert into set
+    moab::Range mesh_nodes;
+    moab::EntityHandle root_set = 0;
+    rval = mbi->get_entities_by_type(root_set, moab::MBVERTEX, mesh_nodes);
+    assert(rval == moab::MB_SUCCESS);
 
-    // test point outside max radius in region2
-    moab::CartVect point2(-0.7, 2 * max_radius, 0.67588);
-    EXPECT_FALSE(region2->point_within_max_radius(point2));
+    std::set<moab::EntityHandle> mesh_set(mesh_nodes.begin(), mesh_nodes.end());
+    EXPECT_EQ(2025, mesh_set.size());
 
-    // test point outside max radius in region3 (max radius should be zero)
-    moab::CartVect point3(0.06, -0.03, 0.02);
-    EXPECT_FALSE(region3->point_within_max_radius(point3));
+    // create neighborhood with no kd-tree and check default calculation points
+    KDENeighborhood region(mbi, mesh_nodes, false);
+
+    EXPECT_EQ(2025, region.get_points().size());
+    EXPECT_TRUE(check_all_points(region, mesh_set));
+
+    // update neighborhood region and check it still includes all points
+    region.update_neighborhood(event, bandwidth);
+
+    EXPECT_EQ(2025, region.get_points().size());
+    EXPECT_TRUE(check_all_points(region, mesh_set));
 }
 //---------------------------------------------------------------------------//
-TEST_F(PointWithinMaxRadiusTest, PointAtMaxRadius)
+// Tests corners of neighborhood are valid calculation points
+TEST_F(IsCalculationPointTest, ValidCornerPoints)
 {
-    // test point at max radius in region1
-    moab::CartVect point1(-0.1, max_radius * cos(PI/4), max_radius * sin(PI/4));
-    EXPECT_FALSE(region1->point_within_max_radius(point1));
+    // define additional valid calculation points at corners of neighborhood
+    moab::Range corner_points;
+    double corner_coords[] =
+        { -0.1, -0.2, -0.3,
+           0.1,  0.2,  0.3,
+          -0.1, -0.2,  0.3,
+          -0.1,  0.2, -0.3,
+           0.1, -0.2,  0.3,
+          -0.1,  0.2,  0.3,
+           0.1, -0.2,  0.3,
+           0.1,  0.2, -0.3 };
 
-    // test point at max radius in region2
-    moab::CartVect point2(-0.1 + 0.514495755428 * max_radius,
-                           0.1 - 0.857492925713 * max_radius,
-                          -0.3);
-    EXPECT_FALSE(region2->point_within_max_radius(point2));
+    // add new corner points to the MOAB instance and convert Range to set
+    rval = mbi->create_vertices(corner_coords, 8, corner_points);
+    assert(rval == moab::MB_SUCCESS);
 
-    // test point at max radius in region3 (max radius should be zero)
-    moab::CartVect point3(0.0, 0.0, 0.0);
-    EXPECT_FALSE(region3->point_within_max_radius(point3));
+    std::set<moab::EntityHandle> corner_set(corner_points.begin(),
+                                            corner_points.end());
+
+    EXPECT_EQ(8, corner_set.size());
+
+    // copy all mesh nodes into Range
+    moab::Range mesh_nodes;
+    moab::EntityHandle root_set = 0;
+    rval = mbi->get_entities_by_type(root_set, moab::MBVERTEX, mesh_nodes);
+    assert(rval == moab::MB_SUCCESS);
+
+    EXPECT_EQ(2033, mesh_nodes.size());
+
+    // create neighborhood with kd-tree and check default calculation points
+    KDENeighborhood region(mbi, mesh_nodes, true);
+    EXPECT_EQ(0, region.get_points().size());
+
+    // update neighborhood region and check it includes corner set
+    region.update_neighborhood(event, bandwidth);
+
+    EXPECT_TRUE(region.get_points().size() > 0);
+    EXPECT_TRUE(check_all_points(region, corner_set));
 }
 //---------------------------------------------------------------------------//
-TEST_F(PointWithinMaxRadiusTest, PointOnTrack)
+// Tests points along edges of neighborhood are valid calculation points
+TEST_F(IsCalculationPointTest, ValidEdgePoints)
 {
-    // test point on track segment in region1
-    moab::CartVect point1(0.0, 0.0, 0.0);
-    EXPECT_TRUE(region1->point_within_max_radius(point1));
+    // define additional valid calculation points along edges of neighborhood
+    moab::Range edge_points;
+    double edge_coords[] =
+        { -0.1,  -0.2,   0.1667,
+          -0.1,  -0.05, -0.3,
+           0.0,  -0.2,  -0.3,
+           0.1,   0.2,  -0.01,
+           0.1,   0.13,  0.3,
+          -0.09,  0.2,   0.3,
+           0.07, -0.2,   0.3,
+           0.1,  0.0,   -0.3 };
 
-    // test point on track segment in region2
-    moab::CartVect point2(-1.35, -0.65, 1.73100960116);
-    EXPECT_TRUE(region2->point_within_max_radius(point2));
+    // add new edge points to the MOAB instance and convert Range to set
+    rval = mbi->create_vertices(edge_coords, 8, edge_points);
+    assert(rval == moab::MB_SUCCESS);
 
-    // no test point in region 3 can be on a track as it is a collision
+    std::set<moab::EntityHandle> edge_set(edge_points.begin(),
+                                          edge_points.end());
+
+    EXPECT_EQ(8, edge_set.size());
+
+    // copy all mesh nodes into Range
+    moab::Range mesh_nodes;
+    moab::EntityHandle root_set = 0;
+    rval = mbi->get_entities_by_type(root_set, moab::MBVERTEX, mesh_nodes);
+    assert(rval == moab::MB_SUCCESS);
+
+    EXPECT_EQ(2033, mesh_nodes.size());
+
+    // create neighborhood with kd-tree and check default calculation points
+    KDENeighborhood region(mbi, mesh_nodes, true);
+    EXPECT_EQ(0, region.get_points().size());
+
+    // update neighborhood region and check it includes edge set
+    region.update_neighborhood(event, bandwidth);
+
+    EXPECT_TRUE(region.get_points().size() > 0);
+    EXPECT_TRUE(check_all_points(region, edge_set));
 }
 //---------------------------------------------------------------------------//
-TEST_F(PointWithinMaxRadiusTest, PointInsideMaxRadius)
+// Tests points inside neighborhood are valid calculation points
+TEST_F(IsCalculationPointTest, ValidInteriorPoints)
 {
-    // test point inside max radius in region1
-    moab::CartVect point1(1.05, 0.09, -0.04);
-    EXPECT_TRUE(region1->point_within_max_radius(point1));
+    // define additional valid points within interior of neighborhood
+    moab::Range interior_points;
+    double interior_coords[] =
+        {  0.0,    0.0,   0.0,
+           0.001,  0.19,  0.2,
+          -0.06,  -0.1,  -0.1,
+          -0.0,    0.05, -0.23 };
 
-    // test point inside max radius in region2
-    moab::CartVect point2(-0.65, -0.1, 0.59);
-    EXPECT_TRUE(region2->point_within_max_radius(point2));
+    // add new interior points to the MOAB instance and convert Range to set
+    rval = mbi->create_vertices(interior_coords, 4, interior_points);
+    assert(rval == moab::MB_SUCCESS);
 
-    // no test point in region 3 can be inside max radius
+    std::set<moab::EntityHandle> interior_set(interior_points.begin(),
+                                              interior_points.end());
+
+    EXPECT_EQ(4, interior_set.size());
+
+    // copy all mesh nodes into Range
+    moab::Range mesh_nodes;
+    moab::EntityHandle root_set = 0;
+    rval = mbi->get_entities_by_type(root_set, moab::MBVERTEX, mesh_nodes);
+    assert(rval == moab::MB_SUCCESS);
+
+    EXPECT_EQ(2029, mesh_nodes.size());
+
+    // create neighborhood with kd-tree and check default calculation points
+    KDENeighborhood region(mbi, mesh_nodes, true);
+    EXPECT_EQ(0, region.get_points().size());
+
+    // update neighborhood region and check it includes edge set
+    region.update_neighborhood(event, bandwidth);
+
+    EXPECT_TRUE(region.get_points().size() > 0);
+    EXPECT_TRUE(check_all_points(region, interior_set));
+}
+//---------------------------------------------------------------------------//
+// Tests points that are NOT in neighborhood are NOT valid calculation points
+TEST_F(IsCalculationPointTest, InvalidPoints)
+{
+    // define additional points that are invalid calculation points
+    moab::Range invalid_points;
+    double invalid_coords[] =
+        { -0.1, -0.2,  0.5,
+          -0.1, -0.3, -0.3,
+           0.2, -0.2, -0.3,
+           0.1,  0.2, -0.7,
+           0.1,  0.9,  0.3, 
+          -0.1,  5.1, -2.9,
+           1.7,  0.0, 10.4,
+          -0.5, -0.8,  0.3,
+           0.6, -0.9,  1.5,
+          -0.7,  0.4, -0.5,
+          -0.1, -0.3, -0.3 };
+ 
+    // add new invalid points to the MOAB instance and convert Range to set
+    rval = mbi->create_vertices(invalid_coords, 11, invalid_points);
+    assert(rval == moab::MB_SUCCESS);
+
+    std::set<moab::EntityHandle> invalid_set(invalid_points.begin(),
+                                             invalid_points.end());
+
+    EXPECT_EQ(11, invalid_set.size());
+
+    // copy all mesh nodes into Range
+    moab::Range mesh_nodes;
+    moab::EntityHandle root_set = 0;
+    rval = mbi->get_entities_by_type(root_set, moab::MBVERTEX, mesh_nodes);
+    assert(rval == moab::MB_SUCCESS);
+
+    EXPECT_EQ(2036, mesh_nodes.size());
+
+    // create neighborhood with kd-tree and check default calculation points
+    KDENeighborhood region(mbi, mesh_nodes, true);
+    EXPECT_EQ(0, region.get_points().size());
+
+    // update neighborhood region and check invalid points are all still invalid
+    region.update_neighborhood(event, bandwidth);
+
+    std::set<moab::EntityHandle>::iterator it;
+    for(it = invalid_set.begin(); it != invalid_set.end(); ++it)
+    {
+        EXPECT_FALSE(region.is_calculation_point(*it));
+    }
 }
 //---------------------------------------------------------------------------//
 

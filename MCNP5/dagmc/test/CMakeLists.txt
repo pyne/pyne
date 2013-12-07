@@ -1,9 +1,8 @@
-# CMAKE build script for DAGMCTally testing
+# CMAKE build script for DAGMC Tally testing
 
 PROJECT(DAGMCTallyUnitTests)
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
 
-# FIND_PACKAGE(GTest REQUIRED PATHS ${GTEST_DIR})
 ADD_SUBDIRECTORY(gtest/gtest-1.7.0)
 
 # Where to look for includes

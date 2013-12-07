@@ -397,8 +397,8 @@ moab::ErrorCode KDEMeshTally::initialize_mesh_data()
     // initialize MeshTally::tally_points to include all mesh nodes
     set_tally_points(mesh_nodes);
 
-    // set up the KDE neighborhood region
-    region = new KDENeighborhood(mbi, moab_mesh_set, use_kd_tree);
+    // set up the KDE neighborhood region from the mesh nodes
+    region = new KDENeighborhood(mbi, mesh_nodes, use_kd_tree);
 
     // reduce the loaded MOAB mesh set to include only 3D elements
     moab::Range mesh_cells;

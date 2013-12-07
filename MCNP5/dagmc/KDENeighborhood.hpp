@@ -51,14 +51,14 @@ class KDENeighborhood
     /**
      * \brief Constructor
      * \param[in] mbi pointer to a pre-loaded MOAB instance
-     * \param[in] mesh_set the MOAB mesh set containing all of the mesh data
+     * \param[in] mesh_nodes the total set of potential calculation points
      * \param[in] build_kd_tree if true, creates kd-tree based on mesh nodes
      *
      * Note that setting build_kd_tree to false forces the KDENeighborhood to
      * always use all calculation points with every TallyEvent that occurs.
      */
     KDENeighborhood(moab::Interface* mbi,
-                    const moab::EntityHandle& mesh_set,
+                    const moab::Range& mesh_nodes,
                     bool build_kd_tree = true);
 
     /**
@@ -78,29 +78,23 @@ class KDENeighborhood
      * \brief Updates the neighborhood region based on the given tally event
      * \param[in] event the tally event for which the neighborhood is desired
      * \param[in] bandwidth the bandwidth vector (hx, hy, hz)
+     *
+     * This method redefines the neighborhood region based on the parameters of
+     * the tally event, then updates the set of calculation points that now
+     * exist within this region.
      */
     void update_neighborhood(const TallyEvent& event,
                              const moab::CartVect& bandwidth);
 
     /**
-     * \brief checks if a point exists within this neighborhood region
-     * \param[in] coords the coordinates of the point to check
-     * \return true if point does exist within this neighborhood region
-     */
-    bool point_in_region(const moab::CartVect& coords) const;
-
-    /**
-     * \brief Determines if point lies within radius of cylindrical region
-     * \param[in] point the calculation point to be tested
-     * \return true if point is inside the region, false otherwise
+     * \brief Checks if point belongs to the set of calculation points
+     * \param[in] point the moab::EntityHandle of the point to check
+     * \return true if point is a calculation point; false otherwise
      *
-     * Note that this method is only valid for track-based events.  If the
-     * event is not a track-based event, then it will always return false.
-     * It will also return false if no radius was set due to the neighborhood
-     * containing all calculation points.
+     * Searches the set of calculation points currently stored in this
+     * neighborhood region.
      */
-    bool point_within_max_radius(const TallyEvent& event,
-                                 const moab::CartVect& point) const;
+    bool is_calculation_point(const moab::EntityHandle& point) const;
 
   private:
     // Set of calculation points currently in this neighborhood region
@@ -138,6 +132,27 @@ class KDENeighborhood
                           const moab::CartVect& start_point,
                           const moab::CartVect& direction,
                           const moab::CartVect& bandwidth);
+
+    /**
+     * \brief Determines if point lies within radius of cylindrical region
+     * \param[in] coords the coordinates of the point to check
+     * \return true if point is inside the region; false otherwise
+     *
+     * TODO currently unused, may integrate into update_neighborhood to
+     * refine neighborhood region for a track-based event.
+     */
+    bool point_within_max_radius(const TallyEvent& event,
+                                 const moab::CartVect& coords) const;
+
+    /**
+     * \brief Determines if point lies within min/max corners of box
+     * \param[in] coords the coordinates of the point to check
+     * \return true if point is inside box; false otherwise
+     *
+     * This is a helper method used by points_in_box to determine if a point
+     * should be added to the set of calculation points.
+     */
+    bool point_inside_box(const moab::CartVect& coords) const;
 
     /**
      * \brief Finds the vertices that exist inside a rectangular region

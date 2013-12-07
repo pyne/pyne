@@ -17,27 +17,33 @@
 // CONSTRUCTOR
 //---------------------------------------------------------------------------//
 KDENeighborhood::KDENeighborhood(moab::Interface* mbi,
-                                 const moab::EntityHandle& mesh_set,
+                                 const moab::Range& mesh_nodes,
                                  bool build_kd_tree)
     : kd_tree(NULL), kd_tree_root(0), radius(0.0)
 {
-    // get all mesh nodes from the mesh set
-    moab::Range mesh_nodes;
-    moab::ErrorCode rval = moab::MB_SUCCESS;
-
-    rval = mbi->get_entities_by_type(mesh_set, moab::MBVERTEX, mesh_nodes);
-
-    assert(rval == moab::MB_SUCCESS);
-
     if (build_kd_tree)
     {
+        if (mbi == NULL)
+        {
+            std::cerr << "\nError: invalid moab::Interface for building KD-tree";
+            std::cerr << std::endl;
+            exit(EXIT_FAILURE);
+        }
+
+        std::cout << "Using KD-tree to construct neighborhood" << std::endl;
+
         // build the kd-tree from the mesh nodes
         kd_tree = new moab::AdaptiveKDTree(mbi);
+
+        moab::ErrorCode rval = moab::MB_SUCCESS;
         rval = kd_tree->build_tree(mesh_nodes, kd_tree_root);
+
         assert(rval == moab::MB_SUCCESS);
     }
     else
     {
+        std::cout << "Using all nodes to construct neighborhood" << std::endl;
+
         // convert range into a default set of calculation points
         points = std::set<moab::EntityHandle>(mesh_nodes.begin(),
                                               mesh_nodes.end());
@@ -88,55 +94,16 @@ void KDENeighborhood::update_neighborhood(const TallyEvent& event,
     points_in_box();
 }
 //---------------------------------------------------------------------------//
-bool KDENeighborhood::point_in_region(const moab::CartVect& coords) const
+bool KDENeighborhood::is_calculation_point(const moab::EntityHandle& point) const
 {
-    if (kd_tree == NULL ) return true;
+    std::set<moab::EntityHandle>::iterator it = points.find(point);
 
-    // check point is in the rectangular neighborhood region
-    for (int i = 0; i < 3; ++i)
+    if (it == points.end())
     {
-        // account for boundary cases first
-        double min_diff = fabs(coords[i] - min_corner[i]);
-        double max_diff = fabs(coords[i] - max_corner[i]);
-
-        if (min_diff < 1e-12 || max_diff < 1e-12 ||
-            (coords[i] > min_corner[i] && coords[i] < max_corner[i]))
-        {
-            // point may still be in the region, so do nothing
-        }
-        else // point is not in the region
-        {
-            return false;
-        }  
+        return false;
     }
 
     return true;
-}
-//---------------------------------------------------------------------------//
-bool KDENeighborhood::point_within_max_radius(const TallyEvent& event,
-                                              const moab::CartVect& point) const
-{
-    // process track-based tally event only
-    if (event.type == TallyEvent::TRACK)
-    {
-        // create a vector from starting position to point being tested
-        moab::CartVect temp;
-
-        for (int i = 0; i < 3; ++i)
-        {
-            temp[i] = point[i] - event.position[i];
-        }
-
-        // compute perpendicular distance from point being tested to line
-        // defined by track segment using the cross-product method
-        double distance_to_track = (event.direction * temp).length();
-
-        // return true if distance is less than radius of cylindrical region
-        if (distance_to_track < radius) return true;
-    }
-
-    // otherwise return false
-    return false;
 }
 //---------------------------------------------------------------------------//
 // PRIVATE METHODS
@@ -150,8 +117,8 @@ void KDENeighborhood::set_neighborhood(const moab::CartVect& collision_point,
         max_corner[i] = collision_point[i] + bandwidth[i];
     }
 
-    // maximum radius is not used for collision events
-    assert(radius == 0.0);
+    // maximum radius is not used for collision events so reset it to 0.0
+    radius = 0.0;
 }
 //---------------------------------------------------------------------------//
 void KDENeighborhood::set_neighborhood(double track_length,
@@ -179,6 +146,55 @@ void KDENeighborhood::set_neighborhood(double track_length,
     // set maximum radius around the track to sqrt(hx^2 + hy^2 + hz^2)
     radius = bandwidth.length();
 }                              
+//---------------------------------------------------------------------------//
+bool KDENeighborhood::point_within_max_radius(const TallyEvent& event,
+                                              const moab::CartVect& coords) const
+{
+    // process track-based tally event only
+    if (event.type == TallyEvent::TRACK)
+    {
+        // create a vector from starting position to point being tested
+        moab::CartVect temp;
+
+        for (int i = 0; i < 3; ++i)
+        {
+            temp[i] = coords[i] - event.position[i];
+        }
+
+        // compute perpendicular distance from point being tested to line
+        // defined by track segment using the cross-product method
+        double distance_to_track = (event.direction * temp).length();
+
+        // return true if distance is less than radius of cylindrical region
+        if (distance_to_track < radius) return true;
+    }
+
+    // otherwise return false
+    return false;
+}
+//---------------------------------------------------------------------------//
+bool KDENeighborhood::point_inside_box(const moab::CartVect& coords) const
+{
+    // check point is in the rectangular neighborhood region
+    for (int i = 0; i < 3; ++i)
+    {
+        // account for boundary cases first
+        double min_diff = fabs(coords[i] - min_corner[i]);
+        double max_diff = fabs(coords[i] - max_corner[i]);
+
+        if (min_diff < 1e-12 || max_diff < 1e-12 ||
+            (coords[i] > min_corner[i] && coords[i] < max_corner[i]))
+        {
+            // point may still be in the box, so do nothing
+        }
+        else // point is not in the box
+        {
+            return false;
+        }  
+    }
+
+    return true;
+}
 //---------------------------------------------------------------------------//
 void KDENeighborhood::points_in_box()
 {
@@ -235,7 +251,7 @@ void KDENeighborhood::points_in_box()
             assert(rval == moab::MB_SUCCESS);
 
             // add the point to the set if it is in the box
-            if (point_in_region(coords))
+            if (point_inside_box(coords))
             {
                 points.insert(point);
             }
