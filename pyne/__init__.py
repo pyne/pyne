@@ -9,7 +9,7 @@ if os.name == 'nt':
     libtype = '.dll'
 elif sys.platform == 'darwin':
     libtype = '.dylib'
-liblist = ['libpyne', 'libpyne_data', 'libpyne_material', 'libpyne_enrichemnt', 'libpyne_nucname', 'libpyne_rxname']
+liblist = ['libpyne', 'libpyne_data', 'libpyne_material', 'libpyne_enrichment', 'libpyne_nucname', 'libpyne_rxname']
 
 if libtype is not None:
     for item in liblist:
