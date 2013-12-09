@@ -52,7 +52,6 @@ def parse_args():
     if 0 < len(hdf5opt):
         os.environ['HDF5_ROOT'] = hdf5opt[0]  # Expose to CMake
         distutils_args = [o for o in distutils_args if not o.startswith('--hdf5=')]
-
     # Change egg-base entry to absolute path so it behaves as expected
     import argparse
     parser = argparse.ArgumentParser()
