@@ -38,28 +38,28 @@ pyne_logo = """\
 """
 
 def parse_args():
-    distutils = []
+    distutils_args = []
     cmake = []
     make = []
-    argsets = [distutils, cmake, make]
+    argsets = [distutils_args, cmake, make]
     i = 0
     for arg in sys.argv:
         if arg == '--':
             i += 1
         else:
             argsets[i].append(arg)
-    hdf5opt = [o.split('=')[1] for o in distutils if o.startswith('--hdf5=')]
+    hdf5opt = [o.split('=')[1] for o in distutils_args if o.startswith('--hdf5=')]
     if 0 < len(hdf5opt):
         os.environ['HDF5_ROOT'] = hdf5opt[0]  # Expose to CMake
-        distutils = [o for o in distutils if not o.startswith('--hdf5=')]
-        if '--egg-base' in distutils:
+        distutils_args = [o for o in distutils_args if not o.startswith('--hdf5=')]
+        if '--egg-base' in distutils_args:
             # Change pip-egg-info entry to absolute path, so pip can find it
             # after changing directory.
-            idx = distutils.index('--egg-base')
-            if distutils[idx + 1] == 'pip-egg-info':
+            idx = distutils_args.index('--egg-base')
+            if distutils_args[idx + 1] == 'pip-egg-info':
                 local_path = os.path.dirname(os.path.dirname(os.path.abspath(sys.argv[0])))
-                distutils[idx + 1] = os.path.join(local_path, 'pip-egg-info')
-    return distutils, cmake, make
+                distutils_args[idx + 1] = os.path.join(local_path, 'pip-egg-info')
+    return distutils_args, cmake, make
 
 
 def main_body():
