@@ -52,13 +52,15 @@ def parse_args():
     if 0 < len(hdf5opt):
         os.environ['HDF5_ROOT'] = hdf5opt[0]  # Expose to CMake
         distutils_args = [o for o in distutils_args if not o.startswith('--hdf5=')]
-        if '--egg-base' in distutils_args:
-            # Change pip-egg-info entry to absolute path, so pip can find it
-            # after changing directory.
-            idx = distutils_args.index('--egg-base')
-            if distutils_args[idx + 1] == 'pip-egg-info':
-                local_path = os.path.dirname(os.path.dirname(os.path.abspath(sys.argv[0])))
-                distutils_args[idx + 1] = os.path.join(local_path, 'pip-egg-info')
+
+    # Change egg-base entry to absolute path so it behaves as expected
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--egg-base')
+    res, distutils_args = parser.parse_known_args(distutils_args)
+    if res.egg_base is not None:
+        local_path = os.path.dirname(os.path.abspath(sys.argv[0]))
+        distutils_args.append('--egg-base='+os.path.join(local_path, res.egg_base))
     return distutils_args, cmake, make
 
 
