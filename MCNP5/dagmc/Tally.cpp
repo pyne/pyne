@@ -105,30 +105,17 @@ void Tally::end_history()
 //---------------------------------------------------------------------------//
 unsigned int Tally::get_energy_bin(double energy)
 {
-    unsigned int bin_no = 0;
-
-    // Test:  print out the energy and all the boundaries
-    std::cout << energy << std::endl;
-    for (std::vector<double>::iterator bdry = input_data.energy_bin_bounds.begin(); bdry != input_data.energy_bin_bounds.end(); ++bdry)
+    unsigned int i = 0;
+    while (true)
     {
-        std::cout << *bdry << ' ';
-    }
-    std::cout << '\n';
-
-    std::vector<double>::iterator curIt = input_data.energy_bin_bounds.begin();
-    double prev = *curIt;
-    // Move the iterator to point to the second boundary
-    ++curIt;
-    for (unsigned int bin = 0; curIt != input_data.energy_bin_bounds.end(); ++curIt, ++bin)
-    {
-       if (prev <= energy && energy < *curIt)
+       if (input_data.energy_bin_bounds[i] <= energy && energy < input_data.energy_bin_bounds[i+1])
        {
-          bin_no = bin;
-          break;
+          return i;
        }
-       prev = *curIt;
+       else
+       {
+          ++i;
+       }
     }
-
-    return bin_no;
 }
 // end of MCNP5/dagmc/Tally.cpp

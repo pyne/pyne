@@ -185,6 +185,12 @@ TrackLengthMeshTally::~TrackLengthMeshTally()
 //---------------------------------------------------------------------------//
 void TrackLengthMeshTally::compute_score(const TallyEvent& event)
 {
+
+  if (!energy_in_bounds(event.particle_energy))
+  {
+     return;
+  }
+
   EntityHandle tet; // tet 
 
   // If it's not the type we want leave immediately

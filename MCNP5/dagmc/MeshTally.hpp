@@ -136,6 +136,7 @@ class MeshTally : public Tally
     moab::ErrorCode setup_tags(moab::Interface* mbi, const char* prefix="");
 
     void add_score_to_energy_tally(double energy, moab::EntityHandle point, double score);
+    bool energy_in_bounds(double energy);
 };
 
 #endif // DAGMC_MESHTALLY_HPP
