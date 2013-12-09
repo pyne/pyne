@@ -52,6 +52,13 @@ def parse_args():
     if 0 < len(hdf5opt):
         os.environ['HDF5_ROOT'] = hdf5opt[0]  # Expose to CMake
         distutils = [o for o in distutils if not o.startswith('--hdf5=')]
+        if '--egg-base' in distutils:
+            # Change pip-egg-info entry to absolute path, so pip can find it
+            # after changing directory.
+            idx = distutils.index('--egg-base')
+            if distutils[idx + 1] == 'pip-egg-info':
+                local_path = os.path.dirname(os.path.dirname(os.path.abspath(sys.argv[0])))
+                distutils[idx + 1] = os.path.join(local_path, 'pip-egg-info')
     return distutils, cmake, make
 
 
@@ -83,13 +90,6 @@ def main_body():
     rtn = subprocess.check_call(['make'] + make_args, cwd='build')
     cwd = os.getcwd()
     os.chdir('build')
-    if '--egg-base' in sys.argv:
-        # Change pip-egg-info entry to absolute path, so pip can find it
-        # after changing directory.
-        local_path = os.path.dirname(os.path.dirname(os.path.abspath(sys.argv[0])))
-        idx = sys.argv.index('--egg-base')
-        if sys.argv[idx + 1] == 'pip-egg-info':
-            sys.argv[idx + 1] = os.path.join(local_path, 'pip-egg-info')
     configure.setup()
     os.chdir(cwd)
 
