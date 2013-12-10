@@ -151,7 +151,7 @@ namespace h5wrap
         offset[0] = offset[0] + npoints;
 
     //If still out of range we have a problem
-    if (offset[0] < 0 || npoints <= offset[0])
+    if (npoints <= offset[0])
         throw HDF5BoundsError();
 
     H5Sselect_hyperslab(dspace, H5S_SELECT_SET, offset, NULL, count, NULL);

@@ -372,8 +372,6 @@ void pyne::Material::write_hdf5(std::string filename, std::string datapath,
       data_dims[0] = row_num + 1;
       H5Dset_extent(data_set, data_dims);
     }
-    else if (data_dims[0] < 0)
-      throw h5wrap::HDF5BoundsError();
 
     data_offset[0] = row_num;
   }
@@ -455,8 +453,6 @@ void pyne::Material::write_hdf5(std::string filename, std::string datapath,
       data_dims[0] = row_num + 1;
       H5Dset_extent(attrset, data_dims);
     }
-    else if (data_dims[0] < 0)
-      throw h5wrap::HDF5BoundsError();
 
     data_offset[0] = row_num;
   }
@@ -867,7 +863,7 @@ pyne::Material pyne::Material::expand_elements()
         abund_itr++;
         if (abund_itr == abund_end)
         {
-          zabund = 9999999999;
+          zabund = INT_MAX;
           break;
         }
         zabund = nucname::znum(nabund);
@@ -1113,7 +1109,7 @@ pyne::Material pyne::Material::sub_act()
 pyne::Material pyne::Material::sub_tru()
 {
   // Returns a material of Transuranics that is a sub-material of this one.
-  return sub_range(930000000, 10000000000);
+  return sub_range(930000000, INT_MAX);
 };
 
 
