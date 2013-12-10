@@ -372,8 +372,6 @@ void pyne::Material::write_hdf5(std::string filename, std::string datapath,
       data_dims[0] = row_num + 1;
       H5Dset_extent(data_set, data_dims);
     }
-    else if (data_dims[0] < 0)
-      throw h5wrap::HDF5BoundsError();
 
     data_offset[0] = row_num;
   }
@@ -455,8 +453,6 @@ void pyne::Material::write_hdf5(std::string filename, std::string datapath,
       data_dims[0] = row_num + 1;
       H5Dset_extent(attrset, data_dims);
     }
-    else if (data_dims[0] < 0)
-      throw h5wrap::HDF5BoundsError();
 
     data_offset[0] = row_num;
   }
