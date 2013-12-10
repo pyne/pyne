@@ -15,6 +15,7 @@ The Python for Nuclear Engineering Team includes:
 * `Eric Relson`_
 * `Elliott Biondo`_
 * `Matthew Gidden`_
+* Cameron Bates
 
 .. _Anthony Scopatz: http://www.scopatz.com/
 
