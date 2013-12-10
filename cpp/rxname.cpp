@@ -2416,7 +2416,7 @@ void * pyne::rxname::_fill_maps()
   id_offset[make_pair("n", name_id["np_2"])] = offset(-1, -1, 2);
   id_offset[make_pair("n", name_id["n"])] = offset(0, 0);
   id_offset[make_pair("n", name_id["gamma"])] = offset(0, 1);
-
+  return NULL;
 };
 void * pyne::rxname::_ = pyne::rxname::_fill_maps();
 
