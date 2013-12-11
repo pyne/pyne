@@ -19,7 +19,7 @@ TallyManager::TallyManager()
 void TallyManager::addNewTally(unsigned int tally_id,
                                std::string tally_type,
                                const std::vector<double>& energy_bin_bounds,
-                               std::multimap<std::string, std::string>& options)
+                               const std::multimap<std::string, std::string>& options)
 {
     Tally *newTally = createTally(tally_id, tally_type, energy_bin_bounds, options);
 
@@ -67,6 +67,11 @@ void TallyManager::updateMultiplier(unsigned int multiplier_id, double value)
     {
         event.multipliers.at(multiplier_id) = value; 
     }
+}
+//---------------------------------------------------------------------------//
+unsigned int TallyManager::num_tallies()
+{
+    return observers.size();
 }
 //---------------------------------------------------------------------------//
 void TallyManager::removeTally(unsigned int tally_id)
@@ -243,8 +248,7 @@ void TallyManager::zeroAllTallyData()
 Tally *TallyManager::createTally(unsigned int tally_id,
                                  std::string  tally_type,
                                  const std::vector<double>& energy_bin_bounds,
-                                 std::multimap<std::string, std::string>& options)
-                                 
+                                 const std::multimap<std::string, std::string>& options)
 {
     TallyInput input; 
 

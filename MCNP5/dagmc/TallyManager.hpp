@@ -105,7 +105,7 @@ class TallyManager
     void addNewTally(unsigned int tally_id,
                      std::string tally_type,
                      const std::vector<double>& energy_bin_bounds,
-                     std::multimap<std::string, std::string>& options);
+                     const std::multimap<std::string, std::string>& options);
 
     /**
      * \brief Add a new tally multiplier
@@ -134,6 +134,12 @@ class TallyManager
      * If the multiplier_id is invalid, then nothing will happen.
      */
     void updateMultiplier(unsigned int multiplier_id, double value);
+
+    /**
+     * \brief num_tallies()
+     * \return number of active Tally Observers
+     */
+    unsigned int num_tallies();
 
     /**
      * \brief Remove a DAGMC Tally from the Observer list
@@ -236,7 +242,7 @@ class TallyManager
     Tally *createTally(unsigned int tally_id,
                        std::string  tally_type,
                        const std::vector<double>& energy_bin_bounds,
-                       std::multimap<std::string, std::string>& options);
+                       const std::multimap<std::string, std::string>& options);
 
     /**
      * \brief Sets up TallyEvent
