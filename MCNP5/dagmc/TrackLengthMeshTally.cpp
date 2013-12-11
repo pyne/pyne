@@ -178,24 +178,23 @@ TrackLengthMeshTally::~TrackLengthMeshTally()
   delete obb_tool;
 }
 
-
-
 //---------------------------------------------------------------------------//
 // DERIVED PUBLIC INTERFACE from Tally.hpp
 //---------------------------------------------------------------------------//
 void TrackLengthMeshTally::compute_score(const TallyEvent& event)
 {
+  
+  // If it's not the type we want leave immediately
+  if (event.type != TallyEvent::TRACK) return;
 
-  if (!energy_in_bounds(event.particle_energy))
+  unsigned int ebin;
+  if ( !get_energy_bin(event.particle_energy, ebin))
   {
      return;
   }
-
-  EntityHandle tet; // tet 
-
-  // If it's not the type we want leave immediately
-  if (event.type != TallyEvent::TRACK) return;
   
+  double weight = event.get_score_multiplier(input_data.multiplier_id);
+
   std::vector<double> intersections;     // vector of distance to triangular facet intersections
   std::vector< EntityHandle > triangles; // vector of entityhandles that belong to the triangles hit
   //  std::vector<ray_data> hit_information; // vector of reformated ray triangle intersections
@@ -393,6 +392,7 @@ void TrackLengthMeshTally::compute_score(const TallyEvent& event)
 
     }
 
+  EntityHandle tet; // tet 
   if( intersections.size() == 0 )
     // ray is so short it either does not intersect a triangular face, or it inside the mesh
     // but can't reach
@@ -406,7 +406,7 @@ void TrackLengthMeshTally::compute_score(const TallyEvent& event)
       else
 	{
 	  // determine tracklength to return
-          determine_score(event, tet);
+          add_score_to_mesh_tally(tet, weight, event.track_length, ebin);
 	  //	  found_crossing = true;
 	  return;
 	}
@@ -415,8 +415,7 @@ void TrackLengthMeshTally::compute_score(const TallyEvent& event)
   // sort the intersection data
   sort_intersection_data(intersections,triangles);
   // compute the tracklengths
-  compute_tracklengths(event,intersections,triangles);
-
+  compute_tracklengths(event, ebin, weight, intersections,triangles);
 
   return;
 }
@@ -819,21 +818,11 @@ void TrackLengthMeshTally::sort_intersection_data(std::vector<double> &intersect
   return;
 }
 
-// determine the score for the given tet
-void TrackLengthMeshTally::determine_score(const TallyEvent event, const EntityHandle tet)
-{
-    double weight = event.get_score_multiplier(input_data.multiplier_id);
-    double score = weight * event.track_length;
-    
-    add_score_to_energy_tally(event.particle_energy, tet, score);
-
-    return;
-}
-
 // function to compute the track lengths
-void TrackLengthMeshTally::compute_tracklengths(const TallyEvent event, 
-						const std::vector<double> intersections,
-						const std::vector<EntityHandle> triangles)
+void TrackLengthMeshTally::compute_tracklengths(const TallyEvent& event, 
+                                                unsigned int ebin, double weight,
+						const std::vector<double>& intersections,
+						const std::vector<EntityHandle>& triangles)
 {
   double track_length; // track_length to add to the tet
   CartVect hit_p; //position on the triangular face of the hit
@@ -870,8 +859,9 @@ void TrackLengthMeshTally::compute_tracklengths(const TallyEvent event,
 	      std::cout << track_length << " " << intersections[i] << " " << intersections[i-1] << std::endl;
 	      std::cout << tet << " " << next_tet << std::endl;
 	    }
-
-	  TrackLengthMeshTally::determine_score(event,tet);
+          // Note: track_length is for the current tet; it is not the event tracklength
+	  // TrackLengthMeshTally::determine_score(ebin, weight, track_length,tet);
+          add_score_to_mesh_tally(tet, weight, track_length, ebin);
 	}
     }
 
@@ -892,7 +882,8 @@ void TrackLengthMeshTally::compute_tracklengths(const TallyEvent event,
       
       if ( tet > 0 ) 
 	{
-	  TrackLengthMeshTally::determine_score(event,tet);
+	  // TrackLengthMeshTally::determine_score(ebin, weight, track_length, tet);
+          add_score_to_mesh_tally(tet, weight, track_length, ebin);
 	}
     }
 

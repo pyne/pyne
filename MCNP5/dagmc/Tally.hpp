@@ -127,11 +127,15 @@ class Tally
     /// All of the tally data for this tally
     TallyData *data;
 
+    // Check that the energy is not outside the allowed range
+    bool energy_in_bounds(double energy);
+
     /// Get the bin index for the current energy
-    unsigned int get_energy_bin(double energy);
+    bool get_energy_bin(double energy, unsigned int& ebin);
 
     /// The purpose of this is to allow TallyManager to use the data
     friend class TallyManager;
+
 };
 
 #endif // DAGMC_TALLY_HPP

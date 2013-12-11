@@ -143,7 +143,7 @@ void TallyManager::updateTallies()
     for (map_it = observers.begin(); map_it != observers.end(); ++map_it)
     {
         Tally *tally = map_it->second;
-        tally->compute_score(event);  
+        tally->compute_score(event);
     }
     clearLastEvent();
 }

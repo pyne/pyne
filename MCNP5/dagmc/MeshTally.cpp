@@ -160,27 +160,14 @@ moab::ErrorCode MeshTally::setup_tags(moab::Interface* mbi, const char* prefix)
     return moab::MB_SUCCESS;
 }
 //---------------------------------------------------------------------------//
-void MeshTally::add_score_to_energy_tally(double energy, moab::EntityHandle point, double score)
+// determine the score for the given tet
+void MeshTally::add_score_to_mesh_tally(const moab::EntityHandle& tally_point, 
+                                        double weight, double score, unsigned int ebin)
 {
-    unsigned int ebin;
-    if (data->get_num_energy_bins() == 1)
-    {
-       ebin = 0;
-    }
-    else
-    { 
-       ebin = get_energy_bin(energy);
-    }
-    unsigned int point_index = get_entity_index(point);
-    // add score to tally data for the current history
-    data->add_score_to_tally(point_index, score, ebin);
-}
-//---------------------------------------------------------------------------//
-bool MeshTally::energy_in_bounds(double energy)
-{
-   unsigned int num_bins = data->get_num_energy_bins();
+    double weighted_score = weight * score;
+    unsigned int point_index = get_entity_index(tally_point);
 
-   return (input_data.energy_bin_bounds[0] <= energy &&
-                                              energy < input_data.energy_bin_bounds[num_bins - 1]);
+    // add score to tally data for the current history
+    data->add_score_to_tally(point_index, weighted_score, ebin);
 }
 // end of MCNP5/dagmc/MeshTally.cpp

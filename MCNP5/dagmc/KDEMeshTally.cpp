@@ -109,12 +109,6 @@ KDEMeshTally::~KDEMeshTally()
 //---------------------------------------------------------------------------//
 void KDEMeshTally::compute_score(const TallyEvent& event)
 {
-   
-    if (!energy_in_bounds(event.particle_energy))
-    {
-       return;
-    }
-
     double weight = event.get_score_multiplier(input_data.multiplier_id);
     
     // set up tally event based on KDE mesh tally type
@@ -139,6 +133,12 @@ void KDEMeshTally::compute_score(const TallyEvent& event)
     else // NONE, return from this method
     {
  	return;
+    }
+
+    unsigned int ebin;
+    if ( !get_energy_bin(event.particle_energy, ebin))
+    {  
+       return;
     }
 
     // create the neighborhood region and find all of the calculations points
@@ -172,22 +172,21 @@ void KDEMeshTally::compute_score(const TallyEvent& event)
         }
 
         // compute the final contribution to the tally for this point
-        double score = weight;
-
+        double score;
         if (estimator == INTEGRAL_TRACK)
         {
-            score *= integral_track_score(X, event);
+            score = integral_track_score(X, event);
         }
         else if (estimator == SUB_TRACK)
         {
-            score *= subtrack_score(X, subtrack_points);
+            score = subtrack_score(X, subtrack_points);
         }
         else // estimator == COLLISION
         {
-            score *= evaluate_kernel(X, event.position);
+            score = evaluate_kernel(X, event.position);
         }
 
-        add_score_to_energy_tally( event.particle_energy, point, score);
+        add_score_to_mesh_tally(point, weight, score,  ebin);
     }// end calculation_points iteration
 }
 //---------------------------------------------------------------------------//

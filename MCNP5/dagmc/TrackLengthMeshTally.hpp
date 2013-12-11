@@ -318,21 +318,17 @@ class TrackLengthMeshTally : public MeshTally
 
   /** 
    * \brief return the tracklengths of the ray in each tet
+   * \param event the tally event, direction, position, track_length, etc
+   * \param ebin
+   * \param weight
    * \param vector<double> intersections list of all the intersections
-   * \param vector<EntityHandle> intersections list of the triangle entity handles that correspond to the intersections
+   * \param vector<EntityHandle> triangles list of the triangle entity handles that correspond to the intersections
    * \return void
    */
-  void compute_tracklengths(const TallyEvent event,
-			    const std::vector<double> intersections,
-			    const std::vector<EntityHandle> triangles);
-
-  /** 
-   * \brief determine the score to add to the results
-   * \param tally event the tally event, direction, position, track_length, etc
-   * \param EntityHandle tet, the MOAB entityhandle of the current tet
-   * \return void
-   */
-  void determine_score(const TallyEvent event, EntityHandle tet);
+  void compute_tracklengths(const TallyEvent& event, 
+                            unsigned int ebin, double weight,
+   			    const std::vector<double>& intersections,
+			    const std::vector<EntityHandle>& triangles);
 
 };
 

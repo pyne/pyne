@@ -2,6 +2,7 @@
 
 #include <cassert>
 #include <iostream>
+#include <cmath>
 
 #include "Tally.hpp"
 #include "TrackLengthMeshTally.hpp"
@@ -103,19 +104,51 @@ void Tally::end_history()
 //---------------------------------------------------------------------------//
 // PROTECTED INTERFACE
 //---------------------------------------------------------------------------//
-unsigned int Tally::get_energy_bin(double energy)
+bool Tally::energy_in_bounds(double energy)
 {
-    unsigned int i = 0;
-    while (true)
+   unsigned int num_bins = data->get_num_energy_bins();
+
+   return !(energy < input_data.energy_bin_bounds[0] ||
+            energy > input_data.energy_bin_bounds[num_bins -1]);
+}
+//---------------------------------------------------------------------------//
+// This is only called if MeshTally::energy_in_bounds returns true
+bool Tally::get_energy_bin(double energy, unsigned int& ebin)
+{
+    bool bin_found = false;
+    if (energy_in_bounds(energy))
     {
-       if (input_data.energy_bin_bounds[i] <= energy && energy < input_data.energy_bin_bounds[i+1])
+       if (data->get_num_energy_bins() == 1)
        {
-          return i;
+          ebin = 0;
+          bin_found = true;
        }
-       else
+       else  // in bounds and more than one energy bin
        {
-          ++i;
-       }
-    }
+          // Case where we are close to the highest energy
+          double tol = 1e-6;
+          unsigned int maxbin = input_data.energy_bin_bounds.size() - 1;
+          if (fabs(energy - input_data.energy_bin_bounds[maxbin]) < tol)
+          {
+             ebin =  maxbin;
+             bin_found = true;
+          }
+
+          unsigned int i = 0;
+          while (!bin_found)
+          {
+             if (input_data.energy_bin_bounds[i] <= energy && energy < input_data.energy_bin_bounds[i+1])
+             {
+                ebin = i;
+                bin_found = true;
+             }
+             else
+             {
+                ++i;
+             }
+          }  // end while 
+       }     // end else in bounds and >1 energy bin
+    }        // end if in bounds
+    return bin_found;
 }
 // end of MCNP5/dagmc/Tally.cpp
