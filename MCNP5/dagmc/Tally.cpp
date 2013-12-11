@@ -14,17 +14,22 @@
 Tally::Tally(const TallyInput& input) 
     : input_data(input), data(NULL)
 {
+
     bool total_energy_bin = true;
+    unsigned int num_energy_bins = 0;
 
-    // determine total number of energy bins requested
-    int num_energy_bins = input_data.energy_bin_bounds.size();
-    assert(num_energy_bins >= 2);
-
+    int num_boundaries = input_data.energy_bin_bounds.size();
     // turn off total energy bin if only one bin exists
-    if (num_energy_bins == 2)
+    if (num_boundaries == 2)
     {
-       --num_energy_bins;
        total_energy_bin = false;
+       num_energy_bins = 1;
+    }
+    else
+    {
+    // determine total number of energy bins requested
+       assert(num_energy_bins > 2);
+       num_energy_bins = num_boundaries;
     }
 
     data = new TallyData(num_energy_bins, total_energy_bin); 
@@ -106,13 +111,16 @@ void Tally::end_history()
 //---------------------------------------------------------------------------//
 bool Tally::energy_in_bounds(double energy)
 {
-   unsigned int num_bins = data->get_num_energy_bins();
+   unsigned int max_boundary = data->get_num_energy_bins();
+   if (data->has_total_energy_bin())
+   {
+      --max_boundary;
+   }
 
-   return !(energy < input_data.energy_bin_bounds[0] ||
-            energy > input_data.energy_bin_bounds[num_bins -1]);
+   return !(energy < input_data.energy_bin_bounds.at(0) ||
+            energy > input_data.energy_bin_bounds.at(max_boundary));
 }
 //---------------------------------------------------------------------------//
-// This is only called if MeshTally::energy_in_bounds returns true
 bool Tally::get_energy_bin(double energy, unsigned int& ebin)
 {
     bool bin_found = false;

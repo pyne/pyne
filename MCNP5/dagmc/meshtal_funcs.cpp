@@ -129,7 +129,7 @@ void dagmc_fmesh_setup_mesh_(int* /*ipt*/, int* id, int* fmesh_idx,
                              int* is_collision_tally)
 {
     std::cout << "Mesh tally " << *id << " has these " << *n_energy_mesh
-              << " energy bins: " << std::endl;
+              << " energy bin boundaries: " << std::endl;
 
     for(int i = 0; i < *n_energy_mesh; ++i)
     {
