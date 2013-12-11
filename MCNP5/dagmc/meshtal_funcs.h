@@ -45,11 +45,6 @@ extern "C" {
 /* Make a valid Fortran pointer to a C array */
 extern void FMESH_FUNC(dagmc_make_fortran_pointer)(void* fort_ref, double* array, int* size);
 
-// TODO remove this method when energy bins are implemented
-/* Choose the energy bin for the i'th tally, given the current particle energy
- * This is only used by collision tallies for which dagmc_fmesh_score is not called directly*/
-extern void FMESH_FUNC(dagmc_mesh_choose_ebin)(int* i, double* erg, int* ien);
-
 /**
  * The dagmc_fmesh_*_ functions are called from fortran to drive our advanced mesh tallies,
  * mostly from fmesh_mod.F90.  They should probably not be called from C++ code.
