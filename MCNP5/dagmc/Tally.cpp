@@ -14,22 +14,22 @@
 Tally::Tally(const TallyInput& input) 
     : input_data(input), data(NULL)
 {
-
     bool total_energy_bin = true;
     unsigned int num_energy_bins = 0;
 
     int num_boundaries = input_data.energy_bin_bounds.size();
+
     // turn off total energy bin if only one bin exists
     if (num_boundaries == 2)
     {
-       total_energy_bin = false;
-       num_energy_bins = 1;
+        total_energy_bin = false;
+        num_energy_bins = 1;
     }
     else
     {
-    // determine total number of energy bins requested
-       assert(num_energy_bins > 2);
-       num_energy_bins = num_boundaries;
+        // determine total number of energy bins requested
+        assert(num_energy_bins > 2);
+        num_energy_bins = num_boundaries;
     }
 
     data = new TallyData(num_energy_bins, total_energy_bin); 
@@ -109,54 +109,57 @@ void Tally::end_history()
 //---------------------------------------------------------------------------//
 // PROTECTED INTERFACE
 //---------------------------------------------------------------------------//
-bool Tally::energy_in_bounds(double energy)
-{
-   unsigned int max_boundary = data->get_num_energy_bins();
-   if (data->has_total_energy_bin())
-   {
-      --max_boundary;
-   }
-
-   return !(energy < input_data.energy_bin_bounds.at(0) ||
-            energy > input_data.energy_bin_bounds.at(max_boundary));
-}
-//---------------------------------------------------------------------------//
 bool Tally::get_energy_bin(double energy, unsigned int& ebin)
 {
     bool bin_found = false;
+
     if (energy_in_bounds(energy))
     {
-       if (data->get_num_energy_bins() == 1)
-       {
-          ebin = 0;
-          bin_found = true;
-       }
-       else  // in bounds and more than one energy bin
-       {
-          // Case where we are close to the highest energy
-          double tol = 1e-6;
-          unsigned int maxbin = input_data.energy_bin_bounds.size() - 1;
-          if (fabs(energy - input_data.energy_bin_bounds[maxbin]) < tol)
-          {
-             ebin =  maxbin;
-             bin_found = true;
-          }
+        if (data->get_num_energy_bins() == 1)
+        {
+            ebin = 0;
+            bin_found = true;
+        }
+        else  // in bounds and more than one energy bin
+        {
+            // Case where we are close to the highest energy
+            double tol = 1e-6;
+            unsigned int maxbin = input_data.energy_bin_bounds.size() - 1;
 
-          unsigned int i = 0;
-          while (!bin_found)
-          {
-             if (input_data.energy_bin_bounds[i] <= energy && energy < input_data.energy_bin_bounds[i+1])
-             {
-                ebin = i;
+            if (fabs(energy - input_data.energy_bin_bounds.at(maxbin)) < tol)
+            {
+                ebin =  maxbin;
                 bin_found = true;
-             }
-             else
-             {
-                ++i;
-             }
-          }  // end while 
-       }     // end else in bounds and >1 energy bin
-    }        // end if in bounds
+            }
+
+            unsigned int i = 0;
+
+            while (!bin_found)
+            {
+                if (input_data.energy_bin_bounds.at(i) <= energy &&
+                    energy < input_data.energy_bin_bounds.at(i+1))
+                {
+                    ebin = i;
+                    bin_found = true;
+                }
+                else
+                {
+                    ++i;
+                }
+            }  // end while
+        }  // end else in bounds and >1 energy bin
+    }  // end if in bounds
+
     return bin_found;
 }
+//---------------------------------------------------------------------------//
+bool Tally::energy_in_bounds(double energy)
+{
+    unsigned int maxbin = input_data.energy_bin_bounds.size() - 1;
+
+    return !(energy < input_data.energy_bin_bounds.at(0) ||
+             energy > input_data.energy_bin_bounds.at(maxbin));
+}
+//---------------------------------------------------------------------------//
+
 // end of MCNP5/dagmc/Tally.cpp

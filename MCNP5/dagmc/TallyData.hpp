@@ -92,6 +92,8 @@ class TallyData
     /**
      * \brief get_num_energy_bins()
      * \return Number of energy bins stored in this TallyData
+     *
+     * This includes the total energy bin.
      */
     unsigned int get_num_energy_bins() const;
 

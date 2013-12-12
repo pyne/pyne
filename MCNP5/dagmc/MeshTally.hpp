@@ -135,6 +135,16 @@ class MeshTally : public Tally
      */
     moab::ErrorCode setup_tags(moab::Interface* mbi, const char* prefix="");
 
+    /**
+     * \brief Adds weight * score to the mesh tally for the tally point
+     * \param[in] tally_point entity handle representing tally point
+     * \param[in] weight the multiplier value for the score to be tallied
+     * \param[in] score the score that is to be tallied
+     * \param[out] ebin the energy bin index corresponding to the energy
+     *
+     * The weight and ebin can be obtained using Tally::get_score_multiplier
+     * and Tally::get_energy_bin respectively.
+     */
     void add_score_to_mesh_tally(const moab::EntityHandle& tally_point, 
                                  double weight, double score, unsigned int ebin);
 };

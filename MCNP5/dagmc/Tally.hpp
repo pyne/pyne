@@ -127,15 +127,26 @@ class Tally
     /// All of the tally data for this tally
     TallyData *data;
 
-    // Check that the energy is not outside the allowed range
-    bool energy_in_bounds(double energy);
-
-    /// Get the bin index for the current energy
+    /**
+     * \brief Get the bin index for the current energy
+     * \param[in] energy the current particle energy
+     * \param[out] ebin the energy bin index corresponding to the energy
+     * \return true if energy bin is found; false otherwise
+     *
+     * Calls energy_in_bounds first to check if energy is valid for this Tally.
+     */
     bool get_energy_bin(double energy, unsigned int& ebin);
 
     /// The purpose of this is to allow TallyManager to use the data
     friend class TallyManager;
 
+  private:
+    /**
+     * \brief Check that the energy is not outside the allowed range
+     * \param[in] energy the current particle energy
+     * \return true if energy is within the allowed range; false otherwise
+     */
+    bool energy_in_bounds(double energy);
 };
 
 #endif // DAGMC_TALLY_HPP

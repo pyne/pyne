@@ -110,7 +110,7 @@ KDEMeshTally::~KDEMeshTally()
 void KDEMeshTally::compute_score(const TallyEvent& event)
 {
     double weight = event.get_score_multiplier(input_data.multiplier_id);
-    
+
     // set up tally event based on KDE mesh tally type
     std::vector<moab::CartVect> subtrack_points;
 
@@ -136,9 +136,9 @@ void KDEMeshTally::compute_score(const TallyEvent& event)
     }
 
     unsigned int ebin;
-    if ( !get_energy_bin(event.particle_energy, ebin))
+    if (!get_energy_bin(event.particle_energy, ebin))
     {  
-       return;
+        return;
     }
 
     // create the neighborhood region and find all of the calculations points
@@ -172,7 +172,8 @@ void KDEMeshTally::compute_score(const TallyEvent& event)
         }
 
         // compute the final contribution to the tally for this point
-        double score;
+        double score = 0.0;
+
         if (estimator == INTEGRAL_TRACK)
         {
             score = integral_track_score(X, event);
@@ -187,7 +188,7 @@ void KDEMeshTally::compute_score(const TallyEvent& event)
         }
 
         add_score_to_mesh_tally(point, weight, score,  ebin);
-    }// end calculation_points iteration
+    }  // end calculation_points iteration
 }
 //---------------------------------------------------------------------------//
 void KDEMeshTally::print(double num_particles, double multiplier)

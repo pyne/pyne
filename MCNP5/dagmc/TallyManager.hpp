@@ -40,7 +40,7 @@
  * Once a list of DAGMC tallies has been created, there are a series of actions
  * that can then be performed to compute the scores and write the results for
  * all currently active tallies.  The first step is to set an event type using
- * either set_collision_event() or set_track_event().  This can be done during
+ * either setCollisionEvent() or setTrackEvent().  This can be done during
  * the Monte Carlo simulation as each event occurs, or during post-processing
  * if the complete particle history data is available.
  *
@@ -50,16 +50,16 @@
  * type is not compatible with a specific DAGMC tally type, then nothing will
  * happen and the code will move on to the next tally in the list.  Note that
  * when updateTallies() has updated all of the tallies it will then reset the
- * event data using clear_last_event().
+ * event data using clearLastEvent().
  *
- * As each particle history is completed, the end_history() method should be
+ * As each particle history is completed, the endHistory() method should be
  * called through the TallyManager.  This adds the current sum of scores to
  * the total for each tally that is currently active.  It is also important
  * for calculating the relative standard errors in the final tally results,
  * and may perform other functionality as needed based on the tally type.
  *
  * When all particle histories have been scored, the final step is to use the
- * write_data() method to write all of the tally results and their corresponding
+ * writeData() method to write all of the tally results and their corresponding
  * relative standard errors to an output file.  These results are typically
  * normalized by the number of histories reported by the physics code.
  *
