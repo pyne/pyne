@@ -14,5 +14,7 @@ work builds upon past work well.
 .. toctree::
     :maxdepth: 1
 
+    unittest
     simplesim
     endf
+    

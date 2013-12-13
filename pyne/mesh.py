@@ -1,14 +1,15 @@
 import copy
 import itertools
 from collections import Iterable, Sequence
+import warnings
 
 import numpy as np
 
 try:
     from itaps import iMesh, iBase, iMeshExtensions
 except ImportError:
-    raise ImportError("The mesh module requires imports of iMesh, iBase, and"
-          " iMeshExtensions from PyTAPS")
+    warnings.warn("the PyTAPS optional dependency could not be imported. "
+         "Some aspects of the mesh module may be incomplete.", ImportWarning)
 
 from .material import Material, MaterialLibrary
 

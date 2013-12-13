@@ -26,10 +26,13 @@ ssrname_onetrack = os.path.join(thisdir,"mcnp_surfsrc_onetrack.w")
 # mesh specific imports
 try:
     from itaps import iMesh
-    from pyne.mesh import Mesh, StatMesh, MeshError
+    HAVE_PYTAPS=True
 except ImportError:
+    from nose.plugins.skip import SkipTest
+    HAVE_PYTAPS=False
     pass
 
+from pyne.mesh import Mesh, StatMesh, MeshError
 from numpy.testing import assert_array_equal
 
 # Test methods for the SurfSrc class
@@ -327,9 +330,11 @@ class TestPtrac(unittest.TestCase):
                 os.unlink("mcnp_ptrac_hdf5_file.h5")
 
 
-# Test Wwinp class. All three function are tested at once because there inputs 
+# Test Wwinp class. All three function are tested at once because their inputs 
 # and ouputs are easily strung together.
 def test_wwinp_n():
+    if not HAVE_PYTAPS: 
+        raise SkipTest
 
     thisdir = os.path.dirname(__file__)
     wwinp_file = os.path.join(thisdir, 'mcnp_wwinp_wwinp_n.txt')
@@ -435,6 +440,8 @@ def test_wwinp_n():
 
 
 def test_wwinp_p():
+    if not HAVE_PYTAPS: 
+        raise SkipTest
 
     thisdir = os.path.dirname(__file__)
     wwinp_file = os.path.join(thisdir, 'mcnp_wwinp_wwinp_p.txt')
@@ -532,6 +539,8 @@ def test_wwinp_p():
 
 
 def test_wwinp_np():
+    if not HAVE_PYTAPS: 
+        raise SkipTest
 
     thisdir = os.path.dirname(__file__)
     wwinp_file = os.path.join(thisdir, 'mcnp_wwinp_wwinp_np.txt')
@@ -658,6 +667,9 @@ def test_single_meshtally_meshtal():
     """Test a meshtal file containing a single mesh tally.
     """
 
+    if not HAVE_PYTAPS: 
+        raise SkipTest
+
     thisdir = os.path.dirname(__file__)
     meshtal_file = os.path.join(thisdir, "mcnp_meshtal_single_meshtal.txt")
     expected_h5m = os.path.join(thisdir, "tally_single.h5m")
@@ -704,6 +716,9 @@ def test_multiple_meshtally_meshtal():
     """Test a meshtal file containing 4 mesh tallies including neutron and
     photon, single energy group and multiple energy group.
     """
+
+    if not HAVE_PYTAPS: 
+        raise SkipTest
 
     thisdir = os.path.dirname(__file__)
     meshtal_file = os.path.join(thisdir, "mcnp_meshtal_multiple_meshtal.txt")

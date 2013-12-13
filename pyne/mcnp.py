@@ -7,6 +7,9 @@ information on MCNP can be obtained from http://mcnp.lanl.gov/
 Mctal and Runtpe classes still need work. Also should add Meshtal and Outp
 classes.
 
+If PyTAPS is not installed, then Wwinp, Meshtal, and Meshtally will not be
+available to use.
+
 """
 
 import collections
@@ -29,10 +32,13 @@ from binaryreader import _BinaryReader, _FortranRecord
 # Mesh specific imports
 try:
     from itaps import iMesh
-    from .mesh import Mesh, StatMesh, MeshError
+    HAVE_PYTAPS=True
 except ImportError:
     warnings.warn("the PyTAPS optional dependency could not be imported. "
                   "Some aspects of the mcnp module may be incomplete.", ImportWarning)
+    HAVE_PYTAPS=False
+
+from pyne.mesh import Mesh, StatMesh, MeshError
 
 class Mctal(object):
     def __init__(self):
@@ -1125,7 +1131,6 @@ def mat_from_mcnp(filename, mat_line, densities='None'):
 
     return finished_mat
 
-
 class Wwinp(Mesh):
     """A Wwinp object stores all of the information from a single MCNP WWINP
     file. Weight window lower bounds are stored on a structured mesh. Only
@@ -1176,6 +1181,8 @@ class Wwinp(Mesh):
     """
 
     def __init__(self):
+        if not HAVE_PYTAPS:
+            raise RuntimeError("PyTAPS is not available, unable to create Wwinp Mesh.")
         pass
 
     def read_wwinp(self, filename):
@@ -1538,6 +1545,9 @@ class Meshtal(object):
         """Instantiate a Meshtal object from a meshtal file.
         """
 
+        if not HAVE_PYTAPS:
+            raise RuntimeError("PyTAPS is not available, unable to create Meshtal.")
+
         self.tally = {}
 
         with open(filename, 'r') as f: 
@@ -1573,7 +1583,6 @@ class Meshtal(object):
                 self.tally[tally_number] = MeshTally(f, tally_number)
 
             line = f.readline()
-
 
 
 class MeshTally(StatMesh):
@@ -1613,6 +1622,10 @@ class MeshTally(StatMesh):
         the MCNP fmesh4 tally number (e.g. 4, 14, 24). MeshTally objects should 
         be instantiated only through the Meshtal class.
         """
+
+        if not HAVE_PYTAPS:
+            raise RuntimeError("PyTAPS is not available, unable to create Meshtally Mesh.")
+
         self.tally_number = tally_number
         self._read_meshtally_head(f)
         self._read_column_order(f)
