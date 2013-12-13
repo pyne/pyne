@@ -30,6 +30,7 @@ ADD_LIBRARY(meshtally
     ${DAGMC_MESHTALLY_SOURCE}/MeshTally.cpp
     ${DAGMC_MESHTALLY_SOURCE}/TrackLengthMeshTally.cpp
     ${DAGMC_MESHTALLY_SOURCE}/KDEMeshTally.cpp
+    ${DAGMC_MESHTALLY_SOURCE}/CellTally.cpp
     ${DAGMC_MESHTALLY_SOURCE}/KDEKernel.cpp
     ${DAGMC_MESHTALLY_SOURCE}/KDEMeshTally.cpp
     ${DAGMC_MESHTALLY_SOURCE}/KDENeighborhood.cpp

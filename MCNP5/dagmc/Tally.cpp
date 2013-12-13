@@ -7,6 +7,7 @@
 #include "Tally.hpp"
 #include "TrackLengthMeshTally.hpp"
 #include "KDEMeshTally.hpp"
+#include "CellTally.hpp"
 
 //---------------------------------------------------------------------------//
 // CONSTRUCTOR
@@ -52,8 +53,8 @@ Tally::~Tally()
 //  KDE          | Integral Track | Mesh Tally   || kde_track     KD's Thesis
 //  KDE          | SubTrack       | Mesh Tally   || kde_subtrack  implemented
 //  KDE          | Collision      | Mesh Tally   || kde_coll      implemented
-//               | Collision      | Cell         || coll_cell     testing, not implemented 
-//               | Track Length   | Cell         || track_cell    testing, not implemented 
+//               | Track Length   | Cell         || cell_track    implemented 
+//               | Collision      | Cell         || cell_coll     implemented 
 //---------------------------------------------------------------------------//
 Tally *Tally::create_tally(const TallyInput& input)
 {
@@ -79,17 +80,13 @@ Tally *Tally::create_tally(const TallyInput& input)
         KDEMeshTally::Estimator estimator = KDEMeshTally::COLLISION;
         newTally = new KDEMeshTally(input, estimator); 
     }
-    else if (input.tally_type == "coll_cell")
+    else if (input.tally_type == "cell_track")
     {
-        // newTally = new CollCellTally(..)
-        std::cout << "Warning: " << input.tally_type
-                  << " is not implemented." << std::endl;
+        newTally = new CellTally(input, TallyEvent::TRACK);
     }
-    else if (input.tally_type == "track_cell")
+    else if (input.tally_type == "cell_coll")
     {
-        // newTally = new TrackCellTally(..)
-        std::cout << "Warning: " << input.tally_type
-                  << " is not implemented." << std::endl;
+        newTally = new CellTally(input, TallyEvent::COLLISION);
     }
     else 
     {

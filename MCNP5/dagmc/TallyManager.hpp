@@ -23,6 +23,8 @@
  *     "kde_coll": KDE collision mesh tally (KDEMeshTally)
  *     "kde_subtrack": KDE sub-track mesh tally (KDEMeshTally)
  *     "kde_track": KDE integral-track mesh tally (KDEMeshTally)
+ *     "cell_coll": Simple collision-based cell tally (CellTally)
+ *     "cell_track": Simple track-based cell tally (CellTally)
  *
  * See the individual implementations for a more detailed description and a
  * list of all available tally options for that particular tally type.  The
