@@ -333,7 +333,8 @@ class TestPtrac(unittest.TestCase):
 # Test Wwinp class. All three function are tested at once because their inputs 
 # and ouputs are easily strung together.
 def test_wwinp_n():
-    if not HAVE_PYTAPS: raise SkipTest
+    if not HAVE_PYTAPS: 
+        raise SkipTest
 
     thisdir = os.path.dirname(__file__)
     wwinp_file = os.path.join(thisdir, 'mcnp_wwinp_wwinp_n.txt')
@@ -439,7 +440,8 @@ def test_wwinp_n():
 
 
 def test_wwinp_p():
-    if not HAVE_PYTAPS: raise SkipTest
+    if not HAVE_PYTAPS: 
+        raise SkipTest
 
     thisdir = os.path.dirname(__file__)
     wwinp_file = os.path.join(thisdir, 'mcnp_wwinp_wwinp_p.txt')
@@ -537,7 +539,8 @@ def test_wwinp_p():
 
 
 def test_wwinp_np():
-    if not HAVE_PYTAPS: raise SkipTest
+    if not HAVE_PYTAPS: 
+        raise SkipTest
 
     thisdir = os.path.dirname(__file__)
     wwinp_file = os.path.join(thisdir, 'mcnp_wwinp_wwinp_np.txt')
@@ -664,7 +667,8 @@ def test_single_meshtally_meshtal():
     """Test a meshtal file containing a single mesh tally.
     """
 
-    if not HAVE_PYTAPS: raise SkipTest
+    if not HAVE_PYTAPS: 
+        raise SkipTest
 
     thisdir = os.path.dirname(__file__)
     meshtal_file = os.path.join(thisdir, "mcnp_meshtal_single_meshtal.txt")
@@ -713,7 +717,8 @@ def test_multiple_meshtally_meshtal():
     photon, single energy group and multiple energy group.
     """
 
-    if not HAVE_PYTAPS: raise SkipTest
+    if not HAVE_PYTAPS: 
+        raise SkipTest
 
     thisdir = os.path.dirname(__file__)
     meshtal_file = os.path.join(thisdir, "mcnp_meshtal_multiple_meshtal.txt")
