@@ -23,6 +23,7 @@ Original Copyright:
 
 """
 
+from __future__ import print_function
 import os
 import time
 import warnings
@@ -64,7 +65,7 @@ class Njoy99(object):
 
         """
 
-        print " --- make pendf for " + self.hmat + " ---"
+        print(" --- make pendf for " + self.hmat + " ---")
         mycwd = os.getcwd()
         mynjoy = mycwd + '/' + self.execdir + "/xnjoy<file_data"
         if not os.path.isfile(os.path.expandvars(self.evaluation_file)):
@@ -214,7 +215,7 @@ class Njoy99(object):
 
         """
 
-        print " --- make gendf for " + self.hmat + " ---"
+        print(" --- make gendf for " + self.hmat + " ---")
         mycwd = os.getcwd()
         mynjoy = mycwd + '/' + self.execdir + "/xnjoy<file_data"
         if not os.path.isfile(os.path.expandvars(self.evaluation_file)):
@@ -337,7 +338,7 @@ class Njoy99(object):
         RECONR, and GAMINR modules.
         """
 
-        print " --- make gamma gendf for " + self.hmatgg + " ---"
+        print(" --- make gamma gendf for " + self.hmatgg + " ---")
         mycwd = os.getcwd()
         mynjoy = mycwd + '/' + self.execdir + "/xnjoy<file_data"
         if not os.path.isfile(os.path.expandvars(self.evaluation_file)):
@@ -415,10 +416,10 @@ class Njoy99(object):
                     else:
                         os.remove(name2)
             os.system("mv draglib" + evaluation_name_base + " tape29")
-            print " append data for " + self.hmat + " to existing draglib file"
+            print(" append data for " + self.hmat + " to existing draglib file")
         else:
             iold = 0
-            print " create a new draglib file for " + self.hmat
+            print(" create a new draglib file for " + self.hmat)
         htime = time.ctime(time.time())
 
         if self.dilutions:
@@ -511,7 +512,7 @@ class Njoy99(object):
     def matxs(self):
         """Generate an ASCII MATXS file using the MODER and MATXSR modules."""
 
-        print " --- make matxs for " + self.hmat + " ---"
+        print(" --- make matxs for " + self.hmat + " ---")
         mycwd = os.getcwd()
         mynjoy = mycwd + '/' + self.execdir + "/xnjoy<file_data"
         os.chdir(self.evaluation_name)
@@ -637,7 +638,7 @@ class Njoy99(object):
         chain_file_name = 'chain' + evaluation_name_base
         list_files = os.listdir(os.getcwd())
         if chain_file_name not in list_files:
-            print 'Make the burnup chain file named',chain_file_name
+            print(('Make the burnup chain file named', chain_file_name))
             data_dict = {}
             mat_dict = {}
             for file_name in list_files:
@@ -675,7 +676,7 @@ class Njoy99(object):
             chain_file.write("stop\n")
             chain_file.close()
         else:
-            print 'Use existing burnup chain file named',chain_file_name
+            print(('Use existing burnup chain file named',chain_file_name))
         os.system("cat file_data " + chain_file_name + " > tempFile")
         os.system(mynjoy)
         os.system("mv tape30 draglib" + evaluation_name_base)
@@ -796,7 +797,7 @@ class Njoy99(object):
             outp1 = open("acexsdir",'a')
             line = inp1.readlines()
             outp1.writelines(line)
-            print " ace file for" + self.hmat + "created"
+            print(" ace file for" + self.hmat + "created")
             if not os.path.isdir(self.dirname):
                 os.mkdir(self.dirname)
             os.system("mv tape38 " + '   ' + self.dirname + "/" + self.hmat + 
