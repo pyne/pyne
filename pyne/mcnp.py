@@ -295,7 +295,7 @@ class SurfSrc(_BinaryReader):
         #  No known case of their actual utility is known currently
         for j in range(self.njsw,self.njsw+self.niwr):
             self.get_fortran_record()
-            print(("Extra info in header not handled:", j))
+            print("Extra info in header not handled: {0}".format(j))
 
         # read summary table record
         summaryInfo = self.get_fortran_record()
@@ -945,7 +945,7 @@ class PtracReader(object):
                 
                 counter += 1
                 if print_progress > 0 and counter % print_progress == 0:
-                    print(("processing event", counter))
+                    print("processing event {0}".format(counter))
 
 
 def read_mcnp_inp(inp):

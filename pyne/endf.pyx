@@ -1513,7 +1513,7 @@ class Evaluation(object):
                 set.append(temp0.y)
                 elast.LT = temp0.params[2]
                 if self.veryverbose:
-                    print(('Number of temperatures:', elast.LT+1))
+                    print('Number of temperatures: {0}'.format(elast.LT+1))
                 for t in range(elast.LT):
                     heads, s = self._get_list_record()
                     # Save S(E,T)
@@ -1583,7 +1583,7 @@ class Evaluation(object):
                 temp.append(temp0.params[0])
                 inel.LT = temp0.params[2]
                 if self.veryverbose:
-                    print(('Number of temperatures:', inel.LT+1))
+                    print('Number of temperatures: {0}'.format(inel.LT+1))
                 for t in range(inel.LT):
                     #Read records for all the other temperatures
                     headsab, sa = self._get_list_record()
