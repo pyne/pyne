@@ -638,7 +638,7 @@ class Njoy99(object):
         chain_file_name = 'chain' + evaluation_name_base
         list_files = os.listdir(os.getcwd())
         if chain_file_name not in list_files:
-            print('Make the burnup chain file named {0}'.format(chain_file_name))
+            print("Make the burnup chain file named {0}".format(chain_file_name))
             data_dict = {}
             mat_dict = {}
             for file_name in list_files:
@@ -676,7 +676,7 @@ class Njoy99(object):
             chain_file.write("stop\n")
             chain_file.close()
         else:
-            print('Use existing burnup chain file named {0}'.format(chain_file_name))
+            print("Use existing burnup chain file named {0}".format(chain_file_name))
         os.system("cat file_data " + chain_file_name + " > tempFile")
         os.system(mynjoy)
         os.system("mv tape30 draglib" + evaluation_name_base)
