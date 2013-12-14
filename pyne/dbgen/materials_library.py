@@ -5,7 +5,8 @@ This currently consists to natural element materials and those coming from PNNL'
 .. _Materials Compendium: http://www.pnnl.gov/main/publications/external/technical_reports/PNNL-15870Rev1.pdf
 """
 
-import csv    
+from __future__ import print_function
+import csv
 import re
 import tables as tb
 import numpy as np
@@ -121,18 +122,18 @@ def make_materials_library(args):
     if os.path.exists(nuc_data):
         with tb.openFile(nuc_data, 'r') as f:
             if '/material_library' in f:
-                print "skipping materials library data table creation; already exists."
+                print("skipping materials library data table creation; already exists.")
                 return
 
     # First make the elements
-    print "Making the elements..."
+    print("Making the elements...")
     make_elements()
 
     # Then grab the materials compendium
-    print "Grabbing materials compendium..."
+    print("Grabbing materials compendium...")
     grab_materials_compendium(os.path.join(os.path.split(__file__)[0], 
                               'materials_compendium.csv'))
 
     # Make atomic weight table once we have the array
-    print "Making materials library..."
+    print("Making materials library...")
     make_materials_compendium(nuc_data)
