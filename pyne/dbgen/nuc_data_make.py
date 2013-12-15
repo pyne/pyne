@@ -1,3 +1,4 @@
+from __future__ import print_function
 import os
 import argparse
 import urllib2
@@ -54,7 +55,7 @@ def _fetch_prebuilt(args):
     prebuilt_nuc_data_url = "http://s3.amazonaws.com/pyne/prebuilt_nuc_data.h5"
 
     if not os.path.exists(prebuilt_nuc_data):
-        print "Fetching pre-built nuc_data.h5 from " + prebuilt_nuc_data_url
+        print("Fetching pre-built nuc_data.h5 from " + prebuilt_nuc_data_url)
         pnd = urllib2.urlopen(prebuilt_nuc_data_url)
         with open(prebuilt_nuc_data, 'wb') as f:
             f.write(pnd.read())
@@ -65,7 +66,7 @@ def _fetch_prebuilt(args):
 
 def main():
     """Entry point for nuc_data_make utility."""
-    print message(pyne_logo)
+    print(message(pyne_logo))
 
     make_funcs = [('atomic_weight', make_atomic_weight),
                   ('scattering_lengths', make_scattering_lengths),
@@ -106,7 +107,7 @@ def main():
 
     # clean nuc data
     if args.clean in [1, 2]:
-        print "Removing nuc_data from {0}".format(args.nuc_data)
+        print("Removing nuc_data from {0}".format(args.nuc_data))
         try:
             os.remove(args.nuc_data)
         except OSError:
@@ -114,7 +115,7 @@ def main():
 
     # Make the build dir
     if args.clean == 2 and os.path.exists(args.build_dir):
-        print "Removing build_dir from {0}".format(args.build_dir)
+        print("Removing build_dir from {0}".format(args.build_dir))
         remove_tree(args.build_dir)
     mkpath(args.build_dir)
 
@@ -134,19 +135,19 @@ def main():
         _fetch_prebuilt(args)
 
     # Make the various tables
-    print "Making nuc_data at {0}".format(args.nuc_data)
+    print("Making nuc_data at {0}".format(args.nuc_data))
     for mo in make_order:
         make_map[mo](args)
 
     if args.hash_check:
-        print "Checking hashes"
+        print("Checking hashes")
         result = check_hashes(args.nuc_data)
-        print "Results:"
+        print("Results:")
         for name, value in result:
             if value:
-                print "    node " + name + " checksum matches"
+                print("    node " + name + " checksum matches")
             else:
-                print "    node " + name + " checksum doesn't match!!"
+                print("    node " + name + " checksum doesn't match!!")
 
 
 if __name__ == '__main__':

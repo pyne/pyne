@@ -12,6 +12,7 @@ available to use.
 
 """
 
+from __future__ import print_function
 import collections
 import string
 import struct
@@ -185,47 +186,47 @@ class SurfSrc(_BinaryReader):
         """"""
 
         if other.kod != self.kod:
-            print "kod does not match"
+            print("kod does not match")
             return False
         if other.ver != self.ver:
-            print "ver does not match"
+            print("ver does not match")
             return False
         if other.loddat != self.loddat:
-            print "loddat does not match"
+            print("loddat does not match")
             return False
 
         if other.ncrd != self.ncrd:
-            print "ncrd does not match"
+            print("ncrd does not match")
             return False
         if other.njsw != self.njsw:
-            print "njsw does not match"
+            print("njsw does not match")
             return False
 
         if other.niwr  != self.niwr:
-            print "niwr does not match"
+            print("niwr does not match")
             return False
         if other.mipts != self.mipts:
-            print "mipts does not match"
+            print("mipts does not match")
             return False
         if other.kjaq  != self.kjaq:
-            print "kjaq does not match"
+            print("kjaq does not match")
             return False
 
         for surf in range(len(self.surflist)):
             if other.surflist[surf].id         != self.surflist[surf].id:
-                print "surf " + str(surf) + " ID doesn't match"
+                print("surf " + str(surf) + " ID doesn't match")
                 return False
             if other.surflist[surf].facetId    != self.surflist[surf].facetId:
-                print "surf " + str(surf) + " facetId doesn't match"
+                print("surf " + str(surf) + " facetId doesn't match")
                 return False
             if other.surflist[surf].type       != self.surflist[surf].type:
-                print "surf " + str(surf) + " type doesn't match"
+                print("surf " + str(surf) + " type doesn't match")
                 return False
             if other.surflist[surf].numParams  != self.surflist[surf].numParams:
-                print "surf " + str(surf) + " numParams doesn't match"
+                print("surf " + str(surf) + " numParams doesn't match")
                 return False
             if other.surflist[surf].surfParams != self.surflist[surf].surfParams:
-                print "surf " + str(surf) + " surfParams doesn't match"
+                print("surf " + str(surf) + " surfParams doesn't match")
                 return False
 
         return True
@@ -300,7 +301,7 @@ class SurfSrc(_BinaryReader):
         #  No known case of their actual utility is known currently
         for j in range(self.njsw,self.njsw+self.niwr):
             self.get_fortran_record()
-            print "Extra info in header not handled:", j
+            print("Extra info in header not handled: {0}".format(j))
 
         # read summary table record
         summaryInfo = self.get_fortran_record()
@@ -950,7 +951,7 @@ class PtracReader(object):
                 
                 counter += 1
                 if print_progress > 0 and counter % print_progress == 0:
-                    print "processing event", counter
+                    print("processing event {0}".format(counter))
 
 
 def read_mcnp_inp(inp):
