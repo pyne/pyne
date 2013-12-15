@@ -1,7 +1,7 @@
 """Generates cython wrapper classes and converter functions for standard library
 containters to the associated python types.
 """
-
+from __future__ import print_function
 
 ctypes = {
     'str': 'std_string',
@@ -737,4 +737,4 @@ if __name__ == "__main__":
     t = [('py2c_set', 'str')]
     #print gentest(t)
     #print genpxd(t)
-    print genpyx(t)
+    print(genpyx(t))

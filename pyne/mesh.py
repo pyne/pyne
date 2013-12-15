@@ -1,3 +1,4 @@
+from __future__ import print_function
 import copy
 import itertools
 from collections import Iterable, Sequence
@@ -570,7 +571,7 @@ class Mesh(object):
                 try:
                     self.mesh.getTagHandle("BOX_DIMS")
                 except iBase.TagNotFoundError as e:
-                    print "BOX_DIMS not found on iMesh instance"
+                    print("BOX_DIMS not found on iMesh instance")
                     raise e
 
                 count = 0
