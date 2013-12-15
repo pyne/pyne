@@ -29,7 +29,7 @@ def grab_eaf_data(build_dir=""):
     build_dir = os.path.join(build_dir, 'EAF')
     try:
         os.makedirs(build_dir)
-        print((build_dir, 'created'))
+        print("{0} created".format(build_dir))
     except OSError:
         pass
 
