@@ -1,4 +1,5 @@
 """This module provides a way to grab and store simple cross sections from KAERI."""
+from __future__ import print_function
 import os
 
 import numpy as np
@@ -232,14 +233,14 @@ def make_simple_xs(args):
 
     with tb.openFile(nuc_data, 'a', filters=BASIC_FILTERS) as f:
         if hasattr(f.root, 'neutron') and hasattr(f.root.neutron, 'simple_xs'):
-            print "skipping simple XS data table creation; already exists."
+            print("skipping simple XS data table creation; already exists.")
             return 
 
     # First grab the atomic abundance data
-    print "Grabbing neutron summary files from KAERI"
+    print("Grabbing neutron summary files from KAERI")
     grab_kaeri_simple_xs(build_dir)
 
     # Make simple table once we have the array
-    print "Making simple cross section data tables"
+    print("Making simple cross section data tables")
     make_simple_xs_tables(nuc_data, build_dir)
 

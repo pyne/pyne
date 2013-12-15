@@ -1,3 +1,4 @@
+from __future__ import print_function
 import argparse
 
 def main():
@@ -8,14 +9,14 @@ def main():
     ns = parser.parse_args()
 
     if ns.enrich:
-        print "generating symbolic enrichment cascades"
+        print("generating symbolic enrichment cascades")
         import enrich_multi_sym
         enrich_multi_sym.cgen_file(filename="cpp/enrichment_symbolic15", 
                                    header_filename="cpp/enrichment_symbolic.h",
                                    max_ncomp=15, 
                                    debug=ns.debug)
     if ns.stlwrap:
-        print "generating C++ standard library wrappers & converters"
+        print("generating C++ standard library wrappers & converters")
         import stlwrap
         template = [('py2c_set', 'int'),
                     ('py2c_set', 'str'),

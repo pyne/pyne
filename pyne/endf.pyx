@@ -14,6 +14,7 @@ For more information on the Evaluation class, contact Paul Romano
 John Xia <john.danger.xia@gmail.com>.
 """
 
+from __future__ import print_function
 import re
 import os
 from libc.stdlib cimport malloc, free
@@ -997,7 +998,7 @@ class Evaluation(object):
     def read(self, reactions=None):
         if not reactions:
             if self.verbose:
-                print 'No reaction given. Read all'
+                print("No reaction given. Read all")
             reactions = []
             for r in self.reactionList[1:]:
                 reactions.append(r[0:2])
@@ -1085,7 +1086,7 @@ class Evaluation(object):
 
             if not found:
                 if self.verbose:
-                    print 'Reaction not found'
+                    print("Reaction not found")
                 raise NotFound('Reaction')
 
     def _read_header(self):
@@ -1499,7 +1500,7 @@ class Evaluation(object):
         elast.LTHR = items[2] # coherent/incoherent flag
         if elast.LTHR == 1:
             if self.verbose:
-                print 'Coherent elastic'
+                print("Coherent elastic")
                 temp = []
                 eint = []
                 set = []
@@ -1512,7 +1513,7 @@ class Evaluation(object):
                 set.append(temp0.y)
                 elast.LT = temp0.params[2]
                 if self.veryverbose:
-                    print 'Number of temperatures:', elast.LT+1
+                    print("Number of temperatures: {0}".format(elast.LT+1))
                 for t in range(elast.LT):
                     heads, s = self._get_list_record()
                     # Save S(E,T)
@@ -1524,7 +1525,7 @@ class Evaluation(object):
                 elast.eint = np.array(eint)
         elif elast.LTHR == 2:
             if self.verbose:
-                print 'Incoherent elastic'
+                print("Incoherent elastic")
                 temp = []
                 eint = []
                 set = []
@@ -1536,7 +1537,7 @@ class Evaluation(object):
                 # Save W(T)
                 elast.w = np.array(record.y)
         else:
-            print 'Invalid value of LHTR'
+            print("Invalid value of LHTR")
         file7.reactions.append(elast)
 
     def _read_thermal_inelastic(self):
@@ -1562,7 +1563,7 @@ class Evaluation(object):
         inel.B = B
         if B[0] == 0.0:
             if self.verbose:
-                print 'No principal atom'
+                print("No principal atom")
         else:
             nbeta = self._get_tab2_record()
             sabt = []
@@ -1582,7 +1583,7 @@ class Evaluation(object):
                 temp.append(temp0.params[0])
                 inel.LT = temp0.params[2]
                 if self.veryverbose:
-                    print 'Number of temperatures:', inel.LT+1
+                    print("Number of temperatures: {0}".format(inel.LT+1))
                 for t in range(inel.LT):
                     #Read records for all the other temperatures
                     headsab, sa = self._get_list_record()
@@ -1826,7 +1827,7 @@ class Evaluation(object):
         if not line:
             line = self.fh.readline()
         if self.veryverbose:
-            print 'Get TEXT record'
+            print("Get TEXT record")
         HL = line[0:66]
         MAT = int(line[66:70])
         MF = int(line[70:72])
@@ -1836,7 +1837,7 @@ class Evaluation(object):
 
     def _get_cont_record(self, line=None, skipC=False):
         if self.veryverbose:
-            print 'Get CONT record'
+            print("Get CONT record")
         if not line:
             line = self.fh.readline()
         if skipC:
@@ -1859,7 +1860,7 @@ class Evaluation(object):
         if not line:
             line = self.fh.readline()
         if self.veryverbose:
-            print 'Get HEAD record'
+            print("Get HEAD record")
         ZA = int(endftod(line[:11]))
         AWR = endftod(line[11:22])
         L1 = int(line[22:33])
@@ -1875,7 +1876,7 @@ class Evaluation(object):
     def _get_list_record(self, onlyList=False):
         # determine how many items are in list
         if self.veryverbose:
-            print 'Get LIST record'
+            print("Get LIST record")
         items = self._get_cont_record()
         NPL = items[4]
 
@@ -1897,14 +1898,14 @@ class Evaluation(object):
 
     def _get_tab1_record(self):
         if self.veryverbose:
-            print 'Get TAB1 record'
+            print("Get TAB1 record")
         r = ENDFTab1Record()
         r.read(self.fh)
         return r
 
     def _get_tab2_record(self):
         if self.veryverbose:
-            print 'Get TAB2 record'
+            print("Get TAB2 record")
         r = ENDFTab2Record()
         r.read(self.fh)
         return r
@@ -1958,7 +1959,7 @@ class Evaluation(object):
             if line == '':
                 # Reached EOF
                 if self.verbose:
-                    print('Could not find MF={0}, MT={1}'.format(MF, MT))
+                    print("Could not find MF={0}, MT={1}".format(MF, MT))
                 raise NotFound('Reaction')
             if line[70:75] == searchString:
                 self.fh.seek(position)

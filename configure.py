@@ -1,5 +1,6 @@
 #!/usr/bin/env python
- 
+
+from __future__ import print_function
 import os
 import sys
 import json
@@ -58,7 +59,7 @@ def final_message(success=True):
         msg = "\n\nCURRENT METADATA:\n"
         for k, v in sorted(metadata.items()):
             msg += "  {0} = {1}\n".format(k, repr(v))
-        print msg[:-1]
+        print(msg[:-1])
 
     if os.name != 'nt':
         return
@@ -84,7 +85,7 @@ def final_message(success=True):
            "[1] http://www.enthought.com/products/epd.php\n"
            "[2] http://www.hdfgroup.org/ftp/HDF5/releases/hdf5-{h5ver}/bin/windows/\n"
            ).format(h5ver=h5ver)
-    print msg
+    print(msg)
 
 
 def cython_version():
