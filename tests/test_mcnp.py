@@ -4,7 +4,9 @@ import unittest
 import nose
 
 import nose.tools
+from nose.tools import assert_almost_equal
 from nose.tools import assert_equal
+from nose.tools import assert_true
 
 import tables
 
@@ -67,69 +69,70 @@ class TestSurfSrc():
                 ssr.read_header()
 
                 # header record values
-                nose.tools.assert_equal(ssr.kod   , "mcnp    ")
-                nose.tools.assert_equal(ssr.ver   , "5    ")
-                nose.tools.assert_equal(ssr.loddat, "01232009")
-                nose.tools.assert_equal(ssr.idtm  , " 10/31/11 13:52:39 ")
-                nose.tools.assert_equal(ssr.probid, " 10/31/11 13:52:35 ")
-                nose.tools.assert_equal(ssr.aid   , "c Test deck with H20 cube, point n source, SSW of top surface interactions      ")
-                nose.tools.assert_equal(ssr.knod  , 2)
+                assert_equal(ssr.kod   , "mcnp    ")
+                assert_equal(ssr.ver   , "5    ")
+                assert_equal(ssr.loddat, "01232009")
+                assert_equal(ssr.idtm  , " 10/31/11 13:52:39 ")
+                assert_equal(ssr.probid, " 10/31/11 13:52:35 ")
+                assert_equal(ssr.aid   , "c Test deck with H20 cube, point n source, "
+                                         "SSW of top surface interactions      ")
+                assert_equal(ssr.knod  , 2)
                 # table 1 record values
-                nose.tools.assert_equal(ssr.np1   , 1000)
-                nose.tools.assert_equal(ssr.nrss  , 173)
-                nose.tools.assert_equal(ssr.ncrd  , 11)
-                nose.tools.assert_equal(ssr.njsw  , 1)
-                nose.tools.assert_equal(ssr.niss  , 173)
+                assert_equal(ssr.np1   , 1000)
+                assert_equal(ssr.nrss  , 173)
+                assert_equal(ssr.ncrd  , 11)
+                assert_equal(ssr.njsw  , 1)
+                assert_equal(ssr.niss  , 173)
                 # table 2 record values
-                nose.tools.assert_equal(ssr.niwr  , 0)
-                nose.tools.assert_equal(ssr.mipts , 3)
-                nose.tools.assert_equal(ssr.kjaq  , 0)
+                assert_equal(ssr.niwr  , 0)
+                assert_equal(ssr.mipts , 3)
+                assert_equal(ssr.kjaq  , 0)
             
             elif 'mcnp6_surfsrc.w' in ssrname:
                 ssr = mcnp.SurfSrc(ssrname, 'rb')
                 ssr.read_header()
 
                 # header record values
-                nose.tools.assert_equal(ssr.kod   , "SF_00001")
-                nose.tools.assert_equal(ssr.ver   , "mcnp    6   ")
-                nose.tools.assert_equal(ssr.loddat, " 05/08/13")
-                nose.tools.assert_equal(ssr.idtm  , " 11/18/13 17:50:49 ")
-                nose.tools.assert_equal(ssr.probid, " 11/18/13 17:50:43 ")
-                nose.tools.assert_equal(ssr.aid   , "Simple MCNP Example that uses SSW                                               ")
-                nose.tools.assert_equal(ssr.knod  , 2)
+                assert_equal(ssr.kod   , "SF_00001")
+                assert_equal(ssr.ver   , "mcnp    6   ")
+                assert_equal(ssr.loddat, " 05/08/13")
+                assert_equal(ssr.idtm  , " 11/18/13 17:50:49 ")
+                assert_equal(ssr.probid, " 11/18/13 17:50:43 ")
+                assert_equal(ssr.aid   , "Simple MCNP Example that uses SSW                                               ")
+                assert_equal(ssr.knod  , 2)
                 # table 1 record values
-                nose.tools.assert_equal(ssr.np1   , 10000)
-                nose.tools.assert_equal(ssr.nrss  , 1710)
-                nose.tools.assert_equal(ssr.ncrd  , -11)
-                nose.tools.assert_equal(ssr.njsw  , 1)
-                nose.tools.assert_equal(ssr.niss  , 1701)
+                assert_equal(ssr.np1   , 10000)
+                assert_equal(ssr.nrss  , 1710)
+                assert_equal(ssr.ncrd  , -11)
+                assert_equal(ssr.njsw  , 1)
+                assert_equal(ssr.niss  , 1701)
                 # table 2 record values
-                nose.tools.assert_equal(ssr.niwr  , 0)
-                nose.tools.assert_equal(ssr.mipts , 37)
-                nose.tools.assert_equal(ssr.kjaq  , 0)
+                assert_equal(ssr.niwr  , 0)
+                assert_equal(ssr.mipts , 37)
+                assert_equal(ssr.kjaq  , 0)
 
             elif 'mcnpx_surfsrc.w' in ssrname:
                 ssr = mcnp.SurfSrc(ssrname, 'rb')
                 ssr.read_header()
 
                 # header record values
-                nose.tools.assert_equal(ssr.kod   , "mcnpx   ")
-                nose.tools.assert_equal(ssr.ver   , "2.6.0")
-                nose.tools.assert_equal(ssr.loddat, "Wed Apr 09 08:00:00 MST 2008")
-                nose.tools.assert_equal(ssr.idtm  , "  10/28/13 02:16:22")
-                nose.tools.assert_equal(ssr.probid, "  10/28/13 02:16:16")
-                nose.tools.assert_equal(ssr.aid   , "Simple MCNP Example that uses SSW                                               ")
-                nose.tools.assert_equal(ssr.knod  , 2)
+                assert_equal(ssr.kod   , "mcnpx   ")
+                assert_equal(ssr.ver   , "2.6.0")
+                assert_equal(ssr.loddat, "Wed Apr 09 08:00:00 MST 2008")
+                assert_equal(ssr.idtm  , "  10/28/13 02:16:22")
+                assert_equal(ssr.probid, "  10/28/13 02:16:16")
+                assert_equal(ssr.aid   , "Simple MCNP Example that uses SSW                                               ")
+                assert_equal(ssr.knod  , 2)
                 # table 1 record values
-                nose.tools.assert_equal(ssr.np1   , 10000)
-                nose.tools.assert_equal(ssr.nrss  , 1658)
-                nose.tools.assert_equal(ssr.ncrd  , 11)
-                nose.tools.assert_equal(ssr.njsw  , 1)
-                nose.tools.assert_equal(ssr.niss  , 1652)
+                assert_equal(ssr.np1   , 10000)
+                assert_equal(ssr.nrss  , 1658)
+                assert_equal(ssr.ncrd  , 11)
+                assert_equal(ssr.njsw  , 1)
+                assert_equal(ssr.niss  , 1652)
                 # table 2 record values
-                nose.tools.assert_equal(ssr.niwr  , 0)
-                nose.tools.assert_equal(ssr.mipts , 35)
-                nose.tools.assert_equal(ssr.kjaq  , 0)
+                assert_equal(ssr.niwr  , 0)
+                assert_equal(ssr.mipts , 35)
+                assert_equal(ssr.kjaq  , 0)
 
     def test_compare(self):
         """Test the compare() method in the SurfSrc class
@@ -143,7 +146,7 @@ class TestSurfSrc():
             ssrB = mcnp.SurfSrc(ssrname, 'rb')
             ssrA.read_header()
             ssrB.read_header()
-            nose.tools.assert_true(ssrA.compare(ssrB))
+            assert_true(ssrA.compare(ssrB))
             ssrA.close()
             ssrB.close()
 
@@ -181,8 +184,8 @@ class TestSurfSrc():
             # surface info record list
             ssw.surflist     = ssr.surflist
             # summary table record values
-            ssw.summaryTable = ssr.summaryTable
-            ssw.summaryExtra = ssr.summaryExtra
+            ssw.summary_table = ssr.summary_table
+            ssw.summary_extra = ssr.summary_extra
 
             ssw.put_header()
             ssw.put_table_1()
@@ -194,7 +197,7 @@ class TestSurfSrc():
             sswr = mcnp.SurfSrc(sswname, "rb")
             sswr.read_header()
             
-            nose.tools.assert_equal(ssr.print_header(), sswr.print_header())
+            assert_equal(ssr.print_header(), sswr.print_header())
             
             ssr.close()
             sswr.close()
@@ -214,18 +217,18 @@ class TestSurfSrc():
             # Should only be one trackData in tracklist
             # trackData.record is skipped; contains the below components.
             # self.assertEqual(trackData.record  , 0) 
-            nose.tools.assert_equal(trackData.nps     , 1) 
-            nose.tools.assert_almost_equal(trackData.bitarray, 8.000048e+06) 
-            nose.tools.assert_almost_equal(trackData.wgt     , 0.99995639) 
-            nose.tools.assert_almost_equal(trackData.erg     , 5.54203947) 
-            nose.tools.assert_almost_equal(trackData.tme     , 0.17144023) 
-            nose.tools.assert_almost_equal(trackData.x       , -8.05902e-02) 
-            nose.tools.assert_almost_equal(trackData.y       , 3.122666098e+00) 
-            nose.tools.assert_almost_equal(trackData.z       , 5.00000e+00) 
-            nose.tools.assert_almost_equal(trackData.u       , -0.35133163) 
-            nose.tools.assert_almost_equal(trackData.v       , 0.48465036) 
-            nose.tools.assert_almost_equal(trackData.cs      , 0.80104937) 
-            nose.tools.assert_almost_equal(trackData.w       , 0.80104937) 
+            assert_equal(trackData.nps     , 1) 
+            assert_almost_equal(trackData.bitarray, 8.000048e+06) 
+            assert_almost_equal(trackData.wgt     , 0.99995639) 
+            assert_almost_equal(trackData.erg     , 5.54203947) 
+            assert_almost_equal(trackData.tme     , 0.17144023) 
+            assert_almost_equal(trackData.x       , -8.05902e-02) 
+            assert_almost_equal(trackData.y       , 3.122666098e+00) 
+            assert_almost_equal(trackData.z       , 5.00000e+00) 
+            assert_almost_equal(trackData.u       , -0.35133163) 
+            assert_almost_equal(trackData.v       , 0.48465036) 
+            assert_almost_equal(trackData.cs      , 0.80104937) 
+            assert_almost_equal(trackData.w       , 0.80104937) 
         return
 
     def test_print_header(self):
@@ -238,7 +241,7 @@ class TestSurfSrc():
         # If comparison output needs to be updated, uncomment the below
         #  and do: nosetests test_mcnp.py --nocapture
         #print ssr.print_header()
-        nose.tools.assert_equal(ssr.print_header(),
+        assert_equal(ssr.print_header(),
                 "Code: mcnp     (version: 5    ) [01232009]\n" \
                 "Problem info: ( 07/05/12 17:50:19 )  07/05/12 17:50:16 \n" \
                 "c Test deck with H20 cube, point n source, SSW of top surface interactions      \n" \
@@ -261,7 +264,7 @@ class TestSurfSrc():
         # If comparison output needs to be updated, uncomment the below
         #  and do: nosetests test_mcnp.py --nocapture
         #print ssr.print_tracklist()
-        nose.tools.assert_equal(ssr.print_tracklist(), 'Track Data\n       nps   BITARRAY        WGT        ERG        TME             X             Y             Z          U          V     COSINE  |       W\n         1 8.00005e+06    0.99996      5.542    0.17144  -8.05902e-02   3.12267e+00   5.00000e+00   -0.35133    0.48465    0.80105  |    0.80105 \n')
+        assert_equal(ssr.print_tracklist(), 'Track Data\n       nps   BITARRAY        WGT        ERG        TME             X             Y             Z          U          V     COSINE  |       W\n         1 8.00005e+06    0.99996      5.542    0.17144  -8.05902e-02   3.12267e+00   5.00000e+00   -0.35133    0.48465    0.80105  |    0.80105 \n')
 
         return
 
