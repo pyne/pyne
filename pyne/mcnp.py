@@ -174,13 +174,13 @@ class SurfSrc(_BinaryReader):
         return headerString
 
     def print_tracklist(self):
-        trackData = "Track Data\n"
+        track_data = "Track Data\n"
   #                       1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890
-        trackData +=     "       nps   BITARRAY        WGT        ERG        TME             X             Y             Z          U          V     COSINE  |       W\n"
+        track_data +=     "       nps   BITARRAY        WGT        ERG        TME             X             Y             Z          U          V     COSINE  |       W\n"
         for j in self.tracklist:
-            trackData += "%10d %10g %10.5g %10.5g %10.5g %13.5e %13.5e %13.5e %10.5f %10.5f %10.5f  | %10.5f " % (j.nps, j.bitarray, j.wgt, j.erg, j.tme, j.x, j.y, j.z, j.u, j.v, j.cs, j.w) + "\n"
+            track_data += "%10d %10g %10.5g %10.5g %10.5g %13.5e %13.5e %13.5e %10.5f %10.5f %10.5f  | %10.5f " % (j.nps, j.bitarray, j.wgt, j.erg, j.tme, j.x, j.y, j.z, j.u, j.v, j.cs, j.w) + "\n"
 
-        return trackData
+        return track_data
 
     def compare(self,other):
         """"""
@@ -273,24 +273,24 @@ class SurfSrc(_BinaryReader):
                 
         elif 'SF_00001' in self.kod:
             header = self.get_fortran_record()
-            self.ver    = header.get_string(12)[0]  # code version identifier
-            self.loddat = header.get_string( 9)[0]  # code version date       
-            self.idtm   = header.get_string(19)[0]  # current date and time
+            self.ver = header.get_string(12)[0]  # code version identifier
+            self.loddat = header.get_string(9)[0]  # code version date       
+            self.idtm = header.get_string(19)[0]  # current date and time
             self.probid = header.get_string(19)[0] # problem identification string
-            self.aid    = header.get_string(80)[0] # title card of initial run    
-            self.knod   = header.get_int()[0]      # dump number
+            self.aid  = header.get_string(80)[0] # title card of initial run    
+            self.knod = header.get_int()[0]      # dump number
 
             # read table 1 record; various counts and sizes
             tablelengths = self.get_fortran_record()
 
             # interpret table lengths
-            self.np1  = tablelengths.get_int()[0]  # number of histories used to generate source
+            self.np1 = tablelengths.get_int()[0]  # number of histories used to generate source
             self.notsure0 = tablelengths.get_int()[0]  # number of values in surface source record
             self.nrss = tablelengths.get_int()[0]  # number of tracks written to surface source
             self.notsure1 = tablelengths.get_int()[0]   # number of surfaces
             self.ncrd = tablelengths.get_int()[0]  # number of histories written to surface source
             self.njsw = tablelengths.get_int()[0]   # number of surfaces
-            self.niss=tablelengths.get_int()[0]  # number of histories written to surface source
+            self.niss = tablelengths.get_int()[0]  # number of histories written to surface source
             self.notsure2 = tablelengths.get_int()[0]   # number of surfaces
 
         if self.np1 < 0:
@@ -350,24 +350,24 @@ class SurfSrc(_BinaryReader):
         """
         self.tracklist = []
         for j in range(self.nrss):
-            trackInfo = self.get_fortran_record()
-            trackData = TrackData()
-            trackData.record   = trackInfo.get_double(abs(self.ncrd))
-            trackData.nps      = trackData.record[0]
-            trackData.bitarray = trackData.record[1]
-            trackData.wgt      = trackData.record[2]
-            trackData.erg      = trackData.record[3]
-            trackData.tme      = trackData.record[4]
-            trackData.x        = trackData.record[5]
-            trackData.y        = trackData.record[6]
-            trackData.z        = trackData.record[7]
-            trackData.u        = trackData.record[8]
-            trackData.v        = trackData.record[9]
-            trackData.cs       = trackData.record[10]
-            trackData.w        = math.copysign(math.sqrt(1 - trackData.u*trackData.u - trackData.v*trackData.v),trackData.bitarray)
-            # trackData.bitarray = abs(trackData.bitarray)
+            track_info = self.get_fortran_record()
+            track_data = TrackData()
+            track_data.record   = track_info.get_double(abs(self.ncrd))
+            track_data.nps      = track_data.record[0]
+            track_data.bitarray = track_data.record[1]
+            track_data.wgt      = track_data.record[2]
+            track_data.erg      = track_data.record[3]
+            track_data.tme      = track_data.record[4]
+            track_data.x        = track_data.record[5]
+            track_data.y        = track_data.record[6]
+            track_data.z        = track_data.record[7]
+            track_data.u        = track_data.record[8]
+            track_data.v        = track_data.record[9]
+            track_data.cs       = track_data.record[10]
+            track_data.w        = math.copysign(math.sqrt(1 - track_data.u*track_data.u - track_data.v*track_data.v),track_data.bitarray)
+            # track_data.bitarray = abs(track_data.bitarray)
             
-            self.tracklist.append(trackData)       
+            self.tracklist.append(track_data)       
         return
 
 
