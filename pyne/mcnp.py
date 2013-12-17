@@ -162,14 +162,14 @@ class SurfSrc(_BinaryReader):
         headerString += "{0} histories, {1} tracks, {2} record size, {3} surfaces, {4} histories\n".format(self.np1, self.nrss, self.ncrd, self.njsw, self.niss)
         headerString += "{0} cells, source particle: {1}, macrobody facet flag: {2}\n".format(self.niwr, self.mipts, self.kjaq)
         for i in self.surflist:
-            headerString += "Surface {0}: facet {1}, type {2} with {3} parameters: (".format(i.id, i.facetId, i.type, i.numParams)
-            if i.numParams > 1:
-                for j in i.surfParams:
+            headerString += "Surface {0}: facet {1}, type {2} with {3} parameters: (".format(i.id, i.facet_id, i.type, i.num_params)
+            if i.num_params > 1:
+                for j in i.surf_params:
                     headerString += " {0}".format(j)
             else:
-                headerString += " {0}".format(i.surfParams)
+                headerString += " {0}".format(i.surf_params)
             headerString += ")\n"
-        headerString += "Summary Table: " + str(self.summaryTable)
+        headerString += "Summary Table: " + str(self.summary_table)
 
         return headerString
 
@@ -216,17 +216,17 @@ class SurfSrc(_BinaryReader):
             if other.surflist[surf].id         != self.surflist[surf].id:
                 print("surf " + str(surf) + " ID doesn't match")
                 return False
-            if other.surflist[surf].facetId    != self.surflist[surf].facetId:
-                print("surf " + str(surf) + " facetId doesn't match")
+            if other.surflist[surf].facet_id    != self.surflist[surf].facet_id:
+                print("surf " + str(surf) + " facet_id doesn't match")
                 return False
             if other.surflist[surf].type       != self.surflist[surf].type:
                 print("surf " + str(surf) + " type doesn't match")
                 return False
-            if other.surflist[surf].numParams  != self.surflist[surf].numParams:
-                print("surf " + str(surf) + " numParams doesn't match")
+            if other.surflist[surf].num_params  != self.surflist[surf].num_params:
+                print("surf " + str(surf) + " num_params doesn't match")
                 return False
-            if other.surflist[surf].surfParams != self.surflist[surf].surfParams:
-                print("surf " + str(surf) + " surfParams doesn't match")
+            if other.surflist[surf].surf_params != self.surflist[surf].surf_params:
+                print("surf " + str(surf) + " surf_params doesn't match")
                 return False
 
         return True
@@ -301,7 +301,7 @@ class SurfSrc(_BinaryReader):
             self.mipts = tablelengths.get_int()[0]  # source particle type
             self.kjaq  = tablelengths.get_int()[0]  # macrobody facet flag
             self.table2extra=[]
-            while tablelengths.numBytes > tablelengths.pos:
+            while tablelengths.num_bytes > tablelengths.pos:
                 self.table2extra += tablelengths.get_int()
 
         else:
@@ -320,13 +320,13 @@ class SurfSrc(_BinaryReader):
             surfinfo = SourceSurf()
             surfinfo.id = self.surfaceinfo.get_int()            # surface ID
             if self.kjaq == 1:
-                surfinfo.facetId = self.surfaceinfo.get_int()   # facet ID
+                surfinfo.facet_id = self.surfaceinfo.get_int()   # facet ID
             else:
-                surfinfo.facetId = -1                           # dummy facet ID
+                surfinfo.facet_id = -1                           # dummy facet ID
 
             surfinfo.type = self.surfaceinfo.get_int()                 # surface type
-            surfinfo.numParams = self.surfaceinfo.get_int()[0]         # number of surface parameters
-            surfinfo.surfParams = self.surfaceinfo.get_double(surfinfo.numParams)
+            surfinfo.num_params = self.surfaceinfo.get_int()[0]         # number of surface parameters
+            surfinfo.surf_params = self.surfaceinfo.get_double(surfinfo.num_params)
 
             self.surflist.append(surfinfo)                  
 
@@ -337,11 +337,11 @@ class SurfSrc(_BinaryReader):
             print("Extra info in header not handled: {0}".format(j))
 
         # read summary table record
-        summaryInfo = self.get_fortran_record()
-        self.summaryTable = summaryInfo.get_int((2+4*self.mipts)*(self.njsw+self.niwr)+1)
-        self.summaryExtra=[]
-        while summaryInfo.numBytes > summaryInfo.pos:
-            self.summaryExtra += summaryInfo.get_int()
+        summary_Info = self.get_fortran_record()
+        self.summary_table = summary_Info.get_int((2+4*self.mipts)*(self.njsw+self.niwr)+1)
+        self.summary_extra=[]
+        while summary_Info.num_bytes > summary_Info.pos:
+            self.summary_extra += summary_Info.get_int()
         
 
     def read_tracklist(self):
@@ -352,19 +352,19 @@ class SurfSrc(_BinaryReader):
         for j in range(self.nrss):
             track_info = self.get_fortran_record()
             track_data = TrackData()
-            track_data.record   = track_info.get_double(abs(self.ncrd))
-            track_data.nps      = track_data.record[0]
+            track_data.record = track_info.get_double(abs(self.ncrd))
+            track_data.nps = track_data.record[0]
             track_data.bitarray = track_data.record[1]
-            track_data.wgt      = track_data.record[2]
-            track_data.erg      = track_data.record[3]
-            track_data.tme      = track_data.record[4]
-            track_data.x        = track_data.record[5]
-            track_data.y        = track_data.record[6]
-            track_data.z        = track_data.record[7]
-            track_data.u        = track_data.record[8]
-            track_data.v        = track_data.record[9]
-            track_data.cs       = track_data.record[10]
-            track_data.w        = math.copysign(math.sqrt(1 - track_data.u*track_data.u - track_data.v*track_data.v),track_data.bitarray)
+            track_data.wgt = track_data.record[2]
+            track_data.erg = track_data.record[3]
+            track_data.tme = track_data.record[4]
+            track_data.x = track_data.record[5]
+            track_data.y = track_data.record[6]
+            track_data.z = track_data.record[7]
+            track_data.u = track_data.record[8]
+            track_data.v = track_data.record[9]
+            track_data.cs = track_data.record[10]
+            track_data.w = math.copysign(math.sqrt(1 - track_data.u*track_data.u - track_data.v*track_data.v),track_data.bitarray)
             # track_data.bitarray = abs(track_data.bitarray)
             
             self.tracklist.append(track_data)       
@@ -398,15 +398,17 @@ class SurfSrc(_BinaryReader):
         to the surface source file
         """
         newrecord = _FortranRecord("", 0)
+
         if '2.6.0' in self.ver:
-            newrecord.put_int( [self.np1])
-            newrecord.put_int( [self.nrss])
+            newrecord.put_int([self.np1])
+            newrecord.put_int([self.nrss])
         else:
-            newrecord.put_long( [self.np1])
-            newrecord.put_long( [self.nrss])
-        newrecord.put_int(  [self.ncrd])
-        newrecord.put_int(  [self.njsw])
-        newrecord.put_long( [self.niss])
+            newrecord.put_long([self.np1])
+            newrecord.put_long([self.nrss])
+
+        newrecord.put_int([self.ncrd])
+        newrecord.put_int([self.njsw])
+        newrecord.put_long([self.niss])
         self.put_fortran_record(newrecord)
         return
     
@@ -416,10 +418,10 @@ class SurfSrc(_BinaryReader):
         to the surface source file
         """
         newrecord = _FortranRecord("", 0)
-        newrecord.put_int( [self.niwr ])
-        newrecord.put_int( [self.mipts])
-        newrecord.put_int( [self.kjaq ])
-        newrecord.put_int( self.table2extra)
+        newrecord.put_int([self.niwr ])
+        newrecord.put_int([self.mipts])
+        newrecord.put_int([self.kjaq ])
+        newrecord.put_int(self.table2extra)
         self.put_fortran_record(newrecord)
         return
 
@@ -433,12 +435,12 @@ class SurfSrc(_BinaryReader):
             newrecord = _FortranRecord("",0)
             newrecord.put_int(s.id)
             if self.kjaq == 1:
-                newrecord.put_int(s.facetId) # don't add a 'dummy facet ID'
+                newrecord.put_int(s.facet_id) # don't add a 'dummy facet ID'
             # else no macrobody flag byte in the record
 
             newrecord.put_int(s.type)
-            newrecord.put_int(s.numParams)
-            newrecord.put_double(s.surfParams)
+            newrecord.put_int(s.num_params)
+            newrecord.put_double(s.surf_params)
             
             self.put_fortran_record(newrecord)
         return
@@ -450,10 +452,10 @@ class SurfSrc(_BinaryReader):
         to the surface source file
         """
         newrecord = _FortranRecord("", 0)
-        newrecord.put_int( list(self.summaryTable) )
-        newrecord.put_int( list(self.summaryExtra) )
-        #newrecord.put_int( [self.summaryTable])
-        #newrecord.put_int( [self.summaryExtra])
+        newrecord.put_int( list(self.summary_table) )
+        newrecord.put_int( list(self.summary_extra) )
+        #newrecord.put_int( [self.summary_table])
+        #newrecord.put_int( [self.summary_extra])
         self.put_fortran_record(newrecord)
         return
 
