@@ -56,10 +56,10 @@ class Mctal(object):
 
         # get code name, version, date/time, etc
         words = self.f.readline().split()
-        self.codeName = words[0]
-        self.codeVersion = words[1]
-        self.codeDate = words[2]
-        self.codeTime = words[3]
+        self.code_name = words[0]
+        self.code_version = words[1]
+        self.code_date = words[2]
+        self.code_time = words[3]
         self.n_dump = words[4]
         self.n_histories = int(words[5])
         self.n_prn       = int(words[6])
@@ -156,22 +156,22 @@ class SurfSrc(_BinaryReader):
         return self.print_header()
 
     def print_header(self):
-        headerString  = "Code: {0} (version: {1}) [{2}]\n".format(self.kod, self.ver, self.loddat)
-        headerString += "Problem info: ({0}) {1}\n{2}\n".format(self.idtm, self.probid, self.aid)
-        headerString += "Showing dump #{0}\n".format(self.knod)
-        headerString += "{0} histories, {1} tracks, {2} record size, {3} surfaces, {4} histories\n".format(self.np1, self.nrss, self.ncrd, self.njsw, self.niss)
-        headerString += "{0} cells, source particle: {1}, macrobody facet flag: {2}\n".format(self.niwr, self.mipts, self.kjaq)
+        header_string  = "Code: {0} (version: {1}) [{2}]\n".format(self.kod, self.ver, self.loddat)
+        header_string += "Problem info: ({0}) {1}\n{2}\n".format(self.idtm, self.probid, self.aid)
+        header_string += "Showing dump #{0}\n".format(self.knod)
+        header_string += "{0} histories, {1} tracks, {2} record size, {3} surfaces, {4} histories\n".format(self.np1, self.nrss, self.ncrd, self.njsw, self.niss)
+        header_string += "{0} cells, source particle: {1}, macrobody facet flag: {2}\n".format(self.niwr, self.mipts, self.kjaq)
         for i in self.surflist:
-            headerString += "Surface {0}: facet {1}, type {2} with {3} parameters: (".format(i.id, i.facet_id, i.type, i.num_params)
+            header_string += "Surface {0}: facet {1}, type {2} with {3} parameters: (".format(i.id, i.facet_id, i.type, i.num_params)
             if i.num_params > 1:
                 for j in i.surf_params:
-                    headerString += " {0}".format(j)
+                    header_string += " {0}".format(j)
             else:
-                headerString += " {0}".format(i.surf_params)
-            headerString += ")\n"
-        headerString += "Summary Table: " + str(self.summary_table)
+                header_string += " {0}".format(i.surf_params)
+            header_string += ")\n"
+        header_string += "Summary Table: " + str(self.summary_table)
 
-        return headerString
+        return header_string
 
     def print_tracklist(self):
         track_data = "Track Data\n"
@@ -337,11 +337,11 @@ class SurfSrc(_BinaryReader):
             print("Extra info in header not handled: {0}".format(j))
 
         # read summary table record
-        summary_Info = self.get_fortran_record()
-        self.summary_table = summary_Info.get_int((2+4*self.mipts)*(self.njsw+self.niwr)+1)
+        summary_info = self.get_fortran_record()
+        self.summary_table = summary_info.get_int((2+4*self.mipts)*(self.njsw+self.niwr)+1)
         self.summary_extra=[]
-        while summary_Info.num_bytes > summary_Info.pos:
-            self.summary_extra += summary_Info.get_int()
+        while summary_info.num_bytes > summary_info.pos:
+            self.summary_extra += summary_info.get_int()
         
 
     def read_tracklist(self):
@@ -525,13 +525,13 @@ class Runtpe(_BinaryReader):
         header = self.get_fortran_record()
 
         # parse identification block
-        self.codeName = header.get_string(8)
-        self.codeVersion = header.get_string(5)
-        self.codeDate = header.get_string(8)
+        self.code_name = header.get_string(8)
+        self.code_version = header.get_string(5)
+        self.code_date = header.get_string(8)
         header.get_string(19) # machine designator, date and time
-        self.chargeCode = header.get_string(10)
-        self.problemID = header.get_string(19)
-        self.problemIDsurf = header.get_string(19)
+        self.charge_code = header.get_string(10)
+        self.problem_ID = header.get_string(19)
+        self.problem_ID_surf = header.get_string(19)
         self.title = header.get_string(80)
         header.pos += 3*6*11 # skip user file characteristics
         self.n_tables = header.get_int()
