@@ -43,246 +43,237 @@ except ImportError:
 from pyne.mesh import Mesh, StatMesh, MeshError
 from numpy.testing import assert_array_equal
 
-# Test methods for the SurfSrc class
-#class TestSurfSrc(unittest.TestCase):
 
+# Test SurfSrc class
+def test_read_header_block():
+    """Test the read_header() method in the SurfSrc class
+    We compare the SurfSrc object variables with expected values from the
+    multiple write files
+    'mcnp_surfsrc.w', 'mcnpx_surfsrc.w', and 'mcnp6_surfsrc.w'.
+    """
 
-class TestSurfSrc():
+    for ssrname in ssrnames:
+        yield check_read_header_block, ssrname
 
-    def setUp(self):
-        pass
-
-    def tearDown(self):
-        pass
-
-    def test_read_header_block(self):
-        """Test the read_header() method in the SurfSrc class
-        We compare the SurfSrc object variables with expected values from the
-        multiple write files
-        'mcnp_surfsrc.w', 'mcnpx_surfsrc.w', and 'mcnp6_surfsrc.w'.
-        """
-
-        for ssrname in ssrnames:
-            yield self.check_read_header_block, ssrname
-
-    def check_read_header_block(self, ssrname):
-            if 'mcnp_surfsrc.w' in ssrname:
-                ssr = mcnp.SurfSrc(ssrname, 'rb')
-                ssr.read_header()
-
-                # header record values
-                assert_equal(ssr.kod, "mcnp    ")
-                assert_equal(ssr.ver, "5    ")
-                assert_equal(ssr.loddat, "01232009")
-                assert_equal(ssr.idtm, " 10/31/11 13:52:39 ")
-                assert_equal(ssr.probid, " 10/31/11 13:52:35 ")
-                assert_equal(ssr.aid,
-                             "c Test deck with H20 cube, point n source, "
-                             "SSW of top surface interactions      ")
-                assert_equal(ssr.knod, 2)
-                # table 1 record values
-                assert_equal(ssr.np1, 1000)
-                assert_equal(ssr.nrss, 173)
-                assert_equal(ssr.ncrd, 11)
-                assert_equal(ssr.njsw, 1)
-                assert_equal(ssr.niss, 173)
-                # table 2 record values
-                assert_equal(ssr.niwr, 0)
-                assert_equal(ssr.mipts, 3)
-                assert_equal(ssr.kjaq, 0)
-
-            elif 'mcnp6_surfsrc.w' in ssrname:
-                ssr = mcnp.SurfSrc(ssrname, 'rb')
-                ssr.read_header()
-
-                # header record values
-                assert_equal(ssr.kod, "SF_00001")
-                assert_equal(ssr.ver, "mcnp    6   ")
-                assert_equal(ssr.loddat, " 05/08/13")
-                assert_equal(ssr.idtm, " 11/18/13 17:50:49 ")
-                assert_equal(ssr.probid, " 11/18/13 17:50:43 ")
-                assert_equal(ssr.aid, "Simple MCNP Example that uses SSW"
-                             "                       "
-                             "                        ")
-                assert_equal(ssr.knod, 2)
-                # table 1 record values
-                assert_equal(ssr.np1, 10000)
-                assert_equal(ssr.nrss, 1710)
-                assert_equal(ssr.ncrd, -11)
-                assert_equal(ssr.njsw, 1)
-                assert_equal(ssr.niss, 1701)
-                # table 2 record values
-                assert_equal(ssr.niwr, 0)
-                assert_equal(ssr.mipts, 37)
-                assert_equal(ssr.kjaq, 0)
-
-            elif 'mcnpx_surfsrc.w' in ssrname:
-                ssr = mcnp.SurfSrc(ssrname, 'rb')
-                ssr.read_header()
-
-                # header record values
-                assert_equal(ssr.kod, "mcnpx   ")
-                assert_equal(ssr.ver, "2.6.0")
-                assert_equal(ssr.loddat, "Wed Apr 09 08:00:00 MST 2008")
-                assert_equal(ssr.idtm, "  10/28/13 02:16:22")
-                assert_equal(ssr.probid, "  10/28/13 02:16:16")
-                assert_equal(ssr.aid, "Simple MCNP Example that uses SSW"
-                             "                                               ")
-                assert_equal(ssr.knod, 2)
-                # table 1 record values
-                assert_equal(ssr.np1, 10000)
-                assert_equal(ssr.nrss, 1658)
-                assert_equal(ssr.ncrd, 11)
-                assert_equal(ssr.njsw, 1)
-                assert_equal(ssr.niss, 1652)
-                # table 2 record values
-                assert_equal(ssr.niwr, 0)
-                assert_equal(ssr.mipts, 35)
-                assert_equal(ssr.kjaq, 0)
-
-    def test_compare(self):
-        """Test the compare() method in the SurfSrc class
-        Tricky to test... this just verifies that comparisons are done right.
-        """
-        for ssrname in ssrnames:
-            yield self.check_compare, ssrname
-
-    def check_compare(self, ssrname):
-            ssrA = mcnp.SurfSrc(ssrname, 'rb')
-            ssrB = mcnp.SurfSrc(ssrname, 'rb')
-            ssrA.read_header()
-            ssrB.read_header()
-            assert_true(ssrA.cmp(ssrB))
-            ssrA.close()
-            ssrB.close()
-
-    def test_put_header_block(self):
-        """We copy the header block, write to new file, re-read, and compare.
-        This tests that information is preserved correctly when written.
-        """
-        for ssrname, sswname in zip(ssrnames, sswnames):
-            yield self.check_put_header_block, ssrname, sswname
-
-    def check_put_header_block(self, ssrname, sswname):
-            ssr = mcnp.SurfSrc(ssrname, "rb")
-            ssw = mcnp.SurfSrc(sswname, "wb")
+def check_read_header_block(ssrname):
+        if 'mcnp_surfsrc.w' in ssrname:
+            ssr = mcnp.SurfSrc(ssrname, 'rb')
             ssr.read_header()
 
             # header record values
-            ssw.kod = ssr.kod
-            ssw.ver = ssr.ver
-            ssw.loddat = ssr.loddat
-            ssw.idtm = ssr.idtm
-            ssw.probid = ssr.probid
-            ssw.aid = ssr.aid
-            ssw.knod = ssr.knod
+            assert_equal(ssr.kod, "mcnp    ")
+            assert_equal(ssr.ver, "5    ")
+            assert_equal(ssr.loddat, "01232009")
+            assert_equal(ssr.idtm, " 10/31/11 13:52:39 ")
+            assert_equal(ssr.probid, " 10/31/11 13:52:35 ")
+            assert_equal(ssr.aid,
+                         "c Test deck with H20 cube, point n source, "
+                         "SSW of top surface interactions      ")
+            assert_equal(ssr.knod, 2)
             # table 1 record values
-            ssw.np1 = ssr.orignp1  # ssr.np1
-            ssw.nrss = ssr.nrss
-            ssw.ncrd = ssr.ncrd
-            ssw.njsw = ssr.njsw
-            ssw.niss = ssr.niss
+            assert_equal(ssr.np1, 1000)
+            assert_equal(ssr.nrss, 173)
+            assert_equal(ssr.ncrd, 11)
+            assert_equal(ssr.njsw, 1)
+            assert_equal(ssr.niss, 173)
             # table 2 record values
-            ssw.niwr = ssr.niwr
-            ssw.mipts = ssr.mipts
-            ssw.kjaq = ssr.kjaq
-            ssw.table2extra = ssr.table2extra
-            # surface info record list
-            ssw.surflist = ssr.surflist
-            # summary table record values
-            ssw.summary_table = ssr.summary_table
-            ssw.summary_extra = ssr.summary_extra
+            assert_equal(ssr.niwr, 0)
+            assert_equal(ssr.mipts, 3)
+            assert_equal(ssr.kjaq, 0)
 
-            ssw.put_header()
-            ssw.put_table_1()
-            ssw.put_table_2()
-            ssw.put_surface_info()
-            ssw.put_summary()
-            ssw.close()
+        elif 'mcnp6_surfsrc.w' in ssrname:
+            ssr = mcnp.SurfSrc(ssrname, 'rb')
+            ssr.read_header()
 
-            sswr = mcnp.SurfSrc(sswname, "rb")
-            sswr.read_header()
+            # header record values
+            assert_equal(ssr.kod, "SF_00001")
+            assert_equal(ssr.ver, "mcnp    6   ")
+            assert_equal(ssr.loddat, " 05/08/13")
+            assert_equal(ssr.idtm, " 11/18/13 17:50:49 ")
+            assert_equal(ssr.probid, " 11/18/13 17:50:43 ")
+            assert_equal(ssr.aid, "Simple MCNP Example that uses SSW"
+                         "                       "
+                         "                        ")
+            assert_equal(ssr.knod, 2)
+            # table 1 record values
+            assert_equal(ssr.np1, 10000)
+            assert_equal(ssr.nrss, 1710)
+            assert_equal(ssr.ncrd, -11)
+        #assert_equal(ssrA, ssrB)
+            assert_equal(ssr.njsw, 1)
+            assert_equal(ssr.niss, 1701)
+            # table 2 record values
+            assert_equal(ssr.niwr, 0)
+            assert_equal(ssr.mipts, 37)
+            assert_equal(ssr.kjaq, 0)
 
-            assert_equal(ssr.print_header(), sswr.print_header())
+        elif 'mcnpx_surfsrc.w' in ssrname:
+            ssr = mcnp.SurfSrc(ssrname, 'rb')
+            ssr.read_header()
 
-            ssr.close()
-            sswr.close()
+            # header record values
+            assert_equal(ssr.kod, "mcnpx   ")
+            assert_equal(ssr.ver, "2.6.0")
+            assert_equal(ssr.loddat, "Wed Apr 09 08:00:00 MST 2008")
+            assert_equal(ssr.idtm, "  10/28/13 02:16:22")
+            assert_equal(ssr.probid, "  10/28/13 02:16:16")
+            assert_equal(ssr.aid, "Simple MCNP Example that uses SSW"
+                         "                                               ")
+            assert_equal(ssr.knod, 2)
+            # table 1 record values
+            assert_equal(ssr.np1, 10000)
+            assert_equal(ssr.nrss, 1658)
+            assert_equal(ssr.ncrd, 11)
+            assert_equal(ssr.njsw, 1)
+            assert_equal(ssr.niss, 1652)
+            # table 2 record values
+            assert_equal(ssr.niwr, 0)
+            assert_equal(ssr.mipts, 35)
+            assert_equal(ssr.kjaq, 0)
 
-            os.system("rm -f " + sswname)
+def test_compare():
+    """Test the __cmp__() method in the SurfSrc class
+    Tricky to test... this just verifies that comparisons are done right.
+    """
+    for ssrname in ssrnames:
+        yield check_compare, ssrname
 
-    def test_read_tracklist(self):
-        """We read in tracklists and compare with known values.
-        We use a file with a single track for this test.
-        """
-        ssr = mcnp.SurfSrc(ssrname_onetrack, "rb")
+def check_compare(ssrname):
+        ssrA = mcnp.SurfSrc(ssrname, 'rb')
+        ssrB = mcnp.SurfSrc(ssrname, 'rb')
+        ssrA.read_header()
+        ssrB.read_header()
+        assert_true(ssrA == ssrB)
+        ssrA.close()
+        ssrB.close()
+
+def test_put_header_block():
+    """We copy the header block, write to new file, re-read, and compare.
+    This tests that information is preserved correctly when written.
+    """
+    for ssrname, sswname in zip(ssrnames, sswnames):
+        yield check_put_header_block, ssrname, sswname
+
+def check_put_header_block(ssrname, sswname):
+        ssr = mcnp.SurfSrc(ssrname, "rb")
+        ssw = mcnp.SurfSrc(sswname, "wb")
         ssr.read_header()
-        ssr.read_tracklist()
 
-        # print "Length: " + str(len(ssr.tracklist))
-        for trackData in ssr.tracklist:
-            # Should only be one trackData in tracklist
-            # trackData.record is skipped; contains the below components.
-            # self.assertEqual(trackData.record  , 0)
-            assert_equal(trackData.nps, 1)
-            assert_almost_equal(trackData.bitarray, 8.000048e+06)
-            assert_almost_equal(trackData.wgt, 0.99995639)
-            assert_almost_equal(trackData.erg, 5.54203947)
-            assert_almost_equal(trackData.tme, 0.17144023)
-            assert_almost_equal(trackData.x, -8.05902e-02)
-            assert_almost_equal(trackData.y, 3.122666098e+00)
-            assert_almost_equal(trackData.z, 5.00000e+00)
-            assert_almost_equal(trackData.u, -0.35133163)
-            assert_almost_equal(trackData.v, 0.48465036)
-            assert_almost_equal(trackData.cs, 0.80104937)
-            assert_almost_equal(trackData.w, 0.80104937)
-        return
+        # header record values
+        ssw.kod = ssr.kod
+        ssw.ver = ssr.ver
+        ssw.loddat = ssr.loddat
+        ssw.idtm = ssr.idtm
+        ssw.probid = ssr.probid
+        ssw.aid = ssr.aid
+        ssw.knod = ssr.knod
+        # table 1 record values
+        ssw.np1 = ssr.orignp1  # ssr.np1
+        ssw.nrss = ssr.nrss
+        ssw.ncrd = ssr.ncrd
+        ssw.njsw = ssr.njsw
+        ssw.niss = ssr.niss
+        # table 2 record values
+        ssw.niwr = ssr.niwr
+        ssw.mipts = ssr.mipts
+        ssw.kjaq = ssr.kjaq
+        ssw.table2extra = ssr.table2extra
+        # surface info record list
+        ssw.surflist = ssr.surflist
+        # summary table record values
+        ssw.summary_table = ssr.summary_table
+        ssw.summary_extra = ssr.summary_extra
 
-    def test_print_header(self):
-        """Check SurfSrc.print_header() against expected resulting string.
-        We use a file with a single track for this test, but only use the
-        header of this file.
-        """
-        ssr = mcnp.SurfSrc(ssrname_onetrack, "rb")
-        ssr.read_header()
-        # If comparison output needs to be updated, uncomment the below
-        #  and do: nosetests test_mcnp.py --nocapture
-        #print ssr.print_header()
-        assert_equal(ssr.print_header(),
-                     "Code: mcnp     (version: 5    ) [01232009]\n"
-                     "Problem info: ( 07/05/12 17:50:19 )"
-                     "  07/05/12 17:50:16 \n"
-                     "c Test deck with H20 cube, point n source,"
-                     " SSW of top surface interactions      \n"
-                     "Showing dump #2\n"
-                     "1 histories, 1 tracks, 11 record size, "
-                     "1 surfaces, 1 histories\n"
-                     "0 cells, source particle: 3, macrobody facet flag: 0\n"
-                     "Surface [6]: facet -1, type [4]"
-                     " with 1 parameters: ( [5.0])\n"
-                     "Summary Table: [0, 0, 1, 1, 1, 1,"
-                     " 0, 0, 0, 0, 0, 0, 0, 0, 0]")
+        ssw.put_header()
+        ssw.put_table_1()
+        ssw.put_table_2()
+        ssw.put_surface_info()
+        ssw.put_summary()
+        ssw.close()
 
-        return
+        sswr = mcnp.SurfSrc(sswname, "rb")
+        sswr.read_header()
 
-    def test_print_tracklist(self):
-        """Check SurfSrc.print_tracklist() against expected resulting string.
-        We use a file with a single track for this test.
-        """
-        ssr = mcnp.SurfSrc(ssrname_onetrack, "rb")
-        ssr.read_header()
-        ssr.read_tracklist()
-        # If comparison output needs to be updated, uncomment the below
-        #  and do: nosetests test_mcnp.py --nocapture
-        #print ssr.print_tracklist()
-        assert_equal(ssr.print_tracklist(),
-                     'Track Data\n       nps   BITARRAY        WGT        ERG'
-                     '        TME             X             Y             Z  '
-                     '        U          V     COSINE  |       W\n         '
-                     '1 8.00005e+06    0.99996      5.542    0.17144  '
-                     '-8.05902e-02   3.12267e+00   5.00000e+00   '
-                     '-0.35133    0.48465    0.80105  |    0.80105 \n')
+        assert_equal(ssr.print_header(), sswr.print_header())
 
-        return
+        ssr.close()
+        sswr.close()
+
+        os.system("rm -f " + sswname)
+
+def test_read_tracklist():
+    """We read in tracklists and compare with known values.
+    We use a file with a single track for this test.
+    """
+    ssr = mcnp.SurfSrc(ssrname_onetrack, "rb")
+    ssr.read_header()
+    ssr.read_tracklist()
+
+    # print "Length: " + str(len(ssr.tracklist))
+    for trackData in ssr.tracklist:
+        # Should only be one trackData in tracklist
+        # trackData.record is skipped; contains the below components.
+        # self.assertEqual(trackData.record  , 0)
+        assert_equal(trackData.nps, 1)
+        assert_almost_equal(trackData.bitarray, 8.000048e+06)
+        assert_almost_equal(trackData.wgt, 0.99995639)
+        assert_almost_equal(trackData.erg, 5.54203947)
+        assert_almost_equal(trackData.tme, 0.17144023)
+        assert_almost_equal(trackData.x, -8.05902e-02)
+        assert_almost_equal(trackData.y, 3.122666098e+00)
+        assert_almost_equal(trackData.z, 5.00000e+00)
+        assert_almost_equal(trackData.u, -0.35133163)
+        assert_almost_equal(trackData.v, 0.48465036)
+        assert_almost_equal(trackData.cs, 0.80104937)
+        assert_almost_equal(trackData.w, 0.80104937)
+    return
+
+def test_print_header():
+    """Check SurfSrc.print_header() against expected resulting string.
+    We use a file with a single track for this test, but only use the
+    header of this file.
+    """
+    ssr = mcnp.SurfSrc(ssrname_onetrack, "rb")
+    ssr.read_header()
+    # If comparison output needs to be updated, uncomment the below
+    #  and do: nosetests test_mcnp.py --nocapture
+    #print ssr.print_header()
+    assert_equal(ssr.print_header(),
+                 "Code: mcnp     (version: 5    ) [01232009]\n"
+                 "Problem info: ( 07/05/12 17:50:19 )"
+                 "  07/05/12 17:50:16 \n"
+                 "c Test deck with H20 cube, point n source,"
+                 " SSW of top surface interactions      \n"
+                 "Showing dump #2\n"
+                 "1 histories, 1 tracks, 11 record size, "
+                 "1 surfaces, 1 histories\n"
+                 "0 cells, source particle: 3, macrobody facet flag: 0\n"
+                 "Surface [6]: facet -1, type [4]"
+                 " with 1 parameters: ( [5.0])\n"
+                 "Summary Table: [0, 0, 1, 1, 1, 1,"
+                 " 0, 0, 0, 0, 0, 0, 0, 0, 0]")
+
+    return
+
+def test_print_tracklist():
+    """Check SurfSrc.print_tracklist() against expected resulting string.
+    We use a file with a single track for this test.
+    """
+    ssr = mcnp.SurfSrc(ssrname_onetrack, "rb")
+    ssr.read_header()
+    ssr.read_tracklist()
+    # If comparison output needs to be updated, uncomment the below
+    #  and do: nosetests test_mcnp.py --nocapture
+    #print ssr.print_tracklist()
+    assert_equal(ssr.print_tracklist(),
+                 'Track Data\n       nps   BITARRAY        WGT        ERG'
+                 '        TME             X             Y             Z  '
+                 '        U          V     COSINE  |       W\n         '
+                 '1 8.00005e+06    0.99996      5.542    0.17144  '
+                 '-8.05902e-02   3.12267e+00   5.00000e+00   '
+                 '-0.35133    0.48465    0.80105  |    0.80105 \n')
+
+    return
 
 
 def test_read_mcnp():
@@ -357,82 +348,75 @@ def test_read_mcnp():
         read_materials[1]._mats.keys()[1].attrs)
 
 
-# test PtracReader class
-class TestPtrac(unittest.TestCase):
-    def setUp(self):
-        pass
+# Test PtracReader class
+def test_read_headers():
+    p = mcnp.PtracReader("mcnp_ptrac_i4_little.ptrac")
+    assert_equal(
+        p.problem_title,
+        "Generate a well-defined PTRAC file for PyNE test cases")
+    del p
 
-    def tearDown(self):
-        pass
+    # 8-byte ints, little endian
+    p = mcnp.PtracReader("mcnp_ptrac_i8_little.ptrac")
+    assert_equal(
+        p.problem_title,
+        "Generate a well-defined PTRAC file for PyNE test cases")
+    del p
 
-    def test_read_headers(self):
-        p = mcnp.PtracReader("mcnp_ptrac_i4_little.ptrac")
-        assert_equal(
-            p.problem_title,
-            "Generate a well-defined PTRAC file for PyNE test cases")
+def test_determine_format():
+    # 4-byte ints, little endian
+    p = mcnp.PtracReader("mcnp_ptrac_i4_little.ptrac")
+    assert_equal(p.endianness, "<")
+    del p
+
+    # 8-byte ints, little endian
+    p = mcnp.PtracReader("mcnp_ptrac_i8_little.ptrac")
+    assert_equal(p.endianness, "<")
+    del p
+
+def test_read_events():
+    p = mcnp.PtracReader("mcnp_ptrac_i4_little.ptrac")
+
+    evt = {}
+
+    p.read_nps_line()
+    assert_equal(p.next_event, 1000)
+
+    p.read_event_line(evt)
+    assert_equal(evt["xxx"], 0.0)
+    assert_equal(evt["yyy"], 0.0)
+    assert_equal(evt["zzz"], 0.0)
+    del p
+    del evt
+
+def test_write_to_hdf5():
+    test_files = ["mcnp_ptrac_i4_little.ptrac",
+                  "mcnp_ptrac_i8_little.ptrac"]
+
+    for test_file in test_files:
+        p = mcnp.PtracReader(test_file)
+        h5file = tables.openFile("mcnp_ptrac_hdf5_file.h5", "w")
+        tab = h5file.createTable("/", "t", mcnp.PtracEvent, "test")
+        p.write_to_hdf5_table(tab)
+        tab.flush()
+        h5file.close()
+        del h5file
+        del tab
         del p
 
-        # 8-byte ints, little endian
-        p = mcnp.PtracReader("mcnp_ptrac_i8_little.ptrac")
-        assert_equal(
-            p.problem_title,
-            "Generate a well-defined PTRAC file for PyNE test cases")
-        del p
+        # now check if the data was correctly written.
+        # there should be 5 events of type 1000 (src)
+        h5file = tables.openFile("mcnp_ptrac_hdf5_file.h5")
+        tab = h5file.getNode("/t")
+        selected = [1 for x in tab.iterrows() if x["event_type"] == 1000]
+        assert_equal(len(selected), 5)
+        h5file.close()
+        del tab
+        del h5file
 
-    def test_determine_format(self):
-        # 4-byte ints, little endian
-        p = mcnp.PtracReader("mcnp_ptrac_i4_little.ptrac")
-        assert_equal(p.endianness, "<")
-        del p
-
-        # 8-byte ints, little endian
-        p = mcnp.PtracReader("mcnp_ptrac_i8_little.ptrac")
-        assert_equal(p.endianness, "<")
-        del p
-
-    def test_read_events(self):
-        p = mcnp.PtracReader("mcnp_ptrac_i4_little.ptrac")
-
-        evt = {}
-
-        p.read_nps_line()
-        assert_equal(p.next_event, 1000)
-
-        p.read_event_line(evt)
-        assert_equal(evt["xxx"], 0.0)
-        assert_equal(evt["yyy"], 0.0)
-        assert_equal(evt["zzz"], 0.0)
-        del p
-        del evt
-
-    def test_write_to_hdf5(self):
-        test_files = ["mcnp_ptrac_i4_little.ptrac",
-                      "mcnp_ptrac_i8_little.ptrac"]
-
-        for test_file in test_files:
-            p = mcnp.PtracReader(test_file)
-            h5file = tables.openFile("mcnp_ptrac_hdf5_file.h5", "w")
-            tab = h5file.createTable("/", "t", mcnp.PtracEvent, "test")
-            p.write_to_hdf5_table(tab)
-            tab.flush()
-            h5file.close()
-            del h5file
-            del tab
-            del p
-
-            # now check if the data was correctly written.
-            # there should be 5 events of type 1000 (src)
-            h5file = tables.openFile("mcnp_ptrac_hdf5_file.h5")
-            tab = h5file.getNode("/t")
-            selected = [1 for x in tab.iterrows() if x["event_type"] == 1000]
-            assert_equal(len(selected), 5)
-            h5file.close()
-            del tab
-            del h5file
-
-            # clean up
-            if os.path.exists("mcnp_ptrac_hdf5_file.h5"):
-                os.unlink("mcnp_ptrac_hdf5_file.h5")
+        # clean up
+        if os.path.exists("mcnp_ptrac_hdf5_file.h5"):
+            os.unlink("mcnp_ptrac_hdf5_file.h5")
 
 
 # Test Wwinp class. All three function are tested at once because their inputs

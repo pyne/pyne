@@ -204,43 +204,60 @@ class SurfSrc(_BinaryReader):
 
         return track_data
 
-    def cmp(self, other):
+    def __cmp__(self, other):
         """"""
 
         if other.kod != self.kod:
-            return False  # kod does not match
+            # kod does not match
+            return cmp(other.kod, self.kod)
         if other.ver != self.ver:
-            return False  # ver does not match
+            # ver does not match
+            return cmp(other.ver, self.ver)
         if other.loddat != self.loddat:
-            return False  # loddat does not match
+            # loddat does not match
+            return cmp(other.loddat, self.loddat)
 
         if other.ncrd != self.ncrd:
-            return False  # ncrd does not match
+            # ncrd does not match
+            return cmp(other.nrcd, self.nrcd)
         if other.njsw != self.njsw:
-            return False  # njsw does not match
+            # njsw does not match
+            return cmp(other.njsw, self.njsw)
 
         if other.niwr != self.niwr:
-            return False  # niwr does not match
+            # niwr does not match
+            return cmp(other.niwr, self.niwr)
         if other.mipts != self.mipts:
-            return False  # mipts does not match
+            # mipts does not match
+            return cmp(other.mipts, self.mipts)
         if other.kjaq != self.kjaq:
-            return False  # kjaq does not match
+            # kjaq does not match
+            return cmp(other.kjaq, self.kjaq)
 
         for surf in range(len(self.surflist)):
             if other.surflist[surf].id != self.surflist[surf].id:
-                return False # ID doesn't match
+                # ID doesn't match
+                return cmp(other.surflist[surf].id, self.surflist[surf].id)
             if other.surflist[surf].facet_id != self.surflist[surf].facet_id:
-                return False  # facet_id doesn't match
+                # facet_id doesn't match
+                return cmp(other.surflist[surf].facet_id, 
+                    self.surflist[surf].facet_id)
             if other.surflist[surf].type != self.surflist[surf].type:
-                return False  # type doesn't match
+                # type doesn't match
+                return cmp(other.surflist[surf].type, 
+                    self.surflist[surf].type)
             if other.surflist[surf].num_params != \
                     self.surflist[surf].num_params:
-                return False  # num_params doesn't match
+                # num_params ddoesn't match
+                return cmp(other.surflist[surf].num_params, 
+                    self.surflist[surf].num_params)
             if other.surflist[surf].surf_params != \
                     self.surflist[surf].surf_params:
-                return False  # surf_params doesn't match
+                # surf_params doesn't match
+                return cmp(other.surflist[surf].surf_params, 
+                    self.surflist[surf].surf_params)
 
-        return True
+        return 0   
 
     def read_header(self):
         """Read in the header block data. This block comprises 4 fortran
