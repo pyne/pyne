@@ -204,54 +204,41 @@ class SurfSrc(_BinaryReader):
 
         return track_data
 
-    def compare(self, other):
+    def cmp(self, other):
         """"""
 
         if other.kod != self.kod:
-            print("kod does not match")
-            return False
+            return False  # kod does not match
         if other.ver != self.ver:
-            print("ver does not match")
-            return False
+            return False  # ver does not match
         if other.loddat != self.loddat:
-            print("loddat does not match")
-            return False
+            return False  # loddat does not match
 
         if other.ncrd != self.ncrd:
-            print("ncrd does not match")
-            return False
+            return False  # ncrd does not match
         if other.njsw != self.njsw:
-            print("njsw does not match")
-            return False
+            return False  # njsw does not match
 
         if other.niwr != self.niwr:
-            print("niwr does not match")
-            return False
+            return False  # niwr does not match
         if other.mipts != self.mipts:
-            print("mipts does not match")
-            return False
+            return False  # mipts does not match
         if other.kjaq != self.kjaq:
-            print("kjaq does not match")
-            return False
+            return False  # kjaq does not match
 
         for surf in range(len(self.surflist)):
             if other.surflist[surf].id != self.surflist[surf].id:
-                print("surf " + str(surf) + " ID doesn't match")
-                return False
+                return False # ID doesn't match
             if other.surflist[surf].facet_id != self.surflist[surf].facet_id:
-                print("surf " + str(surf) + " facet_id doesn't match")
-                return False
+                return False  # facet_id doesn't match
             if other.surflist[surf].type != self.surflist[surf].type:
-                print("surf " + str(surf) + " type doesn't match")
-                return False
+                return False  # type doesn't match
             if other.surflist[surf].num_params != \
                     self.surflist[surf].num_params:
-                print("surf " + str(surf) + " num_params doesn't match")
-                return False
+                return False  # num_params doesn't match
             if other.surflist[surf].surf_params != \
                     self.surflist[surf].surf_params:
-                print("surf " + str(surf) + " surf_params doesn't match")
-                return False
+                return False  # surf_params doesn't match
 
         return True
 
@@ -309,13 +296,13 @@ class SurfSrc(_BinaryReader):
             tablelengths = self.get_fortran_record()
 
             # interpret table lengths
-            self.np1 = tablelengths.get_int()[0]  # hist used to gen.source
-            self.notsure0 = tablelengths.get_int()[0]  # #vals in surf src rec.
-            self.nrss = tablelengths.get_int()[0]  # #tracks writ. to surf.src
-            self.notsure1 = tablelengths.get_int()[0]   # number of surfaces
-            self.ncrd = tablelengths.get_int()[0]  # #histories to surf.src
-            self.njsw = tablelengths.get_int()[0]   # number of surfaces
-            self.niss = tablelengths.get_int()[0]  # #histories to surf.src
+            self.np1 = tablelengths.get_int()[0]       # hist used to gen.source
+            self.notsure0 = tablelengths.get_int()[0]  # vals in surf src rec.
+            self.nrss = tablelengths.get_int()[0]      # tracks writ. to surf.src
+            self.notsure1 = tablelengths.get_int()[0]  # number of surfaces
+            self.ncrd = tablelengths.get_int()[0]      # histories to surf.src
+            self.njsw = tablelengths.get_int()[0]      # number of surfaces
+            self.niss = tablelengths.get_int()[0]      # histories to surf.src
             self.notsure2 = tablelengths.get_int()[0]  # number of surfaces
 
         if self.np1 < 0:
@@ -518,7 +505,7 @@ class Srctp(_BinaryReader):
 
             self.sites.append(site)
 
-    def remainingSites(self):
+    def remaining_sites(self):
         index = self.loc_next - 1
         if (self.loc_next + self.n_run) >= self.n_source:
             return (self.sites[index:] +

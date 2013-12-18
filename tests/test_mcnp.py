@@ -66,7 +66,6 @@ class TestSurfSrc():
             yield self.check_read_header_block, ssrname
 
     def check_read_header_block(self, ssrname):
-
             if 'mcnp_surfsrc.w' in ssrname:
                 ssr = mcnp.SurfSrc(ssrname, 'rb')
                 ssr.read_header()
@@ -153,7 +152,7 @@ class TestSurfSrc():
             ssrB = mcnp.SurfSrc(ssrname, 'rb')
             ssrA.read_header()
             ssrB.read_header()
-            assert_true(ssrA.compare(ssrB))
+            assert_true(ssrA.cmp(ssrB))
             ssrA.close()
             ssrB.close()
 
