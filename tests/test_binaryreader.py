@@ -120,7 +120,7 @@ def test_write_FR_long_list():
 
     set_long_list = [8, 16]
     set_num_bytes = 16
-    set_data =
+    set_data = \
     '\x08\x00\x00\x00\x00\x00\x00\x00\x10\x00\x00\x00\x00\x00\x00\x00'
 
     test_record = _FortranRecord('', 0)
