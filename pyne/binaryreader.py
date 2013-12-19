@@ -41,7 +41,9 @@ class _FortranRecord(object):
         the items are returned in a list.
         """
         if self.pos >= self.num_bytes:
-            raise BinaryReaderError("Already read all data from record")
+            raise ValueError(
+                "All data read from record, pos=" + str(self.pos) +
+                " >= num_bytes=" + str(self.num_bytes))
 
         values = struct.unpack('{0}{1}'.format(n, typeCode),
                                self.data[self.pos:self.pos+item_size*n])
@@ -79,7 +81,9 @@ class _FortranRecord(object):
         """
 
         if self.pos >= self.num_bytes:
-            raise BinaryReaderError("Already read all data from record")
+            raise ValueError(
+                "All data read from record, pos=" + str(self.pos) +
+                " >= num_bytes=" + str(self.num_bytes))
 
         relevantData = self.data[self.pos:self.pos+length*n]
         (s,) = struct.unpack('{0}s'.format(length*n), relevantData)
@@ -186,26 +190,9 @@ class _BinaryReader(object):
         # now read end of record
         num_bytes2 = self.get_int()
         if num_bytes2 != num_bytes:
-            raise InvalidFortranRecordError("Starting and matching integers"
-                                            " in Fortran formatted record"
-                                            " do not match.")
+            raise ValueError(
+                "Fortran formatted record Mismatch" +
+                " in starting and matching integers, " +
+                str(self.num_bytes2) + " != " + str(self.num_bytes))
 
         return _FortranRecord(data, num_bytes)
-
-
-class BinaryReaderError(Exception):
-    """Case class for all binary reader errors."""
-
-    def __init__(self, msg):
-        self.msg = msg
-
-    def __str__(self):
-        return repr(self.msg)
-
-
-class InvalidFortranRecordError(BinaryReaderError):
-    pass
-
-
-class FortranRecordError(BinaryReaderError):
-    pass

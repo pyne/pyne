@@ -281,8 +281,8 @@ class SurfSrc(_BinaryReader):
             elif '5    ' in self.ver:
                 self.loddat = header.get_string(8)[0]  # code version date
             else:
-                raise SurfSrcError("MCNP5/X Version:" +
-                                   self.ver.rstrip() + " not supported")
+                raise NotImplementedError("MCNP5/X Version:" +
+                                          self.ver.rstrip() + " not supported")
 
             self.idtm = header.get_string(19)[0]    # current date and time
             self.probid = header.get_string(19)[0]  # problem id string
@@ -492,16 +492,6 @@ class SurfSrc(_BinaryReader):
         #newrecord.put_int( [self.summary_extra])
         self.put_fortran_record(newrecord)
         return
-
-
-class SurfSrcError(Exception):
-    """Case class for all surface source reader errors."""
-
-    def __init__(self, msg):
-        self.msg = msg
-
-    def __str__(self):
-        return repr(self.msg)
 
 
 class Srctp(_BinaryReader):
