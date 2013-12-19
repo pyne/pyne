@@ -153,6 +153,18 @@ def half_life(ensdf):
 
     return data
 
+_valexp = re.compile('(\d*)([Ee]\d*)')
+_val = re.compile('(\d*)[.](\d*)')
+_errpm = re.compile('[+](\d*)[-](\d*)')
+_err = re.compile('[ ]*(\d*)')
+_base = '([ \d]{3}[ A-Za-z]{2})'
+_ident = re.compile(_base + '    (.{30})(.{26})(.{7})(.{6})')
+_g = re.compile(_base + '  G (.{10})(.{2})(.{8})(.{2}).{24}(.{7})(.{2})')
+_p = re.compile(_base + '  P (.{10})(.{2})(.{18})(.{10})(.{6}).{9}(.{10})(.{2})(.{4})')
+_norm = re.compile(_base + '  N (.{10})(.{2})(.{8})(.{2})(.{8})(.{2})(.{8})(.{6})(.{7})(.{2})')
+_normp = re.compile(_base + ' PN (.{10})(.{2})(.{8})(.{2})(.{8})(.{2})(.{7})(.{2})')
+_decays = [' B- ', ' B+ ', ' EC ', ' IT ', ' A ']
+
 
 def _getvalue(obj, fn=float):
     try:
@@ -162,69 +174,38 @@ def _getvalue(obj, fn=float):
 
 
 def _get_val_err(valstr, errstr):
-    valstr = valstr.strip()
-    inval = _getvalue(valstr)
-    if 'E' in valstr:
-        valobj = valstr.split('E')
+    pm = _errpm.match(errstr)
+    err = _err.match(errstr)
+    if pm is None and err.group(1) == '':
+        return _getvalue(valstr), None
+    val = _valexp.match(valstr)
+    if val is None:
+        valexp = ''
+        val = valstr
     else:
-        valobj = valstr.split('e')
-    if len(valobj) > 1:
-        valstr, valexp = valobj
-        valexp = 'E' + valexp
-    else:
-        valstr = valobj[0]
-        valexp = 'E+0'
-    errstr = errstr.strip()
-    errobj = errstr.split('-')
-    if len(errobj) == 2:
-        errplus, errminus = errobj
-        errplus = errplus.lstrip('+')
-        errplus = errplus.lstrip('-')
-        errvalminus = _getvalue(errminus, int)
-    else:
-        errplus = errobj[0]
-        errvalminus = None
-        errminus = None
-    errvalplus = _getvalue(errplus, int)
-    if inval is not None and not np.isnan(inval):
-        errplus = _get_err(errvalplus, errplus, valexp, valstr, inval)
-        errminus = _get_err(errvalminus, errminus, valexp, valstr, inval)
-    else:
-        errplus = None
-    if errminus is not None:
-        return inval, (errplus, errminus)
-    else:
-        return inval, errplus
-
-
-def _get_err(errval, errstr, valexp, valstr, inval):
-    if errval is not None and not np.isnan(errval):
-        if '.' in errstr:
-            return float(errstr)
-        ind = valstr.find('.')
-        if ind == -1:
-            errval = float(errstr + valexp)
+        valexp = val.group(2)
+        val = val.group(1)
+    punc = _val.match(val)
+    if pm is not None:
+        if punc is None:
+            errplus = _getvalue(pm.group(1) + valexp)
+            errminus = _getvalue(pm.group(2) + valexp)
         else:
-            negindex = -(len(valstr) - ind)
-            nopunc = valstr.replace('.', '')
-            errdif = str(int(nopunc) - errval).zfill(len(valstr))
-            if float(errdif) < 0:
-                if negindex == -1:
-                    negindex = negindex + 2
-            errdif = errdif[:negindex + 1] + '.' + errdif[negindex + 1:] + valexp
-            errval = inval - float(errdif)
-        return errval
+            errplus = _get_err(len(punc.group(2)), pm.group(1), valexp)
+            errminus = _get_err(len(punc.group(2)), pm.group(2), valexp)
+        return _getvalue(valstr), (errplus, errminus)
     else:
-        return None
+        if punc is None:
+            errplus = _getvalue(errstr + valexp)
+        else:
+            errplus = _get_err(len(punc.group(2)), errstr, valexp)
+        return _getvalue(valstr), errplus
 
 
-_base = '([ \d]{3}[ A-Za-z]{2})'
-_ident = _base + '    (.{30})(.{26})(.{7})(.{6})'
-_g = _base + '  G (.{10})(.{2})(.{8})(.{2}).{24}(.{7})(.{2})'
-_p = _base + '  P (.{10})(.{2})(.{18})(.{10})(.{6}).{9}(.{10})(.{2})(.{4})'
-_norm = _base + '  N (.{10})(.{2})(.{8})(.{2})(.{8})(.{2})(.{8})(.{6})(.{7})(.{2})'
-_normp = _base + ' PN (.{10})(.{2})(.{8})(.{2})(.{8})(.{2})(.{7})(.{2})'
-_decays = [' B- ', ' B+ ', ' EC ', ' IT ', ' A ']
+def _get_err(plen, errstr, valexp):
+    errp = list((errstr.strip()).zfill(plen))
+    errp.insert(-plen, '.')
+    return float(''.join(errp) + valexp)
 
 
 def _parse_gamma_record(g):
@@ -422,7 +403,7 @@ def _parse_decay_dataset(lines, decay_s):
 
     """
     gammarays = []
-    ident = re.match(_ident, lines[0])
+    ident = _ident.match(lines[0])
     daughter = ident.group(1)
     parent = ident.group(2).split()[0]
     tfinal = None
@@ -430,23 +411,23 @@ def _parse_decay_dataset(lines, decay_s):
     nrbr = None
     nrbr_err = None
     for line in lines:
-        g_rec = re.match(_g, line)
+        g_rec = _g.match(line)
         if g_rec is not None:
             dat = _parse_gamma_record(g_rec)
             if not np.isnan(dat[0]):
                 gammarays.append(dat)
-        n_rec = re.match(_norm, line)
+        n_rec = _norm.match(line)
         if n_rec is not None:
             nr, nr_err, nt, nt_err, br, br_err, nb, nb_err, nrbr, nrbr_err = \
                 _parse_normalization_record(n_rec)
-        np_rec = re.match(_normp, line)
+        np_rec = _normp.match(line)
         if np_rec is not None:
             nrbr2, nrbr_err2, ntbr, ntbr_err, nbbr, nbbr_err = \
                 _parse_production_normalization_record(np_rec)
             if nrbr2 is not None:
                 nrbr = nrbr2
                 nrbr_err = nrbr_err2
-        p_rec = re.match(_p, line)
+        p_rec = _p.match(line)
         if p_rec is not None:
             tfinal, tfinalerr = _parse_parent_record(p_rec)
     if len(gammarays) > 0:
