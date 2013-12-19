@@ -55,6 +55,7 @@ def test_read_header_block():
     for ssrname in ssrnames:
         yield check_read_header_block, ssrname
 
+
 def check_read_header_block(ssrname):
         if 'mcnp_surfsrc.w' in ssrname:
             ssr = mcnp.SurfSrc(ssrname, 'rb')
@@ -131,12 +132,14 @@ def check_read_header_block(ssrname):
             assert_equal(ssr.mipts, 35)
             assert_equal(ssr.kjaq, 0)
 
+
 def test_compare():
     """Test the __cmp__() method in the SurfSrc class
     Tricky to test... this just verifies that comparisons are done right.
     """
     for ssrname in ssrnames:
         yield check_compare, ssrname
+
 
 def check_compare(ssrname):
         ssrA = mcnp.SurfSrc(ssrname, 'rb')
@@ -147,12 +150,14 @@ def check_compare(ssrname):
         ssrA.close()
         ssrB.close()
 
+
 def test_put_header_block():
     """We copy the header block, write to new file, re-read, and compare.
     This tests that information is preserved correctly when written.
     """
     for ssrname, sswname in zip(ssrnames, sswnames):
         yield check_put_header_block, ssrname, sswname
+
 
 def check_put_header_block(ssrname, sswname):
         ssr = mcnp.SurfSrc(ssrname, "rb")
@@ -201,6 +206,7 @@ def check_put_header_block(ssrname, sswname):
 
         os.system("rm -f " + sswname)
 
+
 def test_read_tracklist():
     """We read in tracklists and compare with known values.
     We use a file with a single track for this test.
@@ -228,6 +234,7 @@ def test_read_tracklist():
         assert_almost_equal(trackData.w, 0.80104937)
     return
 
+
 def test_print_header():
     """Check SurfSrc.print_header() against expected resulting string.
     We use a file with a single track for this test, but only use the
@@ -254,6 +261,7 @@ def test_print_header():
                  " 0, 0, 0, 0, 0, 0, 0, 0, 0]")
 
     return
+
 
 def test_print_tracklist():
     """Check SurfSrc.print_tracklist() against expected resulting string.
@@ -363,6 +371,7 @@ def test_read_headers():
         "Generate a well-defined PTRAC file for PyNE test cases")
     del p
 
+
 def test_determine_format():
     # 4-byte ints, little endian
     p = mcnp.PtracReader("mcnp_ptrac_i4_little.ptrac")
@@ -373,6 +382,7 @@ def test_determine_format():
     p = mcnp.PtracReader("mcnp_ptrac_i8_little.ptrac")
     assert_equal(p.endianness, "<")
     del p
+
 
 def test_read_events():
     p = mcnp.PtracReader("mcnp_ptrac_i4_little.ptrac")
@@ -388,6 +398,7 @@ def test_read_events():
     assert_equal(evt["zzz"], 0.0)
     del p
     del evt
+
 
 def test_write_to_hdf5():
     test_files = ["mcnp_ptrac_i4_little.ptrac",
@@ -454,10 +465,10 @@ def test_wwinp_n():
             8.818181818181813, 26.454545454545453,
             44.090909090909093, 61.72727272727272,
             79.363636363636374, 97.0, 99.0, 100.0],
-        [-100.0, -50.0, -13.333333333333336,
-            23.333333333333329, 60.0, 70.0, 80.0, 90.0, 100.0],
-        [-100.0, -66.666666666666657, -33.333333333333329,
-            0.0, 33.333333333333343, 66.666666666666657, 100.0]])
+         [-100.0, -50.0, -13.333333333333336,
+          23.333333333333329, 60.0, 70.0, 80.0, 90.0, 100.0],
+         [-100.0, -66.666666666666657, -33.333333333333329,
+          0.0, 33.333333333333343, 66.666666666666657, 100.0]])
     for x in range(0, 15):
         for y in range(0, 8):
             for z in range(0, 6):
@@ -494,10 +505,10 @@ def test_wwinp_n():
             8.818181818181813, 26.454545454545453,
             44.090909090909093, 61.72727272727272,
             79.363636363636374, 97.0, 99.0, 100.0],
-        [-100.0, -50.0, -13.333333333333336,
-            23.333333333333329, 60.0, 70.0, 80.0, 90.0, 100.0],
-        [-100.0, -66.666666666666657, -33.333333333333329,
-            0.0, 33.333333333333343, 66.666666666666657, 100.0]])
+         [-100.0, -50.0, -13.333333333333336,
+          23.333333333333329, 60.0, 70.0, 80.0, 90.0, 100.0],
+         [-100.0, -66.666666666666657, -33.333333333333329,
+          0.0, 33.333333333333343, 66.666666666666657, 100.0]])
     for x in range(0, 15):
         for y in range(0, 8):
             for z in range(0, 6):
@@ -562,10 +573,10 @@ def test_wwinp_p():
     assert_equal(
         ww1.bounds,
         [[-100.0, 100],
-        [-100.0, -50.0, -13.333333333333336,
-            23.333333333333329, 60.0, 70.0, 80.0, 90.0, 100.0],
-        [-100.0, -66.666666666666657, -33.333333333333329,
-            0.0, 33.333333333333343, 66.666666666666657, 100.0]])
+         [-100.0, -50.0, -13.333333333333336,
+          23.333333333333329, 60.0, 70.0, 80.0, 90.0, 100.0],
+         [-100.0, -66.666666666666657, -33.333333333333329,
+          0.0, 33.333333333333343, 66.666666666666657, 100.0]])
     for x in range(0, 1):
         for y in range(0, 8):
             for z in range(0, 6):
@@ -597,10 +608,10 @@ def test_wwinp_p():
     assert_equal(
         ww2.bounds,
         [[-100.0, 100],
-        [-100.0, -50.0, -13.333333333333336,
-            23.333333333333329, 60.0, 70.0, 80.0, 90.0, 100.0],
-        [-100.0, -66.666666666666657, -33.333333333333329,
-            0.0, 33.333333333333343, 66.666666666666657, 100.0]])
+         [-100.0, -50.0, -13.333333333333336,
+          23.333333333333329, 60.0, 70.0, 80.0, 90.0, 100.0],
+         [-100.0, -66.666666666666657, -33.333333333333329,
+          0.0, 33.333333333333343, 66.666666666666657, 100.0]])
     for x in range(0, 1):
         for y in range(0, 8):
             for z in range(0, 6):
@@ -664,10 +675,10 @@ def test_wwinp_np():
     assert_equal(
         ww1.bounds,
         [[-100.0, 100],
-        [-100.0, -50.0, -13.333333333333336,
-            23.333333333333329, 60.0, 70.0, 80.0, 90.0, 100.0],
-        [-100.0, -66.666666666666657, -33.333333333333329,
-            0.0, 33.333333333333343, 66.666666666666657, 100.0]])
+         [-100.0, -50.0, -13.333333333333336,
+          23.333333333333329, 60.0, 70.0, 80.0, 90.0, 100.0],
+         [-100.0, -66.666666666666657, -33.333333333333329,
+          0.0, 33.333333333333343, 66.666666666666657, 100.0]])
     for x in range(0, 1):
         for y in range(0, 8):
             for z in range(0, 6):
@@ -711,10 +722,10 @@ def test_wwinp_np():
     assert_equal(
         ww2.bounds,
         [[-100.0, 100],
-        [-100.0, -50.0, -13.333333333333336,
-            23.333333333333329, 60.0, 70.0, 80.0, 90.0, 100.0],
-        [-100.0, -66.666666666666657, -33.333333333333329,
-            0.0, 33.333333333333343, 66.666666666666657, 100.0]])
+         [-100.0, -50.0, -13.333333333333336,
+          23.333333333333329, 60.0, 70.0, 80.0, 90.0, 100.0],
+         [-100.0, -66.666666666666657, -33.333333333333329,
+          0.0, 33.333333333333343, 66.666666666666657, 100.0]])
     for x in range(0, 1):
         for y in range(0, 8):
             for z in range(0, 6):
