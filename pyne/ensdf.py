@@ -228,6 +228,25 @@ _decays = [' B- ', ' B+ ', ' EC ', ' IT ', ' A ']
 
 
 def _parse_gamma_record(g):
+    """
+    This parses an ENSDF gamma record
+
+    Parameters
+    ----------
+    g : re.MatchObject
+        regular expression MatchObject
+
+    Returns
+    -------
+    dat : np.ndarray
+        This array contains 6 floats corresponding to:
+            * gamma ray energy in keV
+            * uncertainty in energy
+            * intensity
+            * uncertainty in intensity
+            * electron conversion intensity
+            * uncertainty in electron conversion intensity
+    """
     dat = np.zeros(6)
     en, en_err = _get_val_err(g.group(2), g.group(3))
     inten, inten_err = _get_val_err(g.group(4), g.group(5))
@@ -237,6 +256,41 @@ def _parse_gamma_record(g):
 
 
 def _parse_normalization_record(n_rec):
+    """
+    This parses an ENSDF normalization record
+
+    Parameters
+    ----------
+    n_rec : re.MatchObject
+        regular expression MatchObject
+
+    Returns
+    -------
+    nr : float
+        Multiplier for converting relative photon intensity to photons per 100
+        decays of the parent through the decay branch or to photons per 100
+        neutron captures for (n,g).
+    nr_err : float
+        Uncertainty in nr
+    nt : float
+        Multiplier for converting relative transition intensity to transitions
+        per 100 decays of the parent through the decay branch or to photons per 100
+        neutron captures for (n,g).
+    nt_err : float
+        Uncertainty in nt
+    br : float
+        Branching ratio multiplier for converting intensity per 100 decays
+        through this decay branch to intensity per 100 decays of the parent
+        nuclide.
+    br_err : float
+        Uncertainty in br
+    nb : float
+        Multiplier for converting relative B- and EC intensities to intensities
+        per 100 decays through this decay branch.
+    nb_err : float
+        Uncertainty in nb
+
+    """
     nr, nr_err = _get_val_err(n_rec.group(2), n_rec.group(3))
     nt, nt_err = _get_val_err(n_rec.group(4), n_rec.group(5))
     br, br_err = _get_val_err(n_rec.group(6), n_rec.group(7))
@@ -253,6 +307,32 @@ def _parse_normalization_record(n_rec):
 
 
 def _parse_production_normalization_record(np_rec):
+    """
+    This parses an ENSDF production normalization record
+
+    Parameters
+    ----------
+    np_rec : re.MatchObject
+        regular expression MatchObject
+
+    Returns
+    -------
+    nrbr : float
+        Multiplier for converting relative photon intensity to photons per 100
+        decays of the parent nuclide
+    nrbr_err : float
+        Uncertainty in nrbr
+    ntbr : float
+        Multiplier for converting relative transition intensity to transitions
+        per 100 decays of the parent nuclide
+    ntbr_err : float
+        Uncertainty in ntbr
+    nbbr: float
+        Multiplier for converting relative B- and EC intensities to intensity
+        per 100 decays of the parent nuclide
+    nbbr_err : float
+        Uncertainty in nbbr
+    """
     nrbr, nrbr_err = _get_val_err(np_rec.group(2), np_rec.group(3))
     ntbr, ntbr_err = _get_val_err(np_rec.group(4), np_rec.group(5))
     nbbr, nbbr_err = _get_val_err(np_rec.group(6), np_rec.group(7))
@@ -260,6 +340,21 @@ def _parse_production_normalization_record(np_rec):
 
 
 def _parse_parent_record(p_rec):
+    """
+    This parses an ENSDF parent record
+
+    Parameters
+    ----------
+    p_rec : re.MatchObject
+        regular expression MatchObject
+
+    Returns
+    -------
+    tfinal : float
+        half-life in seconds
+    tfinalerr : float
+        Uncertainty in half-life in seconds
+    """
     e, e_err = _get_val_err(p_rec.group(2), p_rec.group(3))
     j = p_rec.group(4)
     t = p_rec.group(5)
@@ -290,23 +385,40 @@ def _parse_parent_record(p_rec):
 
 def _parse_decay_dataset(lines, decay_s):
     """
-    This parses a gamma ray dataset It returns the data as tuple containing:
+    This parses a gamma ray dataset It returns a tuple of the data.
 
-    1. the parent id
-    2. the daughter id
-    3. the primary decay type
-    4. Half-life in seconds
-    5. Half-life error in seconds
-    6. Conversion factor for gamma intensity to photons per 100 decays of the
-       parent
-    7. Error in 6
-    8. a numpy array containing information about each gamma ray:
-        * energy in keV
-        * uncertainty in energy
-        * intensity
-        * uncertainty in intensity
-        * electron conversion intensity
-        * uncertainty in electron conversion intensity
+    Parameters
+    ----------
+    lines : list of str
+        list containing lines from one dataset of an ensdf file
+    decay_s : str
+        string of the decay type
+
+    Returns
+    -------
+    int
+        nuc_id of the parent
+    int
+        nuc_id of the daughter
+    str
+        decay type
+    float
+        half-life in seconds
+    float
+        half-life error in seconds
+    float
+        Conversion factor for gamma intensity to photons per 100 decays of the
+        parent
+    float
+        Error in conversion factor for gamma intensity
+    numpy.ndarray
+        a numpy array containing information about each gamma ray:
+            * energy in keV
+            * uncertainty in energy
+            * intensity
+            * uncertainty in intensity
+            * electron conversion intensity
+            * uncertainty in electron conversion intensity
 
     """
     gammarays = []
@@ -339,29 +451,43 @@ def _parse_decay_dataset(lines, decay_s):
             tfinal, tfinalerr = _parse_parent_record(p_rec)
     if len(gammarays) > 0:
         gammas = np.array(gammarays)
-        return _to_id(parent), _to_id(daughter), decay_s, tfinal, tfinalerr, \
+        return _to_id(parent), _to_id(daughter), decay_s.strip(), tfinal, tfinalerr, \
                nrbr, nrbr_err, gammas
     return None
 
 
 def gamma_rays(filename='ensdf.001'):
     """
-    This splits an ensdf file into datasets. It then passes the dataset to the
+    This splits an ENSDF file into datasets. It then passes the dataset to the
     appropriate parser. Currently only a subset of decay datasets are
-    supported.
+    supported. The output is a list of objects containing information
+    pertaining to a particular decay. This object is described in detail in the
+    _parse_decay_dataset function.
+
+    Parameters
+    ----------
+    filename : str
+        Name of ENSDF formatted file
+
+    Returns
+    -------
+    decaylist : list of tuples
+        list of objects containing information pertaining to a particular
+        decay. Contents of the tuple are described in the returns of the
+        _parse_decay_dataset function.
 
     """
-    f = file(filename, 'r')
-    decaylist = []
-    dat = f.read()
-    datasets = dat.split(80 * " " + "\n")[0:-1]
-    for dataset in datasets:
-        lines = dataset.splitlines()
-        ident = re.match(_ident, lines[0])
-        if ident is not None:
-            for decay_s in _decays:
-                if decay_s in ident.group(2):
-                    decay = _parse_decay_dataset(lines, decay_s)
-                    if decay is not None:
-                        decaylist.append(decay)
+    with open(filename, 'r') as f:
+        decaylist = []
+        dat = f.read()
+        datasets = dat.split(80 * " " + "\n")[0:-1]
+        for dataset in datasets:
+            lines = dataset.splitlines()
+            ident = re.match(_ident, lines[0])
+            if ident is not None:
+                for decay_s in _decays:
+                    if decay_s in ident.group(2):
+                        decay = _parse_decay_dataset(lines, decay_s)
+                        if decay is not None:
+                            decaylist.append(decay)
     return decaylist
