@@ -162,21 +162,24 @@ class SurfSrc(_BinaryReader):
         return self.print_header()
 
     def print_header(self):
-        header_string = "Code: {0} (version: {1}) [{2}]\n".format(\
+        header_string = "Code: {0} (version: {1}) [{2}]\n".format(
             self.kod, self.ver, self.loddat)
-        header_string += "Problem info: ({0}) {1}\n{2}\n".format(\
+        header_string += "Problem info: ({0}) {1}\n{2}\n".format(
             self.idtm, self.probid, self.aid)
         header_string += "Showing dump #{0}\n".format(self.knod)
-        header_string += "{0} histories, {1} tracks, {2} record size, "\
-            "{3} surfaces, {4} histories\n".format(\
+        header_string += (
+            "{0} histories, {1} tracks, {2} record size, "
+            "{0} surfaces, {1} histories\n").format(
             self.np1, self.nrss, self.ncrd,
             self.njsw, self.niss)
-        header_string += "{0} cells, source particle: {1},"\
-            " macrobody facet flag: {2}\n".format(\
+        header_string += (
+            "{0} cells, source particle: {1},"
+            " macrobody facet flag: {2}\n").format(
             self.niwr, self.mipts, self.kjaq)
         for i in self.surflist:
-            header_string += "Surface {0}: facet {1},"\
-                " type {2} with {3} parameters: (".format(\
+            header_string += (
+                "Surface {0}: facet {1},"
+                " type {2} with {3} parameters: (").format(
                 i.id, i.facet_id, i.type, i.num_params)
             if i.num_params > 1:
                 for j in i.surf_params:
@@ -240,24 +243,24 @@ class SurfSrc(_BinaryReader):
                 return cmp(other.surflist[surf].id, self.surflist[surf].id)
             if other.surflist[surf].facet_id != self.surflist[surf].facet_id:
                 # facet_id doesn't match
-                return cmp(other.surflist[surf].facet_id, 
-                    self.surflist[surf].facet_id)
+                return cmp(other.surflist[surf].facet_id,
+                           self.surflist[surf].facet_id)
             if other.surflist[surf].type != self.surflist[surf].type:
                 # type doesn't match
-                return cmp(other.surflist[surf].type, 
-                    self.surflist[surf].type)
+                return cmp(other.surflist[surf].type,
+                           self.surflist[surf].type)
             if other.surflist[surf].num_params != \
                     self.surflist[surf].num_params:
                 # num_params ddoesn't match
-                return cmp(other.surflist[surf].num_params, 
-                    self.surflist[surf].num_params)
+                return cmp(other.surflist[surf].num_params,
+                           self.surflist[surf].num_params)
             if other.surflist[surf].surf_params != \
                     self.surflist[surf].surf_params:
                 # surf_params doesn't match
-                return cmp(other.surflist[surf].surf_params, 
-                    self.surflist[surf].surf_params)
+                return cmp(other.surflist[surf].surf_params,
+                           self.surflist[surf].surf_params)
 
-        return 0   
+        return 0
 
     def read_header(self):
         """Read in the header block data. This block comprises 4 fortran
@@ -275,8 +278,11 @@ class SurfSrc(_BinaryReader):
 
             if '2.6.0' in self.ver:
                 self.loddat = header.get_string(28)[0]  # code version date
-            else:
+            elif '5    ' in self.ver:
                 self.loddat = header.get_string(8)[0]  # code version date
+            else:
+                raise SurfSrcError("MCNP5/X Version:" +
+                                   self.ver.rstrip() + " not supported")
 
             self.idtm = header.get_string(19)[0]    # current date and time
             self.probid = header.get_string(19)[0]  # problem id string
@@ -313,9 +319,9 @@ class SurfSrc(_BinaryReader):
             tablelengths = self.get_fortran_record()
 
             # interpret table lengths
-            self.np1 = tablelengths.get_int()[0]       # hist used to gen.source
+            self.np1 = tablelengths.get_int()[0]     # hist used to gen.source
             self.notsure0 = tablelengths.get_int()[0]  # vals in surf src rec.
-            self.nrss = tablelengths.get_int()[0]      # tracks writ. to surf.src
+            self.nrss = tablelengths.get_int()[0]    # tracks writ. to surf.src
             self.notsure1 = tablelengths.get_int()[0]  # number of surfaces
             self.ncrd = tablelengths.get_int()[0]      # histories to surf.src
             self.njsw = tablelengths.get_int()[0]      # number of surfaces
@@ -486,6 +492,16 @@ class SurfSrc(_BinaryReader):
         #newrecord.put_int( [self.summary_extra])
         self.put_fortran_record(newrecord)
         return
+
+
+class SurfSrcError(Exception):
+    """Case class for all surface source reader errors."""
+
+    def __init__(self, msg):
+        self.msg = msg
+
+    def __str__(self):
+        return repr(self.msg)
 
 
 class Srctp(_BinaryReader):
