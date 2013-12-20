@@ -451,12 +451,12 @@ ensdf_sample = """\
 
 def test_gamma_rays():
     import tempfile
+    import os
 
-    f = tempfile.NamedTemporaryFile(delete=False)
-    f.write(ensdf_sample)
-    f.close()
+    with tempfile.NamedTemporaryFile(delete=False) as f:
+        f.write(ensdf_sample)
     gr = ensdf.gamma_rays(f.name)
-    f.__del__()
+    os.remove(f.name)
     assert_equal(gr[0][0:7], (631520000,
                               641520000,
                               'B-',
