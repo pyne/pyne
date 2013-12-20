@@ -439,7 +439,7 @@ def _parse_decay_dataset(lines, decay_s):
     return None
 
 
-def gamma_rays(filename='ensdf.001'):
+def gamma_rays(f='ensdf.001'):
     """
     This splits an ENSDF file into datasets. It then passes the dataset to the
     appropriate parser. Currently only a subset of decay datasets are
@@ -460,17 +460,20 @@ def gamma_rays(filename='ensdf.001'):
         _parse_decay_dataset function.
 
     """
-    with open(filename, 'r') as f:
-        decaylist = []
+    if isinstance(f, str):
+        with open(f, 'r') as f:
+            dat = f.read()
+    else:
         dat = f.read()
-        datasets = dat.split(80 * " " + "\n")[0:-1]
-        for dataset in datasets:
-            lines = dataset.splitlines()
-            ident = re.match(_ident, lines[0])
-            if ident is not None:
-                for decay_s in _decays:
-                    if decay_s in ident.group(2):
-                        decay = _parse_decay_dataset(lines, decay_s)
-                        if decay is not None:
-                            decaylist.append(decay)
+    decaylist = []
+    datasets = dat.split(80 * " " + "\n")[0:-1]
+    for dataset in datasets:
+        lines = dataset.splitlines()
+        ident = re.match(_ident, lines[0])
+        if ident is not None:
+            for decay_s in _decays:
+                if decay_s in ident.group(2):
+                    decay = _parse_decay_dataset(lines, decay_s)
+                    if decay is not None:
+                        decaylist.append(decay)
     return decaylist
