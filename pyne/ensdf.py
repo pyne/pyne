@@ -153,7 +153,7 @@ def half_life(ensdf):
 
     return data
 
-_valexp = re.compile('(\d*)([Ee]\d*)')
+_valexp = re.compile('([0-9.]*)([Ee][+-]\d*)')
 _val = re.compile('(\d*)[.](\d*)')
 _errpm = re.compile('[+](\d*)[-](\d*)')
 _err = re.compile('[ ]*(\d*)')
@@ -185,7 +185,7 @@ def _get_val_err(valstr, errstr):
     else:
         valexp = val.group(2)
         val = val.group(1)
-    punc = _val.match(val)
+    punc = _val.match(val.strip())
     if pm is not None:
         if punc is None:
             errplus = _getvalue(pm.group(1) + valexp)
@@ -230,6 +230,8 @@ def _parse_gamma_record(g):
     """
     dat = np.zeros(6)
     en, en_err = _get_val_err(g.group(2), g.group(3))
+    if en == 283.5:
+        print((g.group(4), g.group(5)))
     inten, inten_err = _get_val_err(g.group(4), g.group(5))
     conv, conv_err = _get_val_err(g.group(6), g.group(7))
     dat[:] = en, en_err, inten, inten_err, conv, conv_err
@@ -281,7 +283,7 @@ def _parse_normalization_record(n_rec):
     else:
         nrbr = None
     if nr_err is not None and br_err is not None:
-        nrbr_err = np.sqrt(nr_err ** 2 + br_err ** 2)
+        nrbr_err = np.sqrt((nr_err ** 2) + (br_err ** 2))
     else:
         nrbr_err = None
     return nr, nr_err, nt, nt_err, br, br_err, nb, nb_err, nrbr, nrbr_err
