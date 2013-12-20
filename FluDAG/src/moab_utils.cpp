@@ -272,12 +272,16 @@ ErrorCode MyClass::unpack_packed_string( moab::Interface* mbi, Tag tag, EntityHa
   return MB_SUCCESS;
 }
 
-ErrorCode MyClass::parse_properties( Interface* mbi,  const std::vector<std::string>& keywords,
-                            const std::map<std::string, std::string>& keyword_synonyms )
+// ErrorCode MyClass::parse_properties( Interface* mbi,  const std::vector<std::string>& keywords,
+//                            const std::map<std::string, std::string>& keyword_synonyms )
+ErrorCode MyClass::parse_properties( Interface* mbi,  const std::vector<std::string>& keywords)
+//                            const std::map<std::string, std::string>& keyword_synonyms )
 {
   ErrorCode rval;
+  const std::map<std::string,std::string> no_synonyms;
   // master keyword map, mapping user-set words in cubit to canonical property names
-  std::map< std::string, std::string > keyword_map( keyword_synonyms );
+  // std::map< std::string, std::string > keyword_map( keyword_synonyms );
+  std::map< std::string, std::string > keyword_map( no_synonyms );
 
   for( std::vector<std::string>::const_iterator i = keywords.begin();
        i != keywords.end(); ++i )
