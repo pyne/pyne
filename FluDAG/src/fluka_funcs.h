@@ -110,11 +110,11 @@ extern "C" {
   /*
    * Prepare a descriptive string that creates the properties of the volume whose index is index
    */
-  std::string mat_property_string (int index, std::vector<std::string> &properties);
+  // std::string mat_property_string (int index, std::vector<std::string> &properties);
   /*
    * Write records to a *.inp file for each volume tagged with material info and scoring requests.
    */
-  void fludagwrite_assignma(std::string matfile);  
+  // void fludagwrite_assignma(std::string matfile);  
 
   void dagmc_version_(double* dagmcVersion);
 #ifdef __cplusplus
