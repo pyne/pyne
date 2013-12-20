@@ -230,8 +230,6 @@ def _parse_gamma_record(g):
     """
     dat = np.zeros(6)
     en, en_err = _get_val_err(g.group(2), g.group(3))
-    if en == 283.5:
-        print((g.group(4), g.group(5)))
     inten, inten_err = _get_val_err(g.group(4), g.group(5))
     conv, conv_err = _get_val_err(g.group(6), g.group(7))
     dat[:] = en, en_err, inten, inten_err, conv, conv_err
