@@ -5,7 +5,7 @@ import nose
 import numpy as np
 import numpy.testing as npt
 
-from nose.tools import assert_equal
+from nose.tools import assert_equal, assert_almost_equal
 
 from pyne import ensdf
 from pyne.utils import to_sec
@@ -454,15 +454,15 @@ def test_gamma_rays():
     f.seek(0)
     gr = ensdf.gamma_rays(f)
     f.close()
-    
-    assert_equal(gr[0][0:7], (631520000,
-                              641520000,
-                              'B-',
-                              426902832.0,
-                              189216.0,
-                              0.26558010000000004,
-                              0.0031953090617340917,))
-    npt.assert_array_equal(gr[0][7], [[3.44278500e+02, 1.20000000e-03, 1.00000000e+02,
+
+    assert_almost_equal(gr[0][0:7], (631520000,
+                        641520000,
+                        'B-',
+                        426902832.0,
+                        189216.0,
+                        0.26558010000000004,
+                        0.0031953090617340917,))
+    npt.assert_array_almost_equal(gr[0][7], [[3.44278500e+02, 1.20000000e-03, 1.00000000e+02,
                                        1.60000000e+00, 3.99000000e-02, np.nan],
                                       [2.71131000e+02, 8.00000000e-03, 2.75000000e-01,
                                        8.00000000e-03, 8.31000000e-02, np.nan],
