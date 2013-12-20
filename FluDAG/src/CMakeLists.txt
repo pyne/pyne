@@ -28,9 +28,18 @@ SET (fluka_libdir ${FLUPRO})
 #ADD_CUSTOM_TARGET (mgdraw
 #	        DEPENDS mgdraw.o)
 
-SET (commonfiles fluka_funcs.cpp dagmc_utils.cpp Input.cpp UnitNumberManager.cpp)
+SET (fludag_files fluka_funcs.cpp dagmc_utils.cpp Input.cpp UnitNumberManager.cpp)
+SET (dagmc_define_files parse_flu.cpp chkerr.cpp moab_utils.cpp UnitNumberManager.cpp )
 SET (wrapperfiles WrapMag.cc WrapLookFX.cc WrapReg.cc WrapFlgfwr.cc)
 
 # Create the executable that can call flukam_
-ADD_EXECUTABLE(mainfludag mainFluDAG.cpp ${commonfiles} ${wrapperfiles})
+ADD_EXECUTABLE(mainfludag mainFluDAG.cpp ${fludag_files} ${wrapperfiles})
 TARGET_LINK_LIBRARIES(mainfludag ${moablibs} ${FLUPRO}/libflukahp.a gfortran)
+
+# Create the executable that can call flukam_
+ADD_EXECUTABLE(mainparse dagmc_define.cpp ${dagmc_define_files} )
+TARGET_LINK_LIBRARIES(mainparse ${moablibs} ${FLUPRO}/libflukahp.a gfortran)
+
+ADD_EXECUTABLE(maintest dagmc_define.cpp chkerr.cpp UnitNumberManager.cpp parse_flu.cpp moab_utils.cpp)
+TARGET_LINK_LIBRARIES(maintest ${moablibs} ${FLUPRO}/libflukahp.a gfortran)
+
