@@ -191,19 +191,25 @@ class SurfSrc(_BinaryReader):
 
         return header_string
 
-    def print_tracklist(self):
+    def print_tracklist(self,quit=None):
+
+        if quit is None:
+            quit = self.nrss
+
         track_data = "Track Data\n"
         track_data += \
             "       nps   BITARRAY        WGT        ERG        TME" \
             "             X             Y             Z" \
             "          U          V     COSINE  |       W\n"
-        for j in self.tracklist:
+        for cnt, j in enumerate(self.tracklist):
             format_string = "%10d %10g %10.5g %10.5g %10.5g" \
                             " %13.5e %13.5e %13.5e" \
                             " %10.5f %10.5f %10.5f  | %10.5f "
             track_data += format_string % (
                 j.nps, j.bitarray, j.wgt, j.erg, j.tme,
                 j.x, j.y, j.z, j.u, j.v, j.cs, j.w) + "\n"
+            if cnt > quit: 
+                break
 
         return track_data
 
@@ -262,7 +268,7 @@ class SurfSrc(_BinaryReader):
 
         return 0
 
-    def read_header(self):
+    def read_full_header(self):
         """Read in the header block data. This block comprises 4 fortran
         records which we refer to as:
         header, table1, table2, summary.
@@ -408,68 +414,90 @@ class SurfSrc(_BinaryReader):
             self.tracklist.append(track_data)
         return
 
-    def put_header(self):
+    def put_header(self, surface_source=None):
         """Write the header part of the header
-        to the surface source file
+        to the surface source file, surface_source drives in the info
+        from another SurfSrc object
         """
-        if 'SF_00001' in self.kod:
-            rec = [self.kod]
-            newrecord = _FortranRecord("".join(rec), len("".join(rec)))
-            newrecord.put_int([self.knod])
-            self.put_fortran_record(newrecord)
 
-            rec = [self.ver, self.loddat, self.idtm, self.probid, self.aid]
+        if surface_source is None:
+            surface_source = self
+
+        if 'SF_00001' in surface_source.kod:
+            rec = [surface_source.kod]
             newrecord = _FortranRecord("".join(rec), len("".join(rec)))
-            newrecord.put_int([self.knod])
+            newrecord.put_int([surface_source.knod])
+            surface_source.put_fortran_record(newrecord)
+
+            rec = [surface_source.ver, surface_source.loddat,
+                   surface_source.idtm, surface_source.probid,
+                   surface_source.aid]
+            newrecord = _FortranRecord("".join(rec), len("".join(rec)))
+            newrecord.put_int([surface_source.knod])
             self.put_fortran_record(newrecord)
         else:
-            rec = [self.kod, self.ver, self.loddat,
-                   self.idtm, self.probid, self.aid]
+            rec = [surface_source.kod, surface_source.ver,
+                   surface_source.loddat, surface_source.idtm,
+                   surface_source.probid, surface_source.aid]
             newrecord = _FortranRecord("".join(rec), len("".join(rec)))
-            newrecord.put_int([self.knod])
+            newrecord.put_int([surface_source.knod])
             self.put_fortran_record(newrecord)
         return
 
-    def put_table_1(self):
+    def put_table_1(self, surface_source=None):
         """Write the table1 part of the header
-        to the surface source file
+        to the surface source file, surface_source drives in the info
+        from another SurfSrc object
         """
+
+        if surface_source is None:
+            surface_source = self
+
         newrecord = _FortranRecord("", 0)
 
-        if '2.6.0' in self.ver:
-            newrecord.put_int([self.np1])
-            newrecord.put_int([self.nrss])
+        if '2.6.0' in surface_source.ver:
+            newrecord.put_int([surface_source.orignp1])
+            newrecord.put_int([surface_source.nrss])
         else:
-            newrecord.put_long([self.np1])
-            newrecord.put_long([self.nrss])
+            newrecord.put_long([surface_source.orignp1])
+            newrecord.put_long([surface_source.nrss])
 
-        newrecord.put_int([self.ncrd])
-        newrecord.put_int([self.njsw])
-        newrecord.put_long([self.niss])
+        newrecord.put_int([surface_source.ncrd])
+        newrecord.put_int([surface_source.njsw])
+        newrecord.put_int([surface_source.niss])
         self.put_fortran_record(newrecord)
         return
 
-    def put_table_2(self):
+    def put_table_2(self, surface_source=None):
         """Write the table2 part of the header
-        to the surface source file
+        to the surface source file, surface_source drives in the info
+        from another SurfSrc object
         """
+
+        if surface_source is None:
+            surface_source = self
+
         newrecord = _FortranRecord("", 0)
-        newrecord.put_int([self.niwr])
-        newrecord.put_int([self.mipts])
-        newrecord.put_int([self.kjaq])
-        newrecord.put_int(self.table2extra)
+        newrecord.put_int([surface_source.niwr])
+        newrecord.put_int([surface_source.mipts])
+        newrecord.put_int([surface_source.kjaq])
+        newrecord.put_int(surface_source.table2extra)
         self.put_fortran_record(newrecord)
         return
 
-    def put_surface_info(self):
+    def put_surface_info(self, surface_source=None):
         """Write the record for each surface
-        to the surface source file
+        to the surface source file, surface_source drives in the info
+        from another SurfSrc object
         """
 
-        for cnt, s in enumerate(self.surflist):
+        if surface_source is None:
+            surface_source = self
+
+        for cnt, s in enumerate(surface_source.surflist):
             newrecord = _FortranRecord("", 0)
             newrecord.put_int(s.id)
-            if self.kjaq == 1:
+            if surface_source.kjaq == 1:
                 newrecord.put_int(s.facet_id)  # don't add a 'dummy facet ID'
             # else no macrobody flag byte in the record
 
@@ -480,19 +508,69 @@ class SurfSrc(_BinaryReader):
             self.put_fortran_record(newrecord)
         return
 
-    def put_summary(self):
+    def put_summary(self, surface_source=None):
         """
         Write the summary part of the header
-        to the surface source file
+        to the surface source file, surface_source drives in the info
+        from another SurfSrc object
         """
+
+        if surface_source is None:
+            surface_source = self
+
         newrecord = _FortranRecord("", 0)
-        newrecord.put_int(list(self.summary_table))
-        newrecord.put_int(list(self.summary_extra))
+        newrecord.put_int(list(surface_source.summary_table))
+        newrecord.put_int(list(surface_source.summary_extra))
         #newrecord.put_int( [self.summary_table])
         #newrecord.put_int( [self.summary_extra])
         self.put_fortran_record(newrecord)
         return
 
+    def put_full_header(self, surface_source=None):
+        """
+        Write the full header up to the tracklist
+        to the surface source file, surface_source drives in the info
+        from another SurfSrc object
+        """
+
+        if surface_source is None:
+            surface_source = self
+
+        self.put_header(surface_source=surface_source)
+        self.put_table_1(surface_source=surface_source)
+        self.put_table_2(surface_source=surface_source)
+        self.put_surface_info(surface_source=surface_source)
+        self.put_summary(surface_source=surface_source)
+
+    def write_tracklist(self, surface_source=None):
+        """
+        Reads in track records for individual particles.
+        """
+
+        if surface_source is None:
+            surface_source = self
+
+        for j in range(surface_source.nrss):
+            newrecord = _FortranRecord("", 0)
+            # 11 records comprising particle information
+            newrecord.put_double(surface_source.tracklist[j].nps)
+            newrecord.put_double(surface_source.tracklist[j].bitarray)
+            newrecord.put_double(surface_source.tracklist[j].wgt)
+            newrecord.put_double(surface_source.tracklist[j].tme)
+            newrecord.put_double(surface_source.tracklist[j].x)
+            newrecord.put_double(surface_source.tracklist[j].y)
+            newrecord.put_double(surface_source.tracklist[j].z)
+            newrecord.put_double(surface_source.tracklist[j].u)
+            newrecord.put_double(surface_source.tracklist[j].v)
+            newrecord.put_double(surface_source.tracklist[j].cs)
+            newrecord.put_double(surface_source.tracklist[j].w)
+            self.put_fortran_record(newrecord)
+        return
+
+    def __del__(self):
+        """Destructor. The only thing to do is close the Ptrac file.
+        """
+        self.f.close()
 
 class Srctp(_BinaryReader):
     """This class stores source site data from a 'srctp' file written by
