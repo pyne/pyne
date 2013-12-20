@@ -105,7 +105,7 @@ def test_half_life():
     f.seek(0)
 
     hl = ensdf.half_life(f)
-
+    f.close()
     assert_equal(hl, [(10030000, 0.0, 20030000, to_sec(12.32, 'Y'), 1.0),
                       (20030000, 0.0, 20030000, np.inf, 1.0),
                       (20030000, 0.0, 20030000, np.inf, 1.0), ])
@@ -450,13 +450,11 @@ ensdf_sample = """\
 
 
 def test_gamma_rays():
-    import tempfile
-    import os
-
-    with tempfile.NamedTemporaryFile(delete=False) as f:
-        f.write(ensdf_sample)
-    gr = ensdf.gamma_rays(f.name)
-    os.remove(f.name)
+    f = StringIO(ensdf_sample)
+    f.seek(0)
+    gr = ensdf.gamma_rays(f)
+    f.close()
+    
     assert_equal(gr[0][0:7], (631520000,
                               641520000,
                               'B-',
