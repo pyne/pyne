@@ -18,7 +18,7 @@ class MyClass
 {
 public:
 
-  MyClass();
+//  MyClass();
 
   /** Calculate the volume contained in a 'volume' */
   ErrorCode measure_volume( Interface* mbi, EntityHandle volume, double& result );
@@ -93,9 +93,10 @@ public:
    *                 group named "graveyard".
    */
   // an empty synonym map to provide as a default argument to parse_properties()
-  static const std::map<std::string,std::string> no_synonyms;
-  ErrorCode parse_properties( Interface* mbi,  const std::vector<std::string>& keywords,
-                              const std::map<std::string, std::string>& keyword_synonyms=no_synonyms );
+  // static const std::map<std::string,std::string> no_synonyms;
+  ErrorCode parse_properties( Interface* mbi,  const std::vector<std::string>& keywords);
+  // ErrorCode parse_properties( Interface* mbi,  const std::vector<std::string>& keywords,
+                              // const std::map<std::string, std::string>& keyword_synonyms=no_synonyms );
 
   /** Get the value of a property on a volume or surface
    *
