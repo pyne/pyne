@@ -189,11 +189,7 @@ def check_put_header_block(ssrname, sswname):
         ssw.summary_table = ssr.summary_table
         ssw.summary_extra = ssr.summary_extra
 
-        ssw.put_header()
-        ssw.put_table_1()
-        ssw.put_table_2()
-        ssw.put_surface_info()
-        ssw.put_summary()
+        ssw.write_header()
         ssw.close()
 
         sswr = mcnp.SurfSrc(sswname, "rb")
