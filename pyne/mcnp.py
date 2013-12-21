@@ -493,6 +493,45 @@ class SurfSrc(_BinaryReader):
         self.put_fortran_record(newrecord)
         return
 
+    def write_header(self):
+        """
+        Write the full header up to the tracklist to the surface source file,
+        To gather all the info up to the tracklist this is it.
+        """
+
+        self.put_header()
+        self.put_table_1()
+        self.put_table_2()
+        self.put_surface_info()
+        self.put_summary()
+
+    def write_tracklist(self):
+        """
+        Write track records for individual particles.
+        """
+
+        for j in range(self.nrss):  # nrss is the size of tracklist
+            newrecord = _FortranRecord("", 0)
+            # 11 records comprising particle information
+            newrecord.put_double(self.tracklist[j].nps)
+            newrecord.put_double(self.tracklist[j].bitarray)
+            newrecord.put_double(self.tracklist[j].wgt)
+            newrecord.put_double(self.tracklist[j].tme)
+            newrecord.put_double(self.tracklist[j].x)
+            newrecord.put_double(self.tracklist[j].y)
+            newrecord.put_double(self.tracklist[j].z)
+            newrecord.put_double(self.tracklist[j].u)
+            newrecord.put_double(self.tracklist[j].v)
+            newrecord.put_double(self.tracklist[j].cs)
+            newrecord.put_double(self.tracklist[j].w)
+            self.put_fortran_record(newrecord)
+        return
+
+    def __del__(self):
+        """Destructor. The only thing to do is close the Ptrac file.
+        """
+        self.f.close()
+
 
 class Srctp(_BinaryReader):
     """This class stores source site data from a 'srctp' file written by
