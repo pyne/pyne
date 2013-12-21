@@ -344,20 +344,13 @@ def _parse_parent_record(p_rec):
     if len(tobj) == 2:
         t, t_unit = tobj
         t, terr = _get_val_err(t, p_rec.group(6))
-        units = ['Y', 'D', 'H', 'M', 'S', 'MS', 'US', 'NS', 'PS',
-                 'FS', 'AS', 'EV', 'KEV', 'MEV']
-        values = [60. ** 2 * 24. * 365., 60. ** 2 * 24., 60. ** 2, 60., 1., 1.0E-3,
-                  1.0E-6, 1.0E-9, 1.0E-12, 1.0E-15, 1, 1E3, 1E6]
-        tmap = dict(zip(units, values))
-        tfinal = t * tmap[t_unit]
+        tfinal = to_sec(t, t_unit)
         if type(terr) == float:
-            tfinalerr = terr * tmap[t_unit]
+            tfinalerr = to_sec(terr, t_unit)
         elif terr is not None:
-            tfinalerr = terr[0] * tmap[t_unit], terr[1] * tmap[t_unit]
+            tfinalerr = to_sec(terr[0], t_unit), to_sec(terr[1], t_unit)
         else:
             tfinalerr = None
-        if 'EV' in t_unit:
-            print('{0} Half life in eV?!'.format(parent))
     else:
         tfinal = None
         tfinalerr = None
