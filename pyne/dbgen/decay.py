@@ -1,4 +1,5 @@
 """This module provides a way to grab and store raw data for radioactive decay."""
+from __future__ import print_function
 import os
 import glob
 import urllib
@@ -7,9 +8,9 @@ from zipfile import ZipFile
 import numpy as np
 import tables as tb
 
-from pyne import nucname
-from pyne import ensdf
-from pyne.dbgen.api import BASIC_FILTERS
+from .. import nucname
+from .. import ensdf
+from .api import BASIC_FILTERS
 
 def grab_ensdf_decay(build_dir=""):
     """Grabs the ENSDF decay data files
@@ -28,18 +29,18 @@ def grab_ensdf_decay(build_dir=""):
         pass
 
     # Grab ENSDF files and unzip them.
-    iaea_base_url = 'http://www-nds.iaea.org/ensdf_base_files/2010-November/'
+    iaea_base_url = 'http://www-nds.iaea.org/ensdf_base_files/2013-October/'
     s3_base_url = 'http://s3.amazonaws.com/pyne/'
-    ensdf_zip = ['ensdf_1010_099.zip', 'ensdf_1010_199.zip', 'ensdf_1010_294.zip',]
+    ensdf_zip = ['ensdf_131009_099.zip', 'ensdf_131009_199.zip', 'ensdf_131009_294.zip',]
 
     for f in ensdf_zip:
         fpath = os.path.join(build_dir, f)
         if f not in os.listdir(build_dir):
-            print "  grabbing {0} and placing it in {1}".format(f, fpath)
+            print("  grabbing {0} and placing it in {1}".format(f, fpath))
             urllib.urlretrieve(iaea_base_url + f, fpath)
 
             if os.path.getsize(fpath) < 1048576: 
-                print "  could not get {0} from IAEA; trying S3 mirror".format(f)
+                print("  could not get {0} from IAEA; trying S3 mirror".format(f))
                 os.remove(fpath)
                 urllib.urlretrieve(s3_base_url + f, fpath)
 
@@ -48,7 +49,7 @@ def grab_ensdf_decay(build_dir=""):
             zf = ZipFile(fpath)
             for name in zf.namelist():
                 if not os.path.exists(os.path.join(build_dir, name)):
-                    print "    extracting {0} from {1}".format(name, f)
+                    print("    extracting {0} from {1}".format(name, f))
                     zf.extract(name, build_dir)
         finally:
             zf.close()
@@ -74,7 +75,7 @@ def parse_decay(build_dir=""):
     decay_data = []
     files = sorted([f for f in glob.glob(os.path.join(build_dir, 'ensdf.*'))])
     for f in files:
-        print "    parsing decay data from {0}".format(f)
+        print("    parsing decay data from {0}".format(f))
         decay_data += ensdf.half_life(f)
 
     ln2 = np.log(2.0)
@@ -127,14 +128,14 @@ def make_decay(args):
 
     with tb.openFile(nuc_data, 'r') as f:
         if hasattr(f.root, 'atomic_decay'):
-            print "skipping ENSDF decay data table creation; already exists."
+            print("skipping ENSDF decay data table creation; already exists.")
             return 
 
     # grab the decay data
-    print "Grabbing the ENSDF decay data from IAEA"
+    print("Grabbing the ENSDF decay data from IAEA")
     grab_ensdf_decay(build_dir)
 
     # Make atomic weight table once we have the array
-    print "Making decay data table."
+    print("Making decay data table.")
     make_atomic_decay_table(nuc_data, build_dir)
 

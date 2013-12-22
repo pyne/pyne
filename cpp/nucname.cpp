@@ -640,6 +640,7 @@ int pyne::nucname::mcnp_to_id(int nuc)
   else if (aaa == 0)
     // MCNP form natural nuclide
     return zzz * 10000000;
+  throw IndeterminateNuclideForm(nuc, "");
 };
 
 

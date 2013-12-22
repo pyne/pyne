@@ -3,6 +3,7 @@ the data to PyNE's HDF5 storage.  The data here is autonatically grabbed from
 the IAEA. 
 """
 
+from __future__ import print_function
 import re
 import os
 import urllib
@@ -11,8 +12,8 @@ from gzip import GzipFile
 import numpy as np
 import tables as tb
 
-from pyne import nucname
-from pyne.dbgen.api import BASIC_FILTERS
+from .. import nucname
+from .api import BASIC_FILTERS
 
 
 def grab_eaf_data(build_dir=""):
@@ -28,7 +29,7 @@ def grab_eaf_data(build_dir=""):
     build_dir = os.path.join(build_dir, 'EAF')
     try:
         os.makedirs(build_dir)
-        print build_dir, 'created'
+        print("{0} created".format(build_dir))
     except OSError:
         pass
 
@@ -40,15 +41,15 @@ def grab_eaf_data(build_dir=""):
 
     fpath = os.path.join(build_dir, eaf_gzip)
     if eaf_gzip not in os.listdir(build_dir):
-        print "  grabbing {0} and placing it in {1}".format(eaf_gzip, fpath)
+        print("  grabbing {0} and placing it in {1}".format(eaf_gzip, fpath))
         urllib.urlretrieve(iaea_url, fpath)
 
         if os.path.getsize(fpath) < 3215713: 
-            print "  could not get {0} from IAEA; trying S3 mirror".format(eaf_gzip)
+            print("  could not get {0} from IAEA; trying S3 mirror".format(eaf_gzip))
             os.remove(fpath)
             urllib.urlretrieve(s3_base_url + eaf_gzip, fpath)
             if os.path.getsize(fpath) < 3215713: 
-                print "  could not get {0} from S3 mirror".format(eaf_gzip)
+                print("  could not get {0} from S3 mirror".format(eaf_gzip))
                 return False
 
     # Write contents of single-file gzip archive to a new file
@@ -128,7 +129,7 @@ def parse_eaf_xs(build_file):
 
     eaf_array = np.array(eaf_data, dtype=eaf_dtype)
 
-    print "Read in {0} sets of EAF data.".format(len(eaf_array))
+    print("Read in {0} sets of EAF data.".format(len(eaf_array)))
 
     return eaf_array
 
@@ -145,7 +146,7 @@ def make_eaf_table(nuc_data, build_path=""):
     
     """
 
-    print "Grabbing the EAF activation data."
+    print("Grabbing the EAF activation data.")
     eaf_array = parse_eaf_xs(build_path)
 
     # Open the HDF5 file
@@ -246,11 +247,11 @@ def make_eaf(args):
     # Check if the table already exists
     with tb.openFile(nuc_data, 'a', filters=BASIC_FILTERS) as f:
         if hasattr(f.root, 'neutron') and hasattr(f.root.neutron, 'eaf_xs'):
-            print "skipping EAF activation data table creation; already exists."
+            print("skipping EAF activation data table creation; already exists.")
             return
 
     # grab the EAF data
-    print "Grabbing the EAF activation data from IAEA"
+    print("Grabbing the EAF activation data from IAEA")
     grabbed = grab_eaf_data(build_dir)
 
     if not grabbed:
@@ -264,6 +265,6 @@ def make_eaf(args):
         return
 
     #
-    print "Making EAF activation data table."
+    print("Making EAF activation data table.")
     make_eaf_table(nuc_data, build_path)
 

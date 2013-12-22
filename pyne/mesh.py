@@ -1,16 +1,18 @@
+from __future__ import print_function
 import copy
 import itertools
 from collections import Iterable, Sequence
+import warnings
 
 import numpy as np
 
 try:
     from itaps import iMesh, iBase, iMeshExtensions
 except ImportError:
-    raise ImportError("The mesh module requires imports of iMesh, iBase, and"
-          " iMeshExtensions from PyTAPS")
+    warnings.warn("the PyTAPS optional dependency could not be imported. "
+         "Some aspects of the mesh module may be incomplete.", ImportWarning)
 
-from pyne.material import Material, MaterialLibrary
+from .material import Material, MaterialLibrary
 
 # dictionary of lamba functions for mesh arithmetic
 _ops = {"+": lambda val_1, val_2: (val_1 + val_2), 
@@ -569,7 +571,7 @@ class Mesh(object):
                 try:
                     self.mesh.getTagHandle("BOX_DIMS")
                 except iBase.TagNotFoundError as e:
-                    print "BOX_DIMS not found on iMesh instance"
+                    print("BOX_DIMS not found on iMesh instance")
                     raise e
 
                 count = 0

@@ -64,11 +64,48 @@ prevents the developers from distributing it with PyNE.  However, the
 do its best to find relevant nuclear data elsewhere on your machine
 or from public sources on the internet.  
 
-On MacOSX, it may be necessary to add the pyne library path to the 
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Mac OSX Specific Instructions
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+| The instructions are based on using the homebrew http://brew.sh/ package manager
+| Install command line tools from https://developer.apple.com/downloads/
+| you will need to create an account in order to download.
+::
+
+    ruby -e "$(curl -fsSL https://raw.github.com/mxcl/homebrew/go/install)"
+    brew doctor
+    brew tap homebrew/science
+    brew install hdf5
+    brew install cmake
+    brew install python
+
+Add ::
+
+    export PATH=/usr/local/bin:$PATH
+    export PATH=/usr/local/share/python:$PATH
+
+to ~/.bash_profile then ::
+
+    source ~/.bash_profile
+    sudo pip install numpy
+    sudo chown -R $(whoami) /usr/local
+    brew install gfortran
+    pip install scipy
+    pip install cython
+    pip install numexpr
+    pip install tables
+
+download pyne-staging cd to that directory ::
+
+
+    cd Downloads/pyne-staging
+    python setup.py install
+
+It may be necessary to add the pyne library path to the
 ``DYLD_FALLBACK_LIBRARY_PATH`` environment variable *before* running 
 ``nuc_data_make``. To do this, add the following lines to your 
 ``~/.bashrc`` file where ``/path/to/pyne/lib`` is the absolute path to the 
-directory containing libpyne.dylib :: 
+directory containing libpyne.dylib ::
 
     DYLD_FALLBACK_LIBRARY_PATH="${DYLD_FALLBACK_LIBRARY_PATH}:/path/to/pyne/lib"
     export DYLD_FALLBACK_LIBRARY_PATH

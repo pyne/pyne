@@ -38,21 +38,29 @@ pyne_logo = """\
 """
 
 def parse_args():
-    distutils = []
+    distutils_args = []
     cmake = []
     make = []
-    argsets = [distutils, cmake, make]
+    argsets = [distutils_args, cmake, make]
     i = 0
     for arg in sys.argv:
         if arg == '--':
             i += 1
         else:
             argsets[i].append(arg)
-    hdf5opt = [o.split('=')[1] for o in distutils if o.startswith('--hdf5=')]
+    hdf5opt = [o.split('=')[1] for o in distutils_args if o.startswith('--hdf5=')]
     if 0 < len(hdf5opt):
         os.environ['HDF5_ROOT'] = hdf5opt[0]  # Expose to CMake
-        distutils = [o for o in distutils if not o.startswith('--hdf5=')]
-    return distutils, cmake, make
+        distutils_args = [o for o in distutils_args if not o.startswith('--hdf5=')]
+    # Change egg-base entry to absolute path so it behaves as expected
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--egg-base')
+    res, distutils_args = parser.parse_known_args(distutils_args)
+    if res.egg_base is not None:
+        local_path = os.path.dirname(os.path.abspath(sys.argv[0]))
+        distutils_args.append('--egg-base='+os.path.join(local_path, res.egg_base))
+    return distutils_args, cmake, make
 
 
 def main_body():

@@ -6,10 +6,10 @@ from collections import MutableMapping
 import numpy as np
 import tables as tb
 
-from pyne import nucname
-from pyne.pyne_config import pyne_conf
-from pyne.xs.models import partial_energy_matrix, phi_g
-from pyne.xs import data_source
+from .. import nucname
+from ..pyne_config import pyne_conf
+from .models import partial_energy_matrix, phi_g
+from . import data_source
 
 
 def _same_arr_or_none(a, b): 

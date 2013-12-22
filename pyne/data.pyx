@@ -37,6 +37,14 @@ import pyne.stlcontainers as conv
 
 
 #
+# hash map and initialization
+#
+cdef conv._MapStrStr data_checksums_proxy = conv.MapStrStr(False)
+data_checksums_proxy.map_ptr = &cpp_data.data_checksums
+data_checksums = data_checksums_proxy
+
+
+#
 # atomic_mass functions
 #
 cdef conv._MapIntDouble atomic_mass_map_proxy = conv.MapIntDouble(False)
@@ -79,7 +87,7 @@ natural_abund_map_proxy.map_ptr = &cpp_data.natural_abund_map
 natural_abund_map = natural_abund_map_proxy
 
 # initialize natural_abund_map
-cpp_data.natural_abund(<int>10000000)
+cpp_data.natural_abund(<int> 10000000)
 
 abundance_by_z = dict([(i, []) for i in range(1,119)])
 for zas, abundance in natural_abund_map.items():

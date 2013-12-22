@@ -1,4 +1,5 @@
 """This module provides a way to grab and store raw data for atomic weights."""
+from __future__ import print_function
 import os
 import re
 import pkgutil
@@ -6,9 +7,9 @@ import pkgutil
 import numpy as np
 import tables as tb
 
-from pyne import nucname
-from pyne.dbgen.api import BASIC_FILTERS
-from pyne.dbgen.isotopic_abundance import get_isotopic_abundances
+from .. import nucname
+from .api import BASIC_FILTERS
+from .isotopic_abundance import get_isotopic_abundances
 
 # Note that since ground state and meta-stable isotopes are of the same atomic weight, 
 # the meta-stables have been discluded from the following data sets.
@@ -138,14 +139,14 @@ def make_atomic_weight(args):
     if os.path.exists(nuc_data):
         with tb.openFile(nuc_data, 'r') as f:
             if hasattr(f.root, 'atomic_weight'):
-                print "skipping atomic weights data table creation; already exists."
-                return 
+                print("skipping atomic weights data table creation; already exists.")
+                return
 
     # Then grab mass data
-    print "Copying AME 2012 atomic mass data."
+    print("Copying AME 2012 atomic mass data.")
     copy_atomic_mass_adjustment(build_dir)
 
     # Make atomic weight table once we have the array
-    print "Making atomic weight data table."
+    print("Making atomic weight data table.")
     make_atomic_weight_table(nuc_data, build_dir)
 
