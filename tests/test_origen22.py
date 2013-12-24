@@ -143,12 +143,12 @@ def test_parse_tape6():
     assert_array_equal(r['average_specific_power'], [0.0, 5.50E-01])
 
     tab_keys = set(['table_{0}'.format(n) for n in range(1, 11) + range(13, 25)])
-    assert_true(tab_keys <=  set(r.keys()))
+    assert_true(tab_keys <=  set(r))
 
     for tk in tab_keys:
         for ttype in ['nuclide', 'element', 'summary']:
             if ttype in r[tk]:
-                assert_true(set(r[tk][ttype].keys()) <= set(['title', 'units', 'activation_products', 'actinides', 'fission_products']))
+                assert_true(set(r[tk][ttype]) <= set(['title', 'units', 'activation_products', 'actinides', 'fission_products']))
 
     assert_array_equal(r['alpha_neutron_source']['U235'], [7.509E-04, 2.442E-14])
     assert_array_equal(r['spont_fiss_neutron_source']['ES255'], [0.000E+00, 1.917E+05])
@@ -167,12 +167,12 @@ def test_parse_tape6_PWRM021():
     assert_array_equal(r['average_flux'], [0.00E+00,  3.46E+14,  3.46E+14,  3.46E+14,  3.46E+14,  3.46E+14,  3.46E+14,  3.46E+14,  3.46E+14,  3.46E+14,  3.46E+14,  3.46E+14])
 
     tab_keys = set(['table_{0}'.format(n) for n in [5]])
-    assert_true(tab_keys <=  set(r.keys()))
+    assert_true(tab_keys <=  set(r))
 
     for tk in tab_keys:
         for ttype in ['nuclide', 'element', 'summary']:
             if ttype in r[tk]:
-                assert_true(set(r[tk][ttype].keys()) <= set(['title', 'units', 'activation_products', 'actinides', 'fission_products']))
+                assert_true(set(r[tk][ttype]) <= set(['title', 'units', 'activation_products', 'actinides', 'fission_products']))
 
     assert_array_equal(r['alpha_neutron_source']['CM242'], [0.00000E+00, 8.50160E+08, 1.28411E+09, 1.48965E+09, 1.57830E+09, 1.60855E+09, 1.61128E+09, 1.60202E+09, 1.58856E+09, 1.57406E+09, 1.55987E+09, 1.54529E+09])
     assert_array_equal(r['spont_fiss_neutron_source']['PU238'], [5.58385E+06, 5.52908E+06, 5.68992E+06, 5.94790E+06, 6.24106E+06, 6.53804E+06, 6.82350E+06, 7.09041E+06, 7.33580E+06, 7.55876E+06, 7.75904E+06, 7.93683E+06])
@@ -190,12 +190,12 @@ def test_parse_tape6():
     assert_array_equal(r['k_inf'], [1.17263, 1.16222, 1.15412, 1.14823, 1.14351, 1.14351, 1.14238])
 
     tab_keys = set(['table_{0}'.format(n) for n in [5]])
-    assert_true(tab_keys <=  set(r.keys()))
+    assert_true(tab_keys <=  set(r))
 
     for tk in tab_keys:
         for ttype in ['nuclide', 'element', 'summary']:
             if ttype in r[tk]:
-                assert_true(set(r[tk][ttype].keys()) <= set(['title', 'units', 'activation_products', 'actinides', 'fission_products']))
+                assert_true(set(r[tk][ttype]) <= set(['title', 'units', 'activation_products', 'actinides', 'fission_products']))
 
     assert_array_equal(r['alpha_neutron_source']['PU240'], [4.51852E+05, 4.62660E+05, 4.71046E+05, 4.76390E+05, 4.81151E+05, 4.81151E+05, 4.82556E+05])
     assert_array_equal(r['spont_fiss_neutron_source']['CM246'], [2.78744E+06, 3.40763E+06, 3.98241E+06, 4.41669E+06, 4.83645E+06, 4.83645E+06, 4.83365E+06])
@@ -296,7 +296,7 @@ def test_parse_tape9():
     tape9_file = StringIO(sample_tape9)
     tape9 = origen22.parse_tape9(tape9_file)
 
-    assert_equal(set(tape9.keys()), set([1, 2, 3, 381, 382, 383]))
+    assert_equal(set(tape9), set([1, 2, 3, 381, 382, 383]))
 
     # Activation product decay
     deck1 = tape9[1]
@@ -341,7 +341,7 @@ def test_parse_tape9():
     assert_equal(deck381['_type'], 'xsfpy')
     assert_equal(deck381['_subtype'], 'activation_products')
     assert_equal(deck381['title'], 'SAMPLE ACTIVATION PRODUCT XS LIB')
-    assert_true(all(['_fiss_yield' not in key for key in deck381.keys()]))
+    assert_true(all(['_fiss_yield' not in key for key in deck381]))
 
     assert_true('sigma_alpha' in deck381)
     assert_true('sigma_3n' not in deck381)
@@ -363,7 +363,7 @@ def test_parse_tape9():
     assert_equal(deck382['_type'], 'xsfpy')
     assert_equal(deck382['_subtype'], 'actinides')
     assert_equal(deck382['title'], 'SAMPLE ACTINIDE XS LIB')
-    assert_true(all(['_fiss_yield' not in key for key in deck382.keys()]))
+    assert_true(all(['_fiss_yield' not in key for key in deck382]))
 
     assert_true('sigma_alpha' not in deck382)
     assert_true('sigma_3n' in deck382)
@@ -385,7 +385,7 @@ def test_parse_tape9():
     assert_equal(deck383['_type'], 'xsfpy')
     assert_equal(deck383['_subtype'], 'fission_products')
     assert_equal(deck383['title'], 'SAMPLE FISSION PRODUCT YIELD')
-    assert_true(any(['_fiss_yield' in key for key in deck383.keys()]))
+    assert_true(any(['_fiss_yield' in key for key in deck383]))
 
     assert_true('sigma_alpha' in deck383)
     assert_true('sigma_3n' not in deck383)
