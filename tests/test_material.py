@@ -35,8 +35,8 @@ def assert_mat_almost_equal(first, second, places=7):
     assert_almost_equal(first.density, second.density, places=places)
     assert_almost_equal(first.atoms_per_mol, second.atoms_per_mol, places=places)
     assert_equal(first.attrs, second.attrs)
-    nucs = set(second.comp.keys())
-    assert_equal(set(first.comp.keys()), nucs)
+    nucs = set(second.comp)
+    assert_equal(set(first.comp), nucs)
     for nuc in nucs:
         assert_almost_equal(first.comp[nuc], second.comp[nuc], places=places)
 
@@ -585,11 +585,11 @@ def test_getitem_sequence():
     mat = Material(nucvec)
     mat1 = mat[922380000, 922350000] 
     assert_equal(mat1.mass, 2.0)
-    assert_equal(set(mat1.keys()), set([922380000, 922350000]))
+    assert_equal(set(mat1), set([922380000, 922350000]))
 
     mat1 = mat[922380, 'H2', 'h1']
     assert_equal(mat1.mass, 2.0)
-    assert_equal(set(mat1.keys()), set([922380000, 10010000]))
+    assert_equal(set(mat1), set([922380000, 10010000]))
 
 
 def test_setitem_int():
@@ -832,7 +832,7 @@ def test_iter():
     values = set([0.04, 0.96])
     items = set([(922350000, 0.04), (922380000, 0.96)])
 
-    assert_equal(set(mat.keys()), keys)
+    assert_equal(set(mat), keys)
     assert_equal(set(mat.values()), values)
     assert_equal(set(mat.items()), items)
 
@@ -1060,7 +1060,7 @@ def test_natural_elements():
     water = Material()
     water.from_atom_frac({10000000: 2.0, 80000000: 1.0})
     expected_comp = {10000000: 0.11189838783149784, 80000000: 0.8881016121685023}
-    for key in expected_comp.keys():
+    for key in expected_comp:
         assert_almost_equal(water.comp[key], expected_comp[key])
 
 
@@ -1106,8 +1106,8 @@ def test_matlib_json():
     wmatlib.write_json(filename)
     rmatlib = MaterialLibrary()
     rmatlib.from_json(filename)
-    assert_equal(set(wmatlib.keys()), set(rmatlib.keys()))
-    for key in rmatlib.keys():
+    assert_equal(set(wmatlib), set(rmatlib))
+    for key in rmatlib:
         assert_mat_almost_equal(wmatlib[key], rmatlib[key])
     os.remove(filename)
 
@@ -1132,8 +1132,8 @@ def test_matlib_hdf5():
     # Round trip!
     rmatlib.write_hdf5(filename)
     wmatlib = MaterialLibrary(filename)
-    assert_equal(set(wmatlib.keys()), set(rmatlib.keys()))
-    for key in rmatlib.keys():
+    assert_equal(set(wmatlib), set(rmatlib))
+    for key in rmatlib:
         assert_mat_almost_equal(wmatlib[key], rmatlib[key])
     os.remove(filename)
 

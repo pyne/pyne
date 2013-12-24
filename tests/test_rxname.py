@@ -234,7 +234,7 @@ def test_unique_ids():
     assert_equal(len(rxname.id_name), len(rxname.name_id))
 
 def test_no_id_mt_clash():
-    badids = [rxid for rxid in rxname.id_name.keys() if rxid < 1000]
+    badids = [rxid for rxid in rxname.id_name if rxid < 1000]
     assert_equal(0, len(badids))
 
 
