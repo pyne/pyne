@@ -96,7 +96,7 @@ def test_mapvalue():
     m = {'name': 'Terry Jones', 'age': 42.0}
     v = Value(m)
     assert_equal(len(v), len(m))
-    assert_equal(dict([(k, v[k]) for k in m.keys()]), m)
+    assert_equal(dict([(k, v[k]) for k in m]), m)
     assert_true(v.isobject())
     assert_equal(v.type(), 7)
     assert_equal(v.type_name(), 'object')
@@ -127,7 +127,7 @@ def test_mapsetitem():
     v = Value({})
     for key, value in m.items():
         v[key] = value
-    assert_equal(dict([(k, v[k]) for k in m.keys()]), m)
+    assert_equal(dict([(k, v[k]) for k in m]), m)
 
 def test_getslice():
     a = [1, 2, 5, 3]

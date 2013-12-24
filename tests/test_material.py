@@ -1060,7 +1060,7 @@ def test_natural_elements():
     water = Material()
     water.from_atom_frac({10000000: 2.0, 80000000: 1.0})
     expected_comp = {10000000: 0.11189838783149784, 80000000: 0.8881016121685023}
-    for key in expected_comp.keys():
+    for key in expected_comp:
         assert_almost_equal(water.comp[key], expected_comp[key])
 
 
@@ -1107,7 +1107,7 @@ def test_matlib_json():
     rmatlib = MaterialLibrary()
     rmatlib.from_json(filename)
     assert_equal(set(wmatlib.keys()), set(rmatlib.keys()))
-    for key in rmatlib.keys():
+    for key in rmatlib:
         assert_mat_almost_equal(wmatlib[key], rmatlib[key])
     os.remove(filename)
 
