@@ -341,7 +341,7 @@ def test_parse_tape9():
     assert_equal(deck381['_type'], 'xsfpy')
     assert_equal(deck381['_subtype'], 'activation_products')
     assert_equal(deck381['title'], 'SAMPLE ACTIVATION PRODUCT XS LIB')
-    assert_true(all(['_fiss_yield' not in key for key in deck381.keys()]))
+    assert_true(all(['_fiss_yield' not in key for key in deck381]))
 
     assert_true('sigma_alpha' in deck381)
     assert_true('sigma_3n' not in deck381)
@@ -363,7 +363,7 @@ def test_parse_tape9():
     assert_equal(deck382['_type'], 'xsfpy')
     assert_equal(deck382['_subtype'], 'actinides')
     assert_equal(deck382['title'], 'SAMPLE ACTINIDE XS LIB')
-    assert_true(all(['_fiss_yield' not in key for key in deck382.keys()]))
+    assert_true(all(['_fiss_yield' not in key for key in deck382]))
 
     assert_true('sigma_alpha' not in deck382)
     assert_true('sigma_3n' in deck382)
@@ -385,7 +385,7 @@ def test_parse_tape9():
     assert_equal(deck383['_type'], 'xsfpy')
     assert_equal(deck383['_subtype'], 'fission_products')
     assert_equal(deck383['title'], 'SAMPLE FISSION PRODUCT YIELD')
-    assert_true(any(['_fiss_yield' in key for key in deck383.keys()]))
+    assert_true(any(['_fiss_yield' in key for key in deck383]))
 
     assert_true('sigma_alpha' in deck383)
     assert_true('sigma_3n' not in deck383)
