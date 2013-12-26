@@ -1,9 +1,8 @@
 """Purpose:
 
   This module is for gamma spectrometry analysis
-  will have functions for activity calculation
-   
-  .. moduleauthor:: S Lilley
+  Currently defines a GammaSpectrum, reads a .spe file
+  Will in the future have functions for activity calculations
 
 """
 
@@ -11,63 +10,68 @@ import numpy as np
 import spectanalysis
 
 
-class GammaSpec(spectanalysis.PhSpectra):
+class GammaSpectrum(spectanalysis.PhSpectrum):
     """ GammaSpec class includes gamma specific variables"""
 
-    def __init__(self):
-        """ define gamma spectra specific variables """    
-        super(GammaSpec,self).__init__()
-        self.real_time = 0
-        self.live_time = 0
-        self.dead_time = 0
-        self.det_id = ""
-        self.det_descp = ""
-        self.start_date = ""
-        self.start_time = ""
-        self.calib_e_fit = []
-        self.calib_fwhm_fit = []
-        self.eres = 0
-        self.file_name = ""
-
-    def calc_dead_time(self):
-        """Calculate the dead time. """
-        self.dead_time = self.real_time - self.live_time
+    def __init__(self, real_time = 0, live_time = 0, det_id = "", 
+    det_descp = "", start_date = "", start_time = "", 
+    calib_e_fit=None, calib_fwhm_fit=None, eres = 0, file_name = ""):
+        """ define gamma spectrum specific variables """    
+        super(GammaSpectrum, self).__init__()
+        self.real_time = real_time
+        self.live_time = live_time
+        self.dead_time = real_time-live_time
+        self.det_id = det_id
+        self.det_descp = det_descp
+        self.start_date = start_date
+        self.start_time = start_time
+        self.calib_e_fit = [] if calib_e_fit is None else calib_e_fit
+        self.calib_fwhm_fit = [] if calib_fwhm_fit is None else calib_fwhm_fit
+        self.eres = eres
+        self.file_name = file_name
 
     def calc_ebins(self):
         """ Calculate the energy value for each channel."""
-        for item in self.channels:
-            energy = self.calib_e_fit[0] + (self.calib_e_fit[1]*item)
-            + (self.calib_e_fit[2]*item*item)
-            self.ebin.append(energy)
-        self.ebin = np.array(self.ebin)
-
-    def print_parameters(self):
-        """Print all the gamma spectrum parameters"""
-        print "Debug print of all header variables"
-        print "The real time is:" + str(self.real_time)
-        print "The live time is:" + str(self.live_time)
-        print "The dead time is:" + str(self.dead_time)
-        print "Detector ID:" + self.det_id
-        print "Detector description:" + self.det_descp
-        print "Start date:" + self.start_date
-        print "Start time:" + self.start_time
-        print "Start channel number:" + str(self.start_chan_num)
-        print "Number of channels:" + str(self.num_channels)
-        print "Energy calibration fit:" + str(self.calib_e_fit)
-        print "FWHM calibration fit:" + str(self.calib_fwhm_fit)
-        print "Spectrum:" + str(self.counts)
-        print "File name:" + self.file_name
+        channels = self.channels = np.asarray(self.channels, float)
+        self.Ebin = self.calib_E_fit[0] + (self.calib_E_fit[1]*channels) + \
+        (self.calib_E_fit[2]*channels**2)
+        
+    def __str__(self):
+        """ print debug information"""
+        print_string= "Debug print of all header variables" \
+        + "\n" + "The real time is:" + str(self.real_time) \
+        + "\n" + "The live time is:" + str(self.live_time) \
+        + "\n" + "The dead time is:" + str(self.dead_time) \
+        + "\n" + "Detector ID:" + self.det_id \
+        + "\n" + "Detector description:" + self.det_descp \
+        + "\n" + "Start date:" + self.start_date \
+        + "\n" + "Start time:" + self.start_time \
+        + "\n" + "Start channel number:" + str(self.start_chan_num) \
+        + "\n" + "Number of channels:" + str(self.num_channels) \
+        + "\n" + "Energy calibration fit:" + str(self.calib_e_fit) \
+        + "\n" + "FWHM calibration fit:" + str(self.calib_fwhm_fit) \
+        + "\n" + "Spectrum:" + str(self.counts) \
+        + "\n" + "File name:" + self.file_name
+        return print_string
 
 
 def read_spe_file(spec_file_path):
-    """ Read spe file
+    """Reads a .spe file
 
-    
+    Parameters
+    ----------
+    spec_file_path : str 
+        Path to spe file
 
+    Returns
+    -------
+    spectrum : a GammaSpec object
+        Contains all information from .spe file
+        
     """
 
-    spectra = gammaSpec()
-    spectra.file_name = spec_file_path
+    spectrum = GammaSpectrum()
+    spectrum.file_name = spec_file_path
    
     with open(spec_file_path, "r") as spec_file:
         full_file_text = spec_file.read()
@@ -81,46 +85,45 @@ def read_spe_file(spec_file_path):
         # the other for counts
         if (inspec):
             if (len(line) > 1):
-                spectra.channels.append(int(line[0]))
+                spectrum.channels.append(int(line[0]))
                 temp = line[1].strip()
-                spectra.counts.append(float(temp))
+                spectrum.counts.append(float(temp))
 
         if (line[0] == "Spectrum name"):
-            spectra.spec_name = line[1]
+            spectrum.spec_name = line[1]
         elif (line[0] == "Detector ID"):
-            spectra.det_id = line[1].strip()
+            spectrum.det_id = line[1].strip()
         elif (line[0] == "Detector description"):
-            spectra.det_descp = line[1].strip()
+            spectrum.det_descp = line[1].strip()
         elif (line[0] == "Real Time"):
-            spectra.real_time = float(line[1])
+            spectrum.real_time = float(line[1])
         elif (line[0] == "Live Time"):
-            spectra.live_time = float(line[1])
+            spectrum.live_time = float(line[1])
         elif (line[0] == "Acquisition start date"):
-            spectra.start_date = line[1].strip()
+            spectrum.start_date = line[1].strip()
         elif (line[0] == "Acquisition start time"):
-            spectra.start_time = line[1].strip() + ":" + line[2] + ":"+line[3]
+            spectrum.start_time = line[1].strip() + ":" + line[2] + ":"+line[3]
         elif (line[0] == "Starting channel number"):
-            spectra.start_chan_num = int(line[1].strip())
+            spectrum.start_chan_num = int(line[1].strip())
         elif (line[0] == "Number of channels"):
-            spectra.num_channels = int(line[1].strip())
+            spectrum.num_channels = int(line[1].strip())
         elif (line[0] == "Energy Fit"):
             temp = line[1].strip()
             temp = temp.split(" ")
-            spectra.calib_e_fit.append(float(temp[0]))
-            spectra.calib_e_fit.append(float(temp[2]))
-            spectra.calib_e_fit.append(float(temp[4]))
+            spectrum.calib_e_fit.append(float(temp[0]))
+            spectrum.calib_e_fit.append(float(temp[2]))
+            spectrum.calib_e_fit.append(float(temp[4]))
         elif (line[0] == "FWHM Fit"):
             temp = line[1].strip()
             temp = temp.split(" ")
-            spectra.calib_fwhm_fit.append(float(temp[0]))
-            spectra.calib_fwhm_fit.append(float(temp[2]))
-            spectra.calib_fwhm_fit.append(float(temp[4]))
+            spectrum.calib_fwhm_fit.append(float(temp[0]))
+            spectrum.calib_fwhm_fit.append(float(temp[2]))
+            spectrum.calib_fwhm_fit.append(float(temp[4]))
         elif (line[0] == "SPECTRUM"):
             inspec = True
 
-    spectra.counts = np.array(spectra.counts)
-    spectra.channels = np.array(spectra.channels)
-    # calculate additional parameters
-    spectra.calc_dead_time()
-    spectra.calc_ebins()
-    return spectra
+    spectrum.counts = np.array(spectrum.counts)
+    spectrum.channels = np.array(spectrum.channels)
+    # calculate additional parameters based on .spe file
+    spectrum.calc_ebins()
+    return spectrum
