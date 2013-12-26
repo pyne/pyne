@@ -2,8 +2,7 @@
 import nose 
 from nose.tools import assert_equal
 
-from pyne import gammaspec
-from pyne import spectanalysis
+import gammaspec
 
 gspec1 = gammaspec.read_spe_file("test.spe")
 
@@ -16,8 +15,13 @@ def test_read_times():
     
     
 def test_read_det():
-    assert_equal(gspec1.det_ID, "1")
+    assert_equal(gspec1.det_id, "1")
     assert_equal(gspec1.det_descp, "DSPEC PRO 1")
+
+
+def test_read_channels():
+     assert_equal(gspec1.start_chan_num, 0)
+     assert_equal(gspec1.num_channels, 16384)
 
 if __name__ == "__main__":
     nose.runmodule()
