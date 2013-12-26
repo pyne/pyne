@@ -33,8 +33,8 @@ class GammaSpectrum(spectanalysis.PhSpectrum):
     def calc_ebins(self):
         """ Calculate the energy value for each channel."""
         channels = self.channels = np.asarray(self.channels, float)
-        self.Ebin = self.calib_E_fit[0] + (self.calib_E_fit[1]*channels) + \
-        (self.calib_E_fit[2]*channels**2)
+        self.ebin = self.calib_e_fit[0] + (self.calib_e_fit[1]*channels) + \
+        (self.calib_e_fit[2]*channels**2)
         
     def __str__(self):
         """ print debug information"""
