@@ -527,8 +527,30 @@ class SurfSrc(_BinaryReader):
             self.put_fortran_record(newrecord)
         return
 
+    def update_tracklist(surf_src):
+        """
+        Update tracklist from another surface source.
+        This updates the surface source in-place.
+        """
+
+        if self == surf_src:
+            raise ValueError('Tracklist cannot be updated with itself')
+        elif type(surf_src) != SurfSrc
+            raise TypeError('Surface Source is not of type SurfSrc')
+        elif surf_src.tracklist is None:
+            raise ValueError('No tracklist read for surface source argument')
+        elif self.tracklist is None:
+            raise ValueError('No tracklist read for surface source')
+        elif surf_src.nrss is None:
+            raise ValueError('No nrss read for surface source argument')
+        elif self.nrss is None:
+            raise ValueError('No nrss read for surface source')
+
+        self.tracklist = surf_src.tracklist
+        self.nrss = surf_src.nrss
+
     def __del__(self):
-        """Destructor. The only thing to do is close the Ptrac file.
+        """Destructor. The only thing to do is close the file.
         """
         self.f.close()
 
