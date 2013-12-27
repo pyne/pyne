@@ -78,6 +78,10 @@ def read_spe_file(spec_file_path):
     file_split = full_file_text.split("\n")
     spec_file.close()
     inspec = False
+    
+    # check version of .spe file matches currently supported version
+    if (file_split[0] == '$SPEC_ID:'):
+        raise RuntimeError('This type of spe file is not supported')
 
     for item in file_split:
         line = item.split(":")
@@ -125,5 +129,6 @@ def read_spe_file(spec_file_path):
     spectrum.counts = np.array(spectrum.counts)
     spectrum.channels = np.array(spectrum.channels)
     # calculate additional parameters based on .spe file
+    spectrum.dead_time=spectrum.real_time-spectrum.live_time
     spectrum.calc_ebins()
     return spectrum
