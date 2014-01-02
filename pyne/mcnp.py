@@ -207,8 +207,15 @@ class SurfSrc(_BinaryReader):
 
         return track_data
 
+#    def __eq__(self, other):
+#        """ Compare two surface sources
+#        """
+#        return self.__dict__ == other.__dict__
+
     def __cmp__(self, other):
-        """"""
+        """ Comparison is not completely robust
+            Tracklists are not compared!!!
+        """
 
         if other.kod != self.kod:
             # kod does not match
@@ -226,6 +233,16 @@ class SurfSrc(_BinaryReader):
         if other.njsw != self.njsw:
             # njsw does not match
             return cmp(other.njsw, self.njsw)
+
+        if other.np1 != self.np1:
+            # np1 does not match
+            return cmp(other.np1, self.np1)
+        if other.nrss != self.nrss:
+            # nrss does not match
+            return cmp(other.nrss, self.nrss)
+        if other.niss != self.niss:
+            # nrss does not match
+            return cmp(other.niss, self.niss)
 
         if other.niwr != self.niwr:
             # niwr does not match
@@ -527,24 +544,35 @@ class SurfSrc(_BinaryReader):
             self.put_fortran_record(newrecord)
         return
 
-    def update_tracklist(surf_src):
+    def update_tracklist(self, surf_src):
         """
         Update tracklist from another surface source.
         This updates the surface source in-place.
         """
 
-        if self == surf_src:
-            raise ValueError('Tracklist cannot be updated with itself')
-        elif type(surf_src) != SurfSrc
+        # Catch for improper non-SurfSrc type
+        if type(surf_src) != SurfSrc:
             raise TypeError('Surface Source is not of type SurfSrc')
-        elif surf_src.tracklist is None:
-            raise ValueError('No tracklist read for surface source argument')
-        elif self.tracklist is None:
-            raise ValueError('No tracklist read for surface source')
-        elif surf_src.nrss is None:
-            raise ValueError('No nrss read for surface source argument')
-        elif self.nrss is None:
-            raise ValueError('No nrss read for surface source')
+
+        # Because 'kod' is the first header attribute
+        elif not hasattr(surf_src, 'kod'):
+            raise AttributeError(
+                'No header attributes for surface source argument')
+        elif not hasattr(self, 'kod'):
+            raise AttributeError(
+                'No header attributes read for surface source')
+        
+        # Because 'tracklist' forms the non-header portion
+        elif not hasattr(surf_src, 'tracklist'):
+            raise AttributeError(
+                'No tracklist read for surface source argument')
+        elif not hasattr(self, 'tracklist'):
+            raise AttributeError(
+                'No tracklist read for surface source')
+
+        # No point in updating with self
+        elif self == surf_src:
+            raise ValueError('Tracklist cannot be updated with itself')
 
         self.tracklist = surf_src.tracklist
         self.nrss = surf_src.nrss
@@ -568,7 +596,7 @@ class Srctp(_BinaryReader):
         header = self.get_fortran_record()
 
         # interpret header block
-        k = header.get_int()  # unique code (947830)
+        #NOTUSED k = header.get_int()  # unique code (947830)
         self.loc_next = header.get_int()  # loc. of next site in FSO arr (ixak)
         self.n_run = header.get_int()  # source particles yet to be run (nsa)
         self.loc_store = header.get_int()  # where to put nxt src neutron (ist)
