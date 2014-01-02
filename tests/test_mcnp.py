@@ -7,6 +7,7 @@ import nose.tools
 from nose.tools import assert_almost_equal
 from nose.tools import assert_equal
 from nose.tools import assert_true
+from nose.tools import assert_raises
 
 import tables
 
@@ -228,6 +229,124 @@ def test_read_tracklist():
         assert_almost_equal(trackData.v, 0.48465036)
         assert_almost_equal(trackData.cs, 0.80104937)
         assert_almost_equal(trackData.w, 0.80104937)
+    return
+
+
+def test_read_tracklist_into_different_surface():
+    """We read in tracklists and compare with known values.
+    We use a file with a single track for this test.
+    """
+    ssrname = "mcnp5_surfsrc.w"
+    ssr1 = mcnp.SurfSrc(ssrname, "rb")
+    ssr1.read_header()
+    ssr1.read_tracklist()
+
+    ssr2 = mcnp.SurfSrc(ssrname_onetrack, "rb")
+    ssr2.read_header()
+    ssr2.read_tracklist()
+
+    # Update ssr1 with ssr2's tracklist
+    ssr1.update_tracklist(ssr2)
+
+    for trackData in ssr1.tracklist:
+        assert_equal(trackData.nps, 1)
+        assert_almost_equal(trackData.bitarray, 8.000048e+06)
+        assert_almost_equal(trackData.wgt, 0.99995639)
+        assert_almost_equal(trackData.erg, 5.54203947)
+        assert_almost_equal(trackData.tme, 0.17144023)
+        assert_almost_equal(trackData.x, -8.05902e-02)
+        assert_almost_equal(trackData.y, 3.122666098e+00)
+        assert_almost_equal(trackData.z, 5.00000e+00)
+        assert_almost_equal(trackData.u, -0.35133163)
+        assert_almost_equal(trackData.v, 0.48465036)
+        assert_almost_equal(trackData.cs, 0.80104937)
+        assert_almost_equal(trackData.w, 0.80104937)
+    return
+
+
+def test_read_tracklist_into_different_surface_errors():
+    """ 6 Exceptions that are handled by update_tracklist
+    We iterate through each type of error and try match each exception
+    We try to confirm each error caught by update_tracklist
+    """
+    ssrname = "mcnp5_surfsrc.w"
+    ssr1 = mcnp.SurfSrc(ssrname, "rb")
+    ssr1.read_header()
+    ssr1.read_tracklist()
+
+    ssr2 = mcnp.SurfSrc(ssrname_onetrack, "rb")
+    ssr2.read_header()
+    ssr2.read_tracklist()
+
+    # TypeError #1: Test with integer '1' in argument
+    def wrong_type():
+        ssr1.update_tracklist(1)
+
+    assert_raises(TypeError, wrong_type)
+
+    # AttributeError #2: If there is no header variables in surf_src argument
+    ssrname = "mcnp5_surfsrc.w"
+    ssr1 = mcnp.SurfSrc(ssrname, "rb")
+    ssr1.read_header()
+
+    ssr2 = mcnp.SurfSrc(ssrname_onetrack, "rb")
+
+    def surf_src_arg_no_header():
+        ssr1.update_tracklist(ssr2)
+
+    assert_raises(AttributeError, surf_src_arg_no_header)
+
+    # AttributeError #3: If there are no header variables in surf_src
+    ssrname = "mcnp5_surfsrc.w"
+    ssr1 = mcnp.SurfSrc(ssrname, "rb")
+
+    ssr2 = mcnp.SurfSrc(ssrname_onetrack, "rb")
+    ssr2.read_header()
+
+    def surf_src_no_header():
+        ssr1.update_tracklist(ssr2)
+
+    assert_raises(AttributeError, surf_src_no_header)
+
+    # AttributeError #4: If there is no tracklist in surf_src argument
+    ssrname = "mcnp5_surfsrc.w"
+    ssr1 = mcnp.SurfSrc(ssrname, "rb")
+    ssr1.read_header()
+    ssr1.read_tracklist()
+
+    ssr2 = mcnp.SurfSrc(ssrname_onetrack, "rb")
+    ssr2.read_header()
+
+    def surf_src_arg_no_tracklist():
+        ssr1.update_tracklist(ssr2)
+
+    assert_raises(AttributeError, surf_src_arg_no_tracklist)
+
+    # AttributeError #5: If there is no tracklist in surf_src
+    ssrname = "mcnp5_surfsrc.w"
+    ssr1 = mcnp.SurfSrc(ssrname, "rb")
+    ssr1.read_header()
+
+    ssr2 = mcnp.SurfSrc(ssrname_onetrack, "rb")
+    ssr2.read_header()
+    ssr2.read_tracklist()
+
+    def surf_src_no_tracklist():
+        ssr1.update_tracklist(ssr2)
+
+    assert_raises(AttributeError, surf_src_no_tracklist)
+
+    # ValueError #6: Update ssr1 with ssr1's tracklist
+    ssrname = "mcnp5_surfsrc.w"
+    ssr1 = mcnp.SurfSrc(ssrname, "rb")
+    ssr1.read_header()
+    ssr1.read_tracklist()
+
+    def update_with_self():
+        ssr1.update_tracklist(ssr1)
+
+    assert_raises(ValueError, update_with_self)
+
     return
 
 
