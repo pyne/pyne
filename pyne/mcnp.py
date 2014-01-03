@@ -512,8 +512,8 @@ class SurfSrc(_BinaryReader):
 
     def write_header(self):
         """
-        Write the full header up to the tracklist to the surface source file,
-        To gather all the info up to the tracklist this is it.
+        First part of the MCNP surface source file.
+        The header content comprises five parts shown below.
         """
 
         self.put_header()
@@ -524,6 +524,8 @@ class SurfSrc(_BinaryReader):
 
     def write_tracklist(self):
         """
+        Second part of the MCNP surface source file.
+        Tracklist is also known as a 'phase space'.
         Write track records for individual particles.
         """
 
@@ -561,7 +563,7 @@ class SurfSrc(_BinaryReader):
         elif not hasattr(self, 'kod'):
             raise AttributeError(
                 'No header attributes read for surface source')
-        
+
         # Because 'tracklist' forms the non-header portion
         elif not hasattr(surf_src, 'tracklist'):
             raise AttributeError(
