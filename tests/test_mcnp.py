@@ -2,6 +2,7 @@
 import os
 import unittest
 import nose
+import numpy as np
 
 import nose.tools
 from nose.tools import assert_almost_equal
@@ -584,17 +585,13 @@ def test_wwinp_n():
           23.333333333333329, 60.0, 70.0, 80.0, 90.0, 100.0],
          [-100.0, -66.666666666666657, -33.333333333333329,
           0.0, 33.333333333333343, 66.666666666666657, 100.0]])
-    for x in range(0, 15):
-        for y in range(0, 8):
-            for z in range(0, 6):
-                for e_group in range(1, 8):
-                    expected_voxel = expected_sm.structured_get_hex(x, y, z)
-                    expected = expected_sm.mesh.getTagHandle(
-                        'ww_n_group_00{0}'.format(e_group))[expected_voxel]
-                    written_voxel = ww1.structured_get_hex(x, y, z)
-                    written = ww1.mesh.getTagHandle(
-                        'ww_n_group_00{0}'.format(e_group))[written_voxel]
-                    assert_equal(written, expected)
+
+    expected_voxels = list(expected_sm.structured_iterate_hex("zyx"))
+    written_voxels = list(expected_sm.structured_iterate_hex("zyx"))
+    for expected_voxel, written_voxel in zip(expected_voxels, written_voxels):
+        expected = expected_sm.mesh.getTagHandle("ww_n")[expected_voxel]
+        written = ww1.mesh.getTagHandle("ww_n")[written_voxel]
+        np.testing.assert_array_equal(written, expected)
 
     # Create an new object based off of only the mesh attribute of the first
     # object and check resutling attributes.
@@ -624,17 +621,13 @@ def test_wwinp_n():
           23.333333333333329, 60.0, 70.0, 80.0, 90.0, 100.0],
          [-100.0, -66.666666666666657, -33.333333333333329,
           0.0, 33.333333333333343, 66.666666666666657, 100.0]])
-    for x in range(0, 15):
-        for y in range(0, 8):
-            for z in range(0, 6):
-                for e_group in range(1, 8):
-                    expected_voxel = expected_sm.structured_get_hex(x, y, z)
-                    expected = expected_sm.mesh.getTagHandle(
-                        'ww_n_group_00{0}'.format(e_group))[expected_voxel]
-                    written_voxel = ww2.structured_get_hex(x, y, z)
-                    written = ww2.mesh.getTagHandle(
-                        'ww_n_group_00{0}'.format(e_group))[written_voxel]
-                    assert_equal(written, expected)
+
+    expected_voxels = list(expected_sm.structured_iterate_hex("zyx"))
+    written_voxels = list(expected_sm.structured_iterate_hex("zyx"))
+    for expected_voxel, written_voxel in zip(expected_voxels, written_voxels):
+        expected = expected_sm.mesh.getTagHandle("ww_n")[expected_voxel]
+        written = ww2.mesh.getTagHandle("ww_n")[written_voxel]
+        np.testing.assert_array_equal(written, expected)
 
     # write a new wwinp file and verify that is same wwinp file used as an
     # input to this test
@@ -692,17 +685,13 @@ def test_wwinp_p():
           23.333333333333329, 60.0, 70.0, 80.0, 90.0, 100.0],
          [-100.0, -66.666666666666657, -33.333333333333329,
           0.0, 33.333333333333343, 66.666666666666657, 100.0]])
-    for x in range(0, 1):
-        for y in range(0, 8):
-            for z in range(0, 6):
-                for e_group in range(1, 8):
-                    expected_voxel = expected_sm.structured_get_hex(x, y, z)
-                    expected = expected_sm.mesh.getTagHandle(
-                        'ww_p_group_00{0}'.format(e_group))[expected_voxel]
-                    written_voxel = ww1.structured_get_hex(x, y, z)
-                    written = ww1.mesh.getTagHandle(
-                        'ww_p_group_00{0}'.format(e_group))[written_voxel]
-                    assert_equal(written, expected)
+
+    expected_voxels = list(expected_sm.structured_iterate_hex("zyx"))
+    written_voxels = list(expected_sm.structured_iterate_hex("zyx"))
+    for expected_voxel, written_voxel in zip(expected_voxels, written_voxels):
+        expected = expected_sm.mesh.getTagHandle("ww_p")[expected_voxel]
+        written = ww1.mesh.getTagHandle("ww_p")[written_voxel]
+        np.testing.assert_array_equal(written, expected)
 
     # Create an new object based off of only the mesh attribute of the first
     # object and check resutling attributes.
@@ -727,17 +716,13 @@ def test_wwinp_p():
           23.333333333333329, 60.0, 70.0, 80.0, 90.0, 100.0],
          [-100.0, -66.666666666666657, -33.333333333333329,
           0.0, 33.333333333333343, 66.666666666666657, 100.0]])
-    for x in range(0, 1):
-        for y in range(0, 8):
-            for z in range(0, 6):
-                for e_group in range(1, 8):
-                    expected_voxel = expected_sm.structured_get_hex(x, y, z)
-                    expected = expected_sm.mesh.getTagHandle(
-                        'ww_p_group_00{0}'.format(e_group))[expected_voxel]
-                    written_voxel = ww2.structured_get_hex(x, y, z)
-                    written = ww2.mesh.getTagHandle(
-                        'ww_p_group_00{0}'.format(e_group))[written_voxel]
-                    assert_equal(written, expected)
+
+    expected_voxels = list(expected_sm.structured_iterate_hex("zyx"))
+    written_voxels = list(expected_sm.structured_iterate_hex("zyx"))
+    for expected_voxel, written_voxel in zip(expected_voxels, written_voxels):
+        expected = expected_sm.mesh.getTagHandle("ww_p")[expected_voxel]
+        written = ww2.mesh.getTagHandle("ww_p")[written_voxel]
+        np.testing.assert_array_equal(written, expected)
 
     # write a new wwinp file and verify that is same wwinp file used as an
     # input to this test
@@ -794,29 +779,20 @@ def test_wwinp_np():
           23.333333333333329, 60.0, 70.0, 80.0, 90.0, 100.0],
          [-100.0, -66.666666666666657, -33.333333333333329,
           0.0, 33.333333333333343, 66.666666666666657, 100.0]])
-    for x in range(0, 1):
-        for y in range(0, 8):
-            for z in range(0, 6):
-                for e_group in range(1, 8):
-                    expected_voxel = expected_sm.structured_get_hex(x, y, z)
-                    expected = expected_sm.mesh.getTagHandle(
-                        'ww_n_group_00{0}'.format(e_group))[expected_voxel]
-                    written_voxel = ww1.structured_get_hex(x, y, z)
-                    written = ww1.mesh.getTagHandle(
-                        'ww_n_group_00{0}'.format(e_group))[written_voxel]
-                    assert_equal(written, expected)
 
-    for x in range(0, 1):
-        for y in range(0, 8):
-            for z in range(0, 6):
-                for e_group in range(1, 2):
-                    expected_voxel = expected_sm.structured_get_hex(x, y, z)
-                    expected = expected_sm.mesh.getTagHandle(
-                        'ww_p_group_00{0}'.format(e_group))[expected_voxel]
-                    written_voxel = ww1.structured_get_hex(x, y, z)
-                    written = ww1.mesh.getTagHandle(
-                        'ww_p_group_00{0}'.format(e_group))[written_voxel]
-                    assert_equal(written, expected)
+    expected_voxels = list(expected_sm.structured_iterate_hex("zyx"))
+    written_voxels = list(expected_sm.structured_iterate_hex("zyx"))
+    for expected_voxel, written_voxel in zip(expected_voxels, written_voxels):
+        expected = expected_sm.mesh.getTagHandle("ww_n")[expected_voxel]
+        written = ww1.mesh.getTagHandle("ww_n")[written_voxel]
+        np.testing.assert_array_equal(written, expected)
+
+    expected_voxels = list(expected_sm.structured_iterate_hex("zyx"))
+    written_voxels = list(expected_sm.structured_iterate_hex("zyx"))
+    for expected_voxel, written_voxel in zip(expected_voxels, written_voxels):
+        expected = expected_sm.mesh.getTagHandle("ww_p")[expected_voxel]
+        written = ww1.mesh.getTagHandle("ww_p")[written_voxel]
+        np.testing.assert_array_equal(written, expected)
 
     # Create an new object based off of only the mesh attribute of the first
     # object and check resutling attributes.
@@ -841,29 +817,20 @@ def test_wwinp_np():
           23.333333333333329, 60.0, 70.0, 80.0, 90.0, 100.0],
          [-100.0, -66.666666666666657, -33.333333333333329,
           0.0, 33.333333333333343, 66.666666666666657, 100.0]])
-    for x in range(0, 1):
-        for y in range(0, 8):
-            for z in range(0, 6):
-                for e_group in range(1, 8):
-                    expected_voxel = expected_sm.structured_get_hex(x, y, z)
-                    expected = expected_sm.mesh.getTagHandle(
-                        'ww_n_group_00{0}'.format(e_group))[expected_voxel]
-                    written_voxel = ww2.structured_get_hex(x, y, z)
-                    written = ww2.mesh.getTagHandle(
-                        'ww_n_group_00{0}'.format(e_group))[written_voxel]
-                    assert_equal(written, expected)
 
-    for x in range(0, 1):
-        for y in range(0, 8):
-            for z in range(0, 6):
-                for e_group in range(1, 2):
-                    expected_voxel = expected_sm.structured_get_hex(x, y, z)
-                    expected = expected_sm.mesh.getTagHandle(
-                        'ww_p_group_00{0}'.format(e_group))[expected_voxel]
-                    written_voxel = ww2.structured_get_hex(x, y, z)
-                    written = ww2.mesh.getTagHandle(
-                        'ww_p_group_00{0}'.format(e_group))[written_voxel]
-                    assert_equal(written, expected)
+    expected_voxels = list(expected_sm.structured_iterate_hex("zyx"))
+    written_voxels = list(expected_sm.structured_iterate_hex("zyx"))
+    for expected_voxel, written_voxel in zip(expected_voxels, written_voxels):
+        expected = expected_sm.mesh.getTagHandle("ww_n")[expected_voxel]
+        written = ww2.mesh.getTagHandle("ww_n")[written_voxel]
+        np.testing.assert_array_equal(written, expected)
+
+    expected_voxels = list(expected_sm.structured_iterate_hex("zyx"))
+    written_voxels = list(expected_sm.structured_iterate_hex("zyx"))
+    for expected_voxel, written_voxel in zip(expected_voxels, written_voxels):
+        expected = expected_sm.mesh.getTagHandle("ww_p")[expected_voxel]
+        written = ww2.mesh.getTagHandle("ww_p")[written_voxel]
+        np.testing.assert_array_equal(written, expected)
 
     # write a new wwinp file and verify that is same wwinp file used as an
     # input to this test

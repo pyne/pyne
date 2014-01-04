@@ -1609,16 +1609,15 @@ class Wwinp(Mesh):
             block3 += '\n'
 
         # Get ww_data.
-        ww_data = np.empty(self.nft, self.ne[particle_index])
+        ww_data = np.empty(shape=(self.nft, self.ne[particle_index]))
         voxels = list(self.structured_iterate_hex('zyx'))
         for i, voxel in enumerate(voxels):
             ww_data[i] = self.mesh.getTagHandle("ww_{0}".format(particle))[voxel]
               
-        for i in range(0, self.ne[0]):
+        for i in range(0, self.ne[particle_index]):
             # Append ww_data to block3 string.
             line_count = 0
             for ww in ww_data[:,i]:
-
                 block3 += ' {0: 1.5E}'.format(ww)
                 line_count += 1
 
@@ -1710,7 +1709,7 @@ class Wwinp(Mesh):
 
         self.nc = [len(self.cm[0]), len(self.cm[1]), len(self.cm[2])]
         self.nf = [sum(self.fm[0]), sum(self.fm[1]), sum(self.fm[2])]
-
+        self.nft = self.nf[0]*self.nf[1]*self.nf[2]
 
 class Meshtal(object):
     """This class stores all the information from an MCNP meshtal file with
