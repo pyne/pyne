@@ -585,11 +585,11 @@ def test_wwinp_n():
          [-100.0, -66.666666666666657, -33.333333333333329,
           0.0, 33.333333333333343, 66.666666666666657, 100.0]])
 
-    expected_voxels = list(expected_sm.structured_iterate_hex("zyx"))
-    written_voxels = list(expected_sm.structured_iterate_hex("zyx"))
-    for expected_voxel, written_voxel in zip(expected_voxels, written_voxels):
-        expected = expected_sm.mesh.getTagHandle("ww_n")[expected_voxel]
-        written = ww1.mesh.getTagHandle("ww_n")[written_voxel]
+    expected_ves = list(expected_sm.structured_iterate_hex("zyx"))
+    written_ves = list(expected_sm.structured_iterate_hex("zyx"))
+    for expected_ve, written_ve in zip(expected_ves, written_ves):
+        expected = expected_sm.mesh.getTagHandle("ww_n")[expected_ve]
+        written = ww1.mesh.getTagHandle("ww_n")[written_ve]
         assert_array_equal(written, expected)
 
     # Create an new object based off of only the mesh attribute of the first
@@ -621,11 +621,11 @@ def test_wwinp_n():
          [-100.0, -66.666666666666657, -33.333333333333329,
           0.0, 33.333333333333343, 66.666666666666657, 100.0]])
 
-    expected_voxels = list(expected_sm.structured_iterate_hex("zyx"))
-    written_voxels = list(expected_sm.structured_iterate_hex("zyx"))
-    for expected_voxel, written_voxel in zip(expected_voxels, written_voxels):
-        expected = expected_sm.mesh.getTagHandle("ww_n")[expected_voxel]
-        written = ww2.mesh.getTagHandle("ww_n")[written_voxel]
+    expected_ves = list(expected_sm.structured_iterate_hex("zyx"))
+    written_ves = list(expected_sm.structured_iterate_hex("zyx"))
+    for expected_ve, written_ve in zip(expected_ves, written_ves):
+        expected = expected_sm.mesh.getTagHandle("ww_n")[expected_ve]
+        written = ww2.mesh.getTagHandle("ww_n")[written_ve]
         assert_array_equal(written, expected)
 
     # write a new wwinp file and verify that is same wwinp file used as an
@@ -685,11 +685,11 @@ def test_wwinp_p():
          [-100.0, -66.666666666666657, -33.333333333333329,
           0.0, 33.333333333333343, 66.666666666666657, 100.0]])
 
-    expected_voxels = list(expected_sm.structured_iterate_hex("zyx"))
-    written_voxels = list(expected_sm.structured_iterate_hex("zyx"))
-    for expected_voxel, written_voxel in zip(expected_voxels, written_voxels):
-        expected = expected_sm.mesh.getTagHandle("ww_p")[expected_voxel]
-        written = ww1.mesh.getTagHandle("ww_p")[written_voxel]
+    expected_ves = list(expected_sm.structured_iterate_hex("zyx"))
+    written_ves = list(expected_sm.structured_iterate_hex("zyx"))
+    for expected_ve, written_ve in zip(expected_ves, written_ves):
+        expected = expected_sm.mesh.getTagHandle("ww_p")[expected_ve]
+        written = ww1.mesh.getTagHandle("ww_p")[written_ve]
         assert_array_equal(written, expected)
 
     # Create an new object based off of only the mesh attribute of the first
@@ -716,11 +716,11 @@ def test_wwinp_p():
          [-100.0, -66.666666666666657, -33.333333333333329,
           0.0, 33.333333333333343, 66.666666666666657, 100.0]])
 
-    expected_voxels = list(expected_sm.structured_iterate_hex("zyx"))
-    written_voxels = list(expected_sm.structured_iterate_hex("zyx"))
-    for expected_voxel, written_voxel in zip(expected_voxels, written_voxels):
-        expected = expected_sm.mesh.getTagHandle("ww_p")[expected_voxel]
-        written = ww2.mesh.getTagHandle("ww_p")[written_voxel]
+    expected_ves = list(expected_sm.structured_iterate_hex("zyx"))
+    written_ves = list(expected_sm.structured_iterate_hex("zyx"))
+    for expected_ve, written_ve in zip(expected_ves, written_ves):
+        expected = expected_sm.mesh.getTagHandle("ww_p")[expected_ve]
+        written = ww2.mesh.getTagHandle("ww_p")[written_ve]
         assert_array_equal(written, expected)
 
     # write a new wwinp file and verify that is same wwinp file used as an
@@ -779,18 +779,18 @@ def test_wwinp_np():
          [-100.0, -66.666666666666657, -33.333333333333329,
           0.0, 33.333333333333343, 66.666666666666657, 100.0]])
 
-    expected_voxels = list(expected_sm.structured_iterate_hex("zyx"))
-    written_voxels = list(expected_sm.structured_iterate_hex("zyx"))
-    for expected_voxel, written_voxel in zip(expected_voxels, written_voxels):
-        expected = expected_sm.mesh.getTagHandle("ww_n")[expected_voxel]
-        written = ww1.mesh.getTagHandle("ww_n")[written_voxel]
+    expected_ves = list(expected_sm.structured_iterate_hex("zyx"))
+    written_ves = list(expected_sm.structured_iterate_hex("zyx"))
+    for expected_ve, written_ve in zip(expected_ves, written_ves):
+        expected = expected_sm.mesh.getTagHandle("ww_n")[expected_ve]
+        written = ww1.mesh.getTagHandle("ww_n")[written_ve]
         assert_array_equal(written, expected)
 
-    expected_voxels = list(expected_sm.structured_iterate_hex("zyx"))
-    written_voxels = list(expected_sm.structured_iterate_hex("zyx"))
-    for expected_voxel, written_voxel in zip(expected_voxels, written_voxels):
-        expected = expected_sm.mesh.getTagHandle("ww_p")[expected_voxel]
-        written = ww1.mesh.getTagHandle("ww_p")[written_voxel]
+    expected_ves = list(expected_sm.structured_iterate_hex("zyx"))
+    written_ves = list(expected_sm.structured_iterate_hex("zyx"))
+    for expected_ve, written_ve in zip(expected_ves, written_ves):
+        expected = expected_sm.mesh.getTagHandle("ww_p")[expected_ve]
+        written = ww1.mesh.getTagHandle("ww_p")[written_ve]
         assert_array_equal(written, expected)
 
     # Create an new object based off of only the mesh attribute of the first
@@ -817,18 +817,18 @@ def test_wwinp_np():
          [-100.0, -66.666666666666657, -33.333333333333329,
           0.0, 33.333333333333343, 66.666666666666657, 100.0]])
 
-    expected_voxels = list(expected_sm.structured_iterate_hex("zyx"))
-    written_voxels = list(expected_sm.structured_iterate_hex("zyx"))
-    for expected_voxel, written_voxel in zip(expected_voxels, written_voxels):
-        expected = expected_sm.mesh.getTagHandle("ww_n")[expected_voxel]
-        written = ww2.mesh.getTagHandle("ww_n")[written_voxel]
+    expected_ves = list(expected_sm.structured_iterate_hex("zyx"))
+    written_ves = list(expected_sm.structured_iterate_hex("zyx"))
+    for expected_ve, written_ve in zip(expected_ves, written_ves):
+        expected = expected_sm.mesh.getTagHandle("ww_n")[expected_ve]
+        written = ww2.mesh.getTagHandle("ww_n")[written_ve]
         assert_array_equal(written, expected)
 
-    expected_voxels = list(expected_sm.structured_iterate_hex("zyx"))
-    written_voxels = list(expected_sm.structured_iterate_hex("zyx"))
-    for expected_voxel, written_voxel in zip(expected_voxels, written_voxels):
-        expected = expected_sm.mesh.getTagHandle("ww_p")[expected_voxel]
-        written = ww2.mesh.getTagHandle("ww_p")[written_voxel]
+    expected_ves = list(expected_sm.structured_iterate_hex("zyx"))
+    written_ves = list(expected_sm.structured_iterate_hex("zyx"))
+    for expected_ve, written_ve in zip(expected_ves, written_ves):
+        expected = expected_sm.mesh.getTagHandle("ww_p")[expected_ve]
+        written = ww2.mesh.getTagHandle("ww_p")[written_ve]
         assert_array_equal(written, expected)
 
     # write a new wwinp file and verify that is same wwinp file used as an
