@@ -1339,8 +1339,10 @@ class Wwinp(Mesh):
     ne : list of number of energy groups for neutrons and photons.
         If ni = 1 the list is only 1 value long,
         to represent the number of neutron energy groups
-    nf : list of number
+    nf : list of numbers
         of fine mesh points in the i, j, k dimensions
+    nft : int
+        total number of fine mesh points
     origin : list of i, j, k
         minimums.
     nc : list
@@ -1362,8 +1364,7 @@ class Wwinp(Mesh):
     mesh : Mesh object
         with a structured mesh containing all the neutron and/or
         photon weight window lower bounds. These tags have the form
-        "ww_X_group_YYY" where X is n or p and YYY is the energy group number
-        (e.g. 001, 002, etc.). The mesh has rootSet tags in the form
+        "ww_X" where X is n or p The mesh has rootSet tags in the form
         X_e_upper_bounds.
 
     Notes
@@ -1395,11 +1396,12 @@ class Wwinp(Mesh):
         self.nr = int(line_1.split()[3])
 
         line_2 = f.readline()
-        self.ne = [float(x) for x in line_2.split()]
+        self.ne = [int(x) for x in line_2.split()]
 
         if self.nr == 10:  # Cartesian
             line_3 = f.readline()
             self.nf = [int(float(x)) for x in line_3.split()[0:3]]
+            self.nft = self.nf[0]*self.nf[1]*self.nf[2]
             self.origin = [float(x) for x in line_3.split()[3:6]]
 
             line_4 = f.readline()
@@ -1480,18 +1482,23 @@ class Wwinp(Mesh):
         elif particle == 'p':
             particle_index = 1
 
-        for i in range(1, len(self.e[particle_index]) + 1):
-            # Create tags for each e_group
-            tag_name = 'ww_{0}_group_{1:03d}'.format(particle, i)
-            tag_ww = self.mesh.createTag(tag_name, 1, float)
+       # read in WW data for a single particle type
+        ww_data = np.empty(shape=(self.ne[particle_index], self.nft))
+        for i in range(0, self.ne[particle_index]):
+            count = 0
+            ww_row = []
+            while count < self.nft:
+                ww_row += [float(x) for x in f.readline().split()]
+                count += 6 # number of entries per row in WWINP
 
-            # Get all data for energy group i
-            ww_data = []
-            while len(ww_data) < self.nf[0]*self.nf[1]*self.nf[2]:
-                ww_data += [float(x) for x in f.readline().split()]
+            ww_data[i] = ww_row
 
-            # tag data to voxels
-            tag_ww[voxels] = ww_data
+        #create vector tags for data
+        tag_ww = self.mesh.createTag("ww_{0}".format(particle), self.ne[particle_index], float)
+
+        #tag vector data to mesh
+        for i, voxel in enumerate(voxels):
+            tag_ww[voxel] = ww_data[:,i]
 
         # Save energy upper bounds to rootset.
         tag_e_bounds = \
@@ -1602,19 +1609,15 @@ class Wwinp(Mesh):
             block3 += '\n'
 
         # Get ww_data.
-        count = 0
-        for e_group in range(1, len(self.e[particle_index]) + 1):
-            voxels = list(self.structured_iterate_hex('zyx'))
-            ww_data = []
-            count += 1
-            for voxel in voxels:
-                ww_data.append(
-                    self.mesh.getTagHandle('ww_{0}_group_{1:03d}'.format(
-                        particle, e_group))[voxel])
-
+        ww_data = np.empty(self.nft, self.ne[particle_index])
+        voxels = list(self.structured_iterate_hex('zyx'))
+        for i, voxel in enumerate(voxels):
+            ww_data[i] = self.mesh.getTagHandle("ww_{0}".format(particle))[voxel]
+              
+        for i in range(0, self.ne[0]):
             # Append ww_data to block3 string.
             line_count = 0
-            for ww in ww_data:
+            for ww in ww_data[:,i]:
 
                 block3 += ' {0: 1.5E}'.format(ww)
                 line_count += 1
@@ -1630,10 +1633,9 @@ class Wwinp(Mesh):
 
     def read_mesh(self, mesh):
         """This method creates a Wwinp object from a structured mesh object.
-        The mesh must have tags in the form "ww_X_group_YYY" where X is n
-        or p, and  YYY is the energy group. For every particle there must
-        be a rootSet tag in the form X_e_upper_bounds containing a list of
-        energy upper bounds.
+        The mesh must have tags in the form "ww_X" where X is n
+        or p. For every particle there must be a rootSet tag in the form 
+        X_e_upper_bounds containing a list of energy upper bounds.
         """
 
         super(Wwinp, self).__init__(mesh=mesh, structured=True)
