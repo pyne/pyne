@@ -1495,7 +1495,8 @@ class Wwinp(Mesh):
             ww_data[i] = ww_row
 
         #create vector tags for data
-        tag_ww = self.mesh.createTag("ww_{0}".format(particle), self.ne[particle_index], float)
+        tag_ww = self.mesh.createTag(
+                 "ww_{0}".format(particle), self.ne[particle_index], float)
 
         #tag vector data to mesh
         for i, volume_element in enumerate(volume_elements):
@@ -1613,7 +1614,8 @@ class Wwinp(Mesh):
         ww_data = np.empty(shape=(self.nft, self.ne[particle_index]))
         volume_elements = list(self.structured_iterate_hex('zyx'))
         for i, volume_element in enumerate(volume_elements):
-            ww_data[i] = self.mesh.getTagHandle("ww_{0}".format(particle))[volume_element]
+            ww_data[i] = self.mesh.getTagHandle(
+                         "ww_{0}".format(particle))[volume_element]
               
         for i in range(0, self.ne[particle_index]):
             # Append ww_data to block3 string.
@@ -1907,7 +1909,9 @@ class MeshTally(StatMesh):
                      "{0}_rel_error".format(self.particle), num_e_groups, float)
         res_vol_elements = list(self.structured_iterate_hex("xyz"))
         err_vol_elements = list(self.structured_iterate_hex("xyz"))
-        for res_ve, err_ve, i in itertools.izip(res_vol_elements, err_vol_elements, range(0, num_vol_elements)):
+        for res_ve, err_ve, i in itertools.izip(res_vol_elements, 
+                                                 err_vol_elements, 
+                                                 range(0, num_vol_elements)):
             tag_result[res_ve] = result[:,i]
             tag_rel_error[err_ve] = rel_error[:,i]
             
