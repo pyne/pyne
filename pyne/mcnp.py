@@ -22,6 +22,7 @@ import linecache
 import tables
 import datetime
 import warnings
+import itertools
 
 import numpy as np
 
@@ -1882,48 +1883,50 @@ class MeshTally(StatMesh):
 
         num_vol_elements = (len(self.x_bounds)-1) * (len(self.y_bounds)-1)\
             * (len(self.z_bounds)-1)
-        num_e_groups = len(self.e_bounds)
+        num_e_groups = len(self.e_bounds)-1
 
         # get result and relative error data from file
-        result = np.empty(shape=(num_vol_elements, num_e_groups))
-        rel_error = np.empty(shape=(num_vol_elements, num_e_groups))
+        result = np.empty(shape=(num_e_groups, num_vol_elements))
+        rel_error = np.empty(shape=(num_e_groups, num_vol_elements))
         for i in range(0, num_e_groups):
             result_row = []
             rel_error_row = []
             for j in range(0, num_vol_elements):
-                result.append(float(line.split()[self._column_idx["Result"]]))
-                rel_error.append(
-                    float(line.split()[self._column_idx["Rel_Error"]]))
+                line = f.readline().split()
+                result_row.append(float(line[self._column_idx["Result"]]))
+                rel_error_row.append(
+                    float(line[self._column_idx["Rel_Error"]]))
 
             result[i] = result_row
             rel_error[i] = rel_error_row
         
         #Tag results and error vector to mesh
         tag_result = self.mesh.createTag(
-                     "{0}_result".format(particle), num_e_groups, float)
+                     "{0}_result".format(self.particle), num_e_groups, float)
         tag_rel_error = self.mesh.createTag(
-                     "{0}_rel_error".format(particle), num_e_groups, float)
+                     "{0}_rel_error".format(self.particle), num_e_groups, float)
         res_vol_elements = list(self.structured_iterate_hex("xyz"))
         err_vol_elements = list(self.structured_iterate_hex("xyz"))
-        for i, res_ve, err_ve in zip(res_vol_elements, err_vol_elents, range(0, num_vol_elements)):
+        for res_ve, err_ve, i in itertools.izip(res_vol_elements, err_vol_elements, range(0, num_vol_elements)):
             tag_result[res_ve] = result[:,i]
             tag_rel_error[err_ve] = rel_error[:,i]
             
 
         #If "total" data exists (i.e. if there is more than
         #1 energy group) get it and tag it onto the mesh.
-        if len(self.e_bounds) > 2:
+        if num_e_groups > 1:
             result = []
             rel_error = []
             for i in range(0, num_vol_elements):
-                result.append(float(line.split()[self._column_idx["Result"]]))
+                line = f.readline().split()
+                result.append(float(line[self._column_idx["Result"]]))
                 rel_error.append(
-                    float(line.split()[self._column_idx["Rel_Error"]]))
+                    float(line[self._column_idx["Rel_Error"]]))
 
             tag_result = self.mesh.createTag(
-                       "{0}_total_result".format(particle), 1, float)
+                       "{0}_total_result".format(self.particle), 1, float)
             tag_rel_error = self.mesh.createTag(
-                       "{0}_total_rel_error".format(particle), 1, float)
+                       "{0}_total_rel_error".format(self.particle), 1, float)
 
             res_vol_elements = list(self.structured_iterate_hex("xyz"))
             err_vol_elements = list(self.structured_iterate_hex("xyz"))
