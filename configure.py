@@ -5,10 +5,6 @@ import os
 import sys
 import json
 
-from Cython.Compiler.Version import version as CYTHON_VERSION
-
-
-
 INFO = {
     'version': '0.4-dev',
     }
@@ -87,26 +83,6 @@ def final_message(success=True):
            ).format(h5ver=h5ver)
     print(msg)
 
-
-def cython_version():
-    pxi = ("# Cython compile-time version information\n"
-           "DEF CYTHON_VERSION_MAJOR = {major}\n"
-           "DEF CYTHON_VERSION_MINOR = {minor}\n"
-           "DEF CYTHON_VERSION_MICRO = {micro}")
-    cyver = CYTHON_VERSION
-    for c in ('-', 'r', 'a', 'b'):
-        cyver = cyver.split(c)[0]
-    cyver = cyver.split('.')
-    while len(cyver) < 3:
-        cyver = cyver + [0]
-    cyver = dict([(k, int(cv)) for k, cv in zip(['major', 'minor', 'micro'], cyver)])
-    pxi = pxi.format(**cyver)
-    basedir = os.path.split(__file__)[0]
-    incldir = os.path.join(basedir, 'pyne', 'include')
-    if not os.path.exists(incldir):
-        os.mkdir(incldir)
-    with open(os.path.join(incldir, 'cython_version.pxi'), 'w') as f:
-        f.write(pxi)
 
 def setup():
     from distutils import core
