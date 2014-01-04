@@ -1,11 +1,14 @@
 PyNE: The Nuclear Engineering Toolkit
 =====================================
-The pyne project aims to provide a common set of tools for nuclear 
+The PyNE project aims to provide a common set of tools for nuclear 
 science and engineering needs.
 
 If you are interested in the package itself, or would like to help
 and contribute, please let us know either on the mailing list 
 (pyne-dev@googlegroups.com) or `github`_.
+
+Examples, documentation, and more can be found at 
+http://pynesim.org/, the official PyNE projectsite.
 
 .. _github: https://github.com/pyne/pyne
 
