@@ -1475,7 +1475,7 @@ class Wwinp(Mesh):
                                         self.bounds[1], self.bounds[2]],
                                         structured=True)
 
-        voxels = list(self.structured_iterate_hex('zyx'))
+        volume_elements = list(self.structured_iterate_hex('zyx'))
 
         if particle == 'n':
             particle_index = 0
@@ -1498,8 +1498,8 @@ class Wwinp(Mesh):
         tag_ww = self.mesh.createTag("ww_{0}".format(particle), self.ne[particle_index], float)
 
         #tag vector data to mesh
-        for i, voxel in enumerate(voxels):
-            tag_ww[voxel] = ww_data[:,i]
+        for i, volume_element in enumerate(volume_elements):
+            tag_ww[volume_element] = ww_data[:,i]
 
         # Save energy upper bounds to rootset.
         tag_e_bounds = \
@@ -1611,9 +1611,9 @@ class Wwinp(Mesh):
 
         # Get ww_data.
         ww_data = np.empty(shape=(self.nft, self.ne[particle_index]))
-        voxels = list(self.structured_iterate_hex('zyx'))
-        for i, voxel in enumerate(voxels):
-            ww_data[i] = self.mesh.getTagHandle("ww_{0}".format(particle))[voxel]
+        volume_elements = list(self.structured_iterate_hex('zyx'))
+        for i, volume_element in enumerate(volume_elements):
+            ww_data[i] = self.mesh.getTagHandle("ww_{0}".format(particle))[volume_element]
               
         for i in range(0, self.ne[particle_index]):
             # Append ww_data to block3 string.
