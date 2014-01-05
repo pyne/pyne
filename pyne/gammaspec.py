@@ -13,14 +13,14 @@ import spectanalysis
 class GammaSpectrum(spectanalysis.PhSpectrum):
     """ GammaSpec class includes gamma specific variables"""
 
-    def __init__(self, real_time = 0, live_time = 0, det_id = "", 
-    det_descp = "", start_date = "", start_time = "", 
-    calib_e_fit=None, calib_fwhm_fit=None, eres = 0, file_name = ""):
-        """ define gamma spectrum specific variables """    
+    def __init__(self, real_time=0, live_time=0, det_id="",
+                 det_descp="", start_date="", start_time="",
+                 calib_e_fit=None, calib_fwhm_fit=None, eres=0, file_name=""):
+        """ define gamma spectrum specific variables """
         super(GammaSpectrum, self).__init__()
         self.real_time = real_time
         self.live_time = live_time
-        self.dead_time = real_time-live_time
+        self.dead_time = real_time - live_time
         self.det_id = det_id
         self.det_descp = det_descp
         self.start_date = start_date
@@ -33,25 +33,25 @@ class GammaSpectrum(spectanalysis.PhSpectrum):
     def calc_ebins(self):
         """ Calculate the energy value for each channel."""
         channels = self.channels = np.asarray(self.channels, float)
-        self.ebin = self.calib_e_fit[0] + (self.calib_e_fit[1]*channels) + \
-        (self.calib_e_fit[2]*channels**2)
-        
+        self.ebin = self.calib_e_fit[0] + (self.calib_e_fit[1] * channels) + \
+                    (self.calib_e_fit[2] * channels ** 2)
+
     def __str__(self):
         """ print debug information"""
-        print_string= "Debug print of all header variables" \
-        + "\n" + "The real time is:" + str(self.real_time) \
-        + "\n" + "The live time is:" + str(self.live_time) \
-        + "\n" + "The dead time is:" + str(self.dead_time) \
-        + "\n" + "Detector ID:" + self.det_id \
-        + "\n" + "Detector description:" + self.det_descp \
-        + "\n" + "Start date:" + self.start_date \
-        + "\n" + "Start time:" + self.start_time \
-        + "\n" + "Start channel number:" + str(self.start_chan_num) \
-        + "\n" + "Number of channels:" + str(self.num_channels) \
-        + "\n" + "Energy calibration fit:" + str(self.calib_e_fit) \
-        + "\n" + "FWHM calibration fit:" + str(self.calib_fwhm_fit) \
-        + "\n" + "Spectrum:" + str(self.counts) \
-        + "\n" + "File name:" + self.file_name
+        print_string = "Debug print of all header variables" \
+                       + "\n" + "The real time is:" + str(self.real_time) \
+                       + "\n" + "The live time is:" + str(self.live_time) \
+                       + "\n" + "The dead time is:" + str(self.dead_time) \
+                       + "\n" + "Detector ID:" + self.det_id \
+                       + "\n" + "Detector description:" + self.det_descp \
+                       + "\n" + "Start date:" + self.start_date \
+                       + "\n" + "Start time:" + self.start_time \
+                       + "\n" + "Start channel number:" + str(self.start_chan_num) \
+                       + "\n" + "Number of channels:" + str(self.num_channels) \
+                       + "\n" + "Energy calibration fit:" + str(self.calib_e_fit) \
+                       + "\n" + "FWHM calibration fit:" + str(self.calib_fwhm_fit) \
+                       + "\n" + "Spectrum:" + str(self.counts) \
+                       + "\n" + "File name:" + self.file_name
         return print_string
 
 
@@ -67,18 +67,18 @@ def read_spe_file(spec_file_path):
     -------
     spectrum : a GammaSpec object
         Contains all information from .spe file
-        
+
     """
 
     spectrum = GammaSpectrum()
     spectrum.file_name = spec_file_path
-   
+
     with open(spec_file_path, "r") as spec_file:
         full_file_text = spec_file.read()
     file_split = full_file_text.split("\n")
     spec_file.close()
     inspec = False
-    
+
     # check version of .spe file matches currently supported version
     if (file_split[0] == '$SPEC_ID:'):
         raise RuntimeError('This type of spe file is not supported')
@@ -106,7 +106,7 @@ def read_spe_file(spec_file_path):
         elif (line[0] == "Acquisition start date"):
             spectrum.start_date = line[1].strip()
         elif (line[0] == "Acquisition start time"):
-            spectrum.start_time = line[1].strip() + ":" + line[2] + ":"+line[3]
+            spectrum.start_time = line[1].strip() + ":" + line[2] + ":" + line[3]
         elif (line[0] == "Starting channel number"):
             spectrum.start_chan_num = int(line[1].strip())
         elif (line[0] == "Number of channels"):
@@ -134,9 +134,9 @@ def read_spe_file(spec_file_path):
     return spectrum
 
 
-def calc_e_eff(energy, eff_coeff, eff_fit = 1):   
+def calc_e_eff(energy, eff_coeff, eff_fit=1):
     """ detector efficiency calculation
-    
+
     Parameters
     ----------
     energy : float  
@@ -152,18 +152,18 @@ def calc_e_eff(energy, eff_coeff, eff_fit = 1):
     -------
     eff : float 
         Value of efficiency for the input energy using the selected fitting eqn
-        
+
     """
     # eff_fit used to choose between calibration fit eqns
     # energy to be in MeV
-    
+
     if eff_fit == 1:
         # eff_fit 1 uses series ao + a1(lnE)^1+ a2(lnE)^2+ ....
         log_eff = eff_coeff[0]
         i = 1
         while i < len(eff_coeff):
-            log_eff = log_eff + (eff_coeff[i] * 
-            (np.power(np.log(energy), i)))
+            log_eff = log_eff + (eff_coeff[i] *
+                                 (np.power(np.log(energy), i)))
             i = i + 1
         eff = np.exp(log_eff)
     elif eff_fit == 2:
@@ -171,11 +171,11 @@ def calc_e_eff(energy, eff_coeff, eff_fit = 1):
         log_eff = eff_coeff[0]
         i = 1
         while i < len(eff_coeff):
-            log_eff = log_eff + (eff_coeff[i] * ((1/energy)**i))
+            log_eff = log_eff + (eff_coeff[i] * ((1 / energy) ** i))
             i = i + 1
         eff = np.exp(log_eff)
     else:
         raise RuntimeError('The selected eff_fit is not valid')
         eff = 0
-        
+
     return eff
