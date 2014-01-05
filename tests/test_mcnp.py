@@ -584,17 +584,13 @@ def test_wwinp_n():
           23.333333333333329, 60.0, 70.0, 80.0, 90.0, 100.0],
          [-100.0, -66.666666666666657, -33.333333333333329,
           0.0, 33.333333333333343, 66.666666666666657, 100.0]])
-    for x in range(0, 15):
-        for y in range(0, 8):
-            for z in range(0, 6):
-                for e_group in range(1, 8):
-                    expected_voxel = expected_sm.structured_get_hex(x, y, z)
-                    expected = expected_sm.mesh.getTagHandle(
-                        'ww_n_group_00{0}'.format(e_group))[expected_voxel]
-                    written_voxel = ww1.structured_get_hex(x, y, z)
-                    written = ww1.mesh.getTagHandle(
-                        'ww_n_group_00{0}'.format(e_group))[written_voxel]
-                    assert_equal(written, expected)
+
+    expected_ves = list(expected_sm.structured_iterate_hex("zyx"))
+    written_ves = list(expected_sm.structured_iterate_hex("zyx"))
+    for expected_ve, written_ve in zip(expected_ves, written_ves):
+        expected = expected_sm.mesh.getTagHandle("ww_n")[expected_ve]
+        written = ww1.mesh.getTagHandle("ww_n")[written_ve]
+        assert_array_equal(written, expected)
 
     # Create an new object based off of only the mesh attribute of the first
     # object and check resutling attributes.
@@ -624,17 +620,13 @@ def test_wwinp_n():
           23.333333333333329, 60.0, 70.0, 80.0, 90.0, 100.0],
          [-100.0, -66.666666666666657, -33.333333333333329,
           0.0, 33.333333333333343, 66.666666666666657, 100.0]])
-    for x in range(0, 15):
-        for y in range(0, 8):
-            for z in range(0, 6):
-                for e_group in range(1, 8):
-                    expected_voxel = expected_sm.structured_get_hex(x, y, z)
-                    expected = expected_sm.mesh.getTagHandle(
-                        'ww_n_group_00{0}'.format(e_group))[expected_voxel]
-                    written_voxel = ww2.structured_get_hex(x, y, z)
-                    written = ww2.mesh.getTagHandle(
-                        'ww_n_group_00{0}'.format(e_group))[written_voxel]
-                    assert_equal(written, expected)
+
+    expected_ves = list(expected_sm.structured_iterate_hex("zyx"))
+    written_ves = list(expected_sm.structured_iterate_hex("zyx"))
+    for expected_ve, written_ve in zip(expected_ves, written_ves):
+        expected = expected_sm.mesh.getTagHandle("ww_n")[expected_ve]
+        written = ww2.mesh.getTagHandle("ww_n")[written_ve]
+        assert_array_equal(written, expected)
 
     # write a new wwinp file and verify that is same wwinp file used as an
     # input to this test
@@ -692,17 +684,13 @@ def test_wwinp_p():
           23.333333333333329, 60.0, 70.0, 80.0, 90.0, 100.0],
          [-100.0, -66.666666666666657, -33.333333333333329,
           0.0, 33.333333333333343, 66.666666666666657, 100.0]])
-    for x in range(0, 1):
-        for y in range(0, 8):
-            for z in range(0, 6):
-                for e_group in range(1, 8):
-                    expected_voxel = expected_sm.structured_get_hex(x, y, z)
-                    expected = expected_sm.mesh.getTagHandle(
-                        'ww_p_group_00{0}'.format(e_group))[expected_voxel]
-                    written_voxel = ww1.structured_get_hex(x, y, z)
-                    written = ww1.mesh.getTagHandle(
-                        'ww_p_group_00{0}'.format(e_group))[written_voxel]
-                    assert_equal(written, expected)
+
+    expected_ves = list(expected_sm.structured_iterate_hex("zyx"))
+    written_ves = list(expected_sm.structured_iterate_hex("zyx"))
+    for expected_ve, written_ve in zip(expected_ves, written_ves):
+        expected = expected_sm.mesh.getTagHandle("ww_p")[expected_ve]
+        written = ww1.mesh.getTagHandle("ww_p")[written_ve]
+        assert_array_equal(written, expected)
 
     # Create an new object based off of only the mesh attribute of the first
     # object and check resutling attributes.
@@ -727,17 +715,13 @@ def test_wwinp_p():
           23.333333333333329, 60.0, 70.0, 80.0, 90.0, 100.0],
          [-100.0, -66.666666666666657, -33.333333333333329,
           0.0, 33.333333333333343, 66.666666666666657, 100.0]])
-    for x in range(0, 1):
-        for y in range(0, 8):
-            for z in range(0, 6):
-                for e_group in range(1, 8):
-                    expected_voxel = expected_sm.structured_get_hex(x, y, z)
-                    expected = expected_sm.mesh.getTagHandle(
-                        'ww_p_group_00{0}'.format(e_group))[expected_voxel]
-                    written_voxel = ww2.structured_get_hex(x, y, z)
-                    written = ww2.mesh.getTagHandle(
-                        'ww_p_group_00{0}'.format(e_group))[written_voxel]
-                    assert_equal(written, expected)
+
+    expected_ves = list(expected_sm.structured_iterate_hex("zyx"))
+    written_ves = list(expected_sm.structured_iterate_hex("zyx"))
+    for expected_ve, written_ve in zip(expected_ves, written_ves):
+        expected = expected_sm.mesh.getTagHandle("ww_p")[expected_ve]
+        written = ww2.mesh.getTagHandle("ww_p")[written_ve]
+        assert_array_equal(written, expected)
 
     # write a new wwinp file and verify that is same wwinp file used as an
     # input to this test
@@ -794,29 +778,20 @@ def test_wwinp_np():
           23.333333333333329, 60.0, 70.0, 80.0, 90.0, 100.0],
          [-100.0, -66.666666666666657, -33.333333333333329,
           0.0, 33.333333333333343, 66.666666666666657, 100.0]])
-    for x in range(0, 1):
-        for y in range(0, 8):
-            for z in range(0, 6):
-                for e_group in range(1, 8):
-                    expected_voxel = expected_sm.structured_get_hex(x, y, z)
-                    expected = expected_sm.mesh.getTagHandle(
-                        'ww_n_group_00{0}'.format(e_group))[expected_voxel]
-                    written_voxel = ww1.structured_get_hex(x, y, z)
-                    written = ww1.mesh.getTagHandle(
-                        'ww_n_group_00{0}'.format(e_group))[written_voxel]
-                    assert_equal(written, expected)
 
-    for x in range(0, 1):
-        for y in range(0, 8):
-            for z in range(0, 6):
-                for e_group in range(1, 2):
-                    expected_voxel = expected_sm.structured_get_hex(x, y, z)
-                    expected = expected_sm.mesh.getTagHandle(
-                        'ww_p_group_00{0}'.format(e_group))[expected_voxel]
-                    written_voxel = ww1.structured_get_hex(x, y, z)
-                    written = ww1.mesh.getTagHandle(
-                        'ww_p_group_00{0}'.format(e_group))[written_voxel]
-                    assert_equal(written, expected)
+    expected_ves = list(expected_sm.structured_iterate_hex("zyx"))
+    written_ves = list(expected_sm.structured_iterate_hex("zyx"))
+    for expected_ve, written_ve in zip(expected_ves, written_ves):
+        expected = expected_sm.mesh.getTagHandle("ww_n")[expected_ve]
+        written = ww1.mesh.getTagHandle("ww_n")[written_ve]
+        assert_array_equal(written, expected)
+
+    expected_ves = list(expected_sm.structured_iterate_hex("zyx"))
+    written_ves = list(expected_sm.structured_iterate_hex("zyx"))
+    for expected_ve, written_ve in zip(expected_ves, written_ves):
+        expected = expected_sm.mesh.getTagHandle("ww_p")[expected_ve]
+        written = ww1.mesh.getTagHandle("ww_p")[written_ve]
+        assert_array_equal(written, expected)
 
     # Create an new object based off of only the mesh attribute of the first
     # object and check resutling attributes.
@@ -841,29 +816,20 @@ def test_wwinp_np():
           23.333333333333329, 60.0, 70.0, 80.0, 90.0, 100.0],
          [-100.0, -66.666666666666657, -33.333333333333329,
           0.0, 33.333333333333343, 66.666666666666657, 100.0]])
-    for x in range(0, 1):
-        for y in range(0, 8):
-            for z in range(0, 6):
-                for e_group in range(1, 8):
-                    expected_voxel = expected_sm.structured_get_hex(x, y, z)
-                    expected = expected_sm.mesh.getTagHandle(
-                        'ww_n_group_00{0}'.format(e_group))[expected_voxel]
-                    written_voxel = ww2.structured_get_hex(x, y, z)
-                    written = ww2.mesh.getTagHandle(
-                        'ww_n_group_00{0}'.format(e_group))[written_voxel]
-                    assert_equal(written, expected)
 
-    for x in range(0, 1):
-        for y in range(0, 8):
-            for z in range(0, 6):
-                for e_group in range(1, 2):
-                    expected_voxel = expected_sm.structured_get_hex(x, y, z)
-                    expected = expected_sm.mesh.getTagHandle(
-                        'ww_p_group_00{0}'.format(e_group))[expected_voxel]
-                    written_voxel = ww2.structured_get_hex(x, y, z)
-                    written = ww2.mesh.getTagHandle(
-                        'ww_p_group_00{0}'.format(e_group))[written_voxel]
-                    assert_equal(written, expected)
+    expected_ves = list(expected_sm.structured_iterate_hex("zyx"))
+    written_ves = list(expected_sm.structured_iterate_hex("zyx"))
+    for expected_ve, written_ve in zip(expected_ves, written_ves):
+        expected = expected_sm.mesh.getTagHandle("ww_n")[expected_ve]
+        written = ww2.mesh.getTagHandle("ww_n")[written_ve]
+        assert_array_equal(written, expected)
+
+    expected_ves = list(expected_sm.structured_iterate_hex("zyx"))
+    written_ves = list(expected_sm.structured_iterate_hex("zyx"))
+    for expected_ve, written_ve in zip(expected_ves, written_ves):
+        expected = expected_sm.mesh.getTagHandle("ww_p")[expected_ve]
+        written = ww2.mesh.getTagHandle("ww_p")[written_ve]
+        assert_array_equal(written, expected)
 
     # write a new wwinp file and verify that is same wwinp file used as an
     # input to this test
@@ -898,7 +864,7 @@ def test_single_meshtally_meshtal():
 
     thisdir = os.path.dirname(__file__)
     meshtal_file = os.path.join(thisdir, "mcnp_meshtal_single_meshtal.txt")
-    expected_h5m = os.path.join(thisdir, "tally_single.h5m")
+    expected_h5m = os.path.join(thisdir, "mcnp_meshtal_single_mesh.h5m")
     expected_sm = Mesh(mesh_file=expected_h5m, structured=True)
 
     meshtal_object = mcnp.Meshtal(meshtal_file)
@@ -930,16 +896,33 @@ def test_single_meshtally_meshtal():
         meshtal_object.tally[4].e_bounds,
         [0.00E+00, 1.00E-01, 2.00E-01, 1.00E+00])
 
-    # test mesh attributes
-    for e_group in range(1, 4):
-        for v_e, expected_v_e in zip(
-                meshtal_object.tally[4].structured_iterate_hex("xyz"),
-                expected_sm.structured_iterate_hex("xyz")):
-            written = meshtal_object.tally[4].mesh.getTagHandle(
-                "n_group_00{0}".format(e_group))[v_e]
-            expected = expected_sm.mesh.getTagHandle(
-                "n_group_00{0}".format(e_group))[expected_v_e]
-            assert_equal(written, expected)
+    # test vector tags
+    for v_e, expected_v_e in zip(
+            meshtal_object.tally[4].structured_iterate_hex("xyz"),
+            expected_sm.structured_iterate_hex("xyz")):
+        written = meshtal_object.tally[4].mesh.getTagHandle("n_result")[v_e]
+        expected = expected_sm.mesh.getTagHandle("n_result")[expected_v_e]
+        assert_array_equal(written, expected)
+    for v_e, expected_v_e in zip(
+            meshtal_object.tally[4].structured_iterate_hex("xyz"),
+            expected_sm.structured_iterate_hex("xyz")):
+        written = meshtal_object.tally[4].mesh.getTagHandle("n_rel_error")[v_e]
+        expected = expected_sm.mesh.getTagHandle("n_rel_error")[expected_v_e]
+        assert_array_equal(written, expected)
+
+    # test total tag
+    for v_e, expected_v_e in zip(
+            meshtal_object.tally[4].structured_iterate_hex("xyz"),
+            expected_sm.structured_iterate_hex("xyz")):
+        written = meshtal_object.tally[4].mesh.getTagHandle("n_total_result")[v_e]
+        expected = expected_sm.mesh.getTagHandle("n_total_result")[expected_v_e]
+        assert_equal(written, expected)
+    for v_e, expected_v_e in zip(
+            meshtal_object.tally[4].structured_iterate_hex("xyz"),
+            expected_sm.structured_iterate_hex("xyz")):
+        written = meshtal_object.tally[4].mesh.getTagHandle("n_total_rel_error")[v_e]
+        expected = expected_sm.mesh.getTagHandle("n_total_rel_error")[expected_v_e]
+        assert_equal(written, expected)
 
 
 def test_multiple_meshtally_meshtal():
@@ -967,42 +950,90 @@ def test_multiple_meshtally_meshtal():
 
     meshtal_object = mcnp.Meshtal(meshtal_file)
 
-    for e_group in range(1, 7):
-        for v_e, expected_v_e in zip(
-                meshtal_object.tally[4].structured_iterate_hex("xyz"),
-                expected_sm_4.structured_iterate_hex("xyz")):
-            written = meshtal_object.tally[4].mesh.getTagHandle(
-                "n_group_00{0}".format(e_group))[v_e]
-            expected = expected_sm_4.mesh.getTagHandle(
-                "n_group_00{0}".format(e_group))[expected_v_e]
-            assert_equal(written, expected)
+    # test meshtally 4
+    for v_e, expected_v_e in zip(
+            meshtal_object.tally[4].structured_iterate_hex("xyz"),
+            expected_sm_4.structured_iterate_hex("xyz")):
+        written = meshtal_object.tally[4].mesh.getTagHandle("n_result")[v_e]
+        expected = expected_sm_4.mesh.getTagHandle("n_result")[expected_v_e]
+        assert_array_equal(written, expected)
 
-    for e_group in range(1, 2):
-        for v_e, expected_v_e in zip(
-                meshtal_object.tally[14].structured_iterate_hex("xyz"),
-                expected_sm_14.structured_iterate_hex("xyz")):
-            written = meshtal_object.tally[14].mesh.getTagHandle(
-                "n_group_00{0}".format(e_group))[v_e]
-            expected = expected_sm_14.mesh.getTagHandle(
-                "n_group_00{0}".format(e_group))[expected_v_e]
-            assert_equal(written, expected)
+    for v_e, expected_v_e in zip(
+            meshtal_object.tally[4].structured_iterate_hex("xyz"),
+            expected_sm_4.structured_iterate_hex("xyz")):
+        written = meshtal_object.tally[4].mesh.getTagHandle("n_rel_error")[v_e]
+        expected = expected_sm_4.mesh.getTagHandle("n_rel_error")[expected_v_e]
+        assert_array_equal(written, expected)
 
-    for e_group in range(1, 7):
-        for v_e, expected_v_e in zip(
-                meshtal_object.tally[24].structured_iterate_hex("xyz"),
-                expected_sm_24.structured_iterate_hex("xyz")):
-            written = meshtal_object.tally[24].mesh.getTagHandle(
-                "p_group_00{0}".format(e_group))[v_e]
-            expected = expected_sm_24.mesh.getTagHandle(
-                "p_group_00{0}".format(e_group))[expected_v_e]
-            assert_equal(written, expected)
+    for v_e, expected_v_e in zip(
+            meshtal_object.tally[4].structured_iterate_hex("xyz"),
+            expected_sm_4.structured_iterate_hex("xyz")):
+        written = meshtal_object.tally[4].mesh.getTagHandle("n_total_result")[v_e]
+        expected = expected_sm_4.mesh.getTagHandle("n_total_result")[expected_v_e]
+        assert_equal(written, expected)
 
-    for e_group in range(1, 2):
-        for v_e, expected_v_e in zip(
-                meshtal_object.tally[34].structured_iterate_hex("xyz"),
-                expected_sm_34.structured_iterate_hex("xyz")):
-            written = meshtal_object.tally[34].mesh.getTagHandle(
-                "p_group_00{0}".format(e_group))[v_e]
-            expected = expected_sm_34.mesh.getTagHandle(
-                "p_group_00{0}".format(e_group))[expected_v_e]
-            assert_equal(written, expected)
+    for v_e, expected_v_e in zip(
+            meshtal_object.tally[4].structured_iterate_hex("xyz"),
+            expected_sm_4.structured_iterate_hex("xyz")):
+        written = meshtal_object.tally[4].mesh.getTagHandle("n_total_rel_error")[v_e]
+        expected = expected_sm_4.mesh.getTagHandle("n_total_rel_error")[expected_v_e]
+        assert_equal(written, expected)
+
+    # test meshtally 14
+    for v_e, expected_v_e in zip(
+            meshtal_object.tally[14].structured_iterate_hex("xyz"),
+            expected_sm_14.structured_iterate_hex("xyz")):
+        written = meshtal_object.tally[14].mesh.getTagHandle("n_result")[v_e]
+        expected = expected_sm_14.mesh.getTagHandle("n_result")[expected_v_e]
+        assert_array_equal(written, expected)
+
+    for v_e, expected_v_e in zip(
+            meshtal_object.tally[14].structured_iterate_hex("xyz"),
+            expected_sm_14.structured_iterate_hex("xyz")):
+        written = meshtal_object.tally[14].mesh.getTagHandle("n_rel_error")[v_e]
+        expected = expected_sm_14.mesh.getTagHandle("n_rel_error")[expected_v_e]
+        assert_array_equal(written, expected)
+
+    # test meshtally 24
+    for v_e, expected_v_e in zip(
+            meshtal_object.tally[24].structured_iterate_hex("xyz"),
+            expected_sm_24.structured_iterate_hex("xyz")):
+        written = meshtal_object.tally[24].mesh.getTagHandle("p_result")[v_e]
+        expected = expected_sm_24.mesh.getTagHandle("p_result")[expected_v_e]
+        assert_array_equal(written, expected)
+
+    for v_e, expected_v_e in zip(
+            meshtal_object.tally[24].structured_iterate_hex("xyz"),
+            expected_sm_24.structured_iterate_hex("xyz")):
+        written = meshtal_object.tally[24].mesh.getTagHandle("p_rel_error")[v_e]
+        expected = expected_sm_24.mesh.getTagHandle("p_rel_error")[expected_v_e]
+        assert_array_equal(written, expected)
+
+    for v_e, expected_v_e in zip(
+            meshtal_object.tally[24].structured_iterate_hex("xyz"),
+            expected_sm_24.structured_iterate_hex("xyz")):
+        written = meshtal_object.tally[24].mesh.getTagHandle("p_total_result")[v_e]
+        expected = expected_sm_24.mesh.getTagHandle("p_total_result")[expected_v_e]
+        assert_equal(written, expected)
+
+    for v_e, expected_v_e in zip(
+            meshtal_object.tally[24].structured_iterate_hex("xyz"),
+            expected_sm_24.structured_iterate_hex("xyz")):
+        written = meshtal_object.tally[24].mesh.getTagHandle("p_total_rel_error")[v_e]
+        expected = expected_sm_24.mesh.getTagHandle("p_total_rel_error")[expected_v_e]
+        assert_equal(written, expected)
+
+    # test meshtally 34
+    for v_e, expected_v_e in zip(
+            meshtal_object.tally[34].structured_iterate_hex("xyz"),
+            expected_sm_34.structured_iterate_hex("xyz")):
+        written = meshtal_object.tally[34].mesh.getTagHandle("p_result")[v_e]
+        expected = expected_sm_34.mesh.getTagHandle("p_result")[expected_v_e]
+        assert_array_equal(written, expected)
+
+    for v_e, expected_v_e in zip(
+            meshtal_object.tally[34].structured_iterate_hex("xyz"),
+            expected_sm_34.structured_iterate_hex("xyz")):
+        written = meshtal_object.tally[34].mesh.getTagHandle("p_rel_error")[v_e]
+        expected = expected_sm_34.mesh.getTagHandle("p_rel_error")[expected_v_e]
+        assert_array_equal(written, expected)
