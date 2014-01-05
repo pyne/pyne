@@ -31,13 +31,8 @@ import pyne.rxdata as rx
 from pyne.rxname import label
 from pyne.utils import fromendf_tok, endftod
 
-include "include/cython_version.pxi"
-IF CYTHON_VERSION_MAJOR == 0 and CYTHON_VERSION_MINOR >= 17:
-    from libc.stdlib cimport atof, atoi
-    from libc.string cimport strtok, strcpy, strncpy
-ELSE:
-    from pyne._includes.libc.stdlib cimport atof, atoi
-    from pyne._includes.libc.string cimport strtok, strcpy, strncpy
+from libc.stdlib cimport atof, atoi
+from libc.string cimport strtok, strcpy, strncpy
 
 libraries = {0: "ENDF/B", 1: "ENDF/A", 2: "JEFF", 3: "EFF",
              4: "ENDF/B High Energy", 5: "CENDL", 6: "JENDL",
