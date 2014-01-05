@@ -1,0 +1,7 @@
+Input file for test problem -- use with dag-mcnp5
+nps 1e5
+sdef  
+m1 1001 2 8016 1
+f4:n 2
+print
+prdmp 2j -1 
