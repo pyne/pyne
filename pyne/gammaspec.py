@@ -129,6 +129,53 @@ def read_spe_file(spec_file_path):
     spectrum.counts = np.array(spectrum.counts)
     spectrum.channels = np.array(spectrum.channels)
     # calculate additional parameters based on .spe file
-    spectrum.dead_time=spectrum.real_time-spectrum.live_time
+    spectrum.dead_time = spectrum.real_time - spectrum.live_time
     spectrum.calc_ebins()
     return spectrum
+
+
+def calc_e_eff(energy, eff_coeff, eff_fit = 1):   
+    """ detector efficiency calculation
+    
+    Parameters
+    ----------
+    energy : float  
+        Energy to calcuate det eff 
+    eff_coeff : arr
+        An array with the coefficients for the energy fit
+        the length is not fixed, the length of the array determines the 
+        number of terms in the expansion
+    eff_fit : int
+        Determines what type of fit to use
+
+    Returns
+    -------
+    eff : float 
+        Value of efficiency for the input energy using the selected fitting eqn
+        
+    """
+    # eff_fit used to choose between calibration fit eqns
+    # energy to be in MeV
+    
+    if eff_fit == 1:
+        # eff_fit 1 uses series ao + a1(lnE)^1+ a2(lnE)^2+ ....
+        log_eff = eff_coeff[0]
+        i = 1
+        while i < len(eff_coeff):
+            log_eff = log_eff + (eff_coeff[i] * 
+            (np.power(np.log(energy), i)))
+            i = i + 1
+        eff = np.exp(log_eff)
+    elif eff_fit == 2:
+        # eff_fit 2 uses series a0 + a1(1/E)^1 + a2(1/E)^2+...
+        log_eff = eff_coeff[0]
+        i = 1
+        while i < len(eff_coeff):
+            log_eff = log_eff + (eff_coeff[i] * ((1/energy)**i))
+            i = i + 1
+        eff = np.exp(log_eff)
+    else:
+        raise RuntimeError('The selected eff_fit is not valid')
+        eff = 0
+        
+    return eff
