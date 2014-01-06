@@ -883,7 +883,7 @@ class Mesh(object):
         elif len(coord) == 8:
             return self.get_hex_volume(ve, coord)
         else:
-            return None:
+            return None
 
 
     def get_tet_volume(self, ve, coord=None):
