@@ -1,74 +1,45 @@
 from __future__ import print_function
 
-#### start __init__
+from pyne cimport cpp_dagmc_bridge
 
-import ctypes
-import ctypes.util
-import sys
-import os.path
+cimport numpy as np
+import numpy as np
 
-# Attempt to find the dagmc_bridge shared library
-# ctypes.util.find_library is (sometimes) useful, but does not work the
-# same way on all platforms.
-_dirname = os.path.dirname(__file__)
-if sys.platform == 'darwin':
-    _bridgepath = ctypes.util.find_library(
-                    os.path.join(_dirname, 'dagmc_bridge', 'dagmc_bridge'))
-elif sys.platform.startswith('linux'):
-    _bridgepath = os.path.join(_dirname, 'dagmc_bridge', 'dagmc_bridge.so')
-else:
-    print('Warning: unknown platform, dagmc_bridge lib import may fail',
-          file=sys.stderr)
-    _bridgepath = ctypes.util.find_library('dagmc_bridge')
-
-
-daglib = ctypes.CDLL(_bridgepath)
-
+# Python imports
+from contextlib import contextmanager
 
 # Set the entity handle type; I don't know a cleaner way than to ask the daglib
 # to return the byte width of the type
-def get_EH_type():
-    EH_size = daglib.dag_ent_handle_size()
-    if EH_size == 8:
-        EH_t = ctypes.c_uint64
-    elif EH_size == 4:
-        EH_t = ctypes.c_uint32
+def get_entity_handle_type():
+    eh_size = cpp_dagmc_bridge.dag_ent_handle_size()
+    if eh_size == 8:
+        eh_t = np.uint64
+    elif eh_size == 4:
+        eh_t = np.uint32
     else:
         raise TypeError("Unrecognized entity handle size in dagmc library: "
-                         + str(EH_size))
-    return type("EntityHandle", (EH_t,), {})
+                         + str(eh_size))
+    return type("EntityHandle", (eh_t,), {})
 
-
-EntityHandle = get_EH_type()
-_ErrorCode = type("ErrorCode", (ctypes.c_int,), {})
-
+EntityHandle = get_entity_handle_type()
+_ErrorCode = type("ErrorCode", (np.int,), {})
 
 class DagmcError(Exception):
     pass
 
 
-#### end __init__
+def dag_version():
+    """Returns the DagMC version."""
+    return cpp_dagmc_bridge.dag_version()
 
 
-#### start bridge
-
-import ctypes
-from contextlib import contextmanager
-from numpy import float64
-from numpy.ctypeslib import ndpointer
-
-from pydagmc import daglib, EntityHandle, _ErrorCode, DagmcError
-
-lib = daglib
-
-lib.dag_version.restype = ctypes.c_float
-lib.dag_version.argtypes = []
-
-lib.dag_rev_version.restype = ctypes.c_uint
-lib.dag_rev_version.argtypes = []
+def dag_rev_version():
+    """Returns the DagMC version number."""
+    return int(cpp_dagmc_bridge.dag_rev_version())
 
 
 def _geom_dim_check(result, func, arguments):
+    """Check dimensions and raise error otherwise."""
     if arguments[0] not in (2, 3):
         raise DagmcError('Incorrect geometric dimension: ' + str(arguments[0]))
     return result
@@ -99,7 +70,7 @@ def _returns_moab_errors(function):
 _returns_moab_errors(lib.dag_load)
 lib.dag_load.argtypes = [ctypes.c_char_p]
 
-_vec3 = ndpointer(dtype=float64, shape=(3,), flags='CONTIGUOUS')
+_vec3 = ndpointer(dtype=np.float64, shape=(3,), flags='CONTIGUOUS')
 
 _returns_moab_errors(lib.dag_pt_in_vol)
 lib.dag_pt_in_vol.argtypes = [EntityHandle, _vec3,
@@ -158,8 +129,8 @@ lib.get_volume_boundary.argtypes = [EntityHandle, _vec3, _vec3]
 
 import sys
 import ctypes
-import numpy
-from numpy.linalg import norm
+import np
+from np.linalg import norm
 
 surf_id_to_handle = {}
 surf_handle_to_id = {}
@@ -249,11 +220,11 @@ def volume_boundary(vol_id):
 
     Return the lower and upper coordinates of an axis-aligned bounding box for the given
     volume.  The returned box may or may not be the minimal bounding box for the volume.
-    Return (xyz low) and (xyz high) as numpy arrays.
+    Return (xyz low) and (xyz high) as np arrays.
     """
     eh = vol_id_to_handle[ vol_id ]
-    low = numpy.array([0,0,0], dtype=numpy.float64)
-    high = numpy.array([0,0,0], dtype=numpy.float64)
+    low = np.array([0,0,0], dtype=np.np.float64)
+    high = np.array([0,0,0], dtype=np.np.float64)
 
     bridge.lib.get_volume_boundary(eh, low, high)
     return low, high
@@ -266,8 +237,8 @@ def point_in_volume(vol_id, xyz, uvw=[1,0,0]):
     query.  Otherwise, a random direction will be chosen. 
     
     """
-    xyz = numpy.array(xyz, dtype=numpy.float64)
-    uvw = numpy.array(uvw, dtype=numpy.float64)
+    xyz = np.array(xyz, dtype=np.np.float64)
+    uvw = np.array(uvw, dtype=np.np.float64)
 
     eh = vol_id_to_handle[ vol_id ]
     result = ctypes.c_int(-2)
@@ -286,8 +257,8 @@ def find_volume(xyz, uvw=[1,0,0]):
     This function may be slow if many volumes exist.
 
     """
-    xyz = numpy.array(xyz, dtype=numpy.float64)
-    uvw = numpy.array(uvw, dtype=numpy.float64)
+    xyz = np.array(xyz, dtype=np.np.float64)
+    uvw = np.array(uvw, dtype=np.np.float64)
 
     for eh, vol_id in vol_handle_to_id.iteritems():
         result = ctypes.c_int(-2)
@@ -312,8 +283,8 @@ def fire_one_ray(vol_id, xyz, uvw):
     If a ray in a given direction will traverse several volumes in a row, ray_iterator should
     be used instead.
     """
-    xyz = numpy.array(xyz, dtype=numpy.float64)
-    uvw = numpy.array(uvw, dtype=numpy.float64)
+    xyz = np.array(xyz, dtype=np.np.float64)
+    uvw = np.array(uvw, dtype=np.np.float64)
 
     eh = vol_id_to_handle[ vol_id ]
     
@@ -345,8 +316,8 @@ def ray_iterator_slow(init_vol_id, startpoint, direction, **kw):
     """
 
     eh = bridge.EntityHandle(vol_id_to_handle[ init_vol_id ])
-    xyz = numpy.array(startpoint, dtype=numpy.float64)
-    uvw = numpy.array(direction, dtype=numpy.float64)
+    xyz = np.array(startpoint, dtype=np.np.float64)
+    uvw = np.array(direction, dtype=np.np.float64)
 
     use_dist_limit = ('dist_limit' in kw)
     dist_limit = kw.get('dist_limit',0.0)
@@ -385,8 +356,8 @@ def ray_iterator_slow(init_vol_id, startpoint, direction, **kw):
 def ray_iterator(init_vol_id, startpoint, direction, **kw):
 
     eh = bridge.EntityHandle(vol_id_to_handle[ init_vol_id ])
-    xyz = numpy.array(startpoint, dtype=numpy.float64)
-    uvw = numpy.array(direction, dtype=numpy.float64)
+    xyz = np.array(startpoint, dtype=np.np.float64)
+    uvw = np.array(direction, dtype=np.np.float64)
 
     dist_limit = kw.get('dist_limit',0.0)
 
@@ -420,8 +391,8 @@ def tell_ray_story(startpoint, direction, output=sys.stdout, **kw):
     kw args are passed on to underlying call to ray_iterator
 
     """
-    xyz = numpy.array(startpoint, dtype=numpy.float64)
-    uvw = numpy.array(direction, dtype=numpy.float64) 
+    xyz = np.array(startpoint, dtype=np.np.float64)
+    uvw = np.array(direction, dtype=np.np.float64) 
     uvw /= norm(uvw)
 
     def pr(*args): 
@@ -463,7 +434,7 @@ def tell_ray_story(startpoint, direction, output=sys.stdout, **kw):
 
 #### start util
 
-import numpy
+import np
 
 from dagmc import *
 from bridge import DagmcError
@@ -485,10 +456,10 @@ def find_graveyard_inner_box():
         raise DagmcError( 'Could not find a graveyard volume' )
 
     xyz_lo, xyz_hi = volume_boundary( graveyard )
-    xyz_mid = numpy.array( [ (hi+lo)/2.0 for (hi,lo) in zip( xyz_hi, xyz_lo) ], dtype=numpy.float64 )
+    xyz_mid = np.array( [ (hi+lo)/2.0 for (hi,lo) in zip( xyz_hi, xyz_lo) ], dtype=np.np.float64 )
 
-    result_lo = numpy.array( [0]*3, dtype=numpy.float64 )
-    result_hi = numpy.array( [0]*3, dtype=numpy.float64 )
+    result_lo = np.array( [0]*3, dtype=np.np.float64 )
+    result_hi = np.array( [0]*3, dtype=np.np.float64 )
 
     for i in range(0,3):
         uvw = [0,0,0]
