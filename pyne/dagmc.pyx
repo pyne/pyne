@@ -38,24 +38,36 @@ def dag_rev_version():
     return int(cpp_dagmc_bridge.dag_rev_version())
 
 
-def _geom_dim_check(result, func, arguments):
+def _geom_dim_check(int dim):
     """Check dimensions and raise error otherwise."""
-    if arguments[0] not in (2, 3):
-        raise DagmcError('Incorrect geometric dimension: ' + str(arguments[0]))
     return result
 
-lib.geom_id_list.restype = ctypes.POINTER(ctypes.c_int)
-lib.geom_id_list.argtypes = [ctypes.c_int, ctypes.POINTER(ctypes.c_int)]
-lib.geom_id_list.errcheck = _geom_dim_check
 
-lib.handle_from_id.restype = EntityHandle
-lib.handle_from_id.argtypes = [ctypes.c_int, ctypes.c_int]
-lib.handle_from_id.errcheck = _geom_dim_check
+def geom_id_list(int dimension):
+    """Generates a list of geometry ids.
+    """
+    cdef int number_of_items, i
+    cdef int * crtn
+    if dimension != 2 or dimension != 3:
+        raise DagmcError('Incorrect geometric dimension: ' + str(dimension))
+    crtn = cpp_dagmc_bridge.geom_id_list(dimension, &number_of_items)
+    rtn = [int(crtn[i]) for i in range(number_of_items)]
+    return rtn
 
-lib.id_from_handle.restype = ctypes.c_int
-lib.id_from_handle.argtypes = [EntityHandle]
+def handle_from_id(int dimension, int id):
+    cdef cpp_dagmc_bridge.EntityHandle crtn
+    if dimension != 2 or dimension != 3:
+        raise DagmcError('Incorrect geometric dimension: ' + str(dimension))
+    crtn = cpp_dagmc_bridge.handle_from_id(dimension, id)
+    rtn = EntityHandle(crtn)
+    return rtn
 
+def id_from_handle(EntityHandle eh):
+    cdef int eh_id
+    eh_id = cpp_dagmc_bridge.id_from_handle(<cpp_dagmc_bridge.EntityHandle> eh)
+    return eh_id
 
+"""\
 def _moab_error_check(result, func, arguments):
     if result.value != 0:
         raise DagmcError("Error code " + str(result.value) +
@@ -139,14 +151,14 @@ vol_handle_to_id = {}
 
 
 def versions():
-    """Return a (str,int) tuple: the version and SVN revision of the 
+    ""Return a (str,int) tuple: the version and SVN revision of the 
     active DagMC C++ library.
-    """
+    ""
     return ('{0:.4}'.format(bridge.lib.dag_version()), int(bridge.lib.dag_rev_version()))
 
 
 def load(filename):
-    """Load a given filename into DagMC"""
+    ""Load a given filename into DagMC""
     global surf_id_to_handle, surf_handle_to_id, vol_id_to_handle, vol_handle_to_id
     bridge.lib.dag_load(filename)
 
@@ -175,36 +187,36 @@ def load(filename):
 
 
 def get_surface_list():
-    """return a list of valid surface IDs"""
+    ""return a list of valid surface IDs""
     return surf_id_to_handle.keys()
 
 
 def get_volume_list():
-    """return a list of valid volume IDs"""
+    ""return a list of valid volume IDs""
     return vol_id_to_handle.keys()
 
 
 def volume_is_graveyard(vol_id):
-    """True if the given volume id is a graveyard volume"""
+    ""True if the given volume id is a graveyard volume""
     eh = vol_id_to_handle[ vol_id ]
     result = bridge.lib.vol_is_graveyard(eh)
     return (result != 0)
 
 
 def volume_is_implicit_complement(vol_id):
-    """True if the given volume id is the implicit complement volume"""
+    ""True if the given volume id is the implicit complement volume""
     eh = vol_id_to_handle[ vol_id ]
     result = bridge.lib.vol_is_implicit_complement(eh)
     return (result != 0)
 
 
 def volume_metadata(vol_id):
-    """Get the metadata of the given volume id
+    ""Get the metadata of the given volume id
 
     returns a dictionary containing keys 'material', 'rho', and 'imp', corresponding
     to the DagmcVolData struct in DagMC.hpp
 
-    """
+    ""
     eh = vol_id_to_handle[ vol_id ]
     mat = ctypes.c_int()
     rho = ctypes.c_double()
@@ -216,12 +228,12 @@ def volume_metadata(vol_id):
 
 
 def volume_boundary(vol_id):
-    """Get the lower and upper boundary of a volume in (x,y,z) coordinates.
+    ""Get the lower and upper boundary of a volume in (x,y,z) coordinates.
 
     Return the lower and upper coordinates of an axis-aligned bounding box for the given
     volume.  The returned box may or may not be the minimal bounding box for the volume.
     Return (xyz low) and (xyz high) as np arrays.
-    """
+    ""
     eh = vol_id_to_handle[ vol_id ]
     low = np.array([0,0,0], dtype=np.np.float64)
     high = np.array([0,0,0], dtype=np.np.float64)
@@ -231,12 +243,12 @@ def volume_boundary(vol_id):
 
 
 def point_in_volume(vol_id, xyz, uvw=[1,0,0]):
-    """Determine whether the given point, xyz, is in the given volume.
+    ""Determine whether the given point, xyz, is in the given volume.
     
     If provided, uvw is used to determine the ray fire direction for the underlying 
     query.  Otherwise, a random direction will be chosen. 
     
-    """
+    ""
     xyz = np.array(xyz, dtype=np.np.float64)
     uvw = np.array(uvw, dtype=np.np.float64)
 
@@ -249,14 +261,14 @@ def point_in_volume(vol_id, xyz, uvw=[1,0,0]):
 
 
 def find_volume(xyz, uvw=[1,0,0]):
-    """Determine which volume the given point is in.
+    ""Determine which volume the given point is in.
 
     Return a volume id.  If no volume contains the point, a DagmcError may be raised,
     or the point may be reported to be part of the implicit complement.
 
     This function may be slow if many volumes exist.
 
-    """
+    ""
     xyz = np.array(xyz, dtype=np.np.float64)
     uvw = np.array(uvw, dtype=np.np.float64)
 
@@ -270,7 +282,7 @@ def find_volume(xyz, uvw=[1,0,0]):
 
 
 def fire_one_ray(vol_id, xyz, uvw):
-    """Fire a ray from xyz, in the direction uvw, at the specified volume
+    ""Fire a ray from xyz, in the direction uvw, at the specified volume
 
     uvw must represent a unit vector.
 
@@ -282,7 +294,7 @@ def fire_one_ray(vol_id, xyz, uvw):
 
     If a ray in a given direction will traverse several volumes in a row, ray_iterator should
     be used instead.
-    """
+    ""
     xyz = np.array(xyz, dtype=np.np.float64)
     uvw = np.array(uvw, dtype=np.np.float64)
 
@@ -302,7 +314,7 @@ def fire_one_ray(vol_id, xyz, uvw):
 
 
 def ray_iterator_slow(init_vol_id, startpoint, direction, **kw):
-    """Return an iterator for a ray in a single direction.
+    ""Return an iterator for a ray in a single direction.
 
     The iterator will yield a series of tuples (vol,dist,surf), indicating the next
     volume intersected, the distance to the next intersection (from the last intersection),
@@ -313,7 +325,7 @@ def ray_iterator_slow(init_vol_id, startpoint, direction, **kw):
     yield_xyz: results will contain a fourth tuple element, being the xyz position of the 
                intersection
     dist_limit: distance at which to consider the ray ended
-    """
+    ""
 
     eh = bridge.EntityHandle(vol_id_to_handle[ init_vol_id ])
     xyz = np.array(startpoint, dtype=np.np.float64)
@@ -382,7 +394,7 @@ def ray_iterator(init_vol_id, startpoint, direction, **kw):
     bridge.lib.dag_dealloc_ray_buffer(buf)
 
 def tell_ray_story(startpoint, direction, output=sys.stdout, **kw):
-    """Write a human-readable history of a ray in a given direction.
+    ""Write a human-readable history of a ray in a given direction.
 
     The history of the ray from startpoint in direction is written to the given output file.
     The initial volume in which startpoint resides will be determined, and 
@@ -390,7 +402,7 @@ def tell_ray_story(startpoint, direction, output=sys.stdout, **kw):
 
     kw args are passed on to underlying call to ray_iterator
 
-    """
+    ""
     xyz = np.array(startpoint, dtype=np.np.float64)
     uvw = np.array(direction, dtype=np.np.float64) 
     uvw /= norm(uvw)
@@ -440,12 +452,12 @@ from dagmc import *
 from bridge import DagmcError
 
 def find_graveyard_inner_box():
-    """Estimate the dimension of the inner wall of the graveyard, assuming box shape.
+    ""Estimate the dimension of the inner wall of the graveyard, assuming box shape.
 
     Return the the (low, high) xyz coordinates of the inner wall of the graveyard volume.
     This assumes the graveyard volume is a box-shaped, axis-aligned shell.  This function
     is slow and should not be called many times where performance is desirable.
-    """
+    ""
     volumes = get_volume_list()
     graveyard = 0
     for v in volumes:
@@ -477,11 +489,11 @@ def find_graveyard_inner_box():
     return result_lo, result_hi
 
 def get_material_set(**kw):
-    """Return all material IDs used in the geometry as a set of integers
+    ""Return all material IDs used in the geometry as a set of integers
     
     If the keyword argument 'with_rho' is True, the set will contain (int,float) tuples
     containing material ID and density
-    """
+    ""
     mat_ids = set()
     volumes = get_volume_list()
     for v in volumes:
@@ -497,3 +509,4 @@ def get_material_set(**kw):
     return mat_ids
 
 #### start util
+"""

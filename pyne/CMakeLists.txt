@@ -35,6 +35,12 @@ set_source_files_properties(${PROJECT_SOURCE_DIR}/pyne/_utils.pyx
 cython_add_module(_utils _utils.pyx)
 target_link_libraries(_utils pyne)
 
+# dagmc
+set_source_files_properties(${PROJECT_SOURCE_DIR}/pyne/dagmc.pyx 
+                            PROPERTIES CYTHON_IS_CXX TRUE)
+cython_add_module(dagmc dagmc.pyx ${PROJECT_SOURCE_DIR}/cpp/dagmc_bridge.cpp)
+target_link_libraries(dagmc dagmc MOAB pyne)
+
 # endf
 set_source_files_properties(${PROJECT_SOURCE_DIR}/pyne/endf.pyx 
                             PROPERTIES CYTHON_IS_CXX TRUE)
