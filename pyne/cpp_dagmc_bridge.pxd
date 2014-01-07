@@ -39,3 +39,6 @@ cdef extern from "dagmc_bridge.h" namespace "pyne":
                            EntityHandle* next_vol) except +
     int vol_is_graveyard(EntityHandle vol) except +
     int vol_is_implicit_complement(EntityHandle vol) except +
+    ErrorCode get_volume_metadata(EntityHandle vol, int* material, double* density, 
+                                  double* importance) except +
+    ErrorCode get_volume_boundary(EntityHandle vol, vec3 minPt, vec3 maxPt) except +

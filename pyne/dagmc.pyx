@@ -220,17 +220,41 @@ def vol_is_implicit_complement(vol):
     crtn = cpp_dagmc_bridge.vol_is_implicit_complement(
                                 <cpp_dagmc_bridge.EntityHandle> vol)
     return bool(crtn)
+
+
+def get_volume_metadata(vol):
+    cdef cpp_dagmc_bridge.ErrorCode crtn
+    cdef int material
+    cdef double density
+    cdef double importance
+    if not isinstance(vol, EntityHandle):
+        vol = EntityHandle(vol)
+    crtn = cpp_dagmc_bridge.get_volume_metadata(<cpp_dagmc_bridge.EntityHandle> vol,
+                                                &material, &density, &importance)
+    if crtn != 0:
+        raise DagmcError("Error code " + str(crtn))
+    return material, density, importance
+
+
+def get_volume_boundary(vol):
+    cdef cpp_dagmc_bridge.ErrorCode crtn
+    cdef cpp_dagmc_bridge.vec3 minpt
+    cdef cpp_dagmc_bridge.vec3 maxpt
+    cdef np.npy_intp shape[1]
+    shape[0] = 3
+    if not isinstance(vol, EntityHandle):
+        vol = EntityHandle(vol)
+    crtn = cpp_dagmc_bridge.get_volume_boundary(<cpp_dagmc_bridge.EntityHandle> vol,
+                                                minpt, maxpt)
+    if crtn != 0:
+        raise DagmcError("Error code " + str(crtn))
+    pyminpt = np.PyArray_SimpleNewFromData(1, shape, np.NPY_FLOAT64, <void *> minpt)
+    pymaxpt = np.PyArray_SimpleNewFromData(1, shape, np.NPY_FLOAT64, <void *> maxpt)
+    return pyminpt, pymaxpt
     
 
+
 """\
-
-_returns_moab_errors(lib.get_volume_metadata)
-lib.get_volume_metadata.argtypes = [EntityHandle, ctypes.POINTER(ctypes.c_int),
-                                    ctypes.POINTER(ctypes.c_double),
-                                    ctypes.POINTER(ctypes.c_double)]
-
-_returns_moab_errors(lib.get_volume_boundary)
-lib.get_volume_boundary.argtypes = [EntityHandle, _vec3, _vec3]
 
 ### end bridge
 
