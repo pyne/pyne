@@ -1,23 +1,23 @@
 import unittest
 import os.path
 
-import pydagmc.dagmc as dagmc
-import pydagmc.util as dagutil
+from pyne import dagmc 
+
 
 class TestDagmcWithUnitbox(unittest.TestCase):
 
-    # use extra underscore to ensure this function is first in alpabetical sorted order,
-    # because it must run before the others.
+    # use extra underscore to ensure this function is first in alpabetical 
+    # sorted order, because it must run before the others.
     def test__load(self):
         path = os.path.join(os.path.dirname(__file__), 'unitbox.h5m')
         dagmc.load(path)
 
     def test_metadata (self):
 
-        rets = [ dagmc.volume_is_graveyard(x) for x in range (1,5) ]
+        rets = [dagmc.volume_is_graveyard(x) for x in range (1,5)]
         self.assertEqual(rets, [True, False, False, False])
 
-        rets = [ dagmc.volume_is_implicit_complement(x) for x in range(1,5) ]
+        rets = [dagmc.volume_is_implicit_complement(x) for x in range(1,5)]
         self.assertEqual(rets, [False, False, False, True])
         
         md = dagmc.volume_metadata(2)
@@ -49,11 +49,11 @@ class TestDagmcWithUnitbox(unittest.TestCase):
     def test_pt_in_vol(self):
 
         # there are 4 volumes; (0,0,.2) is in volume 2
-        rets = [ dagmc.point_in_volume(x, [0,0,.2]) for x in range(1,5) ]
+        rets = [dagmc.point_in_volume(x, [0,0,.2]) for x in range(1,5)]
         self.assertEqual(rets, [False, True, False, False])
 
         # (1.1,0,0) is in volume 3
-        rets = [ dagmc.point_in_volume(x, [1.1, 0, 0]) for x in range (1,5) ]
+        rets = [dagmc.point_in_volume(x, [1.1, 0, 0]) for x in range (1,5)]
         self.assertEqual(rets, [False, False, True, False])
 
     def test_find_volume(self):
@@ -101,8 +101,8 @@ class TestDagmcWithUnitbox(unittest.TestCase):
 
     def test_failures (self):
 
-        self.assertRaises(Exception, dagmc.point_in_volume, [100, (0,0,0) ])
-        self.assertRaises(Exception, dagmc.point_in_volume, [ 1, (0,0,0,0) ])
+        self.assertRaises(Exception, dagmc.point_in_volume, [100, (0,0,0)])
+        self.assertRaises(Exception, dagmc.point_in_volume, [1, (0,0,0,0)])
         self.assertRaises(Exception, dagmc.fire_one_ray, [2, (0,0,0), 1])
 
     def test_ray_iterator(self):
@@ -139,7 +139,7 @@ class TestDagmcWithUnitbox(unittest.TestCase):
 
     def test_util_graveyard_bound(self):
 
-        lo, hi = dagutil.find_graveyard_inner_box()
+        lo, hi = dagmc.find_graveyard_inner_box()
 
         grave_diam = 4.15692194
         for i in range(0,3):
@@ -148,8 +148,8 @@ class TestDagmcWithUnitbox(unittest.TestCase):
 
     def test_util_matlist(self):
 
-        mats = dagutil.get_material_set()
+        mats = dagmc.get_material_set()
         self.assertEqual(set((0,5)), mats)
 
-        mats = dagutil.get_material_set(with_rho=True)
+        mats = dagmc.get_material_set(with_rho=True)
         self.assertEqual(set([(0,0.0),(5,0.5)]), mats)

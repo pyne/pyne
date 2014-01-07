@@ -47,7 +47,7 @@ def geom_id_list(int dimension):
     """
     cdef int number_of_items, i
     cdef const int * crtn
-    if dimension != 2 or dimension != 3:
+    if dimension != 2 and dimension != 3:
         raise DagmcError('Incorrect geometric dimension: ' + str(dimension))
     crtn = cpp_dagmc_bridge.geom_id_list(dimension, &number_of_items)
     rtn = [int(crtn[i]) for i in range(number_of_items)]
@@ -56,7 +56,7 @@ def geom_id_list(int dimension):
 def handle_from_id(int dimension, int id):
     """Get entity from id number."""
     cdef cpp_dagmc_bridge.EntityHandle crtn
-    if dimension != 2 or dimension != 3:
+    if dimension != 2 and dimension != 3:
         raise DagmcError('Incorrect geometric dimension: ' + str(dimension))
     crtn = cpp_dagmc_bridge.handle_from_id(dimension, id)
     rtn = EntityHandle(crtn)
