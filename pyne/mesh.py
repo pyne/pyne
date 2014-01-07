@@ -863,7 +863,7 @@ class Mesh(object):
 
 
     # Non-structured volume methods
-    def get_elem_volume(self, ve):
+    def elem_volume(self, ve):
         """Get the volume of a hexahedral or tetrahedral volume element
 
         Parameters
@@ -874,39 +874,29 @@ class Mesh(object):
         Returns
         -------
         .. : float
-            Element's volume
+            Element's volume. Returns None if volume is not a hex or tet.
         """
         coord = self.mesh.getVtxCoords(
                 self.mesh.getEntAdj(ve, iBase.Type.vertex))
         if len(coord) == 4:
-            return self.get_tet_volume(ve, coord)
+            return self._calc_tet_volume(coord)
         elif len(coord) == 8:
-            return self.get_hex_volume(ve, coord)
+            return self._calc_tet_volume(
+                           [coord[0], coord[1], coord[3], coord[4]]) + \
+                   self._calc_tet_volume(
+                           [coord[7], coord[3], coord[6], coord[4]]) + \
+                   self._calc_tet_volume(
+                           [coord[4], coord[5], coord[1], coord[6]]) + \
+                   self._calc_tet_volume(
+                           [coord[1], coord[6], coord[3], coord[4]]) + \
+                   self._calc_tet_volume(
+                           [coord[2], coord[6], coord[3], coord[1]])
         else:
             return None
 
 
-    def get_tet_volume(self, ve, coord=None):
-        """Get the volume of a tetrahedral volume element
-
-        Parameters
-        ----------
-        ve : iMesh.Mesh.EntitySet
-            Tetrahedral volume element
-
-        Returns
-        -------
-        .. : float
-            Element's volume
-        """
-        if coord == None:
-            coord = self.mesh.getVtxCoords(
-                    self.mesh.getEntAdj(ve, iBase.Type.vertex))
-        return self._calc_tet_volume(coord)
-
-
     def _calc_tet_volume(self, coord):
-        """Calculate volume of a tetrahedron given four coordinates
+        """Calculate volume of a tetrahedral volume given four coordinates
 
         Parameters
         ----------
@@ -922,34 +912,6 @@ class Mesh(object):
         return abs(np.linalg.det([coord[0]-coord[1],
                         coord[1]-coord[2],
                         coord[2]-coord[3]])) / 6.0
-
-
-    def get_hex_volume(self, ve, coord=None):
-        """Hexahedra volume method from MOAB's measure.cpp
-
-        Parameters
-        ----------
-        ve : iMesh.Mesh.EntitySet
-            Hexahedral volume element
-
-        Returns
-        -------
-        .. : float
-            Element's volume
-        """
-        if coord == None:
-            coord = self.mesh.getVtxCoords(
-                    self.mesh.getEntAdj(ve, iBase.Type.vertex))
-        return self._calc_tet_volume(
-                       [coord[0], coord[1], coord[3], coord[4]]) + \
-               self._calc_tet_volume(
-                       [coord[7], coord[3], coord[6], coord[4]]) + \
-               self._calc_tet_volume(
-                       [coord[4], coord[5], coord[1], coord[6]]) + \
-               self._calc_tet_volume(
-                       [coord[1], coord[6], coord[3], coord[4]]) + \
-               self._calc_tet_volume(
-                       [coord[2], coord[6], coord[3], coord[1]])
 
 
     #Structured methods:

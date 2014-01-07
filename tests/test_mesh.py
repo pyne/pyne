@@ -48,46 +48,25 @@ def test_unstructured_mesh_from_instance():
 
 def test_elem_volume():
     """Test the get_elem_volume method"""
-    # Test tet elements recognition
+    # Test tet elements recognition and calculation
     filename = os.path.join(os.path.dirname(__file__),
                             "files_mesh_test/unstr.h5m")
     tetmesh = Mesh(mesh_file=filename)
     vols = list()
     for __, __, ve in tetmesh:
-        vols.append(tetmesh.get_tet_volume(ve))
-
-    assert_almost_equal(np.mean(vols), 0.52702, places=5)
-
-    # Test hex elements recognition
-    filename = os.path.join(os.path.dirname(__file__),
-                            "files_mesh_test/grid543.h5m")
-    mesh = Mesh(mesh_file=filename)
-    vols = list()
-    for __, __, ve in mesh:
-        vols.append(mesh.get_hex_volume(ve))
-    assert_almost_equal(np.mean(vols), 51.3333, places=4)
-
-def test_tet_volume():
-    """Test the get_tet_volume method"""
-    filename = os.path.join(os.path.dirname(__file__),
-                            "files_mesh_test/unstr.h5m")
-    tetmesh = Mesh(mesh_file=filename)
-    vols = list()
-    for __, __, ve in tetmesh:
-        vols.append(tetmesh.get_tet_volume(ve))
+        vols.append(tetmesh.elem_volume(ve))
 
     assert_almost_equal(np.min(vols), 0.13973, places=5)
     assert_almost_equal(np.max(vols), 2.1783, places=4)
     assert_almost_equal(np.mean(vols), 0.52702, places=5)
 
-def test_hex_volume():
-    """Test the get_hex_volume method"""
+    # Test hex elements recognition and calculation
     filename = os.path.join(os.path.dirname(__file__),
                             "files_mesh_test/grid543.h5m")
     mesh = Mesh(mesh_file=filename)
     vols = list()
     for __, __, ve in mesh:
-        vols.append(mesh.get_hex_volume(ve))
+        vols.append(mesh.elem_volume(ve))
     assert_almost_equal(np.mean(vols), 51.3333, places=4)
 
 
