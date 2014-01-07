@@ -360,6 +360,30 @@ class TestArithmetic():
 #                   for vol in statmesh_3.structured_iterate_hex("xyz")]
 #        assert_array_almost_equal(exp_res, obs_res)
 #        assert_array_almost_equal(exp_err, obs_err)
+
+def test_min_and_max_single():
+    """Tests the minimum and maximum methods for a single-valued tag"""
+    mesh = Mesh(structured=True, structured_coords=[[0,1,2],[0,1,2],[0,1]])
+    tag = mesh.mesh.createTag("flux", 1, float)
+    data = [1, 2, 3, 4]
+    ves = list(mesh.mesh.iterate(iBase.Type.region, iMesh.Topology.all))
+    for i, ve in enumerate(ves):
+        tag[ve] = data[i]
+
+    assert_equal(mesh.minimum("flux"), 1)
+    assert_equal(mesh.maximum("flux"), 4)     
+
+def test_min_and_max_multiple():
+    """Tests the minimum and maximum methods for a multi-valued tag"""
+    mesh = Mesh(structured=True, structured_coords=[[0,1,2],[0,1,2],[0,1]])
+    tag = mesh.mesh.createTag("flux", 2, float)
+    data = [[1, 9], [2, 8], [3, 7], [4, 6]]
+    ves = list(mesh.mesh.iterate(iBase.Type.region, iMesh.Topology.all))
+    for i, ve in enumerate(ves):
+        tag[ve] = data[i]
+
+    assert_array_equal(mesh.minimum("flux"), [1, 6])
+    assert_array_equal(mesh.maximum("flux"), [4, 9]) 
     
 #############################################
 #Test Structured mesh iteration functionality
