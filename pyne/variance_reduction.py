@@ -2,6 +2,9 @@
 """
 This module contains functions for mesh-based Monte Carlo variance reduction.
 """
+from itaps import iMesh
+from itaps import iBase
+from itaps import iMeshExtensions
 import numpy as np
 from itertools import izip
 
@@ -44,47 +47,122 @@ def cadis(adj_flux_mesh, adj_flux_tag, q_mesh, q_tag,
     """
     
     #find number of energy groups
-    num_e_groups = len(adj_flux_mesh.mesh.getTagHandle(adj_flux_tag)[list(
+
+    e_groups = adj_flux_mesh.mesh.getTagHandle(adj_flux_tag)[list(
                    adj_flux_mesh.mesh.iterate(iBase.Type.region, 
-                                              iMesh.Topology.all))[0]])
+                                              iMesh.Topology.all))[0]]
+    #if there is one e_group, convert e_groups to list
+    try:
+        len(e_groups)
+    except TypeError:
+        e_groups = [e_groups]
+
+    num_e_groups = len(e_groups)
+
     #verify source (q) mesh has the same number of energy groups
-    num_q_e_groups = len(q_mesh.mesh.getTagHandle(adj_flux_tag)[list(
+    q_e_groups = q_mesh.mesh.getTagHandle(q_tag)[list(
                       q_mesh.mesh.iterate(iBase.Type.region, 
-                                          iMesh.Topology.all))[0]])
+                                          iMesh.Topology.all))[0]]
+    try:
+        len(q_e_groups)
+    except TypeError:
+        q_e_groups = [q_e_groups]
+
+    num_q_e_groups = len(q_e_groups)
+
     if num_q_e_groups != num_e_groups:
         raise TypeError("{0} on {1} and {2} on {3} "
               "must be of the same dimension".format(adj_flux_mesh, adj_flux_tag, 
                                                      q_mesh, q_tag))
 
     #calculate total response (R)
-    R = np.zeros(num_e_groups)
+    R = [0]*num_e_groups
     #create volume element (ve) iterators
     adj_ves = adj_flux_mesh.mesh.iterate(iBase.Type.region, iMesh.Topology.all)
     q_ves = q_mesh.mesh.iterate(iBase.Type.region, iMesh.Topology.all)
-    for adj_ve, q_ve in zip(zip(iter(adj_ves)), zip(iter(q_ves))):
+
+    for adj_ve, q_ve in zip(list(adj_ves), list(q_ves)):
         adj_flux = adj_flux_mesh.mesh.getTagHandle(adj_flux_tag)[adj_ve]
-        q = q_mesh.mesh.getTagHandle(q_flux_tag)[q_ve]
-        R += [x*y for x, y in zip(adj_flux, q)]
+        q = q_mesh.mesh.getTagHandle(q_tag)[q_ve]
+
+        try:
+            len(adj_flux)
+        except TypeError:
+            adj_flux = [adj_flux]
+        try:
+            len(q)
+        except TypeError:
+            q = [q]
+
+        for i in range(0, num_e_groups):
+            R[i] += adj_flux[i]*q[i]
 
     #generate weight windows and biased source densities using total response
     tag_ww = ww_mesh.mesh.createTag(ww_tag, num_e_groups, float)
-    ww_ves = zip(iter((ww_mesh.mesh.iterate(iBase.Type.region, 
-                                              iMesh.Topology.all)))
+    ww_ves = ww_mesh.mesh.iterate(iBase.Type.region, iMesh.Topology.all)
+    tag_q_bias = q_bias_mesh.mesh.createTag(q_bias_tag, num_e_groups, float) 
+    q_bias_ves = q_bias_mesh.mesh.iterate(iBase.Type.region, iMesh.Topology.all)
     q_ves.reset()
     adj_ves.reset()
-    for ww_ve, adj_ve, q_ve in izip(ww_ves, adj_ves, q_ves):
-        adj_flux = adj_mesh.mesh.getTagHandle(adj_tag)[adj_ve]
+
+    for adj_ve, q_ve, ww_ve, q_bias_ve in izip(list(adj_ves), list(q_ves), 
+                                               list(ww_ves), list(q_bias_ves)):
+        adj_flux = adj_flux_mesh.mesh.getTagHandle(adj_flux_tag)[adj_ve]
         q = q_mesh.mesh.getTagHandle(q_tag)[q_ve]
+
+        try:
+            len(adj_flux)
+        except TypeError:
+            adj_flux = [adj_flux]
+        try:
+            len(q)
+        except TypeError:
+            q = [q]
+
         tag_ww[ww_ve] = [R[i]/(adj_flux[i]*q[i]*(beta + 1)/2) 
                          for i in range(0, num_e_groups)]
 
-    tag_q_bias = q_bias_mesh.mesh.createTag(q_bias_tag, num_e_groups, float) 
-                                     iMesh.Topology.all)))
-    q_ves.reset()
-    adj_ves.reset()
-    for q_bias_ve, adj_ve, q_ve in izip(q_bias_ves, adj_ves, q_ves):
-        adj_flux = adj_mesh.mesh.getTagHandle(adj_tag)[adj_ve]
-        q = q_mesh.mesh.getTagHandle(q_tag)[q_ve]
-        tag_q_bias[ww_ve] = [adj_flux[i]*q[i]/R[i] 
-                             for i in range(0, num_e_groups)]
+        tag_q_bias[q_bias_ve] = [adj_flux[i]*q[i]/R[i] 
+                                 for i in range(0, num_e_groups)]
 
+#    tag_ww = ww_mesh.mesh.createTag(ww_tag, num_e_groups, float)
+#    ww_ves = ww_mesh.mesh.iterate(iBase.Type.region, iMesh.Topology.all)
+#    q_ves.reset()
+#    adj_ves.reset()
+#
+#    for ww_ve, adj_ve, q_ve in izip(list(ww_ves), list(adj_ves), list(q_ves)):
+#        adj_flux = adj_flux_mesh.mesh.getTagHandle(adj_flux_tag)[adj_ve]
+#        q = q_mesh.mesh.getTagHandle(q_tag)[q_ve]
+#
+#        try:
+#            len(adj_flux)
+#        except TypeError:
+#            adj_flux = [adj_flux]
+#        try:
+#            len(q)
+#        except TypeError:
+#            q = [q]
+#
+#        tag_ww[ww_ve] = [R[i]/(adj_flux[i]*q[i]*(beta + 1)/2) 
+#                         for i in range(0, num_e_groups)]
+#
+#    tag_q_bias = q_bias_mesh.mesh.createTag(q_bias_tag, num_e_groups, float) 
+#    q_bias_ves = q_bias_mesh.mesh.iterate(iBase.Type.region, iMesh.Topology.all)
+#    q_ves.reset()
+#    adj_ves.reset()
+#
+#    for q_bias_ve, adj_ve, q_ve in izip(list(q_bias_ves), list(adj_ves), list(q_ves)):
+#        adj_flux = adj_flux_mesh.mesh.getTagHandle(adj_flux_tag)[adj_ve]
+#        q = q_mesh.mesh.getTagHandle(q_tag)[q_ve]
+# 
+#        try:
+#            len(adj_flux)
+#        except TypeError:
+#            adj_flux = [adj_flux]
+#        try:
+#            len(q)
+#        except TypeError:
+#            q = [q]
+#
+#        tag_q_bias[q_bias_ve] = [adj_flux[i]*q[i]/R[i] 
+#                                 for i in range(0, num_e_groups)]
