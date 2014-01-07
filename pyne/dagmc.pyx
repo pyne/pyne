@@ -156,25 +156,73 @@ def dag_ray_fire(vol, np.ndarray[np.float64_t, ndim=1] ray_start,
         raise DagmcError("Error code " + str(crtn))
     return EntityHandle(next_surf), next_surf_dist
 
+
+def dag_ray_follow(firstvol, np.ndarray[np.float64_t, ndim=1] ray_start, 
+                   np.ndarray[np.float64_t, ndim=1] ray_dir, double distance_limit, 
+                   RayBuffer data_buffers):
+    cdef int i
+    cdef cpp_dagmc_bridge.ErrorCode crtn
+    cdef int num_intersections = 0
+    cdef cpp_dagmc_bridge.EntityHandle * surfs
+    cdef double * distances
+    cdef cpp_dagmc_bridge.EntityHandle * volumes
+    cdef np.npy_intp shape[1]
+    shape[0] = 3
+    if not isinstance(firstvol, EntityHandle):
+        firstvol = EntityHandle(firstvol)
+    if ray_start.shape != shape:
+        raise ValueError("ray_start must have shape=(3,)")
+    if ray_dir.shape != shape:
+        raise ValueError("ray_dir must have shape=(3,)")
+    crtn = cpp_dagmc_bridge.dag_ray_follow(<cpp_dagmc_bridge.EntityHandle> firstvol, 
+                <cpp_dagmc_bridge.vec3> np.PyArray_DATA(ray_start), 
+                <cpp_dagmc_bridge.vec3> np.PyArray_DATA(ray_dir), distance_limit, 
+                &num_intersections, &surfs, &distances, &volumes, data_buffers.ptr)
+    if crtn != 0:
+        raise DagmcError("Error code " + str(crtn))
+    pysurfs = []
+    pydistances = []
+    pyvolumes = []
+    for i in range(num_intersections):
+        pysurfs.append(EntityHandle(surfs[i]))
+        pydistances.append(float(distances[i]))
+        pysurfs.append(EntityHandle(volumes[i]))
+    return num_intersections, pysurfs, pydistances, pyvolumes
+
+
+def  dag_next_vol(surface, volume): 
+    cdef cpp_dagmc_bridge.ErrorCode crtn
+    cdef cpp_dagmc_bridge.EntityHandle next_vol
+    if not isinstance(surface, EntityHandle):
+        surface = EntityHandle(surface)
+    if not isinstance(volume, EntityHandle):
+        volume = EntityHandle(volume)
+    crtn = cpp_dagmc_bridge.dag_next_vol(<cpp_dagmc_bridge.EntityHandle> surface, 
+                                         <cpp_dagmc_bridge.EntityHandle> volume,
+                                         &next_vol)
+    if crtn != 0:
+        raise DagmcError("Error code " + str(crtn))
+    return EntityHandle(next_vol)
+
+
+def vol_is_graveyard(vol):
+    cdef int crtn 
+    if not isinstance(vol, EntityHandle):
+        vol = EntityHandle(vol)
+    crtn = cpp_dagmc_bridge.vol_is_graveyard(<cpp_dagmc_bridge.EntityHandle> vol)
+    return bool(crtn)
+    
+
+def vol_is_implicit_complement(vol):
+    cdef int crtn 
+    if not isinstance(vol, EntityHandle):
+        vol = EntityHandle(vol)
+    crtn = cpp_dagmc_bridge.vol_is_implicit_complement(
+                                <cpp_dagmc_bridge.EntityHandle> vol)
+    return bool(crtn)
+    
+
 """\
-_returns_moab_errors(lib.dag_ray_follow)
-lib.dag_ray_follow.argtypes = [EntityHandle, _vec3, _vec3, ctypes.c_double,
-                               ctypes.POINTER(ctypes.c_int),
-                               ctypes.POINTER(ctypes.POINTER(EntityHandle)), 
-                               ctypes.POINTER(ctypes.POINTER(ctypes.c_double)),
-                               ctypes.POINTER(ctypes.POINTER(EntityHandle)),
-                               ctypes.c_void_p]
-                               
-
-_returns_moab_errors(lib.dag_next_vol)
-lib.dag_next_vol.argtypes = [EntityHandle, EntityHandle,
-                             ctypes.POINTER(EntityHandle)]
-
-lib.vol_is_graveyard.restype = ctypes.c_int
-lib.vol_is_graveyard.argtypes = [EntityHandle]
-
-lib.vol_is_implicit_complement.restype = ctypes.c_int
-lib.vol_is_implicit_complement.argtypes = [EntityHandle]
 
 _returns_moab_errors(lib.get_volume_metadata)
 lib.get_volume_metadata.argtypes = [EntityHandle, ctypes.POINTER(ctypes.c_int),
