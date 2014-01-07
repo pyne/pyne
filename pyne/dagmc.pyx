@@ -1,6 +1,7 @@
 from __future__ import print_function
 
-from pyne cimport cpp_dagmc_bridge
+#from pyne cimport cpp_dagmc_bridge
+cimport cpp_dagmc_bridge
 
 cimport numpy as np
 import numpy as np
@@ -38,16 +39,11 @@ def dag_rev_version():
     return int(cpp_dagmc_bridge.dag_rev_version())
 
 
-def _geom_dim_check(int dim):
-    """Check dimensions and raise error otherwise."""
-    return result
-
-
 def geom_id_list(int dimension):
     """Generates a list of geometry ids.
     """
     cdef int number_of_items, i
-    cdef int * crtn
+    cdef const int * crtn
     if dimension != 2 or dimension != 3:
         raise DagmcError('Incorrect geometric dimension: ' + str(dimension))
     crtn = cpp_dagmc_bridge.geom_id_list(dimension, &number_of_items)
@@ -55,6 +51,7 @@ def geom_id_list(int dimension):
     return rtn
 
 def handle_from_id(int dimension, int id):
+    """Get entity from id number."""
     cdef cpp_dagmc_bridge.EntityHandle crtn
     if dimension != 2 or dimension != 3:
         raise DagmcError('Incorrect geometric dimension: ' + str(dimension))
@@ -62,8 +59,11 @@ def handle_from_id(int dimension, int id):
     rtn = EntityHandle(crtn)
     return rtn
 
-def id_from_handle(EntityHandle eh):
+def id_from_handle(eh):
+    """Get id from entity handle."""
     cdef int eh_id
+    if not isinstance(eh, EntityHandle):
+        eh = EntityHandle(eh)
     eh_id = cpp_dagmc_bridge.id_from_handle(<cpp_dagmc_bridge.EntityHandle> eh)
     return eh_id
 

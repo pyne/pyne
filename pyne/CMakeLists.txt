@@ -26,7 +26,7 @@ target_link_libraries(jsoncpp pyne)
 # pyne_config
 set_source_files_properties(${PROJECT_SOURCE_DIR}/pyne/pyne_config.pyx 
                             PROPERTIES CYTHON_IS_CXX TRUE)
-cython_add_module(pyne_config  pyne_config.pyx)
+cython_add_module(pyne_config pyne_config.pyx)
 target_link_libraries(pyne_config pyne)
 
 # _utils
@@ -38,8 +38,9 @@ target_link_libraries(_utils pyne)
 # dagmc
 set_source_files_properties(${PROJECT_SOURCE_DIR}/pyne/dagmc.pyx 
                             PROPERTIES CYTHON_IS_CXX TRUE)
-cython_add_module(dagmc dagmc.pyx ${PROJECT_SOURCE_DIR}/cpp/dagmc_bridge.cpp)
-target_link_libraries(dagmc dagmc MOAB pyne)
+cython_add_module(_dagmc dagmc.pyx ${PROJECT_SOURCE_DIR}/cpp/dagmc_bridge.cpp)
+target_link_libraries(_dagmc dagmc MOAB pyne)
+set_target_properties(_dagmc PROPERTIES OUTPUT_NAME dagmc)
 
 # endf
 set_source_files_properties(${PROJECT_SOURCE_DIR}/pyne/endf.pyx 

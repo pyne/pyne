@@ -253,4 +253,5 @@ ErrorCode get_volume_metadata(EntityHandle vol, int* material, double* density, 
 ErrorCode get_volume_boundary(EntityHandle vol, vec3 minPt, vec3 maxPt){
     return DagMC::instance()->getobb(vol, minPt, maxPt);
 }
-// namespace pyne
+
+} // namespace pyne
