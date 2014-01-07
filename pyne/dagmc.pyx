@@ -7,7 +7,10 @@ cimport numpy as np
 import numpy as np
 
 # Python imports
+import sys
 from contextlib import contextmanager
+
+from numpy.linalg import norm
 
 # Set the entity handle type; I don't know a cleaner way than to ask the daglib
 # to return the byte width of the type
@@ -48,7 +51,7 @@ def geom_id_list(int dimension):
         raise DagmcError('Incorrect geometric dimension: ' + str(dimension))
     crtn = cpp_dagmc_bridge.geom_id_list(dimension, &number_of_items)
     rtn = [int(crtn[i]) for i in range(number_of_items)]
-    return rtn
+    return number_of_items, rtn
 
 def handle_from_id(int dimension, int id):
     """Get entity from id number."""
@@ -87,7 +90,7 @@ cdef class RayHistory(object):
 
 
 def dag_pt_in_vol(vol, np.ndarray[np.float64_t, ndim=1] pt, 
-                  np.ndarray[np.float64_t, ndim=1] dir, RayHistory history):
+                  np.ndarray[np.float64_t, ndim=1] dir, RayHistory history=None):
     cdef int result
     cdef cpp_dagmc_bridge.ErrorCode crtn
     cdef np.npy_intp shape[1]
@@ -98,6 +101,8 @@ def dag_pt_in_vol(vol, np.ndarray[np.float64_t, ndim=1] pt,
         raise ValueError("pt must have shape=(3,)")
     if dir.shape != shape:
         raise ValueError("dir must have shape=(3,)")
+    if history is None:
+        history = RayHistory()
     crtn = cpp_dagmc_bridge.dag_pt_in_vol(<cpp_dagmc_bridge.EntityHandle> vol, 
                 <cpp_dagmc_bridge.vec3> np.PyArray_DATA(pt), &result, 
                 <cpp_dagmc_bridge.vec3> np.PyArray_DATA(dir), history.ptr)
@@ -136,7 +141,7 @@ def _ray_history():
 
 def dag_ray_fire(vol, np.ndarray[np.float64_t, ndim=1] ray_start, 
                  np.ndarray[np.float64_t, ndim=1] ray_dir,
-                 RayHistory history, double distance_limit):
+                 RayHistory history=None, double distance_limit=0.0):
     cdef cpp_dagmc_bridge.EntityHandle next_surf 
     cdef cpp_dagmc_bridge.ErrorCode crtn
     cdef double next_surf_dist = 0.0 
@@ -148,6 +153,8 @@ def dag_ray_fire(vol, np.ndarray[np.float64_t, ndim=1] ray_start,
         raise ValueError("ray_start must have shape=(3,)")
     if ray_dir.shape != shape:
         raise ValueError("ray_dir must have shape=(3,)")
+    if history is None:
+        history = RayHistory()
     crtn = cpp_dagmc_bridge.dag_ray_fire(<cpp_dagmc_bridge.EntityHandle> vol, 
                 <cpp_dagmc_bridge.vec3> np.PyArray_DATA(ray_start), 
                 <cpp_dagmc_bridge.vec3> np.PyArray_DATA(ray_dir),
@@ -206,6 +213,7 @@ def  dag_next_vol(surface, volume):
 
 
 def vol_is_graveyard(vol):
+    """True if the given volume id is a graveyard volume"""
     cdef int crtn 
     if not isinstance(vol, EntityHandle):
         vol = EntityHandle(vol)
@@ -214,6 +222,7 @@ def vol_is_graveyard(vol):
     
 
 def vol_is_implicit_complement(vol):
+    """True if the given volume id is the implicit complement volume"""
     cdef int crtn 
     if not isinstance(vol, EntityHandle):
         vol = EntityHandle(vol)
@@ -254,51 +263,38 @@ def get_volume_boundary(vol):
     
 
 
-"""\
-
 ### end bridge
-
-import sys
-import ctypes
-import np
-from np.linalg import norm
 
 surf_id_to_handle = {}
 surf_handle_to_id = {}
 vol_id_to_handle = {}
 vol_handle_to_id = {}
 
-
 def versions():
-    ""Return a (str,int) tuple: the version and SVN revision of the 
+    """Return a (str, int) tuple: the version and SVN revision of the 
     active DagMC C++ library.
-    ""
-    return ('{0:.4}'.format(bridge.lib.dag_version()), int(bridge.lib.dag_rev_version()))
+    """
+    return ('{0:.4}'.format(dag_version()), int(dag_rev_version()))
 
 
 def load(filename):
-    ""Load a given filename into DagMC""
+    """Load a given filename into DagMC"""
     global surf_id_to_handle, surf_handle_to_id, vol_id_to_handle, vol_handle_to_id
-    bridge.lib.dag_load(filename)
+    dag_load(filename)
 
     def get_geom_list(dim):
-        
-        count = ctypes.c_int(0)
-        
-        list_p = bridge.lib.geom_id_list(dim, ctypes.byref(count))
+        cdef int count
+        count, list_p = geom_id_list(dim)
 
         r_dict_forward = {}
-        for i in range(0,count.value):
-            eh = bridge.lib.handle_from_id(dim, list_p[i]).value 
+        for i in range(0, count):
+            eh = handle_from_id(dim, list_p[i])
             if eh == 0:
-                raise bridge.DagmcError(
-                        '{0} ID {1} has no entity handle'.format(
-                         {2:'surf',3:'vol'}[dim], list_p[i]))
+                raise DagmcError('{0} ID {1} has no entity handle'.format({2:'surf',
+                                 3:'vol'}[dim], list_p[i]))
             else:
-                r_dict_forward[ list_p[i] ] = eh
-
-        r_dict_backward = dict((v,k) for k,v in r_dict_forward.iteritems())
-        
+                r_dict_forward[list_p[i]] = eh
+        r_dict_backward = dict((v,k) for k,v in r_dict_forward.items())
         return r_dict_forward, r_dict_backward
 
     surf_id_to_handle, surf_handle_to_id = get_geom_list(2)
@@ -306,102 +302,76 @@ def load(filename):
 
 
 def get_surface_list():
-    ""return a list of valid surface IDs""
+    """return a list of valid surface IDs"""
     return surf_id_to_handle.keys()
 
-
 def get_volume_list():
-    ""return a list of valid volume IDs""
+    """return a list of valid volume IDs"""
     return vol_id_to_handle.keys()
 
-
-def volume_is_graveyard(vol_id):
-    ""True if the given volume id is a graveyard volume""
-    eh = vol_id_to_handle[ vol_id ]
-    result = bridge.lib.vol_is_graveyard(eh)
-    return (result != 0)
-
-
-def volume_is_implicit_complement(vol_id):
-    ""True if the given volume id is the implicit complement volume""
-    eh = vol_id_to_handle[ vol_id ]
-    result = bridge.lib.vol_is_implicit_complement(eh)
-    return (result != 0)
+# Kept for backwards compatibility
+volume_is_graveyard = vol_is_graveyard
+volume_is_implicit_complement = vol_is_implicit_complement
 
 
 def volume_metadata(vol_id):
-    ""Get the metadata of the given volume id
+    """Get the metadata of the given volume id
 
     returns a dictionary containing keys 'material', 'rho', and 'imp', corresponding
     to the DagmcVolData struct in DagMC.hpp
 
-    ""
-    eh = vol_id_to_handle[ vol_id ]
-    mat = ctypes.c_int()
-    rho = ctypes.c_double()
-    imp = ctypes.c_double()
-
-    bridge.lib.get_volume_metadata(eh, mat, rho, imp)
-
-    return {'material':mat.value, 'rho':rho.value, 'imp':imp.value}
+    """
+    eh = vol_id_to_handle[vol_id]
+    mat, rho, imp = get_volume_metadata(eh)
+    return {'material': mat, 'rho': rho, 'imp': imp}
 
 
 def volume_boundary(vol_id):
-    ""Get the lower and upper boundary of a volume in (x,y,z) coordinates.
+    """Get the lower and upper boundary of a volume in (x,y,z) coordinates.
 
-    Return the lower and upper coordinates of an axis-aligned bounding box for the given
-    volume.  The returned box may or may not be the minimal bounding box for the volume.
-    Return (xyz low) and (xyz high) as np arrays.
-    ""
-    eh = vol_id_to_handle[ vol_id ]
-    low = np.array([0,0,0], dtype=np.np.float64)
-    high = np.array([0,0,0], dtype=np.np.float64)
-
-    bridge.lib.get_volume_boundary(eh, low, high)
+    Return the lower and upper coordinates of an axis-aligned bounding box for 
+    the given volume.  The returned box may or may not be the minimal bounding 
+    box for the volume. Return (xyz low) and (xyz high) as np arrays.
+    """
+    eh = vol_id_to_handle[vol_id]
+    low, high = get_volume_boundary(eh)
     return low, high
 
 
 def point_in_volume(vol_id, xyz, uvw=[1,0,0]):
-    ""Determine whether the given point, xyz, is in the given volume.
+    """Determine whether the given point, xyz, is in the given volume.
     
     If provided, uvw is used to determine the ray fire direction for the underlying 
     query.  Otherwise, a random direction will be chosen. 
     
-    ""
-    xyz = np.array(xyz, dtype=np.np.float64)
-    uvw = np.array(uvw, dtype=np.np.float64)
-
-    eh = vol_id_to_handle[ vol_id ]
-    result = ctypes.c_int(-2)
-
-    bridge.lib.dag_pt_in_vol(eh, xyz, ctypes.byref(result), uvw, None)
-
-    return (result.value == 1)
+    """
+    xyz = np.array(xyz, dtype=np.float64)
+    uvw = np.array(uvw, dtype=np.float64)
+    eh = vol_id_to_handle[vol_id]
+    result = dag_pt_in_vol(eh, xyz, uvw)
+    return (result == 1)
 
 
 def find_volume(xyz, uvw=[1,0,0]):
-    ""Determine which volume the given point is in.
+    """Determine which volume the given point is in.
 
     Return a volume id.  If no volume contains the point, a DagmcError may be raised,
     or the point may be reported to be part of the implicit complement.
 
     This function may be slow if many volumes exist.
 
-    ""
-    xyz = np.array(xyz, dtype=np.np.float64)
-    uvw = np.array(uvw, dtype=np.np.float64)
-
+    """
+    xyz = np.array(xyz, dtype=np.float64)
+    uvw = np.array(uvw, dtype=np.float64)
     for eh, vol_id in vol_handle_to_id.iteritems():
-        result = ctypes.c_int(-2)
-        bridge.lib.dag_pt_in_vol(eh, xyz, ctypes.byref(result), uvw, None)
-        if result.value == 1:
-            return vol_id
-    
-    raise bridge.DagmcError("The point {0} does not appear to be in any volume".format(xyz))
+        result = dag_pt_in_vol(eh, xyz, uvw)
+        if result == 1:
+            return vol_id    
+    raise DagmcError("The point {0} does not appear to be in any volume".format(xyz))
 
 
 def fire_one_ray(vol_id, xyz, uvw):
-    ""Fire a ray from xyz, in the direction uvw, at the specified volume
+    """Fire a ray from xyz, in the direction uvw, at the specified volume
 
     uvw must represent a unit vector.
 
@@ -413,24 +383,17 @@ def fire_one_ray(vol_id, xyz, uvw):
 
     If a ray in a given direction will traverse several volumes in a row, ray_iterator should
     be used instead.
-    ""
-    xyz = np.array(xyz, dtype=np.np.float64)
-    uvw = np.array(uvw, dtype=np.np.float64)
-
-    eh = vol_id_to_handle[ vol_id ]
-    
-    surf_result = bridge.EntityHandle(0)
-    dist_result = ctypes.c_double(0.0)
-
-    bridge.lib.dag_ray_fire(eh, xyz, uvw, 
-                             ctypes.byref(surf_result), ctypes.byref(dist_result),
-                             None, 0.0)
-
-    if(surf_result.value != 0):
-        return (surf_handle_to_id[ surf_result.value ], dist_result.value)
+    """
+    xyz = np.array(xyz, dtype=np.float64)
+    uvw = np.array(uvw, dtype=np.float64)
+    eh = vol_id_to_handle[vol_id]
+    surf_result, dist_result = dag_ray_fire(eh, xyz, uvw)
+    if(surf_result != 0):
+        return (surf_handle_to_id[surf_result], dist_result)
     else:
         return None
 
+"""\
 
 def ray_iterator_slow(init_vol_id, startpoint, direction, **kw):
     ""Return an iterator for a ray in a single direction.
@@ -446,7 +409,7 @@ def ray_iterator_slow(init_vol_id, startpoint, direction, **kw):
     dist_limit: distance at which to consider the ray ended
     ""
 
-    eh = bridge.EntityHandle(vol_id_to_handle[ init_vol_id ])
+    eh = bridge.EntityHandle(vol_id_to_handle[init_vol_id])
     xyz = np.array(startpoint, dtype=np.np.float64)
     uvw = np.array(direction, dtype=np.np.float64)
 
@@ -477,16 +440,17 @@ def ray_iterator_slow(init_vol_id, startpoint, direction, **kw):
 
             newvol = vol_handle_to_id[eh.value]
             dist = dist_result.value
-            newsurf = surf_handle_to_id[ surf.value ]
+            newsurf = surf_handle_to_id[surf.value]
             
             if kw.get('yield_xyz', False) :
                 yield (newvol, dist, newsurf, xyz)
             else: 
                 yield (newvol, dist, newsurf)
 
+
 def ray_iterator(init_vol_id, startpoint, direction, **kw):
 
-    eh = bridge.EntityHandle(vol_id_to_handle[ init_vol_id ])
+    eh = bridge.EntityHandle(vol_id_to_handle[init_vol_id])
     xyz = np.array(startpoint, dtype=np.np.float64)
     uvw = np.array(direction, dtype=np.np.float64)
 
@@ -587,7 +551,7 @@ def find_graveyard_inner_box():
         raise DagmcError( 'Could not find a graveyard volume' )
 
     xyz_lo, xyz_hi = volume_boundary( graveyard )
-    xyz_mid = np.array( [ (hi+lo)/2.0 for (hi,lo) in zip( xyz_hi, xyz_lo) ], dtype=np.np.float64 )
+    xyz_mid = np.array( [(hi+lo)/2.0 for (hi,lo) in zip( xyz_hi, xyz_lo)], dtype=np.np.float64 )
 
     result_lo = np.array( [0]*3, dtype=np.np.float64 )
     result_hi = np.array( [0]*3, dtype=np.np.float64 )
