@@ -2,9 +2,13 @@
 """
 This module contains functions for mesh-based Monte Carlo variance reduction.
 """
-from itaps import iMesh
-from itaps import iBase
-from itaps import iMeshExtensions
+try:
+    from itaps import iMesh, iBase, iMeshExtensions
+except ImportError:
+    warnings.warn("the PyTAPS optional dependency could not be imported. "
+        "Some aspects of the variance reduction module may be incomplete.", 
+        ImportWarning)
+
 import numpy as np
 from itertools import izip
 
@@ -19,7 +23,8 @@ def cadis(adj_flux_mesh, adj_flux_tag, q_mesh, q_tag,
     Adjoint-Driven Importance Sampling (CADIS) method. Note that values can be
     stored on the same Mesh object, all different Mesh objects, or any
     combination in between. Meshes can be structured or unstructured. 
-    Note that this function is suitable for Forward Weighted (FW) CADIS as well,     the only difference being the adjoint source used for the estimation of the 
+    Note that this function is suitable for Forward Weighted (FW) CADIS as well,
+    the only difference being the adjoint source used for the estimation of the 
     adjoint flux.
 
     Parameters
