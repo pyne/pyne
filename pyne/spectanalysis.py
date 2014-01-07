@@ -7,7 +7,7 @@
 
 
 class PhSpectrum(object):
-    """ pulse height spectrum class"""
+    """Pulse height spectrum class"""
 
     def __init__(self, spec_name="", start_chan_num=0, num_channels=0,
                  channels=None, ebin=None, counts=None):

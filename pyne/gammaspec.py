@@ -11,12 +11,12 @@ import spectanalysis
 
 
 class GammaSpectrum(spectanalysis.PhSpectrum):
-    """ GammaSpec class includes gamma specific variables"""
+    """GammaSpec class includes gamma specific variables"""
 
     def __init__(self, real_time=0, live_time=0, det_id="",
                  det_descp="", start_date="", start_time="",
                  calib_e_fit=None, calib_fwhm_fit=None, eres=0, file_name=""):
-        """ define gamma spectrum specific variables """
+        """Define gamma spectrum specific variables """
         super(GammaSpectrum, self).__init__()
         self.real_time = real_time
         self.live_time = live_time
@@ -31,13 +31,13 @@ class GammaSpectrum(spectanalysis.PhSpectrum):
         self.file_name = file_name
 
     def calc_ebins(self):
-        """ Calculate the energy value for each channel."""
+        """Calculate the energy value for each channel."""
         channels = self.channels = np.asarray(self.channels, float)
         self.ebin = self.calib_e_fit[0] + (self.calib_e_fit[1] * channels) + \
                     (self.calib_e_fit[2] * channels ** 2)
 
     def __str__(self):
-        """ print debug information"""
+        """Print debug information"""
         print_string = "Debug print of all header variables" \
                        + "\n" + "The real time is:" + str(self.real_time) \
                        + "\n" + "The live time is:" + str(self.live_time) \
@@ -75,7 +75,7 @@ def read_spe_file(spec_file_path):
 
     with open(spec_file_path, "r") as spec_file:
         full_file_text = spec_file.read()
-    file_split = full_file_text.split("\n")
+    file_split = full_file_text.splitlines()
     spec_file.close()
     inspec = False
 
@@ -135,7 +135,7 @@ def read_spe_file(spec_file_path):
 
 
 def calc_e_eff(energy, eff_coeff, eff_fit=1):
-    """ detector efficiency calculation
+    """Detector efficiency calculation
 
     Parameters
     ----------
@@ -175,7 +175,7 @@ def calc_e_eff(energy, eff_coeff, eff_fit=1):
             i = i + 1
         eff = np.exp(log_eff)
     else:
-        raise RuntimeError('The selected eff_fit is not valid')
+        raise ValueError('The selected eff_fit is not valid')
         eff = 0
 
     return eff

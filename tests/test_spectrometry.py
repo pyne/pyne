@@ -1,4 +1,4 @@
-""" spectrometry tests """
+"""Spectrometry tests """
 import nose 
 from nose.tools import assert_equal
 

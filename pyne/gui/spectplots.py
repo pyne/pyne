@@ -1,10 +1,10 @@
-""" Plotting routines for spectrometry modules"""
+"""Plotting routines for spectrometry modules"""
 
 import matplotlib.pyplot as plt
 
 
 def plot_spectrum(spect):
-    """ Create a standard spectrum pulse height plot"""
+    """Create a standard spectrum pulse height plot"""
     plt.plot(spect.ebin, spect.counts)
     plt.xlim(xmin=10)
     plt.ylim(ymin=1)
@@ -16,8 +16,7 @@ def plot_spectrum(spect):
 
 
 def plot_peak(spect, energy, spread=4):
-    """
-    Create a filled plot of a region of the spectra around a given energy
+    """Create a filled plot of a region of the spectra around a given energy
     value.
     """
     plt.plot(spect.ebin, spect.counts)
