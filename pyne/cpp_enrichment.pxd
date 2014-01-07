@@ -1,8 +1,7 @@
 """Cython header for enrichment library."""
 from libcpp.string cimport string as std_string
 
-#from pyne cimport cpp_material
-cimport cpp_material
+from pyne cimport cpp_material
 
 cdef extern from "enrichment_cascade.h" namespace "pyne::enrichment":
 
