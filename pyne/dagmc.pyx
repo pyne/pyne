@@ -95,13 +95,11 @@ def dag_pt_in_vol(vol, np.ndarray[np.float64_t, ndim=1] pt,
                   np.ndarray[np.float64_t, ndim=1] dir, RayHistory history=None):
     cdef int result
     cdef cpp_dagmc_bridge.ErrorCode crtn
-    cdef np.npy_intp shape[1]
-    shape[0] = 3
     if not isinstance(vol, EntityHandle):
         vol = EntityHandle(vol)
-    if pt.shape != shape:
+    if pt.ndim != 1 and pt.shape[0] != 3:
         raise ValueError("pt must have shape=(3,)")
-    if dir.shape != shape:
+    if dir.ndim != 1 and dir.shape[0] != 3:
         raise ValueError("dir must have shape=(3,)")
     if history is None:
         history = RayHistory()
@@ -147,13 +145,11 @@ def dag_ray_fire(vol, np.ndarray[np.float64_t, ndim=1] ray_start,
     cdef cpp_dagmc_bridge.EntityHandle next_surf 
     cdef cpp_dagmc_bridge.ErrorCode crtn
     cdef double next_surf_dist = 0.0 
-    cdef np.npy_intp shape[1]
-    shape[0] = 3
     if not isinstance(vol, EntityHandle):
         vol = EntityHandle(vol)
-    if ray_start.shape != shape:
+    if ray_start.ndim != 1 and ray_start.shape[0] != 3:
         raise ValueError("ray_start must have shape=(3,)")
-    if ray_dir.shape != shape:
+    if ray_dir.ndim != 1 and ray_dir.shape[0] != 3:
         raise ValueError("ray_dir must have shape=(3,)")
     if history is None:
         history = RayHistory()
@@ -179,9 +175,9 @@ def dag_ray_follow(firstvol, np.ndarray[np.float64_t, ndim=1] ray_start,
     shape[0] = 3
     if not isinstance(firstvol, EntityHandle):
         firstvol = EntityHandle(firstvol)
-    if ray_start.shape != shape:
+    if ray_start.ndim != 1 and ray_start.shape[0] != 3:
         raise ValueError("ray_start must have shape=(3,)")
-    if ray_dir.shape != shape:
+    if ray_dir.ndim != 1 and ray_dir.shape[0] != 3:
         raise ValueError("ray_dir must have shape=(3,)")
     crtn = cpp_dagmc_bridge.dag_ray_follow(<cpp_dagmc_bridge.EntityHandle> firstvol, 
                 <cpp_dagmc_bridge.vec3> np.PyArray_DATA(ray_start), 
@@ -195,7 +191,7 @@ def dag_ray_follow(firstvol, np.ndarray[np.float64_t, ndim=1] ray_start,
     for i in range(num_intersections):
         pysurfs.append(EntityHandle(surfs[i]))
         pydistances.append(float(distances[i]))
-        pysurfs.append(EntityHandle(volumes[i]))
+        pyvolumes.append(EntityHandle(volumes[i]))
     return num_intersections, pysurfs, pydistances, pyvolumes
 
 
@@ -459,7 +455,7 @@ def ray_iterator(init_vol_id, startpoint, direction, **kw):
     eh = EntityHandle(vol_id_to_handle[init_vol_id])
     xyz = np.array(startpoint, dtype=np.float64)
     uvw = np.array(direction, dtype=np.float64)
-    dist_limit = kw.get('dist_limit',0.0)
+    dist_limit = kw.get('dist_limit', 0.0)
     buf = RayBuffer()
 
     x, surfs, dists, vols = dag_ray_follow(eh, xyz, uvw, dist_limit, buf)

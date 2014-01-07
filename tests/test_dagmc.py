@@ -10,6 +10,7 @@ class TestDagmcWithUnitbox(unittest.TestCase):
     # use extra underscore to ensure this function is first in alpabetical 
     # sorted order, because it must run before the others.
     def test__load(self):
+        # FIXME laoding causes infor to be printied to stderr (or stdout).
         path = os.path.join(os.path.dirname(__file__), 'unitbox.h5m')
         dagmc.load(path)
 
@@ -42,7 +43,6 @@ class TestDagmcWithUnitbox(unittest.TestCase):
 
     def test_boundary(self):
         low, high = dagmc.volume_boundary(2)
-        print(low)
         for i in range(0,3):
             self.assertTrue(low[i] <= -1.0)
             self.assertTrue(high[i] >= 1.0)
@@ -154,8 +154,6 @@ class TestDagmcWithUnitbox(unittest.TestCase):
 
         mats = dagmc.get_material_set(with_rho=True)
         self.assertEqual(set([(0,0.0),(5,0.5)]), mats)
-"""\
-"""
 
 if __name__ == "__main__":
     import nose
