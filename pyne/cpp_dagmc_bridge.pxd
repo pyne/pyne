@@ -25,3 +25,9 @@ cdef extern from "dagmc_bridge.h" namespace "pyne":
     ErrorCode dag_load(const char* filename) except + 
     ErrorCode dag_pt_in_vol(EntityHandle vol, vec3 pt, int* result, vec3 dir,
                             const void* history) except +
+    void* dag_alloc_ray_history() except +
+    void dag_dealloc_ray_history(void* history) except +
+    void dag_dealloc_ray_buffer(void* data_buffers) except +
+    ErrorCode dag_ray_fire(EntityHandle vol, vec3 ray_start, vec3 ray_dir,
+                        EntityHandle* next_surf, double* next_surf_dist,
+                        void* history, double distance_limit) except +
