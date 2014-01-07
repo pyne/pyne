@@ -1,7 +1,7 @@
 from __future__ import print_function
 
 #from pyne cimport cpp_dagmc_bridge
-cimport cpp_dagmc_bridge
+from pyne cimport cpp_dagmc_bridge
 
 cimport numpy as np
 import numpy as np
@@ -59,6 +59,7 @@ def handle_from_id(int dimension, int id):
     rtn = EntityHandle(crtn)
     return rtn
 
+
 def id_from_handle(eh):
     """Get id from entity handle."""
     cdef int eh_id
@@ -67,28 +68,40 @@ def id_from_handle(eh):
     eh_id = cpp_dagmc_bridge.id_from_handle(<cpp_dagmc_bridge.EntityHandle> eh)
     return eh_id
 
-"""\
-def _moab_error_check(result, func, arguments):
-    if result.value != 0:
-        raise DagmcError("Error code " + str(result.value) +
-                         " returned from " + func.__name__)
+def dag_load(str filename):
+    """Loads a file."""
+    cdef cpp_dagmc_bridge.ErrorCode crtn
+    cdef const char* cfilename
+    bytes_filename = filename.encode('ascii')
+    cfilename = bytes_filename
+    crtn = cpp_dagmc_bridge.dag_load(cfilename)
+    if crtn != 0:
+        raise DagmcError("Error code " + str(crtn))
+    rtn = _ErrorCode(crtn)
+    return rtn
+
+cdef class RayHistory(object):
+
+    cdef void * ptr
+
+def dag_pt_in_vol(vol, np.ndarray[np.float64_t, ndim=1] pt, 
+                  np.ndarray[np.float64_t, ndim=1] dir, RayHistory history):
+    cdef int result
+    cdef cpp_dagmc_bridge.ErrorCode crtn
+    cdef np.npy_intp shape[1]
+    shape[0] = 3
+    if not isinstance(vol, EntityHandle):
+        vol = EntityHandle(vol)
+    if pt.shape != shape:
+        raise ValueError("pt must have shape=(3,)")
+    if dir.shape != shape:
+        raise ValueError("dir must have shape=(3,)")
+    crtn = cpp_dagmc_bridge.dag_pt_in_vol(<cpp_dagmc_bridge.EntityHandle> vol, 
+                <cpp_dagmc_bridge.vec3> np.PyArray_DATA(pt), &result, 
+                <cpp_dagmc_bridge.vec3> np.PyArray_DATA(dir), history.ptr)
     return result
 
-
-def _returns_moab_errors(function):
-    function.restype = _ErrorCode
-    function.errcheck = _moab_error_check
-
-_returns_moab_errors(lib.dag_load)
-lib.dag_load.argtypes = [ctypes.c_char_p]
-
-_vec3 = ndpointer(dtype=np.float64, shape=(3,), flags='CONTIGUOUS')
-
-_returns_moab_errors(lib.dag_pt_in_vol)
-lib.dag_pt_in_vol.argtypes = [EntityHandle, _vec3,
-                              ctypes.POINTER(ctypes.c_int),
-                              _vec3, ctypes.c_void_p]
-
+"""\
 lib.dag_alloc_ray_history.restype = ctypes.c_void_p
 lib.dag_alloc_ray_history.argtypes = []
 
