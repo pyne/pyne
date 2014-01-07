@@ -218,6 +218,7 @@ def vol_is_graveyard(vol):
     if not isinstance(vol, EntityHandle):
         vol = EntityHandle(vol)
     crtn = cpp_dagmc_bridge.vol_is_graveyard(<cpp_dagmc_bridge.EntityHandle> vol)
+    print(crtn)
     return bool(crtn)
     
 
@@ -309,9 +310,17 @@ def get_volume_list():
     """return a list of valid volume IDs"""
     return vol_id_to_handle.keys()
 
-# Kept for backwards compatibility
-volume_is_graveyard = vol_is_graveyard
-volume_is_implicit_complement = vol_is_implicit_complement
+
+def volume_is_graveyard(vol_id):
+    """True if the given volume id is a graveyard volume"""
+    eh = vol_id_to_handle[vol_id]
+    return vol_is_graveyard(eh)
+
+
+def volume_is_implicit_complement(vol_id):
+    """True if the given volume id is the implicit complement volume"""
+    eh = vol_id_to_handle[vol_id]
+    return vol_is_implicit_complement(eh)
 
 
 def volume_metadata(vol_id):
