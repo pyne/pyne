@@ -80,9 +80,11 @@ def dag_load(str filename):
     rtn = _ErrorCode(crtn)
     return rtn
 
-cdef class RayHistory(object):
 
+cdef class RayHistory(object):
+    """A dumb holder for history pointers."""
     cdef void * ptr
+
 
 def dag_pt_in_vol(vol, np.ndarray[np.float64_t, ndim=1] pt, 
                   np.ndarray[np.float64_t, ndim=1] dir, RayHistory history):
@@ -101,28 +103,60 @@ def dag_pt_in_vol(vol, np.ndarray[np.float64_t, ndim=1] pt,
                 <cpp_dagmc_bridge.vec3> np.PyArray_DATA(dir), history.ptr)
     return result
 
-"""\
-lib.dag_alloc_ray_history.restype = ctypes.c_void_p
-lib.dag_alloc_ray_history.argtypes = []
 
-lib.dag_dealloc_ray_history.restype = None
-lib.dag_dealloc_ray_history.argtypes = [ctypes.c_void_p]
+def dag_alloc_ray_history():
+    """Allocates a new ray history object."""
+    cdef RayHistory history = RayHistory()
+    history.ptr = cpp_dagmc_bridge.dag_alloc_ray_history()
+    return history
 
-lib.dag_dealloc_ray_buffer.restype = None
-lib.dag_dealloc_ray_buffer.argtypes = [ctypes.c_void_p]
+
+def dag_dealloc_ray_history(RayHistory history):
+    """Frees an existing ray history object."""
+    cpp_dagmc_bridge.dag_dealloc_ray_history(history.ptr)
+
+
+cdef class RayBuffer(object):
+    """A dumb holder for data buffer pointers."""
+    cdef void * ptr
+
+
+def dag_dealloc_ray_buffer(RayBuffer data_buffers):
+    """Frees an existing ray buffers object."""
+    cpp_dagmc_bridge.dag_dealloc_ray_buffer(data_buffers.ptr)
+
+
 
 @contextmanager
 def _ray_history():
-    history = lib.dag_alloc_ray_history()
+    history = dag_alloc_ray_history()
     yield history
-    lib.dag_dealloc_ray_history(history)
+    dag_dealloc_ray_history(history)
 
-_returns_moab_errors(lib.dag_ray_fire)
-lib.dag_ray_fire.argtypes = [EntityHandle, _vec3, _vec3,
-                             ctypes.POINTER(EntityHandle),
-                             ctypes.POINTER(ctypes.c_double),
-                             ctypes.c_void_p, ctypes.c_double]
 
+def dag_ray_fire(vol, np.ndarray[np.float64_t, ndim=1] ray_start, 
+                 np.ndarray[np.float64_t, ndim=1] ray_dir,
+                 RayHistory history, double distance_limit):
+    cdef cpp_dagmc_bridge.EntityHandle next_surf 
+    cdef cpp_dagmc_bridge.ErrorCode crtn
+    cdef double next_surf_dist = 0.0 
+    cdef np.npy_intp shape[1]
+    shape[0] = 3
+    if not isinstance(vol, EntityHandle):
+        vol = EntityHandle(vol)
+    if ray_start.shape != shape:
+        raise ValueError("ray_start must have shape=(3,)")
+    if ray_dir.shape != shape:
+        raise ValueError("ray_dir must have shape=(3,)")
+    crtn = cpp_dagmc_bridge.dag_ray_fire(<cpp_dagmc_bridge.EntityHandle> vol, 
+                <cpp_dagmc_bridge.vec3> np.PyArray_DATA(ray_start), 
+                <cpp_dagmc_bridge.vec3> np.PyArray_DATA(ray_dir),
+                &next_surf, &next_surf_dist, history.ptr, distance_limit)
+    if crtn != 0:
+        raise DagmcError("Error code " + str(crtn))
+    return EntityHandle(next_surf), next_surf_dist
+
+"""\
 _returns_moab_errors(lib.dag_ray_follow)
 lib.dag_ray_follow.argtypes = [EntityHandle, _vec3, _vec3, ctypes.c_double,
                                ctypes.POINTER(ctypes.c_int),
