@@ -12,6 +12,8 @@ from contextlib import contextmanager
 
 from numpy.linalg import norm
 
+np.import_array()
+
 # Set the entity handle type; I don't know a cleaner way than to ask the daglib
 # to return the byte width of the type
 def get_entity_handle_type():
@@ -247,19 +249,23 @@ def get_volume_metadata(vol):
 
 
 def get_volume_boundary(vol):
+    cdef int i
     cdef cpp_dagmc_bridge.ErrorCode crtn
-    cdef cpp_dagmc_bridge.vec3 minpt
-    cdef cpp_dagmc_bridge.vec3 maxpt
+    cdef cpp_dagmc_bridge.vec3 minpt  
+    cdef cpp_dagmc_bridge.vec3 maxpt 
+    cdef np.ndarray pyminpt = np.empty(3, dtype=np.float64)
+    cdef np.ndarray pymaxpt = np.empty(3, dtype=np.float64)
     cdef np.npy_intp shape[1]
-    shape[0] = 3
+    shape[0] = <np.npy_intp> 3
     if not isinstance(vol, EntityHandle):
         vol = EntityHandle(vol)
     crtn = cpp_dagmc_bridge.get_volume_boundary(<cpp_dagmc_bridge.EntityHandle> vol,
                                                 minpt, maxpt)
     if crtn != 0:
         raise DagmcError("Error code " + str(crtn))
-    pyminpt = np.PyArray_SimpleNewFromData(1, shape, np.NPY_FLOAT64, <void *> minpt)
-    pymaxpt = np.PyArray_SimpleNewFromData(1, shape, np.NPY_FLOAT64, <void *> maxpt)
+    for i in range(3):
+        pyminpt[i] = minpt[i]
+        pymaxpt[i] = maxpt[i]
     return pyminpt, pymaxpt
     
 
