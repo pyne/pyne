@@ -1,16 +1,21 @@
 """This module contains functions relevant to the ALARA activation code.
 """
+import numpy as np
+
 try:
     from itaps import iMesh, iBase, iMeshExtensions
 except ImportError:
     warnings.warn("the PyTAPS optional dependency could not be imported. "
-         "Some aspects of the ALARA module may be incomplete.", ImportWarning)
+         "Some aspects of the alara module may be incomplete.", ImportWarning)
 
-from pyne.Mesh import Mesh, MeshError
+from mesh import Mesh, MeshError
 
-def flux_mesh_to_fluxin(flux_mesh, flux_tag, fluxin=fluxin.out, reverse=False):
+def flux_mesh_to_fluxin(flux_mesh, flux_tag, fluxin="fluxin.out", 
+                        reverse=False):
     """This function creates an ALARA fluxin file from fluxes tagged on a PyNE
-    Mesh object.
+    Mesh object. For structured meshes, output is written in zyx order, meaning
+    z values change the fastest. For unstructured meshes, output is written in
+    the iteration order of imesh.iterate().
 
     Parameters:
     ----------
@@ -26,15 +31,22 @@ def flux_mesh_to_fluxin(flux_mesh, flux_tag, fluxin=fluxin.out, reverse=False):
         the flux vector tagged on the mesh.
     """
     
-    flux_tag = flux_mesh.getTagHandle(flux_tag)
+    tag_flux = flux_mesh.mesh.getTagHandle(flux_tag)
 
     if flux_mesh.structured:
-        ves = flux_mesh.structured_iterateHex("zyx")
+        ves = flux_mesh.structured_iterate_hex("zyx")
     else:
         ves = flux.mesh.mesh.iterate(iBase.Type.region, iMesh.Toplogy.all)
 
-    #Establish for loop bounds based on if forward or backward printing
-    #is requested
+    # find number of e_groups
+    e_groups = flux_mesh.mesh.getTagHandle(flux_tag)[list(
+                    flux_mesh.mesh.iterate(iBase.Type.region, 
+                                           iMesh.Topology.all))[0]]
+    e_groups = np.atleast_1d(e_groups)
+    num_e_groups = len(e_groups)
+
+    # Establish for loop bounds based on if forward or backward printing
+    # is requested
     if not reverse:
         start = 0
         stop = num_e_groups
@@ -46,17 +58,17 @@ def flux_mesh_to_fluxin(flux_mesh, flux_tag, fluxin=fluxin.out, reverse=False):
 
     output = ""
     for ve in ves:
-        #Print flux data to file
+        # print flux data to file
         count = 0
-        flux_data = tag_flux[ve]
+        flux_data = np.atleast_1d(tag_flux[ve])
         for i in range(start, stop, direction):
-            output += "{0} ".format(flux_data[i])
-            #fluxin formatting: create a new line after every 8th entry
+            output += "{:.6E} ".format(flux_data[i])
+            # fluxin formatting: create a new line after every 6th entry
             count += 1
-            if count % 8 == 0:
+            if count % 6 == 0:
                 output += "\n"
     
         output += "\n\n"
 
-    with open(fluxin.out) as f:
+    with open(fluxin, "w") as f:
         f.write(output)
