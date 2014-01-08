@@ -9,7 +9,7 @@ except ImportError:
 from nose.tools import assert_almost_equal
 from numpy.testing import assert_array_almost_equal
 
-from pyne.variance_reduction import cadis
+from pyne.variancereduction import cadis
 from pyne.mesh import Mesh
 from pyne.mesh import MeshError
 
