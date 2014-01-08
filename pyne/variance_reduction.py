@@ -57,9 +57,7 @@ def cadis(adj_flux_mesh, adj_flux_tag, q_mesh, q_tag,
     e_groups = adj_flux_mesh.mesh.getTagHandle(adj_flux_tag)[list(
                    adj_flux_mesh.mesh.iterate(iBase.Type.region, 
                                               iMesh.Topology.all))[0]]
-    print e_groups
     e_groups = np.atleast_1d(e_groups)
-    print e_groups
     num_e_groups = len(e_groups)
 
     # verify source (q) mesh has the same number of energy groups
