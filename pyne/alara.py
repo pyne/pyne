@@ -10,12 +10,9 @@ except ImportError:
 
 from mesh import Mesh, MeshError
 
-def flux_mesh_to_fluxin(flux_mesh, flux_tag, fluxin="fluxin.out", 
-                        reverse=False):
+def flux_mesh_to_fluxin(flux_mesh, flux_tag, fluxin=fluxin.out, reverse=False):
     """This function creates an ALARA fluxin file from fluxes tagged on a PyNE
-    Mesh object. For structured meshes, output is written in zyx order, meaning
-    z values change the fastest. For unstructured meshes, output is written in
-    the iteration order of imesh.iterate().
+    Mesh object.
 
     Parameters:
     ----------
@@ -30,7 +27,6 @@ def flux_mesh_to_fluxin(flux_mesh, flux_tag, fluxin="fluxin.out",
         If true, fluxes will be printed in the reverse order as they appear in
         the flux vector tagged on the mesh.
     """
-    
     tag_flux = flux_mesh.mesh.getTagHandle(flux_tag)
 
     if flux_mesh.structured:
