@@ -1,13 +1,11 @@
-"""Purpose:
-
-  This module is for gamma spectrometry analysis
-  Currently defines a GammaSpectrum, reads a .spe file
-  Will in the future have functions for activity calculations
-
+"""This module is for gamma spectrometry analysis. Currently defines a 
+GammaSpectrum class, reads a .spe file Will in the future have functions 
+for activity calculations.
 """
 
 import numpy as np
-import spectanalysis
+
+from . import spectanalysis
 
 
 class GammaSpectrum(spectanalysis.PhSpectrum):
@@ -38,20 +36,20 @@ class GammaSpectrum(spectanalysis.PhSpectrum):
 
     def __str__(self):
         """Print debug information"""
-        print_string = "Debug print of all header variables" \
-                       + "\n" + "The real time is:" + str(self.real_time) \
-                       + "\n" + "The live time is:" + str(self.live_time) \
-                       + "\n" + "The dead time is:" + str(self.dead_time) \
-                       + "\n" + "Detector ID:" + self.det_id \
-                       + "\n" + "Detector description:" + self.det_descp \
-                       + "\n" + "Start date:" + self.start_date \
-                       + "\n" + "Start time:" + self.start_time \
-                       + "\n" + "Start channel number:" + str(self.start_chan_num) \
-                       + "\n" + "Number of channels:" + str(self.num_channels) \
-                       + "\n" + "Energy calibration fit:" + str(self.calib_e_fit) \
-                       + "\n" + "FWHM calibration fit:" + str(self.calib_fwhm_fit) \
-                       + "\n" + "Spectrum:" + str(self.counts) \
-                       + "\n" + "File name:" + self.file_name
+        print_string = ("Debug print of all header variables\n"
+                        "The real time is: {x.real_time}\n"
+                        "The live time is: {x.live_time}\n"
+                        "The dead time is: {x.dead_time}\n"
+                        "Detector ID: {x.det_id}\n"
+                        "Detector description: {x.self.det_descp}\n"
+                        "Start date: {x.start_date}\n"
+                        "Start time: {x.start_time}\n"
+                        "Start channel number: {x.start_chan_num}\n"
+                        "Number of channels: {x.num_channels}\n"
+                        "Energy calibration fit: {x.calib_e_fit}\n"
+                        "FWHM calibration fit: {x.calib_fwhm_fit}\n"
+                        "Spectrum: {x.counts}\n"
+                        "File name: {x.file_name}").format(x=self)
         return print_string
 
 
