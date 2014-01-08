@@ -29,6 +29,7 @@ The following modules and sub-packages are discussed:
     stlcontainers
     dbgen/index
     mcnp
+    alara
     ptrac_to_hdf5
     binaryreader
     rxdata
