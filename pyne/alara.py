@@ -16,7 +16,7 @@ def flux_mesh_to_fluxin(flux_mesh, flux_tag, fluxin="fluxin.out",
     Mesh object. Structured meshes are printed in zyx order (z changes fastest)
     and unstructured meshes are printed in the imesh.iterate() order.
 
-    Parameters:
+    Parameters
     ----------
     flux_mesh : PyNE Mesh object
         Contains the mesh with fluxes tagged on each volume element.
@@ -25,7 +25,7 @@ def flux_mesh_to_fluxin(flux_mesh, flux_tag, fluxin="fluxin.out",
         groups are assumed to be represented as vector tags.
     fluxin : string
         The name of the ALARA fluxin file to be output.
-    reverse: bool
+    reverse : bool
         If true, fluxes will be printed in the reverse order as they appear in
         the flux vector tagged on the mesh.
     """
