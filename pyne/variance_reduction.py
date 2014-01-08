@@ -1,7 +1,9 @@
-#!/usr/bin/env python
 """
 This module contains functions for mesh-based Monte Carlo variance reduction.
 """
+from itertools import izip
+import numpy as np
+
 try:
     from itaps import iMesh, iBase, iMeshExtensions
 except ImportError:
@@ -9,23 +11,24 @@ except ImportError:
         "Some aspects of the variance reduction module may be incomplete.", 
         ImportWarning)
 
-import numpy as np
-from itertools import izip
-
-from pyne.mesh import Mesh
-from pyne.mesh import MeshError
+from mesh import Mesh
+from mesh import MeshError
 
 def cadis(adj_flux_mesh, adj_flux_tag, q_mesh, q_tag, 
           ww_mesh, ww_tag, q_bias_mesh, q_bias_tag, beta=5):
     """This function reads PyNE Mesh objects tagged with adjoint fluxes and 
     unbiased source densities and outputs PyNE Meshes of weight window lower 
     bounds and biased source densities as computed by the Consistant 
-    Adjoint-Driven Importance Sampling (CADIS) method. Note that values can be
+    Adjoint-Driven Importance Sampling (CADIS) method [1]. Note that values can be
     stored on the same Mesh object, all different Mesh objects, or any
     combination in between. Meshes can be structured or unstructured. 
     Note that this function is suitable for Forward Weighted (FW) CADIS as well,
     the only difference being the adjoint source used for the estimation of the 
     adjoint flux.
+
+    [1] Haghighat, A. and Wagner, J. C., "Monte Carlo Variance Reduction with 
+        Deterministic Importance Functions," Progress in Nuclear Energy, 
+        Vol. 42, No. 1, pp. 25-53, 2003.
 
     Parameters
     -----------
@@ -50,27 +53,20 @@ def cadis(adj_flux_mesh, adj_flux_tag, q_mesh, q_tag,
         bound. The default value is 5: the value used in MCNP. 
     """
     
-    #find number of energy groups
+    # find number of energy groups
     e_groups = adj_flux_mesh.mesh.getTagHandle(adj_flux_tag)[list(
                    adj_flux_mesh.mesh.iterate(iBase.Type.region, 
                                               iMesh.Topology.all))[0]]
-    #if there is one e_group, convert e_groups to list
-    try:
-        len(e_groups)
-    except TypeError:
-        e_groups = [e_groups]
-
+    print e_groups
+    e_groups = np.atleast_1d(e_groups)
+    print e_groups
     num_e_groups = len(e_groups)
 
-    #verify source (q) mesh has the same number of energy groups
+    # verify source (q) mesh has the same number of energy groups
     q_e_groups = q_mesh.mesh.getTagHandle(q_tag)[list(
                       q_mesh.mesh.iterate(iBase.Type.region, 
                                           iMesh.Topology.all))[0]]
-    try:
-        len(q_e_groups)
-    except TypeError:
-        q_e_groups = [q_e_groups]
-
+    q_e_groups = np.atleast_1d(q_e_groups)
     num_q_e_groups = len(q_e_groups)
 
     if num_q_e_groups != num_e_groups:
@@ -78,35 +74,27 @@ def cadis(adj_flux_mesh, adj_flux_tag, q_mesh, q_tag,
             "must be of the same dimension".format(adj_flux_mesh, adj_flux_tag, 
                                                    q_mesh, q_tag))
 
-    #calculate total response (R)
-    R = [0]*num_e_groups
-    #create volume element (ve) iterators
+    # calculate total response (R)
+    R = [0] * num_e_groups
+    # create volume element (ve) iterators
     adj_ves = adj_flux_mesh.mesh.iterate(iBase.Type.region, iMesh.Topology.all)
     q_ves = q_mesh.mesh.iterate(iBase.Type.region, iMesh.Topology.all)
 
     for adj_ve, q_ve in zip(list(adj_ves), list(q_ves)):
         adj_flux = adj_flux_mesh.mesh.getTagHandle(adj_flux_tag)[adj_ve]
         q = q_mesh.mesh.getTagHandle(q_tag)[q_ve]
-
-        # convert single float case to iterable
-        try:
-            len(adj_flux)
-        except TypeError:
-            adj_flux = [adj_flux]
-        try:
-            len(q)
-        except TypeError:
-            q = [q]
+        adj_flux = np.atleast_1d(adj_flux)
+        q = np.atleast_1d(q)
 
         for i in range(0, num_e_groups):
             R[i] += adj_flux[i]*q[i]
 
-    #generate weight windows and biased source densities using total response
+    # generate weight windows and biased source densities using total response
     tag_ww = ww_mesh.mesh.createTag(ww_tag, num_e_groups, float)
     ww_ves = ww_mesh.mesh.iterate(iBase.Type.region, iMesh.Topology.all)
     tag_q_bias = q_bias_mesh.mesh.createTag(q_bias_tag, num_e_groups, float) 
     q_bias_ves = q_bias_mesh.mesh.iterate(iBase.Type.region, iMesh.Topology.all)
-    #reset previously created iterators
+    # reset previously created iterators
     q_ves.reset()
     adj_ves.reset()
 
@@ -114,16 +102,8 @@ def cadis(adj_flux_mesh, adj_flux_tag, q_mesh, q_tag,
                                                list(ww_ves), list(q_bias_ves)):
         adj_flux = adj_flux_mesh.mesh.getTagHandle(adj_flux_tag)[adj_ve]
         q = q_mesh.mesh.getTagHandle(q_tag)[q_ve]
-
-        # convert single float case to iterable
-        try:
-            len(adj_flux)
-        except TypeError:
-            adj_flux = [adj_flux]
-        try:
-            len(q)
-        except TypeError:
-            q = [q]
+        adj_flux = np.atleast_1d(adj_flux)
+        q = np.atleast_1d(q)
 
         tag_ww[ww_ve] = [R[i]/(adj_flux[i]*q[i]*(beta + 1)/2) 
                          for i in range(0, num_e_groups)]
