@@ -11,8 +11,6 @@
 
 using namespace moab;
 
-// namespace moab
-// {
   /*
    * Convenience function to open a file for writing
    */

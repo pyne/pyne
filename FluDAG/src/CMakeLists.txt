@@ -11,7 +11,8 @@ ENDIF (NOT DEFINED FLUPRO)
 
 SET(MOAB_INCLUDE ${MOAB_HOME}/include)
 SET(MOAB_LIB_DIR ${MOAB_HOME}/lib)
-set (moablibs ${MOAB_LIB_DIR}/libdagmc.so ${MOAB_LIB_DIR}/libMOAB.so)
+set (moabdaglibs ${MOAB_LIB_DIR}/libdagmc.so ${MOAB_LIB_DIR}/libMOAB.so)
+set (moablibs ${MOAB_LIB_DIR}/libMOAB.so)
 
 # Where to look for includes
 INCLUDE_DIRECTORIES(${MOAB_INCLUDE})
@@ -34,12 +35,9 @@ SET (wrapperfiles WrapMag.cc WrapLookFX.cc WrapReg.cc WrapFlgfwr.cc)
 
 # Create the executable that can call flukam_
 ADD_EXECUTABLE(mainfludag mainFluDAG.cpp ${fludag_files} ${wrapperfiles})
-TARGET_LINK_LIBRARIES(mainfludag ${moablibs} ${FLUPRO}/libflukahp.a gfortran)
+TARGET_LINK_LIBRARIES(mainfludag ${moabdaglibs} ${FLUPRO}/libflukahp.a gfortran)
 
 # Create the executable that can call flukam_
 ADD_EXECUTABLE(mainparse dagmc_define.cpp ${dagmc_define_files} )
 TARGET_LINK_LIBRARIES(mainparse ${moablibs} ${FLUPRO}/libflukahp.a gfortran)
-
-ADD_EXECUTABLE(maintest dagmc_define.cpp chkerr.cpp UnitNumberManager.cpp parse_flu.cpp moab_utils.cpp)
-TARGET_LINK_LIBRARIES(maintest ${moablibs} ${FLUPRO}/libflukahp.a gfortran)
 

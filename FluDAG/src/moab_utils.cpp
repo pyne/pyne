@@ -31,7 +31,7 @@
 
 using namespace moab;
 
-  int MyClass::num_entities( int dimension )
+  int MCRecordInfo::num_entities( int dimension )
   {
     assert(0 <= dimension && 3 >= dimension);
 
@@ -40,7 +40,7 @@ using namespace moab;
 
 /* SECTION III */
 
-EntityHandle MyClass::entity_by_id( Interface* mbi, int dimension, int id )
+EntityHandle MCRecordInfo::entity_by_id( Interface* mbi, int dimension, int id )
 {
   assert(0 <= dimension && 3 >= dimension);
   const Tag tags[] = { idTag, geomTag };
@@ -67,7 +67,7 @@ EntityHandle MyClass::entity_by_id( Interface* mbi, int dimension, int id )
 }
 
 
-int MyClass::get_entity_id(Interface* mbi, EntityHandle this_ent) 
+int MCRecordInfo::get_entity_id(Interface* mbi, EntityHandle this_ent) 
 {
   int id = 0;
   ErrorCode result = mbi->tag_get_data(idTag, &this_ent, 1, &id);
@@ -78,7 +78,7 @@ int MyClass::get_entity_id(Interface* mbi, EntityHandle this_ent)
 }
 
 
-int MyClass::id_by_index( moab::Interface* mbi, int dimension, int index )
+int MCRecordInfo::id_by_index( moab::Interface* mbi, int dimension, int index )
 {
   EntityHandle h = entity_by_index( dimension, index );
   if (!h)
@@ -90,14 +90,14 @@ int MyClass::id_by_index( moab::Interface* mbi, int dimension, int index )
 }
 
 
-EntityHandle MyClass::entity_by_index( int dimension, int index )
+EntityHandle MCRecordInfo::entity_by_index( int dimension, int index )
 {
   assert(2 <= dimension && 3 >= dimension && (unsigned) index < entHandles[dimension].size());
   return entHandles[dimension][index];
 }
 
 
-ErrorCode MyClass::get_impl_compl(Interface* mbi)
+ErrorCode MCRecordInfo::get_impl_compl(Interface* mbi)
 {
   Range entities;
   const void* const tagdata[] = {implComplName};
@@ -145,7 +145,7 @@ ErrorCode MyClass::get_impl_compl(Interface* mbi)
 //     values associated with each property
 // Copied and modified from obb_analysis.cpp
 /*
-static std::string MyClass::make_property_string (Interface* mbi, EntityHandle eh, std::vector<std::string> &properties)
+static std::string MCRecordInfo::make_property_string (Interface* mbi, EntityHandle eh, std::vector<std::string> &properties)
 {
   ErrorCode ret;
   std::string propstring;
@@ -189,7 +189,7 @@ static std::string MyClass::make_property_string (Interface* mbi, EntityHandle e
 /* SECTION V: Metadata handling */
 
 // ToDo:  Consider using StringSplit
-void MyClass::tokenize( const std::string& str,
+void MCRecordInfo::tokenize( const std::string& str,
                       std::vector<std::string>& tokens,
                       const char* delimiters ) 
                       // const char* delimiters ) const
@@ -208,7 +208,7 @@ void MyClass::tokenize( const std::string& str,
     }
 }
 
-ErrorCode MyClass::get_group_name( moab::Interface* mbi, EntityHandle group_set, std::string& name )
+ErrorCode MCRecordInfo::get_group_name( moab::Interface* mbi, EntityHandle group_set, std::string& name )
 {
   ErrorCode rval;
   const void* v = NULL;
@@ -219,7 +219,7 @@ ErrorCode MyClass::get_group_name( moab::Interface* mbi, EntityHandle group_set,
   return MB_SUCCESS;
 }
 
-ErrorCode MyClass::append_packed_string( moab::Interface* mbi,  Tag tag, EntityHandle eh,
+ErrorCode MCRecordInfo::append_packed_string( moab::Interface* mbi,  Tag tag, EntityHandle eh,
                                        std::string& new_string )
 {
     // When properties have multiple values, the values are tagged in a single character array
@@ -253,7 +253,7 @@ ErrorCode MyClass::append_packed_string( moab::Interface* mbi,  Tag tag, EntityH
 }
 
 
-ErrorCode MyClass::unpack_packed_string( moab::Interface* mbi, Tag tag, EntityHandle eh,
+ErrorCode MCRecordInfo::unpack_packed_string( moab::Interface* mbi, Tag tag, EntityHandle eh,
                                        std::vector< std::string >& values )
 {
   ErrorCode rval;
@@ -272,10 +272,12 @@ ErrorCode MyClass::unpack_packed_string( moab::Interface* mbi, Tag tag, EntityHa
   return MB_SUCCESS;
 }
 
-// ErrorCode MyClass::parse_properties( Interface* mbi,  const std::vector<std::string>& keywords,
+// jcz todo:  pass a constant empty string,string map as keyword_synonyms
+// ErrorCode MCRecordInfo::parse_properties( Interface* mbi,  const std::vector<std::string>& keywords,
 //                            const std::map<std::string, std::string>& keyword_synonyms )
-ErrorCode MyClass::parse_properties( Interface* mbi,  const std::vector<std::string>& keywords)
-//                            const std::map<std::string, std::string>& keyword_synonyms )
+// jcz hack:  took out problematic static const
+ErrorCode MCRecordInfo::parse_properties( Interface* mbi,  const std::vector<std::string>& keywords,
+                              const std::map<std::string, std::string>& keyword_synonyms )
 {
   ErrorCode rval;
   const std::map<std::string,std::string> no_synonyms;
@@ -345,7 +347,7 @@ ErrorCode MyClass::parse_properties( Interface* mbi,  const std::vector<std::str
 }
 
 
-ErrorCode MyClass::prop_value( moab::Interface* mbi, EntityHandle eh, const std::string& prop, std::string& value )
+ErrorCode MCRecordInfo::prop_value( moab::Interface* mbi, EntityHandle eh, const std::string& prop, std::string& value )
 {
   ErrorCode rval;
 
@@ -364,7 +366,7 @@ ErrorCode MyClass::prop_value( moab::Interface* mbi, EntityHandle eh, const std:
   return MB_SUCCESS;
 }
 
-ErrorCode MyClass::prop_values( moab::Interface* mbi, EntityHandle eh, const std::string& prop,
+ErrorCode MCRecordInfo::prop_values( moab::Interface* mbi, EntityHandle eh, const std::string& prop,
                               std::vector< std::string >& values )
 {
 
@@ -378,7 +380,7 @@ ErrorCode MyClass::prop_values( moab::Interface* mbi, EntityHandle eh, const std
 
 }
 
-bool MyClass::has_prop( moab::Interface* mbi, EntityHandle eh, const std::string& prop )
+bool MCRecordInfo::has_prop( moab::Interface* mbi, EntityHandle eh, const std::string& prop )
 {
   ErrorCode rval;
 
@@ -395,7 +397,7 @@ bool MyClass::has_prop( moab::Interface* mbi, EntityHandle eh, const std::string
   return ( rval == MB_SUCCESS );
 }
 
-ErrorCode MyClass::detect_available_props(moab::Interface* mbi, std::vector<std::string>& keywords_list )
+ErrorCode MCRecordInfo::detect_available_props(moab::Interface* mbi, std::vector<std::string>& keywords_list )
 {
   ErrorCode rval;
   std::set< std::string > keywords;
@@ -417,7 +419,7 @@ ErrorCode MyClass::detect_available_props(moab::Interface* mbi, std::vector<std:
   return MB_SUCCESS;
 }
 
-ErrorCode MyClass::parse_group_name(moab::Interface*mbi, EntityHandle group_set, prop_map& result )
+ErrorCode MCRecordInfo::parse_group_name(moab::Interface*mbi, EntityHandle group_set, prop_map& result )
 {
   ErrorCode rval;
   std::string group_name;
@@ -441,7 +443,7 @@ ErrorCode MyClass::parse_group_name(moab::Interface*mbi, EntityHandle group_set,
 
 
 // calculate volume of polyhedron
-ErrorCode MyClass::measure_volume( moab::Interface* mbi, EntityHandle volume, double& result )
+ErrorCode MCRecordInfo::measure_volume( moab::Interface* mbi, EntityHandle volume, double& result )
 {
   ErrorCode rval;
   std::vector<EntityHandle> surfaces, surf_volumes;
@@ -510,7 +512,7 @@ ErrorCode MyClass::measure_volume( moab::Interface* mbi, EntityHandle volume, do
 
 
 // get sense of surface(s) wrt volume
-ErrorCode MyClass::surface_sense( Interface* mbi, EntityHandle volume, 
+ErrorCode MCRecordInfo::surface_sense( Interface* mbi, EntityHandle volume, 
                            int num_surfaces,
                            const EntityHandle* surfaces,
                            int* senses_out )

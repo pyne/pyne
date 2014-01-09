@@ -38,40 +38,17 @@ using moab::DagMC;
 
 #define DAG DagMC::instance()
 
-#define DGFM_SEQ   0
-#define DGFM_READ  1
-#define DGFM_BCAST 2
+// #define DGFM_SEQ   0
+// #define DGFM_READ  1
+// #define DGFM_BCAST 2
 
-#ifdef ENABLE_RAYSTAT_DUMPS
+// #ifdef ENABLE_RAYSTAT_DUMPS
+// #include <fstream>
+// #include <numeric>
+// static std::ostream* raystat_dump = NULL;
+// #endif 
 
-#include <fstream>
-#include <numeric>
-
-static std::ostream* raystat_dump = NULL;
-
-#endif 
 #define DEBUG 1
-/* These 37 strings are predefined FLUKA materials. Any ASSIGNMAt of unique 
- * materials not on this list requires a MATERIAL card. */
-std::string flukaMatStrings[] = {"BLCKHOLE", "VACUUM", "HYDROGEN",
-"HELIUM", "BERYLLIU", "CARBON", "NITROGEN", "OXYGEN", "MAGNESIU",      
-"ALUMINUM", "IRON", "COPPER", "SILVER", "SILICON", "GOLD", "MERCURY",  
-"LEAD", "TANTALUM", "SODIUM", "ARGON", "CALCIUM", "TIN", "TUNGSTEN",   
-"TITANIUM", "NICKEL", "WATER", "POLYSTYR", "PLASCINT", "PMMA",         
-"BONECOMP", "BONECORT", "MUSCLESK", "MUSCLEST", "ADTISSUE", "KAPTON",  
-"POLYETHY", "AIR"};
-
-int NUM_FLUKA_MATS = 37;
-
-/* Create a set out of the hardcoded string array. */
-std::set<std::string> FLUKA_mat_set(flukaMatStrings, flukaMatStrings+NUM_FLUKA_MATS); 
-
-/* Maximum character-length of a cubit-named material property */
-int MAX_MATERIAL_NAME_SIZE = 32;
-
-std::multimap<std::string, unsigned int> scoring_vol_map;
-
-UnitNumberManager unit_no_mgr = UnitNumberManager();
 
 bool debug = false; //true ;
 
