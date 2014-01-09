@@ -816,6 +816,101 @@ class Mesh(object):
         tags = self.common_ve_tags(other)
         self._do_op(other, tags, "/")
 
+
+    def minimum(self, tag_name):
+        """This method returns the minimum value(s) of a tag across all volume 
+        elements.
+        
+        Parameters:
+        ----------
+        tag_name: string
+            name of tag for which the minimum value(s) is/are desired
+    
+        Returns:
+        --------
+        - List of minimum values if the tag is a multi-valued
+        - The single minimum value if the tag is single-valued
+        """
+        tag = self.mesh.getTagHandle(tag_name)
+        ves = list(self.mesh.iterate(iBase.Type.region, iMesh.Topology.all))
+        
+        #find length of the tag from first value
+        first_val = tag[list(self.mesh.iterate(iBase.Type.region, 
+                                               iMesh.Topology.all))[0]]
+    
+        try:
+            tag_len = len(first_val)
+        except TypeError:
+            tag_len = 1
+    
+        #set minimum value equal to first
+        minimum = first_val
+    
+        #find minimum
+        if tag_len > 1:
+            for ve in ves:
+                val = tag[ve]
+                for i in range(0, len(first_val)):
+                    if val[i] < minimum[i]:
+                        minimum[i] = val[i]
+    
+            return minimum
+        else:
+            for ve in ves:
+                val = tag[ve]
+                if val < minimum:
+                    minimum = val
+    
+            return minimum
+
+    
+    def maximum(self, tag_name):
+        """This method returns the maximum value(s) of a tag across all volume 
+        elements.
+        
+        Parameters:
+        ----------
+        tag_name: string
+            name of tag for which the maxnimum value(s) is/are desired
+    
+        Returns:
+        --------
+        - List of maximum values if the tag is a multi-valued
+        - The single maximum value if the tag is single-valued
+        """
+        tag = self.mesh.getTagHandle(tag_name)
+        ves = list(self.mesh.iterate(iBase.Type.region, iMesh.Topology.all))
+        
+        #find length of the tag from first value
+        first_val = tag[list(self.mesh.iterate(iBase.Type.region, 
+                                               iMesh.Topology.all))[0]]
+    
+        try:
+            tag_len = len(first_val)
+        except TypeError:
+            tag_len = 1
+    
+        #set minimum value equal to first
+        maximum = first_val
+    
+        #find maximum
+        if tag_len > 1:
+            for ve in ves:
+                val = tag[ve]
+                for i in range(0, len(first_val)):
+                    if val[i] > maximum[i]:
+                        maximum[i] = val[i]
+    
+            return maximum
+        else:
+            for ve in ves:
+                val = tag[ve]
+                if val > maximum:
+                    maximum = val
+    
+            return maximum
+
+
     def _do_op(self, other, tags, op, in_place=True):
         """Private function to do mesh +, -, *, /.
         """
