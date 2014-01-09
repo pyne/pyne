@@ -272,18 +272,13 @@ ErrorCode MCRecordInfo::unpack_packed_string( moab::Interface* mbi, Tag tag, Ent
   return MB_SUCCESS;
 }
 
-// jcz todo:  pass a constant empty string,string map as keyword_synonyms
-// ErrorCode MCRecordInfo::parse_properties( Interface* mbi,  const std::vector<std::string>& keywords,
-//                            const std::map<std::string, std::string>& keyword_synonyms )
-// jcz hack:  took out problematic static const
 ErrorCode MCRecordInfo::parse_properties( Interface* mbi,  const std::vector<std::string>& keywords,
                               const std::map<std::string, std::string>& keyword_synonyms )
 {
   ErrorCode rval;
-  const std::map<std::string,std::string> no_synonyms;
+
   // master keyword map, mapping user-set words in cubit to canonical property names
-  // std::map< std::string, std::string > keyword_map( keyword_synonyms );
-  std::map< std::string, std::string > keyword_map( no_synonyms );
+  std::map< std::string, std::string > keyword_map( keyword_synonyms );
 
   for( std::vector<std::string>::const_iterator i = keywords.begin();
        i != keywords.end(); ++i )
