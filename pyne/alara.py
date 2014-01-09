@@ -13,7 +13,7 @@ from mesh import Mesh, MeshError
 def flux_mesh_to_fluxin(flux_mesh, flux_tag, fluxin="fluxin.out", 
                         reverse=False):
     """This function creates an ALARA fluxin file from fluxes tagged on a PyNE
-    Mesh object. Structured meshes are printed in zyx order (z changes fastest)
+    Mesh object. Structured meshes are printed in xyz order (z changes fastest)
     and unstructured meshes are printed in the imesh.iterate() order.
 
     Parameters
@@ -32,7 +32,7 @@ def flux_mesh_to_fluxin(flux_mesh, flux_tag, fluxin="fluxin.out",
     tag_flux = flux_mesh.mesh.getTagHandle(flux_tag)
 
     if flux_mesh.structured:
-        ves = flux_mesh.structured_iterate_hex("zyx")
+        ves = flux_mesh.structured_iterate_hex("xyz")
     else:
         ves = flux.mesh.mesh.iterate(iBase.Type.region, iMesh.Toplogy.all)
 

@@ -32,7 +32,7 @@ def test_write_fluxin_single():
     flux_mesh = Mesh(structured=True, structured_coords=[[0,1,2],[0,1,2],[0,1]])
     tag_flux = flux_mesh.mesh.createTag("flux", 1, float)
     flux_data = [1, 2, 3, 4]
-    ves = flux_mesh.structured_iterate_hex("zyx")
+    ves = flux_mesh.structured_iterate_hex("xyz")
     for i, ve in enumerate(ves):
         tag_flux[ve] = flux_data[i]
 
@@ -62,7 +62,7 @@ def test_write_fluxin_multiple():
     flux_mesh = Mesh(structured=True, structured_coords=[[0,1,2],[0,1],[0,1]])
     tag_flux = flux_mesh.mesh.createTag("flux", 7, float)
     flux_data = [[1, 2, 3, 4, 5, 6, 7], [8, 9, 10, 11, 12, 13, 14]]
-    ves = flux_mesh.structured_iterate_hex("zyx")
+    ves = flux_mesh.structured_iterate_hex("xyz")
     for i, ve in enumerate(ves):
         tag_flux[ve] = flux_data[i]
 
