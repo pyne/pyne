@@ -24,11 +24,6 @@
 
 using namespace moab;
 
-  // void fludagwrite_assignma(moab::Interface* mbi, std::string matfile)
-   //{
-    //   return;  
-   //}
-
 int main(int argc, char* argv[]) 
 {
   ProgOptions po("dagmc_define: a tool for processing h5m files for physics analysis");
@@ -40,7 +35,7 @@ int main(int argc, char* argv[])
   std::string output_file = "dagmc_define_out.h5m";
   bool verbose = false;
   po.addOpt<void>( ",v", "Verbose output", &verbose );
-  // po.addOpt<std::string>( "outmesh,o", "Specify output file name (default "+output_file+")", &output_file );
+
   // po.addOpt<void>("no-outmesh,", "Do not write an output mesh" );
   // po.addOpt<std::string>( ",m", "Specify alternate input mesh to override surfaces in input_file" );
   // po.addOpt<std::string>( "obb-vis,O", "Specify obb visualization output file (default none)" );
@@ -54,29 +49,8 @@ int main(int argc, char* argv[])
 
   time_t time_before,time_after;
 
-  // Default h5m filename is for fluka runs
-  // std::string infile = "dagmc.h5m"; 
- 
-  moab::Interface* mbi = new moab::Core();
-/*
-  if ( argc == 1 ) // then its a fluka run
-    {
-      
-      infile = "../"+infile; // fluka create a run directory one higher than where we launch
-      flukarun = true;
-    }
-  else if ( argc > 2 )
-    {
-      std::cout << "run as main_fludag <facet_file>  to produce"
-	        << " material assignments" << std::endl;
-      std::cout << "too many arguments provided" << std::endl;
-      exit(1);
-    }
-  else // its a pre process run
-    {
-      infile = argv[1]; // must be the 2nd argument
-    }
-*/
+  // Create the moab instance for geometry processing
+  Interface* mbi = new Core();
 
   std::ifstream h5mfile (input_file.c_str()); // filestream for mesh geom
   if ( !h5mfile.good() )
@@ -86,22 +60,12 @@ int main(int argc, char* argv[])
       exit(1);
    }
 
-  // int max_pbl = 1;
-
-  // get the current time
-  time(&time_before);  /* get current time; same as: timer = time(NULL)  */
+  // get the current time; same as "timer = time(NULL)
+  time(&time_before);  
 
 
-  // load the dag file
+  // load the h5m file
   std::cout << "Loading the faceted geometry file " << input_file << "..." << std::endl;
-
-  // error = DAG->load_file(infile.c_str(), 0.0 ); // load the dag file takeing the faceting from h5m
-  // error = mbi
- //  if ( error != MB_SUCCESS ) 
-   // {
-    //  std::cerr << "DAGMC failed to read input file: " << infile << std::endl;
-     // exit(EXIT_FAILURE);
-    //}
   
   EntityHandle input_file_set;
   ErrorCode error;
@@ -112,13 +76,13 @@ int main(int argc, char* argv[])
   error = mbi->load_file( input_file.c_str(), &input_file_set );
   CHECKERR( mbi, error );
 
-  // Timing report
+  // Timing report:  get the time in seconds to load the file
   time(&time_after); 
-  double seconds = difftime(time_after,time_before); //get the time in seconds to load file
+  double seconds = difftime(time_after,time_before); 
   time_before = time_after; // reset time to now for the next call
   std::cout << "Time to load the h5m file = " << seconds << " seconds" << std::endl;
 
-  // ToDo:  Do I need to do this?
+  // ToDo:  is this needed?
   // initialize geometry
 /*
   error = DAG->init_OBBTree();
@@ -134,8 +98,8 @@ int main(int argc, char* argv[])
   std::cout << "Time to initialise the geometry" << seconds << std::endl;
 
   // Main call to parse the file and write out the records
-  std::string lcad = "mat.inp";
-  fludagwrite_assignma(mbi, lcad);
+  std::string mat_filename = "mat.inp";
+  fludagwrite_assignma(mbi, mat_filename);
   std::cout << "Producing material snippets" << std::endl;
   std::cout << "please paste these into your input deck" << std::endl;
 

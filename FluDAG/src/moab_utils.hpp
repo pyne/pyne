@@ -13,12 +13,23 @@
 #include "MBTagConventions.hpp"
 
 using namespace moab;
-
-class MyClass
+//===========================================================================//
+/**
+ * \class DagUtil
+ * \brief Defines a utility class similar to, and a subset of, DAGMC
+ *
+ *  This class provides utility calls that are based only on MOAB so that 
+ *  different physics codes may use them to prepare records for Monte Carlo 
+ *  runs, e.g. FLUKA or Geant4
+ * 
+ *  This is for extracting the information from the geometry file in order to
+ *  assist the user of a variety of Monte Carlo codes in preparing the input
+ *  records for the actual physics run.
+ */
+//===========================================================================//
+class MCRecordInfo
 {
 public:
-
-//  MyClass();
 
   /** Calculate the volume contained in a 'volume' */
   ErrorCode measure_volume( Interface* mbi, EntityHandle volume, double& result );
@@ -31,13 +42,8 @@ public:
                            const EntityHandle* surfaces,
                            int* senses_out );
 
-  /** Get the sense of a single surface wrt a volume.  Sense values are:
-   *  {-1 -> reversed, 0 -> both, 1 -> forward}
-   */
-  // ErrorCode surface_sense( EntityHandle volume, EntityHandle surface, int& sense_out );
 
-
-  /* Local utilities also defined in DagMC, but referring to MOAB taggin only */
+  /* Local utilities also defined in DagMC, but referring to MOAB tagging only */
   /** map from dimension & base-1 ordinal index to EntityHandle */
   EntityHandle entity_by_index( int dimension, int index );
   /** map from dimension & base-1 ordinal index to global ID */
@@ -92,11 +98,11 @@ public:
    *                 in the "rest.of.world" group will behave as if they were in a
    *                 group named "graveyard".
    */
+  
   // an empty synonym map to provide as a default argument to parse_properties()
-  // static const std::map<std::string,std::string> no_synonyms;
-  ErrorCode parse_properties( Interface* mbi,  const std::vector<std::string>& keywords);
-  // ErrorCode parse_properties( Interface* mbi,  const std::vector<std::string>& keywords,
-                              // const std::map<std::string, std::string>& keyword_synonyms=no_synonyms );
+  static const std::map<std::string,std::string> no_synonyms;
+  ErrorCode parse_properties( Interface* mbi,  const std::vector<std::string>& keywords,
+                              const std::map<std::string, std::string>& keyword_synonyms=no_synonyms );
 
   /** Get the value of a property on a volume or surface
    *
@@ -139,7 +145,6 @@ public:
 
 private:
 
-
   // a map from the canonical property names to the tags representing them
   std::map<std::string, Tag> property_tagmap;
 
@@ -156,6 +161,6 @@ private:
   Tag sense_tag() {return senseTag;}
   bool debug;
 
-}; // class MyClass
-// } // namespace moab
+}; // class MCRecordInfo
+
 #endif  // FLUDAG_SRC_MOAB_UTILS_HPP

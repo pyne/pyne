@@ -15,6 +15,7 @@
 #include "parse_flu.hpp"
 #include "moab_utils.hpp"
 #include "UnitNumberManager.hpp"
+#include "chkerr.hpp"
 
 #include "moab/Core.hpp"
 
@@ -24,16 +25,14 @@
 #include <cstring>
 #include <string>
 
-#ifdef CUBIT_LIBS_PRESENT
-#include <fenv.h>
-#endif
+// #ifdef CUBIT_LIBS_PRESENT
+// #include <fenv.h>
+// #endif
 
 // globals
 
 #include <fstream>
-#include <numeric>
-
-// using namespace moab;
+// #include <numeric>
 
 #define DEBUG 1
 /* These 37 strings are predefined FLUKA materials. Any ASSIGNMAt of unique 
@@ -56,17 +55,21 @@ int MAX_MATERIAL_NAME_SIZE = 32;
 
 std::multimap<std::string, unsigned int> scoring_vol_map;
 
-MyClass           myClass     = MyClass();
+MCRecordInfo       recordInfo = MCRecordInfo();
 UnitNumberManager unit_no_mgr = UnitNumberManager();
+
+// Empty synonym map for MCRecordInfo::parse_properties()
+const std::map<std::string, std::string> MCRecordInfo::no_synonyms;
 
 bool debug = false; //true ;
 
 //---------------------------------------------------------------------------//
 // fludagwrite_assignma
 //---------------------------------------------------------------------------//
-/// Called from mainFludag when only one argument is given to the program.
-//  This function writes out a simple numerical material assignment to the named argument file
-//  Example usage:  mainFludag dagmc.html
+/// Called from main() 
+//  This function 
+// 	o writes out a simple numerical material assignment to the named argument file
+//  Example usage:  parseMain dagmc.html
 //  Outputs
 //           mat.inp  contains MATERIAL and ASSIGNMAt records for the input geometry.
 //                    The MATERIAL is gotten by parsing the Cubit volume name on underscores.  
@@ -76,13 +79,13 @@ bool debug = false; //true ;
 //                    User-named (not predefined) materials are TRUNCATED to 8 chars.
 //                    User-named material id's start at 25 and increment by 1 for each MATERIAL card
 //           index-id.txt  Map of FluDAG volume index vs Cubit volume ids, for info only.
-//  Note that a preprocessing step to this call sets up the the DAG object that contains 
-//  all the geometry information contained in dagmc.html.  
-//  the name of the (currently hardcoded) output file is "mat.inp"
+//  The geometry information is contained in the Interface* object, mbi, which holds the meshed h5m
+//  geometry extracted during a previous step.
+//  The name of the (currently hardcoded) output file is "mat.inp"
 //  The graveyard is assumed to be the last region.
 void fludagwrite_assignma(Interface* mbi, std::string filename_to_write)  // file with cell/surface cards
 {
-  int num_vols = myClass.num_entities(3);
+  int num_vols = recordInfo.num_entities(3);
   // std::cout << __FILE__ << ", " << __func__ << ":" << __LINE__ << "_______________" << std::endl;
   std::cout << "\tnum_vols is " << num_vols << std::endl;
   ErrorCode ret;
@@ -90,13 +93,13 @@ void fludagwrite_assignma(Interface* mbi, std::string filename_to_write)  // fil
   int id;
 
   std::vector< std::string > keywords;
-  ret = myClass.detect_available_props( mbi, keywords );
+  ret = recordInfo.detect_available_props( mbi, keywords );
 
   // parse data from geometry so that property can be found
-  ret = myClass.parse_properties( mbi, keywords );
+  ret = recordInfo.parse_properties( mbi, keywords );
   if (MB_SUCCESS != ret) 
   {
-    std::cerr << "DAGMC failed to parse metadata properties" <<  std::endl;
+    std::cerr << "Failed to parse metadata properties" <<  std::endl;
     exit(EXIT_FAILURE);
   }
 
@@ -113,8 +116,7 @@ void fludagwrite_assignma(Interface* mbi, std::string filename_to_write)  // fil
   {
      
       std::string props = mat_property_string(mbi, i, keywords);
-      // id = DAG->id_by_index(3, i);
-      id = myClass.id_by_index(mbi, 3, i);
+      id = recordInfo.id_by_index(mbi, 3, i);
       if (props.length()) 
       {
          std::cout << "Vol " << i << ", id=" << id << ": parsed props: " << props << std::endl; 
@@ -150,25 +152,25 @@ void fludagwrite_assignma(Interface* mbi, std::string filename_to_write)  // fil
   for (unsigned int i=1; i<=num_vols ; i++)
   {  
       vals.clear();
-      entity = myClass.entity_by_index(3, i);
+      entity = recordInfo.entity_by_index(3, i);
 
       // Create the id-index string for this vol
       addToIDIndexFile(mbi, i, idstr);
 
       // Create the mat.inp string for this vol
-      if (myClass.has_prop(mbi, entity, "graveyard"))
+      if (recordInfo.has_prop(mbi, entity, "graveyard"))
       {
 	 graveyard_str << std::setw(10) << std::left  << "ASSIGNMAt";
 	 graveyard_str << std::setw(10) << std::right << "BLCKHOLE";
 	 graveyard_str << std::setw(10) << std::right << i << std::endl;
       }
-      if (myClass.has_prop(mbi, entity, "M"))
+      if (recordInfo.has_prop(mbi, entity, "M"))
       {
-         myClass.prop_values(mbi, entity, "M", vals);
+         recordInfo.prop_values(mbi, entity, "M", vals);
 
          process_Mi(mbi, A_filestr, entity, uniqueMatList, i);
       } // end processing of "M_" property
-      if (myClass.has_prop(mbi, entity, "S"))
+      if (recordInfo.has_prop(mbi, entity, "S"))
       {
          process_Si(mbi, entity, i);
       } // end processing of "S_" property
@@ -377,13 +379,13 @@ double measurementOfVol(moab::Interface* mbi, int iVol)
    ErrorCode ret;
 
    // Calculate some things we'll need that are based on the volume id 
-   EntityHandle handle = myClass.entity_by_id(mbi, 3, iVol);
+   EntityHandle handle = recordInfo.entity_by_id(mbi, 3, iVol);
 
    double measurement;
-   ret = myClass.measure_volume(mbi, handle, measurement);
+   ret = recordInfo.measure_volume(mbi, handle, measurement);
    if (MB_SUCCESS != ret) 
    {
-      std::cerr << "DAGMC failed to get the measured volume of region " <<  iVol <<  std::endl;
+      std::cerr << "Failed to get the measured volume of region " <<  iVol <<  std::endl;
       measurement = -1.0;
    }
    return measurement; 
@@ -523,10 +525,10 @@ void process_Si(Interface* mbi, EntityHandle entity, unsigned int vol_id)
     std::vector<std::string> vals;
 
     // We only get here if has_prop(... "S" ...) is true
-    ret = myClass.prop_values(mbi, entity, "S", vals);
+    ret = recordInfo.prop_values(mbi, entity, "S", vals);
     if (MB_SUCCESS != ret) 
     {
-       std::cerr << "DAGMC failed to get S_ properties" <<  std::endl;
+       std::cerr << "Failed to get S_ properties" <<  std::endl;
        return;
     }
     for (int i=0; i<vals.size(); i++) 
@@ -616,10 +618,10 @@ void process_Mi(Interface* mbi, std::ostringstream& ostr,
     char buffer[MAX_MATERIAL_NAME_SIZE];
     std::string material_trunc;
 
-    ret = myClass.prop_values(mbi, entity, "M", vals);
+    ret = recordInfo.prop_values(mbi, entity, "M", vals);
     if (MB_SUCCESS != ret) 
     {
-       std::cerr << "DAGMC failed to get M_ properties" <<  std::endl;
+       std::cerr << "Failed to get M_ properties" <<  std::endl;
        return;
     }
 
@@ -657,7 +659,7 @@ void process_Mi(Interface* mbi, std::ostringstream& ostr,
 void addToIDIndexFile(moab::Interface* mbi, int i, std::ostringstream &idstr)
 {
       idstr << std::setw(5) << std::right << i;
-      idstr << std::setw(5) << std::right << myClass.id_by_index(mbi, 3,i) << std::endl;
+      idstr << std::setw(5) << std::right << recordInfo.id_by_index(mbi, 3,i) << std::endl;
 }
 //---------------------------------------------------------------------------//
 // writeStringToFile
@@ -681,15 +683,15 @@ std::string mat_property_string (moab::Interface* mbi, int index, std::vector<st
 {
   ErrorCode ret;
   std::string propstring;
-  EntityHandle entity = myClass.entity_by_index(3,index);
-  int id = myClass.id_by_index(mbi, 3, index);
+  EntityHandle entity = recordInfo.entity_by_index(3,index);
+  int id = recordInfo.id_by_index(mbi, 3, index);
   for (std::vector<std::string>::iterator p = properties.begin(); p != properties.end(); ++p)
   {
-     if ( myClass.has_prop(mbi, entity, *p) )
+     if ( recordInfo.has_prop(mbi, entity, *p) )
      {
         std::vector<std::string> vals;
-        ret = myClass.prop_values(mbi, entity, *p, vals);
-        // CHECKERR(*DAG, ret);
+        ret = recordInfo.prop_values(mbi, entity, *p, vals);
+        CHECKERR(mbi, ret);
         propstring += *p;
         if (vals.size() == 1)
         {

@@ -31,20 +31,20 @@ extern "C"
 { 
   void flukam(const int &GeoFlag);
 }
-
+// This has been modified so that all runs are now fluka runs.  
+// Getting the geometry out of the file is done by dagmc_define
 int main(int argc, char* argv[]) 
 {
-  bool flukarun = false;
   MBErrorCode error;
   time_t time_before,time_after;
 
   // Default h5m filename is for fluka runs
-  std::string infile = "dagmc.h5m"; // used to be test.h5m should be dagmc.h5m
+  std::string infile = "dagmc.h5m"; 
  
-  if ( argc == 1 ) // then its a fluka run
+  if ( argc >= 1 ) // then its a fluka run
     {
-      infile = "../"+infile; // fluka create a run directory one higher than where we launch
-      flukarun = true;
+      // fluka creates a run dir one lvl higher 
+      infile = "../"+infile; 
     }
   else if ( argc > 2 )
     {
@@ -53,22 +53,18 @@ int main(int argc, char* argv[])
       std::cout << "too many arguments provided" << std::endl;
       exit(1);
     }
-  else // its a pre process run
-    {
-      infile = argv[1]; // must be the 2nd argument
-    }
+//  else // its a pre process run
+//    {
+//      infile = argv[1]; // must be the 2nd argument
+//    }
 
 
   std::ifstream h5mfile (infile.c_str()); // filestream for mesh geom
-  if ( h5mfile.good() )
-    {
-      // ok
-    }
-  else // file not ok
-    {
+  if ( !h5mfile.good() )
+  {
       std::cout << "h5m file does not exist" << std::endl;
       exit(1);
-    }
+  }
 
   int max_pbl = 1;
 
@@ -76,7 +72,7 @@ int main(int argc, char* argv[])
   time(&time_before);  /* get current time; same as: timer = time(NULL)  */
 
 
-  // load the dag file
+  // DAG call to load the file
   std::cout << "Loading the faceted geometry file " << infile << "..." << std::endl;
   error = DAG->load_file(infile.c_str(), 0.0 ); // load the dag file takeing the faceting from h5m
   if ( error != MB_SUCCESS ) 
@@ -93,7 +89,7 @@ int main(int argc, char* argv[])
   
   std::cout << "Time to load the h5m file = " << seconds << " seconds" << std::endl;
 
-  // initialize geometry
+  // DAG call to initialize geometry
   error = DAG->init_OBBTree();
   if ( error != MB_SUCCESS ) 
     {
@@ -106,20 +102,9 @@ int main(int argc, char* argv[])
   seconds = difftime(time_after,time_before);
   std::cout << "Time to initialise the geometry" << seconds << std::endl;
 
-  // if fluka preprocess run then create mat file to paste into input deck
-  if (!flukarun)
-    {
-      std::string lcad = "mat.inp";
-      fludagwrite_assignma(lcad);
-      std::cout << "Producing material snippets" << std::endl;
-      std::cout << "please paste these into your input deck" << std::endl;
-    }
-  else // call fluka run
-    {
-      // flugg mode is flag = 1
-       const int flag = 1;
-       flukam(flag);
-    }
+  // flugg mode is flag = 1
+  const int flag = 1;
+  flukam(flag);
 
   return 0;
 }
