@@ -48,7 +48,8 @@ def test_write_fluxin_single():
         expected = f.readlines()
 
     assert_equal(written, expected)
-    os.remove(output)
+    if os.path.isfile(output):
+        os.remove(output)
 
 def test_write_fluxin_multiple():
     """This function tests the flux_mesh_to_fluxin function for a multiple 
@@ -78,7 +79,8 @@ def test_write_fluxin_multiple():
         expected = f.readlines()
 
     assert_equal(written, expected)
-    os.remove(output)
+    if os.path.isfile(output):
+        os.remove(output)
 
     # test reverse writting
     flux_mesh_to_fluxin(flux_mesh, "flux", output_name, True)
@@ -90,6 +92,8 @@ def test_write_fluxin_multiple():
         expected = f.readlines()
 
     assert_equal(written, expected)
+    if os.path.isfile(output):
+        os.remove(output)
 
 def test_photon_source_to_hdf5():
     filename = os.path.join(thisdir, "files_test_alara", "phtn_src") 
