@@ -18,7 +18,8 @@ except ImportError:
     pass
 
 from pyne.mesh import Mesh, StatMesh, MeshError
-from pyne.alara import flux_mesh_to_fluxin, photon_source_to_hdf5
+from pyne.alara import flux_mesh_to_fluxin, photon_source_to_hdf5, \
+    photon_source_h5_to_mesh
 
 thisdir = os.path.dirname(__file__)
 
@@ -122,4 +123,23 @@ def test_photon_source_to_hdf5():
         os.remove(filename + '.h5')
 
 def test_photon_source_h5_to_mesh():
-    pass
+    filename = os.path.join(thisdir, "files_test_alara", "phtn_src") 
+    photon_source_to_hdf5(filename, chunkshape=(10,))
+    assert_true(os.path.exists(filename + '.h5'))
+
+    mesh = Mesh(structured=True, 
+                structured_coords=[[0, 1, 2], [0, 1, 2], [0, 1]])
+
+    tags = {('h-1', 'shutdown') : 'tag1', ('TOTAL', '1 h') : 'tag2'}
+    photon_source_h5_to_mesh(filename + '.h5', mesh, tags)
+
+    tag1_answers = [[0] * 42, [0] * 42, [0] * 42, [0] * 42] 
+    tag2_answers = [[0] * 42, [0] * 42, [0] * 42, [0] * 42] 
+
+    ves = list(mesh.structured_iterate_hex("xyz"))
+    for i, ve in enumerate(ves):
+	assert_array_equal(mesh.mesh.getTagHandle("tag1")[ve], tag1_answers[i])
+        assert_array_equal(mesh.mesh.getTagHandle("tag2")[ve], tag2_answers[i])
+
+    if os.path.isfile(filename + '.h5'):
+        os.remove(filename + '.h5')
