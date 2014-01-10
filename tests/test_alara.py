@@ -120,3 +120,6 @@ def test_photon_source_to_hdf5():
 
     if os.path.isfile(filename + '.h5'):
         os.remove(filename + '.h5')
+
+def test_photon_source_h5_to_mesh():
+    pass
