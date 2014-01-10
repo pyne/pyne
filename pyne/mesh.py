@@ -14,6 +14,7 @@ except ImportError:
 
 from .material import Material, MaterialLibrary
 
+
 # dictionary of lamba functions for mesh arithmetic
 _ops = {"+": lambda val_1, val_2: (val_1 + val_2), 
         "-": lambda val_1, val_2: (val_1 - val_2),
@@ -488,7 +489,7 @@ class MeshError(Exception):
     pass
 
 class Mesh(object):        
-    """This class houses any iMesh instance and contains methods for various mesh
+    """This class houses an iMesh instance and contains methods for various mesh
     operations. Special methods exploit the properties of structured mesh.
 
     Attributes
@@ -530,7 +531,6 @@ class Mesh(object):
 
     """
 
-    
 
     def __init__(self, mesh=None, mesh_file=None, structured=False, \
                  structured_coords=None, structured_set=None, mats=None):
@@ -700,9 +700,10 @@ class Mesh(object):
             value = type(value)(**kwargs)
         super(Mesh, self).__setattr__(name, value)
 
-    def tag(self, name, value=None, tagtype=None, doc=None, size=None, dtype=None):
-        """Adds a new tag to the mesh, guessing the approriate place to store the
-        data.
+    def tag(self, name, value=None, tagtype=None, doc=None, size=None,
+            dtype=None):
+        """Adds a new tag to the mesh, guessing the approriate place to store
+        the data.
 
         Parameters
         ----------
@@ -860,6 +861,35 @@ class Mesh(object):
         mesh_copy = Mesh(mesh=imesh_copy, structured=copy.copy(self.structured))
         return mesh_copy
 
+
+    # Non-structured volume methods
+    def elem_volume(self, ve):
+        """Get the volume of a hexahedral or tetrahedral volume element
+
+        Approaches are adapted from MOAB's measure.cpp.
+
+        Parameters
+        ----------
+        ve : iMesh.Mesh.EntitySet
+            A volume element
+
+        Returns
+        -------
+        .. : float
+            Element's volume. Returns None if volume is not a hex or tet.
+        """
+        coord = self.mesh.getVtxCoords(
+                self.mesh.getEntAdj(ve, iBase.Type.vertex))
+        if len(coord) == 4:
+            return abs(np.linalg.det(coord[:-1] - coord[1:])) / 6.0
+        elif len(coord) == 8:
+            b = coord[np.array([[0, 1, 3, 4], [7, 3, 6, 4], [4, 5, 1, 6],
+                                [1, 6, 3, 4], [2, 6, 3, 1]])]
+            return np.sum(np.abs(np.linalg.det(b[:, :-1] - b[:, 1:]))) / 6.0
+        else:
+            return None
+
+
     #Structured methods:
     def structured_get_vertex(self, i, j, k):
         """Return the handle for (i,j,k)'th vertex in the mesh"""
@@ -879,9 +909,9 @@ class Mesh(object):
                                  iMesh.Topology.hexahedron), n)
 
 
-    def structured_get_hex_volume(self, i, j, k):
-        self._structured_check()
+    def structured_hex_volume(self, i, j, k):
         """Return the volume of the (i,j,k)'th hexahedron in the mesh"""
+        self._structured_check()
         v = list(self.structured_iterate_vertex(x=[i, i + 1],
                                  y=[j, j + 1],
                                  z=[k, k + 1]))
@@ -917,14 +947,16 @@ class Mesh(object):
 
         Examples::
 
-          structured_iterate_hex(): equivalent to iMesh iterator over hexes in mesh
-          structured_iterate_hex("xyz"): iterate over entire mesh, with k-coordinates
-                                         changing fastest, i-coordinates least fast.
-          structured_iterate_hex("yz", x=3): Iterate over the j-k plane of the mesh
-                                             whose i-coordinate is 3, with k values
-                                             changing fastest.
-          structured_iterate_hex("z"): Iterate over k-coordinates, with i=dims.imin
-                             and j=dims.jmin
+          structured_iterate_hex(): equivalent to iMesh iterator over hexes
+                                    in mesh
+          structured_iterate_hex("xyz"): iterate over entire mesh, with
+                                         k-coordinates changing fastest,
+                                         i-coordinates least fast.
+          structured_iterate_hex("yz", x=3): Iterate over the j-k plane of the
+                                             mesh whose i-coordinate is 3, with
+                                             k values changing fastest.
+          structured_iterate_hex("z"): Iterate over k-coordinates, with
+                                       i=dims.imin and j=dims.jmin
           structured_iterate_hex("yxz", y=(3,4)): Iterate over all hexes with
                                         j-coordinate = 3 or 4.  k-coordinate
                                         values change fastest, j-values least
@@ -948,8 +980,8 @@ class Mesh(object):
     def structured_iterate_vertex(self, order="zyx", **kw):
         """Get an iterator over the vertices of the mesh
 
-        See structured_iterate_hex() for an explanation of the order argument and the
-        available keyword arguments.
+        See structured_iterate_hex() for an explanation of the order argument
+        and the available keyword arguments.
         """
         self._structured_check()
         #special case: zyx order without kw is equivalent to pytaps iterator
@@ -966,12 +998,12 @@ class Mesh(object):
     def structured_iterate_hex_volumes(self, order="zyx", **kw):
         """Get an iterator over the volumes of the mesh hexahedra
 
-        See structured_iterate_hex() for an explanation of the order argument and the
-        available keyword arguments.
+        See structured_iterate_hex() for an explanation of the order argument
+        and the available keyword arguments.
         """
         self._structured_check()
         indices, _ = _structured_iter_setup(self.dims, order, **kw)
-        # Use an inefficient but simple approach: call structured_get_hex_volume()
+        # Use an inefficient but simple approach: call structured_hex_volume()
         # on each required i,j,k pair.  
         # A better implementation would only make one call to getVtxCoords.
         for A in itertools.product(*indices):
@@ -979,7 +1011,7 @@ class Mesh(object):
             # but we want ijk/xyz ordering, so create the ordmap differently.
             ordmap = [order.find(L) for L in "xyz"]
             ijk = [A[ordmap[x]] for x in range(3)]
-            yield self.structured_get_hex_volume(*ijk)
+            yield self.structured_hex_volume(*ijk)
 
 
     def structured_get_divisions(self, dim):
@@ -1030,7 +1062,8 @@ def _structured_find_idx(dims, ijk):
 def _structured_step_iter(it, n):
     """Helper method for structured_get_vertex and structured_get_hex
 
-    Return the nth item in the iterator."""
+    Return the nth item in the iterator.
+    """
     it.step(n)
     r = it.next()
     it.reset()
@@ -1042,8 +1075,8 @@ def _structured_iter_setup(dims, order, **kw):
 
     Given dims and the arguments to the iterator function, return
     a list of three lists, each being a set of desired coordinates,
-    with fastest-changing coordinate in the last column),
-    and the ordmap used by _structured_iter to reorder each coodinate to (i,j,k).
+    with fastest-changing coordinate in the last column), and the
+    ordmap used by _structured_iter to reorder each coodinate to (i,j,k).
     """
     # a valid order has the letters "x", "y", and "z"
     # in any order without duplicates
@@ -1081,7 +1114,8 @@ def _structured_iter_setup(dims, order, **kw):
 
 
 def _structured_iter(indices, ordmap, dims, it):
-    """Iterate over the indices lists, yielding _structured_step_iter(it) for each.
+    """Iterate over the indices lists, yielding _structured_step_iter(it) for
+    each.
     """
     d = [0, 0, 1]
     d[1] = (dims[3] - dims[0])
@@ -1103,8 +1137,8 @@ class StatMesh(Mesh):
               structured_set=structured_set)
 
     def _do_op(self, other, tags, op, in_place=True):
-        """Private function to do mesh +, -, *, /. Called by operater overloading
-        functions.
+        """Private function to do mesh +, -, *, /. Called by operater
+        overloading functions.
         """
         # Exclude error tags because result and error tags are treated simotaneously
         # so there is not need to include both in the tag list to iterate through.
