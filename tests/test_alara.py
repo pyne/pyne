@@ -19,7 +19,7 @@ except ImportError:
 
 from pyne.mesh import Mesh, StatMesh, MeshError
 from pyne.alara import flux_mesh_to_fluxin, photon_source_to_hdf5, \
-    photon_source_h5_to_mesh
+    photon_source_hdf5_to_mesh
 
 thisdir = os.path.dirname(__file__)
 
@@ -111,9 +111,8 @@ def test_photon_source_to_hdf5():
         count = 0
         for i, row in enumerate(obs):
             ls = lines[i].strip().split('\t')
-            if i != 0:
-                if ls[0]  != 'TOTAL' and \
-                    lines[i-1].strip().split('\t')[0] == 'TOTAL':
+            if ls[0]  != 'TOTAL' and lines[i-1].strip().split('\t')[0] == 'TOTAL':
+                if i != 0:
                     count += 1
 
             assert_equal(count, row['ve_idx'])
@@ -124,7 +123,7 @@ def test_photon_source_to_hdf5():
     if os.path.isfile(filename + '.h5'):
         os.remove(filename + '.h5')
 
-def test_photon_source_h5_to_mesh():
+def test_photon_source_hdf5_to_mesh():
     """Tests the function photon source_h5_to_mesh"""
 
     filename = os.path.join(thisdir, "files_test_alara", "phtn_src") 
@@ -135,7 +134,7 @@ def test_photon_source_h5_to_mesh():
                 structured_coords=[[0, 1, 2], [0, 1, 2], [0, 1]])
 
     tags = {('h-1', 'shutdown') : 'tag1', ('TOTAL', '1 h') : 'tag2'}
-    photon_source_h5_to_mesh(filename + '.h5', mesh, tags)
+    photon_source_hdf5_to_mesh(mesh, filename + '.h5', tags)
 
     # create lists of lists of expected results
     tag1_answers = [[1] + [0] * 41, [2] + [0] * 41, 
