@@ -104,11 +104,19 @@ def test_photon_source_to_hdf5():
         obs = h5f.root.data[:]
     
     with open(filename, 'r') as f:
-        for line, row in zip(f, obs):
-            ls = line.strip().split('\t')
+        lines = f.readlines()
+        count = 0
+        for i, row in enumerate(obs):
+            ls = lines[i].strip().split('\t')
+            if i != 0:
+                if ls[0]  != 'TOTAL' and \
+                    lines[i-1].strip().split('\t')[0] == 'TOTAL':
+                    count += 1
+
+            assert_equal(count, row['ve_idx'])
             assert_equal(ls[0].strip(), row['nuc'])
             assert_equal(ls[1].strip(), row['time'])
             assert_array_equal(np.array(ls[2:], dtype=np.float64), row['phtn_src'])
-    
+
     if os.path.isfile(filename + '.h5'):
         os.remove(filename + '.h5')
