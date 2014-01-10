@@ -167,30 +167,33 @@ def photon_source_h5_to_mesh(photon_source_h5, mesh, tags):
         tags = {('u-235', 'shutdown') : 'tag1', ('TOTAL', '1, h') : 'tag2'}
     """
     
-    if mesh.structured:
-        ves = list(mesh.structured_iterate_hex("xyz"))
-    else:
-        ves = list(mesh.imesh.iterate(iBase.Type.region, iMesh.Topology.all))
 
     # find number of energy groups
     with tb.openFile(photon_source_h5) as h5f:
-         num_e_groups = len(h5f.root.data[0][3]) - 3
+         num_e_groups = len(h5f.root.data[0][3])
 
     # create a dict of tag handles for all keys of the tags dict
     tag_handles ={}
     for tag_name in tags.values():
-        tag_handles[tag_name] = mesh.imesh.createTag(tag_name, num_e_groups, float)
+        tag_handles[tag_name] = mesh.mesh.createTag(tag_name, num_e_groups, float)
 
     for cond in tags.keys():
-        with tb.openFile("phtn_src.h5") as h5f:
+        with tb.openFile(photon_source_h5) as h5f:
             matched_data = h5f.root.data.readWhere(
-                           "(nuc == '{0}') & (time = '{1}')".format(cond[0], cond[1]))
+                           "(nuc == '{0}') & (time == '{1}')".format(cond[0], cond[1]))
+
+        if mesh.structured:
+            ves = mesh.structured_iterate_hex("xyz")
+        else:
+            ves = mesh.imesh.iterate(iBase.Type.region, iMesh.Topology.all)
 
         idx = 0
-        for i, ve in enumerate(ves):
+        for i, ve in enumerate(list(ves)):
+            print(cond, "hello")
+            print(idx)
+            print(matched_data[idx][0])
             if matched_data[idx][0] == i:
-                tag_handles[tags[cond]][ve] = matched_data[idx]
+                tag_handles[tags[cond]][ve] = matched_data[idx][3]
                 idx += 1
             else:
                 tag_handles[tags[cond]][ve] = [0] * num_e_groups
-
