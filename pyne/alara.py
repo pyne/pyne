@@ -118,13 +118,14 @@ def photon_source_to_hdf5(filename, chunkshape=(10000,)):
     chunksize = chunkshape[0]
     rows = np.empty(chunksize, dtype=dt)
     ve_idx = 0
+    old = ""
     for i, line in enumerate(f, 1):
         ls = line.strip().split('\t')
 
         # Keep track of the ve_idx by delimiting by the last TOTAL line in a
         # volume element.
-        if i != 1:
-            if ls[0]  != 'TOTAL' and old == 'TOTAL':
+        if ls[0]  != 'TOTAL' and old == 'TOTAL':
+            if i != 1:
                 ve_idx += 1
 
         j = (i-1)%chunksize
@@ -142,7 +143,7 @@ def photon_source_to_hdf5(filename, chunkshape=(10000,)):
     h5f.close()
     f.close()
 
-def photon_source_h5_to_mesh(photon_source_h5, mesh, tags):
+def photon_source_hdf5_to_mesh(mesh, filename, tags):
     """This function reads in an h5 file produced by photon_source_to_hdf5 and
     tags the requested data to the mesh of a PyNE Mesh object. Any combinations
     of isotopes and decay times are allowed. The photon source file is assumed
@@ -151,10 +152,10 @@ def photon_source_h5_to_mesh(photon_source_h5, mesh, tags):
 
     Parameters
     ----------
-    photon_source_h5 : str
-        The path of the hdf5 version of the photon source file.
     mesh : PyNE Mesh
        The object containing the imesh instance to be tagged.
+    filename : str
+        The path of the hdf5 version of the photon source file.
     tags: dict
         A dictionary were the keys are tuples with two values. The first is a
         string denoting an isotope as it appears in the photon source file
@@ -168,7 +169,7 @@ def photon_source_h5_to_mesh(photon_source_h5, mesh, tags):
         tags = {('u-235', 'shutdown') : 'tag1', ('TOTAL', '1 h') : 'tag2'}
     """
     # find number of energy groups
-    with tb.openFile(photon_source_h5) as h5f:
+    with tb.openFile(filename) as h5f:
          num_e_groups = len(h5f.root.data[0][3])
 
     # create a dict of tag handles for all keys of the tags dict
@@ -178,7 +179,7 @@ def photon_source_h5_to_mesh(photon_source_h5, mesh, tags):
 
     # iterate through each requested isotope/dectay time
     for cond in tags.keys():
-        with tb.openFile(photon_source_h5) as h5f:
+        with tb.openFile(filename) as h5f:
             matched_data = h5f.root.data.readWhere(
                            "(nuc == '{0}') & (time == '{1}')".format(cond[0], cond[1]))
 
