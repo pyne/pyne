@@ -126,17 +126,17 @@ def test_structured_hex_volume():
 
     sm = Mesh(structured_coords = [[0,1,3], [-3,-2,0], [12,13,15]], 
               structured=True)
-    assert_equal(sm.structured_get_hex_volume(0,0,0), 1)
-    assert_equal(sm.structured_get_hex_volume(1,0,0), 2)
-    assert_equal(sm.structured_get_hex_volume(0,1,0), 2)
-    assert_equal(sm.structured_get_hex_volume(1,1,0), 4)
-    assert_equal(sm.structured_get_hex_volume(1,1,1), 8)
+    assert_equal(sm.structured_hex_volume(0,0,0), 1)
+    assert_equal(sm.structured_hex_volume(1,0,0), 2)
+    assert_equal(sm.structured_hex_volume(0,1,0), 2)
+    assert_equal(sm.structured_hex_volume(1,1,0), 4)
+    assert_equal(sm.structured_hex_volume(1,1,1), 8)
 
     ijk_all = itertools.product(*([[0,1]]*3))
 
     for V, ijk in itertools.izip_longest(sm.structured_iterate_hex_volumes(), 
                                          ijk_all):
-        assert_equal(V, sm.structured_get_hex_volume(*ijk))
+        assert_equal(V, sm.structured_hex_volume(*ijk))
 
 
 def test_structured_get_vertex():

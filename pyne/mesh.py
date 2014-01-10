@@ -866,6 +866,8 @@ class Mesh(object):
     def elem_volume(self, ve):
         """Get the volume of a hexahedral or tetrahedral volume element
 
+        Approaches are adapted from MOAB's measure.cpp.
+
         Parameters
         ----------
         ve : iMesh.Mesh.EntitySet
@@ -879,39 +881,13 @@ class Mesh(object):
         coord = self.mesh.getVtxCoords(
                 self.mesh.getEntAdj(ve, iBase.Type.vertex))
         if len(coord) == 4:
-            return self._calc_tet_volume(coord)
+            return abs(np.linalg.det(coord[:-1] - coord[1:])) / 6.0
         elif len(coord) == 8:
-            return self._calc_tet_volume(
-                           [coord[0], coord[1], coord[3], coord[4]]) + \
-                   self._calc_tet_volume(
-                           [coord[7], coord[3], coord[6], coord[4]]) + \
-                   self._calc_tet_volume(
-                           [coord[4], coord[5], coord[1], coord[6]]) + \
-                   self._calc_tet_volume(
-                           [coord[1], coord[6], coord[3], coord[4]]) + \
-                   self._calc_tet_volume(
-                           [coord[2], coord[6], coord[3], coord[1]])
+            b = coord[np.array([[0, 1, 3, 4], [7, 3, 6, 4], [4, 5, 1, 6],
+                                [1, 6, 3, 4], [2, 6, 3, 1]])]
+            return np.sum(np.abs(np.linalg.det(b[:, :-1] - b[:, 1:]))) / 6.0
         else:
             return None
-
-
-    def _calc_tet_volume(self, coord):
-        """Calculate volume of a tetrahedral volume given four coordinates
-
-        Parameters
-        ----------
-        coord : list of lists of floats
-            List of four lists, each of which is a coordinate triplet.
-            Triplets are of form (x,y,z).
-
-        Returns
-        -------
-        .. : float
-            Tetrahedron's volume
-        """
-        return abs(np.linalg.det([coord[0]-coord[1],
-                        coord[1]-coord[2],
-                        coord[2]-coord[3]])) / 6.0
 
 
     #Structured methods:
@@ -933,7 +909,7 @@ class Mesh(object):
                                  iMesh.Topology.hexahedron), n)
 
 
-    def structured_get_hex_volume(self, i, j, k):
+    def structured_hex_volume(self, i, j, k):
         """Return the volume of the (i,j,k)'th hexahedron in the mesh"""
         self._structured_check()
         v = list(self.structured_iterate_vertex(x=[i, i + 1],
@@ -1027,7 +1003,7 @@ class Mesh(object):
         """
         self._structured_check()
         indices, _ = _structured_iter_setup(self.dims, order, **kw)
-        # Use an inefficient but simple approach: call structured_get_hex_volume()
+        # Use an inefficient but simple approach: call structured_hex_volume()
         # on each required i,j,k pair.  
         # A better implementation would only make one call to getVtxCoords.
         for A in itertools.product(*indices):
@@ -1035,7 +1011,7 @@ class Mesh(object):
             # but we want ijk/xyz ordering, so create the ordmap differently.
             ordmap = [order.find(L) for L in "xyz"]
             ijk = [A[ordmap[x]] for x in range(3)]
-            yield self.structured_get_hex_volume(*ijk)
+            yield self.structured_hex_volume(*ijk)
 
 
     def structured_get_divisions(self, dim):
