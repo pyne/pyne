@@ -17,7 +17,7 @@ cimport numpy as np
 import numpy as np
 
 # local imports
-cimport cpp_material
+from pyne cimport cpp_material
 cimport pyne.stlcontainers as conv
 import pyne.stlcontainers as conv
 

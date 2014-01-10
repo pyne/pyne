@@ -1,6 +1,8 @@
 """This module contains functions relevant to the ALARA activation code.
 """
+from __future__ import print_function
 import numpy as np
+import tables as tb
 
 try:
     from itaps import iMesh, iBase, iMeshExtensions
@@ -13,7 +15,7 @@ from mesh import Mesh, MeshError
 def flux_mesh_to_fluxin(flux_mesh, flux_tag, fluxin="fluxin.out", 
                         reverse=False):
     """This function creates an ALARA fluxin file from fluxes tagged on a PyNE
-    Mesh object. Structured meshes are printed in zyx order (z changes fastest)
+    Mesh object. Structured meshes are printed in xyz order (z changes fastest)
     and unstructured meshes are printed in the imesh.iterate() order.
 
     Parameters
@@ -32,7 +34,7 @@ def flux_mesh_to_fluxin(flux_mesh, flux_tag, fluxin="fluxin.out",
     tag_flux = flux_mesh.mesh.getTagHandle(flux_tag)
 
     if flux_mesh.structured:
-        ves = flux_mesh.structured_iterate_hex("zyx")
+        ves = flux_mesh.structured_iterate_hex("xyz")
     else:
         ves = flux.mesh.mesh.iterate(iBase.Type.region, iMesh.Toplogy.all)
 
@@ -70,3 +72,45 @@ def flux_mesh_to_fluxin(flux_mesh, flux_tag, fluxin="fluxin.out",
 
     with open(fluxin, "w") as f:
         f.write(output)
+
+def photon_source_to_hdf5(filename, chunkshape=(10000,)):
+    """Converts a plaintext photon source file to an HDF5 version for 
+    quick later use.
+
+    Parameters
+    ----------
+    filename : str
+        The path to the file
+    chunkshape : tuple of int
+        A 1D tuple of the HDF5 chunkshape.
+
+    """
+    f = open(filename, 'r')
+    header = f.readline().strip().split('\t')
+    f.seek(0)
+    G = len(header) - 2
+
+    dt = np.dtype([
+        ('nuc', 'S6'),
+        ('time', 'S20'),
+        ('phtn_src', np.float64, G),
+        ])
+
+    filters = tb.Filters(complevel=1, complib='zlib')
+    h5f = tb.openFile(filename + '.h5', 'w', filters=filters)
+    tab = h5f.createTable('/', 'data', dt, chunkshape=chunkshape)
+
+    chunksize = chunkshape[0]
+    rows = np.empty(chunksize, dtype=dt)
+    for i, line in enumerate(f, 1):
+        ls = line.strip().split('\t')
+        j = (i-1)%chunksize
+        rows[j] = (ls[0].strip(), ls[1].strip(), np.array(ls[2:], dtype=np.float64))
+        if i%chunksize == 0:
+            tab.append(rows)
+            rows = np.empty(chunksize, dtype=dt)
+    if i%chunksize != 0:
+        tab.append(rows[:j+1])
+
+    h5f.close()
+    f.close()
