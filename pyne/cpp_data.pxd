@@ -1,4 +1,4 @@
-"""C++ wrapper for nucname library."""
+"""C++ wrapper for data library."""
 from libcpp.string cimport string as std_string
 from libcpp.map cimport map
 from libcpp.set cimport set
