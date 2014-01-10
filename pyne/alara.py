@@ -86,11 +86,12 @@ def photon_source_to_hdf5(filename, chunkshape=(10000,)):
 
     Output
     ------
-    A single HDF5 file named filename.h5 containg the table headings:
+    A single HDF5 file named <filename>.h5 containing the table headings:
 
     ve_idx : int
         The volume element index assuming the volume elements appear in xyz
-        order (z changing fastest).
+        order (z changing fastest) within the photon source file in the case of
+        a structured mesh or imesh.iterate() order for an unstructured mesh.
     nuc : str
         The nuclide name as it appears in the photon source file.
     time : str
@@ -156,18 +157,16 @@ def photon_source_h5_to_mesh(photon_source_h5, mesh, tags):
        The object containing the imesh instance to be tagged.
     tags: dict
         A dictionary were the keys are tuples with two values. The first is a
-        string denoting an isotope as it appears in the photon source file.
+        string denoting an isotope as it appears in the photon source file
         (e.g. 'h-1', 'u-235', 'TOTAL'). The second is a string denoting the 
         decay time as it appears in the file (e.g. 'shutdown', '1 h' '3 d'. The
-        values are the requested tag names for the combination of isotope and
-        decay time. For example if one wanted tags for the photon source
-        densities from U235 at shutdown and from all isotopes at 1 hour, the
-        dictionary would be:
+        values of the dictionary are the requested tag names for the combination
+        of isotope and decay time. For example if one wanted tags for the photon
+        source densities from U235 at shutdown and from all isotopes at 1 hour, 
+        the dictionary would be:
 
-        tags = {('u-235', 'shutdown') : 'tag1', ('TOTAL', '1, h') : 'tag2'}
+        tags = {('u-235', 'shutdown') : 'tag1', ('TOTAL', '1 h') : 'tag2'}
     """
-    
-
     # find number of energy groups
     with tb.openFile(photon_source_h5) as h5f:
          num_e_groups = len(h5f.root.data[0][3])
@@ -177,6 +176,7 @@ def photon_source_h5_to_mesh(photon_source_h5, mesh, tags):
     for tag_name in tags.values():
         tag_handles[tag_name] = mesh.mesh.createTag(tag_name, num_e_groups, float)
 
+    # iterate through each requested isotope/dectay time
     for cond in tags.keys():
         with tb.openFile(photon_source_h5) as h5f:
             matched_data = h5f.root.data.readWhere(
@@ -189,9 +189,6 @@ def photon_source_h5_to_mesh(photon_source_h5, mesh, tags):
 
         idx = 0
         for i, ve in enumerate(list(ves)):
-            print(cond, "hello")
-            print(idx)
-            print(matched_data[idx][0])
             if matched_data[idx][0] == i:
                 tag_handles[tags[cond]][ve] = matched_data[idx][3]
                 idx += 1
