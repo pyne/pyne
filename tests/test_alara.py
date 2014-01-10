@@ -97,6 +97,8 @@ def test_write_fluxin_multiple():
         os.remove(output)
 
 def test_photon_source_to_hdf5():
+    """Tests the function photon_source_to_hdf5.
+    """
     filename = os.path.join(thisdir, "files_test_alara", "phtn_src") 
     photon_source_to_hdf5(filename, chunkshape=(10,))
     assert_true(os.path.exists(filename + '.h5'))
@@ -123,6 +125,8 @@ def test_photon_source_to_hdf5():
         os.remove(filename + '.h5')
 
 def test_photon_source_h5_to_mesh():
+    """Tests the function photon source_h5_to_mesh"""
+
     filename = os.path.join(thisdir, "files_test_alara", "phtn_src") 
     photon_source_to_hdf5(filename, chunkshape=(10,))
     assert_true(os.path.exists(filename + '.h5'))
@@ -133,8 +137,11 @@ def test_photon_source_h5_to_mesh():
     tags = {('h-1', 'shutdown') : 'tag1', ('TOTAL', '1 h') : 'tag2'}
     photon_source_h5_to_mesh(filename + '.h5', mesh, tags)
 
-    tag1_answers = [[0] * 42, [0] * 42, [0] * 42, [0] * 42] 
-    tag2_answers = [[0] * 42, [0] * 42, [0] * 42, [0] * 42] 
+    # create lists of lists of expected results
+    tag1_answers = [[1] + [0] * 41, [2] + [0] * 41, 
+                    [3] + [0] * 41, [4] + [0] * 41] 
+    tag2_answers = [[5] + [0] * 41, [6] + [0] * 41, 
+                    [7] + [0] * 41, [8] + [0] * 41] 
 
     ves = list(mesh.structured_iterate_hex("xyz"))
     for i, ve in enumerate(ves):
