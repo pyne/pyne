@@ -131,7 +131,7 @@ def photon_source_to_hdf5(filename, chunkshape=(10000,)):
         j = (i-1)%chunksize
         rows[j] = (ve_idx, ls[0].strip(), ls[1].strip(), np.array(ls[2:], dtype=np.float64))
         # Save the nuclide in order to keep track of ve_idx
-        old = ls[0].strip()
+        old = ls[0]
 
         if i%chunksize == 0:
             tab.append(rows)
