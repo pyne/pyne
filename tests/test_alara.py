@@ -109,16 +109,17 @@ def test_photon_source_to_hdf5():
     with open(filename, 'r') as f:
         lines = f.readlines()
         count = 0
+        old = ""
         for i, row in enumerate(obs):
             ls = lines[i].strip().split('\t')
-            if ls[0]  != 'TOTAL' and lines[i-1].strip().split('\t')[0] == 'TOTAL':
-                if i != 0:
-                    count += 1
+            if ls[0]  != 'TOTAL' and old == 'TOTAL':
+                count += 1
 
             assert_equal(count, row['ve_idx'])
             assert_equal(ls[0].strip(), row['nuc'])
             assert_equal(ls[1].strip(), row['time'])
             assert_array_equal(np.array(ls[2:], dtype=np.float64), row['phtn_src'])
+            old = ls[0]
 
     if os.path.isfile(filename + '.h5'):
         os.remove(filename + '.h5')
