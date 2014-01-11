@@ -3,16 +3,19 @@
 from __future__ import print_function
 import numpy as np
 import tables as tb
+import warnings
 
 try:
     from itaps import iMesh, iBase, iMeshExtensions
 except ImportError:
     warnings.warn("the PyTAPS optional dependency could not be imported. "
-         "Some aspects of the alara module may be incomplete.", ImportWarning)
+                  "Some aspects of the alara module may be incomplete.",
+                  ImportWarning)
 
 from mesh import Mesh, MeshError
 
-def flux_mesh_to_fluxin(flux_mesh, flux_tag, fluxin="fluxin.out", 
+
+def flux_mesh_to_fluxin(flux_mesh, flux_tag, fluxin="fluxin.out",
                         reverse=False):
     """This function creates an ALARA fluxin file from fluxes tagged on a PyNE
     Mesh object. Structured meshes are printed in xyz order (z changes fastest)
@@ -40,8 +43,8 @@ def flux_mesh_to_fluxin(flux_mesh, flux_tag, fluxin="fluxin.out",
 
     # find number of e_groups
     e_groups = flux_mesh.mesh.getTagHandle(flux_tag)[list(
-                    flux_mesh.mesh.iterate(iBase.Type.region, 
-                                           iMesh.Topology.all))[0]]
+        flux_mesh.mesh.iterate(iBase.Type.region,
+                               iMesh.Topology.all))[0]]
     e_groups = np.atleast_1d(e_groups)
     num_e_groups = len(e_groups)
 
@@ -67,14 +70,15 @@ def flux_mesh_to_fluxin(flux_mesh, flux_tag, fluxin="fluxin.out",
             count += 1
             if count % 6 == 0:
                 output += "\n"
-    
+
         output += "\n\n"
 
     with open(fluxin, "w") as f:
         f.write(output)
 
+
 def photon_source_to_hdf5(filename, chunkshape=(10000,)):
-    """Converts a plaintext photon source file to an HDF5 version for 
+    """Converts a plaintext photon source file to an HDF5 version for
     quick later use.
 
     Parameters
@@ -104,12 +108,13 @@ def photon_source_to_hdf5(filename, chunkshape=(10000,)):
     rows = np.empty(chunksize, dtype=dt)
     for i, line in enumerate(f, 1):
         ls = line.strip().split('\t')
-        j = (i-1)%chunksize
-        rows[j] = (ls[0].strip(), ls[1].strip(), np.array(ls[2:], dtype=np.float64))
-        if i%chunksize == 0:
+        j = (i-1) % chunksize
+        rows[j] = (ls[0].strip(), ls[1].strip(),
+                   np.array(ls[2:], dtype=np.float64))
+        if i % chunksize == 0:
             tab.append(rows)
             rows = np.empty(chunksize, dtype=dt)
-    if i%chunksize != 0:
+    if i % chunksize != 0:
         tab.append(rows[:j+1])
 
     h5f.close()
