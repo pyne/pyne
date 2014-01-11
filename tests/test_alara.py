@@ -26,6 +26,10 @@ def test_write_fluxin_single():
     """This function tests the flux_mesh_to_fluxin function for a single energy
     group case.
     """
+
+    if not HAVE_PYTAPS:
+        raise SkipTest
+
     output_name = "fluxin.out"
     forward_fluxin = os.path.join(thisdir, 
                      "files_test_alara/fluxin_single_forward.txt")
@@ -55,6 +59,10 @@ def test_write_fluxin_multiple():
     """This function tests the flux_mesh_to_fluxin function for a multiple 
     energy group case.
     """
+
+    if not HAVE_PYTAPS:
+        raise SkipTest
+
     output_name = "fluxin.out"
     forward_fluxin = os.path.join(thisdir, 
                      "files_test_alara/fluxin_multiple_forward.txt")
