@@ -143,6 +143,9 @@ def test_photon_source_to_hdf5():
 def test_photon_source_hdf5_to_mesh():
     """Tests the function photon source_h5_to_mesh."""
 
+    if not HAVE_PYTAPS:
+        raise SkipTest
+
     filename = os.path.join(thisdir, "files_test_alara", "phtn_src")
     photon_source_to_hdf5(filename, chunkshape=(10,))
     assert_true(os.path.exists(filename + '.h5'))
