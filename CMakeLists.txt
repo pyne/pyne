@@ -33,6 +33,9 @@ find_package(PythonInterp REQUIRED)
 find_package(PythonLibsNew REQUIRED)
 message("-- PYTHON_EXECUTABLE: ${PYTHON_EXECUTABLE}")
 
+# Check for MOAB library
+find_package(MOAB)
+
 # Include the CMake script UseCython.cmake.  This defines add_cython_module().
 # Instruction for use can be found at the top of cmake/UseCython.cmake.
 include( UseCython )

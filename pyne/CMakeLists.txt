@@ -36,7 +36,6 @@ cython_add_module(_utils _utils.pyx)
 target_link_libraries(_utils pyne)
 
 # dagmc
-find_package(MOAB)
 if (MOAB_FOUND)
 set_source_files_properties(${PROJECT_SOURCE_DIR}/pyne/dagmc.pyx 
                             PROPERTIES CYTHON_IS_CXX TRUE)
