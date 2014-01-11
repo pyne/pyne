@@ -69,10 +69,10 @@ def test_write_fluxin_multiple():
         raise SkipTest
 
     output_name = "fluxin.out"
-    forward_fluxin = os.path.join(thisdir,
-                     "files_test_alara/fluxin_multiple_forward.txt")
-    reverse_fluxin = os.path.join(thisdir,
-                     "files_test_alara/fluxin_multiple_reverse.txt")
+    forward_fluxin = \
+        os.path.join(thisdir, "files_test_alara/fluxin_multiple_forward.txt")
+    reverse_fluxin = \
+        os.path.join(thisdir, "files_test_alara/fluxin_multiple_reverse.txt")
     output = os.path.join(os.getcwd(), output_name)
 
     flux_mesh = Mesh(structured=True,
@@ -113,7 +113,7 @@ def test_write_fluxin_multiple():
 def test_photon_source_to_hdf5():
     """Tests the function photon_source_to_hdf5.
     """
-    filename = os.path.join(thisdir, "files_test_alara", "phtn_src") 
+    filename = os.path.join(thisdir, "files_test_alara", "phtn_src")
     photon_source_to_hdf5(filename, chunkshape=(10,))
     assert_true(os.path.exists(filename + '.h5'))
 
@@ -126,40 +126,42 @@ def test_photon_source_to_hdf5():
         old = ""
         for i, row in enumerate(obs):
             ls = lines[i].strip().split('\t')
-            if ls[0]  != 'TOTAL' and old == 'TOTAL':
+            if ls[0] != 'TOTAL' and old == 'TOTAL':
                 count += 1
 
             assert_equal(count, row['ve_idx'])
             assert_equal(ls[0].strip(), row['nuc'])
             assert_equal(ls[1].strip(), row['time'])
-            assert_array_equal(np.array(ls[2:], dtype=np.float64), row['phtn_src'])
+            assert_array_equal(np.array(ls[2:], dtype=np.float64),
+                               row['phtn_src'])
             old = ls[0]
 
     if os.path.isfile(filename + '.h5'):
         os.remove(filename + '.h5')
 
+
 def test_photon_source_hdf5_to_mesh():
     """Tests the function photon source_h5_to_mesh."""
 
-    filename = os.path.join(thisdir, "files_test_alara", "phtn_src") 
+    filename = os.path.join(thisdir, "files_test_alara", "phtn_src")
     photon_source_to_hdf5(filename, chunkshape=(10,))
     assert_true(os.path.exists(filename + '.h5'))
 
-    mesh = Mesh(structured=True, 
+    mesh = Mesh(structured=True,
                 structured_coords=[[0, 1, 2], [0, 1, 2], [0, 1]])
 
-    tags = {('1001', 'shutdown') : 'tag1', ('TOTAL', '1 h') : 'tag2'}
+    tags = {('1001', 'shutdown'): 'tag1', ('TOTAL', '1 h'): 'tag2'}
     photon_source_hdf5_to_mesh(mesh, filename + '.h5', tags)
 
     # create lists of lists of expected results
-    tag1_answers = [[1] + [0] * 41, [2] + [0] * 41, 
-                    [3] + [0] * 41, [4] + [0] * 41] 
-    tag2_answers = [[5] + [0] * 41, [6] + [0] * 41, 
-                    [7] + [0] * 41, [8] + [0] * 41] 
+    tag1_answers = [[1] + [0] * 41, [2] + [0] * 41,
+                    [3] + [0] * 41, [4] + [0] * 41]
+    tag2_answers = [[5] + [0] * 41, [6] + [0] * 41,
+                    [7] + [0] * 41, [8] + [0] * 41]
 
     ves = list(mesh.structured_iterate_hex("xyz"))
     for i, ve in enumerate(ves):
-	assert_array_equal(mesh.mesh.getTagHandle("tag1")[ve], tag1_answers[i])
+        assert_array_equal(mesh.mesh.getTagHandle("tag1")[ve], tag1_answers[i])
         assert_array_equal(mesh.mesh.getTagHandle("tag2")[ve], tag2_answers[i])
 
     if os.path.isfile(filename + '.h5'):
