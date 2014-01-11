@@ -10,8 +10,8 @@ except ImportError:
     warnings.warn("the PyTAPS optional dependency could not be imported. "
          "Some aspects of the alara module may be incomplete.", ImportWarning)
 
-from mesh import Mesh, MeshError
-from nucname import serpent
+from .mesh import Mesh, MeshError
+from .nucname import serpent
 
 def flux_mesh_to_fluxin(flux_mesh, flux_tag, fluxin="fluxin.out", 
                         reverse=False):
@@ -126,12 +126,11 @@ def photon_source_to_hdf5(filename, chunkshape=(10000,)):
         # Keep track of the ve_idx by delimiting by the last TOTAL line in a
         # volume element.
         if ls[0]  != 'TOTAL' and old == 'TOTAL':
-            if i != 1:
-                ve_idx += 1
+            ve_idx += 1
 
         j = (i-1)%chunksize
         rows[j] = (ve_idx, ls[0].strip(), ls[1].strip(), np.array(ls[2:], dtype=np.float64))
-        # Save the isotope in order to keep track of ve_idx
+        # Save the nuclide in order to keep track of ve_idx
         old = ls[0].strip()
 
         if i%chunksize == 0:
@@ -147,7 +146,7 @@ def photon_source_to_hdf5(filename, chunkshape=(10000,)):
 def photon_source_hdf5_to_mesh(mesh, filename, tags):
     """This function reads in an hdf5 file produced by photon_source_to_hdf5 and
     tags the requested data to the mesh of a PyNE Mesh object. Any combinations
-    of isotopes and decay times are allowed. The photon source file is assumed
+    of nuclides and decay times are allowed. The photon source file is assumed
     to be in xyz order (z changes fastest) if a stuctured mesh is supplied
     and imesh.iterate() order if an unstructured mesh is supplied.
 
@@ -159,13 +158,13 @@ def photon_source_hdf5_to_mesh(mesh, filename, tags):
         The path of the hdf5 version of the photon source file.
     tags: dict
         A dictionary were the keys are tuples with two values. The first is a
-        string denoting an isotope in any form that is understood by 
+        string denoting an nuclide in any form that is understood by 
         pyne.nucname (e.g. '1001', 'U-235', '242Am') or 'TOTAL' for all 
-        isotopes. The second is a string denoting the decay time as it appears 
+        nuclides. The second is a string denoting the decay time as it appears 
         in the file (e.g. 'shutdown', '1 h' '3 d'). The values of the 
-        dictionary are the requested tag names for the combination of isotope 
+        dictionary are the requested tag names for the combination of nuclide 
         and decay time. For example if one wanted tags for the photon source 
-        densities from U235 at shutdown and from all isotopes at 1 hour, the 
+        densities from U235 at shutdown and from all nuclides at 1 hour, the 
         dictionary could be:
 
         tags = {('U-235', 'shutdown') : 'tag1', ('TOTAL', '1 h') : 'tag2'}
@@ -180,17 +179,17 @@ def photon_source_hdf5_to_mesh(mesh, filename, tags):
         tag_handles[tag_name] = mesh.mesh.createTag(
                                 tag_name, num_e_groups, float)
 
-    # iterate through each requested isotope/dectay time
+    # iterate through each requested nuclide/dectay time
     for cond in tags.keys():
         with tb.openFile(filename) as h5f:
-            # Convert isotope to the form found in the ALARA phtn_src
+            # Convert nuclide to the form found in the ALARA phtn_src
             # file, which is similar to the Serpent form. Note this form is 
             # different from the ALARA input nuclide form found in nucname.
             if cond[0] != "TOTAL":
                 nuc = serpent(cond[0]).lower()
             else:
                 nuc = "TOTAL"
-            #create of array of rows that match the isotope/decay criteria
+            # create of array of rows that match the nuclide/decay criteria
             matched_data = h5f.root.data.readWhere(
                 "(nuc == '{0}') & (time == '{1}')".format(nuc, cond[1]))
 
