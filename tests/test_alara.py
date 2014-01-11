@@ -124,7 +124,7 @@ def test_photon_source_to_hdf5():
         os.remove(filename + '.h5')
 
 def test_photon_source_hdf5_to_mesh():
-    """Tests the function photon source_h5_to_mesh"""
+    """Tests the function photon source_h5_to_mesh."""
 
     filename = os.path.join(thisdir, "files_test_alara", "phtn_src") 
     photon_source_to_hdf5(filename, chunkshape=(10,))
