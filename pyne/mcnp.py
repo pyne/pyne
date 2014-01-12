@@ -543,6 +543,7 @@ class SurfSrc(_BinaryReader):
             newrecord.put_double(self.tracklist[j].nps)
             newrecord.put_double(self.tracklist[j].bitarray)
             newrecord.put_double(self.tracklist[j].wgt)
+            newrecord.put_double(self.tracklist[j].erg)
             newrecord.put_double(self.tracklist[j].tme)
             newrecord.put_double(self.tracklist[j].x)
             newrecord.put_double(self.tracklist[j].y)
@@ -550,7 +551,6 @@ class SurfSrc(_BinaryReader):
             newrecord.put_double(self.tracklist[j].u)
             newrecord.put_double(self.tracklist[j].v)
             newrecord.put_double(self.tracklist[j].cs)
-            newrecord.put_double(self.tracklist[j].w)
             self.put_fortran_record(newrecord)
         return
 
