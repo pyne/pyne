@@ -192,19 +192,26 @@ class SurfSrc(_BinaryReader):
 
         return header_string
 
-    def print_tracklist(self):
+    def print_tracklist(self, max_tracks=None):
+
+        if max_tracks is None:
+            max_tracks = self.nrss
+
         track_data = "Track Data\n"
         track_data += \
             "       nps   BITARRAY        WGT        ERG        TME" \
             "             X             Y             Z" \
             "          U          V     COSINE  |       W\n"
-        for j in self.tracklist:
+        for cnt, j in self.tracklist:
+
             format_string = "%10d %10g %10.5g %10.5g %10.5g" \
                             " %13.5e %13.5e %13.5e" \
                             " %10.5f %10.5f %10.5f  | %10.5f "
             track_data += format_string % (
                 j.nps, j.bitarray, j.wgt, j.erg, j.tme,
                 j.x, j.y, j.z, j.u, j.v, j.cs, j.w) + "\n"
+            if cnt > quit:
+                break
 
         return track_data
 
@@ -1490,17 +1497,17 @@ class Wwinp(Mesh):
             ww_row = []
             while count < self.nft:
                 ww_row += [float(x) for x in f.readline().split()]
-                count += 6 # number of entries per row in WWINP
+                count += 6  # number of entries per row in WWINP
 
             ww_data[i] = ww_row
 
         #create vector tags for data
         tag_ww = self.mesh.createTag(
-                 "ww_{0}".format(particle), self.ne[particle_index], float)
+            "ww_{0}".format(particle), self.ne[particle_index], float)
 
         #tag vector data to mesh
         for i, volume_element in enumerate(volume_elements):
-            tag_ww[volume_element] = ww_data[:,i]
+            tag_ww[volume_element] = ww_data[:, i]
 
         # Save energy upper bounds to rootset.
         tag_e_bounds = \
@@ -1615,12 +1622,12 @@ class Wwinp(Mesh):
         volume_elements = list(self.structured_iterate_hex('zyx'))
         for i, volume_element in enumerate(volume_elements):
             ww_data[i] = self.mesh.getTagHandle(
-                         "ww_{0}".format(particle))[volume_element]
-              
+                "ww_{0}".format(particle))[volume_element]
+
         for i in range(0, self.ne[particle_index]):
             # Append ww_data to block3 string.
             line_count = 0
-            for ww in ww_data[:,i]:
+            for ww in ww_data[:, i]:
                 block3 += ' {0: 1.5E}'.format(ww)
                 line_count += 1
 
@@ -1636,7 +1643,7 @@ class Wwinp(Mesh):
     def read_mesh(self, mesh):
         """This method creates a Wwinp object from a structured mesh object.
         The mesh must have tags in the form "ww_X" where X is n
-        or p. For every particle there must be a rootSet tag in the form 
+        or p. For every particle there must be a rootSet tag in the form
         X_e_upper_bounds containing a list of energy upper bounds.
         """
 
@@ -1713,6 +1720,7 @@ class Wwinp(Mesh):
         self.nc = [len(self.cm[0]), len(self.cm[1]), len(self.cm[2])]
         self.nf = [sum(self.fm[0]), sum(self.fm[1]), sum(self.fm[2])]
         self.nft = self.nf[0]*self.nf[1]*self.nf[2]
+
 
 class Meshtal(object):
     """This class stores all the information from an MCNP meshtal file with
@@ -1901,20 +1909,19 @@ class MeshTally(StatMesh):
 
             result[i] = result_row
             rel_error[i] = rel_error_row
-        
+
         #Tag results and error vector to mesh
         tag_result = self.mesh.createTag(
-                     "{0}_result".format(self.particle), num_e_groups, float)
+            "{0}_result".format(self.particle), num_e_groups, float)
         tag_rel_error = self.mesh.createTag(
-                     "{0}_rel_error".format(self.particle), num_e_groups, float)
+            "{0}_rel_error".format(self.particle), num_e_groups, float)
         res_vol_elements = list(self.structured_iterate_hex("xyz"))
         err_vol_elements = list(self.structured_iterate_hex("xyz"))
-        for res_ve, err_ve, i in itertools.izip(res_vol_elements, 
-                                                 err_vol_elements, 
-                                                 range(0, num_vol_elements)):
-            tag_result[res_ve] = result[:,i]
-            tag_rel_error[err_ve] = rel_error[:,i]
-            
+        for res_ve, err_ve, i in itertools.izip(res_vol_elements,
+                                                err_vol_elements,
+                                                range(0, num_vol_elements)):
+            tag_result[res_ve] = result[:, i]
+            tag_rel_error[err_ve] = rel_error[:, i]
 
         #If "total" data exists (i.e. if there is more than
         #1 energy group) get it and tag it onto the mesh.
@@ -1928,9 +1935,9 @@ class MeshTally(StatMesh):
                     float(line[self._column_idx["Rel_Error"]]))
 
             tag_result = self.mesh.createTag(
-                       "{0}_total_result".format(self.particle), 1, float)
+                "{0}_total_result".format(self.particle), 1, float)
             tag_rel_error = self.mesh.createTag(
-                       "{0}_total_rel_error".format(self.particle), 1, float)
+                "{0}_total_rel_error".format(self.particle), 1, float)
 
             res_vol_elements = list(self.structured_iterate_hex("xyz"))
             err_vol_elements = list(self.structured_iterate_hex("xyz"))
