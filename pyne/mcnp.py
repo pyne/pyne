@@ -202,7 +202,7 @@ class SurfSrc(_BinaryReader):
             "       nps   BITARRAY        WGT        ERG        TME" \
             "             X             Y             Z" \
             "          U          V     COSINE  |       W\n"
-        for cnt, j in self.tracklist:
+        for cnt, j in enumerate(self.tracklist):
 
             format_string = "%10d %10g %10.5g %10.5g %10.5g" \
                             " %13.5e %13.5e %13.5e" \
@@ -210,7 +210,7 @@ class SurfSrc(_BinaryReader):
             track_data += format_string % (
                 j.nps, j.bitarray, j.wgt, j.erg, j.tme,
                 j.x, j.y, j.z, j.u, j.v, j.cs, j.w) + "\n"
-            if cnt > quit:
+            if cnt > max_tracks:
                 break
 
         return track_data
