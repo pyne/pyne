@@ -775,55 +775,55 @@ class Njoy99(object):
                      "Check ACE files\n0 38 0 40 41\n7 1 1 -1/\n/\n"
                      % self.__dict__)
         if self.scattering_law:
-        #     matsab_inc = 221
-        #     matsab_coh = 0
-        #     nbatoms = 1
-        #     elasopt = 0
-        #     if self.scattering_mat == 1:
-        #         # H in H20
-        #         nbatoms = 2
-        #         matsab_inc = 222
-        #     elif self.scattering_mat == 7:
-        #         # H in ZrH
-        #         nbatoms = 2
-        #         elasopt = 1
-        #         matsab_inc = 225
-        #         matsab_coh = 226
-        #     elif self.scattering_mat == 11:
-        #         # D in D20
-        #         nbatoms = 2
-        #         matsab_inc = 228
-        #     elif self.scattering_mat == 26:
-        #         # Beryllium metal
-        #         elasopt = 1
-        #         matsab_inc = 231
-        #         matsab_coh = 232
-        #     elif self.scattering_mat == 27:
-        #         # Beryllium in BeO
-        #         nbatoms = 2
-        #         elasopt = 1
-        #         matsab_inc = 233
-        #         matsab_coh = 234
-        #     elif self.scattering_mat == 31:
-        #         # C in Graphite
-        #         elasopt = 1
-        #         matsab_inc = 229
-        #         matsab_coh = 230
-        #     elif self.scattering_mat == 37:
-        #         # H in Polyethylene (CH2)
-        #         nbatoms = 2
-        #         matsab_inc = 223
-        #         matsab_coh = 224
-        #     elif self.scattering_mat == 40:
-        #         # H in Benzine (C6H6)
-        #         nbatoms = 2
-        #         matsab_inc = 227
-        #     elif self.scattering_mat == 58:
-        #         # Zirconium in ZrH
-        #         nbatoms = 2
-        #         elasopt = 1
-        #         matsab_inc = 235
-        #         matsab_coh = 236
+            matsab_inc = 221
+            matsab_coh = 0
+            nbatoms = 1
+            elasopt = 0
+            if self.scattering_mat == 1:
+                # H in H20
+                nbatoms = 2
+                matsab_inc = 222
+            elif self.scattering_mat == 7:
+                # H in ZrH
+                nbatoms = 2
+                elasopt = 1
+                matsab_inc = 225
+                matsab_coh = 226
+            elif self.scattering_mat == 11:
+                # D in D20
+                nbatoms = 2
+                matsab_inc = 228
+            elif self.scattering_mat == 26:
+                # Beryllium metal
+                elasopt = 1
+                matsab_inc = 231
+                matsab_coh = 232
+            elif self.scattering_mat == 27:
+                # Beryllium in BeO
+                nbatoms = 2
+                elasopt = 1
+                matsab_inc = 233
+                matsab_coh = 234
+            elif self.scattering_mat == 31:
+                # C in Graphite
+                elasopt = 1
+                matsab_inc = 229
+                matsab_coh = 230
+            elif self.scattering_mat == 37:
+                # H in Polyethylene (CH2)
+                nbatoms = 2
+                matsab_inc = 223
+                matsab_coh = 224
+            elif self.scattering_mat == 40:
+                # H in Benzine (C6H6)
+                nbatoms = 2
+                matsab_inc = 227
+            elif self.scattering_mat == 58:
+                # Zirconium in ZrH
+                nbatoms = 2
+                elasopt = 1
+                matsab_inc = 235
+                matsab_coh = 236
 
             text_data += ("acer\n-21 -25 0 48 49\n2 0 1 %(suff)f/\n"
                           "'pendf tape from %(evaluation_name)s'/\n"
