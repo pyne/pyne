@@ -15,7 +15,6 @@
 
 #include "DagWrappers.hh"
 #include "dagmc_utils.hpp"
-#include "UnitNumberManager.hpp"
 
 #include "MBInterface.hpp"
 #include "MBCartVect.hpp"
