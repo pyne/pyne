@@ -470,7 +470,7 @@ class SurfSrc(_BinaryReader):
 
         newrecord.put_int([self.ncrd])
         newrecord.put_int([self.njsw])
-        newrecord.put_long([self.niss])
+        newrecord.put_int([self.niss])  # MCNP needs 'int', could be 'long' ?
         self.put_fortran_record(newrecord)
         return
 
