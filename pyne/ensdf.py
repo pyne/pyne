@@ -123,6 +123,7 @@ def half_life(ensdf):
                 data += [(from_nuc, 0.0, from_nuc, half_lifev, 1.0)]
             if level is None:
                 level = 0.0
+            continue
         levelc = _level_cont_regex.match(line)
         if levelc is not None and from_nuc is not None and half_lifev is not None:
             dat = _parse_level_continuation_record(levelc)
