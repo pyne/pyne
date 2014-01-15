@@ -53,6 +53,11 @@ packages:
    * GEANT4: planned for 2013
    * MCNP6: planned for 2013
 
+Installing
+----------
+
+For installation instructions see `<http://svalinn.github.io/DAGMC/usersguide/>`_.
+
 Building Documentation
 -------------------------
 
