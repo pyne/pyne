@@ -1,11 +1,15 @@
 PyNE: The Nuclear Engineering Toolkit
 =====================================
-The pyne project aims to provide a common set of tools for nuclear 
+The PyNE project aims to provide a common set of tools for nuclear 
 science and engineering needs.
 
 If you are interested in the package itself, or would like to help
 and contribute, please let us know either on the mailing list 
-(pyne-dev@googlegroups.com) or `github`_.
+(https://groups.google.com/forum/#!forum/pyne-dev, 
+pyne-dev@googlegroups.com) or `github`_.
+
+Examples, documentation, and more can be found at 
+http://pynesim.org/, the official PyNE projectsite.
 
 .. _github: https://github.com/pyne/pyne
 
@@ -22,9 +26,9 @@ Dependencies
 PyNE has the following dependencies:
 
    #. `CMake <http://www.cmake.org/>`_ (>= 2.8.5)
-   #. `NumPy <http://www.numpy.org/>`_
+   #. `NumPy <http://www.numpy.org/>`_ (>= 1.8.0)
    #. `SciPy <http://www.scipy.org/>`_
-   #. `Cython <http://cython.org/>`_
+   #. `Cython <http://cython.org/>`_ (>= 0.19.1)
    #. `HDF5 <http://www.hdfgroup.org/HDF5/>`_
    #. `PyTables <http://www.pytables.org/>`_
    #. `Python 2.7 <http://www.python.org/>`_
@@ -124,7 +128,8 @@ Contributing
 We highly encourage contributions to PyNE! If you would like to contribute, 
 it is as easy as forking the repository on GitHub, making your changes, and 
 issuing a pull request. If you have any questions about this process don't 
-hesitate to ask the mailing list (pyne-dev@googlegroups.com).
+hesitate to ask the mailing list (https://groups.google.com/forum/#!forum/pyne-dev, 
+pyne-dev@googlegroups.com).
 
 
 .. _zip: https://github.com/pyne/pyne/zipball/0.3

@@ -22,6 +22,7 @@ import linecache
 import tables
 import datetime
 import warnings
+import itertools
 
 import numpy as np
 
@@ -207,8 +208,15 @@ class SurfSrc(_BinaryReader):
 
         return track_data
 
+#    def __eq__(self, other):
+#        """ Compare two surface sources
+#        """
+#        return self.__dict__ == other.__dict__
+
     def __cmp__(self, other):
-        """"""
+        """ Comparison is not completely robust
+            Tracklists are not compared!!!
+        """
 
         if other.kod != self.kod:
             # kod does not match
@@ -226,6 +234,16 @@ class SurfSrc(_BinaryReader):
         if other.njsw != self.njsw:
             # njsw does not match
             return cmp(other.njsw, self.njsw)
+
+        if other.np1 != self.np1:
+            # np1 does not match
+            return cmp(other.np1, self.np1)
+        if other.nrss != self.nrss:
+            # nrss does not match
+            return cmp(other.nrss, self.nrss)
+        if other.niss != self.niss:
+            # nrss does not match
+            return cmp(other.niss, self.niss)
 
         if other.niwr != self.niwr:
             # niwr does not match
@@ -493,6 +511,80 @@ class SurfSrc(_BinaryReader):
         self.put_fortran_record(newrecord)
         return
 
+    def write_header(self):
+        """
+        First part of the MCNP surface source file.
+        The header content comprises five parts shown below.
+        """
+
+        self.put_header()
+        self.put_table_1()
+        self.put_table_2()
+        self.put_surface_info()
+        self.put_summary()
+
+    def write_tracklist(self):
+        """
+        Second part of the MCNP surface source file.
+        Tracklist is also known as a 'phase space'.
+        Write track records for individual particles.
+        """
+
+        for j in range(self.nrss):  # nrss is the size of tracklist
+            newrecord = _FortranRecord("", 0)
+            # 11 records comprising particle information
+            newrecord.put_double(self.tracklist[j].nps)
+            newrecord.put_double(self.tracklist[j].bitarray)
+            newrecord.put_double(self.tracklist[j].wgt)
+            newrecord.put_double(self.tracklist[j].tme)
+            newrecord.put_double(self.tracklist[j].x)
+            newrecord.put_double(self.tracklist[j].y)
+            newrecord.put_double(self.tracklist[j].z)
+            newrecord.put_double(self.tracklist[j].u)
+            newrecord.put_double(self.tracklist[j].v)
+            newrecord.put_double(self.tracklist[j].cs)
+            newrecord.put_double(self.tracklist[j].w)
+            self.put_fortran_record(newrecord)
+        return
+
+    def update_tracklist(self, surf_src):
+        """
+        Update tracklist from another surface source.
+        This updates the surface source in-place.
+        """
+
+        # Catch for improper non-SurfSrc type
+        if type(surf_src) != SurfSrc:
+            raise TypeError('Surface Source is not of type SurfSrc')
+
+        # Because 'kod' is the first header attribute
+        elif not hasattr(surf_src, 'kod'):
+            raise AttributeError(
+                'No header attributes for surface source argument')
+        elif not hasattr(self, 'kod'):
+            raise AttributeError(
+                'No header attributes read for surface source')
+
+        # Because 'tracklist' forms the non-header portion
+        elif not hasattr(surf_src, 'tracklist'):
+            raise AttributeError(
+                'No tracklist read for surface source argument')
+        elif not hasattr(self, 'tracklist'):
+            raise AttributeError(
+                'No tracklist read for surface source')
+
+        # No point in updating with self
+        elif self == surf_src:
+            raise ValueError('Tracklist cannot be updated with itself')
+
+        self.tracklist = surf_src.tracklist
+        self.nrss = surf_src.nrss
+
+    def __del__(self):
+        """Destructor. The only thing to do is close the file.
+        """
+        self.f.close()
+
 
 class Srctp(_BinaryReader):
     """This class stores source site data from a 'srctp' file written by
@@ -507,7 +599,7 @@ class Srctp(_BinaryReader):
         header = self.get_fortran_record()
 
         # interpret header block
-        k = header.get_int()  # unique code (947830)
+        #NOTUSED k = header.get_int()  # unique code (947830)
         self.loc_next = header.get_int()  # loc. of next site in FSO arr (ixak)
         self.n_run = header.get_int()  # source particles yet to be run (nsa)
         self.loc_store = header.get_int()  # where to put nxt src neutron (ist)
@@ -1248,8 +1340,10 @@ class Wwinp(Mesh):
     ne : list of number of energy groups for neutrons and photons.
         If ni = 1 the list is only 1 value long,
         to represent the number of neutron energy groups
-    nf : list of number
+    nf : list of numbers
         of fine mesh points in the i, j, k dimensions
+    nft : int
+        total number of fine mesh points
     origin : list of i, j, k
         minimums.
     nc : list
@@ -1271,8 +1365,7 @@ class Wwinp(Mesh):
     mesh : Mesh object
         with a structured mesh containing all the neutron and/or
         photon weight window lower bounds. These tags have the form
-        "ww_X_group_YYY" where X is n or p and YYY is the energy group number
-        (e.g. 001, 002, etc.). The mesh has rootSet tags in the form
+        "ww_X" where X is n or p The mesh has rootSet tags in the form
         X_e_upper_bounds.
 
     Notes
@@ -1304,11 +1397,12 @@ class Wwinp(Mesh):
         self.nr = int(line_1.split()[3])
 
         line_2 = f.readline()
-        self.ne = [float(x) for x in line_2.split()]
+        self.ne = [int(x) for x in line_2.split()]
 
         if self.nr == 10:  # Cartesian
             line_3 = f.readline()
             self.nf = [int(float(x)) for x in line_3.split()[0:3]]
+            self.nft = self.nf[0]*self.nf[1]*self.nf[2]
             self.origin = [float(x) for x in line_3.split()[3:6]]
 
             line_4 = f.readline()
@@ -1381,7 +1475,7 @@ class Wwinp(Mesh):
                                         self.bounds[1], self.bounds[2]],
                                         structured=True)
 
-        voxels = list(self.structured_iterate_hex('zyx'))
+        volume_elements = list(self.structured_iterate_hex('zyx'))
 
         if particle == 'n':
             particle_index = 0
@@ -1389,18 +1483,24 @@ class Wwinp(Mesh):
         elif particle == 'p':
             particle_index = 1
 
-        for i in range(1, len(self.e[particle_index]) + 1):
-            # Create tags for each e_group
-            tag_name = 'ww_{0}_group_{1:03d}'.format(particle, i)
-            tag_ww = self.mesh.createTag(tag_name, 1, float)
+       # read in WW data for a single particle type
+        ww_data = np.empty(shape=(self.ne[particle_index], self.nft))
+        for i in range(0, self.ne[particle_index]):
+            count = 0
+            ww_row = []
+            while count < self.nft:
+                ww_row += [float(x) for x in f.readline().split()]
+                count += 6 # number of entries per row in WWINP
 
-            # Get all data for energy group i
-            ww_data = []
-            while len(ww_data) < self.nf[0]*self.nf[1]*self.nf[2]:
-                ww_data += [float(x) for x in f.readline().split()]
+            ww_data[i] = ww_row
 
-            # tag data to voxels
-            tag_ww[voxels] = ww_data
+        #create vector tags for data
+        tag_ww = self.mesh.createTag(
+                 "ww_{0}".format(particle), self.ne[particle_index], float)
+
+        #tag vector data to mesh
+        for i, volume_element in enumerate(volume_elements):
+            tag_ww[volume_element] = ww_data[:,i]
 
         # Save energy upper bounds to rootset.
         tag_e_bounds = \
@@ -1511,20 +1611,16 @@ class Wwinp(Mesh):
             block3 += '\n'
 
         # Get ww_data.
-        count = 0
-        for e_group in range(1, len(self.e[particle_index]) + 1):
-            voxels = list(self.structured_iterate_hex('zyx'))
-            ww_data = []
-            count += 1
-            for voxel in voxels:
-                ww_data.append(
-                    self.mesh.getTagHandle('ww_{0}_group_{1:03d}'.format(
-                        particle, e_group))[voxel])
-
+        ww_data = np.empty(shape=(self.nft, self.ne[particle_index]))
+        volume_elements = list(self.structured_iterate_hex('zyx'))
+        for i, volume_element in enumerate(volume_elements):
+            ww_data[i] = self.mesh.getTagHandle(
+                         "ww_{0}".format(particle))[volume_element]
+              
+        for i in range(0, self.ne[particle_index]):
             # Append ww_data to block3 string.
             line_count = 0
-            for ww in ww_data:
-
+            for ww in ww_data[:,i]:
                 block3 += ' {0: 1.5E}'.format(ww)
                 line_count += 1
 
@@ -1539,10 +1635,9 @@ class Wwinp(Mesh):
 
     def read_mesh(self, mesh):
         """This method creates a Wwinp object from a structured mesh object.
-        The mesh must have tags in the form "ww_X_group_YYY" where X is n
-        or p, and  YYY is the energy group. For every particle there must
-        be a rootSet tag in the form X_e_upper_bounds containing a list of
-        energy upper bounds.
+        The mesh must have tags in the form "ww_X" where X is n
+        or p. For every particle there must be a rootSet tag in the form 
+        X_e_upper_bounds containing a list of energy upper bounds.
         """
 
         super(Wwinp, self).__init__(mesh=mesh, structured=True)
@@ -1617,7 +1712,7 @@ class Wwinp(Mesh):
 
         self.nc = [len(self.cm[0]), len(self.cm[1]), len(self.cm[2])]
         self.nf = [sum(self.fm[0]), sum(self.fm[1]), sum(self.fm[2])]
-
+        self.nft = self.nf[0]*self.nf[1]*self.nf[2]
 
 class Meshtal(object):
     """This class stores all the information from an MCNP meshtal file with
@@ -1788,40 +1883,57 @@ class MeshTally(StatMesh):
                                         self.y_bounds, self.z_bounds],
                                         structured=True)
 
-        for e_group in range(1, len(self.e_bounds)):
-            result_tag_name = '{0}_group_{1:03d}'.format(
-                self.particle, e_group)
-            rel_error_tag_name = '{0}_group_{1:03d}_error'.format(
-                self.particle, e_group)
-            self._tag_mesh(f, result_tag_name, rel_error_tag_name)
-
-        #Tag "total" data if it exists (i.e. if there is more than
-        #1 energy group)
-        if len(self.e_bounds) > 2:
-            result_tag_name = '{0}_group_total'.format(self.particle)
-            rel_error_tag_name = '{0}_group_total_error'.format(self.particle)
-            self._tag_mesh(f, result_tag_name, rel_error_tag_name)
-
-    def _tag_mesh(self, f, result_tag_name, rel_error_tag_name):
-        """Tag the MOAB mesh with data from an open filestream and supplied
-        tag names.
-        """
-
-        tag_result = self.mesh.createTag(result_tag_name, 1, float)
-        tag_rel_error = self.mesh.createTag(rel_error_tag_name, 1, float)
-        result = []
-        rel_error = []
-
         num_vol_elements = (len(self.x_bounds)-1) * (len(self.y_bounds)-1)\
             * (len(self.z_bounds)-1)
+        num_e_groups = len(self.e_bounds)-1
 
-        while len(result) < num_vol_elements:
-            line = f.readline()
-            result.append(float(line.split()[self._column_idx["Result"]]))
-            rel_error.append(
-                float(line.split()[self._column_idx["Rel_Error"]]))
+        # get result and relative error data from file
+        result = np.empty(shape=(num_e_groups, num_vol_elements))
+        rel_error = np.empty(shape=(num_e_groups, num_vol_elements))
+        for i in range(0, num_e_groups):
+            result_row = []
+            rel_error_row = []
+            for j in range(0, num_vol_elements):
+                line = f.readline().split()
+                result_row.append(float(line[self._column_idx["Result"]]))
+                rel_error_row.append(
+                    float(line[self._column_idx["Rel_Error"]]))
 
-        #Tag data for energy group 'e_group' onto all voxels
-        vol_elements = list(self.structured_iterate_hex("xyz"))
-        tag_result[vol_elements] = result
-        tag_rel_error[vol_elements] = rel_error
+            result[i] = result_row
+            rel_error[i] = rel_error_row
+        
+        #Tag results and error vector to mesh
+        tag_result = self.mesh.createTag(
+                     "{0}_result".format(self.particle), num_e_groups, float)
+        tag_rel_error = self.mesh.createTag(
+                     "{0}_rel_error".format(self.particle), num_e_groups, float)
+        res_vol_elements = list(self.structured_iterate_hex("xyz"))
+        err_vol_elements = list(self.structured_iterate_hex("xyz"))
+        for res_ve, err_ve, i in itertools.izip(res_vol_elements, 
+                                                 err_vol_elements, 
+                                                 range(0, num_vol_elements)):
+            tag_result[res_ve] = result[:,i]
+            tag_rel_error[err_ve] = rel_error[:,i]
+            
+
+        #If "total" data exists (i.e. if there is more than
+        #1 energy group) get it and tag it onto the mesh.
+        if num_e_groups > 1:
+            result = []
+            rel_error = []
+            for i in range(0, num_vol_elements):
+                line = f.readline().split()
+                result.append(float(line[self._column_idx["Result"]]))
+                rel_error.append(
+                    float(line[self._column_idx["Rel_Error"]]))
+
+            tag_result = self.mesh.createTag(
+                       "{0}_total_result".format(self.particle), 1, float)
+            tag_rel_error = self.mesh.createTag(
+                       "{0}_total_rel_error".format(self.particle), 1, float)
+
+            res_vol_elements = list(self.structured_iterate_hex("xyz"))
+            err_vol_elements = list(self.structured_iterate_hex("xyz"))
+
+            tag_result[res_vol_elements] = result
+            tag_rel_error[err_vol_elements] = rel_error
