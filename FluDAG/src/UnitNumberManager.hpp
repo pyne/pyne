@@ -20,6 +20,10 @@ class UnitNumberManager
     int getNumUnitsInUse();
     int getUnitNumber(std::string name);
 
+    // Need access for test verification
+    static const int START_UNIT = -21;
+    static const int END_UNIT   = -99;
+
   private:
 
     std::map<std::string, int> nameNumberMap;
