@@ -501,7 +501,7 @@ def parse_tape6(tape6="TAPE6.OUT"):
             tnum, ttype, ttitle, tunits = m.groups()
 
             table_key = "table_{0}".format(tnum)
-            if table_key not in results.keys():
+            if table_key not in results:
                 results[table_key] = {}
 
             table_type = ttype.lower()
@@ -563,7 +563,7 @@ def parse_tape6(tape6="TAPE6.OUT"):
             ttitle, tunits = m.groups()
 
             table_key = _n_source_key_map[ttitle]
-            if table_key not in results.keys():
+            if table_key not in results:
                 results[table_key] = {}
 
             table_type = None

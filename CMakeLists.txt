@@ -33,6 +33,10 @@ find_package(PythonInterp REQUIRED)
 find_package(PythonLibsNew REQUIRED)
 message("-- PYTHON_EXECUTABLE: ${PYTHON_EXECUTABLE}")
 
+# Check for MOAB library
+find_package(MOAB)
+message("-- MOAB Found: ${MOAB_FOUND}")
+
 # Include the CMake script UseCython.cmake.  This defines add_cython_module().
 # Instruction for use can be found at the top of cmake/UseCython.cmake.
 include( UseCython )
@@ -95,13 +99,6 @@ add_custom_target( ReplicatePythonSourceTree ALL ${CMAKE_COMMAND} -P
   ${CMAKE_CURRENT_SOURCE_DIR}/cmake/ReplicatePythonSourceTree.cmake
   ${CMAKE_CURRENT_BINARY_DIR}
   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} )
-
-# Add cython version info to source tree
-message("-- Making Cython Version.")
-execute_process(COMMAND ${PYTHON_EXECUTABLE} 
-                        ${CMAKE_CURRENT_SOURCE_DIR}/configure.py cython_version)
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/pyne/_includes/
-     DESTINATION ${CMAKE_BINARY_DIR}/pyne/_includes/)
 
 add_subdirectory(cpp)
 add_subdirectory(pyne)
