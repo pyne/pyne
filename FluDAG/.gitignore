@@ -17,7 +17,12 @@ html
 mainf
 *old
 remove
+removeme
 run
+runs
+bin
+bld
+build
 # Extensions to ignore
 *.cmake
 *.err
@@ -27,3 +32,4 @@ run
 *.sat
 *.stl
 *.sw?
+*.jcz

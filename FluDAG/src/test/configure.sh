@@ -9,4 +9,4 @@ cmake \
 -D MOAB_HOME=$HOME/dagmc_bld/MOAB   \
 -D GTEST_HOME=$HOME/DAGMC/gtest \
 $EXTRA_ARGS \
-.
+..
