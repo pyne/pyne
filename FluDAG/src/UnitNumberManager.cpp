@@ -4,8 +4,9 @@
 
 /* Start and end logical (Fortran-style) unit numbers for record writing */
 const int BAD_UNIT_NUMBER =   0;
-const int START_UNIT      = -21;
-const int END_UNIT        = -99;
+
+const int UnitNumberManager::START_UNIT;
+const int UnitNumberManager::END_UNIT;
 
 //---------------------------------------------------------------------------//
 // CONSTRUCTOR
@@ -29,10 +30,9 @@ int UnitNumberManager::getUnitNumber(std::string name)
     // During preprocessing of the string it may be determined to be invalid and not set
     if ( name.empty())
     {
-       std::cout << "empty............................................" << std::endl;
+       std::cout << "Warning:  Invalid name." << std::endl;
        return -1;
     }
-
     // If name is already in the map, return the int associated with it
     if ( UnitNumberManager::nameNumberMap.count(name)>0 )
     {
