@@ -270,5 +270,285 @@ keyword, and the ``readonly`` keyword should always be followed by a single spac
     def spruce(int   x):
         ...
 
+-------------------
+C/C++ Style Guide 
+-------------------
+As software that is meant to be exposed to Python, C/C++ code written for pyne
+has special needs.  Existing single-language style guides are non-idiomatic across 
+the language barrier.  This style guide attempts to rectify this impeadence 
+mismatch by defining a heirarchy of style guides and special rules to follow that
+make C/C++ more PyNEthonic. Legacy codes not originally written for pyne in these 
+languages need not be migrated to this style.  While a custom style may not be 
+ideal in terms of levearging linters and style checker tools, the benefits 
+in readability and portability outweigh this cost.  
+
+The aim is to have all languages be as similar and have as idomatic of APIs for that 
+language as possible. 
+
+Except as noted below, C/C++ code should adhere to the rules laid out in the 
+following style guides in order of preference:
+
+1. `PEP8`_
+2. `The Linux Kernel Coding Style <http://www.maultech.com/chrislott/resources/cstyle/LinuxKernelCodingStyle.txt>`_
+3. `The Google C++ Style Guide <http://google-styleguide.googlecode.com/svn/trunk/cppguide.xml>`_
+
+This section was forked from the `ROS C++ Style Guide <http://wiki.ros.org/CppStyleGuide>`_.
+If you require clarification on a particular syntax or idiom, please ask!
+
+*****
+Files
+*****
+Files may have under_scores.
+
+Source files have the extension ``.cpp``.
+
+Header files have the extension ``.h``.
+
+If the file primarily implements a class, name the file after the class.
+
+***************
+Classes / Types
+***************
+Class names (and other type names) are CamelCased:
+
+.. code-block:: c++
+
+    class ExampleClass;
+
+**Exception:** if the class name contains a short acronym, the acronym itself 
+should be all capitals:
+
+.. code-block:: c++
+
+    class HokuyoURGLaser;
+
+Name the class after what it is. If you can't think of what it is, perhaps you 
+have not thought through the design well enough.
+
+Class names should be nouns. 
+
+*********
+Functions
+*********
+Functions and their arguments are lowercase_with_underscores:
+
+.. code-block:: c++
+
+    int example_func(int example_arg);
+
+Functions usually performs an action, so the name should make clear what it does.
+Function names thus should be verbs.
+
+*********
+Variables
+*********
+Variable names are lowercase_with_underscores.
+
+Integral iterator variables can be very short, such as i, j, k. Be consistent in 
+how you use iterators (e.g., i on the outer loop, j on the next inner loop).
+
+STL iterator variables should indicate what they are iterating over:
+
+.. code-block:: c++
+
+    std::list<int> pid_list;
+    std::list<int>::iterator pid_it;
+
+*********
+Constants
+*********
+Constants, wherever they are used, are ALL_CAPITALS.
+
+****************
+Member Variables
+****************
+Variables that are members of a class are lowercase_with_underscores.
+Private and protected member variables start with a single leading underscore.
+Public member varaibles do not have a leading underscore.
+
+.. code-block:: c++
+
+    int public_x;
+    int _protected_y;
+    int _private_z;
+
+****************
+Global Variables
+****************
+Global variables should never be used. 
+
+**Exception:** a file may contain a main() function. 
+
+**********
+Namespaces
+**********
+Namespace names, like Python module names, are lowercase *without* underscores.
+
+Everything should be in a namespace.  Anonymous namespaces are encouraged to help
+meet this requirement.
+
+The bodies of namespace declaration and definition are not indented. This is 
+the same as the `GCSG`_.
+
+Never use a ``using namespace`` directive. Using-declarations inside of class 
+or function scope, which only grab the names you intend to use, are allowed.
+
+.. code-block:: c++
+
+    // Bad, because it imports all names from std::
+    using namespace std;  
+
+    // Good
+    using std::list;  // I want to refer to std::list as list
+    using std::vector;  // I want to refer to std::vector as vector
+
+***************
+Access Patterns
+***************
+We are all adults here. Everything should be public.  Use private and protected 
+variables only when absolutely necessary.
+
+************************
+Accessor/Mutator Pattern
+************************
+Avoid getter and setter member functions. This pattern increases code volume, 
+inlining is not guarenteed, and slows down run times.
+
+Use this pattern only if implementing a Python/Cython-like property where
+getting or setting a member variable is non-trivial. In these cases, the 
+stroage variable should be named with a leading underscore (even though it may be 
+public) and the get/set names should have the same name as the variable but without
+the leading underscore:
+
+.. code-block:: c++
+
+    class WithAnX {
+     public:
+      // storage variable
+      int _x;
+
+      // getter
+      int x();
+
+      // setter
+      void x(int value);
+    }
+
+
+**********
+Formatting
+**********
+Indent each block by 2 spaces. Never insert literal tab characters.
+
+The contents of a namespace are not indented.
+
+We are all friends here! Braces should be `cuddled <http://gskinner.com/blog/archives/2008/11/curly_braces_to.html>`_:
+
+.. code-block:: c++
+
+    if (a < b) {
+      ...
+    } else {
+      ...
+    }
+
+Braces should be omitted if the enclosed block is a single-line statement:
+
+.. code-block:: c++
+
+    if (a < b)
+      x = 2*a;
+
+Only single line comments should be used.  Multiline comments are inconsistent
+and not allowed.
+
+.. code-block:: c++
+
+    // This is OK
+
+    /* This is not OK */
+
+    /* What is even going on here?!
+     * All I can see are the stars...
+     */
+
+***********
+Line Length
+***********
+Maximum line length is 80 characters.
+
+**************
+Include Guards
+**************
+All headers must be protected against multiple inclusion by #ifndef guards.
+These guards ought to be UUIDs:
+
+.. code-block:: c++
+
+    #ifndef _f1b039d4_6ef0_43ac_87b1_0977204f3d8b
+    #define _f1b039d4_6ef0_43ac_87b1_0977204f3d8b
+    ...
+    #endif
+
+Use this BASH command for generating UUIDs:
+
+.. code-block: bash
+
+    (id="_$(uuidgen|tr \\- _)";echo "#ifndef $id";echo "#define $id";echo "#endif")
+
+This guard should begin before any other code and should end at the end of the file.
+
+
+
+*************
+Documentation
+*************
+All code must be documented. We use doxygen to auto-document our code. 
+All functions, methods, classes, variables, enumerations, and constants 
+should be documented.
+
+***************
+Console Output
+***************
+Avoid printf if in C++.  Use ``std::cout`` instead.
+
+******
+Macros
+******
+Avoid preprocessor macros whenever possible. Unlike inline functions and const 
+variables, macros are neither typed nor scoped.
+
+***********
+Inheritance
+***********
+When overriding a virtual method in a subclass always declare it to be virtual
+so that the reader knows what's going on.
+
+**********
+Exceptions
+**********
+Exceptions are the preferred error-reporting mechanism, 
+as opposed to returning integer error codes.
+
+Do not throw exceptions from destructors.
+
+Do not throw exceptions from callbacks that you don't invoke directly.
+
+**************
+Calling exit()
+**************
+Only call ``exit()`` at a well-defined exit point for the application.
+
+Never call ``exit()`` in a library.
+
+***********
+Portability
+***********
+Portability counts. 
+
+Don't use uint as a type. Instead use unsigned int.
+
+Call ``isnan()`` from within the std namespace, i.e.: ``std::isnan()``.
 
 .. _PEP8: http://www.python.org/dev/peps/pep-0008/
+.. _GCSG: http://google-styleguide.googlecode.com/svn/trunk/cppguide.xml
