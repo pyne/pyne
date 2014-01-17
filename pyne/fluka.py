@@ -21,6 +21,12 @@ class Usrbin():
         minimum value of one dimension
     coordinate_system : str
         type of coordinate system being used
+    data : list of lists
+        list of track length data for a particular binning
+    error_data : list of lists
+        list of error data for each binning
+    mesh_tally : int
+        tallies the number of track length binnings in file
     number_of_bins : int
         the number of evenly spaced bins corresponding to one dimension
         (x, y, or z)
