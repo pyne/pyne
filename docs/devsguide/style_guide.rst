@@ -3,15 +3,15 @@
 ===========
 Style Guide
 ===========
-PyNE is a polyglot project about a technical subject with many indpendent developers
+PyNE is a polyglot project about a technical subject with many independent developers
 and users. To keep our heads on straight we have adopted the following styles and 
 conventions.  We use these throughout the code base to ensure consistency. 
 
 ----------------------------------
 Rules to Write By
 ----------------------------------
-It is important to refer to things and concpets by their most specific name.
-When writing PyNE code or documentation please use technical terms approriately.
+It is important to refer to things and concepts by their most specific name.
+When writing PyNE code or documentation please use technical terms appropriately.
 The following rules help provide needed clarity.
 
 ***********
@@ -42,7 +42,7 @@ Interfaces
 * Views belong in the ``gui`` sub-package.
 * Tests belong in the top-level ``tests`` directory.
 * Documentation belongs in the top-level ``docs`` directory.
-* The capilized project name is "PyNE" while the lowercase project name is "pyne".
+* The capitalized project name is "PyNE" while the lowercase project name is "pyne".
 * Write code in whatever language you want but make sure that it is exposed to Python.
   Python is the glue that holds the universe together. It is the ``NULL`` and the 
   ``INT_MAX``.
@@ -68,7 +68,7 @@ Canonical Forms
 ***************
 * We have canonical forms; use them! For example, if a function accepts a nuclide 
   as an argument then you should use nucname to ensure that it accepts all possible 
-  nuclide name spellings. If a function accepts a rection name then use the rxname
+  nuclide name spellings. If a function accepts a reaction name then use the rxname
   module. Turn materials specifications into Material objects.  And so on...
 * Mesh is the gentle giant of canonical forms. Use its strong, kind arms when dealing
   with geometries.
@@ -79,7 +79,7 @@ Canonical Forms
 
 * Making a canonical form great may take time and many iterations. Do not give up.
 * Interim working solutions are better than the best solution never.
-* HDF5 is the preffered persistance format for structured data.
+* HDF5 is the preferred persistence format for structured data.
 
 ************
 Expectations
@@ -188,7 +188,7 @@ unless it is needed for functions returning ``void``.
 *********************
 Pointers & References
 *********************
-Pointers and refernces may be either zero or one space away from the type name.
+Pointers and references may be either zero or one space away from the type name.
 If followed by a variable name, they must be one space away from the variable name.
 Do not put any spaces between the reference operator ``&`` and the variable name.
 
@@ -233,7 +233,7 @@ Property Keyword
 Properties are great! There should be exactly one space between the ``property``
 keyword and the attribute name.  There may be no spaces between the attribute 
 name and the colon ``:``.  All properties should have docstrings. There should 
-be no blank lines between the propert declaration line and the following line.
+be no blank lines between the property declaration line and the following line.
 
 .. code-block:: cython
 
@@ -275,14 +275,14 @@ C/C++ Style Guide
 -------------------
 As software that is meant to be exposed to Python, C/C++ code written for pyne
 has special needs.  Existing single-language style guides are non-idiomatic across 
-the language barrier.  This style guide attempts to rectify this impeadence 
-mismatch by defining a heirarchy of style guides and special rules to follow that
+the language barrier.  This style guide attempts to rectify this impedance 
+mismatch by defining a hierarchy of style guides and special rules to follow that
 make C/C++ more PyNEthonic. Legacy codes not originally written for pyne in these 
 languages need not be migrated to this style.  While a custom style may not be 
-ideal in terms of levearging linters and style checker tools, the benefits 
+ideal in terms of leveraging linters and style checker tools, the benefits 
 in readability and portability outweigh this cost.  
 
-The aim is to have all languages be as similar and have as idomatic of APIs for that 
+The aim is to have all languages be as similar and have as idiomatic of APIs for that 
 language as possible. 
 
 Except as noted below, C/C++ code should adhere to the rules laid out in the 
@@ -300,16 +300,18 @@ Files
 *****
 Files may have under_scores.
 
-Source files have the extension ``.cpp``.
+C source files have the extension ``.c``.
+
+C++ source files have the extension ``.cpp``.
 
 Header files have the extension ``.h``.
 
 If the file primarily implements a class, name the file after the class.
 
-***************
-Classes / Types
-***************
-Class names (and other type names) are CamelCased:
+****************************
+Classes, Typedefs, & Stucts
+****************************
+Class names are CapCased:
 
 .. code-block:: c++
 
@@ -326,6 +328,15 @@ Name the class after what it is. If you can't think of what it is, perhaps you
 have not thought through the design well enough.
 
 Class names should be nouns. 
+
+Typedef names should be lowercase_with_underscores, like primitive C/C++ and 
+Python types.
+
+Struct names should be CapCased if they have non-trivial member functions
+and are more class-like.  
+
+However, if a struct is meant to be used primarily as compound data type 
+it should have a lowercase_with_underscores name, like typedefs.
 
 *********
 Functions
@@ -364,7 +375,7 @@ Member Variables
 ****************
 Variables that are members of a class are lowercase_with_underscores.
 Private and protected member variables start with a single leading underscore.
-Public member varaibles do not have a leading underscore.
+Public member variables do not have a leading underscore.
 
 .. code-block:: c++
 
@@ -408,15 +419,15 @@ Access Patterns
 We are all adults here. Everything should be public.  Use private and protected 
 variables only when absolutely necessary.
 
-************************
-Accessor/Mutator Pattern
-************************
+*************************
+Accessors/Mutator Pattern
+*************************
 Avoid getter and setter member functions. This pattern increases code volume, 
-inlining is not guarenteed, and slows down run times.
+inlining is not guaranteed, and slows down run times.
 
 Use this pattern only if implementing a Python/Cython-like property where
 getting or setting a member variable is non-trivial. In these cases, the 
-stroage variable should be named with a leading underscore (even though it may be 
+storage variable should be named with a leading underscore (even though it may be 
 public) and the get/set names should have the same name as the variable but without
 the leading underscore:
 
@@ -459,7 +470,7 @@ Braces should be omitted if the enclosed block is a single-line statement:
     if (a < b)
       x = 2*a;
 
-Only single line comments should be used.  Multiline comments are inconsistent
+Only single line comments should be used.  Multi-line comments are inconsistent
 and not allowed.
 
 .. code-block:: c++
@@ -515,7 +526,7 @@ Avoid printf if in C++.  Use ``std::cout`` instead.
 ******
 Macros
 ******
-Avoid preprocessor macros whenever possible. Unlike inline functions and const 
+Avoid preprocessor macros whenever possible. Unlike in-line functions and const 
 variables, macros are neither typed nor scoped.
 
 ***********
@@ -546,7 +557,7 @@ Portability
 ***********
 Portability counts. 
 
-Don't use uint as a type. Instead use unsigned int.
+Do not use uint as a type. Instead use unsigned int.
 
 Call ``isnan()`` from within the std namespace, i.e.: ``std::isnan()``.
 
