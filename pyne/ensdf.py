@@ -120,7 +120,7 @@ def half_life(ensdf):
         if level_l is not None:
             level, half_lifev, from_nuc = _parse_level_record(level_l)
             if half_lifev == np.inf and from_nuc is not None:
-                data += [(from_nuc, 0.0, from_nuc, half_lifev, 1.0)]
+                data.append((from_nuc, 0.0, from_nuc, half_lifev, 1.0))
             if level is None:
                 level = 0.0
             continue
@@ -205,6 +205,12 @@ def _parse_level_record(l_rec):
         
     Returns
     -------
+    e : float
+        Level energy in MeV
+    tfinal : float
+        Half life in seconds
+    from_nuc : int
+        nuc id of nuclide
     """
     e, de = _get_val_err(l_rec.group(2), l_rec.group(3))
     tfinal, tfinalerr = _to_time(l_rec.group(5), l_rec.group(6))
@@ -223,9 +229,11 @@ def _parse_level_continuation_record(lc_rec):
     ----------
     g : re.MatchObject
         regular expression MatchObject
-        
+
     Returns
     -------
+    dat : dict
+        dictionary of branching ratios of different reaction channels
     """
     g = lc_rec.groups()
     dat = {}
