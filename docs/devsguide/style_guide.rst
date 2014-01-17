@@ -503,7 +503,7 @@ These guards ought to be UUIDs:
 
 Use this BASH command for generating UUIDs:
 
-.. code-block: bash
+.. code-block:: bash
 
     (id="_$(uuidgen|tr \\- _)";echo "#ifndef $id";echo "#define $id";echo "#endif")
 
