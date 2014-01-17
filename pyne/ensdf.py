@@ -103,17 +103,13 @@ def half_life(ensdf):
         5. branch_ratio, float (frac)
 
     """
-    opened_here = False
     if isinstance(ensdf, basestring):
-        ensdf = open(ensdf, 'r')
-        opened_here = True
+        with open(ensdf, 'r') as f:
+            lines = f.readlines()
+    else:
+        lines = ensdf.readlines()
 
     data = []
-
-    # Run through the file
-    lines = ensdf.readlines()
-    if opened_here:
-        ensdf.close()
 
     for line in lines:
         level_l = _level_regex2.match(line)
