@@ -6,8 +6,19 @@ from pyne import nucname
 from .utils import to_sec
 
 
-_level_regex = re.compile('([ \d]{3}[ A-Za-z]{2})  L (.{10}).{20}(.{10}).{28}([ M])([ 1-9])')
-
+_valexp = re.compile('([0-9.]*)([Ee][+-]\d*)')
+_val = re.compile('(\d*)[.](\d*)')
+_errpm = re.compile('[+](\d*)[-](\d*)')
+_err = re.compile('[ ]*(\d*)')
+_base = '([ \d]{3}[ A-Za-z]{2})'
+_ident = re.compile(_base + '    (.{30})(.{26})(.{7})(.{6})')
+_g = re.compile(_base + '  G (.{10})(.{2})(.{8})(.{2}).{24}(.{7})(.{2})')
+_p = re.compile(_base + '  P (.{10})(.{2})(.{18})(.{10})(.{6}).{9}(.{10})(.{2})(.{4})')
+_norm = re.compile(_base + '  N (.{10})(.{2})(.{8})(.{2})(.{8})(.{2})(.{8})(.{6})(.{7})(.{2})')
+_normp = re.compile(_base + ' PN (.{10})(.{2})(.{8})(.{2})(.{8})(.{2})(.{7})(.{2})')
+_decays = [' B- ', ' B+ ', ' EC ', ' IT ', ' A ']
+_level_regex = re.compile(_base + '  L (.{10}).{20}(.{10}).{28}([ M])([ 1-9])')
+_level_regex2 = re.compile(_base + '  L (.{10})(.{2})(.{18})(.{10})(.{6})(.{9})(.{10})(.{2})(.{1})([ M])([ 1-9])')
 _level_cont_regex = re.compile('([ \d]{3}[ A-Za-z]{2})[0-9A-Za-z] L (.*)')
 
 
@@ -34,6 +45,29 @@ def _to_float(x):
         x = float(x)
 
     return x
+
+
+def _to_time(tstr, errstr):
+    t = tstr.strip()
+    # This accepts questionable levels
+    t = t.replace('?', '')
+    tobj = [s.strip(' ()') for s in t.split()]
+    if len(tobj) == 2:
+        t, t_unit = tobj
+        t, terr = _get_val_err(t, errstr)
+        tfinal = to_sec(t, t_unit)
+        tfinalerr = None
+        if type(terr) == float:
+            tfinalerr = to_sec(terr, t_unit)
+        elif terr is not None:
+            tfinalerr = to_sec(terr[0], t_unit), to_sec(terr[1], t_unit)
+    elif 'STABLE' in t:
+        tfinal = np.inf
+        tfinalerr = None
+    else:
+        tfinal = None
+        tfinalerr = None
+    return tfinal, tfinalerr
 
 
 _decay_to = {
@@ -68,73 +102,32 @@ def half_life(ensdf):
         5. branch_ratio, float (frac)
 
     """
-    opened_here = False
     if isinstance(ensdf, basestring):
-        ensdf = open(ensdf, 'r')
-        opened_here = True
+        with open(ensdf, 'r') as f:
+            lines = f.readlines()
+    else:
+        lines = ensdf.readlines()
 
     data = []
-    from_nuc = 0
-    half_life = 0.0
-    level = 0.0
-    valid_from_nuc = False
 
-    # Run through the file
-    lines = ensdf.readlines()
-    for i, line in enumerate(lines):
-        # See if the line matches
-        m = _level_regex.match(line)
-        if m is not None:
-            g = m.groups()
-
-            # grab the from nuclide
-            try:
-                from_nuc = _to_id(g[0], g[-2], g[-1])
-                valid_from_nuc = True
-            except:
-                valid_from_nuc = False
-                continue
-
-            # parse energy level
-            try:
-                level = float(g[1]) * 1E-3
-            except ValueError:
-                pass
-
-            # Grab the half-lives
-            time_info = g[2].replace('?', '').strip()
-            if 0 == len(time_info):
-                valid_from_nuc = False
-            elif time_info == 'STABLE':
-                half_life = np.inf
-                data += [(from_nuc, 0.0, from_nuc, half_life, 1.0)]
-            else:
-                time_unit = [s.strip(' ()') for s in time_info.split()]
-                if 2 == len(time_unit):
-                    hl, unit = time_unit
-                    half_life = to_sec(float(hl), unit)
+    for line in lines:
+        level_l = _level_regex2.match(line)
+        if level_l is not None:
+            level, half_lifev, from_nuc = _parse_level_record(level_l)
+            if half_lifev == np.inf and from_nuc is not None:
+                data.append((from_nuc, 0.0, from_nuc, half_lifev, 1.0))
+            if level is None:
+                level = 0.0
             continue
-
-        m = _level_cont_regex.match(line)
-        if m is not None and valid_from_nuc:
-            g = m.groups()
-            dat = {}
-            raw_children = g[-1].replace(' AP ', '=')
-            raw_children = raw_children.replace('$', ' ').split()
-            for raw_child in raw_children:
-                if '=' in raw_child:
-                    rx, br = raw_child.split('=')[:2]
-                else:
-                    continue
-                dat[rx] = br
-            dat = dict([(_decay_to[key](from_nuc), _to_float(val)*0.01) 
+        levelc = _level_cont_regex.match(line)
+        if levelc is not None and from_nuc is not None and half_lifev is not None:
+            dat = _parse_level_continuation_record(levelc)
+            dat = dict([(_decay_to[key](from_nuc), _to_float(val) * 0.01)
                         for key, val in dat.items() if key in _decay_to])
-            data += [(from_nuc, level, to_nuc, half_life, br)
+            data += [(from_nuc, level, to_nuc, half_lifev, br)
                      for to_nuc, br in dat.items() if 0.0 < br]
             continue
 
-    if opened_here:
-        ensdf.close()
 
     # Hack to calculate metastable state number, make sure it doesn't go over 10,
     # and then change the from_nuc value, and remove all other states
@@ -142,7 +135,7 @@ def half_life(ensdf):
     # of the 10 lowest levels should be removed when id is removed.
     nuclvl = {}
     for row in data:
-        from_nuc, level, to_nuc, half_life, br = row
+        from_nuc, level, to_nuc, half_lifev, br = row
         if from_nuc not in nuclvl:
             nuclvl[from_nuc] = set()
         nuclvl[from_nuc].add(level)
@@ -152,18 +145,6 @@ def half_life(ensdf):
             if (row[0] in nuclvl) and (row[1] in nuclvl[row[0]])]
 
     return data
-
-_valexp = re.compile('([0-9.]*)([Ee][+-]\d*)')
-_val = re.compile('(\d*)[.](\d*)')
-_errpm = re.compile('[+](\d*)[-](\d*)')
-_err = re.compile('[ ]*(\d*)')
-_base = '([ \d]{3}[ A-Za-z]{2})'
-_ident = re.compile(_base + '    (.{30})(.{26})(.{7})(.{6})')
-_g = re.compile(_base + '  G (.{10})(.{2})(.{8})(.{2}).{24}(.{7})(.{2})')
-_p = re.compile(_base + '  P (.{10})(.{2})(.{18})(.{10})(.{6}).{9}(.{10})(.{2})(.{4})')
-_norm = re.compile(_base + '  N (.{10})(.{2})(.{8})(.{2})(.{8})(.{2})(.{8})(.{6})(.{7})(.{2})')
-_normp = re.compile(_base + ' PN (.{10})(.{2})(.{8})(.{2})(.{8})(.{2})(.{7})(.{2})')
-_decays = [' B- ', ' B+ ', ' EC ', ' IT ', ' A ']
 
 
 def _getvalue(obj, fn=float):
@@ -206,6 +187,60 @@ def _get_err(plen, errstr, valexp):
     errp = list((errstr.strip()).zfill(plen))
     errp.insert(-plen, '.')
     return float(''.join(errp) + valexp)
+
+
+def _parse_level_record(l_rec):
+    """
+    This Parses and ENSDF level record
+    
+    Parameters
+    ----------
+    g : re.MatchObject
+        regular expression MatchObject
+        
+    Returns
+    -------
+    e : float
+        Level energy in MeV
+    tfinal : float
+        Half life in seconds
+    from_nuc : int
+        nuc id of nuclide
+    """
+    e, de = _get_val_err(l_rec.group(2), l_rec.group(3))
+    tfinal, tfinalerr = _to_time(l_rec.group(5), l_rec.group(6))
+    try:
+        from_nuc = _to_id(l_rec.group(1), l_rec.group(11), l_rec.group(12))
+    except:
+        from_nuc = None
+    return e, tfinal, from_nuc
+
+
+def _parse_level_continuation_record(lc_rec):
+    """
+    This Parses and ENSDF level record
+    
+    Parameters
+    ----------
+    g : re.MatchObject
+        regular expression MatchObject
+
+    Returns
+    -------
+    dat : dict
+        dictionary of branching ratios of different reaction channels
+    """
+    g = lc_rec.groups()
+    dat = {}
+    raw_children = g[-1].replace(' AP ', '=')
+    raw_children = raw_children.replace('$', ' ').split()
+    for raw_child in raw_children:
+        if '=' in raw_child:
+            rx, br = raw_child.split('=')[:2]
+        else:
+            continue
+        dat[rx] = br
+    return dat
 
 
 def _parse_gamma_record(g):
@@ -338,29 +373,7 @@ def _parse_parent_record(p_rec):
     """
     e, e_err = _get_val_err(p_rec.group(2), p_rec.group(3))
     j = p_rec.group(4)
-    t = p_rec.group(5)
-    t = t.strip()
-    tobj = t.split()
-    if len(tobj) == 2:
-        t, t_unit = tobj
-        t, terr = _get_val_err(t, p_rec.group(6))
-        units = ['Y', 'D', 'H', 'M', 'S', 'MS', 'US', 'NS', 'PS',
-                 'FS', 'AS', 'EV', 'KEV', 'MEV']
-        values = [60. ** 2 * 24. * 365., 60. ** 2 * 24., 60. ** 2, 60., 1., 1.0E-3,
-                  1.0E-6, 1.0E-9, 1.0E-12, 1.0E-15, 1, 1E3, 1E6]
-        tmap = dict(zip(units, values))
-        tfinal = t * tmap[t_unit]
-        if type(terr) == float:
-            tfinalerr = terr * tmap[t_unit]
-        elif terr is not None:
-            tfinalerr = terr[0] * tmap[t_unit], terr[1] * tmap[t_unit]
-        else:
-            tfinalerr = None
-        if 'EV' in t_unit:
-            print('{0} Half life in eV?!'.format(parent))
-    else:
-        tfinal = None
-        tfinalerr = None
+    tfinal, tfinalerr = _to_time(p_rec.group(5), p_rec.group(6))
     return tfinal, tfinalerr
 
 
