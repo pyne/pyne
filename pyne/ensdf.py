@@ -17,10 +17,8 @@ _p = re.compile(_base + '  P (.{10})(.{2})(.{18})(.{10})(.{6}).{9}(.{10})(.{2})(
 _norm = re.compile(_base + '  N (.{10})(.{2})(.{8})(.{2})(.{8})(.{2})(.{8})(.{6})(.{7})(.{2})')
 _normp = re.compile(_base + ' PN (.{10})(.{2})(.{8})(.{2})(.{8})(.{2})(.{7})(.{2})')
 _decays = [' B- ', ' B+ ', ' EC ', ' IT ', ' A ']
-
 _level_regex = re.compile(_base + '  L (.{10}).{20}(.{10}).{28}([ M])([ 1-9])')
 _level_regex2 = re.compile(_base + '  L (.{10})(.{2})(.{18})(.{10})(.{6})(.{9})(.{10})(.{2})(.{1})([ M])([ 1-9])')
-
 _level_cont_regex = re.compile('([ \d]{3}[ A-Za-z]{2})[0-9A-Za-z] L (.*)')
 
 
@@ -70,6 +68,7 @@ def _to_time(tstr, errstr):
         tfinal = None
         tfinalerr = None
     return tfinal, tfinalerr
+
 
 _decay_to = {
     '%EC': lambda x: (x - 10000000) / 10000 * 10000,
