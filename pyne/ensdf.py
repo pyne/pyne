@@ -30,27 +30,26 @@ _level_regex2 = re.compile(_base + '  L (.{10})(.{2})(.{18})(.{10})(.{6})(.{9})'
 _level_cont_regex = re.compile('([ \d]{3}[ A-Za-z]{2})[0-9A-Za-z] L (.*)')
 
 
+def _getvalue(obj, fn=float):
+    try:
+        return fn(obj)
+    except ValueError:
+        return None
+
+
 def _readpoint(line, dstart, dlen, elen=2):
-    try:
-        data = float(line[dstart:dstart + dlen])
-    except ValueError:
-        data = None
-    try:
-        error = float(line[dstart + dlen:dstart + dlen + elen])
-    except ValueError:
-        error = None
+    data = _getvalue(line[dstart:dstart + dlen])
+    error = _getvalue(line[dstart + dlen:dstart + dlen + elen])
     return data, error
 
 
 def _read_variablepoint(line, dstart, dlen, elen=2):
-    try:
-        sub = line[dstart:dstart + dlen + elen]
-        fin = sub.split(" ")
-        data = float(fin[0])
-        error = float(fin[1])
-    except ValueError:
-        data = None
-        error = None
+    sub = line[dstart:dstart + dlen + elen].split()
+    data = None
+    error = None
+    if len(sub) == 2:
+        data = _getvalue(sub[0])
+        error = _getvalue(sub[1])
     return data, error
 
 
@@ -76,24 +75,12 @@ def _build_xray_table():
         else:
             Kb_to_Ka, Kb_to_Ka_err = _read_variablepoint(line, 9, 7)
             Ka2_to_Ka1, Ka2_to_Ka1_err = _read_variablepoint(line, 19, 7)
-            try:
-                L_auger = float(line[29:36])
-            except ValueError:
-                L_auger = None
-            try:
-                K_auger = float(line[36:42])
-            except ValueError:
-                K_auger = None
+            L_auger = _getvalue(line[29:36])
+            K_auger = _getvalue(line[36:42])
             Ka1_X_ray_en, Ka1_X_ray_en_err = _readpoint(line, 43, 8)
             Ka2_X_ray_en, Ka2_X_ray_en_err = _readpoint(line, 54, 7)
-            try:
-                Kb_X_ray_en = float(line[65:69])
-            except ValueError:
-                Kb_X_ray_en = None
-            try:
-                L_X_ray_en = float(line[70:76])
-            except ValueError:
-                L_X_ray_en = None
+            Kb_X_ray_en = _getvalue(line[65:69])
+            L_X_ray_en = _getvalue(line[70:76])
             dat[j] = Z, k_shell_fluor, k_shell_fluor_error, l_shell_fluor,\
                      l_shell_fluor_error, prob, k_shell_be, k_shell_be_err, \
                      li_shell_be, li_shell_be_err, mi_shell_be, mi_shell_be_err,\
@@ -229,13 +216,6 @@ def half_life(ensdf):
             if (row[0] in nuclvl) and (row[1] in nuclvl[row[0]])]
 
     return data
-
-
-def _getvalue(obj, fn=float):
-    try:
-        return fn(obj)
-    except ValueError:
-        return None
 
 
 def _get_val_err(valstr, errstr):
