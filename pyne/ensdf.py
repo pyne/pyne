@@ -366,26 +366,27 @@ def _parse_gamma_continuation_record(g, gammaray):
     for entry in entries:
         entry = entry.replace('AP', '=')
         entry = entry.replace('EL1C+EL2C', 'LC')
-        if not 'C+' in entry:
-            tsplit = entry.split('C')
-            greff = gammaray[2]
-            if '/T' in entry:
-                tsplit = entry.split('/T')
-                greff = gammaray[6]
-                if np.isnan(greff):
-                    greff = gammaray[2]
-            if len(tsplit) == 2:
-                contype = tsplit[0].lstrip('E')
-                eff = tsplit[1].lstrip('= ').split()
-                if len(eff) == 2:
-                    conv, err = _get_val_err(eff[0], eff[1])
-                else:
-                    conv = _getvalue(eff[0])
-                    err = None
-                if conv is None and not contype in conversions:
-                    conversions[contype] = (None, None)
-                elif not contype in conversions:
-                    conversions[contype] = (conv * greff, err)
+        if 'C+' in entry:
+            continue
+        tsplit = entry.split('C')
+        greff = gammaray[2]
+        if '/T' in entry:
+            tsplit = entry.split('/T')
+            greff = gammaray[6]
+            if np.isnan(greff):
+                greff = gammaray[2]
+        if len(tsplit) == 2:
+            contype = tsplit[0].lstrip('E')
+            eff = tsplit[1].lstrip('= ').split()
+            if len(eff) == 2:
+                conv, err = _get_val_err(eff[0], eff[1])
+            else:
+                conv = _getvalue(eff[0])
+                err = None
+            if conv is None and not contype in conversions:
+                conversions[contype] = (None, None)
+            elif not contype in conversions:
+                conversions[contype] = (conv * greff, err)
     return conversions
 
 
@@ -499,7 +500,7 @@ def _update_xrays(conv, xrays, nuc_id):
     """
     Update X-ray data for a given decay
     """
-    z = int(np.floor(nuc_id / 10000000.0))
+    z = nucname.znum(nuc_id)
     xka1 = 0
     xka2 = 0
     xkb = 0
