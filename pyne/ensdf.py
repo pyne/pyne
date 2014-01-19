@@ -37,14 +37,14 @@ def _getvalue(obj, fn=float):
         return None
 
 
-def _readpoint(line, dstart, dlen, elen=2):
+def _readpoint(line, dstart, dlen):
     data = _getvalue(line[dstart:dstart + dlen])
-    error = _getvalue(line[dstart + dlen:dstart + dlen + elen])
+    error = _getvalue(line[dstart + dlen:dstart + dlen + 2])
     return data, error
 
 
-def _read_variablepoint(line, dstart, dlen, elen=2):
-    sub = line[dstart:dstart + dlen + elen].split()
+def _read_variablepoint(line, dstart, dlen):
+    sub = line[dstart:dstart + dlen + 2].split()
     data = None
     error = None
     if len(sub) == 2:
@@ -250,7 +250,7 @@ def _get_val_err(valstr, errstr):
 def _get_err(plen, errstr, valexp):
     errp = list((errstr.strip()).zfill(plen))
     errp.insert(-plen, '.')
-    return float(''.join(errp) + valexp)
+    return _getvalue(''.join(errp) + valexp)
 
 
 def _parse_level_record(l_rec):
@@ -356,13 +356,14 @@ def _parse_gamma_continuation_record(g, gammaray):
             if np.isnan(greff):
                 greff = gammaray[2]
         if len(tsplit) == 2:
+            conv = None
+            err = None
             contype = tsplit[0].lstrip('E')
             eff = tsplit[1].lstrip('= ').split()
             if len(eff) == 2:
                 conv, err = _get_val_err(eff[0], eff[1])
-            else:
+            elif len(eff) == 1:
                 conv = _getvalue(eff[0])
-                err = None
             if conv is None and not contype in conversions:
                 conversions[contype] = (None, None)
             elif not contype in conversions:
@@ -491,7 +492,7 @@ def _update_xrays(conv, xrays, nuc_id):
         xka1 = xka / (1.0 + _xraydat[z - 1, 16])
         xka2 = xka - xka1
         xkb = xk - xka
-        if 'L' in conv:
+        if 'L' in conv and conv['L'][0] is not None and not np.isnan(conv['L'][0]):
             xl = _xraydat[z - 1, 3] * (conv['L'][0] + conv['K'][0] * _xraydat[z - 1, 5])
         else:
             xl = 0
