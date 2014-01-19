@@ -223,7 +223,7 @@ def half_life(ensdf):
         if from_nuc not in nuclvl:
             nuclvl[from_nuc] = set()
         nuclvl[from_nuc].add(level)
-    for nuc in nuclvl.keys():
+    for nuc in nuclvl:
         nuclvl[nuc] = dict([(lvl, i) for i, lvl in enumerate(sorted(nuclvl[nuc])[:10])])
     data = [(row[0] + nuclvl[row[0]][row[1]],) + row[1:] for row in data \
             if (row[0] in nuclvl) and (row[1] in nuclvl[row[0]])]
@@ -504,17 +504,17 @@ def _update_xrays(conv, xrays, nuc_id):
     xka2 = 0
     xkb = 0
     xl = 0
-    if 'K' in conv.keys() and conv['K'][0] is not None and not np.isnan(conv['K'][0]):
+    if 'K' in conv and conv['K'][0] is not None and not np.isnan(conv['K'][0]):
         xk = _xraydat[z - 1, 1] * conv['K'][0]
         xka = xk / (1.0 + _xraydat[z - 1, 14])
         xka1 = xka / (1.0 + _xraydat[z - 1, 16])
         xka2 = xka - xka1
         xkb = xk - xka
-        if 'L' in conv.keys():
+        if 'L' in conv:
             xl = _xraydat[z - 1, 3] * (conv['L'][0] + conv['K'][0] * _xraydat[z - 1, 5])
         else:
             xl = 0
-    elif 'L' in conv.keys() and conv['L'][0] is not None and not np.isnan(conv['L'][0]):
+    elif 'L' in conv and conv['L'][0] is not None and not np.isnan(conv['L'][0]):
         xl = _xraydat[z - 1, 3] * (conv['L'][0])
 
     xrays = np.array([_xraydat[z - 1, 20], xka1 + xrays[1], _xraydat[z - 1, 22], xka2 + xrays[3],
