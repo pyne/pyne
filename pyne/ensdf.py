@@ -13,6 +13,7 @@ _err = re.compile('[ ]*(\d*)')
 _base = '([ \d]{3}[ A-Za-z]{2})'
 _ident = re.compile(_base + '    (.{30})(.{26})(.{7})(.{6})')
 _g = re.compile(_base + '  G (.{10})(.{2})(.{8})(.{2}).{24}(.{7})(.{2})')
+_gc = re.compile(_base + '[0-9A-Za-z] G (.{70})')
 _p = re.compile(_base + '  P (.{10})(.{2})(.{18})(.{10})(.{6}).{9}(.{10})(.{2})(.{4})')
 _norm = re.compile(_base + '  N (.{10})(.{2})(.{8})(.{2})(.{8})(.{2})(.{8})(.{6})(.{7})(.{2})')
 _normp = re.compile(_base + ' PN (.{10})(.{2})(.{8})(.{2})(.{8})(.{2})(.{7})(.{2})')
@@ -20,6 +21,77 @@ _decays = [' B- ', ' B+ ', ' EC ', ' IT ', ' A ']
 _level_regex = re.compile(_base + '  L (.{10}).{20}(.{10}).{28}([ M])([ 1-9])')
 _level_regex2 = re.compile(_base + '  L (.{10})(.{2})(.{18})(.{10})(.{6})(.{9})(.{10})(.{2})(.{1})([ M])([ 1-9])')
 _level_cont_regex = re.compile('([ \d]{3}[ A-Za-z]{2})[0-9A-Za-z] L (.*)')
+
+
+def _readpoint(line, dstart, dlen, elen=2):
+    try:
+        data = float(line[dstart:dstart + dlen])
+    except:
+        data = None
+    try:
+        error = float(line[dstart + dlen:dstart + dlen + elen])
+    except:
+        error = None
+    return data, error
+
+
+def _read_variablepoint(line, dstart, dlen, elen=2):
+    try:
+        sub = line[dstart:dstart + dlen + elen]
+        fin = sub.split(" ")
+        data = float(fin[0])
+        error = float(fin[1])
+    except:
+        data = None
+        error = None
+    return data, error
+
+
+def _build_xray_table():
+    i = 0
+    j = 0
+    dat = np.zeros((105, 26))
+    with open('mednew.dat', 'r') as f:
+        for line in f:
+            if (-1) ** i == 1:
+                Z = int(line[0:3])
+                k_shell_fluor, k_shell_fluor_error = _readpoint(line, 9, 6)
+                l_shell_fluor, l_shell_fluor_error = _readpoint(line, 18, 6)
+                #Probability of creating L-shell vacancy by filling a K-shell vacancy
+                prob, prob_error = _readpoint(line, 27, 6)
+                k_shell_be, k_shell_be_err = _readpoint(line, 36, 8)
+                li_shell_be, li_shell_be_err = _readpoint(line, 47, 8)
+                mi_shell_be, mi_shell_be_err = _readpoint(line, 58, 8)
+                ni_shell_be, ni_shell_be_err = _readpoint(line, 69, 8)
+            else:
+                Kb_to_Ka, Kb_to_Ka_err = _read_variablepoint(line, 9, 7)
+                Ka2_to_Ka1, Ka2_to_Ka1_err = _read_variablepoint(line, 19, 7)
+                try:
+                    L_auger = float(line[29:36])
+                except:
+                    L_auger = None
+                try:
+                    K_auger = float(line[36:42])
+                except:
+                    K_auger = None
+                Ka1_X_ray_en, Ka1_X_ray_en_err = _readpoint(line, 43, 8)
+                Ka2_X_ray_en, Ka2_X_ray_en_err = _readpoint(line, 54, 7)
+                try:
+                    Kb_X_ray_en = float(line[65:69])
+                except:
+                    Kb_X_ray_en = None
+                try:
+                    L_X_ray_en = float(line[70:76])
+                except:
+                    L_X_ray_en = None
+                dat[
+                    j] = Z, k_shell_fluor, k_shell_fluor_error, l_shell_fluor, l_shell_fluor_error, prob, k_shell_be, k_shell_be_err, \
+                         li_shell_be, li_shell_be_err, mi_shell_be, mi_shell_be_err, ni_shell_be, ni_shell_be_err, \
+                         Kb_to_Ka, Kb_to_Ka_err, Ka2_to_Ka1, Ka2_to_Ka1_err, L_auger, K_auger, Ka1_X_ray_en, Ka1_X_ray_en_err, \
+                         Ka2_X_ray_en, Ka2_X_ray_en_err, Kb_X_ray_en, L_X_ray_en
+                j = j + 1
+            i = i + 1
+    return dat
 
 
 def _to_id(nuc, m=None, s=None):
@@ -271,6 +343,25 @@ def _parse_gamma_record(g):
     return dat
 
 
+def _parse_gamma_continuation_record(g):
+    """
+    This parses an ENSDF gamma continuation record
+
+    """
+    conversions = {}
+    entries = g.group(2).split('$')
+    for entry in entries:
+        if not 'C+' in entry:
+            tsplit = entry.split('C')
+            if len(tsplit) == 2:
+                contype = tsplit[0]
+                eff = tsplit[1].lstrip('=').split()
+                if len(eff) == 2:
+                    conv, err = _get_val_err(eff[0], eff[1])
+                conversions[contype] = (conv, err)
+    return conversions
+
+
 def _parse_normalization_record(n_rec):
     """
     This parses an ENSDF normalization record
@@ -377,6 +468,31 @@ def _parse_parent_record(p_rec):
     return tfinal, tfinalerr
 
 
+def _update_xrays(conv, xrays, nuc_id, rel):
+    """
+    Update X-ray data for a given decay
+    """
+    z = int(np.floor(nuc_id/10000000.0))
+    if 'K' in conv.keys():
+        xk = _xraydat[z-1, 1]*conv['K'][0]*rel
+        xka = xk/(1.0+_xraydat[z-1, 14])
+        xka1 = xka/(1.0+_xraydat[z-1, 16])
+        xka2 = xka - xka1
+        xkb = xk - xka
+        if 'L' in conv.keys():
+            xl = _xraydat[z-1, 3]*(conv['L'][0]*rel + conv['K'][0]*rel*_xraydat[z-1, 5])
+        else:
+            xl = 0
+    else:
+        xka1 = 0
+        xka2 = 0
+        xkb = 0
+        xl = 0
+    xrays = np.array([_xraydat[z-1, 20], xka1 + xrays[1], _xraydat[z-1, 22], xka2 + xrays[3],
+                     _xraydat[z-1, 24], xkb + xrays[5], _xraydat[z-1, 25], xl + xrays[7]])
+    return xrays
+
+
 def _parse_decay_dataset(lines, decay_s):
     """
     This parses a gamma ray dataset It returns a tuple of the data.
@@ -416,6 +532,7 @@ def _parse_decay_dataset(lines, decay_s):
 
     """
     gammarays = []
+    conv = {}
     ident = _ident.match(lines[0])
     daughter = ident.group(1)
     parent = ident.group(2).split()[0]
@@ -423,12 +540,28 @@ def _parse_decay_dataset(lines, decay_s):
     tfinalerr = None
     nrbr = None
     nrbr_err = None
+    xrays = np.zeros(8)
+    gamma = 0
+
     for line in lines:
         g_rec = _g.match(line)
         if g_rec is not None:
             dat = _parse_gamma_record(g_rec)
+            if gamma == 1:
+                gamma = 0
+                #store old atomic data
+                xrays = _update_xrays(conv, xrays, _to_id(daughter), gammarays[-1][-4])
+                #clear conversion data
+                conv = {}
+
             if not np.isnan(dat[0]):
                 gammarays.append(dat)
+        gc_rec = _gc.match(line)
+        if gc_rec is not None:
+            conv_temp = _parse_gamma_continuation_record(gc_rec)
+            if gamma == 0:
+                gamma = 1
+            conv.update(conv_temp)
         n_rec = _norm.match(line)
         if n_rec is not None:
             nr, nr_err, nt, nt_err, br, br_err, nb, nb_err, nrbr, nrbr_err = \
@@ -445,8 +578,10 @@ def _parse_decay_dataset(lines, decay_s):
             tfinal, tfinalerr = _parse_parent_record(p_rec)
     if len(gammarays) > 0:
         gammas = np.array(gammarays)
+        if gamma == 1:
+                xrays = _update_xrays(conv, xrays, _to_id(daughter), gammarays[-1][-4])
         return _to_id(parent), _to_id(daughter), decay_s.strip(), tfinal, tfinalerr, \
-               nrbr, nrbr_err, gammas
+               nrbr, nrbr_err, xrays, gammas
     return None
 
 
@@ -488,3 +623,5 @@ def gamma_rays(f='ensdf.001'):
                     if decay is not None:
                         decaylist.append(decay)
     return decaylist
+
+_xraydat = _build_xray_table()
