@@ -351,13 +351,17 @@ def _parse_gamma_continuation_record(g):
     conversions = {}
     entries = g.group(2).split('$')
     for entry in entries:
+        #entry = entry.replace('AP', '=')
         if not 'C+' in entry:
             tsplit = entry.split('C')
             if len(tsplit) == 2:
-                contype = tsplit[0]
+                contype = tsplit[0].lstrip('E')
                 eff = tsplit[1].lstrip('=').split()
                 if len(eff) == 2:
                     conv, err = _get_val_err(eff[0], eff[1])
+                else:
+                    conv = _getvalue(eff[0])
+                    err = None
                 conversions[contype] = (conv, err)
     return conversions
 
@@ -473,6 +477,10 @@ def _update_xrays(conv, xrays, nuc_id, rel):
     Update X-ray data for a given decay
     """
     z = int(np.floor(nuc_id/10000000.0))
+    xka1 = 0
+    xka2 = 0
+    xkb = 0
+    xl = 0
     if 'K' in conv.keys():
         xk = _xraydat[z-1, 1]*conv['K'][0]*rel
         xka = xk/(1.0+_xraydat[z-1, 14])
@@ -483,11 +491,9 @@ def _update_xrays(conv, xrays, nuc_id, rel):
             xl = _xraydat[z-1, 3]*(conv['L'][0]*rel + conv['K'][0]*rel*_xraydat[z-1, 5])
         else:
             xl = 0
-    else:
-        xka1 = 0
-        xka2 = 0
-        xkb = 0
-        xl = 0
+    elif 'L' in conv.keys() and conv['L'][0] is not None:
+        xl = _xraydat[z-1, 3]*(conv['L'][0]*rel)
+
     xrays = np.array([_xraydat[z-1, 20], xka1 + xrays[1], _xraydat[z-1, 22], xka2 + xrays[3],
                      _xraydat[z-1, 24], xkb + xrays[5], _xraydat[z-1, 25], xl + xrays[7]])
     return xrays
