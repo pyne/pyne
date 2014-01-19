@@ -275,7 +275,7 @@ def _parse_level_record(l_rec):
     tfinal, tfinalerr = _to_time(l_rec.group(5), l_rec.group(6))
     try:
         from_nuc = _to_id(l_rec.group(1), l_rec.group(11), l_rec.group(12))
-    except ValueError:
+    except RuntimeError:
         from_nuc = None
     return e, tfinal, from_nuc
 
