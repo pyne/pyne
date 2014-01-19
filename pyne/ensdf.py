@@ -30,11 +30,14 @@ _level_regex2 = re.compile(_base + '  L (.{10})(.{2})(.{18})(.{10})(.{6})(.{9})'
 _level_cont_regex = re.compile('([ \d]{3}[ A-Za-z]{2})[0-9A-Za-z] L (.*)')
 
 
-def _getvalue(obj, fn=float):
+def _getvalue(obj, fn=float, rn=None):
+    x = obj.strip()
+    x = x.replace('$', '')
+    x = x.replace('?', '')
     try:
-        return fn(obj)
+        return fn(x)
     except ValueError:
-        return None
+        return rn
 
 
 def _readpoint(line, dstart, dlen):
@@ -103,19 +106,6 @@ def _to_id(nuc, m=None, s=None):
             state = 1
         nucid += state
     return nucid
-
-
-def _to_float(x):
-    x = x.strip()
-    x = x.replace('$', '')
-    x = x.replace('?', '')
-
-    if 0 == len(x):
-        x = 0.0
-    else:
-        x = float(x)
-
-    return x
 
 
 def _to_time(tstr, errstr):
@@ -193,7 +183,7 @@ def half_life(ensdf):
         levelc = _level_cont_regex.match(line)
         if levelc is not None and from_nuc is not None and half_lifev is not None:
             dat = _parse_level_continuation_record(levelc)
-            dat = dict([(_decay_to[key](from_nuc), _to_float(val) * 0.01)
+            dat = dict([(_decay_to[key](from_nuc), _getvalue(val, rn=0) * 0.01)
                         for key, val in dat.items() if key in _decay_to])
             data += [(from_nuc, level, to_nuc, half_lifev, br)
                      for to_nuc, br in dat.items() if 0.0 < br]
