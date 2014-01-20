@@ -1,6 +1,7 @@
 import re
 import urllib
-import contextlib
+import os
+import warnings
 
 import numpy as np
 
@@ -60,9 +61,11 @@ def _build_xray_table():
     i = 0
     j = 0
     dat = np.zeros((105, 26))
-    with contextlib.closing(urllib.urlopen(
-                    'http://www.nndc.bnl.gov/nndcscr/ensdf_pgm/analysis/radlst/'
-                    + 'mednew.dat')) as f:
+    medfile = os.path.join(os.path.dirname(__file__), 'mednew.dat')
+    if not os.path.isfile(medfile):
+        urllib.urlretrieve('http://www.nndc.bnl.gov/nndcscr/ensdf_pgm/'
+                           + 'analysis/radlst/mednew.dat', medfile)
+    with open(medfile, 'r') as f:
         lines = f.readlines()
     for line in lines:
         if (-1) ** i == 1:
@@ -97,7 +100,11 @@ def _build_xray_table():
 
 
 def _to_id(nuc, m=None, s=None):
-    nucid = nucname.id(nuc.strip())
+    if nuc.strip() != '1NN':
+        nucid = nucname.id(nuc.strip())
+    else:
+        warnings.warn('Neutron data not supported!')
+        return None
     if m == 'M':
         state = s.strip()
         if 0 < len(state):
@@ -263,10 +270,7 @@ def _parse_level_record(l_rec):
     """
     e, de = _get_val_err(l_rec.group(2), l_rec.group(3))
     tfinal, tfinalerr = _to_time(l_rec.group(5), l_rec.group(6))
-    try:
-        from_nuc = _to_id(l_rec.group(1), l_rec.group(11), l_rec.group(12))
-    except RuntimeError:
-        from_nuc = None
+    from_nuc = _to_id(l_rec.group(1), l_rec.group(11), l_rec.group(12))
     return e, tfinal, from_nuc
 
 
