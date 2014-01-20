@@ -104,7 +104,10 @@ is open to interpretation.
 * Use 'single quotes' for string literals, and """triple double quotes""" for 
   docstrings. Double quotes are allowed to prevent single quote escaping, 
   e.g. "Y'all c'mon o'er here!"
-
+* Lines should be at most 80 characters long. The 72 and 79 character recommendations
+  from PEP8 are not required here.
+* All Python code should be compliant with Python 2.7 and Python 3.3+.  At some 
+  unforeseen date in the future, Python 2.7 support *may* be dropped.
 
 -------------------
 Cython Style Guide 
@@ -118,21 +121,25 @@ cdefs, cpdefs, & ctypedefs
 ***************************
 Separate ``cdef``, ``cpdef``, and ``ctypedef`` statements from the following type by 
 exactly one space. In turn, separate the type from the variable name by exactly 
-one space. Only ``cdef``, ``cpdef``, or ``ctypedef`` one variable per line. 
-Grouping ``cdef`` statements is allowed.  For example,
+one space. Only ``ctypedef`` one variable per line. You may ``cdef`` or ``cpdef``
+multiple variables per line as long as these are simple declarations - multiple 
+assignment, references, or pointers are not allowed. Grouping ``cdef`` statements 
+is allowed.  For example,
 
 .. code-block:: cython
 
     # Good
     cdef int n
     cdef char* s
+    cpdef int i, j, k
     cdef Material mat = Material()
     cdef int true_enough(x):
         return 1
 
     # Bad
     cdef  char *s
-    cpdef int i, j, k
+    cdef char * s, * t, * u, * v
+    cdef double x=42, y=x+1, z=x*y 
     cdef Material     mat   = Material()
     cdef   int   falsified(x):
         return 0
@@ -496,16 +503,16 @@ These guards ought to be UUIDs:
 
 .. code-block:: c++
 
-    #ifndef _f1b039d4_6ef0_43ac_87b1_0977204f3d8b
-    #define _f1b039d4_6ef0_43ac_87b1_0977204f3d8b
+    #ifndef _W7WGLJVRGRDH7G47RDHRLLCP2A
+    #define _W7WGLJVRGRDH7G47RDHRLLCP2A
     ...
     #endif
 
-Use this BASH command for generating UUIDs:
+Use this command for generating UUIDs:
 
 .. code-block: bash
 
-    (id="_$(uuidgen|tr \\- _)";echo "#ifndef $id";echo "#define $id";echo "#endif")
+    $ python -c "import uuid; import base64; print('_' + base64.b32encode(uuid.uuid4().bytes).decode().strip('='))"
 
 This guard should begin before any other code and should end at the end of the file.
 
