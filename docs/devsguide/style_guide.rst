@@ -510,7 +510,7 @@ These guards ought to be UUIDs:
 
 Use this command for generating UUIDs:
 
-.. code-block: bash
+.. code-block:: bash
 
     $ python -c "import uuid; import base64; print('_' + base64.b32encode(uuid.uuid4().bytes).decode().strip('='))"
 
