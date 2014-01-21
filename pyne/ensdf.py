@@ -1,4 +1,7 @@
 import re
+import urllib
+import os
+import warnings
 
 import numpy as np
 
@@ -12,18 +15,96 @@ _errpm = re.compile('[+](\d*)[-](\d*)')
 _err = re.compile('[ ]*(\d*)')
 _base = '([ \d]{3}[ A-Za-z]{2})'
 _ident = re.compile(_base + '    (.{30})(.{26})(.{7})(.{6})')
-_g = re.compile(_base + '  G (.{10})(.{2})(.{8})(.{2}).{24}(.{7})(.{2})')
-_p = re.compile(_base + '  P (.{10})(.{2})(.{18})(.{10})(.{6}).{9}(.{10})(.{2})(.{4})')
-_norm = re.compile(_base + '  N (.{10})(.{2})(.{8})(.{2})(.{8})(.{2})(.{8})(.{6})(.{7})(.{2})')
-_normp = re.compile(_base + ' PN (.{10})(.{2})(.{8})(.{2})(.{8})(.{2})(.{7})(.{2})')
+_g = re.compile(_base + '  G (.{10})(.{2})(.{8})(.{2}).{24}(.{7})(.{2})(.{10})'
+                + '(.{2})')
+_gc = re.compile(_base + '[0-9A-Za-z] G (.{70})')
+_p = re.compile(_base + '  P (.{10})(.{2})(.{18})(.{10})(.{6}).{9}(.{10})(.{2})'
+                + '(.{4})')
+_norm = re.compile(_base + '  N (.{10})(.{2})(.{8})(.{2})(.{8})(.{2})(.{8})'
+                   + '(.{6})(.{7})(.{2})')
+_normp = re.compile(_base +
+                    ' PN (.{10})(.{2})(.{8})(.{2})(.{8})(.{2})(.{7})(.{2})')
 _decays = [' B- ', ' B+ ', ' EC ', ' IT ', ' A ']
 _level_regex = re.compile(_base + '  L (.{10}).{20}(.{10}).{28}([ M])([ 1-9])')
-_level_regex2 = re.compile(_base + '  L (.{10})(.{2})(.{18})(.{10})(.{6})(.{9})(.{10})(.{2})(.{1})([ M])([ 1-9])')
+_level_regex2 = re.compile(_base + '  L (.{10})(.{2})(.{18})(.{10})(.{6})(.{9})'
+                           + '(.{10})(.{2})(.{1})([ M])([ 1-9])')
 _level_cont_regex = re.compile('([ \d]{3}[ A-Za-z]{2})[0-9A-Za-z] L (.*)')
 
 
+def _getvalue(obj, fn=float, rn=None):
+    x = obj.strip()
+    x = x.replace('$', '')
+    x = x.replace('?', '')
+    try:
+        return fn(x)
+    except ValueError:
+        return rn
+
+
+def _readpoint(line, dstart, dlen):
+    data = _getvalue(line[dstart:dstart + dlen])
+    error = _getvalue(line[dstart + dlen:dstart + dlen + 2])
+    return data, error
+
+
+def _read_variablepoint(line, dstart, dlen):
+    sub = line[dstart:dstart + dlen + 2].split()
+    data = None
+    error = None
+    if len(sub) == 2:
+        data = _getvalue(sub[0])
+        error = _getvalue(sub[1])
+    return data, error
+
+
+def _build_xray_table():
+    i = 0
+    j = 0
+    dat = np.zeros((105, 26))
+    medfile = os.path.join(os.path.dirname(__file__), 'mednew.dat')
+    if not os.path.isfile(medfile):
+        urllib.urlretrieve('http://www.nndc.bnl.gov/nndcscr/ensdf_pgm/'
+                           + 'analysis/radlst/mednew.dat', medfile)
+    with open(medfile, 'r') as f:
+        lines = f.readlines()
+    for line in lines:
+        if (-1) ** i == 1:
+            Z = int(line[0:3])
+            k_shell_fluor, k_shell_fluor_error = _readpoint(line, 9, 6)
+            l_shell_fluor, l_shell_fluor_error = _readpoint(line, 18, 6)
+            #Probability of creating L-shell vacancy by filling K-shell vacancy
+            prob, prob_error = _readpoint(line, 27, 6)
+            k_shell_be, k_shell_be_err = _readpoint(line, 36, 8)
+            li_shell_be, li_shell_be_err = _readpoint(line, 47, 8)
+            mi_shell_be, mi_shell_be_err = _readpoint(line, 58, 8)
+            ni_shell_be, ni_shell_be_err = _readpoint(line, 69, 8)
+        else:
+            Kb_to_Ka, Kb_to_Ka_err = _read_variablepoint(line, 9, 7)
+            Ka2_to_Ka1, Ka2_to_Ka1_err = _read_variablepoint(line, 19, 7)
+            L_auger = _getvalue(line[29:36])
+            K_auger = _getvalue(line[36:42])
+            Ka1_X_ray_en, Ka1_X_ray_en_err = _readpoint(line, 43, 8)
+            Ka2_X_ray_en, Ka2_X_ray_en_err = _readpoint(line, 54, 7)
+            Kb_X_ray_en = _getvalue(line[65:69])
+            L_X_ray_en = _getvalue(line[70:76])
+            dat[j] = Z, k_shell_fluor, k_shell_fluor_error, l_shell_fluor,\
+                     l_shell_fluor_error, prob, k_shell_be, k_shell_be_err, \
+                     li_shell_be, li_shell_be_err, mi_shell_be, mi_shell_be_err,\
+                     ni_shell_be, ni_shell_be_err, \
+                     Kb_to_Ka, Kb_to_Ka_err, Ka2_to_Ka1, Ka2_to_Ka1_err,\
+                     L_auger, K_auger, Ka1_X_ray_en, Ka1_X_ray_en_err, \
+                     Ka2_X_ray_en, Ka2_X_ray_en_err, Kb_X_ray_en, L_X_ray_en
+            j += 1
+        i += 1
+    return dat
+
+
 def _to_id(nuc, m=None, s=None):
-    nucid = nucname.id(nuc.strip())
+    if nuc.strip() != '1NN':
+        nucid = nucname.id(nuc.strip())
+    else:
+        warnings.warn('Neutron data not supported!')
+        return None
     if m == 'M':
         state = s.strip()
         if 0 < len(state):
@@ -32,19 +113,6 @@ def _to_id(nuc, m=None, s=None):
             state = 1
         nucid += state
     return nucid
-
-
-def _to_float(x):
-    x = x.strip()
-    x = x.replace('$', '')
-    x = x.replace('?', '')
-
-    if 0 == len(x):
-        x = 0.0
-    else:
-        x = float(x)
-
-    return x
 
 
 def _to_time(tstr, errstr):
@@ -122,7 +190,7 @@ def half_life(ensdf):
         levelc = _level_cont_regex.match(line)
         if levelc is not None and from_nuc is not None and half_lifev is not None:
             dat = _parse_level_continuation_record(levelc)
-            dat = dict([(_decay_to[key](from_nuc), _to_float(val) * 0.01)
+            dat = dict([(_decay_to[key](from_nuc), _getvalue(val, rn=0) * 0.01)
                         for key, val in dat.items() if key in _decay_to])
             data += [(from_nuc, level, to_nuc, half_lifev, br)
                      for to_nuc, br in dat.items() if 0.0 < br]
@@ -139,19 +207,12 @@ def half_life(ensdf):
         if from_nuc not in nuclvl:
             nuclvl[from_nuc] = set()
         nuclvl[from_nuc].add(level)
-    for nuc in nuclvl.keys():
+    for nuc in nuclvl:
         nuclvl[nuc] = dict([(lvl, i) for i, lvl in enumerate(sorted(nuclvl[nuc])[:10])])
     data = [(row[0] + nuclvl[row[0]][row[1]],) + row[1:] for row in data \
             if (row[0] in nuclvl) and (row[1] in nuclvl[row[0]])]
 
     return data
-
-
-def _getvalue(obj, fn=float):
-    try:
-        return fn(obj)
-    except:
-        return None
 
 
 def _get_val_err(valstr, errstr):
@@ -186,7 +247,7 @@ def _get_val_err(valstr, errstr):
 def _get_err(plen, errstr, valexp):
     errp = list((errstr.strip()).zfill(plen))
     errp.insert(-plen, '.')
-    return float(''.join(errp) + valexp)
+    return _getvalue(''.join(errp) + valexp)
 
 
 def _parse_level_record(l_rec):
@@ -209,10 +270,7 @@ def _parse_level_record(l_rec):
     """
     e, de = _get_val_err(l_rec.group(2), l_rec.group(3))
     tfinal, tfinalerr = _to_time(l_rec.group(5), l_rec.group(6))
-    try:
-        from_nuc = _to_id(l_rec.group(1), l_rec.group(11), l_rec.group(12))
-    except:
-        from_nuc = None
+    from_nuc = _to_id(l_rec.group(1), l_rec.group(11), l_rec.group(12))
     return e, tfinal, from_nuc
 
 
@@ -263,12 +321,48 @@ def _parse_gamma_record(g):
             * electron conversion intensity
             * uncertainty in electron conversion intensity
     """
-    dat = np.zeros(6)
+    dat = np.zeros(8)
     en, en_err = _get_val_err(g.group(2), g.group(3))
     inten, inten_err = _get_val_err(g.group(4), g.group(5))
     conv, conv_err = _get_val_err(g.group(6), g.group(7))
-    dat[:] = en, en_err, inten, inten_err, conv, conv_err
+    tti, tti_err = _get_val_err(g.group(8), g.group(9))
+    dat[:] = en, en_err, inten, inten_err, conv, conv_err, tti, tti_err
     return dat
+
+
+def _parse_gamma_continuation_record(g, gammaray):
+    """
+    This parses an ENSDF gamma continuation record
+
+    """
+    conversions = {}
+    entries = g.group(2).split('$')
+    for entry in entries:
+        entry = entry.replace('AP', '=')
+        entry = entry.replace('EL1C+EL2C', 'LC')
+        if 'C+' in entry:
+            continue
+        tsplit = entry.split('C')
+        greff = gammaray[2]
+        if '/T' in entry:
+            tsplit = entry.split('/T')
+            greff = gammaray[6]
+            if np.isnan(greff):
+                greff = gammaray[2]
+        if len(tsplit) == 2:
+            conv = None
+            err = None
+            contype = tsplit[0].lstrip('E')
+            eff = tsplit[1].lstrip('= ').split()
+            if len(eff) == 2:
+                conv, err = _get_val_err(eff[0], eff[1])
+            elif len(eff) == 1:
+                conv = _getvalue(eff[0])
+            if conv is None and not contype in conversions:
+                conversions[contype] = (None, None)
+            elif not contype in conversions:
+                conversions[contype] = (conv * greff, err)
+    return conversions
 
 
 def _parse_normalization_record(n_rec):
@@ -377,9 +471,36 @@ def _parse_parent_record(p_rec):
     return tfinal, tfinalerr
 
 
+def _update_xrays(conv, xrays, nuc_id):
+    """
+    Update X-ray data for a given decay
+    """
+    z = nucname.znum(nuc_id)
+    xka1 = 0
+    xka2 = 0
+    xkb = 0
+    xl = 0
+    if 'K' in conv and conv['K'][0] is not None and not np.isnan(conv['K'][0]):
+        xk = _xraydat[z - 1, 1] * conv['K'][0]
+        xka = xk / (1.0 + _xraydat[z - 1, 14])
+        xka1 = xka / (1.0 + _xraydat[z - 1, 16])
+        xka2 = xka - xka1
+        xkb = xk - xka
+        if 'L' in conv and conv['L'][0] is not None and not np.isnan(conv['L'][0]):
+            xl = _xraydat[z - 1, 3] * (conv['L'][0] + conv['K'][0] * _xraydat[z - 1, 5])
+        else:
+            xl = 0
+    elif 'L' in conv and conv['L'][0] is not None and not np.isnan(conv['L'][0]):
+        xl = _xraydat[z - 1, 3] * (conv['L'][0])
+
+    xrays = np.array([_xraydat[z - 1, 20], xka1 + xrays[1], _xraydat[z - 1, 22], xka2 + xrays[3],
+                      _xraydat[z - 1, 24], xkb + xrays[5], _xraydat[z - 1, 25], xl + xrays[7]])
+    return xrays
+
+
 def _parse_decay_dataset(lines, decay_s):
     """
-    This parses a gamma ray dataset It returns a tuple of the data.
+    This parses a gamma ray dataset. It returns a tuple of the parsed data.
 
     Parameters
     ----------
@@ -390,32 +511,11 @@ def _parse_decay_dataset(lines, decay_s):
 
     Returns
     -------
-    int
-        nuc_id of the parent
-    int
-        nuc_id of the daughter
-    str
-        decay type
-    float
-        half-life in seconds
-    float
-        half-life error in seconds
-    float
-        Conversion factor for gamma intensity to photons per 100 decays of the
-        parent
-    float
-        Error in conversion factor for gamma intensity
-    numpy.ndarray
-        a numpy array containing information about each gamma ray:
-            * energy in keV
-            * uncertainty in energy
-            * intensity
-            * uncertainty in intensity
-            * electron conversion intensity
-            * uncertainty in electron conversion intensity
+    Tuple of decay parameters which is described in detail in gamma_rays docs
 
     """
     gammarays = []
+    conv = {}
     ident = _ident.match(lines[0])
     daughter = ident.group(1)
     parent = ident.group(2).split()[0]
@@ -423,12 +523,33 @@ def _parse_decay_dataset(lines, decay_s):
     tfinalerr = None
     nrbr = None
     nrbr_err = None
+    xrays = np.zeros(8)
+    gamma = 0
+    goodgray = False
+
     for line in lines:
         g_rec = _g.match(line)
         if g_rec is not None:
             dat = _parse_gamma_record(g_rec)
+            if gamma == 1:
+                gamma = 0
+                #store old atomic data
+                xrays = _update_xrays(conv, xrays, _to_id(daughter))
+                #clear conversion data
+                conv = {}
+
             if not np.isnan(dat[0]):
                 gammarays.append(dat)
+                goodgray = True
+            else:
+                goodgray = False
+        gc_rec = _gc.match(line)
+        if gc_rec is not None and goodgray is True:
+            conv_temp = conv
+            conv = _parse_gamma_continuation_record(gc_rec, gammarays[-1])
+            if gamma == 0:
+                gamma = 1
+            conv.update(conv_temp)
         n_rec = _norm.match(line)
         if n_rec is not None:
             nr, nr_err, nt, nt_err, br, br_err, nb, nb_err, nrbr, nrbr_err = \
@@ -445,8 +566,10 @@ def _parse_decay_dataset(lines, decay_s):
             tfinal, tfinalerr = _parse_parent_record(p_rec)
     if len(gammarays) > 0:
         gammas = np.array(gammarays)
+        if gamma == 1:
+            xrays = _update_xrays(conv, xrays, _to_id(daughter))
         return _to_id(parent), _to_id(daughter), decay_s.strip(), tfinal, tfinalerr, \
-               nrbr, nrbr_err, gammas
+               nrbr, nrbr_err, xrays, gammas
     return None
 
 
@@ -467,8 +590,42 @@ def gamma_rays(f='ensdf.001'):
     -------
     decaylist : list of tuples
         list of objects containing information pertaining to a particular
-        decay. Contents of the tuple are described in the returns of the
-        _parse_decay_dataset function.
+        decay. This information is in the following format:
+    int
+        nuc_id of the parent
+    int
+        nuc_id of the daughter
+    str
+        decay type
+    float
+        half-life in seconds
+    float
+        half-life error in seconds
+    float
+        Conversion factor for gamma intensity to photons per 100 decays of the
+        parent
+    float
+        Error in conversion factor for gamma intensity
+    numpy.ndarray
+        X-ray energies and intensities in the following format:
+            * K_alpha1 energy
+            * K_alpha1 intensity (multiply by conversion factor for percentage)
+            * K_alpha2 energy
+            * K_alpha2 intensity (multiply by conversion factor for percentage)
+            * K_beta energy
+            * K_beta intensity (multiply by conversion factor for percentage)
+            * L energy
+            * L intensity (multiply by conversion factor for percentage)
+    numpy.ndarray
+        a numpy array containing information about each gamma ray:
+            * energy in keV
+            * uncertainty in energy
+            * intensity (multiply by conversion factor for percentage)
+            * uncertainty in intensity
+            * electron conversion intensity
+            * uncertainty in electron conversion intensity
+            * total transition intensity
+            * total transition intensity error
 
     """
     if isinstance(f, str):
@@ -488,3 +645,6 @@ def gamma_rays(f='ensdf.001'):
                     if decay is not None:
                         decaylist.append(decay)
     return decaylist
+
+
+_xraydat = _build_xray_table()
