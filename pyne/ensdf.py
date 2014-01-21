@@ -500,7 +500,7 @@ def _update_xrays(conv, xrays, nuc_id):
 
 def _parse_decay_dataset(lines, decay_s):
     """
-    This parses a gamma ray dataset It returns a tuple of the data.
+    This parses a gamma ray dataset. It returns a tuple of the parsed data.
 
     Parameters
     ----------
@@ -511,29 +511,7 @@ def _parse_decay_dataset(lines, decay_s):
 
     Returns
     -------
-    int
-        nuc_id of the parent
-    int
-        nuc_id of the daughter
-    str
-        decay type
-    float
-        half-life in seconds
-    float
-        half-life error in seconds
-    float
-        Conversion factor for gamma intensity to photons per 100 decays of the
-        parent
-    float
-        Error in conversion factor for gamma intensity
-    numpy.ndarray
-        a numpy array containing information about each gamma ray:
-            * energy in keV
-            * uncertainty in energy
-            * intensity
-            * uncertainty in intensity
-            * electron conversion intensity
-            * uncertainty in electron conversion intensity
+    Tuple of decay parameters which is described in detail in gamma_rays docs
 
     """
     gammarays = []
@@ -612,8 +590,42 @@ def gamma_rays(f='ensdf.001'):
     -------
     decaylist : list of tuples
         list of objects containing information pertaining to a particular
-        decay. Contents of the tuple are described in the returns of the
-        _parse_decay_dataset function.
+        decay. This information is in the following format:
+    int
+        nuc_id of the parent
+    int
+        nuc_id of the daughter
+    str
+        decay type
+    float
+        half-life in seconds
+    float
+        half-life error in seconds
+    float
+        Conversion factor for gamma intensity to photons per 100 decays of the
+        parent
+    float
+        Error in conversion factor for gamma intensity
+    numpy.ndarray
+        X-ray energies and intensities in the following format:
+            * K_alpha1 energy
+            * K_alpha1 intensity (multiply by conversion factor for percentage)
+            * K_alpha2 energy
+            * K_alpha2 intensity (multiply by conversion factor for percentage)
+            * K_beta energy
+            * K_beta intensity (multiply by conversion factor for percentage)
+            * L energy
+            * L intensity (multiply by conversion factor for percentage)
+    numpy.ndarray
+        a numpy array containing information about each gamma ray:
+            * energy in keV
+            * uncertainty in energy
+            * intensity (multiply by conversion factor for percentage)
+            * uncertainty in intensity
+            * electron conversion intensity
+            * uncertainty in electron conversion intensity
+            * total transition intensity
+            * total transition intensity error
 
     """
     if isinstance(f, str):
