@@ -108,6 +108,9 @@ is open to interpretation.
   from PEP8 are not required here.
 * All Python code should be compliant with Python 2.7 and Python 3.3+.  At some 
   unforeseen date in the future, Python 2.7 support *may* be dropped.
+* Tests should be written with nose using a procedural style. Do not use unittest
+  directly or write tests in an object-oriented style.
+* Test generators make more dots and the dots must flow!
 
 -------------------
 Cython Style Guide 
