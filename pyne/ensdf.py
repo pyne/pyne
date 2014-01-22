@@ -271,7 +271,9 @@ def _parse_level_record(l_rec):
     e, de = _get_val_err(l_rec.group(2), l_rec.group(3))
     tfinal, tfinalerr = _to_time(l_rec.group(5), l_rec.group(6))
     from_nuc = _to_id(l_rec.group(1), l_rec.group(11), l_rec.group(12))
-    return e*1.0E-3, tfinal, from_nuc
+    if e is not None:
+        e *= 1.0E-3
+    return e, tfinal, from_nuc
 
 
 def _parse_level_continuation_record(lc_rec):
