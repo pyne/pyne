@@ -82,6 +82,25 @@ class Tag(object):
                                  "{0} and {1}".format(self.name, value.name))
         self[:] = value[:]
 
+    def __iter__(self, order='xyz'):
+        """Returns an iterator object containing values of the tag. For
+        structured meshes values appear is xyz order (z changing fastest) by
+        default. For unstructured meshes, value appear in the imesh.iterate()
+        order.
+
+        Parameters:
+        -----------
+        order : string
+            The iteration order if the mesh is structured.
+        """
+        if self.mesh.structured:
+            ves = self.mesh.structured_iterate_hex(order)
+        else:
+            ves = self.mesh.mesh.iterate(iBase.Type.region, iMesh.Topology.all)
+
+        for ve in ves:
+            yield self.mesh.mesh.getTagHandle(self.name)[ve]
+
     def __delete__(self, mesh):
         del self[:]
 
