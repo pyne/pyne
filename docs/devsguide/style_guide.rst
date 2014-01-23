@@ -319,7 +319,7 @@ Header files have the extension ``.h``.
 If the file primarily implements a class, name the file after the class.
 
 ****************************
-Classes, Typedefs, & Stucts
+Classes, Typedefs, & Structs
 ****************************
 Class names are CapCased:
 
@@ -473,7 +473,7 @@ We are all friends here! Braces should be `cuddled <http://gskinner.com/blog/arc
       ...
     }
 
-Braces should be omitted if the enclosed block is a single-line statement:
+Braces may be omitted if the enclosed block is a single-line statement:
 
 .. code-block:: c++
 
@@ -548,8 +548,8 @@ so that the reader knows what's going on.
 **********
 Exceptions
 **********
-Exceptions are the preferred error-reporting mechanism, 
-as opposed to returning integer error codes.
+Built-in exceptions are the preferred error-reporting mechanism, 
+as opposed to returning integer error codes or custom exception mechanisms.
 
 Do not throw exceptions from destructors.
 
