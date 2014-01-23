@@ -416,12 +416,12 @@ or function scope, which only grab the names you intend to use, are allowed.
 
 .. code-block:: c++
 
+    // Good
+    using std::list;    // I want to refer to std::list as list
+    using std::vector;  // I want to refer to std::vector as vector
+
     // Bad, because it imports all names from std::
     using namespace std;  
-
-    // Good
-    using std::list;  // I want to refer to std::list as list
-    using std::vector;  // I want to refer to std::vector as vector
 
 ***************
 Access Patterns
