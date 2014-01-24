@@ -24,7 +24,9 @@ _norm = re.compile(_base + '  N (.{10})(.{2})(.{8})(.{2})(.{8})(.{2})(.{8})'
                    + '(.{6})(.{7})(.{2})')
 _normp = re.compile(_base +
                     ' PN (.{10})(.{2})(.{8})(.{2})(.{8})(.{2})(.{7})(.{2})')
-_decays = [' B- ', ' B+ ', ' EC ', ' IT ', ' A ']
+_decays = ['B-', 'B+A', 'EC', 'B-A', 'B+', 'B+P', 'B-N', 'ECP', 'EC2P', 'N',
+           '2N', 'IT', 'B+2P', 'B-2N', 'B+3P', 'ECA', 'P', '2P', '2B-', 'SF',
+           'A', '2B+', '2EC', '14C']
 _level_regex = re.compile(_base + '  L (.{10}).{20}(.{10}).{28}([ M])([ 1-9])')
 _level_regex2 = re.compile(_base + '  L (.{10})(.{2})(.{18})(.{10})(.{6})(.{9})'
                            + '(.{10})(.{2})(.{1})([ M])([ 1-9])')
@@ -573,6 +575,32 @@ def _parse_decay_dataset(lines, decay_s):
         return _to_id(parent), _to_id(daughter), decay_s.strip(), tfinal, tfinalerr, \
                nrbr, nrbr_err, xrays, gammas
     return None
+
+
+def _dlist_gen(f='ensdf.001'):
+    """
+    This compiles a list of decay types in an ensdf file
+    """
+    if isinstance(f, str):
+        with open(f, 'r') as f:
+            dat = f.read()
+    else:
+        dat = f.read()
+    decaylist = []
+    datasets = dat.split(80 * " " + "\n")[0:-1]
+    for dataset in datasets:
+        lines = dataset.splitlines()
+        ident = re.match(_ident, lines[0])
+        if ident is not None:
+            if 'DECAY' in ident.group(2):
+                #print ident.group(2)
+                fin = ident.group(2).split()[1]
+                if not fin in decaylist:
+                    decaylist.append(fin)
+
+    return decaylist
+
+
 
 
 def gamma_rays(f='ensdf.001'):
