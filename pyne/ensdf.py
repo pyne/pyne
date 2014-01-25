@@ -18,6 +18,8 @@ _ident = re.compile(_base + '    (.{30})(.{26})(.{7})(.{6})')
 _g = re.compile(_base + '  G (.{10})(.{2})(.{8})(.{2}).{24}(.{7})(.{2})(.{10})'
                 + '(.{2})')
 _gc = re.compile(_base + '[0-9A-Za-z] G (.{70})')
+_beta = re.compile(_base + '  B (.{10})(.{2})(.{8})(.{2}).{10}(.{8})(.{6})')
+_ec = re.compile(_base + '  E (.{10})(.{2})(.{8})(.{2})(.{8})(.{2})(.{8})(.{6})')
 _p = re.compile(_base + '  P (.{10})(.{2})(.{18})(.{10})(.{6}).{9}(.{10})(.{2})'
                 + '(.{4})')
 _norm = re.compile(_base + '  N (.{10})(.{2})(.{8})(.{2})(.{8})(.{2})(.{8})'
@@ -370,6 +372,71 @@ def _parse_gamma_continuation_record(g, gammaray):
     return conversions
 
 
+def _parse_beta_record(b_rec):
+    """
+    This parses an ENSDF beta minus record
+
+    Parameters
+    ----------
+    b_rec : re.MatchObject
+        regular expression MatchObject
+
+    Returns
+    -------
+    en : float
+        b- endpoint energy in keV
+    en_err : float
+        error in b- endpoint energy
+    ib : float
+        branch intensity
+    dib : float
+        error in branch intensity
+    logft : float
+        logft of the decay
+    dft : float
+        error in logft
+    """
+    en, en_err = _get_val_err(b_rec.group(2), b_rec.group(3))
+    ib, dib = _get_val_err(b_rec.group(4), b_rec.group(5))
+    logft, dft = _get_val_err(b_rec.group(6), b_rec.group(7))
+    return en, en_err, ib, dib, logft, dft
+
+
+def _parse_ec_record(e_rec):
+    """
+    This parses an ENSDF electron capture + b+ record
+
+    Parameters
+    ----------
+    e_rec : re.MatchObject
+        regular expression MatchObject
+
+    Returns
+    -------
+    en : float
+        b+ endpoint energy in keV
+    en_err : float
+        error in b+ endpoint energy
+    ib : float
+        b+ branch intensity
+    dib : float
+        error in b+ branch intensity
+    ie : float
+        ec branch intensity
+    die : float
+        error in ec branch intensity
+    logft : float
+        logft of the decay
+    dft : float
+        error in logft
+    """
+    en, en_err = _get_val_err(e_rec.group(2), e_rec.group(3))
+    ib, dib = _get_val_err(e_rec.group(4), e_rec.group(5))
+    ie, die = _get_val_err(e_rec.group(6), e_rec.group(7))
+    logft, dft = _get_val_err(e_rec.group(8), e_rec.group(9))
+    return en, en_err, ib, dib, ie, die, logft, dft
+
+
 def _parse_normalization_record(n_rec):
     """
     This parses an ENSDF normalization record
@@ -578,7 +645,7 @@ def _parse_decay_dataset(lines, decay_s):
     return None
 
 
-def origen_data(filename='ensdf.001', longhl = 1.0):
+def origen_data(filename='ensdf.001'):
     """
     This function parses assorted data from an ensdf file in order to collect
     the necessary information to generate data for origen input decks.
@@ -625,11 +692,21 @@ def origen_data(filename='ensdf.001', longhl = 1.0):
                 daughter = ident.group(1)
                 parent = ident.group(2).split()[0]
                 dtype = ident.group(2).split()[1]
-                br = 1.0
+                br = 0.0
                 tfinal = 0
                 e = 0.0
-                longhalf = False
+                ie = None
+                ib = None
+                nb = None
+                br = None
+                newlevel = False
                 for line in lines:
+                    b_rec = _beta.match(line)
+                    if b_rec is not None:
+                        en, en_err, ib, dib, logft, dft = _parse_beta_record(b_rec)
+                    e_rec = _ec.match(line)
+                    if e_rec is not None:
+                        en, en_err, ib, dib, ie, die, logft, dft = _parse_ec_record(e_rec)
                     n_rec = _norm.match(line)
                     if n_rec is not None:
                         nr, nr_err, nt, nt_err, br, br_err, nb, nb_err, nrbr, nrbr_err = \
@@ -639,16 +716,24 @@ def origen_data(filename='ensdf.001', longhl = 1.0):
                         tfinal, tfinalerr, e, e_err = _parse_parent_record(p_rec)
                     level_l = _level_regex2.match(line)
                     if level_l is not None:
+                        if newlevel:
+                            #save old level data
+                            if (ib is not None or ie is not None) and nb is not None and br is not None:
+                                if ib is None:
+                                    ib = 0.0
+                                if ie is None:
+                                    ie = 0.0
+                                decaylist.append((_to_id(parent), tfinal, e, half_lifev, level, dtype, (ib+ie), nb, br))
                         level, half_lifev, from_nuc = _parse_level_record(level_l)
-                        if half_lifev > longhl:
-                            longhalf = True
-                if len(parent) < 6:
-                    decaylist.append((dtype, tfinal, _to_id(parent), _to_id(daughter), br, e, longhalf))
-                elif len(parent.split(',')) > 1 and len(parent.split(',')[0]) < 6:
-                    for item in parent.split(','):
-                        decaylist.append((dtype, tfinal, _to_id(item), _to_id(daughter), br, e, longhalf))
-                else:
-                    print(parent)
+                        newlevel = True
+                if newlevel:
+                    #save old level data
+                    if (ib is not None or ie is not None) and nb is not None and br is not None:
+                        if ib is None:
+                            ib = 0.0
+                        if ie is None:
+                            ie = 0.0
+                        decaylist.append((_to_id(parent), tfinal, e, half_lifev, level, dtype, (ib+ie), nb, br))
             if 'ADOPTED LEVELS' in ident.group(2):
                 parent = ident.group(1)
                 pid = _to_id(parent)
