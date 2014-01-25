@@ -351,7 +351,7 @@ class SurfSrc(_BinaryReader):
             self.ncrd = tablelengths.get_int()[0]      # histories to surf.src
             self.njsw = tablelengths.get_int()[0]      # number of surfaces
             self.niss = tablelengths.get_int()[0]      # histories to surf.src
-            self.notsure2 = tablelengths.get_int()[0]  # number of surfaces
+            # self.notsure2 = tablelengths.get_int()[0]  # number of surfaces
 
         if self.np1 < 0:
             # read table 2 record; more size info
