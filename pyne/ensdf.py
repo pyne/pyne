@@ -578,12 +578,42 @@ def _parse_decay_dataset(lines, decay_s):
     return None
 
 
-def origen_data(f='ensdf.001'):
-    if isinstance(f, str):
-        with open(f, 'r') as f:
+def origen_data(filename='ensdf.001', longhl = 1.0):
+    """
+    This function parses assorted data from an ensdf file in order to collect
+    the necessary information to generate data for origen input decks.
+
+    Parameters
+    ----------
+    filename : str
+        Name of ENSDF formatted file
+    longhl : float
+        Length of "long" half-life in seconds (default 1.0 s)
+
+    Returns
+    -------
+    decaylist : list
+        This is a list of tuples containing:
+            * decay type
+            * half life
+            * parent nuc_id
+            * daughter nuc_id
+            * branching ratio
+            * energy level of parent
+            * whether the daughter has a long half life
+    branchlist : list
+    pid, level, half_lifev, brs
+        This is a list of tuples containing:
+            * parent nuc_id
+            * energy level of parent
+            * half life of parent
+            * dictionary of branching ratios
+    """
+    if isinstance(filename, str):
+        with open(filename, 'r') as f:
             dat = f.read()
     else:
-        dat = f.read()
+        dat = filename.read()
     datasets = dat.split(80 * " " + "\n")[0:-1]
     decaylist = []
     branchlist = []
@@ -610,7 +640,7 @@ def origen_data(f='ensdf.001'):
                     level_l = _level_regex2.match(line)
                     if level_l is not None:
                         level, half_lifev, from_nuc = _parse_level_record(level_l)
-                        if half_lifev > 1.0:
+                        if half_lifev > longhl:
                             longhalf = True
                 if len(parent) < 6:
                     decaylist.append((dtype, tfinal, _to_id(parent), _to_id(daughter), br, e, longhalf))
@@ -646,6 +676,16 @@ def origen_data(f='ensdf.001'):
 def _dlist_gen(f='ensdf.001'):
     """
     This compiles a list of decay types in an ensdf file
+
+    Parameters
+    ----------
+    f : str
+        Name of ENSDF formatted file
+
+    Returns
+    -------
+    decaylist : list
+        list of decay types in the ENSDF file eg. ['B+','B-','A']
     """
     if isinstance(f, str):
         with open(f, 'r') as f:
