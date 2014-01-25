@@ -102,7 +102,7 @@ def _build_xray_table():
 
 
 def _to_id(nuc, m=None, s=None):
-    if nuc.strip() != '1NN':
+    if not 'NN' in nuc:
         nucid = nucname.id(nuc.strip())
     else:
         warnings.warn('Neutron data not supported!')
@@ -301,7 +301,8 @@ def _parse_level_continuation_record(lc_rec):
             rx, br = raw_child.split('=')[:2]
         else:
             continue
-        dat[rx] = br
+        if '%' in rx:
+            dat[rx] = br
     return dat
 
 
@@ -472,7 +473,7 @@ def _parse_parent_record(p_rec):
     e, e_err = _get_val_err(p_rec.group(2), p_rec.group(3))
     j = p_rec.group(4)
     tfinal, tfinalerr = _to_time(p_rec.group(5), p_rec.group(6))
-    return tfinal, tfinalerr
+    return tfinal, tfinalerr, e, e_err
 
 
 def _update_xrays(conv, xrays, nuc_id):
@@ -567,7 +568,7 @@ def _parse_decay_dataset(lines, decay_s):
                 nrbr_err = nrbr_err2
         p_rec = _p.match(line)
         if p_rec is not None:
-            tfinal, tfinalerr = _parse_parent_record(p_rec)
+            tfinal, tfinalerr, e, e_err = _parse_parent_record(p_rec)
     if len(gammarays) > 0:
         gammas = np.array(gammarays)
         if gamma == 1:
@@ -575,6 +576,71 @@ def _parse_decay_dataset(lines, decay_s):
         return _to_id(parent), _to_id(daughter), decay_s.strip(), tfinal, tfinalerr, \
                nrbr, nrbr_err, xrays, gammas
     return None
+
+
+def origen_data(f='ensdf.001'):
+    if isinstance(f, str):
+        with open(f, 'r') as f:
+            dat = f.read()
+    else:
+        dat = f.read()
+    datasets = dat.split(80 * " " + "\n")[0:-1]
+    decaylist = []
+    branchlist = []
+    for dataset in datasets:
+        lines = dataset.splitlines()
+        ident = re.match(_ident, lines[0])
+        if ident is not None:
+            if 'DECAY' in ident.group(2):
+                daughter = ident.group(1)
+                parent = ident.group(2).split()[0]
+                dtype = ident.group(2).split()[1]
+                br = 1.0
+                tfinal = 0
+                e = 0.0
+                longhalf = False
+                for line in lines:
+                    n_rec = _norm.match(line)
+                    if n_rec is not None:
+                        nr, nr_err, nt, nt_err, br, br_err, nb, nb_err, nrbr, nrbr_err = \
+                            _parse_normalization_record(n_rec)
+                    p_rec = _p.match(line)
+                    if p_rec is not None:
+                        tfinal, tfinalerr, e, e_err = _parse_parent_record(p_rec)
+                    level_l = _level_regex2.match(line)
+                    if level_l is not None:
+                        level, half_lifev, from_nuc = _parse_level_record(level_l)
+                        if half_lifev > 1.0:
+                            longhalf = True
+                if len(parent) < 6:
+                    decaylist.append((dtype, tfinal, _to_id(parent), _to_id(daughter), br, e, longhalf))
+                elif len(parent.split(',')) > 1 and len(parent.split(',')[0]) < 6:
+                    for item in parent.split(','):
+                        decaylist.append((dtype, tfinal, _to_id(item), _to_id(daughter), br, e, longhalf))
+                else:
+                    print(parent)
+            if 'ADOPTED LEVELS' in ident.group(2):
+                parent = ident.group(1)
+                pid = _to_id(parent)
+                brs = {}
+                levelc_found = False
+                for line in lines:
+                    level_l = _level_regex2.match(line)
+                    if level_l is not None:
+                        if levelc_found and half_lifev is not None:
+                            levelc_found = False
+                            if len(brs) > 0:
+                                branchlist.append((pid, level, half_lifev, brs))
+                            brs = {}
+                        level, half_lifev, from_nuc = _parse_level_record(level_l)
+                    levelc = _level_cont_regex.match(line)
+                    if levelc is not None:
+                        brs.update(_parse_level_continuation_record(levelc))
+                        levelc_found = True
+                if levelc_found and half_lifev is not None and pid is not None:
+                    if len(brs) > 0:
+                        branchlist.append((pid, level, half_lifev, brs))
+    return decaylist, branchlist
 
 
 def _dlist_gen(f='ensdf.001'):
