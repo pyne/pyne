@@ -68,6 +68,8 @@ void pyne::_load_atomic_mass_map()
     atomic_mass_map[atomic_weight_array[n].nuc] = atomic_weight_array[n].mass;
     natural_abund_map[atomic_weight_array[n].nuc] = atomic_weight_array[n].abund;
   }
+
+  delete[] atomic_weight_array;
 };
 
 
@@ -255,6 +257,8 @@ void pyne::_load_scattering_lengths()
     b_coherent_map[scat_len_array[n].nuc] = scat_len_array[n].b_coherent;
     b_incoherent_map[scat_len_array[n].nuc] = scat_len_array[n].b_incoherent;
   };
+
+  delete[] scat_len_array;
 };
 
 
@@ -544,6 +548,8 @@ void pyne::_load_atomic_decay()
     if (0.0 != atom_dec_array[n].decay_const)
       decay_children_map[from_nuc].insert(to_nuc);
   };
+
+  delete[] atom_dec_array;
 };
 
 
