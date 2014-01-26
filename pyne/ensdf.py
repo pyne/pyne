@@ -18,13 +18,17 @@ _ident = re.compile(_base + '    (.{30})(.{26})(.{7})(.{6})')
 _g = re.compile(_base + '  G (.{10})(.{2})(.{8})(.{2}).{24}(.{7})(.{2})(.{10})'
                 + '(.{2})')
 _gc = re.compile(_base + '[0-9A-Za-z] G (.{70})')
+_beta = re.compile(_base + '  B (.{10})(.{2})(.{8})(.{2}).{10}(.{8})(.{6})')
+_ec = re.compile(_base + '  E (.{10})(.{2})(.{8})(.{2})(.{8})(.{2})(.{8})(.{6})')
 _p = re.compile(_base + '  P (.{10})(.{2})(.{18})(.{10})(.{6}).{9}(.{10})(.{2})'
                 + '(.{4})')
 _norm = re.compile(_base + '  N (.{10})(.{2})(.{8})(.{2})(.{8})(.{2})(.{8})'
                    + '(.{6})(.{7})(.{2})')
 _normp = re.compile(_base +
                     ' PN (.{10})(.{2})(.{8})(.{2})(.{8})(.{2})(.{7})(.{2})')
-_decays = [' B- ', ' B+ ', ' EC ', ' IT ', ' A ']
+_decays = ['B-', 'B+A', 'EC', 'B-A', 'B+', 'B+P', 'B-N', 'ECP', 'EC2P', 'N',
+           '2N', 'IT', 'B+2P', 'B-2N', 'B+3P', 'ECA', 'P', '2P', '2B-', 'SF',
+           'A', '2B+', '2EC', '14C']
 _level_regex = re.compile(_base + '  L (.{10}).{20}(.{10}).{28}([ M])([ 1-9])')
 _level_regex2 = re.compile(_base + '  L (.{10})(.{2})(.{18})(.{10})(.{6})(.{9})'
                            + '(.{10})(.{2})(.{1})([ M])([ 1-9])')
@@ -100,7 +104,7 @@ def _build_xray_table():
 
 
 def _to_id(nuc, m=None, s=None):
-    if nuc.strip() != '1NN':
+    if not 'NN' in nuc:
         nucid = nucname.id(nuc.strip())
     else:
         warnings.warn('Neutron data not supported!')
@@ -299,7 +303,8 @@ def _parse_level_continuation_record(lc_rec):
             rx, br = raw_child.split('=')[:2]
         else:
             continue
-        dat[rx] = br
+        if '%' in rx:
+            dat[rx] = br
     return dat
 
 
@@ -365,6 +370,71 @@ def _parse_gamma_continuation_record(g, gammaray):
             elif not contype in conversions:
                 conversions[contype] = (conv * greff, err)
     return conversions
+
+
+def _parse_beta_record(b_rec):
+    """
+    This parses an ENSDF beta minus record
+
+    Parameters
+    ----------
+    b_rec : re.MatchObject
+        regular expression MatchObject
+
+    Returns
+    -------
+    en : float
+        b- endpoint energy in keV
+    en_err : float
+        error in b- endpoint energy
+    ib : float
+        branch intensity
+    dib : float
+        error in branch intensity
+    logft : float
+        logft of the decay
+    dft : float
+        error in logft
+    """
+    en, en_err = _get_val_err(b_rec.group(2), b_rec.group(3))
+    ib, dib = _get_val_err(b_rec.group(4), b_rec.group(5))
+    logft, dft = _get_val_err(b_rec.group(6), b_rec.group(7))
+    return en, en_err, ib, dib, logft, dft
+
+
+def _parse_ec_record(e_rec):
+    """
+    This parses an ENSDF electron capture + b+ record
+
+    Parameters
+    ----------
+    e_rec : re.MatchObject
+        regular expression MatchObject
+
+    Returns
+    -------
+    en : float
+        b+ endpoint energy in keV
+    en_err : float
+        error in b+ endpoint energy
+    ib : float
+        b+ branch intensity
+    dib : float
+        error in b+ branch intensity
+    ie : float
+        ec branch intensity
+    die : float
+        error in ec branch intensity
+    logft : float
+        logft of the decay
+    dft : float
+        error in logft
+    """
+    en, en_err = _get_val_err(e_rec.group(2), e_rec.group(3))
+    ib, dib = _get_val_err(e_rec.group(4), e_rec.group(5))
+    ie, die = _get_val_err(e_rec.group(6), e_rec.group(7))
+    logft, dft = _get_val_err(e_rec.group(8), e_rec.group(9))
+    return en, en_err, ib, dib, ie, die, logft, dft
 
 
 def _parse_normalization_record(n_rec):
@@ -470,7 +540,7 @@ def _parse_parent_record(p_rec):
     e, e_err = _get_val_err(p_rec.group(2), p_rec.group(3))
     j = p_rec.group(4)
     tfinal, tfinalerr = _to_time(p_rec.group(5), p_rec.group(6))
-    return tfinal, tfinalerr
+    return tfinal, tfinalerr, e, e_err
 
 
 def _update_xrays(conv, xrays, nuc_id):
@@ -545,6 +615,7 @@ def _parse_decay_dataset(lines, decay_s):
                 goodgray = True
             else:
                 goodgray = False
+            continue
         gc_rec = _gc.match(line)
         if gc_rec is not None and goodgray is True:
             conv_temp = conv
@@ -552,10 +623,12 @@ def _parse_decay_dataset(lines, decay_s):
             if gamma == 0:
                 gamma = 1
             conv.update(conv_temp)
+            continue
         n_rec = _norm.match(line)
         if n_rec is not None:
             nr, nr_err, nt, nt_err, br, br_err, nb, nb_err, nrbr, nrbr_err = \
                 _parse_normalization_record(n_rec)
+            continue
         np_rec = _normp.match(line)
         if np_rec is not None:
             nrbr2, nrbr_err2, ntbr, ntbr_err, nbbr, nbbr_err = \
@@ -563,16 +636,170 @@ def _parse_decay_dataset(lines, decay_s):
             if nrbr2 is not None:
                 nrbr = nrbr2
                 nrbr_err = nrbr_err2
+            continue
         p_rec = _p.match(line)
         if p_rec is not None:
-            tfinal, tfinalerr = _parse_parent_record(p_rec)
+            tfinal, tfinalerr, e, e_err = _parse_parent_record(p_rec)
+            continue
     if len(gammarays) > 0:
         gammas = np.array(gammarays)
         if gamma == 1:
             xrays = _update_xrays(conv, xrays, _to_id(daughter))
-        return _to_id(parent), _to_id(daughter), decay_s.strip(), tfinal, tfinalerr, \
+        pfinal = []
+        parent = parent.split('(')[0]
+        parents = parent.split(',')
+        if len(parents) > 1:
+            for item in parents:
+                pfinal.append(_to_id(item))
+        else:
+            pfinal = _to_id(parents[0])
+        return pfinal, _to_id(daughter), decay_s.strip(), tfinal, tfinalerr, \
                nrbr, nrbr_err, xrays, gammas
     return None
+
+
+def origen_data(filename='ensdf.001'):
+    """
+    This function parses assorted data from an ensdf file in order to collect
+    the necessary information to generate data for origen input decks.
+
+    Parameters
+    ----------
+    filename : str
+        Name of ENSDF formatted file
+
+    Returns
+    -------
+    decaylist : list
+        This is a list of tuples containing:
+            * decay type
+            * half life
+            * parent nuc_id
+            * daughter nuc_id
+            * branching ratio
+            * energy level of parent
+            * whether the daughter has a long half life
+    branchlist : list
+    pid, level, half_lifev, brs
+        This is a list of tuples containing:
+            * parent nuc_id
+            * energy level of parent
+            * half life of parent
+            * dictionary of branching ratios
+    """
+    if isinstance(filename, str):
+        with open(filename, 'r') as f:
+            dat = f.read()
+    else:
+        dat = filename.read()
+    datasets = dat.split(80 * " " + "\n")[0:-1]
+    decaylist = []
+    branchlist = []
+    for dataset in datasets:
+        lines = dataset.splitlines()
+        ident = re.match(_ident, lines[0])
+        if ident is not None:
+            if 'DECAY' in ident.group(2):
+                daughter = ident.group(1)
+                parent = ident.group(2).split()[0]
+                dtype = ident.group(2).split()[1]
+                tfinal = 0
+                e = 0.0
+                ie = None
+                ib = None
+                newlevel = False
+                for line in lines:
+                    b_rec = _beta.match(line)
+                    if b_rec is not None:
+                        en, en_err, ib, dib, logft, dft = _parse_beta_record(b_rec)
+                        continue
+                    e_rec = _ec.match(line)
+                    if e_rec is not None:
+                        en, en_err, ib, dib, ie, die, logft, dft = _parse_ec_record(e_rec)
+                        continue
+                    p_rec = _p.match(line)
+                    if p_rec is not None:
+                        tfinal, tfinalerr, e, e_err = _parse_parent_record(p_rec)
+                        continue
+                    level_l = _level_regex2.match(line)
+                    if level_l is not None:
+                        if newlevel:
+                            #save old level data
+                            if ib is not None or ie is not None:
+                                if ib is None:
+                                    ib = 0.0
+                                if ie is None:
+                                    ie = 0.0
+                                decaylist.append((_to_id(parent), tfinal, e, half_lifev, level, dtype, (ib+ie)))
+                        level, half_lifev, from_nuc = _parse_level_record(level_l)
+                        newlevel = True
+                        continue
+                if newlevel:
+                    #save old level data
+                    if ib is not None or ie is not None:
+                        if ib is None:
+                            ib = 0.0
+                        if ie is None:
+                            ie = 0.0
+                        decaylist.append((_to_id(parent), tfinal, e, half_lifev, level, dtype, (ib+ie)))
+            if 'ADOPTED LEVELS' in ident.group(2):
+                parent = ident.group(1)
+                pid = _to_id(parent)
+                brs = {}
+                levelc_found = False
+                for line in lines:
+                    level_l = _level_regex2.match(line)
+                    if level_l is not None:
+                        if levelc_found and half_lifev is not None:
+                            levelc_found = False
+                            if len(brs) > 0:
+                                branchlist.append((pid, level, half_lifev, brs))
+                            brs = {}
+                        level, half_lifev, from_nuc = _parse_level_record(level_l)
+                        continue
+                    levelc = _level_cont_regex.match(line)
+                    if levelc is not None:
+                        brs.update(_parse_level_continuation_record(levelc))
+                        levelc_found = True
+                        continue
+                if levelc_found and half_lifev is not None and pid is not None:
+                    if len(brs) > 0:
+                        branchlist.append((pid, level, half_lifev, brs))
+    return decaylist, branchlist
+
+
+def _dlist_gen(f='ensdf.001'):
+    """
+    This compiles a list of decay types in an ensdf file
+
+    Parameters
+    ----------
+    f : str
+        Name of ENSDF formatted file
+
+    Returns
+    -------
+    decaylist : list
+        list of decay types in the ENSDF file eg. ['B+','B-','A']
+    """
+    if isinstance(f, str):
+        with open(f, 'r') as f:
+            dat = f.read()
+    else:
+        dat = f.read()
+    decaylist = []
+    datasets = dat.split(80 * " " + "\n")[0:-1]
+    for dataset in datasets:
+        lines = dataset.splitlines()
+        ident = re.match(_ident, lines[0])
+        if ident is not None:
+            if 'DECAY' in ident.group(2):
+                #print ident.group(2)
+                fin = ident.group(2).split()[1]
+                if not fin in decaylist:
+                    decaylist.append(fin)
+
+    return decaylist
 
 
 def gamma_rays(f='ensdf.001'):
@@ -642,7 +869,7 @@ def gamma_rays(f='ensdf.001'):
         ident = re.match(_ident, lines[0])
         if ident is not None:
             for decay_s in _decays:
-                if decay_s in ident.group(2):
+                if 'DECAY' in ident.group(2) and decay_s == ident.group(2).split()[1]:
                     decay = _parse_decay_dataset(lines, decay_s)
                     if decay is not None:
                         decaylist.append(decay)
