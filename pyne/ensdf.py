@@ -667,8 +667,6 @@ def origen_data(filename='ensdf.001'):
     ----------
     filename : str
         Name of ENSDF formatted file
-    longhl : float
-        Length of "long" half-life in seconds (default 1.0 s)
 
     Returns
     -------
@@ -810,8 +808,6 @@ def _dlist_gen(f='ensdf.001'):
                     decaylist.append(fin)
 
     return decaylist
-
-
 
 
 def gamma_rays(f='ensdf.001'):
