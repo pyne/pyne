@@ -707,8 +707,6 @@ def origen_data(filename='ensdf.001'):
                 e = 0.0
                 ie = None
                 ib = None
-                nb = None
-                br = None
                 newlevel = False
                 for line in lines:
                     b_rec = _beta.match(line)
@@ -719,11 +717,6 @@ def origen_data(filename='ensdf.001'):
                     if e_rec is not None:
                         en, en_err, ib, dib, ie, die, logft, dft = _parse_ec_record(e_rec)
                         continue
-                    n_rec = _norm.match(line)
-                    if n_rec is not None:
-                        nr, nr_err, nt, nt_err, br, br_err, nb, nb_err, nrbr, nrbr_err = \
-                            _parse_normalization_record(n_rec)
-                        continue
                     p_rec = _p.match(line)
                     if p_rec is not None:
                         tfinal, tfinalerr, e, e_err = _parse_parent_record(p_rec)
@@ -732,23 +725,23 @@ def origen_data(filename='ensdf.001'):
                     if level_l is not None:
                         if newlevel:
                             #save old level data
-                            if (ib is not None or ie is not None) and nb is not None and br is not None:
+                            if ib is not None or ie is not None:
                                 if ib is None:
                                     ib = 0.0
                                 if ie is None:
                                     ie = 0.0
-                                decaylist.append((_to_id(parent), tfinal, e, half_lifev, level, dtype, (ib+ie), nb, br))
+                                decaylist.append((_to_id(parent), tfinal, e, half_lifev, level, dtype, (ib+ie)))
                         level, half_lifev, from_nuc = _parse_level_record(level_l)
                         newlevel = True
                         continue
                 if newlevel:
                     #save old level data
-                    if (ib is not None or ie is not None) and nb is not None and br is not None:
+                    if ib is not None or ie is not None:
                         if ib is None:
                             ib = 0.0
                         if ie is None:
                             ie = 0.0
-                        decaylist.append((_to_id(parent), tfinal, e, half_lifev, level, dtype, (ib+ie), nb, br))
+                        decaylist.append((_to_id(parent), tfinal, e, half_lifev, level, dtype, (ib+ie)))
             if 'ADOPTED LEVELS' in ident.group(2):
                 parent = ident.group(1)
                 pid = _to_id(parent)
