@@ -286,9 +286,9 @@ keyword, and the ``readonly`` keyword should always be followed by a single spac
 **************
 Documentation
 **************
-In addition to folling the numpydoc convention, also include the function or method 
+In addition to following the numpydoc convention, also include the function or method 
 signature as the first line in the docstring.  This helps sphinx print out the 
-signature.  Include type information in this sisnature if available and relevant.
+signature.  Include type information in this signature if available and relevant.
 
 -------------------
 C/C++ Style Guide 
