@@ -615,6 +615,7 @@ def _parse_decay_dataset(lines, decay_s):
                 goodgray = True
             else:
                 goodgray = False
+            continue
         gc_rec = _gc.match(line)
         if gc_rec is not None and goodgray is True:
             conv_temp = conv
@@ -622,10 +623,12 @@ def _parse_decay_dataset(lines, decay_s):
             if gamma == 0:
                 gamma = 1
             conv.update(conv_temp)
+            continue
         n_rec = _norm.match(line)
         if n_rec is not None:
             nr, nr_err, nt, nt_err, br, br_err, nb, nb_err, nrbr, nrbr_err = \
                 _parse_normalization_record(n_rec)
+            continue
         np_rec = _normp.match(line)
         if np_rec is not None:
             nrbr2, nrbr_err2, ntbr, ntbr_err, nbbr, nbbr_err = \
@@ -633,14 +636,24 @@ def _parse_decay_dataset(lines, decay_s):
             if nrbr2 is not None:
                 nrbr = nrbr2
                 nrbr_err = nrbr_err2
+            continue
         p_rec = _p.match(line)
         if p_rec is not None:
             tfinal, tfinalerr, e, e_err = _parse_parent_record(p_rec)
+            continue
     if len(gammarays) > 0:
         gammas = np.array(gammarays)
         if gamma == 1:
             xrays = _update_xrays(conv, xrays, _to_id(daughter))
-        return _to_id(parent), _to_id(daughter), decay_s.strip(), tfinal, tfinalerr, \
+        pfinal = []
+        parent = parent.split('(')[0]
+        parents = parent.split(',')
+        if len(parents) > 1:
+            for item in parents:
+                pfinal.append(_to_id(item))
+        else:
+            pfinal = _to_id(parents[0])
+        return pfinal, _to_id(daughter), decay_s.strip(), tfinal, tfinalerr, \
                nrbr, nrbr_err, xrays, gammas
     return None
 
@@ -704,16 +717,20 @@ def origen_data(filename='ensdf.001'):
                     b_rec = _beta.match(line)
                     if b_rec is not None:
                         en, en_err, ib, dib, logft, dft = _parse_beta_record(b_rec)
+                        continue
                     e_rec = _ec.match(line)
                     if e_rec is not None:
                         en, en_err, ib, dib, ie, die, logft, dft = _parse_ec_record(e_rec)
+                        continue
                     n_rec = _norm.match(line)
                     if n_rec is not None:
                         nr, nr_err, nt, nt_err, br, br_err, nb, nb_err, nrbr, nrbr_err = \
                             _parse_normalization_record(n_rec)
+                        continue
                     p_rec = _p.match(line)
                     if p_rec is not None:
                         tfinal, tfinalerr, e, e_err = _parse_parent_record(p_rec)
+                        continue
                     level_l = _level_regex2.match(line)
                     if level_l is not None:
                         if newlevel:
@@ -726,6 +743,7 @@ def origen_data(filename='ensdf.001'):
                                 decaylist.append((_to_id(parent), tfinal, e, half_lifev, level, dtype, (ib+ie), nb, br))
                         level, half_lifev, from_nuc = _parse_level_record(level_l)
                         newlevel = True
+                        continue
                 if newlevel:
                     #save old level data
                     if (ib is not None or ie is not None) and nb is not None and br is not None:
@@ -748,10 +766,12 @@ def origen_data(filename='ensdf.001'):
                                 branchlist.append((pid, level, half_lifev, brs))
                             brs = {}
                         level, half_lifev, from_nuc = _parse_level_record(level_l)
+                        continue
                     levelc = _level_cont_regex.match(line)
                     if levelc is not None:
                         brs.update(_parse_level_continuation_record(levelc))
                         levelc_found = True
+                        continue
                 if levelc_found and half_lifev is not None and pid is not None:
                     if len(brs) > 0:
                         branchlist.append((pid, level, half_lifev, brs))
@@ -861,7 +881,7 @@ def gamma_rays(f='ensdf.001'):
         ident = re.match(_ident, lines[0])
         if ident is not None:
             for decay_s in _decays:
-                if decay_s in ident.group(2):
+                if 'DECAY' in ident.group(2) and decay_s == ident.group(2).split()[1]:
                     decay = _parse_decay_dataset(lines, decay_s)
                     if decay is not None:
                         decaylist.append(decay)
