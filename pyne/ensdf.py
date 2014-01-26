@@ -672,15 +672,14 @@ def origen_data(filename='ensdf.001'):
     -------
     decaylist : list
         This is a list of tuples containing:
-            * decay type
-            * half life
             * parent nuc_id
-            * daughter nuc_id
-            * branching ratio
-            * energy level of parent
-            * whether the daughter has a long half life
+            * half life of parent
+            * parent energy level
+            * half life of daughter
+            * energy level of daughter
+            * decay type of parent
+            * percent of beta + percent of electron capture decays to daughter level
     branchlist : list
-    pid, level, half_lifev, brs
         This is a list of tuples containing:
             * parent nuc_id
             * energy level of parent
