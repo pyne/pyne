@@ -673,7 +673,7 @@ def _parse_decay_dataset(lines, decay_s):
     return None
 
 
-def origen_data(filename='ensdf.001'):
+def origen_data(filename):
     """
     This function parses assorted data from an ensdf file in order to collect
     the necessary information to generate data for origen input decks.
@@ -785,7 +785,7 @@ def origen_data(filename='ensdf.001'):
     return decaylist, branchlist
 
 
-def _dlist_gen(f='ensdf.001'):
+def _dlist_gen(f):
     """
     This compiles a list of decay types in an ensdf file
 
@@ -819,7 +819,7 @@ def _dlist_gen(f='ensdf.001'):
     return decaylist
 
 
-def gamma_rays(f='ensdf.001'):
+def gamma_rays(f):
     """
     This splits an ENSDF file into datasets. It then passes the dataset to the
     appropriate parser. Currently only a subset of decay datasets are
