@@ -104,6 +104,9 @@ is open to interpretation.
 * Use 'single quotes' for string literals, and """triple double quotes""" for 
   docstrings. Double quotes are allowed to prevent single quote escaping, 
   e.g. "Y'all c'mon o'er here!"
+* We use sphinx with the numpydoc extension to autogenerate API documentation. Follow 
+  the numpydoc standard for docstrings `described here <https://github.com/numpy/numpy/blob/master/doc/HOWTO_DOCUMENT.rst.txt>`_.
+* Simple functions should have simple docstrings.
 * Lines should be at most 80 characters long. The 72 and 79 character recommendations
   from PEP8 are not required here.
 * All Python code should be compliant with Python 2.7 and Python 3.3+.  At some 
@@ -279,6 +282,13 @@ keyword, and the ``readonly`` keyword should always be followed by a single spac
     cdef public  api    int    i
     def spruce(int   x):
         ...
+
+**************
+Documentation
+**************
+In addition to folling the numpydoc convention, also include the function or method 
+signature as the first line in the docstring.  This helps sphinx print out the 
+signature.  Include type information in this sisnature if available and relevant.
 
 -------------------
 C/C++ Style Guide 
