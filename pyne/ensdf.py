@@ -703,7 +703,6 @@ def origen_data(filename='ensdf.001'):
                 daughter = ident.group(1)
                 parent = ident.group(2).split()[0]
                 dtype = ident.group(2).split()[1]
-                br = 0.0
                 tfinal = 0
                 e = 0.0
                 ie = None
