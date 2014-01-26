@@ -505,6 +505,9 @@ class Mesh(object):
     structured_set : iMesh entity set handle
         A preexisting structured entity set on an iMesh instance with a
         "BOX_DIMS" tag.
+    structured_ordering : string
+        A three character string denoting the iteration order of the mesh (e.g.
+        'xyz', meaning z changest fastest, then y, then x.)
 
         Unstructured mesh instantiation:
              - From iMesh instance by specifying: <mesh>
@@ -533,7 +536,8 @@ class Mesh(object):
 
 
     def __init__(self, mesh=None, mesh_file=None, structured=False, \
-                 structured_coords=None, structured_set=None, mats=None):
+                 structured_coords=None, structured_set=None, 
+                 structured_ordering='xyz',mats=None):
         if mesh:
             self.mesh = mesh
         else: 
@@ -562,6 +566,7 @@ class Mesh(object):
 
         #structured mesh cases
         elif self.structured:
+            self.structured_ordering = structured_ordering
             #From mesh or mesh_file
             if (mesh or mesh_file) and not structured_coords \
                                    and not structured_set:
@@ -628,7 +633,11 @@ class Mesh(object):
         self.mats = mats
 
         # tag with volume id and ensure mats exist.
-        ves = list(self.mesh.iterate(iBase.Type.region, iMesh.Topology.all))
+        if self.structured:
+            ves = list(self.structured_iterate_hex(structured_ordering))
+        else:
+            ves = list(self.mesh.iterate(iBase.Type.region, iMesh.Topology.all))
+
         tags = self.mesh.getAllTags(ves[0])
         tags = set(tag.name for tag in tags)
         if 'idx' in tags:
@@ -1013,6 +1022,21 @@ class Mesh(object):
             ijk = [A[ordmap[x]] for x in range(3)]
             yield self.structured_hex_volume(*ijk)
 
+    def structured_iterate_ve_idx(self, order):
+        """Return an iterater object of volume element indexes (ve_idx) for any
+        iteration order. Note that ve_idx is assigned upon instantiation in the 
+        order of the structured_ordering attribute.
+
+        Parameters
+        ----------
+        order : string
+            The requested iteration order (e.g. 'zyx').
+        """
+        self._structured_check()
+        ves = self.structured_iterate_hex(order)
+        tag = self.mesh.getTagHandle('ve_idx')
+        for ve in ves:
+            yield tag[ve]
 
     def structured_get_divisions(self, dim):
         """Get the mesh divisions on a given dimension
