@@ -17,7 +17,7 @@ from pyne.mesh import Mesh, MeshError
 from pyne.material import Material
 from pyne.nucname import serpent, alara, znum
 
-def flux_mesh_to_fluxin(flux_mesh, flux_tag, fluxin="fluxin.out",
+def mesh_to_fluxin(flux_mesh, flux_tag, fluxin="fluxin.out",
                         reverse=False):
     """This function creates an ALARA fluxin file from fluxes tagged on a PyNE
     Mesh object. Structured meshes are printed in xyz order (z changes fastest)
@@ -214,7 +214,7 @@ def photon_source_hdf5_to_mesh(mesh, filename, tags):
                 tag_handles[tags[cond]][ve] = [0] * num_e_groups
 
 
-def mat_mesh_to_alara(mesh, geom_file, matlib_file):
+def mesh_to_alara(mesh, geom_file, matlib_file):
     """This function reads the materials of a PyNE mesh object and prints the
     geometry and materials portion of an ALARA input file, as well as a
     corresponding matlib file. If the mesh is structured, xyz ordering is used
