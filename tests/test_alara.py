@@ -20,8 +20,8 @@ except ImportError:
 
 from pyne.mesh import Mesh, StatMesh, MeshError
 from pyne.material import Material
-from pyne.alara import flux_mesh_to_fluxin, photon_source_to_hdf5, \
-    photon_source_hdf5_to_mesh, mat_mesh_to_alara
+from pyne.alara import mesh_to_fluxin, photon_source_to_hdf5, \
+    photon_source_hdf5_to_mesh, mesh_to_alara
 
 thisdir = os.path.dirname(__file__)
 
@@ -47,7 +47,7 @@ def test_write_fluxin_single():
         tag_flux[ve] = flux_data[i]
 
     # test forward writting
-    flux_mesh_to_fluxin(flux_mesh, "flux", output_name, False)
+    mesh_to_fluxin(flux_mesh, "flux", output_name, False)
 
     with open(output) as f:
         written = f.readlines()
@@ -84,7 +84,7 @@ def test_write_fluxin_multiple():
         tag_flux[ve] = flux_data[i]
 
     # test forward writting
-    flux_mesh_to_fluxin(flux_mesh, "flux", output_name, False)
+    mesh_to_fluxin(flux_mesh, "flux", output_name, False)
 
     with open(output) as f:
         written = f.readlines()
@@ -97,7 +97,7 @@ def test_write_fluxin_multiple():
         os.remove(output)
 
     # test reverse writting
-    flux_mesh_to_fluxin(flux_mesh, "flux", output_name, True)
+    mesh_to_fluxin(flux_mesh, "flux", output_name, True)
 
     with open(output) as f:
         written = f.readlines()
@@ -170,7 +170,7 @@ def test_photon_source_hdf5_to_mesh():
     if os.path.isfile(filename + '.h5'):
         os.remove(filename + '.h5')
 
-def test_mat_mesh_to_alara():
+def test_mesh_to_alara():
     expected_geom = os.path.join(thisdir, "files_test_alara/alara_geom.txt")
     expected_matlib = os.path.join(thisdir, "files_test_alara/alara_matlib.txt")
     geom = os.path.join(os.getcwd(), "alara_geom")
@@ -184,7 +184,7 @@ def test_mat_mesh_to_alara():
            }
     m = Mesh(structured_coords=[[-1,0,1],[-1,0,1],[0,1]], structured=True,
                   mats=mats)
-    mat_mesh_to_alara(m, geom, matlib)
+    mesh_to_alara(m, geom, matlib)
 
     with open(expected_geom) as f:
         written = f.readlines()
