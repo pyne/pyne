@@ -214,7 +214,7 @@ def photon_source_hdf5_to_mesh(mesh, filename, tags):
                 tag_handles[tags[cond]][ve] = [0] * num_e_groups
 
 
-def mesh_to_alara(mesh, geom_file, matlib_file):
+def mesh_to_geom(mesh, geom_file, matlib_file):
     """This function reads the materials of a PyNE mesh object and prints the
     geometry and materials portion of an ALARA input file, as well as a
     corresponding matlib file. If the mesh is structured, xyz ordering is used
