@@ -12,8 +12,8 @@ except ImportError:
                   "Some aspects of the alara module may be incomplete.",
                   ImportWarning)
 
-from .mesh import Mesh, MeshError
-from .nucname import serpent
+from pyne.mesh import Mesh, MeshError
+from pyne.nucname import serpent, alara
 
 
 def flux_mesh_to_fluxin(flux_mesh, flux_tag, fluxin="fluxin.out",
@@ -211,3 +211,50 @@ def photon_source_hdf5_to_mesh(mesh, filename, tags):
                 idx += 1
             else:
                 tag_handles[tags[cond]][ve] = [0] * num_e_groups
+
+
+def mat_mesh_to_alara(mesh, alara_file, matlib_file):
+    """This function reads in the materials in a PyNE mesh object a prints the
+    geometry and materials portion of an ALARA input file. Materials are
+    printed in xyz order (z changes fastest) for structured mesh and
+    iMesh.iterate order for unstructured meshes.
+
+    Parameters:
+    mesh : PyNE Mesh object
+        The Mesh object containing the materials to be tagged.
+    filename : string
+        The file to be written.
+    """
+    # Create geometry information header. Note that the shape of the geometry
+    # (rectangular) is actually inconsequential to the ALARA calculation so
+    # unstructured meshes are not adversely affected. 
+    geometery = "geometry rectangular"
+
+    # create three strings in order to create all ALARA input blocks by
+    # in a single mesh iteration.
+    volume = "volume\n" # volumes input block
+    mat_loading = "mat_loading\n"
+    mat_lib = ""
+
+    if mesh.structured:
+        ves = mesh.structured_iterate_hex('xyz')
+    else:
+        ves = mesh.mesh.iterate(iBase.Type.region, iMesh.Topology.all)
+
+   for i, ve in enumerate(ves):
+       volume += "    {0}    zone_{1}\n".format(mesh.elem_volume(ve), i)
+       mat_loading += "    zone_{0}    mat_{1}\n".format(i, i)
+       matlib += "{0}    {1}    {2}\n".format(i, mesh.density[i], len(mesh.comp[i]))
+       for nuc, comp in mesh.comp[i].iteritems():
+            matlib += "{0}    {1}    {2}".format(alara(nuc), comp, znum(nuc))
+ 
+       matlib += "\n"
+
+    volume += "end\n\n"
+    mat_loading += "end\n\n"
+
+    with open(alara_file, 'w') as f:
+        f.write(header + volume + mat_loading)
+    
+    with open(matlib_file, 'w') as f:
+        f.write(matlib)
