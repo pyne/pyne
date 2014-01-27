@@ -505,7 +505,7 @@ class Mesh(object):
     structured_set : iMesh entity set handle
         A preexisting structured entity set on an iMesh instance with a
         "BOX_DIMS" tag.
-    structured_ordering : string
+    structured_ordering : str
         A three character string denoting the iteration order of the mesh (e.g.
         'xyz', meaning z changest fastest, then y, then x.)
 
@@ -537,7 +537,7 @@ class Mesh(object):
 
     def __init__(self, mesh=None, mesh_file=None, structured=False, \
                  structured_coords=None, structured_set=None, 
-                 structured_ordering='xyz',mats=None):
+                 structured_ordering='xyz', mats=None):
         if mesh:
             self.mesh = mesh
         else: 
@@ -634,7 +634,7 @@ class Mesh(object):
 
         # tag with volume id and ensure mats exist.
         if self.structured:
-            ves = list(self.structured_iterate_hex(structured_ordering))
+            ves = list(self.structured_iterate_hex(self.structured_ordering))
         else:
             ves = list(self.mesh.iterate(iBase.Type.region, iMesh.Topology.all))
 
@@ -1025,7 +1025,9 @@ class Mesh(object):
     def structured_iterate_ve_idx(self, order):
         """Return an iterater object of volume element indexes (ve_idx) for any
         iteration order. Note that ve_idx is assigned upon instantiation in the 
-        order of the structured_ordering attribute.
+        order of the structured_ordering attribute. This method is meant to be
+        used when the order argument is is different from structured_ordering.
+        When they are the same, the iterator (0, 1, 2, ... N-1) is returned.
 
         Parameters
         ----------
