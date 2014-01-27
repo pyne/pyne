@@ -1,6 +1,7 @@
 """This module contains functions relevant to the ALARA activation code.
 """
 from __future__ import print_function
+import os
 import numpy as np
 import tables as tb
 import warnings
@@ -13,8 +14,8 @@ except ImportError:
                   ImportWarning)
 
 from pyne.mesh import Mesh, MeshError
-from pyne.nucname import serpent, alara
-
+from pyne.material import Material
+from pyne.nucname import serpent, alara, znum
 
 def flux_mesh_to_fluxin(flux_mesh, flux_tag, fluxin="fluxin.out",
                         reverse=False):
@@ -213,48 +214,53 @@ def photon_source_hdf5_to_mesh(mesh, filename, tags):
                 tag_handles[tags[cond]][ve] = [0] * num_e_groups
 
 
-def mat_mesh_to_alara(mesh, alara_file, matlib_file):
-    """This function reads in the materials in a PyNE mesh object a prints the
-    geometry and materials portion of an ALARA input file. Materials are
-    printed in xyz order (z changes fastest) for structured mesh and
-    iMesh.iterate order for unstructured meshes.
+def mat_mesh_to_alara(mesh, geom_file, matlib_file):
+    """This function reads the materials of a PyNE mesh object and prints the
+    geometry and materials portion of an ALARA input file, as well as a
+    corresponding matlib file. If the mesh is structured, xyz ordering is used
+    (z changing fastest). If the mesh is unstructured iMesh.iterate order is
+    used. 
 
     Parameters:
     mesh : PyNE Mesh object
-        The Mesh object containing the materials to be tagged.
-    filename : string
-        The file to be written.
+        The Mesh object containing the materials to be printed.
+    geom_file : str
+        The name of the file to print the geometry and material blocks.
+    matlib_file : str
+        The name of the file to print the matlib.
     """
     # Create geometry information header. Note that the shape of the geometry
     # (rectangular) is actually inconsequential to the ALARA calculation so
     # unstructured meshes are not adversely affected. 
-    geometery = "geometry rectangular"
+    geometry = "geometry rectangular\n\n"
 
-    # create three strings in order to create all ALARA input blocks by
-    # in a single mesh iteration.
-    volume = "volume\n" # volumes input block
-    mat_loading = "mat_loading\n"
-    mat_lib = ""
+    # Create three strings in order to create all ALARA input blocks in a
+    # single mesh iteration.
+    volume = "volume\n" # volume input block
+    mat_loading = "mat_loading\n" # material loading input block
+    matlib = "" # ALARA material library string
 
     if mesh.structured:
         ves = mesh.structured_iterate_hex('xyz')
     else:
         ves = mesh.mesh.iterate(iBase.Type.region, iMesh.Topology.all)
 
-   for i, ve in enumerate(ves):
-       volume += "    {0}    zone_{1}\n".format(mesh.elem_volume(ve), i)
-       mat_loading += "    zone_{0}    mat_{1}\n".format(i, i)
-       matlib += "{0}    {1}    {2}\n".format(i, mesh.density[i], len(mesh.comp[i]))
-       for nuc, comp in mesh.comp[i].iteritems():
-            matlib += "{0}    {1}    {2}".format(alara(nuc), comp, znum(nuc))
+    for i, ve in enumerate(ves):
+        volume += "    {0: 1.6E}    zone_{1}\n".format(mesh.elem_volume(ve), i)
+        mat_loading += "    zone_{0}    mat_{1}\n".format(i, i)
+        matlib += "mat_{0}    {1: 1.6E}    {2}\n".format(i, mesh.density[i], 
+                                                         len(mesh.comp[i]))
+        for nuc, comp in mesh.comp[i].iteritems():
+            matlib += "{0}    {1: 1.6E}    {2}\n".format(alara(nuc), comp, 
+                                                         znum(nuc))
  
-       matlib += "\n"
+        matlib += "\n"
 
     volume += "end\n\n"
     mat_loading += "end\n\n"
 
-    with open(alara_file, 'w') as f:
-        f.write(header + volume + mat_loading)
+    with open(geom_file, 'w') as f:
+        f.write(geometry + volume + mat_loading)
     
     with open(matlib_file, 'w') as f:
         f.write(matlib)
