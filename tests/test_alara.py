@@ -19,11 +19,11 @@ except ImportError:
     pass
 
 from pyne.mesh import Mesh, StatMesh, MeshError
+from pyne.material import Material
 from pyne.alara import flux_mesh_to_fluxin, photon_source_to_hdf5, \
-    photon_source_hdf5_to_mesh
+    photon_source_hdf5_to_mesh, mat_mesh_to_alara
 
 thisdir = os.path.dirname(__file__)
-
 
 def test_write_fluxin_single():
     """This function tests the flux_mesh_to_fluxin function for a single energy
@@ -169,3 +169,41 @@ def test_photon_source_hdf5_to_mesh():
 
     if os.path.isfile(filename + '.h5'):
         os.remove(filename + '.h5')
+
+def test_mat_mesh_to_alara():
+    expected_geom = os.path.join(thisdir, "files_test_alara/alara_geom.txt")
+    expected_matlib = os.path.join(thisdir, "files_test_alara/alara_matlib.txt")
+    geom = os.path.join(os.getcwd(), "alara_geom")
+    matlib = os.path.join(os.getcwd(), "alara_matlib")
+
+    mats = {
+           0: Material({'H1': 1.0, 'K39': 1.0}, density=1.1),
+           1: Material({'H1': 0.1, 'O16': 1.0}, density=1.2),
+           2: Material({'He4': 42.0}, density=1.3),
+           3: Material({'Tm171': 171.0}, density=1.4),
+           }
+    m = Mesh(structured_coords=[[-1,0,1],[-1,0,1],[0,1]], structured=True,
+                  mats=mats)
+    mat_mesh_to_alara(m, geom, matlib)
+
+    with open(expected_geom) as f:
+        written = f.readlines()
+
+    with open(geom) as f:
+        expected = f.readlines()
+
+    assert_equal(written, expected)
+
+    #if os.path.isfile(geom):
+    #    os.remove(geom)
+
+    with open(expected_matlib) as f:
+        written = f.readlines()
+
+    with open(matlib) as f:
+        expected = f.readlines()
+
+    assert_equal(written, expected)
+
+    if os.path.isfile(matlib):
+        os.remove(matlib)
