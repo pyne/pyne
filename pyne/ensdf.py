@@ -177,49 +177,39 @@ def half_life(ensdf):
     """
     if isinstance(ensdf, basestring):
         with open(ensdf, 'r') as f:
-            lines = f.readlines()
+            lines = f.read()
     else:
-        lines = ensdf.readlines()
-
+        lines = ensdf.read()
     data = []
-
-    for line in lines:
-        level_l = _level_regex2.match(line)
-        if level_l is not None:
-            level, half_lifev, from_nuc = _parse_level_record(level_l)
-            if half_lifev == np.inf and from_nuc is not None:
-                data.append((from_nuc, 0.0, from_nuc, half_lifev, 1.0))
-            if level is None:
-                level = 0.0
+    datasets = lines.split(80 * " " + "\n")[0:-1]
+    for dataset in datasets:
+        lines = dataset.splitlines()
+        ident = re.match(_ident, lines[0])
+        leveln = 0
+        if ident is None:
             continue
-        levelc = _level_cont_regex.match(line)
-        if levelc is not None and from_nuc is not None:
-            if half_lifev is not None:
-                dat = _parse_level_continuation_record(levelc)
-                dat = dict([(_decay_to[key](from_nuc),
-                             _getvalue(val, rn=0) * 0.01)
-                            for key, val in dat.items() if key in _decay_to])
-                data += [(from_nuc, level, to_nuc, half_lifev, br)
-                         for to_nuc, br in dat.items() if 0.0 < br]
+        if not 'ADOPTED LEVELS' in ident.group(2):
+            continue
+        for line in lines:
+            level_l = _level_regex.match(line)
+            if level_l is not None:
+                level, half_lifev, from_nuc = _parse_level_record(level_l)
+                if half_lifev == np.inf and from_nuc is not None:
+                    data.append((from_nuc, 0.0, from_nuc, half_lifev, 1.0))
+                if level is None:
+                    level = 0.0
+                leveln += 1
                 continue
-    
-    
-    # Hack to calculate metastable state number, make sure it doesn't go over
-    # 10, and then change the from_nuc value, and remove all other states
-    # FIXME: while the renaming bases on level should still happen, the limit
-    # of the 10 lowest levels should be removed when id is removed.
-    nuclvl = {}
-    for row in data:
-        from_nuc, level, to_nuc, half_lifev, br = row
-        if from_nuc not in nuclvl:
-            nuclvl[from_nuc] = set()
-        nuclvl[from_nuc].add(level)
-    for nuc in nuclvl:
-        nuclvl[nuc] = dict([(lvl, i) for i, lvl in
-                            enumerate(sorted(nuclvl[nuc])[:10])])
-    data = [(row[0] + nuclvl[row[0]][row[1]],) + row[1:] for row in data
-            if (row[0] in nuclvl) and (row[1] in nuclvl[row[0]])]
-
+            levelc = _level_cont_regex.match(line)
+            if levelc is None or half_lifev is None or from_nuc is None:
+                continue
+            dat = _parse_level_continuation_record(levelc)
+            dat = dict([(_decay_to[key](from_nuc),
+                         float(val) * 0.01)
+                        for key, val in dat.items() if key in _decay_to])
+            data += [(from_nuc, level*1.0E-3, to_nuc, half_lifev, br)
+                     for to_nuc, br in dat.items() if 0.0 < br]
+            
     return data
 
 
