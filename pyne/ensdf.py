@@ -103,19 +103,12 @@ def _build_xray_table():
     return dat
 
 
-def _to_id(nuc, m=None, s=None):
+def _to_id(nuc):
     if not 'NN' in nuc:
         nucid = nucname.id(nuc.strip())
     else:
         warnings.warn('Neutron data not supported!')
         return None
-    if m == 'M':
-        state = s.strip()
-        if 0 < len(state):
-            state = int(state)
-        else:
-            state = 1
-        nucid += state
     return nucid
 
 
@@ -192,12 +185,14 @@ def half_life(ensdf):
         for line in lines:
             level_l = _level_regex.match(line)
             if level_l is not None:
-                level, half_lifev, from_nuc = _parse_level_record(level_l)
+                level, half_lifev, from_nuc, state = _parse_level_record(level_l)
                 if half_lifev == np.inf and from_nuc is not None:
                     data.append((from_nuc, 0.0, from_nuc, half_lifev, 1.0))
                 if level is None:
                     level = 0.0
-                leveln += 1
+                if from_nuc is not None:
+                    from_nuc += leveln
+                    leveln += 1
                 continue
             levelc = _level_cont_regex.match(line)
             if levelc is None or half_lifev is None or from_nuc is None:
@@ -267,8 +262,17 @@ def _parse_level_record(l_rec):
     """
     e, de = _get_val_err(l_rec.group(2), l_rec.group(3))
     tfinal, tfinalerr = _to_time(l_rec.group(5), l_rec.group(6))
-    from_nuc = _to_id(l_rec.group(1), l_rec.group(11), l_rec.group(12))
-    return e, tfinal, from_nuc
+    from_nuc = _to_id(l_rec.group(1))
+    m = l_rec.group(11)
+    s = l_rec.group(12)
+    state = 0
+    if m == 'M':
+        state = s.strip()
+        if 0 < len(state):
+            state = int(state)
+        else:
+            state = 1
+    return e, tfinal, from_nuc, state
 
 
 def _parse_level_continuation_record(lc_rec):
