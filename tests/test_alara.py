@@ -34,8 +34,8 @@ def test_write_fluxin_single():
         raise SkipTest
 
     output_name = "fluxin.out"
-    forward_fluxin = os.path.join(thisdir,
-                                  "files_test_alara/fluxin_single_forward.txt")
+    forward_fluxin = os.path.join(thisdir, "files_test_alara", 
+                                  "fluxin_single_forward.txt")
     output = os.path.join(os.getcwd(), output_name)
 
     flux_mesh = Mesh(structured=True,
@@ -69,10 +69,10 @@ def test_write_fluxin_multiple():
         raise SkipTest
 
     output_name = "fluxin.out"
-    forward_fluxin = \
-        os.path.join(thisdir, "files_test_alara/fluxin_multiple_forward.txt")
-    reverse_fluxin = \
-        os.path.join(thisdir, "files_test_alara/fluxin_multiple_reverse.txt")
+    forward_fluxin = os.path.join(thisdir, "files_test_alara", 
+                                  "fluxin_multiple_forward.txt")
+    reverse_fluxin = os.path.join(thisdir, "files_test_alara", 
+                                  "fluxin_multiple_reverse.txt")
     output = os.path.join(os.getcwd(), output_name)
 
     flux_mesh = Mesh(structured=True,
@@ -171,8 +171,8 @@ def test_photon_source_hdf5_to_mesh():
         os.remove(filename + '.h5')
 
 def test_mesh_to_geom():
-    expected_geom = os.path.join(thisdir, "files_test_alara/alara_geom.txt")
-    expected_matlib = os.path.join(thisdir, "files_test_alara/alara_matlib.txt")
+    expected_geom = os.path.join(thisdir, "files_test_alara", "alara_geom.txt")
+    expected_matlib = os.path.join(thisdir, "files_test_alara", "alara_matlib.txt")
     geom = os.path.join(os.getcwd(), "alara_geom")
     matlib = os.path.join(os.getcwd(), "alara_matlib")
 
