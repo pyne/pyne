@@ -107,7 +107,6 @@ def test_half_life():
     hl = ensdf.half_life(f)
     f.close()
     assert_equal(hl, [(10030000, 0.0, 20030000, to_sec(12.32, 'Y'), 1.0),
-                      (20030000, 0.0, 20030000, np.inf, 1.0),
                       (20030000, 0.0, 20030000, np.inf, 1.0), ])
 
 
