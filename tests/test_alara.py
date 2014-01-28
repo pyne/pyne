@@ -129,7 +129,7 @@ def test_photon_source_to_hdf5():
             if ls[0] != 'TOTAL' and old == 'TOTAL':
                 count += 1
 
-            assert_equal(count, row['ve_idx'])
+            assert_equal(count, row['idx'])
             assert_equal(ls[0].strip(), row['nuc'])
             assert_equal(ls[1].strip(), row['time'])
             assert_array_equal(np.array(ls[2:], dtype=np.float64),

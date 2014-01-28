@@ -547,7 +547,7 @@ def test_matlib():
     m = gen_mesh(mats=mats)
     for i, ve in enumerate(m.mesh.iterate(iBase.Type.region, iMesh.Topology.all)):
         assert_is(m.mats[i], mats[i])
-        assert_equal(m.mesh.getTagHandle('ve_idx')[ve], i)
+        assert_equal(m.mesh.getTagHandle('idx')[ve], i)
 
     m.write_hdf5('test_matlib.h5m')
     shutil.copy('test_matlib.h5m', 'test_matlib2.h5m')
@@ -733,11 +733,11 @@ def test_iter():
         }
     m = gen_mesh(mats=mats)
     j = 0
-    ve_idx_tag = m.mesh.getTagHandle('ve_idx')
+    idx_tag = m.mesh.getTagHandle('idx')
     for i, mat, ve in m:
         assert_equal(j, i)
         assert_is(mats[i], mat)
-        assert_equal(j, ve_idx_tag[ve])
+        assert_equal(j, idx_tag[ve])
         j += 1
         
 
