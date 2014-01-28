@@ -30,8 +30,7 @@ _normp = re.compile(_base +
 _decays = ['B-', 'B+A', 'EC', 'B-A', 'B+', 'B+P', 'B-N', 'ECP', 'EC2P', 'N',
            '2N', 'IT', 'B+2P', 'B-2N', 'B+3P', 'ECA', 'P', '2P', '2B-', 'SF',
            'A', '2B+', '2EC', '14C']
-_level_regex = re.compile(_base + '  L (.{10}).{20}(.{10}).{28}([ M])([ 1-9])')
-_level_regex2 = re.compile(_base + '  L (.{10})(.{2})(.{18})(.{10})(.{6})'
+_level_regex = re.compile(_base + '  L (.{10})(.{2})(.{18})(.{10})(.{6})'
                            + '(.{9})(.{10})(.{2})(.{1})([ M])([ 1-9])')
 _level_cont_regex = re.compile('([ \d]{3}[ A-Za-z]{2})[0-9A-Za-z] L (.*)')
 
@@ -729,7 +728,7 @@ def origen_data(filename):
                 if p_rec is not None:
                     tfinal, tfinalerr, e, e_err = _parse_parent_record(p_rec)
                     continue
-                level_l = _level_regex2.match(line)
+                level_l = _level_regex.match(line)
                 if level_l is not None:
                     if newlevel and (ib is not None or ie is not None):
                         #save old level data
@@ -756,7 +755,7 @@ def origen_data(filename):
             brs = {}
             levelc_found = False
             for line in lines:
-                level_l = _level_regex2.match(line)
+                level_l = _level_regex.match(line)
                 if level_l is not None:
                     if levelc_found and half_lifev is not None:
                         levelc_found = False
