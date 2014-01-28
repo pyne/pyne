@@ -194,8 +194,8 @@ def test_mesh_to_geom():
 
     assert_equal(written, expected)
 
-    #if os.path.isfile(geom):
-    #    os.remove(geom)
+    if os.path.isfile(geom):
+        os.remove(geom)
 
     with open(expected_matlib) as f:
         written = f.readlines()
