@@ -295,9 +295,10 @@ def _parse_level_continuation_record(lc_rec):
     for raw_child in raw_children:
         if '=' in raw_child:
             rx, br = raw_child.split('=')[:2]
+            br = br.strip()
         else:
             continue
-        if '%' in rx:
+        if '%' in rx and not '?' in br and len(br) > 0:
             dat[rx] = br
     return dat
 
