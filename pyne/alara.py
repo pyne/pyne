@@ -94,7 +94,7 @@ def photon_source_to_hdf5(filename, chunkshape=(10000,)):
     ------
     A single HDF5 file named <filename>.h5 containing the table headings:
 
-    ve_idx : int
+    idx : int
         The volume element index assuming the volume elements appear in xyz
         order (z changing fastest) within the photon source file in the case of
         a structured mesh or imesh.iterate() order for an unstructured mesh.
@@ -111,7 +111,7 @@ def photon_source_to_hdf5(filename, chunkshape=(10000,)):
     G = len(header) - 2
 
     dt = np.dtype([
-        ('ve_idx', np.int64),
+        ('idx', np.int64),
         ('nuc', 'S6'),
         ('time', 'S20'),
         ('phtn_src', np.float64, G),
@@ -123,20 +123,20 @@ def photon_source_to_hdf5(filename, chunkshape=(10000,)):
 
     chunksize = chunkshape[0]
     rows = np.empty(chunksize, dtype=dt)
-    ve_idx = 0
+    idx = 0
     old = ""
     for i, line in enumerate(f, 1):
         ls = line.strip().split('\t')
 
-        # Keep track of the ve_idx by delimiting by the last TOTAL line in a
+        # Keep track of the idx by delimiting by the last TOTAL line in a
         # volume element.
         if ls[0] != 'TOTAL' and old == 'TOTAL':
-            ve_idx += 1
+            idx += 1
 
         j = (i-1) % chunksize
-        rows[j] = (ve_idx, ls[0].strip(), ls[1].strip(),
+        rows[j] = (idx, ls[0].strip(), ls[1].strip(),
                    np.array(ls[2:], dtype=np.float64))
-        # Save the nuclide in order to keep track of ve_idx
+        # Save the nuclide in order to keep track of idx
         old = ls[0]
 
         if i % chunksize == 0:
