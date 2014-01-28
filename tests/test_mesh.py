@@ -166,11 +166,11 @@ def test_get_divs():
     assert_equal(sm.structured_get_divisions("y"), y)
     assert_equal(sm.structured_get_divisions("z"), z)
 
-def test_structured_iterate_ve_idx():
+def test_iter_structured_idx():
     m = gen_mesh() # gen_mesh uses zyx order
-    xyz_ve_idx = [0, 2, 1, 3] # expected results in xyz order
-    for i, ve_idx in enumerate(m.structured_iterate_ve_idx('xyz')):
-        assert_equal(ve_idx, xyz_ve_idx[i])
+    xyz_idx = [0, 2, 1, 3] # expected results in xyz order
+    for n, i in enumerate(m.iter_structured_idx('xyz')):
+        assert_equal(i, xyz_idx[n])
 
 
 #############################################

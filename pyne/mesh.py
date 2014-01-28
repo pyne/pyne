@@ -1037,9 +1037,9 @@ class Mesh(object):
             ijk = [A[ordmap[x]] for x in range(3)]
             yield self.structured_hex_volume(*ijk)
 
-    def structured_iterate_ve_idx(self, order=None):
-        """Return an iterater object of volume element indexes (ve_idx) for any
-        iteration order. Note that ve_idx is assigned upon instantiation in the 
+    def iter_structured_idx(self, order=None):
+        """Return an iterater object of volume element indexes (idx) for any
+        iteration order. Note that idx is assigned upon instantiation in the 
         order of the structured_ordering attribute. This method is meant to be
         used when the order argument is is different from structured_ordering.
         When they are the same, the iterator (0, 1, 2, ... N-1) is returned.
@@ -1054,7 +1054,7 @@ class Mesh(object):
             order = self.structured_ordering
 
         ves = self.structured_iterate_hex(order)
-        tag = self.mesh.getTagHandle('ve_idx')
+        tag = self.mesh.getTagHandle('idx')
         for ve in ves:
             yield tag[ve]
 
