@@ -631,12 +631,12 @@ class Mesh(object):
         ves = list(self.mesh.iterate(iBase.Type.region, iMesh.Topology.all))
         tags = self.mesh.getAllTags(ves[0])
         tags = set(tag.name for tag in tags)
-        if 've_idx' in tags:
-            tag_ve_idx = self.mesh.getTagHandle('ve_idx')
+        if 'idx' in tags:
+            tag_idx = self.mesh.getTagHandle('idx')
         else:
-            tag_ve_idx = self.mesh.createTag('ve_idx', 1, int)
+            tag_idx = self.mesh.createTag('idx', 1, int)
         for i, ve in enumerate(ves):
-            tag_ve_idx[ve] = i
+            tag_idx[ve] = i
             if i not in mats:
                 mats[i] = Material()
         self._len = i + 1
@@ -850,7 +850,7 @@ class Mesh(object):
         self_tags = set(x.name for x in self_tags)
         other_tags = set(x.name for x in other_tags)
         intersect = self_tags & other_tags
-        intersect.discard('ve_idx')
+        intersect.discard('idx')
         return intersect
                            
     def __copy__(self):
