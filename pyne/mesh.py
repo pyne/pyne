@@ -1041,12 +1041,12 @@ class Mesh(object):
         """Return an iterater object of volume element indexes (idx) for any
         iteration order. Note that idx is assigned upon instantiation in the 
         order of the structured_ordering attribute. This method is meant to be
-        used when the order argument is is different from structured_ordering.
+        used when the order argument is different from structured_ordering.
         When they are the same, the iterator (0, 1, 2, ... N-1) is returned.
 
         Parameters
         ----------
-        order : str
+        order : str, optional
             The requested iteration order (e.g. 'zyx').
         """
         self._structured_check()
