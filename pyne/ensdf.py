@@ -740,7 +740,7 @@ def origen_data(filename):
                             ie = 0.0
                         decaylist.append((_to_id(parent), tfinal, e,
                                           half_lifev, level, dtype, (ib + ie)))
-                    level, half_lifev, from_nuc = _parse_level_record(level_l)
+                    level, half_lifev, from_nuc, state = _parse_level_record(level_l)
                     newlevel = True
                     continue
             if newlevel and (ib is not None or ie is not None):
@@ -764,7 +764,7 @@ def origen_data(filename):
                         if len(brs) > 0:
                             branchlist.append((pid, level, half_lifev, brs))
                         brs = {}
-                    level, half_lifev, from_nuc = _parse_level_record(level_l)
+                    level, half_lifev, from_nuc, state = _parse_level_record(level_l)
                     continue
                 levelc = _level_cont_regex.match(line)
                 if levelc is not None:
