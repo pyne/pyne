@@ -62,6 +62,11 @@ considered to have the same semantic meaning throughout the entire code base.
 * ``iso`` stands for an "isotope" in id form.
 * ``iso_name`` stands for an "isotope" in string form.
 * ``mat`` stands for "material".
+* ``m`` and ``mesh`` are used for Mesh instances.
+* ``idx`` stands for "indices". When used with meshes it is the canonical integer 
+  identifier for an entity. This is not necessarily iteration order.
+* ``i`` is the iteration variable of mesh indices, ie ``for i in idx``.
+* Generator names should start with the prefix ``iter``.
 
 ***************
 Canonical Forms
