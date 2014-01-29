@@ -278,7 +278,7 @@ def _parse_level_record(l_rec):
 def _parse_level_continuation_record(lc_rec):
     """
     This Parses and ENSDF level record
-    
+
     Parameters
     ----------
     g : re.MatchObject
@@ -537,6 +537,107 @@ def _parse_parent_record(p_rec):
     j = p_rec.group(4)
     tfinal, tfinalerr = _to_time(p_rec.group(5), p_rec.group(6))
     return tfinal, tfinalerr, e, e_err
+
+
+def _parse_qvalue_record(q_rec):
+    """
+    This parses and ENSDF q-value record
+    
+    Parameters
+    ----------
+    q_rec : re.MatchObject
+        regular expression MatchObject
+
+    Returns
+    -------
+    qminus : float
+        total energy for B- decay (if qminus > 0 B- decay is possible) 
+    dqminus : float
+        standard uncertainty in qminus
+    sn : float
+        neutron separation energy in keV
+    dsn : float
+        standard uncertainty in sn
+    sp : float
+        neutron separation energy in keV
+    dsp : float
+        standard uncertainty in sp
+    qa : float
+        total energy available for alpha decay of the ground state
+    dqa : float
+        standard uncertainty in qa
+    """
+    qminus, dqminus = _get_val_err(q_rec.group(2), q_rec.group(3))
+    sn, dsn = _get_val_err(q_rec.group(4), q_rec.group(5))
+    sp, dsp = _get_val_err(q_rec.group(5), q_rec.group(7))
+    qa, dqa = _get_val_err(q_rec.group(8), q_rec.group(9))
+    return qminus, dqminus, sn, dsn, sp, dsp, qa, dqa
+
+
+def _parse_alpha_record(a_rec):
+    """
+    This parses and ENSDF alpha record
+
+    Parameters
+    ----------
+    q_rec : re.MatchObject
+        regular expression MatchObject
+
+    Returns
+    -------
+    e : float
+        energy of alpha particle
+    de : float
+        standard uncertainty in energy
+    ia : float
+        intensity of the decay branch in percent
+    dia : float
+        standard uncertainty in intensity
+    hf : float
+        hindrance factor
+    dhf : float
+        standard uncertainty in hindrance factor
+    """
+    e, de = _get_val_err(a_rec.group(2), a_rec.group(3))
+    ia, dia = _get_val_err(a_rec.group(4), a_rec.group(5))
+    hf, dhf = _get_val_err(a_rec.group(5), a_rec.group(7))
+    return e, de, ia, dia, hf, dhf
+
+
+def _parse_delayed_particle_record(dp_rec):
+    """
+    This parses and ENSDF delayed particle record
+    
+    Parameters
+    ----------
+    dp_rec : re.MatchObject
+        regular expression MatchObject
+
+    Returns
+    -------
+    ptype : str
+        symbol for delayed particle 
+    e : float
+        particle energy
+    de : float
+        standard uncertainty in energy
+    ip : float
+        intensity of delayed particle in percent
+    dip : float
+        standard uncertainty in intensity
+    ei : float
+        energy level of the intermediate
+    t : float
+        half-life of the transition (in seconds)
+    dt : float
+        standard uncertainty in half-life
+    """
+    ptype = dp_rec.group(2)
+    e, de = _get_val_err(dp_rec.group(3), dp_rec.group(4))
+    ip, dip = _get_val_err(dp_rec.group(5), dp_rec.group(6))
+    ei = _getvalue(dp_rec.group(7))
+    t, dt = _to_time(dp_rec.group(8), dp_rec.group(9))
+    return ptype, e, de, ip, dip, ei, t, dt
 
 
 def _update_xrays(conv, xrays, nuc_id):
