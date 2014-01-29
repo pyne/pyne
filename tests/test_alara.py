@@ -171,6 +171,10 @@ def test_photon_source_hdf5_to_mesh():
         os.remove(filename + '.h5')
 
 def test_mesh_to_geom():
+
+    if not HAVE_PYTAPS:
+        raise SkipTest
+
     expected_geom = os.path.join(thisdir, "files_test_alara", "alara_geom.txt")
     expected_matlib = os.path.join(thisdir, "files_test_alara", "alara_matlib.txt")
     geom = os.path.join(os.getcwd(), "alara_geom")
@@ -194,8 +198,8 @@ def test_mesh_to_geom():
 
     assert_equal(written, expected)
 
-    #if os.path.isfile(geom):
-    #    os.remove(geom)
+    if os.path.isfile(geom):
+        os.remove(geom)
 
     with open(expected_matlib) as f:
         written = f.readlines()
