@@ -22,7 +22,7 @@ def try_rm_file(filename):
 
 def gen_mesh(mats=None):
     mesh_1 = Mesh(structured_coords=[[-1,0,1],[-1,0,1],[0,1]], structured=True, 
-                  mats=mats)
+                  structured_ordering='zyx', mats=mats)
     volumes1 = list(mesh_1.structured_iterate_hex("xyz"))
     flux_tag = mesh_1.mesh.createTag("flux", 1, float)
     flux_data = [1.0, 2.0, 3.0, 4.0]
@@ -165,6 +165,13 @@ def test_get_divs():
     assert_equal(sm.structured_get_divisions("x"), x)
     assert_equal(sm.structured_get_divisions("y"), y)
     assert_equal(sm.structured_get_divisions("z"), z)
+
+def test_iter_structured_idx():
+    m = gen_mesh() # gen_mesh uses zyx order
+    xyz_idx = [0, 2, 1, 3] # expected results in xyz order
+    for n, i in enumerate(m.iter_structured_idx('xyz')):
+        assert_equal(i, xyz_idx[n])
+
 
 #############################################
 #Test mesh arithmetic for Mesh and StatMesh
