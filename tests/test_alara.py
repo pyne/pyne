@@ -21,7 +21,7 @@ except ImportError:
 from pyne.mesh import Mesh, StatMesh, MeshError
 from pyne.material import Material
 from pyne.alara import mesh_to_fluxin, photon_source_to_hdf5, \
-    photon_source_hdf5_to_mesh, mesh_to_geom
+    photon_source_hdf5_to_mesh, mesh_to_geom, num_density_to_mesh
 
 thisdir = os.path.dirname(__file__)
 
@@ -211,3 +211,84 @@ def test_mesh_to_geom():
 
     if os.path.isfile(matlib):
         os.remove(matlib)
+
+def test_num_den_to_mesh_shutdown():
+
+    if not HAVE_PYTAPS:
+        raise SkipTest
+
+    filename = os.path.join(thisdir, "files_test_alara", 
+                            "num_density_output.txt")
+    m = Mesh(structured=True, structured_coords=[[0,1],[0,1],[0,1,2]])
+    num_density_to_mesh(filename, 'shutdown', m)
+
+    # expected composition results:
+    exp_comp_0 = {10010000:5.3390e+19,
+                  10020000:3.0571e+17,
+                  10030000:1.2082e+12,
+                  20030000:7.4323e+09,
+                  20040000:7.1632e+02}
+    exp_comp_1 = {10010000:4.1240e+13,
+                  10020000:4.7443e+11,
+                  10030000:2.6627e+13, 
+                  20030000:8.3547e+10, 
+                  20040000:2.6877e+19}
+
+    # actual composition results
+    act_comp_0 = m.mats[0].to_atom_frac()
+    act_comp_1 = m.mats[1].to_atom_frac()
+
+    assert_equal(len(exp_comp_0), len(act_comp_0))
+    for key, value in exp_comp_0.iteritems():
+        assert_almost_equal(value/act_comp_0[key], 1.0, 15)
+
+    assert_equal(len(exp_comp_1), len(act_comp_1))
+    for key, value in exp_comp_1.iteritems():
+        assert_almost_equal(value/act_comp_1[key], 1.0, 15)
+
+    # compare densities
+    exp_density_0 = 8.96715E-05
+    exp_density_1 = 1.785214E-04
+
+    assert_almost_equal(exp_density_0, m.mats[0].density)
+    assert_almost_equal(exp_density_1, m.mats[1].density)
+
+def test_num_den_to_mesh_1_y():
+
+    if not HAVE_PYTAPS:
+        raise SkipTest
+
+    filename = os.path.join(thisdir, "files_test_alara", 
+                            "num_density_output.txt")
+    m = Mesh(structured=True, structured_coords=[[0,1],[0,1],[0,1,2]])
+    num_density_to_mesh(filename, '1 y', m)
+
+    # expected results:
+    exp_comp_0 = {10010000:5.3390e+19,
+                  10020000:3.0571e+17,
+                  10030000:1.1424e+12,
+                  20030000:7.3260e+10,
+                  20040000:7.1632e+02}
+    exp_comp_1 = {10010000:4.1240e+13,
+                  10020000:4.7443e+11,
+                  10030000:2.5176e+13, 
+                  20030000:1.5343e+12, 
+                  20040000:2.6877e+19}
+
+    # actual results
+    act_comp_0 = m.mats[0].to_atom_frac()
+    act_comp_1 = m.mats[1].to_atom_frac()
+
+    assert_equal(len(exp_comp_0), len(act_comp_0))
+    for key, value in exp_comp_0.iteritems():
+        assert_almost_equal(value/act_comp_0[key], 1.0, 15)
+
+    assert_equal(len(exp_comp_1), len(act_comp_1))
+    for key, value in exp_comp_1.iteritems():
+        assert_almost_equal(value/act_comp_1[key], 1.0, 15)
+
+    # compare densities
+    exp_density_0 = 8.96715E-05
+    exp_density_1 = 1.78521E-04
+    assert_almost_equal(exp_density_0, m.mats[0].density)
+    assert_almost_equal(exp_density_1, m.mats[1].density)
