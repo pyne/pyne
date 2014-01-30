@@ -15,7 +15,9 @@ except ImportError:
 
 from pyne.mesh import Mesh, MeshError
 from pyne.material import Material
-from pyne.nucname import serpent, alara, znum
+from pyne.nucname import serpent, alara, znum, anum
+
+N_AV = 6.0221413E23 # Avogadro's number
 
 def mesh_to_fluxin(flux_mesh, flux_tag, fluxin="fluxin.out",
                         reverse=False):
@@ -285,17 +287,21 @@ def num_density_to_mesh(filename, time, m):
 
     f = open(filename, 'r')
     # Advance file to number density portion
-    header = 'Number Density [atoms/cm3]'
+    header = 'Number Density [atoms/cm3]\n'
     line = ""
     while line != header:
         line = f.readline()
 
-    # Get decay time index from next line
-    time_index = f.readline().split('\t').index(time)
+    # Get decay time index from next line note the subtracting 2 and then
+    # dividing by two in necessary to get the index because the split() will
+    # separate the decay time and its unit (e.g. '1 h' become '1' and 'h')
+    time_index = (f.readline().split().index(time) - 2)/2
 
+    # create a dict of mats for the mesh
+    mats = {}
     count = 0
-    mats = []
     while count != len(m):
+        # pop lines to start of the next material
         while f.readline()[0] != '=':
             pass
 
@@ -303,13 +309,18 @@ def num_density_to_mesh(filename, time, m):
         nucvec = {}
         density = 0.0
         while line[0] != '=':
-            nuc = line.split('\t')[0]
-            n = float(line.split('\t')[time_index])
-            nucvec[nuc] = n
-            density += n * anum[nuc]
+            nuc = line.split()[0]
+            n = float(line.split()[time_index])
+            if n != 0.0:
+                nucvec[nuc] = n
+                density += n * anum(nuc)/N_AV
 
-        mats.append(Material(nucvec=nucvec, density = density))
+            line = f.readline()
+
+        mat = Material(density=density)
+        mat.from_atom_frac(nucvec)
+        mats[count] = mat
         count += 1
 
-    m.mats[:] = mats
+    m.mats = mats
     f.close()
