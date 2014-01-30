@@ -264,3 +264,52 @@ def mesh_to_geom(mesh, geom_file, matlib_file):
     
     with open(matlib_file, 'w') as f:
         f.write(matlib)
+
+def num_density_to_mesh(filename, time, m):
+    """
+    This function reads an ALARA output file containing number density
+    information and creates material objects which are then added to a supplied
+    PyNE Mesh object.
+
+    Parameters
+    ----------
+    filename : str
+        ALARA output file from ALARA run with 'number_density' in the 'output'
+        block of the input file.
+    time : str
+        The decay time for which number densities are requested (e.g. '1 h')
+    m : PyNE Mesh
+        Mesh object for which mats will be applied to.
+    """
+
+
+    f = open(filename, 'r')
+    # Advance file to number density portion
+    header = 'Number Density [atoms/cm3]'
+    line = ""
+    while line != header:
+        line = f.readline()
+
+    # Get decay time index from next line
+    time_index = f.readline().split('\t').index(time)
+
+    count = 0
+    mats = []
+    while count != len(m):
+        while f.readline()[0] != '=':
+            pass
+
+        line = f.readline()
+        nucvec = {}
+        density = 0.0
+        while line[0] != '=':
+            nuc = line.split('\t')[0]
+            n = float(line.split('\t')[time_index])
+            nucvec[nuc] = n
+            density += n * anum[nuc]
+
+        mats.append(Material(nucvec=nucvec, density = density))
+        count += 1
+
+    m.mats[:] = mats
+    f.close()
