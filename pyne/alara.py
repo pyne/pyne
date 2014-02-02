@@ -14,10 +14,9 @@ except ImportError:
                   ImportWarning)
 
 from pyne.mesh import Mesh, MeshError
-from pyne.material import Material
+from pyne.material import Material, from_atom_frac
 from pyne.nucname import serpent, alara, znum, anum
-
-N_AV = 6.0221413E23 # Avogadro's number
+from pyne.data import N_A
 
 def mesh_to_fluxin(flux_mesh, flux_tag, fluxin="fluxin.out",
                         reverse=False):
@@ -317,11 +316,10 @@ def num_density_to_mesh(filename, time, m):
             n = float(line.split()[time_index])
             if n != 0.0:
                 nucvec[nuc] = n
-                density += n * anum(nuc)/N_AV
+                density += n * anum(nuc)/N_A
 
             line = f.readline()
-        mat = Material(density=density, mass=0)
-        mat.from_atom_frac(nucvec)
+        mat = from_atom_frac(nucvec, density=density, mass=0)
         mats[count] = mat
         count += 1
 
