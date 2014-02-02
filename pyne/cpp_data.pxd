@@ -7,6 +7,13 @@ from libcpp.utility cimport pair
 cimport extra_types
 
 cdef extern from "data.h" namespace "pyne":
+    # Mathematical constants
+    double pi
+    double N_A
+    double barns_per_cm2
+    double cm2_per_barn
+    double sec_per_day
+
     # hash map and initialization function
     map[std_string, std_string] data_checksums
     
