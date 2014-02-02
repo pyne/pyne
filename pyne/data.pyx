@@ -28,6 +28,13 @@ cimport cpp_data
 cimport pyne.stlcontainers as conv
 import pyne.stlcontainers as conv
 
+# Mathematical constants
+pi = cpp_data.pi
+N_A = cpp_data.N_A
+barns_per_cm2 = cpp_data.barns_per_cm2
+cm2_per_barn = cpp_data.cm2_per_barn
+sec_per_day = cpp_data.sec_per_day
+
 
 #
 # hash map and initialization
