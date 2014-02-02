@@ -3,8 +3,8 @@
 ///
 /// \brief Implements basic nuclear data functions.
 
-#ifndef _PYNE_DATA_
-#define _PYNE_DATA_
+#ifndef _TEWK4A7VOFFLHDDXD5ZZ7KPXEQ
+#define _TEWK4A7VOFFLHDDXD5ZZ7KPXEQ
 #include <iostream>
 #include <string>
 #include <utility>
@@ -25,6 +25,15 @@
 
 namespace pyne
 {
+  /// \name Mathematical and Physical Constants
+  /// \{
+  extern const double pi;   ///< pi = 3.14159265359
+  extern const double N_A;  ///< Avogadro's Number
+  extern const double barns_per_cm2;  ///< barns per cm^2
+  extern const double cm2_per_barn;   ///< cm^2 per barn
+  extern const double sec_per_day;    ///< seconds per day
+  /// \}
+
   extern std::string NUC_DATA_PATH; ///< Path to the nuc_data.h5 file.
 
   // Mapping from nodes in nuc_data.h5 to hashes of nodes

@@ -28,6 +28,22 @@ cimport cpp_data
 cimport pyne.stlcontainers as conv
 import pyne.stlcontainers as conv
 
+# Mathematical constants
+pi = cpp_data.pi
+"""Mathematical constant pi."""
+
+N_A = cpp_data.N_A
+"""Avogadro constant."""
+
+barns_per_cm2 = cpp_data.barns_per_cm2
+"""Barns per centimeter squared."""
+
+cm2_per_barn = cpp_data.cm2_per_barn
+"""Centimeter squared per barn."""
+
+sec_per_day = cpp_data.sec_per_day
+"""The number of seconds in a canonical day."""
+
 
 #
 # hash map and initialization

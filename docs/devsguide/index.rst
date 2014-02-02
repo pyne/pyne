@@ -15,6 +15,7 @@ work builds upon past work well.
     :maxdepth: 1
 
     unittest
+    style_guide
     simplesim
     endf
     

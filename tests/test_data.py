@@ -75,6 +75,17 @@ def test_abundance_by_z_for_soundness():
         if vs:
             assert(abs(1-sum([v[1] for v in vs]))<1e-12)
 
+def test_constants():
+    cases = [
+        (3.14159265359, data.pi),
+        (6.0221415e+23, data.N_A), 
+        (1e24, data.barns_per_cm2),
+        (1e-24, data.cm2_per_barn),
+        (24.0 * 3600.0, data.sec_per_day),
+        ]
+    for exp, obs in cases:
+        yield assert_equal, exp, obs
+
 if __name__ == "__main__":
     nose.runmodule()
 
