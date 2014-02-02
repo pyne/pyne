@@ -28,7 +28,7 @@ namespace pyne
   /// \name Mathematical and Physical Constants
   /// \{
   extern const double pi;   ///< pi = 3.14159265359
-  extern const double N_A;  ///< Avagardo's Number
+  extern const double N_A;  ///< Avogadro's Number
   extern const double barns_per_cm2;  ///< barns per cm^2
   extern const double cm2_per_barn;   ///< cm^2 per barn
   extern const double sec_per_day;    ///< seconds per day
