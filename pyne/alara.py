@@ -14,8 +14,9 @@ except ImportError:
                   ImportWarning)
 
 from pyne.mesh import Mesh, MeshError
-from pyne.material import Material
-from pyne.nucname import serpent, alara, znum
+from pyne.material import Material, from_atom_frac
+from pyne.nucname import serpent, alara, znum, anum
+from pyne.data import N_A
 
 def mesh_to_fluxin(flux_mesh, flux_tag, fluxin="fluxin.out",
                         reverse=False):
@@ -264,3 +265,63 @@ def mesh_to_geom(mesh, geom_file, matlib_file):
     
     with open(matlib_file, 'w') as f:
         f.write(matlib)
+
+def num_density_to_mesh(filename, time, m):
+    """This function reads an ALARA output file containing number density
+    information and creates material objects which are then added to a supplied
+    PyNE Mesh object. The volumes within ALARA are assummed to appear in the 
+    same order as the idx on the Mesh object.
+
+    Parameters
+    ----------
+    filename : str
+        ALARA output file from ALARA run with 'number_density' in the 'output'
+        block of the input file.
+    time : str
+        The decay time for which number densities are requested (e.g. '1 h',
+        'shutdown', etc.)
+    m : PyNE Mesh
+        Mesh object for which mats will be applied to.
+    """
+
+    f = open(filename, 'r')
+    # Advance file to number density portion.
+    header = 'Number Density [atoms/cm3]\n'
+    line = ""
+    while line != header:
+        line = f.readline()
+
+    # Get decay time index from next line (the column the decay time answers
+    # appear in.
+    line_strs = f.readline().replace('\t', '  ')
+    time_index = [s.strip() for s in line_strs.split('  ') 
+                  if s.strip()].index(time)
+
+    # Create a dict of mats for the mesh.
+    mats = {}
+    count = 0
+    # Read through file until enough material objects are create to fill mesh.
+    while count != len(m):
+        # Pop lines to the start of the next material.
+        while f.readline()[0] != '=':
+            pass
+
+        # Create a new material object and add to mats dict.
+        line = f.readline()
+        nucvec = {}
+        density = 0.0
+        # Read lines until '=' delimiter at the end of a material.
+        while line[0] != '=':
+            nuc = line.split()[0]
+            n = float(line.split()[time_index])
+            if n != 0.0:
+                nucvec[nuc] = n
+                density += n * anum(nuc)/N_A
+
+            line = f.readline()
+        mat = from_atom_frac(nucvec, density=density, mass=0)
+        mats[count] = mat
+        count += 1
+
+    f.close()
+    m.mats = mats
