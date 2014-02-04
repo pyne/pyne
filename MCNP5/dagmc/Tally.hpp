@@ -120,6 +120,13 @@ class Tally
      */
     virtual void write_data(double num_histories) = 0;
 
+    /**
+     * \brief Provide access to data for testing
+     *
+     * Provide read-only access to the protected TallyData *data
+     */
+    const TallyData& getTallyData();
+
   protected:
     /// Input data defined by user for this tally
     TallyInput input_data;

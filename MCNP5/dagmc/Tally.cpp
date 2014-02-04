@@ -103,6 +103,11 @@ void Tally::end_history()
 {
     data->end_history();
 }
+
+const TallyData& Tally::getTallyData()
+{
+      return *data;
+}
 //---------------------------------------------------------------------------//
 // PROTECTED INTERFACE
 //---------------------------------------------------------------------------//

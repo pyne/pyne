@@ -3,10 +3,12 @@
 PROJECT(DAGMCTallyUnitTests)
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
 
-ADD_SUBDIRECTORY(gtest/gtest-1.7.0)
+# ADD_SUBDIRECTORY(gtest/gtest-1.7.0)
+
+# ADD_DIRECTORY(${GTEST_HOME}/gtest-1.7.0)
 
 # Where to look for includes
-INCLUDE_DIRECTORIES("${MOAB_HOME}/include" gtest/gtest-1.7.0/include)
+INCLUDE_DIRECTORIES("${MOAB_HOME}/include" "${GTEST_HOME}/gtest-1.7.0/include")
 
 # make DAGMC Tally source files into a library
 ADD_LIBRARY(dagtally SHARED
@@ -25,8 +27,8 @@ ADD_LIBRARY(dagtally SHARED
 
 # set libraries
 SET(LIBRARIES
-    gtest
-    gtest_main
+    ${GTEST_HOME}/lib/libgtest.a
+    ${GTEST_HOME}/lib/libgtest_main.a
     pthread
     dagtally
     ${MOAB_HOME}/lib/libMOAB.so
@@ -48,6 +50,9 @@ TARGET_LINK_LIBRARIES(test_PolynomialKernel ${LIBRARIES})
 ADD_EXECUTABLE(test_Quadrature test_Quadrature.cpp)
 TARGET_LINK_LIBRARIES(test_Quadrature ${LIBRARIES})
 
+ADD_EXECUTABLE(test_CellTally test_CellTally.cpp)
+TARGET_LINK_LIBRARIES(test_CellTally ${LIBRARIES})
+
 # enable DAGMC Tally test cases
 ENABLE_TESTING()
 
@@ -57,3 +62,4 @@ ADD_TEST(test_KDEMeshTally test_KDEMeshTally)
 ADD_TEST(test_KDENeighborhood test_KDENeighborhood)
 ADD_TEST(test_PolynomialKernel test_PolynomialKernel)
 ADD_TEST(test_Quadrature test_Quadrature)
+ADD_TEST(test_CellTally test_CellTally)
