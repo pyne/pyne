@@ -41,7 +41,7 @@ except ImportError:
                   ImportWarning)
     HAVE_PYTAPS = False
 
-from pyne.mesh import Mesh, StatMesh, MeshError
+from pyne.mesh import Mesh, StatMesh, MeshError, _structured_check
 
 
 class Mctal(object):
@@ -1943,3 +1943,69 @@ class MeshTally(StatMesh):
 
             tag_result[res_vol_elements] = result
             tag_rel_error[err_vol_elements] = rel_error
+
+def mesh_to_geom(mesh, filename, title_card="Generated from PyNE Mesh"):
+    """This function reads a structured Mesh object and writes the geometry
+    portion of an MCNP input file (cells, surfaces, materials).
+
+    Parameters
+    ----------
+    mesh : PyNE Mesh object
+       A structured Mesh object with materials and valid densities.
+   filename : str
+       The file to write the output cards to.
+   title_card : str, optional
+       The MCNP title card to appear at the top of the input file.
+   """
+
+   mesh._structured_check
+   divs = (mesh.structured_get_division('x'),
+           mesh.structured_get_division('y'),
+           mesh.structured_get_division('z'))
+
+   cell_cards = _mesh_to_cell_cards(mesh, divs)
+   surf_cards = _mesh_to_surf_cards(mesh, divs)
+   mat_cards = _mesh_to_mat_cards(mesh, divs)
+
+   with open(filename, 'w') as f:
+       f.write("{0}\n{1}\n{2}\n{3}\n".format(title_card, cell_cards, 
+                                             surf_cards, mat_cards))
+
+def _mesh_to_cell_cards(mesh, divs):
+
+   cell_cards = ""
+   count = 1
+   idx = mesh.iter_structured_idx('xyz')
+   j_offset = len(divs[0])
+   k_offset = len(divs[0]) + len(divs[1])
+   for i in range(1, len(divs[0])):
+      for j in range(1, len(divs[1])):
+          for k in range(1, len(divs[2])):
+              # Cell number, mat number, density
+              cell_cards += "{0} {1} {2} {3} ".format(count, count, 
+                                                      mesh.density[idx])
+              # x, y, and z surfaces
+              cell_cards += "{0} -{1} {2} -{3} {4} -{5}\n".format(
+                           i, i + 1, j + j_offset, j + j_offset + 1,
+                           k + k_offset, k + k_offset + 1)
+              count += 1
+
+   return cell_cards
+
+def _mesh_to_surf_cards(mesh, divs):
+    surf_cards = ""
+    count = 1
+    for i, dim in enumerate("xyz")
+        for div in divs[i]:
+            surf_cards += "{0} p{1} {2}\n".format(count, dim, div)
+
+    return surf_cards
+
+def _mesh_to_mat_cards(mesh, divs):
+   mat_cards = ""
+   idx = mesh.iter_structured_idx('xyz')
+   for i in idx:
+       
+  
+
+    return mat_cards
