@@ -1258,12 +1258,23 @@ class Material(_Material, collections.MutableMapping):
                 repr(self.comp), self.mass, self.density, self.atoms_per_mol, repr(self.attrs))
 
 
-    def write_mcnp(self, filename, frac_type='mass'):
-        """write_mcnp(self, filename, frac_type='mass')
-        The method appends an mcnp mass fraction definition, with
-        attributes to the file with the supplied filename."""
+    def mcnp_str(self, frac_type='mass'):
+        """mcnp_str(self, frac_type='mass')
+        This method returns an MCNP material card in string form. Relevant
+        attributes are added as MCNP valid comments.
 
-        s = ''  # string to output
+        Parameters
+        ----------
+        frac_type : str, optional
+            Either 'mass' or 'atom'. Speficies whether mass or atom fractions
+            are used to describe material composition.
+
+        Returns
+        -------
+        s : str
+            The MCNP material card.
+        """
+        s = ''  # string to return
 
         if 'name' in self.attrs:
             s += 'C name: {0}\n'.format(self.attrs['name'])
@@ -1298,17 +1309,19 @@ class Material(_Material, collections.MutableMapping):
                 s += '     {0} '.format(nucmcnp)
             s += '{0}{1:.4E}\n'.format(frac_sign, frac)
 
-        # write s to output file
-        with open(filename, 'a') as f:
-            f.write(s)
+        return s
 
+    def alara_str(self):
+        """alara_str(self)
+        This method returns an ALARA material in string form, with relevant
+        attributes as ALARA valid comments.
 
-    def write_alara(self, filename):
-        """write_alara(self, filename)
-        The method appends an ALARA definition, with
-        attributes to the file with the supplied filename."""
-
-        s = ''
+        Returns
+        -------
+        s : str
+            The MCNP material card.
+        """
+        s = '' # string to return
 
         if 'mat_number' in self.attrs:
             s += '# mat number: {0}\n'.format(self.attrs['mat_number'])
@@ -1345,8 +1358,7 @@ class Material(_Material, collections.MutableMapping):
             s += '     {0} {1:.4E} {2}\n'.format(nucname.alara(iso),
                                                  frac, str(nucname.znum(iso)))
 
-        with open(filename, 'a') as f:
-            f.write(s)
+        return s
 
 #####################################
 ### Material generation functions ###
