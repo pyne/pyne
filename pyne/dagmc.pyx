@@ -587,3 +587,73 @@ def get_material_set(**kw):
     return mat_ids
 
 #### start util
+class _MeshRow(object):
+   """This private class represents a mesh row that is ray-traced to determine 
+   cell fractions.
+  
+   Attributes
+   ----------
+   direction : tuple of three ints
+       The unit vector representing the direction (e.g. (0, 0, 1) for z).
+   start_points : iterator object of tuples of three floats
+       Represents that starting point of rays to be fired in direction <dir>.
+   row_results : numpy array of floats
+       A slice of the full numpy array representing the results bins for this
+       mesh row.
+   row_unc : numpy array of floats
+       A slice of the full numpy array representing the uncertainty bins for this
+       mesh row.
+   """
+   __init__(dir_letter, results, unc):
+
+def _fire_meshrow_rays(mesh_row):
+    """This private function carries of the ray tracing on a single mesh
+    row and populates the results and uncertainties accordingly.
+
+    Parameters
+    ----------
+    mesh_row : object of the _MeshRow class
+         The mesh row to preform ray tracing on.
+    """
+
+    for point in mesh_row.start_points:
+        vol = find_volume(point, mesh.direction)
+        for (next_vol, dist, _, next_point) in ray_iterator(vol, point, mesh.direction):
+        
+
+        
+
+def cell_vol_fracs_mesh(filename, mesh, num_rays, random=True):
+"""This function opens a DAGMC loadable geometry and finds the volume fractions
+   of each cell with each mesh volume element of a supplied PyNE Mesh object.
+   These cell fractions are then stored as IMeshTags.
+
+   Parameters
+   ----------
+   filename : str
+       A faceted geometry file (.h5m), likely the result of dagmc_preproc.
+   mesh : PyNE Mesh object
+       The Mesh object to tag with cell volume fractions. The mesh must be a 
+       Cartesean structured mesh that overlays the geometry.
+   num_rays : int
+       The number of rays to fire in each mesh row for each direction.
+   random : boolean
+       If true, rays starting points are chosen randomly on the boundary within
+       each mesh row. If false, a linear spaced grid of starting points is 
+       chosen, with dimension sqrt(num_rays) x sqrt(num_rays)
+"""
+
+   dims = (mesh.structured_get_divisions('x'),
+           mesh.structured_get_divisions('y'),
+           mesh.structured_get_divisions('z'))
+
+   results = zeros(shape = dims)
+   load(filename)
+
+   # Iterate over all directions
+   for i, dir_letter in enumerate('xyz'):
+       directions = [0, 1, 2]
+       square_dirs = directions.remove(i)
+       for a in dims[square_dirs[0]]:
+           for b in dims[square_dirs[1]]:
+               _MeshRow(dir_letter) 
