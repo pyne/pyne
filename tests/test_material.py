@@ -980,9 +980,7 @@ def test_multimaterial():
     assert_equal(mat4.comp[280640000], 0.33752561578334067)
     assert_equal(mat4.comp[300000000], 0.14881933003844042)
 
-def test_write_mcnp():
-    if 'mcnp_mass_fracs.txt' in os.listdir('.'):
-        os.remove('mcnp_mass_fracs.txt')
+def test_mcnp_str():
 
     leu = Material(nucvec={'U235': 0.04, 'U238': 0.96}, 
                    attrs={'mat_number': 2, 
@@ -994,20 +992,19 @@ def test_write_mcnp():
                           'name':'leu'}, 
                    density=19.1)
 
-    leu.write_mcnp('mcnp_mass_fracs.txt')
-    leu.write_mcnp('mcnp_mass_fracs.txt', frac_type='atom')
-
-    with open('mcnp_mass_fracs.txt') as f:
-        written = f.read()
-    expected = ('C name: leu\n'
+    mass = leu.mcnp_str()
+    mass_exp = ('C name: leu\n'
                 'C density = 19.1\n'
                 'C source: Some URL\n'
                 'C comments: this is a long comment that will definitly go over the 80 character\n'
                 'C  limit, for science\n'
                 'm2\n'
                 '     92235.15c -4.0000E-02\n'
-                '     92238.25c -9.6000E-01\n'
-                'C name: leu\n'
+                '     92238.25c -9.6000E-01\n')
+    assert_equal(mass, mass_exp)
+
+    atom = leu.mcnp_str(frac_type='atom')
+    atom_exp = ('C name: leu\n'
                 'C density = 19.1\n'
                 'C source: Some URL\n'
                 'C comments: this is a long comment that will definitly go over the 80 character\n'
@@ -1015,13 +1012,10 @@ def test_write_mcnp():
                 'm2\n'
                 '     92235.15c 4.0491E-02\n'
                 '     92238.25c 9.5951E-01\n')
-    assert_equal(written, expected)
-    os.remove('mcnp_mass_fracs.txt')
+    assert_equal(atom, atom_exp)
 
 
-def test_write_alara():
-    if 'alara.txt' in os.listdir('.'):
-        os.remove('alara.txt')
+def test_alara_str():
 
     leu = Material(nucvec={'U235': 0.04, 'U238': 0.96}, attrs={\
           'mat_number':2, 'table_ids':{'922350':'15c', '922380':'25c'},\
@@ -1033,12 +1027,11 @@ def test_write_alara():
           'mat_number':2,}, density=19.1)
     leu3 = Material(nucvec={'U235': 0.04, 'U238': 0.96})
 
-    leu.write_alara('alara.txt')
-    leu2.write_alara('alara.txt')
-    leu3.write_alara('alara.txt')
 
-    with open('alara.txt') as f:
-        written = f.read()
+    written = leu.alara_str()
+    written += leu2.alara_str()
+    written += leu3.alara_str()
+
     expected = ('# mat number: 2\n'
                 '# source: Some URL\n'
                 '# comments: this is a long comment that will definitly go over the 80 character\n'
@@ -1054,7 +1047,6 @@ def test_write_alara():
                 '     u:235 4.0000E-02 92\n'
                 '     u:238 9.6000E-01 92\n')
     assert_equal(written, expected)
-    os.remove('alara.txt')
 
 def test_natural_elements():
     water = Material()
