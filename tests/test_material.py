@@ -980,7 +980,7 @@ def test_multimaterial():
     assert_equal(mat4.comp[280640000], 0.33752561578334067)
     assert_equal(mat4.comp[300000000], 0.14881933003844042)
 
-def test_mcnp_str():
+def test_mcnp():
 
     leu = Material(nucvec={'U235': 0.04, 'U238': 0.96}, 
                    attrs={'mat_number': 2, 
@@ -992,7 +992,7 @@ def test_mcnp_str():
                           'name':'leu'}, 
                    density=19.1)
 
-    mass = leu.mcnp_str()
+    mass = leu.mcnp()
     mass_exp = ('C name: leu\n'
                 'C density = 19.1\n'
                 'C source: Some URL\n'
@@ -1003,7 +1003,7 @@ def test_mcnp_str():
                 '     92238.25c -9.6000E-01\n')
     assert_equal(mass, mass_exp)
 
-    atom = leu.mcnp_str(frac_type='atom')
+    atom = leu.mcnp(frac_type='atom')
     atom_exp = ('C name: leu\n'
                 'C density = 19.1\n'
                 'C source: Some URL\n'
@@ -1015,7 +1015,7 @@ def test_mcnp_str():
     assert_equal(atom, atom_exp)
 
 
-def test_alara_str():
+def test_alara():
 
     leu = Material(nucvec={'U235': 0.04, 'U238': 0.96}, attrs={\
           'mat_number':2, 'table_ids':{'922350':'15c', '922380':'25c'},\
@@ -1028,9 +1028,9 @@ def test_alara_str():
     leu3 = Material(nucvec={'U235': 0.04, 'U238': 0.96})
 
 
-    written = leu.alara_str()
-    written += leu2.alara_str()
-    written += leu3.alara_str()
+    written = leu.alara()
+    written += leu2.alara()
+    written += leu3.alara()
 
     expected = ('# mat number: 2\n'
                 '# source: Some URL\n'
