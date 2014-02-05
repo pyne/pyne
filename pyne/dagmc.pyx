@@ -9,10 +9,13 @@ import numpy as np
 # Python imports
 import sys
 from contextlib import contextmanager
+from copy import copy
 
 from numpy.linalg import norm
 
 np.import_array()
+
+from pyne.mesh import Mesh, _structured_check
 
 # Set the entity handle type; I don't know a cleaner way than to ask the daglib
 # to return the byte width of the type
@@ -588,39 +591,89 @@ def get_material_set(**kw):
 
 #### start util
 class _MeshRow(object):
-   """This private class represents a mesh row that is ray-traced to determine 
-   cell fractions.
-  
-   Attributes
-   ----------
-   direction : tuple of three ints
-       The unit vector representing the direction (e.g. (0, 0, 1) for z).
-   start_points : iterator object of tuples of three floats
-       Represents that starting point of rays to be fired in direction <dir>.
-   row_results : numpy array of floats
-       A slice of the full numpy array representing the results bins for this
-       mesh row.
-   row_unc : numpy array of floats
-       A slice of the full numpy array representing the uncertainty bins for this
-       mesh row.
-   """
-   __init__(dir_letter, results, unc):
+    """This private class represents a mesh row that is ray-traced to determine 
+    cell fractions.
+   
+    Attributes
+    ----------
+    direction : tuple of three ints
+        The unit vector representing the direction (e.g. (0, 0, 1) for z).
+    start_points : iterator object of tuples of three floats
+        Represents that starting point of rays to be fired in direction <dir>.
+    results : numpy array of floats
+        A slice of the full numpy array representing the results bins for this
+        mesh row.
+    uncs : numpy array of floats
+        A slice of the full numpy array representing the uncertainty bins for this
+        mesh row.
+    """
+    __init__(di, s_di_0, s_min_0, s_max_0,
+                 s_di_1, s_min_1, s_max_1, results, uncs, num_rays, random):
+    """
+    Parameters
+    ----------
+    di : int
+        The direction index: x = 0, y = 1, z = 2
+    s_di_0 : int
+        The index of first dimension of the sampling surface (same notation as
+        di)
+    s_min_0 : float
+        The lower bound of the sampling surface in the s_di_0-th direction.
+    s_max_0 : float
+        The upper bound of the sampling surface in the s_di_0-th direction.
+    s_di_1 : int
+        The index of second dimension of the sampling surface (same notation as
+        di)
+    s_min_1 : float
+        The lower bound of the sampling surface in the s_di_1-th direction.
+    s_max_1 : float
+        The upper bound of the sampling surface in the s_di_1-th direction.
+    results : 1D numpy array of floats
+        Stores the results of ray firing in this mesh row.
+    uncs : 1D numpy array of floats
+        Stores the uncertainties of ray firing in this mesh rows.
+   num_rays : int
+       The number of rays to fire in each mesh row for each direction.
+   random : boolean
+       If true, rays starting points are chosen randomly on the boundary within
+       each mesh row. If false, a linear spaced grid of starting points is 
+       chosen, with dimension sqrt(num_rays) x sqrt(num_rays)
+    """
+    direction = (0, 0, 0)
+    direction[di] = 1
+    self.direction = direction
+    self.results = results
+    self.uncs = unc
 
-def _fire_meshrow_rays(mesh_row):
+    if random:
+        self._random_start_points()
+    else:
+        self._grid_start_points()
+
+    def _random_start_points(self):
+    """Populates start_points attributes with random points on the sampling
+    surface.
+    
+    """
+
+    def _grid_start_points(self):
+    """Populates start_points attributes with a uniform grid of points on the
+    sampling surface.
+    """
+
+def _fire_meshrow_rays(row):
     """This private function carries of the ray tracing on a single mesh
     row and populates the results and uncertainties accordingly.
 
     Parameters
     ----------
-    mesh_row : object of the _MeshRow class
+    row : object of the _MeshRow class
          The mesh row to preform ray tracing on.
     """
 
-    for point in mesh_row.start_points:
+    for point in row.start_points:
         vol = find_volume(point, mesh.direction)
         for (next_vol, dist, _, next_point) in ray_iterator(vol, point, mesh.direction):
-        
-
         
 
 def cell_vol_fracs_mesh(filename, mesh, num_rays, random=True):
@@ -642,6 +695,9 @@ def cell_vol_fracs_mesh(filename, mesh, num_rays, random=True):
        each mesh row. If false, a linear spaced grid of starting points is 
        chosen, with dimension sqrt(num_rays) x sqrt(num_rays)
 """
+   # Ensure input is valid
+   mesh._structured_check()
+   if 
 
    dims = (mesh.structured_get_divisions('x'),
            mesh.structured_get_divisions('y'),
@@ -650,10 +706,26 @@ def cell_vol_fracs_mesh(filename, mesh, num_rays, random=True):
    results = zeros(shape = dims)
    load(filename)
 
-   # Iterate over all directions
-   for i, dir_letter in enumerate('xyz'):
-       directions = [0, 1, 2]
-       square_dirs = directions.remove(i)
-       for a in dims[square_dirs[0]]:
-           for b in dims[square_dirs[1]]:
-               _MeshRow(dir_letter) 
+   # direction indicies: x = 0, y = 1, z = 2
+   dis = (0, 1, 2)
+   # Iterate over all directions indicies
+   for di in dis:
+       # For each direction, the remaining two directions define the sampling 
+       # surface. These two directions are the values in s_dis (surface
+       # direction indices)
+       s_dis = copy(dis)
+       s_dis.remove(i)
+       # iterate through all all the sampling planes perpendicular to di,
+       # creating a _MeshRow in each, and subsequently evaluating that row.
+       for a in range(0, len(dims[s_dis[0]]) - 1):
+           for b in range(0, len(dims[s_dis[1]]) - 1):
+               s_min_0 = dims[s_dis[0]][a]
+               s_max_0 = dims[s_dis[0]][a + 1]
+               s_min_1 = dims[s_dis[1]][b]
+               s_max_1 = dims[s_dis[1]][b + 1]
+               row = _MeshRow(di, s_dis[0], s_min_0, s_max_0,
+                                  s_dis[1], s_min_1, s_max_1, 
+                                   results, uncs, num_rays, random)
+               row.evaluate()
+
+        
