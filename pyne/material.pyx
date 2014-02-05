@@ -1258,7 +1258,7 @@ class Material(_Material, collections.MutableMapping):
                 repr(self.comp), self.mass, self.density, self.atoms_per_mol, repr(self.attrs))
 
 
-    def mcnp_str(self, frac_type='mass'):
+    def mcnp(self, frac_type='mass'):
         """mcnp_str(self, frac_type='mass')
         This method returns an MCNP material card in string form. Relevant
         attributes are added as MCNP valid comments.
@@ -1274,7 +1274,7 @@ class Material(_Material, collections.MutableMapping):
         s : str
             The MCNP material card.
         """
-        s = ''  # string to return
+        s = ''
 
         if 'name' in self.attrs:
             s += 'C name: {0}\n'.format(self.attrs['name'])
@@ -1311,7 +1311,7 @@ class Material(_Material, collections.MutableMapping):
 
         return s
 
-    def alara_str(self):
+    def alara(self):
         """alara_str(self)
         This method returns an ALARA material in string form, with relevant
         attributes as ALARA valid comments.
@@ -1321,7 +1321,7 @@ class Material(_Material, collections.MutableMapping):
         s : str
             The MCNP material card.
         """
-        s = '' # string to return
+        s = ''
 
         if 'mat_number' in self.attrs:
             s += '# mat number: {0}\n'.format(self.attrs['mat_number'])
