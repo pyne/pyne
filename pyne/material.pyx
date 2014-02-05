@@ -1259,7 +1259,7 @@ class Material(_Material, collections.MutableMapping):
 
 
     def mcnp(self, frac_type='mass'):
-        """mcnp_str(self, frac_type='mass')
+        """mcnp(self, frac_type='mass')
         This method returns an MCNP material card in string form. Relevant
         attributes are added as MCNP valid comments.
 
@@ -1311,8 +1311,25 @@ class Material(_Material, collections.MutableMapping):
 
         return s
 
+
+    def write_mcnp(self, filename, frac_type='mass'):
+        """write_mcnp(self, filename, frac_type='mass')
+        The method appends an MCNP mass fraction definition, with
+        attributes to the file with the supplied filename.
+
+        Parameters
+        ----------
+        filename : str
+            The file to append the material definition to.
+        frac_type : str, optional
+            Either 'mass' or 'atom'. Speficies whether mass or atom fractions
+            are used to describe material composition.
+        """
+        with open(filename, 'a') as f:
+            f.write(self.mcnp(frac_type))
+
     def alara(self):
-        """alara_str(self)
+        """alara(self)
         This method returns an ALARA material in string form, with relevant
         attributes as ALARA valid comments.
 
@@ -1359,6 +1376,19 @@ class Material(_Material, collections.MutableMapping):
                                                  frac, str(nucname.znum(iso)))
 
         return s
+
+    def write_alara(self, filename):
+        """write_alara(self, filename)
+        The method appends an ALARA material d$efinition, with attributes
+        to the file with the supplied filename.
+
+        Parameters
+        ----------
+        filename : str
+            The file to append the material definition to.
+        """
+        with open(filename, 'a') as f:
+            f.write(self.alara())
 
 #####################################
 ### Material generation functions ###
