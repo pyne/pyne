@@ -112,15 +112,15 @@ void cpp_dagmcinit(std::string infile,         // geom
 //---------------------------------------------------------------------------//
 // jomiwr(..)
 //---------------------------------------------------------------------------//
-/// Initialization routine, was in WrapInit.c
-void jomiwr(int & nge, const int& lin, const int& lou, int& flukaReg)
+/// Wrapper: Initialization routine, was in WrapInit.c
+void jomiwr(int& nge, const int& lin, const int& lou, int& flukaReg)
 {
   if(debug)
     {
       std::cout << "================== JOMIWR =================" << std::endl;
     }
 
-  //Original comment:  returns number of volumes + 1
+  // Original comment:  returns number of volumes + 1
   unsigned int numVol = DAG->num_entities(3);
   flukaReg = numVol;
 
@@ -136,7 +136,7 @@ void jomiwr(int & nge, const int& lin, const int& lou, int& flukaReg)
 //---------------------------------------------------------------------------//
 // g_step(..)
 //---------------------------------------------------------------------------//
-//  returns approved step of particle and all variables 
+//  Wrapper:  returns approved step of particle and all variables 
 //
 void g_step(double& pSx, 
           double& pSy, 
