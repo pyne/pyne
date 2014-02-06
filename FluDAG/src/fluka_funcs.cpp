@@ -193,6 +193,7 @@ void g_step(double& pSx,
 // newRegion is gotten from the volue returned by DAG->next_vol
 void g_fire(int& oldRegion, double point[], double dir[], double &propStep, double& retStep,  int& newRegion)
 {
+  debug = true;
   if(debug)
   {
       std::cout<<"============= g_fire =============="<<std::endl;    
