@@ -21,4 +21,4 @@ Steps to perform an out-of-source build of gtest libraries.
 %> make
 
 Now the fludag and meshtally unit tests can be compiled, assuming
-the gtest libs in this directory are referenced.
+the gtest libs in the ./lib subdirectory are referenced.
