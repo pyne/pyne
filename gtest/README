@@ -1,24 +1,24 @@
 Steps to perform an out-of-source build of gtest libraries.
 
 
--->  Create a build directory, copy configure.sh to it, and move to it
+-->  Create a build directory, copy configure.sh to it, 
+     modify the copy of configure.sh as necessary 
 
 %> cd $HOME/DAGMC/gtest   // the directory of this README
-%> mkdir bld
-%> cp configure.sh bld
-%> cd bld
+%> mkdir lib
+%> cd lib                 
 
--->  Export a definition of GTEST_DIR, the directory containing CMakeLists.txt
+--> Run cmake 
 
-%> export GTEST_DIR=$HOME/DAGMC/gtest/gtest-1.7.0
+%> cmake ../gtest-1.7.0
 
---> Run the cmake script
+-- or --
 
-%> ./configure.sh
+%> ../configure.sh
 
---> Upon successful completion, copy the library one level up
+--> Create the libraries
 
-%> cp libgtest.a ..
+%> make
 
-
-Now the fludag tests can be compiled
+Now the fludag and meshtally unit tests can be compiled, assuming
+the gtest libs in this directory are referenced.
