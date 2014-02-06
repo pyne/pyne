@@ -147,28 +147,28 @@ class Meshtally():
             x_max = self.get_coordinate_system(line)[2]
             x_width = self.get_coordinate_system(line)[3]
             print x_bins, x_min, x_max, x_width
-#            x_info = [x_bins, x_min, x_max, x_width]
+            x_info = [x_bins, x_min, x_max, x_width]
             line = fh.readline()
             # assume next line is y coord info
             y_bins = self.get_coordinate_system(line)[0]
             y_min = self.get_coordinate_system(line)[1]
             y_max = self.get_coordinate_system(line)[2]
             y_width = self.get_coordinate_system(line)[3]
-#            y_info = {'bins': y_bins, 'min': y_min, 'max': y_max, 'width': y_width}
+            y_info = [y_bins, y_min, y_max, y_width]
             line = fh.readline()
             # assume next line is z coord info
             z_bins = self.get_coordinate_system(line)[0]
             z_min = self.get_coordinate_system(line)[1]
             z_max = self.get_coordinate_system(line)[2]
             z_width = self.get_coordinate_system(line)[3]
-#            z_info = {'bins': z_bins, 'min': z_min, 'max': z_max, 'width': z_width}
+            z_info = [z_bins, z_min, z_max, z_width]
         else:
             print "Coordinate sytem is not Cartesian"
         line = fh.readline()
         # collect how data is arranged (number of columns in matrix)
         columns = self.matrix_organization(line)[3]
 #        print x_info, y_info, z_info, columns
-        return x_bins, x_min, x_max, x_width, y_bins, y_min, y_max, y_width, z_bins, z_min, z_max, z_width, columns
+        return x_info, y_info, z_info, columns
 
 
     def read_usrbin(self, filename): # combines all above functions to place data in a list
@@ -182,23 +182,7 @@ class Meshtally():
         while (not cart_tf and not track_length_tf):
             line = fh.readline()
             if ("Cartesian" in line):
-               print line
-               x_bins = self.read_header(fh, line)[0]
-               x_min = self.read_header(fh, line)[1]
-               x_max = self.read_header(fh, line)[2]
-               x_width = self.read_header(fh, line)[3] 
-               print "x info", x_bins #, x_min, x_max, x_width
-               y_bins = self.read_header(fh, line)[4]
-               y_min = self.read_header(fh, line)[5]
-               y_max = self.read_header(fh, line)[6]
-               y_width = self.read_header(fh, line)[7]
-               print "y info", y_bins, y_min, y_max, y_width
-               z_bins = self.read_header(fh, line)[8]
-               z_min = self.read_header(fh, line)[9]
-               z_max = self.read_header(fh, line)[10]
-               z_width = self.read_header(fh, line)[11]
-               print "z info", z_bins, z_min, z_max, z_width
-               columns = self.read_header(fh, line)[12]
+               [x_info, y_info, z_info, columns] = self.read_header(fh, line)
                print columns
                mesh_tally = mesh_tally + 1
                cart_tf = True
@@ -223,8 +207,9 @@ class Meshtally():
             line = fh.readline()
             data = self.read_data(line)
             error_data.append(data)
-            if ("Cartesian" in line):
+            if ("Cartesian" in line or line == ""):
                 cart_tf = True
+	print part_data, error_data
 
 
 
