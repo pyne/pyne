@@ -44,16 +44,16 @@ class FluDAGTest : public ::testing::Test
     virtual void SetUp()
     {
        // Default h5m file for testing
-       std::string infile = directory + "input/test2/fludag/slabs.h5m";
+       // std::string infile = directory + "input/test2/fludag/slabs.h5m";
+       std::string infile = "../slabs.h5m";
 
        rval = DAG->load_file(infile.c_str(), 0.0 ); 
        assert(rval == MB_SUCCESS);
-       std::cout << "Loaded file " << infile << " successfully!" << std::endl;
 
        // DAG call to initialize geometry
        rval = DAG->init_OBBTree();
        assert (rval == MB_SUCCESS);
-       std::cout << "Past init_OBBTree  successfully!" << std::endl;
+       std::cout << "FluDAGTest:Setup():  Past init_OBBTree...." << std::endl;
 
        point[0] = 0.0;
        point[1] = 0.0; 
@@ -101,7 +101,6 @@ class FluDAGTest : public ::testing::Test
 //---------------------------------------------------------------------------//
 TEST_F(FluDAGTest, WrapperTest)
 {
-  // Position
   std::cout << "Calling g_fire. " << std::endl;  
   g_fire(oldReg, point, dir, propStep, retStep, newReg);
   EXPECT_EQ(0.0, retStep);
