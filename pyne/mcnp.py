@@ -1944,22 +1944,27 @@ class MeshTally(StatMesh):
             tag_result[res_vol_elements] = result
             tag_rel_error[err_vol_elements] = rel_error
 
-def mesh_to_geom(mesh, filename, fracs='mass',
-                 title_card="Generated from PyNE Mesh"):
-    """This function reads a structured Mesh object and writes the geometry
-    portion of an MCNP input file (cells, surfaces, materials).
+def mesh_to_geom(mesh, frac_type='mass', title_card="Generated from PyNE Mesh"):
+    """This function reads a structured Mesh object and returns the geometry
+    portion of an MCNP input file (cells, surfaces, materials), prepended by a
+    title card. The mesh must be axis aligned. Surfaces and cells are written
+    in xyz iteration order (z changing fastest).
 
     Parameters
     ----------
     mesh : PyNE Mesh object
        A structured Mesh object with materials and valid densities.
-   filename : str
-       The file to write the output cards to.
-   fracs : str (optional)
+    frac_type : str (optional)
        Either 'mass' or 'atom'. The type of fraction to use for the material
        definition.
-   title_card : str, optional
+    title_card : str, optional
        The MCNP title card to appear at the top of the input file.
+   
+   Returns
+   -------
+   geom : str
+       The title, cell, surface, and material cards of an MCNP input file in
+       the proper order.
    """
 
     mesh._structured_check()
@@ -1969,11 +1974,10 @@ def mesh_to_geom(mesh, filename, fracs='mass',
  
     cell_cards = _mesh_to_cell_cards(mesh, divs)
     surf_cards = _mesh_to_surf_cards(mesh, divs)
-    mat_cards = _mesh_to_mat_cards(mesh, divs, fracs)
+    mat_cards = _mesh_to_mat_cards(mesh, divs, frac_type)
  
-    with open(filename, 'w') as f:
-        f.write("{0}\n{1}\n{2}\n{3}\n".format(title_card, cell_cards, 
-                                              surf_cards, mat_cards))
+    return "{0}\n{1}\n{2}\n{3}\n".format(title_card, cell_cards, 
+                                              surf_cards, mat_cards)
 
 def _mesh_to_cell_cards(mesh, divs):
     """Prepares the cell cards for mesh_to_geom."""
@@ -2017,12 +2021,12 @@ def _mesh_to_surf_cards(mesh, divs):
 
     return surf_cards
 
-def _mesh_to_mat_cards(mesh, divs, fracs):
+def _mesh_to_mat_cards(mesh, divs, frac_type):
     """Prepares the material cards for mesh_to_geom."""
     mat_cards = ""
     idx = mesh.iter_structured_idx('xyz')
     for i in idx:
         mesh.mats[i].attrs['mat_number'] = i + 1
-        mat_cards += mesh.mats[i].mcnp('fracs')
+        mat_cards += mesh.mats[i].mcnp(frac_type=frac_type)
   
     return mat_cards
