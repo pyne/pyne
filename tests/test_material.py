@@ -980,6 +980,74 @@ def test_multimaterial():
     assert_equal(mat4.comp[280640000], 0.33752561578334067)
     assert_equal(mat4.comp[300000000], 0.14881933003844042)
 
+def test_mcnp():
+
+    leu = Material(nucvec={'U235': 0.04, 'U238': 0.96}, 
+                   attrs={'mat_number': 2, 
+                          'table_ids': {'92235':'15c', '92238':'25c'},
+                          'mat_name':'LEU', 
+                          'source':'Some URL',
+                          'comments': ('this is a long comment that will definitly '
+                                       'go over the 80 character limit, for science'),
+                          'name':'leu'}, 
+                   density=19.1)
+
+    mass = leu.mcnp()
+    mass_exp = ('C name: leu\n'
+                'C density = 19.1\n'
+                'C source: Some URL\n'
+                'C comments: this is a long comment that will definitly go over the 80 character\n'
+                'C  limit, for science\n'
+                'm2\n'
+                '     92235.15c -4.0000E-02\n'
+                '     92238.25c -9.6000E-01\n')
+    assert_equal(mass, mass_exp)
+
+    atom = leu.mcnp(frac_type='atom')
+    atom_exp = ('C name: leu\n'
+                'C density = 19.1\n'
+                'C source: Some URL\n'
+                'C comments: this is a long comment that will definitly go over the 80 character\n'
+                'C  limit, for science\n'
+                'm2\n'
+                '     92235.15c 4.0491E-02\n'
+                '     92238.25c 9.5951E-01\n')
+    assert_equal(atom, atom_exp)
+
+
+def test_alara():
+
+    leu = Material(nucvec={'U235': 0.04, 'U238': 0.96}, attrs={\
+          'mat_number':2, 'table_ids':{'922350':'15c', '922380':'25c'},\
+          'name':'LEU', 'source':'Some URL', \
+          'comments': \
+'this is a long comment that will definitly go over the 80 character limit, for science', \
+            }, density=19.1)
+    leu2 = Material(nucvec={'U235': 0.04, 'U238': 0.96}, attrs={\
+          'mat_number':2,}, density=19.1)
+    leu3 = Material(nucvec={'U235': 0.04, 'U238': 0.96})
+
+
+    written = leu.alara()
+    written += leu2.alara()
+    written += leu3.alara()
+
+    expected = ('# mat number: 2\n'
+                '# source: Some URL\n'
+                '# comments: this is a long comment that will definitly go over the 80 character\n'
+                '#  limit, for science\n'
+                'LEU 19.1 2\n'
+                '     u:235 4.0000E-02 92\n'
+                '     u:238 9.6000E-01 92\n'
+                '# mat number: 2\n'
+                'mat2_rho-19.1 19.1 2\n'
+                '     u:235 4.0000E-02 92\n'
+                '     u:238 9.6000E-01 92\n'
+                'mat<mat_num>_rho-<rho> <rho> 2\n'
+                '     u:235 4.0000E-02 92\n'
+                '     u:238 9.6000E-01 92\n')
+    assert_equal(written, expected)
+
 def test_write_mcnp():
     if 'mcnp_mass_fracs.txt' in os.listdir('.'):
         os.remove('mcnp_mass_fracs.txt')
