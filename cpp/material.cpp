@@ -1137,7 +1137,7 @@ std::map<int, double> pyne::Material::to_atom_frac()
 {
   // Returns an atom fraction map from this material's composition
 
-  // the material's molecular weight
+  // the material's molecular mass
   double mat_mw = molecular_mass();
 
   std::map<int, double> atom_fracs = std::map<int, double>();

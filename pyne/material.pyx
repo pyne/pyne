@@ -453,7 +453,7 @@ cdef class _Material:
 
     def molecular_mass(self, atoms_per_mol=-1.0):
         """molecular_mass(atoms_per_mol=-1.0)
-        This method returns the molecular weight of the comp of this
+        This method returns the molecular mass of the comp of this
         material.
 
         Parameters
@@ -465,7 +465,7 @@ cdef class _Material:
         Returns
         -------
         mol_weight : float
-            Molecular weight in [amu].
+            Molecular mass in [amu].
 
         """
         return self.mat_pointer.molecular_mass(atoms_per_mol)
@@ -1226,7 +1226,7 @@ class Material(_Material, collections.MutableMapping):
         This is the density of the material.
     atoms_per_mol : float, optional
         Number of atoms to per molecule of material.  Needed to obtain proper
-        scaling of molecular weights.  For example, this value for water is
+        scaling of molecular mass.  For example, this value for water is
         3.0.
     attrs : JSON-convertable Python object, optional
         Initial attributes to build the material with.  At the top-level this is
@@ -1414,7 +1414,7 @@ def from_atom_frac(atom_fracs, double mass=-1.0, double density=-1.0,
         This is the density of the material.
     atoms_per_mol : float, optional
         Number of atoms per molecule of material.  Needed to obtain proper
-        scaling of molecular weights.  For example, this value for water is
+        scaling of molecular mass.  For example, this value for water is
         3.0.
     attrs : JSON-convertable Python object, optional
         Initial attributes to build the material with.  At the top-level this is
@@ -1522,7 +1522,7 @@ def from_text(char * filename, double mass=-1.0, double atoms_per_mol=-1.0, attr
         positive or zero, then this mass overrides the calculated one.
     atoms_per_mol : float, optional
         Number of atoms to per molecule of material.  Needed to obtain proper
-        scaling of molecular weights.  For example, this value for water is
+        scaling of molecular mass.  For example, this value for water is
         3.0.
     attrs : JSON-convertable Python object, optional
         Initial attributes to build the material with.  At the top-level this is
