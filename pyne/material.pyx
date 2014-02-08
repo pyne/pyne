@@ -451,8 +451,8 @@ cdef class _Material:
         return nucvec_proxy
 
 
-    def molecular_weight(self, atoms_per_mol=-1.0):
-        """molecular_weight(atoms_per_mol=-1.0)
+    def molecular_mass(self, atoms_per_mol=-1.0):
+        """molecular_mass(atoms_per_mol=-1.0)
         This method returns the molecular weight of the comp of this
         material.
 
@@ -468,7 +468,7 @@ cdef class _Material:
             Molecular weight in [amu].
 
         """
-        return self.mat_pointer.molecular_weight(atoms_per_mol)
+        return self.mat_pointer.molecular_mass(atoms_per_mol)
 
     def expand_elements(self):
         """expand_elements(self)

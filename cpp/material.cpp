@@ -801,7 +801,7 @@ pyne::comp_map pyne::Material::mult_by_mass()
 
 
 
-double pyne::Material::molecular_weight(double apm)
+double pyne::Material::molecular_mass(double apm)
 {
   // Calculate the atomic weight of the Material
   double inverseA = 0.0;
@@ -880,7 +880,7 @@ double pyne::Material::mass_density(double num_dens, double apm)
 {
   if (0.0 <= num_dens)
   {
-    double mw = molecular_weight(apm);
+    double mw = molecular_mass(apm);
     density = num_dens * mw / pyne::N_A / atoms_per_mol;
   };
   return density;
@@ -891,7 +891,7 @@ double pyne::Material::number_density(double mass_dens, double apm)
 {
   if (0 <= mass_dens)
     density = mass_dens;
-  double mw = molecular_weight(apm);
+  double mw = molecular_mass(apm);
   double num_dens = density * pyne::N_A * atoms_per_mol / mw;
   return num_dens;
 };
@@ -1138,7 +1138,7 @@ std::map<int, double> pyne::Material::to_atom_frac()
   // Returns an atom fraction map from this material's composition
 
   // the material's molecular weight
-  double mat_mw = molecular_weight();
+  double mat_mw = molecular_mass();
 
   std::map<int, double> atom_fracs = std::map<int, double>();
 
