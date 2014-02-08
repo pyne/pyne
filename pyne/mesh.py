@@ -692,7 +692,7 @@ class Mesh(object):
         self.density = MaterialPropertyTag(mesh=self, name='density', 
                                            doc='the density [g/cc]')
         # Material method tags
-        methtagnames = ('expand_elements', 'mass_density', 'molecular_weight', 
+        methtagnames = ('expand_elements', 'mass_density', 'molecular_mass', 
                         'mult_by_mass', 'number_density', 'sub_act', 'sub_fp', 
                         'sub_lan', 'sub_ma', 'sub_tru', 'to_atom_frac')
         for name in methtagnames:

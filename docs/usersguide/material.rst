@@ -191,13 +191,13 @@ Plutonium vector.
 
 Molecular Weights & Atom Fractions
 ----------------------------------
-You may also calculate the molecular weight of a material via the :meth:`Material.molecular_weight` method.
+You may also calculate the molecular mass of a material via the :meth:`Material.molecular_mass` method.
 This uses the :func:`pyne.data.atomic_mass` function to look up the atomic mass values of
 the constituent nuclides.
 
 .. code-block:: ipython
 
-    In [29]: leu.molecular_weight()
+    In [29]: leu.molecular_mass()
     Out[29]: 237.9290388038301
 
 Note that by default, materials are assumed to have one atom per molecule.  This is a poor
@@ -211,10 +211,10 @@ class.
 
     In [30]: h2o = Material({10010: 0.11191487328808077, 80160: 0.8880851267119192})
 
-    In [31]: h2o.molecular_weight()
+    In [31]: h2o.molecular_mass()
     Out[31]: 6.003521561343334
 
-    In [32]: h2o.molecular_weight(3.0)
+    In [32]: h2o.molecular_mass(3.0)
     Out[32]: 18.01056468403
 
     In [33]: h2o.atoms_per_mol
@@ -262,7 +262,7 @@ already set on the material, the molecular weight will be used.
     In [42]: h2o.mass
     Out[42]: 18.01056468403
 
-    In [43]: h2o.molecular_weight()
+    In [43]: h2o.molecular_mass()
     Out[43]: 18.01056468403
 
 

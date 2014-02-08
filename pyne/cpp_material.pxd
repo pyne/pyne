@@ -52,8 +52,8 @@ cdef extern from "material.h" namespace "pyne":
 
         void normalize() except +
         map[int, double] mult_by_mass() except +
-        double molecular_weight() except +
-        double molecular_weight(double) except +
+        double molecular_mass() except +
+        double molecular_mass(double) except +
         Material expand_elements() except +
         double mass_density() except +
         double mass_density(double) except +
