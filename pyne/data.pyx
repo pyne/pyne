@@ -7,20 +7,13 @@ from libcpp.map cimport map
 from libcpp.set cimport set as cpp_set
 from cython.operator cimport dereference as deref
 from cython.operator cimport preincrement as inc
+from libcpp.map cimport map as cpp_map
+from libcpp.set cimport set as cpp_set
+from libcpp.string cimport string as std_string
+from libcpp.utility cimport pair as cpp_pair
 #from cython cimport pointer
 
 # local imports 
-include "include/cython_version.pxi"
-IF CYTHON_VERSION_MAJOR == 0 and CYTHON_VERSION_MINOR >= 17:
-    from libcpp.map cimport map as cpp_map
-    from libcpp.set cimport set as cpp_set
-    from libcpp.string cimport string as std_string
-    from libcpp.utility cimport pair as cpp_pair
-ELSE:
-    from pyne._includes.libcpp.map cimport map as cpp_map
-    from pyne._includes.libcpp.set cimport set as cpp_set
-    from pyne._includes.libcpp.string cimport string as std_string
-    from pyne._includes.libcpp.utility cimport pair as cpp_pair
 cimport extra_types
 
 cimport pyne.cpp_pyne
@@ -34,6 +27,22 @@ import pyne.nucname
 cimport cpp_data
 cimport pyne.stlcontainers as conv
 import pyne.stlcontainers as conv
+
+# Mathematical constants
+pi = cpp_data.pi
+"""Mathematical constant pi."""
+
+N_A = cpp_data.N_A
+"""Avogadro constant."""
+
+barns_per_cm2 = cpp_data.barns_per_cm2
+"""Barns per centimeter squared."""
+
+cm2_per_barn = cpp_data.cm2_per_barn
+"""Centimeter squared per barn."""
+
+sec_per_day = cpp_data.sec_per_day
+"""The number of seconds in a canonical day."""
 
 
 #

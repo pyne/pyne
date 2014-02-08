@@ -3,6 +3,16 @@
 #include "data.h"
 
 
+//
+// Math Helpers
+//
+
+const double pyne::pi = 3.14159265359;
+const double pyne::N_A = 6.0221415e+23;
+const double pyne::barns_per_cm2 = 1e24;
+const double pyne::cm2_per_barn = 1e-24;
+const double pyne::sec_per_day = 24.0 * 3600.0;
+
 /********************************/
 /*** data_checksums Functions ***/
 /********************************/
@@ -68,6 +78,8 @@ void pyne::_load_atomic_mass_map()
     atomic_mass_map[atomic_weight_array[n].nuc] = atomic_weight_array[n].mass;
     natural_abund_map[atomic_weight_array[n].nuc] = atomic_weight_array[n].abund;
   }
+
+  delete[] atomic_weight_array;
 };
 
 
@@ -255,6 +267,8 @@ void pyne::_load_scattering_lengths()
     b_coherent_map[scat_len_array[n].nuc] = scat_len_array[n].b_coherent;
     b_incoherent_map[scat_len_array[n].nuc] = scat_len_array[n].b_incoherent;
   };
+
+  delete[] scat_len_array;
 };
 
 
@@ -544,6 +558,8 @@ void pyne::_load_atomic_decay()
     if (0.0 != atom_dec_array[n].decay_const)
       decay_children_map[from_nuc].insert(to_nuc);
   };
+
+  delete[] atom_dec_array;
 };
 
 

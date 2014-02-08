@@ -1,0 +1,16 @@
+geometry rectangular
+
+volume
+     1.000000E+00    zone_0
+     1.000000E+00    zone_1
+     1.000000E+00    zone_2
+     1.000000E+00    zone_3
+end
+
+mat_loading
+    zone_0    mat_0
+    zone_1    mat_1
+    zone_2    mat_2
+    zone_3    mat_3
+end
+

@@ -1,19 +1,19 @@
-"""C++ wrapper for nucname library."""
-include "include/cython_version.pxi"
-IF CYTHON_VERSION_MAJOR == 0 and CYTHON_VERSION_MINOR >= 17:
-    from libcpp.string cimport string as std_string
-    from libcpp.map cimport map
-    from libcpp.set cimport set
-    from libcpp.utility cimport pair
-ELSE:
-    from pyne._includes.libcpp.string cimport string as std_string
-    from pyne._includes.libcpp.map cimport map
-    from pyne._includes.libcpp.set cimport set
-    from pyne._includes.libcpp.utility cimport pair
+"""C++ wrapper for data library."""
+from libcpp.string cimport string as std_string
+from libcpp.map cimport map
+from libcpp.set cimport set
+from libcpp.utility cimport pair
 
 cimport extra_types
 
 cdef extern from "data.h" namespace "pyne":
+    # Mathematical constants
+    double pi
+    double N_A
+    double barns_per_cm2
+    double cm2_per_barn
+    double sec_per_day
+
     # hash map and initialization function
     map[std_string, std_string] data_checksums
     

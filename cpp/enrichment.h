@@ -3,8 +3,8 @@
 ///
 /// \brief Top-level enrichment functionality.
 
-#if !defined(_PYNE_ENRICHMENT_)
-#define _PYNE_ENRICHMENT_
+#if !defined(_4fd11fd5_2aa1_4dd1_9561_d8af45cab5ef)
+#define _4fd11fd5_2aa1_4dd1_9561_d8af45cab5ef
 
 #include "enrichment_symbolic.h"
 

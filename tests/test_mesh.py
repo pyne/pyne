@@ -4,7 +4,7 @@ import shutil
 import itertools
 from operator import itemgetter
 from nose.tools import assert_true, assert_equal, assert_raises, with_setup, \
-    assert_is, assert_is_instance, assert_in, assert_not_in
+    assert_is, assert_is_instance, assert_in, assert_not_in, assert_almost_equal
 
 import numpy as np
 from numpy.testing import assert_array_equal, assert_array_almost_equal
@@ -22,7 +22,7 @@ def try_rm_file(filename):
 
 def gen_mesh(mats=None):
     mesh_1 = Mesh(structured_coords=[[-1,0,1],[-1,0,1],[0,1]], structured=True, 
-                  mats=mats)
+                  structured_ordering='zyx', mats=mats)
     volumes1 = list(mesh_1.structured_iterate_hex("xyz"))
     flux_tag = mesh_1.mesh.createTag("flux", 1, float)
     flux_data = [1.0, 2.0, 3.0, 4.0]
@@ -45,6 +45,30 @@ def test_unstructured_mesh_from_instance():
     mesh = iMesh.Mesh()
     mesh.load(filename)
     sm = Mesh(mesh = mesh)
+
+def test_elem_volume():
+    """Test the get_elem_volume method"""
+    # Test tet elements recognition and calculation
+    filename = os.path.join(os.path.dirname(__file__),
+                            "files_mesh_test/unstr.h5m")
+    tetmesh = Mesh(mesh_file=filename)
+    vols = list()
+    for __, __, ve in tetmesh:
+        vols.append(tetmesh.elem_volume(ve))
+
+    assert_almost_equal(np.min(vols), 0.13973, places=5)
+    assert_almost_equal(np.max(vols), 2.1783, places=4)
+    assert_almost_equal(np.mean(vols), 0.52702, places=5)
+
+    # Test hex elements recognition and calculation
+    filename = os.path.join(os.path.dirname(__file__),
+                            "files_mesh_test/grid543.h5m")
+    mesh = Mesh(mesh_file=filename)
+    vols = list()
+    for __, __, ve in mesh:
+        vols.append(mesh.elem_volume(ve))
+    assert_almost_equal(np.mean(vols), 51.3333, places=4)
+
 
 #############################################
 #Test structured mesh functionality
@@ -98,21 +122,21 @@ def test_structured_get_hex():
     assert_raises(MeshError, sm.structured_get_hex, 0, 3, 0)
     assert_raises(MeshError, sm.structured_get_hex, 0, 0, 2)
 
-def test_hex_volume():
+def test_structured_hex_volume():
 
     sm = Mesh(structured_coords = [[0,1,3], [-3,-2,0], [12,13,15]], 
               structured=True)
-    assert_equal(sm.structured_get_hex_volume(0,0,0), 1)
-    assert_equal(sm.structured_get_hex_volume(1,0,0), 2)
-    assert_equal(sm.structured_get_hex_volume(0,1,0), 2)
-    assert_equal(sm.structured_get_hex_volume(1,1,0), 4)
-    assert_equal(sm.structured_get_hex_volume(1,1,1), 8)
+    assert_equal(sm.structured_hex_volume(0,0,0), 1)
+    assert_equal(sm.structured_hex_volume(1,0,0), 2)
+    assert_equal(sm.structured_hex_volume(0,1,0), 2)
+    assert_equal(sm.structured_hex_volume(1,1,0), 4)
+    assert_equal(sm.structured_hex_volume(1,1,1), 8)
 
     ijk_all = itertools.product(*([[0,1]]*3))
 
     for V, ijk in itertools.izip_longest(sm.structured_iterate_hex_volumes(), 
                                          ijk_all):
-        assert_equal(V, sm.structured_get_hex_volume(*ijk))
+        assert_equal(V, sm.structured_hex_volume(*ijk))
 
 
 def test_structured_get_vertex():
@@ -141,6 +165,13 @@ def test_get_divs():
     assert_equal(sm.structured_get_divisions("x"), x)
     assert_equal(sm.structured_get_divisions("y"), y)
     assert_equal(sm.structured_get_divisions("z"), z)
+
+def test_iter_structured_idx():
+    m = gen_mesh() # gen_mesh uses zyx order
+    xyz_idx = [0, 2, 1, 3] # expected results in xyz order
+    for n, i in enumerate(m.iter_structured_idx('xyz')):
+        assert_equal(i, xyz_idx[n])
+
 
 #############################################
 #Test mesh arithmetic for Mesh and StatMesh
@@ -523,7 +554,7 @@ def test_matlib():
     m = gen_mesh(mats=mats)
     for i, ve in enumerate(m.mesh.iterate(iBase.Type.region, iMesh.Topology.all)):
         assert_is(m.mats[i], mats[i])
-        assert_equal(m.mesh.getTagHandle('ve_idx')[ve], i)
+        assert_equal(m.mesh.getTagHandle('idx')[ve], i)
 
     m.write_hdf5('test_matlib.h5m')
     shutil.copy('test_matlib.h5m', 'test_matlib2.h5m')
@@ -709,11 +740,11 @@ def test_iter():
         }
     m = gen_mesh(mats=mats)
     j = 0
-    ve_idx_tag = m.mesh.getTagHandle('ve_idx')
+    idx_tag = m.mesh.getTagHandle('idx')
     for i, mat, ve in m:
         assert_equal(j, i)
         assert_is(mats[i], mat)
-        assert_equal(j, ve_idx_tag[ve])
+        assert_equal(j, idx_tag[ve])
         j += 1
         
 

@@ -1,0 +1,58 @@
+ALARA 2.9.0rc
+Schedule '10_year':
+	pulse: 10 y with 0 s delay pulsed with history steady_state
+Zone output requested:
+	Response Units: Bq /cm3
+	Number Density [atoms/cm3]
+
+
+*** Number Density [atoms/cm3] ***
+
+Zone #1: zone_1
+	Relative Volume: 0.5
+	Containing mixture: mix_1
+
+Total (All constituents) 
+	COMPACTED
+	Volume Fraction: 1	Relative Volume: 0.5
+Number Density [atoms/cm3]
+isotope	 shutdown         1 h         6 h        12 h         1 y   
+====================================================================
+h-1 	5.3390e+19  5.3390e+19  5.3390e+19  5.3390e+19  5.3390e+19  
+h-2 	3.0571e+17  3.0571e+17  3.0571e+17  3.0571e+17  3.0571e+17  
+h-3 	1.2082e+12  1.2082e+12  1.2082e+12  1.2081e+12  1.1424e+12  
+he-3 	7.4323e+09  7.4400e+09  7.4787e+09  7.5252e+09  7.3260e+10  
+he-4 	7.1632e+02  7.1632e+02  7.1632e+02  7.1632e+02  7.1632e+02  
+====================================================================
+total	5.3696e+19  5.3696e+19  5.3696e+19  5.3696e+19  5.3696e+19  
+
+Zone #2: zone_2
+	Relative Volume: 0.75
+	Containing mixture: mix_2
+
+Total (All constituents) 
+	COMPACTED
+	Volume Fraction: 1	Relative Volume: 0.75
+Number Density [atoms/cm3]
+isotope	 shutdown         1 h         6 h        12 h         1 y   
+====================================================================
+h-1 	4.1240e+13  4.1240e+13  4.1240e+13  4.1240e+13  4.1240e+13  
+h-2 	4.7443e+11  4.7443e+11  4.7443e+11  4.7443e+11  4.7443e+11  
+h-3 	2.6627e+13  2.6626e+13  2.6625e+13  2.6624e+13  2.5176e+13  
+he-3 	8.3547e+10  8.3718e+10  8.4571e+10  8.5596e+10  1.5343e+12  
+he-4 	2.6877e+19  2.6877e+19  2.6877e+19  2.6877e+19  2.6877e+19  
+====================================================================
+total	2.6877e+19  2.6877e+19  2.6877e+19  2.6877e+19  2.6877e+19  
+
+Totals for all zones.
+Number Density [atoms/cm3]
+zone	 shutdown         1 h         6 h        12 h         1 y   
+====================================================================
+1	5.3696e+19  5.3696e+19  5.3696e+19  5.3696e+19  5.3696e+19  	zone_1 (mix_1)
+2	2.6877e+19  2.6877e+19  2.6877e+19  2.6877e+19  2.6877e+19  	zone_2 (mix_2)
+====================================================================
+
+
+
+
+

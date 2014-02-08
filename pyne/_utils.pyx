@@ -1,18 +1,12 @@
 """Cython-based utils to be imported into utils."""
 from libc.stdlib cimport malloc, free
+from libc.stdlib cimport atof
+from libc.string cimport strtok, strcpy, strncpy
 
 cimport numpy as np
 cimport pyne.cpp_pyne
 from cython.operator cimport dereference as deref
 import numpy as np
-
-include "include/cython_version.pxi"
-IF CYTHON_VERSION_MAJOR == 0 and CYTHON_VERSION_MINOR >= 17:
-    from libc.stdlib cimport atof
-    from libc.string cimport strtok, strcpy, strncpy
-ELSE:
-    from pyne._includes.libc.stdlib cimport atof
-    from pyne._includes.libc.string cimport strtok, strcpy, strncpy
 
 def fromstring_split(char * s, sep=None, dtype=float):
     """A replacement for numpy.fromstring() using the Python str.split() 

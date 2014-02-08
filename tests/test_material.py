@@ -35,8 +35,8 @@ def assert_mat_almost_equal(first, second, places=7):
     assert_almost_equal(first.density, second.density, places=places)
     assert_almost_equal(first.atoms_per_mol, second.atoms_per_mol, places=places)
     assert_equal(first.attrs, second.attrs)
-    nucs = set(second.comp.keys())
-    assert_equal(set(first.comp.keys()), nucs)
+    nucs = set(second.comp)
+    assert_equal(set(first.comp), nucs)
     for nuc in nucs:
         assert_almost_equal(first.comp[nuc], second.comp[nuc], places=places)
 
@@ -585,11 +585,11 @@ def test_getitem_sequence():
     mat = Material(nucvec)
     mat1 = mat[922380000, 922350000] 
     assert_equal(mat1.mass, 2.0)
-    assert_equal(set(mat1.keys()), set([922380000, 922350000]))
+    assert_equal(set(mat1), set([922380000, 922350000]))
 
     mat1 = mat[922380, 'H2', 'h1']
     assert_equal(mat1.mass, 2.0)
-    assert_equal(set(mat1.keys()), set([922380000, 10010000]))
+    assert_equal(set(mat1), set([922380000, 10010000]))
 
 
 def test_setitem_int():
@@ -832,7 +832,7 @@ def test_iter():
     values = set([0.04, 0.96])
     items = set([(922350000, 0.04), (922380000, 0.96)])
 
-    assert_equal(set(mat.keys()), keys)
+    assert_equal(set(mat), keys)
     assert_equal(set(mat.values()), values)
     assert_equal(set(mat.items()), items)
 
@@ -980,6 +980,74 @@ def test_multimaterial():
     assert_equal(mat4.comp[280640000], 0.33752561578334067)
     assert_equal(mat4.comp[300000000], 0.14881933003844042)
 
+def test_mcnp():
+
+    leu = Material(nucvec={'U235': 0.04, 'U238': 0.96}, 
+                   attrs={'mat_number': 2, 
+                          'table_ids': {'92235':'15c', '92238':'25c'},
+                          'mat_name':'LEU', 
+                          'source':'Some URL',
+                          'comments': ('this is a long comment that will definitly '
+                                       'go over the 80 character limit, for science'),
+                          'name':'leu'}, 
+                   density=19.1)
+
+    mass = leu.mcnp()
+    mass_exp = ('C name: leu\n'
+                'C density = 19.1\n'
+                'C source: Some URL\n'
+                'C comments: this is a long comment that will definitly go over the 80 character\n'
+                'C  limit, for science\n'
+                'm2\n'
+                '     92235.15c -4.0000E-02\n'
+                '     92238.25c -9.6000E-01\n')
+    assert_equal(mass, mass_exp)
+
+    atom = leu.mcnp(frac_type='atom')
+    atom_exp = ('C name: leu\n'
+                'C density = 19.1\n'
+                'C source: Some URL\n'
+                'C comments: this is a long comment that will definitly go over the 80 character\n'
+                'C  limit, for science\n'
+                'm2\n'
+                '     92235.15c 4.0491E-02\n'
+                '     92238.25c 9.5951E-01\n')
+    assert_equal(atom, atom_exp)
+
+
+def test_alara():
+
+    leu = Material(nucvec={'U235': 0.04, 'U238': 0.96}, attrs={\
+          'mat_number':2, 'table_ids':{'922350':'15c', '922380':'25c'},\
+          'name':'LEU', 'source':'Some URL', \
+          'comments': \
+'this is a long comment that will definitly go over the 80 character limit, for science', \
+            }, density=19.1)
+    leu2 = Material(nucvec={'U235': 0.04, 'U238': 0.96}, attrs={\
+          'mat_number':2,}, density=19.1)
+    leu3 = Material(nucvec={'U235': 0.04, 'U238': 0.96})
+
+
+    written = leu.alara()
+    written += leu2.alara()
+    written += leu3.alara()
+
+    expected = ('# mat number: 2\n'
+                '# source: Some URL\n'
+                '# comments: this is a long comment that will definitly go over the 80 character\n'
+                '#  limit, for science\n'
+                'LEU 19.1 2\n'
+                '     u:235 4.0000E-02 92\n'
+                '     u:238 9.6000E-01 92\n'
+                '# mat number: 2\n'
+                'mat2_rho-19.1 19.1 2\n'
+                '     u:235 4.0000E-02 92\n'
+                '     u:238 9.6000E-01 92\n'
+                'mat<mat_num>_rho-<rho> <rho> 2\n'
+                '     u:235 4.0000E-02 92\n'
+                '     u:238 9.6000E-01 92\n')
+    assert_equal(written, expected)
+
 def test_write_mcnp():
     if 'mcnp_mass_fracs.txt' in os.listdir('.'):
         os.remove('mcnp_mass_fracs.txt')
@@ -1060,7 +1128,7 @@ def test_natural_elements():
     water = Material()
     water.from_atom_frac({10000000: 2.0, 80000000: 1.0})
     expected_comp = {10000000: 0.11189838783149784, 80000000: 0.8881016121685023}
-    for key in expected_comp.keys():
+    for key in expected_comp:
         assert_almost_equal(water.comp[key], expected_comp[key])
 
 
@@ -1106,8 +1174,8 @@ def test_matlib_json():
     wmatlib.write_json(filename)
     rmatlib = MaterialLibrary()
     rmatlib.from_json(filename)
-    assert_equal(set(wmatlib.keys()), set(rmatlib.keys()))
-    for key in rmatlib.keys():
+    assert_equal(set(wmatlib), set(rmatlib))
+    for key in rmatlib:
         assert_mat_almost_equal(wmatlib[key], rmatlib[key])
     os.remove(filename)
 
@@ -1132,8 +1200,8 @@ def test_matlib_hdf5():
     # Round trip!
     rmatlib.write_hdf5(filename)
     wmatlib = MaterialLibrary(filename)
-    assert_equal(set(wmatlib.keys()), set(rmatlib.keys()))
-    for key in rmatlib.keys():
+    assert_equal(set(wmatlib), set(rmatlib))
+    for key in rmatlib:
         assert_mat_almost_equal(wmatlib[key], rmatlib[key])
     os.remove(filename)
 

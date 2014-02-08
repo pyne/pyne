@@ -4,14 +4,8 @@ from cython.operator cimport preincrement as inc
 from libc.stdlib cimport malloc, free
 from cython cimport pointer
 from libc.string cimport const_char, memcpy
-
-include "include/cython_version.pxi"
-IF CYTHON_VERSION_MAJOR == 0 and CYTHON_VERSION_MINOR >= 17:
-    from libcpp.string cimport string as std_string
-    from libcpp.vector cimport vector as std_vector
-ELSE:
-    from pyne._includes.libcpp.string cimport string as std_string
-    from pyne._includes.libcpp.vector cimport vector as std_vector
+from libcpp.string cimport string as std_string
+from libcpp.vector cimport vector as std_vector
 
 # Python imports
 import collections
@@ -31,10 +25,7 @@ cdef cpp_jsoncpp.Value * toboolval(bint b):
             new cpp_jsoncpp.Value(<cpp_jsoncpp.ValueType> cpp_jsoncpp.booleanValue)
     cdef cpp_jsoncpp.Reader reader= cpp_jsoncpp.Reader()
     if b:
-        IF CYTHON_VERSION_MAJOR == 0 and CYTHON_VERSION_MINOR >= 17:
-            reader.parse('true', deref(cval), 0)
-        ELSE:
-            reader.parse(std_string(<char *> 'true'), deref(cval), 0)
+        reader.parse('true', deref(cval), 0)
     return cval
 
 
@@ -47,10 +38,7 @@ cdef cpp_jsoncpp.Value * tocppval(object doc) except NULL:
         for k, v in doc.items():
             if not isinstance(k, basestring):
                 raise KeyError('object keys must be strings, got {0}'.format(k))
-            IF CYTHON_VERSION_MAJOR == 0 and CYTHON_VERSION_MINOR >= 17:
-                cval[0][<const_char *> k].swap(deref(tocppval(v)))
-            ELSE:
-                cval[0][<const_char *> (<char *> k)].swap(deref(tocppval(v)))
+            cval[0][<const_char *> k].swap(deref(tocppval(v)))
     elif isinstance(doc, basestring):
         # string must come before other sequences
         cval = new cpp_jsoncpp.Value(<char *> doc)
@@ -120,10 +108,7 @@ cdef class Value(object):
 
         # convert key and get value
         if isinstance(pykey, basestring):
-            IF CYTHON_VERSION_MAJOR == 0 and CYTHON_VERSION_MINOR >= 17:
-                cvalue = &self._inst[0][<const_char *> pykey]
-            ELSE:
-                cvalue = &self._inst[0][<const_char *> (<char *> pykey)]
+            cvalue = &self._inst[0][<const_char *> pykey]
         elif isinstance(pykey, int) and (self._inst.type() == cpp_jsoncpp.arrayValue):
             pykey = toposindex(pykey, self._inst[0].size())
             cvalue = &self._inst[0][<int> pykey]
@@ -164,10 +149,7 @@ cdef class Value(object):
     def __setitem__(self, key, value):
         cdef cpp_jsoncpp.Value * ckey = NULL
         if isinstance(key, basestring):
-            IF CYTHON_VERSION_MAJOR == 0 and CYTHON_VERSION_MINOR >= 17:
-                ckey = &self._inst[0][<const_char *> key]
-            ELSE:
-                ckey = &self._inst[0][<const_char *> (<char *> key)]
+            ckey = &self._inst[0][<const_char *> key]
             ckey.swap(deref(tocppval(value)))
         elif isinstance(key, int):
             curr_size = self._inst[0].size()
@@ -188,10 +170,7 @@ cdef class Value(object):
         cdef int i, ikey, curr_size, end_size
         cdef cpp_jsoncpp.Value ctemp
         if isinstance(key, basestring) and (self._inst.type() == cpp_jsoncpp.objectValue):
-            IF CYTHON_VERSION_MAJOR == 0 and CYTHON_VERSION_MINOR >= 17:
-                self._inst.removeMember(<const_char *> key)
-            ELSE:
-                self._inst.removeMember(<const_char *> (<char *> key))
+            self._inst.removeMember(<const_char *> key)
         elif isinstance(key, int) and (self._inst.type() == cpp_jsoncpp.arrayValue):
             curr_size = self._inst[0].size()
             ikey = key
@@ -217,10 +196,7 @@ cdef class Value(object):
     def __contains__(self, item):
         cdef int i, curr_size
         if isinstance(item, basestring) and (self._inst.type() == cpp_jsoncpp.objectValue):
-            IF CYTHON_VERSION_MAJOR == 0 and CYTHON_VERSION_MINOR >= 17:
-                return self._inst.isMember(<const_char *> item)
-            ELSE:
-                return self._inst.isMember(<const_char *> (<char *> item))
+            return self._inst.isMember(<const_char *> item)
         elif (self._inst.type() == cpp_jsoncpp.arrayValue):
             i = 0
             curr_size = self._inst[0].size()
@@ -253,13 +229,8 @@ cdef class Value(object):
     def __str__(self):
         cdef StyledWriter sw = StyledWriter()
         cdef std_string s 
-        IF CYTHON_VERSION_MAJOR == 0 and CYTHON_VERSION_MINOR >= 17:
-            s = sw.write(self)
-            pys = str(s)
-        ELSE:
-            pys = sw.write(self)
-            s = std_string(<char *> pys)
-            pys = str(<char *> s.c_str())
+        s = sw.write(self)
+        pys = str(s)
         if (self._inst.type() == cpp_jsoncpp.stringValue):
             pys = pys[1:-2]
         else:
@@ -269,13 +240,8 @@ cdef class Value(object):
     def __repr__(self):
         cdef FastWriter fw = FastWriter()
         cdef std_string s 
-        IF CYTHON_VERSION_MAJOR == 0 and CYTHON_VERSION_MINOR >= 17:
-            s = fw.write(self)
-            pys = str(s)
-        ELSE:
-            pys = fw.write(self)
-            s = std_string(<char *> pys)
-            pys = str(<char *> s.c_str())
+        s = fw.write(self)
+        pys = str(s)
         if (self._inst.type() == cpp_jsoncpp.stringValue):
             pys = pys[1:-2]
         else:
@@ -342,11 +308,7 @@ cdef class Value(object):
         if (self._inst.type() != cpp_jsoncpp.objectValue):
             raise TypeError("no keys, not JSON object.")
         ckeys = self._inst.getMemberNames()
-        IF CYTHON_VERSION_MAJOR == 0 and CYTHON_VERSION_MINOR >= 17:
-            return ckeys
-        ELSE:
-            pykeys = [<char *> ckeys[i].c_str() for i in range(ckeys.size())]
-            return pykeys
+        return ckeys
 
     def values(self):
         """Returns a list of values in JSON object."""
@@ -354,10 +316,8 @@ cdef class Value(object):
         if (self._inst.type() != cpp_jsoncpp.objectValue):
             raise TypeError("no values, not JSON object.")
         ckeys = self._inst.getMemberNames()
-        IF CYTHON_VERSION_MAJOR == 0 and CYTHON_VERSION_MINOR >= 17:
-            vals = [self[k] for k in ckeys]
-        ELSE:
-            vals = [self[<char *> ckeys[i].c_str()] for i in range(ckeys.size())]
+        vals = [self[k] for k in ckeys]
+        vals = [self[<char *> ckeys[i].c_str()] for i in range(ckeys.size())]
         return vals
 
     def items(self):
@@ -366,11 +326,7 @@ cdef class Value(object):
         if (self._inst.type() != cpp_jsoncpp.objectValue):
             raise TypeError("no values, not JSON object.")
         ckeys = self._inst.getMemberNames()
-        IF CYTHON_VERSION_MAJOR == 0 and CYTHON_VERSION_MINOR >= 17:
-            its = [(k, self[k]) for k in ckeys]
-        ELSE:
-            its = [(<char *> ckeys[i].c_str(), self[<char *> ckeys[i].c_str()]) \
-                                for i in range(ckeys.size())]
+        its = [(k, self[k]) for k in ckeys]
         return its
 
     def get(self, char * key, default=None):
@@ -559,10 +515,7 @@ cdef class FastWriter(object):
 
         """
         cdef std_string s = self._inst.write(deref(tocppval(value)))
-        IF CYTHON_VERSION_MAJOR == 0 and CYTHON_VERSION_MINOR >= 17:
-            return s
-        ELSE:
-            return <char *> s.c_str()
+        return s
 
 
 cdef class StyledWriter(object):
@@ -589,7 +542,4 @@ cdef class StyledWriter(object):
 
         """
         cdef std_string s = self._inst.write(deref(tocppval(value)))
-        IF CYTHON_VERSION_MAJOR == 0 and CYTHON_VERSION_MINOR >= 17:
-            return s
-        ELSE:
-            return <char *> s.c_str()
+        return s

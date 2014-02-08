@@ -200,6 +200,8 @@ namespace h5wrap
     cpp_set.insert(&mem_arr[0], &mem_arr[arr_len[0]]);
 
     H5Dclose(dset);
+
+    delete[] mem_arr;
     return cpp_set;
   };
 

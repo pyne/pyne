@@ -9,8 +9,8 @@
 
 // Header for general library file.
 
-#if !defined(_PYNE_)
-#define _PYNE_
+#if !defined(_W4LILVESF5GIVCEBPHVDKEICKM)
+#define _W4LILVESF5GIVCEBPHVDKEICKM
 
 //standard libraries
 #include <string>
@@ -118,16 +118,6 @@ namespace pyne {
   /// Calculates a version of the string \a name that is also a valid variable name. 
   /// That is to say that the return value uses only word characters.
   std::string natural_naming(std::string name);
-
-
-  /// \name Mathematical and Physical Constants
-  /// \{
-  extern const double pi;   ///< pi = 3.14159265359
-  extern const double N_A;  ///< Avagardo's Number
-  extern const double barns_per_cm2;  ///< barns per cm^2
-  extern const double cm2_per_barn; 	///< cm^2 per barn
-  extern const double sec_per_day; 	  ///< seconds per day
-  /// \}
 
   /// Finds the slope of a line from the points (\a x1, \a y1) and (\a x2, \a y2).
   double slope (double x2, double y2, double x1, double y1);
