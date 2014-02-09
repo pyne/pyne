@@ -222,7 +222,8 @@ def mesh_to_geom(mesh, geom_file, matlib_file):
     (z changing fastest). If the mesh is unstructured iMesh.iterate order is
     used. 
 
-    Parameters:
+    Parameters
+    ----------
     mesh : PyNE Mesh object
         The Mesh object containing the materials to be printed.
     geom_file : str
