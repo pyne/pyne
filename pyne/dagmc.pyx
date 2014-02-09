@@ -697,14 +697,14 @@ def cell_vol_fracs_mesh(filename, mesh, num_rays, random=True):
 """
    # Ensure input is valid
    mesh._structured_check()
-   if 
+   load(filename)
 
    dims = (mesh.structured_get_divisions('x'),
            mesh.structured_get_divisions('y'),
            mesh.structured_get_divisions('z'))
 
-   results = zeros(shape = dims)
-   load(filename)
+   results = np.zeros(shape = dims)
+   uncs = np.zeros(shape = dims)
 
    # direction indicies: x = 0, y = 1, z = 2
    dis = (0, 1, 2)
@@ -723,9 +723,9 @@ def cell_vol_fracs_mesh(filename, mesh, num_rays, random=True):
                s_max_0 = dims[s_dis[0]][a + 1]
                s_min_1 = dims[s_dis[1]][b]
                s_max_1 = dims[s_dis[1]][b + 1]
+               row_results = np.rollaxis(results, di)[:][a][b]
+               row_unc = np.rollaxis(uncs, di)[:][a][b]
                row = _MeshRow(di, s_dis[0], s_min_0, s_max_0,
                                   s_dis[1], s_min_1, s_max_1, 
-                                   results, uncs, num_rays, random)
+                                  row_results, row_uncs, num_rays, random)
                row.evaluate()
-
-        
