@@ -1954,7 +1954,7 @@ def mesh_to_geom(mesh, frac_type='mass', title_card="Generated from PyNE Mesh"):
     ----------
     mesh : PyNE Mesh object
        A structured Mesh object with materials and valid densities.
-    frac_type : str (optional)
+    frac_type : str, optional
        Either 'mass' or 'atom'. The type of fraction to use for the material
        definition.
     title_card : str, optional
@@ -1984,8 +1984,15 @@ def _mesh_to_cell_cards(mesh, divs):
     cell_cards = ""
     count = 1
     idx = mesh.iter_structured_idx('xyz')
-    j_offset = len(divs[0])
-    k_offset = len(divs[0]) + len(divs[1])
+
+    # Establish min and max idx values for each dimension.
+    x_min = 1
+    x_max = len(divs[0])
+    y_min = x_max + 1
+    y_max = x_max + len(divs[1])
+    z_min = y_max + 1
+    z_max = y_max + len(divs[2])
+
     for i in range(1, len(divs[0])):
        for j in range(1, len(divs[1])):
            for k in range(1, len(divs[2])):
@@ -1994,17 +2001,11 @@ def _mesh_to_cell_cards(mesh, divs):
                                                    mesh.density[idx.next()])
                # x, y, and z surfaces
                cell_cards += "{0} -{1} {2} -{3} {4} -{5}\n".format(
-                            i, i + 1, j + j_offset, j + j_offset + 1,
-                            k + k_offset, k + k_offset + 1)
+                            i, i + 1, j + x_max, j + x_max + 1,
+                            k + y_max, k + y_max + 1)
                count += 1
 
-    # append graveyard
-    x_min = 1
-    x_max = len(divs[0])
-    y_min = len(divs[0]) + 1
-    y_max = len(divs[0]) + len(divs[1])
-    z_min = len(divs[0]) + len(divs[1]) + 1
-    z_max = len(divs[0]) + len(divs[1]) + len(divs[2])
+    # Append graveyard.
     cell_cards += "{0} 0 -{1}:{2}:-{3}:{4}:-{5}:{6}\n".format(
                    count, x_min, x_max, y_min, y_max, z_min, z_max)
 
