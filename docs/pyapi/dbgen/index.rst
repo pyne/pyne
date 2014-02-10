@@ -35,6 +35,7 @@ divided conceptually into three parts, run in series:
     cinder
     eaf
     materials_library
+    wimsdfpy
 
 ++++++++++++++++
 Attribution
@@ -50,6 +51,7 @@ for allowing us to redistribute open nuclear data in binary form as part of
   `atomic mass related data`_.
 * **PNNL** and **Ronald J. McConn Jr** for providing us with the 
   `materials compendium data`_.
+* **IAEA** for WIMSD data.
   
 
 .. _neutron scattering length data: http://www.ncnr.nist.gov/resources/n-lengths/list.html
