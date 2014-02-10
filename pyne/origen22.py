@@ -260,6 +260,16 @@ FISSION_PRODUCT_NUCS = frozenset([
     701690000, 701700000, 701710000, 701720000])
 """Set of fission product nuclides in id form."""
 
+NUCS = ACTIVATION_PRODUCT_NUCS | ACTINIDE_AND_DAUGHTER_NUCS | FISSION_PRODUCT_NUCS
+"""Set of all known nuclides."""
+
+DECAY_FIELDS = ('half_life', 'frac_beta_minus_x', 
+    'frac_beta_plus_or_electron_capture', 'frac_beta_plus_or_electron_capture_x', 
+    'frac_alpha', 'frac_isomeric_transition', 'frac_spont_fiss', 'frac_beta_n', 
+    'recoverable_energy', 'frac_natural_abund', 'inhilation_concentration', 
+    'ingestion_concentration')
+"""The decay data keys in a tape9 dictionary."""
+
 # Table 4.2 in ORIGEN 2.2 manual
 ORIGEN_TIME_UNITS = [None,              # No zero unit
                      1.0,               # seconds
@@ -1147,7 +1157,9 @@ _fpy_card_fmt = "{nlb:>4}     {y1:<9.{p}E} {y2:<9.{p}E} {y3:<9.{p}E} {y4:<9.{p}E
 
 def _decay_deck_2_str(nlb, deck, precision):
     # Get unique isotopes 
-    nucset = set([nuc for nuc in chain(*[v.keys() for k, v in deck.items() if hasattr(v, 'keys')]) ])
+    nucset = set([nuc for nuc in chain(*[v.keys() for k, v in deck.items() \
+                  if hasattr(v, 'keys')]) ])
+    nucset = sorted(nucset)
 
     s = ""
     for nuc in nucset:
