@@ -209,7 +209,7 @@ class Meshtally():
             error_data.append(data)
             if ("Cartesian" in line or line == ""):
                 cart_tf = True
-	print part_data, error_data
+#	print part_data, error_data
 
 
 
