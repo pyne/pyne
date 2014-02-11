@@ -45,6 +45,12 @@ cdef extern from "data.h" namespace "pyne":
     double b(char *) except +
     double b(std_string) except +
 
+    # fission product data
+    map[pair[int, int], double] wimsdfpy_data
+    double fpyield(pair[int, int]) except +
+    double fpyield(int, int) except +
+    double fpyield(char *, char *) except +
+    double fpyield(std_string, std_string) except +
 
     # decay data functions
     map[int, double] half_life_map
