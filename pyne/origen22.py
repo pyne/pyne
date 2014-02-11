@@ -7,7 +7,7 @@ import numpy as np
 from pyne import data
 from pyne import rxname
 from pyne import nucname
-from pyne import xs.cache
+from pyne.xs import cache
 from pyne.material import Material, from_atom_frac
 
 ACTIVATION_PRODUCT_NUCS = frozenset([10010000,  
@@ -1334,8 +1334,10 @@ def _compute_xslib(nuc, key, lib, xscache):
     for field, data in lib.items():
         if field.startswith('_'):
             continue
-        if field == 'fiss_yields_present':
+        elif field == 'fiss_yields_present':
             data[key] = _fyp_present[lib['_subtype']]
+            continue
+        elif field == 'title':
             continue
         data[key] = _xslib_computers[field](nuc, xscache)
 
@@ -1359,7 +1361,7 @@ def xslibs(nucs=NUCS, xscache=None, nlb=(4, 5, 6)):
         The data needed for a TAPE9 file.
     """
     if xscache is None:
-        xscache = xs.cache.xs_cache
+        xscache = cache.xs_cache
     old_group_struct = xscache.get('E_g', None)
     xscache['E_g'] = [10.0, 1e-7]
 
