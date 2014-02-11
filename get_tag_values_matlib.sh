@@ -111,8 +111,9 @@ def check_matname(tag_values,mat_lib):
                 # get the material
                 new_mat = mat_lib.get(key)
                 materials.append(new_mat)
-            #else :
-                #print('material {%str} doesn''t exist in pyne material lib' %item)
+            else :
+                print('material {%str} doesn''t exist in pyne material lib' %item)
+                exit()
     # list of pyne material objects
     print materials
             
