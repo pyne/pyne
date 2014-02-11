@@ -497,3 +497,15 @@ def test_xslibs():
                                            origen22.XSFPY_FIELDS))
     assert_true(set(obs[44].keys()) >= set(origen22.FISSION_PRODUCT_FIELDS +
                                            origen22.XSFPY_FIELDS))
+
+def test_nlbs():
+    exp = (1, 2, 3), (42, 43, 44)
+    t9 = {42: {'_type': 'xsfpy', '_subtype': 'activation_products'}, 
+          43: {'_type': 'xsfpy', '_subtype': 'actinides'}, 
+          44: {'_type': 'xsfpy', '_subtype': 'fission_products'}, 
+          1: {'_type': 'decay'},
+          2: {'_type': 'decay'},
+          3: {'_type': 'decay'},
+           }
+    obs = origen22.nlbs(t9)
+    assert_equal(exp, obs)

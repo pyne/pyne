@@ -1404,3 +1404,33 @@ def xslibs(nucs=NUCS, xscache=None, nlb=(4, 5, 6), verbose=False):
             _compute_xslib(nuc, key, t9[nlb[2]], xscache)
     xscache['E_g'] = old_group_struct
     return t9
+
+
+def nlbs(t9):
+    """Finds the library number tuples in a tape9 dictionary.
+
+    Parameters
+    ----------
+    t9 : dict
+        TAPE9 dictionary.
+
+    Returns
+    -------
+    decay_nlb : 3-tuple
+        Tuple of decay library numbers.
+    xsfpy_nlb : 3-tuple
+        Tuple of cross section & fission product library numbers.
+    """
+    decay_nlb = []
+    xsfpy_nlb = [None, None, None]
+    for n, lib in t9.items():
+        if lib['_type'] == 'decay':
+            decay_nlb.append(n)
+        elif lib['_subtype'] == 'activation_products':
+            xsfpy_nlb[0] = n
+        elif lib['_subtype'] == 'actinides':
+            xsfpy_nlb[1] = n
+        elif lib['_subtype'] == 'fission_products':
+            xsfpy_nlb[2] = n
+    decay_nlb.sort()
+    return tuple(decay_nlb), tuple(xsfpy_nlb)
