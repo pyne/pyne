@@ -1,6 +1,8 @@
 """This module implements an ALARA-like chain-based transmutation solver.
 """
 from __future__ import print_function
+import os
+import tempfile
 import subprocess
 from collections import Mapping
 
@@ -48,14 +50,6 @@ class Transmuter(object):
         kwargs : dict, optional
             Other keyword arguments ignored for compatibility with other Transmuters.
         """
-        self.t = t
-        self._phi = None
-        self.phi = phi
-        self.temp = temp
-        self.tol = tol
-        self.cwd = os.path.abspath(cwd)
-        self.o2exe = o2exe
-
         if not isinstance(base_tape9, Mapping):
             base_tape9 = origen22.parse_tape9(tape9=base_tape9)
         self.base_tape9 = base_tape9
@@ -70,6 +64,14 @@ class Transmuter(object):
             xscache.load(temp=temp)
             xscache.data_sources.insert(0, eafds)
         self.xscache = xscache
+
+        self.t = t
+        self._phi = None
+        self.phi = phi
+        self.temp = temp
+        self.tol = tol
+        self.cwd = os.path.abspath(cwd)
+        self.o2exe = o2exe
 
     @property
     def phi(self):
@@ -142,17 +144,25 @@ class Transmuter(object):
         base_tape9 = self.base_tape9
         decay_nlb, xsfpy_nlb = origen22.nlbs(base_tape9)
         new_tape9 = origen22.xslibs(nucs=nucs, xscache=self.xscache, nlb=xsfpy_nlb)
-        t9 = merge_tape9([new_tape9, base_tape9])
+        t9 = origen22.merge_tape9([new_tape9, base_tape9])
 
         # write out files
         origen22.write_tape4(x, outfile=os.path.join(self.cwd, 'TAPE4.INP'))
-        origen22.write_tape5_irradiation('IRF', self.t/86400.0, self.phi, 
+        origen22.write_tape5_irradiation('IRF', self.t/86400.0, self.xscache['phi_g'][0], 
             outfile=os.path.join(self.cwd, 'TAPE5.INP'), decay_nlb=decay_nlb, 
             xsfpy_nlb=xsfpy_nlb, cut_off=self.tol)
         origen22.write_tape9(t9, outfile=os.path.join(self.cwd, 'TAPE9.INP'))
 
         # run origen & get results
-        subprocess.check_call([self.o2exe], cwd=self.cwd)
+        f = tempfile.NamedTemporaryFile()
+        try:
+            subprocess.check_call([self.o2exe], cwd=self.cwd, stdout=f, stderr=f)
+        except subprocess.CalledProcessError:
+            f.seek(0)
+            print("ORIGEN output:\n\n{0}".format(f.read()))
+            raise
+        finally:
+            f.close()
         t6 = origen22.parse_tape6(tape6=os.path.join(self.cwd, 'TAPE6.OUT'))
         y = results['materials'][-1]
         return y
