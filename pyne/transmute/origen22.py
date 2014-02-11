@@ -13,14 +13,15 @@ from pyne import nucname
 from pyne import nuc_data
 from pyne import origen22
 from pyne.material import Material, from_atom_frac
-from pyne.xs.data_source import NullDataSource, EAFDataSource
+from pyne.xs.data_source import NullDataSource, SimpleDataSource, EAFDataSource
 from pyne.xs.cache import XSCache
 
 class Transmuter(object):
     """A class for transmuting materials using an ALARA-like chain solver."""
 
-    def __init__(self, t=0.0, phi=0.0, temp=300.0, tol=1e-7, 
-                 base_tape9=origen22.BASE_TAPE9, *args, **kwargs):
+    def __init__(self, t=0.0, phi=0.0, temp=300.0, tol=1e-7, cwd='',
+                 base_tape9=origen22.BASE_TAPE9, xscache=None, 
+                 o2exe='o2_therm_linux.exe', *args, **kwargs):
         """Parameters
         ----------
         t : float
@@ -32,31 +33,43 @@ class Transmuter(object):
             Temperature [K] of material, defaults to 300.0.
         tol : float
             Tolerance level for chain truncation.
+        cwd : str, optional
+            Current working directory for origen runs. Defaults to this dir.
         base_tape9 : str or dict, optional
             A base TAPE9.INP file.  If this is a str it is interpreted as a path 
             to a file, which is then read in and parsed.  If this is a dict, it is
             assumed to be in the format described in the main origen22 module.
+        xscache : XSCache, optional
+            A cross section cache to generate cross sections with.
+        o2exe : str, optional
+            Name or path to ORIGEN 2.2 executable.
         args : tuple, optional
             Other arguments ignored for compatibility with other Transmuters.
         kwargs : dict, optional
             Other keyword arguments ignored for compatibility with other Transmuters.
         """
-        eafds = EAFDataSource()
-        eafds.load(temp=temp)
-        gs = np.array([eafds.src_group_struct[0], eafds.src_group_struct[-1]])
-        eafds.dst_group_struct = gs
-        self.xs_cache = XSCache(group_struct=gs, data_source_classes=(NullDataSource,))
-        self.xs_cache.data_sources.insert(0, eafds)
-
         self.t = t
         self._phi = None
         self.phi = phi
         self.temp = temp
         self.tol = tol
+        self.cwd = os.path.abspath(cwd)
+        self.o2exe = o2exe
 
         if not isinstance(base_tape9, Mapping):
             base_tape9 = origen22.parse_tape9(tape9=base_tape9)
         self.base_tape9 = base_tape9
+
+        if xscache is None:
+            eafds = EAFDataSource()
+            eafds.load(temp=temp)
+            gs = np.array([eafds.src_group_struct[0], eafds.src_group_struct[-1]])
+            eafds.dst_group_struct = gs
+            xscache = XSCache(group_struct=gs, data_source_classes=[SimpleDataSource, 
+                                                                    NullDataSource])
+            xscache.load(temp=temp)
+            xscache.data_sources.insert(0, eafds)
+        self.xscache = xscache
 
     @property
     def phi(self):
@@ -76,12 +89,13 @@ class Transmuter(object):
             raise ValueError("The flux vector must be 0- or 1-dimensional.")
         if not np.all(flux >= 0.0):
             raise ValueError("Flux entries must be non-negative.")
-        for ds in self.xs_cache.data_sources:
+        for ds in self.xscache.data_sources:
             ds.src_phi_g = flux
-        self.xs_cache['phi_g'] = np.array([flux.sum()])
+        self.xscache['phi_g'] = np.array([flux.sum()])
         self._phi = flux
 
-    def transmute(self, x, t=None, phi=None, tol=None, log=None):
+    def transmute(self, x, t=None, phi=None, tol=None, cwd=None, xscache=None, 
+                  o2exe=None, *args, **kwargs):
         """Transmutes a material into its daughters.
 
         Parameters
@@ -95,9 +109,12 @@ class Transmuter(object):
             a scalar or match the group structure of EAF.
         tol : float
             Tolerance level for chain truncation.
-        log : file-like or None
-            The log file object should be written. A None imples the log is 
-            not desired.
+        cwd : str, optional
+            Current working directory for origen runs. Defaults to this dir.
+        xscache : XSCache, optional
+            A cross section cache to generate cross sections with.
+        o2exe : str, optional
+            Name or path to ORIGEN 2.2 executable.
 
         Returns
         -------
@@ -111,23 +128,32 @@ class Transmuter(object):
             self.t = t
         if phi is not None:
             self.phi = phi
-        if log is not None:
-            self.log = log
         if tol is not None:
             self.tol = tol
+        if cwd is not None:
+            self.cwd = os.path.abspath(cwd)
+        if xscache is not None:
+            self.xscache = xscache
+        if o2exe is not None:
+            self.o2exe = o2exe
 
-        x_atoms = x.to_atom_frac()
-        y_atoms = {}
-        for nuc, adens in x_atoms.items():
-            # Find output for root of unit density and scale all output by 
-            # actual nuclide density and add to final output.
-            partial = self._transmute_partial(nuc)
-            for part_nuc, part_adens in partial.items():
-                y_atoms[part_nuc] = part_adens * adens + y_atoms.get(part_nuc, 0.0)
-        mw_x = x.molecular_weight()
-        y = from_atom_frac(y_atoms, atoms_per_mol=x.atoms_per_mol)
-        # even though it doesn't look likt it, the following line is actually
-        #   mass_y = MW_y * mass_x / MW_x
-        y.mass *= x.mass / mw_x 
+        # prepare new tape9
+        nucs = set(x.comp.keys())
+        base_tape9 = self.base_tape9
+        decay_nlb, xsfpy_nlb = origen22.nlbs(base_tape9)
+        new_tape9 = origen22.xslibs(nucs=nucs, xscache=self.xscache, nlb=xsfpy_nlb)
+        t9 = merge_tape9([new_tape9, base_tape9])
+
+        # write out files
+        origen22.write_tape4(x, outfile=os.path.join(self.cwd, 'TAPE4.INP'))
+        origen22.write_tape5_irradiation('IRF', self.t/86400.0, self.phi, 
+            outfile=os.path.join(self.cwd, 'TAPE5.INP'), decay_nlb=decay_nlb, 
+            xsfpy_nlb=xsfpy_nlb, cut_off=self.tol)
+        origen22.write_tape9(t9, outfile=os.path.join(self.cwd, 'TAPE9.INP'))
+
+        # run origen & get results
+        subprocess.check_call([self.o2exe], cwd=self.cwd)
+        t6 = origen22.parse_tape6(tape6=os.path.join(self.cwd, 'TAPE6.OUT'))
+        
         return y
 
