@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 import re
 from copy import deepcopy
 from itertools import chain, imap, izip
@@ -1341,7 +1343,7 @@ def _compute_xslib(nuc, key, lib, xscache):
             continue
         data[key] = _xslib_computers[field](nuc, xscache)
 
-def xslibs(nucs=NUCS, xscache=None, nlb=(4, 5, 6)):
+def xslibs(nucs=NUCS, xscache=None, nlb=(4, 5, 6), verbose=False):
     """Generates a TAPE9 dictionary of cross section & fission product yield data
     for a set of nuclides.
 
@@ -1354,6 +1356,8 @@ def xslibs(nucs=NUCS, xscache=None, nlb=(4, 5, 6)):
     nlb : length-3 sequence of ints
         Library numbers for activation products, actinides & daugthers, and fission
         products respectively.
+    verbose : bool, optional
+        Flag to print status as we go.
 
     Returns
     -------
@@ -1364,6 +1368,7 @@ def xslibs(nucs=NUCS, xscache=None, nlb=(4, 5, 6)):
         xscache = cache.xs_cache
     old_group_struct = xscache.get('E_g', None)
     xscache['E_g'] = [10.0, 1e-7]
+    nucs = sorted(nucs)
 
     # setup tape9
     t9 = {nlb[0]: {'_type': 'xsfpy', '_subtype': 'activation_products', 
@@ -1385,6 +1390,8 @@ def xslibs(nucs=NUCS, xscache=None, nlb=(4, 5, 6)):
 
     # fill with data
     for nuc in nucs:
+        if verbose:
+            print('computing {0}'.format(nucname.name(nuc)))
         key = nucname.zzaaam(nuc)
         if nuc in ACTIVATION_PRODUCT_NUCS:
             _compute_xslib(nuc, key, t9[nlb[0]], xscache)
