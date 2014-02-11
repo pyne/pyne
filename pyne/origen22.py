@@ -1,6 +1,7 @@
 from __future__ import print_function
-
+import os
 import re
+import sys
 from copy import deepcopy
 from itertools import chain, imap, izip
 
@@ -11,6 +12,8 @@ from pyne import rxname
 from pyne import nucname
 from pyne.xs import cache
 from pyne.material import Material, from_atom_frac
+
+BASE_TAPE9 = os.path.join(os.path.dirname(__file__), 'base_tape9.inp')
 
 ACTIVATION_PRODUCT_NUCS = frozenset([10010000,  
     10020000,  10030000,  10040000,  20030000,  20040000,  20060000,  30060000,
