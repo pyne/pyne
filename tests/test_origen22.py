@@ -506,6 +506,6 @@ def test_nlbs():
           1: {'_type': 'decay'},
           2: {'_type': 'decay'},
           3: {'_type': 'decay'},
-           }
+          }
     obs = origen22.nlbs(t9)
     assert_equal(exp, obs)

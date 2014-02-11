@@ -1369,6 +1369,7 @@ def xslibs(nucs=NUCS, xscache=None, nlb=(4, 5, 6), verbose=False):
     """
     if xscache is None:
         xscache = cache.xs_cache
+    old_flux = xscache.get('phi_g', None)
     old_group_struct = xscache.get('E_g', None)
     xscache['E_g'] = [10.0, 1e-7]
     nucs = sorted(nucs)
@@ -1403,6 +1404,7 @@ def xslibs(nucs=NUCS, xscache=None, nlb=(4, 5, 6), verbose=False):
         if nuc in FISSION_PRODUCT_NUCS:
             _compute_xslib(nuc, key, t9[nlb[2]], xscache)
     xscache['E_g'] = old_group_struct
+    xscache['phi_g'] = old_flux
     return t9
 
 
