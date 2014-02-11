@@ -8,6 +8,7 @@ from glob import glob
 
 import numpy as np
 
+from pyne import data
 from pyne import ensdf
 from pyne import nucname
 from pyne import origen22
@@ -173,7 +174,9 @@ def main_gen(ns):
     if len(files) == 0:
         grab_ensdf_decay(ns.build_dir)
         files = glob(os.path.join(ns.build_dir, 'ENSDF', 'ensdf.*'))
+    print("parsing ENSDF decay data")
     decays, branches = parse_ensdf(files)
+    print("creating ORIGEN decay libraries")
     t9 = gendecay(decays, branches, metastable_cutoff=ns.metastable_cutoff)
     origen22.write_tape9(t9, outfile=ns.filename)
 
