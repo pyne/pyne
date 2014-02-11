@@ -1182,12 +1182,13 @@ def _decay_deck_2_str(nlb, deck, precision):
     # Get unique isotopes 
     nucset = set([nuc for nuc in chain(*[v.keys() for k, v in deck.items() \
                   if hasattr(v, 'keys')]) ])
-    nucset = sorted(nucset)
+    nucset = sorted(map(int, nucset))
 
     s = ""
     for nuc in nucset:
         nuc_id = nucname.zzaaam_to_id(nuc)
-        t, unit = sec_to_time_unit(_double_get(deck, 'half_life', nuc, np.inf))
+        t, unit = sec_to_time_unit(_double_get(deck, 'half_life', nuc, 
+                                               data.half_life(nuc_id)))
         s += _decay_card_fmt.format(nlb=nlb,
                 nuc=nuc,
                 unit=unit,
@@ -1212,6 +1213,7 @@ def _decay_deck_2_str(nlb, deck, precision):
 def _xs_deck_2_str(nlb, deck, precision):
     # Get unique isotopes 
     nucset = set([nuc for nuc in chain(*[v.keys() for k, v in deck.items() if hasattr(v, 'keys')]) ])
+    nucset = sorted(nucset)
 
     is_actinides = deck['_subtype'] == 'actinides'
 
@@ -1239,6 +1241,7 @@ def _xs_deck_2_str(nlb, deck, precision):
 def _xsfpy_deck_2_str(nlb, deck, precision):
     # Get unique isotopes 
     nucset = set([nuc for nuc in chain(*[v.keys() for k, v in deck.items() if hasattr(v, 'keys')]) ])
+    nucset = sorted(nucset)
 
     is_actinides = deck['_subtype'] == 'actinides'
 
@@ -1348,7 +1351,7 @@ def _compute_xslib(nuc, key, lib, xscache):
             continue
         data[key] = _xslib_computers[field](nuc, xscache)
 
-def xslibs(nucs=NUCS, xscache=None, nlb=(4, 5, 6), verbose=False):
+def xslibs(nucs=NUCS, xscache=None, nlb=(201, 202, 203), verbose=False):
     """Generates a TAPE9 dictionary of cross section & fission product yield data
     for a set of nuclides.
 
