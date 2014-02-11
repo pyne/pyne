@@ -472,9 +472,101 @@ double pyne::b(std::string nuc)
 
 
 
+//
+// Fission Product Yield Data 
+//
+std::map<std::pair<int, int>, double> pyne::wimsdfpy_data = \
+  std::map<std::pair<int, int>, double>();
+
+void pyne::_load_wimsdfpy() {
+  herr_t status;
+
+  //Check to see if the file is in HDF5 format.
+  if (!pyne::file_exists(pyne::NUC_DATA_PATH))
+    throw pyne::FileNotFound(pyne::NUC_DATA_PATH);
+
+  bool ish5 = H5Fis_hdf5(pyne::NUC_DATA_PATH.c_str());
+  if (!ish5)
+    throw h5wrap::FileNotHDF5(pyne::NUC_DATA_PATH);
+
+  // Get the HDF5 compound type (table) description
+  hid_t desc = H5Tcreate(H5T_COMPOUND, sizeof(wimsdfpy_struct));
+  status = H5Tinsert(desc, "from_nuc", HOFFSET(wimsdfpy_struct, from_nuc), 
+                     H5T_NATIVE_INT);
+  status = H5Tinsert(desc, "to_nuc", HOFFSET(wimsdfpy_struct, to_nuc), 
+                     H5T_NATIVE_INT);
+  status = H5Tinsert(desc, "yields", HOFFSET(wimsdfpy_struct, yields),
+                     H5T_NATIVE_DOUBLE);
+
+  // Open the HDF5 file
+  hid_t nuc_data_h5 = H5Fopen(pyne::NUC_DATA_PATH.c_str(), H5F_ACC_RDONLY, 
+                              H5P_DEFAULT);
+
+  // Open the data set
+  hid_t wimsdfpy_set = H5Dopen2(nuc_data_h5, "/neutron/wimsd_fission_products", 
+                                H5P_DEFAULT);
+  hid_t wimsdfpy_space = H5Dget_space(wimsdfpy_set);
+  int wimsdfpy_length = H5Sget_simple_extent_npoints(wimsdfpy_space);
+
+  // Read in the data
+  wimsdfpy_struct * wimsdfpy_array = new wimsdfpy_struct[wimsdfpy_length];
+  status = H5Dread(wimsdfpy_set, desc, H5S_ALL, H5S_ALL, H5P_DEFAULT, wimsdfpy_array);
+
+  // close the nuc_data library, before doing anythng stupid
+  status = H5Dclose(wimsdfpy_set);
+  status = H5Fclose(nuc_data_h5);
+
+  // Ok now that we have the array of stucts, put it in the maps
+  for(int n=0; n < wimsdfpy_length; n++) {
+    wimsdfpy_data[std::make_pair(wimsdfpy_array[n].from_nuc, 
+      wimsdfpy_array[n].to_nuc)] = wimsdfpy_array[n].yields;
+  };
+
+  delete[] wimsdfpy_array;
+};
 
 
+double pyne::fpyield(std::pair<int, int> from_to) {
+  // Note that this may be expanded eventually to include other
+  // sources of fission product data.
 
+  // Find the parent/child pair branch ratio as a fraction
+  std::map<std::pair<int, int>, double>::iterator fpy_iter, fpy_end;
+  fpy_iter = wimsdfpy_data.find(from_to);
+  fpy_end = wimsdfpy_data.end();
+
+  // First check if we already have the pair in the map
+  if (fpy_iter != fpy_end)
+    return (*fpy_iter).second;
+
+  // Next, fill up the map with values from the 
+  // nuc_data.h5, if the map is empty.
+  if (wimsdfpy_data.empty()) {
+    _load_wimsdfpy();
+    return fpyield(from_to);
+  };
+
+  // Finally, if none of these work, 
+  // assume the value is stable
+  double fpy = 0.0;
+  wimsdfpy_data[from_to] = fpy;
+  return fpy;
+};
+
+double pyne::fpyield(int from_nuc, int to_nuc) {
+  return fpyield(std::pair<int, int>(nucname::id(from_nuc), 
+                                     nucname::id(to_nuc)));
+};
+
+double pyne::fpyield(char * from_nuc, char * to_nuc) {
+  return fpyield(std::pair<int, int>(nucname::id(from_nuc), 
+                                     nucname::id(to_nuc)));
+};
+
+double pyne::fpyield(std::string from_nuc, std::string to_nuc) {
+  return fpyield(std::pair<int, int>(nucname::id(from_nuc), 
+                                     nucname::id(to_nuc)));
+};
 
 
 

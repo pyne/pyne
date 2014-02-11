@@ -5,17 +5,18 @@ import urllib2
 import shutil
 from distutils.dir_util import mkpath, remove_tree
 
-from ..api import nuc_data
-from ..utils import message
-from .api import build_dir
-from .decay import make_decay
-from .atomic_weight import make_atomic_weight
-from .materials_library import make_materials_library
-from .scattering_lengths import make_scattering_lengths
-from .simple_xs import make_simple_xs
-from .cinder import make_cinder
-from .eaf import make_eaf
-from .hashtools import check_hashes
+from pyne.api import nuc_data
+from pyne.utils import message
+from pyne.dbgen.api import build_dir
+from pyne.dbgen.decay import make_decay
+from pyne.dbgen.atomic_weight import make_atomic_weight
+from pyne.dbgen.materials_library import make_materials_library
+from pyne.dbgen.scattering_lengths import make_scattering_lengths
+from pyne.dbgen.simple_xs import make_simple_xs
+from pyne.dbgen.cinder import make_cinder
+from pyne.dbgen.eaf import make_eaf
+from pyne.dbgen import wimsdfpy
+from pyne.dbgen.hashtools import check_hashes
 
 # Thanks to http://patorjk.com/software/taag/
 # and http://www.chris.com/ascii/index.php?art=creatures/dragons (Jeff Ferris)
@@ -75,9 +76,11 @@ def main():
                   ('cinder', make_cinder),
                   ('materials', make_materials_library),
                   ('eaf', make_eaf),
+                  ('wimsd_fpy', wimsdfpy.make_fpy)
                   ]
     make_map = dict(make_funcs)
-    make_open = set(['atomic_weight', 'scattering_lengths', 'simple_xs', 'materials'])
+    make_open = set(['atomic_weight', 'scattering_lengths', 'simple_xs', 'materials', 
+                     'wimsd_fpy'])
 
     # Parse the command line arguments
     parser = argparse.ArgumentParser(description='Make a nuclear data library.')
