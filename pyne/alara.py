@@ -329,50 +329,53 @@ def num_density_to_mesh(filename, time, m):
     m.mats = mats
 
 
-def irradiation_blocks(filename, material_lib, element_lib, data_library, 
-                       cooling, flux_file, irr_time, output = "constituant",
+def irradiation_blocks(material_lib, element_lib, data_library, cooling, 
+                       flux_file, irr_time, output = "constituent",
                        truncation=1E-12, impurity = (5E-6, 1E-3), 
-                       dump_file = "dump_file")
-    """iradiation_blocks(filename, material_lib, element_lib, data_library, 
-                       cooling, flux_file, irr_time, output = "constituant",
+                       dump_file = "dump_file"):
+    """irradiation_blocks(material_lib, element_lib, data_library, cooling, 
+                       flux_file, irr_time, output = "constituent",
                        truncation=1E-12, impurity = (5E-6, 1E-3), 
                        dump_file = "dump_file")
 
-    This function appends the irradation-related output blocks to the end of
-    a supplied file. This function is meant to be used with files created by
-    the mesh_to_geom function, in order to add the remaining input blocks to 
-    form a complete ALARA input file. Only the simplest irradiation schedule
-    is supported; a single pulse of time <irr_time>. The notation in this 
-    function is consistent with the ALARA users' guide, found at:
+    This function returns a string of the irradation-related input blocks. This 
+    function is meant to be used with files created by the mesh_to_geom 
+    function, in order to append the remaining input blocks to form a complete
+    ALARA input file. Only the simplest irradiation schedule is supported: a 
+    single pulse of time <irr_time>. The notation in this function is consistent 
+    with the ALARA users' guide, found at:
 
     http://alara.engr.wisc.edu/users.guide.html/
 
     Parameters
     ----------
-    filename : str
-        The file to append irradition input blocks to.
     material_lib : str
         Path to material library.
     element_lib : str
         Path to element library.
     data_library : str
-        Path to data library.
+        The data_library card (see ALARA user's guide).
     cooling : str or iterable of str
         Cooling times for which output is requested. Given in ALARA form (e.g.
-        "1 h", "0.5 y". Note that "shutdown" is always inplicitly included.
+        "1 h", "0.5 y"). Note that "shutdown" is always inplicitly included.
     flux_file : str
         Path to the "fluxin" file.
     irr_time : str
-        The length of the single pulse irradiation. Given in the ALARA form
+        The duration of the single pulse irradiation. Given in the ALARA form
         (e.g. "1 h", "0.5 y").
     output : str or iterable of str, optional.
         The requested output blocks (see ALARA users' guide).
     truncation : float, optional
-        The chain truncation vale (see ALARA users' guide).
+        The chain truncation value (see ALARA users' guide).
     impurity : tuple of two floats, optional
        The impurity parameters (see ALARA users' guide).
     dump_file: str, optional
-       Path to the dump file.   
+       Path to the dump file.
+  
+    Returns
+    -------
+    s : str
+        Irradition-related ALARA input blocks.
     """
 
     s = ""
@@ -380,41 +383,40 @@ def irradiation_blocks(filename, material_lib, element_lib, data_library,
     # Material, element, and data_library blocks
     s += "material_lib {0}\n".format(material_lib)
     s += "element_lib {0}\n".format(element_lib)
-    s += "data_library {0}\n".format(data_library)
+    s += "data_library {0}\n\n".format(data_library)
 
     # Cooling times
-    s += "cooling"
+    s += "cooling\n"
     if isinstance(cooling, collections.Iterable) and not isinstance(cooling, basestring):
         for c in cooling:
-            s += "{0}\n".format(c)
+            s += "    {0}\n".format(c)
     else:
-        s += "{0}\n".format(cooling)
+        s += "    {0}\n".format(cooling)
 
-    s += "end\n"
+    s += "end\n\n"
 
-    # Flux block.
-    s += "flux flux_1 {0} 1.0 0 default".format(flux_file)
+    # Flux block
+    s += "flux flux_1 {0} 1.0 0 default\n".format(flux_file)
 
     # Flux schedule
-    s += "schedule simple_schedule\n"
-         "{0} flux_1 pulse_once 0 s\nend\n".format(irr_time)
+    s += ("schedule simple_schedule\n"
+         "    {0} flux_1 pulse_once 0 s\nend\n\n".format(irr_time))
 
-    s += "pulsehistory    pulse_once\n1   0.0 s\nend"
+    s += "pulsehistory pulse_once\n    1 0.0 s\nend\n\n"
  
-    # output block
-    s += "output zone\nunits Ci cm3\n"
+    # Output block
+    s += "output zone\n    units Ci cm3\n"
     if isinstance(output, collections.Iterable) and not isinstance(output, basestring):
         for out in output:
-            s += "{0}\n".format(out)
+            s += "    {0}\n".format(out)
     else:
-        s += "{0}\n".format(output)
+        s += "    {0}\n".format(output)
 
-    s += "end\n"
+    s += "end\n\n"
 
     # Other parameters
-    s += "truncation {0}\n".format(trunction)
+    s += "truncation {0}\n".format(truncation)
     s += "impurity {0} {1}\n".format(impurity[0], impurity[1])
     s += "dump_file {0}\n".format(dump_file)
 
-    with open(filename, 'a') as f:
-        f.write(s)
+    return s
