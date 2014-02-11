@@ -154,6 +154,6 @@ class Transmuter(object):
         # run origen & get results
         subprocess.check_call([self.o2exe], cwd=self.cwd)
         t6 = origen22.parse_tape6(tape6=os.path.join(self.cwd, 'TAPE6.OUT'))
-        
+        y = results['materials'][-1]
         return y
 
