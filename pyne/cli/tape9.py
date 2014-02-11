@@ -183,6 +183,7 @@ def main_gen(ns):
     print("creating ORIGEN cross section libraries")
     xsc = XSCache(data_source_classes=[EAFDataSource, SimpleDataSource, 
                                        NullDataSource])
+    xsc.load()
     t9xsfpy = origen22.xslibs(xscache=xsc, verbose=True)
     t9 = origen22.merge_tape9([t9decay, t9xsfpy])
     origen22.write_tape9(t9, outfile=ns.filename)

@@ -5,20 +5,21 @@ import numpy as np
 from scipy import linalg
 #from scipy import sparse  # <-- SPARSE
 
-from .. import utils
-from .. import data
-from .. import rxname
-from .. import nucname
-from .. import nuc_data
-from ..material import Material, from_atom_frac
-from ..xs.data_source import NullDataSource, EAFDataSource
-from ..xs.cache import XSCache
-from ..xs.channels import sigma_a
+from pyne import utils
+from pyne import data
+from pyne import rxname
+from pyne import nucname
+from pyne import nuc_data
+from pyne.material import Material, from_atom_frac
+from pyne.xs.data_source import NullDataSource, EAFDataSource
+from pyne.xs.cache import XSCache
+from pyne.xs.channels import sigma_a
 
 class Transmuter(object):
     """A class for transmuting materials using an ALARA-like chain solver."""
 
-    def __init__(self, t=0.0, phi=0.0, temp=300.0, tol=1e-7, rxs=None, log=None):
+    def __init__(self, t=0.0, phi=0.0, temp=300.0, tol=1e-7, rxs=None, log=None, 
+                 *args, **kwargs):
         """Parameters
         ----------
         t : float
@@ -37,6 +38,10 @@ class Transmuter(object):
         log : file-like or None
             The log file object should be written. A None imples the log is 
             not desired.
+        args : tuple, optional
+            Other arguments ignored for compatibility with other Transmuters.
+        kwargs : dict, optional
+            Other keyword arguments ignored for compatibility with other Transmuters.
         """
         eafds = EAFDataSource()
         eafds.load(temp=temp)
