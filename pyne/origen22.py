@@ -1186,24 +1186,26 @@ def _decay_deck_2_str(nlb, deck, precision):
 
     s = ""
     for nuc in nucset:
-        t, unit = sec_to_time_unit(_double_get(deck, 'half_life', nuc))
+        nuc_id = nucname.zzaaam_to_id(nuc)
+        t, unit = sec_to_time_unit(_double_get(deck, 'half_life', nuc, np.inf))
         s += _decay_card_fmt.format(nlb=nlb,
-                                    nuc=nuc,
-                                    unit=unit,
-                                    time=t,
-                                    fbx=_double_get(deck, 'frac_beta_minus_x', nuc),
-                                    fpec=_double_get(deck, 'frac_beta_plus_or_electron_capture', nuc),
-                                    fpecx=_double_get(deck, 'frac_beta_plus_or_electron_capture_x', nuc),
-                                    fa=_double_get(deck, 'frac_alpha', nuc),
-                                    fit=_double_get(deck, 'frac_isomeric_transition', nuc),
-                                    fsf=_double_get(deck, 'frac_spont_fiss', nuc),
-                                    fn=_double_get(deck, 'frac_beta_n', nuc),
-                                    qrec=_double_get(deck, 'recoverable_energy', nuc),
-                                    abund=_double_get(deck, 'frac_natural_abund', nuc),
-                                    arcg=_double_get(deck, 'inhilation_concentration', nuc),
-                                    wrcg=_double_get(deck, 'ingestion_concentration', nuc),
-                                    p=precision,
-                                    )
+                nuc=nuc,
+                unit=unit,
+                time=t,
+                fbx=_double_get(deck, 'frac_beta_minus_x', nuc),
+                fpec=_double_get(deck, 'frac_beta_plus_or_electron_capture', nuc),
+                fpecx=_double_get(deck, 'frac_beta_plus_or_electron_capture_x', nuc),
+                fa=_double_get(deck, 'frac_alpha', nuc),
+                fit=_double_get(deck, 'frac_isomeric_transition', nuc),
+                fsf=_double_get(deck, 'frac_spont_fiss', nuc),
+                fn=_double_get(deck, 'frac_beta_n', nuc),
+                qrec=_double_get(deck, 'recoverable_energy', nuc),
+                abund=_double_get(deck, 'frac_natural_abund', nuc, 
+                                  data.natural_abund(nuc_id)),
+                arcg=_double_get(deck, 'inhilation_concentration', nuc, 1.0),
+                wrcg=_double_get(deck, 'ingestion_concentration', nuc, 1.0),
+                p=precision,
+                )
     return s
 
 
