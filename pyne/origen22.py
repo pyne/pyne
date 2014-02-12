@@ -1314,7 +1314,7 @@ def _ensure_nucs_in_decay(tape9):
                       if isinstance(v, Mapping)]) ])
         for nuc in nucset:
             if nuc not in dhl:
-                dhl[nuc] = data.half_life(nucname.zzaaam(nuc))
+                dhl[nuc] = data.half_life(nucname.zzaaam(int(nuc)))
 
 
 _DECK_2_STR_MAP = {
