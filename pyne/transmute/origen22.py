@@ -164,6 +164,6 @@ class Transmuter(object):
         finally:
             f.close()
         t6 = origen22.parse_tape6(tape6=os.path.join(self.cwd, 'TAPE6.OUT'))
-        y = results['materials'][-1]
+        y = t6['materials'][-1]
         return y
 
