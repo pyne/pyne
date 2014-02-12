@@ -357,7 +357,7 @@ def irradiation_blocks(material_lib, element_lib, data_library, cooling,
         The data_library card (see ALARA user's guide).
     cooling : str or iterable of str
         Cooling times for which output is requested. Given in ALARA form (e.g.
-        "1 h", "0.5 y"). Note that "shutdown" is always inplicitly included.
+        "1 h", "0.5 y"). Note that "shutdown" is always implicitly included.
     flux_file : str
         Path to the "fluxin" file.
     irr_time : str
