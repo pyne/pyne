@@ -400,8 +400,9 @@ class SurfSrc(_BinaryReader):
         else:
             pass
 
+        # Since np1 can be negative, preserve the actual np1 value while
+        # taking the absolute value so that np1 can be used mathematically
         self.orignp1 = self.np1
-
         self.np1 = abs(self.np1)
 
         # get info for each surface
