@@ -62,6 +62,17 @@ def get_tag_values(filename):
                     found_all_tags=1 
     print tag_values
 
+""" 
+function to print near matches to material name
+"""
+def print_near_match(material,material_library):
+    for item in material_library.iterkeys():  
+#        print item
+        if ( material.lower() in item.lower()) or (material.upper() in item.upper()) :
+	    print "near matches to ", material, " are " 
+	    print item
+            print material_library.get(item)
+
 """
 function which loads pyne material library
 """
@@ -96,7 +107,7 @@ def check_matname(tag_values,mat_lib):
             # list of material names from tagged geometry
             mat_list_matname.append(mat_name[0]) 
             for matname in mat_list_matname :
-                  mat_name=matname.split('=')
+                  mat_name=matname.split(':')
                   mat_list.append(mat_name[1])         
 
     print mat_list
@@ -111,16 +122,21 @@ def check_matname(tag_values,mat_lib):
                 # get the material
                 new_mat = mat_lib.get(key)
                 materials.append(new_mat)
-            #else :
-                #print('material {%str} doesn''t exist in pyne material lib' %item)
+
+            else :
+                print('material {%s} doesn''t exist in pyne material lib' %item)
+                print_near_match(item,mat_lib)
+                exit()
+                continue 
     # list of pyne material objects
     print materials
+    return materials
+
             
 # get list of tag valuesaz
 get_tag_values(datafile)
 # now load material library
 load_mat_lib(nuc_data)
 # check that material tags exist in library
-check_matname(tag_values,mat_lib)
-
+material_objects=check_matname(tag_values,mat_lib)
 exit() 
