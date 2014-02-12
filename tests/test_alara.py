@@ -221,7 +221,9 @@ def test_num_den_to_mesh_shutdown():
     filename = os.path.join(thisdir, "files_test_alara", 
                             "num_density_output.txt")
     m = Mesh(structured=True, structured_coords=[[0,1],[0,1],[0,1,2]])
-    num_density_to_mesh(filename, 'shutdown', m)
+    with open(filename) as f:
+        lines = f.readlines()
+    num_density_to_mesh(lines, 'shutdown', m)
 
     # expected composition results:
     exp_comp_0 = {10010000:5.3390e+19,
