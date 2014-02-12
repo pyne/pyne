@@ -1998,7 +1998,7 @@ def mesh_to_geom(mesh, frac_type='mass', title_card="Generated from PyNE Mesh"):
     surf_cards = _mesh_to_surf_cards(mesh, divs)
     mat_cards = _mesh_to_mat_cards(mesh, divs, frac_type)
  
-    return "{0}\n{1}\n{2}\n{3}\n".format(title_card, cell_cards, 
+    return "{0}\n{1}\n{2}\n{3}".format(title_card, cell_cards, 
                                               surf_cards, mat_cards)
 
 def _mesh_to_cell_cards(mesh, divs):
