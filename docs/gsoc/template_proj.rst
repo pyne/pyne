@@ -9,7 +9,7 @@ Brief explanation:
 Expected results:
 ------------------
 
-Knowledge Prerequisite:
+Knowledge Prerequisites:
 ------------------------
 
 Mentor:
