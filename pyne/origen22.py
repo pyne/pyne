@@ -1,10 +1,15 @@
+from __future__ import print_function
+
 import re
 from copy import deepcopy
 from itertools import chain, imap, izip
 
 import numpy as np
 
+from pyne import data
+from pyne import rxname
 from pyne import nucname
+from pyne.xs import cache
 from pyne.material import Material, from_atom_frac
 
 ACTIVATION_PRODUCT_NUCS = frozenset([10010000,  
@@ -110,7 +115,7 @@ ACTIVATION_PRODUCT_NUCS = frozenset([10010000,
 """Set of activation product nuclides in id form."""
 
 ACTINIDE_AND_DAUGHTER_NUCS = frozenset([
-    20040000,  162500000, 812060000, 812070000, 812080000, 812090000, 822060000,
+    20040000,  812060000, 812070000, 812080000, 812090000, 822060000,
     822070000, 822080000, 822090000, 822100000, 822110000, 822120000, 822140000,
     832080000, 832090000, 832100000, 832100001, 832110000, 832120000, 832130000,
     832140000, 842100000, 842110000, 842110001, 842120000, 842130000, 842140000,
@@ -269,6 +274,21 @@ DECAY_FIELDS = ('half_life', 'frac_beta_minus_x',
     'recoverable_energy', 'frac_natural_abund', 'inhilation_concentration', 
     'ingestion_concentration')
 """The decay data keys in a tape9 dictionary."""
+
+XSFPY_FIELDS = ('sigma_gamma', 'sigma_2n', 'sigma_gamma_x', 'sigma_2n_x', 
+    'fiss_yields_present')
+"""The cross section and fission product yield data keys in a tape9 dictionary."""
+
+ACTIVATION_PRODUCT_FIELDS = ('sigma_3n', 'sigma_p')
+"""The cross section data keys for activation products in a tape9 dictionary."""
+
+ACTINIDE_FIELDS = ('sigma_alpha', 'sigma_f')
+"""The cross section data keys for actinides & daughters in a tape9 dictionary."""
+
+FISSION_PRODUCT_FIELDS = ('sigma_3n', 'sigma_p', 'TH232_fiss_yield', 'U233_fiss_yield',
+    'U235_fiss_yield', 'U238_fiss_yield', 'PU239_fiss_yield', 'PU241_fiss_yield', 
+    'CM245_fiss_yield', 'CF249_fiss_yield')
+"""The cross section & yield data keys for fission products in a tape9 dictionary."""
 
 # Table 4.2 in ORIGEN 2.2 manual
 ORIGEN_TIME_UNITS = [None,              # No zero unit
@@ -1287,3 +1307,97 @@ def write_tape9(tape9, outfile="TAPE9.INP", precision=3):
 
     if opened_here:
         outfile.close()
+
+_fyp_present = {'activation_products': False,  'actinides': False, 
+    'fission_products': True,}
+
+_xslib_computers = {
+    'sigma_gamma': lambda nuc, xscache: xscache[nuc, 'gamma'][0],
+    'sigma_2n': lambda nuc, xscache: xscache[nuc, 'z_2n'][0], 
+    'sigma_gamma_x': lambda nuc, xscache: xscache[nuc, 'gamma_1'][0] + \
+                                          xscache[nuc, 'gamma_2'][0], 
+    'sigma_2n_x': lambda nuc, xscache: xscache[nuc, 'z_2n_1'][0] + \
+                                       xscache[nuc, 'z_2n_2'][0], 
+    'sigma_3n': lambda nuc, xscache: xscache[nuc, 'z_3n'][0], 
+    'sigma_p': lambda nuc, xscache: xscache[nuc, 'p'][0],
+    'sigma_alpha': lambda nuc, xscache: xscache[nuc, 'alpha'][0], 
+    'sigma_f': lambda nuc, xscache: xscache[nuc, 'fission'][0],
+    'TH232_fiss_yield': lambda nuc, xscache: data.fpyield(902320000, nuc), 
+    'U233_fiss_yield': lambda nuc, xscache: data.fpyield(922330000, nuc),
+    'U235_fiss_yield': lambda nuc, xscache: data.fpyield(922350000, nuc), 
+    'U238_fiss_yield': lambda nuc, xscache: data.fpyield(922380000, nuc), 
+    'PU239_fiss_yield': lambda nuc, xscache: data.fpyield(942390000, nuc), 
+    'PU241_fiss_yield': lambda nuc, xscache: data.fpyield(942410000, nuc), 
+    'CM245_fiss_yield': lambda nuc, xscache: data.fpyield(962450000, nuc), 
+    'CF249_fiss_yield': lambda nuc, xscache: data.fpyield(982490000, nuc),
+    }
+
+def _compute_xslib(nuc, key, lib, xscache):
+    for field, data in lib.items():
+        if field.startswith('_'):
+            continue
+        elif field == 'fiss_yields_present':
+            data[key] = _fyp_present[lib['_subtype']]
+            continue
+        elif field == 'title':
+            continue
+        data[key] = _xslib_computers[field](nuc, xscache)
+
+def xslibs(nucs=NUCS, xscache=None, nlb=(4, 5, 6), verbose=False):
+    """Generates a TAPE9 dictionary of cross section & fission product yield data
+    for a set of nuclides.
+
+    Parameters
+    ----------
+    nucs : iterable of ints, optional
+        Set of nuclides in id form
+    xscache : XSCache, optional
+        A cross section cache to get cross section data. If None, uses default.
+    nlb : length-3 sequence of ints
+        Library numbers for activation products, actinides & daugthers, and fission
+        products respectively.
+    verbose : bool, optional
+        Flag to print status as we go.
+
+    Returns
+    -------
+    t9 : dict
+        The data needed for a TAPE9 file.
+    """
+    if xscache is None:
+        xscache = cache.xs_cache
+    old_group_struct = xscache.get('E_g', None)
+    xscache['E_g'] = [10.0, 1e-7]
+    nucs = sorted(nucs)
+
+    # setup tape9
+    t9 = {nlb[0]: {'_type': 'xsfpy', '_subtype': 'activation_products', 
+                   'title': 'PyNE Cross Section Data for Activation Products'},
+          nlb[1]: {'_type': 'xsfpy', '_subtype': 'actinides',
+                   'title': 'PyNE Cross Section Data for Actinides & Daughters'},
+          nlb[2]: {'_type': 'xsfpy', '_subtype': 'fission_products',
+                   'title': 'PyNE Cross Section Data for Fission Products'},
+          }
+    for n, lib in t9.items():
+        for field in XSFPY_FIELDS:
+            lib[field] = {}
+    for field in ACTIVATION_PRODUCT_FIELDS:
+        t9[nlb[0]][field] = {}
+    for field in ACTINIDE_FIELDS:
+        t9[nlb[1]][field] = {}
+    for field in FISSION_PRODUCT_FIELDS:
+        t9[nlb[2]][field] = {}
+
+    # fill with data
+    for nuc in nucs:
+        if verbose:
+            print('computing {0}'.format(nucname.name(nuc)))
+        key = nucname.zzaaam(nuc)
+        if nuc in ACTIVATION_PRODUCT_NUCS:
+            _compute_xslib(nuc, key, t9[nlb[0]], xscache)
+        if nuc in ACTINIDE_AND_DAUGHTER_NUCS:
+            _compute_xslib(nuc, key, t9[nlb[1]], xscache)
+        if nuc in FISSION_PRODUCT_NUCS:
+            _compute_xslib(nuc, key, t9[nlb[2]], xscache)
+    xscache['E_g'] = old_group_struct
+    return t9

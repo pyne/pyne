@@ -8,9 +8,12 @@ from glob import glob
 
 import numpy as np
 
+from pyne import data
 from pyne import ensdf
 from pyne import nucname
 from pyne import origen22
+from pyne.xs.cache import XSCache
+from pyne.xs.data_source import EAFDataSource, SimpleDataSource, NullDataSource
 from pyne.dbgen.api import build_dir
 from pyne.dbgen.decay import grab_ensdf_decay
 
@@ -173,8 +176,15 @@ def main_gen(ns):
     if len(files) == 0:
         grab_ensdf_decay(ns.build_dir)
         files = glob(os.path.join(ns.build_dir, 'ENSDF', 'ensdf.*'))
+    print("parsing ENSDF decay data")
     decays, branches = parse_ensdf(files)
-    t9 = gendecay(decays, branches, metastable_cutoff=ns.metastable_cutoff)
+    print("creating ORIGEN decay libraries")
+    t9decay = gendecay(decays, branches, metastable_cutoff=ns.metastable_cutoff)
+    print("creating ORIGEN cross section libraries")
+    xsc = XSCache(data_source_classes=[EAFDataSource, SimpleDataSource, 
+                                       NullDataSource])
+    t9xsfpy = origen22.xslibs(xscache=xsc, verbose=True)
+    t9 = origen22.merge_tape9([t9decay, t9xsfpy])
     origen22.write_tape9(t9, outfile=ns.filename)
 
 _cmd_mains = {
