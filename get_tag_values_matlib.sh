@@ -96,7 +96,7 @@ def check_matname(tag_values,mat_lib):
             # list of material names from tagged geometry
             mat_list_matname.append(mat_name[0]) 
             for matname in mat_list_matname :
-                  mat_name=matname.split('=')
+                  mat_name=matname.split(':')
                   mat_list.append(mat_name[1])         
 
     print mat_list
