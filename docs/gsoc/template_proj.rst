@@ -1,7 +1,6 @@
-
-==================================
-Experimental Nuclear Data Project
-==================================
+===================
+Template Project
+===================
 
 
 Brief explanation:

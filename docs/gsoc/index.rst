@@ -18,8 +18,8 @@ ideas for contributions appropriate for students at a number of levels.
     template_proj
 
 
-.. include:: intro
+.. include:: intro.rst
 
-.. include:: exp_data
+.. include:: exp_data.rst
 
-.. include:: template_proj
+.. include:: template_proj.rst
