@@ -1943,3 +1943,91 @@ class MeshTally(StatMesh):
 
             tag_result[res_vol_elements] = result
             tag_rel_error[err_vol_elements] = rel_error
+
+def mesh_to_geom(mesh, frac_type='mass', title_card="Generated from PyNE Mesh"):
+    """This function reads a structured Mesh object and returns the geometry
+    portion of an MCNP input file (cells, surfaces, materials), prepended by a
+    title card. The mesh must be axis aligned. Surfaces and cells are written
+    in xyz iteration order (z changing fastest).
+
+    Parameters
+    ----------
+    mesh : PyNE Mesh object
+       A structured Mesh object with materials and valid densities.
+    frac_type : str, optional
+       Either 'mass' or 'atom'. The type of fraction to use for the material
+       definition.
+    title_card : str, optional
+       The MCNP title card to appear at the top of the input file.
+   
+   Returns
+   -------
+   geom : str
+       The title, cell, surface, and material cards of an MCNP input file in
+       the proper order.
+   """
+
+    mesh._structured_check()
+    divs = (mesh.structured_get_divisions('x'),
+            mesh.structured_get_divisions('y'),
+            mesh.structured_get_divisions('z'))
+ 
+    cell_cards = _mesh_to_cell_cards(mesh, divs)
+    surf_cards = _mesh_to_surf_cards(mesh, divs)
+    mat_cards = _mesh_to_mat_cards(mesh, divs, frac_type)
+ 
+    return "{0}\n{1}\n{2}\n{3}".format(title_card, cell_cards, 
+                                              surf_cards, mat_cards)
+
+def _mesh_to_cell_cards(mesh, divs):
+    """Prepares the cell cards for mesh_to_geom."""
+    cell_cards = ""
+    count = 1
+    idx = mesh.iter_structured_idx('xyz')
+
+    # Establish min and max idx values for each dimension.
+    x_min = 1
+    x_max = len(divs[0])
+    y_min = x_max + 1
+    y_max = x_max + len(divs[1])
+    z_min = y_max + 1
+    z_max = y_max + len(divs[2])
+
+    for i in range(1, len(divs[0])):
+       for j in range(1, len(divs[1])):
+           for k in range(1, len(divs[2])):
+               # Cell number, mat number, density
+               cell_cards += "{0} {1} {2} ".format(count, count, 
+                                                   mesh.density[idx.next()])
+               # x, y, and z surfaces
+               cell_cards += "{0} -{1} {2} -{3} {4} -{5}\n".format(
+                            i, i + 1, j + x_max, j + x_max + 1,
+                            k + y_max, k + y_max + 1)
+               count += 1
+
+    # Append graveyard.
+    cell_cards += "{0} 0 -{1}:{2}:-{3}:{4}:-{5}:{6}\n".format(
+                   count, x_min, x_max, y_min, y_max, z_min, z_max)
+
+    return cell_cards
+
+def _mesh_to_surf_cards(mesh, divs):
+    """Prepares the surface cards for mesh_to_geom."""
+    surf_cards = ""
+    count = 1
+    for i, dim in enumerate("xyz"):
+        for div in divs[i]:
+            surf_cards += "{0} p{1} {2}\n".format(count, dim, div)
+            count += 1
+
+    return surf_cards
+
+def _mesh_to_mat_cards(mesh, divs, frac_type):
+    """Prepares the material cards for mesh_to_geom."""
+    mat_cards = ""
+    idx = mesh.iter_structured_idx('xyz')
+    for i in idx:
+        mesh.mats[i].attrs['mat_number'] = i + 1
+        mat_cards += mesh.mats[i].mcnp(frac_type=frac_type)
+  
+    return mat_cards
