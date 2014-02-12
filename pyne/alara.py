@@ -276,17 +276,24 @@ def num_density_to_mesh(lines, time, m):
 
     Parameters
     ----------
-    lines : list
-        ALARA output from ALARA run with 'number_density' in the 'output'
-        block of the input file. This is equivalent to calling readlines() on 
-        an ALARA output file. If reading in ALARA output from stdout, call 
-        split('\n') before passing it in as the lines parameter.
+    lines : list or str
+        ALARA output from ALARA run with 'number_density' in the 'output' block
+        of the input file. Lines can either be a filename or the equivalent to
+        calling readlines() on an ALARA output file. If reading in ALARA output
+        from stdout, call split('\n') before passing it in as the lines
+        parameter.
     time : str
         The decay time for which number densities are requested (e.g. '1 h',
         'shutdown', etc.)
     m : PyNE Mesh
         Mesh object for which mats will be applied to.
     """
+    if isinstance(lines, basestring):
+        with open(lines) as f:
+            lines = f.readlines()
+    elif not isinstance(lines, collections.Sequence):
+        raise TypeError("Lines argument not a file or sequence.")
+
     # Advance to number density portion.
     header = 'Number Density [atoms/cm3]\n'
     l_ind = 0
