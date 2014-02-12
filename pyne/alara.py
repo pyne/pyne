@@ -293,19 +293,15 @@ def num_density_to_mesh(lines, time, m):
             lines = f.readlines()
     elif not isinstance(lines, collections.Sequence):
         raise TypeError("Lines argument not a file or sequence.")
-
-    # Advance to number density portion.
+    # Advance file to number density portion.
     header = 'Number Density [atoms/cm3]\n'
-    l_ind = 0
-    line = lines[l_ind]
+    line = ""
     while line != header:
-        l_ind += 1
-        line = lines[l_ind]
+        line = lines.pop(0)
 
     # Get decay time index from next line (the column the decay time answers
     # appear in.
-    l_ind += 1
-    line_strs = lines[l_ind].replace('\t', '  ')
+    line_strs = lines.pop(0).replace('\t', '  ')
     time_index = [s.strip() for s in line_strs.split('  ') 
                   if s.strip()].index(time)
 
@@ -315,12 +311,11 @@ def num_density_to_mesh(lines, time, m):
     # Read through file until enough material objects are create to fill mesh.
     while count != len(m):
         # Pop lines to the start of the next material.
-        l_ind += 1
-        line = lines[l_ind]
-        while line[0] != '=':
+        while lines.pop(0)[0] != '=':
             pass
 
         # Create a new material object and add to mats dict.
+        line = lines.pop(0)
         nucvec = {}
         density = 0.0
         # Read lines until '=' delimiter at the end of a material.
@@ -330,8 +325,8 @@ def num_density_to_mesh(lines, time, m):
             if n != 0.0:
                 nucvec[nuc] = n
                 density += n * anum(nuc)/N_A
-            l_ind += 1
-            line = lines[l_ind]
+
+            line = lines.pop(0)
         mat = from_atom_frac(nucvec, density=density, mass=0)
         mats[count] = mat
         count += 1
