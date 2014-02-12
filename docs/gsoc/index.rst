@@ -11,7 +11,7 @@ ideas for contributions appropriate for students at a number of levels.
 
 
 .. toctree::
-    :maxdepth: 2
+    :maxdepth: 1
     
     intro
     exp_data
