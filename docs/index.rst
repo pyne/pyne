@@ -56,6 +56,7 @@ Development:
     devsguide/index
     pubs
     dev_team
+    gsoc/index
 
 ------------
 Search Links

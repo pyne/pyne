@@ -674,8 +674,7 @@ def _parse_decay_dataset(lines, decay_s):
 
 
 def origen_data(filename):
-    """
-    This function parses assorted data from an ensdf file in order to collect
+    """This function parses assorted data from an ensdf file in order to collect
     the necessary information to generate data for origen input decks.
 
     Parameters
