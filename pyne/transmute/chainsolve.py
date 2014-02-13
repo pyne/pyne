@@ -96,7 +96,7 @@ class Transmuter(object):
 
         Parameters
         ----------
-        x : Marterial or similar
+        x : Material or similar
             Input material for transmutation.
         t : float
             Transmutations time [sec].

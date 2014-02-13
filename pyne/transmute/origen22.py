@@ -1,4 +1,4 @@
-"""This module implements an ALARA-like chain-based transmutation solver.
+"""This module implements an ORIGEN v2.2 transmutation solver.
 """
 from __future__ import print_function
 import os
@@ -19,7 +19,7 @@ from pyne.xs.data_source import NullDataSource, SimpleDataSource, EAFDataSource
 from pyne.xs.cache import XSCache
 
 class Transmuter(object):
-    """A class for transmuting materials using an ALARA-like chain solver."""
+    """A class for transmuting materials using ORIGEN v2.2."""
 
     def __init__(self, t=0.0, phi=0.0, temp=300.0, tol=1e-7, cwd='',
                  base_tape9=origen22.BASE_TAPE9, xscache=None, 
@@ -102,7 +102,7 @@ class Transmuter(object):
 
         Parameters
         ----------
-        x : Marterial or similar
+        x : Material or similar
             Input material for transmutation.
         t : float
             Transmutations time [sec].
