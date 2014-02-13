@@ -27,6 +27,7 @@ SET(LIBRARIES
     fludag
     ${MOAB_HOME}/lib/libMOAB.so
     ${MOAB_HOME}/lib/libdagmc.so
+    ${MOAB_HOME}/lib/libMOAB.so
 )
 
 # set up test cases
