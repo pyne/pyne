@@ -71,10 +71,9 @@ or from public sources on the internet.
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Mac OSX Specific Instructions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-| The instructions are based on using the homebrew http://brew.sh/ package manager
-| Install command line tools from https://developer.apple.com/downloads/
-| you will need to create an account in order to download.
-::
+The instructions are based on using the homebrew http://brew.sh/ package manager
+Install command line tools from https://developer.apple.com/downloads/
+you will need to create an account in order to download::
 
     ruby -e "$(curl -fsSL https://raw.github.com/mxcl/homebrew/go/install)"
     brew doctor
@@ -83,12 +82,12 @@ Mac OSX Specific Instructions
     brew install cmake
     brew install python
 
-Add ::
+Add::
 
     export PATH=/usr/local/bin:$PATH
     export PATH=/usr/local/share/python:$PATH
 
-to ~/.bash_profile then ::
+to ~/.bash_profile, then::
 
     source ~/.bash_profile
     sudo pip install numpy
@@ -99,7 +98,7 @@ to ~/.bash_profile then ::
     pip install numexpr
     pip install tables
 
-download pyne-staging cd to that directory ::
+download pyne-staging cd to that directory::
 
 
     cd Downloads/pyne-staging
@@ -109,15 +108,19 @@ It may be necessary to add the pyne library path to the
 ``DYLD_FALLBACK_LIBRARY_PATH`` environment variable *before* running 
 ``nuc_data_make``. To do this, add the following lines to your 
 ``~/.bashrc`` file where ``/path/to/pyne/lib`` is the absolute path to the 
-directory containing libpyne.dylib ::
+directory containing libpyne.dylib::
 
     DYLD_FALLBACK_LIBRARY_PATH="${DYLD_FALLBACK_LIBRARY_PATH}:/path/to/pyne/lib"
     export DYLD_FALLBACK_LIBRARY_PATH
 
 Once those lines have been added, run the following command before running 
-``nuc_data_make`` ::
+``nuc_data_make``::
 
     source ~/.bashrc
+
+
+.. _zip: https://github.com/pyne/pyne/zipball/0.3
+.. _tar: https://github.com/pyne/pyne/tarball/0.3
 
 .. install-end
 
@@ -131,7 +134,4 @@ issuing a pull request. If you have any questions about this process don't
 hesitate to ask the mailing list (https://groups.google.com/forum/#!forum/pyne-dev, 
 pyne-dev@googlegroups.com).
 
-
-.. _zip: https://github.com/pyne/pyne/zipball/0.3
-.. _tar: https://github.com/pyne/pyne/tarball/0.3
 

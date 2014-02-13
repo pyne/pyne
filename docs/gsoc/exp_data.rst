@@ -45,7 +45,7 @@ Necessary :
 Desired : 
 
 *  An undergraduate degree in physics, nuclear engineering, computer science, or 
-  related discipline.
+   related discipline.
 *  Familiarity with nuclear data sources and experiments.
 *  Familiarity with HDF5 and pytables.
 

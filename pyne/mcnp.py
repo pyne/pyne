@@ -169,6 +169,7 @@ class SurfSrc(_BinaryReader):
         Path to surface source file being read or written.
     mode : str, optional
         String indicating file opening mode to be used (defaults to 'rb').
+
     """
 
     def __init__(self, filename, mode="rb"):
@@ -184,6 +185,7 @@ class SurfSrc(_BinaryReader):
         -------
         header_string : str
             A line-by-line listing of the contents of the SurfSrc's header.
+
         """
         header_string = "Code: {0} (version: {1}) [{2}]\n".format(
             self.kod, self.ver, self.loddat)
@@ -255,8 +257,7 @@ class SurfSrc(_BinaryReader):
 #        return self.__dict__ == other.__dict__
 
     def __cmp__(self, other):
-        """ Comparison is not completely robust
-            Tracklists are not compared!!!
+        """ Comparison is not completely robust. Tracklists are not compared!!!
         """
 
         if other.kod != self.kod:
@@ -323,8 +324,7 @@ class SurfSrc(_BinaryReader):
 
     def read_header(self):
         """Read in the header block data. This block comprises 4 fortran
-        records which we refer to as:
-        header, table1, table2, summary.
+        records which we refer to as: header, table1, table2, summary.
         """
         # read header record
         header = self.get_fortran_record()
@@ -530,7 +530,7 @@ class SurfSrc(_BinaryReader):
         return
 
     def put_summary(self):
-        """ Write the summary part of the header to the surface source file"""
+        """Write the summary part of the header to the surface source file"""
         newrecord = _FortranRecord("", 0)
         newrecord.put_int(list(self.summary_table))
         newrecord.put_int(list(self.summary_extra))
@@ -538,9 +538,8 @@ class SurfSrc(_BinaryReader):
         return
 
     def write_header(self):
-        """Write the first part of the MCNP surface source file.
-        
-        The header content comprises five parts shown below.
+        """Write the first part of the MCNP surface source file. The header content 
+        comprises five parts shown below.
         """
         self.put_header()
         self.put_table_1()
@@ -549,10 +548,8 @@ class SurfSrc(_BinaryReader):
         self.put_summary()
 
     def write_tracklist(self):
-        """Write track records for individual particles.
-
-        Second part of the MCNP surface source file.
-        Tracklist is also known as a 'phase space'.
+        """Write track records for individual particles. Second part of the MCNP 
+        surface source file.  Tracklist is also known as a 'phase space'.
         """
 
         for j in range(self.nrss):  # nrss is the size of tracklist
@@ -617,6 +614,7 @@ class Srctp(_BinaryReader):
     ----------
     filename : str
         Path to Srctp file being worked with.
+
     """
 
     def __init__(self, filename):
@@ -1361,8 +1359,7 @@ class Wwinp(Mesh):
     Attributes
     ----------
     ni : number of integers on card 2.
-        ni = 1 for neutron WWINPs, ni = 2 for photon WWINPs
-        or neutron + photon WWINPs.
+        ni = 1 for neutron WWINPs, ni = 2 for photon WWINPs or neutron + photon WWINPs.
     nr : int
         10 for rectangular, 16 for cylindrical.
     ne : list of number of energy groups for neutrons and photons.
@@ -1749,10 +1746,10 @@ class Meshtal(object):
     provides key/value access to invidial MeshTally objects.
 
     Attributes
-    ==========
+    ----------
     filename : string
         Path to an MCNP meshtal file
-    version: float
+    version : float
         The MCNP verison number
     ld : string
         The MCNP verison date
@@ -1820,11 +1817,11 @@ class MeshTally(StatMesh):
 
     Attributes
     ----------
-    tally number : int
+    tally_number : int
         The MCNP tally number. Must end in 4 (e.g. 4, 14, 214).
     particle : string
         Either "n" for a neutron mesh tally or "p" for a photon mesh tally.
-    dose response : bool
+    dose_response : bool
         True is the tally is modified by a dose response function.
     x_bounds : list of floats
         The locations of mesh vertices in the x direction.
@@ -1838,8 +1835,11 @@ class MeshTally(StatMesh):
         An iMesh instance tagged with all results and
         relative errors
 
-    Note: All Mesh attributes are also present via a super() call to
+    Notes
+    -----
+    All Mesh attributes are also present via a super() call to
     Mesh.__init__().
+
     """
 
     def __init__(self, f, tally_number):
@@ -1975,18 +1975,18 @@ def mesh_to_geom(mesh, frac_type='mass', title_card="Generated from PyNE Mesh"):
     Parameters
     ----------
     mesh : PyNE Mesh object
-       A structured Mesh object with materials and valid densities.
+        A structured Mesh object with materials and valid densities.
     frac_type : str, optional
-       Either 'mass' or 'atom'. The type of fraction to use for the material
-       definition.
+        Either 'mass' or 'atom'. The type of fraction to use for the material
+        definition.
     title_card : str, optional
-       The MCNP title card to appear at the top of the input file.
+        The MCNP title card to appear at the top of the input file.
    
-   Returns
-   -------
-   geom : str
-       The title, cell, surface, and material cards of an MCNP input file in
-       the proper order.
+    Returns
+    -------
+    geom : str
+        The title, cell, surface, and material cards of an MCNP input file in
+        the proper order.
    """
 
     mesh._structured_check()
