@@ -2,6 +2,7 @@
 """
 from __future__ import print_function
 import os
+import collections
 import numpy as np
 import tables as tb
 import warnings
@@ -19,7 +20,7 @@ from pyne.nucname import serpent, alara, znum, anum
 from pyne.data import N_A
 
 def mesh_to_fluxin(flux_mesh, flux_tag, fluxin="fluxin.out",
-                        reverse=False):
+                   reverse=False):
     """This function creates an ALARA fluxin file from fluxes tagged on a PyNE
     Mesh object. Structured meshes are printed in xyz order (z changes fastest)
     and unstructured meshes are printed in the imesh.iterate() order.
@@ -267,34 +268,40 @@ def mesh_to_geom(mesh, geom_file, matlib_file):
     with open(matlib_file, 'w') as f:
         f.write(matlib)
 
-def num_density_to_mesh(filename, time, m):
-    """This function reads an ALARA output file containing number density
-    information and creates material objects which are then added to a supplied
-    PyNE Mesh object. The volumes within ALARA are assummed to appear in the 
-    same order as the idx on the Mesh object.
+def num_density_to_mesh(lines, time, m):
+    """This function reads ALARA output containing number density information
+    and creates material objects which are then added to a supplied PyNE Mesh
+    object. The volumes within ALARA are assummed to appear in the same order as
+    the idx on the Mesh object. 
 
     Parameters
     ----------
-    filename : str
-        ALARA output file from ALARA run with 'number_density' in the 'output'
-        block of the input file.
+    lines : list or str
+        ALARA output from ALARA run with 'number_density' in the 'output' block
+        of the input file. Lines can either be a filename or the equivalent to
+        calling readlines() on an ALARA output file. If reading in ALARA output
+        from stdout, call split('\n') before passing it in as the lines
+        parameter.
     time : str
         The decay time for which number densities are requested (e.g. '1 h',
         'shutdown', etc.)
     m : PyNE Mesh
         Mesh object for which mats will be applied to.
     """
-
-    f = open(filename, 'r')
+    if isinstance(lines, basestring):
+        with open(lines) as f:
+            lines = f.readlines()
+    elif not isinstance(lines, collections.Sequence):
+        raise TypeError("Lines argument not a file or sequence.")
     # Advance file to number density portion.
     header = 'Number Density [atoms/cm3]\n'
     line = ""
     while line != header:
-        line = f.readline()
+        line = lines.pop(0)
 
     # Get decay time index from next line (the column the decay time answers
     # appear in.
-    line_strs = f.readline().replace('\t', '  ')
+    line_strs = lines.pop(0).replace('\t', '  ')
     time_index = [s.strip() for s in line_strs.split('  ') 
                   if s.strip()].index(time)
 
@@ -304,11 +311,11 @@ def num_density_to_mesh(filename, time, m):
     # Read through file until enough material objects are create to fill mesh.
     while count != len(m):
         # Pop lines to the start of the next material.
-        while f.readline()[0] != '=':
+        while lines.pop(0)[0] != '=':
             pass
 
         # Create a new material object and add to mats dict.
-        line = f.readline()
+        line = lines.pop(0)
         nucvec = {}
         density = 0.0
         # Read lines until '=' delimiter at the end of a material.
@@ -319,10 +326,102 @@ def num_density_to_mesh(filename, time, m):
                 nucvec[nuc] = n
                 density += n * anum(nuc)/N_A
 
-            line = f.readline()
+            line = lines.pop(0)
         mat = from_atom_frac(nucvec, density=density, mass=0)
         mats[count] = mat
         count += 1
 
-    f.close()
     m.mats = mats
+
+
+def irradiation_blocks(material_lib, element_lib, data_library, cooling, 
+                       flux_file, irr_time, output = "constituent",
+                       truncation=1E-12, impurity = (5E-6, 1E-3), 
+                       dump_file = "dump_file"):
+    """irradiation_blocks(material_lib, element_lib, data_library, cooling, 
+                       flux_file, irr_time, output = "constituent",
+                       truncation=1E-12, impurity = (5E-6, 1E-3), 
+                       dump_file = "dump_file")
+
+    This function returns a string of the irradation-related input blocks. This 
+    function is meant to be used with files created by the mesh_to_geom 
+    function, in order to append the remaining input blocks to form a complete
+    ALARA input file. Only the simplest irradiation schedule is supported: a 
+    single pulse of time <irr_time>. The notation in this function is consistent 
+    with the ALARA users' guide, found at:
+
+    http://alara.engr.wisc.edu/users.guide.html/
+
+    Parameters
+    ----------
+    material_lib : str
+        Path to material library.
+    element_lib : str
+        Path to element library.
+    data_library : str
+        The data_library card (see ALARA user's guide).
+    cooling : str or iterable of str
+        Cooling times for which output is requested. Given in ALARA form (e.g.
+        "1 h", "0.5 y"). Note that "shutdown" is always implicitly included.
+    flux_file : str
+        Path to the "fluxin" file.
+    irr_time : str
+        The duration of the single pulse irradiation. Given in the ALARA form
+        (e.g. "1 h", "0.5 y").
+    output : str or iterable of str, optional.
+        The requested output blocks (see ALARA users' guide).
+    truncation : float, optional
+        The chain truncation value (see ALARA users' guide).
+    impurity : tuple of two floats, optional
+       The impurity parameters (see ALARA users' guide).
+    dump_file: str, optional
+       Path to the dump file.
+  
+    Returns
+    -------
+    s : str
+        Irradition-related ALARA input blocks.
+    """
+
+    s = ""
+
+    # Material, element, and data_library blocks
+    s += "material_lib {0}\n".format(material_lib)
+    s += "element_lib {0}\n".format(element_lib)
+    s += "data_library {0}\n\n".format(data_library)
+
+    # Cooling times
+    s += "cooling\n"
+    if isinstance(cooling, collections.Iterable) and not isinstance(cooling, basestring):
+        for c in cooling:
+            s += "    {0}\n".format(c)
+    else:
+        s += "    {0}\n".format(cooling)
+
+    s += "end\n\n"
+
+    # Flux block
+    s += "flux flux_1 {0} 1.0 0 default\n".format(flux_file)
+
+    # Flux schedule
+    s += ("schedule simple_schedule\n"
+         "    {0} flux_1 pulse_once 0 s\nend\n\n".format(irr_time))
+
+    s += "pulsehistory pulse_once\n    1 0.0 s\nend\n\n"
+ 
+    # Output block
+    s += "output zone\n    units Ci cm3\n"
+    if isinstance(output, collections.Iterable) and not isinstance(output, basestring):
+        for out in output:
+            s += "    {0}\n".format(out)
+    else:
+        s += "    {0}\n".format(output)
+
+    s += "end\n\n"
+
+    # Other parameters
+    s += "truncation {0}\n".format(truncation)
+    s += "impurity {0} {1}\n".format(impurity[0], impurity[1])
+    s += "dump_file {0}\n".format(dump_file)
+
+    return s
