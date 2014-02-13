@@ -24,7 +24,7 @@ def combine_multiple_ss_files(newssrname, ssrnames):
 
     Returns
     -------
-    .. : bool
+    bool
         True if successfully created the new ssr file.
 
     """
@@ -50,25 +50,25 @@ def combine_multiple_ss_files(newssrname, ssrnames):
     newssr = SurfSrc(newssrname, "wb")
 
     # header
-    newssr.kod         = ssrfiles[0].kod   
-    newssr.ver         = ssrfiles[0].ver   
-    newssr.loddat      = ssrfiles[0].loddat
-    newssr.idtm        = ssrfiles[0].idtm  
-    newssr.probid      = ssrfiles[0].probid
-    newssr.aid         = ssrfiles[0].aid   
-    newssr.knod        = ssrfiles[0].knod
+    newssr.kod = ssrfiles[0].kod   
+    newssr.ver = ssrfiles[0].ver   
+    newssr.loddat = ssrfiles[0].loddat
+    newssr.idtm = ssrfiles[0].idtm  
+    newssr.probid = ssrfiles[0].probid
+    newssr.aid = ssrfiles[0].aid   
+    newssr.knod = ssrfiles[0].knod
     
     # table 1
-    newssr.np1         = sum(x.orignp1 for x in ssrfiles) # note orignp1 vs np1
-    newssr.nrss        = sum(x.nrss for x in ssrfiles)
-    newssr.ncrd        = ssrfiles[0].ncrd
-    newssr.njsw        = ssrfiles[0].njsw
-    newssr.niss        = ssrfiles[0].niss
+    newssr.np1 = sum(x.orignp1 for x in ssrfiles) # note orignp1 vs np1
+    newssr.nrss = sum(x.nrss for x in ssrfiles)
+    newssr.ncrd = ssrfiles[0].ncrd
+    newssr.njsw = ssrfiles[0].njsw
+    newssr.niss = ssrfiles[0].niss
     
     # table 2
-    newssr.niwr        = ssrfiles[0].niwr
-    newssr.mipts       = ssrfiles[0].mipts
-    newssr.kjaq        = ssrfiles[0].kjaq
+    newssr.niwr = ssrfiles[0].niwr
+    newssr.mipts = ssrfiles[0].mipts
+    newssr.kjaq = ssrfiles[0].kjaq
     newssr.table2extra = ssrfiles[0].table2extra
 
     # surfaces list
@@ -117,7 +117,7 @@ def _compare_compatible(first, other):
 
     Returns
     -------
-    .. : int
+    int
         0 if all comparisons are valid, else the result of cmp() which was
         determined to be invald.
     """
