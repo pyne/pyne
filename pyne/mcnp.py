@@ -1982,12 +1982,12 @@ def mesh_to_geom(mesh, frac_type='mass', title_card="Generated from PyNE Mesh"):
     title_card : str, optional
        The MCNP title card to appear at the top of the input file.
    
-   Returns
-   -------
-   geom : str
-       The title, cell, surface, and material cards of an MCNP input file in
-       the proper order.
-   """
+    Returns
+    -------
+    geom : str
+        The title, cell, surface, and material cards of an MCNP input file in
+        the proper order.
+    """
 
     mesh._structured_check()
     divs = (mesh.structured_get_divisions('x'),
