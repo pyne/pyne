@@ -155,6 +155,21 @@ class TrackData(object):
 
 
 class SurfSrc(_BinaryReader):
+    """Enables manipulating both the header and tracklists in surface source
+    files.
+
+    Example use cases include adding source particles from other codes, and
+    combining multiple files together. Note that typically additional code
+    will be needed to supplement this class in order to modify the header or
+    track information in a way suitable to the use case.
+
+    Parameters
+    ----------
+    filename : str
+        Path to surface source file being read or written.
+    mode : str, optional
+        String indicating file opening mode to be used (defaults to 'rb').
+    """
 
     def __init__(self, filename, mode="rb"):
         super(SurfSrc, self).__init__(filename, mode)
@@ -163,6 +178,13 @@ class SurfSrc(_BinaryReader):
         return self.print_header()
 
     def print_header(self):
+        """Returns contents of SurfSrc's header as an informative string.
+
+        Returns
+        -------
+        header_string : str
+            A line-by-line listing of the contents of the SurfSrc's header.
+        """
         header_string = "Code: {0} (version: {1}) [{2}]\n".format(
             self.kod, self.ver, self.loddat)
         header_string += "Problem info: ({0}) {1}\n{2}\n".format(
@@ -193,6 +215,18 @@ class SurfSrc(_BinaryReader):
         return header_string
 
     def print_tracklist(self, max_tracks=None):
+        """Returns tracklists in SurfSrc as a string.
+
+        Parameters
+        ----------
+        max_tracks : int, optional
+            Maximum number of tracks to print. Defaults to all tracks.
+
+        Returns
+        -------
+        track_data : str
+            Single string with data for one track on each line.
+        """
 
         if max_tracks is None:
             max_tracks = self.nrss
@@ -366,8 +400,9 @@ class SurfSrc(_BinaryReader):
         else:
             pass
 
+        # Since np1 can be negative, preserve the actual np1 value while
+        # taking the absolute value so that np1 can be used mathematically
         self.orignp1 = self.np1
-
         self.np1 = abs(self.np1)
 
         # get info for each surface
@@ -405,9 +440,7 @@ class SurfSrc(_BinaryReader):
             self.summary_extra += summary_info.get_int()
 
     def read_tracklist(self):
-        """
-        Reads in track records for individual particles.
-        """
+        """Reads in track records for individual particles."""
         self.tracklist = []
         for j in range(self.nrss):
             track_info = self.get_fortran_record()
@@ -433,9 +466,7 @@ class SurfSrc(_BinaryReader):
         return
 
     def put_header(self):
-        """Write the header part of the header
-        to the surface source file
-        """
+        """Write the header part of the header to the surface source file"""
         if 'SF_00001' in self.kod:
             rec = [self.kod]
             newrecord = _FortranRecord("".join(rec), len("".join(rec)))
@@ -455,9 +486,7 @@ class SurfSrc(_BinaryReader):
         return
 
     def put_table_1(self):
-        """Write the table1 part of the header
-        to the surface source file
-        """
+        """Write the table1 part of the header to the surface source file"""
         newrecord = _FortranRecord("", 0)
 
         if '2.6.0' in self.ver:
@@ -474,9 +503,7 @@ class SurfSrc(_BinaryReader):
         return
 
     def put_table_2(self):
-        """Write the table2 part of the header
-        to the surface source file
-        """
+        """Write the table2 part of the header to the surface source file"""
         newrecord = _FortranRecord("", 0)
         newrecord.put_int([self.niwr])
         newrecord.put_int([self.mipts])
@@ -486,9 +513,7 @@ class SurfSrc(_BinaryReader):
         return
 
     def put_surface_info(self):
-        """Write the record for each surface
-        to the surface source file
-        """
+        """Write the record for each surface to the surface source file"""
 
         for cnt, s in enumerate(self.surflist):
             newrecord = _FortranRecord("", 0)
@@ -505,24 +530,18 @@ class SurfSrc(_BinaryReader):
         return
 
     def put_summary(self):
-        """
-        Write the summary part of the header
-        to the surface source file
-        """
+        """ Write the summary part of the header to the surface source file"""
         newrecord = _FortranRecord("", 0)
         newrecord.put_int(list(self.summary_table))
         newrecord.put_int(list(self.summary_extra))
-        #newrecord.put_int( [self.summary_table])
-        #newrecord.put_int( [self.summary_extra])
         self.put_fortran_record(newrecord)
         return
 
     def write_header(self):
-        """
-        First part of the MCNP surface source file.
+        """Write the first part of the MCNP surface source file.
+        
         The header content comprises five parts shown below.
         """
-
         self.put_header()
         self.put_table_1()
         self.put_table_2()
@@ -530,10 +549,10 @@ class SurfSrc(_BinaryReader):
         self.put_summary()
 
     def write_tracklist(self):
-        """
+        """Write track records for individual particles.
+
         Second part of the MCNP surface source file.
         Tracklist is also known as a 'phase space'.
-        Write track records for individual particles.
         """
 
         for j in range(self.nrss):  # nrss is the size of tracklist
@@ -554,8 +573,7 @@ class SurfSrc(_BinaryReader):
         return
 
     def update_tracklist(self, surf_src):
-        """
-        Update tracklist from another surface source.
+        """ Update tracklist from another surface source.
         This updates the surface source in-place.
         """
 
@@ -587,14 +605,18 @@ class SurfSrc(_BinaryReader):
         self.nrss = surf_src.nrss
 
     def __del__(self):
-        """Destructor. The only thing to do is close the file.
-        """
+        """Destructor. The only thing to do is close the file."""
         self.f.close()
 
 
 class Srctp(_BinaryReader):
     """This class stores source site data from a 'srctp' file written by
     MCNP. The source sites are stored in the 'fso' array in MCNP.
+
+    Parameters
+    ----------
+    filename : str
+        Path to Srctp file being worked with.
     """
 
     def __init__(self, filename):
@@ -1976,7 +1998,7 @@ def mesh_to_geom(mesh, frac_type='mass', title_card="Generated from PyNE Mesh"):
     surf_cards = _mesh_to_surf_cards(mesh, divs)
     mat_cards = _mesh_to_mat_cards(mesh, divs, frac_type)
  
-    return "{0}\n{1}\n{2}\n{3}\n".format(title_card, cell_cards, 
+    return "{0}\n{1}\n{2}\n{3}".format(title_card, cell_cards, 
                                               surf_cards, mat_cards)
 
 def _mesh_to_cell_cards(mesh, divs):

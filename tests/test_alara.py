@@ -21,7 +21,8 @@ except ImportError:
 from pyne.mesh import Mesh, StatMesh, MeshError
 from pyne.material import Material
 from pyne.alara import mesh_to_fluxin, photon_source_to_hdf5, \
-    photon_source_hdf5_to_mesh, mesh_to_geom, num_density_to_mesh
+    photon_source_hdf5_to_mesh, mesh_to_geom, num_density_to_mesh, \
+    irradiation_blocks
 
 thisdir = os.path.dirname(__file__)
 
@@ -220,7 +221,9 @@ def test_num_den_to_mesh_shutdown():
     filename = os.path.join(thisdir, "files_test_alara", 
                             "num_density_output.txt")
     m = Mesh(structured=True, structured_coords=[[0,1],[0,1],[0,1,2]])
-    num_density_to_mesh(filename, 'shutdown', m)
+    with open(filename) as f:
+        lines = f.readlines()
+    num_density_to_mesh(lines, 'shutdown', m)
 
     # expected composition results:
     exp_comp_0 = {10010000:5.3390e+19,
@@ -292,3 +295,41 @@ def test_num_den_to_mesh_1_y():
     exp_density_1 = 1.78521E-04
     assert_almost_equal(exp_density_0, m.mats[0].density)
     assert_almost_equal(exp_density_1, m.mats[1].density)
+
+def test_irradiation_blocks():
+ 
+    # actual results
+    act = irradiation_blocks("matlib", "isolib", 
+                             "FEINDlib CINDER CINDER90 THERMAL", 
+                             ["1 h", "0.5 y"], "fluxin.out", "1 y", 
+                             output = "constituant")
+
+    exp = ("material_lib matlib\n"
+          "element_lib isolib\n"
+          "data_library FEINDlib CINDER CINDER90 THERMAL\n"
+          "\n"
+          "cooling\n"
+          "    1 h\n"
+          "    0.5 y\n"
+          "end\n"
+          "\n"
+          "flux flux_1 fluxin.out 1.0 0 default\n"
+          "schedule simple_schedule\n"
+          "    1 y flux_1 pulse_once 0 s\n"
+          "end\n"
+          "\n"
+          "pulsehistory pulse_once\n"
+          "    1 0.0 s\n"
+          "end\n"
+          "\n"
+          "output zone\n"
+          "    units Ci cm3\n"
+          "    constituant\n"
+          "end\n"
+          "\n"
+          "truncation 1e-12\n"
+          "impurity 5e-06 0.001\n"
+          "dump_file dump_file\n")
+
+    assert_equal(act, exp)
+
