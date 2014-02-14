@@ -302,7 +302,7 @@ def test_irradiation_blocks():
     act = irradiation_blocks("matlib", "isolib", 
                              "FEINDlib CINDER CINDER90 THERMAL", 
                              ["1 h", "0.5 y"], "fluxin.out", "1 y", 
-                             output = "constituant")
+                             output = "number_density")
 
     exp = ("material_lib matlib\n"
           "element_lib isolib\n"
@@ -324,7 +324,7 @@ def test_irradiation_blocks():
           "\n"
           "output zone\n"
           "    units Ci cm3\n"
-          "    constituant\n"
+          "    number_density\n"
           "end\n"
           "\n"
           "truncation 1e-12\n"
