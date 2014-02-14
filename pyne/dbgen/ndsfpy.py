@@ -8,6 +8,9 @@ from pyne.dbgen.api import BASIC_FILTERS
 
 
 def readtable(i, spdat):
+    """
+    Reads in a set of 5 html tables and returns corresponding yield data
+    """
     parent = getdata(i, spdat)[0]
     pfinal = (parent.split('<strong>')[1]).split('</strong>')[0]
     pid = conv_to_id(pfinal)
@@ -33,11 +36,17 @@ def readtable(i, spdat):
 
 
 def conv_to_id(nuc):
+    """
+    Converts html nuclide names to nuclide ids
+    """
     parts = nuc.split('-')
     return nucname.id(parts[1] + parts[2])
 
 
 def conv_to_num(dstring):
+    """
+    Converts html number and error to floats
+    """
     if dstring == '-':
         return 0, 0
     dat, err = dstring.split('&plusmn;')
@@ -53,6 +62,9 @@ def conv_to_num(dstring):
 
 
 def parse_num(dst):
+    """
+    Converts html numbers with exponents to floats
+    """
     nums = dst.split('x')
     base = float(nums[0])
     exp = (nums[1].split('<sup>')[1]).split('</sup>')[0]
@@ -60,6 +72,9 @@ def parse_num(dst):
 
 
 def getpoint(line):
+    """
+    Gets data entries from html lines
+    """
     spline = line.split('<tr><td class="xl28b">&nbsp;&nbsp;')
     if len(spline) > 1:
         data = spline[1].split('</td></tr>')[0]
@@ -69,6 +84,9 @@ def getpoint(line):
 
 
 def getdata(i, spdat):
+    """
+    Gets the data from the nds html table
+    """
     lines = spdat[i].splitlines()
     dlist = []
     for line in lines:
@@ -80,6 +98,13 @@ def getdata(i, spdat):
 
 
 def getndsfpdata(nuc_data):
+    """Adds the NDS fission yields to the nuc_data library.
+
+    Parameters
+    ----------
+    nuc_data : str
+        Path to nuclide data file.
+    """
     doc = urlopen("https://www-nds.iaea.org/sgnucdat/c2.htm")
     dat = doc.read()
     spdat = dat.split("<table>")
@@ -97,6 +122,7 @@ def getndsfpdata(nuc_data):
 
 
 def make_fpy(args):
+    """Controller function for NDS fission products."""
     nuc_data, build_dir = args.nuc_data, args.build_dir
     # Check that the table exists
     with tb.openFile(nuc_data, 'a', filters=BASIC_FILTERS) as f:
