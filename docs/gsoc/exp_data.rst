@@ -44,8 +44,7 @@ Necessary :
 
 Desired : 
 
-*  An undergraduate degree in physics, nuclear engineering, computer science, or 
-  related discipline.
+*  An undergraduate degree in physics, nuclear engineering, computer science, or related discipline.
 *  Familiarity with nuclear data sources and experiments.
 *  Familiarity with HDF5 and pytables.
 
@@ -54,7 +53,7 @@ Mentor:
 -------
 
 Professor Rachel Slaybaugh and Postdoctoral Scholar Kathryn Huff, University of 
-California -- Berkeley.
+California, Berkeley.
 
 More Resources:
 ---------------
