@@ -31,10 +31,10 @@ def _prep_cache(xs_cache, E_g=None, phi_g=None):
         xs_cache['phi_g'] = phi_g
 
 
-def _atom_weight_channel(chanfunc, nucspec, *args, **kwargs):
-    """Convolves a channel for several nuclides based on atomic weights."""
+def _atom_mass_channel(chanfunc, nucspec, *args, **kwargs):
+    """Convolves a channel for several nuclides based on atomic mass."""
     xs_cache = kwargs['xs_cache'] if 'xs_cache' in kwargs else cache.xs_cache
-    # convert to atom weights
+    # convert to atomic mass
     if isinstance(nucspec, Material):
         aws = nucspec.to_atom_frac()
     elif isinstance(nucspec, collections.Mapping):
@@ -43,16 +43,16 @@ def _atom_weight_channel(chanfunc, nucspec, *args, **kwargs):
         aws = dict(nucspec)
 
     # tally the channels as we go
-    weight_total = 0.0
+    mass_total = 0.0
     chan = np.zeros(len(xs_cache['E_g']) - 1, float)
-    for nuc, weight in aws.items():
-        weight_total += weight
+    for nuc, mass in aws.items():
+        mass_total += mass
         nuc_chan = chanfunc(nuc, *args, **kwargs)
-        chan += weight * nuc_chan
+        chan += mass * nuc_chan
 
     # re-normalize
-    if weight_total != 1.0:
-        chan = chan / weight_total
+    if mass_total != 1.0:
+        chan = chan / mass_total
 
     return chan
 
@@ -88,7 +88,7 @@ def sigma_f(nuc, temp=300.0, group_struct=None, phi_g=None, xs_cache=None):
     xs_cache = cache.xs_cache if xs_cache is None else xs_cache
     _prep_cache(xs_cache, group_struct, phi_g)
     if isinstance(nuc, collections.Iterable) and not isinstance(nuc, basestring):
-        return _atom_weight_channel(sigma_f, nuc, temp=temp, xs_cache=xs_cache)
+        return _atom_mass_channel(sigma_f, nuc, temp=temp, xs_cache=xs_cache)
     nuc = nucname.id(nuc)
     key = (nuc, rxname.id('fission'), temp)
     return xs_cache[key]
@@ -134,7 +134,7 @@ def sigma_s_gh(nuc, temp=300.0, group_struct=None, phi_g=None, xs_cache=None):
     xs_cache = cache.xs_cache if xs_cache is None else xs_cache
     _prep_cache(xs_cache, group_struct, phi_g)
     if isinstance(nuc, collections.Iterable) and not isinstance(nuc, basestring):
-        return _atom_weight_channel(sigma_s_gh, nuc, temp=temp, xs_cache=xs_cache)
+        return _atom_mass_channel(sigma_s_gh, nuc, temp=temp, xs_cache=xs_cache)
     nuc = nucname.id(nuc)
     key = (nuc, 's_gh', temp)
 
@@ -209,7 +209,7 @@ def sigma_s(nuc, temp=300.0, group_struct=None, phi_g=None, xs_cache=None):
     xs_cache = cache.xs_cache if xs_cache is None else xs_cache
     _prep_cache(xs_cache, group_struct, phi_g)
     if isinstance(nuc, collections.Iterable) and not isinstance(nuc, basestring):
-        return _atom_weight_channel(sigma_s, nuc, temp=temp, xs_cache=xs_cache)
+        return _atom_mass_channel(sigma_s, nuc, temp=temp, xs_cache=xs_cache)
     nuc = nucname.id(nuc)
     key_g  = (nuc, 's_g', temp)
     key_gh = (nuc, 's_gh', temp)
@@ -269,7 +269,7 @@ def sigma_a_reaction(nuc, rx, temp=300.0, group_struct=None, phi_g=None, xs_cach
     xs_cache = cache.xs_cache if xs_cache is None else xs_cache
     _prep_cache(xs_cache, group_struct, phi_g)
     if isinstance(nuc, collections.Iterable) and not isinstance(nuc, basestring):
-        return _atom_weight_channel(sigma_a_reaction, nuc, rx=rx, temp=temp, 
+        return _atom_mass_channel(sigma_a_reaction, nuc, rx=rx, temp=temp, 
                                     xs_cache=xs_cache)
     nuc = nucname.id(nuc)
     key= (nuc, rx, temp)
@@ -370,7 +370,7 @@ def sigma_a(nuc, temp=300.0, group_struct=None, phi_g=None, xs_cache=None):
     xs_cache = cache.xs_cache if xs_cache is None else xs_cache
     _prep_cache(xs_cache, group_struct, phi_g)
     if isinstance(nuc, collections.Iterable) and not isinstance(nuc, basestring):
-        return _atom_weight_channel(sigma_a, nuc, temp=temp, xs_cache=xs_cache)
+        return _atom_mass_channel(sigma_a, nuc, temp=temp, xs_cache=xs_cache)
     nuc = nucname.id(nuc)
     key = (nuc, rxname.id('absorption'), temp)
     return xs_cache[key]
@@ -409,7 +409,7 @@ def chi(nuc, temp=300.0, group_struct=None, phi_g=None, xs_cache=None, eres=101)
     xs_cache = cache.xs_cache if xs_cache is None else xs_cache
     _prep_cache(xs_cache, group_struct, phi_g)
     if isinstance(nuc, collections.Iterable) and not isinstance(nuc, basestring):
-        return _atom_weight_channel(chi, nuc, temp=temp, xs_cache=xs_cache, eres=eres)
+        return _atom_mass_channel(chi, nuc, temp=temp, xs_cache=xs_cache, eres=eres)
     nuc = nucname.id(nuc)
     key = (nuc, 'chi', temp)
 
@@ -477,7 +477,7 @@ def sigma_t(nuc, temp=300.0, group_struct=None, phi_g=None, xs_cache=None):
     xs_cache = cache.xs_cache if xs_cache is None else xs_cache
     _prep_cache(xs_cache, group_struct, phi_g)
     if isinstance(nuc, collections.Iterable) and not isinstance(nuc, basestring):
-        return _atom_weight_channel(sigma_t, nuc, temp=temp, xs_cache=xs_cache)
+        return _atom_mass_channel(sigma_t, nuc, temp=temp, xs_cache=xs_cache)
     nuc = nucname.id(nuc)
     key_a = (nuc, rxname.id('absorption'), temp)
     key_s = (nuc, rxname.id('scattering'), temp)

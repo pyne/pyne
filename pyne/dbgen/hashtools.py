@@ -10,7 +10,7 @@ import tables
 from .. import data
 
 #list of nodes from distinct data sets
-nodelist = ['/atomic_decay', '/atomic_weight', '/material_library',
+nodelist = ['/atomic_decay', '/atomic_mass', '/material_library',
             '/neutron/eaf_xs', '/neutron/scattering_lengths',
             '/neutron/simple_xs']
 

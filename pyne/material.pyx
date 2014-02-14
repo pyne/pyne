@@ -464,7 +464,7 @@ cdef class _Material:
 
         Returns
         -------
-        mol_weight : float
+        mol_mass : float
             Molecular mass in [amu].
 
         """
@@ -554,7 +554,7 @@ cdef class _Material:
         submaterial : Material
             A new mass stream object that only
             has the members given in nuc_sequence.  The mass of the submaterial
-            is calculated based on the weight fraction composition and mass
+            is calculated based on the mass fraction composition and mass
             of the original mass stream.
 
         Notes
@@ -592,7 +592,7 @@ cdef class _Material:
         submaterial : Material
             A new material object whose members in nuc_sequence have the
             cooresponding mass value.  The mass of the submaterial is
-            calculated based on the weight fraction composition and mass of the
+            calculated based on the mass fraction composition and mass of the
             original material.
 
         """
@@ -620,7 +620,7 @@ cdef class _Material:
         submaterial : Material
             A new material object that only has the members not given in
             nuc_sequence.  The mass of the submaterial is calculated based on
-            the weight fraction composition and mass of the original material.
+            the mass fraction composition and mass of the original material.
 
         Notes
         -----
@@ -1211,9 +1211,9 @@ class Material(_Material, collections.MutableMapping):
         This is the input nuclide component dictionary.  This dictionary need
         not be normalized; Material initialization will automatically
         renormalize the stream.  Thus the comp simply is a dictionary of
-        relative weights.  The keys of comp must be integers representing
+        relative mass.  The keys of comp must be integers representing
         nuclides in id-form.  The values are floats for each nuclide's
-        weight fraction. If a string is provided instead of a dictionary, then
+        mass fraction. If a string is provided instead of a dictionary, then
         Material will read in the comp vector from a file at the string's
         location.  This either plaintext or hdf5 files. If no comp is provided,
         an empty Material object is constructed.
