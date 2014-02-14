@@ -297,9 +297,9 @@ def num_density_to_mesh(lines, time, m):
     elif not isinstance(lines, collections.Sequence):
         raise TypeError("Lines argument not a file or sequence.")
     # Advance file to number density portion.
-    header = 'Number Density [atoms/cm3]\n'
+    header = 'Number Density [atoms/cm3]'
     line = ""
-    while line != header:
+    while line.rstrip() != header:
         line = lines.pop(0)
 
     # Get decay time index from next line (the column the decay time answers
@@ -314,7 +314,7 @@ def num_density_to_mesh(lines, time, m):
     # Read through file until enough material objects are create to fill mesh.
     while count != len(m):
         # Pop lines to the start of the next material.
-        while lines.pop(0)[0] != '=':
+        while (lines.pop(0) + " " )[0] != '=':
             pass
 
         # Create a new material object and add to mats dict.
