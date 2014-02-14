@@ -1,6 +1,7 @@
 """alara module tests"""
 import os
 import nose
+import subprocess
 
 from nose.tools import assert_almost_equal
 from nose.tools import assert_equal, assert_true, with_setup
@@ -265,12 +266,10 @@ def test_num_den_to_mesh_stdout():
                             "num_density_output.txt")
     m = Mesh(structured=True, structured_coords=[[0,1],[0,1],[0,1,2]])
 
-    lines = ''
-    with open(filename) as f:
-        for line in f.readlines():
-            lines += line
+    p = subprocess.Popen(["cat", filename], stdout=subprocess.PIPE)
+    lines, err = p.communicate()
 
-    num_density_to_mesh(lines.split("\n"), 'shutdown', m)
+    num_density_to_mesh(lines.split('\n'), 'shutdown', m)
 
     # expected composition results:
     exp_comp_0 = {10010000:5.3390e+19,
