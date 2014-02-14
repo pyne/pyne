@@ -13,16 +13,16 @@ J_PER_MEV = 1.602177E-22
 
 mcnp_data_cards = (
 """MODE:n
-IMP:n 1 999R 0
-KCODE 1000 0.8 0 10
+IMP:n 1 26R 0
+KCODE 1000 0.8 0 1
 KSRC 1E-9 0 0
 FMESH4:n origin=-5,-5,-5
       imesh = 5
-      iints = 10
+      iints = 3
       jmesh = 5
-      jints = 10
+      jints = 3
       kmesh = 5
-      kints = 10
+      kints = 3
       $ lowest energy bin commented out, MCNP uses 0
       emesh=  $ 1.00000E-11
                  5.00000E-09 1.00000E-08 1.50000E-08 2.00000E-08
@@ -68,23 +68,25 @@ def burnup(mesh, irr_time, power, count):
     # use mcnp out to create alara input files
     meshtal = mcnp.Meshtal("meshtal_{0}".format(count))
     normalize_to_power(meshtal, power)
-    alara.mesh_to_fluxin(meshtal.tally[4], "n_result", "fluxin_{0}".format(count), reverse=False)
+    alara.mesh_to_fluxin(meshtal.tally[4], "n_result",
+                         "fluxin_{0}".format(count), reverse=False)
     alara.mesh_to_geom(mesh, "alara_geom_{0}".format(count), 
                        "alara_matlib_{0}".format(count))
     irr_blocks = alara.irradiation_blocks("alara_matlib_{0}".format(count), "isolib", 
                    "FEINDlib CINDER CINDER90 THERMAL", ["0 s"], 
-                   "fluxin_{0}".format(count), irr_time)
+                   "fluxin_{0}".format(count), irr_time, output="number_density",truncation=1E-6)
 
     with open("alara_geom_{0}".format(count), 'a') as f:
         f.write(irr_blocks)
 
     # run alara
+    #p = subprocess.Popen(["alara", "alara_geom_{0}".format(count)])
     p = subprocess.Popen(["alara", "alara_geom_{0}".format(count)], stdout=subprocess.PIPE)
+    #p = subprocess.Popen(["alara", "alara_geom_{0}".format(count)], shell=True, stderr=None)
     alara_out, err = p.communicate()
     # tag transmuted materials back to mesh
-    print alara_out
-    alara.num_density_to_mesh(alara_out.split('\n'), "shutdown", mesh)
-
+    alara.num_density_to_mesh(alara_out.split("\n"), 'shutdown', mesh)
+    mesh.mesh.save("aaa.h5m")
     return mesh
 
 def normalize_to_power(meshtal, power):
@@ -130,8 +132,10 @@ def main(arguments=None):
     # elements near the center
     fuel = from_atom_frac({'U235': 0.045, 'U238': 0.955, 'O16': 2.0}, density=10.7)
     mod = from_atom_frac({'H1': 2.0, 'O16': 1.0}, density=1.0)
-    fuel_idx = range(399, 500)
-    coords = range(-5, 6)
+    #fuel_idx = range(399, 500)
+    #coords = range(-5, 6)
+    fuel_idx = [13, 14]
+    coords = [-5, -3, 3, 5]
     mesh = Mesh(structured_coords = [coords, coords, coords], structured=True)
     gen_reactor(mesh, fuel, fuel_idx, mod)
 
