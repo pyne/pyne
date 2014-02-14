@@ -9,7 +9,7 @@ from ..api import nuc_data
 from ..utils import message
 from .api import build_dir
 from .decay import make_decay
-from .atomic_weight import make_atomic_weight
+from .atomic_mass import make_atomic_mass
 from .materials_library import make_materials_library
 from .scattering_lengths import make_scattering_lengths
 from .simple_xs import make_simple_xs
@@ -68,7 +68,7 @@ def main():
     """Entry point for nuc_data_make utility."""
     print(message(pyne_logo))
 
-    make_funcs = [('atomic_weight', make_atomic_weight),
+    make_funcs = [('atomic_mass', make_atomic_mass),
                   ('scattering_lengths', make_scattering_lengths),
                   ('decay', make_decay),
                   ('simple_xs', make_simple_xs),
@@ -77,7 +77,7 @@ def main():
                   ('eaf', make_eaf),
                   ]
     make_map = dict(make_funcs)
-    make_open = set(['atomic_weight', 'scattering_lengths', 'simple_xs', 'materials'])
+    make_open = set(['atomic_mass', 'scattering_lengths', 'simple_xs', 'materials'])
 
     # Parse the command line arguments
     parser = argparse.ArgumentParser(description='Make a nuclear data library.')

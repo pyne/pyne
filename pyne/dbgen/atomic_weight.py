@@ -1,4 +1,4 @@
-"""This module provides a way to grab and store raw data for atomic weights."""
+"""This module provides a way to grab and store raw data for atomic mass."""
 from __future__ import print_function
 import os
 import re
@@ -11,7 +11,7 @@ from .. import nucname
 from .api import BASIC_FILTERS
 from .isotopic_abundance import get_isotopic_abundances
 
-# Note that since ground state and meta-stable isotopes are of the same atomic weight, 
+# Note that since ground state and meta-stable isotopes are of the same atomic mass, 
 # the meta-stables have been discluded from the following data sets.
 
 MASS_FILE = 'mass.mas12'
@@ -59,22 +59,22 @@ def parse_atomic_mass_adjustment(build_dir=""):
 
 
 
-atomic_weight_desc = {
+atomic_mass_desc = {
     'nuc':   tb.IntCol(pos=1),
     'mass':  tb.FloatCol(pos=2),
     'error': tb.FloatCol(pos=3),
     'abund': tb.FloatCol(pos=4),
     }
 
-atomic_weight_dtype = np.dtype([
+atomic_mass_dtype = np.dtype([
     ('nuc',   int),
     ('mass',  float),
     ('error', float), 
     ('abund', float), 
     ])
 
-def make_atomic_weight_table(nuc_data, build_dir=""):
-    """Makes an atomic weight table in the nuc_data library.
+def make_atomic_mass_table(nuc_data, build_dir=""):
+    """Makes an atomic mass table in the nuc_data library.
 
     Parameters
     ----------
@@ -119,8 +119,8 @@ def make_atomic_weight_table(nuc_data, build_dir=""):
     kdb = tb.openFile(nuc_data, 'a', filters=BASIC_FILTERS)
 
     # Make a new the table
-    Atable = kdb.createTable("/", "atomic_weight", atomic_weight_desc, 
-                             "Atomic Weight Data [amu]", expectedrows=len(A))
+    Atable = kdb.createTable("/", "atomic_mass", atomic_mass_desc, 
+                             "Atomic Mass Data [amu]", expectedrows=len(A))
     Atable.append(A)
 
     # Ensure that data was written to table
@@ -132,21 +132,21 @@ def make_atomic_weight_table(nuc_data, build_dir=""):
 
 
 
-def make_atomic_weight(args):
-    """Controller function for adding atomic_weights."""
+def make_atomic_mass(args):
+    """Controller function for adding atomic_mass."""
     nuc_data, build_dir = args.nuc_data, args.build_dir
 
     if os.path.exists(nuc_data):
         with tb.openFile(nuc_data, 'r') as f:
-            if hasattr(f.root, 'atomic_weight'):
-                print("skipping atomic weights data table creation; already exists.")
+            if hasattr(f.root, 'atomic_mass'):
+                print("skipping atomic mass data table creation; already exists.")
                 return
 
     # Then grab mass data
     print("Copying AME 2012 atomic mass data.")
     copy_atomic_mass_adjustment(build_dir)
 
-    # Make atomic weight table once we have the array
-    print("Making atomic weight data table.")
-    make_atomic_weight_table(nuc_data, build_dir)
+    # Make atomic mass table once we have the array
+    print("Making atomic mass data table.")
+    make_atomic_mass_table(nuc_data, build_dir)
 
