@@ -16,22 +16,29 @@ def readtable(i, spdat):
     pid = conv_to_id(pfinal)
     fpdata = getdata(i + 1, spdat)
     dt = np.dtype([('parent', int), ('fission_product', int),
-                   ('thermal_yield', float), ('fast_yield', float),
-                   ('_14MeV_yield', float)
-    ])
+                   ('thermal_yield', float), ('thermal_yield_err', float),
+                   ('fast_yield', float), ('fast_yield_err', float),
+                   ('_14MeV_yield', float), ('_14MeV_yield_err', float)
+                  ])
     dfinal = np.zeros((len(fpdata),), dtype=dt)
     for index, item in enumerate(fpdata):
         dfinal[index]['parent'] = pid
         dfinal[index]['fission_product'] = conv_to_id(item)
     thermaldata = getdata(i + 2, spdat)
     for index, item in enumerate(thermaldata):
-        dfinal[index]['thermal_yield'] = conv_to_num(item)[0]
+        dat, err = conv_to_num(item)
+        dfinal[index]['thermal_yield'] = dat
+        dfinal[index]['thermal_yield_err'] = err
     fastdata = getdata(i + 3, spdat)
     for index, item in enumerate(fastdata):
-        dfinal[index]['fast_yield'] = conv_to_num(item)[0]
+        dat, err = conv_to_num(item)
+        dfinal[index]['fast_yield'] = dat
+        dfinal[index]['fast_yield_err'] = err
     dtdata = getdata(i + 4, spdat)
     for index, item in enumerate(dtdata):
-        dfinal[index]['_14MeV_yield'] = conv_to_num(item)[0]
+        dat, err = conv_to_num(item)
+        dfinal[index]['_14MeV_yield'] = dat
+        dfinal[index]['_14MeV_yield_err'] = err
     return dfinal
 
 
@@ -97,7 +104,7 @@ def getdata(i, spdat):
     return dlist
 
 
-def getndsfpdata(nuc_data):
+def make_fpy_table(nuc_data, build_dir=""):
     """Adds the NDS fission yields to the nuc_data library.
 
     Parameters
@@ -105,9 +112,10 @@ def getndsfpdata(nuc_data):
     nuc_data : str
         Path to nuclide data file.
     """
-    doc = urlopen("https://www-nds.iaea.org/sgnucdat/c2.htm")
-    dat = doc.read()
-    spdat = dat.split("<table>")
+    build_filename = os.path.join(build_dir, 'wimsd-fpyield.html')
+    with open(build_filename, 'r') as f:
+        raw_data = f.read()
+    spdat = raw_data.split("<table>")
     alldata = []
     for i in range(1, 31, 5):
         alldata.append(readtable(i, spdat))
@@ -120,6 +128,20 @@ def getndsfpdata(nuc_data):
     fpy_table.flush()
     db.close()
 
+def grab_fpy(build_dir="", file_out='nds-fpyield.html'):
+    """Grabs the NDS fission product yields from the IAEA website
+    """
+    build_filename = os.path.join(build_dir, file_out)
+    local_filename = os.path.join(os.path.dirname(__file__), file_out)
+
+    if os.path.exists(local_filename):
+        shutil.copy(local_filename, build_filename)
+        return
+
+    nist = urllib2.urlopen('https://www-nds.iaea.org/sgnucdat/c2.htm')
+    with open(build_filename, 'w') as f:
+        f.write(nist.read())
+
 
 def make_fpy(args):
     """Controller function for NDS fission products."""
@@ -131,5 +153,8 @@ def make_fpy(args):
             print('skipping WIMSD fission product yield table creation; '
                   'already exists.')
             return
+    print("Grabbing NDS fission product yield data.")
+    grab_fpy(build_dir)
+
     print('Making NDS fission product yield table.')
-    getndsfpdata(nuc_data)
+    make_fpy_table(nuc_data, build_dir)
