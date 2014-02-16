@@ -873,7 +873,8 @@ def _parse_decay_dataset(lines, decay_s, levellist=None):
         else:
             pfinal = _to_id(parents[0][:5])
         return pfinal, _to_id(daughter), decay_s.strip(), tfinal, tfinalerr, \
-               nrbr, nrbr_err, nbbr, nbbr_err, xrays, gammas, alphas, betas, ecbp
+               br, nrbr, nrbr_err, nbbr, nbbr_err, xrays, gammas, alphas, \
+               betas, ecbp
     return None
 
 
