@@ -2,10 +2,13 @@
 // The very central Material class
 // -- Anthony Scopatz
 
-#include "material.h"
-#include "nucname.h"
 #include <string>
 #include <vector>
+
+#ifndef PYNE_IS_AMALGAMATED
+#include "material.h"
+#include "nucname.h"
+#endif
 
 // h5wrap template
 template double h5wrap::get_array_index(hid_t, int, hid_t);

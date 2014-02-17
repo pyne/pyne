@@ -24,11 +24,13 @@
 #endif
 #include <json/json-forwards.h>
 #include <json/json.h>
-#include "h5wrap.h"
 
+#ifndef PYNE_IS_AMALGAMATED
+#include "h5wrap.h"
 #include "pyne.h"
 #include "nucname.h"
 #include "data.h"
+#endif
 
 namespace pyne
 {

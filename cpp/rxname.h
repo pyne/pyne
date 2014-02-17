@@ -14,8 +14,10 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#ifndef PYNE_IS_AMALGAMATED
 #include "pyne.h"
 #include "nucname.h"
+#endif
 
 /// Number of reactions supported by default.
 #define NUM_RX_NAMES 549

@@ -18,7 +18,9 @@
 
 #include "hdf5.h"
 
+#ifndef PYNE_IS_AMALGAMATED
 #include "extra_types.h"
+#endif
 
 
 namespace h5wrap

@@ -15,7 +15,10 @@
 #define PYNE_OU4PO4TJDBDM5PY4VKAVL7JCSM
 
 #include <math.h>
+
+#ifndef PYNE_IS_AMALGAMATED
 #include "enrichment_cascade.h"
+#endif
 
 namespace pyne {
 namespace enrichment {
