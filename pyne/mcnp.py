@@ -26,10 +26,10 @@ import itertools
 
 import numpy as np
 
-from .material import Material
-from .material import MultiMaterial
+from pyne.material import Material
+from pyne.material import MultiMaterial
 from pyne import nucname
-from binaryreader import _BinaryReader, _FortranRecord
+from pyne.binaryreader import _BinaryReader, _FortranRecord
 
 # Mesh specific imports
 try:
@@ -364,6 +364,9 @@ class SurfSrc(_BinaryReader):
                                                    # 11 otherwise
             self.njsw = tablelengths.get_int()[0]  # number of surfaces
             self.niss = tablelengths.get_int()[0]  # #histories to surf src
+            self.table1extra = list()
+            while tablelengths.num_bytes > tablelengths.pos:
+                self.table1extra += tablelengths.get_int()
 
         elif 'SF_00001' in self.kod:
             header = self.get_fortran_record()
@@ -385,6 +388,9 @@ class SurfSrc(_BinaryReader):
             self.ncrd = tablelengths.get_int()[0]      # histories to surf.src
             self.njsw = tablelengths.get_int()[0]      # number of surfaces
             self.niss = tablelengths.get_int()[0]      # histories to surf.src
+            self.table1extra = list()
+            while tablelengths.num_bytes > tablelengths.pos:
+                self.table1extra += tablelengths.get_int()
 
         if self.np1 < 0:
             # read table 2 record; more size info
@@ -393,7 +399,7 @@ class SurfSrc(_BinaryReader):
             self.niwr = tablelengths.get_int()[0]   # #cells in surf.src card
             self.mipts = tablelengths.get_int()[0]  # source particle type
             self.kjaq = tablelengths.get_int()[0]   # macrobody facet flag
-            self.table2extra = []
+            self.table2extra = list()
             while tablelengths.num_bytes > tablelengths.pos:
                 self.table2extra += tablelengths.get_int()
 
@@ -406,7 +412,7 @@ class SurfSrc(_BinaryReader):
         self.np1 = abs(self.np1)
 
         # get info for each surface
-        self.surflist = []
+        self.surflist = list()
         for j in range(self.njsw):
             # read next surface info record
             self.surfaceinfo = self.get_fortran_record()
@@ -435,7 +441,7 @@ class SurfSrc(_BinaryReader):
         summary_info = self.get_fortran_record()
         self.summary_table = summary_info.get_int(
             (2+4*self.mipts)*(self.njsw+self.niwr)+1)
-        self.summary_extra = []
+        self.summary_extra = list()
         while summary_info.num_bytes > summary_info.pos:
             self.summary_extra += summary_info.get_int()
 
@@ -470,7 +476,6 @@ class SurfSrc(_BinaryReader):
         if 'SF_00001' in self.kod:
             rec = [self.kod]
             newrecord = _FortranRecord("".join(rec), len("".join(rec)))
-            newrecord.put_int([self.knod])
             self.put_fortran_record(newrecord)
 
             rec = [self.ver, self.loddat, self.idtm, self.probid, self.aid]
@@ -499,6 +504,7 @@ class SurfSrc(_BinaryReader):
         newrecord.put_int([self.ncrd])
         newrecord.put_int([self.njsw])
         newrecord.put_int([self.niss])  # MCNP needs 'int', could be 'long' ?
+        newrecord.put_int(self.table1extra)
         self.put_fortran_record(newrecord)
         return
 
