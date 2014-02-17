@@ -99,7 +99,6 @@ def photon_source_to_hdf5(filename, chunkshape=(10000,)):
         phtn_src : 1D array of floats
             Contains the photon source density for each energy group.
 
-
     Parameters
     ----------
     filename : str
