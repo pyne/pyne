@@ -265,7 +265,8 @@ def fpyield(from_nuc, to_nuc, type = 0):
     to_nuc : int or str 
         Child nuclide.
     type : int
-        data type: 0 WIMS, 1 thermal NDS, 2 fast NDS, 3 14 MeV NDS
+        data type: 0 WIMS, 1 thermal NDS, 2 fast NDS, 3 14 MeV NDS.
+        Negative type values return error for that data type.
 
     Returns
     -------
