@@ -4,7 +4,9 @@
 /*** WARNING: This file is auto-generated.             ***/
 /***                  DO NOT MODIFY!!!                 ***/
 /*********************************************************/
+#ifndef PYNE_IS_AMALGAMATED
 #include "enrichment_symbolic.h"
+#endif
 
 pyne::enrichment::Cascade pyne::enrichment::solve_symbolic(pyne::enrichment::Cascade & orig_casc)
 {

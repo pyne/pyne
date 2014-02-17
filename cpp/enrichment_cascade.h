@@ -6,10 +6,12 @@
 #ifndef PYNE_3QGDWZMLZBHDHI424JL52SQHN4
 #define PYNE_3QGDWZMLZBHDHI424JL52SQHN4
 
+#ifndef PYNE_IS_AMALGAMATED
 #include "pyne.h"
 #include "nucname.h"
 #include "data.h"
 #include "material.h"
+#endif
 
 /************************************************/
 /*** Enrichment Component Class and Functions ***/
