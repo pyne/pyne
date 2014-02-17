@@ -179,6 +179,7 @@ def check_put_header_block(ssrname, sswname):
         ssw.ncrd = ssr.ncrd
         ssw.njsw = ssr.njsw
         ssw.niss = ssr.niss
+        ssw.table1extra = ssr.table1extra
         # table 2 record values
         ssw.niwr = ssr.niwr
         ssw.mipts = ssr.mipts
