@@ -161,12 +161,39 @@ namespace pyne
   /// Loads the WIMSD fission product yield data from the nuc_data.h5 file into memory.
   void _load_wimsdfpy();
 
+  /// a struct matching the '/neutron/wimsd_fission_product' table in nuc_data.h5
+  typedef struct ndsfpy_struct {
+    int from_nuc;
+    int to_nuc;
+    double thermal_yield;
+    double thermal_yield_err;
+    double fast_yield;
+    double fast_yield_err;
+    double _14MeV_yield;
+    double _14MeV_yield_err;
+  }
+
+  typedef struct ndsfpypair_struct {
+    double thermal_yield;
+    double thermal_yield_err;
+    double fast_yield;
+    double fast_yield_err;
+    double _14MeV_yield;
+    double _14MeV_yield_err;
+  }
+
+
+  extern std::map<std::pair<int, int>, ndsfpy_struct> ndsfpy_data;
+
+  /// Loads the NDS fission product yield data from the nuc_data.h5 file into memory.
+  void _load_ndsfpy();
+
   /// \brief Returns the fission product yield for a parent/child nuclide pair
   ///
   /// This function works by first checking the wimsdfpy_data.  If this is empty it
   /// loads the data from disk.  If the parent/child nuclide pair is still not found, 
   /// then the process is assumed to be impossible and 0.0 is returned.
-  double fpyield(std::pair<int, int> from_to);
+  double fpyield(std::pair<int, int> from_to, int type);
   /// Returns the fission product yield for a parent/child nuclide pair
   double fpyield(int from_nuc, int to_nuc);
   /// Returns the fission product yield for a parent/child nuclide pair

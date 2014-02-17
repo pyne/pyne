@@ -255,7 +255,7 @@ def b(nuc):
 # Fission product yield data
 #
 
-def fpyield(from_nuc, to_nuc):
+def fpyield(from_nuc, to_nuc, type = 0):
     """Finds the fission product yield for a (parent, child) nuclide pair [fraction].
 
     Parameters
@@ -264,6 +264,8 @@ def fpyield(from_nuc, to_nuc):
         Parent nuclide.
     to_nuc : int or str 
         Child nuclide.
+    type : int
+        data type: 0 WIMS, 1 thermal NDS, 2 fast NDS, 3 14 MeV NDS
 
     Returns
     -------
@@ -289,7 +291,7 @@ def fpyield(from_nuc, to_nuc):
     else:
         raise pyne.nucname.NucTypeError(to_nuc)
 
-    fpy = cpp_data.fpyield(cpp_pair[int, int](fn, tn))
+    fpy = cpp_data.fpyield(cpp_pair[int, int](fn, tn), type)
     return fpy
 
 

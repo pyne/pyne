@@ -15,15 +15,15 @@ def readtable(i, spdat):
     pfinal = (parent.split('<strong>')[1]).split('</strong>')[0]
     pid = conv_to_id(pfinal)
     fpdata = getdata(i + 1, spdat)
-    dt = np.dtype([('parent', int), ('fission_product', int),
+    dt = np.dtype([('from_nuc', int), ('to_nuc', int),
                    ('thermal_yield', float), ('thermal_yield_err', float),
                    ('fast_yield', float), ('fast_yield_err', float),
                    ('_14MeV_yield', float), ('_14MeV_yield_err', float)
                   ])
     dfinal = np.zeros((len(fpdata),), dtype=dt)
     for index, item in enumerate(fpdata):
-        dfinal[index]['parent'] = pid
-        dfinal[index]['fission_product'] = conv_to_id(item)
+        dfinal[index]['from_nuc'] = pid
+        dfinal[index]['to_nuc'] = conv_to_id(item)
     thermaldata = getdata(i + 2, spdat)
     for index, item in enumerate(thermaldata):
         dat, err = conv_to_num(item)
