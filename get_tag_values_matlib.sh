@@ -1,7 +1,23 @@
 #!/usr/bin/python 
 
-
-datafile='test_models/test_4.h5m'
+"""
+function to parse the script, adding options:
+defining 
+-f  : the .h5m file path
+-d  : nuc_data path
+"""
+import argparse
+parser=argparse.ArgumentParser()
+parser.add_argument('-f', action='store',dest='datafile', help='the path to the .h5m file')
+parser.add_argument('-d', action='store',dest='nuc_data', help='the path to the PyNE materials library nuc_data.h5')
+args=parser.parse_args()
+if args.datafile:
+   #print args
+   global datafile
+   datafile=args.datafile
+if args.nuc_data :
+   global nuc_data
+   nuc_data=args.nuc_data
 
 """
 gets all tags on dagmc geometry
@@ -62,29 +78,20 @@ def get_tag_values(filename):
                     found_all_tags=1 
     print tag_values
 
-""" 
-function to print near matches to material name
-"""
-def print_near_match(material,material_library):
-    for item in material_library.iterkeys():  
-#        print item
-        if ( material.lower() in item.lower()) or (material.upper() in item.upper()) :
-	    print "near matches to ", material, " are " 
-	    print item
-            print material_library.get(item)
 
 """
 function which loads pyne material library
 """
-nuc_data='/home/moataz/.local/lib/python2.7/site-packages/pyne/nuc_data.h5'
-from pyne import material
-from pyne.material import Material
+#nuc_data='/home/moataz/.local/lib/python2.7/site-packages/pyne/nuc_data.h5'
 def load_mat_lib(filename):
+    from pyne import material
+    from pyne.material import Material
     mat_lib=material.Material()
     mat_lib=material.MaterialLibrary()
     mat_lib.from_hdf5(filename,datapath="/material_library/materials",nucpath="/material_library/nucid")
     #print mat_lib
     global mat_lib
+
 """
 function to check that materials exist in library
 -------------------------------------------------
@@ -130,6 +137,19 @@ def check_matname(tag_values,mat_lib):
     print materials
     return materials
 
+""" 
+function to print near matches to material name
+"""
+def print_near_match(material,material_library):
+    for item in material_library.iterkeys():  
+#        print item
+        if ( material.lower() in item.lower()) or (material.upper() in item.upper()) :
+	    print "near matches to ", material, " are " 
+	    print item
+            print material_library.get(item)
+
+
+
             
 # get list of tag valuesaz
 get_tag_values(datafile)
@@ -137,4 +157,4 @@ get_tag_values(datafile)
 load_mat_lib(nuc_data)
 # check that material tags exist in library
 material_objects=check_matname(tag_values,mat_lib)
-exit() 
+exit()
