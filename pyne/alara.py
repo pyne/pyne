@@ -20,7 +20,7 @@ from pyne.nucname import serpent, alara, znum, anum
 from pyne.data import N_A
 
 def mesh_to_fluxin(flux_mesh, flux_tag, fluxin="fluxin.out",
-                        reverse=False):
+                   reverse=False):
     """This function creates an ALARA fluxin file from fluxes tagged on a PyNE
     Mesh object. Structured meshes are printed in xyz order (z changes fastest)
     and unstructured meshes are printed in the imesh.iterate() order.
@@ -241,6 +241,7 @@ def mesh_to_geom(mesh, geom_file, matlib_file):
     # single mesh iteration.
     volume = "volume\n" # volume input block
     mat_loading = "mat_loading\n" # material loading input block
+    mixture = "" # mixture blocks
     matlib = "" # ALARA material library string
 
     if mesh.structured:
@@ -250,52 +251,60 @@ def mesh_to_geom(mesh, geom_file, matlib_file):
 
     for i, ve in enumerate(ves):
         volume += "    {0: 1.6E}    zone_{1}\n".format(mesh.elem_volume(ve), i)
-        mat_loading += "    zone_{0}    mat_{1}\n".format(i, i)
+        mat_loading += "    zone_{0}    mix_{0}\n".format(i)
         matlib += "mat_{0}    {1: 1.6E}    {2}\n".format(i, mesh.density[i], 
                                                          len(mesh.comp[i]))
+        mixture += ("mixture mix_{0}\n"
+                    "    material mat_{0} 1 1\nend\n\n".format(i))
+
         for nuc, comp in mesh.comp[i].iteritems():
             matlib += "{0}    {1: 1.6E}    {2}\n".format(alara(nuc), comp, 
                                                          znum(nuc))
- 
         matlib += "\n"
 
     volume += "end\n\n"
     mat_loading += "end\n\n"
 
     with open(geom_file, 'w') as f:
-        f.write(geometry + volume + mat_loading)
+        f.write(geometry + volume + mat_loading + mixture)
     
     with open(matlib_file, 'w') as f:
         f.write(matlib)
 
-def num_density_to_mesh(filename, time, m):
-    """This function reads an ALARA output file containing number density
-    information and creates material objects which are then added to a supplied
-    PyNE Mesh object. The volumes within ALARA are assummed to appear in the 
-    same order as the idx on the Mesh object.
+def num_density_to_mesh(lines, time, m):
+    """This function reads ALARA output containing number density information
+    and creates material objects which are then added to a supplied PyNE Mesh
+    object. The volumes within ALARA are assummed to appear in the same order as
+    the idx on the Mesh object. 
 
     Parameters
     ----------
-    filename : str
-        ALARA output file from ALARA run with 'number_density' in the 'output'
-        block of the input file.
+    lines : list or str
+        ALARA output from ALARA run with 'number_density' in the 'output' block
+        of the input file. Lines can either be a filename or the equivalent to
+        calling readlines() on an ALARA output file. If reading in ALARA output
+        from stdout, call split('\n') before passing it in as the lines
+        parameter.
     time : str
         The decay time for which number densities are requested (e.g. '1 h',
         'shutdown', etc.)
     m : PyNE Mesh
         Mesh object for which mats will be applied to.
     """
-
-    f = open(filename, 'r')
+    if isinstance(lines, basestring):
+        with open(lines) as f:
+            lines = f.readlines()
+    elif not isinstance(lines, collections.Sequence):
+        raise TypeError("Lines argument not a file or sequence.")
     # Advance file to number density portion.
-    header = 'Number Density [atoms/cm3]\n'
+    header = 'Number Density [atoms/cm3]'
     line = ""
-    while line != header:
-        line = f.readline()
+    while line.rstrip() != header:
+        line = lines.pop(0)
 
     # Get decay time index from next line (the column the decay time answers
     # appear in.
-    line_strs = f.readline().replace('\t', '  ')
+    line_strs = lines.pop(0).replace('\t', '  ')
     time_index = [s.strip() for s in line_strs.split('  ') 
                   if s.strip()].index(time)
 
@@ -305,11 +314,11 @@ def num_density_to_mesh(filename, time, m):
     # Read through file until enough material objects are create to fill mesh.
     while count != len(m):
         # Pop lines to the start of the next material.
-        while f.readline()[0] != '=':
+        while (lines.pop(0) + " " )[0] != '=':
             pass
 
         # Create a new material object and add to mats dict.
-        line = f.readline()
+        line = lines.pop(0)
         nucvec = {}
         density = 0.0
         # Read lines until '=' delimiter at the end of a material.
@@ -320,21 +329,20 @@ def num_density_to_mesh(filename, time, m):
                 nucvec[nuc] = n
                 density += n * anum(nuc)/N_A
 
-            line = f.readline()
+            line = lines.pop(0)
         mat = from_atom_frac(nucvec, density=density, mass=0)
         mats[count] = mat
         count += 1
 
-    f.close()
     m.mats = mats
 
 
 def irradiation_blocks(material_lib, element_lib, data_library, cooling, 
-                       flux_file, irr_time, output = "constituent",
+                       flux_file, irr_time, output = "number_density",
                        truncation=1E-12, impurity = (5E-6, 1E-3), 
                        dump_file = "dump_file"):
     """irradiation_blocks(material_lib, element_lib, data_library, cooling, 
-                       flux_file, irr_time, output = "constituent",
+                       flux_file, irr_time, output = "number_density",
                        truncation=1E-12, impurity = (5E-6, 1E-3), 
                        dump_file = "dump_file")
 
