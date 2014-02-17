@@ -730,7 +730,6 @@ def _parse_decay_dataset(lines, decay_s, levellist=None):
     betas = []
     alphas = []
     ecbp = []
-    conv = {}
     ident = _ident.match(lines[0])
     daughter = ident.group(1)
     parent = ident.group(2).split()[0]
@@ -772,8 +771,7 @@ def _parse_decay_dataset(lines, decay_s, levellist=None):
                 else:
                     ecbp[-1][1] = bcdat[0]
                     econv = _parse_gamma_continuation_record(bc_rec, dat[2], dat[8])
-                    ecbp[-1][6:] = _update_xrays(econv, np.zeros(8), _to_id(daughter))
-
+                    ecbp[-1][6:] = _update_xrays(econv, ecbp[-1][6:], _to_id(daughter))
         a_rec = _alpha.match(line)
         if a_rec is not None:
             dat = _parse_alpha_record(a_rec)
@@ -819,7 +817,7 @@ def _parse_decay_dataset(lines, decay_s, levellist=None):
         gc_rec = _gc.match(line)
         if gc_rec is not None and goodgray is True:
             conv = _parse_gamma_continuation_record(gc_rec, gammarays[-1][2], gammarays[-1][6])
-            gammarays[-1][8:] = _update_xrays(conv, np.zeros(8), _to_id(daughter))
+            gammarays[-1][8:] = _update_xrays(conv, gammarays[-1][8:], _to_id(daughter))
             continue
         n_rec = _norm.match(line)
         if n_rec is not None:
