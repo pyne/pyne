@@ -64,6 +64,7 @@ def combine_multiple_ss_files(newssrname, ssrnames):
     newssr.ncrd = ssrfiles[0].ncrd
     newssr.njsw = ssrfiles[0].njsw
     newssr.niss = ssrfiles[0].niss
+    newssr.table1extra = ssrfiles[0].table1extra
     
     # table 2
     newssr.niwr = ssrfiles[0].niwr
