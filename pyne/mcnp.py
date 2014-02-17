@@ -441,7 +441,7 @@ class SurfSrc(_BinaryReader):
         summary_info = self.get_fortran_record()
         self.summary_table = summary_info.get_int(
             (2+4*self.mipts)*(self.njsw+self.niwr)+1)
-        self.summary_extra = []
+        self.summary_extra = list()
         while summary_info.num_bytes > summary_info.pos:
             self.summary_extra += summary_info.get_int()
 
@@ -476,7 +476,6 @@ class SurfSrc(_BinaryReader):
         if 'SF_00001' in self.kod:
             rec = [self.kod]
             newrecord = _FortranRecord("".join(rec), len("".join(rec)))
-            #newrecord.put_int([self.knod])
             self.put_fortran_record(newrecord)
 
             rec = [self.ver, self.loddat, self.idtm, self.probid, self.aid]
