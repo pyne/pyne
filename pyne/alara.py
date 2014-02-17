@@ -242,6 +242,7 @@ def mesh_to_geom(mesh, geom_file, matlib_file):
     # single mesh iteration.
     volume = "volume\n" # volume input block
     mat_loading = "mat_loading\n" # material loading input block
+    mixture = "" # mixture blocks
     matlib = "" # ALARA material library string
 
     if mesh.structured:
@@ -251,20 +252,22 @@ def mesh_to_geom(mesh, geom_file, matlib_file):
 
     for i, ve in enumerate(ves):
         volume += "    {0: 1.6E}    zone_{1}\n".format(mesh.elem_volume(ve), i)
-        mat_loading += "    zone_{0}    mat_{1}\n".format(i, i)
+        mat_loading += "    zone_{0}    mix_{0}\n".format(i)
         matlib += "mat_{0}    {1: 1.6E}    {2}\n".format(i, mesh.density[i], 
                                                          len(mesh.comp[i]))
+        mixture += ("mixture mix_{0}\n"
+                    "    material mat_{0} 1 1\nend\n\n".format(i))
+
         for nuc, comp in mesh.comp[i].iteritems():
             matlib += "{0}    {1: 1.6E}    {2}\n".format(alara(nuc), comp, 
                                                          znum(nuc))
- 
         matlib += "\n"
 
     volume += "end\n\n"
     mat_loading += "end\n\n"
 
     with open(geom_file, 'w') as f:
-        f.write(geometry + volume + mat_loading)
+        f.write(geometry + volume + mat_loading + mixture)
     
     with open(matlib_file, 'w') as f:
         f.write(matlib)
@@ -295,9 +298,9 @@ def num_density_to_mesh(lines, time, m):
     elif not isinstance(lines, collections.Sequence):
         raise TypeError("Lines argument not a file or sequence.")
     # Advance file to number density portion.
-    header = 'Number Density [atoms/cm3]\n'
+    header = 'Number Density [atoms/cm3]'
     line = ""
-    while line != header:
+    while line.rstrip() != header:
         line = lines.pop(0)
 
     # Get decay time index from next line (the column the decay time answers
@@ -312,7 +315,7 @@ def num_density_to_mesh(lines, time, m):
     # Read through file until enough material objects are create to fill mesh.
     while count != len(m):
         # Pop lines to the start of the next material.
-        while lines.pop(0)[0] != '=':
+        while (lines.pop(0) + " " )[0] != '=':
             pass
 
         # Create a new material object and add to mats dict.
@@ -336,11 +339,11 @@ def num_density_to_mesh(lines, time, m):
 
 
 def irradiation_blocks(material_lib, element_lib, data_library, cooling, 
-                       flux_file, irr_time, output = "constituent",
+                       flux_file, irr_time, output = "number_density",
                        truncation=1E-12, impurity = (5E-6, 1E-3), 
                        dump_file = "dump_file"):
     """irradiation_blocks(material_lib, element_lib, data_library, cooling, 
-                       flux_file, irr_time, output = "constituent",
+                       flux_file, irr_time, output = "number_density",
                        truncation=1E-12, impurity = (5E-6, 1E-3), 
                        dump_file = "dump_file")
 

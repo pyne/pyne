@@ -1,4 +1,3 @@
-
 ==================================
 Experimental Nuclear Data Project
 ==================================
@@ -54,7 +53,7 @@ Mentor:
 -------
 
 Professor Rachel Slaybaugh and Postdoctoral Scholar Kathryn Huff, University of 
-California -- Berkeley.
+California, Berkeley.
 
 More Resources:
 ---------------
