@@ -1,4 +1,4 @@
-"""This example uses the SurfSrc class in MCNP.py to combine multiple files
+"""This example uses the SurfSrc class in pyne.mcnp to combine multiple files
 together.
 
 Script includes method combine_multiple_ss_files to combine MCNP surface source
@@ -6,9 +6,10 @@ entries with a combined header. The SurfSrc.__cmp__() method is reimplemented
 to compare only the parts of the ssr files that matter for this operation.
 """
 
-from pyne.mcnp import SurfSrc
 from math import copysign
 from itertools import izip
+
+from pyne.mcnp import SurfSrc
 
 
 def combine_multiple_ss_files(newssrname, ssrnames):
