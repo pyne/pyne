@@ -3,8 +3,8 @@
 ///
 /// \brief Converts between naming conventions for nuclides.
 
-#ifndef _PYNE_NUCNAME_
-#define _PYNE_NUCNAME_
+#ifndef PYNE_D35WIXV5DZAA5LLOWBY2BL2DPA
+#define PYNE_D35WIXV5DZAA5LLOWBY2BL2DPA
 #include <iostream>
 #include <string>
 #include <map>
@@ -457,4 +457,4 @@ namespace nucname
 };
 };
 
-#endif
+#endif  // PYNE_D35WIXV5DZAA5LLOWBY2BL2DPA

@@ -3,8 +3,8 @@
 ///
 /// \brief Provides some HDF5 helper functionality in its own namespace
 
-#if !defined(_H5_WRAP_)
-#define _H5_WRAP_
+#ifndef PYNE_MRNAFG5GNZDNPCRPX3UCBZ5MFE
+#define PYNE_MRNAFG5GNZDNPCRPX3UCBZ5MFE
 
 #include <iostream>
 #include <fstream>
