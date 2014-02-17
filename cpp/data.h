@@ -190,9 +190,12 @@ namespace pyne
 
   /// \brief Returns the fission product yield for a parent/child nuclide pair
   ///
-  /// This function works by first checking the wimsdfpy_data.  If this is empty it
-  /// loads the data from disk.  If the parent/child nuclide pair is still not found, 
-  /// then the process is assumed to be impossible and 0.0 is returned.
+  /// This function works by first checking the fission yield data.  If this is
+  /// empty it loads the data from disk. If the parent/child nuclide pair
+  /// is still not found, then the process is assumed to be impossible
+  /// and 0.0 is returned. The data source is determined by the type value
+  /// as follows: 0 WIMS, 1 thermal NDS, 2 fast NDS, 3 14 MeV NDS.
+  /// negative type values return error for that data type.
   double fpyield(std::pair<int, int> from_to, int type);
   /// Returns the fission product yield for a parent/child nuclide pair
   double fpyield(int from_nuc, int to_nuc);

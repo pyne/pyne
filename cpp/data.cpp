@@ -616,10 +616,16 @@ double pyne::fpyield(std::pair<int, int> from_to, int type) {
         return (*fpy_iter).second;
     else if (type == 1)
         return (*fpy_iter).second.thermal_yield;
+    else if (type == -1)
+        return (*fpy_iter).second.thermal_yield_err;
     else if (type == 2)
         return (*fpy_iter).second.fast_yield;
+    else if (type == -2)
+        return (*fpy_iter).second.fast_yield_err;
     else if (type == 3)
         return (*fpy_iter).second._14MeV_yield;
+    else if (type == -3)
+        return (*fpy_iter).second._14MeV_yield_err;
   }
   // Next, fill up the map with values from the
   // nuc_data.h5, if the map is empty.
