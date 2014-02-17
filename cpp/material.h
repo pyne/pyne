@@ -8,8 +8,8 @@
 /// implementation also contains other functions for mixing materials and generating 
 /// related materials.
 
-#if !defined(_PYNE_MATERIAL_)
-#define _PYNE_MATERIAL_
+#ifndef PYNE_MR34UE5INRGMZK2QYRDWICFHVM
+#define PYNE_MR34UE5INRGMZK2QYRDWICFHVM
 
 #include <iostream>
 #include <fstream>
@@ -291,4 +291,4 @@ namespace pyne
 // End pyne namespace
 };
 
-#endif
+#endif  // PYNE_MR34UE5INRGMZK2QYRDWICFHVM

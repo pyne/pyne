@@ -9,8 +9,8 @@
 
 // Header for general library file.
 
-#if !defined(_W4LILVESF5GIVCEBPHVDKEICKM)
-#define _W4LILVESF5GIVCEBPHVDKEICKM
+#ifndef PYNE_KMMHYNANYFF5BFMEYIP7TUNLHA
+#define PYNE_KMMHYNANYFF5BFMEYIP7TUNLHA
 
 //standard libraries
 #include <string>
@@ -170,4 +170,4 @@ namespace pyne {
 // End PyNE namespace
 };
 
-#endif
+#endif  // PYNE_KMMHYNANYFF5BFMEYIP7TUNLHA
