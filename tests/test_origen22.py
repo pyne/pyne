@@ -6,6 +6,8 @@ from nose.tools import assert_equal, assert_true
 from numpy.testing import assert_array_equal
 
 from pyne import origen22
+from pyne.xs.cache import XSCache
+from pyne.xs.data_source import NullDataSource
 from pyne.material import Material
 
 
@@ -465,3 +467,33 @@ def test_write_tape9():
 
     backin_tape9 = origen22.parse_tape9(backout_tape9)
     assert_equal(full_tape9, backin_tape9)
+
+
+def test_xslibs():
+    exp = {42: {'_type': 'xsfpy', '_subtype': 'activation_products', 
+                'title': 'PyNE Cross Section Data for Activation Products'},
+           43: {'_type': 'xsfpy', '_subtype': 'actinides', 
+                'title': 'PyNE Cross Section Data for Actinides & Daughters'},
+           44: {'_type': 'xsfpy', '_subtype': 'fission_products', 
+                'title': 'PyNE Cross Section Data for Fission Products'},
+           }
+    xsc = XSCache(data_source_classes=[NullDataSource])
+    nucs = [922350000, 10010000, 461080000]
+    obs = origen22.xslibs(nucs=nucs, xscache=xsc, nlb=(42, 43, 44))
+    obs_meta = {}
+    for n in exp:
+        obs_meta[n] = {}
+        for field in ['_type', '_subtype', 'title']:
+            obs_meta[n][field] = obs[n][field]
+    assert_equal(exp, obs_meta)
+    for n in exp:
+        for field in obs[n]:
+            if not field.startswith('sigma_'):
+                continue
+            assert_true(all([v == 0.0 for v in obs[n][field].values()]))
+    assert_true(set(obs[42].keys()) >= set(origen22.ACTIVATION_PRODUCT_FIELDS + 
+                                           origen22.XSFPY_FIELDS))
+    assert_true(set(obs[43].keys()) >= set(origen22.ACTINIDE_FIELDS + 
+                                           origen22.XSFPY_FIELDS))
+    assert_true(set(obs[44].keys()) >= set(origen22.FISSION_PRODUCT_FIELDS +
+                                           origen22.XSFPY_FIELDS))
