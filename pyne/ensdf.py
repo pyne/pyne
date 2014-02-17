@@ -339,13 +339,11 @@ def _parse_gamma_record(g):
             * electron conversion intensity
             * uncertainty in electron conversion intensity
     """
-    dat = np.zeros(8)
     en, en_err = _get_val_err(g.group(2), g.group(3))
     inten, inten_err = _get_val_err(g.group(4), g.group(5))
     conv, conv_err = _get_val_err(g.group(6), g.group(7))
     tti, tti_err = _get_val_err(g.group(8), g.group(9))
-    dat[:] = en, en_err, inten, inten_err, conv, conv_err, tti, tti_err
-    return dat
+    return en, en_err, inten, inten_err, conv, conv_err, tti, tti_err
 
 
 def _parse_gamma_continuation_record(g, inten, tti):
@@ -747,8 +745,6 @@ def _parse_decay_dataset(lines, decay_s, levellist=None):
     nb = None
     br = None
     level = None
-    xrays = np.zeros(8)
-    gamma = 0
     goodgray = False
     parent2 = None
     for line in lines:
@@ -775,11 +771,9 @@ def _parse_decay_dataset(lines, decay_s, levellist=None):
                     betas[-1][1] = bcdat[0]
                 else:
                     ecbp[-1][1] = bcdat[0]
-                    conv_temp = conv
-                    conv = _parse_gamma_continuation_record(bc_rec, dat[2], dat[8])
-                    if gamma == 0:
-                        gamma = 1
-                    conv.update(conv_temp)
+                    econv = _parse_gamma_continuation_record(bc_rec, dat[2], dat[8])
+                    ecbp[-1][6:] = _update_xrays(econv, np.zeros(8), _to_id(daughter))
+
         a_rec = _alpha.match(line)
         if a_rec is not None:
             dat = _parse_alpha_record(a_rec)
@@ -800,18 +794,12 @@ def _parse_decay_dataset(lines, decay_s, levellist=None):
             if levellist is not None:
                 ecparent = _to_id_from_level(parent2, e, levellist)
                 ecdaughter = _to_id_from_level(daughter, level, levellist)
-                ecbp.append([dat[0], 0.0, dat[2], dat[4], ecparent, ecdaughter])
+                ecbp.append([dat[0], 0.0, dat[2], dat[4], ecparent, ecdaughter,
+                             0, 0, 0, 0, 0, 0, 0, 0])
             continue
         g_rec = _g.match(line)
         if g_rec is not None:
             dat = _parse_gamma_record(g_rec)
-            if gamma == 1:
-                gamma = 0
-                #store old atomic data
-                xrays = _update_xrays(conv, xrays, _to_id(daughter))
-                #clear conversion data
-                conv = {}
-
             if not np.isnan(dat[0]):
                 dat = dat.tolist()
                 if levellist is not None:
@@ -823,18 +811,15 @@ def _parse_decay_dataset(lines, decay_s, levellist=None):
                         gdaughter = _to_id_from_level(daughter, dlevel, levellist)
                     dat.append(gparent)
                     dat.append(gdaughter)
-                gammarays.append(dat)
+                gammarays.append([dat[:], 0, 0, 0, 0, 0, 0, 0, 0])
                 goodgray = True
             else:
                 goodgray = False
             continue
         gc_rec = _gc.match(line)
         if gc_rec is not None and goodgray is True:
-            conv_temp = conv
             conv = _parse_gamma_continuation_record(gc_rec, gammarays[-1][2], gammarays[-1][6])
-            if gamma == 0:
-                gamma = 1
-            conv.update(conv_temp)
+            gammarays[-1][8:] = _update_xrays(conv, np.zeros(8), _to_id(daughter))
             continue
         n_rec = _norm.match(line)
         if n_rec is not None:
@@ -860,8 +845,6 @@ def _parse_decay_dataset(lines, decay_s, levellist=None):
     if len(gammarays) > 0 or len(alphas) > 0 or len(betas) > 0 or len(ecbp) > 0:
         if len(gammarays) > 0:
             gammas = np.array(gammarays)
-            if gamma == 1:
-                xrays = _update_xrays(conv, xrays, _to_id(daughter))
         else:
             gammas = None
         pfinal = []
@@ -873,7 +856,7 @@ def _parse_decay_dataset(lines, decay_s, levellist=None):
         else:
             pfinal = _to_id(parents[0][:5])
         return pfinal, _to_id(daughter), decay_s.strip(), tfinal, tfinalerr, \
-               br, nrbr, nrbr_err, nbbr, nbbr_err, xrays, gammas, alphas, \
+               br, nrbr, nrbr_err, nbbr, nbbr_err, gammas, alphas, \
                betas, ecbp
     return None
 
