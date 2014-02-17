@@ -27,6 +27,7 @@ The following modules and sub-packages are discussed:
     enrichment
     utils
     stlcontainers
+    cli/index
     dbgen/index
     variancereduction
     mcnp
