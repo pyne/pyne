@@ -59,6 +59,44 @@ class CellTallyTest : public ::testing::Test
 
 };
 //---------------------------------------------------------------------------//
+// Test parsing of an invalid cell id
+TEST(CellTallyInputTest, InvalidCellID)
+{
+    TallyInput input;
+
+    // add general input data
+    input.tally_id = 1;
+    input.energy_bin_bounds.push_back(0.0);
+    input.energy_bin_bounds.push_back(10.0);
+
+    std::multimap<std::string, std::string> options;
+    options.insert(std::make_pair("cell", "hello10"));
+    input.options = options;
+
+    CellTally* cell_tally;
+    EXPECT_NO_THROW(cell_tally = new CellTally(input, TallyEvent::NONE));
+    EXPECT_EQ(1, cell_tally->get_cell_id());
+}
+//---------------------------------------------------------------------------//
+// Test parsing of an invalid volume
+TEST(CellTallyInputTest, InvalidCellVolume)
+{
+    TallyInput input;
+
+    // add general input data
+    input.tally_id = 1;
+    input.energy_bin_bounds.push_back(0.0);
+    input.energy_bin_bounds.push_back(10.0);
+
+    std::multimap<std::string, std::string> options;
+    options.insert(std::make_pair("volume", "Omaha! Omaha!"));
+    input.options = options;
+
+    CellTally* cell_tally;
+    EXPECT_NO_THROW(cell_tally = new CellTally(input, TallyEvent::NONE));
+}
+//---------------------------------------------------------------------------//
+//---------------------------------------------------------------------------//
 // FIXTURE-BASED TESTS: CellTallyTest
 //---------------------------------------------------------------------------//
 // Test that cell_id mismatch results in no score being computed
@@ -279,4 +317,5 @@ TEST_F(CellTallyTest,TrackEventScore)
     EXPECT_DOUBLE_EQ(2.8,  result.first);
     EXPECT_DOUBLE_EQ(7.84, result.second);
 } 
+
 // end of MCNP5/dagmc/test/test_CellTally.cpp

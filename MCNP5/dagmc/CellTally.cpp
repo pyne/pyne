@@ -126,7 +126,7 @@ void CellTally::parse_tally_options()
         // process tally option according to key
         if (key == "cell")
         {
-            char* end;
+            char* end; // pointer to first non-numeric char
             cell_id = strtol(value.c_str(), &end, 10);
 
             if (value.c_str() == end)
@@ -140,13 +140,15 @@ void CellTally::parse_tally_options()
         }
         else if (key == "volume")
         {
-            char* end;
+            char* end; // pointer to first non-numeric char
             cell_volume = strtod(value.c_str(), &end);
 
             if (value.c_str() == end)
             {
                std::cerr << "Warning: '" << value << "' is an invalid value"
                          << " for the cell volume" << std::endl;
+               cell_volume = 1.0;
+               std::cerr << "cell_volume has been set to " << cell_volume << std::endl;
             }
         }
         else // invalid tally option
