@@ -11,7 +11,6 @@ objects. The functionality of the module can be obtained by importing as such::
 
     from pyne import alara
 
-You may also want to consult the userguide page :ref:`usersguide_alara`.
 
 ALARA API
 ---------
