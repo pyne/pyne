@@ -18,7 +18,9 @@ subsequent fee for these data.
 
 """
 from __future__ import print_function, division
-from urllib import urlopen
+import os
+import shutil
+import urllib2
 
 import numpy as np
 import numpy.lib.recfunctions
@@ -133,14 +135,14 @@ def make_fpy_table(nuc_data, build_dir=""):
     nuc_data : str
         Path to nuclide data file.
     """
-    build_filename = os.path.join(build_dir, 'wimsd-fpyield.html')
+    build_filename = os.path.join(build_dir, 'nds-fpyield.html')
     with open(build_filename, 'r') as f:
         raw_data = f.read()
     spdat = raw_data.split("<table>")
     alldata = []
     for i in range(1, 31, 5):
         alldata.append(readtable(i, spdat))
-    alldata = numpy.lib.recfunctions.stack_arrays(alldata)
+    alldata = numpy.lib.recfunctions.stack_arrays(alldata, asrecarray=True)
     db = tb.openFile(nuc_data, 'a', filters=BASIC_FILTERS)
     if not hasattr(db.root, 'neutron'):
         neutron_group = db.createGroup('/', 'neutron', 'Neutron Data')
