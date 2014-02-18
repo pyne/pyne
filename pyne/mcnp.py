@@ -800,6 +800,22 @@ class Xsdir(object):
         for table in self.tables:
             yield table
 
+    def nucs(self):
+        """Provides a list of the valid nuclide ids for nuclides contained
+        in the xsdir.
+
+        Returns
+        -------
+        nuc : list
+            The list of nuclide ids.
+        """
+        nucs = []
+        for nuc in self.awr.keys():
+            if nucname.isnuclide(nuc):
+                nucs.append(nucname.id(nuc))
+    
+        return nucs
+
 
 class XsdirTable(object):
 
