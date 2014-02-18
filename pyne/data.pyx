@@ -291,8 +291,7 @@ def fpyield(from_nuc, to_nuc, type = 0):
         tn = pyne.cpp_nucname.id(std_string(<char *> to_nuc))
     else:
         raise pyne.nucname.NucTypeError(to_nuc)
-
-    fpy = cpp_data.fpyield(cpp_pair[int, int](fn, tn), type)
+    fpy = cpp_data.fpyield(cpp_pair[int, int](fn, tn), <int> type)
     return fpy
 
 
