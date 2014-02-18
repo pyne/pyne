@@ -22,3 +22,5 @@ Steps to perform an out-of-source build of gtest libraries.
 
 
 Now the fludag tests can be compiled
+
+NOTE:  This documentation needs updating
