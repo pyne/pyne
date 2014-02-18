@@ -171,7 +171,7 @@ namespace pyne
     double yield_fast_err;
     double yield_14MeV;
     double yield_14MeV_err;
-  }
+  } ndsfpy_struct;
 
   typedef struct ndsfpypair_struct {
     double yield_thermal;
@@ -180,10 +180,10 @@ namespace pyne
     double yield_fast_err;
     double yield_14MeV;
     double yield_14MeV_err;
-  }
+  } ndsfpypair_struct;
 
 
-  extern std::map<std::pair<int, int>, ndsfpy_struct> ndsfpy_data;
+  extern std::map<std::pair<int, int>, ndsfpypair_struct> ndsfpy_data;
 
   /// Loads the NDS fission product yield data from the nuc_data.h5 file into memory.
   void _load_ndsfpy();
@@ -198,11 +198,11 @@ namespace pyne
   /// negative type values return error for that data type.
   double fpyield(std::pair<int, int> from_to, int type);
   /// Returns the fission product yield for a parent/child nuclide pair
-  double fpyield(int from_nuc, int to_nuc);
+  double fpyield(int from_nuc, int to_nuc, int type);
   /// Returns the fission product yield for a parent/child nuclide pair
-  double fpyield(char * from_nuc, char * to_nuc);
+  double fpyield(char * from_nuc, char * to_nuc, int type);
   /// Returns the fission product yield for a parent/child nuclide pair
-  double fpyield(std::string from_nuc, std::string to_nuc);
+  double fpyield(std::string from_nuc, std::string to_nuc, int type);
 
   /// \}
 
