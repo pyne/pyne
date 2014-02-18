@@ -1,9 +1,11 @@
 from __future__ import print_function, division
 from urllib import urlopen
+
 import numpy as np
 import numpy.lib.recfunctions
-from pyne import nucname
 import tables as tb
+
+from pyne import nucname
 from pyne.dbgen.api import BASIC_FILTERS
 
 
