@@ -1,6 +1,8 @@
 from __future__ import print_function
-
+import os
 import re
+import sys
+from collections import Mapping
 from copy import deepcopy
 from itertools import chain, imap, izip
 
@@ -11,6 +13,8 @@ from pyne import rxname
 from pyne import nucname
 from pyne.xs import cache
 from pyne.material import Material, from_atom_frac
+
+BASE_TAPE9 = os.path.join(os.path.dirname(__file__), 'base_tape9.inp')
 
 ACTIVATION_PRODUCT_NUCS = frozenset([10010000,  
     10020000,  10030000,  10040000,  20030000,  20040000,  20060000,  30060000,
@@ -1179,34 +1183,38 @@ def _decay_deck_2_str(nlb, deck, precision):
     # Get unique isotopes 
     nucset = set([nuc for nuc in chain(*[v.keys() for k, v in deck.items() \
                   if hasattr(v, 'keys')]) ])
-    nucset = sorted(nucset)
+    nucset = sorted(map(int, nucset))
 
     s = ""
     for nuc in nucset:
-        t, unit = sec_to_time_unit(_double_get(deck, 'half_life', nuc))
+        nuc_id = nucname.zzaaam_to_id(nuc)
+        t, unit = sec_to_time_unit(_double_get(deck, 'half_life', nuc, 
+                                               data.half_life(nuc_id)))
         s += _decay_card_fmt.format(nlb=nlb,
-                                    nuc=nuc,
-                                    unit=unit,
-                                    time=t,
-                                    fbx=_double_get(deck, 'frac_beta_minus_x', nuc),
-                                    fpec=_double_get(deck, 'frac_beta_plus_or_electron_capture', nuc),
-                                    fpecx=_double_get(deck, 'frac_beta_plus_or_electron_capture_x', nuc),
-                                    fa=_double_get(deck, 'frac_alpha', nuc),
-                                    fit=_double_get(deck, 'frac_isomeric_transition', nuc),
-                                    fsf=_double_get(deck, 'frac_spont_fiss', nuc),
-                                    fn=_double_get(deck, 'frac_beta_n', nuc),
-                                    qrec=_double_get(deck, 'recoverable_energy', nuc),
-                                    abund=_double_get(deck, 'frac_natural_abund', nuc),
-                                    arcg=_double_get(deck, 'inhilation_concentration', nuc),
-                                    wrcg=_double_get(deck, 'ingestion_concentration', nuc),
-                                    p=precision,
-                                    )
+                nuc=nuc,
+                unit=unit,
+                time=t,
+                fbx=_double_get(deck, 'frac_beta_minus_x', nuc),
+                fpec=_double_get(deck, 'frac_beta_plus_or_electron_capture', nuc),
+                fpecx=_double_get(deck, 'frac_beta_plus_or_electron_capture_x', nuc),
+                fa=_double_get(deck, 'frac_alpha', nuc),
+                fit=_double_get(deck, 'frac_isomeric_transition', nuc),
+                fsf=_double_get(deck, 'frac_spont_fiss', nuc),
+                fn=_double_get(deck, 'frac_beta_n', nuc),
+                qrec=_double_get(deck, 'recoverable_energy', nuc),
+                abund=_double_get(deck, 'frac_natural_abund', nuc, 
+                                  data.natural_abund(nuc_id)),
+                arcg=_double_get(deck, 'inhilation_concentration', nuc, 1.0),
+                wrcg=_double_get(deck, 'ingestion_concentration', nuc, 1.0),
+                p=precision,
+                )
     return s
 
 
 def _xs_deck_2_str(nlb, deck, precision):
     # Get unique isotopes 
     nucset = set([nuc for nuc in chain(*[v.keys() for k, v in deck.items() if hasattr(v, 'keys')]) ])
+    nucset = sorted(nucset)
 
     is_actinides = deck['_subtype'] == 'actinides'
 
@@ -1234,29 +1242,22 @@ def _xs_deck_2_str(nlb, deck, precision):
 def _xsfpy_deck_2_str(nlb, deck, precision):
     # Get unique isotopes 
     nucset = set([nuc for nuc in chain(*[v.keys() for k, v in deck.items() if hasattr(v, 'keys')]) ])
-
-    is_actinides = deck['_subtype'] == 'actinides'
-
+    nucset = sorted(nucset)
     s = ""
     for nuc in nucset:
-        fpy_flag = -1.0
-        fpy_present = _double_get(deck, 'fiss_yields_present', nuc, False)
-        if fpy_present:
-            fpy_flag = 1.0
-
+        fpy_flag = 1.0
         s += _xs_card_fmt.format(nlb=nlb,
                                  nuc=nuc,
                                  sg=_double_get(deck, 'sigma_gamma', nuc),
                                  s2n=_double_get(deck, 'sigma_2n', nuc),
-                                 s3n_or_a=_double_get(deck, 'sigma_alpha', nuc) if is_actinides else _double_get(deck, 'sigma_3n', nuc),
-                                 sf_or_p=_double_get(deck, 'sigma_f', nuc) if is_actinides else _double_get(deck, 'sigma_p', nuc),
+                                 s3n_or_a=_double_get(deck, 'sigma_3n', nuc),
+                                 sf_or_p=_double_get(deck, 'sigma_p', nuc),
                                  sg_x=_double_get(deck, 'sigma_gamma_x', nuc),
                                  s2n_x=_double_get(deck, 'sigma_2n_x', nuc),
                                  fpy_flag=fpy_flag,
                                  p=precision,
                                  )
-        if fpy_present:
-            s += _fpy_card_fmt.format(nlb=nlb,
+        s += _fpy_card_fmt.format(nlb=nlb,
                                  y1=_double_get(deck, 'TH232_fiss_yield', nuc),
                                  y2=_double_get(deck, 'U233_fiss_yield', nuc),
                                  y3=_double_get(deck, 'U235_fiss_yield', nuc),
@@ -1268,6 +1269,52 @@ def _xsfpy_deck_2_str(nlb, deck, precision):
                                  p=precision,
                                  )
     return s
+
+def _del_deck_nuc(deck, nuc):
+    """removes a nucide from a deck completely."""
+    for field, data in deck.items():
+        if not isinstance(data, Mapping):
+            continue
+        if nuc not in data:
+            continue
+        del data[nuc]
+
+def _filter_fpy(tape9):
+    decay_nlb, xsfpy_nlb = nlbs(tape9)
+    declib = tape9[decay_nlb[-1]]
+    fpylib = tape9[xsfpy_nlb[-1]]
+    nucset = set([nuc for nuc in chain(*[v.keys() for k, v in fpylib.items() \
+                  if isinstance(v, Mapping)])])
+    decnucs = set([nuc for nuc in chain(*[v.keys() for k, v in declib.items() \
+                   if isinstance(v, Mapping)])])
+    for nuc in nucset:
+        fpy_present = _double_get(fpylib, 'fiss_yields_present', nuc, False)
+        y1 = _double_get(fpylib, 'TH232_fiss_yield', nuc)
+        y2 = _double_get(fpylib, 'U233_fiss_yield', nuc)
+        y3 = _double_get(fpylib, 'U235_fiss_yield', nuc)
+        y4 = _double_get(fpylib, 'U238_fiss_yield', nuc)
+        y5 = _double_get(fpylib, 'PU239_fiss_yield', nuc)
+        y6 = _double_get(fpylib, 'PU241_fiss_yield', nuc)
+        y7 = _double_get(fpylib, 'CM245_fiss_yield', nuc)
+        y8 = _double_get(fpylib, 'CF249_fiss_yield', nuc)
+        fpy_present = fpy_present and any([y > 0.0 for y in [y1, y2, y3, y4, 
+                                                             y5, y6, y7, y8]])
+        if fpy_present:
+            continue
+        _del_deck_nuc(fpylib, nuc)
+        _del_deck_nuc(declib, nuc)
+
+def _ensure_nucs_in_decay(tape9):
+    decay_nlb, xsfpy_nlb = nlbs(tape9)
+    for dn, xn in zip(decay_nlb, xsfpy_nlb):
+        dlib = tape9[dn]
+        dhl = tape9[dn]['half_life']
+        xlib = tape9[xn]
+        nucset = set([nuc for nuc in chain(*[v.keys() for k, v in xlib.items() \
+                      if isinstance(v, Mapping)]) ])
+        for nuc in nucset:
+            if nuc not in dhl:
+                dhl[nuc] = data.half_life(nucname.zzaaam(int(nuc)))
 
 
 _DECK_2_STR_MAP = {
@@ -1292,7 +1339,8 @@ def write_tape9(tape9, outfile="TAPE9.INP", precision=3):
         the decimal point.
     """
     t9 = ""
-
+    _filter_fpy(tape9)
+    _ensure_nucs_in_decay(tape9)
     for nlb, deck in tape9.items():
         t9 += _deck_title_fmt.format(nlb=nlb, title=deck['title'])
         t9 += _DECK_2_STR_MAP[deck['_type'], deck.get('_subtype', None)](nlb, deck, precision)
@@ -1343,7 +1391,7 @@ def _compute_xslib(nuc, key, lib, xscache):
             continue
         data[key] = _xslib_computers[field](nuc, xscache)
 
-def xslibs(nucs=NUCS, xscache=None, nlb=(4, 5, 6), verbose=False):
+def xslibs(nucs=NUCS, xscache=None, nlb=(201, 202, 203), verbose=False):
     """Generates a TAPE9 dictionary of cross section & fission product yield data
     for a set of nuclides.
 
@@ -1366,6 +1414,7 @@ def xslibs(nucs=NUCS, xscache=None, nlb=(4, 5, 6), verbose=False):
     """
     if xscache is None:
         xscache = cache.xs_cache
+    old_flux = xscache.get('phi_g', None)
     old_group_struct = xscache.get('E_g', None)
     xscache['E_g'] = [10.0, 1e-7]
     nucs = sorted(nucs)
@@ -1400,4 +1449,35 @@ def xslibs(nucs=NUCS, xscache=None, nlb=(4, 5, 6), verbose=False):
         if nuc in FISSION_PRODUCT_NUCS:
             _compute_xslib(nuc, key, t9[nlb[2]], xscache)
     xscache['E_g'] = old_group_struct
+    xscache['phi_g'] = old_flux
     return t9
+
+
+def nlbs(t9):
+    """Finds the library number tuples in a tape9 dictionary.
+
+    Parameters
+    ----------
+    t9 : dict
+        TAPE9 dictionary.
+
+    Returns
+    -------
+    decay_nlb : 3-tuple
+        Tuple of decay library numbers.
+    xsfpy_nlb : 3-tuple
+        Tuple of cross section & fission product library numbers.
+    """
+    decay_nlb = []
+    xsfpy_nlb = [None, None, None]
+    for n, lib in t9.items():
+        if lib['_type'] == 'decay':
+            decay_nlb.append(n)
+        elif lib['_subtype'] == 'activation_products':
+            xsfpy_nlb[0] = n
+        elif lib['_subtype'] == 'actinides':
+            xsfpy_nlb[1] = n
+        elif lib['_subtype'] == 'fission_products':
+            xsfpy_nlb[2] = n
+    decay_nlb.sort()
+    return tuple(decay_nlb), tuple(xsfpy_nlb)

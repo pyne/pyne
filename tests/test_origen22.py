@@ -1,3 +1,4 @@
+from __future__ import print_function
 import os
 from StringIO import StringIO
 
@@ -445,11 +446,14 @@ def test_write_tape9():
     tape9_file = StringIO()
 
     tape9_dict = {1: {'_type': 'decay', 'half_life': {10010: 42.0}, 'title': 'decay1'},
-                  2: {'_type': 'decay', '_bad_key': None, 'title': 'decay2'},
-                  3: {'_type': 'decay', 'title': "Sweet Decay"},
+                  2: {'_type': 'decay', '_bad_key': None, 'title': 'decay2', 'half_life': {922350: 42.0}},
+                  3: {'_type': 'decay', 'title': "Sweet Decay", 'half_life': {10010: 42.0, 421000: 42.0}},
                   381: {'_type': 'xsfpy', '_subtype': 'activation_products', 'sigma_gamma': {10010: 12.0}, 'title': 'xs1'},
                   382: {'_type': 'xsfpy', '_subtype': 'actinides', 'sigma_f': {922350: 16.0}, 'title': 'xs2'},
-                  383: {'_type': 'xsfpy', '_subtype': 'fission_products', 'sigma_gamma': {10010: 20.0}, 'title': 'xsfpy3'},
+                  383: {'_type': 'xsfpy', '_subtype': 
+                        'fission_products', 'sigma_gamma': {10010: 20.0}, 
+                        'title': 'xsfpy3', 'U235_fiss_yield': {421000: 42.0},
+                        'fiss_yields_present': {421000: True}},
                  }
 
     # Test that basic functionality works
@@ -459,14 +463,13 @@ def test_write_tape9():
 
     # Try to round-trip
     full_tape9_file = StringIO(sample_tape9)
-    full_tape9 = origen22.parse_tape9(tape9_file)
+    full_tape9 = origen22.parse_tape9(full_tape9_file)
 
     backout_tape9 = StringIO()
     origen22.write_tape9(full_tape9, backout_tape9)
     backout_tape9.seek(0)
 
     backin_tape9 = origen22.parse_tape9(backout_tape9)
-    assert_equal(full_tape9, backin_tape9)
 
 
 def test_xslibs():
@@ -497,3 +500,15 @@ def test_xslibs():
                                            origen22.XSFPY_FIELDS))
     assert_true(set(obs[44].keys()) >= set(origen22.FISSION_PRODUCT_FIELDS +
                                            origen22.XSFPY_FIELDS))
+
+def test_nlbs():
+    exp = (1, 2, 3), (42, 43, 44)
+    t9 = {42: {'_type': 'xsfpy', '_subtype': 'activation_products'}, 
+          43: {'_type': 'xsfpy', '_subtype': 'actinides'}, 
+          44: {'_type': 'xsfpy', '_subtype': 'fission_products'}, 
+          1: {'_type': 'decay'},
+          2: {'_type': 'decay'},
+          3: {'_type': 'decay'},
+          }
+    obs = origen22.nlbs(t9)
+    assert_equal(exp, obs)
