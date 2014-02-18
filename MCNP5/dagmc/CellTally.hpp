@@ -77,6 +77,12 @@ class CellTally : public Tally
      */
     virtual void write_data(double num_histories);
 
+    /**
+     * \brief get_cell_id() 
+     * 
+     */
+    int get_cell_id();
+
   private:
     // ID for the geometric cell to be tallied
     int cell_id;

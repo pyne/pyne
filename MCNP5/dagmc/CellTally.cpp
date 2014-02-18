@@ -35,10 +35,10 @@ void CellTally::compute_score(const TallyEvent& event)
     {
         return;
     }
-
+    
     // Compute score based on event type and add it to this CellTally
     double event_score = event.get_score_multiplier(input_data.multiplier_id);
-
+    
     if (event.type == TallyEvent::TRACK && event.type == expected_type)
     {
         event_score *= event.track_length;         
@@ -104,6 +104,11 @@ void CellTally::write_data(double num_histories)
         std::cout << "    error = " << rel_error << std::endl;
         std::cout << std::endl;
     }
+}
+//---------------------------------------------------------------------------//
+int CellTally::get_cell_id()
+{
+    return cell_id;
 }
 //---------------------------------------------------------------------------//
 // PRIVATE METHODS
