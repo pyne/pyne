@@ -37,9 +37,9 @@ def readtable(i, spdat):
     pid = conv_to_id(pfinal)
     fpdata = getdata(i + 1, spdat)
     dt = np.dtype([('from_nuc', int), ('to_nuc', int),
-                   ('thermal_yield', float), ('thermal_yield_err', float),
-                   ('fast_yield', float), ('fast_yield_err', float),
-                   ('_14MeV_yield', float), ('_14MeV_yield_err', float)
+                   ('yield_thermal', float), ('yield_thermal_err', float),
+                   ('yield_fast', float), ('yield_fast_err', float),
+                   ('yield_14MeV', float), ('yield_14MeV_err', float)
                   ])
     dfinal = np.zeros((len(fpdata),), dtype=dt)
     for index, item in enumerate(fpdata):
@@ -48,18 +48,18 @@ def readtable(i, spdat):
     thermaldata = getdata(i + 2, spdat)
     for index, item in enumerate(thermaldata):
         dat, err = conv_to_num(item)
-        dfinal[index]['thermal_yield'] = dat
-        dfinal[index]['thermal_yield_err'] = err
+        dfinal[index]['yield_thermal'] = dat
+        dfinal[index]['yield_thermal_err'] = err
     fastdata = getdata(i + 3, spdat)
     for index, item in enumerate(fastdata):
         dat, err = conv_to_num(item)
-        dfinal[index]['fast_yield'] = dat
-        dfinal[index]['fast_yield_err'] = err
+        dfinal[index]['yield_fast'] = dat
+        dfinal[index]['yield_fast_err'] = err
     dtdata = getdata(i + 4, spdat)
     for index, item in enumerate(dtdata):
         dat, err = conv_to_num(item)
-        dfinal[index]['_14MeV_yield'] = dat
-        dfinal[index]['_14MeV_yield_err'] = err
+        dfinal[index]['yield_14MeV'] = dat
+        dfinal[index]['yield_14MeV_err'] = err
     return dfinal
 
 
