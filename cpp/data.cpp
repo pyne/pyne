@@ -543,17 +543,17 @@ void pyne::_load_ndsfpy() {
                      H5T_NATIVE_INT);
   status = H5Tinsert(desc, "to_nuc", HOFFSET(ndsfpy_struct, to_nuc),
                      H5T_NATIVE_INT);
-  status = H5Tinsert(desc, "thermal_yield", HOFFSET(ndsfpy_struct, thermal_yield),
+  status = H5Tinsert(desc, "yield_thermal", HOFFSET(ndsfpy_struct, yield_thermal),
                      H5T_NATIVE_DOUBLE);
-  status = H5Tinsert(desc, "thermal_yield_err", HOFFSET(ndsfpy_struct, thermal_yield_err),
+  status = H5Tinsert(desc, "yield_thermal_err", HOFFSET(ndsfpy_struct, yield_thermal_err),
                      H5T_NATIVE_DOUBLE);
-  status = H5Tinsert(desc, "fast_yield", HOFFSET(ndsfpy_struct, fast_yield),
+  status = H5Tinsert(desc, "yield_fast", HOFFSET(ndsfpy_struct, yield_fast),
                      H5T_NATIVE_DOUBLE);
-  status = H5Tinsert(desc, "fast_yield_err", HOFFSET(ndsfpy_struct, fast_yield_err),
+  status = H5Tinsert(desc, "yield_fast_err", HOFFSET(ndsfpy_struct, yield_fast_err),
                      H5T_NATIVE_DOUBLE);
-  status = H5Tinsert(desc, "_14MeV_yield", HOFFSET(ndsfpy_struct, _14MeV_yield),
+  status = H5Tinsert(desc, "yield_14MeV", HOFFSET(ndsfpy_struct, yield_14MeV),
                      H5T_NATIVE_DOUBLE);
-  status = H5Tinsert(desc, "_14MeV_yield_err", HOFFSET(ndsfpy_struct, _14MeV_yield_err),
+  status = H5Tinsert(desc, "yield_14MeV_err", HOFFSET(ndsfpy_struct, yield_14MeV_err),
                      H5T_NATIVE_DOUBLE);
 
   // Open the HDF5 file
@@ -578,12 +578,12 @@ void pyne::_load_ndsfpy() {
 
   // Ok now that we have the array of structs, put it in the maps
   for(int n=0; n < ndsfpy_length; n++) {
-    ndsfpypair_temp.thermal_yield = ndsfpy_array[n].thermal_yield
-    ndsfpypair_temp.thermal_yield_err = ndsfpy_array[n].thermal_yield_err
-    ndsfpypair_temp.fast_yield = ndsfpy_array[n].fast_yield
-    ndsfpypair_temp.fast_yield_err = ndsfpy_array[n].fast_yield_err
-    ndsfpypair_temp._14MeV_yield = ndsfpy_array[n]._14MeV_yield
-    ndsfpypair_temp._14MeV_yield_err = ndsfpy_array[n]._14MeV_yield_err
+    ndsfpypair_temp.yield_thermal = ndsfpy_array[n].yield_thermal
+    ndsfpypair_temp.yield_thermal_err = ndsfpy_array[n].yield_thermal_err
+    ndsfpypair_temp.yield_fast = ndsfpy_array[n].yield_fast
+    ndsfpypair_temp.yield_fast_err = ndsfpy_array[n].yield_fast_err
+    ndsfpypair_temp.yield_14MeV = ndsfpy_array[n].yield_14MeV
+    ndsfpypair_temp.yield_14MeV_err = ndsfpy_array[n].yield_14MeV_err
     ndsfpy_data[std::make_pair(ndsfpy_array[n].from_nuc,
       ndsfpy_array[n].to_nuc)] = ndsfpypair_temp;
   };
@@ -615,17 +615,17 @@ double pyne::fpyield(std::pair<int, int> from_to, int type) {
     if (type == 0)
         return (*fpy_iter).second;
     else if (type == 1)
-        return (*fpy_iter).second.thermal_yield;
+        return (*fpy_iter).second.yield_thermal;
     else if (type == -1)
-        return (*fpy_iter).second.thermal_yield_err;
+        return (*fpy_iter).second.yield_thermal_err;
     else if (type == 2)
-        return (*fpy_iter).second.fast_yield;
+        return (*fpy_iter).second.yield_fast;
     else if (type == -2)
-        return (*fpy_iter).second.fast_yield_err;
+        return (*fpy_iter).second.yield_fast_err;
     else if (type == 3)
-        return (*fpy_iter).second._14MeV_yield;
+        return (*fpy_iter).second.yield_14MeV;
     else if (type == -3)
-        return (*fpy_iter).second._14MeV_yield_err;
+        return (*fpy_iter).second.yield_14MeV_err;
   }
   // Next, fill up the map with values from the
   // nuc_data.h5, if the map is empty.

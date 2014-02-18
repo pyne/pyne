@@ -165,21 +165,21 @@ namespace pyne
   typedef struct ndsfpy_struct {
     int from_nuc;
     int to_nuc;
-    double thermal_yield;
-    double thermal_yield_err;
-    double fast_yield;
-    double fast_yield_err;
-    double _14MeV_yield;
-    double _14MeV_yield_err;
+    double yield_thermal;
+    double yield_thermal_err;
+    double yield_fast;
+    double yield_fast_err;
+    double yield_14MeV;
+    double yield_14MeV_err;
   }
 
   typedef struct ndsfpypair_struct {
-    double thermal_yield;
-    double thermal_yield_err;
-    double fast_yield;
-    double fast_yield_err;
-    double _14MeV_yield;
-    double _14MeV_yield_err;
+    double yield_thermal;
+    double yield_thermal_err;
+    double yield_fast;
+    double yield_fast_err;
+    double yield_14MeV;
+    double yield_14MeV_err;
   }
 
 
