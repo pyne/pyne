@@ -17,7 +17,7 @@ _base = '([ \d]{3}[ A-Za-z]{2})'
 _ident = re.compile(_base + '    (.{30})(.{26})(.{7})(.{6})')
 _g = re.compile(_base + '  G (.{10})(.{2})(.{8})(.{2}).{24}(.{7})(.{2})(.{10})'
                 + '(.{2})')
-_gc = re.compile(_base + '[0-9A-Za-z] G (.{70})')
+_gc = re.compile(_base + '[0-9A-Za-z] [GE] (.{70})')
 _beta = re.compile(_base + '  B (.{10})(.{2})(.{8})(.{2}).{10}(.{8})(.{6})')
 _betac = re.compile(_base + '[0-9A-Za-z] ([BE]) (.{70})')
 _ec = re.compile(_base + '  E (.{10})(.{2})(.{8})(.{2})'
@@ -343,7 +343,7 @@ def _parse_gamma_record(g):
     inten, inten_err = _get_val_err(g.group(4), g.group(5))
     conv, conv_err = _get_val_err(g.group(6), g.group(7))
     tti, tti_err = _get_val_err(g.group(8), g.group(9))
-    return en, en_err, inten, inten_err, conv, conv_err, tti, tti_err
+    return [en, en_err, inten, inten_err, conv, conv_err, tti, tti_err]
 
 
 def _parse_gamma_continuation_record(g, inten, tti):
@@ -356,15 +356,21 @@ def _parse_gamma_continuation_record(g, inten, tti):
     for entry in entries:
         entry = entry.replace('AP', '=')
         entry = entry.replace('EL1C+EL2C', 'LC')
-        if 'C+' in entry:
+        if '+=' in entry or 'EAV' in entry:
             continue
-        tsplit = entry.split('C')
+        if 'C=' in entry:
+            tsplit = entry.split('C')
+        else:
+            tsplit = entry.split('=')
+            tsplit[0] = tsplit[0].lstrip('C')
         greff = inten
         if '/T' in entry:
             tsplit = entry.split('/T')
             greff = tti
             if np.isnan(greff):
                 greff = inten
+        if greff is None:
+            greff = 1.0
         if len(tsplit) == 2:
             conv = None
             err = None
@@ -770,8 +776,9 @@ def _parse_decay_dataset(lines, decay_s, levellist=None):
                     betas[-1][1] = bcdat[0]
                 else:
                     ecbp[-1][1] = bcdat[0]
-                    econv = _parse_gamma_continuation_record(bc_rec, dat[2], dat[8])
-                    ecbp[-1][6:] = _update_xrays(econv, ecbp[-1][6:], _to_id(daughter))
+                    bggc = _gc.match(line)
+                    econv = _parse_gamma_continuation_record(bggc, dat[2], dat[8])
+                    ecbp[-1][-8:] = _update_xrays(econv, ecbp[-1][-8:], _to_id(daughter))
         a_rec = _alpha.match(line)
         if a_rec is not None:
             dat = _parse_alpha_record(a_rec)
@@ -799,7 +806,6 @@ def _parse_decay_dataset(lines, decay_s, levellist=None):
         if g_rec is not None:
             dat = _parse_gamma_record(g_rec)
             if not np.isnan(dat[0]):
-                dat = dat.tolist()
                 if levellist is not None:
                     gparent = None
                     gdaughter = None
@@ -809,7 +815,9 @@ def _parse_decay_dataset(lines, decay_s, levellist=None):
                         gdaughter = _to_id_from_level(daughter, dlevel, levellist)
                     dat.append(gparent)
                     dat.append(gdaughter)
-                gammarays.append([dat[:], 0, 0, 0, 0, 0, 0, 0, 0])
+                for i in range(8):
+                    dat.append(0)
+                gammarays.append(dat)
                 goodgray = True
             else:
                 goodgray = False
@@ -817,7 +825,7 @@ def _parse_decay_dataset(lines, decay_s, levellist=None):
         gc_rec = _gc.match(line)
         if gc_rec is not None and goodgray is True:
             conv = _parse_gamma_continuation_record(gc_rec, gammarays[-1][2], gammarays[-1][6])
-            gammarays[-1][8:] = _update_xrays(conv, gammarays[-1][8:], _to_id(daughter))
+            gammarays[-1][8:] = _update_xrays(conv, gammarays[-1][-8:], _to_id(daughter))
             continue
         n_rec = _norm.match(line)
         if n_rec is not None:
@@ -860,7 +868,6 @@ def _parse_decay_dataset(lines, decay_s, levellist=None):
 
 
 def decays(filename):
-    #TODO Add EC atomic processes
     if isinstance(filename, str):
         with open(filename, 'r') as f:
             dat = f.read()
