@@ -611,19 +611,20 @@ double pyne::fpyield(std::pair<int, int> from_to, int type) {
     std::map<std::pair<int, int>, ndsfpypair_struct>::iterator fpy_iter, fpy_end;
     fpy_iter = ndsfpy_data.find(from_to);
     fpy_end = ndsfpy_data.end();
-    if (type == 1)
-        return (*fpy_iter).second.yield_thermal;
-    else if (type == -1)
-        return (*fpy_iter).second.yield_thermal_err;
-    else if (type == 2)
-        return (*fpy_iter).second.yield_fast;
-    else if (type == -2)
-        return (*fpy_iter).second.yield_fast_err;
-    else if (type == 3)
-        return (*fpy_iter).second.yield_14MeV;
-    else if (type == -3)
-        return (*fpy_iter).second.yield_14MeV_err;
-
+    if (fpy_iter != fpy_end) {
+        if (type == 1)
+            return (*fpy_iter).second.yield_thermal;
+        else if (type == -1)
+            return (*fpy_iter).second.yield_thermal_err;
+        else if (type == 2)
+            return (*fpy_iter).second.yield_fast;
+        else if (type == -2)
+            return (*fpy_iter).second.yield_fast_err;
+        else if (type == 3)
+            return (*fpy_iter).second.yield_14MeV;
+        else if (type == -3)
+            return (*fpy_iter).second.yield_14MeV_err;
+    }
   }
 
 
@@ -632,7 +633,7 @@ double pyne::fpyield(std::pair<int, int> from_to, int type) {
   if ((type == 0 ) && (wimsdfpy_data.empty())) {
     _load_wimsdfpy();
     return fpyield(from_to, 0);
-  }else {
+  }else if(ndsfpy_data.empty()){
     _load_ndsfpy();
     return fpyield(from_to, type);
   }

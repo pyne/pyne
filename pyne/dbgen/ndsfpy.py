@@ -38,7 +38,7 @@ def readtable(i, spdat):
     pfinal = (parent.split('<strong>')[1]).split('</strong>')[0]
     pid = conv_to_id(pfinal)
     fpdata = getdata(i + 1, spdat)
-    dt = np.dtype([('from_nuc', int), ('to_nuc', int),
+    dt = np.dtype([('from_nuc', 'i4'), ('to_nuc', 'i4'),
                    ('yield_thermal', float), ('yield_thermal_err', float),
                    ('yield_fast', float), ('yield_fast_err', float),
                    ('yield_14MeV', float), ('yield_14MeV_err', float)
