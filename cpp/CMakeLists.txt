@@ -1,6 +1,6 @@
-set(PYNE_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR} ${PYNE_INCLUDE_DIRS} PARENT_SCOPE)
+set(PYNE_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}" ${PYNE_INCLUDE_DIRS} PARENT_SCOPE)
 
-include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+include_directories("${CMAKE_CURRENT_SOURCE_DIR}")
 
 # pyne
 add_library(pyne jsoncpp.cpp pyne.cpp)
@@ -48,5 +48,5 @@ install_lib(pyne_enrichment)
 get_property(inc_dirs DIRECTORY PROPERTY INCLUDE_DIRECTORIES)
 message("-- C_INCLUDE_PATH for ${CMAKE_CURRENT_SOURCE_DIR}: ${inc_dirs}")
 
-#file(COPY ${CMAKE_CURRENT_SOURCE_DIR} DESTINATION 
-#    ${CMAKE_BINARY_DIR}/pyne/includes/ FILES_MATCHING PATTERN "*.h")
+#file(COPY "${CMAKE_CURRENT_SOURCE_DIR}" DESTINATION 
+#    "${CMAKE_BINARY_DIR}/pyne/includes/" FILES_MATCHING PATTERN "*.h")
