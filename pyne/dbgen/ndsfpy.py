@@ -1,3 +1,22 @@
+"""This module provides a way to grab and store raw data for fission product yeilds
+from the NDS library at the IAEA. For more information, please visit their website:
+https://www-nds.iaea.org/sgnucdat/index.htm or
+https://www-nds.iaea.org/sgnucdat/c2.htm. Please contact the NDS at
+online@iaeand.iaea.org with questions about the data itself.
+
+The copyright for the data parsed here is held by the IAEA and is made available
+under the following conditions:
+
+**Disclaimer:** Distributed data products contain consensus values of physical
+constants. However, neither the network centre nor the IAEA guarantees the
+accuracy of such data products or their suitability for particular applied
+scientific purposes.
+
+**Copyright:**  One may use or reproduce data and information from this site with
+an appropriate acknowledgement to the source of data. One may not charge any
+subsequent fee for these data.
+
+"""
 from __future__ import print_function, division
 from urllib import urlopen
 
@@ -130,6 +149,7 @@ def make_fpy_table(nuc_data, build_dir=""):
     fpy_table.flush()
     db.close()
 
+
 def grab_fpy(build_dir="", file_out='nds-fpyield.html'):
     """Grabs the NDS fission product yields from the IAEA website
     """
@@ -152,7 +172,7 @@ def make_fpy(args):
     with tb.openFile(nuc_data, 'a', filters=BASIC_FILTERS) as f:
         if hasattr(f.root, 'neutron') and hasattr(f.root.neutron,
                                                   'nds_fission_products'):
-            print('skipping WIMSD fission product yield table creation; '
+            print('skipping NDS fission product yield table creation; '
                   'already exists.')
             return
     print("Grabbing NDS fission product yield data.")
