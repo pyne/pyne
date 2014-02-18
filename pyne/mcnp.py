@@ -801,19 +801,17 @@ class Xsdir(object):
             yield table
 
     def nucs(self):
-        """Provides a list of the valid nuclide ids for nuclides contained
+        """Provides a set of the valid nuclide ids for nuclides contained
         in the xsdir.
 
         Returns
         -------
-        nuc : list
-            The list of nuclide ids.
+        nuc : set
+            The set of nuclide ids.
         """
-        nucs = []
-        for nuc in self.awr.keys():
-            if nucname.isnuclide(nuc):
-                nucs.append(nucname.id(nuc))
-    
+         
+        nucs = set(nucname.id(nuc) for nuc in self.awr.keys() 
+                   if nucname.isnuclide(nuc))
         return nucs
 
 
