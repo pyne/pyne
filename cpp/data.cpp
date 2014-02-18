@@ -526,6 +526,9 @@ void pyne::_load_wimsdfpy() {
 };
 
 
+std::map<std::pair<int, int>, pyne::ndsfpypair_struct> pyne::ndsfpy_data = \
+  std::map<std::pair<int, int>, pyne::ndsfpypair_struct>();
+
 void pyne::_load_ndsfpy() {
   herr_t status;
 
@@ -563,7 +566,7 @@ void pyne::_load_ndsfpy() {
   // Open the data set
   hid_t ndsfpy_set = H5Dopen2(nuc_data_h5, "/neutron/nds_fission_products",
                                 H5P_DEFAULT);
-  hid_t ndspy_space = H5Dget_space(ndsfpy_set);
+  hid_t ndsfpy_space = H5Dget_space(ndsfpy_set);
   int ndsfpy_length = H5Sget_simple_extent_npoints(ndsfpy_space);
 
   // Read in the data
@@ -578,12 +581,12 @@ void pyne::_load_ndsfpy() {
 
   // Ok now that we have the array of structs, put it in the maps
   for(int n=0; n < ndsfpy_length; n++) {
-    ndsfpypair_temp.yield_thermal = ndsfpy_array[n].yield_thermal
-    ndsfpypair_temp.yield_thermal_err = ndsfpy_array[n].yield_thermal_err
-    ndsfpypair_temp.yield_fast = ndsfpy_array[n].yield_fast
-    ndsfpypair_temp.yield_fast_err = ndsfpy_array[n].yield_fast_err
-    ndsfpypair_temp.yield_14MeV = ndsfpy_array[n].yield_14MeV
-    ndsfpypair_temp.yield_14MeV_err = ndsfpy_array[n].yield_14MeV_err
+    ndsfpypair_temp.yield_thermal = ndsfpy_array[n].yield_thermal;
+    ndsfpypair_temp.yield_thermal_err = ndsfpy_array[n].yield_thermal_err;
+    ndsfpypair_temp.yield_fast = ndsfpy_array[n].yield_fast;
+    ndsfpypair_temp.yield_fast_err = ndsfpy_array[n].yield_fast_err;
+    ndsfpypair_temp.yield_14MeV = ndsfpy_array[n].yield_14MeV;
+    ndsfpypair_temp.yield_14MeV_err = ndsfpy_array[n].yield_14MeV_err;
     ndsfpy_data[std::make_pair(ndsfpy_array[n].from_nuc,
       ndsfpy_array[n].to_nuc)] = ndsfpypair_temp;
   };
@@ -602,19 +605,13 @@ double pyne::fpyield(std::pair<int, int> from_to, int type) {
     std::map<std::pair<int, int>, double>::iterator fpy_iter, fpy_end;
     fpy_iter = wimsdfpy_data.find(from_to);
     fpy_end = wimsdfpy_data.end();
+    if (fpy_iter != fpy_end)
+        return (*fpy_iter).second;
   }else {
     std::map<std::pair<int, int>, ndsfpypair_struct>::iterator fpy_iter, fpy_end;
     fpy_iter = ndsfpy_data.find(from_to);
     fpy_end = ndsfpy_data.end();
-  }
-
-
-
-  // First check if we already have the pair in the map
-  if (fpy_iter != fpy_end) {
-    if (type == 0)
-        return (*fpy_iter).second;
-    else if (type == 1)
+    if (type == 1)
         return (*fpy_iter).second.yield_thermal;
     else if (type == -1)
         return (*fpy_iter).second.yield_thermal_err;
@@ -626,7 +623,10 @@ double pyne::fpyield(std::pair<int, int> from_to, int type) {
         return (*fpy_iter).second.yield_14MeV;
     else if (type == -3)
         return (*fpy_iter).second.yield_14MeV_err;
+
   }
+
+
   // Next, fill up the map with values from the
   // nuc_data.h5, if the map is empty.
   if ((type == 0 ) && (wimsdfpy_data.empty())) {
@@ -644,19 +644,19 @@ double pyne::fpyield(std::pair<int, int> from_to, int type) {
   return fpy;
 };
 
-double pyne::fpyield(int from_nuc, int to_nuc) {
+double pyne::fpyield(int from_nuc, int to_nuc, int type) {
   return fpyield(std::pair<int, int>(nucname::id(from_nuc), 
-                                     nucname::id(to_nuc)));
+                                     nucname::id(to_nuc)), type);
 };
 
-double pyne::fpyield(char * from_nuc, char * to_nuc) {
+double pyne::fpyield(char * from_nuc, char * to_nuc, int type) {
   return fpyield(std::pair<int, int>(nucname::id(from_nuc), 
-                                     nucname::id(to_nuc)));
+                                     nucname::id(to_nuc)), type);
 };
 
-double pyne::fpyield(std::string from_nuc, std::string to_nuc) {
+double pyne::fpyield(std::string from_nuc, std::string to_nuc, int type) {
   return fpyield(std::pair<int, int>(nucname::id(from_nuc), 
-                                     nucname::id(to_nuc)));
+                                     nucname::id(to_nuc)), type);
 };
 
 
