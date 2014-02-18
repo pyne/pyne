@@ -6,8 +6,9 @@ entries with a combined header. The SurfSrc.__cmp__() method is reimplemented
 to compare only the parts of the ssr files that matter for this operation.
 """
 
-from math import copysign
 from itertools import izip
+
+from numpy import copysign
 
 from pyne.mcnp import SurfSrc
 
