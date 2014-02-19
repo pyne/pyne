@@ -194,7 +194,7 @@ class Isotxs(_BinaryReader):
         nuc.libParams['nuclide'] = r.get_string(8)[0].strip() # absolute nuclide label
         nuc.libParams['libName'] = r.get_string(8)[0] # library name (ENDFV, etc. )
         nuc.libParams['isoIdent'] = r.get_string(8)[0]
-        nuc.libParams['amass'] = r.get_float()[0] # gram atomic weight
+        nuc.libParams['amass'] = r.get_float()[0] # gram atomic mass
         nuc.libParams['efiss'] = r.get_float()[0] # thermal energy yield/fission
         nuc.libParams['ecapt'] = r.get_float()[0] # thermal energy yield/capture
         nuc.libParams['temp'] = r.get_float()[0] # nuclide temperature (K)
