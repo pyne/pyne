@@ -53,7 +53,7 @@ print
 
 """)
 
-def burnup(mesh, irr_time, power, count):
+def burnup(mesh, irr_time, power, xsdir_path, count):
 
     # create m
     geom = mcnp.mesh_to_geom(mesh, 
@@ -63,7 +63,7 @@ def burnup(mesh, irr_time, power, count):
         f.write(geom + mcnp_data_cards)
 
     # run mcnp
-    subprocess.call("mcnp5 i=MCNP_inp_{0} meshtal=meshtal_{0}".format(count), shell=True)
+    subprocess.call("mcnp5 i=MCNP_inp_{0} meshtal=meshtal_{0} xsdir={1}".format(count, xsdir_path), shell=True)
 
     # use mcnp out to create alara input files
     meshtal = mcnp.Meshtal("meshtal_{0}".format(count))
@@ -86,8 +86,7 @@ def burnup(mesh, irr_time, power, count):
     alara_out, err = p.communicate()
     # tag transmuted materials back to mesh
     alara.num_density_to_mesh(alara_out.split("\n"), 'shutdown', mesh)
- 
-    return mesh
+
 
 def normalize_to_power(meshtal, power):
     # calculate fission energy per source
@@ -127,7 +126,8 @@ def main(arguments=None):
     time = float(args[1])
     num_steps = int(args[2])
     irr_time = str(time/num_steps) + ' s'
-    xsdir = mcnp.Xsdir(args[3])
+    xsdir_path = args[3]
+    xsdir = mcnp.Xsdir(xsdir_path)
 
     # create reactor that spans [[-5, 5], [-5, 5],[-5, 5]] with fuel volume
     # elements near the center
@@ -144,21 +144,10 @@ def main(arguments=None):
     step = 0
     while step < num_steps:
         for i, mat, ve in mesh:
-            mesh.mats[i] = mesh.mats[i][nucs]
+            mesh.mats[i][nucs]
 
-        mesh = burnup(mesh, irr_time, power, step)
+        burnup(mesh, irr_time, power, xsdir_path, step)
         step += 1
 
-    print mesh.mats[0]
-
-    for iso in mesh.mats[0]:
-        print iso, (iso in nucs)
-
-    mesh.mats[0] = mesh.mats[0][nucs]
-
-    for iso in mesh.mats[0]:
-        print iso, (iso in nucs)
-
-    print mesh.mats[0]
 
 main()
