@@ -325,7 +325,7 @@ def num_density_to_mesh(lines, time, m):
         while line[0] != '=':
             nuc = line.split()[0]
             n = float(line.split()[time_index])
-            if n != 0.0:
+            if n != 0.0 and str(nuc)[-1] != 'n':
                 nucvec[nuc] = n
                 density += n * anum(nuc)/N_A
 

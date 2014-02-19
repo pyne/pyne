@@ -72,8 +72,8 @@ def burnup(mesh, irr_time, power, count):
                          "fluxin_{0}".format(count), reverse=False)
     alara.mesh_to_geom(mesh, "alara_geom_{0}".format(count), 
                        "alara_matlib_{0}".format(count))
-    irr_blocks = alara.irradiation_blocks("alara_matlib_{0}".format(count), "isolib", 
-                   "FEINDlib CINDER CINDER90 THERMAL", ["0 s"], 
+    irr_blocks = alara.irradiation_blocks("alara_matlib_{0}".format(count), "../isolib", 
+                   "FEINDlib CINDER ../CINDER90 THERMAL", ["0 s"], 
                    "fluxin_{0}".format(count), irr_time, output="number_density",truncation=1E-6)
 
     with open("alara_geom_{0}".format(count), 'a') as f:
@@ -86,7 +86,7 @@ def burnup(mesh, irr_time, power, count):
     alara_out, err = p.communicate()
     # tag transmuted materials back to mesh
     alara.num_density_to_mesh(alara_out.split("\n"), 'shutdown', mesh)
-    mesh.mesh.save("aaa.h5m")
+ 
     return mesh
 
 def normalize_to_power(meshtal, power):
@@ -127,6 +127,7 @@ def main(arguments=None):
     time = float(args[1])
     num_steps = int(args[2])
     irr_time = str(time/num_steps) + ' s'
+    xsdir = mcnp.Xsdir(args[3])
 
     # create reactor that spans [[-5, 5], [-5, 5],[-5, 5]] with fuel volume
     # elements near the center
@@ -139,9 +140,25 @@ def main(arguments=None):
     mesh = Mesh(structured_coords = [coords, coords, coords], structured=True)
     gen_reactor(mesh, fuel, fuel_idx, mod)
 
+    nucs = xsdir.nucs()
     step = 0
     while step < num_steps:
+        for i, mat, ve in mesh:
+            mesh.mats[i] = mesh.mats[i][nucs]
+
         mesh = burnup(mesh, irr_time, power, step)
         step += 1
+
+    print mesh.mats[0]
+
+    for iso in mesh.mats[0]:
+        print iso, (iso in nucs)
+
+    mesh.mats[0] = mesh.mats[0][nucs]
+
+    for iso in mesh.mats[0]:
+        print iso, (iso in nucs)
+
+    print mesh.mats[0]
 
 main()
