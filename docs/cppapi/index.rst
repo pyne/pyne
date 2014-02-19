@@ -87,7 +87,7 @@ This mechanism is known as *amalgamation*.
 In the top level pyne source code directory, there is an ``amalgamate.py`` script.
 Simply run this script to combine all C++ source information into ``pyne.cpp`` and
 ``pyne.h`` files.  Run with no options to combine all commonly used C++ files.
-Add options to modify the behaviour.  Current options are:
+Add options to modify the behavior.  Current options are:
 
 .. code-block:: bash
 
@@ -108,7 +108,7 @@ For example, to take only up through the rxname, amalgamate with:
     scopatz@ares ~/pyne $ ./amalgamate.py -s pyne.cc -i pyne.h -f license.txt \
     cpp/pyne.* cpp/extra_types.h cpp/h5wrap.h cpp/nucname.* cpp/rxname.*
 
-`Cyclus <http://fuelcycle.org>`_ is an example of a project which uses an amalgameted
+`Cyclus <http://fuelcycle.org>`_ is an example of a project which uses an amalgamated
 version of pyne.
 
 
