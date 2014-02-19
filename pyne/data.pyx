@@ -251,8 +251,46 @@ def b(nuc):
 
     return float(value)
 
+#
+# Fission product yield data
+#
 
+def fpyield(from_nuc, to_nuc):
+    """Finds the fission product yield for a (parent, child) nuclide pair [fraction].
 
+    Parameters
+    ----------
+    from_nuc : int or str 
+        Parent nuclide.
+    to_nuc : int or str 
+        Child nuclide.
+
+    Returns
+    -------
+    fpy : float
+        Fractional yield of this nuclide pair [unitless].
+
+    Notes
+    -----
+    If this pair is not found, it is assumed to be impossible, and the yield
+    is set to zero.
+    """
+    if isinstance(from_nuc, int):
+        fn = pyne.cpp_nucname.id(<int> from_nuc)
+    elif isinstance(from_nuc, basestring):
+        fn = pyne.cpp_nucname.id(std_string(<char *> from_nuc))
+    else:
+        raise pyne.nucname.NucTypeError(from_nuc)
+
+    if isinstance(to_nuc, int):
+        tn = pyne.cpp_nucname.id(<int> to_nuc)
+    elif isinstance(to_nuc, basestring):
+        tn = pyne.cpp_nucname.id(std_string(<char *> to_nuc))
+    else:
+        raise pyne.nucname.NucTypeError(to_nuc)
+
+    fpy = cpp_data.fpyield(cpp_pair[int, int](fn, tn))
+    return fpy
 
 
 #

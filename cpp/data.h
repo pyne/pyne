@@ -144,6 +144,39 @@ namespace pyne
   double b(std::string nuc);
   /// \}
 
+
+  /// \name Fission Product Yield Data
+  /// \{
+
+  /// Mapping from nuclides in id form to their scattering length.
+  extern std::map<std::pair<int, int>, double> wimsdfpy_data;
+
+  /// a struct matching the '/neutron/wimsd_fission_product' table in nuc_data.h5.
+  typedef struct wimsdfpy_struct {
+    int from_nuc;  ///< from nuclide in id form
+    int to_nuc;  ///< from nuclide in id form
+    double yields; ///< fission product yield, fraction [unitless]
+  } wimsdfpy_struct; 
+
+  /// Loads the WIMSD fission product yield data from the nuc_data.h5 file into memory.
+  void _load_wimsdfpy();
+
+  /// \brief Returns the fission product yield for a parent/child nuclide pair
+  ///
+  /// This function works by first checking the wimsdfpy_data.  If this is empty it
+  /// loads the data from disk.  If the parent/child nuclide pair is still not found, 
+  /// then the process is assumed to be impossible and 0.0 is returned.
+  double fpyield(std::pair<int, int> from_to);
+  /// Returns the fission product yield for a parent/child nuclide pair
+  double fpyield(int from_nuc, int to_nuc);
+  /// Returns the fission product yield for a parent/child nuclide pair
+  double fpyield(char * from_nuc, char * to_nuc);
+  /// Returns the fission product yield for a parent/child nuclide pair
+  double fpyield(std::string from_nuc, std::string to_nuc);
+
+  /// \}
+
+
   /// \name Decay Data
   /// \{
 
