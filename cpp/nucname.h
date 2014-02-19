@@ -13,7 +13,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#ifndef PYNE_IS_AMALGAMATED
 #include "pyne.h"
+#endif
 
 namespace pyne
 {
