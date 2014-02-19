@@ -1,6 +1,7 @@
 // Implements basic nuclear data functions.
-
+#ifndef PYNE_IS_AMALGAMATED
 #include "data.h"
+#endif
 
 
 //
