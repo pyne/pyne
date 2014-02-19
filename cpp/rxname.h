@@ -3,8 +3,8 @@
 ///
 /// \brief Converts between naming conventions for reaction channels.
 
-#ifndef _PYNE_RXNAME_
-#define _PYNE_RXNAME_
+#ifndef PYNE_7DOEB2PKSBEFFIA3Q2NARI3KFY
+#define PYNE_7DOEB2PKSBEFFIA3Q2NARI3KFY
 #include <utility>
 #include <iostream>
 #include <string>
@@ -354,4 +354,4 @@ namespace rxname
 };
 };
 
-#endif
+#endif  // PYNE_7DOEB2PKSBEFFIA3Q2NARI3KFY
