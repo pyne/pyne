@@ -16,12 +16,13 @@
 
 #include "hdf5.h"
 #include "hdf5_hl.h"
+
+#ifndef PYNE_IS_AMALGAMATED
 #include "h5wrap.h"
-
 #include "extra_types.h"
-
 #include "pyne.h"
 #include "nucname.h"
+#endif
 
 namespace pyne
 {

@@ -1,4 +1,6 @@
+#ifndef PYNE_IS_AMALGAMATED
 #include "dagmc_bridge.h"
+#endif
 
 #include <DagMC.hpp>
 #include <moab/CartVect.hpp>
