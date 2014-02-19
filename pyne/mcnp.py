@@ -806,13 +806,13 @@ class Xsdir(object):
 
         Returns
         -------
-        nuc : set
-            The set of nuclide ids.
+        valid_nucs : set
+            The valid nuclide ids.
         """
          
-        nucs = set(nucname.id(nuc) for nuc in self.awr.keys() 
+        valid_nucs = set(nucname.id(nuc) for nuc in self.awr.keys() 
                    if nucname.isnuclide(nuc))
-        return nucs
+        return valid_nucs
 
 
 class XsdirTable(object):
