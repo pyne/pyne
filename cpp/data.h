@@ -3,8 +3,8 @@
 ///
 /// \brief Implements basic nuclear data functions.
 
-#ifndef _TEWK4A7VOFFLHDDXD5ZZ7KPXEQ
-#define _TEWK4A7VOFFLHDDXD5ZZ7KPXEQ
+#ifndef PYNE_TEWK4A7VOFFLHDDXD5ZZ7KPXEQ
+#define PYNE_TEWK4A7VOFFLHDDXD5ZZ7KPXEQ
 #include <iostream>
 #include <string>
 #include <utility>
