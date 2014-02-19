@@ -731,7 +731,7 @@ class Xsdir(object):
         words = line.split()
         assert len(words) == 3
         assert words[0].lower() == 'atomic'
-        assert words[1].lower() == 'weight'
+        assert words[1].lower() == 'mass'
         assert words[2].lower() == 'ratios'
 
         while True:
@@ -937,7 +937,7 @@ class PtracReader(object):
             24: "vvv",  # cos(y-direction)
             25: "www",  # cos(z-direction)
             26: "erg",  # energy
-            27: "wgt",  # weight
+            27: "wgt",  # mass
             28: "tme"
         }
 
@@ -1409,7 +1409,7 @@ class Wwinp(Mesh):
         of spacial bounds in the i, j, k dimensions.
     mesh : Mesh object
         with a structured mesh containing all the neutron and/or
-        photon weight window lower bounds. These tags have the form
+        photon mass window lower bounds. These tags have the form
         "ww_X" where X is n or p The mesh has rootSet tags in the form
         X_e_upper_bounds.
 
