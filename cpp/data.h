@@ -46,13 +46,13 @@ namespace pyne
   /// Mapping from nuclides in id form to their atomic masses.
   extern std::map<int, double> atomic_mass_map;
 
-  /// a struct matching the atomic_weight table in nuc_data.h5.
-  typedef struct atomic_weight_struct {
+  /// a struct matching the atomic_mass table in nuc_data.h5.
+  typedef struct atomic_mass_struct {
     int nuc;      ///< nuclide in id form
     double mass;  ///< nuclide atomic mass [amu]
     double error; ///< error in atomic mass [amu]
     double abund; ///< natural abundance of nuclide [atom fraction]
-  } atomic_weight_struct; 
+  } atomic_mass_struct; 
 
   // Loads preset dataset hashes into memory.
   std::map<std::string, std::string> get_data_checksums();
