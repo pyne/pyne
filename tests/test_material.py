@@ -191,19 +191,19 @@ class TestMaterialMethods(TestCase):
         assert_equal(nucvec, {922350000: 0.75, 922380000: 14.25})
 
 
-    def test_molecular_weight(self):
+    def test_molecular_mass(self):
         mat_empty = Material({})
-        assert_equal(mat_empty.molecular_weight(), 0.0)
+        assert_equal(mat_empty.molecular_mass(), 0.0)
 
         mat_u238 = Material({922380000: 1.0})
-        mw_u238 = mat_u238.molecular_weight()
+        mw_u238 = mat_u238.molecular_mass()
         try:
             assert_almost_equal(mw_u238, 238.050788423)
         except AssertionError:
             assert_almost_equal(mw_u238, 238.0)            
 
         mat_mixed = Material({922350000: 0.5, 922380000: 0.5})
-        mw_mixed = mat_mixed.molecular_weight()
+        mw_mixed = mat_mixed.molecular_mass()
         try:
             assert_almost_equal(mw_mixed/236.547360417, 1.0, 4)            
         except AssertionError:
@@ -472,7 +472,7 @@ def test_to_atom_frac():
     assert_equal(mat.atoms_per_mol, 3.0)
     assert_equal(af[10010000], 2.0)
     assert_equal(af[80160000], 1.0)
-    assert_equal(mat.molecular_weight(), 18.01056468403)    
+    assert_equal(mat.molecular_mass(), 18.01056468403)    
 
 
 def test_from_atom_frac_meth():
@@ -483,7 +483,7 @@ def test_from_atom_frac_meth():
     assert_equal(mat.comp[10010000], 0.11191487328808077)
     assert_equal(mat.comp[80160000], 0.8880851267119192)
     assert_equal(mat.mass, 18.01056468403)    
-    assert_equal(mat.molecular_weight(), 18.01056468403)    
+    assert_equal(mat.molecular_mass(), 18.01056468403)    
 
     h2 = Material({10010000: 1.0}, atoms_per_mol=2.0)
     h2o = {'O16': 1.0, h2: 1.0}
@@ -492,7 +492,7 @@ def test_from_atom_frac_meth():
     assert_equal(mat.atoms_per_mol, 3.0)
     assert_equal(mat.comp[10010000], 0.11191487328808077)
     assert_equal(mat.comp[80160000], 0.8880851267119192)
-    assert_equal(mat.molecular_weight(), 18.01056468403)    
+    assert_equal(mat.molecular_mass(), 18.01056468403)    
 
     ihm = Material()
     ihm.from_atom_frac({922350000: 0.5, 922380000: 0.5})
@@ -503,7 +503,7 @@ def test_from_atom_frac_meth():
     assert_almost_equal(mat.comp[80160000], 0.11912625367051276, 16)
     assert_almost_equal(mat.comp[922350000], 0.43763757904405304, 15)
     assert_almost_equal(mat.comp[922380000], 0.44323616728543414, 15)
-    assert_almost_equal(mat.molecular_weight()/268.53718851614, 1.0, 15)
+    assert_almost_equal(mat.molecular_mass()/268.53718851614, 1.0, 15)
 
 
 #
@@ -849,7 +849,7 @@ def test_from_atom_frac_func():
     assert_equal(mat.comp[10010000], 0.11191487328808077)
     assert_equal(mat.comp[80160000], 0.8880851267119192)
     assert_equal(mat.mass, 18.01056468403)    
-    assert_equal(mat.molecular_weight(), 18.01056468403)    
+    assert_equal(mat.molecular_mass(), 18.01056468403)    
 
     h2 = Material({10010000: 1.0}, atoms_per_mol=2.0)
     h2o = {'O16': 1.0, h2: 1.0}
@@ -857,7 +857,7 @@ def test_from_atom_frac_func():
     assert_equal(mat.atoms_per_mol, 3.0)
     assert_equal(mat.comp[10010000], 0.11191487328808077)
     assert_equal(mat.comp[80160000], 0.8880851267119192)
-    assert_equal(mat.molecular_weight(), 18.01056468403)    
+    assert_equal(mat.molecular_mass(), 18.01056468403)    
 
     ihm = from_atom_frac({922350000: 0.5, 922380000: 0.5})
     uox = {ihm: 1.0, 'O16': 2.0}
@@ -866,7 +866,7 @@ def test_from_atom_frac_func():
     assert_almost_equal(mat.comp[80160000], 0.11912625367051276, 16)
     assert_almost_equal(mat.comp[922350000], 0.43763757904405304, 15)
     assert_almost_equal(mat.comp[922380000], 0.44323616728543414, 15)
-    assert_almost_equal(mat.molecular_weight()/268.53718851614, 1.0, 15)
+    assert_almost_equal(mat.molecular_mass()/268.53718851614, 1.0, 15)
 
 
 

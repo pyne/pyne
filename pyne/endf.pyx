@@ -1310,7 +1310,7 @@ class Evaluation(object):
         # Find reaction
         self.seek_mfmt(3, MT)
 
-        # Read HEAD record with ZA and atomic weight ratio
+        # Read HEAD record with ZA and atomic mass ratio
         items = self._get_head_record()
         xs.ZA = items[0]
         xs.AWR = items[1]
@@ -1778,7 +1778,7 @@ class Evaluation(object):
         # Get head record
         items = self._get_head_record()
         mp.ZA = items[0]
-        mp.AWR = items[1] # Atomic weight ratio
+        mp.AWR = items[1] # Atomic mass ratio
         mp.LIS = items[2] # Level number of the target
         mp.NS = items[4] # Number of final states
 
@@ -1809,7 +1809,7 @@ class Evaluation(object):
         # Get head record
         items = self._get_head_record()
         rxn.ZA = items[0]
-        rxn.AWR = items[1] # Atomic weight ratio
+        rxn.AWR = items[1] # Atomic mass ratio
         rxn.LIS = items[2] # Level number of the target
         rxn.NS = items[4] # Number of final states
 

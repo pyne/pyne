@@ -451,9 +451,9 @@ cdef class _Material:
         return nucvec_proxy
 
 
-    def molecular_weight(self, atoms_per_mol=-1.0):
-        """molecular_weight(atoms_per_mol=-1.0)
-        This method returns the molecular weight of the comp of this
+    def molecular_mass(self, atoms_per_mol=-1.0):
+        """molecular_mass(atoms_per_mol=-1.0)
+        This method returns the molecular mass of the comp of this
         material.
 
         Parameters
@@ -464,11 +464,11 @@ cdef class _Material:
 
         Returns
         -------
-        mol_weight : float
-            Molecular weight in [amu].
+        mol_mass : float
+            Molecular mass in [amu].
 
         """
-        return self.mat_pointer.molecular_weight(atoms_per_mol)
+        return self.mat_pointer.molecular_mass(atoms_per_mol)
 
     def expand_elements(self):
         """expand_elements(self)
@@ -554,7 +554,7 @@ cdef class _Material:
         submaterial : Material
             A new mass stream object that only
             has the members given in nuc_sequence.  The mass of the submaterial
-            is calculated based on the weight fraction composition and mass
+            is calculated based on the mass fraction composition and mass
             of the original mass stream.
 
         Notes
@@ -592,7 +592,7 @@ cdef class _Material:
         submaterial : Material
             A new material object whose members in nuc_sequence have the
             cooresponding mass value.  The mass of the submaterial is
-            calculated based on the weight fraction composition and mass of the
+            calculated based on the mass fraction composition and mass of the
             original material.
 
         """
@@ -620,7 +620,7 @@ cdef class _Material:
         submaterial : Material
             A new material object that only has the members not given in
             nuc_sequence.  The mass of the submaterial is calculated based on
-            the weight fraction composition and mass of the original material.
+            the mass fraction composition and mass of the original material.
 
         Notes
         -----
@@ -1211,9 +1211,9 @@ class Material(_Material, collections.MutableMapping):
         This is the input nuclide component dictionary.  This dictionary need
         not be normalized; Material initialization will automatically
         renormalize the stream.  Thus the comp simply is a dictionary of
-        relative weights.  The keys of comp must be integers representing
+        relative mass.  The keys of comp must be integers representing
         nuclides in id-form.  The values are floats for each nuclide's
-        weight fraction. If a string is provided instead of a dictionary, then
+        mass fraction. If a string is provided instead of a dictionary, then
         Material will read in the comp vector from a file at the string's
         location.  This either plaintext or hdf5 files. If no comp is provided,
         an empty Material object is constructed.
@@ -1226,7 +1226,7 @@ class Material(_Material, collections.MutableMapping):
         This is the density of the material.
     atoms_per_mol : float, optional
         Number of atoms to per molecule of material.  Needed to obtain proper
-        scaling of molecular weights.  For example, this value for water is
+        scaling of molecular mass.  For example, this value for water is
         3.0.
     attrs : JSON-convertable Python object, optional
         Initial attributes to build the material with.  At the top-level this is
@@ -1414,7 +1414,7 @@ def from_atom_frac(atom_fracs, double mass=-1.0, double density=-1.0,
         This is the density of the material.
     atoms_per_mol : float, optional
         Number of atoms per molecule of material.  Needed to obtain proper
-        scaling of molecular weights.  For example, this value for water is
+        scaling of molecular mass.  For example, this value for water is
         3.0.
     attrs : JSON-convertable Python object, optional
         Initial attributes to build the material with.  At the top-level this is
@@ -1522,7 +1522,7 @@ def from_text(char * filename, double mass=-1.0, double atoms_per_mol=-1.0, attr
         positive or zero, then this mass overrides the calculated one.
     atoms_per_mol : float, optional
         Number of atoms to per molecule of material.  Needed to obtain proper
-        scaling of molecular weights.  For example, this value for water is
+        scaling of molecular mass.  For example, this value for water is
         3.0.
     attrs : JSON-convertable Python object, optional
         Initial attributes to build the material with.  At the top-level this is
