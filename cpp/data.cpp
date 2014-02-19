@@ -23,7 +23,7 @@ std::map<std::string, std::string> pyne::get_data_checksums()
     std::map<std::string, std::string> temp_map;
     // Initialization of dataset hashes
     temp_map["/atomic_decay"]="09bf73252629077785e20b3532fde8b3";
-    temp_map["/atomic_weight"]="10edfdc662e35bdfab91beb89285efff";
+    temp_map["/atomic_mass"]="10edfdc662e35bdfab91beb89285efff";
     temp_map["/material_library"]="8b10864378fbd88538434679acf908cc";
     temp_map["/neutron/eaf_xs"]="29622c636c4a3a46802207b934f9516c";
     temp_map["/neutron/scattering_lengths"]="a24d391cc9dc0fc146392740bb97ead4";
@@ -52,47 +52,47 @@ void pyne::_load_atomic_mass_map()
     throw h5wrap::FileNotHDF5(pyne::NUC_DATA_PATH);
 
   // Get the HDF5 compound type (table) description
-  hid_t desc = H5Tcreate(H5T_COMPOUND, sizeof(atomic_weight_struct));
-  H5Tinsert(desc, "nuc",   HOFFSET(atomic_weight_struct, nuc),   H5T_NATIVE_INT);
-  H5Tinsert(desc, "mass",  HOFFSET(atomic_weight_struct, mass),  H5T_NATIVE_DOUBLE);
-  H5Tinsert(desc, "error", HOFFSET(atomic_weight_struct, error), H5T_NATIVE_DOUBLE);
-  H5Tinsert(desc, "abund", HOFFSET(atomic_weight_struct, abund), H5T_NATIVE_DOUBLE);
+  hid_t desc = H5Tcreate(H5T_COMPOUND, sizeof(atomic_mass_struct));
+  H5Tinsert(desc, "nuc",   HOFFSET(atomic_mass_struct, nuc),   H5T_NATIVE_INT);
+  H5Tinsert(desc, "mass",  HOFFSET(atomic_mass_struct, mass),  H5T_NATIVE_DOUBLE);
+  H5Tinsert(desc, "error", HOFFSET(atomic_mass_struct, error), H5T_NATIVE_DOUBLE);
+  H5Tinsert(desc, "abund", HOFFSET(atomic_mass_struct, abund), H5T_NATIVE_DOUBLE);
 
   // Open the HDF5 file
   hid_t nuc_data_h5 = H5Fopen(pyne::NUC_DATA_PATH.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT);
 
   // Open the data set
-  hid_t atomic_weight_set = H5Dopen2(nuc_data_h5, "/atomic_weight", H5P_DEFAULT);
-  hid_t atomic_weight_space = H5Dget_space(atomic_weight_set);
-  int atomic_weight_length = H5Sget_simple_extent_npoints(atomic_weight_space);
+  hid_t atomic_mass_set = H5Dopen2(nuc_data_h5, "/atomic_mass", H5P_DEFAULT);
+  hid_t atomic_mass_space = H5Dget_space(atomic_mass_set);
+  int atomic_mass_length = H5Sget_simple_extent_npoints(atomic_mass_space);
 
   // Read in the data
-  atomic_weight_struct * atomic_weight_array = new atomic_weight_struct[atomic_weight_length];
-  H5Dread(atomic_weight_set, desc, H5S_ALL, H5S_ALL, H5P_DEFAULT, atomic_weight_array);
+  atomic_mass_struct * atomic_mass_array = new atomic_mass_struct[atomic_mass_length];
+  H5Dread(atomic_mass_set, desc, H5S_ALL, H5S_ALL, H5P_DEFAULT, atomic_mass_array);
 
   // close the nuc_data library, before doing anythng stupid
-  H5Dclose(atomic_weight_set);
+  H5Dclose(atomic_mass_set);
   H5Fclose(nuc_data_h5);
 
   // Ok now that we have the array of stucts, put it in the map
-  for(int n = 0; n < atomic_weight_length; n++){
-    atomic_mass_map[atomic_weight_array[n].nuc] = atomic_weight_array[n].mass;
-    natural_abund_map[atomic_weight_array[n].nuc] = atomic_weight_array[n].abund;
+  for(int n = 0; n < atomic_mass_length; n++){
+    atomic_mass_map[atomic_mass_array[n].nuc] = atomic_mass_array[n].mass;
+    natural_abund_map[atomic_mass_array[n].nuc] = atomic_mass_array[n].abund;
   }
 
-  delete[] atomic_weight_array;
+  delete[] atomic_mass_array;
 };
 
 
 double pyne::atomic_mass(int nuc)
 {
-  // Find the nuclide's weight in AMU
+  // Find the nuclide's mass in AMU
   std::map<int, double>::iterator nuc_iter, nuc_end;
 
   nuc_iter = atomic_mass_map.find(nuc);
   nuc_end = atomic_mass_map.end();
 
-  // First check if we already have the nuc weight in the map
+  // First check if we already have the nuc mass in the map
   if (nuc_iter != nuc_end)
     return (*nuc_iter).second;
 
@@ -113,7 +113,7 @@ double pyne::atomic_mass(int nuc)
   int nucid = nucname::id(nuc);
 
   // If in an excited state, return the ground
-  // state weight...not strictly true, but good guess.
+  // state mass...not strictly true, but good guess.
   if (0 < nucid%10000)
   {
     aw = atomic_mass((nucid/10000)*10000);
@@ -158,7 +158,7 @@ double pyne::natural_abund(int nuc)
   nuc_iter = natural_abund_map.find(nuc);
   nuc_end = natural_abund_map.end();
 
-  // First check if we already have the nuc weight in the map
+  // First check if we already have the nuc mass in the map
   if (nuc_iter != nuc_end)
     return (*nuc_iter).second;
 
