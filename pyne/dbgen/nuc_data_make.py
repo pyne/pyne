@@ -9,7 +9,7 @@ from pyne.api import nuc_data
 from pyne.utils import message
 from pyne.dbgen.api import build_dir
 from pyne.dbgen.decay import make_decay
-from pyne.dbgen.atomic_weight import make_atomic_mass
+from pyne.dbgen.atomic_mass import make_atomic_mass
 from pyne.dbgen.materials_library import make_materials_library
 from pyne.dbgen.scattering_lengths import make_scattering_lengths
 from pyne.dbgen.simple_xs import make_simple_xs
@@ -103,9 +103,9 @@ def main():
                         help='check hashes against built-in ones')
     parser.add_argument('--clean', dest='clean', type=int, default=0,
                         help="""level to clean up existing files.
-0: no cleaning (default).
-1: clean nuc_data.
-2: clean nuc_data and build_dir.""")
+				0: no cleaning (default).
+				1: clean nuc_data.
+				2: clean nuc_data and build_dir.""")
     args = parser.parse_args()
 
     # clean nuc data
