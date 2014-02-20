@@ -161,7 +161,7 @@ namespace pyne
   /// Loads the WIMSD fission product yield data from the nuc_data.h5 file into memory.
   void _load_wimsdfpy();
 
-  /// a struct matching the '/neutron/wimsd_fission_product' table in nuc_data.h5
+  /// a struct matching the '/neutron/nds_fission_product' table in nuc_data.h5
   typedef struct ndsfpy_struct {
     int from_nuc;
     int to_nuc;
@@ -173,17 +173,18 @@ namespace pyne
     double yield_14MeV_err;
   } ndsfpy_struct;
 
-  typedef struct ndsfpypair_struct {
+  /// a struct for the nds data for fpyield
+  typedef struct ndsfpysub_struct {
     double yield_thermal;
     double yield_thermal_err;
     double yield_fast;
     double yield_fast_err;
     double yield_14MeV;
     double yield_14MeV_err;
-  } ndsfpypair_struct;
+  } ndsfpysub_struct;
 
 
-  extern std::map<std::pair<int, int>, ndsfpypair_struct> ndsfpy_data;
+  extern std::map<std::pair<int, int>, ndsfpysub_struct> ndsfpy_data;
 
   /// Loads the NDS fission product yield data from the nuc_data.h5 file into memory.
   void _load_ndsfpy();
@@ -196,13 +197,13 @@ namespace pyne
   /// and 0.0 is returned. The data source is determined by the type value
   /// as follows: 0 WIMS, 1 thermal NDS, 2 fast NDS, 3 14 MeV NDS.
   /// negative type values return error for that data type.
-  double fpyield(std::pair<int, int> from_to, int type);
+  double fpyield(std::pair<int, int> from_to, int source, bool get_error);
   /// Returns the fission product yield for a parent/child nuclide pair
-  double fpyield(int from_nuc, int to_nuc, int type);
+  double fpyield(int from_nuc, int to_nuc, int source, bool get_error);
   /// Returns the fission product yield for a parent/child nuclide pair
-  double fpyield(char * from_nuc, char * to_nuc, int type);
+  double fpyield(char * from_nuc, char * to_nuc, int source, bool get_error);
   /// Returns the fission product yield for a parent/child nuclide pair
-  double fpyield(std::string from_nuc, std::string to_nuc, int type);
+  double fpyield(std::string from_nuc, std::string to_nuc, int source, bool get_error);
 
   /// \}
 
