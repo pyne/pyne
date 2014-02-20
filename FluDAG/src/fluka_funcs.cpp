@@ -190,7 +190,6 @@ void g_step(double& pSx,
 // propStep  - ??
 // retStep   - returned as the distance from the particle's current location, along its ray, to the next boundary
 // newRegion - gotten from the value returned by DAG->next_vol
-// newRegion is gotten from the volue returned by DAG->next_vol
 void g_fire(int& oldRegion, double point[], double dir[], double &propStep, double& retStep,  int& newRegion)
 {
   debug = true;
