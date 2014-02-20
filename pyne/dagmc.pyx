@@ -15,7 +15,7 @@ from numpy.linalg import norm
 
 np.import_array()
 
-from pyne.mesh import Mesh, _structured_check
+from pyne.mesh import Mesh
 
 # Set the entity handle type; I don't know a cleaner way than to ask the daglib
 # to return the byte width of the type
@@ -607,59 +607,60 @@ class _MeshRow(object):
         A slice of the full numpy array representing the uncertainty bins for this
         mesh row.
     """
-    __init__(di, s_di_0, s_min_0, s_max_0,
-                 s_di_1, s_min_1, s_max_1, results, uncs, num_rays, random):
-    """
-    Parameters
-    ----------
-    di : int
-        The direction index: x = 0, y = 1, z = 2
-    s_di_0 : int
-        The index of first dimension of the sampling surface (same notation as
-        di)
-    s_min_0 : float
-        The lower bound of the sampling surface in the s_di_0-th direction.
-    s_max_0 : float
-        The upper bound of the sampling surface in the s_di_0-th direction.
-    s_di_1 : int
-        The index of second dimension of the sampling surface (same notation as
-        di)
-    s_min_1 : float
-        The lower bound of the sampling surface in the s_di_1-th direction.
-    s_max_1 : float
-        The upper bound of the sampling surface in the s_di_1-th direction.
-    results : 1D numpy array of floats
-        Stores the results of ray firing in this mesh row.
-    uncs : 1D numpy array of floats
-        Stores the uncertainties of ray firing in this mesh rows.
-   num_rays : int
-       The number of rays to fire in each mesh row for each direction.
-   random : boolean
-       If true, rays starting points are chosen randomly on the boundary within
-       each mesh row. If false, a linear spaced grid of starting points is 
-       chosen, with dimension sqrt(num_rays) x sqrt(num_rays)
-    """
-    direction = (0, 0, 0)
-    direction[di] = 1
-    self.direction = direction
-    self.results = results
-    self.uncs = unc
-
-    if random:
-        self._random_start_points()
-    else:
-        self._grid_start_points()
-
-    def _random_start_points(self):
-    """Populates start_points attributes with random points on the sampling
-    surface.
+    def __init__(self, di, s_di_0, s_min_0, s_max_0, s_di_1, s_min_1, s_max_1,
+                 results, uncs, num_rays, random):
+        """
+        Parameters
+        ----------
+        di : int
+            The direction index: x = 0, y = 1, z = 2
+        s_di_0 : int
+            The index of first dimension of the sampling surface (same notation as
+            di)
+        s_min_0 : float
+            The lower bound of the sampling surface in the s_di_0-th direction.
+        s_max_0 : float
+            The upper bound of the sampling surface in the s_di_0-th direction.
+        s_di_1 : int
+            The index of second dimension of the sampling surface (same notation as
+            di)
+        s_min_1 : float
+            The lower bound of the sampling surface in the s_di_1-th direction.
+        s_max_1 : float
+            The upper bound of the sampling surface in the s_di_1-th direction.
+        results : 1D numpy array of floats
+            Stores the results of ray firing in this mesh row.
+        uncs : 1D numpy array of floats
+            Stores the uncertainties of ray firing in this mesh rows.
+       num_rays : int
+           The number of rays to fire in each mesh row for each direction.
+       random : boolean
+           If true, rays starting points are chosen randomly on the boundary within
+           each mesh row. If false, a linear spaced grid of starting points is 
+           chosen, with dimension sqrt(num_rays) x sqrt(num_rays)
+        """
+        direction = (0, 0, 0)
+        direction[di] = 1
+        self.direction = direction
+        self.results = results
+        self.uncs = uncs
     
-    """
-
-    def _grid_start_points(self):
-    """Populates start_points attributes with a uniform grid of points on the
-    sampling surface.
-    """
+        if random:
+            self._random_start_points()
+        else:
+            self._grid_start_points()
+    
+        def _random_start_points(self):
+            """Populates start_points attributes with random points on the sampling
+            surface.
+            """
+            pass
+    
+        def _grid_start_points(self):
+            """Populates start_points attributes with a uniform grid of points on the
+            sampling surface.
+            """
+            pass
 
 def _fire_meshrow_rays(row):
     """This private function carries of the ray tracing on a single mesh
@@ -672,60 +673,59 @@ def _fire_meshrow_rays(row):
     """
 
     for point in row.start_points:
-        vol = find_volume(point, mesh.direction)
-        for (next_vol, dist, _, next_point) in ray_iterator(vol, point, mesh.direction):
-        
+        vol = find_volume(point, row.direction)
+        for (next_vol, dist, _, next_point) in ray_iterator(vol, point, row.direction):
+            pass   
 
 def cell_vol_fracs_mesh(filename, mesh, num_rays, random=True):
-"""This function opens a DAGMC loadable geometry and finds the volume fractions
-   of each cell with each mesh volume element of a supplied PyNE Mesh object.
-   These cell fractions are then stored as IMeshTags.
+    """This function opens a DAGMC loadable geometry and finds the volume fractions
+    of each cell with each mesh volume element of a supplied PyNE Mesh object.
+    These cell fractions are then stored as IMeshTags.
+ 
+    Parameters
+    ----------
+    filename : str
+        A faceted geometry file (.h5m), likely the result of dagmc_preproc.
+    mesh : PyNE Mesh object
+        The Mesh object to tag with cell volume fractions. The mesh must be a 
+        Cartesean structured mesh that overlays the geometry.
+    num_rays : int
+        The number of rays to fire in each mesh row for each direction.
+    random : boolean
+        If true, rays starting points are chosen randomly on the boundary within
+        each mesh row. If false, a linear spaced grid of starting points is 
+        chosen, with dimension sqrt(num_rays) x sqrt(num_rays)
+     """
+    # Ensure input is valid
+    mesh._structured_check()
+    load(filename)
 
-   Parameters
-   ----------
-   filename : str
-       A faceted geometry file (.h5m), likely the result of dagmc_preproc.
-   mesh : PyNE Mesh object
-       The Mesh object to tag with cell volume fractions. The mesh must be a 
-       Cartesean structured mesh that overlays the geometry.
-   num_rays : int
-       The number of rays to fire in each mesh row for each direction.
-   random : boolean
-       If true, rays starting points are chosen randomly on the boundary within
-       each mesh row. If false, a linear spaced grid of starting points is 
-       chosen, with dimension sqrt(num_rays) x sqrt(num_rays)
-"""
-   # Ensure input is valid
-   mesh._structured_check()
-   load(filename)
+    dims = (mesh.structured_get_divisions('x'),
+            mesh.structured_get_divisions('y'),
+            mesh.structured_get_divisions('z'))
 
-   dims = (mesh.structured_get_divisions('x'),
-           mesh.structured_get_divisions('y'),
-           mesh.structured_get_divisions('z'))
+    results = np.zeros(shape = dims)
+    uncs = np.zeros(shape = dims)
 
-   results = np.zeros(shape = dims)
-   uncs = np.zeros(shape = dims)
+    # direction indicies: x = 0, y = 1, z = 2
+    dis = (0, 1, 2)
+    # Iterate over all directions indicies
+    for di in dis:
+        # For each direction, the remaining two directions define the sampling 
+        # surface. These two directions are the values in s_dis (surface
+        # direction indices)
+        s_dis = copy(dis)
+        s_dis.remove(di)
 
-   # direction indicies: x = 0, y = 1, z = 2
-   dis = (0, 1, 2)
-   # Iterate over all directions indicies
-   for di in dis:
-       # For each direction, the remaining two directions define the sampling 
-       # surface. These two directions are the values in s_dis (surface
-       # direction indices)
-       s_dis = copy(dis)
-       s_dis.remove(i)
-       # iterate through all all the sampling planes perpendicular to di,
-       # creating a _MeshRow in each, and subsequently evaluating that row.
-       for a in range(0, len(dims[s_dis[0]]) - 1):
-           for b in range(0, len(dims[s_dis[1]]) - 1):
-               s_min_0 = dims[s_dis[0]][a]
-               s_max_0 = dims[s_dis[0]][a + 1]
-               s_min_1 = dims[s_dis[1]][b]
-               s_max_1 = dims[s_dis[1]][b + 1]
-               row_results = np.rollaxis(results, di)[:][a][b]
-               row_unc = np.rollaxis(uncs, di)[:][a][b]
-               row = _MeshRow(di, s_dis[0], s_min_0, s_max_0,
-                                  s_dis[1], s_min_1, s_max_1, 
-                                  row_results, row_uncs, num_rays, random)
-               row.evaluate()
+        row_results = ''
+        row_uncs = ''
+        # iterate through all all the sampling planes perpendicular to di,
+        # creating a _MeshRow in each, and subsequently evaluating that row.
+        for a in range(0, len(dims[s_dis[0]]) - 1):
+            for b in range(0, len(dims[s_dis[1]]) - 1):
+                s_min_0 = dims[s_dis[0]][a]
+                s_max_0 = dims[s_dis[0]][a + 1]
+                s_min_1 = dims[s_dis[1]][b]
+                s_max_1 = dims[s_dis[1]][b + 1]
+                row = _MeshRow(di, s_dis[0], s_min_0, s_max_0, s_dis[1], s_min_1, s_max_1, row_results, row_uncs, num_rays, random)
+                row.evaluate()
