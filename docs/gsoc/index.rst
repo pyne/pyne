@@ -15,11 +15,20 @@ ideas for contributions appropriate for students at a number of levels.
     
     intro
     exp_data
+    ahotn_proj
+    hexmesh_proj
+    transport_proj
     template_proj
 
 
 .. include:: intro.rst
 
 .. include:: exp_data.rst
+
+.. include:: ahotn_proj.rst
+
+.. include:: hexmesh_proj.rst
+
+.. include:: transport_proj.rst
 
 .. include:: template_proj.rst
