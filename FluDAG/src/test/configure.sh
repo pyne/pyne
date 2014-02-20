@@ -1,4 +1,6 @@
 #! /bin/bash
+# Any changes to this script may require changes to
+# batlab scripts in repo svalinn/DAGMC-CI
 
 EXTRA_ARGS=$@
 

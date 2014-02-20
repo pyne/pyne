@@ -22,8 +22,11 @@ ADD_LIBRARY(fludag SHARED
 	    ${DAGMC_FLUDAG_SOURCE}/WrapLookFX.cc
 	    ${DAGMC_FLUDAG_SOURCE}/WrapReg.cc
 	    ${DAGMC_FLUDAG_SOURCE}/WrapFlgfwr.cc
-
 )
+# ADD_LIBRARY(parseflu SHARED
+#	    ${DAGMC_FLUDAG_SOURCE}/dagmc_define.cpp
+#	    ${DAGMC_FLUDAG_SOURCE}/parse_flu.cpp
+#)
 
 # set libraries needed to link to test cases
 SET(FLUDAG_LIBRARIES
@@ -42,4 +45,5 @@ ENABLE_LANGUAGE(Fortran)
 ADD_EXECUTABLE(mainfludag mainFluDAG.cpp) 
 TARGET_LINK_LIBRARIES(mainfludag ${FLUDAG_LIBRARIES})
 
-
+# ADD_EXECUTABLE(mainparse dagmc_define.cpp parse_flu.cpp moab_utils.cpp UnitNumberManager.cpp) 
+# TARGET_LINK_LIBRARIES(mainparse ${FLUDAG_LIBRARIES})

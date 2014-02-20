@@ -47,8 +47,17 @@ int main(int argc, char* argv[])
   po.addOpt<std::string>("input,i", "Specify the .h5m file for processing", &input_file);
   po.addOpt<std::string>("output,o", "Specify the output file", &output_file);
 
+  if (argc >= 2)
+  {
+     input_file = argv[1];
+  }
+  else
+  {
+     std::cout << "Too few arguments.  Please provide a *.h5m input geometry file." << std::endl;
+     exit(1);
+  }
   time_t time_before,time_after;
-
+  
   // Create the moab instance for geometry processing
   Interface* mbi = new Core();
 
