@@ -268,7 +268,7 @@ def fpyield(from_nuc, to_nuc, source=0, get_errors=False):
     source : int or str
         The int or corresponding dictionary key for the source dataset.
         Allowed values are:
-        'WIMS': 0, 'NDS_THERMAL' : 1, 'NDS_FAST' : 2, 'NDS_14MEV' : 3
+        'WIMSD': 0, 'NDS_THERMAL' : 1, 'NDS_FAST' : 2, 'NDS_14MEV' : 3
     get_errors : boolean
         return the error in the value if possible or 0
 
@@ -282,7 +282,7 @@ def fpyield(from_nuc, to_nuc, source=0, get_errors=False):
     If this pair is not found, it is assumed to be impossible, and the yield
     is set to zero.
     """
-    srcmap = {'WIMS': 0, 'NDS_THERMAL': 1, 'NDS_FAST': 2, 'NDS_14MEV': 3}
+    srcmap = {'WIMSD': 0, 'NDS_THERMAL': 1, 'NDS_FAST': 2, 'NDS_14MEV': 3}
     if isinstance(source, str):
         sourceint = srcmap[source]
     elif isinstance(source, int):
