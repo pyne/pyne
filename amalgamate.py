@@ -54,7 +54,7 @@ class AmalgamatedFile(object):
         self._blocks.append(line)
 
     def append_file(self, filename, comment_out=None):
-        """Adds a whole to the end of this one."""
+        """Adds a whole file to the end of this one."""
         if comment_out is None:
             _, ext = os.path.splitext(filename)
             comment_out = ext not in CODE_EXTS
