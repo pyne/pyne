@@ -14,7 +14,7 @@ J_PER_MEV = 1.602177E-22
 mcnp_data_cards = (
 """MODE:n
 IMP:n 1 26R 0
-KCODE 1000 0.8 0 1
+KCODE 1000 0.8 5 10
 KSRC 1E-9 0 0
 FMESH4:n origin=-5,-5,-5
       imesh = 5
@@ -48,9 +48,7 @@ FMESH14:n origin=-5,-5,-5
       jints = 1
       kmesh = 5
       kints = 1
-FM14 -6 -8
-print
-
+FM14 -1 0 -6 -8
 """)
 
 def burnup(mesh, irr_time, power, xsdir_path, count):
@@ -87,13 +85,23 @@ def burnup(mesh, irr_time, power, xsdir_path, count):
     # tag transmuted materials back to mesh
     alara.num_density_to_mesh(alara_out.split("\n"), 'shutdown', mesh)
 
+    #xsdir = mcnp.Xsdir(xsdir_path)
+    #nucs = xsdir.nucs()
+    #print mesh.mats[0]
+    #mesh.mats[0]  = mesh.mats[0][nucs]
+    #print mesh.mats[0]
+
+    return mesh
 
 def normalize_to_power(meshtal, power):
     # calculate fission energy per source
     flux_mesh = meshtal.tally[4]
     e_mesh = meshtal.tally[14]
 
-    e = e_mesh.mesh.getTagHandle("n_result")[list(e_mesh.structured_iterate_hex())[0]]
+    e_ve = list(e_mesh.structured_iterate_hex())[0]
+    tot_vol = e_mesh.structured_hex_volume(0, 0, 0)
+    e = e_mesh.mesh.getTagHandle("n_result")[e_ve]*tot_vol
+    print e
     norm = power/J_PER_MEV/e
     ves = flux_mesh.structured_iterate_hex('xyz')
     tag = flux_mesh.mesh.getTagHandle("n_result")
@@ -115,7 +123,8 @@ def gen_reactor(mesh, fuel, fuel_idx, mod):
 def main(arguments=None):
 
     #Instantiate option parser
-    parser = OptionParser(usage='%prog <power> <time> <num_steps> [options]')
+    parser = OptionParser(usage =
+             '%prog <power [W]> <time [s]> <num steps> <xsdir path> [options]')
 
     # 
     #parser.add_option('-o', dest='mesh_output', default='flux_mesh.h5m',\
@@ -133,21 +142,26 @@ def main(arguments=None):
     # elements near the center
     fuel = from_atom_frac({'U235': 0.045, 'U238': 0.955, 'O16': 2.0}, density=10.7)
     mod = from_atom_frac({'H1': 2.0, 'O16': 1.0}, density=1.0)
+
+    # big reactor
     #fuel_idx = range(399, 500)
     #coords = range(-5, 6)
-    fuel_idx = [13, 14]
-    coords = [-5, -3, 3, 5]
+
+    # small reactor
+    fuel_idx = range(0,15)
+    coords = [-5000, -300, 300, 500]
     mesh = Mesh(structured_coords = [coords, coords, coords], structured=True)
     gen_reactor(mesh, fuel, fuel_idx, mod)
 
     nucs = xsdir.nucs()
     step = 0
+
     while step < num_steps:
         for i, mat, ve in mesh:
-            mesh.mats[i][nucs]
+            mesh.mats[i]  = mesh.mats[i][nucs]
 
-        burnup(mesh, irr_time, power, xsdir_path, step)
+        mesh = burnup(mesh, irr_time, power, xsdir_path, step)
         step += 1
 
-
+    mesh.mesh.save("test.h5m")
 main()
