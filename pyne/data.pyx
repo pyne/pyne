@@ -264,8 +264,10 @@ def fpyield(from_nuc, to_nuc, source = 0, get_errors = False):
         Parent nuclide.
     to_nuc : int or str 
         Child nuclide.
-    source : int
-        data type: 0 WIMS, 1 thermal NDS, 2 fast NDS, 3 14 MeV NDS.
+    source : int or str
+        The int or corresponding dictionary key for the source dataset.
+        Allowed values are:
+        'WIMS': 0, 'NDS_THERMAL' : 1, 'NDS_FAST' : 2, 'NDS_14MEV' : 3
     get_errors : boolean
         return the error in the value if possible or 0
 
@@ -279,6 +281,16 @@ def fpyield(from_nuc, to_nuc, source = 0, get_errors = False):
     If this pair is not found, it is assumed to be impossible, and the yield
     is set to zero.
     """
+    srcmap = {'WIMS': 0, 'NDS_THERMAL' : 1, 'NDS_FAST' : 2, 'NDS_14MEV' : 3}
+    if isinstance(source, str):
+        sourceint = srcmap[source]
+    elif isinstance(source, int):
+        if 0 <= source <= 3:
+            sourceint = source
+        else:
+            raise ValueError
+    else:
+        raise ValueError('Only ints or strings are accepted')
     if isinstance(from_nuc, int):
         fn = pyne.cpp_nucname.id(<int> from_nuc)
     elif isinstance(from_nuc, basestring):
