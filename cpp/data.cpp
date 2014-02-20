@@ -526,8 +526,8 @@ void pyne::_load_wimsdfpy() {
 };
 
 
-std::map<std::pair<int, int>, pyne::ndsfpypair_struct> pyne::ndsfpy_data = \
-  std::map<std::pair<int, int>, pyne::ndsfpypair_struct>();
+std::map<std::pair<int, int>, pyne::ndsfpysub_struct> pyne::ndsfpy_data = \
+  std::map<std::pair<int, int>, pyne::ndsfpysub_struct>();
 
 void pyne::_load_ndsfpy() {
   herr_t status;
@@ -577,18 +577,18 @@ void pyne::_load_ndsfpy() {
   status = H5Dclose(ndsfpy_set);
   status = H5Fclose(nuc_data_h5);
 
-  ndsfpypair_struct ndsfpypair_temp;
+  ndsfpysub_struct ndsfpysub_temp;
 
   // Ok now that we have the array of structs, put it in the maps
   for(int n=0; n < ndsfpy_length; n++) {
-    ndsfpypair_temp.yield_thermal = ndsfpy_array[n].yield_thermal;
-    ndsfpypair_temp.yield_thermal_err = ndsfpy_array[n].yield_thermal_err;
-    ndsfpypair_temp.yield_fast = ndsfpy_array[n].yield_fast;
-    ndsfpypair_temp.yield_fast_err = ndsfpy_array[n].yield_fast_err;
-    ndsfpypair_temp.yield_14MeV = ndsfpy_array[n].yield_14MeV;
-    ndsfpypair_temp.yield_14MeV_err = ndsfpy_array[n].yield_14MeV_err;
+    ndsfpysub_temp.yield_thermal = ndsfpy_array[n].yield_thermal;
+    ndsfpysub_temp.yield_thermal_err = ndsfpy_array[n].yield_thermal_err;
+    ndsfpysub_temp.yield_fast = ndsfpy_array[n].yield_fast;
+    ndsfpysub_temp.yield_fast_err = ndsfpy_array[n].yield_fast_err;
+    ndsfpysub_temp.yield_14MeV = ndsfpy_array[n].yield_14MeV;
+    ndsfpysub_temp.yield_14MeV_err = ndsfpy_array[n].yield_14MeV_err;
     ndsfpy_data[std::make_pair(ndsfpy_array[n].from_nuc,
-      ndsfpy_array[n].to_nuc)] = ndsfpypair_temp;
+      ndsfpy_array[n].to_nuc)] = ndsfpysub_temp;
   };
 
 
@@ -596,46 +596,51 @@ void pyne::_load_ndsfpy() {
   delete[] ndsfpy_array;
 };
 
-double pyne::fpyield(std::pair<int, int> from_to, int type) {
+double pyne::fpyield(std::pair<int, int> from_to, int source, bool get_error) {
   // Note that this may be expanded eventually to include other
   // sources of fission product data.
 
   // Find the parent/child pair branch ratio as a fraction
-  if (type == 0){
+  if (source == 0){
     std::map<std::pair<int, int>, double>::iterator fpy_iter, fpy_end;
     fpy_iter = wimsdfpy_data.find(from_to);
     fpy_end = wimsdfpy_data.end();
     if (fpy_iter != fpy_end)
+        if (get_error)
+            return 0;
         return (*fpy_iter).second;
   }else {
-    std::map<std::pair<int, int>, ndsfpypair_struct>::iterator fpy_iter, fpy_end;
+    std::map<std::pair<int, int>, ndsfpysub_struct>::iterator fpy_iter, fpy_end;
     fpy_iter = ndsfpy_data.find(from_to);
     fpy_end = ndsfpy_data.end();
     if (fpy_iter != fpy_end) {
-        if (type == 1)
+        if (source == 1) {
+            if (get_error)
+                return (*fpy_iter).second.yield_thermal_err;
             return (*fpy_iter).second.yield_thermal;
-        else if (type == -1)
-            return (*fpy_iter).second.yield_thermal_err;
-        else if (type == 2)
+        }
+        else if (source == 2) {
+            if (get_error)
+                return (*fpy_iter).second.yield_fast_err;
             return (*fpy_iter).second.yield_fast;
-        else if (type == -2)
-            return (*fpy_iter).second.yield_fast_err;
-        else if (type == 3)
+        }
+        else if (source == 3) {
+            if (get_error)
+                return (*fpy_iter).second.yield_14MeV_err;
             return (*fpy_iter).second.yield_14MeV;
-        else if (type == -3)
-            return (*fpy_iter).second.yield_14MeV_err;
+        }
     }
   }
 
 
   // Next, fill up the map with values from the
   // nuc_data.h5, if the map is empty.
-  if ((type == 0 ) && (wimsdfpy_data.empty())) {
+  if ((source == 0 ) && (wimsdfpy_data.empty())) {
     _load_wimsdfpy();
-    return fpyield(from_to, 0);
+    return fpyield(from_to, 0, get_error);
   }else if(ndsfpy_data.empty()){
     _load_ndsfpy();
-    return fpyield(from_to, type);
+    return fpyield(from_to, source, get_error);
   }
 
   // Finally, if none of these work, 
@@ -645,19 +650,19 @@ double pyne::fpyield(std::pair<int, int> from_to, int type) {
   return fpy;
 };
 
-double pyne::fpyield(int from_nuc, int to_nuc, int type) {
+double pyne::fpyield(int from_nuc, int to_nuc, int source, bool get_error) {
   return fpyield(std::pair<int, int>(nucname::id(from_nuc), 
-                                     nucname::id(to_nuc)), type);
+                                     nucname::id(to_nuc)), source, get_error);
 };
 
-double pyne::fpyield(char * from_nuc, char * to_nuc, int type) {
+double pyne::fpyield(char * from_nuc, char * to_nuc, int source, bool get_error) {
   return fpyield(std::pair<int, int>(nucname::id(from_nuc), 
-                                     nucname::id(to_nuc)), type);
+                                     nucname::id(to_nuc)), source, get_error);
 };
 
-double pyne::fpyield(std::string from_nuc, std::string to_nuc, int type) {
+double pyne::fpyield(std::string from_nuc, std::string to_nuc, int source, bool get_error) {
   return fpyield(std::pair<int, int>(nucname::id(from_nuc), 
-                                     nucname::id(to_nuc)), type);
+                                     nucname::id(to_nuc)), source, get_error);
 };
 
 

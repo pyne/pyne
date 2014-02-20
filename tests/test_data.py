@@ -45,7 +45,7 @@ def test_wims_fpyield():
 
 def test_nds_fpyield():
     assert_equal(data.fpyield('Th-232', 'Eu-154', 3), 9.6000E-8)
-    assert_equal(data.fpyield('Th-232', 'Eu-154', -3), 3.8000E-8)
+    assert_equal(data.fpyield('Th-232', 'Eu-154', 3, True), 3.8000E-8)
 
 def test_half_life():
     assert_equal(data.half_life('H1'), np.inf)
