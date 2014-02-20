@@ -103,9 +103,9 @@ def main():
                         help='check hashes against built-in ones')
     parser.add_argument('--clean', dest='clean', type=int, default=0,
                         help="""level to clean up existing files.
-				0: no cleaning (default).
-				1: clean nuc_data.
-				2: clean nuc_data and build_dir.""")
+				 0: no cleaning (default).
+				 1: clean nuc_data.
+				 2: clean nuc_data and build_dir.""")
     args = parser.parse_args()
 
     # clean nuc data
