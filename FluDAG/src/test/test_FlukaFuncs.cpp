@@ -14,6 +14,7 @@
 #define DAG moab::DagMC::instance()
 
 const std::string directory = "/filespace/people/z/zachman/repos/fludag_testing/";
+int num_slab_vols = 12;
 
 //---------------------------------------------------------------------------//
 // HELPER METHODS
@@ -47,14 +48,14 @@ class FluDAGTest : public ::testing::Test
        // std::string infile = directory + "input/test2/fludag/slabs.h5m";
        std::string infile = "../slabs.h5m";
 
-       rval = DAG->load_file(infile.c_str(), 0.0 ); 
+       rloadval = DAG->load_file(infile.c_str(), 0.0 ); 
        assert(rval == MB_SUCCESS);
 
        // DAG call to initialize geometry
        rval = DAG->init_OBBTree();
        assert (rval == MB_SUCCESS);
-       std::cout << "FluDAGTest:Setup():  Past init_OBBTree...." << std::endl;
 
+       // Initialize point and dir
        point[0] = 0.0;
        point[1] = 0.0; 
        point[2] = 0.0;
@@ -69,7 +70,9 @@ class FluDAGTest : public ::testing::Test
 
   protected:
 
+    MBErrorCode rloadval;
     MBErrorCode rval;
+
     // Position
     double point[3];
 
@@ -97,14 +100,52 @@ class FluDAGTest : public ::testing::Test
 
 };
 //---------------------------------------------------------------------------//
+// Test setup outcomes
+TEST_F(FluDAGTest, SetUp)
+{
+    EXPECT_EQ(MB_SUCCESS, rloadval);
+
+    // DAG call to initialize geometry
+    EXPECT_EQ(MB_SUCCESS, rval);
+
+    int num_vols = DAG->num_entities(3);
+    std::cout << "Number of regions is " << num_vols << std::endl;
+    EXPECT_EQ(num_slab_vols, num_vols);
+
+    std::vector< std::string > keywords;
+    rval = DAG->detect_available_props( keywords );
+    EXPECT_EQ(MB_SUCCESS, rval);
+    rval = DAG->parse_properties( keywords );
+    EXPECT_EQ(MB_SUCCESS, rval);
+    
+    int ret, volume;
+    for (unsigned i=1; i<=num_slab_vols; i++)
+    {
+      int id = DAG->id_by_index(3, i);
+      std::cout << "Vol " << i << ", id = " << id << std::endl; 
+
+      moab::EntityHandle eh = DAG->entity_by_index(3,i);
+      rval = DAG->point_in_volume(eh, point, ret); 
+      EXPECT_EQ(MB_SUCCESS, rval);
+      if (ret == 1)
+      {
+         volume = i;
+         std::cout << "\tPoint is in this volume!" << std::endl;
+      } 
+    }
+}
+//---------------------------------------------------------------------------//
 // FIXTURE-BASED TESTS: WrapperTest
 //---------------------------------------------------------------------------//
-TEST_F(FluDAGTest, WrapperTest)
+TEST_F(FluDAGTest, GFireTests)
 {
-  std::cout << "Calling g_fire. " << std::endl;  
+  std::cout << "Calling g_fire. Start in middle of leftmost cube" << std::endl;  
+  oldReg   = 2;
+  point[2] = 5.0;
+  dir[2]   = 1.0;
+  
   g_fire(oldReg, point, dir, propStep, retStep, newReg);
-  EXPECT_EQ(0.0, retStep);
- 
+  EXPECT_EQ(5.0, retStep);
 }
 //---------------------------------------------------------------------------//
 // end of FluDAG/src/test/test_FlukaFuncs.cpp
