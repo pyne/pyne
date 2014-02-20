@@ -3,6 +3,7 @@ from libcpp.string cimport string as std_string
 from libcpp.map cimport map
 from libcpp.set cimport set
 from libcpp.utility cimport pair
+from libcpp cimport bool
 
 cimport extra_types
 
