@@ -74,7 +74,7 @@ void pyne::_load_atomic_mass_map()
   H5Fclose(nuc_data_h5);
 
   // Ok now that we have the array of stucts, put it in the map
-  for(int n = 0; n < atomic_weight_length; n++){
+  for(int n = 0; n < atomic_weight_length; n++) {
     atomic_mass_map[atomic_weight_array[n].nuc] = atomic_weight_array[n].mass;
     natural_abund_map[atomic_weight_array[n].nuc] = atomic_weight_array[n].abund;
   }
@@ -601,33 +601,34 @@ double pyne::fpyield(std::pair<int, int> from_to, int source, bool get_error) {
   // sources of fission product data.
 
   // Find the parent/child pair branch ratio as a fraction
-  if (source == 0){
+  if (source == 0) {
     std::map<std::pair<int, int>, double>::iterator fpy_iter, fpy_end;
     fpy_iter = wimsdfpy_data.find(from_to);
     fpy_end = wimsdfpy_data.end();
     if (fpy_iter != fpy_end)
-        if (get_error)
-            return 0;
+        //if (get_error == true) return 0;
         return (*fpy_iter).second;
-  }else {
+  } else {
     std::map<std::pair<int, int>, ndsfpysub_struct>::iterator fpy_iter, fpy_end;
     fpy_iter = ndsfpy_data.find(from_to);
     fpy_end = ndsfpy_data.end();
     if (fpy_iter != fpy_end) {
-        if (source == 1) {
+        switch (source) {
+          case 1:
             if (get_error)
                 return (*fpy_iter).second.yield_thermal_err;
             return (*fpy_iter).second.yield_thermal;
-        }
-        else if (source == 2) {
+            break;
+          case 2:
             if (get_error)
                 return (*fpy_iter).second.yield_fast_err;
             return (*fpy_iter).second.yield_fast;
-        }
-        else if (source == 3) {
+            break;
+          case 3:
             if (get_error)
                 return (*fpy_iter).second.yield_14MeV_err;
             return (*fpy_iter).second.yield_14MeV;
+            break;
         }
     }
   }
@@ -638,7 +639,7 @@ double pyne::fpyield(std::pair<int, int> from_to, int source, bool get_error) {
   if ((source == 0 ) && (wimsdfpy_data.empty())) {
     _load_wimsdfpy();
     return fpyield(from_to, 0, get_error);
-  }else if(ndsfpy_data.empty()){
+  }else if (ndsfpy_data.empty()) {
     _load_ndsfpy();
     return fpyield(from_to, source, get_error);
   }
@@ -957,7 +958,7 @@ std::set<int> pyne::decay_children(int nuc)
   nuc_end = decay_children_map.end();
 
   // First check if we already have the nuc in the map
-  if (nuc_iter != nuc_end){
+  if (nuc_iter != nuc_end) {
     return (*nuc_iter).second;
   };
 
