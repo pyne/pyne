@@ -138,7 +138,7 @@ def make_fpy_table(nuc_data, build_dir=""):
     build_filename = os.path.join(build_dir, 'nds-fpyield.html')
     with open(build_filename, 'r') as f:
         raw_data = f.read()
-    spdat = raw_data.split("<table>")
+    spdat = raw_data.split('<table>')
     alldata = []
     for i in range(1, 31, 5):
         alldata.append(readtable(i, spdat))
@@ -152,7 +152,7 @@ def make_fpy_table(nuc_data, build_dir=""):
     db.close()
 
 
-def grab_fpy(build_dir="", file_out='nds-fpyield.html'):
+def grab_fpy(build_dir='', file_out='nds-fpyield.html'):
     """Grabs the NDS fission product yields from the IAEA website
     """
     build_filename = os.path.join(build_dir, file_out)
@@ -177,7 +177,7 @@ def make_fpy(args):
             print('skipping NDS fission product yield table creation; '
                   'already exists.')
             return
-    print("Grabbing NDS fission product yield data.")
+    print('Grabbing NDS fission product yield data.')
     grab_fpy(build_dir)
 
     print('Making NDS fission product yield table.')
