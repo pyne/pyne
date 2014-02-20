@@ -1,5 +1,5 @@
-#ifndef _PYNE_DAGMC_BRIDGE_
-#define _PYNE_DAGMC_BRIDGE_
+#ifndef PYNE_SKQ36P4BFNE3VI6VHVADCDT4VQ
+#define PYNE_SKQ36P4BFNE3VI6VHVADCDT4VQ
 
 /* Types.hpp may be validly included from C code */
 #include <moab/Types.hpp>
@@ -69,4 +69,4 @@ ErrorCode get_volume_boundary(EntityHandle vol, vec3 minPt, vec3 maxPt);
 } // extern "C"
 #endif
 
-#endif /* _PYNE_DAGMC_BRIDGE_ */
+#endif /* PYNE_SKQ36P4BFNE3VI6VHVADCDT4VQ */

@@ -62,11 +62,11 @@ def grab_materials_compendium(location = 'materials_compendium.csv'):
     def elemental_row(row):
         if re.match('[A-Z][a-z]?-?(\d{1,3})?$', row[0]):
             element = nucname.id(row[0])
-            weight_frac = row[3]
+            mass_frac = row[3]
             if nucname.name(element) in elemental_mats:
                 composition.update(elemental_mats[row[0]])
             else:
-                composition[element] = float(weight_frac)
+                composition[element] = float(mass_frac)
             nucids.add(element)
         else:
             pass
@@ -134,6 +134,6 @@ def make_materials_library(args):
     grab_materials_compendium(os.path.join(os.path.split(__file__)[0], 
                               'materials_compendium.csv'))
 
-    # Make atomic weight table once we have the array
+    # Make atomic mass table once we have the array
     print("Making materials library...")
     make_materials_compendium(nuc_data)

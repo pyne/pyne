@@ -26,10 +26,10 @@ import itertools
 
 import numpy as np
 
-from .material import Material
-from .material import MultiMaterial
+from pyne.material import Material
+from pyne.material import MultiMaterial
 from pyne import nucname
-from binaryreader import _BinaryReader, _FortranRecord
+from pyne.binaryreader import _BinaryReader, _FortranRecord
 
 # Mesh specific imports
 try:
@@ -169,6 +169,7 @@ class SurfSrc(_BinaryReader):
         Path to surface source file being read or written.
     mode : str, optional
         String indicating file opening mode to be used (defaults to 'rb').
+
     """
 
     def __init__(self, filename, mode="rb"):
@@ -184,6 +185,7 @@ class SurfSrc(_BinaryReader):
         -------
         header_string : str
             A line-by-line listing of the contents of the SurfSrc's header.
+
         """
         header_string = "Code: {0} (version: {1}) [{2}]\n".format(
             self.kod, self.ver, self.loddat)
@@ -255,8 +257,7 @@ class SurfSrc(_BinaryReader):
 #        return self.__dict__ == other.__dict__
 
     def __cmp__(self, other):
-        """ Comparison is not completely robust
-            Tracklists are not compared!!!
+        """ Comparison is not completely robust. Tracklists are not compared!!!
         """
 
         if other.kod != self.kod:
@@ -323,8 +324,7 @@ class SurfSrc(_BinaryReader):
 
     def read_header(self):
         """Read in the header block data. This block comprises 4 fortran
-        records which we refer to as:
-        header, table1, table2, summary.
+        records which we refer to as: header, table1, table2, summary.
         """
         # read header record
         header = self.get_fortran_record()
@@ -364,6 +364,9 @@ class SurfSrc(_BinaryReader):
                                                    # 11 otherwise
             self.njsw = tablelengths.get_int()[0]  # number of surfaces
             self.niss = tablelengths.get_int()[0]  # #histories to surf src
+            self.table1extra = list()
+            while tablelengths.num_bytes > tablelengths.pos:
+                self.table1extra += tablelengths.get_int()
 
         elif 'SF_00001' in self.kod:
             header = self.get_fortran_record()
@@ -385,6 +388,9 @@ class SurfSrc(_BinaryReader):
             self.ncrd = tablelengths.get_int()[0]      # histories to surf.src
             self.njsw = tablelengths.get_int()[0]      # number of surfaces
             self.niss = tablelengths.get_int()[0]      # histories to surf.src
+            self.table1extra = list()
+            while tablelengths.num_bytes > tablelengths.pos:
+                self.table1extra += tablelengths.get_int()
 
         if self.np1 < 0:
             # read table 2 record; more size info
@@ -393,7 +399,7 @@ class SurfSrc(_BinaryReader):
             self.niwr = tablelengths.get_int()[0]   # #cells in surf.src card
             self.mipts = tablelengths.get_int()[0]  # source particle type
             self.kjaq = tablelengths.get_int()[0]   # macrobody facet flag
-            self.table2extra = []
+            self.table2extra = list()
             while tablelengths.num_bytes > tablelengths.pos:
                 self.table2extra += tablelengths.get_int()
 
@@ -406,7 +412,7 @@ class SurfSrc(_BinaryReader):
         self.np1 = abs(self.np1)
 
         # get info for each surface
-        self.surflist = []
+        self.surflist = list()
         for j in range(self.njsw):
             # read next surface info record
             self.surfaceinfo = self.get_fortran_record()
@@ -435,7 +441,7 @@ class SurfSrc(_BinaryReader):
         summary_info = self.get_fortran_record()
         self.summary_table = summary_info.get_int(
             (2+4*self.mipts)*(self.njsw+self.niwr)+1)
-        self.summary_extra = []
+        self.summary_extra = list()
         while summary_info.num_bytes > summary_info.pos:
             self.summary_extra += summary_info.get_int()
 
@@ -470,7 +476,6 @@ class SurfSrc(_BinaryReader):
         if 'SF_00001' in self.kod:
             rec = [self.kod]
             newrecord = _FortranRecord("".join(rec), len("".join(rec)))
-            newrecord.put_int([self.knod])
             self.put_fortran_record(newrecord)
 
             rec = [self.ver, self.loddat, self.idtm, self.probid, self.aid]
@@ -499,6 +504,7 @@ class SurfSrc(_BinaryReader):
         newrecord.put_int([self.ncrd])
         newrecord.put_int([self.njsw])
         newrecord.put_int([self.niss])  # MCNP needs 'int', could be 'long' ?
+        newrecord.put_int(self.table1extra)
         self.put_fortran_record(newrecord)
         return
 
@@ -530,7 +536,7 @@ class SurfSrc(_BinaryReader):
         return
 
     def put_summary(self):
-        """ Write the summary part of the header to the surface source file"""
+        """Write the summary part of the header to the surface source file"""
         newrecord = _FortranRecord("", 0)
         newrecord.put_int(list(self.summary_table))
         newrecord.put_int(list(self.summary_extra))
@@ -538,9 +544,8 @@ class SurfSrc(_BinaryReader):
         return
 
     def write_header(self):
-        """Write the first part of the MCNP surface source file.
-        
-        The header content comprises five parts shown below.
+        """Write the first part of the MCNP surface source file. The header content 
+        comprises five parts shown below.
         """
         self.put_header()
         self.put_table_1()
@@ -549,10 +554,8 @@ class SurfSrc(_BinaryReader):
         self.put_summary()
 
     def write_tracklist(self):
-        """Write track records for individual particles.
-
-        Second part of the MCNP surface source file.
-        Tracklist is also known as a 'phase space'.
+        """Write track records for individual particles. Second part of the MCNP 
+        surface source file.  Tracklist is also known as a 'phase space'.
         """
 
         for j in range(self.nrss):  # nrss is the size of tracklist
@@ -617,6 +620,7 @@ class Srctp(_BinaryReader):
     ----------
     filename : str
         Path to Srctp file being worked with.
+
     """
 
     def __init__(self, filename):
@@ -727,7 +731,7 @@ class Xsdir(object):
         words = line.split()
         assert len(words) == 3
         assert words[0].lower() == 'atomic'
-        assert words[1].lower() == 'weight'
+        assert words[1].lower() == 'mass'
         assert words[2].lower() == 'ratios'
 
         while True:
@@ -795,6 +799,20 @@ class Xsdir(object):
     def __iter__(self):
         for table in self.tables:
             yield table
+
+    def nucs(self):
+        """Provides a set of the valid nuclide ids for nuclides contained
+        in the xsdir.
+
+        Returns
+        -------
+        valid_nucs : set
+            The valid nuclide ids.
+        """
+         
+        valid_nucs = set(nucname.id(nuc) for nuc in self.awr.keys() 
+                   if nucname.isnuclide(nuc))
+        return valid_nucs
 
 
 class XsdirTable(object):
@@ -919,7 +937,7 @@ class PtracReader(object):
             24: "vvv",  # cos(y-direction)
             25: "www",  # cos(z-direction)
             26: "erg",  # energy
-            27: "wgt",  # weight
+            27: "wgt",  # mass
             28: "tme"
         }
 
@@ -1361,8 +1379,7 @@ class Wwinp(Mesh):
     Attributes
     ----------
     ni : number of integers on card 2.
-        ni = 1 for neutron WWINPs, ni = 2 for photon WWINPs
-        or neutron + photon WWINPs.
+        ni = 1 for neutron WWINPs, ni = 2 for photon WWINPs or neutron + photon WWINPs.
     nr : int
         10 for rectangular, 16 for cylindrical.
     ne : list of number of energy groups for neutrons and photons.
@@ -1392,7 +1409,7 @@ class Wwinp(Mesh):
         of spacial bounds in the i, j, k dimensions.
     mesh : Mesh object
         with a structured mesh containing all the neutron and/or
-        photon weight window lower bounds. These tags have the form
+        photon mass window lower bounds. These tags have the form
         "ww_X" where X is n or p The mesh has rootSet tags in the form
         X_e_upper_bounds.
 
@@ -1749,10 +1766,10 @@ class Meshtal(object):
     provides key/value access to invidial MeshTally objects.
 
     Attributes
-    ==========
+    ----------
     filename : string
         Path to an MCNP meshtal file
-    version: float
+    version : float
         The MCNP verison number
     ld : string
         The MCNP verison date
@@ -1820,11 +1837,11 @@ class MeshTally(StatMesh):
 
     Attributes
     ----------
-    tally number : int
+    tally_number : int
         The MCNP tally number. Must end in 4 (e.g. 4, 14, 214).
     particle : string
         Either "n" for a neutron mesh tally or "p" for a photon mesh tally.
-    dose response : bool
+    dose_response : bool
         True is the tally is modified by a dose response function.
     x_bounds : list of floats
         The locations of mesh vertices in the x direction.
@@ -1838,8 +1855,11 @@ class MeshTally(StatMesh):
         An iMesh instance tagged with all results and
         relative errors
 
-    Note: All Mesh attributes are also present via a super() call to
+    Notes
+    -----
+    All Mesh attributes are also present via a super() call to
     Mesh.__init__().
+
     """
 
     def __init__(self, f, tally_number):
@@ -1975,20 +1995,20 @@ def mesh_to_geom(mesh, frac_type='mass', title_card="Generated from PyNE Mesh"):
     Parameters
     ----------
     mesh : PyNE Mesh object
-       A structured Mesh object with materials and valid densities.
+        A structured Mesh object with materials and valid densities.
     frac_type : str, optional
-       Either 'mass' or 'atom'. The type of fraction to use for the material
-       definition.
+        Either 'mass' or 'atom'. The type of fraction to use for the material
+        definition.
     title_card : str, optional
-       The MCNP title card to appear at the top of the input file.
+        The MCNP title card to appear at the top of the input file.
    
-   Returns
-   -------
-   geom : str
-       The title, cell, surface, and material cards of an MCNP input file in
-       the proper order.
-   """
+    Returns
+    -------
+    geom : str
+        The title, cell, surface, and material cards of an MCNP input file in
+        the proper order.
 
+    """
     mesh._structured_check()
     divs = (mesh.structured_get_divisions('x'),
             mesh.structured_get_divisions('y'),

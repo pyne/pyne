@@ -6,7 +6,7 @@ project( pyne )
 
 # Make the scripts available in the 'cmake' directory available for the
 # 'include()' command, 'find_package()' command.
-set( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_LIST_DIR}/cmake )
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 
 #Default to release build type
 set(CMAKE_BUILD_TYPE Release)
@@ -79,7 +79,7 @@ message("-- RPATH: ${CMAKE_INSTALL_RPATH}")
 
 # find numpy and include the numpy headers
 find_package(Numpy REQUIRED)
-include_directories(${NUMPY_INCLUDE_DIR})
+include_directories("${NUMPY_INCLUDE_DIR}")
 
 # Add JsonCpp Flag
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DJSON_IS_AMALGAMATION")
@@ -95,10 +95,10 @@ endif(${IS_CI})
 # no-longer needed in the build tree.  However, with pure *.py source, the
 # source is processed directly.  To handle this, we reproduce the availability
 # of the source files in the build tree.
-add_custom_target( ReplicatePythonSourceTree ALL ${CMAKE_COMMAND} -P
-  ${CMAKE_CURRENT_SOURCE_DIR}/cmake/ReplicatePythonSourceTree.cmake
-  ${CMAKE_CURRENT_BINARY_DIR}
-  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} )
+add_custom_target(ReplicatePythonSourceTree ALL "${CMAKE_COMMAND}" -P
+  "${CMAKE_CURRENT_SOURCE_DIR}/cmake/ReplicatePythonSourceTree.cmake"
+  "${CMAKE_CURRENT_BINARY_DIR}"
+  WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}")
 
 add_subdirectory(cpp)
 add_subdirectory(pyne)
@@ -109,21 +109,21 @@ get_property(inc_dirs DIRECTORY PROPERTY INCLUDE_DIRECTORIES)
 message("-- C_INCLUDE_PATH for ${CMAKE_CURRENT_SOURCE_DIR}: ${inc_dirs}")
 
 message("-- Copying C/C++ header files.")
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/cpp/ DESTINATION
-    ${CMAKE_BINARY_DIR}/pyne/include/ FILES_MATCHING PATTERN "*.h")
+file(COPY "${CMAKE_CURRENT_SOURCE_DIR}/cpp/" DESTINATION
+    "${CMAKE_BINARY_DIR}/pyne/include/" FILES_MATCHING PATTERN "*.h")
 
 message("-- Copying Cython header files.")
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/pyne/ 
-    DESTINATION ${CMAKE_BINARY_DIR}/pyne/
+file(COPY "${CMAKE_CURRENT_SOURCE_DIR}/pyne/"
+    DESTINATION "${CMAKE_BINARY_DIR}/pyne/"
     FILES_MATCHING PATTERN "*.pxd"
                    PATTERN "lib" EXCLUDE
                    PATTERN "include" EXCLUDE)
 
 message("-- Copying scripts.")
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/scripts DESTINATION ${CMAKE_BINARY_DIR})
+file(COPY "${CMAKE_CURRENT_SOURCE_DIR}/scripts" DESTINATION "${CMAKE_BINARY_DIR}")
 
 # Add cython version info to source tree
 message("-- Making Metadata.")
-execute_process(COMMAND ${PYTHON_EXECUTABLE} 
-                        ${CMAKE_CURRENT_SOURCE_DIR}/configure.py metadata)
+execute_process(COMMAND "${PYTHON_EXECUTABLE}"
+                        "${CMAKE_CURRENT_SOURCE_DIR}/configure.py" metadata)
 

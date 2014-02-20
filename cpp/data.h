@@ -3,8 +3,8 @@
 ///
 /// \brief Implements basic nuclear data functions.
 
-#ifndef _TEWK4A7VOFFLHDDXD5ZZ7KPXEQ
-#define _TEWK4A7VOFFLHDDXD5ZZ7KPXEQ
+#ifndef PYNE_TEWK4A7VOFFLHDDXD5ZZ7KPXEQ
+#define PYNE_TEWK4A7VOFFLHDDXD5ZZ7KPXEQ
 #include <iostream>
 #include <string>
 #include <utility>
@@ -16,12 +16,13 @@
 
 #include "hdf5.h"
 #include "hdf5_hl.h"
+
+#ifndef PYNE_IS_AMALGAMATED
 #include "h5wrap.h"
-
 #include "extra_types.h"
-
 #include "pyne.h"
 #include "nucname.h"
+#endif
 
 namespace pyne
 {
@@ -45,13 +46,13 @@ namespace pyne
   /// Mapping from nuclides in id form to their atomic masses.
   extern std::map<int, double> atomic_mass_map;
 
-  /// a struct matching the atomic_weight table in nuc_data.h5.
-  typedef struct atomic_weight_struct {
+  /// a struct matching the atomic_mass table in nuc_data.h5.
+  typedef struct atomic_mass_struct {
     int nuc;      ///< nuclide in id form
     double mass;  ///< nuclide atomic mass [amu]
     double error; ///< error in atomic mass [amu]
     double abund; ///< natural abundance of nuclide [atom fraction]
-  } atomic_weight_struct; 
+  } atomic_mass_struct; 
 
   // Loads preset dataset hashes into memory.
   std::map<std::string, std::string> get_data_checksums();
