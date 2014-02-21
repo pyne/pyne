@@ -1,5 +1,8 @@
+.. _devsguide_unittest:
+
+================
 How to Unit Test  
------------------
+================
 
 First, install nose:
 http://nose.readthedocs.org/en/latest/

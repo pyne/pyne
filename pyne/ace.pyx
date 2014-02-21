@@ -109,7 +109,7 @@ class Library(object):
                 return
             self.f.seek(start_position)
 
-            # Read name, atomic weight ratio, temperature, date, comment, and
+            # Read name, atomic mass ratio, temperature, date, comment, and
             # material
             name, awr, temp, date, comment, mat = \
                 struct.unpack('=10sdd10s70s10s', self.f.read(116))
@@ -182,7 +182,7 @@ class Library(object):
         lines = [f.readline() for i in range(13)]
 
         while (0 != len(lines)) and (lines[0] != ''):
-            # Read name of table, atomic weight ratio, and temperature. If first
+            # Read name of table, atomic mass ratio, and temperature. If first
             # line is empty, we are at end of file
             words = lines[0].split()
             name = words[0]
@@ -297,13 +297,13 @@ class NeutronTable(AceTable):
     name : str
         ZAID identifier of the table, e.g. '92235.70c'.
     awr : float
-        Atomic weight ratio of the target nuclide.
+        Atomic mass ratio of the target nuclide.
     temp : float
         Temperature of the target nuclide in eV.
     
     :Attributes:
       **awr** : float
-        Atomic weight ratio of the target nuclide.
+        Atomic mass ratio of the target nuclide.
 
       **energy** : list of floats
         The energy values (MeV) at which reaction cross-sections are tabulated.
@@ -1274,13 +1274,13 @@ class SabTable(AceTable):
     name : str
         ZAID identifier of the table, e.g. lwtr.10t.
     awr : float
-        Atomic weight ratio of the target nuclide.
+        Atomic mass ratio of the target nuclide.
     temp : float
         Temperature of the target nuclide in eV.
 
     :Attributes:
       **awr** : float
-        Atomic weight ratio of the target nuclide.
+        Atomic mass ratio of the target nuclide.
 
       **elastic_e_in** : list of floats
         Incoming energies in MeV for which the elastic cross section is

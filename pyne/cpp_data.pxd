@@ -7,6 +7,13 @@ from libcpp.utility cimport pair
 cimport extra_types
 
 cdef extern from "data.h" namespace "pyne":
+    # Mathematical constants
+    double pi
+    double N_A
+    double barns_per_cm2
+    double cm2_per_barn
+    double sec_per_day
+
     # hash map and initialization function
     map[std_string, std_string] data_checksums
     
@@ -38,6 +45,12 @@ cdef extern from "data.h" namespace "pyne":
     double b(char *) except +
     double b(std_string) except +
 
+    # fission product data
+    map[pair[int, int], double] wimsdfpy_data
+    double fpyield(pair[int, int]) except +
+    double fpyield(int, int) except +
+    double fpyield(char *, char *) except +
+    double fpyield(std_string, std_string) except +
 
     # decay data functions
     map[int, double] half_life_map

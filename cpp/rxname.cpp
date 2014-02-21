@@ -1,4 +1,6 @@
+#ifndef PYNE_IS_AMALGAMATED
 #include "rxname.h"
+#endif
 
 std::string pyne::rxname::_names[NUM_RX_NAMES] = {
   "total",

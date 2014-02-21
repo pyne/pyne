@@ -495,45 +495,64 @@ class Mesh(object):
     Attributes
     ----------
     mesh : iMesh instance
-    mesh_file : string
-        File name of file containing iMesh instance.
     structured : bool
         True for structured mesh.
     structured_coords : list of lists
         A list containing lists of x_points, y_points and z_points that make up
         a structured mesh. 
-    structured_set : iMesh entity set handle
-        A preexisting structured entity set on an iMesh instance with a
-        "BOX_DIMS" tag.
-
-        Unstructured mesh instantiation:
-             - From iMesh instance by specifying: <mesh>
-             - From mesh file by specifying: <mesh_file>
-
-        Structured mesh instantiation:
-            - From iMesh instance with exactly 1 entity set (with BOX_DIMS tag)
-              by specifying <mesh> and structured = True.
-            - From mesh file with exactly 1 entity set (with BOX_DIMS tag) by
-              specifying <mesh_file> and structured = True.
-            - From an imesh instance with multiple entity sets by specifying 
-              <mesh>, <structured_set>, structured=True.
-            - From coordinates by specifying <structured_coords>,
-              structured=True, and optional preexisting iMesh instance <mesh>
-
-        The "BOX_DIMS" tag on iMesh instances containing structured mesh is
-        a vector of floats it the following form:
-        [i_min, j_min, k_min, i_max, j_max, k_max]
-        where each value is a volume element index number. Typically volume 
-        elements should be indexed from 0. The "BOX_DIMS" information is stored
-        in self.dims.
-    mats : MaterialLibrary or dict or Materials or None
-        This is a mapping of volume element handles to Material objects.
-
+    structured_ordering : str
+        A three character string denoting the iteration order of the mesh (e.g.
+        'xyz', meaning z changest fastest, then y, then x.)
     """
 
 
     def __init__(self, mesh=None, mesh_file=None, structured=False, \
-                 structured_coords=None, structured_set=None, mats=None):
+                 structured_coords=None, structured_set=None, 
+                 structured_ordering='xyz', mats=None):
+        """
+        Parameters
+        ----------
+        mesh : iMesh instance, optional
+        mesh_file : str, optional
+            File name of file containing iMesh instance.
+        structured : bool, optional
+            True for structured mesh.
+        structured_coords : list of lists, optional
+            A list containing lists of x_points, y_points and z_points that make up
+            a structured mesh. 
+        structured_set : iMesh entity set handle, optional
+            A preexisting structured entity set on an iMesh instance with a
+            "BOX_DIMS" tag.
+        structured_ordering : str, optional
+            A three character string denoting the iteration order of the mesh (e.g.
+            'xyz', meaning z changest fastest, then y, then x.)
+        mats : MaterialLibrary or dict or Materials or None, optional
+            This is a mapping of volume element handles to Material objects.
+    
+            Unstructured mesh instantiation:
+                 - From iMesh instance by specifying: <mesh>
+                 - From mesh file by specifying: <mesh_file>
+    
+            Structured mesh instantiation:
+                - From iMesh instance with exactly 1 entity set (with BOX_DIMS tag)
+                  by specifying <mesh> and structured = True.
+                - From mesh file with exactly 1 entity set (with BOX_DIMS tag) by
+                  specifying <mesh_file> and structured = True.
+                - From an imesh instance with multiple entity sets by specifying 
+                  <mesh>, <structured_set>, structured=True.
+                - From coordinates by specifying <structured_coords>,
+                  structured=True, and optional preexisting iMesh instance <mesh>
+    
+            The "BOX_DIMS" tag on iMesh instances containing structured mesh is
+            a vector of floats it the following form:
+            [i_min, j_min, k_min, i_max, j_max, k_max]
+            where each value is a volume element index number. Typically volume 
+            elements should be indexed from 0. The "BOX_DIMS" information is stored
+            in self.dims.
+    
+        """
+
+
         if mesh:
             self.mesh = mesh
         else: 
@@ -562,6 +581,7 @@ class Mesh(object):
 
         #structured mesh cases
         elif self.structured:
+            self.structured_ordering = structured_ordering
             #From mesh or mesh_file
             if (mesh or mesh_file) and not structured_coords \
                                    and not structured_set:
@@ -628,15 +648,19 @@ class Mesh(object):
         self.mats = mats
 
         # tag with volume id and ensure mats exist.
-        ves = list(self.mesh.iterate(iBase.Type.region, iMesh.Topology.all))
+        if self.structured:
+            ves = list(self.structured_iterate_hex(self.structured_ordering))
+        else:
+            ves = list(self.mesh.iterate(iBase.Type.region, iMesh.Topology.all))
+
         tags = self.mesh.getAllTags(ves[0])
         tags = set(tag.name for tag in tags)
-        if 've_idx' in tags:
-            tag_ve_idx = self.mesh.getTagHandle('ve_idx')
+        if 'idx' in tags:
+            tag_idx = self.mesh.getTagHandle('idx')
         else:
-            tag_ve_idx = self.mesh.createTag('ve_idx', 1, int)
+            tag_idx = self.mesh.createTag('idx', 1, int)
         for i, ve in enumerate(ves):
-            tag_ve_idx[ve] = i
+            tag_idx[ve] = i
             if i not in mats:
                 mats[i] = Material()
         self._len = i + 1
@@ -668,7 +692,7 @@ class Mesh(object):
         self.density = MaterialPropertyTag(mesh=self, name='density', 
                                            doc='the density [g/cc]')
         # Material method tags
-        methtagnames = ('expand_elements', 'mass_density', 'molecular_weight', 
+        methtagnames = ('expand_elements', 'mass_density', 'molecular_mass', 
                         'mult_by_mass', 'number_density', 'sub_act', 'sub_fp', 
                         'sub_lan', 'sub_ma', 'sub_tru', 'to_atom_frac')
         for name in methtagnames:
@@ -850,7 +874,7 @@ class Mesh(object):
         self_tags = set(x.name for x in self_tags)
         other_tags = set(x.name for x in other_tags)
         intersect = self_tags & other_tags
-        intersect.discard('ve_idx')
+        intersect.discard('idx')
         return intersect
                            
     def __copy__(self):
@@ -1013,6 +1037,26 @@ class Mesh(object):
             ijk = [A[ordmap[x]] for x in range(3)]
             yield self.structured_hex_volume(*ijk)
 
+    def iter_structured_idx(self, order=None):
+        """Return an iterater object of volume element indexes (idx) for any
+        iteration order. Note that idx is assigned upon instantiation in the 
+        order of the structured_ordering attribute. This method is meant to be
+        used when the order argument is different from structured_ordering.
+        When they are the same, the iterator (0, 1, 2, ... N-1) is returned.
+
+        Parameters
+        ----------
+        order : str, optional
+            The requested iteration order (e.g. 'zyx').
+        """
+        self._structured_check()
+        if not order:
+            order = self.structured_ordering
+
+        ves = self.structured_iterate_hex(order)
+        tag = self.mesh.getTagHandle('idx')
+        for ve in ves:
+            yield tag[ve]
 
     def structured_get_divisions(self, dim):
         """Get the mesh divisions on a given dimension
