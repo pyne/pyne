@@ -179,6 +179,7 @@ def check_put_header_block(ssrname, sswname):
         ssw.ncrd = ssr.ncrd
         ssw.njsw = ssr.njsw
         ssw.niss = ssr.niss
+        ssw.table1extra = ssr.table1extra
         # table 2 record values
         ssw.niwr = ssr.niwr
         ssw.mipts = ssr.mipts
@@ -1037,3 +1038,65 @@ def test_multiple_meshtally_meshtal():
         written = meshtal_object.tally[34].mesh.getTagHandle("p_rel_error")[v_e]
         expected = expected_sm_34.mesh.getTagHandle("p_rel_error")[expected_v_e]
         assert_array_equal(written, expected)
+
+def test_mesh_to_geom():
+
+    if not HAVE_PYTAPS:
+        raise SkipTest
+
+    mats = {
+        0: Material({'H1': 1.0, 'K39': 1.0}, density=42.0),
+        1: Material({'H1': 0.1, 'O16': 1.0}, density=43.0),
+        2: Material({'He4': 42.0}, density=44.0),
+        3: Material({'Tm171': 171.0}, density=45.0),
+        4: Material({'C12': 1.0}, density=47.0),
+        5: Material({'1002': 1.0}, density=5.0),
+        }
+
+    m = Mesh(structured_coords=[[0, 1, 2, 3], [0, 1, 2], [0, 1]], mats=mats, 
+             structured=True)
+    
+    geom = mcnp.mesh_to_geom(m)
+
+    exp_geom = (
+    "Generated from PyNE Mesh\n"
+    "1 1 42.0 1 -2 5 -6 8 -9\n"
+    "2 2 43.0 1 -2 6 -7 8 -9\n"
+    "3 3 44.0 2 -3 5 -6 8 -9\n"
+    "4 4 45.0 2 -3 6 -7 8 -9\n"
+    "5 5 47.0 3 -4 5 -6 8 -9\n"
+    "6 6 5.0 3 -4 6 -7 8 -9\n"
+    "7 0 -1:4:-5:7:-8:9\n"
+    "\n"
+    "1 px 0.0\n"
+    "2 px 1.0\n"
+    "3 px 2.0\n"
+    "4 px 3.0\n"
+    "5 py 0.0\n"
+    "6 py 1.0\n"
+    "7 py 2.0\n"
+    "8 pz 0.0\n"
+    "9 pz 1.0\n"
+    "\n"
+    "C density = 42.0\n"
+    "m1\n"
+    "     1001 -5.0000E-01\n"
+    "     19039 -5.0000E-01\n"
+    "C density = 43.0\n"
+    "m2\n"
+    "     1001 -9.0909E-02\n"
+    "     8016 -9.0909E-01\n"
+    "C density = 44.0\n"
+    "m3\n"
+    "     2004 -1.0000E+00\n"
+    "C density = 45.0\n"
+    "m4\n"
+    "     69171 -1.0000E+00\n"
+    "C density = 47.0\n"
+    "m5\n"
+    "     6012 -1.0000E+00\n"
+    "C density = 5.0\n"
+    "m6\n"
+    "     1002 -1.0000E+00\n")
+
+    assert_equal(geom, exp_geom)

@@ -1,7 +1,18 @@
 // Implements basic nuclear data functions.
-
+#ifndef PYNE_IS_AMALGAMATED
 #include "data.h"
+#endif
 
+
+//
+// Math Helpers
+//
+
+const double pyne::pi = 3.14159265359;
+const double pyne::N_A = 6.0221415e+23;
+const double pyne::barns_per_cm2 = 1e24;
+const double pyne::cm2_per_barn = 1e-24;
+const double pyne::sec_per_day = 24.0 * 3600.0;
 
 /********************************/
 /*** data_checksums Functions ***/
@@ -12,7 +23,7 @@ std::map<std::string, std::string> pyne::get_data_checksums()
     std::map<std::string, std::string> temp_map;
     // Initialization of dataset hashes
     temp_map["/atomic_decay"]="09bf73252629077785e20b3532fde8b3";
-    temp_map["/atomic_weight"]="10edfdc662e35bdfab91beb89285efff";
+    temp_map["/atomic_mass"]="10edfdc662e35bdfab91beb89285efff";
     temp_map["/material_library"]="8b10864378fbd88538434679acf908cc";
     temp_map["/neutron/eaf_xs"]="29622c636c4a3a46802207b934f9516c";
     temp_map["/neutron/scattering_lengths"]="a24d391cc9dc0fc146392740bb97ead4";
@@ -41,45 +52,47 @@ void pyne::_load_atomic_mass_map()
     throw h5wrap::FileNotHDF5(pyne::NUC_DATA_PATH);
 
   // Get the HDF5 compound type (table) description
-  hid_t desc = H5Tcreate(H5T_COMPOUND, sizeof(atomic_weight_struct));
-  H5Tinsert(desc, "nuc",   HOFFSET(atomic_weight_struct, nuc),   H5T_NATIVE_INT);
-  H5Tinsert(desc, "mass",  HOFFSET(atomic_weight_struct, mass),  H5T_NATIVE_DOUBLE);
-  H5Tinsert(desc, "error", HOFFSET(atomic_weight_struct, error), H5T_NATIVE_DOUBLE);
-  H5Tinsert(desc, "abund", HOFFSET(atomic_weight_struct, abund), H5T_NATIVE_DOUBLE);
+  hid_t desc = H5Tcreate(H5T_COMPOUND, sizeof(atomic_mass_struct));
+  H5Tinsert(desc, "nuc",   HOFFSET(atomic_mass_struct, nuc),   H5T_NATIVE_INT);
+  H5Tinsert(desc, "mass",  HOFFSET(atomic_mass_struct, mass),  H5T_NATIVE_DOUBLE);
+  H5Tinsert(desc, "error", HOFFSET(atomic_mass_struct, error), H5T_NATIVE_DOUBLE);
+  H5Tinsert(desc, "abund", HOFFSET(atomic_mass_struct, abund), H5T_NATIVE_DOUBLE);
 
   // Open the HDF5 file
   hid_t nuc_data_h5 = H5Fopen(pyne::NUC_DATA_PATH.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT);
 
   // Open the data set
-  hid_t atomic_weight_set = H5Dopen2(nuc_data_h5, "/atomic_weight", H5P_DEFAULT);
-  hid_t atomic_weight_space = H5Dget_space(atomic_weight_set);
-  int atomic_weight_length = H5Sget_simple_extent_npoints(atomic_weight_space);
+  hid_t atomic_mass_set = H5Dopen2(nuc_data_h5, "/atomic_mass", H5P_DEFAULT);
+  hid_t atomic_mass_space = H5Dget_space(atomic_mass_set);
+  int atomic_mass_length = H5Sget_simple_extent_npoints(atomic_mass_space);
 
   // Read in the data
-  atomic_weight_struct * atomic_weight_array = new atomic_weight_struct[atomic_weight_length];
-  H5Dread(atomic_weight_set, desc, H5S_ALL, H5S_ALL, H5P_DEFAULT, atomic_weight_array);
+  atomic_mass_struct * atomic_mass_array = new atomic_mass_struct[atomic_mass_length];
+  H5Dread(atomic_mass_set, desc, H5S_ALL, H5S_ALL, H5P_DEFAULT, atomic_mass_array);
 
   // close the nuc_data library, before doing anythng stupid
-  H5Dclose(atomic_weight_set);
+  H5Dclose(atomic_mass_set);
   H5Fclose(nuc_data_h5);
 
   // Ok now that we have the array of stucts, put it in the map
-  for(int n = 0; n < atomic_weight_length; n++){
-    atomic_mass_map[atomic_weight_array[n].nuc] = atomic_weight_array[n].mass;
-    natural_abund_map[atomic_weight_array[n].nuc] = atomic_weight_array[n].abund;
+  for(int n = 0; n < atomic_mass_length; n++){
+    atomic_mass_map[atomic_mass_array[n].nuc] = atomic_mass_array[n].mass;
+    natural_abund_map[atomic_mass_array[n].nuc] = atomic_mass_array[n].abund;
   }
+
+  delete[] atomic_mass_array;
 };
 
 
 double pyne::atomic_mass(int nuc)
 {
-  // Find the nuclide's weight in AMU
+  // Find the nuclide's mass in AMU
   std::map<int, double>::iterator nuc_iter, nuc_end;
 
   nuc_iter = atomic_mass_map.find(nuc);
   nuc_end = atomic_mass_map.end();
 
-  // First check if we already have the nuc weight in the map
+  // First check if we already have the nuc mass in the map
   if (nuc_iter != nuc_end)
     return (*nuc_iter).second;
 
@@ -100,7 +113,7 @@ double pyne::atomic_mass(int nuc)
   int nucid = nucname::id(nuc);
 
   // If in an excited state, return the ground
-  // state weight...not strictly true, but good guess.
+  // state mass...not strictly true, but good guess.
   if (0 < nucid%10000)
   {
     aw = atomic_mass((nucid/10000)*10000);
@@ -145,7 +158,7 @@ double pyne::natural_abund(int nuc)
   nuc_iter = natural_abund_map.find(nuc);
   nuc_end = natural_abund_map.end();
 
-  // First check if we already have the nuc weight in the map
+  // First check if we already have the nuc mass in the map
   if (nuc_iter != nuc_end)
     return (*nuc_iter).second;
 
@@ -255,6 +268,8 @@ void pyne::_load_scattering_lengths()
     b_coherent_map[scat_len_array[n].nuc] = scat_len_array[n].b_coherent;
     b_incoherent_map[scat_len_array[n].nuc] = scat_len_array[n].b_incoherent;
   };
+
+  delete[] scat_len_array;
 };
 
 
@@ -458,9 +473,101 @@ double pyne::b(std::string nuc)
 
 
 
+//
+// Fission Product Yield Data 
+//
+std::map<std::pair<int, int>, double> pyne::wimsdfpy_data = \
+  std::map<std::pair<int, int>, double>();
+
+void pyne::_load_wimsdfpy() {
+  herr_t status;
+
+  //Check to see if the file is in HDF5 format.
+  if (!pyne::file_exists(pyne::NUC_DATA_PATH))
+    throw pyne::FileNotFound(pyne::NUC_DATA_PATH);
+
+  bool ish5 = H5Fis_hdf5(pyne::NUC_DATA_PATH.c_str());
+  if (!ish5)
+    throw h5wrap::FileNotHDF5(pyne::NUC_DATA_PATH);
+
+  // Get the HDF5 compound type (table) description
+  hid_t desc = H5Tcreate(H5T_COMPOUND, sizeof(wimsdfpy_struct));
+  status = H5Tinsert(desc, "from_nuc", HOFFSET(wimsdfpy_struct, from_nuc), 
+                     H5T_NATIVE_INT);
+  status = H5Tinsert(desc, "to_nuc", HOFFSET(wimsdfpy_struct, to_nuc), 
+                     H5T_NATIVE_INT);
+  status = H5Tinsert(desc, "yields", HOFFSET(wimsdfpy_struct, yields),
+                     H5T_NATIVE_DOUBLE);
+
+  // Open the HDF5 file
+  hid_t nuc_data_h5 = H5Fopen(pyne::NUC_DATA_PATH.c_str(), H5F_ACC_RDONLY, 
+                              H5P_DEFAULT);
+
+  // Open the data set
+  hid_t wimsdfpy_set = H5Dopen2(nuc_data_h5, "/neutron/wimsd_fission_products", 
+                                H5P_DEFAULT);
+  hid_t wimsdfpy_space = H5Dget_space(wimsdfpy_set);
+  int wimsdfpy_length = H5Sget_simple_extent_npoints(wimsdfpy_space);
+
+  // Read in the data
+  wimsdfpy_struct * wimsdfpy_array = new wimsdfpy_struct[wimsdfpy_length];
+  status = H5Dread(wimsdfpy_set, desc, H5S_ALL, H5S_ALL, H5P_DEFAULT, wimsdfpy_array);
+
+  // close the nuc_data library, before doing anythng stupid
+  status = H5Dclose(wimsdfpy_set);
+  status = H5Fclose(nuc_data_h5);
+
+  // Ok now that we have the array of stucts, put it in the maps
+  for(int n=0; n < wimsdfpy_length; n++) {
+    wimsdfpy_data[std::make_pair(wimsdfpy_array[n].from_nuc, 
+      wimsdfpy_array[n].to_nuc)] = wimsdfpy_array[n].yields;
+  };
+
+  delete[] wimsdfpy_array;
+};
 
 
+double pyne::fpyield(std::pair<int, int> from_to) {
+  // Note that this may be expanded eventually to include other
+  // sources of fission product data.
 
+  // Find the parent/child pair branch ratio as a fraction
+  std::map<std::pair<int, int>, double>::iterator fpy_iter, fpy_end;
+  fpy_iter = wimsdfpy_data.find(from_to);
+  fpy_end = wimsdfpy_data.end();
+
+  // First check if we already have the pair in the map
+  if (fpy_iter != fpy_end)
+    return (*fpy_iter).second;
+
+  // Next, fill up the map with values from the 
+  // nuc_data.h5, if the map is empty.
+  if (wimsdfpy_data.empty()) {
+    _load_wimsdfpy();
+    return fpyield(from_to);
+  };
+
+  // Finally, if none of these work, 
+  // assume the value is stable
+  double fpy = 0.0;
+  wimsdfpy_data[from_to] = fpy;
+  return fpy;
+};
+
+double pyne::fpyield(int from_nuc, int to_nuc) {
+  return fpyield(std::pair<int, int>(nucname::id(from_nuc), 
+                                     nucname::id(to_nuc)));
+};
+
+double pyne::fpyield(char * from_nuc, char * to_nuc) {
+  return fpyield(std::pair<int, int>(nucname::id(from_nuc), 
+                                     nucname::id(to_nuc)));
+};
+
+double pyne::fpyield(std::string from_nuc, std::string to_nuc) {
+  return fpyield(std::pair<int, int>(nucname::id(from_nuc), 
+                                     nucname::id(to_nuc)));
+};
 
 
 
@@ -544,6 +651,8 @@ void pyne::_load_atomic_decay()
     if (0.0 != atom_dec_array[n].decay_const)
       decay_children_map[from_nuc].insert(to_nuc);
   };
+
+  delete[] atom_dec_array;
 };
 
 
