@@ -16,12 +16,12 @@ INCLUDE_DIRECTORIES("${MOAB_HOME}/include", "${FLUPRO}/flukapro")
 
 # make fludag source files into a library
 ADD_LIBRARY(fludag SHARED
-	    ${DAGMC_FLUDAG_SOURCE}/fluka_funcs.cpp
-	    ${DAGMC_FLUDAG_SOURCE}/dagmc_utils.cpp
-	    ${DAGMC_FLUDAG_SOURCE}/WrapMag.cc
-	    ${DAGMC_FLUDAG_SOURCE}/WrapLookFX.cc
-	    ${DAGMC_FLUDAG_SOURCE}/WrapReg.cc
-	    ${DAGMC_FLUDAG_SOURCE}/WrapFlgfwr.cc
+	    ${FLUDAG_SOURCE}/fluka_funcs.cpp
+	    ${FLUDAG_SOURCE}/dagmc_utils.cpp
+	    ${FLUDAG_SOURCE}/WrapMag.cc
+	    ${FLUDAG_SOURCE}/WrapLookFX.cc
+	    ${FLUDAG_SOURCE}/WrapReg.cc
+	    ${FLUDAG_SOURCE}/WrapFlgfwr.cc
 )
 # ADD_LIBRARY(parseflu SHARED
 #	    ${DAGMC_FLUDAG_SOURCE}/dagmc_define.cpp
@@ -31,12 +31,11 @@ ADD_LIBRARY(fludag SHARED
 # set libraries needed to link to test cases
 SET(FLUDAG_LIBRARIES
     pthread
-    gfortran
-    fludag
-    ${FLUPRO}/libflukahp.a
-    ${MOAB_HOME}/lib/libMOAB.so
     ${MOAB_HOME}/lib/libdagmc.so
     ${MOAB_HOME}/lib/libMOAB.so
+    ${FLUPRO}/libflukahp.a
+    fludag
+    gfortran
 )
 
 ENABLE_LANGUAGE(Fortran)
