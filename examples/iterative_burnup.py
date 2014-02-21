@@ -8,13 +8,14 @@ from pyne.material import Material, from_atom_frac
 from pyne.mesh import Mesh
 from pyne import mcnp
 from pyne import alara
+from pyne import nucname
 
 J_PER_MEV = 1.602177E-22
 
 mcnp_data_cards = (
 """MODE:n
 IMP:n 1 26R 0
-KCODE 1000 0.8 5 10
+KCODE 1000 0.8 1 2
 KSRC 1E-9 0 0
 FMESH4:n origin=-5,-5,-5
       imesh = 5
@@ -61,7 +62,8 @@ def burnup(mesh, irr_time, power, xsdir_path, count):
         f.write(geom + mcnp_data_cards)
 
     # run mcnp
-    subprocess.call("mcnp5 i=MCNP_inp_{0} meshtal=meshtal_{0} xsdir={1}".format(count, xsdir_path), shell=True)
+    #subprocess.call("mcnp5 i=MCNP_inp_{0} meshtal=meshtal_{0} xsdir={1}".format(count, xsdir_path), shell=True)
+    subprocess.call("mcnp5 i=MCNP_inp_{0} meshtal=meshtal_{0}".format(count, xsdir_path), shell=True)
 
     # use mcnp out to create alara input files
     meshtal = mcnp.Meshtal("meshtal_{0}".format(count))
@@ -85,13 +87,20 @@ def burnup(mesh, irr_time, power, xsdir_path, count):
     # tag transmuted materials back to mesh
     alara.num_density_to_mesh(alara_out.split("\n"), 'shutdown', mesh)
 
-    #xsdir = mcnp.Xsdir(xsdir_path)
-    #nucs = xsdir.nucs()
-    #print mesh.mats[0]
-    #mesh.mats[0]  = mesh.mats[0][nucs]
-    #print mesh.mats[0]
+    xsdir = mcnp.Xsdir(xsdir_path)
+    #nucs = [nucname.id(x.name.split('.')[0]) for x in xsdir.tables if x.name.split('.')[0].isdigit()]
+    nucs = [nucname.id(x.name.split('.')[0]) for x in xsdir.tables if nucname.isnuclide(x.name.split('.')[0])]
+    bad_nucs = [60150000, 60140000, 80180000, 410960000, 410980000, 411000000, 421010000, 410970000]
+    for bad_nuc in bad_nucs:
+        if bad_nuc in nucs:
+            nucs.remove(bad_nuc)
 
-    return mesh
+    for i, mat, ve in mesh:
+       comp = mesh.mats[i].comp
+       density = mesh.mats[i].density
+       new_mat = Material(nucvec=dict(comp))
+       mesh.mats[i]  = new_mat[nucs]
+       mesh.mats[i].density = density
 
 def normalize_to_power(meshtal, power):
     # calculate fission energy per source
@@ -111,14 +120,14 @@ def normalize_to_power(meshtal, power):
     print("The normalization is {0} [n/s]".format(norm))   
 
 
-def gen_reactor(mesh, fuel, fuel_idx, mod):
+def gen_reactor(mesh, fuel_idx):
 
     ves = mesh.structured_iterate_hex(mesh.structured_ordering)
     for i, ve in enumerate(ves):
        if i in fuel_idx:
-           mesh.mats[i] = fuel
+           mesh.mats[i] = from_atom_frac({'U235': 0.045, 'U238': 0.955, 'O16': 2.0}, density=10.7)
        else:
-           mesh.mats[i] = mod 
+           mesh.mats[i] = from_atom_frac({'H1': 2.0, 'O16': 1.0}, density=1.0)
 
 def main(arguments=None):
 
@@ -140,9 +149,6 @@ def main(arguments=None):
 
     # create reactor that spans [[-5, 5], [-5, 5],[-5, 5]] with fuel volume
     # elements near the center
-    fuel = from_atom_frac({'U235': 0.045, 'U238': 0.955, 'O16': 2.0}, density=10.7)
-    mod = from_atom_frac({'H1': 2.0, 'O16': 1.0}, density=1.0)
-
     # big reactor
     #fuel_idx = range(399, 500)
     #coords = range(-5, 6)
@@ -151,17 +157,16 @@ def main(arguments=None):
     fuel_idx = range(0,15)
     coords = [-5000, -300, 300, 500]
     mesh = Mesh(structured_coords = [coords, coords, coords], structured=True)
-    gen_reactor(mesh, fuel, fuel_idx, mod)
+    gen_reactor(mesh, fuel_idx)
 
     nucs = xsdir.nucs()
     step = 0
 
     while step < num_steps:
-        for i, mat, ve in mesh:
-            mesh.mats[i]  = mesh.mats[i][nucs]
+        #for i, mat, ve in mesh:
+        #    mesh.mats[i]  = mesh.mats[i][nucs]
 
-        mesh = burnup(mesh, irr_time, power, xsdir_path, step)
+        burnup(mesh, irr_time, power, xsdir_path, step)
         step += 1
 
-    mesh.mesh.save("test.h5m")
 main()
