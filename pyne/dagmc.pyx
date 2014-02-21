@@ -596,8 +596,8 @@ class _MeshRow(object):
    
     Attributes
     ----------
-    direction : tuple of three ints
-        The unit vector representing the direction (e.g. (0, 0, 1) for z).
+    direction : list of three ints
+        The unit vector representing the direction (e.g. [0, 0, 1] for z).
     start_points : iterator object of tuples of three floats
         Represents that starting point of rays to be fired in direction <dir>.
     results : numpy array of floats
@@ -639,43 +639,45 @@ class _MeshRow(object):
            each mesh row. If false, a linear spaced grid of starting points is 
            chosen, with dimension sqrt(num_rays) x sqrt(num_rays)
         """
-        direction = (0, 0, 0)
+        direction = [0, 0, 0]
         direction[di] = 1
         self.direction = direction
         self.results = results
         self.uncs = uncs
     
-        if random:
+        if random is True:
             self._random_start_points()
         else:
             self._grid_start_points()
     
-        def _random_start_points(self):
-            """Populates start_points attributes with random points on the sampling
-            surface.
-            """
-            pass
+    def _random_start_points(self):
+        """Populates start_points attributes with random points on the sampling
+        surface.
+        """
+        self.start_points = [[-5,0,0]]
+        pass
+
+    def _grid_start_points(self):
+        """Populates start_points attributes with a uniform grid of points on the
+        sampling surface.
+        """
+        self.start_points = [[-5,0,0]]
+        pass
+
+    def _evaluate(self):
+        """This private function carries of the ray tracing on a single mesh
+        row and populates the results and uncertainties accordingly.
     
-        def _grid_start_points(self):
-            """Populates start_points attributes with a uniform grid of points on the
-            sampling surface.
-            """
-            pass
-
-def _fire_meshrow_rays(row):
-    """This private function carries of the ray tracing on a single mesh
-    row and populates the results and uncertainties accordingly.
-
-    Parameters
-    ----------
-    row : object of the _MeshRow class
-         The mesh row to preform ray tracing on.
-    """
-
-    for point in row.start_points:
-        vol = find_volume(point, row.direction)
-        for (next_vol, dist, _, next_point) in ray_iterator(vol, point, row.direction):
-            pass   
+        Parameters
+        ----------
+        row : object of the _MeshRow class
+             The mesh row to preform ray tracing on.
+        """
+    
+        for point in self.start_points:
+            vol = find_volume(point, self.direction)
+            for next_vol, distance, _, next_point, in ray_iterator(vol, point, self.direction, yield_xyz=True):
+                print(next_vol)
 
 def cell_vol_fracs_mesh(filename, mesh, num_rays, random=True):
     """This function opens a DAGMC loadable geometry and finds the volume fractions
@@ -700,15 +702,12 @@ def cell_vol_fracs_mesh(filename, mesh, num_rays, random=True):
     mesh._structured_check()
     load(filename)
 
-    dims = (mesh.structured_get_divisions('x'),
-            mesh.structured_get_divisions('y'),
-            mesh.structured_get_divisions('z'))
-
-    results = np.zeros(shape = dims)
-    uncs = np.zeros(shape = dims)
+    dims = [mesh.structured_get_divisions(a) for a in 'xyz']
+    results = np.zeros(shape = [len(x) for x in dims])
+    uncs = np.zeros(shape = [len(x) for x in dims])
 
     # direction indicies: x = 0, y = 1, z = 2
-    dis = (0, 1, 2)
+    dis = [0, 1, 2]
     # Iterate over all directions indicies
     for di in dis:
         # For each direction, the remaining two directions define the sampling 
@@ -728,4 +727,4 @@ def cell_vol_fracs_mesh(filename, mesh, num_rays, random=True):
                 s_min_1 = dims[s_dis[1]][b]
                 s_max_1 = dims[s_dis[1]][b + 1]
                 row = _MeshRow(di, s_dis[0], s_min_0, s_max_0, s_dis[1], s_min_1, s_max_1, row_results, row_uncs, num_rays, random)
-                row.evaluate()
+                row._evaluate()
