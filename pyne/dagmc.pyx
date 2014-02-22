@@ -10,6 +10,7 @@ import numpy as np
 import sys
 from contextlib import contextmanager
 from copy import copy
+from random import uniform
 
 from numpy.linalg import norm
 
@@ -677,7 +678,7 @@ class _MeshRow(object):
         for point in self.start_points:
             vol = find_volume(point, self.direction)
             for next_vol, distance, _, next_point, in ray_iterator(vol, point, self.direction, yield_xyz=True):
-                print(next_vol)
+                print("next_vol {0}".format(next_vol))
 
 def cell_vol_fracs_mesh(filename, mesh, num_rays, random=True):
     """This function opens a DAGMC loadable geometry and finds the volume fractions
@@ -702,9 +703,9 @@ def cell_vol_fracs_mesh(filename, mesh, num_rays, random=True):
     mesh._structured_check()
     load(filename)
 
-    dims = [mesh.structured_get_divisions(a) for a in 'xyz']
-    results = np.zeros(shape = [len(x) for x in dims])
-    uncs = np.zeros(shape = [len(x) for x in dims])
+    divs = [mesh.structured_get_divisions(a) for a in 'xyz']
+    results = np.zeros(shape = [len(x) for x in divs])
+    uncs = np.zeros(shape = [len(x) for x in divs])
 
     # direction indicies: x = 0, y = 1, z = 2
     dis = [0, 1, 2]
@@ -716,15 +717,95 @@ def cell_vol_fracs_mesh(filename, mesh, num_rays, random=True):
         s_dis = copy(dis)
         s_dis.remove(di)
 
-        row_results = ''
-        row_uncs = ''
         # iterate through all all the sampling planes perpendicular to di,
         # creating a _MeshRow in each, and subsequently evaluating that row.
-        for a in range(0, len(dims[s_dis[0]]) - 1):
-            for b in range(0, len(dims[s_dis[1]]) - 1):
-                s_min_0 = dims[s_dis[0]][a]
-                s_max_0 = dims[s_dis[0]][a + 1]
-                s_min_1 = dims[s_dis[1]][b]
-                s_max_1 = dims[s_dis[1]][b + 1]
-                row = _MeshRow(di, s_dis[0], s_min_0, s_max_0, s_dis[1], s_min_1, s_max_1, row_results, row_uncs, num_rays, random)
-                row._evaluate()
+        for a in range(0, len(divs[s_dis[0]]) - 1):
+            for b in range(0, len(divs[s_dis[1]]) - 1):
+                s_min_0 = divs[s_dis[0]][a]
+                s_max_0 = divs[s_dis[0]][a + 1]
+                s_min_1 = divs[s_dis[1]][b]
+                s_max_1 = divs[s_dis[1]][b + 1]
+
+                #print("direction {0}".format(di))
+                #print("bounds {0}, {1}, {2}, {3}".format(s_min_0, s_max_0, s_min_1, s_max_1))
+
+                # create a lines of starting points to fire rays for this
+                # particular mesh row
+                if random:
+                    start_points = _rand_start(num_rays, di, divs[di][0],
+                                               s_dis[0], s_min_0, s_max_0, 
+                                               s_dis[1], s_min_1, s_max_1)
+                else:
+                    start_points = _grid_start(num_rays, di, divs[di][0],
+                                               s_dis[0], s_min_0, s_max_0, 
+                                               s_dis[1], s_min_1, s_max_1)
+                #print(start_points)
+                
+                results, uncs = _evaluate_row(di, divs[di], start_points)
+
+def _evaluate_row(di, divs, start_points):
+
+    direction = [0, 0, 0]
+    direction[di] = 1
+    results = [{} for x in range(0, len(divs) - 1)]
+    width = [divs[x] - divs[x - 1] for x in range(1, len(divs))]
+    for point in start_points:
+        vol = find_volume(point, direction)
+        print("start point {0} in vol {1}".format(point, vol))
+        ve_count = 0
+        mesh_dist = divs[1] - divs[0]
+        for next_vol, distance, _ in ray_iterator(vol, point, direction):
+            print("next_vol {0} distance {1}".format(next_vol, distance))
+            if distance > 0:
+                if distance > mesh_dist:
+                    while distance > mesh_dist:
+                        if vol not in results[ve_count].keys():
+                            results[ve_count][vol] = 0
+
+                        results[ve_count][vol] += mesh_dist#/width[ve_count]
+                        distance -= mesh_dist
+                        ve_count += 1
+                        if ve_count != len(divs) - 1:
+                            mesh_dist = divs[ve_count + 1] - divs[ve_count]
+
+                if distance < mesh_dist and ve_count != len(divs) - 1:
+                    if vol not in results[ve_count].keys():
+                        results[ve_count][vol] = 0
+
+                    results[ve_count][vol] += distance#/width[ve_count]
+                    mesh_dist -= distance
+            
+            vol = next_vol
+
+        print(results)
+            
+
+    return 0, 0
+
+def _rand_start(num_rays, di_perp, min_perp, di_1, min_1, max_1, di_2, min_2, max_2):
+
+   start_points = []
+   ray_count = 0
+   while ray_count < num_rays:
+       start_point = [0]*3
+       start_point[di_perp] = min_perp
+       start_point[di_1] = uniform(min_1, max_1)
+       start_point[di_2] = uniform(min_2, max_2)
+       start_points.append(start_point)
+       ray_count += 1
+
+   return start_points
+
+def _grid_start(num_rays, di_perp, min_perp, di_1, min_1, max_1, di_2, min_2, max_2):
+
+   start_points = []
+   ray_count = 0
+   while ray_count < num_rays:
+       start_point = [0]*3
+       start_point[di_perp] = min_perp
+       start_point[di_1] = uniform(min_1, max_1)
+       start_point[di_2] = uniform(min_2, max_2)
+       start_points.append(start_point)
+       ray_count += 1
+
+   return start_points
