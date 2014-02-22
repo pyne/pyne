@@ -22,7 +22,7 @@ def try_rm_file(filename):
 
 def gen_mesh(mats=None):
     mesh_1 = Mesh(structured_coords=[[-1,0,1],[-1,0,1],[0,1]], structured=True, 
-                  mats=mats)
+                  structured_ordering='zyx', mats=mats)
     volumes1 = list(mesh_1.structured_iterate_hex("xyz"))
     flux_tag = mesh_1.mesh.createTag("flux", 1, float)
     flux_data = [1.0, 2.0, 3.0, 4.0]
@@ -165,6 +165,13 @@ def test_get_divs():
     assert_equal(sm.structured_get_divisions("x"), x)
     assert_equal(sm.structured_get_divisions("y"), y)
     assert_equal(sm.structured_get_divisions("z"), z)
+
+def test_iter_structured_idx():
+    m = gen_mesh() # gen_mesh uses zyx order
+    xyz_idx = [0, 2, 1, 3] # expected results in xyz order
+    for n, i in enumerate(m.iter_structured_idx('xyz')):
+        assert_equal(i, xyz_idx[n])
+
 
 #############################################
 #Test mesh arithmetic for Mesh and StatMesh
@@ -597,14 +604,14 @@ def test_matmethtag():
         }
     m = gen_mesh(mats=mats)
 
-    mws = np.array([mat.molecular_weight() for i, mat in mats.items()])
+    mws = np.array([mat.molecular_mass() for i, mat in mats.items()])
 
     # Getting tags
-    assert_equal(m.molecular_weight[0], mws[0])
-    assert_array_equal(m.molecular_weight[::2], mws[::2])
+    assert_equal(m.molecular_mass[0], mws[0])
+    assert_array_equal(m.molecular_mass[::2], mws[::2])
     mask = np.array([True, False, True, True], dtype=bool)
-    assert_array_equal(m.molecular_weight[mask], mws[mask])
-    assert_array_equal(m.molecular_weight[1, 0, 1, 3], mws[[1, 0, 1, 3]])
+    assert_array_equal(m.molecular_mass[mask], mws[mask])
+    assert_array_equal(m.molecular_mass[1, 0, 1, 3], mws[[1, 0, 1, 3]])
 
 def test_metadatatag():
     mats = {

@@ -136,7 +136,7 @@ def make_decay(args):
     print("Grabbing the ENSDF decay data from IAEA")
     grab_ensdf_decay(build_dir)
 
-    # Make atomic weight table once we have the array
+    # Make atomic mass table once we have the array
     print("Making decay data table.")
     make_decay_half_life_table(nuc_data, build_dir)
 

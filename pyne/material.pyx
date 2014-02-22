@@ -451,9 +451,9 @@ cdef class _Material:
         return nucvec_proxy
 
 
-    def molecular_weight(self, atoms_per_mol=-1.0):
-        """molecular_weight(atoms_per_mol=-1.0)
-        This method returns the molecular weight of the comp of this
+    def molecular_mass(self, atoms_per_mol=-1.0):
+        """molecular_mass(atoms_per_mol=-1.0)
+        This method returns the molecular mass of the comp of this
         material.
 
         Parameters
@@ -464,11 +464,11 @@ cdef class _Material:
 
         Returns
         -------
-        mol_weight : float
-            Molecular weight in [amu].
+        mol_mass : float
+            Molecular mass in [amu].
 
         """
-        return self.mat_pointer.molecular_weight(atoms_per_mol)
+        return self.mat_pointer.molecular_mass(atoms_per_mol)
 
     def expand_elements(self):
         """expand_elements(self)
@@ -554,7 +554,7 @@ cdef class _Material:
         submaterial : Material
             A new mass stream object that only
             has the members given in nuc_sequence.  The mass of the submaterial
-            is calculated based on the weight fraction composition and mass
+            is calculated based on the mass fraction composition and mass
             of the original mass stream.
 
         Notes
@@ -592,7 +592,7 @@ cdef class _Material:
         submaterial : Material
             A new material object whose members in nuc_sequence have the
             cooresponding mass value.  The mass of the submaterial is
-            calculated based on the weight fraction composition and mass of the
+            calculated based on the mass fraction composition and mass of the
             original material.
 
         """
@@ -620,7 +620,7 @@ cdef class _Material:
         submaterial : Material
             A new material object that only has the members not given in
             nuc_sequence.  The mass of the submaterial is calculated based on
-            the weight fraction composition and mass of the original material.
+            the mass fraction composition and mass of the original material.
 
         Notes
         -----
@@ -1211,9 +1211,9 @@ class Material(_Material, collections.MutableMapping):
         This is the input nuclide component dictionary.  This dictionary need
         not be normalized; Material initialization will automatically
         renormalize the stream.  Thus the comp simply is a dictionary of
-        relative weights.  The keys of comp must be integers representing
+        relative mass.  The keys of comp must be integers representing
         nuclides in id-form.  The values are floats for each nuclide's
-        weight fraction. If a string is provided instead of a dictionary, then
+        mass fraction. If a string is provided instead of a dictionary, then
         Material will read in the comp vector from a file at the string's
         location.  This either plaintext or hdf5 files. If no comp is provided,
         an empty Material object is constructed.
@@ -1226,7 +1226,7 @@ class Material(_Material, collections.MutableMapping):
         This is the density of the material.
     atoms_per_mol : float, optional
         Number of atoms to per molecule of material.  Needed to obtain proper
-        scaling of molecular weights.  For example, this value for water is
+        scaling of molecular mass.  For example, this value for water is
         3.0.
     attrs : JSON-convertable Python object, optional
         Initial attributes to build the material with.  At the top-level this is
@@ -1258,12 +1258,23 @@ class Material(_Material, collections.MutableMapping):
                 repr(self.comp), self.mass, self.density, self.atoms_per_mol, repr(self.attrs))
 
 
-    def write_mcnp(self, filename, frac_type='mass'):
-        """write_mcnp(self, filename, frac_type='mass')
-        The method appends an mcnp mass fraction definition, with
-        attributes to the file with the supplied filename."""
+    def mcnp(self, frac_type='mass'):
+        """mcnp(self, frac_type='mass')
+        This method returns an MCNP material card in string form. Relevant
+        attributes are added as MCNP valid comments.
 
-        s = ''  # string to output
+        Parameters
+        ----------
+        frac_type : str, optional
+            Either 'mass' or 'atom'. Speficies whether mass or atom fractions
+            are used to describe material composition.
+
+        Returns
+        -------
+        s : str
+            The MCNP material card.
+        """
+        s = ''
 
         if 'name' in self.attrs:
             s += 'C name: {0}\n'.format(self.attrs['name'])
@@ -1298,16 +1309,35 @@ class Material(_Material, collections.MutableMapping):
                 s += '     {0} '.format(nucmcnp)
             s += '{0}{1:.4E}\n'.format(frac_sign, frac)
 
-        # write s to output file
+        return s
+
+
+    def write_mcnp(self, filename, frac_type='mass'):
+        """write_mcnp(self, filename, frac_type='mass')
+        The method appends an MCNP mass fraction definition, with
+        attributes to the file with the supplied filename.
+
+        Parameters
+        ----------
+        filename : str
+            The file to append the material definition to.
+        frac_type : str, optional
+            Either 'mass' or 'atom'. Speficies whether mass or atom fractions
+            are used to describe material composition.
+        """
         with open(filename, 'a') as f:
-            f.write(s)
+            f.write(self.mcnp(frac_type))
 
+    def alara(self):
+        """alara(self)
+        This method returns an ALARA material in string form, with relevant
+        attributes as ALARA valid comments.
 
-    def write_alara(self, filename):
-        """write_alara(self, filename)
-        The method appends an ALARA definition, with
-        attributes to the file with the supplied filename."""
-
+        Returns
+        -------
+        s : str
+            The MCNP material card.
+        """
         s = ''
 
         if 'mat_number' in self.attrs:
@@ -1345,8 +1375,20 @@ class Material(_Material, collections.MutableMapping):
             s += '     {0} {1:.4E} {2}\n'.format(nucname.alara(iso),
                                                  frac, str(nucname.znum(iso)))
 
+        return s
+
+    def write_alara(self, filename):
+        """write_alara(self, filename)
+        The method appends an ALARA material d$efinition, with attributes
+        to the file with the supplied filename.
+
+        Parameters
+        ----------
+        filename : str
+            The file to append the material definition to.
+        """
         with open(filename, 'a') as f:
-            f.write(s)
+            f.write(self.alara())
 
 #####################################
 ### Material generation functions ###
@@ -1372,7 +1414,7 @@ def from_atom_frac(atom_fracs, double mass=-1.0, double density=-1.0,
         This is the density of the material.
     atoms_per_mol : float, optional
         Number of atoms per molecule of material.  Needed to obtain proper
-        scaling of molecular weights.  For example, this value for water is
+        scaling of molecular mass.  For example, this value for water is
         3.0.
     attrs : JSON-convertable Python object, optional
         Initial attributes to build the material with.  At the top-level this is
@@ -1480,7 +1522,7 @@ def from_text(char * filename, double mass=-1.0, double atoms_per_mol=-1.0, attr
         positive or zero, then this mass overrides the calculated one.
     atoms_per_mol : float, optional
         Number of atoms to per molecule of material.  Needed to obtain proper
-        scaling of molecular weights.  For example, this value for water is
+        scaling of molecular mass.  For example, this value for water is
         3.0.
     attrs : JSON-convertable Python object, optional
         Initial attributes to build the material with.  At the top-level this is
