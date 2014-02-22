@@ -150,18 +150,18 @@ namespace pyne
   /// Mapping from nuclides in id form to its decay children, if any.
   extern std::map<int, std::set<int> > decay_children_map;
 
-  /// a struct matching the '/atomic_decay' table in nuc_data.h5.
-  typedef struct atomic_decay_struct {
+  /// a struct matching the '/half_life_decay' table in nuc_data.h5.
+  typedef struct half_life_decay_struct {
     int from_nuc; ///< parent species in id form
     double level; ///< decay level [MeV]
     int to_nuc;   ///< child species in id form
     double half_life;     ///< species half life [s]
     double decay_const;   ///< decay constant [1/s]
     double branch_ratio;  ///< decay branch ratio [fraction]
-  } atomic_decay_struct;
+  } half_life_decay_struct;
 
   /// Loads the decay data from the nuc_data.h5 file into memory.
-  void _load_atomic_decay();
+  void _load_half_life_decay();
 
   /// \brief Returns the half life for a nuclide \a nuc.
   ///

@@ -468,9 +468,9 @@ double pyne::b(std::string nuc)
 
 
 
-/******************************/
-/*** atomic decay functions ***/
-/******************************/
+/***********************/
+/*** decay functions ***/
+/***********************/
 std::map<int, double> pyne::half_life_map = std::map<int, double>();
 std::map<int, double> pyne::decay_const_map = std::map<int, double>();
 std::map<std::pair<int, int>, double> pyne::branch_ratio_map = \
@@ -480,9 +480,9 @@ std::map<int, std::set<int> > pyne::decay_children_map = \
                                                       std::map<int, std::set<int> >();
 
 
-void pyne::_load_atomic_decay()
+void pyne::_load_half_life_decay()
 {
-  // Loads the important parts of atomic_decay table into memory
+  // Loads the important parts of half_life_decay table into memory
   herr_t status;
 
   //Check to see if the file is in HDF5 format.
@@ -494,28 +494,28 @@ void pyne::_load_atomic_decay()
     throw h5wrap::FileNotHDF5(pyne::NUC_DATA_PATH);
 
   // Get the HDF5 compound type (table) description
-  hid_t desc = H5Tcreate(H5T_COMPOUND, sizeof(atomic_decay_struct));
-  status = H5Tinsert(desc, "from_nuc", HOFFSET(atomic_decay_struct, from_nuc), 
+  hid_t desc = H5Tcreate(H5T_COMPOUND, sizeof(half_life_decay_struct));
+  status = H5Tinsert(desc, "from_nuc", HOFFSET(half_life_decay_struct, from_nuc),
                       H5T_NATIVE_INT);
-  status = H5Tinsert(desc, "level", HOFFSET(atomic_decay_struct, level), H5T_NATIVE_DOUBLE);
-  status = H5Tinsert(desc, "to_nuc", HOFFSET(atomic_decay_struct, to_nuc), H5T_NATIVE_INT);
-  status = H5Tinsert(desc, "half_life", HOFFSET(atomic_decay_struct, half_life), 
+  status = H5Tinsert(desc, "level", HOFFSET(half_life_decay_struct, level), H5T_NATIVE_DOUBLE);
+  status = H5Tinsert(desc, "to_nuc", HOFFSET(half_life_decay_struct, to_nuc), H5T_NATIVE_INT);
+  status = H5Tinsert(desc, "half_life", HOFFSET(half_life_decay_struct, half_life),
                       H5T_NATIVE_DOUBLE);
-  status = H5Tinsert(desc, "decay_const", HOFFSET(atomic_decay_struct, decay_const), 
+  status = H5Tinsert(desc, "decay_const", HOFFSET(half_life_decay_struct, decay_const),
                       H5T_NATIVE_DOUBLE);
-  status = H5Tinsert(desc, "branch_ratio", HOFFSET(atomic_decay_struct, branch_ratio), 
+  status = H5Tinsert(desc, "branch_ratio", HOFFSET(half_life_decay_struct, branch_ratio),
                       H5T_NATIVE_DOUBLE);
 
   // Open the HDF5 file
   hid_t nuc_data_h5 = H5Fopen(pyne::NUC_DATA_PATH.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT);
 
   // Open the data set
-  hid_t atom_dec_set = H5Dopen2(nuc_data_h5, "/atomic_decay", H5P_DEFAULT);
+  hid_t atom_dec_set = H5Dopen2(nuc_data_h5, "/decay/half_life", H5P_DEFAULT);
   hid_t atom_dec_space = H5Dget_space(atom_dec_set);
   int atom_dec_length = H5Sget_simple_extent_npoints(atom_dec_space);
 
   // Read in the data
-  atomic_decay_struct * atom_dec_array = new atomic_decay_struct[atom_dec_length];
+  half_life_decay_struct * atom_dec_array = new half_life_decay_struct[atom_dec_length];
   status = H5Dread(atom_dec_set, desc, H5S_ALL, H5S_ALL, H5P_DEFAULT, atom_dec_array);
 
   // close the nuc_data library, before doing anythng stupid
@@ -573,7 +573,7 @@ double pyne::half_life(int nuc)
   // nuc_data.h5, if the map is empty.
   if (half_life_map.empty())
   {
-    _load_atomic_decay();
+    _load_half_life_decay();
     return half_life(nuc);
   };
 
@@ -620,7 +620,7 @@ double pyne::decay_const(int nuc)
   // nuc_data.h5, if the map is empty.
   if (decay_const_map.empty())
   {
-    _load_atomic_decay();
+    _load_half_life_decay();
     return decay_const(nuc);
   };
 
@@ -668,7 +668,7 @@ double pyne::branch_ratio(std::pair<int, int> from_to)
   // nuc_data.h5, if the map is empty.
   if (branch_ratio_map.empty())
   {
-    _load_atomic_decay();
+    _load_half_life_decay();
     return branch_ratio(from_to);
   };
 
@@ -720,7 +720,7 @@ double pyne::state_energy(int nuc)
   // nuc_data.h5, if the map is empty.
   if (state_energy_map.empty())
   {
-    _load_atomic_decay();
+    _load_half_life_decay();
     return state_energy(nuc);
   };
 
@@ -766,7 +766,7 @@ std::set<int> pyne::decay_children(int nuc)
   // nuc_data.h5, if the map is empty.
   if (decay_children_map.empty())
   {
-    _load_atomic_decay();
+    _load_half_life_decay();
     return decay_children(nuc);
   };
 

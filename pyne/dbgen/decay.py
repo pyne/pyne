@@ -90,7 +90,7 @@ def parse_decay(build_dir=""):
     return decay_array
     
     
-def make_atomic_decay_table(nuc_data, build_dir=""):
+def make_decay_half_life_table(nuc_data, build_dir=""):
     """Makes a decay table in the nuc_data library.
 
     Parameters
@@ -107,9 +107,12 @@ def make_atomic_decay_table(nuc_data, build_dir=""):
     decay_db = tb.openFile(nuc_data, 'a', filters=BASIC_FILTERS)
 
     # Make a new the table
-    decaytable = decay_db.createTable("/", "atomic_decay", 
+    if not hasattr(db.root, 'decay'):
+        db.createGroup('/', 'decay', 'ENSDF Decay data')
+
+    decaytable = decay_db.createTable("/decay", "half_life",
                     np.empty(0, dtype=atomic_decay_dtype), 
-                    "Atomic Decay Data level [MeV], half_life [s], decay_const "
+                    "Decay Energy level [MeV], half_life [s], decay_const "
                     "[1/s], branch_ratio [frac]", expectedrows=len(atomic_decay))
     decaytable.append(atomic_decay)
 
@@ -120,14 +123,12 @@ def make_atomic_decay_table(nuc_data, build_dir=""):
     decay_db.close()
 
 
-
-
 def make_decay(args):
     """Controller function for adding decay data."""
     nuc_data, build_dir = args.nuc_data, args.build_dir
 
     with tb.openFile(nuc_data, 'r') as f:
-        if hasattr(f.root, 'atomic_decay'):
+        if hasattr(f.root, 'decay'):
             print("skipping ENSDF decay data table creation; already exists.")
             return 
 
@@ -137,5 +138,5 @@ def make_decay(args):
 
     # Make atomic weight table once we have the array
     print("Making decay data table.")
-    make_atomic_decay_table(nuc_data, build_dir)
+    make_decay_half_life_table(nuc_data, build_dir)
 
