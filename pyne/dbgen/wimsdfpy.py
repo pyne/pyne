@@ -95,7 +95,7 @@ fpy_dtype = np.dtype([
 
 
 def parse_fpy(build_dir):
-    """Converts to scattering lenth data to a numpy array."""
+    """Converts fission product yeild data to a numpy array."""
     build_filename = os.path.join(build_dir, 'wimsd-fpyield.html')
     with open(build_filename, 'r') as f:
         raw_data = f.read()

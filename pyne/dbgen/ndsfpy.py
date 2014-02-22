@@ -66,16 +66,14 @@ def readtable(i, spdat):
 
 
 def conv_to_id(nuc):
-    """
-    Converts html nuclide names to nuclide ids
+    """Converts html nuclide names to nuclide ids
     """
     parts = nuc.split('-')
     return nucname.id(parts[1] + parts[2])
 
 
 def conv_to_num(dstring):
-    """
-    Converts html number and error to floats
+    """Converts html number and error to floats
     """
     if dstring == '-':
         return 0, 0
@@ -92,8 +90,7 @@ def conv_to_num(dstring):
 
 
 def parse_num(dst):
-    """
-    Converts html numbers with exponents to floats
+    """Converts html numbers with exponents to floats
     """
     nums = dst.split('x')
     base = float(nums[0])
@@ -102,8 +99,7 @@ def parse_num(dst):
 
 
 def getpoint(line):
-    """
-    Gets data entries from html lines
+    """Gets data entries from html lines
     """
     spline = line.split('<tr><td class="xl28b">&nbsp;&nbsp;')
     if len(spline) > 1:
@@ -114,8 +110,7 @@ def getpoint(line):
 
 
 def getdata(i, spdat):
-    """
-    Gets the data from the nds html table
+    """Gets the data from the nds html table
     """
     lines = spdat[i].splitlines()
     dlist = []
