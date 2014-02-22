@@ -704,8 +704,8 @@ def cell_vol_fracs_mesh(filename, mesh, num_rays, random=True):
     load(filename)
 
     divs = [mesh.structured_get_divisions(a) for a in 'xyz']
-    results = np.zeros(shape = [len(x) for x in divs])
-    uncs = np.zeros(shape = [len(x) for x in divs])
+    results = [{} for x in range(0, 
+              (len(divs[0]) - 1)*(len(divs[1]) -1 )*(len(divs[2])-1))]
 
     # direction indicies: x = 0, y = 1, z = 2
     dis = [0, 1, 2]
@@ -741,46 +741,88 @@ def cell_vol_fracs_mesh(filename, mesh, num_rays, random=True):
                                                s_dis[1], s_min_1, s_max_1)
                 #print(start_points)
                 
-                results, uncs = _evaluate_row(di, divs[di], start_points)
+                row_results = _evaluate_row(di, divs[di], start_points)
+                #for res in row_results:
+                #    print(res)
+
+                if di == 0:
+                    ves = mesh.structured_iterate_hex('x', y=a, z=b)
+                elif di == 1:
+                    ves = mesh.structured_iterate_hex('y', x=a, z=b)
+                elif di == 2:
+                    ves = mesh.structured_iterate_hex('z', x=a, y=b)
+
+                idx_tag = mesh.mesh.getTagHandle("idx")
+                idx = []
+                for ve in ves:
+                    #print(idx_tag[ve])
+                    idx.append(idx_tag[ve])
+
+                print(len(results))
+                for i, row_res in zip(idx, row_results):
+                    for vol, val in row_res.iteritems():
+                        if vol not in results[i].keys():
+                           results[i][vol] = 0
+
+                        results[i][vol] += val
+
+    for res in results:
+        print(res)
+                        
 
 def _evaluate_row(di, divs, start_points):
 
+    # Total number of rays fired: multiply by 3 to account for 3 directions
+    num_rays = len(start_points) * 3
+    # number of volume elements in this mesh row
+    num_ve = len(divs) - 1
     direction = [0, 0, 0]
     direction[di] = 1
     results = [{} for x in range(0, len(divs) - 1)]
     width = [divs[x] - divs[x - 1] for x in range(1, len(divs))]
+
+    # fire ray for each starting point
     for point in start_points:
+
         vol = find_volume(point, direction)
-        print("start point {0} in vol {1}".format(point, vol))
+        #print("start point {0} in vol {1}".format(point, vol))
         ve_count = 0
-        mesh_dist = divs[1] - divs[0]
+        mesh_dist = width[0]
+
+        # track a single ray down the mesh row and tally accordingly
         for next_vol, distance, _ in ray_iterator(vol, point, direction):
-            print("next_vol {0} distance {1}".format(next_vol, distance))
-            if distance > 0:
-                if distance > mesh_dist:
-                    while distance > mesh_dist:
-                        if vol not in results[ve_count].keys():
-                            results[ve_count][vol] = 0
-
-                        results[ve_count][vol] += mesh_dist#/width[ve_count]
-                        distance -= mesh_dist
-                        ve_count += 1
-                        if ve_count != len(divs) - 1:
-                            mesh_dist = divs[ve_count + 1] - divs[ve_count]
-
-                if distance < mesh_dist and ve_count != len(divs) - 1:
+            #print("next_vol {0} distance {1}".format(next_vol, distance))
+            # volume extends past mesh boundary
+            if distance > mesh_dist:
+                while distance > mesh_dist:
+                    # check to see if current volume has already by tallied
                     if vol not in results[ve_count].keys():
                         results[ve_count][vol] = 0
 
-                    results[ve_count][vol] += distance#/width[ve_count]
-                    mesh_dist -= distance
+                    results[ve_count][vol] += mesh_dist/width[ve_count]/num_rays
+                    distance -= mesh_dist
+
+                    # if not on the last volume element, continue into the next
+                    # volume element
+                    if ve_count < num_ve - 1:
+                        ve_count += 1
+                        mesh_dist = width[ve_count]
+
+            # volume does not extend past mesh volume
+            if distance <= mesh_dist and distance > 1E-10:
+                # check to see if current volume has already by tallied
+                if vol not in results[ve_count].keys():
+                    results[ve_count][vol] = 0
+
+                results[ve_count][vol] += distance/width[ve_count]/num_rays
+                mesh_dist -= distance
             
             vol = next_vol
 
-        print(results)
-            
-
-    return 0, 0
+    #print("ve count {0}".format(ve_count))
+    #print(results)
+    #print("\n")
+    return results
 
 def _rand_start(num_rays, di_perp, min_perp, di_1, min_1, max_1, di_2, min_2, max_2):
 
