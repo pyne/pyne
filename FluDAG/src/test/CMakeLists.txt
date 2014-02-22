@@ -8,14 +8,14 @@ INCLUDE_DIRECTORIES("${MOAB_HOME}/include" "${GTEST_HOME}/gtest-1.7.0/include")
 
 # make fludag source files into a library
 ADD_LIBRARY(fludag SHARED
-	    ${DAGMC_FLUDAG_SOURCE}/fluka_funcs.cpp
-	    ${DAGMC_FLUDAG_SOURCE}/dagmc_utils.cpp
-	    ${DAGMC_FLUDAG_SOURCE}/Input.cpp
-	    ${DAGMC_FLUDAG_SOURCE}/WrapMag.cc
-	    ${DAGMC_FLUDAG_SOURCE}/WrapLookFX.cc
-	    ${DAGMC_FLUDAG_SOURCE}/WrapReg.cc
-	    ${DAGMC_FLUDAG_SOURCE}/WrapFlgfwr.cc
-	    ${DAGMC_FLUDAG_SOURCE}/UnitNumberManager.cpp
+	    ${FLUDAG_SOURCE}/fluka_funcs.cpp
+	    ${FLUDAG_SOURCE}/dagmc_utils.cpp
+	    ${FLUDAG_SOURCE}/Input.cpp
+	    ${FLUDAG_SOURCE}/WrapMag.cc
+	    ${FLUDAG_SOURCE}/WrapLookFX.cc
+	    ${FLUDAG_SOURCE}/WrapReg.cc
+	    ${FLUDAG_SOURCE}/WrapFlgfwr.cc
+	    ${FLUDAG_SOURCE}/UnitNumberManager.cpp
  )
 
 
