@@ -731,7 +731,7 @@ class Xsdir(object):
         words = line.split()
         assert len(words) == 3
         assert words[0].lower() == 'atomic'
-        assert words[1].lower() == 'mass'
+        assert words[1].lower() == 'weight'
         assert words[2].lower() == 'ratios'
 
         while True:
