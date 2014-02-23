@@ -591,117 +591,35 @@ def get_material_set(**kw):
     return mat_ids
 
 #### start util
-class _MeshRow(object):
-    """This private class represents a mesh row that is ray-traced to determine 
-    cell fractions.
-   
-    Attributes
-    ----------
-    direction : list of three ints
-        The unit vector representing the direction (e.g. [0, 0, 1] for z).
-    start_points : iterator object of tuples of three floats
-        Represents that starting point of rays to be fired in direction <dir>.
-    results : numpy array of floats
-        A slice of the full numpy array representing the results bins for this
-        mesh row.
-    uncs : numpy array of floats
-        A slice of the full numpy array representing the uncertainty bins for this
-        mesh row.
-    """
-    def __init__(self, di, s_di_0, s_min_0, s_max_0, s_di_1, s_min_1, s_max_1,
-                 results, uncs, num_rays, random):
-        """
-        Parameters
-        ----------
-        di : int
-            The direction index: x = 0, y = 1, z = 2
-        s_di_0 : int
-            The index of first dimension of the sampling surface (same notation as
-            di)
-        s_min_0 : float
-            The lower bound of the sampling surface in the s_di_0-th direction.
-        s_max_0 : float
-            The upper bound of the sampling surface in the s_di_0-th direction.
-        s_di_1 : int
-            The index of second dimension of the sampling surface (same notation as
-            di)
-        s_min_1 : float
-            The lower bound of the sampling surface in the s_di_1-th direction.
-        s_max_1 : float
-            The upper bound of the sampling surface in the s_di_1-th direction.
-        results : 1D numpy array of floats
-            Stores the results of ray firing in this mesh row.
-        uncs : 1D numpy array of floats
-            Stores the uncertainties of ray firing in this mesh rows.
-       num_rays : int
-           The number of rays to fire in each mesh row for each direction.
-       random : boolean
-           If true, rays starting points are chosen randomly on the boundary within
-           each mesh row. If false, a linear spaced grid of starting points is 
-           chosen, with dimension sqrt(num_rays) x sqrt(num_rays)
-        """
-        direction = [0, 0, 0]
-        direction[di] = 1
-        self.direction = direction
-        self.results = results
-        self.uncs = uncs
-    
-        if random is True:
-            self._random_start_points()
-        else:
-            self._grid_start_points()
-    
-    def _random_start_points(self):
-        """Populates start_points attributes with random points on the sampling
-        surface.
-        """
-        self.start_points = [[-5,0,0]]
-        pass
-
-    def _grid_start_points(self):
-        """Populates start_points attributes with a uniform grid of points on the
-        sampling surface.
-        """
-        self.start_points = [[-5,0,0]]
-        pass
-
-    def _evaluate(self):
-        """This private function carries of the ray tracing on a single mesh
-        row and populates the results and uncertainties accordingly.
-    
-        Parameters
-        ----------
-        row : object of the _MeshRow class
-             The mesh row to preform ray tracing on.
-        """
-    
-        for point in self.start_points:
-            vol = find_volume(point, self.direction)
-            for next_vol, distance, _, next_point, in ray_iterator(vol, point, self.direction, yield_xyz=True):
-                print("next_vol {0}".format(next_vol))
-
-def cell_vol_fracs_mesh(filename, mesh, num_rays, random=True):
-    """This function opens a DAGMC loadable geometry and finds the volume fractions
-    of each cell with each mesh volume element of a supplied PyNE Mesh object.
-    These cell fractions are then stored as IMeshTags.
+def discretize_geom(mesh, num_rays, grid=False):
+    """This function reads in a structured, axis-aligned, PyNE mesh object,
+    then uses Monte Carlo ray tracing to determing the volume fraction of each
+    geometry volume within each mesh volume element of the mesh. Note that a 
+    DAGMC geometry must already be loaded into memory.
  
     Parameters
     ----------
-    filename : str
-        A faceted geometry file (.h5m), likely the result of dagmc_preproc.
     mesh : PyNE Mesh object
         The Mesh object to tag with cell volume fractions. The mesh must be a 
         Cartesean structured mesh that overlays the geometry.
     num_rays : int
         The number of rays to fire in each mesh row for each direction.
-    random : boolean
-        If true, rays starting points are chosen randomly on the boundary within
-        each mesh row. If false, a linear spaced grid of starting points is 
+    grid : boolean
+        If false, rays starting points are chosen randomly on the boundary within
+        each mesh row. If true, a linear spaced grid of starting points is 
         chosen, with dimension sqrt(num_rays) x sqrt(num_rays)
+
+    Returns
+    -------
+    results : list
+        List with an entry for each mesh volume element in the order determined
+        by the structured_ordering attribute of the PyNE mesh object. Each entry
+        in the list is a dictionary maps geometry volume numbers to lists
+        containing the corresponding volume fractions and standard deviations.
      """
     # Ensure input is valid
     mesh._structured_check()
-    load(filename)
+    #load(filename)
 
     divs = [mesh.structured_get_divisions(a) for a in 'xyz']
     results = [{} for x in range(0, 
@@ -731,7 +649,7 @@ def cell_vol_fracs_mesh(filename, mesh, num_rays, random=True):
 
                 # create a lines of starting points to fire rays for this
                 # particular mesh row
-                if random:
+                if not grid:
                     start_points = _rand_start(num_rays, di, divs[di][0],
                                                s_dis[0], s_min_0, s_max_0, 
                                                s_dis[1], s_min_1, s_max_1)
@@ -758,7 +676,6 @@ def cell_vol_fracs_mesh(filename, mesh, num_rays, random=True):
                     #print(idx_tag[ve])
                     idx.append(idx_tag[ve])
 
-                print(len(results))
                 for i, row_res in zip(idx, row_results):
                     for vol, val in row_res.iteritems():
                         if vol not in results[i].keys():
@@ -766,8 +683,7 @@ def cell_vol_fracs_mesh(filename, mesh, num_rays, random=True):
 
                         results[i][vol] += val
 
-    for res in results:
-        print(res)
+    return results
                         
 
 def _evaluate_row(di, divs, start_points):
@@ -780,18 +696,18 @@ def _evaluate_row(di, divs, start_points):
     direction[di] = 1
     results = [{} for x in range(0, len(divs) - 1)]
     width = [divs[x] - divs[x - 1] for x in range(1, len(divs))]
-
     # fire ray for each starting point
     for point in start_points:
-
         vol = find_volume(point, direction)
-        #print("start point {0} in vol {1}".format(point, vol))
-        ve_count = 0
         mesh_dist = width[0]
-
+        ve_count = 0
+        complete = False
+        print("\nStarting at point {0}, in vol {1}".format(point, vol))
         # track a single ray down the mesh row and tally accordingly
         for next_vol, distance, _ in ray_iterator(vol, point, direction):
-            #print("next_vol {0} distance {1}".format(next_vol, distance))
+            if complete:
+                break
+            print("next_vol {0} distance {1}".format(next_vol, distance))
             # volume extends past mesh boundary
             if distance > mesh_dist:
                 while distance > mesh_dist:
@@ -799,29 +715,30 @@ def _evaluate_row(di, divs, start_points):
                     if vol not in results[ve_count].keys():
                         results[ve_count][vol] = 0
 
-                    results[ve_count][vol] += mesh_dist/width[ve_count]/num_rays
+                    print("Travel {0} in ve_count {1}".format(mesh_dist, ve_count))
+                    results[ve_count][vol] += mesh_dist/(width[ve_count]*num_rays)
                     distance -= mesh_dist
 
                     # if not on the last volume element, continue into the next
                     # volume element
-                    if ve_count < num_ve - 1:
+                    if ve_count == num_ve - 1:
+                        complete = True
+                        break
+                    else:
                         ve_count += 1
                         mesh_dist = width[ve_count]
 
             # volume does not extend past mesh volume
-            if distance <= mesh_dist and distance > 1E-10:
+            if distance <= mesh_dist and distance > 1E-10 and not complete:
                 # check to see if current volume has already by tallied
                 if vol not in results[ve_count].keys():
                     results[ve_count][vol] = 0
 
-                results[ve_count][vol] += distance/width[ve_count]/num_rays
+                print("Travel {0} in ve_count {1}".format(distance, ve_count))
+                results[ve_count][vol] += distance/(width[ve_count]*num_rays)
                 mesh_dist -= distance
             
             vol = next_vol
-
-    #print("ve count {0}".format(ve_count))
-    #print(results)
-    #print("\n")
     return results
 
 def _rand_start(num_rays, di_perp, min_perp, di_1, min_1, max_1, di_2, min_2, max_2):
