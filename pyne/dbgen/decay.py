@@ -8,9 +8,8 @@ from zipfile import ZipFile
 import numpy as np
 import tables as tb
 
-from .. import nucname
-from .. import ensdf
-from .api import BASIC_FILTERS
+from pyne import ensdf
+from pyne.dbgen.api import BASIC_FILTERS
 
 
 def grab_ensdf_decay(build_dir=""):
@@ -77,7 +76,7 @@ level_dtype = np.dtype([
 decay_dtype = np.dtype([
     ('parent', int),
     ('daughter', int),
-    ('decay', 's5'),
+    ('decay', 'S5'),
     ('half_life', float),
     ('half_life_error', float),
     ('branch_ratio', float),
@@ -176,11 +175,15 @@ def parse_decay(build_dir=""):
     all_betas = []
     all_ecbp = []
     for item in decay_data:
-        all_decays.append([item[:10]])
-        all_gammas.append(item[11])
-        all_alphas.append(item[12])
-        all_betas.append(item[13])
-        all_ecbp.append(item[14])
+        all_decays.append(item[:10])
+        if len(item[10]) > 0:
+            all_gammas.append(tuple(item[10][0]))
+        if len(item[11]) > 0:
+            all_alphas.append(tuple(item[11][0]))
+        if len(item[12]) > 0:
+            all_betas.append(tuple(item[12][0]))
+        if len(item[13]) > 0:
+            all_ecbp.append(tuple(item[13][0]))
 
     all_decay_array = np.array(all_decays, dtype=decay_dtype)
     all_gammas_array = np.array(all_gammas, dtype=gammas_dtype)
@@ -242,7 +245,7 @@ def make_decay_half_life_table(nuc_data, build_dir=""):
                                  'ENSDF beta decays')
     betas_table.flush()
 
-    ecbp_table = db.createTable('/decay/', 'decays', ecbp,
+    ecbp_table = db.createTable('/decay/', 'ecbp', ecbp,
                                 'ENSDF ecbp decays')
     ecbp_table.flush()
 

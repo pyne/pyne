@@ -68,11 +68,11 @@ def _read_variablepoint(line, dstart, dlen):
 
 
 def _to_id_from_level(nuc_id, level, levellist):
-    gparent = None
+    gparent = 0
     for levels in levellist:
         if levels[0] == _to_id(nuc_id):
-            if level is not None and level + 1.0 > level[2] > level - 1.0:
-                gparent = level[0]
+            if level is not None and level + 1.0 > levels[2] > level - 1.0:
+                gparent = levels[0]
     return gparent
 
 
@@ -123,7 +123,7 @@ def _to_id(nuc):
         nucid = nucname.id(nuc.strip())
     else:
         warnings.warn('Neutron data not supported!')
-        return None
+        return 0
     return nucid
 
 
@@ -366,7 +366,7 @@ def _parse_gamma_continuation_record(g, inten, tti):
         if '/T' in entry:
             tsplit = entry.split('/T')
             greff = tti
-            if np.isnan(greff):
+            if greff is None:
                 greff = inten
         if greff is None:
             greff = 1.0
@@ -804,16 +804,16 @@ def _parse_decay_dataset(lines, decay_s, levellist=None):
         g_rec = _g.match(line)
         if g_rec is not None:
             dat = _parse_gamma_record(g_rec)
-            if not np.isnan(dat[0]):
+            if dat[0] is not None:
+                gparent = 0
+                gdaughter = 0
                 if levellist is not None:
-                    gparent = None
-                    gdaughter = None
                     if level is not None:
                         gparent = _to_id_from_level(daughter, level, levellist)
                         dlevel = level - dat[0]
                         gdaughter = _to_id_from_level(daughter, dlevel, levellist)
-                    dat.append(gparent)
-                    dat.append(gdaughter)
+                dat.append(gparent)
+                dat.append(gdaughter)
                 for i in range(8):
                     dat.append(0)
                 gammarays.append(dat)
@@ -824,7 +824,7 @@ def _parse_decay_dataset(lines, decay_s, levellist=None):
         gc_rec = _gc.match(line)
         if gc_rec is not None and goodgray is True:
             conv = _parse_gamma_continuation_record(gc_rec, gammarays[-1][2], gammarays[-1][6])
-            gammarays[-1][8:] = _update_xrays(conv, gammarays[-1][-8:], _to_id(daughter))
+            gammarays[-1][-8:] = _update_xrays(conv, gammarays[-1][-8:], _to_id(daughter))
             continue
         n_rec = _norm.match(line)
         if n_rec is not None:
@@ -848,20 +848,16 @@ def _parse_decay_dataset(lines, decay_s, levellist=None):
             parent2, tfinal, tfinalerr, e, e_err = _parse_parent_record(p_rec)
             continue
     if len(gammarays) > 0 or len(alphas) > 0 or len(betas) > 0 or len(ecbp) > 0:
-        if len(gammarays) > 0:
-            gammas = np.array(gammarays)
-        else:
-            gammas = None
         pfinal = []
         parent = parent.split('(')[0]
         parents = parent.split(',')
         if len(parents) > 1:
-            for item in parents:
-                pfinal.append(_to_id(item))
+            pfinal = _to_id(parents[0])
+            warnings.warn('Multiple parents {0}'.format(parent))
         else:
             pfinal = _to_id(parents[0][:5])
         return pfinal, _to_id(daughter), decay_s.strip(), tfinal, tfinalerr, \
-               br, nrbr, nrbr_err, nbbr, nbbr_err, gammas, alphas, \
+               br, nrbr, nrbr_err, nbbr, nbbr_err, gammarays, alphas, \
                betas, ecbp
     return None
 
