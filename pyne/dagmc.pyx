@@ -702,20 +702,20 @@ def _evaluate_row(di, divs, start_points):
         mesh_dist = width[0]
         ve_count = 0
         complete = False
-        print("\nStarting at point {0}, in vol {1}".format(point, vol))
+        #print("\nStarting at point {0}, in vol {1}".format(point, vol))
         # track a single ray down the mesh row and tally accordingly
         for next_vol, distance, _ in ray_iterator(vol, point, direction):
             if complete:
                 break
-            print("next_vol {0} distance {1}".format(next_vol, distance))
+            #print("next_vol {0} distance {1}".format(next_vol, distance))
             # volume extends past mesh boundary
             while distance >= mesh_dist:
                 # check to see if current volume has already by tallied
                 if vol not in results[ve_count].keys():
-                    print("hello {0}".format(distance))
+                    #print("hello {0}".format(distance))
                     results[ve_count][vol] = 0
 
-                print("hello Travel {0} in ve_count {1}".format(mesh_dist, ve_count))
+                #print("hello Travel {0} in ve_count {1}".format(mesh_dist, ve_count))
                 results[ve_count][vol] += mesh_dist/(width[ve_count]*num_rays)
                 distance -= mesh_dist
 
@@ -732,10 +732,10 @@ def _evaluate_row(di, divs, start_points):
             if distance < mesh_dist and distance > 1E-10 and not complete:
                 # check to see if current volume has already by tallied
                 if vol not in results[ve_count].keys():
-                    print("goob {0}".format(distance))
+                    #print("goob {0}".format(distance))
                     results[ve_count][vol] = 0
 
-                print("goob Travel {0} in ve_count {1}".format(distance, ve_count))
+                #print("goob Travel {0} in ve_count {1}".format(distance, ve_count))
                 results[ve_count][vol] += distance/(width[ve_count]*num_rays)
                 mesh_dist -= distance
             
@@ -758,14 +758,26 @@ def _rand_start(num_rays, di_perp, min_perp, di_1, min_1, max_1, di_2, min_2, ma
 
 def _grid_start(num_rays, di_perp, min_perp, di_1, min_1, max_1, di_2, min_2, max_2):
 
+   # test to see if num_rays is a perfect square
+   if int(np.sqrt(num_rays))**2 != num_rays:
+       raise ValueError("For rays fired in a grid, "
+                        "num_rays must be a perfect square.")
+   else:
+      square_dim = int(np.sqrt(num_rays))
+
+   step_1 = (max_1 - min_1)/(float(square_dim) + 1)
+   step_2 = (max_2 - min_2)/(float(square_dim) + 1)
+   range_1 = np.arange(min_1 + step_1, max_1, step_1)
+   range_2 = np.arange(min_2 + step_2, max_2, step_2)
+
    start_points = []
-   ray_count = 0
-   while ray_count < num_rays:
-       start_point = [0]*3
-       start_point[di_perp] = min_perp
-       start_point[di_1] = uniform(min_1, max_1)
-       start_point[di_2] = uniform(min_2, max_2)
-       start_points.append(start_point)
-       ray_count += 1
+
+   for point_1 in range_1:
+       for point_2 in range_2:
+           start_point = [0]*3
+           start_point[di_perp] = min_perp
+           start_point[di_1] = point_1
+           start_point[di_2] = point_2
+           start_points.append(start_point)
 
    return start_points
