@@ -70,10 +70,9 @@ def _read_variablepoint(line, dstart, dlen):
 def _to_id_from_level(nuc_id, level, levellist):
     gparent = None
     for levels in levellist:
-        if levels[0][0] == _to_id(nuc_id):
-            for level_b in levels:
-                if level is not None and level + 1.0 > level_b[2] > level - 1.0:
-                    gparent = level_b[0]
+        if levels[0] == _to_id(nuc_id):
+            if level is not None and level + 1.0 > level[2] > level - 1.0:
+                gparent = level[0]
     return gparent
 
 
@@ -260,12 +259,12 @@ def _get_err(plen, errstr, valexp):
 def _parse_level_record(l_rec):
     """
     This Parses and ENSDF level record
-    
+
     Parameters
     ----------
     g : re.MatchObject
         regular expression MatchObject
-        
+
     Returns
     -------
     e : float
@@ -490,7 +489,7 @@ def _parse_normalization_record(n_rec):
         Uncertainty in nr
     nt : float
         Multiplier for converting relative transition intensity to transitions
-        per 100 decays of the parent through the decay branch or to photons 
+        per 100 decays of the parent through the decay branch or to photons
         per 100 neutron captures for (n,g).
     nt_err : float
         Uncertainty in nt
@@ -580,7 +579,7 @@ def _parse_parent_record(p_rec):
 def _parse_qvalue_record(q_rec):
     """
     This parses and ENSDF q-value record
-    
+
     Parameters
     ----------
     q_rec : re.MatchObject
@@ -589,7 +588,7 @@ def _parse_qvalue_record(q_rec):
     Returns
     -------
     qminus : float
-        total energy for B- decay (if qminus > 0 B- decay is possible) 
+        total energy for B- decay (if qminus > 0 B- decay is possible)
     dqminus : float
         standard uncertainty in qminus
     sn : float
@@ -645,7 +644,7 @@ def _parse_alpha_record(a_rec):
 def _parse_delayed_particle_record(dp_rec):
     """
     This parses and ENSDF delayed particle record
-    
+
     Parameters
     ----------
     dp_rec : re.MatchObject
@@ -654,7 +653,7 @@ def _parse_delayed_particle_record(dp_rec):
     Returns
     -------
     ptype : str
-        symbol for delayed particle 
+        symbol for delayed particle
     e : float
         particle energy
     de : float
@@ -867,15 +866,17 @@ def _parse_decay_dataset(lines, decay_s, levellist=None):
     return None
 
 
-def decays(filename):
+def decays(filename, levellist=None, decaylist=None):
+    if levellist is None:
+        levellist = []
+    if decaylist is None:
+        decaylist = []
     if isinstance(filename, str):
         with open(filename, 'r') as f:
             dat = f.read()
     else:
         dat = filename.read()
     datasets = dat.split(80 * " " + "\n")[0:-1]
-    levellist = []
-    decaylist = []
     for dataset in datasets:
         levels = []
         lines = dataset.splitlines()
@@ -891,9 +892,7 @@ def decays(filename):
                     if from_nuc is not None:
                         nuc_id = from_nuc + leveln
                         leveln += 1
-                        levels.append((nuc_id, half_lifev, level))
-            if len(levels) > 0:
-                levellist.append(levels)
+                        levellist.append((nuc_id, half_lifev, level, state))
     for dataset in datasets:
         lines = dataset.splitlines()
         ident = re.match(_ident, lines[0])
@@ -904,7 +903,7 @@ def decays(filename):
             decay = _parse_decay_dataset(lines, decay_s, levellist)
             if decay is not None:
                 decaylist.append(decay)
-    return decaylist
+    return levellist, decaylist
 
 
 def origen_data(filename):
