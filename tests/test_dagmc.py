@@ -167,13 +167,16 @@ class TestDagmcWithUnitbox(unittest.TestCase):
         """
         coords = [-4, -1, 1, 4]
         mesh = Mesh(structured=True, structured_coords=[coords, coords, coords])
-        results = dagmc.discretize_geom(mesh, 50)
-        for c, res in enumerate(results):
+        results, uncs = dagmc.discretize_geom(mesh, 50)
+        for c, (res, unc) in enumerate(zip(results, uncs)):
             assert_equal(len(res.keys()), 1)
+            assert_equal(len(unc.keys()), 1)
             if c != 13:
                assert_almost_equal(res[3], 1.0)
+               assert_almost_equal(unc[3], 0.0)
             else:
                assert_almost_equal(res[2], 1.0)
+               assert_almost_equal(unc[2], 0.0)
 
     def test_discretize_geom_grid(self):
         """The 14th (index 13) mesh volume element fully contains volume 2. Use 
@@ -181,13 +184,16 @@ class TestDagmcWithUnitbox(unittest.TestCase):
         """
         coords = [-4, -1, 1, 4]
         mesh = Mesh(structured=True, structured_coords=[coords, coords, coords])
-        results = dagmc.discretize_geom(mesh, 9, grid=True)
-        for c, res in enumerate(results):
+        results, uncs = dagmc.discretize_geom(mesh, 9, grid=True)
+        for c, (res, unc) in enumerate(zip(results, uncs)):
             assert_equal(len(res.keys()), 1)
+            assert_equal(len(unc.keys()), 1)
             if c != 13:
-               assert_equal(res[3], 1.0)
+               assert_almost_equal(res[3], 1.0)
+               assert_almost_equal(unc[3], 0.0)
             else:
-               assert_equal(res[2], 1.0)
+               assert_almost_equal(res[2], 1.0)
+               assert_almost_equal(unc[2], 0.0)
 
     def test_discretize_geom_mix(self):
         """Single mesh volume element that is a 50:50 split of geometry volumes
@@ -196,10 +202,15 @@ class TestDagmcWithUnitbox(unittest.TestCase):
         coords = [0, 1]
         coords2 = [0, 2]
         mesh = Mesh(structured=True, structured_coords=[coords2, coords, coords])
-        results = dagmc.discretize_geom(mesh, 100, grid=True)
-        assert_almost_equal(results[0][2], 0.5)
-        assert_almost_equal(results[0][3], 0.5)
+        results1, uncs1 = dagmc.discretize_geom(mesh, 100, grid=True)
+        assert_almost_equal(results1[0][2], 0.5)
+        assert_almost_equal(results1[0][3], 0.5)
 
+        # To to make sure standard error decreases with increasing rays
+        results1, uncs2 = dagmc.discretize_geom(mesh, 625, grid=True)
+        assert(uncs2[0][2] < uncs1[0][2])
+        assert(uncs2[0][3] < uncs1[0][3])
+        
     def test_discretize_non_square(self):
         """Test to make sure requesting a grid with a num_rays that is not a
         perfect square raises ValueError.

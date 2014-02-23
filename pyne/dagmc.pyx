@@ -614,16 +614,19 @@ def discretize_geom(mesh, num_rays, grid=False):
     results : list
         List with an entry for each mesh volume element in the order determined
         by the structured_ordering attribute of the PyNE mesh object. Each entry
-        in the list is a dictionary maps geometry volume numbers to lists
-        containing the corresponding volume fractions and standard deviations.
+        in the list is a dictionary maps geometry volume numbers to its volume 
+        fraction within the mesh volume element.
+    uncs : list
+        Same structure as "results" but contains the standard error for the 
+        volume fractions.
      """
     # Ensure input is valid
     mesh._structured_check()
     #load(filename)
-
     divs = [mesh.structured_get_divisions(a) for a in 'xyz']
-    results = [{} for x in range(0, 
-              (len(divs[0]) - 1)*(len(divs[1]) -1 )*(len(divs[2])-1))]
+    num_ves = (len(divs[0]) - 1) * (len(divs[1]) - 1 ) * (len(divs[2]) - 1)
+    results = [{} for x in range(0, num_ves)]
+    uncs = [{} for x in range(0, num_ves)]
 
     # direction indicies: x = 0, y = 1, z = 2
     dis = [0, 1, 2]
@@ -659,7 +662,7 @@ def discretize_geom(mesh, num_rays, grid=False):
                                                s_dis[1], s_min_1, s_max_1)
                 #print(start_points)
                 
-                row_results = _evaluate_row(di, divs[di], start_points)
+                row_samples = _evaluate_row(di, divs[di], start_points)
                 #for res in row_results:
                 #    print(res)
 
@@ -676,14 +679,27 @@ def discretize_geom(mesh, num_rays, grid=False):
                     #print(idx_tag[ve])
                     idx.append(idx_tag[ve])
 
-                for i, row_res in zip(idx, row_results):
-                    for vol, val in row_res.iteritems():
+                # Calculate means. Simotaneous populate uncs with a list of all
+                # samples so the standard error can later be calculated.
+                for i, samples in zip(idx, row_samples):
+                    for vol, val in samples.iteritems():
                         if vol not in results[i].keys():
                            results[i][vol] = 0
+                           uncs[i][vol] = []
 
-                        results[i][vol] += val
+                        results[i][vol] += np.sum(samples[vol])/(3 * num_rays)
+                        uncs[i][vol] += samples[vol]
 
-    return results
+    # calculate standard errors
+    for i in range(0, num_ves):
+        for vol in uncs[i].keys():
+            # calculate sample standard deviation
+            var = (np.sum([(results[i][vol] - x)**2 for x in uncs[i][vol]])
+                  /(len(uncs[i][vol]) - 1))
+            stdev = np.sqrt(var)
+            uncs[i][vol] = stdev/np.sqrt(len(uncs[i][vol]))
+
+    return results, uncs
                         
 
 def _evaluate_row(di, divs, start_points):
@@ -701,10 +717,11 @@ def _evaluate_row(di, divs, start_points):
 
     Returns
     -------
-    results : list
+    samples : list
         One entry for each mesh volume element in the firing direction. Each
-        entry is a dictionary that maps geometry volume numbers to their
-        respective volume fractions in the mesh volume element.
+        entry is a dictionary that maps geometry volume numbers to a list of
+        normalized track length samples (ratio of track length to mesh volume 
+        element width).
     """
 
     # Total number of rays fired: multiply by 3 to account for 3 directions
@@ -713,7 +730,7 @@ def _evaluate_row(di, divs, start_points):
     num_ve = len(divs) - 1
     direction = [0, 0, 0]
     direction[di] = 1
-    results = [{} for x in range(0, len(divs) - 1)]
+    samples = [{} for x in range(0, len(divs) - 1)]
     width = [divs[x] - divs[x - 1] for x in range(1, len(divs))]
     # fire ray for each starting point
     for point in start_points:
@@ -730,12 +747,12 @@ def _evaluate_row(di, divs, start_points):
             # volume extends past mesh boundary
             while distance >= mesh_dist:
                 # check to see if current volume has already by tallied
-                if vol not in results[ve_count].keys():
+                if vol not in samples[ve_count].keys():
                     #print("hello {0}".format(distance))
-                    results[ve_count][vol] = 0
+                    samples[ve_count][vol] = []
 
                 #print("hello Travel {0} in ve_count {1}".format(mesh_dist, ve_count))
-                results[ve_count][vol] += mesh_dist/(width[ve_count]*num_rays)
+                samples[ve_count][vol].append(mesh_dist/width[ve_count])
                 distance -= mesh_dist
 
                 # if not on the last volume element, continue into the next
@@ -750,16 +767,17 @@ def _evaluate_row(di, divs, start_points):
             # volume does not extend past mesh volume
             if distance < mesh_dist and distance > 1E-10 and not complete:
                 # check to see if current volume has already by tallied
-                if vol not in results[ve_count].keys():
+                if vol not in samples[ve_count].keys():
                     #print("goob {0}".format(distance))
-                    results[ve_count][vol] = 0
+                    samples[ve_count][vol] = []
 
                 #print("goob Travel {0} in ve_count {1}".format(distance, ve_count))
-                results[ve_count][vol] += distance/(width[ve_count]*num_rays)
+                samples[ve_count][vol].append(distance/width[ve_count])
                 mesh_dist -= distance
             
             vol = next_vol
-    return results
+
+    return samples
 
 def _rand_start(num_rays, di_fire, min_fire, di_1, min_1, max_1, 
                                              di_2, min_2, max_2):
