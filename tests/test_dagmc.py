@@ -1,7 +1,7 @@
 from __future__ import print_function
 import unittest
 import os.path
-from nose.tools import assert_equal
+from nose.tools import assert_equal, assert_almost_equal, assert_raises
 
 try:
     from pyne import dagmc
@@ -162,20 +162,22 @@ class TestDagmcWithUnitbox(unittest.TestCase):
         self.assertEqual(set([(0, 0.0), (5, 0.5)]), mats)
 
     def test_discretize_geom_rand(self):
-        """The 14th mesh volume element fully contains volume 2.
+        """The 14th (index 13) mesh volume element fully contains volume 2. Use 
+        random sampling.
         """
         coords = [-4, -1, 1, 4]
         mesh = Mesh(structured=True, structured_coords=[coords, coords, coords])
-        results = dagmc.discretize_geom(mesh, 5)
+        results = dagmc.discretize_geom(mesh, 50)
         for c, res in enumerate(results):
             assert_equal(len(res.keys()), 1)
             if c != 13:
-               assert_equal(res[3], 1.0)
+               assert_almost_equal(res[3], 1.0)
             else:
-               assert_equal(res[2], 1.0)
+               assert_almost_equal(res[2], 1.0)
 
     def test_discretize_geom_grid(self):
-        """The 14th mesh volume element fully contains volume 2.
+        """The 14th (index 13) mesh volume element fully contains volume 2. Use 
+        grid sampling.
         """
         coords = [-4, -1, 1, 4]
         mesh = Mesh(structured=True, structured_coords=[coords, coords, coords])
@@ -186,6 +188,25 @@ class TestDagmcWithUnitbox(unittest.TestCase):
                assert_equal(res[3], 1.0)
             else:
                assert_equal(res[2], 1.0)
+
+    def test_discretize_geom_mix(self):
+        """Single mesh volume element that is a 50:50 split of geometry volumes
+        2 and 3.
+        """
+        coords = [0, 1]
+        coords2 = [0, 2]
+        mesh = Mesh(structured=True, structured_coords=[coords2, coords, coords])
+        results = dagmc.discretize_geom(mesh, 100, grid=True)
+        assert_almost_equal(results[0][2], 0.5)
+        assert_almost_equal(results[0][3], 0.5)
+
+    def test_discretize_non_square(self):
+        """Test to make sure requesting a grid with a num_rays that is not a
+        perfect square raises ValueError.
+        """
+        coords = [0, 1]
+        mesh = Mesh(structured=True, structured_coords=[coords, coords, coords])
+        assert_raises(ValueError, dagmc.discretize_geom, mesh, 3, grid=True)
 
 if __name__ == "__main__":
     import nose

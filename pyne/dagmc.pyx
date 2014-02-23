@@ -605,8 +605,8 @@ def discretize_geom(mesh, num_rays, grid=False):
     num_rays : int
         The number of rays to fire in each mesh row for each direction.
     grid : boolean
-        If false, rays starting points are chosen randomly on the boundary within
-        each mesh row. If true, a linear spaced grid of starting points is 
+        If false, rays starting points are chosen randomly (on the boundary) 
+        for each mesh row. If true, a linear spaced grid of starting points is 
         chosen, with dimension sqrt(num_rays) x sqrt(num_rays)
 
     Returns
@@ -687,6 +687,25 @@ def discretize_geom(mesh, num_rays, grid=False):
                         
 
 def _evaluate_row(di, divs, start_points):
+    """Private function that fires rays down a single mesh row and returns the
+    results.
+
+    Parameters
+    ----------
+    di : int
+        The direction index of the current firing direction.
+    divs : list
+        The mesh boundaries perpendicular to the firing direction.
+    start_points : list
+        The xyz points describing where rays should start from.
+
+    Returns
+    -------
+    results : list
+        One entry for each mesh volume element in the firing direction. Each
+        entry is a dictionary that maps geometry volume numbers to their
+        respective volume fractions in the mesh volume element.
+    """
 
     # Total number of rays fired: multiply by 3 to account for 3 directions
     num_rays = len(start_points) * 3
@@ -742,42 +761,107 @@ def _evaluate_row(di, divs, start_points):
             vol = next_vol
     return results
 
-def _rand_start(num_rays, di_perp, min_perp, di_1, min_1, max_1, di_2, min_2, max_2):
+def _rand_start(num_rays, di_fire, min_fire, di_1, min_1, max_1, 
+                                             di_2, min_2, max_2):
+    """Private function for randomly generating ray starting points for a single
+    mesh row.
+    
+    Parameters
+    ----------
+    num_rays : int
+        Number of starting points to generate.
+    di_fire : int
+        The direction index of ray fire.
+    min_fire : float
+        The location of fire plane perpedicular to the firing direction, i.e.
+        the plane for which all starting locations are on.
+    di_1 : int
+        The direction index of one of the directions that makes up the rectangle
+        for which starting points are sampled from.
+    min_1 : float
+        The location that bounds the sampling rectangle from the left in di_1.
+    max_1 : float
+        The location that bounds the sampling rectangle from the right in di_1.
+    di_2 : int
+        The direction index of one the directions (that is not di_1) that makes
+        up the rectangle for which starting points are sampled from.
+    min_2 : float
+        The location that bounds the sampling rectangle from the left in di_2.
+    max_2 : float
+        The location that bounds the sampling rectangle from the right in di_2.
+  
+    Returns
+    -------
+    start_points : list
+        The xyz values of the randomly sampled starting points.
+    """
+    start_points = []
+    ray_count = 0
+    while ray_count < num_rays:
+        start_point = [0]*3
+        start_point[di_fire] = min_fire
+        start_point[di_1] = uniform(min_1, max_1)
+        start_point[di_2] = uniform(min_2, max_2)
+        start_points.append(start_point)
+        ray_count += 1
 
-   start_points = []
-   ray_count = 0
-   while ray_count < num_rays:
-       start_point = [0]*3
-       start_point[di_perp] = min_perp
-       start_point[di_1] = uniform(min_1, max_1)
-       start_point[di_2] = uniform(min_2, max_2)
-       start_points.append(start_point)
-       ray_count += 1
+    return start_points
 
-   return start_points
+def _grid_start(num_rays, di_fire, min_fire, di_1, min_1, max_1,
+                                             di_2, min_2, max_2):
+    """Private function for generating a uniform grid of start points for a
+    sinlge mesh row. The grid is a rectangle, each side divided equally into 
+    sqrt(num_rays) rays. The boundaries (values specified by min_1, min_2,
+    max_1, max_2) are not included in the sampling grid.
+    
+    Parameters
+    ----------
+    num_rays : int
+        Number of starting points to generate. Must be a perfect square.
+    di_fire : int
+        The direction index of ray fire.
+    min_fire : float
+        The location of fire plane perpedicular to the firing direction, i.e.
+        the plane for which all starting locations are on.
+    di_1 : int
+        The direction index of one of the directions that makes up the rectangle
+        for which starting points are sampled from.
+    min_1 : float
+        The location that bounds the sampling rectangle from the left in di_1.
+    max_1 : float
+        The location that bounds the sampling rectangle from the right in di_1.
+    di_2 : int
+        The direction index of one the directions (that is not di_1) that makes
+        up the rectangle for which starting points are sampled from.
+    min_2 : float
+        The location that bounds the sampling rectangle from the left in di_2.
+    max_2 : float
+        The location that bounds the sampling rectangle from the right in di_2.
 
-def _grid_start(num_rays, di_perp, min_perp, di_1, min_1, max_1, di_2, min_2, max_2):
-
-   # test to see if num_rays is a perfect square
-   if int(np.sqrt(num_rays))**2 != num_rays:
-       raise ValueError("For rays fired in a grid, "
-                        "num_rays must be a perfect square.")
-   else:
-      square_dim = int(np.sqrt(num_rays))
-
-   step_1 = (max_1 - min_1)/(float(square_dim) + 1)
-   step_2 = (max_2 - min_2)/(float(square_dim) + 1)
-   range_1 = np.arange(min_1 + step_1, max_1, step_1)
-   range_2 = np.arange(min_2 + step_2, max_2, step_2)
-
-   start_points = []
-
-   for point_1 in range_1:
-       for point_2 in range_2:
-           start_point = [0]*3
-           start_point[di_perp] = min_perp
-           start_point[di_1] = point_1
-           start_point[di_2] = point_2
-           start_points.append(start_point)
-
-   return start_points
+    Returns
+    -------
+    start_points : list
+        The xyz values of the starting points.
+    """
+    # test to see if num_rays is a perfect square
+    if int(np.sqrt(num_rays))**2 != num_rays:
+        raise ValueError("For rays fired in a grid, "
+                         "num_rays must be a perfect square.")
+    else:
+       square_dim = int(np.sqrt(num_rays))
+ 
+    step_1 = (max_1 - min_1)/(float(square_dim) + 1)
+    step_2 = (max_2 - min_2)/(float(square_dim) + 1)
+    range_1 = np.linspace(min_1 + step_1, max_1, square_dim, endpoint=False)
+    range_2 = np.linspace(min_2 + step_2, max_2, square_dim, endpoint=False)
+ 
+    start_points = []
+    for point_1 in range_1:
+        for point_2 in range_2:
+            start_point = [0]*3
+            start_point[di_fire] = min_fire
+            start_point[di_1] = point_1
+            start_point[di_2] = point_2
+            start_points.append(start_point)
+ 
+    return start_points
