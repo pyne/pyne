@@ -70,9 +70,7 @@ level_dtype = np.dtype([
     ('half_life', float),
     ('metastable', int),
     ])
-#pfinal, _to_id(daughter), decay_s.strip(), tfinal, tfinalerr, \
-#               br, nrbr, nrbr_err, nbbr, nbbr_err, gammas, alphas, \
-#               betas, ecbp)
+
 decay_dtype = np.dtype([
     ('parent', int),
     ('daughter', int),
@@ -86,7 +84,6 @@ decay_dtype = np.dtype([
     ('beta_branch_ratio_err', float),
     ])
 
-#en, en_err, inten, inten_err, conv, conv_err, tti, tti_err, from_nuc, to_nuc, xrays[]
 gammas_dtype = np.dtype([
     ('energy', float),
     ('energy_err', float),
@@ -108,7 +105,6 @@ gammas_dtype = np.dtype([
     ('l_xray_inten', float),
     ])
 
-#en, inten, aparent, adaughter
 alphas_dtype = np.dtype([
     ('energy', float),
     ('intensity', float),
@@ -116,7 +112,6 @@ alphas_dtype = np.dtype([
     ('to_nuc', int),
     ])
 
-# endpoint, eav, inten, bparent, bdaughter
 betas_dtype = np.dtype([
     ('endpoint_energy', float),
     ('avg_energy', float),
@@ -125,8 +120,6 @@ betas_dtype = np.dtype([
     ('to_nuc', int),
     ])
 
-#[dat[0], 0.0, dat[2], dat[4], ecparent, ecdaughter,
-#                             0, 0, 0, 0, 0, 0, 0, 0]
 ecbp_dtype = np.dtype([
     ('endpoint_energy', float),
     ('avg_energy', float),
@@ -153,11 +146,13 @@ def parse_decay(build_dir=""):
     half_life_data = []
     decay_data = []
     level_list = []
+    lmap = dict()
+    lcount = 0
     files = sorted([f for f in glob.glob(os.path.join(build_dir, 'ensdf.*'))])
     for f in files:
         print("    parsing decay data from {0}".format(f))
         half_life_data += ensdf.half_life(f)
-        level_list, decay_data = ensdf.decays(f, level_list, decay_data)
+        level_list, decay_data, lmap, lcount = ensdf.decays(f, level_list, decay_data, lmap, lcount)
 
     ln2 = np.log(2.0)
     half_life_data = [(fn, lvl, tn, hl, ln2 / hl, br) for fn, lvl, tn, hl, br in half_life_data]

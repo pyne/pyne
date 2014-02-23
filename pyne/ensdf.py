@@ -67,12 +67,16 @@ def _read_variablepoint(line, dstart, dlen):
     return data, error
 
 
-def _to_id_from_level(nuc_id, level, levellist):
+def _to_id_from_level(nuc_id, level, levellist, lmap):
     gparent = 0
-    for levels in levellist:
-        if levels[0] == _to_id(nuc_id):
-            if level is not None and level + 1.0 > levels[2] > level - 1.0:
-                gparent = levels[0]
+    nid = _to_id(nuc_id)
+    if nid in lmap:
+        for i in range(lmap[nid], len(levellist)):
+            if level is not None and level + 1.0 > levellist[i][2] > level - 1.0:
+                gparent = levellist[i][0]
+                break
+            if int(nid/1000) != int(levellist[i][0]/1000):
+                break
     return gparent
 
 
@@ -715,7 +719,7 @@ def _update_xrays(conv, xrays, nuc_id):
     return xrays
 
 
-def _parse_decay_dataset(lines, decay_s, levellist=None):
+def _parse_decay_dataset(lines, decay_s, levellist=None, lmap = None):
     """
     This parses a gamma ray dataset. It returns a tuple of the parsed data.
 
@@ -763,8 +767,8 @@ def _parse_decay_dataset(lines, decay_s, levellist=None):
                 if parent2 is None:
                     parent2 = parent
                     e = 0
-                bparent = _to_id_from_level(parent2, e, levellist)
-                bdaughter = _to_id_from_level(daughter, level, levellist)
+                bparent = _to_id_from_level(parent2, e, levellist, lmap)
+                bdaughter = _to_id_from_level(daughter, level, levellist, lmap)
                 betas.append([dat[0], 0.0, dat[2], bparent, bdaughter])
             continue
         bc_rec = _betac.match(line)
@@ -785,8 +789,8 @@ def _parse_decay_dataset(lines, decay_s, levellist=None):
                 if parent2 is None:
                     parent2 = parent
                     e = 0
-                aparent = _to_id_from_level(parent2, e, levellist)
-                adaughter = _to_id_from_level(daughter, level, levellist)
+                aparent = _to_id_from_level(parent2, e, levellist, lmap)
+                adaughter = _to_id_from_level(daughter, level, levellist, lmap)
                 alphas.append((dat[0], dat[2], aparent, adaughter))
             continue
         ec_rec = _ec.match(line)
@@ -796,8 +800,8 @@ def _parse_decay_dataset(lines, decay_s, levellist=None):
                 parent2 = parent
                 e = 0
             if levellist is not None:
-                ecparent = _to_id_from_level(parent2, e, levellist)
-                ecdaughter = _to_id_from_level(daughter, level, levellist)
+                ecparent = _to_id_from_level(parent2, e, levellist, lmap)
+                ecdaughter = _to_id_from_level(daughter, level, levellist, lmap)
                 ecbp.append([dat[0], 0.0, dat[2], dat[4], ecparent, ecdaughter,
                              0, 0, 0, 0, 0, 0, 0, 0])
             continue
@@ -809,9 +813,9 @@ def _parse_decay_dataset(lines, decay_s, levellist=None):
                 gdaughter = 0
                 if levellist is not None:
                     if level is not None:
-                        gparent = _to_id_from_level(daughter, level, levellist)
+                        gparent = _to_id_from_level(daughter, level, levellist, lmap)
                         dlevel = level - dat[0]
-                        gdaughter = _to_id_from_level(daughter, dlevel, levellist)
+                        gdaughter = _to_id_from_level(daughter, dlevel, levellist, lmap)
                 dat.append(gparent)
                 dat.append(gdaughter)
                 for i in range(8):
@@ -851,6 +855,9 @@ def _parse_decay_dataset(lines, decay_s, levellist=None):
         pfinal = []
         parent = parent.split('(')[0]
         parents = parent.split(',')
+        #FIXME: Handle uneven errors
+        if tfinalerr is not None and not isinstance(tfinalerr, float):
+            tfinalerr = tfinalerr[0]
         if len(parents) > 1:
             pfinal = _to_id(parents[0])
             warnings.warn('Multiple parents {0}'.format(parent))
@@ -862,11 +869,13 @@ def _parse_decay_dataset(lines, decay_s, levellist=None):
     return None
 
 
-def decays(filename, levellist=None, decaylist=None):
+def decays(filename, levellist=None, decaylist=None, lmap=None, lcount = 0):
     if levellist is None:
         levellist = []
     if decaylist is None:
         decaylist = []
+    if lmap is None:
+        lmap = dict()
     if isinstance(filename, str):
         with open(filename, 'r') as f:
             dat = f.read()
@@ -887,7 +896,10 @@ def decays(filename, levellist=None, decaylist=None):
                     level, half_lifev, from_nuc, state = _parse_level_record(level_l)
                     if from_nuc is not None:
                         nuc_id = from_nuc + leveln
+                        if leveln == 0:
+                            lmap.update({nuc_id: lcount})
                         leveln += 1
+                        lcount += 1
                         levellist.append((nuc_id, half_lifev, level, state))
     for dataset in datasets:
         lines = dataset.splitlines()
@@ -896,10 +908,10 @@ def decays(filename, levellist=None, decaylist=None):
             continue
         if 'DECAY' in ident.group(2):
             decay_s = ident.group(2).split()[1]
-            decay = _parse_decay_dataset(lines, decay_s, levellist)
+            decay = _parse_decay_dataset(lines, decay_s, levellist, lmap)
             if decay is not None:
                 decaylist.append(decay)
-    return levellist, decaylist
+    return levellist, decaylist, lmap, lcount
 
 
 def origen_data(filename):
