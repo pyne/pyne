@@ -709,32 +709,33 @@ def _evaluate_row(di, divs, start_points):
                 break
             print("next_vol {0} distance {1}".format(next_vol, distance))
             # volume extends past mesh boundary
-            if distance > mesh_dist:
-                while distance > mesh_dist:
-                    # check to see if current volume has already by tallied
-                    if vol not in results[ve_count].keys():
-                        results[ve_count][vol] = 0
-
-                    print("Travel {0} in ve_count {1}".format(mesh_dist, ve_count))
-                    results[ve_count][vol] += mesh_dist/(width[ve_count]*num_rays)
-                    distance -= mesh_dist
-
-                    # if not on the last volume element, continue into the next
-                    # volume element
-                    if ve_count == num_ve - 1:
-                        complete = True
-                        break
-                    else:
-                        ve_count += 1
-                        mesh_dist = width[ve_count]
-
-            # volume does not extend past mesh volume
-            if distance <= mesh_dist and distance > 1E-10 and not complete:
+            while distance >= mesh_dist:
                 # check to see if current volume has already by tallied
                 if vol not in results[ve_count].keys():
+                    print("hello {0}".format(distance))
                     results[ve_count][vol] = 0
 
-                print("Travel {0} in ve_count {1}".format(distance, ve_count))
+                print("hello Travel {0} in ve_count {1}".format(mesh_dist, ve_count))
+                results[ve_count][vol] += mesh_dist/(width[ve_count]*num_rays)
+                distance -= mesh_dist
+
+                # if not on the last volume element, continue into the next
+                # volume element
+                if ve_count == num_ve - 1:
+                    complete = True
+                    break
+                else:
+                    ve_count += 1
+                    mesh_dist = width[ve_count]
+
+            # volume does not extend past mesh volume
+            if distance < mesh_dist and distance > 1E-10 and not complete:
+                # check to see if current volume has already by tallied
+                if vol not in results[ve_count].keys():
+                    print("goob {0}".format(distance))
+                    results[ve_count][vol] = 0
+
+                print("goob Travel {0} in ve_count {1}".format(distance, ve_count))
                 results[ve_count][vol] += distance/(width[ve_count]*num_rays)
                 mesh_dist -= distance
             

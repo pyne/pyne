@@ -1,9 +1,11 @@
 from __future__ import print_function
 import unittest
 import os.path
+from nose.tools import assert_equal
 
 try:
     from pyne import dagmc
+    from pyne.mesh import Mesh
 except ImportError:
     from nose.plugins.skip import SkipTest
     raise SkipTest
@@ -158,6 +160,19 @@ class TestDagmcWithUnitbox(unittest.TestCase):
 
         mats = dagmc.get_material_set(with_rho=True)
         self.assertEqual(set([(0, 0.0), (5, 0.5)]), mats)
+
+    def test_discretize_geom(self):
+    """The 14th mesh volume element fully contains volume 2.
+    """
+        coords = [-4, -1, 1, 4]
+        mesh = Mesh(structured=True, structured_coords=[coords, coords, coords])
+        results = dagmc.discretize_geom(mesh, 5)
+        for c, res in enumerate(results):
+            assert_equal(len(res.keys()), 1)
+            if c != 13:
+               assert_equal(res[3], 1.0)
+            else:
+               assert_equal(res[2], 1.0)
 
 if __name__ == "__main__":
     import nose
