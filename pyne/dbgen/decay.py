@@ -212,9 +212,9 @@ def make_decay_half_life_table(nuc_data, build_dir=""):
         db.createGroup('/', 'decay', 'ENSDF Decay data')
 
     decaytable = db.createTable('/decay/', 'half_life',
-                                      np.empty(0, dtype=half_life_dtype),
-                                      'Decay Energy level [MeV], half_life [s], decay_const '
-                                      '[1/s], branch_ratio [frac]', expectedrows=len(half_life))
+                                np.empty(0, dtype=half_life_dtype),
+                                'Decay Energy level [MeV], half_life [s], decay_const '
+                                '[1/s], branch_ratio [frac]', expectedrows=len(half_life))
     decaytable.append(half_life)
 
     # Ensure that data was written to table
