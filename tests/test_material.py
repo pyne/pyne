@@ -987,13 +987,13 @@ def test_multimaterial_mix_density():
     mat3 = mix.mix_by_volume()
     # calculated mass fracs by hand, same problem as above stated in mass fraction terms
     # rather than volume fraction terms.
-    mix = MultiMaterial({mat1:1/3.0, mat2:2/3.})
+    mix = MultiMaterial({mat1:1/3., mat2:2/3.})
     mat4 = mix.mix_by_mass()
 
-    assert_equal(mat3.density,1.5)
-    assert_equal(mat4.density,1.5)
+    assert_equal(mat3.density, 1.5)
+    assert_equal(mat4.density, 1.5)
 
-    assert_equal(mat3.density,mat4.density)
+    assert_equal(mat3.density, mat4.density)
 
 def test_mcnp():
 
