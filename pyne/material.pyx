@@ -1792,7 +1792,7 @@ class MultiMaterial(collections.MutableMapping):
         total_mass_frac = 0
         mix = Material()
         for mat, mat_frac in self._mats.items():
-            mix = mix + mat * mat_frac
+            mix = mix + mat*mat_frac
             total_mass_frac += mat_frac
             total += (mat_frac/mat.density)
         mix.mass = 1
@@ -1807,7 +1807,7 @@ class MultiMaterial(collections.MutableMapping):
         total = 0
         mix = Material()
         for mat, mat_frac in self._mats.items():
-            mix = mix + mat * mat_frac * mat.density
+            mix = mix + mat*mat_frac*mat.density
             total += (mat.density*mat_frac)
         mix.mass = 1
         mix.density = total
