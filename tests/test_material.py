@@ -959,26 +959,41 @@ def test_attrs():
 #
 # Test MultiMaterial
 #
-def test_multimaterial():
+def test_multimaterial_mix_composition():
     mat1 = Material(nucvec={120240000:0.3, 300000000:0.2, 10010000:0.1}, density=2.71)
     mat2 = Material(nucvec={60120000:0.2, 280640000:0.5, 10010000:0.12}, density=8.0)
     mix = MultiMaterial({mat1:0.5, mat2:0.21})
     mat3 = mix.mix_by_mass()
     mat4 = mix.mix_by_volume()
 
-    assert_equal(mat3.density, -1.0)
     assert_equal(mat3.comp[10010000], 0.16065498683155846)
     assert_equal(mat3.comp[60120000], 0.0721401580212985)
     assert_equal(mat3.comp[120240000], 0.352112676056338)
     assert_equal(mat3.comp[280640000], 0.18035039505324627)
     assert_equal(mat3.comp[300000000], 0.2347417840375587)
 
-    assert_equal(mat4.density, -1.0)
     assert_equal(mat4.comp[10010000], 0.15541581280722197)
     assert_equal(mat4.comp[60120000], 0.13501024631333625)
     assert_equal(mat4.comp[120240000], 0.2232289950576606)
     assert_equal(mat4.comp[280640000], 0.33752561578334067)
     assert_equal(mat4.comp[300000000], 0.14881933003844042)
+
+
+def test_multimaterial_mix_density():
+    mat1 = Material(nucvec={120240000:0.3, 300000000:0.2, 10010000:0.1}, density=1.0)
+    mat2 = Material(nucvec={60120000:0.2, 280640000:0.5, 10010000:0.12}, density=2.0)
+    # mixing by hand to get density 1.5 when 50:50 by volume of density 1 & 2
+    mix = MultiMaterial({mat1:0.5, mat2:0.5})
+    mat3 = mix.mix_by_volume()
+    # calculated mass fracs by hand, same problem as above stated in mass fraction terms
+    # rather than volume fraction terms.
+    mix = MultiMaterial({mat1:1/3., mat2:2/3.})
+    mat4 = mix.mix_by_mass()
+
+    assert_equal(mat3.density, 1.5)
+    assert_equal(mat4.density, 1.5)
+
+    assert_equal(mat3.density, mat4.density)
 
 def test_mcnp():
 
