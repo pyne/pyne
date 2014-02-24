@@ -592,30 +592,32 @@ def get_material_set(**kw):
 
 #### start util
 def discretize_geom(mesh, num_rays, grid=False):
-    """This function reads in a structured, axis-aligned, PyNE mesh object,
-    then uses Monte Carlo ray tracing to determing the volume fraction of each
-    geometry volume within each mesh volume element of the mesh. Note that a 
-    DAGMC geometry must already be loaded into memory.
+    """This function reads in a Cartesian, structured, axis-aligned, PyNE mesh
+    object, then uses Monte Carlo ray tracing to determine the volume 
+    fractions of each geometry volume within each mesh volume element of the 
+    mesh. Note that a DAGMC geometry must already be loaded into memory.
  
     Parameters
     ----------
     mesh : PyNE Mesh object
-        The Mesh object to tag with cell volume fractions. The mesh must be a 
-        Cartesean structured mesh that overlays the geometry.
+        The Mesh object to superimpose over the geometry. The mesh must be a 
+        Cartesean, structured mesh this is axis-aligned and does not extend 
+        into undefined portion of the DAGMC geometry.
     num_rays : int
         The number of rays to fire in each mesh row for each direction.
     grid : boolean
         If false, rays starting points are chosen randomly (on the boundary) 
-        for each mesh row. If true, a linear spaced grid of starting points is 
-        chosen, with dimension sqrt(num_rays) x sqrt(num_rays)
+        for each mesh row. If true, a linearly spaced grid of starting points is 
+        used, with dimension sqrt(num_rays) x sqrt(num_rays). In this case, 
+        "num_rays" must be a perfect square.
 
     Returns
     -------
     results : list
         List with an entry for each mesh volume element in the order determined
         by the structured_ordering attribute of the PyNE mesh object. Each entry
-        in the list is a dictionary maps geometry volume numbers to its volume 
-        fraction within the mesh volume element.
+        in the list is a dictionary that maps geometry volume numbers to their
+        volume fraction within the mesh volume element.
     uncs : list
         Same structure as "results" but contains the standard error for the 
         volume fractions.
@@ -647,9 +649,6 @@ def discretize_geom(mesh, num_rays, grid=False):
                 s_min_1 = divs[s_dis[1]][b]
                 s_max_1 = divs[s_dis[1]][b + 1]
 
-                #print("direction {0}".format(di))
-                #print("bounds {0}, {1}, {2}, {3}".format(s_min_0, s_max_0, s_min_1, s_max_1))
-
                 # create a lines of starting points to fire rays for this
                 # particular mesh row
                 if not grid:
@@ -660,12 +659,10 @@ def discretize_geom(mesh, num_rays, grid=False):
                     start_points = _grid_start(num_rays, di, divs[di][0],
                                                s_dis[0], s_min_0, s_max_0, 
                                                s_dis[1], s_min_1, s_max_1)
-                #print(start_points)
                 
                 row_samples = _evaluate_row(di, divs[di], start_points)
-                #for res in row_results:
-                #    print(res)
 
+                # Create a list of mesh idx corresponding to this mesh row.
                 if di == 0:
                     ves = mesh.structured_iterate_hex('x', y=a, z=b)
                 elif di == 1:
@@ -676,11 +673,10 @@ def discretize_geom(mesh, num_rays, grid=False):
                 idx_tag = mesh.mesh.getTagHandle("idx")
                 idx = []
                 for ve in ves:
-                    #print(idx_tag[ve])
                     idx.append(idx_tag[ve])
 
-                # Calculate means. Simotaneous populate uncs with a list of all
-                # samples so the standard error can later be calculated.
+                # Calculate means. Simotaneously populate uncs with a list of
+                # all samples so the standard error can later be calculated.
                 for i, samples in zip(idx, row_samples):
                     for vol, val in samples.iteritems():
                         if vol not in results[i].keys():
@@ -693,9 +689,8 @@ def discretize_geom(mesh, num_rays, grid=False):
     # calculate standard errors
     for i in range(0, num_ves):
         for vol in uncs[i].keys():
-            # calculate sample standard deviation
             var = (np.sum([(results[i][vol] - x)**2 for x in uncs[i][vol]])
-                  /(len(uncs[i][vol]) - 1))
+                  /len(uncs[i][vol]))
             stdev = np.sqrt(var)
             uncs[i][vol] = stdev/np.sqrt(len(uncs[i][vol]))
 
@@ -732,26 +727,27 @@ def _evaluate_row(di, divs, start_points):
     direction[di] = 1
     samples = [{} for x in range(0, len(divs) - 1)]
     width = [divs[x] - divs[x - 1] for x in range(1, len(divs))]
+
+    #find the first volume the first point is located in.
+    vol = find_volume(start_points[0], direction)
     # fire ray for each starting point
     for point in start_points:
-        vol = find_volume(point, direction)
+        if not point_in_volume(vol, point, direction):
+            vol = find_volume(point, direction)
+
         mesh_dist = width[0]
         ve_count = 0
         complete = False
-        #print("\nStarting at point {0}, in vol {1}".format(point, vol))
         # track a single ray down the mesh row and tally accordingly
         for next_vol, distance, _ in ray_iterator(vol, point, direction):
             if complete:
                 break
-            #print("next_vol {0} distance {1}".format(next_vol, distance))
             # volume extends past mesh boundary
             while distance >= mesh_dist:
                 # check to see if current volume has already by tallied
                 if vol not in samples[ve_count].keys():
-                    #print("hello {0}".format(distance))
                     samples[ve_count][vol] = []
 
-                #print("hello Travel {0} in ve_count {1}".format(mesh_dist, ve_count))
                 samples[ve_count][vol].append(mesh_dist/width[ve_count])
                 distance -= mesh_dist
 
@@ -768,10 +764,8 @@ def _evaluate_row(di, divs, start_points):
             if distance < mesh_dist and distance > 1E-10 and not complete:
                 # check to see if current volume has already by tallied
                 if vol not in samples[ve_count].keys():
-                    #print("goob {0}".format(distance))
                     samples[ve_count][vol] = []
 
-                #print("goob Travel {0} in ve_count {1}".format(distance, ve_count))
                 samples[ve_count][vol].append(distance/width[ve_count])
                 mesh_dist -= distance
             
@@ -791,8 +785,8 @@ def _rand_start(num_rays, di_fire, min_fire, di_1, min_1, max_1,
     di_fire : int
         The direction index of ray fire.
     min_fire : float
-        The location of fire plane perpedicular to the firing direction, i.e.
-        the plane for which all starting locations are on.
+        The location of first plane perpedicular to the firing direction, i.e.
+        the plane which all starting locations are on.
     di_1 : int
         The direction index of one of the directions that makes up the rectangle
         for which starting points are sampled from.
@@ -801,7 +795,7 @@ def _rand_start(num_rays, di_fire, min_fire, di_1, min_1, max_1,
     max_1 : float
         The location that bounds the sampling rectangle from the right in di_1.
     di_2 : int
-        The direction index of one the directions (that is not di_1) that makes
+        The direction index of the direction (that is not di_1) that makes
         up the rectangle for which starting points are sampled from.
     min_2 : float
         The location that bounds the sampling rectangle from the left in di_2.
@@ -828,7 +822,7 @@ def _rand_start(num_rays, di_fire, min_fire, di_1, min_1, max_1,
 def _grid_start(num_rays, di_fire, min_fire, di_1, min_1, max_1,
                                              di_2, min_2, max_2):
     """Private function for generating a uniform grid of start points for a
-    sinlge mesh row. The grid is a rectangle, each side divided equally into 
+    single mesh row. The grid is a rectangle, each side divided equally into 
     sqrt(num_rays) rays. The boundaries (values specified by min_1, min_2,
     max_1, max_2) are not included in the sampling grid.
     
@@ -839,7 +833,7 @@ def _grid_start(num_rays, di_fire, min_fire, di_1, min_1, max_1,
     di_fire : int
         The direction index of ray fire.
     min_fire : float
-        The location of fire plane perpedicular to the firing direction, i.e.
+        The location of first plane perpedicular to the firing direction, i.e.
         the plane for which all starting locations are on.
     di_1 : int
         The direction index of one of the directions that makes up the rectangle
@@ -849,7 +843,7 @@ def _grid_start(num_rays, di_fire, min_fire, di_1, min_1, max_1,
     max_1 : float
         The location that bounds the sampling rectangle from the right in di_1.
     di_2 : int
-        The direction index of one the directions (that is not di_1) that makes
+        The direction index of the direction (that is not di_1) that makes
         up the rectangle for which starting points are sampled from.
     min_2 : float
         The location that bounds the sampling rectangle from the left in di_2.
