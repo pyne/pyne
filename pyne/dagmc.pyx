@@ -597,10 +597,8 @@ def discretize_geom(mesh, num_rays, grid=False):
  
     Parameters
     ----------
-    mesh : PyNE Mesh object
-        The Mesh object to superimpose over the geometry. The mesh must be a 
-        Cartesean, structured mesh this is axis-aligned and does not extend 
-        into undefined portion of the DAGMC geometry.
+    divs : list of list
+        Equivalent to structured_coords on the Mesh class.
     num_rays : int
         The number of rays to fire in each mesh row for each direction.
     grid : boolean
@@ -619,81 +617,89 @@ def discretize_geom(mesh, num_rays, grid=False):
     uncs : list
         Same structure as "results" but contains the standard error for the 
         volume fractions.
-     """
-    # Ensure input is valid
-    mesh._structured_check()
-    #load(filename)
-    divs = [mesh.structured_get_divisions(a) for a in 'xyz']
-    num_ves = (len(divs[0]) - 1) * (len(divs[1]) - 1 ) * (len(divs[2]) - 1)
-    results = [{} for x in range(0, num_ves)]
-    uncs = [{} for x in range(0, num_ves)]
+    """
+    cell_mesh = _CellMesh(mesh, num_rays, grid)
+    cell_mesh._fire_rays()
+    return cell_mesh.results, cell_mesh.uncs
 
-    # direction indicies: x = 0, y = 1, z = 2
-    dis = [0, 1, 2]
-    # Iterate over all directions indicies
-    for di in dis:
-        # For each direction, the remaining two directions define the sampling 
-        # surface. These two directions are the values in s_dis (surface
-        # direction indices)
-        s_dis = [0, 1, 2]
-        s_dis.remove(di)
+class _CellMesh(object):
 
-        # iterate through all all the sampling planes perpendicular to di,
-        # creating a _MeshRow in each, and subsequently evaluating that row.
-        for a in range(0, len(divs[s_dis[0]]) - 1):
-            for b in range(0, len(divs[s_dis[1]]) - 1):
-                s_min_0 = divs[s_dis[0]][a]
-                s_max_0 = divs[s_dis[0]][a + 1]
-                s_min_1 = divs[s_dis[1]][b]
-                s_max_1 = divs[s_dis[1]][b + 1]
+    def __init__(self, mesh, num_rays, grid):
+        self.mesh = mesh
+        self.divs = [mesh.structured_get_divisions(x) for x in 'xyz']
+        self.num_rays = num_rays
+        self.grid = grid
+        self.num_ves = (len(self.divs[0])-1)*(len(self.divs[1])-1)*(len(self.divs[2])-1)
+        self.results = [{} for x in range(0, self.num_ves)]
+        self.uncs = [{} for x in range(0, self.num_ves)]
 
-                # create a lines of starting points to fire rays for this
-                # particular mesh row
-                if not grid:
-                    start_points = _rand_start(num_rays, di, divs[di][0],
-                                               s_dis[0], s_min_0, s_max_0, 
-                                               s_dis[1], s_min_1, s_max_1)
-                else:
-                    start_points = _grid_start(num_rays, di, divs[di][0],
-                                               s_dis[0], s_min_0, s_max_0, 
-                                               s_dis[1], s_min_1, s_max_1)
-                
-                row_samples = _evaluate_row(di, divs[di], start_points)
+    def _fire_rays(self):
+        # Direction indicies: x = 0, y = 1, z = 2
+        dis = [0, 1, 2]
+        # Iterate over all directions indicies
+        for di in dis:
+            # For each direction, the remaining two directions define the sampling 
+            # surface. These two directions are the values in s_dis (surface
+            # direction indices)
+            s_dis = [0, 1, 2]
+            s_dis.remove(di)
+            # iterate through all all the sampling planes perpendicular to di,
+            # creating a _MeshRow in each, and subsequently evaluating that row.
+            for a in range(0, len(self.divs[s_dis[0]]) - 1):
+                for b in range(0, len(self.divs[s_dis[1]]) - 1):
+                    mesh_row = _MeshRow()
+                    mesh_row.di = di
+                    mesh_row.divs = self.divs[di]
+                    mesh_row.num_rays = self.num_rays
+                    mesh_row.s_dis_0 = s_dis[0]
+                    mesh_row.s_min_0 = self.divs[s_dis[0]][a]
+                    mesh_row.s_max_0 = self.divs[s_dis[0]][a + 1]
+                    mesh_row.s_dis_1 = s_dis[1]
+                    mesh_row.s_min_1 = self.divs[s_dis[1]][b]
+                    mesh_row.s_max_1 = self.divs[s_dis[1]][b + 1]
 
-                # Create a list of mesh idx corresponding to this mesh row.
-                if di == 0:
-                    ves = mesh.structured_iterate_hex('x', y=a, z=b)
-                elif di == 1:
-                    ves = mesh.structured_iterate_hex('y', x=a, z=b)
-                elif di == 2:
-                    ves = mesh.structured_iterate_hex('z', x=a, y=b)
+                    # create a lines of starting points to fire rays for this
+                    # particular mesh row
+                    if not self.grid:
+                        mesh_row._rand_start()
+                    else:
+                        mesh_row._grid_start()
+                    
 
-                idx_tag = mesh.mesh.getTagHandle("idx")
-                idx = []
-                for ve in ves:
-                    idx.append(idx_tag[ve])
+                    # Create a list of mesh idx corresponding to this mesh row.
+                    if mesh_row.di == 0:
+                        ves = self.mesh.structured_iterate_hex('x', y=a, z=b)
+                    elif mesh_row.di == 1:
+                        ves = self.mesh.structured_iterate_hex('y', x=a, z=b)
+                    elif mesh_row.di == 2:
+                        ves = self.mesh.structured_iterate_hex('z', x=a, y=b)
 
-                # Calculate means. Simultaneously populate uncs with a list of
-                # all samples so the standard error can later be calculated.
-                for i, samples in zip(idx, row_samples):
-                    for vol, val in samples.iteritems():
-                        if vol not in results[i].keys():
-                           results[i][vol] = 0
-                           uncs[i][vol] = []
+                    idx_tag = self.mesh.mesh.getTagHandle("idx")
+                    mesh_row.idx = []
+                    for ve in ves:
+                        mesh_row.idx.append(idx_tag[ve])
 
-                        results[i][vol] += np.sum(samples[vol])/(3 * num_rays)
-                        uncs[i][vol] += samples[vol]
+                    # Fire rays
+                    row_samples = _evaluate_row(mesh_row.di, mesh_row.divs, mesh_row.start_points)
 
-    # calculate standard errors
-    for i in range(0, num_ves):
-        for vol in uncs[i].keys():
-            var = (np.sum([(results[i][vol] - x)**2 for x in uncs[i][vol]])
-                  /len(uncs[i][vol]))
-            stdev = np.sqrt(var)
-            uncs[i][vol] = stdev/np.sqrt(len(uncs[i][vol]))
+                    # Calculate means. Simultaneously populate uncs with a list of
+                    # all samples so the standard error can later be calculated.
+                    for i, samples in zip(mesh_row.idx, row_samples):
+                        for vol, val in samples.iteritems():
+                            if vol not in self.results[i].keys():
+                               self.results[i][vol] = 0
+                               self.uncs[i][vol] = []
 
-    return results, uncs
-                        
+                            self.results[i][vol] += np.sum(samples[vol])/(3 * self.num_rays)
+                            self.uncs[i][vol] += samples[vol]
+
+        # calculate standard errors
+        for i in range(0, self.num_ves):
+            for vol in self.uncs[i].keys():
+                var = (np.sum([(self.results[i][vol] - x)**2 for x in self.uncs[i][vol]])
+                      /len(self.uncs[i][vol]))
+                stdev = np.sqrt(var)
+                self.uncs[i][vol] = stdev/np.sqrt(len(self.uncs[i][vol]))
 
 def _evaluate_row(di, divs, start_points):
     """Private function that fires rays down a single mesh row and returns the
@@ -771,107 +777,45 @@ def _evaluate_row(di, divs, start_points):
 
     return samples
 
-def _rand_start(num_rays, di_fire, min_fire, di_1, min_1, max_1, 
-                                             di_2, min_2, max_2):
-    """Private function for randomly generating ray starting points for a single
-    mesh row.
-    
-    Parameters
-    ----------
-    num_rays : int
-        Number of starting points to generate.
-    di_fire : int
-        The direction index of ray fire.
-    min_fire : float
-        The location of first plane perpedicular to the firing direction, i.e.
-        the plane which all starting locations are on.
-    di_1 : int
-        The direction index of one of the directions that makes up the rectangle
-        for which starting points are sampled from.
-    min_1 : float
-        The location that bounds the sampling rectangle from the left in di_1.
-    max_1 : float
-        The location that bounds the sampling rectangle from the right in di_1.
-    di_2 : int
-        The direction index of the direction (that is not di_1) that makes
-        up the rectangle for which starting points are sampled from.
-    min_2 : float
-        The location that bounds the sampling rectangle from the left in di_2.
-    max_2 : float
-        The location that bounds the sampling rectangle from the right in di_2.
-  
-    Returns
-    -------
-    start_points : list
-        The xyz values of the randomly sampled starting points.
-    """
-    start_points = []
-    ray_count = 0
-    while ray_count < num_rays:
-        start_point = [0]*3
-        start_point[di_fire] = min_fire
-        start_point[di_1] = np.random.uniform(min_1, max_1)
-        start_point[di_2] = np.random.uniform(min_2, max_2)
-        start_points.append(start_point)
-        ray_count += 1
+class _MeshRow():
+    def __init__(self):
+        pass
 
-    return start_points
-
-def _grid_start(num_rays, di_fire, min_fire, di_1, min_1, max_1,
-                                             di_2, min_2, max_2):
-    """Private function for generating a uniform grid of start points for a
-    single mesh row. The grid is a rectangle, each side divided equally into 
-    sqrt(num_rays) rays. The boundaries (values specified by min_1, min_2,
-    max_1, max_2) are not included in the sampling grid.
-    
-    Parameters
-    ----------
-    num_rays : int
-        Number of starting points to generate. Must be a perfect square.
-    di_fire : int
-        The direction index of ray fire.
-    min_fire : float
-        The location of first plane perpedicular to the firing direction, i.e.
-        the plane for which all starting locations are on.
-    di_1 : int
-        The direction index of one of the directions that makes up the rectangle
-        for which starting points are sampled from.
-    min_1 : float
-        The location that bounds the sampling rectangle from the left in di_1.
-    max_1 : float
-        The location that bounds the sampling rectangle from the right in di_1.
-    di_2 : int
-        The direction index of the direction (that is not di_1) that makes
-        up the rectangle for which starting points are sampled from.
-    min_2 : float
-        The location that bounds the sampling rectangle from the left in di_2.
-    max_2 : float
-        The location that bounds the sampling rectangle from the right in di_2.
-
-    Returns
-    -------
-    start_points : list
-        The xyz values of the starting points.
-    """
-    # test to see if num_rays is a perfect square
-    if int(np.sqrt(num_rays))**2 != num_rays:
-        raise ValueError("For rays fired in a grid, "
-                         "num_rays must be a perfect square.")
-    else:
-       square_dim = int(np.sqrt(num_rays))
- 
-    step_1 = (max_1 - min_1)/(float(square_dim) + 1)
-    step_2 = (max_2 - min_2)/(float(square_dim) + 1)
-    range_1 = np.linspace(min_1 + step_1, max_1, square_dim, endpoint=False)
-    range_2 = np.linspace(min_2 + step_2, max_2, square_dim, endpoint=False)
- 
-    start_points = []
-    for point_1 in range_1:
-        for point_2 in range_2:
+    def _rand_start(self):
+        """Private function for randomly generating ray starting points for a single
+        mesh row.
+        """
+        self.start_points = []
+        ray_count = 0
+        while ray_count < self.num_rays:
             start_point = [0]*3
-            start_point[di_fire] = min_fire
-            start_point[di_1] = point_1
-            start_point[di_2] = point_2
-            start_points.append(start_point)
- 
-    return start_points
+            start_point[self.di] = self.divs[0]
+            start_point[self.s_dis_0] = np.random.uniform(self.s_min_0, self.s_max_0)
+            start_point[self.s_dis_1] = np.random.uniform(self.s_min_1, self.s_max_1)
+            self.start_points.append(start_point)
+            ray_count += 1
+    
+    def _grid_start(self):
+        """Private function for generating a uniform grid of ray starting points for a single
+        mesh row.
+        """
+        # test to see if num_rays is a perfect square
+        if int(np.sqrt(self.num_rays))**2 != self.num_rays:
+            raise ValueError("For rays fired in a grid, "
+                             "num_rays must be a perfect square.")
+        else:
+           square_dim = int(np.sqrt(self.num_rays))
+     
+        step_1 = (self.s_max_0-self.s_min_0)/(float(square_dim) + 1)
+        step_2 = (self.s_max_1 - self.s_min_1)/(float(square_dim) + 1)
+        range_1 = np.linspace(self.s_min_0 + step_1, self.s_max_0, square_dim, endpoint=False)
+        range_2 = np.linspace(self.s_min_1 + step_2, self.s_max_1, square_dim, endpoint=False)
+     
+        self.start_points = []
+        for point_1 in range_1:
+            for point_2 in range_2:
+                start_point = [0]*3
+                start_point[self.di] = self.divs[0]
+                start_point[self.s_dis_0] = point_1
+                start_point[self.s_dis_1]= point_2
+                self.start_points.append(start_point)
