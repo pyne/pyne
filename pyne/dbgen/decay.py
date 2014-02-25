@@ -221,27 +221,53 @@ def make_decay_half_life_table(nuc_data, build_dir=""):
     decaytable.flush()
 
     ll_table = db.createTable('/decay/', 'level_list', level_list,
-                              'ENSDF energy levels')
+                              'nuclide [nuc_id], level [keV], half life [s]'
+                              'metastable [int]', expectedrows=len(level_list))
     ll_table.flush()
 
     decay_table = db.createTable('/decay/', 'decays', decay,
-                                 'ENSDF primary decays')
+                                 'parent nuclide [nuc_id], daughter nuclide '
+                                 '[nuc_id], decay [string], half life [s],'
+                                 'half life error [s], branch ratio [frac],'
+                                 'photon branch ratio [ratio],'
+                                 'photon branch ratio error [ratio],'
+                                 'beta branch ratio [ratio],'
+                                 'beta branch ratio error [ratio]',
+                                 expectedrows=len(decay))
     decay_table.flush()
 
     gamma_table = db.createTable('/decay/', 'gammas', gammas,
-                                 'ENSDF gamma decays')
+                                 'Energy [keV], Energy error [keV], '
+                                 'photon intensity [ratio], '
+                                 'photon intensity error [ratio],'
+                                 'conversion e intensity [ratio],'
+                                 'conversion e intensity error [ratio],'
+                                 'total intensity [ratio],'
+                                 'total intensity error [ratio], '
+                                 'from_nuc [int], to_nuc [int]',
+                                 expectedrows=len(gammas))
+
     gamma_table.flush()
 
     alphas_table = db.createTable('/decay/', 'alphas', alphas,
-                                  'ENSDF alpha decays')
+                                  'Energy [keV], Intensity [ratio],'
+                                  'from_nuc [int], to_nuc [int]',
+                                  expectedrows=len(alphas))
     alphas_table.flush()
 
     betas_table = db.createTable('/decay/', 'betas', betas,
-                                 'ENSDF beta decays')
+                                 'Endpoint Energy [keV], Average Energy [keV],'
+                                 'Intensity [ratio], from_nuc [int],'
+                                 'to_nuc [int]', expectedrows=len(betas))
+
     betas_table.flush()
 
     ecbp_table = db.createTable('/decay/', 'ecbp', ecbp,
-                                'ENSDF ecbp decays')
+                                'Endpoint Energy [keV], Average Energy [keV],'
+                                'B+ Intensity [ratio], '
+                                'Electron Capture Intensity [ratio],'
+                                'from_nuc [int], to_nuc [int]',
+                                expectedrows=len(ecbp))
     ecbp_table.flush()
 
     # Close the hdf5 file
