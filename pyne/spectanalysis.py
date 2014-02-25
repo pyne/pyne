@@ -13,7 +13,7 @@ warn(__name__ + " is not yet QA compliant.", QAWarning)
 class PhSpectrum(object):
     """Pulse height spectrum class"""
 
-    def __init__(self, spec_name="", start_chan_num=0, num_channels=0,
+    def __init__(self, spec_name='', start_chan_num=0, num_channels=0,
                  channels=None, ebin=None, counts=None):
         """Initialise Ph Spectrum variables"""
         self.channels = [] if channels is None else channels
