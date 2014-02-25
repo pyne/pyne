@@ -9,8 +9,6 @@ import numpy as np
 # Python imports
 import sys
 from contextlib import contextmanager
-from copy import copy
-from random import uniform
 
 from numpy.linalg import norm
 
@@ -637,7 +635,7 @@ def discretize_geom(mesh, num_rays, grid=False):
         # For each direction, the remaining two directions define the sampling 
         # surface. These two directions are the values in s_dis (surface
         # direction indices)
-        s_dis = copy(dis)
+        s_dis = [0, 1, 2]
         s_dis.remove(di)
 
         # iterate through all all the sampling planes perpendicular to di,
@@ -675,7 +673,7 @@ def discretize_geom(mesh, num_rays, grid=False):
                 for ve in ves:
                     idx.append(idx_tag[ve])
 
-                # Calculate means. Simotaneously populate uncs with a list of
+                # Calculate means. Simultaneously populate uncs with a list of
                 # all samples so the standard error can later be calculated.
                 for i, samples in zip(idx, row_samples):
                     for vol, val in samples.iteritems():
@@ -812,8 +810,8 @@ def _rand_start(num_rays, di_fire, min_fire, di_1, min_1, max_1,
     while ray_count < num_rays:
         start_point = [0]*3
         start_point[di_fire] = min_fire
-        start_point[di_1] = uniform(min_1, max_1)
-        start_point[di_2] = uniform(min_2, max_2)
+        start_point[di_1] = np.random.uniform(min_1, max_1)
+        start_point[di_2] = np.random.uniform(min_2, max_2)
         start_points.append(start_point)
         ray_count += 1
 
