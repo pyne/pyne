@@ -95,14 +95,10 @@ gammas_dtype = np.dtype([
     ('total_intensity_err', float),
     ('from_nuc', int),
     ('to_nuc', int),
-    ('ka1_xray_en', float),
-    ('ka1_xray_inten', float),
-    ('ka2_xray_en', float),
-    ('ka2_xray_inten', float),
-    ('kb_xray_en', float),
-    ('kb_xray_inten', float),
-    ('l_xray_en', float),
-    ('l_xray_inten', float),
+    ('parent_nuc', int),
+    ('k_conv_e', float),
+    ('l_conv_e', float),
+    ('m_conv_e', float),
     ])
 
 alphas_dtype = np.dtype([
@@ -127,14 +123,9 @@ ecbp_dtype = np.dtype([
     ('ec_intensity', float),
     ('from_nuc', int),
     ('to_nuc', int),
-    ('ka1_xray_en', float),
-    ('ka1_xray_inten', float),
-    ('ka2_xray_en', float),
-    ('ka2_xray_inten', float),
-    ('kb_xray_en', float),
-    ('kb_xray_inten', float),
-    ('l_xray_en', float),
-    ('l_xray_inten', float),
+    ('k_conv_e', float),
+    ('l_conv_e', float),
+    ('m_conv_e', float),
     ])
 
 
@@ -213,15 +204,16 @@ def make_decay_half_life_table(nuc_data, build_dir=""):
 
     decaytable = db.createTable('/decay/', 'half_life',
                                 np.empty(0, dtype=half_life_dtype),
-                                'Decay Energy level [MeV], half_life [s], decay_const '
-                                '[1/s], branch_ratio [frac]', expectedrows=len(half_life))
+                                'Decay Energy level [MeV], half_life [s],'
+                                'decay_const [1/s], branch_ratio [frac]',
+                                expectedrows=len(half_life))
     decaytable.append(half_life)
 
     # Ensure that data was written to table
     decaytable.flush()
 
     ll_table = db.createTable('/decay/', 'level_list', level_list,
-                              'nuclide [nuc_id], level [keV], half life [s]'
+                              'nuclide [nuc_id], level [keV], half life [s],'
                               'metastable [int]', expectedrows=len(level_list))
     ll_table.flush()
 
@@ -244,7 +236,11 @@ def make_decay_half_life_table(nuc_data, build_dir=""):
                                  'conversion e intensity error [ratio],'
                                  'total intensity [ratio],'
                                  'total intensity error [ratio], '
-                                 'from_nuc [int], to_nuc [int]',
+                                 'from_nuc [int], to_nuc [int], primary parent'
+                                 'nuc_id [int], K conversion electron'
+                                 'intensity [ratio], L conversion electron'
+                                 'intensity [ratio], M conversion electron'
+                                 'intensity [ratio]',
                                  expectedrows=len(gammas))
 
     gamma_table.flush()
@@ -266,7 +262,10 @@ def make_decay_half_life_table(nuc_data, build_dir=""):
                                 'Endpoint Energy [keV], Average Energy [keV],'
                                 'B+ Intensity [ratio], '
                                 'Electron Capture Intensity [ratio],'
-                                'from_nuc [int], to_nuc [int]',
+                                'from_nuc [int], to_nuc [int], K conversion'
+                                'electron intensity [ratio], L conversion'
+                                'electron intensity [ratio], M conversion'
+                                'electron intensity [ratio]',
                                 expectedrows=len(ecbp))
     ecbp_table.flush()
 
