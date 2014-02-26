@@ -664,7 +664,6 @@ class _CellMesh(object):
                         mesh_row._rand_start()
                     else:
                         mesh_row._grid_start()
-                    
 
                     # Create a list of mesh idx corresponding to this mesh row.
                     if mesh_row.di == 0:
@@ -680,7 +679,7 @@ class _CellMesh(object):
                         mesh_row.idx.append(idx_tag[ve])
 
                     # Fire rays
-                    row_samples = _evaluate_row(mesh_row.di, mesh_row.divs, mesh_row.start_points)
+                    row_samples = mesh_row._evaluate_row()
 
                     # Calculate means. Simultaneously populate uncs with a list of
                     # all samples so the standard error can later be calculated.
@@ -701,10 +700,9 @@ class _CellMesh(object):
                 stdev = np.sqrt(var)
                 self.uncs[i][vol] = stdev/np.sqrt(len(self.uncs[i][vol]))
 
-def _evaluate_row(di, divs, start_points):
-    """Private function that fires rays down a single mesh row and returns the
-    results.
 
+class _MeshRow():
+    """
     Parameters
     ----------
     di : int
@@ -713,7 +711,7 @@ def _evaluate_row(di, divs, start_points):
         The mesh boundaries perpendicular to the firing direction.
     start_points : list
         The xyz points describing where rays should start from.
-
+ 
     Returns
     -------
     samples : list
@@ -721,69 +719,12 @@ def _evaluate_row(di, divs, start_points):
         entry is a dictionary that maps geometry volume numbers to a list of
         normalized track length samples (ratio of track length to mesh volume 
         element width).
-    """
-
-    # Total number of rays fired: multiply by 3 to account for 3 directions
-    num_rays = len(start_points) * 3
-    # number of volume elements in this mesh row
-    num_ve = len(divs) - 1
-    direction = [0, 0, 0]
-    direction[di] = 1
-    samples = [{} for x in range(0, len(divs) - 1)]
-    width = [divs[x] - divs[x - 1] for x in range(1, len(divs))]
-
-    #find the first volume the first point is located in.
-    vol = find_volume(start_points[0], direction)
-    # fire ray for each starting point
-    for point in start_points:
-        if not point_in_volume(vol, point, direction):
-            vol = find_volume(point, direction)
-
-        mesh_dist = width[0]
-        ve_count = 0
-        complete = False
-        # track a single ray down the mesh row and tally accordingly
-        for next_vol, distance, _ in ray_iterator(vol, point, direction):
-            if complete:
-                break
-            # volume extends past mesh boundary
-            while distance >= mesh_dist:
-                # check to see if current volume has already by tallied
-                if vol not in samples[ve_count].keys():
-                    samples[ve_count][vol] = []
-
-                samples[ve_count][vol].append(mesh_dist/width[ve_count])
-                distance -= mesh_dist
-
-                # if not on the last volume element, continue into the next
-                # volume element
-                if ve_count == num_ve - 1:
-                    complete = True
-                    break
-                else:
-                    ve_count += 1
-                    mesh_dist = width[ve_count]
-
-            # volume does not extend past mesh volume
-            if distance < mesh_dist and distance > 1E-10 and not complete:
-                # check to see if current volume has already by tallied
-                if vol not in samples[ve_count].keys():
-                    samples[ve_count][vol] = []
-
-                samples[ve_count][vol].append(distance/width[ve_count])
-                mesh_dist -= distance
-            
-            vol = next_vol
-
-    return samples
-
-class _MeshRow():
+       """
     def __init__(self):
         pass
 
     def _rand_start(self):
-        """Private function for randomly generating ray starting points for a single
-        mesh row.
+        """Private function for randomly generating ray starting points.
         """
         self.start_points = []
         ray_count = 0
@@ -796,8 +737,7 @@ class _MeshRow():
             ray_count += 1
     
     def _grid_start(self):
-        """Private function for generating a uniform grid of ray starting points for a single
-        mesh row.
+        """Private function for generating a uniform grid of ray starting points.
         """
         # test to see if num_rays is a perfect square
         if int(np.sqrt(self.num_rays))**2 != self.num_rays:
@@ -819,3 +759,61 @@ class _MeshRow():
                 start_point[self.s_dis_0] = point_1
                 start_point[self.s_dis_1]= point_2
                 self.start_points.append(start_point)
+
+    def _evaluate_row(self):
+        """Private function that fires rays down a single mesh row and returns the
+        results."""
+    
+        # Total number of rays fired: multiply by 3 to account for 3 directions
+        num_rays = len(self.start_points) * 3
+        # number of volume elements in this mesh row
+        num_ve = len(self.divs) - 1
+        direction = [0, 0, 0]
+        direction[self.di] = 1
+        samples = [{} for x in range(0, len(self.divs) - 1)]
+        width = [self.divs[x] - self.divs[x - 1] for x in range(1, len(self.divs))]
+    
+        #find the first volume the first point is located in.
+        vol = find_volume(self.start_points[0], direction)
+        # fire ray for each starting point
+        for point in self.start_points:
+            if not point_in_volume(vol, point, direction):
+                vol = find_volume(point, direction)
+    
+            mesh_dist = width[0]
+            ve_count = 0
+            complete = False
+            # track a single ray down the mesh row and tally accordingly
+            for next_vol, distance, _ in ray_iterator(vol, point, direction):
+                if complete:
+                    break
+                # volume extends past mesh boundary
+                while distance >= mesh_dist:
+                    # check to see if current volume has already by tallied
+                    if vol not in samples[ve_count].keys():
+                        samples[ve_count][vol] = []
+    
+                    samples[ve_count][vol].append(mesh_dist/width[ve_count])
+                    distance -= mesh_dist
+    
+                    # if not on the last volume element, continue into the next
+                    # volume element
+                    if ve_count == num_ve - 1:
+                        complete = True
+                        break
+                    else:
+                        ve_count += 1
+                        mesh_dist = width[ve_count]
+    
+                # volume does not extend past mesh volume
+                if distance < mesh_dist and distance > 1E-10 and not complete:
+                    # check to see if current volume has already by tallied
+                    if vol not in samples[ve_count].keys():
+                        samples[ve_count][vol] = []
+    
+                    samples[ve_count][vol].append(distance/width[ve_count])
+                    mesh_dist -= distance
+                
+                vol = next_vol
+    
+        return samples
