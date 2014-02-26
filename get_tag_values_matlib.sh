@@ -1,38 +1,22 @@
 #!/usr/bin/python 
 
-"""
-function to parse the script, adding options:
-defining 
--f  : the .h5m file path
--d  : nuc_data path
-"""
+from itaps import iMesh,iBase
+from pyne import material
+from pyne.material import Material
+import string
 import argparse
-parser=argparse.ArgumentParser()
-parser.add_argument('-f', action='store',dest='datafile', help='the path to the .h5m file')
-parser.add_argument('-d', action='store',dest='nuc_data', help='the path to the PyNE materials library nuc_data.h5')
-args=parser.parse_args()
-if args.datafile:
-   #print args
-   global datafile
-   datafile=args.datafile
-if args.nuc_data :
-   global nuc_data
-   nuc_data=args.nuc_data
 
 """
 gets all tags on dagmc geometry
 ------------------------------
 filename : the dagmc filename
 """
-from itaps import iMesh,iBase
-import string
-
 def get_tag_values(filename):
     mesh = iMesh.Mesh()
     mesh.load(filename)
 
-    ents = mesh.getEntities()
-    print mesh.getEntType(ents)
+   # ents = mesh.getEntities()
+   # print mesh.getEntType(ents)
     ents = mesh.getEntities(iBase.Type.all, iMesh.Topology.triangle)
     print len(ents)
     mesh_set = mesh.getEntSets()
@@ -84,13 +68,12 @@ function which loads pyne material library
 """
 #nuc_data='/home/moataz/.local/lib/python2.7/site-packages/pyne/nuc_data.h5'
 def load_mat_lib(filename):
-    from pyne import material
-    from pyne.material import Material
+    global mat_lib
     mat_lib=material.Material()
     mat_lib=material.MaterialLibrary()
     mat_lib.from_hdf5(filename,datapath="/material_library/materials",nucpath="/material_library/nucid")
     #print mat_lib
-    global mat_lib
+    
 
 """
 function to check that materials exist in library
@@ -98,11 +81,12 @@ function to check that materials exist in library
 tag_values - list of tags from dagmc file
 mat_lib - pyne material library instance
 """
-
 def check_matname(tag_values,mat_lib):
+    global mat_list, d
+    global materials_list
     # loop over tags 
-    mat_list=[]
-    global mat_list
+    mat_list=[]   
+    d=0
     for tag in tag_values :
         # material=steel
         #name=tag.split("=")
@@ -114,47 +98,119 @@ def check_matname(tag_values,mat_lib):
             # list of material names from tagged geometry
             mat_list_matname.append(mat_name[0]) 
             for matname in mat_list_matname :
-                  mat_name=matname.split(':')
-                  mat_list.append(mat_name[1])         
-
+		  try: 
+                       mat_name=matname.split(':')
+                       mat_list.append(mat_name[1])         
+                  except:
+                       print "Could not find group name in approaprite format", tag
+	             
+    if len(mat_list) == 0:
+	print "There were no group names found"
+	exit()    
+                  
     print mat_list
     # list of pyne materials to add to h5m
-    materials=[]
-    for key in mat_lib.iterkeys() :    
+    materials_list=[]
     # if name from geom matches name in lib
-        # loop over materials in geometry
-        for item in mat_list:
-        # loop over materials in library
-            if item in key :
+    # loop over materials in geometry
+    for item in mat_list:
+       # loop over materials in library
+       for key in mat_lib.iterkeys() :  
+           if item == key :
+                d=d+1
                 # get the material
                 new_mat = mat_lib.get(key)
-                materials.append(new_mat)
-            else :
-                print('material {%s} doesn''t exist in pyne material lib' %item)
-                print_near_match(item,mat_lib)
-                exit()
+                # set the mcnp material number
+                set_attrs(new_mat,d)
+                materials_list.append(new_mat)
+                break
+	        if key.index() == key.length():
+                    print('material {%s} doesn''t exist in pyne material lib' %item)
+	            exit()
+
+    # check that there are as many materials as there are groups
+    if d != len(mat_list):
+	print "There are insuficient materials"
+	exit()
+
     # list of pyne material objects
-    print materials
-    return materials
+    #print materials_list/
+    return materials_list
 
 """ 
 function to print near matches to material name
 """
 def print_near_match(material,material_library):
-    for item in material_library.iterkeys():  
-#        print item
+    #p=open('w.txt','w')
+    #m=Material()
+    for item in material_library.iterkeys() :  
         if ( material.lower() in item.lower()) or (material.upper() in item.upper()) :
 	    print "near matches to ", material, " are " 
 	    print item
             print material_library.get(item)
+            return material_library.get(item)
+           # p.write(str(item))
+           # p.write('\n')
+           # print material_library.get(item)
+           # p.write(str(material_library.get(item)))
+           # p.write('\n')
+           # p.write('\n')    
+    #p.close()
+
+"""
+function to set mcnp mat num
+"""
+def set_mcnp_material_number(matt,number):
+	return
+
+"""
+function to set fluka name
+"""
+def set_fluka_name(matt):
+	return
+
+"""
+function to set the attributes of the materials:
+"""
+def set_attrs(matt,number):
+        #print(type(matt))
+#        matt.attrs['mat_number']=str(number)
+	set_mcnp_material(matt,number)
+	set_fluka_name(matt)
+
+"""
+function to parse the script, adding options:
+defining 
+-f  : the .h5m file path
+-d  : nuc_data path
+"""
+def parsing(parsescript) :
+    parser=argparse.ArgumentParser()
+    parser.add_argument('-f', action='store',dest='datafile', help='the path to the .h5m file')
+    parser.add_argument('-d', action='store',dest='nuc_data', help='the path to the PyNE materials library   nuc_data.h5')
+    args=parser.parse_args()
+    if args.datafile:
+       #print args
+       global datafile
+       datafile=args.datafile
+    else :
+       print('h5m file not found!!')   
+       exit()   
+    if args.nuc_data :
+       global nuc_data
+       nuc_data=args.nuc_data
+    else :
+       print('nuc_data file not found!!') 
+       exit()
 
 
 
-            
+#parse the script
+parsing(1)            
 # get list of tag valuesaz
 get_tag_values(datafile)
 # now load material library
 load_mat_lib(nuc_data)
 # check that material tags exist in library
-material_objects=check_matname(tag_values,mat_lib)
+check_matname(tag_values,mat_lib)
 exit()
