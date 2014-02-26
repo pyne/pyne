@@ -72,7 +72,7 @@ def load_mat_lib(filename):
     mat_lib=material.Material()
     mat_lib=material.MaterialLibrary()
     mat_lib.from_hdf5(filename,datapath="/material_library/materials",nucpath="/material_library/nucid")
-    #print mat_lib
+   # print mat_lib.keys()
     
 
 """
@@ -115,27 +115,30 @@ def check_matname(tag_values,mat_lib):
     # loop over materials in geometry
     for item in mat_list:
        # loop over materials in library
-       for key in mat_lib.iterkeys() :  
+       for key in mat_lib.iterkeys():  
            if item == key :
                 d=d+1
                 # get the material
                 new_mat = mat_lib.get(key)
                 # set the mcnp material number
-                set_attrs(new_mat,d)
+                set_attrs(new_mat,d, 'mcnp')
                 materials_list.append(new_mat)
                 break
-	        if key.index() == key.length():
-                    print('material {%s} doesn''t exist in pyne material lib' %item)
-	            exit()
+           if mat_lib.keys().index(key) == len(mat_lib.keys())-1:	
+                print('material {%s} doesn''t exist in pyne material lib' %item)
+                print_near_match(item,mat_lib)
+                exit()
+          
 
     # check that there are as many materials as there are groups
-    if d != len(mat_list):
-	print "There are insuficient materials"
-	exit()
+   # if d != len(mat_list):
+	#print "There are insuficient materials"
+	#exit()
 
     # list of pyne material objects
     #print materials_list/
     return materials_list
+    print materials_list
 
 """ 
 function to print near matches to material name
@@ -147,8 +150,7 @@ def print_near_match(material,material_library):
         if ( material.lower() in item.lower()) or (material.upper() in item.upper()) :
 	    print "near matches to ", material, " are " 
 	    print item
-            print material_library.get(item)
-            return material_library.get(item)
+            return
            # p.write(str(item))
            # p.write('\n')
            # print material_library.get(item)
@@ -158,25 +160,15 @@ def print_near_match(material,material_library):
     #p.close()
 
 """
-function to set mcnp mat num
-"""
-def set_mcnp_material_number(matt,number):
-	return
-
-"""
-function to set fluka name
-"""
-def set_fluka_name(matt):
-	return
-
-"""
 function to set the attributes of the materials:
 """
-def set_attrs(matt,number):
+def set_attrs(matt,number,code):
         #print(type(matt))
-#        matt.attrs['mat_number']=str(number)
-	set_mcnp_material(matt,number)
-	set_fluka_name(matt)
+        if code == 'mcnp' or 'MCNP' :      
+	     matt.attrs['mat_number']=str(number)
+        if code == 'fluka' or 'FLUKA' :
+             pass
+
 
 """
 function to parse the script, adding options:
@@ -203,6 +195,16 @@ def parsing(parsescript) :
        print('nuc_data file not found!!') 
        exit()
 
+"""
+Function write_mats, writes material objects to hdf5 file
+
+-------
+material_list: list of PyNE Material Objects
+filename: filename to write the objects to
+"""
+def write_mats_h5m(material_list,filename):
+    for material in material_list:
+	material.write_hdf5(filename)
 
 
 #parse the script
@@ -212,5 +214,9 @@ get_tag_values(datafile)
 # now load material library
 load_mat_lib(nuc_data)
 # check that material tags exist in library
-check_matname(tag_values,mat_lib)
+# material_list is list of pyne objects in problem
+material_list=check_matname(tag_values,mat_lib)
+# write materials to file
+write_mats_h5m(material_list,"test.h5m")
+
 exit()
