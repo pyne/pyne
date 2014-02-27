@@ -618,92 +618,93 @@ def discretize_geom(mesh, num_rays, grid=False):
         Same structure as "results" but contains the standard error for the 
         volume fractions.
     """
-    cell_mesh = _CellMesh(mesh, num_rays, grid)
-    cell_mesh._fire_rays()
-    return cell_mesh.results, cell_mesh.uncs
+    divs = [mesh.structured_get_divisions(x) for x in 'xyz']
+    num_ves = (len(divs[0])-1)*(len(divs[1])-1)*(len(divs[2])-1)
+    mesh_sigmas = [{} for x in range(0, num_ves)]
+    len_count = 0
 
-class _CellMesh(object):
+    # Direction indicies: x = 0, y = 1, z = 2
+    dis = [0, 1, 2]
+    # Iterate over all directions indicies
+    for di in dis:
+        # For each direction, the remaining two directions define the sampling 
+        # surface. These two directions are the values in s_dis (surface
+        # direction indices)
+        s_dis = [0, 1, 2]
+        s_dis.remove(di)
+        # iterate through all all the sampling planes perpendicular to di,
+        # creating a _MeshRow in each, and subsequently evaluating that row.
+        for a in range(0, len(divs[s_dis[0]]) - 1):
+            for b in range(0, len(divs[s_dis[1]]) - 1):
+                mesh_row = _MeshRow()
+                mesh_row.di = di
+                mesh_row.divs = divs[di]
+                mesh_row.num_rays = num_rays
+                mesh_row.s_dis_0 = s_dis[0]
+                mesh_row.s_min_0 = divs[s_dis[0]][a]
+                mesh_row.s_max_0 = divs[s_dis[0]][a + 1]
+                mesh_row.s_dis_1 = s_dis[1]
+                mesh_row.s_min_1 = divs[s_dis[1]][b]
+                mesh_row.s_max_1 = divs[s_dis[1]][b + 1]
 
-    def __init__(self, mesh, num_rays, grid):
-        self.mesh = mesh
-        self.divs = [mesh.structured_get_divisions(x) for x in 'xyz']
-        self.num_rays = num_rays
-        self.grid = grid
-        self.num_ves = (len(self.divs[0])-1)*(len(self.divs[1])-1)*(len(self.divs[2])-1)
-        self.results = [{} for x in range(0, self.num_ves)]
-        self.uncs = [{} for x in range(0, self.num_ves)]
+                # create a lines of starting points to fire rays for this
+                # particular mesh row
+                if not grid:
+                    mesh_row._rand_start()
+                else:
+                    mesh_row._grid_start()
 
-    def _fire_rays(self):
-        # Direction indicies: x = 0, y = 1, z = 2
-        dis = [0, 1, 2]
-        # Iterate over all directions indicies
-        for di in dis:
-            # For each direction, the remaining two directions define the sampling 
-            # surface. These two directions are the values in s_dis (surface
-            # direction indices)
-            s_dis = [0, 1, 2]
-            s_dis.remove(di)
-            # iterate through all all the sampling planes perpendicular to di,
-            # creating a _MeshRow in each, and subsequently evaluating that row.
-            for a in range(0, len(self.divs[s_dis[0]]) - 1):
-                for b in range(0, len(self.divs[s_dis[1]]) - 1):
-                    mesh_row = _MeshRow()
-                    mesh_row.di = di
-                    mesh_row.divs = self.divs[di]
-                    mesh_row.num_rays = self.num_rays
-                    mesh_row.s_dis_0 = s_dis[0]
-                    mesh_row.s_min_0 = self.divs[s_dis[0]][a]
-                    mesh_row.s_max_0 = self.divs[s_dis[0]][a + 1]
-                    mesh_row.s_dis_1 = s_dis[1]
-                    mesh_row.s_min_1 = self.divs[s_dis[1]][b]
-                    mesh_row.s_max_1 = self.divs[s_dis[1]][b + 1]
+                # Create a list of mesh idx corresponding to this mesh row.
+                if di == 0:
+                    ves = mesh.structured_iterate_hex('x', y=a, z=b)
+                elif di == 1:
+                    ves = mesh.structured_iterate_hex('y', x=a, z=b)
+                elif di == 2:
+                    ves = mesh.structured_iterate_hex('z', x=a, y=b)
 
-                    # create a lines of starting points to fire rays for this
-                    # particular mesh row
-                    if not self.grid:
-                        mesh_row._rand_start()
-                    else:
-                        mesh_row._grid_start()
+                idx_tag = mesh.mesh.getTagHandle("idx")
+                idx = []
+                for ve in ves:
+                    idx.append(idx_tag[ve])
 
-                    # Create a list of mesh idx corresponding to this mesh row.
-                    if mesh_row.di == 0:
-                        ves = self.mesh.structured_iterate_hex('x', y=a, z=b)
-                    elif mesh_row.di == 1:
-                        ves = self.mesh.structured_iterate_hex('y', x=a, z=b)
-                    elif mesh_row.di == 2:
-                        ves = self.mesh.structured_iterate_hex('z', x=a, y=b)
+                # Fire rays
+                row_sigmas = mesh_row._evaluate_row()
 
-                    idx_tag = self.mesh.mesh.getTagHandle("idx")
-                    mesh_row.idx = []
-                    for ve in ves:
-                        mesh_row.idx.append(idx_tag[ve])
+                # Add row results to the full mesh sigma matrix
+                for j, ve_sigmas in enumerate(row_sigmas):
+                   for cell in ve_sigmas.keys():
+                       if cell not in mesh_sigmas[idx[j]].keys():
+                           mesh_sigmas[idx[j]][cell] = [0, 0]
+                           len_count += 1
 
-                    # Fire rays
-                    row_samples = mesh_row._evaluate_row()
+                       mesh_sigmas[idx[j]][cell][0] += ve_sigmas[cell][0]
+                       mesh_sigmas[idx[j]][cell][1] += ve_sigmas[cell][1]
 
-                    # Calculate means. Simultaneously populate uncs with a list of
-                    # all samples so the standard error can later be calculated.
-                    for i, samples in zip(mesh_row.idx, row_samples):
-                        for vol, val in samples.iteritems():
-                            if vol not in self.results[i].keys():
-                               self.results[i][vol] = 0
-                               self.uncs[i][vol] = []
 
-                            self.results[i][vol] += np.sum(samples[vol])/(3 * self.num_rays)
-                            self.uncs[i][vol] += samples[vol]
+    # Create structured array
+    total_rays = num_rays*3 # three directions
+    vol_fracs = np.zeros(len_count, dtype=[('idx', np.int64),
+                                           ('cell', np.int64),
+                                           ('vol_frac', np.float64), 
+                                           ('rel_error', np.float64)])
 
-        # calculate standard errors
-        for i in range(0, self.num_ves):
-            for vol in self.uncs[i].keys():
-                var = (np.sum([(self.results[i][vol] - x)**2 for x in self.uncs[i][vol]])
-                      /len(self.uncs[i][vol]))
-                stdev = np.sqrt(var)
-                self.uncs[i][vol] = stdev/np.sqrt(len(self.uncs[i][vol]))
+    row_count = 0
+    total_rays = num_rays*3
+    for i, ve_sigmas in enumerate(mesh_sigmas):
+       for vol in ve_sigmas.keys():
+           vol_frac = ve_sigmas[vol][0]/total_rays
+           rel_error = np.sqrt((ve_sigmas[vol][1])/(ve_sigmas[vol][0])**2 
+                                - 1/total_rays)
+           vol_fracs[row_count] = (i, vol, vol_frac, rel_error)
+           row_count += 1
 
+    vol_fracs.sort()
+
+    return vol_fracs
 
 class _MeshRow():
     """
-    Parameters
+    Attributes
     ----------
     di : int
         The direction index of the current firing direction.
@@ -764,13 +765,11 @@ class _MeshRow():
         """Private function that fires rays down a single mesh row and returns the
         results."""
     
-        # Total number of rays fired: multiply by 3 to account for 3 directions
-        num_rays = len(self.start_points) * 3
         # number of volume elements in this mesh row
         num_ve = len(self.divs) - 1
         direction = [0, 0, 0]
         direction[self.di] = 1
-        samples = [{} for x in range(0, len(self.divs) - 1)]
+        row_sigmas = [{} for x in range(0, len(self.divs) - 1)]
         width = [self.divs[x] - self.divs[x - 1] for x in range(1, len(self.divs))]
     
         #find the first volume the first point is located in.
@@ -790,10 +789,12 @@ class _MeshRow():
                 # volume extends past mesh boundary
                 while distance >= mesh_dist:
                     # check to see if current volume has already by tallied
-                    if vol not in samples[ve_count].keys():
-                        samples[ve_count][vol] = []
+                    if vol not in row_sigmas[ve_count].keys():
+                        row_sigmas[ve_count][vol] = [0, 0]
     
-                    samples[ve_count][vol].append(mesh_dist/width[ve_count])
+                    sample = mesh_dist/width[ve_count]
+                    row_sigmas[ve_count][vol][0] += sample
+                    row_sigmas[ve_count][vol][1] += sample**2
                     distance -= mesh_dist
     
                     # if not on the last volume element, continue into the next
@@ -808,12 +809,14 @@ class _MeshRow():
                 # volume does not extend past mesh volume
                 if distance < mesh_dist and distance > 1E-10 and not complete:
                     # check to see if current volume has already by tallied
-                    if vol not in samples[ve_count].keys():
-                        samples[ve_count][vol] = []
+                    if vol not in row_sigmas[ve_count].keys():
+                        row_sigmas[ve_count][vol] = [0, 0]
     
-                    samples[ve_count][vol].append(distance/width[ve_count])
+                    sample = distance/width[ve_count]
+                    row_sigmas[ve_count][vol][0] += sample
+                    row_sigmas[ve_count][vol][1] += sample**2
                     mesh_dist -= distance
                 
                 vol = next_vol
     
-        return samples
+        return row_sigmas
