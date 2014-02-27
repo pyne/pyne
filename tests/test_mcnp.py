@@ -450,8 +450,8 @@ def test_read_mcnp():
         expected_multimaterial._mats.keys()[0].density,
         read_materials[1]._mats.keys()[0].density)
     assert_equal(
-        expected_multimaterial._mats.keys()[0].atoms_per_mol,
-        read_materials[1]._mats.keys()[0].atoms_per_mol)
+        expected_multimaterial._mats.keys()[0].atoms_per_molecule,
+        read_materials[1]._mats.keys()[0].atoms_per_molecule)
     assert_equal(
         expected_multimaterial._mats.keys()[0].attrs,
         read_materials[1]._mats.keys()[0].attrs)
@@ -465,8 +465,8 @@ def test_read_mcnp():
         expected_multimaterial._mats.keys()[1].density,
         read_materials[1]._mats.keys()[1].density)
     assert_equal(
-        expected_multimaterial._mats.keys()[1].atoms_per_mol,
-        read_materials[1]._mats.keys()[1].atoms_per_mol)
+        expected_multimaterial._mats.keys()[1].atoms_per_molecule,
+        read_materials[1]._mats.keys()[1].atoms_per_molecule)
     assert_equal(
         expected_multimaterial._mats.keys()[1].attrs,
         read_materials[1]._mats.keys()[1].attrs)
