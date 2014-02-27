@@ -217,7 +217,7 @@ class.
     In [32]: h2o.molecular_mass(3.0)
     Out[32]: 18.01056468403
 
-    In [33]: h2o.atoms_per_mol
+    In [33]: h2o.atoms_per_molecule
     Out[33]: 3.0
 
 It is often also useful to be able to convert the current mass-weighted material to 
@@ -232,7 +232,7 @@ fractional number of atoms is returned.
     In [34]: h2o.to_atom_frac()
     Out[34]: {10010: 2.0, 80160: 1.0}
 
-    In [35]: h2o.atoms_per_mol = -1.0
+    In [35]: h2o.atoms_per_molecule = -1.0
 
     In [36]: h2o.to_atom_frac()
     Out[36]: {10010: 0.666666666667, 80160: 0.333333333333}
@@ -256,7 +256,7 @@ already set on the material, the molecular mass will be used.
     In [40]: h2o.comp
     Out[40]: {10010: 0.111914873288, 80160: 0.888085126712}
 
-    In [41]: h2o.atoms_per_mol
+    In [41]: h2o.atoms_per_molecule
     Out[41]: 3.0
 
     In [42]: h2o.mass
