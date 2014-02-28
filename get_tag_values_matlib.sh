@@ -113,6 +113,9 @@ def check_matname(tag_values,mat_lib):
 	exit()    
                   
     print mat_list
+    # for the sake of testing, fmat_list >>> fluka materials
+    global fmat_list
+    fmat_list=[]
     # list of pyne materials to add to h5m
     materials_list=[]
     # if name from geom matches name in lib
@@ -132,14 +135,17 @@ def check_matname(tag_values,mat_lib):
                 print('material {%s} doesn''t exist in pyne material lib' %item)
                 print_near_match(item,mat_lib)
                 exit()
-
+    
     # check that there are as many materials as there are groups
     if d != len(mat_list):
 	print "There are insuficient materials"
 	exit()
     # list of pyne material objects
     #print materials_list/
+    #print materials_list
     return materials_list
+    print fmat_list
+    
 
 """ 
 function to print near matches to material name
@@ -166,11 +172,38 @@ function to set the attributes of the materials:
 def set_attrs(mat,number,code):
     if code == 'mcnp' or 'MCNP' :     
         mat.attrs['mat_number']=str(number)
-    if code == 'fluka' or 'FLUKA' :
-        pass
-             
-
-
+    if code == 'fluka' or 'FLUKA' :      
+        mattf=mat.attrs['name']
+        matf=''.join(c for c in mattf if c.isalnum())
+        if len(matf) <= 8 :
+            if matf in fmat_list :
+                if number <= 9 :
+                    matf=matf.strip(matf[-1])
+                    matf=matf+str(number)
+                if number >= 9 and number <= 99 :
+                    for i in 2 :
+                        matf=matf.strip(matf[-1])
+                    matf=matf+str(number)
+                fmat_list.append(matf)    
+            else :            
+                fmat_list.append(matf)
+        else :
+            matff=matf[0:8]
+            if matff in fmat_list :
+                if number <= 9 :
+                    matf=matff.strip(matf[-1])
+                    matf=matf+str(number)
+                if number >= 9 and number <= 99 :
+                    for i in 2 :
+                        matf=matff.strip(matf[-1])
+                    matf=matf+str(number)
+                fmat_list.append(matf)    
+            else :            
+                fmat_list.append(matff)
+    print fmat_list
+    return fmat_list 
+     
+ 
 """
 Function write_mats, writes material objects to hdf5 file
 -------
@@ -220,8 +253,6 @@ def parsing(parsescript) :
     else :
        global output
        output='output.h5m'
-
-
 
 
 #parse the script
