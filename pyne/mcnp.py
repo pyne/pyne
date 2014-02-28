@@ -1358,7 +1358,7 @@ def mat_from_mcnp(filename, mat_line, densities='None'):
             for density in converted_densities:
                 mat2 = Material()
                 mat2.comp = mat.comp
-                mat2.atoms_per_mol = mat.atoms_per_mol
+                mat2.atoms_per_molecule = mat.atoms_per_molecule
                 mat2.mass = mat.mass
                 mat2.attrs = mat.attrs
                 mat2.density = density
