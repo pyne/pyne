@@ -135,6 +135,7 @@ def check_matname(tag_values,mat_lib):
                 print('material {%s} doesn''t exist in pyne material lib' %item)
                 print_near_match(item,mat_lib)
                 exit()
+    print fmat_list
     
     # check that there are as many materials as there are groups
     if d != len(mat_list):
@@ -144,9 +145,7 @@ def check_matname(tag_values,mat_lib):
     #print materials_list/
     #print materials_list
     return materials_list
-    print fmat_list
     
-
 """ 
 function to print near matches to material name
 """
@@ -200,7 +199,6 @@ def set_attrs(mat,number,code):
                 fmat_list.append(matf)    
             else :            
                 fmat_list.append(matff)
-    print fmat_list
     return fmat_list 
      
  
