@@ -18,9 +18,9 @@ def get_tag_values(filename):
    # ents = mesh.getEntities()
    # print mesh.getEntType(ents)
     ents = mesh.getEntities(iBase.Type.all, iMesh.Topology.triangle)
-    print len(ents)
+    #print len(ents)
     mesh_set = mesh.getEntSets()
-    print len(mesh_set)
+    #print len(mesh_set)
 
     global tag_values
     tag_values=[]
@@ -60,6 +60,7 @@ def get_tag_values(filename):
 		    # last tag we are done
                 if any('impl_complement' in s for s in tag_values):
                     found_all_tags=1 
+    print('The matrials group names found in the h5m file are: ')
     print tag_values
 
 
@@ -94,18 +95,21 @@ def check_matname(tag_values,mat_lib):
         mat_name=[]
         mat_list_matname=[]
         if "mat" in tag:
-            mat_name = tag.split("/")
-            # list of material names from tagged geometry
-            mat_list_matname.append(mat_name[0]) 
+            if "/" in tag :
+                mat_name = tag.split("/")
+                # list of material names from tagged geometry
+                mat_list_matname.append(mat_name[0])
+            else :
+                mat_list_matname.append(tag) 
             for matname in mat_list_matname :
 		  try: 
                        mat_name=matname.split(':')
                        mat_list.append(mat_name[1])         
                   except:
-                       print "Could not find group name in approaprite format", tag
+                       print("Could not find group name in approaprite format"), tag
 	             
     if len(mat_list) == 0:
-	print "There were no group names found"
+	print("no group names found")
 	exit()    
                   
     print mat_list
@@ -121,24 +125,21 @@ def check_matname(tag_values,mat_lib):
                 # get the material
                 new_mat = mat_lib.get(key)
                 # set the mcnp material number
-                set_attrs(new_mat,d, 'mcnp')
+                set_attrs(new_mat,d, code)
                 materials_list.append(new_mat)
                 break
            if mat_lib.keys().index(key) == len(mat_lib.keys())-1:	
                 print('material {%s} doesn''t exist in pyne material lib' %item)
                 print_near_match(item,mat_lib)
                 exit()
-          
 
     # check that there are as many materials as there are groups
-   # if d != len(mat_list):
-	#print "There are insuficient materials"
-	#exit()
-
+    if d != len(mat_list):
+	print "There are insuficient materials"
+	exit()
     # list of pyne material objects
     #print materials_list/
     return materials_list
-    print materials_list
 
 """ 
 function to print near matches to material name
@@ -162,12 +163,23 @@ def print_near_match(material,material_library):
 """
 function to set the attributes of the materials:
 """
-def set_attrs(matt,number,code):
-        #print(type(matt))
-        if code == 'mcnp' or 'MCNP' :      
-	     matt.attrs['mat_number']=str(number)
-        if code == 'fluka' or 'FLUKA' :
-             pass
+def set_attrs(mat,number,code):
+    if code == 'mcnp' or 'MCNP' :     
+        mat.attrs['mat_number']=str(number)
+    if code == 'fluka' or 'FLUKA' :
+        pass
+             
+
+
+"""
+Function write_mats, writes material objects to hdf5 file
+-------
+material_list: list of PyNE Material Objects
+filename: filename to write the objects to
+"""
+def write_mats_h5m(material_list,filename):
+    for material in material_list:
+	material.write_hdf5(filename)
 
 
 """
@@ -180,31 +192,36 @@ def parsing(parsescript) :
     parser=argparse.ArgumentParser()
     parser.add_argument('-f', action='store',dest='datafile', help='the path to the .h5m file')
     parser.add_argument('-d', action='store',dest='nuc_data', help='the path to the PyNE materials library   nuc_data.h5')
+    parser.add_argument('-c', action='store',dest='code',help='the format of the output h5m file; mcnp or fluka')
+    parser.add_argument('-o',action='store',dest='output',help='the name of the output file')
     args=parser.parse_args()
     if args.datafile:
        #print args
        global datafile
        datafile=args.datafile
     else :
-       print('h5m file not found!!')   
+       print('h5m file not found!!. [-f] is not set')   
        exit()   
     if args.nuc_data :
        global nuc_data
        nuc_data=args.nuc_data
     else :
-       print('nuc_data file not found!!') 
+       print('nuc_data file not found!!. [-d] is not set') 
        exit()
+    if args.code :
+       global code
+       code=args.code
+    else :
+       print('output file format is not specified!!. [-c] is not set') 
+       exit()
+    if args.output :
+       global output
+       output=args.output
+    else :
+       global output
+       output='output.h5m'
 
-"""
-Function write_mats, writes material objects to hdf5 file
 
--------
-material_list: list of PyNE Material Objects
-filename: filename to write the objects to
-"""
-def write_mats_h5m(material_list,filename):
-    for material in material_list:
-	material.write_hdf5(filename)
 
 
 #parse the script
@@ -217,6 +234,6 @@ load_mat_lib(nuc_data)
 # material_list is list of pyne objects in problem
 material_list=check_matname(tag_values,mat_lib)
 # write materials to file
-write_mats_h5m(material_list,"test.h5m")
+write_mats_h5m(material_list,output)
 
 exit()
