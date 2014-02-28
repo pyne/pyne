@@ -28,7 +28,7 @@ cdef extern from "material.h" namespace "pyne":
         map[int, double] comp
         double mass
         double density
-        double atoms_per_mol
+        double atoms_per_molecule
         cpp_jsoncpp.Value attrs
 
         # Methods
