@@ -19,14 +19,29 @@ This script takes ~2 mins to run. The runtime can be reduced to near
 instanteous by changing the num_divs and num_rays varible to decrease the
 resolution or the rays fired per mesh row.
 """
+import os
+import numpy as np
+from subprocess import Popen, PIPE
+
 from pyne import dagmc
 from pyne.mesh import Mesh
-import numpy as np
+
+url = ('https://grabcad.com/library/ceramic-tea-set-teapot-teacup-1'
+       '/download?cadid=9cf77e9e7b37bb7f9d263f96203605a8')
+location = 'teapot.sat'
+
+if not os.path.isfile('teapot.sat'):
+    args = ['wget', '-O', location, url]
+    output = Popen(args, stdout=PIPE)
+    
+if not os.path.isfile('teapot.h5m'):
+    args = ['dagmc_preproc', '-o', 'teapot.h5m', 'teapot.sat']
+    output = Popen(args, stdout=PIPE)
 
 # Number of division in the x, y, and z directions.
-num_divs = 50
+num_divs = 5
 # Number of rays fired per mesh row.
-num_rays = 30
+num_rays = 3
 
 # Geneate superimposed Mesh.
 coords1 = np.linspace(-6, 6, num_divs)
