@@ -628,23 +628,23 @@ def discretize_geom(mesh, num_rays, grid=False):
     """
     divs = [mesh.structured_get_divisions(x) for x in 'xyz']
     num_ves = (len(divs[0])-1)*(len(divs[1])-1)*(len(divs[2])-1)
-    # Stores a running tally of sigma x and sigma x^2 for each ve
-    mesh_sigmas = [{} for x in range(0, num_ves)]
-    # The length of the output array (will vary because different ve contain
-    # different numbers of geometry cells.
+    #  Stores a running tally of sums of x and sums of x^2 for each ve
+    mesh_sums = [{} for x in range(0, num_ves)]
+    #  The length of the output array (will vary because different ve contain
+    #  different numbers of geometry cells.
     len_count = 0
 
-    # Direction indicies: x = 0, y = 1, z = 2
+    #  Direction indicies: x = 0, y = 1, z = 2
     dis = [0, 1, 2]
-    # Iterate over all directions indicies
+    #  Iterate over all directions indicies
     for di in dis:
-        # For each direction, the remaining two directions define the sampling 
-        # surface. These two directions are the values in s_dis (surface
-        # direction indices)
+        #  For each direction, the remaining two directions define the sampling 
+        #  surface. These two directions are the values in s_dis (surface
+        #  direction indices)
         s_dis = [0, 1, 2]
         s_dis.remove(di)
-        # Iterate through all all the sampling planes perpendicular to di,
-        # creating a _MeshRow in each, and subsequently evaluating that row.
+        #  Iterate through all all the sampling planes perpendicular to di,
+        #  creating a _MeshRow in each, and subsequently evaluating that row.
         for a in range(0, len(divs[s_dis[0]]) - 1):
             for b in range(0, len(divs[s_dis[1]]) - 1):
                 mesh_row = _MeshRow()
@@ -658,14 +658,14 @@ def discretize_geom(mesh, num_rays, grid=False):
                 mesh_row.s_min_1 = divs[s_dis[1]][b]
                 mesh_row.s_max_1 = divs[s_dis[1]][b + 1]
 
-                # create a lines of starting points to fire rays for this
-                # particular mesh row
+                #  Create a lines of starting points to fire rays for this
+                #  particular mesh row.
                 if not grid:
                     mesh_row._rand_start()
                 else:
                     mesh_row._grid_start()
 
-                # Create a list of mesh idx corresponding to this mesh row.
+                #  Create a list of mesh idx corresponding to this mesh row.
                 if di == 0:
                     ves = mesh.structured_iterate_hex('x', y=a, z=b)
                 elif di == 1:
@@ -678,21 +678,21 @@ def discretize_geom(mesh, num_rays, grid=False):
                 for ve in ves:
                     idx.append(idx_tag[ve])
 
-                # Fire rays
-                row_sigmas = mesh_row._evaluate_row()
+                #  Fire rays.
+                row_sums = mesh_row._evaluate_row()
 
-                # Add row results to the full mesh sigma matrix
-                for j, ve_sigmas in enumerate(row_sigmas):
-                   for cell in ve_sigmas.keys():
-                       if cell not in mesh_sigmas[idx[j]].keys():
-                           mesh_sigmas[idx[j]][cell] = [0, 0]
+                #  Add row results to the full mesh sum matrix.
+                for j, ve_sums in enumerate(row_sums):
+                   for cell in ve_sums.keys():
+                       if cell not in mesh_sums[idx[j]].keys():
+                           mesh_sums[idx[j]][cell] = [0, 0]
                            len_count += 1
 
-                       mesh_sigmas[idx[j]][cell][0] += ve_sigmas[cell][0]
-                       mesh_sigmas[idx[j]][cell][1] += ve_sigmas[cell][1]
+                       mesh_sums[idx[j]][cell][0] += ve_sums[cell][0]
+                       mesh_sums[idx[j]][cell][1] += ve_sums[cell][1]
 
 
-    # Create structured array
+    #  Create structured array
     total_rays = num_rays*3 # three directions
     results = np.zeros(len_count, dtype=[('idx', np.int64),
                                          ('cell', np.int64),
@@ -701,10 +701,10 @@ def discretize_geom(mesh, num_rays, grid=False):
 
     row_count = 0
     total_rays = num_rays*3
-    for i, ve_sigmas in enumerate(mesh_sigmas):
-       for vol in ve_sigmas.keys():
-           vol_frac = ve_sigmas[vol][0]/total_rays
-           rel_error = np.sqrt((ve_sigmas[vol][1])/(ve_sigmas[vol][0])**2 
+    for i, ve_sums in enumerate(mesh_sums):
+       for vol in ve_sums.keys():
+           vol_frac = ve_sums[vol][0]/total_rays
+           rel_error = np.sqrt((ve_sums[vol][1])/(ve_sums[vol][0])**2 
                                 - 1.0/total_rays)
            results[row_count] = (i, vol, vol_frac, rel_error)
            row_count += 1
@@ -714,7 +714,9 @@ def discretize_geom(mesh, num_rays, grid=False):
     return results
 
 class _MeshRow():
-    """Attributes
+    """A class to store data and fire rays down a single mesh row.
+
+    Attributes
     ----------
     di : int
         The direction index of the current firing direction.
@@ -766,7 +768,7 @@ class _MeshRow():
         """Private function for generating a uniform grid of ray starting
         points to populate self.starting_points.
         """
-        # test to see if num_rays is a perfect square
+        #  Test to see if num_rays is a perfect square.
         if int(np.sqrt(self.num_rays))**2 != self.num_rays:
             raise ValueError("For rays fired in a grid, "
                              "num_rays must be a perfect square.")
@@ -795,7 +797,7 @@ class _MeshRow():
 
         Returns
         -------
-        row_sigmas : list
+        row_sums : list
             A list with one entry per mesh volume element in the mesh row. Each
             entry is a dictionary that maps geometry cell number to a list
             containing two statistical results. The first result is the sum of
@@ -803,43 +805,43 @@ class _MeshRow():
             of all of the samples.
         """
     
-        # number of volume elements in this mesh row
+        # Number of volume elements in this mesh row.
         num_ve = len(self.divs) - 1
         direction = [0, 0, 0]
         direction[self.di] = 1
-        row_sigmas = [{} for x in range(0, len(self.divs) - 1)]
+        row_sums = [{} for x in range(0, len(self.divs) - 1)]
         width = [self.divs[x] - self.divs[x - 1] for x in range(1, len(self.divs))]
     
-        #find the first volume the first point is located in.
+        #  Find the first volume the first point is located in.
         vol = find_volume(self.start_points[0], direction)
-        # fire ray for each starting point
+        #  Fire ray for each starting point.
         for point in self.start_points:
-            # check to see if the staring point is in the same volume as the
-            # last staring point to avoid expensive find_volume calls.
+            #  Check to see if the staring point is in the same volume as the
+            #  last staring point to avoid expensive find_volume calls.
             if not point_in_volume(vol, point, direction):
                 vol = find_volume(point, direction)
     
             mesh_dist = width[0]
             ve_count = 0
             complete = False
-            # track a single ray down the mesh row and tally accordingly
+            #  Track a single ray down the mesh row and tally accordingly.
             for next_vol, distance, _ in ray_iterator(vol, point, direction):
                 if complete:
                     break
 
-                # volume extends past mesh boundary
+                #  Volume extends past mesh boundary
                 while distance >= mesh_dist:
-                    # check to see if current volume has already by tallied
-                    if vol not in row_sigmas[ve_count].keys():
-                        row_sigmas[ve_count][vol] = [0, 0]
+                    #  Check to see if current volume has already by tallied
+                    if vol not in row_sums[ve_count].keys():
+                        row_sums[ve_count][vol] = [0, 0]
     
                     sample = mesh_dist/width[ve_count]
-                    row_sigmas[ve_count][vol][0] += sample
-                    row_sigmas[ve_count][vol][1] += sample**2
+                    row_sums[ve_count][vol][0] += sample
+                    row_sums[ve_count][vol][1] += sample**2
                     distance -= mesh_dist
     
-                    # if not on the last volume element, continue into the next
-                    # volume element
+                    #  If not on the last volume element, continue into the next
+                    #  volume element.
                     if ve_count == num_ve - 1:
                         complete = True
                         break
@@ -847,18 +849,18 @@ class _MeshRow():
                         ve_count += 1
                         mesh_dist = width[ve_count]
     
-                # volume does not extend past mesh volume
+                #  Volume does not extend past mesh volume.
                 if distance < mesh_dist and distance > VOL_FRAC_TOLERANCE \
                     and not complete:
-                    # check to see if current volume has already by tallied
-                    if vol not in row_sigmas[ve_count].keys():
-                        row_sigmas[ve_count][vol] = [0, 0]
+                    #  Check to see if current volume has already by tallied
+                    if vol not in row_sums[ve_count].keys():
+                        row_sums[ve_count][vol] = [0, 0]
     
                     sample = distance/width[ve_count]
-                    row_sigmas[ve_count][vol][0] += sample
-                    row_sigmas[ve_count][vol][1] += sample**2
+                    row_sums[ve_count][vol][0] += sample
+                    row_sums[ve_count][vol][1] += sample**2
                     mesh_dist -= distance
                 
                 vol = next_vol
     
-        return row_sigmas
+        return row_sums
