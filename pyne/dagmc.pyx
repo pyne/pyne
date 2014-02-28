@@ -617,10 +617,14 @@ def discretize_geom(mesh, num_rays, grid=False):
     results : structured array
         Stores in a one dimensional array, each entry containing the following
         fields:
-        'idx' - the volume element index.
-        'cell' - the geometry cell.
-        'vol_frac' - the volume fraction of the cell withing the mesh ve.
-        'rel_error'- the relative error.
+        :idx: int 
+            The volume element index.
+        :cell: int
+            The geometry cell number.
+        :vol_frac: float
+            The volume fraction of the cell withing the mesh ve.
+        :rel_error: float
+            The relative error associated with the volume fraction.
     """
     divs = [mesh.structured_get_divisions(x) for x in 'xyz']
     num_ves = (len(divs[0])-1)*(len(divs[1])-1)*(len(divs[2])-1)
@@ -669,7 +673,7 @@ def discretize_geom(mesh, num_rays, grid=False):
                 elif di == 2:
                     ves = mesh.structured_iterate_hex('z', x=a, y=b)
 
-                idx_tag = mesh.mesh.getTagHandle("idx")
+                idx_tag = mesh.mesh.getTagHandle('idx')
                 idx = []
                 for ve in ves:
                     idx.append(idx_tag[ve])
@@ -691,9 +695,9 @@ def discretize_geom(mesh, num_rays, grid=False):
     # Create structured array
     total_rays = num_rays*3 # three directions
     results = np.zeros(len_count, dtype=[('idx', np.int64),
-                                           ('cell', np.int64),
-                                           ('vol_frac', np.float64), 
-                                           ('rel_error', np.float64)])
+                                         ('cell', np.int64),
+                                         ('vol_frac', np.float64), 
+                                         ('rel_error', np.float64)])
 
     row_count = 0
     total_rays = num_rays*3
@@ -701,7 +705,7 @@ def discretize_geom(mesh, num_rays, grid=False):
        for vol in ve_sigmas.keys():
            vol_frac = ve_sigmas[vol][0]/total_rays
            rel_error = np.sqrt((ve_sigmas[vol][1])/(ve_sigmas[vol][0])**2 
-                                - 1/total_rays)
+                                - 1.0/total_rays)
            results[row_count] = (i, vol, vol_frac, rel_error)
            row_count += 1
 
@@ -719,7 +723,7 @@ class _MeshRow():
     start_points : list
         The xyz points describing where rays should start from.
     num_rays : int
-        The number of rays to fire down the mesh row
+        The number of rays to fire down the mesh row.
     s_dis_0 : int
         The first of two directions that define the surface for which rays
         are fired.
@@ -751,8 +755,10 @@ class _MeshRow():
         while ray_count < self.num_rays:
             start_point = [0]*3
             start_point[self.di] = self.divs[0]
-            start_point[self.s_dis_0] = np.random.uniform(self.s_min_0, self.s_max_0)
-            start_point[self.s_dis_1] = np.random.uniform(self.s_min_1, self.s_max_1)
+            start_point[self.s_dis_0] = np.random.uniform(self.s_min_0,
+                                                          self.s_max_0)
+            start_point[self.s_dis_1] = np.random.uniform(self.s_min_1,
+                                                          self.s_max_1)
             self.start_points.append(start_point)
             ray_count += 1
     
@@ -769,8 +775,10 @@ class _MeshRow():
      
         step_1 = (self.s_max_0-self.s_min_0)/(float(square_dim) + 1)
         step_2 = (self.s_max_1 - self.s_min_1)/(float(square_dim) + 1)
-        range_1 = np.linspace(self.s_min_0 + step_1, self.s_max_0, square_dim, endpoint=False)
-        range_2 = np.linspace(self.s_min_1 + step_2, self.s_max_1, square_dim, endpoint=False)
+        range_1 = np.linspace(self.s_min_0 + step_1, self.s_max_0, square_dim,
+                              endpoint=False)
+        range_2 = np.linspace(self.s_min_1 + step_2, self.s_max_1, square_dim,
+                              endpoint=False)
      
         self.start_points = []
         for point_1 in range_1:
