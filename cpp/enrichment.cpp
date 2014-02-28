@@ -1,6 +1,7 @@
 // Enrichment 
-
+#ifndef PYNE_IS_AMALGAMATED
 #include "enrichment.h"
+#endif
 
 namespace pyne_enr = pyne::enrichment;
 

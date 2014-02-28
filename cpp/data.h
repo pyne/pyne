@@ -3,8 +3,8 @@
 ///
 /// \brief Implements basic nuclear data functions.
 
-#ifndef _TEWK4A7VOFFLHDDXD5ZZ7KPXEQ
-#define _TEWK4A7VOFFLHDDXD5ZZ7KPXEQ
+#ifndef PYNE_TEWK4A7VOFFLHDDXD5ZZ7KPXEQ
+#define PYNE_TEWK4A7VOFFLHDDXD5ZZ7KPXEQ
 #include <iostream>
 #include <string>
 #include <utility>
@@ -16,12 +16,13 @@
 
 #include "hdf5.h"
 #include "hdf5_hl.h"
+
+#ifndef PYNE_IS_AMALGAMATED
 #include "h5wrap.h"
-
 #include "extra_types.h"
-
 #include "pyne.h"
 #include "nucname.h"
+#endif
 
 namespace pyne
 {
@@ -45,13 +46,13 @@ namespace pyne
   /// Mapping from nuclides in id form to their atomic masses.
   extern std::map<int, double> atomic_mass_map;
 
-  /// a struct matching the atomic_weight table in nuc_data.h5.
-  typedef struct atomic_weight_struct {
+  /// a struct matching the atomic_mass table in nuc_data.h5.
+  typedef struct atomic_mass_struct {
     int nuc;      ///< nuclide in id form
     double mass;  ///< nuclide atomic mass [amu]
     double error; ///< error in atomic mass [amu]
     double abund; ///< natural abundance of nuclide [atom fraction]
-  } atomic_weight_struct; 
+  } atomic_mass_struct; 
 
   // Loads preset dataset hashes into memory.
   std::map<std::string, std::string> get_data_checksums();
@@ -143,6 +144,70 @@ namespace pyne
   /// Computes the scattering length [cm] from the coherent and incoherent components.
   double b(std::string nuc);
   /// \}
+
+
+  /// \name Fission Product Yield Data
+  /// \{
+
+  /// Mapping from nuclides in id form to their scattering length.
+  extern std::map<std::pair<int, int>, double> wimsdfpy_data;
+
+  /// a struct matching the '/neutron/wimsd_fission_product' table in nuc_data.h5.
+  typedef struct wimsdfpy_struct {
+    int from_nuc;  ///< from nuclide in id form
+    int to_nuc;  ///< from nuclide in id form
+    double yields; ///< fission product yield, fraction [unitless]
+  } wimsdfpy_struct; 
+
+  /// Loads the WIMSD fission product yield data from the nuc_data.h5 file into memory.
+  void _load_wimsdfpy();
+
+  /// a struct matching the '/neutron/nds_fission_product' table in nuc_data.h5
+  typedef struct ndsfpy_struct {
+    int from_nuc;
+    int to_nuc;
+    double yield_thermal;
+    double yield_thermal_err;
+    double yield_fast;
+    double yield_fast_err;
+    double yield_14MeV;
+    double yield_14MeV_err;
+  } ndsfpy_struct;
+
+  /// a struct for the nds data for fpyield
+  typedef struct ndsfpysub_struct {
+    double yield_thermal;
+    double yield_thermal_err;
+    double yield_fast;
+    double yield_fast_err;
+    double yield_14MeV;
+    double yield_14MeV_err;
+  } ndsfpysub_struct;
+
+
+  extern std::map<std::pair<int, int>, ndsfpysub_struct> ndsfpy_data;
+
+  /// Loads the NDS fission product yield data from the nuc_data.h5 file into memory.
+  void _load_ndsfpy();
+
+  /// \brief Returns the fission product yield for a parent/child nuclide pair
+  ///
+  /// This function works by first checking the fission yield data.  If this is
+  /// empty it loads the data from disk. If the parent/child nuclide pair
+  /// is still not found, then the process is assumed to be impossible
+  /// and 0.0 is returned. The data source is determined by the type value
+  /// as follows: 0 WIMS, 1 thermal NDS, 2 fast NDS, 3 14 MeV NDS.
+  /// negative type values return error for that data type.
+  double fpyield(std::pair<int, int> from_to, int source, bool get_error);
+  /// Returns the fission product yield for a parent/child nuclide pair
+  double fpyield(int from_nuc, int to_nuc, int source, bool get_error);
+  /// Returns the fission product yield for a parent/child nuclide pair
+  double fpyield(char * from_nuc, char * to_nuc, int source, bool get_error);
+  /// Returns the fission product yield for a parent/child nuclide pair
+  double fpyield(std::string from_nuc, std::string to_nuc, int source, bool get_error);
+
+  /// \}
+
 
   /// \name Decay Data
   /// \{

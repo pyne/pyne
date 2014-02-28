@@ -681,7 +681,7 @@ class Mesh(object):
         for name in tagnames:
             setattr(self, name, IMeshTag(mesh=self, name=name)) 
         # Material property tags
-        self.atoms_per_mol = MaterialPropertyTag(mesh=self, name='atoms_per_mol', 
+        self.atoms_per_molecule = MaterialPropertyTag(mesh=self, name='atoms_per_molecule', 
                                                  doc='Number of atoms per molecule')
         self.attrs = MaterialPropertyTag(mesh=self, name='attrs', 
                         doc='metadata attributes, stored on the material')
@@ -692,7 +692,7 @@ class Mesh(object):
         self.density = MaterialPropertyTag(mesh=self, name='density', 
                                            doc='the density [g/cc]')
         # Material method tags
-        methtagnames = ('expand_elements', 'mass_density', 'molecular_weight', 
+        methtagnames = ('expand_elements', 'mass_density', 'molecular_mass', 
                         'mult_by_mass', 'number_density', 'sub_act', 'sub_fp', 
                         'sub_lan', 'sub_ma', 'sub_tru', 'to_atom_frac')
         for name in methtagnames:

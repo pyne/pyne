@@ -12,7 +12,7 @@ import pyne.data
 import pyne.xs.models
 from pyne.xs.cache import xs_cache
 from pyne.xs.channels import sigma_f, sigma_s_gh, sigma_s, sigma_a_reaction, \
-    metastable_ratio, sigma_a, chi, sigma_t, _atom_weight_channel
+    metastable_ratio, sigma_a, chi, sigma_t, _atom_mass_channel
 from pyne.pyne_config import pyne_conf
 from pyne.material import Material
 
@@ -34,19 +34,19 @@ def test_atom_weight_channel1():
 
     # Test dict
     nucspec = {1: 1, 10: 2}
-    obs = _atom_weight_channel(chanfunc, nucspec)
+    obs = _atom_mass_channel(chanfunc, nucspec)
     exp = np.array([1.0, 7.0])
     assert_array_equal(obs, exp)
 
     # Test list of tuples
     nucspec = [(1, 1), (10, 2)]
-    obs = _atom_weight_channel(chanfunc, nucspec)
+    obs = _atom_mass_channel(chanfunc, nucspec)
     exp = np.array([1.0, 7.0])
     assert_array_equal(obs, exp)
 
     # test material
     h2o = Material({10010000: 0.11191487328808077, 80160000: 0.8880851267119192})
-    obs = _atom_weight_channel(chanfunc, h2o)
+    obs = _atom_mass_channel(chanfunc, h2o)
     exp = np.array([1.0, 33393333.333333336])
     assert_array_almost_equal(obs, exp)
 
@@ -57,17 +57,17 @@ def test_atom_weight_channel2():
 
     # Test dict
     nucspec = {'H1': 2.0, 'O16': 1.0}
-    obs = _atom_weight_channel(sigma_t, nucspec)
+    obs = _atom_mass_channel(sigma_t, nucspec)
     assert_array_almost_equal(obs, exp)
 
     # Test list of tuples
     nucspec = [('H1', 2.0), ('O16', 1.0)]
-    obs = _atom_weight_channel(sigma_t, nucspec)
+    obs = _atom_mass_channel(sigma_t, nucspec)
     assert_array_equal(obs, exp)
 
     # test material
     h2o = Material({10010000: 0.11191487328808077, 80160000: 0.8880851267119192})
-    obs = _atom_weight_channel(sigma_t, h2o)
+    obs = _atom_mass_channel(sigma_t, h2o)
     assert_array_almost_equal(obs, exp)
 
 

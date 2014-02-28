@@ -13,9 +13,6 @@ obtained by importing as such::
 
     from pyne import variancereduction
 
-You may also want to consult the userguide page 
-:ref:`usersguide_variancereduction`.
-
 Variance Reduction API
 ----------------------
 

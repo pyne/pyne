@@ -604,14 +604,14 @@ def test_matmethtag():
         }
     m = gen_mesh(mats=mats)
 
-    mws = np.array([mat.molecular_weight() for i, mat in mats.items()])
+    mws = np.array([mat.molecular_mass() for i, mat in mats.items()])
 
     # Getting tags
-    assert_equal(m.molecular_weight[0], mws[0])
-    assert_array_equal(m.molecular_weight[::2], mws[::2])
+    assert_equal(m.molecular_mass[0], mws[0])
+    assert_array_equal(m.molecular_mass[::2], mws[::2])
     mask = np.array([True, False, True, True], dtype=bool)
-    assert_array_equal(m.molecular_weight[mask], mws[mask])
-    assert_array_equal(m.molecular_weight[1, 0, 1, 3], mws[[1, 0, 1, 3]])
+    assert_array_equal(m.molecular_mass[mask], mws[mask])
+    assert_array_equal(m.molecular_mass[1, 0, 1, 3], mws[[1, 0, 1, 3]])
 
 def test_metadatatag():
     mats = {
