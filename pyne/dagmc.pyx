@@ -14,6 +14,11 @@ from numpy.linalg import norm
 
 np.import_array()
 
+from pyne.mesh import Mesh
+
+# Globals
+VOL_FRAC_TOLERANCE = 1E-10 # The maximum volume fraction to be considered valid
+
 # Set the entity handle type; I don't know a cleaner way than to ask the daglib
 # to return the byte width of the type
 def get_entity_handle_type():
@@ -587,3 +592,275 @@ def get_material_set(**kw):
     return mat_ids
 
 #### start util
+
+def discretize_geom(mesh, num_rays, grid=False):
+    """This function reads in a Cartesian, structured, axis-aligned, PyNE mesh
+    object, then uses Monte Carlo ray tracing to determine the volume 
+    fractions of each geometry cell within each mesh volume element of the 
+    mesh. Note that a DAGMC geometry must already be loaded into memory.
+ 
+    Parameters
+    ----------
+    mesh : PyNE Mesh
+        A Cartesian, structured, axis-aligned Mesh that superimposed the
+        geometry.
+    num_rays : int
+        The number of rays to fire in each mesh row for each direction.
+    grid : boolean
+        If false, rays starting points are chosen randomly (on the boundary) 
+        for each mesh row. If true, a linearly spaced grid of starting points is 
+        used, with dimension sqrt(num_rays) x sqrt(num_rays). In this case, 
+        "num_rays" must be a perfect square.
+
+    Returns
+    -------
+    results : structured array
+        Stores in a one dimensional array, each entry containing the following
+        fields:
+        :idx: int 
+            The volume element index.
+        :cell: int
+            The geometry cell number.
+        :vol_frac: float
+            The volume fraction of the cell withing the mesh ve.
+        :rel_error: float
+            The relative error associated with the volume fraction.
+    """
+    divs = [mesh.structured_get_divisions(x) for x in 'xyz']
+    num_ves = (len(divs[0])-1)*(len(divs[1])-1)*(len(divs[2])-1)
+    #  Stores a running tally of sums of x and sums of x^2 for each ve
+    mesh_sums = [{} for x in range(0, num_ves)]
+    #  The length of the output array (will vary because different ve contain
+    #  different numbers of geometry cells.
+    len_count = 0
+
+    #  Direction indicies: x = 0, y = 1, z = 2
+    dis = [0, 1, 2]
+    #  Iterate over all directions indicies
+    for di in dis:
+        #  For each direction, the remaining two directions define the sampling 
+        #  surface. These two directions are the values in s_dis (surface
+        #  direction indices)
+        s_dis = [0, 1, 2]
+        s_dis.remove(di)
+        #  Iterate through all all the sampling planes perpendicular to di,
+        #  creating a _MeshRow in each, and subsequently evaluating that row.
+        for a in range(0, len(divs[s_dis[0]]) - 1):
+            for b in range(0, len(divs[s_dis[1]]) - 1):
+                mesh_row = _MeshRow()
+                mesh_row.di = di
+                mesh_row.divs = divs[di]
+                mesh_row.num_rays = num_rays
+                mesh_row.s_dis_0 = s_dis[0]
+                mesh_row.s_min_0 = divs[s_dis[0]][a]
+                mesh_row.s_max_0 = divs[s_dis[0]][a + 1]
+                mesh_row.s_dis_1 = s_dis[1]
+                mesh_row.s_min_1 = divs[s_dis[1]][b]
+                mesh_row.s_max_1 = divs[s_dis[1]][b + 1]
+
+                #  Create a lines of starting points to fire rays for this
+                #  particular mesh row.
+                if not grid:
+                    mesh_row._rand_start()
+                else:
+                    mesh_row._grid_start()
+
+                #  Create a list of mesh idx corresponding to this mesh row.
+                if di == 0:
+                    ves = mesh.structured_iterate_hex('x', y=a, z=b)
+                elif di == 1:
+                    ves = mesh.structured_iterate_hex('y', x=a, z=b)
+                elif di == 2:
+                    ves = mesh.structured_iterate_hex('z', x=a, y=b)
+
+                idx_tag = mesh.mesh.getTagHandle('idx')
+                idx = []
+                for ve in ves:
+                    idx.append(idx_tag[ve])
+
+                #  Fire rays.
+                row_sums = mesh_row._evaluate_row()
+
+                #  Add row results to the full mesh sum matrix.
+                for j, ve_sums in enumerate(row_sums):
+                   for cell in ve_sums.keys():
+                       if cell not in mesh_sums[idx[j]].keys():
+                           mesh_sums[idx[j]][cell] = [0, 0]
+                           len_count += 1
+
+                       mesh_sums[idx[j]][cell][0] += ve_sums[cell][0]
+                       mesh_sums[idx[j]][cell][1] += ve_sums[cell][1]
+
+
+    #  Create structured array
+    total_rays = num_rays*3 # three directions
+    results = np.zeros(len_count, dtype=[('idx', np.int64),
+                                         ('cell', np.int64),
+                                         ('vol_frac', np.float64), 
+                                         ('rel_error', np.float64)])
+
+    row_count = 0
+    total_rays = num_rays*3
+    for i, ve_sums in enumerate(mesh_sums):
+       for vol in ve_sums.keys():
+           vol_frac = ve_sums[vol][0]/total_rays
+           rel_error = np.sqrt((ve_sums[vol][1])/(ve_sums[vol][0])**2 
+                                - 1.0/total_rays)
+           results[row_count] = (i, vol, vol_frac, rel_error)
+           row_count += 1
+
+    results.sort()
+
+    return results
+
+class _MeshRow():
+    """A class to store data and fire rays down a single mesh row.
+
+    Attributes
+    ----------
+    di : int
+        The direction index of the current firing direction.
+    divs : list
+        The mesh boundaries perpendicular to the firing direction.
+    start_points : list
+        The xyz points describing where rays should start from.
+    num_rays : int
+        The number of rays to fire down the mesh row.
+    s_dis_0 : int
+        The first of two directions that define the surface for which rays
+        are fired.
+    s_min_0 : float
+        The location of the plane the bounds the firing surface from the left
+        in direction s_dis_0.
+    s_max_0 : float
+        The location of the plane the bounds the firing surface from the right
+        in direction s_dis_0.
+    s_dis_1 : int
+        The second of two directions that define the surface for which rays
+        are fired.
+    s_min_1 : float
+        The location of the plane the bounds the firing surface from the left
+        in direction s_dis_1.
+    s_max_1 : float
+        The location of the plane the bounds the firing surface from the right
+        in direction s_dis_1.
+       """
+    def __init__(self):
+        pass
+
+    def _rand_start(self):
+        """Private function for randomly generating ray starting points to
+        populate self.starting_points
+        """
+        self.start_points = []
+        ray_count = 0
+        while ray_count < self.num_rays:
+            start_point = [0]*3
+            start_point[self.di] = self.divs[0]
+            start_point[self.s_dis_0] = np.random.uniform(self.s_min_0,
+                                                          self.s_max_0)
+            start_point[self.s_dis_1] = np.random.uniform(self.s_min_1,
+                                                          self.s_max_1)
+            self.start_points.append(start_point)
+            ray_count += 1
+    
+    def _grid_start(self):
+        """Private function for generating a uniform grid of ray starting
+        points to populate self.starting_points.
+        """
+        #  Test to see if num_rays is a perfect square.
+        if int(np.sqrt(self.num_rays))**2 != self.num_rays:
+            raise ValueError("For rays fired in a grid, "
+                             "num_rays must be a perfect square.")
+        else:
+           square_dim = int(np.sqrt(self.num_rays))
+     
+        step_1 = (self.s_max_0-self.s_min_0)/(float(square_dim) + 1)
+        step_2 = (self.s_max_1 - self.s_min_1)/(float(square_dim) + 1)
+        range_1 = np.linspace(self.s_min_0 + step_1, self.s_max_0, square_dim,
+                              endpoint=False)
+        range_2 = np.linspace(self.s_min_1 + step_2, self.s_max_1, square_dim,
+                              endpoint=False)
+     
+        self.start_points = []
+        for point_1 in range_1:
+            for point_2 in range_2:
+                start_point = [0]*3
+                start_point[self.di] = self.divs[0]
+                start_point[self.s_dis_0] = point_1
+                start_point[self.s_dis_1]= point_2
+                self.start_points.append(start_point)
+
+    def _evaluate_row(self):
+        """Private function that fires rays down a single mesh row and returns the
+        results.
+
+        Returns
+        -------
+        row_sums : list
+            A list with one entry per mesh volume element in the mesh row. Each
+            entry is a dictionary that maps geometry cell number to a list
+            containing two statistical results. The first result is the sum of
+            all the samples and the second result is the sum of all the squares
+            of all of the samples.
+        """
+    
+        # Number of volume elements in this mesh row.
+        num_ve = len(self.divs) - 1
+        direction = [0, 0, 0]
+        direction[self.di] = 1
+        row_sums = [{} for x in range(0, len(self.divs) - 1)]
+        width = [self.divs[x] - self.divs[x - 1] for x in range(1, len(self.divs))]
+    
+        #  Find the first volume the first point is located in.
+        vol = find_volume(self.start_points[0], direction)
+        #  Fire ray for each starting point.
+        for point in self.start_points:
+            #  Check to see if the staring point is in the same volume as the
+            #  last staring point to avoid expensive find_volume calls.
+            if not point_in_volume(vol, point, direction):
+                vol = find_volume(point, direction)
+    
+            mesh_dist = width[0]
+            ve_count = 0
+            complete = False
+            #  Track a single ray down the mesh row and tally accordingly.
+            for next_vol, distance, _ in ray_iterator(vol, point, direction):
+                if complete:
+                    break
+
+                #  Volume extends past mesh boundary
+                while distance >= mesh_dist:
+                    #  Check to see if current volume has already by tallied
+                    if vol not in row_sums[ve_count].keys():
+                        row_sums[ve_count][vol] = [0, 0]
+    
+                    sample = mesh_dist/width[ve_count]
+                    row_sums[ve_count][vol][0] += sample
+                    row_sums[ve_count][vol][1] += sample**2
+                    distance -= mesh_dist
+    
+                    #  If not on the last volume element, continue into the next
+                    #  volume element.
+                    if ve_count == num_ve - 1:
+                        complete = True
+                        break
+                    else:
+                        ve_count += 1
+                        mesh_dist = width[ve_count]
+    
+                #  Volume does not extend past mesh volume.
+                if distance < mesh_dist and distance > VOL_FRAC_TOLERANCE \
+                    and not complete:
+                    #  Check to see if current volume has already by tallied
+                    if vol not in row_sums[ve_count].keys():
+                        row_sums[ve_count][vol] = [0, 0]
+    
+                    sample = distance/width[ve_count]
+                    row_sums[ve_count][vol][0] += sample
+                    row_sums[ve_count][vol][1] += sample**2
+                    mesh_dist -= distance
+                
+                vol = next_vol
+    
+        return row_sums
