@@ -183,9 +183,9 @@ def set_attrs(mat,number,code):
                     for i in 2 :
                         matf=matf.strip(matf[-1])
                     matf=matf+str(number)
-                fmat_list.append(matf)    
+                fmat_list.append(matf.upper())    
             else :            
-                fmat_list.append(matf)
+                fmat_list.append(matf.upper())
         else :
             matff=matf[0:8]
             if matff in fmat_list :
@@ -196,9 +196,9 @@ def set_attrs(mat,number,code):
                     for i in 2 :
                         matf=matff.strip(matf[-1])
                     matf=matf+str(number)
-                fmat_list.append(matf)    
+                fmat_list.append(matf.upper())    
             else :            
-                fmat_list.append(matff)
+                fmat_list.append(matff.upper())
     return fmat_list 
      
  
