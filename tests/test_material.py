@@ -33,7 +33,7 @@ leu = {922380000: 0.96, 922350000: 0.04}
 def assert_mat_almost_equal(first, second, places=7):
     assert_almost_equal(first.mass, second.mass, places=places)
     assert_almost_equal(first.density, second.density, places=places)
-    assert_almost_equal(first.atoms_per_molecule, second.atoms_per_molule, places=places)
+    assert_almost_equal(first.atoms_per_molecule, second.atoms_per_molecule, places=places)
     assert_equal(first.attrs, second.attrs)
     nucs = set(second.comp)
     assert_equal(set(first.comp), nucs)
