@@ -832,7 +832,10 @@ def _parse_decay_dataset(lines, decay_s, levellist=None, lmap = None):
                         gdaughter = _to_id_from_level(daughter, dlevel, levellist, lmap)
                 dat.append(gparent)
                 dat.append(gdaughter)
-                dat.append(pfinal)
+                if parent2 is None:
+                    parent2 = pfinal
+                    e = 0
+                dat.append(_to_id(parent2))
                 for i in range(3):
                     dat.append(0)
                 gammarays.append(dat)

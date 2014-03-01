@@ -294,7 +294,114 @@ namespace pyne
   /// Returns the decay constant for a nuclide \a nuc.
   std::set<int> decay_children(std::string nuc);
 
+  void _load_level_data();
+
+  /// \brief Returns the nuc_id of a metastable state
+  ///
+  /// This function looks through the level map for a given input nuc_id to find the
+  /// nuc_id corresponding to the level
+  int metastable_id(int nuc, int m);
+  /// Assumes the first metastable state is the desired one
+  int metastable_id(int nuc);
+
+  typedef struct level_struct{
+    int nuc_id;
+    double level;
+    double half_life;
+    int metastable;
+  } level_struct;
   /// \}
+  extern std::map<int, level_struct> level_data;
+
+  void _load_decay_data();
+
+  typedef struct decay_struct{
+    int parent;
+    int daughter;
+    char decay[5];
+    double half_life;
+    double half_life_error;
+    double branch_ratio;
+    double photon_branch_ratio;
+    double photon_branch_ratio_error;
+    double beta_branch_ratio;
+    double beta_branch_ratio_error;
+  } decay_struct;
+
+  extern std::map<std::pair<int, int>, decay_struct> decay_data;
+
+  template<typename T> void decay_data_access(std::pair<int, int> from_to, T &a, size_t valoffset);
+
+  void _load_gamma_data();
+
+  typedef struct gamma_struct{
+    double energy;
+    double energy_err;
+    double photon_intensity;
+    double photon_intensity_err;
+    double conv_intensity;
+    double conv_intensity_err;
+    double total_intensity;
+    double total_intensity_err;
+    int from_nuc;
+    int to_nuc;
+    int parent_nuc;
+    double k_conv_e;
+    double l_conv_e;
+    double m_conv_e;
+  } gamma_struct;
+
+  extern std::vector<gamma_struct> gamma_data;
+
+  void gamma_data_byen(double en, double pm, gamma_struct *data);
+  void gamma_data_byparent(int nuc, gamma_struct *data);
+
+  void _load_alpha_data();
+
+  typedef struct alpha_struct{
+    double energy;
+    double intensity;
+    int from_nuc;
+    int to_nuc;
+  } alpha_struct;
+
+  extern std::vector<alpha_struct> alpha_data;
+
+  void alpha_data_byen(double en, double pm, alpha_struct *data);
+  void alpha_data_byparent(int nuc, alpha_struct *data);
+
+  void _load_beta_data();
+
+  typedef struct beta_struct{
+    double endpoint_energy;
+    double avg_energy;
+    double intensity;
+    int from_nuc;
+    int to_nuc;
+  } beta_struct;
+
+  extern std::vector<beta_struct> beta_data;
+
+  void beta_data_byparent(int nuc, beta_struct *data);
+
+  void _load_ecbp_data();
+
+  typedef struct ecbp_struct{
+    double endpoint_energy;
+    double avg_energy;
+    double beta_plus_intensity;
+    double ec_intensity;
+    int from_nuc;
+    int to_nuc;
+    double k_conv_e;
+    double l_conv_e;
+    double m_conv_e;
+  } ecbp_struct;
+
+  extern std::vector<ecbp_struct> ecbp_data;
+
+  void ecbp_data_byparent(int nuc, ecbp_struct *data);
+
 }
 
 #endif
