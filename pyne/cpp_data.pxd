@@ -80,3 +80,21 @@ cdef extern from "data.h" namespace "pyne":
     set[int] decay_children(char *) except +
     set[int] decay_children(std_string) except +
 
+    int metastable_id(int, int) except +
+    int metastable_id(int) except +
+
+    void decay_data_access[T](pair[int, int], T, size_t) except +
+
+    struct gamma_struct
+    void gamma_data_byen(double, double, gamma_struct *) except +
+    void gamma_data_byparent(int, gamma_struct *) except +
+
+    struct alpha_struct
+    void alpha_data_byen(double, double, alpha_struct *) except +
+    void alpha_data_byparent(int, alpha_struct *) except +
+
+    struct beta_struct
+    void beta_data_byparent(int, beta_struct *) except +
+
+    struct ecbp_struct
+    void ecbp_data_byparent(int, ecbp_struct *) except +
