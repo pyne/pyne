@@ -1788,20 +1788,29 @@ class MultiMaterial(collections.MutableMapping):
         """This function reads in a python dict of materials and mass fractions
         then mixes the material by mass fractions and returns a material of mass=1.
         """
+        total = 0
+        total_mass_frac = 0
         mix = Material()
         for mat, mat_frac in self._mats.items():
-            mix = mix + mat * mat_frac
+            mix = mix + mat*mat_frac
+            total_mass_frac += mat_frac
+            total += (mat_frac/mat.density)
         mix.mass = 1
+        mix.density = total_mass_frac/total
+
         return mix
 
     def mix_by_volume(self):
         """This function reads in a python dict of materials and volume fractions
         then mixes the material by volume fractions and returns a material of mass=1.
         """
+        total = 0
         mix = Material()
         for mat, mat_frac in self._mats.items():
-            mix=mix + mat * mat_frac * mat.density
+            mix = mix + mat*mat_frac*mat.density
+            total += (mat.density*mat_frac)
         mix.mass = 1
+        mix.density = total
         return mix
 
 

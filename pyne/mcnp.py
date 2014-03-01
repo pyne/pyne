@@ -731,7 +731,7 @@ class Xsdir(object):
         words = line.split()
         assert len(words) == 3
         assert words[0].lower() == 'atomic'
-        assert words[1].lower() == 'mass'
+        assert words[1].lower() == 'weight'
         assert words[2].lower() == 'ratios'
 
         while True:
@@ -799,6 +799,20 @@ class Xsdir(object):
     def __iter__(self):
         for table in self.tables:
             yield table
+
+    def nucs(self):
+        """Provides a set of the valid nuclide ids for nuclides contained
+        in the xsdir.
+
+        Returns
+        -------
+        valid_nucs : set
+            The valid nuclide ids.
+        """
+         
+        valid_nucs = set(nucname.id(nuc) for nuc in self.awr.keys() 
+                   if nucname.isnuclide(nuc))
+        return valid_nucs
 
 
 class XsdirTable(object):

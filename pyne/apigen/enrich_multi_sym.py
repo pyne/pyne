@@ -307,11 +307,14 @@ _header_file_template = r"""
 /***                  DO NOT MODIFY!!!                 ***/
 /*********************************************************/
 
-#if !defined(_PYNE_ENRICHMENT_SYMBOLIC_)
-#define _PYNE_ENRICHMENT_SYMBOLIC_
+#ifndef PYNE_OU4PO4TJDBDM5PY4VKAVL7JCSM
+#define PYNE_OU4PO4TJDBDM5PY4VKAVL7JCSM
 
 #include <math.h>
+
+#ifndef PYNE_IS_AMALGAMATED
 #include "enrichment_cascade.h"
+#endif
 
 namespace pyne {{
 namespace enrichment {{
@@ -337,7 +340,9 @@ _source_file_header_template = """
 /*** WARNING: This file is auto-generated.             ***/
 /***                  DO NOT MODIFY!!!                 ***/
 /*********************************************************/
+#ifndef PYNE_IS_AMALGAMATED
 #include "{hfname}"
+#endif
 
 """
 

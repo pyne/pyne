@@ -521,8 +521,8 @@ These guards ought to be UUIDs:
 
 .. code-block:: c++
 
-    #ifndef _W7WGLJVRGRDH7G47RDHRLLCP2A
-    #define _W7WGLJVRGRDH7G47RDHRLLCP2A
+    #ifndef PYNE_W7WGLJVRGRDH7G47RDHRLLCP2A
+    #define PYNE_W7WGLJVRGRDH7G47RDHRLLCP2A
     ...
     #endif
 
@@ -530,7 +530,7 @@ Use this command for generating UUIDs:
 
 .. code-block:: bash
 
-    $ python -c "import uuid; import base64; print('_' + base64.b32encode(uuid.uuid4().bytes).decode().strip('='))"
+    $ python -c "import uuid; import base64; print('PYNE_' + base64.b32encode(uuid.uuid4().bytes).decode().strip('='))"
 
 This guard should begin before any other code and should end at the end of the file.
 
