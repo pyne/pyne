@@ -16,7 +16,7 @@ The following files and libraries are part of the PyNE C++ interface:
     enrichment
     extra_types
     h5wrap
-    
+
 
 -----------------
 Using the C++ API
@@ -70,3 +70,46 @@ the authors if you require additional assistance.
     ========== ===================== =================
 
 .. _setup.py: https://github.com/pyne/pyne/blob/staging/setup.py
+
+
+--------------------------------------------
+Amalgamating PyNE into a Single Source File
+--------------------------------------------
+PyNE has a lot of great stuff in it! However, adding dependencies to C++ projects
+can be annoying, frustrating, and error prone. It often seems easier to just rip 
+out the functionality that you need and include it in your own project.  
+
+*Good news!* PyNE offers a formal mechanism for combining some or all of its
+C++ API into a single, redistributable source file and an accompanying header file.
+This let's you use pyne in your projects without adding pyne as an external dependency.
+This mechanism is known as *amalgamation*. 
+
+In the top level pyne source code directory, there is an ``amalgamate.py`` script.
+Simply run this script to combine all C++ source information into ``pyne.cpp`` and
+``pyne.h`` files.  Run with no options to combine all commonly used C++ files.
+Add options to modify the behavior.  Current options are:
+
+.. code-block:: bash
+
+    scopatz@ares ~/pyne $ ./amalgamate.py -h
+    usage: amalgamate.py [-h] [-s SOURCE_PATH] [-i HEADER_PATH]
+                         [-f FILES [FILES ...]]
+
+    optional arguments:
+      -h, --help            show this help message and exit
+      -s SOURCE_PATH        Output *.cpp source path.
+      -i HEADER_PATH        Output header path.
+      -f FILES [FILES ...]  Files to amalgamate.
+
+For example, to take only up through the rxname, amalgamate with:
+
+.. code-block:: bash
+
+    scopatz@ares ~/pyne $ ./amalgamate.py -s pyne.cc -i pyne.h -f license.txt \
+    cpp/pyne.* cpp/extra_types.h cpp/h5wrap.h cpp/nucname.* cpp/rxname.*
+
+`Cyclus <http://fuelcycle.org>`_ is an example of a project which uses an amalgamated
+version of pyne.
+
+
+
