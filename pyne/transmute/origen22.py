@@ -17,8 +17,9 @@ from pyne import origen22
 from pyne.material import Material, from_atom_frac
 from pyne.xs.data_source import NullDataSource, SimpleDataSource, EAFDataSource
 from pyne.xs.cache import XSCache
+from pyne.transmuter import Transmuter
 
-class Transmuter(object):
+class OrigenTransmuter(Transmuter):
     """A class for transmuting materials using ORIGEN v2.2."""
 
     def __init__(self, t=0.0, phi=0.0, temp=300.0, tol=1e-7, cwd='',
@@ -26,15 +27,6 @@ class Transmuter(object):
                  o2exe='o2_therm_linux.exe', *args, **kwargs):
         """Parameters
         ----------
-        t : float
-            Transmutations time [sec].
-        phi : float or array of floats
-            Neutron flux vector [n/cm^2/sec].  Currently this must either be 
-            a scalar or match the group structure of EAF.
-        temp : float, optional
-            Temperature [K] of material, defaults to 300.0.
-        tol : float
-            Tolerance level for chain truncation.
         cwd : str, optional
             Current working directory for origen runs. Defaults to this dir.
         base_tape9 : str or dict, optional
@@ -48,8 +40,10 @@ class Transmuter(object):
         args : tuple, optional
             Other arguments ignored for compatibility with other Transmuters.
         kwargs : dict, optional
-            Other keyword arguments ignored for compatibility with other Transmuters.
+            Other keyword arguments ignored for compatibility with other 
+            Transmuters.
         """
+        super(OrigenTransmuter, self).__init__(t, phi, temp, tol)
         if not isinstance(base_tape9, Mapping):
             base_tape9 = origen22.parse_tape9(tape9=base_tape9)
         self.base_tape9 = base_tape9
@@ -64,12 +58,6 @@ class Transmuter(object):
             xscache.load(temp=temp)
             xscache.data_sources.insert(0, eafds)
         self.xscache = xscache
-
-        self.t = t
-        self._phi = None
-        self.phi = phi
-        self.temp = temp
-        self.tol = tol
         self.cwd = os.path.abspath(cwd)
         self.o2exe = o2exe
 

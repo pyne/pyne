@@ -14,48 +14,37 @@ from pyne.material import Material, from_atom_frac
 from pyne.xs.data_source import NullDataSource, EAFDataSource
 from pyne.xs.cache import XSCache
 from pyne.xs.channels import sigma_a
+from pyne.transmute.transmuter import Transmuter
 
-class Transmuter(object):
+class ChainSolveTransmuter(Transmuter):
     """A class for transmuting materials using an ALARA-like chain solver."""
 
     def __init__(self, t=0.0, phi=0.0, temp=300.0, tol=1e-7, rxs=None, log=None, 
                  *args, **kwargs):
         """Parameters
         ----------
-        t : float
-            Transmutations time [sec].
-        phi : float or array of floats
-            Neutron flux vector [n/cm^2/sec].  Currently this must either be 
-            a scalar or match the group structure of EAF.
-        temp : float, optional
-            Temperature [K] of material, defaults to 300.0.
-        tol : float
-            Tolerance level for chain truncation.
         rxs : set of ints or strs
-            Reaction ids or names to use in transmutation which produce well-defined 
-            children.  This set should thus not include fission.  If None, then the 
-            reactions from EAF are used.
+            Reaction ids or names to use in transmutation which produce 
+            well-defined children.  This set should thus not include fission.  If 
+            None, then the reactions from EAF are used.
         log : file-like or None
             The log file object should be written. A None imples the log is 
             not desired.
         args : tuple, optional
             Other arguments ignored for compatibility with other Transmuters.
         kwargs : dict, optional
-            Other keyword arguments ignored for compatibility with other Transmuters.
+            Other keyword arguments ignored for compatibility with other 
+            Transmuters.
         """
         eafds = EAFDataSource()
         eafds.load(temp=temp)
         gs = np.array([eafds.src_group_struct[0], eafds.src_group_struct[-1]])
         eafds.dst_group_struct = gs
-        self.xscache = XSCache(group_struct=gs, data_source_classes=(NullDataSource,))
+        self.xscache = XSCache(group_struct=gs, 
+                               data_source_classes=(NullDataSource,))
         self.xscache.data_sources.insert(0, eafds)
-
-        self.t = t
-        self._phi = None
-        self.phi = phi
-        self.temp = temp
+        super(ChainSolveTransmuter, self).__init__(t, phi, temp, tol)
         self.log = log
-        self.tol = tol
         if rxs is None:
             rxs = ['gamma', 'gamma_1', 'gamma_2', 'p', 'p_1', 'p_2', 'd', 'd_1', 
                    'd_2', 't', 't_1', 't_2', 'He3', 'He3_1', 'He3_2', 'a', 'a_1', 

@@ -17,13 +17,13 @@ from pyne import nuc_data
 from pyne import nucname as nn
 from pyne import data
 from pyne.material import Material
-from pyne.transmute.chainsolve import Transmuter
+from pyne.transmute.chainsolve import ChainSolveTransmuter
 
 tm = None
 
 def setup():
     global tm
-    tm = Transmuter()
+    tm = ChainSolveTransmuter()
 
 def teardown():
     global tm
