@@ -215,8 +215,8 @@ double pyne::natural_abund(std::string nuc)
 /***********************************/
 /*** scattering length functions ***/
 /***********************************/
-std::map<int, extra_types::complex_t> pyne::b_coherent_map = std::map<int, extra_types::complex_t>();
-std::map<int, extra_types::complex_t> pyne::b_incoherent_map = std::map<int, extra_types::complex_t>();
+std::map<int, xd_complex_t> pyne::b_coherent_map = std::map<int, xd_complex_t>();
+std::map<int, xd_complex_t> pyne::b_incoherent_map = std::map<int, xd_complex_t>();
 std::map<int, double> pyne::b_map = std::map<int, double>();
 
 
@@ -279,10 +279,10 @@ void pyne::_load_scattering_lengths()
 //
 
 
-extra_types::complex_t pyne::b_coherent(int nuc)
+xd_complex_t pyne::b_coherent(int nuc)
 {
   // Find the nuclide's bound scattering length in cm
-  std::map<int, extra_types::complex_t>::iterator nuc_iter, nuc_end;
+  std::map<int, xd_complex_t>::iterator nuc_iter, nuc_end;
 
   nuc_iter = b_coherent_map.find(nuc);
   nuc_end = b_coherent_map.end();
@@ -299,7 +299,7 @@ extra_types::complex_t pyne::b_coherent(int nuc)
     return b_coherent(nuc);
   };
 
-  extra_types::complex_t bc;
+  xd_complex_t bc;
   int nucid = nucname::id(nuc);
   int znum = nucname::znum(nucid);
   int anum = nucname::anum(nucid);
@@ -339,14 +339,14 @@ extra_types::complex_t pyne::b_coherent(int nuc)
 };
 
 
-extra_types::complex_t pyne::b_coherent(char * nuc)
+xd_complex_t pyne::b_coherent(char * nuc)
 {
   int nuc_zz = nucname::id(nuc);
   return b_coherent(nuc_zz);
 };
 
 
-extra_types::complex_t pyne::b_coherent(std::string nuc)
+xd_complex_t pyne::b_coherent(std::string nuc)
 {
   int nuc_zz = nucname::id(nuc);
   return b_coherent(nuc_zz);
@@ -359,10 +359,10 @@ extra_types::complex_t pyne::b_coherent(std::string nuc)
 //
 
 
-extra_types::complex_t pyne::b_incoherent(int nuc)
+xd_complex_t pyne::b_incoherent(int nuc)
 {
   // Find the nuclide's bound inchoherent scattering length in cm
-  std::map<int, extra_types::complex_t>::iterator nuc_iter, nuc_end;
+  std::map<int, xd_complex_t>::iterator nuc_iter, nuc_end;
 
   nuc_iter = b_incoherent_map.find(nuc);
   nuc_end = b_incoherent_map.end();
@@ -379,7 +379,7 @@ extra_types::complex_t pyne::b_incoherent(int nuc)
     return b_incoherent(nuc);
   };
 
-  extra_types::complex_t bi;
+  xd_complex_t bi;
   int nucid = nucname::id(nuc);
   int znum = nucname::znum(nucid);
   int anum = nucname::anum(nucid);
@@ -419,13 +419,13 @@ extra_types::complex_t pyne::b_incoherent(int nuc)
 };
 
 
-extra_types::complex_t pyne::b_incoherent(char * nuc)
+xd_complex_t pyne::b_incoherent(char * nuc)
 {
   return b_incoherent(nucname::id(nuc));
 };
 
 
-extra_types::complex_t pyne::b_incoherent(std::string nuc)
+xd_complex_t pyne::b_incoherent(std::string nuc)
 {
   return b_incoherent(nucname::id(nuc));
 };
@@ -449,8 +449,8 @@ double pyne::b(int nuc)
     return (*nuc_iter).second;
 
   // Next, calculate the value from coherent and incoherent lengths
-  extra_types::complex_t bc = b_coherent(nuc);
-  extra_types::complex_t bi = b_incoherent(nuc);
+  xd_complex_t bc = b_coherent(nuc);
+  xd_complex_t bi = b_incoherent(nuc);
 
   double b_val = sqrt(bc.re*bc.re + bc.im*bc.im + bi.re*bi.re + bi.im*bi.im);
 

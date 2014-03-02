@@ -10,6 +10,11 @@ set_source_files_properties("${PROJECT_SOURCE_DIR}/pyne/extra_types.pyx"
                             PROPERTIES CYTHON_IS_CXX TRUE)
 cython_add_module(extra_types extra_types.pyx)
 
+# dtypes
+set_source_files_properties("${PROJECT_SOURCE_DIR}/pyne/dtypes.pyx"
+                            PROPERTIES CYTHON_IS_CXX TRUE)
+cython_add_module(dtypes dtypes.pyx)
+
 # STL containers
 # If the pyx file is a C++ file, we should specify that here.
 # then, add the module
