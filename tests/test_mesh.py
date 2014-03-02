@@ -756,9 +756,9 @@ def test_contains():
 def test_cell_fracs_to_mats():
     m = gen_mesh()
     cell_fracs = np.zeros(7, dtype=[('idx', np.int64),
-                                            ('cell', np.int64),
-                                            ('vol_frac', np.float64),
-                                            ('rel_error', np.float64)])
+                                    ('cell', np.int64),
+                                    ('vol_frac', np.float64),
+                                    ('rel_error', np.float64)])
     cell_mats = {11: Material({'H': 1.0}, density = 1.0),
                  12: Material({'He': 1.0}, density = 1.0),
                  13: Material({'Li': 1.0}, density = 1.0),
@@ -771,7 +771,8 @@ def test_cell_fracs_to_mats():
     m.cell_fracs_to_mats(cell_fracs, cell_mats)
 
     #  Expected compositions:
-    exp_comps = [{10000000: 0.55, 20000000: 0.45}, {10000000: 0.2, 20000000: 0.3, 30000000: 0.5},
+    exp_comps = [{10000000: 0.55, 20000000: 0.45},
+                 {10000000: 0.2, 20000000: 0.3, 30000000: 0.5},
                  {10000000: 1.0}, {20000000: 1.0}]
 
     for i, mat, _ in m:

@@ -1084,7 +1084,7 @@ class Mesh(object):
 
     def cell_fracs_to_mats(self, cell_fracs, cell_mats):
         """This function uses the output from dagmc.discretize_geom() and 
-        a mapping of geometry cells to materials to assign mixed materials
+        a mapping of geometry cells to Materials to assign materials
         to each mesh volume element.
 
         Parameters
