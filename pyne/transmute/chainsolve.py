@@ -11,16 +11,14 @@ from pyne import rxname
 from pyne import nucname
 from pyne import nuc_data
 from pyne.material import Material, from_atom_frac
-from pyne.xs.data_source import NullDataSource, EAFDataSource
-from pyne.xs.cache import XSCache
 from pyne.xs.channels import sigma_a
 from pyne.transmute.transmuter import Transmuter
 
 class ChainSolveTransmuter(Transmuter):
     """A class for transmuting materials using an ALARA-like chain solver."""
 
-    def __init__(self, t=0.0, phi=0.0, temp=300.0, tol=1e-7, rxs=None, log=None, 
-                 *args, **kwargs):
+    def __init__(self, t=0.0, phi=0.0, temp=300.0, tol=1e-7, xscache=None, 
+                 rxs=None, log=None, *args, **kwargs):
         """Parameters
         ----------
         rxs : set of ints or strs
@@ -36,14 +34,7 @@ class ChainSolveTransmuter(Transmuter):
             Other keyword arguments ignored for compatibility with other 
             Transmuters.
         """
-        eafds = EAFDataSource()
-        eafds.load(temp=temp)
-        gs = np.array([eafds.src_group_struct[0], eafds.src_group_struct[-1]])
-        eafds.dst_group_struct = gs
-        self.xscache = XSCache(group_struct=gs, 
-                               data_source_classes=(NullDataSource,))
-        self.xscache.data_sources.insert(0, eafds)
-        super(ChainSolveTransmuter, self).__init__(t, phi, temp, tol)
+        super(ChainSolveTransmuter, self).__init__(t, phi, temp, tol, xscache)
         self.log = log
         if rxs is None:
             rxs = ['gamma', 'gamma_1', 'gamma_2', 'p', 'p_1', 'p_2', 'd', 'd_1', 
@@ -56,29 +47,6 @@ class ChainSolveTransmuter(Transmuter):
         rxs = set([rxname.id(rx) for rx in rxs])
         rxs.discard(rxname.id('fission'))
         self.rxs = rxs
-
-    @property
-    def phi(self):
-        return self._phi
-
-    @phi.setter
-    def phi(self, flux):
-        """Ensures that the flux is correctly formatted."""
-        flux = np.asarray(flux)
-        if flux.ndim == 0:
-            _ = np.empty(175, float)
-            _.fill(flux / 175.0)
-            flux = _
-        elif flux.ndim == 1 and flux.shape[0] != 175:
-            raise ValueError("Group structure must match EAF.")
-        elif flux.ndim > 1:
-            raise ValueError("The flux vector must be 0- or 1-dimensional.")
-        if not np.all(flux >= 0.0):
-            raise ValueError("Flux entries must be non-negative.")
-        for ds in self.xscache.data_sources:
-            ds.src_phi_g = flux
-        self.xscache['phi_g'] = np.array([flux.sum()])
-        self._phi = flux
 
     def transmute(self, x, t=None, phi=None, tol=None, log=None, *args, **kwargs):
         """Transmutes a material into its daughters.
