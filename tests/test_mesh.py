@@ -752,3 +752,28 @@ def test_contains():
     m = gen_mesh()
     assert_in(1, m)
     assert_not_in(42, m)
+
+def test_cell_fracs_to_mats():
+    m = gen_mesh()
+    cell_fracs = np.zeros(7, dtype=[('idx', np.int64),
+                                            ('cell', np.int64),
+                                            ('vol_frac', np.float64),
+                                            ('rel_error', np.float64)])
+    cell_mats = {11: Material({'H': 1.0}, density = 1.0),
+                 12: Material({'He': 1.0}, density = 1.0),
+                 13: Material({'Li': 1.0}, density = 1.0),
+                 14: Material({'Be': 1.0}, density = 1.0)}
+
+    cell_fracs[:] = [(0, 11, 0.55, 0.0), (0, 12, 0.45, 0.0), (1, 11, 0.2, 0.0), 
+                     (1, 12, 0.3, 0.0), (1, 13, 0.5, 0.0), (2, 11, 1.0, 0.0), 
+                     (3, 12, 1.0, 0.0)]
+
+    m.cell_fracs_to_mats(cell_fracs, cell_mats)
+
+    #  Expected compositions:
+    exp_comps = [{10000000: 0.55, 20000000: 0.45}, {10000000: 0.2, 20000000: 0.3, 30000000: 0.5},
+                 {10000000: 1.0}, {20000000: 1.0}]
+
+    for i, mat, _ in m:
+        assert_equal(mat.comp, exp_comps[i])
+        assert_equal(mat.density, 1.0)

@@ -12,7 +12,7 @@ except ImportError:
     warnings.warn("the PyTAPS optional dependency could not be imported. "
          "Some aspects of the mesh module may be incomplete.", ImportWarning)
 
-from .material import Material, MaterialLibrary
+from pyne.material import Material, MaterialLibrary, MultiMaterial
 
 
 # dictionary of lamba functions for mesh arithmetic
@@ -1081,6 +1081,48 @@ class Mesh(object):
         """Writes the mesh to an hdf5 file."""
         self.mesh.save(filename)
         self.mats.write_hdf5(filename)
+
+    def cell_fracs_to_mats(self, cell_fracs, cell_mats):
+        """This function uses the output from dagmc.discretize_geom() and 
+        a mapping of geometry cells to materials to assign mixed materials
+        to each mesh volume element.
+
+        Parameters
+        ----------
+        cell_fracs : structured array
+            The output from dagmc.discretize_geom(). A one dimensional array,
+            each entry containing the following fields:
+            :idx: int 
+                The volume element index.
+            :cell: int
+                The geometry cell number.
+            :vol_frac: float
+                The volume fraction of the cell withing the mesh ve.
+            :rel_error: float
+                The relative error associated with the volume fraction.
+        cell_mats : dict
+            Maps geometry cell numbers to Material objects that represent what
+            material each cell is made of.
+        """
+        mats = []
+        num_rows = len(cell_fracs)
+        rc = 0 #  row count
+
+        for i in range(0, len(self)):
+            mat_col = {} #  Collection of materials in the ith ve.
+            while cell_fracs['idx'][rc] == i:
+                mat_col[cell_mats[cell_fracs['cell'][rc]]] \
+                    = cell_fracs['vol_frac'][rc]
+                if rc < num_rows - 1:
+                    rc += 1
+                else:
+                    break
+
+            mixed = MultiMaterial(mat_col)
+            mats.append(mixed.mix_by_volume())
+
+        self.mats = mats
+      
 
 ######################################################
 # private helper functions for structured mesh methods
