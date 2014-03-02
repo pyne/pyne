@@ -1100,25 +1100,17 @@ class Mesh(object):
                 The volume fraction of the cell withing the mesh ve.
             :rel_error: float
                 The relative error associated with the volume fraction.
-            The array must be sorted in respect to both idx and cell, with cell
+            The array must be sorted with respect to both idx and cell, with cell
             changing fastest.
         cell_mats : dict
             Maps geometry cell numbers to Material objects that represent what
             material each cell is made of.
         """
         mats = []
-        num_rows = len(cell_fracs)
-        rc = 0 #  row count
-
-        for i in range(0, len(self)):
+        for i in range(len(self)):
             mat_col = {} #  Collection of materials in the ith ve.
-            while cell_fracs['idx'][rc] == i:
-                mat_col[cell_mats[cell_fracs['cell'][rc]]] \
-                    = cell_fracs['vol_frac'][rc]
-                if rc < num_rows - 1:
-                    rc += 1
-                else:
-                    break
+            for row in cell_fracs[cell_fracs['idx'] == i]:
+                mat_col[cell_mats[row['cell']]] = row['vol_frac']
 
             mixed = MultiMaterial(mat_col)
             mats.append(mixed.mix_by_volume())
