@@ -1,6 +1,6 @@
-
 from pyne import alara
 from pyne.transmute.transmuter import Transmuter
+from pyne.mesh import Mesh
 import uuid
 
 class AlaraTransmuter(Transmuter):
@@ -23,6 +23,54 @@ class AlaraTransmuter(Transmuter):
         super(AlaraTransmuter, self).__init__(t, phi, temp, tol)
         self.element_lib = element_lib
         self.data_lib = data_lib
+
+    def transmute(self, x, t=None, phi=None, tol=None, log=None, *args, 
+                  **kwargs):
+        """Transmutes a material into its daughters.
+
+        Parameters
+        ----------
+        x : Material or similar
+            Input material for transmutation.
+        t : float
+            Transmutations time [sec].
+        phi : float or array of floats
+            Neutron flux vector [n/cm^2/sec].  Currently this must either be 
+            a scalar or match the group structure of EAF.
+        tol : float
+            Tolerance level for chain truncation.
+        element_lib : str
+            Path to element library.
+        data_library : str
+            The data_library card (see ALARA user's guide).
+
+        Returns
+        -------
+        y : Material
+            The output material post-transmutation.
+
+        """
+        if t is not None:
+            self.t = t
+        if phi is nophi None:
+            self.phi = phi
+        if tol is not None:
+            self.tol = tol
+        if element_lib is not None:
+            self.element_lib = element_lib
+        if data_lib is not None:
+            self.data_lib = data_lib
+
+        mesh = Mesh(structured_coords=[[-1,0,1],[-1,0,1],[0,1]], structured=True, 
+                    structured_ordering='zyx', mats={0: x})
+        flux_tag = "flux"
+        tag = mesh.mesh.createTag(flux_tag, 1, float)
+        ve = list(mesh.structure_iterate_hex())[0]
+        tag[ve] = phi
+        transmute_mesh(mesh, flux_tag, t, tol, element_lib, data_lib, args, 
+                       kwargs)
+        y = mesh.mats[0]
+        return y        
 
     def transmute_mesh(self, mesh, flux_tag, t=None, tol=None, element_lib=None, 
                        data_lib=None, *args, **kwargs):
