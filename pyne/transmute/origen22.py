@@ -46,11 +46,11 @@ class OrigenTransmuter(Transmuter):
             eafds.load(temp=temp)
             gs = np.array([eafds.src_group_struct[0], eafds.src_group_struct[-1]])
             eafds.dst_group_struct = gs
-            self.xscache = XSCache(group_struct=gs, 
-                                   data_source_classes=[SimpleDataSource, 
-                                                        NullDataSource])
-            self.xscache.load(temp=temp)
-            self.xscache.data_sources.insert(0, eafds)
+            xscache = XSCache(group_struct=gs, 
+                              data_source_classes=[SimpleDataSource, 
+                                                   NullDataSource])
+            xscache.load(temp=temp)
+            xscache.data_sources.insert(0, eafds)
         super(OrigenTransmuter, self).__init__(t, phi, temp, tol, xscache)
 
         if not isinstance(base_tape9, Mapping):
