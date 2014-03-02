@@ -11,6 +11,7 @@ from libcpp.map cimport map as cpp_map
 from libcpp.set cimport set as cpp_set
 from libcpp.string cimport string as std_string
 from libcpp.utility cimport pair as cpp_pair
+from libc.stdlib cimport free
 #from cython cimport pointer
 
 import numpy as np
@@ -487,8 +488,13 @@ def metastable_id(nuc, level=1):
         Input nuclide
     level : int
         integer metastable state
+
+    Returns
+    -------
+    nuc : int
+        nuc_id of metastable state
     """
-    cpp_data.metastable_id(<int> nuc, <int> level)
+    return cpp_data.metastable_id(<int> nuc, <int> level)
 
 decay_dtype = np.dtype([
     ('parent', int),
@@ -513,6 +519,11 @@ def get_decay_data(from_nuc, to_nuc):
         Parent nuclide.
     to_nuc : int or str 
         Child nuclide.
+        
+    Returns
+    -------
+    arr : np.ndarray
+        Returns decay data associated with the parent daughter pair.
     """
     cdef cpp_data.decay_struct * decay_st
     cpp_data.decay_data_byparentchild(cpp_pair[int, int](from_nuc, to_nuc), decay_st)
@@ -527,6 +538,7 @@ def get_decay_data(from_nuc, to_nuc):
     arr[0]['photon_branch_ratio_err'] = decay_st[0].photon_branch_ratio_error
     arr[0]['beta_branch_ratio'] = decay_st[0].beta_branch_ratio
     arr[0]['beta_branch_ratio_err'] = decay_st[0].beta_branch_ratio_error
+    free(decay_st)
     
     return arr
 
@@ -559,6 +571,11 @@ def get_gammas_by_en(en, pm = 1.0):
         energy in kev
     pm : double
         neighboring region to search in keV
+
+    Returns
+    -------
+    arr : np.ndarray
+        Array of gamma decays in the specified energy range.
     """
 
     cdef cpp_data.gamma_struct * gamma_st
@@ -579,6 +596,7 @@ def get_gammas_by_en(en, pm = 1.0):
         arr[i]['k_conv_e'] = gamma_st[i].k_conv_e
         arr[i]['l_conv_e'] = gamma_st[i].l_conv_e
         arr[i]['l_conv_e'] = gamma_st[i].m_conv_e
+    free(gamma_st)
 
     return arr
 
@@ -590,6 +608,11 @@ def get_gammas_by_parent(id):
     ----------
     id : int
         id of parent nuclide
+
+    Returns
+    -------
+    arr : np.ndarray
+        Array of gamma decays associated with the parent nuclide.
     """
 
     cdef cpp_data.gamma_struct * gamma_st
@@ -610,6 +633,7 @@ def get_gammas_by_parent(id):
         arr[i]['k_conv_e'] = gamma_st[i].k_conv_e
         arr[i]['l_conv_e'] = gamma_st[i].l_conv_e
         arr[i]['l_conv_e'] = gamma_st[i].m_conv_e
+    free(gamma_st)
 
     return arr
 
@@ -631,6 +655,11 @@ def get_alphas_by_en(en, pm = 1.0):
         energy in kev
     pm : double
         neighboring region to search in keV
+        
+    Returns
+    -------
+    arr : np.ndarray
+        Array of alpha decays in the specified energy range.
     """
     
     cdef cpp_data.alpha_struct * alpha_st
@@ -641,6 +670,7 @@ def get_alphas_by_en(en, pm = 1.0):
         arr[i]['intensity'] = alpha_st[i].intensity
         arr[i]['from_nuc'] = alpha_st[i].from_nuc
         arr[i]['to_nuc'] = alpha_st[i].to_nuc
+    free(alpha_st)
     return arr
 
 def get_alphas_by_parent(id):
@@ -651,6 +681,11 @@ def get_alphas_by_parent(id):
     ----------
     id : int
         id of parent nuclide
+        
+    Returns
+    -------
+    arr : np.ndarray
+        Array of alpha decays associated with the parent nuclide.
     """
 
     cdef cpp_data.alpha_struct * alpha_st
@@ -661,6 +696,7 @@ def get_alphas_by_parent(id):
         arr[i]['intensity'] = alpha_st[i].intensity
         arr[i]['from_nuc'] = alpha_st[i].from_nuc
         arr[i]['to_nuc'] = alpha_st[i].to_nuc
+    free(alpha_st)
     return arr
 
 betas_dtype = np.dtype([
@@ -679,6 +715,11 @@ def get_betas_by_parent(id):
     ----------
     id : int
         id of parent nuclide
+    
+    Returns
+    -------
+    arr : np.ndarray
+        Array of beta minus decays associated with the parent nuclide.
     """
     cdef cpp_data.beta_struct * beta_st
     cdef int alen = cpp_data.beta_data_byparent(<int> id, beta_st)
@@ -689,6 +730,7 @@ def get_betas_by_parent(id):
         arr[i]['intensity'] = beta_st[i].intensity
         arr[i]['from_nuc'] = beta_st[i].from_nuc
         arr[i]['to_nuc'] = beta_st[i].to_nuc
+    free(beta_st)
     return arr
 
 ecbp_dtype = np.dtype([
@@ -711,6 +753,12 @@ def get_ecbp_by_parent(id):
     ----------
     id : int
         id of parent nuclide
+    
+    Returns
+    -------
+    arr : np.ndarray
+        Array of electron capture and beta plus decays associated with the 
+        parent nuclide.
     """
     cdef cpp_data.ecbp_struct * ecbp_st
     cdef int alen = cpp_data.ecbp_data_byparent(<int> id, ecbp_st)
@@ -725,6 +773,5 @@ def get_ecbp_by_parent(id):
         arr[i]['k_conv_e'] = ecbp_st[i].k_conv_e
         arr[i]['l_conv_e'] = ecbp_st[i].l_conv_e
         arr[i]['l_conv_e'] = ecbp_st[i].m_conv_e
+    free(ecbp_st)
     return arr
-    
-    

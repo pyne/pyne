@@ -224,7 +224,7 @@ namespace pyne
   /// Mapping from nuclides in id form to its decay children, if any.
   extern std::map<int, std::set<int> > decay_children_map;
 
-  /// a struct matching the '/half_life_decay' table in nuc_data.h5.
+  /// a struct matching the '/decay/half_life_decay' table in nuc_data.h5.
   typedef struct half_life_decay_struct {
     int from_nuc; ///< parent species in id form
     double level; ///< decay level [MeV]
@@ -234,7 +234,7 @@ namespace pyne
     double branch_ratio;  ///< decay branch ratio [fraction]
   } half_life_decay_struct;
 
-  /// Loads the decay data from the nuc_data.h5 file into memory.
+  /// Loads the half life data from the nuc_data.h5 file into memory.
   void _load_half_life_decay();
 
   /// \brief Returns the half life for a nuclide \a nuc.
@@ -294,6 +294,7 @@ namespace pyne
   /// Returns the decay constant for a nuclide \a nuc.
   std::set<int> decay_children(std::string nuc);
 
+  /// Loads the level data from the nuc_data.h5 file into memory.
   void _load_level_data();
 
   /// \brief Returns the nuc_id of a metastable state
@@ -304,17 +305,22 @@ namespace pyne
   /// Assumes the first metastable state is the desired one
   int metastable_id(int nuc);
 
+  /// a struct matching the '/decay/level_list' table in nuc_data.h5.
   typedef struct level_struct{
     int nuc_id;
     double level;
     double half_life;
     int metastable;
   } level_struct;
-  /// \}
+
+  /// Mapping from nuclides in id form to a struct containing data associated
+  /// with that level.
   extern std::map<int, level_struct> level_data;
 
+  /// Loads the decay data from the nuc_data.h5 file into memory.
   void _load_decay_data();
 
+  /// a struct matching the '/decay/decays' table in nuc_data.h5.
   typedef struct decay_struct{
     int parent;
     int daughter;
@@ -328,13 +334,17 @@ namespace pyne
     double beta_branch_ratio_error;
   } decay_struct;
 
+  /// Mapping from a pair of nuclides in id form to a struct containing data
+  /// associated with the decay from the first to the second
   extern std::map<std::pair<int, int>, decay_struct> decay_data;
 
   template<typename T> void decay_data_access(std::pair<int, int> from_to, T &a, size_t valoffset);
   void decay_data_byparentchild(std::pair<int, int> from_to, decay_struct *data);
 
+  /// Loads the gamma ray data from the nuc_data.h5 file into memory.
   void _load_gamma_data();
 
+  /// a struct matching the '/decay/gammas' table in nuc_data.h5.
   typedef struct gamma_struct{
     double energy;
     double energy_err;
@@ -352,13 +362,22 @@ namespace pyne
     double m_conv_e;
   } gamma_struct;
 
+  /// A vector of structs containing gamma ray data for access in memory
   extern std::vector<gamma_struct> gamma_data;
 
+  /// access the alpha data by the energy of the alpha decay. Returns
+  /// information by allocating an array of structs with the data. User is
+  /// responsible for freeing memory when finished.
   int gamma_data_byen(double en, double pm, gamma_struct *data);
+  /// access the beta data by the parent nuclide in id form. Returns
+  /// information by allocating an array of structs with the data. User is
+  /// responsible for freeing memory when finished.
   int gamma_data_byparent(int nuc, gamma_struct *data);
 
+  /// Loads the alpha decay data from the nuc_data.h5 file into memory.
   void _load_alpha_data();
 
+  /// a struct matching the '/decay/alphas' table in nuc_data.h5.
   typedef struct alpha_struct{
     double energy;
     double intensity;
@@ -366,13 +385,22 @@ namespace pyne
     int to_nuc;
   } alpha_struct;
 
+  /// A vector of structs containing alpha data for access in memory
   extern std::vector<alpha_struct> alpha_data;
 
+  /// access the alpha data by the energy of the alpha decay. Returns
+  /// information by allocating an array of structs with the data. User is
+  /// responsible for freeing memory when finished.
   int alpha_data_byen(double en, double pm, alpha_struct *data);
+  /// access the alpha data by the parent nuclide in id form. Returns
+  /// information by allocating an array of structs with the data. User is
+  /// responsible for freeing memory when finished.
   int alpha_data_byparent(int nuc, alpha_struct *data);
 
+  /// Loads the beta decay data from the nuc_data.h5 file into memory.
   void _load_beta_data();
 
+  /// a struct matching the '/decay/betas' table in nuc_data.h5.
   typedef struct beta_struct{
     double endpoint_energy;
     double avg_energy;
@@ -381,12 +409,19 @@ namespace pyne
     int to_nuc;
   } beta_struct;
 
+  /// A vector of structs containing beta data for access in memory
   extern std::vector<beta_struct> beta_data;
 
+  /// access the beta data by the parent nuclide in id form. Returns
+  /// information by allocating an array of structs with the data. User is
+  /// responsible for freeing memory when finished.
   int beta_data_byparent(int nuc, beta_struct *data);
 
+  /// Loads the electron capture and beta plus decay data from the
+  /// nuc_data.h5 file into memory.
   void _load_ecbp_data();
 
+  /// A struct matching the '/decay/ecbp' table in nuc_data.h5.
   typedef struct ecbp_struct{
     double endpoint_energy;
     double avg_energy;
@@ -399,10 +434,14 @@ namespace pyne
     double m_conv_e;
   } ecbp_struct;
 
+  /// A vector of structs containing ecbp data for access in memory
   extern std::vector<ecbp_struct> ecbp_data;
 
+  /// Access the electron capture and beta plus data by the parent nuclide in
+  /// id form. Returns information by allocating an array of structs with
+  /// the data. User is responsible for freeing memory when finished.
   int ecbp_data_byparent(int nuc, ecbp_struct *data);
-
+  /// \}
 }
 
 #endif

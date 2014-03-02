@@ -131,6 +131,27 @@ ecbp_dtype = np.dtype([
 
 def parse_decay(build_dir=""):
     """Builds and returns a list of nuclide decay data.
+    Parameters
+    ----------
+    build_dir : str
+        build_nuc_data directory containing ENSDF folder
+
+    Returns
+    -------
+    half_life_data_array : np.ndarray
+        array of half life data
+    level_list_array : np.ndarray
+        array of level data
+    all_decay_array : np.ndarray
+        array of decay data
+    all_gammas_array : np.ndarray
+        array of gamma ray data
+    all_alphas_array : np.ndarray
+        array of alpha decay data
+    all_betas_array : np.ndarray
+        array of beta decay data
+    all_ecbp_array : np.ndarray
+        array of electron capture and beta plus decay data
     """
     build_dir = os.path.join(build_dir, 'ENSDF')
 
