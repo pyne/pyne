@@ -331,6 +331,7 @@ namespace pyne
   extern std::map<std::pair<int, int>, decay_struct> decay_data;
 
   template<typename T> void decay_data_access(std::pair<int, int> from_to, T &a, size_t valoffset);
+  void decay_data_byparentchild(std::pair<int, int> from_to, decay_struct *data);
 
   void _load_gamma_data();
 

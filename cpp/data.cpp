@@ -1126,6 +1126,25 @@ template<typename T> void pyne::decay_data_access(std::pair<int, int> from_to, T
 }
 
 
+void pyne::decay_data_byparentchild(std::pair<int, int> from_to, decay_struct *data){
+
+  if (decay_data.empty()) {
+    _load_decay_data();
+    decay_data_byparentchild(from_to, data);
+  }
+
+  data = (decay_struct*) malloc(sizeof(decay_struct));
+
+  std::map<std::pair<int, int> , pyne::decay_struct>::iterator nuc_iter, nuc_end;
+
+  nuc_iter = decay_data.find(from_to);
+  nuc_end = decay_data.end();
+
+  if (nuc_iter != nuc_end)
+    data[0] = nuc_iter->second;
+}
+
+
 std::vector<pyne::gamma_struct> pyne::gamma_data;
 
 void pyne::_load_gamma_data()
