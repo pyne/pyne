@@ -2,8 +2,6 @@
 """
 
 import numpy as np
-from pyne.xs.data_source import NullDataSource, EAFDataSource
-from pyne.xs.cache import XSCache
 
 class Transmuter(object):
     def __init__(self, t=0.0, phi=0.0, temp=300.0, tol=1e-7, xscache=None):
@@ -21,17 +19,6 @@ class Transmuter(object):
         xscache : XSCache, optional
             A cross section cache to generate cross sections with.
         """
-        if xscache is None:
-            eafds = EAFDataSource()
-            eafds.load(temp=temp)
-            gs = np.array([eafds.src_group_struct[0], eafds.src_group_struct[-1]])
-            eafds.dst_group_struct = gs
-            self.xscache = XSCache(group_struct=gs, 
-                                   data_source_classes=(NullDataSource,))
-            self.xscache.data_sources.insert(0, eafds)
-        else:
-            self.xscache = xscache
-
         self.t = t
         self._phi = None
         self.phi = phi

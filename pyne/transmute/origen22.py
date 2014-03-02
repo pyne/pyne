@@ -51,7 +51,7 @@ class OrigenTransmuter(Transmuter):
                                                    NullDataSource])
             xscache.load(temp=temp)
             xscache.data_sources.insert(0, eafds)
-        super(OrigenTransmuter, self).__init__(t, phi, temp, tol, xscache)
+        super(OrigenTransmuter, self).__init__(t, phi, temp, tol)
 
         if not isinstance(base_tape9, Mapping):
             base_tape9 = origen22.parse_tape9(tape9=base_tape9)
@@ -111,8 +111,8 @@ class OrigenTransmuter(Transmuter):
 
         # write out files
         origen22.write_tape4(x, outfile=os.path.join(self.cwd, 'TAPE4.INP'))
-        origen22.write_tape5_irradiation('IRF', self.t/86400.0, 
-                                         self.xscache['phi_g'][0], 
+        origen22.write_tape5_irradiation(
+            'IRF', self.t/86400.0, self.xscache['phi_g'][0], 
             outfile=os.path.join(self.cwd, 'TAPE5.INP'), decay_nlb=decay_nlb, 
             xsfpy_nlb=xsfpy_nlb, cut_off=self.tol)
         origen22.write_tape9(t9, outfile=os.path.join(self.cwd, 'TAPE9.INP'))
