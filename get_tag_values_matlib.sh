@@ -110,8 +110,7 @@ def check_matname(tag_values,mat_lib):
 	             
     if len(mat_list) == 0:
 	print("no group names found")
-	exit()    
-                  
+	exit()                      
     print mat_list
     # for the sake of testing, fmat_list >>> fluka materials
     global fmat_list
@@ -120,7 +119,8 @@ def check_matname(tag_values,mat_lib):
     materials_list=[]
     # if name from geom matches name in lib
     # loop over materials in geometry
-    for item in mat_list:
+    for u in range(len(mat_list)):
+       item=mat_list[u]
        # loop over materials in library
        for key in mat_lib.iterkeys():  
            if item == key :
@@ -143,7 +143,7 @@ def check_matname(tag_values,mat_lib):
 	exit()
     # list of pyne material objects
     #print materials_list/
-    #print materials_list
+    print materials_list
     return materials_list
     
 """ 
@@ -169,39 +169,50 @@ def print_near_match(material,material_library):
 function to set the attributes of the materials:
 """
 def set_attrs(mat,number,code):
-    if code == 'mcnp' or 'MCNP' :     
+    if code is 'mcnp' or 'both' :     
         mat.attrs['mat_number']=str(number)
-    if code == 'fluka' or 'FLUKA' :      
-        mattf=mat.attrs['name']
-        matf=''.join(c for c in mattf if c.isalnum())
-        if len(matf) <= 8 :
-            if matf in fmat_list :
-                if number <= 9 :
-                    matf=matf.strip(matf[-1])
-                    matf=matf+str(number)
-                if number >= 9 and number <= 99 :
-                    for i in 2 :
-                        matf=matf.strip(matf[-1])
-                    matf=matf+str(number)
-                fmat_list.append(matf.upper())    
-            else :            
-                fmat_list.append(matf.upper())
-        else :
-            matff=matf[0:8]
-            if matff in fmat_list :
-                if number <= 9 :
-                    matf=matff.strip(matf[-1])
-                    matf=matf+str(number)
-                if number >= 9 and number <= 99 :
-                    for i in 2 :
-                        matf=matff.strip(matf[-1])
-                    matf=matf+str(number)
-                fmat_list.append(matf.upper())    
-            else :            
-                fmat_list.append(matff.upper())
-    return fmat_list 
+    if code == 'fluka' or 'both' :   
+        fluka_material_naming(mat,number)
+    return
      
- 
+
+"""
+Function to prepare fluka material names:
+"""
+def fluka_material_naming(material,number) :
+    matf=material.attrs['name']
+    matf=''.join(c for c in matf if c.isalnum())
+    if len(matf) <= 8 :
+        if matf.upper() in fmat_list :
+            if number <= 9 :
+                matf=matf.rstrip(matf[-1])
+                matf=matf+str(number)
+            if number >= 9 and number <= 99 :
+                for i in range(2) :
+                    matf=matf.rstrip(matf[-1])
+                matf=matf+str(number)
+            fmat_list.append(matf.upper())    
+        else :            
+            fmat_list.append(matf.upper())
+    else :
+        matf=matf[0:8]
+        if matf.upper() in fmat_list :
+            if number <= 9 :
+                matf=matf.rstrip(matf[-1])
+                matf=matf+str(number)
+            if number >= 9 and number <= 99 :
+                for i in 2 :
+                    matf=matf.rstrip(matf[-1])
+                matf=matf+str(number)
+            fmat_list.append(matf.upper())    
+        else :            
+            fmat_list.append(matf.upper())
+    material.attrs['name']=matf.upper()   
+    material.attrs['mat_number']=str(number)
+    return fmat_list
+    return material
+
+
 """
 Function write_mats, writes material objects to hdf5 file
 -------
