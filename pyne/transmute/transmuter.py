@@ -19,12 +19,12 @@ class Transmuter(object):
         xscache : XSCache, optional
             A cross section cache to generate cross sections with.
         """
+        self.xscache = xscache
         self.t = t
         self._phi = None
         self.phi = phi
         self.temp = temp
         self.tol = tol
-        self.xscache = xscache
 
     @property
     def phi(self):
