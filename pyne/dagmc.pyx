@@ -625,6 +625,8 @@ def discretize_geom(mesh, num_rays, grid=False):
             The volume fraction of the cell withing the mesh ve.
         :rel_error: float
             The relative error associated with the volume fraction.
+        This array is returned in sorted order in respect to idx and cell, with
+        cell changing fastest.
     """
     divs = [mesh.structured_get_divisions(x) for x in 'xyz']
     num_ves = (len(divs[0])-1)*(len(divs[1])-1)*(len(divs[2])-1)
