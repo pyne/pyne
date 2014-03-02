@@ -11,9 +11,9 @@ from pyne import rxname
 from pyne import nucname
 from pyne import nuc_data
 from pyne.material import Material, from_atom_frac
-from pyne.xs.channels import sigma_a
 from pyne.xs.data_source import NullDataSource, EAFDataSource
 from pyne.xs.cache import XSCache
+from pyne.xs.channels import sigma_a
 from pyne.transmute.transmuter import Transmuter
 
 class ChainSolveTransmuter(Transmuter):
@@ -41,11 +41,9 @@ class ChainSolveTransmuter(Transmuter):
             eafds.load(temp=temp)
             gs = np.array([eafds.src_group_struct[0], eafds.src_group_struct[-1]])
             eafds.dst_group_struct = gs
-            self.xscache = XSCache(group_struct=gs, 
-                                   data_source_classes=(NullDataSource,))
-            self.xscache.data_sources.insert(0, eafds)
-        else:
-            self.xscache = xscache
+            xscache = XSCache(group_struct=gs, 
+                              data_source_classes=(NullDataSource,))
+            xscache.data_sources.insert(0, eafds)
         super(ChainSolveTransmuter, self).__init__(t, phi, temp, tol, xscache)
 
         self.log = log

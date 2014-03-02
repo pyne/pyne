@@ -4,7 +4,7 @@ from pyne.mesh import Mesh
 import uuid
 
 class AlaraTransmuter(Transmuter):
-    """A class for transmuting materials using a ALARA."""
+    """A class for transmuting materials (possibly on meshes) using ALARA."""
 
     def __init__(self, element_lib, data_lib, t=0.0, phi=0.0, temp=300.0, 
                  tol=1e-7, *args, **kwargs):
@@ -52,7 +52,7 @@ class AlaraTransmuter(Transmuter):
         """
         if t is not None:
             self.t = t
-        if phi is nophi None:
+        if phi is not None:
             self.phi = phi
         if tol is not None:
             self.tol = tol
@@ -65,10 +65,10 @@ class AlaraTransmuter(Transmuter):
                     structured_ordering='zyx', mats={0: x})
         flux_tag = "flux"
         tag = mesh.mesh.createTag(flux_tag, 1, float)
-        ve = list(mesh.structure_iterate_hex())[0]
+        ve = list(mesh.structured_iterate_hex())[0]
         tag[ve] = phi
-        transmute_mesh(mesh, flux_tag, t, tol, element_lib, data_lib, args, 
-                       kwargs)
+        self.transmute_mesh(mesh, flux_tag, t, tol, element_lib, data_lib, args, 
+                            kwargs)
         y = mesh.mats[0]
         return y        
 

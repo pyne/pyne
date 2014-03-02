@@ -24,6 +24,7 @@ class Transmuter(object):
         self.phi = phi
         self.temp = temp
         self.tol = tol
+        self.xscache = xscache
 
     @property
     def phi(self):
