@@ -353,8 +353,8 @@ namespace pyne
 
   extern std::vector<gamma_struct> gamma_data;
 
-  void gamma_data_byen(double en, double pm, gamma_struct *data);
-  void gamma_data_byparent(int nuc, gamma_struct *data);
+  int gamma_data_byen(double en, double pm, gamma_struct *data);
+  int gamma_data_byparent(int nuc, gamma_struct *data);
 
   void _load_alpha_data();
 
@@ -367,8 +367,8 @@ namespace pyne
 
   extern std::vector<alpha_struct> alpha_data;
 
-  void alpha_data_byen(double en, double pm, alpha_struct *data);
-  void alpha_data_byparent(int nuc, alpha_struct *data);
+  int alpha_data_byen(double en, double pm, alpha_struct *data);
+  int alpha_data_byparent(int nuc, alpha_struct *data);
 
   void _load_beta_data();
 
@@ -382,7 +382,7 @@ namespace pyne
 
   extern std::vector<beta_struct> beta_data;
 
-  void beta_data_byparent(int nuc, beta_struct *data);
+  int beta_data_byparent(int nuc, beta_struct *data);
 
   void _load_ecbp_data();
 
@@ -400,7 +400,7 @@ namespace pyne
 
   extern std::vector<ecbp_struct> ecbp_data;
 
-  void ecbp_data_byparent(int nuc, ecbp_struct *data);
+  int ecbp_data_byparent(int nuc, ecbp_struct *data);
 
 }
 

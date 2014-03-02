@@ -83,18 +83,43 @@ cdef extern from "data.h" namespace "pyne":
     int metastable_id(int, int) except +
     int metastable_id(int) except +
 
-    void decay_data_access[T](pair[int, int], T, size_t) except +
+    ctypedef struct decay_struct:
+        int parent
+        int daughter
+        char decay[5]
+        double half_life
+        double half_life_error
+        double branch_ratio
+        double photon_branch_ratio
+        double photon_branch_ratio_error
+        double beta_branch_ratio
+        double beta_branch_ratio_error
 
-    struct gamma_struct
-    void gamma_data_byen(double, double, gamma_struct *) except +
-    void gamma_data_byparent(int, gamma_struct *) except +
+    ctypedef struct gamma_struct:
+        double energy
+        double energy_err
+        double photon_intensity
+        double photon_intensity_err
+        double conv_intensity
+        double conv_intensity_err
+        double total_intensity
+        double total_intensity_err
+        int from_nuc
+        int to_nuc
+        int parent_nuc
+        double k_conv_e
+        double l_conv_e
+        double m_conv_e
+
+    int gamma_data_byen(double, double, gamma_struct *) except +
+    int gamma_data_byparent(int, gamma_struct *) except +
 
     struct alpha_struct
-    void alpha_data_byen(double, double, alpha_struct *) except +
-    void alpha_data_byparent(int, alpha_struct *) except +
+    int alpha_data_byen(double, double, alpha_struct *) except +
+    int alpha_data_byparent(int, alpha_struct *) except +
 
     struct beta_struct
-    void beta_data_byparent(int, beta_struct *) except +
+    int beta_data_byparent(int, beta_struct *) except +
 
     struct ecbp_struct
-    void ecbp_data_byparent(int, ecbp_struct *) except +
+    int ecbp_data_byparent(int, ecbp_struct *) except +

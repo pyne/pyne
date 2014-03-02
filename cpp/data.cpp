@@ -1186,13 +1186,13 @@ void pyne::_load_gamma_data()
 }
 
 
-void pyne::gamma_data_byparent(int nuc, gamma_struct *data){
+int pyne::gamma_data_byparent(int nuc, gamma_struct *data){
+  int count = 0;
   if (gamma_data.empty()) {
     _load_gamma_data();
-    gamma_data_byparent(nuc, data);
-    return;
+    count = gamma_data_byparent(nuc, data);
+    return count;
   }
-  int count = 0;
   for (int i = 0; i < gamma_data.size(); ++i) {
     if (gamma_data[i].parent_nuc == nuc) ++count;
   }
@@ -1202,16 +1202,16 @@ void pyne::gamma_data_byparent(int nuc, gamma_struct *data){
     if (gamma_data[i].from_nuc == nuc)
       data[i] = gamma_data[i];
   }
-
+  return count;
 }
 
-void pyne::gamma_data_byen(double en, double pm, gamma_struct *data){
+int pyne::gamma_data_byen(double en, double pm, gamma_struct *data){
+  int count = 0;
   if (gamma_data.empty()) {
     _load_gamma_data();
-    gamma_data_byen(en, pm, data);
-    return;
+    count = gamma_data_byen(en, pm, data);
+    return count;
   }
-  int count = 0;
   for (int i = 0; i < gamma_data.size(); ++i) {
     if ((en + pm > gamma_data[i].energy) && (gamma_data[i].energy > en - pm)) ++count;
   }
@@ -1221,7 +1221,7 @@ void pyne::gamma_data_byen(double en, double pm, gamma_struct *data){
     if ((en + pm > gamma_data[i].energy) && (gamma_data[i].energy > en - pm))
       data[i] = gamma_data[i];
   }
-
+  return count;
 }
 
 
@@ -1273,13 +1273,13 @@ void pyne::_load_alpha_data()
 
 }
 
-void pyne::alpha_data_byparent(int nuc, alpha_struct *data){
+int pyne::alpha_data_byparent(int nuc, alpha_struct *data){
+  int count = 0;
   if (alpha_data.empty()) {
     _load_alpha_data();
-    alpha_data_byparent(nuc, data);
-    return;
+    count = alpha_data_byparent(nuc, data);
+    return count;
   }
-  int count = 0;
   for (int i = 0; i < alpha_data.size(); ++i) {
     if (alpha_data[i].from_nuc == nuc) ++count;
   }
@@ -1289,16 +1289,16 @@ void pyne::alpha_data_byparent(int nuc, alpha_struct *data){
     if (alpha_data[i].from_nuc == nuc)
       data[i] = alpha_data[i];
   }
-
+  return count;
 }
 
-void pyne::alpha_data_byen(double en, double pm, alpha_struct *data){
+int pyne::alpha_data_byen(double en, double pm, alpha_struct *data){
+  int count = 0;
   if (alpha_data.empty()) {
     _load_alpha_data();
-    alpha_data_byen(en, pm, data);
-    return;
+    count = alpha_data_byen(en, pm, data);
+    return count;
   }
-  int count = 0;
   for (int i = 0; i < alpha_data.size(); ++i) {
     if ((en + pm > alpha_data[i].energy) && (alpha_data[i].energy > en - pm)) ++count;
   }
@@ -1308,7 +1308,7 @@ void pyne::alpha_data_byen(double en, double pm, alpha_struct *data){
     if ((en + pm > alpha_data[i].energy) && (alpha_data[i].energy > en - pm))
       data[i] = alpha_data[i];
   }
-
+  return count;
 }
 
 
@@ -1363,13 +1363,13 @@ void pyne::_load_beta_data()
 }
 
 
-void pyne::beta_data_byparent(int nuc, beta_struct *data){
+int pyne::beta_data_byparent(int nuc, beta_struct *data){
+  int count = 0;
   if (beta_data.empty()) {
     _load_beta_data();
-    beta_data_byparent(nuc, data);
-    return;
+    count = beta_data_byparent(nuc, data);
+    return count;
   }
-  int count = 0;
   for (int i = 0; i < beta_data.size(); ++i) {
     if (beta_data[i].from_nuc == nuc) ++count;
   }
@@ -1379,7 +1379,7 @@ void pyne::beta_data_byparent(int nuc, beta_struct *data){
     if (beta_data[i].from_nuc == nuc)
       data[i] = beta_data[i];
   }
-
+  return count;
 }
 
 
@@ -1437,13 +1437,13 @@ void pyne::_load_ecbp_data()
 }
 
 
-void pyne::ecbp_data_byparent(int nuc, ecbp_struct *data){
+int pyne::ecbp_data_byparent(int nuc, ecbp_struct *data){
+  int count = 0;
   if (ecbp_data.empty()) {
     _load_ecbp_data();
-    ecbp_data_byparent(nuc, data);
-    return;
+    count = ecbp_data_byparent(nuc, data);
+    return count;
   }
-  int count = 0;
   for (int i = 0; i < ecbp_data.size(); ++i) {
     if (ecbp_data[i].from_nuc == nuc) ++count;
   }
@@ -1453,5 +1453,5 @@ void pyne::ecbp_data_byparent(int nuc, ecbp_struct *data){
     if (ecbp_data[i].from_nuc == nuc)
       data[i] = ecbp_data[i];
   }
-
+  return count;
 }

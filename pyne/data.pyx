@@ -13,6 +13,9 @@ from libcpp.string cimport string as std_string
 from libcpp.utility cimport pair as cpp_pair
 #from cython cimport pointer
 
+import numpy as np
+cimport numpy as np
+
 # local imports 
 cimport extra_types
 
@@ -473,3 +476,110 @@ def decay_children(nuc):
         raise pyne.nucname.NucTypeError(nuc)
 
     return dc
+
+def metastable_id(nuc, level=1):
+    """
+    return the nuc_id of a metastable state
+
+    Parameters
+    ----------
+    nuc : int
+        Input nuclide
+    level : int
+        integer metastable state
+    """
+    cpp_data.metastable_id(<int> nuc, <int> level)
+
+
+gammas_dtype = np.dtype([
+    ('energy', float),
+    ('energy_err', float),
+    ('photon_intensity', float),
+    ('photon_intensity_err', float),
+    ('conv_intensity', float),
+    ('conv_intensity_err', float),
+    ('total_intensity', float),
+    ('total_intensity_err', float),
+    ('from_nuc', int),
+    ('to_nuc', int),
+    ('parent_nuc', int),
+    ('k_conv_e', float),
+    ('l_conv_e', float),
+    ('m_conv_e', float),
+    ])
+
+
+def get_gammas_by_en(en, pm = 1.0):
+    """
+    return a list of gamma rays with energies between en + pm and en - pm
+
+    Parameters
+    ----------
+    en : double
+        energy in kev
+    pm : double
+        neighboring region to search in keV
+    """
+
+    cdef cpp_data.gamma_struct * gamma_st
+    len = cpp_data.gamma_data_byen(<double> en, <double> pm, gamma_st)
+    cdef np.ndarray arr = np.require(np.ndarray(len,dtype=gammas_dtype),requirements=['C','A'])
+    for i in range(len):
+        arr[i]['energy'] = gamma_st[i].energy
+        arr[i]['energy_err'] = gamma_st[i].energy_err
+        arr[i]['photon_intensity'] = gamma_st[i].photon_intensity
+        arr[i]['photon_intensity_err'] = gamma_st[i].photon_intensity_err
+        arr[i]['conv_intensity'] = gamma_st[i].conv_intensity
+        arr[i]['conv_intensity_err'] = gamma_st[i].conv_intensity_err
+        arr[i]['total_intensity'] = gamma_st[i].total_intensity
+        arr[i]['total_intensity_err'] = gamma_st[i].total_intensity_err
+        arr[i]['from_nuc'] = gamma_st[i].from_nuc
+        arr[i]['to_nuc'] = gamma_st[i].to_nuc
+        arr[i]['parent_nuc'] = gamma_st[i].parent_nuc
+        arr[i]['k_conv_e'] = gamma_st[i].k_conv_e
+        arr[i]['l_conv_e'] = gamma_st[i].l_conv_e
+        arr[i]['l_conv_e'] = gamma_st[i].m_conv_e
+
+    return arr
+
+def get_gammas_by_parent(id):
+    """
+    return a list of gamma rays with a given parent
+
+    Parameters
+    ----------
+    id : int
+        id of parent nuclide
+    """
+
+    cdef cpp_data.gamma_struct * gamma_st
+    cpp_data.gamma_data_byparent(<int> id, gamma_st)
+
+
+def get_alphas_by_en(en, pm = 1.0):
+    """
+    return a list of alpha rays with energies between en + pm and en - pm
+
+    Parameters
+    ----------
+    en : double
+        energy in kev
+    pm : double
+        neighboring region to search in keV
+    """
+
+    cdef cpp_data.alpha_struct * alpha_st
+    cpp_data.alpha_data_byen(<double> en, <double> pm, alpha_st)
+
+def get_alphas_by_parent(id):
+    """
+    return a list of alpha rays with a given parent
+
+    Parameters
+    ----------
+    id : int
+        id of parent nuclide
+    """
+
+    cdef cpp_data.alpha_struct * alpha_st
+    cpp_data.alpha_data_byparent(<int> id, alpha_st)
