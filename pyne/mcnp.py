@@ -858,8 +858,8 @@ class Xsdir(object):
         valid_nucs : set
             The valid nuclide ids.
         """
-        valid_nucs = set(nucname.id(table.ziad()) for table in self.tables if
-                         nucname.isnuclide(table.ziad()))
+        valid_nucs = set(nucname.id(table.name.split('.')[0]) for table in self.tables if
+                         nucname.isnuclide(table.name.split('.')[0]))
         return valid_nucs
 
 
@@ -951,7 +951,7 @@ class XsdirTable(object):
             return 0
 
         # All other cases
-        A = int(self.zaid) % 1000
+        A = int(self.name.split('.')[0]) % 1000
         if A > 600:
             return 1
         else:
