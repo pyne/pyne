@@ -247,14 +247,14 @@ def parsing(parsescript) :
        print('output file format is not specified!!. [-c] is not set') 
        exit()
     if args.output :
-       global output
        output=args.output
     else :
-       global output
        output='output.h5m'
 
+    return output
+
 #parse the script
-parsing(1)            
+output = parsing(1)            
 
 # get list of tag values
 tag_values = get_tag_values(datafile)
