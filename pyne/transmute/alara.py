@@ -82,9 +82,9 @@ class AlaraTransmuter(Transmuter):
             Transmutations time [sec].
         tol : float
             Tolerance level for chain truncation.
-        mesh :
+        mesh : PyNE mesh object
             The mesh to be transmuted
-        flux_tag :
+        flux_tag : str
             The name of the tag related to flux on the mesh
         element_lib : str
             Path to element library.
