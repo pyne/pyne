@@ -63,7 +63,6 @@ def get_tag_values(filename):
     print('The matrials group names found in the h5m file are: ')
     print tag_values
 
-
 """
 function which loads pyne material library
 """
@@ -75,7 +74,6 @@ def load_mat_lib(filename):
     mat_lib.from_hdf5(filename,datapath="/material_library/materials",nucpath="/material_library/nucid")
    # print mat_lib.keys()
     
-
 """
 function to check that materials exist in library
 -------------------------------------------------
@@ -106,8 +104,7 @@ def check_matname(tag_values,mat_lib):
                        mat_name=matname.split(':')
                        mat_list.append(mat_name[1])         
                   except:
-                       print("Could not find group name in approaprite format"), tag
-	             
+                       print("Could not find group name in approaprite format"), tag	             
     if len(mat_list) == 0:
 	print("no group names found")
 	exit()                      
@@ -130,13 +127,14 @@ def check_matname(tag_values,mat_lib):
                 # set the mcnp material number
                 set_attrs(new_mat,d, code)
                 materials_list.append(new_mat)
+                print new_mat
+                print materials_list
                 break
            if mat_lib.keys().index(key) == len(mat_lib.keys())-1:	
                 print('material {%s} doesn''t exist in pyne material lib' %item)
                 print_near_match(item,mat_lib)
                 exit()
-    print fmat_list
-    
+    print fmat_list   
     # check that there are as many materials as there are groups
     if d != len(mat_list):
 	print "There are insuficient materials"
@@ -175,7 +173,6 @@ def set_attrs(mat,number,code):
         fluka_material_naming(mat,number)
     return
      
-
 """
 Function to prepare fluka material names:
 """
@@ -212,7 +209,6 @@ def fluka_material_naming(material,number) :
     return fmat_list
     return material
 
-
 """
 Function write_mats, writes material objects to hdf5 file
 -------
@@ -222,7 +218,6 @@ filename: filename to write the objects to
 def write_mats_h5m(material_list,filename):
     for material in material_list:
 	material.write_hdf5(filename)
-
 
 """
 function to parse the script, adding options:
@@ -263,7 +258,6 @@ def parsing(parsescript) :
        global output
        output='output.h5m'
 
-
 #parse the script
 parsing(1)            
 # get list of tag valuesaz
@@ -275,5 +269,4 @@ load_mat_lib(nuc_data)
 material_list=check_matname(tag_values,mat_lib)
 # write materials to file
 write_mats_h5m(material_list,output)
-
 exit()
