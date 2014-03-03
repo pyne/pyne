@@ -704,8 +704,36 @@ class Runtpe(_BinaryReader):
 
 
 class Xsdir(object):
+    """This class stores the information contained in a single MCNP xsdir file.
+
+    Attributes
+    ----------
+    f : file handle
+        The xsdir file.
+    filename : str
+        Path to the xsdir file.
+    directory : str
+        Path to the directory containing the xsdir file.
+    datapath : str
+        The data path specified in the first line of the xsdir file, if it
+        exists.
+    awr : dict
+        Maps material ids to their atomic weight ratios.
+    tables : list
+        Entries are XsdirTable objects, that appear in the same order as the
+        xsdir table lines.
+
+    Notes
+    -----
+    See MCNP5 User's Guide Volume 3 Appendix K for more information.
+    """
 
     def __init__(self, filename):
+        """Parameters
+        ----------
+        filename : str
+            Path to xsdir file.
+        """
         self.f = open(filename, 'r')
         self.filename = os.path.abspath(filename)
         self.directory = os.path.dirname(filename)
@@ -715,6 +743,8 @@ class Xsdir(object):
         self.read()
 
     def read(self):
+        """Populate the Xsdir object by reading the file.
+        """
         # Go to beginning of file
         self.f.seek(0)
 
@@ -783,6 +813,18 @@ class Xsdir(object):
                 table.ptable = (words[10] == 'ptable')
 
     def find_table(self, name):
+        """Find all tables for a given ZIAD.
+        
+        Parameters
+        ----------
+        name : str
+            The ZIAD name.
+ 
+        Returns
+        -------
+        tables : list
+            All XsdirTable objects for a given ZIAD.
+        """
         tables = []
         for table in self:
             if name in table.name:
@@ -790,6 +832,13 @@ class Xsdir(object):
         return tables
 
     def to_xsdata(self, filename):
+        """Writes a Serpent xsdata file for all continuous energy xs tables.
+
+        Parameters
+        ---------
+        filename : str
+            The output filename.
+        """
         xsdata = open(filename, 'w')
         for table in self.tables:
             if table.serpent_type == 1:
@@ -809,13 +858,47 @@ class Xsdir(object):
         valid_nucs : set
             The valid nuclide ids.
         """
-         
-        valid_nucs = set(nucname.id(nuc) for nuc in self.awr.keys() 
-                   if nucname.isnuclide(nuc))
+        valid_nucs = set(nucname.id(table.name.split('.')[0]) for table in self.tables if
+                         nucname.isnuclide(table.name.split('.')[0]))
         return valid_nucs
 
 
 class XsdirTable(object):
+    """Stores all information that describes a xsdir table entry, which appears
+    as a single line in xsdir file. Attribute names are based off of those found in
+    the MCNP5 User's Guide Volume 3, appendix K.
+
+    Attributes
+    ----------
+    name : str
+        The ZAID and library identifier, delimited by a '.'.
+    awr : float
+        The atomic mass ratio of the nuclide.
+    filename : str
+        The relative path of the file containing the xs table.
+    access : str
+       Additional string to specify an access route, such as UNIX directory.
+       This entry is typically 0.
+    filetype : int
+        Describes whether the file contains formated (1) or unformated (2)
+        file.
+    address : int
+        If filetype is 1, address is the line number of the xsdir table. If
+        filetype is 2, address is the record number.
+    tablelength : int
+        Length of the second block of a data table.
+    recordlength : int
+        Unused for filetype = 1. For filetype = 2, recordlength is the number
+        of entires per record times the size (in bytes) of each entry.
+    entries : int
+        Unused for filetype = 1. For filetype = 2, it is the number of entries
+        per record
+    temperature : float
+        Temperature in MeV for neutron data only.
+    ptable : bool
+        True if xs table describes continuous energy neutron data with
+        unresolved resonance range probability tables.
+    """
 
     def __init__(self):
         self.name = None
@@ -832,10 +915,17 @@ class XsdirTable(object):
 
     @property
     def alias(self):
+        """Returns the name of the table entry <ZIAD>.<library id>.
+        """
         return self.name
 
     @property
     def serpent_type(self):
+        """Converts cross section table type to Serpent format:
+            :1: continuous energy (c).
+            :2: dosimetry table (y).
+            :3: termal (t).
+        """
         if self.name.endswith('c'):
             return 1
         elif self.name.endswith('y'):
@@ -847,6 +937,9 @@ class XsdirTable(object):
 
     @property
     def metastable(self):
+        """Returns 1 is xsdir table nuclide is metastable. Returns zero
+        otherwise.
+        """
         # Only valid for neutron cross-sections
         if not self.name.endswith('c'):
             return
@@ -858,7 +951,7 @@ class XsdirTable(object):
             return 0
 
         # All other cases
-        A = int(self.zaid) % 1000
+        A = int(self.name.split('.')[0]) % 1000
         if A > 600:
             return 1
         else:
@@ -866,9 +959,18 @@ class XsdirTable(object):
 
     @property
     def zaid(self):
+        """Returns the ZIAD of the nuclide.
+        """
         return self.name[:self.name.find('.')]
 
     def to_serpent(self, directory=''):
+        """Converts table to serpent format.
+
+        Parameters
+        ----------
+        directory : str
+            The directory where Serpent data is to be stored.
+        """
         # Adjust directory
         if directory:
             if not directory.endswith('/'):
