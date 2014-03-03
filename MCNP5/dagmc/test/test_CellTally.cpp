@@ -1,7 +1,5 @@
 // MCNP5/dagmc/test/test_CellTally.cpp
 
-#include <cmath>
-
 #include "gtest/gtest.h"
 
 #include "moab/CartVect.hpp"
@@ -48,7 +46,8 @@ class CellTallyTest : public ::testing::Test
     {
         delete cell_tally1;
         delete cell_tally2;
-        delete cell_tally3; }
+        delete cell_tally3;
+    }
 
   protected:
     // data needed for each test
@@ -58,6 +57,8 @@ class CellTallyTest : public ::testing::Test
     CellTally* cell_tally3;
 
 };
+//---------------------------------------------------------------------------//
+// SIMPLE TESTS
 //---------------------------------------------------------------------------//
 // Test parsing of an invalid cell id
 TEST(CellTallyInputTest, InvalidCellID)
@@ -96,7 +97,6 @@ TEST(CellTallyInputTest, InvalidCellVolume)
     EXPECT_NO_THROW(cell_tally = new CellTally(input, TallyEvent::NONE));
 }
 //---------------------------------------------------------------------------//
-//---------------------------------------------------------------------------//
 // FIXTURE-BASED TESTS: CellTallyTest
 //---------------------------------------------------------------------------//
 // Test that cell_id mismatch results in no score being computed
@@ -114,7 +114,6 @@ TEST_F(CellTallyTest, NotInCell)
     EXPECT_DOUBLE_EQ(0.0, result.first);
     EXPECT_DOUBLE_EQ(0.0, result.second);
     EXPECT_EQ(1, cell_tally1->get_cell_id());
-
     
     // Collision-based tally
     EXPECT_NO_THROW(cell_tally2->compute_score(event)); 
@@ -125,7 +124,6 @@ TEST_F(CellTallyTest, NotInCell)
     EXPECT_DOUBLE_EQ(0.0, result.first);
     EXPECT_DOUBLE_EQ(0.0, result.second);
     EXPECT_EQ(10, cell_tally2->get_cell_id());
-
     
     // Track-based tally
     EXPECT_NO_THROW(cell_tally3->compute_score(event)); 
@@ -136,7 +134,6 @@ TEST_F(CellTallyTest, NotInCell)
     EXPECT_DOUBLE_EQ(0.0, result.first);
     EXPECT_DOUBLE_EQ(0.0, result.second);
     EXPECT_EQ(45, cell_tally3->get_cell_id());
-
 }
 //---------------------------------------------------------------------------//
 // Test the case of a match between the current_cell and the cell_id
@@ -158,7 +155,6 @@ TEST_F(CellTallyTest, InCell)
     EXPECT_DOUBLE_EQ(0.0, result.second);
     EXPECT_EQ(1, cell_tally1->get_cell_id());
 
-    
     // Collision-based tally
     event.type         = TallyEvent::COLLISION;
     event.current_cell = 10;
@@ -174,7 +170,6 @@ TEST_F(CellTallyTest, InCell)
     EXPECT_NEAR(0.123457, result.first, 1e-6);
     EXPECT_NEAR(0.015242, result.second, 1e-6); 
     EXPECT_EQ(10, cell_tally2->get_cell_id());
-
     
     // Track-based tally
     event.type         = TallyEvent::TRACK;
@@ -190,7 +185,6 @@ TEST_F(CellTallyTest, InCell)
     EXPECT_DOUBLE_EQ(62.41, result.second);
     EXPECT_EQ(45, cell_tally3->get_cell_id());
 }
-
 //---------------------------------------------------------------------------//
 // Test the response to different event types
 //---------------------------------------------------------------------------//
@@ -232,6 +226,7 @@ TEST_F(CellTallyTest,NullEventScore)
     EXPECT_DOUBLE_EQ(0.0,  result.first);
     EXPECT_DOUBLE_EQ(0.0, result.second);
 }
+//---------------------------------------------------------------------------//
 // Test TallyEvent::COLLISION
 TEST_F(CellTallyTest,CollisionEventScore) 
 {
@@ -273,11 +268,11 @@ TEST_F(CellTallyTest,CollisionEventScore)
     result = data3.get_data(0,0);
     EXPECT_DOUBLE_EQ(0.0,  result.first);
     EXPECT_DOUBLE_EQ(0.0, result.second);
-} 
+}
+//---------------------------------------------------------------------------//
 // Test TallyEvent::TRACK
 TEST_F(CellTallyTest,TrackEventScore) 
 {
-
     TallyEvent event;
     event.type             = TallyEvent::TRACK;
     event.particle_weight  = 1.0;
@@ -317,5 +312,6 @@ TEST_F(CellTallyTest,TrackEventScore)
     EXPECT_DOUBLE_EQ(2.8,  result.first);
     EXPECT_DOUBLE_EQ(7.84, result.second);
 } 
+//---------------------------------------------------------------------------//
 
 // end of MCNP5/dagmc/test/test_CellTally.cpp

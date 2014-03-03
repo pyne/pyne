@@ -77,7 +77,7 @@ struct TallyEvent
     {
         int size = multipliers.size();
 
-        if (multiplier_index == -1 || multiplier_index >= size)
+        if (multiplier_index <= -1 || multiplier_index >= size)
         {
             return particle_weight;
         }
