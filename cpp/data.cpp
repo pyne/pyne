@@ -1216,10 +1216,12 @@ int pyne::gamma_data_byparent(int nuc, gamma_struct *data){
     if (gamma_data[i].parent_nuc == nuc) ++count;
   }
   data = (gamma_struct*) malloc(sizeof(gamma_struct)*count);
-
+  int n = 0;
   for (int i = 0; i < gamma_data.size(); ++i) {
-    if (gamma_data[i].from_nuc == nuc)
-      data[i] = gamma_data[i];
+    if (gamma_data[i].parent_nuc == nuc) {
+      data[n] = gamma_data[i];
+      ++n;
+    }
   }
   return count;
 }
@@ -1235,10 +1237,12 @@ int pyne::gamma_data_byen(double en, double pm, gamma_struct *data){
     if ((en + pm > gamma_data[i].energy) && (gamma_data[i].energy > en - pm)) ++count;
   }
   data = (gamma_struct*) malloc(sizeof(gamma_struct)*count);
-
+  int n = 0;
   for (int i = 0; i < gamma_data.size(); ++i) {
-    if ((en + pm > gamma_data[i].energy) && (gamma_data[i].energy > en - pm))
-      data[i] = gamma_data[i];
+    if ((en + pm > gamma_data[i].energy) && (gamma_data[i].energy > en - pm)) {
+      data[n] = gamma_data[i];
+      ++n;
+    }
   }
   return count;
 }
@@ -1303,10 +1307,12 @@ int pyne::alpha_data_byparent(int nuc, alpha_struct *data){
     if (alpha_data[i].from_nuc == nuc) ++count;
   }
   data = (alpha_struct*) malloc(sizeof(alpha_struct)*count);
-
+  int n = 0;
   for (int i = 0; i < alpha_data.size(); ++i) {
-    if (alpha_data[i].from_nuc == nuc)
-      data[i] = alpha_data[i];
+    if (alpha_data[i].from_nuc == nuc) {
+      data[n] = alpha_data[i];
+      ++n;
+    }
   }
   return count;
 }
@@ -1322,10 +1328,12 @@ int pyne::alpha_data_byen(double en, double pm, alpha_struct *data){
     if ((en + pm > alpha_data[i].energy) && (alpha_data[i].energy > en - pm)) ++count;
   }
   data = (alpha_struct*) malloc(sizeof(alpha_struct)*count);
-
+  int n = 0;
   for (int i = 0; i < alpha_data.size(); ++i) {
-    if ((en + pm > alpha_data[i].energy) && (alpha_data[i].energy > en - pm))
-      data[i] = alpha_data[i];
+    if ((en + pm > alpha_data[i].energy) && (alpha_data[i].energy > en - pm)) {
+      data[n] = alpha_data[i];
+      ++n;
+    }
   }
   return count;
 }
@@ -1393,10 +1401,12 @@ int pyne::beta_data_byparent(int nuc, beta_struct *data){
     if (beta_data[i].from_nuc == nuc) ++count;
   }
   data = (beta_struct*) malloc(sizeof(beta_struct)*count);
-
+  int n = 0;
   for (int i = 0; i < beta_data.size(); ++i) {
-    if (beta_data[i].from_nuc == nuc)
-      data[i] = beta_data[i];
+    if (beta_data[i].from_nuc == nuc) {
+      data[n] = beta_data[i];
+      ++n;
+    }
   }
   return count;
 }
@@ -1467,10 +1477,12 @@ int pyne::ecbp_data_byparent(int nuc, ecbp_struct *data){
     if (ecbp_data[i].from_nuc == nuc) ++count;
   }
   data = (ecbp_struct*) malloc(sizeof(ecbp_struct)*count);
-
+  int n = 0;
   for (int i = 0; i < ecbp_data.size(); ++i) {
-    if (ecbp_data[i].from_nuc == nuc)
-      data[i] = ecbp_data[i];
+    if (ecbp_data[i].from_nuc == nuc) {
+      data[n] = ecbp_data[i];
+      ++n;
+    }
   }
   return count;
 }

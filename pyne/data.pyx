@@ -618,6 +618,7 @@ def get_gammas_by_parent(id):
     cdef cpp_data.gamma_struct * gamma_st
     cdef int alen = cpp_data.gamma_data_byparent(<int> id, gamma_st)
     cdef np.ndarray arr = np.ndarray(alen,dtype=gammas_dtype)
+    print gamma_st[0].energy
     for i in range(alen):
         arr[i]['energy'] = gamma_st[i].energy
         arr[i]['energy_err'] = gamma_st[i].energy_err
