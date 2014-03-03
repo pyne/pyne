@@ -61,7 +61,7 @@ class AlaraTransmuter(Transmuter):
         if data_lib is not None:
             self.data_lib = data_lib
 
-        mesh = Mesh(structured_coords=[[-1,0,1],[-1,0,1],[0,1]], structured=True, 
+        mesh = Mesh(structured_coords=[[0,1], [0,1], [0,1]], structured=True, 
                     structured_ordering='zyx', mats={0: x})
         flux_tag = "flux"
         tag = mesh.mesh.createTag(flux_tag, 1, float)
