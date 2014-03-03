@@ -7,13 +7,15 @@ class AlaraTransmuter(Transmuter):
     """A class for transmuting materials (possibly on meshes) using ALARA."""
 
     def __init__(self, element_lib, data_lib, t=0.0, phi=0.0, temp=300.0, 
-                 tol=1e-7, *args, **kwargs):
+                 tol=1e-7, irr_blocks=None, *args, **kwargs):
         """Parameters
         ----------
         element_lib : str
             Path to element library.
         data_library : str
             The data_library card (see ALARA user's guide).
+        irr_blocks : str, optional
+            Irradition-related ALARA input blocks.
         args : tuple, optional
             Other arguments ignored for compatibility with other Transmuters.
         kwargs : dict, optional
@@ -23,44 +25,40 @@ class AlaraTransmuter(Transmuter):
         super(AlaraTransmuter, self).__init__(t, phi, temp, tol)
         self.element_lib = element_lib
         self.data_lib = data_lib
+        self.irr_blocks = irr_blocks
 
-    def transmute(self, x, t=None, phi=None, tol=None, log=None, *args, 
-                  **kwargs):
+    def transmute(self, x, t=None, phi=None, tol=None, element_lib=None, 
+                  data_lib=None, irr_blocks = None, *args, **kwargs):
         """Transmutes a material into its daughters.
 
         Parameters
         ----------
         x : Material or similar
             Input material for transmutation.
-        t : float
+        t : float, optional
             Transmutations time [sec].
-        phi : float or array of floats
+        phi : float or array of floats, optional
             Neutron flux vector [n/cm^2/sec].  Currently this must either be 
             a scalar or match the group structure of EAF.
-        tol : float
+        tol : float, optional
             Tolerance level for chain truncation.
-        element_lib : str
+        element_lib : str, optional
             Path to element library.
-        data_library : str
+        data_library : str, optional
             The data_library card (see ALARA user's guide).
+        irr_blocks : str, optional
+            Irradition-related ALARA input blocks.
+        args : tuple, optional
+            Other arguments ignored for compatibility with other Transmuters.
+        kwargs : dict, optional
+            Other keyword arguments ignored for compatibility with other 
+            Transmuters.
 
         Returns
         -------
         y : Material
             The output material post-transmutation.
-
         """
-        if t is not None:
-            self.t = t
-        if phi is not None:
-            self.phi = phi
-        if tol is not None:
-            self.tol = tol
-        if element_lib is not None:
-            self.element_lib = element_lib
-        if data_lib is not None:
-            self.data_lib = data_lib
-
         mesh = Mesh(structured_coords=[[0,1], [0,1], [0,1]], structured=True, 
                     structured_ordering='zyx', mats={0: x})
         flux_tag = "flux"
@@ -73,7 +71,7 @@ class AlaraTransmuter(Transmuter):
         return y        
 
     def transmute_mesh(self, mesh, flux_tag, t=None, tol=None, element_lib=None, 
-                       data_lib=None, *args, **kwargs):
+                       data_lib=None, irr_blocks=None, *args, **kwargs):
         """Transmutes a mesh of material into their daughters.
 
         Parameters
@@ -90,6 +88,13 @@ class AlaraTransmuter(Transmuter):
             Path to element library.
         data_library : str
             The data_library card (see ALARA user's guide).
+        irr_blocks : str, optional
+            Irradition-related ALARA input blocks.
+        args : tuple, optional
+            Other arguments ignored for compatibility with other Transmuters.
+        kwargs : dict, optional
+            Other keyword arguments ignored for compatibility with other 
+            Transmuters.
         """
         if t is not None:
             self.t = t
@@ -99,6 +104,8 @@ class AlaraTransmuter(Transmuter):
             self.element_lib = element_lib
         if data_lib is not None:
             self.data_lib = data_lib
+        if irr_blocks is not None:
+            self.irr_blocks = irr_blocks
 
         fluxin = str(uuid.uuid4())
         geom = str(uuid.uuid4())
@@ -107,10 +114,14 @@ class AlaraTransmuter(Transmuter):
         # build alara input
         alara.mesh_to_fluxin(mesh, flux_tag, fluxin, reverse=False)
         alara.mesh_to_geom(mesh, geom, matlib)
-        irr_blocks = alara.irradiation_blocks(matlib, element_lib, data_lib,
-                                              ["0 s"], fluxin, self.t, 
-                                              output="number_density",
-                                              truncation=self.tol)
+        if self.irr_blocks is None:
+            irr_blocks = alara.irradiation_blocks(matlib, element_lib, data_lib,
+                                                  ["0 s"], fluxin, self.t, 
+                                                  output="number_density",
+                                                  truncation=self.tol)
+        else:
+            irr_blocks = self.irr_blocks
+
         with open(geom, 'a') as f:
             f.write(irr_blocks)
         # run alara
