@@ -921,7 +921,7 @@ class XsdirTable(object):
 
     @property
     def serpent_type(self):
-        """Coverts cross section table type to Serpent format:
+        """Converts cross section table type to Serpent format:
             :1: continuous energy (c).
             :2: dosimetry table (y).
             :3: termal (t).
