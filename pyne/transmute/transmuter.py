@@ -44,9 +44,10 @@ class Transmuter(object):
             raise ValueError("The flux vector must be 0- or 1-dimensional.")
         if not np.all(flux >= 0.0):
             raise ValueError("Flux entries must be non-negative.")
-        for ds in self.xscache.data_sources:
-            ds.src_phi_g = flux
-        self.xscache['phi_g'] = np.array([flux.sum()])
+        if self.xscache is not None:
+            for ds in self.xscache.data_sources:
+                ds.src_phi_g = flux
+            self.xscache['phi_g'] = np.array([flux.sum()])
         self._phi = flux
 
     def transmute(*args, **kwargs):
