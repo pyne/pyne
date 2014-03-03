@@ -53,3 +53,7 @@ class Transmuter(object):
     def transmute(*args, **kwargs):
         """All derived classes must implement a transmute method."""
         pass
+
+    def transmute_mesh(self, *args, **kwargs):
+        """All derived classes must implement a transmute_mesh method."""
+        pass

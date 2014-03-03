@@ -7,8 +7,8 @@ from optparse import OptionParser
 from pyne.material import Material, from_atom_frac
 from pyne.mesh import Mesh
 from pyne import mcnp
-from pyne import alara
 from pyne import nucname
+from pyne.transmuters.alara import AlaraTransmuter
 
 J_PER_MEV = 1.602177E-22
 
@@ -52,8 +52,7 @@ FMESH14:n origin=-5,-5,-5
 FM14 -1 0 -6 -8
 """)
 
-def burnup(mesh, irr_time, power, xsdir_path, count):
-
+def burnup(mesh, transmuter, irr_time, power, xsdir_path, count):
     # create m
     geom = mcnp.mesh_to_geom(mesh, 
            title_card="Input for iteration {0}".format(count))
@@ -62,33 +61,15 @@ def burnup(mesh, irr_time, power, xsdir_path, count):
         f.write(geom + mcnp_data_cards)
 
     # run mcnp
-    #subprocess.call("mcnp5 i=MCNP_inp_{0} meshtal=meshtal_{0} xsdir={1}".format(count, xsdir_path), shell=True)
     subprocess.call("mcnp5 i=MCNP_inp_{0} meshtal=meshtal_{0}".format(count, xsdir_path), shell=True)
 
     # use mcnp out to create alara input files
     meshtal = mcnp.Meshtal("meshtal_{0}".format(count))
     normalize_to_power(meshtal, power)
-    alara.mesh_to_fluxin(meshtal.tally[4], "n_result",
-                         "fluxin_{0}".format(count), reverse=False)
-    alara.mesh_to_geom(mesh, "alara_geom_{0}".format(count), 
-                       "alara_matlib_{0}".format(count))
-    irr_blocks = alara.irradiation_blocks("alara_matlib_{0}".format(count), "../isolib", 
-                   "FEINDlib CINDER ../CINDER90 THERMAL", ["0 s"], 
-                   "fluxin_{0}".format(count), irr_time, output="number_density",truncation=1E-6)
-
-    with open("alara_geom_{0}".format(count), 'a') as f:
-        f.write(irr_blocks)
-
-    # run alara
-    #p = subprocess.Popen(["alara", "alara_geom_{0}".format(count)])
-    p = subprocess.Popen(["alara", "alara_geom_{0}".format(count)], stdout=subprocess.PIPE)
-    #p = subprocess.Popen(["alara", "alara_geom_{0}".format(count)], shell=True, stderr=None)
-    alara_out, err = p.communicate()
-    # tag transmuted materials back to mesh
-    alara.num_density_to_mesh(alara_out.split("\n"), 'shutdown', mesh)
+    mesh = meshtal.tally[4]
+    transmuter.transmute_mesh(mesh, "n_result", irr_time, tol=1E-6)
 
     xsdir = mcnp.Xsdir(xsdir_path)
-    #nucs = [nucname.id(x.name.split('.')[0]) for x in xsdir.tables if x.name.split('.')[0].isdigit()]
     nucs = [nucname.id(x.name.split('.')[0]) for x in xsdir.tables if nucname.isnuclide(x.name.split('.')[0])]
     bad_nucs = [60150000, 60140000, 80180000, 410960000, 410980000, 411000000, 421010000, 410970000]
     for bad_nuc in bad_nucs:
@@ -119,9 +100,7 @@ def normalize_to_power(meshtal, power):
  
     print("The normalization is {0} [n/s]".format(norm))   
 
-
 def gen_reactor(mesh, fuel_idx):
-
     ves = mesh.structured_iterate_hex(mesh.structured_ordering)
     for i, ve in enumerate(ves):
        if i in fuel_idx:
@@ -130,14 +109,9 @@ def gen_reactor(mesh, fuel_idx):
            mesh.mats[i] = from_atom_frac({'H1': 2.0, 'O16': 1.0}, density=1.0)
 
 def main(arguments=None):
-
     #Instantiate option parser
     parser = OptionParser(usage =
              '%prog <power [W]> <time [s]> <num steps> <xsdir path> [options]')
-
-    # 
-    #parser.add_option('-o', dest='mesh_output', default='flux_mesh.h5m',\
-    #                  help = 'Name of mesh output file, default=%default')
 
     (opts, args) = parser.parse_args(arguments)
     power = float(args[0])
@@ -147,26 +121,23 @@ def main(arguments=None):
     xsdir_path = args[3]
     xsdir = mcnp.Xsdir(xsdir_path)
 
-    # create reactor that spans [[-5, 5], [-5, 5],[-5, 5]] with fuel volume
-    # elements near the center
-    # big reactor
-    #fuel_idx = range(399, 500)
-    #coords = range(-5, 6)
-
     # small reactor
     fuel_idx = range(0,15)
     coords = [-5000, -300, 300, 500]
     mesh = Mesh(structured_coords = [coords, coords, coords], structured=True)
     gen_reactor(mesh, fuel_idx)
 
-    nucs = xsdir.nucs()
-    step = 0
+    # instantiate transmuters
+    transmuters = []
+    transmuters.append(AlaraTransmuter("../isolib", "FEINDlib CINDER ../CINDER90 THERMAL"))
+    # append more transmuters
 
-    while step < num_steps:
-        #for i, mat, ve in mesh:
-        #    mesh.mats[i]  = mesh.mats[i][nucs]
+    for transmuter in transmuters:
+        step = 0
+        
+        while step < num_steps:
+            burnup(mesh, transmuter, irr_time, power, xsdir_path, step)
+            step += 1
 
-        burnup(mesh, irr_time, power, xsdir_path, step)
-        step += 1
-
-main()
+if __name__ == "__main__":
+    main()
