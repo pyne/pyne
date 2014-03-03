@@ -141,7 +141,6 @@ def check_matname(tag_values,mat_lib):
 	exit()
     # list of pyne material objects
     #print materials_list/
-    print materials_list
     return materials_list
     
 """ 
@@ -176,11 +175,11 @@ def set_attrs(mat,number,code):
 """
 Function to prepare fluka material names:
 """
-def fluka_material_naming(material,number) :
-    matf=material.attrs['name']
+def fluka_material_naming(matl,number) :
+    matf=matl.attrs['name']
     matf=''.join(c for c in matf if c.isalnum())
     if len(matf) <= 8 :
-        if matf.upper() in fmat_list :
+        if matf.upper() in fmat_list : 
             if number <= 9 :
                 matf=matf.rstrip(matf[-1])
                 matf=matf+str(number)
@@ -198,16 +197,18 @@ def fluka_material_naming(material,number) :
                 matf=matf.rstrip(matf[-1])
                 matf=matf+str(number)
             if number >= 9 and number <= 99 :
-                for i in 2 :
+                for i in range(2) :
                     matf=matf.rstrip(matf[-1])
                 matf=matf+str(number)
             fmat_list.append(matf.upper())    
         else :            
             fmat_list.append(matf.upper())
-    material.attrs['name']=matf.upper()   
-    material.attrs['mat_number']=str(number)
+    matl.attrs['name']=matf.upper()   
+    matl.attrs['mat_number']=str(number)
+   # if matl in materials_list :
+    #            print('found %s' %matl)
     return fmat_list
-    return material
+    return
 
 """
 Function write_mats, writes material objects to hdf5 file
@@ -215,8 +216,8 @@ Function write_mats, writes material objects to hdf5 file
 material_list: list of PyNE Material Objects
 filename: filename to write the objects to
 """
-def write_mats_h5m(material_list,filename):
-    for material in material_list:
+def write_mats_h5m(materials_list,filename):
+    for material in materials_list:
 	material.write_hdf5(filename)
 
 """
@@ -266,7 +267,7 @@ get_tag_values(datafile)
 load_mat_lib(nuc_data)
 # check that material tags exist in library
 # material_list is list of pyne objects in problem
-material_list=check_matname(tag_values,mat_lib)
+check_matname(tag_values,mat_lib)
 # write materials to file
-write_mats_h5m(material_list,output)
+write_mats_h5m(materials_list,output)
 exit()
