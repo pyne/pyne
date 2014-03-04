@@ -1,5 +1,5 @@
 Nuclide,,Q-value (MeV per disintegration) ,Fraction of Q that comes from gammas
-     HE, 4b,,
+     HE, 4,,
      TL,206,0.537,0
      TL,207,0.497,0.004
      TL,208,3.946,0.852
@@ -127,4 +127,4 @@ Nuclide,,Q-value (MeV per disintegration) ,Fraction of Q that comes from gammas
          ES, 254M,8.173,0.06
          ES,254,6.499,0.012
          ES,255,7.37,0
-          S, 250 c,,
+          S, 250,,
