@@ -12,7 +12,7 @@ except ImportError:
     warnings.warn("the PyTAPS optional dependency could not be imported. "
          "Some aspects of the mesh module may be incomplete.", ImportWarning)
 
-from .material import Material, MaterialLibrary
+from pyne.material import Material, MaterialLibrary, MultiMaterial
 
 
 # dictionary of lamba functions for mesh arithmetic
@@ -1081,6 +1081,42 @@ class Mesh(object):
         """Writes the mesh to an hdf5 file."""
         self.mesh.save(filename)
         self.mats.write_hdf5(filename)
+
+    def cell_fracs_to_mats(self, cell_fracs, cell_mats):
+        """This function uses the output from dagmc.discretize_geom() and 
+        a mapping of geometry cells to Materials to assign materials
+        to each mesh volume element.
+
+        Parameters
+        ----------
+        cell_fracs : structured array
+            The output from dagmc.discretize_geom(). A sorted, one dimensional
+            array, each entry containing the following fields:
+            :idx: int 
+                The volume element index.
+            :cell: int
+                The geometry cell number.
+            :vol_frac: float
+                The volume fraction of the cell withing the mesh ve.
+            :rel_error: float
+                The relative error associated with the volume fraction.
+            The array must be sorted with respect to both idx and cell, with cell
+            changing fastest.
+        cell_mats : dict
+            Maps geometry cell numbers to Material objects that represent what
+            material each cell is made of.
+        """
+        mats = []
+        for i in range(len(self)):
+            mat_col = {} #  Collection of materials in the ith ve.
+            for row in cell_fracs[cell_fracs['idx'] == i]:
+                mat_col[cell_mats[row['cell']]] = row['vol_frac']
+
+            mixed = MultiMaterial(mat_col)
+            mats.append(mixed.mix_by_volume())
+
+        self.mats = mats
+      
 
 ######################################################
 # private helper functions for structured mesh methods
