@@ -9,7 +9,7 @@ and contribute, please let us know either on the mailing list
 pyne-dev@googlegroups.com) or `github`_.
 
 Examples, documentation, and more can be found at 
-http://pynesim.org/, the official PyNE projectsite.
+http://pyne.io/, the official PyNE projectsite.
 
 .. _github: https://github.com/pyne/pyne
 
