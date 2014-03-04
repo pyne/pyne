@@ -4,6 +4,7 @@ Module allows the grabbing of q_values (energy per disintegration) for the calcu
 
 from __future__ import print_function
 import csv
+import os
 
 import numpy as np
 import tables as tb
@@ -11,15 +12,15 @@ import tables as tb
 from pyne import nucname
 
 # Parses data from .csv
-def grab_q_values(location = 'q_val_actinides.csv'):
+def grab_q_values(fname):
     """Parses data from three q_val csv files."""
-
+    
     # create list
     all_q_vals = []
-    
+        
     # grabs data row by row
     def read_row(row):
-        if row[0] == 'Nuclide':
+        if row[0] == 'Nuclide' or len(row[0].strip()) == 0:
             return
         nuclide = nucname.id(''.join(row[0:2]).replace(' ', ''))
         if len(row[2]) == 0:
@@ -34,7 +35,7 @@ def grab_q_values(location = 'q_val_actinides.csv'):
         all_q_vals.append(entry)
     
     # opens .csv files and parses them
-    with open(location, 'r') as f:
+    with open(fname, 'r') as f:
         reader = csv.reader(f)
         for row in reader:
             read_row(row)
@@ -46,17 +47,19 @@ def grab_q_values(location = 'q_val_actinides.csv'):
 
 def make_q_value():
     """Controller function for adding q-values"""
-    q_values = args.q_values
-    if os.path.exists(q_values):
-        with tb.openFile(q_values, 'r') as f:
-            if '/q_values' in f:
-                print("skipping q_value table creation; already exists.")
-                return
+#    q_values = args.q_values
+#    if os.path.exists(q_values):
+#        with tb.openFile(q_values, 'r') as f:
+#            if '/q_values' in f:
+#                print("skipping q_value table creation; already exists.")
+#                return
 
     # Grab the q_values
     print("Grabbing q_values...")
-    grab_q_values(os.path.join(os.path.split(__file__)[0], 
-                              'q_val_actinides.csv')) 
+    q_value_files = ['q_val_actinides.csv', 'q_val_fissionproducts.csv', 
+                     'q_val_light.csv']
+    for fname in q_value_files:
+        grab_q_values(fname) 
 
     # Make q_value table once we have the array
 #    print("Making q_value table...")
