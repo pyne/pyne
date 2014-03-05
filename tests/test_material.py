@@ -1,4 +1,6 @@
 """Material tests"""
+import os
+from copy import deepcopy
 
 from unittest import TestCase
 import nose 
@@ -6,7 +8,6 @@ import nose
 from nose.tools import assert_equal, assert_not_equal, assert_raises, raises, \
     assert_almost_equal, assert_true, assert_false, assert_in
 
-import os
 from pyne import nuc_data
 from pyne.material import Material, from_atom_frac, from_hdf5, from_text, \
     MapStrMaterial, MultiMaterial, MaterialLibrary
@@ -994,6 +995,22 @@ def test_multimaterial_mix_density():
     assert_equal(mat4.density, 1.5)
 
     assert_equal(mat3.density, mat4.density)
+
+def test_deepcopy():
+    x = Material({'H1': 1.0}, mass=2.0, density=3.0, atoms_per_molecule=4.0, 
+                 attrs={'name': 'loki'})
+    y = deepcopy(x)
+    assert_equal(x, y)
+    y.comp[10010000] = 42.0
+    y[80160000] = 21.0
+    y.density = 65.0
+    y.atoms_per_molecule = 28.0
+    y.attrs['wakka'] = 'jawaka'
+    y.mass = 48.0
+    y.attrs['name'] = 'odin'
+    assert_not_equal(x, y)
+    assert_equal(x, Material({'H1': 1.0}, mass=2.0, density=3.0, atoms_per_molecule=4.0, 
+                             attrs={'name': 'loki'}))
 
 def test_mcnp():
 
