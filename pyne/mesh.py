@@ -33,6 +33,7 @@ err__ops = {"+": lambda val_1, val_2, val_1_err, val_2_err: \
                  (np.sqrt(val_1_err**2 + val_2_err**2))}
 
 _INTEGRAL_TYPES = (int, np.integer, np.bool_)
+_SEQUENCE_TYPES = (Sequence, np.ndarray)
 
 class Tag(object):
     """A mesh tag, which acts as a descriptor on the mesh.  This dispatches
@@ -122,7 +123,7 @@ class MaterialPropertyTag(Tag):
             setattr(mats[key], name, value)
         elif isinstance(key, slice):
             idx = range(*key.indices(size))
-            if isinstance(value, Sequence) and len(value) == len(idx):
+            if isinstance(value, _SEQUENCE_TYPES) and len(value) == len(idx):
                 for i, v in zip(idx, value):
                     setattr(mats[i], name, v)
             else:
@@ -132,14 +133,14 @@ class MaterialPropertyTag(Tag):
             if len(key) != size:
                 raise KeyError("boolean mask must match the length of the mesh.")
             idx = np.where(key)[0]
-            if isinstance(value, Sequence) and len(value) == key.sum():
+            if isinstance(value, _SEQUENCE_TYPES) and len(value) == key.sum():
                 for i, v in zip(idx, value):
                     setattr(mats[i], name, v)
             else:
                 for i in idx:
                     setattr(mats[i], name, value) 
         elif isinstance(key, Iterable):
-            if isinstance(value, Sequence) and len(value) == len(key):
+            if isinstance(value, _SEQUENCE_TYPES) and len(value) == len(key):
                 for i, v in zip(key, value):
                     setattr(mats[i], name, v)
             else:
@@ -231,7 +232,7 @@ class MetadataTag(Tag):
             mats[key].attrs[name] = value
         elif isinstance(key, slice):
             idx = range(*key.indices(size))
-            if isinstance(value, Sequence) and len(value) == len(idx):
+            if isinstance(value, _SEQUENCE_TYPES) and len(value) == len(idx):
                 for i, v in zip(idx, value):
                     mats[i].attrs[name] = v
             else:
@@ -241,14 +242,14 @@ class MetadataTag(Tag):
             if len(key) != size:
                 raise KeyError("boolean mask must match the length of the mesh.")
             idx = np.where(key)[0]
-            if isinstance(value, Sequence) and len(value) == key.sum():
+            if isinstance(value, _SEQUENCE_TYPES) and len(value) == key.sum():
                 for i, v in zip(idx, value):
                     mats[i].attrs[name] = v
             else:
                 for i in idx:
                     mats[i].attrs[name] = value
         elif isinstance(key, Iterable):
-            if isinstance(value, Sequence) and len(value) == len(key):
+            if isinstance(value, _SEQUENCE_TYPES) and len(value) == len(key):
                 for i, v in zip(key, value):
                     mats[i].attrs[name] = v
             else:
@@ -774,7 +775,7 @@ class Mesh(object):
                 tagtype = IMeshTag
             elif isinstance(value, str):
                 tagtype = MetadataTag                
-            elif isinstance(value, Sequence):
+            elif isinstance(value, _SEQUENCE_TYPES):
                 raise ValueError('ambiguous tag {0!r} creation when value is a '
                         'sequence, please set tagtype, size, or dtype'.format(name))
             else:

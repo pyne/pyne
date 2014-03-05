@@ -729,7 +729,9 @@ def test_addtag():
 def test_lazytaginit():
     m = gen_mesh()
     m.cactus = IMeshTag(3, 'i')
+    m.cactus[:] = np.array([42, 43, 44])
     assert_in('cactus', m.tags)
+    assert_array_equal(m.cactus[0], [42, 43, 44])
 
 def test_iter():
     mats = {
