@@ -81,6 +81,7 @@ def check_matname(tag_values):
     mat_list = []   # list of materials
     d = 0  # counter of the
     mat_list_matname = []  # list of material names
+    mat_list_density = []
     # loop over the tags in the file
     for tag in tag_values:
         # look for mat, this id's material in group name
@@ -90,9 +91,12 @@ def check_matname(tag_values):
                 mat_name = tag.split("/")
                 # list of material name only
                 mat_list_matname.append(mat_name[0])
+                mat_list_density.append(mat_name[1])
             # otherwise we have only mat:
             else:
                 mat_list_matname.append(tag)
+                mat_list_density.append('')
+    print mat_list_matname , mat_list_density
     # split colons from name
     for matname in mat_list_matname:
         try:
@@ -173,7 +177,7 @@ def set_attrs(mat, number, code, flukamat_list):
     if code is 'mcnp' or 'both':
         mat.attrs['mat_number'] = str(number)
     if code == 'fluka' or 'both':
-        fluka_material_naming(mat, number, flukamat_list)
+        fluka_material_naming(mat,flukamat_list)
     return
 
 """
@@ -181,26 +185,29 @@ Function to prepare fluka material names:
 """
 
 
-def fluka_material_naming(matl, number, flukamat_list):
+def fluka_material_naming(matl,flukamat_list):
     matf = matl.attrs['name']
     matf = ''.join(c for c in matf if c.isalnum())
-    if len(matf) > 8:
-        matf = matf[0:7]
     if len(matf) > 8:
         matf = matf[0:7]
     else:
         pass
     # if name in list change name by appending number
     if matf.upper() in flukamat_list:
-        if number <= 9:
-            matf = matf.rstrip(matf[-1])
-            matf = matf + str(number)
-        else:
-            for i in range(2):
+        for a in range(len(flukamat_list)):
+            a=a+1
+            if a <= 9:
                 matf = matf.rstrip(matf[-1])
-                matf = matf + str(number)
-
-        flukamat_list.append(matf.upper())
+                matf = matf + str(a)
+            else:
+                for i in range(2):
+                    matf = matf.rstrip(matf[-1])
+                    matf = matf + str(a)
+            if matf.upper() in flukamat_list:
+                   continue
+            else:
+                flukamat_list.append(matf.upper()) 
+                break                      
     # otherwise uppercase
     else:
         flukamat_list.append(matf.upper())
@@ -276,7 +283,7 @@ mat_lib = load_mat_lib(nuc_data)
 mat_list = check_matname(tag_values)
 # create material objects from library
 material_object_list = check_and_create_materials(mat_list, mat_lib)
-# print material_object_list
+print material_object_list
 # write materials to file
 write_mats_h5m(material_object_list, output)
 exit()
