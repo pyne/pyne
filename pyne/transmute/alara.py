@@ -74,7 +74,7 @@ class Transmuter(Transmuter):
         """
         if isinstance(x, Mesh): 
             self._transmute_mesh(mesh, flux_tag, t, tol, element_lib, data_lib, 
-                                 irr_blocks)
+                                 irr_blocks, args, kwargs)
         else:
             mesh = Mesh(structured_coords=[[0,1], [0,1], [0,1]], structured=True, 
                         structured_ordering='zyx', mats={0: x})
