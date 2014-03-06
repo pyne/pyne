@@ -835,9 +835,10 @@ class Xsdir(object):
         """Writes a Serpent xsdata file for all continuous energy xs tables.
 
         Parameters
-        ---------
+        ----------
         filename : str
             The output filename.
+
         """
         xsdata = open(filename, 'w')
         for table in self.tables:
