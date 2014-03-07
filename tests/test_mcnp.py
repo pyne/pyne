@@ -927,7 +927,7 @@ def test_single_meshtally_meshtal():
     expected_sm = Mesh(mesh_file=expected_h5m, structured=True)
 
     tags = {4: ["n_result", "n_rel_error", 
-                 "n_total_result", "n_total_rel_error"]}
+                "n_total_result", "n_total_rel_error"]}
     meshtal_object = mcnp.Meshtal(meshtal_file, tags)
 
     # test Meshtal attributes
