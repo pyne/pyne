@@ -41,7 +41,7 @@ except ImportError:
                   ImportWarning)
     HAVE_PYTAPS = False
 
-from pyne.mesh import Mesh, StatMesh, MeshError
+from pyne.mesh import Mesh, StatMesh, MeshError, IMeshTag
 
 
 class Mctal(object):
@@ -2096,16 +2096,11 @@ class MeshTally(StatMesh):
             rel_error[i] = rel_error_row
 
         #Tag results and error vector to mesh
-        tag_result = self.mesh.createTag(self.tag_names[0], num_e_groups, float)
-        tag_rel_error = self.mesh.createTag(self.tag_names[1], num_e_groups, float)
-        res_vol_elements = list(self.structured_iterate_hex("xyz"))
-        err_vol_elements = list(self.structured_iterate_hex("xyz"))
-        for res_ve, err_ve, i in itertools.izip(res_vol_elements,
-                                                err_vol_elements,
-                                                range(0, num_vol_elements)):
-            tag_result[res_ve] = result[:, i]
-            tag_rel_error[err_ve] = rel_error[:, i]
-
+        res_tag = IMeshTag(num_e_groups, float, mesh=self, name=self.tag_names[0])
+        rel_err_tag = IMeshTag(num_e_groups, float, mesh=self, name=self.tag_names[1])
+        res_tag[:] = result.transpose().tolist()
+        rel_err_tag[:] = rel_error.transpose().tolist()
+        
         #If "total" data exists (i.e. if there is more than
         #1 energy group) get it and tag it onto the mesh.
         if num_e_groups > 1:
@@ -2117,14 +2112,11 @@ class MeshTally(StatMesh):
                 rel_error.append(
                     float(line[self._column_idx["Rel_Error"]]))
 
-            tag_result = self.mesh.createTag(self.tag_names[2], 1, float)
-            tag_rel_error = self.mesh.createTag(self.tag_names[3], 1, float)
+            res_tot_tag = IMeshTag(1, float, mesh=self, name=self.tag_names[2])
+            rel_err_tot_tag = IMeshTag(1, float, mesh=self, name=self.tag_names[3])
+            res_tot_tag[:] = result
+            rel_err_tot_tag[:] = rel_error
 
-            res_vol_elements = list(self.structured_iterate_hex("xyz"))
-            err_vol_elements = list(self.structured_iterate_hex("xyz"))
-
-            tag_result[res_vol_elements] = result
-            tag_rel_error[err_vol_elements] = rel_error
 
 def mesh_to_geom(mesh, frac_type='mass', title_card="Generated from PyNE Mesh"):
     """This function reads a structured Mesh object and returns the geometry

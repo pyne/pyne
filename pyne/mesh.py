@@ -327,7 +327,10 @@ class IMeshTag(Tag):
         m = self.mesh.mesh
         size = len(self.mesh)
         mtag = self.tag
-        miter = m.iterate(iBase.Type.region, iMesh.Topology.all)
+        if self.mesh.structured:
+           miter = self.mesh.structured_iterate_hex(self.mesh.structured_ordering)
+        else:
+            miter = m.iterate(iBase.Type.region, iMesh.Topology.all)
         if isinstance(key, _INTEGRAL_TYPES):
             if key >= size:
                 raise IndexError("key index {0} greater than the size of the "
@@ -352,7 +355,10 @@ class IMeshTag(Tag):
         m = self.mesh.mesh
         size = len(self.mesh)
         mtag = self.tag
-        miter = m.iterate(iBase.Type.region, iMesh.Topology.all)
+        if self.mesh.structured:
+           miter = self.mesh.structured_iterate_hex(self.mesh.structured_ordering)
+        else:
+            miter = m.iterate(iBase.Type.region, iMesh.Topology.all)
         if isinstance(key, _INTEGRAL_TYPES):
             if key >= size:
                 raise IndexError("key index {0} greater than the size of the "
