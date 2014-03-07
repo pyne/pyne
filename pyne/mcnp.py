@@ -1963,7 +1963,8 @@ class MeshTally(StatMesh):
     tally_number : int
         The MCNP tally number. Must end in 4 (e.g. 4, 14, 214).
     particle : string
-        Either "n" for a neutron mesh tally or "p" for a photon mesh tally.
+        Either "neutron" for a neutron mesh tally or "photon" for a photon mesh
+        tally.
     dose_response : bool
         True is the tally is modified by a dose response function.
     x_bounds : list of floats
@@ -2029,9 +2030,9 @@ class MeshTally(StatMesh):
         """
         line = f.readline()
         if ('neutron' in line):
-            self.particle = 'n'
+            self.particle = 'neutron'
         elif ('photon' in line):
-            self.particle = 'p'
+            self.particle = 'photon'
 
         #determine if meshtally flux-to-dose conversion factors are being used.
         line = f.readline()
