@@ -926,7 +926,9 @@ def test_single_meshtally_meshtal():
     expected_h5m = os.path.join(thisdir, "mcnp_meshtal_single_mesh.h5m")
     expected_sm = Mesh(mesh_file=expected_h5m, structured=True)
 
-    meshtal_object = mcnp.Meshtal(meshtal_file)
+    tags = {4: ["n_result", "n_rel_error", 
+                "n_total_result", "n_total_rel_error"]}
+    meshtal_object = mcnp.Meshtal(meshtal_file, tags)
 
     # test Meshtal attributes
     assert_equal(meshtal_object.version, 5)
@@ -1007,7 +1009,15 @@ def test_multiple_meshtally_meshtal():
     expected_h5m_34 = os.path.join(thisdir, "mcnp_meshtal_tally_34.h5m")
     expected_sm_34 = Mesh(mesh_file=expected_h5m_34, structured=True)
 
-    meshtal_object = mcnp.Meshtal(meshtal_file)
+    tags = {4: ["n_result", "n_rel_error",
+                 "n_total_result", "n_total_rel_error"],
+            14: ["n_result", "n_rel_error",
+                 "n_total_result", "n_total_rel_error"],
+            24:["p_result", "p_rel_error", 
+                "p_total_result", "p_total_rel_error"],
+            34:["p_result", "p_rel_error",
+                "p_total_result", "p_total_rel_error"]}
+    meshtal_object = mcnp.Meshtal(meshtal_file, tags)
 
     # test meshtally 4
     for v_e, expected_v_e in zip(
