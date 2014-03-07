@@ -1883,10 +1883,25 @@ class Meshtal(object):
         A dictionary with MCNP fmesh4 tally numbers
         (e.g. 4, 14, 24) as keys and
         MeshTally objects as values.
+    tags : dict
+        Maps integer tally numbers to iterables containing four strs: the
+        results tag name, the relative error tag name, the total results
+        tag name, and the total relative error tag name. If tags is None
+        the tags are named 'x_result', 'x_rel_error', 'x_result_total', 
+        'x_rel_error_total' where x is n or p for neutrons or photons.
     """
 
-    def __init__(self, filename):
-        """Instantiate a Meshtal object from a meshtal file.
+    def __init__(self, filename, tags=None):
+        """Parameters
+        ----------
+        filename : str
+            MCNP meshtal file.
+        tags : dict, optional
+            Maps integer tally numbers to iterables containing four strs: the
+            results tag name, the relative error tag name, the total results
+            tag name, and the total relative error tag name. If tags is None
+            the tags are named 'x_result', 'x_rel_error', 'x_result_total', 
+            'x_rel_error_total' where x is n or p for neutrons or photons.
         """
 
         if not HAVE_PYTAPS:
@@ -1894,6 +1909,7 @@ class Meshtal(object):
                                "unable to create Meshtal.")
 
         self.tally = {}
+        self.tags = tags
 
         with open(filename, 'r') as f:
             self._read_meshtal_head(f)
@@ -1924,8 +1940,12 @@ class Meshtal(object):
 
         while line != "":
             if line.split()[0:3] == ['Mesh', 'Tally', 'Number']:
-                tally_number = int(line.split()[3])
-                self.tally[tally_number] = MeshTally(f, tally_number)
+                tally_num = int(line.split()[3])
+                if self.tags is not None and tally_num in self.tags.keys():
+                    self.tally[tally_num] = MeshTally(f, tally_num,
+                                                      self.tags[tally_num])
+                else:
+                    self.tally[tally_num] = MeshTally(f, tally_num)
 
             line = f.readline()
 
@@ -1956,20 +1976,32 @@ class MeshTally(StatMesh):
     mesh :
         An iMesh instance tagged with all results and
         relative errors
+    tag_names : iterable
+        Four strs that specify the tag names for the results, relative errors,
+        total results, and relative errors of the total results.
 
     Notes
     -----
-    All Mesh attributes are also present via a super() call to
-    Mesh.__init__().
+    All Mesh/StatMesh attributes are also present via a super() call to
+    StatMesh.__init__().
 
     """
 
-    def __init__(self, f, tally_number):
-        """Create MeshTally object from a filestream (f) open to the second
-        line of a mesh tally header (the neutron/photon line). The
-        "tally_number" is the MCNP fmesh4 tally number (e.g. 4, 14, 24).
-        MeshTally objects should be instantiated only through the
-        Meshtal class.
+    def __init__(self, f, tally_number, tag_names=None):
+        """Create MeshTally object from a filestream open to the second
+        line of a mesh tally header (the neutron/photon line). MeshTally objects
+        should be instantiated only through the Meshtal class.
+
+        Parameters
+        ----------
+        f : filestream
+            Open to the neutron/photon line.
+        tally number : int
+            The MCNP fmesh4 tally number (e.g. 4, 14, 24).
+        tag_names : iterable, optional
+            Four strs that specify the tag names for the results, relative 
+            errors, total results and relative errors of the total results.
+            This should come from the Meshtal.tags attribute dict.
         """
 
         if not HAVE_PYTAPS:
@@ -1979,6 +2011,15 @@ class MeshTally(StatMesh):
         self.tally_number = tally_number
         self._read_meshtally_head(f)
         self._read_column_order(f)
+        
+        if tag_names is None:
+            self.tag_names = ("{0}_result".format(self.particle), 
+                              "{0}_rel_error".format(self.particle),
+                              "{0}_result_total".format(self.particle),
+                              "{0}_rel_error_total".format(self.particle))
+        else:
+            self.tag_names = tag_names
+
         self._create_mesh(f)
 
     def _read_meshtally_head(self, f):
@@ -2054,10 +2095,8 @@ class MeshTally(StatMesh):
             rel_error[i] = rel_error_row
 
         #Tag results and error vector to mesh
-        tag_result = self.mesh.createTag(
-            "{0}_result".format(self.particle), num_e_groups, float)
-        tag_rel_error = self.mesh.createTag(
-            "{0}_rel_error".format(self.particle), num_e_groups, float)
+        tag_result = self.mesh.createTag(self.tag_names[0], num_e_groups, float)
+        tag_rel_error = self.mesh.createTag(self.tag_names[1], num_e_groups, float)
         res_vol_elements = list(self.structured_iterate_hex("xyz"))
         err_vol_elements = list(self.structured_iterate_hex("xyz"))
         for res_ve, err_ve, i in itertools.izip(res_vol_elements,
@@ -2077,10 +2116,8 @@ class MeshTally(StatMesh):
                 rel_error.append(
                     float(line[self._column_idx["Rel_Error"]]))
 
-            tag_result = self.mesh.createTag(
-                "{0}_total_result".format(self.particle), 1, float)
-            tag_rel_error = self.mesh.createTag(
-                "{0}_total_rel_error".format(self.particle), 1, float)
+            tag_result = self.mesh.createTag(self.tag_names[2], 1, float)
+            tag_rel_error = self.mesh.createTag(self.tag_names[3], 1, float)
 
             res_vol_elements = list(self.structured_iterate_hex("xyz"))
             err_vol_elements = list(self.structured_iterate_hex("xyz"))
