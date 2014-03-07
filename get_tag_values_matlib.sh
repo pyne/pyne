@@ -79,7 +79,6 @@ mat_lib - pyne material library instance
 
 def check_matname(tag_values):
     # loop over tags
-<<<<<<< HEAD
     mat_list_matname = []  # list of material names
     mat_list_density = []  # list of density if provided in the group names
     # loop over the tags in the file
@@ -89,23 +88,11 @@ def check_matname(tag_values):
         # split on the basis of "/" being delimiter and split colons from
         # name
             try:
-=======
-    # a dictionary of material names as values and density as keys
-    mat_dict = {}
-    # loop over the tags in the file
-    for tag in tag_values:
-        # look for mat, this id's material in group name
-        try:
-            if "mat" in tag:
-            # split on the basis of "/" being delimiter and split colons from
-            # name
->>>>>>> 0dd8100e95cfa1b36c844cce9e2703c5ebb3e557
                 if "/" in tag:
                     mat_name = tag.split("/")
                     # list of material name only
                     matname = mat_name[0].split(":")
                     matdensity = mat_name[1].split(":")
-<<<<<<< HEAD
                     mat_list_density.append(matdensity[1])
                 # otherwise we have only "mat:"
                 else:
@@ -127,45 +114,15 @@ function to check the existence of material names on the PyNE library
 and creates a list of material with attrs set
 -------------------------------------------------------------
 """
-=======
-                    mat_dict[str(matdensity[1])] = matname[1]
-                # otherwise we have only "mat:"
-                else:
-                    matname = tag.split(":")
-                    mat_dict[""] = matname[1]
-        except:
-            print("Could not find group name in appropriate format"), tag
-            exit()
-    print mat_dict
-    # error conditions, not tags found
-    if len(mat_dict) == 0:
-        print("no group names found")
-        exit()
-    # print mat_list
-    return mat_dict
->>>>>>> 0dd8100e95cfa1b36c844cce9e2703c5ebb3e557
 
-"""
-----------------------------------
-"""
 
-<<<<<<< HEAD
 def check_and_create_materials(material_list, mat_lib):
-=======
-
-def check_and_create_materials(material_dict, mat_lib):
->>>>>>> 0dd8100e95cfa1b36c844cce9e2703c5ebb3e557
     flukamaterials_list = []
     material_object_list = []
-    d = 0  # counter of the materials to set mat_number for mcnp
+    d = 0
     # loop over materials in geometry
-<<<<<<< HEAD
     for g in range(len(material_list)):
         material = material_list[g][0]
-=======
-    for dkey in mat_dict:
-        material = material_dict[dkey]
->>>>>>> 0dd8100e95cfa1b36c844cce9e2703c5ebb3e557
         # loop over materials in library
         for key in mat_lib.iterkeys():
             if material == key:
@@ -174,17 +131,11 @@ def check_and_create_materials(material_dict, mat_lib):
                 new_mat = mat_lib.get(key)[:]
                 flukamaterials_list.append(material)
                 copy_attrs(new_mat, mat_lib.get(key))
-<<<<<<< HEAD
                 # set the mcnp material number or fluka material name
                 set_attrs(new_mat, d, code, flukamaterials_list)
                 if material_list[g][1] != ' ':
                     new_mat.density = float(material_list[g][1])
 
-=======
-                flukamaterials_list.append(material)
-                # set the mcnp material number or fluka material name
-                set_attrs(new_mat, d, code, flukamaterials_list, dkey)
->>>>>>> 0dd8100e95cfa1b36c844cce9e2703c5ebb3e557
                 material_object_list.append(new_mat)
                 break
             if mat_lib.keys().index(key) == len(mat_lib.keys()) - 1:
@@ -193,22 +144,14 @@ def check_and_create_materials(material_dict, mat_lib):
                 print_near_match(material, mat_lib)
                 exit()
     # check that there are as many materials as there are groups
-<<<<<<< HEAD
     if d != len(mat_dens_list):
-=======
-    if d != len(mat_dict):
->>>>>>> 0dd8100e95cfa1b36c844cce9e2703c5ebb3e557
         print "There are insuficient materials"
         exit()
     # return the list of material objects to write to file
     return material_object_list
 
 """
-<<<<<<< HEAD
 function to copy the attrs of materials from the PyNE material library
-=======
-------------------------------
->>>>>>> 0dd8100e95cfa1b36c844cce9e2703c5ebb3e557
 """
 
 
@@ -240,10 +183,9 @@ function to set the attributes of the materials:
 """
 
 
-def set_attrs(mat, number, code, flukamat_list, density):
+def set_attrs(mat, number, code, flukamat_list):
     if code is 'mcnp' or 'both':
         mat.attrs['mat_number'] = str(number)
-        mat.attrs['mat_density'] = density
     if code == 'fluka' or 'both':
         fluka_material_naming(mat, flukamat_list)
     return
@@ -348,15 +290,9 @@ tag_values = get_tag_values(datafile)
 mat_lib = load_mat_lib(nuc_data)
 # check that material tags exist in library
 # material_list is list of pyne objects in problem
-<<<<<<< HEAD
 mat_dens_list = check_matname(tag_values)
 # create material objects from library
 material_object_list = check_and_create_materials(mat_dens_list, mat_lib)
-=======
-mat_dict = check_matname(tag_values)
-# create material objects from library
-material_object_list = check_and_create_materials(mat_dict, mat_lib)
->>>>>>> 0dd8100e95cfa1b36c844cce9e2703c5ebb3e557
 print material_object_list
 # write materials to file
 write_mats_h5m(material_object_list, output)
