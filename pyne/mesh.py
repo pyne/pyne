@@ -1093,19 +1093,22 @@ class Mesh(object):
         cell_fracs : structured array
             The output from dagmc.discretize_geom(). A sorted, one dimensional
             array, each entry containing the following fields:
-            :idx: int 
-                The volume element index.
-            :cell: int
-                The geometry cell number.
-            :vol_frac: float
-                The volume fraction of the cell withing the mesh ve.
-            :rel_error: float
-                The relative error associated with the volume fraction.
+
+                :idx: int 
+                    The volume element index.
+                :cell: int
+                    The geometry cell number.
+                :vol_frac: float
+                    The volume fraction of the cell withing the mesh ve.
+                :rel_error: float
+                    The relative error associated with the volume fraction.
+
             The array must be sorted with respect to both idx and cell, with cell
             changing fastest.
         cell_mats : dict
             Maps geometry cell numbers to Material objects that represent what
             material each cell is made of.
+
         """
         mats = []
         for i in range(len(self)):

@@ -1,6 +1,6 @@
-===================
+=======================================
 Hexahedral Mesh Sampling
-===================
+=======================================
 The Hexahedral (hex) Mesh Sampling project will provide a tool for generating source distributions in cartesian coordiantes to first order accuracy given values on hexahedral meshes. This provides source definition flexibility to PyNE users.
 
 Brief explanation:
