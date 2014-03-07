@@ -40,7 +40,7 @@ def grab_ensdf_decay(build_dir=""):
             urllib.urlretrieve(iaea_base_url + f, fpath)
 
             if os.path.getsize(fpath) < 1048576: 
-                print("  could not get {0} from IAEA; trying S3 mirror".format(f))
+                print("  could not get {0} from IAEA; trying mirror".format(f))
                 os.remove(fpath)
                 urllib.urlretrieve(s3_base_url + f, fpath)
 
