@@ -30,7 +30,7 @@ def grab_ensdf_decay(build_dir=""):
 
     # Grab ENSDF files and unzip them.
     iaea_base_url = 'http://www-nds.iaea.org/ensdf_base_files/2013-October/'
-    s3_base_url = 'http://s3.amazonaws.com/pyne/'
+    cf_base_url = 'http://data.pyne.io/'
     ensdf_zip = ['ensdf_131009_099.zip', 'ensdf_131009_199.zip', 'ensdf_131009_294.zip',]
 
     for f in ensdf_zip:
