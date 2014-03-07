@@ -36,7 +36,7 @@ def grab_eaf_data(build_dir=""):
     # Grab ENSDF files and unzip them.
     # This link was taken from 'http://www-nds.iaea.org/fendl/fen-activation.htm'
     iaea_url = 'http://www-nds.iaea.org/fendl2/activation/processed/vitj_e/libout/fendlg-2.0_175-gz'
-    s3_base_url = 'http://s3.amazonaws.com/pyne/'
+    cf_base_url = 'http://data.pyne.io/'
     eaf_gzip = 'fendlg-2.0_175-gz'
 
     fpath = os.path.join(build_dir, eaf_gzip)
