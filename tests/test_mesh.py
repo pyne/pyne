@@ -735,6 +735,12 @@ def test_lazytaginit():
     m.cactus[:] = x
     assert_array_equal(m.cactus[2], x[2])
 
+def test_issue360():
+    a = Mesh(structured=True, structured_coords=[[0,1,2],[0,1],[0,1]])
+    a.cat = IMeshTag(3, float)
+    a.cat[:] = [[0.11, 0.22, 0.33],[0.44, 0.55, 0.66]]
+    a.cat[:] = np.array([[0.11, 0.22, 0.33],[0.44, 0.55, 0.66]])
+
 def test_iter():
     mats = {
         0: Material({'H1': 1.0, 'K39': 1.0}, density=42.0), 
@@ -750,6 +756,17 @@ def test_iter():
         assert_is(mats[i], mat)
         assert_equal(j, idx_tag[ve])
         j += 1
+
+def test_iter_ve():
+    mats = {
+        0: Material({'H1': 1.0, 'K39': 1.0}, density=42.0), 
+        1: Material({'H1': 0.1, 'O16': 1.0}, density=43.0), 
+        2: Material({'He4': 42.0}, density=44.0), 
+        3: Material({'Tm171': 171.0}, density=45.0), 
+        }
+    m = gen_mesh(mats=mats)
+    ves1 = set(ve for _, _, ve in m)
+    ves2 = set(m.iter_ve())
         
 
 def test_contains():

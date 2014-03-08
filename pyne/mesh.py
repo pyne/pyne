@@ -336,7 +336,7 @@ class IMeshTag(Tag):
         m = self.mesh.mesh
         size = len(self.mesh)
         mtag = self.tag
-        miter = m.iterate(iBase.Type.region, iMesh.Topology.all)
+        miter = self.mesh.iter_ve()
         if isinstance(key, _INTEGRAL_TYPES):
             if key >= size:
                 raise IndexError("key index {0} greater than the size of the "
@@ -366,7 +366,7 @@ class IMeshTag(Tag):
         m = self.mesh.mesh
         msize = len(self.mesh)
         mtag = self.tag
-        miter = m.iterate(iBase.Type.region, iMesh.Topology.all)
+        miter = self.mesh.iter_ve()
         if isinstance(key, _INTEGRAL_TYPES):
             if key >= msize:
                 raise IndexError("key index {0} greater than the size of the "
@@ -399,7 +399,7 @@ class IMeshTag(Tag):
         m = self.mesh.mesh
         size = len(self.mesh)
         mtag = self.tag
-        miter = m.iterate(iBase.Type.region, iMesh.Topology.all)
+        miter = self.mesh.iter_ve()
         if isinstance(key, _INTEGRAL_TYPES):
             if key >= size:
                 raise IndexError("key index {0} greater than the size of the "
@@ -662,11 +662,7 @@ class Mesh(object):
         self.mats = mats
 
         # tag with volume id and ensure mats exist.
-        if self.structured:
-            ves = list(self.structured_iterate_hex(self.structured_ordering))
-        else:
-            ves = list(self.mesh.iterate(iBase.Type.region, iMesh.Topology.all))
-
+        ves = list(self.iter_ve())
         tags = self.mesh.getAllTags(ves[0])
         tags = set(tag.name for tag in tags)
         if 'idx' in tags:
@@ -725,6 +721,14 @@ class Mesh(object):
         for i, ve in enumerate(self.mesh.iterate(iBase.Type.region, 
                                                  iMesh.Topology.all)):
             yield i, mats[i], ve
+
+    def iter_ve(self):
+        """Returns an iterator that yields on the volume elements.
+        """
+        if self.structured:
+            return self.structured_iterate_hex(self.structured_ordering)
+        else:
+            return self.mesh.iterate(iBase.Type.region, iMesh.Topology.all)
 
     def __contains__(self, i):
         return i < len(self)
