@@ -661,9 +661,7 @@ def test_imeshtag():
         }
     m = gen_mesh(mats=mats)
     m.f = IMeshTag(mesh=m, name='f')
-    ftag = m.mesh.getTagHandle('f')
-    ftag[list(m.mesh.iterate(iBase.Type.region, iMesh.Topology.all))] = \
-                                                                [1.0, 2.0, 3.0, 4.0]
+    m.f[:] = [1.0, 2.0, 3.0, 4.0]                                                                
 
     # Getting tags
     assert_equal(m.f[0], 1.0)
@@ -732,6 +730,10 @@ def test_lazytaginit():
     m.cactus[:] = np.array([42, 43, 44])
     assert_in('cactus', m.tags)
     assert_array_equal(m.cactus[0], [42, 43, 44])
+
+    x = np.arange(len(m))[:,np.newaxis] * np.array([42, 43, 44])
+    m.cactus[:] = x
+    assert_array_equal(m.cactus[2], x[2])
 
 def test_iter():
     mats = {
