@@ -1,4 +1,4 @@
-PyNE: The Nuclear Engineering Toolkit
+Viva, el Scopz!!!!!!
 =====================================
 The PyNE project aims to provide a common set of tools for nuclear 
 science and engineering needs.
