@@ -18,6 +18,7 @@ from pyne.dbgen.eaf import make_eaf
 from pyne.dbgen import wimsdfpy
 from pyne.dbgen import ndsfpy
 from pyne.dbgen.hashtools import check_hashes
+from pyne.dbgen.q_val import make_q_value
 
 # Thanks to http://patorjk.com/software/taag/
 # and http://www.chris.com/ascii/index.php?art=creatures/dragons (Jeff Ferris)
@@ -78,11 +79,12 @@ def main():
                   ('materials', make_materials_library),
                   ('eaf', make_eaf),
                   ('wimsd_fpy', wimsdfpy.make_fpy),
-                  ('nds_fpy', ndsfpy.make_fpy)
+                  ('nds_fpy', ndsfpy.make_fpy),
+                  ('q_values', make_q_value)
                   ]
     make_map = dict(make_funcs)
     make_open = set(['atomic_mass', 'scattering_lengths', 'simple_xs', 'materials',
-                     'wimsd_fpy', 'nds_fpy'])
+                     'wimsd_fpy', 'nds_fpy', 'q_values'])
 
     # Parse the command line arguments
     parser = argparse.ArgumentParser(description='Make a nuclear data library.')
