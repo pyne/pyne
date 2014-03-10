@@ -2,7 +2,7 @@ from pyne import alara
 from pyne.mesh import Mesh
 import uuid
 
-class Transmuter(Transmuter):
+class Transmuter(object):
     """A class for transmuting materials (possibly on meshes) using ALARA."""
 
     def __init__(self, element_lib, data_lib, t=0.0, phi=0.0,
