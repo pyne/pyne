@@ -14,16 +14,34 @@ ________________________________________________________________________________
 >>./get_tag_values_matlib.sh -d /home/moataz/.local/lib/python2.7/site-packages/pyne/nuc_data.h5 -f test_models/test_6.h5m -c fluka
 
 The matrials group names found in the h5m file are: 
-['graveyard', 'mat:Nitrogen', 'tally_4.cell.flux.p', 'mat:Mg/rho:-2.3', 'mat:Nitrogen/rho:-3', 'mat:Steel, Stainless 321/rho:-7']
+['graveyard', 'mat:Nitrogen', 'tally_4.cell.flux.p', 'mat:Mg/rho:-2.3', 
+'mat:Nitrogen/rho:-3', 'mat:Steel, Stainless 321/rho:-7']
 
-[pyne.material.Material({70140000: 0.99636, 70150000: 0.00364}, 1.0, 0.001165, -1.0, {"fluka_name":"NITROGEN","mat_number":"1","name":"Nitrogen"}), pyne.material.Material({120240000: 0.7899, 120250000: 0.10000000000000002, 120260000: 0.11010000000000002}, 1.0, -2.3, -1.0, {"fluka_name":"MG","mat_number":"2","name":"Mg"}), pyne.material.Material({70140000: 0.99636, 70150000: 0.00364}, 1.0, -3.0, -1.0, {"fluka_name":"NITROGE1","mat_number":"3","name":"Nitrogen"}), pyne.material.Material({60120000: 0.10992222222222221, 60130000: 0.001188888888888889, 140280000: 0.10246999999999999, 140290000: 0.005205555555555555, 140300000: 0.0034355555555555554, 150310000: 0.11111111111111109, 160320000: 0.10554444444444443, 160330000: 0.0008333333333333332, 160340000: 0.004722222222222222, 160360000: 1.1111111111111112e-05, 220460000: 0.009166666666666667, 220470000: 0.008266666666666667, 220480000: 0.0819111111111111, 220490000: 0.00601111111111111, 220500000: 0.005755555555555555, 240500000: 0.004827777777777777, 240520000: 0.0930988888888889, 240530000: 0.010556666666666666, 240540000: 0.0026277777777777784, 250550000: 0.11111111111111109, 260540000: 0.006494444444444444, 260560000: 0.10194888888888888, 260570000: 0.002354444444444445, 260580000: 0.00031333333333333327, 280580000: 0.0756411111111111, 280600000: 0.029136666666666665, 280610000: 0.0012665555555555555, 280620000: 0.004038444444444444, 280640000: 0.0010283333333333334}, 1.0, -7.0, -1.0, {"fluka_name":"STEELSTA","mat_number":"4","name":"Steel, Stainless 321"})]
+[pyne.material.Material({70140000: 0.99636, 70150000: 0.00364}, 1.0, 0.001165, -1.0, 
+{"fluka_name":"NITROGEN","mat_number":"1","name":"Nitrogen"}), pyne.material.Material({120240000: 
+0.7899, 120250000: 0.10000000000000002, 120260000: 0.11010000000000002}, 1.0, -2.3, -1.0, 
+{"fluka_name":"MG","mat_number":"2","name":"Mg"}), pyne.material.Material({70140000: 0.99636, 
+70150000: 0.00364}, 1.0, -3.0, -1.0, {"fluka_name":"NITROGE1","mat_number":"3","name":"Nitrogen"}),
+pyne.material.Material({60120000: 0.10992222222222221, 60130000: 0.001188888888888889, 140280000: 
+0.10246999999999999, 140290000: 0.005205555555555555, 140300000: 0.0034355555555555554, 150310000: 
+0.11111111111111109, 160320000: 0.10554444444444443, 160330000: 0.0008333333333333332, 160340000: 
+0.004722222222222222, 160360000: 1.1111111111111112e-05, 220460000: 0.009166666666666667, 220470000: 
+0.008266666666666667, 220480000: 0.0819111111111111, 220490000: 0.00601111111111111, 220500000: 
+0.005755555555555555, 240500000: 0.004827777777777777, 240520000: 0.0930988888888889, 240530000: 
+0.010556666666666666, 240540000: 0.0026277777777777784, 250550000: 0.11111111111111109, 260540000:
+0.006494444444444444, 260560000: 0.10194888888888888, 260570000: 0.002354444444444445, 260580000: 
+0.00031333333333333327, 280580000: 0.0756411111111111, 280600000: 0.029136666666666665, 280610000: 
+0.0012665555555555555, 280620000: 0.004038444444444444, 280640000: 0.0010283333333333334}, 1.0,
+-7.0, -1.0, {"fluka_name":"STEELSTA","mat_number":"4","name":"Steel, Stainless 321"})]
 
 __________________________________________________________________________________________
 
->>./get_tag_values_matlib.sh -d /home/moataz/.local/lib/python2.7/site-packages/pyne/nuc_data.h5 -f test_models/test_.h5m -c fluka
+>>./get_tag_values_matlib.sh -d /home/moataz/.local/lib/python2.7/site-packages/pyne/nuc_data.h5 -f 
+test_models/test_.h5m -c fluka
 
 The matrials group names found in the h5m file are: 
-['graveyard', 'mat:Air/rho:-0.001205', 'tally_4.cell.flux.p', 'mat:Concrete/rho:-2.3', 'mat:Lead/rho:-11.35', 'mat:Mercury/rho:-7.874']
+['graveyard', 'mat:Air/rho:-0.001205', 'tally_4.cell.flux.p', 'mat:Concrete/rho:-2.3', 
+'mat:Lead/rho:-11.35', 'mat:Mercury/rho:-7.874']
 
 material {Air} doesnt exist in pyne material lib
 near matches to  Air  are 
@@ -33,7 +51,8 @@ C-552 Air-Equivalent Plastic
 
 ____________________________________________________________________________________________
 
->>./get_tag_values_matlib.sh -d /home/moataz/.local/lib/python2.7/site-packages/pyne/nuc_data.h5 -f test_models/test_2.h5m -c fluka
+>>./get_tag_values_matlib.sh -d /home/moataz/.local/lib/python2.7/site-packages/pyne/nuc_data.h5 -f 
+test_models/test_2.h5m -c fluka
 
 The matrials group names found in the h5m file are: 
 ['material/copper', 'material/iron']
