@@ -2099,8 +2099,12 @@ class MeshTally(StatMesh):
         #Tag results and error vector to mesh
         res_tag = IMeshTag(num_e_groups, float, mesh=self, name=self.tag_names[0])
         rel_err_tag = IMeshTag(num_e_groups, float, mesh=self, name=self.tag_names[1])
-        res_tag[:] = result.transpose().tolist()
-        rel_err_tag[:] = rel_error.transpose().tolist()
+        if num_e_groups == 1:
+            res_tag[:] = result[0]
+            rel_err_tag[:] = rel_error[0]
+        else:
+            res_tag[:] = result.transpose()
+            rel_err_tag[:] = rel_error.transpose()
         
         #If "total" data exists (i.e. if there is more than
         #1 energy group) get it and tag it onto the mesh.
