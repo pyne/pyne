@@ -11,7 +11,8 @@ optional arguments:
 
 _______________________________________________________________________________________
 
->>./get_tag_values_matlib.sh -d /home/moataz/.local/lib/python2.7/site-packages/pyne/nuc_data.h5 -f test_models/test_6.h5m -c fluka
+>>./get_tag_values_matlib.sh -d /home/moataz/.local/lib/python2.7/site-packages/pyne/nuc_data.h5 -f 
+test_models/test_6.h5m -c fluka
 
 The matrials group names found in the h5m file are: 
 ['graveyard', 'mat:Nitrogen', 'tally_4.cell.flux.p', 'mat:Mg/rho:-2.3', 
