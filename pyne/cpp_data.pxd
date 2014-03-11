@@ -4,6 +4,7 @@ from libcpp.map cimport map
 from libcpp.set cimport set
 from libcpp.utility cimport pair
 from libcpp cimport bool
+from libcpp.vector cimport vector
 
 cimport extra_types
 
@@ -83,7 +84,7 @@ cdef extern from "data.h" namespace "pyne":
     int metastable_id(int, int) except +
     int metastable_id(int) except +
 
-    ctypedef struct decay_struct:
+    cdef struct decay_struct:
         int parent
         int daughter
         char decay[5]
@@ -95,9 +96,16 @@ cdef extern from "data.h" namespace "pyne":
         double beta_branch_ratio
         double beta_branch_ratio_error
 
-    void decay_data_byparentchild(pair[int, int] from_to, decay_struct *) except +
+    pair[double,double] decay_half_life(pair[int, int]) except +
+    vector[pair[double, double]] decay_half_life(int) except +
+    double decay_branch_ratio(pair[int, int] from_to) except +
+    vector[double] decay_branch_ratio(int) except +
+    pair[double,double] decay_photon_branch_ratio(pair[int, int] from_to) except +
+    vector[pair[double, double]] decay_photon_branch_ratio(int) except +
+    pair[double,double] decay_beta_branch_ratio(pair[int, int] from_to) except +
+    vector[pair[double, double]] decay_beta_branch_ratio(int) except +
 
-    ctypedef struct gamma_struct:
+    cdef struct gamma_struct:
         double energy
         double energy_err
         double photon_intensity
@@ -113,28 +121,28 @@ cdef extern from "data.h" namespace "pyne":
         double l_conv_e
         double m_conv_e
 
-    int gamma_data_byen(double, double, gamma_struct *) except +
-    int gamma_data_byparent(int, gamma_struct *) except +
+    #int gamma_data_byen(double, double, gamma_struct *) except +
+    #int gamma_data_byparent(int, gamma_struct *) except +
 
-    ctypedef struct alpha_struct:
+    cdef struct alpha_struct:
         double energy
         double intensity
         int from_nuc
         int to_nuc
 
-    int alpha_data_byen(double, double, alpha_struct *) except +
-    int alpha_data_byparent(int, alpha_struct *) except +
+    #int alpha_data_byen(double, double, alpha_struct *) except +
+    #int alpha_data_byparent(int, alpha_struct *) except +
 
-    ctypedef struct beta_struct:
+    cdef struct beta_struct:
         double endpoint_energy
         double avg_energy
         double intensity
         int from_nuc
         int to_nuc
 
-    int beta_data_byparent(int, beta_struct *) except +
+    #int beta_data_byparent(int, beta_struct *) except +
 
-    ctypedef struct ecbp_struct:
+    cdef struct ecbp_struct:
         double endpoint_energy
         double avg_energy
         double beta_plus_intensity
@@ -144,4 +152,4 @@ cdef extern from "data.h" namespace "pyne":
         double k_conv_e
         double l_conv_e
         double m_conv_e
-    int ecbp_data_byparent(int, ecbp_struct *) except +
+    #int ecbp_data_byparent(int, ecbp_struct *) except +

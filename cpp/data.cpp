@@ -1053,7 +1053,7 @@ double pyne::half_life(std::string nuc)
 std::map<std::pair<int, int>, pyne::decay_struct> pyne::decay_data = \
   std::map<std::pair<int, int>, pyne::decay_struct>();
 
-void pyne::_load_decay_data()
+template<> void pyne::_load_data<pyne::decay_struct>()
 {
 
   // Loads the decay table into memory
@@ -1104,28 +1104,106 @@ void pyne::_load_decay_data()
 }
 
 
-template<typename T> void pyne::decay_data_access(std::pair<int, int> from_to, T &a, size_t valoffset) {
-  // Find the nuclide's state energy in MeV
-  std::map<std::pair<int, int> , pyne::decay_struct>::iterator nuc_iter, nuc_end;
 
-  nuc_iter = decay_data.find(from_to);
-  nuc_end = decay_data.end();
+template<typename T, typename U> T pyne::data_access(std::pair<int, int> from_to, size_t valoffset, std::map<std::pair<int, int>, U> &data) {
+  typename std::map<std::pair<int, int>, U>::iterator nuc_iter, nuc_end;
 
+  nuc_iter = data.find(from_to);
+  nuc_end = data.end();
+  T *ret;
   // First check if we already have the nuc in the map
-  if (nuc_iter != nuc_end)
-    a = T ((char*)&(nuc_iter->second) + valoffset);
-
+  if (nuc_iter != nuc_end){
+    ret = (T *)((char *)&(nuc_iter->second) + valoffset);
+    return *ret;
+  }
   // Next, fill up the map with values from the
   // nuc_data.h5, if the map is empty.
-  if (decay_data.empty())
+  if (data.empty())
   {
-    _load_decay_data();
-    decay_data_access(from_to, a, valoffset);
+    _load_data<U>();
+    return data_access<T, U>(from_to, valoffset, data);
   };
+  // This is okay for now because we only return ints and doubles
+  return 0;
+}
 
+template<typename T, typename U> std::vector<T> pyne::data_access(int parent, size_t valoffset, std::map<std::pair<int, int>, U> &data){
+  typename std::map<std::pair<int, int>, U>::iterator nuc_iter, nuc_end, it;
+  std::vector<T> result;
+  nuc_iter = data.lower_bound(std::make_pair(parent,0));
+  nuc_end = data.upper_bound(std::make_pair(parent,9999999999));
+  T *ret;
+  // First check if we already have the nuc in the map
+  for (it = nuc_iter; it!= nuc_end; ++it){
+    ret = (T *)((char *)&(nuc_iter->second) + valoffset);
+    result.push_back(*ret);
+  }
+  // Next, fill up the map with values from the
+  // nuc_data.h5, if the map is empty.
+  if (data.empty())
+  {
+    _load_data<U>();
+    return data_access<T, U>(parent, valoffset, data);
+  };
+  return result;
+};
+
+
+std::pair<double, double> pyne::decay_half_life(std::pair<int, int> from_to){
+  return std::make_pair(data_access<double, decay_struct>(from_to, offsetof(decay_struct, half_life), decay_data),
+   data_access<double, decay_struct>(from_to, offsetof(decay_struct, half_life_error), decay_data));
+};
+
+std::vector<std::pair<double, double> >pyne::decay_half_life(int parent){
+  std::vector<std::pair<double, double> > result;
+  std::vector<double> part1 = data_access<double, decay_struct>(parent, offsetof(decay_struct, half_life), decay_data);
+  std::vector<double> part2 = data_access<double, decay_struct>(parent, offsetof(decay_struct, half_life_error), decay_data);
+  for(int i = 0; i < part1.size(); ++i){
+    result.push_back(std::make_pair(part1[i],part2[i]));
+  }
+  return result;
+}
+
+double pyne::decay_branch_ratio(std::pair<int, int> from_to){
+  return data_access<double, decay_struct>(from_to, offsetof(decay_struct, branch_ratio), decay_data);
+};
+
+std::vector<double> pyne::decay_branch_ratio(int parent){
+  return data_access<double, decay_struct>(parent, offsetof(decay_struct, half_life), decay_data);
+}
+
+std::pair<double, double> pyne::decay_photon_branch_ratio(std::pair<int,int> from_to){
+  return std::make_pair(data_access<double, decay_struct>(from_to, offsetof(decay_struct, photon_branch_ratio), decay_data),
+   data_access<double, decay_struct>(from_to, offsetof(decay_struct, photon_branch_ratio_error), decay_data));
+};
+
+std::vector<std::pair<double, double> >pyne::decay_photon_branch_ratio(int parent){
+  std::vector<std::pair<double, double> > result;
+  std::vector<double> part1 = data_access<double, decay_struct>(parent, offsetof(decay_struct, photon_branch_ratio), decay_data);
+  std::vector<double> part2 = data_access<double, decay_struct>(parent, offsetof(decay_struct, photon_branch_ratio_error), decay_data);
+  for(int i = 0; i < part1.size(); ++i){
+    result.push_back(std::make_pair(part1[i],part2[i]));
+  }
+  return result;
+}
+
+std::pair<double, double> pyne::decay_beta_branch_ratio(std::pair<int,int> from_to){
+  return std::make_pair(data_access<double, decay_struct>(from_to, offsetof(decay_struct, beta_branch_ratio), decay_data),
+   data_access<double, decay_struct>(from_to, offsetof(decay_struct, beta_branch_ratio_error), decay_data));
+};
+
+std::vector<std::pair<double, double> >pyne::decay_beta_branch_ratio(int parent){
+  std::vector<std::pair<double, double> > result;
+  std::vector<double> part1 = data_access<double, decay_struct>(parent, offsetof(decay_struct, beta_branch_ratio), decay_data);
+  std::vector<double> part2 = data_access<double, decay_struct>(parent, offsetof(decay_struct, beta_branch_ratio_error), decay_data);
+  for(int i = 0; i < part1.size(); ++i){
+    result.push_back(std::make_pair(part1[i],part2[i]));
+  }
+  return result;
 }
 
 
+/*
 void pyne::decay_data_byparentchild(std::pair<int, int> from_to, decay_struct *data){
 
   if (decay_data.empty()) {
@@ -1143,11 +1221,11 @@ void pyne::decay_data_byparentchild(std::pair<int, int> from_to, decay_struct *d
   if (nuc_iter != nuc_end)
     data[0] = nuc_iter->second;
 }
+*/
 
+std::map<std::pair<int, double>, pyne::gamma_struct> pyne::gamma_data_byparent;
 
-std::vector<pyne::gamma_struct> pyne::gamma_data;
-
-void pyne::_load_gamma_data()
+template<> void pyne::_load_data<pyne::gamma_struct>()
 {
 
   // Loads the gamma table into memory
@@ -1199,12 +1277,113 @@ void pyne::_load_gamma_data()
   gamma_data.resize(gamma_length);
 
   for (int i = 0; i < gamma_length; ++i) {
-    gamma_data[i] = gamma_array[i];
+    gamma_data_byparent[std::make_pair(gamma_array[i].parent_nuc, gamma_array[i].energy)] = gamma_array[i];
   }
 
 }
 
+template<typename T, typename U> std::vector<T> pyne::data_access(double energy_min, double energy_max, size_t valoffset, std::map<std::pair<int, double>, U>  &data){
+  typename std::map<std::pair<int, double>, U>::iterator nuc_iter, nuc_end, it;
+  std::vector<T> result;
+  nuc_iter = data.lower_bound(std::make_pair(energy_min,0));
+  nuc_end = data.upper_bound(std::make_pair(energy_max,9999999999));
+  T *ret;
+  // First check if we already have the nuc in the map
+  for (it = nuc_iter; it!= nuc_end; ++it){
+    ret = (T *)((char *)&(nuc_iter->second) + valoffset);
+    result.push_back(*ret);
+  }
+  // Next, fill up the map with values from the
+  // nuc_data.h5, if the map is empty.
+  if (data.empty())
+  {
+    _load_data<U>();
+    return data_access<T, U>(parent, valoffset, data);
+  };
+  return result;
+};
 
+template<typename T, typename U> std::vector<T> pyne::data_access(int parent, size_t valoffset, std::map<std::pair<int, double>, U>  &data){
+  typename std::map<std::pair<int, double>, U>::iterator nuc_iter, nuc_end, it;
+  std::vector<T> result;
+  nuc_iter = data.lower_bound(std::make_pair(0,parent));
+  nuc_end = data.upper_bound(std::make_pair(DBL_MAX,parent));
+  T *ret;
+  // First check if we already have the nuc in the map
+  for (it = nuc_iter; it!= nuc_end; ++it){
+    ret = (T *)((char *)&(nuc_iter->second) + valoffset);
+    result.push_back(*ret);
+  }
+  // Next, fill up the map with values from the
+  // nuc_data.h5, if the map is empty.
+  if (data.empty())
+  {
+    _load_data<U>();
+    return data_access<T, U>(parent, valoffset, data);
+  };
+  return result;
+};
+
+
+std::vector<std::pair<double, double> > pyne::gamma_energy(int parent){
+  std::vector<std::pair<double, double> > result;
+  std::vector<double> part1 = data_access<double, gamma_struct>(parent, offsetof(gamma_struct, energy), gamma_data);
+  std::vector<double> part2 = data_access<double, gamma_struct>(parent, offsetof(gamma_struct, energy_error), gamma_data);
+  for(int i = 0; i < part1.size(); ++i){
+    result.push_back(std::make_pair(part1[i],part2[i]));
+  }
+  return result;
+};
+std::vector<std::pair<double, double> > pyne::gamma_photon_intensity(int parent){
+  std::vector<std::pair<double, double> > result;
+  std::vector<double> part1 = data_access<double, gamma_struct>(parent, offsetof(gamma_struct, photon_intensity), gamma_data);
+  std::vector<double> part2 = data_access<double, gamma_struct>(parent, offsetof(gamma_struct, photon_intensity_error), gamma_data);
+  for(int i = 0; i < part1.size(); ++i){
+    result.push_back(std::make_pair(part1[i],part2[i]));
+  }
+  return result;
+};
+std::vector<std::pair<double, double> > pyne::gamma_conversion_intensity(int parent){
+  std::vector<std::pair<double, double> > result;
+  std::vector<double> part1 = data_access<double, gamma_struct>(parent, offsetof(gamma_struct, conversion_intensity), gamma_data);
+  std::vector<double> part2 = data_access<double, gamma_struct>(parent, offsetof(gamma_struct, conversion_intensity_error), gamma_data);
+  for(int i = 0; i < part1.size(); ++i){
+    result.push_back(std::make_pair(part1[i],part2[i]));
+  }
+  return result;
+};
+std::vector<std::pair<double, double> > pyne::gamma_total_intensity(int parent){
+  std::vector<std::pair<double, double> > result;
+  std::vector<double> part1 = data_access<double, gamma_struct>(parent, offsetof(gamma_struct, total_intensity), gamma_data);
+  std::vector<double> part2 = data_access<double, gamma_struct>(parent, offsetof(gamma_struct, total_intensity_error), gamma_data);
+  for(int i = 0; i < part1.size(); ++i){
+    result.push_back(std::make_pair(part1[i],part2[i]));
+  }
+  return result;
+};
+std::vector<std::pair<int, int> > pyne::gamma_from_to(int parent){
+  std::vector<std::pair<int, int> > result;
+  std::vector<int> part1 = data_access<int, gamma_struct>(parent, offsetof(gamma_struct, from_nuc), gamma_data);
+  std::vector<int> part2 = data_access<int, gamma_struct>(parent, offsetof(gamma_struct, to_nuc), gamma_data);
+  for(int i = 0; i < part1.size(); ++i){
+    result.push_back(std::make_pair(part1[i],part2[i]));
+  }
+  return result;
+};
+std::vector<std::pair<int, int> > pyne::gamma_from_to(double energy, double error){
+  std::vector<std::pair<int, int> > result;
+  std::vector<int> part1 = data_access<int, gamma_struct>(energy+error, energy-error, offsetof(gamma_struct, from_nuc), gamma_data);
+  std::vector<int> part2 = data_access<int, gamma_struct>(energy+error, energy-error, offsetof(gamma_struct, to_nuc), gamma_data);
+  for(int i = 0; i < part1.size(); ++i){
+    result.push_back(std::make_pair(part1[i],part2[i]));
+  }
+  return result;
+
+};
+std::vector<int> pyne::gamma_parent(double energy, double error){
+  return std::vector<int> part1 = data_access<int, gamma_struct>(energy+error, energy-error, offsetof(gamma_struct, from_nuc), gamma_data);
+};
+/*
 int pyne::gamma_data_byparent(int nuc, gamma_struct *data){
   int count = 0;
   if (gamma_data.empty()) {
@@ -1226,7 +1405,7 @@ int pyne::gamma_data_byparent(int nuc, gamma_struct *data){
   return count;
 }
 
-int pyne::gamma_data_byen(double en, double pm, gamma_struct *data){
+int pyne::gamma_data(double en, double pm, gamma_struct *data){
   int count = 0;
   if (gamma_data.empty()) {
     _load_gamma_data();
@@ -1246,11 +1425,11 @@ int pyne::gamma_data_byen(double en, double pm, gamma_struct *data){
   }
   return count;
 }
-
+*/
 
 std::vector<pyne::alpha_struct> pyne::alpha_data;
 
-void pyne::_load_alpha_data()
+template<> void pyne::_load_data<pyne::alpha_struct>()
 {
 
   // Loads the alpha table into memory
@@ -1291,12 +1470,12 @@ void pyne::_load_alpha_data()
   alpha_data.resize(alpha_length);
 
   for (int i = 0; i < alpha_length; ++i) {
-    alpha_data[i] = alpha_array[i];
+    alpha_data[std::make_pair(alpha_array[i].from_nuc, alpha_array[i].to_nuc)] = alpha_array[i];
   }
 
 }
-
-int pyne::alpha_data_byparent(int nuc, alpha_struct *data){
+/*
+int pyne::alpha_data(int nuc, alpha_struct *data){
   int count = 0;
   if (alpha_data.empty()) {
     _load_alpha_data();
@@ -1317,7 +1496,7 @@ int pyne::alpha_data_byparent(int nuc, alpha_struct *data){
   return count;
 }
 
-int pyne::alpha_data_byen(double en, double pm, alpha_struct *data){
+int pyne::alpha_data(double en, double pm, alpha_struct *data){
   int count = 0;
   if (alpha_data.empty()) {
     _load_alpha_data();
@@ -1337,11 +1516,11 @@ int pyne::alpha_data_byen(double en, double pm, alpha_struct *data){
   }
   return count;
 }
-
+*/
 
 std::vector<pyne::beta_struct> pyne::beta_data;
 
-void pyne::_load_beta_data()
+template<> void pyne::_load_data<pyne::beta_struct>()
 {
 
   // Loads the beta table into memory
@@ -1384,37 +1563,15 @@ void pyne::_load_beta_data()
   beta_data.resize(beta_length);
 
   for (int i = 0; i < beta_length; ++i) {
-    beta_data[i] = beta_array[i];
+    beta_data[std::make_pair(beta_array[i].from_nuc, beta_array[i].to_nuc)] = beta_array[i];
   }
 
-}
-
-
-int pyne::beta_data_byparent(int nuc, beta_struct *data){
-  int count = 0;
-  if (beta_data.empty()) {
-    _load_beta_data();
-    count = beta_data_byparent(nuc, data);
-    return count;
-  }
-  for (int i = 0; i < beta_data.size(); ++i) {
-    if (beta_data[i].from_nuc == nuc) ++count;
-  }
-  data = (beta_struct*) malloc(sizeof(beta_struct)*count);
-  int n = 0;
-  for (int i = 0; i < beta_data.size(); ++i) {
-    if (beta_data[i].from_nuc == nuc) {
-      data[n] = beta_data[i];
-      ++n;
-    }
-  }
-  return count;
 }
 
 
 std::vector<pyne::ecbp_struct> pyne::ecbp_data;
 
-void pyne::_load_ecbp_data()
+template<> void pyne::_load_data<pyne::ecbp_struct>()
 {
 
   // Loads the ecbp table into memory
@@ -1465,24 +1622,3 @@ void pyne::_load_ecbp_data()
 
 }
 
-
-int pyne::ecbp_data_byparent(int nuc, ecbp_struct *data){
-  int count = 0;
-  if (ecbp_data.empty()) {
-    _load_ecbp_data();
-    count = ecbp_data_byparent(nuc, data);
-    return count;
-  }
-  for (int i = 0; i < ecbp_data.size(); ++i) {
-    if (ecbp_data[i].from_nuc == nuc) ++count;
-  }
-  data = (ecbp_struct*) malloc(sizeof(ecbp_struct)*count);
-  int n = 0;
-  for (int i = 0; i < ecbp_data.size(); ++i) {
-    if (ecbp_data[i].from_nuc == nuc) {
-      data[n] = ecbp_data[i];
-      ++n;
-    }
-  }
-  return count;
-}
