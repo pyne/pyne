@@ -1,5 +1,5 @@
-#ifndef DAGMC_MCNP_IFACE_H
-#define DAGMC_MCNP_IFACE_H
+#ifndef FLUDAG_SRC_FLUKA_FUNCS_H
+#define FLUDAG_SRC_FLUKA_FUNCS_H
 
 #include <string>
 #include <vector>
@@ -29,24 +29,16 @@ extern "C" {
                 int max_pbl);
 
   void slow_check(double pos[3], const double dir[3], int &oldReg);
-  MBEntityHandle check_reg(MBEntityHandle volume, double point[3], double dir[3]); // check we are where we say we are
+  // check we are where we say we are
+  MBEntityHandle check_reg(MBEntityHandle volume, double point[3], double dir[3]); 
 
   /* get the sense of a region with respect to the global next_surf,
    * which is set by a call to rayfire
   */
   int getSense(int region);
-/*
- * Prepare a descriptive string that creates the properties of the volume whose index is index
- */
-  std::string mat_property_string (int index, std::vector<std::string> &properties);
-/*
- * Write the material assignment for each volume to a file named matfile
- */
-  void fludagwrite_assignma(std::string matfile);  
-
   void dagmc_version_(double* dagmcVersion);
 #ifdef __cplusplus
 } // extern "C"
 #endif
 
-#endif /* DAGMC_MCNP_IFACE_H */
+#endif /* FLUDAG_SRC_FLUKA_FUNCS_H */

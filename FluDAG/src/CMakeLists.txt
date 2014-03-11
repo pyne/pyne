@@ -1,37 +1,48 @@
+# CMAKE build script for FluDag 
+
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6.4)
 PROJECT (MyFluDAG)
 
 IF (NOT DEFINED HOME) 
-	set (HOME "$ENV{HOME}")
+	SET (HOME "$ENV{HOME}")
 ENDIF (NOT DEFINED HOME) 
 
 IF (NOT DEFINED FLUPRO)
-	set (FLUPRO "$ENV{FLUPRO}")
+	SET (FLUPRO "$ENV{FLUPRO}")
 ENDIF (NOT DEFINED FLUPRO)
 
-SET(MOAB_INCLUDE ${MOAB_HOME}/include)
-SET(MOAB_LIB_DIR ${MOAB_HOME}/lib)
-set (moablibs ${MOAB_LIB_DIR}/libdagmc.so ${MOAB_LIB_DIR}/libMOAB.so)
-
 # Where to look for includes
-INCLUDE_DIRECTORIES(${MOAB_INCLUDE})
+INCLUDE_DIRECTORIES("${MOAB_HOME}/include", "${FLUPRO}/flukapro")
+
+# make fludag source files into a library
+ADD_LIBRARY(fludag SHARED
+	    ${FLUDAG_SOURCE}/fluka_funcs.cpp
+	    ${FLUDAG_SOURCE}/dagmc_utils.cpp
+	    ${FLUDAG_SOURCE}/WrapMag.cc
+	    ${FLUDAG_SOURCE}/WrapLookFX.cc
+	    ${FLUDAG_SOURCE}/WrapReg.cc
+	    ${FLUDAG_SOURCE}/WrapFlgfwr.cc
+)
+# ADD_LIBRARY(parseflu SHARED
+#	    ${DAGMC_FLUDAG_SOURCE}/dagmc_define.cpp
+#	    ${DAGMC_FLUDAG_SOURCE}/parse_flu.cpp
+#)
+
+# set libraries needed to link to test cases
+SET(FLUDAG_LIBRARIES
+    pthread
+    ${MOAB_HOME}/lib/libdagmc.so
+    ${MOAB_HOME}/lib/libMOAB.so
+    ${FLUPRO}/libflukahp.a
+    fludag
+    gfortran
+)
+
 ENABLE_LANGUAGE(Fortran)
 
-#SET (fluka_file ${FLUPRO}/usermvax/mgdraw.f)
-SET (fluka_includes ${FLUPRO}/flukapro)
-SET (fluka_libdir ${FLUPRO})
-#ADD_CUSTOM_COMMAND(OUTPUT mgdraw.o
-#       COMMAND gfortran -c ${fluka_file} -I${fluka_includes} 
-#       DEPENDS ${FLUPRO}/usermvax/mgdraw.f
-#       COMMENT "Custom command to compile mgdraw object with parenthetically named includes"
-#       )
-#ADD_CUSTOM_TARGET (mgdraw
-#	        DEPENDS mgdraw.o)
-
-SET (commonfiles fluka_funcs.cpp dagmc_utils.cpp Input.cpp)
-SET (wrapperfiles WrapReg2Name.cc WrapMag.cc 
-		  WrapLookFX.cc WrapReg.cc WrapFlgfwr.cc)
-
 # Create the executable that can call flukam_
-ADD_EXECUTABLE(mainfludag mainFluDAG.cpp ${commonfiles} ${wrapperfiles})
-TARGET_LINK_LIBRARIES(mainfludag ${moablibs} ${FLUPRO}/libflukahp.a gfortran)
+ADD_EXECUTABLE(mainfludag mainFluDAG.cpp) 
+TARGET_LINK_LIBRARIES(mainfludag ${FLUDAG_LIBRARIES})
+
+# ADD_EXECUTABLE(mainparse dagmc_define.cpp parse_flu.cpp moab_utils.cpp UnitNumberManager.cpp) 
+# TARGET_LINK_LIBRARIES(mainparse ${FLUDAG_LIBRARIES})
