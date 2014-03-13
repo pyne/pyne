@@ -29,7 +29,6 @@ def gen_mesh(mats=None):
     flux_tag[volumes1] = flux_data
     return mesh_1
 
-
 #############################################
 #Test unstructured mesh functionality
 #############################################
@@ -690,6 +689,41 @@ def test_imeshtag():
 
     # deleting tag
     del m.f[:]
+
+def test_imeshtag_fancy_indexing():
+    m = gen_mesh()
+    
+    #  tags of length 1
+    m.horse = IMeshTag(1, float)
+    #  test fancy indexing
+    m.horse[[2, 0]] = [3.0, 1.0]
+    assert_array_equal(m.horse[:], [1.0, 0.0, 3.0, 0.0])
+    m.horse[[2]] = [7.0]
+    assert_array_equal(m.horse[:], [1.0, 0.0, 7.0, 0.0])
+
+    #  tags of length > 1
+    m.grape = IMeshTag(2, float)
+    #  test fancy indexing
+    m.grape[[2, 0]] = [[3.0, 4.0], [5.0, 6.0]]
+    assert_array_equal(m.grape[:], [[5.0, 6.0], [0.0, 0.0], [3.0, 4.0], [0.0, 0.0]])
+    m.grape[[2]] = [[13.0, 14.0]]
+    assert_array_equal(m.grape[:], [[5.0, 6.0], [0.0, 0.0], [13.0, 14.0], [0.0, 0.0]])
+    m.grape[1] = [23.0, 24.0]
+    assert_array_equal(m.grape[:], [[5.0, 6.0], [23.0, 24.0], [13.0, 14.0], [0.0, 0.0]])
+
+
+def test_imeshtag_broadcasting():
+    m = gen_mesh()
+    #  tags of length 1
+    m.horse = IMeshTag(1, float)
+    m.horse[:] = 2.0
+    assert_array_equal(m.horse[:], [2.0]*4)
+
+    #  tags of length > 1
+    m.grape = IMeshTag(2, float)
+    #  test broadcasing
+    m.grape[[2, 0]] = [7.0, 8.0]
+    assert_array_equal(m.grape[:], [[7.0, 8.0], [0.0, 0.0], [7.0, 8.0], [0.0, 0.0]])
 
 
 def test_comptag():
