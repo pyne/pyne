@@ -3,8 +3,8 @@
 ///
 /// \brief Converts between naming conventions for reaction channels.
 
-#ifndef _PYNE_RXNAME_
-#define _PYNE_RXNAME_
+#ifndef PYNE_7DOEB2PKSBEFFIA3Q2NARI3KFY
+#define PYNE_7DOEB2PKSBEFFIA3Q2NARI3KFY
 #include <utility>
 #include <iostream>
 #include <string>
@@ -14,8 +14,10 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#ifndef PYNE_IS_AMALGAMATED
 #include "pyne.h"
 #include "nucname.h"
+#endif
 
 /// Number of reactions supported by default.
 #define NUM_RX_NAMES 549
@@ -354,4 +356,4 @@ namespace rxname
 };
 };
 
-#endif
+#endif  // PYNE_7DOEB2PKSBEFFIA3Q2NARI3KFY

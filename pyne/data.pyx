@@ -7,20 +7,13 @@ from libcpp.map cimport map
 from libcpp.set cimport set as cpp_set
 from cython.operator cimport dereference as deref
 from cython.operator cimport preincrement as inc
+from libcpp.map cimport map as cpp_map
+from libcpp.set cimport set as cpp_set
+from libcpp.string cimport string as std_string
+from libcpp.utility cimport pair as cpp_pair
 #from cython cimport pointer
 
 # local imports 
-include "include/cython_version.pxi"
-IF CYTHON_VERSION_MAJOR == 0 and CYTHON_VERSION_MINOR >= 17:
-    from libcpp.map cimport map as cpp_map
-    from libcpp.set cimport set as cpp_set
-    from libcpp.string cimport string as std_string
-    from libcpp.utility cimport pair as cpp_pair
-ELSE:
-    from pyne._includes.libcpp.map cimport map as cpp_map
-    from pyne._includes.libcpp.set cimport set as cpp_set
-    from pyne._includes.libcpp.string cimport string as std_string
-    from pyne._includes.libcpp.utility cimport pair as cpp_pair
 cimport extra_types
 
 cimport pyne.cpp_pyne
@@ -34,6 +27,30 @@ import pyne.nucname
 cimport cpp_data
 cimport pyne.stlcontainers as conv
 import pyne.stlcontainers as conv
+
+# Mathematical constants
+pi = cpp_data.pi
+"""Mathematical constant pi."""
+
+N_A = cpp_data.N_A
+"""Avogadro constant."""
+
+barns_per_cm2 = cpp_data.barns_per_cm2
+"""Barns per centimeter squared."""
+
+cm2_per_barn = cpp_data.cm2_per_barn
+"""Centimeter squared per barn."""
+
+sec_per_day = cpp_data.sec_per_day
+"""The number of seconds in a canonical day."""
+
+
+#
+# hash map and initialization
+#
+cdef conv._MapStrStr data_checksums_proxy = conv.MapStrStr(False)
+data_checksums_proxy.map_ptr = &cpp_data.data_checksums
+data_checksums = data_checksums_proxy
 
 
 #
@@ -234,8 +251,62 @@ def b(nuc):
 
     return float(value)
 
+#
+# Fission product yield data
+#
 
 
+def fpyield(from_nuc, to_nuc, source=0, get_errors=False):
+    """Finds the fission product yield for a (parent, child) nuclide pair [fraction].
+
+    Parameters
+    ----------
+    from_nuc : int or str 
+        Parent nuclide.
+    to_nuc : int or str 
+        Child nuclide.
+    source : int or str
+        The int or corresponding dictionary key for the source dataset.
+        Allowed values are:
+        'WIMSD': 0, 'NDS_THERMAL' : 1, 'NDS_FAST' : 2, 'NDS_14MEV' : 3
+    get_errors : boolean
+        return the error in the value if possible or 0
+
+    Returns
+    -------
+    fpy : float
+        Fractional yield of this nuclide pair [unitless].
+
+    Notes
+    -----
+    If this pair is not found, it is assumed to be impossible, and the yield
+    is set to zero.
+    """
+    srcmap = {'WIMSD': 0, 'NDS_THERMAL': 1, 'NDS_FAST': 2, 'NDS_14MEV': 3}
+    if isinstance(source, str):
+        sourceint = srcmap[source]
+    elif isinstance(source, int):
+        if 0 <= source <= 3:
+            sourceint = source
+        else:
+            raise ValueError
+    else:
+        raise ValueError('Only ints or strings are accepted')
+    if isinstance(from_nuc, int):
+        fn = pyne.cpp_nucname.id(<int> from_nuc)
+    elif isinstance(from_nuc, basestring):
+        fn = pyne.cpp_nucname.id(std_string(<char *> from_nuc))
+    else:
+        raise pyne.nucname.NucTypeError(from_nuc)
+
+    if isinstance(to_nuc, int):
+        tn = pyne.cpp_nucname.id(<int> to_nuc)
+    elif isinstance(to_nuc, basestring):
+        tn = pyne.cpp_nucname.id(std_string(<char *> to_nuc))
+    else:
+        raise pyne.nucname.NucTypeError(to_nuc)
+    fpy = cpp_data.fpyield(cpp_pair[int, int](fn, tn), <int> source, get_errors)
+    return fpy
 
 
 #
@@ -244,6 +315,7 @@ def b(nuc):
 cdef conv._MapIntDouble half_life_map_proxy = conv.MapIntDouble(False)
 half_life_map_proxy.map_ptr = &cpp_data.half_life_map
 half_life_map = half_life_map_proxy
+
 
 def half_life(nuc):
     """Finds the half-life of a nuclide in [seconds].
@@ -272,10 +344,10 @@ def half_life(nuc):
     return hl
 
 
-
 cdef conv._MapIntDouble decay_const_map_proxy = conv.MapIntDouble(False)
 decay_const_map_proxy.map_ptr = &cpp_data.decay_const_map
 decay_const_map = decay_const_map_proxy
+
 
 def decay_const(nuc):
     """Finds the decay constant of a nuclide in [1/seconds].
@@ -302,7 +374,6 @@ def decay_const(nuc):
         raise pyne.nucname.NucTypeError(nuc)
 
     return dc
-
 
 
 def branch_ratio(from_nuc, to_nuc):
@@ -346,6 +417,7 @@ def branch_ratio(from_nuc, to_nuc):
 cdef conv._MapIntDouble state_energy_map_proxy = conv.MapIntDouble(False)
 state_energy_map_proxy.map_ptr = &cpp_data.state_energy_map
 state_energy_map = state_energy_map_proxy
+
 
 def state_energy(nuc):
     """Finds the excitation energy [MeV] of a nuclide in a given state.

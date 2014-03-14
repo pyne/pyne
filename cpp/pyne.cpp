@@ -1,6 +1,8 @@
 // General Library
 
+#ifndef PYNE_IS_AMALGAMATED
 #include "pyne.h"
+#endif
 
 
 // PyNE Globals
@@ -96,10 +98,10 @@ double pyne::endftod (char * s) {
              100000 * s[3] + 1000000 * s[1] - 1111111 * '0';
       exp = s[10] - '0';
       // Make the right power of 10.
-      dbl_exp = (exp & 01? 10.: 1) * \
-                ((exp >>= 1) & 01? 100.: 1) * \
-                ((exp >>= 1) & 01? 1.0e4: 1) * \
-                ((exp >>= 1) & 01? 1.0e8: 1);
+      dbl_exp = exp & 01? 10.: 1;
+      dbl_exp *= (exp >>= 1) & 01? 100.: 1;
+      dbl_exp *= (exp >>= 1) & 01? 1.0e4: 1;
+      dbl_exp *= (exp >>= 1) & 01? 1.0e8: 1;
       // Adjust for powers of ten from treating mantissa as an integer.
       dbl_exp = (s[9] == '-'? 1/dbl_exp: dbl_exp) * 1.0e-6;
       // Get mantissa sign, apply exponent.
@@ -109,13 +111,13 @@ double pyne::endftod (char * s) {
       mant = s[7] + 10 * s[6] + 100 * s[5] + 1000 * s[4] + 10000 * s[3] + \
              100000 * s[1] - 111111 * '0';
       exp = s[10] + 10 * s[9] - 11 * '0';
-      dbl_exp = (exp & 01? 10.: 1) * \
-                ((exp >>= 1) & 01? 100.: 1) * \
-                ((exp >>= 1) & 01? 1.0e4: 1) * \
-                ((exp >>= 1) & 01? 1.0e8: 1) * \
-                ((exp >>= 1) & 01? 1.0e16: 1) * \
-                ((exp >>= 1) & 01? 1.0e32: 1) * \
-                ((exp >>= 1) & 01? 1.0e64: 1);
+      dbl_exp = exp & 01? 10.: 1;
+      dbl_exp *= (exp >>= 1) & 01? 100.: 1;
+      dbl_exp *= (exp >>= 1) & 01? 1.0e4: 1;
+      dbl_exp *= (exp >>= 1) & 01? 1.0e8: 1;
+      dbl_exp *= (exp >>= 1) & 01? 1.0e16: 1;
+      dbl_exp *= (exp >>= 1) & 01? 1.0e32: 1;
+      dbl_exp *= (exp >>= 1) & 01? 1.0e64: 1;
       dbl_exp = (s[8] == '-'? 1/dbl_exp: dbl_exp) * 1.0e-5;
       v = mant * (s[0] == '-'? -1: 1) * dbl_exp;
     }
@@ -289,12 +291,6 @@ std::string pyne::natural_naming(std::string name)
 //
 // Math Helpers
 //
-
-const double pyne::pi = 3.14159265359;
-const double pyne::N_A = 6.0221415e+23;
-const double pyne::barns_per_cm2 = 1e24; 
-const double pyne::cm2_per_barn = 1e-24; 
-const double pyne::sec_per_day = 24.0 * 3600.0; 
 
 double pyne::slope(double x2, double y2, double x1, double y1)
 {

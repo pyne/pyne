@@ -2,10 +2,13 @@
 // The very central Material class
 // -- Anthony Scopatz
 
-#include "material.h"
-#include "nucname.h"
 #include <string>
 #include <vector>
+
+#ifndef PYNE_IS_AMALGAMATED
+#include "material.h"
+#include "nucname.h"
+#endif
 
 // h5wrap template
 template double h5wrap::get_array_index(hid_t, int, hid_t);
@@ -82,7 +85,7 @@ void pyne::Material::_load_comp_protocol0(hid_t db, std::string datapath, int ro
   };
 
   // Set meta data
-  atoms_per_mol = -1.0;
+  atoms_per_molecule = -1.0;
 };
 
 
@@ -136,7 +139,7 @@ void pyne::Material::_load_comp_protocol1(hid_t db, std::string datapath, int ro
   H5Tinsert(desc, "mass", HOFFSET(pyne::material_struct, mass), H5T_NATIVE_DOUBLE);
   H5Tinsert(desc, "density", HOFFSET(pyne::material_struct, density), 
             H5T_NATIVE_DOUBLE);
-  H5Tinsert(desc, "atoms_per_mol", HOFFSET(pyne::material_struct, atoms_per_mol), 
+  H5Tinsert(desc, "atoms_per_molecule", HOFFSET(pyne::material_struct, atoms_per_mol), 
             H5T_NATIVE_DOUBLE);
   H5Tinsert(desc, "comp", HOFFSET(pyne::material_struct, comp), comp_values_array_type);
 
@@ -148,7 +151,7 @@ void pyne::Material::_load_comp_protocol1(hid_t db, std::string datapath, int ro
 
   mass = (*mat_data).mass;
   density = (*mat_data).density;
-  atoms_per_mol = (*mat_data).atoms_per_mol;
+  atoms_per_molecule = (*mat_data).atoms_per_mol;
   for (int i = 0; i < nuc_size; i++)
     comp[nuclides[i]] = (double) (*mat_data).comp[i];
 
@@ -336,7 +339,7 @@ void pyne::Material::write_hdf5(std::string filename, std::string datapath,
   H5Tinsert(desc, "mass", HOFFSET(pyne::material_struct, mass), H5T_NATIVE_DOUBLE);
   H5Tinsert(desc, "density", HOFFSET(pyne::material_struct, density), 
             H5T_NATIVE_DOUBLE);
-  H5Tinsert(desc, "atoms_per_mol", HOFFSET(pyne::material_struct, atoms_per_mol), 
+  H5Tinsert(desc, "atoms_per_molecule", HOFFSET(pyne::material_struct, atoms_per_mol), 
             H5T_NATIVE_DOUBLE);
   H5Tinsert(desc, "comp", HOFFSET(pyne::material_struct, comp), 
             comp_values_array_type);
@@ -344,7 +347,7 @@ void pyne::Material::write_hdf5(std::string filename, std::string datapath,
   material_struct * mat_data  = new material_struct[material_struct_size];
   (*mat_data).mass = mass;
   (*mat_data).density = density;
-  (*mat_data).atoms_per_mol = atoms_per_mol;
+  (*mat_data).atoms_per_mol = atoms_per_molecule;
   for (int n = 0; n != nuc_size; n++)
   {
     if (0 < comp.count(nuclides[n]))
@@ -372,8 +375,6 @@ void pyne::Material::write_hdf5(std::string filename, std::string datapath,
       data_dims[0] = row_num + 1;
       H5Dset_extent(data_set, data_dims);
     }
-    else if (data_dims[0] < 0)
-      throw h5wrap::HDF5BoundsError();
 
     data_offset[0] = row_num;
   }
@@ -455,8 +456,6 @@ void pyne::Material::write_hdf5(std::string filename, std::string datapath,
       data_dims[0] = row_num + 1;
       H5Dset_extent(attrset, data_dims);
     }
-    else if (data_dims[0] < 0)
-      throw h5wrap::HDF5BoundsError();
 
     data_offset[0] = row_num;
   }
@@ -557,7 +556,7 @@ void pyne::Material::from_text(std::string filename)
     }
     else if (keystr == "APerM"){
       f >> valstr;
-      atoms_per_mol = pyne::to_dbl(valstr);
+      atoms_per_molecule = pyne::to_dbl(valstr);
     }
     else if (pyne::nucname::isnuclide(keystr)){
       f >> valstr;
@@ -598,8 +597,8 @@ void pyne::Material::write_text(std::string filename)
   if (0 <= density)
     f << "Density "  << density << "\n";
   
-  if (0 <= atoms_per_mol)
-    f << "APerM   " << atoms_per_mol << "\n";
+  if (0 <= atoms_per_molecule)
+    f << "APerM   " << atoms_per_molecule << "\n";
 
   for (int i=0; i < attrs.size(); i=i+2){
     f <<attrs.get(obj.at(i), "") << attrs.get(obj.at(i+1), "");
@@ -628,7 +627,7 @@ void pyne::Material::load_json(Json::Value json) {
   norm_comp(); 
   mass = json["mass"].asDouble();
   density = json["density"].asDouble();
-  atoms_per_mol = json["atoms_per_mol"].asDouble();
+  atoms_per_molecule = json["atoms_per_molecule"].asDouble();
   attrs = json["attrs"];
 };
 
@@ -638,7 +637,7 @@ Json::Value pyne::Material::dump_json() {
   Json::Value jcomp = Json::Value(Json::objectValue);
   json["mass"] = mass;
   json["density"] = density;
-  json["atoms_per_mol"] = atoms_per_mol;
+  json["atoms_per_molecule"] = atoms_per_molecule;
   json["attrs"] = attrs;
   for(comp_iter i = comp.begin(); i != comp.end(); i++)
     jcomp[nucname::name(i->first)] = (i->second);
@@ -696,7 +695,7 @@ pyne::Material::Material()
   // Empty Material constructor
   mass = -1.0;
   density = -1.0;
-  atoms_per_mol = -1.0;
+  atoms_per_molecule = -1.0;
   attrs = Json::Value(Json::objectValue);
 }
 
@@ -708,7 +707,7 @@ pyne::Material::Material(pyne::comp_map cm, double m, double d, double apm,
   comp = cm;
   mass = m;
   density=d;
-  atoms_per_mol = apm;
+  atoms_per_molecule = apm;
   attrs = attributes;
   if (!comp.empty()) 
     norm_comp();
@@ -721,7 +720,7 @@ pyne::Material::Material(char * filename, double m, double d, double apm,
 {
   mass = m;
   density=d;
-  atoms_per_mol = apm;
+  atoms_per_molecule = apm;
   attrs = attributes;
 
   // Check that the file is there
@@ -744,7 +743,7 @@ pyne::Material::Material(std::string filename, double m, double d, double apm,
   // Initializes the mass stream based on an isotopic composition file with a string name.
   mass = m;
   density=d;
-  atoms_per_mol = apm;
+  atoms_per_molecule = apm;
   attrs = attributes;
 
   // Check that the file is there
@@ -805,7 +804,7 @@ pyne::comp_map pyne::Material::mult_by_mass()
 
 
 
-double pyne::Material::molecular_weight(double apm)
+double pyne::Material::molecular_mass(double apm)
 {
   // Calculate the atomic weight of the Material
   double inverseA = 0.0;
@@ -820,11 +819,11 @@ double pyne::Material::molecular_weight(double apm)
   if (0.0 <= apm)
   {
     atsperm = apm;            // take the function argument, if valid
-    if (atoms_per_mol < 0.0)
-      atoms_per_mol = apm;     // Store the function argument on class, if class has no value
+    if (atoms_per_molecule < 0.0)
+      atoms_per_molecule = apm;     // Store the function argument on class, if class has no value
   }
-  else if (0.0 <= atoms_per_mol)
-    atsperm = atoms_per_mol;  // select the class's value
+  else if (0.0 <= atoms_per_molecule)
+    atsperm = atoms_per_molecule;  // select the class's value
 
   return atsperm / inverseA;
 };
@@ -867,7 +866,7 @@ pyne::Material pyne::Material::expand_elements()
         abund_itr++;
         if (abund_itr == abund_end)
         {
-          zabund = 9999999999;
+          zabund = INT_MAX;
           break;
         }
         zabund = nucname::znum(nabund);
@@ -876,7 +875,7 @@ pyne::Material pyne::Material::expand_elements()
     else
       newcomp.insert(*nuc);
   };
-  return Material(newcomp, mass, density, atoms_per_mol, attrs);
+  return Material(newcomp, mass, density, atoms_per_molecule, attrs);
 };
 
 
@@ -884,8 +883,8 @@ double pyne::Material::mass_density(double num_dens, double apm)
 {
   if (0.0 <= num_dens)
   {
-    double mw = molecular_weight(apm);
-    density = num_dens * mw / pyne::N_A / atoms_per_mol;
+    double mw = molecular_mass(apm);
+    density = num_dens * mw / pyne::N_A / atoms_per_molecule;
   };
   return density;
 };
@@ -895,8 +894,8 @@ double pyne::Material::number_density(double mass_dens, double apm)
 {
   if (0 <= mass_dens)
     density = mass_dens;
-  double mw = molecular_weight(apm);
-  double num_dens = density * pyne::N_A * atoms_per_mol / mw;
+  double mw = molecular_mass(apm);
+  double num_dens = density * pyne::N_A * atoms_per_molecule / mw;
   return num_dens;
 };
 
@@ -1113,7 +1112,7 @@ pyne::Material pyne::Material::sub_act()
 pyne::Material pyne::Material::sub_tru()
 {
   // Returns a material of Transuranics that is a sub-material of this one.
-  return sub_range(930000000, 10000000000);
+  return sub_range(930000000, INT_MAX);
 };
 
 
@@ -1141,8 +1140,8 @@ std::map<int, double> pyne::Material::to_atom_frac()
 {
   // Returns an atom fraction map from this material's composition
 
-  // the material's molecular weight
-  double mat_mw = molecular_weight();
+  // the material's molecular mass
+  double mat_mw = molecular_mass();
 
   std::map<int, double> atom_fracs = std::map<int, double>();
 
@@ -1161,12 +1160,12 @@ void pyne::Material::from_atom_frac(std::map<int, double> atom_fracs)
 
   // clear existing components
   comp.clear();
-  atoms_per_mol = 0.0;
+  atoms_per_molecule = 0.0;
 
   for (std::map<int, double>::iterator afi = atom_fracs.begin(); afi != atom_fracs.end(); afi++)
   {
     comp[afi->first] = (afi->second) * pyne::atomic_mass(afi->first);
-    atoms_per_mol += (afi->second);
+    atoms_per_molecule += (afi->second);
   };
 
   norm_comp();

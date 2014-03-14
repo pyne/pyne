@@ -1,12 +1,9 @@
 #!/usr/bin/env python
- 
+
+from __future__ import print_function
 import os
 import sys
 import json
-
-from Cython.Compiler.Version import version as CYTHON_VERSION
-
-
 
 INFO = {
     'version': '0.4-dev',
@@ -58,7 +55,7 @@ def final_message(success=True):
         msg = "\n\nCURRENT METADATA:\n"
         for k, v in sorted(metadata.items()):
             msg += "  {0} = {1}\n".format(k, repr(v))
-        print msg[:-1]
+        print(msg[:-1])
 
     if os.name != 'nt':
         return
@@ -84,28 +81,8 @@ def final_message(success=True):
            "[1] http://www.enthought.com/products/epd.php\n"
            "[2] http://www.hdfgroup.org/ftp/HDF5/releases/hdf5-{h5ver}/bin/windows/\n"
            ).format(h5ver=h5ver)
-    print msg
+    print(msg)
 
-
-def cython_version():
-    pxi = ("# Cython compile-time version information\n"
-           "DEF CYTHON_VERSION_MAJOR = {major}\n"
-           "DEF CYTHON_VERSION_MINOR = {minor}\n"
-           "DEF CYTHON_VERSION_MICRO = {micro}")
-    cyver = CYTHON_VERSION
-    for c in ('-', 'r', 'a', 'b'):
-        cyver = cyver.split(c)[0]
-    cyver = cyver.split('.')
-    while len(cyver) < 3:
-        cyver = cyver + [0]
-    cyver = dict([(k, int(cv)) for k, cv in zip(['major', 'minor', 'micro'], cyver)])
-    pxi = pxi.format(**cyver)
-    basedir = os.path.split(__file__)[0]
-    incldir = os.path.join(basedir, 'pyne', 'include')
-    if not os.path.exists(incldir):
-        os.mkdir(incldir)
-    with open(os.path.join(incldir, 'cython_version.pxi'), 'w') as f:
-        f.write(pxi)
 
 def setup():
     from distutils import core
@@ -113,12 +90,13 @@ def setup():
     scripts = [s for s in scripts if (os.name == 'nt' and s.endswith('.bat')) or 
                                      (os.name != 'nt' and not s.endswith('.bat'))]
     packages = ['pyne', 'pyne.lib', 'pyne.dbgen', 'pyne.apigen', 'pyne.xs', 
-                'pyne.simplesim', 'pyne.transmute', 'pyne.gui']
+                'pyne.simplesim', 'pyne.transmute', 'pyne.gui', 'pyne.cli']
     pack_dir = {
         'pyne': 'pyne',
         'pyne.xs': 'pyne/xs',
         'pyne.lib': 'pyne/lib',
         'pyne.gui': 'pyne/gui',
+        'pyne.cli': 'pyne/cli',
         'pyne.dbgen': 'pyne/dbgen',
         'pyne.apigen': 'pyne/apigen',
         'pyne.simplesim': 'pyne/simplesim',
@@ -126,7 +104,7 @@ def setup():
         }
     extpttn = ['*.dll', '*.so', '*.dylib', '*.pyd', '*.pyo']
     pack_data = {
-        'pyne': ['*.pxd', 'include/*.h', 'include/*.pxi', 'include/*/*.h', 
+        'pyne': ['*.pxd', 'include/*.h', 'include/*.pxi', 'include/*/*.h', '*.inp',
                  'include/*/*/*.h', 'include/*/*/*/*.h', '*.json', '_includes/*.txt',
                  '_includes/*.pxd', '_includes/*/*', '_includes/*/*/*'] + extpttn,
         'pyne.xs': ['*.pxd'] + extpttn,

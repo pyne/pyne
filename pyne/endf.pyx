@@ -14,6 +14,7 @@ For more information on the Evaluation class, contact Paul Romano
 John Xia <john.danger.xia@gmail.com>.
 """
 
+from __future__ import print_function
 import re
 import os
 from libc.stdlib cimport malloc, free
@@ -30,13 +31,8 @@ import pyne.rxdata as rx
 from pyne.rxname import label
 from pyne.utils import fromendf_tok, endftod
 
-include "include/cython_version.pxi"
-IF CYTHON_VERSION_MAJOR == 0 and CYTHON_VERSION_MINOR >= 17:
-    from libc.stdlib cimport atof, atoi
-    from libc.string cimport strtok, strcpy, strncpy
-ELSE:
-    from pyne._includes.libc.stdlib cimport atof, atoi
-    from pyne._includes.libc.string cimport strtok, strcpy, strncpy
+from libc.stdlib cimport atof, atoi
+from libc.string cimport strtok, strcpy, strncpy
 
 libraries = {0: "ENDF/B", 1: "ENDF/A", 2: "JEFF", 3: "EFF",
              4: "ENDF/B High Energy", 5: "CENDL", 6: "JENDL",
@@ -49,7 +45,7 @@ NUMERICAL_DATA_R = re.compile('[\d\-+. ]{80}\n$')
 SPACE66_R = re.compile(' {66}')
 
 class Library(rx.RxLib):
-    "A class for a file which contains multiple ENDF evaluations."
+    """A class for a file which contains multiple ENDF evaluations."""
     def __init__(self, fh):
         self.mts = {}
         self.structure = {}
@@ -69,7 +65,8 @@ class Library(rx.RxLib):
 
 
     def load(self):
-        """Read the ENDF file into a NumPy array.
+        """load()
+        Read the ENDF file into a NumPy array.
 
         Returns
         --------
@@ -450,7 +447,8 @@ class Library(rx.RxLib):
         raise NotImplementedError("see docs for more details.")
 
     def integrate_tab_range(self, intscheme, e_int, xs, low=None, high=None):
-        """Integrates across one tabulation range.
+        """integrate_tab_range(intscheme, e_int, xs, low=None, high=None)
+        Integrates across one tabulation range.
 
         Parameters
         ----------
@@ -501,7 +499,8 @@ class Library(rx.RxLib):
         return total_lines
 
     def _read_res(self, mat_id):
-        """Read the resonance data from one material in the library and updates
+        """_read_res(mat_id)
+        Read the resonance data from one material in the library and updates
         self.structure.
 
         Parameters
@@ -529,7 +528,8 @@ class Library(rx.RxLib):
             isotope['unresolved'].sort()
 
     def _read_nis(self, isotope_data, lrp, mat_id):
-        """Read resonance data for a specific isotope.
+        """_read_nis(isotope_data, lrp, mat_id)
+        Read resonance data for a specific isotope.
 
         Parameters
         -----------
@@ -885,7 +885,8 @@ class Library(rx.RxLib):
         total_lines += int_size
 
     def get_xs(self, nuc, mt, nuc_i=None):
-        """Grab cross-section data.
+        """get_xs(nuc, mt, nuc_i=None)
+        Grab cross-section data.
 
         Parameters
         -----------
@@ -914,7 +915,8 @@ class Library(rx.RxLib):
         return self.structure[nuc]['data'][nuc_i]['xs'][mt]
 
     def get_rx(self, nuc, mf, mt, lines=0):
-        """Grab the data from one reaction type.
+        """get_rx(nuc, mf, mt, lines=0)
+        Grab the data from one reaction type.
 
         Parameters
         -----------
@@ -997,7 +999,7 @@ class Evaluation(object):
     def read(self, reactions=None):
         if not reactions:
             if self.verbose:
-                print 'No reaction given. Read all'
+                print("No reaction given. Read all")
             reactions = []
             for r in self.reactionList[1:]:
                 reactions.append(r[0:2])
@@ -1085,7 +1087,7 @@ class Evaluation(object):
 
             if not found:
                 if self.verbose:
-                    print 'Reaction not found'
+                    print("Reaction not found")
                 raise NotFound('Reaction')
 
     def _read_header(self):
@@ -1308,7 +1310,7 @@ class Evaluation(object):
         # Find reaction
         self.seek_mfmt(3, MT)
 
-        # Read HEAD record with ZA and atomic weight ratio
+        # Read HEAD record with ZA and atomic mass ratio
         items = self._get_head_record()
         xs.ZA = items[0]
         xs.AWR = items[1]
@@ -1499,7 +1501,7 @@ class Evaluation(object):
         elast.LTHR = items[2] # coherent/incoherent flag
         if elast.LTHR == 1:
             if self.verbose:
-                print 'Coherent elastic'
+                print("Coherent elastic")
                 temp = []
                 eint = []
                 set = []
@@ -1512,7 +1514,7 @@ class Evaluation(object):
                 set.append(temp0.y)
                 elast.LT = temp0.params[2]
                 if self.veryverbose:
-                    print 'Number of temperatures:', elast.LT+1
+                    print("Number of temperatures: {0}".format(elast.LT+1))
                 for t in range(elast.LT):
                     heads, s = self._get_list_record()
                     # Save S(E,T)
@@ -1524,7 +1526,7 @@ class Evaluation(object):
                 elast.eint = np.array(eint)
         elif elast.LTHR == 2:
             if self.verbose:
-                print 'Incoherent elastic'
+                print("Incoherent elastic")
                 temp = []
                 eint = []
                 set = []
@@ -1536,7 +1538,7 @@ class Evaluation(object):
                 # Save W(T)
                 elast.w = np.array(record.y)
         else:
-            print 'Invalid value of LHTR'
+            print("Invalid value of LHTR")
         file7.reactions.append(elast)
 
     def _read_thermal_inelastic(self):
@@ -1562,7 +1564,7 @@ class Evaluation(object):
         inel.B = B
         if B[0] == 0.0:
             if self.verbose:
-                print 'No principal atom'
+                print("No principal atom")
         else:
             nbeta = self._get_tab2_record()
             sabt = []
@@ -1582,7 +1584,7 @@ class Evaluation(object):
                 temp.append(temp0.params[0])
                 inel.LT = temp0.params[2]
                 if self.veryverbose:
-                    print 'Number of temperatures:', inel.LT+1
+                    print("Number of temperatures: {0}".format(inel.LT+1))
                 for t in range(inel.LT):
                     #Read records for all the other temperatures
                     headsab, sa = self._get_list_record()
@@ -1776,7 +1778,7 @@ class Evaluation(object):
         # Get head record
         items = self._get_head_record()
         mp.ZA = items[0]
-        mp.AWR = items[1] # Atomic weight ratio
+        mp.AWR = items[1] # Atomic mass ratio
         mp.LIS = items[2] # Level number of the target
         mp.NS = items[4] # Number of final states
 
@@ -1807,7 +1809,7 @@ class Evaluation(object):
         # Get head record
         items = self._get_head_record()
         rxn.ZA = items[0]
-        rxn.AWR = items[1] # Atomic weight ratio
+        rxn.AWR = items[1] # Atomic mass ratio
         rxn.LIS = items[2] # Level number of the target
         rxn.NS = items[4] # Number of final states
 
@@ -1826,7 +1828,7 @@ class Evaluation(object):
         if not line:
             line = self.fh.readline()
         if self.veryverbose:
-            print 'Get TEXT record'
+            print("Get TEXT record")
         HL = line[0:66]
         MAT = int(line[66:70])
         MF = int(line[70:72])
@@ -1836,7 +1838,7 @@ class Evaluation(object):
 
     def _get_cont_record(self, line=None, skipC=False):
         if self.veryverbose:
-            print 'Get CONT record'
+            print("Get CONT record")
         if not line:
             line = self.fh.readline()
         if skipC:
@@ -1859,7 +1861,7 @@ class Evaluation(object):
         if not line:
             line = self.fh.readline()
         if self.veryverbose:
-            print 'Get HEAD record'
+            print("Get HEAD record")
         ZA = int(endftod(line[:11]))
         AWR = endftod(line[11:22])
         L1 = int(line[22:33])
@@ -1875,7 +1877,7 @@ class Evaluation(object):
     def _get_list_record(self, onlyList=False):
         # determine how many items are in list
         if self.veryverbose:
-            print 'Get LIST record'
+            print("Get LIST record")
         items = self._get_cont_record()
         NPL = items[4]
 
@@ -1897,14 +1899,14 @@ class Evaluation(object):
 
     def _get_tab1_record(self):
         if self.veryverbose:
-            print 'Get TAB1 record'
+            print("Get TAB1 record")
         r = ENDFTab1Record()
         r.read(self.fh)
         return r
 
     def _get_tab2_record(self):
         if self.veryverbose:
-            print 'Get TAB2 record'
+            print("Get TAB2 record")
         r = ENDFTab2Record()
         r.read(self.fh)
         return r
@@ -1958,7 +1960,7 @@ class Evaluation(object):
             if line == '':
                 # Reached EOF
                 if self.verbose:
-                    print('Could not find MF={0}, MT={1}'.format(MF, MT))
+                    print("Could not find MF={0}, MT={1}".format(MF, MT))
                 raise NotFound('Reaction')
             if line[70:75] == searchString:
                 self.fh.seek(position)
