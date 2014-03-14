@@ -373,7 +373,7 @@ class IMeshTag(Tag):
                                  "mesh {1}".format(key, msize))
             for i_ve in zip(range(key+1), miter):
                 pass
-            mtag[i_ve[1]] = value
+            mtag[i_ve[1]] = value if tsize == 1 else value[0]
         elif isinstance(key, slice):
             key = list(miter)[key]
             v = np.empty(len(key), self.tag.type) if tsize == 1 else \
@@ -390,6 +390,10 @@ class IMeshTag(Tag):
             mtag[key] = v
         elif isinstance(key, Iterable):
             ves = list(miter)
+            if tsize != 1 and len(value) != len(key):
+                v = np.empty((len(key), tsize), self.tag.type)
+                v[...] = value
+                value = v
             mtag[[ves[i] for i in key]] = value
         else:
             raise TypeError("{0} is not an int, slice, mask, "
