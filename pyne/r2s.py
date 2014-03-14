@@ -60,18 +60,20 @@ def irradiation_setup(meshtal, tally_num, cell_mats, alara_params, geom=None,
         setup.
     """
     # Acquire fluxes
-    if not isinstance(Meshtal, meshtal) and isfile(meshtal):
-        meshtal = Meshtal(meshtal, flux_tag)
+    if not isinstance(meshtal, Meshtal) and isfile(meshtal):
+        meshtal = Meshtal(meshtal, {4: (flux_tag, flux_tag + "_err", 
+                                        flux_tag + "_total", 
+                                        flux_tag + "_err_total")})
 
     if geom is not None and isfile(geom):
         load(geom)
+
     m = meshtal.tally[tally_num]
     vol_fracs = discretize_geom(m, num_rays, grid=grid)
-    mesh.cell_fracs_to_mats(vol_fracs, mats)
-
+    m.cell_fracs_to_mats(vol_fracs, cell_mats)
 
     mesh_to_fluxin(m, flux_tag, fluxin, reverse)
-    mesh_to_geom(m, inp, alara_matlib)
+    mesh_to_geom(m, alara_inp, alara_matlib)
 
     if isfile(alara_params):
         with open(alara_params, 'r') as f:
@@ -79,8 +81,8 @@ def irradiation_setup(meshtal, tally_num, cell_mats, alara_params, geom=None,
 
     with open(alara_inp, 'a') as f:
         f.write("\n" + alara_params)
-    
-    m.mesh.save(output_mesh)
+ 
+    m.write_hdf5(output_mesh)
 
 def photon_sampling_setup(phtn_src, mesh, tags):
     """This function reads in an hdf5 file produced by photon_source_to_hdf5

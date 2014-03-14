@@ -1107,16 +1107,13 @@ class Mesh(object):
             Maps geometry cell numbers to Material objects that represent what
             material each cell is made of.
         """
-        mats = []
         for i in range(len(self)):
             mat_col = {} #  Collection of materials in the ith ve.
             for row in cell_fracs[cell_fracs['idx'] == i]:
                 mat_col[cell_mats[row['cell']]] = row['vol_frac']
 
             mixed = MultiMaterial(mat_col)
-            mats.append(mixed.mix_by_volume())
-
-        self.mats = mats
+            self.mats[i] = mixed.mix_by_volume()
       
 
 ######################################################

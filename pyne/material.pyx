@@ -1883,7 +1883,8 @@ cdef class _MaterialLibrary(object):
             self._lib = _lib
             if lib.endswith('.json') or lib.endswith('.js'):
                 self.from_json(lib)
-            if lib.endswith('.h5') or lib.endswith('.hdf5'):
+            if lib.endswith('.h5') or lib.endswith('.hdf5')\
+                                   or lib.endswith('.h5m'):
                 self.from_hdf5(lib, datapath=datapath, nucpath=nucpath)
         elif isinstance(lib, collections.Sequence):
             for key, mat in lib:
