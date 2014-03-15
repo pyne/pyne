@@ -31,7 +31,7 @@ def test_irradiation_setup():
     grid = True
     flux_tag = "n_flux"
     fluxin = os.path.join(os.getcwd(), "alara_fluxin")
-    reverse = False
+    reverse = True
     alara_inp = os.path.join(os.getcwd(), "alara_inp")
     alara_matlib= os.path.join(os.getcwd(), "alara_matlib")
     output_mesh= os.path.join(os.getcwd(), "r2s_step1.h5m")
