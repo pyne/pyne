@@ -662,8 +662,9 @@ class Mesh(object):
         if mesh_file and mats is None:
             with tb.openFile(mesh_file) as h5f:
                 if '/materials' in h5f:
-                    mats = MaterialLibrary(mesh_file)
                     mats_in_mesh_file = True
+            if mats_in_mesh_file:
+                mats = MaterialLibrary(mesh_file)
 
         if mats is None and not mats_in_mesh_file:
             mats = MaterialLibrary()
