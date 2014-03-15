@@ -5,7 +5,7 @@ from collections import Iterable, Sequence
 import warnings
 
 import numpy as np
-from tables import NoSuchNodeError
+import tables as tb
 
 try:
     from itaps import iMesh, iBase, iMeshExtensions
@@ -660,11 +660,12 @@ class Mesh(object):
         # sets mats
         mats_in_mesh_file = False
         if mesh_file and mats is None:
-            try:
+            h5f = tb.openFile(mesh_file, 'r')
+            if '/materials' in h5f:
                 mats = MaterialLibrary(mesh_file)
                 mats_in_mesh_file = True
-            except NoSuchNodeError:
-                pass
+            h5f.close()
+
         if mats is None and not mats_in_mesh_file:
             mats = MaterialLibrary()
         elif not isinstance(mats, MaterialLibrary):
