@@ -592,6 +592,42 @@ def get_material_set(**kw):
     return mat_ids
 
 #### start util
+def cell_ve_centers(mesh):
+    """This function reads in any PyNE Mesh object and finds the geometry cell
+    at the point in the center of every mesh volume element.
+
+    Parameters
+    ----------
+    mesh : PyNE Mesh
+        Any Mesh that is superimposed over the geometry.
+
+    Returns
+    -------
+    results : structured array
+        Stores in a one dimensional array, each entry containing the following
+        fields:
+        :idx: int 
+            The volume element index.
+        :cell: int
+            The geometry cell number.
+        :vol_frac: float
+            The volume fraction of the cell withing the mesh ve. Always 1.0.
+        :rel_error: float
+            The relative error associated with the volume fraction. Always 1.0
+        This array is returned in sorted order with respect to idx and cell, with
+        cell changing fastest.
+    """
+    results = np.zeros(len(mesh), dtype=[('idx', np.int64),
+                                         ('cell', np.int64),
+                                         ('vol_frac', np.float64), 
+                                         ('rel_error', np.float64)])
+    for i, mat, ve in mesh:
+        center = mesh.ve_center(ve)
+        cell = find_volume(center)
+        results[i] = (i, vol, 1.0, 1.0)
+
+    return results
+
 
 def discretize_geom(mesh, num_rays, grid=False):
     """This function reads in a Cartesian, structured, axis-aligned, PyNE mesh
