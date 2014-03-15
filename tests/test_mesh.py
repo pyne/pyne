@@ -29,7 +29,6 @@ def gen_mesh(mats=None):
     flux_tag[volumes1] = flux_data
     return mesh_1
 
-
 #############################################
 #Test unstructured mesh functionality
 #############################################
@@ -661,9 +660,7 @@ def test_imeshtag():
         }
     m = gen_mesh(mats=mats)
     m.f = IMeshTag(mesh=m, name='f')
-    ftag = m.mesh.getTagHandle('f')
-    ftag[list(m.mesh.iterate(iBase.Type.region, iMesh.Topology.all))] = \
-                                                                [1.0, 2.0, 3.0, 4.0]
+    m.f[:] = [1.0, 2.0, 3.0, 4.0]                                                                
 
     # Getting tags
     assert_equal(m.f[0], 1.0)
@@ -692,6 +689,41 @@ def test_imeshtag():
 
     # deleting tag
     del m.f[:]
+
+def test_imeshtag_fancy_indexing():
+    m = gen_mesh()
+    
+    #  tags of length 1
+    m.horse = IMeshTag(1, float)
+    #  test fancy indexing
+    m.horse[[2, 0]] = [3.0, 1.0]
+    assert_array_equal(m.horse[:], [1.0, 0.0, 3.0, 0.0])
+    m.horse[[2]] = [7.0]
+    assert_array_equal(m.horse[:], [1.0, 0.0, 7.0, 0.0])
+
+    #  tags of length > 1
+    m.grape = IMeshTag(2, float)
+    #  test fancy indexing
+    m.grape[[2, 0]] = [[3.0, 4.0], [5.0, 6.0]]
+    assert_array_equal(m.grape[:], [[5.0, 6.0], [0.0, 0.0], [3.0, 4.0], [0.0, 0.0]])
+    m.grape[[2]] = [[13.0, 14.0]]
+    assert_array_equal(m.grape[:], [[5.0, 6.0], [0.0, 0.0], [13.0, 14.0], [0.0, 0.0]])
+    m.grape[1] = [23.0, 24.0]
+    assert_array_equal(m.grape[:], [[5.0, 6.0], [23.0, 24.0], [13.0, 14.0], [0.0, 0.0]])
+
+
+def test_imeshtag_broadcasting():
+    m = gen_mesh()
+    #  tags of length 1
+    m.horse = IMeshTag(1, float)
+    m.horse[:] = 2.0
+    assert_array_equal(m.horse[:], [2.0]*4)
+
+    #  tags of length > 1
+    m.grape = IMeshTag(2, float)
+    #  test broadcasing
+    m.grape[[2, 0]] = [7.0, 8.0]
+    assert_array_equal(m.grape[:], [[7.0, 8.0], [0.0, 0.0], [7.0, 8.0], [0.0, 0.0]])
 
 
 def test_comptag():
@@ -733,6 +765,16 @@ def test_lazytaginit():
     assert_in('cactus', m.tags)
     assert_array_equal(m.cactus[0], [42, 43, 44])
 
+    x = np.arange(len(m))[:,np.newaxis] * np.array([42, 43, 44])
+    m.cactus[:] = x
+    assert_array_equal(m.cactus[2], x[2])
+
+def test_issue360():
+    a = Mesh(structured=True, structured_coords=[[0,1,2],[0,1],[0,1]])
+    a.cat = IMeshTag(3, float)
+    a.cat[:] = [[0.11, 0.22, 0.33],[0.44, 0.55, 0.66]]
+    a.cat[:] = np.array([[0.11, 0.22, 0.33],[0.44, 0.55, 0.66]])
+
 def test_iter():
     mats = {
         0: Material({'H1': 1.0, 'K39': 1.0}, density=42.0), 
@@ -748,6 +790,17 @@ def test_iter():
         assert_is(mats[i], mat)
         assert_equal(j, idx_tag[ve])
         j += 1
+
+def test_iter_ve():
+    mats = {
+        0: Material({'H1': 1.0, 'K39': 1.0}, density=42.0), 
+        1: Material({'H1': 0.1, 'O16': 1.0}, density=43.0), 
+        2: Material({'He4': 42.0}, density=44.0), 
+        3: Material({'Tm171': 171.0}, density=45.0), 
+        }
+    m = gen_mesh(mats=mats)
+    ves1 = set(ve for _, _, ve in m)
+    ves2 = set(m.iter_ve())
         
 
 def test_contains():

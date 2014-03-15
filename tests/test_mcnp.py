@@ -942,7 +942,7 @@ def test_single_meshtally_meshtal():
 
     # test MeshTally attributes
     assert_equal(meshtal_object.tally[4].tally_number, 4)
-    assert_equal(meshtal_object.tally[4].particle, "n")
+    assert_equal(meshtal_object.tally[4].particle, "neutron")
     assert_equal(meshtal_object.tally[4].dose_response, True)
     assert_equal(
         meshtal_object.tally[4].x_bounds,

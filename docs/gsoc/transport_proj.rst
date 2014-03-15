@@ -1,6 +1,6 @@
-===================
+===================================
 Transport Solver Components
-===================
+===================================
 The Transport Solver Components project will create the structure and first pieces to allow PyNE to have plug-and-play deterministic transport solver functionality. 
 
 Brief explanation:

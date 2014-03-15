@@ -41,7 +41,7 @@ except ImportError:
                   ImportWarning)
     HAVE_PYTAPS = False
 
-from pyne.mesh import Mesh, StatMesh, MeshError
+from pyne.mesh import Mesh, StatMesh, MeshError, IMeshTag
 
 
 class Mctal(object):
@@ -835,9 +835,10 @@ class Xsdir(object):
         """Writes a Serpent xsdata file for all continuous energy xs tables.
 
         Parameters
-        ---------
+        ----------
         filename : str
             The output filename.
+
         """
         xsdata = open(filename, 'w')
         for table in self.tables:
@@ -1962,7 +1963,8 @@ class MeshTally(StatMesh):
     tally_number : int
         The MCNP tally number. Must end in 4 (e.g. 4, 14, 214).
     particle : string
-        Either "n" for a neutron mesh tally or "p" for a photon mesh tally.
+        Either "neutron" for a neutron mesh tally or "photon" for a photon mesh
+        tally.
     dose_response : bool
         True is the tally is modified by a dose response function.
     x_bounds : list of floats
@@ -2028,9 +2030,9 @@ class MeshTally(StatMesh):
         """
         line = f.readline()
         if ('neutron' in line):
-            self.particle = 'n'
+            self.particle = 'neutron'
         elif ('photon' in line):
-            self.particle = 'p'
+            self.particle = 'photon'
 
         #determine if meshtally flux-to-dose conversion factors are being used.
         line = f.readline()
@@ -2095,16 +2097,15 @@ class MeshTally(StatMesh):
             rel_error[i] = rel_error_row
 
         #Tag results and error vector to mesh
-        tag_result = self.mesh.createTag(self.tag_names[0], num_e_groups, float)
-        tag_rel_error = self.mesh.createTag(self.tag_names[1], num_e_groups, float)
-        res_vol_elements = list(self.structured_iterate_hex("xyz"))
-        err_vol_elements = list(self.structured_iterate_hex("xyz"))
-        for res_ve, err_ve, i in itertools.izip(res_vol_elements,
-                                                err_vol_elements,
-                                                range(0, num_vol_elements)):
-            tag_result[res_ve] = result[:, i]
-            tag_rel_error[err_ve] = rel_error[:, i]
-
+        res_tag = IMeshTag(num_e_groups, float, mesh=self, name=self.tag_names[0])
+        rel_err_tag = IMeshTag(num_e_groups, float, mesh=self, name=self.tag_names[1])
+        if num_e_groups == 1:
+            res_tag[:] = result[0]
+            rel_err_tag[:] = rel_error[0]
+        else:
+            res_tag[:] = result.transpose()
+            rel_err_tag[:] = rel_error.transpose()
+        
         #If "total" data exists (i.e. if there is more than
         #1 energy group) get it and tag it onto the mesh.
         if num_e_groups > 1:
@@ -2116,14 +2117,11 @@ class MeshTally(StatMesh):
                 rel_error.append(
                     float(line[self._column_idx["Rel_Error"]]))
 
-            tag_result = self.mesh.createTag(self.tag_names[2], 1, float)
-            tag_rel_error = self.mesh.createTag(self.tag_names[3], 1, float)
+            res_tot_tag = IMeshTag(1, float, mesh=self, name=self.tag_names[2])
+            rel_err_tot_tag = IMeshTag(1, float, mesh=self, name=self.tag_names[3])
+            res_tot_tag[:] = result
+            rel_err_tot_tag[:] = rel_error
 
-            res_vol_elements = list(self.structured_iterate_hex("xyz"))
-            err_vol_elements = list(self.structured_iterate_hex("xyz"))
-
-            tag_result[res_vol_elements] = result
-            tag_rel_error[err_vol_elements] = rel_error
 
 def mesh_to_geom(mesh, frac_type='mass', title_card="Generated from PyNE Mesh"):
     """This function reads a structured Mesh object and returns the geometry
