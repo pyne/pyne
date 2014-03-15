@@ -591,7 +591,7 @@ class Mesh(object):
             #From file
             elif mesh_file and not mesh:
                 self.mesh.load(mesh_file)
-                self.mats = MaterialLibrary(mesh_file)
+                #self.mats = MaterialLibrary(mesh_file)
             else:
                 raise MeshError("To instantiate unstructured mesh object, "
                                  "must supply exactly 1 of the following: "
@@ -605,7 +605,7 @@ class Mesh(object):
                                    and not structured_set:
                 if mesh_file:
                     self.mesh.load(mesh_file)
-                    self.mats = MaterialLibrary(mesh_file)
+                    #self.mats = MaterialLibrary(mesh_file)
                 try:
                     self.mesh.getTagHandle("BOX_DIMS")
                 except iBase.TagNotFoundError as e:
@@ -722,8 +722,7 @@ class Mesh(object):
         index i, the material mat, and the volume element itself ve.
         """
         mats = self.mats
-        for i, ve in enumerate(self.mesh.iterate(iBase.Type.region, 
-                                                 iMesh.Topology.all)):
+        for i, ve in enumerate(self.iter_ve()):
             yield i, mats[i], ve
 
     def iter_ve(self):

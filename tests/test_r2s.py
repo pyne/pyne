@@ -1,5 +1,6 @@
 import os
 from nose.tools import assert_equal, assert_almost_equal
+from numpy.testing import assert_array_equal
 
 from pyne.r2s import irradiation_setup
 from pyne.material import Material
@@ -57,24 +58,20 @@ def test_irradiation_setup():
     tot_fluxes = [1.74147E-06, 1.61484E-06, 1.50290E-06, 1.56677E-06] 
     tot_errs = [6.01522E-02, 6.13336E-02, 6.19920E-02, 5.98742E-02]
 
-    m = Mesh(structured=True, mesh_file=output_mesh)
-
-    print m.mats
-    m.flux = IMeshTag(2, float)
-    m.err = IMeshTag(2, float)
-    m.flux_tot = IMeshTag(1, float)
-    m.flux_err_tot = IMeshTag(1, float)
-
+    m = Mesh(structured=True, mesh_file=output_mesh, mats=output_mesh)
     for i, mat, _ in m:
         assert_almost_equal(mat.density, 1.962963E+00)
-        assert_almost_equal(mat.comp, {20040000: 1.886792E-02, 
-                                       30060000: 5.886792E-01, 
-                                       20070000: 3.924528E-01})
-        assert_array_equal(m.flux[i], fluxes[i])
-        assert_array_equal(m.err[i], errs[i])
-        assert_almost_equal(m.flux_tot[i], tot_fluxes[i])
-        assert_almost_equal(m.flux_err_tot[i], tot_errs[i])
+        assert_equal(len(mat.comp), 3)
+        assert_almost_equal(mat.comp[20040000], 1.886792E-02)
+        assert_almost_equal(mat.comp[30060000], 5.886792E-01)
+        assert_almost_equal(mat.comp[30070000], 3.924528E-01)
+        assert_array_equal(m.n_flux[i], fluxes[i])
+        assert_array_equal(m.n_flux_err[i], errs[i])
+        assert_almost_equal(m.n_flux_total[i], tot_fluxes[i])
+        assert_almost_equal(m.n_flux_err_total[i], tot_errs[i])
 
     os.remove(alara_inp)
     os.remove(alara_matlib)
     os.remove(fluxin)
+    os.remove(output_mesh)
+
