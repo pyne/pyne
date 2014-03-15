@@ -5,6 +5,7 @@ from collections import Iterable, Sequence
 import warnings
 
 import numpy as np
+import tables as tb
 
 try:
     from itaps import iMesh, iBase, iMeshExtensions
@@ -591,7 +592,6 @@ class Mesh(object):
             #From file
             elif mesh_file and not mesh:
                 self.mesh.load(mesh_file)
-                self.mats = MaterialLibrary(mesh_file)
             else:
                 raise MeshError("To instantiate unstructured mesh object, "
                                  "must supply exactly 1 of the following: "
@@ -605,7 +605,6 @@ class Mesh(object):
                                    and not structured_set:
                 if mesh_file:
                     self.mesh.load(mesh_file)
-                    self.mats = MaterialLibrary(mesh_file)
                 try:
                     self.mesh.getTagHandle("BOX_DIMS")
                 except iBase.TagNotFoundError as e:
@@ -659,10 +658,19 @@ class Mesh(object):
             self.vertex_dims = list(self.dims[0:3]) \
                                + [x + 1 for x in self.dims[3:6]]
         # sets mats
-        if mats is None:
+        mats_in_mesh_file = False
+        if mesh_file and mats is None:
+            with tb.openFile(mesh_file) as h5f:
+                if '/materials' in h5f:
+                    mats_in_mesh_file = True
+            if mats_in_mesh_file:
+                mats = MaterialLibrary(mesh_file)
+
+        if mats is None and not mats_in_mesh_file:
             mats = MaterialLibrary()
         elif not isinstance(mats, MaterialLibrary):
             mats = MaterialLibrary(mats)
+
         self.mats = mats
 
         # tag with volume id and ensure mats exist.
@@ -722,8 +730,7 @@ class Mesh(object):
         index i, the material mat, and the volume element itself ve.
         """
         mats = self.mats
-        for i, ve in enumerate(self.mesh.iterate(iBase.Type.region, 
-                                                 iMesh.Topology.all)):
+        for i, ve in enumerate(self.iter_ve()):
             yield i, mats[i], ve
 
     def iter_ve(self):
@@ -1131,16 +1138,13 @@ class Mesh(object):
             material each cell is made of.
 
         """
-        mats = []
         for i in range(len(self)):
             mat_col = {} #  Collection of materials in the ith ve.
             for row in cell_fracs[cell_fracs['idx'] == i]:
                 mat_col[cell_mats[row['cell']]] = row['vol_frac']
 
             mixed = MultiMaterial(mat_col)
-            mats.append(mixed.mix_by_volume())
-
-        self.mats = mats
+            self.mats[i] = mixed.mix_by_volume()
       
 
 ######################################################

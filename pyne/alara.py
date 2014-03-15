@@ -22,8 +22,7 @@ from pyne.data import N_A
 def mesh_to_fluxin(flux_mesh, flux_tag, fluxin="fluxin.out",
                    reverse=False):
     """This function creates an ALARA fluxin file from fluxes tagged on a PyNE
-    Mesh object. Structured meshes are printed in xyz order (z changes fastest)
-    and unstructured meshes are printed in the imesh.iterate() order.
+    Mesh object. Fluxes are printed in the order of the flux_mesh.__iter__().
 
     Parameters
     ----------
@@ -39,11 +38,6 @@ def mesh_to_fluxin(flux_mesh, flux_tag, fluxin="fluxin.out",
         the flux vector tagged on the mesh.
     """
     tag_flux = flux_mesh.mesh.getTagHandle(flux_tag)
-
-    if flux_mesh.structured:
-        ves = flux_mesh.structured_iterate_hex("xyz")
-    else:
-        ves = flux.mesh.mesh.iterate(iBase.Type.region, iMesh.Toplogy.all)
 
     # find number of e_groups
     e_groups = flux_mesh.mesh.getTagHandle(flux_tag)[list(
@@ -64,7 +58,7 @@ def mesh_to_fluxin(flux_mesh, flux_tag, fluxin="fluxin.out",
         direction = -1
 
     output = ""
-    for ve in ves:
+    for i, mat, ve in flux_mesh:
         # print flux data to file
         count = 0
         flux_data = np.atleast_1d(tag_flux[ve])
@@ -156,8 +150,7 @@ def photon_source_hdf5_to_mesh(mesh, filename, tags):
     """This function reads in an hdf5 file produced by photon_source_to_hdf5
     and tags the requested data to the mesh of a PyNE Mesh object. Any
     combinations of nuclides and decay times are allowed. The photon source
-    file is assumed to be in xyz order (z changes fastest) if a stuctured mesh
-    is supplied and imesh.iterate() order if an unstructured mesh is supplied.
+    file is assumed to be in mesh.__iter__() order
 
     Parameters
     ----------
@@ -202,13 +195,8 @@ def photon_source_hdf5_to_mesh(mesh, filename, tags):
             matched_data = h5f.root.data.readWhere(
                 "(nuc == '{0}') & (time == '{1}')".format(nuc, cond[1]))
 
-        if mesh.structured:
-            ves = mesh.structured_iterate_hex("xyz")
-        else:
-            ves = mesh.imesh.iterate(iBase.Type.region, iMesh.Topology.all)
-
         idx = 0
-        for i, ve in enumerate(list(ves)):
+        for i, _, ve in mesh:
             if matched_data[idx][0] == i:
                 tag_handles[tags[cond]][ve] = matched_data[idx][3]
                 idx += 1
@@ -244,12 +232,7 @@ def mesh_to_geom(mesh, geom_file, matlib_file):
     mixture = "" # mixture blocks
     matlib = "" # ALARA material library string
 
-    if mesh.structured:
-        ves = mesh.structured_iterate_hex('xyz')
-    else:
-        ves = mesh.mesh.iterate(iBase.Type.region, iMesh.Topology.all)
-
-    for i, ve in enumerate(ves):
+    for i, mat, ve in mesh:
         volume += "    {0: 1.6E}    zone_{1}\n".format(mesh.elem_volume(ve), i)
         mat_loading += "    zone_{0}    mix_{0}\n".format(i)
         matlib += "mat_{0}    {1: 1.6E}    {2}\n".format(i, mesh.density[i], 
