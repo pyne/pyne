@@ -2,13 +2,24 @@ import os
 from nose.tools import assert_equal, assert_almost_equal
 from numpy.testing import assert_array_equal
 
-from pyne.r2s import irradiation_setup
+from pyne.r2s import irradiation_setup, photon_sampling_setup
 from pyne.material import Material
 from pyne.mesh import Mesh, IMeshTag
+# mesh specific imports
+
+try:
+    from itaps import iMesh
+    HAVE_PYTAPS = True
+except ImportError:
+    from nose.plugins.skip import SkipTest
+    HAVE_PYTAPS = False
+    pass
 
 thisdir = os.path.dirname(__file__)
 
 def test_irradiation_setup():
+    if not HAVE_PYTAPS:
+        raise SkipTest
 
     meshtal = os.path.join(thisdir, "files_test_r2s", "meshtal_2x2x1")
     tally_num = 4
@@ -75,3 +86,23 @@ def test_irradiation_setup():
     os.remove(fluxin)
     os.remove(output_mesh)
 
+
+def test_photon_sampling_setup():
+    if not HAVE_PYTAPS:
+        raise SkipTest
+
+    phtn_src = os.path.join(thisdir, "files_test_r2s", "phtn_src")
+    coords = [[0, 1, 2], [0, 1, 2], [0, 1]]
+    m = Mesh(structured=True, structured_coords=coords)
+    tags = {(10010000, "1 h"): "tag1", ("TOTAL", "shutdown"): "tag2"}
+    photon_sampling_setup(m, phtn_src, tags)
+
+    exp_tag1 = [[1.1, 2.2], [3.3, 4.4], [5.5, 6.6], [7.7, 8.8]]
+    exp_tag2 = [[11.1, 12.2], [13.3, 14.4], [15.5, 16.6], [17.7, 18.8]]
+
+    m.tag1 = IMeshTag(2, float)
+    m.tag2 = IMeshTag(2, float)
+
+    for i, mat, ve in m:
+        assert_array_equal(m.tag1[i], exp_tag1[i])
+        assert_array_equal(m.tag2[i], exp_tag2[i])

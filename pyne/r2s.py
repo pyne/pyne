@@ -1,9 +1,12 @@
-from os.path import isfile
+from os.path import isfile, join, dirname
 
 from pyne.mesh import Mesh
 from pyne.mcnp import Meshtal
-from pyne.alara import mesh_to_fluxin, mesh_to_geom
+from pyne.alara import mesh_to_fluxin, mesh_to_geom, photon_source_to_hdf5, \
+                       photon_source_hdf5_to_mesh
 from pyne.dagmc import load, discretize_geom
+
+
 
 def irradiation_setup(meshtal, tally_num, cell_mats, alara_params, geom=None,
                       num_rays=10, grid=False, flux_tag="n_flux",
@@ -84,7 +87,7 @@ def irradiation_setup(meshtal, tally_num, cell_mats, alara_params, geom=None,
  
     m.write_hdf5(output_mesh)
 
-def photon_sampling_setup(phtn_src, mesh, tags):
+def photon_sampling_setup(mesh, phtn_src, tags):
     """This function reads in an hdf5 file produced by photon_source_to_hdf5
 
     Parameters
@@ -106,6 +109,6 @@ def photon_sampling_setup(phtn_src, mesh, tags):
         tags = {('U-235', 'shutdown'): 'tag1', ('TOTAL', '1 h'): 'tag2'}
     """
     photon_source_to_hdf5(phtn_src)
-    h5_file = "{0}.h5".format(phtn_src)
+    h5_file = phtn_src + ".h5"
     photon_source_hdf5_to_mesh(mesh, h5_file, tags)
 
