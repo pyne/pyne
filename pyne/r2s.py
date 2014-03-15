@@ -6,8 +6,6 @@ from pyne.alara import mesh_to_fluxin, mesh_to_geom, photon_source_to_hdf5, \
                        photon_source_hdf5_to_mesh
 from pyne.dagmc import load, discretize_geom
 
-
-
 def irradiation_setup(meshtal, tally_num, cell_mats, alara_params, geom=None,
                       num_rays=10, grid=False, flux_tag="n_flux",
                       fluxin="alara_fluxin", reverse=False, 
@@ -20,7 +18,7 @@ def irradiation_setup(meshtal, tally_num, cell_mats, alara_params, geom=None,
                           output_mesh="r2s_step1.h5m")
 
     This function is used to setup the irradiation inputs after the first
-    transport step.
+    R2S transport step.
 
     Parameters
     ----------
@@ -33,7 +31,7 @@ def irradiation_setup(meshtal, tally_num, cell_mats, alara_params, geom=None,
         Maps geometry cell numbers to PyNE Material objects.
     alara_params : str
         The ALARA input blocks specifying everything except the geometry
-        and materials. This can either be passed a string or as a file name.
+        and materials. This can either be passed as string or as a file name.
     geom : str, optional
         The file name of a DAGMC-loadable faceted geometry. This is only
         necessary if the geometry is not already loaded into memory.
@@ -51,7 +49,7 @@ def irradiation_setup(meshtal, tally_num, cell_mats, alara_params, geom=None,
     reverse : bool, optional
         If True the fluxes in the fluxin file will be printed in the reverse
         order of how they appear within the flux vector tag. Since MCNP and
-        the meshtal class order fluxes from low energy to high energy, this
+        the Meshtal class order fluxes from low energy to high energy, this
         option should only be true if the transmutation data being used is
         ordered from high energy to low energy.
     alara_inp : str, optional
@@ -88,12 +86,14 @@ def irradiation_setup(meshtal, tally_num, cell_mats, alara_params, geom=None,
     m.write_hdf5(output_mesh)
 
 def photon_sampling_setup(mesh, phtn_src, tags):
-    """This function reads in an hdf5 file produced by photon_source_to_hdf5
+    """This function reads in an ALARA photon source file and creates and tags
+    photon source densities onto a Mesh object for the second R2S transport
+    step.
 
     Parameters
     ----------
     mesh : PyNE Mesh
-       The object containing the imesh instance to be tagged.
+       The object containing the iMesh instance to be tagged.
     phtn_src : str
         The path of the ALARA phtn_file.
     tags: dict
