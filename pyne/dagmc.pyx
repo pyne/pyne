@@ -592,9 +592,14 @@ def get_material_set(**kw):
     return mat_ids
 
 #### start util
-def cell_ve_centers(mesh):
+def cells_at_ve_centers(mesh):
     """This function reads in any PyNE Mesh object and finds the geometry cell
-    at the point in the center of every mesh volume element.
+    at the point in the center of each mesh volume element. This function can be
+    used for the same purposes as dagmc.discretize_geom(), but will work for 
+    all Meshs including non-axis-aligned and unstructured. The returned
+    structured array is in the same form as the returned array of 
+    discretize_geom(). A DAGMC geometry must be loaded prior to running this
+    function.
 
     Parameters
     ----------
@@ -614,8 +619,7 @@ def cell_ve_centers(mesh):
             The volume fraction of the cell withing the mesh ve. Always 1.0.
         :rel_error: float
             The relative error associated with the volume fraction. Always 1.0
-        This array is returned in sorted order with respect to idx and cell, with
-        cell changing fastest.
+        This array is returned in sorted order with respect to idx.
     """
     results = np.zeros(len(mesh), dtype=[('idx', np.int64),
                                          ('cell', np.int64),
@@ -624,7 +628,7 @@ def cell_ve_centers(mesh):
     for i, mat, ve in mesh:
         center = mesh.ve_center(ve)
         cell = find_volume(center)
-        results[i] = (i, vol, 1.0, 1.0)
+        results[i] = (i, cell, 1.0, 1.0)
 
     return results
 

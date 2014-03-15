@@ -68,6 +68,12 @@ def test_elem_volume():
         vols.append(mesh.elem_volume(ve))
     assert_almost_equal(np.mean(vols), 51.3333, places=4)
 
+def test_ve_center():
+    m = Mesh(structured=True, structured_coords=[[-1, 3, 5], [-1, 1], [-1, 1]])
+    exp_centers = [(1, 0, 0), (4, 0, 0)]
+    for i, mat, ve in m:
+        assert_equal(m.ve_center(ve), exp_centers[i])
+
 
 #############################################
 #Test structured mesh functionality

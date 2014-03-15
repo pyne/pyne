@@ -2,6 +2,7 @@ from __future__ import print_function
 import unittest
 import os.path
 from nose.tools import assert_equal, assert_almost_equal, assert_raises
+from numpy.testing import assert_array_equal
 
 try:
     from pyne import dagmc
@@ -228,6 +229,21 @@ class TestDagmcWithUnitbox(unittest.TestCase):
         mesh = Mesh(structured=True, 
                     structured_coords=[coords, coords, coords])
         assert_raises(ValueError, dagmc.discretize_geom, mesh, 3, grid=True)
+
+    def test_cell_ve_centers(self):
+        """Test that a mesh with one ve in cell 2 and one ve in cell 3 produces
+        correct results.
+        """
+        coords = [0, 1]
+        coords2 = [0, 2, 4]
+        mesh = Mesh(structured=True, 
+                    structured_coords=[coords2, coords, coords])
+        res = dagmc.cells_at_ve_centers(mesh)
+        assert_array_equal(res["idx"], [0, 1])
+        assert_array_equal(res["cell"], [2, 3])
+        assert_array_equal(res["vol_frac"], [1.0, 1.0])
+        assert_array_equal(res["rel_error"], [1.0, 1.0])
+
 
 if __name__ == "__main__":
     import nose
