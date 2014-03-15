@@ -13,6 +13,7 @@
 #include <exception>
 #include <stdlib.h>
 #include <stdio.h>
+#include <float.h>
 
 #include "hdf5.h"
 #include "hdf5_hl.h"
@@ -344,13 +345,13 @@ namespace pyne
   //
   //void decay_data(std::pair<int, int> from_to, decay_struct *data);
   std::pair<double, double> decay_half_life(std::pair<int,int>);
-  std::vector<std::pair<double, double> > decay_half_life(int);
+  std::vector<std::pair<double, double> > decay_half_lifes(int);
   double decay_branch_ratio(std::pair<int,int>);
-  std::vector<double> decay_branch_ratio(int parent);
+  std::vector<double> decay_branch_ratios(int parent);
   std::pair<double, double> decay_photon_branch_ratio(std::pair<int,int>);
-  std::vector<std::pair<double, double> >decay_photon_branch_ratio(int parent);
+  std::vector<std::pair<double, double> >decay_photon_branch_ratios(int parent);
   std::pair<double, double> decay_beta_branch_ratio(std::pair<int,int>);
-  std::vector<std::pair<double, double> >decay_beta_branch_ratio(int parent);
+  std::vector<std::pair<double, double> >decay_beta_branch_ratios(int parent);
 
 
   /// a struct matching the '/decay/gammas' table in nuc_data.h5.
@@ -376,9 +377,17 @@ namespace pyne
 
   /// A vector of structs containing gamma ray data for access in memory
   //extern std::vector<gamma_struct> gamma_data;
-  template<typename T, typename U> std::vector<T> data_access(double energy, size_t valoffset, std::map<std::pair<int, double>, U>  &data);
+  template<typename T, typename U> std::vector<T> data_access(double emin, double emax, size_t valoffset, std::map<std::pair<int, double>, U>  &data);
   template<typename T, typename U> std::vector<T> data_access(int parent, size_t valoffset, std::map<std::pair<int, double>, U>  &data);
-  extern std::map<std::pair<int, double>, gamma_struct> gamma_data_byparent;
+  extern std::map<std::pair<int, double>, gamma_struct> gamma_data;
+
+  std::vector<std::pair<double, double> > gamma_energy(int parent);
+  std::vector<std::pair<double, double> > gamma_photon_intensity(int parent);
+  std::vector<std::pair<double, double> > gamma_conversion_intensity(int parent);
+  std::vector<std::pair<double, double> > gamma_total_intensity(int parent);
+  std::vector<std::pair<int, int> > gamma_from_to(int parent);
+  std::vector<std::pair<int, int> > gamma_from_to(double energy, double error);
+  std::vector<int> gamma_parent(double energy, double error);
 
   /// a struct matching the '/decay/alphas' table in nuc_data.h5.
   typedef struct alpha_struct{
@@ -393,6 +402,12 @@ namespace pyne
 
   /// A vector of structs containing alpha data for access in memory
   extern std::map<std::pair<int, double>, alpha_struct> alpha_data;
+  
+  std::vector<double > alpha_energy(int parent);
+  std::vector<double> alpha_intensity(int parent);
+  std::vector<int> alpha_parent(double energy, double error);
+  std::vector<int> alpha_daughter(double energy, double error);
+  std::vector<int> alpha_daughter(int parent);
 
   /// access the alpha data by the energy of the alpha decay. Returns
   /// information by allocating an array of structs with the data. User is
@@ -418,6 +433,13 @@ namespace pyne
 
   /// A vector of structs containing beta data for access in memory
   extern std::map<std::pair<int, double>, beta_struct> beta_data;
+  
+  std::vector<double > beta_endpoint_energy(int parent);
+  std::vector<double > beta_average_energy(int parent);
+  std::vector<double> beta_intensity(int parent);
+  std::vector<int> beta_parent(double energy, double error);
+  std::vector<int> beta_daughter(double energy, double error);
+  std::vector<int> beta_daughter(int parent);
 
   /// access the beta data by the parent nuclide in id form. Returns
   /// information by allocating an array of structs with the data. User is
@@ -444,7 +466,14 @@ namespace pyne
   /// Loads the electron capture and beta plus decay data from the
   /// nuc_data.h5 file into memory.
   template<> void _load_data<ecbp_struct>();
-
+  
+  std::vector<double > ecbp_endpoint_energy(int parent);
+  std::vector<double > ecbp_average_energy(int parent);
+  std::vector<double> ec_intensity(int parent);
+  std::vector<double> bp_intensity(int parent);
+  std::vector<int> ecbp_parent(double energy, double error);
+  std::vector<int> ecbp_daughter(double energy, double error);
+  std::vector<int> ecbp_daughter(int parent);
   /// Access the electron capture and beta plus data by the parent nuclide in
   /// id form. Returns information by allocating an array of structs with
   /// the data. User is responsible for freeing memory when finished.

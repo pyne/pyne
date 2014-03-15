@@ -1154,7 +1154,7 @@ std::pair<double, double> pyne::decay_half_life(std::pair<int, int> from_to){
    data_access<double, decay_struct>(from_to, offsetof(decay_struct, half_life_error), decay_data));
 };
 
-std::vector<std::pair<double, double> >pyne::decay_half_life(int parent){
+std::vector<std::pair<double, double> >pyne::decay_half_lifes(int parent){
   std::vector<std::pair<double, double> > result;
   std::vector<double> part1 = data_access<double, decay_struct>(parent, offsetof(decay_struct, half_life), decay_data);
   std::vector<double> part2 = data_access<double, decay_struct>(parent, offsetof(decay_struct, half_life_error), decay_data);
@@ -1168,7 +1168,7 @@ double pyne::decay_branch_ratio(std::pair<int, int> from_to){
   return data_access<double, decay_struct>(from_to, offsetof(decay_struct, branch_ratio), decay_data);
 };
 
-std::vector<double> pyne::decay_branch_ratio(int parent){
+std::vector<double> pyne::decay_branch_ratios(int parent){
   return data_access<double, decay_struct>(parent, offsetof(decay_struct, half_life), decay_data);
 }
 
@@ -1177,7 +1177,7 @@ std::pair<double, double> pyne::decay_photon_branch_ratio(std::pair<int,int> fro
    data_access<double, decay_struct>(from_to, offsetof(decay_struct, photon_branch_ratio_error), decay_data));
 };
 
-std::vector<std::pair<double, double> >pyne::decay_photon_branch_ratio(int parent){
+std::vector<std::pair<double, double> >pyne::decay_photon_branch_ratios(int parent){
   std::vector<std::pair<double, double> > result;
   std::vector<double> part1 = data_access<double, decay_struct>(parent, offsetof(decay_struct, photon_branch_ratio), decay_data);
   std::vector<double> part2 = data_access<double, decay_struct>(parent, offsetof(decay_struct, photon_branch_ratio_error), decay_data);
@@ -1192,7 +1192,7 @@ std::pair<double, double> pyne::decay_beta_branch_ratio(std::pair<int,int> from_
    data_access<double, decay_struct>(from_to, offsetof(decay_struct, beta_branch_ratio_error), decay_data));
 };
 
-std::vector<std::pair<double, double> >pyne::decay_beta_branch_ratio(int parent){
+std::vector<std::pair<double, double> >pyne::decay_beta_branch_ratios(int parent){
   std::vector<std::pair<double, double> > result;
   std::vector<double> part1 = data_access<double, decay_struct>(parent, offsetof(decay_struct, beta_branch_ratio), decay_data);
   std::vector<double> part2 = data_access<double, decay_struct>(parent, offsetof(decay_struct, beta_branch_ratio_error), decay_data);
@@ -1202,28 +1202,7 @@ std::vector<std::pair<double, double> >pyne::decay_beta_branch_ratio(int parent)
   return result;
 }
 
-
-/*
-void pyne::decay_data_byparentchild(std::pair<int, int> from_to, decay_struct *data){
-
-  if (decay_data.empty()) {
-    _load_decay_data();
-    decay_data_byparentchild(from_to, data);
-  }
-
-  data = (decay_struct*) malloc(sizeof(decay_struct));
-
-  std::map<std::pair<int, int> , pyne::decay_struct>::iterator nuc_iter, nuc_end;
-
-  nuc_iter = decay_data.find(from_to);
-  nuc_end = decay_data.end();
-
-  if (nuc_iter != nuc_end)
-    data[0] = nuc_iter->second;
-}
-*/
-
-std::map<std::pair<int, double>, pyne::gamma_struct> pyne::gamma_data_byparent;
+std::map<std::pair<int, double>, pyne::gamma_struct> pyne::gamma_data;
 
 template<> void pyne::_load_data<pyne::gamma_struct>()
 {
@@ -1274,10 +1253,9 @@ template<> void pyne::_load_data<pyne::gamma_struct>()
   // close the nuc_data library, before doing anythng stupid
   status = H5Dclose(gamma_set);
   status = H5Fclose(nuc_data_h5);
-  gamma_data.resize(gamma_length);
 
   for (int i = 0; i < gamma_length; ++i) {
-    gamma_data_byparent[std::make_pair(gamma_array[i].parent_nuc, gamma_array[i].energy)] = gamma_array[i];
+    gamma_data[std::make_pair(gamma_array[i].parent_nuc, gamma_array[i].energy)] = gamma_array[i];
   }
 
 }
@@ -1298,7 +1276,7 @@ template<typename T, typename U> std::vector<T> pyne::data_access(double energy_
   if (data.empty())
   {
     _load_data<U>();
-    return data_access<T, U>(parent, valoffset, data);
+    return data_access<T, U>(energy_min, energy_max, valoffset, data);
   };
   return result;
 };
@@ -1328,7 +1306,7 @@ template<typename T, typename U> std::vector<T> pyne::data_access(int parent, si
 std::vector<std::pair<double, double> > pyne::gamma_energy(int parent){
   std::vector<std::pair<double, double> > result;
   std::vector<double> part1 = data_access<double, gamma_struct>(parent, offsetof(gamma_struct, energy), gamma_data);
-  std::vector<double> part2 = data_access<double, gamma_struct>(parent, offsetof(gamma_struct, energy_error), gamma_data);
+  std::vector<double> part2 = data_access<double, gamma_struct>(parent, offsetof(gamma_struct, energy_err), gamma_data);
   for(int i = 0; i < part1.size(); ++i){
     result.push_back(std::make_pair(part1[i],part2[i]));
   }
@@ -1337,7 +1315,7 @@ std::vector<std::pair<double, double> > pyne::gamma_energy(int parent){
 std::vector<std::pair<double, double> > pyne::gamma_photon_intensity(int parent){
   std::vector<std::pair<double, double> > result;
   std::vector<double> part1 = data_access<double, gamma_struct>(parent, offsetof(gamma_struct, photon_intensity), gamma_data);
-  std::vector<double> part2 = data_access<double, gamma_struct>(parent, offsetof(gamma_struct, photon_intensity_error), gamma_data);
+  std::vector<double> part2 = data_access<double, gamma_struct>(parent, offsetof(gamma_struct, photon_intensity_err), gamma_data);
   for(int i = 0; i < part1.size(); ++i){
     result.push_back(std::make_pair(part1[i],part2[i]));
   }
@@ -1345,8 +1323,8 @@ std::vector<std::pair<double, double> > pyne::gamma_photon_intensity(int parent)
 };
 std::vector<std::pair<double, double> > pyne::gamma_conversion_intensity(int parent){
   std::vector<std::pair<double, double> > result;
-  std::vector<double> part1 = data_access<double, gamma_struct>(parent, offsetof(gamma_struct, conversion_intensity), gamma_data);
-  std::vector<double> part2 = data_access<double, gamma_struct>(parent, offsetof(gamma_struct, conversion_intensity_error), gamma_data);
+  std::vector<double> part1 = data_access<double, gamma_struct>(parent, offsetof(gamma_struct, conv_intensity), gamma_data);
+  std::vector<double> part2 = data_access<double, gamma_struct>(parent, offsetof(gamma_struct, conv_intensity_err), gamma_data);
   for(int i = 0; i < part1.size(); ++i){
     result.push_back(std::make_pair(part1[i],part2[i]));
   }
@@ -1355,7 +1333,7 @@ std::vector<std::pair<double, double> > pyne::gamma_conversion_intensity(int par
 std::vector<std::pair<double, double> > pyne::gamma_total_intensity(int parent){
   std::vector<std::pair<double, double> > result;
   std::vector<double> part1 = data_access<double, gamma_struct>(parent, offsetof(gamma_struct, total_intensity), gamma_data);
-  std::vector<double> part2 = data_access<double, gamma_struct>(parent, offsetof(gamma_struct, total_intensity_error), gamma_data);
+  std::vector<double> part2 = data_access<double, gamma_struct>(parent, offsetof(gamma_struct, total_intensity_err), gamma_data);
   for(int i = 0; i < part1.size(); ++i){
     result.push_back(std::make_pair(part1[i],part2[i]));
   }
@@ -1381,53 +1359,10 @@ std::vector<std::pair<int, int> > pyne::gamma_from_to(double energy, double erro
 
 };
 std::vector<int> pyne::gamma_parent(double energy, double error){
-  return std::vector<int> part1 = data_access<int, gamma_struct>(energy+error, energy-error, offsetof(gamma_struct, from_nuc), gamma_data);
+  return data_access<int, gamma_struct>(energy+error, energy-error, offsetof(gamma_struct, parent_nuc), gamma_data);
 };
-/*
-int pyne::gamma_data_byparent(int nuc, gamma_struct *data){
-  int count = 0;
-  if (gamma_data.empty()) {
-    _load_gamma_data();
-    count = gamma_data_byparent(nuc, data);
-    return count;
-  }
-  for (int i = 0; i < gamma_data.size(); ++i) {
-    if (gamma_data[i].parent_nuc == nuc) ++count;
-  }
-  data = (gamma_struct*) malloc(sizeof(gamma_struct)*count);
-  int n = 0;
-  for (int i = 0; i < gamma_data.size(); ++i) {
-    if (gamma_data[i].parent_nuc == nuc) {
-      data[n] = gamma_data[i];
-      ++n;
-    }
-  }
-  return count;
-}
 
-int pyne::gamma_data(double en, double pm, gamma_struct *data){
-  int count = 0;
-  if (gamma_data.empty()) {
-    _load_gamma_data();
-    count = gamma_data_byen(en, pm, data);
-    return count;
-  }
-  for (int i = 0; i < gamma_data.size(); ++i) {
-    if ((en + pm > gamma_data[i].energy) && (gamma_data[i].energy > en - pm)) ++count;
-  }
-  data = (gamma_struct*) malloc(sizeof(gamma_struct)*count);
-  int n = 0;
-  for (int i = 0; i < gamma_data.size(); ++i) {
-    if ((en + pm > gamma_data[i].energy) && (gamma_data[i].energy > en - pm)) {
-      data[n] = gamma_data[i];
-      ++n;
-    }
-  }
-  return count;
-}
-*/
-
-std::vector<pyne::alpha_struct> pyne::alpha_data;
+std::map<std::pair<int, double>, pyne::alpha_struct> pyne::alpha_data;
 
 template<> void pyne::_load_data<pyne::alpha_struct>()
 {
@@ -1467,58 +1402,32 @@ template<> void pyne::_load_data<pyne::alpha_struct>()
   // close the nuc_data library, before doing anything stupid
   status = H5Dclose(alpha_set);
   status = H5Fclose(nuc_data_h5);
-  alpha_data.resize(alpha_length);
 
   for (int i = 0; i < alpha_length; ++i) {
-    alpha_data[std::make_pair(alpha_array[i].from_nuc, alpha_array[i].to_nuc)] = alpha_array[i];
+    alpha_data[std::make_pair(alpha_array[i].from_nuc, alpha_array[i].energy)] = alpha_array[i];
   }
 
 }
-/*
-int pyne::alpha_data(int nuc, alpha_struct *data){
-  int count = 0;
-  if (alpha_data.empty()) {
-    _load_alpha_data();
-    count = alpha_data_byparent(nuc, data);
-    return count;
-  }
-  for (int i = 0; i < alpha_data.size(); ++i) {
-    if (alpha_data[i].from_nuc == nuc) ++count;
-  }
-  data = (alpha_struct*) malloc(sizeof(alpha_struct)*count);
-  int n = 0;
-  for (int i = 0; i < alpha_data.size(); ++i) {
-    if (alpha_data[i].from_nuc == nuc) {
-      data[n] = alpha_data[i];
-      ++n;
-    }
-  }
-  return count;
-}
 
-int pyne::alpha_data(double en, double pm, alpha_struct *data){
-  int count = 0;
-  if (alpha_data.empty()) {
-    _load_alpha_data();
-    count = alpha_data_byen(en, pm, data);
-    return count;
-  }
-  for (int i = 0; i < alpha_data.size(); ++i) {
-    if ((en + pm > alpha_data[i].energy) && (alpha_data[i].energy > en - pm)) ++count;
-  }
-  data = (alpha_struct*) malloc(sizeof(alpha_struct)*count);
-  int n = 0;
-  for (int i = 0; i < alpha_data.size(); ++i) {
-    if ((en + pm > alpha_data[i].energy) && (alpha_data[i].energy > en - pm)) {
-      data[n] = alpha_data[i];
-      ++n;
-    }
-  }
-  return count;
-}
-*/
+std::vector<double > pyne::alpha_energy(int parent){
+  return data_access<double, alpha_struct>(parent, offsetof(alpha_struct, energy), alpha_data);
+};
+std::vector<double> pyne::alpha_intensity(int parent){
+  return data_access<double, alpha_struct>(parent, offsetof(alpha_struct, intensity), alpha_data);
+};
 
-std::vector<pyne::beta_struct> pyne::beta_data;
+std::vector<int> pyne::alpha_parent(double energy, double error){
+  return data_access<int, alpha_struct>(energy+error, energy-error, offsetof(alpha_struct, from_nuc), alpha_data);
+};
+
+std::vector<int> pyne::alpha_daughter(double energy, double error){
+  return data_access<int, alpha_struct>(energy+error, energy-error, offsetof(alpha_struct, to_nuc), alpha_data);
+};
+std::vector<int> pyne::alpha_daughter(int parent){
+  return data_access<int, alpha_struct>(parent, offsetof(alpha_struct, to_nuc), alpha_data);
+};
+
+std::map<std::pair<int, double>, pyne::beta_struct> pyne::beta_data;
 
 template<> void pyne::_load_data<pyne::beta_struct>()
 {
@@ -1560,16 +1469,39 @@ template<> void pyne::_load_data<pyne::beta_struct>()
   // close the nuc_data library, before doing anythng stupid
   status = H5Dclose(beta_set);
   status = H5Fclose(nuc_data_h5);
-  beta_data.resize(beta_length);
 
   for (int i = 0; i < beta_length; ++i) {
-    beta_data[std::make_pair(beta_array[i].from_nuc, beta_array[i].to_nuc)] = beta_array[i];
+    beta_data[std::make_pair(beta_array[i].from_nuc, beta_array[i].endpoint_energy)] = beta_array[i];
   }
 
 }
 
+std::vector<double > pyne::beta_endpoint_energy(int parent){
+  return data_access<double, beta_struct>(parent, offsetof(beta_struct, endpoint_energy), beta_data);
+};
 
-std::vector<pyne::ecbp_struct> pyne::ecbp_data;
+std::vector<double > pyne::beta_average_energy(int parent){
+  return data_access<double, beta_struct>(parent, offsetof(beta_struct, avg_energy), beta_data);
+};
+
+std::vector<double> pyne::beta_intensity(int parent){
+  return data_access<double, beta_struct>(parent, offsetof(beta_struct, intensity), beta_data);
+};
+
+std::vector<int> pyne::beta_parent(double energy, double error){
+  return data_access<int, beta_struct>(energy+error, energy-error, offsetof(beta_struct, from_nuc), beta_data);
+};
+
+std::vector<int> pyne::beta_daughter(double energy, double error){
+  return data_access<int, beta_struct>(energy+error, energy-error, offsetof(beta_struct, to_nuc), beta_data);
+};
+
+std::vector<int> pyne::beta_daughter(int parent){
+  return data_access<int, beta_struct>(parent, offsetof(beta_struct, to_nuc), beta_data);
+};
+
+
+std::map<std::pair<int, double>, pyne::ecbp_struct> pyne::ecbp_data;
 
 template<> void pyne::_load_data<pyne::ecbp_struct>()
 {
@@ -1614,11 +1546,39 @@ template<> void pyne::_load_data<pyne::ecbp_struct>()
   // close the nuc_data library, before doing anythng stupid
   status = H5Dclose(ecbp_set);
   status = H5Fclose(nuc_data_h5);
-  ecbp_data.resize(ecbp_length);
 
   for (int i = 0; i < ecbp_length; ++i) {
-    ecbp_data[i] = ecbp_array[i];
+    ecbp_data[std::make_pair(ecbp_array[i].from_nuc, ecbp_array[i].endpoint_energy)] = ecbp_array[i];
   }
 
 }
 
+
+
+std::vector<double > pyne::ecbp_endpoint_energy(int parent){
+  return data_access<double, ecbp_struct>(parent, offsetof(ecbp_struct, endpoint_energy), ecbp_data);
+};
+
+std::vector<double > pyne::ecbp_average_energy(int parent){
+  return data_access<double, ecbp_struct>(parent, offsetof(ecbp_struct, avg_energy), ecbp_data);
+};
+
+std::vector<double> pyne::ec_intensity(int parent){
+  return data_access<double, ecbp_struct>(parent, offsetof(ecbp_struct, ec_intensity), ecbp_data);
+};
+
+std::vector<double> pyne::bp_intensity(int parent){
+  return data_access<double, ecbp_struct>(parent, offsetof(ecbp_struct, beta_plus_intensity), ecbp_data);
+};
+
+std::vector<int> pyne::ecbp_parent(double energy, double error){
+  return data_access<int, ecbp_struct>(energy+error, energy-error, offsetof(ecbp_struct, from_nuc), ecbp_data);
+};
+
+std::vector<int> pyne::ecbp_daughter(double energy, double error){
+  return data_access<int, ecbp_struct>(energy+error, energy-error, offsetof(ecbp_struct, to_nuc), ecbp_data);
+};
+
+std::vector<int> pyne::ecbp_daughter(int parent){
+  return data_access<int, ecbp_struct>(parent, offsetof(ecbp_struct, to_nuc), ecbp_data);
+};

@@ -499,25 +499,25 @@ def metastable_id(nuc, level=1):
 def decay_half_life(from_nuc, to_nuc):
     energy, error = cpp_data.decay_half_life(cpp_pair[int,int](from_nuc, to_nuc)) 
     return energy, error
-    
+
 def decay_half_life_byparent(parent):
-    arr = cpp_data.decay_half_life(<int> parent)
+    arr = cpp_data.decay_half_lifes(<int> parent)
     return arr
-    
+
 def decay_branch_ratio(from_nuc, to_nuc):
     ratio = cpp_data.decay_branch_ratio(cpp_pair[int,int](from_nuc, to_nuc)) 
     return ratio
 
 def decay_branch_ratio_byparent(parent):
-    arr = cpp_data.decay_branch_ratio(<int> parent)
+    arr = cpp_data.decay_branch_ratios(<int> parent)
     return arr
-    
+
 def decay_photon_branch_ratio(from_nuc, to_nuc):
     energy, error = cpp_data.decay_photon_branch_ratio(cpp_pair[int,int](from_nuc, to_nuc)) 
     return energy, error
 
 def decay_photon_branch_ratio_byparent(parent):
-    arr = cpp_data.decay_photon_branch_ratio(<int> parent)
+    arr = cpp_data.decay_photon_branch_ratios(<int> parent)
     return arr
 
 def decay_beta_branch_ratio(from_nuc, to_nuc):
@@ -525,5 +525,98 @@ def decay_beta_branch_ratio(from_nuc, to_nuc):
     return energy, error
 
 def decay_beta_branch_ratio_byparent(parent):
-    arr = cpp_data.decay_beta_branch_ratio(<int> parent)
+    arr = cpp_data.decay_beta_branch_ratios(<int> parent)
     return arr
+
+def gamma_energy(parent):
+    return cpp_data.gamma_energy(<int> parent)
+
+def gamma_photon_intensity(parent):
+    return cpp_data.gamma_photon_intensity(<int> parent)
+    
+def gamma_conversion_intensity(parent):
+    return cpp_data.gamma_conversion_intensity(<int> parent)
+    
+def gamma_total_intensity(parent):
+    return cpp_data.gamma_total_intensity(<int> parent)
+
+def gamma_from_to_byparent(parent):
+    return cpp_data.gamma_from_to(<int> parent)
+    
+def gamma_from_to_byen(en, enerror=None):
+    if enerror == None:
+        enerror = en * 0.01
+    return cpp_data.gamma_from_to(<double> en,<double> enerror)   
+
+def gamma_parent(en, enerror=None):
+    if enerror == None:
+        enerror = en * 0.01
+    return cpp_data.gamma_parent(<double> en, <double> enerror)
+
+
+def alpha_energy(parent):
+    return cpp_data.alpha_energy(<int> parent)
+
+def alpha_intensity(parent):
+    return cpp_data.alpha_intensity(<int> parent) 
+
+def alpha_parent(en, enerror=None):
+    if enerror == None:
+        enerror = en * 0.01
+    return cpp_data.alpha_parent(<double> en, <double> enerror)
+
+def alpha_daughter(en, enerror=None):
+    if enerror == None:
+        enerror = en * 0.01
+    return cpp_data.alpha_daughter(<double> en, <double> enerror)
+    
+def alpha_daughter(parent):
+    return cpp_data.alpha_daughter(<int> parent)
+
+def beta_endpoint_energy(parent):
+    return cpp_data.beta_endpoint_energy(<int> parent)
+
+def beta_average_energy(parent):
+    return cpp_data.beta_average_energy(<int> parent)
+
+def beta_intensity(parent):
+    return cpp_data.beta_intensity(<int> parent) 
+
+def beta_parent(en, enerror=None):
+    if enerror == None:
+        enerror = en * 0.01
+    return cpp_data.beta_parent(<double> en, <double> enerror)
+
+def beta_daughter(en, enerror=None):
+    if enerror == None:
+        enerror = en * 0.01
+    return cpp_data.beta_daughter(<double> en, <double> enerror)
+    
+def beta_daughter(parent):
+    return cpp_data.beta_daughter(<int> parent)
+
+def ecbp_endpoint_energy(parent):
+    return cpp_data.ecbp_endpoint_energy(<int> parent)
+
+def ecbp_average_energy(parent):
+    return cpp_data.ecbp_average_energy(<int> parent)
+
+def ec_intensity(parent):
+    return cpp_data.ec_intensity(<int> parent)
+
+def beta_plus_intensity(parent):
+    return cpp_data.bp_intensity(<int> parent) 
+
+def ecbp_parent(en, enerror=None):
+    if enerror == None:
+        enerror = en * 0.01
+    return cpp_data.ecbp_parent(<double> en, <double> enerror)
+
+def ecbp_daughter(en, enerror=None):
+    if enerror == None:
+        enerror = en * 0.01
+    return cpp_data.ecbp_daughter(<double> en, <double> enerror)
+    
+def ecbp_daughter(parent):
+    return cpp_data.ecbp_daughter(<int> parent)
+
