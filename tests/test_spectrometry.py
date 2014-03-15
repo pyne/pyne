@@ -1,6 +1,6 @@
 """Spectrometry tests """
 import nose 
-from nose.tools import assert_equal
+from nose.tools import assert_equal, assert_true
 
 from pyne import gammaspec
 
@@ -22,6 +22,10 @@ def test_read_spe():
     
 def test_calib():
     assert_equal(gammaspec.calc_e_eff(1, eff_coeff, 1), 0.059688551591347033)
+
+def test_str():
+    s = str(gspec1)
+    assert_true(len(s) > 0)
 
 if __name__ == "__main__":
     nose.runmodule()

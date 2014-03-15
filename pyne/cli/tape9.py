@@ -165,6 +165,14 @@ def gendecay(decays, branches, metastable_cutoff=1.0):
             if (item[2] <= longest[key]):
                 continue 
             _set_branch_item(t9, nuc, key, item)
+    for nucs, hl in zip([origen22.ACTIVATION_PRODUCT_NUCS, 
+                         origen22.ACTINIDE_AND_DAUGHTER_NUCS, 
+                         origen22.FISSION_PRODUCT_NUCS], 
+                        [t9[i]['half_life'] for i in range(1, 4)]):
+        for nuc in nucs:
+            key = nucname.zzaaam(nuc)
+            if key not in hl:
+                hl[key] = data.half_life(nuc)
     return t9
 
 
@@ -183,6 +191,7 @@ def main_gen(ns):
     print("creating ORIGEN cross section libraries")
     xsc = XSCache(data_source_classes=[EAFDataSource, SimpleDataSource, 
                                        NullDataSource])
+    xsc.load()
     t9xsfpy = origen22.xslibs(xscache=xsc, verbose=True)
     t9 = origen22.merge_tape9([t9decay, t9xsfpy])
     origen22.write_tape9(t9, outfile=ns.filename)

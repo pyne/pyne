@@ -9,13 +9,14 @@ from pyne.api import nuc_data
 from pyne.utils import message
 from pyne.dbgen.api import build_dir
 from pyne.dbgen.decay import make_decay
-from pyne.dbgen.atomic_weight import make_atomic_weight
+from pyne.dbgen.atomic_mass import make_atomic_mass
 from pyne.dbgen.materials_library import make_materials_library
 from pyne.dbgen.scattering_lengths import make_scattering_lengths
 from pyne.dbgen.simple_xs import make_simple_xs
 from pyne.dbgen.cinder import make_cinder
 from pyne.dbgen.eaf import make_eaf
 from pyne.dbgen import wimsdfpy
+from pyne.dbgen import ndsfpy
 from pyne.dbgen.hashtools import check_hashes
 
 # Thanks to http://patorjk.com/software/taag/
@@ -53,7 +54,7 @@ pyne_logo = """\
 def _fetch_prebuilt(args):
     nuc_data, build_dir = args.nuc_data, args.build_dir
     prebuilt_nuc_data = os.path.join(build_dir, 'prebuilt_nuc_data.h5')
-    prebuilt_nuc_data_url = "http://s3.amazonaws.com/pyne/prebuilt_nuc_data.h5"
+    prebuilt_nuc_data_url = "http://data.pyne.io/prebuilt_nuc_data.h5"
 
     if not os.path.exists(prebuilt_nuc_data):
         print("Fetching pre-built nuc_data.h5 from " + prebuilt_nuc_data_url)
@@ -69,18 +70,19 @@ def main():
     """Entry point for nuc_data_make utility."""
     print(message(pyne_logo))
 
-    make_funcs = [('atomic_weight', make_atomic_weight),
+    make_funcs = [('atomic_mass', make_atomic_mass),
                   ('scattering_lengths', make_scattering_lengths),
                   ('decay', make_decay),
                   ('simple_xs', make_simple_xs),
                   ('cinder', make_cinder),
                   ('materials', make_materials_library),
                   ('eaf', make_eaf),
-                  ('wimsd_fpy', wimsdfpy.make_fpy)
+                  ('wimsd_fpy', wimsdfpy.make_fpy),
+                  ('nds_fpy', ndsfpy.make_fpy)
                   ]
     make_map = dict(make_funcs)
-    make_open = set(['atomic_weight', 'scattering_lengths', 'simple_xs', 'materials', 
-                     'wimsd_fpy'])
+    make_open = set(['atomic_mass', 'scattering_lengths', 'simple_xs', 'materials',
+                     'wimsd_fpy', 'nds_fpy'])
 
     # Parse the command line arguments
     parser = argparse.ArgumentParser(description='Make a nuclear data library.')
@@ -103,9 +105,9 @@ def main():
                         help='check hashes against built-in ones')
     parser.add_argument('--clean', dest='clean', type=int, default=0,
                         help="""level to clean up existing files.
-                                0: no cleaning (default).
-                                1: clean nuc_data.
-                                2: clean nuc_data and build_dir.""")
+				 0: no cleaning (default).
+				 1: clean nuc_data.
+				 2: clean nuc_data and build_dir.""")
     args = parser.parse_args()
 
     # clean nuc data
@@ -148,9 +150,9 @@ def main():
         print("Results:")
         for name, value in result:
             if value:
-                print("    node " + name + " checksum matches")
+                print(" node " + name + " checksum matches")
             else:
-                print("    node " + name + " checksum doesn't match!!")
+                print(" node " + name + " checksum doesn't match!!")
 
 
 if __name__ == '__main__':

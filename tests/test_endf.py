@@ -4,7 +4,8 @@ import StringIO
 from math import e
 
 import numpy as np
-from numpy.testing import assert_array_equal, assert_allclose
+from numpy.testing import assert_array_equal, assert_allclose, \
+    assert_array_almost_equal
 
 from pyne.endf import Library
 from pyne.utils import endftod
@@ -962,7 +963,7 @@ def test_discretize():
            19.175694435799141, 29.334824378652982, 45.254982026071197,
            74.217617672501689, 162.26091389706099, 218.90153743636509,
            312.62178192130619, 590.40136068709603, 724.64216445611373]
-    assert_equal(nonelastic_c, exp)
+    assert_array_almost_equal(nonelastic_c, exp)
 
 if __name__ == "__main__":
     nose.runmodule()

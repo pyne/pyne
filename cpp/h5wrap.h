@@ -3,8 +3,8 @@
 ///
 /// \brief Provides some HDF5 helper functionality in its own namespace
 
-#if !defined(_H5_WRAP_)
-#define _H5_WRAP_
+#ifndef PYNE_MRNAFG5GNZDNPCRPX3UCBZ5MFE
+#define PYNE_MRNAFG5GNZDNPCRPX3UCBZ5MFE
 
 #include <iostream>
 #include <fstream>
@@ -18,7 +18,9 @@
 
 #include "hdf5.h"
 
+#ifndef PYNE_IS_AMALGAMATED
 #include "extra_types.h"
+#endif
 
 
 namespace h5wrap
@@ -402,9 +404,9 @@ namespace h5wrap
   /// complex data type that is used by PyTables ^_~.
   inline hid_t _get_PYTABLES_COMPLEX128()
   {
-    hid_t ct = H5Tcreate(H5T_COMPOUND, sizeof(extra_types::complex_t));
-    H5Tinsert(ct, "r", HOFFSET(extra_types::complex_t, re), H5T_NATIVE_DOUBLE);
-    H5Tinsert(ct, "i", HOFFSET(extra_types::complex_t, im), H5T_NATIVE_DOUBLE);
+    hid_t ct = H5Tcreate(H5T_COMPOUND, sizeof(xd_complex_t));
+    H5Tinsert(ct, "r", HOFFSET(xd_complex_t, re), H5T_NATIVE_DOUBLE);
+    H5Tinsert(ct, "i", HOFFSET(xd_complex_t, im), H5T_NATIVE_DOUBLE);
     return ct;
   };
 

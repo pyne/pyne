@@ -4,11 +4,8 @@ import unittest
 import nose
 
 import nose.tools
-from nose.tools import assert_almost_equal
-from nose.tools import assert_equal
-from nose.tools import assert_true
-from nose.tools import assert_raises
-
+from nose.tools import assert_almost_equal, assert_equal, assert_true, \
+                       assert_false, assert_raises
 import tables
 
 try:
@@ -179,6 +176,7 @@ def check_put_header_block(ssrname, sswname):
         ssw.ncrd = ssr.ncrd
         ssw.njsw = ssr.njsw
         ssw.niss = ssr.niss
+        ssw.table1extra = ssr.table1extra
         # table 2 record values
         ssw.niwr = ssr.niwr
         ssw.mipts = ssr.mipts
@@ -398,6 +396,67 @@ def test_print_tracklist():
 
     return
 
+def _gen_xsdir():
+    thisdir = os.path.dirname(__file__)
+    xsdir_file = os.path.join(thisdir, "files_test_mcnp", "dummy_xsdir")
+    return mcnp.Xsdir(xsdir_file)
+    
+def test_xsdir():
+    xsdir = _gen_xsdir()
+
+    #  test atomic mass ratio tables
+    exp_awr = {'1000': '0.99931697', '3000': '6.88131188', '3003': '3.11111111', 
+               '3004': '4.11111111', '3005': '5.111111111','3009': '9.11111111',
+                '0001': '1.000000'}
+    assert_equal(xsdir.awr, exp_awr)
+
+    # test xs tables
+    assert_equal(xsdir.tables[0].name, '1001.44c')
+    assert_equal(xsdir.tables[0].awr, 1.111111)
+    assert_equal(xsdir.tables[0].filename, 'many_xs/1001.555nc')
+    assert_equal(xsdir.tables[0].access, '0')
+    assert_equal(xsdir.tables[0].filetype, 1)
+    assert_equal(xsdir.tables[0].address, 4)
+    assert_equal(xsdir.tables[0].tablelength, 55555)
+    assert_equal(xsdir.tables[0].recordlength, 0)
+    assert_equal(xsdir.tables[0].entries, 0)
+    assert_equal(xsdir.tables[0].temperature, 5.5555E+05)
+    assert_false(xsdir.tables[0].ptable)
+    assert_true(xsdir.tables[1].ptable)
+
+def test_xsdir_find_table():
+    xsdir = _gen_xsdir()
+    table = xsdir.find_table('1001')
+    assert_equal(table[0].name, '1001.44c')
+    assert_equal(table[1].name, '1001.66c')
+
+def test_xsdir_to_serpent():
+    xsdir = _gen_xsdir()
+    output = os.path.join(os.getcwd(), 'test_output')
+    xsdir.to_xsdata(output)
+
+    with open(output, 'r') as f:
+        lines = f.readlines()
+
+    exp = [("1001.44c 1001.44c 1 1001 0 1.111111 6.44688328094e+15 0"
+            " many_xs/1001.555nc\n"),
+           ("1001.66c 1001.66c 1 1001 0 1.111111 6.44688328094e+15 0"
+            " such_data/1001.777nc\n")]
+
+    assert_equal(lines, exp)
+    os.remove(output)
+    
+
+def test_xsdir_nucs():
+    xsdir = _gen_xsdir()
+    assert_equal(xsdir.nucs(), set([10010000]))
+
+def test_xsdirtable_to_serpent():
+    xsdir = _gen_xsdir()
+    line = xsdir.tables[0].to_serpent('.')
+    exp_line = ("1001.44c 1001.44c 1 1001 0 1.111111 6.44688328094e+15 0"
+                " ./many_xs/1001.555nc")
+    assert_equal(line, exp_line)
 
 def test_read_mcnp():
 
@@ -449,8 +508,8 @@ def test_read_mcnp():
         expected_multimaterial._mats.keys()[0].density,
         read_materials[1]._mats.keys()[0].density)
     assert_equal(
-        expected_multimaterial._mats.keys()[0].atoms_per_mol,
-        read_materials[1]._mats.keys()[0].atoms_per_mol)
+        expected_multimaterial._mats.keys()[0].atoms_per_molecule,
+        read_materials[1]._mats.keys()[0].atoms_per_molecule)
     assert_equal(
         expected_multimaterial._mats.keys()[0].attrs,
         read_materials[1]._mats.keys()[0].attrs)
@@ -464,8 +523,8 @@ def test_read_mcnp():
         expected_multimaterial._mats.keys()[1].density,
         read_materials[1]._mats.keys()[1].density)
     assert_equal(
-        expected_multimaterial._mats.keys()[1].atoms_per_mol,
-        read_materials[1]._mats.keys()[1].atoms_per_mol)
+        expected_multimaterial._mats.keys()[1].atoms_per_molecule,
+        read_materials[1]._mats.keys()[1].atoms_per_molecule)
     assert_equal(
         expected_multimaterial._mats.keys()[1].attrs,
         read_materials[1]._mats.keys()[1].attrs)
@@ -867,7 +926,9 @@ def test_single_meshtally_meshtal():
     expected_h5m = os.path.join(thisdir, "mcnp_meshtal_single_mesh.h5m")
     expected_sm = Mesh(mesh_file=expected_h5m, structured=True)
 
-    meshtal_object = mcnp.Meshtal(meshtal_file)
+    tags = {4: ["n_result", "n_rel_error", 
+                "n_total_result", "n_total_rel_error"]}
+    meshtal_object = mcnp.Meshtal(meshtal_file, tags)
 
     # test Meshtal attributes
     assert_equal(meshtal_object.version, 5)
@@ -881,7 +942,7 @@ def test_single_meshtally_meshtal():
 
     # test MeshTally attributes
     assert_equal(meshtal_object.tally[4].tally_number, 4)
-    assert_equal(meshtal_object.tally[4].particle, "n")
+    assert_equal(meshtal_object.tally[4].particle, "neutron")
     assert_equal(meshtal_object.tally[4].dose_response, True)
     assert_equal(
         meshtal_object.tally[4].x_bounds,
@@ -948,7 +1009,15 @@ def test_multiple_meshtally_meshtal():
     expected_h5m_34 = os.path.join(thisdir, "mcnp_meshtal_tally_34.h5m")
     expected_sm_34 = Mesh(mesh_file=expected_h5m_34, structured=True)
 
-    meshtal_object = mcnp.Meshtal(meshtal_file)
+    tags = {4: ["n_result", "n_rel_error",
+                 "n_total_result", "n_total_rel_error"],
+            14: ["n_result", "n_rel_error",
+                 "n_total_result", "n_total_rel_error"],
+            24:["p_result", "p_rel_error", 
+                "p_total_result", "p_total_rel_error"],
+            34:["p_result", "p_rel_error",
+                "p_total_result", "p_total_rel_error"]}
+    meshtal_object = mcnp.Meshtal(meshtal_file, tags)
 
     # test meshtally 4
     for v_e, expected_v_e in zip(

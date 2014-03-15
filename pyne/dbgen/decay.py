@@ -30,7 +30,7 @@ def grab_ensdf_decay(build_dir=""):
 
     # Grab ENSDF files and unzip them.
     iaea_base_url = 'http://www-nds.iaea.org/ensdf_base_files/2013-October/'
-    s3_base_url = 'http://s3.amazonaws.com/pyne/'
+    cf_base_url = 'http://data.pyne.io/'
     ensdf_zip = ['ensdf_131009_099.zip', 'ensdf_131009_199.zip', 'ensdf_131009_294.zip',]
 
     for f in ensdf_zip:
@@ -40,7 +40,7 @@ def grab_ensdf_decay(build_dir=""):
             urllib.urlretrieve(iaea_base_url + f, fpath)
 
             if os.path.getsize(fpath) < 1048576: 
-                print("  could not get {0} from IAEA; trying S3 mirror".format(f))
+                print("  could not get {0} from IAEA; trying mirror".format(f))
                 os.remove(fpath)
                 urllib.urlretrieve(s3_base_url + f, fpath)
 
@@ -135,7 +135,7 @@ def make_decay(args):
     print("Grabbing the ENSDF decay data from IAEA")
     grab_ensdf_decay(build_dir)
 
-    # Make atomic weight table once we have the array
+    # Make atomic mass table once we have the array
     print("Making decay data table.")
     make_atomic_decay_table(nuc_data, build_dir)
 

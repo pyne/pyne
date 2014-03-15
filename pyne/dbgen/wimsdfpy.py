@@ -37,8 +37,7 @@ from pyne.dbgen.api import BASIC_FILTERS
 
 
 def grab_fpy(build_dir="", file_out='wimsd-fpyield.html'):
-    """Grabs the scattering cross-section lengths for neutrons from the NIST website
-    or locally from this module.
+    """Grabs the WIMS fission product yields from the IAEA website
     """
     build_filename = os.path.join(build_dir, file_out)
     local_filename = os.path.join(os.path.dirname(__file__), file_out)
@@ -96,7 +95,7 @@ fpy_dtype = np.dtype([
 
 
 def parse_fpy(build_dir):
-    """Converts to scattering lenth data to a numpy array."""
+    """Converts fission product yeild data to a numpy array."""
     build_filename = os.path.join(build_dir, 'wimsd-fpyield.html')
     with open(build_filename, 'r') as f:
         raw_data = f.read()
@@ -108,7 +107,7 @@ def parse_fpy(build_dir):
 
 
 def make_fpy_table(nuc_data, build_dir=""):
-    """Adds the neutron sacttering lengths to the nuc_data library.
+    """Adds the neutron scattering lengths to the nuc_data library.
 
     Parameters
     ----------

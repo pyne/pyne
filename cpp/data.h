@@ -3,8 +3,8 @@
 ///
 /// \brief Implements basic nuclear data functions.
 
-#ifndef _TEWK4A7VOFFLHDDXD5ZZ7KPXEQ
-#define _TEWK4A7VOFFLHDDXD5ZZ7KPXEQ
+#ifndef PYNE_TEWK4A7VOFFLHDDXD5ZZ7KPXEQ
+#define PYNE_TEWK4A7VOFFLHDDXD5ZZ7KPXEQ
 #include <iostream>
 #include <string>
 #include <utility>
@@ -16,12 +16,13 @@
 
 #include "hdf5.h"
 #include "hdf5_hl.h"
+
+#ifndef PYNE_IS_AMALGAMATED
 #include "h5wrap.h"
-
 #include "extra_types.h"
-
 #include "pyne.h"
 #include "nucname.h"
+#endif
 
 namespace pyne
 {
@@ -45,13 +46,13 @@ namespace pyne
   /// Mapping from nuclides in id form to their atomic masses.
   extern std::map<int, double> atomic_mass_map;
 
-  /// a struct matching the atomic_weight table in nuc_data.h5.
-  typedef struct atomic_weight_struct {
+  /// a struct matching the atomic_mass table in nuc_data.h5.
+  typedef struct atomic_mass_struct {
     int nuc;      ///< nuclide in id form
     double mass;  ///< nuclide atomic mass [amu]
     double error; ///< error in atomic mass [amu]
     double abund; ///< natural abundance of nuclide [atom fraction]
-  } atomic_weight_struct; 
+  } atomic_mass_struct; 
 
   // Loads preset dataset hashes into memory.
   std::map<std::string, std::string> get_data_checksums();
@@ -95,17 +96,17 @@ namespace pyne
   /// \{
 
   /// Mapping from nuclides in id form to their coherent scattering length.
-  extern std::map<int, extra_types::complex_t> b_coherent_map;
+  extern std::map<int, xd_complex_t> b_coherent_map;
   /// Mapping from nuclides in id form to their incoherent scattering length.
-  extern std::map<int, extra_types::complex_t> b_incoherent_map;
+  extern std::map<int, xd_complex_t> b_incoherent_map;
   /// Mapping from nuclides in id form to their scattering length.
   extern std::map<int, double> b_map;
 
   /// a struct matching the '/neutron/scattering_lengths' table in nuc_data.h5.
   typedef struct scattering_lengths_struct {
     int nuc;  ///< nuclide in id form
-    extra_types::complex_t b_coherent;  ///< coherent scattering length [cm]
-    extra_types::complex_t b_incoherent;  ///< incoherent scattering length [cm]
+    xd_complex_t b_coherent;  ///< coherent scattering length [cm]
+    xd_complex_t b_incoherent;  ///< incoherent scattering length [cm]
     double xs_coherent;   ///< coherent scattering cross section
     double xs_incoherent; ///< incoherent scattering cross section
     double xs;            ///< scattering cross section
@@ -121,20 +122,20 @@ namespace pyne
   /// nuclide with the same A number is returned instead.  If none of these exist,
   /// then the value of a nuclide with the same Z number is used.  If none of these
   /// work then 0.0 is returned.
-  extra_types::complex_t b_coherent(int nuc);
+  xd_complex_t b_coherent(int nuc);
   /// Finds the coherent scattering length [cm] for a nuclide \a nuc.
-  extra_types::complex_t b_coherent(char * nuc);
+  xd_complex_t b_coherent(char * nuc);
   /// Finds the coherent scattering length [cm] for a nuclide \a nuc.
-  extra_types::complex_t b_coherent(std::string nuc);
+  xd_complex_t b_coherent(std::string nuc);
 
   /// \brief Finds the incoherent scattering length [cm] for a nuclide \a nuc.
   ///
   /// This function works in the same way that b_coherent() does.
-  extra_types::complex_t b_incoherent(int nuc);
+  xd_complex_t b_incoherent(int nuc);
   /// Finds the incoherent scattering length [cm] for a nuclide \a nuc.
-  extra_types::complex_t b_incoherent(char * nuc);
+  xd_complex_t b_incoherent(char * nuc);
   /// Finds the incoherent scattering length [cm] for a nuclide \a nuc.
-  extra_types::complex_t b_incoherent(std::string nuc);
+  xd_complex_t b_incoherent(std::string nuc);
 
   /// Computes the scattering length [cm] from the coherent and incoherent components.
   double b(int nuc);
@@ -161,18 +162,49 @@ namespace pyne
   /// Loads the WIMSD fission product yield data from the nuc_data.h5 file into memory.
   void _load_wimsdfpy();
 
+  /// a struct matching the '/neutron/nds_fission_product' table in nuc_data.h5
+  typedef struct ndsfpy_struct {
+    int from_nuc;
+    int to_nuc;
+    double yield_thermal;
+    double yield_thermal_err;
+    double yield_fast;
+    double yield_fast_err;
+    double yield_14MeV;
+    double yield_14MeV_err;
+  } ndsfpy_struct;
+
+  /// a struct for the nds data for fpyield
+  typedef struct ndsfpysub_struct {
+    double yield_thermal;
+    double yield_thermal_err;
+    double yield_fast;
+    double yield_fast_err;
+    double yield_14MeV;
+    double yield_14MeV_err;
+  } ndsfpysub_struct;
+
+
+  extern std::map<std::pair<int, int>, ndsfpysub_struct> ndsfpy_data;
+
+  /// Loads the NDS fission product yield data from the nuc_data.h5 file into memory.
+  void _load_ndsfpy();
+
   /// \brief Returns the fission product yield for a parent/child nuclide pair
   ///
-  /// This function works by first checking the wimsdfpy_data.  If this is empty it
-  /// loads the data from disk.  If the parent/child nuclide pair is still not found, 
-  /// then the process is assumed to be impossible and 0.0 is returned.
-  double fpyield(std::pair<int, int> from_to);
+  /// This function works by first checking the fission yield data.  If this is
+  /// empty it loads the data from disk. If the parent/child nuclide pair
+  /// is still not found, then the process is assumed to be impossible
+  /// and 0.0 is returned. The data source is determined by the type value
+  /// as follows: 0 WIMS, 1 thermal NDS, 2 fast NDS, 3 14 MeV NDS.
+  /// negative type values return error for that data type.
+  double fpyield(std::pair<int, int> from_to, int source, bool get_error);
   /// Returns the fission product yield for a parent/child nuclide pair
-  double fpyield(int from_nuc, int to_nuc);
+  double fpyield(int from_nuc, int to_nuc, int source, bool get_error);
   /// Returns the fission product yield for a parent/child nuclide pair
-  double fpyield(char * from_nuc, char * to_nuc);
+  double fpyield(char * from_nuc, char * to_nuc, int source, bool get_error);
   /// Returns the fission product yield for a parent/child nuclide pair
-  double fpyield(std::string from_nuc, std::string to_nuc);
+  double fpyield(std::string from_nuc, std::string to_nuc, int source, bool get_error);
 
   /// \}
 
