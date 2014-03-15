@@ -5,6 +5,7 @@ from collections import Iterable, Sequence
 import warnings
 
 import numpy as np
+from tables import NoSuchNodeError
 
 try:
     from itaps import iMesh, iBase, iMeshExtensions
@@ -657,10 +658,18 @@ class Mesh(object):
             self.vertex_dims = list(self.dims[0:3]) \
                                + [x + 1 for x in self.dims[3:6]]
         # sets mats
-        if mats is None:
+        mats_in_mesh_file = False
+        if mesh_file and mats is None:
+            try:
+                mats = MaterialLibrary(mesh_file)
+                mats_in_mesh_file = True
+            except NoSuchNodeError:
+                pass
+        if mats is None and not mats_in_mesh_file:
             mats = MaterialLibrary()
         elif not isinstance(mats, MaterialLibrary):
             mats = MaterialLibrary(mats)
+
         self.mats = mats
 
         # tag with volume id and ensure mats exist.
