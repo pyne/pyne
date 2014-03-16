@@ -2,24 +2,19 @@ import os
 from nose.tools import assert_equal, assert_almost_equal
 from numpy.testing import assert_array_equal
 
+try:
+    from itaps import iMesh
+except ImportError:
+    from nose.plugins.skip import SkipTest
+    raise SkipTest
+
 from pyne.r2s import irradiation_setup, photon_sampling_setup
 from pyne.material import Material
 from pyne.mesh import Mesh, IMeshTag
-# mesh specific imports
-
-try:
-    from itaps import iMesh
-    HAVE_PYTAPS = True
-except ImportError:
-    from nose.plugins.skip import SkipTest
-    HAVE_PYTAPS = False
-    pass
 
 thisdir = os.path.dirname(__file__)
 
 def test_irradiation_setup():
-    if not HAVE_PYTAPS:
-        raise SkipTest
 
     meshtal = os.path.join(thisdir, "files_test_r2s", "meshtal_2x2x1")
     tally_num = 4
@@ -88,8 +83,6 @@ def test_irradiation_setup():
 
 
 def test_photon_sampling_setup():
-    if not HAVE_PYTAPS:
-        raise SkipTest
 
     phtn_src = os.path.join(thisdir, "files_test_r2s", "phtn_src")
     coords = [[0, 1, 2], [0, 1, 2], [0, 1]]
