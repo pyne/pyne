@@ -551,10 +551,10 @@ def test_large_iterator():
 @with_setup(None, try_rm_file('test_matlib2.h5m'))
 def test_matlib():
     mats = {
-        0: Material({'H1': 1.0, 'K39': 1.0}), 
-        1: Material({'H1': 0.1, 'O16': 1.0}), 
-        2: Material({'He4': 42.0}), 
-        3: Material({'Tm171': 171.0}), 
+        0: Material({'H1': 1.0, 'K39': 1.0}, density=1.1), 
+        1: Material({'H1': 0.1, 'O16': 1.0}, density=2.2), 
+        2: Material({'He4': 42.0}, density=3.3), 
+        3: Material({'Tm171': 171.0}, density=4.4), 
         }
     m = gen_mesh(mats=mats)
     for i, ve in enumerate(m.mesh.iterate(iBase.Type.region, iMesh.Topology.all)):
@@ -564,6 +564,12 @@ def test_matlib():
     m.write_hdf5('test_matlib.h5m')
     shutil.copy('test_matlib.h5m', 'test_matlib2.h5m')
     m2 = Mesh(mesh_file='test_matlib2.h5m')  # MOAB fails to flush
+    for i, mat, ve in m2:
+        assert_equal(len(mat.comp), len(mats[i].comp))
+        for key in mats[i].iterkeys():
+            assert_equal(mat.comp[key], mats[i].comp[key])
+        assert_equal(mat.density, mats[i].density)
+        assert_equal(m2.idx[i], i)
 
     
 def test_matproptag():
