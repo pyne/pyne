@@ -1,16 +1,15 @@
 #!/usr/bin/python
 
-#from itaps import iMesh
-#from pyne.mesh import Mesh, StatMesh
+from itaps import iMesh
+from pyne.mesh import Mesh, StatMesh
 
 import math
-#from pyne.mcnp import MeshTally
-#from pyne.mesh import Mesh, StatMesh, MeshError
-class Meshtal():
+from pyne.mesh import Mesh, StatMesh, MeshError
+class USR():
     """Wrapper class for Usrbin() class. This class stores information for the
        complete file given.
     """
-    def __init__(self):
+    def __init__(self, filename):
         self.track_tally = {}
         with open(filename) as fh:
             self.read_tally_sets(fh)
@@ -28,11 +27,12 @@ class Meshtal():
 	line = fh.readline()
 	while ("Cart" not in line):
 	    tally_number = track_tally
-	    self.tally[tally_number] = Meshtally(fh, tally_number)
+	    self.tally[tally_number] = USRBIN(fh, tally_number)
 
 	track_tally = track_tally + 1
+        print track_tally
 
-class Meshtally():
+class USRBIN(StatMesh):
     """This class stores all the information from Fluka USRBIN output
     file with a single **or multiple** track length binnings and their 
     associated error binnings. Currently this class only supports a 
@@ -67,20 +67,24 @@ class Meshtally():
     description in the Fluka Manual, section 7.77 USRBIN input commands.
 
     """
-    def __init__(self):
+    def __init__(self, filename):
 #(self, fh, track_tally, line):
 #        self.track_tally = track_tally
 #        self.get_name_and_system(line)
 #        self.get_coordinate_system(line)
 #        self.matrix_organization(line)
-        pass
-
-    def create_mesh(self,x_bounds,y_bounds,z_bounds):
-        """Instantiate a Mesh object and tag the iMesh instance
-        with results and relative errors.
-        """    
-        my_mesh = structured_coords=[self.x_bounds,self.y_bounds, self.z_bounds],structured=True
-        return my_mesh
+#	self._create_mesh(x_bounds=x_bounds,y_bounds=y_bounds,z_bounds=z_bounds)
+#	self._create_mesh(x_bounds,y_bounds,z_bounds)
+	self.read_usrbin(filename)
+        print "creating mesh"
+	self.x_bounds=[-5,5]
+	self.y_bounds=[-5,5]
+	self.z_bounds=[-5,5]
+	super(USRBIN, self).__init__(structured_coords=[self.x_bounds,
+                                        self.y_bounds, self.z_bounds],
+                                        structured=True)
+	print "done creating mesh"
+        # my_mesh = structured_coords=[self.x_bounds,self.y_bounds, self.z_bounds],structured=True
 
     def get_name_and_system(self, line): # retrieves user defined binning name, coordinate system, and particle type used
         # readlines until finds "cartesian" -- then parse as have already
@@ -156,12 +160,14 @@ class Meshtally():
             y_width = self.get_coordinate_system(line)[3]
             y_info = [y_bins, y_min, y_max, y_width]
             line = fh.readline()
+            print y_bins, y_min, y_max, y_width
             # assume next line is z coord info
             z_bins = self.get_coordinate_system(line)[0]
             z_min = self.get_coordinate_system(line)[1]
             z_max = self.get_coordinate_system(line)[2]
             z_width = self.get_coordinate_system(line)[3]
             z_info = [z_bins, z_min, z_max, z_width]
+            print z_bins, z_min, z_max, z_width
         else:
             print "Coordinate sytem is not Cartesian"
         line = fh.readline()
@@ -177,43 +183,101 @@ class Meshtally():
         cart_tf = False
         track_length_tf = False
         track_error_tf = False
+        EOF_tf = False
         part_data = []
         error_data = []
-        while (not cart_tf and not track_length_tf):
-            line = fh.readline()
-            if ("Cartesian" in line):
-               [x_info, y_info, z_info, columns] = self.read_header(fh, line)
-               print columns
-               mesh_tally = mesh_tally + 1
-               cart_tf = True
-               track_error_tf =  False
+        line = True
+        while line:
+	    line = fh.readline()
+            if "1" not in line:
+		print "error not a usrbin file"
+                line = False
+            line = fh.readline()    
+	    [x_info, y_info, z_info, columns] = self.read_header(fh, line)
+	    for count in range (0,3):
+		line = fh.readline()
+	    print line
+            if "track-length binning" not in line:
+		print "not a track length binning?"
+		line = False
+	    
+	    # now reading track length data
+	    for item in range (0,int(math.ceil(x_info[0]*y_info[0]*z_info[0]/float(columns)))):
+		line = fh.readline()
+		data = self.read_data(line)
+		part_data.append(data)
+	    line = fh.readline()
+	    print line
+            for count in range (0,2):
+		line = fh.readline()
+		print line
+	    for item in range (0,int(math.ceil(x_info[0]*y_info[0]*z_info[0]/float(columns)))):
+		line = fh.readline()
+		data = self.read_data(line)
+		error_data.append(data)
 
-        while (cart_tf and not track_length_tf):
-            line = fh.readline()
-            if ("this is a track-length binning" in line): # initializes the collection of track length data into list
-                track_length_tf = True
+	    line = fh.readline()
+	    # now all data assigne for nth tally
+	    # create mesh object
 
-        while (cart_tf and track_length_tf):
-            line = fh.readline()
-            data = self.read_data(line)
-            part_data.append(data)
-            if ("Percentage errors" in line): 
-            # stops collection of track length data and initializes collection of error data
-                track_length_tf = False
-                track_error_tf = True
-                cart_tf = False
+            self.x_bounds = self.generate_bounds(x_info[1],x_info[2],x_info[3],x_info[0])
+            self.y_bounds = self.generate_bounds(y_info[1],y_info[2],y_info[3],y_info[0])
+            self.z_bounds = self.generate_bounds(z_info[1],z_info[2],z_info[3],z_info[0])
 
-        while (not cart_tf and track_error_tf and not track_length_tf):
-            line = fh.readline()
-            data = self.read_data(line)
-            error_data.append(data)
-            if ("Cartesian" in line or line == ""):
-                cart_tf = True
+	    if "1" in line:
+		line = False
+	    print line
+    
+"""         
+	    while (not cart_tf):
+		line = fh.readline()
+                if not line:
+		    EOF_tf = True
+		if ("Cartesian" in line):
+		   [x_info, y_info, z_info, columns] = self.read_header(fh, line)
+		   print columns
+		   mesh_tally = mesh_tally + 1
+		   cart_tf = True
+
+	    while (cart_tf and not track_length_tf):
+		line = fh.readline()
+                if not line:
+		    EOF_tf = True
+		if ("this is a track-length binning" in line): # initializes the collection of track length data into list
+		    track_length_tf = True
+
+            while (cart_tf and track_length_tf):
+		line = fh.readline()
+		data = self.read_data(line)
+		part_data.append(data)
+		if ("Percentage errors" in line): 
+		# stops collection of track length data and initializes collection of error data
+		    track_length_tf = False
+		    track_error_tf = True
+                    cart_tf = False
+                if not line:
+		    EOF_tf = True
+	   
+            while (not cart_tf and track_error_tf):
+		line = fh.readline()
+		data = self.read_data(line)
+		error_data.append(data)
+		if ("Cartesian" in line):
+		    cart_tf = True
+                    track_error_tf = False
+                if not line:
+		    EOF_tf = True
+
+	    line = fh.readline()
+	    if not line:
+		EOF_tf = True       
+"""
 #	print part_data, error_data
 
 
 
 
-
-my_file = Meshtally()
-my_file.read_usrbin("fng_dose_usrbin_23.lis")
+#test1=USR("fng_dose_usrbin_22.lis")
+# test2=read_tally_sets()
+my_file = USRBIN("fng_dose_usrbin_22.lis")
+#my_file.read_usrbin("fng_dose_usrbin_22.lis")
