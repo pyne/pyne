@@ -381,12 +381,19 @@ namespace pyne
   template<typename T, typename U> std::vector<T> data_access(int parent, size_t valoffset, std::map<std::pair<int, double>, U>  &data);
   extern std::map<std::pair<int, double>, gamma_struct> gamma_data;
 
+  //returns a list of gamma decay energies from input parent nuclide
   std::vector<std::pair<double, double> > gamma_energy(int parent);
+  //returns a list of gamma photon intensities from input parent nuclide
   std::vector<std::pair<double, double> > gamma_photon_intensity(int parent);
+  //returns a list of gamma conversion intensities from input parent nuclide
   std::vector<std::pair<double, double> > gamma_conversion_intensity(int parent);
+  //returns a list of gamma total intensities from input parent nuclide
   std::vector<std::pair<double, double> > gamma_total_intensity(int parent);
-  std::vector<std::pair<int, int> > gamma_from_to(int parent);
+  //returns a list of pairs of excited state transitions from an input parent nuclide
+  std::vector<std::pair<int, int> > gamma_from_to(int parxent);
+  //returns a list of pairs of excited state transitions from an decay energy
   std::vector<std::pair<int, int> > gamma_from_to(double energy, double error);
+  //returns a list of parent nuclides associated with an input decay energy
   std::vector<int> gamma_parent(double energy, double error);
 
   /// a struct matching the '/decay/alphas' table in nuc_data.h5.
@@ -403,21 +410,16 @@ namespace pyne
   /// A vector of structs containing alpha data for access in memory
   extern std::map<std::pair<int, double>, alpha_struct> alpha_data;
   
+  //returns a list of alpha decay energies from input parent nuclide
   std::vector<double > alpha_energy(int parent);
+  //returns a list of alpha decay intensities from input parent nuclide
   std::vector<double> alpha_intensity(int parent);
+  //returns a list of alpha decay parents from input decay energy range
   std::vector<int> alpha_parent(double energy, double error);
+  //returns a list of alpha decay daughters from input decay energy range
   std::vector<int> alpha_daughter(double energy, double error);
+  //returns a list of alpha decay daughters from input parent nuclide
   std::vector<int> alpha_daughter(int parent);
-
-  /// access the alpha data by the energy of the alpha decay. Returns
-  /// information by allocating an array of structs with the data. User is
-  /// responsible for freeing memory when finished.
-  //int alpha_data(double en, double pm, alpha_struct *data);
-  /// access the alpha data by the parent nuclide in id form. Returns
-  /// information by allocating an array of structs with the data. User is
-  /// responsible for freeing memory when finished.
-  //int alpha_data(int nuc, alpha_struct *data);
-
 
   /// a struct matching the '/decay/betas' table in nuc_data.h5.
   typedef struct beta_struct{
@@ -433,19 +435,18 @@ namespace pyne
 
   /// A vector of structs containing beta data for access in memory
   extern std::map<std::pair<int, double>, beta_struct> beta_data;
-  
+  //returns a list of beta decay endpoint energies from input parent nuclide
   std::vector<double > beta_endpoint_energy(int parent);
+  //returns a list of beta decay average energies from input parent nuclide
   std::vector<double > beta_average_energy(int parent);
+  //returns a list of beta decay intensities from input parent nuclide
   std::vector<double> beta_intensity(int parent);
+  //returns a list of beta decay parents from input decay energy range
   std::vector<int> beta_parent(double energy, double error);
+  //returns a list of beta decay daughters from input decay energy range
   std::vector<int> beta_daughter(double energy, double error);
+  //returns a list of beta decay daughters from input parent nuclide
   std::vector<int> beta_daughter(int parent);
-
-  /// access the beta data by the parent nuclide in id form. Returns
-  /// information by allocating an array of structs with the data. User is
-  /// responsible for freeing memory when finished.
-  //int beta_data_byparent(int nuc, beta_struct *data);
-
 
   /// A struct matching the '/decay/ecbp' table in nuc_data.h5.
   typedef struct ecbp_struct{
@@ -466,18 +467,20 @@ namespace pyne
   /// Loads the electron capture and beta plus decay data from the
   /// nuc_data.h5 file into memory.
   template<> void _load_data<ecbp_struct>();
-  
+  //returns a list of electron capture/ beta plus decay endpoint energies from input parent nuclide
   std::vector<double > ecbp_endpoint_energy(int parent);
+  //returns a list of electron capture/ beta plus decay average energies from input parent nuclide
   std::vector<double > ecbp_average_energy(int parent);
+  //returns a list of electron capture decay intensities from input parent nuclide
   std::vector<double> ec_intensity(int parent);
+  //returns a list of beta plus decay intensities from input parent nuclide
   std::vector<double> bp_intensity(int parent);
+  //returns a list of electron capture /beta plus decay parents from input decay energy range
   std::vector<int> ecbp_parent(double energy, double error);
+  //returns a list of electron capture /beta plus decay daughters from input decay energy range
   std::vector<int> ecbp_daughter(double energy, double error);
+  //returns a list of electron capture /beta plus decay daughters from input parent nuclide
   std::vector<int> ecbp_daughter(int parent);
-  /// Access the electron capture and beta plus data by the parent nuclide in
-  /// id form. Returns information by allocating an array of structs with
-  /// the data. User is responsible for freeing memory when finished.
-  //int ecbp_data_byparent(int nuc, ecbp_struct *data);
   /// \}
 }
 

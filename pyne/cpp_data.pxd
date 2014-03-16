@@ -84,18 +84,6 @@ cdef extern from "data.h" namespace "pyne":
     int metastable_id(int, int) except +
     int metastable_id(int) except +
 
-    cdef struct decay_struct:
-        int parent
-        int daughter
-        char decay[5]
-        double half_life
-        double half_life_error
-        double branch_ratio
-        double photon_branch_ratio
-        double photon_branch_ratio_error
-        double beta_branch_ratio
-        double beta_branch_ratio_error
-
     pair[double,double] decay_half_life(pair[int, int]) except +
     vector[pair[double, double]] decay_half_lifes(int) except +
     double decay_branch_ratio(pair[int, int] from_to) except +
@@ -105,22 +93,6 @@ cdef extern from "data.h" namespace "pyne":
     pair[double,double] decay_beta_branch_ratio(pair[int, int] from_to) except +
     vector[pair[double, double]] decay_beta_branch_ratios(int) except +
 
-    cdef struct gamma_struct:
-        double energy
-        double energy_err
-        double photon_intensity
-        double photon_intensity_err
-        double conv_intensity
-        double conv_intensity_err
-        double total_intensity
-        double total_intensity_err
-        int from_nuc
-        int to_nuc
-        int parent_nuc
-        double k_conv_e
-        double l_conv_e
-        double m_conv_e
-
     vector[pair[double, double]] gamma_energy(int parent) except +
     vector[pair[double, double]] gamma_photon_intensity(int parent) except +
     vector[pair[double, double]] gamma_conversion_intensity(int parent) except +
@@ -128,25 +100,12 @@ cdef extern from "data.h" namespace "pyne":
     vector[pair[int, int]] gamma_from_to(int parent) except +
     vector[pair[int, int]] gamma_from_to(double energy, double error) except +
     vector[int] gamma_parent(double energy, double error) except +
-
-    cdef struct alpha_struct:
-        double energy
-        double intensity
-        int from_nuc
-        int to_nuc
-
+    
     vector[double] alpha_energy(int parent) except +
     vector[double] alpha_intensity(int parent) except +
     vector[int] alpha_parent(double energy, double error) except +
     vector[int] alpha_daughter(double energy, double error) except +
     vector[int] alpha_daughter(int parent) except +
-
-    cdef struct beta_struct:
-        double endpoint_energy
-        double avg_energy
-        double intensity
-        int from_nuc
-        int to_nuc
 
     vector[double] beta_endpoint_energy(int parent) except +
     vector[double] beta_average_energy(int parent) except +
@@ -154,18 +113,6 @@ cdef extern from "data.h" namespace "pyne":
     vector[int] beta_parent(double energy, double error) except +
     vector[int] beta_daughter(double energy, double error) except +
     vector[int] beta_daughter(int parent) except +
-
-
-    cdef struct ecbp_struct:
-        double endpoint_energy
-        double avg_energy
-        double beta_plus_intensity
-        double ec_intensity
-        int from_nuc
-        int to_nuc
-        double k_conv_e
-        double l_conv_e
-        double m_conv_e
 
     vector[double] ecbp_endpoint_energy(int parent) except +
     vector[double] ecbp_average_energy(int parent) except +
