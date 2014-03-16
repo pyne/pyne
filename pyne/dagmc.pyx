@@ -593,13 +593,10 @@ def get_material_set(**kw):
 
 #### start util
 def cells_at_ve_centers(mesh):
-    """This function reads in any PyNE Mesh object and finds the geometry cell
-    at the point in the center of each mesh volume element. This function can be
-    used for the same purposes as dagmc.discretize_geom(), but will work for 
-    all Meshs including non-axis-aligned and unstructured. The returned
-    structured array is in the same form as the returned array of 
-    discretize_geom(). A DAGMC geometry must be loaded prior to running this
-    function.
+    """cells_at_ve_centers(mesh)
+    This function reads in any PyNE Mesh object and finds the geometry cell
+    at the point in the center of each mesh volume element. A DAGMC geometry 
+    must be loaded prior to running this function.
 
     Parameters
     ----------
@@ -608,36 +605,27 @@ def cells_at_ve_centers(mesh):
 
     Returns
     -------
-    results : structured array
-        Stores in a one dimensional array, each entry containing the following
-        fields:
-        :idx: int 
-            The volume element index.
-        :cell: int
-            The geometry cell number.
-        :vol_frac: float
-            The volume fraction of the cell withing the mesh ve. Always 1.0.
-        :rel_error: float
-            The relative error associated with the volume fraction. Always 1.0
-        This array is returned in sorted order with respect to idx.
+    cells : list
+        The cell numbers of the geometry cells that occupy the center of the
+        mesh volume element, in the order of the mesh idx.
     """
-    results = np.zeros(len(mesh), dtype=[('idx', np.int64),
-                                         ('cell', np.int64),
-                                         ('vol_frac', np.float64), 
-                                         ('rel_error', np.float64)])
+    cells = []
     for i, mat, ve in mesh:
         center = mesh.ve_center(ve)
         cell = find_volume(center)
-        results[i] = (i, cell, 1.0, 1.0)
+        cells.append(cell)
 
-    return results
+    return cells
 
-
-def discretize_geom(mesh, num_rays, grid=False):
-    """This function reads in a Cartesian, structured, axis-aligned, PyNE mesh
-    object, then uses Monte Carlo ray tracing to determine the volume 
-    fractions of each geometry cell within each mesh volume element of the 
-    mesh. Note that a DAGMC geometry must already be loaded into memory.
+def discretize_geom(mesh, num_rays=10, grid=False):
+    """discretize_geom(mesh, num_rays=10, grid=False)
+    This function discretizes a geometry (by geometry cell) onto a superimposed
+    mesh. If the mesh is structured, Monte Carlo ray tracing is used to 
+    determine the volume fractions of each geometry cell within each mesh volume
+    element of the mesh. If the mesh is not structured, each mesh volume is
+    assigned a geometry cell based off of what geometry cell occupies the
+    center of the mesh volume element. Note that a DAGMC geometry must already 
+    be loaded into memory.
  
     Parameters
     ----------
@@ -645,12 +633,13 @@ def discretize_geom(mesh, num_rays, grid=False):
         A Cartesian, structured, axis-aligned Mesh that superimposed the
         geometry.
     num_rays : int
-        The number of rays to fire in each mesh row for each direction.
+        Structured mesh only. The number of rays to fire in each mesh row for 
+        each direction.
     grid : boolean
-        If false, rays starting points are chosen randomly (on the boundary) 
-        for each mesh row. If true, a linearly spaced grid of starting points is 
-        used, with dimension sqrt(num_rays) x sqrt(num_rays). In this case, 
-        "num_rays" must be a perfect square.
+        Structured mesh only. If false, rays starting points are chosen randomly
+        (on the boundary) for each mesh row. If true, a linearly spaced grid of
+        starting points is used, with dimension sqrt(num_rays) x sqrt(num_rays). 
+        In this case, "num_rays" must be a perfect square.
 
     Returns
     -------
@@ -667,6 +656,25 @@ def discretize_geom(mesh, num_rays, grid=False):
             The relative error associated with the volume fraction.
         This array is returned in sorted order with respect to idx and cell, with
         cell changing fastest.
+    """
+    if mesh.structured:
+       results = _ray_discretize(mesh, num_rays, grid)
+    else:
+       cells = cells_at_ve_centers(mesh)
+       results = np.zeros(len(mesh), dtype=[('idx', np.int64),
+                                            ('cell', np.int64),
+                                            ('vol_frac', np.float64), 
+                                            ('rel_error', np.float64)])
+       for i, cell in enumerate(cells):
+           results[i] = (i, cells[i], 1.0, 1.0)
+
+    return results
+
+def _ray_discretize(mesh, num_rays=10, grid=False):
+    """_ray_discretize(mesh, num_rays=10, grid=False)
+
+    Private function for discretizing geometry by ray firing down structured, 
+    axis-aligned mesh rows. Same arguments as discretize_geom().
     """
     divs = [mesh.structured_get_divisions(x) for x in 'xyz']
     num_ves = (len(divs[0])-1)*(len(divs[1])-1)*(len(divs[2])-1)

@@ -230,7 +230,23 @@ class TestDagmcWithUnitbox(unittest.TestCase):
                     structured_coords=[coords, coords, coords])
         assert_raises(ValueError, dagmc.discretize_geom, mesh, 3, grid=True)
 
-    def test_cell_ve_centers(self):
+    def test_discretize_geom_centers(self):
+        """Test that unstructured mesh is sampled by mesh ve centers.
+        """
+        coords = [0, 1]
+        coords2 = [0, 2, 4]
+        mesh = Mesh(structured=True, 
+                    structured_coords=[coords2, coords, coords])
+        #  explicitly set to unstructured to trigger the ve centers sampling
+        #  method
+        mesh.structured = False
+        res = dagmc.discretize_geom(mesh)
+        assert_array_equal(res["idx"], [0, 1])
+        assert_array_equal(res["cell"], [2, 3])
+        assert_array_equal(res["vol_frac"], [1.0, 1.0])
+        assert_array_equal(res["rel_error"], [1.0, 1.0])
+
+    def test_cells_at_ve_centers(self):
         """Test that a mesh with one ve in cell 2 and one ve in cell 3 produces
         correct results.
         """
@@ -238,11 +254,8 @@ class TestDagmcWithUnitbox(unittest.TestCase):
         coords2 = [0, 2, 4]
         mesh = Mesh(structured=True, 
                     structured_coords=[coords2, coords, coords])
-        res = dagmc.cells_at_ve_centers(mesh)
-        assert_array_equal(res["idx"], [0, 1])
-        assert_array_equal(res["cell"], [2, 3])
-        assert_array_equal(res["vol_frac"], [1.0, 1.0])
-        assert_array_equal(res["rel_error"], [1.0, 1.0])
+        cells = dagmc.cells_at_ve_centers(mesh)
+        assert_array_equal(cells, [2, 3])
 
 
 if __name__ == "__main__":
