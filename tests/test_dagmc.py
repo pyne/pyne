@@ -168,7 +168,7 @@ class TestDagmcWithUnitbox(unittest.TestCase):
         """
         coords = [-4, -1, 1, 4]
         mesh = Mesh(structured=True, structured_coords=[coords, coords, coords])
-        results = dagmc.discretize_geom(mesh, 50)
+        results = dagmc.discretize_geom(mesh, num_rays=50)
         
         assert_equal(len(results), (len(coords) - 1)**3)
 
@@ -186,7 +186,7 @@ class TestDagmcWithUnitbox(unittest.TestCase):
         """
         coords = [-4, -1, 1, 4]
         mesh = Mesh(structured=True, structured_coords=[coords, coords, coords])
-        results = dagmc.discretize_geom(mesh, 49, grid=True)
+        results = dagmc.discretize_geom(mesh, num_rays=49, grid=True)
         
         assert_equal(len(results), (len(coords) - 1)**3)
 
@@ -206,7 +206,7 @@ class TestDagmcWithUnitbox(unittest.TestCase):
         coords2 = [0, 2]
         mesh = Mesh(structured=True, 
                     structured_coords=[coords2, coords, coords])
-        results1 = dagmc.discretize_geom(mesh, 100, grid=True)
+        results1 = dagmc.discretize_geom(mesh, num_rays=100, grid=True)
 
         assert_equal(results1[0]['cell'], 2)
         assert_almost_equal(results1[0]['vol_frac'], 0.5)
@@ -216,7 +216,7 @@ class TestDagmcWithUnitbox(unittest.TestCase):
 
         
         # To to make sure standard error decreases with increasing rays
-        results2 = dagmc.discretize_geom(mesh, 625, grid=True)
+        results2 = dagmc.discretize_geom(mesh, num_rays=625, grid=True)
         assert(results2[0]['rel_error'] < results1[0]['rel_error'])
         assert(results2[1]['rel_error'] < results1[1]['rel_error'])
 
@@ -228,7 +228,7 @@ class TestDagmcWithUnitbox(unittest.TestCase):
         coords = [0, 1]
         mesh = Mesh(structured=True, 
                     structured_coords=[coords, coords, coords])
-        assert_raises(ValueError, dagmc.discretize_geom, mesh, 3, grid=True)
+        assert_raises(ValueError, dagmc.discretize_geom, mesh, num_rays=3, grid=True)
 
     def test_discretize_geom_centers(self):
         """Test that unstructured mesh is sampled by mesh ve centers.
@@ -245,6 +245,9 @@ class TestDagmcWithUnitbox(unittest.TestCase):
         assert_array_equal(res["cell"], [2, 3])
         assert_array_equal(res["vol_frac"], [1.0, 1.0])
         assert_array_equal(res["rel_error"], [1.0, 1.0])
+
+        #  ensure kwargs are not accepted for unstructured mesh
+        assert_raises(ValueError, dagmc.discretize_geom, mesh, num_rays=3, grid=True)
 
     def test_cells_at_ve_centers(self):
         """Test that a mesh with one ve in cell 2 and one ve in cell 3 produces

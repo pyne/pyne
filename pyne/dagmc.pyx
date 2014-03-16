@@ -617,7 +617,7 @@ def cells_at_ve_centers(mesh):
 
     return cells
 
-def discretize_geom(mesh, num_rays=10, grid=False):
+def discretize_geom(mesh, **kwargs):
     """discretize_geom(mesh, num_rays=10, grid=False)
     This function discretizes a geometry (by geometry cell) onto a superimposed
     mesh. If the mesh is structured, Monte Carlo ray tracing is used to 
@@ -632,10 +632,13 @@ def discretize_geom(mesh, num_rays=10, grid=False):
     mesh : PyNE Mesh
         A Cartesian, structured, axis-aligned Mesh that superimposed the
         geometry.
-    num_rays : int
+
+    Key Word Arguments
+    ------------------
+    num_rays : int, optional, default = 10
         Structured mesh only. The number of rays to fire in each mesh row for 
         each direction.
-    grid : boolean
+    grid : boolean, optional, default = False
         Structured mesh only. If false, rays starting points are chosen randomly
         (on the boundary) for each mesh row. If true, a linearly spaced grid of
         starting points is used, with dimension sqrt(num_rays) x sqrt(num_rays). 
@@ -658,8 +661,12 @@ def discretize_geom(mesh, num_rays=10, grid=False):
         cell changing fastest.
     """
     if mesh.structured:
+       num_rays = kwargs['num_rays'] if 'num_rays' in kwargs else 10
+       grid = kwargs['grid'] if 'grid' in kwargs else False
        results = _ray_discretize(mesh, num_rays, grid)
     else:
+       if kwargs:
+           raise ValueError("No valid key word arguments for unstructed mesh.")
        cells = cells_at_ve_centers(mesh)
        results = np.zeros(len(mesh), dtype=[('idx', np.int64),
                                             ('cell', np.int64),
