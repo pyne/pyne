@@ -6,7 +6,7 @@ from pyne.alara import mesh_to_fluxin, mesh_to_geom, photon_source_to_hdf5, \
                        photon_source_hdf5_to_mesh
 from pyne.dagmc import load, discretize_geom
 
-def irradiation_setup(meshtal, tally_num, cell_mats, alara_params, geom=None,
+def irradiation_setup(meshtal, cell_mats, alara_params, tally_num=4, geom=None,
                       num_rays=10, grid=False, flux_tag="n_flux",
                       fluxin="alara_fluxin", reverse=False, 
                       alara_inp="alara_geom", alara_matlib="alara_matlib",  
@@ -63,17 +63,20 @@ def irradiation_setup(meshtal, tally_num, cell_mats, alara_params, geom=None,
     if geom is not None and isfile(geom):
         load(geom)
 
-    # Acquire fluxes
-    if not isinstance(meshtal, Meshtal):
-        if isfile(meshtal) and not meshtal.endswith(".h5m"):
-            meshtal = Meshtal(meshtal, {4: (flux_tag, flux_tag + "_err", 
-                                            flux_tag + "_total", 
-                                            flux_tag + "_err_total")})
+    if isinstance(meshtal, str) and isfile(meshtal) and meshtal.endswith(".h5m"):
+            m = Mesh(structured=False, mesh_file=meshtal)
+            vol_fracs = discretize_geom(m)
+    else:
+        print meshtal
+        if isinstance(meshtal, str) and isfile(meshtal):
+            meshtal = Meshtal(meshtal, {tally_num: (flux_tag, flux_tag + "_err", 
+                                                    flux_tag + "_total", 
+                                                    flux_tag + "_err_total")})
+        elif not isinstance(meshtal, Meshtal):
+            raise ValueError("meshtal argument not a Meshtal object, MCNP"
+                             " meshtal file or meshtal.h5m file.")
         m = meshtal.tally[tally_num]
         vol_fracs = discretize_geom(m, num_rays=num_rays, grid=grid)
-    elif isfile(meshtal) and meshtal.endswith(".h5m"):
-        m = Mesh(structured=False, mesh_file=meshtal)
-        vol_fracs = discretize_geom(m)
 
     m.cell_fracs_to_mats(vol_fracs, cell_mats)
 
