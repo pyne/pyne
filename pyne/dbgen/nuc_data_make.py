@@ -13,12 +13,12 @@ from pyne.dbgen.atomic_mass import make_atomic_mass
 from pyne.dbgen.materials_library import make_materials_library
 from pyne.dbgen.scattering_lengths import make_scattering_lengths
 from pyne.dbgen.simple_xs import make_simple_xs
+from pyne.dbgen.q_val import make_q_value
 from pyne.dbgen.cinder import make_cinder
 from pyne.dbgen.eaf import make_eaf
 from pyne.dbgen import wimsdfpy
 from pyne.dbgen import ndsfpy
 from pyne.dbgen.hashtools import check_hashes
-from pyne.dbgen.q_val import make_q_value
 
 # Thanks to http://patorjk.com/software/taag/
 # and http://www.chris.com/ascii/index.php?art=creatures/dragons (Jeff Ferris)
@@ -77,10 +77,10 @@ def main():
                   ('simple_xs', make_simple_xs),
                   ('cinder', make_cinder),
                   ('materials', make_materials_library),
-                  ('eaf', make_eaf),
-                  ('wimsd_fpy', wimsdfpy.make_fpy),
-                  ('nds_fpy', ndsfpy.make_fpy),
                   ('q_values', make_q_value)
+#                  ('eaf', make_eaf),
+#                  ('wimsd_fpy', wimsdfpy.make_fpy),
+#                  ('nds_fpy', ndsfpy.make_fpy),
                   ]
     make_map = dict(make_funcs)
     make_open = set(['atomic_mass', 'scattering_lengths', 'simple_xs', 'materials',
