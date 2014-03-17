@@ -60,17 +60,21 @@ def irradiation_setup(meshtal, tally_num, cell_mats, alara_params, geom=None,
         A mesh containing all the fluxes and materials used for irradiation
         setup.
     """
-    # Acquire fluxes
-    if not isinstance(meshtal, Meshtal) and isfile(meshtal):
-        meshtal = Meshtal(meshtal, {4: (flux_tag, flux_tag + "_err", 
-                                        flux_tag + "_total", 
-                                        flux_tag + "_err_total")})
-
     if geom is not None and isfile(geom):
         load(geom)
 
-    m = meshtal.tally[tally_num]
-    vol_fracs = discretize_geom(m, num_rays=num_rays, grid=grid)
+    # Acquire fluxes
+    if not isinstance(meshtal, Meshtal):
+        if isfile(meshtal) and not meshtal.endswith(".h5m"):
+            meshtal = Meshtal(meshtal, {4: (flux_tag, flux_tag + "_err", 
+                                            flux_tag + "_total", 
+                                            flux_tag + "_err_total")})
+        m = meshtal.tally[tally_num]
+        vol_fracs = discretize_geom(m, num_rays=num_rays, grid=grid)
+    elif isfile(meshtal) and meshtal.endswith(".h5m"):
+        m = Mesh(structured=False, mesh_file=meshtal)
+        vol_fracs = discretize_geom(m)
+
     m.cell_fracs_to_mats(vol_fracs, cell_mats)
 
     mesh_to_fluxin(m, flux_tag, fluxin, reverse)
