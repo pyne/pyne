@@ -77,10 +77,10 @@ def main():
                   ('simple_xs', make_simple_xs),
                   ('cinder', make_cinder),
                   ('materials', make_materials_library),
-                  ('q_values', make_q_value)
+                  ('q_values', make_q_value),
                   ('eaf', make_eaf),
                   ('wimsd_fpy', wimsdfpy.make_fpy),
-                  ('nds_fpy', ndsfpy.make_fpy),
+                  ('nds_fpy', ndsfpy.make_fpy)
                   ]
     make_map = dict(make_funcs)
     make_open = set(['atomic_mass', 'scattering_lengths', 'simple_xs', 'materials',
