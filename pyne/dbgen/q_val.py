@@ -1,5 +1,9 @@
 """
-Module allows the grabbing of q_values (energy per disintegration) for the calculation of decay heat. This currently consists of the nuclide, it's q_value, and the percent of q coming from gammas. This data is from 'ORIGEN-S DECAY DATA LIBRARY AND HALF-LIFE UNCERTAINTIES' (http://web.ornl.gov/~webworks/cppr/y2001/rpt/97914.pdf)
+Module allows the grabbing of q_values (energy per disintegration) for the
+calculation of decay heat. This currently consists of the nuclide, it's
+q_value, and the percent of q coming from gammas. This data is from 
+'ORIGEN-S DECAY DATA LIBRARY AND HALF-LIFE UNCERTAINTIES' 
+(http://web.ornl.gov/~webworks/cppr/y2001/rpt/97914.pdf)
 """
 
 from __future__ import print_function
@@ -11,7 +15,7 @@ import tables as tb
 
 from pyne import nucname
 from pyne.api import nuc_data
-#from pyne.api import BASIC_FILTERS
+from pyne.dbgen.api import BASIC_FILTERS
 
 # Parses data from .csv
 def grab_q_values(fname):
@@ -20,35 +24,49 @@ def grab_q_values(fname):
     Parameters
     ----------
     fname : str
-        Path to q_value file.
+        Name of q_value file.
     """
     
     # Create list
     all_q_values = []
-        
-    # Grabs data row by row
-    def read_row(row):
-        if row[0] == 'Nuclide' or len(row[0].strip()) == 0:
-            return
-        nuclide = nucname.id(''.join(row[0:2]).replace(' ', ''))
-        if len(row[2]) == 0:
-            q_val = 0.0
-        else:
-            q_val = float(row[2])
-        if len(row[3]) == 0:
-            gamma_frac = 0.0
-        else:   
-            gamma_frac = float(row[3])
-        entry = [nuclide, q_val, gamma_frac]
-        all_q_values.append(entry)
-    
-    # Opens .csv files and parses them
-    with open(fname, 'r') as f:
+
+    # Open .csv files and parses them
+    with open(os.path.join(os.path.dirname(__file__), fname), 'r') as f:
         reader = csv.reader(f)
         for row in reader:
-            read_row(row)
+            entry = read_row(row)
+            all_q_values.append(entry)
 
-    return all_q_values         
+    return all_q_values
+
+# Grabs data row by row
+def read_row(row):
+    """Returns a list of the format [int, float, float] for each nuclide.
+    
+    Parameters
+    ----------
+    row : list
+        One entry in a q_val file.
+    """
+
+    # Create list
+    entry = []
+
+    # Evaluate each component of the given row
+    if row[0] == 'Nuclide' or len(row[0].strip()) == 0:
+        return
+    nuclide = nucname.id(''.join(row[0:2]).replace(' ', ''))
+    if len(row[2]) == 0:
+        q_val = 0.0
+    else:
+        q_val = float(row[2])
+    if len(row[3]) == 0:
+        gamma_frac = 0.0
+    else:   
+        gamma_frac = float(row[3])
+    entry = [nuclide, q_val, gamma_frac]
+
+    return entry
 
 # Sorts and filters list of q_values
 def format_q_values(all_q_values):
@@ -62,10 +80,10 @@ def format_q_values(all_q_values):
 
     distinct_all_q_values = []
     
-    # Ensures only one entry per nuclide
+    # Ensure only one entry per nuclide
     for nuclide in all_q_values:
-        if not nuclide in distinct_all_q_values:
-            distinct_all_q_values.append(nuclide)
+        if not nuclide in distinct_all_q_values and nuclide is not None:
+            distinct_all_q_values.append(tuple(nuclide))
     
     # Sort in order of nuclide
     distinct_all_q_values.sort(key=lambda nucid: nucid[0])
@@ -86,47 +104,39 @@ def make_q_value_table(all_q_values, nuc_data, build_dir=""):
         Directory to place q_value files in.
     """
 
-    # Sort and filter the q_values
+    # Sort and filter the q_values, make into list of tuples
     distinct_all_q_values = format_q_values(all_q_values)
     
-    # Iterate over all nuclides in the q_value table
-    for row in distinct_all_q_values:
+    # Define data type
+    qv_dtype = np.dtype([
+        ('nuclide',    int),
+        ('q_val',      float),
+        ('gamma_frac', float),
+        ])
+    
+    # Convert to numpy array
+    q_value_array = np.array(distinct_all_q_values, dtype=qv_dtype)
 
-        row = (nuclide['Nuclide'],
-               nuclide['Q_value [MeV per disintegration]'],
-               nuclide['Fraction of Q that comes from gammas'])
-
-        distinct_all_q_values.append(row)
-
-    # Converts to numpy array
-    q_value_array = np.array(distinct_all_q_values)
-
-    # Open the hdf5 file and create group
+    # Open the hdf5 file
     nuc_file = tb.openFile(nuc_data, 'a', filters=BASIC_FILTERS)
-    q_val_group = nuc_file.createGroup('/', 'q_values', 'Q_values for nuclides')
 
     # Make a new table
-    q_value_table = nuc_file.createTable(q_val_group, np.empty(0), 
-                    'Nuclide, Q_value [MeV per disintegration],' 
-                    'Fraction of Q that comes from gammas')
-    q_value_table.append(q_value_array)
+    q_value_table = nuc_file.createTable('/neutron', 'q_values',              q_value_array, 'Nuclide, Q_value [MeV per disintegration], Fraction of Q that comes from gammas')
 
     # Ensure that data was written to table
     q_value_table.flush()
 
     # Close the hdf5 file
-    q_values.close()
+    nuc_file.close()
 
 def make_q_value(args):
     """Controller function for adding q-values"""
-#    q_values = args.q_values
-#    if os.path.exists(q_values):
-#        with tb.openFile(q_values, 'r') as f:
-#            if '/q_values' in f:
-#                print("skipping q_value table creation; already exists.")
-#                return
-
     nuc_data, build_dir = args.nuc_data, args.build_dir
+    if os.path.exists(nuc_data):
+        with tb.openFile(nuc_data, 'r') as f:
+            if '/neutron/q_values' in f:
+                print("skipping q_value table creation; already exists.")
+                return
     
     # Grab the q_values
     print('Grabbing q_values...')
@@ -138,4 +148,4 @@ def make_q_value(args):
     
     # Make the q_value table and write to file
     print("Making q_value table...")
-    make_q_value_table(all_q_values, nuc_data, build_dir))     
+    make_q_value_table(all_q_values, nuc_data, build_dir) 
