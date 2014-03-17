@@ -6,13 +6,13 @@ from pyne.alara import mesh_to_fluxin, mesh_to_geom, photon_source_to_hdf5, \
                        photon_source_hdf5_to_mesh
 from pyne.dagmc import load, discretize_geom
 
-def irradiation_setup(meshtal, cell_mats, alara_params, tally_num=4, geom=None,
-                      num_rays=10, grid=False, flux_tag="n_flux",
+def irradiation_setup(flux_mesh, cell_mats, alara_params, tally_num=4,
+                      geom=None, num_rays=10, grid=False, flux_tag="n_flux",
                       fluxin="alara_fluxin", reverse=False, 
                       alara_inp="alara_geom", alara_matlib="alara_matlib",  
                       output_mesh="r2s_step1.h5m"):
-    """def irradiation_setup(meshtal, tally_num, cell_mats, alara_params, geom=None,
-                          num_rays=10, grid=False, flux_tag="n_flux",
+    """def irradiation_setup(meshtal, tally_num, cell_mats, alara_params, 
+                          geom=None, num_rays=10, grid=False, flux_tag="n_flux",
                           fluxin="alara_fluxin", reverse=False, 
                           alara_inp="alara_geom", alara_matlib="alara_matlib",  
                           output_mesh="r2s_step1.h5m")
@@ -22,8 +22,10 @@ def irradiation_setup(meshtal, cell_mats, alara_params, tally_num=4, geom=None,
 
     Parameters
     ----------
-    meshtal : PyNE Meshtal object or str
-        The meshtal file contain the neutron flux data.
+    flux_mesh : PyNE Meshtal object, Mesh object, or str
+        The source of the neutron flux information. This can be a PyNE Meshtal
+        object, a pyne Mesh object, or the filename an MCNP meshtal file, or
+        the filename of an unstructured mesh tagged with fluxes.
     tally_num : int
         The MCNP FMESH4 tally number of the neutron flux tally within the
         meshtal file.
@@ -63,19 +65,29 @@ def irradiation_setup(meshtal, cell_mats, alara_params, tally_num=4, geom=None,
     if geom is not None and isfile(geom):
         load(geom)
 
-    if isinstance(meshtal, str) and isfile(meshtal) and meshtal.endswith(".h5m"):
-            m = Mesh(structured=False, mesh_file=meshtal)
+    #  flux_mesh is mesh
+    if isinstance(flux_mesh, Mesh):
+        m = flux_mesh
+        vol_fracs = discretize_geom(m)
+    #  flux_mesh is unstructured mesh file
+    elif isinstance(flux_mesh, str) and isfile(flux_mesh) \
+                                  and flux_mesh.endswith(".h5m"):
+            m = Mesh(structured=False, mesh_file=flux_mesh)
             vol_fracs = discretize_geom(m)
+    #  flux_mesh is Meshtal is meshtal_file
     else:
-        print meshtal
-        if isinstance(meshtal, str) and isfile(meshtal):
-            meshtal = Meshtal(meshtal, {tally_num: (flux_tag, flux_tag + "_err", 
-                                                    flux_tag + "_total", 
-                                                    flux_tag + "_err_total")})
-        elif not isinstance(meshtal, Meshtal):
-            raise ValueError("meshtal argument not a Meshtal object, MCNP"
-                             " meshtal file or meshtal.h5m file.")
-        m = meshtal.tally[tally_num]
+        if isinstance(flux_mesh, str) and isfile(flux_mesh):
+            flux_mesh = Meshtal(flux_mesh, {tally_num: (flux_tag, 
+                                                        flux_tag + "_err", 
+                                                        flux_tag + "_total", 
+                                                        flux_tag + "_err_total")})
+            m = flux_mesh.tally[tally_num]
+        elif instance(flux_mesh, Meshtal):
+            m = flux_mesh.tally[tally_num]
+        else:
+            raise ValueError("meshtal argument not a Mesh object, Meshtal"
+                             " object, MCNP meshtal file or meshtal.h5m file.")
+       
         vol_fracs = discretize_geom(m, num_rays=num_rays, grid=grid)
 
     m.cell_fracs_to_mats(vol_fracs, cell_mats)

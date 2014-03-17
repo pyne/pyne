@@ -104,20 +104,13 @@ def test_photon_sampling_setup_structured():
 
 def test_irradiation_setup_unstructured():
 
-    #  create a dummy unstructured mesh with fluxes
-    #unstr_file = os.path.join(thisdir, "files_mesh_test", "unstr.h5m")
-    #m = Mesh(mesh_file=unstr_file)
-    #m.n_flux = IMeshTag(2, float)
-    #for i, mat, ve in m:
-    #    m.n_flux = [float(i), float(i + 1)]
-    #meshtal = os.path.join(os.getcwd(), "meshtal.h5m")
-    #m.mesh.save(meshtal)
-    
     flux_tag = "n_flux"
     meshtal_file = os.path.join(thisdir, "files_test_r2s", "meshtal_2x2x1")
     meshtal = Meshtal(meshtal_file, {4: (flux_tag, flux_tag + "_err",
                                          flux_tag + "_total",
                                          flux_tag + "_err_total")})
+    #  Explicitly make this mesh unstructured, it will now iterate in yxz
+    #  order which is MOAB structured mesh creation order.
     meshtal = Mesh(structured=False, mesh=meshtal.tally[4].mesh)
     meshtal_mesh_file = os.path.join(thisdir, "meshtal.h5m")
     meshtal.mesh.save(meshtal_mesh_file)
@@ -133,7 +126,7 @@ def test_irradiation_setup_unstructured():
     alara_matlib= os.path.join(os.getcwd(), "alara_matlib")
     output_mesh= os.path.join(os.getcwd(), "r2s_step1.h5m")
  
-    irradiation_setup(meshtal=meshtal_mesh_file, cell_mats=cell_mats, 
+    irradiation_setup(flux_mesh=meshtal_mesh_file, cell_mats=cell_mats, 
                       alara_params=alara_params, geom=geom, flux_tag=flux_tag, 
                       fluxin=fluxin, reverse=reverse, alara_inp=alara_inp,
                       alara_matlib=alara_matlib, output_mesh=output_mesh)
@@ -141,8 +134,8 @@ def test_irradiation_setup_unstructured():
     #  expected output files
     exp_alara_inp = os.path.join(thisdir, "files_test_r2s", "exp_alara_inp")
     exp_alara_matlib = os.path.join(thisdir, "files_test_r2s", 
-                                             "exp_alara_matlib")
-    exp_fluxin = os.path.join(thisdir, "files_test_r2s", "exp_fluxin")
+                                             "exp_alara_matlib_un")
+    exp_fluxin = os.path.join(thisdir, "files_test_r2s", "exp_fluxin_un")
 
     #  test alara input file
     with open(alara_inp, 'r') as f1, open(exp_alara_inp, 'r') as f2:
@@ -171,9 +164,8 @@ def test_irradiation_setup_unstructured():
     for i, mat, _ in m:
         assert_almost_equal(mat.density, 2.0)
         assert_equal(len(mat.comp), 2)
-        assert_almost_equal(mat.comp[20040000], 1.886792E-02)
-        assert_almost_equal(mat.comp[30060000], 5.886792E-01)
-        assert_almost_equal(mat.comp[30070000], 3.924528E-01)
+        assert_almost_equal(mat.comp[30060000], 0.6)
+        assert_almost_equal(mat.comp[30070000], 0.4)
         assert_array_equal(m.n_flux[i], fluxes[i])
         assert_array_equal(m.n_flux_err[i], errs[i])
         assert_almost_equal(m.n_flux_total[i], tot_fluxes[i])
@@ -184,3 +176,22 @@ def test_irradiation_setup_unstructured():
     os.remove(alara_matlib)
     os.remove(fluxin)
     os.remove(output_mesh)
+
+def test_photon_sampling_setup_unstructured():
+
+    phtn_src = os.path.join(thisdir, "files_test_r2s", "phtn_src")
+    coords = [[0, 1, 2], [0, 1, 2], [0, 1]]
+    m = Mesh(structured=True, structured_coords=coords)
+    m.structured = False
+    tags = {(10010000, "1 h"): "tag1", ("TOTAL", "shutdown"): "tag2"}
+    photon_sampling_setup(m, phtn_src, tags)
+
+    exp_tag1 = [[1.1, 2.2], [3.3, 4.4], [5.5, 6.6], [7.7, 8.8]]
+    exp_tag2 = [[11.1, 12.2], [13.3, 14.4], [15.5, 16.6], [17.7, 18.8]]
+
+    m.tag1 = IMeshTag(2, float)
+    m.tag2 = IMeshTag(2, float)
+
+    for i, mat, ve in m:
+        assert_array_equal(m.tag1[i], exp_tag1[i])
+        assert_array_equal(m.tag2[i], exp_tag2[i])
