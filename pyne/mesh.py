@@ -5,6 +5,7 @@ from collections import Iterable, Sequence
 import warnings
 
 import numpy as np
+import tables as tb
 
 try:
     from itaps import iMesh, iBase, iMeshExtensions
@@ -33,6 +34,7 @@ err__ops = {"+": lambda val_1, val_2, val_1_err, val_2_err: \
                  (np.sqrt(val_1_err**2 + val_2_err**2))}
 
 _INTEGRAL_TYPES = (int, np.integer, np.bool_)
+_SEQUENCE_TYPES = (Sequence, np.ndarray)
 
 class Tag(object):
     """A mesh tag, which acts as a descriptor on the mesh.  This dispatches
@@ -122,7 +124,7 @@ class MaterialPropertyTag(Tag):
             setattr(mats[key], name, value)
         elif isinstance(key, slice):
             idx = range(*key.indices(size))
-            if isinstance(value, Sequence) and len(value) == len(idx):
+            if isinstance(value, _SEQUENCE_TYPES) and len(value) == len(idx):
                 for i, v in zip(idx, value):
                     setattr(mats[i], name, v)
             else:
@@ -132,14 +134,14 @@ class MaterialPropertyTag(Tag):
             if len(key) != size:
                 raise KeyError("boolean mask must match the length of the mesh.")
             idx = np.where(key)[0]
-            if isinstance(value, Sequence) and len(value) == key.sum():
+            if isinstance(value, _SEQUENCE_TYPES) and len(value) == key.sum():
                 for i, v in zip(idx, value):
                     setattr(mats[i], name, v)
             else:
                 for i in idx:
                     setattr(mats[i], name, value) 
         elif isinstance(key, Iterable):
-            if isinstance(value, Sequence) and len(value) == len(key):
+            if isinstance(value, _SEQUENCE_TYPES) and len(value) == len(key):
                 for i, v in zip(key, value):
                     setattr(mats[i], name, v)
             else:
@@ -231,7 +233,7 @@ class MetadataTag(Tag):
             mats[key].attrs[name] = value
         elif isinstance(key, slice):
             idx = range(*key.indices(size))
-            if isinstance(value, Sequence) and len(value) == len(idx):
+            if isinstance(value, _SEQUENCE_TYPES) and len(value) == len(idx):
                 for i, v in zip(idx, value):
                     mats[i].attrs[name] = v
             else:
@@ -241,14 +243,14 @@ class MetadataTag(Tag):
             if len(key) != size:
                 raise KeyError("boolean mask must match the length of the mesh.")
             idx = np.where(key)[0]
-            if isinstance(value, Sequence) and len(value) == key.sum():
+            if isinstance(value, _SEQUENCE_TYPES) and len(value) == key.sum():
                 for i, v in zip(idx, value):
                     mats[i].attrs[name] = v
             else:
                 for i in idx:
                     mats[i].attrs[name] = value
         elif isinstance(key, Iterable):
-            if isinstance(value, Sequence) and len(value) == len(key):
+            if isinstance(value, _SEQUENCE_TYPES) and len(value) == len(key):
                 for i, v in zip(key, value):
                     mats[i].attrs[name] = v
             else:
@@ -292,7 +294,7 @@ class IMeshTag(Tag):
     features to this process.
     """
 
-    def __init__(self, size=1, dtype='f8', mesh=None, name=None, doc=None):
+    def __init__(self, size=1, dtype='f8', default=0.0, mesh=None, name=None, doc=None):
         """Parameters
         ----------
         size : int, optional
@@ -300,6 +302,9 @@ class IMeshTag(Tag):
         dtype : np.dtype or similar, optional
             The data type of this tag from int, float, and byte. See PyTAPS
             tags for more details.
+        default : dtype or None, optional
+            The default value to fill this tag with upon creation. If None, then 
+            the tag is created empty.
         mesh : Mesh, optional
             The PyNE mesh to tag.
         name : str, optional
@@ -312,11 +317,17 @@ class IMeshTag(Tag):
         if mesh is None or name is None:
             self._lazy_args['size'] = size
             self._lazy_args['dtype'] = dtype
-            return 
+            self._lazy_args['default'] = default
+            return
+        self.size = size
+        self.dtype = dtype
+        self.default = default
         try:
             self.tag = self.mesh.mesh.getTagHandle(self.name)
         except iBase.TagNotFoundError: 
             self.tag = self.mesh.mesh.createTag(self.name, size, dtype)
+            if default is not None:
+                self[:] = default
 
     def __delete__(self, mesh):
         super(IMeshTag, self).__delete__(mesh)
@@ -326,7 +337,7 @@ class IMeshTag(Tag):
         m = self.mesh.mesh
         size = len(self.mesh)
         mtag = self.tag
-        miter = m.iterate(iBase.Type.region, iMesh.Topology.all)
+        miter = self.mesh.iter_ve()
         if isinstance(key, _INTEGRAL_TYPES):
             if key >= size:
                 raise IndexError("key index {0} greater than the size of the "
@@ -348,33 +359,42 @@ class IMeshTag(Tag):
                             "or fancy index.".format(key))        
 
     def __setitem__(self, key, value):
+        # get value into canonical form
+        tsize = self.size
+        value = np.asarray(value, self.tag.type)
+        value = np.atleast_1d(value) if tsize == 1 else np.atleast_2d(value)
+        # set up mesh to be iterated over
         m = self.mesh.mesh
-        size = len(self.mesh)
+        msize = len(self.mesh)
         mtag = self.tag
-        miter = m.iterate(iBase.Type.region, iMesh.Topology.all)
+        miter = self.mesh.iter_ve()
         if isinstance(key, _INTEGRAL_TYPES):
-            if key >= size:
+            if key >= msize:
                 raise IndexError("key index {0} greater than the size of the "
-                                 "mesh {1}".format(key, size))
+                                 "mesh {1}".format(key, msize))
             for i_ve in zip(range(key+1), miter):
                 pass
-            mtag[i_ve[1]] = value
+            mtag[i_ve[1]] = value if tsize == 1 else value[0]
         elif isinstance(key, slice):
-            idx = range(*key.indices(size))
-            if not (isinstance(value, Sequence) and len(value) == len(idx)):
-                value = [value] * len(idx)
-            mtag[list(miter)[key]] = value
+            key = list(miter)[key]
+            v = np.empty(len(key), self.tag.type) if tsize == 1 else \
+                np.empty((len(key), tsize), self.tag.type)
+            v[...] = value
+            mtag[key] = v
         elif isinstance(key, np.ndarray) and key.dtype == np.bool:
-            if len(key) != size:
+            if len(key) != msize:
                 raise KeyError("boolean mask must match the length of the mesh.")
-            ntrues = key.sum()
-            if not (isinstance(value, Sequence) and len(value) == ntrues):
-                value = [value] * ntrues                
-            mtag[[ve for b, ve in zip(key, miter) if b]] = value
+            key = [ve for b, ve in zip(key, miter) if b]
+            v = np.empty(len(key), self.tag.type) if tsize == 1 else \
+                np.empty((len(key), tsize), self.tag.type)
+            v[...] = value
+            mtag[key] = v
         elif isinstance(key, Iterable):
-            if not (isinstance(value, Sequence) and len(value) == len(key)):
-                value = [value] * len(key)
             ves = list(miter)
+            if tsize != 1 and len(value) != len(key):
+                v = np.empty((len(key), tsize), self.tag.type)
+                v[...] = value
+                value = v
             mtag[[ves[i] for i in key]] = value
         else:
             raise TypeError("{0} is not an int, slice, mask, "
@@ -384,7 +404,7 @@ class IMeshTag(Tag):
         m = self.mesh.mesh
         size = len(self.mesh)
         mtag = self.tag
-        miter = m.iterate(iBase.Type.region, iMesh.Topology.all)
+        miter = self.mesh.iter_ve()
         if isinstance(key, _INTEGRAL_TYPES):
             if key >= size:
                 raise IndexError("key index {0} greater than the size of the "
@@ -509,8 +529,7 @@ class Mesh(object):
     def __init__(self, mesh=None, mesh_file=None, structured=False, \
                  structured_coords=None, structured_set=None, 
                  structured_ordering='xyz', mats=None):
-        """
-        Parameters
+        """Parameters
         ----------
         mesh : iMesh instance, optional
         mesh_file : str, optional
@@ -573,7 +592,6 @@ class Mesh(object):
             #From file
             elif mesh_file and not mesh:
                 self.mesh.load(mesh_file)
-                self.mats = MaterialLibrary(mesh_file)
             else:
                 raise MeshError("To instantiate unstructured mesh object, "
                                  "must supply exactly 1 of the following: "
@@ -587,7 +605,6 @@ class Mesh(object):
                                    and not structured_set:
                 if mesh_file:
                     self.mesh.load(mesh_file)
-                    self.mats = MaterialLibrary(mesh_file)
                 try:
                     self.mesh.getTagHandle("BOX_DIMS")
                 except iBase.TagNotFoundError as e:
@@ -641,18 +658,23 @@ class Mesh(object):
             self.vertex_dims = list(self.dims[0:3]) \
                                + [x + 1 for x in self.dims[3:6]]
         # sets mats
-        if mats is None:
+        mats_in_mesh_file = False
+        if mesh_file and mats is None:
+            with tb.openFile(mesh_file) as h5f:
+                if '/materials' in h5f:
+                    mats_in_mesh_file = True
+            if mats_in_mesh_file:
+                mats = MaterialLibrary(mesh_file)
+
+        if mats is None and not mats_in_mesh_file:
             mats = MaterialLibrary()
         elif not isinstance(mats, MaterialLibrary):
             mats = MaterialLibrary(mats)
+
         self.mats = mats
 
         # tag with volume id and ensure mats exist.
-        if self.structured:
-            ves = list(self.structured_iterate_hex(self.structured_ordering))
-        else:
-            ves = list(self.mesh.iterate(iBase.Type.region, iMesh.Topology.all))
-
+        ves = list(self.iter_ve())
         tags = self.mesh.getAllTags(ves[0])
         tags = set(tag.name for tag in tags)
         if 'idx' in tags:
@@ -708,9 +730,16 @@ class Mesh(object):
         index i, the material mat, and the volume element itself ve.
         """
         mats = self.mats
-        for i, ve in enumerate(self.mesh.iterate(iBase.Type.region, 
-                                                 iMesh.Topology.all)):
+        for i, ve in enumerate(self.iter_ve()):
             yield i, mats[i], ve
+
+    def iter_ve(self):
+        """Returns an iterator that yields on the volume elements.
+        """
+        if self.structured:
+            return self.structured_iterate_hex(self.structured_ordering)
+        else:
+            return self.mesh.iterate(iBase.Type.region, iMesh.Topology.all)
 
     def __contains__(self, i):
         return i < len(self)
@@ -774,7 +803,7 @@ class Mesh(object):
                 tagtype = IMeshTag
             elif isinstance(value, str):
                 tagtype = MetadataTag                
-            elif isinstance(value, Sequence):
+            elif isinstance(value, _SEQUENCE_TYPES):
                 raise ValueError('ambiguous tag {0!r} creation when value is a '
                         'sequence, please set tagtype, size, or dtype'.format(name))
             else:
@@ -1092,30 +1121,30 @@ class Mesh(object):
         cell_fracs : structured array
             The output from dagmc.discretize_geom(). A sorted, one dimensional
             array, each entry containing the following fields:
-            :idx: int 
-                The volume element index.
-            :cell: int
-                The geometry cell number.
-            :vol_frac: float
-                The volume fraction of the cell withing the mesh ve.
-            :rel_error: float
-                The relative error associated with the volume fraction.
+
+                :idx: int 
+                    The volume element index.
+                :cell: int
+                    The geometry cell number.
+                :vol_frac: float
+                    The volume fraction of the cell withing the mesh ve.
+                :rel_error: float
+                    The relative error associated with the volume fraction.
+
             The array must be sorted with respect to both idx and cell, with cell
             changing fastest.
         cell_mats : dict
             Maps geometry cell numbers to Material objects that represent what
             material each cell is made of.
+
         """
-        mats = []
         for i in range(len(self)):
             mat_col = {} #  Collection of materials in the ith ve.
             for row in cell_fracs[cell_fracs['idx'] == i]:
                 mat_col[cell_mats[row['cell']]] = row['vol_frac']
 
             mixed = MultiMaterial(mat_col)
-            mats.append(mixed.mix_by_volume())
-
-        self.mats = mats
+            self.mats[i] = mixed.mix_by_volume()
       
 
 ######################################################

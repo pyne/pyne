@@ -1201,7 +1201,6 @@ cdef class _Material:
         return id(self)
 
 
-
 class Material(_Material, collections.MutableMapping):
     """Material composed of nuclides.
 
@@ -1241,7 +1240,7 @@ class Material(_Material, collections.MutableMapping):
     def __str__(self):
         header = ["Material:"]
         header += ["mass = {0}".format(self.mass)]
-        header += ["density= {0}".format(self.density)]
+        header += ["density = {0}".format(self.density)]
         header += ["atoms per molecule = {0}".format(self.atoms_per_molecule)]
         if self.attrs.isobject():
             for key, value in self.attrs.items():
@@ -1257,6 +1256,18 @@ class Material(_Material, collections.MutableMapping):
         return "pyne.material.Material({0}, {1}, {2}, {3}, {4})".format(
                 repr(self.comp), self.mass, self.density, self.atoms_per_molecule, repr(self.attrs))
 
+    def __deepcopy__(self, memo):
+        cdef _Material other = Material(free_mat=False)
+        cdef cpp_material.Material * self_ptr = (<_Material> self).mat_pointer
+        cdef cpp_material.Material * other_ptr = new cpp_material.Material()
+        other_ptr.comp = self_ptr.comp
+        other_ptr.mass = self_ptr.mass
+        other_ptr.density = self_ptr.density
+        other_ptr.atoms_per_molecule = self_ptr.atoms_per_molecule
+        other_ptr.attrs = self_ptr.attrs
+        other.mat_pointer = other_ptr
+        other._free_mat = True
+        return other
 
     def mcnp(self, frac_type='mass'):
         """mcnp(self, frac_type='mass')
@@ -1872,7 +1883,8 @@ cdef class _MaterialLibrary(object):
             self._lib = _lib
             if lib.endswith('.json') or lib.endswith('.js'):
                 self.from_json(lib)
-            if lib.endswith('.h5') or lib.endswith('.hdf5'):
+            if lib.endswith('.h5') or lib.endswith('.hdf5') \
+                                   or lib.endswith('.h5m'):
                 self.from_hdf5(lib, datapath=datapath, nucpath=nucpath)
         elif isinstance(lib, collections.Sequence):
             for key, mat in lib:

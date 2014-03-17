@@ -59,4 +59,4 @@ More Resources:
 ---------------
 
 * Source code : github.com/pyne/pyne
-* Example gallery : http://pynesim.org/gallery/index.html
+* Example gallery : http://pyne.io/gallery/index.html
