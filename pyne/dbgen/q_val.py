@@ -139,6 +139,7 @@ def make_q_value(args):
                 return
     
     # Grab the q_values
+    print('Grabbing q_values...')
     q_value_files = ['q_val_actinides.csv', 'q_val_fissionproducts.csv', 
                      'q_val_light.csv']
     all_q_values = []
@@ -146,4 +147,5 @@ def make_q_value(args):
         all_q_values += grab_q_values(fname)
     
     # Make the q_value table and write to file
+    print("Making q_value table...")
     make_q_value_table(all_q_values, nuc_data, build_dir) 
