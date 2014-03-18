@@ -267,10 +267,12 @@ function buildMOAB() {
         then
        	    ../src/configure --enable-optimize --disable-debug \
 	            --with-cgm=$cgm_prefix  \
+                --with-hdf5=$hdf5_prefix \
 	            --prefix=$moab_prefix     
         else
     	    ../src/configure --enable-optimize --disable-debug \
 	            --enable-static  \
+                --with-hdf5=$hdf5_prefix \
 	            --prefix=$moab_prefix
         fi
         
