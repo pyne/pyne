@@ -155,6 +155,10 @@ class TrackLengthMeshTally : public MeshTally
     // Stores barycentric data for tetrahedrons
     std::vector<Matrix3> tet_baryc_data;
 
+    // Stores tag name and values expected in input mesh
+    std::string tag_name; 
+    std::vector<std::string> tag_values;
+
     // >>> PROTECTED METHODS
 
     /**

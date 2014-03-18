@@ -38,10 +38,6 @@
 // (note: this paramater is ignored by GeomUtil, so don't bother trying to tune it)
 #define TRIANGLE_INTERSECTION_TOL 1e-6
 
-// Stores tag name and values expected in input mesh
-std::string tag_name;
-std::vector<std::string> tag_values;
-
 // used to store the intersection data
 struct ray_data {
   double intersect;
