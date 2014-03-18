@@ -9,6 +9,9 @@
 #ifndef DAGWRAPPERS_HH
 #define DAGWRAPPERS_HH
 
+#include "MBInterface.hpp"
+#include "MBCartVect.hpp"
+#include "moab/Types.hpp"
 
 #define f_idnr idnrwr_
 #define g_step g1wr_
@@ -39,17 +42,18 @@ extern "C" void  g_step(double& pSx, double& pSy, double& pSz, double* pV,
 	              double& saf, int& newLttc, int& LttcFlag,
                       double* sLt, int* jrLt);
 
-  /**
-   * g_fire is called by fludag's implementation of g_step.  It calls DAG->ray_fire(...).
-   * oldRegion region of start point
-   * point     start point
-   * dir       direction vector
-   * propStep
-   * retStep   set to distance to next surface
-   * newRegion region ofter step
-  */
-  void g_fire(int& oldRegion, double point[], double dir[], 
-               double &propStep, double& retStep,  int& newRegion);
+/**
+ * g_fire is called by fludag's implementation of g_step.  It calls DAG->ray_fire(...).
+ * oldRegion region of start point
+ * point     start point
+ * dir       direction vector
+ * propStep
+ * retStep   set to distance to next surface
+ * newRegion region ofter step
+ */
+void g_fire(int& oldRegion, double point[], double dir[], 
+	      double &propStep, double& retStep, double &safety,
+	      int& newRegion);
 
 // Stub function
 extern "C" void f_g1rt(void);
@@ -99,6 +103,12 @@ extern "C" void f_normal(double& pSx, double& pSy, double& pSz,
 
 // Wrapper for f_normal clarifying which arguments are used
 int  normal (double& posx, double& posy, double& posz, double *norml, int& regionForSense);
+
+// Protoype for boundary test funct
+int boundary_test(MBEntityHandle vol, double xyz[3], double uvw[3]);
+
+// protoype for mat props
+std::string mat_property_string (int index, std::vector<std::string> &properties);
 
 // WrapReg
 
