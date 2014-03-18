@@ -1,0 +1,28 @@
+Simple DAGMC test problem
+
+geom.inp - This file was used to create geom.sat with mcnp2cad.
+           It specifies a sphere around the origin with material
+           number 1 and rho = -1.  The rest of the universe is 
+           void.
+
+geom.sat - Output from mcnp2cad.  Note that the added 'graveyard' 
+           volume, which mcnp2cad creates by default, is assigned
+           volume number 1.  This means the volume numbering in 
+           geom.sat is different from that of geom.inp; the f4 tally
+           in test.inp reflects this.
+
+test.inp - DAG-MCNP5 test input with simple defaults.  An f4 tally
+           is performed on the sphere.
+
+To run this problem in dag-mcnp5, provide the following command line:
+
+   dag-mcnp5 i=test.inp g=geom.sat
+
+You may optionally specify. a faceting tolerance by adding 
+   
+   ftol=1e-4
+
+or similar to the command line.  See the dagmc documentation [1] for 
+more information.
+
+[1]: http://cnerg.engr.wisc.edu/cgi-bin/index.cgi/wiki?p=DirectAcceleratedGeometryMonteCarlo
