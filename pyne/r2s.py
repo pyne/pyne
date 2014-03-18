@@ -65,30 +65,33 @@ def irradiation_setup(flux_mesh, cell_mats, alara_params, tally_num=4,
     if geom is not None and isfile(geom):
         load(geom)
 
-    #  flux_mesh is mesh
+    #  flux_mesh is Mesh object
     if isinstance(flux_mesh, Mesh):
         m = flux_mesh
-        vol_fracs = discretize_geom(m)
     #  flux_mesh is unstructured mesh file
     elif isinstance(flux_mesh, str) and isfile(flux_mesh) \
                                   and flux_mesh.endswith(".h5m"):
             m = Mesh(structured=False, mesh_file=flux_mesh)
-            vol_fracs = discretize_geom(m)
-    #  flux_mesh is Meshtal is meshtal_file
+    #  flux_mesh is Meshtal or meshtal file
     else:
+        #  flux_mesh is meshtal file
         if isinstance(flux_mesh, str) and isfile(flux_mesh):
             flux_mesh = Meshtal(flux_mesh, {tally_num: (flux_tag, 
                                                         flux_tag + "_err", 
                                                         flux_tag + "_total", 
                                                         flux_tag + "_err_total")})
             m = flux_mesh.tally[tally_num]
+        #  flux_mesh is Meshtal object
         elif instance(flux_mesh, Meshtal):
             m = flux_mesh.tally[tally_num]
         else:
             raise ValueError("meshtal argument not a Mesh object, Meshtal"
                              " object, MCNP meshtal file or meshtal.h5m file.")
        
+    if m.structured:
         vol_fracs = discretize_geom(m, num_rays=num_rays, grid=grid)
+    else:
+        vol_fracs = discretize_geom(m)
 
     m.cell_fracs_to_mats(vol_fracs, cell_mats)
 
