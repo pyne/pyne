@@ -144,6 +144,7 @@ double pyne::atomic_mass(std::string nuc)
 };
 
 
+
 /*******************************/
 /*** natural_abund functions ***/
 /*******************************/
@@ -210,6 +211,113 @@ double pyne::natural_abund(std::string nuc)
 };
 
 
+
+/*****************************/
+/*** Q_value Functions ***/
+/*****************************/
+std::map<int, double> pyne::q_val_map = std::map<int, double>();
+
+void pyne::_load_q_val_map()
+{
+  // Loads the important parts of q_value table into q_value_map
+
+  //Check to see if the file is in HDF5 format.
+  if (!pyne::file_exists(pyne::NUC_DATA_PATH))
+    throw pyne::FileNotFound(pyne::NUC_DATA_PATH);
+
+  bool ish5 = H5Fis_hdf5(pyne::NUC_DATA_PATH.c_str());
+  if (!ish5)
+    throw h5wrap::FileNotHDF5(pyne::NUC_DATA_PATH);
+
+  // Get the HDF5 compound type (table) description
+  hid_t desc = H5Tcreate(H5T_COMPOUND, sizeof(q_val_struct));
+  H5Tinsert(desc, "nuc",   HOFFSET(q_val_struct, nuc),   H5T_NATIVE_INT);
+  H5Tinsert(desc, "q_val",  HOFFSET(q_val_struct, q_val),  H5T_NATIVE_FLOAT);
+  H5Tinsert(desc, "gamma_frac", HOFFSET(q_val_struct, gamma_frac), H5T_NATIVE_FLOAT);
+
+  // Open the HDF5 file
+  hid_t nuc_data_h5 = H5Fopen(pyne::NUC_DATA_PATH.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT);
+
+  // Open the data set
+  hid_t q_val_set = H5Dopen2(nuc_data_h5, "/neutron/q_values", H5P_DEFAULT);
+  hid_t q_val_space = H5Dget_space(q_val_set);
+  int q_val_length = H5Sget_simple_extent_npoints(q_val_space);
+
+  // Read in the data
+  q_val_struct * q_val_array = new q_val_struct[q_val_length];
+  H5Dread(q_val_set, desc, H5S_ALL, H5S_ALL, H5P_DEFAULT, q_val_array);
+
+  // close the nuc_data library, before doing anything stupid
+  H5Dclose(q_val_set);
+  H5Fclose(nuc_data_h5);
+
+  // Ok now that we have the array of stucts, put it in the map
+  for(int n = 0; n < q_val_length; n++){
+    q_val_map[q_val_array[n].nuc] = q_val_array[n].q_val;
+    gamma_frac_map[q_val_array[n].nuc] = q_val_array[n].gamma_frac;
+  }
+
+  delete[] q_val_array;
+};
+
+
+double pyne::q_val(int nuc)
+{
+  // Find the nuclide's q_val in MeV/fission
+  std::map<int, double>::iterator nuc_iter, nuc_end;
+
+  nuc_iter = q_val_map.find(nuc);
+  nuc_end = q_val_map.end();
+
+  // First check if we already have the nuc q_val in the map
+  if (nuc_iter != nuc_end)
+    return (*nuc_iter).second;
+
+  // Next, fill up the map with values from the nuc_data.h5 if the map is empty.
+  if (q_val_map.empty())
+  {
+    // Don't fail if we can't load the library
+    try
+    {
+      _load_q_val_map();
+      return q_val(nuc);
+    }
+    catch(...){};
+  };
+/*
+  double aw;
+  int nucid = nucname::id(nuc);
+
+  // If in an excited state, return the estimate of the ground state mass.
+  if (0 < nucid%10000)
+  {
+    aw = atomic_mass((nucid/10000)*10000);
+    atomic_mass_map[nuc] = aw;
+    return aw;
+  };
+
+  // Finally, if none of these work, 
+  // take a best guess based on the 
+  // aaa number.
+  aw = (double) ((nucid/10000)%1000);
+  atomic_mass_map[nuc] = aw;
+  return aw;
+*/
+};
+
+
+double pyne::q_val(char * nuc)
+{
+  int nuc_zz = nucname::id(nuc);
+  return q_val(nuc_zz);
+};
+
+
+double pyne::q_val(std::string nuc)
+{
+  int nuc_zz = nucname::id(nuc);
+  return q_val(nuc_zz);
+};
 
 
 /***********************************/
