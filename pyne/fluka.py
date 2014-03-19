@@ -1,10 +1,10 @@
 #!/usr/bin/python
 
 from itaps import iMesh
-from pyne.mesh import Mesh, StatMesh
+from pyne.mesh import Mesh, StatMesh, IMeshTag
 
 import math
-from pyne.mesh import Mesh, StatMesh, MeshError
+#from pyne.mesh import Mesh, StatMesh, MeshError, IMeshTag
 
 class USRBIN(StatMesh):
     """This class stores all the information from Fluka USRBIN output
@@ -51,8 +51,8 @@ class USRBIN(StatMesh):
                                         self.y_bounds, self.z_bounds],
                                         structured=True)
 	print "done creating mesh"
-	part_data_tag = IMeshTag(size=1, float, mesh=self, name="part_data_{0}".format(self.particle))
-	error_data_tag = IMeshTag(size=1, float, mesh=self, name="error_data_{0}".format(self.particle))
+	self.part_data_tag = IMeshTag(size=1, dtype=float, mesh=self, name="part_data_{0}".format(self.particle))
+	self.error_data_tag = IMeshTag(size=1, dtype=float, mesh=self, name="error_data_{0}".format(self.particle))
 
 	
 	self.part_data_tag[:] = self.part_data
@@ -171,7 +171,9 @@ class USRBIN(StatMesh):
             line = fh.readline()    
 #	    print line
 
-	    [self.name, self.particle] = self.get_name_and_system(line)[0,2]
+	    self.name = self.get_name_and_system(line)[0]
+	    self.particle = self.get_name_and_system(line)[2]
+
 #	    print self.name
 
 	    [x_info, y_info, z_info, columns] = self.read_header(fh, line)
