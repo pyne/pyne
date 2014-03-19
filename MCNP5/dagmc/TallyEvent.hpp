@@ -28,11 +28,6 @@
 struct TallyEvent
 {
     /**
-     * \brief Constructor
-     */
-    TallyEvent();
-
-    /**
      * \brief Defines type of tally event
      *
      *     0) NONE indicates no event has been set yet

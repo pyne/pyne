@@ -53,7 +53,7 @@ class Quadrature
      * \brief Constructor
      * \param[in] n the number of points to use with this Quadrature
      */
-    Quadrature(unsigned int n);
+    explicit Quadrature(unsigned int n);
 
     // >>> PUBLIC INTERFACE
 

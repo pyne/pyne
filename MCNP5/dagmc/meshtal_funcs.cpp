@@ -384,7 +384,6 @@ void dagmc_update_multiplier_(int* fmesh_idx, double* value)
 {
    tallyManager.updateMultiplier(*fmesh_idx-1, *value);
 }
-
 //---------------------------------------------------------------------------//
 
 // end of MCNP5/dagmc/meshtal_funcs.cpp

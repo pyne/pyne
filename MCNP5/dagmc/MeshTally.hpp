@@ -60,7 +60,7 @@ class MeshTally : public Tally
      * \brief Constructor
      * \param[in] input user-defined input parameters for this mesh tally
      */
-    MeshTally(const TallyInput& input);
+    explicit MeshTally(const TallyInput& input);
 
   public:
     /**

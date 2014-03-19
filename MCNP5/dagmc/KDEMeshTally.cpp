@@ -4,9 +4,9 @@
 #include <climits>
 #include <cmath>
 #include <iostream>
+#include <set>
 #include <sstream>
 #include <string>
-#include <set>
 
 #include "moab/Core.hpp"
 #include "moab/Range.hpp"
@@ -83,8 +83,8 @@ KDEMeshTally::KDEMeshTally(const TallyInput& input,
     if (rval != moab::MB_SUCCESS)
     {
         std::cerr << "Error: Could not load mesh data for KDE mesh tally "
-                  << input_data.tally_id << " from input file "
-                  << input_data.input_filename << std::endl;
+                  << input.tally_id << " from input file "
+                  << input_filename << std::endl;
         exit(EXIT_FAILURE);
     }
 
@@ -105,7 +105,7 @@ KDEMeshTally::~KDEMeshTally()
     delete mbi;
 }
 //---------------------------------------------------------------------------//
-// DERIVED PUBLIC INTERFACE from MeshTally.hpp
+// DERIVED PUBLIC INTERFACE from Tally.hpp
 //---------------------------------------------------------------------------//
 void KDEMeshTally::compute_score(const TallyEvent& event)
 {
@@ -123,12 +123,11 @@ void KDEMeshTally::compute_score(const TallyEvent& event)
             subtrack_points = choose_points(num_subtracks, event);
         }
     }
-    else if (event.type == TallyEvent::COLLISION  &&  estimator == COLLISION)
+    else if (event.type == TallyEvent::COLLISION && estimator == COLLISION)
     {
-            // divide weight by cross section and update optimal bandwidth
-            weight /= event.total_cross_section;
-            // update_variance(collision.collision_point);
-            update_variance(event.position);
+        // divide weight by cross section and update optimal bandwidth
+        weight /= event.total_cross_section;
+        update_variance(event.position);
     }
     else // NONE, return from this method
     {
@@ -148,7 +147,7 @@ void KDEMeshTally::compute_score(const TallyEvent& event)
     // iterate through calculation points and compute their final scores
     std::set<moab::EntityHandle>::iterator i;
     CalculationPoint X;
-    
+
     for (i = calculation_points.begin(); i != calculation_points.end(); ++i)
     {
         // get coordinates of this point
@@ -191,7 +190,7 @@ void KDEMeshTally::compute_score(const TallyEvent& event)
     }  // end calculation_points iteration
 }
 //---------------------------------------------------------------------------//
-void KDEMeshTally::print(double num_particles, double multiplier)
+void KDEMeshTally::write_data(double num_histories)
 {
     // display the optimal bandwidth if it was computed
     if (estimator == COLLISION)

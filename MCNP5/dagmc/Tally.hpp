@@ -77,7 +77,7 @@ class Tally
      * \brief Constructor
      * \param[in] input user-defined input parameters for this Tally
      */
-    Tally(const TallyInput& input);
+    explicit Tally(const TallyInput& input);
 
   public:
     /**

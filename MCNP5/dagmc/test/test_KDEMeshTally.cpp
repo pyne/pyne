@@ -22,13 +22,12 @@ class KDEMeshTallyTest : public ::testing::Test
         options.insert(std::make_pair("hx", "0.1"));
         options.insert(std::make_pair("hy", "0.1"));
         options.insert(std::make_pair("hz", "0.1"));
+        options.insert(std::make_pair("inp", "../structured_mesh.h5m"));
 
         // add general input data
         input.tally_id = 1;
-        input.input_filename = "../structured_mesh.h5m";
         input.energy_bin_bounds.push_back(0.0);
         input.energy_bin_bounds.push_back(10.0);
-        input.total_energy_bin = false;
         input.options = options;
 
         kde_tally = NULL;
@@ -42,7 +41,7 @@ class KDEMeshTallyTest : public ::testing::Test
 
   protected:
     // data needed for each test
-    MeshTallyInput input;
+    TallyInput input;
     KDEMeshTally* kde_tally;
 
     // wrapper for the KDEMeshTally::integral_track_score method
@@ -169,14 +168,13 @@ TEST(KDEMeshTallyDeathTest, MissingInputMesh)
 
     // define empty tally options
     std::multimap<std::string, std::string> options;
+    options.insert(std::make_pair("inp", "missing_file.h5m"));
 
     // add input data
-    MeshTallyInput input;
+    TallyInput input;
     input.tally_id = 1;
-    input.input_filename = "missing_file.h5m";
     input.energy_bin_bounds.push_back(0.0);
     input.energy_bin_bounds.push_back(10.0);
-    input.total_energy_bin = false;
     input.options = options;
 
     // make sure KDEMeshTally returns error for missing input file
@@ -202,7 +200,7 @@ TEST_F(KDEMeshTallyTest, MissingBoundaryTags)
     event.position = moab::CartVect(0.0, 0.0, 0.0);
     event.direction = moab::CartVect(1.0, 0.0, 0.0);
     event.track_length = 1.0;
-    EXPECT_NO_THROW(kde_tally->compute_score(event, 0));
+    EXPECT_NO_THROW(kde_tally->compute_score(event));
 }
 //---------------------------------------------------------------------------//
 TEST_F(KDEMeshTallyTest, TurnOffBoundaryForHigherOrderKernels)

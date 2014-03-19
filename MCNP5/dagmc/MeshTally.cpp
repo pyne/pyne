@@ -3,7 +3,6 @@
 #include <cassert>
 #include <cstdlib>
 #include <iostream>
-#include <set>
 #include <sstream>
 
 #include "moab/Interface.hpp"
@@ -14,7 +13,7 @@
 // CONSTRUCTOR
 //---------------------------------------------------------------------------//
 MeshTally::MeshTally(const TallyInput& input)
-	: Tally(input)    
+    : Tally(input)    
 {
     // Determine name of the output file
     TallyInput::TallyOptions::iterator it = input_data.options.find("out");

@@ -11,7 +11,6 @@
 #include "KDEKernel.hpp"
 #include "KDENeighborhood.hpp"
 #include "MeshTally.hpp"
-#include "TallyEvent.hpp"
 #include "Quadrature.hpp"
 
 // forward declarations
@@ -125,13 +124,13 @@ class KDEMeshTally : public MeshTally
      */
     virtual ~KDEMeshTally();
 
-    // >>> DERIVED PUBLIC INTERFACE from MeshTally.hpp
+    // >>> DERIVED PUBLIC INTERFACE from Tally.hpp
 
     /**
      * \brief Computes scores for this KDEMeshTally based on the given TallyEvent
      * \param[in] event the parameters needed to compute the scores
      */
-    virtual void compute_score(const TallyEvent& event, int ebin);
+    virtual void compute_score(const TallyEvent& event);
 
     /**
      * \brief Write results to the output file for this KDEMeshTally
