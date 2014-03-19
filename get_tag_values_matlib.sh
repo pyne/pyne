@@ -16,16 +16,17 @@ filename : the dagmc filename
 def get_tag_values(filename):
     mesh = iMesh.Mesh()
     mesh.load(filename)
-   # get all entities
+    # get all entities
     ents = mesh.getEntities(iBase.Type.all, iMesh.Topology.triangle)
     # get mesh set
-    mesh_set = mesh.getEntSets()
-    tag_values = []  # list of tag values
+    mesh_sets = mesh.getEntSets()
+    #tag_values = []  # list of tag values
+    tag_values = []
     found_all_tags = 0
-    for i in mesh_set:
+    for i in mesh_sets:
         if found_all_tags == 1:
             break
-    # get all the tags
+        # get all the tags
         tags = mesh.getAllTags(i)
         # loop over the tags checking for name
         for t in tags:
@@ -35,26 +36,35 @@ def get_tag_values(filename):
                 t_handle = mesh.getTagHandle(t.name)
                 # get the data for the tag, with taghandle in element i
                 tag = t_handle[i]
-                a = []
-                # since we have a byte type tag loop over the 32 elements
-                for part in tag:
-                    # if the byte char code is non 0
-                    if (part != 0):
-                        # convert to ascii
-                        a.append(str(unichr(part)))
-                        # join to end string
-                        test = ''.join(a)
-                        # the the string we are testing for is not in the list of found
-                        # tag values, add to the list of tag_values
-                # if not already in list append to lilst
-                if not any(test in s for s in tag_values):
-                    tag_values.append(test)
+                tag_to_script(tag,tag_values)
                 # last tag we are done
                 if any('impl_complement' in s for s in tag_values):
                     found_all_tags = 1
-    print('The matrials group names found in the h5m file are: ')
+
+    print('The groups found in the h5m file are: ')
     print tag_values
-    return tag_values
+    return tag_values 
+
+"""
+function to transform the tags into strings
+"""
+
+def tag_to_script(tag,tag_list):
+    a = []
+    # since we have a byte type tag loop over the 32 elements
+    for part in tag:
+        # if the byte char code is non 0
+        if (part != 0):
+            # convert to ascii
+            a.append(str(unichr(part)))
+            # join to end string
+            test = ''.join(a)
+            # the the string we are testing for is not in the list of found
+            # tag values, add to the list of tag_values
+    # if not already in list append to lilst
+    if not any(test in s for s in tag_list):
+        tag_list.append(test)
+    return tag_list
 
 """
 function which loads pyne material library
@@ -84,24 +94,23 @@ def check_matname(tag_values):
     # loop over the tags in the file
     for tag in tag_values:
     # look for mat, this id's material in group name
-        if "mat" in tag:
+        while tag[0:3] == "mat":
         # split on the basis of "/" being delimiter and split colons from
         # name
-            try:
-                if "/" in tag:
-                    mat_name = tag.split("/")
-                    # list of material name only
-                    matname = mat_name[0].split(":")
-                    matdensity = mat_name[1].split(":")
-                    mat_list_density.append(matdensity[1])
+            if "/" in tag:
+                mat_name = tag.split("/")
+                # list of material name only
+                matname = mat_name[0].split(":")
+                matdensity = mat_name[1].split(":")
+                mat_list_density.append(matdensity[1])
                 # otherwise we have only "mat:"
-                else:
-                    matname = tag.split(":")
-                    mat_list_density.append(' ')
-                mat_list_matname.append(matname[1])
-            except:
+            elif ":" in tag:
+                matname = tag.split(":")
+                mat_list_density.append(' ')
+            else:
                 print("Could not find group name in appropriate format"), tag
                 exit()
+            mat_list_matname.append(matname[1])
     mat_dens_list = zip(mat_list_matname, mat_list_density)
     # error conditions, not tags found
     if len(mat_dens_list) == 0:
@@ -244,7 +253,7 @@ defining
 """
 
 
-def parsing(parsescript):
+def parsing():
     parser = argparse.ArgumentParser()
     parser.add_argument(
         '-f', action='store', dest='datafile', help='the path to the .h5m file')
@@ -283,7 +292,7 @@ def parsing(parsescript):
 
 
 # parse the script
-output = parsing(1)
+output = parsing()
 # get list of tag values
 tag_values = get_tag_values(datafile)
 # now load material library
