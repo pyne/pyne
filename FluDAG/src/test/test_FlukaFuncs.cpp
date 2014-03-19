@@ -67,7 +67,8 @@ class FluDAGTest : public ::testing::Test
        oldReg = 1;
        // How far the particle would be expected to go if no physics boundaries
        propStep = 0.0;
-      
+       safety   = 0.0;
+ 
        // Direction cosine for component headed from center of cube to a corner
        dir_norm = 1.0/sqrt(3);
     }
@@ -85,7 +86,7 @@ class FluDAGTest : public ::testing::Test
     
     int      oldReg;
     double propStep;
-
+    double safety;
     double retStep;
     int    newReg;
 
@@ -94,7 +95,7 @@ class FluDAGTest : public ::testing::Test
 
 //---------------------------------------------------------------------------//
 // void g_fire(int& oldRegion, double point[], double dir[], 
-//              double &propStep, double& retStep,  int& newRegion)
+//              double &propStep, double& retStep, double& safety, int& newRegion)
 //---------------------------------------------------------------------------//
 // oldRegion - the region of the particle's current coordinates
 // point     - the particle's coordinate location vector
@@ -103,7 +104,7 @@ class FluDAGTest : public ::testing::Test
 // retStep   - returned as the distance from the particle's current location, along its ray, to the next boundary
 // newRegion - gotten from the value returned by DAG->next_vol
 // newRegion is gotten from the volue returned by DAG->next_vol
-// void g_fire(int& oldRegion, double point[], double dir[], double &propStep, double& retStep,  int& newRegion)
+// void g_fire(int& oldRegion, double point[], double dir[], double &propStep, double& retStep, double& safety, int& newRegion)
 
 //---------------------------------------------------------------------------//
 // Test setup outcomes
@@ -151,7 +152,7 @@ TEST_F(FluDAGTest, GFireBadPropStep)
   point[2] = 5.0;
   dir[2]   = 1.0;
   
-  g_fire(oldReg, point, dir, propStep, retStep, newReg);
+  g_fire(oldReg, point, dir, propStep, retStep, safety, newReg);
   EXPECT_EQ(0.0, retStep);
 }
 //---------------------------------------------------------------------------//
@@ -166,77 +167,98 @@ TEST_F(FluDAGTest, GFireGoodPropStep)
   
   // +z direction
   dir[2]   = 1.0;
-  g_fire(oldReg, point, dir, propStep, retStep, newReg);
+  g_fire(oldReg, point, dir, propStep, retStep, safety, newReg);
   std::cout << "newReg is " << newReg << std::endl;
   // Start in middle of 10x10x10 cube, expect 10/2 to be dist. to next surface
   EXPECT_EQ(5.0, retStep);
   // -z direction
   dir[2] = -dir[2];
-  g_fire(oldReg, point, dir, propStep, retStep, newReg);
+  g_fire(oldReg, point, dir, propStep, retStep, safety, newReg);
   EXPECT_EQ(5.0, retStep);
   // +y direction
   dir[2] = 0.0;
   dir[1] = 1.0;
-  g_fire(oldReg, point, dir, propStep, retStep, newReg);
+  g_fire(oldReg, point, dir, propStep, retStep, safety, newReg);
   EXPECT_EQ(5.0, retStep);
   // -y direction
   dir[1] = -dir[1];
-  g_fire(oldReg, point, dir, propStep, retStep, newReg);
+  g_fire(oldReg, point, dir, propStep, retStep, safety, newReg);
   EXPECT_EQ(5.0, retStep);
   // +x direction
   dir[1] = 0.0;
   dir[0] = 1.0;
-  g_fire(oldReg, point, dir, propStep, retStep, newReg);
+  g_fire(oldReg, point, dir, propStep, retStep, safety, newReg);
   EXPECT_EQ(5.0, retStep);
   // -x direction
   dir[0] = -dir[0];
-  g_fire(oldReg, point, dir, propStep, retStep, newReg);
+  g_fire(oldReg, point, dir, propStep, retStep, safety, newReg);
   EXPECT_EQ(5.0, retStep);
 
   // +++
   dir[0] = +dir_norm;
   dir[1] = +dir_norm;
   dir[2] = +dir_norm;
-  g_fire(oldReg, point, dir, propStep, retStep, newReg);
+  g_fire(oldReg, point, dir, propStep, retStep, safety, newReg);
   EXPECT_NEAR(8.660254, retStep, 1e-6);
 
   // ++-
-  // Lost Particle!
+  // Not Lost Particle!
+  dir[0] = +dir_norm;
+  dir[1] = +dir_norm;
+  dir[2] = -dir_norm;
+  g_fire(oldReg, point, dir, propStep, retStep, safety, newReg);
+  EXPECT_NEAR(8.660254, retStep, 1e-6);
   
   // +-+
   dir[0] = +dir_norm;
   dir[1] = -dir_norm;
   dir[2] = +dir_norm;
-  g_fire(oldReg, point, dir, propStep, retStep, newReg);
+  g_fire(oldReg, point, dir, propStep, retStep, safety, newReg);
   EXPECT_NEAR(8.660254, retStep, 1e-6);
 
   // +--
-  // Lost Particle!
+  // Not Lost Particle!
+  dir[0] = +dir_norm;
+  dir[1] = -dir_norm;
+  dir[2] = -dir_norm;
+  g_fire(oldReg, point, dir, propStep, retStep, safety, newReg);
+  EXPECT_NEAR(8.660254, retStep, 1e-6);
 
   // -++
   dir[0] = -dir_norm;
   dir[1] = +dir_norm;
   dir[2] = +dir_norm;
-  g_fire(oldReg, point, dir, propStep, retStep, newReg);
+  g_fire(oldReg, point, dir, propStep, retStep, safety, newReg);
   EXPECT_DOUBLE_EQ(5.0/dir_norm, retStep);
 
   // -+-
-  // Lost Particle!
+  // Not Lost Particle!
+  dir[0] = -dir_norm;
+  dir[1] = +dir_norm;
+  dir[2] = -dir_norm;
+  g_fire(oldReg, point, dir, propStep, retStep, safety, newReg);
+  EXPECT_DOUBLE_EQ(5.0/dir_norm, retStep);
 
   // --+
   dir[0] = -dir_norm;
   dir[1] = -dir_norm;
   dir[2] = +dir_norm;
-  g_fire(oldReg, point, dir, propStep, retStep, newReg);
+  g_fire(oldReg, point, dir, propStep, retStep, safety, newReg);
   EXPECT_DOUBLE_EQ(5.0/dir_norm, retStep);
 
   // ---
-  // Lost Particle!
+  // Not Lost Particle!
+  dir[0] = -dir_norm;
+  dir[1] = -dir_norm;
+  dir[2] = -dir_norm;
+  g_fire(oldReg, point, dir, propStep, retStep, safety, newReg);
+  EXPECT_DOUBLE_EQ(5.0/dir_norm, retStep);
 }
 
 //---------------------------------------------------------------------------//
 // Test that for particles with a -z component exit(0) is called
 // Death Tests require special handling and naming recommendation
+/*
 TEST_F(FluDAGTest, LostParticleDeathTest)
 {
   ::testing::FLAGS_gtest_death_test_style = "threadsafe";
@@ -277,6 +299,6 @@ TEST_F(FluDAGTest, LostParticleDeathTest)
   g_fire(oldReg, point, dir, propStep, retStep, newReg);
   EXPECT_EXIT(g_fire(oldReg, point, dir, propStep, retStep, newReg), ::testing::ExitedWithCode(0), "");
 }
-
+*/
 //---------------------------------------------------------------------------//
 // end of FluDAG/src/test/test_FlukaFuncs.cpp
