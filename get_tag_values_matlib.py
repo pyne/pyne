@@ -2,7 +2,7 @@
 
 from itaps import iMesh, iBase
 from pyne import material
-from pyne.material import Material
+from pyne.material import Material, MaterialLibrary
 import string
 import argparse
 
@@ -171,7 +171,7 @@ def copy_attrs(material, material_from_lib):
 
     material.density = material_from_lib.density
     material.mass = material_from_lib.mass
-    material.atoms_per_mol = material_from_lib.atoms_per_mol
+#    material.atoms_per_mol = material_from_lib.atoms_per_mol
     return
 
 
@@ -242,8 +242,12 @@ filename: filename to write the objects to
 
 
 def write_mats_h5m(materials_list, filename):
+
+    new_matlib = MaterialLibrary()
+
     for material in materials_list:
-        material.write_hdf5(filename)
+        new_matlib[material.attrs['name']] = material
+    new_matlib.write_hdf5(filename)
 
 """
 function to parse the script, adding options:
