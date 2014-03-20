@@ -144,7 +144,6 @@ double pyne::atomic_mass(std::string nuc)
 };
 
 
-
 /*******************************/
 /*** natural_abund functions ***/
 /*******************************/
@@ -220,6 +219,7 @@ std::map<int, double> pyne::q_val_map = std::map<int, double>();
 void pyne::_load_q_val_map()
 {
   // Loads the important parts of q_value table into q_value_map
+  std::cout << "started loading qvalues\n";
 
   //Check to see if the file is in HDF5 format.
   if (!pyne::file_exists(pyne::NUC_DATA_PATH))
@@ -231,9 +231,9 @@ void pyne::_load_q_val_map()
 
   // Get the HDF5 compound type (table) description
   hid_t desc = H5Tcreate(H5T_COMPOUND, sizeof(q_val_struct));
-  H5Tinsert(desc, "nuc",   HOFFSET(q_val_struct, nuc),   H5T_NATIVE_INT);
-  H5Tinsert(desc, "q_val",  HOFFSET(q_val_struct, q_val),  H5T_NATIVE_FLOAT);
-  H5Tinsert(desc, "gamma_frac", HOFFSET(q_val_struct, gamma_frac), H5T_NATIVE_FLOAT);
+  H5Tinsert(desc, "nuc", HOFFSET(q_val_struct, nuc),  H5T_NATIVE_INT);
+  H5Tinsert(desc, "q_val", HOFFSET(q_val_struct, q_val), H5T_NATIVE_DOUBLE);
+  H5Tinsert(desc, "gamma_frac", HOFFSET(q_val_struct, gamma_frac), H5T_NATIVE_DOUBLE);
 
   // Open the HDF5 file
   hid_t nuc_data_h5 = H5Fopen(pyne::NUC_DATA_PATH.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT);
@@ -244,6 +244,7 @@ void pyne::_load_q_val_map()
   int q_val_length = H5Sget_simple_extent_npoints(q_val_space);
 
   // Read in the data
+  std::cout << "qval_len: " << q_val_length << "\n";
   q_val_struct * q_val_array = new q_val_struct[q_val_length];
   H5Dread(q_val_set, desc, H5S_ALL, H5S_ALL, H5P_DEFAULT, q_val_array);
 
@@ -251,13 +252,18 @@ void pyne::_load_q_val_map()
   H5Dclose(q_val_set);
   H5Fclose(nuc_data_h5);
 
-  // Ok now that we have the array of stucts, put it in the map
+  // Ok now that we have the array of structs, put it in the map
   for(int n = 0; n < q_val_length; n++){
     q_val_map[q_val_array[n].nuc] = q_val_array[n].q_val;
     gamma_frac_map[q_val_array[n].nuc] = q_val_array[n].gamma_frac;
+  //std::cout << "last n: " << n << "\n";
   }
 
   delete[] q_val_array;
+  std::cout << "loaded qvalues \n";
+
+  for (std::map<int, double>::iterator inuc = q_val_map.begin(); inuc != q_val_map.end(); inuc++)
+    std::cout << "entry: " << (*inuc).first << "  " << (*inuc).second << "\n";
 };
 
 
@@ -266,12 +272,16 @@ double pyne::q_val(int nuc)
   // Find the nuclide's q_val in MeV/fission
   std::map<int, double>::iterator nuc_iter, nuc_end;
 
+  std::cout << "\n table: " << q_val_map.size() << "\n";
+
   nuc_iter = q_val_map.find(nuc);
   nuc_end = q_val_map.end();
 
   // First check if we already have the nuc q_val in the map
-  if (nuc_iter != nuc_end)
+  if (nuc_iter != nuc_end) 
     return (*nuc_iter).second;
+  else 
+    std::cout << nuc << " not found!\n";
 
   // Next, fill up the map with values from the nuc_data.h5 if the map is empty.
   if (q_val_map.empty())
@@ -284,25 +294,17 @@ double pyne::q_val(int nuc)
     }
     catch(...){};
   };
-/*
-  double aw;
+  
+  double qv;
   int nucid = nucname::id(nuc);
+  std::cout << nuc << "\t" << nucid << "\n";
+  if (nucid != nuc)
+    return q_val(nucid);
 
-  // If in an excited state, return the estimate of the ground state mass.
-  if (0 < nucid%10000)
-  {
-    aw = atomic_mass((nucid/10000)*10000);
-    atomic_mass_map[nuc] = aw;
-    return aw;
-  };
-
-  // Finally, if none of these work, 
-  // take a best guess based on the 
-  // aaa number.
-  aw = (double) ((nucid/10000)%1000);
-  atomic_mass_map[nuc] = aw;
-  return aw;
-*/
+  // If nuclide is not found, return 0
+  qv = 0.0;
+  q_val_map[nuc] = qv;
+  return qv;
 };
 
 
@@ -317,6 +319,60 @@ double pyne::q_val(std::string nuc)
 {
   int nuc_zz = nucname::id(nuc);
   return q_val(nuc_zz);
+};
+
+
+/*******************************/
+/*** gamma_frac functions ***/
+/*******************************/
+
+std::map<int, double> pyne::gamma_frac_map = std::map<int, double>();
+
+double pyne::gamma_frac(int nuc)
+{
+  // Find the nuclide's fraction of Q that comes from gammas
+  std::map<int, double>::iterator nuc_iter, nuc_end;
+
+  nuc_iter = gamma_frac_map.find(nuc);
+  nuc_end = gamma_frac_map.end();
+
+  // First check if we already have the gamma_frac in the map
+  if (nuc_iter != nuc_end)
+    return (*nuc_iter).second;
+
+  // Next, fill up the map with values from nuc_data.h5 if the map is empty.
+  if (gamma_frac_map.empty())
+  {
+    // Don't fail if we can't load the library
+    try
+    {
+      _load_q_val_map();
+      return gamma_frac(nuc);
+    }
+    catch(...){};
+  };
+
+  double gf;
+  int nucid = nucname::id(nuc);
+
+  // If nuclide is not found, return 0
+  gf = 0.0;
+  gamma_frac_map[nucid] = gf;
+  return gf;
+};
+
+
+double pyne::gamma_frac(char * nuc)
+{
+  int nuc_zz = nucname::id(nuc);
+  return gamma_frac(nuc_zz);
+};
+
+
+double pyne::gamma_frac(std::string nuc)
+{
+  int nuc_zz = nucname::id(nuc);
+  return gamma_frac(nuc_zz);
 };
 
 

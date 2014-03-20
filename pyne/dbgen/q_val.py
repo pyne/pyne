@@ -49,8 +49,8 @@ def read_row(row):
         One entry in a q_val file.
     """
 
-    # Create list
-    entry = []
+    # Create tuple
+    entry = ()
 
     # Evaluate each component of the given row
     if row[0] == 'Nuclide' or len(row[0].strip()) == 0:
@@ -64,7 +64,7 @@ def read_row(row):
         gamma_frac = 0.0
     else:   
         gamma_frac = float(row[3])
-    entry = [nuclide, q_val, gamma_frac]
+    entry = (nuclide, q_val, gamma_frac)
 
     return entry
 
@@ -74,18 +74,19 @@ def format_q_values(all_q_values):
     
     Parameters
     ----------
-    all_q_values : list of lists
+    all_q_values : list of tuples
         Array of q_values for all nuclides.
     """
-
+    
+    # Create list
+    d_all_q_values = []
     distinct_all_q_values = []
-    
-    # Ensure only one entry per nuclide
+
+    # Ensure only one entry per nuclide then sort in order of nuclide
     for nuclide in all_q_values:
-        if not nuclide in distinct_all_q_values and nuclide is not None:
-            distinct_all_q_values.append(tuple(nuclide))
-    
-    # Sort in order of nuclide
+        if nuclide is not None:
+            d_all_q_values.append(nuclide)    
+    distinct_all_q_values = list(set(d_all_q_values))
     distinct_all_q_values.sort(key=lambda nucid: nucid[0])
  
     return distinct_all_q_values
