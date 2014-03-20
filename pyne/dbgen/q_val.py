@@ -110,9 +110,9 @@ def make_q_value_table(all_q_values, nuc_data, build_dir=""):
     
     # Define data type
     qv_dtype = np.dtype([
-        ('nuclide', int),
-        ('q_val', float),
-        ('gamma_frac', float),
+        ('nuc', np.int32),
+        ('q_val', np.float64),
+        ('gamma_frac', np.float64),
         ])
     
     # Convert to numpy array
