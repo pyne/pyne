@@ -103,7 +103,8 @@ namespace pyne
 
   /// a struct matching the q_value table in nuc_data.h5.
   typedef struct q_val_struct {
-    int nuc;          ///< nuclide in id form
+    //int nuc;          ///< nuclide in id form
+    long nuc;          ///< nuclide in id form
     double q_val;      ///< nuclide q_value [MeV/fission]
     double gamma_frac; ///< fraction of q that comes from gammas
   } q_val_struct; 
