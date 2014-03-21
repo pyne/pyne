@@ -225,8 +225,8 @@ def _materials_to_g4elements(materials, material_lib):
             ## normalise it
             new_mat.normalize()
             # get each material
-            g4_elements.append("  G4Element* el_"+str(mat_idx)+"_"+elem+" = new G4Element(name = "+str(mat_idx) \
-                   +"_"+elem+", symbol="+elem+", ncomponents="+str(len(new_mat.keys()))+"); \n")
+            g4_elements.append('  G4Element* el_'+str(mat_idx)+'_'+elem+' = new G4Element(name = "'+str(mat_idx) \
+                   +'"_'+elem+', symbol='+elem+', ncomponents='+str(len(new_mat.keys()))+'); \n')
             for isotope in new_mat.keys():
                 # get each isotope
                 g4_elements.append("  el_"+str(mat_idx)+"_"+elem+"->AddIsotope("+name(isotope)+", abundance = "+ \
