@@ -618,7 +618,7 @@ def cells_at_ve_centers(mesh):
     return cells
 
 def discretize_geom(mesh, **kwargs):
-    """discretize_geom(mesh, num_rays=10, grid=False)
+    """discretize_geom(mesh, **kwargs)
     This function discretizes a geometry (by geometry cell) onto a superimposed
     mesh. If the mesh is structured, Monte Carlo ray tracing is used to 
     determine the volume fractions of each geometry cell within each mesh volume
@@ -632,9 +632,6 @@ def discretize_geom(mesh, **kwargs):
     mesh : PyNE Mesh
         A Cartesian, structured, axis-aligned Mesh that superimposed the
         geometry.
-
-    Key Word Arguments
-    ------------------
     num_rays : int, optional, default = 10
         Structured mesh only. The number of rays to fire in each mesh row for 
         each direction.
