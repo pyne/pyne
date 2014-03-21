@@ -84,6 +84,7 @@ cdef extern from "data.h" namespace "pyne":
     int metastable_id(int, int) except +
     int metastable_id(int) except +
 
+    #ENSDF data functions
     pair[double,double] decay_half_life(pair[int, int]) except +
     vector[pair[double, double]] decay_half_lifes(int) except +
     double decay_branch_ratio(pair[int, int] from_to) except +
