@@ -106,11 +106,23 @@ def test_metastable_id():
 
 
 def test_decay_half_life():
-    assert_equal(data.decay_half_life(551370000, 561370000), [(949252608.0, 2840184.0)])
+    assert_equal(data.decay_half_life(551370000, 561370000), (949252608.0, 2840184.0))
 
 
 def test_decay_half_life_byparent():
     assert_equal(data.decay_half_life_byparent(551370000), [(949252608.0, 2840184.0)])
+
+
+def test_decay_branch_ratio():
+    assert_equal(data.decay_branch_ratio(551370000, 561370000), 1.0)
+
+
+def test_decay_photon_branch_ratio():
+    assert_equal(data.decay_photon_branch_ratio(551370000, 561370000), (1.0, 0.0))
+
+
+def test_decay_beta_branch_ratio():
+    assert_equal(data.decay_beta_branch_ratio(551370000, 561370000), (1.0, 0.0))
 
 
 def test_decay_branch_ratio_byparent():
@@ -187,11 +199,11 @@ def test_alpha_energy():
 
 def test_alpha_intensity():
     npt.assert_array_almost_equal(data.alpha_intensity(952410000),
-                 [1e-05, 8.6e-05, 0.0007, np.nan, np.nan, np.nan, np.nan,
-                  0.0001, np.nan, 0.00014, 0.0004, 0.0004, np.nan, 0.0004,
-                  0.00032, 0.0007, 0.0003, 0.0009, 0.0006, 1e-05, 0.0013,
-                  np.nan, 0.0024, 0.0005, 0.015, 1.66, 0.01, 13.1, 0.04, 84.8,
-                  0.225, 0.37])
+                                  [1e-05, 8.6e-05, 0.0007, np.nan, np.nan, np.nan, np.nan,
+                                   0.0001, np.nan, 0.00014, 0.0004, 0.0004, np.nan, 0.0004,
+                                   0.00032, 0.0007, 0.0003, 0.0009, 0.0006, 1e-05, 0.0013,
+                                   np.nan, 0.0024, 0.0005, 0.015, 1.66, 0.01, 13.1, 0.04, 84.8,
+                                   0.225, 0.37])
 
 
 def test_alpha_parent():
