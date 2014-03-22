@@ -4,10 +4,12 @@ import math
 
 import nose
 from nose.tools import assert_equal, assert_not_equal, assert_raises, raises, assert_in
+import numpy as np
+import numpy.testing as npt
 
 import pyne
 from pyne import data
-import numpy as np
+
 
 # These tests require nuc_data
 if not os.path.isfile(pyne.nuc_data):
@@ -132,11 +134,11 @@ def test_gamma_photon_intensity():
 
 
 def test_gamma_conversion_intensity():
-    assert_equal(data.gamma_conversion_intensity(551370000), [(np.nan, np.nan), (0.1124, np.nan)])
+    npt.assert_array_almost_equal(data.gamma_conversion_intensity(551370000), [(np.nan, np.nan), (0.1124, np.nan)])
 
 
 def test_gamma_total_intensity():
-    assert_equal(data.gamma_total_intensity(561370000), [(100.0, np.nan)])
+    npt.assert_array_almost_equal(data.gamma_total_intensity(561370000), [(100.0, np.nan)])
 
 
 def test_gamma_from_to_byparent():
@@ -145,7 +147,9 @@ def test_gamma_from_to_byparent():
 
 def test_gamma_from_to_byen():
     assert_equal(data.gamma_from_to_byen(661.65, 0.1),
-                 [(390990016, 390990005),
+                 [(621510087, 621510015),
+                  (641500021, 641500006),
+                  (390990016, 390990005),
                   (822040062, 822040024),
                   (902290055, 902290000),
                   (400880011, 400880004),
@@ -182,7 +186,7 @@ def test_alpha_energy():
 
 
 def test_alpha_intensity():
-    assert_equal(data.alpha_intensity(95241),
+    npt.assert_array_almost_equal(data.alpha_intensity(952410000),
                  [1e-05, 8.6e-05, 0.0007, np.nan, np.nan, np.nan, np.nan,
                   0.0001, np.nan, 0.00014, 0.0004, 0.0004, np.nan, 0.0004,
                   0.00032, 0.0007, 0.0003, 0.0009, 0.0006, 1e-05, 0.0013,
@@ -210,15 +214,15 @@ def test_alpha_child_byparent():
 
 
 def test_beta_endpoint_energy():
-    assert_equal(data.beta_endpoint_energy(551370000), [514.03, np.nan])
+    npt.assert_array_almost_equal(data.beta_endpoint_energy(551370000), [514.03, np.nan, 1176.])
 
 
 def test_beta_average_energy():
-    assert_equal(data.beta_average_energy(551370000), [174.32, 334.65])
+    assert_equal(data.beta_average_energy(551370000), [174.32, 334.65, 416.26])
 
 
 def test_beta_intensity():
-    assert_equal(data.beta_intensity(551370000), [94.7, 0.00058])
+    assert_equal(data.beta_intensity(551370000), [94.7, 0.00058, 5.3])
 
 
 def test_beta_parent():
@@ -234,7 +238,7 @@ def test_beta_child_byparent():
 
 
 def test_ecbp_endpoint_energy():
-    assert_equal(data.ecbp_endpoint_energy(170320000), 11600.0)
+    assert_equal(data.ecbp_endpoint_energy(170320000)[-1], 11600.0)
 
 
 def test_ecbp_average_energy():
@@ -242,7 +246,7 @@ def test_ecbp_average_energy():
 
 
 def test_ec_intensity():
-    assert_equal(data.ec_intensity(110220000), [9.618, np.nan])
+    npt.assert_array_almost_equal(data.ec_intensity(110220000), [9.618, np.nan])
 
 
 def test_beta_plus_intensity():

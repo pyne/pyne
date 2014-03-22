@@ -778,6 +778,8 @@ def _parse_decay_dataset(lines, decay_s, levellist=None, lmap = None):
                 bparent = _to_id_from_level(parent2, e, levellist, lmap)
                 bdaughter = _to_id_from_level(daughter, level, levellist, lmap)
                 betas.append([bparent, bdaughter, dat[0], 0.0, dat[2]])
+            else:
+                betas.append([pfinal, daughter_id, dat[0], 0.0, dat[2]])
             continue
         bc_rec = _betac.match(line)
         if bc_rec is not None:
@@ -807,6 +809,8 @@ def _parse_decay_dataset(lines, decay_s, levellist=None, lmap = None):
                 aparent = _to_id_from_level(parent2, e, levellist, lmap)
                 adaughter = _to_id_from_level(daughter, level, levellist, lmap)
                 alphas.append((aparent, adaughter, dat[0], dat[2]))
+            else:
+                alphas.append((pfinal, daughter_id, dat[0], dat[2]))
             continue
         ec_rec = _ec.match(line)
         if ec_rec is not None:
@@ -818,6 +822,9 @@ def _parse_decay_dataset(lines, decay_s, levellist=None, lmap = None):
                 ecparent = _to_id_from_level(parent2, e, levellist, lmap)
                 ecdaughter = _to_id_from_level(daughter, level, levellist, lmap)
                 ecbp.append([ecparent, ecdaughter, dat[0], 0.0, dat[2], dat[4],
+                             0, 0, 0])
+            else:
+                ecbp.append([pfinal, daughter_id, dat[0], 0.0, dat[2], dat[4],
                              0, 0, 0])
             continue
         g_rec = _g.match(line)
@@ -992,11 +999,11 @@ def origen_data(filename):
                 e_rec = _ec.match(line)
                 if e_rec is not None:
                     en, en_err, ib, dib, ie, die, logft, \
-                    dft = _parse_ec_record(e_rec)
+                    dft, tti, dtti = _parse_ec_record(e_rec)
                     continue
                 p_rec = _p.match(line)
                 if p_rec is not None:
-                    tfinal, tfinalerr, e, e_err = _parse_parent_record(p_rec)
+                    parent2, tfinal, tfinalerr, e, e_err = _parse_parent_record(p_rec)
                     continue
                 level_l = _level_regex.match(line)
                 if level_l is not None:
